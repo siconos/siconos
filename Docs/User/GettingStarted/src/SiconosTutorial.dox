@@ -71,7 +71,7 @@ it results in:
 \f[
 \dot x = A.x + r
 \f]
-which fits with formalism proposed by \ref doc_ltids "LinearTIDS" class. 
+which fits with formalism proposed by \ref doc_ltids "FirstOrderLinearTIDS" class. 
 
 Then in DiodeBridge.cpp, you can start the construction of your DynamicalSystem. First define the required parameters, matrices and vectors.
 
@@ -87,7 +87,7 @@ SiconosMatrix * A = new SimpleMatrix(ndof,ndof); // All components of A are auto
 (*A)(0,1) = -1.0/Cvalue;
 (*A)(1,0) = 1.0/Lvalue;
 \endcode
-In the Doxygen documentation of class LinearTIDS, you can find a constructor with A, initial condition and a number that identify the system:
+In the Doxygen documentation of class FirstOrderLinearTIDS, you can find a constructor with A, initial condition and a number that identify the system:
 \code
 // User-defined parameters
 double Vinit = 10.0;    // initial voltage
@@ -97,10 +97,10 @@ double Vinit = 10.0;    // initial voltage
 SiconosVector * x0 = new SimpleVector(ndof);
 (*x0)(0) = Vinit;
 // 
-DynamicalSystem * oscillator = new LinearTIDS(1,*x0,*A);
+DynamicalSystem * oscillator = new FirstOrderLinearTIDS(1,*x0,*A);
 \endcode
 
-From this point you have access to all the methods of LinearTIDS for oscillator, like:
+From this point you have access to all the methods of FirstOrderLinearTIDS for oscillator, like:
 
 \code
 oscillator->display(); 
@@ -419,7 +419,7 @@ To complete DiodeBridge.cpp, some header files are required:
 \code
 // Header files
 #include "Model.h"
-#include "LinearTIDS.h"
+#include "FirstOrderLinearTIDS.h"
 #include "LinearTIR.h"
 #include "ComplementarityConditionNSL.h"
 #include "TimeStepping.h"
@@ -450,7 +450,7 @@ Results are given on the figure below:
 \code
 // Header files
 #include "Model.h"
-#include "LinearTIDS.h"
+#include "FirstOrderLinearTIDS.h"
 #include "LinearTIR.h"
 #include "ComplementarityConditionNSL.h"
 #include "TimeStepping.h"
@@ -485,7 +485,7 @@ int main(int argc, char* argv[])
     (*A)(1,0) = 1.0/Lvalue;
     SiconosVector * x0 = new SimpleVector(ndof);
     (*x0)(0) = Vinit;
-    DynamicalSystem * oscillator = new LinearTIDS(1,*x0,*A);
+    DynamicalSystem * oscillator = new FirstOrderLinearTIDS(1,*x0,*A);
     DynamicalSystemsSet allDS; 
     allDS.insert(oscillator);
     // Relations

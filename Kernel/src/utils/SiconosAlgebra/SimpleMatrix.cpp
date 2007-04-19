@@ -13,6 +13,9 @@
 
 namespace atlas = boost::numeric::bindings::atlas;
 
+// \todo: treat BlockMatrix case in all friend operators (at the time: exceptions).
+
+
 // Build a Simple Matrix from its type (ie DENSE, TRIANGULAR, BANDED, SPARSE or SYMMETRIC)
 // => default (private) constructor
 SimpleMatrix::SimpleMatrix(TYP typ): SiconosMatrix(false), num(1), isPLUFactorized(false), isPLUInversed(false)
@@ -115,37 +118,6 @@ SimpleMatrix::SimpleMatrix(const SiconosMatrix &smat): SiconosMatrix(false), num
   dim[0] = smat.size(0);
   dim[1] = smat.size(1);
 }
-
-SimpleMatrix::SimpleMatrix(const std::string& in, const SiconosMatrix &smat): SiconosMatrix(false), num(smat.getNum()), isPLUFactorized(false), isPLUInversed(false)
-{
-  if (in != "transpose")
-    SiconosMatrixException::selfThrow("constructor(trans,const SiconosMatrix) : wrong value for trans.");
-  assert(smat.isBlock() == false);
-  if (num == 1)
-    mat.Dense = new DenseMat(ublas::trans(*smat.getDensePtr()));
-
-  else if (num == 3)
-    mat.Sym = new SymMat(*smat.getSymPtr());
-
-  else if (num == 4)
-    mat.Sparse = new SparseMat(ublas::trans(*smat.getSparsePtr()));
-
-  else if (num == 5)
-    mat.Banded = new BandedMat(ublas::trans(*smat.getBandedPtr()));
-
-  else if (num == 6)
-    mat.Zero = new ZeroMat(*smat.getZeroPtr());
-
-  else if (num == 7)
-    mat.Identity = new IdentityMat(*smat.getIdentityPtr());
-
-  else
-    SiconosMatrixException::selfThrow("constructor(const SiconosMatrix) : invalid parameter given");
-
-  dim[0] = smat.size(1);
-  dim[1] = smat.size(0);
-}
-
 
 SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, TYP typ, unsigned int upper, unsigned int lower):
   SiconosMatrix(false), num(1), isPLUFactorized(false), isPLUInversed(false)
@@ -577,20 +549,22 @@ const BlocksMat SimpleMatrix::getAllBlocks(void)const
 
 void SimpleMatrix::matrixCopy(const SiconosMatrix &m, unsigned int i, unsigned int j)
 {
+  if (m.isBlock())
+    SiconosMatrixException::selfThrow("SimpleMatrix::matrixCopy(M) failed: not yet implemented for M being a block matrix. You can try with BlockMatrix::getBlockPtr function?");
 
   if (num != 1)
     SiconosMatrixException::selfThrow("SimpleMatrix::matrixCopy : the current matrix is not dense, a copy into its data may change its type.");
 
-  if (i >= dim[0] || i < 0)
+  if (i >= dim[0])
     SiconosMatrixException::selfThrow("SimpleMatrix::matrixCopy : row_min given is out of range");
 
-  if (j >= dim[1] || j < 0)
+  if (j >= dim[1])
     SiconosMatrixException::selfThrow("SimpleMatrix::matrixCopy : col_min given is out of range");
 
   unsigned int num2 = m.getNum();
   unsigned int row_max = i, col_max = j;
 
-  unsigned int sizeM1, sizeM2;
+  unsigned int sizeM1 = 0, sizeM2 = 0;
   if (num2 == 1)
   {
     sizeM1 = (m.getDensePtr())->size1();
@@ -630,9 +604,9 @@ void SimpleMatrix::matrixCopy(const SiconosMatrix &m, unsigned int i, unsigned i
   row_max += sizeM1;
   col_max += sizeM2;
 
-  if (row_max > dim[0] || row_max < 0)
+  if (row_max > dim[0])
     SiconosMatrixException::selfThrow("SimpleMatrix::matrixCopy : inconsistent sizes");
-  if (col_max > dim[1] || col_max < 0)
+  if (col_max > dim[1])
     SiconosMatrixException::selfThrow("SimpleMatrix::matrixCopy : inconsistent sizes");
 
   if (num2 == 1)
@@ -653,6 +627,10 @@ void SimpleMatrix::matrixCopy(const SiconosMatrix &m, unsigned int i, unsigned i
 
 void SimpleMatrix::getBlock(unsigned int row_min, unsigned int col_min, SiconosMatrix &m)const
 {
+  if (m.isBlock())
+    SiconosMatrixException::selfThrow("SimpleMatrix::getBlock(M) failed: not yet implemented for M being a block matrix. You can try with BlockMatrix::getBlockPtr function?");
+
+
   // We only accept dense matrix for m.
   if (m.getNum() != 1)
     SiconosMatrixException::selfThrow("getBlock(i,j,m) : m must be a dense matrix.");
@@ -964,6 +942,10 @@ void SimpleMatrix::trans(const SiconosMatrix &m)
 {
   if (&m == this)
     SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, m = this, use this->trans().");
+
+  if (m.isBlock())
+    SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, not yet implemented for m being a BlockMatrix.");
+
 
   unsigned int numM = m.getNum();
   switch (numM)
@@ -1327,8 +1309,12 @@ SimpleMatrix& SimpleMatrix::operator = (const SiconosMatrix& m)
 
   // Warning!!! If sizes are inconsistent between m and this, boost operator = results in resize of this to the dim of m !!!
   // Add an exception to prevent this???
+  if (m.isBlock())
+    SiconosMatrixException::selfThrow("SimpleMatrix operator = M failed. Not yet implemented for M being a BlockMatrix.");
+
   if (dim[0] != m.size(0) || dim[1] != m.size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix operator = failed. Inconsistent sizes.");
+
   unsigned int numM = m.getNum();
   switch (num)
   {
@@ -1448,6 +1434,9 @@ SimpleMatrix& SimpleMatrix::operator = (const SiconosMatrix& m)
 
 SimpleMatrix& SimpleMatrix::operator += (const SiconosMatrix& m)
 {
+  if (m.isBlock())
+    SiconosMatrixException::selfThrow("SimpleMatrix operator += M failed. Not yet implemented for M being a BlockMatrix.");
+
   unsigned int numM = m.getNum();
   switch (num)
   {
@@ -1559,6 +1548,8 @@ SimpleMatrix& SimpleMatrix::operator += (const SiconosMatrix& m)
 
 SimpleMatrix& SimpleMatrix::operator -= (const SiconosMatrix& m)
 {
+  if (m.isBlock())
+    SiconosMatrixException::selfThrow("SimpleMatrix operator -= M failed. Not yet implemented for M being a BlockMatrix.");
 
   unsigned int numM = m.getNum();
 
@@ -1813,6 +1804,8 @@ void SimpleMatrix::PLUInverseInPlace()
 
 void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
 {
+  if (B.isBlock())
+    SiconosMatrixException::selfThrow("SimpleMatrix PLUForwardBackwardInPlace(M) failed. Not yet implemented for M being a BlockMatrix.");
   int info;
   if (!isPLUFactorized) // call gesv => LU-factorize+solve
   {
@@ -1831,6 +1824,8 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
 
 void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
 {
+  if (B.isBlock())
+    SiconosMatrixException::selfThrow("SimpleMatrix PLUForwardBackwardInPlace(V) failed. Not yet implemented for V being a BlockVector.");
   DenseMat tmpB(B.size(), 1);
   ublas::column(tmpB, 0) = *(B.getDensePtr()); // Conversion of vector to matrix. Temporary solution.
   int info;
@@ -1857,6 +1852,150 @@ void SimpleMatrix::resetLU()
   isPLUInversed = false;
 }
 
+void SimpleMatrix::scal(double a, const SiconosMatrix &A)
+{
+  if (this == &A)
+    *this *= a;
+  else if (A.isBlock())
+  {
+    SiconosMatrixException::selfThrow("SimpleMatrix::scal(a,A) failed. Not yet implemented for A a BlockMatrix.");
+  }
+  else
+  {
+    if (num == 6 || num == 7)
+      SiconosMatrixException::selfThrow("SimpleMatrix::scal(a,A) failed. Try to assign value to a null or identity matrix.");
+
+    unsigned int numA = A.getNum();
+
+    if (numA == 6)
+      zero();
+    else if (numA == 7)
+    {
+      eye();
+      *this *= a;
+    }
+    else
+    {
+      if (numA == num)
+      {
+        switch (num)
+        {
+        case 1:
+          noalias(*mat.Dense) = a ** A.getDensePtr();
+          break;
+        case 2:
+          noalias(*mat.Triang) = a ** A.getTriangPtr();
+          break;
+        case 3:
+          noalias(*mat.Sym) = a ** A.getSymPtr();
+          break;
+        case 4:
+          noalias(*mat.Sparse) = a ** A.getSparsePtr();
+          break;
+        case 5:
+          noalias(*mat.Banded) = a ** A.getBandedPtr();
+          break;
+        }
+      }
+      else
+      {
+        if (num != 1)
+          SiconosMatrixException::selfThrow("SimpleMatrix::B = a*A failed. A and B types do not fit together.");
+        switch (numA)
+        {
+        case 1:
+          noalias(*mat.Dense) = a ** A.getDensePtr();
+          break;
+        case 2:
+          noalias(*mat.Dense) = a ** A.getTriangPtr();
+          break;
+        case 3:
+          noalias(*mat.Dense) = a ** A.getSymPtr();
+          break;
+        case 4:
+          noalias(*mat.Dense) = a ** A.getSparsePtr();
+          break;
+        case 5:
+          noalias(*mat.Dense) = a ** A.getBandedPtr();
+          break;
+        }
+      }
+    }
+  }
+}
+
+void SimpleMatrix::scal(int a, const SiconosMatrix &A)
+{
+  if (this == &A)
+    *this *= a;
+  else if (A.isBlock())
+  {
+    SiconosMatrixException::selfThrow("SimpleMatrix::scal(a,A) failed. Not yet implemented for A a BlockMatrix.");
+  }
+  else
+  {
+    if (num == 6 || num == 7)
+      SiconosMatrixException::selfThrow("SimpleMatrix::scal(a,A) failed. Try to assign value to a null or identity matrix.");
+
+    unsigned int numA = A.getNum();
+
+    if (numA == 6)
+      zero();
+    else if (numA == 7)
+    {
+      eye();
+      *this *= a;
+    }
+    else
+    {
+      if (numA == num)
+      {
+        switch (num)
+        {
+        case 1:
+          noalias(*mat.Dense) = a ** A.getDensePtr();
+          break;
+        case 2:
+          noalias(*mat.Triang) = a ** A.getTriangPtr();
+          break;
+        case 3:
+          noalias(*mat.Sym) = a ** A.getSymPtr();
+          break;
+        case 4:
+          noalias(*mat.Sparse) = a ** A.getSparsePtr();
+          break;
+        case 5:
+          noalias(*mat.Banded) = a ** A.getBandedPtr();
+          break;
+        }
+      }
+      else
+      {
+        if (num != 1)
+          SiconosMatrixException::selfThrow("SimpleMatrix::scal(a,A) failed. A and B types do not fit together.");
+        switch (numA)
+        {
+        case 1:
+          noalias(*mat.Dense) = a ** A.getDensePtr();
+          break;
+        case 2:
+          noalias(*mat.Dense) = a ** A.getTriangPtr();
+          break;
+        case 3:
+          noalias(*mat.Dense) = a ** A.getSymPtr();
+          break;
+        case 4:
+          noalias(*mat.Dense) = a ** A.getSparsePtr();
+          break;
+        case 5:
+          noalias(*mat.Dense) = a ** A.getBandedPtr();
+          break;
+        }
+      }
+    }
+  }
+}
+
 bool operator == (const SiconosMatrix &m, const SiconosMatrix &x)
 {
   if (m.isBlock() ||  x.isBlock())
@@ -1865,17 +2004,17 @@ bool operator == (const SiconosMatrix &m, const SiconosMatrix &x)
   return (norm < tolerance);
 }
 
-SimpleMatrix operator + (const SiconosMatrix &x, const SiconosMatrix &m)
+const SimpleMatrix operator + (const SiconosMatrix &x, const SiconosMatrix &m)
 {
-  if ((x.size(0) != m.size(0)) || (x.size(1) != m.size(1)))
+  if ((x.size(0) != m.size(0)) || x.size(1) != m.size(1))
     SiconosMatrixException::selfThrow("Matrix addition: inconsistent sizes");
+
+  if (x.isBlock() || m.isBlock())
+    SiconosMatrixException::selfThrow("Matrix addition: not yet implemented for BlockMatrix.");
 
   unsigned int numX = x.getNum();
   if (numX != m.getNum())
-    SiconosMatrixException::selfThrow("SimpleMatrix:Matrix addition: use function add in order to add matrices of different type");
-
-  if (numX == 7)
-    SiconosMatrixException::selfThrow("SimpleMatrix:Matrix addition: illegal matrix type for operator -. Try sub()?");
+    SiconosMatrixException::selfThrow("SimpleMatrix:Matrix operator +: addition of matrices of different types. Use 'add' function.");
 
   if (numX == 1)
   {
@@ -1899,29 +2038,407 @@ SimpleMatrix operator + (const SiconosMatrix &x, const SiconosMatrix &m)
   }
   else if (numX == 5)
   {
-    BandedMat b;
+    BandedMat b ;
     b.resize(m.size(0), m.size(1), (*m.getBandedPtr()).lower(), (*m.getBandedPtr()).upper(), false);
     b = *x.getBandedPtr() + *m.getBandedPtr();
     return b;
   }
-  else //if(numX == 6){
+  else if (numX == 6)
   {
-    ZeroMat z;
+    ZeroMat z(x.size(0), x.size(1));
     return z;
+  }
+  else // if(numX ==7)
+  {
+    DenseMat p = *x.getIdentityPtr();
+    p *= 2.0;
+    return p;
   }
 }
 
-SimpleMatrix operator - (const SiconosMatrix &x, const SiconosMatrix &m)
+const SimpleMatrix add(const SiconosMatrix &x, const SiconosMatrix& m)
+{
+  if ((x.size(0) != m.size(0)) || (x.size(1) != m.size(1)))
+    SiconosMatrixException::selfThrow("SimpleMatrix: function add, inconsistent sizes.");
+
+  if (x.isBlock() || m.isBlock())
+    SiconosMatrixException::selfThrow("Matrix, add function: not yet implemented for BlockMatrix.");
+
+  unsigned int numM = m.getNum();
+  unsigned int numX = x.getNum();
+
+  if (numX == 6) // if x = zero
+    return m;
+  else if (numM == 6) // if m = 0
+    return x;
+  else
+  {
+    if (numX == numM) // if x and m are of the same type.
+    {
+      if (numX == 1)
+      {
+        DenseMat p = *x.getDensePtr() + *m.getDensePtr();
+        return p;
+      }
+      else if (numX == 2)
+      {
+        TriangMat t = *x.getTriangPtr() + *m.getTriangPtr();
+        return t;
+      }
+      else if (numX == 3)
+      {
+        SymMat s = *x.getSymPtr() + *m.getSymPtr();
+        return s;
+      }
+      else if (numX == 3)
+      {
+        SparseMat s = *x.getSparsePtr() + *m.getSparsePtr();
+        return s;
+      }
+      else if (numX == 5)
+      {
+        BandedMat b = *x.getBandedPtr() + *m.getBandedPtr();
+        return b;
+      }
+      else // if(numX==7)
+      {
+        DenseMat p = *x.getIdentityPtr();
+        p *= 2.0;
+        return p;
+      }
+    }
+    else
+    {
+      // if x and m are different, result is a DenseMat.
+      DenseMat p(x.size(0), x.size(1));
+      if (numX == 1) // if x dense.
+        switch (numM)
+        {
+        case 2:
+          noalias(p) = *x.getDensePtr() + *m.getTriangPtr();
+          break;
+        case 3:
+          noalias(p) = *x.getDensePtr() + *m.getSymPtr();
+          break;
+        case 4:
+          noalias(p) = *x.getDensePtr() + *m.getSparsePtr();
+          break;
+        case 5:
+          noalias(p) = *x.getDensePtr() + *m.getBandedPtr();
+          break;
+        case 7:
+          noalias(p) = *x.getDensePtr() + *m.getIdentityPtr();
+          break;
+        default:
+          SiconosMatrixException::selfThrow("Matrix function add(A,B): invalid type of matrix");
+        }
+      else if (numX == 2)
+        switch (numM)
+        {
+        case 1:
+          noalias(p) = *x.getTriangPtr() + *m.getDensePtr();
+          break;
+        case 3:
+          noalias(p) = *x.getTriangPtr() + *m.getSymPtr();
+          break;
+        case 4:
+          noalias(p) = *x.getTriangPtr() + *m.getSparsePtr();
+          break;
+        case 5:
+          noalias(p) = *x.getTriangPtr() + *m.getBandedPtr();
+          break;
+        case 7:
+          noalias(p) = *x.getTriangPtr() + *m.getIdentityPtr();
+          break;
+        default:
+          SiconosMatrixException::selfThrow("Matrix function add(A,B): invalid type of matrix");
+        }
+      else if (numX == 3)
+        switch (numM)
+        {
+        case 1:
+          noalias(p) = *x.getSymPtr() + *m.getDensePtr();
+          break;
+        case 2:
+          noalias(p) = *x.getSymPtr() + *m.getTriangPtr();
+          break;
+        case 4:
+          noalias(p) = *x.getSymPtr() + *m.getSparsePtr();
+          break;
+        case 5:
+          noalias(p) = *x.getSymPtr() + *m.getBandedPtr();
+          break;
+        case 7:
+          noalias(p) = *x.getSymPtr() + *m.getIdentityPtr();
+          break;
+        default:
+          SiconosMatrixException::selfThrow("Matrix function add(A,B): invalid type of matrix");
+        }
+      else if (numX == 4)
+        switch (numM)
+        {
+        case 1:
+          noalias(p) = *x.getSparsePtr() + *m.getDensePtr();
+          break;
+        case 2:
+          noalias(p) = *x.getSparsePtr() + *m.getTriangPtr();
+          break;
+        case 3:
+          noalias(p) = *x.getSparsePtr() + *m.getSymPtr();
+          break;
+        case 5:
+          noalias(p) = *x.getSparsePtr() + *m.getBandedPtr();
+          break;
+        case 7:
+          noalias(p) = *x.getSparsePtr() + *m.getIdentityPtr();
+          break;
+        default:
+          SiconosMatrixException::selfThrow("Matrix function add(A,B): invalid type of matrix");
+        }
+      else if (numX == 5)
+        switch (numM)
+        {
+        case 1:
+          noalias(p) = *x.getBandedPtr() + *m.getDensePtr();
+          break;
+        case 2:
+          noalias(p) = *x.getBandedPtr() + *m.getTriangPtr();
+          break;
+        case 3:
+          noalias(p) = *x.getBandedPtr() + *m.getSymPtr();
+          break;
+        case 4:
+          noalias(p) = *x.getBandedPtr() + *m.getSparsePtr();
+          break;
+        case 7:
+          noalias(p) = *x.getBandedPtr() + *m.getIdentityPtr();
+          break;
+        default:
+          SiconosMatrixException::selfThrow("Matrix function add(A,B): invalid type of matrix");
+        }
+      else if (numX == 7)
+        switch (numM)
+        {
+        case 1:
+          noalias(p) = *x.getIdentityPtr() + *m.getDensePtr();
+          break;
+        case 2:
+          noalias(p) = *x.getIdentityPtr() + *m.getTriangPtr();
+          break;
+        case 3:
+          noalias(p) = *x.getIdentityPtr() + *m.getSymPtr();
+          break;
+        case 4:
+          noalias(p) = *x.getIdentityPtr() + *m.getSparsePtr();
+          break;
+        case 7:
+          noalias(p) = *x.getIdentityPtr() + *m.getIdentityPtr();
+          break;
+        default:
+          SiconosMatrixException::selfThrow("Matrix function add(A,B): invalid type of matrix");
+        }
+      else
+        SiconosMatrixException::selfThrow("Matrix function add(A,B): invalid type of matrix");
+      return p;
+    }
+  }
+}
+
+void add(const SiconosMatrix &x, const SiconosMatrix& m, SiconosMatrix& res)
+{
+  if ((x.size(0) != m.size(0)) || (x.size(1) != m.size(1)))
+    SiconosMatrixException::selfThrow("Matrix function add: inconsistent sizes");
+  if ((x.size(0) != res.size(0)) || (x.size(1) != res.size(1)))
+    SiconosMatrixException::selfThrow("Matrix function add: inconsistent sizes");
+  if (x.isBlock() || m.isBlock() || res.isBlock())
+    SiconosMatrixException::selfThrow("Matrix, add function: not yet implemented for BlockMatrix.");
+
+  unsigned int numX = x.getNum();
+  unsigned int numM = m.getNum();
+  unsigned int numRes = res.getNum();
+
+  if (&res == &m)
+    res += x;
+  else if (&res == &x)
+    res += m;
+  else
+  {
+    if (numX == 6) // if x = zero
+      res = m;
+    else if (numM == 6) // if m = 0
+      res = x;
+    else
+    {
+      if (numX == numM) // if x and m are of the same type.
+      {
+        if (numRes != numX && numX != 7)
+          SiconosMatrixException::selfThrow("Matrix function add(A,B,C): wrong type for C.");
+        if (numX == 1)
+          noalias(*res.getDensePtr()) = *x.getDensePtr() + *m.getDensePtr();
+        else if (numX == 2)
+          noalias(*res.getTriangPtr()) = *x.getTriangPtr() + *m.getTriangPtr();
+        else if (numX == 3)
+          noalias(*res.getSymPtr()) = *x.getSymPtr() + *m.getSymPtr();
+        else if (numX == 4)
+          noalias(*res.getSparsePtr()) = *x.getSparsePtr() + *m.getSparsePtr();
+        else if (numX == 5)
+          noalias(*res.getBandedPtr()) = *x.getBandedPtr() + *m.getBandedPtr();
+        else // if(numX==7)
+        {
+          res = x;
+          res *= 2.0;
+        }
+      }
+      else
+      {
+        // if m and x are of different type, res must be dense.
+        if (numRes != 1)
+          SiconosMatrixException::selfThrow("Matrix function add(A,B,C): wrong type for C.");
+
+        if (numX == 1) // if x dense.
+          switch (numM)
+          {
+          case 2:
+            noalias(*res.getDensePtr()) = *x.getDensePtr() + *m.getTriangPtr();
+            break;
+          case 3:
+            noalias(*res.getDensePtr()) = *x.getDensePtr() + *m.getSymPtr();
+            break;
+          case 4:
+            noalias(*res.getDensePtr()) = *x.getDensePtr() + *m.getSparsePtr();
+            break;
+          case 5:
+            noalias(*res.getDensePtr()) = *x.getDensePtr() + *m.getBandedPtr();
+            break;
+          case 7:
+            noalias(*res.getDensePtr()) = *x.getDensePtr() + *m.getIdentityPtr();
+            break;
+          default:
+            SiconosMatrixException::selfThrow("Matrix function add(A,B,C): invalid type of matrix");
+          }
+        else if (numX == 2)
+          switch (numM)
+          {
+          case 1:
+            noalias(*res.getDensePtr()) = *x.getTriangPtr() + *m.getDensePtr();
+            break;
+          case 3:
+            noalias(*res.getDensePtr()) = *x.getTriangPtr() + *m.getSymPtr();
+            break;
+          case 4:
+            noalias(*res.getDensePtr()) = *x.getTriangPtr() + *m.getSparsePtr();
+            break;
+          case 5:
+            noalias(*res.getDensePtr()) = *x.getTriangPtr() + *m.getBandedPtr();
+            break;
+          case 7:
+            noalias(*res.getDensePtr()) = *x.getTriangPtr() + *m.getIdentityPtr();
+            break;
+          default:
+            SiconosMatrixException::selfThrow("Matrix function add(A,B,C): invalid type of matrix");
+          }
+        else if (numX == 3)
+          switch (numM)
+          {
+          case 1:
+            noalias(*res.getDensePtr()) = *x.getSymPtr() + *m.getDensePtr();
+            break;
+          case 2:
+            noalias(*res.getDensePtr()) = *x.getSymPtr() + *m.getTriangPtr();
+            break;
+          case 4:
+            noalias(*res.getDensePtr()) = *x.getSymPtr() + *m.getSparsePtr();
+            break;
+          case 5:
+            noalias(*res.getDensePtr()) = *x.getSymPtr() + *m.getBandedPtr();
+            break;
+          case 7:
+            noalias(*res.getDensePtr()) = *x.getSymPtr() + *m.getIdentityPtr();
+            break;
+          default:
+            SiconosMatrixException::selfThrow("Matrix function add(A,B,C): invalid type of matrix");
+          }
+        else if (numX == 4)
+          switch (numM)
+          {
+          case 1:
+            noalias(*res.getDensePtr()) = *x.getSparsePtr() + *m.getDensePtr();
+            break;
+          case 2:
+            noalias(*res.getDensePtr()) = *x.getSparsePtr() + *m.getTriangPtr();
+            break;
+          case 3:
+            noalias(*res.getDensePtr()) = *x.getSparsePtr() + *m.getSymPtr();
+            break;
+          case 5:
+            noalias(*res.getDensePtr()) = *x.getSparsePtr() + *m.getBandedPtr();
+            break;
+          case 7:
+            noalias(*res.getDensePtr()) = *x.getSparsePtr() + *m.getIdentityPtr();
+            break;
+          default:
+            SiconosMatrixException::selfThrow("Matrix function add(A,B,C): invalid type of matrix");
+          }
+        else if (numX == 5)
+          switch (numM)
+          {
+          case 1:
+            noalias(*res.getDensePtr()) = *x.getBandedPtr() + *m.getDensePtr();
+            break;
+          case 2:
+            noalias(*res.getDensePtr()) = *x.getBandedPtr() + *m.getTriangPtr();
+            break;
+          case 3:
+            noalias(*res.getDensePtr()) = *x.getBandedPtr() + *m.getSymPtr();
+            break;
+          case 4:
+            noalias(*res.getDensePtr()) = *x.getBandedPtr() + *m.getSparsePtr();
+            break;
+          case 7:
+            noalias(*res.getDensePtr()) = *x.getBandedPtr() + *m.getIdentityPtr();
+            break;
+          default:
+            SiconosMatrixException::selfThrow("Matrix function add(A,B,C): invalid type of matrix");
+          }
+        else if (numX == 7)
+          switch (numM)
+          {
+          case 1:
+            noalias(*res.getDensePtr()) = *x.getIdentityPtr() + *m.getDensePtr();
+            break;
+          case 2:
+            noalias(*res.getDensePtr()) = *x.getIdentityPtr() + *m.getTriangPtr();
+            break;
+          case 3:
+            noalias(*res.getDensePtr()) = *x.getIdentityPtr() + *m.getSymPtr();
+            break;
+          case 4:
+            noalias(*res.getDensePtr()) = *x.getIdentityPtr() + *m.getSparsePtr();
+            break;
+          case 7:
+            noalias(*res.getDensePtr()) = *x.getIdentityPtr() + *m.getIdentityPtr();
+            break;
+          default:
+            SiconosMatrixException::selfThrow("Matrix function add(A,B,C): invalid type of matrix");
+          }
+        else
+          SiconosMatrixException::selfThrow("Matrix function add(A,B,C): invalid type of matrix");
+
+      }
+    }
+  }
+}
+
+const SimpleMatrix operator - (const SiconosMatrix &x, const SiconosMatrix &m)
 {
   if ((x.size(0) != m.size(0)) || (x.size(1) != m.size(1)))
     SiconosMatrixException::selfThrow("Matrix subtraction: inconsistent sizes");
+  if (x.isBlock() || m.isBlock())
+    SiconosMatrixException::selfThrow("Matrix, operator -: not yet implemented for BlockMatrix.");
 
   unsigned int numX = x.getNum();
   if (numX != m.getNum())
     SiconosMatrixException::selfThrow("SimpleMatrix:Matrix subtraction: use function sub in order to subtract matrices of different type");
-
-  if (numX == 7)
-    SiconosMatrixException::selfThrow("SimpleMatrix:Matrix subtraction: illegal matrix type for operator -. Try sub()?");
 
   if (numX == 1)
   {
@@ -1950,18 +2467,432 @@ SimpleMatrix operator - (const SiconosMatrix &x, const SiconosMatrix &m)
     b = *x.getBandedPtr() - *m.getBandedPtr();
     return b;
   }
-  else  // if(numX == 6){
+  else
   {
-    ZeroMat z;
+    //if(numX == 6 || numX ==7){
+    ZeroMat z(x.size(0), x.size(1));
     return z;
   }
 }
 
-SimpleMatrix operator * (const SiconosMatrix &x, const SiconosMatrix &m)
+const SimpleMatrix sub(const SiconosMatrix &x, const SiconosMatrix& m)
+{
+  if ((x.size(0) != m.size(0)) || (x.size(1) != m.size(1)))
+    SiconosMatrixException::selfThrow("Function sub(A,B), inconsistent sizes.");
+  if (x.isBlock() || m.isBlock())
+    SiconosMatrixException::selfThrow("Matrix, sub function: not yet implemented for BlockMatrix.");
+
+  unsigned int numM = m.getNum();
+  unsigned int numX = x.getNum();
+
+  if (numM == 6) // if m = zero
+    return x;
+  else
+  {
+    if (numX == numM) // if x and m are of the same type.
+    {
+      if (numX == 1)
+      {
+        DenseMat p = *x.getDensePtr() - *m.getDensePtr();
+        return p;
+      }
+      else if (numX == 2)
+      {
+        TriangMat t = *x.getTriangPtr() - *m.getTriangPtr();
+        return t;
+      }
+      else if (numX == 3)
+      {
+        SymMat s = *x.getSymPtr() - *m.getSymPtr();
+        return s;
+      }
+      else if (numX == 3)
+      {
+        SparseMat s = *x.getSparsePtr() - *m.getSparsePtr();
+        return s;
+      }
+      else if (numX == 5)
+      {
+        BandedMat b = *x.getBandedPtr() - *m.getBandedPtr();
+        return b;
+      }
+      else // if(numX==7)
+      {
+        ZeroMat z(x.size(0), x.size(1));
+        return z;
+      }
+    }
+    else
+    {
+      // if x and m are different, result is a DenseMat.
+      DenseMat p(x.size(0), x.size(1));
+      if (numX == 1) // if x dense.
+        switch (numM)
+        {
+        case 2:
+          noalias(p) = *x.getDensePtr() - *m.getTriangPtr();
+          break;
+        case 3:
+          noalias(p) = *x.getDensePtr() - *m.getSymPtr();
+          break;
+        case 4:
+          noalias(p) = *x.getDensePtr() - *m.getSparsePtr();
+          break;
+        case 5:
+          noalias(p) = *x.getDensePtr() - *m.getBandedPtr();
+          break;
+        case 7:
+          noalias(p) = *x.getDensePtr() - *m.getIdentityPtr();
+          break;
+        default:
+          SiconosMatrixException::selfThrow("Matrix function sub(A,B): invalid type of matrix");
+        }
+      else if (numX == 2)
+        switch (numM)
+        {
+        case 1:
+          noalias(p) = *x.getTriangPtr() - *m.getDensePtr();
+          break;
+        case 3:
+          noalias(p) = *x.getTriangPtr() - *m.getSymPtr();
+          break;
+        case 4:
+          noalias(p) = *x.getTriangPtr() - *m.getSparsePtr();
+          break;
+        case 5:
+          noalias(p) = *x.getTriangPtr() - *m.getBandedPtr();
+          break;
+        case 7:
+          noalias(p) = *x.getTriangPtr() - *m.getIdentityPtr();
+          break;
+        default:
+          SiconosMatrixException::selfThrow("Matrix function sub(A,B): invalid type of matrix");
+        }
+      else if (numX == 3)
+        switch (numM)
+        {
+        case 1:
+          noalias(p) = *x.getSymPtr() - *m.getDensePtr();
+          break;
+        case 2:
+          noalias(p) = *x.getSymPtr() - *m.getTriangPtr();
+          break;
+        case 4:
+          noalias(p) = *x.getSymPtr() - *m.getSparsePtr();
+          break;
+        case 5:
+          noalias(p) = *x.getSymPtr() - *m.getBandedPtr();
+          break;
+        case 7:
+          noalias(p) = *x.getSymPtr() - *m.getIdentityPtr();
+          break;
+        default:
+          SiconosMatrixException::selfThrow("Matrix function sub(A,B): invalid type of matrix");
+        }
+      else if (numX == 4)
+        switch (numM)
+        {
+        case 1:
+          noalias(p) = *x.getSparsePtr() - *m.getDensePtr();
+          break;
+        case 2:
+          noalias(p) = *x.getSparsePtr() - *m.getTriangPtr();
+          break;
+        case 3:
+          noalias(p) = *x.getSparsePtr() - *m.getSymPtr();
+          break;
+        case 5:
+          noalias(p) = *x.getSparsePtr() - *m.getBandedPtr();
+          break;
+        case 7:
+          noalias(p) = *x.getSparsePtr() - *m.getIdentityPtr();
+          break;
+        default:
+          SiconosMatrixException::selfThrow("Matrix function sub(A,B): invalid type of matrix");
+        }
+      else if (numX == 5)
+        switch (numM)
+        {
+        case 1:
+          noalias(p) = *x.getBandedPtr() - *m.getDensePtr();
+          break;
+        case 2:
+          noalias(p) = *x.getBandedPtr() - *m.getTriangPtr();
+          break;
+        case 3:
+          noalias(p) = *x.getBandedPtr() - *m.getSymPtr();
+          break;
+        case 4:
+          noalias(p) = *x.getBandedPtr() - *m.getSparsePtr();
+          break;
+        case 7:
+          noalias(p) = *x.getBandedPtr() - *m.getIdentityPtr();
+          break;
+        default:
+          SiconosMatrixException::selfThrow("Matrix function sub(A,B): invalid type of matrix");
+        }
+      else if (numX == 6)
+      {
+        if (numM == 1)
+        {
+          p = *m.getDensePtr();
+          p *= -1.0;
+        }
+        else if (numM == 2)
+        {
+          TriangMat t = *m.getTriangPtr();
+          t *= -1.0;
+          return t;
+        }
+        else if (numM == 3)
+        {
+          SymMat s = *m.getSymPtr();
+          s *= -1.0;
+          return s;
+        }
+        else if (numM == 4)
+        {
+          SparseMat s =  *m.getSparsePtr();
+          s *= -1.0;
+          return s;
+        }
+        else if (numM == 5)
+        {
+          BandedMat b =  *m.getBandedPtr();
+          b *= -1.0;
+          return b;
+        }
+        else if (numM == 7)
+        {
+          p =  *m.getIdentityPtr();
+          p *= -1.0;
+        }
+      }
+      else if (numX == 7)
+        switch (numM)
+        {
+        case 1:
+          noalias(p) = *x.getIdentityPtr() - *m.getDensePtr();
+          break;
+        case 2:
+          noalias(p) = *x.getIdentityPtr() - *m.getTriangPtr();
+          break;
+        case 3:
+          noalias(p) = *x.getIdentityPtr() - *m.getSymPtr();
+          break;
+        case 4:
+          noalias(p) = *x.getIdentityPtr() - *m.getSparsePtr();
+          break;
+        case 5:
+          noalias(p) = *x.getIdentityPtr() - *m.getBandedPtr();
+          break;
+        default:
+          SiconosMatrixException::selfThrow("Matrix function sub(A,B): invalid type of matrix");
+        }
+      else
+        SiconosMatrixException::selfThrow("Matrix function sub(A,B): invalid type of matrix");
+      return p;
+    }
+  }
+}
+
+void sub(const SiconosMatrix &x, const SiconosMatrix& m, SiconosMatrix& res)
+{
+  if ((x.size(0) != m.size(0)) || (x.size(1) != m.size(1)))
+    SiconosMatrixException::selfThrow("Matrix function sub(A,B,C): inconsistent sizes");
+  if ((x.size(0) != res.size(0)) || (x.size(1) != res.size(1)))
+    SiconosMatrixException::selfThrow("Matrix function sub(A,B,C): inconsistent sizes");
+  if (x.isBlock() || m.isBlock() || res.isBlock())
+    SiconosMatrixException::selfThrow("Matrix, sub function: not yet implemented for BlockMatrix.");
+
+  if (&res == &m)
+  {
+    res -= x;
+    res *= -1.0;
+  }
+  else if (&res == &x)
+    res -= m;
+  else
+  {
+
+    unsigned int numX = x.getNum();
+    unsigned int numM = m.getNum();
+    unsigned int numRes = res.getNum();
+
+    if (numM == 6) // if m = zero
+      res = x;
+    else if (numX == 6) // if x = 0
+    {
+      res = m;
+      res *= -1.0;
+    }
+    else
+    {
+      if (numX == numM) // if x and m are of the same type.
+      {
+        if (numRes != numX && numX != 7)
+          SiconosMatrixException::selfThrow("Matrix function sub(A,B,C): wrong type for C.");
+        if (numX == 1)
+          noalias(*res.getDensePtr()) = *x.getDensePtr() - *m.getDensePtr();
+        else if (numX == 2)
+          noalias(*res.getTriangPtr()) = *x.getTriangPtr() - *m.getTriangPtr();
+        else if (numX == 3)
+          noalias(*res.getSymPtr()) = *x.getSymPtr() - *m.getSymPtr();
+        else if (numX == 4)
+          noalias(*res.getSparsePtr()) = *x.getSparsePtr() - *m.getSparsePtr();
+        else if (numX == 5)
+          noalias(*res.getBandedPtr()) = *x.getBandedPtr() - *m.getBandedPtr();
+        else // if(numX==7)
+          res.zero();
+      }
+      else
+      {
+        // if m and x are of different type, res must be dense.
+        if (numRes != 1)
+          SiconosMatrixException::selfThrow("Matrix function sub(A,B,C): wrong type for C.");
+
+        if (numX == 1) // if x dense.
+          switch (numM)
+          {
+          case 2:
+            noalias(*res.getDensePtr()) = *x.getDensePtr() - *m.getTriangPtr();
+            break;
+          case 3:
+            noalias(*res.getDensePtr()) = *x.getDensePtr() - *m.getSymPtr();
+            break;
+          case 4:
+            noalias(*res.getDensePtr()) = *x.getDensePtr() - *m.getSparsePtr();
+            break;
+          case 5:
+            noalias(*res.getDensePtr()) = *x.getDensePtr() - *m.getBandedPtr();
+            break;
+          case 7:
+            noalias(*res.getDensePtr()) = *x.getDensePtr() - *m.getIdentityPtr();
+            break;
+          default:
+            SiconosMatrixException::selfThrow("Matrix function sub(A,B,C): invalid type of matrix");
+          }
+        else if (numX == 2)
+          switch (numM)
+          {
+          case 1:
+            noalias(*res.getDensePtr()) = *x.getTriangPtr() - *m.getDensePtr();
+            break;
+          case 3:
+            noalias(*res.getDensePtr()) = *x.getTriangPtr() - *m.getSymPtr();
+            break;
+          case 4:
+            noalias(*res.getDensePtr()) = *x.getTriangPtr() - *m.getSparsePtr();
+            break;
+          case 5:
+            noalias(*res.getDensePtr()) = *x.getTriangPtr() - *m.getBandedPtr();
+            break;
+          case 7:
+            noalias(*res.getDensePtr()) = *x.getTriangPtr() - *m.getIdentityPtr();
+            break;
+          default:
+            SiconosMatrixException::selfThrow("Matrix function sub(A,B,C): invalid type of matrix");
+          }
+        else if (numX == 3)
+          switch (numM)
+          {
+          case 1:
+            noalias(*res.getDensePtr()) = *x.getSymPtr() - *m.getDensePtr();
+            break;
+          case 2:
+            noalias(*res.getDensePtr()) = *x.getSymPtr() - *m.getTriangPtr();
+            break;
+          case 4:
+            noalias(*res.getDensePtr()) = *x.getSymPtr() - *m.getSparsePtr();
+            break;
+          case 5:
+            noalias(*res.getDensePtr()) = *x.getSymPtr() - *m.getBandedPtr();
+            break;
+          case 7:
+            noalias(*res.getDensePtr()) = *x.getSymPtr() - *m.getIdentityPtr();
+            break;
+          default:
+            SiconosMatrixException::selfThrow("Matrix function sub(A,B,C): invalid type of matrix");
+          }
+        else if (numX == 4)
+          switch (numM)
+          {
+          case 1:
+            noalias(*res.getDensePtr()) = *x.getSparsePtr() - *m.getDensePtr();
+            break;
+          case 2:
+            noalias(*res.getDensePtr()) = *x.getSparsePtr() - *m.getTriangPtr();
+            break;
+          case 3:
+            noalias(*res.getDensePtr()) = *x.getSparsePtr() - *m.getSymPtr();
+            break;
+          case 5:
+            noalias(*res.getDensePtr()) = *x.getSparsePtr() - *m.getBandedPtr();
+            break;
+          case 7:
+            noalias(*res.getDensePtr()) = *x.getSparsePtr() - *m.getIdentityPtr();
+            break;
+          default:
+            SiconosMatrixException::selfThrow("Matrix function sub(A,B,C): invalid type of matrix");
+          }
+        else if (numX == 5)
+          switch (numM)
+          {
+          case 1:
+            noalias(*res.getDensePtr()) = *x.getBandedPtr() - *m.getDensePtr();
+            break;
+          case 2:
+            noalias(*res.getDensePtr()) = *x.getBandedPtr() - *m.getTriangPtr();
+            break;
+          case 3:
+            noalias(*res.getDensePtr()) = *x.getBandedPtr() - *m.getSymPtr();
+            break;
+          case 4:
+            noalias(*res.getDensePtr()) = *x.getBandedPtr() - *m.getSparsePtr();
+            break;
+          case 7:
+            noalias(*res.getDensePtr()) = *x.getBandedPtr() - *m.getIdentityPtr();
+            break;
+          default:
+            SiconosMatrixException::selfThrow("Matrix function sub(A,B,C): invalid type of matrix");
+          }
+        else if (numX == 7)
+          switch (numM)
+          {
+          case 1:
+            noalias(*res.getDensePtr()) = *x.getIdentityPtr() - *m.getDensePtr();
+            break;
+          case 2:
+            noalias(*res.getDensePtr()) = *x.getIdentityPtr() - *m.getTriangPtr();
+            break;
+          case 3:
+            noalias(*res.getDensePtr()) = *x.getIdentityPtr() - *m.getSymPtr();
+            break;
+          case 4:
+            noalias(*res.getDensePtr()) = *x.getIdentityPtr() - *m.getSparsePtr();
+            break;
+          case 5:
+            noalias(*res.getDensePtr()) = *x.getIdentityPtr() - *m.getBandedPtr();
+            break;
+          default:
+            SiconosMatrixException::selfThrow("Matrix function sub(A,B,C): invalid type of matrix");
+          }
+        else
+          SiconosMatrixException::selfThrow("Matrix function sub(A,B,C): invalid type of matrix");
+
+      }
+    }
+  }
+}
+
+const SimpleMatrix operator * (const SiconosMatrix &x, const SiconosMatrix &m)
 {
 
   if ((x.size(1) != m.size(0)))
     SiconosMatrixException::selfThrow("Matrix product : inconsistent sizes");
+
+  if (x.isBlock() || m.isBlock())
+    SiconosMatrixException::selfThrow("Matrix function prod : not yet implemented for block matrices.");
 
   unsigned int numX = x.getNum();
   if (numX != m.getNum())
@@ -1992,367 +2923,11 @@ SimpleMatrix operator * (const SiconosMatrix &x, const SiconosMatrix &m)
     DenseMat p = prod(*x.getBandedPtr(), *m.getBandedPtr());
     return p;
   }
-  else if (numX == 6)
-  {
-    ZeroMat z;
-    return z;
-  }
-  else  // num = 7
-  {
-    IdentityMat I;
-    return I;
-  }
+  else //if(numX == 6 || numX == 7){
+    return x;
 }
 
-SimpleMatrix add(const SiconosMatrix &x, const SiconosMatrix& m)
-{
-  DenseMat p;
-
-  if ((x.size(0) != m.size(0)) || (x.size(1) != m.size(1)))
-    SiconosMatrixException::selfThrow("SimpleMatrix: function add, inconsistent sizes.");
-
-  unsigned int numM = m.getNum();
-  unsigned int numX = x.getNum();
-
-  if (numM == 1)
-  {
-    if (numX == 1)
-      p = *x.getDensePtr() + *m.getDensePtr();
-    else if (numX == 2)
-      p = *x.getTriangPtr() + *m.getDensePtr();
-    else if (numX == 3)
-      p = *x.getSymPtr() + *m.getDensePtr();
-    else if (numX == 4)
-      p = *x.getSparsePtr() + *m.getDensePtr();
-    else if (numX == 5)
-      p = *x.getBandedPtr() + *m.getDensePtr();
-    else if (numX == 6)
-      p = *m.getDensePtr();
-    else if (numX == 7)
-      p = *x.getIdentityPtr() + *m.getDensePtr();
-  }
-  else if (numM == 2)
-  {
-    if (numX == 1)
-      p = *x.getDensePtr() + *m.getTriangPtr();
-    else if (numX == 2)
-    {
-      TriangMat t = *x.getTriangPtr() + *m.getTriangPtr();
-      return t;
-    }
-    else if (numX == 3)
-      p = *x.getSymPtr() + *m.getTriangPtr();
-    else if (numX == 4)
-      p = *x.getSparsePtr() + *m.getTriangPtr();
-    else if (numX == 5)
-      p = *x.getBandedPtr() + *m.getTriangPtr();
-    else if (numX == 6)
-      p = *m.getTriangPtr();
-    else if (numX == 7)
-      p = *x.getIdentityPtr() + *m.getTriangPtr();
-  }
-  else if (numM == 3)
-  {
-    if (numX == 1)
-      p = *x.getDensePtr() + *m.getSymPtr();
-    else if (numX == 2)
-      p = *x.getTriangPtr() + *m.getSymPtr();
-    else if (numX == 3)
-    {
-      SymMat s = *x.getSymPtr() + *m.getSymPtr();
-      return s;
-    }
-    else if (numX == 4)
-      p = *x.getSparsePtr() + *m.getSymPtr();
-    else if (numX == 5)
-      p = *x.getBandedPtr() + *m.getSymPtr();
-    else if (numX == 6)
-      p = *m.getSymPtr();
-    else if (numX == 7)
-      p = *x.getIdentityPtr() + *m.getSymPtr();
-  }
-  else if (numM == 4)
-  {
-    if (numX == 1)
-      p = *x.getDensePtr() + *m.getSparsePtr();
-    else if (numX == 2)
-      p = *x.getTriangPtr() + *m.getSparsePtr();
-    else if (numX == 3)
-      p = *x.getSymPtr() + *m.getSparsePtr();
-    else if (numX == 4)
-      p = *x.getSparsePtr() + *m.getSparsePtr();
-    else if (numX == 5)
-      p = *x.getBandedPtr() + *m.getSparsePtr();
-    else if (numX == 6)
-      p = *m.getSparsePtr();
-    else if (numX == 7)
-      p = *x.getIdentityPtr() + *m.getSparsePtr();
-  }
-  else if (numM == 5)
-  {
-    if (numX == 1)
-      p = *x.getDensePtr() + *m.getBandedPtr();
-    else if (numX == 2)
-      p = *x.getTriangPtr() + *m.getBandedPtr();
-    else if (numX == 3)
-      p = *x.getSymPtr() + *m.getBandedPtr();
-    else if (numX == 4)
-      p = *x.getSparsePtr() + *m.getBandedPtr();
-    else if (numX == 5)
-    {
-      BandedMat b = *x.getBandedPtr() + *m.getBandedPtr();
-      return b;
-    }
-    else if (numX == 6)
-      p = *m.getBandedPtr();
-    else if (numX == 7)
-      p = *x.getIdentityPtr() + *m.getBandedPtr();
-  }
-  else if (numM == 6)
-  {
-    if (numX == 1)
-      p = *x.getDensePtr();
-    else if (numX == 2)
-    {
-      TriangMat t  = *x.getTriangPtr();
-      return t;
-    }
-    else if (numX == 3)
-    {
-      SymMat s = *x.getSymPtr();
-      return s;
-    }
-    else if (numX == 4)
-    {
-      SparseMat s = *x.getSparsePtr();
-      return s;
-    }
-    else if (numX == 5)
-    {
-      BandedMat b = *x.getBandedPtr();
-      return b;
-    }
-    else if (numX == 6)
-    {
-      ZeroMat z(x.size(0), x.size(1));
-      return z;
-    }
-    else if (numX == 7)
-    {
-      IdentityMat i = *x.getIdentityPtr();
-      return i;
-    }
-  }
-  else if (numM == 7)
-  {
-    if (numX == 1)
-      p = *x.getDensePtr() + *m.getIdentityPtr();
-    else if (numX == 2)
-    {
-      TriangMat t = *x.getTriangPtr() + *m.getIdentityPtr();
-      return t;
-    }
-    else if (numX == 3)
-    {
-      SymMat s = *x.getSymPtr() + *m.getIdentityPtr();
-      return s;
-    }
-    else if (numX == 4)
-    {
-      SparseMat s = *x.getSparsePtr() + *m.getIdentityPtr();
-      return s;
-    }
-    else if (numX == 5)
-      p = *x.getBandedPtr() + *m.getIdentityPtr();
-    else if (numX == 6)
-      p = *m.getIdentityPtr();
-    else if (numX == 7)
-      p = 2 * *x.getIdentityPtr();
-  }
-  else
-  {
-    SiconosMatrixException::selfThrow("Matrix function sub: invalid type of matrix");
-  }
-  return p;
-}
-
-SimpleMatrix sub(const SiconosMatrix &x, const SiconosMatrix& m)
-{
-  DenseMat p;
-
-  if ((x.size(0) != m.size(0)) || (x.size(1) != m.size(1)))
-    SiconosMatrixException::selfThrow("SimpleMatrix: function sub, inconsistent sizes.");
-
-  unsigned int numM = m.getNum();
-  unsigned int numX = x.getNum();
-
-  if (numM == 1)
-  {
-    if (numX == 1)
-      p = *x.getDensePtr() - *m.getDensePtr();
-    else if (numX == 2)
-      p = *x.getTriangPtr() - *m.getDensePtr();
-    else if (numX == 3)
-      p = *x.getSymPtr() - *m.getDensePtr();
-    else if (numX == 4)
-      p = *x.getSparsePtr() - *m.getDensePtr();
-    else if (numX == 5)
-      p = *x.getBandedPtr() - *m.getDensePtr();
-    else if (numX == 6)
-      p = -*m.getDensePtr();
-    else if (numX == 7)
-      p = *x.getIdentityPtr() - *m.getDensePtr();
-  }
-  else if (numM == 2)
-  {
-    if (numX == 1)
-      p = *x.getDensePtr() - *m.getTriangPtr();
-    else if (numX == 2)
-    {
-      TriangMat t = *x.getTriangPtr() - *m.getTriangPtr();
-      return t;
-    }
-    else if (numX == 3)
-      p = *x.getSymPtr() - *m.getTriangPtr();
-    else if (numX == 4)
-      p = *x.getSparsePtr() - *m.getTriangPtr();
-    else if (numX == 5)
-      p = *x.getBandedPtr() - *m.getTriangPtr();
-    else if (numX == 6)
-      p = -*m.getTriangPtr();
-    else if (numX == 7)
-      p = *x.getIdentityPtr() - *m.getTriangPtr();
-  }
-  else if (numM == 3)
-  {
-    if (numX == 1)
-      p = *x.getDensePtr() - *m.getSymPtr();
-    else if (numX == 2)
-      p = *x.getTriangPtr() - *m.getSymPtr();
-    else if (numX == 3)
-    {
-      SymMat s = *x.getSymPtr() - *m.getSymPtr();
-      return s;
-    }
-    else if (numX == 4)
-      p = *x.getSparsePtr() - *m.getSymPtr();
-    else if (numX == 5)
-      p = *x.getBandedPtr() - *m.getSymPtr();
-    else if (numX == 6)
-      p = -*m.getSymPtr();
-    else if (numX == 7)
-      p = *x.getIdentityPtr() - *m.getSymPtr();
-  }
-  else if (numM == 4)
-  {
-    if (numX == 1)
-      p = *x.getDensePtr() - *m.getSparsePtr();
-    else if (numX == 2)
-      p = *x.getTriangPtr() - *m.getSparsePtr();
-    else if (numX == 3)
-      p = *x.getSymPtr() - *m.getSparsePtr();
-    else if (numX == 4)
-      p = *x.getSparsePtr() - *m.getSparsePtr();
-    else if (numX == 5)
-      p = *x.getBandedPtr() - *m.getSparsePtr();
-    else if (numX == 6)
-      p = -*m.getSparsePtr();
-    else if (numX == 7)
-      p = *x.getIdentityPtr() - *m.getSparsePtr();
-  }
-  else if (numM == 5)
-  {
-    if (numX == 1)
-      p = *x.getDensePtr() - *m.getBandedPtr();
-    else if (numX == 2)
-      p = *x.getTriangPtr() - *m.getBandedPtr();
-    else if (numX == 3)
-      p = *x.getSymPtr() - *m.getBandedPtr();
-    else if (numX == 4)
-      p = *x.getSparsePtr() - *m.getBandedPtr();
-    else if (numX == 5)
-    {
-      BandedMat b = *x.getBandedPtr() - *m.getBandedPtr();
-      return b;
-    }
-    else if (numX == 6)
-      p = -*m.getBandedPtr();
-    else if (numX == 7)
-      p = *x.getIdentityPtr() - *m.getBandedPtr();
-  }
-  else if (numM == 6)
-  {
-    if (numX == 1)
-      p = *x.getDensePtr();
-    else if (numX == 2)
-    {
-      TriangMat t  = *x.getTriangPtr();
-      return t;
-    }
-    else if (numX == 3)
-    {
-      SymMat s = *x.getSymPtr();
-      return s;
-    }
-    else if (numX == 4)
-    {
-      SparseMat s = *x.getSparsePtr();
-      return s;
-    }
-    else if (numX == 5)
-    {
-      BandedMat b = *x.getBandedPtr();
-      return b;
-    }
-    else if (numX == 6)
-    {
-      ZeroMat z(x.size(0), x.size(1));
-      return z;
-    }
-    else if (numX == 7)
-    {
-      IdentityMat i = *x.getIdentityPtr();
-      return i;
-    }
-  }
-  else if (numM == 7)
-  {
-    if (numX == 1)
-      p = *x.getDensePtr() - *m.getIdentityPtr();
-    else if (numX == 2)
-    {
-      TriangMat t = *x.getTriangPtr() - *m.getIdentityPtr();
-      return t;
-    }
-    else if (numX == 3)
-    {
-      SymMat s = *x.getSymPtr() - *m.getIdentityPtr();
-      return s;
-    }
-    else if (numX == 4)
-    {
-      SparseMat s = *x.getSparsePtr() - *m.getIdentityPtr();
-      return s;
-    }
-    else if (numX == 5)
-      p = *x.getBandedPtr() - *m.getIdentityPtr();
-
-    else if (numX == 6)
-      p = -*m.getIdentityPtr();
-    else if (numX == 7)
-    {
-      ZeroMat z(x.size(0), x.size(1));
-      return z;
-    }
-  }
-  else
-  {
-    SiconosMatrixException::selfThrow("Matrix function sub: invalid type of matrix");
-  }
-  return p;
-}
-
-SimpleMatrix prod(const SiconosMatrix &x, const SiconosMatrix& m)
+const SimpleMatrix prod(const SiconosMatrix &x, const SiconosMatrix& m)
 {
   if ((x.size(1) != m.size(0)))
     SiconosMatrixException::selfThrow("Matrix function prod : inconsistent sizes");
@@ -2368,36 +2943,48 @@ SimpleMatrix prod(const SiconosMatrix &x, const SiconosMatrix& m)
     DenseMat p(ublas::scalar_matrix<double>(x.size(0), m.size(1), 0.0));
     return p;
   }
+  else if (numM == 7)
+    return x;
+  else if (numX == 7)
+    return m;
   else
   {
-    DenseMat p(x.size(0), m.size(1));
     if (numM == 1)
     {
       if (numX == 1)
-        p = prod(*x.getDensePtr(), *m.getDensePtr());
-
+      {
+        DenseMat p = prod(*x.getDensePtr(), *m.getDensePtr());
+        return p;
+      }
       else if (numX == 2)
-        p = prod(*x.getTriangPtr(), *m.getDensePtr());
+      {
+        DenseMat p = prod(*x.getTriangPtr(), *m.getDensePtr());
+        return p;
+      }
 
       else if (numX == 3)
-        p = prod(*x.getSymPtr(), *m.getDensePtr());
+      {
+        DenseMat p  = prod(*x.getSymPtr(), *m.getDensePtr());
+        return p;
+      }
 
       else if (numX == 4)
-        p = prod(*x.getSparsePtr(), *m.getDensePtr());
+      {
+        DenseMat p = prod(*x.getSparsePtr(), *m.getDensePtr());
+        return p;
+      }
 
-      else if (numX == 5)
-        p = prod(*x.getBandedPtr(), *m.getDensePtr());
-
-      else //if(numX==7)
-        p = prod(*x.getIdentityPtr(), *m.getDensePtr());
-
-      return p;
+      else// if(numX==5)
+      {
+        DenseMat p  = prod(*x.getBandedPtr(), *m.getDensePtr());
+        return p;
+      }
     }
     else if (numM == 2)
     {
       if (numX == 1)
       {
-        p = prod(*x.getDensePtr(), *m.getTriangPtr());
+        DenseMat p  = prod(*x.getDensePtr(), *m.getTriangPtr());
         return p;
       }
       else if (numX == 2)
@@ -2407,22 +2994,17 @@ SimpleMatrix prod(const SiconosMatrix &x, const SiconosMatrix& m)
       }
       else if (numX == 3)
       {
-        p = prod(*x.getSymPtr(), *m.getTriangPtr());
+        DenseMat p  = prod(*x.getSymPtr(), *m.getTriangPtr());
         return p;
       }
       else if (numX == 4)
       {
-        p = prod(*x.getSparsePtr(), *m.getTriangPtr());
+        DenseMat p  = prod(*x.getSparsePtr(), *m.getTriangPtr());
         return p;
       }
-      else if (numX == 5)
+      else //if(numX==5)
       {
-        p = prod(*x.getBandedPtr(), *m.getTriangPtr());
-        return p;
-      }
-      else //if(numX==7)
-      {
-        p = prod(*x.getIdentityPtr(), *m.getTriangPtr());
+        DenseMat p  = prod(*x.getBandedPtr(), *m.getTriangPtr());
         return p;
       }
     }
@@ -2430,12 +3012,12 @@ SimpleMatrix prod(const SiconosMatrix &x, const SiconosMatrix& m)
     {
       if (numX == 1)
       {
-        p = prod(*x.getDensePtr(), *m.getSymPtr());
+        DenseMat p  = prod(*x.getDensePtr(), *m.getSymPtr());
         return p;
       }
       else if (numX == 2)
       {
-        p = prod(*x.getTriangPtr(), *m.getSymPtr());
+        DenseMat p  = prod(*x.getTriangPtr(), *m.getSymPtr());
         return p;
       }
       else if (numX == 3)
@@ -2445,17 +3027,13 @@ SimpleMatrix prod(const SiconosMatrix &x, const SiconosMatrix& m)
       }
       else if (numX == 4)
       {
-        p = prod(*x.getSparsePtr(), *m.getSymPtr());
+        DenseMat p  = prod(*x.getSparsePtr(), *m.getSymPtr());
         return p;
       }
-      else if (numX == 5)
+      else
       {
-        p = prod(*x.getBandedPtr(), *m.getSymPtr());
-        return p;
-      }
-      else //if(numX==7)
-      {
-        p = prod(*x.getIdentityPtr(), *m.getSymPtr());
+        //if(numX==5){
+        DenseMat p  = prod(*x.getBandedPtr(), *m.getSymPtr());
         return p;
       }
     }
@@ -2463,17 +3041,17 @@ SimpleMatrix prod(const SiconosMatrix &x, const SiconosMatrix& m)
     {
       if (numX == 1)
       {
-        p = prod(*x.getDensePtr(), *m.getSparsePtr());
+        DenseMat p = prod(*x.getDensePtr(), *m.getSparsePtr());
         return p;
       }
       else if (numX == 2)
       {
-        p = prod(*x.getTriangPtr(), *m.getSparsePtr());
+        DenseMat p = prod(*x.getTriangPtr(), *m.getSparsePtr());
         return p;
       }
       else if (numX == 3)
       {
-        p = prod(*x.getSymPtr(), *m.getSparsePtr());
+        DenseMat p = prod(*x.getSymPtr(), *m.getSparsePtr());
         return p;
       }
       else if (numX == 4)
@@ -2481,114 +3059,271 @@ SimpleMatrix prod(const SiconosMatrix &x, const SiconosMatrix& m)
         SparseMat sp = prod(*x.getSparsePtr(), *m.getSparsePtr());
         return sp;
       }
-      else if (numX == 5)
+      else //if(numX==5){
       {
-        p = prod(*x.getBandedPtr(), *m.getSparsePtr());
-        return p;
-      }
-      else //if(numX==7)
-      {
-        p = prod(*x.getIdentityPtr(), *m.getSparsePtr());
+        DenseMat p = prod(*x.getBandedPtr(), *m.getSparsePtr());
         return p;
       }
     }
-    else if (numM == 5)
+    else //if(numM==5)
     {
       if (numX == 1)
-        p = prod(*x.getDensePtr(), *m.getBandedPtr());
+      {
+        DenseMat p = prod(*x.getDensePtr(), *m.getBandedPtr());
+        return p;
+      }
 
       else if (numX == 2)
-        p = prod(*x.getTriangPtr(), *m.getBandedPtr());
+      {
+        DenseMat p = prod(*x.getTriangPtr(), *m.getBandedPtr());
+        return p;
+      }
 
       else if (numX == 3)
-        p = prod(*x.getSymPtr(), *m.getBandedPtr());
+      {
+        DenseMat p = prod(*x.getSymPtr(), *m.getBandedPtr());
+        return p;
+      }
 
       else if (numX == 4)
-        p = prod(*x.getSparsePtr(), *m.getBandedPtr());
+      {
+        DenseMat p = prod(*x.getSparsePtr(), *m.getBandedPtr());
+        return p;
+      }
 
-      else if (numX == 5)
-        p = prod(*x.getBandedPtr(), *m.getBandedPtr());
-
-      else //if(numX==7)
-        p = prod(*x.getIdentityPtr(), *m.getBandedPtr());
-
-      return p;
-    }
-    else //if(numM==7)
-    {
-      if (numX == 1)
-        p = prod(*x.getDensePtr(), *m.getIdentityPtr());
-
-      else if (numX == 2)
-        p = prod(*x.getTriangPtr(), *m.getIdentityPtr());
-
-      else if (numX == 3)
-        p = prod(*x.getSymPtr(), *m.getIdentityPtr());
-
-      else if (numX == 4)
-        p = prod(*x.getSparsePtr(), *m.getIdentityPtr());
-
-      else if (numX == 5)
-        p = prod(*x.getBandedPtr(), *m.getIdentityPtr());
-
-      else //if(numX==7)
-        p = prod(*x.getIdentityPtr(), *m.getIdentityPtr());
-      return p;
+      else //if(numX==5)
+      {
+        DenseMat p = prod(*x.getBandedPtr(), *m.getBandedPtr());
+        return p;
+      }
     }
   }
 }
 
-SimpleMatrix operator * (const SiconosMatrix &m, double d)
+void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C)
 {
-  unsigned int num = m.getNum();
+  if ((A.size(1) != B.size(0)))
+    SiconosMatrixException::selfThrow("Matrix function prod(A,B,C) : inconsistent sizes");
 
-  if (num == 7)
-    SiconosMatrixException::selfThrow("SimpleMatrix:operator * (m*double), forbidden for this type of matrix.");
+  if (A.size(0) != C.size(0) || B.size(1) != C.size(1))
+    SiconosMatrixException::selfThrow("Matrix function prod(A,B,C) : inconsistent sizes");
 
-  if (num == 1)
+  if (A.isBlock() || B.isBlock() || C.isBlock())
+    SiconosMatrixException::selfThrow("Matrix function prod(A,B,C) : not yet implemented for block matrices.");
+
+  unsigned int numA = A.getNum();
+  unsigned int numB = B.getNum();
+  unsigned int numC = C.getNum();
+
+  if (&C == &A || &C == &B) // if common memory ...
   {
-    DenseMat p;
-    p = *m.getDensePtr() * d;
-    return p;
+    if (numA == 7) // if A is identity
+    {
+      if (&C != &B) C = B;
+    }
+    else if (numB == 7) // if B is identity
+    {
+      if (&C != &A) C = A;
+    }
+    else if (numA == 6 || numB == 6) // if A or B is null
+      C.zero();
+    else
+    {
+      switch (numC)
+      {
+      case 1:
+        if (numB == 1)
+        {
+          if (numA == 1)
+            *C.getDensePtr() = prod(*A.getDensePtr(), *B.getDensePtr());
+          else if (numA == 2)
+            *C.getDensePtr() = prod(*A.getTriangPtr(), *B.getDensePtr());
+          else if (numA == 3)
+            *C.getDensePtr()  = prod(*A.getSymPtr(), *B.getDensePtr());
+          else if (numA == 4)
+            *C.getDensePtr() = prod(*A.getSparsePtr(), *B.getDensePtr());
+          else// if(numA==5)
+            *C.getDensePtr()  = prod(*A.getBandedPtr(), *B.getDensePtr());
+        }
+        else if (numB == 2)
+        {
+          if (numA == 1)
+            *C.getDensePtr()  = prod(*A.getDensePtr(), *B.getTriangPtr());
+          else if (numA == 2)
+            *C.getDensePtr()  = prod(*A.getTriangPtr(), *B.getTriangPtr());
+          else if (numA == 3)
+            *C.getDensePtr()  = prod(*A.getSymPtr(), *B.getTriangPtr());
+          else if (numA == 4)
+            *C.getDensePtr()  = prod(*A.getSparsePtr(), *B.getTriangPtr());
+          else //if(numA==5)
+            *C.getDensePtr()  = prod(*A.getBandedPtr(), *B.getTriangPtr());
+        }
+        else if (numB == 3)
+        {
+          if (numA == 1)
+            *C.getDensePtr()  = prod(*A.getDensePtr(), *B.getSymPtr());
+          else if (numA == 2)
+            *C.getDensePtr()  = prod(*A.getTriangPtr(), *B.getSymPtr());
+          else if (numA == 3)
+            *C.getDensePtr()  = prod(*A.getSymPtr(), *B.getSymPtr());
+          else if (numA == 4)
+            *C.getDensePtr()  = prod(*A.getSparsePtr(), *B.getSymPtr());
+          else // if (numA == 5)
+            *C.getDensePtr()  = prod(*A.getBandedPtr(), *B.getSymPtr());
+        }
+        else if (numB == 4)
+        {
+          if (numA == 1)
+            *C.getDensePtr() = prod(*A.getDensePtr(), *B.getSparsePtr());
+          else if (numA == 2)
+            *C.getDensePtr() = prod(*A.getTriangPtr(), *B.getSparsePtr());
+          else if (numA == 3)
+            *C.getDensePtr() = prod(*A.getSymPtr(), *B.getSparsePtr());
+          else if (numA == 4)
+            *C.getDensePtr() = prod(*A.getSparsePtr(), *B.getSparsePtr());
+          else //if(numA==5){
+            *C.getDensePtr() = prod(*A.getBandedPtr(), *B.getSparsePtr());
+        }
+        else //if(numB==5)
+        {
+          if (numA == 1)
+            *C.getDensePtr() = prod(*A.getDensePtr(), *B.getBandedPtr());
+          else if (numA == 2)
+            *C.getDensePtr() = prod(*A.getTriangPtr(), *B.getBandedPtr());
+          else if (numA == 3)
+            *C.getDensePtr() = prod(*A.getSymPtr(), *B.getBandedPtr());
+          else if (numA == 4)
+            *C.getDensePtr() = prod(*A.getSparsePtr(), *B.getBandedPtr());
+          else //if(numA==5)
+            *C.getDensePtr() = prod(*A.getBandedPtr(), *B.getBandedPtr());
+        }
+        break;
+      case 2:
+        if (numA != 2 || numB != 2)
+          SiconosMatrixException::selfThrow("Matrix function prod(A,B,C) : wrong type for C (according to A and B types).");
+        *C.getTriangPtr() = prod(*A.getTriangPtr(), *B.getTriangPtr());
+        break;
+      case 3:
+        if (numA != 3 || numB != 3)
+          SiconosMatrixException::selfThrow("Matrix function prod(A,B,C) : wrong type for C (according to A and B types).");
+        *C.getSymPtr() = prod(*A.getSymPtr(), *B.getSymPtr());
+        break;
+      case 4:
+        if (numA != 4 || numB != 4)
+          SiconosMatrixException::selfThrow("Matrix function prod(A,B,C) : wrong type for C (according to A and B types).");
+        *C.getSparsePtr() = prod(*A.getSparsePtr(), *B.getSparsePtr());
+        break;
+      default:
+        SiconosMatrixException::selfThrow("Matrix function prod(A,B,C) : wrong type for C (according to A and B types).");
+      }
+    }
   }
-  else if (num == 2)
+  else // if no alias between C and A or B.
   {
-    TriangMat t;
-    t = *m.getTriangPtr() * d;
-    return t;
-  }
-  else if (num == 3)
-  {
-    SymMat s;
-    s = *m.getSymPtr() * d;
-    return s;
-  }
-  else if (num == 4)
-  {
-    SparseMat sp;
-    sp = *m.getSparsePtr() * d;
-    return sp;
-  }
-  else if (num == 5)
-  {
-    BandedMat b;
-    b.resize(m.size(0), m.size(1), (*m.getBandedPtr()).lower(), (*m.getBandedPtr()).upper(), false);
-    b = *m.getBandedPtr() * d;
-    return b;
-  }
-  else //if(num==6)
-  {
-    ZeroMat z;
-    return z;
+    if (numA == 7) // if A is identity
+      C = B;
+    else if (numB == 7) // if B is identity
+      C = A;
+    else if (numA == 6 || numB == 6) // if A or B is null
+      C.zero();
+    else
+    {
+      switch (numC)
+      {
+      case 1:
+        if (numB == 1)
+        {
+          if (numA == 1)
+            noalias(*C.getDensePtr()) = prod(*A.getDensePtr(), *B.getDensePtr());
+          else if (numA == 2)
+            noalias(*C.getDensePtr()) = prod(*A.getTriangPtr(), *B.getDensePtr());
+          else if (numA == 3)
+            noalias(*C.getDensePtr())  = prod(*A.getSymPtr(), *B.getDensePtr());
+          else if (numA == 4)
+            noalias(*C.getDensePtr()) = prod(*A.getSparsePtr(), *B.getDensePtr());
+          else// if(numA==5)
+            noalias(*C.getDensePtr())  = prod(*A.getBandedPtr(), *B.getDensePtr());
+        }
+        else if (numB == 2)
+        {
+          if (numA == 1)
+            noalias(*C.getDensePtr())  = prod(*A.getDensePtr(), *B.getTriangPtr());
+          else if (numA == 2)
+            noalias(*C.getDensePtr())  = prod(*A.getTriangPtr(), *B.getTriangPtr());
+          else if (numA == 3)
+            noalias(*C.getDensePtr())  = prod(*A.getSymPtr(), *B.getTriangPtr());
+          else if (numA == 4)
+            noalias(*C.getDensePtr())  = prod(*A.getSparsePtr(), *B.getTriangPtr());
+          else //if(numA==5)
+            noalias(*C.getDensePtr())  = prod(*A.getBandedPtr(), *B.getTriangPtr());
+        }
+        else if (numB == 3)
+        {
+          if (numA == 1)
+            noalias(*C.getDensePtr())  = prod(*A.getDensePtr(), *B.getSymPtr());
+          else if (numA == 2)
+            noalias(*C.getDensePtr())  = prod(*A.getTriangPtr(), *B.getSymPtr());
+          else if (numA == 3)
+            noalias(*C.getDensePtr())  = prod(*A.getSymPtr(), *B.getSymPtr());
+          else if (numA == 4)
+            noalias(*C.getDensePtr())  = prod(*A.getSparsePtr(), *B.getSymPtr());
+          else // if (numA == 5)
+            noalias(*C.getDensePtr())  = prod(*A.getBandedPtr(), *B.getSymPtr());
+        }
+        else if (numB == 4)
+        {
+          if (numA == 1)
+            noalias(*C.getDensePtr()) = prod(*A.getDensePtr(), *B.getSparsePtr());
+          else if (numA == 2)
+            noalias(*C.getDensePtr()) = prod(*A.getTriangPtr(), *B.getSparsePtr());
+          else if (numA == 3)
+            noalias(*C.getDensePtr()) = prod(*A.getSymPtr(), *B.getSparsePtr());
+          else if (numA == 4)
+            noalias(*C.getDensePtr()) = prod(*A.getSparsePtr(), *B.getSparsePtr());
+          else //if(numA==5){
+            noalias(*C.getDensePtr()) = prod(*A.getBandedPtr(), *B.getSparsePtr());
+        }
+        else //if(numB==5)
+        {
+          if (numA == 1)
+            noalias(*C.getDensePtr()) = prod(*A.getDensePtr(), *B.getBandedPtr());
+          else if (numA == 2)
+            noalias(*C.getDensePtr()) = prod(*A.getTriangPtr(), *B.getBandedPtr());
+          else if (numA == 3)
+            noalias(*C.getDensePtr()) = prod(*A.getSymPtr(), *B.getBandedPtr());
+          else if (numA == 4)
+            noalias(*C.getDensePtr()) = prod(*A.getSparsePtr(), *B.getBandedPtr());
+          else //if(numA==5)
+            noalias(*C.getDensePtr()) = prod(*A.getBandedPtr(), *B.getBandedPtr());
+        }
+        break;
+      case 2:
+        if (numA != 2 || numB != 2)
+          SiconosMatrixException::selfThrow("Matrix function prod(A,B,C) : wrong type for C (according to A and B types).");
+        noalias(*C.getTriangPtr()) = prod(*A.getTriangPtr(), *B.getTriangPtr());
+        break;
+      case 3:
+        if (numA != 3 || numB != 3)
+          SiconosMatrixException::selfThrow("Matrix function prod(A,B,C) : wrong type for C (according to A and B types).");
+        noalias(*C.getSymPtr()) = prod(*A.getSymPtr(), *B.getSymPtr());
+        break;
+      case 4:
+        if (numA != 4 || numB != 4)
+          SiconosMatrixException::selfThrow("Matrix function prod(A,B,C) : wrong type for C (according to A and B types).");
+        noalias(*C.getSparsePtr()) = prod(*A.getSparsePtr(), *B.getSparsePtr());
+        break;
+      default:
+        SiconosMatrixException::selfThrow("Matrix function prod(A,B,C) : wrong type for C (according to A and B types).");
+      }
+    }
   }
 }
 
-SimpleMatrix operator * (const SiconosMatrix &m, int d)
+const SimpleMatrix operator * (const SiconosMatrix &m, double d)
 {
-
+  if (m.isBlock())
+    SiconosMatrixException::selfThrow("Matrix, operator * (m*scalar): not yet implemented for BlockMatrix.");
   unsigned int num = m.getNum();
-  if (num == 7)
-    SiconosMatrixException::selfThrow("SimpleMatrix:operator * (m*int), forbidden for this type of matrix.");
 
   if (num == 1)
   {
@@ -2617,18 +3352,65 @@ SimpleMatrix operator * (const SiconosMatrix &m, int d)
     b = *m.getBandedPtr() * d;
     return b;
   }
-  else // if(num==6)
+  else if (num == 6)
+    return m; // ie zero
+  else //if(num==7)
   {
-    ZeroMat z;
-    return z;
+    DenseMat p(*m.getIdentityPtr());
+    p *= d;
+    return p;
   }
 }
 
-SimpleMatrix operator * (double d, const SiconosMatrix &m)
+const SimpleMatrix operator * (const SiconosMatrix &m, int d)
 {
+  if (m.isBlock())
+    SiconosMatrixException::selfThrow("Matrix, operator * (m*scalar): not yet implemented for BlockMatrix.");
+
   unsigned int num = m.getNum();
-  if (num == 7)
-    SiconosMatrixException::selfThrow("SimpleMatrix:operator * (double*m), forbidden for this type of matrix.");
+
+  if (num == 1)
+  {
+    DenseMat p = *m.getDensePtr() * d;
+    return p;
+  }
+  else if (num == 2)
+  {
+    TriangMat t = *m.getTriangPtr() * d;
+    return t;
+  }
+  else if (num == 3)
+  {
+    SymMat s = *m.getSymPtr() * d;
+    return s;
+  }
+  else if (num == 4)
+  {
+    SparseMat sp = *m.getSparsePtr() * d;
+    return sp;
+  }
+  else if (num == 5)
+  {
+    BandedMat b;
+    b.resize(m.size(0), m.size(1), (*m.getBandedPtr()).lower(), (*m.getBandedPtr()).upper(), false);
+    b = *m.getBandedPtr() * d;
+    return b;
+  }
+  else if (num == 6)
+    return m; // ie zero
+  else //if(num==7)
+  {
+    DenseMat p(*m.getIdentityPtr());
+    p *= d;
+    return p;
+  }
+}
+
+const SimpleMatrix operator * (double d, const SiconosMatrix &m)
+{
+  if (m.isBlock())
+    SiconosMatrixException::selfThrow("Matrix, operator * (m*scalar): not yet implemented for BlockMatrix.");
+  unsigned int num = m.getNum();
 
   if (num == 1)
   {
@@ -2657,18 +3439,21 @@ SimpleMatrix operator * (double d, const SiconosMatrix &m)
     b = d * *m.getBandedPtr();
     return b;
   }
-  else //if(num==6)
+  else if (num == 6)
+    return m; // ie zero
+  else //if(num==7)
   {
-    ZeroMat z;
-    return z;
+    DenseMat p(*m.getIdentityPtr());
+    p *= d;
+    return p;
   }
 }
 
-SimpleMatrix operator * (int d, const SiconosMatrix &m)
+const SimpleMatrix operator * (int d, const SiconosMatrix &m)
 {
+  if (m.isBlock())
+    SiconosMatrixException::selfThrow("Matrix, operator * (m*scalar): not yet implemented for BlockMatrix.");
   unsigned int num = m.getNum();
-  if (num == 7)
-    SiconosMatrixException::selfThrow("SimpleMatrix:operator * (int*m), forbidden for this type of matrix.");
 
   if (num == 1)
   {
@@ -2697,21 +3482,69 @@ SimpleMatrix operator * (int d, const SiconosMatrix &m)
     b = d * *m.getBandedPtr();
     return b;
   }
-  else //if(num==6)
+  else if (num == 6)
+    return m; // ie zero
+  else //if(num==7)
   {
-    ZeroMat z;
-    return z;
+    DenseMat p(*m.getIdentityPtr());
+    p *= d;
+    return p;
   }
 }
 
-SimpleMatrix operator / (const SiconosMatrix &m, double d)
+const SimpleMatrix operator / (const SiconosMatrix &m, double d)
 {
+  if (m.isBlock())
+    SiconosMatrixException::selfThrow("Matrix, operator / (m/scalar): not yet implemented for BlockMatrix.");
   if (d == 0)
     SiconosMatrixException::selfThrow("SimpleMatrix:operator /, division by zero.");
 
   unsigned int num = m.getNum();
-  if (num == 7)
-    SiconosMatrixException::selfThrow("SimpleMatrix:operator / (m/double), forbidden for this type of matrix.");
+  if (num == 1)
+  {
+    DenseMat p = *m.getDensePtr() / d;
+    return p;
+  }
+  else if (num == 2)
+  {
+    TriangMat t = *m.getTriangPtr() / d;
+    return t;
+  }
+  else if (num == 3)
+  {
+    SymMat s = *m.getSymPtr() / d;
+    return s;
+  }
+  else if (num == 4)
+  {
+    SparseMat sp = *m.getSparsePtr() / d;
+    return sp;
+  }
+  else if (num == 5)
+  {
+    BandedMat b;
+    b.resize(m.size(0), m.size(1), (*m.getBandedPtr()).lower(), (*m.getBandedPtr()).upper(), false);
+    b = *m.getBandedPtr() / d;
+    return b;
+  }
+  else if (num == 6)
+    return m; // ie zero
+  else //if(num==7)
+  {
+    DenseMat p(*m.getIdentityPtr());
+    p /= d;
+    return p;
+  }
+}
+
+const SimpleMatrix operator / (const SiconosMatrix &m, int d)
+{
+  if (m.isBlock())
+    SiconosMatrixException::selfThrow("Matrix, operator / (m/scalar): not yet implemented for BlockMatrix.");
+  if (d == 0)
+    SiconosMatrixException::selfThrow("SimpleMatrix:operator /, division by zero.");
+
+  unsigned int num = m.getNum();
 
   if (num == 1)
   {
@@ -2740,58 +3573,20 @@ SimpleMatrix operator / (const SiconosMatrix &m, double d)
     b = *m.getBandedPtr() / d;
     return b;
   }
-  else //if(num==6)
+  else if (num == 6)
+    return m; // ie zero
+  else //if(num==7)
   {
-    ZeroMat z;
-    return z;
-  }
-}
-
-SimpleMatrix operator / (const SiconosMatrix &m, int d)
-{
-  if (d == 0)
-    SiconosMatrixException::selfThrow("SimpleMatrix:operator /, division by zero.");
-
-  unsigned int num = m.getNum();
-  if (num == 7)
-    SiconosMatrixException::selfThrow("SimpleMatrix:operator / (m/int), forbidden for this type of matrix.");
-
-  if (num == 1)
-  {
-    DenseMat p = *m.getDensePtr() / d;
+    DenseMat p(*m.getIdentityPtr());
+    p /= d;
     return p;
   }
-  else if (num == 2)
-  {
-    TriangMat t = *m.getTriangPtr() / d;
-    return t;
-  }
-  else if (num == 3)
-  {
-    SymMat s = *m.getSymPtr() / d;
-    return s;
-  }
-  else if (num == 4)
-  {
-    SparseMat sp = *m.getSparsePtr() / d;
-    return sp;
-  }
-  else if (num == 5)
-  {
-    BandedMat b;
-    b.resize(m.size(0), m.size(1), (*m.getBandedPtr()).lower(), (*m.getBandedPtr()).upper(), false);
-    b = *m.getBandedPtr() / d;
-    return b;
-  }
-  else //if(num==6)
-  {
-    ZeroMat z;
-    return z;
-  }
 }
 
-SimpleMatrix pow(const SimpleMatrix& m, unsigned int power)
+const SimpleMatrix pow(const SimpleMatrix& m, unsigned int power)
 {
+  if (m.isBlock())
+    SiconosMatrixException::selfThrow("Matrix, pow function: not yet implemented for BlockMatrix.");
   if (!m.isSquare())
     SiconosMatrixException::selfThrow("pow(SimpleMatrix), matrix is not square.");
 
@@ -2803,8 +3598,7 @@ SimpleMatrix pow(const SimpleMatrix& m, unsigned int power)
     unsigned int num = m.getNum();
     if (num == 1)
     {
-      DenseMat p ;
-      p = *m.getDensePtr();
+      DenseMat p = *m.getDensePtr();
       for (unsigned int i = 1; i < power; i++)
         p = prod(p, *m.getDensePtr());
       return p;
@@ -2839,182 +3633,399 @@ SimpleMatrix pow(const SimpleMatrix& m, unsigned int power)
     }
     else if (num == 6)
     {
-      ZeroMat z;
+      ZeroMat z(m.size(0), m.size(1));
       return z;
     }
     else // if (num==7)
     {
-      IdentityMat I;
+      IdentityMat I(m.size(0), m.size(1));;
       return I;
     }
   }
   else// if(power == 0)
   {
-    SimpleMatrix p = m;
-    p.eye();
-    return p;
+    IdentityMat I = ublas::identity_matrix<double>(m.size(0), m.size(1));
+    return I;
   }
 }
 
-SimpleVector prod(const SiconosMatrix& m, const SiconosVector& v)
+// ========== Products matrix - vector ==========
+//
+// Computation of y = A*x
+//
+// Two specific functions are used to handle all the cases where x or y are blocks.
+// All of their blocks can also be blocks. Then we use:
+// - private_prod to "slice" A when y is block, ie according to its rows.
+// - private_addprod to "slice" A when x is block, and to sum over the columns of blocks to compute y = sum subA x[i].
+
+// The following function is private and used inside prod(...) public functions.
+// It is required to deal with block vectors of blocks ( of blocks ...).
+// It computes res = subA*x +res, subA being a submatrix of A (rows from startRow to startRow+sizeY and columns between startCol and startCol+sizeX).
+// If x is a block vector, it call the present function for all blocks.
+void private_addprod(const SiconosMatrix *A, unsigned int startRow, unsigned int startCol, const SiconosVector *x, DenseVect& res)
 {
-  if (m.isBlock())
+  if (A->isBlock())
+    SiconosMatrixException::selfThrow("private_prod(A,start,x,y) error: not yet implemented for block matrix.");
+
+  if (!x->isBlock()) // if input vector is not block
+  {
+    // we take a submatrix subA of A, starting from row startRow to row (startRow+sizeY) and between columns startCol and (startCol+sizeX).
+    // Then computation of res = subA*x + res.
+    unsigned int numA = A->getNum();
+    unsigned int sizeX = x->size();
+    unsigned int sizeY = res.size();
+    if (numA == 1)
+      res += prod(ublas::subrange(*A->getDensePtr(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->getDensePtr());
+    else if (numA == 2)
+      res += prod(ublas::subrange(*A->getTriangPtr(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->getDensePtr());
+    else if (numA == 3)
+      res += prod(ublas::subrange(*A->getSymPtr(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->getDensePtr());
+    else if (numA == 4)
+      res += prod(ublas::subrange(*A->getSparsePtr(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->getDensePtr());
+    else //if(numA==5)
+      res += prod(ublas::subrange(*A->getBandedPtr(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->getDensePtr());
+  }
+  else // if block
+  {
+    ConstBlockVectIterator it;
+    unsigned int startColBis = startCol;
+    for (it = x->begin(); it != x->end(); ++it)
+    {
+      private_addprod(A, startRow, startColBis, (*it), res);
+      startColBis += (*it)->size();
+    }
+  }
+}
+
+// x and y blocks
+void private_prod(const SiconosMatrix *A, unsigned int startRow, const SiconosVector *x, SiconosVector * y)
+{
+
+  if (!y->isBlock()) // if y is not a block vector, private_addProd, to consider cases where x is block.
+  {
+    private_addprod(A, startRow, 0, x, *(y->getDensePtr()));
+  }
+  else // if y is a block: call private_prod on each block and so on until the considered block is a simple vector.
+  {
+    unsigned int row = startRow;
+    ConstBlockVectIterator it;
+    for (it = y->begin(); it != y->end(); ++it)
+    {
+      private_prod(A, row, x, *it);
+      row += (*it)->size();
+    }
+  }
+}
+
+const SimpleVector prod(const SiconosMatrix& A, const SiconosVector& x)
+{
+  if (A.isBlock())
     SiconosMatrixException::selfThrow("prod(matrix,vector) error: not yet implemented for block matrix.");
 
-  if (m.size(1) != v.size())
+  if (A.size(1) != x.size())
     SiconosMatrixException::selfThrow("prod(matrix,vector) error: inconsistent sizes.");
 
-  DenseVect res;
+  unsigned int numA = A.getNum();
 
-  unsigned int numM = m.getNum();
-  if (v.isBlock())
+  if (numA == 6)
   {
-    SiconosVector * tmp;
-    // TMP: copy into a SimpleVector
-    tmp = new SimpleVector(v);
-    if (numM == 1)
-      res = prod(*m.getDensePtr(), *tmp->getDensePtr());
-    else if (numM == 2)
-      res = prod(*m.getTriangPtr(), *tmp->getDensePtr());
-    else if (numM == 3)
-      res = prod(*m.getSymPtr(), *tmp->getDensePtr());
-    else if (numM == 4)
-      res = prod(*m.getSparsePtr(), *tmp->getDensePtr());
-    else if (numM == 5)
-      res = prod(*m.getBandedPtr(), *tmp->getDensePtr());
-    else if (numM == 6)
-      res = 0.0 * *tmp->getDensePtr();
-    else if (numM == 7)
-      res = *tmp->getDensePtr();
-    else
-      SiconosMatrixException::selfThrow("prod(matrix,vector) error: unknown matrix type.");
-
-    delete tmp;
+    DenseVect res = ublas::zero_vector<double>(x.size());
+    return res;
   }
+  else if (numA == 7)
+    return x;
   else
   {
-    unsigned int numV = v.getNum();
-    if (numV == 1)
+    if (!x.isBlock()) // if x is not a block vector.
     {
-      if (numM == 1)
-        res = prod(*m.getDensePtr(), *v.getDensePtr());
-      else if (numM == 2)
-        res = prod(*m.getTriangPtr(), *v.getDensePtr());
-      else if (numM == 3)
-        res = prod(*m.getSymPtr(), *v.getDensePtr());
-      else if (numM == 4)
-        res = prod(*m.getSparsePtr(), *v.getDensePtr());
-      else if (numM == 5)
-        res = prod(*m.getBandedPtr(), *v.getDensePtr());
-      else if (numM == 6)
-        res = 0.0 * *v.getDensePtr();
-      else if (numM == 7)
-        res = *v.getDensePtr();
-      else
-        SiconosMatrixException::selfThrow("prod(matrix,vector) error: unknown matrix type.");
+      unsigned int numX = x.getNum();
+      if (numX == 1)
+      {
+        if (numA == 1)
+        {
+          DenseVect res = prod(*A.getDensePtr(), *x.getDensePtr());
+          return res;
+        }
+        else if (numA == 2)
+        {
+          DenseVect res = prod(*A.getTriangPtr(), *x.getDensePtr());
+          return res;
+        }
+        else if (numA == 3)
+        {
+          DenseVect res = prod(*A.getSymPtr(), *x.getDensePtr());
+          return res;
+        }
+        else if (numA == 4)
+        {
+          DenseVect res = prod(*A.getSparsePtr(), *x.getDensePtr());
+          return res;
+        }
+        else if (numA == 5)
+        {
+          DenseVect res = prod(*A.getBandedPtr(), *x.getDensePtr());
+          return res;
+        }
+        else if (numA == 6)
+        {
+          DenseVect res = ublas::zero_vector<double>(x.size());
+          return res;
+        }
+        else //if(numA==7)
+        {
+          DenseVect  res = *x.getDensePtr();
+          return res;
+        }
+      }
+      else //if(numX == 4)
+      {
+        if (numA == 1)
+        {
+          DenseVect res = prod(*A.getDensePtr(), *x.getSparsePtr());
+          return res;
+        }
+        else if (numA == 2)
+        {
+          DenseVect res = prod(*A.getTriangPtr(), *x.getSparsePtr());
+          return res;
+        }
+        else if (numA == 3)
+        {
+          DenseVect res = prod(*A.getSymPtr(), *x.getSparsePtr());
+          return res;
+        }
+        else if (numA == 4)
+        {
+          DenseVect res = prod(*A.getSparsePtr(), *x.getSparsePtr());
+          return res;
+        }
+        else if (numA == 5)
+        {
+          DenseVect res = prod(*A.getBandedPtr(), *x.getSparsePtr());
+          return res;
+        }
+        else if (numA == 6)
+        {
+          DenseVect res = ublas::zero_vector<double>(x.size());
+          return res;
+        }
+        else //if(numA==7)
+        {
+          DenseVect res = *x.getSparsePtr();
+          return res;
+        }
+      }
     }
-    else if (numV == 4)
+    else // if (x.isBlock())
     {
-      if (numM == 1)
-        res = prod(*m.getDensePtr(), *v.getSparsePtr());
-      else if (numM == 2)
-        res = prod(*m.getTriangPtr(), *v.getSparsePtr());
-      else if (numM == 3)
-        res = prod(*m.getSymPtr(), *v.getSparsePtr());
-      else if (numM == 4)
-        res = prod(*m.getSparsePtr(), *v.getSparsePtr());
-      else if (numM == 5)
-        res = prod(*m.getBandedPtr(), *v.getSparsePtr());
-      else if (numM == 6)
-        res = 0.0 * *v.getSparsePtr();
-      else if (numM == 7)
-        res = *v.getSparsePtr();
-      else
-        SiconosMatrixException::selfThrow("prod(matrix,vector) error: unknown matrix type.");
+      ConstBlockVectIterator it;
+      DenseVect res = ublas::zero_vector<double>(A.size(0));
+      unsigned int start = 0;
+      for (it = x.begin(); it != x.end(); ++it)
+      {
+        private_addprod(&A, 0, start, *it, res);
+        start += (*it)->size();
+      }
+      return res;
     }
-    else
-      SiconosMatrixException::selfThrow("prod(matrix,vector) error: unknown vector type.");
   }
-  return res;
-}
-
-void gemv(const CBLAS_TRANSPOSE transA, double a, const SiconosMatrix& A, const SiconosVector& x, double b, SiconosVector& y)
-{
-  if (x.isBlock() || y.isBlock())
-    SiconosMatrixException::selfThrow("gemv(...) not yet implemented for block vectors.");
-
-  unsigned int numA = A.getNum();
-  unsigned int numX = x.getNum();
-  unsigned int numY = y.getNum();
-  if (numA == numX && numX == numY && numX == 1) // if all are dense ...
-    atlas::gemv(transA, a, *A.getDensePtr(), *x.getDensePtr(), b, *y.getDensePtr());
-  else
-    SiconosMatrixException::selfThrow("gemv(...) not yet implemented for matrix or vector that are not dense.");
-}
-
-void gemv(double a, const SiconosMatrix& A, const SiconosVector& x, double b, SiconosVector& y)
-{
-  if (x.isBlock() || y.isBlock())
-    SiconosMatrixException::selfThrow("gemv(...) not yet implemented for block vectors.");
-  unsigned int numA = A.getNum();
-  unsigned int numX = x.getNum();
-  unsigned int numY = y.getNum();
-  if (numA == numX && numX == numY && numX == 1) // if all are dense ...
-    atlas::gemv(a, *A.getDensePtr(), *x.getDensePtr(), b, *y.getDensePtr());
-  else
-    SiconosMatrixException::selfThrow("gemv(...) not yet implemented for matrix or vector that are not dense.");
 }
 
 void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y)
 {
-  if (x.isBlock() || y.isBlock())
-    SiconosMatrixException::selfThrow("prod(...) not yet implemented for block vectors.");
+  if (A.isBlock())
+    SiconosMatrixException::selfThrow("prod(A,x,y) error: not yet implemented for block matrices.");
+
+  if (A.size(1) != x.size())
+    SiconosMatrixException::selfThrow("prod(A,x,y) error: inconsistent sizes between A and x.");
+
+  if (A.size(0) != y.size())
+    SiconosMatrixException::selfThrow("prod(A,x,y) error: inconsistent sizes between A and y.");
+  unsigned int numA = A.getNum();
+
+  if (numA == 6) // A = 0
+    y.zero();
+  else if (numA == 7) // A = I
+  {
+    if (&x != &y) y = x;
+  }
+  else
+  {
+    // === First case: y is not a block vector ===
+    if (!y.isBlock())
+    {
+      if (y.getNum() != 1)
+        SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
+
+      // if x is block: call of a specific function to treat each block
+      if (x.isBlock())
+      {
+        y.zero();
+        unsigned int startRow = 0;
+        unsigned int startCol = 0;
+        // In private_addprod, the sum of all blocks of x, x[i], is computed : y = Sum_i (subA x[i]), with subA a submatrix of A,
+        // starting from position startRow in rows and startCol in columns.
+        // private_prod takes also into account the fact that each block of x can also be a block.
+        ConstBlockVectIterator it;
+        for (it = x.begin(); it != x.end(); ++it)
+        {
+          private_addprod(&A, startRow, startCol, *it, *y.getDensePtr());
+          startCol += (*it)->size();
+        }
+      }
+      else // If neither x nor y are block: direct call to ublas::prod.
+      {
+        unsigned int numX = x.getNum();
+        if (&x != &y) // if no common memory between x and y.
+        {
+          if (numX == 1)
+          {
+            if (numA == 1)
+              noalias(*y.getDensePtr()) = ublas::prod(*A.getDensePtr(), *x.getDensePtr());
+            else if (numA == 2)
+              noalias(*y.getDensePtr()) = ublas::prod(*A.getTriangPtr(), *x.getDensePtr());
+            else if (numA == 3)
+              noalias(*y.getDensePtr()) = ublas::prod(*A.getSymPtr(), *x.getDensePtr());
+            else if (numA == 4)
+              noalias(*y.getDensePtr()) = ublas::prod(*A.getSparsePtr(), *x.getDensePtr());
+            else //if(numA==5)
+              noalias(*y.getDensePtr()) = ublas::prod(*A.getBandedPtr(), *x.getDensePtr());
+          }
+          else //if(numX == 4)
+          {
+            if (numA == 1)
+              noalias(*y.getDensePtr()) = ublas::prod(*A.getDensePtr(), *x.getSparsePtr());
+            else if (numA == 2)
+              noalias(*y.getDensePtr()) = ublas::prod(*A.getTriangPtr(), *x.getSparsePtr());
+            else if (numA == 3)
+              noalias(*y.getDensePtr()) = ublas::prod(*A.getSymPtr(), *x.getSparsePtr());
+            else if (numA == 4)
+              noalias(*y.getDensePtr()) = ublas::prod(*A.getSparsePtr(), *x.getSparsePtr());
+            else //if(numA==5)
+              noalias(*y.getDensePtr()) = ublas::prod(*A.getBandedPtr(), *x.getSparsePtr());
+          }
+        }
+        else
+        {
+          if (numX == 1)
+          {
+            if (numA == 1)
+              *y.getDensePtr() = ublas::prod(*A.getDensePtr(), *x.getDensePtr());
+            else if (numA == 2)
+              *y.getDensePtr() = ublas::prod(*A.getTriangPtr(), *x.getDensePtr());
+            else if (numA == 3)
+              *y.getDensePtr() = ublas::prod(*A.getSymPtr(), *x.getDensePtr());
+            else if (numA == 4)
+              *y.getDensePtr() = ublas::prod(*A.getSparsePtr(), *x.getDensePtr());
+            else //if(numA==5)
+              *y.getDensePtr() = ublas::prod(*A.getBandedPtr(), *x.getDensePtr());
+          }
+          else //if(numX == 4)
+          {
+            if (numA == 1)
+              *y.getDensePtr() = ublas::prod(*A.getDensePtr(), *x.getSparsePtr());
+            else if (numA == 2)
+              *y.getDensePtr() = ublas::prod(*A.getTriangPtr(), *x.getSparsePtr());
+            else if (numA == 3)
+              *y.getDensePtr() = ublas::prod(*A.getSymPtr(), *x.getSparsePtr());
+            else if (numA == 4)
+              *y.getDensePtr() = ublas::prod(*A.getSparsePtr(), *x.getSparsePtr());
+            else //if(numA==5)
+              *y.getDensePtr() = ublas::prod(*A.getBandedPtr(), *x.getSparsePtr());
+          }
+        }
+      }
+    }
+    else // === Second case: y is a block vector ===
+    {
+      unsigned int startRow = 0;
+      ConstBlockVectIterator it;
+      // For Each subvector of y, y[i], private_prod computes y[i] = subA x, subA being a submatrix of A corresponding to y[i] position.
+      // private_prod takes into account the fact that x and y[i] may be block vectors.
+      for (it = y.begin(); it != y.end(); ++it)
+      {
+        private_prod(&A, startRow, &x, *it);
+        startRow += (*it)->size();
+      }
+    }
+  }
+}
+
+void gemv(const CBLAS_TRANSPOSE transA, double a, const SiconosMatrix& A, const SiconosVector& x, double b, SiconosVector& y)
+{
+  if (x.isBlock() || y.isBlock() || A.isBlock())
+    SiconosMatrixException::selfThrow("gemv(...) not yet implemented for block vectors or matrices.");
+
   unsigned int numA = A.getNum();
   unsigned int numX = x.getNum();
   unsigned int numY = y.getNum();
-  if (numA == numX && numX == numY && numX == 1) // if all are dense ...
-    atlas::gemv(*A.getDensePtr(), *x.getDensePtr(), *y.getDensePtr());
-  else
-    y = prod(A, x);
+  if (numA != 1 || numX != 1 || numY != 1)
+    SiconosMatrixException::selfThrow("gemv(...) failed: reserved to dense matrices or vectors.");
+
+  atlas::gemv(transA, a, *A.getDensePtr(), *x.getDensePtr(), b, *y.getDensePtr());
+}
+
+void gemv(double a, const SiconosMatrix& A, const SiconosVector& x, double b, SiconosVector& y)
+{
+  if (x.isBlock() || y.isBlock() || A.isBlock())
+    SiconosMatrixException::selfThrow("gemv(...) not yet implemented for block vectors or matrices.");
+  unsigned int numA = A.getNum();
+  unsigned int numX = x.getNum();
+  unsigned int numY = y.getNum();
+  if (numA != 1 || numX != 1 || numY != 1)
+    SiconosMatrixException::selfThrow("gemv(...) failed: reserved to dense matrices or vectors.");
+
+  atlas::gemv(a, *A.getDensePtr(), *x.getDensePtr(), b, *y.getDensePtr());
+}
+
+void gemv(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y)
+{
+  if (x.isBlock() || y.isBlock() || A.isBlock())
+    SiconosMatrixException::selfThrow("gemv(...) not yet implemented for block vectors or matrices.");
+  unsigned int numA = A.getNum();
+  unsigned int numX = x.getNum();
+  unsigned int numY = y.getNum();
+  if (numA != 1 || numX != 1 || numY != 1)
+    SiconosMatrixException::selfThrow("gemv(...) failed: reserved to dense matrices or vectors.");
+
+  atlas::gemv(*A.getDensePtr(), *x.getDensePtr(), *y.getDensePtr());
 }
 
 void gemm(const CBLAS_TRANSPOSE transA, const CBLAS_TRANSPOSE transB, double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, SiconosMatrix& C)
 {
   if (A.isBlock() || B.isBlock() || C.isBlock())
-    SiconosMatrixException::selfThrow("gemv(...) not yet implemented for block matrices.");
+    SiconosMatrixException::selfThrow("gemm(...) not yet implemented for block matrices.");
   unsigned int numA = A.getNum();
   unsigned int numB = B.getNum();
   unsigned int numC = C.getNum();
-  if (numA == numB && numA == numC && numA == 1) // if all are dense ...
-    atlas::gemm(transA, transB, a, *A.getDensePtr(), *B.getDensePtr(), b, *C.getDensePtr());
-  else
-    SiconosMatrixException::selfThrow("gemm(...) not yet implemented for matrices that are not dense.");
+  if (numA != 1 || numB != 1 || numC != 1)
+    SiconosMatrixException::selfThrow("gemm(...) failed: reserved to dense matrices.");
+
+  atlas::gemm(transA, transB, a, *A.getDensePtr(), *B.getDensePtr(), b, *C.getDensePtr());
 }
 
 void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, SiconosMatrix& C)
 {
   if (A.isBlock() || B.isBlock() || C.isBlock())
-    SiconosMatrixException::selfThrow("gemv(...) not yet implemented for block matrices.");
+    SiconosMatrixException::selfThrow("gemm(...) not yet implemented for block matrices.");
   unsigned int numA = A.getNum();
   unsigned int numB = B.getNum();
   unsigned int numC = C.getNum();
-  if (numA == numB && numA == numC && numA == 1) // if all are dense ...
-    atlas::gemm(a, *A.getDensePtr(), *B.getDensePtr(), b, *C.getDensePtr());
-  else
-    SiconosMatrixException::selfThrow("gemm(...) not yet implemented for matrices that are not dense.");
+  if (numA != 1 || numB != 1 || numC != 1)
+    SiconosMatrixException::selfThrow("gemm(...) failed: reserved to dense matrices.");
+
+  atlas::gemm(a, *A.getDensePtr(), *B.getDensePtr(), b, *C.getDensePtr());
 }
-void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C)
+
+void gemm(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C)
 {
+  if (A.isBlock() || B.isBlock() || C.isBlock())
+    SiconosMatrixException::selfThrow("gemm(...) not yet implemented for block matrices.");
   unsigned int numA = A.getNum();
   unsigned int numB = B.getNum();
   unsigned int numC = C.getNum();
-  if (A.isBlock() || B.isBlock() || C.isBlock())
-    C = prod(A, B);
-  else
-  {
-    if (numA == numB && numA == numC && numA == 1) // if all are dense ...
-      atlas::gemm(*A.getDensePtr(), *B.getDensePtr(), *C.getDensePtr());
-    else
-      C = prod(A, B);
-  }
+  if (numA != 1 || numB != 1 || numC != 1)
+    SiconosMatrixException::selfThrow("gemm(...) failed: reserved to dense matrices.");
+
+  atlas::gemm(*A.getDensePtr(), *B.getDensePtr(), *C.getDensePtr());
 }

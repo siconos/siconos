@@ -22,7 +22,7 @@
 
 const unsigned int n0 = 7; // Real problem dimension
 
-extern "C" void mass(unsigned int sizeOfq, const double *q, double *mass, double* param)
+extern "C" void mass(unsigned int sizeOfq, const double *q, double *mass, unsigned int sizeZ, double* z)
 {
   unsigned int n = sizeOfq;
   unsigned int n1 = n0 * n0;
@@ -60,7 +60,7 @@ extern "C" void mass(unsigned int sizeOfq, const double *q, double *mass, double
   }
 }
 
-extern "C" void NNL(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, double* param)
+extern "C" void NNL(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, unsigned int sizeZ, double* z)
 {
   unsigned int n = sizeOfq;
 
@@ -100,7 +100,7 @@ extern "C" void NNL(unsigned int sizeOfq, const double *q, const double *velocit
 
 }
 
-extern "C" void jacobianQNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, double* param)
+extern "C" void jacobianQNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   unsigned int n = sizeOfq;
   unsigned int n1 = n0 * n0;
@@ -138,7 +138,7 @@ extern "C" void jacobianQNNL(unsigned int sizeOfq, const double *q, const double
   }
 }
 
-extern "C" void jacobianVNNL(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, double* param)
+extern "C" void jacobianVNNL(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   unsigned int n = sizeOfq;
   unsigned int n1 = n0 * n0;
@@ -175,62 +175,30 @@ extern "C" void jacobianVNNL(unsigned int sizeOfq, const double *q, const  doubl
   }
 }
 
-// extern "C" void FInt(unsigned int sizeOfq, double time, const double *q, const double *velocity, double *fInt, double* param)
-// {
-//   unsigned int i;
-//   unsigned int n = sizeOfq;
-//   for(i = 0; i<n ; i++)
-//     fInt[i] = 0.0;
-// }
-// extern "C" void jacobianQFInt(unsigned int sizeOfq, double time, const double *q, const double *velocity, double *jacob, double* param)
-// {
-//   unsigned int i;
-//   unsigned int n = sizeOfq * sizeOfq;
-//   for(i = 0; i<n ; i++)
-//     jacob[i] = 0.0;
-// }
-
-// extern "C" void jacobianVFInt(unsigned int sizeOfq, double time, const double *q, const double *velocity, double *jacob, double* param)
-// {
-//   unsigned int i;
-//   unsigned int n = sizeOfq * sizeOfq;
-//   for(i = 0; i<n ; i++)
-//     jacob[i] = 0.0;
-// }
-
-// extern "C" void FExt(unsigned int  sizeOfq, double time, double *fExt, double* param)
-// {
-//   unsigned int i;
-//   unsigned int n = sizeOfq;
-//   for(i = 0; i<n ; i++)
-//     fExt[i] = 0.0;
-
-// }
-
-extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, double* param)
+extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* z)
 {
   y[0] = 0.45 * cos(q[0]);
 }
 
-extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, double* param)
+extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* z)
 {
   G[0] = -0.45 * sin(q[0]);
   G[1] = 0.0;
 }
 
 
-extern "C" void h1(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, double* param)
+extern "C" void h1(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* z)
 {
   y[0] = 0.45 * cos(q[0]) + 0.48 * cos(q[1] + q[0]);
 }
 
-extern "C" void G1(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, double* param)
+extern "C" void G1(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* z)
 {
   G[0] = -0.45 * sin(q[0]) - 0.48 * sin(q[1] + q[0]);
   G[1] = -0.48 * sin(q[1] + q[0]);
 }
 
-extern "C" void h2(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, double* param)
+extern "C" void h2(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* z)
 {
   //  printf("BJBJBJBJ%f\n",y[0]);
   //printf("BJBJBJBsddssdJ%f\n",y[1]);
@@ -240,7 +208,7 @@ extern "C" void h2(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, 
   //  printf("AAAAAABJBJBJBsddssdJ%f\n",y[1]);
 }
 
-extern "C" void G2(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, double* param)
+extern "C" void G2(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* z)
 {
   G[0] = -0.45 * sin(q[0]);
   G[1] = -0.45 * sin(q[0]) - 0.48 * sin(q[1] + q[0]);

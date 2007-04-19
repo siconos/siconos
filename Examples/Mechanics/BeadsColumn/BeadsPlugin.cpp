@@ -21,7 +21,7 @@
 const double m = 1;   // beads mass
 const double g = 9.8; // gravity
 
-extern "C" void gravity(unsigned int sizeOfq, double time, double *fExt, double* param)
+extern "C" void gravity(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < sizeOfq; i++)
     fExt[i] = 0.0;

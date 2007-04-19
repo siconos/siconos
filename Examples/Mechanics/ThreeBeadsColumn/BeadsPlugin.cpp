@@ -30,7 +30,7 @@ extern "C" double FextFunction(double time)
 }
 
 
-extern "C" void beadsFExt(unsigned int sizeOfq, double time, double *fExt, double* param)
+extern "C" void beadsFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < sizeOfq; i++)
     fExt[i] = 0.0;
@@ -38,13 +38,13 @@ extern "C" void beadsFExt(unsigned int sizeOfq, double time, double *fExt, doubl
   fExt[0] = -m * g + FextFunction(time);
 }
 
-extern "C" void groundFExt(unsigned int sizeOfq, double time, double *fExt, double* param)
+extern "C" void groundFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < sizeOfq; i++)
     fExt[i] = 0.0;
 }
 
-extern "C" void ceilingFExt(unsigned int sizeOfq, double time, double *fExt, double* param)
+extern "C" void ceilingFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < sizeOfq; i++)
     fExt[i] = 0.0;

@@ -97,7 +97,7 @@ public:
   ~BlockVector();
 
   /** iterator equal to vect.begin
-      \param a BlocksVectIterator
+      \return a BlocksVectIterator
   */
   inline BlockVectIterator begin()
   {
@@ -105,7 +105,7 @@ public:
   };
 
   /** iterator equal to vect.end
-      \param a BlocksVectIterator
+      \return a BlocksVectIterator
   */
   inline BlockVectIterator end()
   {
@@ -139,7 +139,7 @@ public:
   /** get the attribute num of current vector
    * \return an unsigned int.
    */
-  unsigned int getNum() const;
+  const unsigned int getNum() const;
 
   /** get the attribute if it's type is DenseVect
    *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
@@ -186,7 +186,7 @@ public:
   /** get the number of SimpleVector-Blocks
    *  \return unsigned int
    */
-  inline unsigned int getNumberOfBlocks() const
+  inline const unsigned int getNumberOfBlocks() const
   {
     return tabIndex.size();
   };
@@ -249,13 +249,13 @@ public:
 
   /** put data of the vector into a string
    */
-  std::string toString() const;
+  const std::string toString() const;
 
   /** return the element vector[i]
    *  \param an unsigned int i
    *  \return a double
    */
-  double getValue(unsigned int);
+  const double getValue(unsigned int);
 
   /** set the element vector[i]
    *  \param an unsigned int i
@@ -273,7 +273,7 @@ public:
    *  \param an unsigned integer i
    *  \return a double
    */
-  double operator()(unsigned int) const;
+  const double operator()(unsigned int) const;
 
   /** get the vector at position i(ie this for Simple and block i for BlockVector)
    *  \param an unsigned integer i

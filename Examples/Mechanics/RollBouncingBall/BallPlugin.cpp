@@ -19,10 +19,9 @@
 #include <stdio.h>
 #include <math.h>
 
-const double R = 0.5; // ball radius
 const double m = 1; // ball mass
 const double g = 9.8; // gravity
-
+static const double R = 0.5; // ball radius
 
 extern "C" double FextFunction(double time)
 {
@@ -31,7 +30,7 @@ extern "C" double FextFunction(double time)
 }
 
 
-extern "C" void ballFExt(unsigned int sizeOfq, double time, double *fExt, double* param)
+extern "C" void ballFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < sizeOfq; i++)
     fExt[i] = 0.0;
@@ -39,19 +38,19 @@ extern "C" void ballFExt(unsigned int sizeOfq, double time, double *fExt, double
   fExt[0] = -m * g + FextFunction(time);
 }
 
-extern "C" void groundFExt(unsigned int sizeOfq, double time, double *fExt, double* param)
+extern "C" void groundFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < sizeOfq ; i++)
     fExt[i] = 0.0;
 }
 
-extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, double* param)
+extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* z)
 {
   double R0 = 0.0;
   y[0] = q[0] + sqrt(R * R - q[1] * q[1]) - R0;
 }
 
-extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, double* param)
+extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* z)
 {
   G[0] = 1.0;
   G[1] = -q[1] / (sqrt(fabs(R * R - q[1] * q[1])));

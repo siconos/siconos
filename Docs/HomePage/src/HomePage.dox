@@ -33,18 +33,17 @@
 \anchor aboutA
 \section about About
 The Siconos Platform is a scientific computing software dedicated to the modeling, simulation, control and analysis of <b>Non Smooth Dynamical Systems (NSDS)</b>.
-This project belongs to the European project <a href="http://siconos.inrialpes.fr/">SICONOS</a>, dedicated to the modeling,
-the control the analysis and the simulation of the so-called "Non Smooth Dynamical system".\n
+This project belongs to the European project <a href="http://siconos.inrialpes.fr/">SICONOS</a>.
 \subsection MainObj What are the main objectives and motivations?
-Besides the standard features which are required for a software of scientific computing, the objectives of this project are of the
+Besides the standard features which are required for a software of scientific computing, the objectives of this project are the
 following :
 - To provide a common framework (modeling and simulation tools)
 for non smooth problems present in various scientific fields : applied
-Mathematics, Mechanics, Robotics, Electrical networks, etc.
+Mathematics, Mechanics, Robotics, Electrical networks, \e etc.
 - To be able to rely on existing developments, as well for the
 modeling tools as for the simulation tools. The platform will not
 re-implement the dedicated tools, which are already used for the
-modeling of specific systems in various fields,but will provide a
+modeling of specific systems in various fields, but will provide a
 framework to their integration. In the same way, we want to re-use
 improved numerical low-level routines.
 - To support exchanges and comparisons of methods between

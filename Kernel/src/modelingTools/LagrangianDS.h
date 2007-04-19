@@ -28,7 +28,7 @@
 #include "DynamicalSystem.h"
 
 /** Pointer to function for plug-in. For NNL and its jacobian. */
-typedef void (*FPtr5)(unsigned int, const double*, const double*, double*, double*);
+typedef void (*FPtr5)(unsigned int, const double*, const double*, double*, unsigned int, double*);
 
 class DynamicalSystem;
 
@@ -168,44 +168,49 @@ protected:
    * @param sizeOfq : size of vector q
    * @param q : pointer to the first element of q
    * @param[in,out] mass : pointer to the first element of mass
-   * @param[in,out] param : a vector of user-defined parameters
+   * @param  size of vector z
+   * @param[in,out] z : a vector of user-defined parameters
    */
-  void (*computeMassPtr)(unsigned int, const double*, double*, double*);
+  void (*computeMassPtr)(unsigned int, const double*, double*, unsigned int, double*);
 
   /** LagrangianDS plug-in to compute internal forces \f$F_{int}(t,q,\dot q)\f$ - id = "fInt"
-   * @param sizeOfq : size of vector q
    * @param time : current time
+   * @param sizeOfq : size of vector q
    * @param q : pointer to the first element of q
    * @param velocity : pointer to the first element of velocity
    * @param[in,out] fInt : pointer to the first element of fInt
-   * @param[in,out] param  : a vector of user-defined parameters
+   * @param  size of vector z
+   * @param[in,out] z : a vector of user-defined parameters
    */
   FPtr6 computeFIntPtr;
 
   /** LagrangianDS plug-in to compute external forces \f$F_{Ext}(t)\f$, id = "fExt"
-   * @param sizeOfq : size of vector q
    * @param time : current time
+   * @param sizeOfq : size of vector q
    * @param[in,out] fExt : pointer to the first element of fExt
-   * @param[in,out] param : a vector of user-defined parameters
+   * @param  size of vector z
+   * @param[in,out] z : a vector of user-defined parameters
    */
-  void (*computeFExtPtr)(unsigned int, double, double*, double*);
+  void (*computeFExtPtr)(double, unsigned int, double*, unsigned int, double*);
 
   /** LagrangianDS plug-in to compute \f$NNL(\dot q, q)\f$, id = "NNL"
    * @param sizeOfq : size of vector q
    * @param q : pointer to the first element of q
    * @param velocity : pointer to the first element of velocity
    * @param[in,out] NNL : pointer to the first element of NNL
-   * @param[in,out] param  : a vector of user-defined parameters
+   * @param  size of vector z
+   * @param[in,out] z  : a vector of user-defined parameters
    */
   FPtr5 computeNNLPtr;
 
   /** LagrangianDS plug-in to compute \f$\nabla_qF_{Int}(\dot q, q, t)\f$, id = "jacobianFInt0" and \f$\nabla_{\dot q}F_{Int}(\dot q, q, t)\f$, id = "jacobianFInt1"
-   * @param sizeOfq : size of vector q
    * @param time : current time
+   * @param sizeOfq : size of vector q
    * @param q : pointer to the first element of q
    * @param velocity : pointer to the first element of velocity
    * @param[in,out] jacob : pointer to the first element of the jacobian
-   * @param[in,out] param  : a vector of user-defined parameters
+   * @param  size of vector z
+   * @param[in,out] z  : a vector of user-defined parameters
    */
   std::vector<FPtr6> computeJacobianFIntPtr;
 
@@ -214,7 +219,8 @@ protected:
    * @param q : pointer to the first element of q
    * @param velocity : pointer to the first element of velocity
    * @param[in,out] jacob : pointer to the first element of the jacobian
-   * @param[in,out] param  : a vector of user-defined parameters
+   * @param  size of vector z
+   * @param[in,out] z  : a vector of user-defined parameters
    */
   std::vector<FPtr5> computeJacobianNNLPtr;
 

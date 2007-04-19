@@ -15,14 +15,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 /*!\file BouncingBallED.cpp
-\brief \ref EMBouncingBall - C++ input file, Event-Driven version - V. Acary, F. Perignon.
+  \brief \ref EMBouncingBall - C++ input file, Event-Driven version - V. Acary, F. Perignon.
 
-A Ball bouncing on the ground.
-Direct description of the model without XML input.
-Simulation with an Event-Driven scheme.
+  A Ball bouncing on the ground.
+  Direct description of the model without XML input.
+  Simulation with an Event-Driven scheme.
 */
 
 #include "SiconosKernel.h"
@@ -31,43 +31,46 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-  boost::timer t;
-  t.restart();
+  boost::timer time;
+  time.restart();
   try
   {
-
     // ================= Creation of the model =======================
 
     // User-defined main parameters
-    unsigned int dsNumber = 1;       // the bouncing ball and the ground
     unsigned int nDof = 3;           // degrees of freedom for the ball
     double t0 = 0;                   // initial computation time
-    double T = 10;                    // final computation time
-    double h = 0.05;                // time step
+    double T = 10.0;                   // final computation time
+    double h = 0.005;                // time step
     double position_init = 1.0;      // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
     string solverName = "Lemke" ;
+    double R = 0.1; // Ball radius
+    double m = 1; // Ball mass
+    double g = 9.81; // Gravity
     // -------------------------
     // --- Dynamical systems ---
     // -------------------------
 
+    cout << "====> Model loading ..." << endl << endl;
     DynamicalSystemsSet allDS; // the list of DS
     SiconosMatrix *Mass = new SimpleMatrix(nDof, nDof);
-    Mass->eye();
+    (*Mass)(0, 0) = m;
+    (*Mass)(1, 1) = m;
+    (*Mass)(2, 2) = 3. / 5 * m * R * R;
 
     // -- Initial positions and velocities --
-    vector<SimpleVector *> q0;
-    vector<SimpleVector *> velocity0;
-    q0.resize(dsNumber, NULL);
-    velocity0.resize(dsNumber, NULL);
-    q0[0] = new SimpleVector(nDof);
-    velocity0[0] = new SimpleVector(nDof);
-    (*(q0[0]))(0) = position_init;
-    (*(velocity0[0]))(0) = velocity_init;
-    LagrangianLinearTIDS* lds = new LagrangianLinearTIDS(0, *(q0[0]), *(velocity0[0]), *Mass);
-
-    allDS.insert(lds);
-    lds->setComputeFExtFunction("BallPlugin.so", "ballFExt");
+    SiconosVector * q0 = new SimpleVector(nDof);
+    SiconosVector * v0 = new SimpleVector(nDof);
+    (*q0)(0) = position_init;
+    (*v0)(0) = velocity_init;
+    // -- The dynamical system --
+    LagrangianLinearTIDS* ball = new LagrangianLinearTIDS(0, *q0, *v0, *Mass);
+    allDS.insert(ball);
+    // -- Set external forces (weight) --
+    SiconosVector * weight = new SimpleVector(nDof);
+    (*weight)(0) = -m * g;
+    ball->setFExtPtr(weight);
 
     // --------------------
     // --- Interactions ---
@@ -98,54 +101,56 @@ int main(int argc, char* argv[])
     // --- Model ---
     // -------------
 
-    Model * ball = new Model(t0, T);
-    ball->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
+    Model * bouncingBall = new Model(t0, T);
+    bouncingBall->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
 
     // ----------------
     // --- Simulation ---
     // ----------------
 
     // -- Time discretisation --
-    TimeDiscretisation * t = new TimeDiscretisation(h, ball);
+    TimeDiscretisation * t = new TimeDiscretisation(h, bouncingBall);
 
     EventDriven* s = new EventDriven(t);
 
     // -- OneStepIntegrators --
-    OneStepIntegrator * OSI = new Lsodar(lds, s);
+    OneStepIntegrator * OSI = new Lsodar(ball, s);
 
     // -- OneStepNsProblem --
-    OneStepNSProblem * impact = new LCP(s, "impact", solverName, 101, 0.0001, "max", 0.6);
-    OneStepNSProblem * acceleration = new LCP(s, "acceleration", solverName, 101, 0.0001, "max", 0.6);
+    OneStepNSProblem * impact = new LCP(s, "impact", solverName, 101, 0.0001);
+    OneStepNSProblem * acceleration = new LCP(s, "acceleration", solverName, 101, 0.0001);
 
-    cout << "=== End of model loading === " << endl;
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
     // --- Simulation initialization ---
+    cout << "====> Simulation initialisation ..." << endl << endl;
     s->initialize();
 
-    cout << "End of simulation initialisation" << endl;
-
-    int N = 10534; // Number of saved points: depends on the number of events ...
+    int N = 12368; // Number of saved points: depends on the number of events ...
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
     unsigned int outputSize = 4;
     SimpleMatrix dataPlot(N + 1, outputSize);
+    SiconosVector * q = ball->getQPtr();
+    SiconosVector * v = ball->getVelocityPtr();
+    SiconosVector * lambda = bouncingBall->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambdaPtr(1);
+
     // For the initial time step:
     // time
 
-    int k = 0;
-    dataPlot(k, 0) = s->getCurrentTime();
-    dataPlot(k, 1) = lds->getX()(0);
-    dataPlot(k, 2) = lds->getX()(3);
-    dataPlot(k, 3) = (ball->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
+    dataPlot(0, 0) = bouncingBall->getT0();
+    dataPlot(0, 1) = (*q)(0);
+    dataPlot(0, 2) = (*v)(0);
+    dataPlot(0, 3) = (*lambda)(0);
 
     // --- Time loop ---
-    cout << " ==== Start of Event Driven simulation - This may take a while ... ====" << endl;
+    cout << "====> Start computation ... " << endl << endl;
     EventsManager * eventsManager = s->getEventsManagerPtr();
     unsigned int numberOfEvent = 0 ;
+    int k = 0;
     while (s->hasNextEvent())
     {
       k++;
@@ -156,22 +161,22 @@ int main(int argc, char* argv[])
       if (eventsManager->getCurrentEventPtr()->getType() == "NonSmoothEvent")
       {
         dataPlot(k, 0) = s->getCurrentTime();
-        dataPlot(k, 1) = (*lds->getQMemoryPtr()->getSiconosVector(1))(0);
-        dataPlot(k, 2) = (*lds->getVelocityMemoryPtr()->getSiconosVector(1))(0);
+        dataPlot(k, 1) = (*ball->getQMemoryPtr()->getSiconosVector(1))(0);
+        dataPlot(k, 2) = (*ball->getVelocityMemoryPtr()->getSiconosVector(1))(0);
         k++;
       }
 
       dataPlot(k, 0) = s->getCurrentTime();
-      dataPlot(k, 1) = lds->getX()(0);
-      dataPlot(k, 2) = lds->getX()(3);
-      dataPlot(k, 3) = (ball->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
-
+      dataPlot(k, 1) = (*q)(0);
+      dataPlot(k, 2) = (*v)(0);
+      dataPlot(k, 3) = (*lambda)(0);
       numberOfEvent++;
     }
     // --- Output files ---
+    cout << "===== End of Event Driven simulation. " << numberOfEvent << " events have been processed. ==== " << endl << endl;
+    cout << "====> Output file writing ..." << endl << endl;
     ioMatrix io("result.dat", "ascii");
     io.write(dataPlot, "noDim");
-    cout << "===== End of Event Driven simulation. " << numberOfEvent << " events have been processed. ==== " << endl;
 
     // --- Free memory ---
 
@@ -179,16 +184,18 @@ int main(int argc, char* argv[])
     delete acceleration;
     delete t;
     delete s;
-    delete ball;
+    delete OSI;
+    delete bouncingBall;
     delete nsds;
+    delete inter;
     delete relation0;
     delete nslaw0;
     delete H;
-    delete lds;
-    delete q0[0];
-    delete velocity0[0];
+    delete weight;
+    delete ball;
+    delete q0;
+    delete v0;
     delete Mass;
-    delete OSI;
   }
 
   catch (SiconosException e)
@@ -199,5 +206,5 @@ int main(int argc, char* argv[])
   {
     cout << "Exception caught in \'sample/MultiBeadsColumn\'" << endl;
   }
-  cout << "Computation Time " << t.elapsed()  << endl;
+  cout << "Computation Time: " << time.elapsed()  << endl;
 }

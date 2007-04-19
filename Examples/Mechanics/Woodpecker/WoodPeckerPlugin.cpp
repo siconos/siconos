@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include "WoodPeckerConsts.h"
 
-extern "C" void FExt(unsigned int sizeOfq, double time, double *fExt, double* param)
+extern "C" void FExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
 
   fExt[0] = -(m_S + m_M) * g;

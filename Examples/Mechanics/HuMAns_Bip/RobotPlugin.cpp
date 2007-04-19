@@ -5,40 +5,40 @@
 
 const unsigned int n0 = 21; // Real problem dimension
 
-extern "C" void mass(unsigned int sizeOfq, const double *q, double *Mass, double* param)
+extern "C" void mass(unsigned int sizeOfq, const double *q, double *Mass, unsigned int sizeZ, double* z)
 {
   // compute mass matrix
   Inertia(Mass, q);
 }
 
-extern "C" void NNL(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, double* param)
+extern "C" void NNL(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, unsigned int sizeZ, double* z)
 {
   // compute mass matrix
   NLEffects(NNL, q, velocity);
 }
 
-extern "C" void jacobianQNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, double* param)
+extern "C" void jacobianQNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   // compute jacobian matrix
   JacobianQNLEffects(jacob, q, velocity);
 
 }
 
-extern "C" void jacobianVNNL(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, double* param)
+extern "C" void jacobianVNNL(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   // compute jacobian matrix
   JacobianVNLEffects(jacob, q, velocity);
 
 }
 
-// extern "C" void FInt(unsigned int sizeOfq, double time, const double *q, const double *velocity, double *fInt, double* param)
+// extern "C" void FInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *fInt, unsigned int sizeZ, double* z)
 // {
 //   unsigned int i;
 //   unsigned int n = sizeOfq;
 //   for(i = 0; i<n ; i++)
 //     fInt[i] = 0.0;
 // }
-// extern "C" void jacobianQFInt(unsigned int sizeOfq, double time, const double *q, const double *velocity, double *jacob, double* param)
+// extern "C" void jacobianQFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 // {
 //   unsigned int i;
 //   unsigned int n = sizeOfq * sizeOfq;
@@ -46,7 +46,7 @@ extern "C" void jacobianVNNL(unsigned int sizeOfq, const double *q, const  doubl
 //     jacob[i] = 0.0;
 // }
 
-// extern "C" void jacobianVFInt(unsigned int sizeOfq, double time, const double *q, const double *velocity, double *jacob, double* param)
+// extern "C" void jacobianVFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 // {
 //   unsigned int i;
 //   unsigned int n = sizeOfq * sizeOfq;
@@ -54,7 +54,7 @@ extern "C" void jacobianVNNL(unsigned int sizeOfq, const double *q, const  doubl
 //     jacob[i] = 0.0;
 // }
 
-extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, double* param)
+extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* z)
 {
   unsigned int i;
   double CC[69];
@@ -66,7 +66,7 @@ extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, 
 
 }
 
-extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, double* param)
+extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* z)
 {
   unsigned int i, j;
   double CJ[1449];

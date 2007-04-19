@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
 
     string G = "DoublePendulumPlugin:G0";
     NonSmoothLaw * nslaw = new NewtonImpactNSL(e);
-    Relation * relation = new LagrangianScleronomousR("SimplependulumPlugin:h0", G);
+    Relation * relation = new LagrangianScleronomousR("SimplePendulumPlugin:h0", G);
     Interaction * inter = new Interaction("floor-mass1", allDS, 1, 1, nslaw, relation);
 
 

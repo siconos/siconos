@@ -1,8 +1,8 @@
-/*! \page start_NSP Describing a Non Smooth Problem with Siconos
+/*! \page start_NSP Introduction: How to describe a Non Smooth Problem with Siconos
 
 \section start_modelinPrinciple Modeling Principle
 
-A Non Smooth Dynamical System is mainly a set of Dynamical Systems that interact all together, through what we call some Non Smooth Interactions. 
+A Non Smooth Dynamical System is mainly a set of Dynamical Systems that may interact together, through what we call some Non Smooth Interactions. 
 
 The figure below summarizes the modeling process inside Siconos: 
 \image html modelingPrinciple.png
@@ -16,7 +16,7 @@ For details on :
 - DynamicalSystems see \ref dsInSiconos. \n
 - Interactions, Relations and Non Smooth Laws see \ref doc_Interactions
 
-As a simple example, consider the classical case of a ball bouncing on the floor.
+As a simple example, consider the classical case of a ball bouncing on the floor: \ref EMBouncingBall.
 
 \section start_writingProcess Writing Process
 
@@ -26,13 +26,14 @@ Any Siconos input file is composed of the following steps:
 -# define some Interactions, and for each Interaction: 
   - define Relation
   - define NonSmoothLaw
--# built a NonSmoothDynamicalSystem: all DynamicalSystems + all Interactions
+-# build a NonSmoothDynamicalSystem: all DynamicalSystems + all Interactions
+-# build a Model that holds the NonSmoothDynamicalSystem.
 -# define a Simulation: the way the behavior of the NonSmoothDynamicalSystem will be computed
-  - a type: TimeStepping or EventDriven
   - define a TimeDiscretisation
+  - choose a strategy: TimeStepping or EventDriven
   - define some integrators for the DynamicalSystems (OneStepIntegrator)
-  - define a way to solve the non smooth problem (formulation + solver, the OneStepNSProblem)
--# build the Model: NonSmoothDynamicalSystem + associated Simulation
+  - define a way to formalize and solve the possible non smooth problems (formulation + solver, the OneStepNSProblem)
+-# associate the Simulation to the Model
 -# lead the Simulation (time loop)
 
 

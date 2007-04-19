@@ -57,7 +57,7 @@ private:
   /** constructor with the type of the Boost vector
    *  \param TYP
    */
-  SimpleVector(TYP = DENSE);
+  SimpleVector();
 
 public:
   /***************************** CONSTRUCTORS ****************************/
@@ -118,7 +118,10 @@ public:
    *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    * \return an unsigned int.
    */
-  unsigned int getNum() const;
+  inline const unsigned int getNum() const
+  {
+    return num;
+  };
 
   /** get the attribute if it's type is DenseVect
    *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
@@ -195,7 +198,7 @@ public:
 
   /** put data of the vector into a string
    */
-  std::string toString() const;
+  const std::string toString() const;
 
   //************************** VECTORS HANDLING AND OPERATORS *******************************
 
@@ -203,7 +206,7 @@ public:
    *  \param an unsigned int i
    *  \return a double
    */
-  double getValue(unsigned int);
+  const double getValue(unsigned int);
 
   /** set the element vector[i]
    *  \param an unsigned int i
@@ -213,23 +216,33 @@ public:
 
   /** set the elements starting from position i with input vector
    *  \param an unsigned int i
-   *  \param a SimpleVector
+   *  \param a SiconosVector
    */
-  void setBlock(unsigned int, const SimpleVector&);
+  void setBlock(unsigned int, const SiconosVector&);
+
+  /** add the input vector to the elements starting from position i.
+   *  \param an unsigned int i
+   *  \param a SiconosVector
+   */
+  void addBlock(unsigned int, const SiconosVector&);
+
+  /** subtract the input vector to the elements starting from position i.
+   *  \param an unsigned int i
+   *  \param a SiconosVector
+   */
+  void subBlock(unsigned int, const SiconosVector&);
 
   /** get the element at position i in the vector
    *  \param an integer i
-   *  \exception SiconosVectorException
    *  \return a double
    */
   double& operator()(unsigned int);
 
   /** get the element at position i in the vector
    *  \param an integer i
-   *  \exception SiconosVectorException
    *  \return a double
    */
-  double operator()(unsigned int)const;
+  const double operator()(unsigned int)const;
 
   /** get the vector at position i(ie this for Simple and block i for BlockVector)
    *  \param an unsigned integer i
@@ -308,7 +321,7 @@ public:
    * \param 2 SiconosVector
    * \return a boolean
    */
-  friend  bool  operator ==(const SiconosVector&, const SiconosVector&);
+  friend bool operator ==(const SiconosVector&, const SiconosVector&);
 
   /** Addition of two vectors
    *  \param 2 SiconosMatrix

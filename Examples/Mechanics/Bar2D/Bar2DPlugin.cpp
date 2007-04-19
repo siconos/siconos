@@ -31,7 +31,7 @@ extern "C" double FextFunction(double time)
 }
 
 
-extern "C" void bar2DFExt(unsigned int sizeOfq, double time, double *fExt, double* param)
+extern "C" void bar2DFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
   /* input parameter : sizeOfq (size of the vector q); time; q (pointer to q vector);
    * output parameter : fExt (pointer to Fext vector)
@@ -48,7 +48,7 @@ extern "C" void bar2DFExt(unsigned int sizeOfq, double time, double *fExt, doubl
   fExt[0] = -m * g + FextFunction(time);
 }
 
-extern "C" void groundFExt(unsigned int sizeOfq, double time, double *fExt, double* param)
+extern "C" void groundFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
   /* input parameter : sizeOfq (size of the vector q); time; q (pointer to q vector);
    * output patarmeter : fExt (pointer to Fext vector)

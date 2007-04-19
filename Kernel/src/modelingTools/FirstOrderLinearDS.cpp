@@ -270,7 +270,7 @@ void FirstOrderLinearDS::computeA(const double time)
   {
     if (APtr == NULL)
       RuntimeException::selfThrow("computeA() is not linked to a plugin function");
-    APtr(n, time, &(*A)(0, 0), &(*z)(0));
+    APtr(time, n, &(*A)(0, 0), z->size(), &(*z)(0));
   }
   // else nothing
 }
@@ -281,7 +281,7 @@ void FirstOrderLinearDS::computeB(const double time)
   {
     if (bPtr == NULL)
       RuntimeException::selfThrow("computeB() is not linked to a plugin function");
-    bPtr(n, time, &(*b)(0), &(*z)(0));
+    bPtr(time, n, &(*b)(0), z->size(), &(*z)(0));
   }
   // else nothing
 }

@@ -167,7 +167,7 @@ BlockVector::~BlockVector()
 }
 
 /******************************** METHODS ******************************/
-unsigned int BlockVector::getNum() const
+const unsigned int BlockVector::getNum() const
 {
   SiconosVectorException::selfThrow("BlockVector::getNum of a block is forbidden.");
   return 1;
@@ -315,7 +315,7 @@ void BlockVector::fill(double value)
     if ((*it) != NULL)(*it)->fill(value);
 }
 
-std::string BlockVector::toString() const
+const std::string BlockVector::toString() const
 {
   SiconosVectorException::selfThrow("BlockVector::toString, not yet implemented.");
   return "BlockVector";
@@ -323,7 +323,7 @@ std::string BlockVector::toString() const
 
 /***************************** OPERATORS ******************************/
 
-double BlockVector::getValue(unsigned int pos)
+const double BlockVector::getValue(unsigned int pos)
 {
   unsigned int blockNum = 0;
 
@@ -368,7 +368,7 @@ double& BlockVector::operator()(unsigned int pos)
   return (*vect[blockNum])(relativePos);
 }
 
-double BlockVector::operator()(unsigned int pos) const
+const double BlockVector::operator()(unsigned int pos) const
 {
   unsigned int blockNum = 0;
 

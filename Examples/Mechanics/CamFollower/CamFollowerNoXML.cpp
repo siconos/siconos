@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
     OneStepIntegrator*  OSI = new Moreau(lds, theta, S);
 
     // -- OneStepNsProblem --
-    OneStepNSProblem * osnspb = new LCP(S, "name", solverName, 101, 0.0001, "max", 0.6);
+    OneStepNSProblem * osnspb = new LCP(S, "name", solverName, 101, 0.0001);
 
     cout << "=== End of model loading === " << endl;
     // =========================== End of model definition ===========================

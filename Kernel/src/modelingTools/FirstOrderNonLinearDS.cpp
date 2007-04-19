@@ -508,7 +508,7 @@ void FirstOrderNonLinearDS::computeF(double time)
   {
     if (computeFPtr == NULL)
       RuntimeException::selfThrow("FirstOrderNonLinearDS::computeVF() f is not linked to a plugin function");
-    computeFPtr(n, time, &((*(x[0]))(0)) , &(*f)(0), &(*z)(0));
+    computeFPtr(time, n, &((*(x[0]))(0)) , &(*f)(0), z->size(), &(*z)(0));
   }
   // else nothing!
 }
@@ -520,7 +520,7 @@ void FirstOrderNonLinearDS::computeJacobianXF(double time, bool)
   {
     if (computeJacobianXFPtr == NULL)
       RuntimeException::selfThrow("FirstOrderNonLinearDS::computeJacobianXF() is not linked to a plugin function");
-    computeJacobianXFPtr(n, time, &((*(x[0]))(0)), &(*jacobianXF)(0, 0), &(*z)(0));
+    computeJacobianXFPtr(time, n, &((*(x[0]))(0)), &(*jacobianXF)(0, 0), z->size(), &(*z)(0));
   }
   // else nothing!
 }

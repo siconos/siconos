@@ -27,28 +27,16 @@
 // ======================================================================================================
 
 #include "SiconosKernel.h"
-#include <sys/time.h>
-#include <math.h>
-#include <iostream>
-#include <fstream>
 
 using namespace std;
 
 
 int main(int argc, char* argv[])
 {
+  boost::timer time;
+  time.restart();
   try
   {
-
-    // --- Compute elapsed time ---
-    double t1, t2, elapsed;
-    struct timeval tp;
-    int rtn;
-    clock_t start, end;
-    double elapsed2;
-    start = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t1 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
 
     // ================= Creation of the model =======================
 
@@ -628,15 +616,10 @@ int main(int argc, char* argv[])
     // --- Output files ---
     //    ioMatrix io("result.dat", "ascii");
     //     io.write(dataPlot,"noDim");
-
-    end = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t2 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-    elapsed = t2 - t1;
-    elapsed2 = (end - start) / (double)CLOCKS_PER_SEC;
-    cout << "time = " << elapsed << " --- cpu time " << elapsed2 << endl;
     //    cout<<"End of computation - Number of iterations done: "<<k<<endl;
 
+    delete OSI;
+    delete osnspb;
 
   }
   catch (SiconosException e)
@@ -647,6 +630,7 @@ int main(int argc, char* argv[])
   {
     cout << "Exception caught in \'sample/MultiBeadsColumn Init\'" << endl;
   }
+  cout << "Computation Time: " << time.elapsed()  << endl << endl;
 }
 
 

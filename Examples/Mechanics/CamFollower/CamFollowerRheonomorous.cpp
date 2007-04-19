@@ -113,21 +113,19 @@ int main(int argc, char* argv[])
     dsConcerned.insert(lds);
 
     //    Relation * relation0 = new LagrangianLinearR(*H);
-    vector<string> listofG(2);
-    listofG[0] = "FollowerPlugin:FollowerComputeG10";
-    listofG[1] = "FollowerPlugin:FollowerComputeG11";
     vector<string> listofG2(1);
     listofG2[0] = "FollowerPlugin:FollowerComputeG0";
-    Relation * relation0 = new LagrangianR("rhenomorous", "FollowerPlugin:FollowerComputeH1", listofG);
-    //Relation * relation0 = new LagrangianR("scleronomic","FollowerPlugin:FollowerComputeH0",listofG2);
+    Relation * relation0 = new LagrangianRheonomousR("FollowerPlugin:FollowerComputeH1", "FollowerPlugin:FollowerComputeG10", "FollowerPlugin:FollowerComputeG11");
+    //Relation * relation0 = new LagrangianScleronomousR("FollowerPlugin:FollowerComputeH0",listofG2);
 
     //    relation0->computeOutput(0);
     SimpleVector * param2 = new SimpleVector(1); // Here we only set one parameter, the DS number.
     //    (*param)(0) = vectorDS[0]->getNumber();
     (*param2)(0) = rpm;
 
-    static_cast<LagrangianR*>(relation0)->setParameterPtr(param2, "h");
-    static_cast<LagrangianR*>(relation0)->setParameterPtr(param2, "G10");
+
+    //    static_cast<LagrangianR*>(relation0)->setZPtr(param2,"h");
+    //    static_cast<LagrangianR*>(relation0)->setZPtr(param2,"G10");
 
     Interaction * inter =  new Interaction("Follower-Ground", dsConcerned, 0, 1, nslaw0, relation0);
 
@@ -157,7 +155,7 @@ int main(int argc, char* argv[])
     OneStepIntegrator * OSI = new Moreau(lds, theta, S);
 
     // -- OneStepNsProblem --
-    OneStepNSProblem * osnspb = new LCP(S, "name", solverName, 101, 0.0001, "max", 0.6);
+    OneStepNSProblem * osnspb = new LCP(S, "name", solverName, 101, 0.0001);
 
     cout << "=== End of model loading === " << endl;
     // =========================== End of model definition ===========================

@@ -61,7 +61,7 @@ bool DiodeBridge()
   double Rvalue = 1e3;    // resistance
   double Vinit = 10.0;    // initial voltage
   string Modeltitle = "DiodeBridge";
-  string solverName = "NSQP"; // non smooth problem solver algo name.
+  string solverName = "Lemke"; // non smooth problem solver algo name.
 
   bool res = false;
 
@@ -162,10 +162,9 @@ bool DiodeBridge()
     dataPlot(k, 6) = (InterDiodeBridge->getLambda(0))(2);
 
     // --- Time loop  ---
-    while (k < N)
+    for (k = 1 ; k < N ; ++k)
     {
       // get current time step
-      k++;
 
       // solve ...
       StratDiodeBridge->computeOneStep();

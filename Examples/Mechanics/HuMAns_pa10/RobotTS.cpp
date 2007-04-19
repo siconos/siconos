@@ -32,6 +32,8 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
+  boost::timer t;
+  t.restart();
   try
   {
 
@@ -188,16 +190,6 @@ int main(int argc, char* argv[])
     dataPlot(k, 7) = (inter->getY(0))(0);
     dataPlot(k, 8) = (inter->getY(0))(1);
 
-    // --- Compute elapsed time ---
-    double t1, t2, elapsed;
-    struct timeval tp;
-    int rtn;
-    clock_t start, end;
-    double elapsed2;
-    start = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t1 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-
     //    EventsManager * eventsManager = s->getEventsManagerPtr();
 
     // --- Time loop ---
@@ -265,12 +257,6 @@ int main(int argc, char* argv[])
       dataPlot(k, 8) = (inter->getY(0))(1);
     }
 
-    end = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t2 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-    elapsed = t2 - t1;
-    elapsed2 = (end - start) / (double)CLOCKS_PER_SEC;
-    cout << "time = " << elapsed << " --- cpu time " << elapsed2 << endl;
     cout << "End of computation - Number of iterations done: " << k << endl;
 
     // --- Output files ---

@@ -23,7 +23,7 @@
 const double g = 0; // gravity
 const double m = 1.221;
 
-extern "C" void FollowerMass(unsigned int sizeOfq, const double *q, double* mass, double* param)
+extern "C" void FollowerMass(unsigned int sizeOfq, const double *q, double* mass, unsigned int sizeZ, double* z)
 {
   double m = 1.221;
   // initialisation of the Mass matrix
@@ -33,7 +33,7 @@ extern "C" void FollowerMass(unsigned int sizeOfq, const double *q, double* mass
   mass[0] = m;
 }
 
-extern "C" void FollowerQNLInertia(unsigned int sizeOfq, const double *q, const double *velocity, double *Q, double* param)
+extern "C" void FollowerQNLInertia(unsigned int sizeOfq, const double *q, const double *velocity, double *Q, unsigned int sizeZ, double* z)
 {
   unsigned int i;
 
@@ -41,15 +41,15 @@ extern "C" void FollowerQNLInertia(unsigned int sizeOfq, const double *q, const 
     Q[i] = 0.0;
 }
 
-extern "C" void FollowerFInt(unsigned int sizeOfq, double time, const double *q, const double *velocity, double *fInt, double* param)
+extern "C" void FollowerFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *fInt, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < sizeOfq; i++)
     fInt[i] = 0.0;
 }
 
-extern "C" double FextFunction(double time, double* param)
+extern "C" double FextFunction(double time, double* z)
 {
-  double rpm = *param;
+  double rpm = *z;
   double res = -0.0;
   double w, beta, hc, hcp, hcpp, mass, kspring, cfriction, phio;
   double PI = 3.14159265;
@@ -133,18 +133,18 @@ extern "C" double FextFunction(double time, double* param)
   return res;
 }
 
-extern "C" void FollowerFExtR(unsigned int sizeOfq, double time, double *fExt, double* param)
+extern "C" void FollowerFExtR(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
-  //double rpm = param[0];
+  //double rpm = z[0];
 
   for (unsigned int i = 0; i < sizeOfq; i++)
     fExt[i] = 0.0;
 
   fExt[0] = -m * g;
 }
-extern "C" void FollowerFExt(unsigned int sizeOfq, double time, double *fExt, double* param)
+extern "C" void FollowerFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
-  double rpm = param[0];
+  double rpm = z[0];
   //  double rpm = 358;
 
   for (unsigned int i = 0; i < sizeOfq; i++)
@@ -153,25 +153,25 @@ extern "C" void FollowerFExt(unsigned int sizeOfq, double time, double *fExt, do
   fExt[0] = -m * g + FextFunction(time, &rpm);
 }
 
-extern "C" void groundFExt(unsigned int sizeOfq, double time, double *fExt, double* param)
+extern "C" void groundFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < sizeOfq; i++)
     fExt[i] = 0.0;
 }
 
-extern "C" void ballJacobianQFInt(unsigned int sizeOfq, double time, const double *q, const double *velocity, double *jacob, double* param)
+extern "C" void ballJacobianQFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < sizeOfq * sizeOfq; i++)
     jacob[i] = 0.0;
 }
 
-extern "C" void ballJacobianVelocityFInt(unsigned int sizeOfq, double time, const double *q, const double *velocity, double *jacob, double* param)
+extern "C" void ballJacobianVelocityFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < sizeOfq * sizeOfq; i++)
     jacob[i] = 0.0;
 }
 
-extern "C" void ballJacobianQQNLInertia(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, double* param)
+extern "C" void ballJacobianQQNLInertia(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i <  sizeOfq * sizeOfq; i++)
   {
@@ -179,7 +179,7 @@ extern "C" void ballJacobianQQNLInertia(unsigned int sizeOfq, const double *q, c
   }
 }
 
-extern "C" void ballJacobianVelocityQNLInertia(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, double* param)
+extern "C" void ballJacobianVelocityQNLInertia(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   printf("Call of the function 'ballJacobianVelocityQ' of the basic plugin.\nYou have to implement this function.\n");
   for (unsigned int i = 0; i <  sizeOfq * sizeOfq; i++)
@@ -190,20 +190,20 @@ extern "C" void ballJacobianVelocityQNLInertia(unsigned int sizeOfq, const doubl
 
 
 
-extern "C" void FollowerComputeH0(unsigned int sizeDS, const double* q, unsigned int sizeY, double* y, double* param)
+extern "C" void FollowerComputeH0(unsigned int sizeDS, const double* q, unsigned int sizeY, double* y, unsigned int sizeZ, double* z)
 {
 
   y[0] = q[0];
 }
 
-extern "C" void FollowerComputeG0(unsigned int sizeDS, const double* q, unsigned int sizeY, double* G0, double* param)
+extern "C" void FollowerComputeG0(unsigned int sizeDS, const double* q, unsigned int sizeY, double* G0, unsigned int sizeZ, double* z)
 {
   G0[0] = 1;
 }
 
-extern "C" void FollowerComputeH1(unsigned int sizeDS, const double* q, double time, unsigned int sizeY, double* y, double* param)
+extern "C" void FollowerComputeH1(unsigned int sizeDS, const double* q, double time, unsigned int sizeY, double* y, unsigned int sizeZ, double* z)
 {
-  double CamEqForce, CamPosition, CamVelocity, CamAcceleration, rpm = param[0];
+  double CamEqForce, CamPosition, CamVelocity, CamAcceleration, rpm = z[0];
 
   CamEqForce = CamState(time, rpm, CamPosition, CamVelocity, CamAcceleration);
   y[0] = q[0] - CamPosition;
@@ -211,16 +211,16 @@ extern "C" void FollowerComputeH1(unsigned int sizeDS, const double* q, double t
 }
 
 
-extern "C" void FollowerComputeG10(unsigned int sizeDS, const double* q, double time, unsigned int sizeY, double* G0, double* param)
+extern "C" void FollowerComputeG10(unsigned int sizeDS, const double* q, double time, unsigned int sizeY, double* G0, unsigned int sizeZ, double* z)
 {
   G0[0] = 1;
 }
 
 
-extern "C" void FollowerComputeG11(unsigned int sizeDS, const double* q, double time, unsigned int sizeY, double* G1, double* param)
+extern "C" void FollowerComputeG11(unsigned int sizeDS, const double* q, double time, unsigned int sizeY, double* G1, unsigned int sizeZ, double* z)
 {
 
-  double CamEqForce, CamPosition, CamVelocity, CamAcceleration, rpm = param[0];
+  double CamEqForce, CamPosition, CamVelocity, CamAcceleration, rpm = z[0];
 
   CamEqForce = CamState(time, rpm, CamPosition, CamVelocity, CamAcceleration);
   G1[0] = -CamVelocity;

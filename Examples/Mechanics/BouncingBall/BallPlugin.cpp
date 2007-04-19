@@ -30,7 +30,7 @@ extern "C" double FextFunction(double time)
 }
 
 
-extern "C" void ballFExt(unsigned int sizeOfq, double time, double *fExt, double* param)
+extern "C" void ballFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < sizeOfq; i++)
     fExt[i] = 0.0;

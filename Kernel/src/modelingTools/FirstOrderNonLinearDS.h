@@ -92,22 +92,24 @@ protected:
   SiconosMatrix *jacobianXF;
 
   /** DynamicalSystem plug-in to compute f(x,t,z) - id="f".
-   *  @param  : the size of the vector x
    *  @param  : current time
+   *  @param  : the size of the vector x
    *  @param  : the pointer to the first element of the vector x
    *  @param  : the pointer to the first element of the vector f(x,t)
+   *  @param  : the size of the vector z
    *  @param  : a vector of parameters, z
    */
-  void (*computeFPtr)(unsigned int, double, const double*, double*, double*);
+  void (*computeFPtr)(double, unsigned int, const double*, double*, unsigned int, double*);
 
   /** DynamicalSystem plug-in to compute the gradient of f(x,t,z) with respect to the state: \f$ \nabla_x f: (x,t,z) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
-   * @param sizeOfX : size of vector x
    * @param time : current time
+   * @param sizeOfX : size of vector x
    * @param x : pointer to the first element of x
    * @param[in,out] jacob : pointer to the first element of jacobianXF matrix
+   * @param  : the size of the vector z
    * @param[in,out] z: a vector of parameters, z
    */
-  void (*computeJacobianXFPtr)(unsigned int, double, const double*, double*, double*);
+  void (*computeJacobianXFPtr)(double, unsigned int, const double*, double*, unsigned int, double*);
 
   /** the  input vector due to the non-smooth law \f$  r \in R^{n}\f$ (multiplier, force, ...)*/
   SiconosVector *r;

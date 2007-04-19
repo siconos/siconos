@@ -59,7 +59,7 @@ typedef std::map<const std::string , SiconosVector*> WorkMap;
 typedef std::map<std::string , SiconosMatrix*> WorkMap2;
 
 /** Pointer to function for plug-in. */
-typedef void (*FPtr6)(unsigned int, double, const double*, const double*, double*, double*);
+typedef void (*FPtr6)(double, unsigned int, const double*, const double*, double*, unsigned int, double*);
 
 /**  Abstract class to handle Dynamical Systems => interface for derived classes (First Order or Lagrangian systems)
  *
@@ -78,15 +78,18 @@ typedef void (*FPtr6)(unsigned int, double, const double*, const double*, double
  *
  *  with \f$ g : R^{n} \times R  \mapsto  R^{n}   \f$ .
  *
- * g is computed thanks to computeG(t), and its jacobians with computeJacobianG(0,...) for jacobianXG[0] = \f$ \nabla_x g(t,\dot x,x,z) \f$,
- * computeJacobianG(1,...) for jacobianXG[1] = \f$ \nabla_{\dot x} g(t,\dot x,x,z) \f$.
+ * Operators and the functions used to compute them:
+ *
+ * - g: computeG(t)
+ * - jacobianXG[0] = \f$ \nabla_x g(t,\dot x,x,z) \f$: computeJacobianG(0,...)
+ * - jacobianXG[1] = \f$ \nabla_{\dot x} g(t,\dot x,x,z) \f$: computeJacobianG(1,...)
  *
  * By default, the DynamicalSystem is considered to be an Initial Value Problem (IVP)
  * and the initial conditions are given by
  *  \f[
  *  x(t_0)=x_0
  * \f]
- * To define a boundary Value Problem, the pointer on a BoundaryCondition must be set (not yet implemented).
+ * To define a boundary Value Problem, a pointer on a BoundaryCondition must be set (not yet implemented).
  *
  * Under some specific conditions, the system can be written as:
  *
@@ -99,7 +102,7 @@ typedef void (*FPtr6)(unsigned int, double, const double*, const double*, double
  *
  * And its Jacobian according to x, named jacobianXRhs, with computeJacobianXRhs(t).
  *
- * <b> Those two functions are pure virtual and must be implemented in all the derived classes. </b>
+ * <b> Those two functions (computeRhs and computeJacobianXRhs) are pure virtual and must be implemented in all the derived classes. </b>
  *
  * Dynamical System types (followed by derived classes names):
  *  - First Order Non Linear Dynamical Systems (FirstOrderNonLinearDS)
@@ -128,28 +131,28 @@ protected:
   /** Dynamical System type - See possible types in description of this file.*/
   std::string  DSType;
 
-  /** this number defines in a single way the DynamicalSystem */
+  /** An id number for the DynamicalSystem */
   int number;
 
-  /** the name of the DS ("ball", "solid1254", etc.)*/
+  /** the name of the DS ("ball", "solid1254", etc)*/
   std::string  id;
 
   /** NonSmoothDynamicalSystem owner of this DynamicalSystem */
   NonSmoothDynamicalSystem* nsds;
 
-  /** the dimension of the system (i.e. size of the state vector x) */
+  /** the dimension of the system (\e ie size of the state vector x) */
   unsigned int n;
 
   /** initial state of the system */
   SiconosVector *x0;
 
-  /** state of the system, \f$  x \in R^{n}\f$ - Container, with \f$ x[0]=\f$ x \f$ , x[1]= \f$ \dot x \f$ . */
+  /** state of the system, \f$  x \in R^{n}\f$ - With \f$ x[0]=\f$ x \f$ , x[1]= \f$ \dot x \f$ . */
   VectorOfVectors x;
 
-  /** jacobian according to x of the right-hand side (\f$ \dot x = f(x,t) + Tu +r \f$) */
+  /** jacobian according to x of the right-hand side (\f$ \dot x = f(x,t) + r \f$) */
   SiconosMatrix *jacobianXRhs;
 
-  /** Arbitrary algebraic values vector, z. Discret state of the system. */
+  /** Arbitrary algebraic values vector, z, discret state of the system. */
   SiconosVector * z;
 
   /** \f$ g(t,\dot x,x,z) \f$ */
@@ -158,27 +161,29 @@ protected:
   /** jacobianXG[0] = \f$ \nabla_x g(t,\dot x,x,z) \f$, jacobianXG[1] = \f$ \nabla_{\dot x} g(t,\dot x,x,z) \f$  */
   VectorOfMatrices jacobianG;
 
-  /* contains the names of the various plug-in. Example: pluginNames["mass"] is the function used to compute the mass.
+  /** contains the names of the various plug-in. Example: pluginNames["mass"] is the function used to compute the mass.
      Id are the names of the member (mass, fInt ...) */
   NamesList pluginNames;
 
   /** DynamicalSystem plug-in to compute \f$ g(t,\dot x,x,z) \f$
-   *  @param  : the size of the vector x
-   *  @param  : current time
-   *  @param  : the pointer to the first element of the vector x[0]=\f$ x \f$
-   *  @param  : the pointer to the first element of the vector x[1]=\f$ \dot x \f$
-   *  @param  : the pointer to the first element of the vector g(t, ...)
-   *  @param  : a vector of parameters, z
+   *  @param   current time
+   *  @param   the size of the vector x
+   *  @param   the pointer to the first element of the vector x[0]=\f$ x \f$
+   *  @param   the pointer to the first element of the vector x[1]=\f$ \dot x \f$
+   *  @param   the pointer to the first element of the vector g(t, ...)
+   *  @param   the size of the vector z
+   *  @param   a vector of parameters, z
    */
   FPtr6 computeGPtr;
 
-  /** DynamicalSystem plug-in to compute jacobianG; computeJacobianGPtr[i] for jacobianG[i].
-   *  @param  : the size of the vector x
-   *  @param  : current time
-   *  @param  : the pointer to the first element of the vector x[0]=\f$ x \f$
-   *  @param  : the pointer to the first element of the vector x[1]=\f$ \dot x \f$
-   *  @param  : the pointer to the first element of the vector g(t, ...)
-   *  @param  : a vector of parameters, z
+  /** Plug-in to compute jacobianG (computeJacobianGPtr[i] for jacobianG[i]).
+   *  @param   current time
+   *  @param   the size of the vector x
+   *  @param   the pointer to the first element of the vector x[0]=\f$ x \f$
+   *  @param   the pointer to the first element of the vector x[1]=\f$ \dot x \f$
+   *  @param   the pointer to the first element of the vector g(t, ...)
+   *  @param   the size of the vector z
+   *  @param   a vector of parameters, z
    */
   std::vector<FPtr6> computeJacobianGPtr;
 

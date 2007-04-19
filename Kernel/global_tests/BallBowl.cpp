@@ -40,24 +40,45 @@ bool BallBowl()
     int N = t->getNSteps(); // Number of time steps
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    SimpleMatrix dataPlot(N + 1, 3);
 
+
+    SimpleMatrix dataPlot(N + 1, 6);
+
+    cout << "Prepare data for plotting ... " << endl;
     // For the initial time step:
     // time
-    dataPlot(k, 0) = bouncingBall.getT0();
+    dataPlot(k, 0) =  bouncingBall.getT0();
     // state q for the first dynamical system (ball)
     LagrangianDS* ball = static_cast<LagrangianDS*>(bouncingBall.getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
     dataPlot(k, 1) = (ball->getQ())(0);
-    // velocity for the ball
     dataPlot(k, 2) = (ball->getVelocity())(0);
+    dataPlot(k, 3) = (ball->getQ())(1);
+    dataPlot(k, 4) = (ball->getVelocity())(1);
+    dataPlot(k, 5) = (bouncingBall.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
+
+    cout << "Computation ... " << endl;
     // --- Time loop  ---
     while (k < N)
     {
+      // get current time step
       k++;
+      // solve ...
       s->computeOneStep();
-      dataPlot(k, 0) = bouncingBall.getCurrentT();
+
+      // --- Get values to be plotted ---
+      //time
+      dataPlot(k, 0) = bouncingBall.getCurrentT();;
+      // Ball: state q
       dataPlot(k, 1) = (ball->getQ())(0);
+      // Ball: velocity
       dataPlot(k, 2) = (ball->getVelocity())(0);
+      // Ground: q
+      dataPlot(k, 3) = (ball->getQ())(1);
+      // Ground: velocity
+      dataPlot(k, 4) = (ball->getVelocity())(1);
+      // Reaction
+      dataPlot(k, 5) = (bouncingBall.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
+      // transfer of state i+1 into state i and time incrementation
       s->nextStep();
     }
     SiconosMatrix * dataRef = new SimpleMatrix("refBallBowl.dat", true);

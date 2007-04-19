@@ -31,85 +31,66 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
+  boost::timer time;
+  time.restart();
   try
   {
 
     // --- Model loading from xml file ---
-    Model * ball = new Model("./BallED.xml");
-    cout << "\n *** BallED.xml file loaded ***" << endl;
+    cout << "====> Model loading (XML) ..." << endl << endl;
+    Model * bouncingBall = new Model("./BallED.xml");
+    cout << "\n *** BallED.xml file loaded ***" << endl << endl;
 
     // --- Get and initialize the simulation ---
-    Simulation* s;
-    s = ball->getSimulationPtr();
-    LagrangianLinearTIDS* lds = static_cast<LagrangianLinearTIDS*>(ball->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
-    cout << "simulation initialization ..." << endl;
+    EventDriven* s = static_cast<EventDriven*>(bouncingBall->getSimulationPtr());
+    LagrangianDS* ball = static_cast<LagrangianDS*>(bouncingBall->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
+    cout << "====> Simulation initialisation ..." << endl << endl;
     s->initialize();
-
-    // --- Get the time discretisation scheme ---
-    //TimeDiscretisation* t = s->getTimeDiscretisationPtr();
-
-    EventDriven * eventDriven = static_cast<EventDriven*>(s);
-
-    cout << "End of simulation initialisation" << endl;
-
-    int k = 0; // Current step
-    int N = 100000;//t->getNSteps(); // Number of time steps
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
+
+    int N = 12368; // Number of saved points: depends on the number of events ...
     unsigned int outputSize = 4;
     SimpleMatrix dataPlot(N + 1, outputSize);
-    // For the initial time step:
-    // time
 
-    dataPlot(k, 0) =  s->getCurrentTime();
-    dataPlot(k, 1) = lds->getX()(0);
-    dataPlot(k, 2) = lds->getX()(3);
-    dataPlot(k, 3) = (ball->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
+    SiconosVector * q = ball->getQPtr();
+    SiconosVector * v = ball->getVelocityPtr();
+    SiconosVector * lambda = bouncingBall->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambdaPtr(1);
 
-    // --- Time loop ---
-    cout << " ==== Start of Event Driven simulation - This may take a while ... ====" << endl;
-    // --- Compute elapsed time ---
-    double t1, t2, elapsed;
-    struct timeval tp;
-    int rtn;
-    clock_t start, end;
-    double elapsed2;
-    start = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t1 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
+    dataPlot(0, 0) = bouncingBall->getT0();
+    dataPlot(0, 1) = (*q)(0);
+    dataPlot(0, 2) = (*v)(0);
+    dataPlot(0, 3) = (*lambda)(0);
+
+    cout << "====> Start computation ... " << endl << endl;
+    // --- Time loop  ---
     EventsManager * eventsManager = s->getEventsManagerPtr();
     unsigned int numberOfEvent = 0 ;
-    while (eventDriven->hasNextEvent())
+    int k = 0;
+    while (s->hasNextEvent())
     {
       k++;
-      eventDriven->advanceToEvent();
+      s->advanceToEvent();
 
-      eventDriven->processEvents();
+      s->processEvents();
       // If the treated event is non smooth, we save pre-impact state.
       if (eventsManager->getCurrentEventPtr()->getType() == "NonSmoothEvent")
       {
         dataPlot(k, 0) = s->getCurrentTime();
-        dataPlot(k, 1) = (*lds->getQMemoryPtr()->getSiconosVector(1))(0);
-        dataPlot(k, 2) = (*lds->getVelocityMemoryPtr()->getSiconosVector(1))(0);
+        dataPlot(k, 1) = (*ball->getQMemoryPtr()->getSiconosVector(1))(0);
+        dataPlot(k, 2) = (*ball->getVelocityMemoryPtr()->getSiconosVector(1))(0);
         k++;
       }
-
       dataPlot(k, 0) = s->getCurrentTime();
-      dataPlot(k, 1) = lds->getX()(0);
-      dataPlot(k, 2) = lds->getX()(3);
-      dataPlot(k, 3) = (ball->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
-
+      dataPlot(k, 1) = (*q)(0);
+      dataPlot(k, 2) = (*v)(0);
+      dataPlot(k, 3) = (*lambda)(0);
       numberOfEvent++;
     }
-    end = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t2 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-    elapsed = t2 - t1;
-    elapsed2 = (end - start) / (double)CLOCKS_PER_SEC;
-    cout << "time = " << elapsed << " --- cpu time " << elapsed2 << endl;
     // --- Output files ---
-    cout << "===== End of Event Driven simulation. " << numberOfEvent << " events have been processed. ==== " << endl;
+    cout << "===== End of Event Driven simulation. " << numberOfEvent << " events have been processed. ==== " << endl << endl;
+    cout << "====> Output file writing ..." << endl;
     ioMatrix io("result.dat", "ascii");
     io.write(dataPlot, "noDim");
 
@@ -124,4 +105,5 @@ int main(int argc, char* argv[])
   {
     cout << "Exception caught in \'sample/MultiBeadsColumn\'" << endl;
   }
+  cout << "Computation Time: " << time.elapsed()  << endl << endl;
 }

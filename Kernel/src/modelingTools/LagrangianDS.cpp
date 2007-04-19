@@ -1098,7 +1098,7 @@ void LagrangianDS::computeMass()
   {
     if (computeMassPtr == NULL)
       RuntimeException::selfThrow("computeMass() is not linked to a plugin function");
-    computeMassPtr(ndof, &(*q[0])(0), &(*mass)(0, 0), &(*z)(0));
+    computeMassPtr(ndof, &(*q[0])(0), &(*mass)(0, 0), z->size(), &(*z)(0));
   }
 }
 
@@ -1109,7 +1109,7 @@ void LagrangianDS::computeMass(SiconosVector *q2)
     if (computeMassPtr == NULL)
       RuntimeException::selfThrow("computeMass() is not linked to a plugin function");
 
-    computeMassPtr(ndof, &(*q2)(0), &(*mass)(0, 0), &(*z)(0));
+    computeMassPtr(ndof, &(*q2)(0), &(*mass)(0, 0), z->size(), &(*z)(0));
   }
 }
 
@@ -1120,7 +1120,7 @@ void LagrangianDS::computeFInt(double time)
     if (computeFIntPtr == NULL)
       RuntimeException::selfThrow("computeFInt() is not linked to a plugin function");
 
-    computeFIntPtr(ndof, time, &(*q[0])(0), &(*q[1])(0), &(*fInt)(0), &(*z)(0));
+    computeFIntPtr(time, ndof, &(*q[0])(0), &(*q[1])(0), &(*fInt)(0), z->size(), &(*z)(0));
   }
 }
 void LagrangianDS::computeFInt(double time, SiconosVector *q2, SiconosVector *velocity2)
@@ -1130,7 +1130,7 @@ void LagrangianDS::computeFInt(double time, SiconosVector *q2, SiconosVector *ve
     if (computeFIntPtr == NULL)
       RuntimeException::selfThrow("computeFInt() is not linked to a plugin function");
 
-    computeFIntPtr(ndof, time, &(*q2)(0), &(*velocity2)(0), &(*fInt)(0), &(*z)(0));
+    computeFIntPtr(time, ndof, &(*q2)(0), &(*velocity2)(0), &(*fInt)(0), z->size(), &(*z)(0));
   }
 }
 
@@ -1141,7 +1141,7 @@ void LagrangianDS::computeFExt(double time)
     if (computeFExtPtr == NULL)
       RuntimeException::selfThrow("computeFExt() is not linked to a plugin function");
 
-    computeFExtPtr(ndof, time, &(*fExt)(0), &(*z)(0));
+    computeFExtPtr(time, ndof, &(*fExt)(0), z->size(), &(*z)(0));
   }
 }
 
@@ -1151,7 +1151,7 @@ void LagrangianDS::computeNNL()
   {
     if (computeNNLPtr == NULL)
       RuntimeException::selfThrow("computeQ() is not linked to a plugin function");
-    computeNNLPtr(ndof, &(*q[0])(0), &(*q[1])(0), &(*NNL)(0), &(*z)(0));
+    computeNNLPtr(ndof, &(*q[0])(0), &(*q[1])(0), &(*NNL)(0), z->size(), &(*z)(0));
   }
 }
 
@@ -1162,7 +1162,7 @@ void LagrangianDS::computeNNL(SiconosVector *q2, SiconosVector *velocity2)
     if (computeNNLPtr == NULL)
       RuntimeException::selfThrow("computeQ() is not linked to a plugin function");
 
-    computeNNLPtr(ndof, &(*q2)(0), &(*velocity2)(0), &(*NNL)(0), &(*z)(0));
+    computeNNLPtr(ndof, &(*q2)(0), &(*velocity2)(0), &(*NNL)(0), z->size(), &(*z)(0));
   }
 }
 
@@ -1175,7 +1175,7 @@ void LagrangianDS::computeJacobianFInt(unsigned int i, double time)
     if (computeJacobianFIntPtr[i] == NULL)
       RuntimeException::selfThrow("computeJacobianFInt(i,time) is not linked to a plugin function. i=" + i);
 
-    (computeJacobianFIntPtr[i])(ndof, time, &(*q[0])(0), &(*q[1])(0), &(*jacobianFInt[i])(0, 0), &(*z)(0));
+    (computeJacobianFIntPtr[i])(time, ndof, &(*q[0])(0), &(*q[1])(0), &(*jacobianFInt[i])(0, 0), z->size(), &(*z)(0));
   }
 }
 
@@ -1187,7 +1187,7 @@ void LagrangianDS::computeJacobianFInt(unsigned int i, double time, SiconosVecto
     if (computeJacobianFIntPtr[i] == NULL)
       RuntimeException::selfThrow("computeJacobianFInt(i, ...) is not linked to a plugin function. i=" + i);
 
-    computeJacobianFIntPtr[i](ndof, time, &(*q2)(0), &(*velocity2)(0), &(*jacobianFInt[i])(0, 0), &(*z)(0));
+    computeJacobianFIntPtr[i](time, ndof, &(*q2)(0), &(*velocity2)(0), &(*jacobianFInt[i])(0, 0), z->size(), &(*z)(0));
   }
 }
 
@@ -1199,7 +1199,7 @@ void LagrangianDS::computeJacobianNNL(unsigned int i)
     if (computeJacobianNNLPtr[i] == NULL)
       RuntimeException::selfThrow("computeJacobianNNL(i) is not linked to a plugin function. i=" + i);
 
-    computeJacobianNNLPtr[i](ndof, &(*q[0])(0), &(*q[1])(0), &(*jacobianNNL[i])(0, 0), &(*z)(0));
+    computeJacobianNNLPtr[i](ndof, &(*q[0])(0), &(*q[1])(0), &(*jacobianNNL[i])(0, 0), z->size(), &(*z)(0));
   }
 }
 
@@ -1211,7 +1211,7 @@ void LagrangianDS::computeJacobianNNL(unsigned int i, SiconosVector *q2, Siconos
     if (computeJacobianNNLPtr[i] == NULL)
       RuntimeException::selfThrow("computeJacobianNNL(i, ...) is not linked to a plugin function. i=" + i);
 
-    computeJacobianNNLPtr[i](ndof, &(*q2)(0), &(*velocity2)(0), &(*jacobianNNL[i])(0, 0), &(*z)(0));
+    computeJacobianNNLPtr[i](ndof, &(*q2)(0), &(*velocity2)(0), &(*jacobianNNL[i])(0, 0), z->size(), &(*z)(0));
   }
 }
 

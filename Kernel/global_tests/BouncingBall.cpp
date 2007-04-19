@@ -65,6 +65,7 @@ bool BouncingBall()
     // Reaction
     dataPlot(k, 3) = (bouncingBall->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
     // --- Time loop  ---
+
     for (k = 1 ; k < N + 1 ; ++k)
     {
       s->computeOneStep();
@@ -77,9 +78,6 @@ bool BouncingBall()
     }
 
     SiconosMatrix * dataRef = new SimpleMatrix("refBouncingBall.dat", true);
-    ioMatrix io("result.dat", "ascii");
-    io.write(dataPlot);
-
     double tol = 1e-9;
     double norm = (dataPlot - (*dataRef)).normInf() ;// diff->normInf();
     if (norm < tol)

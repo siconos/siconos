@@ -436,7 +436,7 @@ void DynamicalSystem::computeG(double time)
     if (computeGPtr == NULL)
       RuntimeException::selfThrow("DynamicalSystem::computeG() is not linked to a plugin function");
 
-    computeGPtr(n, time, &(*x[0])(0), &(*x[1])(0), &(*g)(0), &(*z)(0));
+    computeGPtr(time, n, &(*x[0])(0), &(*x[1])(0), &(*g)(0), z->size(), &(*z)(0));
   }
   else RuntimeException::selfThrow("DynamicalSystem::computeG - Not yet implemented for DS of type " + DSType);
 }
@@ -450,7 +450,7 @@ void DynamicalSystem::computeJacobianG(unsigned int i, double time)
     if (computeJacobianGPtr[i] == NULL)
       RuntimeException::selfThrow("computeJacobianG(i,time) is not linked to a plugin function. i=" + i);
 
-    (computeJacobianGPtr[i])(n, time, &(*x[0])(0), &(*x[1])(0), &(*jacobianG[i])(0, 0), &(*z)(0));
+    (computeJacobianGPtr[i])(time, n, &(*x[0])(0), &(*x[1])(0), &(*jacobianG[i])(0, 0), z->size(), &(*z)(0));
   }
   else RuntimeException::selfThrow("DynamicalSystem::computeJacobianG - Not yet implemented for DS of type " + DSType);
 }

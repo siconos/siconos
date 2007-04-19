@@ -15,14 +15,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 /*!\file BouncingBallTS.cpp
-\brief \ref EMBouncingBall - C++ input file, Time-Stepping version - V. Acary, F. Perignon.
+  \brief \ref EMBouncingBall - C++ input file, Time-Stepping version - V. Acary, F. Perignon.
 
-A Ball bouncing on the ground.
-Direct description of the model without XML input.
-Simulation with a Time-Stepping scheme.
+  A Ball bouncing on the ground.
+  Direct description of the model without XML input.
+  Simulation with a Time-Stepping scheme.
 */
 
 #include "SiconosKernel.h"
@@ -31,8 +31,8 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-  boost::timer t;
-  t.restart();
+  boost::timer time;
+  time.restart();
 
   try
   {
@@ -55,6 +55,7 @@ int main(int argc, char* argv[])
     // --- Dynamical systems ---
     // -------------------------
 
+    cout << "====> Model loading ..." << endl << endl;
     DynamicalSystemsSet allDS; // the list of DS
     SiconosMatrix *Mass = new SimpleMatrix(nDof, nDof);
     (*Mass)(0, 0) = m;
@@ -121,15 +122,15 @@ int main(int argc, char* argv[])
     // -- OneStepNsProblem --
     OneStepNSProblem * osnspb = new LCP(s, "LCP", solverName, 101, 0.0001);
 
-    cout << "=== End of model loading === " << endl;
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
     // --- Simulation initialization ---
 
+    cout << "====> Simulation initialisation ..." << endl << endl;
+
     s->initialize();
-    cout << "End of simulation initialisation" << endl;
 
     int N = t->getNSteps(); // Number of time steps
 
@@ -146,10 +147,9 @@ int main(int argc, char* argv[])
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
     dataPlot(0, 3) = (*lambda)(0);
-    cout << N << endl;
     // --- Time loop ---
-    cout << "Start computation ... " << endl;
-    // == Simulation, first possible writing ==
+    cout << "====> Start computation ... " << endl << endl;
+    // ==== Simulation loop - Writing without explicit event handling =====
     int k = 0;
     for (k = 1 ; k < N + 1 ; ++k)
     {
@@ -163,37 +163,40 @@ int main(int argc, char* argv[])
     }
     cout << "End of computation - Number of iterations done: " << k - 1 << endl;
 
-    // == Simulation, second possible writing ==
+    // == Simulation loop - Writing with explicit event handling =====
     //     while(s->hasNextEvent())
     //       {
     //  s->computeOneStep();
     //  k++;
-    //  dataPlot(k, 0) = bouncingBall->getCurrentT();
-    //  dataPlot(k,1) = ball->getQ()(0);
-    //  dataPlot(k,2) = ball->getVelocity()(0);
-    //  dataPlot(k, 3) = (bouncingBall->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
+    //  dataPlot(k, 0) =  bouncingBall->getCurrentT();
+    //  dataPlot(k,1) = (*q)(0);
+    //  dataPlot(k,2) = (*v)(0);
+    //  dataPlot(k, 3) = (*lambda)(0);
     //  s->nextStep();
     //  // --- Get values to be plotted ---
     //       }
     //     cout<<"End of computation - Number of iterations done: "<<k<<endl;
 
     // --- Output files ---
+    cout << "====> Output file writing ..." << k - 1 << endl;
     ioMatrix io("result.dat", "ascii");
     io.write(dataPlot, "noDim");
     // --- Free memory ---
     delete osnspb;
     delete t;
     delete s;
+    delete OSI;
     delete bouncingBall;
     delete nsds;
+    delete inter;
     delete relation0;
     delete nslaw0;
     delete H;
+    delete weight;
     delete ball;
     delete q0;
     delete v0;
     delete Mass;
-    delete OSI;
   }
 
   catch (SiconosException e)
@@ -204,7 +207,7 @@ int main(int argc, char* argv[])
   {
     cout << "Exception caught in BouncingBallTS.cpp" << endl;
   }
-  cout << "Computation Time " << t.elapsed()  << endl;
+  cout << "Computation Time " << time.elapsed()  << endl;
 
 
 }

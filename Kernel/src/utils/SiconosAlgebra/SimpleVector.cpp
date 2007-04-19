@@ -27,24 +27,7 @@
 
 namespace atlas = boost::numeric::bindings::atlas;
 
-/***************************** CONSTRUCTORS ****************************/
-// Default (private)
-SimpleVector::SimpleVector(TYP typ): SiconosVector(false), num(1)
-{
-  if (typ == DENSE)
-  {
-    vect.Dense = new DenseVect();
-    num = 1;
-  }
-  else if (typ == SPARSE)
-  {
-    vect.Sparse = new SparseVect();
-    num = 4;
-  }
-  else
-    SiconosVectorException::selfThrow("SimpleVector:constructor(TYP) : invalid type given");
-}
-
+// parameters: dimension and type.
 SimpleVector::SimpleVector(unsigned int row, TYP typ): SiconosVector(false), num(1)
 {
   if (typ == SPARSE)
@@ -59,11 +42,12 @@ SimpleVector::SimpleVector(unsigned int row, TYP typ): SiconosVector(false), num
   }
   else
   {
-    SiconosVectorException::selfThrow("SimpleVector::constructor(TYP, unsigned int) : invalid type given");
+    SiconosVectorException::selfThrow("SimpleVector::constructor(TYP, unsigned int) failed, invalid type given");
   }
   sizeV = row;
 }
 
+// parameters: dimension, default value for all components and type.
 SimpleVector::SimpleVector(unsigned int row, double val, TYP typ): SiconosVector(false), num(1)
 {
   if (typ == SPARSE)
@@ -84,6 +68,7 @@ SimpleVector::SimpleVector(unsigned int row, double val, TYP typ): SiconosVector
   fill(val);
 }
 
+// parameters: a vector (stl) of double and the type.
 SimpleVector::SimpleVector(const std::vector<double> v, TYP typ): SiconosVector(false), num(1)
 {
   if (typ != DENSE)
@@ -94,6 +79,7 @@ SimpleVector::SimpleVector(const std::vector<double> v, TYP typ): SiconosVector(
   num = 1;
 }
 
+// Copy
 SimpleVector::SimpleVector(const SimpleVector &svect): SiconosVector(false), num(svect.getNum())
 {
   if (num == 1)
@@ -107,6 +93,7 @@ SimpleVector::SimpleVector(const SimpleVector &svect): SiconosVector(false), num
   sizeV = svect.size();
 }
 
+// Copy
 SimpleVector::SimpleVector(const SiconosVector &v): SiconosVector(false), num(1)
 {
   sizeV = v.size();
@@ -158,79 +145,12 @@ SimpleVector::SimpleVector(const std::string &file, bool ascii): SiconosVector(f
   sizeV = (vect.Dense)->size();
 }
 
-/****************************** DESTRUCTOR  ****************************/
 SimpleVector::~SimpleVector(void)
 {
   if (num == 1)
     delete(vect.Dense);
   else if (num == 4)
     delete(vect.Sparse);
-}
-
-/******************************** METHODS ******************************/
-unsigned int SimpleVector::getNum() const
-{
-  return num;
-}
-
-void SimpleVector::zero(void)
-{
-  if (num == 1)
-    atlas::set(0.0, *vect.Dense);
-
-  else //if(num==4)
-    *vect.Sparse *= 0.0;
-}
-
-double* SimpleVector::getArray(unsigned int) const
-{
-  if (num == 4)
-    SiconosVectorException::selfThrow("SimpleVector::getArray() : not yet implemented for sparse vector.");
-
-  return &(((*vect.Dense).data())[0]);
-}
-
-void SimpleVector::getBlock(unsigned int pos, SiconosVector& vOut) const
-{
-  unsigned int end = vOut.size();
-  if ((pos + end) > sizeV)
-    SiconosVectorException::selfThrow("SimpleVector::getBlock(pos,vOut): vOut size+pos is out of range.");
-
-  if (num == 1)
-    *(vOut.getDensePtr()) = project((*vect.Dense), ublas::range(pos, pos + end));
-  else
-    *(vOut.getSparsePtr()) = project((*vect.Sparse), ublas::range(pos, pos + end));
-}
-
-const double SimpleVector::normInf(void)const
-{
-  double d = 0;
-  if (num == 1)
-    d = norm_inf(*vect.Dense);
-  else if (num == 4)
-    d = norm_inf(*vect.Sparse);
-  return d;
-}
-
-
-const double SimpleVector::norm2(void)const
-{
-  double d = 0;
-  if (num == 1)
-    d = atlas::nrm2(*vect.Dense);
-  else if (num == 4)
-    d = norm_2(*vect.Sparse);
-  return d;
-}
-
-void SimpleVector::resize(unsigned int n, bool preserve)
-{
-
-  sizeV = n;
-  if (num == 1)
-    (vect.Dense)->resize(n, preserve);
-  if (num == 4)
-    (vect.Sparse)->resize(n, preserve);
 }
 
 const DenseVect SimpleVector::getDense(unsigned int)const
@@ -268,6 +188,64 @@ SparseVect* SimpleVector::getSparsePtr(unsigned int)const
   return vect.Sparse;
 }
 
+double* SimpleVector::getArray(unsigned int) const
+{
+  if (num == 4)
+    SiconosVectorException::selfThrow("SimpleVector::getArray() : not yet implemented for sparse vector.");
+
+  return &(((*vect.Dense).data())[0]);
+}
+
+void SimpleVector::getBlock(unsigned int pos, SiconosVector& vOut) const
+{
+  unsigned int end = vOut.size();
+  if ((pos + end) > sizeV)
+    SiconosVectorException::selfThrow("SimpleVector::getBlock(pos,vOut): vOut size+pos is out of range.");
+
+  if (vOut.isBlock())
+    SiconosVectorException::selfThrow("SimpleVector::getBlock(pos,vOut) failed: not yet implemented for vOut being a BlockVector.");
+
+  if (num == 1)
+    *(vOut.getDensePtr()) = project((*vect.Dense), ublas::range(pos, pos + end));
+  else
+    *(vOut.getSparsePtr()) = project((*vect.Sparse), ublas::range(pos, pos + end));
+}
+
+void SimpleVector::zero()
+{
+  if (num == 1)
+    atlas::set(0.0, *vect.Dense);
+
+  else //if(num==4)
+    *vect.Sparse *= 0.0;
+}
+
+void SimpleVector::resize(unsigned int n, bool preserve)
+{
+  sizeV = n;
+  if (num == 1)
+    (vect.Dense)->resize(n, preserve);
+  if (num == 4)
+    (vect.Sparse)->resize(n, preserve);
+}
+
+const double SimpleVector::normInf() const
+{
+  if (num == 1)
+    return norm_inf(*vect.Dense);
+  else //if(num==4)
+    return norm_inf(*vect.Sparse);
+}
+
+
+const double SimpleVector::norm2() const
+{
+  if (num == 1)
+    return ublas::norm_2(*vect.Dense);
+  else //if(num==4)
+    return ublas::norm_2(*vect.Sparse);
+}
+
 void SimpleVector::display()const
 {
   std::cout << "vect: " ;
@@ -288,7 +266,7 @@ void SimpleVector::fill(double value)
     atlas::set(value, *vect.Dense);
 }
 
-std::string SimpleVector::toString() const
+const std::string SimpleVector::toString() const
 {
   std::stringstream sstr;
   std::string s;
@@ -304,9 +282,7 @@ std::string SimpleVector::toString() const
   return s;
 }
 
-/***************************** OPERATORS ******************************/
-
-double SimpleVector::getValue(unsigned int row)
+const double SimpleVector::getValue(unsigned int row)
 {
   if (num == 1)
     return (*vect.Dense)(row);
@@ -322,12 +298,70 @@ void SimpleVector::setValue(unsigned int row, double value)
     (*vect.Sparse)(row) = value;
 }
 
-void SimpleVector::setBlock(unsigned int index, const SimpleVector& m)
+void SimpleVector::setBlock(unsigned int index, const SiconosVector& m)
 {
+  if (num != 1) SiconosVectorException::selfThrow("SimpleVector::setBlock : vector should be dense");
   if ((index + m.size()) > size()) SiconosVectorException::selfThrow("SimpleVector::setBlock : invalid ranges");
-  if ((num != 1) || (m.getNum() != 1)) SiconosVectorException::selfThrow("SimpleVector::setBlock : vectors should be dense");
 
-  ublas::subrange(*vect.Dense, index, index + m.size()) = m.getDense(0);
+  if (!m.isBlock()) // m a SimpleVector ...
+  {
+    if (m.getNum() != 1) SiconosVectorException::selfThrow("SimpleVector::setBlock : vectors should be dense");
+    ublas::subrange(*vect.Dense, index, index + m.size()) = *m.getDensePtr();
+  }
+  else // m a BlockVector
+  {
+    ConstBlockVectIterator it;
+    unsigned int pos = index;
+    for (it = m.begin(); it != m.end(); ++it)
+    {
+      setBlock(pos, **it);
+      pos += (*it)->size();
+    }
+  }
+}
+
+void SimpleVector::addBlock(unsigned int index, const SiconosVector& m)
+{
+  if (num != 1) SiconosVectorException::selfThrow("SimpleVector::addBlock : vector should be dense");
+  if ((index + m.size()) > size()) SiconosVectorException::selfThrow("SimpleVector::addBlock : invalid ranges");
+
+  if (!m.isBlock()) // m a SimpleVector ...
+  {
+    if (m.getNum() != 1) SiconosVectorException::selfThrow("SimpleVector::addBlock : vectors should be dense");
+    ublas::subrange(*vect.Dense, index, index + m.size()) += *m.getDensePtr();
+  }
+  else // m a BlockVector
+  {
+    ConstBlockVectIterator it;
+    unsigned int pos = index;
+    for (it = m.begin(); it != m.end(); ++it)
+    {
+      addBlock(pos, **it);
+      pos += (*it)->size();
+    }
+  }
+}
+
+void SimpleVector::subBlock(unsigned int index, const SiconosVector& m)
+{
+  if (num != 1) SiconosVectorException::selfThrow("SimpleVector::subBlock : vector should be dense");
+  if ((index + m.size()) > size()) SiconosVectorException::selfThrow("SimpleVector::subBlock : invalid ranges");
+
+  if (!m.isBlock()) // m a SimpleVector ...
+  {
+    if (m.getNum() != 1) SiconosVectorException::selfThrow("SimpleVector::subBlock : vectors should be dense");
+    ublas::subrange(*vect.Dense, index, index + m.size()) -= *m.getDensePtr();
+  }
+  else // m a BlockVector
+  {
+    ConstBlockVectIterator it;
+    unsigned int pos = index;
+    for (it = m.begin(); it != m.end(); ++it)
+    {
+      subBlock(pos, **it);
+      pos += (*it)->size();
+    }
+  }
 }
 
 double& SimpleVector::operator()(unsigned int row)
@@ -338,7 +372,7 @@ double& SimpleVector::operator()(unsigned int row)
     return (*vect.Sparse)(row).ref();
 }
 
-double SimpleVector::operator()(unsigned int row)const
+const double SimpleVector::operator()(unsigned int row)const
 {
   double d = 0;
   switch (num)
@@ -358,31 +392,47 @@ double SimpleVector::operator()(unsigned int row)const
 
 SimpleVector& SimpleVector::operator = (const SiconosVector& m)
 {
-  switch (num)
+  if (!m.isBlock())
   {
-  case 1:
-    switch (m.getNum())
+    switch (num)
     {
     case 1:
-      atlas::copy(*m.getDensePtr(), *vect.Dense);
+      switch (m.getNum())
+      {
+      case 1:
+        atlas::copy(*m.getDensePtr(), *vect.Dense);
+        break;
+      case 4:
+        *vect.Dense = *m.getSparsePtr();
+        break;
+      default:
+        SiconosVectorException::selfThrow("SimpleVector::operator = : invalid type given");
+        break;
+      }
       break;
     case 4:
-      *vect.Dense = *m.getSparsePtr();
+      if (m.getNum() == 4)
+        *vect.Sparse = *m.getSparsePtr();
+      else
+        SiconosVectorException::selfThrow("SimpleVector::operator = : can not set sparse = dense.");
       break;
     default:
       SiconosVectorException::selfThrow("SimpleVector::operator = : invalid type given");
       break;
     }
-    break;
-  case 4:
-    if (m.getNum() == 4)
-      *vect.Sparse = *m.getSparsePtr();
-    else
-      SiconosVectorException::selfThrow("SimpleVector::operator = : can not set sparse = dense.");
-    break;
-  default:
-    SiconosVectorException::selfThrow("SimpleVector::operator = : invalid type given");
-    break;
+  }
+  else // m a BlockVector: element by element copy ...
+  {
+    if (sizeV != m.size())
+      SiconosVectorException::selfThrow("SimpleVector::operator = failed: inconsistent sizes.");
+
+    ConstBlockVectIterator it;
+    unsigned int pos = 0;
+    for (it = m.begin(); it != m.end(); ++it)
+    {
+      setBlock(pos, **it);
+      pos += (*it)->size();
+    }
   }
   return *this;
 }
@@ -446,60 +496,94 @@ bool operator == (const SiconosVector &m, const SiconosVector &x)
 
 SimpleVector& SimpleVector::operator += (const SiconosVector& m)
 {
-  switch (num)
+  if (!m.isBlock()) // if m is not a BlockVector
   {
-  case 1:
-    switch (m.getNum())
+    unsigned int numM = m.getNum();
+    switch (num)
     {
     case 1:
-      atlas::xpy(*m.getDensePtr(), *vect.Dense);
+      switch (numM)
+      {
+      case 1:
+        *vect.Dense += *m.getDensePtr();
+        break;
+      case 4:
+        *vect.Dense += *m.getSparsePtr();
+        break;
+      default:
+        SiconosVectorException::selfThrow("SimpleVector::operator += : invalid type given");
+        break;
+      }
       break;
     case 4:
-      *vect.Dense += *m.getSparsePtr();
+      if (numM == 4)
+        *vect.Sparse += *m.getSparsePtr();
+      else SiconosVectorException::selfThrow("SimpleVector::operator += : can not add a dense to a sparse.");
       break;
     default:
       SiconosVectorException::selfThrow("SimpleVector::operator += : invalid type given");
       break;
     }
-    break;
-  case 4:
-    if (m.getNum() == 4)
-      *vect.Sparse += *m.getSparsePtr();
-    else SiconosVectorException::selfThrow("SimpleVector::operator += : can not add a dense to a sparse.");
-    break;
-  default:
-    SiconosVectorException::selfThrow("SimpleVector::operator += : invalid type given");
-    break;
+  }
+  else // m a BlockVector: element by element copy ...
+  {
+    if (sizeV != m.size())
+      SiconosVectorException::selfThrow("SimpleVector::operator += failed: inconsistent sizes.");
+
+    ConstBlockVectIterator it;
+    unsigned int pos = 0;
+    for (it = m.begin(); it != m.end(); ++it)
+    {
+      addBlock(pos, **it);
+      pos += (*it)->size();
+    }
   }
   return *this;
 }
 
 SimpleVector& SimpleVector::operator -= (const SiconosVector& m)
 {
-  switch (num)
+  if (!m.isBlock()) // if m is not a BlockVector
   {
-  case 1:
-    switch (m.getNum())
+    unsigned int numM = m.getNum();
+    switch (num)
     {
     case 1:
-      atlas::axpy(-1.0, *m.getDensePtr(), *vect.Dense);
+      switch (numM)
+      {
+      case 1:
+        *vect.Dense -= *m.getDensePtr();
+        break;
+      case 4:
+        *vect.Dense -= *m.getSparsePtr();
+        break;
+      default:
+        SiconosVectorException::selfThrow("SimpleVector::operator -= : invalid type given");
+        break;
+      }
       break;
     case 4:
-      *vect.Dense -= *m.getSparsePtr();
+      if (numM == 4)
+        *vect.Sparse -= *m.getSparsePtr();
+      else SiconosVectorException::selfThrow("SimpleVector::operator -= : can not sub a dense to a sparse.");
       break;
     default:
       SiconosVectorException::selfThrow("SimpleVector::operator -= : invalid type given");
       break;
     }
-    break;
-  case 4:
-    if (m.getNum() == 4)
-      *vect.Sparse -= *m.getSparsePtr();
-    else SiconosVectorException::selfThrow("SimpleVector::operator -= : can not sub a dense to a sparse.");
-    break;
-  default:
-    SiconosVectorException::selfThrow("SimpleVector::operator -= : invalid type given");
-    break;
+  }
+  else // m a BlockVector: element by element copy ...
+  {
+    if (sizeV != m.size())
+      SiconosVectorException::selfThrow("SimpleVector::operator -= failed: inconsistent sizes.");
+
+    ConstBlockVectIterator it;
+    unsigned int pos = 0;
+    for (it = m.begin(); it != m.end(); ++it)
+    {
+      subBlock(pos, **it);
+      pos += (*it)->size();
+    }
   }
   return *this;
 }
@@ -509,7 +593,7 @@ SimpleVector& SimpleVector::operator *= (double m)
   switch (num)
   {
   case 1:
-    atlas::scal(m, *vect.Dense);
+    *vect.Dense *= m;
     break;
   case 4:
     *vect.Sparse *= m;
@@ -526,7 +610,7 @@ SimpleVector& SimpleVector::operator *= (int m)
   switch (num)
   {
   case 1:
-    atlas::scal((double)m, *vect.Dense);
+    *vect.Dense *= m;
     break;
   case 4:
     *vect.Sparse *= m;
@@ -543,7 +627,7 @@ SimpleVector& SimpleVector::operator /= (double m)
   switch (num)
   {
   case 1:
-    atlas::scal(1.0 / m, *vect.Dense);
+    *vect.Dense /= m;
     break;
   case 4:
     *vect.Sparse /= m;
@@ -560,7 +644,7 @@ SimpleVector& SimpleVector::operator /= (int m)
   switch (num)
   {
   case 1:
-    atlas::scal(1.0 / m, *vect.Dense);
+    *vect.Dense /= m;
     break;
   case 4:
     *vect.Sparse /= m;
@@ -574,8 +658,11 @@ SimpleVector& SimpleVector::operator /= (int m)
 
 const double inner_prod(const SiconosVector &x, const SiconosVector &m)
 {
+  if (x.isBlock() || m.isBlock())
+    SiconosVectorException::selfThrow("inner_prod: not implemented for BlockVectors.");
+
   if (x.size() != m.size())
-    SiconosVectorException::selfThrow("SimpleVector::inner_prod: inconsistent sizes");
+    SiconosVectorException::selfThrow("inner_prod: inconsistent sizes");
 
   unsigned int numM = m.getNum();
   unsigned int numX = x.getNum();
@@ -643,7 +730,7 @@ SimpleVector operator - (const SimpleVector &x, const SimpleVector &m)
     {
       // Copy m into p, scal p = -p and call xpy(x,p): p = x+p.
       DenseVect p = *m.getDensePtr();
-      atlas::scal(-1.0, p);
+      p *= -1.0;
       atlas::xpy(*x.getDensePtr(), p);
       return p;
     }
@@ -672,31 +759,36 @@ SimpleVector operator - (const SimpleVector &x, const SimpleVector &m)
 // outer_prod(v,w) = trans(v)*w
 SimpleMatrix outer_prod(const SiconosVector &x, const SiconosVector& m)
 {
-  DenseMat p;
+  if (x.isBlock() || m.isBlock())
+    SiconosVectorException::selfThrow("outer_prod: not implemented for BlockVectors.");
   unsigned int numM = m.getNum();
   unsigned int numX = x.getNum();
   if (numM == 1)
   {
     if (numX == 1)
-      p = outer_prod(*x.getDensePtr(), *m.getDensePtr());
-    else if (numX == 4)
-      p = outer_prod(*x.getSparsePtr(), *m.getDensePtr());
-    else
-      SiconosVectorException::selfThrow("vector function outer_prod : invalid type of vector");
+    {
+      DenseMat p = outer_prod(*x.getDensePtr(), *m.getDensePtr());
+      return p;
+    }
+    else// if(numX == 4)
+    {
+      DenseMat p = outer_prod(*x.getSparsePtr(), *m.getDensePtr());
+      return p;
+    }
   }
-  else if (numM == 4)
+  else // if(numM == 4)
   {
     if (numX == 1)
-      p = outer_prod(*x.getDensePtr(), *m.getSparsePtr());
-    else if (numX == 4)
-      p = outer_prod(*x.getSparsePtr(), *m.getSparsePtr());
-    else
-      SiconosVectorException::selfThrow("vector function outer_prod : invalid type of vector");
+    {
+      DenseMat p = outer_prod(*x.getDensePtr(), *m.getSparsePtr());
+      return p;
+    }
+    else //if(numX == 4)
+    {
+      DenseMat p = outer_prod(*x.getSparsePtr(), *m.getSparsePtr());
+      return p;
+    }
   }
-  else
-    SiconosVectorException::selfThrow("vector function outer_prod : invalid type of vector");
-
-  return p;
 }
 
 SimpleVector operator * (const SimpleVector &m, double d)
@@ -891,10 +983,7 @@ void SimpleVector::scal(double a, const SiconosVector& x)
   if (x.getNum() == num)
   {
     if (num == 1)
-    {
-      *this = x;
-      atlas::scal(a, *vect.Dense);
-    }
+      axpby(a, x, 0.0, *this);
     else
       *vect.Sparse = a**x.getSparsePtr();
   }

@@ -279,12 +279,14 @@ void LagrangianLinearR::computeInput(double time, const unsigned int level)
   // get lambda of the concerned interaction
   string name = "p" + toString<unsigned int>(level);
 
-  SiconosVector *lambda = interaction->getLambdaPtr(level);
+  SiconosVector *lambda = new SimpleVector(*interaction->getLambdaPtr(level));
   // compute p = Ht lambda
   SiconosMatrix * HT = new SimpleMatrix(*H);
   HT->trans();
-  *data[name] += prod(*HT, *lambda);
+  //  *data[name] += prod(*HT,*lambda);
+  prod(*HT, *lambda, *data[name]);
   delete HT;
+  delete lambda;
   //gemv(CblasTrans,1.0,*H,*lambda,1.0, *data[name]); => not yet implemented for BlockVectors.
 }
 

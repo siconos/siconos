@@ -74,6 +74,26 @@ private:
    */
   bool isPLUInversed;
 
+  /**  computes res = subA*x +res, subA being a submatrix of A (rows from startRow to startRow+sizeY and columns between startCol and startCol+sizeX).
+       If x is a block vector, it call the present function for all blocks.
+       \param a pointer to SiconosMatrix A
+       \param an int, sub-block position (startRow)
+       \param an int, sub-block position (startCol)
+       \param a pointer to a SiconosVector, x
+       \param a DenseVect, res.
+   */
+  friend void private_addprod(const SiconosMatrix *, unsigned int, unsigned int, const SiconosVector *, DenseVect&);
+
+  /**  computes y = subA*x, subA being a submatrix of A (all columns, and rows between start and start+sizeY).
+       If x is a block vector, it call the present function for all blocks.
+       \param a pointer to SiconosMatrix A
+       \param an int, sub-block position (start)
+       \param a pointer to a SiconosVector, x
+       \param a pointer to a SiconosVector, y
+
+   */
+  friend void private_prod(const SiconosMatrix *, unsigned int, const SiconosVector *, SiconosVector *);
+
 public:
   /***************************** CONSTRUCTORS ****************************/
 
@@ -86,12 +106,6 @@ public:
    *  \param SiconosMatrix
    */
   SimpleMatrix(const SiconosMatrix&);
-
-  /** copy and transpose constructor
-   *  \param a string: "trans"
-   *  \param SiconosMatrix
-   */
-  SimpleMatrix(const std::string&, const SiconosMatrix&);
 
   /** constructor with the type and the dimension of the Boost matrix
    *  \param 2 unsigned int (number of rows and columns)
@@ -482,56 +496,108 @@ public:
   */
   void resetLU();
 
+  /** computes scalar-matrix product. This = a*A
+      \param double, a
+      \param SiconosMatrix A
+  */
+  void scal(double, const SiconosMatrix&);
+
+  /** computes scalar-matrix product. This = a*A
+      \param int, a
+      \param SiconosMatrix A
+  */
+  void scal(int, const SiconosMatrix&);
+
   /**: A==B when (A-B).normInf()<tolerance
-   * \param 2 SiconosMatrix
+   * \param SiconosMatrix A
+   * \param SiconosMatrix B
    * \return a boolean
    */
   friend bool operator == (const SiconosMatrix&, const SiconosMatrix&);
 
-  /** Addition of two matrices
-   *  \param 2 SiconosMatrix
-   *  \return a SimpleMatrix
-   *  \exception SiconosMatrixException, if the sizes are incompatible
-   *  \exception SiconosMatrixException, if the two matrices have different types, in this case use function add
+  /** Addition of two matrices of the same type, C = A+B
+   * \param SiconosMatrix A
+   * \param SiconosMatrix B
+   * \return a SimpleMatrix C
    */
-  friend SimpleMatrix operator +(const SiconosMatrix&, const SiconosMatrix&);
+  friend const SimpleMatrix operator +(const SiconosMatrix&, const SiconosMatrix&);
 
-  /** subtraction of two matrices
-   *  \param 2 SiconosMatrix
-   *  \return a SimpleMatrix
-   *  \exception SiconosMatrixException, if the sizes are incompatible
-   *  \exception SiconosMatrixException, if the two matrices have different types, in this case use function sub
+  /** Addition of two matrices (possibly of different type) C = A+B
+   * \param SiconosMatrix A
+   * \param SiconosMatrix B
+   * \return a SimpleMatrix C
    */
-  friend SimpleMatrix operator - (const SiconosMatrix&, const SiconosMatrix&);
+  friend const SimpleMatrix add(const SiconosMatrix&, const SiconosMatrix&);
 
-  /** multiplication of two matrices
-   *  \param 2 SiconosMatrix
-   *  \return a SimpleMatrix
-   *  \exception SiconosMatrixException, if the two matrices have different types, in this case use function prod
+  /** Addition of two matrices C = A+B
+   *  \param SiconosMatrix A (in)
+   *  \param SiconosMatrix B (in)
+   *  \param SiconosMatrix C (in-out)
    */
-  friend SimpleMatrix operator *(const SiconosMatrix&, const SiconosMatrix&);
+  friend void add(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&);
+
+  /** Subtraction of two matrices of the same type, C = A-B
+   * \param SiconosMatrix A
+   * \param SiconosMatrix B
+   * \return a SimpleMatrix C
+   */
+  friend const SimpleMatrix operator -(const SiconosMatrix&, const SiconosMatrix&);
+
+  /** Subtraction of two matrices (possibly of different type) C = A-B
+   * \param SiconosMatrix A
+   * \param SiconosMatrix B
+   * \return a SimpleMatrix C
+   */
+  friend const SimpleMatrix sub(const SiconosMatrix&, const SiconosMatrix&);
+
+  /** Subtraction of two matrices C = A-B
+   *  \param SiconosMatrix A (in)
+   *  \param SiconosMatrix B (in)
+   *  \param SiconosMatrix C (in-out)
+   */
+  friend void sub(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&);
+
+  /** product of two matrices, C = A*B
+   *  \param SiconosMatrix A (in)
+   *  \param SiconosMatrix B (in)
+   *  \return SimpleMatrix C
+   */
+  friend const SimpleMatrix operator *(const SiconosMatrix&, const SiconosMatrix&);
+
+  /** product of two matrices, C = A*B
+   *  \param SiconosMatrix A (in)
+   *  \param SiconosMatrix B (in)
+   *  \return SimpleMatrix C
+   */
+  friend const SimpleMatrix prod(const SiconosMatrix&, const SiconosMatrix&);
+
+  /** prod(A, B, C) computes C = A*B in an optimal way.
+      \param a SiconosMatrix, A (in)
+      \param a SiconosMatrix, B (in)
+      \param a SiconosMatrix, C (in-out)
+  */
+  friend void prod(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&);
 
   /** multiplication of a matrix by a double
    *  \param a SiconosMatrix
    *  \param a double
    *  \return a SimpleMatrix
    */
-  friend SimpleMatrix operator * (const SiconosMatrix&, double);
-
+  friend const SimpleMatrix operator * (const SiconosMatrix&, double);
 
   /** multiplication of a matrix by an int
    *  \param a SiconosMatrix
    *  \param an int
    *  \return a SimpleMatrix
    */
-  friend SimpleMatrix operator *(const SiconosMatrix&, int);
+  friend const SimpleMatrix operator *(const SiconosMatrix&, int);
 
   /** multiplication of a matrix by a double
    *  \param a double
    *  \param a SiconosMatrix
    *  \return a SimpleMatrix
    */
-  friend SimpleMatrix operator * (double , const SiconosMatrix&);
+  friend const SimpleMatrix operator * (double , const SiconosMatrix&);
 
 
   /** multiplication of a matrix by an int
@@ -539,58 +605,50 @@ public:
    *  \param a SiconosMatrix
    *  \return a SimpleMatrix
    */
-  friend SimpleMatrix operator *(int, const SiconosMatrix&);
+  friend const SimpleMatrix operator *(int, const SiconosMatrix&);
 
   /** division of the matrix by a double
    *  \param a SiconosMatrix
    *  \param a double
    *  \return a SimpleMatrix
-   *  \exception SiconosMatrixException, if the double d = 0
    */
-  friend SimpleMatrix operator /(const SiconosMatrix&, double);
+  friend const SimpleMatrix operator /(const SiconosMatrix&, double);
 
   /** division of the matrix by an int
    *  \param a SiconosMatrix
    *  \param an int
    *  \return a SimpleMatrix
-   *  \exception SiconosMatrixException, if the int d = 0
    */
-  friend SimpleMatrix operator / (const SiconosMatrix&, int);
+  friend const SimpleMatrix operator / (const SiconosMatrix&, int);
 
-  /** Addition of two matrices
-   *  \param 2 SiconosMatrix
-   *  \return a SimpleMatrix
-   *  \exception SiconosMatrixException, if the sizes are incompatible
-   */
-  friend SimpleMatrix add(const SiconosMatrix&, const SiconosMatrix&);
-
-  /** subtraction of two matrices
-   *  \param 2 SiconosMatrix
-   *  \return a SimpleMatrix
-   *  \exception SiconosMatrixException, if the sizes are incompatible
-   */
-  friend SimpleMatrix sub(const SiconosMatrix&, const SiconosMatrix&);
-
-  /** multiplication of two matrices
-   *  \param 2 SiconosMatrix
-   *  \return a SimpleMatrix
-   */
-  friend SimpleMatrix prod(const SiconosMatrix&, const SiconosMatrix&);
 
   /** compute the power of the matrix (!)
    *  \return a SimpleMatrix
-   *  \exception SiconosMatrixException, if the power < 0
    */
-  friend SimpleMatrix pow(const SimpleMatrix&, unsigned int);
+  friend const SimpleMatrix pow(const SimpleMatrix&, unsigned int);
 
   /** compute the product matrix-vector
    *  \return a SimpleVector
    */
-  friend SimpleVector prod(const SiconosMatrix&, const SiconosVector&);
+  friend const SimpleVector prod(const SiconosMatrix&, const SiconosVector&);
+
+  /** prod(A, x, y) computes y = A*x
+      \param a SiconosMatrix, A (in)
+      \param a SiconosVector, x (in)
+      \param a SiconosVector, y (in-out)
+  */
+  friend void prod(const SiconosMatrix&, const SiconosVector&, SiconosVector&);
+
+  /** prod(A, x, y) computes y = A*x, using atlas::gemv - Reserved to dense matrices and vectors.
+      \param a SiconosMatrix, A (in)
+      \param a SiconosVector, x (in)
+      \param a SiconosVector, y (in-out)
+  */
+  friend void gemv(const SiconosMatrix&, const SiconosVector&, SiconosVector&);
 
   /** gemv(transA, a, A, x, b, y) computes y = a*op(A)*x + b*y
       with transX = CblasNoTrans (op(X) = X), CblasTrans (op(X) = transpose(X)), CblasConjTrans (op(X) = conj(X))
-      This function encapsulates atlas::gemv.
+      This function encapsulates atlas::gemv. Reserved to dense matrices and vectors.
       \param CBLAS_TRANSPOSE, op for A
       \param a double, a (in)
       \param a SiconosMatrix, A (in)
@@ -601,7 +659,7 @@ public:
   friend void gemv(CBLAS_TRANSPOSE, double, const SiconosMatrix&, const SiconosVector&, double, SiconosVector&);
 
   /** gemv(a, A, x, b, y) computes y = a*A*x+ b*y
-      This function encapsulates atlas::gemm.
+      This function encapsulates atlas::gemv. Reserved to dense matrices and vectors.
       \param a double, a (in)
       \param a SiconosMatrix, A (in)
       \param a SiconosVector, x (in)
@@ -610,16 +668,9 @@ public:
   */
   friend void gemv(double, const SiconosMatrix&, const SiconosVector&, double, SiconosVector&);
 
-  /** prod(A, x, y) computes y = A*x
-      \param a SiconosMatrix, A (in)
-      \param a SiconosVector, x (in)
-      \param a SiconosVector, y (in-out)
-  */
-  friend void prod(const SiconosMatrix&, const SiconosVector&, SiconosVector&);
-
   /** gemm(transA, transB, a, A, B, b, C) computes C = a*op(A)*op(B) + b*C
       with transX = CblasNoTrans (op(X) = X), CblasTrans (op(X) = transpose(X)), CblasConjTrans (op(X) = conj(X))
-      This function encapsulates atlas::gemm.
+      This function encapsulates atlas::gemm. Reserved to dense matrices.
       \param CBLAS_TRANSPOSE, op for A
       \param CBLAS_TRANSPOSE, op for B
       \param a double, a (in)
@@ -631,7 +682,7 @@ public:
   friend void gemm(const CBLAS_TRANSPOSE, const CBLAS_TRANSPOSE, double, const SiconosMatrix&, const SiconosMatrix&, double, SiconosMatrix&);
 
   /** gemm(a, A, B, b, C) computes C = a*A*B+ b*C
-      This function encapsulates atlas::gemm.
+      This function encapsulates atlas::gemm. Reserved to dense matrices.
       \param a double, a (in)
       \param a SiconosMatrix, A (in)
       \param a SiconosMatrix, B (in)
@@ -640,13 +691,14 @@ public:
   */
   friend void gemm(double, const SiconosMatrix&, const SiconosMatrix&, double, SiconosMatrix&);
 
-  /** prod(A, B, C) computes C = A*B
-      This function encapsulates atlas::gemm
+  /** gemm(A, B, C) computes C = A*B
+      This function encapsulates atlas::gemm. Reserved to dense matrices.
       \param a SiconosMatrix, A (in)
       \param a SiconosMatrix, B (in)
       \param a SiconosMatrix, C (in-out)
   */
-  friend void prod(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&);
+  friend void gemm(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&);
+
 
 };
 #endif

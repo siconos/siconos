@@ -15,6 +15,34 @@ Index SiconosVector::getTabIndex() const
   return tmp;
 }
 
+BlockVectIterator SiconosVector::begin()
+{
+  SiconosVectorException::selfThrow("SiconosVector::begin(): reserved to BlockVectors");
+  BlockVectIterator it;
+  return it;
+};
+
+BlockVectIterator SiconosVector::end()
+{
+  SiconosVectorException::selfThrow("SiconosVector::end(): reserved to BlockVectors");
+  BlockVectIterator it;
+  return it;
+};
+
+ConstBlockVectIterator SiconosVector::begin() const
+{
+  SiconosVectorException::selfThrow("SiconosVector::begin(): reserved to BlockVectors");
+  ConstBlockVectIterator it;
+  return it;
+};
+
+ConstBlockVectIterator SiconosVector::end() const
+{
+  SiconosVectorException::selfThrow("SiconosVector::end(): reserved to BlockVectors");
+  ConstBlockVectIterator it;
+  return it;
+};
+
 void SiconosVector::add(const  SiconosVector&)
 {
   SiconosVectorException::selfThrow("SiconosVector::add() : not implemented for this type of vector (Simple?) reserved to BlockVectors.");

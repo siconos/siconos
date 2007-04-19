@@ -7,9 +7,9 @@ Siconos is a free (GNU license) software, dedicated to modeling, simulation and 
 
 This manual aims at giving user a short overview of the software functionnalities. It is also supposed to provide some guidelines on how
 to build its own simulation. \n
-However, this manual does not give a full description of all the classes, functions etc of Siconos. For this, you need to check directly
+However, this manual does not give a full description of all the classes, functions \e etc of Siconos. For this, you need to check directly
 in the <a href="http://siconos.gforge.inria.fr/Doxygen/index.html"> Siconos Doxygen Documentation</a>. \n
-You can also check the Related Pages list on the left of this page.
+You can also check the Related Pages list on the left of this page for specific items.
 
 \section GScontents Contents:
 

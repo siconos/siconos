@@ -22,7 +22,7 @@ const double omega = 1.4;
 const double g = 10;
 const double m = 1;
 
-extern "C" void FExt(unsigned int sizeOfq, double time, double *fExt, double* param)
+extern "C" void FExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
   fExt[0] = sin(omega * time);
   fExt[1] = -m * g;

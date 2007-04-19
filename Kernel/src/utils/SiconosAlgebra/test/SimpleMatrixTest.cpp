@@ -975,7 +975,6 @@ void SimpleMatrixTest::testOperators6()
   for (signed i = 0; i < signed(B->size1()); ++ i)
     for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(B->size2())); ++ j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == ((*B)(i, j) + (*B)(i, j)), true);
-
   *res = *tmp - *tmp2;
   for (signed i = 0; i < signed(B->size1()); ++ i)
     for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(B->size2())); ++ j)

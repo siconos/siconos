@@ -20,27 +20,13 @@
 
 // ==== Dynamical System ====
 
-/** DynamicalSystem plug-in to compute f(x,t) - id="f".
- *  @param sizeOfX : the size of the vector x
- *  @param time : current time
- *  @param x : the pointer to the first element of the vector x
- *  @param[in,out] f : the pointer to the first element of the vector f(x,t)
- *  @param[in,out] param : a vector of user-defined parameters
- */
-extern "C" void computeF(unsigned int sizeOfX, double time, const double* x, double* f, double* z)
+extern "C" void computeF(double time, unsigned int sizeOfX, const double* x, double* f, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < sizeOfX; i++)
     f[i] = time * x[i];
 }
 
-/** DynamicalSystem plug-in to compute the gradient of f(x,t) with respect to the state: \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$ - id = "jacobianXF"
- * @param sizeOfX : size of vector x
- * @param time : current time
- * @param x : pointer to the first element of x
- * @param[in,out] jacob : pointer to the first element of jacobianXF matrix
- * @param[in,out] param : a vector of user-defined parameters
- */
-extern "C" void computeJacobianXF(unsigned int sizeOfX, double time, const double *x, double *jacob, double* z)
+extern "C" void computeJacobianXF(double time, unsigned int sizeOfX, const double* x, double* jacob, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < sizeOfX * sizeOfX; i++)
     jacob[i] = i + 1;
@@ -48,16 +34,7 @@ extern "C" void computeJacobianXF(unsigned int sizeOfX, double time, const doubl
 
 // ===== Lagrangian DS  =====
 
-// Plugins for Fext, Fint, NNL (vectors), Mass, JacobianQNNL, JacobianVelocityNNL,
-// JacobianQFint and JacobianVelocityFint (matrices)
-
-/** LagrangianDS plug-in to compute mass(q,t) - id = "mass"
- * @param sizeOfq : size of vector q
- * @param q : pointer to the first element of q
- * @param[in,out] mass : pointer to the first element of mass
- * @param[in,out] param : a vector of user-defined parameters
- */
-extern "C" void computeMass(unsigned int sizeOfq, const double *q, double *mass, double* z)
+extern "C" void computeMass(unsigned int sizeOfq, const double *q, double *mass, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     mass[i] = 0;
@@ -66,124 +43,58 @@ extern "C" void computeMass(unsigned int sizeOfq, const double *q, double *mass,
   mass[8] = 3;
 }
 
-/** LagrangianDS plug-in to compute internal forces \f$F_{int}(t,q,\dot q)\f$ - id = "fInt"
- * @param sizeOfq : size of vector q
- * @param time : current time
- * @param q : pointer to the first element of q
- * @param velocity : pointer to the first element of velocity
- * @param[in,out] fInt : pointer to the first element of fInt
- * @param[in,out] param  : a vector of user-defined parameters
- */
-extern "C" void computeFInt(unsigned int sizeOfq, double time, const double *q, const double *velocity, double *fInt, double * param)
+extern "C" void computeFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *fInt, unsigned int sizeZ, double * z)
 {
   for (unsigned int i = 0; i < sizeOfq; ++i)
     fInt[i] = i * q[i];
 }
 
-/** LagrangianDS plug-in to compute external forces \f$F_{Ext}(t)\f$, id = "fExt"
- * @param sizeOfq : size of vector q
- * @param time : current time
- * @param[in,out] fExt : pointer to the first element of fExt
- * @param[in,out] param : a vector of user-defined parameters
- */
-extern "C" void computeFExt(unsigned int sizeOfq, double time, double *fExt, double *param)
+extern "C" void computeFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeOfZ, double *z)
 {
   for (unsigned int i = 0; i < sizeOfq; ++i)
     fExt[i] = i * time;
 }
 
-/** LagrangianDS plug-in to compute \f$NNL(\dot q, q)\f$, id = "NNL"
- * @param sizeOfq : size of vector q
- * @param q : pointer to the first element of q
- * @param velocity : pointer to the first element of velocity
- * @param[in,out] NNL : pointer to the first element of NNL
- * @param[in,out] param  : a vector of user-defined parameters
- */
-extern "C" void computeNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, double *param)
+extern "C" void computeNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, unsigned int sizeOfZ, double *z)
 {
   for (unsigned int i = 0; i < sizeOfq; ++i)
     NNL[i] = i * q[i];
 }
 
-/** LagrangianDS plug-in to compute \f$\nabla_qF_{Int}(\dot q, q, t)\f$, id = "jacobianQFInt"
- * @param sizeOfq : size of vector q
- * @param time : current time
- * @param q : pointer to the first element of q
- * @param velocity : pointer to the first element of velocity
- * @param[in,out] jacob : pointer to the first element of the jacobian
- * @param[in,out] param  : a vector of user-defined parameters
- */
-extern "C" void computeJacobianQFInt(unsigned int sizeOfq, double time, const double *q, const double *velocity, double *jacob, double* z)
+extern "C" void computeJacobianQFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
 {
   for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];
 }
 
-/** LagrangianDS plug-in to compute \f$\nabla_{\dot q}F_{Int}(\dot q, q, t)\f$, id = "jacobianVelocityFInt"
- * @param sizeOfq : size of vector q
- * @param time : current time
- * @param q : pointer to the first element of q
- * @param velocity : pointer to the first element of velocity
- * @param[in,out] jacob : pointer to the first element of the jacobian
- * @param[in,out] param  : a vector of user-defined parameters
- */
-extern "C" void computeJacobianVelocityFInt(unsigned int sizeOfq, double time, const double *q, const double *velocity, double *jacob, double* z)
+extern "C" void computeJacobianVelocityFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
 {
   for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];
 }
 
-/** LagrangianDS plug-in to compute \f$\nabla_qNNL(\dot q, q)\f$, id = "jacobianQNNL"
- * @param sizeOfq : size of vector q
- * @param q : pointer to the first element of q
- * @param velocity : pointer to the first element of velocity
- * @param[in,out] jacob : pointer to the first element of the jacobian
- * @param[in,out] param  : a vector of user-defined parameters
- */
-extern "C" void computeJacobianQNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, double* z)
+extern "C" void computeJacobianQNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
 {
   for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];
 }
 
-/** LagrangianDS plug-in to compute \f$\nabla_{\dot q}NNL(\dot q, q)\f$, id = "jacobianVelocityNNL"
- * @param sizeOfq : size of vector q
- * @param q : pointer to the first element of q
- * @param velocity : pointer to the first element of velocity
- * @param[in,out] jacob : pointer to the first element of the jacobian
- * @param[in,out] param  : a vector of user-defined parameters
- */
-extern "C" void computeJacobianVelocityNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, double* z)
+extern "C" void computeJacobianVelocityNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
 {
   for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];
 }
 
 
-// ===== Linear DS  ====
+//==================  FirstOrderLinearDS ==================
 
-// Plugins for A, B (matrices), u and f. See LinearDS.h
-
-/** LinearDS plug-in to compute b(t), id = "b"
- * @param sizeOfB : size of vector b
- * @param time : current time
- * @param[in,out] b : pointer to the first element of b
- * @param[in,out] param  : a vector of user-defined parameters
- */
-extern "C" void computeB(unsigned int sizeOfB, double time, double* b, double *param)
+extern "C" void computeB(double time, unsigned int sizeOfB, double* b, unsigned int sizeOfZ, double *z)
 {
   for (unsigned int i = 0; i < sizeOfB; i++)
     b[i] = time * i ;
 
 }
-
-/** LinearDS plug-in to compute A(t), id = "A"
- * @param sizeOfA : size of square-matrix A
- * @param time : current time
- * @param[in,out] A : pointer to the first element of A
- * @param[in,out] param  : a vector of user-defined parameters
- */
-extern "C" void computeA(unsigned int  sizeOfA, double time, double* A, double *param)
+extern "C" void computeA(double time, unsigned int  sizeOfA, double* A, unsigned int sizeOfZ, double *z)
 {
   for (unsigned int j = 0; j < sizeOfA; j++)
   {
@@ -192,128 +103,52 @@ extern "C" void computeA(unsigned int  sizeOfA, double time, double* A, double *
   }
 }
 
-// ===== RELATIONS ====
-
-// === Lagrangian Relations ===
-
-// Scleronomous
-
-/** LagrangianR plug-in to compute h(q,z)
- * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
- * @param q : pointer to the first element of q
- * @param sizeY : size of vector y (ie of the interaction)
- * @param[in,out] y : pointer to the first element of y
- * @param sizeZ : size of vector z
- * @param[in,out] z : a vector of user-defined parameters
- */
+//==================  LagrangianScleronomousR ==================
 extern "C" void hSclero(unsigned int sizeDS, const double* q, unsigned int sizeY, double* y, unsigned int sizeZ, double* z)
 {
-  printf("Call of the function 'hSclero' of the default plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'hSclero' of the test plugin.\n");
 }
 
-/** LagrangianR plug-in to compute G0(q,z), gradient of h0 according to q
- * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
- * @param q : pointer to the first element of q
- * @param sizeY : size of vector y (ie of the interaction)
- * @param[in,out] G0 : pointer to the first element of G0 (sizeY X sizeDS matrix)
- * @param sizeZ : size of vector z
- * @param[in,out] param : a vector of user-defined parameters
- */
 extern "C" void G0Sclero(unsigned int sizeDS, const double* q, unsigned int sizeY, double* G0, unsigned int sizeZ, double* z)
 {
-  printf("Call of the function 'G0' of the default plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'G0' of the test plugin.\n");
 }
 
-// Rheonomous
+//==================  LagrangianRheonomousR ==================
 
-/** LagrangianRheonomousR plug-in to compute h(q,t,z).
- * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
- * @param q : pointer to the first element of q
- * @param time : current time
- * @param sizeY : size of vector y (ie of the intercation)
- * @param[in,out] y : pointer to the first element of y
- * @param sizeZ : size of vector z
- * @param[in,out] z : a vector of user-defined parameters
- */
 extern "C" void hRheo(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)
 {
-  printf("Call of the function 'hRheo' of the default plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'hRheo' of the test plugin.\n");
 }
 
-/** LagrangianRheonomousR plug-in to compute G0(q,t,z) gradient of h according to q
- * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
- * @param q : pointer to the first element of q
- * @param time : current time
- * @param sizeY : size of vector y (ie of the intercation)
- * @param[in,out] pointer to the first element of G0
- * @param sizeZ : size of vector z
- * @param[in,out] z : a vector of user-defined parameters
- */
 extern "C" void G0Rheo(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)
 {
-  printf("Call of the function 'G0Rheo' of the default plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'G0Rheo' of the test plugin.\n");
 }
 
-
-/** LagrangianRheonomousR plug-in to compute hDot(q,t,z)
- * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
- * @param q : pointer to the first element of q
- * @param time : current time
- * @param sizeY : size of vector y (ie of the intercation)
- * @param[in,out] pointer to the first element of hDot
- * @param sizeZ : size of vector z
- * @param[in,out] z : a vector of user-defined parameters
- */
 extern "C" void hDot(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)
 {
-  printf("Call of the function 'hDot' of the default plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'hDot' of the test plugin.\n");
 }
 
-// Compliant
+//==================  LagrangianCompliantR ==================
 
-/** LagrangianR plug-in to compute h(q,lambda,z)
- * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
- * @param q : pointer to the first element of q
- * @param sizeY : size of vector y (ie of lambda and of the interaction)
- * @param lambda : pointer to lambda of the interaction
- * @param[in,out] y : pointer to the first element of y
- * @param sizeZ : size of vector z.
- * @param[in,out] z : a vector of user-defined parameters
- */
 extern "C" void hCompl(unsigned int, const double*, unsigned int, const double*, double*, unsigned int, double*)
 {
-  printf("Call of the function 'hCompl' of the default plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'hCompl' of the test plugin.\n");
 }
 
-/** LagrangianR plug-in to compute G0(q,lambda,z), gradient of hCompl according to q.
- * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
- * @param q : pointer to the first element of q
- * @param sizeY : size of vector y (ie of lambda and of the interaction)
- * @param lambda : pointer to lambda of the interaction
- * @param[in,out] G0 : pointer to the first element of G0
- * @param sizeZ : size of vector z.
- * @param[in,out] z : a vector of user-defined parameters
- */
 extern "C" void G0Compl(unsigned int, const double*, unsigned int, const double*, double*, unsigned int, double*)
 {
-  printf("Call of the function 'G0Compl' of the default plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'G0Compl' of the test plugin.\n");
 }
 
-/** LagrangianR plug-in to compute G1(q,lambda), gradient of hCompl according to lambda.
- * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
- * @param q : pointer to the first element of q
- * @param sizeY : size of vector y (ie of lambda and of the interaction)
- * @param lambda : pointer to lambda of the interaction
- * @param[in,out] G1 : pointer to the first element of G1
- * @param sizeZ : size of vector z.
- * @param[in,out] z : a vector of user-defined parameters
- */
 extern "C" void G1Compl(unsigned int, const double*, unsigned int, const double*, double*, unsigned int, double*)
 {
-  printf("Call of the function 'G1Compl' of the default plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'G1Compl' of the test plugin.\n");
 }
 
-// ========== FirstOrderRelations ==========
+// ========== FirstOrderR ==========
 
 extern "C" void y(unsigned int, const double*, double, unsigned int, const double*, double*, unsigned int, double*)
 {
@@ -337,6 +172,8 @@ extern "C" void Jg0(unsigned int, const double*, double, unsigned int, double*, 
 {
   printf("Warning: call of the function 'Jg0' of the test plugin.\n");
 }
+
+//==================  FirstOrderLinearR ==================
 
 extern "C" void C(double, unsigned int, unsigned int, double*, unsigned int, double*)
 {

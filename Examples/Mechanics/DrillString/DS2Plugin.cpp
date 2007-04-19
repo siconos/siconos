@@ -41,7 +41,7 @@ const double Jl = 0.0414;
 
 // Plugins for Fext, Fint, NNL (vectors), Mass, JacobianQNNL, JacobianVelocityNNL,
 // JacobianQFint and JacobianVelocityFint (matrices)
-extern "C" void FExt(unsigned int sizeOfq, double time, double *fExt, double* param)
+extern "C" void FExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
   fExt[0] = km * u;
   fExt[1] = 0;
@@ -49,7 +49,7 @@ extern "C" void FExt(unsigned int sizeOfq, double time, double *fExt, double* pa
   fExt[3] = 0;
 }
 
-extern "C" void FInt(unsigned int sizeOfq, double time, const double *q, const double *vel, double *fInt, double * param)
+extern "C" void FInt(double time, unsigned int sizeOfq, const double *q, const double *vel, double *fInt, unsigned int sizeZ, double * z)
 {
   fInt[0] = DTsu + Dbu * fabs(vel[0]);
   fInt[1] = 0;
@@ -57,7 +57,7 @@ extern "C" void FInt(unsigned int sizeOfq, double time, const double *q, const d
   fInt[3] = ((Tsl - Tcl) * exp(-pow(fabs(vel[1] / omegasl), deltasl)) + Tcl);
 }
 
-extern "C" void NNL(unsigned int sizeOfq, const double *q, const double *vel, double *NNL, double *param)
+extern "C" void NNL(unsigned int sizeOfq, const double *q, const double *vel, double *NNL, unsigned int sizeZ, double *z)
 {
   NNL[0] = bu * vel[0] + kth * q[0] - kth * q[1];
   NNL[1] = bl * vel[1] - kth * q[0] + kth * q[1];

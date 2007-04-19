@@ -20,34 +20,38 @@
 #include <stdio.h>
 #include <math.h>
 
-extern double gravity;
-extern double m1;
-extern double l1;
+// extern double gravity;
+// extern double m1;
+// extern double l1;
+
+double gravity = 10.0;
+double m1 = 1.0;
+double m2 = 1.0 ;
+double l1 = 1.0 ;
+double l2 = 1.0 ;
 
 
 
-
-
-//extern "C" void mass(unsigned int sizeOfq, const double *q, double *mass, double* param)
+//extern "C" void mass(unsigned int sizeOfq, const double *q, double *mass, unsigned int sizeZ, double* z)
 //{
 //  mass[0]= (m1*l1);
 //}
 
-extern "C" void FInt(unsigned int sizeOfq, double time, const double *q, const double *velocity, double *fInt, double* param)
+extern "C" void FInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *fInt, unsigned int sizeZ, double* z)
 {
   fInt[0] =  m1 * sin(q[0]) * gravity;
 }
-extern "C" void jacobianQFInt(unsigned int sizeOfq, double time, const double *q, const double *velocity, double *jacob, double* param)
+extern "C" void jacobianQFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   jacob[0] =  cos(q[0]) * gravity * (m1);
 }
 
-extern "C" void jacobianVFInt(unsigned int sizeOfq, double time, const double *q, const double *velocity, double *jacob, double* param)
+extern "C" void jacobianVFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   jacob[0] = 0.0;
 }
 
-// extern "C" void FExt(unsigned int  sizeOfq, double time, double *fExt, double* param)
+// extern "C" void FExt(unsigned int  sizeOfq, double time, double *fExt, unsigned int sizeZ, double* z)
 // {
 //   unsigned int i;
 //   unsigned int n = sizeOfq;
@@ -57,12 +61,12 @@ extern "C" void jacobianVFInt(unsigned int sizeOfq, double time, const double *q
 // }
 
 
-extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, double* param)
+extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* z)
 {
   y[0] = l1 * sin(q[0]);
 }
 
-extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, double* param)
+extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* z)
 {
   G[0] = l1 * cos(q[0]);
   G[1] = 0.0;

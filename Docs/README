@@ -23,14 +23,23 @@
 
 The current directory contains:
 
-- Dev: sources for html pages: Siconos - Project Overview 
+- Devel: all files used to generate (from doxygen) documentation related to developments inside Siconos.
+
+- SiconosProjectOverview:  sources for html pages: Siconos - Project Overview 
        Description of the project, specification, quality plan and design (developper guide ...).	
                      =>  http://siconos.gforge.inria.fr/docDev/index.html
+	Based on readySet tools.
 
-- Dev_Notes: tex/pdf files - Documentation for developpers, various notes and remarks. This only "draft-documentation", to prepare future Developper Manual. 
+- Drafts:  doxygen, tex/pdf files - Documentation for developpers, various notes and remarks. This only "draft-documentation", to prepare future Developper Manual. When finished, move to User or Devel.
 
-- User: tex/pdf files - Documentation for Users - Draft-documentation, and so uncomplete, to prepare getting started and User Manuals. 
+- User: doxygen, tex/pdf files - Documentation for Users - Draft-documentation, and so uncomplete, to prepare getting started and User Manuals. 
 
 - Tex-tools: macros, packages ...
+
+- figures: graph. directory.
+
+- HomePage: doxygen files used to generate Siconos Home Page: http://siconos.gforge.inria.fr.
+
+
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------

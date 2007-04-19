@@ -75,20 +75,22 @@ protected:
   SimpleVector *b;
 
   /** FirstOrderLinearDS plug-in to compute A(t,z), id = "A"
-   * @param sizeOfA : size of square-matrix A
    * @param time : current time
+   * @param sizeOfA : size of square-matrix A
    * @param[in,out] A : pointer to the first element of A
-   * @param[in,out] param  : a vector of user-defined parameters
+   * @param size of vector z
+   * @param[in,out] z a vector of user-defined parameters
    */
-  void (*APtr)(unsigned int, double, double*, double*);
+  void (*APtr)(double, unsigned int, double*, unsigned int, double*);
 
   /** FirstOrderLinearDS plug-in to compute b(t,z), id = "b"
-   * @param sizeOfB : size of vector b
    * @param time : current time
+   * @param sizeOfB : size of vector b
    * @param[in,out] b : pointer to the first element of b
+   * @param size of vector z
    * @param[in,out] param  : a vector of user-defined parameters
    */
-  void (*bPtr)(unsigned int, double, double*, double*);
+  void (*bPtr)(double, unsigned int, double*, unsigned int, double*);
 
   /** set all allocation flags (isAllocated map)
    *  \param bool: = if true (default) set default configuration, else set all to false

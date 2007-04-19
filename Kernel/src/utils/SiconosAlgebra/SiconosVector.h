@@ -65,7 +65,7 @@ public:
   /** true if the vector is block else false.
    * \return a bool.
    */
-  inline bool isBlock(void) const
+  inline const bool isBlock(void) const
   {
     return isBlockVector;
   }
@@ -77,7 +77,27 @@ public:
   /** get the attribute num of current vector
    * \return an unsigned int.
    */
-  virtual unsigned int getNum() const = 0;
+  virtual const unsigned int getNum() const = 0;
+
+  /** reserved to BlockVector
+      \return a BlocksVectIterator
+  */
+  virtual BlockVectIterator begin();
+
+  /** reserved to BlockVector
+      \return a BlocksVectIterator
+  */
+  virtual BlockVectIterator end();
+
+  /** reserved to BlockVector
+      \return a ConstBlocksVectIterator
+  */
+  virtual ConstBlockVectIterator begin() const;
+
+  /** reserved to BlockVector
+      \return a ConstBlocksVectIterator
+  */
+  virtual ConstBlockVectIterator end() const;
 
   /** get the attribute if it's type is DenseVect
    *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
@@ -123,7 +143,7 @@ public:
   /** get the vector size, ie the total number of (double) elements in the vector
    *  \return unsigned int
    */
-  inline unsigned int size() const
+  inline const unsigned int size() const
   {
     return sizeV;
   };
@@ -167,14 +187,14 @@ public:
   /** get the number of SimpleVector-Blocks - only usefull for BlockVector.
    *  \return unsigned int
    */
-  virtual unsigned int getNumberOfBlocks() const
+  virtual const unsigned int getNumberOfBlocks() const
   {
     return 1;
   };
 
   /** put data of the vector into a string
    */
-  virtual std::string toString() const = 0;
+  virtual const std::string toString() const = 0;
 
   /* Note: in the following functions, index is a general one;
    that means that for a SimpleVector v, v(i) is index i element but
@@ -185,7 +205,7 @@ public:
    *  \param an unsigned int i
    *  \return a double
    */
-  virtual double getValue(unsigned int) = 0;
+  virtual const double getValue(unsigned int) = 0;
 
   /** set the element vector[i]
    *  \param an unsigned int i
@@ -205,7 +225,7 @@ public:
    *  \exception SiconosVectorException
    *  \return a double
    */
-  virtual double operator()(unsigned int) const = 0;
+  virtual const double operator()(unsigned int) const = 0;
 
   /** get the vector at position i(ie this for Simple and block i for BlockVector)
    *  \param an unsigned integer i
