@@ -223,7 +223,6 @@ void LCP::initialize()
     if ((10 * sizeOutput) > solverBackup->getMaxIter()) solverBackup->setMaxIter(10 * sizeOutput);
     solverBackup->setSolvingMethod();
   }
-
   // get topology
   Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
@@ -384,7 +383,9 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
       // centralBlock contains a lu-factorized matrix and we solve
       // centralBlock * X = rightBlock with PLU
       centralBlocks[*itDS]->PLUForwardBackwardInPlace(*rightBlock);
-      *currentBlock += h * Theta[*itDS]* *leftBlock * (*rightBlock); //left = C, right = B
+      //      integration of r with theta method removed
+      //      *currentBlock += h *Theta[*itDS]* *leftBlock * (*rightBlock); //left = C, right = W.B
+      *currentBlock += h * (*leftBlock) * (*rightBlock); //left = C, right = W.B
       delete rightBlock;
     }
     else if (relationType1 == "Lagrangian" || relationType2 == "Lagrangian")
@@ -595,6 +596,8 @@ void LCP::computeQ(const double time)
 void LCP::compute(const double time)
 {
   clock_t startLCPsolve, startLCPuni, timeLCPuni;
+  // SolverBackup stuff: to be removed ...
+  bool Pascal = false;
 
   // --- Prepare data for LCP computing ---
   preCompute(time);
@@ -622,16 +625,19 @@ void LCP::compute(const double time)
 
       if (info != 0)
       {
-        solvingMethod = *(solverBackup->getSolvingMethodPtr());
-        *z = zprev;
-        *w = wprev;
+        if (Pascal)
+        {
+          solvingMethod = *(solverBackup->getSolvingMethodPtr());
+          *z = zprev;
+          *w = wprev;
 
-        startLCPuni = clock();
-        info = lcp_solver_block(Mspbl , q->getArray() , &solvingMethod , z->getArray() , w->getArray() , &iter , &titer , &err);
-        timeLCPuni = clock() - startLCPuni;
+          startLCPuni = clock();
+          info = lcp_solver_block(Mspbl , q->getArray() , &solvingMethod , z->getArray() , w->getArray() , &iter , &titer , &err);
+          timeLCPuni = clock() - startLCPuni;
 
-        LCP_CPUtime_bck += timeLCPuni;
-        nbiterbck += iter;
+          LCP_CPUtime_bck += timeLCPuni;
+          nbiterbck += iter;
+        }
       }
       else
       {
@@ -654,16 +660,19 @@ void LCP::compute(const double time)
 
       if (info != 0)
       {
-        solvingMethod = *(solverBackup->getSolvingMethodPtr());
-        *z = zprev;
-        *w = wprev;
+        if (Pascal)
+        {
+          solvingMethod = *(solverBackup->getSolvingMethodPtr());
+          *z = zprev;
+          *w = wprev;
 
-        startLCPuni = clock();
-        info = lcp_solver(M->getArray(), q->getArray(), &Nlcp, &solvingMethod, z->getArray(), w->getArray());
-        timeLCPuni = clock() - startLCPuni;
+          startLCPuni = clock();
+          info = lcp_solver(M->getArray(), q->getArray(), &Nlcp, &solvingMethod, z->getArray(), w->getArray());
+          timeLCPuni = clock() - startLCPuni;
 
-        LCP_CPUtime_bck += timeLCPuni;
-        nbiterbck += solvingMethod.lcp.iter;
+          LCP_CPUtime_bck += timeLCPuni;
+          nbiterbck += solvingMethod.lcp.iter;
+        }
       }
       else
       {

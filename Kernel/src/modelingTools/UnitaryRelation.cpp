@@ -165,8 +165,10 @@ void UnitaryRelation::getLeftBlockForDS(DynamicalSystem * ds, SiconosMatrix* Blo
   {
     if (relationSubType == "LinearTIR")
       originalMatrix = (static_cast<FirstOrderLinearTIR*>(mainInteraction->getRelationPtr()))->getCPtr();
+    else if (relationSubType == "LinearR")
+      originalMatrix = (static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr()))->getCPtr();
     else
-      RuntimeException::selfThrow("UnitaryRelation::getBlockForDS, not yet implemented for first order relations of subtype " + relationSubType);
+      RuntimeException::selfThrow("UnitaryRelation::getLeftBlockForDS, not yet implemented for first order relations of subtype " + relationSubType);
   }
   else if (relationType == "Lagrangian")
   {
@@ -174,10 +176,10 @@ void UnitaryRelation::getLeftBlockForDS(DynamicalSystem * ds, SiconosMatrix* Blo
       originalMatrix = (static_cast<LagrangianLinearR*>(mainInteraction->getRelationPtr()))->getHPtr();
     else
       originalMatrix = (static_cast<LagrangianR*>(mainInteraction->getRelationPtr()))->getGPtr(index);
-    //      else RuntimeException::selfThrow("UnitaryRelation::getBlockForDS, not yet implemented for Lagrangian relation of subtype "+relationSubType);
+    //      else RuntimeException::selfThrow("UnitaryRelation::getLeftBlockForDS, not yet implemented for Lagrangian relation of subtype "+relationSubType);
   }
   else
-    RuntimeException::selfThrow("UnitaryRelation::getBlockForDS, not yet implemented for relations of type " + relationType);
+    RuntimeException::selfThrow("UnitaryRelation::getLeftBlockForDS, not yet implemented for relations of type " + relationType);
 
   // get block
   originalMatrix->getBlock(relativePosition, k, *Block);
@@ -205,11 +207,13 @@ void UnitaryRelation::getRightBlockForDS(DynamicalSystem * ds, SiconosMatrix* Bl
   string relationType = getRelationType() + getRelationSubType();
   if (relationType == "FirstOrderLinearTIR")
     originalMatrix = (static_cast<FirstOrderLinearTIR*>(mainInteraction->getRelationPtr()))->getBPtr();
+  else if (relationType == "FirstOrderLinearR")
+    originalMatrix = (static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr()))->getBPtr();
 
   //else if( (relationType == LAGRANGIANRELATION || relationType == LAGRANGIANLINEARRELATION))
   // originalMatrix = (static_cast<LagrangianR*>(mainInteraction->getRelationPtr()))->getGPtr(index);
   // For Lagrangian systems, right block = transpose (left block) so we do not need to use the present function.
-  else RuntimeException::selfThrow("UnitaryRelation::getBlockForDS, not yet implemented for relation of type " + relationType);
+  else RuntimeException::selfThrow("UnitaryRelation::getRightBlockForDS, not yet implemented for relation of type " + relationType);
 
   originalMatrix->getBlock(k, relativePosition, *Block);
 }
@@ -220,9 +224,16 @@ void UnitaryRelation::getExtraBlock(SiconosMatrix* Block) const
   // Any coupling between relations through D must be taken into account thanks to the nslaw (by "increasing" its dimension).
 
   if (getRelationType() != "FirstOrder")
-    RuntimeException::selfThrow("UnitaryRelation::getExtraBlockPtr(), forbidden or not yet implemented for relation of type " + getRelationType());
+    RuntimeException::selfThrow("UnitaryRelation::getExtraBlock, forbidden or not yet implemented for relation of type " + getRelationType());
 
-  SiconosMatrix * D = static_cast<FirstOrderLinearTIR*>(mainInteraction->getRelationPtr())->getDPtr();
+  string relationSubType = getRelationSubType();
+  SiconosMatrix * D = NULL;
+  if (relationSubType == "LinearTIR")
+    D = static_cast<FirstOrderLinearTIR*>(mainInteraction->getRelationPtr())->getDPtr();
+  else if (relationSubType == "LinearR")
+    D = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getDPtr();
+  else
+    RuntimeException::selfThrow("UnitaryRelation::getExtraBlock, not yet implemented for first order relations of subtype " + relationSubType);
   D->getBlock(relativePosition, relativePosition, *Block);
 }
 

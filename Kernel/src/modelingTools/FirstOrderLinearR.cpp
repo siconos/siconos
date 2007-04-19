@@ -552,6 +552,7 @@ void FirstOrderLinearR::computeC(const double time)
     unsigned int sizeZ = interaction->getSizeZ();
     SimpleVector * zCopy = new SimpleVector(*data["z"]);
     CPtr(time, sizeY, sizeX, &(*C)(0, 0), sizeZ, &(*zCopy)(0));
+    *data["z"] = *zCopy;
     delete zCopy;
   }
   // else nothing
@@ -567,6 +568,7 @@ void FirstOrderLinearR::computeD(const double time)
     unsigned int sizeZ = interaction->getSizeZ();
     SimpleVector * zCopy = new SimpleVector(*data["z"]);
     DPtr(time, sizeY, &(*D)(0, 0), sizeZ, &(*zCopy)(0));
+    *data["z"] = *zCopy;
     delete zCopy;
   }
   // else nothing
@@ -582,6 +584,7 @@ void FirstOrderLinearR::computeF(const double time)
     unsigned int sizeZ = interaction->getSizeZ();
     SimpleVector * zCopy = new SimpleVector(*data["z"]);
     FPtr(time, sizeY, &(*F)(0, 0), sizeZ, &(*zCopy)(0));
+    *data["z"] = *zCopy;
     delete zCopy;
   }
   // else nothing
@@ -597,6 +600,7 @@ void FirstOrderLinearR::computeE(const double time)
     unsigned int sizeZ = interaction->getSizeZ();
     SimpleVector * zCopy = new SimpleVector(*data["z"]);
     ePtr(time, sizeY, &(*e)(0), sizeZ, &(*zCopy)(0));
+    *data["z"] = *zCopy;
     delete zCopy;
   }
   // else nothing
@@ -613,6 +617,7 @@ void FirstOrderLinearR::computeB(const double time)
     unsigned int sizeZ = interaction->getSizeZ();
     SimpleVector * zCopy = new SimpleVector(*data["z"]);
     BPtr(time, sizeX, sizeY, &(*B)(0, 0), sizeZ, &(*zCopy)(0));
+    *data["z"] = *zCopy;
     delete zCopy;
   }
   // else nothing

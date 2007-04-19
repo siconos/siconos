@@ -463,7 +463,8 @@ void Moreau::computeFreeState()
       FirstOrderLinearDS *d = static_cast<FirstOrderLinearDS*>(ds);
       SimpleVector *xfree = static_cast<SimpleVector*>(d->getXFreePtr());
       SimpleVector *xold = static_cast<SimpleVector*>(d->getXMemoryPtr()->getSiconosVector(0));
-      SimpleVector *rold = static_cast<SimpleVector*>(d->getRMemoryPtr()->getSiconosVector(0));
+      //          integration of r with theta method removed
+      //    SimpleVector *rold = static_cast<SimpleVector*>(d->getRMemoryPtr()->getSiconosVector(0));
       unsigned int sizeX = xfree->size();
 
       SiconosMatrix *A = d->getAPtr();
@@ -473,22 +474,34 @@ void Moreau::computeFreeState()
       {
         I = new SimpleMatrix(sizeX, sizeX);
         I->eye();
-        *xfree =  prod((*I + h * (1.0 - theta) * *A), *xold) + (h * (1.0 - theta) * *rold);
+        //          *xfree =  prod((*I + h*(1.0 - theta) * *A),*xold) + (h*(1.0 - theta) * *rold);
+        *xfree =  prod((*I + h * (1.0 - theta) * *A), *xold);
         delete I;
       }
       else
       {
         I = d->getMPtr();
-        *xfree = prod((*I + h * (1.0 - theta) * *A), *xold) + (h * (1.0 - theta) * *rold);
+        //          *xfree = prod((*I + h*(1.0 - theta) * *A), *xold) + (h*(1.0 - theta) * *rold);
+        *xfree = prod((*I + h * (1.0 - theta) * *A), *xold);
       }
 
-      // Warning: b is supposed to be constant, not time dependent.
       SimpleVector *b = d->getBPtr();
       if (b != NULL)
-        *xfree += h * *b;
-
-      //        *xfree += h * prod(*T, (theta * uCurrent + (1.0-theta) * uOld));
-      //      }
+      {
+        if (d->isPlugged("b"))
+        {
+          // if b is a plugin, it is integrated with a theta method
+          d->computeB(told);
+          SimpleVector bOld = d->getB();
+          d->computeB(t);
+          SimpleVector bCurrent = d->getB();
+          *xfree += h * (theta * bCurrent + (1.0 - theta) * bOld);
+        }
+        else
+        {
+          *xfree += h * *b;
+        }
+      }
 
       W->PLUForwardBackwardInPlace(*xfree);
     }
@@ -638,7 +651,9 @@ void Moreau::updateState(const unsigned int level)
       SiconosVector* x = ds->getXPtr();
       SiconosVector* xFree = fonlds->getXFreePtr();
 
-      *x = h * theta * *fonlds->getRPtr();
+      //          integration of r with theta method removed
+      //      *x = h * theta * *fonlds->getRPtr();
+      *x = h * *fonlds->getRPtr();
       W->PLUForwardBackwardInPlace(*x);
       *x += *xFree;
     }

@@ -76,7 +76,17 @@ FirstOrderLinearTIDS::~FirstOrderLinearTIDS()
 
 void FirstOrderLinearTIDS::initRhs(double time)
 {
+  if (M != NULL)
+  {
+    if (invM == NULL)
+    {
+      invM = new SimpleMatrix(*M);
+      isAllocatedIn["invM"] = true;
+    }
+  }
+
   computeRhs(time);
+
   if (jacobianXRhs == NULL) // if not allocated with a set or anything else
   {
     if (A != NULL && M == NULL) // if M is not defined, then A = jacobianXRhs, no memory allocation for that one.
@@ -86,8 +96,6 @@ void FirstOrderLinearTIDS::initRhs(double time)
       jacobianXRhs = new SimpleMatrix(*A); // Copy A into jacobianXRhs
       isAllocatedIn["jacobianXRhs"] = true;
       // Solve MjacobianXRhs = A
-      invM = new SimpleMatrix(*M); // Copy M into invM.
-      isAllocatedIn["invM"] = true;
       invM->PLUForwardBackwardInPlace(*jacobianXRhs);
     }
     // else no allocation, jacobian is equal to 0.
