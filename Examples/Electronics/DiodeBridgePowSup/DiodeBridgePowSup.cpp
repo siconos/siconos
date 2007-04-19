@@ -37,13 +37,14 @@ int main(int argc, char* argv[])
 
   double t0 = 0.0;
   double T = 5e-3;           // Total simulation time
-  double h_step = 1e-6;    // Time step
+  double h_step = 1.0e-6;    // Time step
   double Rvalue = 1e3;       // load resistance
   double Cfilt  = 300.0e-9;  // filtering capacitor
   double VinitLS = 0.0;     // initial voltage Cfilt
   double DiodeThreshold = 0.21; // Guess what ???
   string Modeltitle = "DiodeBridgePowSup";
   double tinst;
+  int k = 0;
 
   try
   {
@@ -61,7 +62,7 @@ int main(int argc, char* argv[])
 
     //    //  Source term "u" specification
     //    LSDiodeBridgePowSup->setUSize(1);
-    LSDiodeBridgePowSup->setComputeBFunction("./SinPoPlugin.so", "SinPo");
+    //    LSDiodeBridgePowSup->setComputeBFunction("./SinPoPlugin.so","SinPo");
 
     DynamicalSystemsSet allDS;
     allDS.insert(LSDiodeBridgePowSup);
@@ -91,21 +92,17 @@ int main(int argc, char* argv[])
     Offset_lambda(1) = 1.0;
     Offset_lambda = -DiodeThreshold * Offset_lambda;
 
-    SimpleVector* Int_e = new SimpleVector(4);
-    *Int_e = prod(*Int_D, Offset_lambda) - Offset_y;
+    SimpleVector* Int_z = new SimpleVector(5);
+    Int_z->setBlock(0, prod(*Int_D, Offset_lambda) - Offset_y);
+    LSDiodeBridgePowSup->setZPtr(Int_z);
 
     SiconosMatrix* Int_B = new SimpleMatrix(1, 4);
     (*Int_B)(0 , 0) = 1.0 / Cfilt;
     (*Int_B)(0 , 2) = 1.0 / Cfilt;
 
-    SiconosMatrix* Int_F = new SimpleMatrix(4, 1);
-    (*Int_F)(2 , 0) = -1.0;
-    (*Int_F)(3 , 0) =  1.0;
-
-    FirstOrderLinearTIR* LTIRDiodeBridgePowSup = new FirstOrderLinearTIR(*Int_C, *Int_B);
+    FirstOrderLinearR* LTIRDiodeBridgePowSup = new FirstOrderLinearR(Int_C, Int_B);
     LTIRDiodeBridgePowSup->setDPtr(Int_D);
-    LTIRDiodeBridgePowSup->setEPtr(Int_e);
-    LTIRDiodeBridgePowSup->setFPtr(Int_F);
+    LTIRDiodeBridgePowSup->setComputeEFunction("./SinPoPlugin.so", "SinPo");
 
     ComplementarityConditionNSL * nslaw = new ComplementarityConditionNSL(4);
 
@@ -122,6 +119,7 @@ int main(int argc, char* argv[])
     TimeDiscretisation* TiDisc = new TimeDiscretisation(h_step, &DiodeBridgePowSup);
 
     TimeStepping* StratDiodeBridgePowSup = new TimeStepping(TiDisc);
+    StratDiodeBridgePowSup->getEventsManagerPtr()->setTick(1e-9);
 
     double theta = 0.5;
 
@@ -134,8 +132,9 @@ int main(int argc, char* argv[])
 
     StratDiodeBridgePowSup->initialize();
 
-    int k = 0;
+    k = 0;
     int N = TiDisc->getNSteps(); // Number of time steps
+    cout << "Number of time steps = " << N << endl;
     tinst = k * h_step;
 
     // --- Get the values to be plotted ---
@@ -162,7 +161,7 @@ int main(int argc, char* argv[])
     dataPlot(k, 0) = k * h_step;
 
     // source voltage
-    dataPlot(k, 1) = (LSDiodeBridgePowSup->getB())(0);
+    dataPlot(k, 1) = (LSDiodeBridgePowSup->getZ())(4);
 
     // source current
     dataPlot(k, 2) = i_DF1 - i_DR2;
@@ -190,8 +189,8 @@ int main(int argc, char* argv[])
     double t1, t2, elapsed;
     struct timeval tp;
     int rtn;
-    clock_t start, end;
     double elapsed2;
+    clock_t start, end;
     start = clock();
     rtn = gettimeofday(&tp, NULL);
     t1 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
@@ -221,7 +220,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 0) = k * h_step;
 
       // source voltage
-      dataPlot(k, 1) = (LSDiodeBridgePowSup->getB())(0);
+      dataPlot(k, 1) = (LSDiodeBridgePowSup->getZ())(4);
 
       // source current
       dataPlot(k, 2) = i_DF1 - i_DR2;
@@ -285,9 +284,8 @@ int main(int argc, char* argv[])
     delete StratDiodeBridgePowSup;
     delete LTIRDiodeBridgePowSup;
     delete InterDiodeBridgePowSup;
-    delete Int_F ;
     delete Int_B ;
-    delete Int_e ;
+    delete Int_z ;
     delete Int_D ;
     delete Int_C;
     delete LSDiodeBridgePowSup;
@@ -298,7 +296,7 @@ int main(int argc, char* argv[])
   // --- Exceptions handling ---
   catch (SiconosException e)
   {
-    cout << "SiconosException" << endl;
+    cout << "SiconosException at time step " << k << endl;
     cout << e.report() << endl;
   }
   catch (std::exception& e)
