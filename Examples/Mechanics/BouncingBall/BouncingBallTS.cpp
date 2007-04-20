@@ -27,6 +27,8 @@
 
 #include "SiconosKernel.h"
 
+#include <boost/progress.hpp>
+
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -151,6 +153,7 @@ int main(int argc, char* argv[])
     cout << "====> Start computation ... " << endl << endl;
     // ==== Simulation loop - Writing without explicit event handling =====
     int k = 0;
+    boost::progress_display show_progress(N);
     for (k = 1 ; k < N + 1 ; ++k)
     {
       s->computeOneStep();
@@ -160,6 +163,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*lambda)(0);
       s->nextStep();
+      ++show_progress;
     }
     cout << "End of computation - Number of iterations done: " << k - 1 << endl;
 

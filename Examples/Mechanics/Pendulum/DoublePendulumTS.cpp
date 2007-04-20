@@ -30,6 +30,8 @@
 #include <stdlib.h>
 using namespace std;
 
+#include <boost/progress.hpp>
+
 double gravity = 10.0;
 double m1 = 1.0;
 double m2 = 1.0 ;
@@ -46,7 +48,7 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 2;           // degrees of freedom for robot arm
     double t0 = 0;                   // initial computation time
-    double T = 5.0;                   // final computation time
+    double T = 50.0;                   // final computation time
     double h = 0.0005;                // time step
     double criterion = 0.00005;
     unsigned int maxIter = 2000;
@@ -186,7 +188,7 @@ int main(int argc, char* argv[])
 
     int k = 0;
     int N = t->getNSteps(); // Number of time steps
-    cout << "Number of time step" << N << endl;
+    cout << "Number of time step   " << N << endl;
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
     unsigned int outputSize = 11;
@@ -204,7 +206,6 @@ int main(int argc, char* argv[])
     dataPlot(k, 8) = -l1 * cos(doublependulum->getQ()(0)) - l2 * cos(doublependulum->getQ()(1));
     dataPlot(k, 9) =  l1 * cos(doublependulum->getQ()(0)) * (doublependulum->getVelocity()(0));
     dataPlot(k, 10) = l1 * cos(doublependulum->getQ()(0)) * (doublependulum->getVelocity()(0)) + l2 * cos(doublependulum->getQ()(1)) * (doublependulum->getVelocity()(1));
-    cout << "Number of time step" << N << endl;
     // --- Compute elapsed time ---
     double t1, t2, elapsed;
     struct timeval tp;
@@ -219,14 +220,16 @@ int main(int argc, char* argv[])
 
     // --- Time loop ---
     cout << "Start computation ... " << endl;
-    cout << "Number of time step" << N << "\t";
     bool isNewtonConverge = false;
     unsigned int nbNewtonStep = 0; // number of Newton iterations
+    boost::progress_display show_progress(N);
 
     while (s->hasNextEvent())
     {
       k++;
-      if (!(div(k, 1000).rem))  cout << "Step number " << k << "\n";
+      ++show_progress;
+
+      //  if (!(div(k,1000).rem))  cout <<"Step number "<< k << "\n";
 
 
 

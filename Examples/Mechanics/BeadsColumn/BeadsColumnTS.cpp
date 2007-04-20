@@ -184,8 +184,8 @@ int main(int argc, char* argv[])
     // That means that all systems in allDS have the same theta value.
 
     // -- OneStepNsProblem --
-    OneStepNSProblem * osnspb = new LCP(s, "LCP", solverName, 10001, 0.001);
-
+    LCP * osnspb = new LCP(s, "LCP", solverName, 10001, 0.001);
+    osnspb->setisMSparseBlock(true);
     cout << "=== End of model loading === " << endl;
     // =========================== End of model definition =================================
     // ================================= Computation =================================
@@ -215,8 +215,25 @@ int main(int argc, char* argv[])
     while (k < N)
     {
       k++;
+      if (!(div(k, 10).rem))  cout << "Step number " << k << "\n";
+
       // solve ...
-      s->computeOneStep();
+
+      try
+      {
+        s->computeOneStep();
+      }
+      catch (SiconosException e)
+      {
+        cout << e.report() << endl;
+        osnspb-> display();
+        ioMatrix io("M.dat", "ascii");
+        io.write(osnspb->getM(), "noDim");
+        cout << k << endl;
+        ioVector io2("q.dat", "ascii");
+        io2.write(osnspb->getQ(), "noDim");
+        cout << k << endl;
+      }
       // --- Get values to be plotted ---
       dataPlot(k, 0) = k * t->getH();
       i = 0;
@@ -270,4 +287,5 @@ int main(int argc, char* argv[])
     cout << "Exception caught in \'sample/MultiBeadsColumn\'" << endl;
   }
   cout << "Computation Time " << t.elapsed()  << endl;
+
 }
