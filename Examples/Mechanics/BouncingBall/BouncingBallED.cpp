@@ -40,8 +40,8 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 3;           // degrees of freedom for the ball
     double t0 = 0;                   // initial computation time
-    double T = 10.0;                   // final computation time
-    double h = 0.005;                // time step
+    double T = 1.0;                   // final computation time
+    double h = 0.0000005;                // time step
     double position_init = 1.0;      // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
     string solverName = "Lemke" ;
@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
     cout << "====> Simulation initialisation ..." << endl << endl;
     s->initialize();
 
-    int N = 12368; // Number of saved points: depends on the number of events ...
+    int N = 12370; // Number of saved points: depends on the number of events ...
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -149,8 +149,12 @@ int main(int argc, char* argv[])
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
     EventsManager * eventsManager = s->getEventsManagerPtr();
+    eventsManager->display();
+
+    return 0;
     unsigned int numberOfEvent = 0 ;
     int k = 0;
+    boost::progress_display show_progress(N);
     while (s->hasNextEvent())
     {
       k++;
@@ -164,6 +168,7 @@ int main(int argc, char* argv[])
         dataPlot(k, 1) = (*ball->getQMemoryPtr()->getSiconosVector(1))(0);
         dataPlot(k, 2) = (*ball->getVelocityMemoryPtr()->getSiconosVector(1))(0);
         k++;
+        ++show_progress;
       }
 
       dataPlot(k, 0) = s->getCurrentTime();
@@ -171,8 +176,10 @@ int main(int argc, char* argv[])
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*lambda)(0);
       numberOfEvent++;
+      ++show_progress;
     }
     // --- Output files ---
+    cout << endl;
     cout << "===== End of Event Driven simulation. " << numberOfEvent << " events have been processed. ==== " << endl << endl;
     cout << "====> Output file writing ..." << endl << endl;
     ioMatrix io("result.dat", "ascii");
@@ -204,7 +211,7 @@ int main(int argc, char* argv[])
   }
   catch (...)
   {
-    cout << "Exception caught in \'sample/MultiBeadsColumn\'" << endl;
+    cout << "Exception caught." << endl;
   }
   cout << "Computation Time: " << time.elapsed()  << endl;
 }

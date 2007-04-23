@@ -25,14 +25,10 @@
 #include <iostream>
 using namespace std;
 
-// RuntimeCmp object used to sort Events in the set of Events
-// !!! \todo Find a way to avoid global variable ... !!!
-RuntimeCmp<Event> compEvents(&Event::getTimeOfEvent);
-
-Sensor::Sensor(): type("generic"), id("none"), model(NULL), timeDiscretisation(NULL), eventsSet(compEvents)
+Sensor::Sensor(): type("generic"), id("none"), model(NULL), timeDiscretisation(NULL), eventsSet()
 {}
 
-Sensor::Sensor(const std::string& name, TimeDiscretisation* t): type(name), id("none"), model(t->getModelPtr()), timeDiscretisation(t), eventsSet(compEvents)
+Sensor::Sensor(const std::string& name, TimeDiscretisation* t): type(name), id("none"), model(t->getModelPtr()), timeDiscretisation(t), eventsSet()
 {}
 
 Sensor::~Sensor()
@@ -46,18 +42,15 @@ void Sensor::initialize()
   unsigned int sizeTk = tk->size();
 
   // == Create Events linked to the present Sensor. ==
-  // convert input double time to unsigned int
-  unsigned long int intTime;
 
   EventsContainerIterator it; // to check if insertion succeed or not.
   string type = "SensorEvent";
 
+  // Uses the events factory to insert the new event.
+  EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;
   for (unsigned int i = 0; i < sizeTk; ++i)
   {
-    intTime = EventsManager::doubleToIntTime((*tk)(i));
-    // Uses the events factory to insert the new event.
-    EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;
-    it = eventsSet.insert(regEvent.instantiate(intTime, type));
+    it = eventsSet.insert(regEvent.instantiate((*tk)(i), type));
   }
   // == Set Sensor object of all Events to this ==
   for (it = eventsSet.begin(); it != eventsSet.end(); ++it)

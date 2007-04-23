@@ -115,7 +115,7 @@ string FirstOrderRXML::getHPlugin() const
 
 // ================== jacobianG ==================
 
-void setJacobianGPlugin(const std::string&, unsigned int)
+void FirstOrderRXML::setJacobianGPlugin(const std::string&, unsigned int)
 {
   XMLException::selfThrow("FirstOrderRXML -  setJacobianGPlugin: not yet implemented.");
 }
@@ -142,7 +142,7 @@ SimpleMatrix FirstOrderRXML::getJacobianGMatrix(unsigned int index) const
 
 // ================== jacobianH ==================
 
-void setJacobianHPlugin(const std::string&, unsigned int)
+void FirstOrderRXML::setJacobianHPlugin(const std::string&, unsigned int)
 {
   XMLException::selfThrow("FirstOrderRXML -  setJacobianHPlugin: not yet implemented.");
 }

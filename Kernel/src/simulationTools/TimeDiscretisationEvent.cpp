@@ -23,10 +23,10 @@ using namespace std;
 using namespace EventFactory;
 
 // Default constructor
-TimeDiscretisationEvent::TimeDiscretisationEvent(): Event(DEFAULT_EVENT_TIME, "TimeDiscretisationEvent")
+TimeDiscretisationEvent::TimeDiscretisationEvent(): Event(0.0, "TimeDiscretisationEvent")
 {}
 
-TimeDiscretisationEvent::TimeDiscretisationEvent(unsigned long int time, const std::string& name): Event(time, "TimeDiscretisationEvent")
+TimeDiscretisationEvent::TimeDiscretisationEvent(double time, const std::string& name): Event(time, "TimeDiscretisationEvent")
 {}
 
 TimeDiscretisationEvent::~TimeDiscretisationEvent()

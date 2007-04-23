@@ -25,20 +25,31 @@
 
 #include "SiconosConst.h"
 #include "RuntimeCmp.h"
+#include "Event.h"
+#include <gmp.h>
 #include<iostream>
 #include<set>
 
 class Simulation;
-class Event;
 class TimeDiscretisation;
 
-// tick default value
-const double DEFAULT_TICK = 1e-07;
+/** Structure used for Events sorting. The time of occurence (in mpz_t format!!!)  is used to compare two Events. */
+struct compareEvent
+{
+  bool operator()(const Event* e1, const Event* e2) const
+  {
+    const mpz_t *t1 = e1->getTimeOfEvent();
+    const mpz_t *t2 = e2->getTimeOfEvent();
 
-/** set of events, with a RuntimeCmp based on Event time value (unsigned int) to compare Events
+    int res = mpz_cmpabs(*t1, *t2); // res>0 if t1<t2, 0 if t1=t2 else res<0.
+    return (res < 0);
+  }
+};
+
+/** set of events, with a RuntimeCmp based on Event time value (mpz_t) to compare Events
  *  A stl container of type "multiset" is used at the time
  *  \Warning This may be not the best choice => review all possibi lities */
-typedef std::multiset<Event*, RuntimeCmp<Event> > EventsContainer; // sort in a chronological way
+typedef std::multiset<Event*, compareEvent > EventsContainer; // sort in a chronological way
 
 /** Iterator through a set of Events */
 typedef EventsContainer::iterator EventsContainerIterator;
@@ -86,12 +97,6 @@ protected:
     */
   Event * nextEvent;
 
-  /** confidence interval used to convert double time value to long unsigned int
-   *  See doubleToIntTime function for details. Note that max unsigned long int value is
-   * given by constant ULONG_MAX, from limits.h.
-   */
-  static double tick;
-
   /* link to the simulation that owns this manager*/
   Simulation * simulation;
 
@@ -115,14 +120,6 @@ public:
   /** destructor
   */
   ~EventsManager();
-
-  /** convert time from double to unsigned int according to tick.
-  */
-  static const unsigned long int doubleToIntTime(double);
-
-  /** convert time from unsigned int to double according to tick.
-  */
-  static const double intToDoubleTime(unsigned long int);
 
   /** manager initialization function
    */
@@ -163,10 +160,10 @@ public:
   };
 
   /** get the event that occurs at time inputTime
-  *  \param an unsigned long int
+  *  \param a mpz_t
   *  \return a pointer to Event
   */
-  Event* getEventPtr(unsigned long int inputTime) const;
+  Event* getEventPtr(const mpz_t& inputTime) const;
 
   /** get the current event
   *  \return a pointer to Event
@@ -191,27 +188,10 @@ public:
   Event* getFollowingEventPtr(Event*) const;
 
   /** get the event that follows the event at time inputTime  ("following" defined with operator(s) comparison of events)
-  *  \param an unsigned long int
+  *  \param a mpz_t
   *  \return a pointer to Event
   */
-  Event* getFollowingEventPtr(unsigned long int inputTime) const;
-
-  /** get tick value
-  *  \return a double
-  */
-  inline const double getTick() const
-  {
-    return tick ;
-  };
-
-  /** set tick value
-  *  \param a double
-  */
-  inline void setTick(double newTick)
-  {
-    std::cout << "Warning: you change tick value for EventsManager -> a new initialization of the object is required. " << std::endl;
-    tick = newTick;
-  };
+  Event* getFollowingEventPtr(const mpz_t& inputTime) const;
 
   /** get the Simulation
   *  \return a pointer to Simulation
@@ -243,11 +223,6 @@ public:
   *  \return a double
   */
   const double getTimeOfEvent(Event*) const;
-
-  /** get the time (int format) of an event
-  *  \return an unsigned long int
-  */
-  const unsigned long int getIntTimeOfEvent(Event*) const;
 
   /** get the time of current event, in double format
   *  \return a double

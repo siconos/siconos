@@ -27,8 +27,6 @@
 
 #include "SiconosKernel.h"
 
-#include <boost/progress.hpp>
-
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -182,7 +180,7 @@ int main(int argc, char* argv[])
     //     cout<<"End of computation - Number of iterations done: "<<k<<endl;
 
     // --- Output files ---
-    cout << "====> Output file writing ..." << k - 1 << endl;
+    cout << "====> Output file writing ..." << endl;
     ioMatrix io("result.dat", "ascii");
     io.write(dataPlot, "noDim");
     // --- Free memory ---

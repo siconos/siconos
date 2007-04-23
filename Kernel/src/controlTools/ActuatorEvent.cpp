@@ -24,10 +24,10 @@ using namespace std;
 using namespace EventFactory;
 
 // Default constructor
-ActuatorEvent::ActuatorEvent(): Event(DEFAULT_EVENT_TIME, "ActuatorEvent")
+ActuatorEvent::ActuatorEvent(): Event(0.0, "ActuatorEvent")
 {}
 
-ActuatorEvent::ActuatorEvent(unsigned long int time, const std::string& name): Event(time, name)
+ActuatorEvent::ActuatorEvent(double time, const std::string& name): Event(time, name)
 {}
 
 ActuatorEvent::~ActuatorEvent()

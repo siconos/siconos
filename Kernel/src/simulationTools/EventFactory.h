@@ -35,7 +35,7 @@ namespace EventFactory
 {
 
 /** A pointer to function, returning a pointer to Event, built with its type (ie class name) and a pointer to Model.*/
-typedef Event* (*object_creator)(unsigned long int, const std::string&);
+typedef Event* (*object_creator)(double, const std::string&);
 
 /** The type of the factory map */
 typedef std::map<const std::string, object_creator> MapFactory;
@@ -44,7 +44,7 @@ typedef std::map<const std::string, object_creator> MapFactory;
 typedef MapFactory::iterator MapFactoryIt;
 
 /** Template function to return a new object of type SubType*/
-template<class SubType> Event* factory(unsigned long int time, const std::string& type)
+template<class SubType> Event* factory(double time, const std::string& type)
 {
   return new SubType(time, type);
 }
@@ -76,10 +76,10 @@ public :
   void add(const std::string&, object_creator);
 
   /**
-   *  \param an unsigned int, time of Event
+   *  \param a double, time of Event
    *  \param a string, type of Event
    */
-  Event* instantiate(unsigned long int, const std::string&);
+  Event* instantiate(double, const std::string&);
 
 } ;
 

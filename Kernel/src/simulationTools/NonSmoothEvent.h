@@ -46,10 +46,10 @@ private:
 public:
 
   /** constructor with time value as a parameter
-  *  \param an unsigned long int
+  *  \param a double
   *  \param a string, type of Event
   */
-  NonSmoothEvent(unsigned long int, const std::string&);
+  NonSmoothEvent(double, const std::string&);
 
   /** destructor
   */

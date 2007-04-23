@@ -25,10 +25,10 @@ using namespace std;
 using namespace EventFactory;
 
 // Default constructor
-NonSmoothEvent::NonSmoothEvent(): Event(DEFAULT_EVENT_TIME, "NonSmoothEvent")
+NonSmoothEvent::NonSmoothEvent(): Event(0.0, "NonSmoothEvent")
 {}
 
-NonSmoothEvent::NonSmoothEvent(unsigned long int time, const std::string& name): Event(time, "NonSmoothEvent")
+NonSmoothEvent::NonSmoothEvent(double time, const std::string& name): Event(time, "NonSmoothEvent")
 {}
 
 NonSmoothEvent::~NonSmoothEvent()

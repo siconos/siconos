@@ -42,10 +42,10 @@ private:
 public:
 
   /** constructor with time value as a parameter
-  *  \param an unsigned long int
+  *  \param a double
   *  \param a string, type of Event
   */
-  TimeDiscretisationEvent(unsigned long int, const std::string&);
+  TimeDiscretisationEvent(double, const std::string&);
 
   /** destructor
   */

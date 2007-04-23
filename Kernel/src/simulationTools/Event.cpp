@@ -17,23 +17,35 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "Event.h"
+#include <math.h>
 using namespace std;
 
 // Default constructor (protected)
-Event::Event(): timeOfEvent(DEFAULT_EVENT_TIME), type(DEFAULT_EVENT_TYPE)
-{}
+Event::Event(): type(DEFAULT_EVENT_TYPE), dTime(0.0)
+{
+  mpz_init(timeOfEvent);
+}
 
-Event::Event(unsigned long int time, const string& newType): timeOfEvent(time), type(newType)
-{}
+double Event::tick = DEFAULT_TICK;
+
+Event::Event(double time, const string& newType): type(newType), dTime(time)
+{
+  // Initialize and set timeOfEvent.
+  mpz_init_set_d(timeOfEvent, ceil(time / tick)) ;
+}
 
 Event::~Event()
-{}
+{
+  mpz_clear(timeOfEvent);
+}
 
 void Event::display() const
 {
   cout << "===== Event data display =====" << endl;
   cout << " - Type: " << type << endl;
-  cout << " - time (unsigned int format): " << timeOfEvent << endl;
+  cout << " - time (mpz_t format, double format): (";
+  mpz_out_str(stdout, 10, timeOfEvent);
+  cout << ", " << dTime << ")" << endl;
   cout << "===== End of Event display =====" << endl;
 }
 

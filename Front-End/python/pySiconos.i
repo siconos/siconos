@@ -49,7 +49,7 @@
 #include "SiconosMemoryXML.h"
 #include "RelationXML.h"
 #include "FirstOrderRXML.h"
-#include "FirstOrderLinearTIRXML.h"
+#include "FirstOrderLinearRXML.h"
 #include "LagrangianRXML.h"
 #include "LagrangianLinearRXML.h"
 #include "NonSmoothLawXML.h"
@@ -92,6 +92,7 @@
 #include "Interaction.h"
 #include "Relation.h"
 #include "FirstOrderR.h"
+#include "FirstOrderLinearR.h"
 #include "FirstOrderLinearTIR.h"
 #include "LagrangianR.h"
 #include "LagrangianLinearR.h"
@@ -186,7 +187,7 @@ $1 = string(PyString_AsString($input));
 // Xml - formalisation
 %include "RelationXML.h"
 %include "FirstOrderRXML.h"
-%include "FirstOrderLinearTIRXML.h"
+%include "FirstOrderLinearRXML.h"
 %include "LagrangianRXML.h"
 %include "LagrangianLinearRXML.h"
 // ---
@@ -230,6 +231,7 @@ $1 = string(PyString_AsString($input));
 
 %include "Relation.h"
 %include "FirstOrderR.h"
+%include "FirstOrderLinearR.h"
 %include "FirstOrderLinearTIR.h"
 %include "LagrangianR.h"
 %include "LagrangianScleronomousR.h"

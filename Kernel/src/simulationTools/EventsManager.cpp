@@ -32,32 +32,19 @@ using namespace std;
 // There are two different functions, to avoid multiple nextEvent update during initialize calls of insertEvent.
 const bool EventsManager::insertEvent(const string& type, double time)
 {
-  unsigned long int intTime;
-
-  // convert input double time to unsigned int
-
-  intTime = doubleToIntTime(time);
-
   EventsContainerIterator it; // to check if insertion succeed or not.
-
   // Uses the events factory to insert the new event.
   EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;
-  it = unProcessedEvents.insert(regEvent.instantiate(intTime, type));
+  it = unProcessedEvents.insert(regEvent.instantiate(time, type));
 
   return (it != unProcessedEvents.end());
 }
 
 // PUBLIC METHODS
 
-// RuntimeCmp object used to sort Events in the sets (pastEvents and unProcessedEvents.
-// !!! \todo Find a way to avoid global variable ... !!!
-RuntimeCmp<Event> compareEvents(&Event::getTimeOfEvent);
-
-double EventsManager::tick = DEFAULT_TICK;
-
 // Default/from data constructor
 EventsManager::EventsManager(Simulation * newSimu):
-  pastEvents(compareEvents), unProcessedEvents(compareEvents), currentEvent(NULL), nextEvent(NULL), simulation(newSimu)
+  currentEvent(NULL), nextEvent(NULL), simulation(newSimu)
 {}
 
 EventsManager::~EventsManager()
@@ -77,24 +64,6 @@ EventsManager::~EventsManager()
   unProcessedEvents.clear();
 }
 
-const unsigned long int EventsManager::doubleToIntTime(double doubleTime)
-{
-  double res = ceil(doubleTime / tick);
-  if (res > ULONG_MAX) // check if res value can be converted to unsigned long int.
-  {
-    string report = "EventsManager doubleToIntTime, conversion results in an overflow value > ULONG_MAX, max value for unsigned long int. Try to change tick value. ULONG_MAX=";
-    std::ostringstream oss;
-    oss << report << ULONG_MAX;
-    RuntimeException::selfThrow(oss.str());
-  }
-  return (unsigned long int)res;
-}
-
-const double EventsManager::intToDoubleTime(unsigned long int intTime)
-{
-  return tick * intTime;
-}
-
 void EventsManager::initialize()
 {
   if (simulation == NULL)
@@ -110,9 +79,8 @@ void EventsManager::initialize()
   // Mind to check that new time-events are superior to t0/currentEvent ...
 
   // === Set current and nextEvent ===
-  double t0 = td->getModelPtr()->getT0();
-  currentEvent = getEventPtr(doubleToIntTime(t0));
-  nextEvent = getFollowingEventPtr(doubleToIntTime(t0));
+  currentEvent = *(unProcessedEvents.begin()); // First event in the set, normally the one at t0.
+  nextEvent = getFollowingEventPtr(currentEvent);
   if (nextEvent == NULL)
     RuntimeException::selfThrow("EventsManager initialize, can not find next event since there is only one event in the set!");
 }
@@ -138,14 +106,14 @@ const bool EventsManager::insertEvents(const EventsContainer& e)
   return (it != unProcessedEvents.end());
 }
 
-Event* EventsManager::getEventPtr(unsigned long int inputTime) const
+Event* EventsManager::getEventPtr(const mpz_t& inputTime) const
 {
   EventsContainer::iterator current;
   Event * searchedEvent = NULL;
   // look for the event following the one which time is inputTime
   for (current = unProcessedEvents.begin(); current != unProcessedEvents.end(); ++current)
   {
-    if ((*current)->getTimeOfEvent() == inputTime)
+    if (*(*current)->getTimeOfEvent() == inputTime)
     {
       searchedEvent = *current;
       break;
@@ -173,7 +141,7 @@ Event* EventsManager::getFollowingEventPtr(Event* inputEvent) const
     return (*next);
 }
 
-Event* EventsManager::getFollowingEventPtr(unsigned long int inputTime) const
+Event* EventsManager::getFollowingEventPtr(const mpz_t& inputTime) const
 {
   EventsContainer::iterator next = unProcessedEvents.upper_bound(getEventPtr(inputTime));
 
@@ -201,29 +169,21 @@ const double EventsManager::getTimeOfEvent(Event* event) const
   //  if(!hasEvent(event))
   if (event == NULL)
     RuntimeException::selfThrow("EventsManager getTimeOfEvent, Event == NULL (not present in the set?) ");
-  return intToDoubleTime(event->getTimeOfEvent());
-}
-
-const unsigned long int EventsManager::getIntTimeOfEvent(Event* event) const
-{
-  //  if(!hasEvent(event))
-  if (event == NULL)
-    RuntimeException::selfThrow("EventsManager getIntTimeOfEvent,  Event == NULL (not present in the set?) ");
-  return event->getTimeOfEvent();
+  return event->getDoubleTimeOfEvent();
 }
 
 const double EventsManager::getCurrentTime() const
 {
   if (currentEvent == NULL)
     RuntimeException::selfThrow("EventsManager getCurrentTime, current event is NULL");
-  return intToDoubleTime(currentEvent->getTimeOfEvent());
+  return currentEvent->getDoubleTimeOfEvent();
 }
 
 const double EventsManager::getNextTime() const
 {
   if (nextEvent == NULL)
     RuntimeException::selfThrow("EventsManager getNextTime, next event is NULL");
-  return intToDoubleTime(nextEvent->getTimeOfEvent());
+  return nextEvent->getDoubleTimeOfEvent();
 }
 
 void EventsManager::display() const
@@ -233,7 +193,6 @@ void EventsManager::display() const
     cout << "- This manager belongs to the simulation named \" " << simulation->getName() << "\", of type " << simulation->getType() << "." << endl;
   else
     cout << "- No simulation linked to this manager." << endl;
-  cout << " - Tick: " << tick << endl;
   EventsContainer::iterator it;
   cout << " - The number of already processed events is: " << pastEvents.size() << endl;
   for (it = pastEvents.begin(); it != pastEvents.end(); ++it)
@@ -252,25 +211,17 @@ const bool EventsManager::scheduleEvent(const string& type, double time)
   if (time < t0 || time > finalT)
     RuntimeException::selfThrow("EventsManager scheduleEvent(..., time), time out of bounds ([t0,T]).");
 
+  double currentTime = currentEvent->getDoubleTimeOfEvent();
+  if (time < currentTime)
+    RuntimeException::selfThrow("EventsManager scheduleEvent(..., time), time is lower than current event time while it is forbidden to step back.");
+
   // === Insert the event into the list ===
   bool isInsertOk = insertEvent(type, time);
 
-  // Check if an event already exists at this time (=>isInsertOk == false), if so update its type
-  // Usually this corresponds to a Non Smooth Event that occurs at a user time-step.
   if (!isInsertOk)
-  {
-    // convert time to the int format
-    unsigned long int t_int = doubleToIntTime(time) ;
-    // We first erase the existing element
-    unProcessedEvents.erase(getEventPtr(t_int));
-    // and then insert a new one at the same time but of a different type
-    isInsertOk = insertEvent(type, time);
-    if (currentEvent->getTimeOfEvent() == t_int)
-      currentEvent = getEventPtr(t_int);
-  }
+    RuntimeException::selfThrow("EventsManager scheduleEvent(..., time): insertion of a new event failed.");
 
   // update nextEvent value (may have change because of insertion).
-
   nextEvent = getFollowingEventPtr(currentEvent);
   return isInsertOk;
 }
@@ -327,15 +278,15 @@ void EventsManager::shiftEvents()
 
   EventsContainerIterator check; // to check if insertion succeed or not.
   // 1 - Get time of current event
-  unsigned long int told = currentEvent->getTimeOfEvent();
+  const mpz_t * told = currentEvent->getTimeOfEvent();
 
   // 2 - Get new currentEvent. currentEvent is shifted to the next event in time.
-  currentEvent = getFollowingEventPtr(told);
+  currentEvent = getFollowingEventPtr(*told);
 
   // 3 - Save Event(s) simultaneous to told into pastEvents
   // Warning: do not directly insert or remove currentEvent. Mind the pointer links!!
   // We get a range of all the Events at time told.
-  pair<EventsContainerIterator, EventsContainerIterator> rangeOld = unProcessedEvents.equal_range(getEventPtr(told));
+  pair<EventsContainerIterator, EventsContainerIterator> rangeOld = unProcessedEvents.equal_range(getEventPtr(*told));
   EventsContainerIterator it;
   for (it = rangeOld.first; it != rangeOld.second ; ++it)
     pastEvents.insert(*it);
@@ -344,7 +295,7 @@ void EventsManager::shiftEvents()
   unProcessedEvents.erase(rangeOld.first, rangeOld.second);
 
   // Get new nextEvent (return NULL if currentEvent is the last one)
-  nextEvent = getFollowingEventPtr(currentEvent->getTimeOfEvent());
+  nextEvent = getFollowingEventPtr(*currentEvent->getTimeOfEvent());
 }
 
 

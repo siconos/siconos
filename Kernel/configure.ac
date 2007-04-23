@@ -117,7 +117,8 @@ AC_HEADER_TIME
 # Checks for library functions.
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([floor gettimeofday])
-
+AC_CHECK_LIB(gmp, __gmpz_init, ,
+       [AC_MSG_ERROR([GNU MP not found, see http://swox.com/gmp/])])
 
 ###################################
 ## all the --enable-* argument help

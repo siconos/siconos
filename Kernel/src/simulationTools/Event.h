@@ -24,13 +24,16 @@
 #define EVENT_H
 
 #include "SiconosConst.h"
+#include<gmp.h>
 #include<string>
 #include<iostream>
 
 class Simulation;
 
-const unsigned long int DEFAULT_EVENT_TIME = 0;
 const std::string DEFAULT_EVENT_TYPE = "undefined";
+
+// tick default value
+const double DEFAULT_TICK = 1e-16;
 
 /** virtual class that represents generic time events.
  *
@@ -40,7 +43,7 @@ const std::string DEFAULT_EVENT_TYPE = "undefined";
  *
  *  This base class simply records the time at which the event will take place. A pure virtual function named process
  *  will be invoked to execute the event.
- *  The time is represented with an unsigned long int.
+ *  The time is represented with a mpz_t, from gmp library. See http://gmplib.org.
  *
  * Derived classes:
  * - TimeDiscretisationEvent: events that corresponds to user-defined time-discretisation points
@@ -54,11 +57,19 @@ class Event
 protected:
 
   /** Date of the present event,
-   *  represented with a long int */
-  const unsigned long int timeOfEvent;
+   *  represented with a mpz_t */
+  mpz_t timeOfEvent;
 
   /** Id or type of the Event */
   const std::string type;
+
+  /** Date of the present event,
+   *  represented with a double */
+  const double dTime;
+
+  /** confidence interval used to convert double time value to mpz_t
+   */
+  static double tick;
 
   /** Default constructor */
   Event();
@@ -70,22 +81,47 @@ protected:
 public:
 
   /** constructor with time value and type as input
-  *  \param an unsigned int
+  *  \param double
   *  \param a string
   */
-  Event(unsigned long int, const std::string & = DEFAULT_EVENT_TYPE);
+  Event(double, const std::string & = DEFAULT_EVENT_TYPE);
 
   /** destructor
    */
   virtual ~Event();
 
-  /** get the time of the present event (unsigned int format)
-   *  \return an unsigned long int
-   */
-  inline const unsigned long int getTimeOfEvent() const
+  /** get tick value
+  *  \return a double
+  */
+  inline const double getTick() const
   {
-    return timeOfEvent ;
+    return tick ;
   };
+
+  /** set tick value
+  *  \param a double
+  */
+  inline void setTick(double newTick)
+  {
+    std::cout << "Warning: you change tick value for EventsManager -> a new initialization of the object is required. " << std::endl;
+    tick = newTick;
+  };
+
+  /** get the time of the present event (mpz_t format)
+   *  \return a mpz_t
+   */
+  inline const mpz_t * getTimeOfEvent() const
+  {
+    return &timeOfEvent ;
+  };
+
+  /** get the time of the present event (double format)
+   *  \return a double
+   */
+  inline const double getDoubleTimeOfEvent() const
+  {
+    return dTime;
+  }
 
   /** get a type of the present event
    *  \return an std::string

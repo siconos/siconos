@@ -37,7 +37,7 @@ void Registry::add(const string& name, object_creator creator)
   factory_map[name] = creator;
 }
 
-Event* Registry::instantiate(unsigned long int time, const std::string& name)
+Event* Registry::instantiate(double time, const std::string& name)
 {
   MapFactoryIt it = factory_map.find(name) ;
 

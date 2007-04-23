@@ -28,5 +28,6 @@ Include files related to Siconos Kernel
 #include "XmlTools.h"
 #include <sys/time.h>
 #include <boost/timer.hpp>
+#include <boost/progress.hpp>
 
 

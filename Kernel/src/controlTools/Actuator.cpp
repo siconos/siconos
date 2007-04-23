@@ -27,17 +27,13 @@
 #include <iostream>
 using namespace std;
 
-// RuntimeCmp object used to sort Events in the set of Events
-// !!! \todo Find a way to avoid global variable ... !!!
-RuntimeCmp<Event> compEventsActuator(&Event::getTimeOfEvent);
-
-Actuator::Actuator(): type("generic"), id("none"), model(NULL), timeDiscretisation(NULL), eventsSet(compEventsActuator)
+Actuator::Actuator(): type("generic"), id("none"), model(NULL), timeDiscretisation(NULL), eventsSet()
 {}
 
-Actuator::Actuator(const std::string& name, TimeDiscretisation* t): type(name), id("none"), model(t->getModelPtr()), timeDiscretisation(t), eventsSet(compEventsActuator)
+Actuator::Actuator(const std::string& name, TimeDiscretisation* t): type(name), id("none"), model(t->getModelPtr()), timeDiscretisation(t), eventsSet()
 {}
 
-Actuator::Actuator(const std::string& name, TimeDiscretisation* t, const Sensors& sensorList): type(name), id("none"), model(t->getModelPtr()), timeDiscretisation(t), eventsSet(compEventsActuator)
+Actuator::Actuator(const std::string& name, TimeDiscretisation* t, const Sensors& sensorList): type(name), id("none"), model(t->getModelPtr()), timeDiscretisation(t), eventsSet()
 {
 
 }
@@ -91,19 +87,15 @@ void Actuator::initialize()
   unsigned int sizeTk = tk->size();
 
   // == Create Events linked to the present Actuator. ==
-  // convert input double time to unsigned int
-  unsigned long int intTime;
 
   EventsContainerIterator it; // to check if insertion succeed or not.
   string type = "ActuatorEvent";
 
+  // Uses the events factory to insert the new event.
+  EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;
   for (unsigned int i = 0; i < sizeTk; ++i)
-  {
-    intTime = EventsManager::doubleToIntTime((*tk)(i));
-    // Uses the events factory to insert the new event.
-    EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;
-    it = eventsSet.insert(regEvent.instantiate(intTime, type));
-  }
+    it = eventsSet.insert(regEvent.instantiate((*tk)(i), type));
+
   // == Set Actuator object of all Events to this ==
   for (it = eventsSet.begin(); it != eventsSet.end(); ++it)
     static_cast<ActuatorEvent*>((*it))->setActuatorPtr(this);
