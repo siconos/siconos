@@ -117,8 +117,14 @@ AC_HEADER_TIME
 # Checks for library functions.
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([floor gettimeofday])
+
+dnl case "$target" in
+dnl     *-apple-darwin*)
+dnl      LDFLAGS="-L/sw/lib/"
+dnl       ;; 
+dnl esac
 AC_CHECK_LIB(gmp, __gmpz_init, ,
-       [AC_MSG_ERROR([GNU MP not found, see http://swox.com/gmp/])])
+       [AC_MSG_ERROR([GNU MP not found, see http://swox.com/gmp/. If the GNU MP is installed in a non standard directory DIR, set the variable LDFLAGS="-LDIR"])])
 
 ###################################
 ## all the --enable-* argument help
@@ -154,6 +160,7 @@ if test "$atlas_available" = "yes"; then
  else
     AC_MSG_ERROR([Cannot find  Atlas. Please install it or use the option  --with-atlas-libs=DIR  to add ATLAS library path.]) 
 fi
+
 case "$target" in
     *-linux*)
       ATLAS_LIBS="$atlas_libraries $atlas_lib"
