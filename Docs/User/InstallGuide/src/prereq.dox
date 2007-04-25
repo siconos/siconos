@@ -2,12 +2,23 @@
 
 \section req_libs Required libraries
 
-\subsection atlas ATLAS (Automatically Tuned Linear Algebra Software). 
+\subsection atlas 1 - ATLAS (Automatically Tuned Linear Algebra Software). 
 
 On most Linuxes this package is available as pre-compiled binary under the name atlas. You also need atlas-devel to include some required header files. \n
 Atlas usually comes with \b Blas (Basic Linear Algebra Subprograms) and \b Lapack (Linear Algebra PACKage). 
 
-On Fedora: yum install atlas atlas-devel 
+\e Examples: \n
+
+\b Fedora: 
+\verbatim
+yum install atlas atlas-devel 
+\endverbatim
+\b Debian
+\verbatim
+apt-get install atlas atlas-devel
+\endverbatim
+
+\e More: \n
 
 About \b Blas: http://www.netlib.org/blas/
 
@@ -15,14 +26,14 @@ About \b Lapack: http://www.netlib.org/lapack/
 
 About \b Atlas: http://math-atlas.sourceforge.net/
 
-\subsection xml libxml2
+\subsection xml 2 - libxml2
 The XML C parser and toolkit. Required for XML file reading and writing.
 
 Usually available as rpm or pre-compiled binaries. 
 
 About \b libxml2: http://xmlsoft.org/
 
-\subsection boost Boost
+\subsection boost 3 - Boost
 Boost provides a lot of useful C++ binaries, especially \b Ublas, a C++ template class library that provides BLAS level 1, 2, 3 functionality for dense, packed and sparse matrices. 
 
 Ublas is used in Siconos for matrices and vectors definition and implementation.
@@ -37,23 +48,29 @@ About \b Boost: http://www.boost.org/
 
 About \b Ublas: http://www.boost.org/libs/numeric/ublas/doc/index.htm
 
+\subsection gmp 4 - GMP
+
+"GMP is a free library for arbitrary precision arithmetic, operating on signed integers, rational numbers, and floating point numbers ... "
+
+This library usually comes with gcc. If not see http://gmplib.org/ for download and installation instructions.
+
 \section opt_lib Optional libraries
 
-\subsection cppunit
+\subsection cppunit 1 - Cppunit
 CppUnit is a C++ unit testing framework, necessary in Siconos in you want to run tests (make check).
 
-About \b cppunit: http://cppunit.sourceforge.net/
+More about \b cppunit: see http://cppunit.sourceforge.net/
 
-\subsection Scilab
+\subsection scilab 2 - Scilab
 Scilab is an open source platform for numerical computation, used in Front-End package.
 
 Download : http://www.scilab.org/download/index_download.php?page=releasecandidate.html \n
 About \b scilab:  http://www.scilab.org/en/
 
-\subsection Python
+\subsection py 3 - Python
 Python® is a dynamic object-oriented programming language, used in Front-End package. 
 
-About \b Python; http://www.python.org/
+About \b Python: http://www.python.org/
 
 The Numeric package for Python is available on Gforge, https://gforge.inria.fr/frs/?group_id=9.\n
 
@@ -61,7 +78,7 @@ You also need Swig, a software development tool that connects programs written i
 
 About \b swig: http://www.swig.org/
 
-\subsection Doxygen
+\subsection doxy 4 - Doxygen
 
 Doxygen is a documentation system for C++, C, Java, Objective-C, Python, IDL (Corba and Microsoft flavors) and to some extent PHP, C#, and D. \n
 It is used to generate documentation for Siconos files. \n
@@ -71,7 +88,7 @@ See http://www.stack.nl/~dimitri/doxygen/install.html for details.
 
 \section sicInstPlatforms Platforms
 
-Siconos v2.0.1 has been successfully compiled on Linux Fedora Core 4 (gcc4.x)
+Siconos v2.0.1 has been successfully compiled on Linux Fedora Core 6 (gcc4.x).
 
 For: 
 
@@ -84,22 +101,21 @@ the maintainer would be glad to hear about that.
 
 \section libext External libraries versions
 
-Here is a list of the (recommended) version of the various external libraries used to compile Siconos (on Fedora Core 4)
+Here is a list of the (recommended) version of the various external libraries used to compile Siconos (on Fedora Core 6)
 
 Autotools:
 - libtool 1.5.22 
-- autoconf 2.60
-- automake 1.10
+- autoconf 2.59
+- automake 1.9.6
 
-Compiler: gcc 4.0.2 \n
+Compiler: gcc 4.1.1 \n
 
 Boost 1.33.1 \n
 
-cppunit: 1.10.2 (warning: it seems that higher versions lead to bugs ...)
+cppunit: 1.12
 
-Python: 2.4.3
+Python: 2.4.4
 
 Doxygen: 1.5.1
-
 
 */

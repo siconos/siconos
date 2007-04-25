@@ -2,24 +2,24 @@
 
 Four packages are available:
 
-- \b Siconos-Numerics: shared dynamic library that provides low-level algorithms (Fortran and C) - Requires Blas-Lapack. 
+- \b Siconos-Numerics: shared dynamic library that provides low-level algorithms (Fortran and C).
 
 - \b Siconos-Kernel: high level C++ classes and methods, main package of the software. 
 
 - \b Siconos-Front-End: interfaces with "user-friendly" softwares, Scilab and Python
 
-- \b Siconos-Samples: a library of examples. 
+- \b Siconos-Examples: a library of examples. 
 
-You need at least Numerics and Kernel. 
+For a minimal Siconos installation, Numerics and Kernel are required.
 
-\section tgz Source (tgz archives)
+\section tgz 1 - Downloading from Sources (tgz archives)
 
 The platform sources (.tgz) are available at the following address: 
 https://gforge.inria.fr/frs/?group_id=9
 
 To download the sources of any package of the
 Siconos software a login and a password are required.
-To get them, please send a mail to: 
+To get them, please send an e-mail to: 
 
 siconos-download@lists.gforge.inria.fr
 
@@ -40,7 +40,7 @@ You will get login and password by e-mail.
 
 Then you can log in and select the requested packages or files.
 
-\section svn Subversion
+\section svn 2 - Subversion
 
 If you are a developer of the platform, you can use subversion tools to get the software.
 First you need to connect to the Gforge and add your ssh-key (see https://gforge.inria.fr/scm/?group_id=9).

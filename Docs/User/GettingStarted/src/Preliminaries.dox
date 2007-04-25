@@ -15,23 +15,21 @@ DynamicalSystem * nameOfMyDS = new LagrangianDS(someParameters)
 delete nameOfMyDS
 \endcode
 A call to \e new reserve memory and build the object, while \e delete release memory. \n
-For each object, different types of constructors are available. See the corresponding Doxygen documentation of the class for an exhaustive list.\n
-Access to methods of the objects is done thanks to "*" or "->":
+For each object, different types of constructors are available. For an exhaustive list see the Doxygen documentation of the class (for example click on class name "LagrangianDS" above).\n
+
+
+The access to the methods of the objects is done thanks to "*" or "->":
 \code
 nameOfMyDS->getType(); // return the type of the DynamicalSystem
 (*nameOfMyDS).getType(); // Same thing. 
 \endcode
-\subsection tutHeader About include headers
-For all objects you use in main.cpp, you need to include the corresponding header file.\n
-Example: to use LagrangianDS objects:
-\code
-#include "LagrangianDS.h"
-\endcode
+
+
 \subsection tutTempl Siconos input file template
 Any main.cpp should more or less looks like:
 \code
-// A list of include files 
-#include "LagrangianDS.h"
+// Include file for all Siconos functionnalities ...
+#include "SiconosKernel.h"
 // ...
 // The main 
 int main(int argc, char* argv[])
@@ -84,12 +82,15 @@ ioMatrix myMat("outMat","ascii");
 myMat.write(m); // Write m in file outMat
 \endcode
 Note that for reading, you can also directly use constructor as shown in \ref creatingVector. 
+
 <b> Input/Ouput Files format: </b> \n
-On the first line, the dimensions, with space as separator. Then the data. Exemple, for a 2-rows, 3-columns matrix:\n
+On the first line, the dimensions, with space as separator. Then the data. 
+
+Example, for a 2-rows, 3-columns matrix:\n
 2 3\n
 1 2 3\n
 4 5 6\n
-However, if you give as as second argument to \e write function "noDim", the first line with dimensions will skipped.
+However, if you give as a second argument to \e write function "noDim", the first line with dimensions will not be written.
 \subsection matUtils Useful functions
 \code
 v->size() // return the size of the vector

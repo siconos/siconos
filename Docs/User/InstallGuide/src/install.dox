@@ -1,6 +1,6 @@
 /*! \page IG_install Installing Siconos
 
-\section comp Compile and Install of Siconos
+\section howtoIG How to Compile and Install Siconos
 
 Three steps:
 
@@ -14,6 +14,8 @@ Warning: before that, make sure you have read the section \ref IG_prereq.
 
 For compilation of each package, run the following commands in Numerics/Kernel/FrontEnd directories:
 
+<em> Warning: you may need to be connected as root for "make install", depending on the targeted location. </em>
+
 \verbatim
  ./autogen.sh
  ./configure 
@@ -21,15 +23,13 @@ For compilation of each package, run the following commands in Numerics/Kernel/F
   make install
 \endverbatim
 
-Type <tt>./configure --help</tt> to see more information.
+Type <tt>./configure --help</tt> to see more information on the available options.
 
-Default installation path is /usr/local. \n
-To change that, type 
+The default installation path is /usr/local but you can choose a local one at configure:\n
 \verbatim
 ./configure --prefix=/your/install/path 
 \endverbatim
 
-Warning: depending on the installation path, you might be root to run make install.
 
 To run tests: 
 \verbatim
@@ -44,5 +44,11 @@ To generate Doxygen documentation:
 \verbatim
 make doc
 \endverbatim
+
+The resulting doc (html) is saved in ../GeneratedDocs/XXX, XXX being Kernel or Numerics.
+
+\section IG_more More ...
+
+- \subpage IG_debian
 
 */

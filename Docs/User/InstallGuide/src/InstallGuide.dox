@@ -7,7 +7,7 @@ Siconos is a free (GNU license) software, dedicated to modeling, simulation and 
 This manual explains how to download and install the Siconos platform. \n
 It also shortly describes the different required or optional libraries.\n
 
-\section IG_contents Contents
+\section IG_contents Contents:
 
 \subpage IG_prereq 
 
