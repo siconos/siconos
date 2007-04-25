@@ -44,12 +44,13 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 2;           // degrees of freedom for robot arm
     double t0 = 0;                   // initial computation time
-    double T = 25;                   // final computation time
+    double T = 30;                   // final computation time
     double h = 0.0005;                // time step
     double criterion = 0.0005;
     unsigned int maxIter = 20000;
     double e = 0.7;                  // nslaw
     double e2 = 0.0;
+    int test = 0;
 
     // -> mind to set the initial conditions below.
 
@@ -68,13 +69,15 @@ int main(int argc, char* argv[])
     SimpleVector q0(nDof), v0(nDof);
     q0.zero();
     v0.zero();
-    q0(0) = 1.7;
+    q0(0) = 1;
     q0(1) = -1.5;
-    SiconosVector * z = new SimpleVector(nDof * 2);
+    SiconosVector * z = new SimpleVector(nDof * 3);
     (*z)(0) = q0(0);
     (*z)(1) = q0(1);
     (*z)(2) = v0(0);
     (*z)(3) = v0(1);
+    (*z)(4) = 0;
+    (*z)(5) = 0;
 
     LagrangianDS * arm = new LagrangianDS(1, q0, v0);
 
@@ -183,13 +186,14 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 7;
+    unsigned int outputSize = 8;
     SimpleMatrix dataPlot(N + 1, outputSize);
     // For the initial time step:
     // time
 
     SiconosVector * q = arm->getQPtr();
     SiconosVector * v = arm->getVelocityPtr();
+    // EventsManager * eventsManager = s->getEventsManagerPtr();
 
     dataPlot(k, 0) =  Manipulator->getCurrentT();
     dataPlot(k, 1) = (*q)(0);
@@ -198,7 +202,23 @@ int main(int argc, char* argv[])
     dataPlot(k, 4) = (*v)(0);
     dataPlot(k, 5) = (*v)(1);
     dataPlot(k, 6) = (inter->getY(0))(0) - 2;
-    //     //    EventsManager * eventsManager = s->getEventsManagerPtr();
+    dataPlot(k, 7) = (inter->getY(1))(1);
+
+    bool isNewtonConverge = false;
+    unsigned int nbNewtonStep = 0; // number of Newton iterations
+
+    UnitaryRelationsSet * I0 = s->getIndexSetPtr(0);
+    UnitaryRelationIterator it;
+    Interaction *tmp;
+    UnitaryRelation * UR = NULL;
+    for (it = I0->begin(); it != I0->end(); ++it)
+    {
+      tmp = (*it)->getInteractionPtr();
+      if (tmp == inter)
+        UR = *it;
+    }
+
+    UnitaryRelationsSet * I1 = s->getIndexSetPtr(1);
 
     while (s->hasNextEvent())
     {
@@ -206,9 +226,10 @@ int main(int argc, char* argv[])
       (*z)(1) = (*q)(1);
       (*z)(2) = (*v)(0);
       (*z)(3) = (*v)(1);
+
       // get current time step
       k++;
-      s->newtonSolve(criterion, maxIter);
+
       dataPlot(k, 0) =  Manipulator->getCurrentT();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*q)(1);
@@ -216,7 +237,34 @@ int main(int argc, char* argv[])
       dataPlot(k, 4) = (*v)(0);
       dataPlot(k, 5) = (*v)(1);
       dataPlot(k, 6) = (inter->getY(0))(0) - 2;
-      //dataPlot(k,7) = (inter->getY(0))(1);
+      dataPlot(k, 7) = (inter->getY(1))(1);
+
+      isNewtonConverge = false;
+      nbNewtonStep = 0; // number of Newton iterations
+
+      s->newtonSolve(criterion, maxIter);
+      (*z)(4) = (inter->getLambda(0))(1);
+      // change of controller between the free-motion phase and impacts accumulation phase.
+      if ((I1->find(UR) != I1->end()) && (test == 0) && ((inter->getY(0))(0) - 2 < 0.65))
+      {
+        (*z)(5) = (inter->getY(0))(0) - 2;
+        arm->setComputeFExtFunction("Two-linkPlugin.so", "U1");
+        test = 1;
+      }
+
+      // change of controller between the impacts accumulation phase and constraint-motion phase.
+      if (((inter->getY(1))(1) <= 0.0001) && (test == 1))
+      {
+        arm->setComputeFExtFunction("Two-linkPlugin.so", "U2");
+        test = 2;
+      }
+
+      // change of controller between the constraint-motion phase and free-motion phase.
+      if (((inter->getY(0))(0) - 2 >= 0.745) && (test == 2))
+      {
+        arm->setComputeFExtFunction("Two-linkPlugin.so", "U");
+        test = 0;
+      }
     }
 
     // --- Output files ---
