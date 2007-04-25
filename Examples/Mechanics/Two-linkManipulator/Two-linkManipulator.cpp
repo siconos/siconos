@@ -239,7 +239,7 @@ int main(int argc, char* argv[])
     delete nslaw;
     delete nslaw2;
     delete z;
-    //    delete arm;
+    delete arm;
   }
 
   catch (SiconosException e)

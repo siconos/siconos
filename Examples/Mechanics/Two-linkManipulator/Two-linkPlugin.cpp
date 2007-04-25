@@ -34,7 +34,7 @@ double gamma1 = 5;
 double P = 10;
 
 
-extern "C" void mass(unsigned int sizeOfq, const double *q, double *mass, double* param)
+extern "C" void mass(unsigned int sizeOfq, const double *q, double *mass, unsigned int sizeZ, double* z)
 {
   mass[0]  = m1 * (l1 * l1 / 4) + I1 + I2 + m2 * (l1 * l1 + (l2 * l2 / 4) + l1 * l2 * cos(q[1]));
   mass[1]  = I2 + m2 * l2 * l2 / 4 + m2 * l1 * l2 * cos(q[1]) / 2;
@@ -42,14 +42,14 @@ extern "C" void mass(unsigned int sizeOfq, const double *q, double *mass, double
   mass[3]  = I2 + m2 * l2 * l2 / 4;
 }
 
-extern "C" void NNL(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, double* param)
+extern "C" void NNL(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, unsigned int sizeZ, double* z)
 {
   NNL[0] = -m2 * l1 * l2 * sin(q[1]) * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + g * (l1 * (m1 / 2 + m2) * cos(q[0]) + m2 * l2 * cos(q[0] + q[1]) / 2);
   NNL[1] = m2 * l1 * l2 * sin(q[1]) * velocity[0] * velocity[0] / 2 + g * m2 * l2 * cos(q[1] + q[0]) / 2;
 }
 
 
-extern "C" void U(unsigned int sizeOfq, double time, double *U, double* z)
+extern "C" void U(double time, unsigned int sizeOfq, double *U, unsigned int sizeZ, double* z)
 {
   double m11 = m1 * (l1 * l1 / 4) + I1 + I2 + m2 * (l1 * l1 + (l2 * l2 / 4) + l1 * l2 * cos(z[1]));
   double m12 = (m2 * l2 * l2 / 4) + I2 + m2 * l1 * l2 * cos(z[1]) / 2;
@@ -114,7 +114,7 @@ extern "C" void U(unsigned int sizeOfq, double time, double *U, double* z)
 
 }
 
-extern "C" void jacobianQNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, double* param)
+extern "C" void jacobianQNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
 {
   jacob[0] = 0;//-g*(l1*(m1/2+m2)*sin(q[0])+m2*l2*sin(q[0]+q[1])/2);
   jacob[1] = 0;//-g*m2*l2*sin(q[1]+q[0])/2;
@@ -122,7 +122,7 @@ extern "C" void jacobianQNNL(unsigned int sizeOfq, const double *q, const double
   jacob[3] = (m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] / 2); //-g*m2*l2*sin(q[1]+q[0])/2;
 }
 
-extern "C" void jacobianVNNL(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, double* param)
+extern "C" void jacobianVNNL(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
 {
   jacob[0] =   -m2 * l1 * l2 * sin(q[1]) * velocity[1];
   jacob[1] =   m2 * l1 * l2 * sin(q[1]) * velocity[0];
@@ -132,14 +132,14 @@ extern "C" void jacobianVNNL(unsigned int sizeOfq, const double *q, const  doubl
 
 
 
-extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, double* param)
+extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeOfZ, double* z)
 {
   y[0] = 2 + l1 * cos(q[0]) + l2 * cos(q[0] + q[1]);
   y[1] = l1 * sin(q[0]) + l2 * sin(q[0] + q[1]);
 
 }
 
-extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, double* param)
+extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeOfZ, double* z)
 {
   G[0] = 0;
   G[1] = l1 * cos(q[0]) + l2 * cos(q[0] + q[1]);
@@ -147,59 +147,3 @@ extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, 
   G[3] = l2 * cos(q[0] + q[1]);
 }
 
-// extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, double* param)
-// {
-//     y[0] = l1*sin(q[0])+l2*sin(q[0]+q[1]);
-
-// }
-
-// extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, double* param)
-// {
-//   G[0] = l1*cos(q[0])+l2*cos(q[0]+q[1]);
-//   G[1] = l2*cos(q[0]+q[1]);
-// }
-
-//extern "C" void h1(unsigned int sizeOfq, const double* q,const  double *velocity, unsigned int sizeOfY, double* x, double* param)
-// {
-//   x[0] = l1*cos(q[0])+l2*cos(q[0]+q[1]); // x
-//   x[1] = l1*sin(q[0])+l2*sin(q[0]+q[1]); // y
-//   x[2] = -l1*sin(q[0])*velocity[0]-l2*sin(q[0]+q[1])*(velocity[0]+velocity[1]); // x prime
-//   x[3] = l1*cos(q[0])*velocity[0]+l2*cos(q[0]+q[1])*(velocity[0]+velocity[1]); // y prime
-// }
-
-// extern "C" void G1(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* H, double* param)
-// {
-//   H[0] = l1*cos(q[0])+l2*cos(q[0]+q[1]);
-//   H[1] = -l1*sin(q[0])-l2*sin(q[0]+q[1]);
-//   H[2] = l2*cos(q[0]+q[1]);
-//   H[3] = -l2*sin(q[0]+q[1]);
-// }
-
-// extern "C" void hd(unsigned int sizeOfq, double time, unsigned int sizeOfY, double* xd, double* param)
-// {
-//   xd[0] =0.65+0.1*cos(2*3.14*time/T); // xd
-//   xd[1] =0.1*sin(2*3.14*time/T);  // yd
-// }
-
-// extern "C" void Gd(unsigned int sizeOfq,double time, const double* q, unsigned int sizeOfY, double* Hd, double* param)
-// {
-//   Hd[0] = -(2*3.14/T)*0.1*sin(2*3.14*time/T);// xd prime
-//   Hd[1] = (2*3.14/T)*0.1*cos(2*3.14*time/T); // yd prime
-//   Hd[2] = -(2*3.14/T)*(2*3.14/T)*0.1*cos(2*3.14*time/T);// xd second
-//   Hd[3] = -(2*3.14/T)*(2*3.14/T)*0.1*sin(2*3.14*time/T);// yd second
-// }
-// extern "C" void Qr1(unsigned int sizeOfq,double time, const double* q, unsigned int sizeOfY, double* qr, double* param)
-// {
-//   qr[0] = -(2*3.14/T)*0.1*sin(2*3.14*time/T)-gamma2*(l1*cos(q[0])+l2*cos(q[0]+q[1])-0.65+0.1*cos(2*3.14*time/T));//xr prime
-//   qr[1] =(2*3.14/T)*0.1*cos(2*3.14*time/T)-gamma2*(l1*sin(q[0])+l2*sin(q[0]+q[1])-0.1*sin(2*3.14*time/T));//yr prime
-
-// }
-
-// extern "C" void Qr2(unsigned int sizeOfq, double time, const double* q,const  double *velocity, unsigned int sizeOfY, double* qrl, double* param)
-// {
-// //xr second
-//   qrl[0] = -(2*3.14/T)*(2*3.14/T)*0.1*cos(2*3.14*time/T)-gamma2* (-l1*(sin(q[0])*velocity[0]-l2*sin(q[0]+q[1])*(velocity[0]+velocity[1])+(2*3.14/T)*0.1*sin(2*3.14*time/T)));
-// //yr second
-//   qrl[1] = -(2*3.14/T)*(2*3.14/T)*0.1*sin(2*3.14*time/T)-gamma2*(l1*cos(q[0])*velocity[0]+l2*cos(q[0]+q[1])*(velocity[0]+velocity[1])-(2*3.14/T)*0.1*cos(2*3.14*time/T));
-
-// }
