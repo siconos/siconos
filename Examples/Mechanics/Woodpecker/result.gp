@@ -1,6 +1,6 @@
-!set term post eps color solid
-!set output "woodpecker.eps"
-set  term X11
+set term post eps color solid
+set output "woodpecker.eps"
+!set  term X11
 !tail -n 100000 result.dat > result-gp.dat
 
 set xzeroaxis
