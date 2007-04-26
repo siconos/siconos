@@ -1,11 +1,10 @@
-/*! \page doc_prelim Preliminaries
+/*! \page cppPrelim Preliminaries on C++
 
-\section cppPrelim Preliminaries on C++
 Since the Siconos input file is written in C++, you need at least a basic knowledge of this language. See for example
 <a href="http://www.ibiblio.org/pub/docs/books/eckel/">Thinking in C++</a> from Bruce Eckel.\n
 However, you can find in this first section the main C++ commands you need to know to write a first input file. \n
 
-\subsection tutBuild Building/destroying and using objects
+\section tutBuild Building/destroying and using objects
 To describe your problem, you will mainly need to build an destroy pointers to objects. 
 For example, suppose you want to build a LagrangianDS, which belongs to the base class DynamicalSystem, then do:
 \code
@@ -23,147 +22,7 @@ The access to the methods of the objects is done thanks to "*" or "->":
 nameOfMyDS->getType(); // return the type of the DynamicalSystem
 (*nameOfMyDS).getType(); // Same thing. 
 \endcode
+*/
 
-
-\subsection tutTempl Siconos input file template
-Any main.cpp should more or less looks like:
-\code
-// Include file for all Siconos functionnalities ...
-#include "SiconosKernel.h"
-// ...
-// The main 
-int main(int argc, char* argv[])
-{
-  try{
-
-    // Objects building
-    NonSmoothDynamicalSystem * nsds = ...;
-    Model * mod = new Model(t0, t1);
- 
-    // Release memory
-    delete nsds;
-    delete mode;
-     }
-\endcode
-
-\section tutVector Vectors and Matrices handling
-In Siconos, matrices and vectors handling is based on <a href="http://www.boost.org/libs/numeric/ublas/doc/index.htm">Boost Ublas library</a>. 
-The Base (virtual) classes are SiconosVector and SiconosMatrix, with two kinds of usable derivated classes: Simple and Block. In addition some io classes are used for reading/writing object. \n
-
-<b>Main classes:</b>  <em> SimpleVector, SimpleMatrix, BlockVector, BlockMatrix, ioVector, ioMatrix</em>\n
-
-Vectors can be dense or sparse and matrices dense, sparse, triangular, banded and symetric. 
-\subsection creatingVector Creating a vector: 
-\code
-int size = 4;
-// Dense vector
-SiconosVector * v = new SimpleVector(size); 
-// Or without pointers
-SimpleVector w(size);
-// Sparse vector
-SiconosVector * z = new SimpleVector(size,SPARSE);
-// Read the vector from the file vect.dat (only for dense) 
-SiconosVector * v2 = new SimpleVector("vect.dat",1); // 1: ascii, 0:binary
-\endcode
-\subsection creatingMatrix Creating a matrix:
-\code
-int row = 3, col = 3;
-// row X col Dense matrix:
-SiconosMatrix * m = new SimpleMatrix(row,col);
-// Read from a file
-SiconosMatrix * m2 = new SimpleMatrix("mat.dat",1); // 1: ascii, 0:binary
-\endcode
-\subsection matIO Matrix/Vector Input/Output
-\code
-// v is a vector, m a matrix
-ioVector myOutput ("MyData","ascii"); 
-myOutput.read(v); // read v from file MyData
-ioMatrix myMat("outMat","ascii");
-myMat.write(m); // Write m in file outMat
-\endcode
-Note that for reading, you can also directly use constructor as shown in \ref creatingVector. 
-
-<b> Input/Ouput Files format: </b> \n
-On the first line, the dimensions, with space as separator. Then the data. 
-
-Example, for a 2-rows, 3-columns matrix:\n
-2 3\n
-1 2 3\n
-4 5 6\n
-However, if you give as a second argument to \e write function "noDim", the first line with dimensions will not be written.
-\subsection matUtils Useful functions
-\code
-v->size() // return the size of the vector
-m->size(0); // number of rows in the matrix
-m->size(1), // number of columns
-v->zero();  // for matrix or vectors, set all elements to 0.
-m->eye();   // set m to identity
-m->resize(a,b); // resize m, available also for vectors
-m->normInf() ; // compute infinite matrix norm of m
-// Elements access: () 
-(*v)(0) = 4;
-w(1) = 2;
-w(2) = (*v)(0);
-\endcode
-All classical operators are also available, see doxygen. \n
-For operations between matrices or vectors of different types, use prod, add or sub. 
-\code
-// Let m1, m2, m3 be dense matrices and s a symetric matrix
-// Then you can write:
-m3 = m1*m2; // equivalent to m3 = prod(m1,m2);
-// but you have to write
-m3 = prod(m1,s); 
-\endcode
-In a general way, if you need efficiency, always prefer functions to overloaded operators. 
-
-\section tutGCtemplate Templates for main input file
-
-\code
-// Header files
-#include "Model.h"
-// ...
-using namespace std;
-
-// main program
-int main(int argc, char* argv[])
-{
-  // Exception handling
-  try{
-    // == User-defined parameters ==
-	
-    // ================= Creation of the model =======================
-
-    // == Creation of the NonSmoothDynamicalSystem ==
-    // -- DynamicalSystem(s) --
-    // -- Interaction --
-    // - Relations - 
-    // - NonSmoothLaw -
-    // -- NonSmoothDynamicalSystem --	
-    // -- Model --
-    // == Creation of the Simulation ==
-    // -- TimeDiscretisation --
-    // -- OneStepIntegrator --
-    // -- OneStepNSProblem --
-    // ================================= Computation =================================
-
-    // --- Initialisation of the simulation ---
-
-    // --- Time loop ---
-    
-    // --- Free memory --- 
-    delete ...
-   }
-	
-  catch(SiconosException e)
-    {cout << e.report() << endl;}
-  catch(...)
-    {cout << "Exception caught in \'mySample.cpp\'" << endl;}
-}
-
-\endcode
-
-\section prelSTLTool STL tools in Siconos
-
-Something about sets (STL) \n
 
 */

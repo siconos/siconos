@@ -19,12 +19,6 @@ For more details on specific topics see the \ref SicUsersGuide.
 
 \subpage doc_prelim
 
- - \ref cppPrelim
- - \ref tutVector
- - \ref tutGCtemplate
-
-\subpage runningSimu
-
 \subpage SiconosTutorial 
 
 \subpage usingxml 

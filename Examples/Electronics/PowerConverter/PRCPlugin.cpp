@@ -1,4 +1,4 @@
-/* Siconos-sample version 2.0.1, Copyright INRIA 2005-2006.
+/* Siconos-sample version 2.0.0, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -28,19 +28,12 @@
 // ===== Dynamical System =====
 
 // function to compute u
-extern "C" void computeU(unsigned int sizeOfU, unsigned int sizeOfX, double time, const double* xPtr, double* UPtr, double* param)
+extern "C" void computeU(double time, unsigned int sizeU, double *U, unsigned int sizeZ, double* z)
 {
-  /* input parameter :
-   *  sizeOfU (size of the vector u)
-   *  sizeOfX (size of the vector x)
-   *  time
-   *  pointer to x
-   *  pointer to xDot
-   *  pointer to u (in-out parameter)
-   */
-
+  // z[0] = 100/Lrvalue.
   if (time == 0.0)
-    UPtr[0] = 0;
+    U[0] = 0;
   else
-    UPtr[0] = sin(2.0 * M_PI * 55000.0 * time) / fabs(sin(2.0 * M_PI * 55000.0 * time));
+    U[0] = z[0] * sin(2.0 * M_PI * 55000.0 * time) / fabs(sin(2.0 * M_PI * 55000.0 * time));
 }
+

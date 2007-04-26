@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
   {
 
     // User-defined main parameters
-    unsigned int dsNumber = 10;      // the number of dynamical systems
+    unsigned int dsNumber = 10000;      // the number of dynamical systems
     unsigned int nDof = 3;           // degrees of freedom for beads
     double increment_position = 1;   // initial position increment from one DS to the following
     double increment_velocity = 0;   // initial velocity increment from one DS to the following
@@ -185,7 +185,7 @@ int main(int argc, char* argv[])
 
     // -- OneStepNsProblem --
     LCP * osnspb = new LCP(s, "LCP", solverName, 10001, 0.001);
-    osnspb->setisMSparseBlock(true);
+    //    osnspb->setisMSparseBlock(true);
     cout << "=== End of model loading === " << endl;
     // =========================== End of model definition =================================
     // ================================= Computation =================================
@@ -215,7 +215,7 @@ int main(int argc, char* argv[])
     while (k < N)
     {
       k++;
-      if (!(div(k, 10).rem))  cout << "Step number " << k << "\n";
+      //   if (!(div(k,10).rem))  cout <<"Step number "<< k << "\n";
 
       // solve ...
 
