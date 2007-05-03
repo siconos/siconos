@@ -44,7 +44,6 @@
 //    y and lambda (derived from Kirchhoff laws)
 //
 //-----------------------------------------------------------------------
-
 #include "SiconosKernel.h"
 
 using namespace std;

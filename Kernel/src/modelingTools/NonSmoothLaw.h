@@ -57,19 +57,27 @@ protected:
   /** the XML pbject linked to the NonSmoothLaw to read XML data */
   NonSmoothLawXML *nslawxml;
 
+  /** default constructor
+   */
+  NonSmoothLaw() {};
+
+  /** copy constructor (private=> no copy nor pass-by value allowed)
+   */
+  NonSmoothLaw(const NonSmoothLaw&) {};
+
 public:
 
-  /** default constructor
+  /** basic constructor
   * \param string: type of the law (optional, default = none)
-  * \param unsigned int, the non smooth law size, default = 1
+  * \param unsigned int, the non smooth law size
   */
-  NonSmoothLaw(const std::string = "none", const unsigned int& = 1);
+  NonSmoothLaw(const std::string&, unsigned int);
 
   /** constructor with XML object of the NonSmoothLaw
   * \param string: type of the law
   *  \param NonSmoothLawXML* : the XML object corresponding
   */
-  NonSmoothLaw(const std::string , NonSmoothLawXML*);
+  NonSmoothLaw(const std::string& , NonSmoothLawXML*);
 
   /** destructor
   */
@@ -123,7 +131,7 @@ public:
   /** set the size of the nsLaw
   *  \param an unsigned int
   */
-  inline void setNsLawSize(const unsigned int newVal)
+  inline void setNsLawSize(unsigned int newVal)
   {
     size = newVal;
   }

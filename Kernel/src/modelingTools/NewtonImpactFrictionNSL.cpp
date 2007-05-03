@@ -20,7 +20,12 @@
 #include "NewtonImpactFrictionNSLXML.h"
 using namespace std;
 
-NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(const unsigned int newSize):
+// Default (private)
+NewtonImpactFrictionNSL::NewtonImpactFrictionNSL():
+  NonSmoothLaw(), en(0.0), et(0.0), mu(0.0)
+{}
+
+NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(unsigned int newSize):
   NonSmoothLaw(NEWTONIMPACTFRICTIONNSLAW, newSize), en(0.0), et(0.0), mu(0.0)
 {}
 
@@ -39,7 +44,7 @@ NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(NonSmoothLawXML* nslawxml):
   mu = (static_cast<NewtonImpactFrictionNSLXML*>(nslawxml))->getMu();
 }
 
-NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(const double newEn, const double newEt, const double newMu, const unsigned int newSize):
+NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(double newEn, double newEt, double newMu, unsigned int newSize):
   NonSmoothLaw(NEWTONIMPACTFRICTIONNSLAW, newSize), en(newEn), et(newEt), mu(newMu)
 {}
 

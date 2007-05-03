@@ -30,10 +30,12 @@
 // function to compute u
 extern "C" void computeU(double time, unsigned int sizeU, double *U, unsigned int sizeZ, double* z)
 {
-  // z[0] = 100/Lrvalue.
+  double f = 55000.0;
   if (time == 0.0)
     U[0] = 0;
   else
-    U[0] = z[0] * sin(2.0 * M_PI * 55000.0 * time) / fabs(sin(2.0 * M_PI * 55000.0 * time));
+  {
+    U[0] = z[0] * sin(2.0 * M_PI * f * time) / fabs(sin(2.0 * M_PI * f * time));
+  }
 }
 

@@ -56,6 +56,7 @@ int main(int argc, char* argv[])
     // --- Dynamical systems ---
     // -------------------------
 
+    cout << "====> Model loading ..." << endl << endl;
     unsigned int i;
     // A set of DS that will handle all the "balls"
     DynamicalSystemsSet allDS;
@@ -186,18 +187,17 @@ int main(int argc, char* argv[])
     // -- OneStepNsProblem --
     LCP * osnspb = new LCP(s, "LCP", solverName, 10001, 0.001);
     //    osnspb->setisMSparseBlock(true);
-    cout << "=== End of model loading === " << endl;
     // =========================== End of model definition =================================
     // ================================= Computation =================================
     // --- Simulation initialization ---
+    cout << "====> Simulation initialisation ..." << endl << endl;
     s->initialize();
-    cout << "End of simulation initialisation" << endl;
 
     int k = 0;
     int N = t->getNSteps(); // Number of time steps
 
     // Prepare output and save value for the initial time
-    unsigned int outputSize = dsNumber * 2 + 1;
+    unsigned int outputSize = 21;//dsNumber*2+1;
     SimpleMatrix dataPlot(N + 1, outputSize); // Output data matrix
     // time
     dataPlot(k, 0) = s->getCurrentTime();
@@ -209,9 +209,11 @@ int main(int argc, char* argv[])
       dataPlot(k, (int)i * 2 + 1) = static_cast<LagrangianLinearTIDS*>(*it)->getQ()(0);
       dataPlot(k, (int)i * 2 + 2) = static_cast<LagrangianLinearTIDS*>(*it)->getVelocity()(0);
       i++;
+      if ((*it)->getNumber() == 9)
+        break;
     }
     // --- Time loop ---
-    cout << "Start computation ... " << endl;
+    cout << "====> Start computation ... " << endl << endl;
     while (k < N)
     {
       k++;
@@ -242,12 +244,16 @@ int main(int argc, char* argv[])
         dataPlot(k, (int)i * 2 + 1) = static_cast<LagrangianLinearTIDS*>(*it)->getQ()(0);
         dataPlot(k, (int)i * 2 + 2) = static_cast<LagrangianLinearTIDS*>(*it)->getVelocity()(0);
         i++;
+        if ((*it)->getNumber() == 9)
+          break;
       }
       // transfer of state i+1 into state i and time incrementation
       s->nextStep();
 
     }
+    cout << "End of computation - Number of iterations done: " << k - 1 << endl;
     // --- Output files ---
+    cout << "====> Output file writing ..." << endl;
     ioMatrix io("result.dat", "ascii");
     io.write(dataPlot, "noDim");
 
@@ -275,7 +281,6 @@ int main(int argc, char* argv[])
       delete v0[i];
     }
     delete Mass;
-    cout << "End of computation - Number of iterations done: " << k << endl;
   }
 
   catch (SiconosException e)

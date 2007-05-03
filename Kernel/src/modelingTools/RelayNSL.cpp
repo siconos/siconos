@@ -21,8 +21,12 @@
 #include "RelayNSLXML.h"
 using namespace std;
 
-RelayNSL::RelayNSL():
-  NonSmoothLaw(RELAYNSLAW), c(0.0), d(0.0)
+// Default (private)
+RelayNSL::RelayNSL(): NonSmoothLaw(), c(0.0), d(0.0)
+{}
+
+RelayNSL::RelayNSL(unsigned int newSize):
+  NonSmoothLaw(RELAYNSLAW, newSize), c(0.0), d(0.0)
 {}
 
 RelayNSL::RelayNSL(NonSmoothLawXML* nslawxml):
@@ -36,8 +40,8 @@ RelayNSL::RelayNSL(NonSmoothLawXML* nslawxml):
   else RuntimeException::selfThrow("RelayNSL::xml constructor, xml file=NULL");
 }
 
-RelayNSL::RelayNSL(const double newC, const double newD):
-  NonSmoothLaw(RELAYNSLAW), c(newC), d(newD)
+RelayNSL::RelayNSL(double newC, double newD, unsigned int newSize):
+  NonSmoothLaw(RELAYNSLAW, newSize), c(newC), d(newD)
 {}
 
 RelayNSL::~RelayNSL()

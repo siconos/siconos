@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
     unsigned int nDof = 2;           // degrees of freedom for robot arm
     double t0 = 0;                   // initial computation time
     double T = 30;                   // final computation time
-    double h = 0.0005;                // time step
+    double h = 0.005;                // time step
     double criterion = 0.0005;
     unsigned int maxIter = 20000;
     double e = 0.7;                  // nslaw

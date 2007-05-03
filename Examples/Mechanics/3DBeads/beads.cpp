@@ -556,7 +556,7 @@ int main(int argc, char* argv[])
     // ----------------
 
     TimeDiscretisation * GLOB_T = new TimeDiscretisation(h, multiBeads);
-    Simulation* GLOB_SIM = new TimeStepping(GLOB_T);
+    TimeStepping* GLOB_SIM = new TimeStepping(GLOB_T);
 
     // -- OneStepIntegrators --
     OneStepIntegrator * OSI = new Moreau(allDS , 0.5000001 , GLOB_SIM);
@@ -599,8 +599,9 @@ int main(int argc, char* argv[])
 
     while (eventsManager->hasNextEvent())
     {
-      GLOB_SIM->advanceToEvent();
-      GLOB_SIM->processEvents();
+      GLOB_SIM->computeOneStep();
+      //  GLOB_SIM->advanceToEvent();
+      //  GLOB_SIM->processEvents();
       // --- Get values to be plotted ---
       k++;
       //  dataPlot(k,0) = k*GLOB_T->getH();
@@ -610,6 +611,7 @@ int main(int argc, char* argv[])
       //  dataPlot(k,4) = GLOB_tabLDS[1]->getQ()(2);
       //  dataPlot(k,5) = GLOB_tabLDS[1]->getVelocity()(2);
       //  dataPlot(k,6) = (multiBeads->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(1)->getLambda(1))(0);
+      GLOB_SIM->nextStep();
     }
     cout << "End of computation - Number of iterations done: " << k << endl;
 
@@ -618,8 +620,8 @@ int main(int argc, char* argv[])
     //     io.write(dataPlot,"noDim");
     //    cout<<"End of computation - Number of iterations done: "<<k<<endl;
 
-    delete OSI;
-    delete osnspb;
+    //    delete OSI;
+    //    delete osnspb;
 
   }
   catch (SiconosException e)

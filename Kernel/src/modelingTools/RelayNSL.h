@@ -37,11 +37,18 @@ class NonSmoothLaw;
 class RelayNSL : public NonSmoothLaw
 {
 
+private:
+
+  /** default constructor
+   */
+  RelayNSL();
+
 public:
 
   /** basic constructor
-  */
-  RelayNSL();
+      \param law size
+   */
+  RelayNSL(unsigned int);
 
   /** constructor with XML object of the RelayNSL
   *  \param NonSmoothLawXML* : the XML object corresponding
@@ -51,8 +58,9 @@ public:
   /** constructor with the value of the RelayNSL attributes
   *  \param a double value c
   *  \param a double value d
+  *  \param unsigned int: size of the ns law
   */
-  RelayNSL(const double, const double);
+  RelayNSL(double, double, unsigned int);
 
   ~RelayNSL();
 
@@ -72,7 +80,7 @@ public:
   /** to set c
   *  \param a double
   */
-  inline void setC(const double& newVal)
+  inline void setC(double newVal)
   {
     c = newVal;
   };
@@ -89,7 +97,7 @@ public:
   /** to set d
   *  \param a double
   */
-  inline void setD(const double& newVal)
+  inline void setD(double newVal)
   {
     d = newVal;
   };

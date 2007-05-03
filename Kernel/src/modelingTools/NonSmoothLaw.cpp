@@ -24,19 +24,21 @@ using namespace std;
 // Constructors
 // warning -> this is an abstract class, so constructors are usefull only for
 // calls in derived classes constructors
-NonSmoothLaw::NonSmoothLaw(const string newType, const unsigned int& newSize): nsLawType(newType), size(newSize), nslawxml(NULL)
+
+NonSmoothLaw::NonSmoothLaw(const string& newType, unsigned int newSize): nsLawType(newType), size(newSize), nslawxml(NULL)
 {}
 
-NonSmoothLaw::NonSmoothLaw(const string newType, NonSmoothLawXML* newNsLawXml):
+NonSmoothLaw::NonSmoothLaw(const string& newType, NonSmoothLawXML* newNsLawXml):
   nsLawType(newType), size(1), nslawxml(newNsLawXml)
 {
-  // Warning: default size = 1.
   if (nslawxml == NULL)
     RuntimeException::selfThrow("NonSmoothLaw:: xml constructor, xml file==NULL");
 
-  // Read size of the non smooth law, if given.
-  if (nslawxml->hasSize())
-    size = nslawxml->getSize();
+  // Read size of the non smooth law
+  if (! nslawxml->hasSize())
+    RuntimeException::selfThrow("NonSmoothLaw:: xml constructor, an input is required for the nslaw size.");
+
+  size = nslawxml->getSize();
 }
 
 NonSmoothLaw::~NonSmoothLaw()

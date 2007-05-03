@@ -40,17 +40,21 @@ class NonSmoothLaw;
  **/
 class ComplementarityConditionNSL : public NonSmoothLaw
 {
-public:
+private:
   /** default constructor
-  *  \param: size of the non smooth law (optional default =1)
+   */
+  ComplementarityConditionNSL() {};
+
+public:
+  /** basic constructor
+  *  \param: size of the non smooth law
   */
-  ComplementarityConditionNSL(const unsigned int = 1);
+  ComplementarityConditionNSL(unsigned int);
 
   /** constructor with XML object of the parent class NonSmoothLaw
   *  \param NonSmoothLawXML* : the XML object corresponding
-  *  \param: size of the non smooth law (optional default =1)
   */
-  ComplementarityConditionNSL(NonSmoothLawXML*, const unsigned int = 1);
+  ComplementarityConditionNSL(NonSmoothLawXML*);
 
   /** Destructor */
   ~ComplementarityConditionNSL();

@@ -45,12 +45,16 @@ private:
   /** friction coefficient */
   double mu;
 
+  /** default constructor
+   */
+  NewtonImpactFrictionNSL();
+
 public:
 
-  /** default constructor
-   *  \param unsigned int: size of the ns law, default = 2
+  /** basic constructor
+   *  \param unsigned int: size of the ns law
    */
-  NewtonImpactFrictionNSL(const unsigned int = 2);
+  NewtonImpactFrictionNSL(unsigned int);
 
   /** constructor with XML object of the NewtonImpactFrictionNSL
    *  \param NonSmoothLawXML* : the XML object corresponding
@@ -61,9 +65,9 @@ public:
    *  \param double : normal e coefficient
    *  \param double : tangent e coefficient
    *  \param double : friction coefficient
-   *  \param unsigned int: size of the ns law, default = 2
+   *  \param unsigned int: size of the ns law
    */
-  NewtonImpactFrictionNSL(const double, const double, const double, const unsigned int);
+  NewtonImpactFrictionNSL(double, double, double, unsigned int);
 
   /** Destructor */
   ~NewtonImpactFrictionNSL();
@@ -86,7 +90,7 @@ public:
   /** setter of en
    *  \param a double to set en
    */
-  inline void setEn(const double newVal)
+  inline void setEn(double newVal)
   {
     en = newVal;
   };
@@ -102,7 +106,7 @@ public:
   /** setter of et
    *  \param a double to set et
    */
-  inline void setEt(const double newVal)
+  inline void setEt(double newVal)
   {
     et = newVal;
   };
@@ -118,7 +122,7 @@ public:
   /** setter of mu
    *  \param a double to set mu
    */
-  inline void setMu(const double newVal)
+  inline void setMu(double newVal)
   {
     mu = newVal;
   };

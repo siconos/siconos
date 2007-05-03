@@ -52,7 +52,7 @@ private:
 public:
 
   /** default constructor
-  */
+   */
   NewtonImpactNSL();
 
   /** constructor with XML object of the NewtonImpactNSL
@@ -63,8 +63,10 @@ public:
   /** constructor with the value of the NewtonImpactNSL attributes
   *  \param a double value e
   */
-  NewtonImpactNSL(const double&);
+  NewtonImpactNSL(double);
 
+  /** destructor
+   */
   ~NewtonImpactNSL();
 
   /** check the ns law to see if it is verified
@@ -83,7 +85,7 @@ public:
   /** setter of e
   *  \param a double to set e
   */
-  inline void setE(const double& newVal)
+  inline void setE(double newVal)
   {
     e = newVal;
   };

@@ -19,10 +19,10 @@
 #include "ComplementarityConditionNSL.h"
 using namespace std;
 
-ComplementarityConditionNSL::ComplementarityConditionNSL(const unsigned int newSize): NonSmoothLaw(COMPLEMENTARITYCONDITIONNSLAW, newSize)
+ComplementarityConditionNSL::ComplementarityConditionNSL(unsigned int newSize): NonSmoothLaw(COMPLEMENTARITYCONDITIONNSLAW, newSize)
 {}
 
-ComplementarityConditionNSL::ComplementarityConditionNSL(NonSmoothLawXML* nslawxml, const unsigned int newSize):
+ComplementarityConditionNSL::ComplementarityConditionNSL(NonSmoothLawXML* nslawxml):
   NonSmoothLaw(COMPLEMENTARITYCONDITIONNSLAW, nslawxml)
 {}
 

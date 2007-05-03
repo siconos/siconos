@@ -648,14 +648,15 @@ void LCP::compute(const double time)
 
       LCP_CPUtime += (clock() - startLCPsolve);
       statnbsolve++;
-
     }
     else
     {
 
       startLCPsolve = clock();
       startLCPuni = clock();
+
       info = lcp_solver(M->getArray(), q->getArray(), &Nlcp, &solvingMethod, z->getArray(), w->getArray());
+
       timeLCPuni = clock() - startLCPuni;
 
       if (info != 0)

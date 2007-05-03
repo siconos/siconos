@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
     TimeDiscretisation* TiDisc = new TimeDiscretisation(h_step, &DiodeBridgePowSup);
 
     TimeStepping* StratDiodeBridgePowSup = new TimeStepping(TiDisc);
-    StratDiodeBridgePowSup->getEventsManagerPtr()->setTick(1e-9);
+    //    StratDiodeBridgePowSup->getEventsManagerPtr()->setTick(1e-9);
 
     double theta = 0.5;
 
@@ -196,7 +196,7 @@ int main(int argc, char* argv[])
     t1 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
 
     // --- Time loop  ---
-    while (k < N)
+    while (k < N - 1)
     {
       // get current time step
       k++;

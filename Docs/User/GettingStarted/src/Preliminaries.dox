@@ -23,6 +23,3 @@ nameOfMyDS->getType(); // return the type of the DynamicalSystem
 (*nameOfMyDS).getType(); // Same thing. 
 \endcode
 */
-
-
-*/

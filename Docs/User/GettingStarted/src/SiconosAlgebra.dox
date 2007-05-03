@@ -1,0 +1,73 @@
+/*! \page GS_SicAlgebra Siconos Algebra
+
+\section tutVector Vectors and Matrices handling
+In Siconos, matrices and vectors handling is based on <a href="http://www.boost.org/libs/numeric/ublas/doc/index.htm">Boost Ublas library</a>. 
+The Base (virtual) classes are SiconosVector and SiconosMatrix, with two kinds of usable derivated classes: Simple and Block. In addition some io classes are used for reading/writing object. \n
+
+<b>Main classes:</b>  <em> SimpleVector, SimpleMatrix, BlockVector, BlockMatrix, ioVector, ioMatrix</em>\n
+
+Vectors can be dense or sparse and matrices dense, sparse, triangular, banded, symetric, zero or identity. 
+\subsection creatingVector Creating a vector: 
+\code
+int size = 4;
+// Dense vector, as a pointer
+SiconosVector * v = new SimpleVector(size); 
+// Or without pointers
+SimpleVector w(size);
+// Sparse vector
+SiconosVector * z = new SimpleVector(size,SPARSE);
+// Read the vector from the file vect.dat (only for dense) 
+SiconosVector * v2 = new SimpleVector("vect.dat",1); // 1: ascii, 0:binary
+\endcode
+\subsection creatingMatrix Creating a matrix:
+\code
+int row = 3, col = 3;
+// row X col Dense matrix:
+SiconosMatrix * m = new SimpleMatrix(row,col);
+// Read from a file
+SiconosMatrix * m2 = new SimpleMatrix("mat.dat",1); // 1: ascii, 0:binary
+\endcode
+\subsection matIO Matrix/Vector Input/Output
+\code
+// v is a vector, m a matrix
+ioVector myOutput ("MyData","ascii"); 
+myOutput.read(v); // read v from file MyData
+ioMatrix myMat("outMat","ascii");
+myMat.write(m); // Write m in file outMat
+\endcode
+Note that for reading, you can also directly use constructor as shown in \ref creatingVector. 
+
+<b> Input/Ouput Files format: </b> \n
+On the first line, the dimensions, with space as separator. Then the data. 
+
+Example, for a 2-rows, 3-columns matrix:\n
+2 3\n
+1 2 3\n
+4 5 6\n
+However, if you give as a second argument to \e write function "noDim", the first line with dimensions will not be written.
+\subsection matUtils Useful functions
+\code
+v->size() // return the size of the vector
+m->size(0); // number of rows in the matrix
+m->size(1), // number of columns
+v->zero();  // for matrix or vectors, set all elements to 0.
+m->eye();   // set m to identity
+m->resize(a,b); // resize m, available also for vectors
+m->normInf() ; // compute infinite matrix norm of m
+// Elements access: () 
+(*v)(0) = 4;
+w(1) = 2;
+w(2) = (*v)(0);
+\endcode
+All classical operators are also available, see doxygen. \n
+For operations between matrices or vectors of different types, use prod, add or sub. 
+\code
+// Let m1, m2, m3 be dense matrices and s a symetric matrix
+// Then you can write:
+m3 = m1*m2; // equivalent to m3 = prod(m1,m2);
+// but you have to write
+m3 = prod(m1,s); 
+\endcode
+In a general way, if you need efficiency, always prefer functions to overloaded operators. 
+
+*/
