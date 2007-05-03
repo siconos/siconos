@@ -26,7 +26,7 @@ const double R = 0.1; // beads radius
 const double m = 1; // beads mass
 const double g = 9.81; // gravity
 
-extern "C" void gravity(unsigned int sizeOfq, double time, double *fExt, double* param)
+extern "C" void gravity(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* param)
 {
   for (unsigned int i = 0; i < sizeOfq; i++)
     fExt[i] = 0.0;
@@ -34,69 +34,15 @@ extern "C" void gravity(unsigned int sizeOfq, double time, double *fExt, double*
   fExt[2] = -m * g;
 }
 
-// // Momentum inertia
-// const double I = 3./5*R*R;
 
-// extern "C" void Mass(unsigned int sizeOfq, const double *q, double *mass, double* param)
-// {
-//   mass[0]  = mass[7]  = mass[14] = m;
-//   mass[21] = mass[28] = mass[35] = I;
-// }
-
-extern "C" void NNL1(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, double* param)
-{
-  //NNL[3] = - I1*velocity[4]*velocity[5]*sin(q[3]);
-  //NNL[4] =   I1*velocity[3]*velocity[5]*sin(q[3]);
-  //NNL[5] =   I1*velocity[3]*velocity[4]*sin(q[3]);
-}
-
-extern "C" void NNL2(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, double* param)
-{
-  // NNL[3] = - I2*velocity[4]*velocity[5]*sin(q[3]);
-  // NNL[4] =   I2*velocity[3]*velocity[5]*sin(q[3]);
-  // NNL[5] =   I2*velocity[3]*velocity[4]*sin(q[3]);
-}
-
-extern "C" void jacobianQNNL1(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, double* param)
-{
-  //jacob[21] = - I1*velocity[4]*velocity[5]*cos(q[3]);
-  //jacob[27] =   I1*velocity[3]*velocity[5]*cos(q[3]);
-  //jacob[33] =   I1*velocity[3]*velocity[4]*cos(q[3]);
-}
-
-extern "C" void jacobianQNNL2(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, double* param)
-{
-  //jacob[21] = - I2*velocity[4]*velocity[5]*cos(q[3]);
-  //jacob[27] =   I2*velocity[3]*velocity[5]*cos(q[3]);
-  //jacob[33] =   I2*velocity[3]*velocity[4]*cos(q[3]);
-}
-
-extern "C" void jacobianVNNL1(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, double* param)
-{
-  //jacob[22] = - I1*velocity[5]*sin(q[3]);
-  //jacob[27] =   I1*velocity[5]*sin(q[3]);
-  //jacob[23] = - I1*velocity[4]*sin(q[3]);
-  //jacob[33] =   I1*velocity[4]*sin(q[3]);
-  //jacob[29] = jacob[34] =   I1*velocity[3]*sin(q[3]);
-}
-
-extern "C" void jacobianVNNL2(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, double* param)
-{
-  //jacob[22] = - I2*velocity[5]*sin(q[3]);
-  //jacob[27] =   I2*velocity[5]*sin(q[3]);
-  //jacob[23] = - I2*velocity[4]*sin(q[3]);
-  //jacob[33] =   I2*velocity[4]*sin(q[3]);
-  //jacob[29] = jacob[34] =   I2*velocity[3]*sin(q[3]);
-}
-
-extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, double* param)
+extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* param)
 {
   double d = sqrt((q[6] - q[0]) * (q[6] - q[0]) + (q[7] - q[1]) * (q[7] - q[1]) + (q[8] - q[2]) * (q[8] - q[2]));
   y[0] =  d - 2 * R;
 }
 
 
-extern "C" void Gcontact(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, double* param)
+extern "C" void Gcontact(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* param)
 {
 
   G[0] = -(q[6] - q[0]) / sqrt((q[6] - q[0]) * (q[6] - q[0]) + (q[7] - q[1]) * (q[7] - q[1]) + (q[8] - q[2]) * (q[8] - q[2]));
@@ -106,7 +52,7 @@ extern "C" void Gcontact(unsigned int sizeOfq, const double* q, unsigned int siz
   G[7] = (q[7] - q[1]) / sqrt((q[6] - q[0]) * (q[6] - q[0]) + (q[7] - q[1]) * (q[7] - q[1]) + (q[8] - q[2]) * (q[8] - q[2]));
   G[8] = (q[8] - q[2]) / sqrt((q[6] - q[0]) * (q[6] - q[0]) + (q[7] - q[1]) * (q[7] - q[1]) + (q[8] - q[2]) * (q[8] - q[2]));
 }
-extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, double* param)
+extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* param)
 {
 
   G[0] = -(q[6] - q[0]) / sqrt((q[6] - q[0]) * (q[6] - q[0]) + (q[7] - q[1]) * (q[7] - q[1]) + (q[8] - q[2]) * (q[8] - q[2]));
@@ -129,4 +75,3 @@ extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, 
   G[35] = -R * (q[6] - q[0]) / sqrt((q[6] - q[0]) * (q[6] - q[0]) + (q[7] - q[1]) * (q[7] - q[1]) + (q[8] - q[2]) * (q[8] - q[2]));
 
 }
-
