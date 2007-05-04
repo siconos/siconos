@@ -940,54 +940,56 @@ void SimpleMatrix::trans()
 
 void SimpleMatrix::trans(const SiconosMatrix &m)
 {
-  if (&m == this)
-    SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, m = this, use this->trans().");
-
   if (m.isBlock())
     SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, not yet implemented for m being a BlockMatrix.");
 
 
-  unsigned int numM = m.getNum();
-  switch (numM)
+  if (&m == this)
+    trans();//SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, m = this, use this->trans().");
+  else
   {
-  case 1:
-    if (num != 1)
-      SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, try to transpose a dense matrix into another type.");
-    noalias(*mat.Dense) = ublas::trans(*m.getDensePtr());
-    break;
-  case 2:
-    if (num != 1)
-      SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, try to transpose a triangular matrix into a non-dense one.");
-    noalias(*mat.Dense) = ublas::trans(*m.getTriangPtr());
-    break;
-  case 3:
-    *this = m;
-    break;
-  case 4:
-    if (num == 1)
-      noalias(*mat.Dense) = ublas::trans(*m.getSparsePtr());
-    else if (num == 4)
-      noalias(*mat.Sparse) = ublas::trans(*m.getSparsePtr());
-    else
-      SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, try to transpose a sparse matrix into a forbidden type (not dense nor sparse).");
-    break;
-  case 5:
-    if (num == 1)
-      noalias(*mat.Dense) = ublas::trans(*m.getBandedPtr());
-    else if (num == 5)
-      noalias(*mat.Banded) = ublas::trans(*m.getBandedPtr());
-    else
-      SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, try to transpose a banded matrix into a forbidden type (not dense nor banded).");
-    break;
-  case 6:
-    *this = m;
-    break;
-  case 7:
-    *this = m;
+    unsigned int numM = m.getNum();
+    switch (numM)
+    {
+    case 1:
+      if (num != 1)
+        SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, try to transpose a dense matrix into another type.");
+      noalias(*mat.Dense) = ublas::trans(*m.getDensePtr());
+      break;
+    case 2:
+      if (num != 1)
+        SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, try to transpose a triangular matrix into a non-dense one.");
+      noalias(*mat.Dense) = ublas::trans(*m.getTriangPtr());
+      break;
+    case 3:
+      *this = m;
+      break;
+    case 4:
+      if (num == 1)
+        noalias(*mat.Dense) = ublas::trans(*m.getSparsePtr());
+      else if (num == 4)
+        noalias(*mat.Sparse) = ublas::trans(*m.getSparsePtr());
+      else
+        SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, try to transpose a sparse matrix into a forbidden type (not dense nor sparse).");
+      break;
+    case 5:
+      if (num == 1)
+        noalias(*mat.Dense) = ublas::trans(*m.getBandedPtr());
+      else if (num == 5)
+        noalias(*mat.Banded) = ublas::trans(*m.getBandedPtr());
+      else
+        SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed, try to transpose a banded matrix into a forbidden type (not dense nor banded).");
+      break;
+    case 6:
+      *this = m;
+      break;
+    case 7:
+      *this = m;
+    }
+    unsigned int tmp = dim[0];
+    dim[0] = dim[1];
+    dim[1] = tmp;
   }
-  unsigned int tmp = dim[0];
-  dim[0] = dim[1];
-  dim[1] = tmp;
 }
 
 void SimpleMatrix::display(void)const
@@ -2004,60 +2006,60 @@ bool operator == (const SiconosMatrix &m, const SiconosMatrix &x)
   return (norm < tolerance);
 }
 
-const SimpleMatrix operator + (const SiconosMatrix &x, const SiconosMatrix &m)
-{
-  if ((x.size(0) != m.size(0)) || x.size(1) != m.size(1))
-    SiconosMatrixException::selfThrow("Matrix addition: inconsistent sizes");
-
-  if (x.isBlock() || m.isBlock())
-    SiconosMatrixException::selfThrow("Matrix addition: not yet implemented for BlockMatrix.");
-
-  unsigned int numX = x.getNum();
-  if (numX != m.getNum())
-    SiconosMatrixException::selfThrow("SimpleMatrix:Matrix operator +: addition of matrices of different types. Use 'add' function.");
-
-  if (numX == 1)
-  {
-    DenseMat p = *x.getDensePtr() + *m.getDensePtr();
-    return p;
-  }
-  else if (numX == 2)
-  {
-    TriangMat t = *x.getTriangPtr() + *m.getTriangPtr();
-    return t;
-  }
-  else if (numX == 3)
-  {
-    SymMat s = *x.getSymPtr() + *m.getSymPtr();
-    return s;
-  }
-  else if (numX == 4)
-  {
-    SparseMat sp = *x.getSparsePtr() + *m.getSparsePtr();
-    return sp;
-  }
-  else if (numX == 5)
-  {
-    BandedMat b ;
-    b.resize(m.size(0), m.size(1), (*m.getBandedPtr()).lower(), (*m.getBandedPtr()).upper(), false);
-    b = *x.getBandedPtr() + *m.getBandedPtr();
-    return b;
-  }
-  else if (numX == 6)
-  {
-    ZeroMat z(x.size(0), x.size(1));
-    return z;
-  }
-  else // if(numX ==7)
-  {
-    DenseMat p = *x.getIdentityPtr();
-    p *= 2.0;
-    return p;
-  }
-}
-
 const SimpleMatrix add(const SiconosMatrix &x, const SiconosMatrix& m)
 {
+  DenseMat p = *x.getDensePtr() + *m.getDensePtr();
+  return p;
+}
+const SimpleMatrix operator + (const SiconosMatrix &x, const SiconosMatrix &m)
+{
+  //   if ((x.size(0) != m.size(0)) || x.size(1) != m.size(1))
+  //     SiconosMatrixException::selfThrow("Matrix addition: inconsistent sizes");
+
+  //   if(x.isBlock() || m.isBlock())
+  //     SiconosMatrixException::selfThrow("Matrix addition: not yet implemented for BlockMatrix.");
+
+  //   unsigned int numX= x.getNum();
+  //   if(numX != m.getNum())
+  //     SiconosMatrixException::selfThrow("SimpleMatrix:Matrix operator +: addition of matrices of different types. Use 'add' function.");
+
+  //   if(numX == 1){
+  //     DenseMat p = *x.getDensePtr() + *m.getDensePtr();
+  //     return p;
+  //   }
+  //   else if(numX == 2){
+  //     TriangMat t = *x.getTriangPtr() + *m.getTriangPtr();
+  //     return t;
+  //   }
+  //   else if(numX == 3){
+  //     SymMat s = *x.getSymPtr() + *m.getSymPtr();
+  //     return s;
+  //   }
+  //   else if(numX == 4){
+  //     SparseMat sp = *x.getSparsePtr() + *m.getSparsePtr();
+  //     return sp;
+  //   }
+  //   else if(numX == 5){
+  //     BandedMat b ;
+  //     b.resize(m.size(0), m.size(1),(*m.getBandedPtr() ).lower(), (*m.getBandedPtr() ).upper(),false);
+  //     b = *x.getBandedPtr() + *m.getBandedPtr();
+  //     return b;
+  //   }
+  //   else if(numX == 6)
+  //     {
+  //       ZeroMat z(x.size(0),x.size(1));
+  //       return z;
+  //     }
+  //   else // if(numX ==7)
+  //     {
+  //       DenseMat p = *x.getIdentityPtr();
+  //       p *= 2.0;
+  //       return p;
+  //     }
+  // }
+
+  // const SimpleMatrix add(const SiconosMatrix &x,const SiconosMatrix& m)
+  // {
   if ((x.size(0) != m.size(0)) || (x.size(1) != m.size(1)))
     SiconosMatrixException::selfThrow("SimpleMatrix: function add, inconsistent sizes.");
 
@@ -2428,55 +2430,53 @@ void add(const SiconosMatrix &x, const SiconosMatrix& m, SiconosMatrix& res)
     }
   }
 }
-
-const SimpleMatrix operator - (const SiconosMatrix &x, const SiconosMatrix &m)
-{
-  if ((x.size(0) != m.size(0)) || (x.size(1) != m.size(1)))
-    SiconosMatrixException::selfThrow("Matrix subtraction: inconsistent sizes");
-  if (x.isBlock() || m.isBlock())
-    SiconosMatrixException::selfThrow("Matrix, operator -: not yet implemented for BlockMatrix.");
-
-  unsigned int numX = x.getNum();
-  if (numX != m.getNum())
-    SiconosMatrixException::selfThrow("SimpleMatrix:Matrix subtraction: use function sub in order to subtract matrices of different type");
-
-  if (numX == 1)
-  {
-    DenseMat p = *x.getDensePtr() - *m.getDensePtr();
-    return p;
-  }
-  else if (numX == 2)
-  {
-    TriangMat t = *x.getTriangPtr() - *m.getTriangPtr();
-    return t;
-  }
-  else if (numX == 3)
-  {
-    SymMat s = *x.getSymPtr() - *m.getSymPtr();
-    return s;
-  }
-  else if (numX == 4)
-  {
-    SparseMat sp = *x.getSparsePtr() - *m.getSparsePtr();
-    return sp;
-  }
-  else if (numX == 5)
-  {
-    BandedMat b;
-    b.resize(m.size(0), m.size(1), (*m.getBandedPtr()).lower(), (*m.getBandedPtr()).upper(), false);
-    b = *x.getBandedPtr() - *m.getBandedPtr();
-    return b;
-  }
-  else
-  {
-    //if(numX == 6 || numX ==7){
-    ZeroMat z(x.size(0), x.size(1));
-    return z;
-  }
-}
-
 const SimpleMatrix sub(const SiconosMatrix &x, const SiconosMatrix& m)
 {
+  DenseMat p = *x.getDensePtr() - *m.getDensePtr();
+  return p;
+}
+const SimpleMatrix operator - (const SiconosMatrix &x, const SiconosMatrix &m)
+{
+  //   if ((x.size(0) != m.size(0)) || (x.size(1) != m.size(1)))
+  //     SiconosMatrixException::selfThrow("Matrix subtraction: inconsistent sizes");
+  //   if(x.isBlock() || m.isBlock())
+  //     SiconosMatrixException::selfThrow("Matrix, operator -: not yet implemented for BlockMatrix.");
+
+  //   unsigned int numX = x.getNum();
+  //   if(numX != m.getNum())
+  //     SiconosMatrixException::selfThrow("SimpleMatrix:Matrix subtraction: use function sub in order to subtract matrices of different type");
+
+  //   if(numX == 1){
+  //     DenseMat p = *x.getDensePtr() - *m.getDensePtr();
+  //     return p;
+  //   }
+  //   else if(numX == 2){
+  //     TriangMat t = *x.getTriangPtr() - *m.getTriangPtr();
+  //     return t;
+  //   }
+  //   else if(numX == 3){
+  //     SymMat s = *x.getSymPtr() - *m.getSymPtr();
+  //     return s;
+  //   }
+  //   else if(numX == 4){
+  //     SparseMat sp = *x.getSparsePtr() - *m.getSparsePtr();
+  //     return sp;
+  //   }
+  //   else if(numX == 5){
+  //     BandedMat b;
+  //     b.resize(m.size(0), m.size(1),(*m.getBandedPtr() ).lower(), (*m.getBandedPtr() ).upper(),false);
+  //     b = *x.getBandedPtr() - *m.getBandedPtr();
+  //     return b;
+  //   }
+  //   else
+  //     {//if(numX == 6 || numX ==7){
+  //       ZeroMat z(x.size(0),x.size(1));
+  //       return z;
+  //     }
+  // }
+
+  // const SimpleMatrix sub(const SiconosMatrix &x,const SiconosMatrix& m)
+  // {
   if ((x.size(0) != m.size(0)) || (x.size(1) != m.size(1)))
     SiconosMatrixException::selfThrow("Function sub(A,B), inconsistent sizes.");
   if (x.isBlock() || m.isBlock())

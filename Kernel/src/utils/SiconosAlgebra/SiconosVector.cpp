@@ -1,8 +1,12 @@
 #include "SiconosVector.h"
 #include "SiconosVectorException.h"
 
-// Default (private) constructor
+// Default (protected) constructor
 SiconosVector::SiconosVector(bool isblock): isBlockVector(isblock), sizeV(0)
+{}
+
+// Basic (protected) constructor
+SiconosVector::SiconosVector(bool isblock, unsigned int size): isBlockVector(isblock), sizeV(size)
 {}
 
 SiconosVector::~SiconosVector() {}

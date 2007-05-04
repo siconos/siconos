@@ -1,0 +1,54 @@
+/*! \page UMsiconosAlgebra Siconos Algebra toolbox.
+
+\author Franck Pérignon
+\version Siconos-Kernel 2.0.0 
+
+\section UmsiconosAlgebraIntro Introduction
+
+\code
+// set to zero	
+X->zero()
+// Fill with a single scalar value
+double a = 3.2;
+X->fill(a);
+\endcode
+\section UMsiconosVectorVector Vector-vector operations
+
+In the following, a and b are scalars, x, y, z vectors, A a matrix.
+
+- z = z +(-) x 
+z += x
+z -= x
+- z = a * z or z = z/a
+z *= a
+z /= a
+- inner product:
+a = inner_product(x,z)
+- outer product
+A = outer_product(x,z)
+- to add two vectors, z = x+y
+z = x + y
+z->xpy(x,y)
+- to compute z = ax + by
+z = a*x+b*y
+z->axpby(a,x,b,y)
+- to compute z = ax
+z = a*x
+z->scal(a,x)
+- to compute z = ax + y
+z = a*x + y
+z->axpy(a,x,y)
+- to compute y = ax + y
+y = a*x + y
+axpy(a,x,y)
+- to compute y = ax + by
+y = a*x + b*y
+axpby(a,x,b,y)
+
+\section UMsiconosMatrixVector Vector-Matrix operations
+
+\section UMsiconosMatrixMatrix Matrix-Matrix operations
+
+
+
+*/

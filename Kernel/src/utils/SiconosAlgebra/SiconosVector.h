@@ -60,6 +60,11 @@ protected:
   /** default constructor */
   SiconosVector(bool = false);
 
+  /** basic constructor
+      \param bool = true if block else false.
+      \param size of the vector */
+  SiconosVector(bool, unsigned int);
+
 public:
 
   /** true if the vector is block else false.
@@ -170,9 +175,21 @@ public:
   virtual void display(void)const = 0;
 
   /** if this is a block vector return i-eme SimpleVector, else return this.
-   * \return a pointer to a SimpleVector
+   * \return a pointer to a SiconosVector
    */
   virtual SiconosVector* getVectorPtr(unsigned int) = 0;
+
+  /** set i-eme SiconosVector (copy) - Useful only for BlockVector (else equivalent to a single copy)
+   * \param unsigned int: block number (0 for SimpleVector)
+   * \param a SiconosVector
+   */
+  virtual void setVector(unsigned int, const SiconosVector&) = 0;
+
+  /** set i-eme SiconosVector (pointer link) - Useful only for BlockVector
+   * \param unsigned int: block number (0 for SimpleVector)
+   * \param a pointer to a SiconosVector
+   */
+  virtual void setVectorPtr(unsigned int, SiconosVector*) = 0;
 
   /** set all values of the vector component to value.
    * \param a double

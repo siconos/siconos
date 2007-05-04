@@ -191,6 +191,18 @@ public:
     return this;
   };
 
+  /** set i-eme SiconosVector (copy) - Useful only for BlockVector (else equivalent to a single copy)
+   * \param unsigned int: block number (0 for SimpleVector)
+   * \param a SiconosVector
+   */
+  void setVector(unsigned int, const SiconosVector&);
+
+  /** set i-eme SiconosVector (pointer link) - Useful only for BlockVector
+   * \param unsigned int: block number (0 for SimpleVector)
+   * \param a pointer to a SiconosVector
+   */
+  void setVectorPtr(unsigned int, SiconosVector*);
+
   /** set all values of the vector component to value.
    * \param a double
    */

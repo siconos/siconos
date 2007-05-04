@@ -2,11 +2,11 @@
 
 \section tutVector Vectors and Matrices handling
 In Siconos, matrices and vectors handling is based on <a href="http://www.boost.org/libs/numeric/ublas/doc/index.htm">Boost Ublas library</a>. 
-The Base (virtual) classes are SiconosVector and SiconosMatrix, with two kinds of usable derivated classes: Simple and Block. In addition some io classes are used for reading/writing object. \n
+The Base (virtual) classes are SiconosVector and SiconosMatrix, with two kinds of usable derived classes: Simple and Block. In addition some io classes are used for reading/writing object. \n
 
 <b>Main classes:</b>  <em> SimpleVector, SimpleMatrix, BlockVector, BlockMatrix, ioVector, ioMatrix</em>\n
 
-Vectors can be dense or sparse and matrices dense, sparse, triangular, banded, symetric, zero or identity. 
+Vectors can be dense or sparse and matrices dense, sparse, triangular, banded, symmetric, zero or identity. 
 \subsection creatingVector Creating a vector: 
 \code
 int size = 4;
@@ -50,24 +50,210 @@ However, if you give as a second argument to \e write function "noDim", the firs
 v->size() // return the size of the vector
 m->size(0); // number of rows in the matrix
 m->size(1), // number of columns
-v->zero();  // for matrix or vectors, set all elements to 0.
-m->eye();   // set m to identity
 m->resize(a,b); // resize m, available also for vectors
 m->normInf() ; // compute infinite matrix norm of m
-// Elements access: () 
-(*v)(0) = 4;
-w(1) = 2;
-w(2) = (*v)(0);
 \endcode
 All classical operators are also available, see doxygen. \n
 For operations between matrices or vectors of different types, use prod, add or sub. 
 \code
-// Let m1, m2, m3 be dense matrices and s a symetric matrix
+// Let m1, m2, m3 be dense matrices and s a symmetric matrix
 // Then you can write:
 m3 = m1*m2; // equivalent to m3 = prod(m1,m2);
 // but you have to write
 m3 = prod(m1,s); 
 \endcode
 In a general way, if you need efficiency, always prefer functions to overloaded operators. 
+
+
+\subsection SAUsing Using SiconosMatrix and SiconosVector
+
+- Single elements access or assignment: operator "()" or \e get/setValue functions.
+
+\code
+SiconosVector * v = new SimpleVector(3); // v = [0 0 0]
+SimpleVector w(4);  			 // w = [0 0 0 0]
+(*v)(0) = 4;				 // v = [4 0 0] 
+// equivalent to:
+v->setValue(0,4); 
+w(1) = 2;
+w(2) = (*v)(0);				 // w = [0 2 4 0]
+// equivalent to:
+w.setValue( 2,v->getValue(0) );
+\endcode	
+
+In the same way for matrices:
+
+\code
+SiconosMatrix * M = new SimpleMatrix(3,3); // M = [ 0 0 0 ]
+					   //     [ 0 0 0 ]
+					   //     [ 0 0 0 ]
+SimpleMatrix P(1,2);   			   // P = [ 0 0 ]
+
+(*M)(1,2) = 2; 
+P(0,1) = 12;				   // P = [ 0 12.0 ]
+M->setValue(2,0,3.6);			   // M = [  0  0  0  ]
+					   //     [  0  0 2.0 ]
+					   //     [ 3.6 0  0  ]
+	
+cout << P.getValue(0,1); // display 12.0
+
+\endcode
+
+For BlockVector:
+"()" and \e get/setValue functions have the same action as for SimpleVectors:
+\code
+// We suppose that v1 and v2 are two pointers to SimpleVector of size 3 and 4.
+SiconosVector * vB = new BlockVector(v1,v2); // vB = [ [1 2 3] [4 5 6 7] ]
+(*vB)(4) = 12; 				     // vB = [ [1 2 3] [4 12 6 7] ]
+vB->setValue(6,8.6); 		             // vB = [ [1 2 3] [4 12 6 8.6] ]	
+// Warning: the given input for position is an "absolute" one, not a block position.
+\endcode
+
+Remark: \e get/setValue functions are equivalent to "()" operator but mainly useful in Siconos-Python, since in that case operators can not be overloaded and thus
+"()" is not available. The same remark applies for "[ ]" and \e get/setVector and in a general way for all operators overloading.
+
+- Set vector or matrix to zero or identity
+\code
+x->zero();
+A->zero();
+A->eye(); 
+\endcode
+
+- Assignment of vectors or matrices: "A = B" or "x = y"
+
+\code 
+
+// Operator =
+A = B;
+x = y;
+\endcode
+
+Remark: sizes must be consistents between A/B and x/y, else it results in a Siconos Exception.
+
+- Addition of matrices or vectors
+	- add "in place": \f$A = A+B\f$ or \f$x = x+y\f$
+\code	
+A += B;
+x += y;
+\endcode
+	- \f$C = A + B\f$ or \f$z = x + y\f$
+\code
+C = A+B;
+add(A,B,C);
+
+z = x + y;
+add(x,y,z);
+\endcode
+
+- Subtraction of matrices or vectors
+	- sub "in place": \f$A = A-B\f$ or \f$x = x-y\f$
+\code
+A -= B;
+x -= y;
+\endcode
+	- \f$C = A - B\f$ or \f$z = x - y\f$
+\code
+C = A-B;
+sub(A,B,C);
+
+z = x - y;
+sub(x,y,z);
+\endcode
+
+- Multiplication by a scalar:
+	- "in place": \f$A = a*A\f$ or \f$x = a*x\f$
+\code
+A *=a;
+x *=a;
+\endcode
+	- \f$B=a*A\f$ or \f$y=a*x\f$
+\code
+B = a*B;
+B.scal(a,A);
+y = a*x;
+y.scal(a,x);
+\endcode
+
+- Division by a scalar:
+	- "in place": \f$A = A/a\f$ or \f$x = x/a\f$
+\code
+A /=a;
+x /=a;
+\endcode
+	- \f$B=A/a\f$ or \f$y=x/a\f$
+\code
+B = B/a;
+B.scal(1.0/a,A);
+y = x/a;
+y.scal(1.0/a,x);
+\endcode
+
+- Matrices product: \f$ C= A*B \f$
+\code
+C = A*B;
+prod(A,B,C); // Based on atlas gemm for Dense matrices and ublas::prod for others. 
+	     // C and A or B can be the same matrices (ie have common memory), 
+	     // but that will slow down the operation.
+gemm(A,B,C); // Only for denses matrices.
+\endcode
+
+- Matrix transpose:
+	- in place: \f$ A = A^t \f$
+\code
+A->trans();
+\endcode
+	- \f$ B = A^t \f$
+\code
+B->trans(A);
+\endcode
+
+- inner product: \f$a = x.y\f$
+\code
+a = inner_prod(x,y);
+\endcode
+
+- Matrix-vector product: \f$y=A*x\f$
+\code
+y = prod(A,x);
+prod(A,x,y);
+\endcode
+
+
+To handle a specific block, use "[ ]" or \e getVector and \e getVectorPtr functions.
+
+\code
+
+SiconosVector * v3 = new SimpleVector(3);  // v3 = [0 0 0]
+SiconosVector * v4 = new SimpleVector(4);  // v4 = [0 0 0 0]
+
+// get and copy a block:
+*v3 = *(*vB[0]); 			   // v3 = v1 = [1 2 3]
+// Equivalent to
+*v3 = *vB->getVectorPtr(0);
+
+// get and copy pointer to block:
+v4 = vB->getVectorPtr(1);		   // v4 = v2 = [4 12 6 8.6]
+					   // AND pointer equality 
+					   // between v4, vB[1] and v2
+// Equivalent to:
+v4 = (*vB)[1];			           // v4 = v2 = [4 12 6 8.6]. 
+
+// Assignment:
+SiconosVector * v5 = new SimpleVector(3);  // v5 = [0 0 0]
+
+*(*vB)[0] = *v5; //  vB = [ [0 0 0] [4 5 6 7] ]
+		 //  AND v1 = [0 0 0] because of pointer link between vB[0] and v1.
+// Equivalent to:
+vB->setVector(0,*v5);
+
+(*v5)(1) = 12;
+vB->setVectorPtr(0,v5); // vB = [ [0 0 0] [0 12 0] ]
+// Pointer equality between v5 and vB[0]. 
+// The pointer link between vB[0] and v1 has been canceled.
+
+// Warning: when using setVectorPtr(i,w), 
+// the vector w must be of the same size as the block[i] of v. 
+
+\endcode
 
 */

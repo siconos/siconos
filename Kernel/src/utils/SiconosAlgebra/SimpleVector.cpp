@@ -28,7 +28,7 @@
 namespace atlas = boost::numeric::bindings::atlas;
 
 // parameters: dimension and type.
-SimpleVector::SimpleVector(unsigned int row, TYP typ): SiconosVector(false), num(1)
+SimpleVector::SimpleVector(unsigned int row, TYP typ): SiconosVector(false, row), num(1)
 {
   if (typ == SPARSE)
   {
@@ -38,17 +38,16 @@ SimpleVector::SimpleVector(unsigned int row, TYP typ): SiconosVector(false), num
   else if (typ == DENSE)
   {
     vect.Dense = new DenseVect(row);
-    num = 1;
+    // num = 1; // set by default
   }
   else
   {
     SiconosVectorException::selfThrow("SimpleVector::constructor(TYP, unsigned int) failed, invalid type given");
   }
-  sizeV = row;
 }
 
 // parameters: dimension, default value for all components and type.
-SimpleVector::SimpleVector(unsigned int row, double val, TYP typ): SiconosVector(false), num(1)
+SimpleVector::SimpleVector(unsigned int row, double val, TYP typ): SiconosVector(false, row), num(1)
 {
   if (typ == SPARSE)
   {
@@ -58,29 +57,26 @@ SimpleVector::SimpleVector(unsigned int row, double val, TYP typ): SiconosVector
   else if (typ == DENSE)
   {
     vect.Dense = new DenseVect(row);
-    num = 1;
+    // num = 1; // set by default
   }
   else
   {
     SiconosVectorException::selfThrow("SimpleVector::constructor(TYP, unsigned int) : invalid type given");
   }
-  sizeV = row;
   fill(val);
 }
 
 // parameters: a vector (stl) of double and the type.
-SimpleVector::SimpleVector(const std::vector<double> v, TYP typ): SiconosVector(false), num(1)
+SimpleVector::SimpleVector(const std::vector<double> v, TYP typ): SiconosVector(false, v.size()), num(1)
 {
   if (typ != DENSE)
     SiconosVectorException::selfThrow("SimpleVector::constructor(TYP, std::vector<double>, unsigned int) : invalid type given");
 
-  sizeV = v.size();
   vect.Dense = new DenseVect(sizeV, v);
-  num = 1;
 }
 
 // Copy
-SimpleVector::SimpleVector(const SimpleVector &svect): SiconosVector(false), num(svect.getNum())
+SimpleVector::SimpleVector(const SimpleVector &svect): SiconosVector(false, svect.size()), num(svect.getNum())
 {
   if (num == 1)
     vect.Dense = new DenseVect(*svect.getDensePtr());
@@ -90,13 +86,11 @@ SimpleVector::SimpleVector(const SimpleVector &svect): SiconosVector(false), num
 
   else
     SiconosVectorException::selfThrow("SimpleVector:constructor(const SimpleVector) : invalid type given");
-  sizeV = svect.size();
 }
 
 // Copy
-SimpleVector::SimpleVector(const SiconosVector &v): SiconosVector(false), num(1)
+SimpleVector::SimpleVector(const SiconosVector &v): SiconosVector(false, v.size()), num(1)
 {
-  sizeV = v.size();
   if (v.isBlock())
   {
     vect.Dense = new DenseVect(sizeV);
@@ -117,16 +111,14 @@ SimpleVector::SimpleVector(const SiconosVector &v): SiconosVector(false), num(1)
   }
 }
 
-SimpleVector::SimpleVector(const DenseVect& m): SiconosVector(false), num(1)
+SimpleVector::SimpleVector(const DenseVect& m): SiconosVector(false, m.size()), num(1)
 {
   vect.Dense = new DenseVect(m);
-  sizeV = m.size();
 }
 
-SimpleVector::SimpleVector(const SparseVect& m): SiconosVector(false), num(4)
+SimpleVector::SimpleVector(const SparseVect& m): SiconosVector(false, m.size()), num(4)
 {
   vect.Sparse = new SparseVect(m);
-  sizeV = m.size();
 }
 
 SimpleVector::SimpleVector(const std::string &file, bool ascii): SiconosVector(false), num(1)
@@ -253,6 +245,19 @@ void SimpleVector::display()const
     std::cout << *vect.Dense << std::endl;
   else if (num == 4)
     std::cout << *vect.Sparse << std::endl;
+}
+
+void SimpleVector::setVector(unsigned int, const SiconosVector& newV)
+{
+  if (newV.size() != sizeV)
+    SiconosVectorException::selfThrow("SimpleVector::setVector(num,v), unconsistent sizes.");
+
+  *this = newV ;
+}
+
+void SimpleVector::setVectorPtr(unsigned int, SiconosVector*)
+{
+  SiconosVectorException::selfThrow("SimpleVector::setVectorPtr(num,v), not allowed for SimpleVector.");
 }
 
 void SimpleVector::fill(double value)
