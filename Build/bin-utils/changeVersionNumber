@@ -1,0 +1,75 @@
+#! /bin/sh
+
+# Fonction that update version number (replace 'oldversion' with 'newversion' in all files).
+# directory given in argument
+udpateDir()
+{
+oldversion="2\.0\.0";
+newversion="2\.0\.1";
+initDir=`pwd`
+if test "$1" != "./bin-utils" 
+then
+cd $1
+for i in `ls`
+do
+if test -f $i
+then 
+sed '1,200s/'$oldversion'/'$newversion'/' $i > Bob
+mv Bob $i
+fi
+done
+cd $initDir
+fi;
+}
+
+sweepDir()
+{
+    startDir=`pwd`;
+    cd $1
+    for dir in `ls -l | grep '^d' | awk '{print $9}'`
+      do
+      udpateDir "./$dir";
+    done
+    cd $startDir;
+}
+
+
+udpateDir "./";
+sweepDir "./"
+for currentDir in `ls -l | grep '^d' | awk '{print $9}'`
+  do
+  cd $currentDir;
+  sweepDir "./"
+  for Sub1Dir in `ls -l | grep '^d' | awk '{print $9}'`
+    do
+    cd $Sub1Dir;
+    sweepDir "./"
+    for Sub2Dir in `ls -l | grep '^d' | awk '{print $9}'`
+      do
+      cd $Sub2Dir;
+      sweepDir "./"
+      for Sub3Dir in `ls -l | grep '^d' | awk '{print $9}'`
+	do
+	cd $Sub3Dir;
+	sweepDir "./"
+	for Sub4Dir in `ls -l | grep '^d' | awk '{print $9}'`
+	  do
+	  cd $Sub4Dir;
+	  sweepDir "./"
+	  cd ..
+	done
+	cd ..
+      done
+      cd ..
+    done
+    cd ..
+  done
+  cd ..
+done
+chmod 755 Numerics/autogen.sh
+chmod 755 Kernel/autogen.sh
+chmod 755 Front-End/autogen.sh
+
+
+    
+
