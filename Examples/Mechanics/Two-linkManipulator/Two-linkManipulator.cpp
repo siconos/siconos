@@ -71,13 +71,15 @@ int main(int argc, char* argv[])
     v0.zero();
     q0(0) = 1;
     q0(1) = -1.5;
-    SiconosVector * z = new SimpleVector(nDof * 3);
+    SiconosVector * z = new SimpleVector(nDof * 4);
     (*z)(0) = q0(0);
     (*z)(1) = q0(1);
     (*z)(2) = v0(0);
     (*z)(3) = v0(1);
     (*z)(4) = 0;
     (*z)(5) = 0;
+    (*z)(6) = 0;
+    (*z)(7) = 0;
 
     LagrangianDS * arm = new LagrangianDS(1, q0, v0);
 
@@ -166,7 +168,7 @@ int main(int argc, char* argv[])
     OneStepIntegrator * OSI =  new Moreau(arm, 0.500001, s);
 
     // -- OneStepNsProblem --
-    OneStepNSProblem * osnspb = new LCP(s, "name", "Lemke", 20001, 0.0005);
+    OneStepNSProblem * osnspb = new LCP(s, "name", "Lemke", 20001, 0.00005);
 
     cout << "=== End of model loading === " << endl;
 
@@ -186,7 +188,7 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 8;
+    unsigned int outputSize = 10;
     SimpleMatrix dataPlot(N + 1, outputSize);
     // For the initial time step:
     // time
@@ -203,22 +205,25 @@ int main(int argc, char* argv[])
     dataPlot(k, 5) = (*v)(1);
     dataPlot(k, 6) = (inter->getY(0))(0) - 2;
     dataPlot(k, 7) = (inter->getY(1))(1);
+    dataPlot(k, 8) = (*z)(6);
+    dataPlot(k, 9) = (inter->getLambda(1))(1);
 
     bool isNewtonConverge = false;
     unsigned int nbNewtonStep = 0; // number of Newton iterations
 
-    UnitaryRelationsSet * I0 = s->getIndexSetPtr(0);
-    UnitaryRelationIterator it;
-    Interaction *tmp;
-    UnitaryRelation * UR = NULL;
-    for (it = I0->begin(); it != I0->end(); ++it)
-    {
-      tmp = (*it)->getInteractionPtr();
-      if (tmp == inter)
-        UR = *it;
-    }
+    //  UnitaryRelationsSet * I0 = s->getIndexSetPtr(0);
+    //     UnitaryRelationIterator it;
+    //     Interaction *tmp;
 
-    UnitaryRelationsSet * I1 = s->getIndexSetPtr(1);
+    //     UnitaryRelation * UR = NULL;
+    //     for(it=I0->begin();it!=I0->end();++it)
+    //       {
+    //  tmp = (*it)->getInteractionPtr();
+    //  if(tmp == inter)
+    //    UR = *it;
+    //       }
+
+    //     UnitaryRelationsSet * I1 = s->getIndexSetPtr(1);
 
     while (s->hasNextEvent())
     {
@@ -238,29 +243,81 @@ int main(int argc, char* argv[])
       dataPlot(k, 5) = (*v)(1);
       dataPlot(k, 6) = (inter->getY(0))(0) - 2;
       dataPlot(k, 7) = (inter->getY(1))(1);
-
+      dataPlot(k, 8) = (*z)(6);
       isNewtonConverge = false;
       nbNewtonStep = 0; // number of Newton iterations
 
       s->newtonSolve(criterion, maxIter);
-      (*z)(4) = (inter->getLambda(0))(1);
+      //  bool isNewtonConverge = false;
+      //  unsigned int nbNewtonStep = 0; // number of Newton iterations
+
+      //  while((!isNewtonConverge)&&(nbNewtonStep<=maxIter))
+      //    {
+      //      nbNewtonStep++;
+      //      s->computeFreeState();
+      //      if(!(s->getOneStepNSProblems().empty()))
+      //        {
+      //    s->updateIndexSets();
+      //    s->computeOneStepNSProblem("timeStepping");
+
+      // //     cout <<"nbNewtonStep " <<nbNewtonStep << endl ;
+      // //     cout << "lambda(0) =" << endl;
+      // //     (inter->getLambdaPtr(0)->display());
+      // //     cout << "lambda(1) =" << endl;
+      // //     (inter->getLambdaPtr(1)->display());
+      //    dataPlot(k,8) = (inter->getLambda(1))(1);
+      //    (*z)(4) = (inter->getLambda(1))(1);
+
+      //        }
+      //      // update
+      //      s->update(1);
+      //      // Process all events simultaneous to nextEvent.
+      //      //  eventsManager->process();
+      //      isNewtonConverge = s->newtonCheckConvergence(criterion);
+      //    }
+
+      //  // Process NextEvent (Save OSI (DS) and OSNS (Interactions) states into Memory vectors ...)
+      //  s->getEventsManagerPtr()->processEvents();
+
+      //  if (!isNewtonConverge)
+      //    cout << "Newton process stopped: reach max step number" <<endl ;
+
+      //cout << "lambdaOld(1) =" << endl;
+      //(inter->getLambdaOldPtr(1)->display());
+      (*z)(4) = (inter->getLambdaOld(1))(1) * h;
+      dataPlot(k, 9) = (*z)(4) ;
+
+
+
+      //  cout << "Z =" << endl;
+      //  if ((static_cast<LCP*>(osnspb))->getZPtr() != NULL)
+      //    {
+      //      (static_cast<LCP*>(osnspb))->getZPtr()->display();
+      //    }
+      //  cout << "W =" << endl;
+      //  if ((static_cast<LCP*>(osnspb))->getWPtr() != NULL)
+      //    {
+      //      (static_cast<LCP*>(osnspb))->getWPtr()->display();
+      //    }
+
       // change of controller between the free-motion phase and impacts accumulation phase.
-      if ((I1->find(UR) != I1->end()) && (test == 0) && ((inter->getY(0))(0) - 2 < 0.65))
+      if (((*z)(4) > 0) && (test == 0) && ((inter->getY(0))(0) - 2 < 0.65))
       {
         (*z)(5) = (inter->getY(0))(0) - 2;
+        (*z)(7) = (*z)(6);
         arm->setComputeFExtFunction("Two-linkPlugin.so", "U1");
         test = 1;
       }
 
       // change of controller between the impacts accumulation phase and constraint-motion phase.
-      if (((inter->getY(1))(1) <= 0.0001) && (test == 1))
+      if (((inter->getY(1))(1) <= 0.0001) && (test == 1) && ((inter->getY(0))(1) <= 0.0001))
       {
         arm->setComputeFExtFunction("Two-linkPlugin.so", "U2");
         test = 2;
       }
 
       // change of controller between the constraint-motion phase and free-motion phase.
-      if (((inter->getY(0))(0) - 2 >= 0.745) && (test == 2))
+      if (((*z)(4) < 0.0001) && (test == 2))
       {
         arm->setComputeFExtFunction("Two-linkPlugin.so", "U");
         test = 0;

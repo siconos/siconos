@@ -29,10 +29,11 @@ double m2 = 1; //mass of the second link
 double I1 = 1;// the moment of inertia of the first link about the axis that passes through the center of mass (parallel to the Z axis)
 double I2 = 1;// the moment of inertia of the second link about the axis that passes through the center of mass (parallel to the Z axis)
 double g = 9.8;//gravitational acceleration
-double gamma2 = 10;
+double gamma2 = 30;
 double gamma1 = 25;
-double Kf = 0.1;
-double P = 10;
+double Kf = 3;
+double P = 3;
+//double alpha = 20;
 
 
 extern "C" void mass(unsigned int sizeOfq, const double *q, double *mass, unsigned int sizeZ, double* z)
@@ -55,23 +56,28 @@ extern "C" void U(double time, unsigned int sizeOfq, double *U, unsigned int siz
   double m12 = (m2 * l2 * l2 / 4) + I2 + m2 * l1 * l2 * cos(z[1]) / 2;
   double m22 = (m2 * l2 * l2 / 4) + I2;
 
+  // generalized coordinates q=(x,y)^T
   double x = l1 * cos(z[0]) + l2 * cos(z[0] + z[1]);
   double y = l1 * sin(z[0]) + l2 * sin(z[0] + z[1]);
 
+  // time derivatives of x and y
   double x1 = -l1 * sin(z[0]) * z[2] - l2 * sin(z[0] + z[1]) * (z[2] + z[3]);
   double y1 = l1 * cos(z[0]) * z[2] + l2 * cos(z[0] + z[1]) * (z[2] + z[3]);
 
+  // the gradient of the transformation \theta->q
   double grad11 = -y;
   double grad12 = -l2 * sin(z[0] + z[1]);
   double grad21 = x;
   double grad22 = l2 * cos(z[0] + z[1]);
   double det = grad11 * grad22 - grad12 * grad21;
 
+  // d=(grad)^{-1}
   double d11 = grad22 / det;
   double d12 = -grad12 / det;
   double d21 = -grad21 / det;
   double d22 = grad11 / det;
 
+  // time derivative of d
   double dd11 =  -l1 * cos(z[0]) * z[2] - l2 * cos(z[0] + z[1]) * (z[2] + z[3]);
   double dd12 =  -l2 * cos(z[0] + z[1]) * (z[2] + z[3]);
   double dd21 =  -l1 * sin(z[0]) * z[2] - l2 * sin(z[0] + z[1]) * (z[2] + z[3]);
@@ -90,6 +96,9 @@ extern "C" void U(double time, unsigned int sizeOfq, double *U, unsigned int siz
 
   double s1 = x1 - qr11;
   double s2 = y1 - qr12;
+
+  double V1 = (s1 * s1 * (d11 * mc11 + d21 * mc12) + 2 * s1 * s2 * (d12 * mc11 + d22 * mc21) + s2 * s2 * (d12 * mc12 + d22 * mc22)) / 2;
+  z[6] = V1 + gamma1 * gamma2 * ((x - (0.65 + 0.1 * cos(2 * PI * time / P))) * (x - (0.65 + 0.1 * cos(2 * PI * time / P))) + (y - 0.1 * sin(2 * PI * time / P)) * (y - 0.1 * sin(2 * PI * time / P)));
 
   double a11 = mc11 * dd11 + mc12 * dd21;
   double a12 = mc11 * dd12 + mc12 * dd22;
@@ -154,7 +163,11 @@ extern "C" void U1(double time, unsigned int sizeOfq, double *U1, unsigned int s
   double qr22 = -gamma2 * y1;
 
   double s1 = x1 + gamma2 * (x - z[5]);
-  double s2 = y1 + gamma2 * (y + sqrt(0.5 / gamma1 * gamma2));
+  double s2 = y1 + gamma2 * (y + sqrt(z[7] / gamma1 * gamma2));
+  double s2ly = y1 + gamma2 * y;
+
+  double V1 = (s1 * s1 * (d11 * mc11 + d21 * mc12) + 2 * s1 * s2ly * (d12 * mc11 + d22 * mc21) + s2ly * s2ly * (d12 * mc12 + d22 * mc22)) / 2;
+  z[6] = V1 + gamma1 * gamma2 * ((x - z[5]) * (x - z[5]) + y * y);
 
   double a11 = mc11 * dd11 + mc12 * dd21;
   double a12 = mc11 * dd12 + mc12 * dd22;
@@ -220,6 +233,9 @@ extern "C" void U2(double time, unsigned int sizeOfq, double *U, unsigned int si
   double s1 = x1 - qr11;
   double s2 = y1 - qr12;
 
+  double V1 = (s1 * s1 * (d11 * mc11 + d21 * mc12) + 2 * s1 * s2 * (d12 * mc11 + d22 * mc21) + s2 * s2 * (d12 * mc12 + d22 * mc22)) / 2;
+  z[6] = V1 + gamma1 * gamma2 * ((x - (0.65 + 0.1 * cos(2 * PI * time / P))) * (x - (0.65 + 0.1 * cos(2 * PI * time / P))) + y * y);
+
   double a11 = mc11 * dd11 + mc12 * dd21;
   double a12 = mc11 * dd12 + mc12 * dd22;
   double a21 = mc21 * dd11 + mc22 * dd21;
@@ -238,8 +254,8 @@ extern "C" void U2(double time, unsigned int sizeOfq, double *U, unsigned int si
   double T12 = a3 - a4;
   double T13 = grad12 * gamma1 * s1 + grad22 * gamma1 * s2;
 
-  U[0] = T01 + T02 - T03 + grad12 * (Kf * (z[4] - 0.1) - 0.1);
-  U[1] = T11 + T12 - T13 + grad12 * (Kf * (z[4] - 0.1) - 0.1);;
+  U[0] = T01 + T02 - T03 + grad12 * (Kf * z[4] - (1 + Kf) * 0.5 * (0.75 - x));
+  U[1] = T11 + T12 - T13 + grad12 * (Kf * z[4] - (1 + Kf) * 0.5 * (0.75 - x));
 
 }
 extern "C" void jacobianQNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
@@ -269,9 +285,9 @@ extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, 
 
 extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeOfZ, double* z)
 {
-  G[0] = 0;
+  G[0] = 0;// -(l1*sin(q[0])+l2*sin(q[0]+q[1]));
   G[1] = l1 * cos(q[0]) + l2 * cos(q[0] + q[1]);
-  G[2] = 0;
+  G[2] = 0;//-l2*sin(q[0]+q[1]);
   G[3] = l2 * cos(q[0] + q[1]);
 }
 
