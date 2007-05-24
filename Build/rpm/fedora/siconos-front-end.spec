@@ -1,4 +1,4 @@
-Summary: Siconos/Front-End provides python and/or scilab interfaces for Siconos/Kernel
+Summary: Siconos/Front-End provides python and scilab interfaces for Siconos/Kernel
 Name: siconos-front-end
 Version: 2.0.1
 Release: 1
@@ -8,11 +8,11 @@ URL: http://gforge.inria.fr/projects/siconos
 Source0: Siconos-Front-End-v%{version}.tgz
 BuildRoot: %{_tmppath}/%{name}-v%{version}-%{release}-root
 
-BuildPreReq: autoconf, automake, gcc, gcc-gfortran, doxygen, atlas, atlas-devel, cppunit, siconos-numerics, swig
-Requires: atlas, siconos-numerics, siconos-kernel, python
+BuildPreReq: autoconf, automake, gcc, gcc-gfortran, doxygen, atlas, atlas-devel, cppunit, siconos-numerics, swig,scilab 
+Requires: atlas, siconos-numerics, siconos-kernel, python, numpy, gnuplot, scilab
 
 %description 
-The present package, Siconos/Front-End provides python and/or scilab
+The present package, Siconos/Front-End provides python and scilab
 interfaces for Siconos/Kernel.  More details are available on software
 documentation pages, Doc/Devel directory of the current distribution,
 in "design" chapter, or on http://siconos.gforge.inria.fr/
@@ -30,13 +30,13 @@ pushd %{component}
 
 %build
 pushd %{component}
-%{configure}
+%{configure} --enable-scilab
 %{__make}
 
 %install
 pushd %{component}
 rm -rf %{buildroot}
-make DESTDIR=%{buildroot} PYTHON_PATH=%{buildroot}usr/site-package PYTHON_DIR=%{buildroot}usr/site-package install
+make DESTDIR=%{buildroot} PYTHON_PATH=%{buildroot}/usr/site-package PYTHON_DIR=%{buildroot}/usr/site-package install
 mkdir -p %{buildroot}%{docs}/%{component}
 %{__install} AUTHORS COPYING ChangeLog NEWS README %{buildroot}%{docs}
 popd
@@ -50,6 +50,7 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 %doc %{docs}
 %{_bindir}
+%{_usr}/site-package
 %exclude %{_usrsrc}/debug
 
 %changelog
