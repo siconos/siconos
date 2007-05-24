@@ -1,6 +1,6 @@
-Summary: The Siconos/Numerics Package is dedicated to low-level algorithms 
+Summary: The Siconos/Numerics Package is dedicated to low-level algorithms
 Name: siconos-numerics
-Version: 2.0.0
+Version: 2.0.1
 Release: 1
 License: GNU LGPL
 Group: Development/Libraries
@@ -33,6 +33,7 @@ pushd %{component}
 %{configure}
 %{__make}
 %{__make} doc
+#%{__make} check
 
 %install
 pushd %{component}
