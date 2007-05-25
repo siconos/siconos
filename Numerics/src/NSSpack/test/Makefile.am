@@ -27,10 +27,14 @@
 
 include $(top_srcdir)/config/Make-rules
 
-check_PROGRAMS = test1  test2 test3  test4  test5
+check_PROGRAMS = test1 test2 test3  test4  test5
 
-TESTS = $(check_PROGRAMS)
-XFAIL_TESTS = $(check_PROGRAMS)
+#TESTS = $(check_PROGRAMS)
+#XFAIL_TESTS = $(check_PROGRAMS)
+
+TESTS = test1 test2 test3  test4  test5
+XFAIL_TESTS =   test5
+
 
 test1_SOURCES = main_lcp_new.c
 include_HEADERS = 

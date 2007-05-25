@@ -301,7 +301,7 @@ int main(void)
 
   free(meth_dfc_2D.dfc_2D.J1);
 
-  return 1;
+  return info;
 
 }
 

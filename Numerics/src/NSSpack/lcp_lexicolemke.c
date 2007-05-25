@@ -36,7 +36,7 @@
 
 /*!\fn  void lcp_lexicolemke( int *nn , double *vec , double *q , double *zlem , double *wlem , int *info , int *iparamLCP , double *dparamLCP )
 
-  lcp_lexicolemke is a direct solver for LCP based on pivoting method principle for degenrate problem.\n
+  lcp_lexicolemke is a direct solver for LCP based on pivoting method principle for degenerate problem.\n
   Choice of pivot variable is performed via lexicographic ordering
   Ref: "The Linear Complementary Problem" Cottle, Pang, Stone (1992)\n
 

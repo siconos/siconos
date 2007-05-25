@@ -77,7 +77,7 @@
 #define CHAT
 
 
-void test_mmc(void)
+int test_mmc(void)
 {
   FILE      *f1, *f2, *f3, *f4;
   int       i, j, nl, nc, nll, n = 40;
@@ -281,6 +281,17 @@ void test_mmc(void)
 #endif
 
   info2 = dr_solver(vec, q, &n, &meth_dr2, z2, w2);
+
+
+  if (info1 >= info2)
+  {
+    return info1;
+  }
+  else return info2;
+
+
+
+
 
 
 #ifdef CHAT
@@ -812,8 +823,8 @@ void test_mmc(void)
 
 int main(void)
 {
-  test_mmc();
-  return 1;
+  return test_mmc();
+
 }
 
 

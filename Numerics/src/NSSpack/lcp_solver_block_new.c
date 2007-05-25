@@ -287,13 +287,15 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
     if (adrbldiag != NULL)
     {
       /* Local LCP resolution  */
-      strcpy(savename, pt->lcp.name);
-      strcpy(pt->lcp.name, "NLGS");
+
+
+      /* strcpy(savename,pt->lcp.name); */
+      /*strcpy(pt->lcp.name,"NLGS"); */
 
       pt->lcp.iter = 0;
       info1 = lcp_solver(adrbldiag , rhs , &rowsize , pt , &z[indicrow] , &w[indicrow]);
 
-      strcpy(pt->lcp.name, savename);
+      /* strcpy(pt->lcp.name,savename); */
 
       totaliter += pt->lcp.iter;
       if (info1 > 0)
