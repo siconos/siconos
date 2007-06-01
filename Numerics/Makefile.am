@@ -28,7 +28,7 @@ include $(top_srcdir)/config/Make-rules
 SUBDIRS = src
 
 
-EXTRA_DIST = config
+EXTRA_DIST = config src api
 
 doc:
 	@if ! test -d $(top_srcdir)/../Docs; then \
