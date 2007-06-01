@@ -1,0 +1,50 @@
+#! /bin/sh
+case $1 in -x) shift; set -x;; esac
+
+export PATH=/bin:/usr/bin
+set -e
+workdir=${workdir:-/tmp}
+
+remove_tmp_dir () {
+    case $1 in
+	*siconos-dist.?????) rm -rf $1;;
+	*) echo "cannot remove this tmp dir : $1" >&2 ;;
+    esac
+}
+
+ndir=`mktemp -d ${workdir}/siconos-dist.XXXXX`
+
+trap 'echo removing tmp dir... ; remove_tmp_dir ${ndir} ; exit 1' 2 3
+
+
+get_src () {
+    pushd $ndir
+    revarg=
+    [ x$2 = x ] || revarg="-r$2"
+    svn export $revarg svn+ssh://d`id -nu`scm.gforge.inria.fr/svn/siconos/trunk/$1
+    popd
+}
+
+make_dist () { 
+    get_src $1 $2
+    pushd ${ndir}/$1
+    ./autogen.sh
+    ./configure
+    make dist
+    mv siconos-*.tar.gz ${workdir}
+    popd
+}
+
+rev=
+while [ $# -gt 0 ] ; do
+    case $1 in 
+	-workdir) shift; $workdir=$1; shift;;
+	-r) shift; rev=$1; shift;;
+	*) component=$1; shift;;
+    esac
+done
+
+make_dist $component $rev
+
+remove_tmp_dir $ndir
+
