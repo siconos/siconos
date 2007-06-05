@@ -5,9 +5,8 @@ Release: 1
 License: GNU LGPL
 Group: Development/Libraries
 URL: http://gforge.inria.fr/projects/siconos
-Source0: Siconos-Numerics-v%{version}.tgz
-BuildRoot: %{_tmppath}/%{name}-v%{version}-%{release}-root
-
+Source0: %{name}-%{version}.tar.gz
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildPreReq: autoconf, automake, gcc, gcc-gfortran, doxygen, atlas, atlas-devel, cppunit
 Requires: atlas
 
@@ -18,32 +17,33 @@ provides low-level algorithms to compute basic well-identified
 problems.
 
 %define component Numerics
+%define namev %{name}-%{version}
 %define gdocs GeneratedDocs
-%define docs %{_datadir}/doc/%{name}-%{version}
+%define docs %{_datadir}/doc/siconos-%{version}
 
 %prep
 %setup -q -c
 mkdir -p %{gdocs}/%{component}
 mkdir -p %{gdocs}/Tags
-pushd %{component}
-./autogen.sh
+pushd %{namev}
 
 %build
-pushd %{component}
+pushd %{namev}
 %{configure}
 %{__make}
 %{__make} doc
-#%{__make} check
+%{__make} check
 
 %install
-pushd %{component}
+pushd %{namev}
 rm -rf %{buildroot}
 make DESTDIR=%{buildroot} install
 mkdir -p %{buildroot}%{docs}/%{component}
-%{__install} AUTHORS COPYING ChangeLog NEWS README %{buildroot}%{docs}
+mkdir -p %{buildroot}%{docs}/html
+%{__install} AUTHORS COPYING ChangeLog NEWS README %{buildroot}%{docs}/%{component}
 popd
 pushd %{gdocs}
-tar cvf - %{component} | (cd %{buildroot}%{docs} ; tar xvf -)
+cp -r %{component} %{buildroot}%{docs}/html
 
 %clean
 rm -rf %{buildroot}
