@@ -32,7 +32,7 @@ libModelingTools_la_SOURCES = DynamicalSystem.cpp FirstOrderNonLinearDS.cpp Firs
 			      NonSmoothLaw.cpp NewtonImpactFrictionNSL.cpp NewtonImpactNSL.cpp RelayNSL.cpp ComplementarityConditionNSL.cpp \
 			      Interaction.cpp InteractionsSet.cpp UnitaryRelation.cpp UnitaryRelationsSet.cpp Topology.cpp NonSmoothDynamicalSystem.cpp \
 			      DynamicalSystem.h FirstOrderNonLinearDS.h FirstOrderLinearDS.h FirstOrderLinearTIDS.h LagrangianDS.h \
-			      LagrangianLinearTIDS.h DynamicalSystemsSet.h Relation.h FirstOrderR.h FirstOrderLinearR FirstOrderLinearTIR.h LagrangianR.h LagrangianLinearR.h \
+			      LagrangianLinearTIDS.h DynamicalSystemsSet.h Relation.h FirstOrderR.h FirstOrderLinearR.h FirstOrderLinearTIR.h LagrangianR.h LagrangianLinearR.h \
 			      LagrangianScleronomousR.h LagrangianRheonomousR.h LagrangianCompliantR.h\
 			      NonSmoothLaw.h NewtonImpactFrictionNSL.h NewtonImpactNSL.h RelayNSL.h ComplementarityConditionNSL.h \
 			      Interaction.h InteractionsSet.h UnitaryRelation.h UnitaryRelationsSet.h Topology.h NonSmoothDynamicalSystem.h \
