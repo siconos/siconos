@@ -4,6 +4,8 @@ case $1 in -x) shift; set -x;; esac
 export PATH=/bin:/usr/bin
 set -e
 workdir=${workdir:-/tmp}
+mydir=`dirname \`readlink -f $0\``
+ndir=`mktemp -d ${workdir}/siconos-dist.XXXXX`
 
 remove_tmp_dir () {
     case $1 in
@@ -12,16 +14,11 @@ remove_tmp_dir () {
     esac
 }
 
-ndir=`mktemp -d ${workdir}/siconos-dist.XXXXX`
-
-trap 'echo removing tmp dir... ; remove_tmp_dir ${ndir} ; exit 1' 2 3
-
-
 get_src () {
     pushd $ndir
     revarg=
     [ x$2 = x ] || revarg="-r$2"
-    svn export $revarg svn+ssh://d`id -nu`scm.gforge.inria.fr/svn/siconos/trunk/$1
+    svn export $revarg $mydir/../../$1 $ndir/$1
     popd
 }
 
@@ -35,6 +32,7 @@ make_dist () {
     popd
 }
 
+trap 'echo removing tmp dir... ; remove_tmp_dir ${ndir} ; exit 1' 2 3
 rev=
 while [ $# -gt 0 ] ; do
     case $1 in 
