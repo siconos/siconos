@@ -18,3 +18,5 @@
  #	
 SUBDIRS = config python @SCILAB@
 
+# make dist via svn export
+EXTRA_DIST = config python scilab
