@@ -22,7 +22,7 @@ SUBDIRS = pySiconos
 
 include $(top_srcdir)/config/Make-rules
 include $(KERNEL_PATH)/share/siconos-kernel/KernelConfig.sh
-EXTRA_DIST = pySiconos.i createLibSiconos.sh
+EXTRA_DIST = pySiconos.i 
 
 all:swig_interface lib
 
