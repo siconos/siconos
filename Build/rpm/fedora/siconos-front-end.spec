@@ -5,8 +5,8 @@ Release: 1
 License: GNU LGPL
 Group: Application/Math
 URL: http://gforge.inria.fr/projects/siconos
-Source0: Siconos-Front-End-v%{version}.tgz
-BuildRoot: %{_tmppath}/%{name}-v%{version}-%{release}-root
+Source0: %{name}-%{version}.tar.gz
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 BuildPreReq: autoconf, automake, gcc, gcc-gfortran, doxygen, atlas, atlas-devel, cppunit, siconos-numerics, swig,scilab 
 Requires: atlas, siconos-numerics, siconos-kernel, python, numpy, gnuplot, scilab
@@ -18,30 +18,34 @@ documentation pages, Doc/Devel directory of the current distribution,
 in "design" chapter, or on http://siconos.gforge.inria.fr/
 
 %define component Front-End
+%define namev %{name}-%{version}
 %define gdocs GeneratedDocs
-%define docs %{_datadir}/doc/%{name}-%{version}
+%define docs %{_datadir}/doc/siconos-%{version}
 
 %prep
 %setup -q -c
 mkdir -p %{gdocs}/%{component}
 mkdir -p %{gdocs}/Tags
-pushd %{component}
-./autogen.sh
 
 %build
-pushd %{component}
+pushd %{namev}
 %{configure} --enable-scilab
 %{__make}
 
 %install
-pushd %{component}
+pushd %{namev}
 rm -rf %{buildroot}
 make DESTDIR=%{buildroot} PYTHON_PATH=%{buildroot}/usr/site-package PYTHON_DIR=%{buildroot}/usr/site-package install
 mkdir -p %{buildroot}%{docs}/%{component}
-%{__install} AUTHORS COPYING ChangeLog NEWS README %{buildroot}%{docs}
+mkdir -p %{buildroot}%{docs}/html
+mkdir -p %{buildroot}%{docs}/pdf
+%{__install} AUTHORS COPYING ChangeLog NEWS README %{buildroot}%{docs}/%{component}
+pdfs=`find . -name \*.pdf`; [ x"$pdfs" = x ] || cp $pdfs %{buildroot}%{docs}/pdf
 popd
 pushd %{gdocs}
-tar cvf - %{component} | (cd %{buildroot}%{docs} ; tar xvf -)
+rm -rf `find . -name latex -type d`
+pdfs=`find . -name \*.pdf`; [ x"$pdfs" = x ] || cp $pdfs %{buildroot}%{docs}/pdf
+cp -r %{component} %{buildroot}%{docs}/html
 
 %clean
 rm -rf %{buildroot}

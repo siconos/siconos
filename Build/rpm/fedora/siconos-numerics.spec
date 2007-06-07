@@ -25,7 +25,6 @@ problems.
 %setup -q -c
 mkdir -p %{gdocs}/%{component}
 mkdir -p %{gdocs}/Tags
-pushd %{namev}
 
 %build
 pushd %{namev}
@@ -40,9 +39,13 @@ rm -rf %{buildroot}
 make DESTDIR=%{buildroot} install
 mkdir -p %{buildroot}%{docs}/%{component}
 mkdir -p %{buildroot}%{docs}/html
+mkdir -p %{buildroot}%{docs}/pdf
 %{__install} AUTHORS COPYING ChangeLog NEWS README %{buildroot}%{docs}/%{component}
+pdfs=`find . -name \*.pdf`; [ x"$pdfs" = x ] || cp $pdfs %{buildroot}%{docs}/pdf
 popd
 pushd %{gdocs}
+rm -rf `find . -name latex -type d`
+pdfs=`find . -name \*.pdf`; [ x"$pdfs" = x ] || cp $pdfs %{buildroot}%{docs}/pdf
 cp -r %{component} %{buildroot}%{docs}/html
 
 %clean
