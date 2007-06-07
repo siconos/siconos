@@ -55,6 +55,7 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root,-)
 %doc %{docs}
+%doc %{_mandir}/*/*
 %{_libdir}
 %{_includedir}
 %{_bindir}
