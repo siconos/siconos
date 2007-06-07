@@ -147,6 +147,8 @@ AC_CONFIG_FILES([Makefile
 		 python/Makefile
 		 python/pySiconos/pySiconos
 		 python/pySiconos/Makefile
+		 python/pySiconos/man/Makefile
+		 python/pySiconos/man/pySiconos.1
 		 scilab/Makefile
 		 scilab/loaderSiconos.sce
 		 scilab/env.sh]
