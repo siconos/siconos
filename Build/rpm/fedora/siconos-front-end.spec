@@ -53,6 +53,7 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root,-)
 %doc %{docs}
+%doc %{_mandir}/*/*
 %{_bindir}
 %{_usr}/site-package
 %exclude %{_usrsrc}/debug
