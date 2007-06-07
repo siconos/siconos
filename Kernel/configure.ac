@@ -297,6 +297,8 @@ AC_CONFIG_FILES([Makefile
                  config/Makefile
 		 config/xmlschema/Makefile
 		 config/KernelConfig.sh
+		 man/Makefile
+		 man/siconos.1
 		 siconos/MakefilePluginSample 
 		 siconos/siconos
 		 siconos/Makefile
