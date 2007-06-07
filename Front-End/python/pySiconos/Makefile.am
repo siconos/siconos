@@ -20,3 +20,4 @@
 
 bin_SCRIPTS = pySiconos
 
+SUBDIRS = man
