@@ -1,13 +1,51 @@
 /*! \page GS_SicAlgebra Siconos Algebra
 
+The src/utils/SiconosAlgebra directory contains all classes dedicated to matrices and vectors handling in the Siconos platform. \n
+The present page is supposed to give the basics on how to build and use such objects.
+
 \section tutVector Vectors and Matrices handling
-In Siconos, matrices and vectors handling is based on <a href="http://www.boost.org/libs/numeric/ublas/doc/index.htm">Boost Ublas library</a>. 
-The Base (virtual) classes are SiconosVector and SiconosMatrix, with two kinds of usable derived classes: Simple and Block. In addition some io classes are used for reading/writing object. \n
+
+Two basic classes are available in the platform to deal with vectors and matrices: SiconosVector and SiconosMatrix.\n
+These objects are virtual classes and thus only interfaces to some specific objects: either SimpleVector (resp. SimpleMatrix) or BlockVector (resp. BlockMatrix). 
+
+- SimpleMatrix and SimpleVector represent the classical matrices and vectors (of double) in a mathematical sense and are mainly characterized by their dimensions and a type. \n
+SimpleVector can be dense or sparse and SimpleMatrix dense, sparse, triangular, banded, symmetric, zero or identity. \n
+- BlockMatrix and BlockVector are some containers of pointers to SiconosMatrix or SiconosVector. \n
+For example:
+\code
+
+// a SimpleVector of size 4
+SimpleVector * v1 = new SimpleVector(4);
+// a SimpleVector of size 2.
+SiconosVector * v2 = new SimpleVector(2);
+// Note that since Simple is derived from Siconos, 
+// the previous line is equivalent to
+// SimpleVector * v2 = new SimpleVector(2);
+
+// A BlockVector that contains two SimpleVector
+SiconosVector * myBlockV = new BlockVector(v1, v2);
+
+(*myBlockV)[0]->display(); // display v1
+// (*myBlockV)[0] represents the same pointer as v1.
+
+\endcode
+
+All these objects are based on <a href="http://www.boost.org/libs/numeric/ublas/doc/index.htm">Boost Ublas library</a>. 
+
+In addition some io classes are used for reading/writing object. \n
 
 <b>Main classes:</b>  <em> SimpleVector, SimpleMatrix, BlockVector, BlockMatrix, ioVector, ioMatrix</em>\n
 
-Vectors can be dense or sparse and matrices dense, sparse, triangular, banded, symmetric, zero or identity. 
-\subsection creatingVector Creating a vector: 
+Some details about the way to build these objects and the existing operators and functionnalities are given in the sections below.
+
+- \ref creatingVector
+- \ref creatingMatrix
+- \ref creatingBlock
+- \ref matIO
+- \ref SAUsing
+
+
+\subsection creatingVector How to build a vector?
 \code
 int size = 4;
 // Dense vector, as a pointer
@@ -19,14 +57,71 @@ SiconosVector * z = new SimpleVector(size,SPARSE);
 // Read the vector from the file vect.dat (only for dense) 
 SiconosVector * v2 = new SimpleVector("vect.dat",1); // 1: ascii, 0:binary
 \endcode
-\subsection creatingMatrix Creating a matrix:
+
+\e Keywords for constructors: DENSE (default value), SPARSE.
+
+\subsection creatingMatrix How to build a matrix?
 \code
 int row = 3, col = 3;
 // row X col Dense matrix:
 SiconosMatrix * m = new SimpleMatrix(row,col);
+// row X row Symmetric matrix:
+SiconosMatrix * m = new SimpleMatrix(row,row,SYMMETRIC);
 // Read from a file
 SiconosMatrix * m2 = new SimpleMatrix("mat.dat",1); // 1: ascii, 0:binary
 \endcode
+
+\e Keywords for constructors: DENSE (default), TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO, IDENTITY.
+
+\subsection creatingBlock How to build block-matrices or vectors?
+
+A BlockVector or a BlockMatrix is no more that a collection of pointers to SiconosVector or SiconosMatrix. \n
+Then in most cases, to build such an object, you just need to insert some existing objects. \n
+The main way of construction are described below.
+
+- From two existing SiconosVector:
+\code
+ 
+\endcode
+\code
+// SimpleVector construction
+SiconosVector * v1 = new SimpleVector(2);
+SiconosVector * v2 = new SimpleVector(4);
+// ...
+
+// Build an empty vector and insert some existing vectors.
+SiconosVector * V0 = new BlockVector();
+
+// Pointer insertion: 
+V0->insertPtr(v1); 
+// V0 has now one block equal to v1.
+// warning: because of pointer equality, 
+// v1 and (*V0)[0] represent the same object
+// and thus have the same memory location.
+
+// Copy of an existing vector:
+V0->insert(*v2); 
+// A new block has been created in V0
+// and v2 has been copied into this block.
+// Thus v2 and (*V0)[1] contain the same 
+// elements but are two different objects.
+\endcode
+
+A BlockVector can also contain some other BlockVector.
+
+\code
+SiconosVector * V1 = new BlockVector();
+V1->insertPtr(V0);
+V1->insertPtr(v1);
+
+\endcode
+
+V1 has now two blocks: the first one is a block of two blocks and the second 
+is equal to v1.
+
+\endcode
+
+
 \subsection matIO Matrix/Vector Input/Output
 \code
 // v is a vector, m a matrix
@@ -45,31 +140,22 @@ Example, for a 2-rows, 3-columns matrix:\n
 1 2 3\n
 4 5 6\n
 However, if you give as a second argument to \e write function "noDim", the first line with dimensions will not be written.
-\subsection matUtils Useful functions
+
+\subsection SAUsing Using SiconosMatrix and SiconosVector
+
+- Matrix/vector dimension(s):
 \code
+
 v->size() // return the size of the vector
 m->size(0); // number of rows in the matrix
 m->size(1), // number of columns
 m->resize(a,b); // resize m, available also for vectors
-m->normInf() ; // compute infinite matrix norm of m
-\endcode
-All classical operators are also available, see doxygen. \n
-For operations between matrices or vectors of different types, use prod, add or sub. 
-\code
-// Let m1, m2, m3 be dense matrices and s a symmetric matrix
-// Then you can write:
-m3 = m1*m2; // equivalent to m3 = prod(m1,m2);
-// but you have to write
-m3 = prod(m1,s); 
-\endcode
-In a general way, if you need efficiency, always prefer functions to overloaded operators. 
 
-
-\subsection SAUsing Using SiconosMatrix and SiconosVector
+\endcode
 
 - Single elements access or assignment: operator "()" or \e get/setValue functions.
-
 \code
+
 SiconosVector * v = new SimpleVector(3); // v = [0 0 0]
 SimpleVector w(4);  			 // w = [0 0 0 0]
 (*v)(0) = 4;				 // v = [4 0 0] 
@@ -79,11 +165,11 @@ w(1) = 2;
 w(2) = (*v)(0);				 // w = [0 2 4 0]
 // equivalent to:
 w.setValue( 2,v->getValue(0) );
+
 \endcode	
-
 In the same way for matrices:
-
 \code
+
 SiconosMatrix * M = new SimpleMatrix(3,3); // M = [ 0 0 0 ]
 					   //     [ 0 0 0 ]
 					   //     [ 0 0 0 ]
@@ -98,17 +184,17 @@ M->setValue(2,0,3.6);			   // M = [  0  0  0  ]
 cout << P.getValue(0,1); // display 12.0
 
 \endcode
-
 For BlockVector:
 "()" and \e get/setValue functions have the same action as for SimpleVectors:
 \code
+
 // We suppose that v1 and v2 are two pointers to SimpleVector of size 3 and 4.
 SiconosVector * vB = new BlockVector(v1,v2); // vB = [ [1 2 3] [4 5 6 7] ]
 (*vB)(4) = 12; 				     // vB = [ [1 2 3] [4 12 6 7] ]
 vB->setValue(6,8.6); 		             // vB = [ [1 2 3] [4 12 6 8.6] ]	
 // Warning: the given input for position is an "absolute" one, not a block position.
-\endcode
 
+\endcode
 Remark: \e get/setValue functions are equivalent to "()" operator but mainly useful in Siconos-Python, since in that case operators can not be overloaded and thus
 "()" is not available. The same remark applies for "[ ]" and \e get/setVector and in a general way for all operators overloading.
 
@@ -120,102 +206,133 @@ A->eye();
 \endcode
 
 - Assignment of vectors or matrices: "A = B" or "x = y"
-
 \code 
 
 // Operator =
+// Ok if A and x have been built before.
 A = B;
 x = y;
-\endcode
+// Remark: sizes must be consistents between A/B and x/y, 
+// else it results in a Siconos Exception.
 
-Remark: sizes must be consistents between A/B and x/y, else it results in a Siconos Exception.
+// Else copy constructor: memory allocation and initialization with B or x
+SiconosMatrix * A = new SimpleMatrix(*B);
+SiconosVector * x = new SimpleVector(*y);
+
+\endcode
 
 - Addition of matrices or vectors
 	- add "in place": \f$A = A+B\f$ or \f$x = x+y\f$
 \code	
+
 A += B;
 x += y;
+
 \endcode
 	- \f$C = A + B\f$ or \f$z = x + y\f$
 \code
+
 C = A+B;
 add(A,B,C);
 
 z = x + y;
 add(x,y,z);
+
 \endcode
 
 - Subtraction of matrices or vectors
 	- sub "in place": \f$A = A-B\f$ or \f$x = x-y\f$
 \code
+
 A -= B;
 x -= y;
+
 \endcode
 	- \f$C = A - B\f$ or \f$z = x - y\f$
 \code
+
 C = A-B;
 sub(A,B,C);
 
 z = x - y;
 sub(x,y,z);
+
 \endcode
 
 - Multiplication by a scalar:
 	- "in place": \f$A = a*A\f$ or \f$x = a*x\f$
 \code
+
 A *=a;
 x *=a;
+
 \endcode
 	- \f$B=a*A\f$ or \f$y=a*x\f$
 \code
-B = a*B;
-B.scal(a,A);
+
+B = a*A;
+scal(a,A,B);
 y = a*x;
-y.scal(a,x);
+scal(a,x,y);
+
 \endcode
 
 - Division by a scalar:
 	- "in place": \f$A = A/a\f$ or \f$x = x/a\f$
 \code
+
 A /=a;
 x /=a;
+
 \endcode
 	- \f$B=A/a\f$ or \f$y=x/a\f$
 \code
+
 B = B/a;
-B.scal(1.0/a,A);
+scal(1.0/a,A,B);
 y = x/a;
-y.scal(1.0/a,x);
+scal(1.0/a,x,y);
+
 \endcode
 
 - Matrices product: \f$ C= A*B \f$
 \code
+
 C = A*B;
 prod(A,B,C); // Based on atlas gemm for Dense matrices and ublas::prod for others. 
 	     // C and A or B can be the same matrices (ie have common memory), 
 	     // but that will slow down the operation.
 gemm(A,B,C); // Only for denses matrices.
+
 \endcode
 
 - Matrix transpose:
 	- in place: \f$ A = A^t \f$
 \code
+
 A->trans();
+
 \endcode
 	- \f$ B = A^t \f$
 \code
+
 B->trans(A);
+
 \endcode
 
 - inner product: \f$a = x.y\f$
 \code
+
 a = inner_prod(x,y);
+
 \endcode
 
 - Matrix-vector product: \f$y=A*x\f$
 \code
+
 y = prod(A,x);
 prod(A,x,y);
+
 \endcode
 
 
@@ -255,5 +372,23 @@ vB->setVectorPtr(0,v5); // vB = [ [0 0 0] [0 12 0] ]
 // the vector w must be of the same size as the block[i] of v. 
 
 \endcode
+
+\subsection matvecEff About efficiency
+
+As you can notice above, for most of the functionnalities, two solutions are available: either an overloaded operator or a function without any return value.
+For example in the case of matrix addition:
+
+\code
+C = A + B;
+// or 
+add(A,B,C);
+\endcode
+
+In a general way, if you need efficiency, always prefer functions to overloaded operators. 
+The first solution is just there to give a more pleasant, and readable, way of writing operations.
+
+Try also to use pointers to objects to avoid temporary and time-consuming copies.
+
+...
 
 */
