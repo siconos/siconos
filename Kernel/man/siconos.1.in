@@ -1,0 +1,50 @@
+.TH SICONOS 1
+
+.SH NAME
+siconos \- The Siconos C++ Front-End.
+
+.SH SYNOPSIS
+.B siconos
+[
+.B \-c
+]
+[
+.BI \-v
+]
+[
+.BI \-h
+]
+[
+.I sample.cpp
+]
+.SH DESCRIPTION
+
+The
+.BR siconos (1)
+command compiles, links and runs a Siconos C++ input file.
+
+Siconos is a free (GNU license) software, dedicated to modeling,
+simulation and control of Non Smooth Dynamical Systems.
+
+.SH OPTIONS
+
+The following command-line options are recognized by
+.BR siconos (1).
+.TP
+.BI \-c
+ clean the current directory (deletes binary files, etc.)
+.TP
+.BI \-v
+ print 
+.BR make (1) 
+commands as they are executed.
+.TP
+.BI \-h
+ print help
+
+
+.SH SEE ALSO
+.I The Siconos Software Documentation
+.TP
+in the directory @datadir@/doc/siconos-2.0.1/html
+
