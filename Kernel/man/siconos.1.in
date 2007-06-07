@@ -46,5 +46,5 @@ commands as they are executed.
 .SH SEE ALSO
 .I The Siconos Software Documentation
 .TP
-in the directory @datadir@/doc/siconos-2.0.1/html
+in the directory @prefix@/share/doc/siconos-@PACKAGE_VERSION@/html
 
