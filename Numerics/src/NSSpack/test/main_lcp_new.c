@@ -100,7 +100,7 @@ void test_lcp_series(int n , double *vec , double *q)
 
   /* Method definition */
 
-  static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp1 = { "PGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
   static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
   static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-6 , 0.3 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
   static method_lcp method_lcp8 = { "Latin_w"    , 1000 , 1e-6 , 0.3 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
@@ -131,9 +131,9 @@ void test_lcp_series(int n , double *vec , double *q)
   else printf(" M is a symmetric matrix \n");
 #endif
 
-  /* #1 NLGS TEST */
+  /* #1 PGS TEST */
 #ifdef BAVARD
-  printf("**** NLGS TEST ****\n");
+  printf("**** PGS TEST ****\n");
 #endif
   for (i = 0 ; i < n ; ++i)
   {
@@ -246,11 +246,11 @@ void test_lcp_series(int n , double *vec , double *q)
 
   printf(" ****** z = ********************************\n");
   for (i = 0 ; i < n ; i++)
-    printf("NLGS: %14.7e    CPG: %14.7e   LATIN: %14.7e    LATIN_w %14.7e \n", z1[i], z2[i], z3[i], z8[i]);
+    printf("PGS: %14.7e    CPG: %14.7e   LATIN: %14.7e    LATIN_w %14.7e \n", z1[i], z2[i], z3[i], z8[i]);
 
   printf(" ****** w = ********************************\n");
   for (i = 0 ; i < n ; i++)
-    printf("NLGS: %14.7e    CPG: %14.7e   LATIN: %14.7e    LATIN_w %14.7e \n", w1[i], w2[i], w3[i], w8[i]);
+    printf("PGS: %14.7e    CPG: %14.7e   LATIN: %14.7e    LATIN_w %14.7e \n", w1[i], w2[i], w3[i], w8[i]);
 
   printf(" ****** z = ********************************\n");
   for (i = 0 ; i < n ; i++)
@@ -273,7 +273,7 @@ void test_lcp_series(int n , double *vec , double *q)
   dgemv_(&NT , &n , &n , &beta , vec , &n , z1 , &incx , &alpha , w1 , &incy);
   diff = dnrm2_(&n , w1 , &incx);
 
-  printf("\n    NLGS   (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info1, method_lcp1.iter, method_lcp1.err, comp, diff);
+  printf("\n    PGS   (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info1, method_lcp1.iter, method_lcp1.err, comp, diff);
 
   comp = ddot_(&n , z2 , &incx , w2 , &incy);
   daxpy_(&n , &alpha , q , &incx , w2 , &incy);
@@ -398,7 +398,7 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 
   /* Method definition */
 
-  static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp1 = { "PGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
   static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
   static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
   static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
@@ -408,9 +408,9 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
   static method_lcp method_lcp8 = { "RPGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
 
 
-  /* #1 NLGS TEST */
+  /* #1 PGS TEST */
 #ifdef BAVARD
-  printf("**** NLGS TEST ****\n");
+  printf("**** PGS TEST ****\n");
 #endif
 
   for (i = 0 ; i < dim ; ++i) z1[i] = 0.0;
@@ -485,7 +485,7 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 
 #ifdef BAVARD
   printf(" *** z ************************************** ***\n");
-  printf("\n   NLGS RESULT : ");
+  printf("\n   PGS RESULT : ");
   for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , z1[i]);
   printf("\n    CPG RESULT : ");
   for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , z2[i]);
@@ -503,7 +503,7 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
   for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , z8[i]);
   printf("\n\n");
   printf(" *** w ************************************** ***\n");
-  printf("\n   NLGS RESULT : ");
+  printf("\n   PGS RESULT : ");
   for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , w1[i]);
   printf("\n    CPG RESULT : ");
   for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , w2[i]);
@@ -526,7 +526,7 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 
   comp = ddot_(&dim , z1 , &incx , w1 , &incy);
 
-  printf("\n    NLGS   (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info1, iter1, titer1, err1, comp);
+  printf("\n    PGS   (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info1, iter1, titer1, err1, comp);
 
   comp = ddot_(&dim , z2 , &incx , w2 , &incy);
 

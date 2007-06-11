@@ -260,7 +260,7 @@ void lcp_lexicolemke(int *nn , double *vec , double *q , double *zlem , double *
     nobasis = basis[block];
     basis[block] = drive;
 
-  }
+  } /* end while*/
 
   for (ic = 0 ; ic < dim; ++ic)
   {
