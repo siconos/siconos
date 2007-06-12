@@ -21,7 +21,7 @@
 dnl configure script for SICONOS Docs
 
 AC_PREREQ(2.59)
-AC_INIT([Examples],[2.0.1],[siconos.gforge.inria.fr])
+AC_INIT([Siconos-Examples],[2.0.1],[siconos.gforge.inria.fr])
 
 dnl Checking host/target/build systems, for make, install etc.
 AC_CANONICAL_TARGET([])
