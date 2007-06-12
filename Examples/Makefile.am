@@ -19,8 +19,7 @@
 
 include $(top_srcdir)/config/Make-rules
 
+SUBDIRS = config
+
 EXTRA_DIST =  Electronics Mechanics Misc figures src config
 
-DX_PROJECT=Examples
-
-all: doxygen-doc
