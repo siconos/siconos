@@ -26,7 +26,7 @@ AC_INIT([Siconos-Examples],[2.0.1],[siconos.gforge.inria.fr])
 dnl Checking host/target/build systems, for make, install etc.
 AC_CANONICAL_TARGET([])
 AC_CONFIG_SRCDIR([Makefile.am])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([1.9 tar-ustar])
 AC_CONFIG_HEADERS([config.h])
 
 #Checks libtool
