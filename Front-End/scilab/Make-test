@@ -31,19 +31,11 @@ include $(SICONOSPATH)/share/siconos-kernel/KernelConfig.sh
 #CFLAGS=-g -fbounds-check -w -fPIC -DLA_COMPLEX_SUPPORT -DWITHOUT_NANA $(INC_PATH)  `xml2-config --cflags`
 DYNFLAGS=-shared
 
-all: sictest sictest1 sictest2
+all: sictest
 
 sictest:sictest.c
 	gcc -g -c $(CXXFLAGS) $(LIBEXT_INCLUDES) sictest.c
 	gcc -g sictest.o -o sictest $(SICONOS_LIBS) $(SICONOS_LDFLAGS)
-
-sictest1:sictest1.cpp
-	gcc -g -c $(CXXFLAGS) $(LIBEXT_INCLUDES) sictest1.cpp
-	gcc -g sictest1.o -o sictest1 $(SICONOS_LIBS) $(SICONOS_LDFLAGS)
-
-sictest2:sictest2.cpp
-	gcc -g -c $(CXXFLAGS) $(LIBEXT_INCLUDES) sictest2.cpp
-	gcc -g sictest2.o -o sictest2 $(SICONOS_LIBS) $(SICONOS_LDFLAGS)
 
 clean:
 	rm sictest sictest.o

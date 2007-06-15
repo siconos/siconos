@@ -134,31 +134,6 @@ int sicSTNextStepInterface(char *fname)
   return 0;
 }
 
-int sicSTAdvanceToEventInterface(char *fname)
-{
-  static int minrhs = 0, maxrhs = 0, minlhs = 1, maxlhs = 1;
-  static int dimo1 = 1, dimo2 = 1, st;
-
-#ifdef _DEBUG
-  printf("sicSTNextStepInterface\n");
-#endif
-
-  /* Check number of inputs (rhs=1) and outputs (lhs=0) */
-  CheckRhs(minrhs, maxrhs) ;
-  CheckLhs(minlhs, maxlhs) ;
-
-
-  CreateVar(1, "i", &dimo1, &dimo2, &st);
-  /* Call function */
-  *istk(st) = sicSTAdvanceToEvent();
-  /*  Return variable  */
-  LhsVar(1) = 1;
-
-  return 0;
-}
-
-
-
 int sicSTSaveInMemoryInterface(char *fname)
 {
   static int minrhs = 0, maxrhs = 0, minlhs = 1, maxlhs = 1;
@@ -188,7 +163,7 @@ int sicSTComputeOneStepInterface(char *fname)
   static int dimo1 = 1, dimo2 = 1, st;
 
 #ifdef _DEBUG
-  printf("sicSTAdvanceToEventInterface\n");
+  printf("sicSTComputeOneStepInterface\n");
 #endif
 
   /* Check number of inputs (rhs=1) and outputs (lhs=0) */
@@ -272,6 +247,116 @@ int sicSTupdateStateInterface(char *fname)
   LhsVar(1) = 1;
 
   return 0;
+}
+
+int sicAdvanceToEventInterface(char *fname)
+{
+  static int minrhs = 0, maxrhs = 0, minlhs = 1, maxlhs = 1;
+  static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf("sicAdvanceToEventInterface\n");
+#endif
+
+  /* Check number of inputs (rhs=1) and outputs (lhs=0) */
+  CheckRhs(minrhs, maxrhs) ;
+  CheckLhs(minlhs, maxlhs) ;
+
+
+  CreateVar(1, "i", &dimo1, &dimo2, &st);
+  /* Call function */
+  // *istk(st)=sicAdvanceToEvent();
+  sicAdvanceToEvent();
+  *istk(st) = 0;
+  /*  Return variable  */
+  LhsVar(1) = 1;
+
+  return 0;
+}
+
+int sicProcessEventsInterface(char *fname)
+{
+  static int minrhs = 0, maxrhs = 0, minlhs = 1, maxlhs = 1;
+  static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf("sicProcessEventsInterface\n");
+#endif
+
+  /* Check number of inputs (rhs=1) and outputs (lhs=0) */
+  CheckRhs(minrhs, maxrhs) ;
+  CheckLhs(minlhs, maxlhs) ;
+
+
+  CreateVar(1, "i", &dimo1, &dimo2, &st);
+  /* Call function */
+  *istk(st) = sicProcessEvents();
+  /*  Return variable  */
+  LhsVar(1) = 1;
+
+  return 0;
+}
+
+int sicHasNextEventInterface(char *fname)
+{
+  static int minrhs = 0, maxrhs = 0, minlhs = 1, maxlhs = 2;
+  static int dim1 = 1, dim2 = 1, hasnext;
+  static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf("sicHasNextEventInterface\n");
+#endif
+
+
+  /* Check number of inputs (rhs=1) and outputs (lhs=1) */
+  CheckRhs(minrhs, maxrhs) ;
+  CheckLhs(minlhs, maxlhs) ;
+
+
+  CreateVar(1, "i", &dim1, &dim2, &hasnext);
+  CreateVar(2, "i", &dimo1, &dimo2, &st);
+  /* Call function */
+  *istk(st) = sicHasNextEvent(istk(hasnext));
+
+  /* Return variable*/
+  LhsVar(1) = 1;
+  LhsVar(2) = 2;
+
+  return 0;
+}
+
+int sicGetTypeEventInterface(char *fname)
+{
+  static int minrhs = 1, maxrhs = 1, minlhs = 1, maxlhs = 1;
+  static int dim1, dim2;
+  static int dimo1 = 1, dimo2 = 1, st;
+  static int EventType;
+
+#ifdef _DEBUG
+  printf("sicGetTypeEventInterface\n");
+#endif
+
+  /* Check number of inputs (rhs=1) and outputs (lhs=1) */
+  CheckRhs(minrhs, maxrhs) ;
+  CheckLhs(minlhs, maxlhs) ;
+
+  /* Get EventType (1, char *)  */
+  GetRhsVar(1, "c", &dim1, &dim2, &EventType);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in sicLoadModel (number EventType has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  CreateVar(2, "i", &dimo1, &dimo2, &st);
+  /* Call function */
+  *istk(st) = sicLoadModel(cstk(EventType));
+  /*  Return variables  */
+  LhsVar(1) = 2;
+
+  return 0;
+
 }
 
 int sicModelgetQInterface(char *fname)
