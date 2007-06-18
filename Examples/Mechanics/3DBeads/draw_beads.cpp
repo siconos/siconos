@@ -36,22 +36,19 @@ using namespace std;
 
 #include <drawstuff/drawstuff.h>
 
-#define DSNUMBER   16      // the number of dynamical systems
+#define DSNUMBER   1      // the number of dynamical systems
 
 #define WALL 1       // Positions of walls
 #define TOP 1       // Positions of walls
 #define GROUND 0       // Positions of walls
 
-Simulation* GLOB_SIM;
+Simulation * GLOB_SIM;
 TimeDiscretisation * GLOB_T;
-LagrangianDS *GLOB_tabLDS[DSNUMBER];
+LagrangianDS * GLOB_tabLDS[DSNUMBER];
 
 int GLOB_COMPUTE;
 int GLOB_STEP;
 EventsManager * GLOB_EVT;
-
-vector<Relation*> GLOB_LLR(3);
-
 
 // Global variables for computation of CPU time, number of iterations and for curves ploting
 
@@ -91,6 +88,7 @@ void DrawBall(LagrangianDS *lds, float radius)
   theta = lds->getQ()(3);
   phi = lds->getQ()(4);
   psi = lds->getQ()(5);
+
   R[0] = 1;
   R[1] = 0;
   R[2] = 0;
@@ -292,17 +290,14 @@ void initSiconos()
     double T = 10;                    // final computation time
     double h = 0.005;                 // time step
 
-    string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
-
-    //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
-
+    //string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
+    string solverName = "NLGS";      // solver algorithm used for non-smooth problem
     //string solverName = "PGS";      // solver algorithm used for non-smooth problem
-
     //string solverName = "Lemke";      // solver algorithm used for non-smooth problem
 
     double e  = 0.9;                  // nslaw
     double e2 = 0.9;                  // nslaw2
-    double mu = 0.5;
+    double mu = 0.0;
 
 
     // 1 to take in account the obstacle and  0 no
@@ -348,10 +343,12 @@ void initSiconos()
     }
 
     //    // set values
-    // (*(q0[0]))(0) =  0.0;    (*(q0[0]))(1) =  0.3;  (*(q0[0]))(2) =  0.2;
+    (*(q0[0]))(0) =  0.0;
+    (*(q0[0]))(1) =  0.3;
+    (*(q0[0]))(2) =  0.15;
     //      (*(v0[0]))(0) =  0.;    (*(v0[0]))(1) =  -1.;  (*(v0[0]))(2) =  0.;
 
-    //   (*(q0[1]))(0) =  0.0;    (*(q0[1]))(1) =  0.;  (*(q0[1]))(2) =  0.2;
+    //    (*(q0[1]))(0) =  0.0;    (*(q0[1]))(1) =  0.;  (*(q0[1]))(2) =  0.15;
     //      (*(v0[1]))(0) =  0.;    (*(v0[1]))(1) =  1.;  (*(v0[1]))(2) =  0.;
 
     //   (*(q0[0]))(0) =  0.0;    (*(q0[0]))(1) =  0.0;  (*(q0[0]))(2) =  0.2;
@@ -368,59 +365,26 @@ void initSiconos()
 
     // billard
 
-    (*(q0[0]))(0) =  0.;
-    (*(q0[0]))(1) =  0.;
-    (*(q0[0]))(2) =  0.1;
-    (*(q0[1]))(0) =  0.1;
-    (*(q0[1]))(1) = -0.2;
-    (*(q0[1]))(2) =  0.1;
-    (*(q0[2]))(0) = -0.1;
-    (*(q0[2]))(1) = -0.2;
-    (*(q0[2]))(2) =  0.1;
-    (*(q0[3]))(0) =  0.2;
-    (*(q0[3]))(1) = -0.4;
-    (*(q0[3]))(2) =  0.1;
-    (*(q0[4]))(0) = -0.2;
-    (*(q0[4]))(1) = -0.4;
-    (*(q0[4]))(2) =  0.1;
-    (*(q0[5]))(0) =  0.;
-    (*(q0[5]))(1) = -0.4;
-    (*(q0[5]))(2) =  0.1;
-    (*(q0[6]))(0) =  0.1;
-    (*(q0[6]))(1) = -0.6;
-    (*(q0[6]))(2) =  0.1;
-    (*(q0[7]))(0) = -0.1;
-    (*(q0[7]))(1) = -0.6;
-    (*(q0[7]))(2) =  0.1;
+    //     (*(q0[0]))(0) =  0.;     (*(q0[0]))(1) =  0.;   (*(q0[0]))(2) =  0.1;
+    //     (*(q0[1]))(0) =  0.1;    (*(q0[1]))(1) = -0.2;  (*(q0[1]))(2) =  0.1;
+    //     (*(q0[2]))(0) = -0.1;    (*(q0[2]))(1) = -0.2;  (*(q0[2]))(2) =  0.1;
+    //     (*(q0[3]))(0) =  0.2;    (*(q0[3]))(1) = -0.4;  (*(q0[3]))(2) =  0.1;
+    //     (*(q0[4]))(0) = -0.2;    (*(q0[4]))(1) = -0.4;  (*(q0[4]))(2) =  0.1;
+    //     (*(q0[5]))(0) =  0.;     (*(q0[5]))(1) = -0.4;  (*(q0[5]))(2) =  0.1;
+    //     (*(q0[6]))(0) =  0.1;    (*(q0[6]))(1) = -0.6;  (*(q0[6]))(2) =  0.1;
+    //     (*(q0[7]))(0) = -0.1;    (*(q0[7]))(1) = -0.6;  (*(q0[7]))(2) =  0.1;
 
-    (*(q0[8]))(0) =  0.;
-    (*(q0[8]))(1) =  0.8;
-    (*(q0[8]))(2) =  0.1;
+    //     (*(q0[8]))(0) =  0.;     (*(q0[8]))(1) =  0.8;  (*(q0[8]))(2) =  0.1;
 
-    (*(v0[8]))(0) = -1;
-    (*(v0[8]))(1) = -20.;
+    //     (*(v0[8]))(0) = -1;      (*(v0[8]))(1) = -20.;
 
-    (*(q0[9]))(0) =  0.3;
-    (*(q0[9]))(1) = -0.6;
-    (*(q0[9]))(2) =  0.1;
-    (*(q0[10]))(0) = -0.3;
-    (*(q0[10]))(1) = -0.6;
-    (*(q0[10]))(2) =  0.1;
-    (*(q0[11]))(0) =  0.2;
-    (*(q0[11]))(1) = -0.8;
-    (*(q0[11]))(2) =  0.1;
-    (*(q0[12]))(0) = -0.2;
-    (*(q0[12]))(1) = -0.8;
-    (*(q0[12]))(2) =  0.1;
-    (*(q0[13]))(0) =  0.;
-    (*(q0[13]))(1) = -0.8;
-    (*(q0[13]))(2) =  0.1;
-    (*(q0[14]))(0) =  0.4;
-    (*(q0[14]))(1) = -0.8;
-    (*(q0[14]))(2) =  0.1;
-    (*(q0[15]))(0) = -0.4;
-    (*(q0[15]))(1) = -0.8;
-    (*(q0[15]))(2) =  0.1;
+    //     (*(q0[9]))(0) =  0.3;    (*(q0[9]))(1) = -0.6;  (*(q0[9]))(2) =  0.1;
+    //     (*(q0[10]))(0)= -0.3;    (*(q0[10]))(1)= -0.6;  (*(q0[10]))(2)=  0.1;
+    //     (*(q0[11]))(0)=  0.2;    (*(q0[11]))(1)= -0.8;  (*(q0[11]))(2)=  0.1;
+    //     (*(q0[12]))(0)= -0.2;    (*(q0[12]))(1)= -0.8;  (*(q0[12]))(2)=  0.1;
+    //     (*(q0[13]))(0)=  0.;     (*(q0[13]))(1)= -0.8;  (*(q0[13]))(2)=  0.1;
+    //     (*(q0[14]))(0)=  0.4;    (*(q0[14]))(1)= -0.8;  (*(q0[14]))(2)=  0.1;
+    //     (*(q0[15]))(0)= -0.4;    (*(q0[15]))(1)= -0.8;  (*(q0[15]))(2)=  0.1;
 
     // Cube de billes
 
@@ -1003,7 +967,7 @@ void initSiconos()
 
     //OneStepNSProblem * osnspb = new LCP(GLOB_SIM ,"FrictionContact3D",solverName,101, 0.001);
 
-    OneStepNSProblem * osnspb = new FrictionContact3D(GLOB_SIM , "FrictionContact3D", solverName, 101, 0.001);
+    OneStepNSProblem * osnspb = new FrictionContact3D(GLOB_SIM , "FrictionContact3D", solverName, 1000001, 0.001);
 
     cout << "=== End of model loading === " << endl;
 
@@ -1052,6 +1016,7 @@ void computeSiconos()
       GLOB_SIM->advanceToEvent();
       GLOB_SIM->processEvents();
       // --- Get values to be plotted ---
+
       k_iter++;
       dataPlot(k_iter, 0) = k_iter * GLOB_T->getH();
       dataPlot(k_iter, 1) = GLOB_tabLDS[0]->getQ()(2);

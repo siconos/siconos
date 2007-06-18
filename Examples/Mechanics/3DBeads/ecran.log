@@ -1,0 +1,448 @@
+
+|=========================================================|
+| Siconos-Kernel version 2.0.1, Copyright INRIA 2005-2006.|
+|                                                         |
+|     Free software under GNU General Public License.     |
+|=========================================================|
+
+
+=== End of model loading === 
+End of simulation initialisation
+Start computation ... 
+received command 114 (`r')
+-- Run Simu
+End of computation - Number of iterations done: 1
+End of computation - Number of iterations done: 2
+End of computation - Number of iterations done: 3
+End of computation - Number of iterations done: 4
+End of computation - Number of iterations done: 5
+End of computation - Number of iterations done: 6
+End of computation - Number of iterations done: 7
+End of computation - Number of iterations done: 8
+End of computation - Number of iterations done: 9
+End of computation - Number of iterations done: 10
+End of computation - Number of iterations done: 11
+End of computation - Number of iterations done: 12
+End of computation - Number of iterations done: 13
+End of computation - Number of iterations done: 14
+End of computation - Number of iterations done: 15
+End of computation - Number of iterations done: 16
+End of computation - Number of iterations done: 17
+End of computation - Number of iterations done: 18
+End of computation - Number of iterations done: 19
+End of computation - Number of iterations done: 20
+ ---------------le point de contact 0-----------------
+la vitesse et la force de contact en 0 est (w,z)[0] = 0.00000e+00
+la vitesse et la force de contact en 0 est (w,z)[1] = 0.00000e+00
+la vitesse et la force de contact en 0 est (w,z)[2] = 0.00000e+00
+la vitesse et la force de contact en 0 est (w,z)[3] = 0.00000e+00
+la vitesse et la force de contact en 0 est (w,z)[4] = 0.00000e+00
+la vitesse et la force de contact en 0 est (w,z)[5] = 0.00000e+00
+---------------- Itermax = 1000001
+---------------- Iteration 1 -----------------
+G[0] = 1.91295e+00
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = 0.00000e+00
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
+JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
+JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
+JacG[3,0] = 0.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
+JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
+JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
+Iteration 1 -- Direction www[0] = -1.91295e+00
+Iteration 1 -- Direction www[1] = 0.00000e+00
+Iteration 1 -- Direction www[2] = 0.00000e+00
+Iteration 1 -- Direction www[3] = 0.00000e+00
+Iteration 1 -- Direction www[4] = 0.00000e+00
+Iteration 1 -- Direction www[5] = 0.00000e+00
+Iteration 1 -- xk+1[0] = -1.91295e+00
+Iteration 1 -- xk+1[1] = 0.00000e+00
+Iteration 1 -- xk+1[2] = 0.00000e+00
+Iteration 1 -- xk+1[3] = 0.00000e+00
+Iteration 1 -- xk+1[4] = 0.00000e+00
+Iteration 1 -- xk+1[5] = 0.00000e+00
+Iteration 1 Erreur =  1.9129500e+00
+G[0] = 0.00000e+00
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = -1.91295e+00
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+---------------- Iteration 2 -----------------
+G[0] = 0.00000e+00
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = -1.91295e+00
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
+JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
+JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
+JacG[3,0] = 1.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
+JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
+JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
+Iteration 2 -- Direction www[0] = 9.56475e-01
+Iteration 2 -- Direction www[1] = 0.00000e+00
+Iteration 2 -- Direction www[2] = 0.00000e+00
+Iteration 2 -- Direction www[3] = 9.56475e-01
+Iteration 2 -- Direction www[4] = 0.00000e+00
+Iteration 2 -- Direction www[5] = 0.00000e+00
+Iteration 2 -- xk+1[0] = -9.56475e-01
+Iteration 2 -- xk+1[1] = 0.00000e+00
+Iteration 2 -- xk+1[2] = 0.00000e+00
+Iteration 2 -- xk+1[3] = 9.56475e-01
+Iteration 2 -- xk+1[4] = 0.00000e+00
+Iteration 2 -- xk+1[5] = 0.00000e+00
+Iteration 2 Erreur =  9.5647500e-01
+G[0] = 0.00000e+00
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = -9.56475e-01
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+---------------- Iteration 3 -----------------
+G[0] = 0.00000e+00
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = -9.56475e-01
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
+JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
+JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
+JacG[3,0] = 1.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
+JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
+JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
+Iteration 3 -- Direction www[0] = 4.78237e-01
+Iteration 3 -- Direction www[1] = 0.00000e+00
+Iteration 3 -- Direction www[2] = 0.00000e+00
+Iteration 3 -- Direction www[3] = 4.78237e-01
+Iteration 3 -- Direction www[4] = 0.00000e+00
+Iteration 3 -- Direction www[5] = 0.00000e+00
+Iteration 3 -- xk+1[0] = -4.78237e-01
+Iteration 3 -- xk+1[1] = 0.00000e+00
+Iteration 3 -- xk+1[2] = 0.00000e+00
+Iteration 3 -- xk+1[3] = 1.43471e+00
+Iteration 3 -- xk+1[4] = 0.00000e+00
+Iteration 3 -- xk+1[5] = 0.00000e+00
+Iteration 3 Erreur =  4.7823750e-01
+G[0] = 1.11022e-16
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = -4.78237e-01
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+---------------- Iteration 4 -----------------
+G[0] = 1.11022e-16
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = -4.78237e-01
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
+JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
+JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
+JacG[3,0] = 1.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
+JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
+JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
+Iteration 4 -- Direction www[0] = 2.39119e-01
+Iteration 4 -- Direction www[1] = 0.00000e+00
+Iteration 4 -- Direction www[2] = 0.00000e+00
+Iteration 4 -- Direction www[3] = 2.39119e-01
+Iteration 4 -- Direction www[4] = 0.00000e+00
+Iteration 4 -- Direction www[5] = 0.00000e+00
+Iteration 4 -- xk+1[0] = -2.39119e-01
+Iteration 4 -- xk+1[1] = 0.00000e+00
+Iteration 4 -- xk+1[2] = 0.00000e+00
+Iteration 4 -- xk+1[3] = 1.67383e+00
+Iteration 4 -- xk+1[4] = 0.00000e+00
+Iteration 4 -- xk+1[5] = 0.00000e+00
+Iteration 4 Erreur =  2.3911875e-01
+G[0] = 0.00000e+00
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = -2.39119e-01
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+---------------- Iteration 5 -----------------
+G[0] = 0.00000e+00
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = -2.39119e-01
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
+JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
+JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
+JacG[3,0] = 1.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
+JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
+JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
+Iteration 5 -- Direction www[0] = 1.19559e-01
+Iteration 5 -- Direction www[1] = 0.00000e+00
+Iteration 5 -- Direction www[2] = 0.00000e+00
+Iteration 5 -- Direction www[3] = 1.19559e-01
+Iteration 5 -- Direction www[4] = 0.00000e+00
+Iteration 5 -- Direction www[5] = 0.00000e+00
+Iteration 5 -- xk+1[0] = -1.19559e-01
+Iteration 5 -- xk+1[1] = 0.00000e+00
+Iteration 5 -- xk+1[2] = 0.00000e+00
+Iteration 5 -- xk+1[3] = 1.79339e+00
+Iteration 5 -- xk+1[4] = 0.00000e+00
+Iteration 5 -- xk+1[5] = 0.00000e+00
+Iteration 5 Erreur =  1.1955938e-01
+G[0] = 1.11022e-16
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = -1.19559e-01
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+---------------- Iteration 6 -----------------
+G[0] = 1.11022e-16
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = -1.19559e-01
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
+JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
+JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
+JacG[3,0] = 1.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
+JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
+JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
+Iteration 6 -- Direction www[0] = 5.97797e-02
+Iteration 6 -- Direction www[1] = 0.00000e+00
+Iteration 6 -- Direction www[2] = 0.00000e+00
+Iteration 6 -- Direction www[3] = 5.97797e-02
+Iteration 6 -- Direction www[4] = 0.00000e+00
+Iteration 6 -- Direction www[5] = 0.00000e+00
+Iteration 6 -- xk+1[0] = -5.97797e-02
+Iteration 6 -- xk+1[1] = 0.00000e+00
+Iteration 6 -- xk+1[2] = 0.00000e+00
+Iteration 6 -- xk+1[3] = 1.85317e+00
+Iteration 6 -- xk+1[4] = 0.00000e+00
+Iteration 6 -- xk+1[5] = 0.00000e+00
+Iteration 6 Erreur =  5.9779688e-02
+G[0] = 0.00000e+00
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = -5.97797e-02
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+---------------- Iteration 7 -----------------
+G[0] = 0.00000e+00
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = -5.97797e-02
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
+JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
+JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
+JacG[3,0] = 1.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
+JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
+JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
+Iteration 7 -- Direction www[0] = 2.98898e-02
+Iteration 7 -- Direction www[1] = 0.00000e+00
+Iteration 7 -- Direction www[2] = 0.00000e+00
+Iteration 7 -- Direction www[3] = 2.98898e-02
+Iteration 7 -- Direction www[4] = 0.00000e+00
+Iteration 7 -- Direction www[5] = 0.00000e+00
+Iteration 7 -- xk+1[0] = -2.98898e-02
+Iteration 7 -- xk+1[1] = 0.00000e+00
+Iteration 7 -- xk+1[2] = 0.00000e+00
+Iteration 7 -- xk+1[3] = 1.88306e+00
+Iteration 7 -- xk+1[4] = 0.00000e+00
+Iteration 7 -- xk+1[5] = 0.00000e+00
+Iteration 7 Erreur =  2.9889844e-02
+G[0] = -1.11022e-16
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = -2.98898e-02
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+---------------- Iteration 8 -----------------
+G[0] = -1.11022e-16
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = -2.98898e-02
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
+JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
+JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
+JacG[3,0] = 1.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
+JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
+JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
+Iteration 8 -- Direction www[0] = 1.49449e-02
+Iteration 8 -- Direction www[1] = 0.00000e+00
+Iteration 8 -- Direction www[2] = 0.00000e+00
+Iteration 8 -- Direction www[3] = 1.49449e-02
+Iteration 8 -- Direction www[4] = 0.00000e+00
+Iteration 8 -- Direction www[5] = 0.00000e+00
+Iteration 8 -- xk+1[0] = -1.49449e-02
+Iteration 8 -- xk+1[1] = 0.00000e+00
+Iteration 8 -- xk+1[2] = 0.00000e+00
+Iteration 8 -- xk+1[3] = 1.89801e+00
+Iteration 8 -- xk+1[4] = 0.00000e+00
+Iteration 8 -- xk+1[5] = 0.00000e+00
+Iteration 8 Erreur =  1.4944922e-02
+G[0] = 0.00000e+00
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = -1.49449e-02
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+---------------- Iteration 9 -----------------
+G[0] = 0.00000e+00
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = -1.49449e-02
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
+JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
+JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
+JacG[3,0] = 1.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
+JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
+JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
+Iteration 9 -- Direction www[0] = 7.47246e-03
+Iteration 9 -- Direction www[1] = 0.00000e+00
+Iteration 9 -- Direction www[2] = 0.00000e+00
+Iteration 9 -- Direction www[3] = 7.47246e-03
+Iteration 9 -- Direction www[4] = 0.00000e+00
+Iteration 9 -- Direction www[5] = 0.00000e+00
+Iteration 9 -- xk+1[0] = -7.47246e-03
+Iteration 9 -- xk+1[1] = 0.00000e+00
+Iteration 9 -- xk+1[2] = 0.00000e+00
+Iteration 9 -- xk+1[3] = 1.90548e+00
+Iteration 9 -- xk+1[4] = 0.00000e+00
+Iteration 9 -- xk+1[5] = 0.00000e+00
+Iteration 9 Erreur =  7.4724609e-03
+G[0] = 1.11022e-16
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = -7.47246e-03
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+---------------- Iteration 10 -----------------
+G[0] = 1.11022e-16
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = -7.47246e-03
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
+JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
+JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
+JacG[3,0] = 1.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
+JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
+JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
+Iteration 10 -- Direction www[0] = 3.73623e-03
+Iteration 10 -- Direction www[1] = 0.00000e+00
+Iteration 10 -- Direction www[2] = 0.00000e+00
+Iteration 10 -- Direction www[3] = 3.73623e-03
+Iteration 10 -- Direction www[4] = 0.00000e+00
+Iteration 10 -- Direction www[5] = 0.00000e+00
+Iteration 10 -- xk+1[0] = -3.73623e-03
+Iteration 10 -- xk+1[1] = 0.00000e+00
+Iteration 10 -- xk+1[2] = 0.00000e+00
+Iteration 10 -- xk+1[3] = 1.90921e+00
+Iteration 10 -- xk+1[4] = 0.00000e+00
+Iteration 10 -- xk+1[5] = 0.00000e+00
+Iteration 10 Erreur =  3.7362305e-03
+G[0] = 0.00000e+00
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = -3.73623e-03
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+---------------- Iteration 11 -----------------
+G[0] = 0.00000e+00
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = -3.73623e-03
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
+JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
+JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
+JacG[3,0] = 1.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
+JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
+JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
+Iteration 11 -- Direction www[0] = 1.86812e-03
+Iteration 11 -- Direction www[1] = 0.00000e+00
+Iteration 11 -- Direction www[2] = 0.00000e+00
+Iteration 11 -- Direction www[3] = 1.86812e-03
+Iteration 11 -- Direction www[4] = 0.00000e+00
+Iteration 11 -- Direction www[5] = 0.00000e+00
+Iteration 11 -- xk+1[0] = -1.86812e-03
+Iteration 11 -- xk+1[1] = 0.00000e+00
+Iteration 11 -- xk+1[2] = 0.00000e+00
+Iteration 11 -- xk+1[3] = 1.91108e+00
+Iteration 11 -- xk+1[4] = 0.00000e+00
+Iteration 11 -- xk+1[5] = 0.00000e+00
+Iteration 11 Erreur =  1.8681152e-03
+G[0] = -1.11022e-16
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = -1.86812e-03
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+---------------- Iteration 12 -----------------
+G[0] = -1.11022e-16
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = -1.86812e-03
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
+JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
+JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
+JacG[3,0] = 1.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
+JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
+JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
+Iteration 12 -- Direction www[0] = 9.34058e-04
+Iteration 12 -- Direction www[1] = 0.00000e+00
+Iteration 12 -- Direction www[2] = 0.00000e+00
+Iteration 12 -- Direction www[3] = 9.34058e-04
+Iteration 12 -- Direction www[4] = 0.00000e+00
+Iteration 12 -- Direction www[5] = 0.00000e+00
+Iteration 12 -- xk+1[0] = -9.34058e-04
+Iteration 12 -- xk+1[1] = 0.00000e+00
+Iteration 12 -- xk+1[2] = 0.00000e+00
+Iteration 12 -- xk+1[3] = 1.91202e+00
+Iteration 12 -- xk+1[4] = 0.00000e+00
+Iteration 12 -- xk+1[5] = 0.00000e+00
+Iteration 12 Erreur =  9.3405762e-04
+G[0] = 0.00000e+00
+G[1] = 0.00000e+00
+G[2] = 0.00000e+00
+G[3] = -9.34058e-04
+G[4] = 0.00000e+00
+G[5] = 0.00000e+00
+---------------------la vitesse et la force de contact en 0 est w[0] = -9.34058e-04 et z[0] = 1.91202e+00
+End of computation - Number of iterations done: 21
+End of computation - Number of iterations done: 22
+End of computation - Number of iterations done: 23
+End of computation - Number of iterations done: 24
+End of computation - Number of iterations done: 25
+End of computation - Number of iterations done: 26
+End of computation - Number of iterations done: 27
+End of computation - Number of iterations done: 28
+End of computation - Number of iterations done: 29
+End of computation - Number of iterations done: 30
+End of computation - Number of iterations done: 31
+End of computation - Number of iterations done: 32
+End of computation - Number of iterations done: 33
+End of computation - Number of iterations done: 34
+End of computation - Number of iterations done: 35
+End of computation - Number of iterations done: 36
+End of computation - Number of iterations done: 37
+End of computation - Number of iterations done: 38
+End of computation - Number of iterations done: 39
+End of computation - Number of iterations done: 40
+End of computation - Number of iterations done: 41
+End of computation - Number of iterations done: 42

@@ -80,6 +80,7 @@ int main(int argc, char* argv[])
     Fact = (DSNUMBER) * (DSNUMBER - 1) / 2;
 
     unsigned int i;
+
     unsigned int j;
     unsigned int l;
     DynamicalSystemsSet allDS; // the list of DS
@@ -620,8 +621,8 @@ int main(int argc, char* argv[])
     //     io.write(dataPlot,"noDim");
     //    cout<<"End of computation - Number of iterations done: "<<k<<endl;
 
-    //    delete OSI;
-    //    delete osnspb;
+    delete OSI;
+    delete osnspb;
 
   }
   catch (SiconosException e)
