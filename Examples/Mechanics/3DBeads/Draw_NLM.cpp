@@ -36,7 +36,7 @@ using namespace std;
 
 #include <drawstuff/drawstuff.h>
 
-#define COUPLE   4      // the number of dynamical systems
+#define COUPLE   2      // the number of dynamical systems
 
 Simulation* GLOB_SIM;
 TimeDiscretisation * GLOB_T;
@@ -211,13 +211,13 @@ void initSiconos()
     double T = 10.;                    // final computation time
     double h = 0.005;                 // time step
 
-    string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
-    //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
+    //string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
+    string solverName = "NLGS";      // solver algorithm used for non-smooth problem
     //string solverName = "Lemke";      // solver algorithm used for non-smooth problem
 
     double e  = 0.5;                  // nslaw
     double e2  = 0.5;
-    double mu = 0.2;
+    double mu = 0.;
     double PI = 3.14;
 
 
@@ -251,8 +251,7 @@ void initSiconos()
 
     // set values
 
-    //     (*(q0[0]))(0) = 0.; (*(q0[0]))(1) = 0.; (*(q0[0]))(2) =  0.3; (*(q0[0]))(3) =  PI/2; //(*(v0[0]))(3) =  40.;
-
+    //     (*(q0[0]))(0) = 0.; (*(q0[0]))(1) = 0.; (*(q0[0]))(2) =  0.3; (*(q0[0]))(3) =  PI/3; //(*(v0[0]))(3) =  40.;
     //     (*(q0[1]))(0) = 0.; (*(q0[1]))(1) = 0.; (*(q0[1]))(2) =  0.6; (*(q0[1]))(3) =  PI/2; //(*(v0[0]))(3) =  40.;
 
     for (i = 0; i < COUPLE; i++)
@@ -362,7 +361,49 @@ void initSiconos()
 
       // Interaction between beads
 
-      NonSmoothLaw * nslaw12 = new NewtonImpactNSL(e2); //contact condition between beads
+      NonSmoothLaw * nslaw12 = new NewtonImpactNSL(e2);
+
+      l = 0;
+      for (i = 0; (int)i < COUPLE; i++)
+      {
+        dsConcerned2.insert(GLOB_tabLDS[i]);
+        for (j = 0; (int)j < COUPLE; j++)
+        {
+          if (j > i)
+          {
+            dsConcerned2.insert(GLOB_tabLDS[j]);
+            ostringstream ostr;
+            ostr << l;
+            id[l] = ostr.str();
+            LLR[l] = new LagrangianScleronomousR("NLMPlugin:h22", "NLMPlugin:Gcontact22");
+            checkInter = allInteractions.insert(new Interaction(id[l], dsConcerned2, l, 1, nslaw12, LLR[l]));
+            dsConcerned2.erase(GLOB_tabLDS[j]);
+            l = l + 1;
+          }
+        }
+        dsConcerned2.clear();
+      }
+
+      l = 0;
+      for (i = 0; (int)i < COUPLE; i++)
+      {
+        dsConcerned2.insert(GLOB_tabLDS[i]);
+        for (j = 0; (int)j < COUPLE; j++)
+        {
+          if (j > i)
+          {
+            dsConcerned2.insert(GLOB_tabLDS[j]);
+            ostringstream ostr;
+            ostr << l;
+            id[l] = ostr.str();
+            LLR[l] = new LagrangianScleronomousR("NLMPlugin:h21", "NLMPlugin:Gcontact21");
+            checkInter = allInteractions.insert(new Interaction(id[l], dsConcerned2, l, 1, nslaw12, LLR[l]));
+            dsConcerned2.erase(GLOB_tabLDS[j]);
+            l = l + 1;
+          }
+        }
+        dsConcerned2.clear();
+      }
 
       l = 0;
       for (i = 0; (int)i < COUPLE; i++)
@@ -397,7 +438,7 @@ void initSiconos()
             ostringstream ostr;
             ostr << l;
             id[l] = ostr.str();
-            LLR[l] = new LagrangianScleronomousR("NLMPlugin:h21", "NLMPlugin:Gcontact21");
+            LLR[l] = new LagrangianScleronomousR("NLMPlugin:h11", "NLMPlugin:Gcontact11");
             checkInter = allInteractions.insert(new Interaction(id[l], dsConcerned2, l, 1, nslaw12, LLR[l]));
             dsConcerned2.erase(GLOB_tabLDS[j]);
             l = l + 1;
