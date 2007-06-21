@@ -17,12 +17,10 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  *
  * Two beads 3D frictionl contact problem in presence of a rigid foundation
- * 30/01/2007- Authors: houari khenous & Roger Pissard
+ * 16/05/2007- Authors: houari khenous & Roger Pissard
 
 */
-// =============================== Multi bouncing beads column simulation ===============================
-//  N beads between a floor and a ceiling ...
-// Keywords: LagrangianLinearDS, LagrangianLinear relation, Moreau TimeStepping, LCP.
+// =============================== Multi contact beads couple simulation ===============================
 //
 // ======================================================================================================
 

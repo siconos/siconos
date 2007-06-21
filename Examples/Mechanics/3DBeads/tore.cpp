@@ -58,7 +58,8 @@ int main(int argc, char* argv[])
 
     double e = 0.8;                  // nslaw
     double mu = 10.;
-
+    double rho = 6e-6;
+    double g = 9.81;
 
     // -------------------------
     // --- Dynamical systems ---
@@ -99,10 +100,13 @@ int main(int argc, char* argv[])
     double gap = 1.;
 
     // Memory allocation for q0[i] and v0[i]
-    for (i = 0; i < FEM; i++)
-      (*q0)(i) = (*Position)(i, 0) + gap;
-
-    // set values
+    for (i = 1; i < FEM; i++)
+    {
+      if (i % 3 == 0)
+      {
+        (*q0)(i - 1) = (*Position)(i - 1, 0) + gap;
+      }
+    }
 
     GLOB_tabLDS = new LagrangianLinearTIDS(0, *q0, *v0, *M, *K, *C);
 
@@ -110,6 +114,12 @@ int main(int argc, char* argv[])
     allDS.insert(GLOB_tabLDS);
 
 
+    // -- Set external forces (weight) --
+    SiconosVector * weight = new SimpleVector(FEM);
+    for (i = 1; i < FEM; i++)
+      if (i % 3 == 0)
+        (*weight)(i - 1) = -rho * g;
+    GLOB_tabLDS->setFExtPtr(weight);
 
     // ==> at this point, all the required dynamical systems are saved in allDS.
 

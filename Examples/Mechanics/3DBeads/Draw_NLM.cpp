@@ -138,7 +138,7 @@ void SimuLoop(int pause)
 
   // Ball Radius
   radius = 0.1;
-  // a voir comment dessiner les deux billes collees
+
   for (i = 0; i < COUPLE; i++)
   {
     DrawCouple(GLOB_tabLDS[i], radius);
@@ -297,9 +297,6 @@ void initSiconos()
     vector<Relation*> LLR1(COUPLE);
     vector<Relation*> LLR2(COUPLE);
 
-
-
-    // With friction
 
 
     NonSmoothLaw * nslaw1 = new NewtonImpactFrictionNSL(e, e, mu, 3);
@@ -518,7 +515,7 @@ void computeSiconos()
   }
   catch (...)
   {
-    cout << "Exception caught in \'sample/MultiBeadsColumn\'" << endl;
+    cout << "Exception caught in \'sample/CoupleBeads\'" << endl;
   }
 }
 
