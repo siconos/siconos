@@ -9,440 +9,2022 @@
 === End of model loading === 
 End of simulation initialisation
 Start computation ... 
-received command 114 (`r')
--- Run Simu
-End of computation - Number of iterations done: 1
-End of computation - Number of iterations done: 2
-End of computation - Number of iterations done: 3
-End of computation - Number of iterations done: 4
-End of computation - Number of iterations done: 5
-End of computation - Number of iterations done: 6
-End of computation - Number of iterations done: 7
-End of computation - Number of iterations done: 8
-End of computation - Number of iterations done: 9
-End of computation - Number of iterations done: 10
-End of computation - Number of iterations done: 11
-End of computation - Number of iterations done: 12
-End of computation - Number of iterations done: 13
-End of computation - Number of iterations done: 14
-End of computation - Number of iterations done: 15
-End of computation - Number of iterations done: 16
-End of computation - Number of iterations done: 17
-End of computation - Number of iterations done: 18
-End of computation - Number of iterations done: 19
-End of computation - Number of iterations done: 20
  ---------------le point de contact 0-----------------
-la vitesse et la force de contact en 0 est (w,z)[0] = 0.00000e+00
-la vitesse et la force de contact en 0 est (w,z)[1] = 0.00000e+00
-la vitesse et la force de contact en 0 est (w,z)[2] = 0.00000e+00
-la vitesse et la force de contact en 0 est (w,z)[3] = 0.00000e+00
-la vitesse et la force de contact en 0 est (w,z)[4] = 0.00000e+00
-la vitesse et la force de contact en 0 est (w,z)[5] = 0.00000e+00
----------------- Itermax = 1000001
 ---------------- Iteration 1 -----------------
-G[0] = 1.91295e+00
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = 0.00000e+00
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
-JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
-JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
-JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
-JacG[3,0] = 0.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
-JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
-JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
-Iteration 1 -- Direction www[0] = -1.91295e+00
-Iteration 1 -- Direction www[1] = 0.00000e+00
-Iteration 1 -- Direction www[2] = 0.00000e+00
-Iteration 1 -- Direction www[3] = 0.00000e+00
-Iteration 1 -- Direction www[4] = 0.00000e+00
-Iteration 1 -- Direction www[5] = 0.00000e+00
-Iteration 1 -- xk+1[0] = -1.91295e+00
-Iteration 1 -- xk+1[1] = 0.00000e+00
-Iteration 1 -- xk+1[2] = 0.00000e+00
-Iteration 1 -- xk+1[3] = 0.00000e+00
-Iteration 1 -- xk+1[4] = 0.00000e+00
-Iteration 1 -- xk+1[5] = 0.00000e+00
-Iteration 1 Erreur =  1.9129500e+00
-G[0] = 0.00000e+00
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = -1.91295e+00
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 1-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 0-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 1-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 2-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 3-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 4-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 5-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 6-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  1.9070049e+01
 ---------------- Iteration 2 -----------------
-G[0] = 0.00000e+00
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = -1.91295e+00
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
-JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
-JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
-JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
-JacG[3,0] = 1.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
-JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
-JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
-Iteration 2 -- Direction www[0] = 9.56475e-01
-Iteration 2 -- Direction www[1] = 0.00000e+00
-Iteration 2 -- Direction www[2] = 0.00000e+00
-Iteration 2 -- Direction www[3] = 9.56475e-01
-Iteration 2 -- Direction www[4] = 0.00000e+00
-Iteration 2 -- Direction www[5] = 0.00000e+00
-Iteration 2 -- xk+1[0] = -9.56475e-01
-Iteration 2 -- xk+1[1] = 0.00000e+00
-Iteration 2 -- xk+1[2] = 0.00000e+00
-Iteration 2 -- xk+1[3] = 9.56475e-01
-Iteration 2 -- xk+1[4] = 0.00000e+00
-Iteration 2 -- xk+1[5] = 0.00000e+00
-Iteration 2 Erreur =  9.5647500e-01
-G[0] = 0.00000e+00
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = -9.56475e-01
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
+Iteration 2 Erreur =  9.9267487e+00
 ---------------- Iteration 3 -----------------
-G[0] = 0.00000e+00
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = -9.56475e-01
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
-JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
-JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
-JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
-JacG[3,0] = 1.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
-JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
-JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
-Iteration 3 -- Direction www[0] = 4.78237e-01
-Iteration 3 -- Direction www[1] = 0.00000e+00
-Iteration 3 -- Direction www[2] = 0.00000e+00
-Iteration 3 -- Direction www[3] = 4.78237e-01
-Iteration 3 -- Direction www[4] = 0.00000e+00
-Iteration 3 -- Direction www[5] = 0.00000e+00
-Iteration 3 -- xk+1[0] = -4.78237e-01
-Iteration 3 -- xk+1[1] = 0.00000e+00
-Iteration 3 -- xk+1[2] = 0.00000e+00
-Iteration 3 -- xk+1[3] = 1.43471e+00
-Iteration 3 -- xk+1[4] = 0.00000e+00
-Iteration 3 -- xk+1[5] = 0.00000e+00
-Iteration 3 Erreur =  4.7823750e-01
-G[0] = 1.11022e-16
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = -4.78237e-01
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
+Iteration 3 Erreur =  5.1671673e+00
 ---------------- Iteration 4 -----------------
-G[0] = 1.11022e-16
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = -4.78237e-01
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
-JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
-JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
-JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
-JacG[3,0] = 1.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
-JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
-JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
-Iteration 4 -- Direction www[0] = 2.39119e-01
-Iteration 4 -- Direction www[1] = 0.00000e+00
-Iteration 4 -- Direction www[2] = 0.00000e+00
-Iteration 4 -- Direction www[3] = 2.39119e-01
-Iteration 4 -- Direction www[4] = 0.00000e+00
-Iteration 4 -- Direction www[5] = 0.00000e+00
-Iteration 4 -- xk+1[0] = -2.39119e-01
-Iteration 4 -- xk+1[1] = 0.00000e+00
-Iteration 4 -- xk+1[2] = 0.00000e+00
-Iteration 4 -- xk+1[3] = 1.67383e+00
-Iteration 4 -- xk+1[4] = 0.00000e+00
-Iteration 4 -- xk+1[5] = 0.00000e+00
-Iteration 4 Erreur =  2.3911875e-01
-G[0] = 0.00000e+00
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = -2.39119e-01
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
+Iteration 4 Erreur =  2.6896656e+00
 ---------------- Iteration 5 -----------------
-G[0] = 0.00000e+00
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = -2.39119e-01
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
-JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
-JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
-JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
-JacG[3,0] = 1.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
-JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
-JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
-Iteration 5 -- Direction www[0] = 1.19559e-01
-Iteration 5 -- Direction www[1] = 0.00000e+00
-Iteration 5 -- Direction www[2] = 0.00000e+00
-Iteration 5 -- Direction www[3] = 1.19559e-01
-Iteration 5 -- Direction www[4] = 0.00000e+00
-Iteration 5 -- Direction www[5] = 0.00000e+00
-Iteration 5 -- xk+1[0] = -1.19559e-01
-Iteration 5 -- xk+1[1] = 0.00000e+00
-Iteration 5 -- xk+1[2] = 0.00000e+00
-Iteration 5 -- xk+1[3] = 1.79339e+00
-Iteration 5 -- xk+1[4] = 0.00000e+00
-Iteration 5 -- xk+1[5] = 0.00000e+00
-Iteration 5 Erreur =  1.1955938e-01
-G[0] = 1.11022e-16
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = -1.19559e-01
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
+Iteration 5 Erreur =  1.4000516e+00
 ---------------- Iteration 6 -----------------
-G[0] = 1.11022e-16
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = -1.19559e-01
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
-JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
-JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
-JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
-JacG[3,0] = 1.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
-JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
-JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
-Iteration 6 -- Direction www[0] = 5.97797e-02
-Iteration 6 -- Direction www[1] = 0.00000e+00
-Iteration 6 -- Direction www[2] = 0.00000e+00
-Iteration 6 -- Direction www[3] = 5.97797e-02
-Iteration 6 -- Direction www[4] = 0.00000e+00
-Iteration 6 -- Direction www[5] = 0.00000e+00
-Iteration 6 -- xk+1[0] = -5.97797e-02
-Iteration 6 -- xk+1[1] = 0.00000e+00
-Iteration 6 -- xk+1[2] = 0.00000e+00
-Iteration 6 -- xk+1[3] = 1.85317e+00
-Iteration 6 -- xk+1[4] = 0.00000e+00
-Iteration 6 -- xk+1[5] = 0.00000e+00
-Iteration 6 Erreur =  5.9779688e-02
-G[0] = 0.00000e+00
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = -5.97797e-02
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
+Iteration 6 Erreur =  7.2876885e-01
 ---------------- Iteration 7 -----------------
-G[0] = 0.00000e+00
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = -5.97797e-02
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
-JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
-JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
-JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
-JacG[3,0] = 1.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
-JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
-JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
-Iteration 7 -- Direction www[0] = 2.98898e-02
-Iteration 7 -- Direction www[1] = 0.00000e+00
-Iteration 7 -- Direction www[2] = 0.00000e+00
-Iteration 7 -- Direction www[3] = 2.98898e-02
-Iteration 7 -- Direction www[4] = 0.00000e+00
-Iteration 7 -- Direction www[5] = 0.00000e+00
-Iteration 7 -- xk+1[0] = -2.98898e-02
-Iteration 7 -- xk+1[1] = 0.00000e+00
-Iteration 7 -- xk+1[2] = 0.00000e+00
-Iteration 7 -- xk+1[3] = 1.88306e+00
-Iteration 7 -- xk+1[4] = 0.00000e+00
-Iteration 7 -- xk+1[5] = 0.00000e+00
-Iteration 7 Erreur =  2.9889844e-02
-G[0] = -1.11022e-16
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = -2.98898e-02
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
+Iteration 7 Erreur =  3.7934601e-01
 ---------------- Iteration 8 -----------------
-G[0] = -1.11022e-16
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = -2.98898e-02
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
-JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
-JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
-JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
-JacG[3,0] = 1.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
-JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
-JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
-Iteration 8 -- Direction www[0] = 1.49449e-02
-Iteration 8 -- Direction www[1] = 0.00000e+00
-Iteration 8 -- Direction www[2] = 0.00000e+00
-Iteration 8 -- Direction www[3] = 1.49449e-02
-Iteration 8 -- Direction www[4] = 0.00000e+00
-Iteration 8 -- Direction www[5] = 0.00000e+00
-Iteration 8 -- xk+1[0] = -1.49449e-02
-Iteration 8 -- xk+1[1] = 0.00000e+00
-Iteration 8 -- xk+1[2] = 0.00000e+00
-Iteration 8 -- xk+1[3] = 1.89801e+00
-Iteration 8 -- xk+1[4] = 0.00000e+00
-Iteration 8 -- xk+1[5] = 0.00000e+00
-Iteration 8 Erreur =  1.4944922e-02
-G[0] = 0.00000e+00
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = -1.49449e-02
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
+Iteration 8 Erreur =  1.9746095e-01
 ---------------- Iteration 9 -----------------
-G[0] = 0.00000e+00
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = -1.49449e-02
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
-JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
-JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
-JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
-JacG[3,0] = 1.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
-JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
-JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
-Iteration 9 -- Direction www[0] = 7.47246e-03
-Iteration 9 -- Direction www[1] = 0.00000e+00
-Iteration 9 -- Direction www[2] = 0.00000e+00
-Iteration 9 -- Direction www[3] = 7.47246e-03
-Iteration 9 -- Direction www[4] = 0.00000e+00
-Iteration 9 -- Direction www[5] = 0.00000e+00
-Iteration 9 -- xk+1[0] = -7.47246e-03
-Iteration 9 -- xk+1[1] = 0.00000e+00
-Iteration 9 -- xk+1[2] = 0.00000e+00
-Iteration 9 -- xk+1[3] = 1.90548e+00
-Iteration 9 -- xk+1[4] = 0.00000e+00
-Iteration 9 -- xk+1[5] = 0.00000e+00
-Iteration 9 Erreur =  7.4724609e-03
-G[0] = 1.11022e-16
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = -7.47246e-03
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
+Iteration 9 Erreur =  1.0278433e-01
 ---------------- Iteration 10 -----------------
-G[0] = 1.11022e-16
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = -7.47246e-03
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
-JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
-JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
-JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
-JacG[3,0] = 1.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
-JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
-JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
-Iteration 10 -- Direction www[0] = 3.73623e-03
-Iteration 10 -- Direction www[1] = 0.00000e+00
-Iteration 10 -- Direction www[2] = 0.00000e+00
-Iteration 10 -- Direction www[3] = 3.73623e-03
-Iteration 10 -- Direction www[4] = 0.00000e+00
-Iteration 10 -- Direction www[5] = 0.00000e+00
-Iteration 10 -- xk+1[0] = -3.73623e-03
-Iteration 10 -- xk+1[1] = 0.00000e+00
-Iteration 10 -- xk+1[2] = 0.00000e+00
-Iteration 10 -- xk+1[3] = 1.90921e+00
-Iteration 10 -- xk+1[4] = 0.00000e+00
-Iteration 10 -- xk+1[5] = 0.00000e+00
-Iteration 10 Erreur =  3.7362305e-03
-G[0] = 0.00000e+00
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = -3.73623e-03
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
+Iteration 10 Erreur =  5.3502321e-02
 ---------------- Iteration 11 -----------------
-G[0] = 0.00000e+00
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = -3.73623e-03
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
-JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
-JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
-JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
-JacG[3,0] = 1.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
-JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
-JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
-Iteration 11 -- Direction www[0] = 1.86812e-03
-Iteration 11 -- Direction www[1] = 0.00000e+00
-Iteration 11 -- Direction www[2] = 0.00000e+00
-Iteration 11 -- Direction www[3] = 1.86812e-03
-Iteration 11 -- Direction www[4] = 0.00000e+00
-Iteration 11 -- Direction www[5] = 0.00000e+00
-Iteration 11 -- xk+1[0] = -1.86812e-03
-Iteration 11 -- xk+1[1] = 0.00000e+00
-Iteration 11 -- xk+1[2] = 0.00000e+00
-Iteration 11 -- xk+1[3] = 1.91108e+00
-Iteration 11 -- xk+1[4] = 0.00000e+00
-Iteration 11 -- xk+1[5] = 0.00000e+00
-Iteration 11 Erreur =  1.8681152e-03
-G[0] = -1.11022e-16
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = -1.86812e-03
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
+Iteration 11 Erreur =  2.7849559e-02
 ---------------- Iteration 12 -----------------
-G[0] = -1.11022e-16
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = -1.86812e-03
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
-JacG[0,0] = 1.00000e+00	JacG[0,1] = 0.00000e+00	JacG[0,2] = 0.00000e+00	JacG[0,3] = -1.00000e+00	JacG[0,4] = -0.00000e+00	JacG[0,5] = -0.00000e+00	
-JacG[1,0] = 0.00000e+00	JacG[1,1] = 1.00000e+00	JacG[1,2] = 0.00000e+00	JacG[1,3] = -0.00000e+00	JacG[1,4] = -2.66667e+00	JacG[1,5] = -0.00000e+00	
-JacG[2,0] = 0.00000e+00	JacG[2,1] = 0.00000e+00	JacG[2,2] = 1.00000e+00	JacG[2,3] = -0.00000e+00	JacG[2,4] = -0.00000e+00	JacG[2,5] = -2.66667e+00	
-JacG[3,0] = 1.00000e+00	JacG[3,1] = 0.00000e+00	JacG[3,2] = 0.00000e+00	JacG[3,3] = 1.00000e+00	JacG[3,4] = 0.00000e+00	JacG[3,5] = 0.00000e+00	
-JacG[4,0] = 0.00000e+00	JacG[4,1] = 0.00000e+00	JacG[4,2] = 0.00000e+00	JacG[4,3] = 0.00000e+00	JacG[4,4] = 2.66667e+00	JacG[4,5] = 0.00000e+00	
-JacG[5,0] = 0.00000e+00	JacG[5,1] = 0.00000e+00	JacG[5,2] = 0.00000e+00	JacG[5,3] = 0.00000e+00	JacG[5,4] = 0.00000e+00	JacG[5,5] = 2.66667e+00	
-Iteration 12 -- Direction www[0] = 9.34058e-04
-Iteration 12 -- Direction www[1] = 0.00000e+00
-Iteration 12 -- Direction www[2] = 0.00000e+00
-Iteration 12 -- Direction www[3] = 9.34058e-04
-Iteration 12 -- Direction www[4] = 0.00000e+00
-Iteration 12 -- Direction www[5] = 0.00000e+00
-Iteration 12 -- xk+1[0] = -9.34058e-04
-Iteration 12 -- xk+1[1] = 0.00000e+00
-Iteration 12 -- xk+1[2] = 0.00000e+00
-Iteration 12 -- xk+1[3] = 1.91202e+00
-Iteration 12 -- xk+1[4] = 0.00000e+00
-Iteration 12 -- xk+1[5] = 0.00000e+00
-Iteration 12 Erreur =  9.3405762e-04
-G[0] = 0.00000e+00
-G[1] = 0.00000e+00
-G[2] = 0.00000e+00
-G[3] = -9.34058e-04
-G[4] = 0.00000e+00
-G[5] = 0.00000e+00
----------------------la vitesse et la force de contact en 0 est w[0] = -9.34058e-04 et z[0] = 1.91202e+00
-End of computation - Number of iterations done: 21
-End of computation - Number of iterations done: 22
-End of computation - Number of iterations done: 23
-End of computation - Number of iterations done: 24
-End of computation - Number of iterations done: 25
-End of computation - Number of iterations done: 26
-End of computation - Number of iterations done: 27
-End of computation - Number of iterations done: 28
-End of computation - Number of iterations done: 29
-End of computation - Number of iterations done: 30
-End of computation - Number of iterations done: 31
-End of computation - Number of iterations done: 32
-End of computation - Number of iterations done: 33
-End of computation - Number of iterations done: 34
-End of computation - Number of iterations done: 35
-End of computation - Number of iterations done: 36
-End of computation - Number of iterations done: 37
-End of computation - Number of iterations done: 38
-End of computation - Number of iterations done: 39
-End of computation - Number of iterations done: 40
-End of computation - Number of iterations done: 41
-End of computation - Number of iterations done: 42
+Iteration 12 Erreur =  1.4496528e-02
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  7.5458766e-03
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  3.9278545e-03
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  2.0445657e-03
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  1.0642576e-03
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  5.5397792e-04
+ ---------------le point de contact 7-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  1.5942892e+04
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  7.9499086e+03
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  3.9999301e+03
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  1.9983306e+03
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  9.9831127e+02
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  4.9872883e+02
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  2.4915119e+02
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  1.2446908e+02
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  6.2181324e+01
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  3.1064078e+01
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  1.5518758e+01
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  7.7527444e+00
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  3.8730577e+00
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  1.9348730e+00
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  9.6660928e-01
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  4.8289138e-01
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  2.4123924e-01
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  1.2051648e-01
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  6.0206718e-02
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  3.0077619e-02
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  1.5025950e-02
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  7.5065511e-03
+---------------- Iteration 23 -----------------
+Iteration 23 Erreur =  3.7500663e-03
+---------------- Iteration 24 -----------------
+Iteration 24 Erreur =  1.8734299e-03
+---------------- Iteration 25 -----------------
+Iteration 25 Erreur =  9.3591399e-04
+ ---------------le point de contact 0-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 1-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  1.0524857e+03
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  4.8268316e+02
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  2.2135812e+02
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  1.0151461e+02
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  4.6554480e+01
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  2.1349827e+01
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  9.7910029e+00
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  4.4901411e+00
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  2.0591728e+00
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  9.4433389e-01
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  4.3307026e-01
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  1.9860544e-01
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  9.1080191e-02
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  4.1769254e-02
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  1.9155324e-02
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  8.7846059e-03
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  4.0286085e-03
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  1.8475145e-03
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  8.4726767e-04
+ ---------------le point de contact 2-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  4.1232468e+03
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  1.1700161e+03
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  4.6844302e+02
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  2.2409688e+02
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  1.1131170e+02
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  5.5613354e+01
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  2.7806414e+01
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  1.3903795e+01
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  6.9520640e+00
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  3.4760689e+00
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  1.7380421e+00
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  8.6902257e-01
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  4.3451159e-01
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  2.1725586e-01
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  1.0862794e-01
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  5.4313973e-02
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  2.7156987e-02
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  1.3578493e-02
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  6.7892467e-03
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  3.3946234e-03
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  1.6973117e-03
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  8.4865584e-04
+ ---------------le point de contact 3-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  2.6768237e+04
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  1.2092387e+04
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  5.9316416e+03
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  2.9576827e+03
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  1.4783281e+03
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  7.3914376e+02
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  3.6957381e+02
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  1.8478771e+02
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  9.2394046e+01
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  4.6197061e+01
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  2.3098538e+01
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  1.1549271e+01
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  5.7746356e+00
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  2.8873179e+00
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  1.4436589e+00
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  7.2182947e-01
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  3.6091474e-01
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  1.8045737e-01
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  9.0228684e-02
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  4.5114342e-02
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  2.2557171e-02
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  1.1278586e-02
+---------------- Iteration 23 -----------------
+Iteration 23 Erreur =  5.6392928e-03
+---------------- Iteration 24 -----------------
+Iteration 24 Erreur =  2.8196464e-03
+---------------- Iteration 25 -----------------
+Iteration 25 Erreur =  1.4098232e-03
+---------------- Iteration 26 -----------------
+Iteration 26 Erreur =  7.0491159e-04
+ ---------------le point de contact 4-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  6.0071260e+03
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  6.9520445e+02
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  2.0693744e+03
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  1.9678623e+03
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  1.2742755e+03
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  6.2095248e+02
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  2.6868608e+01
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  1.5163404e+01
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  1.0141684e+01
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  6.7829956e+00
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  4.5366264e+00
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  3.0342022e+00
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  2.0293458e+00
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  1.3572742e+00
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  9.0777695e-01
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  6.0714261e-01
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  4.0607128e-01
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  2.7159004e-01
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  1.8164582e-01
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  1.2148901e-01
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  8.1254711e-02
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  5.4345066e-02
+---------------- Iteration 23 -----------------
+Iteration 23 Erreur =  3.6347262e-02
+---------------- Iteration 24 -----------------
+Iteration 24 Erreur =  2.4309905e-02
+---------------- Iteration 25 -----------------
+Iteration 25 Erreur =  1.6259038e-02
+---------------- Iteration 26 -----------------
+Iteration 26 Erreur =  1.0874428e-02
+---------------- Iteration 27 -----------------
+Iteration 27 Erreur =  7.2730736e-03
+---------------- Iteration 28 -----------------
+Iteration 28 Erreur =  4.8644031e-03
+---------------- Iteration 29 -----------------
+Iteration 29 Erreur =  3.2534275e-03
+---------------- Iteration 30 -----------------
+Iteration 30 Erreur =  2.1759690e-03
+---------------- Iteration 31 -----------------
+Iteration 31 Erreur =  1.4553394e-03
+---------------- Iteration 32 -----------------
+Iteration 32 Erreur =  9.7336527e-04
+ ---------------le point de contact 5-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  5.3308201e+03
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  1.3443389e+03
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  1.8999061e+03
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  1.2173708e+03
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  5.9627824e+02
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  2.4218412e+02
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  8.0696177e+01
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  1.9762729e+01
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  1.4291313e+00
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  1.4526615e-01
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  1.4757436e-02
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  1.4992137e-03
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  1.5230595e-04
+ ---------------le point de contact 6-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  2.4417678e+03
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  2.7188567e+02
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  8.5247875e+02
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  7.7978754e+02
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  4.8921083e+02
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  2.3105213e+02
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  1.4171166e+02
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  1.2842633e+01
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  1.5595951e+00
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  1.8932800e-01
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  2.2987018e-02
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  2.7909923e-03
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  3.3887196e-04
+ ---------------le point de contact 7-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  2.1825179e+03
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  1.0130054e+03
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  5.9596635e+02
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  2.9506907e+02
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  1.4377314e+02
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  6.9938952e+01
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  3.4016268e+01
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  1.6544230e+01
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  8.0464748e+00
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  3.9134940e+00
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  1.9033720e+00
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  9.2572649e-01
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  4.5023753e-01
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  2.1897811e-01
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  1.0650248e-01
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  5.1798683e-02
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  2.5192875e-02
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  1.2252839e-02
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  5.9593068e-03
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  2.8983762e-03
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  1.4096580e-03
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  6.8560309e-04
+ ---------------le point de contact 0-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 1-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 2-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 3-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 4-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 5-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 6-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 7-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  1.3421355e+02
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  1.2387903e+02
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  1.1433394e+02
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  1.0552096e+02
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  9.7384445e+01
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  8.9872879e+01
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  8.2938619e+01
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  7.6537601e+01
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  7.0629081e+01
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  6.5175386e+01
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  6.0141698e+01
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  5.5495831e+01
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  5.1208047e+01
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  4.7250862e+01
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  4.3598890e+01
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  4.0228675e+01
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  3.7118553e+01
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  3.4248515e+01
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  3.1600082e+01
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  2.9156187e+01
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  2.6901074e+01
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  2.4820194e+01
+---------------- Iteration 23 -----------------
+Iteration 23 Erreur =  2.2900112e+01
+---------------- Iteration 24 -----------------
+Iteration 24 Erreur =  2.1128429e+01
+---------------- Iteration 25 -----------------
+Iteration 25 Erreur =  1.9493694e+01
+---------------- Iteration 26 -----------------
+Iteration 26 Erreur =  1.7985340e+01
+---------------- Iteration 27 -----------------
+Iteration 27 Erreur =  1.6593611e+01
+---------------- Iteration 28 -----------------
+Iteration 28 Erreur =  1.5309503e+01
+---------------- Iteration 29 -----------------
+Iteration 29 Erreur =  1.4124704e+01
+---------------- Iteration 30 -----------------
+Iteration 30 Erreur =  1.3031544e+01
+---------------- Iteration 31 -----------------
+Iteration 31 Erreur =  1.2022941e+01
+---------------- Iteration 32 -----------------
+Iteration 32 Erreur =  1.1092363e+01
+---------------- Iteration 33 -----------------
+Iteration 33 Erreur =  1.0233779e+01
+---------------- Iteration 34 -----------------
+Iteration 34 Erreur =  9.4416243e+00
+---------------- Iteration 35 -----------------
+Iteration 35 Erreur =  8.7107632e+00
+---------------- Iteration 36 -----------------
+Iteration 36 Erreur =  8.0364567e+00
+---------------- Iteration 37 -----------------
+Iteration 37 Erreur =  7.4143314e+00
+---------------- Iteration 38 -----------------
+Iteration 38 Erreur =  6.8403520e+00
+---------------- Iteration 39 -----------------
+Iteration 39 Erreur =  6.3107946e+00
+---------------- Iteration 40 -----------------
+Iteration 40 Erreur =  5.8222232e+00
+---------------- Iteration 41 -----------------
+Iteration 41 Erreur =  5.3714671e+00
+---------------- Iteration 42 -----------------
+Iteration 42 Erreur =  4.9556008e+00
+---------------- Iteration 43 -----------------
+Iteration 43 Erreur =  4.5719249e+00
+---------------- Iteration 44 -----------------
+Iteration 44 Erreur =  4.2179486e+00
+---------------- Iteration 45 -----------------
+Iteration 45 Erreur =  3.8913738e+00
+---------------- Iteration 46 -----------------
+Iteration 46 Erreur =  3.5900800e+00
+---------------- Iteration 47 -----------------
+Iteration 47 Erreur =  3.3121107e+00
+---------------- Iteration 48 -----------------
+Iteration 48 Erreur =  3.0556608e+00
+---------------- Iteration 49 -----------------
+Iteration 49 Erreur =  2.8190649e+00
+---------------- Iteration 50 -----------------
+Iteration 50 Erreur =  2.6007861e+00
+---------------- Iteration 51 -----------------
+Iteration 51 Erreur =  2.3994067e+00
+---------------- Iteration 52 -----------------
+Iteration 52 Erreur =  2.2136187e+00
+---------------- Iteration 53 -----------------
+Iteration 53 Erreur =  2.0422150e+00
+---------------- Iteration 54 -----------------
+Iteration 54 Erreur =  1.8840823e+00
+---------------- Iteration 55 -----------------
+Iteration 55 Erreur =  1.7381931e+00
+---------------- Iteration 56 -----------------
+Iteration 56 Erreur =  1.6035997e+00
+---------------- Iteration 57 -----------------
+Iteration 57 Erreur =  1.4794276e+00
+---------------- Iteration 58 -----------------
+Iteration 58 Erreur =  1.3648699e+00
+---------------- Iteration 59 -----------------
+Iteration 59 Erreur =  1.2591824e+00
+---------------- Iteration 60 -----------------
+Iteration 60 Erreur =  1.1616783e+00
+---------------- Iteration 61 -----------------
+Iteration 61 Erreur =  1.0717240e+00
+---------------- Iteration 62 -----------------
+Iteration 62 Erreur =  9.8873498e-01
+---------------- Iteration 63 -----------------
+Iteration 63 Erreur =  9.1217196e-01
+---------------- Iteration 64 -----------------
+Iteration 64 Erreur =  8.4153739e-01
+---------------- Iteration 65 -----------------
+Iteration 65 Erreur =  7.7637227e-01
+---------------- Iteration 66 -----------------
+Iteration 66 Erreur =  7.1625310e-01
+---------------- Iteration 67 -----------------
+Iteration 67 Erreur =  6.6078918e-01
+---------------- Iteration 68 -----------------
+Iteration 68 Erreur =  6.0962006e-01
+---------------- Iteration 69 -----------------
+Iteration 69 Erreur =  5.6241319e-01
+---------------- Iteration 70 -----------------
+Iteration 70 Erreur =  5.1886177e-01
+---------------- Iteration 71 -----------------
+Iteration 71 Erreur =  4.7868276e-01
+---------------- Iteration 72 -----------------
+Iteration 72 Erreur =  4.4161502e-01
+---------------- Iteration 73 -----------------
+Iteration 73 Erreur =  4.0741765e-01
+---------------- Iteration 74 -----------------
+Iteration 74 Erreur =  3.7586837e-01
+---------------- Iteration 75 -----------------
+Iteration 75 Erreur =  3.4676214e-01
+---------------- Iteration 76 -----------------
+Iteration 76 Erreur =  3.1990979e-01
+---------------- Iteration 77 -----------------
+Iteration 77 Erreur =  2.9513679e-01
+---------------- Iteration 78 -----------------
+Iteration 78 Erreur =  2.7228212e-01
+---------------- Iteration 79 -----------------
+Iteration 79 Erreur =  2.5119724e-01
+---------------- Iteration 80 -----------------
+Iteration 80 Erreur =  2.3174511e-01
+---------------- Iteration 81 -----------------
+Iteration 81 Erreur =  2.1379929e-01
+---------------- Iteration 82 -----------------
+Iteration 82 Erreur =  1.9724314e-01
+---------------- Iteration 83 -----------------
+Iteration 83 Erreur =  1.8196905e-01
+---------------- Iteration 84 -----------------
+Iteration 84 Erreur =  1.6787775e-01
+---------------- Iteration 85 -----------------
+Iteration 85 Erreur =  1.5487764e-01
+---------------- Iteration 86 -----------------
+Iteration 86 Erreur =  1.4288423e-01
+---------------- Iteration 87 -----------------
+Iteration 87 Erreur =  1.3181956e-01
+---------------- Iteration 88 -----------------
+Iteration 88 Erreur =  1.2161170e-01
+---------------- Iteration 89 -----------------
+Iteration 89 Erreur =  1.1219432e-01
+---------------- Iteration 90 -----------------
+Iteration 90 Erreur =  1.0350621e-01
+---------------- Iteration 91 -----------------
+Iteration 91 Erreur =  9.5490876e-02
+---------------- Iteration 92 -----------------
+Iteration 92 Erreur =  8.8096237e-02
+---------------- Iteration 93 -----------------
+Iteration 93 Erreur =  8.1274222e-02
+---------------- Iteration 94 -----------------
+Iteration 94 Erreur =  7.4980490e-02
+---------------- Iteration 95 -----------------
+Iteration 95 Erreur =  6.9174133e-02
+---------------- Iteration 96 -----------------
+Iteration 96 Erreur =  6.3817408e-02
+---------------- Iteration 97 -----------------
+Iteration 97 Erreur =  5.8875497e-02
+---------------- Iteration 98 -----------------
+Iteration 98 Erreur =  5.4316279e-02
+---------------- Iteration 99 -----------------
+Iteration 99 Erreur =  5.0110118e-02
+---------------- Iteration 100 -----------------
+Iteration 100 Erreur =  4.6229674e-02
+ ---------------le point de contact 8-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  8.5762553e+03
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  4.3178225e+03
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  1.6406723e+03
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  8.7172770e+02
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  4.4606472e+02
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  2.2960429e+02
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  1.1813801e+02
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  6.0792623e+01
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  3.1283335e+01
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  1.6098178e+01
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  8.2840101e+00
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  4.2628943e+00
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  2.1936560e+00
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  1.1288403e+00
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  5.8089342e-01
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  2.9892375e-01
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  1.5382410e-01
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  7.9156823e-02
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  4.0733556e-02
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  2.0961207e-02
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  1.0786493e-02
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  5.5506548e-03
+---------------- Iteration 23 -----------------
+Iteration 23 Erreur =  2.8563287e-03
+---------------- Iteration 24 -----------------
+Iteration 24 Erreur =  1.4698471e-03
+---------------- Iteration 25 -----------------
+Iteration 25 Erreur =  7.5637318e-04
+ ---------------le point de contact 9-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  1.2656906e+04
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  5.8980833e+03
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  2.9355161e+03
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  1.4674190e+03
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  7.3370416e+02
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  3.6685240e+02
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  1.8342626e+02
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  9.1713140e+01
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  4.5856571e+01
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  2.2928286e+01
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  1.1464143e+01
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  5.7320714e+00
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  2.8660357e+00
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  1.4330179e+00
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  7.1650893e-01
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  3.5825446e-01
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  1.7912723e-01
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  8.9563616e-02
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  4.4781808e-02
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  2.2390904e-02
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  1.1195452e-02
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  5.5977260e-03
+---------------- Iteration 23 -----------------
+Iteration 23 Erreur =  2.7988630e-03
+---------------- Iteration 24 -----------------
+Iteration 24 Erreur =  1.3994315e-03
+---------------- Iteration 25 -----------------
+Iteration 25 Erreur =  6.9971575e-04
+ ---------------le point de contact 10-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  9.3509368e+03
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  6.2675034e+02
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  6.9661304e+01
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  5.0139140e+01
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  4.2143253e+01
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  3.5360555e+01
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  2.9664860e+01
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  2.4886614e+01
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  2.0878189e+01
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  1.7515516e+01
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  1.4694529e+01
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  1.2327941e+01
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  1.0342542e+01
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  8.6769190e+00
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  7.2795593e+00
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  6.1072502e+00
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  5.1237418e+00
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  4.2986246e+00
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  3.6063879e+00
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  3.0256305e+00
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  2.5383984e+00
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  2.1296295e+00
+---------------- Iteration 23 -----------------
+Iteration 23 Erreur =  1.7866876e+00
+---------------- Iteration 24 -----------------
+Iteration 24 Erreur =  1.4989719e+00
+---------------- Iteration 25 -----------------
+Iteration 25 Erreur =  1.2575885e+00
+---------------- Iteration 26 -----------------
+Iteration 26 Erreur =  1.0550762e+00
+---------------- Iteration 27 -----------------
+Iteration 27 Erreur =  8.8517517e-01
+---------------- Iteration 28 -----------------
+Iteration 28 Erreur =  7.4263389e-01
+---------------- Iteration 29 -----------------
+Iteration 29 Erreur =  6.2304643e-01
+---------------- Iteration 30 -----------------
+Iteration 30 Erreur =  5.2271644e-01
+---------------- Iteration 31 -----------------
+Iteration 31 Erreur =  4.3854279e-01
+---------------- Iteration 32 -----------------
+Iteration 32 Erreur =  3.6792378e-01
+---------------- Iteration 33 -----------------
+Iteration 33 Erreur =  3.0867667e-01
+---------------- Iteration 34 -----------------
+Iteration 34 Erreur =  2.5897020e-01
+---------------- Iteration 35 -----------------
+Iteration 35 Erreur =  2.1726802e-01
+---------------- Iteration 36 -----------------
+Iteration 36 Erreur =  1.8228119e-01
+---------------- Iteration 37 -----------------
+Iteration 37 Erreur =  1.5292833e-01
+---------------- Iteration 38 -----------------
+Iteration 38 Erreur =  1.2830219e-01
+---------------- Iteration 39 -----------------
+Iteration 39 Erreur =  1.0764161e-01
+---------------- Iteration 40 -----------------
+Iteration 40 Erreur =  9.0308019e-02
+---------------- Iteration 41 -----------------
+Iteration 41 Erreur =  7.5765670e-02
+---------------- Iteration 42 -----------------
+Iteration 42 Erreur =  6.3565085e-02
+---------------- Iteration 43 -----------------
+Iteration 43 Erreur =  5.3329168e-02
+---------------- Iteration 44 -----------------
+Iteration 44 Erreur =  4.4741546e-02
+---------------- Iteration 45 -----------------
+Iteration 45 Erreur =  3.7536794e-02
+---------------- Iteration 46 -----------------
+Iteration 46 Erreur =  3.1492227e-02
+---------------- Iteration 47 -----------------
+Iteration 47 Erreur =  2.6421019e-02
+---------------- Iteration 48 -----------------
+Iteration 48 Erreur =  2.2166431e-02
+---------------- Iteration 49 -----------------
+Iteration 49 Erreur =  1.8596961e-02
+---------------- Iteration 50 -----------------
+Iteration 50 Erreur =  1.5602284e-02
+---------------- Iteration 51 -----------------
+Iteration 51 Erreur =  1.3089842e-02
+---------------- Iteration 52 -----------------
+Iteration 52 Erreur =  1.0981979e-02
+---------------- Iteration 53 -----------------
+Iteration 53 Erreur =  9.2135462e-03
+---------------- Iteration 54 -----------------
+Iteration 54 Erreur =  7.7298850e-03
+---------------- Iteration 55 -----------------
+Iteration 55 Erreur =  6.4851384e-03
+---------------- Iteration 56 -----------------
+Iteration 56 Erreur =  5.4408339e-03
+---------------- Iteration 57 -----------------
+Iteration 57 Erreur =  4.5646941e-03
+---------------- Iteration 58 -----------------
+Iteration 58 Erreur =  3.8296396e-03
+---------------- Iteration 59 -----------------
+Iteration 59 Erreur =  3.2129511e-03
+---------------- Iteration 60 -----------------
+Iteration 60 Erreur =  2.6955683e-03
+---------------- Iteration 61 -----------------
+Iteration 61 Erreur =  2.2614998e-03
+---------------- Iteration 62 -----------------
+Iteration 62 Erreur =  1.8973296e-03
+---------------- Iteration 63 -----------------
+Iteration 63 Erreur =  1.5918018e-03
+---------------- Iteration 64 -----------------
+Iteration 64 Erreur =  1.3354733e-03
+---------------- Iteration 65 -----------------
+Iteration 65 Erreur =  1.1204215e-03
+---------------- Iteration 66 -----------------
+Iteration 66 Erreur =  9.3999959e-04
+ ---------------le point de contact 11-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  1.7476204e+03
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  2.4237366e+02
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  1.1046891e+02
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  5.7220399e+01
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  2.9923572e+01
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  1.5657361e+01
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  8.1922907e+00
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  4.2862383e+00
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  2.2425441e+00
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  1.1732850e+00
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  6.1385432e-01
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  3.2116402e-01
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  1.6803061e-01
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  8.7912351e-02
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  4.5995081e-02
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  2.4064281e-02
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  1.2590251e-02
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  6.5871245e-03
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  3.4463340e-03
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  1.8030961e-03
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  9.4336631e-04
+ ---------------le point de contact 0-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 1-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 2-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 3-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  1.0720139e+03
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  5.3603374e+02
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  2.6801007e+02
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  1.3400360e+02
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  6.7001495e+01
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  3.3500679e+01
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  1.6750323e+01
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  8.3751578e+00
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  4.1875780e+00
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  2.0937887e+00
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  1.0468943e+00
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  5.2344714e-01
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  2.6172357e-01
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  1.3086178e-01
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  6.5430891e-02
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  3.2715445e-02
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  1.6357723e-02
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  8.1788613e-03
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  4.0894307e-03
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  2.0447153e-03
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  1.0223577e-03
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  5.1117883e-04
+ ---------------le point de contact 4-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  2.2644849e+04
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  7.1988393e+03
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  3.0691736e+03
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  1.5438182e+03
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  8.9205822e+02
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  3.6139423e+03
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  2.6858421e+03
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  1.5517820e+03
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  7.2168316e+02
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  2.5768692e+02
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  1.0035832e+02
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  1.0176034e+02
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  8.8701725e+01
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  6.1648786e+01
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  3.6149206e+01
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  1.8016086e+01
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  7.2795584e+00
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  1.9651375e+00
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  6.7208808e-01
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  1.0097694e+00
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  8.6471419e-01
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  5.6953496e-01
+---------------- Iteration 23 -----------------
+Iteration 23 Erreur =  3.1130220e-01
+---------------- Iteration 24 -----------------
+Iteration 24 Erreur =  1.4008870e-01
+---------------- Iteration 25 -----------------
+Iteration 25 Erreur =  4.6974209e-02
+---------------- Iteration 26 -----------------
+Iteration 26 Erreur =  1.1690893e-02
+---------------- Iteration 27 -----------------
+Iteration 27 Erreur =  1.4530306e-02
+---------------- Iteration 28 -----------------
+Iteration 28 Erreur =  1.3938162e-02
+---------------- Iteration 29 -----------------
+Iteration 29 Erreur =  9.9227567e-03
+---------------- Iteration 30 -----------------
+Iteration 30 Erreur =  5.8317429e-03
+---------------- Iteration 31 -----------------
+Iteration 31 Erreur =  2.8750251e-03
+---------------- Iteration 32 -----------------
+Iteration 32 Erreur =  1.1288123e-03
+---------------- Iteration 33 -----------------
+Iteration 33 Erreur =  2.8938926e-04
+ ---------------le point de contact 0-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 1-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 2-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  1.6197868e+03
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  8.8572678e+02
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  4.8434853e+02
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  2.6488539e+02
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  1.4487082e+02
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  7.9234651e+01
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  4.3336509e+01
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  2.3702474e+01
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  1.2963815e+01
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  7.0904036e+00
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  3.8780022e+00
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  2.1210178e+00
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  1.1600588e+00
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  6.3447609e-01
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  3.4701660e-01
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  1.8979513e-01
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  1.0380536e-01
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  5.6774644e-02
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  3.1051960e-02
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  1.6983359e-02
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  9.2887687e-03
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  5.0803390e-03
+---------------- Iteration 23 -----------------
+Iteration 23 Erreur =  2.7786077e-03
+---------------- Iteration 24 -----------------
+Iteration 24 Erreur =  1.5197137e-03
+---------------- Iteration 25 -----------------
+Iteration 25 Erreur =  8.3118235e-04
+ ---------------le point de contact 3-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  4.7904448e+03
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  1.3374544e+03
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  7.3453983e+02
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  7.4661541e+02
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  5.4299703e+02
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  3.0134612e+02
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  1.5127722e+02
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  1.5869237e+01
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  9.2020248e-01
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  5.2914827e-02
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  3.0459294e-03
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  1.7535299e-04
+ ---------------le point de contact 4-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  8.6357279e+02
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  9.3699629e+01
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  2.9784481e+02
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  2.8150205e+02
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  1.8119700e+02
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  8.7739618e+01
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  1.1632306e+01
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  1.9633751e+00
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  1.3142587e+00
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  8.7975013e-01
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  5.8889494e-01
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  3.9419972e-01
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  2.6387290e-01
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  1.7663358e-01
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  1.1823655e-01
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  7.9146232e-02
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  5.2979606e-02
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  3.5463958e-02
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  2.3739179e-02
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  1.5890742e-02
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  1.0637086e-02
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  7.1203468e-03
+---------------- Iteration 23 -----------------
+Iteration 23 Erreur =  4.7662808e-03
+---------------- Iteration 24 -----------------
+Iteration 24 Erreur =  3.1904953e-03
+---------------- Iteration 25 -----------------
+Iteration 25 Erreur =  2.1356820e-03
+---------------- Iteration 26 -----------------
+Iteration 26 Erreur =  1.4296018e-03
+---------------- Iteration 27 -----------------
+Iteration 27 Erreur =  9.5695951e-04
+ ---------------le point de contact 5-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  2.2621470e+03
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  1.6504895e+02
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  7.8867340e+01
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  3.9422396e+01
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  1.9711097e+01
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  9.8555434e+00
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  4.9277710e+00
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  2.4638854e+00
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  1.2319426e+00
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  6.1597132e-01
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  3.0798566e-01
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  1.5399283e-01
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  7.6996414e-02
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  3.8498207e-02
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  1.9249103e-02
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  9.6245517e-03
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  4.8122758e-03
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  2.4061379e-03
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  1.2030690e-03
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  6.0153448e-04
+ ---------------le point de contact 6-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  7.5600196e+04
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  8.3918018e+04
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  1.5379637e+04
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  3.5314200e+03
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  4.4621154e+03
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  2.6155104e+03
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  1.3220869e+03
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  6.4341405e+02
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  3.1000900e+02
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  1.4897898e+02
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  7.1545900e+01
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  3.4353470e+01
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  1.6494450e+01
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  7.9195481e+00
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  3.8024349e+00
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  1.8256725e+00
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  8.7656454e-01
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  4.2086702e-01
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  2.0207189e-01
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  9.7021256e-02
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  4.6583047e-02
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  2.2366029e-02
+---------------- Iteration 23 -----------------
+Iteration 23 Erreur =  1.0738655e-02
+---------------- Iteration 24 -----------------
+Iteration 24 Erreur =  5.1559759e-03
+---------------- Iteration 25 -----------------
+Iteration 25 Erreur =  2.4755510e-03
+---------------- Iteration 26 -----------------
+Iteration 26 Erreur =  1.1885922e-03
+---------------- Iteration 27 -----------------
+Iteration 27 Erreur =  5.7068160e-04
+ ---------------le point de contact 7-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  5.4249058e+04
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  6.2361934e+04
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  1.2912761e+04
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  1.7369258e+03
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  3.4778964e+03
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  2.9035213e+03
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  1.6665466e+03
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  7.5373802e+02
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  2.6589456e+02
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  1.0821759e+01
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  3.8035666e+00
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  2.3014916e+00
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  1.3926159e+00
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  8.4266187e-01
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  5.0988867e-01
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  3.0853000e-01
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  1.8668930e-01
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  1.1296437e-01
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  6.8353936e-02
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  4.1360481e-02
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  2.5026933e-02
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  1.5143619e-02
+---------------- Iteration 23 -----------------
+Iteration 23 Erreur =  9.1632965e-03
+---------------- Iteration 24 -----------------
+Iteration 24 Erreur =  5.5446456e-03
+---------------- Iteration 25 -----------------
+Iteration 25 Erreur =  3.3550256e-03
+---------------- Iteration 26 -----------------
+Iteration 26 Erreur =  2.0301022e-03
+---------------- Iteration 27 -----------------
+Iteration 27 Erreur =  1.2284004e-03
+---------------- Iteration 28 -----------------
+Iteration 28 Erreur =  7.4329636e-04
+ ---------------le point de contact 8-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  1.4982422e+04
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  6.8410084e+03
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  4.1607939e+03
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  2.0625666e+03
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  9.9941040e+02
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  4.8287291e+02
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  2.3321820e+02
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  1.1263455e+02
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  5.4397410e+01
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  2.6271476e+01
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  1.2687927e+01
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  6.1276913e+00
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  2.9593960e+00
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  1.4292535e+00
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  6.9026440e-01
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  3.3336628e-01
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  1.6100074e-01
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  7.7756029e-02
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  3.7552622e-02
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  1.8136207e-02
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  8.7589625e-03
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  4.2301802e-03
+---------------- Iteration 23 -----------------
+Iteration 23 Erreur =  2.0429845e-03
+---------------- Iteration 24 -----------------
+Iteration 24 Erreur =  9.8666850e-04
+ ---------------le point de contact 9-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  4.2795892e+04
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  2.1397946e+04
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  1.0698973e+04
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  5.3494865e+03
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  2.6747432e+03
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  1.3373716e+03
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  6.6868581e+02
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  3.3434290e+02
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  1.6717145e+02
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  8.3585726e+01
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  4.1792863e+01
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  2.0896431e+01
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  1.0448216e+01
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  5.2241079e+00
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  2.6120539e+00
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  1.3060270e+00
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  6.5301348e-01
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  3.2650674e-01
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  1.6325337e-01
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  8.1626685e-02
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  4.0813343e-02
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  2.0406671e-02
+---------------- Iteration 23 -----------------
+Iteration 23 Erreur =  1.0203336e-02
+---------------- Iteration 24 -----------------
+Iteration 24 Erreur =  5.1016678e-03
+---------------- Iteration 25 -----------------
+Iteration 25 Erreur =  2.5508339e-03
+---------------- Iteration 26 -----------------
+Iteration 26 Erreur =  1.2754170e-03
+---------------- Iteration 27 -----------------
+Iteration 27 Erreur =  6.3770848e-04
+ ---------------le point de contact 10-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  3.8674455e+04
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  9.8180996e+03
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  1.1890334e+04
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  1.7142323e+04
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  1.3381886e+04
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  7.7304999e+03
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  3.3312928e+03
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  8.2164132e+02
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  3.5827353e+02
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  5.6875811e+02
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  4.5733946e+02
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  2.7002662e+02
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  1.1977144e+02
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  3.2021965e+01
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  1.0591073e+01
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  1.8657153e+01
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  1.5506676e+01
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  9.3595655e+00
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  4.2601129e+00
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  1.2102089e+00
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  3.0855021e-01
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  6.1238155e-01
+---------------- Iteration 23 -----------------
+Iteration 23 Erreur =  5.2660441e-01
+---------------- Iteration 24 -----------------
+Iteration 24 Erreur =  3.2495706e-01
+---------------- Iteration 25 -----------------
+Iteration 25 Erreur =  1.5178141e-01
+---------------- Iteration 26 -----------------
+Iteration 26 Erreur =  4.5773988e-02
+---------------- Iteration 27 -----------------
+Iteration 27 Erreur =  8.9988849e-03
+---------------- Iteration 28 -----------------
+Iteration 28 Erreur =  1.9955876e-02
+---------------- Iteration 29 -----------------
+Iteration 29 Erreur =  1.7809623e-02
+---------------- Iteration 30 -----------------
+Iteration 30 Erreur =  1.1240195e-02
+---------------- Iteration 31 -----------------
+Iteration 31 Erreur =  5.3804599e-03
+---------------- Iteration 32 -----------------
+Iteration 32 Erreur =  1.7081132e-03
+---------------- Iteration 33 -----------------
+Iteration 33 Erreur =  2.6775597e-04
+ ---------------le point de contact 0-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 1-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 2-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 3-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 4-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 0-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 1-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 2-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 3-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 4-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 5-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 6-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 7-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 8-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  6.7900352e+03
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  3.4763916e+03
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  1.7673252e+03
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  8.9990735e+02
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  4.5873404e+02
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  2.3390371e+02
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  1.1920935e+02
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  6.0698266e+01
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  3.0870147e+01
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  1.5681242e+01
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  7.9566875e+00
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  4.0331879e+00
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  2.0426355e+00
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  1.0337612e+00
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  5.2286732e-01
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  2.6433359e-01
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  1.3358046e-01
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  6.7483326e-02
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  3.4083185e-02
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  1.7210600e-02
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  8.6892397e-03
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  4.3864349e-03
+---------------- Iteration 23 -----------------
+Iteration 23 Erreur =  2.2140996e-03
+---------------- Iteration 24 -----------------
+Iteration 24 Erreur =  1.1174994e-03
+---------------- Iteration 25 -----------------
+Iteration 25 Erreur =  5.6398729e-04
+ ---------------le point de contact 9-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  4.2997816e+05
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  7.5680412e+05
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  2.2626215e+05
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  4.7470614e+04
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  3.2448149e+04
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  2.2324121e+04
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  1.5256439e+04
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  1.0360873e+04
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  7.0014027e+03
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  4.7136107e+03
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  3.1646799e+03
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  2.1204988e+03
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  1.4187927e+03
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  9.4830543e+02
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  6.3336384e+02
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  4.2279112e+02
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  2.8211879e+02
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  1.8819978e+02
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  1.2552235e+02
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  8.3707077e+01
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  5.5816140e+01
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  3.7215713e+01
+---------------- Iteration 23 -----------------
+Iteration 23 Erreur =  2.4812510e+01
+---------------- Iteration 24 -----------------
+Iteration 24 Erreur =  1.6542426e+01
+---------------- Iteration 25 -----------------
+Iteration 25 Erreur =  1.1028498e+01
+---------------- Iteration 26 -----------------
+Iteration 26 Erreur =  7.3523379e+00
+---------------- Iteration 27 -----------------
+Iteration 27 Erreur =  4.9014973e+00
+---------------- Iteration 28 -----------------
+Iteration 28 Erreur =  3.2675930e+00
+---------------- Iteration 29 -----------------
+Iteration 29 Erreur =  2.1783326e+00
+---------------- Iteration 30 -----------------
+Iteration 30 Erreur =  1.4521729e+00
+---------------- Iteration 31 -----------------
+Iteration 31 Erreur =  9.6807937e-01
+---------------- Iteration 32 -----------------
+Iteration 32 Erreur =  6.4536071e-01
+---------------- Iteration 33 -----------------
+Iteration 33 Erreur =  4.3022269e-01
+---------------- Iteration 34 -----------------
+Iteration 34 Erreur =  2.8680292e-01
+---------------- Iteration 35 -----------------
+Iteration 35 Erreur =  1.9119363e-01
+---------------- Iteration 36 -----------------
+Iteration 36 Erreur =  1.2745679e-01
+---------------- Iteration 37 -----------------
+Iteration 37 Erreur =  8.4967408e-02
+---------------- Iteration 38 -----------------
+Iteration 38 Erreur =  5.6642394e-02
+---------------- Iteration 39 -----------------
+Iteration 39 Erreur =  3.7759891e-02
+---------------- Iteration 40 -----------------
+Iteration 40 Erreur =  2.5172120e-02
+---------------- Iteration 41 -----------------
+Iteration 41 Erreur =  1.6780651e-02
+---------------- Iteration 42 -----------------
+Iteration 42 Erreur =  1.1186591e-02
+---------------- Iteration 43 -----------------
+Iteration 43 Erreur =  7.4573877e-03
+---------------- Iteration 44 -----------------
+Iteration 44 Erreur =  4.9713649e-03
+---------------- Iteration 45 -----------------
+Iteration 45 Erreur =  3.3140920e-03
+---------------- Iteration 46 -----------------
+Iteration 46 Erreur =  2.2092937e-03
+---------------- Iteration 47 -----------------
+Iteration 47 Erreur =  1.4727952e-03
+---------------- Iteration 48 -----------------
+Iteration 48 Erreur =  9.8181860e-04
+ ---------------le point de contact 0-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  5.4191369e+03
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  2.7119774e+03
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  1.3562177e+03
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  6.7829548e+02
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  3.3925529e+02
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  1.6967971e+02
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  8.4862459e+01
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  4.2440331e+01
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  2.1223640e+01
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  1.0613096e+01
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  5.3070042e+00
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  2.6536619e+00
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  1.3268861e+00
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  6.6346192e-01
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  3.3173736e-01
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  1.6587084e-01
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  8.2936145e-02
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  4.1468315e-02
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  2.0734239e-02
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  1.0367147e-02
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  5.1835824e-03
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  2.5917942e-03
+---------------- Iteration 23 -----------------
+Iteration 23 Erreur =  1.2958981e-03
+---------------- Iteration 24 -----------------
+Iteration 24 Erreur =  6.4794939e-04
+ ---------------le point de contact 1-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  3.5467352e+04
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  1.0453552e+04
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  3.2217630e+03
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  1.1191636e+03
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  4.5537767e+02
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  2.0879900e+02
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  1.0133600e+02
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  5.0208345e+01
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  2.5041472e+01
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  1.2513855e+01
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  6.2567175e+00
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  3.1285763e+00
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  1.5643938e+00
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  7.8223384e-01
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  3.9112848e-01
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  1.9556768e-01
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  9.7784844e-02
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  4.8892710e-02
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  2.4446437e-02
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  1.2223242e-02
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  6.1116275e-03
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  3.0558156e-03
+---------------- Iteration 23 -----------------
+Iteration 23 Erreur =  1.5279083e-03
+---------------- Iteration 24 -----------------
+Iteration 24 Erreur =  7.6395431e-04
+ ---------------le point de contact 2-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  6.4427661e+04
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  1.4991736e+05
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  4.1879598e+04
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  5.4020564e+03
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  1.6523765e+03
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  1.3150883e+03
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  1.2432323e+03
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  8.5768551e+02
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  4.5417619e+02
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  6.4005480e+01
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  1.0172334e+01
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  6.7953310e+00
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  4.5398478e+00
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  3.0329984e+00
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  2.0262971e+00
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  1.3537363e+00
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  9.0440935e-01
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  6.0422130e-01
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  4.0367051e-01
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  2.6968576e-01
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  1.8017271e-01
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  1.2037049e-01
+---------------- Iteration 23 -----------------
+Iteration 23 Erreur =  8.0417585e-02
+---------------- Iteration 24 -----------------
+Iteration 24 Erreur =  5.3725694e-02
+---------------- Iteration 25 -----------------
+Iteration 25 Erreur =  3.5893271e-02
+---------------- Iteration 26 -----------------
+Iteration 26 Erreur =  2.3979717e-02
+---------------- Iteration 27 -----------------
+Iteration 27 Erreur =  1.6020463e-02
+---------------- Iteration 28 -----------------
+Iteration 28 Erreur =  1.0703013e-02
+---------------- Iteration 29 -----------------
+Iteration 29 Erreur =  7.1505108e-03
+---------------- Iteration 30 -----------------
+Iteration 30 Erreur =  4.7771412e-03
+---------------- Iteration 31 -----------------
+Iteration 31 Erreur =  3.1915311e-03
+---------------- Iteration 32 -----------------
+Iteration 32 Erreur =  2.1322106e-03
+---------------- Iteration 33 -----------------
+Iteration 33 Erreur =  1.4244956e-03
+---------------- Iteration 34 -----------------
+Iteration 34 Erreur =  9.5168255e-04
+ ---------------le point de contact 3-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  2.7334008e+04
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  5.2175072e+03
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  4.4128856e+03
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  4.0896646e+03
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  2.2112283e+04
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  1.8958964e+04
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  1.1800019e+04
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  5.6478653e+03
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  1.8507764e+03
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  3.4447267e+02
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  6.3896948e+02
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  5.9462194e+02
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  3.8510832e+02
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  1.8937080e+02
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  6.3227212e+01
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  7.4611558e+00
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  2.0543822e+01
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  2.0228417e+01
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  1.3533614e+01
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  6.9215971e+00
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  2.5196049e+00
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  3.9482175e-01
+---------------- Iteration 23 -----------------
+Iteration 23 Erreur =  6.0655427e-01
+---------------- Iteration 24 -----------------
+Iteration 24 Erreur =  6.5051735e-01
+---------------- Iteration 25 -----------------
+Iteration 25 Erreur =  4.5299376e-01
+---------------- Iteration 26 -----------------
+Iteration 26 Erreur =  2.3931672e-01
+---------------- Iteration 27 -----------------
+Iteration 27 Erreur =  9.1105457e-02
+---------------- Iteration 28 -----------------
+Iteration 28 Erreur =  1.5148091e-02
+---------------- Iteration 29 -----------------
+Iteration 29 Erreur =  1.8354504e-02
+---------------- Iteration 30 -----------------
+Iteration 30 Erreur =  2.1448070e-02
+---------------- Iteration 31 -----------------
+Iteration 31 Erreur =  1.5504087e-02
+---------------- Iteration 32 -----------------
+Iteration 32 Erreur =  8.4760080e-03
+---------------- Iteration 33 -----------------
+Iteration 33 Erreur =  3.4128540e-03
+---------------- Iteration 34 -----------------
+Iteration 34 Erreur =  7.0358326e-04
+ ---------------le point de contact 4-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  9.3823371e+04
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  5.4786891e+04
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  1.3199553e+02
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  1.3107926e+01
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  2.1638600e+00
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  6.3066206e-01
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  2.0628112e-01
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  6.8140231e-02
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  2.2524763e-02
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  7.4462521e-03
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  2.4615926e-03
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  8.1375660e-04
+ ---------------le point de contact 5-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  9.2456613e+04
+---------------- Iteration 2 -----------------
+Iteration 2 Erreur =  5.1021790e+04
+---------------- Iteration 3 -----------------
+Iteration 3 Erreur =  1.9388733e+04
+---------------- Iteration 4 -----------------
+Iteration 4 Erreur =  1.0499792e+04
+---------------- Iteration 5 -----------------
+Iteration 5 Erreur =  5.3837451e+03
+---------------- Iteration 6 -----------------
+Iteration 6 Erreur =  2.7810368e+03
+---------------- Iteration 7 -----------------
+Iteration 7 Erreur =  1.4351055e+03
+---------------- Iteration 8 -----------------
+Iteration 8 Erreur =  7.4066589e+02
+---------------- Iteration 9 -----------------
+Iteration 9 Erreur =  3.8225431e+02
+---------------- Iteration 10 -----------------
+Iteration 10 Erreur =  1.9728025e+02
+---------------- Iteration 11 -----------------
+Iteration 11 Erreur =  1.0181568e+02
+---------------- Iteration 12 -----------------
+Iteration 12 Erreur =  5.2546735e+01
+---------------- Iteration 13 -----------------
+Iteration 13 Erreur =  2.7119196e+01
+---------------- Iteration 14 -----------------
+Iteration 14 Erreur =  1.3996127e+01
+---------------- Iteration 15 -----------------
+Iteration 15 Erreur =  7.2233549e+00
+---------------- Iteration 16 -----------------
+Iteration 16 Erreur =  3.7279495e+00
+---------------- Iteration 17 -----------------
+Iteration 17 Erreur =  1.9239824e+00
+---------------- Iteration 18 -----------------
+Iteration 18 Erreur =  9.9296095e-01
+---------------- Iteration 19 -----------------
+Iteration 19 Erreur =  5.1246386e-01
+---------------- Iteration 20 -----------------
+Iteration 20 Erreur =  2.6448090e-01
+---------------- Iteration 21 -----------------
+Iteration 21 Erreur =  1.3649772e-01
+---------------- Iteration 22 -----------------
+Iteration 22 Erreur =  7.0446020e-02
+---------------- Iteration 23 -----------------
+Iteration 23 Erreur =  3.6356958e-02
+---------------- Iteration 24 -----------------
+Iteration 24 Erreur =  1.8763705e-02
+---------------- Iteration 25 -----------------
+Iteration 25 Erreur =  9.6838862e-03
+---------------- Iteration 26 -----------------
+Iteration 26 Erreur =  4.9978216e-03
+---------------- Iteration 27 -----------------
+Iteration 27 Erreur =  2.5793592e-03
+---------------- Iteration 28 -----------------
+Iteration 28 Erreur =  1.3311987e-03
+---------------- Iteration 29 -----------------
+Iteration 29 Erreur =  6.8702727e-04
+ ---------------le point de contact 0-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 1-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 0-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 1-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le point de contact 2-----------------
+---------------- Iteration 1 -----------------
+Iteration 1 Erreur =  0.0000000e+00
+ ---------------le

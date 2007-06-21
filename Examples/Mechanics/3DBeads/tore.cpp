@@ -17,12 +17,12 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  *
  * Torus 3D frictionl contact problem in presence of a rigid foundations
- * 30/01/2007- Authors: houari khenous & Roger Pissard
+ * 21/06/2007- Authors: houari khenous
 
 */
 // =============================== Torus simulation ===============================
 //
-// Keywords: LagrangianLinearTIDS, LagrangianLinear relation, Moreau TimeStepping, LCP.
+// Keywords: LagrangianLinearTIDS relation, Moreau TimeStepping, NLGS, NLGSNEWTON.
 //
 // ======================================================================================================
 
@@ -54,6 +54,7 @@ int main(int argc, char* argv[])
     double h = 0.005;                 // time step
 
     string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
+    //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
 
     double e = 0.8;                  // nslaw
     double mu = 10.;
@@ -95,9 +96,11 @@ int main(int argc, char* argv[])
     SimpleVector* q0 = new SimpleVector(FEM);
     SimpleVector* v0 = new SimpleVector(FEM);
 
+    double gap = 1.;
+
     // Memory allocation for q0[i] and v0[i]
-    //  for (i=0;i<FEM;i++)
-    //       (*q0)(i) = (*Position)(i,1);
+    for (i = 0; i < FEM; i++)
+      (*q0)(i) = (*Position)(i, 0) + gap;
 
     // set values
 
@@ -119,12 +122,12 @@ int main(int argc, char* argv[])
 
     //cp = [0 1 2 6 7 8 12 13 14 18 19 20 24 25 26 30 31 32 54 55 56 57 58 59 66 67 68 72 73 74 75 76 77 78 79 80 81 82 83 87 88 89 99 100 101 105 106 107 198 199 200 201 202 203 204 205 206 213 214 215 288 289 290 291 292 293 294 295 296 303 304 305]
 
-    SiconosMatrix *H1 = new SimpleMatrix(FEM, cp);
-    SimpleVector *b1 = new SimpleVector(FEM);
+    SiconosMatrix *H = new SimpleMatrix(cp, FEM);
+    SimpleVector *b = new SimpleVector(cp);
 
 
     std::vector<int> v;
-    v.resize(24);
+    v.resize(cp / 3);
 
     v[0] = 0;
     v[1] = 6;
@@ -150,23 +153,24 @@ int main(int argc, char* argv[])
     v[21] = 291;
     v[22] = 294;
     v[23] = 303;
-    cout << "=== je vais biennnnnnnnnnnnnnnnnnnn === " << endl;
+
+
     j = 0;
     for (size_t m = 0, size = v.size(); m < size; ++m)
     {
-      (*H1)(m + 2, j) = 1.;
-      (*H1)(m, 2 * j) = 1.;
-      (*H1)(m + 1, 2 * j + 1) = 1.;
-      (*b1)(j) = 1.0;//(*Position)(m+2,1);
+      (*H)(3 * j + 2, v[m] + 2) = 1.;
+      (*H)(3 * j, v[m]) = 1.;
+      (*H)(3 * j + 1, v[m] + 1) = 1.;
+      (*b)(3 * j + 2) = (*Position)(v[m] + 2, 0) + gap;
       ++j;
     }
 
-    NonSmoothLaw* nslaw1 = new NewtonImpactFrictionNSL(e, e, mu, 3);
-    Relation* relation1 = new LagrangianLinearR(*H1, *b1);
-    Interaction * inter1 = new Interaction("bead1", allDS, 0, 3, nslaw1, relation1);
+    NonSmoothLaw* nslaw = new NewtonImpactFrictionNSL(e, e, mu, 3);
+    Relation* relation = new LagrangianLinearR(*H, *b);
+    Interaction * inter = new Interaction("bead1", allDS, 0, cp, nslaw, relation);
 
 
-    allInteractions.insert(inter1);
+    allInteractions.insert(inter);
 
     // --------------------------------
     // --- NonSmoothDynamicalSystem ---
@@ -252,6 +256,27 @@ int main(int argc, char* argv[])
 
     delete OSI;
     delete osnspb;
+
+    // --- Free memory ---
+    delete osnspb;
+    delete GLOB_T;
+    delete GLOB_SIM;
+    delete OSI;
+    delete GLOB_tabLDS;
+    delete TORE;
+    delete nsds;
+    delete inter;
+    delete relation;
+    delete nslaw;
+    delete H;
+    delete Position;
+    delete b;
+    delete q0;
+    delete v0;
+    delete K;
+    delete M;
+    delete C;
+
 
   }
   catch (SiconosException e)
