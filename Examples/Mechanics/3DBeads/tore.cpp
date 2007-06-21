@@ -100,14 +100,23 @@ int main(int argc, char* argv[])
     double gap = 1.;
 
     // Memory allocation for q0[i] and v0[i]
-    for (i = 1; i < FEM; i++)
+    // Memory allocation for q0[i] and v0[i]
+    // add the gap with ground
+
+    for (i = 0; i < FEM / 3; i++)
     {
-      if (i % 3 == 0)
-      {
-        (*q0)(i - 1) = (*Position)(i - 1, 0) + gap;
-      }
+      (*q0)(3 * i) = (*Position)(3 * i, 0);
+      (*q0)(3 * i + 1) = (*Position)(3 * i + 1, 0);
+      (*q0)(3 * i + 2) = (*Position)(3 * i + 2, 0) + gap;
     }
 
+    for (i = 0; i < FEM; i++)
+    {
+      cout << "=== q0 === " << endl;
+      cout << "q0(" << i << ") = " << (*q0)(i) << endl;
+      cout << "=== position === " << endl;
+      cout << "position(" << i << ") = " << (*Position)(i, 0) << endl;
+    }
     GLOB_tabLDS = new LagrangianLinearTIDS(0, *q0, *v0, *M, *K, *C);
 
 

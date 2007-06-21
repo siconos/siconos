@@ -106,13 +106,15 @@ void DrawFEM(LagrangianLinearTIDS *lds, float radius)
     MS->V3[2] = lds->getQ()(3 * i + 2);
 
     my_vector.push_back(MS);
+    cout << MS->V3[0] << endl;
+    cout << MS->V3[1] << endl;
+    cout << MS->V3[2] << endl;
   }
 
   vector<my_struct *>::iterator my_it;
   //deque<my_struct *>::iterator my_it;
 
   my_it = my_vector.begin();
-  int i = 0;
 
   while (my_it != my_vector.end())
   {
@@ -136,7 +138,7 @@ void SimuLoop(int pause)
     GLOB_COMPUTE = false;
 
   // Ball Radius
-  radius = 0.1;
+  radius = 0.3;
 
   DrawFEM(GLOB_tabLDS, radius);
 }
@@ -252,9 +254,14 @@ void initSiconos()
     double gap = 1.;
 
     // Memory allocation for q0[i] and v0[i]
-    for (i = 0; i < FEM / 3; i++)
-      (*q0)(3 * i + 2) = (*Position)(3 * i + 2, 0) + gap;
+    // add the gap with ground
 
+    for (i = 0; i < FEM / 3; i++)
+    {
+      (*q0)(3 * i) = (*Position)(3 * i, 0);
+      (*q0)(3 * i + 1) = (*Position)(3 * i + 1, 0);
+      (*q0)(3 * i + 2) = (*Position)(3 * i + 2, 0) + gap;
+    }
     GLOB_tabLDS = new LagrangianLinearTIDS(0, *q0, *v0, *M, *K, *C);
 
     allDS.insert(GLOB_tabLDS);
