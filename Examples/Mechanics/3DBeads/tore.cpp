@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
 
     //    unsigned int DSNUMBER = 1;       // the number of dynamical systems
 
-    unsigned int FEM = 48;
+    unsigned int FEM = 324;
 
     // unsigned int nDof = 3;            // degrees of freedom for beads
 
@@ -96,8 +96,8 @@ int main(int argc, char* argv[])
     SimpleVector* v0 = new SimpleVector(FEM);
 
     // Memory allocation for q0[i] and v0[i]
-    for (i = 0; i < FEM; i++)
-      (*q0)(i) = 1.;
+    //  for (i=0;i<FEM;i++)
+    //       (*q0)(i) = (*Position)(i,1);
 
     // set values
 
@@ -115,47 +115,52 @@ int main(int argc, char* argv[])
     // --- Interactions---
     // -------------------
     InteractionsSet allInteractions;
+    int cp = 72;
 
-    cp = []
+    //cp = [0 1 2 6 7 8 12 13 14 18 19 20 24 25 26 30 31 32 54 55 56 57 58 59 66 67 68 72 73 74 75 76 77 78 79 80 81 82 83 87 88 89 99 100 101 105 106 107 198 199 200 201 202 203 204 205 206 213 214 215 288 289 290 291 292 293 294 295 296 303 304 305]
 
-         SiconosMatrix * H1 = new SimpleMatrix(cp, FEM);
-    for (i = 0; i < FEM; i++)
+    SiconosMatrix *H1 = new SimpleMatrix(FEM, cp);
+    SimpleVector *b1 = new SimpleVector(FEM);
+
+
+    std::vector<int> v;
+    v.resize(24);
+
+    v[0] = 0;
+    v[1] = 6;
+    v[2] = 12;
+    v[3] = 18;
+    v[4] = 24;
+    v[5] = 30;
+    v[6] = 54;
+    v[7] = 57;
+    v[8] = 66;
+    v[9] = 72;
+    v[10] = 75;
+    v[11] = 78;
+    v[12] = 81;
+    v[13] = 87;
+    v[14] = 99;
+    v[15] = 105;
+    v[16] = 198;
+    v[17] = 201;
+    v[18] = 204;
+    v[19] = 213;
+    v[20] = 288;
+    v[21] = 291;
+    v[22] = 294;
+    v[23] = 303;
+    cout << "=== je vais biennnnnnnnnnnnnnnnnnnn === " << endl;
+    j = 0;
+    for (size_t m = 0, size = v.size(); m < size; ++m)
     {
-      (*H1)(i, 0) = 1.;
-      (*H1)(i, 1) = 1.;
-      (*H1)(i, 2) = 1.;
+      (*H1)(m + 2, j) = 1.;
+      (*H1)(m, 2 * j) = 1.;
+      (*H1)(m + 1, 2 * j + 1) = 1.;
+      (*b1)(j) = 1.0;//(*Position)(m+2,1);
+      ++j;
     }
 
-    SimpleVector *b1 = new SimpleVector(10);
-    j = 0.;
-    for (dal::bv_visitor i(cn); !i.finished(); ++i)
-      if (i % 3 == 0)
-      {
-        (*H1)(j, i + 2) = 1.;
-        (*H1)(2 * j, i) = 1.;
-        (*H1)(2 * j + 1, i + 1) = 1.;
-        ++j;
-        (*b1)(j) = (*Position)(i, j);
-      }
-
-
-    //  vector<SimpleVector *> Pos;
-    //     Pos.resize(FEM,NULL);
-
-    //     for (i=0;i<FEM;i++){
-    //       Pos[i] = new SimpleVector(3);
-    //       for (j=0;j<3;j++)
-    //  (*(Pos[i]))(j) = ;
-    //}
-
-
-
-    for (i = 0; i < FEM; i++)
-    {
-      (*b1)(i) = 0.;
-      (*b1)(i + 1) = 0.;
-      (*b1)(i + 2) = -10.;
-    }
     NonSmoothLaw* nslaw1 = new NewtonImpactFrictionNSL(e, e, mu, 3);
     Relation* relation1 = new LagrangianLinearR(*H1, *b1);
     Interaction * inter1 = new Interaction("bead1", allDS, 0, 3, nslaw1, relation1);

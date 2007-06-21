@@ -36,7 +36,8 @@ using namespace std;
 
 #include <drawstuff/drawstuff.h>
 
-#define COUPLE   2      // the number of dynamical systems
+
+#define COUPLE   1      // the number of dynamical systems
 
 Simulation* GLOB_SIM;
 TimeDiscretisation * GLOB_T;
@@ -110,7 +111,7 @@ void DrawCouple(LagrangianDS *lds, float radius)
   pos11[1] = pos[1] +  radius * sin(theta) * cos(phi);
   pos11[2] = pos[2] - radius * cos(theta);
 
-  pos22[0] = pos[0] - radius * sin(theta) * sin(phi);
+  pos22[0] = pos[0] + radius * sin(theta) * sin(phi);
   pos22[1] = pos[1] - radius * sin(theta) * cos(phi);
   pos22[2] = pos[2] + radius * cos(theta);
 
@@ -257,9 +258,10 @@ void initSiconos()
     for (i = 0; i < COUPLE; i++)
     {
       (*(q0[i]))(0) = 0.;
-      (*(q0[i]))(2) =  0.3;
-      (*(q0[i]))(3) =  PI / 3;
-      (*(q0[i]))(1) = 0.5 * i;
+      (*(q0[i]))(1) = 0.;
+      (*(q0[i]))(2) =  0.3 * (i + 1.);
+      (*(q0[i]))(3) =  PI / 2;
+      //  (*(q0[i]))(1) = 0.5*i;
     }
 
     for (i = 0; i < COUPLE; i++)
@@ -293,160 +295,126 @@ void initSiconos()
 
     vector<Relation*> LLR(Fact);
     vector<Relation*> LLR1(COUPLE);
-    vector<Relation*> LLR1_(COUPLE);
     vector<Relation*> LLR2(COUPLE);
-    vector<Relation*> LLR2_(COUPLE);
 
 
 
     // With friction
 
-    if (mu > 0.)
+
+    NonSmoothLaw * nslaw1 = new NewtonImpactFrictionNSL(e, e, mu, 3);
+
+    for (i = 0; (int)i < COUPLE; i++)
     {
+      dsConcernedi.insert(GLOB_tabLDS[i]);
+      ostringstream ostr;
+      ostr << i;
+      id2[i] = ostr.str();
+      LLR1[i] = new LagrangianScleronomousR("NLMPlugin:h1", "NLMPlugin:G1");
+      checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 3, nslaw1, LLR1[i]));
+      dsConcernedi.clear();
+    }
 
-      NonSmoothLaw * nslaw1 = new NewtonImpactFrictionNSL(e, e, mu, 3);
-
-      for (i = 0; (int)i < COUPLE; i++)
-      {
-        dsConcernedi.insert(GLOB_tabLDS[i]);
-        ostringstream ostr;
-        ostr << i;
-        id2[i] = ostr.str();
-        LLR1[i] = new LagrangianScleronomousR("NLMPlugin:h1", "NLMPlugin:G1");
-        checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 3, nslaw1, LLR1[i]));
-        dsConcernedi.clear();
-      }
-
-      for (i = 0; (int)i < COUPLE; i++)
-      {
-        dsConcernedi.insert(GLOB_tabLDS[i]);
-        ostringstream ostr;
-        ostr << i;
-        id2[i] = ostr.str();
-        LLR2[i] = new LagrangianScleronomousR("NLMPlugin:h2", "NLMPlugin:G2");
-        checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 3, nslaw1, LLR2[i]));
-        dsConcernedi.clear();
-      }
+    for (i = 0; (int)i < COUPLE; i++)
+    {
+      dsConcernedi.insert(GLOB_tabLDS[i]);
+      ostringstream ostr;
+      ostr << i;
+      id2[i] = ostr.str();
+      LLR2[i] = new LagrangianScleronomousR("NLMPlugin:h2", "NLMPlugin:G2");
+      checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 3, nslaw1, LLR2[i]));
+      dsConcernedi.clear();
     }
 
 
-    // Without friction
+    // Interaction between beads
 
-    if (!mu)
+    NonSmoothLaw * nslaw12 = new NewtonImpactFrictionNSL(e2, e2, mu, 3);
+
+    l = 0;
+    for (i = 0; (int)i < COUPLE; i++)
     {
-
-      NonSmoothLaw * nslaw2 = new NewtonImpactNSL(e);
-
-      for (i = 0; (int)i < COUPLE; i++)
+      dsConcerned2.insert(GLOB_tabLDS[i]);
+      for (j = 0; (int)j < COUPLE; j++)
       {
-        dsConcernedi.insert(GLOB_tabLDS[i]);
-        ostringstream ostr;
-        ostr << i;
-        id2[i] = ostr.str();
-        LLR1_[i] = new LagrangianScleronomousR("NLMPlugin:h1", "NLMPlugin:G1_");
-        checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 1, nslaw2, LLR1_[i]));
-        dsConcernedi.clear();
-      }
-
-      for (i = 0; (int)i < COUPLE; i++)
-      {
-        dsConcernedi.insert(GLOB_tabLDS[i]);
-        ostringstream ostr;
-        ostr << i;
-        id2[i] = ostr.str();
-        LLR2_[i] = new LagrangianScleronomousR("NLMPlugin:h2", "NLMPlugin:G2_");
-        checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 1, nslaw2, LLR2_[i]));
-        dsConcernedi.clear();
-      }
-
-      // Interaction between beads
-
-      NonSmoothLaw * nslaw12 = new NewtonImpactNSL(e2);
-
-      l = 0;
-      for (i = 0; (int)i < COUPLE; i++)
-      {
-        dsConcerned2.insert(GLOB_tabLDS[i]);
-        for (j = 0; (int)j < COUPLE; j++)
+        if (j > i)
         {
-          if (j > i)
-          {
-            dsConcerned2.insert(GLOB_tabLDS[j]);
-            ostringstream ostr;
-            ostr << l;
-            id[l] = ostr.str();
-            LLR[l] = new LagrangianScleronomousR("NLMPlugin:h22", "NLMPlugin:Gcontact22");
-            checkInter = allInteractions.insert(new Interaction(id[l], dsConcerned2, l, 1, nslaw12, LLR[l]));
-            dsConcerned2.erase(GLOB_tabLDS[j]);
-            l = l + 1;
-          }
+          dsConcerned2.insert(GLOB_tabLDS[j]);
+          ostringstream ostr;
+          ostr << l;
+          id[l] = ostr.str();
+          LLR[l] = new LagrangianScleronomousR("NLMPlugin:h22", "NLMPlugin:G22");
+          checkInter = allInteractions.insert(new Interaction(id[l], dsConcerned2, l, 3, nslaw12, LLR[l]));
+          dsConcerned2.erase(GLOB_tabLDS[j]);
+          l = l + 1;
         }
-        dsConcerned2.clear();
       }
-
-      l = 0;
-      for (i = 0; (int)i < COUPLE; i++)
-      {
-        dsConcerned2.insert(GLOB_tabLDS[i]);
-        for (j = 0; (int)j < COUPLE; j++)
-        {
-          if (j > i)
-          {
-            dsConcerned2.insert(GLOB_tabLDS[j]);
-            ostringstream ostr;
-            ostr << l;
-            id[l] = ostr.str();
-            LLR[l] = new LagrangianScleronomousR("NLMPlugin:h21", "NLMPlugin:Gcontact21");
-            checkInter = allInteractions.insert(new Interaction(id[l], dsConcerned2, l, 1, nslaw12, LLR[l]));
-            dsConcerned2.erase(GLOB_tabLDS[j]);
-            l = l + 1;
-          }
-        }
-        dsConcerned2.clear();
-      }
-
-      l = 0;
-      for (i = 0; (int)i < COUPLE; i++)
-      {
-        dsConcerned2.insert(GLOB_tabLDS[i]);
-        for (j = 0; (int)j < COUPLE; j++)
-        {
-          if (j > i)
-          {
-            dsConcerned2.insert(GLOB_tabLDS[j]);
-            ostringstream ostr;
-            ostr << l;
-            id[l] = ostr.str();
-            LLR[l] = new LagrangianScleronomousR("NLMPlugin:h12", "NLMPlugin:Gcontact12");
-            checkInter = allInteractions.insert(new Interaction(id[l], dsConcerned2, l, 1, nslaw12, LLR[l]));
-            dsConcerned2.erase(GLOB_tabLDS[j]);
-            l = l + 1;
-          }
-        }
-        dsConcerned2.clear();
-      }
-
-      l = 0;
-      for (i = 0; (int)i < COUPLE; i++)
-      {
-        dsConcerned2.insert(GLOB_tabLDS[i]);
-        for (j = 0; (int)j < COUPLE; j++)
-        {
-          if (j > i)
-          {
-            dsConcerned2.insert(GLOB_tabLDS[j]);
-            ostringstream ostr;
-            ostr << l;
-            id[l] = ostr.str();
-            LLR[l] = new LagrangianScleronomousR("NLMPlugin:h11", "NLMPlugin:Gcontact11");
-            checkInter = allInteractions.insert(new Interaction(id[l], dsConcerned2, l, 1, nslaw12, LLR[l]));
-            dsConcerned2.erase(GLOB_tabLDS[j]);
-            l = l + 1;
-          }
-        }
-        dsConcerned2.clear();
-      }
+      dsConcerned2.clear();
     }
+
+    l = 0;
+    for (i = 0; (int)i < COUPLE; i++)
+    {
+      dsConcerned2.insert(GLOB_tabLDS[i]);
+      for (j = 0; (int)j < COUPLE; j++)
+      {
+        if (j > i)
+        {
+          dsConcerned2.insert(GLOB_tabLDS[j]);
+          ostringstream ostr;
+          ostr << l;
+          id[l] = ostr.str();
+          LLR[l] = new LagrangianScleronomousR("NLMPlugin:h21", "NLMPlugin:G21");
+          checkInter = allInteractions.insert(new Interaction(id[l], dsConcerned2, l, 3, nslaw12, LLR[l]));
+          dsConcerned2.erase(GLOB_tabLDS[j]);
+          l = l + 1;
+        }
+      }
+      dsConcerned2.clear();
+    }
+
+    l = 0;
+    for (i = 0; (int)i < COUPLE; i++)
+    {
+      dsConcerned2.insert(GLOB_tabLDS[i]);
+      for (j = 0; (int)j < COUPLE; j++)
+      {
+        if (j > i)
+        {
+          dsConcerned2.insert(GLOB_tabLDS[j]);
+          ostringstream ostr;
+          ostr << l;
+          id[l] = ostr.str();
+          LLR[l] = new LagrangianScleronomousR("NLMPlugin:h12", "NLMPlugin:G12");
+          checkInter = allInteractions.insert(new Interaction(id[l], dsConcerned2, l, 3, nslaw12, LLR[l]));
+          dsConcerned2.erase(GLOB_tabLDS[j]);
+          l = l + 1;
+        }
+      }
+      dsConcerned2.clear();
+    }
+
+    l = 0;
+    for (i = 0; (int)i < COUPLE; i++)
+    {
+      dsConcerned2.insert(GLOB_tabLDS[i]);
+      for (j = 0; (int)j < COUPLE; j++)
+      {
+        if (j > i)
+        {
+          dsConcerned2.insert(GLOB_tabLDS[j]);
+          ostringstream ostr;
+          ostr << l;
+          id[l] = ostr.str();
+          LLR[l] = new LagrangianScleronomousR("NLMPlugin:h11", "NLMPlugin:G11");
+          checkInter = allInteractions.insert(new Interaction(id[l], dsConcerned2, l, 3, nslaw12, LLR[l]));
+          dsConcerned2.erase(GLOB_tabLDS[j]);
+          l = l + 1;
+        }
+      }
+      dsConcerned2.clear();
+    }
+
 
 
     // --------------------------------
@@ -473,7 +441,7 @@ void initSiconos()
     OneStepIntegrator * OSI = new Moreau(allDS , 0.5000001 , GLOB_SIM);
 
     // -- OneStepNsProblem --
-    OneStepNSProblem * osnspb = new FrictionContact3D(GLOB_SIM , "FrictionContact3D", solverName, 10000, 0.001);
+    OneStepNSProblem * osnspb = new FrictionContact3D(GLOB_SIM , "FrictionContact3D", solverName, 10000000, 0.001);
     //OneStepNSProblem * osnspb = new LCP(GLOB_SIM,"name",solverName,100, 0.001,1);
 
     cout << "=== End of model loading === " << endl;
