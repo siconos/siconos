@@ -70,21 +70,133 @@
 #include <math.h>
 #include "blaslapack.h"
 
+
+
+
 void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w , int *info,
                        int *iparamLCP , double *dparamLCP)
 {
+
+
+  void Calcul_G(int m , double * Z , double * x , double * y , double rn, double rt, double coef)
+  {
+
+    /*                               [Da,a   Da,a+1   Da,a+2   ]  */
+    /* at each contact point a, Da = [Da+1,a Da+1,a+1 Da+1,a+2 ] is the delassus operator */
+    /*                               [Da+2,a Da+2,a+1 Da+2,a+1 ]  */
+
+    /* G = wa - Daa*za - q - \sum_{b<a} Dab zb^{k+1} - \sum_{b>a} Dab zb^k   */
+
+
+    int n, in, it, is, mm;
+    double zn , zt, zs, mrn, mrn3, coef2, num, a2, b2, ab;
+    integer Gsize;
+    double  *G, *JacG;
+
+    Gsize  = 6;
+    mm = Gsize * Gsize;
+    coef2 = coef * coef;
+
+    /* Allocation */
+
+    x  = (double*)malloc(Gsize * sizeof(double));
+    y  = (double*)malloc(3 * sizeof(double));
+    G    = (double*)malloc(Gsize * sizeof(double));
+    JacG = (double*)malloc(Gsize * Gsize * sizeof(double));
+
+
+
+    JacG[0 * Gsize + 0] = JacG[1 * Gsize + 1] = JacG[2 * Gsize + 2] = 1.;
+
+    JacG[3 * Gsize + 0] = -Z[(in) * n + in];
+    JacG[3 * Gsize + 1] = -Z[(in) * n + it];
+    JacG[3 * Gsize + 2] = -Z[(in) * n + is];
+    JacG[4 * Gsize + 0] = -Z[(it) * n + in];
+    JacG[4 * Gsize + 1] = -Z[(it) * n + it];
+    JacG[4 * Gsize + 2] = -Z[(it) * n + is];
+    JacG[5 * Gsize + 0] = -Z[(is) * n + in];
+    JacG[5 * Gsize + 1] = -Z[(is) * n + it];
+    JacG[5 * Gsize + 2] = -Z[(is) * n + is];
+
+    G[0] = x[0] - Z[(in) * n + in] * x[3] - Z[(it) * n + in] * x[4] - Z[(is) * n + in] * x[5] - y[0];
+    G[1] = x[1] - Z[(in) * n + it] * x[3] - Z[(it) * n + it] * x[4] - Z[(is) * n + it] * x[5] - y[1];
+    G[2] = x[2] - Z[(in) * n + is] * x[3] - Z[(it) * n + is] * x[4] - Z[(is) * n + is] * x[5] - y[2];
+
+    // Projection on [0, +infty[ and on D(0, mu*zn)
+
+    zn = x[3] - rn * x[0];
+    if (zn > 0)
+    {
+      G[3] = x[0];
+      JacG[0 * Gsize + 3] = 1.;
+    }
+    else
+    {
+      G[3] = x[3] / rn;
+      JacG[3 * Gsize + 3] = 1. / rn;
+    }
+    zt = x[4] - rt * x[1];
+    zs = x[5] - rt * x[2];
+
+    a2 = zt * zt;
+    b2 = zs * zs;
+    ab = zt * zs;
+
+    mrn = zt * zt + zs * zs;
+
+    // if the radius is negative or the vector is null projection on the disk = 0
+
+    if (x[3] < 0. || mrn < 1e-16)
+    {
+      G[4] = x[4] / rt;
+      G[5] = x[5] / rt;
+      JacG[4 * Gsize + 4] = JacG[5 * Gsize + 5] = 1. / rt;
+    }
+
+    // if the radius is positive and the vector is non null, we compute projection on the disk
+
+    else
+    {
+
+      if (mrn < coef2 * x[3]*x[3])
+      {
+        G[4] = x[1];
+        G[5] = x[2];
+        JacG[1 * Gsize + 4] = JacG[2 * Gsize + 5] = 1.;
+      }
+      else
+      {
+        num  = coef / sqrt(mrn);
+        G[4] = (x[4] - zt * x[3] * num) / rt;
+        G[5] = (x[5] - zs * x[3] * num) / rt;
+        JacG[3 * Gsize + 4] = - num * zt / rt;
+        JacG[3 * Gsize + 5] = - num * zs / rt;
+        mrn3 = sqrt(mrn) * sqrt(mrn) * sqrt(mrn);
+        JacG[1 * Gsize + 4] = coef * x[3] * b2 / mrn3;
+        JacG[2 * Gsize + 4] = -coef * x[3] * ab / mrn3;
+        JacG[1 * Gsize + 5] = -coef * x[3] * ab / mrn3;
+        JacG[2 * Gsize + 5] = coef * x[3] * a2 / mrn3;
+        JacG[4 * Gsize + 4] = (1. - rt * coef * x[3] * b2 / mrn3) / rt;
+        JacG[5 * Gsize + 4] = coef * x[3] * ab / mrn3;
+        JacG[4 * Gsize + 5] = coef * x[3] * ab / mrn3;
+        JacG[5 * Gsize + 5] = (1. - rt * coef * x[3] * a2 / mrn3) / rt;
+      }
+    }
+    return G, JacG;
+  }
+
 
 
   FILE *f101;
 
   int n, in, it, is, ispeak, itermax, nc, i, j, iter, mm;
   int nrhs = 1, infoDGESV;
-  double err, zn , zt, zs, zn1, zt1, zs1, den, mrn, mrn3, num, tol, mu, mu2, rn, rt, a2, b2, ab;
-  double qs, a1, b1, alpha, beta, det;
+  double err, tol, mu, mu2, rn, rt;
+  double qs, a1, alpha, beta, det;
   integer incx, incy, Gsize;
-  double *ww, *www, *G, *G0, *JacG, *A;
+  double *ww, *www, *G, *G0, *JacG, *A, *zz;
   int *ipiv;
-  char NOTRANS = 'N';
+
 
   ispeak = 1;
   nc     = *nn;
@@ -114,7 +226,6 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
   iparamLCP[2] = 0;
   dparamLCP[2] = 0.0;
 
-
   if (ispeak == 2) f101 = fopen("pfc_3D_nlgs.log" , "w+");
 
   iter = 0;
@@ -127,34 +238,28 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
   ww   = (double*)malloc(Gsize * sizeof(double));
   www  = (double*)malloc(Gsize * sizeof(double));
   A    = (double*)malloc(Gsize * Gsize * sizeof(double));
+  zz   = (double*)malloc(3 * sizeof(double));
 
   ipiv = (int *)malloc(Gsize * sizeof(int));
-
-  /* Intialization of w*/
-
-  /* for( i = 0 ; i < n ; ++i ){ */
-  /*     w[i] = 0.; */
-  /*   } */
 
   /* Intialization of G, JacG, ww and www */
   for (i = 0 ; i < Gsize ; ++i)
   {
-    G[i] = ww[i] = www[i] = 0.;
+    G[i] = w[i] = ww[i] = www[i] = 0.;
     for (j = 0 ; j < Gsize ; ++j)
       JacG[j * Gsize + i] = 0.;
   }
-
 
   /*  printf( " Nombre de contact %i\n" , nc ); */
 
   for (i = 0 ; i < nc ; ++i)
   {
 
-    /*    printf( " ---------------le point de contact %i-----------------\n" , i );
+    printf(" ---------------le point de contact %i-----------------\n" , i);
 
-    for( j = 0 ; j < Gsize ; ++j ){
-      printf("la vitesse et la force de contact en %i est (w,z)[%i] = %8.5e\n",i,j,www[j]);
-      }*/
+    /*  for( j = 0 ; j < Gsize ; ++j ){ */
+    /*       printf("la vitesse et la force de contact en %i est (w,z)[%i] = %8.5e\n",i,j,www[j]); */
+    /*     } */
     in = 3 * i;
     it = 3 * i + 1;
     is = 3 * i + 2;
@@ -172,19 +277,6 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
 
     rt = 2 * (alpha - beta) / ((alpha + beta) * (alpha + beta));
 
-
-    JacG[0 * Gsize + 0] = JacG[1 * Gsize + 1] = JacG[2 * Gsize + 2] = 1.;
-
-    JacG[3 * Gsize + 0] = -vec[(in) * n + in];
-    JacG[3 * Gsize + 1] = -vec[(in) * n + it];
-    JacG[3 * Gsize + 2] = -vec[(in) * n + is];
-    JacG[4 * Gsize + 0] = -vec[(it) * n + in];
-    JacG[4 * Gsize + 1] = -vec[(it) * n + it];
-    JacG[4 * Gsize + 2] = -vec[(it) * n + is];
-    JacG[5 * Gsize + 0] = -vec[(is) * n + in];
-    JacG[5 * Gsize + 1] = -vec[(is) * n + it];
-    JacG[5 * Gsize + 2] = -vec[(is) * n + is];
-
     incx = n;
     incy = 1;
 
@@ -195,9 +287,9 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
 
     //   printf("la vitesse et la force de contact en %i est w[%i] = %8.5e et z[%i] = %8.5e\n",i,i,w[i],i, z[i]);
 
-    zn1 = q[in] + ddot_((integer *)&n , &vec[in] , &incx , z , &incy);
-    zt1 = q[it] + ddot_((integer *)&n , &vec[it] , &incx , z , &incy);
-    zs1 = q[is] + ddot_((integer *)&n , &vec[is] , &incx , z , &incy);
+    zz[0] = q[in] + ddot_((integer *)&n , &vec[in] , &incx , z , &incy);
+    zz[1] = q[it] + ddot_((integer *)&n , &vec[it] , &incx , z , &incy);
+    zz[2] = q[is] + ddot_((integer *)&n , &vec[is] , &incx , z , &incy);
 
     /*start Newton iterations*/
 
@@ -218,7 +310,7 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
     {
 
       ++iter;
-      /*printf("---------------- Iteration %i -----------------\n",iter); */
+      printf("---------------- Iteration %i -----------------\n", iter);
 
 
       /* the unknown is X^k = ww = (wa,za) at each node a*/
@@ -226,78 +318,10 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
       incy =  1;
       dcopy_(&Gsize , www , &incx , ww , &incy);
 
+      calcul_G(Gsize, vec, ww, zz, rn, rt, mu);
+
       /* Computation of G and its Jacobian matrix JacG */
-      /*                               [Da,a   Da,a+1   Da,a+2   ]  */
-      /* at each contact point a, Da = [Da+1,a Da+1,a+1 Da+1,a+2 ] is the delassus operator */
-      /*
-       [Da+2,a Da+2,a+1 Da+2,a+1 ]  */
 
-      /* G = wa - Daa*za - q - \sum_{b<a} Dab zb^{k+1} - \sum_{b>a} Dab zb^k   */
-
-      G[0] = ww[0] - vec[(in) * n + in] * ww[3] - vec[(it) * n + in] * ww[4] - vec[(is) * n + in] * ww[5] - zn1;
-      G[1] = ww[1] - vec[(in) * n + it] * ww[3] - vec[(it) * n + it] * ww[4] - vec[(is) * n + it] * ww[5] - zt1;
-      G[2] = ww[2] - vec[(in) * n + is] * ww[3] - vec[(it) * n + is] * ww[4] - vec[(is) * n + is] * ww[5] - zs1;
-
-      // Projection on [0, +infty[ and on D(0, mu*zn)
-
-      zn = ww[3] - rn * ww[0];
-      if (zn > 0)
-      {
-        G[3] = ww[0];
-        JacG[0 * Gsize + 3] = 1.;
-      }
-      else
-      {
-        G[3] = ww[3] / rn;
-        JacG[3 * Gsize + 3] = 1. / rn;
-      }
-      zt = ww[4] - rt * ww[1];
-      zs = ww[5] - rt * ww[2];
-
-      a2 = zt * zt;
-      b2 = zs * zs;
-      ab = zt * zs;
-
-      mrn = zt * zt + zs * zs;
-
-      // if the radius is negative or the vector is null projection on the disk = 0
-
-      if (ww[3] < 0. || mrn < 1e-16)
-      {
-        G[4] = ww[4] / rt;
-        G[5] = ww[5] / rt;
-        JacG[4 * Gsize + 4] = JacG[5 * Gsize + 5] = 1. / rt;
-      }
-
-      // if the radius is positive and the vector is non null, we compute projection on the disk
-
-      else
-      {
-
-        if (mrn < mu2 * ww[3]*ww[3])
-        {
-          G[4] = ww[1];
-          G[5] = ww[2];
-          JacG[1 * Gsize + 4] = JacG[2 * Gsize + 5] = 1.;
-        }
-        else
-        {
-          num  = mu / sqrt(mrn);
-          G[4] = (ww[4] - zt * ww[3] * num) / rt;
-          G[5] = (ww[5] - zs * ww[3] * num) / rt;
-          JacG[3 * Gsize + 4] = - num * zt / rt;
-          JacG[3 * Gsize + 5] = - num * zs / rt;
-          mrn3 = sqrt(mrn) * sqrt(mrn) * sqrt(mrn);
-          JacG[1 * Gsize + 4] = mu * ww[3] * b2 / mrn3;
-          JacG[2 * Gsize + 4] = -mu * ww[3] * ab / mrn3;
-          JacG[1 * Gsize + 5] = -mu * ww[3] * ab / mrn3;
-          JacG[2 * Gsize + 5] = mu * ww[3] * a2 / mrn3;
-          JacG[4 * Gsize + 4] = (1. - rt * mu * ww[3] * b2 / mrn3) / rt;
-          JacG[5 * Gsize + 4] = mu * ww[3] * ab / mrn3;
-          JacG[4 * Gsize + 5] = mu * ww[3] * ab / mrn3;
-          JacG[5 * Gsize + 5] = (1. - rt * mu * ww[3] * a2 / mrn3) / rt;
-        }
-      }
 
 
       /*
@@ -368,60 +392,13 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
 
       /* compute the new G with X^{k+1} = www  */
 
-      G[0] = www[0] - vec[(in) * n + in] * www[3] - vec[(it) * n + in] * www[4] - vec[(is) * n + in] * www[5] - zn1;
-      G[1] = www[1] - vec[(in) * n + it] * www[3] - vec[(it) * n + it] * www[4] - vec[(is) * n + it] * www[5] - zt1;
-      G[2] = www[2] - vec[(in) * n + is] * www[3] - vec[(it) * n + is] * www[4] - vec[(is) * n + is] * www[5] - zs1;
-
-      // Projection on [0, +infty[ and on D(0, mu*zn)
-
-      zn = www[3] - rn * www[0];
-      if (zn > 0)
-      {
-        G[3] = www[0];
-      }
-      else
-      {
-        G[3] = www[3] / rn;
-      }
-      zt = www[4] - rt * www[1];
-      zs = www[5] - rt * www[2];
-
-      a2 = zt * zt;
-      b2 = zs * zs;
-      ab = zt * zs;
-
-      mrn = zt * zt + zs * zs;
-
-      // if the radius is negative or the vector is null projection on the disk = 0
-
-      if (www[3] < 0. || mrn < 1e-16)
-      {
-        G[4] = www[4] / rt;
-        G[5] = www[5] / rt;
-      }
-
-      // if the radius is positive and the vector is non null, we compute projection on the disk
-
-      else
-      {
-
-        if (mrn < mu2 * www[3]*www[3])
-        {
-          G[4] = www[1];
-          G[5] = www[2];
-        }
-        else
-        {
-          num  = mu / sqrt(mrn);
-          G[4] = (www[4] - zt * www[3] * num) / rt;
-          G[5] = (www[5] - zs * www[3] * num) / rt;
-        }
-      }
+      calcul_G(Gsize, vec, www, zz, rn, rt, mu);
 
       /* compute the norm of G */
 
       err = dnrm2_(&Gsize, G , &incx);
 
+      /*     printf("Iteration %i Erreur = %14.7e\n",iter,err); */
       /*
       printf("Iteration %i Erreur = %14.7e\n",iter,err);
       for( j = 0 ; j < Gsize ; ++j ){
@@ -438,9 +415,10 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
     z[is] = www[5] ;
   }
 
-  /*for( i = 0 ; i < nc ; ++i ){
-    printf("---------------------la vitesse et la force de contact en %i est w[%i] = %8.5e et z[%i] = %8.5e\n",i,i,w[i],i, z[i]);
-    }*/
+
+  /*  for( i = 0 ; i < nc ; ++i ){ */
+  /*     printf("---------------------la vitesse et la force de contact en %i est w[%i] = %8.5e et z[%i] = %8.5e\n",i,i,w[i],i, z[i]);    */
+  /*     } */
 
   iparamLCP[2] = iter;
   dparamLCP[2] = err;
