@@ -7,6 +7,11 @@ workdir=${workdir:-/tmp}
 mydir=`dirname \`readlink -f $0\``
 ndir=`mktemp -d ${workdir}/siconos-dist.XXXXX`
 
+get_rev () {
+    svn status -N -u $1 | sed 's/Status against revision:.*\([0-9]+\)/\1/p;d'
+}
+
+
 remove_tmp_dir () {
     case $1 in
 	*siconos-dist.?????) rm -rf $1;;
@@ -14,12 +19,15 @@ remove_tmp_dir () {
     esac
 }
 
+
 get_src () {
-    pushd $ndir
     revarg=
-    [ x$2 = x ] || revarg="-r$2"
+    if [ x$2 = x ]; then 
+	revarg="-r COMMITTED"
+    else 
+	revarg="-r$2"
+    fi
     svn export $revarg $mydir/../../$1 $ndir/$1
-    popd
 }
 
 make_dist () { 
@@ -36,7 +44,7 @@ trap 'echo removing tmp dir... ; remove_tmp_dir ${ndir} ; exit 1' 2 3
 rev=
 while [ $# -gt 0 ] ; do
     case $1 in 
-	-workdir) shift; $workdir=$1; shift;;
+	-workdir) shift; workdir=$1; shift;;
 	-r) shift; rev=$1; shift;;
 	*) component=$1; shift;;
     esac
