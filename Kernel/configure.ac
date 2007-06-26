@@ -149,9 +149,20 @@ dnl #################################
 
 # required version of the libraries
 
-dnl Numerics
-AC_MSG_CHECKING([for Siconos/Numerics])
-ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES) AC_SUBST(NUMERICS_PATH)], [AC_MSG_ERROR([Cannot find  Numerics. Please install it or use the option --with-numerics.])])
+dnl dnl Check for Blas and Lapack
+ACX_LAPACK([
+   dnl action-if-found:    
+# This defines LAPACK_LIBS, BLAS_LIBS, and FLIBS
+], [
+dnl action-if-not-found: 
+   AC_MSG_ERROR([Blas/Lapack was not found. 
+ *** This means Lapack and matrix support cannot be compiled. 
+ *** This makes this library unusable. Please get blas and lapack 
+ *** installed. If you do have these installed, use the options 
+ *** --with-blas=<libname> or --with-lapack=<libname> and/or set 
+ *** the env variable LDFLAGS to include the appropriate linker 
+ *** flags.])
+])
 
 dnl Check for Atlas
 AQ_CHECK_ATLAS
@@ -197,6 +208,11 @@ AM_PATH_CPPUNIT(1.10,,AC_MSG_ERROR([Cannot find  cppunit in a good version.]))
 else
  AC_MSG_RESULT(option --enable-cppunit not selected : Warning : unable to run test suite)  
 fi
+
+dnl Numerics
+AC_MSG_CHECKING([for Siconos/Numerics])
+ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES) AC_SUBST(NUMERICS_PATH)], [AC_MSG_ERROR([Cannot find  Numerics. Please install it or use the option --with-numerics.])])
+
 
 #################################
 ## COMPILE FLAGS CXXFLAGS
@@ -274,7 +290,7 @@ SICONOS_EXT_INCLUDES="$NUMERICS_INCLUDES $ATLAS_INCLUDES $XML_CPPFLAGS $BOOST_CP
 AC_SUBST(SICONOS_EXT_INCLUDES)
 
 
-SICONOS_EXT_LIBS="$NUMERICS_LIBRARIES $ATLAS_LIBS $XML_LIBS -ldl"
+SICONOS_EXT_LIBS="$NUMERICS_LIBRARIES $FLIBS $ATLAS_LIBS $LAPACK_LIBS $XML_LIBS -ldl"
 SICONOS_EXT_LIBS="$SICONOS_EXT_LIBS $LIBS " dnl  -L/usr/lib/atlas -llapack_atlas"
 
 AC_SUBST(SICONOS_EXT_LIBS)
