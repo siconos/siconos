@@ -51,7 +51,7 @@ for d in $atlas_search_lib_dirs; do
          atlas_lib="$d/$found_file"
          ;;
        *)
-         atlas_libraries="-L$d"
+         atlas_libraries="-Wl,-R -Wl,$d -L$d"
          atlas_lib="-l`echo $found_file | sed 's/lib//;s/\.so*//;s/\.a//'`"
          ;;
        esac
