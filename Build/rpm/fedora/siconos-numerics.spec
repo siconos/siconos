@@ -7,8 +7,8 @@ Group: Development/Libraries
 URL: http://gforge.inria.fr/projects/siconos
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
-BuildPreReq: autoconf, automake, gcc, doxygen, lapack 
-Requires: lapack
+BuildPreReq: autoconf, automake, gcc, doxygen, atlas-devel 
+Requires: atlas
 
 %description 
 Siconos is a program dedicated to modeling, simulation and control of
