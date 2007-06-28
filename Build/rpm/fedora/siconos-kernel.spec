@@ -1,15 +1,15 @@
 Summary: Siconos/Kernel, is dedicated to the modeling and the simulation of NSDS
 Name: siconos-kernel
-Version: 2.0.1
-Release: 1
+Version: 2.1.0
+Release: 1.fc6
 License: GNU LGPL
 Group: Development/Libraries
 URL: http://gforge.inria.fr/projects/siconos
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
-BuildPreReq: autoconf, automake, gcc, gcc-gfortran, doxygen, atlas, atlas-devel, cppunit, cppunit-devel, siconos-numerics
-Requires: atlas, siconos-numerics
+BuildPreReq: autoconf, automake, gcc, doxygen, siconos-numerics, atlas-devel, boost-devel
+Requires: atlas, boost, siconos-numerics
 
 %description 
 The present package, Siconos/Kernel, is dedicated to the modeling and
@@ -32,7 +32,7 @@ pushd %{namev}
 %{configure} --enable-cppunit
 %{__make}
 %{__make} doc
-#%{__make} check
+%{__make} check
 
 %install
 pushd %{namev}
