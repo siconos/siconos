@@ -79,7 +79,7 @@ which means that each figure must be saved in png and eps format. The two comman
 For the figure directory, please keep the same files tree as in Samples (i.e. if your sample is in Samples/Mechanics/MySample, save your figures in Samples/figures/Mechanics/MySample).
 -# Document .cpp input file with Doxygen. At least the GNU-license header and a brief description of the sample:
 \verbatim
-/* Siconos-Samples version 2.0.1, Copyright INRIA 2005-2006.
+/* Siconos-Samples version 2.1.0, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.	
  * Siconos is a free software; you can redistribute it and/or modify

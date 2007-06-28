@@ -3,7 +3,7 @@
  <XMI.header>
   <XMI.documentation>
    <XMI.exporter>umbrello uml modeller http://uml.sf.net</XMI.exporter>
-   <XMI.exporterVersion>2.0.1</XMI.exporterVersion>
+   <XMI.exporterVersion>2.1.0</XMI.exporterVersion>
    <XMI.exporterEncoding>UnicodeUTF8</XMI.exporterEncoding>
   </XMI.documentation>
   <XMI.model xmi.name="simulationToolsClassDiagram" href="/scratch/Franck/SicoTmp/siconos/trunk/Docs/Dev/figures/simulationToolsClassDiagram.xmi" />

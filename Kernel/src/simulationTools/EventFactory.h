@@ -52,7 +52,7 @@ template<class SubType> Event* factory(double time, const std::string& type)
 /** Registry Class for Events.
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 2.0.1.
+ *  \version 2.1.0.
  *  \date (Creation) February 01, 2007
  *
  */
@@ -86,7 +86,7 @@ public :
 /** Registration Class for Events.
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 2.0.1.
+ *  \version 2.1.0.
  *  \date (Creation) February 01, 2007
  *
  * Class used for auto-registration of Event-type objects.

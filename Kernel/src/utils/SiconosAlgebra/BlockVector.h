@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.0.1, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 2.1.0, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -32,7 +32,7 @@ class SimpleVector;
 /** Object to handle block-vectors (ie list of SiconosVector*)
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 2.0.1.
+ *  \version 2.1.0.
  *
  * A block vector is a stl vector that handles pointers to SiconosVector.
  *

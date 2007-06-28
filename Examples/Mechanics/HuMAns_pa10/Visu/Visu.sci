@@ -39,7 +39,7 @@
 // Revision 1.2  2005/04/07 15:37:29  wieber
 // Drawing contact forces on different solids through the use of the variable ContactSolids.
 //
-// Revision 2.0.1.1  2005/02/08 13:08:22  rpissard
+// Revision 2.1.0.1  2005/02/08 13:08:22  rpissard
 // version start HuMAnS
 //
 // 

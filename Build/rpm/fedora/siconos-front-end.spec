@@ -1,6 +1,6 @@
 Summary: Siconos/Front-End provides python and scilab interfaces for Siconos/Kernel
 Name: siconos-front-end
-Version: 2.0.1
+Version: 2.1.0
 Release: 1
 License: GNU LGPL
 Group: Application/Math

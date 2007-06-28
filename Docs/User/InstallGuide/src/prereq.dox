@@ -88,7 +88,7 @@ See http://www.stack.nl/~dimitri/doxygen/install.html for details.
 
 \section sicInstPlatforms Platforms
 
-Siconos v2.0.1 has been successfully compiled on Linux Fedora Core 6 (gcc4.x).
+Siconos v2.1.0 has been successfully compiled on Linux Fedora Core 6 (gcc4.x).
 
 For: 
 

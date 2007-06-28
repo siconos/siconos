@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.0.1, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 2.1.0, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -51,7 +51,7 @@ typedef std::pair<URSet::iterator, bool> CheckInsertUnitaryRelation;
 /** Set (STL) of pointers to Unitary Relation - Used in Index sets in Topology.
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 2.0.1.
+ *  \version 2.1.0.
  *  \date (Creation) June 8, 2006
  *
  * Unitary Relations pointers are sorted in according to their address

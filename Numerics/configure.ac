@@ -1,4 +1,4 @@
-# Siconos-Numerics version 2.0.1, Copyright INRIA 2005-2006.
+# Siconos-Numerics version 2.1.0, Copyright INRIA 2005-2006.
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@ dnl configure script for SICONOS
 dnl V. ACARY, 2005
 
 AC_PREREQ(2.59)
-AC_INIT([Siconos-Numerics],[2.0.1],[siconos.gforge.inria.fr])
+AC_INIT([Siconos-Numerics],[2.1.0],[siconos.gforge.inria.fr])
 
 dnl Checking host/target/build systems, for make, install etc.
 AC_CANONICAL_TARGET([])

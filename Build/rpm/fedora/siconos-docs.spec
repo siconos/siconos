@@ -1,5 +1,5 @@
 Summary: Documentation for Siconos software
-Version: 2.0.1
+Version: 2.1.0
 Name: siconos-docs
 Release: 1
 License: GNU LGPL
@@ -64,7 +64,7 @@ rm -rf %{buildroot}
 %doc %{docs}
 
 %changelog
-* Thu May 31 2007 Maurice Bremond <Maurice.Bremond@inria.fr> - 2.0.1-1
+* Thu May 31 2007 Maurice Bremond <Maurice.Bremond@inria.fr> - 2.1.0-1
 - Initial rpm
 
 

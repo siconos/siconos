@@ -1,4 +1,4 @@
-/* Siconos-Numerics version 2.0.1, Copyright INRIA 2005-2006.
+/* Siconos-Numerics version 2.1.0, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -318,7 +318,7 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
       incy =  1;
       dcopy_(&Gsize , www , &incx , ww , &incy);
 
-      calcul_G(Gsize, vec, ww, zz, rn, rt, mu);
+      Calcul_G(Gsize, vec, ww, zz, rn, rt, mu);
 
       /* Computation of G and its Jacobian matrix JacG */
 
@@ -392,7 +392,7 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
 
       /* compute the new G with X^{k+1} = www  */
 
-      calcul_G(Gsize, vec, www, zz, rn, rt, mu);
+      Calcul_G(Gsize, vec, www, zz, rn, rt, mu);
 
       /* compute the norm of G */
 
