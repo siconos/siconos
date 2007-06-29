@@ -20,11 +20,12 @@
  * 14/05/2007- Authors: houari khenous
 
 */
-// =============================== Multi bouncing beads column simulation ===============================
-//  N beads between a floor and a ceiling ...
-// Keywords: LagrangianLinearDS, LagrangianLinear relation, Moreau TimeStepping, LCP.
+// =============================== Multi bouncing beads couple simulation ===============================
+//
+// Keywords: LagrangianLinearDS, LagrangianDS relation, Moreau TimeStepping, newton method.
 //
 // ======================================================================================================
+
 
 #include "SiconosKernel.h"
 
@@ -52,8 +53,8 @@ int main(int argc, char* argv[])
     double h = 0.005;                 // time step
     double PI = 3.14;
 
-
-    string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
+    string solverName = "NEWTONFUNCTION";      // solver algorithm used for non-smooth problem
+    //string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
     //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
     //string solverName = "Lemke";      // solver algorithm used for non-smooth problem
 
@@ -87,10 +88,18 @@ int main(int argc, char* argv[])
 
     // set values
 
-    (*(q0[0]))(0) =  0.0;
-    (*(q0[0]))(1) =  0.;
-    (*(q0[0]))(2) =  0.3;
-    (*(q0[0]))(3) =  PI / 2;
+    // (*(q0[0]))(0) =  0.0;  (*(q0[0]))(1) =  0.;  (*(q0[0]))(2) =  0.3; (*(q0[0]))(3) =  PI/2;
+
+    // multi couple without contact between coulpes
+
+    for (i = 0; i < COUPLE; i++)
+    {
+      (*(q0[i]))(0) = 0.;
+      (*(q0[i]))(1) = 0.5 * (i + 1.);
+      (*(q0[i]))(2) =  0.3;
+      (*(q0[i]))(3) =  PI / 3;
+      //  (*(q0[i]))(1) = 0.5*i;
+    }
 
     GLOB_tabLDS = new LagrangianDS(0, *(q0[0]), *(v0[0]));
 
@@ -110,42 +119,18 @@ int main(int argc, char* argv[])
     InteractionsSet allInteractions;
     DynamicalSystemsSet dsConcernedi;
 
-    // With friction
-
-    if (mu > 0.)
-    {
-
-      NonSmoothLaw * nslaw1 = new NewtonImpactFrictionNSL(e, e, mu, 3);
+    NonSmoothLaw * nslaw1 = new NewtonImpactFrictionNSL(e, e, mu, 3);
 
 
-      Relation * relation1 = new LagrangianScleronomousR("NLMPlugin:h1", "NLMPlugin:G1");
-      Interaction * inter1 = new Interaction("bead1", allDS, 0, 3, nslaw1, relation1);
+    Relation * relation1 = new LagrangianScleronomousR("NLMPlugin:h1", "NLMPlugin:G1");
+    Interaction * inter1 = new Interaction("bead1", allDS, 0, 3, nslaw1, relation1);
 
-      Relation * relation2 = new LagrangianScleronomousR("NLMPlugin:h2", "NLMPlugin:G2");
-      Interaction * inter2 = new Interaction("bead2", allDS, 0, 3, nslaw1, relation2);
+    Relation * relation2 = new LagrangianScleronomousR("NLMPlugin:h2", "NLMPlugin:G2");
+    Interaction * inter2 = new Interaction("bead2", allDS, 0, 3, nslaw1, relation2);
 
-      allInteractions.insert(inter1);
-      allInteractions.insert(inter2);
-    }
+    allInteractions.insert(inter1);
+    allInteractions.insert(inter2);
 
-
-    // Without friction
-
-    if (!mu)
-    {
-
-      NonSmoothLaw * nslaw2 = new NewtonImpactNSL(e);
-
-
-      Relation * relation1_ = new LagrangianScleronomousR("NLMPlugin:h1", "NLMPlugin:G1_");
-      Interaction * inter1_ = new Interaction("bead1", allDS, 0, 1, nslaw2, relation1_);
-
-      Relation * relation2_ = new LagrangianScleronomousR("NLMPlugin:h2", "NLMPlugin:G2_");
-      Interaction * inter2_ = new Interaction("bead2", allDS, 0, 1, nslaw2, relation2_);
-
-      allInteractions.insert(inter1_);
-      allInteractions.insert(inter2_);
-    }
 
     // --------------------------------
     // --- NonSmoothDynamicalSystem ---

@@ -20,9 +20,9 @@
  * 26/05/2007- Authors: houari khenous
 
 */
-// =============================== Multi bouncing beads column simulation ===============================
-//  N beads between a floor and a ceiling ...
-// Keywords: LagrangianLinearDS, LagrangianLinear relation, Moreau TimeStepping, LCP.
+// =============================== Multi bouncing beads couple simulation ===============================
+//
+// Keywords: LagrangianLinearDS, LagrangianDS relation, Moreau TimeStepping, newton method.
 //
 // ======================================================================================================
 
@@ -37,7 +37,7 @@ using namespace std;
 #include <drawstuff/drawstuff.h>
 
 
-#define COUPLE   1      // the number of dynamical systems
+#define COUPLE   2      // the number of dynamical systems
 
 Simulation* GLOB_SIM;
 TimeDiscretisation * GLOB_T;
@@ -216,7 +216,7 @@ void initSiconos()
     string solverName = "NLGS";      // solver algorithm used for non-smooth problem
     //string solverName = "Lemke";      // solver algorithm used for non-smooth problem
 
-    double e  = 0.5;                  // nslaw
+    double e  = 0.9;                  // nslaw
     double e2  = 0.5;
     double mu = 0.;
     double PI = 3.14;
@@ -258,9 +258,9 @@ void initSiconos()
     for (i = 0; i < COUPLE; i++)
     {
       (*(q0[i]))(0) = 0.;
-      (*(q0[i]))(1) = 0.;
-      (*(q0[i]))(2) =  0.3 * (i + 1.);
-      (*(q0[i]))(3) =  PI / 2;
+      (*(q0[i]))(1) = 0.5 * (i + 1.);
+      (*(q0[i]))(2) =  0.3;
+      (*(q0[i]))(3) =  PI / 3;
       //  (*(q0[i]))(1) = 0.5*i;
     }
 

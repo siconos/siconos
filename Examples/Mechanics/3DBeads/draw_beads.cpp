@@ -288,15 +288,15 @@ void initSiconos()
     double T = 10;                    // final computation time
     double h = 0.005;                 // time step
 
-    //string solverName = "NEWTONFUNCTION";      // solver algorithm used for non-smooth problem
-    string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
+    string solverName = "NEWTONFUNCTION";      // solver algorithm used for non-smooth problem
+    //string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
     //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
     //string solverName = "PGS";      // solver algorithm used for non-smooth problem
     //string solverName = "Lemke";      // solver algorithm used for non-smooth problem
 
     double e  = 0.9;                  // nslaw
     double e2 = 0.9;                  // nslaw2
-    double mu = 0.2;
+    double mu = 0.;
 
 
     // 1 to take in account the obstacle and  0 no
@@ -632,204 +632,20 @@ void initSiconos()
     vector<Relation*> LLR3(DSNUMBER);
     vector<Relation*> LLR3_(DSNUMBER);
 
-    // With friction
+    NonSmoothLaw * nslaw1 = new NewtonImpactFrictionNSL(e, e, mu, 3);
 
-    if (mu > 0.)
+    // Interaction beads and plan1 (OXY)
+
+    if (obst_z_m)
     {
-
-      NonSmoothLaw * nslaw1 = new NewtonImpactFrictionNSL(e, e, mu, 3);
-
-      // Interaction beads and plan1 (OXY)
-
-      if (obst_z_m)
-      {
-        SiconosVector *b1 = new SimpleVector(3);
-        (*b1)(0) = -R;
-        SiconosMatrix *H1 = new SimpleMatrix(3, nDof);
-        (*H1)(0, 2) = 1.0;
-        (*H1)(1, 0) = 1.0;
-        (*H1)(1, 4) = -R;
-        (*H1)(2, 1) = 1.0;
-        (*H1)(2, 3) =  R;
-
-        for (i = 0; (int)i < DSNUMBER; i++)
-        {
-          dsConcernedi.insert(GLOB_tabLDS[i]);
-          ostringstream ostr;
-          ostr << i;
-          id2[i] = ostr.str();
-          LLR1[i] = new LagrangianLinearR(*H1, *b1);
-          checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 3, nslaw1, LLR1[i]));
-          dsConcernedi.clear();
-        }
-      }
-
-      // Interaction beads and plan1 (-YOX)
-
-      if (obst_z_p)
-      {
-        SiconosVector *b1_ = new SimpleVector(3);
-        (*b1_)(0) = 1.0 - R;
-        SiconosMatrix *H1_ = new SimpleMatrix(3, nDof);
-        (*H1_)(0, 2) = -1.0;
-        (*H1_)(1, 0) = 1.0;
-        (*H1_)(1, 4) = -R;
-        (*H1_)(2, 1) = 1.0;
-        (*H1_)(2, 3) =  R;
-
-        for (i = 0; (int)i < DSNUMBER; i++)
-        {
-          dsConcernedi.insert(GLOB_tabLDS[i]);
-          ostringstream ostr;
-          ostr << i;
-          id2[i] = ostr.str();
-          LLR1_[i] = new LagrangianLinearR(*H1_, *b1_);
-          checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 3, nslaw1, LLR1_[i]));
-          dsConcernedi.clear();
-        }
-      }
-
-
-      // Interaction beads and plan2 (OXZ)
-
-      if (obst_y_p)
-      {
-        SiconosVector *b2 = new SimpleVector(3);
-        (*b2)(0) = 1. - R;
-        SiconosMatrix *H2 = new SimpleMatrix(3, nDof);
-        (*H2)(0, 1) = 1.0;
-        (*H2)(1, 0) = 1.0;
-        (*H2)(1, 5) = -R;
-        (*H2)(2, 2) = 1.0;
-        (*H2)(2, 3) =  R;
-
-        for (i = 0; (int)i < DSNUMBER; i++)
-        {
-          dsConcernedi.insert(GLOB_tabLDS[i]);
-          ostringstream ostr;
-          ostr << i;
-          id2[i] = ostr.str();
-          LLR2[i] = new LagrangianLinearR(*H2, *b2);
-          checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 3, nslaw1, LLR2[i]));
-          dsConcernedi.clear();
-        }
-      }
-
-      // Interaction beads and plan2 (-ZOX)
-
-      if (obst_y_m)
-      {
-        SiconosVector *b2_ = new SimpleVector(3);
-        (*b2_)(0) = 1. - R;
-        SiconosMatrix *H2_ = new SimpleMatrix(3, nDof);
-        (*H2_)(0, 1) = -1.0;
-        (*H2_)(1, 0) = 1.0;
-        (*H2_)(1, 5) = -R;
-        (*H2_)(2, 2) = 1.0;
-        (*H2_)(2, 3) =  R;
-
-        for (i = 0; (int)i < DSNUMBER; i++)
-        {
-          dsConcernedi.insert(GLOB_tabLDS[i]);
-          ostringstream ostr;
-          ostr << i;
-          id2[i] = ostr.str();
-          LLR2_[i] = new LagrangianLinearR(*H2_, *b2_);
-          checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 3, nslaw1, LLR2_[i]));
-          dsConcernedi.clear();
-        }
-      }
-
-      // Interaction beads and plan3 (OYZ)
-
-      if (obst_x_p)
-      {
-        SiconosVector *b3 = new SimpleVector(3);
-        (*b3)(0) = 1. - R;
-        SiconosMatrix *H3 = new SimpleMatrix(3, nDof);
-        (*H3)(0, 0) = 1.0;
-        (*H3)(1, 1) = 1.0;
-        (*H3)(1, 5) = -R;
-        (*H3)(2, 2) = 1.0;
-        (*H3)(2, 4) =  R;
-
-        for (i = 0; (int)i < DSNUMBER; i++)
-        {
-          dsConcernedi.insert(GLOB_tabLDS[i]);
-          ostringstream ostr;
-          ostr << i;
-          id2[i] = ostr.str();
-          LLR3[i] = new LagrangianLinearR(*H3, *b3);
-          checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 3, nslaw1, LLR3[i]));
-          dsConcernedi.clear();
-        }
-      }
-      // Interaction beads and plan3 (-ZOY)
-
-      if (obst_x_m)
-      {
-        SiconosVector *b3_ = new SimpleVector(3);
-        (*b3_)(0) = 1. - R;
-        SiconosMatrix *H3_ = new SimpleMatrix(3, nDof);
-        (*H3_)(0, 0) = -1.0;
-        (*H3_)(1, 1) = 1.0;
-        (*H3_)(1, 5) = -R;
-        (*H3_)(2, 2) = 1.0;
-        (*H3_)(2, 4) =  R;
-
-        for (i = 0; (int)i < DSNUMBER; i++)
-        {
-          dsConcernedi.insert(GLOB_tabLDS[i]);
-          ostringstream ostr;
-          ostr << i;
-          id2[i] = ostr.str();
-          LLR3_[i] = new LagrangianLinearR(*H3_, *b3_);
-          checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 3, nslaw1, LLR3_[i]));
-          dsConcernedi.clear();
-        }
-      }
-
-      // Interaction between beads
-
-      // frictional contact condition between beads
-      NonSmoothLaw * nslaw2 = new NewtonImpactFrictionNSL(e2, e2, mu, 3);
-      //      NonSmoothLaw * nslaw2 = new NewtonImpactFrictionNSL(e2, e2, mu, 3);
-
-      l = 0;
-      for (i = 0; (int)i < DSNUMBER; i++)
-      {
-        dsConcerned2.insert(GLOB_tabLDS[i]);
-        for (j = 0; (int)j < DSNUMBER; j++)
-        {
-          if (j > i)
-          {
-            dsConcerned2.insert(GLOB_tabLDS[j]);
-            ostringstream ostr;
-            ostr << l;
-            id[l] = ostr.str();
-            LLR[l] = new LagrangianScleronomousR("3DDrawPlugin:h0", "3DDrawPlugin:G0");
-            checkInter = allInteractions.insert(new Interaction(id[l], dsConcerned2, l, 3, nslaw2, LLR[l]));
-            dsConcerned2.erase(GLOB_tabLDS[j]);
-            l = l + 1;
-          }
-        }
-        dsConcerned2.clear();
-      }
-    }
-
-    // Without friction
-
-    if (!mu)
-    {
-
-      NonSmoothLaw * nslaw1 = new NewtonImpactNSL(e); //contact condition with walls
-
-      // Interaction beads and plan1 (OXY)
-
-      SiconosVector *b1 = new SimpleVector(1);
+      SiconosVector *b1 = new SimpleVector(3);
       (*b1)(0) = -R;
-      SiconosMatrix *H1 = new SimpleMatrix(1, nDof);
+      SiconosMatrix *H1 = new SimpleMatrix(3, nDof);
       (*H1)(0, 2) = 1.0;
+      (*H1)(1, 0) = 1.0;
+      (*H1)(1, 4) = -R;
+      (*H1)(2, 1) = 1.0;
+      (*H1)(2, 3) =  R;
 
       for (i = 0; (int)i < DSNUMBER; i++)
       {
@@ -838,136 +654,161 @@ void initSiconos()
         ostr << i;
         id2[i] = ostr.str();
         LLR1[i] = new LagrangianLinearR(*H1, *b1);
-        checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 1, nslaw1, LLR1[i]));
+        checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 3, nslaw1, LLR1[i]));
         dsConcernedi.clear();
       }
+    }
 
-      if (obst_z_p)
-      {
-        // Interaction beads and plan1 (-YOX)
+    // Interaction beads and plan1 (-YOX)
 
-        SiconosVector *b1_ = new SimpleVector(1);
-        (*b1_)(0) = 1. - R;
-        SiconosMatrix *H1_ = new SimpleMatrix(1, nDof);
-        (*H1_)(0, 2) = -1.0;
+    if (obst_z_p)
+    {
+      SiconosVector *b1_ = new SimpleVector(3);
+      (*b1_)(0) = 1.0 - R;
+      SiconosMatrix *H1_ = new SimpleMatrix(3, nDof);
+      (*H1_)(0, 2) = -1.0;
+      (*H1_)(1, 0) = 1.0;
+      (*H1_)(1, 4) = -R;
+      (*H1_)(2, 1) = 1.0;
+      (*H1_)(2, 3) =  R;
 
-        for (i = 0; (int)i < DSNUMBER; i++)
-        {
-          dsConcernedi.insert(GLOB_tabLDS[i]);
-          ostringstream ostr;
-          ostr << i;
-          id2[i] = ostr.str();
-          LLR1_[i] = new LagrangianLinearR(*H1_, *b1_);
-          checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 1, nslaw1, LLR1_[i]));
-          dsConcernedi.clear();
-        }
-      }
-      if (obst_y_p)
-      {
-        // Interaction beads and plan2 (OXZ)
-
-        SiconosVector *b2 = new SimpleVector(1);
-        (*b2)(0) = 1. - R;
-        SiconosMatrix *H2 = new SimpleMatrix(1, nDof);
-        (*H2)(0, 1) = 1.0;
-
-        for (i = 0; (int)i < DSNUMBER; i++)
-        {
-          dsConcernedi.insert(GLOB_tabLDS[i]);
-          ostringstream ostr;
-          ostr << i;
-          id2[i] = ostr.str();
-          LLR2[i] = new LagrangianLinearR(*H2, *b2);
-          checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 1, nslaw1, LLR2[i]));
-          dsConcernedi.clear();
-        }
-      }
-      if (obst_y_m)
-      {
-        // Interaction beads and plan2 (-ZOX)
-
-        SiconosVector *b2_ = new SimpleVector(1);
-        (*b2_)(0) = 1. - R;
-        SiconosMatrix *H2_ = new SimpleMatrix(1, nDof);
-        (*H2_)(0, 1) = -1.0;
-
-        for (i = 0; (int)i < DSNUMBER; i++)
-        {
-          dsConcernedi.insert(GLOB_tabLDS[i]);
-          ostringstream ostr;
-          ostr << i;
-          id2[i] = ostr.str();
-          LLR2_[i] = new LagrangianLinearR(*H2_, *b2_);
-          checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 1, nslaw1, LLR2_[i]));
-          dsConcernedi.clear();
-        }
-      }
-      if (obst_x_p)
-      {
-        // Interaction beads and plan3 (OYZ)
-
-        SiconosVector *b3 = new SimpleVector(1);
-        (*b3)(0) = 1. - R;
-        SiconosMatrix *H3 = new SimpleMatrix(1, nDof);
-        (*H3)(0, 0) = 1.0;
-
-        for (i = 0; (int)i < DSNUMBER; i++)
-        {
-          dsConcernedi.insert(GLOB_tabLDS[i]);
-          ostringstream ostr;
-          ostr << i;
-          id2[i] = ostr.str();
-          LLR3[i] = new LagrangianLinearR(*H3, *b3);
-          checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 1, nslaw1, LLR3[i]));
-          dsConcernedi.clear();
-        }
-      }
-      if (obst_x_m)
-      {
-        // Interaction beads and plan3 (-ZOY)
-
-        SiconosVector *b3_ = new SimpleVector(1);
-        (*b3_)(0) = 1. - R;
-        SiconosMatrix *H3_ = new SimpleMatrix(1, nDof);
-        (*H3_)(0, 0) = -1.0;
-
-        for (i = 0; (int)i < DSNUMBER; i++)
-        {
-          dsConcernedi.insert(GLOB_tabLDS[i]);
-          ostringstream ostr;
-          ostr << i;
-          id2[i] = ostr.str();
-          LLR3_[i] = new LagrangianLinearR(*H3_, *b3_);
-          checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 1, nslaw1, LLR3_[i]));
-          dsConcernedi.clear();
-        }
-      }
-
-      // Interaction between beads
-
-      NonSmoothLaw * nslaw2 = new NewtonImpactNSL(e2); //contact condition between beads
-
-      l = 0;
       for (i = 0; (int)i < DSNUMBER; i++)
       {
-        dsConcerned2.insert(GLOB_tabLDS[i]);
-        for (j = 0; (int)j < DSNUMBER; j++)
-        {
-          if (j > i)
-          {
-            dsConcerned2.insert(GLOB_tabLDS[j]);
-
-            ostringstream ostr;
-            ostr << l;
-            id[l] = ostr.str();
-            LLR[l] = new LagrangianScleronomousR("3DDrawPlugin:h0", "3DDrawPlugin:Gcontact");
-            checkInter = allInteractions.insert(new Interaction(id[l], dsConcerned2, l, 1, nslaw2, LLR[l]));
-            dsConcerned2.erase(GLOB_tabLDS[j]);
-            l = l + 1;
-          }
-        }
-        dsConcerned2.clear();
+        dsConcernedi.insert(GLOB_tabLDS[i]);
+        ostringstream ostr;
+        ostr << i;
+        id2[i] = ostr.str();
+        LLR1_[i] = new LagrangianLinearR(*H1_, *b1_);
+        checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 3, nslaw1, LLR1_[i]));
+        dsConcernedi.clear();
       }
+    }
+
+
+    // Interaction beads and plan2 (OXZ)
+
+    if (obst_y_p)
+    {
+      SiconosVector *b2 = new SimpleVector(3);
+      (*b2)(0) = 1. - R;
+      SiconosMatrix *H2 = new SimpleMatrix(3, nDof);
+      (*H2)(0, 1) = 1.0;
+      (*H2)(1, 0) = 1.0;
+      (*H2)(1, 5) = -R;
+      (*H2)(2, 2) = 1.0;
+      (*H2)(2, 3) =  R;
+
+      for (i = 0; (int)i < DSNUMBER; i++)
+      {
+        dsConcernedi.insert(GLOB_tabLDS[i]);
+        ostringstream ostr;
+        ostr << i;
+        id2[i] = ostr.str();
+        LLR2[i] = new LagrangianLinearR(*H2, *b2);
+        checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 3, nslaw1, LLR2[i]));
+        dsConcernedi.clear();
+      }
+    }
+
+    // Interaction beads and plan2 (-ZOX)
+
+    if (obst_y_m)
+    {
+      SiconosVector *b2_ = new SimpleVector(3);
+      (*b2_)(0) = 1. - R;
+      SiconosMatrix *H2_ = new SimpleMatrix(3, nDof);
+      (*H2_)(0, 1) = -1.0;
+      (*H2_)(1, 0) = 1.0;
+      (*H2_)(1, 5) = -R;
+      (*H2_)(2, 2) = 1.0;
+      (*H2_)(2, 3) =  R;
+
+      for (i = 0; (int)i < DSNUMBER; i++)
+      {
+        dsConcernedi.insert(GLOB_tabLDS[i]);
+        ostringstream ostr;
+        ostr << i;
+        id2[i] = ostr.str();
+        LLR2_[i] = new LagrangianLinearR(*H2_, *b2_);
+        checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 3, nslaw1, LLR2_[i]));
+        dsConcernedi.clear();
+      }
+    }
+
+    // Interaction beads and plan3 (OYZ)
+
+    if (obst_x_p)
+    {
+      SiconosVector *b3 = new SimpleVector(3);
+      (*b3)(0) = 1. - R;
+      SiconosMatrix *H3 = new SimpleMatrix(3, nDof);
+      (*H3)(0, 0) = 1.0;
+      (*H3)(1, 1) = 1.0;
+      (*H3)(1, 5) = -R;
+      (*H3)(2, 2) = 1.0;
+      (*H3)(2, 4) =  R;
+
+      for (i = 0; (int)i < DSNUMBER; i++)
+      {
+        dsConcernedi.insert(GLOB_tabLDS[i]);
+        ostringstream ostr;
+        ostr << i;
+        id2[i] = ostr.str();
+        LLR3[i] = new LagrangianLinearR(*H3, *b3);
+        checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 3, nslaw1, LLR3[i]));
+        dsConcernedi.clear();
+      }
+    }
+    // Interaction beads and plan3 (-ZOY)
+
+    if (obst_x_m)
+    {
+      SiconosVector *b3_ = new SimpleVector(3);
+      (*b3_)(0) = 1. - R;
+      SiconosMatrix *H3_ = new SimpleMatrix(3, nDof);
+      (*H3_)(0, 0) = -1.0;
+      (*H3_)(1, 1) = 1.0;
+      (*H3_)(1, 5) = -R;
+      (*H3_)(2, 2) = 1.0;
+      (*H3_)(2, 4) =  R;
+
+      for (i = 0; (int)i < DSNUMBER; i++)
+      {
+        dsConcernedi.insert(GLOB_tabLDS[i]);
+        ostringstream ostr;
+        ostr << i;
+        id2[i] = ostr.str();
+        LLR3_[i] = new LagrangianLinearR(*H3_, *b3_);
+        checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 3, nslaw1, LLR3_[i]));
+        dsConcernedi.clear();
+      }
+    }
+
+    // Interaction between beads
+
+    // frictional contact condition between beads
+    NonSmoothLaw * nslaw2 = new NewtonImpactFrictionNSL(e2, e2, mu, 3);
+    //      NonSmoothLaw * nslaw2 = new NewtonImpactFrictionNSL(e2, e2, mu, 3);
+
+    l = 0;
+    for (i = 0; (int)i < DSNUMBER; i++)
+    {
+      dsConcerned2.insert(GLOB_tabLDS[i]);
+      for (j = 0; (int)j < DSNUMBER; j++)
+      {
+        if (j > i)
+        {
+          dsConcerned2.insert(GLOB_tabLDS[j]);
+          ostringstream ostr;
+          ostr << l;
+          id[l] = ostr.str();
+          LLR[l] = new LagrangianScleronomousR("3DDrawPlugin:h0", "3DDrawPlugin:G0");
+          checkInter = allInteractions.insert(new Interaction(id[l], dsConcerned2, l, 3, nslaw2, LLR[l]));
+          dsConcerned2.erase(GLOB_tabLDS[j]);
+          l = l + 1;
+        }
+      }
+      dsConcerned2.clear();
     }
 
     // --------------------------------
