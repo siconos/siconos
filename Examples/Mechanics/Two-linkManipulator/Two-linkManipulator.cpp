@@ -45,8 +45,8 @@ int main(int argc, char* argv[])
     unsigned int nDof = 2;           // degrees of freedom for robot arm
     double t0 = 0;                   // initial computation time
     double T = 30;                   // final computation time
-    double h = 0.005;                // time step
-    double criterion = 0.0005;
+    double h = 0.001;                // time step
+    double criterion = 0.0001;
     unsigned int maxIter = 20000;
     double e = 0.7;                  // nslaw
     double e2 = 0.0;
@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
     v0.zero();
     q0(0) = 1;
     q0(1) = -1.5;
-    SiconosVector * z = new SimpleVector(nDof * 4);
+    SiconosVector * z = new SimpleVector(nDof * 7);
     (*z)(0) = q0(0);
     (*z)(1) = q0(1);
     (*z)(2) = v0(0);
@@ -80,6 +80,13 @@ int main(int argc, char* argv[])
     (*z)(5) = 0;
     (*z)(6) = 0;
     (*z)(7) = 0;
+    (*z)(8) = 0;
+    (*z)(9) = 0;
+    (*z)(10) = 0;
+    (*z)(11) = 0;
+    (*z)(12) = 0;
+    (*z)(13) = 0;
+
 
     LagrangianDS * arm = new LagrangianDS(1, q0, v0);
 
@@ -128,8 +135,8 @@ int main(int argc, char* argv[])
     H2(0, 1) = -1;
     H2(1, 1) = 1;
 
-    b2(0) = -0.01;
-    b2(1) = PI - 0.01;
+    b2(0) = 0.0001;
+    b2(1) = PI - 0.0001;
 
 
     Relation * relation2 = new LagrangianLinearR(H2, b2);
@@ -168,7 +175,7 @@ int main(int argc, char* argv[])
     OneStepIntegrator * OSI =  new Moreau(arm, 0.500001, s);
 
     // -- OneStepNsProblem --
-    OneStepNSProblem * osnspb = new LCP(s, "name", "Lemke", 20001, 0.00005);
+    OneStepNSProblem * osnspb = new LCP(s, "name", "Lemke", 200001, 0.0001);
 
     cout << "=== End of model loading === " << endl;
 
@@ -188,7 +195,7 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 10;
+    unsigned int outputSize = 11;
     SimpleMatrix dataPlot(N + 1, outputSize);
     // For the initial time step:
     // time
@@ -206,24 +213,12 @@ int main(int argc, char* argv[])
     dataPlot(k, 6) = (inter->getY(0))(0) - 2;
     dataPlot(k, 7) = (inter->getY(1))(1);
     dataPlot(k, 8) = (*z)(6);
-    dataPlot(k, 9) = (inter->getLambda(1))(1);
+    dataPlot(k, 9) = (*z)(4);
+    dataPlot(k, 10) = test;
 
     bool isNewtonConverge = false;
     unsigned int nbNewtonStep = 0; // number of Newton iterations
 
-    //  UnitaryRelationsSet * I0 = s->getIndexSetPtr(0);
-    //     UnitaryRelationIterator it;
-    //     Interaction *tmp;
-
-    //     UnitaryRelation * UR = NULL;
-    //     for(it=I0->begin();it!=I0->end();++it)
-    //       {
-    //  tmp = (*it)->getInteractionPtr();
-    //  if(tmp == inter)
-    //    UR = *it;
-    //       }
-
-    //     UnitaryRelationsSet * I1 = s->getIndexSetPtr(1);
 
     while (s->hasNextEvent())
     {
@@ -244,83 +239,58 @@ int main(int argc, char* argv[])
       dataPlot(k, 6) = (inter->getY(0))(0) - 2;
       dataPlot(k, 7) = (inter->getY(1))(1);
       dataPlot(k, 8) = (*z)(6);
+      dataPlot(k, 9) = (*z)(4);
+      dataPlot(k, 10) = test;
+
       isNewtonConverge = false;
       nbNewtonStep = 0; // number of Newton iterations
 
+
       s->newtonSolve(criterion, maxIter);
-      //  bool isNewtonConverge = false;
-      //  unsigned int nbNewtonStep = 0; // number of Newton iterations
-
-      //  while((!isNewtonConverge)&&(nbNewtonStep<=maxIter))
-      //    {
-      //      nbNewtonStep++;
-      //      s->computeFreeState();
-      //      if(!(s->getOneStepNSProblems().empty()))
-      //        {
-      //    s->updateIndexSets();
-      //    s->computeOneStepNSProblem("timeStepping");
-
-      // //     cout <<"nbNewtonStep " <<nbNewtonStep << endl ;
-      // //     cout << "lambda(0) =" << endl;
-      // //     (inter->getLambdaPtr(0)->display());
-      // //     cout << "lambda(1) =" << endl;
-      // //     (inter->getLambdaPtr(1)->display());
-      //    dataPlot(k,8) = (inter->getLambda(1))(1);
-      //    (*z)(4) = (inter->getLambda(1))(1);
-
-      //        }
-      //      // update
-      //      s->update(1);
-      //      // Process all events simultaneous to nextEvent.
-      //      //  eventsManager->process();
-      //      isNewtonConverge = s->newtonCheckConvergence(criterion);
-      //    }
-
-      //  // Process NextEvent (Save OSI (DS) and OSNS (Interactions) states into Memory vectors ...)
-      //  s->getEventsManagerPtr()->processEvents();
-
-      //  if (!isNewtonConverge)
-      //    cout << "Newton process stopped: reach max step number" <<endl ;
-
-      //cout << "lambdaOld(1) =" << endl;
-      //(inter->getLambdaOldPtr(1)->display());
-      (*z)(4) = (inter->getLambdaOld(1))(1) * h;
-      dataPlot(k, 9) = (*z)(4) ;
-
-
-
-      //  cout << "Z =" << endl;
-      //  if ((static_cast<LCP*>(osnspb))->getZPtr() != NULL)
-      //    {
-      //      (static_cast<LCP*>(osnspb))->getZPtr()->display();
-      //    }
-      //  cout << "W =" << endl;
-      //  if ((static_cast<LCP*>(osnspb))->getWPtr() != NULL)
-      //    {
-      //      (static_cast<LCP*>(osnspb))->getWPtr()->display();
-      //    }
-
-      // change of controller between the free-motion phase and impacts accumulation phase.
-      if (((*z)(4) > 0) && (test == 0) && ((inter->getY(0))(0) - 2 < 0.65))
+      (*z)(4) = (inter->getLambdaOld(1))(1);
+      //  controller during impacts accumulation phase before the first impact
+      if ((- dataPlot(k, 0) + trunc(dataPlot(k, 0) / (*z)(11)) * (*z)(11) + (*z)(11) / 2 <= 0.08) &&
+          (test == 0))
       {
-        (*z)(5) = (inter->getY(0))(0) - 2;
-        (*z)(7) = (*z)(6);
-        arm->setComputeFExtFunction("Two-linkPlugin.so", "U1");
+        (*z)(8) = dataPlot(k, 0);
+        (*z)(5) =  0.65 + 0.1 * cos(2 * PI * (*z)(8) / (*z)(11));
+        (*z)(10) =  0.1 * sin(2 * PI * (*z)(8) / (*z)(11));
+        (*z)(13) = 2 * 0.1 * (PI / (*z)(11)) * cos(2 * PI * (*z)(8) / (*z)(11));
+        (*z)(7) = (*z)(9);
+        arm->setComputeFExtFunction("Two-linkPlugin.so", "U10");
         test = 1;
       }
 
-      // change of controller between the impacts accumulation phase and constraint-motion phase.
-      if (((inter->getY(1))(1) <= 0.0001) && (test == 1) && ((inter->getY(0))(1) <= 0.0001))
+      //  controller during impacts accumulation phase after the first impact
+      if (((*z)(4) >= 1e-12) && (test == 1))
       {
-        arm->setComputeFExtFunction("Two-linkPlugin.so", "U2");
+        arm->setComputeFExtFunction("Two-linkPlugin.so", "U11");
         test = 2;
       }
 
-      // change of controller between the constraint-motion phase and free-motion phase.
-      if (((*z)(4) < 0.0001) && (test == 2))
+      // controller during constraint-motion phase.
+      if ((fabs((inter->getY(1))(1)) <= 1e-3) && (test == 2) && ((inter->getY(0))(1) <= 1e-6))
+      {
+        (*z)(8) = dataPlot(k, 0);
+        arm->setComputeFExtFunction("Two-linkPlugin.so", "U2");
+        test = 3;
+      }
+
+      // change of control law with a particular design of the desired trajectory that guarantee the take-off
+      if ((trunc((dataPlot(k, 0) + h) / (*z)(11)) > trunc((dataPlot(k, 0)) / (*z)(11))) && (test == 3))
+      {
+        (*z)(10) = dataPlot(k, 0) + h;
+        (*z)(8) = (*z)(12);
+        arm->setComputeFExtFunction("Two-linkPlugin.so", "U3");
+        test = 4;
+      }
+
+      // change of desired trajectory during free-motion phase
+      if (((*z)(9) > 0.999) && (test == 4))
       {
         arm->setComputeFExtFunction("Two-linkPlugin.so", "U");
         test = 0;
+        (*z)(9) = 0;
       }
     }
 
