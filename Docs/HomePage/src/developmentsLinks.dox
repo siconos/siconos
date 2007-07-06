@@ -68,8 +68,7 @@ instance, see the <a href="http://www.esmf.ucar.edu/esmf_docs/ESMF_archdoc/ESMF_
 \anchor HP_OOAD
 \section objectOriented Object Oriented Analysis and design
 -# <a href="http://www.devel.lyx.org/references.php3">Recommended reading</a>
--# <a href="http://www.mcs.vuw.ac.nz/courses/COMP201/2003T1/">Courses at Victoria University of Wellington</a>
--# <a href="http://www.tdb.uu.se/%7Engssc/OOP01/module2/">Object oriented scientific programming</a> 
+-# <a href="www.oonumerics.org/ ">The Object-Oriented Numerics Page</a> Scientific Computing in Object-Oriented Languages.
 -# <a href="http://gee.cs.oswego.edu/dl/oosd/"> Object Oriented System Development: HTML Edition</a>. The original hardcover textbook edition (ISBN 0-201-56355-X) of <em>Object-Oriented System Development</em> by Dennis de Champeaux,
 Douglas Lea, and Penelope Faure was published by 
 <a href="http://www.awl.com/"> Addison Wesley</a>, copyright &copy; 1993 by Hewlett-Packard Company. 
@@ -85,15 +84,13 @@ by <a href="http://gee.cs.oswego.edu/dl/"> Doug Lea</a>. Mail comments to <a  hr
 -# <a target="_top" href="http://lush.sourceforge.net/">Lush</a>(GPL license) "is an object oriented programming language designed for
 researchers, experimenters, and engineers interested in large-scale numerical and graphic applications. Lush is designed to be used in situations where one would want to combine the flexibility of a high-level, loosely-typed interpreted language, with the efficiency of a
 strongly-typed, natively-compiled language, and with the easy integration of code written in C, C++, or other languages."
--# <a href="http://root.cern.ch/root/Cint.html">CINT C/C++ Interpreter</a>
--# <a href="http://www.w3.org/XML/">Extensible Markup Language (XML)</a>
--# <a href="http://www.omg.org/technology/documents/formal/xmi.htm">XML Metadata Interchange</a>\n 
-  a) <a href="http://xmlmodeling.com/" add_date="1052919866" last_charset="windows-1252" id="rdf:#$FiCQU1">XML Modeling</a>\n
-  b) <a href="http://xmi2code.sourceforge.net/" add_date="1052921088" last_visit="1052921038" last_charset="ISO-8859-1" id="rdf:#$GiCQU1">xmi2code Homepage</a> 
+-# <a href="http://www.w3.org/XML/"> XML. Extensible Markup Language</a>
+  a) <a href="http://www.omg.org/technology/documents/formal/xmi.htm">XML Metadata Interchange</a>\n 
+  b) <a href="http://xmlmodeling.com/" add_date="1052919866" last_charset="windows-1252" id="rdf:#$FiCQU1">XML Modeling</a>\n
+  c) <a href="http://xmi2code.sourceforge.net/" add_date="1052921088" last_visit="1052921038" last_charset="ISO-8859-1" id="rdf:#$GiCQU1">xmi2code Homepage</a> 
 -# <a href="http://www.doxygen.org/">Doxygen</a>
 -# <a target="_top" href="http://www.corba.org/">CORBA</a>
--# <a target="_top" href="http://www.gnome.org/gnome-office/bonobo.shtml">bonobo/CORBA</a>
--# <a href="http://george.ee.washington.edu/prog_docs/make/make.html#SEC68" add_date="918563590" last_visit="918563605" last_modified="918563586" id="rdf:#$wkCQU1">GNU make</a>
+
 
 \htmlonly
 <div class=horizontalline>  </div>
