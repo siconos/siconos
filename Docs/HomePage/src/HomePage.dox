@@ -15,6 +15,7 @@
 		  <li><a href="https://gforge.inria.fr/projects/siconos/"> Siconos Forge</a></li>
 		  <li><a href="#contacts"> Contacts</a></li>
 		  <li><a href="./SiconosDocList.html"> Documentation</a></li>
+		  <li><a href="#relatedProjects"> Related Projects</a></li>
 		  <li><a href="#uLinks"> Useful links</a></li>
 		</ul>
 
@@ -22,7 +23,7 @@
               <div class="side_title">Latest news</div>
         <div class="sidenotes">
           <ul>
-            <li><a href="#"><span class="title"><a href="https://gforge.inria.fr/frs/?group_id=9">Siconos Software v2.0.0 </a></span><span class="date">14.12.2006</span>Download the last release of the Siconos platform</a></li>
+            <li><a href="#"><span class="title"><a href="https://gforge.inria.fr/frs/?group_id=9">Siconos Software v2.1.0 </a></span><span class="date">28.06.2007</span>Download the last release of the Siconos platform</a></li>
           </ul>
 
         </div>
@@ -32,8 +33,14 @@
 \endhtmlonly
 \anchor aboutA
 \section about About
-The Siconos Platform is a scientific computing software dedicated to the modeling, simulation, control and analysis of <b>Non Smooth Dynamical Systems (NSDS)</b>.
-This project belongs to the European project <a href="http://siconos.inrialpes.fr/">SICONOS</a>.
+The Siconos Platform is a scientific computing software dedicated to the modeling, simulation, control and analysis of <b>Non Smooth Dynamical Systems (NSDS)</b>. Especially, the following classes of NSDS are addressed:
+<ul>
+<li> Mechanical systems with contact, impact and friction</li>
+<li> Electrical circuits with ideal and piecewise linear components</li>
+<li> Differential inclusions and Complementarity systems</li>
+</ul>
+
+
 \subsection MainObj What are the main objectives and motivations?
 Besides the standard features which are required for a software of scientific computing, the objectives of this project are the
 following :
@@ -56,6 +63,9 @@ industrial users, etc ... ).
 - To set up standards in terms of modeling of the NSDS.
 - To ensure software quality by the use of modern software design
 methods.
+
+This project was a part of the European project <a href="http://siconos.inrialpes.fr/">SICONOS</a>.
+
 \subsection license License
 This software is distributed under the
 <a href="http://www.gnu.org/copyleft/gpl.html">GNU General Public License</a>
@@ -67,7 +77,8 @@ You can find here some publications at the origin of this software on <a href="h
 \endhtmlonly
 \anchor news
 \section News News
-- <em> December 14th 2006</em>: release 2.1.0, patch for gcc4.1.1 compatibility (Fedora Core 6) 
+- <em> June 28th 2007</em>: release 2.1.0
+- <em> December 12th 2006</em>: release 2.0.1, patch for gcc4.1.1 compatibility (Fedora Core 6) 
 - <em> November 30th 2006</em>: release 2.0.0 
 - <em> September 7th 2006</em>: release 1.3.0 available on <a href="http://gforge.inria.fr/projects/siconos">Gforge</a> (include Event Driven algorithm)
 - <em> June 5th 2006:</em> release 1.2.0 
@@ -115,6 +126,17 @@ our bug tracker  on the  <a href="https://gforge.inria.fr/tracker/?group_id=9"> 
 \subsection gencontact General contacts
 <a href="mailto:vincent.acary@ nospam inrialpes.fr"> Vincent Acary</a>\n
 <a href="mailto:franck.perignon@ nospam inrialpes.fr"> Franck Pérignon</a>\n
+
+\htmlonly
+<div class=horizontalline>  </div>
+\endhtmlonly
+\anchor relatedProjects
+\section projects Related Projects 
+<ul>
+ <li><a href="http://confeti.gforge.inria.fr/"> Confeti </a></li>. Mechanical Modeling and Simulation  for the Virtual Reality.Collisions, contact and friction.
+<li><a href="http://www.lmgc.univ-montp2.fr/~dubois/LMGC90/index.html"> LMGC90 </a></li>.This software is an open platform for modelling interaction problems between elements including multi-physics. It allows to model: granular material made of rigid or deformable bodies and with complex interactions (contact, friction, cohesion, wear, etc.), discrete media, masonry, fracture, wear.
+</ul>
+
 
 \htmlonly
 <div class=horizontalline>  </div>
