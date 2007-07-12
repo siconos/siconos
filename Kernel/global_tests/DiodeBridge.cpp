@@ -136,7 +136,7 @@ bool DiodeBridge()
     int N = TiDiscRLCD->getNSteps(); // Number of time steps
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    SimpleMatrix dataPlot(N + 1, 7);
+    SimpleMatrix dataPlot(N, 7);
 
     // For the initial time step:
 

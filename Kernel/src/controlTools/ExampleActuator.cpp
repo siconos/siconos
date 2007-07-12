@@ -58,6 +58,6 @@ ExampleActuator* ExampleActuator::convert(Actuator* s)
   return sp;
 }
 
-AUTO_REGISTER_SENSOR("ExampleActuator", ExampleActuator);
+AUTO_REGISTER_ACTUATOR("ExampleActuator", ExampleActuator);
 
 

@@ -16,11 +16,15 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-// =============================== Multi bouncing beads column simulation ===============================
-//  N beads between a floor and a ceiling ...
-// Keywords: LagrangianLinearDS, LagrangianLinear relation, Moreau TimeStepping, LCP.
-//
-// ======================================================================================================
+
+/*!\file BeadsColumnTS.cpp
+\brief \ref EMBeadsColumnED - C++ input file, Event-Driven version - F. Perignon.
+
+A column of balls
+Direct description of the model without XML input.
+Simulation with an Event-Driven scheme.
+Keywords: LagrangianLinearDS, LagrangianLinear relation, Event Driven, Lsodar, LCP.
+*/
 
 #include "SiconosKernel.h"
 
@@ -39,7 +43,7 @@ int main(int argc, char* argv[])
     double increment_position = 1;   // initial position increment from one DS to the following
     double increment_velocity = 0;   // initial velocity increment from one DS to the following
     double t0 = 0;                   // initial computation time
-    double T = 4;                   // final computation time
+    double T = 4.0;                   // final computation time
     double h = 0.05;                 // time step
     double position_init = 10.5;     // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
@@ -52,13 +56,14 @@ int main(int argc, char* argv[])
     // --- Dynamical systems ---
     // -------------------------
 
+    cout << "====> Model loading ..." << endl << endl;
     unsigned int i;
     // A set of DS that will handle all the "balls"
     DynamicalSystemsSet allDS;
     // mass matrix, set to identity
     SiconosMatrix *Mass = new SimpleMatrix(nDof, nDof);
     Mass->eye();
-    (*Mass)(2, 2) = 3. / 5 * R * R;
+    (*Mass)(2, 2) = 3. / 5 * R * R; // m = 1
 
     // -- Initial positions and velocities --
     // q0[i] and v0[i] correspond to position and velocity of ball i.
@@ -177,28 +182,23 @@ int main(int argc, char* argv[])
     OneStepIntegrator * OSI = new Lsodar(allDS, s);
 
     // -- OneStepNsProblem --
-    OneStepNSProblem * impact = new LCP(s, "impact", solverName, 101, 0.0001);
-    OneStepNSProblem * acceleration = new LCP(s, "acceleration", solverName, 101, 0.0001);
-
-    cout << "=== End of model loading === " << endl;
+    OneStepNSProblem * impact = new LCP(s, "impact", solverName, 10000, 0.0001);
+    OneStepNSProblem * acceleration = new LCP(s, "acceleration", solverName, 10000, 0.0001);
 
     // =========================== End of model definition
     // ================================= Computation
     // --- Simulation initialization ---
+    cout << "====> Simulation initialisation ..." << endl << endl;
     s->initialize();
-    cout << "End of simulation initialisation" << endl;
 
     int k = 0; // Current step
-    int N = 13770;//t->getNSteps(); // Number of Events
+    int N = 570;// Number of Events
 
-    // --- Get the values to be plotted ---
-    // -> saved in a matrix dataPlot
+    // Prepare output and save value for the initial time
     unsigned int outputSize = dsNumber * 2 + 1;
     SimpleMatrix dataPlot(N + 1, outputSize);
-    // For the initial time step:
     // time
-    dataPlot(k, 0) =  s->getCurrentTime();
-
+    dataPlot(k, 0) =   multiBeads->getT0();
     // Positions and velocities
     i = 0; // Remember that DS are sorted in a growing order according to their number.
     DSIterator it;
@@ -207,9 +207,11 @@ int main(int argc, char* argv[])
       dataPlot(k, (int)i * 2 + 1) = static_cast<LagrangianLinearTIDS*>(*it)->getQ()(0);
       dataPlot(k, (int)i * 2 + 2) = static_cast<LagrangianLinearTIDS*>(*it)->getVelocity()(0);
       i++;
+      if ((*it)->getNumber() == 9)
+        break;
     }
 
-    //     // --- Time loop ---
+    // --- Time loop ---
     cout << "Start computation ... " << endl;
     EventsManager * eventsManager = s->getEventsManagerPtr();
     unsigned int numberOfEvent = 0 ;
@@ -229,6 +231,8 @@ int main(int argc, char* argv[])
           dataPlot(k, (int)i * 2 + 1) = (*static_cast<LagrangianLinearTIDS*>(*it)->getQMemoryPtr()->getSiconosVector(1))(0);
           dataPlot(k, (int)i * 2 + 2) = (*static_cast<LagrangianLinearTIDS*>(*it)->getVelocityMemoryPtr()->getSiconosVector(1))(0);
           i++;
+          if ((*it)->getNumber() == 9)
+            break;
         }
         k++;
       }
@@ -240,14 +244,16 @@ int main(int argc, char* argv[])
         dataPlot(k, (int)i * 2 + 1) = static_cast<LagrangianLinearTIDS*>(*it)->getQ()(0);
         dataPlot(k, (int)i * 2 + 2) = static_cast<LagrangianLinearTIDS*>(*it)->getVelocity()(0);
         i++;
+        if ((*it)->getNumber() == 9)
+          break;
       }
       numberOfEvent++;
     }
+    cout << "===== End of Event Driven simulation. " << numberOfEvent << " events have been processed. ==== " << endl;
+    cout << k - numberOfEvent << " impacts detected." << endl;
     // --- Output files ---
     ioMatrix io("result.dat", "ascii");
     io.write(dataPlot, "noDim");
-    cout << "===== End of Event Driven simulation. " << numberOfEvent << " events have been processed. ==== " << endl;
-    cout << k - numberOfEvent << " impacts detected." << endl;
 
     // --- Free memory ---
     delete impact;

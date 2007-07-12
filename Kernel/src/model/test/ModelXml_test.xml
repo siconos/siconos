@@ -102,7 +102,8 @@
 					</LagrangianLinearRelation>			
 					<!-- NS Law of this interaction	-->
 					<NewtonImpactLaw>
-						<e>0.9</e>				
+						<e>0.9</e>
+						<size>1</size>				
 					</NewtonImpactLaw>
 				</Interaction_Content>	
 			</Interaction>				

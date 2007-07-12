@@ -382,9 +382,8 @@ public:
   virtual void compute(const double) = 0;
 
   /** post treatment for output of the solver
-  *  param two pointers to SiconosVector (ex: for LCP or Friction, w and z)
-  */
-  virtual void postCompute(SiconosVector*, SiconosVector*) = 0;
+   */
+  virtual void postCompute() = 0;
 
   /** copy the data of the OneStepNSProblem to the XML tree
   *  \exception RuntimeException

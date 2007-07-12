@@ -230,10 +230,10 @@ void Interaction::initializeMemory(unsigned int numberOfDerivatives)
     lambdaOld[i] = new BlockVector();
     for (unsigned int j = 0; j < numberOfRelations; ++j)
     {
-      y[i]->addPtr(new SimpleVector(nslawSize));
-      yOld[i]->addPtr(new SimpleVector(nslawSize));
-      lambda[i]->addPtr(new SimpleVector(nslawSize));
-      lambdaOld[i]->addPtr(new SimpleVector(nslawSize));
+      y[i]->insertPtr(new SimpleVector(nslawSize));
+      yOld[i]->insertPtr(new SimpleVector(nslawSize));
+      lambda[i]->insertPtr(new SimpleVector(nslawSize));
+      lambdaOld[i]->insertPtr(new SimpleVector(nslawSize));
     }
   }
 

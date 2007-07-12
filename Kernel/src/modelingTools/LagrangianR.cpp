@@ -92,14 +92,14 @@ void LagrangianR::initialize()
     // convert vDS systems into LagrangianDS and put them in vLDS
     lds = static_cast<LagrangianDS*>(*it);
     // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-    data["q0"]->addPtr(lds->getQPtr());
-    data["q1"]->addPtr(lds->getVelocityPtr());
-    data["q2"]->addPtr(lds->getAccelerationPtr());
-    data["p1"]->addPtr(lds->getPPtr(1));
-    data["p2"]->addPtr(lds->getPPtr(2));
-    data["q0Free"]->addPtr(lds->getQFreePtr());
-    data["q1Free"]->addPtr(lds->getVelocityFreePtr());
-    data["z"]->addPtr(lds->getZPtr());
+    data["q0"]->insertPtr(lds->getQPtr());
+    data["q1"]->insertPtr(lds->getVelocityPtr());
+    data["q2"]->insertPtr(lds->getAccelerationPtr());
+    data["p1"]->insertPtr(lds->getPPtr(1));
+    data["p2"]->insertPtr(lds->getPPtr(2));
+    data["q0Free"]->insertPtr(lds->getQFreePtr());
+    data["q1Free"]->insertPtr(lds->getVelocityFreePtr());
+    data["z"]->insertPtr(lds->getZPtr());
   }
 }
 

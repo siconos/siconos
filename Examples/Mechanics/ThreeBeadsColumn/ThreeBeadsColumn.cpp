@@ -26,11 +26,11 @@ int main(int argc, char* argv[])
   {
 
     // --- Model loading from xml file ---
-    Model uBeads("./ThreeBeadsColumn.xml");
+    Model * BeadsModel = new Model("./ThreeBeadsColumn.xml");
     cout << "\n *** ThreeBeadsColumn.xml loaded ***" << endl;
 
     // --- Get and initialize the simulation ---
-    TimeStepping* s = static_cast<TimeStepping*>(uBeads.getSimulationPtr());
+    TimeStepping * s = static_cast<TimeStepping*>(BeadsModel->getSimulationPtr());
     s->initialize();
     cout << "\n **** the simulation is ready ****" << endl;
 
@@ -46,22 +46,28 @@ int main(int argc, char* argv[])
     cout << "Prepare data for plotting ... " << endl;
     // For the initial time step:
     // time
-    dataPlot(k, 0) = k * t->getH();
+    dataPlot(k, 0) = BeadsModel->getT0();
 
     // state q and velocity for the first dynamical system
-    LagrangianLinearTIDS* bead = static_cast<LagrangianLinearTIDS*>(uBeads.getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
-    dataPlot(k, 1) = (bead->getQ())(0);
-    dataPlot(k, 2) = (bead->getVelocity())(0);
+    LagrangianLinearTIDS* bead = static_cast<LagrangianLinearTIDS*>(BeadsModel->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
+    SiconosVector * q1 = bead->getQPtr();
+    SiconosVector * v1 = bead->getVelocityPtr();
+    dataPlot(k, 1) = (*q1)(0);
+    dataPlot(k, 2) = (*v1)(0);
 
     // state q and velocity for the second dynamical system
-    LagrangianLinearTIDS* bead2 = static_cast<LagrangianLinearTIDS*>(uBeads.getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(1));
-    dataPlot(k, 3) = (bead2->getQ())(0);
-    dataPlot(k, 4) = (bead2->getVelocity())(0);
+    LagrangianLinearTIDS* bead2 = static_cast<LagrangianLinearTIDS*>(BeadsModel->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(1));
+    SiconosVector * q2 = bead2->getQPtr();
+    SiconosVector * v2 = bead2->getVelocityPtr();
+    dataPlot(k, 3) = (*q2)(0);
+    dataPlot(k, 4) = (*v2)(0);
 
     // state q and velocity for the third dynamical system
-    LagrangianLinearTIDS* bead3 = static_cast<LagrangianLinearTIDS*>(uBeads.getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(2));
-    dataPlot(k, 5) = (bead3->getQ())(0);
-    dataPlot(k, 6) = (bead3->getVelocity())(0);
+    LagrangianLinearTIDS* bead3 = static_cast<LagrangianLinearTIDS*>(BeadsModel->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(2));
+    SiconosVector * q3 = bead3->getQPtr();
+    SiconosVector * v3 = bead3->getVelocityPtr();
+    dataPlot(k, 5) = (*q3)(0);
+    dataPlot(k, 6) = (*v3)(0);
 
     cout << " Computation ... " << endl;
     while (k < N)
@@ -74,13 +80,13 @@ int main(int argc, char* argv[])
       //cout<<"Iteration: "<<k<<endl;
       // --- Get values to be plotted ---
 
-      dataPlot(k, 0) = k * t->getH();
-      dataPlot(k, 1) = (bead->getQ())(0);
-      dataPlot(k, 2) = (bead->getVelocity())(0);
-      dataPlot(k, 3) = (bead2->getQ())(0);
-      dataPlot(k, 4) = (bead2->getVelocity())(0);
-      dataPlot(k, 5) = (bead3->getQ())(0);
-      dataPlot(k, 6) = (bead3->getVelocity())(0);
+      dataPlot(k, 0) = BeadsModel->getCurrentT();
+      dataPlot(k, 1) = (*q1)(0);
+      dataPlot(k, 2) = (*v1)(0);
+      dataPlot(k, 3) = (*q2)(0);
+      dataPlot(k, 4) = (*v2)(0);
+      dataPlot(k, 5) = (*q3)(0);
+      dataPlot(k, 6) = (*v3)(0);
       // transfer of state i+1 into state i and time incrementation
       s->nextStep();
 
@@ -89,7 +95,7 @@ int main(int argc, char* argv[])
     io.write(dataPlot, "noDim");
     cout << "End of computation - Number of iterations  done: " << k << endl;
 
-    //    uBeads.saveToXMLFile("./ThreeBeadsColumn.xml.output");
+    //    BeadsModel.saveToXMLFile("./ThreeBeadsColumn.xml.output");
 
   }
 

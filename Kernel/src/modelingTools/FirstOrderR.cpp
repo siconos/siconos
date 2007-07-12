@@ -158,10 +158,10 @@ void FirstOrderR::initDSLinks()
   {
     // Put x/r ... of each DS into a block. (Pointers links, no copy!!)
     ds = static_cast<FirstOrderNonLinearDS*>(*it);
-    data["x"]->addPtr(ds->getXPtr());
-    data["xFree"]->addPtr(ds->getXFreePtr());
-    data["z"]->addPtr(ds->getZPtr());
-    data["r"]->addPtr(ds->getRPtr());
+    data["x"]->insertPtr(ds->getXPtr());
+    data["xFree"]->insertPtr(ds->getXFreePtr());
+    data["z"]->insertPtr(ds->getZPtr());
+    data["r"]->insertPtr(ds->getRPtr());
   }
 }
 

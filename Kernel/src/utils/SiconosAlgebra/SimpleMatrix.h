@@ -28,51 +28,59 @@
 /**Input parameter for copy and transpose constructor.*/
 const std::string transpose = "transpose";
 
+class SimpleVector;
+
 /**  Matrix (embedded various types of Boost matrices of double)
  *
  *  \author SICONOS Development Team - copyright INRIA
  *   \version 2.1.0.
  *   \date (Creation) 07/21/2006
  *
+ * SimpleMatrix is used in the platform to store matrices (mathematical object) of double.
  *
- * SimpleMatrix is used in the platform to store matrices (mathematical object).
+ * Possible types: DENSE (default), TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO, IDENTITY.
  *
  * \todo: review resize function for Banded, Symetric and Triangular. Error in tests.
+ *
+ * Notes:
+ *  - to handle with sparse matrices see http://freenet-homepage.de/guwi17/ublas/matrix_sparse_usage.html#Q2, for operations improvments.
+ *  - See SandBox/Algebra for comparison between ublas, atlas and Siconos perf.
+ *  - Different way to compute matrix-vector or matrix-matrix products are proposed (prod, axpy_prod, gem...) based either on ublas or ublas-bindings atlas.
+ *   See SandBox/Algebra/TestOperators to know which the most performant op. on your system.
+ *   Usually, atlas bindings are to be prefered, but limited to dense objects.
+ *   axpy_prod is only efficient for sparse or for large objects. For small matrices and vectors it is slower.
+ *
+ *  See also Siconos Algebra's page in Users Guide, \ref UMsiconosAlgebra.
+ *
  *
  */
 class SimpleMatrix: public SiconosMatrix
 {
 private:
 
-  /**  unsigned int num
-   * an unsigned int which make a correspondance with Boost Matrices: 1 -> DenseMat, 2 -> TriangMat, 3 -> SymMat, 4->SparseMat, 5->BandedMat, 6->zeroMat, 7->IdentityMat
-   */
-  unsigned int num;
-
-  /** Mat mat (See SiconosMatrix.h for more details on Mat type);
-   * union of The Boost Matrices : DenseMat, TriangMat, SymMat are encapsulated.
-   */
-  Mat mat;
-
-  /** constructor with the type of the Boost matrix
-   *  \param TYP
-   */
-  SimpleMatrix(TYP = DENSE);
+  /** Union of The Boost Matrices : DenseMat, TriangMat, SymMat ...
+      (See SiconosMatrix.h for more details on MATRIX_UBLAS_TYPE);
+  */
+  MATRIX_UBLAS_TYPE mat;
 
   /** std::vector<int> ipiv;
    * The pivot indices obtained from DGETRF (PLUFactorizationInPlace)
    */
-  std::vector<int> ipiv;
+  std::vector<int> * ipiv;
 
   /** bool isPLUFactorized;
-   *  Boolean = true if the Matrix is PLU Factorized
+   *  Boolean = true if the Matrix has been PLU Factorized in place.
    */
   bool isPLUFactorized;
 
   /** bool isPLUInversed;
-   *  Boolean = true if the Matrix is Inversed in Place
+   *  Boolean = true if the Matrix has been Inversed in Place
    */
   bool isPLUInversed;
+
+  /** Default constructor
+   */
+  SimpleMatrix() {};
 
   /**  computes res = subA*x +res, subA being a submatrix of A (rows from startRow to startRow+sizeY and columns between startCol and startCol+sizeX).
        If x is a block vector, it call the present function for all blocks.
@@ -81,21 +89,50 @@ private:
        \param an int, sub-block position (startCol)
        \param a pointer to a SiconosVector, x
        \param a DenseVect, res.
-   */
-  friend void private_addprod(const SiconosMatrix *, unsigned int, unsigned int, const SiconosVector *, DenseVect&);
+  */
+  friend void private_addprod(const SiconosMatrix *, unsigned int, unsigned int, const SiconosVector *, SiconosVector*);
 
-  /**  computes y = subA*x, subA being a submatrix of A (all columns, and rows between start and start+sizeY).
+  /**  computes y = subA*x (init =true) or += subA * x (init = false), subA being a submatrix of A (all columns, and rows between start and start+sizeY).
        If x is a block vector, it call the present function for all blocks.
        \param a pointer to SiconosMatrix A
        \param an int, sub-block position (start)
        \param a pointer to a SiconosVector, x
        \param a pointer to a SiconosVector, y
-
-   */
-  friend void private_prod(const SiconosMatrix *, unsigned int, const SiconosVector *, SiconosVector *);
+       \param init, a bool
+  */
+  friend void private_prod(const SiconosMatrix *, unsigned int, const SiconosVector *, SiconosVector *, bool);
 
 public:
-  /***************************** CONSTRUCTORS ****************************/
+
+  /** constructor with the type and the dimension of the Boost matrix
+   *  \param unsigned int, number of rows.
+   *  \param unsigned int, number of columns.
+   *  \param UBLAS_TYPE
+   *  \param unsigned int, if UBLAS_TYPE==SPARSE, number of non-zero terms, if UBLAS_TYPE == BANDED, number of diags. under the main diagonal
+   *  \param unsigned int, if UBLAS_TYPE == BANDED, number of diags. over the main diagonal
+   */
+  SimpleMatrix(unsigned int, unsigned int, UBLAS_TYPE = DENSE, unsigned int = 1, unsigned int = 1);
+
+  /** constructor with the the dimensions of the Boost matrix, a default value and the type.
+   *  \param unsigned int, number of rows.
+   *  \param unsigned int, number of columns.
+   *  \param double a, so that *this = [a a a ...]
+   *  \param UBLAS_TYPE
+   *  \param unsigned int, if UBLAS_TYPE==SPARSE, number of non-zero terms, if UBLAS_TYPE == BANDED, number of diags. under the main diagonal
+   *  \param unsigned int, if UBLAS_TYPE == BANDED, number of diags. over the main diagonal
+   */
+  SimpleMatrix(unsigned int, unsigned int, double, UBLAS_TYPE = DENSE, unsigned int = 1, unsigned int = 1);
+
+  /** constructor with a vector of the values, the dimensiosn and the type of the boost matrix.
+   *  The integers upper and lower are useful only for BandedMat
+   *  \param a std::vector<double>
+   *  \param unsigned int, number of rows
+   *  \param unsigned int, number of columns
+   *  \param a UBLAS_TYPE
+   *  \param unsigned int, if UBLAS_TYPE==SPARSE, number of non-zero terms, if UBLAS_TYPE == BANDED, number of diags. under the main diagonal
+   *  \param unsigned int, if UBLAS_TYPE == BANDED, number of diags. over the main diagonal
+   */
+  //  SimpleMatrix (const std::vector<double>& ,unsigned int, unsigned int = 0, UBLAS_TYPE = DENSE, unsigned int = 0, unsigned int = 0);
 
   /** copy constructor
    *  \param SimpleMatrix
@@ -106,14 +143,6 @@ public:
    *  \param SiconosMatrix
    */
   SimpleMatrix(const SiconosMatrix&);
-
-  /** constructor with the type and the dimension of the Boost matrix
-   *  \param 2 unsigned int (number of rows and columns)
-   *  \param TYP
-   *  \param unsigned int, if TYP==SPARSE, number of non-zero terms, if TYP == BANDED, number of diags. under the main diagonal
-   *  \param unsigned int, if TYP == BANDED, number of diags. over the main diagonal
-   */
-  SimpleMatrix(unsigned int, unsigned int, TYP = DENSE, unsigned int = 1, unsigned int = 1);
 
   /** constructor with a DenseMat matrix (see SiconosMatrix.h for details)
    *  \param a DenseMat
@@ -150,14 +179,6 @@ public:
    */
   SimpleMatrix(const IdentityMat&);
 
-  /** constructor with the type of the boost matrix, a vector of the values and the dimensions
-   *  of the matrix, the integers upper and lower are useful only for BandedMat
-   *  \param a TYP
-   *  \param a std::vector<double>
-   *  \param unsigned int
-   */
-  SimpleMatrix(const std::vector<double>& , unsigned int, unsigned int = 0, TYP = DENSE, unsigned int = 0, unsigned int = 0);
-
   /** constructor with an input file
    *  \param a std::string which contain the file path
    *  \param a boolean to indicate if the file is in ascii
@@ -166,23 +187,15 @@ public:
 
   /** destructor
    */
-  ~SimpleMatrix(void);
+  ~SimpleMatrix();
   //************************** GETTERS/SETTERS  **************************
-
-  /** determines if the matrix is square
-   *  \return true if the matrix is square
-   */
-  inline bool isSquare() const
-  {
-    return (size(0) == size(1));
-  } ;
 
   /** determines if the matrix has been inversed
    *  \return true if the matrix is inversed
    */
   inline bool isInversed() const
   {
-    return false;
+    return isPLUInversed;
   }
 
   /** determines if the matrix has been factorized
@@ -190,16 +203,8 @@ public:
    */
   inline bool isFactorized() const
   {
-    return false;
+    return isPLUFactorized;
   }
-
-  /** get the attribute num of current matrix, useless for Block Matrix
-   * \return an unsigned int.
-   */
-  inline unsigned int getNum(void) const
-  {
-    return num;
-  };
 
   /** get DenseMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
@@ -229,7 +234,6 @@ public:
    */
   const BandedMat getBanded(unsigned int = 0, unsigned int = 0) const;
 
-
   /** get SparseMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
@@ -238,17 +242,17 @@ public:
   const SparseMat getSparse(unsigned int = 0, unsigned int = 0) const;
 
   /** get ZeroMat matrix
-  *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-  *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
-  *  \return a ZeroMat
-  */
+   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \return a ZeroMat
+   */
   const ZeroMat getZero(unsigned int = 0, unsigned int = 0) const;
 
   /** get  getIdentity matrix
-  *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-  *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
-  *  \return an IdentityMat
-  */
+   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \return an IdentityMat
+   */
   const IdentityMat getIdentity(unsigned int = 0, unsigned int = 0) const;
 
   /** get a pointer on DenseMat matrix
@@ -287,66 +291,18 @@ public:
   SparseMat* getSparsePtr(unsigned int = 0, unsigned int = 0) const;
 
   /** get a pointer on ZeroMat matrix
-  *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-  *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
-  *  \return a ZeroMat*
-  */
+   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \return a ZeroMat*
+   */
   ZeroMat* getZeroPtr(unsigned int = 0, unsigned int = 0) const;
 
   /** get a pointer on Identity matrix
-  *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
-  *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
-  *  \return an IdentityMat*
-  */
+   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \return an IdentityMat*
+   */
   IdentityMat* getIdentityPtr(unsigned int = 0, unsigned int = 0) const;
-
-  /** get BlocksMat matrix
-   *  \useless for SimpleMatrix
-   *  \return a BlocksMat
-   */
-  const BlocksMat getAllBlocks(void) const;
-
-  /** get block corresponding to lines given in numRow and columns in numCol
-   *  \param 2 unsigned int for indexes and a SiconosMatrix (in-out paramater)
-   */
-  void getBlock(unsigned int, unsigned int, SiconosMatrix&) const;
-
-  /** get block at position row-col, ie return this in SimpleMatrix case
-   *  \param unsigned int row
-   *  \param unsigned int col
-   */
-  inline SiconosMatrix* getBlockPtr(unsigned int = 0, unsigned int = 0)
-  {
-    return this;
-  };
-
-  /** get std::deque of bool
-   *   \useless for SimpleMatrix
-   *   \return a std::deque<bool>
-   */
-  const std::deque<bool> getBlockAllocated(void) const;
-
-  /** get row index of current matrix and save it into vOut
-   *  \param unsigned int: index of required line
-   *  \param ref to SimpleVector: in-out parameter
-   */
-  void getRow(unsigned int, SimpleVector&) const;
-
-  /** get column index of current matrix and save it into vOut
-   *  \param unsigned int: index of required column
-   *  \param ref to SimpleVector: in-out parameter
-   */
-  void getCol(unsigned int, SimpleVector&) const;
-
-  /** set line row of the current matrix with vector v
-   *  \param an unsigned int and a SimpleVector
-   */
-  void setRow(unsigned int, const SimpleVector&);
-
-  /** set column col of the current matrix with vector v
-   *  \param an unsigned int and a SimpleVector
-   */
-  void setCol(unsigned int, const SimpleVector&);
 
   /** return the adress of the array of double values of the matrix
    *  \param: row position for the required block ->useless for SimpleMatrix
@@ -357,15 +313,11 @@ public:
 
   /** sets all the values of the matrix to 0.0
    */
-  void zero(void);
+  void zero();
 
   /** set an identity matrix
    */
-  void eye(void);
-
-  /** Computes dim according to the matrix type.
-   */
-  void computeDim();
+  void eye();
 
   /** resize the matrix with nbrow rows and nbcol columns The existing elements of the matrix are preseved when specified.
    *  \exception SiconosMatrixException
@@ -375,7 +327,139 @@ public:
   /** compute the infinite norm of the matrix
    *  \return a double
    */
-  const double normInf(void) const;
+  const double normInf() const;
+
+  /** display data on standard output
+   */
+  void display() const;
+
+  /** get or set the element matrix[i,j]
+   *  \param an unsigned int i
+   *  \param an unsigned int j
+   *  \exception SiconosMatrixException
+   *  \return the element matrix[i,j]
+   */
+  double& operator()(unsigned int , unsigned int);
+
+  /** get or set the element matrix[i,j]
+   *  \param an unsigned int i
+   *  \param an unsigned int j
+   *  \exception SiconosMatrixException
+   *  \return the element matrix[i,j]
+   */
+  const double operator()(unsigned int , unsigned int) const;
+
+  /** return the element matrix[i,j]
+   *  \param an unsigned int i
+   *  \param an unsigned int j
+   *  \return a double
+   */
+  const double getValue(unsigned int, unsigned int) const;
+
+  /** set the element matrix[i,j]
+   *  \param an unsigned int i
+   *  \param an unsigned int j
+   *  \param the value
+   */
+  void setValue(unsigned int, unsigned int, double);
+
+  /** set block starting at row "posRow" (first argument) and column "posCol" (second argument) with m (last arg)
+   *  \param posRow an int, row-position of the first element of the required block
+   *  \param posCol an int, col-position of the first element of the required block
+   *  \param a SiconosMatrix*  m
+   */
+  void setBlock(unsigned int, unsigned int, const SiconosMatrix *);
+
+  /** Copy a subBlock of MIn into a sub-block of MOut - Dim and positions of the sub-block are given in dim and start.
+   * \param MIn, a SiconosMatrix*
+   * \param MOut, a SiconosMatrix*
+   * \param dim, an Index, dim[0], dim[1]: number of rows and columns of the sub-block
+   * \param start, an Index, start[0], start[1]: position (row, column) of the first element of the sub-block in MIn
+   *  start[2], start[3]: position (row, column) of the first element of the sub-block in MOut.
+   */
+  friend void setBlock(const SiconosMatrix *, SiconosMatrix *, const Index&, const Index&);
+
+  /** get block at position row-col, ie return this in SimpleMatrix case
+   *  \param unsigned int row
+   *  \param unsigned int col
+   */
+  inline SiconosMatrix* getBlockPtr(unsigned int = 0, unsigned int = 0)
+  {
+    return this;
+  };
+
+  /** get block at position row-col, ie return this in SimpleMatrix case
+   *  \param unsigned int row
+   *  \param unsigned int col
+   */
+  inline const SiconosMatrix* getBlockPtr(unsigned int = 0, unsigned int = 0) const
+  {
+    return this;
+  };
+
+  /** get row index of current matrix and save it into vOut
+   *  \param unsigned int: index of required line
+   *  \param ref to SimpleVector: in-out parameter
+   */
+  void getRow(unsigned int, SiconosVector&) const;
+
+  /** get column index of current matrix and save it into vOut
+   *  \param unsigned int: index of required column
+   *  \param ref to SimpleVector: in-out parameter
+   */
+  void getCol(unsigned int, SiconosVector&) const;
+
+  /** set line row of the current matrix with vector v
+   *  \param an unsigned int and a SimpleVector
+   */
+  void setRow(unsigned int, const SiconosVector&);
+
+  /** set column col of the current matrix with vector v
+   *  \param an unsigned int and a SimpleVector
+   */
+  void setCol(unsigned int, const SiconosVector&);
+
+  /** get column number index of current matrix, starting from element at position pos and save it into vOut
+   *  \param index, unsigned int, index of required column
+   *  \param pos, unsigned int, index of the first required element in the column
+   *  \param vOut, SiconosVector*
+   */
+  void getSubCol(unsigned int, unsigned int, SiconosVector*) const;
+
+  /** get row number index of current matrix, starting from element at position pos and save it into vOut
+   *  \param index, unsigned int, index of required row
+   *  \param pos, unsigned int, index of the first required element in the row
+   *  \param vOut, SiconosVector*
+   */
+  void getSubRow(unsigned int, unsigned int, SiconosVector*) const;
+
+  /** set column number index of current matrix, starting from element at position pos, with vIn
+   *  \param index, unsigned int, index of required column
+   *  \param pos, unsigned int, index of the first required element in the column
+   *  \param vIn, SiconosVector*
+   */
+  void setSubCol(unsigned int, unsigned int, SiconosVector*);
+
+  /** set row number index of current matrix, starting from element at position pos, with vIn
+   *  \param index, unsigned int, index of required row
+   *  \param pos, unsigned int, index of the first required element in the row
+   *  \param vIn, SiconosVector*
+   */
+  void setSubRow(unsigned int, unsigned int, SiconosVector*);
+
+  /** add the input matrix to the elements starting from position i (row) and j (col).
+   *  \param an unsigned int i
+   *  \param an unsigned int j
+   *  \param a SiconosMatrix
+   */
+  void addBlock(unsigned int, unsigned int, const SiconosMatrix&);
+
+  /** subtract the input matrix to the elements starting from position i (row) and j (col).
+   *  \param an unsigned int i
+   *  \param an unsigned int j
+   *  \param a SiconosMatrix
+   */
+  void subBlock(unsigned int, unsigned int, const SiconosMatrix&);
 
   /** transpose in place: x->trans() is x = transpose of x.
    */
@@ -386,68 +470,20 @@ public:
    */
   void trans(const SiconosMatrix&);
 
-  /** display data on standard output
-   */
-  void display(void) const;
-
-  // --- MATRICES HANDLING AND OPERATORS ---
-
-  /** copy the matrix "blockMat" into the matrix "mat" at the position (xPos, yPos)
-   *  \param SiconosMatrix& : the block matrix to be copied in the current matrix
-   *  \param unsigned int : the line position to start the copy of the blockmatrix
-   *  \param unsigned int : the column position to start the copy of the blockmatrix
-   */
-  void matrixCopy(const SiconosMatrix&, unsigned int, unsigned int);
-
-  /** get or set the element matrix[i,j]
-   *  \param an unsigned int i
-   *  \param an unsigned int j
-   *  \exception SiconosMatrixException
-   *  \return the element matrix[i,j]
-   */
-  double& operator()(unsigned int , unsigned int);
-
-  /** return the element matrix[i,j]
-   *  \param an unsigned int i
-   *  \param an unsigned int j
-   *  \return a double
-   */
-  double getValue(unsigned int, unsigned int);
-
-  /** set the element matrix[i,j]
-   *  \param an unsigned int i
-   *  \param an unsigned int j
-   *  \param the value
-   */
-  void setValue(unsigned int, unsigned int, double);
-
-  /** get or set the element matrix[i,j]
-   *  \param an unsigned int i
-   *  \param an unsigned int j
-   *  \exception SiconosMatrixException
-   *  \return the element matrix[i,j]
-   */
-  double operator()(unsigned int , unsigned int) const;
-
-  /** operator =
+  /** assignment
    *  \param SiconosMatrix : the matrix to be copied
    */
   SimpleMatrix& operator = (const SiconosMatrix&);
 
-  /** operator =
+  /** assignment
    *  \param SimpleMatrix : the matrix to be copied
    */
   SimpleMatrix& operator = (const SimpleMatrix&);
 
-  /** operator /=
-   *  \param double, a scalar
+  /** assignment to a DenseMat
+   *  \param the matrix to be copied
    */
-  SimpleMatrix& operator /= (double);
-
-  /** operator /=
-   *  \param int, a scalar
-   */
-  SimpleMatrix& operator /= (int);
+  SimpleMatrix& operator = (const DenseMat&);
 
   /** operator +=
    *  \param SiconosMatrix : a matrix to add
@@ -459,25 +495,15 @@ public:
    */
   SimpleMatrix& operator -=(const SiconosMatrix&);
 
-  /** operator *=
-   *  \param double, a scalar
-   */
-  SimpleMatrix& operator *= (double);
-
-  /** operator *=
-   *  \param int, a scalar
-   */
-  SimpleMatrix& operator *= (int);
-
   /** computes an LU factorization of a general M-by-N matrix using partial pivoting with row interchanges.
    *  The result is returned in this (InPlace). Based on Blas dgetrf function.
    */
-  void PLUFactorizationInPlace(void);
+  void PLUFactorizationInPlace();
 
   /**  compute inverse of this thanks to LU factorization with Partial pivoting. This method inverts U and then computes inv(A) by solving the system
    *  inv(A)*L = inv(U) for inv(A). The result is returned in this (InPlace). Based on Blas dgetri function.
    */
-  void PLUInverseInPlace(void);
+  void PLUInverseInPlace();
 
   /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
    *   by PLUFactorizationInPlace. Based on Blas dgetrs function.
@@ -496,38 +522,33 @@ public:
   */
   void resetLU();
 
-  /** computes scalar-matrix product. This = a*A
-      \param double, a
-      \param SiconosMatrix A
-  */
-  void scal(double, const SiconosMatrix&);
-
-  /** computes scalar-matrix product. This = a*A
-      \param int, a
-      \param SiconosMatrix A
-  */
-  void scal(int, const SiconosMatrix&);
-
-  /**: A==B when (A-B).normInf()<tolerance
-   * \param SiconosMatrix A
-   * \param SiconosMatrix B
-   * \return a boolean
+  /** multiplication of a matrix by a double
+   *  \param a SiconosMatrix
+   *  \param a double
+   *  \return a SimpleMatrix
    */
-  friend bool operator == (const SiconosMatrix&, const SiconosMatrix&);
+  friend const SimpleMatrix operator * (const SiconosMatrix&, double);
 
-  /** Addition of two matrices of the same type, C = A+B
+  /** multiplication of a matrix by a double
+   *  \param a double
+   *  \param a SiconosMatrix
+   *  \return a SimpleMatrix
+   */
+  friend const SimpleMatrix operator * (double , const SiconosMatrix&);
+
+  /** division of the matrix by a double
+   *  \param a SiconosMatrix
+   *  \param a double
+   *  \return a SimpleMatrix
+   */
+  friend const SimpleMatrix operator /(const SiconosMatrix&, double);
+
+  /** Addition of two matrices, C = A+B
    * \param SiconosMatrix A
    * \param SiconosMatrix B
    * \return a SimpleMatrix C
    */
   friend const SimpleMatrix operator +(const SiconosMatrix&, const SiconosMatrix&);
-
-  /** Addition of two matrices (possibly of different type) C = A+B
-   * \param SiconosMatrix A
-   * \param SiconosMatrix B
-   * \return a SimpleMatrix C
-   */
-  friend const SimpleMatrix add(const SiconosMatrix&, const SiconosMatrix&);
 
   /** Addition of two matrices C = A+B
    *  \param SiconosMatrix A (in)
@@ -536,19 +557,12 @@ public:
    */
   friend void add(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&);
 
-  /** Subtraction of two matrices of the same type, C = A-B
+  /** Subtraction of two matrices, C = A-B
    * \param SiconosMatrix A
    * \param SiconosMatrix B
    * \return a SimpleMatrix C
    */
   friend const SimpleMatrix operator -(const SiconosMatrix&, const SiconosMatrix&);
-
-  /** Subtraction of two matrices (possibly of different type) C = A-B
-   * \param SiconosMatrix A
-   * \param SiconosMatrix B
-   * \return a SimpleMatrix C
-   */
-  friend const SimpleMatrix sub(const SiconosMatrix&, const SiconosMatrix&);
 
   /** Subtraction of two matrices C = A-B
    *  \param SiconosMatrix A (in)
@@ -557,12 +571,17 @@ public:
    */
   friend void sub(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&);
 
-  /** product of two matrices, C = A*B
-   *  \param SiconosMatrix A (in)
-   *  \param SiconosMatrix B (in)
-   *  \return SimpleMatrix C
+  /**: A==B when (A-B).normInf()<tolerance
+   * \param SiconosMatrix A
+   * \param SiconosMatrix B
+   * \return a boolean
    */
-  friend const SimpleMatrix operator *(const SiconosMatrix&, const SiconosMatrix&);
+  friend bool operator == (const SiconosMatrix&, const SiconosMatrix&);
+
+  /*   /\** compute the power of the matrix (!) */
+  /*    *  \return a SimpleMatrix */
+  /*    *\/ */
+  friend const SimpleMatrix pow(const SimpleMatrix&, unsigned int);
 
   /** product of two matrices, C = A*B
    *  \param SiconosMatrix A (in)
@@ -578,58 +597,17 @@ public:
   */
   friend void prod(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&);
 
-  /** multiplication of a matrix by a double
-   *  \param a SiconosMatrix
-   *  \param a double
-   *  \return a SimpleMatrix
-   */
-  friend const SimpleMatrix operator * (const SiconosMatrix&, double);
+  /** prod(A, B, C) computes C = A*B in an optimal way (= if init = true, else +=).
+      \param A, a SiconosMatrix
+      \param B, a SiconosMatrix
+      \param C, a SiconosMatrix
+      \param init, a bool
+  */
+  friend void axpy_prod(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&, bool);
 
-  /** multiplication of a matrix by an int
-   *  \param a SiconosMatrix
-   *  \param an int
-   *  \return a SimpleMatrix
-   */
-  friend const SimpleMatrix operator *(const SiconosMatrix&, int);
-
-  /** multiplication of a matrix by a double
-   *  \param a double
-   *  \param a SiconosMatrix
-   *  \return a SimpleMatrix
-   */
-  friend const SimpleMatrix operator * (double , const SiconosMatrix&);
-
-
-  /** multiplication of a matrix by an int
-   *  \param an int
-   *  \param a SiconosMatrix
-   *  \return a SimpleMatrix
-   */
-  friend const SimpleMatrix operator *(int, const SiconosMatrix&);
-
-  /** division of the matrix by a double
-   *  \param a SiconosMatrix
-   *  \param a double
-   *  \return a SimpleMatrix
-   */
-  friend const SimpleMatrix operator /(const SiconosMatrix&, double);
-
-  /** division of the matrix by an int
-   *  \param a SiconosMatrix
-   *  \param an int
-   *  \return a SimpleMatrix
-   */
-  friend const SimpleMatrix operator / (const SiconosMatrix&, int);
-
-
-  /** compute the power of the matrix (!)
-   *  \return a SimpleMatrix
-   */
-  friend const SimpleMatrix pow(const SimpleMatrix&, unsigned int);
-
-  /** compute the product matrix-vector
-   *  \return a SimpleVector
-   */
+  /*   /\** compute the product matrix-vector */
+  /*    *  \return a SimpleVector */
+  /*    *\/ */
   friend const SimpleVector prod(const SiconosMatrix&, const SiconosVector&);
 
   /** prod(A, x, y) computes y = A*x
@@ -638,6 +616,14 @@ public:
       \param a SiconosVector, y (in-out)
   */
   friend void prod(const SiconosMatrix&, const SiconosVector&, SiconosVector&);
+
+  /** computes y = A*x (init = true) or y += A*x (init = false)
+      \param a SiconosMatrix, A (in)
+      \param a SiconosVector, x (in)
+      \param a SiconosVector, y (in-out)
+      \param init, a bool
+  */
+  friend void axpy_prod(const SiconosMatrix&, const SiconosVector&, SiconosVector&, bool);
 
   /** prod(A, x, y) computes y = A*x, using atlas::gemv - Reserved to dense matrices and vectors.
       \param a SiconosMatrix, A (in)
@@ -698,7 +684,6 @@ public:
       \param a SiconosMatrix, C (in-out)
   */
   friend void gemm(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&);
-
 
 };
 #endif

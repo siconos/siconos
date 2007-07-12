@@ -85,7 +85,6 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl << endl;
     ioMatrix io("result.dat", "ascii");
     io.write(dataPlot, "noDim");
-
     // Xml output
     //  bouncingBall->saveToXMLFile("./BouncingBall_TIDS.xml.output");
     delete bouncingBall;

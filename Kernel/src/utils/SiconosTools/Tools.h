@@ -26,6 +26,7 @@
 
 #include<string>
 #include <sstream>
+#include <vector>
 #include <map>
 #include <deque>
 
@@ -52,5 +53,65 @@ template <class T> std::string toString(const T& obj)
   o << obj ;
   return o.str();
 }
+
+// Next two functions: from Thinking in C++ vol2, p 536.
+/** to purge a STL container of pointers, assuming it owns all its pointers.
+    \param a STL sequence container
+*/
+template<class Seq> void purge(Seq& c)
+{
+  typename Seq::iterator i;
+  for (i = c.begin(); i != c.end(); ++i)
+  {
+    delete *i;
+    *i = NULL;
+  }
+}
+
+/** to purge a STL container of pointers, assuming it owns all its pointers.
+    \param iterator equal to a container.begin()
+    \param iterator equal to a container.end()
+*/
+template<class InpIt> void purge(InpIt begin, InpIt end)
+{
+  while (begin != end)
+  {
+    delete *begin;
+    *begin = NULL;
+    ++begin;
+  }
+}
+
+/** to purge a STL container of pointers; only pointers owned by the container, ie for which second arg
+    corresponding value is true, are deleted.
+    \param a STL sequence container
+    \param a std::vector<bool>
+*/
+template<class Seq> void purge(Seq& c, const std::vector<bool>& isAllocatedIn)
+{
+  typename Seq::iterator i;
+  std::vector<bool>::const_iterator it = isAllocatedIn.begin();
+  for (i = c.begin(); i != c.end(); ++i)
+  {
+    if (*it ++) delete *i;
+    *i = NULL;
+  }
+}
+
+/** to purge a STL container of pointers, assuming it owns all its pointers.
+    \param iterator equal to a container.begin()
+    \param iterator equal to a container.end()
+*/
+template<class InpIt> void purge(InpIt begin, InpIt end, const std::vector<bool>& isAllocatedIn)
+{
+  std::vector<bool>::const_iterator it = isAllocatedIn.begin();
+  while (begin != end)
+  {
+    if (*it ++) delete *begin;
+    *begin = NULL;
+    ++begin;
+  }
+}
+
 
 #endif

@@ -47,9 +47,9 @@ void SiconosMemoryTest::setUp()
   c1 = new BlockVector();
   c2 = new BlockVector();
 
-  (static_cast<BlockVector*>(c1))->add(*q1);
-  (static_cast<BlockVector*>(c1))->add(*q2);
-  (static_cast<BlockVector*>(c2))->add(*q3);
+  (static_cast<BlockVector*>(c1))->insert(*q1);
+  (static_cast<BlockVector*>(c1))->insert(*q2);
+  (static_cast<BlockVector*>(c2))->insert(*q3);
 
   V1.push_back(q1);
   V1.push_back(q2);

@@ -114,8 +114,6 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2G : ", ds->isPlugged("jacobianXF"), true);
   ds->initialize("TimeStepping", 0.5);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2H : ", ds->getF() == *x0, true);
-  J0->display();
-  ds->getJacobianXFPtr()->display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2I : ", ds->getJacobianXF() == *J0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2I : ", ds->getMPtr() == NULL, true);
   delete ds;
@@ -135,8 +133,6 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3D : ", ds->getX0() == *x0, true);
   double time = 1.5;
   ds->initialize("TimeStepping", time);
-  ds->getRhsPtr()->display();
-  x0->display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3E : ", ds->getRhs() == time* *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2H : ", ds->getF() == time* *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2I : ", ds->getJacobianXF() == *J0, true);

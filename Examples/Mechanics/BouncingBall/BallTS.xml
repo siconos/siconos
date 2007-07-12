@@ -67,6 +67,7 @@
 					</LagrangianLinearRelation>			
 					<!-- NS Law of this interaction	-->
 					<NewtonImpactLaw>
+					        <size>1</size>
 						<e>0.9</e>				
 					</NewtonImpactLaw>
 				</Interaction_Content>	
@@ -92,7 +93,7 @@
 		<!-- One Step NS Problem of th Simulation-->
 		<OneStepNSProblem>
 		 	<LCP>
-	                  <Solver type="QP" maxIter="101" />
+	                  <Solver type="Lemke" maxIter="101" />
 		 	</LCP>
 		 </OneStepNSProblem>
 	</Simulation>	

@@ -70,7 +70,8 @@
   				 </LagrangianLinearRelation>			
 				<!-- NS Law of this interaction	-->
 				<NewtonImpactFrictionLaw>
-  				  <en>0.0</en>				
+					<size>2</size>			 
+					<en>0.0</en>				
                                   <mu>1.0</mu>
 				</NewtonImpactFrictionLaw>
 				</Interaction_Content>	

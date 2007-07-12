@@ -470,7 +470,6 @@ void Simulation::updateInput(int level)
 
 void Simulation::updateOutput(int level0, int level1)
 {
-
   if (level1 == -1)
     level1 = levelMax;
 

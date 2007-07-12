@@ -75,7 +75,7 @@ void FrictionContact2D::compute(const double time)
 
     check_solver(info);
     // --- Recover the desired variables from FrictionContact2D output ---
-    postCompute(w, z);
+    postCompute();
   }
 }
 

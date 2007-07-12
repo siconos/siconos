@@ -181,9 +181,18 @@ void UnitaryRelation::getLeftBlockForDS(DynamicalSystem * ds, SiconosMatrix* Blo
   else
     RuntimeException::selfThrow("UnitaryRelation::getLeftBlockForDS, not yet implemented for relations of type " + relationType);
 
-  // get block
-  originalMatrix->getBlock(relativePosition, k, *Block);
-
+  // copy sub-block of originalMatrix into Block
+  // dim of the sub-block
+  Index subDim(2);
+  subDim[0] = Block->size(0);
+  subDim[1] = Block->size(1);
+  // Position (row,col) of first element to be read in originalMatrix and of first element to be set in Block
+  Index subPos(4);
+  subPos[0] = relativePosition;
+  subPos[1] = k;
+  subPos[2] = 0;
+  subPos[3] = 0;
+  setBlock(originalMatrix, Block, subDim, subPos);
 }
 
 void UnitaryRelation::getRightBlockForDS(DynamicalSystem * ds, SiconosMatrix* Block, const unsigned index) const
@@ -215,7 +224,18 @@ void UnitaryRelation::getRightBlockForDS(DynamicalSystem * ds, SiconosMatrix* Bl
   // For Lagrangian systems, right block = transpose (left block) so we do not need to use the present function.
   else RuntimeException::selfThrow("UnitaryRelation::getRightBlockForDS, not yet implemented for relation of type " + relationType);
 
-  originalMatrix->getBlock(k, relativePosition, *Block);
+  // copy sub-block of originalMatrix into Block
+  // dim of the sub-block
+  Index subDim(2);
+  subDim[0] = Block->size(0);
+  subDim[1] = Block->size(1);
+  // Position (row,col) of first element to be read in originalMatrix and of first element to be set in Block
+  Index subPos(4);
+  subPos[0] = k;
+  subPos[1] = relativePosition;
+  subPos[2] = 0;
+  subPos[3] = 0;
+  setBlock(originalMatrix, Block, subDim, subPos);
 }
 
 void UnitaryRelation::getExtraBlock(SiconosMatrix* Block) const
@@ -234,7 +254,18 @@ void UnitaryRelation::getExtraBlock(SiconosMatrix* Block) const
     D = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getDPtr();
   else
     RuntimeException::selfThrow("UnitaryRelation::getExtraBlock, not yet implemented for first order relations of subtype " + relationSubType);
-  D->getBlock(relativePosition, relativePosition, *Block);
+  // copy sub-block of originalMatrix into Block
+  // dim of the sub-block
+  Index subDim(2);
+  subDim[0] = Block->size(0);
+  subDim[1] = Block->size(1);
+  // Position (row,col) of first element to be read in originalMatrix and of first element to be set in Block
+  Index subPos(4);
+  subPos[0] = relativePosition;
+  subPos[1] = relativePosition;
+  subPos[2] = 0;
+  subPos[3] = 0;
+  setBlock(D, Block, subDim, subPos);
 }
 
 void UnitaryRelation::computeEquivalentY(const double time, const unsigned int level, const string simulationType, SiconosVector* yOut)
@@ -263,7 +294,8 @@ void UnitaryRelation::computeEquivalentY(const double time, const unsigned int l
     {
       e = (static_cast<NewtonImpactNSL*>(mainInteraction->getNonSmoothLawPtr()))->getE();
       if (simulationType == "TimeStepping")
-        axpy(e, *getYOldPtr(level), *yOut); // yOut = e*yOld + yOut
+        *yOut += e**getYOldPtr(level);
+      //axpy(e,*getYOldPtr(level),*yOut);  // yOut = e*yOld + yOut
       else if (simulationType == "EventDriven")
         *yOut *= (1.0 + e);
       else

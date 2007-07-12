@@ -20,7 +20,7 @@
 #define __SimpleVectorTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "SiconosVector.h"
+#include "BlockVector.h"
 #include "SimpleVector.h"
 #include "SimpleMatrix.h"
 #include <math.h>
@@ -38,52 +38,76 @@ private:
   // tests to be done ...
 
   //  CPPUNIT_TEST(testBuildSimpleVector);
+  CPPUNIT_TEST(testConstructor0);
   CPPUNIT_TEST(testConstructor1);
   CPPUNIT_TEST(testConstructor2);
   CPPUNIT_TEST(testConstructor3);
+  CPPUNIT_TEST(testConstructor3Bis);
   CPPUNIT_TEST(testConstructor4);
   CPPUNIT_TEST(testConstructor5);
   CPPUNIT_TEST(testConstructor6);
   CPPUNIT_TEST(testConstructor7);
   CPPUNIT_TEST(testZero);
+  CPPUNIT_TEST(testFill);
   CPPUNIT_TEST(testNorm);
   CPPUNIT_TEST(testResize);
+  CPPUNIT_TEST(testSetBlock);
+  CPPUNIT_TEST(testSetBlock2);
+  CPPUNIT_TEST(testSetBlock3);
+  CPPUNIT_TEST(testSetBlock4);
   CPPUNIT_TEST(testAssignment);
   CPPUNIT_TEST(testOperators1);
   CPPUNIT_TEST(testOperators2);
   CPPUNIT_TEST(testOperators3);
   CPPUNIT_TEST(testOperators4);
+  CPPUNIT_TEST(testOperators4Bis);
   CPPUNIT_TEST(testOperators5);
+  CPPUNIT_TEST(testOperators5Bis);
   CPPUNIT_TEST(testOperators6);
+  CPPUNIT_TEST(testOperators6Bis);
   CPPUNIT_TEST(testOperators7);
+  CPPUNIT_TEST(testOperators8);
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
+  void testConstructor0();
   void testConstructor1();
   void testConstructor2();
   void testConstructor3();
+  void testConstructor3Bis();
   void testConstructor4();
   void testConstructor5();
   void testConstructor6();
   void testConstructor7();
   void testZero();
+  void testFill();
   void testNorm();
   void testResize();
+  void testSetBlock();
+  void testSetBlock2();
+  void testSetBlock3();
+  void testSetBlock4();
   void testAssignment();
   void testOperators1();
   void testOperators2();
   void testOperators3();
   void testOperators4();
+  void testOperators4Bis();
   void testOperators5();
+  void testOperators5Bis();
   void testOperators6();
+  void testOperators6Bis();
   void testOperators7();
+  void testOperators8();
   void End();
   // Members
 
-  SiconosVector * ref;
+  SiconosVector *ref, *z, *zB, *tmp1, *tmp2, *tmp3, *tmp4;
+  const SiconosVector *x, *y, *xB, *yB;
+  unsigned int size, size1, size2;
   std::vector<double> vq;
   DenseVect * dv;
   SparseVect * sv;

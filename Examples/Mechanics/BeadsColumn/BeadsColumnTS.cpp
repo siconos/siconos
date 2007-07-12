@@ -16,12 +16,14 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+
 /*!\file BeadsColumnTS.cpp
 \brief \ref EMBeadsColumn - C++ input file, Time-Stepping version - F. Perignon.
 
 A column of balls
 Direct description of the model without XML input.
 Simulation with a Time-Stepping scheme.
+Keywords: LagrangianLinearDS, LagrangianLinear relation, Moreau TimeStepping, LCP.
 */
 
 #include "SiconosKernel.h"
@@ -30,7 +32,6 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-
   boost::timer t;
   t.restart();
   // Exception handling
@@ -38,12 +39,12 @@ int main(int argc, char* argv[])
   {
 
     // User-defined main parameters
-    unsigned int dsNumber = 10000;      // the number of dynamical systems
+    unsigned int dsNumber = 10;      // the number of dynamical systems
     unsigned int nDof = 3;           // degrees of freedom for beads
     double increment_position = 1;   // initial position increment from one DS to the following
     double increment_velocity = 0;   // initial velocity increment from one DS to the following
     double t0 = 0;                   // initial computation time
-    double T = 10;                   // final computation time
+    double T = 4.0;                   // final computation time
     double h = 0.005;                // time step
     double position_init = 10.5;     // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
@@ -63,7 +64,7 @@ int main(int argc, char* argv[])
     // mass matrix, set to identity
     SiconosMatrix *Mass = new SimpleMatrix(nDof, nDof);
     Mass->eye();
-    (*Mass)(2, 2) = 3. / 5 * R * R;
+    (*Mass)(2, 2) = 3. / 5 * R * R; // m = 1
 
     // -- Initial positions and velocities --
     // q0[i] and v0[i] correspond to position and velocity of ball i.
@@ -185,7 +186,7 @@ int main(int argc, char* argv[])
     // That means that all systems in allDS have the same theta value.
 
     // -- OneStepNsProblem --
-    LCP * osnspb = new LCP(s, "LCP", solverName, 10001, 0.001);
+    LCP * osnspb = new LCP(s, "LCP", solverName, 10001, 0.0001);
     //    osnspb->setisMSparseBlock(true);
     // =========================== End of model definition =================================
     // ================================= Computation =================================
@@ -197,10 +198,10 @@ int main(int argc, char* argv[])
     int N = t->getNSteps(); // Number of time steps
 
     // Prepare output and save value for the initial time
-    unsigned int outputSize = 21;//dsNumber*2+1;
+    unsigned int outputSize = dsNumber * 2 + 1;
     SimpleMatrix dataPlot(N + 1, outputSize); // Output data matrix
     // time
-    dataPlot(k, 0) = s->getCurrentTime();
+    dataPlot(k, 0) = multiBeads->getT0();
     // Positions and velocities
     i = 0; // Remember that DS are sorted in a growing order according to their number.
     DSIterator it;
@@ -212,6 +213,7 @@ int main(int argc, char* argv[])
       if ((*it)->getNumber() == 9)
         break;
     }
+
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
     while (k < N)
@@ -237,7 +239,7 @@ int main(int argc, char* argv[])
         cout << k << endl;
       }
       // --- Get values to be plotted ---
-      dataPlot(k, 0) = k * t->getH();
+      dataPlot(k, 0) = multiBeads->getCurrentT();
       i = 0;
       for (it = allDS.begin(); it != allDS.end(); ++it)
       {

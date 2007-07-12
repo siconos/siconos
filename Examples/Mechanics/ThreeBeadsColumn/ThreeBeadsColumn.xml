@@ -21,9 +21,9 @@
 <!-- SICONOS Model XML file -->
 
 <SiconosModel>
-	<Title>title</Title>
-	<Author>author</Author>
-	<Description>description</Description>
+	<Title>A column of 3 beads</Title>
+	<Author>F. Perignon</Author>
+	<Description>Three falling beads - Lagrangian Linear DS, Lag. Linear Relation - Time Stepping (Moreau) </Description>
 	<Date>date</Date>
 	<Time>
 		<t0>0.0</t0>
@@ -35,69 +35,37 @@
 				<Id> Bead1 </Id>				
 				<StepsInMemory>1</StepsInMemory>
 				<q0 vectorSize='3'>10.5 0.0 0.0</q0>
-				<Velocity0  vectorSize='3'>
-		                0.0 0.0 0.0 </Velocity0>
-				<FExt vectorPlugin="BeadsPlugin:beadsFExt"/>
+				<Velocity0  vectorSize='3'>0.0 0.0 0.0</Velocity0>
+				<FExt vectorSize='3'>-9.8 0. 0.</FExt>
 				<Mass matrixRowSize='3' matrixColSize='3'>	
 					<row>1.0 0.0 0.0</row>
 					<row>0.0 1.0 0.0</row>
 					<row>0.0 0.0 0.006</row>
 				</Mass>			
-				<K matrixRowSize='3' matrixColSize='3'>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-				</K>
-				<C matrixRowSize='3' matrixColSize='3'>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-				</C>
-			</LagrangianLinearTIDS>
+			</LagrangianLinearTIDS>		
 			<LagrangianLinearTIDS number='2'>
 				<Id> Bead2 </Id>				
 				<StepsInMemory>1</StepsInMemory>
-				<q0 vectorSize='3'>	20.50 0.0 0.0	</q0>
-				<Velocity0  vectorSize='3'>	0.0 0.0  0.0	</Velocity0>
-				<FExt vectorPlugin="BeadsPlugin:beadsFExt"/>
+				<q0 vectorSize='3'>20.50 0.0 0.0</q0>
+				<Velocity0  vectorSize='3'>0.0 0.0  0.0</Velocity0>
+				<FExt vectorSize='3'>-9.8 0. 0.</FExt>
 				<Mass matrixRowSize='3' matrixColSize='3'>	
 					<row>1.0 0.0 0.0</row>
 					<row>0.0 1.0 0.0</row>
 					<row>0.0 0.0 0.006</row>
 				</Mass>			
-				<K matrixRowSize='3' matrixColSize='3'>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-				</K>
-				<C matrixRowSize='3' matrixColSize='3'>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-				</C>
-			</LagrangianLinearTIDS>
-			
+			</LagrangianLinearTIDS>			
 			<LagrangianLinearTIDS number='3'>
 				<Id> Bead3 </Id>				
 				<StepsInMemory>1</StepsInMemory>
-				<q0 vectorSize='3'>	30.50 0.0 0.0	</q0>
-				<Velocity0  vectorSize='3'>	0.0  0.0  0.0	</Velocity0>
-				<FExt vectorPlugin="BeadsPlugin:beadsFExt"/>
+				<q0 vectorSize='3'>30.50 0.0 0.0</q0>
+				<Velocity0  vectorSize='3'>0.0  0.0  0.0</Velocity0>
+				<FExt vectorSize='3'>-9.8 0. 0.</FExt>
 				<Mass matrixRowSize='3' matrixColSize='3'>	
 					<row>1.0 0.0 0.0</row>
 					<row>0.0 1.0 0.0</row>
 					<row>0.0 0.0 0.006</row>
 				</Mass>			
-				<K matrixRowSize='3' matrixColSize='3'>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-				</K>
-				<C matrixRowSize='3' matrixColSize='3'>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-				</C>
 			</LagrangianLinearTIDS>
 		</DS_Definition>
 		<Interaction_Definition>
@@ -111,6 +79,7 @@
                       </H>
                   </LagrangianLinearRelation>
                   <NewtonImpactLaw>
+		  <size>1</size>
                   <e>0.9</e>
                   </NewtonImpactLaw>
                </Interaction_Content>
@@ -125,21 +94,23 @@
                       </H>
                   </LagrangianLinearRelation>
                   <NewtonImpactLaw>
+		  <size>1</size>
                   <e>0.9</e>
                   </NewtonImpactLaw>
                </Interaction_Content>
             </Interaction>
             <Interaction number='3' Id='Bead1-Ground'>
-               <size> 1 </size>
+               <size>1</size>
                <DS_Concerned vectorSize='1'>1</DS_Concerned>
                <Interaction_Content>
                   <LagrangianLinearRelation>
                      <H matrixRowSize='1' matrixColSize='3'>
                      <row>1.0  0.0  0.0</row>
                       </H>
+		      <b vectorSize='1'>-0.1</b>
                   </LagrangianLinearRelation>
                   <NewtonImpactLaw>
-                  <e>0.9</e>
+  		  <size>1</size><e>0.9</e>
                   </NewtonImpactLaw>
                </Interaction_Content>
             </Interaction>
@@ -160,7 +131,7 @@
 
 		<OneStepNSProblem>
 		 	<LCP>
-                        <Solver type="Lemke" maxIter="10" tolerance="0.0001"/>
+                        <Solver type="Lemke" maxIter="1000" tolerance="0.0001"/>
 		 	</LCP>
 		 </OneStepNSProblem>
 	</Simulation>

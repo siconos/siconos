@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
     (*Int_B)(0 , 0) = -1.0 / Cvalue;
 
     FirstOrderLinearTIR* LTIRCircuitRLCD = new FirstOrderLinearTIR(*Int_C, *Int_B);
-    NonSmoothLaw * NSLaw = new ComplementarityConditionNSL();
+    NonSmoothLaw * NSLaw = new ComplementarityConditionNSL(1);
 
     LTIRCircuitRLCD->setDPtr(Int_D);
     //   LTIRCircuitRLCD->getCPtr()->display();

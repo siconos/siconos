@@ -287,9 +287,8 @@ public:
   void compute(const double time);
 
   /** post-treatment for LCP
-  *  \param 2 pointers to SiconosVector: output of LCP solver
   */
-  void postCompute(SiconosVector*, SiconosVector*) ;
+  void postCompute() ;
 
   /** print the data to the screen
   */

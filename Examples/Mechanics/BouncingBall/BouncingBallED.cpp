@@ -40,8 +40,8 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 3;           // degrees of freedom for the ball
     double t0 = 0;                   // initial computation time
-    double T = 1.0;                   // final computation time
-    double h = 0.0000005;                // time step
+    double T = 10;                   // final computation time
+    double h = 0.005;                // time step
     double position_init = 1.0;      // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
     string solverName = "Lemke" ;
@@ -149,9 +149,7 @@ int main(int argc, char* argv[])
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
     EventsManager * eventsManager = s->getEventsManagerPtr();
-    eventsManager->display();
 
-    return 0;
     unsigned int numberOfEvent = 0 ;
     int k = 0;
     boost::progress_display show_progress(N);
@@ -170,7 +168,6 @@ int main(int argc, char* argv[])
         k++;
         ++show_progress;
       }
-
       dataPlot(k, 0) = s->getCurrentTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);

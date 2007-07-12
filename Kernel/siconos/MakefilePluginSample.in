@@ -32,7 +32,7 @@ C_OBJ  = $(patsubst %.c,%.o,  $(C_SOURCES))
 sample:$(SAMPLE_OBJ) $(SAMPLE_EXE)
 
 .cpp.o:
-	$(CXX) -c $(CXXFLAGS) -fPIC @SICONOS_EXT_INCLUDES@ -I $(SICONOSPATH)/include $<
+	$(CXX) -c $(CXXFLAGS) -fPIC @SICONOS_EXT_INCLUDES@ -I $(SICONOSPATH)/include/Siconos $<
 
 $(SAMPLE_EXE):$(SAMPLE_OBJ)
 	$(CXX) $(CXXFLAGS) -o $@ $< -L@prefix@/lib  -lSiconosKernel   @SICONOS_EXT_LIBS@   

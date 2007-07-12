@@ -274,7 +274,9 @@ void LagrangianDSTest::testcomputeDS()
   double time = 1.5;
   ds->initialize("EventDriven", time);
   ds->computeRhs(time);
+  cout << "-->Test: computeDS." << endl;
   ds->computeJacobianXRhs(time);
+  cout << "-->Test: computeDS." << endl;
   SimpleMatrix M(3, 3);
   M(0, 0) = 1;
   M(1, 1) = 2;

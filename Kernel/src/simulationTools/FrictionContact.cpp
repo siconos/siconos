@@ -328,7 +328,7 @@ void FrictionContact::assembleM() //
         pos = blocksPositions[*itRow];
         col = blocksPositions[(*itCol).first];
         // copy the block into Mlcp - pos/col: position in M (row and column) of first element of the copied block
-        M->matrixCopy(*(blocks[*itRow][(*itCol).first]), pos, col); // \todo avoid copy
+        static_cast<SimpleMatrix*>(M)->setBlock(pos, col, (blocks[*itRow][(*itCol).first])); // \todo avoid copy
       }
     }
   }
@@ -452,18 +452,18 @@ void FrictionContact::compute(const double time)
       RuntimeException::selfThrow("FrictionContact::compute, unknown or unconsistent non smooth problem type: " + nspbType);
     check_solver(info);
     // --- Recover the desired variables from FrictionContact2D output ---
-    postCompute(w, z);
+    postCompute();
   }
 }
 
-void FrictionContact::postCompute(SiconosVector* w, SiconosVector* z)
+void FrictionContact::postCompute()
 {
   // === Get index set from Topology ===
   UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
 
   // y and lambda vectors
   //  vector< SimpleVector* >  Y, Lambda;
-  SimpleVector * y, *lambda;
+  SiconosVector * y, *lambda;
 
   // === Loop through "active" Unitary Relations (ie present in indexSets[1]) ===
 
@@ -485,8 +485,12 @@ void FrictionContact::postCompute(SiconosVector* w, SiconosVector* z)
 
     //      static_cast<SimpleVector*>(w)->getBlock(pos,nsLawSize, *y) ;
     //      static_cast<SimpleVector*>(z)->getBlock(pos,nsLawSize, *lambda) ;
-    w->getBlock(pos, *y) ;
-    z->getBlock(pos, *lambda) ;
+
+    // Copy w/z values, starting from index pos into y/lambda.
+
+    setBlock(w, y, y->size(), pos, 0);
+    setBlock(z, lambda, lambda->size(), pos, 0);
+
   }
 }
 

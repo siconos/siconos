@@ -42,8 +42,6 @@ private:
   CPPUNIT_TEST(testEye);
   CPPUNIT_TEST(testNormInf);
   CPPUNIT_TEST(testGetSetRowCol);
-  CPPUNIT_TEST(testGetBlock);
-  CPPUNIT_TEST(testMatrixCopy);
   CPPUNIT_TEST(testAssignment);
   CPPUNIT_TEST(testOperators1);
   CPPUNIT_TEST(End);
@@ -58,8 +56,6 @@ private:
   void testZero();
   void testEye();
   void testNormInf();
-  void testGetBlock();
-  void testMatrixCopy();
   void testAssignment();
   void testOperators1();
   void End();
@@ -68,6 +64,7 @@ private:
   std::vector<SiconosMatrix*> m;
   std::vector<unsigned int> tRow, tCol;
   BlocksMat * mapRef;
+  double tol;
 
 public:
   void setUp();

@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
     // ==== Simulation loop - Writing without explicit event handling =====
     int k = 0;
     boost::progress_display show_progress(N);
-    for (k = 1 ; k < N + 1 ; ++k)
+    for (k = 1 ; k < N + 1  ; ++k)
     {
       s->computeOneStep();
       // --- Get values to be plotted ---

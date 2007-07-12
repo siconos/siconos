@@ -242,7 +242,7 @@ void LagrangianLinearR::computeOutput(double time, unsigned int derivativeNumber
 
   string name = "q" + toString<unsigned int>(derivativeNumber);
 
-  *y = prod(*H, *data[name]);
+  prod(*H, *data[name], *y);
   if (derivativeNumber == 0 && b != NULL)
     *y += *b;
 
@@ -263,7 +263,7 @@ void LagrangianLinearR::computeFreeOutput(double time, unsigned int derivativeNu
 
   if (derivativeNumber == 2) name = "q2";
 
-  *y = prod(*H, *data[name]);
+  prod(*H, *data[name], *y);
   if (derivativeNumber == 0 && b != NULL)
     *y += *b;
 
@@ -282,9 +282,10 @@ void LagrangianLinearR::computeInput(double time, const unsigned int level)
   SiconosVector *lambda = new SimpleVector(*interaction->getLambdaPtr(level));
   // compute p = Ht lambda
   SiconosMatrix * HT = new SimpleMatrix(*H);
+
   HT->trans();
-  //  *data[name] += prod(*HT,*lambda);
-  prod(*HT, *lambda, *data[name]);
+  *data[name] += prod(*HT, *lambda);
+
   delete HT;
   delete lambda;
   //gemv(CblasTrans,1.0,*H,*lambda,1.0, *data[name]); => not yet implemented for BlockVectors.

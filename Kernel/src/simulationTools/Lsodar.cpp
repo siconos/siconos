@@ -237,11 +237,11 @@ void Lsodar::initialize()
     type = (*it)->getType();
     if (type == LLTIDS)
     {
-      xWork->addPtr((static_cast<LagrangianLinearTIDS*>(*it))->getQPtr()) ;
-      xWork->addPtr((static_cast<LagrangianLinearTIDS*>(*it))->getVelocityPtr()) ;
+      xWork->insertPtr((static_cast<LagrangianLinearTIDS*>(*it))->getQPtr()) ;
+      xWork->insertPtr((static_cast<LagrangianLinearTIDS*>(*it))->getVelocityPtr()) ;
     }
     else
-      xWork->addPtr((*it)->getXPtr());
+      xWork->insertPtr((*it)->getXPtr());
   }
 
   //   Integer parameters for LSODAR are saved in vector intParam.

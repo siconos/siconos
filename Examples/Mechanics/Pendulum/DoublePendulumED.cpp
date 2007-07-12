@@ -166,8 +166,8 @@ int main(int argc, char* argv[])
 
     // -- OneStepNsProblem --
     //OneStepNSProblem * osnspb = new LCP(s,"name","Lemke",2001, 0.005);
-    OneStepNSProblem * impact = new LCP(s, "impact", solverName, 101, 0.0001, "max", 0.6);
-    OneStepNSProblem * acceleration = new LCP(s, "acceleration", solverName, 101, 0.0001, "max", 0.6);
+    OneStepNSProblem * impact = new LCP(s, "impact", solverName, 101, 0.0001);
+    OneStepNSProblem * acceleration = new LCP(s, "acceleration", solverName, 101, 0.0001);
 
 
     cout << "=== End of model loading === " << endl;
@@ -230,7 +230,6 @@ int main(int argc, char* argv[])
 
       if (eventsManager->getCurrentEventPtr()->getType() == "NonSmoothEvent")
       {
-
         dataPlot(k, 0) =  Pendulum->getCurrentT();
         dataPlot(k, 1) = doublependulum->getQ()(0);
         dataPlot(k, 2) = doublependulum->getVelocity()(0);

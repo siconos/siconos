@@ -255,9 +255,8 @@ public:
   virtual void compute(const double time) = 0;
 
   /** post-treatment for LCP
-  *  \param 2 pointers to SiconosVector: output of LCP solver
-  */
-  void postCompute(SiconosVector*, SiconosVector*) ;
+   */
+  void postCompute();
 
   /** copy the data of the OneStepNSProblem to the XML tree
   *  \exception RuntimeException

@@ -21,6 +21,8 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "SimpleMatrix.h"
+#include "BlockMatrix.h"
+#include "BlockVector.h"
 
 using namespace std;
 
@@ -36,7 +38,7 @@ private:
   CPPUNIT_TEST(testConstructor0);
   CPPUNIT_TEST(testConstructor1);
   CPPUNIT_TEST(testConstructor2);
-  //CPPUNIT_TEST(testConstructor3);
+  CPPUNIT_TEST(testConstructor3);
   CPPUNIT_TEST(testConstructor4);
   CPPUNIT_TEST(testConstructor5);
   CPPUNIT_TEST(testConstructor6);
@@ -51,32 +53,43 @@ private:
   CPPUNIT_TEST(testEye);
   CPPUNIT_TEST(testResize);
   CPPUNIT_TEST(testNormInf);
-  CPPUNIT_TEST(testGetBlock);
-  CPPUNIT_TEST(testMatrixCopy);
+  CPPUNIT_TEST(testSetBlock);
+  CPPUNIT_TEST(testSetBlock2);
   CPPUNIT_TEST(testTrans);
-  CPPUNIT_TEST(testAssignment);
+  CPPUNIT_TEST(testAssignment0);
+  CPPUNIT_TEST(testAssignment1);
+  CPPUNIT_TEST(testAssignment2);
   CPPUNIT_TEST(testOperators1);
   CPPUNIT_TEST(testOperators2);
   CPPUNIT_TEST(testOperators3);
   CPPUNIT_TEST(testOperators4);
   CPPUNIT_TEST(testOperators5);
   CPPUNIT_TEST(testOperators6);
+  CPPUNIT_TEST(testOperators6Bis);
+  CPPUNIT_TEST(testOperators6Ter);
   CPPUNIT_TEST(testOperators7);
   CPPUNIT_TEST(testOperators8);
+  CPPUNIT_TEST(testOperators8Bis);
+  CPPUNIT_TEST(testOperators8Ter);
   CPPUNIT_TEST(testOperators9);
+  CPPUNIT_TEST(testOperators9Bis);
   CPPUNIT_TEST(testOperators10);
   CPPUNIT_TEST(testOperators11);
   CPPUNIT_TEST(testOperators12);
   CPPUNIT_TEST(testOperators13);
   CPPUNIT_TEST(testPow);
   CPPUNIT_TEST(testProd);
+  CPPUNIT_TEST(testProdBis);
+  CPPUNIT_TEST(testProdTer);
+  CPPUNIT_TEST(testGemv);
+  CPPUNIT_TEST(testGemm);
   CPPUNIT_TEST(End);
   CPPUNIT_TEST_SUITE_END();
 
   void testConstructor0();
   void testConstructor1();
   void testConstructor2();
-  //  void testConstructor3();
+  void testConstructor3();
   void testConstructor4();
   void testConstructor5();
   void testConstructor6();
@@ -91,35 +104,48 @@ private:
   void testEye();
   void testResize();
   void testNormInf();
-  void testGetBlock();
-  void testMatrixCopy();
+  void testSetBlock();
+  void testSetBlock2();
   void testTrans();
-  void testAssignment();
+  void testAssignment0();
+  void testAssignment1();
+  void testAssignment2();
   void testOperators1();
   void testOperators2();
   void testOperators3();
   void testOperators4();
   void testOperators5();
   void testOperators6();
+  void testOperators6Bis();
+  void testOperators6Ter();
   void testOperators7();
   void testOperators8();
+  void testOperators8Bis();
+  void testOperators8Ter();
   void testOperators9();
+  void testOperators9Bis();
   void testOperators10();
   void testOperators11();
   void testOperators12();
   void testOperators13();
   void testPow();
   void testProd();
+  void testProdBis();
+  void testProdTer();
+  void testGemm();
+  void testGemv();
   void End();
 
-  SiconosMatrix *SicM;
+  unsigned int size, size2;
+  SiconosMatrix *SicM, *m1, *m2, *m3, *m4, *m5, *m6, *m7, *m8, *C, *Cb, *Cb2;
+  const SiconosMatrix *A, *B, *Ab, *Bb;
   SimpleMatrix *SimM;
   string fic1, fic2;
   SimpleVector* vect1, *vect2, *vect3;
   DenseMat * D;
   TriangMat *T, *T2;
   SymMat *S, *S2;
-  BandedMat *B, *B2;
+  BandedMat *Band, *Band2;
   SparseMat *SP;
   ZeroMat * Z, *Z2;
   IdentityMat* I, *I2;

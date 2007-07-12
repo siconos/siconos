@@ -30,4 +30,4 @@ SUBDIRS = test
 
 noinst_LTLIBRARIES = libModel.la
 libModel_la_SOURCES = Model.cpp Model.h 
-siconos_HEADERS = Model.h  SiconosConst.h
+siconos_HEADERS = Model.h 

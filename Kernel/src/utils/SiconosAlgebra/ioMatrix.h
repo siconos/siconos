@@ -59,15 +59,6 @@ private :
   ioMatrix();
 
 public :
-  /**static SimpleMatrix *temporary
-   * used for storing matrix written in a file when Mode = "binary"
-   */
-  static SimpleMatrix* temporary;
-
-  /** static writeSimpleBinary
-   * true if temporary is allocated, else false.
-   */
-  static bool writeSimpleBinary;
 
   /** constructor with FileName = file and Mode = mode
    *  \param 2 std::string
@@ -76,7 +67,7 @@ public :
 
   /** destructor
    */
-  ~ioMatrix(void);
+  ~ioMatrix() {};
 
   /** read the matrix in the file "Filename" and write it into matrix A
    *  \param a SiconosMatrix

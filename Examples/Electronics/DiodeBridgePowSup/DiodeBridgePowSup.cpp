@@ -93,7 +93,11 @@ int main(int argc, char* argv[])
     Offset_lambda = -DiodeThreshold * Offset_lambda;
 
     SimpleVector* Int_z = new SimpleVector(5);
-    Int_z->setBlock(0, prod(*Int_D, Offset_lambda) - Offset_y);
+    SiconosVector * tmp = new SimpleVector(4) ;
+    prod(*Int_D, Offset_lambda, *tmp);
+    *tmp -= Offset_y;
+    Int_z->setBlock(0, tmp);
+    delete tmp;
     LSDiodeBridgePowSup->setZPtr(Int_z);
 
     SiconosMatrix* Int_B = new SimpleMatrix(1, 4);

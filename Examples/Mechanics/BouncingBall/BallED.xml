@@ -67,6 +67,7 @@
 					</LagrangianLinearRelation>			
 					<!-- NS Law of this interaction	-->
 					<NewtonImpactLaw>
+					        <size>1</size>
 						<e>0.9</e>				
 					</NewtonImpactLaw>
 				</Interaction_Content>	

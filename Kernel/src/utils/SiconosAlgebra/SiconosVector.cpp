@@ -1,21 +1,45 @@
+/* Siconos-Kernel version 2.0.1, Copyright INRIA 2005-2006.
+ * Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ * Siconos is a free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * Siconos is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Siconos; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ */
+
 #include "SiconosVector.h"
-#include "SiconosVectorException.h"
 
 // Default (protected) constructor
-SiconosVector::SiconosVector(bool isblock): isBlockVector(isblock), sizeV(0)
+SiconosVector::SiconosVector(unsigned int newNum): sizeV(0), num(newNum)
 {}
 
 // Basic (protected) constructor
-SiconosVector::SiconosVector(bool isblock, unsigned int size): isBlockVector(isblock), sizeV(size)
+SiconosVector::SiconosVector(unsigned int newNum, unsigned int size): sizeV(size), num(newNum)
 {}
-
-SiconosVector::~SiconosVector() {}
 
 Index SiconosVector::getTabIndex() const
 {
   SiconosVectorException::selfThrow("SiconosVector::getTabIndex() : not implemented for this type of vector (Simple?) reserved to BlockVectors.");
   // fake to avoid error on warning.
   Index tmp;
+  return tmp;
+}
+
+const Index * SiconosVector::getTabIndexPtr() const
+{
+  SiconosVectorException::selfThrow("SiconosVector::getTabIndexPtr() : not implemented for this type of vector (Simple?) reserved to BlockVectors.");
+  // fake to avoid error on warning.
+  Index * tmp = NULL;
   return tmp;
 }
 
@@ -47,35 +71,100 @@ ConstBlockVectIterator SiconosVector::end() const
   return it;
 };
 
-void SiconosVector::add(const  SiconosVector&)
+//=====================
+// vectors comparison
+//=====================
+const bool isComparableTo(const SiconosVector * v1, const SiconosVector * v2)
 {
-  SiconosVectorException::selfThrow("SiconosVector::add() : not implemented for this type of vector (Simple?) reserved to BlockVectors.");
+  // return:
+  // - true if one of the vectors is a Simple and if they have the same size
+  // - true if both are block but with blocks which are facing each other of the same size.
+  // - false in other cases
+
+  if ((!v1->isBlock() || !v2->isBlock()) && (v1->size() == v2->size())) return true;
+
+  const Index * I1 = v1->getTabIndexPtr();
+  const Index * I2 = v2->getTabIndexPtr();
+
+  return (*I1 == *I2);
 }
 
-void SiconosVector::addPtr(SiconosVector*)
+void scal(double a, const SiconosVector & x, SiconosVector & y)
 {
-  SiconosVectorException::selfThrow("SiconosVector::addPtr() : not implemented for this type of vector (Simple?) reserved to BlockVectors.");
+  // To compute y = a *x
+
+  if (&x == &y)
+    y *= a;
+  else
+  {
+    unsigned int sizeX = x.size();
+    unsigned int sizeY = y.size();
+
+    if (sizeX != sizeY)
+      SiconosVectorException::selfThrow("scal(a,SiconosVector,SiconosVector) failed, sizes are not consistent.");
+
+    unsigned int numY = y.getNum();
+    unsigned int numX = x.getNum();
+    if (numX == numY)
+    {
+      if (numX == 0) // ie if both are block vectors
+      {
+        if (isComparableTo(&x, &y)) // if x and y are "block-consistent"
+        {
+          ConstBlockVectIterator itX = x.begin();
+          BlockVectIterator itY ;
+          for (itY = y.begin(); itY != y.end(); ++itY)
+            scal(a, **itX++, **itY++);
+        }
+        else
+        {
+          for (unsigned int i = 0; i < x.size(); ++i)
+            y(i) = a * x(i);
+        }
+      }
+      else if (numX == 1) // ie if both are Dense
+      {
+        //atlas::axpby(a,*x.getDensePtr(),0.0,*y.getDensePtr());
+        noalias(*y.getDensePtr()) = a * *x.getDensePtr();
+      }
+      else  // if both are sparse
+        noalias(*y.getSparsePtr()) = a**x.getSparsePtr();
+    }
+    else
+    {
+      if (numY == 0 || numX == 0) // if y or x is block
+      {
+        y = x;
+        y *= a;
+      }
+      else
+      {
+        if (numY == 1) // if y is dense
+          noalias(*y.getDensePtr()) = a**x.getSparsePtr();
+        else
+          SiconosVectorException::selfThrow("SiconosVector::scal(a,dense,sparse) not allowed.");
+      }
+    }
+  }
 }
 
-void SiconosVector::xpy(const SiconosVector &, const SiconosVector &)
+void swap(SiconosVector& x, SiconosVector& y)
 {
-  SiconosVectorException::selfThrow("SiconosVector::xpy() : not implemented for this type of vector (Simple?) reserved to BlockVectors.");
+  unsigned int numX = x.getNum();
+  unsigned int numY = y.getNum();
+
+
+  if (numX == numY)
+  {
+    if (numX == 1) // ublas swap seems to be much more efficient than atlas::swap (bindings) ...
+      swap(*x.getDensePtr(), *y.getDensePtr());
+    else if (numX == 4)
+      swap(*x.getSparsePtr(), *y.getSparsePtr());
+    else
+      SiconosVectorException::selfThrow("Swap(x,y): not yet implemented for block vectors.");
+  }
+  else
+    SiconosVectorException::selfThrow("Swap(x,y): can not swap two vectors of different types.");
 }
 
-void SiconosVector::scal(double, const SiconosVector&)
-{
-  SiconosVectorException::selfThrow("SiconosVector::scal() : not implemented for this type of vector (Simple?) reserved to BlockVectors.");
-}
-
-
-void SiconosVector::axpy(double, const SiconosVector&, const SiconosVector&)
-{
-  SiconosVectorException::selfThrow("SiconosVector::axpy() : not implemented for this type of vector (Simple?) reserved to BlockVectors.");
-}
-
-
-void SiconosVector::axpby(double, const SiconosVector&, double, const SiconosVector&)
-{
-  SiconosVectorException::selfThrow("SiconosVector::axpby() : not implemented for this type of vector (Simple?) reserved to BlockVectors.");
-}
 

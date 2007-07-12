@@ -27,60 +27,53 @@
 
 class SimpleMatrix;
 
-/** Vectors (embedded various types of Boost-Ublas vectors of double).
+/** Vectors of double. (Interface to various types of Boost-Ublas vectors).
  *
  * \author SICONOS Development Team - copyright INRIA
  *   \version 2.1.0.
  *   \date (Creation) 07/21/2006
  *
+ * Used to handle vectors of double.
  *
+ * Two possible types: DENSE (default) and SPARSE.
  *
- *
- * SimpleVector is used in the platform to store vectors (mathematical object).
+ * You can find an overview on how to build and use vectors and matrices in \ref GS_SicAlgebra .
  *
  */
 class SimpleVector: public SiconosVector
 {
 private:
 
-  /** unsigned int num
-   * an unsigned int which make a correspondance with Boost Vector: 1 -> DenseVect, 4 -> SparseVect
-   * Note: 4 for sparse to keep the same num as for matrices.
+  /**
+   * Union of pointers to the ublas vector type (dense or sparse)
    */
-  unsigned int num;
+  VECTOR_UBLAS_TYPE vect;
 
-  /** Vect vect (See SiconosMatrix.h for more details on Mat type);
-   * union of The Boost Matrices : DenseVect, SparseVect are encapsulated.
+  /** Default constructor
    */
-  Vect vect;
-
-  /** constructor with the type of the Boost vector
-   *  \param TYP
-   */
-  SimpleVector();
+  SimpleVector() {};
 
 public:
   /***************************** CONSTRUCTORS ****************************/
 
   /** constructor with the type and the dimension of the Boost vector
    *  \param an unsigned int, dimension
-   *  \param a TYP
+   *  \param an_UBLAS_TYPE
    */
-  SimpleVector(unsigned int , TYP = DENSE);
+  SimpleVector(unsigned int , UBLAS_TYPE = DENSE);
 
-  /** constructor with the type and the dimension of the Boost vector and a default value
+  /** constructor with the dimension of the Boost vector, a default value and the type.
    *  \param an unsigned int, dimension
    *  \param double a, so that *this = [a a a ...]
-   *  \param a TYP (default = dense)
+   *  \param an UBLAS_TYPE (default = dense)
    */
-  SimpleVector(unsigned int , double, TYP = DENSE);
+  SimpleVector(unsigned int , double, UBLAS_TYPE = DENSE);
 
-  /** constructor with the type of the boost vector, a std::vector of the values and the dimension of the vector
+  /** constructor with  a std::vector of the values and the type of the boost vector.
    *  \param a std::vector<double>
-   *  \param an unsigned int
-   *  \param a TYP
+   *  \param an UBLAS_TYPE
    */
-  SimpleVector(const std::vector<double>, TYP = DENSE);
+  SimpleVector(const std::vector<double>&, UBLAS_TYPE = DENSE);
 
   /** copy constructor
    *  \param SimpleVector
@@ -92,12 +85,12 @@ public:
    */
   SimpleVector(const SiconosVector&);
 
-  /** constructor with a DenseVect vector (see SiconosMatrix.h for details)
+  /** constructor with a DenseVect vector (see SiconosAlgebra.h for details)
    *  \param a DenseVect
    */
   SimpleVector(const DenseVect&);
 
-  /** constructor with a SparseVect vector (see SiconosMatrix.h for details)
+  /** constructor with a SparseVect vector (see SiconosAlgebra.h for details)
    *  \param a SparseVect
    */
   SimpleVector(const SparseVect&);
@@ -110,55 +103,46 @@ public:
 
   /** destructor
    */
-  ~SimpleVector(void);
+  ~SimpleVector();
 
-  /******************************** METHODS ******************************/
-
-  /** get the attribute num of current vector
-   *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
-   * \return an unsigned int.
-   */
-  inline const unsigned int getNum() const
-  {
-    return num;
-  };
-
-  /** get the attribute if it's type is DenseVect
+  /** get the ublas embedded vector if it's type is Dense
    *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    *  \return a DenseVect
    */
   const DenseVect getDense(unsigned int = 0) const;
 
-  /** get the attribute if it's type is SparseVect
+  /** get the ublas embedded vector if it's type is Sparse
    *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    *  \return a SparseVect
    */
   const SparseVect getSparse(unsigned int = 0) const;
 
-  /** get a pointer on DenseVect
+  /** get a pointer to the ublas embedded vector if it's type is Dense
    *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    *  \return a DenseVect*
    */
-  DenseVect* getDensePtr(unsigned int = 0) const;
+  inline DenseVect* getDensePtr(unsigned int = 0) const
+  {
+    return vect.Dense;
+  };
 
-  /** get a pointer on SparseVect
+  /** get a pointer to the ublas embedded vector if it's type is Sparse
    *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    *  \return a SparseVect*
    */
   SparseVect* getSparsePtr(unsigned int = 0) const;
 
   /** return the array of double values of the vector
-   *  \exception SiconosVectorException
    *  \param unsigned int: vector position (only for block vector)
    *  \return double* : the pointer on the array
    */
   double* getArray(unsigned int = 0) const;
 
-  /** get block starting at pos and of size block.size()
-   *  \param an int, position of the first element of the required block
-   *  \param a SiconosVector, in-out parameter.
+  /** get block starting at "pos" (first argument) and of size block.size() and write it in v (second arg)
+   *  \param pos an int, position of the first element of the required block
+   *  \param v a SiconosVector *, in-out parameter.
    */
-  void getBlock(unsigned int, SiconosVector&) const;
+  //  void getBlock(unsigned int, SiconosVector*) const;
 
   /** sets all the values of the vector to 0.0
    */
@@ -191,19 +175,30 @@ public:
     return this;
   };
 
-  /** set i-eme SiconosVector (copy) - Useful only for BlockVector (else equivalent to a single copy)
+  /** return the current object. This function is really usefull only for block vector
+   * \return a pointer to a SiconosVector
+   */
+  inline const SiconosVector* getVectorPtr(unsigned int) const
+  {
+    return this;
+  };
+
+  /** set SiconosVector number i (copy) with v (second arg) - Useful only for BlockVector (else equivalent to a single copy)
    * \param unsigned int: block number (0 for SimpleVector)
    * \param a SiconosVector
    */
   void setVector(unsigned int, const SiconosVector&);
 
-  /** set i-eme SiconosVector (pointer link) - Useful only for BlockVector
+  /** set SiconosVector number i (pointer link) with v (second arg) - Useful only for BlockVector
    * \param unsigned int: block number (0 for SimpleVector)
    * \param a pointer to a SiconosVector
    */
-  void setVectorPtr(unsigned int, SiconosVector*);
+  inline void setVectorPtr(unsigned int, SiconosVector*)
+  {
+    SiconosVectorException::selfThrow("SimpleVector::setVectorPtr(num,v), not allowed for SimpleVector.");
+  };
 
-  /** set all values of the vector component to value.
+  /** set all values of the vector component to input value.
    * \param a double
    */
   void fill(double);
@@ -214,35 +209,17 @@ public:
 
   //************************** VECTORS HANDLING AND OPERATORS *******************************
 
-  /** return the element vector[i]
+  /** get the element at position i in the vector
    *  \param an unsigned int i
    *  \return a double
    */
-  const double getValue(unsigned int);
+  const double getValue(unsigned int) const ;
 
-  /** set the element vector[i]
+  /** set the element at position i in the vector.
    *  \param an unsigned int i
    *  \param the value
    */
   void setValue(unsigned int, double);
-
-  /** set the elements starting from position i with input vector
-   *  \param an unsigned int i
-   *  \param a SiconosVector
-   */
-  void setBlock(unsigned int, const SiconosVector&);
-
-  /** add the input vector to the elements starting from position i.
-   *  \param an unsigned int i
-   *  \param a SiconosVector
-   */
-  void addBlock(unsigned int, const SiconosVector&);
-
-  /** subtract the input vector to the elements starting from position i.
-   *  \param an unsigned int i
-   *  \param a SiconosVector
-   */
-  void subBlock(unsigned int, const SiconosVector&);
 
   /** get the element at position i in the vector
    *  \param an integer i
@@ -260,7 +237,7 @@ public:
    *  \param an unsigned integer i
    *  \return a SiconosVector*
    */
-  inline SimpleVector* operator [](unsigned int)
+  inline SiconosVector* operator [](unsigned int)
   {
     return this;
   };
@@ -269,10 +246,28 @@ public:
    *  \param an unsigned integer i
    *  \return a SiconosVector*
    */
-  inline const SimpleVector* operator [](unsigned int) const
+  inline const SiconosVector* operator [](unsigned int) const
   {
     return this;
   };
+
+  /** set the elements starting from position i with input vector
+   *  \param an unsigned int i
+   *  \param a SiconosVector
+   */
+  void setBlock(unsigned int, const SiconosVector *);
+
+  /** add the input vector to the elements starting from position i.
+   *  \param an unsigned int i
+   *  \param a SiconosVector
+   */
+  void addBlock(unsigned int, const SiconosVector&);
+
+  /** subtract the input vector to the elements starting from position i.
+   *  \param an unsigned int i
+   *  \param a SiconosVector
+   */
+  void subBlock(unsigned int, const SiconosVector&);
 
   /** operator =
    *  \param SiconosVector : the vector to be copied
@@ -304,80 +299,35 @@ public:
    */
   SimpleVector& operator -=(const SiconosVector&);
 
-  /** operator /=
-   *  \param double, a scalar
+  /** Copy a subBlock of size sizeB of vIn (from index startIn) into a subBlock
+   *  of vOut (from index startOut)
+   * \param vIn, a SiconosVector*
+   * \param vOut, a SiconosVector*
+   * \param sizeB, an unsigned int
+   * \param startIn, an unsigned int
+   * \param startOut, an unsigned int
    */
-  SimpleVector& operator /= (double);
+  friend void setBlock(const SiconosVector*, SiconosVector*, unsigned int, unsigned int, unsigned int);
 
-  /** operator /=
-   *  \param int, a scalar
-   */
-  SimpleVector& operator /= (int);
-
-  /** multiply the current vector with a double
-   *  \param a double
-   *  \exception SiconosVectorException
-   */
-  SimpleVector& operator *= (double);
-
-  /** multiply the current vector with an int
-   *  \param an int
-   *  \exception SiconosVectorException
-   */
-  SimpleVector& operator *= (int);
-
-  /** Copy x into y */
-
-
-  /**: A==B when (A-B).normInf()<tolerance
+  /** A==B when (A-B).normInf()<tolerance
    * \param 2 SiconosVector
    * \return a boolean
    */
   friend bool operator ==(const SiconosVector&, const SiconosVector&);
 
-  /** Addition of two vectors
-   *  \param 2 SiconosMatrix
+  /** multiplication of a vector by a scalar
+   *  \param a double
+   *  \param a SiconosVector
    *  \return a SimpleVector
-   *  \exception SiconosVectorException, if the sizes are incompatible
-   *  \exception SiconosVectorException, if the two vectors have different types, in this case use function add
    */
-  friend SimpleVector operator + (const SimpleVector&, const SimpleVector&);
-
-  /** Subtraction of two vectors
-   *  \param 2 SiconosVector
-   *  \return a SimpleVector
-   *  \exception SiconosVectorException, if the sizes are incompatible
-   *  \exception SiconosVectorException, if the two vectors have different types, in this case use function add
-   */
-  friend SimpleVector operator - (const SimpleVector&, const SimpleVector&);
+  friend SimpleVector operator * (double, const SiconosVector&);
 
   /** multiplication of a vector by a double
    *  \param a SiconosVector
    *  \param a double
    *  \return a SimpleVector
    */
-  friend SimpleVector operator * (const SimpleVector&, double);
-
-  /** multiplication of a vector by an int
-   *  \param a SiconosVector
-   *  \param an integer
-   *  \return a SimpleVector
-   */
-  friend SimpleVector operator * (const SimpleVector&, int);
-
-  /** multiplication of a vector by a double
-   *  \param a SiconosVector
-   *  \param a double
-   *  \return a SimpleVector
-   */
-  friend SimpleVector operator * (double, const SimpleVector&);
-
-  /** multiplication of a vector by an int
-   *  \param a SiconosVector
-   *  \param an integer
-   *  \return a SimpleVector
-   */
-  friend SimpleVector operator * (int, const SimpleVector&);
+  friend SimpleVector operator * (const SiconosVector&, double);
 
   /** division of the vector by a double
    *  \param a SiconosVector
@@ -387,19 +337,48 @@ public:
    */
   friend SimpleVector operator / (const SimpleVector&, double);
 
-  /** division of the vector by an int
-   *  \param a SiconosVector
-   *  \param an integer
-   *  \return a SimpleVector
-   *  \exception SiconosVectorException, if the int d = 0
+  /** Addition of two vectors
+   * \param a SiconosVector
+   * \param a SiconosVector
+   * \return a SimpleVector
    */
-  friend SimpleVector operator / (const SimpleVector&, int);
+  friend SimpleVector operator + (const SiconosVector&, const SiconosVector&);
 
-  /** compute the product m1 * trans(m2)
-   *  \param 2 SiconosVectors
-   *  \return a SimpleMatrix
+  /** computes z = x + y
+      \param x, a  SiconosVector, IN.
+      \param y, a  SiconosVector, IN.
+      \param z, a SiconosVector, IN-OUT.
+  */
+  friend void add(const SiconosVector&, const SiconosVector&, SiconosVector&);
+
+  /** Subtraction of two vectors
+      \param a SiconosVector (x), IN.
+      \param a SiconosVector (y), IN.
+      \return a SimpleVector
    */
-  friend SimpleMatrix outer_prod(const SiconosVector&, const SiconosVector&);
+  friend SimpleVector operator - (const SiconosVector&, const SiconosVector&);
+
+  /** computes z = x - y
+      \param a SiconosVector (x), IN.
+      \param a SiconosVector (y), IN.
+      \param a SiconosVector (z), IN-OUT.
+  */
+  friend void sub(const SiconosVector&, const SiconosVector&, SiconosVector&);
+
+  /** computes y = a*x + b*y with atlas axpy.
+      \param a, a double.
+      \param x, a SiconosVector , IN.
+      \param b, a double.
+      \param y, a SiconosVector , IN-OUT.
+  */
+  friend void axpby(double, const SiconosVector&, double, SiconosVector&);
+
+  /** computes y = a*x + y with atlas axpy.
+      \param a, a double.
+      \param x, a SiconosVector , IN.
+      \param y, a SiconosVector , IN-OUT.
+  */
+  friend void axpy(double, const SiconosVector&, SiconosVector&);
 
   /** compute dot product m1.m2
    *  \param 2 SiconosVectors
@@ -407,44 +386,10 @@ public:
    */
   friend const double inner_prod(const SiconosVector&, const SiconosVector&);
 
-  /** computes this = x + y with atlas xpy .
-      \param a SiconosVector (x)
-      \param a SiconosVector (y)
-  */
-  void xpy(const SiconosVector &, const SiconosVector &);
-
-  /** computes this = ax + by with atlas axpby .
-      \param a SiconosVector (x)
-      \param a SiconosVector (y)
-  */
-  void axpby(double, const SiconosVector&, double, const SiconosVector&);
-
-  /** computes this = a*x with atlas scal.
-      \param a SiconosVector (x)
-      \param a SiconosVector (y)
-  */
-  void scal(double, const SiconosVector&);
-
-  /** computes this = a*x + y with atlas axpy.
-      \param a SiconosVector (x)
-      \param a SiconosVector (y)
-  */
-  void axpy(double, const SiconosVector&, const SiconosVector&);
-
-  /** computes y = a*x + b*y with atlas axpy.
-      \param a SiconosVector (x), IN.
-      \param a SiconosVector (y), IN-OUT.
-  */
-  friend void axpby(double, const SiconosVector&, double, SiconosVector&);
-
-  /** computes y = a*x + y with atlas axpy.
-      \param a SiconosVector (x), IN.
-      \param a SiconosVector (y), IN-OUT.
-  */
-  friend void axpy(double, const SiconosVector&, SiconosVector&);
-
-  /** Swap x and y contents, using atlas swap.*/
-  friend void swap(SiconosVector&, SiconosVector&);
-
+  /** compute the product m1 * trans(m2)
+   *  \param 2 SiconosVectors
+   *  \return a SimpleMatrix
+   */
+  friend SimpleMatrix outer_prod(const SiconosVector&, const SiconosVector&);
 };
 #endif

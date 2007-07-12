@@ -4,20 +4,10 @@
 #include <fstream>
 #include <iterator>
 
-SimpleMatrix* ioMatrix::temporary = new SimpleMatrix(1, 1);
-
-bool ioMatrix::writeSimpleBinary = false;
-
 // Default (private)
 ioMatrix::ioMatrix(): ioObject() {}
 
 ioMatrix::ioMatrix(const std::string& file, const std::string& mode): ioObject(file, mode) {}
-
-ioMatrix::~ioMatrix()
-{
-  if (writeSimpleBinary)
-    delete(temporary);
-}
 
 const bool ioMatrix::read(SiconosMatrix& m) const
 {

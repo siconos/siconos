@@ -24,5 +24,5 @@ SUBDIRS = SiconosTools SiconosException SiconosSharedLibrary SiconosAlgebra Sico
 
 EXTRA_DIST = Utils.h
 
-siconos_HEADERS = Utils.h
+siconos_HEADERS = Utils.h SiconosConst.h
 

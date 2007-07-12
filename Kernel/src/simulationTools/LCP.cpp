@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 #include "LCP.h"
 #include "LCPXML.h"
 #include "Topology.h"
@@ -385,7 +385,8 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
       centralBlocks[*itDS]->PLUForwardBackwardInPlace(*rightBlock);
       //      integration of r with theta method removed
       //      *currentBlock += h *Theta[*itDS]* *leftBlock * (*rightBlock); //left = C, right = W.B
-      *currentBlock += h * (*leftBlock) * (*rightBlock); //left = C, right = W.B
+      //gemm(h,*leftBlock,*rightBlock,1.0,*currentBlock);
+      *currentBlock += h * prod(*leftBlock, *rightBlock); //left = C, right = W.B
       delete rightBlock;
     }
     else if (relationType1 == "Lagrangian" || relationType2 == "Lagrangian")
@@ -539,7 +540,7 @@ void LCP::assembleM() //
           pos = blocksPositions[*itRow];
           col = blocksPositions[(*itCol).first];
           // copy the block into Mlcp - pos/col: position in M (row and column) of first element of the copied block
-          M->matrixCopy(*(blocks[*itRow][(*itCol).first]), pos, col); // \todo avoid copy
+          static_cast<SimpleMatrix*>(M)->setBlock(pos, col, (blocks[*itRow][(*itCol).first])); // \todo avoid copy
         }
       }
     }
@@ -549,7 +550,6 @@ void LCP::assembleM() //
 
 void LCP::computeQ(const double time)
 {
-
   // === Memory allocation, if required ===
   if (q == NULL)
   {
@@ -656,7 +656,6 @@ void LCP::compute(const double time)
       startLCPuni = clock();
 
       info = lcp_solver(M->getArray(), q->getArray(), &Nlcp, &solvingMethod, z->getArray(), w->getArray());
-
       timeLCPuni = clock() - startLCPuni;
 
       if (info != 0)
@@ -703,21 +702,21 @@ void LCP::compute(const double time)
       for (unsigned int i = 0; i < sizeOutput - 1; i++) cout << (*w)(i) << " ; ";
       cout << (*w)(sizeOutput - 1) << " ]" << endl;
     }
-    // \warning : info value and signification depends on solver type ...
+    // \warning : info value and signification depend on solver type ...
     check_solver(info);
     // --- Recover the desired variables from LCP output ---
-    postCompute(w, z);
+    postCompute();
   }
 }
 
-void LCP::postCompute(SiconosVector* w, SiconosVector* z)
+void LCP::postCompute()
 {
   // === Get index set from Topology ===
   UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
 
   // y and lambda vectors
   //  vector< SimpleVector* >  Y, Lambda;
-  SimpleVector *lambda, *y;
+  SiconosVector *lambda, *y;
 
   // === Loop through "active" Unitary Relations (ie present in indexSets[1]) ===
 
@@ -734,12 +733,15 @@ void LCP::postCompute(SiconosVector* w, SiconosVector* z)
     pos = blocksPositions[*itCurrent];
 
     // Get Y and Lambda for the current Unitary Relation
-    y = static_cast<SimpleVector*>((*itCurrent)-> getYPtr(levelMin));
-    lambda = static_cast<SimpleVector*>((*itCurrent)->getLambdaPtr(levelMin));
-    // static_cast<SimpleVector*>(w)->getBlock(pos,nsLawSize, *y) ; // Warning: yEquivalent is saved in y !!
-    //static_cast<SimpleVector*>(z)->getBlock(pos,nsLawSize, *lambda) ;
-    w->getBlock(pos, *y) ; // Warning: yEquivalent is saved in y !!
-    z->getBlock(pos, *lambda) ;
+
+    //y = static_cast<SimpleVector*>((*itCurrent)-> getYPtr(levelMin));
+    //      lambda = static_cast<SimpleVector*>((*itCurrent)->getLambdaPtr(levelMin));
+
+    y = (*itCurrent)->getYPtr(levelMin);
+    lambda = (*itCurrent)->getLambdaPtr(levelMin);
+    // Copy w/z values, starting from index pos into y/lambda.
+    setBlock(w, y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
+    setBlock(z, lambda, lambda->size(), pos, 0);
   }
 }
 
