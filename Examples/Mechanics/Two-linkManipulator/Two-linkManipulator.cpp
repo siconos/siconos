@@ -69,8 +69,8 @@ int main(int argc, char* argv[])
     SimpleVector q0(nDof), v0(nDof);
     q0.zero();
     v0.zero();
-    q0(0) = 1;
-    q0(1) = -1.5;
+    q0(0) = 0.9;
+    q0(1) = -1.6;
     SiconosVector * z = new SimpleVector(nDof * 7);
     (*z)(0) = q0(0);
     (*z)(1) = q0(1);
@@ -249,10 +249,10 @@ int main(int argc, char* argv[])
       s->newtonSolve(criterion, maxIter);
       (*z)(4) = (inter->getLambdaOld(1))(1);
       //  controller during impacts accumulation phase before the first impact
-      if ((- dataPlot(k, 0) + trunc(dataPlot(k, 0) / (*z)(11)) * (*z)(11) + (*z)(11) / 2 <= 0.08) &&
+      if ((- dataPlot(k, 0) + trunc(dataPlot(k, 0) / (*z)(11)) * (*z)(11) + (*z)(11) / 2 <= 0.1) &&
           (test == 0))
       {
-        (*z)(8) = dataPlot(k, 0);
+        (*z)(8) = dataPlot(k, 0) + h;
         (*z)(5) =  0.65 + 0.1 * cos(2 * PI * (*z)(8) / (*z)(11));
         (*z)(10) =  0.1 * sin(2 * PI * (*z)(8) / (*z)(11));
         (*z)(13) = 2 * 0.1 * (PI / (*z)(11)) * cos(2 * PI * (*z)(8) / (*z)(11));
@@ -269,7 +269,7 @@ int main(int argc, char* argv[])
       }
 
       // controller during constraint-motion phase.
-      if ((fabs((inter->getY(1))(1)) <= 1e-3) && (test == 2) && ((inter->getY(0))(1) <= 1e-6))
+      if ((fabs((inter->getY(1))(1)) <= 1e-4) && (test == 2) && ((inter->getY(0))(1) <= 1e-6))
       {
         (*z)(8) = dataPlot(k, 0);
         arm->setComputeFExtFunction("Two-linkPlugin.so", "U2");

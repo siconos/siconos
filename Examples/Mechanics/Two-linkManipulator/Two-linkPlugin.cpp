@@ -33,7 +33,8 @@ double gamma2 = 20;
 double gamma1 = 35;
 double Kf = 0.5;
 double P = 5;
-double ep = 0.001;
+double ep = 0.1;
+double delta = 0.05;
 double eps = 0.1;
 double alpha = 10;
 
@@ -160,25 +161,43 @@ extern "C" void U10(double time, unsigned int sizeOfq, double *U1, unsigned int 
   double mc21 = m12 * d11 + m22 * d21;
   double mc22 = m12 * d12 + m22 * d22;
 
-  double td = (time - z[8]) / (eps);
-  double b0 = z[10];
-  double b1 = z[13];
-  double b2 = -2 * b1 - 3 * b0 - 3 * z[7] * alpha;
-  double b3 = b1 + 2 * b0 + 2 * z[7] * alpha;
+  //double td = (time-z[8])/(eps);
+  //   double b0 = z[10];
+  //   double b1 = z[13];
+  //   double b2 = -2*b1-3*b0-3*z[7]*alpha;
+  //   double b3 = b1+2*b0+2*z[7]*alpha;
 
-  double qd2 = b3 * td * td * td + b2 * td * td + b1 * td + b0;
-  double qd12 = 3 * b3 * td * td + 2 * b2 * td + b1;
-  double qd22 = 6 * b3 * td + 2 * b2;
+  //   double qd2 = b3*td*td*td+b2*td*td+b1*td+b0;
+  //   double qd12 = 3*b3*td*td+2*b2*td+b1;
+  //   double qd22 = 6*b3*td+2*b2;
 
-  //  double qd2 = 0.1*sin(2*PI*time/P);
-  //   double qd12 = (2*PI/P)*0.1*cos(2*PI*time/P);
-  //   double qd22 = -(2*PI/P)*(2*PI/P)*0.1*sin(2*PI*time/P);
+  double qd1 = 0;
+  double qd11 = 0;
+  double qd21 = 0;
+  double t2 = time - z[8];
+
+  if (t2 < 0.01)
+  {
+    qd1 = 0.65 + 0.1 * cos(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P);
+    qd11 = -(2 * PI / P) * 0.1 * sin(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) / (delta * delta);
+    qd21 = -(2 * PI / P) * (2 * PI / P) * 0.1 * cos(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) / (delta * delta) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) / (delta * delta) - (2 * PI / P) * 0.1 * sin(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (2 * t2 + 4 * (t2 - delta)) / (delta * delta);
+  }
+  else
+  {
+    qd1 = z[5];
+    qd11 = 0;
+    qd21 = 0;
+  }
+
+  double qd2 = 0.1 * sin(2 * PI * time / P);
+  double qd12 = (2 * PI / P) * 0.1 * cos(2 * PI * time / P);
+  double qd22 = -(2 * PI / P) * (2 * PI / P) * 0.1 * sin(2 * PI * time / P);
   double qd2c = (fabs(qd2) + qd2) / 2;
 
-  double qr11 =  -gamma2 * (x - z[5]);
+  double qr11 = qd11 - gamma2 * (x - qd1);
   double qr12 = qd12 - gamma2 * (y - qd2);
 
-  double qr21 =  -gamma2 * x1;
+  double qr21 = qd21 - gamma2 * (x1 - qd11);
   double qr22 = qd22 - gamma2 * (y1 - qd12);
 
   double s1 = x1 - qr11;
@@ -212,7 +231,7 @@ extern "C" void U10(double time, unsigned int sizeOfq, double *U1, unsigned int 
   U1[1] = T11 + T12 - T13;
 
   double V1 = (s1 * s1 * (d11 * mc11 + d21 * mc12) + 2 * s1 * s2ly * (d12 * mc11 + d22 * mc21) + s2ly * s2ly * (d12 * mc12 + d22 * mc22)) / 2;
-  z[6] = V1 + gamma1 * gamma2 * ((x - z[5]) * (x - z[5]) + (y - qd2c) * (y - qd2c));
+  z[6] = V1 + gamma1 * gamma2 * ((x - qd1) * (x - qd1) + (y - qd2c) * (y - qd2c));
 
   z[9] = 0;
   z[11] = P;
@@ -349,7 +368,7 @@ extern "C" void U2(double time, unsigned int sizeOfq, double *U, unsigned int si
   double a3 = m2 * l1 * l2 * sin(z[1]) * z[2] * (d11 * qr11 + d12 * qr12) / 2;
   double a4 = (a21 * d11 + a22 * d21) * qr11 + (a21 * d12 + a22 * d22) * qr12;
   double ld = (-(-m2 * l1 * l2 * sin(z[1]) * z[2] * d11 / 2 - (a21 * d11 + a22 * d21) - (mc21 / mc11) * (-m2 * l1 * l2 * sin(z[1]) * z[3] * (d11 + d21 / 2) - (a11 * d11 + a12 * d21))) * s1 + gamma1 * mc12 * s1 / mc11 - 3 * (k * P - time)) / (mc11 * mc22 - mc12 * mc21);
-  z[12] = 0.4 + (-mc11 * ld + fabs(mc11 * ld)) / 2;
+  z[12] = 0.5 + (-mc11 * ld + fabs(mc11 * ld)) / 2;
 
   double T01 = mc11 * qr21 + mc12 * qr22;
   double T02 = a1 - a2;
@@ -407,21 +426,12 @@ extern "C" void U3(double time, unsigned int sizeOfq, double *U, unsigned int si
 
   double k = trunc(z[10] / P);
   double td = (time - k * P) / ep;
-  double b2 = z[8] / 2;
-  // double b3 = -0.1*2*PI*cos(2*PI*ep/P)/P+4*0.1*sin(2*PI*ep/P)-z[8];
-  //   double b4 = 0.1*2*PI*cos(2*PI*ep/P)/P-3*0.1*sin(2*PI*ep/P)+z[8]/2;
+  double b = z[8] * ep * P / (4 * 0.1 * PI);
 
-  //   double qd2 = b4*td*td*td*td+b3*td*td*td+b2*td*td;
-  //   double qd12 = 4*b4*td*td*td+3*b3*td*td+2*b2*td;
-  //   double qd22 = 12*b4*td*td+6*b3*td+2*b2;
-  double b3 = -0.1 * 2 * PI * PI * sin(2 * PI * ep / P) / (P * P) - 4 * 0.1 * 2 * PI * cos(2 * PI * ep / P) / P + 10 * 0.1 * sin(2 * PI * ep / P) - 3 * z[8] / 2;
-  double b4 =  0.1 * 4 * PI * PI * sin(2 * PI * ep / P) / (P * P) + 7 * 0.1 * 2 * PI * cos(2 * PI * ep / P) / P - 15 * 0.1 * sin(2 * PI * ep / P) + 3 * z[8] / 2;
-  double b5 = -0.1 * 2 * PI * PI * sin(2 * PI * ep / P) / (P * P) - 3 * 0.1 * 2 * PI * cos(2 * PI * ep / P) / P + 6 * 0.1 * sin(2 * PI * ep / P) - z[8] / 2;
+  double qd2 = 0.1 * sin(2 * PI * (k * P + (time - k * P) * sin(b * td + (PI / 2 - b) * td * td)) / P);
+  double qd12 = 0.1 * (2 * PI / P) * cos(2 * PI * (k * P + (time - k * P) * sin(b * td + (PI / 2 - b) * td * td)) / P) * (sin(b * td + (PI / 2 - b) * td * td) + (time - k * P) * cos(b * td + (PI / 2 - b) * td * td) * (b / ep + 2 * (PI / 2 - b) * td / ep));
+  double qd22 = -0.1 * (2 * PI / P) * (2 * PI / P) * sin(2 * PI * (k * P + (time - k * P) * sin(b * td + (PI / 2 - b) * td * td)) / P) * (sin(b * td + (PI / 2 - b) * td * td) + (time - k * P) * cos(b * td + (PI / 2 - b) * td * td) * (b / ep + 2 * (PI / 2 - b) * td / ep)) + 0.1 * (2 * PI / P) * cos(2 * PI * (k * P + (time - k * P) * sin(b * td + (PI / 2 - b) * td * td)) / P) * (2 * cos(b * td + (PI / 2 - b) * td * td) * (b / ep + 2 * (PI / 2 - b) * td / ep) + (time - k * P) * (2 * cos(b * td + (PI / 2 - b) * td * td) * (PI / 2 - b) / (ep * ep) - sin(b * td + (PI / 2 - b) * td * td) * (b / ep + 2 * (PI / 2 - b) * td / ep) * (b / ep + 2 * (PI / 2 - b) * td / ep)));
 
-  double qd2 = b5 * td * td * td * td * td + b4 * td * td * td * td + b3 * td * td * td + b2 * td * td;
-  double qd12 = 5 * b5 * td * td * td * td + 4 * b4 * td * td * td + 3 * b3 * td * td + 2 * b2 * td;
-  double qd22 = 20 * b5 * td * td * td + 12 * b4 * td * td + 6 * b3 * td + 2 * b2;
-  // double qd2c = (fabs(qd2)+qd2)/2;
   z[9] = td;
 
   double qr11 = -(2 * PI / P) * 0.1 * sin(2 * PI * time / P) - gamma2 * (x - (0.65 + 0.1 * cos(2 * PI * time / P)));
