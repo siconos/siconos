@@ -1,9 +1,25 @@
-/** \page Control Siconos Control Toolbox
+/** \page SicControl Siconos Control Toolbox
 \anchor SiconosControl
 
 \section SCIntro Foreword
 
 \section SCcontents Contents
+
+
+\subsection SCSensors Sensors
+
+- tk
+- capture
+- map of vectors. Save values for all events? 
+
+\subsection SCActuators Actuators
+
+link to one DS. 
+
+- tk
+- a way to compute the value of z
+- setZ in DS
+
 
 
 

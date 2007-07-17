@@ -1,3 +1,22 @@
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.
+ * Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ * Siconos is a free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * Siconos is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Siconos; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ */
+
 #include "SimpleMatrix.h"
 #include "SimpleVector.h"
 #include "ioMatrix.h"
@@ -3456,7 +3475,7 @@ const SimpleMatrix prod(const SiconosMatrix &A, const SiconosMatrix& B)
   }
 }
 
-void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C)
+void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool init)
 {
   // To compute C = A * B
 
@@ -3481,185 +3500,365 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C)
 
   if (numA == 7) // A = identity ...
   {
-    if (&C != &B) C = B; // if C and B are two different objects.
-    // else nothing
+    if (init)
+    {
+      if (&C != &B) C = B; // if C and B are two different objects.
+      // else nothing
+    }
+    else
+      C += B;
   }
 
   else if (numB == 7) // B = identity
   {
-    if (&C != &A) C = A; // if C and A are two different objects.
-    // else nothing
+    if (init)
+    {
+      if (&C != &A) C = A; // if C and A are two different objects.
+      // else nothing
+    }
+    else
+      C += A;
   }
 
   else if (numA == 6 || numB == 6) // if A or B = 0
-    C.zero();
+  {
+    if (init)
+      C.zero();
+    //else nothing
+  }
   else if (numC == 0) // if C is Block - Temp. solution
   {
     SimpleMatrix tmp(C);
-    prod(A, B, tmp);
+    prod(A, B, tmp, init);
     C = tmp;
   }
   else // neither A or B is equal to identity or zero.
   {
-    if (&C == &A) // if common memory between A and C
+    if (init)
     {
-      switch (numA)
+      if (&C == &A) // if common memory between A and C
       {
-      case 1:
-        if (numB == 1)
-          //*C.getDensePtr() = prod(*A.getDensePtr(),*B.getDensePtr());
-          atlas::gemm(*A.getDensePtr(), *B.getDensePtr(), *C.getDensePtr());
-        else if (numB == 2)
-          *C.getDensePtr()  = prod(*A.getDensePtr(), *B.getTriangPtr());
-        else if (numB == 3)
-          *C.getDensePtr()  = prod(*A.getDensePtr(), *B.getSymPtr());
-        else if (numB == 4)
-          *C.getDensePtr()  = prod(*A.getDensePtr(), *B.getSparsePtr());
-        else //if(numB==5)
-          *C.getDensePtr() = prod(*A.getDensePtr(), *B.getBandedPtr());
-        break;
-      case 2:
-        if (numB != 2)
+        switch (numA)
+        {
+        case 1:
+          if (numB == 1)
+            //*C.getDensePtr() = prod(*A.getDensePtr(),*B.getDensePtr());
+            atlas::gemm(*A.getDensePtr(), *B.getDensePtr(), *C.getDensePtr());
+          else if (numB == 2)
+            *C.getDensePtr()  = prod(*A.getDensePtr(), *B.getTriangPtr());
+          else if (numB == 3)
+            *C.getDensePtr()  = prod(*A.getDensePtr(), *B.getSymPtr());
+          else if (numB == 4)
+            *C.getDensePtr()  = prod(*A.getDensePtr(), *B.getSparsePtr());
+          else //if(numB==5)
+            *C.getDensePtr() = prod(*A.getDensePtr(), *B.getBandedPtr());
+          break;
+        case 2:
+          if (numB != 2)
+            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+          *C.getTriangPtr() = prod(*A.getTriangPtr(), *B.getTriangPtr());
+          break;
+        case 3:
+          if (numB != 3)
+            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+          *C.getSymPtr() = prod(*A.getSymPtr(), *B.getSymPtr());
+          break;
+        case 4:
+          if (numB != 4)
+            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+          *C.getSparsePtr() = prod(*A.getSparsePtr(), *B.getSparsePtr());
+          break;
+        default:
           SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
-        *C.getTriangPtr() = prod(*A.getTriangPtr(), *B.getTriangPtr());
-        break;
-      case 3:
-        if (numB != 3)
+        }
+      }
+      else if (&C == &B)
+      {
+        switch (numB)
+        {
+        case 1:
+          if (numA == 1)
+            *C.getDensePtr() = prod(*A.getDensePtr(), *B.getDensePtr());
+          else if (numA == 2)
+            *C.getDensePtr()  = prod(*A.getTriangPtr(), *B.getDensePtr());
+          else if (numA == 3)
+            *C.getDensePtr()  = prod(*A.getSymPtr(), *B.getDensePtr());
+          else if (numA == 4)
+            *C.getDensePtr()  = prod(*A.getSparsePtr(), *B.getDensePtr());
+          else //if(numB==5)
+            *C.getDensePtr() = prod(*A.getBandedPtr(), *B.getDensePtr());
+          break;
+        case 2:
+          if (numA != 2)
+            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+          *C.getTriangPtr() = prod(*A.getTriangPtr(), *B.getTriangPtr());
+          break;
+        case 3:
+          if (numA != 3)
+            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+          *C.getSymPtr() = prod(*A.getSymPtr(), *B.getSymPtr());
+          break;
+        case 4:
+          if (numA != 4)
+            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+          *C.getSparsePtr() = prod(*A.getSparsePtr(), *B.getSparsePtr());
+          break;
+        default:
           SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
-        *C.getSymPtr() = prod(*A.getSymPtr(), *B.getSymPtr());
-        break;
-      case 4:
-        if (numB != 4)
+        }
+      }
+      else // if no alias between C and A or B.
+      {
+        switch (numC)
+        {
+        case 1:
+          if (numB == 1)
+          {
+            if (numA == 1)
+              noalias(*C.getDensePtr()) = prod(*A.getDensePtr(), *B.getDensePtr());
+            else if (numA == 2)
+              noalias(*C.getDensePtr()) = prod(*A.getTriangPtr(), *B.getDensePtr());
+            else if (numA == 3)
+              noalias(*C.getDensePtr())  = prod(*A.getSymPtr(), *B.getDensePtr());
+            else if (numA == 4)
+              noalias(*C.getDensePtr()) = prod(*A.getSparsePtr(), *B.getDensePtr());
+            else// if(numA==5)
+              noalias(*C.getDensePtr())  = prod(*A.getBandedPtr(), *B.getDensePtr());
+          }
+          else if (numB == 2)
+          {
+            if (numA == 1)
+              noalias(*C.getDensePtr())  = prod(*A.getDensePtr(), *B.getTriangPtr());
+            else if (numA == 2)
+              noalias(*C.getDensePtr())  = prod(*A.getTriangPtr(), *B.getTriangPtr());
+            else if (numA == 3)
+              noalias(*C.getDensePtr())  = prod(*A.getSymPtr(), *B.getTriangPtr());
+            else if (numA == 4)
+              noalias(*C.getDensePtr())  = prod(*A.getSparsePtr(), *B.getTriangPtr());
+            else //if(numA==5)
+              noalias(*C.getDensePtr())  = prod(*A.getBandedPtr(), *B.getTriangPtr());
+          }
+          else if (numB == 3)
+          {
+            if (numA == 1)
+              noalias(*C.getDensePtr())  = prod(*A.getDensePtr(), *B.getSymPtr());
+            else if (numA == 2)
+              noalias(*C.getDensePtr())  = prod(*A.getTriangPtr(), *B.getSymPtr());
+            else if (numA == 3)
+              noalias(*C.getDensePtr())  = prod(*A.getSymPtr(), *B.getSymPtr());
+            else if (numA == 4)
+              noalias(*C.getDensePtr())  = prod(*A.getSparsePtr(), *B.getSymPtr());
+            else // if (numA == 5)
+              noalias(*C.getDensePtr())  = prod(*A.getBandedPtr(), *B.getSymPtr());
+          }
+          else if (numB == 4)
+          {
+            if (numA == 1)
+              noalias(*C.getDensePtr()) = prod(*A.getDensePtr(), *B.getSparsePtr());
+            else if (numA == 2)
+              noalias(*C.getDensePtr()) = prod(*A.getTriangPtr(), *B.getSparsePtr());
+            else if (numA == 3)
+              noalias(*C.getDensePtr()) = prod(*A.getSymPtr(), *B.getSparsePtr());
+            else if (numA == 4)
+              noalias(*C.getDensePtr()) = prod(*A.getSparsePtr(), *B.getSparsePtr());
+            else //if(numA==5){
+              noalias(*C.getDensePtr()) = prod(*A.getBandedPtr(), *B.getSparsePtr());
+          }
+          else //if(numB==5)
+          {
+            if (numA == 1)
+              noalias(*C.getDensePtr()) = prod(*A.getDensePtr(), *B.getBandedPtr());
+            else if (numA == 2)
+              noalias(*C.getDensePtr()) = prod(*A.getTriangPtr(), *B.getBandedPtr());
+            else if (numA == 3)
+              noalias(*C.getDensePtr()) = prod(*A.getSymPtr(), *B.getBandedPtr());
+            else if (numA == 4)
+              noalias(*C.getDensePtr()) = prod(*A.getSparsePtr(), *B.getBandedPtr());
+            else //if(numA==5)
+              noalias(*C.getDensePtr()) = prod(*A.getBandedPtr(), *B.getBandedPtr());
+          }
+          break;
+        case 2:
+          if (numA != 2 || numB != 2)
+            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+          noalias(*C.getTriangPtr()) = prod(*A.getTriangPtr(), *B.getTriangPtr());
+          break;
+        case 3:
+          if (numA != 3 || numB != 3)
+            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+          noalias(*C.getSymPtr()) = prod(*A.getSymPtr(), *B.getSymPtr());
+          break;
+        case 4:
+          if (numA != 4 || numB != 4)
+            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+          noalias(*C.getSparsePtr()) = prod(*A.getSparsePtr(), *B.getSparsePtr());
+          break;
+        default:
           SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
-        *C.getSparsePtr() = prod(*A.getSparsePtr(), *B.getSparsePtr());
-        break;
-      default:
-        SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+        }
       }
     }
-    else if (&C == &B)
+    else // += case
     {
-      switch (numB)
+      if (&C == &A) // if common memory between A and C
       {
-      case 1:
-        if (numA == 1)
-          *C.getDensePtr() = prod(*A.getDensePtr(), *B.getDensePtr());
-        else if (numA == 2)
-          *C.getDensePtr()  = prod(*A.getTriangPtr(), *B.getDensePtr());
-        else if (numA == 3)
-          *C.getDensePtr()  = prod(*A.getSymPtr(), *B.getDensePtr());
-        else if (numA == 4)
-          *C.getDensePtr()  = prod(*A.getSparsePtr(), *B.getDensePtr());
-        else //if(numB==5)
-          *C.getDensePtr() = prod(*A.getBandedPtr(), *B.getDensePtr());
-        break;
-      case 2:
-        if (numA != 2)
+        switch (numA)
+        {
+        case 1:
+          if (numB == 1)
+            *C.getDensePtr() += prod(*A.getDensePtr(), *B.getDensePtr());
+          else if (numB == 2)
+            *C.getDensePtr()  += prod(*A.getDensePtr(), *B.getTriangPtr());
+          else if (numB == 3)
+            *C.getDensePtr()  += prod(*A.getDensePtr(), *B.getSymPtr());
+          else if (numB == 4)
+            *C.getDensePtr()  += prod(*A.getDensePtr(), *B.getSparsePtr());
+          else //if(numB==5)
+            *C.getDensePtr() += prod(*A.getDensePtr(), *B.getBandedPtr());
+          break;
+        case 2:
+          if (numB != 2)
+            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+          *C.getTriangPtr() += prod(*A.getTriangPtr(), *B.getTriangPtr());
+          break;
+        case 3:
+          if (numB != 3)
+            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+          *C.getSymPtr() += prod(*A.getSymPtr(), *B.getSymPtr());
+          break;
+        case 4:
+          if (numB != 4)
+            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+          *C.getSparsePtr() += prod(*A.getSparsePtr(), *B.getSparsePtr());
+          break;
+        default:
           SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
-        *C.getTriangPtr() = prod(*A.getTriangPtr(), *B.getTriangPtr());
-        break;
-      case 3:
-        if (numA != 3)
-          SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
-        *C.getSymPtr() = prod(*A.getSymPtr(), *B.getSymPtr());
-        break;
-      case 4:
-        if (numA != 4)
-          SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
-        *C.getSparsePtr() = prod(*A.getSparsePtr(), *B.getSparsePtr());
-        break;
-      default:
-        SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+        }
       }
-    }
-    else // if no alias between C and A or B.
-    {
-      switch (numC)
+      else if (&C == &B)
       {
-      case 1:
-        if (numB == 1)
+        switch (numB)
         {
+        case 1:
           if (numA == 1)
-            noalias(*C.getDensePtr()) = prod(*A.getDensePtr(), *B.getDensePtr());
+            *C.getDensePtr() += prod(*A.getDensePtr(), *B.getDensePtr());
           else if (numA == 2)
-            noalias(*C.getDensePtr()) = prod(*A.getTriangPtr(), *B.getDensePtr());
+            *C.getDensePtr()  += prod(*A.getTriangPtr(), *B.getDensePtr());
           else if (numA == 3)
-            noalias(*C.getDensePtr())  = prod(*A.getSymPtr(), *B.getDensePtr());
+            *C.getDensePtr()  += prod(*A.getSymPtr(), *B.getDensePtr());
           else if (numA == 4)
-            noalias(*C.getDensePtr()) = prod(*A.getSparsePtr(), *B.getDensePtr());
-          else// if(numA==5)
-            noalias(*C.getDensePtr())  = prod(*A.getBandedPtr(), *B.getDensePtr());
-        }
-        else if (numB == 2)
-        {
-          if (numA == 1)
-            noalias(*C.getDensePtr())  = prod(*A.getDensePtr(), *B.getTriangPtr());
-          else if (numA == 2)
-            noalias(*C.getDensePtr())  = prod(*A.getTriangPtr(), *B.getTriangPtr());
-          else if (numA == 3)
-            noalias(*C.getDensePtr())  = prod(*A.getSymPtr(), *B.getTriangPtr());
-          else if (numA == 4)
-            noalias(*C.getDensePtr())  = prod(*A.getSparsePtr(), *B.getTriangPtr());
-          else //if(numA==5)
-            noalias(*C.getDensePtr())  = prod(*A.getBandedPtr(), *B.getTriangPtr());
-        }
-        else if (numB == 3)
-        {
-          if (numA == 1)
-            noalias(*C.getDensePtr())  = prod(*A.getDensePtr(), *B.getSymPtr());
-          else if (numA == 2)
-            noalias(*C.getDensePtr())  = prod(*A.getTriangPtr(), *B.getSymPtr());
-          else if (numA == 3)
-            noalias(*C.getDensePtr())  = prod(*A.getSymPtr(), *B.getSymPtr());
-          else if (numA == 4)
-            noalias(*C.getDensePtr())  = prod(*A.getSparsePtr(), *B.getSymPtr());
-          else // if (numA == 5)
-            noalias(*C.getDensePtr())  = prod(*A.getBandedPtr(), *B.getSymPtr());
-        }
-        else if (numB == 4)
-        {
-          if (numA == 1)
-            noalias(*C.getDensePtr()) = prod(*A.getDensePtr(), *B.getSparsePtr());
-          else if (numA == 2)
-            noalias(*C.getDensePtr()) = prod(*A.getTriangPtr(), *B.getSparsePtr());
-          else if (numA == 3)
-            noalias(*C.getDensePtr()) = prod(*A.getSymPtr(), *B.getSparsePtr());
-          else if (numA == 4)
-            noalias(*C.getDensePtr()) = prod(*A.getSparsePtr(), *B.getSparsePtr());
-          else //if(numA==5){
-            noalias(*C.getDensePtr()) = prod(*A.getBandedPtr(), *B.getSparsePtr());
-        }
-        else //if(numB==5)
-        {
-          if (numA == 1)
-            noalias(*C.getDensePtr()) = prod(*A.getDensePtr(), *B.getBandedPtr());
-          else if (numA == 2)
-            noalias(*C.getDensePtr()) = prod(*A.getTriangPtr(), *B.getBandedPtr());
-          else if (numA == 3)
-            noalias(*C.getDensePtr()) = prod(*A.getSymPtr(), *B.getBandedPtr());
-          else if (numA == 4)
-            noalias(*C.getDensePtr()) = prod(*A.getSparsePtr(), *B.getBandedPtr());
-          else //if(numA==5)
-            noalias(*C.getDensePtr()) = prod(*A.getBandedPtr(), *B.getBandedPtr());
-        }
-        break;
-      case 2:
-        if (numA != 2 || numB != 2)
+            *C.getDensePtr()  += prod(*A.getSparsePtr(), *B.getDensePtr());
+          else //if(numB==5)
+            *C.getDensePtr() += prod(*A.getBandedPtr(), *B.getDensePtr());
+          break;
+        case 2:
+          if (numA != 2)
+            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+          *C.getTriangPtr() += prod(*A.getTriangPtr(), *B.getTriangPtr());
+          break;
+        case 3:
+          if (numA != 3)
+            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+          *C.getSymPtr() += prod(*A.getSymPtr(), *B.getSymPtr());
+          break;
+        case 4:
+          if (numA != 4)
+            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+          *C.getSparsePtr() += prod(*A.getSparsePtr(), *B.getSparsePtr());
+          break;
+        default:
           SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
-        noalias(*C.getTriangPtr()) = prod(*A.getTriangPtr(), *B.getTriangPtr());
-        break;
-      case 3:
-        if (numA != 3 || numB != 3)
+        }
+      }
+      else // if no alias between C and A or B.
+      {
+        switch (numC)
+        {
+        case 1:
+          if (numB == 1)
+          {
+            if (numA == 1)
+              noalias(*C.getDensePtr()) += prod(*A.getDensePtr(), *B.getDensePtr());
+            else if (numA == 2)
+              noalias(*C.getDensePtr()) += prod(*A.getTriangPtr(), *B.getDensePtr());
+            else if (numA == 3)
+              noalias(*C.getDensePtr())  += prod(*A.getSymPtr(), *B.getDensePtr());
+            else if (numA == 4)
+              noalias(*C.getDensePtr()) += prod(*A.getSparsePtr(), *B.getDensePtr());
+            else// if(numA==5)
+              noalias(*C.getDensePtr())  += prod(*A.getBandedPtr(), *B.getDensePtr());
+          }
+          else if (numB == 2)
+          {
+            if (numA == 1)
+              noalias(*C.getDensePtr())  += prod(*A.getDensePtr(), *B.getTriangPtr());
+            else if (numA == 2)
+              noalias(*C.getDensePtr())  += prod(*A.getTriangPtr(), *B.getTriangPtr());
+            else if (numA == 3)
+              noalias(*C.getDensePtr())  += prod(*A.getSymPtr(), *B.getTriangPtr());
+            else if (numA == 4)
+              noalias(*C.getDensePtr())  += prod(*A.getSparsePtr(), *B.getTriangPtr());
+            else //if(numA==5)
+              noalias(*C.getDensePtr())  += prod(*A.getBandedPtr(), *B.getTriangPtr());
+          }
+          else if (numB == 3)
+          {
+            if (numA == 1)
+              noalias(*C.getDensePtr())  += prod(*A.getDensePtr(), *B.getSymPtr());
+            else if (numA == 2)
+              noalias(*C.getDensePtr())  += prod(*A.getTriangPtr(), *B.getSymPtr());
+            else if (numA == 3)
+              noalias(*C.getDensePtr())  += prod(*A.getSymPtr(), *B.getSymPtr());
+            else if (numA == 4)
+              noalias(*C.getDensePtr())  += prod(*A.getSparsePtr(), *B.getSymPtr());
+            else // if (numA == 5)
+              noalias(*C.getDensePtr())  += prod(*A.getBandedPtr(), *B.getSymPtr());
+          }
+          else if (numB == 4)
+          {
+            if (numA == 1)
+              noalias(*C.getDensePtr()) += prod(*A.getDensePtr(), *B.getSparsePtr());
+            else if (numA == 2)
+              noalias(*C.getDensePtr()) += prod(*A.getTriangPtr(), *B.getSparsePtr());
+            else if (numA == 3)
+              noalias(*C.getDensePtr()) += prod(*A.getSymPtr(), *B.getSparsePtr());
+            else if (numA == 4)
+              noalias(*C.getDensePtr()) += prod(*A.getSparsePtr(), *B.getSparsePtr());
+            else //if(numA==5){
+              noalias(*C.getDensePtr()) += prod(*A.getBandedPtr(), *B.getSparsePtr());
+          }
+          else //if(numB==5)
+          {
+            if (numA == 1)
+              noalias(*C.getDensePtr()) += prod(*A.getDensePtr(), *B.getBandedPtr());
+            else if (numA == 2)
+              noalias(*C.getDensePtr()) += prod(*A.getTriangPtr(), *B.getBandedPtr());
+            else if (numA == 3)
+              noalias(*C.getDensePtr()) += prod(*A.getSymPtr(), *B.getBandedPtr());
+            else if (numA == 4)
+              noalias(*C.getDensePtr()) += prod(*A.getSparsePtr(), *B.getBandedPtr());
+            else //if(numA==5)
+              noalias(*C.getDensePtr()) += prod(*A.getBandedPtr(), *B.getBandedPtr());
+          }
+          break;
+        case 2:
+          if (numA != 2 || numB != 2)
+            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+          noalias(*C.getTriangPtr()) += prod(*A.getTriangPtr(), *B.getTriangPtr());
+          break;
+        case 3:
+          if (numA != 3 || numB != 3)
+            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+          noalias(*C.getSymPtr()) += prod(*A.getSymPtr(), *B.getSymPtr());
+          break;
+        case 4:
+          if (numA != 4 || numB != 4)
+            SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+          noalias(*C.getSparsePtr()) += prod(*A.getSparsePtr(), *B.getSparsePtr());
+          break;
+        default:
           SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
-        noalias(*C.getSymPtr()) = prod(*A.getSymPtr(), *B.getSymPtr());
-        break;
-      case 4:
-        if (numA != 4 || numB != 4)
-          SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
-        noalias(*C.getSparsePtr()) = prod(*A.getSparsePtr(), *B.getSparsePtr());
-        break;
-      default:
-        SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
+        }
       }
     }
     C.resetLU();
@@ -3738,18 +3937,18 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
           ublas::axpy_prod(*A.getDensePtr(), *B.getBandedPtr(), *A.getDensePtr(), init);
         break;
       case 2:
-        if (numB != 2)
-          SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
+        //        if(numB != 2)
+        SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
         //        ublas::axpy_prod(*A.getTriangPtr(), *B.getTriangPtr(), *A.getTriangPtr(), init);
         break;
       case 3:
-        if (numB != 3)
-          SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
+        //if(numB != 3)
+        SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
         //ublas::axpy_prod(*A.getSymPtr(), *B.getSymPtr(), *A.getSymPtr(), init);
         break;
       case 4:
-        if (numB != 4)
-          SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
+        //        if(numB != 4)
+        SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
         //ublas::axpy_prod(*A.getSparsePtr(), *B.getSparsePtr(), *A.getSparsePtr(),init);
         break;
       default:
@@ -3773,18 +3972,18 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
           ublas::axpy_prod(*A.getBandedPtr(), *B.getDensePtr(), *B.getDensePtr(), init);
         break;
       case 2:
-        if (numA != 2)
-          SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
+        //if(numA != 2)
+        SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
         //        ublas::axpy_prod(*A.getTriangPtr(), *B.getTriangPtr(),*B.getTriangPtr(), init);
         break;
       case 3:
-        if (numA != 3)
-          SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
+        //        if(numA != 3)
+        SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
         //ublas::axpy_prod(*A.getSymPtr(), *B.getSymPtr(), *B.getSymPtr(), init);
         break;
       case 4:
-        if (numA != 4)
-          SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
+        //        if(numA != 4)
+        SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
         //ublas::axpy_prod(*A.getSparsePtr(), *B.getSparsePtr(), *B.getSparsePtr(), init);
         break;
       default:
@@ -3863,18 +4062,18 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
         }
         break;
       case 2:
-        if (numA != 2 || numB != 2)
-          SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
+        // if(numA!= 2 || numB != 2)
+        SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
         //ublas::axpy_prod(*A.getTriangPtr(), *B.getTriangPtr(),*C.getTriangPtr(), init);
         break;
       case 3:
-        if (numA != 3 || numB != 3)
-          SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
+        //        if(numA!= 3 || numB != 3)
+        SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
         //ublas::axpy_prod(*A.getSymPtr(), *B.getSymPtr(),*C.getSymPtr(),init);
         break;
       case 4:
-        if (numA != 4 || numB != 4)
-          SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
+        //        if(numA!= 4 || numB != 4)
+        SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
         //ublas::axpy_prod(*A.getSparsePtr(), *B.getSparsePtr(),*C.getSparsePtr(),init);
         break;
       default:
@@ -4041,6 +4240,158 @@ void private_prod(const SiconosMatrix *A, unsigned int startRow, const SiconosVe
   }
 }
 
+
+// With trans(A) ...
+void private_addprod(const SiconosVector *x, const SiconosMatrix *A, unsigned int startRow, unsigned int startCol, SiconosVector* y)
+{
+  if (A->isBlock())
+    SiconosMatrixException::selfThrow("private_addprod(x,A,start,y) error: not yet implemented for block matrix.");
+
+  if (!x->isBlock()) // if input vector is not block
+  {
+    // we take a submatrix subA of A, starting from row startRow to row (startRow+sizeY) and between columns startCol and (startCol+sizeX).
+    // Then computation of y = subA*x + y.
+    unsigned int numA = A->getNum();
+    unsigned int numY = y->getNum();
+    unsigned int numX = x->getNum();
+    unsigned int sizeX = x->size();
+    unsigned int sizeY = y->size();
+
+    if (numX != numY)
+      SiconosMatrixException::selfThrow("private_addprod(x,A,start,y) error: not yet implemented for x and y of different types.");
+
+    if (numY == 1 && numX == 1)
+    {
+      if (numA == 1)
+        *y->getDensePtr() += prod(ublas::subrange(trans(*A->getDensePtr()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->getDensePtr());
+      else if (numA == 2)
+        *y->getDensePtr() += prod(ublas::subrange(trans(*A->getTriangPtr()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->getDensePtr());
+      else if (numA == 3)
+        *y->getDensePtr() += prod(ublas::subrange(trans(*A->getSymPtr()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->getDensePtr());
+      else if (numA == 4)
+        *y->getDensePtr() += prod(ublas::subrange(trans(*A->getSparsePtr()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->getDensePtr());
+      else //if(numA==5)
+        *y->getDensePtr() += prod(ublas::subrange(trans(*A->getBandedPtr()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->getDensePtr());
+    }
+    else // x and y sparse
+    {
+      if (numA == 4)
+        *y->getSparsePtr() += prod(ublas::subrange(trans(*A->getSparsePtr()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->getSparsePtr());
+      else
+        SiconosMatrixException::selfThrow("private_addprod(x,A,start,y) error: not yet implemented for x, y  sparse and A not sparse.");
+    }
+
+  }
+  else // if block
+  {
+    ConstBlockVectIterator it;
+    unsigned int startColBis = startCol;
+    for (it = x->begin(); it != x->end(); ++it)
+    {
+      private_addprod((*it), A, startRow, startColBis, y);
+      startColBis += (*it)->size();
+    }
+  }
+}
+
+void private_prod(const SiconosVector *x, const SiconosMatrix *A, unsigned int startCol, SiconosVector * y, bool init)
+{
+
+  // Computes y = subA *x (or += if init = false), subA being a sub-matrix of trans(A), between el. of A of index (col) startCol and startCol + sizeY
+
+  if (!y->isBlock()) // if y is not a block vector, private_addProd, to consider cases where x is block.
+  {
+    if (init) // y = subA * x , else y += subA * x
+      y->zero();
+    private_addprod(x, A, startCol, 0 , y);
+  }
+  else // if y is a block: call private_prod on each block and so on until the considered block is a simple vector.
+  {
+    unsigned int col = startCol;
+    ConstBlockVectIterator it;
+    for (it = y->begin(); it != y->end(); ++it)
+    {
+      private_prod(x, A, col, *it, init);
+      col += (*it)->size();
+    }
+  }
+}
+
+void private_addprod(double a, const SiconosMatrix *A, unsigned int startRow, unsigned int startCol, const SiconosVector *x, SiconosVector* y)
+{
+  if (A->isBlock())
+    SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for block matrix.");
+
+  if (!x->isBlock()) // if input vector is not block
+  {
+    // we take a submatrix subA of A, starting from row startRow to row (startRow+sizeY) and between columns startCol and (startCol+sizeX).
+    // Then computation of y = subA*x + y.
+    unsigned int numA = A->getNum();
+    unsigned int numY = y->getNum();
+    unsigned int numX = x->getNum();
+    unsigned int sizeX = x->size();
+    unsigned int sizeY = y->size();
+
+    if (numX != numY)
+      SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for x and y of different types.");
+
+    if (numY == 1 && numX == 1)
+    {
+      if (numA == 1)
+        *y->getDensePtr() += a * prod(ublas::subrange(*A->getDensePtr(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->getDensePtr());
+      else if (numA == 2)
+        *y->getDensePtr() += a * prod(ublas::subrange(*A->getTriangPtr(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->getDensePtr());
+      else if (numA == 3)
+        *y->getDensePtr() += a * prod(ublas::subrange(*A->getSymPtr(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->getDensePtr());
+      else if (numA == 4)
+        *y->getDensePtr() += a * prod(ublas::subrange(*A->getSparsePtr(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->getDensePtr());
+      else //if(numA==5)
+        *y->getDensePtr() += a * prod(ublas::subrange(*A->getBandedPtr(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->getDensePtr());
+    }
+    else // x and y sparse
+    {
+      if (numA == 4)
+        *y->getSparsePtr() += a * prod(ublas::subrange(*A->getSparsePtr(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->getSparsePtr());
+      else
+        SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for x, y  sparse and A not sparse.");
+    }
+
+  }
+  else // if block
+  {
+    ConstBlockVectIterator it;
+    unsigned int startColBis = startCol;
+    for (it = x->begin(); it != x->end(); ++it)
+    {
+      private_addprod(a, A, startRow, startColBis, (*it), y);
+      startColBis += (*it)->size();
+    }
+  }
+}
+
+void private_prod(double a, const SiconosMatrix *A, unsigned int startRow, const SiconosVector *x, SiconosVector * y, bool init)
+{
+
+  // Computes y = subA *x (or += if init = false), subA being a sub-matrix of A, between el. of index (row) startRow and startRow + sizeY
+
+  if (!y->isBlock()) // if y is not a block vector, private_addProd, to consider cases where x is block.
+  {
+    if (init) // y = subA * x , else y += subA * x
+      y->zero();
+    private_addprod(a, A, startRow, 0, x, y);
+  }
+  else // if y is a block: call private_prod on each block and so on until the considered block is a simple vector.
+  {
+    unsigned int row = startRow;
+    ConstBlockVectIterator it;
+    for (it = y->begin(); it != y->end(); ++it)
+    {
+      private_prod(a, A, row, x, *it, init);
+      row += (*it)->size();
+    }
+  }
+}
+
 const SimpleVector prod(const SiconosMatrix& A, const SiconosVector& x)
 {
   // To compute y = A * x
@@ -4107,9 +4458,10 @@ const SimpleVector prod(const SiconosMatrix& A, const SiconosVector& x)
   }
 }
 
-void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y)
+void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool init)
 {
   // To compute y = A * x in an "optimized" way (in comparison with y = prod(A,x) )
+  // or y += A*x if init = false.
 
   if (A.size(1) != x.size())
     SiconosMatrixException::selfThrow("prod(A,x,y) error: inconsistent sizes between A and x.");
@@ -4125,23 +4477,34 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y)
     SiconosMatrixException::selfThrow("prod(A,x,y) error: not yet implemented for block matrices.");
 
   if (numA == 6) // A = 0
-    y.zero();
+  {
+    if (init)
+      y.zero();
+    //else nothing
+  }
 
   else if (numA == 7) // A = identity
   {
-    if (&x != &y) y = x ; // if x and y do not share memory (ie are different objects)
-    // else nothing
+    if (!init)
+      y += x;
+    else
+    {
+      if (&x != &y) y = x ; // if x and y do not share memory (ie are different objects)
+      // else nothing
+    }
   }
 
   else // A is not 0 or identity
   {
+
     // === First case: y is not a block vector ===
     if (numY != 0)
     {
       // if x is block: call of a specific function to treat each block
       if (numX == 0)
       {
-        y.zero();
+        if (init)
+          y.zero();
         unsigned int startRow = 0;
         unsigned int startCol = 0;
         // In private_addprod, the sum of all blocks of x, x[i], is computed: y = Sum_i (subA x[i]), with subA a submatrix of A,
@@ -4156,73 +4519,148 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y)
       }
       else // If neither x nor y are block: direct call to ublas::prod.
       {
-        if (&x != &y) // if no common memory between x and y.
+        if (init)
         {
-          if (numX == 1)
+          if (&x != &y) // if no common memory between x and y.
           {
-            if (numY != 1)
-              SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
-
-            if (numA == 1)
-              noalias(*y.getDensePtr()) = ublas::prod(*A.getDensePtr(), *x.getDensePtr());
-            else if (numA == 2)
-              noalias(*y.getDensePtr()) = ublas::prod(*A.getTriangPtr(), *x.getDensePtr());
-            else if (numA == 3)
-              noalias(*y.getDensePtr()) = ublas::prod(*A.getSymPtr(), *x.getDensePtr());
-            else if (numA == 4)
-              noalias(*y.getDensePtr()) = ublas::prod(*A.getSparsePtr(), *x.getDensePtr());
-            else //if(numA==5)
-              noalias(*y.getDensePtr()) = ublas::prod(*A.getBandedPtr(), *x.getDensePtr());
-          }
-          else //if(numX == 4)
-          {
-            if (numY != 1 && numA != 4)
-              SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
-
-            if (numA == 1)
-              noalias(*y.getDensePtr()) = ublas::prod(*A.getDensePtr(), *x.getSparsePtr());
-            else if (numA == 2)
-              noalias(*y.getDensePtr()) = ublas::prod(*A.getTriangPtr(), *x.getSparsePtr());
-            else if (numA == 3)
-              noalias(*y.getDensePtr()) = ublas::prod(*A.getSymPtr(), *x.getSparsePtr());
-            else if (numA == 4)
+            if (numX == 1)
             {
-              if (numY == 1)
-                noalias(*y.getDensePtr()) = ublas::prod(*A.getSparsePtr(), *x.getSparsePtr());
-              else
-                noalias(*y.getSparsePtr()) = ublas::prod(*A.getSparsePtr(), *x.getSparsePtr());
+              if (numY != 1)
+                SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
+
+              if (numA == 1)
+                noalias(*y.getDensePtr()) = ublas::prod(*A.getDensePtr(), *x.getDensePtr());
+              else if (numA == 2)
+                noalias(*y.getDensePtr()) = ublas::prod(*A.getTriangPtr(), *x.getDensePtr());
+              else if (numA == 3)
+                noalias(*y.getDensePtr()) = ublas::prod(*A.getSymPtr(), *x.getDensePtr());
+              else if (numA == 4)
+                noalias(*y.getDensePtr()) = ublas::prod(*A.getSparsePtr(), *x.getDensePtr());
+              else //if(numA==5)
+                noalias(*y.getDensePtr()) = ublas::prod(*A.getBandedPtr(), *x.getDensePtr());
             }
-            else //if(numA==5)
-              noalias(*y.getDensePtr()) = ublas::prod(*A.getBandedPtr(), *x.getSparsePtr());
+            else //if(numX == 4)
+            {
+              if (numY != 1 && numA != 4)
+                SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
+
+              if (numA == 1)
+                noalias(*y.getDensePtr()) = ublas::prod(*A.getDensePtr(), *x.getSparsePtr());
+              else if (numA == 2)
+                noalias(*y.getDensePtr()) = ublas::prod(*A.getTriangPtr(), *x.getSparsePtr());
+              else if (numA == 3)
+                noalias(*y.getDensePtr()) = ublas::prod(*A.getSymPtr(), *x.getSparsePtr());
+              else if (numA == 4)
+              {
+                if (numY == 1)
+                  noalias(*y.getDensePtr()) = ublas::prod(*A.getSparsePtr(), *x.getSparsePtr());
+                else
+                  noalias(*y.getSparsePtr()) = ublas::prod(*A.getSparsePtr(), *x.getSparsePtr());
+              }
+              else //if(numA==5)
+                noalias(*y.getDensePtr()) = ublas::prod(*A.getBandedPtr(), *x.getSparsePtr());
+            }
+          }
+          else // if x and y are the same object => alias
+          {
+            if (numX == 1)
+            {
+              if (numA == 1)
+                *y.getDensePtr() = ublas::prod(*A.getDensePtr(), *x.getDensePtr());
+              else if (numA == 2)
+                *y.getDensePtr() = ublas::prod(*A.getTriangPtr(), *x.getDensePtr());
+              else if (numA == 3)
+                *y.getDensePtr() = ublas::prod(*A.getSymPtr(), *x.getDensePtr());
+              else if (numA == 4)
+                *y.getDensePtr() = ublas::prod(*A.getSparsePtr(), *x.getDensePtr());
+              else //if(numA==5)
+                *y.getDensePtr() = ublas::prod(*A.getBandedPtr(), *x.getDensePtr());
+            }
+            else //if(numX == 4)
+            {
+              if (numA == 1)
+                *y.getSparsePtr() = ublas::prod(*A.getDensePtr(), *x.getSparsePtr());
+              else if (numA == 2)
+                *y.getSparsePtr() = ublas::prod(*A.getTriangPtr(), *x.getSparsePtr());
+              else if (numA == 3)
+                *y.getSparsePtr() = ublas::prod(*A.getSymPtr(), *x.getSparsePtr());
+              else if (numA == 4)
+                *y.getSparsePtr() = ublas::prod(*A.getSparsePtr(), *x.getSparsePtr());
+              else //if(numA==5)
+                *y.getSparsePtr() = ublas::prod(*A.getBandedPtr(), *x.getSparsePtr());
+            }
           }
         }
-        else // if x and y are the same object => alias
+        else // += case
         {
-          if (numX == 1)
+          if (&x != &y) // if no common memory between x and y.
           {
-            if (numA == 1)
-              *y.getDensePtr() = ublas::prod(*A.getDensePtr(), *x.getDensePtr());
-            else if (numA == 2)
-              *y.getDensePtr() = ublas::prod(*A.getTriangPtr(), *x.getDensePtr());
-            else if (numA == 3)
-              *y.getDensePtr() = ublas::prod(*A.getSymPtr(), *x.getDensePtr());
-            else if (numA == 4)
-              *y.getDensePtr() = ublas::prod(*A.getSparsePtr(), *x.getDensePtr());
-            else //if(numA==5)
-              *y.getDensePtr() = ublas::prod(*A.getBandedPtr(), *x.getDensePtr());
+            if (numX == 1)
+            {
+              if (numY != 1)
+                SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
+
+              if (numA == 1)
+                noalias(*y.getDensePtr()) += ublas::prod(*A.getDensePtr(), *x.getDensePtr());
+              else if (numA == 2)
+                noalias(*y.getDensePtr()) += ublas::prod(*A.getTriangPtr(), *x.getDensePtr());
+              else if (numA == 3)
+                noalias(*y.getDensePtr()) += ublas::prod(*A.getSymPtr(), *x.getDensePtr());
+              else if (numA == 4)
+                noalias(*y.getDensePtr()) += ublas::prod(*A.getSparsePtr(), *x.getDensePtr());
+              else //if(numA==5)
+                noalias(*y.getDensePtr()) += ublas::prod(*A.getBandedPtr(), *x.getDensePtr());
+            }
+            else //if(numX == 4)
+            {
+              if (numY != 1 && numA != 4)
+                SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
+
+              if (numA == 1)
+                noalias(*y.getDensePtr()) += ublas::prod(*A.getDensePtr(), *x.getSparsePtr());
+              else if (numA == 2)
+                noalias(*y.getDensePtr()) += ublas::prod(*A.getTriangPtr(), *x.getSparsePtr());
+              else if (numA == 3)
+                noalias(*y.getDensePtr()) += ublas::prod(*A.getSymPtr(), *x.getSparsePtr());
+              else if (numA == 4)
+              {
+                if (numY == 1)
+                  noalias(*y.getDensePtr()) += ublas::prod(*A.getSparsePtr(), *x.getSparsePtr());
+                else
+                  noalias(*y.getSparsePtr()) += ublas::prod(*A.getSparsePtr(), *x.getSparsePtr());
+              }
+              else //if(numA==5)
+                noalias(*y.getDensePtr()) += ublas::prod(*A.getBandedPtr(), *x.getSparsePtr());
+            }
           }
-          else //if(numX == 4)
+          else // if x and y are the same object => alias
           {
-            if (numA == 1)
-              *y.getSparsePtr() = ublas::prod(*A.getDensePtr(), *x.getSparsePtr());
-            else if (numA == 2)
-              *y.getSparsePtr() = ublas::prod(*A.getTriangPtr(), *x.getSparsePtr());
-            else if (numA == 3)
-              *y.getSparsePtr() = ublas::prod(*A.getSymPtr(), *x.getSparsePtr());
-            else if (numA == 4)
-              *y.getSparsePtr() = ublas::prod(*A.getSparsePtr(), *x.getSparsePtr());
-            else //if(numA==5)
-              *y.getSparsePtr() = ublas::prod(*A.getBandedPtr(), *x.getSparsePtr());
+            if (numX == 1)
+            {
+              if (numA == 1)
+                *y.getDensePtr() += ublas::prod(*A.getDensePtr(), *x.getDensePtr());
+              else if (numA == 2)
+                *y.getDensePtr() += ublas::prod(*A.getTriangPtr(), *x.getDensePtr());
+              else if (numA == 3)
+                *y.getDensePtr() += ublas::prod(*A.getSymPtr(), *x.getDensePtr());
+              else if (numA == 4)
+                *y.getDensePtr() += ublas::prod(*A.getSparsePtr(), *x.getDensePtr());
+              else //if(numA==5)
+                *y.getDensePtr() += ublas::prod(*A.getBandedPtr(), *x.getDensePtr());
+            }
+            else //if(numX == 4)
+            {
+              if (numA == 1)
+                *y.getSparsePtr() += ublas::prod(*A.getDensePtr(), *x.getSparsePtr());
+              else if (numA == 2)
+                *y.getSparsePtr() += ublas::prod(*A.getTriangPtr(), *x.getSparsePtr());
+              else if (numA == 3)
+                *y.getSparsePtr() += ublas::prod(*A.getSymPtr(), *x.getSparsePtr());
+              else if (numA == 4)
+                *y.getSparsePtr() += ublas::prod(*A.getSparsePtr(), *x.getSparsePtr());
+              else //if(numA==5)
+                *y.getSparsePtr() += ublas::prod(*A.getBandedPtr(), *x.getSparsePtr());
+            }
           }
         }
       }
@@ -4235,7 +4673,446 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y)
       // private_prod takes into account the fact that x and y[i] may be block vectors.
       for (it = y.begin(); it != y.end(); ++it)
       {
-        private_prod(&A, startRow, &x, *it, true);
+        private_prod(&A, startRow, &x, *it, init);
+        startRow += (*it)->size();
+      }
+    }
+  }
+}
+
+void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool init)
+{
+  // To compute y = a*A * x in an "optimized" way (in comparison with y = prod(A,x) )
+  // or y += a*A*x if init = false.
+
+  if (A.size(1) != x.size())
+    SiconosMatrixException::selfThrow("prod(A,x,y) error: inconsistent sizes between A and x.");
+
+  if (A.size(0) != y.size())
+    SiconosMatrixException::selfThrow("prod(A,x,y) error: inconsistent sizes between A and y.");
+
+  unsigned int numA = A.getNum();
+  unsigned int numX = x.getNum();
+  unsigned int numY = y.getNum();
+
+  if (numA == 0) // If A is Block
+    SiconosMatrixException::selfThrow("prod(A,x,y) error: not yet implemented for block matrices.");
+
+  if (numA == 6) // A = 0
+  {
+    if (init)
+      y.zero();
+    //else nothing
+  }
+
+  else if (numA == 7) // A = identity
+  {
+    scal(a, x, y, init);
+  }
+
+  else // A is not 0 or identity
+  {
+
+    // === First case: y is not a block vector ===
+    if (numY != 0)
+    {
+      // if x is block: call of a specific function to treat each block
+      if (numX == 0)
+      {
+        if (init)
+          y.zero();
+        unsigned int startRow = 0;
+        unsigned int startCol = 0;
+        // In private_addprod, the sum of all blocks of x, x[i], is computed: y = Sum_i (subA x[i]), with subA a submatrix of A,
+        // starting from position startRow in rows and startCol in columns.
+        // private_prod takes also into account the fact that each block of x can also be a block.
+        ConstBlockVectIterator it;
+        for (it = x.begin(); it != x.end(); ++it)
+        {
+          private_addprod(a, &A, startRow, startCol, *it, &y);
+          startCol += (*it)->size();
+        }
+      }
+      else // If neither x nor y are block: direct call to ublas::prod.
+      {
+        if (init)
+        {
+          if (&x != &y) // if no common memory between x and y.
+          {
+            if (numX == 1)
+            {
+              if (numY != 1)
+                SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
+
+              if (numA == 1)
+                noalias(*y.getDensePtr()) = a * ublas::prod(*A.getDensePtr(), *x.getDensePtr());
+              else if (numA == 2)
+                noalias(*y.getDensePtr()) = a * ublas::prod(*A.getTriangPtr(), *x.getDensePtr());
+              else if (numA == 3)
+                noalias(*y.getDensePtr()) = a * ublas::prod(*A.getSymPtr(), *x.getDensePtr());
+              else if (numA == 4)
+                noalias(*y.getDensePtr()) = a * ublas::prod(*A.getSparsePtr(), *x.getDensePtr());
+              else //if(numA==5)
+                noalias(*y.getDensePtr()) = a * ublas::prod(*A.getBandedPtr(), *x.getDensePtr());
+            }
+            else //if(numX == 4)
+            {
+              if (numY != 1 && numA != 4)
+                SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
+
+              if (numA == 1)
+                noalias(*y.getDensePtr()) = a * ublas::prod(*A.getDensePtr(), *x.getSparsePtr());
+              else if (numA == 2)
+                noalias(*y.getDensePtr()) = a * ublas::prod(*A.getTriangPtr(), *x.getSparsePtr());
+              else if (numA == 3)
+                noalias(*y.getDensePtr()) = a * ublas::prod(*A.getSymPtr(), *x.getSparsePtr());
+              else if (numA == 4)
+              {
+                if (numY == 1)
+                  noalias(*y.getDensePtr()) = a * ublas::prod(*A.getSparsePtr(), *x.getSparsePtr());
+                else
+                  noalias(*y.getSparsePtr()) = a * ublas::prod(*A.getSparsePtr(), *x.getSparsePtr());
+              }
+              else //if(numA==5)
+                noalias(*y.getDensePtr()) = a * ublas::prod(*A.getBandedPtr(), *x.getSparsePtr());
+            }
+          }
+          else // if x and y are the same object => alias
+          {
+            if (numX == 1)
+            {
+              if (numA == 1)
+                *y.getDensePtr() = a * ublas::prod(*A.getDensePtr(), *x.getDensePtr());
+              else if (numA == 2)
+                *y.getDensePtr() = a * ublas::prod(*A.getTriangPtr(), *x.getDensePtr());
+              else if (numA == 3)
+                *y.getDensePtr() = a * ublas::prod(*A.getSymPtr(), *x.getDensePtr());
+              else if (numA == 4)
+                *y.getDensePtr() = a * ublas::prod(*A.getSparsePtr(), *x.getDensePtr());
+              else //if(numA==5)
+                *y.getDensePtr() = a * ublas::prod(*A.getBandedPtr(), *x.getDensePtr());
+            }
+            else //if(numX == 4)
+            {
+              if (numA == 1)
+                *y.getSparsePtr() = a * ublas::prod(*A.getDensePtr(), *x.getSparsePtr());
+              else if (numA == 2)
+                *y.getSparsePtr() = a * ublas::prod(*A.getTriangPtr(), *x.getSparsePtr());
+              else if (numA == 3)
+                *y.getSparsePtr() = a * ublas::prod(*A.getSymPtr(), *x.getSparsePtr());
+              else if (numA == 4)
+                *y.getSparsePtr() = a * ublas::prod(*A.getSparsePtr(), *x.getSparsePtr());
+              else //if(numA==5)
+                *y.getSparsePtr() = a * ublas::prod(*A.getBandedPtr(), *x.getSparsePtr());
+            }
+          }
+        }
+        else // += case
+        {
+          if (&x != &y) // if no common memory between x and y.
+          {
+            if (numX == 1)
+            {
+              if (numY != 1)
+                SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
+
+              if (numA == 1)
+                noalias(*y.getDensePtr()) += a * ublas::prod(*A.getDensePtr(), *x.getDensePtr());
+              else if (numA == 2)
+                noalias(*y.getDensePtr()) += a * ublas::prod(*A.getTriangPtr(), *x.getDensePtr());
+              else if (numA == 3)
+                noalias(*y.getDensePtr()) += a * ublas::prod(*A.getSymPtr(), *x.getDensePtr());
+              else if (numA == 4)
+                noalias(*y.getDensePtr()) += a * ublas::prod(*A.getSparsePtr(), *x.getDensePtr());
+              else //if(numA==5)
+                noalias(*y.getDensePtr()) += a * ublas::prod(*A.getBandedPtr(), *x.getDensePtr());
+            }
+            else //if(numX == 4)
+            {
+              if (numY != 1 && numA != 4)
+                SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
+
+              if (numA == 1)
+                noalias(*y.getDensePtr()) += a * ublas::prod(*A.getDensePtr(), *x.getSparsePtr());
+              else if (numA == 2)
+                noalias(*y.getDensePtr()) += a * ublas::prod(*A.getTriangPtr(), *x.getSparsePtr());
+              else if (numA == 3)
+                noalias(*y.getDensePtr()) += a * ublas::prod(*A.getSymPtr(), *x.getSparsePtr());
+              else if (numA == 4)
+              {
+                if (numY == 1)
+                  noalias(*y.getDensePtr()) += a * ublas::prod(*A.getSparsePtr(), *x.getSparsePtr());
+                else
+                  noalias(*y.getSparsePtr()) += a * ublas::prod(*A.getSparsePtr(), *x.getSparsePtr());
+              }
+              else //if(numA==5)
+                noalias(*y.getDensePtr()) += a * ublas::prod(*A.getBandedPtr(), *x.getSparsePtr());
+            }
+          }
+          else // if x and y are the same object => alias
+          {
+            if (numX == 1)
+            {
+              if (numA == 1)
+                *y.getDensePtr() += a * ublas::prod(*A.getDensePtr(), *x.getDensePtr());
+              else if (numA == 2)
+                *y.getDensePtr() += a * ublas::prod(*A.getTriangPtr(), *x.getDensePtr());
+              else if (numA == 3)
+                *y.getDensePtr() += a * ublas::prod(*A.getSymPtr(), *x.getDensePtr());
+              else if (numA == 4)
+                *y.getDensePtr() += a * ublas::prod(*A.getSparsePtr(), *x.getDensePtr());
+              else //if(numA==5)
+                *y.getDensePtr() += a * ublas::prod(*A.getBandedPtr(), *x.getDensePtr());
+            }
+            else //if(numX == 4)
+            {
+              if (numA == 1)
+                *y.getSparsePtr() += a * ublas::prod(*A.getDensePtr(), *x.getSparsePtr());
+              else if (numA == 2)
+                *y.getSparsePtr() += a * ublas::prod(*A.getTriangPtr(), *x.getSparsePtr());
+              else if (numA == 3)
+                *y.getSparsePtr() += a * ublas::prod(*A.getSymPtr(), *x.getSparsePtr());
+              else if (numA == 4)
+                *y.getSparsePtr() += a * ublas::prod(*A.getSparsePtr(), *x.getSparsePtr());
+              else //if(numA==5)
+                *y.getSparsePtr() += a * ublas::prod(*A.getBandedPtr(), *x.getSparsePtr());
+            }
+          }
+        }
+      }
+    }
+    else // === Second case: y is a block vector ===
+    {
+      unsigned int startRow = 0;
+      ConstBlockVectIterator it;
+      // For Each subvector of y, y[i], private_prod computes y[i] = subA x, subA being a submatrix of A corresponding to y[i] position.
+      // private_prod takes into account the fact that x and y[i] may be block vectors.
+      for (it = y.begin(); it != y.end(); ++it)
+      {
+        private_prod(a, &A, startRow, &x, *it, init);
+        startRow += (*it)->size();
+      }
+    }
+  }
+}
+
+void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool init)
+{
+  // To compute y = trans(A) * x in an "optimized" way, if init = true
+  // (or y = trans(A) * x + y if init = false
+
+  if (A.size(0) != x.size())
+    SiconosMatrixException::selfThrow("prod(x,A,y) error: inconsistent sizes between A and x.");
+
+  if (A.size(1) != y.size())
+    SiconosMatrixException::selfThrow("prod(x,A,y) error: inconsistent sizes between A and y.");
+
+  unsigned int numA = A.getNum();
+  unsigned int numX = x.getNum();
+  unsigned int numY = y.getNum();
+
+  if (numA == 0) // If A is Block
+    SiconosMatrixException::selfThrow("prod(x,A,y) error: not yet implemented for block matrices.");
+
+  if (numA == 6) // A = 0
+  {
+    if (init)
+      y.zero();
+    // else nothing
+  }
+
+  else if (numA == 7) // A = identity
+  {
+    if (!init)
+      y += x;
+    else
+    {
+      if (&x != &y) y = x ; // if x and y do not share memory (ie are different objects)
+      // else nothing
+    }
+  }
+
+  else // A is not 0 or identity
+  {
+    // === First case: y is not a block vector ===
+    if (numY != 0)
+    {
+      // if x is block: call of a specific function to treat each block
+      if (numX == 0)
+      {
+        if (init)
+          y.zero();
+        unsigned int startRow = 0;
+        unsigned int startCol = 0;
+        // In private_addprod, the sum of all blocks of x, x[i], is computed: y = Sum_i (subA x[i]), with subA a submatrix of A,
+        // starting from position startRow in rows and startCol in columns.
+        // private_prod takes also into account the fact that each block of x can also be a block.
+        ConstBlockVectIterator it;
+        for (it = x.begin(); it != x.end(); ++it)
+        {
+          private_addprod(*it, &A, startRow, startCol, &y);
+          startCol += (*it)->size();
+        }
+      }
+      else // If neither x nor y are block: direct call to ublas::prod.
+      {
+        if (init)
+        {
+
+          if (&x != &y) // if no common memory between x and y.
+          {
+            if (numX == 1)
+            {
+              if (numY != 1)
+                SiconosMatrixException::selfThrow("prod(x,A,y) error: y (output) must be a dense vector.");
+
+              if (numA == 1)
+                noalias(*y.getDensePtr()) = ublas::prod(trans(*A.getDensePtr()), *x.getDensePtr());
+              else if (numA == 2)
+                noalias(*y.getDensePtr()) = ublas::prod(trans(*A.getTriangPtr()), *x.getDensePtr());
+              else if (numA == 3)
+                noalias(*y.getDensePtr()) = ublas::prod(trans(*A.getSymPtr()), *x.getDensePtr());
+              else if (numA == 4)
+                noalias(*y.getDensePtr()) = ublas::prod(trans(*A.getSparsePtr()), *x.getDensePtr());
+              else //if(numA==5)
+                noalias(*y.getDensePtr()) = ublas::prod(trans(*A.getBandedPtr()), *x.getDensePtr());
+            }
+            else //if(numX == 4)
+            {
+              if (numY != 1 && numA != 4)
+                SiconosMatrixException::selfThrow("prod(x,A,y) error: y (output) must be a dense vector.");
+
+              if (numA == 1)
+                noalias(*y.getDensePtr()) = ublas::prod(trans(*A.getDensePtr()), *x.getSparsePtr());
+              else if (numA == 2)
+                noalias(*y.getDensePtr()) = ublas::prod(trans(*A.getTriangPtr()), *x.getSparsePtr());
+              else if (numA == 3)
+                noalias(*y.getDensePtr()) = ublas::prod(trans(*A.getSymPtr()), *x.getSparsePtr());
+              else if (numA == 4)
+              {
+                if (numY == 1)
+                  noalias(*y.getDensePtr()) = ublas::prod(trans(*A.getSparsePtr()), *x.getSparsePtr());
+                else
+                  noalias(*y.getSparsePtr()) = ublas::prod(trans(*A.getSparsePtr()), *x.getSparsePtr());
+              }
+              else //if(numA==5)
+                noalias(*y.getDensePtr()) = ublas::prod(trans(*A.getBandedPtr()), *x.getSparsePtr());
+            }
+          }
+          else // if x and y are the same object => alias
+          {
+            if (numX == 1)
+            {
+              if (numA == 1)
+                *y.getDensePtr() = ublas::prod(trans(*A.getDensePtr()), *x.getDensePtr());
+              else if (numA == 2)
+                *y.getDensePtr() = ublas::prod(trans(*A.getTriangPtr()), *x.getDensePtr());
+              else if (numA == 3)
+                *y.getDensePtr() = ublas::prod(trans(*A.getSymPtr()), *x.getDensePtr());
+              else if (numA == 4)
+                *y.getDensePtr() = ublas::prod(trans(*A.getSparsePtr()), *x.getDensePtr());
+              else //if(numA==5)
+                *y.getDensePtr() = ublas::prod(trans(*A.getBandedPtr()), *x.getDensePtr());
+            }
+            else //if(numX == 4)
+            {
+              if (numA == 1)
+                *y.getSparsePtr() = ublas::prod(trans(*A.getDensePtr()), *x.getSparsePtr());
+              else if (numA == 2)
+                *y.getSparsePtr() = ublas::prod(trans(*A.getTriangPtr()), *x.getSparsePtr());
+              else if (numA == 3)
+                *y.getSparsePtr() = ublas::prod(trans(*A.getSymPtr()), *x.getSparsePtr());
+              else if (numA == 4)
+                *y.getSparsePtr() = ublas::prod(trans(*A.getSparsePtr()), *x.getSparsePtr());
+              else //if(numA==5)
+                *y.getSparsePtr() = ublas::prod(trans(*A.getBandedPtr()), *x.getSparsePtr());
+            }
+          }
+        }
+        else // += case
+        {
+
+          if (&x != &y) // if no common memory between x and y.
+          {
+            if (numX == 1)
+            {
+              if (numY != 1)
+                SiconosMatrixException::selfThrow("prod(x,A,y) error: y (output) must be a dense vector.");
+
+              if (numA == 1)
+                noalias(*y.getDensePtr()) += ublas::prod(trans(*A.getDensePtr()), *x.getDensePtr());
+              else if (numA == 2)
+                noalias(*y.getDensePtr()) += ublas::prod(trans(*A.getTriangPtr()), *x.getDensePtr());
+              else if (numA == 3)
+                noalias(*y.getDensePtr()) += ublas::prod(trans(*A.getSymPtr()), *x.getDensePtr());
+              else if (numA == 4)
+                noalias(*y.getDensePtr()) += ublas::prod(trans(*A.getSparsePtr()), *x.getDensePtr());
+              else //if(numA==5)
+                noalias(*y.getDensePtr()) += ublas::prod(trans(*A.getBandedPtr()), *x.getDensePtr());
+            }
+            else //if(numX == 4)
+            {
+              if (numY != 1 && numA != 4)
+                SiconosMatrixException::selfThrow("prod(x,A,y) error: y (output) must be a dense vector.");
+
+              if (numA == 1)
+                noalias(*y.getDensePtr()) += ublas::prod(trans(*A.getDensePtr()), *x.getSparsePtr());
+              else if (numA == 2)
+                noalias(*y.getDensePtr()) += ublas::prod(trans(*A.getTriangPtr()), *x.getSparsePtr());
+              else if (numA == 3)
+                noalias(*y.getDensePtr()) += ublas::prod(trans(*A.getSymPtr()), *x.getSparsePtr());
+              else if (numA == 4)
+              {
+                if (numY == 1)
+                  noalias(*y.getDensePtr()) += ublas::prod(trans(*A.getSparsePtr()), *x.getSparsePtr());
+                else
+                  noalias(*y.getSparsePtr()) += ublas::prod(trans(*A.getSparsePtr()), *x.getSparsePtr());
+              }
+              else //if(numA==5)
+                noalias(*y.getDensePtr()) += ublas::prod(trans(*A.getBandedPtr()), *x.getSparsePtr());
+            }
+          }
+          else // if x and y are the same object => alias
+          {
+            if (numX == 1)
+            {
+              if (numA == 1)
+                *y.getDensePtr() += ublas::prod(trans(*A.getDensePtr()), *x.getDensePtr());
+              else if (numA == 2)
+                *y.getDensePtr() += ublas::prod(trans(*A.getTriangPtr()), *x.getDensePtr());
+              else if (numA == 3)
+                *y.getDensePtr() += ublas::prod(trans(*A.getSymPtr()), *x.getDensePtr());
+              else if (numA == 4)
+                *y.getDensePtr() += ublas::prod(trans(*A.getSparsePtr()), *x.getDensePtr());
+              else //if(numA==5)
+                *y.getDensePtr() += ublas::prod(trans(*A.getBandedPtr()), *x.getDensePtr());
+            }
+            else //if(numX == 4)
+            {
+              if (numA == 1)
+                *y.getSparsePtr() += ublas::prod(trans(*A.getDensePtr()), *x.getSparsePtr());
+              else if (numA == 2)
+                *y.getSparsePtr() += ublas::prod(trans(*A.getTriangPtr()), *x.getSparsePtr());
+              else if (numA == 3)
+                *y.getSparsePtr() += ublas::prod(trans(*A.getSymPtr()), *x.getSparsePtr());
+              else if (numA == 4)
+                *y.getSparsePtr() += ublas::prod(trans(*A.getSparsePtr()), *x.getSparsePtr());
+              else //if(numA==5)
+                *y.getSparsePtr() += ublas::prod(trans(*A.getBandedPtr()), *x.getSparsePtr());
+            }
+          }
+        }
+      }
+    }
+    else // === Second case: y is a block vector ===
+    {
+      unsigned int startRow = 0;
+      ConstBlockVectIterator it;
+      // For Each subvector of y, y[i], private_prod computes y[i] = subA x, subA being a submatrix of A corresponding to y[i] position.
+      // private_prod takes into account the fact that x and y[i] may be block vectors.
+      for (it = y.begin(); it != y.end(); ++it)
+      {
+        private_prod(&x, &A, startRow, *it, init);
         startRow += (*it)->size();
       }
     }
@@ -4499,4 +5376,182 @@ void gemm(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C)
 
   atlas::gemm(*A.getDensePtr(), *B.getDensePtr(), *C.getDensePtr());
   C.resetLU();
+}
+
+void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
+{
+  // To compute B = a * A (init = true) or B += a*A (init = false).
+
+  if (&A == &B)
+  {
+    if (init) B *= a;
+    else B *= (1.0 + a);
+  }
+  else
+  {
+    unsigned int numA = A.getNum();
+    unsigned int numB = B.getNum();
+
+    if (numB == 6 || numB == 7) // B = 0 or identity.
+      SiconosMatrixException::selfThrow("scal(a,A,B) : forbidden for B being a zero or identity matrix.");
+
+    if (numA == 6)
+    {
+      if (init) B.zero(); // else nothing
+    }
+    else if (numA == 7)
+    {
+      if (init)
+      {
+        B.eye();
+        B *= a;
+      }
+      else
+      {
+        // Assuming B is square ...
+        for (unsigned int i = 0; i < B.size(0); ++i)
+          B(i, i) += a;
+      }
+    }
+    else
+    {
+      if (numA == numB) // if A and B are of the same type ...
+      {
+        switch (numA)
+        {
+
+        case 0: // A and B are block
+          if (isComparableTo(&A, &B))
+          {
+            BlockIterator1 itB1;
+            BlockIterator2 itB2;
+            ConstBlockIterator1 itA1 = A.begin();
+            ConstBlockIterator2 itA2;
+            for (itB1 = B.begin(); itB1 != B.end(); ++itB1)
+            {
+              itA2 = itA1.begin();
+              for (itB2 = itB1.begin(); itB2 != itB1.end(); ++itB2)
+              {
+                scal(a, **itA2++, **itB2, init);
+              }
+              itA1++;
+            }
+          }
+          else // if A and B are not "block-consistent"
+          {
+            if (init)
+            {
+              for (unsigned int i = 0; i < A.size(0); ++i)
+                for (unsigned int j = 0; j < A.size(1); ++j)
+                  B(i, j) = a * A(i, j);
+            }
+            else
+            {
+              for (unsigned int i = 0; i < A.size(0); ++i)
+                for (unsigned int j = 0; j < A.size(1); ++j)
+                  B(i, j) += a * A(i, j);
+            }
+          }
+          break;
+
+        case 1: // if both are dense
+          if (init)
+            noalias(*B.getDensePtr()) = a ** A.getDensePtr();
+          else
+            noalias(*B.getDensePtr()) += a ** A.getDensePtr();
+          break;
+        case 2:
+          if (init)
+            noalias(*B.getTriangPtr()) = a ** A.getTriangPtr();
+          else
+            noalias(*B.getTriangPtr()) += a ** A.getTriangPtr();
+          break;
+        case 3:
+          if (init)
+            noalias(*B.getSymPtr()) = a ** A.getSymPtr();
+          else
+            noalias(*B.getSymPtr()) += a ** A.getSymPtr();
+          break;
+        case 4:
+          if (init)
+            noalias(*B.getSparsePtr()) = a ** A.getSparsePtr();
+          else
+            noalias(*B.getSparsePtr()) += a ** A.getSparsePtr();
+          break;
+        case 5:
+          if (init)
+            noalias(*B.getBandedPtr()) = a ** A.getBandedPtr();
+          else
+            noalias(*B.getBandedPtr()) += a ** A.getBandedPtr();
+          break;
+        }
+      }
+      else // if A and B are of different types.
+      {
+        if (numA == 0 || numB == 0) // if A or B is block
+        {
+          if (init)
+          {
+            B = A;
+            B *= a;
+          }
+          else
+          {
+            SimpleMatrix tmp(A);
+            tmp *= a;
+            B += tmp; // bof bof ...
+          }
+        }
+        else
+        {
+          if (numB != 1)
+            SiconosMatrixException::selfThrow("scal(a,A,B) failed. A and B types do not fit together.");
+
+          if (init)
+          {
+            switch (numB)
+            {
+            case 1:
+              noalias(*B.getDensePtr()) = a ** A.getDensePtr();
+              break;
+            case 2:
+              noalias(*B.getDensePtr()) = a ** A.getTriangPtr();
+              break;
+            case 3:
+              noalias(*B.getDensePtr()) = a ** A.getSymPtr();
+              break;
+            case 4:
+              noalias(*B.getDensePtr()) = a ** A.getSparsePtr();
+              break;
+            case 5:
+              noalias(*B.getDensePtr()) = a ** A.getBandedPtr();
+              break;
+            }
+          }
+          else
+
+          {
+            switch (numB)
+            {
+            case 1:
+              noalias(*B.getDensePtr()) += a ** A.getDensePtr();
+              break;
+            case 2:
+              noalias(*B.getDensePtr()) += a ** A.getTriangPtr();
+              break;
+            case 3:
+              noalias(*B.getDensePtr()) += a ** A.getSymPtr();
+              break;
+            case 4:
+              noalias(*B.getDensePtr()) += a ** A.getSparsePtr();
+              break;
+            case 5:
+              noalias(*B.getDensePtr()) += a ** A.getBandedPtr();
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
 }

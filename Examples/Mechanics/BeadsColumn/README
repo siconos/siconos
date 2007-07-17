@@ -1,4 +1,4 @@
-/* Siconos-sample version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-sample version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.	
  * Siconos is a free software; you can redistribute it and/or modify
@@ -18,9 +18,15 @@
 */
 
 
-Column of n falling beads, bouncing alltogether and on the ground or the ceiling.
+Column of n falling beads.
 
 Input: direct c++ model description (TS for time stepping, ED for event driven)
+
+-> BeadsColumnsTS.cpp
+-> BeadsColumnED.cpp
+-> ThreeBeadsColumn.cpp (3 beads, time-stepping and Xml input).
+
 Output: result.dat
 
-Post-treatment: gnuplot -persist result.gp
+Post-treatment: gnuplot -persist result.gp or ThreeBeadsXML.gp
+

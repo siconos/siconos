@@ -1,4 +1,4 @@
-/* Siconos-sample version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-sample version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
     double t0 = 0;                   // initial computation time
     double T = 4.0;                   // final computation time
     double h = 0.005;                // time step
-    double position_init = 10.5;     // initial position for lowest bead.
+    double position_init = 5;     // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
     double R = 0.1;                  // balls radius
     string solverName = "Lemke";     // solver algorithm used for non-smooth problem

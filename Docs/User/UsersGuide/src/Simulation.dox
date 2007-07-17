@@ -182,9 +182,8 @@ with UR=UnitaryRelation, and \f$ y_{ur}[i-1] \f$ the i-1 derivative of the relat
 
 \section docSimuTypes Simulation types and process 
 
-\ref docSimuMoreauTS 
+\subpage docSimuMoreauTS
 
-\ref docSimuED 
-
+\subpage docSimuED
 
 */

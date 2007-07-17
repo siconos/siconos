@@ -51,7 +51,7 @@ template<class SubType> Sensor* factory(const std::string& name, TimeDiscretisat
 /** Registry Class for sensors.
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 2.1.0.
+ *  \version 2.1.1.
  *  \date (Creation) February 01, 2007
  *
  * Sensor factory.
@@ -91,7 +91,7 @@ public :
 /** Registration Class for sensors.
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 2.1.0.
+ *  \version 2.1.1.
  *  \date (Creation) February 01, 2007
  *
  * Class used for auto-registration of Sensor-type objects.

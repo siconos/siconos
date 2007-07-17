@@ -1,6 +1,6 @@
 Summary: The Siconos/Numerics Package is dedicated to low-level algorithms
 Name: siconos-numerics
-Version: 2.1.0
+Version: 2.1.1
 Release: 1.fc6
 License: GNU LGPL
 Group: Development/Libraries
@@ -59,8 +59,8 @@ rm -rf %{buildroot}
 %exclude %{_libdir}/debug
 
 %changelog
-* Thu Jun 28 2007 Maurice Bremond <Maurice.Bremond@inria.fr> - 2.1.0-1.fc6
-- version 2.1.0, fc6
+* Thu Jun 28 2007 Maurice Bremond <Maurice.Bremond@inria.fr> - 2.1.1-1.fc6
+- version 2.1.1, fc6
 		  
 
 * Fri May 11 2007 Maurice Bremond <Maurice.Bremond@inria.fr> - 2.0.0-1

@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -518,15 +518,6 @@ public:
       \param a SiconosMatrix*
   */
   friend const bool isComparableTo(const  SiconosMatrix*, const  SiconosMatrix*);
-
-  /** multiplication of a matrix by a scalar, B = a*A
-   *  \param a, a double
-   *  \param A, a SiconosMatrix (IN)
-   *  \return B a SiconosMatrix (IN-OUT)
-   */
-  friend void scal(double, const SiconosMatrix&, SiconosMatrix&);
-
-
 
 };
 

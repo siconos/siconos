@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -43,7 +43,7 @@ union VECTOR_UBLAS_TYPE
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \date (creation) 07/21/2006
- *  \version 2.1.0.
+ *  \version 2.1.1.
  *
  *  In Siconos, a "vector" can be either a SimpleVector or a BlockVector, ie a container of several pointers to SiconosVector.
  *
@@ -371,13 +371,6 @@ public:
       \param a SiconosVector*.
   */
   friend const bool isComparableTo(const SiconosVector *, const SiconosVector *);
-
-  /** multiplication of a vector by a scalar, y = a*x
-   *  \param a, a double
-   *  \param x, a SiconosVector (IN)
-   *  \return y, a SiconosVector (IN-OUT)
-   */
-  friend void scal(double, const SiconosVector&, SiconosVector&);
 
   /** Swap x and y contents, using atlas swap.*/
   friend void swap(SiconosVector&, SiconosVector&);

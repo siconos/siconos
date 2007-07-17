@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -272,10 +272,12 @@ void LagrangianCompliantR::computeOutput(double time, unsigned int derivativeNum
     if (derivativeNumber == 1)
     {
       SiconosVector *lambda = interaction->getLambdaPtr(derivativeNumber);
-      *y = prod(*G[0], *data["q1"]) + prod(*G[1], *lambda);
+      // y = G0 q1 + G1 lambda
+      prod(*G[0], *data["q1"], *y);
+      prod(*G[1], *lambda, *y, false);
     }
     else if (derivativeNumber == 2)
-      *y = prod(*G[0], *data["q2"]); // Approx: y[2] = G0q[2], other terms are neglected ...
+      prod(*G[0], *data["q2"], *y); // Approx: y[2] = G0q[2], other terms are neglected ...
     else
       RuntimeException::selfThrow("LagrangianR2::computeOutput(time,index), index out of range or not yet implemented.");
   }
@@ -291,9 +293,9 @@ void LagrangianCompliantR::computeFreeOutput(const double time, const unsigned i
     computeGFree(time, 0);
     computeGFree(time, 1);
     if (derivativeNumber == 1)
-      *y = prod(*G[0], *data["q1Free"]);
+      prod(*G[0], *data["q1Free"], *y);
     else if (derivativeNumber == 2)
-      *y = prod(*G[0], *data["q2"]);
+      prod(*G[0], *data["q2"], *y);
     else
       RuntimeException::selfThrow("LagrangianR2::computeOutput(time,index), index out of range or not yet implemented.");
   }
@@ -305,10 +307,14 @@ void LagrangianCompliantR::computeInput(const double time, const unsigned int le
   string name = "p" + toString<unsigned int>(level);
   // get lambda of the concerned interaction
   SiconosVector *lambda = interaction->getLambdaPtr(level);
-  SiconosMatrix * GT = new SimpleMatrix(*G[0]);
-  GT->trans();
-  *data[name] += prod(*GT, *lambda);
-  delete GT;
+
+  // data[name] += trans(G) * lambda
+  prod(*lambda, *G[0], *data[name], false);
+
+  //   SiconosMatrix * GT = new SimpleMatrix(*G[0]);
+  //   GT->trans();
+  //   *data[name] += prod(*GT, *lambda);
+  //   delete GT;
   //  gemv(CblasTrans, 1.0,*(G[0]), *lambda, 1.0, *data[name]); => not yet implemented for BlockVectors.
 }
 

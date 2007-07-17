@@ -1,5 +1,5 @@
 
-/* Siconos-sample version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-sample version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -60,6 +60,8 @@ int main(int argc, char* argv[])
   string Modeltitle = "DiodeBridge";
   string solverName = "Lemke"; // non smooth problem solver algo name.
 
+  boost::timer time;
+  time.restart();
   try
   {
     // --- Dynamical system specification ---
@@ -238,4 +240,5 @@ int main(int argc, char* argv[])
   {
     cout << "Exception caught " << endl;
   }
+  cout << "Computation Time: " << time.elapsed()  << endl;
 }

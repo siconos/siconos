@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -39,7 +39,7 @@ const std::string  TD_ISCONSTANT = "isConstant";
 /** XML management for Time Discretisation
  *
  *  \author SICONOS Development Team - copyright INRIA
- *   \version 2.1.0.
+ *   \version 2.1.1.
  *   \date 05/17/2004
  *
  */

@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -294,7 +294,8 @@ void UnitaryRelation::computeEquivalentY(const double time, const unsigned int l
     {
       e = (static_cast<NewtonImpactNSL*>(mainInteraction->getNonSmoothLawPtr()))->getE();
       if (simulationType == "TimeStepping")
-        *yOut += e**getYOldPtr(level);
+        scal(e, *getYOldPtr(level), *yOut, false);
+      //*yOut+=e**getYOldPtr(level);
       //axpy(e,*getYOldPtr(level),*yOut);  // yOut = e*yOld + yOut
       else if (simulationType == "EventDriven")
         *yOut *= (1.0 + e);

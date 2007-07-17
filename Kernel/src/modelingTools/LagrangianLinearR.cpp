@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -247,10 +247,10 @@ void LagrangianLinearR::computeOutput(double time, unsigned int derivativeNumber
     *y += *b;
 
   if (D != NULL)
-    *y += prod(*D, *lambda) ;
+    prod(*D, *lambda, *y, false) ;
 
   if (F != NULL)
-    *y += prod(*F, *data["z"]);
+    prod(*F, *data["z"], *y, false);
 }
 
 void LagrangianLinearR::computeFreeOutput(double time, unsigned int derivativeNumber)
@@ -268,10 +268,10 @@ void LagrangianLinearR::computeFreeOutput(double time, unsigned int derivativeNu
     *y += *b;
 
   if (D != NULL)
-    *y += prod(*D, *lambda) ;
+    prod(*D, *lambda, *y, false) ;
 
   if (F != NULL)
-    *y += prod(*F, *data["z"]);
+    prod(*F, *data["z"], *y, false);
 }
 
 void LagrangianLinearR::computeInput(double time, const unsigned int level)
@@ -281,12 +281,8 @@ void LagrangianLinearR::computeInput(double time, const unsigned int level)
 
   SiconosVector *lambda = new SimpleVector(*interaction->getLambdaPtr(level));
   // compute p = Ht lambda
-  SiconosMatrix * HT = new SimpleMatrix(*H);
+  prod(*lambda, *H, *data[name], false);
 
-  HT->trans();
-  *data[name] += prod(*HT, *lambda);
-
-  delete HT;
   delete lambda;
   //gemv(CblasTrans,1.0,*H,*lambda,1.0, *data[name]); => not yet implemented for BlockVectors.
 }

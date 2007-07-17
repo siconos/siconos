@@ -4,8 +4,8 @@
 # directory given in argument
 udpateDir()
 {
-oldversion="2\.0\.1";
-newversion="2\.1\.0";
+oldversion="2\.1\.0";
+newversion="2\.1\.1";
 initDir=`pwd`
 if test "$1" != "./bin-utils" 
 then

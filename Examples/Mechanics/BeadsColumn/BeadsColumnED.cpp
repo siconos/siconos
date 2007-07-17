@@ -1,4 +1,4 @@
-/* Siconos-sample version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-sample version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
     double t0 = 0;                   // initial computation time
     double T = 4.0;                   // final computation time
     double h = 0.05;                 // time step
-    double position_init = 10.5;     // initial position for lowest bead.
+    double position_init = 5;     // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
     double R = 0.1;                  // balls radius
     string solverName = "Lemke";     // solver algorithm used for non-smooth problem
@@ -192,7 +192,7 @@ int main(int argc, char* argv[])
     s->initialize();
 
     int k = 0; // Current step
-    int N = 570;// Number of Events
+    int N = 692;// Number of Events
 
     // Prepare output and save value for the initial time
     unsigned int outputSize = dsNumber * 2 + 1;
@@ -237,6 +237,7 @@ int main(int argc, char* argv[])
         k++;
       }
       // Positions and velocities
+
       i = 0; // Remember that DS are sorted in a growing order according to their number.
       dataPlot(k, 0) = s->getCurrentTime();
       for (it = allDS.begin(); it != allDS.end(); ++it)

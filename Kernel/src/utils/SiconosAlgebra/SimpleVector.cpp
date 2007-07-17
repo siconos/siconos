@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -1383,4 +1383,103 @@ SimpleMatrix outer_prod(const SiconosVector &x, const SiconosVector& m)
       return (DenseMat)(outer_prod(*x.getSparsePtr(), *m.getSparsePtr()));
   }
 }
+
+void scal(double a, const SiconosVector & x, SiconosVector & y, bool init)
+{
+  // To compute y = a *x (init = true) or y += a*x (init = false)
+
+  if (&x == &y)
+  {
+    if (init)
+      y *= a;
+    else
+    {
+      y *= (1.0 + a);
+    }
+  }
+  else
+  {
+    unsigned int sizeX = x.size();
+    unsigned int sizeY = y.size();
+
+    if (sizeX != sizeY)
+      SiconosVectorException::selfThrow("scal(a,SiconosVector,SiconosVector) failed, sizes are not consistent.");
+
+    unsigned int numY = y.getNum();
+    unsigned int numX = x.getNum();
+    if (numX == numY)
+    {
+      if (numX == 0) // ie if both are block vectors
+      {
+        if (isComparableTo(&x, &y)) // if x and y are "block-consistent"
+        {
+          ConstBlockVectIterator itX = x.begin();
+          BlockVectIterator itY ;
+          for (itY = y.begin(); itY != y.end(); ++itY)
+            scal(a, **itX++, **itY++, init);
+        }
+        else
+        {
+          if (init)
+          {
+            for (unsigned int i = 0; i < x.size(); ++i)
+              y(i) = a * x(i);
+          }
+          else
+          {
+            for (unsigned int i = 0; i < x.size(); ++i)
+              y(i) += a * x(i);
+          }
+        }
+      }
+      else if (numX == 1) // ie if both are Dense
+      {
+        if (init)
+          //atlas::axpby(a,*x.getDensePtr(),0.0,*y.getDensePtr());
+          noalias(*y.getDensePtr()) = a * *x.getDensePtr();
+        else
+          noalias(*y.getDensePtr()) += a * *x.getDensePtr();
+      }
+      else  // if both are sparse
+      {
+        if (init)
+          noalias(*y.getSparsePtr()) = a**x.getSparsePtr();
+        else
+          noalias(*y.getSparsePtr()) += a**x.getSparsePtr();
+      }
+    }
+    else
+    {
+      if (numY == 0 || numX == 0) // if y or x is block
+      {
+        if (init)
+        {
+          y = x;
+          y *= a;
+        }
+        else
+        {
+          SimpleVector tmp(x);
+          tmp *= a;
+          y += tmp;
+        }
+      }
+      else
+      {
+        if (numY == 1) // if y is dense
+        {
+          if (init)
+            noalias(*y.getDensePtr()) = a**x.getSparsePtr();
+          else
+            noalias(*y.getDensePtr()) += a**x.getSparsePtr();
+
+        }
+        else
+          SiconosVectorException::selfThrow("SiconosVector::scal(a,dense,sparse) not allowed.");
+      }
+    }
+  }
+}
+
+
 

@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -27,7 +27,7 @@
 /**  Virtual functors class
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 2.1.0.
+ *  \version 2.1.1.
  *  \date (Creation) April 25, 2006
  *
  *  Note: this is strongly inspired from tutorial http://www.newty.de/fpt/functor.html
@@ -48,7 +48,7 @@ public:
 
 /** derived template class for functors
 *  \author SICONOS Development Team - copyright INRIA
-*  \version 2.1.0.
+*  \version 2.1.1.
 *  \date (Creation) April 25, 2006
 *
 *  Note: this is strongly inspired from tutorial http://www.newty.de/fpt/functor.html
@@ -87,7 +87,7 @@ public:
 /** Template to provide comparison operator in stl set or map
 *   see examples of using in EventsManager.h
 *  \author SICONOS Development Team - copyright INRIA
-*  \version 2.1.0.
+*  \version 2.1.1.
 *  \date (Creation) April 25, 2006
 *
 * Convention: objects to be compared must have a function of type:

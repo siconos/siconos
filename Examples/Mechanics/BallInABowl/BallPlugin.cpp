@@ -1,4 +1,4 @@
-/* Siconos-sample version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-sample version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -17,11 +17,11 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include <stdio.h>
+#include <math.h>
 
-const double R = 0.1; // beads radius
-const double m = 1; // beads mass
-const double g = 9.81; // gravity
-const double h = -0.1; // position of the ground
+const double m = 1; // ball mass
+const double g = 9.8; // gravity
+static const double R = 0.5; // ball radius
 
 extern "C" double FextFunction(double time)
 {
@@ -30,7 +30,7 @@ extern "C" double FextFunction(double time)
 }
 
 
-extern "C" void beadsFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
+extern "C" void ballFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < sizeOfq; i++)
     fExt[i] = 0.0;
@@ -40,12 +40,20 @@ extern "C" void beadsFExt(double time, unsigned int sizeOfq, double *fExt, unsig
 
 extern "C" void groundFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
-  for (unsigned int i = 0; i < sizeOfq; i++)
+  for (unsigned int i = 0; i < sizeOfq ; i++)
     fExt[i] = 0.0;
 }
 
-extern "C" void ceilingFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
+extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* z)
 {
-  for (unsigned int i = 0; i < sizeOfq; i++)
-    fExt[i] = 0.0;
+  double R0 = 0.0;
+  y[0] = q[0] + sqrt(R * R - q[1] * q[1]) - R0;
 }
+
+extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* z)
+{
+  G[0] = 1.0;
+  G[1] = -q[1] / (sqrt(fabs(R * R - q[1] * q[1])));
+}
+
+

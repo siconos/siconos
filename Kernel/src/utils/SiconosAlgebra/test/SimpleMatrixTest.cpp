@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -2266,6 +2266,27 @@ void SimpleMatrixTest::testOperators8Ter()
   cout << "-->  test operators8Ter ended with success." << endl;
 }
 
+void SimpleMatrixTest::testOperators8_4() // C += A*B
+{
+  cout << "--> Test: operator8_4." << endl;
+  // Simple = Simple * Simple
+  C->zero();
+  prod(*A, *B, *C, false);
+  prod(*A, *B, *C, false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_4: ", norm_inf(*C->getDensePtr() - 2 * prod(*A->getDensePtr(), *B->getDensePtr())) < tol, true);
+
+  // Block = Simple * Simple
+  Cb->zero();
+  prod(*A, *B, *Cb, false);
+  prod(*A, *B, *Cb, false);
+  DenseMat Dtmp = prod(*A->getDensePtr(), *B->getDensePtr());
+  SimpleMatrix * tmp = new SimpleMatrix(Dtmp);
+  for (unsigned int i = 0; i < Cb->size(0); ++i)
+    for (unsigned int j = i ; j < Cb->size(1); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", fabs((*Cb)(i, j) - 2 * (*tmp)(i, j)) < tol, true);
+  cout << "-->  test operators8_4 ended with success." << endl;
+}
+
 void SimpleMatrixTest::testOperators9()
 {
   cout << "--> Test: operator9." << endl;
@@ -2440,6 +2461,48 @@ void SimpleMatrixTest::testOperators9Bis()
   cout << "-->  test operators9Bis ended with success." << endl;
 }
 
+void SimpleMatrixTest::testOperators9Ter()
+{
+  cout << "--> Test: operator9Ter." << endl;
+
+  // C += a*A or A/a
+
+  double a = 2.2;
+  C->zero();
+  // Simple = a * Simple or Simple/a
+  scal(a, *A, *C, false);
+  scal(a, *A, *C, false);
+  for (unsigned int i = 0; i < C->size(0); ++i)
+    for (unsigned int j = i ; j < C->size(1); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators9Ter: ", fabs((*C)(i, j) - 2 * a * (*A)(i, j)) < tol, true);
+
+  // Simple = a * Block
+  C->zero();
+  scal(a, *Ab, *C, false);
+  scal(a, *Ab, *C, false);
+  for (unsigned int i = 0; i < C->size(0); ++i)
+    for (unsigned int j = i ; j < C->size(1); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators9Ter: ", fabs((*C)(i, j) - 2 * a * (*Ab)(i, j)) < tol, true);
+
+  // Block = a * Block
+  Cb->zero();
+  scal(a, *Ab, *Cb, false);
+  scal(a, *Ab, *Cb, false);
+  for (unsigned int i = 0; i < Cb->size(0); ++i)
+    for (unsigned int j = i ; j < Cb->size(1); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators9Ter: ", fabs((*Cb)(i, j) - 2 * a * (*Ab)(i, j)) < tol, true);
+
+  // Block = a * Simple
+  Cb->zero();
+  scal(a, *A, *Cb, false);
+  scal(a, *A, *Cb, false);
+  for (unsigned int i = 0; i < Cb->size(0); ++i)
+    for (unsigned int j = i ; j < Cb->size(1); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators9Ter: ", fabs((*Cb)(i, j) - 2 * a * (*A)(i, j)) < tol, true);
+
+  cout << "-->  test operators9Ter ended with success." << endl;
+}
+
 void SimpleMatrixTest::testOperators10()
 {
   cout << "--> Test: operator10." << endl;
@@ -2577,7 +2640,7 @@ void SimpleMatrixTest::testPow()
   cout << "-->  test pow ended with success." << endl;
 }
 
-void SimpleMatrixTest::testProd()
+void SimpleMatrixTest::testProd() // y = A*x
 {
   cout << "--> Test: prod. mat-vect" << endl;
 
@@ -2991,6 +3054,226 @@ void SimpleMatrixTest::testProdTer()
   delete res;
   delete res2;
   cout << "-->  test prodTer ended with success." << endl;
+}
+
+void SimpleMatrixTest::testProd4() // y += A*x
+{
+  cout << "--> Test: prod. mat-vect (4)" << endl;
+
+  SiconosVector * y = new SimpleVector(size);
+  SiconosVector * x = new SimpleVector(size, 4.3);
+  SiconosVector * x1 = new SimpleVector(size - 2, 2.3);
+  SiconosVector * x2 = new SimpleVector(2, 3.1);
+
+  SiconosVector * xB = new BlockVector(x1, x2);
+  SiconosVector * yB = new BlockVector(*xB);
+  yB->zero();
+
+  // Matrix - vector product
+
+  // Simple = Simple * Simple
+  y->zero();
+  prod(*A, *x, *y, false);
+  prod(*A, *x, *y, false);
+  double sum;
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    sum = 0;
+    for (unsigned int j = 0; j < A->size(1); ++j)
+      sum += 2 * (*A)(i, j) * (*x)(j);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd4: ", fabs((*y)(i) - sum) < tol, true);
+  }
+  // Simple = Simple * Block
+  y->zero();
+  prod(*A , *xB, *y, false);
+  prod(*A , *xB, *y, false);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    sum = 0;
+    for (unsigned int j = 0; j < A->size(1); ++j)
+      sum += 2 * (*A)(i, j) * (*xB)(j);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd4: ", fabs((*y)(i) - sum) < tol, true);
+  }
+
+  // Block = Simple * Simple
+  yB->zero();
+  prod(*A , *x, *yB, false);
+  prod(*A , *x, *yB, false);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    sum = 0;
+    for (unsigned int j = 0; j < A->size(1); ++j)
+      sum += 2 * (*A)(i, j) * (*x)(j);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd4: ", fabs((*yB)(i) - sum) < tol, true);
+  }
+
+  // Block = Simple * Block
+  yB->zero();
+  prod(*A , *xB, *yB, false);
+  prod(*A , *xB, *yB, false);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    sum = 0;
+    for (unsigned int j = 0; j < A->size(1); ++j)
+      sum += 2 * (*A)(i, j) * (*xB)(j);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd4: ", fabs((*yB)(i) - sum) < tol, true);
+  }
+
+  delete x;
+  delete y;
+  delete xB;
+  delete yB;
+  delete x1;
+  delete x2;
+  cout << "-->  test prod4 ended with success." << endl;
+}
+
+void SimpleMatrixTest::testProd5() // y += a*A*x
+{
+  cout << "--> Test: prod. mat-vect (5)" << endl;
+
+  SiconosVector * y = new SimpleVector(size);
+  SiconosVector * x = new SimpleVector(size, 4.3);
+  SiconosVector * x1 = new SimpleVector(size - 2, 2.3);
+  SiconosVector * x2 = new SimpleVector(2, 3.1);
+
+  SiconosVector * xB = new BlockVector(x1, x2);
+  SiconosVector * yB = new BlockVector(*xB);
+  yB->zero();
+
+  // Matrix - vector product
+  double a = 3.0;
+  // Simple = Simple * Simple
+  y->zero();
+  prod(a, *A, *x, *y, false);
+  prod(a, *A, *x, *y, false);
+  double sum;
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    sum = 0;
+    for (unsigned int j = 0; j < A->size(1); ++j)
+      sum += 2 * a * (*A)(i, j) * (*x)(j);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd5: ", fabs((*y)(i) - sum) < tol, true);
+  }
+  // Simple = Simple * Block
+  y->zero();
+  prod(a, *A , *xB, *y, false);
+  prod(a, *A , *xB, *y, false);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    sum = 0;
+    for (unsigned int j = 0; j < A->size(1); ++j)
+      sum += a * 2 * (*A)(i, j) * (*xB)(j);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd5: ", fabs((*y)(i) - sum) < tol, true);
+  }
+
+  // Block = Simple * Simple
+  yB->zero();
+  prod(a, *A , *x, *yB, false);
+  prod(a, *A , *x, *yB, false);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    sum = 0;
+    for (unsigned int j = 0; j < A->size(1); ++j)
+      sum += a * 2 * (*A)(i, j) * (*x)(j);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd5: ", fabs((*yB)(i) - sum) < tol, true);
+  }
+
+  // Block = Simple * Block
+  yB->zero();
+  prod(a, *A , *xB, *yB, false);
+  prod(a, *A , *xB, *yB, false);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    sum = 0;
+    for (unsigned int j = 0; j < A->size(1); ++j)
+      sum += a * 2 * (*A)(i, j) * (*xB)(j);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd5: ", fabs((*yB)(i) - sum) < tol, true);
+  }
+
+  delete x;
+  delete y;
+  delete xB;
+  delete yB;
+  delete x1;
+  delete x2;
+  cout << "-->  test prod5 ended with success." << endl;
+}
+
+void SimpleMatrixTest::testProd6() // y += trans(A)*x
+{
+  cout << "--> Test: prod. mat-vect (6)" << endl;
+
+  SiconosVector * y = new SimpleVector(size);
+  SiconosVector * x = new SimpleVector(size, 4.3);
+  SiconosVector * x1 = new SimpleVector(size - 2, 2.3);
+  SiconosVector * x2 = new SimpleVector(2, 3.1);
+
+  SiconosVector * xB = new BlockVector(x1, x2);
+  SiconosVector * yB = new BlockVector(*xB);
+  yB->zero();
+
+  SiconosMatrix * tmp = new SimpleMatrix(*A);
+  tmp->trans();
+  // Matrix - vector product
+
+  // Simple = Simple * Simple
+  y->zero();
+  prod(*x, *A, *y);
+  prod(*x, *A, *y, false);
+  double sum;
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    sum = 0;
+    for (unsigned int j = 0; j < A->size(1); ++j)
+      sum += 2 * (*tmp)(i, j) * (*x)(j);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd6: ", fabs((*y)(i) - sum) < tol, true);
+  }
+  // Simple = Simple * Block
+  y->zero();
+  prod(*xB, *A, *y);
+  prod(*xB, *A, *y, false);
+
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    sum = 0;
+    for (unsigned int j = 0; j < size; ++j)
+      sum += 2 * (*tmp)(i, j) * (*xB)(j);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd6: ", fabs((*y)(i) - sum) < tol, true);
+  }
+
+  // Block = Simple * Simple
+  yB->zero();
+  prod(*x, *A , *yB);
+  prod(*x, *A , *yB, false);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    sum = 0;
+    for (unsigned int j = 0; j < A->size(1); ++j)
+      sum += 2 * (*tmp)(i, j) * (*x)(j);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd6: ", fabs((*yB)(i) - sum) < tol, true);
+  }
+
+  // Block = Simple * Block
+  yB->zero();
+  prod(*xB, *A , *yB);
+  prod(*xB, *A , *yB, false);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    sum = 0;
+    for (unsigned int j = 0; j < A->size(1); ++j)
+      sum += 2 * (*tmp)(i, j) * (*xB)(j);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd6: ", fabs((*yB)(i) - sum) < tol, true);
+  }
+
+  delete tmp;
+  delete x;
+  delete y;
+  delete xB;
+  delete yB;
+  delete x1;
+  delete x2;
+  cout << "-->  test prod6 ended with success." << endl;
 }
 
 void SimpleMatrixTest::testGemv()

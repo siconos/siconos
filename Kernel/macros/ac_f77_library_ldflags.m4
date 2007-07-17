@@ -25,7 +25,7 @@
 #
 # This macro was packaged in its current form by Matthew D. Langston.
 # However, nearly all of this macro came from the "OCTAVE_FLIBS" macro
-# in "octave-2.1.03/aclocal.m4", and full credit should go to John
+# in "octave-2.1.13/aclocal.m4", and full credit should go to John
 # W. Eaton for writing this extremely useful macro.  Thank you John.
 AC_DEFUN([_AC_FC_LIBRARY_LDFLAGS],
 [_AC_FORTRAN_ASSERT()dnl

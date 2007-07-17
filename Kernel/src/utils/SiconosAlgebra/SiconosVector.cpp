@@ -89,65 +89,6 @@ const bool isComparableTo(const SiconosVector * v1, const SiconosVector * v2)
   return (*I1 == *I2);
 }
 
-void scal(double a, const SiconosVector & x, SiconosVector & y)
-{
-  // To compute y = a *x
-
-  if (&x == &y)
-    y *= a;
-  else
-  {
-    unsigned int sizeX = x.size();
-    unsigned int sizeY = y.size();
-
-    if (sizeX != sizeY)
-      SiconosVectorException::selfThrow("scal(a,SiconosVector,SiconosVector) failed, sizes are not consistent.");
-
-    unsigned int numY = y.getNum();
-    unsigned int numX = x.getNum();
-    if (numX == numY)
-    {
-      if (numX == 0) // ie if both are block vectors
-      {
-        if (isComparableTo(&x, &y)) // if x and y are "block-consistent"
-        {
-          ConstBlockVectIterator itX = x.begin();
-          BlockVectIterator itY ;
-          for (itY = y.begin(); itY != y.end(); ++itY)
-            scal(a, **itX++, **itY++);
-        }
-        else
-        {
-          for (unsigned int i = 0; i < x.size(); ++i)
-            y(i) = a * x(i);
-        }
-      }
-      else if (numX == 1) // ie if both are Dense
-      {
-        //atlas::axpby(a,*x.getDensePtr(),0.0,*y.getDensePtr());
-        noalias(*y.getDensePtr()) = a * *x.getDensePtr();
-      }
-      else  // if both are sparse
-        noalias(*y.getSparsePtr()) = a**x.getSparsePtr();
-    }
-    else
-    {
-      if (numY == 0 || numX == 0) // if y or x is block
-      {
-        y = x;
-        y *= a;
-      }
-      else
-      {
-        if (numY == 1) // if y is dense
-          noalias(*y.getDensePtr()) = a**x.getSparsePtr();
-        else
-          SiconosVectorException::selfThrow("SiconosVector::scal(a,dense,sparse) not allowed.");
-      }
-    }
-  }
-}
-
 void swap(SiconosVector& x, SiconosVector& y)
 {
   unsigned int numX = x.getNum();

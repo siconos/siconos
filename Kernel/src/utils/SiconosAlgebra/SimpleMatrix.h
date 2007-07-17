@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -33,7 +33,7 @@ class SimpleVector;
 /**  Matrix (embedded various types of Boost matrices of double)
  *
  *  \author SICONOS Development Team - copyright INRIA
- *   \version 2.1.0.
+ *   \version 2.1.1.
  *   \date (Creation) 07/21/2006
  *
  * SimpleMatrix is used in the platform to store matrices (mathematical object) of double.
@@ -92,6 +92,27 @@ private:
   */
   friend void private_addprod(const SiconosMatrix *, unsigned int, unsigned int, const SiconosVector *, SiconosVector*);
 
+  /**  computes res = a*subA*x +res, subA being a submatrix of A (rows from startRow to startRow+sizeY and columns between startCol and startCol+sizeX).
+       If x is a block vector, it call the present function for all blocks.
+       \param a double, a
+       \param a pointer to SiconosMatrix A
+       \param an int, sub-block position (startRow)
+       \param an int, sub-block position (startCol)
+       \param a pointer to a SiconosVector, x
+       \param a DenseVect, res.
+  */
+  friend void private_addprod(double, const SiconosMatrix *, unsigned int, unsigned int, const SiconosVector *, SiconosVector*);
+
+  /**  computes res = subA*x +res, subA being a submatrix of trans(A) (rows from startRow to startRow+sizeY and columns between startCol and startCol+sizeX).
+       If x is a block vector, it call the present function for all blocks.
+       \param a pointer to a SiconosVector, x
+       \param a pointer to SiconosMatrix A
+       \param an int, sub-block position (startRow)
+       \param an int, sub-block position (startCol)
+       \param a DenseVect, res.
+  */
+  friend void private_addprod(const SiconosVector *, const SiconosMatrix *, unsigned int, unsigned int, SiconosVector*);
+
   /**  computes y = subA*x (init =true) or += subA * x (init = false), subA being a submatrix of A (all columns, and rows between start and start+sizeY).
        If x is a block vector, it call the present function for all blocks.
        \param a pointer to SiconosMatrix A
@@ -101,6 +122,27 @@ private:
        \param init, a bool
   */
   friend void private_prod(const SiconosMatrix *, unsigned int, const SiconosVector *, SiconosVector *, bool);
+
+  /**  computes y = a*subA*x (init =true) or += a*subA * x (init = false), subA being a submatrix of A (all columns, and rows between start and start+sizeY).
+       If x is a block vector, it call the present function for all blocks.
+       \param a double, a
+       \param a pointer to SiconosMatrix A
+       \param an int, sub-block position (start)
+       \param a pointer to a SiconosVector, x
+       \param a pointer to a SiconosVector, y
+       \param init, a bool
+  */
+  friend void private_prod(double, const SiconosMatrix *, unsigned int, const SiconosVector *, SiconosVector *, bool);
+
+  /**  computes y = subA*x (init =true) or += subA * x (init = false), subA being a submatrix of trans(A) (all columns, and rows between start and start+sizeY).
+       If x is a block vector, it call the present function for all blocks.
+       \param a pointer to a SiconosVector, x
+       \param a pointer to SiconosMatrix A
+       \param an int, sub-block position (start)
+       \param a pointer to a SiconosVector, y
+       \param init, a bool
+  */
+  friend void private_prod(const SiconosVector *, const SiconosMatrix *, unsigned int, SiconosVector *, bool);
 
 public:
 
@@ -587,15 +629,17 @@ public:
    *  \param SiconosMatrix A (in)
    *  \param SiconosMatrix B (in)
    *  \return SimpleMatrix C
+      \param init, a bool (default = true)
    */
   friend const SimpleMatrix prod(const SiconosMatrix&, const SiconosMatrix&);
 
-  /** prod(A, B, C) computes C = A*B in an optimal way.
+  /** prod(A, B, C) computes C = A*B in an optimal way, or C += AB if init = false.
       \param a SiconosMatrix, A (in)
       \param a SiconosMatrix, B (in)
       \param a SiconosMatrix, C (in-out)
+      \param init, a bool (default = true)
   */
-  friend void prod(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&);
+  friend void prod(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&, bool = true);
 
   /** prod(A, B, C) computes C = A*B in an optimal way (= if init = true, else +=).
       \param A, a SiconosMatrix
@@ -610,12 +654,30 @@ public:
   /*    *\/ */
   friend const SimpleVector prod(const SiconosMatrix&, const SiconosVector&);
 
-  /** prod(A, x, y) computes y = A*x
+  /** prod(A, x, y) computes y = A*x or y += A*x if init = false
       \param a SiconosMatrix, A (in)
       \param a SiconosVector, x (in)
       \param a SiconosVector, y (in-out)
+      \param init, a bool (default = true)
   */
-  friend void prod(const SiconosMatrix&, const SiconosVector&, SiconosVector&);
+  friend void prod(const SiconosMatrix&, const SiconosVector&, SiconosVector&, bool = true);
+
+  /** prod(a, A, x, y, init) computes y = a*A*x or y += a*A*x if init = false
+      \param double, a (in)
+      \param a SiconosMatrix, A (in)
+      \param a SiconosVector, x (in)
+      \param a SiconosVector, y (in-out)
+      \param init, a bool (default = true)
+  */
+  friend void prod(double, const SiconosMatrix&, const SiconosVector&, SiconosVector&, bool = true);
+
+  /** prod(x, A, y) computes y = trans(A)*x (init = true) or y += trans(A)*x (init = false)
+      \param a SiconosVector, x (in)
+      \param a SiconosMatrix, A (in)
+      \param a SiconosVector, y (in-out)
+      \param a bool, init
+  */
+  friend void prod(const SiconosVector&, const SiconosMatrix&, SiconosVector&, bool = true);
 
   /** computes y = A*x (init = true) or y += A*x (init = false)
       \param a SiconosMatrix, A (in)
@@ -684,6 +746,14 @@ public:
       \param a SiconosMatrix, C (in-out)
   */
   friend void gemm(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&);
+
+  /** multiplication of a matrix by a scalar, B = a*A (init = true) or B += a*A (init = false)
+   *  \param a, a double
+   *  \param A, a SiconosMatrix (IN)
+   *  \param B a SiconosMatrix (IN-OUT)
+   *  \param init, a bool
+   */
+  friend void scal(double, const SiconosMatrix&, SiconosMatrix&, bool = true);
 
 };
 #endif

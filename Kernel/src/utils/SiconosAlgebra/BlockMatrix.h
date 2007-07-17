@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -30,7 +30,7 @@
 /** Object to handle block-matrices (ie lists of SiconosMatrix*)
  *
  * \author SICONOS Development Team - copyright INRIA
- *   \version 2.1.0.
+ *   \version 2.1.1.
  *   \date (Creation) 21/07/2006
  *
  *  A BlockMatrix is a boost::ublas::compressed_matrix of SiconosMatrix*.
@@ -318,21 +318,6 @@ public:
   {
     return tabCol;
   };
-
-  /** get block starting at row "posRow" (first argument) and column "posCol" (second argument) and write it into m (last arg)
-   *  \param posRow an int, row-position of the first element of the required block
-   *  \param posCol an int, col-position of the first element of the required block
-   *  \param a SiconosMatrix* (in-out paramater) m
-   */
-  //  void  getBlock(unsigned int, unsigned int, SiconosMatrix*) const;
-
-  /** set block starting at row "posRow" (first argument) and column "posCol" (second argument) with m (last arg) -
-   * Warning: posRow and posCol are block-coordinates !!
-   *  \param posRow an int, block-row-position
-   *  \param posCol an int, block-col-position
-   *  \param a SiconosMatrix*  m
-   */
-  //  void setBlock(unsigned int, unsigned int, const SiconosMatrix *);
 
   /** get block at position row-col
    *  \param unsigned int row

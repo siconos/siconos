@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -291,12 +291,12 @@ void FirstOrderLinearDS::computeRhs(const double time, const bool)
   // second argument is useless at the time - Used in derived classes
   // compute A=jacobianXF
 
-  *x[1] = * r; // Warning: r update is done in Interactions/Relations
+  *x[1] = * r;
 
   if (A != NULL)
   {
     computeA(time);
-    *x[1] += prod(*A, *x[0]);
+    prod(*A, *x[0], *x[1], false);
   }
 
   // compute and add b if required

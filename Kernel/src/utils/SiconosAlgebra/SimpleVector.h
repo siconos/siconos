@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -30,7 +30,7 @@ class SimpleMatrix;
 /** Vectors of double. (Interface to various types of Boost-Ublas vectors).
  *
  * \author SICONOS Development Team - copyright INRIA
- *   \version 2.1.0.
+ *   \version 2.1.1.
  *   \date (Creation) 07/21/2006
  *
  * Used to handle vectors of double.
@@ -391,5 +391,15 @@ public:
    *  \return a SimpleMatrix
    */
   friend SimpleMatrix outer_prod(const SiconosVector&, const SiconosVector&);
+
+  /** multiplication of a vector by a scalar, y = a*x (init = true) or y += a*x (init = false)
+   *  \param a, a double
+   *  \param x, a SiconosVector (IN)
+   *  \param y, a SiconosVector (IN-OUT)
+   *  \param init, a bool, default = true
+   */
+  friend void scal(double, const SiconosVector&, SiconosVector&, bool = true);
+
+
 };
 #endif

@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -215,9 +215,9 @@ void LagrangianScleronomousR::computeOutput(double time, unsigned int derivative
     computeG(time);
     SiconosVector *y = interaction->getYPtr(derivativeNumber) ;
     if (derivativeNumber == 1)
-      *y = prod(*G[0], *data["q1"]);
+      prod(*G[0], *data["q1"], *y);
     else if (derivativeNumber == 2)
-      *y = prod(*G[0], *data["q2"]);
+      prod(*G[0], *data["q2"], *y);
     else
       RuntimeException::selfThrow("LagrangianScleronomousR::computeOutput(t,index), index out of range");
   }
@@ -233,9 +233,9 @@ void LagrangianScleronomousR::computeFreeOutput(double time, unsigned int deriva
     computeGFree(time);
     SiconosVector *y = interaction->getYPtr(derivativeNumber) ;
     if (derivativeNumber == 1)
-      *y = prod(*G[0], *data["q1Free"]);
+      prod(*G[0], *data["q1Free"], *y);
     else if (derivativeNumber == 2)
-      *y = prod(*G[0], *data["q2"]);
+      prod(*G[0], *data["q2"], *y);
     else
       RuntimeException::selfThrow("LagrangianScleronomousR::computeOutput(t,index), index out of range");
   }
@@ -247,10 +247,13 @@ void LagrangianScleronomousR::computeInput(double time, unsigned int level)
   string name = "p" + toString<unsigned int>(level);
   // get lambda of the concerned interaction
   SiconosVector *lambda = interaction->getLambdaPtr(level);
-  SiconosMatrix * GT = new SimpleMatrix(*G[0]);
-  GT->trans();
-  *data[name] += prod(*GT, *lambda);
-  delete GT;
+  // data[name] += trans(G) * lambda
+  prod(*lambda, *G[0], *data[name], false);
+
+  //   SiconosMatrix * GT = new SimpleMatrix(*G[0]);
+  //   GT->trans();
+  //   *data[name] += prod(*GT, *lambda);
+  //   delete GT;
   //gemv(CblasTrans, 1.0,*(G[0]), *lambda, 1.0, *data[name]); => not yet implemented for BlockVectors.
 }
 

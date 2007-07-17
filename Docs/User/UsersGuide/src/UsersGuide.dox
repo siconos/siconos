@@ -1,12 +1,23 @@
 /** \mainpage Siconos Users' Guide
 \anchor usersGuide
 
-\section ugIntro Foreword
+\section UMIntro Foreword
 
 Siconos is a free (GNU license) software, dedicated to modeling, simulation and control of <b>Non Smooth Dynamical Systems</b>. \n
 
-First Draft of Siconos Users' Guide. Only partial documents.
+Warning: this document is a first draft of Siconos Users' Guide. 
+It's only a collection of help-pages about the Siconos software, not yet complete or fully organized.
 
-\section GScontents Contents:
+\section UMContents Contents
+
+\subpage dsInSiconos
+
+\subpage doc_Interactions
+
+\subpage docSimu
+
+\subpage SicControl
+
+\subpage UM_SicAlgebra
 
 */

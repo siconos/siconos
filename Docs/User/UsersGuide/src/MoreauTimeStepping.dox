@@ -267,5 +267,4 @@ s->update(level); //
 
 Note that all time-independent operators are computed during simulation initialisation.
 
-
 */

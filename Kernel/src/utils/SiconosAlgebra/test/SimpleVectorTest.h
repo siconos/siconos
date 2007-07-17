@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -61,6 +61,7 @@ private:
   CPPUNIT_TEST(testOperators3);
   CPPUNIT_TEST(testOperators4);
   CPPUNIT_TEST(testOperators4Bis);
+  CPPUNIT_TEST(testOperators4Ter);
   CPPUNIT_TEST(testOperators5);
   CPPUNIT_TEST(testOperators5Bis);
   CPPUNIT_TEST(testOperators6);
@@ -96,6 +97,7 @@ private:
   void testOperators3();
   void testOperators4();
   void testOperators4Bis();
+  void testOperators4Ter();
   void testOperators5();
   void testOperators5Bis();
   void testOperators6();

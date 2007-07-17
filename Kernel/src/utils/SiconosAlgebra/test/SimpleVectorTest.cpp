@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -769,6 +769,61 @@ void SimpleVectorTest::testOperators4Bis()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Bis : ", fabs((*zB)(i) - ((*x)(i) / a)) < tol, true);
   zB->zero();
   cout << "--> operators4Bis test ended with success." << endl;
+}
+
+// vector * or / by double with function scal (init = false) =>   z += a*x
+void SimpleVectorTest::testOperators4Ter()
+{
+  cout << "--> Test: operators4Ter." << endl;
+
+  double a = 2.2;
+  //  z = a * x
+  z->zero();
+  //  dense += a*dense or dense/a
+  scal(a, *x, *z, false); //
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Ter : ", norm_2(z->getDense() - a * x->getDense()) < tol, true);
+  scal(a, *x, *z, false); //
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Ter : ", norm_2(z->getDense() - 2 * a * x->getDense()) < tol, true);
+
+  //  sparse += a*sparse or sparse/a
+  x = new SimpleVector(*sv);
+  delete z;
+  z = new SimpleVector(size, SPARSE);
+  z->zero();
+  scal(a, *x, *z, false);
+  scal(a, *x, *z, false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Ter : ", norm_2(z->getSparse() - 2 * a * x->getSparse()) < tol, true);
+
+  delete z;
+  z = NULL;
+  delete x;
+  x = NULL;
+
+  // simple = a * block
+  z = new SimpleVector(size);
+  scal(a, *xB, *z, false); //
+  scal(a, *xB, *z, false); //
+
+  for (unsigned int i = 0; i < size ; ++i)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Ter : ", fabs((*z)(i) - 2 * (a * (*xB)(i))) < tol, true);
+  z->zero();
+  // x block, z block
+
+  scal(a, *xB, *zB, false);
+  scal(a, *xB, *zB, false);
+  for (unsigned int i = 0; i < size ; ++i)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Ter : ", fabs((*zB)(i) - 2 * (a * (*xB)(i))) < tol, true);
+
+  x = new SimpleVector(vq);
+
+  // block = a *simple
+  zB->zero();
+  scal(a, *x, *zB, false);
+  scal(a, *x, *zB, false);
+  for (unsigned int i = 0; i < size ; ++i)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Ter : ", fabs((*zB)(i) - 2 * (a * (*x)(i))) < tol, true);
+  zB->zero();
+  cout << "--> operators4Ter test ended with success." << endl;
 }
 
 // +

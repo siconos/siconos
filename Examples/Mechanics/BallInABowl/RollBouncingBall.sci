@@ -1,4 +1,4 @@
-// Siconos-sample version 2.1.0, Copyright INRIA 2005-2006.
+// Siconos-sample version 2.1.1, Copyright INRIA 2005-2006.
 // Siconos is a program dedicated to modeling, simulation and control
 // of non smooth dynamical systems.	
 // Siconos is a free software; you can redistribute it and/or modify
@@ -19,71 +19,67 @@
 //
 //
 
+exec '../../Front-End/scilab/loaderSiconos.sce';
 
-exec '../../../Front-End/scilab/loaderSiconos.sce';
-getf("../../../Front-End/scilab/visuballs.sci");
+getf("../../Front-End/scilab/visuballs.sci");
+
 
 function Simul()
 
-[t,qx,qy]=ThreeBeadsColumn(%F);
+[t,qx,qy]=RollBouncingBall(%T);
 
-VisuBalls(qx,qy,5,4,0.1);
+VisuBalls(qx,qy,1,1,0.1);
+
 
 endfunction
 
 
-function [Time,Qx,Qy] = ThreeBeadsColumn(realtimeFlag)
+function [Time,Qx,Qy] = RollBouncingBall(realtime)
 
-nBalls=3;
+// Bug dgetri ?
+errcatch(998,'continue');
 
-sicLoadModel('./ThreeBeadsColumn_sci.xml');
-
+sicLoadModel('./Ball.xml');
 sicInitSimulation();
 
-k = 1;
+k = sicTimeGetK(); 
 N = sicTimeGetN();
-h = sicTimeGetH();
+
+if realtime then 
+  arc=InitDrawBall(1,1,0.1); 
+end;
 
 winId=waitbar('Siconos Computation');
 
-if realtimeFlag then 
-  arc=InitDrawBall(nBalls,4,0.1); 
-end;
-
-dixpc=0;
-
 while k < N do 
 
-  // solve ... 
-  sicSTComputeOneStep();
- // transfer of state i+1 into state i and time incrementation
+  // transfer of state i+1 into state i and time incrementation
   sicSTNextStep();
-	
- // --- Get values to be plotted ---
+  
+  // get current time step
+  k = sicTimeGetK();
 
- dixpc=dixpc+1/N;
- 
- if (dixpc>=0.01) then
-   waitbar(k/N,winId);
-   dixpc=0;
- end
- 
- for i = 1:nBalls,
-   Qx(i,k+1)=sicModelgetQ(i-1,0); 
-   Qy(i,k+1)=sicModelgetQ(i-1,1);
-   if realtimeFlag then 
-     DrawBall(arc,i,Qx(i,k+1),Qy(i,k+1));
-   end
- end //for
- 
- Time(k+1)=k*h;
- 
- k=k+1;
+  // solve ... 
+  sicSTComputeFreeState();
+  sicSTcomputePb();
 
-end // while
+  // update
+  sicSTupdateState();
 
-  winclose(winId);
-
+  // --- Get values to be plotted ---
+  waitbar(k/N,winId);
+  Qx(1,k+1)=sicModelgetQ(0,0);
+  Qy(1,k+1)=sicModelgetQ(0,1);
+  Time(k+1)=k*sicTimeGetH();
+  if realtime then 
+    DrawBall(arc,1,Qx(1,k+1),Qy(1,k+1));
+  end
+end//for
+ 
+ winclose(winId);
+ 
 endfunction
+
+
 
 

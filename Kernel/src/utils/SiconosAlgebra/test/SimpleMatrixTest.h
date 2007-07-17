@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -71,8 +71,10 @@ private:
   CPPUNIT_TEST(testOperators8);
   CPPUNIT_TEST(testOperators8Bis);
   CPPUNIT_TEST(testOperators8Ter);
+  CPPUNIT_TEST(testOperators8_4);
   CPPUNIT_TEST(testOperators9);
   CPPUNIT_TEST(testOperators9Bis);
+  CPPUNIT_TEST(testOperators9Ter);
   CPPUNIT_TEST(testOperators10);
   CPPUNIT_TEST(testOperators11);
   CPPUNIT_TEST(testOperators12);
@@ -81,6 +83,9 @@ private:
   CPPUNIT_TEST(testProd);
   CPPUNIT_TEST(testProdBis);
   CPPUNIT_TEST(testProdTer);
+  CPPUNIT_TEST(testProd4);
+  CPPUNIT_TEST(testProd5);
+  CPPUNIT_TEST(testProd6);
   CPPUNIT_TEST(testGemv);
   CPPUNIT_TEST(testGemm);
   CPPUNIT_TEST(End);
@@ -122,8 +127,10 @@ private:
   void testOperators8();
   void testOperators8Bis();
   void testOperators8Ter();
+  void testOperators8_4();
   void testOperators9();
   void testOperators9Bis();
+  void testOperators9Ter();
   void testOperators10();
   void testOperators11();
   void testOperators12();
@@ -132,6 +139,9 @@ private:
   void testProd();
   void testProdBis();
   void testProdTer();
+  void testProd4();
+  void testProd5();
+  void testProd6();
   void testGemm();
   void testGemv();
   void End();

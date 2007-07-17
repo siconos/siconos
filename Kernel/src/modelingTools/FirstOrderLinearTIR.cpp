@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -96,16 +96,18 @@ void FirstOrderLinearTIR::computeOutput(double time, unsigned int)
 
   // compute y
   if (C != NULL)
-    *y = prod(*C, *data["x"]);
+    prod(*C, *data["x"], *y);
+  else
+    y->zero();
 
   if (D != NULL)
-    *y += prod(*D, *lambda);
+    prod(*D, *lambda, *y, false);
 
   if (e != NULL)
     *y += *e;
 
   if (F != NULL)
-    *y += prod(*F, *data["z"]);
+    prod(*F, *data["z"], *y, false);
 }
 
 void FirstOrderLinearTIR::computeFreeOutput(double time, unsigned int)
@@ -118,13 +120,15 @@ void FirstOrderLinearTIR::computeFreeOutput(double time, unsigned int)
 
   // compute yFree
   if (C != NULL)
-    *yFree = prod(*C, *data["xFree"]);
+    prod(*C, *data["xFree"], *yFree);
+  else
+    yFree->zero();
 
   if (e != NULL)
     *yFree += *e;
 
   if (F != NULL)
-    *yFree += prod(*F, *data["z"]);
+    prod(*F, *data["z"], *yFree, false);
 }
 
 void FirstOrderLinearTIR::computeInput(double time, unsigned int level)
@@ -133,7 +137,7 @@ void FirstOrderLinearTIR::computeInput(double time, unsigned int level)
   {
     // We get lambda of the interaction (pointers)
     SiconosVector *lambda = interaction->getLambdaPtr(level);
-    *data["r"] += prod(*B, *lambda);
+    prod(*B, *lambda, *data["r"], false);
   }
 }
 

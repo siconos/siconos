@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.0, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -303,9 +303,11 @@ void Moreau::computeW(const double t, DynamicalSystem* ds)
       K = d->getJacobianFLPtr(0);
       C = d->getJacobianFLPtr(1);
       if (C != NULL)
-        *W -= h * theta**C;
+        scal(-h * theta, *C, *W); // W -= h*theta*C
+      //      *W -= h*theta**C;
       if (K != NULL)
-        *W -= h * h * theta * theta**K;
+        scal(-h * h * theta * theta, *K, *W);
+      //*W -= h*h*theta*theta**K; // W -= h*h*theta*theta*K
     }
     else // if dsType = LLTIDS, LagrangianLinearTIDS
     {
@@ -314,9 +316,11 @@ void Moreau::computeW(const double t, DynamicalSystem* ds)
       K = ((static_cast<LagrangianLinearTIDS*>(d))->getKPtr());
       C = ((static_cast<LagrangianLinearTIDS*>(d))->getCPtr());
       if (C != NULL)
-        *W += h * theta**C;
+        scal(h * theta, *C, *W); // W += h*theta *C
+      //*W+= h*theta**C;
       if (K != NULL)
-        *W += h * h * theta * theta**K;
+        scal(h * h * theta * theta, *K, *W); // W = h*h*theta*theta*K
+      //      *W+= h*h*theta*theta**K;
     }
   }
 
@@ -324,20 +328,21 @@ void Moreau::computeW(const double t, DynamicalSystem* ds)
   else if (dsType == FOLDS || dsType == FOLTIDS)
   {
     FirstOrderLinearDS* d = static_cast<FirstOrderLinearDS*>(ds);
-    SiconosMatrix *I;
     unsigned int size = d->getN();
     // Deals with M
     if (d->getMPtr() == NULL)
     {
-      I = new SimpleMatrix(size, size);
-      I->eye();
-      *W = *I - (h * theta * (d->getA()));
-      delete I;
+      SimpleMatrix I(size, size, IDENTITY);
+      *W = *d->getAPtr();
+      *W *= (-1.0 * h * theta);
+      *W += I;
     }
     else
     {
-      I = d->getMPtr();
-      *W = *I - (h * theta * (d->getA()));
+      SiconosMatrix * I = d->getMPtr();
+      *W = *d->getAPtr();
+      *W *= (-1.0 * h * theta);
+      *W += *I;
     }
   }
   // === ===
@@ -383,7 +388,7 @@ void Moreau::computeFreeState()
       // Velocity free and residu. vFree = RESfree (pointer equality !!).
       SiconosVector *vfree = d->getVelocityFreePtr();
       SiconosVector *RESfree = vfree;
-      RESfree->zero();
+      RESfree->zero(); // => vfree = zero
 
       // --- Compute Velocity Free ---
       // For non-linear Lagrangian systems (LNLDS)
@@ -405,17 +410,20 @@ void Moreau::computeFreeState()
           d->computeFL(t);
           SiconosVector * fLCurrent = d->getFLPtr();
           // Resfree = -h*(theta * flcurrent + (1-theta) Resfree).
-          axpby(-h * theta, *fLCurrent, h * (theta - 1.0), *RESfree);
+          *RESfree *= (h * (theta - 1.0));
+          scal(-h * theta, *fLCurrent, *RESfree);
+          //      axpby(-h*theta,*fLCurrent,h*(theta-1.0),*RESfree);
           fLCurrent = NULL;
         }
 
         // === Compute ResFree and vfree solution of Wk(v-vfree)= RESfree ===
-        *RESfree += prod(*M, (*v - *vold));
-
+        prod(*M, (*v - *vold), *RESfree, false); // RESfree += M(v - vold)
         // W(vFree-vOld) = RESFree. Solution saved in RESfre.
         W->PLUForwardBackwardInPlace(*RESfree);
         // *vfree =  *v - *RESfree; Mind that Resfree = vfree (pointers).
-        axpby(1.0, *v, -1.0, *RESfree);
+        *RESfree *= -1.0;
+        *RESfree += *v;
+        //axpby(1.0,*v,-1.0,*RESfree);
       }
       // --- For linear Lagrangian LLTIDS:
       else
@@ -433,7 +441,9 @@ void Moreau::computeFreeState()
           // we compute RESfree += h*(theta * FExtCurrent+(1.0-theta) * FExtOld);
           //
           // ResFree = h*((1-theta)*fextCurrent + theta * ResFree)
-          axpby(h * theta, *FExtCurrent, h * (1.0 - theta), *RESfree);
+          *RESfree *= h * (1.0 - theta);
+          scal(h * theta, *FExtCurrent, *RESfree, false);
+          //axpby(h*theta,*FExtCurrent,h*(1.0-theta),*RESfree);
           FExtCurrent = NULL;
         }
 
@@ -442,9 +452,14 @@ void Moreau::computeFreeState()
         SiconosMatrix * C = static_cast<LagrangianLinearTIDS*>(d)->getCPtr();
         // Compute ResFree and vfree
         if (K != NULL)
-          *RESfree -= h * (prod(*K, *qold) + h * theta * prod(*K, *vold));
+        {
+          prod(-h, *K, *qold, *RESfree, false);
+          prod(-h * theta, *K, *vold, *RESfree, false);
+          // *RESfree -= h*(prod(*K,*qold)+h*theta*prod(*K,*vold));
+        }
         if (C != NULL)
-          *RESfree -= h * prod(*C, *vold);
+          prod(-h, *C, *vold, *RESfree, false);
+        //*RESfree -= h*prod(*C,*vold);
 
         // W(vFree-vOld) = RFree.
         W->PLUForwardBackwardInPlace(*RESfree);
@@ -455,7 +470,9 @@ void Moreau::computeFreeState()
       SiconosVector *qfree = d->getQFreePtr();
       // we compute *qfree = (*qold) + h * (theta * (*vfree) + (1.0 - theta) * (*vold));
       *qfree = *vfree;
-      axpby(h * (1.0 - theta), *vold, h * theta, *qfree) ; // qfree = h*theta * qfree + h*(1.0 - theta) *vold
+      *qfree *= h * theta;
+      scal(h * (1.0 - theta), *vold, *qfree, false);
+      // axpby(h*(1.0 - theta),*vold, h*theta,*qfree) ; // qfree = h*theta * qfree + h*(1.0 - theta) *vold
       *qfree += *qold;
     }
     else if (dsType == FOLDS || dsType == FOLTIDS)
@@ -465,24 +482,29 @@ void Moreau::computeFreeState()
       SimpleVector *xold = static_cast<SimpleVector*>(d->getXMemoryPtr()->getSiconosVector(0));
       //          integration of r with theta method removed
       //    SimpleVector *rold = static_cast<SimpleVector*>(d->getRMemoryPtr()->getSiconosVector(0));
-      unsigned int sizeX = xfree->size();
+      // unsigned int sizeX = xfree->size();
 
       SiconosMatrix *A = d->getAPtr();
-      SiconosMatrix *I;
+      //SiconosMatrix *I;
       // Deals with M
       if (d->getMPtr() == NULL)
       {
-        I = new SimpleMatrix(sizeX, sizeX);
-        I->eye();
+        //        I = new SimpleMatrix(sizeX,sizeX,IDENTITY);
         //          *xfree =  prod((*I + h*(1.0 - theta) * *A),*xold) + (h*(1.0 - theta) * *rold);
-        *xfree =  prod((*I + h * (1.0 - theta) * *A), *xold);
-        delete I;
+        prod(*A, *xold, *xfree);
+        *xfree *=  h * (1.0 - theta);
+        *xfree += *xold;
+        // *xfree =  prod((*I + h*(1.0 - theta) * *A),*xold);
+        // delete I;
       }
       else
       {
-        I = d->getMPtr();
+        //I = d->getMPtr();
         //          *xfree = prod((*I + h*(1.0 - theta) * *A), *xold) + (h*(1.0 - theta) * *rold);
-        *xfree = prod((*I + h * (1.0 - theta) * *A), *xold);
+        prod(*A, *xold, *xfree);
+        *xfree *=  h * (1.0 - theta);
+        prod(*d->getMPtr(), *xold, *xfree, false);
+        //*xfree = prod((*I + h*(1.0 - theta) * *A), *xold);
       }
 
       SimpleVector *b = d->getBPtr();
@@ -492,14 +514,19 @@ void Moreau::computeFreeState()
         {
           // if b is a plugin, it is integrated with a theta method
           d->computeB(told);
-          SimpleVector bOld = d->getB();
+          SimpleVector * bOld = d->getBPtr();
           d->computeB(t);
-          SimpleVector bCurrent = d->getB();
-          *xfree += h * (theta * bCurrent + (1.0 - theta) * bOld);
+          SimpleVector * bCurrent = d->getBPtr();
+          //            *xfree += h * (theta * bCurrent + (1.0-theta) * bOld);
+
+          scal(h * theta, *bCurrent, *xfree, false);
+          scal(h * (1.0 - theta), *bOld, *xfree, false);
+
         }
         else
         {
-          *xfree += h * *b;
+          //*xfree += h * *b;
+          scal(h, *b, *xfree, false);
         }
       }
 
@@ -562,15 +589,20 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
       //*v = (h*(theta*FExt1+(1.0-theta)*FExt0-prod(*C,*vold)-prod(*K,*qold)-h*theta*prod(*K,*vold))+ *p);
       v->zero();
       if (C != NULL)
-        *v -= prod(*C, *vold);
+        prod(-1.0, *C, *vold, *v, false);
+      //*v -= prod(*C,*vold);
       if (K != NULL)
       {
-        *v -= prod(*K, *qold);
-        *v -= h * theta * prod(*K, *vold);
+        prod(-1.0, *K, *qold, *v, false);
+        //        *v -= prod(*K,*qold);
+        prod(-1.0, *K, *vold, *v, false);
+        //        *v -= h*theta*prod(*K,*vold);
       }
       if (FExt1 != NULL && FExt0 != NULL)
       {
-        axpby(theta, *FExt1 , (1.0 - theta), *FExt0); //FExt0 = theta*FExt1+(1.0-theta)*FExt0
+        *FExt0 *= (1.0 - theta);
+        scal(theta, *FExt1, *FExt0, false);
+        //        axpby(theta,*FExt1 ,(1.0-theta),*FExt0); //FExt0 = theta*FExt1+(1.0-theta)*FExt0
         *v += *FExt0;
       }
       delete FExt0;
@@ -582,7 +614,9 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
       // q computation
       //*q = (*qold) + h * ((theta * (*v)) + (1.0 - theta) * (*vold));
       *q = *vold;
-      axpby(h * theta, *v, h * (1.0 - theta), *q); // q = theta*v + (1-theta)*q
+      *q *= h * (1.0 - theta);
+      scal(h * theta, *v, *q, false);
+      // axpby(h*theta,*v,h*(1.0-theta),*q); // q = h*theta*v + h*(1-theta)*q
       *q += *qold; // q = q +qold.
 
       // Right Way  : Fortran 77 version with BLAS call
@@ -633,7 +667,9 @@ void Moreau::updateState(const unsigned int level)
       SiconosVector *qold = d->getQMemoryPtr()->getSiconosVector(0);
       // *q = *qold + h*(theta * *v +(1.0 - theta)* *vold);
       *q = *vold;
-      axpby(h * theta, *v, h * (1.0 - theta), *q); // q = theta*v+ (1-theta)* q
+      *q *= (h * (1.0 - theta));
+      scal(h * theta, *v, *q, false);
+      //axpby(h*theta,*v,h*(1.0-theta),*q); // q = h*theta*v+ h*(1-theta)* q
       *q += *qold;
       // set reaction to zero
       p->zero();
@@ -653,7 +689,7 @@ void Moreau::updateState(const unsigned int level)
 
       //          integration of r with theta method removed
       //      *x = h * theta * *fonlds->getRPtr();
-      *x = h * *fonlds->getRPtr();
+      scal(h, *fonlds->getRPtr(), *x);
       W->PLUForwardBackwardInPlace(*x);
       *x += *xFree;
     }
