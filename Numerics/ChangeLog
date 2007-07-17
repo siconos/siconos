@@ -23,11 +23,38 @@ before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
-  v2.0.x - (current release)
+  v2.1.x - (current release)
 --------------------------------------------------------------------------------	
 Notes:
 
 Changes:
+	
+--------------------------------------------------------------------------------
+  v2.1.1 - July, 17th 2007 (release 824)
+--------------------------------------------------------------------------------	
+Notes:
+
+Changes:
+
+2007 July Franck Perignon <franck.perignon@inrialpes.fr>
+	* Review SiconosAlgebra tool to improve computation times
+	  (use ublas or ublas/atlas functions in a better way ...)
+	
+--------------------------------------------------------------------------------
+  v2.1.0 - June, 28th 2007 (release 809)
+--------------------------------------------------------------------------------	
+Notes:
+
+Changes:
+
+2007 March to June Franck Perignon <franck.perignon@inrialpes.fr>
+	* add/review DynamicalSystem and derived classes
+	* add/review Relation and derived classes 
+	* add Control toolbox (actuator, sensors ...)
+	* add an EventsManager object
+	* add z parameter ("discrete state") in DS and relation
+	* add gmp utilities
+		
 2007-03-02 Vincent Acary <vincent,acary@inrialpes.fr>
                                                                                
 	* lcp_solver : Modification of the convergence criteria
@@ -35,14 +62,14 @@ Changes:
 	* lcp_solver : Renaming lcp_sor into lcp_psor
 	
 --------------------------------------------------------------------------------
-  v2.1.1 - 14 Decembre 2006 (release 626)
+  v2.0.1 - December, 14th 2006 (release 626)
 --------------------------------------------------------------------------------	
 Notes:
 
 Main Changes:
 
 --------------------------------------------------------------------------------
-  v2.0.0 - 30 Novembre 2006
+  v2.0.0 - November, 30th 2006
 --------------------------------------------------------------------------------	
 Notes:
 

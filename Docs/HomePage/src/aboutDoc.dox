@@ -17,7 +17,7 @@ That means:
 
 - all sources must be documented thanks to Doxygen commands. See <a href="http://www.stack.nl/~dimitri/doxygen/manual.html"> Doxygen Manual</a> or the already documented files to get some examples.
 - the manuals are writen in .dox files in order to generate either html and latex(pdf) documentation
-- all samples are also documented with Doxygen. (a .dox file to describe the problem + documentation in the cpp input file)
+- all examples are also documented with Doxygen. (a .dox file to describe the problem + documentation in the cpp input file)
 
 The figure below represents the files organisation for documentation. 
 \image html treeview.png "" width=3cm
@@ -29,7 +29,7 @@ Possible Manuals are:
 -# InstallGuide
 -# Kernel
 -# Numerics
--# Samples
+-# Examples
 
 Each of them handles a config directory that contains the .cfg configuration file. 
 For 1,2,3, figures must be in Docs/figures and the css is described in Docs/css. The others have their own css and figures location (if required). 

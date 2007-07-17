@@ -11,7 +11,7 @@ The main documents you can find on these pages are listed below.
 
 - <a href="./GettingStarted/index.html" target="_top">Getting Started with Siconos</a>: a short tutorial on how to use Siconos and write your own samples in C++ or Python.
 
-- <a href="./Samples/index.html" target="_top">Siconos Examples Manual</a>: a collection of descriptions (physical problem + implementation) of some examples treated with Siconos.
+- <a href="./Examples/index.html" target="_top">Siconos Examples Manual</a>: a collection of descriptions (physical problem + implementation) of some examples treated with Siconos.
 
 In Process:
 

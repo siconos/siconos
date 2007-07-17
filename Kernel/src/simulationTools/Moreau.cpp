@@ -303,10 +303,10 @@ void Moreau::computeW(const double t, DynamicalSystem* ds)
       K = d->getJacobianFLPtr(0);
       C = d->getJacobianFLPtr(1);
       if (C != NULL)
-        scal(-h * theta, *C, *W); // W -= h*theta*C
+        scal(-h * theta, *C, *W, false); // W -= h*theta*C
       //      *W -= h*theta**C;
       if (K != NULL)
-        scal(-h * h * theta * theta, *K, *W);
+        scal(-h * h * theta * theta, *K, *W, false);
       //*W -= h*h*theta*theta**K; // W -= h*h*theta*theta*K
     }
     else // if dsType = LLTIDS, LagrangianLinearTIDS
@@ -316,10 +316,10 @@ void Moreau::computeW(const double t, DynamicalSystem* ds)
       K = ((static_cast<LagrangianLinearTIDS*>(d))->getKPtr());
       C = ((static_cast<LagrangianLinearTIDS*>(d))->getCPtr());
       if (C != NULL)
-        scal(h * theta, *C, *W); // W += h*theta *C
+        scal(h * theta, *C, *W, false); // W += h*theta *C
       //*W+= h*theta**C;
       if (K != NULL)
-        scal(h * h * theta * theta, *K, *W); // W = h*h*theta*theta*K
+        scal(h * h * theta * theta, *K, *W, false); // W = h*h*theta*theta*K
       //      *W+= h*h*theta*theta**K;
     }
   }
@@ -411,7 +411,7 @@ void Moreau::computeFreeState()
           SiconosVector * fLCurrent = d->getFLPtr();
           // Resfree = -h*(theta * flcurrent + (1-theta) Resfree).
           *RESfree *= (h * (theta - 1.0));
-          scal(-h * theta, *fLCurrent, *RESfree);
+          scal(-h * theta, *fLCurrent, *RESfree, false);
           //      axpby(-h*theta,*fLCurrent,h*(theta-1.0),*RESfree);
           fLCurrent = NULL;
         }
@@ -454,7 +454,7 @@ void Moreau::computeFreeState()
         if (K != NULL)
         {
           prod(-h, *K, *qold, *RESfree, false);
-          prod(-h * theta, *K, *vold, *RESfree, false);
+          prod(-h * h * theta, *K, *vold, *RESfree, false);
           // *RESfree -= h*(prod(*K,*qold)+h*theta*prod(*K,*vold));
         }
         if (C != NULL)
@@ -595,7 +595,7 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
       {
         prod(-1.0, *K, *qold, *v, false);
         //        *v -= prod(*K,*qold);
-        prod(-1.0, *K, *vold, *v, false);
+        prod(-h * theta, *K, *vold, *v, false);
         //        *v -= h*theta*prod(*K,*vold);
       }
       if (FExt1 != NULL && FExt0 != NULL)
