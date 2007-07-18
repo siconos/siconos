@@ -15,17 +15,14 @@
 
 \endhtmlonly  
 
-\anchor HP_HS
-\section hybrid Hybrid Systems
--# <a href="http://www-er.df.op.dlr.de/cacsd/hds/index.shtml">Virtual
-Action Group on <b>Hybrid</b> Dynamic <b>Systems</b> for CACSD</a> Technical Committee on Computer Aided <b>Control</b> System Design. 
-IEEE Technical Committee on <b>Hybrid</b> Dynamical <b>Systems</b>
--# <a href="http://yoric.mit.edu/daepack/daepack.html"><b>DAEPACK</b></a> - Homepage for <b>DAEPACK</b> Project, a component library for combined symbolic/numeric analysis of FORTRAN models.
 
 \htmlonly
 <div class=horizontalline>  </div>
 \endhtmlonly
 \anchor HP_SSP
+
+
+
 \section ssp Scientific Software Packages
 
 -# <a href="http://www-rocq.inria.fr/scilab/">Scilab</a> is a scientific software package for numerical computations providing a
@@ -72,6 +69,7 @@ the aim of formalising and extending current collaboration with respect to robus
 -# <a href="http://www.openfem.net">OpenFem</a> is an open-source software freely distributed under the terms of the 
 "<a href="http://www.fsf.org/copyleft/lesser.html">GNU Lesser Public License</a>" (LGPL). It is also a registered trademark of 
 <a href="http://www.inria.fr">INRIA</a> and <a href="http://www.sdtools.com">SDTools</a>.
+-# <a href="http://www.freefem.org/ff++/index.htm">FreeFem++</a> FreeFem++ is an implementation of a language dedicated to the finite element method. It enables you to solve Partial Differential Equations (PDE) easily.
 -# <a href="http://www.gmm.insa-tlse.fr/getfem/"><b>GETFEM++</b> Home Page</a>
 -# <a href="http://www.nwnumerics.com">Zebulon</a> is an advanced object oriented FEA program with many non-linear solution capabilities.
 The program is designed to be flexible for the user and provide solution options not found in other codes. We are aggressively developing cutting edge
@@ -82,6 +80,16 @@ University of Liege, Belgium. The objective of this work is to define the archit
 The program is built around an interpreter, which allows the user to define interactively either data as well as algorithms. 
 The program may thus be very easily configured to new computational strategies.
 See also the non offical site <a href="http://garfield.ltas.ulg.ac.be/oo_meta/fr_oometa.htm">Garfield's webserver - oo_meta / oofelie</a>
--# Pelicans ...
+
+
+\htmlonly
+<div class=horizontalline>  </div>
+\endhtmlonly
+\anchor HP_HS
+\section hybrid Hybrid Systems
+-# <a href="http://www-er.df.op.dlr.de/cacsd/hds/index.shtml">Virtual
+Action Group on <b>Hybrid</b> Dynamic <b>Systems</b> for CACSD</a> Technical Committee on Computer Aided <b>Control</b> System Design. 
+IEEE Technical Committee on <b>Hybrid</b> Dynamical <b>Systems</b>
+-# <a href="http://yoric.mit.edu/daepack/daepack.html"><b>DAEPACK</b></a> - Homepage for <b>DAEPACK</b> Project, a component library for combined symbolic/numeric analysis of FORTRAN models.
 
 */

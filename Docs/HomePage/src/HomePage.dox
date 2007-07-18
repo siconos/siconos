@@ -40,6 +40,7 @@ The Siconos Platform is a scientific computing software dedicated to the modelin
 <li> Differential inclusions and Complementarity systems</li>
 </ul>
 
+For a comprehensive introduction to Siconos, we refer to the <a href="http://hal.inria.fr/action/open_file.php?url=http://hal.inria.fr/docs/00/16/36/84/PDF/RT-0340.pdf&docid=163684">INRIA technical report RT 340</a>
 
 \subsection MainObj What are the main objectives and motivations?
 Besides the standard features which are required for a software of scientific computing, the objectives of this project are the
