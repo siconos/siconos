@@ -21,18 +21,18 @@
 # INTERNAL LIBRARIES
 
 #--- Odepack --------------------------------------
-ODEPACK_PATH = $(top_srcdir)/src/odepack
-ODEPACK_INC = $(ODEPACK_PATH)
-ODEPACK_LIB = -L$(ODEPACK_PATH) -lodepack
+ODEPACK_PATH = src/odepack
+ODEPACK_INC = $(top_srcdir)/$(ODEPACK_PATH)
+ODEPACK_LIB = -L$(top_builddir)/$(ODEPACK_PATH) -lodepack
 
 #--- NSSpack --------------------------------------
-NSSPACK_PATH = $(top_srcdir)/src/NSSpack
-NSSPACK_INC = $(NSSPACK_PATH)
-NSSPACK_LIB = -L$(NSSPACK_PATH) -lNSSpack
+NSSPACK_PATH = src/NSSpack
+NSSPACK_INC = $(top_srcdir)/$(NSSPACK_PATH)
+NSSPACK_LIB = -L$(top_builddir)/$(NSSPACK_PATH) -lNSSpack
 
 #--- utils --------------------------------------
-UTILS_PATH = $(top_srcdir)/src/utils
-UTILS_INC = $(UTILS_PATH)
+UTILS_PATH = src/utils
+UTILS_INC = $(top_srcdir)/$(UTILS_PATH)
 UTILS_LIB = 
 
 # INCLUDES
@@ -47,7 +47,7 @@ CCCOMPILE = $(CC) $(CFLAGS) $(INCLUDES)
 F77COMPILE = $(F77) $(CFLAGS) $(INCLUDES)
 
 
-SICONOSNUMERICS_LIBS=-L$(top_srcdir)/src/ -lSiconosNumerics
+SICONOSNUMERICS_LIBS=-L$(top_builddir)/src/ -lSiconosNumerics
 
 
 #--- Directory for include files ---
