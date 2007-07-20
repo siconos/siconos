@@ -32,6 +32,32 @@ check_PROGRAMS = test1 test2 test3  test4  test5
 #TESTS = $(check_PROGRAMS)
 #XFAIL_TESTS = $(check_PROGRAMS)
 
+
+DATADIRS=DATA MATRIX BLOCKMATRIX BLOCKMATRIX_NEW testlab
+
+.PHONY: links
+
+cleanlinks:	
+	for f in $(DATADIRS) ; do \
+		if test -h $$f ; then \
+			rm $$f ; \
+		fi; \
+	done;	
+
+links: $(DATADIRS)
+	@for d in $(^D) ; do \
+	  for f in $(^F) ; do \
+		if [ ! -L $$f -o ! -d $$f ]; then ln -s $$d/$$f ; fi \
+          done;\
+	done; 
+
+clean: cleanlinks
+
+all: links
+
+links: $(DATADIRS)
+
+
 TESTS = test1 test2 test3  test4  test5
 XFAIL_TESTS =   test5
 
