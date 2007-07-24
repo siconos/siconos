@@ -367,7 +367,7 @@ void testBouncingBallED()
     error("BouncingBallED::sicTimeDiscretisation construction");
 
   sicSimulationTimeStepping(idTime);
-  sicOneStepIntegratorLsodar(theta);
+  //sicOneStepIntegratorLsodar(theta);
   sicOneStepNSProblemLCP("LCP", 101, 0.0001);
 
 
