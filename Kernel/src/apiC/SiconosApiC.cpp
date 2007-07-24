@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2007.
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.
 * Siconos is a program dedicated to the modeling, the simulation and the control
 * of non smooth dynamical systems
 * Siconos is a free software; you can redistribute it and/or modify
@@ -21,20 +21,7 @@
 #include "SiconosDataC.h"
 #include "SiconosApiC.h"
 
-
-
-//
-// TODO: add a structure with array and manage index
-//
-
-
-//Model *GLOB_MODEL;
-//NonSmoothDynamicalSystem *GLOB_NSDS;
-//Simulation *GLOB_SIMULATION;
-//TimeDiscretisation *GLOB_TIME;
-//DynamicalSystemsSet *GLOB_SET_DS;
-//InteractionsSet GLOB_SET_INTERACTION;
-//CheckInsertDS GLOB_CHECK_DS;
+using namespace std;
 
 DataC GLOB_DATA;
 
@@ -46,7 +33,11 @@ extern "C" int sicLoadModel(char ModelXmlFile[])
   {
     Model *ptrModel = new Model(ModelXmlFile) ;
     GLOB_DATA.setModelPtr(ptrModel);
+    // shortcut of object pointers
     GLOB_DATA.setSimulationPtr(ptrModel->getSimulationPtr());
+    GLOB_DATA.setEventsManagerPtr(ptrModel->getSimulationPtr()->getEventsManagerPtr());
+
+    GLOB_DATA.setStatus(DATAC_MODEL);
   }
   catch (SiconosException e)
   {
@@ -69,16 +60,19 @@ extern "C" int sicInitSimulation()
   try
   {
 
-    Model * prtModel = GLOB_DATA.getModelPtr();
-    Simulation * prtSimul = GLOB_DATA.getSimulationPtr();
-    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
+    if (GLOB_DATA.getStatus() != DATAC_MODEL)
+      RuntimeException::selfThrow("ApiC:: MODEL must be constructed before sicInitSimulation");
 
+    // TimeStepping* s = static_cast<TimeStepping*>(GLOB_DATA.getSimulationPtr());
 
+    Simulation *s = GLOB_DATA.getSimulationPtr();
 
-    prtSimul = prtModel->getSimulationPtr();
-    prtSimul->initialize();
+    cout << "-->" << GLOB_DATA.getSimulationPtr() << endl;
+    //GLOB_DATA.getSimulationPtr()->initialize();
+    s->initialize();
+    cout << "END" << endl;
 
-    SetDSPtr = new DynamicalSystemsSet();
+    GLOB_DATA.setStatus(DATAC_INIT);
 
   }
   catch (SiconosException e)
@@ -146,9 +140,8 @@ extern "C" int sicSTNextStep()
   int ret = SIC_OK;
   try
   {
-    Simulation * prtSimul = GLOB_DATA.getSimulationPtr();
-    //RPG OUPS !!!
-    ((TimeStepping*) prtSimul)->nextStep();
+
+    GLOB_DATA.getEventsManagerPtr()->processEvents();
 
   }
   catch (SiconosException e)
@@ -165,28 +158,6 @@ extern "C" int sicSTNextStep()
   return ret;
 }
 
-extern "C" int sicSTAdvanceToEvent()
-{
-  int ret = SIC_OK;
-  try
-  {
-    Simulation * prtSimul = GLOB_DATA.getSimulationPtr();
-    //RPG OUPS !!!
-    ((TimeStepping*) prtSimul)->advanceToEvent();
-  }
-  catch (SiconosException e)
-  {
-    cout << e.report() << endl;
-    ret = SIC_ERROR;
-  }
-  catch (...)
-  {
-    cout << "Exception caught insicSTAdvanceToEvent" << endl;
-    ret = SIC_ERROR;
-  }
-
-  return ret;
-}
 
 extern "C" int sicSTSaveInMemory()
 {
@@ -217,8 +188,7 @@ extern "C" int sicSTComputeOneStep()
 
   try
   {
-    Simulation * prtSimul = GLOB_DATA.getSimulationPtr();
-    ((TimeStepping*) prtSimul)->computeOneStep();
+    GLOB_DATA.getSimulationPtr()->advanceToEvent();
   }
   catch (SiconosException e)
   {
@@ -284,6 +254,103 @@ extern "C" int sicSTupdateState()
   return ret;
 }
 
+extern "C" int sicAdvanceToEvent()
+{
+  int ret = SIC_OK;
+  try
+  {
+
+    cout << "sicAdvanceToEvent APIC" << endl;
+    cout << "TYPE " << ((EventDriven*)GLOB_DATA.getSimulationPtr())->getType() << endl;
+    cout << "OK" << endl;
+    ((EventDriven*) GLOB_DATA.getSimulationPtr())->advanceToEvent();
+  }
+  catch (SiconosException e)
+  {
+    cout << e.report() << endl;
+    ret = SIC_ERROR;
+  }
+  catch (...)
+  {
+    cout << "Exception caught in sicAdvanceToEvent" << endl;
+    ret = SIC_ERROR;
+  }
+
+  return ret;
+}
+
+extern "C" int sicProcessEvents()
+{
+  int ret = SIC_OK;
+  try
+  {
+    // Simulation * prtSimul=GLOB_DATA.getSimulationPtr();
+    //RPG OUPS !!!
+    GLOB_DATA.getEventsManagerPtr()->processEvents();
+  }
+  catch (SiconosException e)
+  {
+    cout << e.report() << endl;
+    ret = SIC_ERROR;
+  }
+  catch (...)
+  {
+    cout << "Exception caught in sicProcessEvents" << endl;
+    ret = SIC_ERROR;
+  }
+
+  return ret;
+}
+
+extern "C" int sicHasNextEvent(int *hasnextevent)
+{
+  int ret = SIC_OK;
+
+  try
+  {
+    Simulation * prtSimul = GLOB_DATA.getSimulationPtr();
+
+    *hasnextevent = (int) prtSimul->hasNextEvent();
+  }
+  catch (SiconosException e)
+  {
+    cout << e.report() << endl;
+    ret = SIC_ERROR;
+  }
+  catch (...)
+  {
+    cout << "Exception caught in sicProcessEvents" << endl;
+    ret = SIC_ERROR;
+  }
+
+  return ret;
+}
+
+extern "C" int sicGetTypeEvent(char *type)
+{
+  int ret = SIC_OK;
+  string typeSring;
+
+  try
+  {
+    EventsManager *prtEventsManager = GLOB_DATA.getEventsManagerPtr();
+    strcpy(type, prtEventsManager->getCurrentEventPtr()->getType().c_str());
+  }
+  catch (SiconosException e)
+  {
+    cout << e.report() << endl;
+    ret = SIC_ERROR;
+  }
+  catch (...)
+  {
+    cout << "Exception caught in sicProcessEvents" << endl;
+    ret = SIC_ERROR;
+  }
+
+  return ret;
+}
+
+
 
 extern "C" void sicDebug(int *ret)
 {
@@ -322,7 +389,6 @@ extern "C" int sicModelgetQ(double *value, int indexDS, int indexVector)
         RuntimeException::selfThrow("siconos/C:: sicModelgetQ failed");
       else
       {
-        printf("DEBUG --> %d %lf \n", indexVector, system->getQ()(indexVector));
         *value = system->getQ()(indexVector);
       }
     }
@@ -347,7 +413,7 @@ extern "C" int sicModelgetQ(double *value, int indexDS, int indexVector)
 }
 
 
-extern "C" int sicLagrangianLinearTIDS(int nDof, double *Q0, double *Vel0, double *Mass, double *K, double *C, char *libname, char * fctname)
+extern "C" int sicLagrangianLinearTIDS(int nDof, double *Q0, double *Vel0, double *Mass)
 {
   int nId, i, j;
 
@@ -355,7 +421,6 @@ extern "C" int sicLagrangianLinearTIDS(int nDof, double *Q0, double *Vel0, doubl
   {
 
     DynamicalSystemsSet* SetDSPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
-    CheckInsertDS* CheckDSPtr = GLOB_DATA.getCheckInsertDStPtr();
 
     // Id of LagrangianLinearTIDS
     nId = SetDSPtr->size();
@@ -366,8 +431,7 @@ extern "C" int sicLagrangianLinearTIDS(int nDof, double *Q0, double *Vel0, doubl
     SimpleVector vQ0(nDof);
     SimpleVector vVel0(nDof);
     SimpleMatrix  mMass(nDof, nDof);
-    SimpleMatrix  mK(nDof, nDof);
-    SimpleMatrix mC(nDof, nDof);
+
 
     // Vectors and Matrix initialisation with function parameters
     // Is there a solution less stupid ?
@@ -378,21 +442,11 @@ extern "C" int sicLagrangianLinearTIDS(int nDof, double *Q0, double *Vel0, doubl
       for (j = 0; j < nDof; j++)
       {
         mMass(i, j) = Mass[j + i * nDof];
-        mK(i, j) = Mass[j + i * nDof];
-        mC(i, j) = Mass[j + i * nDof];
       }
     }
 
-    // Create the object
-    //DynamicalSystem *DS = new LagrangianLinearTIDS(nId,nDof,vQ0,vVel0,mMass,mK,mC);
-
     // Push the LagrangianLinearTIDS on global DS vectors
-    *CheckDSPtr = SetDSPtr->insert(new LagrangianLinearTIDS(nId, vQ0, vVel0, mMass, mK, mC));
-
-    // Set the Fext
-    (static_cast<LagrangianDS*>(*(CheckDSPtr->first)))->setComputeFExtFunction(libname, fctname);
-
-    cout << "Create LagrangianLinearTIDS Id " << nId << endl;
+    SetDSPtr->insert(new LagrangianLinearTIDS(nId, vQ0, vVel0, mMass));
 
   }
   catch (SiconosException e)
@@ -719,6 +773,47 @@ extern "C" int sicSetComputeJacobianVelocityFIntFunction(int nIdDs, char *libnam
   return st;
 }
 
+extern "C" int  sicSetFExt(int nIdDs, double *tFext)
+{
+  int st = SIC_OK, ndof;
+
+  try
+  {
+    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
+
+    // DS verification
+    int  nDSMax = SetDSPtr->size();
+    if ((nIdDs > nDSMax) || (nIdDs < 0))
+    {
+      RuntimeException::selfThrow("siconos/C:: sicSetFExt failed");
+      st = SIC_ERROR;
+    }
+
+    DynamicalSystem *DS = SetDSPtr->getDynamicalSystemPtr(nIdDs);
+
+    ndof = DS->getDim();
+
+    SiconosVector * Vfext = new SimpleVector(ndof);
+    for (int index = 0; index < ndof; index++)
+      (*Vfext)(index) = tFext[index];
+
+    static_cast<LagrangianDS*>(DS)->setFExtPtr(Vfext);
+
+  }
+  catch (SiconosException e)
+  {
+    cout << e.report() << endl;
+    st = SIC_ERROR;
+  }
+  catch (...)
+  {
+    cout << "Exception caught in  setComputeFExtFunction" << endl;
+    st = SIC_ERROR;
+  }
+
+  return st;
+}
+
 extern "C" int  sicSetComputeFExtFunction(int nIdDs, char *libname, char *func)
 {
   int st = SIC_OK;
@@ -756,41 +851,47 @@ extern "C" int  sicSetComputeFExtFunction(int nIdDs, char *libname, char *func)
   return st;
 }
 
-extern "C" int sicInteraction(char *name, int nbDS, int *DS, int nbRel)
+extern "C" int sicInteraction(char *name, int nbDS, int *DS, int idLaw, int idRelation, int nSize)
 {
-  int nId, dimDS = 0;
+  int nId;
 
   try
   {
-    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
-    InteractionsSet * InteractionSetPtr = GLOB_DATA.getInteractionsSetPtr();
+    DynamicalSystemsSet * DSSetPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
+    NonSmoothLawSet * NSLawSetPtr = GLOB_DATA.getNonSmoothLawSetPtr();
+    RelationsSet *RelationsSetPtr = GLOB_DATA.getRelationsSetPtr();
+    InteractionsSet * InteractionsSetPtr = GLOB_DATA.getInteractionsSetPtr();
 
     // Id of Interaction
-    nId = InteractionSetPtr->size();
+    nId = InteractionsSetPtr->size();
 
     // TODO: parameters verification
-    int  nDSMax = SetDSPtr->size();
-    if (nDSMax < nbDS)
+    int  nDSMax = DSSetPtr->size();
+    if ((nbDS < 0) || (nDSMax < nbDS))
+      RuntimeException::selfThrow("siconos/C:: sicInteraction failed");
+
+    int  nLawMax = NSLawSetPtr->size();
+    if ((idLaw < 0) || (idLaw > nLawMax))
+      RuntimeException::selfThrow("siconos/C:: sicInteraction failed");
+
+    int  nRelMax = RelationsSetPtr->size();
+    if ((idRelation < 0) || (idRelation > nRelMax))
       RuntimeException::selfThrow("siconos/C:: sicInteraction failed");
 
     // Compute sum of DS size and add DS into the set
     DSIterator it;
     DynamicalSystemsSet dsConcerned;
-    for (it = SetDSPtr->begin(); it != SetDSPtr->end(); ++it)
+    for (it = DSSetPtr->begin(); it != DSSetPtr->end(); ++it)
     {
-      dimDS += (*it)->getDim();
+      //---- TODO ---- get ???
+      //dimDS+=(*it)->getDim();
       dsConcerned.insert(*it);
     }
 
-    // Create object
-    // Warning FP: comment next line for fast debug. Review Interaction construction: first Nslaw and Relation and THEN interaction
-    // with nslaw and relation as arguments of the constructor list.
-    //Interaction *interaction = new  Interaction(name,dsConcerned, nId,nbRel );    // interaction->display();
-
-    // Push the interaction on global DS vectors
-    //GLOB_SET_INTERACTION.insert(interaction);
-
-    cout << "Create Interaction Id " << nId << endl;
+    // Interaction construction
+    Relation *rel     = (*RelationsSetPtr)[idRelation];
+    NonSmoothLaw *law = (*NSLawSetPtr)[idLaw];
+    InteractionsSetPtr->insert(new Interaction(name, dsConcerned, nId, nSize, law, rel));
 
   }
   catch (SiconosException e)
@@ -809,48 +910,35 @@ extern "C" int sicInteraction(char *name, int nbDS, int *DS, int nbRel)
 
 
 
-extern "C" int sicLagrangianLinearR(int nIdInteraction, double *H, double *b)
+extern "C" int sicLagrangianLinearR(int nDof, int nRel, double *H, double *b)
 {
-  int nId = 0, dimDS = 0, nbRel = 0;
+  int nId = 0;
 
   try
   {
-    InteractionsSet * InteractionSetPtr = GLOB_DATA.getInteractionsSetPtr();
+    RelationsSet * RelationsSetPtr = GLOB_DATA.getRelationsSetPtr();
 
-    // Retrieve Interaction
-    int nSize = InteractionSetPtr->size();
-    if ((nIdInteraction < 0) || (nIdInteraction > nSize))
-      RuntimeException::selfThrow("siconos/C:: sicLagrangianLinearR failed");
+    // Id of sicLagrangianLinearR
+    nId = RelationsSetPtr->size();
 
-    Interaction *interaction = InteractionSetPtr->getInteraction(nIdInteraction);
+    SimpleMatrix mH(nRel, nDof);
 
-    // Compute sum of DS size
-    dimDS = interaction->getSizeOfDS();
-    nbRel = interaction->getSizeOfY();
-
-    if ((dimDS <= 0) || (nbRel <= 0))
-      RuntimeException::selfThrow("siconos/C:: sicLagrangianLinearR  failed");
-
-    // Vectors and Matrix creation
-    SimpleMatrix mH(nbRel, dimDS);
-    SimpleVector  vb(nbRel);
-
-    // Vectors and Matrix initialisation with function parameters
-    // Is there a solution less stupid ?
-    //vb(0,0);
-    for (int i = 0; i < nbRel; i++)
+    for (int i = 0; i < nRel; i++)
     {
-      vb(i) = b[i];
-      for (int j = 0; j < dimDS; j++)
+      for (int j = 0; j < nDof; j++)
       {
-        mH(i, j) = H[i * nbRel + j];
+        mH(i, j) = H[i * nRel + j];
       }
     }
-    //    cout <<"H("<<dimDS<<")="<< mH <<endl;
 
-    Relation *relation = new LagrangianLinearR(mH, vb);
-    interaction->setRelationPtr(relation);
+    SimpleVector vB(nRel);
 
+    for (int i = 0; i < nRel; i++)
+    {
+      vB(i) = b[i];
+    }
+
+    RelationsSetPtr->push_back(new LagrangianLinearR(mH, vB));
   }
   catch (SiconosException e)
   {
@@ -901,25 +989,18 @@ extern "C" int sicLagrangianR(int nIdInteraction, char *relationType, char *func
 }
 */
 
-extern "C" int sicNewtonImpactNSL(int nIdInteraction, double e)
+extern "C" int sicNewtonImpactNSL(double e)
 {
-  int nId = SIC_OK;
+  int nId = 0;
 
   try
   {
-    InteractionsSet * InteractionSetPtr = GLOB_DATA.getInteractionsSetPtr();
+    NonSmoothLawSet * NSLawSetPtr = GLOB_DATA.getNonSmoothLawSetPtr();
 
-    // Retrieve Interaction
-    int nSize = InteractionSetPtr->size();
-    if ((nIdInteraction < 0) || (nIdInteraction > nSize))
-      RuntimeException::selfThrow("siconos/C:: sicLagrangianLinearR failed");
-
-    Interaction *interaction = InteractionSetPtr->getInteraction(nIdInteraction);
-
-    NonSmoothLaw *nslaw = new NewtonImpactNSL(e);
-
-    interaction->setNonSmoothLawPtr(nslaw);
-
+    // Id of NewtonImpactNSL
+    nId = NSLawSetPtr->size();
+    // Push the NewtonImpactNSL
+    NSLawSetPtr->push_back(new NewtonImpactNSL(e));
   }
   catch (SiconosException e)
   {
@@ -928,7 +1009,7 @@ extern "C" int sicNewtonImpactNSL(int nIdInteraction, double e)
   }
   catch (...)
   {
-    cout << "Exception caught in ssicNewtonImpactNSL" << endl;
+    cout << "Exception caught in sicNewtonImpactNSL" << endl;
     nId = SIC_ERROR;
   }
 
@@ -942,16 +1023,13 @@ extern "C" int sicNonSmoothDynamicalSystem(int isBVP)
 
   try
   {
-    NonSmoothDynamicalSystem *prtNSDS = GLOB_DATA.getNonSmoothDynamicalSystemPtr();
     DynamicalSystemsSet * SetDSPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
     InteractionsSet * InteractionSetPtr = GLOB_DATA.getInteractionsSetPtr();
 
     if ((isBVP < 0) || (isBVP > 1))
       RuntimeException::selfThrow("siconos/C:: sicNSDSModel failed due to bad isBVP");
-    // Create NSDS system connected with DS and Interactions
-    // Warning FP: NSDS constructor change -> add set of DS and set of Interactions in arguments list.
-    // => To be reviewed?
-    prtNSDS = new NonSmoothDynamicalSystem(*SetDSPtr, *InteractionSetPtr, isBVP);
+
+    GLOB_DATA.setNonSmoothDynamicalSystemPtr(new NonSmoothDynamicalSystem(*SetDSPtr, *InteractionSetPtr, isBVP));
 
   }
   catch (SiconosException e)
@@ -974,7 +1052,6 @@ extern "C" int sicModel(double t0, double T)
 
   try
   {
-    Model * prtModel = GLOB_DATA.getModelPtr();
     NonSmoothDynamicalSystem *prtNSDS = GLOB_DATA.getNonSmoothDynamicalSystemPtr();
     DynamicalSystemsSet * SetDSPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
     InteractionsSet * InteractionSetPtr = GLOB_DATA.getInteractionsSetPtr();
@@ -993,12 +1070,12 @@ extern "C" int sicModel(double t0, double T)
     if (prtNSDS == NULL)
       RuntimeException::selfThrow("siconos/C:: sicModel failed due to NSDS empty");
 
-    prtNSDS->setDynamicalSystems(*SetDSPtr);
-    prtNSDS->setInteractions(*InteractionSetPtr);
+    //prtNSDS->setDynamicalSystems(*SetDSPtr);
+    //prtNSDS->setInteractions(*InteractionSetPtr);
 
     // Create the model connected with NSDS
-    prtModel = new Model(t0, T);
-    prtModel->setNonSmoothDynamicalSystemPtr(prtNSDS);
+    GLOB_DATA.setModelPtr(new Model(t0, T));
+    GLOB_DATA.getModelPtr()->setNonSmoothDynamicalSystemPtr(prtNSDS);
   }
 
   catch (SiconosException e)
@@ -1015,22 +1092,51 @@ extern "C" int sicModel(double t0, double T)
   return nId;
 }
 
-extern "C" int sicSimulationTimeStepping(double h)
+extern "C" int sicTimeDiscretisation(double h)
 {
-  int nId = SIC_OK;
+  int nId;
 
   try
   {
-    Simulation * prtSimul = GLOB_DATA.getSimulationPtr();
     Model * prtModel = GLOB_DATA.getModelPtr();
-    TimeDiscretisation *prtTime = GLOB_DATA.getTimeDiscretisationPtr();
 
-    prtSimul = new TimeStepping(prtTime);
+    TimesSet * TimesSetPtr = GLOB_DATA.getTimesSetPtr();
 
+    // Id of  Time discretisation
+    nId = TimesSetPtr->size();
+    // Push the Time discretisation
+    TimesSetPtr->push_back(new  TimeDiscretisation(h, prtModel));
+
+  }
+  catch (SiconosException e)
+  {
+    cout << e.report() << endl;
+    nId = SIC_ERROR;
+  }
+  catch (...)
+  {
+    cout << "Exception caught in sicTimeDiscretisation" << endl;
+    nId = SIC_ERROR;
+  }
+
+  return nId;
+
+}
+
+extern "C" int sicSimulationTimeStepping(int idTime)
+{
+  int nId = SIC_OK;
+  int nSize;
+
+  try
+  {
     // Time discretisation
-    prtTime = new  TimeDiscretisation(h, prtModel);
+    TimesSet * timediscret = GLOB_DATA.getTimesSetPtr();
+    nSize = timediscret->size();
+    if ((idTime < 0) || (idTime > nSize))
+      RuntimeException::selfThrow("siconos/C:: sicSimulationTimeStepping failed due to bad time index");
 
-    prtSimul->initialize();
+    GLOB_DATA.setSimulationPtr(new TimeStepping((*timediscret)[idTime]));
 
   }
   catch (SiconosException e)
@@ -1061,7 +1167,7 @@ extern "C" int sicOneStepIntegratorMoreau(double *theta)
     int  dsNumber = SetDSPtr->size();
 
     if (dsNumber == 0)
-      RuntimeException::selfThrow("siconos/C:: ssicSimulationTimeStepping failed due to DS empty");
+      RuntimeException::selfThrow("siconos/C:: sicOneStepIntegratorMoreau failed due to DS empty");
 
     // One Step integrator s
     set<OneStepIntegrator *> vOSI;
@@ -1092,6 +1198,50 @@ extern "C" int sicOneStepIntegratorMoreau(double *theta)
 
 }
 
+/* TBV by Franck */
+extern "C" int sicOneStepIntegratorLsodar()
+{
+  int nId = SIC_OK, i;
+
+  try
+  {
+    Simulation * prtSimul = GLOB_DATA.getSimulationPtr();
+    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
+
+    int  dsNumber = SetDSPtr->size();
+
+    if (dsNumber == 0)
+      RuntimeException::selfThrow("siconos/C:: sicOneStepIntegratorMoreau failed due to DS empty");
+
+    // One Step integrator s
+    set<OneStepIntegrator *> vOSI;
+    DSIterator it;
+    i = 0;
+    // \Warning Franck: corrections = consequences of Simulation/NSDS changes (vector<> => set<> )
+    // Thus this part has to be reviewed -> especially the way theta values are sorted?
+    for (it = SetDSPtr->begin(); it != SetDSPtr->end(); ++it)
+    {
+      vOSI.insert(new Lsodar(*it, prtSimul));
+      i++;
+    }
+
+    prtSimul->setOneStepIntegrators(vOSI);
+  }
+  catch (SiconosException e)
+  {
+    cout << e.report() << endl;
+    nId = SIC_ERROR;
+  }
+  catch (...)
+  {
+    cout << "Exception caught in sicOneStepIntegratorLsodar" << endl;
+    nId = SIC_ERROR;
+  }
+
+  return nId;
+
+}
+
 extern "C" int sicOneStepNSProblemLCP(char *solverName, int maxiter, double tolerance)
 {
   int nId = SIC_OK;
@@ -1099,12 +1249,14 @@ extern "C" int sicOneStepNSProblemLCP(char *solverName, int maxiter, double tole
   try
   {
     // One Step problem
-    //OneStepNSProblem * onsspb = new LCP(GLOB_SIMULATION,solverName,maxiter,tolerance);
-    //    GLOB_SIMULATION->setOneStepNSProblemPtr(onsspb);
 
-    cout << "=== End of model loading === " << endl;
+    TimeStepping *s = (TimeStepping *)GLOB_DATA.getSimulationPtr();
+    //OneStepNSProblem * onsspb = new LCP(GLOB_DATA.getSimulationPtr(),"LCP",solverName,maxiter,tolerance,normetyp,searchdir,rho);
+    // PB
+    OneStepNSProblem * onsspb = new LCP(s, "LCP", solverName, maxiter, tolerance);
 
   }
+
   catch (SiconosException e)
   {
     cout << e.report() << endl;
@@ -1115,6 +1267,11 @@ extern "C" int sicOneStepNSProblemLCP(char *solverName, int maxiter, double tole
     cout << "Exception caught in sicOneStepNSProblemLCP" << endl;
     nId = SIC_ERROR;
   }
+
+  // shortcut of object pointers
+  GLOB_DATA.setEventsManagerPtr(GLOB_DATA.getSimulationPtr()->getEventsManagerPtr());
+
+  GLOB_DATA.setStatus(DATAC_MODEL);
 
   return nId;
 

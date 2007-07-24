@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2007.
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -23,21 +23,19 @@
 #define SICONOS_DATAC_H
 
 
-#include <math.h>
-#include <stdio.h>
 
-#include <iostream>
-#include "Model.h"
-#include "DynamicalSystem.h"
-#include "DynamicalSystemsSet.h"
-#include "InteractionsSet.h"
+#include "SiconosKernel.h"
 
-using namespace std;
+enum DATAC_STATUS {DATAC_NULL, DATAC_MODEL, DATAC_INIT, DATAC_FULL };
+typedef  std::vector <NonSmoothLaw*> NonSmoothLawSet;
+typedef  std::vector <Relation*> RelationsSet;
+typedef  std::vector <TimeDiscretisation*> TimesSet;
+
 
 /** Class to manage a global structure for siconos simulation
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 2.1.1.
+ *  \version 2.1.0.
  *  \date (Creation) Apr 26, 2004
  *
  *  This class is dedicated to be declared in a global scope and to be use
@@ -47,107 +45,67 @@ using namespace std;
  *   pointer.
  *
  */
+
 class DataC
 {
 
 protected:
 
   /** The object is initialized */
-  int _initOk;
+  int _Status;
 
-  Model *_Model;
-  Simulation * _Simulation;
-  NonSmoothDynamicalSystem *_NSDS;
-  TimeDiscretisation *_Time;
-  DynamicalSystemsSet *_SetDS;
-  CheckInsertDS       *_CheckDS;
+  DynamicalSystemsSet *_DSSet;
+  NonSmoothLawSet *_NSLawSet;
+  RelationsSet *_RelationsSet;
   InteractionsSet     *_InteractionsSet;
+  NonSmoothDynamicalSystem *_NSDS;
+  Model *_Model;
+  TimesSet *_TimesSet;
+  Simulation * _Simulation;
+  EventsManager  *_EventsManager;
 
 public:
 
-  /** default constructor
+  /** default constructor - no parameters
   *  \param
   *  \param
   */
-  DataC() {};
 
+  DataC();
 
   /** destructor
   */
-  ~DataC() {};
+  ~DataC();
 
   // GETTERS/SETTERS
 
   /** get initialization state
-  *  \return int : 0 the object is not initialized, 1 the object is not initialized
+  *  \return int : DATAC_STATUS
   */
-  inline int getInitialized()
-  {
-    return _initOk;
-  };
+  int getStatus();
+  void setStatus(int status);
 
-  inline Model * getModelPtr()
-  {
-    return _Model;
-  };
-  inline void  setModelPtr(Model *ptrModel)
-  {
-    _Model = ptrModel;
-  };
+  Model *getModelPtr();
+  void  setModelPtr(Model *ptrModel);
 
-  inline Simulation * getSimulationPtr()
-  {
-    return _Simulation;
-  };
-  inline void setSimulationPtr(Simulation * ptrSimulation)
-  {
-    _Simulation = ptrSimulation;
-  };
+  Simulation * getSimulationPtr();
+  void setSimulationPtr(Simulation * ptrSimulation);
 
-  inline NonSmoothDynamicalSystem * getNonSmoothDynamicalSystemPtr()
-  {
-    return _NSDS;
-  };
-  inline void setNonSmoothDynamicalSystemPtr(NonSmoothDynamicalSystem * ptr)
-  {
-    _NSDS = ptr;
-  };
+  NonSmoothDynamicalSystem * getNonSmoothDynamicalSystemPtr();
+  void setNonSmoothDynamicalSystemPtr(NonSmoothDynamicalSystem * ptr);
 
-  inline TimeDiscretisation * getTimeDiscretisationPtr()
-  {
-    return _Time;
-  };
-  inline void setTimeDiscretisationPtr(TimeDiscretisation *ptr)
-  {
-    _Time = ptr;
-  };
+  DynamicalSystemsSet * getDynamicalSystemsSetPtr();
 
-  inline DynamicalSystemsSet * getDynamicalSystemsSetPtr()
-  {
-    return _SetDS;
-  };
-  inline  void setDynamicalSystemsSetPtr(DynamicalSystemsSet *ptr)
-  {
-    _SetDS = ptr;
-  };
+  InteractionsSet* getInteractionsSetPtr();
 
-  inline CheckInsertDS* getCheckInsertDStPtr()
-  {
-    return _CheckDS;
-  };
-  inline void setCheckInsertDStPtr(CheckInsertDS* ptr)
-  {
-    _CheckDS = ptr;
-  };
+  RelationsSet* getRelationsSetPtr();
 
-  inline InteractionsSet* getInteractionsSetPtr()
-  {
-    return _InteractionsSet;
-  };
-  inline void setInteractionsSetPtr(InteractionsSet* ptr)
-  {
-    _InteractionsSet = ptr;
-  };
+  TimesSet* getTimesSetPtr();
+
+  NonSmoothLawSet* getNonSmoothLawSetPtr();
+
+  EventsManager* getEventsManagerPtr();
+  void setEventsManagerPtr(EventsManager* ptr);
 
 };
 
