@@ -1,39 +1,33 @@
-I - Faire Exemples.
- OK BouncingBall.sci
- OK  ThreeBeadsColumn.sci
- OK  RollBouncingBall.sci
- OK  MultiBeadsColumn.sci
+24/7 RPG
 
-I.1 Fignoler les simuls Boules
-  - visu sol, traj.
+Refonte du boulot Scilab/siconos
 
-I.2 Faire tourner PA10
+1 - Faire test Kernel/src/apiC 
+  dans Front-End/scilab
+  > make -f Make-test
+
+  ./sictest 0 ok
+
+  Il faut debogguer le reste
+
+2 - Tests visés 
+ BouncingBall/ (4 cas)
+  3DBeads/
+
+3- Mettre à jour l'interface Scilab
+  en profiter pour faire 1 doc
+
+4 - Amélirorer la visu bille ?
+
+5 - Compléter l'apiC (checker avec Franck)
+
+6 - Intégration
+   Doc : MAJ README, doc html, tutorial pour ajouter une fct, doxygen... 
+   Finir le configure de loader.sce.in et samples.sci et gestion env.sh
+
+7 - PA10
+ - compatible humans
  - ecrire sictest.c
  - compléter SiconosApiSci.c
  - tester Robot.sci
 
-I.4 Faire tourner exemples electriques ?
-
-
-II - Integration
-
- - Doxygen
- - README / Doc utilisateur
- - finir le configure de loader.sce.in et samples.sci et gestion env.sh
-
-III - Integration siconos/humans
-
-IV - plugin en scilab !!
-
-V - Fonctions qui manquent
-  sicModelgetVelocity
-  sicInteractionDisplay 
-  sicModelSaveXMLfile
-  sicIsModelComplete
-  all setters
-  sicDSgetNumber
-  and so on...
-
-VI - Fignoler
- - Robustifier ctl des parametres ds siconosScilab.c
- - Temps de calcul
