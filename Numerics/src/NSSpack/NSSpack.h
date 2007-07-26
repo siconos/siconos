@@ -383,8 +383,6 @@ extern "C" void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , doub
 
 extern "C" void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
 
-extern "C" void pfc_3D_newtonfunction(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
-
 /* ******************************************* */
 extern "C" int pr_solver(double* , double* , int* , method* , double* , double*);
 
@@ -606,9 +604,7 @@ extern int pfc_3D_solver(double *vec , double *q , int *n , method *pt , double 
 
   pfc_3D_nlgsnewton.c
 
-  pfc_3D_newtonfunction.c
-
-  pfc_3D_cpg.c
+    pfc_3D_cpg.c
 
 */
 
@@ -712,8 +708,6 @@ extern void pfc_3D_cpg(int *nn , double *vec , double *q , double *z , double *w
 extern void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
 
 extern void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
-
-extern void pfc_3D_newtonfunction(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
 
 /* ************************* DFC 2D **************************************** */
 

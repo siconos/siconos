@@ -70,6 +70,7 @@
 #include <string.h>
 #include <math.h>
 #include "blaslapack.h"
+#include <time.h>
 
 void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info,
                  int *iparamLCP , double *dparamLCP)
@@ -84,6 +85,10 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
   integer incx, incy;
   double *diag, *ww;
   char NOTRANS = 'N';
+
+  clock_t t1, t2;
+
+  t1 = clock();
 
   ispeak = 0;
   nc     = *nn;
@@ -144,10 +149,7 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
     w[i]  = 0.;
   }
 
-  incx = 1;
-  incy = 1;
 
-  dcopy_((integer *)&n , q , &incx , w , &incy);
 
   /* Preparation of the diagonal of the inverse matrix */
 
@@ -177,15 +179,11 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
     }
   }
 
+
   /*start iterations*/
 
   iter = 0;
   err  = 1.;
-
-  incx = 1;
-  incy = 1;
-
-  dcopy_((integer *)&n , q , &incx , w , &incy);
 
   while ((iter < itermax) && (err > tol))
   {
@@ -255,6 +253,8 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
     num = dnrm2_((integer *)&n, ww , &incx);
     err = num * den;
 
+    /*  printf("Iteration %i Erreur = %24.8e\n",iter,err); */
+
     if (ispeak == 2) for (i = 0 ; i < n ; ++i) fprintf(f101, "%i  %i  %14.7e\n", iter - 1, i, z[i]);
 
   }
@@ -287,5 +287,7 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
   free(ww);
 
   if (ispeak == 2) fclose(f101);
+  t2 = clock();
+  /*  printf("%.4lf seconds of processing\n", (t2-t1)/(double)CLOCKS_PER_SEC); */
 
 }
