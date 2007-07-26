@@ -23,8 +23,8 @@
 #--------------------------------------------------
 # Author(s)      : RPG
 # Creation Date  : 06 June 2005
-# Version        : 28 Oct 2005
-# Copyright      : INRIA 2005
+# Version        : 26 Jul 2007
+# Copyright      : INRIA 2007
 #--------------------------------------------------
 
 Introduction
@@ -35,85 +35,154 @@ scilab. It allows a 'high-level' interaction with the siconos platform
 with around 20 scilab functions. It allows flat acces without having
 deep siconos tree acces like proposed with python interface.
 
-This interface consists in :
+Developer's View
+----------------
+
+The scilab interface is made following three levels :
+ C-level : in the siconos Kernel consisting of pure C functions
+ Scilab-Interface :  link between C and scilab function calls
+ Scilab-Run : initialisation of scilab
+
+C-level interface: Kernel/src/apiC/
+---
+
+Siconos objects are wrapped into pure C functions. 
+
+ There is one class dedicated to be declared in a global scope and to
+ be use by the global API C to store informations about siconos
+ simulation
+=> SiconosDataC.h SiconosDataC.cpp
+
+ The C function Siconos API are exported in SiconosApiC.h and
+ implemented in SiconosApiC.cpp. Siconos simulation objects stored in
+ SiconosDataC are accessible through index.
+=> SiconosApiC.h SiconosApiC.cpp
+
+
+Scilab-Interface
+---
+This interface between C and Scilab consists in :
  
- siconos.cpp : a C++ module with global objects (Model and Simulation)
- and "C" functions which uses it.
+  * a gateway table between C and Scilab functions 
+     => libSiconosApiSci.c
+ 
+   * an implementation of the interface between C and Scilab functions
+     (variables and call)
+     => SiconosSci.h/c
 
- siconos.sci : interface "C" functions of siconos.cpp in scilab
-function. It uses the simplest mechanism : scilab link and scilab
-call.
+   * an automatic generation of scilab loader (loader.sce)
+     => builder.sce
 
-Scilab function implemented:
- sicLink()  // Load siconos platform
- sicLoadModel(ModelXml) // Load a Xml model
- sicTimeGetH()
- sicTimeGetK()
- sicTimeGetN()
- sicInitSimulation()
- sicSTNextStep()
- sicSTComputeFreeState()
- sicSTcomputePb()
- sicSTupdateState()
- sicModelgetQ(index)
+For more details, see the part 'Process to integrate a new Scilab
+function'.
+
+Scilab-Run 
+---
+
+Launching scilab, the process of execution is
+
+scilab> exec './loaderSiconos.sce';
+=> link external c++ dynamic libraries (Numerics, Kernel and dependencies)
+=> call  loader.sce
+   =>  load libSiconosApiSci.so and link C and Scilab functions (addinter)
+
+
 
 
 BouncingBall Execution
 -----------------------
-variables of environnement to set (example):
 
-export SICONOSPATH=/local_home/pissard/Workspace/siconos/distrib
-export NUMERICSPATH=/local_home/pissard/Workspace/siconos/distrib
+Examples/Mechanics/BouncingBall/BouncingBall.sci
+---
 
-export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOSPATH/share/siconos-kernel:$NUMERICSPATH/lib:.
+TBD
 
-copy the xml file (BouncingBall_TIDS.xml) in the current directory
-copy BallPlugin.so in $SICONOSPATH/share/siconos-kernel
+Examples/Mechanics/BeadsColumn/ThreeBeadsColumn.sci
+---
 
-scilab -f sample.sci : scilab example of the "famous" BouncingBall execution
-
-scilab> BouncingBall();
-
-normally, you will see during the simulation the ball animation; and
-after the simulation the plot of y(t)
-
-Limitations 
------------ 
-
-The goal of this prototype is to validate and illustrate the scilab
-interface mechanism. We implement only scilab function required to
-bouncing ball simulation.
-
-TODO by RPG
-------------
-It remains some work to validate scilab mechanism:
- - use a scilab function for a siconos simulation like a 'C' plugin
- - solve the bug with DGETRI call (on parameter 6) which has been fixed with a
-simple silab catch error !
+TBD
 
 
+
+
+Process to integrate a new Scilab function
+------------------------------------------
+
+How to add the Scilab function sicMyfunc(...)
+
+In Kernel/src/ApiC
+
+step1 : Write the C function Myfunc() in SiconosApiC.h/cpp
+
+make & installation of the new Kernel
+
+In FrontEnd/Scilab/sictest.c
+
+step2: tested the C-function in FrontEnd/Scilab/sictest.c
+
+step3 : add the scilab gateway in libSiconosApiSci.c
+...
+extern Gatefunc sicMyfunc;
+...
+{(Myinterfun)sci_gateway,sicMyfuncInterface,"sicMyfunc"},
+...
+
+step4 : Write sicMyfuncInterface in SiconosSci.c
+
+..
+int sicMyfunclInterface(char *fname)
+{
+  // stack C / scilab  interface (GetRhsVar...)
+
+   sicMyfunc(...) call
+
+  //  Return variables
+}
+...
+
+
+step5 : Automatic generation
+
+edit builder.sce    
+  add the new entry in table 
+...
+'sicMyfunc', 'sicMyfuncInterface';
+...
+
+then generation by builder.sce
+ loader.sce
+ Makelib
+
+compilation.
 
 TODO for a complete toolbox
 ----------------------------
- - robustify the prototype (test pointers values before calling, test if some requiered functions have been called before others,...)
- - doxygen code documentation
- - complete scilab function like (non exhaustive)
-  sicModelgetVelocity
-  sicModelgetLambda
-  sicModel(all parameters)
-  sicInteractionDisplay
-  sicModelSaveXMLfile
-  sicIsModelComplete
-  sicCreateModel
-  all setters
-  sicDSgetNumber
-  and so on...
 
- - is it necessary to use a global object to encapsulate the use of
-siconos objects ?
-
- - scilab 'C' Gateway to replace call ?
-
- - Packaging toolbox (compilation, loading and documentation)
-
+1 -  test of  Kernel/src/apiC 
  
+> make -f Make-test
+  ./sictest 0 ok
+
+Debug the other tests (number 1 to 4):
+  * The "four cases" of BouncingBall(TS)(ED)(TSXml)(EDXml)
+  * ThreeBeadsColumn
+
+2 - Update the scilab interface and samples
+
+3 - Enhace the scilab balls visualisation
+
+4 - Complete the C/Scilab API (check with Franck)
+
+5 - Siconos integration :
+     doxygen enhacement  (SiconosApiC.h)
+     integrate the README in a .dox
+     terminate the configure process:
+        loaderSiconos.sce.in, env.sh.in, Makefile.in
+
+6 - Complete scilab samples
+
+7 - Automatic scilab interface generation 
+
+8 - Plugin in scilab
+
+9 - Publish the package as a scilab toolbox
