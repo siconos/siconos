@@ -58,7 +58,7 @@ With this changes, siconos allows to compile with external 3D libraries : X11/op
 In draw_beads.cpp you can find some examples of 3D frictional contact of beads.
 
 
-For any question, pleanse contact me: houari.khenous@inrialpes.fr
+For any question, please contact me: houari.khenous@inrialpes.fr
 
 
 

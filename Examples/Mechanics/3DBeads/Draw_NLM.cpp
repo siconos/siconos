@@ -37,7 +37,12 @@ using namespace std;
 #include <drawstuff/drawstuff.h>
 
 
-#define COUPLE   2      // the number of dynamical systems
+#define COUPLE   3      // the number of dynamical systems
+
+#define WALL 1       // Positions of walls
+#define TOP 1       // Positions of walls
+#define GROUND 0       // Positions of walls
+
 
 Simulation* GLOB_SIM;
 TimeDiscretisation * GLOB_T;
@@ -124,6 +129,93 @@ void DrawCouple(LagrangianDS *lds, float radius)
   dsDrawSphere(pos22, R, radius);
 
 
+}
+void Drawwall()
+{
+
+  int Wall_z_p = 0;                    //  for z --> +
+  int Wall_y_p = 1;                    //  for y --> +
+  int Wall_y_m = 1;                    //  for y --> -
+  int Wall_x_p = 1;                    //  for x --> +
+  int Wall_x_m = 1;                    //  for x --> -
+
+  double pos1[3];
+  pos1[0] = pos1[1] = WALL;
+  pos1[2] = GROUND;
+  double pos2[3];
+  pos2[0] = -WALL;
+  pos2[1] = WALL;
+  pos2[2] = GROUND;
+  double pos3[3];
+  pos3[0] = pos3[1] = -WALL;
+  pos3[2] = GROUND;
+  double pos4[3];
+  pos4[0] = WALL;
+  pos4[1] = -WALL;
+  pos4[2] = GROUND;
+
+  dsSetColor(1, 0.8f, 0.6f);
+  int k;
+
+  //  y-wall of the cube (positive direction)
+  if (Wall_y_p)
+  {
+    pos1[2] = pos2[2] = pos3[2] = pos4[2] = GROUND;
+    for (k = 0; k < 15; ++k)
+    {
+      dsDrawLineD(pos1, pos2);
+      pos1[2] += k * 0.01;
+      pos2[2] += k * 0.01;
+    }
+  }
+  //  x-wall of the cube (negative direction)
+  if (Wall_x_m)
+  {
+    pos1[2] = pos2[2] = GROUND;
+    for (k = 0; k < 15; ++k)
+    {
+      dsDrawLineD(pos2, pos3);
+      pos2[2] += k * 0.01;
+      pos3[2] += k * 0.01;
+    }
+  }
+  //  y-wall of the cube (negative direction)
+  if (Wall_y_m)
+  {
+    pos3[2] = GROUND;
+    for (k = 0; k < 15; ++k)
+    {
+      dsDrawLineD(pos3, pos4);
+      pos3[2] += k * 0.01;
+      pos4[2] += k * 0.01;
+    }
+  }
+  //  x-wall of the cube (positive direction)
+  if (Wall_x_p)
+  {
+    pos4[2] = GROUND;
+    for (k = 0; k < 15; ++k)
+    {
+      dsDrawLineD(pos4, pos1);
+      pos4[2] += k * 0.01;
+      pos1[2] += k * 0.01;
+    }
+  }
+  //  Top wall of the cube
+  if (Wall_z_p)
+  {
+    pos1[2] = pos2[2] = pos3[2] = pos4[2] = TOP;
+    dsDrawLineD(pos1, pos2);
+    dsDrawLineD(pos2, pos3);
+    dsDrawLineD(pos3, pos4);
+    dsDrawLineD(pos4, pos1);
+    for (k = 0; k < 20; ++k)
+    {
+      dsDrawLineD(pos3, pos4);
+      pos3[1] += k * 0.01;
+      pos4[1] += k * 0.01;
+    }
+  }
 }
 
 void SimuLoop(int pause)
@@ -212,8 +304,8 @@ void initSiconos()
     double T = 10.;                    // final computation time
     double h = 0.005;                 // time step
 
-    //string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
-    string solverName = "NLGS";      // solver algorithm used for non-smooth problem
+    string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
+    //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
     //string solverName = "Lemke";      // solver algorithm used for non-smooth problem
 
     double e  = 0.9;                  // nslaw
@@ -252,17 +344,28 @@ void initSiconos()
 
     // set values
 
-    //     (*(q0[0]))(0) = 0.; (*(q0[0]))(1) = 0.; (*(q0[0]))(2) =  0.3; (*(q0[0]))(3) =  PI/3; //(*(v0[0]))(3) =  40.;
-    //     (*(q0[1]))(0) = 0.; (*(q0[1]))(1) = 0.; (*(q0[1]))(2) =  0.6; (*(q0[1]))(3) =  PI/2; //(*(v0[0]))(3) =  40.;
+    (*(q0[0]))(0) = 0.;
+    (*(q0[0]))(1) = 0.;
+    (*(q0[0]))(2) =  0.15;
+    (*(q0[0]))(3) =  PI / 2;
+    (*(v0[0]))(3) =  4.;
+    (*(q0[1]))(0) = 0.;
+    (*(q0[1]))(1) = 0.;
+    (*(q0[1]))(2) =  0.40;
+    (*(q0[1]))(3) =  PI / 2;
+    (*(v0[0]))(3) =  4.;
+    (*(q0[2]))(0) = 0.;
+    (*(q0[2]))(1) = 0.;
+    (*(q0[2]))(2) =  0.65;
+    (*(q0[2]))(3) =  PI / 3;
+    (*(q0[2]))(4) =  PI / 3;
+    (*(v0[2]))(3) =  4.;
 
-    for (i = 0; i < COUPLE; i++)
-    {
-      (*(q0[i]))(0) = 0.;
-      (*(q0[i]))(1) = 0.5 * (i + 1.);
-      (*(q0[i]))(2) =  0.3;
-      (*(q0[i]))(3) =  PI / 3;
-      //  (*(q0[i]))(1) = 0.5*i;
-    }
+    //  for (i=0;i<COUPLE;i++)
+    //       {
+    //  (*(q0[i]))(0) = 0.; (*(q0[i]))(1) = 0.5*(i+1.);  (*(q0[i]))(2) =  0.3; (*(q0[i]))(3) =  PI/2;
+    //  //  (*(q0[i]))(1) = 0.5*i;
+    //       }
 
     for (i = 0; i < COUPLE; i++)
     {
@@ -281,46 +384,45 @@ void initSiconos()
     // --- Interactions---
     // -------------------
     InteractionsSet allInteractions;
-
-    vector<string> id2;
-    id2.resize(COUPLE);
-
-    vector<string> id;
-    id.resize(Fact);
-
-
-    DynamicalSystemsSet dsConcernedi;
-    DynamicalSystemsSet dsConcerned2;
     CheckInsertInteraction checkInter;
 
-    vector<Relation*> LLR(Fact);
-    vector<Relation*> LLR1(COUPLE);
-    vector<Relation*> LLR2(COUPLE);
+    // Interactions with walls
 
+    // Interactions between beads couple
+    vector<string> id22;
+    id22.resize(COUPLE);
+    vector<string> idd;
+    idd.resize(Fact);
 
+    DynamicalSystemsSet dsConcernedii;
+    DynamicalSystemsSet dsConcerned22;
 
-    NonSmoothLaw * nslaw1 = new NewtonImpactFrictionNSL(e, e, mu, 3);
+    vector<Relation*> LLRR(Fact);
+    vector<Relation*> LLR11(COUPLE);
+    vector<Relation*> LLR22(COUPLE);
+
+    NonSmoothLaw * nslaw11 = new NewtonImpactFrictionNSL(e, e, mu, 3);
 
     for (i = 0; (int)i < COUPLE; i++)
     {
-      dsConcernedi.insert(GLOB_tabLDS[i]);
+      dsConcernedii.insert(GLOB_tabLDS[i]);
       ostringstream ostr;
       ostr << i;
-      id2[i] = ostr.str();
-      LLR1[i] = new LagrangianScleronomousR("NLMPlugin:h1", "NLMPlugin:G1");
-      checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 3, nslaw1, LLR1[i]));
-      dsConcernedi.clear();
+      id22[i] = ostr.str();
+      LLR11[i] = new LagrangianScleronomousR("NLMPlugin:h1", "NLMPlugin:G1");
+      checkInter = allInteractions.insert(new Interaction(id22[i], dsConcernedii, i, 3, nslaw11, LLR11[i]));
+      dsConcernedii.clear();
     }
 
     for (i = 0; (int)i < COUPLE; i++)
     {
-      dsConcernedi.insert(GLOB_tabLDS[i]);
+      dsConcernedii.insert(GLOB_tabLDS[i]);
       ostringstream ostr;
       ostr << i;
-      id2[i] = ostr.str();
-      LLR2[i] = new LagrangianScleronomousR("NLMPlugin:h2", "NLMPlugin:G2");
-      checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 3, nslaw1, LLR2[i]));
-      dsConcernedi.clear();
+      id22[i] = ostr.str();
+      LLR22[i] = new LagrangianScleronomousR("NLMPlugin:h2", "NLMPlugin:G2");
+      checkInter = allInteractions.insert(new Interaction(id22[i], dsConcernedii, i, 3, nslaw11, LLR22[i]));
+      dsConcernedii.clear();
     }
 
 
@@ -331,85 +433,85 @@ void initSiconos()
     l = 0;
     for (i = 0; (int)i < COUPLE; i++)
     {
-      dsConcerned2.insert(GLOB_tabLDS[i]);
+      dsConcerned22.insert(GLOB_tabLDS[i]);
       for (j = 0; (int)j < COUPLE; j++)
       {
         if (j > i)
         {
-          dsConcerned2.insert(GLOB_tabLDS[j]);
+          dsConcerned22.insert(GLOB_tabLDS[j]);
           ostringstream ostr;
           ostr << l;
-          id[l] = ostr.str();
-          LLR[l] = new LagrangianScleronomousR("NLMPlugin:h22", "NLMPlugin:G22");
-          checkInter = allInteractions.insert(new Interaction(id[l], dsConcerned2, l, 3, nslaw12, LLR[l]));
-          dsConcerned2.erase(GLOB_tabLDS[j]);
+          idd[l] = ostr.str();
+          LLRR[l] = new LagrangianScleronomousR("NLMPlugin:h22", "NLMPlugin:G22");
+          checkInter = allInteractions.insert(new Interaction(idd[l], dsConcerned22, l, 3, nslaw12, LLRR[l]));
+          dsConcerned22.erase(GLOB_tabLDS[j]);
           l = l + 1;
         }
       }
-      dsConcerned2.clear();
+      dsConcerned22.clear();
     }
 
     l = 0;
     for (i = 0; (int)i < COUPLE; i++)
     {
-      dsConcerned2.insert(GLOB_tabLDS[i]);
+      dsConcerned22.insert(GLOB_tabLDS[i]);
       for (j = 0; (int)j < COUPLE; j++)
       {
         if (j > i)
         {
-          dsConcerned2.insert(GLOB_tabLDS[j]);
+          dsConcerned22.insert(GLOB_tabLDS[j]);
           ostringstream ostr;
           ostr << l;
-          id[l] = ostr.str();
-          LLR[l] = new LagrangianScleronomousR("NLMPlugin:h21", "NLMPlugin:G21");
-          checkInter = allInteractions.insert(new Interaction(id[l], dsConcerned2, l, 3, nslaw12, LLR[l]));
-          dsConcerned2.erase(GLOB_tabLDS[j]);
+          idd[l] = ostr.str();
+          LLRR[l] = new LagrangianScleronomousR("NLMPlugin:h21", "NLMPlugin:G21");
+          checkInter = allInteractions.insert(new Interaction(idd[l], dsConcerned22, l, 3, nslaw12, LLRR[l]));
+          dsConcerned22.erase(GLOB_tabLDS[j]);
           l = l + 1;
         }
       }
-      dsConcerned2.clear();
+      dsConcerned22.clear();
     }
 
     l = 0;
     for (i = 0; (int)i < COUPLE; i++)
     {
-      dsConcerned2.insert(GLOB_tabLDS[i]);
+      dsConcerned22.insert(GLOB_tabLDS[i]);
       for (j = 0; (int)j < COUPLE; j++)
       {
         if (j > i)
         {
-          dsConcerned2.insert(GLOB_tabLDS[j]);
+          dsConcerned22.insert(GLOB_tabLDS[j]);
           ostringstream ostr;
           ostr << l;
-          id[l] = ostr.str();
-          LLR[l] = new LagrangianScleronomousR("NLMPlugin:h12", "NLMPlugin:G12");
-          checkInter = allInteractions.insert(new Interaction(id[l], dsConcerned2, l, 3, nslaw12, LLR[l]));
-          dsConcerned2.erase(GLOB_tabLDS[j]);
+          idd[l] = ostr.str();
+          LLRR[l] = new LagrangianScleronomousR("NLMPlugin:h12", "NLMPlugin:G12");
+          checkInter = allInteractions.insert(new Interaction(idd[l], dsConcerned22, l, 3, nslaw12, LLRR[l]));
+          dsConcerned22.erase(GLOB_tabLDS[j]);
           l = l + 1;
         }
       }
-      dsConcerned2.clear();
+      dsConcerned22.clear();
     }
 
     l = 0;
     for (i = 0; (int)i < COUPLE; i++)
     {
-      dsConcerned2.insert(GLOB_tabLDS[i]);
+      dsConcerned22.insert(GLOB_tabLDS[i]);
       for (j = 0; (int)j < COUPLE; j++)
       {
         if (j > i)
         {
-          dsConcerned2.insert(GLOB_tabLDS[j]);
+          dsConcerned22.insert(GLOB_tabLDS[j]);
           ostringstream ostr;
           ostr << l;
-          id[l] = ostr.str();
-          LLR[l] = new LagrangianScleronomousR("NLMPlugin:h11", "NLMPlugin:G11");
-          checkInter = allInteractions.insert(new Interaction(id[l], dsConcerned2, l, 3, nslaw12, LLR[l]));
-          dsConcerned2.erase(GLOB_tabLDS[j]);
+          idd[l] = ostr.str();
+          LLRR[l] = new LagrangianScleronomousR("NLMPlugin:h11", "NLMPlugin:G11");
+          checkInter = allInteractions.insert(new Interaction(idd[l], dsConcerned22, l, 3, nslaw12, LLRR[l]));
+          dsConcerned22.erase(GLOB_tabLDS[j]);
           l = l + 1;
         }
       }
-      dsConcerned2.clear();
+      dsConcerned22.clear();
     }
 
 
@@ -485,7 +587,7 @@ void computeSiconos()
   {
 
     // --- Time loop ---
-    cout << "Start computation ... " << endl;
+    //  cout << "Start computation ... " << endl;
 
     // --- simulation solver ---
     if (GLOB_EVT->hasNextEvent())

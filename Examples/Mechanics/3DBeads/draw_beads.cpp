@@ -34,7 +34,7 @@ using namespace std;
 
 #include <drawstuff/drawstuff.h>
 
-#define DSNUMBER   16      // the number of dynamical systems
+#define DSNUMBER   2      // the number of dynamical systems
 
 #define WALL 1       // Positions of walls
 #define TOP 1       // Positions of walls
@@ -51,7 +51,7 @@ EventsManager * GLOB_EVT;
 // Global variables for computation of CPU time, number of iterations and for curves ploting
 
 #define PLOTMAX 2000
-unsigned int outputSize = 3;
+unsigned int outputSize = 5;
 SimpleMatrix dataPlot(PLOTMAX + 1, outputSize);
 int k_iter = 0; // index for output.
 
@@ -109,7 +109,7 @@ void DrawBall(LagrangianDS *lds, float radius)
 void Drawwall()
 {
 
-  int Wall_z_p = 1;                    //  for z --> +
+  int Wall_z_p = 0;                    //  for z --> +
   int Wall_y_p = 1;                    //  for y --> +
   int Wall_y_m = 1;                    //  for y --> -
   int Wall_x_p = 1;                    //  for x --> +
@@ -288,20 +288,20 @@ void initSiconos()
     double T = 10;                    // final computation time
     double h = 0.005;                 // time step
 
-    string solverName = "NEWTONFUNCTION";      // solver algorithm used for non-smooth problem
-    //string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
+
+    string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
     //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
     //string solverName = "PGS";      // solver algorithm used for non-smooth problem
     //string solverName = "Lemke";      // solver algorithm used for non-smooth problem
 
     double e  = 0.9;                  // nslaw
     double e2 = 0.9;                  // nslaw2
-    double mu = 0.;
+    double mu = 0.1;
 
 
     // 1 to take in account the obstacle and  0 no
 
-    int obst_z_p = 1;                    //  for z --> +
+    int obst_z_p = 0;                    //  for z --> +
     int obst_z_m = 1;                    //  for z --> -
     int obst_y_p = 1;                    //  for y --> +
     int obst_y_m = 1;                    //  for y --> -
@@ -319,6 +319,7 @@ void initSiconos()
     unsigned int i;
     unsigned int j;
     unsigned int l;
+
     DynamicalSystemsSet allDS; // the list of DS
     CheckInsertDS checkDS;
 
@@ -342,11 +343,22 @@ void initSiconos()
     }
 
     //    // set values
-    //    (*(q0[0]))(0) =  0.0;    (*(q0[0]))(1) =  0.1;  (*(q0[0]))(2) =  0.45;
-    //      (*(v0[0]))(0) =  0.;    (*(v0[0]))(1) =  -1.;  (*(v0[0]))(2) =  0.;
+    (*(q0[0]))(0) =  0.0;
+    (*(q0[0]))(1) =  0.3;
+    (*(q0[0]))(2) =  0.35;
+    (*(q0[1]))(0) =  0.0;
+    (*(q0[1]))(1) =  0.3;
+    (*(q0[1]))(2) =  0.12;
 
-    //          (*(q0[1]))(0) =  0.0;    (*(q0[1]))(1) =  0.1;  (*(q0[1]))(2) =  0.15;
-    //      (*(v0[1]))(0) =  0.;    (*(v0[1]))(1) =  1.;  (*(v0[1]))(2) =  0.;
+    //   (*(q0[0]))(0) =  0.0;    (*(q0[0]))(1) =  0.4;  (*(q0[0]))(2) =  0.1;
+    //     (*(v0[0]))(0) =  0.;    (*(v0[0]))(1) =  -1.;  (*(v0[0]))(2) =  0.;
+
+    //     (*(q0[1]))(0) =  0.0;    (*(q0[1]))(1) =  0.;  (*(q0[1]))(2) =  0.1;
+    //     (*(v0[1]))(0) =  0.;    (*(v0[1]))(1) =  1.;  (*(v0[1]))(2) =  0.;
+
+    //     (*(q0[2]))(0) =  0.;    (*(q0[2]))(1) =  0.8;  (*(q0[2]))(2) =  0.1;
+    //     (*(q0[3]))(0) =  0.;    (*(q0[3]))(1) =  -0.5;  (*(q0[3]))(2) =  0.1;
+
 
     //   (*(q0[0]))(0) =  0.0;    (*(q0[0]))(1) =  0.0;  (*(q0[0]))(2) =  0.2;
     //      (*(q0[1]))(0) =  0.0;    (*(q0[1]))(1) =  0.;  (*(q0[1]))(2) =  0.5;
@@ -362,63 +374,29 @@ void initSiconos()
 
     // billard
 
-    (*(q0[0]))(0) =  0.;
-    (*(q0[0]))(1) =  0.;
-    (*(q0[0]))(2) =  0.1;
-    (*(q0[1]))(0) =  0.1;
-    (*(q0[1]))(1) = -0.2;
-    (*(q0[1]))(2) =  0.1;
-    (*(q0[2]))(0) = -0.1;
-    (*(q0[2]))(1) = -0.2;
-    (*(q0[2]))(2) =  0.1;
-    (*(q0[3]))(0) =  0.2;
-    (*(q0[3]))(1) = -0.4;
-    (*(q0[3]))(2) =  0.1;
-    (*(q0[4]))(0) = -0.2;
-    (*(q0[4]))(1) = -0.4;
-    (*(q0[4]))(2) =  0.1;
-    (*(q0[5]))(0) =  0.;
-    (*(q0[5]))(1) = -0.4;
-    (*(q0[5]))(2) =  0.1;
-    (*(q0[6]))(0) =  0.1;
-    (*(q0[6]))(1) = -0.6;
-    (*(q0[6]))(2) =  0.1;
-    (*(q0[7]))(0) = -0.1;
-    (*(q0[7]))(1) = -0.6;
-    (*(q0[7]))(2) =  0.1;
+    //     (*(q0[0]))(0) =  0.;     (*(q0[0]))(1) =  0.;   (*(q0[0]))(2) =  0.1;
+    //     (*(q0[1]))(0) =  0.1;    (*(q0[1]))(1) = -0.2;  (*(q0[1]))(2) =  0.1;
+    //     (*(q0[2]))(0) = -0.1;    (*(q0[2]))(1) = -0.2;  (*(q0[2]))(2) =  0.1;
+    //     (*(q0[3]))(0) =  0.2;    (*(q0[3]))(1) = -0.4;  (*(q0[3]))(2) =  0.1;
+    //     (*(q0[4]))(0) = -0.2;    (*(q0[4]))(1) = -0.4;  (*(q0[4]))(2) =  0.1;
+    //     (*(q0[5]))(0) =  0.;     (*(q0[5]))(1) = -0.4;  (*(q0[5]))(2) =  0.1;
+    //     (*(q0[6]))(0) =  0.1;    (*(q0[6]))(1) = -0.6;  (*(q0[6]))(2) =  0.1;
+    //     (*(q0[7]))(0) = -0.1;    (*(q0[7]))(1) = -0.6;  (*(q0[7]))(2) =  0.1;
 
-    (*(q0[8]))(0) =  0.;
-    (*(q0[8]))(1) =  0.8;
-    (*(q0[8]))(2) =  0.1;
+    //     (*(q0[8]))(0) =  0.;     (*(q0[8]))(1) =  0.8;  (*(q0[8]))(2) =  0.1;
 
-    (*(v0[8]))(0) = -1;
-    (*(v0[8]))(1) = -20.;
+    //     (*(v0[8]))(0) = -1;      (*(v0[8]))(1) = -20.;
 
-    (*(q0[9]))(0) =  0.3;
-    (*(q0[9]))(1) = -0.6;
-    (*(q0[9]))(2) =  0.1;
-    (*(q0[10]))(0) = -0.3;
-    (*(q0[10]))(1) = -0.6;
-    (*(q0[10]))(2) =  0.1;
-    (*(q0[11]))(0) =  0.2;
-    (*(q0[11]))(1) = -0.8;
-    (*(q0[11]))(2) =  0.1;
-    (*(q0[12]))(0) = -0.2;
-    (*(q0[12]))(1) = -0.8;
-    (*(q0[12]))(2) =  0.1;
-    (*(q0[13]))(0) =  0.;
-    (*(q0[13]))(1) = -0.8;
-    (*(q0[13]))(2) =  0.1;
-    (*(q0[14]))(0) =  0.4;
-    (*(q0[14]))(1) = -0.8;
-    (*(q0[14]))(2) =  0.1;
-    (*(q0[15]))(0) = -0.4;
-    (*(q0[15]))(1) = -0.8;
-    (*(q0[15]))(2) =  0.1;
+    //     (*(q0[9]))(0) =  0.3;    (*(q0[9]))(1) = -0.6;  (*(q0[9]))(2) =  0.1;
+    //     (*(q0[10]))(0)= -0.3;    (*(q0[10]))(1)= -0.6;  (*(q0[10]))(2)=  0.1;
+    //     (*(q0[11]))(0)=  0.2;    (*(q0[11]))(1)= -0.8;  (*(q0[11]))(2)=  0.1;
+    //     (*(q0[12]))(0)= -0.2;    (*(q0[12]))(1)= -0.8;  (*(q0[12]))(2)=  0.1;
+    //     (*(q0[13]))(0)=  0.;     (*(q0[13]))(1)= -0.8;  (*(q0[13]))(2)=  0.1;
+    //     (*(q0[14]))(0)=  0.4;    (*(q0[14]))(1)= -0.8;  (*(q0[14]))(2)=  0.1;
+    //     (*(q0[15]))(0)= -0.4;    (*(q0[15]))(1)= -0.8;  (*(q0[15]))(2)=  0.1;
 
 
     //Cube de billes
-
 
     //  (*(q0[0]))(0) =  0.2;    (*(q0[0]))(1) = -0.2;  (*(q0[0]))(2) =  0.2;
     //     (*(q0[1]))(0) =  0.2;    (*(q0[1]))(1) =  0.2;  (*(q0[1]))(2) =  0.2;
@@ -444,6 +422,27 @@ void initSiconos()
     //     (*(q0[17]))(0)=  0.35;   (*(q0[17]))(1)= 0.35;  (*(q0[17]))(2)=  0.1;
     //     (*(q0[18]))(0)= -0.35;   (*(q0[18]))(1)= 0.35;  (*(q0[18]))(2)=  0.1;
     //     (*(q0[19]))(0)= -0.35;   (*(q0[19]))(1)=-0.35;  (*(q0[19]))(2)=  0.1;
+
+
+    //     // 25*etage beads in cube
+    //     unsigned int cote  = 5;
+    //     unsigned int etage  = 4;
+    //     unsigned int k = 0;
+    //     for (j=0;j<etage;j++){
+    //       for (k=0;k<cote;k++) {
+    //  for (i=0;i<cote;i++) {
+    //    if (j % 2 == 0){
+    //      (*(q0[k*cote+i+j*cote*cote]))(0) = -0.6 + 3*k*R; (*(q0[k*cote+i+j*cote*cote]))(1) = -0.6 + 3*i*R; (*(q0[k*cote+i+j*cote*cote]))(2) = 0.2+(2*j)*R;
+    //    }
+    //    else{
+    //      (*(q0[k*cote+i+j*cote*cote]))(0) = -0.6 + 3*k*R; (*(q0[k*cote+i+j*cote*cote]))(1) = -0.6 + 3*i*R+R/4;(*(q0[k*cote+i+j*cote*cote]))(2) = 0.2+(2*j)*R;
+    //    }
+    //  }
+    //       }
+    //     }
+
+    //     (*(q0[DSNUMBER-2]))(0)= 0.;   (*(q0[DSNUMBER-2]))(1)= 0.;   (*(q0[DSNUMBER-2]))(2)=  1.2;    (*(v0[DSNUMBER-2]))(1) =  -1;(*(v0[DSNUMBER-2]))(2) =  -2;
+    //     (*(q0[DSNUMBER-1]))(0)= -0.8;  (*(q0[DSNUMBER-1]))(1)= -0.8;  (*(q0[DSNUMBER-1]))(2)=  0.1;  (*(v0[DSNUMBER-1]))(0) =  10;(*(v0[DSNUMBER-1]))(1) =  10;
 
 
     // un grand merci
@@ -811,6 +810,7 @@ void initSiconos()
       dsConcerned2.clear();
     }
 
+
     // --------------------------------
     // --- NonSmoothDynamicalSystem ---
     // --------------------------------
@@ -858,8 +858,8 @@ void initSiconos()
     dataPlot(k_iter, 1) = GLOB_tabLDS[0]->getQ()(2);
     dataPlot(k_iter, 2) = GLOB_tabLDS[0]->getVelocity()(2);
     // dataPlot(k_iter,3) = (multiBeads->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
-    //    dataPlot(k_iter,5) = GLOB_tabLDS[1]->getQ()(2);
-    //    dataPlot(k_iter,6) = GLOB_tabLDS[1]->getVelocity()(2);
+    dataPlot(k_iter, 3) = GLOB_tabLDS[1]->getQ()(2);
+    dataPlot(k_iter, 4) = GLOB_tabLDS[1]->getVelocity()(2);
     //    dataPlot(k_iter,7) = (multiBeads->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(1)->getLambda(1))(0);
     // --- Time loop ---
 
@@ -894,11 +894,11 @@ void computeSiconos()
       dataPlot(k_iter, 1) = GLOB_tabLDS[0]->getQ()(2);
       dataPlot(k_iter, 2) = GLOB_tabLDS[0]->getVelocity()(2);
       //    dataPlot(k_iter,3) = (multiBeads->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
-      //dataPlot(k_iter,5) = GLOB_tabLDS[1]->getQ()(2);
-      //dataPlot(k_iter,6) = GLOB_tabLDS[1]->getVelocity()(2);
+      dataPlot(k_iter, 3) = GLOB_tabLDS[1]->getQ()(2);
+      dataPlot(k_iter, 4) = GLOB_tabLDS[1]->getVelocity()(2);
       //dataPlot(k_iter,7) = (multiBeads->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(1)->getLambda(1))(0);
     }
-    //   cout<<"End of computation - Number of iterations done: "<<k_iter<<endl;
+    cout << "End of computation - Number of iterations done: " << k_iter << endl;
 
     // --- Output files ---
     ioMatrix io("result.dat", "ascii");

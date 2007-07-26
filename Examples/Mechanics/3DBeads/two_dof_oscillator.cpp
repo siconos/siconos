@@ -1,4 +1,4 @@
-/* Siconos-sample version 2.0.0, Copyright INRIA 2005-2007.
+/* Siconos-sample version 2.0.0, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -43,21 +43,20 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 2;           // degrees of freedom for the ball
     double t0 = 0;                   // initial computation time
-    double T = 10.0;                 // final computation time
-    double h = 0.005;                // time step
+    double T = 100.0;                 // final computation time
+    double h = 0.005;                 // time step
 
-    double pos1 = 1.0;               // initial position for m1.
+    double pos1 = 0.2;               // initial position for m1.
     double v1   = 0.0;               // initial velocity for m1
-    double pos2 = 1.6;               // initial position for m2
-    double v2   = 0.0;               // initial velocity for m2
-    double theta = 0.5;              // theta for Moreau integrator
+    double pos2 = 0.8;               // initial position for m2
+    double v2   = -0.1;               // initial velocity for m2
 
-    //string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
     string solverName = "NEWTONFUNCTION";      // solver algorithm used for non-smooth problem
+    //string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
     //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
     // string solverName = "Lemke" ;
 
-    double k = 0.5; // stiffness coefficient
+    double k = 0.2; // stiffness coefficient
     double L = 0.5; // initial lenth
     double m1 = 1.; //  m1
     double m2 = 1.; //  m2
@@ -113,17 +112,22 @@ int main(int argc, char* argv[])
     InteractionsSet allInteractions;
 
     // -- nslaw --
-    double e = 0.9;
-
-    // Interaction mass floor
+    double mu = 0.1;
+    double e  = 0.9;
+    double R  = 0.1;
+    // Interaction ball-floor
     //
-    SiconosMatrix *H1 = new SimpleMatrix(1, nDof);
-    (*H1)(0, 0) = 1.0;
-    NonSmoothLaw * nslaw1 = new NewtonImpactNSL(e);
-    Relation * relation1 = new LagrangianLinearR(*H1);
-    Interaction * inter1 = new Interaction("wall", allDS, 0, 1, nslaw1, relation1);
+    SiconosMatrix *H = new SimpleMatrix(3, nDof);
+    SiconosVector *b = new SimpleVector(3);
+    (*H)(0, 0) = 1.;
+    (*b)(0) = -R;
 
-    allInteractions.insert(inter1);
+    NonSmoothLaw * nslaw = new NewtonImpactFrictionNSL(e, e, mu, 3);
+    Relation * relation = new LagrangianLinearR(*H, *b);
+
+    Interaction * inter = new Interaction("wall", allDS, 0, 3, nslaw, relation);
+    allInteractions.insert(inter);
+
 
     // --------------------------------
     // --- NonSmoothDynamicalSystem ---
@@ -148,11 +152,11 @@ int main(int argc, char* argv[])
     TimeStepping* GLOB_SIM = new TimeStepping(GLOB_T);
 
     // -- OneStepIntegrators --
-    OneStepIntegrator * OSI = new Moreau(oscillator, theta, GLOB_SIM);
+    OneStepIntegrator * OSI = new Moreau(oscillator, 0.5000001 , GLOB_SIM);
 
     // -- OneStepNsProblem --
     OneStepNSProblem * osnspb = new FrictionContact3D(GLOB_SIM , "FrictionContact3D", solverName, 1000001, 0.001);
-    //    OneStepNSProblem * osnspb = new LCP(GLOB_SIM,"LCP",solverName,101, 0.0001);
+    //OneStepNSProblem * osnspb = new LCP(GLOB_SIM,"LCP",solverName,101, 0.0001);
 
     // =========================== End of model definition ===========================
 
@@ -214,10 +218,11 @@ int main(int argc, char* argv[])
     delete OSI;
     delete two_dof_oscillator;
     delete nsds;
-    delete inter1;
-    delete relation1;
-    delete nslaw1;
-    delete H1;
+    delete inter;
+    delete relation;
+    delete nslaw;
+    delete H;
+    delete b;
     delete Stiff;
     delete oscillator;
     delete q0;

@@ -1,4 +1,4 @@
-/* Siconos-sample version 2.0.0, Copyright INRIA 2005-2007.
+/* Siconos-sample version 2.0.0, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -22,7 +22,15 @@
 */
 // =============================== Two dof oscillator simulation ===============================
 //
-// ======================================================================================================
+//                  v1 --->        <--- v2
+//  |               m1                  m2             |
+//  |                _     spring (k)   _              |
+//  |_______________(_)xxxxxxxxxxxxxxxx(_)_____________|
+//
+//  0                                                  1
+//  |--------------------------------------------------|------> x-axis
+//
+// =============================================================================================
 
 #include "SiconosKernel.h"
 #include <sys/time.h>
@@ -52,7 +60,7 @@ EventsManager * GLOB_EVT;
 
 // Global variables for computation of CPU time, number of iterations and for curves ploting
 
-#define PLOTMAX 2000
+#define PLOTMAX 3000
 unsigned int outputSize = 4;
 SimpleMatrix dataPlot(PLOTMAX + 1, outputSize);
 int i = 0; // index for output.
@@ -76,10 +84,10 @@ void Draw_two_dof_oscillator(LagrangianLinearTIDS *lds, float radius)
 
 
   // Translation
-  pos1[0] = 0.;
+  pos1[0] = 0.5;
   pos1[1] = lds->getQ()(0);
   pos1[2] = radius;
-  pos2[0] = 0.;
+  pos2[0] = 0.5;
   pos2[1] = lds->getQ()(1);
   pos2[2] = radius;
 
@@ -177,24 +185,24 @@ void initSiconos()
     // User-defined main parameters
     unsigned int nDof = 2;           // degrees of freedom for the ball
     double t0 = 0;                   // initial computation time
-    double T = 10.0;                 // final computation time
+    double T = 15.0;                 // final computation time
     double h = 0.005;                 // time step
 
-    double pos1 = 4.0;               // initial position for m1.
-    double v1   = 0.0;               // initial velocity for m1
-    double pos2 = 4.8;               // initial position for m2
-    double v2   = 0.0;               // initial velocity for m2
+    double pos1 = 0.2;               // initial position for m1.
+    double v1   = 0.;               // initial velocity for m1
+    double pos2 = 0.6;               // initial position for m2
+    double v2   = -0.1;               // initial velocity for m2
 
 
-    //string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
-    string solverName = "NLGS";      // solver algorithm used for non-smooth problem
+    string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
+    //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
     // string solverName = "Lemke" ;
 
-    double k = 0.5; // stiffness coefficient
-    double L = 0.5; // initial lenth
+    double k = 0.4; // stiffness coefficient
+    double L = 0.3; // initial lenth
     double m1 = 1.; //  m1
     double m2 = 1.; //  m2
-    //double g = 9.81; // Gravity
+    double g = 9.81; // Gravity
 
     // -------------------------
     // --- Dynamical systems ---
@@ -225,10 +233,11 @@ void initSiconos()
     oscillator = new LagrangianLinearTIDS(0, *q0, *v0, *M, *K, *C);
     allDS.insert(oscillator);
 
-    // // -- Set external forces (weight) --
-    //     SiconosVector * weight = new SimpleVector(nDof);
-    //     (*weight)(0) = -m*g;
-    //     oscillator->setFExtPtr(weight);
+    // -- Set external forces (weight) --
+    SiconosVector * weight = new SimpleVector(nDof);
+    (*weight)(0) = -m1 * g;
+    (*weight)(1) = -m2 * g;
+    oscillator->setFExtPtr(weight);
 
     // -- Set internal forces (stiffness) --
     SiconosVector * Stiff = new SimpleVector(nDof);
@@ -247,17 +256,30 @@ void initSiconos()
     InteractionsSet allInteractions;
 
     // -- nslaw --
-    double e = 0.9;
-
+    double mu = 0.1;
+    double e  = 0.9;
+    double R  = 0.05;
     // Interaction ball-floor
     //
-    SiconosMatrix *H = new SimpleMatrix(1, nDof);
-    (*H)(0, 0) = 1.0;
-    NonSmoothLaw * nslaw0 = new NewtonImpactNSL(e);
-    Relation * relation0 = new LagrangianLinearR(*H);
+    SiconosMatrix *H = new SimpleMatrix(3, nDof);
+    SiconosVector *b = new SimpleVector(3);
+    (*H)(0, 0) = 1.;
+    (*b)(0) = -R;
 
-    Interaction * inter = new Interaction("wall", allDS, 0, 1, nslaw0, relation0);
+    NonSmoothLaw * nslaw = new NewtonImpactFrictionNSL(e, e, mu, 3);
+    Relation * relation = new LagrangianLinearR(*H, *b);
+
+    Interaction * inter = new Interaction("wall1", allDS, 0, 3, nslaw, relation);
     allInteractions.insert(inter);
+
+    SiconosMatrix *H1 = new SimpleMatrix(3, nDof);
+    SiconosVector *b1 = new SimpleVector(3);
+    (*H1)(0, 1) = -1.;
+    (*b1)(0)   = 0.7 - R;
+
+    Relation * relation1 = new LagrangianLinearR(*H1, *b1);
+    Interaction * inter1 = new Interaction("wall2", allDS, 1, 3, nslaw, relation1);
+    allInteractions.insert(inter1);
 
     // --------------------------------
     // --- NonSmoothDynamicalSystem ---
@@ -341,13 +363,11 @@ void computeSiconos()
       dataPlot(i, 2) = (*GLOB_VELO)(0);
       dataPlot(i, 3) = (*GLOB_LAMBDA)(0);
 
-      cout << "x1 =  " << (*GLOB_POS)(0) << endl;
-      cout << "x2 =  " << (*GLOB_POS)(1) << endl;
     }
 
     cout << "End of computation - Number of iterations done: " << i << endl;
     // --- Output files ---
-    cout << "====> Output file writing ..." << endl;
+    // cout<<"====> Output file writing ..."<<endl;
     ioMatrix io("result.dat", "ascii");
     io.write(dataPlot, "noDim");
   }

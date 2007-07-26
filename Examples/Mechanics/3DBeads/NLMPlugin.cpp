@@ -28,9 +28,6 @@ const double g = 9.81; // gravity
 
 extern "C" void gravity(double time, unsigned int sizeOfq, double *gravity, unsigned int sizeZ, double* z)
 {
-  for (unsigned int i = 0; i < sizeOfq; i++)
-    gravity[i] = 0.0;
-
   gravity[2] = -2 * m * g;
 }
 
@@ -100,8 +97,8 @@ extern "C" void h2(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, 
 extern "C" void G2(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* param)
 {
   double epsilon2 = 1;
-  G[1] =  G[5] = G[6] = 1.;
-  G[9] =  -epsilon2 * R * sin(q[3]);
+  G[1]  = G[5] = G[6] = 1.;
+  G[9]  = -epsilon2 * R * sin(q[3]);
   G[11] = -epsilon2 * R * (cos(q[3]) - 1);
   G[13] = epsilon2 * R * (cos(q[3]) - 1);
   G[16] = epsilon2 * R * sin(q[3]) * cos(q[4]);
@@ -120,8 +117,6 @@ extern "C" void h22(unsigned int sizeOfq, const double* q, unsigned int sizeOfY,
                + ((q[2] + epsilon1 * R * cos(q[3])) - (q[8] + epsilon2 * R * cos(q[9]))) * ((q[2] + epsilon1 * R * cos(q[3])) - (q[8] + epsilon2 * R * cos(q[9])))
              );
   y[0] =  d - 2 * R;
-  cout << "h22 = " << y[0] << endl;
-  cout << "d22 = " << d << endl;
 }
 
 /* For contact between couples of beads*/ /* A FAIRE */
@@ -149,8 +144,8 @@ extern "C" void G22(unsigned int sizeOfq, const double* q, unsigned int sizeOfY,
                           + ((q[1] - epsilon1 * R * sin(q[3]) * cos(q[4])) - (q[7] - epsilon2 * R * sin(q[9]) * cos(q[10]))) * sin(q[3]) * sin(q[4])) / d;
 
   G[18] = -G[0];
-  G[21] = -G[1];
-  G[24] = -G[2];
+  G[21] = -G[3];
+  G[24] = -G[6];
 
   G[27] = -epsilon2 * R * (((q[0] + epsilon1 * R * sin(q[3]) * sin(q[4])) - (q[6] + epsilon2 * R * sin(q[9]) * sin(q[10]))) * cos(q[9]) * sin(q[10])
                            - ((q[1] - epsilon1 * R * sin(q[3]) * cos(q[4])) - (q[7] - epsilon2 * R * sin(q[9]) * cos(q[10]))) * cos(q[9]) * cos(q[10])
@@ -172,8 +167,6 @@ extern "C" void h21(unsigned int sizeOfq, const double* q, unsigned int sizeOfY,
                + ((q[2] + epsilon1 * R * cos(q[3])) - (q[8] + epsilon2 * R * cos(q[9]))) * ((q[2] + epsilon1 * R * cos(q[3])) - (q[8] + epsilon2 * R * cos(q[9])))
              );
   y[0] =  d - 2 * R;
-  cout << "h21 = " << y[0] << endl;
-  cout << "d21 = " << d << endl;
 }
 
 extern "C" void G21(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* param)
@@ -199,8 +192,8 @@ extern "C" void G21(unsigned int sizeOfq, const double* q, unsigned int sizeOfY,
                           + ((q[1] - epsilon1 * R * sin(q[3]) * cos(q[4])) - (q[7] - epsilon2 * R * sin(q[9]) * cos(q[10]))) * sin(q[3]) * sin(q[4])) / d;
 
   G[18] = -G[0];
-  G[21] = -G[1];
-  G[24] = -G[2];
+  G[21] = -G[3];
+  G[24] = -G[6];
 
   G[27] = -epsilon2 * R * (((q[0] + epsilon1 * R * sin(q[3]) * sin(q[4])) - (q[6] + epsilon2 * R * sin(q[9]) * sin(q[10]))) * cos(q[9]) * sin(q[10])
                            - ((q[1] - epsilon1 * R * sin(q[3]) * cos(q[4])) - (q[7] - epsilon2 * R * sin(q[9]) * cos(q[10]))) * cos(q[9]) * cos(q[10])
@@ -224,8 +217,6 @@ extern "C" void h12(unsigned int sizeOfq, const double* q, unsigned int sizeOfY,
              );
 
   y[0] =  d - 2 * R;
-  cout << "h12 = " << y[0] << endl;
-  cout << "d12 = " << d << endl;
 }
 
 /* For contact between couples of beads*/ /* A FAIRE */
@@ -253,8 +244,8 @@ extern "C" void G12(unsigned int sizeOfq, const double* q, unsigned int sizeOfY,
                           + ((q[1] - epsilon1 * R * sin(q[3]) * cos(q[4])) - (q[7] - epsilon2 * R * sin(q[9]) * cos(q[10]))) * sin(q[3]) * sin(q[4])) / d;
 
   G[18] = -G[0];
-  G[21] = -G[1];
-  G[24] = -G[2];
+  G[21] = -G[3];
+  G[24] = -G[6];
 
   G[27] = -epsilon2 * R * (((q[0] + epsilon1 * R * sin(q[3]) * sin(q[4])) - (q[6] + epsilon2 * R * sin(q[9]) * sin(q[10]))) * cos(q[9]) * sin(q[10])
                            - ((q[1] - epsilon1 * R * sin(q[3]) * cos(q[4])) - (q[7] - epsilon2 * R * sin(q[9]) * cos(q[10]))) * cos(q[9]) * cos(q[10])
@@ -277,10 +268,6 @@ extern "C" void h11(unsigned int sizeOfq, const double* q, unsigned int sizeOfY,
              );
 
   y[0] =  d - 2 * R;
-  cout << "h11 = " << y[0] << endl;
-  cout << "d11 = " << d << endl;
-  cout << " " << endl;
-  cout << " " << endl;
 }
 
 extern "C" void G11(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* param)
@@ -305,8 +292,8 @@ extern "C" void G11(unsigned int sizeOfq, const double* q, unsigned int sizeOfY,
                           + ((q[1] - epsilon1 * R * sin(q[3]) * cos(q[4])) - (q[7] - epsilon2 * R * sin(q[9]) * cos(q[10]))) * sin(q[3]) * sin(q[4])) / d;
 
   G[18] = -G[0];
-  G[21] = -G[1];
-  G[24] = -G[2];
+  G[21] = -G[3];
+  G[24] = -G[6];
 
   G[27] = -epsilon2 * R * (((q[0] + epsilon1 * R * sin(q[3]) * sin(q[4])) - (q[6] + epsilon2 * R * sin(q[9]) * sin(q[10]))) * cos(q[9]) * sin(q[10])
                            - ((q[1] - epsilon1 * R * sin(q[3]) * cos(q[4])) - (q[7] - epsilon2 * R * sin(q[9]) * cos(q[10]))) * cos(q[9]) * cos(q[10])
