@@ -235,7 +235,7 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
   double err, nerr, nerr1, nerr2, tol, mu, mu2, an, at;
   double qs, a1, alpha, den, num; //,beta, det;
   integer incx, incy;
-  double *ww, *www, *G, *JacG, *A, *AA, *B, *zz, *W, *zzz, *zzzz, *C;
+  double *ww, *www, *wwww, *G, *JacG, *A, *AA, *B, *zz, *W, *zzz, *zzzz, *C;
   int *ipiv;
   char NOTRANS = 'N';
 
@@ -275,6 +275,7 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
   G    = (double*)malloc(Gsize * sizeof(double));
   ww   = (double*)malloc(Gsize * sizeof(double));
   www  = (double*)malloc(Gsize * sizeof(double));
+  wwww  = (double*)malloc(Gsize * sizeof(double));
   zz   = (double*)malloc(Gsize * sizeof(double));
   zzz  = (double*)malloc(Gsize * sizeof(double));
   zzzz = (double*)malloc(Gsize * sizeof(double));
@@ -309,6 +310,7 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
     free(ww);
     free(W);
     free(www);
+    free(wwww);
     free(zz);
     free(zzzz);
 
@@ -460,6 +462,7 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
             free(ww);
             free(W);
             free(www);
+            free(wwww);
             free(zz);
             free(zzzz);
             *info = 2;
@@ -487,7 +490,12 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
               incy = 1.;
               dcopy_((integer *)&Gsize , zz , &incx , zzzz , &incy);
               daxpy_((integer *)&Gsize , &alpha , www , &incx , zzzz , &incy);
-              G_f(Gsize , G , C , zzzz , ww , an , at , mu);
+
+              wwww[0] = vec[(in) * n + in] * zzzz[0] + vec[(it) * n + in] * zzzz[1] + vec[(is) * n + in] * zzzz[2] + zzz[0];
+              wwww[1] = vec[(in) * n + it] * zzzz[0] + vec[(it) * n + it] * zzzz[1] + vec[(is) * n + it] * zzzz[2] + zzz[1];
+              wwww[2] = vec[(in) * n + is] * zzzz[0] + vec[(it) * n + is] * zzzz[1] + vec[(is) * n + is] * zzzz[2] + zzz[2];
+
+              G_f(Gsize , G , C , zzzz , wwww , an , at , mu);
               nerr2 = dnrm2_((integer *)&Gsize, G , &incx);
               /* printf("Iteration %i Erreur = %14.7e\n",iter,nerr2); */
               if (nerr2 < nerr1 * nerr1) break;
@@ -498,6 +506,7 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
             incx = 1.;
             incy = 1.;
             dcopy_((integer *)&Gsize , zzzz , &incx , zz , &incy);
+            dcopy_((integer *)&Gsize , wwww , &incx , ww , &incy);
           }
         }
       }
@@ -518,7 +527,7 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
     daxpy_((integer *)&n , &qs , w , &incx , W , &incy);
     num = dnrm2_((integer *)&n, W , &incx);
     err = num * den;
-    /* err = dnrm2_( (integer *)&n, W , &incx ); */
+
     /* printf("Iteration %i Erreur = %14.7e\n",iter,err); */
 
     /* for( i = 0 ; i < n ; ++i ) fprintf(f101,"%i  %i  %14.7e\n",iter-1,i,z[i]); */
@@ -561,6 +570,7 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
   free(ww);
   free(W);
   free(www);
+  free(wwww);
   free(zz);
 
   if (ispeak == 2) fclose(f101);
