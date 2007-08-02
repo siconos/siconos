@@ -48,10 +48,10 @@ links: $(DATADIRS)
 	@for d in $(^D) ; do \
 	  for f in $(^F) ; do \
 		if [ ! -L $$f -a ! -d $$f ]; then ln -s $$d/$$f ; fi \
-          done;\
+          done; \
 	done; 
 
-clean: cleanlinks
+clean-local: cleanlinks
 
 all: links
 
