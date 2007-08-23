@@ -1,5 +1,7 @@
 /*! \page IG_debian Notes to install Siconos on Linux/Debian
 
+WARNING: OUT OF DATE
+
 \section debian_intro Introduction
 
 These notes give some details to install Siconos on Debian in version Etch (testing phase in February 2007). See http://www.debian.org/releases/testing/.

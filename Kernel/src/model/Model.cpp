@@ -35,6 +35,7 @@ Model::Model(): t(0.0), t0(0.0), T(0.0), strat(NULL), nsds(NULL),
   modelxml(NULL), title("none"), author("nobody"), description("none"),
   date("none"), xmlSchema("none")
 {}
+
 // -> xml
 Model::Model(char *xmlFile):
   t(0.0), t0(0.0), T(-1.0), strat(NULL), nsds(NULL),
@@ -265,24 +266,17 @@ int Model::xmlSchemaValidated(string xmlFile, string xmlSchema)
 
 void Model::display() const
 {
-  cout << " ===== Model display =====" << endl;
-  cout << "| current time = " << t << endl;
-  cout << "| t0 (initial time) = " << t0 << endl;
-  cout << "| T (final time) = " << T << endl;
-  cout << "| &simulation = " << endl;
-  if (strat != NULL) cout << strat << endl;
-  else cout << "-> NULL" << endl;
-  cout << "| &nsds = " << endl;
-  if (nsds != NULL) cout << nsds << endl;
-  else cout << "-> NULL" << endl;
-  cout << "| &modelxml = " << endl;
-  if (modelxml != NULL) cout << modelxml << endl;
-  else cout << "-> NULL" << endl;
-  cout << "| author = " << author << endl;
-  cout << "| description = " << description << endl;
-  cout << "| date = " << date << endl;
-  cout << "| title = " << title << endl;
-  cout << "| xmlSchema = " << xmlSchema << endl;
-  cout << "============================" << endl;
+  cout << " =========> Model named " << title << ", written by " << author << " (" << date << ")." << endl;
+  cout << " ----- Description: " << description << endl;
+  cout << " ----- xml schema: " << xmlSchema << endl;
+  cout << endl;
+  cout << " Time runs from " << t0 << " to " << T << endl;
+  cout << " Current time is " << t << endl;
+  cout << endl;
+  if (nsds == NULL) cout << "No NSDS linked to the Model" << endl;
+  if (strat != NULL) cout << "The simulation (name: " << strat->getName() << ") is a " << strat->getType() << "." << endl;
+  else cout << "No simulation attached to this model." << endl;
+  cout << endl;
+  cout << " ============================" << endl;
 }
 

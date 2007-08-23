@@ -426,10 +426,7 @@ To complete DiodeBridge.cpp, some header files are required:
 #include <iostream>
 \endcode
 
-The full cpp file is available in examples list
-
-\example DiodeBridge.cpp
-\example BouncingBallTS.cpp
+The full cpp file is available here: \ref GSDiodeBridgeEx
 
 \section tutDiodeResults Results
 You can now run in a terminal:
@@ -447,7 +444,7 @@ Results are given on the figure below:
 
 
 
-/*! \page tutorialSample1 DiodeBridge.cpp
+/*! \page GSDiodeBridgeEx DiodeBridge.cpp
 \code
 // Header files
 #include "Model.h"

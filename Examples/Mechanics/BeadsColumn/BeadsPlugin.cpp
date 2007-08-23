@@ -16,6 +16,10 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+
+/*!\file
+
+*/
 #include <stdio.h>
 
 const double m = 1;   // beads mass

@@ -1,0 +1,86 @@
+/*! \page downloadForm Siconos download form
+\htmlonly
+<BR>
+Anybody interested in the Siconos software should fill in the following form.
+<BR>
+
+<form method="post"
+action="mailto:siconos-download@lists.gforge.inria.fr" enctype="text/plain">
+
+<h3>Identification informations</h3>
+<BR>
+<table border="0" width="100%">
+<tbody>
+<tr>
+	<td width="20%">First Name <EM>(Prenom)</EM></td>
+	<td><input type="text" size="60" name="First Name"></td>
+</tr>
+<tr>
+	<td>Last Name <EM>(Nom)</EM></td>
+	<td><input type="text" size="60" name="Name"></td>
+</tr>
+<tr>
+	<td>Office E-mail</td>
+	<td><input type="text" size="60" name="Mail"></td>
+</tr>
+<tr>
+	<td>Position</td>
+	<td><input type="text" size="60" name="Position"></td>
+</tr>
+<tr>
+	<td>Office Address</td>
+	<td><textarea cols="59" rows="3" name="Address"> </textarea></td>
+</tr>
+</tbody>
+</table>
+
+<BR>
+
+<h3>What do you plan to do with Siconos?</h3>
+<BR>
+
+<table border="0" width="100%">
+<tbody>
+<tr>
+	<td width="20%">Prospected use of Siconos</td>
+	<td><textarea cols="59" rows="8" name="Expected use"></textarea></td>
+</tr>
+</tbody>
+</table>
+
+<BR>
+
+<h3>Project Description</h3>
+<BR>
+
+<table border="0" width="100%">
+<tbody>
+<tr>
+	<td width="20%">Project Name</td>
+	<td><input type="text" size="60" name="Project Name"></td>
+</tr>
+<tr>
+	<td>Project URL</td>
+	<td><input type="text" size="60" name="Project url"></td>
+</tr>
+<tr>
+	<td width="20%">Project Description</td>
+	<td><textarea cols="59" rows="8" name="Project Description"></textarea></td>
+</tr>
+</table>
+
+<hr>
+<p>
+  <input type="submit" value="Send"> 
+  <input type="reset" value="Reset" name="Reset"></p>
+</form>
+
+<P>
+<font color="#ff0000">
+If this form doesn't work, please send directly an e-mail to
+<a href="mailto:siconos-download@lists.gforge.inria.fr">siconos-download@lists.gforge.inria.fr</a> with
+the same informations.</font>
+</P>
+\endhtmlonly
+
+*/

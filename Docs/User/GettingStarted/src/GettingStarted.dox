@@ -1,16 +1,16 @@
-/** \mainpage Getting Started with Siconos
+/** \mainpage Getting Started with Siconos 2.1.1
 \anchor gettingStarted
 
 \section gsIntro Foreword
 
 Siconos is a free (GNU license) software, dedicated to modeling, simulation and control of <b>Non Smooth Dynamical Systems</b>. \n
 
-This manual aims at giving user a short overview of the software functionnalities. It is also supposed to provide some guidelines on how
-to build its own simulation. \n
-However, this manual does not give a full description of all the classes, functions \e etc of Siconos. For this, you need to check directly
-in the <a href="http://siconos.gforge.inria.fr/Kernel/index.html"> Siconos Doxygen Documentation</a>. \n
+This manual aims at giving user a short overview of the software functionnalities.\n
+It is also supposed to provide some guidelines on how to build its own simulation. \n
+However, this manual does not give a full description of all the classes, functions \e etc of Siconos. \n
+For this, you need to check directly in the <a href="http://siconos.gforge.inria.fr/Kernel/index.html"> Siconos Doxygen Documentation</a>. \n
 
-For more details on specific topics see the \ref SicUsersGuide.
+For more details on specific topics see the \ref usersGuide "Siconos User's Guide".
 
 \section GScontents Contents:
 

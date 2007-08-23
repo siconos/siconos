@@ -51,5 +51,4 @@ The resulting html pages are in GeneratedDocs  for the HomePage and in Generated
 Latex sources are in GeneratedDocs/DIR/latex. Just run "make" in this location to get "refman.pdf" the pdf version of the html pages.
 
 
-
 */

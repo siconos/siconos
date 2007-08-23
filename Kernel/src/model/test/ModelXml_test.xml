@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.-->
+<!-- Siconos-sample version 2.1.1, Copyright INRIA 2005-2007.-->
 <!-- Siconos is a program dedicated to modeling, simulation and control-->
 <!-- of non smooth dynamical systems.	-->
 <!-- Siconos is a free software; you can redistribute it and/or modify-->
@@ -23,12 +23,12 @@
 <SiconosModel>
 	<Title>tryMxml</Title>
   <Author>SiconosTeam</Author>
-  <Description>none</Description>
+  <Description>Description</Description>
   <Date>Today</Date>
   <SchemaXML>../../../config/xmlschema/SiconosModelSchema-V1.2.xsd</SchemaXML>
 	<Time>
 		<t0>0.1</t0>
-		<T>10.0</T>
+		<T>10</T>
 	</Time>
 
 	<NSDS bvp='false'>
@@ -49,42 +49,7 @@
 					<row>0.0 1.0 0.0</row>
 					<row>0.0 0.0 1.0</row>
 				</Mass>			
-				<ndof>3</ndof>								
-				<K matrixRowSize='3' matrixColSize='3'>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-				</K>
-				<C matrixRowSize='3' matrixColSize='3'>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-				</C>
 			</LagrangianLinearTIDS>
-			
-			<LagrangianLinearTIDS number='2'> 
-				<Id> Ground </Id>
-				<n>2</n>
-				<StepsInMemory>1</StepsInMemory>				
-				<q0 vectorSize='1'>
-					0.0
-				</q0>	
-				<Velocity0 vectorSize='1'>
-					0.0
-				</Velocity0>
-				<Mass matrixRowSize='1' matrixColSize='1'>	
-					<row>1.0 </row>
-				</Mass>			
-				
-				<ndof>1</ndof>								
-				<K matrixRowSize='1' matrixColSize='1'>
-					<row>0.0</row>
-				</K>
-				<C matrixRowSize='1' matrixColSize='1'>
-					<row>0.0</row>
-				</C>			
-
-			</LagrangianLinearTIDS>	
 		</DS_Definition>
 		<!-- Interactions defined in the problem -->		
 		<Interaction_Definition>
@@ -92,26 +57,25 @@
 			<Interaction number='1' Id='Ball-Ground'>
 				<size> 1 </size>
 				<!-- List of couple of DS concerned by this interaction -->
-		               <DS_Concerned all='true'></DS_Concerned>									
+	                        <DS_Concerned all='true'></DS_Concerned>									
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>		
 					<LagrangianLinearRelation>
-						<H matrixRowSize='1' matrixColSize='4'>
-			                         <row> 1.0  0.0  0.0 -0.0</row>
-						</H>
+						<H matrixRowSize='1' matrixColSize='3'>
+         	                                <row> 1.0  0.0  0.0</row>
+						</H>              
 					</LagrangianLinearRelation>			
 					<!-- NS Law of this interaction	-->
 					<NewtonImpactLaw>
-						<e>0.9</e>
-						<size>1</size>				
+					        <size>1</size>
+						<e>0.9</e>				
 					</NewtonImpactLaw>
 				</Interaction_Content>	
 			</Interaction>				
 		</Interaction_Definition>		
-	
 	</NSDS>
-	<!-- Strategy to use in order to solve the problem -->	
-	<Strategy type='TimeStepping'>
+	<!-- Simulation to use in order to solve the problem -->	
+	<Simulation type='TimeStepping'>
 
 		<TimeDiscretisation isConstant='true'>	
 			<h>0.005</h>
@@ -122,21 +86,15 @@
 			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			
 			<Moreau>
 				<DS_Concerned vectorSize='1'>1</DS_Concerned>		
-				<Theta vectorSize='1'>1.0</Theta>
+				<Theta all="0.5"></Theta>
 			</Moreau>					
-			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			
-			<Moreau>
-				<DS_Concerned vectorSize='1'>2</DS_Concerned>
-				<Theta vectorSize='1'>0.5</Theta>
-			</Moreau>					
-
 		</OneStepIntegrator_Definition>
 
-		<!-- One Step NS Problem of th Strategy-->
+		<!-- One Step NS Problem of th Simulation-->
 		<OneStepNSProblem>
 		 	<LCP>
-	                  <Solver type="QP" maxIter="101" />
-                        </LCP>
+	                  <Solver type="Lemke" maxIter="101" />
+		 	</LCP>
 		 </OneStepNSProblem>
-	</Strategy>	
+	</Simulation>	
 </SiconosModel>

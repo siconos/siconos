@@ -17,8 +17,9 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-/*!\file BeadsColumnTS.cpp
-\brief \ref EMBeadsColumn - C++ input file, Time-Stepping version - F. Perignon.
+/*!\file
+
+\brief \ref EMBeadsColumnTS - C++ input file, Time-Stepping version - F. Perignon.
 
 A column of balls
 Direct description of the model without XML input.

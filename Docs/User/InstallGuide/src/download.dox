@@ -14,33 +14,18 @@ For a minimal Siconos installation, Numerics and Kernel are required.
 
 \section tgz 1 - Downloading from Sources (tgz archives)
 
-The platform sources (.tgz) are available at the following address: 
-https://gforge.inria.fr/frs/?group_id=9
+The platform sources (.tgz) are available on <a href="https://gforge.inria.fr/frs/?group_id=9">Siconos GForge</a> page.
 
-To download the sources of any package of the
-Siconos software a login and a password are required.
-To get them, please send an e-mail to: 
-
-siconos-download@lists.gforge.inria.fr
-
-We ask that you fill out a request form to identify yourself and indicate your interest in Siconos.
-
-Please give us your:
-
-- name:
-
-- institution: 
-
-- mail:
-
-- interest in the Siconos software:
-
-
-You will get login and password by e-mail.
+To download the sources of any package of the Siconos software a login and a password are required.\n
+To get them, please fill in this form : \subpage downloadForm. \n
 
 Then you can log in and select the requested packages or files.
 
-\section svn 2 - Subversion
+\section binaries 2 - Binaries
+
+Binaries (rpm, deb ...) for different linux distributions are available on <a href="https://gforge.inria.fr/frs/?group_id=9">Siconos GForge</a> page.
+
+\section svn 3 - Subversion
 
 If you are a developer of the platform, you can use subversion tools to get the software.
 First you need to connect to the Gforge and add your ssh-key (see https://gforge.inria.fr/scm/?group_id=9).

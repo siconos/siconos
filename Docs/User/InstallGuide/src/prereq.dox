@@ -34,19 +34,22 @@ Usually available as rpm or pre-compiled binaries.
 About \b libxml2: http://xmlsoft.org/
 
 \subsection boost 3 - Boost
-Boost provides a lot of useful C++ binaries, especially \b Ublas, a C++ template class library that provides BLAS level 1, 2, 3 functionality for dense, packed and sparse matrices. 
+Boost provides a lot of useful C++ binaries, especially \b Ublas, a C++ template class library that provides BLAS level 1, 2, 3 functionalities \n
+for dense, packed and sparse matrices. 
 
 Ublas is used in Siconos for matrices and vectors definition and implementation.
 
-Install:
+About \b Boost: http://www.boost.org/
+
+About \b Ublas: http://www.boost.org/libs/numeric/ublas/doc/index.htm
+
+Install (note that an adequate Boost version comes with most linux distributions and thus no more install is required.)
 
 -# Download Boost at http://sourceforge.net/project/showfiles.php?group_id=7586
 -# Download bjam. The recommended way to get Boost.Jam if you are using a Boost distribution is to  download a pre-built executable from http://sourceforge.net/project/showfiles.php?group_id=7586&package_id=72941.
 -# Type in the Boost directory: /the/path/of/BOOST-JAM/bjam install (as root)
 
-About \b Boost: http://www.boost.org/
-
-About \b Ublas: http://www.boost.org/libs/numeric/ublas/doc/index.htm
+If you have some problems or need more details on download and installation of boost, see <a href="http://www.boost.org/more/getting_started/index.html">Boost Getting Started</a>.
 
 \subsection gmp 4 - GMP
 
@@ -88,7 +91,7 @@ See http://www.stack.nl/~dimitri/doxygen/install.html for details.
 
 \section sicInstPlatforms Platforms
 
-Siconos v2.1.1 has been successfully compiled on Linux Fedora Core 6 (gcc4.x).
+Siconos v2.1.1 has been successfully compiled on Linux Fedora Core 6 and 7(gcc4.x).
 
 For: 
 
@@ -110,7 +113,7 @@ Autotools:
 
 Compiler: gcc 4.1.1 \n
 
-Boost 1.33.1 \n
+Boost 1.34 \n
 
 cppunit: 1.12
 

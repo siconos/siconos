@@ -1,16 +1,26 @@
 /*! \page IG_install Installing Siconos
 
-\section howtoIG How to Compile and Install Siconos
-
 Three steps:
 
 -# compile and install Siconos-Numerics
 -# compile and install Siconos-Kernel
 -# compile and install Siconos-Front-End (optional)
 
-Warning: before that, make sure you have read the section \ref IG_prereq.
+Warnings: 
+- before that, make sure you have read the section \ref IG_prereq.
+- Packages must be installed in this order: 1-Numerics, 2-Kernel, 3-Front-End.
+
+\section IG_installsources Installing from Sources.
 
 \subsection compile_linux Linux/Unix
+
+First download all the required packages (.tgz) as explained in \ref IG_download section.\n
+Then uncompressed the downloaded archives:
+\verbatim 
+tar -zxvf siconos-XXXX.tgz
+\endverbatim
+
+XXXX being Numerics, Kernel or Front-End package name. \n
 
 For compilation of each package, run the following commands in Numerics/Kernel/FrontEnd directories:
 
@@ -23,6 +33,9 @@ For compilation of each package, run the following commands in Numerics/Kernel/F
   make install
 \endverbatim
 
+Take care to the resulting messages after "configure" call; if some external libraries are missing or \n
+with a too old version it may fail. 
+
 Type <tt>./configure --help</tt> to see more information on the available options.
 
 The default installation path is /usr/local but you can choose a local one at configure:\n
@@ -33,10 +46,6 @@ The default installation path is /usr/local but you can choose a local one at co
 
 To run tests: 
 \verbatim
- ./autogen.sh
- ./configure --enable-cppunit 
-  make
-  make install
   make check
 \endverbatim
 
@@ -47,8 +56,24 @@ make doc
 
 The resulting doc (html) is saved in ../GeneratedDocs/XXX, XXX being Kernel or Numerics.
 
-\section IG_more More ...
+\section IG_installsources Installing from Binaries
 
-- \subpage IG_debian
+\subsection install_fedora Fedora Core
+
+Download rpm packages as explained in \ref IG_download section.\n
+And, as root, run:
+\verbatim
+rpm -Uvh siconos-XXXX.rpm
+\endverbatim
+XXXX being Numerics, Kernel and possibly Front-End packages names.
+
+\subsection install_debian Debian or Ubuntu
+
+Download deb packages as explained in \ref IG_download section.\n
+And, as root, run:
+\verbatim
+apt-get install siconos-XXXX.deb
+\endverbatim
+XXXX being Numerics, Kernel and possibly Front-End packages names.
 
 */

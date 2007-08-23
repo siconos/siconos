@@ -23,12 +23,24 @@ before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
-  v2.1.1 - July, 17th 2007 (release 825)
+  v2.x.x - (current release)
 --------------------------------------------------------------------------------	
 Notes:
 
 Changes:
 	
+--------------------------------------------------------------------------------
+  v2.1.1 - August, 23rd 2007 (release 837)
+--------------------------------------------------------------------------------	
+	
+Notes:
+
+Changes:
+
+2007 July Franck Perignon <franck.perignon@inrialpes.fr>
+	* Review SiconosAlgebra tool to improve computation times
+	  (use ublas or ublas/atlas functions in a better way ...)
+
 --------------------------------------------------------------------------------
   v2.1.0 - June, 28th 2007 (release 809)
 --------------------------------------------------------------------------------	

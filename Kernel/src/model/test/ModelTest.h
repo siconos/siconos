@@ -22,8 +22,6 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "Model.h"
 #include "SiconosModelXML.h"
-#include "TimeStepping.h"
-#include "EventDriven.h"
 
 class ModelTest : public CppUnit::TestFixture
 {
@@ -36,19 +34,19 @@ private:
   // tests to be done ...
 
   //CPPUNIT_TEST(testBuildModel);
+  CPPUNIT_TEST(testBuildModel0);
   CPPUNIT_TEST(testBuildModel1);
   CPPUNIT_TEST(testBuildModel2);
-  CPPUNIT_TEST(testsetNonSmoothDynamicalSystemPtr);
-  CPPUNIT_TEST(testsetSiconosModelXMLPtr);
+  CPPUNIT_TEST(testBuildModel3);
   CPPUNIT_TEST(End);
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
+  void testBuildModel0();
   void testBuildModel1();
   void testBuildModel2();
-  void testsetNonSmoothDynamicalSystemPtr();
-  void testsetSiconosModelXMLPtr();
+  void testBuildModel3();
   void End();
   // Members
 

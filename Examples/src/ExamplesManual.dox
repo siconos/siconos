@@ -20,9 +20,9 @@ Then, for each example, you get:
 On top of this page, you get links to the Siconos Home Page and to some other documents. \n
 On the left, the summary with:
 - a list of all commented examples
-- a list of all the namespaces (if documented) used in Siconos Samples.
-- a list of all the documented files in Siconos Samples. It provides a short description of each sample and some links to the source code and to the detailed documentation page.
-- Directories: files hierarchy in Siconos Samples
+- a list of all the namespaces (if documented) used in Siconos Examples.
+- a list of all the documented files in Siconos Examples. It provides a short description of each sample and some links to the source code and to the detailed documentation page.
+- Directories: files hierarchy in Siconos Examples
 
 \section EMHowTo How to Write a new sample
 
@@ -42,9 +42,9 @@ First of all, read <a href="http://siconos.gforge.inria.fr/homePageAboutDoc.html
 
 Then the process is:
 
--# in the directory where your sample input files are located, create a mySample.dox file. It must looks like:
+-# in the directory where your sample input files are located, create a myExample.dox file. It must looks like:
 \verbatim
-/** \page labelOfYourSample TitleOfYourSample
+/** \page labelOfYourExample TitleOfYourExample
 
 \author author's name
 
@@ -67,19 +67,19 @@ A second section where you describe the implementation of your problem in Sicono
 The results of the simulation.
 */
 \endverbatim
-See for example the dox file in Samples/Mechanics/CamFollower/ to have an overview of the main commands and \ref EMCamFollower to see the resulting page. \n
+See for example the dox file in Examples/Mechanics/CamFollower/ to have an overview of the main commands and \ref EMCamFollower to see the resulting page. \n
 For details on all the doxygen commands see http://www.stack.nl/~dimitri/doxygen/commands.html . 
--# Save the figures you need in Samples/figures, possibly with some subdirectories. \n
-For example, to include a figure myFigure, saved in Samples/figures/mySample: 
+-# Save the figures you need in Examples/figures, possibly with some subdirectories. \n
+For example, to include a figure myFigure, saved in Examples/figures/myExample: 
 \verbatim
-\image html mySample/myFigure.png "caption" width=5cm
-\image latex mySample/myFigure.eps "caption" widht=5cm
+\image html myExample/myFigure.png "caption" width=5cm
+\image latex myExample/myFigure.eps "caption" widht=5cm
 \endverbatim
 which means that each figure must be saved in png and eps format. The two commands are required: one to include the picture in html pages and another for latex/pdf. \n
-For the figure directory, please keep the same files tree as in Samples (i.e. if your sample is in Samples/Mechanics/MySample, save your figures in Samples/figures/Mechanics/MySample).
+For the figure directory, please keep the same files tree as in Examples (i.e. if your sample is in Examples/Mechanics/MyExample, save your figures in Examples/figures/Mechanics/MyExample).
 -# Document .cpp input file with Doxygen. At least the GNU-license header and a brief description of the sample:
 \verbatim
-/* Siconos-Samples version 2.1.1, Copyright INRIA 2005-2006.
+/* Siconos-Examples version 2.1.1, Copyright INRIA 2005-2007.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.	
  * Siconos is a free software; you can redistribute it and/or modify
@@ -97,8 +97,8 @@ For the figure directory, please keep the same files tree as in Samples (i.e. if
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr 
 */
-/*! \file mySample.cpp 
-\brief \ref labelOfYourSample - Brief comments - Author(s).
+/*! \file myExample.cpp 
+\brief \ref labelOfYourExample - Brief comments - Author(s).
 Some more comments if required.
 */
 \endverbatim
@@ -125,20 +125,20 @@ From left to right:
 \b Warning: you need doxygen 1.5.1, doxywizard and maybe graphviz utilities to process with doxygen documentation.
 For details on doxygen and related tools download and install, see <a href="http://www.stack.nl/~dimitri/doxygen/install.html#install_bin_unix">Doxygen Installation Page</a>.\n
 
-First of all, if it does not exist, create the directory "Samples/../GeneratedDocs". 
+First of all, if it does not exist, create the directory "Examples/../GeneratedDocs". 
 
-Then, to generate the documentation, from Samples directory, launch doxywizard, and follow the steps:
+Then, to generate the documentation, from Examples directory, launch doxywizard, and follow the steps:
 -# load config/SiconosExamples.cfg 
 -# "start" generation. 
 
-Then you can open Samples/../GeneratedDocs/Samples/index.html with any web browser.
+Then you can open Examples/../GeneratedDocs/Examples/index.html with any web browser.
 
 To generate latex, from doxywizard:
 -# load config/SiconosExamples.cfg, choose Expert and in "LaTex" tab, tick GENERATE_LATEX.
 -# save in config/SiconosExamples.cfg
 -# start
 
-A latex directory is then created in Samples/../GeneratedDocs/Samples. From this location, type "make" to obtain refman.pdf, the pdf version of the Manual.
+A latex directory is then created in Examples/../GeneratedDocs/Examples. From this location, type "make" to obtain refman.pdf, the pdf version of the Manual.
 
 If you do not want to use doxywizard, just run from config directory:
 \verbatim

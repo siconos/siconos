@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
     //Moreau* OSI_LS2DiodeBridgeCapFilter = new Moreau(LS2DiodeBridgeCapFilter,theta,StratDiodeBridgeCapFilter);
     Moreau* OSI_LS1DiodeBridgeCapFilter = new Moreau(Inter_DS, theta, StratDiodeBridgeCapFilter);
 
-    LCP* LCP_DiodeBridgeCapFilter = new LCP(StratDiodeBridgeCapFilter, "LCP", "PGS", 10000, 1e-7);
+    LCP* LCP_DiodeBridgeCapFilter = new LCP(StratDiodeBridgeCapFilter, "LCP", "Lemke", 10000, 1e-7);
 
     cout << " -----  Model description ------" << endl;
     DiodeBridgeCapFilter.display();
@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
     t1 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
 
     // --- Time loop  ---
-    while (k < N)
+    while (k < N - 1)
     {
       // get current time step
       k++;

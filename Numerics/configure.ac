@@ -21,7 +21,7 @@ dnl V. ACARY, 2005
 
 AC_PREREQ(2.59)
 AC_INIT([Siconos-Numerics],[2.1.1],[siconos.gforge.inria.fr])
-
+ 
 dnl Checking host/target/build systems, for make, install etc.
 AC_CANONICAL_TARGET([])
 AC_CONFIG_SRCDIR([src/SiconosNumerics.h])
@@ -29,8 +29,8 @@ AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS([config.h]) 
 
 # SO version of all siconos shared libraries
-SICONOSNUMERICS_SO_CURRENT=1
-SICONOSNUMERICS_SO_REVISION=2
+SICONOSNUMERICS_SO_CURRENT=4
+SICONOSNUMERICS_SO_REVISION=0
 SICONOSNUMERICS_SO_AGE=0
 AC_SUBST(SICONOSNUMERICS_SO_CURRENT)
 AC_SUBST(SICONOSNUMERICS_SO_REVISION)

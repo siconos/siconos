@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-/*!\file BeadsColumnTS.cpp
+/*!\file BeadsColumnED.cpp
 \brief \ref EMBeadsColumnED - C++ input file, Event-Driven version - F. Perignon.
 
 A column of balls

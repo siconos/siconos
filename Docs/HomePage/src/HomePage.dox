@@ -14,7 +14,7 @@
 		  <li><a href="#downloadHP"> Download</a></li>
 		  <li><a href="https://gforge.inria.fr/projects/siconos/"> Siconos Forge</a></li>
 		  <li><a href="#contacts"> Contacts</a></li>
-		  <li><a href="./SiconosDocList.html"> Documentation</a></li>
+		  <li><a href="./SiconosDocList.html"> Help and Documentation</a></li>
 		  <li><a href="#relatedProjects"> Related Projects</a></li>
 		  <li><a href="#uLinks"> Useful links</a></li>
 		</ul>
@@ -78,7 +78,7 @@ You can find here some publications at the origin of this software on <a href="h
 \endhtmlonly
 \anchor news
 \section News News
-- <em> July 17th 2007</em>: release 2.1.1
+- <em> August 23rd 2007</em>: release 2.1.1
 - <em> June 28th 2007</em>: release 2.1.0
 - <em> December 12th 2006</em>: release 2.0.1, patch for gcc4.1.1 compatibility (Fedora Core 6) 
 - <em> November 30th 2006</em>: release 2.0.0 
@@ -93,39 +93,20 @@ You can find here some publications at the origin of this software on <a href="h
 \anchor downloadHP
 \section d Downloads
 
-The last stable release is 2.0.0 or 2.1.1 for Kernel.
-It has been succesfully tested on Fedora Core 4 and 6. 
+The last stable release is 2.1.1.
+It has been succesfully tested on Fedora Core 6 and 7. 
 
-To download the sources of any package of the Siconos software a login and a password are required.
-To get them, please send a mail to: 
+Either binaries or sources can be freely downloaded.
 
-siconos-download@lists.gforge.inria.fr
-
-We ask that you fill out a request form to identify yourself and indicate your interest in Siconos.
-
-Please give us your:
-
-- name:
-- institution: 
-- mail:
-- interest in the Siconos software:
-
-You will automatically get login and password by e-mail. 
-Then you can log in on the <a href="https://gforge.inria.fr/frs/?group_id=9"> Siconos Gforge download page</a> and select the requested packages or files.
+- \b Binaries: see the <a href="https://gforge.inria.fr/frs/?group_id=9"> Siconos Gforge download page</a>. \n
+- \b Sources: to download the sources of any package of the Siconos software a login and a password are required. \n
+To get them, please fill in this form : \subpage downloadForm.
 
 \htmlonly
 <div class=horizontalline>  </div>
 \endhtmlonly
-\anchor contacts
-\section c Contacts
-\subsection Mailing lists
- See Mailing lists at <a href="https://gforge.inria.fr/mail/?group_id=9">Gforge.</a>
-\subsection forum Forum
-See forum list at <a href="https://gforge.inria.fr/forum/?group_id=9">Gforge.</a>
-\subsection bug Bug reports
-To report a bug, or see previously reported bugs and fixes, please use
-our bug tracker  on the  <a href="https://gforge.inria.fr/tracker/?group_id=9"> Gforge</a>
-\subsection gencontact General contacts
+\anchor contact
+\section contacts Contacts
 <a href="mailto:vincent.acary@ nospam inrialpes.fr"> Vincent Acary</a>\n
 <a href="mailto:franck.perignon@ nospam inrialpes.fr"> Franck Pérignon</a>\n
 

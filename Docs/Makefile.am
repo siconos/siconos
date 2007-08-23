@@ -19,7 +19,10 @@
 
 include $(top_srcdir)/config/Make-rules
 
-SUBDIRS = User/UsersGuide/config \
-          User/InstallGuide/config # User/GettingStarted/config
+SUBDIRS = HomePage/config  \
+	User/UsersGuide/config \
+	User/InstallGuide/config \
+	User/GettingStarted/config 
+
 
 

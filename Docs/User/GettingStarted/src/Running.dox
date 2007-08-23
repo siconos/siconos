@@ -45,9 +45,4 @@ With Scilab
 scilab -f myInputFile.sci
 \endverbatim
 
-\section usingDoc How to use this guide? 
-
-For each topic, we first give a list of the concerned classes. This should help you to find the required header files and to access to more detailed documentation in the Doxygen. \n
-Then we describe the more common way to build objects (ie the constructors) and give a list of the more useful functions. 
-
 */

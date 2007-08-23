@@ -1,4 +1,4 @@
-/** \mainpage Siconos Numerics - API Documentation
+/** \mainpage Siconos Numerics 2.1.1 - API Documentation
 \anchor doxyNumerics
 \section doxyNumericsIntro Introduction
 
@@ -6,7 +6,7 @@ Siconos is a free (GNU license) software, dedicated to modeling, simulation and 
 
 This API documentation is automatically generated from the software sources thanks to doxygen tools. 
 
-To get access to other documents, see tab list on top of page or Documentation tab on Home Page.
+To get access to other documents, see tab list on top of this page or Documentation tab on Home Page.
 
 The Numerics Package is dedicated to low-level algorithms, written in C and Fortran.
 

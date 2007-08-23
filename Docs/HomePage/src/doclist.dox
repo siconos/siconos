@@ -1,9 +1,13 @@
 /*! \page SiconosDocList Siconos Help and Documentation.
 \anchor docList
-<em>
-All documentation files and help are located on <a href="https://gforge.inria.fr/projects/siconos/"> Siconos Gforge</a>\n
-The main documents you can find on these pages are listed below.
-</em>
+
+\e Warning: all on-line documentations correspond to the last published version of Siconos. 
+
+\section gforgelists Mailing lists, Forum ...
+ On the Siconos Gforge, differents tools are available to get help, submit bugs and so on:
+ - a "Siconos users" \b mailing \b list for any questions or comments on Siconos at <a href="https://gforge.inria.fr/mail/?group_id=9">Siconos Gforge mailing lists</a>.
+ - a \b forum, <a href="https://gforge.inria.fr/forum/?group_id=9">Siconos Gforge forum.</a>
+ - a \b bug \b tracker, to report or check for any installation, use, documentation ... problems: <a href="https://gforge.inria.fr/tracker/?group_id=9"> Siconos Gforge bug-tracker.</a>
 
 \section manuals Available Manuals:
 
@@ -15,29 +19,24 @@ The main documents you can find on these pages are listed below.
 
 In Process:
 
-- Siconos User Manual: fully detailed description of all the Siconos functionalities (based on Doxygen)
+- <a href="./UsersGuide/index.html" target="_top">Siconos User's Guide</a>: a fully detailed description of all the Siconos functionalities.
 
-- Siconos Theory Manual (in progress, not yet available)
+- Siconos Theory Manual (in progress, not yet available).
 
 \section docCode Code documentation 
 
-- A detailed <a href="http://siconos.gforge.inria.fr/docDev/design.html" >Design Description</a>. 
+- \ref doxyKernel "Doxygen Documentation for Kernel", auto-generated documentation for Siconos-Kernel.
 
-- A basic software <a href="http://siconos.gforge.inria.fr/docDev/sdm.html" >Development Methodology</a>.
-
-- A <a href="http://siconos.gforge.inria.fr/Documentation/SiconosOverview/CapriSept2006.pdf"> Short Overview</a> of the Software design.
-
-- \ref doxyKernel "Doxygen Documentation for Kernel", auto-generated documentation for Siconos-Kernel
-
-- \ref doxyNumerics "Doxygen Documentation for Numerics", auto-generated documentation for Siconos-Numerics
+- \ref doxyNumerics "Doxygen Documentation for Numerics", auto-generated documentation for Siconos-Numerics.
 
 \section miscDoc Miscellaneous
 
+- <a href="http://hal.inria.fr/action/open_file.php?url=http://hal.inria.fr/docs/00/16/36/84/PDF/RT-0340.pdf&docid=163684">INRIA technical report RT 340</a>, "An Introduction to Siconos".
+
+- An overview of the <a href="http://siconos.gforge.inria.fr/docDev/index.html" > Siconos European project</a>, including \n
+ a detailed <a href="http://siconos.gforge.inria.fr/docDev/design.html" >Design Description</a> and \n 
+ a basic software <a href="http://siconos.gforge.inria.fr/docDev/sdm.html" >Development Methodology</a>.
+
 - An overview of the <a href="http://siconos.gforge.inria.fr/docDev/index.html" > Siconos European project</a>.
 
-- <a href="https://gforge.inria.fr/forum/?group_id=9" >Forum</a>.
-
-- <a href="https://gforge.inria.fr/tracker/?group_id=9">Bug Trackers</a>.
-
-- <a href="https://gforge.inria.fr/mail/?group_id=9">Mailing Lists</a>.
 */

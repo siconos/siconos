@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2007.
 * Siconos is a program dedicated to the modeling, the simulation and the control
 * of non smooth dynamical systems
 * Siconos is a free software; you can redistribute it and/or modify
@@ -1250,10 +1250,11 @@ extern "C" int sicOneStepNSProblemLCP(char *solverName, int maxiter, double tole
   {
     // One Step problem
 
-    TimeStepping *s = (TimeStepping *)GLOB_DATA.getSimulationPtr();
-    //OneStepNSProblem * onsspb = new LCP(GLOB_DATA.getSimulationPtr(),"LCP",solverName,maxiter,tolerance,normetyp,searchdir,rho);
+    // TimeStepping *s = (TimeStepping *)GLOB_DATA.getSimulationPtr();
+    // OneStepNSProblem * onsspb = new LCP(GLOB_DATA.getSimulationPtr(),"LCP",solverName,maxiter,tolerance,normetyp,searchdir,rho);
     // PB
-    OneStepNSProblem * onsspb = new LCP(s, "LCP", solverName, maxiter, tolerance);
+    // OneStepNSProblem * onsspb = new LCP(s,"LCP",solverName,maxiter,tolerance);
+    // FP: unused variables => comment.
 
   }
 

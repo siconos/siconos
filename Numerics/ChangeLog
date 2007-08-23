@@ -30,15 +30,11 @@ Notes:
 Changes:
 	
 --------------------------------------------------------------------------------
-  v2.1.1 - July, 17th 2007 (release 825)
+  v2.1.1 - August, 23rd 2007 (release 837)
 --------------------------------------------------------------------------------	
 Notes:
 
 Changes:
-
-2007 July Franck Perignon <franck.perignon@inrialpes.fr>
-	* Review SiconosAlgebra tool to improve computation times
-	  (use ublas or ublas/atlas functions in a better way ...)
 	
 --------------------------------------------------------------------------------
   v2.1.0 - June, 28th 2007 (release 809)
@@ -46,14 +42,6 @@ Changes:
 Notes:
 
 Changes:
-
-2007 March to June Franck Perignon <franck.perignon@inrialpes.fr>
-	* add/review DynamicalSystem and derived classes
-	* add/review Relation and derived classes 
-	* add Control toolbox (actuator, sensors ...)
-	* add an EventsManager object
-	* add z parameter ("discrete state") in DS and relation
-	* add gmp utilities
 		
 2007-03-02 Vincent Acary <vincent,acary@inrialpes.fr>
                                                                                

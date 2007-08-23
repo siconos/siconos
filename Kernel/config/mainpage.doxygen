@@ -1,54 +1,17 @@
-/** \mainpage Siconos Kernel - API Documentation
+/** \mainpage Siconos Kernel 2.1.1 - API Documentation
 \anchor doxyKernel
 
 \section doxyKernelIntro Introduction
 
 Siconos is a free (GNU license) software, dedicated to modeling, simulation and control of Non Smooth Dynamical Systems. 
 
-This API documentation is automatically generated from the software sources (.h and .cpp) thanks to doxygen tools. 
-You can also find other tools and documents (installation guide, tutorial ...) on \ref siconosHomePage "Siconos Home Page" (see tabs list on top of this page).\n 
+This API documentation is automatically generated from the software sources (.h and .cpp) thanks to doxygen tools. \n
 
-To get and install the platform Siconos, see \ref <a href="https://gforge.inria.fr/frs/?group_id=9">Download Section</a>.\n
+You can also find other tools and documents (installation guide, tutorial ...) \n
+on \ref siconosHomePage "Siconos Home Page" (see tabs list on top of this page).\n 
 
-\section sectplat Platforms
 
-Siconos v2.1.1 has been successfully compiled on the following platforms:
-- Linux/Unix gcc2.95.x, gcc3.x, gcc4.x
-- Mac OS X (note: this platform required to set 
-  FLIBS="-L/sw/lib -lfrtbegin -lg2c -lSystem" before 
-  the ./configure completed successfully.)
 
-If you have compiled Siconos on another platform successfully, then
-the maintainer would be glad to hear about that.
-
-\section sect_req Requirements
-
-- Atlas ("blas" and "lapack") and a Fortran compiler. 
-- libxml2
-- Boost-ublas
-
-\section sect_opt Optional
-
-- cppunit (required to run unit tests)
-
-\section sect_compile Compile and Install
-
-\subsection compilelinux Linux/Unix
-
-For compilation, run the following commands:
-
-For details see \ref installGuide "Siconos Installation Guide".
-
-\verbatim
- ./autogen.sh
- ./configure --prefix=/your/install/path
-  make
-  make install
-\endverbatim
-
-Type <tt>./configure --help</tt> to see more information. After
-successful compilation, you can run various test programs by the
-command "make check" (requires cppunit v1.10.2 and option --enable-cppunit for configure). 
 
 Contact: <a href="mailto:franck.perignon@inrialpes.fr">Franck Pérignon</a> 
 
