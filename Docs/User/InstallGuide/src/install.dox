@@ -27,7 +27,6 @@ For compilation of each package, run the following commands in Numerics/Kernel/F
 <em> Warning: you may need to be connected as root for "make install", depending on the targeted location. </em>
 
 \verbatim
- ./autogen.sh
  ./configure 
   make
   make install
@@ -43,6 +42,7 @@ The default installation path is /usr/local but you can choose a local one at co
 ./configure --prefix=/your/install/path 
 \endverbatim
 
+\b Warning: if the "configure" file is not in the directory, you may need to run "./autogen.sh" first, to generate it.
 
 To run tests: 
 \verbatim
