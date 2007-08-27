@@ -25,13 +25,13 @@ In Process:
 
 \section docCode Code documentation 
 
-- \ref doxyKernel "Doxygen Documentation for Kernel", auto-generated documentation for Siconos-Kernel.
+- <a href="./Kernel/index.html" target="_top">Doxygen Documentation for Kernel</a>, auto-generated documentation for Siconos-Kernel.
 
-- \ref doxyNumerics "Doxygen Documentation for Numerics", auto-generated documentation for Siconos-Numerics.
+- <a href="./Numerics/index.html" target="_top">Doxygen Documentation for Numerics</a>, auto-generated documentation for Siconos-Numerics.
 
 \section miscDoc Miscellaneous
 
-- <a href="http://hal.inria.fr/action/open_file.php?url=http://hal.inria.fr/docs/00/16/36/84/PDF/RT-0340.pdf&docid=163684">INRIA technical report RT 340</a>, "An Introduction to Siconos".
+- <a href="http://hal.inria.fr/action/open_file.php?url=http://hal.inria.fr/docs/00/16/36/84/PDF/RT-0340.pdf&amp;docid=163684">INRIA technical report RT 340</a>, "An Introduction to Siconos".
 
 - An overview of the <a href="http://siconos.gforge.inria.fr/SiconosProjectOverview/index.html" > Siconos European project</a>, including \n
  a detailed <a href="http://siconos.gforge.inria.fr/SiconosProjectOverview/design.html" >Design Description</a> and \n 

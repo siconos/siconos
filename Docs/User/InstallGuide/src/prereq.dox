@@ -46,7 +46,7 @@ About \b Ublas: http://www.boost.org/libs/numeric/ublas/doc/index.htm
 Install (note that an adequate Boost version comes with most linux distributions and thus no more install is required.)
 
 -# Download Boost at http://sourceforge.net/project/showfiles.php?group_id=7586
--# Download bjam. The recommended way to get Boost.Jam if you are using a Boost distribution is to  download a pre-built executable from http://sourceforge.net/project/showfiles.php?group_id=7586&package_id=72941.
+-# Download bjam. The recommended way to get Boost.Jam if you are using a Boost distribution is to  download a pre-built executable from http://sourceforge.net/project/showfiles.php?group_id=7586&amp;package_id=72941.
 -# Type in the Boost directory: /the/path/of/BOOST-JAM/bjam install (as root)
 
 If you have some problems or need more details on download and installation of boost, see <a href="http://www.boost.org/more/getting_started/index.html">Boost Getting Started</a>.
