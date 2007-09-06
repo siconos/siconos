@@ -35,7 +35,7 @@ double Kf = 0.5;
 double P = 5;
 double ep = 0.1;
 double delta = 0.05;
-double eps = 0.1;
+// double eps = 0.1;
 double alpha = 10;
 
 
@@ -160,16 +160,6 @@ extern "C" void U10(double time, unsigned int sizeOfq, double *U1, unsigned int 
   double mc12 = m11 * d12 + m12 * d22;
   double mc21 = m12 * d11 + m22 * d21;
   double mc22 = m12 * d12 + m22 * d22;
-
-  //double td = (time-z[8])/(eps);
-  //   double b0 = z[10];
-  //   double b1 = z[13];
-  //   double b2 = -2*b1-3*b0-3*z[7]*alpha;
-  //   double b3 = b1+2*b0+2*z[7]*alpha;
-
-  //   double qd2 = b3*td*td*td+b2*td*td+b1*td+b0;
-  //   double qd12 = 3*b3*td*td+2*b2*td+b1;
-  //   double qd22 = 6*b3*td+2*b2;
 
   double qd1 = 0;
   double qd11 = 0;
@@ -367,7 +357,7 @@ extern "C" void U2(double time, unsigned int sizeOfq, double *U, unsigned int si
   double a2 = (a11 * d11 + a12 * d21) * qr11 + (a11 * d12 + a12 * d22) * qr12;
   double a3 = m2 * l1 * l2 * sin(z[1]) * z[2] * (d11 * qr11 + d12 * qr12) / 2;
   double a4 = (a21 * d11 + a22 * d21) * qr11 + (a21 * d12 + a22 * d22) * qr12;
-  double ld = (-(-m2 * l1 * l2 * sin(z[1]) * z[2] * d11 / 2 - (a21 * d11 + a22 * d21) - (mc21 / mc11) * (-m2 * l1 * l2 * sin(z[1]) * z[3] * (d11 + d21 / 2) - (a11 * d11 + a12 * d21))) * s1 + gamma1 * mc12 * s1 / mc11 - 3 * (k * P - time)) / (mc11 * mc22 - mc12 * mc21);
+  double ld = (-(-m2 * l1 * l2 * sin(z[1]) * z[2] * d11 / 2 - (a21 * d11 + a22 * d21) - (mc21 / mc11) * (-m2 * l1 * l2 * sin(z[1]) * z[3] * (d11 + d21 / 2) - (a11 * d11 + a12 * d21))) * s1 + gamma1 * mc12 * s1 / mc11 - 0.1 * (k * P - time)) / (mc11 * mc22 - mc12 * mc21);
   z[12] = 0.5 + (-mc11 * ld + fabs(mc11 * ld)) / 2;
 
   double T01 = mc11 * qr21 + mc12 * qr22;
