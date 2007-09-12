@@ -22,7 +22,7 @@
 #include <math.h>
 
 
-min_part(double x[], double *sol, int *nn)
+void min_part(double x[], double *sol, int *nn)
 
 {
 

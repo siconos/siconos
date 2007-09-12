@@ -334,7 +334,7 @@ extern "C" int sicGetTypeEvent(char *type)
   try
   {
     EventsManager *prtEventsManager = GLOB_DATA.getEventsManagerPtr();
-    strcpy(type, prtEventsManager->getCurrentEventPtr()->getType().c_str());
+    strcpy(type, prtEventsManager->getStartingEventPtr()->getType().c_str());
   }
   catch (SiconosException e)
   {

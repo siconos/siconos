@@ -22,23 +22,11 @@
 //
 // see modelRobot1.jpg for complete system view.
 //
-// Keywords: LagrangianDS, LagrangianLinear relation, Moreau TimeStepping, LCP.
+// Keywords: LagrangianDS, LagrangianLinear relation, EventDriven, LCP.
 //
 // =============================================================================================
 
-#include "Model.h"
-
-#include "LagrangianLinearTIDS.h"
-#include "LCP.h"
-#include "NewtonImpactNSL.h"
-#include "LagrangianLinearR.h"
-#include "EventDriven.h"
-#include "Lsodar.h"
-#include "Interaction.h"
-#include <sys/time.h>
-#include <math.h>
-#include <iostream>
-#include <sstream>
+#include "SiconosKernel.h"
 
 using namespace std;
 
@@ -52,10 +40,10 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 3;           // degrees of freedom for robot arm
     double t0 = 0;                   // initial computation time
-    double T = 1.2;                   // final computation time
+    double T = 1.9;                   // final computation time
     double h = 0.005;                // time step
-    double e = 0.9;                  // nslaw
-    double e2 = 0.1;
+    double e = 0.9;                  // restit. coef. for impact on the ground.
+    double e2 = 0.0;                 // restit. coef for angular stops impacts.
 
     // -> mind to set the initial conditions below.
 
@@ -68,22 +56,22 @@ int main(int argc, char* argv[])
 
     // --- DS: robot arm ---
 
-    // The dof are angles between ground and arm and between differents parts of the arm. (See corresponding .pdf for more details)
+    // The dof are angles between ground and arm and between differents parts of the arm. (See Robot.fig for more details)
+    //
+
 
     // Initial position (angles in radian)
     SimpleVector q0(nDof), v0(nDof);
-    q0.zero();
-    v0.zero();
     q0(0) = 0.05;
     q0(1) = 0.05;
 
-    LagrangianDS * arm = new LagrangianDS(1, nDof, q0, v0);
+    LagrangianDS * arm = new LagrangianDS(1, q0, v0);
 
     // external plug-in
     arm->setComputeMassFunction("RobotPlugin.so", "mass");
     arm->setComputeNNLFunction("RobotPlugin.so", "NNL");
-    arm->setComputeJacobianVelocityNNLFunction("RobotPlugin.so", "jacobianVNNL");
-    arm->setComputeJacobianQNNLFunction("RobotPlugin.so", "jacobianQNNL");
+    arm->setComputeJacobianNNLFunction(1, "RobotPlugin.so", "jacobianVNNL");
+    arm->setComputeJacobianNNLFunction(0, "RobotPlugin.so", "jacobianQNNL");
 
     allDS.insert(arm);
 
@@ -94,31 +82,55 @@ int main(int argc, char* argv[])
     // Two interactions:
     //  - one with Lagrangian non linear relation to define contact with ground
     //  - the other to define angles limitations (articular stops), with lagrangian linear relation
-    //  Both with newton impact nslaw.
+    //  Both with newton impact ns laws.
 
-    InteractionsSet allInteractions;
+    InteractionsSet allInteractions; // The set of all interactions.
 
     // -- relations --
 
+    // => arm-floor relation
     NonSmoothLaw * nslaw = new NewtonImpactNSL(e);
-    vector<string> G;
-    G.reserve(1);
-    G.push_back("RobotPlugin:G2");
-    Relation * relation = new LagrangianR("scleronomic", "RobotPlugin:h2", G);
+    string G = "RobotPlugin:G2";
+    Relation * relation = new LagrangianScleronomousR("RobotPlugin:h2", G);
     Interaction * inter = new Interaction("floor-arm", allDS, 0, 2, nslaw, relation);
 
-    SimpleMatrix H(2, 3);
-    SimpleVector b(2);
-    H.zero();
-    H(0, 1) = -1;
-    H(1, 1) = 1;
+    // => angular stops
 
-    b(0) = 0.3;
-    b(1) = 0.3;
+    //     SimpleMatrix H(6,3);
+    //     SimpleVector b(6);
+    //     H.zero();
+    //     H(0,0) =-1;
+    //     H(1,0) =1;
+    //     H(2,1) =-1;
+    //     H(3,1) =1;
+    //     H(4,2) =-1;
+    //     H(5,2) =1;
+
+    //     b(0) = 1.7;
+    //     b(1) = 1.7;
+    //     b(2) = 0.3;
+    //     b(3) = 0.3;
+    //     b(4) = 3.14;
+    //     b(5) = 3.14;
+    double lim0 = 1.6;
+    double lim1 = 3.1;  // -lim_i <= q[i] <= lim_i
+    SimpleMatrix H(4, 3);
+    SimpleVector b(4);
+    H.zero();
+
+    H(0, 0) = -1;
+    H(1, 0) = 1;
+    H(2, 1) = -1;
+    H(3, 1) = 1;
+
+    b(0) = lim0;
+    b(1) = lim0;
+    b(2) = lim1;
+    b(3) = lim1;
 
     NonSmoothLaw * nslaw2 = new NewtonImpactNSL(e2);
     Relation * relation2 = new LagrangianLinearR(H, b);
-    Interaction * inter2 =  new Interaction("floor-arm2", allDS, 1, 2, nslaw2, relation2);
+    Interaction * inter2 =  new Interaction("floor-arm2", allDS, 1, 4, nslaw2, relation2);
 
     allInteractions.insert(inter);
     allInteractions.insert(inter2);
@@ -141,18 +153,16 @@ int main(int argc, char* argv[])
     // --- Simulation ---
     // ----------------
 
-    EventDriven* s = new EventDriven(Robot);
-
     // -- Time discretisation --
-    TimeDiscretisation * t = new TimeDiscretisation(h, s);
+    TimeDiscretisation * t = new TimeDiscretisation(h, Robot);
+
+    EventDriven* s = new EventDriven(t);
 
     // -- OneStepIntegrators --
-    OneStepIntegrator * OSI =  new Lsodar(arm, s);
-    OSI->setSizeMem(2); // Necessary to save pre and post impact values.
-
+    Lsodar * OSI =  new Lsodar(arm, s);
     // -- OneStepNsProblem --
-    OneStepNSProblem * impact = new LCP(s, "impact", "NSQP", 20001, 0.5);
-    OneStepNSProblem * acceleration = new LCP(s, "acceleration", "NSQP", 2001, 0.5);
+    OneStepNSProblem * impact = new LCP(s, "impact", "PGS", 20001, 0.005);
+    OneStepNSProblem * acceleration = new LCP(s, "acceleration", "PGS", 20001, 0.005);
 
     cout << "=== End of model loading === " << endl;
 
@@ -162,88 +172,97 @@ int main(int argc, char* argv[])
     // ================================= Computation =================================
 
     // --- Simulation initialization ---
+    s->setPrintStat(true);
     s->initialize();
     cout << "End of simulation initialisation" << endl;
 
-    int k = 0; // Current step
-    int N = 322; // Number of time steps
+    int k = 0;
+    int N = 10630;
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 9;
+    unsigned int outputSize = 11;
     SimpleMatrix dataPlot(N + 1, outputSize);
     // For the initial time step:
     // time
-    dataPlot(k, 0) = 0;
 
-    dataPlot(k, 1) = arm->getQ()(0);
-    dataPlot(k, 2) = arm->getVelocity()(0);
-    dataPlot(k, 3) = arm->getQ()(1);
-    dataPlot(k, 4) = arm->getVelocity()(1);
-    dataPlot(k, 5) = arm->getQ()(2);
-    dataPlot(k, 6) = arm->getVelocity()(2);
-    dataPlot(k, 7) = (inter->getY(0))(0);
-    dataPlot(k, 8) = (inter->getY(0))(1);
+    SiconosVector * q = arm->getQPtr();
+    SiconosVector * vel = arm->getVelocityPtr();
+    SiconosVector * y = inter->getYPtr(0);
+    SiconosVector * yDot = inter->getYPtr(1);
+    // When a non-smooth event occurs, pre-impact values are saved in memory vectors at pos. 1:
+    SiconosVector * qMem = arm->getQMemoryPtr()->getSiconosVector(1);
+    SiconosVector * velMem = arm->getVelocityMemoryPtr()->getSiconosVector(1);
+    SiconosVector * yMem = inter->getYOldPtr(0);
+    SiconosVector * yDotMem = inter->getYOldPtr(1);
 
-    // --- Compute elapsed time ---
-    double t1, t2, elapsed;
-    struct timeval tp;
-    int rtn;
-    clock_t start, end;
-    double elapsed2;
-    start = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t1 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-
-    OSI->display();
+    dataPlot(k, 0) =  Robot->getT0();
+    dataPlot(k, 1) = (*q)(0);
+    dataPlot(k, 2) = (*vel)(0);
+    dataPlot(k, 3) = (*q)(1);
+    dataPlot(k, 4) = (*vel)(1);
+    dataPlot(k, 5) = (*q)(2);
+    dataPlot(k, 6) = (*vel)(2);
+    dataPlot(k, 7) = (*y)(0);
+    dataPlot(k, 8) = (*y)(1);
+    dataPlot(k, 9) = (*yDot)(0);
+    dataPlot(k, 10) = (*yDot)(1);
 
     // --- Time loop ---
-    EventsManager * eventsManager = s->getEventsManagerPtr();
-    cout << " ==== Start of Event Driven simulation - This may take a while ... ====" << endl;
+    cout << "Start computation ... " << endl;
+    boost::timer boostTimer;
+    boostTimer.restart();
 
     unsigned int numberOfEvent = 0 ;
-    while (eventsManager->hasNextEvent())
+    EventsManager * eventsManager = s->getEventsManagerPtr();
+    while (s->hasNextEvent())
     {
+      // get current time step
       k++;
-      s->computeOneStep();
-      cout << Robot->getCurrentT() << endl;
-      if (eventsManager->getCurrentEventPtr()->getType() == "NonSmoothEvent")
-      {
-        dataPlot(k, 0) = Robot->getCurrentT();
+      s->advanceToEvent();
 
-        dataPlot(k, 1) = (*arm->getQMemoryPtr()->getSiconosVector(1))(0);
-        dataPlot(k, 2) = (*arm->getVelocityMemoryPtr()->getSiconosVector(1))(0);
-        dataPlot(k, 3) = (*arm->getQMemoryPtr()->getSiconosVector(1))(1);
-        dataPlot(k, 4) = (*arm->getVelocityMemoryPtr()->getSiconosVector(1))(1);
-        dataPlot(k, 5) = (*arm->getQMemoryPtr()->getSiconosVector(1))(2);
-        dataPlot(k, 6) = (*arm->getVelocityMemoryPtr()->getSiconosVector(1))(2);
-        dataPlot(k, 7) = (inter->getY(0))(0);
-        dataPlot(k, 8) = (inter->getY(0))(1);
+      s->processEvents();
+      // If the treated event is non smooth, we get the pre-impact state.
+      if (eventsManager->getStartingEventPtr()->getType() == "NonSmoothEvent")
+      {
+        dataPlot(k, 0) =  s->getStartingTime();
+        dataPlot(k, 1) = (*qMem)(0);
+        dataPlot(k, 2) = (*velMem)(0);
+        dataPlot(k, 3) = (*qMem)(1);
+        dataPlot(k, 4) = (*velMem)(1);
+        dataPlot(k, 5) = (*qMem)(2);
+        dataPlot(k, 6) = (*velMem)(2);
+        dataPlot(k, 7) = (*yMem)(0);
+        dataPlot(k, 8) = (*yMem)(1);
+        dataPlot(k, 9) = (*yDotMem)(0);
+        dataPlot(k, 10) = (*yDotMem)(1);
+
+
         k++;
       }
-      dataPlot(k, 0) = Robot->getCurrentT();
-      dataPlot(k, 1) = arm->getQ()(0);
-      dataPlot(k, 2) = arm->getVelocity()(0);
-      dataPlot(k, 3) = arm->getQ()(1);
-      dataPlot(k, 4) = arm->getVelocity()(1);
-      dataPlot(k, 5) = arm->getQ()(2);
-      dataPlot(k, 6) = arm->getVelocity()(2);
-      dataPlot(k, 7) = (inter->getY(0))(0);
-      dataPlot(k, 8) = (inter->getY(0))(1);
+      dataPlot(k, 0) =  s->getStartingTime();
+      dataPlot(k, 1) = (*q)(0);
+      dataPlot(k, 2) = (*vel)(0);
+      dataPlot(k, 3) = (*q)(1);
+      dataPlot(k, 4) = (*vel)(1);
+      dataPlot(k, 5) = (*q)(2);
+      dataPlot(k, 6) = (*vel)(2);
+      dataPlot(k, 7) = (*y)(0);
+      dataPlot(k, 8) = (*y)(1);
+      dataPlot(k, 9) = (*yDot)(0);
+      dataPlot(k, 10) = (*yDot)(1);
       numberOfEvent++;
+      //  cout << k << endl;
+      //  if (k==N) break;
     }
-    cout << "===== End of Event Driven simulation. " << numberOfEvent << " events have been processed. ==== " << endl;
-    cout << "Number of impacts: " << k - numberOfEvent << endl;
-    end = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t2 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-    elapsed = t2 - t1;
-    elapsed2 = (end - start) / (double)CLOCKS_PER_SEC;
-    cout << "time = " << elapsed << " --- cpu time " << elapsed2 << endl;
 
+    cout << "===== End of Event Driven simulation. " << numberOfEvent << " events have been processed. ==== " << endl << endl;
+    cout << "Computation Time: " << boostTimer.elapsed()  << endl;
+
+    cout << endl << "Output writing ..." << endl;
     // --- Output files ---
-    ioMatrix io("result.dat", "ascii");
-    io.write(dataPlot, "noDim");
+    ioMatrix out("result.dat", "ascii");
+    out.write(dataPlot, "noDim");
 
     // --- Free memory ---
     delete impact;

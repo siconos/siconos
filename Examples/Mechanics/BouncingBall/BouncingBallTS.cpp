@@ -97,8 +97,7 @@ int main(int argc, char* argv[])
     // --------------------------------
     // --- NonSmoothDynamicalSystem ---
     // --------------------------------
-    bool isBVP = 0;
-    NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(allDS, allInteractions, isBVP);
+    NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(allDS, allInteractions);
 
     // -------------
     // --- Model ---
@@ -120,7 +119,7 @@ int main(int argc, char* argv[])
     OneStepIntegrator * OSI = new Moreau(ball, theta, s);
 
     // -- OneStepNsProblem --
-    OneStepNSProblem * osnspb = new LCP(s, "LCP", solverName, 101, 0.0001);
+    OneStepNSProblem * osnspb = new LCP(s, "LCP", solverName, 101, 1e-15);
 
     // =========================== End of model definition ===========================
 
@@ -156,7 +155,7 @@ int main(int argc, char* argv[])
     {
       s->computeOneStep();
       // --- Get values to be plotted ---
-      dataPlot(k, 0) =  bouncingBall->getCurrentT();
+      dataPlot(k, 0) =  s->getNextTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*lambda)(0);
@@ -183,6 +182,7 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     ioMatrix io("result.dat", "ascii");
     io.write(dataPlot, "noDim");
+
     // --- Free memory ---
     delete osnspb;
     delete t;

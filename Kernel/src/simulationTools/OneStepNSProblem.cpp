@@ -32,13 +32,13 @@ using namespace std;
 // Default constructor
 OneStepNSProblem::OneStepNSProblem(const string pbType):
   nspbType(pbType), id(DEFAULT_OSNS_NAME), sizeOutput(0), solver(NULL), isSolverAllocatedIn(false),  simulation(NULL), onestepnspbxml(NULL),
-  levelMin(0), levelMax(0)
+  OSNSInteractions(NULL), levelMin(0), levelMax(0)
 {}
 
 // xml constructor
 OneStepNSProblem::OneStepNSProblem(const string pbType, OneStepNSProblemXML* osnspbxml, Simulation* newSimu):
   nspbType(pbType), id(DEFAULT_OSNS_NAME), sizeOutput(0), solver(NULL), isSolverAllocatedIn(false),  simulation(newSimu), onestepnspbxml(osnspbxml),
-  levelMin(0), levelMax(0)
+  OSNSInteractions(NULL), levelMin(0), levelMax(0)
 {
   if (onestepnspbxml == NULL)
     RuntimeException::selfThrow("OneStepNSProblem::xml constructor, xml file == NULL");
@@ -68,19 +68,20 @@ OneStepNSProblem::OneStepNSProblem(const string pbType, OneStepNSProblemXML* osn
   isSolverAllocatedIn = true;
 
   // === Link to the Interactions of the Non Smooth Dynamical System (through the Simulation) ===
+  // Warning: this means that all Interactions of the NSProblem are included in the OSNS !!
   OSNSInteractions = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
 }
 
 // Constructor with given simulation and a pointer on Solver (Warning, solver is an optional argument)
 OneStepNSProblem::OneStepNSProblem(const string pbType, Simulation * newSimu, string newId, Solver* newSolver):
   nspbType(pbType), id(newId), sizeOutput(0), solver(newSolver), isSolverAllocatedIn(false),  simulation(newSimu), onestepnspbxml(NULL),
-  levelMin(0), levelMax(0)
+  OSNSInteractions(NULL), levelMin(0), levelMax(0)
 {
   // === Checks simulation ===
   if (newSimu == NULL)
     RuntimeException::selfThrow("OneStepNSProblem::xml constructor(..., simulation), simulation == NULL");
 
-  // === Links to the Interactions of the Non Smooth Dynamical System (through the Simulation) ===
+  // === Link to the Interactions of the Non Smooth Dynamical System (through the Simulation) ===
   // Warning: this means that all Interactions of the NSProblem are included in the OSNS !!
   OSNSInteractions = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
 
@@ -98,7 +99,8 @@ OneStepNSProblem::~OneStepNSProblem()
   simulation = NULL;
   onestepnspbxml = NULL;
   clearBlocks();
-  OSNSInteractions.clear();
+  OSNSInteractions->clear();
+  OSNSInteractions = NULL;
 }
 
 SiconosMatrix* OneStepNSProblem::getBlockPtr(UnitaryRelation* UR1, UnitaryRelation* UR2) const
@@ -219,7 +221,7 @@ void OneStepNSProblem::updateBlocks()
   UnitaryRelationsSet * indexSet;
   bool isTimeInvariant, isBlockRequired;
   UnitaryRelationIterator itUR1, itUR2;
-
+  DynamicalSystemsSet commonDS;
   // Get index set from Simulation
 
   indexSet = simulation->getIndexSetPtr(levelMin);
@@ -228,7 +230,8 @@ void OneStepNSProblem::updateBlocks()
   {
     for (itUR2 = indexSet->begin(); itUR2 != indexSet->end(); ++itUR2)
     {
-      isBlockRequired = !(intersection(*(*itUR1)->getDynamicalSystemsPtr(), *(*itUR2)->getDynamicalSystemsPtr())).isEmpty();
+      intersection(*(*itUR1)->getDynamicalSystemsPtr(), *(*itUR2)->getDynamicalSystemsPtr(), commonDS);
+      isBlockRequired = !(commonDS.isEmpty());
 
       if (!isTimeInvariant && isBlockRequired)
         computeBlock(*itUR1, *itUR2);
@@ -253,6 +256,7 @@ void OneStepNSProblem::computeAllBlocks()
   UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(0);
 
   UnitaryRelationIterator itUR1, itUR2;
+  DynamicalSystemsSet commonDS;
 
   bool isBlockRequired;
 
@@ -260,7 +264,8 @@ void OneStepNSProblem::computeAllBlocks()
   {
     for (itUR2 = indexSet->begin(); itUR2 != indexSet->end(); ++itUR2)
     {
-      isBlockRequired = !(intersection(*(*itUR1)->getDynamicalSystemsPtr(), *(*itUR2)->getDynamicalSystemsPtr())).isEmpty();
+      intersection(*(*itUR1)->getDynamicalSystemsPtr(), *(*itUR2)->getDynamicalSystemsPtr(), commonDS);
+      isBlockRequired = !(commonDS.isEmpty());
 
       if (isBlockRequired)
         computeBlock(*itUR1, *itUR2);
@@ -277,7 +282,7 @@ void OneStepNSProblem::initialize()
 {
   // Checks that the set of Interactions is not empty -
   // Empty set is not forbidden, then we just display a warning message.
-  if (OSNSInteractions.isEmpty())
+  if (OSNSInteractions->isEmpty())
     //RuntimeException::selfThrow("OneStepNSProblem::initialize - The set of Interactions of this problem is empty.");
     cout << "Warning, OneStepNSProblem::initialize, the set of Interactions of this problem is empty." << endl;
   else
@@ -290,7 +295,7 @@ void OneStepNSProblem::initialize()
 void OneStepNSProblem::saveInMemory()
 {
   InteractionsIterator it;
-  for (it = OSNSInteractions.begin(); it != OSNSInteractions.end(); it++)
+  for (it = OSNSInteractions->begin(); it != OSNSInteractions->end(); it++)
     (*it)->swapInMemory();
 }
 
@@ -308,7 +313,7 @@ void OneStepNSProblem::saveNSProblemToXML()
     onestepnspbxml->setDimNSProblem(sizeOutput);
     vector<int> v;
     InteractionsIterator it;
-    for (it = OSNSInteractions.begin(); it != OSNSInteractions.end(); ++it)
+    for (it = OSNSInteractions->begin(); it != OSNSInteractions->end(); ++it)
       v.push_back((*it)->getNumber());
     //onestepnspbxml->setInteractionConcerned( v, allInteractionConcerned() );
 

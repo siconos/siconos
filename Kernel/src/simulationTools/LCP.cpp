@@ -29,13 +29,6 @@
 
 using namespace std;
 
-// Default constructor (private)
-LCP::LCP():
-  OneStepNSProblem("LCP"), w(NULL), z(NULL), M(NULL), q(NULL),
-  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false) ,
-  isMSparseBlock(false) , Mspbl(NULL)
-{}
-
 // xml constructor
 LCP::LCP(OneStepNSProblemXML* onestepnspbxml, Simulation* newSimu):
   OneStepNSProblem("LCP", onestepnspbxml, newSimu), w(NULL), z(NULL), M(NULL), q(NULL),
@@ -227,7 +220,7 @@ void LCP::initialize()
   Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
   // if all relative degrees are equal to 0 or 1
-  if (topology->isTimeInvariant() &&   !OSNSInteractions.isEmpty())
+  if (topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty())
   {
     // computeSizeOutput and updateBlocks were already done in OneStepNSProblem::initialize
     if (sizeOutput != 0)
@@ -332,7 +325,8 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
     blocks[UR1][UR2] = new SimpleMatrix(nslawSize1, nslawSize2);
 
   // Get DS common between UR1 and UR2
-  DynamicalSystemsSet commonDS = intersection(*UR1->getDynamicalSystemsPtr(), *UR2->getDynamicalSystemsPtr());
+  DynamicalSystemsSet commonDS;
+  intersection(*UR1->getDynamicalSystemsPtr(), *UR2->getDynamicalSystemsPtr(), commonDS);
   DSIterator itDS;
 
   // Get the W and Theta maps of one of the Unitary Relation - Warning: in the current version, if OSI!=Moreau, this fails.
@@ -654,7 +648,6 @@ void LCP::compute(const double time)
 
       startLCPsolve = clock();
       startLCPuni = clock();
-
       info = lcp_solver(M->getArray(), q->getArray(), &Nlcp, &solvingMethod, z->getArray(), w->getArray());
       timeLCPuni = clock() - startLCPuni;
 

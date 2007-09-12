@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlot(N + 1, outputSize);
     // For the initial time step:
     // time
-    dataPlot(k, 0) =  Pendulum->getCurrentT();
+    dataPlot(k, 0) =  Pendulum->getT0();
     dataPlot(k, 1) = simplependulum->getQ()(0);
     dataPlot(k, 2) = simplependulum->getVelocity()(0);
     dataPlot(k, 3) =  l1 * sin(simplependulum->getQ()(0));
@@ -197,46 +197,16 @@ int main(int argc, char* argv[])
     // --- Time loop ---
     cout << "Start computation ... " << endl;
     cout << "Number of time step" << N << "\n";
-    bool isNewtonConverge = false;
-    unsigned int nbNewtonStep = 0; // number of Newton iterations
-
     while (s->hasNextEvent())
     {
       k++;
       if (!(div(k, 1000).rem))  cout << "Step number " << k << "\n";
 
-
-
-      //s->newtonSolve(criterion,maxIter);
-
-      // Set Model current time
-      Pendulum->setCurrentT(s->getNextTime());
-      isNewtonConverge = false;
-      nbNewtonStep = 0;
-      while ((!isNewtonConverge) && (nbNewtonStep <= maxIter))
-      {
-        nbNewtonStep++;
-        s->advanceToEvent();
-        // Process all events simultaneous to nextEvent.
-        //  eventsManager->process();
-        isNewtonConverge = s->newtonCheckConvergence(criterion);
-      }
-      //cout << "Number of Newton iteration = " << nbNewtonStep <<endl;
-      // Process NextEvent (Save OSI (DS) and OSNS (Interactions) states into Memory vectors ...)
-      s->getEventsManagerPtr()->process();
-
-      // Set Model current time (may have changed because of events insertion during the loop above).
-      Pendulum->setCurrentT(s->getNextTime());
-
-      // Shift current to next ...
-      s->getEventsManagerPtr()->shiftEvents();
-
-      if (!isNewtonConverge)
-        cout << "Newton process stopped: reach max step number" << endl ;
-
+      // Solve problem
+      s->newtonSolve(criterion, maxIter);
 
       // Data Output
-      dataPlot(k, 0) =  Pendulum->getCurrentT();
+      dataPlot(k, 0) =  s->getStartingTime();
       dataPlot(k, 1) = simplependulum->getQ()(0);
       dataPlot(k, 2) = simplependulum->getVelocity()(0);
       dataPlot(k, 3) =  l1 * sin(simplependulum->getQ()(0));

@@ -28,8 +28,19 @@
 
 class DynamicalSystem;
 
+/* /\** Structure used for Interactions sorting. The address is used to compare two Interactions. *\/ */
+/* struct compareDS */
+/* { */
+/*   bool operator()(const DynamicalSystem* ds1, const DynamicalSystem* ds2) const */
+/*   { */
+/*     return (ds1<ds2); */
+/*   } */
+/* }; */
+
 /** set of Dynamical Systems */
 typedef std::set<DynamicalSystem*, RuntimeCmp<DynamicalSystem> > DSSet;
+//typedef std::set<DynamicalSystem*, compareDS > DSSet;
+
 
 /** iterator through a set of Dynamical Systems */
 typedef DSSet::iterator DSIterator;
@@ -50,20 +61,25 @@ typedef std::pair<DSSet::iterator, bool> CheckInsertDS;
  * Only one occurence of a DS can be present in the set.
  * Possible operations are insert, erase, get or check presence of Dynamical Systems.
  *
- * Warning: any call to operator = or copy constructor results in a false copy: (if set1=set2, pointers to ds of set1 are equal to those of set2)
- *
  */
 class DynamicalSystemsSet
 {
 protected:
 
   /** a set of DynamicalSystem, sorted thanks to their id number */
-  DSSet setOfDS;
+  DSSet * setOfDS;
 
   /** a map of bool to check inside-class allocation.
    *  isDSAllocatedIn[ds] = true if ds has been allocated in a method of the present class.
    */
   std::map<DynamicalSystem*, bool > isDSAllocatedIn;
+
+private:
+
+  /** copy constructor, private => copy forbidden
+   *  \param a DynamicalSystemsSet to be copied
+   */
+  DynamicalSystemsSet(const DynamicalSystemsSet&);
 
 public:
 
@@ -71,25 +87,16 @@ public:
    */
   DynamicalSystemsSet();
 
-  /** copy constructor
-   *  \param a DynamicalSystemsSet to be copied
-   */
-  DynamicalSystemsSet(const DynamicalSystemsSet&);
-
   /** destructor
    */
   ~DynamicalSystemsSet();
-
-  /** assignment
-   */
-  DynamicalSystemsSet& operator=(const DynamicalSystemsSet&);
 
   /** return the number of DS in the set
    *  \return an unsigned int
    */
   inline const unsigned int size() const
   {
-    return setOfDS.size();
+    return setOfDS->size();
   };
 
   /** iterator equal to the first element of setOfDS
@@ -97,15 +104,15 @@ public:
    */
   inline DSIterator begin()
   {
-    return setOfDS.begin();
+    return setOfDS->begin();
   };
 
-  /** iterator equal to setOfDS.end()
+  /** iterator equal to setOfDS->end()
    *  \return a DSIterator
    */
   inline DSIterator end()
   {
-    return setOfDS.end();
+    return setOfDS->end();
   }
 
   /** const iterator equal to the first element of setOfDS
@@ -113,21 +120,21 @@ public:
    */
   inline ConstDSIterator begin() const
   {
-    return setOfDS.begin();
+    return setOfDS->begin();
   };
 
-  /** const iterator equal to setOfDS.end()
+  /** const iterator equal to setOfDS->end()
    *  \return a ConstDSIterator
    */
   inline ConstDSIterator end() const
   {
-    return setOfDS.end();
+    return setOfDS->end();
   }
 
   /** return setOfDS
    *  \return a DSSet
    */
-  inline const DSSet getSetOfDS() const
+  inline const DSSet* getSetOfDS() const
   {
     return setOfDS;
   }
@@ -135,7 +142,7 @@ public:
   /** get Dynamical System number num, if it is present in the set (else, exception)
    *  \return a pointer to DynamicalSystem
    */
-  DynamicalSystem* getDynamicalSystemPtr(const int) const;
+  DynamicalSystem* getDynamicalSystemPtr(int) const;
 
   /** return true if ds is in the set
    *  \param a pointer to DynamicalSystem
@@ -172,7 +179,7 @@ public:
    */
   inline const bool isEmpty() const
   {
-    return setOfDS.empty();
+    return setOfDS->empty();
   };
 
   /** remove Dynamical System ds from the set
@@ -188,13 +195,19 @@ public:
    */
   void display() const;
 
-  /** return the intersection of s1 and s2 (-> set_intersection stl function)
-   */
-  friend const DynamicalSystemsSet intersection(const DynamicalSystemsSet& s1, const DynamicalSystemsSet& s2);
+  /** computes in s3 the intersection of s1 and s2 (-> set_intersection stl function)
+      \param DynamicalSystemsSet, s1
+      \param DynamicalSystemsSet, s2
+      \param DynamicalSystemsSet, s3
+  */
+  friend void intersection(const DynamicalSystemsSet&, const DynamicalSystemsSet&, DynamicalSystemsSet&);
 
-  /** return the difference betwee s1 and s2 (-> set_difference stl function)
+  /** computes in s3 the difference between s1 and s2 (-> set_difference stl function)
+      \param DynamicalSystemsSet, s1
+      \param DynamicalSystemsSet, s2
+      \param DynamicalSystemsSet, s3
    */
-  friend const DynamicalSystemsSet operator-(const DynamicalSystemsSet& s1, const DynamicalSystemsSet& s2);
+  friend void difference(const DynamicalSystemsSet&, const DynamicalSystemsSet&, DynamicalSystemsSet&);
 };
 
 #endif

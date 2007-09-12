@@ -48,7 +48,7 @@ class DynamicalSystem;
  *
  * with
  * \f[
- * G0(q,\lambda,z) = \nabla_q h(q,\lambda,z)
+ * G0(q,t,z) = \nabla_q h(q,t,z)
  * \f]
  *
  *

@@ -55,7 +55,7 @@ typedef std::pair<InterSet::iterator, bool> CheckInsertInteraction;
  *  \version 2.1.1.
  *  \date (Creation) May 17, 2006
  *
- * Interactions are sorted according to their id-number in a growing order.
+ * Interactions are sorted according to their address in a growing order.
  * Only one occurence of an Interaction can be present in the set.
  * Possible operations are insert, erase, get or check presence of Interactions.
  *
@@ -66,13 +66,20 @@ class InteractionsSet
 {
 protected:
 
-  /** a set of Interaction, sorted thanks to their id number */
-  InterSet setOfInteractions;
+  /** a set of Interaction, sorted thanks to their address */
+  InterSet * setOfInteractions;
 
   /** a map of bool to check inside-class allocation.
    *  isInteractionAllocatedIn[ds] = true if ds has been allocated in a method of the present class.
    */
   std::map<Interaction*, bool > isInteractionAllocatedIn;
+
+private:
+
+  /** copy constructor, private => forbidden
+   *  \param a InteractionsSet to be copied
+   */
+  InteractionsSet(const InteractionsSet&);
 
 public:
 
@@ -80,25 +87,16 @@ public:
   */
   InteractionsSet();
 
-  /** copy constructor
-  *  \param a InteractionsSet to be copied
-  */
-  InteractionsSet(const InteractionsSet&);
-
   /** destructor
   */
   ~InteractionsSet();
 
-  /** assignment
-  */
-  InteractionsSet& operator=(const InteractionsSet&);
-
   /** return the number of Interactions in the set
-  *  \return an unsigned int
-  */
+   *  \return an unsigned int
+   */
   inline const unsigned int size() const
   {
-    return setOfInteractions.size();
+    return setOfInteractions->size();
   };
 
   /** return true if the set is empty, else false
@@ -106,7 +104,7 @@ public:
   */
   inline const bool isEmpty() const
   {
-    return setOfInteractions.empty();
+    return setOfInteractions->empty();
   };
 
   /** iterator equal to the first element of setOfInteractions
@@ -114,15 +112,15 @@ public:
   */
   inline InteractionsIterator begin()
   {
-    return setOfInteractions.begin();
+    return setOfInteractions->begin();
   };
 
-  /** iterator equal to setOfInteractions.end()
+  /** iterator equal to setOfInteractions->end()
   *  \return a InteractionsIterator
   */
   inline InteractionsIterator end()
   {
-    return setOfInteractions.end();
+    return setOfInteractions->end();
   }
 
   /** const iterator equal to the first element of setOfInteractions
@@ -130,21 +128,21 @@ public:
   */
   inline ConstInteractionsIterator begin() const
   {
-    return setOfInteractions.begin();
+    return setOfInteractions->begin();
   };
 
-  /** const iterator equal to setOfInteractions.end()
+  /** const iterator equal to setOfInteractions->end()
   *  \return a InteractionsIterator
   */
   inline ConstInteractionsIterator end() const
   {
-    return setOfInteractions.end();
+    return setOfInteractions->end();
   }
 
   /** return setOfInteractions
   *  \return an InterSet
   */
-  inline const InterSet getSetOfInteractions() const
+  inline const InterSet * getSetOfInteractions() const
   {
     return setOfInteractions;
   }
@@ -197,13 +195,19 @@ public:
   */
   void display() const;
 
-  /** return the intersection of s1 and s2 (-> set_intersection stl function)
+  /** computes in s3 the intersection of s1 and s2 (-> set_intersection stl function)
+     \param InteractionsSet, s1
+     \param InteractionsSet, s2
+     \param InteractionsSet, s3
   */
-  friend const InteractionsSet intersection(const InteractionsSet& s1, const InteractionsSet& s2);
+  friend void intersection(const InteractionsSet&, const InteractionsSet&, InteractionsSet&);
 
-  /** return the difference betwee s1 and s2 (-> set_difference stl function)
+  /** computes in s3 the difference betwee s1 and s2 (-> set_difference stl function)
+     \param InteractionsSet, s1
+     \param InteractionsSet, s2
+     \param InteractionsSet, s3
   */
-  friend const InteractionsSet operator-(const InteractionsSet& s1, const InteractionsSet& s2);
+  friend void difference(const InteractionsSet&, const InteractionsSet&, InteractionsSet&);
 };
 
 #endif

@@ -42,12 +42,12 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int dsNumber = 10;      // the number of dynamical systems
     unsigned int nDof = 3;           // degrees of freedom for beads
-    double increment_position = 1;   // initial position increment from one DS to the following
+    double increment_position = 5;   // initial position increment from one DS to the following
     double increment_velocity = 0;   // initial velocity increment from one DS to the following
     double t0 = 0;                   // initial computation time
     double T = 4.0;                   // final computation time
     double h = 0.005;                // time step
-    double position_init = 5;     // initial position for lowest bead.
+    double position_init = 5.5;     // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
     double R = 0.1;                  // balls radius
     string solverName = "Lemke";     // solver algorithm used for non-smooth problem
@@ -240,7 +240,7 @@ int main(int argc, char* argv[])
         cout << k << endl;
       }
       // --- Get values to be plotted ---
-      dataPlot(k, 0) = multiBeads->getCurrentT();
+      dataPlot(k, 0) = s->getNextTime();
       i = 0;
       for (it = allDS.begin(); it != allDS.end(); ++it)
       {

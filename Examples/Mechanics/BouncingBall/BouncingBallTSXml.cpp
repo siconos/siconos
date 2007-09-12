@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
     {
       s->computeOneStep();
       // --- Get values to be plotted ---
-      dataPlot(k, 0) =  bouncingBall->getCurrentT();
+      dataPlot(k, 0) =  s->getStartingTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*lambda)(0);

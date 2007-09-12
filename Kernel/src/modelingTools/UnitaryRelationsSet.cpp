@@ -26,20 +26,6 @@ using namespace std;
 UnitaryRelationsSet::UnitaryRelationsSet()
 {}
 
-//-- Copy constructor --
-UnitaryRelationsSet::UnitaryRelationsSet(const UnitaryRelationsSet& newSet)
-{
-
-  // Warning: "false" copy since pointers links remain between Dynamical Systems of each set
-  clear();
-  ConstUnitaryRelationIterator it;
-  for (it = newSet.begin(); it != newSet.end(); ++it)
-  {
-    setOfUnitaryRelations.insert(*it);
-    isURAllocatedIn[*it] = false ;
-  }
-}
-
 // --- Destructor ---
 UnitaryRelationsSet::~UnitaryRelationsSet()
 {

@@ -195,93 +195,54 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlot(N + 1, outputSize);
     // For the initial time step:
     // time
-    dataPlot(k, 0) =  Pendulum->getCurrentT();
-    dataPlot(k, 1) = doublependulum->getQ()(0);
-    dataPlot(k, 2) = doublependulum->getVelocity()(0);
-    dataPlot(k, 3) = doublependulum->getQ()(1);
-    dataPlot(k, 4) = doublependulum->getVelocity()(1);
-    dataPlot(k, 5) =  l1 * sin(doublependulum->getQ()(0));
-    dataPlot(k, 6) = -l1 * cos(doublependulum->getQ()(0));
-    dataPlot(k, 7) =  l1 * sin(doublependulum->getQ()(0)) + l2 * sin(doublependulum->getQ()(1));
-    dataPlot(k, 8) = -l1 * cos(doublependulum->getQ()(0)) - l2 * cos(doublependulum->getQ()(1));
-    dataPlot(k, 9) =  l1 * cos(doublependulum->getQ()(0)) * (doublependulum->getVelocity()(0));
-    dataPlot(k, 10) = l1 * cos(doublependulum->getQ()(0)) * (doublependulum->getVelocity()(0)) + l2 * cos(doublependulum->getQ()(1)) * (doublependulum->getVelocity()(1));
-    // --- Compute elapsed time ---
-    double t1, t2, elapsed;
-    struct timeval tp;
-    int rtn;
-    clock_t start, end;
-    double elapsed2;
-    start = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t1 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
+    SiconosVector * q = doublependulum->getQPtr();
+    SiconosVector * v = doublependulum->getVelocityPtr();
 
-    //    EventsManager * eventsManager = s->getEventsManagerPtr();
+    dataPlot(k, 0) =  Pendulum->getT0();
+    dataPlot(k, 1) = (*q)(0);
+    dataPlot(k, 2) = (*v)(0);
+    dataPlot(k, 3) = (*q)(1);
+    dataPlot(k, 4) = (*v)(1);
+    dataPlot(k, 5) =  l1 * sin((*q)(0));
+    dataPlot(k, 6) = -l1 * cos((*q)(0));
+    dataPlot(k, 7) =  l1 * sin((*q)(0)) + l2 * sin((*q)(1));
+    dataPlot(k, 8) = -l1 * cos((*q)(0)) - l2 * cos((*q)(1));
+    dataPlot(k, 9) =  l1 * cos((*q)(0)) * ((*v)(0));
+    dataPlot(k, 10) = l1 * cos((*q)(0)) * ((*v)(0)) + l2 * cos((*q)(1)) * ((*v)(1));
+
+    boost::timer time;
+    time.restart();
 
     // --- Time loop ---
     cout << "Start computation ... " << endl;
-    bool isNewtonConverge = false;
-    unsigned int nbNewtonStep = 0; // number of Newton iterations
+
     boost::progress_display show_progress(N);
 
     while (s->hasNextEvent())
     {
       k++;
       ++show_progress;
-
       //  if (!(div(k,1000).rem))  cout <<"Step number "<< k << "\n";
 
-
-
-      //s->newtonSolve(criterion,maxIter);
-
-      // Set Model current time
-      Pendulum->setCurrentT(s->getNextTime());
-      isNewtonConverge = false;
-      nbNewtonStep = 0;
-      while ((!isNewtonConverge) && (nbNewtonStep <= maxIter))
-      {
-        nbNewtonStep++;
-        s->advanceToEvent();
-        // Process all events simultaneous to nextEvent.
-        //  eventsManager->process();
-        isNewtonConverge = s->newtonCheckConvergence(criterion);
-      }
-      //cout << "Number of Newton iteration = " << nbNewtonStep <<endl;
-      // Process NextEvent (Save OSI (DS) and OSNS (Interactions) states into Memory vectors ...)
-      s->getEventsManagerPtr()->process();
-
-      // Set Model current time (may have changed because of events insertion during the loop above).
-      Pendulum->setCurrentT(s->getNextTime());
-
-      // Shift current to next ...
-      s->getEventsManagerPtr()->shiftEvents();
-
-      if (!isNewtonConverge)
-        cout << "Newton process stopped: reach max step number" << endl ;
-
+      // Solve problem
+      s->newtonSolve(criterion, maxIter);
 
       // Data Output
-      dataPlot(k, 0) =  Pendulum->getCurrentT();
-      dataPlot(k, 1) = doublependulum->getQ()(0);
-      dataPlot(k, 2) = doublependulum->getVelocity()(0);
-      dataPlot(k, 3) = doublependulum->getQ()(1);
-      dataPlot(k, 4) = doublependulum->getVelocity()(1);
-      dataPlot(k, 5) =  l1 * sin(doublependulum->getQ()(0));
-      dataPlot(k, 6) = -l1 * cos(doublependulum->getQ()(0));
-      dataPlot(k, 7) =  l1 * sin(doublependulum->getQ()(0)) + l2 * sin(doublependulum->getQ()(1));
-      dataPlot(k, 8) = -l1 * cos(doublependulum->getQ()(0)) - l2 * cos(doublependulum->getQ()(1));
-      dataPlot(k, 9) =  l1 * cos(doublependulum->getQ()(0)) * (doublependulum->getVelocity()(0));
-      dataPlot(k, 10) = l1 * cos(doublependulum->getQ()(0)) * (doublependulum->getVelocity()(0)) + l2 * cos(doublependulum->getQ()(1)) * (doublependulum->getVelocity()(1));
+      dataPlot(k, 0) =  s->getStartingTime();
+      dataPlot(k, 1) = (*q)(0);
+      dataPlot(k, 2) = (*v)(0);
+      dataPlot(k, 3) = (*q)(1);
+      dataPlot(k, 4) = (*v)(1);
+      dataPlot(k, 5) =  l1 * sin((*q)(0));
+      dataPlot(k, 6) = -l1 * cos((*q)(0));
+      dataPlot(k, 7) =  l1 * sin((*q)(0)) + l2 * sin((*q)(1));
+      dataPlot(k, 8) = -l1 * cos((*q)(0)) - l2 * cos((*q)(1));
+      dataPlot(k, 9) =  l1 * cos((*q)(0)) * ((*v)(0));
+      dataPlot(k, 10) = l1 * cos((*q)(0)) * ((*v)(0)) + l2 * cos((*q)(1)) * ((*v)(1));
     }
 
-    end = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t2 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-    elapsed = t2 - t1;
-    elapsed2 = (end - start) / (double)CLOCKS_PER_SEC;
-    cout << "time = " << elapsed << " --- cpu time " << elapsed2 << endl;
     cout << "End of computation - Number of iterations done: " << k << endl;
+    cout << "Computation Time " << time.elapsed()  << endl;
 
     // --- Output files ---
     ioMatrix out("DoublePendulumResult.dat", "ascii");

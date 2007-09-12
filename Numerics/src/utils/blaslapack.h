@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 #ifndef BLASLAPACK_H
 #define BLASLAPACK_H
@@ -334,14 +334,7 @@ extern void F77NAME(zgesdd)(char *jobz, integer *m, integer *n, doublecomplex *a
 #ifndef _DLAPACK_H_
 #define _DLAPACK_H_
 
-
-
 // *************************** Utility Routines **********************
-
-
-extern double F77NAME(dlamch)(char *t);
-
-
 
 //******************** Linear Equation Solvers *************************
 extern void F77NAME(dgesv)(integer *n, integer *k, doublereal *A, integer *lda, integer *ipiv,
@@ -402,6 +395,9 @@ extern void F77NAME(dgecon)(char *norm, integer *n, double *a,
                             integer *lda, double *anorm, double *rcond,
                             double *work, integer *iwork,
                             integer *info);
+extern void F77NAME(dpotri)(char *UPLO, integer *N, doublereal *SM, integer *LDSM,
+                            integer *info);
+
 // ********************* LU Solve Routines ***************************
 
 extern void F77NAME(dgetrs)(char *trans, integer *N, integer *nrhs, doublereal *A, integer *lda,

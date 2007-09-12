@@ -77,12 +77,12 @@ void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , int *in
   int i, iter;
   int itermax, verbose;
   int incxn;
-  double qs, err, num, den, zi;
+  double qs, err,/* num, */den, zi;
   double tol, omega;
   double *ww, *diag;
-  double a1, b1;
+  /*   double a1,b1; */
 
-  char NOTRANS = 'N';
+  /*   char NOTRANS = 'N'; */
 
   n = *nn;
   incx = 1;

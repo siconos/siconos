@@ -2,7 +2,7 @@
 
 Simulation object is used to describe how a previously defined NonSmoothDynamicalSystem will be computed. \n
 
-So before starting any simulation process, you need to have a complete non smooth dynamical system (roughly some DynamicalSystems and some Interactions), attached to a Model. Then the key points of the Simulation are:
+So before starting any simulation process, you need to have a complete non smooth dynamical system (roughly some dynamical systems and some interactions), attached to a Model. Then the key points of the Simulation are:
 - the description of a time discretisation (see \ref docSimuTD)
 - how the dynamical systems are integrate (see \ref docSimuOSI)
 - how the non smooth problem is written and solved (see \ref docSimuOSNS)
@@ -10,6 +10,7 @@ So before starting any simulation process, you need to have a complete non smoot
 Above all these points, a global strategy must be defined. At the time, two possibilities exist in Siconos:
 - TimeStepping scheme 
 - EventDriven algorithm
+
 Those two types are derived classes of the base one, Simulation.
 
 \image html classSimulation.png
@@ -42,35 +43,45 @@ Lsodar * integrator = new Lsodar(someDS,s);
 OneStepNSProblem * lcp = new LCP(s, ...)
 \endcode
 Then, from this point the Model is complete and the simulation process can start. Its development depends strongly on the chosen strategy and will then be detailed in the corresponding sections (see \ref docSimuMoreauTS or \ref docSimuED).\n
+
 Warning: it is important to make a clear difference between the building of the Simulation, which is part of the Model, and the computation process which consists mainly in some calls to specific functions of the Simulation. 
 
 \section docSimuIntro Main components of a Simulation
 \subsection docSimuTD Time Discretisation
 
-The discretization scheme is characterized by a vector of size nSteps+1, denoted tk, that handles the values at each time-step, nSteps being the number of time steps. At the time, only constant time-step (denoted h) time discretisation is available. \n
-A TimeDiscretisation must be linked to one and only one Simulation (required parameter of any constructor). The initial time value is always given by the Model that holds the Simulation, while the final time value is an optional parameter of the Model. Thus depending on the constructor you use, you may need to give the time-step, the final time ... Just take care to avoid redundant or conflicting information. See the constructors list in the TimeDiscretisation class documentation for full details. 
+The discretisation scheme is characterized by a vector of size nSteps+1, denoted tk, that handles the values at each time-step, nSteps being the number of time steps. At the time, only a constant time-step (denoted h) time discretisation is available. \n
+
+A TimeDiscretisation must be linked to one and only one Model (required parameter of any constructor). This Model provides the initial time value and possibly the final time value, which is an optional parameter. Thus depending on the constructor you use, you may need to give the time-step, the final time ... \n
+Just take care to avoid redundant or conflicting information. See the constructors list in the TimeDiscretisation class documentation for full details. 
 
 Example: 
 \code
 
 Model * m = new Model(t0); // only initial time is provided
-Simulation * s = new TimeStepping(m); // s belongs to the Model m
 double h = ...;
 unsigned int nSteps = ...;
-TimeDiscretisation * td = new TimeDiscretisation(h, nSteps);
+TimeDiscretisation * td = new TimeDiscretisation(h, nSteps,m);
 // tk and final time will be automatically computed. 
+// 
+// Then a simulation is created and associated to m through td. 
+Simulation * s = new TimeStepping(td);
 \endcode
 
 \subsection docSimuOSI One Step Integrators
 
-OneStepIntegrator ("OSI") class defines how Dynamical Systems will be integrated over a time-step. Two types of integrators are available at the time in the platform:
- Moreau (see details in \ref docSimuMoreauTS) and Lsodar. \n
+The OneStepIntegrator ("OSI") class defines the way some dynamical systems will be integrated over a time-step or between two events. \n
+
+At the time, two types of integrators are available in the platform. Each of them corresponds to a specific simulation strategy
+- Moreau (see details in \ref docSimuMoreauTS), for time-stepping simulations \n
+- Lsodar, for event-driven simulations (see \ref docSimuED). \n
+
 To build an OSI, you need to provide a set of DynamicalSystems (and possibly a set of Interactions) and some specific values depending on the type of the integrator.
 Moreover, the "size of the memory" (variable sizeMem) can be set: it concerns the number of time steps for which states values are saved, but at the time no multi-steps integrators are available in Siconos, so keep default value, 1.
 
-main functions:
-- integrate(t0, t, ...): integrate the system between t0 and t. 
-- updateState(...): computes DynamicalSystems states values 
+Main functions are:
+
+- integrate(tinit, tend,tout ...): to integrate the systems between tinit and tend with a possible stop at tout.
+- updateState(...): to compute dynamical systems states values.
 
 \subsubsection docSimuOSIMoreau Moreau
 Integration thanks to a theta-method. See \ref docSimuMoreauTS for a full description. 

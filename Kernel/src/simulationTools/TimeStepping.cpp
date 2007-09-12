@@ -79,10 +79,12 @@ TimeStepping::~TimeStepping()
 
 void TimeStepping::updateIndexSet(unsigned int i)
 {
+  // To update IndexSet number i: add or remove UnitaryRelations from this set, depending on y values.
+
   if (i > indexSets.size())
     RuntimeException::selfThrow("TimeStepping::updateIndexSet(i), indexSets[i] does not exist.");
 
-  if (i == 0) // IndexSets[0] must not be updated by this function.
+  if (i == 0) // IndexSets[0] must not be updated in simulation, since it belongs to the Topology.
     RuntimeException::selfThrow("TimeStepping::updateIndexSet(i=0), indexSets[0] can not be updated.");
 
   // for all Unitary Relations in indexSet[i-1], compute y[i-1] and update the indexSet[i]
@@ -90,47 +92,29 @@ void TimeStepping::updateIndexSet(unsigned int i)
 
   double y;
 
-  if (i == 1) // special case for Moreau time-stepping
+  // For all UR in Index0 ...
+  for (it = (indexSets[i - 1])->begin(); it != (indexSets[i - 1])->end(); ++it)
   {
-    double yp;
-    double yDot;
-    for (it = (indexSets[0])->begin(); it != (indexSets[0])->end(); ++it)
+    // itForFind: indicator to check if current Unitary Relation (ie *it) is already in indexSets[1]
+    // (if not itForFind will be equal to indexSets.end())
+    itForFind = (indexSets[i])->find(*it);
+
+    // Get y values for the considered UnitaryRelation
+    y = (*it)->getYRef(i - 1); // y[i-1](0)
+    if (i == 1)
     {
-      double h = getTimeStep();
-      // checks if current Unitary Relation (ie *it) is already in indexSets[1]
-      // (if not itForFind will be equal to indexSets.end())
-      itForFind = (indexSets[1])->find(*it);
-      y = (*it)->getYRef(0);
-      yDot = (*it)->getYRef(1);
-      yp = y + 0.5 * h * yDot;
-
-      // if yp <=0, then the unitary relation is added in indexSets[1] (if it was not already there)
-      // else if yp > 0 and if the unitary relation was in the set, it is removed.
-      if (yp <= 0 && itForFind == (indexSets[1])->end())
-        (indexSets[1])->insert(*it);
-
-      else if (yp > 0 && itForFind != (indexSets[1])->end())
-        (indexSets[1])->erase(*it);
+      double h = getTimeStep(); // Current time step
+      double yDot = (*it)->getYRef(1); // y[1](0)
+      y += 0.5 * h * yDot; // y_"prediction" = y[0](0) + 0.5*h*y[1](0)
     }
-  }
-  else
-  {
-    for (it = indexSets[i - 1]->begin(); it != indexSets[i - 1]->end(); ++it)
-    {
-      // check if current Unitary Relation (ie *it) is in indexSets[i]
-      // (if not itForFind will be equal to indexSets.end())
-      itForFind = indexSets[i]->find(*it);
 
-      // Get y[i-1] double value
-      y = (*it)->getYRef(i - 1);
+    // if y <=0, then the unitary relation is added in indexSets[1] (if it was not already there)
+    // else if y > 0 and if the unitary relation was in the set, it is removed.
+    if (y <= 0 && itForFind == (indexSets[i])->end())
+      (indexSets[i])->insert(*it);
 
-      // if y[i-1] <=0, then the unitary relation is added in indexSets[i] (if it was not already there)
-      // else if y[i-1] > 0 and if the unitary relation was in the set, it is removed.
-      if (y <= 0 && itForFind == indexSets[i]->end())
-        indexSets[i]->insert(*it);
-      else if (y > 0 && itForFind != indexSets[i]->end())
-        indexSets[i]->erase(*it);
-    }
+    else if (y > 0 && itForFind != (indexSets[i])->end())
+      (indexSets[i])->erase(*it);
   }
 }
 
@@ -192,19 +176,23 @@ void TimeStepping::nextStep()
 
 void TimeStepping::update(unsigned int levelInput)
 {
-  // compute input (lambda -> r)
+  // 1 - compute input (lambda -> r)
   updateInput(levelInput);
 
-  // compute state for each dynamical system
+  // 2 - compute state for each dynamical system
 
   OSIIterator itOSI;
   for (itOSI = allOSI.begin(); itOSI != allOSI.end() ; ++itOSI)
     (*itOSI)->updateState(levelInput);
 
+  // 3 - compute output ( x ... -> y)
   if (!allNSProblems.empty() && levelMin > 0)
   {
     updateOutput(0, levelMax);
   }
+
+  // 4 - Update index sets
+  updateIndexSets();
 }
 
 void TimeStepping::computeFreeState()
@@ -228,10 +216,8 @@ void TimeStepping::advanceToEvent()
 
   computeFreeState();
   if (!allNSProblems.empty())
-  {
-    updateIndexSets();
     computeOneStepNSProblem("timeStepping");
-  }
+
   // update
   update(levelMin);
 }

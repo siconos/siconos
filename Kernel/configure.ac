@@ -30,7 +30,7 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([macros])
 # SO version of all siconos shared libraries
 SICONOS_SO_CURRENT=4
-SICONOS_SO_REVISION=0
+SICONOS_SO_REVISION=1
 SICONOS_SO_AGE=0
 AC_SUBST(SICONOS_SO_CURRENT)
 AC_SUBST(SICONOS_SO_REVISION)
@@ -325,6 +325,7 @@ AC_CONFIG_FILES([Makefile
                  src/modelingTools/Makefile
 		 src/modelingTools/test/Makefile
 	         src/simulationTools/Makefile
+	         src/simulationTools/test/Makefile
 	         src/controlTools/Makefile
                  src/plugin/Makefile
 		 src/plugin/test/Makefile

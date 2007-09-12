@@ -3,14 +3,14 @@
 \section docInterIntro Interactions
 class Interaction
 
-What is an Interaction? \n
+\b What \b is \b an \b Interaction? \n
 
-An Interaction is an "object" that defines the way some Dynamical Systems are linked, how they behave all together. \n
-For example if you consider a set of rigid bodies, Interactions will define what's happening at contact. 
+An Interaction is an "object" that defines the way some Dynamical Systems are linked, how they behave together. \n
+For example if you consider a set of rigid bodies, Interactions will define what is happening at contact. 
 
-Building an Interaction? \n
+\b Building \b an \b Interaction? \n
 
-An Interaction is applied to a set of Dynamical Systems, and is then charaterized by a vector of global coordinates, say X (or Q in the Lagrangian case), with:
+An Interaction is applied to a set of Dynamical Systems, then we introduce the following vectors of global coordinates, say X (or Q in the Lagrangian case):
 
 \f[
 X=\left[\begin{array}{c} 
@@ -26,7 +26,9 @@ q_1 \\
 \f]
 \f$ x_i \ (or \ q_i)\f$ being the vectors of global coordinates of the Dynamical Systems involved in the Interaction.
 
-Remember also that each Dynamical System as a variable called \e r (or \e p in the Lagrangian case), input vector related to non smooth law. Thus we define for the Interaction R as:
+Remember also that each DynamicalSystem as a variable called \e r (or \e p in the Lagrangian case), an input vector related to the non smooth behavior or law. \n
+(for example, p may represent the reaction when contact occurs). \n
+Thus we define R for the Interaction as:
 \f[
 R=\left[\begin{array}{c} 
 r_0 \\
@@ -40,123 +42,26 @@ p_1 \\
 \end{array}\right]
 \f]
  
-Warning: it is not possible at the time to mix first and second order Dynamical Systems in a single Interaction. \n
+\e Warning: it is forbidden to mix first and second order Dynamical Systems in a single Interaction. \n
 
-An Interaction is characterized by some "local" variables, y (also called output, R being the input) and \f$ \lambda \f$. Both of them are "vector of vectors":
+An Interaction is characterized by some "local" variables, y (also called output, R being the input) and \f$ \lambda \f$. Both of them are "vector of vectors": \n
 y[i] is a vector that represents the derivative number i of variable y according to time. Each y[i] or \f$ \lambda[i] \f$ is a vector of size
-interactionSize. 
+\e interactionSize. \n
+Not that the number of saved derivatives depends on the problem type.
 
 Then an Interaction proposes:
 - a \ref docNSL "Non Smooth Law" that links y and \f$ \lambda \f$
-- a \ref docRelation "Relation" between the local variables \f$ (y,\lambda) \f$ and the global ones (those of the Dynamical Systems), \f$ (X,R) \f$.
+- a \ref docRelation "Relation" between the local variables \f$ (y,\lambda) \f$ and the global ones (those of the Dynamical Systems), \f$ (X,R) \f$ (the constraints).
 
-As an example consider again the case of a Ball bouncing on the ground:
-- the Interaction will include the two Dynamical Systems (ball and ground)
-- the relation will consist in defining y as the distance between the ground and the ball and \f$ \lambda \f$ as something like the reaction of the ground at contact.
-- the Non-Smooth law will "say": if there is contact, then the reaction is positive (y=0 then \f$ \lambda \f$>0) and if no contact, no reaction (if \f$ \lambda \f$=0, y>0); and also that the velocity after contact is equal to the opposite of the one before contact multiplied by some "damping" coefficient (this corresponds to a Newton Impact Law, see below).
+As an example consider again the case of a ball bouncing on the ground:
+- the Interaction will include the two dynamical systems (ball and ground)
+- the relation will consist in defining y as the distance between the ground and the ball and \f$ \lambda \f$ as something like the reaction of the ground at contact
+(Lagrangian multipliers indeed).
+- the Non-Smooth law will "say": if there is contact, then the reaction is positive (y=0 then \f$ \lambda \f$>0) and if not, no reaction occurs(if \f$ \lambda \f$=0, y>0); and also that the velocity after contact is equal to the opposite of the one before contact multiplied by some "damping" coefficient (this corresponds to a Newton Impact Law, see below).
 
-\section docNSL Non Smooth Laws
-\b classes: NonSmoothLaw, ComplementarityConditionNSL, NewtonImpactNSL, NewtonImpactFrictionNLS, RelayNSL.
+Definition and description of the different types of relations and non-smooth laws are presented in the sections below.
 
-\image html classNonSmoothLaw.png
-\image latex classNonSmoothLaw.eps "" width=10cm
-
-Each non-smooth law is characterized by a type (more or less the name of its class), a size, plus some specific variables depending on its type.
-
-\subsection docNSLCC Complementarity Condition
-
-nsLawSize: 1.\n
-no specific parameters.
-\f{eqnarray*}
- 0 \leq y \perp \lambda\geq 0
-\f}
-\subsection docNSLNI Newton Impact
-nsLawSize: 1.\n
-parameter: \e e, the Newton normal coefficient of restitution.
-\f[
-if \ y(t)=0,\ 0 \leq \dot y(t^+) +e   \dot y(t^-) \perp \lambda\geq 0
-\f]
-\subsection docNSLNIF Newton Impact-Friction
-nsLawSize: 2 or 3 (2 or 3 dimensional friction).\n
-parameters: en, et (Newton impact normal and tangential coefficients) and mu, friction coefficient.\n
-
-Newton Impact Law plus Coulomb Friction. \n
-In this case, y components are in the following order:\n
-first relation, normal part\n
-first relation, tangential part\n
-...\n
-relation n, normal part \n
-relation n, tangential part\n
-and so on ...\n
-
-Note also that usually only normal part definition is required for y[0]. 
-
-\subsection docNSLR Relay
-nsLawSize: 1.\n
-parameters: c and d
-\f{eqnarray*}
-\dot y &=0&, \  d \leq \lambda \leq c \\
-\dot y &\geq 0&, \ \lambda =  c \\
-\dot y &\leq 0&, \ \lambda =  d \\
-\f}
-\section docRelation Relations
-
-\b classes: Relation, LinearTIR, LagrangianR, LagrangianLinearR.
-
-\image html classRelation.png
-\image latex classRelation.eps "" width=10cm
-
-A Relation defines the link between local variables of the Interaction and global variables of the DynamicalSystems.
-They fit with first order systems (Relation and LinearTIR) or second order Lagrangian ones (LagrangianR, LagrangianLinearR).
-
-\subsection docRelationNL Non Linear Relation
-\f{eqnarray*}
-output &= y =& h(X,t,\lambda,u,...)\\
-input &= R =& g(\lambda,t)
-\f}
-
-h and g are defined in a plug-in. 
-Use setComputeOutputFunction and setComputeInputFunction to set them and computeInput(time), computeOutput(time) to compute y and R. 
-
-\subsection docRelationLTI Linear Time Invariant Relation
-\f{eqnarray*}
-y &=& CX + FU + D \lambda + e \\
-R &=& B \lambda
-\f}
-
-\subsection docRelationLag Lagrangian Relation
-Lagrangian non linear relation, 3 different cases are available:
-
-- scleronomic: the constraints depend only on the state,
- \f{eqnarray*}
-y &=& h0(q) \\
-\dot y &=& G0(q)\dot q \\
-p &=& G0^t(q)\lambda 
-\f}
-
-- rhenomorous: the constraints depend on time and state
-\f{eqnarray*}
-y &=& h1(q,t) \\
-\dot y &=& G10(q,t)\dot q + G11(q,t) \\
-p &=& G10^t(q)\lambda 
-\f}
-
-- scleronomic+lambda: the constraints depends on state and \f$ \lambda \f$
-\f{eqnarray*}
-y &=& h2(q,\lambda[0]) \\
-\dot y &=& G20(q,t)\dot q + G21(q,t)\lambda[1] \\
-p[i] &=& G20^t(q)\lambda[i] 
-\f}
-
-\subsection docRelationLagLin  Lagrangian Linear Relation
- \f{eqnarray*}
- y&=& H q + b + D\lambda \\
- p&=& H^t \lambda 
- \f}
-
-\subsection doc_relPlugIn Relations plug-in functions
-
-Relation: \f$ h(X,t,\lambda, u), \ \ g(\lambda,t) \f$.\n
-LagrangianR: \f$ h0(q), \ \ G0(q) \ \, \ \ h1(q,t), \ \ G10(q,t), \ \ G11(q,t), \ \ h2(q,\lambda), \ \ G20(q,\lambda), \ \ G21(q,\lambda) \f$
+-- \subpage docNSL \n
+-- \subpage docRelation
 
 */

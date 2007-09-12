@@ -77,12 +77,12 @@ void lcp_rpgs(int *nn , double *vec , double *q , double *z , double *w , int *i
   int n, incx, incy;
   int i, iter;
   int itermax, ispeak;
-  double qs, err, num, den, zi, wi;
+  double qs, err/* ,num */, den, zi, wi;
   double tol, omega, rho;
-  double *ww, *diag, *zprev;
+  double /* *ww, */*diag/* ,*zprev */;
   double a1, b1;
-  double invrho, vecii, ziprev, maxdiag;
-  int *diagprev;
+  double/*  invrho, */ vecii, ziprev/* ,maxdiag */;
+  /*   int *diagprev; */
 
   char NOTRANS = 'N';
 

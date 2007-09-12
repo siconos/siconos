@@ -51,7 +51,7 @@ The events manager is initialized with time-discretisation events, from the user
 The manager has also a \link EventsManager::processEvents processEvents \endlink function, which moves currentEvent to past events set, processes nextEvent and prepare the next step. \n
 
 Other useful functions are: 
-- \link EventsManager::getCurrentTime() getCurrentTime \endlink, \link EventsManager::getNextTime() getNextTime \endlink
+- \link EventsManager::getStartingTime() getStartingTime \endlink, \link EventsManager::getNextTime() getNextTime \endlink
 - \link EventsManager::scheduleEvent scheduleEvent \endlink: to add a new event in the manager. This function is the only way to create and add new events in your simulation; since you are not allowed to straightforward create an Event and add it in the manager.
 - \link EventsManager::removeEvent removeEvent \endlink to delete an event ...
 

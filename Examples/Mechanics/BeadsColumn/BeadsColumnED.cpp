@@ -43,8 +43,8 @@ int main(int argc, char* argv[])
     double increment_position = 1;   // initial position increment from one DS to the following
     double increment_velocity = 0;   // initial velocity increment from one DS to the following
     double t0 = 0;                   // initial computation time
-    double T = 4.0;                   // final computation time
-    double h = 0.05;                 // time step
+    double T = 4;                   // final computation time
+    double h = 0.005;                 // time step
     double position_init = 5;     // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
     double R = 0.1;                  // balls radius
@@ -192,7 +192,7 @@ int main(int argc, char* argv[])
     s->initialize();
 
     int k = 0; // Current step
-    int N = 692;// Number of Events
+    int N = 14692;// Number of Events
 
     // Prepare output and save value for the initial time
     unsigned int outputSize = dsNumber * 2 + 1;
@@ -222,10 +222,10 @@ int main(int argc, char* argv[])
 
       s->processEvents();
 
-      if (eventsManager->getCurrentEventPtr()->getType() == "NonSmoothEvent")
+      if (eventsManager->getStartingEventPtr()->getType() == "NonSmoothEvent")
       {
         i = 0; // Remember that DS are sorted in a growing order according to their number.
-        dataPlot(k, 0) = s->getCurrentTime();
+        dataPlot(k, 0) = s->getStartingTime();
         for (it = allDS.begin(); it != allDS.end(); ++it)
         {
           dataPlot(k, (int)i * 2 + 1) = (*static_cast<LagrangianLinearTIDS*>(*it)->getQMemoryPtr()->getSiconosVector(1))(0);
@@ -239,7 +239,7 @@ int main(int argc, char* argv[])
       // Positions and velocities
 
       i = 0; // Remember that DS are sorted in a growing order according to their number.
-      dataPlot(k, 0) = s->getCurrentTime();
+      dataPlot(k, 0) = s->getStartingTime();
       for (it = allDS.begin(); it != allDS.end(); ++it)
       {
         dataPlot(k, (int)i * 2 + 1) = static_cast<LagrangianLinearTIDS*>(*it)->getQ()(0);

@@ -19,7 +19,7 @@
  * WARNING: at the time mainly written for Lagrangian systems !!!
  */
 /*! \file
- Lsodar solver (from odepack)
+  Lsodar solver (from odepack)
 */
 #ifndef Lsodar_H
 #define Lsodar_H
@@ -35,6 +35,17 @@ class BlockVector;
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 2.1.1.
  *  \date (Creation) Apr 26, 2004
+ *
+ * Many parameters are required as input/output for LSODAR. See the documentation of this function
+ * in Numerics/src/odepack/opkdmain.f to have a full description of these parameters.  \n
+ * Most of them are read-only parameters (ie can not be set by user). \n
+ *  Except: \n
+ *  - jt: Jacobian type indicator (1 means a user-supplied full Jacobian, 2 means an internally generated full Jacobian). \n
+ *    Default = 2.
+ *  - itol, rtol and atol \n
+ *    ITOL   = an indicator for the type of error control. \n
+ *    RTOL   = a relative error tolerance parameter, either a scalar or array of length NEQ. \n
+ *    ATOL   = an absolute error tolerance parameter, either a scalar or an array of length NEQ.  Input only.
  */
 class Lsodar : public OneStepIntegrator
 {
@@ -55,139 +66,147 @@ private:
    * See opkdmain.f and lsodar routine for details on those variables.
    */
   std::vector<integer> intData;
-  /** rtol, atol, rwork, jroot */
-  std::vector<doublereal*> doubleData;
-  /** iwork */
+  /** relative tolerance */
+  doublereal * rtol;
+  /** absolute tolerance */
+  doublereal * atol;
+  /** real work array */
+  doublereal * rwork;
+  /** integer work array */
   integer * iwork;
-
+  /** integer array used for output of root information */
+  integer * jroot;
   /** temporary vector to save x values */
   BlockVector* xWork;
 
-  /** default constructor
-  */
-  Lsodar();
+  /** default constructor, private
+   */
+  Lsodar() {};
 
 public:
 
   /** constructor from xml file
-  *  \param OneStepIntegratorXML* : the XML object
-  *  \param Simulation * : the simulation that owns the osi
-  */
+   *  \param OneStepIntegratorXML* : the XML object
+   *  \param Simulation * : the simulation that owns the osi
+   */
   Lsodar(OneStepIntegratorXML*, Simulation*);
 
   /** constructor from a minimum set of data
-  *  \param DynamicalSystem* : the DynamicalSystem linked to the OneStepIntegrator
-  *  \param Simulation * : the simulation that owns the osi
-  */
+   *  \param DynamicalSystem* : the DynamicalSystem linked to the OneStepIntegrator
+   *  \param Simulation * : the simulation that owns the osi
+   */
   Lsodar(DynamicalSystem* , Simulation*);
 
   /** constructor from a list of Dynamical Systems
-  *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
-  *  \param Simulation * : the simulation that owns the osi
-  */
+   *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
+   *  \param Simulation * : the simulation that owns the osi
+   */
   Lsodar(DynamicalSystemsSet&, Simulation*);
 
   /** destructor
-  */
+   */
   ~Lsodar();
 
   /** get the TimeDiscretisation of lsodar
-  *  \return the TimeDiscretisation
-  */
+   *  \return the TimeDiscretisation
+   */
   inline TimeDiscretisation* getTimeDiscretisationPtr() const
   {
     return localTimeDiscretisation;
   };
 
   /** set timeDiscretisation of lsodar
-  *  \param the TimeDiscretisation to set
-  */
+   *  \param the TimeDiscretisation to set
+   */
   void setTimeDiscretisationPtr(TimeDiscretisation*);
 
   /** get vector of integer parameters for lsodar
-  *  \return a vector<integer>
-  */
+   *  \return a vector<integer>
+   */
   inline const std::vector<integer> getIntData() const
   {
     return intData;
   }
 
   /** get intData[i]
-  *  \return an integer
-  */
-  inline const integer getIntData(const unsigned int i) const
+   *  \return an integer
+   */
+  inline const integer getIntData(unsigned int i) const
   {
     return intData[i];
   }
 
-  /** set vector intData to newVector with a copy.
-  *  \param std::vector<integer>
-  */
-  void setIntData(const std::vector<integer>&);
-
-  /** set intData[i] to newValue
-  *  \param a unsigned int (index) and an integer (value)
-  */
-  inline void setIntData(const unsigned int  i, const integer  newValue)
+  /** get relative tolerance parameter for lsodar
+   *  \return a doublereal*
+   */
+  inline const doublereal* getRtol() const
   {
-    intData[i] = newValue;
+    return rtol;
   }
 
-  /** get vector of doublereal* parameters for lsodar
-  *  \return a vector<doublereal*>
-  */
-  inline const std::vector<doublereal*> getDoubleData() const
+  /** get absolute tolerance parameter for lsodar
+   *  \return a doublereal*
+   */
+  inline const doublereal* getAtol() const
   {
-    return doubleData;
+    return atol;
   }
 
-  /** get doubleData[i]
-  *  \return a pointer on doublereal.
-  */
-  inline doublereal* getDoubleData(const unsigned int i) const
+  /** get real work vector parameter for lsodar
+   *  \return a doublereal*
+   */
+  inline const doublereal* getRwork() const
   {
-    return doubleData[i];
+    return rwork;
   }
-
-  /** set vector doubleData to newVector with a copy -> memory allocation
-  *  \param std::vector<doublereal*>
-  */
-  void setDoubleData(const std::vector<doublereal*>&);
-
-  /** set doubleData[i] to newPtr
-  *  \param a unsigned int (index) and a pointer to doublereal
-  */
-  // void setDoubleData(const unsigned int , doublereal*);
 
   /** get iwork
-  *  \return a pointer to integer
-  */
+   *  \return a pointer to integer
+   */
   inline integer* getIwork() const
   {
     return iwork;
   }
 
-  /** set iwork to newValue with a copy.
-  *  \param pointer to integer
-  */
-  void setIwork(integer*);
+  /** get output of root information
+   *  \return a pointer to integer
+   */
+  inline integer* getJroot() const
+  {
+    return jroot;
+  }
+
+  /** set Jt value, Jacobian type indicator
+   *  \param pointer to integer
+   */
+  inline void setJT(integer newValue)
+  {
+    intData[8] = newValue;
+  };
+
+  /** set itol, rtol and atol (tolerance parameters for lsodar)
+   *  \param integer (itol value)
+   *  \param doublereal * (rtol)
+   *  \param doublereal * (atol)
+   */
+  void setTol(integer, doublereal *, doublereal*);
 
   /** update doubleData and iwork memory size, when changes occur in intData.
-  */
+   */
   void updateData();
 
   /** fill xWork with a doublereal
-  *  \param integer*, size of x array
-  *  \param doublereal* x:array of double
-  */
+   *  \param integer*, size of x array
+   *  \param doublereal* x:array of double
+   */
   void fillXWork(integer*, doublereal *) ;
 
   /** compute rhs(t) for all dynamical systems in the set
-  */
+   */
   void computeRhs(const double) ;
 
   /** compute jacobian of the rhs at time t for all dynamical systems in the set
-  */
+   */
   void computeJacobianRhs(const double) ;
 
   void f(integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot);
@@ -197,34 +216,30 @@ public:
   void jacobianF(integer *, doublereal *, doublereal *, integer *, integer *,  doublereal *, integer *);
 
   /** initialise the integrator
-  */
+   */
   void initialize();
 
-  /** compute the free state of the dynamical system
-  */
-  void computeFreeState();
-
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
-  *  \param double: tinit, initial time
-  *  \param double: tend, end time
-  *  \param double: tout, real end time
-  *  \param int&: in-out parameter, input: 1 for first call, else 2. Output: 2 if no root was found, else 3.
-  */
+   *  \param double: tinit, initial time
+   *  \param double: tend, end time
+   *  \param double: tout, real end time
+   *  \param int&: in-out parameter, input: 1 for first call, else 2. Output: 2 if no root was found, else 3.
+   */
   void integrate(double&, double&, double&, int&);
 
   /** update the state of the DynamicalSystems attached to this Integrator
-  *  \param unsigned int: level of interest for the dynamics
-  */
+   *  \param unsigned int: level of interest for the dynamics
+   */
   void updateState(const unsigned int);
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
-  *  \param OneStepIntegrator* : the integrator which must be converted
-  * \return a pointer on the integrator if it is of the right type, NULL otherwise
-  */
+   *  \param OneStepIntegrator* : the integrator which must be converted
+   * \return a pointer on the integrator if it is of the right type, NULL otherwise
+   */
   //static Lsodar* convert (OneStepIntegrator* osi);
 
   /** print the data to the screen
-  */
+   */
   void display();
 
 

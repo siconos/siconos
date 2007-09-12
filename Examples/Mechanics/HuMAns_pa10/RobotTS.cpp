@@ -32,8 +32,6 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-  boost::timer t;
-  t.restart();
   try
   {
 
@@ -42,12 +40,12 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 3;           // degrees of freedom for robot arm
     double t0 = 0;                   // initial computation time
-    double T = 3;                   // final computation time
+    double T = 1.9;                   // final computation time
     double h = 0.005;                // time step
-    double criterion = 0.005;
-    unsigned int maxIter = 2000;
-    double e = 0.9;                  // nslaw
-    double e2 = 0.0;
+    double criterion = 0.000005;
+    unsigned int maxIter = 20000;
+    double e = 0.9;                  // restit. coef. for impact on the ground.
+    double e2 = 0.0;                 // restit. coef for angular stops impacts.
 
     // -> mind to set the initial conditions below.
 
@@ -60,12 +58,12 @@ int main(int argc, char* argv[])
 
     // --- DS: robot arm ---
 
-    // The dof are angles between ground and arm and between differents parts of the arm. (See corresponding .pdf for more details)
+    // The dof are angles between ground and arm and between differents parts of the arm. (See Robot.fig for more details)
+    //
+
 
     // Initial position (angles in radian)
     SimpleVector q0(nDof), v0(nDof);
-    q0.zero();
-    v0.zero();
     q0(0) = 0.05;
     q0(1) = 0.05;
 
@@ -86,16 +84,19 @@ int main(int argc, char* argv[])
     // Two interactions:
     //  - one with Lagrangian non linear relation to define contact with ground
     //  - the other to define angles limitations (articular stops), with lagrangian linear relation
-    //  Both with newton impact nslaw.
+    //  Both with newton impact ns laws.
 
-    InteractionsSet allInteractions;
+    InteractionsSet allInteractions; // The set of all interactions.
 
     // -- relations --
 
+    // => arm-floor relation
     NonSmoothLaw * nslaw = new NewtonImpactNSL(e);
     string G = "RobotPlugin:G2";
     Relation * relation = new LagrangianScleronomousR("RobotPlugin:h2", G);
     Interaction * inter = new Interaction("floor-arm", allDS, 0, 2, nslaw, relation);
+
+    // => angular stops
 
     //     SimpleMatrix H(6,3);
     //     SimpleVector b(6);
@@ -113,20 +114,25 @@ int main(int argc, char* argv[])
     //     b(3) = 0.3;
     //     b(4) = 3.14;
     //     b(5) = 3.14;
-    SimpleMatrix H(2, 3);
-    SimpleVector b(2);
+    double lim0 = 1.6;
+    double lim1 = 3.1;  // -lim <= q[1] <= lim
+    SimpleMatrix H(4, 3);
+    SimpleVector b(4);
     H.zero();
-    H(0, 1) = -1;
-    H(1, 1) = 1;
 
-    b(0) = 0.3;
-    b(1) = 0.3;
+    H(0, 0) = -1;
+    H(1, 0) = 1;
+    H(2, 1) = -1;
+    H(3, 1) = 1;
+
+    b(0) = lim0;
+    b(1) = lim0;
+    b(2) = lim1;
+    b(3) = lim1;
 
     NonSmoothLaw * nslaw2 = new NewtonImpactNSL(e2);
     Relation * relation2 = new LagrangianLinearR(H, b);
-    //     Interaction * inter2 =  new Interaction("floor-arm2", allDS,1,6, nslaw2, relation2);
-    Interaction * inter2 =  new Interaction("floor-arm2", allDS, 1, 2, nslaw2, relation2);
-
+    Interaction * inter2 =  new Interaction("floor-arm2", allDS, 1, 4, nslaw2, relation2);
 
     allInteractions.insert(inter);
     allInteractions.insert(inter2);
@@ -158,7 +164,7 @@ int main(int argc, char* argv[])
     OneStepIntegrator * OSI =  new Moreau(arm, 0.500001, s);
 
     // -- OneStepNsProblem --
-    OneStepNSProblem * osnspb = new LCP(s, "name", "PGS", 2001, 0.005);
+    OneStepNSProblem * osnspb = new LCP(s, "name", "PGS", 30001, 0.005);
 
     cout << "=== End of model loading === " << endl;
 
@@ -180,85 +186,47 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlot(N + 1, outputSize);
     // For the initial time step:
     // time
-    dataPlot(k, 0) =  Robot->getCurrentT();
-    dataPlot(k, 1) = arm->getQ()(0);
-    dataPlot(k, 2) = arm->getVelocity()(0);
-    dataPlot(k, 3) = arm->getQ()(1);
-    dataPlot(k, 4) = arm->getVelocity()(1);
-    dataPlot(k, 5) = arm->getQ()(2);
-    dataPlot(k, 6) = arm->getVelocity()(2);
-    dataPlot(k, 7) = (inter->getY(0))(0);
-    dataPlot(k, 8) = (inter->getY(0))(1);
 
-    //    EventsManager * eventsManager = s->getEventsManagerPtr();
+    SiconosVector * q = arm->getQPtr();
+    SiconosVector * vel = arm->getVelocityPtr();
+    SiconosVector * y = inter->getYPtr(0);
+
+    dataPlot(k, 0) =  Robot->getT0();
+    dataPlot(k, 1) = (*q)(0);
+    dataPlot(k, 2) = (*vel)(0);
+    dataPlot(k, 3) = (*q)(1);
+    dataPlot(k, 4) = (*vel)(1);
+    dataPlot(k, 5) = (*q)(2);
+    dataPlot(k, 6) = (*vel)(2);
+    dataPlot(k, 7) = (*y)(0);
+    dataPlot(k, 8) = (*y)(1);
 
     // --- Time loop ---
     cout << "Start computation ... " << endl;
-    //     bool isNewtonConverge = false;
-    //     unsigned int nbNewtonStep = 0; // number of Newton iterations
-    //     while(k<N)
-    //       {
-    //  // get current time step
-    //  k++;
-    //  Robot->setCurrentT( Robot->getCurrentT()+t->getH() );
-    //  s->saveInMemory();
-    //  isNewtonConverge = false;
-    //  nbNewtonStep = 0;
-    //    while((!isNewtonConverge)&&(nbNewtonStep<=maxIter))
-    //    {
-    //      nbNewtonStep++;
-    //      s->computeFreeState();
-    //      s->updateIndexSets();
-    //      s->computeOneStepNSProblem("timeStepping");
-    //      s->update(1);
-    //      isNewtonConverge = s->newtonCheckConvergence(criterion);
-    //    }
-    //  if (!isNewtonConverge)
-    //    cout << "Newton process stopped: reach max step number" <<endl ;
+    boost::timer boostTimer;
+    boostTimer.restart();
 
-    //  // time step increment
-    //  Robot->setCurrentT(Robot->getCurrentT()+t->getH()  );
-
-
-
-    //  //  cout << k << endl;
-
-    //  //cout << "step " << k << endl;
-    //  // solve ...
-    //  //  s->newtonSolve(criterion,maxIter);
-
-
-
-    //  dataPlot(k, 0) =  k*t->getH();//Robot->getCurrentT();
-
-    //  dataPlot(k,1) = arm->getQ()(0);
-    //  dataPlot(k,2) = arm->getVelocity()(0);
-    //  dataPlot(k,3) = arm->getQ()(1);
-    //  dataPlot(k,4) = arm->getVelocity()(1);
-    //  dataPlot(k,5) = arm->getQ()(2);
-    //  dataPlot(k,6) = arm->getVelocity()(2);
-    //  dataPlot(k,7) = (inter->getY(0))(0);
-    //  dataPlot(k,8) = (inter->getY(0))(1);
-    //       }
     while (s->hasNextEvent())
     {
       // get current time step
       k++;
       s->newtonSolve(criterion, maxIter);
-      dataPlot(k, 0) =  Robot->getCurrentT();
 
-      dataPlot(k, 1) = arm->getQ()(0);
-      dataPlot(k, 2) = arm->getVelocity()(0);
-      dataPlot(k, 3) = arm->getQ()(1);
-      dataPlot(k, 4) = arm->getVelocity()(1);
-      dataPlot(k, 5) = arm->getQ()(2);
-      dataPlot(k, 6) = arm->getVelocity()(2);
-      dataPlot(k, 7) = (inter->getY(0))(0);
-      dataPlot(k, 8) = (inter->getY(0))(1);
+      dataPlot(k, 0) =  s->getStartingTime();
+      dataPlot(k, 1) = (*q)(0);
+      dataPlot(k, 2) = (*vel)(0);
+      dataPlot(k, 3) = (*q)(1);
+      dataPlot(k, 4) = (*vel)(1);
+      dataPlot(k, 5) = (*q)(2);
+      dataPlot(k, 6) = (*vel)(2);
+      dataPlot(k, 7) = (*y)(0);
+      dataPlot(k, 8) = (*y)(1);
     }
 
     cout << "End of computation - Number of iterations done: " << k << endl;
+    cout << "Computation Time: " << boostTimer.elapsed()  << endl;
 
+    cout << endl << "Output writing ..." << endl;
     // --- Output files ---
     ioMatrix out("result.dat", "ascii");
     out.write(dataPlot, "noDim");

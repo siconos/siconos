@@ -69,7 +69,7 @@ int dr_solver(double *vec , double *q , int *nn , method *pt , double *z , doubl
 
   double res;
 
-  char drkey1[10] = "NLGS" , drkey2[10] = "Latin", drkey3[10] = "CPG";
+  char drkey1[10] = "NLGS" , drkey2[10] = "Latin"/* ,drkey3[10] = "CPG" */;
 
 
 

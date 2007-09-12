@@ -44,27 +44,27 @@ class BlockVector;
  *  \version 2.1.1.
  *  \date (Creation) Apr 29, 2004
  *
- * An interaction represents the "link" between a set of Dynamical Systems (var: involvedDS) that interact alltogether through
+ * An interaction represents the "link" between a set of Dynamical Systems (var: involvedDS) that interact through
  * some relations (between state variables (x,R) and local variables (y,lambda)) completed by a non-smooth law.
  *
  * Thus, the interaction main members are:
  *
  * - a set of Dynamical Systems (from 1 to ...) that interacts, named involvedDS.
  *
- * - relation: a pointer to a Relation object that determines the type of relation and so the way it is computed.
+ * - relation: a pointer to a Relation object that determines the type of relation and so the way it is computed.\n
  *   Warning: there is only one Relation object (ie only one type of relation for an interaction) but there can be several "relations", in the sense
  *   of constraints equations between (y,lambda) and (x,r).
  *
  * - nslaw: the non smooth law
  *
  * - the local variables y and lambda (their size is interactionSize).
- *   stl vectors are used and y[i] (resp lambda[i]) represents the i-eme derivative of variable y (resp lambda).
+ *   STL vectors are used and y[i] (resp lambda[i]) represents the i-eme derivative of variable y (resp lambda).
  *
- *   y is a container of BlockVector. Each block corresponds to a "unitary relation", a relation which size is the one of the non-smooth law.
+ *   y is a container of BlockVector. Each block corresponds to a "unitary relation", a relation which size is the one of the non-smooth law. \n
  *    => ySize = interactionSize = numberOfRelations * nsLawSize .
  *   Same thing for lambda.
  *
- *  => all the relations of the interaction have the same non-smooth law.
+ *  => all the relations of the interaction have the same non-smooth law. \n
  *  => the number of relations is equal to interactionSize/nsLawSize. Thus a relation is not necessarily represented
  *     by a single equation.
  *
@@ -111,7 +111,7 @@ private:
   VectorOfVectors lambdaOld;
 
   /** the Dynamical Systems concerned by this interaction */
-  DynamicalSystemsSet involvedDS;
+  DynamicalSystemsSet * involvedDS;
 
   /** the Non-smooth Law of the interaction*/
   NonSmoothLaw *nslaw;
@@ -449,15 +449,15 @@ public:
    */
   inline DSIterator dynamicalSystemsBegin()
   {
-    return involvedDS.begin();
+    return involvedDS->begin();
   };
 
-  /** gets an iterator equal to involvedDS.end().
+  /** gets an iterator equal to involvedDS->end().
    *  \return a DSIterator.
    */
   inline DSIterator dynamicalSystemsEnd()
   {
-    return involvedDS.end();
+    return involvedDS->end();
   };
 
   /** gets a const iterator to the first element of the involvedDS set.
@@ -465,31 +465,23 @@ public:
    */
   inline ConstDSIterator dynamicalSystemsBegin() const
   {
-    return involvedDS.begin();
+    return involvedDS->begin();
   };
 
-  /** gets a const iterator equal to involvedDS.end().
+  /** gets a const iterator equal to involvedDS->end().
    *  \return a ConstDSIterator.
    */
   inline ConstDSIterator dynamicalSystemsEnd() const
   {
-    return involvedDS.end();
+    return involvedDS->end();
   };
 
-  /** get the DynamicalSystems of this Interaction
-  *  \return a DynamicalSystemsSet
-  */
-  inline DynamicalSystemsSet getDynamicalSystems() const
-  {
-    return involvedDS;
-  }
-
   /** get a pointer to the DynamicalSystems of this Interaction
-  *  \return a DynamicalSystemsSet*
-  */
+   *  \return a DynamicalSystemsSet*
+   */
   inline DynamicalSystemsSet * getDynamicalSystemsPtr()
   {
-    return &involvedDS;
+    return involvedDS;
   }
 
   /** set the involvedDS

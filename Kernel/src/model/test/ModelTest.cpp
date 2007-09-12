@@ -44,7 +44,7 @@ void ModelTest::testBuildModel0()
   Model * M = new Model(t0);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->getT0() == t0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->getFinalT() == -1, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->getCurrentT() == t0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->getCurrentTime() == t0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->getSimulationPtr() == NULL, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->getNonSmoothDynamicalSystemPtr() == NULL, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->getSiconosModelXMLPtr() == NULL, true);
@@ -63,7 +63,7 @@ void ModelTest::testBuildModel1()
   Model * M = new Model(t0, T);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getT0() == t0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getFinalT() == T, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getCurrentT() == t0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getCurrentTime() == t0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getSimulationPtr() == NULL, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getNonSmoothDynamicalSystemPtr() == NULL, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getSiconosModelXMLPtr() == NULL, true);
@@ -82,7 +82,7 @@ void ModelTest::testBuildModel2()
   Model * M = new Model(t0, T, "myModel", "SiconosTeam", "Description", "Today", "XMLschema");
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getT0() == t0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getFinalT() == T, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getCurrentT() == t0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getCurrentTime() == t0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getSimulationPtr() == NULL, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getNonSmoothDynamicalSystemPtr() == NULL, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getSiconosModelXMLPtr() == NULL, true);
@@ -104,7 +104,7 @@ void ModelTest::testBuildModel3()
   Model * M = new Model(xmlFile);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getT0() == t0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getFinalT() == T, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getCurrentT() == t0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getCurrentTime() == t0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getSimulationPtr() != NULL, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getNonSmoothDynamicalSystemPtr() != NULL, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getSiconosModelXMLPtr() != NULL, true);

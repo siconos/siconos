@@ -93,9 +93,9 @@ public:
   void setVectorMemory(const std::deque<SiconosVector*>&);
 
   /**
-   * gives a SiconosVectors of the memory
-   * \param int the position in the memory of the wanted SiconosVector
-   * \return SiconosVector* if the parameter has its value in [0, nbVectorsInMemory[
+   * To get SiconosVector number i of the memory
+   * \param int i: the position in the memory of the wanted SiconosVector
+   * \return a SiconosVector*
    */
   SiconosVector* getSiconosVector(const unsigned int) const;
 

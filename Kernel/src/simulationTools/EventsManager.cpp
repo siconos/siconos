@@ -172,10 +172,10 @@ const double EventsManager::getTimeOfEvent(Event* event) const
   return event->getDoubleTimeOfEvent();
 }
 
-const double EventsManager::getCurrentTime() const
+const double EventsManager::getStartingTime() const
 {
   if (currentEvent == NULL)
-    RuntimeException::selfThrow("EventsManager getCurrentTime, current event is NULL");
+    RuntimeException::selfThrow("EventsManager getStartingTime, current event is NULL");
   return currentEvent->getDoubleTimeOfEvent();
 }
 
@@ -258,7 +258,7 @@ void EventsManager::processEvents()
 
   // Set Model current time
   if (nextEvent != NULL)
-    simulation->getModelPtr()->setCurrentT(getTimeOfEvent(nextEvent));
+    simulation->getModelPtr()->setCurrentTime(getTimeOfEvent(nextEvent));
 }
 
 void EventsManager::process()

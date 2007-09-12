@@ -1,4 +1,4 @@
-/* Siconos-Numerics version 2.1.1, Copyright INRIA 2005-2007.
+/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2007.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -16,30 +16,23 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
 
+#include <cppunit/extensions/TestFactoryRegistry.h>
+#include <cppunit/ui/text/TestRunner.h>
+#include <iostream>
+using namespace std;
 
-void max_part(double x[], double *sol, int *nn)
-
+int main()
 {
+  // The object to run tests
+  CppUnit::TextUi::TestRunner runner;
 
-  int     i, n = *nn;
-  double  max;
+  // Get test classes that have been registered
+  CppUnit::TestFactoryRegistry &registry = CppUnit::TestFactoryRegistry::getRegistry();
 
+  // Put tests into the runner
+  runner.addTest(registry.makeTest());
 
-  max = x[0];
-
-  for (i = 1 ; i < n ; i++)
-  {
-
-    if (max < x[i]) max = x[i] ;
-
-  }
-
-
-  *sol = max;
-
+  // Run tests
+  runner.run("", false, true, false);
 }

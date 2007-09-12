@@ -43,53 +43,55 @@ void NonSmoothEvent::process(Simulation* simulation)
   {
     EventDriven * eventDriven = static_cast<EventDriven*>(simulation);
 
-    // Compute y[0], y[1] and update index sets.
-    simulation->updateOutput(0, 1);
+    // Compute y[0], y[1] and update index sets. => already done during advance to event ...
 
-    simulation->updateIndexSets();
+    //       simulation->updateOutput(0, 1);
 
+    //       simulation->updateIndexSets();
+
+    // Get the required index sets ...
     UnitaryRelationsSet * indexSet1 = simulation->getIndexSetPtr(1);
     UnitaryRelationsSet * indexSet2 = simulation->getIndexSetPtr(2);
 
     // ---> solve impact LCP if IndexSet[1]\IndexSet[2] is not empty.
     if (!(*indexSet1 - *indexSet2).isEmpty())
     {
+
+      // For Event-Driven algo., memories vectors are of size 2 (ie 2 blocks).
+      // First block (pos 0, last in) for post-event values and last block (pos 1, first in) for
+      // pre-event values.
+
       simulation->saveInMemory();  // To save pre-impact values
+
       // solve the LCP-impact => y[1],lambda[1]
       eventDriven->computeOneStepNSProblem("impact"); // solveLCPImpact();
 
       // compute p[1], post-impact velocity, y[1] and indexSet[2]
       eventDriven->update(1);
-
-      //    for(itOsns=allOSNS.begin();itOsns!=allOSNS.end();++itOsns)
-      //      (itOsns->second)->updateOutput(0);
-
-      //    //  update indexSet that depends on y[0]
-      //    eventDriven->updateIndexSet(1);
+      // Update the corresponding index set ...
+      eventDriven->updateIndexSets();
 
       // check that IndexSet[1]-IndexSet[2] is now empty
-
-      //    if( !(indexSet1-indexSet2).isEmpty())
-      //RuntimeException::selfThrow("NonSmoothEvent::process, error after impact-LCP solving.");
+      //    if( !((*indexSet1-*indexSet2).isEmpty()))
+      //      RuntimeException::selfThrow("NonSmoothEvent::process, error after impact-LCP solving.");
     }
 
+    // ---> solve acceleration LCP if IndexSet[2] is not empty
     if (!((indexSet2)->isEmpty()))
     {
-      cout << "SOLVE LCP ACCELERATION " << endl;
-
       // Update the state of the DS
-      OSIIterator itOSI;
-      for (itOSI = simulation->getOneStepIntegrators().begin(); itOSI != simulation->getOneStepIntegrators().end() ; ++itOSI)
-        (*itOSI)->updateState(2);
+      //    OSIIterator itOSI;
+      //    for(itOSI = simulation->getOneStepIntegrators().begin(); itOSI!=simulation->getOneStepIntegrators().end() ; ++itOSI)
+      //      (*itOSI)->updateState(2);
 
       // solve LCP-acceleration
-      cout << "LCP acc solving ..." << endl;
       eventDriven->computeOneStepNSProblem("acceleration"); //solveLCPAcceleration();
 
       // for all index in IndexSets[2], update the index set according to y[2] and/or lambda[2] sign.
       eventDriven->updateIndexSetsWithDoubleCondition();
     }
 
+    // Save results in memory
     simulation->saveInMemory();
   }
 }

@@ -28,7 +28,7 @@
 
 using namespace std;
 
-// --- Default constructor ---
+// --- Default constructor (private) ---
 Moreau::Moreau(): OneStepIntegrator()
 {
   integratorType = "Moreau";
@@ -55,7 +55,7 @@ Moreau::Moreau(OneStepIntegratorXML * osiXML, Simulation* newS):
     RuntimeException::selfThrow("Moreau::xml constructor - theta list is missing in xml input file.");
 
   vector<double> thetaXml;     // list of theta values
-  // thetaXml[i] will correspond to the i-eme ds in the xml list. If all attributes is true in ds,
+  // thetaXml[i] will correspond to the ds number i in the xml list. If "all" attribute is true in ds,
   // then theta values are sorted so to correspond to growing ds numbers order.
 
   if (moreauXml->hasAllTheta()) // if one single value for all theta
@@ -71,7 +71,7 @@ Moreau::Moreau(OneStepIntegratorXML * osiXML, Simulation* newS):
     unsigned int i = 0;
     for (it = nsds->dynamicalSystemsBegin(); it != nsds->dynamicalSystemsEnd(); ++it)
     {
-      OSIDynamicalSystems.insert(*it);
+      OSIDynamicalSystems->insert(*it);
       // get corresponding theta. In xml they must be sorted in an order that corresponds to growing DS-numbers order.
       if (moreauXml->hasAllTheta()) // if one single value for all theta
         thetaMap[*it] = thetaXml[0];
@@ -89,7 +89,7 @@ Moreau::Moreau(OneStepIntegratorXML * osiXML, Simulation* newS):
     vector<int>::iterator it;
     for (it = dsNumbers.begin(); it != dsNumbers.end(); ++it)
     {
-      OSIDynamicalSystems.insert(nsds->getDynamicalSystemPtrNumber(*it));
+      OSIDynamicalSystems->insert(nsds->getDynamicalSystemPtrNumber(*it));
       if (moreauXml->hasAllTheta()) // if one single value for all theta
         thetaMap[nsds->getDynamicalSystemPtrNumber(*it)] = thetaXml[0];
       else
@@ -108,7 +108,7 @@ Moreau::Moreau(DynamicalSystem* newDS, const double newTheta, Simulation* newS):
   if (simulationLink == NULL)
     RuntimeException::selfThrow("Moreau:: constructor (ds,theta,simulation) - simulation == NULL");
 
-  OSIDynamicalSystems.insert(newDS);
+  OSIDynamicalSystems->insert(newDS);
   thetaMap[newDS] = newTheta;
 }
 
@@ -119,7 +119,7 @@ Moreau::Moreau(DynamicalSystemsSet& newDS, const double newTheta, Simulation* ne
     RuntimeException::selfThrow("Moreau:: constructor (setOfDS,theta,simulation) - simulation == NULL");
 
   DSIterator itDS;
-  for (itDS = OSIDynamicalSystems.begin(); itDS != OSIDynamicalSystems.end(); ++itDS)
+  for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
     thetaMap[*itDS] = newTheta;
 }
 
@@ -140,14 +140,14 @@ Moreau::~Moreau()
   thetaMap.clear();
 
   DSIterator itDS;
-  for (itDS = OSIDynamicalSystems.begin(); itDS != OSIDynamicalSystems.end(); ++itDS)
+  for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
     if (*itDS != NULL && (*itDS)->getType() == LNLDS)(*itDS)->freeWorkVector("LagNLDSMoreau");
 }
 
 void Moreau::setWMap(const MapOfMatrices& newMap)
 {
   // check sizes.
-  if (newMap.size() != OSIDynamicalSystems.size())
+  if (newMap.size() != OSIDynamicalSystems->size())
     RuntimeException::selfThrow("Moreau::setWMap(newMap): number of W matrices is different from number of DS.");
 
   // pointer links! No reallocation
@@ -254,7 +254,7 @@ void Moreau::initialize()
   double t0 = simulationLink->getModelPtr()->getT0();
   // Compute W(t0) for all ds
   DSIterator it;
-  for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
+  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     computeW(t0, *it);
     if ((*it)->getType() == LNLDS)
@@ -270,6 +270,7 @@ void Moreau::computeW(const double t, DynamicalSystem* ds)
   double h = simulationLink->getTimeStep();
 
   double theta = thetaMap[ds];
+
   // Check if W is allocated; if not, do allocation.
   if (WMap[ds] == NULL)
   {
@@ -280,7 +281,7 @@ void Moreau::computeW(const double t, DynamicalSystem* ds)
 
   SiconosMatrix * W = WMap[ds];
 
-  // === Lagrangian systems
+  // === Lagrangian systems ===
   string dsType = ds->getType();
   if (dsType == LNLDS || dsType == LLTIDS)
   {
@@ -357,7 +358,7 @@ void Moreau::computeFreeState()
 {
   // get current and next times, theta and time step
   double t = simulationLink->getNextTime();
-  double told = simulationLink->getCurrentTime();
+  double told = simulationLink->getStartingTime();
   double h = t - told;
 
   DynamicalSystem* ds; // Current Dynamical System.
@@ -365,7 +366,7 @@ void Moreau::computeFreeState()
   SiconosMatrix * W; // W Moreau matrix of the current DS.
   string dsType ; // Type of the current DS.
   double theta; // Theta parameter of the current ds.
-  for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
+  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     ds = *it;
     theta = thetaMap[ds];
@@ -539,13 +540,15 @@ void Moreau::computeFreeState()
 
 void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
 {
+  // Last parameter is not used (required for Lsodar but not for Moreau).
+
   double h = tend - tinit;
   tout = tend;
 
   DSIterator it;
   SiconosMatrix * W;
   double theta;
-  for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
+  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     DynamicalSystem* ds = *it;
     W = WMap[ds];
@@ -636,7 +639,7 @@ void Moreau::updateState(const unsigned int level)
   DSIterator it;
   SiconosMatrix * W;
   double theta;
-  for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
+  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     DynamicalSystem* ds = *it;
     W = WMap[ds];
@@ -705,7 +708,7 @@ void Moreau::display()
 
   cout << "====== Moreau OSI display ======" << endl;
   DSIterator it;
-  for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
+  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     cout << "--------------------------------" << endl;
     cout << "--> W of dynamical system number " << (*it)->getNumber() << ": " << endl;

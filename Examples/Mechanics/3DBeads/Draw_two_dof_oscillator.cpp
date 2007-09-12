@@ -358,7 +358,7 @@ void computeSiconos()
       GLOB_SIM->processEvents();
       // --- Get values to be plotted ---
       i++;
-      dataPlot(i, 0) =  two_dof_oscillator->getCurrentT();
+      dataPlot(i, 0) =  s->getStartingTime();
       dataPlot(i, 1) = (*GLOB_POS)(0);
       dataPlot(i, 2) = (*GLOB_VELO)(0);
       dataPlot(i, 3) = (*GLOB_LAMBDA)(0);

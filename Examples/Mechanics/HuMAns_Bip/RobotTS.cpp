@@ -199,7 +199,7 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlot(N + 1, outputSize);
     // For the initial time step:
     // time
-    dataPlot(k, 0) = Robot->getCurrentT();
+    dataPlot(k, 0) = Robot->getT0();
 
     for (unsigned int i = 1; i < 22; i++)
       dataPlot(k, i) = bip->getQ()(i - 1);
@@ -226,7 +226,7 @@ int main(int argc, char* argv[])
       cout << k << endl;
       s->newtonSolve(criterion, maxIter);
 
-      dataPlot(k, 0) = Robot->getCurrentT();
+      dataPlot(k, 0) = s->getStartingTime();
 
       for (unsigned int i = 1; i < 22; i++)
         dataPlot(k, i) = bip->getQ()(i - 1);

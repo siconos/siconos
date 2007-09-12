@@ -171,7 +171,7 @@ bool DiodeBridge()
 
       // --- Get values to be plotted ---
       // time
-      dataPlot(k, 0) = DiodeBridge.getCurrentT();
+      dataPlot(k, 0) = StratDiodeBridge->getNextTime();
 
       // inductor voltage
       dataPlot(k, 1) = (LSDiodeBridge->getX())(0);

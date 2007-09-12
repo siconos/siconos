@@ -136,7 +136,7 @@ protected:
 
   /** set of Interactions: link to the Interactions of the Non Smooth Dynamical System
     * Note: no get or set functions for this object in the class -> used only in OneStepNSProblem methods. */
-  InteractionsSet OSNSInteractions;
+  InteractionsSet * OSNSInteractions;
 
   /** minimum index set number to be taken into account */
   unsigned int levelMin;
@@ -282,7 +282,7 @@ public:
   /** get the Interactions set
   *  \return an InteractionsSet
   */
-  inline InteractionsSet getInteractions() const
+  inline InteractionsSet * getInteractions() const
   {
     return OSNSInteractions;
   }

@@ -418,7 +418,7 @@ void dfc_2D2lcp(int *dim_F1 , double *mumu , double *K1 , double *F1, int *ddl_n
   }
 
 
-  dpotri_(&uplo, &taille_i, R , &taille_i, &info2);
+  dpotri_(&uplo, (integer*)&taille_i, R , (integer*)&taille_i, (integer*)&info2);
 
   if (info2 != 0)
   {

@@ -35,7 +35,7 @@ TimeDiscretisationEvent::~TimeDiscretisationEvent()
 void TimeDiscretisationEvent::process(Simulation* simulation)
 {
   // Update y[i] values in Interactions with new DS states.
-  simulation->updateOutput(0, 1);
+  //simulation->updateOutput(0, 1);
   // Save state(s) in Memories (DS and Interactions, through OSI and OSNS).
   simulation->saveInMemory();
 }

@@ -28,11 +28,8 @@ Linear Complementarity Problem
 #include "SimpleMatrix.h"
 #include <sys/time.h>
 
-using namespace std;
-
 class OneStepNSProblem;
 class DynamicalSystemsSet;
-
 
 /** Formalization and Resolution of a Linear Complementarity Problem (LCP)
  *

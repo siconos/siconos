@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
     // For the initial time step:
 
     // time
-    dataPlot(k, 0) = CircuitRLCD->getCurrentT();
+    dataPlot(k, 0) = CircuitRLCD->getT0();
 
     // inductor voltage
     dataPlot(k, 1) = (LSCircuitRLCD->getX())(0);
@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
 
       // --- Get values to be plotted ---
       // time
-      dataPlot(k, 0) = CircuitRLCD->getCurrentT();
+      dataPlot(k, 0) = StratCircuitRLCD->getNextTime();
 
       // inductor voltage
       dataPlot(k, 1) = (LSCircuitRLCD->getX())(0);

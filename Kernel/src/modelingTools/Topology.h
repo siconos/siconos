@@ -81,10 +81,10 @@ private:
   // --- MEMBERS ---
 
   /** the set of all the interactions of the system */
-  InteractionsSet allInteractions;
+  InteractionsSet * allInteractions;
 
   /** index set I0, ie a set of all the Unitary Relations - This corresponds to indexSets[0] of the Simulation */
-  UnitaryRelationsSet indexSet0;
+  UnitaryRelationsSet * indexSet0;
 
   /** map that links UnitaryRelations with their relative degrees */
   UnitaryRelationsIntMap relativeDegrees;
@@ -135,15 +135,15 @@ public:
   */
   inline InteractionsIterator interactionsBegin()
   {
-    return allInteractions.begin();
+    return allInteractions->begin();
   };
 
-  /** iterator equal to allInteractions.end()
+  /** iterator equal to allInteractions->end()
   *  \return a InteractionsIterator
   */
   inline InteractionsIterator interactionsEnd()
   {
-    return allInteractions.end();
+    return allInteractions->end();
   };
 
   /** const iterator equal to the first element of allInteractions
@@ -151,21 +151,21 @@ public:
   */
   inline ConstInteractionsIterator interactionsBegin() const
   {
-    return allInteractions.begin();
+    return allInteractions->begin();
   };
 
-  /** const iterator equal to allInteractions.end()
+  /** const iterator equal to allInteractions->end()
   *  \return a ConstInteractionsIterator
   */
   inline ConstInteractionsIterator interactionsEnd() const
   {
-    return allInteractions.end();
+    return allInteractions->end();
   }
 
   /** get all the Interactions of the Topology problem (saved in a set)
   *  \return an InteractionsSet
   */
-  inline const InteractionsSet getInteractions() const
+  inline const InteractionsSet * getInteractions() const
   {
     return allInteractions;
   }
@@ -176,20 +176,12 @@ public:
   */
   const bool hasInteraction(Interaction*) const;
 
-  /** get the index set of all Unitary Relations
-  *  \return a UnitaryRelationsSet
-  */
-  inline const UnitaryRelationsSet getIndexSet0() const
-  {
-    return indexSet0;
-  }
-
   /** get a pointer to the index set of all Unitary Relations.
-  *  \return a UnitaryRelationsSet*
-  */
+   *  \return a UnitaryRelationsSet*
+   */
   inline UnitaryRelationsSet* getIndexSet0Ptr()
   {
-    return &indexSet0;
+    return indexSet0;
   }
 
   // --- relativeDegreesMap ---

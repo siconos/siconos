@@ -50,8 +50,9 @@ using namespace std;
 // --- Default constructor (protected) ---
 Simulation::Simulation(const string& type):
   name("unnamed"), simulationType(type), timeDiscretisation(NULL), eventsManager(NULL),
-  simulationxml(NULL), model(NULL), levelMin(0), levelMax(0)
+  simulationxml(NULL), model(NULL), levelMin(0), levelMax(0), tolerance(DEFAULT_TOLERANCE), printStat(false)
 {
+  tolerance = DEFAULT_TOLERANCE; // useless but else warning "DEFAULT_TOLERANCE defined but not used when compile ..."
   isAllocatedIn["eventsManager"] = false;
   isAllocatedIn["timeDiscretisation"] = false;
 }
@@ -59,7 +60,7 @@ Simulation::Simulation(const string& type):
 // --- Constructor with a TimeDiscretisation (and thus a Model) and an id ---
 Simulation::Simulation(TimeDiscretisation* td, const string& id):
   name("unnamed"), simulationType(id), timeDiscretisation(td), eventsManager(NULL),
-  simulationxml(NULL), model(td->getModelPtr()), levelMin(0), levelMax(0)
+  simulationxml(NULL), model(td->getModelPtr()), levelMin(0), levelMax(0), tolerance(DEFAULT_TOLERANCE), printStat(false)
 {
   if (timeDiscretisation == NULL)
     RuntimeException::selfThrow("Simulation constructor - timeDiscretisation == NULL.");
@@ -80,7 +81,7 @@ Simulation::Simulation(TimeDiscretisation* td, const string& id):
 // --- xml constructor ---
 Simulation::Simulation(SimulationXML* strxml, Model *newModel, const string& id):
   name("unnamed"), simulationType(id), timeDiscretisation(NULL), eventsManager(NULL),
-  simulationxml(strxml), model(newModel), levelMin(0), levelMax(0)
+  simulationxml(strxml), model(newModel), levelMin(0), levelMax(0), tolerance(DEFAULT_TOLERANCE), printStat(false)
 {
   if (simulationxml == NULL)
     RuntimeException::selfThrow("Simulation:: xml constructor - xml file = NULL");
@@ -161,6 +162,8 @@ Simulation::~Simulation()
   for (unsigned int i = 1; i < indexSets.size(); ++i)
     if (indexSets[i] != NULL) delete indexSets[i];
   indexSets.clear();
+
+  if (statOut.is_open()) statOut.close();
 }
 
 // Getters/setters
@@ -168,14 +171,17 @@ Simulation::~Simulation()
 void Simulation::setTimeDiscretisationPtr(TimeDiscretisation* td)
 {
   // Warning: this function may be used carefully because of the links between Model and TimeDiscretisation
-  // The simulation of the td input MUST be the current simulation.
+  // td will replace the current timeDiscretisation, which may change the linked Model.
   //
+  if (model != td->getModelPtr())
+    RuntimeException::selfThrow("Simulation::setTimeDiscretisationPtr(td) - The model associated to td is different from the one associated to the simulation.");
+
   if (isAllocatedIn["timeDiscretisation"]) delete timeDiscretisation;
   timeDiscretisation = td;
   isAllocatedIn["timeDiscretisation"] = false;
 }
 
-void Simulation::setOneStepIntegrators(const OSISet& newVect)
+void Simulation::setOneStepIntegrators(const OSISet& newSet)
 {
   // clear old set
   OSIIterator it;
@@ -187,10 +193,12 @@ void Simulation::setOneStepIntegrators(const OSISet& newVect)
   allOSI.clear();
   isOSIAllocatedIn.clear();
 
-  // copy the new one
-  allOSI = newVect;
-  for (it = allOSI.begin(); it != allOSI.end(); ++it)
+  // Warning: pointers links between osi of newSet and allOSI.
+  for (it = newSet.begin(); it != newSet.end(); ++it)
+  {
+    allOSI.insert(*it);
     isOSIAllocatedIn[*it] = false;
+  }
 }
 
 OneStepIntegrator* Simulation::getIntegratorOfDSPtr(int numberDS) const
@@ -211,45 +219,29 @@ OneStepIntegrator* Simulation::getIntegratorOfDSPtr(int numberDS) const
 
 OneStepIntegrator* Simulation::getIntegratorOfDSPtr(DynamicalSystem * ds) const
 {
-  return (osiMap.find(ds))->second;
+  DSOSIConstIterator it = osiMap.find(ds);
+  if (it == osiMap.end())
+    RuntimeException::selfThrow("Simulation::getIntegratorOfDSPtr(ds), ds not found in the integrator set.");
+  return it->second;
 }
 
 void Simulation::addOneStepIntegratorPtr(OneStepIntegrator *osi)
 {
-  if (hasCommonDSInIntegrators(osi))
-    RuntimeException::selfThrow("Simulation::addOneStepIntegratorPtr(osi), one of the dynamical system of the new integrator has already an integrator defined in the simulation!");
-
   allOSI.insert(osi);
   isOSIAllocatedIn[osi] = false;
   osi->setSimulationPtr(this);
+
+  // Note: each (ds,osi) pair will be registered into the osiMap during initialize() call (in osi->initialize).
+  // During this step, we will check that each ds belongs to one and only one osi.
+
 }
 
 void Simulation::addInOSIMap(DynamicalSystem * ds, OneStepIntegrator * osi)
 {
+  if (osiMap.find(ds) != osiMap.end()) // ie if ds is already registered in the map with another integrator
+    RuntimeException::selfThrow("Simulation::addInOSIMap(ds,osi), ds is already associated with another one-step integrator");
+
   osiMap[ds] = osi;
-}
-
-const bool Simulation::hasCommonDSInIntegrators(OneStepIntegrator* osi) const
-{
-  bool val = false;
-  ConstOSIIterator itOSI;
-  DynamicalSystemsSet commonDS;
-
-  for (itOSI = allOSI.begin(); itOSI != allOSI.begin() ; ++itOSI)
-  {
-    // check intersection of set of dynamical system of new osi and all osi of the simulation
-    val = (intersection((*itOSI)->getDynamicalSystems() , osi->getDynamicalSystems())).isEmpty();
-    if (!val) break;
-  }
-
-  return val;
-}
-
-const UnitaryRelationsSet Simulation::getIndexSet(unsigned int i) const
-{
-  if (i >= indexSets.size())
-    RuntimeException::selfThrow("Simulation - getIndexSet(i) - index set(i) does not exist.");
-  return *(indexSets[i]);
 }
 
 UnitaryRelationsSet * Simulation::getIndexSetPtr(unsigned int i)
@@ -348,20 +340,21 @@ void Simulation::initialize()
   // We first need to initialize the topology (computes UnitaryRelation sets, relative degrees ...)
   model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->initialize();
 
-  // initialization of the OneStepIntegrators
+  // === OneStepIntegrators initialization ===
   OSIIterator itOsi;
   for (itOsi = allOSI.begin(); itOsi != allOSI.end(); ++itOsi)
     (*itOsi)->initialize();
-  // The number of indexSets is given by the maximum value of relative degrees of the unitary relations.
 
-  InteractionsSet allInteractions = model->getNonSmoothDynamicalSystemPtr()->getInteractions();
+  // === IndexSets building ===
+  // The number of indexSets is given by the maximum value of relative degrees of the unitary relations.
+  InteractionsSet * allInteractions = model->getNonSmoothDynamicalSystemPtr()->getInteractions();
   double t0 = model->getT0();
-  if (!allInteractions.isEmpty()) // ie if some Interactions have been declared
+  if (!allInteractions->isEmpty()) // ie if some Interactions have been declared
   {
     initLevelMax();
 
     InteractionsIterator it;
-    for (it = allInteractions.begin(); it != allInteractions.end(); ++it)
+    for (it = allInteractions->begin(); it != allInteractions->end(); ++it)
       (*it)->initialize(t0, levelMax + 1);
 
     indexSets.resize(levelMax + 1);
@@ -371,19 +364,31 @@ void Simulation::initialize()
       indexSets[i] = new UnitaryRelationsSet();
   }
 
-  // Initialize OneStepNSProblem: in derived classes specific function.
+  // Initialize OneStepNSProblem: in derived classes specific functions.
   initOSNS();
 
   // == Call process functions of events (usefull to save initial values for example) ==
   eventsManager->process();
   // Set Model current time (warning: current time of the model corresponds to the time of the next event to be treated).
-  model->setCurrentT(getNextTime());
+  model->setCurrentTime(getNextTime());
 
   // End of initialize:
   //  - all OSI and OSNS (ie DS and Interactions) states are computed for time t0 and saved into memories.
   //  - Sensors or related objects are updated for t=t0.
   //  - current time of the model is equal to t1, time of the first event after t0.
   //  - currentEvent of the simu. corresponds to t0 and nextEvent to t1.
+
+
+  // If printStat is true, open output file.
+  if (printStat)
+  {
+    statOut.open("simulationStat.dat", std::ofstream::out);
+    statOut << "============================================" << endl;
+    statOut << " Siconos Simulation of type " << simulationType << "." << endl;
+    statOut << endl;
+    statOut << "The tolerance parameter is equal to: " << tolerance << endl;
+    statOut << endl << endl;
+  }
 }
 
 void Simulation::reset()
@@ -414,7 +419,7 @@ void Simulation::computeOneStepNSProblem(const std::string& name)
   if (allNSProblems[name] == NULL)
     RuntimeException::selfThrow("Simulation - computeOneStepNSProblem, OneStepNSProblem == NULL, Id: " + name);
 
-  allNSProblems[name]->compute(model->getCurrentT());
+  allNSProblems[name]->compute(model->getCurrentTime());
 }
 
 void Simulation::saveSimulationToXML()
@@ -453,27 +458,31 @@ void Simulation::saveSimulationToXML()
 
 void Simulation::updateInput(int level)
 {
+  // To compute input(level) (ie with lambda[level]) for all Interactions.
+
   if (level == -1)
     level = levelMin; // We use this since it is impossible to set levelMin as defaultValue in OneStepNSProblem.h
 
   //  double time = getNextTime();
-  double time = model->getCurrentT();
+  double time = model->getCurrentTime();
   Topology * topology = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
   InteractionsIterator it;
 
+  // Set dynamical systems non-smooth part to zero.
   reset();
 
-  // We compute input using lambda(levelMin).
+  // We compute input using lambda(level).
   for (it = topology->interactionsBegin(); it != topology->interactionsEnd(); it++)
     (*it)->computeInput(time, level);
 }
 
 void Simulation::updateOutput(int level0, int level1)
 {
+  // To compute output() for all levels between level0 and level1 (included), for all Interactions.
   if (level1 == -1)
     level1 = levelMax;
 
-  double time = model->getCurrentT();
+  double time = model->getCurrentTime();
   Topology * topology = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
   InteractionsIterator it;
 

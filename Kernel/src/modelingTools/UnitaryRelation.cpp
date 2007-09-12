@@ -130,11 +130,6 @@ const string UnitaryRelation::getRelationSubType() const
   return mainInteraction->getRelationPtr()->getSubType();
 }
 
-DynamicalSystemsSet UnitaryRelation::getDynamicalSystems() const
-{
-  return mainInteraction->getDynamicalSystems();
-}
-
 DynamicalSystemsSet * UnitaryRelation::getDynamicalSystemsPtr()
 {
   return mainInteraction->getDynamicalSystemsPtr();

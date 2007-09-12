@@ -36,14 +36,9 @@ using namespace std;
 
 // --- CONSTRUCTORS ---
 
-// Default (private) constructor
-Interaction::Interaction():
-  id("none"), number(0), interactionSize(0), sizeOfDS(0), sizeZ(0), nslaw(NULL), relation(NULL), interactionxml(NULL)
-{}
-
 // --- XML constructor ---
 Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * nsds):
-  id("undefined"), number(0), interactionSize(0), numberOfRelations(0), sizeOfDS(0), sizeZ(0),
+  id("undefined"), number(0), interactionSize(0), numberOfRelations(0), sizeOfDS(0), sizeZ(0), involvedDS(NULL),
   nslaw(NULL), relation(NULL), NSDS(nsds), interactionxml(interxml)
 {
   if (interactionxml == NULL)
@@ -75,13 +70,18 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
 
   // --- Dynamical Systems ---
   unsigned int sizeDS ;
+  involvedDS = new DynamicalSystemsSet();
   if (nsds != NULL)
   {
     // Get a list of DS concerned from xml
 
     if (interactionxml->hasAllDS())
-      involvedDS = nsds->getDynamicalSystems();
-
+    {
+      DSIterator itDS;
+      DynamicalSystemsSet * nsdsSet = nsds->getDynamicalSystems();
+      for (itDS = nsdsSet->begin(); itDS != nsdsSet->end(); ++itDS)
+        involvedDS->insert(*itDS); // Warning: insert pointers to DS!!
+    }
     else
     {
       // get numbers of DS involved in the interaction from the xml input file.
@@ -91,7 +91,7 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
       // get corresponding DS and insert them into the involvedDS set.
       sizeDS = listDS.size();
       for (unsigned int i = 0; i < sizeDS; i++)
-        involvedDS.insert(nsds->getDynamicalSystemPtrNumber(listDS[i]));
+        involvedDS->insert(nsds->getDynamicalSystemPtrNumber(listDS[i]));
     }
   }
   else cout << "Interaction constructor, warning: no dynamical systems linked to the interaction!" << endl;
@@ -142,11 +142,13 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
 // --- Constructor from a set of data ---
 
 Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, int newNumber, int nInter, NonSmoothLaw* newNSL, Relation* newRel):
-  id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0), involvedDS(),
+  id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0), involvedDS(NULL),
   nslaw(newNSL), relation(newRel), NSDS(NULL), interactionxml(NULL)
 {
-  // Memory allocation and initialization for y and lambda
-  involvedDS = dsConcerned; // !! this keeps pointers link between DS in the set !!
+  involvedDS = new DynamicalSystemsSet();
+  DSIterator itDS;
+  for (itDS = dsConcerned.begin(); itDS != dsConcerned.end(); ++itDS)
+    involvedDS->insert(*itDS); // Warning: insert pointers to DS!!
   isAllocatedIn["relation"] = false;
   isAllocatedIn["nsLaw"] = false;
 }
@@ -175,6 +177,8 @@ Interaction::~Interaction()
   if (isAllocatedIn["nsLaw"]) delete nslaw;
   nslaw = NULL;
   NSDS = NULL;
+  involvedDS->clear();
+  delete involvedDS;
 }
 
 void Interaction::initialize(double t0, unsigned int level)
@@ -514,24 +518,27 @@ void Interaction::setLambdaOldPtr(const unsigned int  index, SiconosVector* newL
 
 void Interaction::setDynamicalSystems(const DynamicalSystemsSet& newSet)
 {
-  involvedDS = newSet; // !! Pointers links between ds !!
+  DSIterator itDS;
+  for (itDS = newSet.begin(); itDS != newSet.end(); ++itDS)
+    involvedDS->insert(*itDS); // Warning: insert pointers to DS!!
+
   computeSizeOfDS();
 }
 
 DynamicalSystem* Interaction::getDynamicalSystemPtr(int nb)
 {
-  if (! involvedDS.isDynamicalSystemIn(nb)) // if ds number nb is not in the set ...
+  if (! involvedDS->isDynamicalSystemIn(nb)) // if ds number nb is not in the set ...
     RuntimeException::selfThrow("Interaction::getDynamicalSystemPtr(nb), DS number nb is not in the set.");
-  return involvedDS.getDynamicalSystemPtr(number);
+  return involvedDS->getDynamicalSystemPtr(number);
 }
 
 void Interaction::getDynamicalSystem(int nb, DynamicalSystem& ds)
 {
   // This function is useless in C++ but maybe required in Python? To be checked.
   // DS is a parameter, since it can be returned, DynamicalSystem being an abstract class.
-  if (! involvedDS.isDynamicalSystemIn(nb)) // if ds number nb is not in the set ...
+  if (! involvedDS->isDynamicalSystemIn(nb)) // if ds number nb is not in the set ...
     RuntimeException::selfThrow("Interaction::getDynamicalSystem(nb), DS number nb is not in the set.");
-  ds = *(involvedDS.getDynamicalSystemPtr(nb));
+  ds = *(involvedDS->getDynamicalSystemPtr(nb));
 }
 
 void Interaction::setRelationPtr(Relation* newRelation)
@@ -555,7 +562,7 @@ void Interaction::computeSizeOfDS()
   sizeOfDS = 0;
   sizeZ = 0;
   DSIterator it;
-  for (it = involvedDS.begin(); it != involvedDS.end(); it++)
+  for (it = involvedDS->begin(); it != involvedDS->end(); it++)
   {
     sizeOfDS += (*it)->getDim();
     sizeZ += (*it)->getZPtr()->size();
@@ -581,7 +588,7 @@ void Interaction::display() const
   cout << "======= Interaction display =======" << endl;
   cout << "| id : " << id << endl;
   cout << "| number : " << number << endl;
-  involvedDS.display();
+  involvedDS->display();
   cout << "| y : " << endl;
   if (y[0] != NULL) y[0]->display();
   else cout << "->NULL" << endl;

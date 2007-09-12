@@ -244,24 +244,19 @@ TimeDiscretisation * t = new TimeDiscretisation(timeStep,s);
 
 s->initialize();
 
-int k = t->getK(); // Current step 
 int N = t->getNSteps(); // Number of time steps
 
 // --- Time loop ---
 while(k < N)// for each time step ...
 {
-// transfer of state i+1 into state i and time incrementation
-s->nextStep();
-// get current time step
-k = t->getK();
 // compute xFree, or qFree,vFree
 s->computeFreeStep();
-// Update the index sets (ie compute prediction yp for Lagrangian Systems)
-s->updateIndexSets();
 // Formalize and solve a LCP
 computeOneStepNSProblem("timeStepping");
 // Update state, using last computed values
 s->update(level); // 
+// transfer of state i+1 into state i and time incrementation
+s->nextStep();
 }
 \endcode
 

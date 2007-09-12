@@ -1,3 +1,4 @@
+
 /* Siconos-sample version 2.1.1, Copyright INRIA 2005-2007.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
@@ -26,6 +27,7 @@
 */
 
 #include "SiconosKernel.h"
+#include "NSSpack.h"
 
 using namespace std;
 
@@ -40,7 +42,7 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 3;           // degrees of freedom for the ball
     double t0 = 0;                   // initial computation time
-    double T = 10;                   // final computation time
+    double T = 8.5;                   // final computation time
     double h = 0.005;                // time step
     double position_init = 1.0;      // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
@@ -48,6 +50,7 @@ int main(int argc, char* argv[])
     double R = 0.1; // Ball radius
     double m = 1; // Ball mass
     double g = 9.81; // Gravity
+
     // -------------------------
     // --- Dynamical systems ---
     // -------------------------
@@ -114,11 +117,10 @@ int main(int argc, char* argv[])
     EventDriven* s = new EventDriven(t);
 
     // -- OneStepIntegrators --
-    OneStepIntegrator * OSI = new Lsodar(ball, s);
-
+    Lsodar * OSI = new Lsodar(ball, s);
     // -- OneStepNsProblem --
-    OneStepNSProblem * impact = new LCP(s, "impact", solverName, 101, 0.0001);
-    OneStepNSProblem * acceleration = new LCP(s, "acceleration", solverName, 101, 0.0001);
+    OneStepNSProblem * impact = new LCP(s, "impact", solverName, 101, 1e-12);
+    OneStepNSProblem * acceleration = new LCP(s, "acceleration", solverName, 101, 1e-12);
 
     // =========================== End of model definition ===========================
 
@@ -126,9 +128,12 @@ int main(int argc, char* argv[])
 
     // --- Simulation initialization ---
     cout << "====> Simulation initialisation ..." << endl << endl;
+    s->setPrintStat(true);
     s->initialize();
 
-    int N = 12370; // Number of saved points: depends on the number of events ...
+    cout << "Tolerance is : " << s->getTolerance() << endl;
+
+    int N = 20000;//;12370; // Number of saved points: depends on the number of events ...
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -136,7 +141,10 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlot(N + 1, outputSize);
     SiconosVector * q = ball->getQPtr();
     SiconosVector * v = ball->getVelocityPtr();
-    SiconosVector * lambda = bouncingBall->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambdaPtr(1);
+    SiconosVector * lambda = bouncingBall->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambdaPtr(0);
+    //   SiconosVector * y = bouncingBall->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getYPtr(0);
+
+    EventsManager * eventsManager = s->getEventsManagerPtr();
 
     // For the initial time step:
     // time
@@ -148,7 +156,6 @@ int main(int argc, char* argv[])
 
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
-    EventsManager * eventsManager = s->getEventsManagerPtr();
 
     unsigned int numberOfEvent = 0 ;
     int k = 0;
@@ -156,25 +163,28 @@ int main(int argc, char* argv[])
     while (s->hasNextEvent())
     {
       k++;
+
       s->advanceToEvent();
 
       s->processEvents();
-      // If the treated event is non smooth, we save pre-impact state.
-      if (eventsManager->getCurrentEventPtr()->getType() == "NonSmoothEvent")
+
+      // If the treated event is non smooth, the pre-impact state has been solved in memory vectors during process.
+      if (eventsManager->getStartingEventPtr()->getType() == "NonSmoothEvent")
       {
-        dataPlot(k, 0) = s->getCurrentTime();
+        dataPlot(k, 0) = s->getStartingTime();
         dataPlot(k, 1) = (*ball->getQMemoryPtr()->getSiconosVector(1))(0);
         dataPlot(k, 2) = (*ball->getVelocityMemoryPtr()->getSiconosVector(1))(0);
         k++;
         ++show_progress;
       }
-      dataPlot(k, 0) = s->getCurrentTime();
+      dataPlot(k, 0) = s->getStartingTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*lambda)(0);
       numberOfEvent++;
       ++show_progress;
     }
+
     // --- Output files ---
     cout << endl;
     cout << "===== End of Event Driven simulation. " << numberOfEvent << " events have been processed. ==== " << endl << endl;

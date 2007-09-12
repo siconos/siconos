@@ -41,7 +41,7 @@ class DynamicalSystem;
  * \f]
  *
  * \f[
- * p = G^t(q,\lambda[0],z)\lambda[0]
+ * p = G0^t(q,\lambda[0],z)\lambda[0]
  * \f]
  *
  * with

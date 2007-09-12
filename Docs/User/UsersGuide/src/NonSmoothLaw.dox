@@ -1,0 +1,54 @@
+/*! \page docNSL Non Smooth Laws
+\b What \b is \b a \b Non-Smooth \b Law? \n
+
+A non-smooth law is an object used to define the behavior of the systems involved in an Interaction, when a non-smooth event occurs. \n
+For example, in the case of an impact, a Newton impact law will link the pre and post velocities at impact in something like "post-velocity = -e X pre-velocity".
+
+\b Building \b a \b NonSmooth \b Law ?\n
+
+Each non-smooth law is characterized by a type (more or less the name of its class), a size, plus some specific variables depending on its type.\n
+The top abstract class NonSmoothLaw is only a generic interface for the specific laws defined below.
+
+\b Available \b classes: NonSmoothLaw, ComplementarityConditionNSL, NewtonImpactNSL, NewtonImpactFrictionNSL, RelayNSL.
+
+\image html classNonSmoothLaw.png
+\image latex classNonSmoothLaw.eps "" width=10cm
+
+\section docNSLCC Complementarity Condition
+
+nsLawSize: 1.\n
+no specific parameters.
+\f{eqnarray*}
+ 0 \leq y \perp \lambda\geq 0
+\f}
+\section docNSLNI Newton Impact
+nsLawSize: 1.\n
+parameter: \e e, the Newton normal coefficient of restitution.
+\f[
+if \ y(t)=0,\ 0 \leq \dot y(t^+) +e   \dot y(t^-) \perp \lambda\geq 0
+\f]
+\section docNSLNIF Newton Impact-Friction
+nsLawSize: 2 or 3 (2 or 3 dimensional friction).\n
+parameters: en, et (Newton impact normal and tangential coefficients) and mu, friction coefficient.\n
+
+Newton Impact Law plus Coulomb Friction. \n
+In this case, y components are in the following order:\n
+first relation, normal part\n
+first relation, tangential part\n
+...\n
+relation n, normal part \n
+relation n, tangential part\n
+and so on ...\n
+
+Note also that usually only normal part definition is required for y[0]. 
+
+\section docNSLR Relay
+nsLawSize: 1.\n
+parameters: c and d
+\f{eqnarray*}
+\dot y &=0&, \  d \leq \lambda \leq c \\
+\dot y &\geq 0&, \ \lambda =  c \\
+\dot y &\leq 0&, \ \lambda =  d \\
+\f}
+
+*/

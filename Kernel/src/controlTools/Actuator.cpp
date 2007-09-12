@@ -27,21 +27,30 @@
 #include <iostream>
 using namespace std;
 
-Actuator::Actuator(): type("generic"), id("none"), model(NULL), timeDiscretisation(NULL), eventsSet()
-{}
-
-Actuator::Actuator(const std::string& name, TimeDiscretisation* t): type(name), id("none"), model(t->getModelPtr()), timeDiscretisation(t), eventsSet()
-{}
-
-Actuator::Actuator(const std::string& name, TimeDiscretisation* t, const Sensors& sensorList): type(name), id("none"), model(t->getModelPtr()), timeDiscretisation(t), eventsSet()
+Actuator::Actuator(): type("generic"), id("none"), allSensors(NULL), allDS(NULL),  model(NULL), timeDiscretisation(NULL), eventsSet()
 {
+  allDS = new DynamicalSystemsSet();
+  allSensors = new Sensors();
+}
 
+Actuator::Actuator(const std::string& name, TimeDiscretisation* t): type(name), id("none"), allSensors(NULL), allDS(NULL), model(t->getModelPtr()), timeDiscretisation(t), eventsSet()
+{
+  allDS = new DynamicalSystemsSet();
+  allSensors = new Sensors();
+}
+
+Actuator::Actuator(const std::string& name, TimeDiscretisation* t, const Sensors& sensorList): type(name), id("none"), allSensors(NULL), allDS(NULL), model(t->getModelPtr()), timeDiscretisation(t), eventsSet()
+{
+  allDS = new DynamicalSystemsSet();
+  allSensors = new Sensors();
 }
 
 Actuator::~Actuator()
 {
-  allDS.clear();
-  allSensors.clear();
+  allDS->clear();
+  allSensors->clear();
+  delete allDS;
+  delete allSensors;
 }
 
 void Actuator::addSensors(const Sensors& newSensors)
@@ -52,14 +61,14 @@ void Actuator::addSensors(const Sensors& newSensors)
 
   SensorsIterator itS;
   for (itS = newSensors.begin(); itS != newSensors.end(); ++itS)
-    allSensors.insert(*itS);
+    allSensors->insert(*itS);
 
 }
 
 void Actuator::addSensorPtr(Sensor * newSensor)
 {
   // Add a Sensor into allSensors set: no copy, pointer link.
-  allSensors.insert(newSensor);
+  allSensors->insert(newSensor);
 }
 
 void Actuator::addDynamicalSystems(const DynamicalSystemsSet& newDSs)
@@ -70,13 +79,13 @@ void Actuator::addDynamicalSystems(const DynamicalSystemsSet& newDSs)
 
   DSIterator itDS;
   for (itDS = newDSs.begin(); itDS != newDSs.end(); ++itDS)
-    allDS.insert(*itDS);
+    allDS->insert(*itDS);
 }
 
 void Actuator::addDynamicalSystemPtr(DynamicalSystem * newDS)
 {
   // Add a DS into allDS set: no copy, pointer link.
-  allDS.insert(newDS);
+  allDS->insert(newDS);
 }
 
 void Actuator::initialize()
@@ -112,11 +121,11 @@ void Actuator::display() const
     cout << " and not linked to a model." << endl;
   cout << "The associated Sensors are: " << endl;
   SensorsIterator itS;
-  for (itS = allSensors.begin(); itS != allSensors.end(); ++itS)
+  for (itS = allSensors->begin(); itS != allSensors->end(); ++itS)
     (*itS)->display();
   cout << "The associated DynamicalSystems are: " << endl;
   DSIterator itDS;
-  for (itDS = allDS.begin(); itDS != allDS.end(); ++itDS)
+  for (itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
     cout << " - Number and Id: " << (*itDS)->getNumber() << ", " << (*itDS)->getId() << endl;
   cout << "======" << endl;
   cout << endl;

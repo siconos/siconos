@@ -29,6 +29,7 @@ Global interface for simulation process description (Base for TimeStepping or Ev
 #include "UnitaryRelationsSet.h"
 #include "EventsManager.h"
 #include <vector>
+#include <fstream>
 
 class Model;
 class DynamicalSystem;
@@ -72,8 +73,8 @@ typedef DSOSIMap::iterator DSOSIIterator;
 /** Const Iterator through a DSOSIMap. */
 typedef DSOSIMap::const_iterator DSOSIConstIterator;
 
-/** tolerance value used in indexSets updating */
-const double TOLERANCE = 1e-8;
+/** default tolerance value, used to update index sets */
+const double DEFAULT_TOLERANCE = 10 * MACHINE_PREC;
 
 /** Description of the simulation process (integrators, time discretisation,...) - Base class for TimeStepping or EventDriven.
  *
@@ -141,6 +142,15 @@ protected:
 
   /** int used to set the maximal derivative order used in the OSNS variables */
   unsigned int levelMax;
+
+  /** tolerance value used to compute the index sets - Default: equal to machine double precision (from dlamch lapack routine).*/
+  double tolerance;
+
+  /** Flag for optional output. True if output display for solver stat required, else false.*/
+  bool printStat;
+
+  /**Output file for stats*/
+  std::ofstream statOut;
 
   /** default constructor
    */
@@ -232,9 +242,9 @@ public:
   /** get "current time" (ie starting point for current integration, time of currentEvent of eventsManager.)
    *  \return a double.
    */
-  inline const double getCurrentTime() const
+  inline const double getStartingTime() const
   {
-    return eventsManager->getCurrentTime();
+    return eventsManager->getStartingTime();
   };
 
   /** get "next time" (ie ending point for current integration, time of nextEvent of eventsManager.)
@@ -250,7 +260,7 @@ public:
    */
   inline const double getTimeStep() const
   {
-    return (eventsManager->getNextTime() - eventsManager->getCurrentTime());
+    return (getNextTime() - getStartingTime());
   };
 
   /** check if a future event is to be treated or not (ie if some events remain in the eventsManager).
@@ -302,25 +312,6 @@ public:
    *  \param a pointer to a OneStepIntegrator.
    */
   void addInOSIMap(DynamicalSystem*, OneStepIntegrator *);
-
-  /** check if the new OSI (parameter of the function) has common DynamicalSystems with one of the existing OSI of the simulation.
-   * \param a OneStepIntegrator*
-   * \return a bool
-   */
-  const bool hasCommonDSInIntegrators(OneStepIntegrator*) const ;
-
-  /** get indexSets (the whole vector)
-   *  \return a VectorOfSetOfUnitaryRelations
-   */
-  inline const VectorOfSetOfUnitaryRelations getIndexSets() const
-  {
-    return indexSets;
-  };
-
-  /** get indexSets[i]
-   *  \return a UnitaryRelationsSet
-   */
-  const UnitaryRelationsSet getIndexSet(unsigned int) const ;
 
   /** get a pointer to indexSets[i]
    *  \return a UnitaryRelationsSet
@@ -399,6 +390,37 @@ public:
     model = m;
   }
 
+  /** get tolerance
+   *  \return a double
+   */
+  const double getTolerance() const
+  {
+    return tolerance;
+  };
+
+  /** set the value of offset for q dof vector in dynamical systems (to avoid events accumulation)
+   *  \param a double;
+   */
+  void setTolerance(double inputVal)
+  {
+    tolerance = inputVal;
+  };
+
+  /** set printStat value: if true, print solver stats.
+   * \param a bool
+   */
+  inline void setPrintStat(const bool& newVal)
+  {
+    printStat = newVal;
+  };
+
+  /** get printStat value
+   */
+  inline const bool getPrintStat() const
+  {
+    return printStat;
+  };
+
   /** update all index sets of the topology, using current y and lambda values of Interactions.
    */
   void updateIndexSets();
@@ -448,7 +470,7 @@ public:
    */
   virtual void saveSimulationToXML();
 
-  /** compute r thanks to lambda[level]
+  /** compute r thanks to lambda[level] for all Interactions
    *  \param unsigned int: lambda order, default = levelMin
    */
   void updateInput(int = -1);

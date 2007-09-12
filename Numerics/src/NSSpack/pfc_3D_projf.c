@@ -40,6 +40,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "NSSpack.h"
 
 void pfc_3D_projf(int nc , double *ww , double *zz , double *rr , double *pp , int *status)
 {

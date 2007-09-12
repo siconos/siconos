@@ -66,14 +66,17 @@ private:
   Interaction * mainInteraction;
 
   /** relative position of the present relation in the Interaction - For example if the present relation takes place from index 2 to 4 in y vector
-   of mainInteraction, thus the relative position is equal to 2. */
+   of mainInteraction, the relative position is equal to 2. */
   unsigned int relativePosition;
 
   /** number of the relation, ie the number of the corresponding block vector in the main Interaction.*/
   unsigned int number;
 
+  /** Absolute position in the "global" vector of constraints (for example, the one handled by lsodar) */
+  unsigned int absolutePostion;
+
   /** default constructor
-  */
+   */
   UnitaryRelation();
 
 public:
@@ -209,11 +212,6 @@ public:
   {
     return mainInteraction->dynamicalSystemsEnd();
   };
-
-  /** gets the DynamicalSystemsSet
-   *  \return a DynamicalSystemsSet
-   */
-  DynamicalSystemsSet getDynamicalSystems() const;
 
   /** gets a pointer to the DynamicalSystemsSet
    *  \return a DynamicalSystemsSet*

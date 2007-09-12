@@ -66,10 +66,10 @@ protected:
   std::string id;
 
   /** data list - Each vector of data is identified with a string. */
-  Sensors allSensors;
+  Sensors * allSensors;
 
   /** Dynamical Systems list: all the systems on which this actuator may act. */
-  DynamicalSystemsSet allDS;
+  DynamicalSystemsSet * allDS;
 
   /** The model linked to this sensor */
   Model * model;
@@ -135,7 +135,7 @@ public:
   /** get all the Sensors linked to this actuator.
    *  \return a Sensors object (list of Sensor)
    */
-  inline const Sensors getSensors() const
+  inline const Sensors* getSensors() const
   {
     return allSensors;
   };
@@ -153,7 +153,7 @@ public:
   /** get all the Dynamical Systems linked to this actuator.
    *  \return a DynamicalSystemsSet.
    */
-  inline const DynamicalSystemsSet getDynamicalSystems() const
+  inline const DynamicalSystemsSet * getDynamicalSystems() const
   {
     return allDS;
   };

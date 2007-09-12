@@ -23,60 +23,33 @@
 using namespace std;
 
 //-- Default constructor --
-InteractionsSet::InteractionsSet()
-{}
-
-//-- Copy constructor --
-InteractionsSet::InteractionsSet(const InteractionsSet& newSet)
+InteractionsSet::InteractionsSet(): setOfInteractions(NULL)
 {
-
-  // Warning: "false" copy since pointers links remain between Interactions of each set
-  clear();
-  ConstInteractionsIterator it;
-  for (it = newSet.begin(); it != newSet.end(); ++it)
-  {
-    setOfInteractions.insert(*it);
-    isInteractionAllocatedIn[*it] = false ;
-  }
-  // Warning: Copy of Interactions leads to Interactions with non id and -2 as a number.
-  // Thus it is better to avoid InteractionsSet copy.
-  //  RuntimeException::selfThrow("InteractionsSet::copy constructor, not implemented. ");
+  setOfInteractions = new InterSet();
 }
 
 // --- Destructor ---
 InteractionsSet::~InteractionsSet()
 {
   InteractionsIterator it;
-  for (it = setOfInteractions.begin(); it != setOfInteractions.end(); ++it)
+  for (it = setOfInteractions->begin(); it != setOfInteractions->end(); ++it)
   {
     if (isInteractionAllocatedIn[*it]) delete(*it);
   }
-  setOfInteractions.clear();
+  setOfInteractions->clear();
   isInteractionAllocatedIn.clear();
-}
-
-InteractionsSet& InteractionsSet::operator=(const InteractionsSet& newSet)
-{
-  // Warning: "false" copy since pointers links remain between Interactions of each set
-  clear();
-  ConstInteractionsIterator it;
-  for (it = newSet.begin(); it != newSet.end(); ++it)
-  {
-    setOfInteractions.insert(*it);
-    isInteractionAllocatedIn[*it] = false ;
-  }
-  return *this;
+  delete setOfInteractions;
 }
 
 Interaction* InteractionsSet::getInteraction(const int num) const
 {
   ConstInteractionsIterator it;
-  for (it = setOfInteractions.begin(); it != setOfInteractions.end(); ++it)
+  for (it = setOfInteractions->begin(); it != setOfInteractions->end(); ++it)
   {
     if (((*it)->getNumber()) == num)
       break;
   }
-  if (it == setOfInteractions.end())
+  if (it == setOfInteractions->end())
     RuntimeException::selfThrow("InteractionsSet::getInteraction(num): can not find this Dynamical System in the set.");
 
   return *it;
@@ -84,9 +57,9 @@ Interaction* InteractionsSet::getInteraction(const int num) const
 
 const bool InteractionsSet::isInteractionIn(Interaction* ds) const
 {
-  InteractionsIterator it = setOfInteractions.find(ds);
+  InteractionsIterator it = setOfInteractions->find(ds);
   bool out = false;
-  if (it != setOfInteractions.end()) out = true;
+  if (it != setOfInteractions->end()) out = true;
   return out;
 }
 
@@ -94,7 +67,7 @@ const bool InteractionsSet::isInteractionIn(const int num) const
 {
   bool out = false;
   InteractionsIterator it;
-  for (it = setOfInteractions.begin(); it != setOfInteractions.end(); ++it)
+  for (it = setOfInteractions->begin(); it != setOfInteractions->end(); ++it)
   {
     if (((*it)->getNumber()) == num)
     {
@@ -108,13 +81,13 @@ const bool InteractionsSet::isInteractionIn(const int num) const
 
 InteractionsIterator InteractionsSet::find(Interaction* ds)
 {
-  return setOfInteractions.find(ds);
+  return setOfInteractions->find(ds);
 }
 
 InteractionsIterator InteractionsSet::find(const int num)
 {
   InteractionsIterator it;
-  for (it = setOfInteractions.begin(); it != setOfInteractions.end(); ++it)
+  for (it = setOfInteractions->begin(); it != setOfInteractions->end(); ++it)
   {
     if (((*it)->getNumber()) == num)
       break;
@@ -124,31 +97,31 @@ InteractionsIterator InteractionsSet::find(const int num)
 
 CheckInsertInteraction InteractionsSet::insert(Interaction* ds)
 {
-  return setOfInteractions.insert(ds);
+  return setOfInteractions->insert(ds);
   isInteractionAllocatedIn[ds] = false;
 }
 
 void InteractionsSet::erase(Interaction* ds)
 {
-  InteractionsIterator it = setOfInteractions.find(ds);
-  if (it == setOfInteractions.end())
+  InteractionsIterator it = setOfInteractions->find(ds);
+  if (it == setOfInteractions->end())
     RuntimeException::selfThrow("InteractionsSet::erase(ds): ds is not in the set!");
 
   // If ds has been allocated inside the class, it is first necessary to release memory.
   if (isInteractionAllocatedIn[ds])
     delete *it;
   isInteractionAllocatedIn.erase(ds);
-  setOfInteractions.erase(*it);
+  setOfInteractions->erase(*it);
 }
 
 void InteractionsSet::clear()
 {
   InteractionsIterator it;
-  for (it = setOfInteractions.begin(); it != setOfInteractions.end(); ++it)
+  for (it = setOfInteractions->begin(); it != setOfInteractions->end(); ++it)
   {
     if (isInteractionAllocatedIn[*it]) delete *it;
   }
-  setOfInteractions.clear();
+  setOfInteractions->clear();
   isInteractionAllocatedIn.clear();
 }
 
@@ -156,30 +129,20 @@ void InteractionsSet::display() const
 {
   cout << "====> InteractionsSet display - The following Interactions are present in the set ( id - number):" << endl;
   InteractionsIterator it;
-  for (it = setOfInteractions.begin(); it != setOfInteractions.end(); ++it)
+  for (it = setOfInteractions->begin(); it != setOfInteractions->end(); ++it)
     cout << "(" << (*it)->getId() << "," << (*it)->getNumber() << "), ";
   cout << endl;
   cout << "=============================================================================================" << endl;
 }
 
-const InteractionsSet intersection(const InteractionsSet& s1, const InteractionsSet& s2)
+void intersection(const InteractionsSet& s1, const InteractionsSet& s2, InteractionsSet& commonInteractions)
 {
-  // output
-  InteractionsSet commonInteractions;
-
-  set_intersection(s1.setOfInteractions.begin(), s1.setOfInteractions.end(), s2.setOfInteractions.begin(), s2.setOfInteractions.end(),
-                   inserter(commonInteractions.setOfInteractions, commonInteractions.setOfInteractions.begin()), compareInter());
-
-  return commonInteractions;
+  set_intersection(s1.setOfInteractions->begin(), s1.setOfInteractions->end(), s2.setOfInteractions->begin(), s2.setOfInteractions->end(),
+                   inserter(*commonInteractions.setOfInteractions, commonInteractions.setOfInteractions->begin()), compareInter());
 }
 
-const InteractionsSet operator - (const InteractionsSet& s1, const InteractionsSet& s2)
+void difference(const InteractionsSet& s1, const InteractionsSet& s2, InteractionsSet& commonInteractions)
 {
-  // output
-  InteractionsSet commonInteractions;
-
-  set_difference(s1.setOfInteractions.begin(), s1.setOfInteractions.end(), s2.setOfInteractions.begin(), s2.setOfInteractions.end(),
-                 inserter(commonInteractions.setOfInteractions, commonInteractions.setOfInteractions.begin()), compareInter());
-
-  return commonInteractions;
+  set_difference(s1.setOfInteractions->begin(), s1.setOfInteractions->end(), s2.setOfInteractions->begin(), s2.setOfInteractions->end(),
+                 inserter(*commonInteractions.setOfInteractions, commonInteractions.setOfInteractions->begin()), compareInter());
 }

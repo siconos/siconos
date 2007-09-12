@@ -23,7 +23,7 @@
 
 
 
-projf(int etat[], int *nn, double y[], double fric[], double projf1[])
+void projf(int etat[], int *nn, double y[], double fric[], double projf1[])
 {
 
   int i, nc, n = *nn;

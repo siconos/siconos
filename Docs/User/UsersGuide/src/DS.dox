@@ -1,7 +1,7 @@
 /*! \page dsInSiconos Dynamical Systems formulations in Siconos
 
 \author Franck Pérignon
-\version Siconos-Kernel 2.0.0 
+\version Siconos-Kernel 2.1.1 
 
 \section doc_dsIntro Introduction
 
@@ -50,10 +50,10 @@ Note that in that case \f$ \nabla_{\dot x} g \f$ must be invertible.
 
 The aim of this class is to provide some members and functions for all dynamical systems types (ie for all derived classes), but with some specific behaviors depending on the type of system (see the related sections below for details).
 
-<e> That means that all members and functions described below are also available in any of the derived classes. </e>
+<em>That means that all members and functions described below are also available in any of the derived classes. </em>
 
 \b Main \b class \b members:
-- Each DynamicalSystem is identified thanks to a number and an id.
+- each DynamicalSystem is identified thanks to a number and an id.
 - a link to the non-smooth system that owns the present dynamical system
 - x, with x[0]=\f$ x \f$ and x[1]=\f$ \dot x \f$ = rhs. 
 - x0
@@ -77,7 +77,7 @@ Use functions getX()/getXPtr(), setX()/setXPtr() to access \f$ x \f$ and getRhs/
 
 g and its gradients can be connected to user plug-in functions. 
 
-\b plug-in: some members can be connected to user plug-in functions, used to compute them. In that case, the following methods can be used:
+\b Plug-in: some members can be connected to user plug-in functions, used to compute them. In that case, the following methods can be used:
 - setComputeNameFunction(...) to link name with your own function
 - computeName(...) to compute name using your own function
 
@@ -104,7 +104,7 @@ ds->setComputeFInt("myPlugin", "myFunction");
 ds->computeFInt(time); 
 // compute fInt value at time for the current state
 \endcode
-Note that the signature (ie the number and type of arguments) of the function you use in your plugin  must be exactly the same as the one given in Kernel/src/plugin/DefaultPlugin.cpp for the corresponding function. 
+Note that the signature (\e ie the number and type of arguments) of the function you use in your plugin  must be exactly the same as the one given in Kernel/src/plugin/DefaultPlugin.cpp for the corresponding function. 
 
 
 \section doc_fonlds General non linear first order dynamical systems: class FirstOrderNonLinearDS
@@ -124,8 +124,8 @@ with: \n
 
 - M is supposed to be invertible (if not, we can not compute x[1]=rhs ...).  
 
-- Initial conditions are given by the member x0, vector of size n. This corresponds to x value when simulation is starting, 
-ie after a call to simulation initialize() function. \n
+- initial conditions are given by the member x0, vector of size n. This corresponds to x value when simulation is starting, 
+\e ie after a call to simulation initialize() function. \n
 
 - There are plug-in functions in this class for f and its Jacobian, jacobianXF.
 

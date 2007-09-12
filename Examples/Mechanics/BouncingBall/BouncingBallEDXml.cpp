@@ -75,14 +75,14 @@ int main(int argc, char* argv[])
 
       s->processEvents();
       // If the treated event is non smooth, we save pre-impact state.
-      if (eventsManager->getCurrentEventPtr()->getType() == "NonSmoothEvent")
+      if (eventsManager->getStartingEventPtr()->getType() == "NonSmoothEvent")
       {
-        dataPlot(k, 0) = s->getCurrentTime();
+        dataPlot(k, 0) = s->getStartingTime();
         dataPlot(k, 1) = (*ball->getQMemoryPtr()->getSiconosVector(1))(0);
         dataPlot(k, 2) = (*ball->getVelocityMemoryPtr()->getSiconosVector(1))(0);
         k++;
       }
-      dataPlot(k, 0) = s->getCurrentTime();
+      dataPlot(k, 0) = s->getStartingTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*lambda)(0);

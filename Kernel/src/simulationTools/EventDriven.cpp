@@ -74,45 +74,86 @@ EventDriven::~EventDriven()
 void EventDriven::updateIndexSet(unsigned int i)
 {
   if (i > indexSets.size())
-    RuntimeException::selfThrow("Topology::updateIndexSet(i), indexSets[i] does not exist.");
+    RuntimeException::selfThrow("EventDriven::updateIndexSet(i), indexSets[i] does not exist.");
 
   if (i == 0) // IndexSets[0] must not be updated by this function.
-    RuntimeException::selfThrow("Topology::updateIndexSet(i=0), indexSets[0] can not be updated.");
+    RuntimeException::selfThrow("EventDriven::updateIndexSet(i=0), indexSets[0] can not be updated.");
 
   // for all Unitary Relations in indexSet[i-1], compute y[i-1] and update the indexSet[i]
   UnitaryRelationIterator it, itForFind;
 
-  double borneInf;
-  if (i == 1)
-    borneInf = -1000;
-  else
-    borneInf = -TOLERANCE;
-
   double y;
-  for (it = indexSets[i - 1]->begin(); it != indexSets[i - 1]->end(); ++it)
+
+  if (i == 1) // Action is different when first set is treated
   {
-    // check if current Unitary Relation (ie *it) is in indexSets[i]
-    // (if not itForFind will be equal to indexSets.end())
-    itForFind = indexSets[i]->find(*it);
+    // We get jroot array, output of root information
+    // Warning! work only if there is only one osi in the simulation.
+    if (allOSI.size() > 1)
+      RuntimeException::selfThrow("EventDriven::updateIndexSet(i), not yet implemented for several OneStepIntegrators in the same Simulation process.");
+    Lsodar * lsodar = static_cast<Lsodar*>(*(allOSI.begin()));
+    integer * jroot = lsodar->getJroot();
+    unsigned int nsLawSize; // size of each UR, which corresponds to the related nsLaw size
+    unsigned int absolutePosition = 0; // global position of the UR in the vector of constraints, ie in jroot.
+    bool out = true;
+    for (it = indexSets[i - 1]->begin(); it != indexSets[i - 1]->end(); ++it)
+    {
+      itForFind = indexSets[i]->find(*it);
+      nsLawSize = (*it)->getNonSmoothLawSize();
 
-    // Get y[i-1] double value
-    y = (*it)->getYRef(i - 1);
+      // 1 - If the UR is not yet in the set
+      if (itForFind == indexSets[i]->end())
+      {
+        // Each UR may handle several constraints and thus corresponds to a set of position in jroot
+        for (unsigned int pos = absolutePosition; pos < (absolutePosition + nsLawSize); ++pos)
+        {
+          if (jroot[pos] == 1)
+          {
+            indexSets[i]->insert(*it);
+            break; // if one, at least, of the nsLawSize constraints is active, the UR is inserted into the set.
+          }
+        }
+      }
+      else // if the UR was already in the set
+      {
+        out = true;
+        for (unsigned int pos = absolutePosition; pos < (absolutePosition + nsLawSize); ++pos)
+        {
+          if (jroot[pos] == 1)
+          {
+            out = false;
+            break; // if one, at least, of the nsLawSize constraints is active, the UR remains in the set.
+          }
+        }
+        if (out) indexSets[i]->erase(*it);
+      }
+      absolutePosition += nsLawSize; // step to next UR ...
+    }
+  }
+  else
+  {
+    for (it = indexSets[i - 1]->begin(); it != indexSets[i - 1]->end(); ++it)
+    {
+      // check if current Unitary Relation (ie *it) is in indexSets[i]
+      // (if not itForFind will be equal to indexSets.end())
+      itForFind = indexSets[i]->find(*it);
 
-    //       // if y[i-1] <=0, then the unitary relation is added in indexSets[i] (if it was not already there)
-    //       // else if y[i-1] > 0 and if the unitary relation was in the set, it is removed.
-    //       if( y <= 0 && itForFind==indexSets[i].end())
-    //  indexSets[i].insert(*it);
-    //       else if( y > 0 && itForFind!=indexSets[i].end())
-    //  indexSets[i].erase(*it);
+      // Get y[i-1] double value
+      y = (*it)->getYRef(i - 1);
 
-    if ((borneInf < y && y < TOLERANCE) &&  itForFind == indexSets[i]->end())
-      indexSets[i]->insert(*it);
-    else if ((-TOLERANCE > y || y > TOLERANCE) &&  itForFind != indexSets[i]->end())
-      indexSets[i]->erase(*it);
 
-    // Note if *it is already in the set, insert(*it) is supposed to have no effect. Same for erase when (*it) is not in the set.
-    // => to be reviewed in UnitaryRelationsSet
-
+      // if y[i-1] <=0, then the unitary relation is added in indexSets[i] (if it was not already there)
+      // else if y[i-1] > 0 and if the unitary relation was in the set, it is removed.
+      if (itForFind == indexSets[i]->end()) // If the UR is not yet in the set ...
+      {
+        if (fabs(y) < tolerance)
+          indexSets[i]->insert(*it);
+      }
+      else  // if the UR is already in the set
+      {
+        if (fabs(y) > tolerance)
+          indexSets[i]->erase(*it);
+      }
+    }
   }
 }
 
@@ -127,16 +168,16 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
     double gamma = (*it)->getYRef(2);
     double F     = (*it)->getLambdaRef(2);
 
-    if (gamma > 0 && F < TOLERANCE)
+    if (gamma > 0 && fabs(F) < tolerance)
       indexSets[2]->erase(*it);
-    else if (gamma < TOLERANCE && F < TOLERANCE) // undetermined case
+    else if (fabs(gamma) < tolerance && fabs(F) < tolerance) // undetermined case
       RuntimeException::selfThrow("EventDriven::updateIndexSetsWithDoubleCondition(), undetermined case.");
   }
 }
 
 void EventDriven::initOSNS()
 {
-  tinit = eventsManager->getCurrentTime();
+  tinit = eventsManager->getStartingTime();
   tend =  eventsManager->getNextTime();
 
   if (!allNSProblems.empty()) // ie if some Interactions have been declared and a Non smooth problem built.
@@ -178,6 +219,9 @@ void EventDriven::initLevelMax()
 
 void EventDriven::computeF(OneStepIntegrator* osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
 {
+
+  // computeF is supposed to fill xdot in, using the definition of the dynamical systems belonging to the osi
+
   // Check osi type: only lsodar is allowed.
   if (osi->getType() != "Lsodar")
     RuntimeException::selfThrow("EventDriven::computeF(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
@@ -188,22 +232,24 @@ void EventDriven::computeF(OneStepIntegrator* osi, integer * sizeOfX, doublereal
   lsodar->fillXWork(sizeOfX, x);
 
   double t = *time;
-  model->setCurrentT(t);
+  model->setCurrentTime(t);
 
-  // update the DS of the OSI.
-  lsodar->updateState(2); // update based on the last saved values for the DS state, ie the ones computed by lsodar (x above)
-
-  // solve a LCP "acceleration"
+  // solve a LCP at "acceleration" level if required
   if (!allNSProblems.empty())
   {
-    if (!(allNSProblems["acceleration"]->getInteractions()).isEmpty())
+    if (!(allNSProblems["acceleration"]->getInteractions())->isEmpty())
     {
       allNSProblems["acceleration"]->compute(t);
       updateInput(2); // Necessary to compute DS state below
     }
-    // Compute the right-hand side ( xdot = f + Tu + r in DS) for all the ds, with the new value of input.
-    lsodar->computeRhs(t);
+    // Compute the right-hand side ( xdot = f + r in DS) for all the ds, with the new value of input.
+    //lsodar->computeRhs(t);
   }
+  // update the DS of the OSI.
+  lsodar->computeRhs(t);
+  //  lsodar->updateState(2); // update based on the last saved values for the DS state, ie the ones computed by lsodar (x above)
+
+  // Update Index sets?
 
   // Get the required value, ie xdot for output.
   SiconosVector * xtmp2; // The Right-Hand side
@@ -228,14 +274,12 @@ void EventDriven::computeJacobianF(OneStepIntegrator* osi, integer *sizeOfX, dou
   //   // Remark A: according to DLSODAR doc, each call to jacobian is preceded by a call to f with the same
   //   // arguments NEQ, T, and Y.  Thus to gain some efficiency, intermediate quantities shared by both calculations may be
   //   // saved in class members?
-  cout << "in jaco f: " <<  endl;
-
   // fill in xWork vector (ie all the x of the ds of this osi) with x
   // fillXWork(x); // -> copy // Maybe this step is not necessary? because of remark A above
 
   // Compute the jacobian of the vector field according to x for the current ds
   double t = *time;
-  model->setCurrentT(t);
+  model->setCurrentTime(t);
   lsodar->computeJacobianRhs(t);
 
   //   // Save jacobianX values from dynamical system into current jacob (in-out parameter)
@@ -265,7 +309,7 @@ void EventDriven::computeG(OneStepIntegrator* osi, integer * sizeOfX, doublereal
   lsodar->fillXWork(sizeOfX, x); // That may be not necessary? Check if computeF is called for each computeG.
 
   double t = *time;
-  model->setCurrentT(t);
+  model->setCurrentTime(t);
 
   // IN: - lambda[2] obtained during LCP call in computeF()
   //     - y[0]: need to be updated.
@@ -279,6 +323,7 @@ void EventDriven::computeG(OneStepIntegrator* osi, integer * sizeOfX, doublereal
     nsLawSize = (*itUR)->getNonSmoothLawSize();
     if (indexSets[2]->find(*itUR) != indexSets[2]->end()) // ie if the current Unitary Relation is in indexSets[2]
     {
+      // Get lambda at acc. level, solution of LCP acc, called during computeF().
       lambda = (*itUR)->getLambdaPtr(2);
       for (unsigned int i = 0; i < nsLawSize; i++)
         gOut[k++] = (*lambda)(i);
@@ -295,7 +340,6 @@ void EventDriven::computeG(OneStepIntegrator* osi, integer * sizeOfX, doublereal
 void EventDriven::updateImpactState()
 {
   OSIIterator itOSI;
-  OSNSIterator itOsns;
   // Compute input = R(lambda[1])
   updateInput(1);
 
@@ -311,14 +355,15 @@ void EventDriven::update(unsigned int levelInput)
     // compute input (lambda -> r)
     updateInput(levelInput);
 
+    // Update dynamical systems states
     OSIIterator itOSI;
     for (itOSI = allOSI.begin(); itOSI != allOSI.end() ; ++itOSI)
       (*itOSI)->updateState(levelInput);
 
+    // Update output (y)
     updateOutput(levelInput, levelInput);
-
-    updateIndexSet(levelInput);
   }
+  // Warning: index sets are not updated in this function !!
 }
 
 void EventDriven::advanceToEvent()
@@ -327,14 +372,14 @@ void EventDriven::advanceToEvent()
   // To be reviewed for multiple OSI case (if it has sense?).
 
   // ---> Step 1: integrate the smooth dynamics from current event to next event;
-  // Current event = last accessed event.
+  // Starting event = last accessed event.
   // Next event = next time step or first root of the 'g' function found by integrator (Lsodar)
 
   // if istate == 1 => first call. It this case we suppose that tinit and tend have been initialized before.
 
-  if (istate == 2 || istate == 3) // ie no root found at previous step
+  if (istate == 2 || istate == 3)
   {
-    tinit = eventsManager->getCurrentTime();
+    tinit = eventsManager->getStartingTime();
     tend =  eventsManager->getNextTime();
   }
 
@@ -345,21 +390,38 @@ void EventDriven::advanceToEvent()
   OSIIterator it;
   for (it = allOSI.begin(); it != allOSI.end(); ++it)
   {
-    (*it)->integrate(tinit, tend, tout, istate); // integrate must return a flag telling if tend has been reached or not.
+    (*it)->integrate(tinit, tend, tout, istate); // integrate must return a flag (istate) telling if tend has been reached or not.
 
-    if (istate == 3)
+    if (printStat)
     {
-      //    cout << "new event at time " << tout << endl;
+      statOut << " =================> Results after advanceToEvent <================= " << endl;
+      statOut << " Starting time: " << tinit << endl;
+
+    }
+    if (istate == 3) // ie if tout is not equal to tend: one or more roots have been found.
+    {
       isNewEventOccur = true;
       // Add an event into the events manager list
       eventsManager->scheduleEvent("NonSmoothEvent", tout);
-      // if isScheduleOk == false, ie if the schedule failed, this means that the NonSmoothEvent occurs at a time-discretisation step.
-      // => we only change the type of the concerned event, from "TimeDiscr" to "NonSmooth".
-      // See eventsManager::scheduleEvent for details.
+      if (printStat)
+        statOut << " -----------> New non-smooth event at time " << tout << endl;
+    }
+    if (printStat)
+    {
+      Lsodar * lsodar = static_cast<Lsodar*>(*it);
+      statOut << "Results at time " << tout << ":" << endl;
+      integer * iwork = lsodar->getIwork();
+      statOut << "Number of steps: " << iwork[10] << ", number of f evaluations: " << iwork[11] << ", number of jacobianF eval.: " << iwork[12] << "." << endl;
+
     }
   }
 
-  model->setCurrentT(tout);
+
+  // Set model time to tout
+  model->setCurrentTime(tout);
+  // Update all the index sets ...
+  updateOutput(1, 1);
+  updateIndexSets();
 }
 
 EventDriven* EventDriven::convert(Simulation *str)

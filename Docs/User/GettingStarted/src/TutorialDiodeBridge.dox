@@ -333,14 +333,12 @@ But after that you only have access to values computed at the last time step, wh
 So that may be better to write a complete time loop like:
 
 \code
-int k = td->getK(); // Current step 
+int k = 0; // Current step 
 int N = td->getNSteps(); // Number of time steps
-while(k < N-1)	
+for(k = 1 ; k < N ; ++k)
 {	
-  s->nextStep();
-  // get current time step
-  k = td->getK();	
   s->computeOneStep();
+  s->nextStep();
 }  
 \endcode
 
@@ -352,13 +350,13 @@ The problem of output still remains. To answer that, we create a matrix where re
 
 \code
 // Before simulation loop
-int k = td->getK(); // Current step 
+int k = 0;
 int N = td->getNSteps(); // Number of time steps
 unsigned int outputSize = 7; // number of required data
 SimpleMatrix dataPlot(N,outputSize);
 // We get values for the initial time step: 
 // time
-dataPlot(k, 0) = k*h;
+dataPlot(k, 0) = DiodeBridge->getT0();
 // inductor voltage
 dataPlot(k, 1) = (oscillator->getX())(0);
 // inductor current
@@ -373,19 +371,17 @@ dataPlot(k, 5) = -(myInteraction->getLambda(0))(1);
 dataPlot(k, 6) = (myInteraction->getLambda(0))(2);
 
 // Simulation loop
-while(k < N-1)	
+for(k = 1 ; k < N ; ++k)
 {	
-  s->nextStep();
-  // get current time step
-  k = td->getK();	
   s->computeOneStep();
-  dataPlot(k, 0) = k*h;
+  dataPlot(k, 0) = s->getNextTime(); 
   dataPlot(k, 1) = (oscillator->getX())(0);
   dataPlot(k, 2) = (oscillator->getX())(1);
   dataPlot(k, 3) = (myInteraction->getY(0))(0);
   dataPlot(k, 4) = -(myInteraction->getLambda(0))(0);
   dataPlot(k, 5) = -(myInteraction->getLambda(0))(1);
   dataPlot(k, 6) = (myInteraction->getLambda(0))(2);
+  s->nextStep();
 }  
 
 // Write the results into the file "DiodeBridge.dat"
@@ -531,13 +527,13 @@ int main(int argc, char* argv[])
     // --- Initialisation of the simulation ---
     s->initialize();    
     
-    int k = td->getK(); // Current step 
+    int k = 0; // Current step 
     int N = td->getNSteps(); // Number of time steps
     unsigned int outputSize = 7; // number of required data
     SimpleMatrix dataPlot(N,outputSize);
     // We get values for the initial time step: 
     // time
-    dataPlot(k, 0) = k*h;
+    dataPlot(k, 0) = DiodeBridge->getT0();
     // inductor voltage
     dataPlot(k, 1) = (oscillator->getX())(0);
     // inductor current
@@ -552,20 +548,19 @@ int main(int argc, char* argv[])
     dataPlot(k, 6) = (myInteraction->getLambda(0))(2);
 
     // Simulation loop
-    while(k < N-1)	
-      {	
-	s->nextStep();
-  	// get current time step
-	k = td->getK();	
+    for(k = 1 ; k < N ; ++k)
+      {
 	s->computeOneStep();
- 	dataPlot(k, 0) = k*h;
+ 	dataPlot(k, 0) = s->getNextTime();
 	dataPlot(k, 1) = (oscillator->getX())(0);
 	dataPlot(k, 2) = (oscillator->getX())(1);
 	dataPlot(k, 3) = (myInteraction->getY(0))(0);
 	dataPlot(k, 4) = -(myInteraction->getLambda(0))(0);
 	dataPlot(k, 5) = -(myInteraction->getLambda(0))(1);
 	dataPlot(k, 6) = (myInteraction->getLambda(0))(2);
-      }  
+ 	s->nextStep();
+  	// get current time step
+     }  
 
     // Write the results into the file "DiodeBridge.dat"
     ioMatrix io("DiodeBridge.dat", "ascii");

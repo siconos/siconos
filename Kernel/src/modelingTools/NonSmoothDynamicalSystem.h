@@ -48,13 +48,13 @@ private:
   bool BVP;
 
   /** contains all the Dynamic Systems of the simulation */
-  DynamicalSystemsSet allDS;
+  DynamicalSystemsSet * allDS;
 
   /** inside-class allocation flags*/
   std::map<DynamicalSystem*, bool> isDSAllocatedIn;
 
   /** contains all the Interactions */
-  InteractionsSet allInteractions;
+  InteractionsSet * allInteractions;
 
   /** inside-class allocation flags*/
   std::map<Interaction*, bool> isInteractionAllocatedIn;
@@ -71,7 +71,7 @@ private:
   /** default constructor
    *  \param (optional) a bool which determines if the problem is BVP (true) or IVP (false)
    */
-  NonSmoothDynamicalSystem(const bool& = false);
+  NonSmoothDynamicalSystem() {};
 
   /** copy constructor => private: no copy nor pass-by value.
    */
@@ -143,13 +143,21 @@ public:
    */
   inline const unsigned int getNumberOfDS() const
   {
-    return allDS.size();
+    return allDS->size();
   };
 
   /** get all the DynamicalSystem of the NonSmoothDynamicalSystem problem (saved in a set)
-   *  \return a DynamicalSystemsSet
+   *  \return a DynamicalSystemsSet *
    */
-  inline const DynamicalSystemsSet getDynamicalSystems() const
+  inline const DynamicalSystemsSet * getDynamicalSystems() const
+  {
+    return allDS;
+  }
+
+  /** get all the DynamicalSystem of the NonSmoothDynamicalSystem problem (saved in a set)
+   *  \return a DynamicalSystemsSet *
+   */
+  inline DynamicalSystemsSet * getDynamicalSystems()
   {
     return allDS;
   }
@@ -159,15 +167,15 @@ public:
    */
   inline DSIterator dynamicalSystemsBegin()
   {
-    return allDS.begin();
+    return allDS->begin();
   };
 
-  /** iterator equal to allDS.end()
+  /** iterator equal to allDS->end()
    *  \return a DSIterator
    */
   inline DSIterator dynamicalSystemsEnd()
   {
-    return allDS.end();
+    return allDS->end();
   }
 
   /** const iterator equal to the first element of allDS
@@ -175,15 +183,15 @@ public:
    */
   inline ConstDSIterator dynamicalSystemsBegin() const
   {
-    return allDS.begin();
+    return allDS->begin();
   };
 
-  /** const iterator equal to allDS.end()
+  /** const iterator equal to allDS->end()
    *  \return a ConstDSIterator
    */
   inline ConstDSIterator dynamicalSystemsEnd() const
   {
-    return allDS.end();
+    return allDS->end();
   }
 
   /** get DynamicalSystem at indix position in the set
@@ -222,15 +230,55 @@ public:
    */
   inline const unsigned int getNumberOfInteractions() const
   {
-    return allInteractions.size();
+    return allInteractions->size();
   };
 
   /** get all the Interactions of the NonSmoothDynamicalSystem problem (saved in a set)
-   *  \return an InteractionsSet
+   *  \return an InteractionsSet *
    */
-  inline const InteractionsSet getInteractions() const
+  inline const InteractionsSet * getInteractions() const
   {
     return allInteractions;
+  }
+
+  /** get all the Interactions of the NonSmoothDynamicalSystem problem (saved in a set)
+   *  \return an InteractionsSet *
+   */
+  inline InteractionsSet * getInteractions()
+  {
+    return allInteractions;
+  }
+
+  /** iterator equal to the first element of the set of Interactions
+   *  \return an InteractionsIterator
+   */
+  inline InteractionsIterator interactionsBegin()
+  {
+    return allInteractions->begin();
+  };
+
+  /** iterator equal to allInteractions->end()
+   *  \return an InteractionsIterator
+   */
+  inline InteractionsIterator interactionsEnd()
+  {
+    return allInteractions->end();
+  }
+
+  /** const iterator equal to the first element of allInteractions
+   *  \return a ConstInteractionsIterator
+   */
+  inline ConstInteractionsIterator interactionsBegin() const
+  {
+    return allInteractions->begin();
+  };
+
+  /** const iterator equal to allInteractions->end()
+   *  \return a ConstInteractionsIterator
+   */
+  inline ConstInteractionsIterator interactionsEnd() const
+  {
+    return allInteractions->end();
   }
 
   /** get Interaction at indix position in the set

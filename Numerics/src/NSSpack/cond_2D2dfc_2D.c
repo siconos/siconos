@@ -281,7 +281,7 @@ void cond_2D2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double 
 
 
 
-  dpotri_(&uplo, &taille_i, R , &taille_i, &info2);
+  dpotri_(&uplo, (integer*)&taille_i, R , (integer*)&taille_i, (integer*)&info2);
 
   if (info2 != 0)
   {

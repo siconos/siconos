@@ -72,6 +72,7 @@ it_end  On enter, the number of iterations performed by the algorithm.
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "NSSpack.h"
 #include "blaslapack.h"
 
 void lcp_psor(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
@@ -83,12 +84,12 @@ void lcp_psor(int *nn , double *vec , double *q , double *z , double *w , int *i
   int i, iter;
   int itermax, verbose;
 
-  double qs, err, num, den;
+  double qs, err,/* num ,*/den;
   double tol, omega;
   double *ww, *diag;
-  double a1 = 1.0, b1 = 1.0;
+  /*   double a1=1.0,b1=1.0; */
 
-  char NOTRANS = 'N';
+  /*   char NOTRANS = 'N'; */
 
   n = *nn;
   incxn = n;

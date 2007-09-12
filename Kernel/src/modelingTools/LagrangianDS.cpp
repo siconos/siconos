@@ -1541,10 +1541,8 @@ void LagrangianDS::resetNonSmoothPart()
 
 void LagrangianDS::computePostImpactVelocity()
 {
-
   // When this function is call, q[1] is supposed to be pre-impact velocity.
   // We solve M(v+ - v-) = p - The result is saved in(place of) p[1].
   workMatrix["invMass"]->PLUForwardBackwardInPlace(*p[1]);
   *q[1] += *p[1];  // v+ = v- + p
-
 }

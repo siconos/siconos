@@ -60,7 +60,7 @@ private:
   SiconosModelXML *modelxml;
 
   /** information concerning the Model */
-  std::string  title, author, description, date, xmlSchema;
+  std::string title, author, description, date, xmlSchema;
 
   /** Flags to check wheter pointers were allocated in class constructors or not */
   BoolMap isAllocatedIn;
@@ -103,7 +103,7 @@ public:
   /** get the current time
    *  \return a double
    */
-  inline const double getCurrentT() const
+  inline const double getCurrentTime() const
   {
     return t;
   }
@@ -111,7 +111,7 @@ public:
   /** set the current time
    *  \param a double
    */
-  inline void setCurrentT(const double& newValue)
+  inline void setCurrentTime(const double& newValue)
   {
     t = newValue;
   }

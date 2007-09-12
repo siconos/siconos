@@ -233,7 +233,7 @@ void SiconosModelXML::loadModel(Model * model)
      */
     timeNode = xmlNewChild(rootNode, NULL, (xmlChar*)SM_TIME.c_str(), NULL);
     setT0(model->getT0());
-    setTCurrent(model->getCurrentT());
+    setTCurrent(model->getCurrentTime());
     setT(model->getFinalT());
     setTitle(model->getTitle());
     setAuthor(model->getAuthor());

@@ -319,7 +319,7 @@ void lcp2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1,
 
 
 
-  dpotri_(&uplo, &taille_i, R , &taille_i, &info2);
+  dpotri_(&uplo, (integer*)&taille_i, R , (integer*)&taille_i, (integer*)&info2);
 
   if (info2 != 0)
   {

@@ -26,19 +26,22 @@ using namespace std;
 
 const bool Topology::addInteractionInIndexSet(Interaction * inter)
 {
+  // Private function
+  //
   // Creates UnitaryRelations corresponding to inter and add them into indexSet0
 
-  // get number of relations in the interaction. This corresponds to inter->getNumberOfRelations but since Interaction has not
+  // First, we get the number of relations in the interaction.
+  // This corresponds to inter->getNumberOfRelations but since Interaction has not
   // been initialized yet, this value is not set and we need to get interaction size and nsLaw size.
-  unsigned int m = inter->getSizeOfY() / inter->getNonSmoothLawPtr()->getNsLawSize() ;
   unsigned int nsLawSize = inter->getNonSmoothLawPtr()->getNsLawSize();
+  unsigned int m = inter->getSizeOfY() / nsLawSize;
   unsigned int pos = 0; // relative position of the relation in the y vector of the Interaction
   CheckInsertUnitaryRelation checkUR;
   bool res = true; // output value. False if insertion of one of the relations fails.
   for (unsigned int i = 0; i < m; ++i)
   {
     // each UnitaryRelation is of size "nsLawSize", at position pos and of number i.
-    checkUR = indexSet0.insert(new UnitaryRelation(inter, pos, i));
+    checkUR = indexSet0->insert(new UnitaryRelation(inter, pos, i));
     pos += nsLawSize;
     if (checkUR.second == false) res = false;
   }
@@ -57,7 +60,7 @@ void Topology::computeRelativeDegrees()
 
   // loop through indexSet0
   UnitaryRelationIterator it;
-  for (it = indexSet0.begin(); it != indexSet0.end(); it++)
+  for (it = indexSet0->begin(); it != indexSet0->end(); it++)
   {
     nslawType = (*it)->getNonSmoothLawType();
     if (nslawType == COMPLEMENTARITYCONDITIONNSLAW)
@@ -81,27 +84,31 @@ void Topology::computeRelativeDegrees()
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
 // default
-Topology::Topology(): isTopologyUpToDate(false), isTopologyTimeInvariant(true), nsds(NULL), numberOfConstraints(0)
+Topology::Topology(): allInteractions(NULL), isTopologyUpToDate(false), isTopologyTimeInvariant(true), nsds(NULL), numberOfConstraints(0)
 {}
 
 // with NonSmoothDynamicalSystem
-Topology::Topology(NonSmoothDynamicalSystem* newNsds): isTopologyUpToDate(false), isTopologyTimeInvariant(true), nsds(newNsds), numberOfConstraints(0)
-{}
+Topology::Topology(NonSmoothDynamicalSystem* newNsds): allInteractions(NULL), isTopologyUpToDate(false), isTopologyTimeInvariant(true), nsds(newNsds), numberOfConstraints(0)
+{
+  indexSet0 = new UnitaryRelationsSet();
+}
 
 // destructor
 Topology::~Topology()
 {
   // Clears all Unitary Relations of IndexSets[0]
   UnitaryRelationIterator it;
-  for (it = indexSet0.begin(); it != indexSet0.end(); ++it)
+  for (it = indexSet0->begin(); it != indexSet0->end(); ++it)
     delete *it;
 
+  delete indexSet0;
   nsds = NULL;
+  allInteractions = NULL;
 }
 
 const bool Topology::hasInteraction(Interaction* inter) const
 {
-  return allInteractions.isInteractionIn(inter);
+  return allInteractions->isInteractionIn(inter);
 }
 
 const unsigned int Topology::getMaxRelativeDegree()
@@ -116,7 +123,7 @@ const unsigned int Topology::getMaxRelativeDegree()
 const unsigned int Topology::getMinRelativeDegree()
 {
   if (relativeDegrees.empty())
-    RuntimeException::selfThrow("Topology::getMaxRelativeDegree, non-existent value, since the relative degrees map is empty.");
+    RuntimeException::selfThrow("Topology::getMinRelativeDegree, non-existent value, since the relative degrees map is empty.");
 
   ConstIteratorForRelativeDegrees it = min_element(relativeDegrees.begin(), relativeDegrees.end());
   return(it->second);
@@ -129,12 +136,11 @@ void Topology::initialize()
 
   //-- Get all interactions --
   allInteractions = nsds->getInteractions() ;
-
   // -- Creates Unitary Relations and put them in indexSet0 ---
   // loop through interactions list (from NSDS)
-  indexSet0.clear();
+  indexSet0->clear();
   InteractionsIterator it;
-  for (it = allInteractions.begin()  ; it != allInteractions.end() ; ++it)
+  for (it = allInteractions->begin()  ; it != allInteractions->end() ; ++it)
     addInteractionInIndexSet(*it);
 
   //-- Fills RelativeDegreesMaps in --

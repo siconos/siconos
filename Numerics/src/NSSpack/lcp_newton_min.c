@@ -82,6 +82,7 @@
 #include <string.h>
 #include <math.h>
 #include "blaslapack.h"
+#include "NSSpack.h"
 
 void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
 {

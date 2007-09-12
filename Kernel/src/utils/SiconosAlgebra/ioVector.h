@@ -51,24 +51,15 @@ class ioVector : public ioObject
 {
 private :
 
-  /** default constructor with Mode = "ascii"
+  /** default constructor
    */
   ioVector();
 
 public :
-  /** static SimpleVector *temporary
-   * used for storing vector read from a file when Mode = "binary"
-   */
-  static SimpleVector* temporary;
-
-  /** static bool writeSimpleBinary
-   * true if temporary is allocated, else false.
-   */
-  static bool writeSimpleBinary;
 
   /** constructor with FileName = file and Mode = mode
-  *  \param 2 std::string
-  */
+   *  \param 2 std::string
+   */
   ioVector(const std::string&, const std::string&);
 
   /** destructor

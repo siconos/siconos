@@ -65,7 +65,7 @@ class UnitaryRelationsSet
 {
 protected:
 
-  /** a set of UnitaryRelation, sorted thanks to their id number */
+  /** a set of UnitaryRelation */
   URSet setOfUnitaryRelations;
 
   /** a map of bool to check inside-class allocation.
@@ -73,16 +73,16 @@ protected:
    */
   std::map<UnitaryRelation*, bool > isURAllocatedIn;
 
+  /** copy constructor
+   *  \param a UnitaryRelationsSet to be copied: private => copy forbidden.
+   */
+  UnitaryRelationsSet(const UnitaryRelationsSet&) {};
+
 public:
 
   /** default constructor
    */
   UnitaryRelationsSet();
-
-  /** copy constructor
-   *  \param a UnitaryRelationsSet to be copied
-   */
-  UnitaryRelationsSet(const UnitaryRelationsSet&);
 
   /** destructor
    */

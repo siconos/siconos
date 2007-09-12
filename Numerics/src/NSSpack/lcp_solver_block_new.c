@@ -112,7 +112,7 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
   int incx, incy;
 
   double a1, b1, tol;
-  double qs, err, num, den;
+  double qs, err,/* num, */den;
 
   double *adrcurbl, *adrbldiag;
   double *rhs;
@@ -120,7 +120,7 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
 
   char NOTRANS = 'N';
 
-  char savename[40];
+  /*   char savename[40]; */
 
   *it_end   = 0;
   *itt_end   = 0;

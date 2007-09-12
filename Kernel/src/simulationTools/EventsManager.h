@@ -168,7 +168,7 @@ public:
   /** get the current event
   *  \return a pointer to Event
   */
-  inline Event* getCurrentEventPtr() const
+  inline Event* getStartingEventPtr() const
   {
     return currentEvent;
   };
@@ -227,7 +227,7 @@ public:
   /** get the time of current event, in double format
   *  \return a double
   */
-  const double getCurrentTime() const ;
+  const double getStartingTime() const ;
 
   /** get the time of next event, in double format
   *  \return a double

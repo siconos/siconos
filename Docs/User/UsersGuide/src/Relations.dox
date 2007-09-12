@@ -1,0 +1,113 @@
+/*! \page docRelation Relations
+
+\b What \b is \b a \b Relation? \n
+
+Relations are used to link local variables of the Interaction and global variables of the DynamicalSystems, and thus define constraints in the systems. \n
+
+\b Building \b a \b Relation ?\n
+
+Relation class is an abstract class which provides a generic interface for all types of relations. \n
+Each relation has a type which correspond to the types of dynamical systems they fit with (FirstOrder or Lagrangian), a sub-type, (linear, non linear, scleronomous...).
+Usually, "type+subtype" corresponds more or less to the name of the derived class. su\n
+Then, depending on the sub-class, each relation holds some plug-in functions or operators used to define the constraints. They are listed below for each available type of relation. 
+
+\b Available \b classes: Relation, FirstOrderR, FirstOrderLinearR, FirstOrderLinearTIR, LagrangianR, LagrangianRheonomousR, \n
+LagrangianScleronomousR, LagrangianCompliantR, LagrangianLinearR.
+
+\image html classRelation.png
+\image latex classRelation.eps "" width=10cm
+
+
+\section docRelationNL FirstOrderR
+
+First order non linear relations. 
+\f{eqnarray*}
+output &= y =& h(X,t,\lambda,Z)\\
+input &= R =& g(\lambda,t,Z)
+\f}
+
+h, g (and their jacobian according to X and lambda) are defined with some plug-in functions. \n
+See the doxygen documentation of the class to have a list of the set/get/compute functions.
+
+<em> Note: for the signification of X, Z, R see \ref doc_Interactions </em>
+
+\section docRelationLR FirstOrderLinearR 
+
+First order linear relations. 
+
+\f{eqnarray*}
+y &=& C(t,Z)X + F(t,Z)Z + D(t,Z) \lambda + e(t,Z) \\
+R &=& B(t,Z) \lambda
+\f}
+
+Plug-in functions are available for all operators.
+
+\section docRelationLTIR FirstOrderLinearTIR 
+
+First order linear relations with time-invariant coefficients. 
+
+\f{eqnarray*}
+y &=& CX + FZ + D\lambda + e \\
+R &=& B \lambda
+\f}
+
+\section docRelationLag LagrangianR
+
+Lagrangian non linear relations. This class is an abstract interface for the three following cases:
+
+- scleronomic: the constraints depend only on the state, (class LagrangianScleronomousR)
+ \f{eqnarray*}
+y &=& h(Q,Z) \\
+\dot y &=& G0(Q,Z)\dot Q \\
+P &=& G0^t(Q,Z)\lambda 
+\f}
+
+- rheonomous: the constraints depend on time and state, (class LagrangianRheonomousR)
+\f{eqnarray*}
+y &=& h(Q,t,Z)\\
+\dot y &=& G0(Q,t,Z)\dot Q + \frac{\partial h}{\partial t}(Q,t,Z) \\
+P &=& G0^t(Q,t,Z)\lambda 
+\f}
+ with 
+ \f[ 
+ G0(Q,t,Z) = \nabla_Q h(Q,t,Z) 
+ \f]
+and
+\f[ 
+hdot =  \frac{\partial h}{\partial t}(Q,t,Z) 
+ \f]
+
+- compliant: the constraints depends on state and \f$ \lambda \f$, (class LagrangianCompliantR)
+\f{eqnarray*}
+y &=& h(Q,\lambda[0],Z) \\
+\dot y &=& G0(Q,\lambda[0],Z)\dot Q + G1(Q,\lambda[0],Z)\lambda[1] \\
+P[i] &=& G0^t(Q,\lambda[0],Z)\lambda[i] 
+\f}
+with 
+\f[ 
+G0(Q,\lambda[0],Z) = \nabla_q h(Q,\lambda[0],Z) 
+\f]
+\f[
+G1(Q,\lambda[0],Z) = \nabla_{\lambda[0]}h(Q,\lambda[0],Z)
+\f]
+
+<em> Recall that [i] means derivative number i according to time </em>.
+
+\section docRelationLagLin  LagrangianLinearR
+
+Lagrangian linear relations with time-invariant coefficients. 
+ \f{eqnarray*}
+ y&=& H Q + b + D\lambda +FZ \\
+ P[i]&=& H^t \lambda[i] 
+ \f}
+
+\section doc_relPlugIn Relations plug-in functions
+
+FirstOrderR: \f$ h(X,t,\lambda,Z), \ \ g(\lambda,t,Z) \f$.\n
+FirstOrderLinearR: \f$ C(t,Z), \ \ F(t,Z), \ \ , D(t,Z), \ \ e(t,Z), B(t,Z) \f$.\n
+LagrangianScleronomousR: \f$ h(Q,Z), \ \ G0(Q,Z) \f$. \n
+LagrangianRheonomousR: \f$  h(Q,t,Z), \ \ G0(Q,t,Z), \ \ hdot(Q,t,Z) \f$.\n
+LagrangianCompliantR:  \f$  h(Q,\lambda[0],Z), \ \ G0(Q,\lambda[0],Z), \ \ G1(Q,\lambda[0],Z) \f$.
+\f}
+
+*/

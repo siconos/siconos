@@ -204,7 +204,7 @@ int main(int argc, char* argv[])
     SiconosVector * v = arm->getVelocityPtr();
     // EventsManager * eventsManager = s->getEventsManagerPtr();
 
-    dataPlot(k, 0) =  Manipulator->getCurrentT();
+    dataPlot(k, 0) =  Manipulator->getT0();
     dataPlot(k, 1) = (*q)(0);
     dataPlot(k, 2) = (*q)(1);
     dataPlot(k, 3) = (inter->getY(0))(1);
@@ -230,7 +230,7 @@ int main(int argc, char* argv[])
       // get current time step
       k++;
 
-      dataPlot(k, 0) =  Manipulator->getCurrentT();
+      dataPlot(k, 0) =  s->getNextTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*q)(1);
       dataPlot(k, 3) = (inter->getY(0))(1);

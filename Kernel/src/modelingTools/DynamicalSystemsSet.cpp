@@ -26,82 +26,34 @@ using namespace std;
 RuntimeCmp<DynamicalSystem> compareDS(&DynamicalSystem::getNumberForSorting);
 
 //-- Default constructor --
-DynamicalSystemsSet::DynamicalSystemsSet(): setOfDS(compareDS)
-{}
-
-//-- Copy constructor --
-DynamicalSystemsSet::DynamicalSystemsSet(const DynamicalSystemsSet& newSet): setOfDS(compareDS)
+DynamicalSystemsSet::DynamicalSystemsSet(): setOfDS(NULL)
 {
-
-  // Warning: "false" copy since pointers links remain between Dynamical Systems of each set
-  clear();
-  ConstDSIterator it;
-  for (it = newSet.begin(); it != newSet.end(); ++it)
-  {
-    setOfDS.insert(*it);
-    isDSAllocatedIn[*it] = false ;
-  }
-
-  // Warning: Copy of DS leads to DS with non id and -2 as a number.
-  // Thus it is better to avoid DynamicalSystemsSet copy.
-  //  RuntimeException::selfThrow("DynamicalSystemsSet::copy constructor, not implemented. ");
-  //   constDSIterator it;
-  //   string type;
-  //   // We sweep the DS set of newSet and, depending on the DS type, insert a new one in setOfDS, by using the DynamicalSystem copy constructor.
-  //   for(it=newSet.begin();it!=newSet.end();++it)
-  //     {
-  //       // \todo use factories to improve this copy.
-  //       type = (*it) ->getType();
-  //       if( type ==  NLDS)
-  //  setOfDS.insert( new DynamicalSystem( **it ));
-  //       else if ( type ==  LDS)
-  //  setOfDS.insert( new LinearDS( **it ));
-  //       else if ( type ==  LITIDS)
-  //  setOfDS.insert( new LinearTIDS( **it ));
-  //       else if ( type ==  LNLDS)
-  //  setOfDS.insert( new LagrangianDS( **it ));
-  //       else if ( type ==  LTIDS)
-  //  setOfDS.insert( new LagrangianLinearTIDS( **it ));
-  //       else
-  //  RuntimeException::selfThrow("DynamicalSystemsSet::copy constructor, unknown Dynamical system type:"+type);
-  //       isDSAllocatedIn[*it] = true ;
-  //     }
+  setOfDS = new DSSet(compareDS);
+  //setOfDS = new DSSet();
 }
 
 // --- Destructor ---
 DynamicalSystemsSet::~DynamicalSystemsSet()
 {
   DSIterator it;
-  for (it = setOfDS.begin(); it != setOfDS.end(); ++it)
+  for (it = setOfDS->begin(); it != setOfDS->end(); ++it)
   {
     if (isDSAllocatedIn[*it]) delete *it;
   }
-  setOfDS.clear();
+  setOfDS->clear();
   isDSAllocatedIn.clear();
+  delete setOfDS;
 }
 
-DynamicalSystemsSet& DynamicalSystemsSet::operator=(const DynamicalSystemsSet& newSet)
-{
-  // Warning: "false" copy since pointers links remain between Dynamical Systems of each set
-  clear();
-  ConstDSIterator it;
-  for (it = newSet.begin(); it != newSet.end(); ++it)
-  {
-    setOfDS.insert(*it);
-    isDSAllocatedIn[*it] = false ;
-  }
-  return *this;
-}
-
-DynamicalSystem* DynamicalSystemsSet::getDynamicalSystemPtr(const int num) const
+DynamicalSystem* DynamicalSystemsSet::getDynamicalSystemPtr(int num) const
 {
   ConstDSIterator it;
-  for (it = setOfDS.begin(); it != setOfDS.end(); ++it)
+  for (it = setOfDS->begin(); it != setOfDS->end(); ++it)
   {
     if (((*it)->getNumber()) == num)
       break;
   }
-  if (it == setOfDS.end())
+  if (it == setOfDS->end())
     RuntimeException::selfThrow("DynamicalSystemsSet::getDynamicalSystem(num): can not find this Dynamical System in the set.");
 
   return *it;
@@ -109,9 +61,9 @@ DynamicalSystem* DynamicalSystemsSet::getDynamicalSystemPtr(const int num) const
 
 const bool DynamicalSystemsSet::isDynamicalSystemIn(DynamicalSystem* ds) const
 {
-  DSIterator it = setOfDS.find(ds);
+  DSIterator it = setOfDS->find(ds);
   bool out = false;
-  if (it != setOfDS.end()) out = true;
+  if (it != setOfDS->end()) out = true;
   return out;
 }
 
@@ -119,7 +71,7 @@ const bool DynamicalSystemsSet::isDynamicalSystemIn(const int num) const
 {
   bool out = false;
   DSIterator it;
-  for (it = setOfDS.begin(); it != setOfDS.end(); ++it)
+  for (it = setOfDS->begin(); it != setOfDS->end(); ++it)
   {
     if (((*it)->getNumber()) == num)
     {
@@ -133,13 +85,13 @@ const bool DynamicalSystemsSet::isDynamicalSystemIn(const int num) const
 
 DSIterator DynamicalSystemsSet::find(DynamicalSystem* ds)
 {
-  return setOfDS.find(ds);
+  return setOfDS->find(ds);
 }
 
 DSIterator DynamicalSystemsSet::find(const int num)
 {
   DSIterator it;
-  for (it = setOfDS.begin(); it != setOfDS.end(); ++it)
+  for (it = setOfDS->begin(); it != setOfDS->end(); ++it)
   {
     if (((*it)->getNumber()) == num)
       break;
@@ -149,31 +101,31 @@ DSIterator DynamicalSystemsSet::find(const int num)
 
 CheckInsertDS DynamicalSystemsSet::insert(DynamicalSystem* ds)
 {
-  return setOfDS.insert(ds);
+  return setOfDS->insert(ds);
   isDSAllocatedIn[ds] = false;
 }
 
 void DynamicalSystemsSet::erase(DynamicalSystem* ds)
 {
-  DSIterator it = setOfDS.find(ds);
-  if (it == setOfDS.end())
+  DSIterator it = setOfDS->find(ds);
+  if (it == setOfDS->end())
     RuntimeException::selfThrow("DynamicalSystemsSet::erase(ds): ds is not in the set!");
 
   // If ds has been allocated inside the class, it is first necessary to release memory.
   if (isDSAllocatedIn[ds])
     delete *it;
   isDSAllocatedIn.erase(ds);
-  setOfDS.erase(*it);
+  setOfDS->erase(*it);
 }
 
 void DynamicalSystemsSet::clear()
 {
   DSIterator it;
-  for (it = setOfDS.begin(); it != setOfDS.end(); ++it)
+  for (it = setOfDS->begin(); it != setOfDS->end(); ++it)
   {
     if (isDSAllocatedIn[*it]) delete *it;
   }
-  setOfDS.clear();
+  setOfDS->clear();
   isDSAllocatedIn.clear();
 }
 
@@ -181,29 +133,20 @@ void DynamicalSystemsSet::display() const
 {
   cout << "====> DynamicalSystemsSet display - The following Dynamical Systems are present in the set ( id - number):" << endl;
   DSIterator it;
-  for (it = setOfDS.begin(); it != setOfDS.end(); ++it)
+  for (it = setOfDS->begin(); it != setOfDS->end(); ++it)
     cout << "(" << (*it)->getId() << "," << (*it)->getNumber() << "), ";
   cout << endl;
   cout << "=============================================================================================" << endl;
 }
 
-const DynamicalSystemsSet intersection(const DynamicalSystemsSet& s1, const DynamicalSystemsSet& s2)
+void intersection(const DynamicalSystemsSet& s1, const DynamicalSystemsSet& s2, DynamicalSystemsSet& commonDS)
 {
-  DynamicalSystemsSet commonDS;
-  set_intersection(s1.setOfDS.begin(), s1.setOfDS.end(), s2.setOfDS.begin(), s2.setOfDS.end(),
-                   inserter(commonDS.setOfDS, commonDS.setOfDS.begin()), compareDS);
-
-  return commonDS;
+  set_intersection(s1.setOfDS->begin(), s1.setOfDS->end(), s2.setOfDS->begin(), s2.setOfDS->end(),
+                   inserter(*commonDS.setOfDS, commonDS.setOfDS->begin()), compareDS);
 }
 
-const DynamicalSystemsSet operator - (const DynamicalSystemsSet& s1, const DynamicalSystemsSet& s2)
+void difference(const DynamicalSystemsSet& s1, const DynamicalSystemsSet& s2, DynamicalSystemsSet& commonDS)
 {
-
-  // output
-  DynamicalSystemsSet commonDS;
-
-  set_difference(s1.setOfDS.begin(), s1.setOfDS.end(), s2.setOfDS.begin(), s2.setOfDS.end(),
-                 inserter(commonDS.setOfDS, commonDS.setOfDS.begin()), compareDS);
-
-  return commonDS;
+  set_difference(s1.setOfDS->begin(), s1.setOfDS->end(), s2.setOfDS->begin(), s2.setOfDS->end(),
+                 inserter(*commonDS.setOfDS, commonDS.setOfDS->begin()), compareDS);
 }

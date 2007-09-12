@@ -203,7 +203,7 @@ void FrictionContact::initialize()
   Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
   // if all relative degrees are equal to 0 or 1
-  if (topology->isTimeInvariant() &&   !OSNSInteractions.isEmpty())
+  if (topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty())
     assembleM();
 }
 
@@ -220,7 +220,8 @@ void FrictionContact::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
     blocks[UR1][UR2] = new SimpleMatrix(nslawSize1, nslawSize2);
 
   // Get DS common between UR1 and UR2
-  DynamicalSystemsSet commonDS = intersection(*UR1->getDynamicalSystemsPtr(), *UR2->getDynamicalSystemsPtr());
+  DynamicalSystemsSet commonDS;
+  intersection(*UR1->getDynamicalSystemsPtr(), *UR2->getDynamicalSystemsPtr(), commonDS);
   DSIterator itDS;
 
   // Get the W and Theta maps of one of the Unitary Relation - Warning: in the current version, if OSI!=Moreau, this fails.

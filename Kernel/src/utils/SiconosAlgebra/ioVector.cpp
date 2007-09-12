@@ -3,21 +3,13 @@
 #include "SiconosVectorException.h"
 #include <boost/numeric/ublas/io.hpp>
 #include<fstream>
-//SimpleVector *tmp = new SimpleVector();
-
-SimpleVector* ioVector::temporary = new SimpleVector(1);
-bool ioVector::writeSimpleBinary = false;
 
 // Default private
 ioVector::ioVector(): ioObject() {}
 
 ioVector::ioVector(const std::string& file, const std::string& mode): ioObject(file, mode) {}
 
-ioVector::~ioVector(void)
-{
-  if (writeSimpleBinary)
-    delete(temporary);
-}
+ioVector::~ioVector(void) {}
 
 const bool ioVector::read(SiconosVector& m) const
 {

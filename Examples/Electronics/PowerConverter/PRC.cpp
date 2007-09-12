@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
     // For the initial time step:
     int k = 0;
     // time
-    dataPlot(k, 0) = PRC->getCurrentT();
+    dataPlot(k, 0) = PRC->getT0();
 
     // inductor voltage
     dataPlot(k, 1) = (*x)(0);
@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
     {
       StratPRC->computeOneStep();
       // --- Get values to be plotted ---
-      dataPlot(k, 0) = PRC->getCurrentT();
+      dataPlot(k, 0) = StratPRC->getNextTime();
       dataPlot(k, 1) = (*x)(0);
       dataPlot(k, 2) = (*x)(1);
       dataPlot(k, 3) = (*x)(2);

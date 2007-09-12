@@ -70,7 +70,7 @@ bool BouncingBall()
     {
       s->computeOneStep();
       // --- Get values to be plotted ---
-      dataPlot(k, 0) =  bouncingBall->getCurrentT();
+      dataPlot(k, 0) =  s->getNextTime();
       dataPlot(k, 1) = ball->getQ()(0);
       dataPlot(k, 2) = ball->getVelocity()(0);
       dataPlot(k, 3) = (bouncingBall->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);

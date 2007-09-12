@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
       //cout<<"Iteration: "<<k<<endl;
       // --- Get values to be plotted ---
 
-      dataPlot(k, 0) = BeadsModel->getCurrentT();
+      dataPlot(k, 0) = s->getStartingTime();
       dataPlot(k, 1) = (*q1)(0);
       dataPlot(k, 2) = (*v1)(0);
       dataPlot(k, 3) = (*q2)(0);

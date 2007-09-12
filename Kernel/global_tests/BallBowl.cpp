@@ -67,7 +67,7 @@ bool BallBowl()
 
       // --- Get values to be plotted ---
       //time
-      dataPlot(k, 0) = bouncingBall.getCurrentT();;
+      dataPlot(k, 0) = s->getNextTime();;
       // Ball: state q
       dataPlot(k, 1) = (ball->getQ())(0);
       // Ball: velocity

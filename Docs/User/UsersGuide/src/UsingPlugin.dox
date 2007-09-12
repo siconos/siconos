@@ -6,15 +6,15 @@ For example, user can define a function to compute the external forces of a Dyna
 
 <b> What is a plug-in? </b>
 
-Some classes have pre-defined functions that can be "connected" to external user-defined functions.
+Some classes have pre-defined functions that can be "connected" to external user-defined functions.\n
 Thus a plug-in consists in an "extern C" function, written in a specific file, that must be named "xxxPlugin.cpp", xxx being whatever you want. 
 
 <b> What are the available plug-in?</b>
 
 All the plug-in functions are documented in file DefaultPlugin.cpp. There you can find a complete list of the available plug-in, their signature (ie the \b required types of their arguments) and to which class they are linked. \n
 At the time, there are plug-in for:
-- DynamicalSystems (see \ref doc_dsPlugin)
-- Relations (see \ref doc_relPlugIn)
+- DynamicalSystems (see \ref doc_dsPlugin).
+- Relations (see \ref doc_relPlugIn).
 
 <b> How to write your own plug-in? </b>
 
@@ -23,16 +23,16 @@ Suppose that you want to define your own way to compute the internal forces for 
 -# Check that a plug-in is available for what you want (ie see DefaultPlugin.cpp).\n
 In \ref doc_dsPlugin, you see that this plug-in exists and in DefaultPlugin.cpp you find:  
 \code
-extern "C" void computeFInt(unsigned int sizeOfq, double time, const double *q, 
-                            const double *velocity, double *fInt, double * param)
+extern "C" void computeFInt(double time, unsigned int sizeOfq, const double *q, 
+			    const double *velocity, double *fInt, unsigned int sizeOfZ, double *z)
 {...}
 \endcode
 
 -# Create xxxPlugin.cpp file and write your function as an "extern C", using the right signature as given in DefaultPlugin.cpp.\n
 Thus, in myPlugin.cpp
 \code
-extern "C" void myFint(unsigned int sizeOfq, double time, const double *q, 
-                       const double *velocity, double *fInt, double * param)
+extern "C" void myFint(double time, unsigned int sizeOfq, const double *q, 
+		       const double *velocity, double *fInt, unsigned int sizeOfZ, double *z)
 {
  // work on fInt ...
 }
@@ -49,42 +49,48 @@ myDS->computeFInt(time); // call myFint(...) with current values of q, velocity 
 \endcode
 
 <b> Plug-in parameters</b>\n
-In all the available plug-in of the platform, it is possible to set user-defined parameters. They consist in the last argument of the plug-in function (a double*). \n
-To set a parameter for a specific function, call \e setParameter or \e setParameterPtr( arg1, arg2), arg1 being a pointer to SimpleVector that contains the values of your parameter(s) and arg2 a string, the id of the function. This id is given for each plug-in in the DefaultPlugin.cpp documentation. 
 
-Example:  suppose that you defined a LagrangianDS named lds, and want to set two parameters in the external forces, say \e mu and \e lambda. Then cpp input file looks like:
+As you can notice, in all the plug-in functions, the last argument is the z parameter of the corresponding DynamicalSystem(s). \n
+Then, through this variable you can set and/or use some specific parameters in the plug-in function. 
+
+Example:  suppose that you defined a LagrangianDS named lds, and want to set two parameters in the external forces, say \e mu and \e lambda. \n
+Then cpp input file looks like:
 \code
 // In the main file:
 double mu , lambda;
 // ... give mu and lambda the required values
 // ... declare and built your dynamical system
 DynamicalSystem * lds = new LagrangianDS(...);
-// === First way, with setParameter function ===
-// declare and built a SimpleVector of size 2
-SimpleVector parameters(2);
-parameters(0) = mu;
-parameters(1) = lambda;
+// Link with the plug-in function
+lds->setComputeFExtFunction("myPlugin.so", "myFExt");
 
-lds->setParameter(parameters,"fExt");
+
+// === First way, with setZ function (copy) ===
+// declare and built a SimpleVector of size 2
+SimpleVector myZ(2);
+myZ(0) = mu;
+myZ(1) = lambda;
+
+lds->setZ(myZ);
 // In this case, if parameters values are change after this step,
 // this won't affect param values inside the dynamical system. 
 //
-//=== Second way, with setParameterPtr function ===
+//=== Second way, with setZPtr function (pointer link) ===
 // declare and built a pointer to SimpleVector of size 2
-SimpleVector * parameters = new SimpleVector(2);
-(*parameters)(0) = mu;
-(*parameters)(1) = lambda;
+SimpleVector * myZPtr = new SimpleVector(2);
+(*myZPtr)(0) = mu;
+(*myZPtr)(1) = lambda;
 
-lds->setParameterPtr(parameters,"fExt");
+lds->setZPtr(myZPtr);
 
 // Warning: in that case, from this point any change in parameters
 // will affect param value in the dynamical system.
 //
 // Then in the plug-in file, you have access to the parameter values:
-extern "C" void computeFExt(unsigned int sizeOfq, double time, double* fExt, double* param)
+extern "C" void myFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeOfZ, double *z)
 {
 for(unsigned int i = 0; i<sizeOfq;++i)
-   fExt[i] = cos(param[1]*time) + param[0] ;
+   fExt[i] = cos(z[1]*time) + z[0] ;
 // this means that Fext = cos(lambda t) + mu
 }
 \endcode

@@ -195,7 +195,7 @@ int main(int argc, char* argv[])
     {
       GLOB_SIM->computeOneStep();
       // --- Get values to be plotted ---
-      dataPlot(i, 0) =  two_dof_oscillator->getCurrentT();
+      dataPlot(i, 0) = s->getNextTime();
       dataPlot(i, 1) = (*q)(0);
       dataPlot(i, 2) = (*v)(0);
       dataPlot(i, 3) = (*lambda)(0);

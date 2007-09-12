@@ -329,14 +329,14 @@ Concerning the output, we save the position and velocity of all balls.
 \code
 s->initialize(); 
 
-int k = t->getK(); // Current step 
+int k = 0;
 int N = t->getNSteps(); // Number of time steps
 
 // Prepare output and save value for the initial time
 unsigned int outputSize = dsNumber*2+1;
 SimpleMatrix dataPlot(N+1,outputSize ); // Output data matrix
 // time
-dataPlot(k, 0) = k*t->getH();
+dataPlot(k, 0) = multiBeads->getT0();
 // Positions and velocities
 i = 0; // Remember that DS are sorted in a growing order according to their number.
 DSIterator it;
@@ -354,12 +354,10 @@ Next, we write:
 \code
 while(k < N)	
  {
-  s->nextStep();
-  // get current time step
-  k = t->getK();
+  k++;	
   // solve ... 
   s->computeOneStep();
-  dataPlot(k, 0) = k*t->getH();
+  dataPlot(k, 0) = s->getNextTime();
   // 
   i = 0;
   for(it = allDS.begin();it!=allDS.end();++it)
@@ -367,6 +365,7 @@ while(k < N)
     dataPlot(k,(int)i*2+1) = static_cast<LagrangianLinearTIDS*>(*it)->getQ()(0);
     dataPlot(k,(int)i*2+2) = static_cast<LagrangianLinearTIDS*>(*it)->getVelocity()(0);
     i++;
+    s->nextStep();
   }
 \endcode
 
@@ -416,11 +415,14 @@ Concerning output, we first save displacements and velocities at each time step:
 \code
     while(eventsManager->hasNextEvent())
       {
-	eventDriven->computeOneStep();
+	k++;
+	eventDriven->advanceToEvent();
+
+	eventDriven->processEvents();
         // Positions and velocities for user time steps
 	i = 0; // Remember that DS are sorted in a growing order according to their number.
 	DSIterator it;
-	dataPlot(k, 0) = multiBeads->getCurrentT(); 
+	dataPlot(k, 0) = eventDriven->getStartingTime(); 
 	for(it = allDS.begin();it!=allDS.end();++it)
 	  {
 	    dataPlot(k,(int)i*2+1) = static_cast<LagrangianLinearTIDS*>(*it)->getQ()(0);
@@ -430,19 +432,22 @@ Concerning output, we first save displacements and velocities at each time step:
       }
 \endcode
 
-But when a non-smooth event occurs, that may interesting to get pre and post impact values. 
+But when a non-smooth event occurs, that may be interesting to get pre and post impact values. 
 In Siconos, the values saved in object are usually the last computed, thus in the present case, post-impact values.
 The next-to-last values are saved in "memory" objects; we get them in case of "Non-Smooth event":
 
 \code
     while(eventsManager->hasNextEvent())
       {
-	eventDriven->computeOneStep();
-	if(eventsManager->getCurrentEventPtr()->getType() == "NonSmoothEvent")
+	k++;
+	eventDriven->advanceToEvent();
+
+	eventDriven->processEvents();
+	if(eventsManager->getStartingEventPtr()->getType() == "NonSmoothEvent")
 	  {
 	    i = 0; // Remember that DS are sorted in a growing order according to their number.
 	    DSIterator it;
-	    dataPlot(k, 0) = multiBeads->getCurrentT(); 
+	    dataPlot(k, 0) = eventDriven->getStartingTime(); 
 	    for(it = allDS.begin();it!=allDS.end();++it)
 	      {
 		dataPlot(k,(int)i*2+1) = (*static_cast<LagrangianLinearTIDS*>(*it)->getQMemoryPtr()->getSiconosVector(1))(0);
@@ -454,7 +459,7 @@ The next-to-last values are saved in "memory" objects; we get them in case of "N
         // Positions and velocities for user time steps
 	i = 0; // Remember that DS are sorted in a growing order according to their number.
 	DSIterator it;
-	dataPlot(k, 0) = multiBeads->getCurrentT(); 
+	dataPlot(k, 0) = eventDriven->getStartingTime();  
 	for(it = allDS.begin();it!=allDS.end();++it)
 	  {
 	    dataPlot(k,(int)i*2+1) = static_cast<LagrangianLinearTIDS*>(*it)->getQ()(0);

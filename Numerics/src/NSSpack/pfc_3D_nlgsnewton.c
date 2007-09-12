@@ -151,7 +151,7 @@ void G_f(int m, double *G, double *Z , double *x , double *y , double rn, double
   mrn = zt * zt + zs * zs;
 
   // if the radius is negative or the vector is null projection on the disk = 0
-  if (coef = 0. || x[0] <= 0. || mrn < 1e-16)
+  if ((coef = 0. || x[0] <= 0.) || mrn < 1e-16)
   {
     G[1] = x[1] / rt;
     G[2] = x[2] / rt;
@@ -200,7 +200,7 @@ void JacG_f(int m, double *A, double *B , double *x , double *y , double rn, dou
   mrn = zt * zt + zs * zs;
 
   // if the radius is negative or the vector is null projection on the disk = 0
-  if (coef = 0. || x[0] < 0. || mrn < 1e-16)
+  if ((coef = 0. || x[0] < 0.) || mrn < 1e-16)
     B[1 * m + 1] = B[2 * m + 2] = 1. / rt;
   // if the radius is positive and the vector is non null, we compute projection on the disk
   else
