@@ -293,11 +293,10 @@ public:
     return number;
   }
 
-  /** same as getNumber, but return an unsigned long int, used for set<DynamicalSystem*> in OSI, NSDS ...
-   *   as sorting criterion.
-   *  \return the value of number
+  /** function used to sort DynamicalSystem in SiconosSet<DynamicalSystem*>
+   *  \return an int
    */
-  inline const unsigned long int getNumberForSorting() const
+  inline const int getSort() const
   {
     return number;
   }

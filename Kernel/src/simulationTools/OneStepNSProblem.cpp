@@ -171,7 +171,7 @@ void OneStepNSProblem::computeUnitaryRelationsPositions()
 
   // Get index sets from Topology
   UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
-  UnitaryRelationIterator it;
+  UnitaryRelationsIterator it;
   unsigned int pos = 0;
   unsigned int blIndex = 0;
 
@@ -191,7 +191,7 @@ void OneStepNSProblem::computeSizeOutput()
   UnitaryRelationsSet * indexSet;
   sizeOutput = 0;
   // For all UnitaryRelations in indexSets[levelMin...levelMax], we sum non smooth laws dimensions
-  UnitaryRelationIterator it;
+  UnitaryRelationsIterator it;
   for (unsigned int i = levelMin; i <= levelMax; ++i)
   {
     indexSet = simulation->getIndexSetPtr(i);
@@ -220,7 +220,7 @@ void OneStepNSProblem::updateBlocks()
   //
   UnitaryRelationsSet * indexSet;
   bool isTimeInvariant, isBlockRequired;
-  UnitaryRelationIterator itUR1, itUR2;
+  UnitaryRelationsIterator itUR1, itUR2;
   DynamicalSystemsSet commonDS;
   // Get index set from Simulation
 
@@ -255,7 +255,7 @@ void OneStepNSProblem::computeAllBlocks()
 {
   UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(0);
 
-  UnitaryRelationIterator itUR1, itUR2;
+  UnitaryRelationsIterator itUR1, itUR2;
   DynamicalSystemsSet commonDS;
 
   bool isBlockRequired;

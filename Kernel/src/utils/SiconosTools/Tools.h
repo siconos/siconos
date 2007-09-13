@@ -120,3 +120,27 @@ extern "C" double dlamch_(char*);
 const double MACHINE_PREC = dlamch_("e");
 
 #endif
+
+#ifndef PRINTSEQUENCE_H
+#define PRINTSEQUENCE_H
+#include<algorithm>
+#include<iostream>
+#include<iterator>
+
+/** Print the contents of any sequence - From Thinking in C++, vol 2 p365.
+\param first, any iterator, beginning of the sequence
+\param last, any iterator, end of the sequence
+\param char*, optional message on top of output, default ""
+\param char*, separator between sequence elements, default new line
+\param ostream, output destination, default cout
+*/
+template<typename Iter>
+void print(Iter first, Iter last, const char* nm = "", const char * sep = "\n", std::ostream& os = std::cout)
+{
+  if (nm != 0 && *nm != '\0')
+    os << nm << ": " << sep;
+  typedef typename std::iterator_traits<Iter>::value_type T;
+  std::copy(first, last, std::ostream_iterator<T>(os, sep));
+  os << std::endl;
+}
+#endif // PRINTSEQUENCE_H

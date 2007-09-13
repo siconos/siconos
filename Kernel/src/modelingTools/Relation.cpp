@@ -19,7 +19,6 @@
 #include "Relation.h"
 #include "RelationXML.h"
 #include "Interaction.h"
-#include "DynamicalSystemsSet.h"
 #include "FirstOrderNonLinearDS.h"
 
 using namespace std;

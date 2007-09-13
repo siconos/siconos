@@ -38,5 +38,6 @@ Include files related to utils directory
 #include "SiconosSharedLibrary.h"
 
 #include "Tools.h"
-#include "RuntimeCmp.h"
+#include "Cmp.h"
+#include "SiconosSet.h"
 #include "check.h"

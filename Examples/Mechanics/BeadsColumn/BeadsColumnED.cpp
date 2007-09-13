@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
     DynamicalSystemsSet dsConcerned;
     // Only the "bottom" bead is concerned by this first Interaction,
     // therefore DynamicalSystem number 0.
-    dsConcerned.insert(allDS.getDynamicalSystemPtr(0));
+    dsConcerned.insert(allDS.getPtr(0));
 
     // -- Newton impact law --
     double e = 0.9;
@@ -146,8 +146,8 @@ int main(int argc, char* argv[])
       {
         // The systems handled by the current Interaction ...
         dsConcerned.clear();
-        dsConcerned.insert(allDS.getDynamicalSystemPtr(i - 1));
-        dsConcerned.insert(allDS.getDynamicalSystemPtr(i));
+        dsConcerned.insert(allDS.getPtr(i - 1));
+        dsConcerned.insert(allDS.getPtr(i));
         ostringstream ostr;
         ostr << i;
         id[i - 1] = ostr.str();

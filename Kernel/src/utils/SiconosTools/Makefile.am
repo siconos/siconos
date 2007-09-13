@@ -19,7 +19,7 @@
 
 include $(top_srcdir)/config/Make-rules
 
-EXTRA_DIST = RuntimeCmp.h Tools.h
+EXTRA_DIST = Cmp.h SiconosSet.h Tools.h
 
-siconos_HEADERS = RuntimeCmp.h Tools.h
+siconos_HEADERS = Cmp.h SiconosSet.h Tools.h
 

@@ -17,12 +17,12 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-/*! \file RuntimeCmp.h
-
+/*! \file Cmp.h
+Classes related to object ordering in SiconosSet.
 */
 
-#ifndef RUNTIMECMP_H
-#define RUNTIMECMP_H
+#ifndef CMP_H
+#define CMP_H
 
 /**  Virtual functors class
  *
@@ -31,19 +31,20 @@
  *  \date (Creation) April 25, 2006
  *
  *  Note: this is strongly inspired from tutorial http://www.newty.de/fpt/functor.html
+ *
  */
-class TFunctor
+template <class U> class myTFunctor
 {
 public:
 
   /** destructor
    */
-  virtual ~TFunctor() {};
+  virtual ~myTFunctor() {};
 
   /**
-   *  \return unsigned long int
+   *  \return int
    */
-  virtual const unsigned long int Call() = 0;      // call using function
+  virtual const U Call() = 0;      // call using function
 };
 
 /** derived template class for functors
@@ -53,11 +54,11 @@ public:
 *
 *  Note: this is strongly inspired from tutorial http://www.newty.de/fpt/functor.html
 */
-template <class TClass> class TSpecificFunctor : public TFunctor
+template <class TClass, class U> class myTSpecificFunctor : public myTFunctor<U>
 {
 private:
   /** pointer to member function */
-  const unsigned long int (TClass::*fpt)() const;
+  const U(TClass::*fpt)() const;
   /** pointer to object */
   TClass* pt2Object;
 
@@ -67,36 +68,47 @@ public:
    *  constructor - takes pointer to an object and pointer to a member and stores
    * them in two private variables
    * \param pointer to TClass
-   * \param pointer to function of type const unsigned long int(TClass::*_fpt)() const
+   * \param pointer to function of type const int(TClass::*_fpt)() const
    */
-  TSpecificFunctor(TClass* _pt2Object, const unsigned long int(TClass::*_fpt)() const)
+  myTSpecificFunctor(TClass* _pt2Object, const U(TClass::*_fpt)() const)
   {
     pt2Object = _pt2Object;
     fpt = _fpt;
   };
 
   /** override function "Call" that executes member function
-  *  \return unsigned long int
+  *  \return int
   */
-  virtual const unsigned long int Call()
+  virtual const U Call()
   {
     return (*pt2Object.*fpt)();
   };
 };
 
-/** Template to provide comparison operator in stl set or map
-*   see examples of using in EventsManager.h
-*  \author SICONOS Development Team - copyright INRIA
-*  \version 2.1.1.
-*  \date (Creation) April 25, 2006
-*
-* Convention: objects to be compared must have a function of type:
-*  const unsigned long int name() const (whatever name is)
-* The comparison will be based on the return value of this function.
-*
-*  Note: this is strongly inspired from http://www.josuttis.com/libbook/
-*/
-template <class T> class RuntimeCmp
+/** Cmp<T,U> objects are used to provide "strict weak ordering" relations,
+ * used in SiconosSet to compare objects; See STL doc or
+ * SiconosSet.h class for example of use.
+ *  \author SICONOS Development Team - copyright INRIA
+ *  \version 2.1.1.
+ *  \date (Creation) April 25, 2006
+ *
+ *  \code
+ *  Cmp<T,U> myCmp;
+ *  // a and b objects of type T
+ *  //
+ *  bool res = myCmp(a,b); // return true if "a<b" else false.
+ *
+ * \endcode
+ *
+ * "a<b" is evaluated according to the returning value of the member \n
+ * function pointed by fpt.
+ *
+ * Cmp objects are not supposed to be used directly but as arguments in SiconosSet.h.
+ * See that class for details.
+ *
+ *  Note: this is strongly inspired from http://www.josuttis.com/libbook/
+ */
+template <class T, class U> class Cmp
 {
 public:
 
@@ -109,15 +121,15 @@ private:
   cmp_mode mode;
 
   /**  pointer to member function: return the value that will be used for sorting */
-  const unsigned long int (T::*fpt)() const ;
+  const U(T::*fpt)() const ;
 
 public:
 
   /**  constructor for sorting criterion
   *  default criterion uses value normal
-  * \param a pointer to function of type const unsigned long int(T::*_fpt)() const
+  * \param a pointer to function of type const int(T::*_fpt)() const
   */
-  RuntimeCmp(const unsigned long int(T::*_fpt)() const, cmp_mode m = normal): mode(m), fpt(_fpt) {};
+  Cmp(const U(T::*_fpt)() const, cmp_mode m = normal): mode(m), fpt(_fpt) {};
 
   /** comparison of elements
   * \param two pointers to T
@@ -125,19 +137,19 @@ public:
   bool operator()(T* t1, T* t2) const
   {
     // set functors and call pointers to function to get values to be compared
-    TSpecificFunctor<T> specFuncA(t1, fpt);
-    TSpecificFunctor<T> specFuncB(t2, fpt);
-    TFunctor* vTable[] = { &specFuncA, &specFuncB};
-    unsigned long int i1 = vTable[0]->Call();
-    unsigned long int i2 = vTable[1]->Call();
+    myTSpecificFunctor<T, U> specFuncA(t1, fpt);
+    myTSpecificFunctor<T, U> specFuncB(t2, fpt);
+    myTFunctor<U>* vTable[] = { &specFuncA, &specFuncB};
+    U i1 = vTable[0]->Call();
+    U i2 = vTable[1]->Call();
 
     return mode == normal ? i1 < i2 : i2 < i1;
   }
   /** comparison of sorting criteria
-  * \param a RuntimeCmp
+  * \param a Cmp
   * \return a bool
   */
-  bool operator== (const RuntimeCmp& rc)
+  bool operator== (const Cmp& rc)
   {
     return mode == rc.mode;
   }

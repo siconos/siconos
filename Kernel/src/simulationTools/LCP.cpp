@@ -423,7 +423,7 @@ void LCP::assembleM() //
 
   // Get index set 1 from Simulation
   UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
-  UnitaryRelationIterator itRow;
+  UnitaryRelationsIterator itRow;
   unsigned int pos = 0, col = 0; // index position used for block copy into M, see below.
   UnitaryMatrixColumnIterator itCol;
 
@@ -567,7 +567,7 @@ void LCP::computeQ(const double time)
 
   unsigned int pos = 0;
   unsigned int nsLawSize;
-  UnitaryRelationIterator itCurrent, itLinked;
+  UnitaryRelationsIterator itCurrent, itLinked;
   string simulationType = simulation->getType();
   for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
   {
@@ -715,7 +715,7 @@ void LCP::postCompute()
 
   unsigned int pos = 0;
   unsigned int nsLawSize;
-  UnitaryRelationIterator itCurrent, itLinked;
+  UnitaryRelationsIterator itCurrent, itLinked;
 
   for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
   {

@@ -315,7 +315,7 @@ void FrictionContact::assembleM() //
   // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
 
   unsigned int pos = 0, col = 0; // index position used for block copy into M, see below.
-  UnitaryRelationIterator itRow;
+  UnitaryRelationsIterator itRow;
   UnitaryMatrixColumnIterator itCol;
   for (itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
   {
@@ -362,7 +362,7 @@ void FrictionContact::computeQ(const double time)
 
   unsigned int pos = 0;
   unsigned int nsLawSize;
-  UnitaryRelationIterator itCurrent, itLiked;
+  UnitaryRelationsIterator itCurrent, itLiked;
   string simulationType = simulation->getType();
   for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
   {
@@ -470,7 +470,7 @@ void FrictionContact::postCompute()
 
   unsigned int pos = 0;
   unsigned int nsLawSize;
-  UnitaryRelationIterator itCurrent, itLinked;
+  UnitaryRelationsIterator itCurrent, itLinked;
 
   for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
   {

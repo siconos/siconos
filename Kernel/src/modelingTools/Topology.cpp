@@ -59,7 +59,7 @@ void Topology::computeRelativeDegrees()
   string nslawType;
 
   // loop through indexSet0
-  UnitaryRelationIterator it;
+  UnitaryRelationsIterator it;
   for (it = indexSet0->begin(); it != indexSet0->end(); it++)
   {
     nslawType = (*it)->getNonSmoothLawType();
@@ -97,7 +97,7 @@ Topology::Topology(NonSmoothDynamicalSystem* newNsds): allInteractions(NULL), is
 Topology::~Topology()
 {
   // Clears all Unitary Relations of IndexSets[0]
-  UnitaryRelationIterator it;
+  UnitaryRelationsIterator it;
   for (it = indexSet0->begin(); it != indexSet0->end(); ++it)
     delete *it;
 
@@ -108,7 +108,7 @@ Topology::~Topology()
 
 const bool Topology::hasInteraction(Interaction* inter) const
 {
-  return allInteractions->isInteractionIn(inter);
+  return allInteractions->isIn(inter);
 }
 
 const unsigned int Topology::getMaxRelativeDegree()

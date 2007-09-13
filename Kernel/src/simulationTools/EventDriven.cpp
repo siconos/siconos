@@ -80,7 +80,7 @@ void EventDriven::updateIndexSet(unsigned int i)
     RuntimeException::selfThrow("EventDriven::updateIndexSet(i=0), indexSets[0] can not be updated.");
 
   // for all Unitary Relations in indexSet[i-1], compute y[i-1] and update the indexSet[i]
-  UnitaryRelationIterator it, itForFind;
+  UnitaryRelationsIterator it, itForFind;
 
   double y;
 
@@ -161,7 +161,7 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
 {
 
   // for all Unitary Relations in indexSet[i-1], compute y[i-1] and update the indexSet[i]
-  UnitaryRelationIterator it, itForFind;
+  UnitaryRelationsIterator it, itForFind;
 
   for (it = indexSets[2]->begin(); it != indexSets[2]->end(); ++it)
   {
@@ -299,7 +299,7 @@ void EventDriven::computeJacobianF(OneStepIntegrator* osi, integer *sizeOfX, dou
 
 void EventDriven::computeG(OneStepIntegrator* osi, integer * sizeOfX, doublereal* time, doublereal* x, integer * ng, doublereal * gOut)
 {
-  UnitaryRelationIterator itUR;
+  UnitaryRelationsIterator itUR;
   unsigned int nsLawSize, k = 0 ;
   SiconosVector * y = NULL, * lambda = NULL;
 

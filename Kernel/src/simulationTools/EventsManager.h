@@ -24,7 +24,6 @@
 #define EVENTSMANAGER_H
 
 #include "SiconosConst.h"
-#include "RuntimeCmp.h"
 #include "Event.h"
 #include <gmp.h>
 #include<iostream>
@@ -46,7 +45,7 @@ struct compareEvent
   }
 };
 
-/** set of events, with a RuntimeCmp based on Event time value (mpz_t) to compare Events
+/** set of events, with an ordering based on Event time value (mpz_t) to compare Events
  *  A stl container of type "multiset" is used at the time
  *  \Warning This may be not the best choice => review all possibi lities */
 typedef std::multiset<Event*, compareEvent > EventsContainer; // sort in a chronological way

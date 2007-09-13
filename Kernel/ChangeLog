@@ -32,7 +32,8 @@ Changes:
 2007 September Franck Perignon <franck.perignon@inrialpes.fr>
 	* Review event-driven 
 	* Review "sets" management
-
+	* Replace Interaction/UnitaryRelation/DynamicalSystem/Set classes
+	with a template class SiconosSet
 	
 --------------------------------------------------------------------------------
   v2.1.1 - August, 23rd 2007 (release 839)

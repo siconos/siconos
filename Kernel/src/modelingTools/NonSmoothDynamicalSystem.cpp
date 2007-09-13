@@ -213,10 +213,10 @@ DynamicalSystem* NonSmoothDynamicalSystem::getDynamicalSystemPtr(const int& nb) 
 
 DynamicalSystem* NonSmoothDynamicalSystem::getDynamicalSystemPtrNumber(const int& nb) const
 {
-  if (! allDS->isDynamicalSystemIn(nb)) // if ds number nb is not in the set ...
+  if (! allDS->isIn(nb)) // if ds number nb is not in the set ...
     RuntimeException::selfThrow("NonSmoothDynamicalSystem::getDynamicalSystemOnNumber(nb), DS number nb is not in the set.");
 
-  return allDS->getDynamicalSystemPtr(nb);
+  return allDS->getPtr(nb);
 }
 
 void NonSmoothDynamicalSystem::setDynamicalSystems(const DynamicalSystemsSet& newVect)
@@ -243,12 +243,12 @@ void NonSmoothDynamicalSystem::setDynamicalSystems(const DynamicalSystemsSet& ne
 
 const bool NonSmoothDynamicalSystem::hasDynamicalSystemNumber(const int& nb) const
 {
-  return allDS->isDynamicalSystemIn(nb);
+  return allDS->isIn(nb);
 }
 
 const bool NonSmoothDynamicalSystem::hasDynamicalSystem(DynamicalSystem* ds) const
 {
-  return allDS->isDynamicalSystemIn(ds);
+  return allDS->isIn(ds);
 }
 
 // === Interactions management ===
@@ -268,10 +268,10 @@ Interaction* NonSmoothDynamicalSystem::getInteractionPtr(const int& nb) const
 
 Interaction* NonSmoothDynamicalSystem::getInteractionPtrNumber(const int& nb) const
 {
-  if (! allInteractions->isInteractionIn(nb)) // if Interaction number nb is not in the set ...
+  if (! allInteractions->isIn(nb)) // if Interaction number nb is not in the set ...
     RuntimeException::selfThrow("NonSmoothDynamicalSystem::getInteractionOnNumber(nb), Interaction number nb is not in the set.");
 
-  return allInteractions->getInteraction(nb);
+  return allInteractions->getPtr(nb);
 }
 
 void NonSmoothDynamicalSystem::setInteractions(const InteractionsSet& newVect)
@@ -298,12 +298,12 @@ void NonSmoothDynamicalSystem::setInteractions(const InteractionsSet& newVect)
 
 const bool NonSmoothDynamicalSystem::hasInteractionNumber(const int& nb) const
 {
-  return allInteractions->isInteractionIn(nb);
+  return allInteractions->isIn(nb);
 }
 
 const bool NonSmoothDynamicalSystem::hasInteraction(Interaction* inter) const
 {
-  return allInteractions->isInteractionIn(inter);
+  return allInteractions->isIn(inter);
 }
 
 void NonSmoothDynamicalSystem::saveNSDSToXML()

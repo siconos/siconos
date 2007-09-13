@@ -28,7 +28,6 @@ enum dynamicalsystem {LAGRANGIANNLDS, LAGRANGIANTIDS, LINEARTIDS};
 #include "DynamicalSystemsSet.h"
 
 class Interaction;
-class InteractionsSet;
 class DynamicalSystem;
 class Topology;
 class NonSmoothDynamicalSystemXML;

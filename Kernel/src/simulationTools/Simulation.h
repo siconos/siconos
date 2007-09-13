@@ -38,7 +38,6 @@ class OneStepIntegrator;
 class OneStepNSProblem;
 class TimeDiscretisation;
 class SimulationXML;
-class UnitaryRelationsSet;
 
 /** vector of OneStepIntegrator */
 typedef std::set<OneStepIntegrator*> OSISet;

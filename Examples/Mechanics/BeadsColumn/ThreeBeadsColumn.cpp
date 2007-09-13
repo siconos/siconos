@@ -27,11 +27,13 @@ int main(int argc, char* argv[])
 
     // --- Model loading from xml file ---
     Model * BeadsModel = new Model("./ThreeBeadsColumn.xml");
+
     cout << "\n *** ThreeBeadsColumn.xml loaded ***" << endl;
 
     // --- Get and initialize the simulation ---
     TimeStepping * s = static_cast<TimeStepping*>(BeadsModel->getSimulationPtr());
     s->initialize();
+
     cout << "\n **** the simulation is ready ****" << endl;
 
     // --- Get the time discretisation scheme ---

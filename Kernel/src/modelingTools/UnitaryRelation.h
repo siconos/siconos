@@ -24,7 +24,7 @@
 
 #include "Tools.h"
 #include "SiconosAlgebra.h"
-#include "DynamicalSystemsSet.h"
+//#include "DynamicalSystemsSet.h"
 #include "Interaction.h"
 
 /** Interface to single relations from Interactions
@@ -180,6 +180,14 @@ public:
    *  \return a string
    */
   const std::string getRelationSubType() const;
+
+  /** function used to sort UnitaryRelation in SiconosSet<UnitaryRelation*>
+   *  \return an int
+   */
+  inline double* const getSort() const
+  {
+    return (double*)this;
+  }
 
   /** gets an iterator to the first element of the DynamicalSystems set.
    *  \return a DSIterator.

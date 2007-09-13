@@ -29,7 +29,6 @@ Linear Complementarity Problem
 #include <sys/time.h>
 
 class OneStepNSProblem;
-class DynamicalSystemsSet;
 
 /** Formalization and Resolution of a Linear Complementarity Problem (LCP)
  *

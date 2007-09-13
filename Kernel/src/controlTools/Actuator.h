@@ -32,7 +32,6 @@ class SiconosVector;
 class TimeDiscretisation;
 class Model;
 class Event;
-class DynamicalSystemsSet;
 class DynamicalSystem;
 class Sensor;
 

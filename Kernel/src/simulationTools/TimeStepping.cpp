@@ -88,7 +88,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
     RuntimeException::selfThrow("TimeStepping::updateIndexSet(i=0), indexSets[0] can not be updated.");
 
   // for all Unitary Relations in indexSet[i-1], compute y[i-1] and update the indexSet[i]
-  UnitaryRelationIterator it, itForFind;
+  UnitaryRelationsIterator it, itForFind;
 
   double y;
 

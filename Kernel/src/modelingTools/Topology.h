@@ -28,10 +28,8 @@
 #include "UnitaryRelationsSet.h"
 
 class NonSmoothDynamicalSystem;
-class InteractionsSet;
 class Interaction;
 class SiconosMatrix;
-class UnitaryRelationsSet;
 class UnitaryRelation;
 
 

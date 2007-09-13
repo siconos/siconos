@@ -23,13 +23,13 @@
 #ifndef ONESTEPINTEGRATOR_H
 #define ONESTEPINTEGRATOR_H
 
+
 #include "SiconosConst.h"
 #include "DynamicalSystemsSet.h"
 #include "InteractionsSet.h"
 #include "RuntimeException.h"
 
 class DynamicalSystem;
-class DynamicalSystemsSet;
 class TimeDiscretisation;
 class OneStepIntegratorXML;
 class Simulation;

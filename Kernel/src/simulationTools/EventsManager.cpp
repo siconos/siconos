@@ -17,7 +17,6 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "EventsManager.h"
-#include "RuntimeCmp.h"
 #include "EventFactory.h"
 #include "TimeDiscretisation.h"
 #include "Model.h"

@@ -29,8 +29,7 @@
 #include "BlockVector.h"
 #include "DynamicalSystemsSet.h"
 #include "Tools.h"
-
-class DynamicalSystemsSet;
+//class DynamicalSystemsSet;
 class NonSmoothLaw;
 class DynamicalSystem;
 class Relation;
@@ -541,6 +540,14 @@ public:
   inline void setNonSmoothDynamicalSystemPtr(NonSmoothDynamicalSystem *newNsds)
   {
     NSDS = newNsds;
+  }
+
+  /** function used to sort Interaction in SiconosSet<Interaction*>
+   *  \return an int
+   */
+  inline double* const getSort() const
+  {
+    return (double*)this;
   }
 
   // --- OTHER FUNCTIONS ---

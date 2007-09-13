@@ -32,7 +32,6 @@ class Simulation;
 class SiconosVector;
 class DynamicalSystem;
 class UnitaryRelation;
-class InteractionsSet;
 class EqualityConstraint;
 class SiconosMatrix;
 class OneStepNSProblemXML;
