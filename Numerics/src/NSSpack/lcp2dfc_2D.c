@@ -71,7 +71,7 @@
 #ifndef MEXFLAG
 #include "NSSpack.h"
 #endif
-#include "blaslapack.h"
+#include "LA.h"
 
 
 
@@ -103,10 +103,6 @@ void lcp2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1,
   double   *Kin;
 
   double   *Fi, *R;
-
-  char     uplo = 'U';
-
-
 
   taille_c = 2 * taille_n;
 
@@ -273,7 +269,7 @@ void lcp2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1,
   /*                   Cholesky            */
 
 
-  dpotrf_(&uplo, (integer *)&taille_i, R , (integer *)&taille_i, (integer *)&info2);
+  DPOTRF(LA_UP, taille_i, R , taille_i, info2);
 
 
   if (info2 != 0)
@@ -319,7 +315,7 @@ void lcp2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1,
 
 
 
-  dpotri_(&uplo, (integer*)&taille_i, R , (integer*)&taille_i, (integer*)&info2);
+  DPOTRI(LA_UP, taille_i, R , taille_i, info2);
 
   if (info2 != 0)
   {
@@ -440,7 +436,7 @@ void lcp2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1,
 
 
 
-  dcopy_((integer *)&taille_i, Fi, &incx, temp_i, &incy);
+  DCOPY(taille_i, Fi, incx, temp_i, incy);
 
 
   for (i = 0; i < taille_i; i++)

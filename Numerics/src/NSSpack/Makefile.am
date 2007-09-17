@@ -20,6 +20,9 @@
 
 include $(top_srcdir)/config/Make-rules
 
+# fmax
+AM_CFLAGS=-std=c99
+
 .c.o:
 	$(CCCOMPILE) -c $<
 .f.o:
@@ -78,6 +81,7 @@ noinst_LTLIBRARIES = libNSSpack.la
 
 libNSSpack_la_SOURCES = NSSpack.h \
 	minf.c maxf.c \
+        clapack_dtrtrs.c \
 	$(LCP_SOURCES) \
 	$(PFC_SOURCES) \
 	$(DFC_SOURCES) \
@@ -85,7 +89,7 @@ libNSSpack_la_SOURCES = NSSpack.h \
 	$(PR_SOURCES) \
 	$(DR_SOURCES) \
 	ql0001.f sortsn.f diffns.c  \
-	freeSpBlMat.c
+	freeSpBlMat.c 
 
 
 libNSSpack_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)

@@ -78,7 +78,7 @@ w - M z = q\\
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "blaslapack.h"
+#include "LA.h"
 
 
 void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info, int *iparamPFC , double *dparamPFC)
@@ -87,16 +87,12 @@ void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
   int i, j, k, iter, maxit;
   int n = *nn, nc = n / 2;
   int ispeak, it_end;
-  integer  incx, incy;
+  int  incx, incy;
 
   double errmax, alpha, beta, mu;
   double *y, res;
   double normr, eps, avn, avt, det, gplus, gmoins;
   double apn, apt, zn , zt, den1, num1;
-
-  char  notrans = 'N';
-
-
 
   maxit        = iparamPFC[0];
   ispeak       = iparamPFC[1];
@@ -309,20 +305,20 @@ void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
     incx = 1;
     incy = 1;
 
-    dcopy_((integer *)&n, q, &incx, y, &incy);
+    DCOPY(n, q, incx, y, incy);
 
     alpha = 1.;
     beta  = 1.;
-    dgemv_(&notrans, (integer *)&n, (integer *)&n, &alpha, vec, (integer *)&n, z, &incx, &beta, y, &incy);
+    DGEMV(LA_NOTRANS, n, n, alpha, vec, n, z, incx, beta, y, incy);
 
 
 
     alpha = -1.;
-    daxpy_((integer *)&n, &alpha, w, &incx, y, &incy);
+    DAXPY(n, alpha, w, incx, y, incy);
 
 
-    num1 = ddot_((integer *)&n, y, &incx, y, &incy);
-    den1 = ddot_((integer *)&n, q, &incx, q, &incy);
+    num1 = DDOT(n, y, incx, y, incy);
+    den1 = DDOT(n, q, incx, q, incy);
 
 
     normr = sqrt(num1 / den1);

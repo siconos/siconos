@@ -33,8 +33,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "blaslapack.h"
+#include "LA.h"
 #include <math.h>
 
 int lcp_compute_error(int n, double *vec , double *q , double *z , int verbose, double *w, double *err)
@@ -44,11 +43,9 @@ int lcp_compute_error(int n, double *vec , double *q , double *z , int verbose, 
   int i, incx, incy;
   int param = 1;
 
-  char NOTRANS = 'N';
-
   incx = 1;
   incy = 1;
-  dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
+  DCOPY(n , q , incx , w , incy);
 
   a1 = 1.;
   b1 = 1.;
@@ -59,8 +56,8 @@ int lcp_compute_error(int n, double *vec , double *q , double *z , int verbose, 
 
   if (param == 1)
   {
-    dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z ,
-           (integer *)&incx , &b1 , w , (integer *)&incy);
+    DGEMV(LA_NOTRANS , n , n , a1 , vec , n , z ,
+          incx , b1 , w , incy);
   }
 
 
@@ -78,7 +75,7 @@ int lcp_compute_error(int n, double *vec , double *q , double *z , int verbose, 
   }
 
   incx  = 1;
-  normq = dnrm2_((integer *)&n , q , (integer *)&incx);
+  normq = DNRM2(n , q , incx);
 
   *err = error / normq;
 

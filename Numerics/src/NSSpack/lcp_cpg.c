@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "blaslapack.h"
+#include "LA.h"
 
 /*!\file lcp_cpg.c
 
@@ -68,12 +68,11 @@
 \author Mathieu Renouf.
 */
 
-
 void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
 {
 
   int n;
-  integer incx, incy;
+  int incx, incy;
   int i, iter;
   int itermax, ispeak;
 
@@ -81,8 +80,6 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
 
   double alpha, beta, rp, pMp;
   double den, num, tol;
-
-  char NOTRANS = 'N';
 
   int *status;
   double *zz , *pp , *rr, *ww, *Mp;
@@ -103,7 +100,7 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
   iparamLCP[2] = 0;
   dparamLCP[1] = 0.0;
 
-  qs = dnrm2_((integer *)&n , q , &incx);
+  qs = DNRM2(n , q , incx);
 
   /*printf( " Norm: %g \n", qs );*/
 
@@ -141,18 +138,18 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
   incx = 1;
   incy = 1;
 
-  dcopy_((integer *)&n , q , &incx , rr , &incy);
+  DCOPY(n, q, incx, rr, incy);
 
   a1 = -1.;
   b1 = -1.;
 
-  dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z , &incx , &b1 , rr , &incy);
+  DGEMV(LA_NOTRANS, n, n, a1, vec, n, z, incx, b1, rr, incy);
 
   /* Initialization of gradients */
   /* rr -> p and rr -> w */
 
-  dcopy_((integer *)&n , rr , &incx , ww , &incy);
-  dcopy_((integer *)&n , rr , &incx , pp , &incy);
+  DCOPY(n, rr, incx, ww, incy);
+  DCOPY(n, rr, incx, pp, incy);
 
   iter = 0.0;
   err  = 1.0 ;
@@ -167,14 +164,14 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
     incx = 1;
     incy = 1;
 
-    dcopy_((integer *)&n , pp , &incx , Mp , &incy);
+    DCOPY(n, pp, incx, Mp, incy);
 
     a1 = 1.0;
     b1 = 0.0;
 
-    dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , Mp , &incx , &b1 , w , &incy);
+    DGEMV(LA_NOTRANS, n, n, a1, vec, n, Mp, incx, b1, w, incy);
 
-    pMp = ddot_((integer *)&n , pp , &incx , w  , &incy);
+    pMp = DDOT(n, pp, incx, w, incy);
 
     if (fabs(pMp) < 1e-16)
     {
@@ -198,7 +195,7 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
       return;
     }
 
-    rp  = ddot_((integer *)&n , pp , &incx , rr , &incy);
+    rp  = DDOT(n, pp, incx, rr, incy);
 
     alpha = rp / pMp;
 
@@ -208,7 +205,7 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
      *
      */
 
-    daxpy_((integer *)&n , &alpha , pp , &incx , z , &incy);
+    DAXPY(n, alpha, pp, incx, z, incy);
 
     /* Iterate projection*/
 
@@ -227,13 +224,13 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
 
     /* rr = -Wz + q */
 
-    dcopy_((integer *)&n , rr , &incx , w  , &incy);
-    dcopy_((integer *)&n , q  , &incx , rr , &incy);
+    DCOPY(n, rr, incx, w , incy);
+    DCOPY(n, q , incx, rr, incy);
 
     a1 = -1.;
     b1 = -1.;
 
-    dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z , &incx , &b1 , rr , &incy);
+    DGEMV(LA_NOTRANS, n, n, a1, vec, n, z, incx, b1, rr, incy);
 
     /* Gradients projection
      * rr --> ww
@@ -266,18 +263,18 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
 
     /*   beta = -w.Mp / pMp  */
 
-    rp = ddot_((integer *)&n , ww , &incx, w , &incy);
+    rp = DDOT(n , ww, incx, w, incy);
 
     beta = -rp / pMp;
 
-    dcopy_((integer *)&n , ww , &incx , pp , &incy);
-    daxpy_((integer *)&n, &beta , zz , &incx , pp , &incy);
+    DCOPY(n, ww, incx, pp, incy);
+    DAXPY(n, beta, zz, incx, pp, incy);
 
     /* **** Criterium convergence **** */
 
     qs   = -1.0;
-    daxpy_((integer *)&n , &qs , rr , &incx , w , &incy);
-    num = dnrm2_((integer *)&n, w , &incx);
+    DAXPY(n, qs, rr, incx, w, incy);
+    num = DNRM2(n, w, incx);
     err = num * den;
 
   }
@@ -285,10 +282,10 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
   iparamLCP[2] = iter;
   dparamLCP[1] = err;
 
-  dcopy_((integer *)&n , rr , &incx , w , &incy);
+  DCOPY(n, rr, incx, w, incy);
 
   qs   = -1.0;
-  dscal_((integer *)&n , &qs , w , &incx);
+  DSCAL(n, qs, w, incx);
 
 
   *info = 1;

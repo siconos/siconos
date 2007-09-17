@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
+#include <LA.h>
 
 /*!\file rp_gsnl.c
 
@@ -39,11 +39,6 @@ M z- w=q\\
  here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
 
 */
-
-
-
-double ddot_(int *, double [], int *, double [], int*);
-
 
 /*!\fn  rp_gsnl(double vec[],double *qq,int *nn,double a[],int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
 
@@ -97,10 +92,10 @@ rp_gsnl(double vec[], double *q, int *nn, double a[], double b[], int * itermax,
   while ((iter1 < itt) && (err1 > errmax))
   {
     iter1 = iter1 + 1;
-    dcopy_(&n, q, &incx, wnum1, &incy);
+    DCOPY(n , q , incx , wnum1 , incy);
     alpha = 1.;
     beta = -1.;
-    dgemv_(&trans, &n, &n, &alpha, M, &n, z, &incx, &beta, wnum1, &incy);
+    DGEMV(LA_TRANS , n , n , alpha , M , n , z , incx , beta , wnum1 , incy);
 
     for (i = 0; i < n; i++)
     {
@@ -135,14 +130,14 @@ rp_gsnl(double vec[], double *q, int *nn, double a[], double b[], int * itermax,
 
     /* ///////// convergence criterium ///////////// */
 
-    dcopy_(&n, w, &incx, wnum1, &incy);
+    DCOPY(n , w , incx , wnum1 , incy);
     alpha = 1.;
-    daxpy_(&n, &alpha, q, &incx, wnum1, &incy);
+    DAXPY(n , alpha , q , incx, wnum1 , incy);
     alpha = 1.;
     beta = -1.;
-    dgemv_(&trans, &n, &n, &alpha, M, &n, z, &incx, &beta, wnum1, &incy);
-    num = ddot_(&n, wnum1, &incx, wnum1, &incy);
-    den = ddot_(&n, q, &incx, q, &incy);
+    DGEMV(LA_TRANS, n, n, alpha, M, n, z, incx, beta, wnum1, incy);
+    num = DDOT(n , wnum1 , incx , wnum1 , incy);
+    den = DDOT(n , q , incx , q , incy);
 
     err1 = sqrt(num) / sqrt(den);
     *it_end = iter1;

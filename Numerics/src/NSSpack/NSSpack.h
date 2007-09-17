@@ -311,8 +311,6 @@ extern  "C" void lcp_qp(int *nn , double *vec , double *q , double *z , double *
 extern  "C" void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                          int *iparamLCP , double *dparamLCP);
 
-extern "C" double getPrec();
-
 extern  "C" void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                          int *iparamLCP , double *dparamLCP);
 
@@ -738,11 +736,6 @@ extern  void dfc_2D2cond_2D(int *, double *, double *, double *, int *, int *, i
 
 extern  void cond_2D2dfc_2D(int *, double *, double *, double *, double *, double *,  int *, int *,
                             int *, int *, int *,  double *, double *);
-
-extern int lcp_compute_error(int, double *, double *, double *, int, double *, double *);
-
-
-extern void diffns(int *, int *, int *, int *, int *, int *);
 
 
 /* ***************************** **************** ************************* */

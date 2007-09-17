@@ -56,7 +56,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "NSSpack.h"
-#include "blaslapack.h"
+#include "LA.h"
 
 #define BAVARD
 
@@ -243,63 +243,60 @@ void test_lcp_series(int n , double *vec , double *q)
 
   printf(" -- SOLVEUR ------ ITER/PIVOT ----- ERR ----- COMP ----- SOL?");
 
-  comp = ddot_(&n , z1 , &incx , w1 , &incy);
-  daxpy_(&n , &alpha , q , &incx , w1 , &incy);
-  dgemv_(&NT , &n , &n , &beta , vec , &n , z1 , &incx , &alpha , w1 , &incy);
-  diff = dnrm2_(&n , w1 , &incx);
+  comp = DDOT(n , z1 , incx , w1 , incy);
+  DAXPY(n , alpha , q , incx , w1 , incy);
+  DGEMV(LA_NOTRANS , n , n , beta , vec , n , z1 , incx , alpha , w1 , incy);
+  diff = DNRM2(n , w1 , incx);
 
   printf("\n    NLGS   (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info1, method_lcp1.iter, method_lcp1.err, comp, diff);
 
-  comp = ddot_(&n , z2 , &incx , w2 , &incy);
-  daxpy_(&n , &alpha , q , &incx , w2 , &incy);
-  dgemv_(&NT , &n , &n , &beta , vec , &n , z2 , &incx , &alpha , w2 , &incy);
-  diff = dnrm2_(&n , w2 , &incx);
+  comp = DDOT(n , z2 , incx , w2 , incy);
+  DAXPY(n , alpha , q , incx , w2 , incy);
+  DGEMV(LA_NOTRANS , n , n , beta , vec , n , z2 , incx , alpha , w2 , incy);
+  diff = DNRM2(n , w2 , incx);
 
   printf("\n    CPG    (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info2, method_lcp2.iter, method_lcp2.err, comp, diff);
 
-  comp = ddot_(&n , z3 , &incx , w3 , &incy);
-  daxpy_(&n , &alpha , q , &incx , w3 , &incy);
-  dgemv_(&NT , &n , &n , &beta , vec , &n , z3 , &incx , &alpha , w3 , &incy);
-  diff = dnrm2_(&n , w3 , &incx);
+  comp = DDOT(n , z3 , incx , w3 , incy);
+  DAXPY(n , alpha , q , incx , w3 , incy);
+  DGEMV(LA_NOTRANS , n , n , beta , vec , n , z3 , incx , alpha , w3 , incy);
+  diff = DNRM2(n , w3 , incx);
 
   printf("\n    LATIN  (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info3, method_lcp3.iter, method_lcp3.err, comp, diff);
 
-
-
-
-  comp = ddot_(&n , z8 , &incx , w8 , &incy);
-  daxpy_(&n , &alpha , q , &incx , w8 , &incy);
-  dgemv_(&NT , &n , &n , &beta , vec , &n , z8 , &incx , &alpha , w8 , &incy);
-  diff = dnrm2_(&n , w8 , &incx);
+  comp = DDOT(n , z8 , incx , w8 , incy);
+  DAXPY(n , alpha , q , incx , w8 , incy);
+  DGEMV(LA_NOTRANS , n , n , beta , vec , n , z8 , incx , alpha , w8 , incy);
+  diff = DNRM2(n , w8 , incx);
 
   printf("\n  LATIN_W  (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info8, method_lcp8.iter, method_lcp8.err, comp, diff);
 
-  comp = ddot_(&n , z4 , &incx , w4 , &incy);
-  daxpy_(&n , &alpha , q , &incx , w4 , &incy);
-  dgemv_(&NT , &n , &n , &beta , vec , &n , z4 , &incx , &alpha , w4 , &incy);
-  diff = dnrm2_(&n , w4 , &incx);
+  comp = DDOT(n , z4 , incx , w4 , incy);
+  DAXPY(n , alpha , q , incx , w4 , incy);
+  DGEMV(LA_NOTRANS , n , n , beta , vec , n , z4 , incx , alpha , w4 , incy);
+  diff = DNRM2(n , w4 , incx);
 
 
   printf("\n    QP     (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info4, method_lcp4.iter, method_lcp4.err, comp, diff);
 
-  comp = ddot_(&n , z5 , &incx , w5 , &incy);
-  daxpy_(&n , &alpha , q , &incx , w5 , &incy);
-  dgemv_(&NT , &n , &n , &beta , vec , &n , z5 , &incx , &alpha , w5 , &incy);
-  diff = dnrm2_(&n , w5 , &incx);
+  comp = DDOT(n , z5 , incx , w5 , incy);
+  DAXPY(n , alpha , q , incx , w5 , incy);
+  DGEMV(LA_NOTRANS , n , n , beta , vec , n , z5 , incx , alpha , w5 , incy);
+  diff = DNRM2(n , w5 , incx);
 
   printf("\n    NSQP   (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info5, method_lcp5.iter, method_lcp5.err, comp, diff);
 
-  comp = ddot_(&n , z6 , &incx , w6 , &incy);
-  daxpy_(&n , &alpha , q , &incx , w6 , &incy);
-  dgemv_(&NT , &n , &n , &beta , vec , &n , z6 , &incx , &alpha , w6 , &incy);
-  diff = dnrm2_(&n , w6 , &incx);
+  comp = DDOT(n , z6 , incx , w6 , incy);
+  DAXPY(n , alpha , q , incx , w6 , incy);
+  DGEMV(LA_NOTRANS , n , n , beta , vec , n , z6 , incx , alpha , w6 , incy);
+  diff = DNRM2(n , w6 , incx);
 
   printf("\n    Lemke  (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info6, method_lcp6.iter, method_lcp6.err, comp, diff);
 
-  comp = ddot_(&n , z7 , &incx , w7 , &incy);
-  daxpy_(&n , &alpha , q , &incx , w7 , &incy);
-  dgemv_(&NT , &n , &n , &beta , vec , &n , z7 , &incx , &alpha , w7 , &incy);
-  diff = dnrm2_(&n , w7 , &incx);
+  comp = DDOT(n , z7 , incx , w7 , incy);
+  DAXPY(n , alpha , q , incx , w7 , incy);
+  DGEMV(LA_NOTRANS , n , n , beta , vec , n , z7 , incx , alpha , w7 , incy);
+  diff = DNRM2(n , w7 , incx);
 
   printf("\n    Newton (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g | \n \n ", info7, method_lcp7.iter, method_lcp7.err, comp, diff);
 
@@ -457,23 +454,23 @@ void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM
 
   printf(" -- SOLVEUR ------ BLOCK I/P ----- TOTAL I/P ----- ERR ----- COMP ");
 
-  comp = ddot_(&dim , z1 , &incx , w1 , &incy);
+  comp = DDOT(dim , z1 , incx , w1 , incy);
 
   printf("\n    NLGS   (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info1, iter1, titer1, err1, comp);
 
-  comp = ddot_(&dim , z2 , &incx , w2 , &incy);
+  comp = DDOT(dim , z2 , incx , w2 , incy);
 
   printf("\n    CPG    (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info2, iter2, titer2, err2, comp);
 
-  comp = ddot_(&dim , z4 , &incx , w4 , &incy);
+  comp = DDOT(dim , z4 , incx , w4 , incy);
 
   printf("\n    QP     (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info4, iter4, titer4, err4, comp);
 
-  comp = ddot_(&dim , z5 , &incx , w5 , &incy);
+  comp = DDOT(dim , z5 , incx , w5 , incy);
 
   printf("\n    NSQP   (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info5, iter5, titer5, err5, comp);
 
-  comp = ddot_(&dim , z6 , &incx , w6 , &incy);
+  comp = DDOT(dim , z6 , incx , w6 , incy);
 
   /*  printf("\n    Lemke  (LOG:%1d)|",info6);
   printf("\n    Lemke    %5d ",iter6);
@@ -482,11 +479,11 @@ void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM
   printf("\n    Lemke %10.4g |",comp);*/
   printf("\n    Lemke  (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info6, iter6, titer6, err6, comp);
 
-  comp = ddot_(&dim , z7 , &incx , w7 , &incy);
+  comp = DDOT(dim , z7 , incx , w7 , incy);
 
   printf("\n    Newton (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info7, iter7, titer7, err7, comp);
 
-  comp = ddot_(&dim , z3 , &incx , w3 , &incy);
+  comp = DDOT(dim , z3 , incx , w3 , incy);
 
   printf("\n    LATIN  (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info3, iter3, titer3, err3, comp);
 

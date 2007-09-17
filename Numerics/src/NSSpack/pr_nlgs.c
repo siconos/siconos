@@ -74,8 +74,7 @@ This subroutine allows the primal resolution of relay problems(PR).\n
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "blaslapack.h"
-
+#include "LA.h"
 
 
 void pr_nlgs(double *vec, double *q, int *nn, double *a, double *b, int * itermax, double * tol, int *chat, double *z, double *w, int *it_end, double * res, int *info)
@@ -85,15 +84,11 @@ void pr_nlgs(double *vec, double *q, int *nn, double *a, double *b, int * iterma
 
   int i, j, iter1, k, ispeak = *chat;
   int n = *nn,  itt = *itermax;
-  integer incx = 1, incy = 1;
+  int incx = 1, incy = 1;
 
   double errmax = *tol, alpha, beta, mina;
   double err1, num, den, avn, apn, xn;
   double *zt, *wnum1;
-
-  char trans = 'N';
-
-
 
 
   wnum1 = (double*) malloc(n * sizeof(double));
@@ -176,18 +171,18 @@ void pr_nlgs(double *vec, double *q, int *nn, double *a, double *b, int * iterma
 
     /*          Convergence criterium      */
 
-    dcopy_((integer *)&n, w, &incx, wnum1, &incy);
+    DCOPY(n, w, incx, wnum1, incy);
 
     alpha = -1.;
-    daxpy_((integer *)&n, &alpha, q, &incx, wnum1, &incy);
+    DAXPY(n, alpha, q, incx, wnum1, incy);
 
     alpha = 1.;
     beta = -1.;
-    dgemv_(&trans, (integer *)&n, (integer *)&n, &alpha, vec, (integer *)&n, z, &incx, &beta, wnum1, &incy);
+    DGEMV(LA_TRANS, n, n, alpha, vec, n, z, incx, beta, wnum1, incy);
 
-    num = ddot_((integer *)&n, wnum1, &incx, wnum1, &incy);
+    num = DDOT(n, wnum1, incx, wnum1, incy);
 
-    den = ddot_((integer *)&n, q, &incx, q, &incy);
+    den = DDOT(n, q, incx, q, incy);
 
     err1 = sqrt(num) / sqrt(den);
 

@@ -16,12 +16,9 @@
 //
 // Contact: Vincent ACARY vincent.acary@inrialpes.fr
 //
-#ifndef ODEPACK_H
-#define ODEPACK_H
 
 #include "blaslapack.h"
 
-/***/
 typedef void (*fpointer)(integer *, doublereal *, doublereal *, doublereal *);
 typedef void (*gpointer)(integer *, doublereal *, doublereal*, integer *, doublereal *);
 typedef void (*jacopointer)(integer *, doublereal *, doublereal *, integer* , integer *,  doublereal *, integer *);
@@ -30,9 +27,6 @@ extern "C" {
   void F77NAME(DLSODE)(fpointer, integer * neq, doublereal * y, doublereal *t, doublereal *tout, integer * itol, doublereal * rtol, doublereal *atol, integer * itask, integer *istate, integer * iopt, doublereal * rwork, integer * lrw, integer * iwork, integer * liw, jacopointer, integer * mf);
 }
 
-/** ode solver with root finding - From odepack. */
 extern "C" {
-  void F77NAME(dlsodar)(fpointer, integer * neq, doublereal * y, doublereal *t, doublereal *tout, integer * itol, doublereal * rtol, doublereal *atol, integer * itask, integer *istate, integer * iopt, doublereal * rwork, integer * lrw, integer * iwork, integer * liw, jacopointer, integer * jt, gpointer, integer* ng, integer* jroot);
+  void F77NAME(dlsodar)(fpointer, integer * neq, doublereal * y, doublereal *t, doublereal *tout, integer * itol, doublereal * rtol, doublereal *atol, integer * itask, integer *istate, integer * iopt, doublereal * rwork, integer * lrw, integer * iwork, integer * liw, jacopointer, integer * jt, gpointer, integer* ng, integer * jroot);
 }
-
-#endif

@@ -83,7 +83,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "blaslapack.h"
+#include "LA.h"
 
 void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
 {
@@ -93,9 +93,7 @@ void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , i
   int n = *nn, m, k;
   int itermax, ispeak;
 
-  integer incx, incy;
-  char NOTRANS = 'N';
-  char TRANS = 'T';
+  int incx, incy;
   double err, tol, a1, b1;
   double alpha, normi;
   int infoDGESV;
@@ -155,11 +153,11 @@ void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , i
 
     // Construction of the directional derivatives of Phi, JacPhi
     // q --> w
-    dcopy_((integer *)&n , q , &incx , w , &incy);
+    DCOPY(n , q , incx , w , incy);
     // Mz+q --> w
     a1 = 1.;
     b1 = 1.;
-    dgemv_(&TRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z , &incx , &b1 , w , &incy);
+    DGEMV(LA_TRANS , n , n , a1 , vec , n , z , incx , b1 , w , incy);
     for (i = 0; i < n; i++) printf("z[%i]=%e", i, z[i]);
     printf("\n");
     for (i = 0; i < n; i++) printf("w[%i]=%e", i, w[i]);
@@ -185,7 +183,7 @@ void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , i
     // M^T.beta --> mbeta
     a1 = 1.;
     b1 = 0.0;
-    dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , beta , &incx , &b1 , mbeta  , &incy);
+    DGEMV(LA_NOTRANS , n , n , a1 , vec , n , beta , incx , b1 , mbeta  , incy);
     for (i = 0; i < n; i++) printf("mbeta[%i]=%e", i, mbeta[i]);
     printf("\n");
 
@@ -237,9 +235,9 @@ void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , i
 
     // Computation of the element of the subgradient.
 
-    dcopy_((integer *)&n , JacPhi , &incx , JacPhi_copy , &incy);
+    DCOPY(n , JacPhi , incx , JacPhi_copy , incy);
     k = 1;
-    F77NAME(dgesv)((integer *)&m, (integer *)&k, JacPhi_copy, (integer *)&m, (integer *)ipiv, beta, (integer *)&m, (integer *)&infoDGESV);
+    DGESV(m, k, JacPhi_copy, m, ipiv, beta, m, infoDGESV);
 
     if (infoDGESV)
     {
@@ -258,16 +256,16 @@ void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , i
 
     // iteration
     alpha = -1.0;
-    daxpy_((integer *)&n , &alpha , beta , &incx , z , &incy);     //  z-beta --> z
+    DAXPY(n , alpha , beta , incx , z , incy);     //  z-beta --> z
 
 
     // Construction of the RHS for the next iterate and for the error evaluation
     // q --> w
-    dcopy_((integer *)&n , q , &incx , w , &incy);
+    DCOPY(n , q , incx , w , incy);
     // Mz+q --> w
     a1 = 1.;
     b1 = 1.;
-    dgemv_(&TRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z , &incx , &b1 , w , &incy);
+    DGEMV(LA_TRANS , n , n , a1 , vec , n , z , incx , b1 , w , incy);
 
     for (i = 0; i < n; i++)
     {
@@ -280,7 +278,7 @@ void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , i
 
 
 
-    err = dnrm2_((integer *)&n , Phi , &incx);
+    err = DNRM2(n , Phi , incx);
     err = 1 / 2 * err * err;
 
   }

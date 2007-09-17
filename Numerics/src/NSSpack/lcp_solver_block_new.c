@@ -96,7 +96,7 @@
 #ifndef MEXFLAG
 #include "NSSpack.h"
 #endif
-#include "blaslapack.h"
+#include "LA.h"
 
 int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt , double *z , double *w , int *it_end ,
                      int *itt_end , double *res)
@@ -112,15 +112,11 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
   int incx, incy;
 
   double a1, b1, tol;
-  double qs, err,/* num, */den;
+  double qs, err, den;
 
   double *adrcurbl, *adrbldiag;
   double *rhs;
   /*  double *ww;*/
-
-  char NOTRANS = 'N';
-
-  /*   char savename[40]; */
 
   *it_end   = 0;
   *itt_end   = 0;
@@ -168,7 +164,7 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
   rhs  = (double*)malloc(blsizemax * sizeof(double));
 
   incx = 1;
-  qs = dnrm2_((integer *)&n , q , (integer *)&incx);
+  qs = DNRM2(n , q , incx);
   den = 1.0 / qs;
 
   /* Initialization of z and w */
@@ -279,8 +275,8 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
         b1 = 1.;
         incx = 1;
         incy = 1;
-        dgemv_(&NOTRANS , (integer *)&rowsize , (integer *)&colsize , &a1 , adrcurbl , (integer *)&rowsize , &z[indiccol] ,
-               (integer *)&incx , &b1 , rhs , (integer *)&incy);
+        DGEMV(LA_NOTRANS , rowsize , colsize , a1 , adrcurbl , rowsize , &z[indiccol] ,
+              incx , b1 , rhs , incy);
       }
     }
 

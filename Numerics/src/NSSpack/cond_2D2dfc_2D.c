@@ -74,10 +74,11 @@
 #ifndef MEXFLAG
 #include "NSSpack.h"
 #endif
-#include "blaslapack.h"
+#include "LA.h"
 
 void sortsn_(int *ddl_i, int *sort, int *n);
 
+void diffns(int *na, int *a, int *nb, int * b, int *nc, int *c);
 
 void cond_2D2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1, double *J1, int *ddl_n, int *ddl_tt, int * dim_tt, int *ddl_d, int *dim_d, double *U2, double *F2)
 {
@@ -104,10 +105,6 @@ void cond_2D2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double 
   double   *Kic;
 
   double   *Fi, *R;
-
-  char     uplo = 'U';
-
-
 
   ddl_c     = (int*) malloc(taille_c * sizeof(int));
   sort1     = (int*) malloc(taille_c * sizeof(int));
@@ -248,7 +245,7 @@ void cond_2D2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double 
   /*                   Cholesky                 */
 
 
-  dpotrf_(&uplo, (integer *)&taille_i, R , (integer *)&taille_i, (integer *)&info2);
+  DPOTRF(LA_UP, taille_i, R,  taille_i, info2);
 
   if (info2 != 0)
   {
@@ -281,7 +278,7 @@ void cond_2D2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double 
 
 
 
-  dpotri_(&uplo, (integer*)&taille_i, R , (integer*)&taille_i, (integer*)&info2);
+  DPOTRI(LA_UP, taille_i , R , taille_i, info2);
 
   if (info2 != 0)
   {

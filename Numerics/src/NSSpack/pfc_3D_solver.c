@@ -65,7 +65,7 @@
 int pfc_3D_solver(double *vec , double *q , int *n , method *pt , double *z , double *w)
 {
 
-  char pfckey1[10] = "NLGS"/* ,pfckey2[10]="CPG" */, pfckey3[15] = "NLGSNEWTON";
+  char pfckey1[10] = "NLGS", pfckey2[10] = "CPG", pfckey3[15] = "NLGSNEWTON";
 
   int i, info;
 

@@ -35,7 +35,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "blaslapack.h"
+#include "LA.h"
 #include <math.h>
 #include "NSSpack.h"
 
@@ -47,7 +47,7 @@ int filter_result_LCP_block(SparseBlockStructuredMatrix *blmat, double *q , doub
   int n, nbbl, nbblrow;
   int rowprecbl, rowcurbl, indicrow, rowsize;
   int colprecbl, colcurbl, indiccol, colsize;
-  char NOTRANS = 'N';
+
   double *adrcurbl;
 
   nbbl = blmat->nbblocks;
@@ -60,7 +60,7 @@ int filter_result_LCP_block(SparseBlockStructuredMatrix *blmat, double *q , doub
 
   incx = 1;
   incy = 1;
-  dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
+  DCOPY(n , q , incx , w , incy);
 
   rowprecbl = -1;
   rowsize = 0;
@@ -89,8 +89,8 @@ int filter_result_LCP_block(SparseBlockStructuredMatrix *blmat, double *q , doub
     colsize = blmat->blocksize[colcurbl];
     adrcurbl = blmat->block[i];
 
-    dgemv_(&NOTRANS , (integer *)&rowsize , (integer *)&colsize , &a1 , adrcurbl , (integer *)&rowsize , &z[indiccol] ,
-           (integer *)&incx , &b1 , &w[indicrow] , (integer *)&incy);
+    DGEMV(LA_NOTRANS , rowsize , colsize , a1 , adrcurbl , rowsize , &z[indiccol] ,
+          incx , b1 , &w[indicrow] , incy);
   }
 
   error = 0.;
@@ -106,7 +106,7 @@ int filter_result_LCP_block(SparseBlockStructuredMatrix *blmat, double *q , doub
   }
 
   incx  = 1;
-  normq = dnrm2_((integer *)&n , q , (integer *)&incx);
+  normq = DNRM2(n , q , incx);
 
   error = error / normq;
   if (error > tol)

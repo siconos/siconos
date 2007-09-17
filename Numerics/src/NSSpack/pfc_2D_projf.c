@@ -42,7 +42,7 @@
 
 
 
-void pfc_2D_projf(int etat[], int *nn, double y[], double fric[], double projf1[])
+pfc_2D_projf(int etat[], int *nn, double y[], double fric[], double projf1[])
 {
 
   int      i, nc, n = *nn;

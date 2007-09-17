@@ -18,13 +18,6 @@
 #	
 # Makefile.am --- SICONOS ModelingTools tests
 
-.c.o:
-	$(CCCOMPILE) -c $<
-.f.o:
-	$(F77COMPILE) -c $<
-.cpp.o:
-	$(CXXCOMPILE) -c $<
-
 include $(top_srcdir)/config/Make-rules
 
 check_PROGRAMS = test1 test2 test3  test4  test5

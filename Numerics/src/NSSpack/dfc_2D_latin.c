@@ -77,7 +77,7 @@ w - M z = q\\
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "blaslapack.h"
+#include "LA.h"
 
 /*
   void dfc_2D_latin(double vec[],double *qq,int *nn, double * k_latin,double *mumu,int * itermax, double * tol, int *chat,double z[],double w[],int *it_end,double * res,int *info) */
@@ -89,7 +89,7 @@ void dfc_2D_latin(double *vec, double *qq, int *nn, double * k_latin, double *mu
   int       n = *nn,  nc = n / 2, idim, jdim, nbno, itt = *itermax;
   int       taille, taillet, taillen, ispeak = *chat;
   int       *ddln, *ddlt, *vectnt;
-  integer incx = 1, incy = 1;
+  int incx = 1, incy = 1;
 
 
   double    errmax = *tol, alpha, beta, maxa, aa, nt, wn, tc, zc0, mu = *mumu;
@@ -101,7 +101,7 @@ void dfc_2D_latin(double *vec, double *qq, int *nn, double * k_latin, double *mu
   double    *kf, *kninv;
   double    *kinvwden1, *kzden1, *kfinv, *knz, *wtnc;
 
-  char      trans = 'T', uplo = 'U', diag = 'N', notrans = 'N';
+  /*  char      trans='T', uplo='U', diag='N', notrans='N';*/
 
 
 
@@ -331,7 +331,7 @@ void dfc_2D_latin(double *vec, double *qq, int *nn, double * k_latin, double *mu
 
 
 
-  dpotrf_(&uplo, (integer *)&n, R , (integer *)&n, (integer *)&info2);
+  DPOTRF(LA_UP, n, R , n, info2);
 
   if (info2 != 0)
   {
@@ -391,30 +391,30 @@ void dfc_2D_latin(double *vec, double *qq, int *nn, double * k_latin, double *mu
 
     alpha = 1.;
     beta  = 1.;
-    dgemv_(&trans, (integer *)&n, (integer *)&n, &alpha, kf, (integer *)&n, zc, &incx, &beta,  wc, &incy);
+    DGEMV(LA_TRANS, n, n, alpha, kf, n, zc, incx, beta,  wc, incy);
 
-    dcopy_((integer *)&n, qq, &incx, znum1, &incy);
+    DCOPY(n, qq, incx, znum1, incy);
 
 
     alpha = -1.;
-    dscal_((integer *)&n, &alpha, znum1, &incx);
+    DSCAL(n, alpha, znum1, incx);
 
 
     alpha = 1.;
-    daxpy_((integer *)&n, &alpha, wc, &incx, znum1, &incy);
+    DAXPY(n, alpha, wc, incx, znum1, incy);
 
     nrhs = 1;
 
-    dtrtrs_(&uplo, &trans, &diag, (integer *)&n, (integer *)&nrhs, R, (integer *)&n, znum1, (integer *)&n, (integer *)&info2);
+    DTRTRS(LA_UP, LA_TRANS, LA_NONUNIT, n, nrhs, R, n, znum1, n, info2);
 
-    dtrtrs_(&uplo, &notrans, &diag, (integer *)&n, (integer *)&nrhs, R, (integer *)&n, znum1, (integer *)&n, (integer *)&info2);
+    DTRTRS(LA_UP, LA_NOTRANS, LA_NONUNIT, n, nrhs, R, n, znum1, n, info2);
 
-    dcopy_((integer *)&n, znum1, &incx, z, &incy);
+    DCOPY(n, znum1, incx, z, incy);
 
     alpha = -1.;
     beta  = 1.;
-    dgemv_(&trans, (integer *)&n, (integer *)&n, &alpha, kf, (integer *)&n, z, &incx, &beta, wc, &incy);
-    dcopy_((integer *)&n, wc, &incx, w, &incy);
+    DGEMV(LA_TRANS, n, n, alpha, kf, n, z, incx, beta, wc, incy);
+    DCOPY(n, wc, incx, w, incy);
 
 
     /*   Local stage (z,w)->(zc,wc)   */
@@ -552,49 +552,48 @@ void dfc_2D_latin(double *vec, double *qq, int *nn, double * k_latin, double *mu
 
 
 
-    dcopy_((integer *)&n, z, &incx, znum1, &incy)
-    ;
+    DCOPY(n, z, incx, znum1, incy);
     alpha = -1.;
-    daxpy_((integer *)&n, &alpha, zc, &incx, znum1, &incy);
+    DAXPY(n, alpha, zc, incx, znum1, incy);
 
-    dcopy_((integer *)&n, w, &incx, wnum1, &incy);
+    DCOPY(n, w, incx, wnum1, incy);
 
-    daxpy_((integer *)&n, &alpha, wc, &incx, wnum1, &incy);
+    DAXPY(n, alpha, wc, incx, wnum1, incy);
 
     alpha = 1.;
     beta = 1.;
-    dgemv_(&trans, (integer *)&n, (integer *)&n, &alpha, kf, (integer *)&n, znum1, &incx, &beta, wnum1, &incy);
+    DGEMV(LA_TRANS, n, n, alpha, kf, n, znum1, incx, beta, wnum1, incy);
 
     num11 = 0.;
 
     alpha = 1.;
     beta = 0.;
-    dgemv_(&trans, (integer *)&n, (integer *)&n, &alpha, kfinv, (integer *)&n, wnum1, &incx, &beta, znum1, &incy);
+    DGEMV(LA_TRANS, n, n, alpha, kfinv, n, wnum1, incx, beta, znum1, incy);
 
-    num11 = ddot_((integer *)&n, wnum1, &incx, znum1, &incy);
+    num11 = DDOT(n, wnum1, incx, znum1, incy);
 
-    dcopy_((integer *)&n, z, &incx, znum1, &incy);
+    DCOPY(n, z, incx, znum1, incy);
 
     alpha = 1.;
-    daxpy_((integer *)&n, &alpha, zc, &incx, znum1, &incy);
+    DAXPY(n, alpha, zc, incx, znum1, incy);
 
     beta  = 0.;
     alpha = 1.;
-    dgemv_(&trans, (integer *)&n, (integer *)&n, &alpha, kf, (integer *)&n, znum1, &incx, &beta, wnum1, &incy);
+    DGEMV(LA_TRANS, n, n, alpha, kf, n, znum1, incx, beta, wnum1, incy);
 
-    den11 = ddot_((integer *)&n, znum1, &incx, wnum1, &incy);
+    den11 = DDOT(n, znum1, incx, wnum1, incy);
 
 
-    dcopy_((integer *)&n, w, &incx, wnum1, &incy);
+    DCOPY(n, w, incx, wnum1, incy);
 
     alpha = 1.;
-    daxpy_((integer *)&n, &alpha, wc, &incx, wnum1, &incy);
+    DAXPY(n, alpha, wc, incx, wnum1, incy);
 
     beta  = 0.;
     alpha = 1.;
-    dgemv_(&trans, (integer *)&n, (integer *)&n, &alpha, kfinv, (integer *)&n, wnum1, &incx, &beta, znum1, &incy);
+    DGEMV(LA_TRANS, n, n, alpha, kfinv, n, wnum1, incx, beta, znum1, incy);
 
-    den22 = ddot_((integer *)&n, wnum1, &incx, znum1, &incy);
+    den22 = DDOT(n, wnum1, incx, znum1, incy);
 
 
     err0    = num11 / (den11 + den22);

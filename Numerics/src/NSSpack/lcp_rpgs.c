@@ -66,7 +66,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "blaslapack.h"
+#include "LA.h"
 #include <math.h>
 
 #define EPSDIAG 1e-16
@@ -77,14 +77,11 @@ void lcp_rpgs(int *nn , double *vec , double *q , double *z , double *w , int *i
   int n, incx, incy;
   int i, iter;
   int itermax, ispeak;
-  double qs, err/* ,num */, den, zi, wi;
+  double qs, err, den, zi, wi;
   double tol, omega, rho;
-  double /* *ww, */*diag/* ,*zprev */;
+  double *diag;
   double a1, b1;
-  double/*  invrho, */ vecii, ziprev/* ,maxdiag */;
-  /*   int *diagprev; */
-
-  char NOTRANS = 'N';
+  double vecii, ziprev;
 
   /*  double *buffer_errors;
     FILE *ficbuffer_errors;*/
@@ -115,7 +112,7 @@ void lcp_rpgs(int *nn , double *vec , double *q , double *z , double *w , int *i
 
   /*  qs = 0.;*/
   incx = 1;
-  qs = dnrm2_((integer *)&n , q , (integer *)&incx);
+  qs = DNRM2(n , q , incx);
   if (ispeak > 0) printf("\n ||q||= %g \n", qs);
   den = 1.0 / qs;
 
@@ -189,7 +186,7 @@ void lcp_rpgs(int *nn , double *vec , double *q , double *z , double *w , int *i
       ziprev = z[i];
       z[i] = 0.0;
 
-      zi = -(q[i] - (rho * ziprev) + ddot_((integer *)&n , &vec[i] , (integer *)&incx , z , (integer *)&incy)) * diag[i];
+      zi = -(q[i] - (rho * ziprev) + DDOT(n , &vec[i] , incx , z , incy)) * diag[i];
 
       if (zi > 0) z[i] = zi;
 
@@ -215,12 +212,12 @@ void lcp_rpgs(int *nn , double *vec , double *q , double *z , double *w , int *i
 
     incx = 1;
     incy = 1;
-    dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
+    DCOPY(n , q , incx , w , incy);
 
     a1 = 1.;
     b1 = 1.;
-    dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z ,
-           (integer *)&incx , &b1 , w , (integer *)&incy);
+    DGEMV(LA_NOTRANS , n , n , a1 , vec , n , z ,
+          incx , b1 , w , incy);
 
     err = 0.;
     for (i = 0 ; i < n ; i++)

@@ -68,7 +68,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "blaslapack.h"
+#include "LA.h"
 
 
 //------ get matrix ------//
@@ -151,7 +151,7 @@ void G_f(int m, double *G, double *Z , double *x , double *y , double rn, double
   mrn = zt * zt + zs * zs;
 
   // if the radius is negative or the vector is null projection on the disk = 0
-  if ((coef = 0. || x[0] <= 0.) || mrn < 1e-16)
+  if (coef == 0. || x[0] <= 0. || mrn < 1e-16)
   {
     G[1] = x[1] / rt;
     G[2] = x[2] / rt;
@@ -200,7 +200,7 @@ void JacG_f(int m, double *A, double *B , double *x , double *y , double rn, dou
   mrn = zt * zt + zs * zs;
 
   // if the radius is negative or the vector is null projection on the disk = 0
-  if ((coef = 0. || x[0] < 0.) || mrn < 1e-16)
+  if (coef == 0. || x[0] < 0. || mrn < 1e-16)
     B[1 * m + 1] = B[2 * m + 2] = 1. / rt;
   // if the radius is positive and the vector is non null, we compute projection on the disk
   else
@@ -234,10 +234,9 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
   int nrhs = 1, infoDGESV;
   double err, nerr, nerr1, nerr2, tol, mu, mu2, an, at;
   double qs, a1, alpha, den, num; //,beta, det;
-  integer incx, incy;
+  int incx, incy;
   double *ww, *www, *wwww, *G, *JacG, *A, *AA, *B, *zz, *W, *zzz, *zzzz, *C;
   int *ipiv;
-  char NOTRANS = 'N';
 
   ispeak = 1;
   nc     = *nn;
@@ -286,7 +285,7 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
 
   /* Check for non trivial case */
 
-  qs = dnrm2_((integer *)&n , q , &incx);
+  qs = DNRM2(n , q , incx);
 
   if (ispeak > 0) printf("\n ||q||= %g \n" , qs);
 
@@ -345,8 +344,8 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
     incx = 1;
     incy = 1;
 
-    dcopy_((integer *)&n , w , &incx , W , &incy);
-    dcopy_((integer *)&n , q , &incx ,  w , &incy);
+    DCOPY(n , w , incx , W , incy);
+    DCOPY(n , q , incx , w , incy);
 
     for (i = 0 ; i < nc ; ++i)
     {
@@ -396,9 +395,9 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
       z[is] = 0.0;
 
       /*printf("la vitesse et la force de contact en %i est w[%i] = %8.5e et z[%i] = %8.5e\n",i,i,w[i],i, z[i]); */
-      zzz[0] = q[in] + ddot_((integer *)&n , &vec[in] , &incx , z , &incy);
-      zzz[1] = q[it] + ddot_((integer *)&n , &vec[it] , &incx , z , &incy);
-      zzz[2] = q[is] + ddot_((integer *)&n , &vec[is] , &incx , z , &incy);
+      zzz[0] = q[in] + DDOT(n , &vec[in] , incx , z , incy);
+      zzz[1] = q[it] + DDOT(n , &vec[it] , incx , z , incy);
+      zzz[2] = q[is] + DDOT(n , &vec[is] , incx , z , incy);
 
       if (zzz[0] > 0)
       {
@@ -424,7 +423,7 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
           G_f(Gsize , G , C , zz , ww , an , at , mu);
           JacG_f(Gsize , A , B , zz , ww , an , at , mu);
 
-          nerr1 = dnrm2_((integer *)&Gsize, G , &incx);
+          nerr1 = DNRM2(Gsize, G , incx);
           /*  printf("Iteration Newton %i Erreur = %14.7e\n",niter,nerr1); */
 
           matrix_mult(Gsize, Gsize, Gsize, A, C, C);
@@ -436,11 +435,11 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
           a1   = -1.0;
 
           /* compute the direction www s.t X^{k+1} = X^{k} + www, where X^{k} = za */
-          dcopy_((integer *)&Gsize , G , &incx , www , &incy);
-          dscal_((integer *)&Gsize , &a1 , www, &incx);
-          dcopy_((integer *)&mm , JacG , &incx , AA , &incy);
+          DCOPY(Gsize , G , incx , www , incy);
+          DSCAL(Gsize , a1 , www, incx);
+          DCOPY(mm , JacG , incx , AA , incy);
 
-          F77NAME(dgesv)((integer *)&Gsize, (integer *)&nrhs, AA, (integer *)&Gsize, (integer *)ipiv, www, (integer *)&Gsize, (integer *)&infoDGESV);
+          DGESV(Gsize, nrhs, AA, Gsize, ipiv, www, Gsize, infoDGESV);
 
           if (infoDGESV)
           {
@@ -478,7 +477,7 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
             incx =  1;
             incy =  1;
             qs = 1.;
-            daxpy_((integer *)&Gsize , &qs , www , &incx , zz , &incy);
+            DAXPY(Gsize , qs , www , incx , zz , incy);
             nerr = nerr1;
           }
           else
@@ -488,15 +487,15 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
             {
               incx = 1.;
               incy = 1.;
-              dcopy_((integer *)&Gsize , zz , &incx , zzzz , &incy);
-              daxpy_((integer *)&Gsize , &alpha , www , &incx , zzzz , &incy);
+              DCOPY(Gsize , zz , incx , zzzz , incy);
+              DAXPY(Gsize , alpha , www , incx , zzzz , incy);
 
               wwww[0] = vec[(in) * n + in] * zzzz[0] + vec[(it) * n + in] * zzzz[1] + vec[(is) * n + in] * zzzz[2] + zzz[0];
               wwww[1] = vec[(in) * n + it] * zzzz[0] + vec[(it) * n + it] * zzzz[1] + vec[(is) * n + it] * zzzz[2] + zzz[1];
               wwww[2] = vec[(in) * n + is] * zzzz[0] + vec[(it) * n + is] * zzzz[1] + vec[(is) * n + is] * zzzz[2] + zzz[2];
 
               G_f(Gsize , G , C , zzzz , wwww , an , at , mu);
-              nerr2 = dnrm2_((integer *)&Gsize, G , &incx);
+              nerr2 = DNRM2(Gsize, G , incx);
               /* printf("Iteration %i Erreur = %14.7e\n",iter,nerr2); */
               if (nerr2 < nerr1 * nerr1) break;
               alpha = alpha * 0.5;
@@ -505,8 +504,8 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
             /* printf("Iteration Newton %i Erreur = %14.7e\n",niter,nerr); */
             incx = 1.;
             incy = 1.;
-            dcopy_((integer *)&Gsize , zzzz , &incx , zz , &incy);
-            dcopy_((integer *)&Gsize , wwww , &incx , ww , &incy);
+            DCOPY(Gsize , zzzz , incx , zz , incy);
+            DCOPY(Gsize , wwww , incx , ww , incy);
           }
         }
       }
@@ -521,11 +520,11 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
     incy =  1;
     a1 = 1.0;
 
-    dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z , &incx , &a1 , w , &incy);
+    DGEMV(LA_NOTRANS , n , n , a1 , vec , n , z , incx , a1 , w , incy);
 
     qs   = -1.0;
-    daxpy_((integer *)&n , &qs , w , &incx , W , &incy);
-    num = dnrm2_((integer *)&n, W , &incx);
+    DAXPY(n , qs , w , incx , W , incy);
+    num = DNRM2(n, W , incx);
     err = num * den;
 
     /* printf("Iteration %i Erreur = %14.7e\n",iter,err); */

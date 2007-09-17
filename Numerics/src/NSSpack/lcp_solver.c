@@ -59,7 +59,6 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
-#include "blaslapack.h"
 
 #ifndef MEXFLAG
 #include "NSSpack.h"

@@ -30,7 +30,7 @@ AC_CONFIG_HEADERS([config.h])
 
 # SO version of all siconos shared libraries
 SICONOSNUMERICS_SO_CURRENT=4
-SICONOSNUMERICS_SO_REVISION=1
+SICONOSNUMERICS_SO_REVISION=0
 SICONOSNUMERICS_SO_AGE=0
 AC_SUBST(SICONOSNUMERICS_SO_CURRENT)
 AC_SUBST(SICONOSNUMERICS_SO_REVISION)
@@ -138,20 +138,27 @@ AC_ARG_ENABLE(error-on-warning,[  --enable-erroronwarning     treat all compile 
 ## Checks for external libraries
 #################################
 
-dnl Check for Lapack
-ACX_LAPACK([
-  dnl action-if-found: 
-  # This defines LAPACK_LIBS, BLAS_LIBS, and FLIBS
-], [
-  dnl action-if-not-found: 
-  AC_MSG_ERROR([Blas/Lapack was not found. 
+# Check for atlas
+#this define ATLAS_CPPFLAGS and ATLAS_LDFLAGS
+ACX_CHECK_ATLAS(,
+  [AC_MSG_ERROR([Atlas was not found. This makes this library unusable.
+*** This makes this library unusable. Please get the atlas library 
+*** installed. If you do have this installed, use the options 
+*** --with-atlas-include=<path of atlas include dir > and 
+*** --with-atlas-lib=<path of atlas libdir> and/or set 
+*** the env variable LDFLAGS to include the appropriate linker 
+*** flags.])])
+
+# Check for Lapack
+# This defines LAPACK_LIBS, BLAS_LIBS, and FLIBS
+ACX_LAPACK(,
+  [AC_MSG_ERROR([Blas/Lapack was not found. 
 *** This means Lapack and matrix support cannot be compiled. 
 *** This makes this library unusable. Please get blas and lapack 
 *** installed. If you do have these installed, use the options 
 *** --with-blas=<libname> or --with-lapack=<libname> and/or set 
 *** the env variable LDFLAGS to include the appropriate linker 
-*** flags.])
-])
+*** flags.])])
 
 # Cppunit : Warning, by default we skip ccpunit
 AC_MSG_CHECKING([cppunit])

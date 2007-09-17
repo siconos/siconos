@@ -76,7 +76,7 @@ w - M z = q \\
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "blaslapack.h"
+#include "LA.h"
 
 void pfc_2D_projc(double *, int *, int *  , double *, double *, double *, int *) ;
 void pfc_2D_projf(int *, int *, double *, double *, double *);
@@ -90,7 +90,7 @@ void pfc_2D_cpg(int *nn , double *vec , double *b , double *x , double *rout , i
 
   int       n = *nn, maxit, ispeak;
   int       nc = n / 2, i, iter;
-  integer incx = 1, incy = 1;
+  int       incx = 1, incy = 1;
   int       *stat, *statusi, it_end;
 
 
@@ -100,10 +100,6 @@ void pfc_2D_cpg(int *nn , double *vec , double *b , double *x , double *rout , i
 
   double    *p, *fric, *r;
   double    *fric1, *v, *w, *Ap, *xi, *z;
-
-
-  char      notrans = 'N';
-
 
 
   maxit         = iparamPFC[0];
@@ -159,12 +155,12 @@ void pfc_2D_cpg(int *nn , double *vec , double *b , double *x , double *rout , i
 
 
 
-  dcopy_((integer *)&n, b, &incx, r, &incy);
+  DCOPY(n, b, incx, r, incy);
 
   alphaf = -1.;
   betaf  = -1.;
 
-  dgemv_(&notrans, (integer *)&n, (integer *)&n, &alphaf, vec, (integer *)&n, x, &incx, &betaf, r, &incy);
+  DGEMV(LA_NOTRANS, n, n, alphaf, vec, n, x, incx, betaf, r, incy);
 
 
 
@@ -213,20 +209,20 @@ void pfc_2D_cpg(int *nn , double *vec , double *b , double *x , double *rout , i
       statusi[i] = stat[i];
 
 
-    dcopy_((integer *)&n, r, &incx, v, &incy);
+    DCOPY(n, r, incx, v, incy);
 
     if (iter == 0)
     {
-      dcopy_((integer *)&n, r, &incx, w, &incy);
+      DCOPY(n, r, incx, w, incy);
 
-      dcopy_((integer *)&n, w, &incx, p, &incy);
+      DCOPY(n, w, incx, p, incy);
     }
 
     alphaf = 1.0;
     betaf  = 0.0;
-    dgemv_(&notrans, (integer *)&n, (integer *)&n, &alphaf, vec, (integer *)&n, p, &incx, &betaf, Ap, &incy);
+    DGEMV(LA_NOTRANS, n, n, alphaf, vec, n, p, incx, betaf, Ap, incy);
 
-    pAp    = ddot_((integer *)&n, p, &incx, Ap, &incy);
+    pAp    = DDOT(n, p, incx, Ap, incy);
 
     /*}
       else
@@ -261,39 +257,39 @@ void pfc_2D_cpg(int *nn , double *vec , double *b , double *x , double *rout , i
 
     /*} */
 
-    rp     = ddot_((integer *)&n, r, &incx, p, &incy);
+    rp     = DDOT(n, r, incx, p, incy);
 
     alpha  = rp / pAp;
 
-    dcopy_((integer *)&n, x, &incx, xi, &incy);
+    DCOPY(n, x, incx, xi, incy);
 
     alphaf = alpha;
-    daxpy_((integer *)&n, &alphaf, p, &incx, xi, &incy);
+    DAXPY(n, alphaf, p, incx, xi, incy);
 
     pfc_2D_projc(xi, &n, statusi, p, fric, x, stat);
 
 
     /*         r(:)=b(:)-matmul(A,x)          */
 
-    dcopy_((integer *)&n, b, &incx, r, &incy);
+    DCOPY(n, b, incx, r, incy);
 
     alphaf = -1.;
     betaf  = -1.;
-    dgemv_(&notrans, (integer *)&n, (integer *)&n, &alphaf, vec, (integer *)&n, x, &incx, &betaf, r, &incy);
+    DGEMV(LA_NOTRANS, n, n, alphaf, vec, n, x, incx, betaf, r, incy);
 
     pfc_2D_projf(statusi, &n, r, fric, w);
 
     pfc_2D_projf(statusi, &n, p, fric, z);
 
 
-    wAp    = ddot_((integer *)&n, w, &incx, Ap, &incy);
+    wAp    = DDOT(n, w, incx, Ap, incy);
 
     beta   = - wAp / pAp;
 
-    dcopy_((integer *)&n, w, &incx, p, &incy);
+    DCOPY(n, w, incx, p, incy);
 
     alphaf  = beta;
-    daxpy_((integer *)&n, &alphaf, z, &incx, p, &incy);
+    DAXPY(n, alphaf, z, incx, p, incy);
 
 
     /*    alphaf  = 1.;
@@ -302,14 +298,14 @@ void pfc_2D_cpg(int *nn , double *vec , double *b , double *x , double *rout , i
 
     pAp     = ddot_( (integer *)&n, p, &incx, Ap, &incy );*/
 
-    dcopy_((integer *)&n, r, &incx, xi, &incy);
+    DCOPY(n, r, incx, xi, incy);
 
     alphaf  = -1.;
-    daxpy_((integer *)&n, &alphaf, v, &incx, xi, &incy);
+    DAXPY(n, alphaf, v, incx, xi, incy);
 
-    num     = ddot_((integer *)&n, xi, &incx, xi, &incy);
+    num     = DDOT(n, xi, incx, xi, incy);
 
-    den     = ddot_((integer *)&n, v, &incx, v, &incy);
+    den     = DDOT(n, v, incx, v, incy);
 
     normr   = sqrt(num / den);
 
@@ -348,9 +344,9 @@ void pfc_2D_cpg(int *nn , double *vec , double *b , double *x , double *rout , i
 
 
   alpha = -1.;
-  dscal_((integer *)&n , &alpha , r , &incx);
+  DSCAL(n , alpha , r , incx);
 
-  dcopy_((integer *)&n, r, &incx, rout, &incy);
+  DCOPY(n, r, incx, rout, incy);
 
 
 

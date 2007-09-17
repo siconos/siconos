@@ -64,22 +64,19 @@ here M is an (nn \f$\times\f$nn)-matrix, q an nn-dimensional vector, w, z, a and
    \author Nineb Sheherazade.
  */
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "blaslapack.h"
-
-
+#include "LA.h"
 
 void dr_latin(double *vec, double *qq, int *nn, double * k_latin, double *a, double *b, int * itermax, double * tol, int * chat, double *z, double *w, int *it_end, double * res, int *info)
 {
 
-
-
   int i, j, iter1, nrhs, info2, ispeak = *chat;
   int n = *nn;
-  integer incx = 1, incy = 1;
+  int incx = 1, incy = 1;
 
   double errmax = *tol, alpha, beta, mina, aa;
   double err1, num11, err0;
@@ -87,7 +84,8 @@ void dr_latin(double *vec, double *qq, int *nn, double * k_latin, double *a, dou
   double *wc, *zc, *wt, *wnum1, *znum1;
   double *zt, *kinvnum1;
 
-  char trans = 'T', notrans = 'N', uplo = 'U', diag = 'N';
+  /*  char trans='T',notrans='N', uplo='U', diag='N'; */
+
   double *k, *kinv, *DPO;
 
 
@@ -165,9 +163,10 @@ void dr_latin(double *vec, double *qq, int *nn, double * k_latin, double *a, dou
 
 
 
-  for (i = 0; i < n; i++)
+  for (j = 0; j < n; j++)
   {
-    for (j = 0; j < n; j++)
+    for (i = 0; i < n; i++)
+
     {
       DPO[i + n * j] =  vec[j * n + i] + k[i + n * j];
     }
@@ -178,8 +177,8 @@ void dr_latin(double *vec, double *qq, int *nn, double * k_latin, double *a, dou
   /*                    Cholesky             */
 
 
-  dpotrf_(&uplo, (integer *)&n, DPO , (integer *)&n, (integer *)&info2);
 
+  DPOTRF(LA_UP, n, DPO , n, info2);
 
   if (info2 != 0)
   {
@@ -226,39 +225,39 @@ void dr_latin(double *vec, double *qq, int *nn, double * k_latin, double *a, dou
 
     alpha = 1.;
     beta = 1.;
-    dgemv_(&trans, (integer *)&n, (integer *)&n, &alpha, k, (integer *)&n, zc, &incx, &beta, wc, &incy);
+    DGEMV(LA_TRANS, n, n, alpha, k, n, zc, incx, beta, wc, incy);
 
-    dcopy_((integer *)&n, qq, &incx, znum1, &incy);
+    DCOPY(n, qq, incx, znum1, incy);
 
 
     alpha = -1.;
-    dscal_((integer *)&n , &alpha , znum1 , &incx);
+    DSCAL(n, alpha, znum1, incx);
 
     alpha = 1.;
-    daxpy_((integer *)&n, &alpha, wc, &incx, znum1, &incy);
+    DAXPY(n, alpha, wc, incx, znum1, incy);
 
     nrhs = 1;
-    dtrtrs_(&uplo, &trans, &diag, (integer *)&n, (integer *)&nrhs, DPO, (integer *)&n, znum1, (integer *)&n, (integer*)&info2);
+    DTRTRS(LA_UP, LA_TRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, info2);
 
 
-    dtrtrs_(&uplo, &notrans, &diag, (integer *)&n, (integer *)&nrhs, DPO, (integer *)&n, znum1, (integer *)&n, (integer*)&info2);
+    DTRTRS(LA_UP, LA_NOTRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, info2);
 
-    dcopy_((integer *)&n, znum1, &incx, z, &incy);
+    DCOPY(n, znum1, incx, z, incy);
 
-    dcopy_((integer *)&n, wc, &incx, w, &incy);
+    DCOPY(n, wc, incx, w, incy);
 
     alpha = -1.;
     beta = 1.;
-    dgemv_(&trans, (integer *)&n, (integer *)&n, &alpha, k, (integer *)&n, z, &incx, &beta, w, &incy);
+    DGEMV(LA_TRANS, n, n, alpha, k, n, z, incx, beta, w, incy);
 
     /*     Local stage (z,w)->(zc,wc)         */
 
 
-    dcopy_((integer *)&n, w, &incx, zt, &incy);
+    DCOPY(n, w, incx, zt, incy);
 
     alpha = -1.;
     beta = 1.;
-    dgemv_(&trans, (integer *)&n, (integer *)&n, &alpha, k, (integer *)&n, z, &incx, &beta, zt, &incy);
+    DGEMV(LA_TRANS, n, n, alpha, k, n, z, incx, beta, zt, incy);
 
     for (i = 0; i < n; i++)
     {
@@ -281,62 +280,62 @@ void dr_latin(double *vec, double *qq, int *nn, double * k_latin, double *a, dou
       }
     }
 
-    dcopy_((integer *)&n, wc, &incx, wnum1, &incy);
+    DCOPY(n, wc, incx, wnum1, incy);
 
     alpha = -1.;
-    daxpy_((integer *)&n, &alpha, zt, &incx, wnum1, &incy);
+    DAXPY(n, alpha, zt, incx, wnum1, incy);
 
-    dcopy_((integer *)&n, wnum1, &incx, zt, &incy);
+    DCOPY(n, wnum1, incx, zt, incy);
 
     alpha = 1.;
     beta = 0.;
-    dgemv_(&trans, (integer *)&n, (integer *)&n, &alpha, kinv, (integer *)&n, zt, &incx, &beta, zc, &incy);
+    DGEMV(LA_TRANS, n, n, alpha, kinv, n, zt, incx, beta, zc, incy);
 
     /*            Convergence criterium          */
 
-    dcopy_((integer *)&n, w, &incx, wnum1, &incy);
+    DCOPY(n, w, incx, wnum1, incy);
 
     alpha = -1.;
-    daxpy_((integer *)&n, &alpha, wc, &incx, wnum1, &incy);
+    DAXPY(n, alpha, wc, incx, wnum1, incy);
 
-    dcopy_((integer *)&n, z, &incx, znum1, &incy);
+    DCOPY(n, z, incx, znum1, incy);
 
-    daxpy_((integer *)&n, &alpha, zc, &incx, znum1, &incy);
+    DAXPY(n, alpha, zc, incx, znum1, incy);
 
     alpha = 1.;
     beta = 1.;
-    dgemv_(&trans, (integer *)&n, (integer *)&n, &alpha, k, (integer *)&n, znum1, &incx, &beta, wnum1, &incy);
+    DGEMV(LA_TRANS, n, n, alpha, k, n, znum1, incx, beta, wnum1, incy);
 
     /*       num1(:) =(w(:)-wc(:))+matmul( k(:,:),(z(:)-zc(:)))  */
 
     num11 = 0.;
     alpha = 1.;
     beta = 0.;
-    dgemv_(&trans, (integer *)&n, (integer *)&n, &alpha, kinv, (integer *)&n, wnum1, &incx, &beta, kinvnum1, &incy);
+    DGEMV(LA_TRANS, n, n, alpha, kinv, n, wnum1, incx, beta, kinvnum1, incy);
 
-    num11 = ddot_((integer *)&n, wnum1, &incx, kinvnum1, &incy);
+    num11 = DDOT(n, wnum1, incx, kinvnum1, incy);
 
-    dcopy_((integer *)&n, w, &incx, wnum1, &incy);
+    DCOPY(n, w, incx, wnum1, incy);
 
     alpha = 1.;
-    daxpy_((integer *)&n, &alpha, wc, &incx, wnum1, &incy);
+    DAXPY(n, alpha, wc, incx, wnum1, incy);
 
-    dcopy_((integer *)&n, z, &incx, znum1, &incy);
+    DCOPY(n, z, incx, znum1, incy);
 
-    daxpy_((integer *)&n, &alpha, zc, &incx, znum1, &incy);
+    DAXPY(n, alpha, zc, incx, znum1, incy);
 
     beta = 0.;
     alpha = 1.;
-    dgemv_(&trans, (integer *)&n, (integer *)&n, &alpha, k, (integer *)&n, znum1, &incx, &beta, kinvnum1, &incy);
+    DGEMV(LA_TRANS, n, n, alpha, k, n, znum1, incx, beta, kinvnum1, incy);
 
-    den22 = ddot_((integer *)&n, znum1, &incx, kinvnum1, &incy);
+    den22 = DDOT(n, znum1, incx, kinvnum1, incy);
 
     beta = 0.;
     alpha = 1.;
 
-    dgemv_(&trans, (integer *)&n, (integer *)&n, &alpha, kinv, (integer *)&n, wnum1, &incx, &beta, kinvnum1, &incy);
+    DGEMV(LA_TRANS, n, n, alpha, kinv, n, wnum1, incx, beta, kinvnum1, incy);
 
-    den11 = ddot_((integer *)&n, wnum1, &incx, kinvnum1, &incy);
+    den11 = DDOT(n, wnum1, incx, kinvnum1, incy);
 
     err0 = num11 / (den11 + den22);
     err1 = sqrt(err0);
@@ -379,56 +378,4 @@ void dr_latin(double *vec, double *qq, int *nn, double * k_latin, double *a, dou
   free(k);
   free(DPO);
   free(kinv);
-
-
-
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

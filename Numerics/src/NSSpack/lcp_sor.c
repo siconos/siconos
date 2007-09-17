@@ -72,8 +72,10 @@ it_end  On enter, the number of iterations performed by the algorithm.
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "NSSpack.h"
-#include "blaslapack.h"
+#include "LA.h"
+
+int lcp_compute_error(int n, double *vec , double *q , double *z , int verbose, double *w, double *err);
+
 
 void lcp_psor(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
 {
@@ -84,12 +86,9 @@ void lcp_psor(int *nn , double *vec , double *q , double *z , double *w , int *i
   int i, iter;
   int itermax, verbose;
 
-  double qs, err,/* num ,*/den;
+  double qs, err, den;
   double tol, omega;
   double *ww, *diag;
-  /*   double a1=1.0,b1=1.0; */
-
-  /*   char NOTRANS = 'N'; */
 
   n = *nn;
   incxn = n;
@@ -113,7 +112,7 @@ void lcp_psor(int *nn , double *vec , double *q , double *z , double *w , int *i
 
   /* Check for non trivial case */
 
-  qs = dnrm2_((integer *)&n , q , (integer *)&incx);
+  qs = DNRM2(n , q , incx);
 
   if (verbose > 0) printf("\n ||q||= %g \n", qs);
 
@@ -138,7 +137,7 @@ void lcp_psor(int *nn , double *vec , double *q , double *z , double *w , int *i
     ww[i] = 0.;
   }
 
-  dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
+  DCOPY(n , q , incx , w , incy);
   /* Intialization of w and z */
   /*if(initmethod == 0) {*/
   /* dcopy_( (integer *)&n , q , (integer *)&incx , w , (integer *)&incy );*/
@@ -175,15 +174,15 @@ void lcp_psor(int *nn , double *vec , double *q , double *z , double *w , int *i
 
   qs   = -1.0;
 
-  dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
+  DCOPY(n , q , incx , w , incy);
 
   while ((iter < itermax) && (err > tol))
   {
 
     ++iter;
 
-    dcopy_((integer *)&n , w , (integer *)&incx , ww , (integer *)&incy);   /* w --> ww */
-    dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);    /* q --> w */
+    DCOPY(n , w , incx , ww , incy);   /* w --> ww */
+    DCOPY(n , q , incx , w , incy);    /* q --> w */
 
     for (i = 0 ; i < n ; ++i)
     {
@@ -195,7 +194,7 @@ void lcp_psor(int *nn , double *vec , double *q , double *z , double *w , int *i
       /*       if( zi < 0 ) z[i] = 0.0;  */
       /*       else z[i] = zi; */
 
-      z[i] = fmax(0.0, -(q[i] + ddot_((integer *)&n , &vec[i] , (integer *)&incxn , z , (integer *)&incy)) * diag[i]);
+      z[i] = fmax(0.0, -(q[i] + DDOT(n , &vec[i] , incxn , z , incy)) * diag[i]);
 
     }
 

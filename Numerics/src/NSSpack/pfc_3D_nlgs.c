@@ -69,7 +69,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "blaslapack.h"
+#include "LA.h"
 #include <time.h>
 
 void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info,
@@ -82,9 +82,8 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
   int n, in, it, is, ispeak, itermax, nc, i, iter;
   double err, zn , zt, zs, den, mrn, num, tol, mu, mu2;
   double qs, a1, b1;
-  integer incx, incy;
+  int incx, incy;
   double *diag, *ww;
-  char NOTRANS = 'N';
 
   clock_t t1, t2;
 
@@ -122,7 +121,7 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
 
   /* Check for non trivial case */
 
-  qs = dnrm2_((integer *)&n , q , &incx);
+  qs = DNRM2(n , q , incx);
 
   if (ispeak > 0) printf("\n ||q||= %g \n" , qs);
 
@@ -193,8 +192,8 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
     incx = 1;
     incy = 1;
 
-    dcopy_((integer *)&n , w , &incx , ww , &incy);
-    dcopy_((integer *)&n , q , &incx ,  w , &incy);
+    DCOPY(n , w , incx , ww , incy);
+    DCOPY(n , q , incx ,  w , incy);
 
     for (i = 0 ; i < nc ; ++i)
     {
@@ -210,9 +209,9 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
       z[it] = 0.0;
       z[is] = 0.0;
 
-      zn = q[in] + ddot_((integer *)&n , &vec[in] , &incx , z , &incy);
-      zt = q[it] + ddot_((integer *)&n , &vec[it] , &incx , z , &incy);
-      zs = q[is] + ddot_((integer *)&n , &vec[is] , &incx , z , &incy);
+      zn = q[in] + DDOT(n , &vec[in] , incx , z , incy);
+      zt = q[it] + DDOT(n , &vec[it] , incx , z , incy);
+      zs = q[is] + DDOT(n , &vec[is] , incx , z , incy);
 
       if (zn > 0.0)
       {
@@ -245,12 +244,12 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
     a1 = 1.0;
     b1 = 1.0;
 
-    dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z , &incx , &b1 , w , &incy);
+    DGEMV(LA_NOTRANS , n , n , a1 , vec , n , z , incx , b1 , w , incy);
 
     qs   = -1.0;
-    daxpy_((integer *)&n , &qs , w , &incx , ww , &incy);
+    DAXPY(n , qs , w , incx , ww , incy);
 
-    num = dnrm2_((integer *)&n, ww , &incx);
+    num = DNRM2(n, ww , incx);
     err = num * den;
 
     /*  printf("Iteration %i Erreur = %24.8e\n",iter,err); */

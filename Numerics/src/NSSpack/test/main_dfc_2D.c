@@ -83,10 +83,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "NSSpack.h"
-#include "blaslapack.h"
-
-
-
 
 int main(void)
 {

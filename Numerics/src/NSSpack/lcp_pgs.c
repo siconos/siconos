@@ -64,9 +64,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "blaslapack.h"
+#include "LA.h"
 #include <math.h>
+
 int lcp_compute_error(int n, double *vec , double *q , double *z , int chat, double *w, double *err);
 
 void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
@@ -77,12 +77,9 @@ void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , int *in
   int i, iter;
   int itermax, verbose;
   int incxn;
-  double qs, err,/* num, */den, zi;
+  double qs, err, den, zi;
   double tol, omega;
   double *ww, *diag;
-  /*   double a1,b1; */
-
-  /*   char NOTRANS = 'N'; */
 
   n = *nn;
   incx = 1;
@@ -107,10 +104,7 @@ void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , int *in
   diag = (double*)malloc(n * sizeof(double));
 
   /* Check for non trivial case */
-  integer totoincx;
-  totoincx = (integer)incx;
-
-  qs = dnrm2_((integer *)&n , q , (integer *)&incx);
+  qs = DNRM2(n , q , incx);
 
   if (verbose > 0) printf("\n ||q||= %g \n", qs);
 
@@ -126,7 +120,7 @@ void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , int *in
 
   incx = 1;
   incy = 1;
-  dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
+  DCOPY(n , q , incx , w , incy);
 
   /* Preparation of the diagonal of the inverse matrix */
 
@@ -158,7 +152,7 @@ void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , int *in
   incx = 1;
   incy = 1;
 
-  dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
+  DCOPY(n , q , incx , w , incy);
 
   while ((iter < itermax) && (err > tol))
   {
@@ -168,8 +162,8 @@ void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , int *in
     incx = 1;
     incy = 1;
 
-    dcopy_((integer *)&n , w , (integer *)&incx , ww , (integer *)&incy);
-    dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
+    DCOPY(n , w , incx , ww , incy);
+    DCOPY(n , q , incx , w , incy);
 
     for (i = 0 ; i < n ; ++i)
     {
@@ -179,7 +173,7 @@ void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , int *in
 
       z[i] = 0.0;
 
-      zi = -(q[i] + ddot_((integer *)&n , &vec[i] , (integer *)&incx , z , (integer *)&incy)) * diag[i];
+      zi = -(q[i] + DDOT(n , &vec[i] , incx , z , incy)) * diag[i];
 
       if (zi < 0) z[i] = 0.0;
       else z[i] = zi;

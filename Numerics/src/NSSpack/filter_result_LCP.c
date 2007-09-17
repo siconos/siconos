@@ -34,7 +34,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "blaslapack.h"
+#include "LA.h"
 #include <math.h>
 
 int filter_result_LCP(int n, double *vec , double *q , double *z , double tol, int chat, double *w)
@@ -43,16 +43,13 @@ int filter_result_LCP(int n, double *vec , double *q , double *z , double tol, i
   double a1, b1;
   int i, incx, incy;
 
-  char NOTRANS = 'N';
-
   incx = 1;
   incy = 1;
-  dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
+  DCOPY(n , q , incx , w , incy);
 
   a1 = 1.;
   b1 = 1.;
-  dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z ,
-         (integer *)&incx , &b1 , w , (integer *)&incy);
+  DGEMV(LA_NOTRANS , n , n , a1 , vec , n , z , incx , b1 , w , incy);
 
   error = 0.;
   for (i = 0 ; i < n ; i++)
@@ -67,7 +64,7 @@ int filter_result_LCP(int n, double *vec , double *q , double *z , double tol, i
   }
 
   incx  = 1;
-  normq = dnrm2_((integer *)&n , q , (integer *)&incx);
+  normq = DNRM2(n , q , incx);
 
   error = error / normq;
   chat = 1;

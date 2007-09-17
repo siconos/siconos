@@ -72,7 +72,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "NSSpack.h"
-#include "blaslapack.h"
+#include "LA.h"
 
 #define CHAT
 
@@ -314,18 +314,18 @@ int test_mmc(void)
   }
 
 
-  dcopy_(&n, w1, &incx, wt1, &incy);
-  dcopy_(&n, w2, &incx, wt2, &incy);
-  dcopy_(&n,  q, &incx, qt, &incy);
+  DCOPY(n, w1, incx, wt1, incy);
+  DCOPY(n, w2, incx, wt2, incy);
+  DCOPY(n,  q, incx, qt,  incy);
 
   alpha = -1.;
-  daxpy_(&n , &alpha , c , &incx , wt1 , &incy);
+  DAXPY(n, alpha, c, incx, wt1, incy);
 
   alpha = -1.;
-  daxpy_(&n , &alpha , c , &incx , wt2 , &incy);
+  DAXPY(n , alpha , c , incx , wt2 , incy);
 
   alpha = -1.;
-  daxpy_(&n , &alpha , c , &incx , qt , &incy);
+  DAXPY(n , alpha , c , incx , qt , incy);
 
 
   /*  TEST of behavior laws */
@@ -341,7 +341,7 @@ int test_mmc(void)
   abs_part(d, abso2, &n);
 
   alpha = -1.0;
-  daxpy_(&n , &alpha , abso1 , &incx , abso2 , &incy);
+  DAXPY(n , alpha , abso1 , incx , abso2 , incy);
 
   min_part(abso2, &mini, &n);
 
@@ -391,13 +391,13 @@ int test_mmc(void)
   abs_part(d, abso2, &n);
 
   alpha = -1.0;
-  daxpy_(&n , &alpha , abso1 , &incx , abso2 , &incy);
+  DAXPY(n , alpha , abso1 , incx , abso2 , incy);
 
   abs_part(abso2, abso1, &n);
 
   abs_part(z1, abso2, &n);
 
-  comp11 = ddot_(&n , abso1 , &incx , abso2 , &incy);
+  comp11 = DDOT(n , abso1 , incx , abso2 , incy);
 
 
   abs_part(z1, abso2, &n);
@@ -436,16 +436,16 @@ int test_mmc(void)
   /*       Test of z > 0       */
 
 
-  dcopy_(&n, wt1, &incx, abso1, &incy);
+  DCOPY(n, wt1, incx, abso1, incy);
 
   alpha = 1.0;
-  daxpy_(&n , &alpha , d , &incx , abso1 , &incy);
+  DAXPY(n , alpha , d , incx , abso1 , incy);
 
   abs_part(abso1, abso2, &n);
 
   pos_part(z1, abso1, &n) ;
 
-  comp111 = ddot_(&n , abso1 , &incx , abso2 , &incy);
+  comp111 = DDOT(n , abso1 , incx , abso2 , incy);
 
   abs_part(z1, abso2, &n);
 
@@ -489,21 +489,21 @@ int test_mmc(void)
   /*        Test of z < 0         */
 
 
-  dcopy_(&n, wt1, &incx, abso1, &incy);
+  DCOPY(n, wt1, incx, abso1, incy);
 
   alpha = -1.0;
-  daxpy_(&n , &alpha , d , &incx , abso1 , &incy);
+  DAXPY(n , alpha , d , incx , abso1 , incy);
 
   abs_part(abso1, abso2, &n);
 
-  dcopy_(&n, z1, &incx, abso1, &incy);
+  DCOPY(n, z1, incx, abso1, incy);
 
   alpha = -1.;
-  dscal_(&n , &alpha , abso1 , &incx);
+  DSCAL(n , alpha , abso1 , incx);
 
   pos_part(abso1, abso1, &n) ;
 
-  comp1111 = ddot_(&n , abso1 , &incx , abso2 , &incy);
+  comp1111 = DDOT(n , abso1 , incx , abso2 , incy);
 
   abs_part(z1, abso2, &n);
 
@@ -545,13 +545,13 @@ int test_mmc(void)
 
 
   alpha = -1;
-  daxpy_(&n , &alpha , q , &incx , w1 , &incy);
+  DAXPY(n , alpha , q , incx , w1 , incy);
 
   beta  = 1;
-  dgemv_(&NT , &n , &n , &beta , vec , &n , z1 , &incx , &alpha , w1 , &incy);
+  DGEMV(NT , n , n , beta , vec , n , z1 , incx , alpha , w1 , incy);
 
-  num = dnrm2_(&n , w1 , &incx);
-  den = dnrm2_(&n , q , &incx);
+  num = DNRM2(n , w1 , incx);
+  den = DNRM2(n , q ,  incx);
 
   diff1 = num / den ;
 
@@ -569,9 +569,9 @@ int test_mmc(void)
   abs_part(d, abso2, &n);
 
   alpha = -1.0;
-  daxpy_(&n , &alpha , abso1 , &incx , abso2 , &incy);
+  DAXPY(n , alpha , abso1 , incx , abso2 , incy);
 
-  min_part(abso2, &mini, &n);
+  min_part(abso2, mini, n);
 
   mini = - mini;
 
@@ -619,13 +619,13 @@ int test_mmc(void)
   abs_part(d, abso2, &n);
 
   alpha = -1.0;
-  daxpy_(&n , &alpha , abso1 , &incx , abso2 , &incy);
+  DAXPY(n , alpha , abso1 , incx , abso2 , incy);
 
   abs_part(abso2, abso1, &n);
 
   abs_part(z2, abso2, &n);
 
-  comp22 = ddot_(&n , abso1 , &incx , abso2 , &incy);
+  comp22 = DDOT(n , abso1 , incx , abso2 , incy);
 
 
   abs_part(z2, abso2, &n);
@@ -666,16 +666,16 @@ int test_mmc(void)
   /*       Test of z > 0       */
 
 
-  dcopy_(&n, wt2, &incx, abso1, &incy);
+  DCOPY(n, wt2, incx, abso1, incy);
 
   alpha = 1.0;
-  daxpy_(&n , &alpha , d , &incx , abso1 , &incy);
+  DAXPY(n , alpha , d , incx , abso1 , incy);
 
   abs_part(abso1, abso2, &n);
 
   pos_part(z2, abso1, &n) ;
 
-  comp222 = ddot_(&n , abso1 , &incx , abso2 , &incy);
+  comp222 = DDOT(n , abso1 , incx , abso2 , incy);
 
   abs_part(z2, abso2, &n);
 
@@ -719,21 +719,21 @@ int test_mmc(void)
   /*        Test of z < 0         */
 
 
-  dcopy_(&n, wt2, &incx, abso1, &incy);
+  DCOPY(n, wt2, incx, abso1, incy);
 
   alpha = -1.0;
-  daxpy_(&n , &alpha , d , &incx , abso1 , &incy);
+  DAXPY(n , alpha , d , incx , abso1 , incy);
 
   abs_part(abso1, abso2, &n);
 
-  dcopy_(&n, z2, &incx, abso1, &incy);
+  DCOPY(n, z2, incx, abso1, incy);
 
   alpha = -1.;
-  dscal_(&n , &alpha , abso1 , &incx);
+  DSCAL(n , alpha , abso1 , incx);
 
   pos_part(abso1, abso1, &n) ;
 
-  comp2222 = ddot_(&n , abso1 , &incx , abso2 , &incy);
+  comp2222 = DDOT(n , abso1 , incx , abso2 , incy);
 
   abs_part(z2, abso2, &n);
 
@@ -775,13 +775,13 @@ int test_mmc(void)
   /*        Equilibrium       */
 
   alpha = -1;
-  daxpy_(&n , &alpha , q , &incx , w2 , &incy);
+  DAXPY(n , alpha , q , incx , w2 , incy);
 
   beta  = 1;
-  dgemv_(&NT , &n , &n , &beta , vec , &n , z2 , &incx , &alpha , w2 , &incy);
+  DGEMV(LA_NOTRANS , n , n , beta , vec , n , z2 , incx , alpha , w2 , incy);
 
-  num = dnrm2_(&n , w2 , &incx);
-  den = dnrm2_(&n , q , &incx);
+  num = DNRM2(n , w2 , incx);
+  den = DNRM2(n , q , incx);
 
   diff2 = num / den ;
 

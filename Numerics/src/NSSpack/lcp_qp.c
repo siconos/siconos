@@ -63,7 +63,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "blaslapack.h"
 
 void ql0001_(int *m , int *me , int *mmax , int *n , int *nmax , int *mnn ,
              double *c , double *d , double *a , double *b , double *xl , double *xu ,
@@ -114,9 +113,9 @@ void lcp_qp(int *nn , double *vec , double *qq , double *z , double *w , int *in
 
   // Q= vec;*/
   Q = (double *)malloc(nmax * nmax * sizeof(double));
-  for (i = 0; i < n; i++)
+  for (j = 0; j < n; j++)
   {
-    for (j = 0; j < n; j++) Q[j * nmax + i] = (vec[j * n + i]);
+    for (i = 0; i < n; i++) Q[j * nmax + i] = (vec[j * n + i]);
   }
 
 
@@ -126,9 +125,9 @@ void lcp_qp(int *nn , double *vec , double *qq , double *z , double *w , int *in
 
   /* / Creation of the data matrix of the linear constraints, A and  the constant data of the linear constraints b*/
   A = (double *)malloc(mmax * nmax * sizeof(double));
-  for (i = 0; i < m; i++)
+  for (j = 0; j < m; j++)
   {
-    for (j = 0; j < n; j++) A[j * mmax + i] = 0.0;
+    for (i = 0; i < n; i++) A[j * mmax + i] = 0.0;
   }
 
   b = (double *)malloc(mmax * sizeof(double));

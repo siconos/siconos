@@ -54,7 +54,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "NSSpack.h"
-#include "blaslapack.h"
+#include "LA.h"
 
 #define BAVARD
 
@@ -318,7 +318,7 @@ void pfc_2D_series(int n , double *vec , double *q)
   abs_part(zn1, abso2, &nc);
 
 
-  comp1 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+  comp1 = DDOT(nc , abso1 , incx , abso2 , incy);
 
   max_part(abso1 , &max1 , &nc);
 
@@ -362,16 +362,16 @@ void pfc_2D_series(int n , double *vec , double *q)
 
   abs_part(zt1, abso1, &nc);
 
-  dcopy_(&nc, zn1, &incx, muzn1, &incy);
+  DCOPY(nc, zn1, incx, muzn1, incy);
 
   alpha = 0.3;
-  dscal_(&nc , &alpha , muzn1 , &incx);
+  DSCAL(nc , alpha , muzn1 , incx);
 
   abs_part(muzn1, abso2, &nc);
 
 
   alpha = -1.0;
-  daxpy_(&nc , &alpha , abso1 , &incx , abso2 , &incy);
+  DAXPY(nc , alpha , abso1 , incx , abso2 , incy);
 
   min_part(abso2, &mini, &nc);
 
@@ -393,16 +393,16 @@ void pfc_2D_series(int n , double *vec , double *q)
 
   abs_part(zt1, abso1, &nc);
 
-  dcopy_(&nc, zn1, &incx, muzn1, &incy);
+  DCOPY(nc, zn1, incx, muzn1, incy);
 
   alpha = 0.3;
-  dscal_(&nc , &alpha , muzn1 , &incx);
+  DSCAL(nc , alpha , muzn1 , incx);
 
   abs_part(muzn1, abso2, &nc);
 
 
   alpha = -1.0;
-  daxpy_(&nc , &alpha , abso1 , &incx , abso2 , &incy);
+  DAXPY(nc , alpha , abso1 , incx , abso2 , incy);
 
   abs_part(abso2, abso1, &nc);
 
@@ -410,7 +410,7 @@ void pfc_2D_series(int n , double *vec , double *q)
 
 
 
-  comp11 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+  comp11 = DDOT(nc , abso1 , incx , abso2 , incy);
 
 
   abs_part(z1, absoz, &n);
@@ -456,19 +456,19 @@ void pfc_2D_series(int n , double *vec , double *q)
 
   /*             Test of wt > 0           */
 
-  dcopy_(&nc, zn1, &incx, muzn1, &incy);
+  DCOPY(nc, zn1, incx, muzn1, incy);
 
   alpha = 0.3;
-  dscal_(&nc , &alpha , muzn1 , &incx);
+  DSCAL(nc , alpha , muzn1 , incx);
 
   alpha = -1.0;
-  daxpy_(&nc , &alpha , zt1 , &incx , muzn1 , &incy);
+  DAXPY(nc , alpha , zt1 , incx , muzn1 , incy);
 
   abs_part(muzn1, abso1, &nc);
 
   pos_part(wt1, abso2, &nc) ;
 
-  comp111 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+  comp111 = DDOT(nc , abso1 , incx , abso2 , incy);
 
   abs_part(z1, absoz, &n);
 
@@ -510,24 +510,24 @@ void pfc_2D_series(int n , double *vec , double *q)
 
 
 
-  dcopy_(&nc, zn1, &incx, muzn1, &incy);
+  DCOPY(nc, zn1, incx, muzn1, incy);
 
   alpha = 0.3;
-  dscal_(&nc , &alpha , muzn1 , &incx);
+  DSCAL(nc , alpha , muzn1 , incx);
 
   alpha = 1.0;
-  daxpy_(&nc , &alpha , zt1 , &incx , muzn1 , &incy);
+  DAXPY(nc , alpha , zt1 , incx , muzn1 , incy);
 
   abs_part(muzn1, abso1, &nc);
 
-  dcopy_(&nc, wt1, &incx, muzn1, &incy);
+  DCOPY(nc, wt1, incx, muzn1, incy);
 
   alpha = -1.;
-  dscal_(&nc , &alpha , muzn1 , &incx);
+  DSCAL(nc , alpha , muzn1 , incx);
 
   pos_part(muzn1, abso2, &nc) ;
 
-  comp1111 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+  comp1111 = DDOT(nc , abso1 , incx , abso2 , incy);
 
   abs_part(z1, absoz, &n);
 
@@ -568,13 +568,13 @@ void pfc_2D_series(int n , double *vec , double *q)
   /*                 Equilibrium                   */
 
   alpha = -1;
-  daxpy_(&n , &alpha , q , &incx , w1 , &incy);
+  DAXPY(n , alpha , q , incx , w1 , incy);
 
   beta  = 1;
-  dgemv_(&NT , &n , &n , &beta , vec , &n , z1 , &incx , &alpha , w1 , &incy);
+  DGEMV(LA_NOTRANS , n , n , beta , vec , n , z1 , incx , alpha , w1 , incy);
 
-  num = dnrm2_(&n , w1 , &incx);
-  den = dnrm2_(&n , q , &incx);
+  num = DNRM2(n , w1 , incx);
+  den = DNRM2(n , q , incx);
 
   diff = num / den ;
 
@@ -646,7 +646,7 @@ void pfc_2D_series(int n , double *vec , double *q)
 
   abs_part(zn2, abso2, &nc);
 
-  comp2 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+  comp2 = DDOT(nc , abso1 , incx , abso2 , incy);
 
   max_part(abso1 , &max1 , &nc);
 
@@ -687,16 +687,16 @@ void pfc_2D_series(int n , double *vec , double *q)
 
   abs_part(zt2, abso1, &nc);
 
-  dcopy_(&nc, zn2, &incx, muzn2, &incy);
+  DCOPY(nc, zn2, incx, muzn2, incy);
 
   alpha = 0.3;
-  dscal_(&nc , &alpha , muzn2 , &incx);
+  DSCAL(nc , alpha , muzn2 , incx);
 
   abs_part(muzn2, abso2, &nc);
 
 
   alpha = -1.0;
-  daxpy_(&nc , &alpha , abso1 , &incx , abso2 , &incy);
+  DAXPY(nc , alpha , abso1 , incx , abso2 , incy);
 
   min_part(abso2, &mini, &nc);
 
@@ -716,16 +716,16 @@ void pfc_2D_series(int n , double *vec , double *q)
 
   abs_part(zt2, abso1, &nc);
 
-  dcopy_(&nc, zn2, &incx, muzn2, &incy);
+  DCOPY(nc, zn2, incx, muzn2, incy);
 
   alpha = 0.3;
-  dscal_(&nc , &alpha , muzn2 , &incx);
+  DSCAL(nc , alpha , muzn2 , incx);
 
   abs_part(muzn2, abso2, &nc);
 
 
   alpha = -1.0;
-  daxpy_(&nc , &alpha , abso1 , &incx , abso2 , &incy);
+  DAXPY(nc , alpha , abso1 , incx , abso2 , incy);
 
   abs_part(abso2, abso1, &nc);
 
@@ -733,7 +733,7 @@ void pfc_2D_series(int n , double *vec , double *q)
 
 
 
-  comp22 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+  comp22 = DDOT(nc , abso1 , incx , abso2 , incy);
 
 
   abs_part(z2, absoz, &n);
@@ -775,19 +775,19 @@ void pfc_2D_series(int n , double *vec , double *q)
   /*             Test of wt > 0           */
 
 
-  dcopy_(&nc, zn2, &incx, muzn2, &incy);
+  DCOPY(nc, zn2, incx, muzn2, incy);
 
   alpha = 0.3;
-  dscal_(&nc , &alpha , muzn2 , &incx);
+  DSCAL(nc , alpha , muzn2 , incx);
 
   alpha = -1.0;
-  daxpy_(&nc , &alpha , zt2 , &incx , muzn2 , &incy);
+  DAXPY(nc , alpha , zt2 , incx , muzn2 , incy);
 
   abs_part(muzn2, abso1, &nc);
 
   pos_part(wt2, abso2, &nc) ;
 
-  comp222 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+  comp222 = DDOT(nc , abso1 , incx , abso2 , incy);
 
   abs_part(z2, absoz, &n);
 
@@ -828,24 +828,24 @@ void pfc_2D_series(int n , double *vec , double *q)
   /*           Test of wt < 0             */
 
 
-  dcopy_(&nc, zn2, &incx, muzn2, &incy);
+  DCOPY(nc, zn2, incx, muzn2, incy);
 
   alpha = 0.3;
-  dscal_(&nc , &alpha , muzn2 , &incx);
+  DSCAL(nc , alpha , muzn2 , incx);
 
   alpha = 1.0;
-  daxpy_(&nc , &alpha , zt2 , &incx , muzn2 , &incy);
+  DAXPY(nc , alpha , zt2 , incx , muzn2 , incy);
 
   abs_part(muzn2, abso1, &nc);
 
-  dcopy_(&nc, wt2, &incx, muzn2, &incy);
+  DCOPY(nc, wt2, incx, muzn2, incy);
 
   alpha = -1.;
-  dscal_(&nc , &alpha , muzn2 , &incx);
+  DSCAL(nc , alpha , muzn2 , incx);
 
   pos_part(muzn2, abso2, &nc) ;
 
-  comp2222 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+  comp2222 = DDOT(nc , abso1 , incx , abso2 , incy);
 
   abs_part(z2, absoz, &n);
 
@@ -886,13 +886,13 @@ void pfc_2D_series(int n , double *vec , double *q)
   /*           Equilibrium                   */
 
   alpha = -1;
-  daxpy_(&n , &alpha , q , &incx , w2 , &incy);
+  DAXPY(n , alpha , q , incx , w2 , incy);
 
   beta  = 1;
-  dgemv_(&NT , &n , &n , &beta , vec , &n , z2 , &incx , &alpha , w2 , &incy);
+  DGEMV(LA_NOTRANS , n , n , beta , vec , n , z2 , incx , alpha , w2 , incy);
 
-  num = dnrm2_(&n , w2 , &incx);
-  den = dnrm2_(&n , q , &incx);
+  num = DNRM2(n , w2 , incx);
+  den = DNRM2(n , q , incx);
 
   diff = num / den ;
 
@@ -956,7 +956,7 @@ void pfc_2D_series(int n , double *vec , double *q)
 
   abs_part(zn3, abso2, &nc);
 
-  comp3 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+  comp3 = DDOT(nc , abso1 , incx , abso2 , incy);
 
   max_part(abso1 , &max1 , &nc);
 
@@ -999,16 +999,16 @@ void pfc_2D_series(int n , double *vec , double *q)
 
   abs_part(zt3, abso1, &nc);
 
-  dcopy_(&nc, zn3, &incx, muzn3, &incy);
+  DCOPY(nc, zn3, incx, muzn3, incy);
 
   alpha = 0.3;
-  dscal_(&nc , &alpha , muzn3 , &incx);
+  DSCAL(nc , alpha , muzn3 , incx);
 
   abs_part(muzn3, abso2, &nc);
 
 
   alpha = -1.0;
-  daxpy_(&nc , &alpha , abso1 , &incx , abso2 , &incy);
+  DAXPY(nc , alpha , abso1 , incx , abso2 , incy);
 
   min_part(abso2, &mini, &nc);
 
@@ -1029,22 +1029,22 @@ void pfc_2D_series(int n , double *vec , double *q)
 
   abs_part(zt3, abso1, &nc);
 
-  dcopy_(&nc, zn3, &incx, muzn3, &incy);
+  DCOPY(nc, zn3, incx, muzn3, incy);
 
   alpha = 0.3;
-  dscal_(&nc , &alpha , muzn3 , &incx);
+  DSCAL(nc , alpha , muzn3 , incx);
 
   abs_part(muzn3, abso2, &nc);
 
 
   alpha = -1.0;
-  daxpy_(&nc , &alpha , abso1 , &incx , abso2 , &incy);
+  DAXPY(nc , alpha , abso1 , incx , abso2 , incy);
 
   abs_part(abso2, abso1, &nc);
 
   abs_part(wt3, abso2, &nc);
 
-  comp33 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+  comp33 = DDOT(nc , abso1 , incx , abso2 , incy);
 
 
   abs_part(z3, absoz, &n);
@@ -1087,19 +1087,19 @@ void pfc_2D_series(int n , double *vec , double *q)
   /*          Test of wt > 0            */
 
 
-  dcopy_(&nc, zn3, &incx, muzn3, &incy);
+  DCOPY(nc, zn3, incx, muzn3, incy);
 
   alpha = 0.3;
-  dscal_(&nc , &alpha , muzn3 , &incx);
+  DSCAL(nc , alpha , muzn3 , incx);
 
   alpha = -1.0;
-  daxpy_(&nc , &alpha , zt3 , &incx , muzn3 , &incy);
+  DAXPY(nc , alpha , zt3 , incx , muzn3 , incy);
 
   abs_part(muzn3, abso1, &nc);
 
   pos_part(wt3, abso2, &nc) ;
 
-  comp333 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+  comp333 = DDOT(nc , abso1 , incx , abso2 , incy);
 
   abs_part(z3, absoz, &n);
 
@@ -1143,24 +1143,24 @@ void pfc_2D_series(int n , double *vec , double *q)
 
 
 
-  dcopy_(&nc, zn3, &incx, muzn3, &incy);
+  DCOPY(nc, zn3, incx, muzn3, incy);
 
   alpha = 0.3;
-  dscal_(&nc , &alpha , muzn3 , &incx);
+  DSCAL(nc , alpha , muzn3 , incx);
 
   alpha = 1.0;
-  daxpy_(&nc , &alpha , zt3 , &incx , muzn3 , &incy);
+  DAXPY(nc , alpha , zt3 , incx , muzn3 , incy);
 
   abs_part(muzn3, abso1, &nc);
 
-  dcopy_(&nc, wt3, &incx, muzn3, &incy);
+  DCOPY(nc, wt3, incx, muzn3, incy);
 
   alpha = -1.;
-  dscal_(&nc , &alpha , muzn3 , &incx);
+  DSCAL(nc , alpha , muzn3 , incx);
 
   pos_part(muzn3, abso2, &nc) ;
 
-  comp3333 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+  comp3333 = DDOT(nc , abso1 , incx , abso2 , incy);
 
   abs_part(z3, absoz, &n);
 
@@ -1200,14 +1200,14 @@ void pfc_2D_series(int n , double *vec , double *q)
   /*              Equilibrium                   */
 
   alpha = -1;
-  daxpy_(&n , &alpha , q , &incx , w3 , &incy);
+  DAXPY(n , alpha , q , incx , w3 , incy);
 
   beta  = 1;
-  dgemv_(&NT , &n , &n , &beta , vec , &n , z3 , &incx , &alpha , w3 , &incy);
+  DGEMV(LA_NOTRANS , n , n , beta , vec , n , z3 , incx , alpha , w3 , incy);
 
 
-  num = dnrm2_(&n , w3 , &incx);
-  den = dnrm2_(&n , q , &incx);
+  num = DNRM2(n , w3 , incx);
+  den = DNRM2(n , q , incx);
 
 
   diff = num / den ;

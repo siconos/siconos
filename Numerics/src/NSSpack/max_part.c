@@ -22,7 +22,7 @@
 #include <math.h>
 
 
-void max_part(double x[], double *sol, int *nn)
+max_part(double x[], double *sol, int *nn)
 
 {
 

@@ -100,7 +100,7 @@
 #ifndef MEXFLAG
 #include "NSSpack.h"
 #endif
-#include "blaslapack.h"
+#include "LA.h"
 
 /*
  * Pointer function
@@ -218,7 +218,7 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
   /* Check for non trivial case */
 
   incx = 1;
-  qs = dnrm2_((integer *)&n , q , (integer *)&incx);
+  qs = DNRM2(n , q , incx);
 
   if (qs > 1e-16) den = 1.0 / qs;
   else
@@ -242,7 +242,7 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
 
   incx = 1;
   incy = 1;
-  dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
+  DCOPY(n , q , incx , w , incy);
 
   iter = 0;
   err  = 1.;
@@ -256,7 +256,7 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
     incx = 1;
     incy = 1;
 
-    dcopy_((integer *)&n , w , (integer *)&incx , ww , (integer *)&incy);
+    DCOPY(n , w , incx , ww , incy);
 
     for (i = 0 ; i < *dn ; ++i)
     {
@@ -283,7 +283,7 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
         incx = 1;
         incy = 1;
 
-        dgemv_(&NOTRANS , (integer *)db , (integer *)db , &a1 , &vec[iblock * db2] , (integer *)db , &z[(*db)*k] , (integer *)&incx , &b1 , rhs , (integer *)&incy);
+        DGEMV(LA_NOTRANS , db , db , a1 , &vec[iblock * db2] , db , &z[(*db)*k] , incx , b1 , rhs , incy);
         ++iblock;
 
       }
@@ -301,9 +301,9 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
     incx =  1;
     incy =  1;
 
-    daxpy_((integer *)&n , &qs , w , (integer *)&incx , ww , (integer *)&incy);
+    DAXPY(n , qs , w , incx , ww , incy);
 
-    num = dnrm2_((integer *)&n, ww , (integer *)&incx);
+    num = DNRM2(n, ww , incx);
     err = num * den;
 
     /* **** ********************* **** */

@@ -71,7 +71,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "blaslapack.h"
+#include "LA.h"
 void pfc_3D_projf(int  , double * , double * , double * , double * , int *);
 void pfc_3D_projc(int  , double , double *z , double * , int *);
 
@@ -82,15 +82,13 @@ void pfc_3D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
 
   FILE *f101;
   int n, nc;
-  integer incx, incy;
+  int incx, incy;
   int i, iter, itermax, ispeak;
 
   double err, a1, b1, qs;
 
   double alpha, beta, rp, pMp;
   double den, num, tol, mu;
-
-  char NOTRANS = 'N';
 
   int *status;
   double *zz , *pp , *rr , *ww , *Mp;
@@ -118,7 +116,7 @@ void pfc_3D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
 
   if (ispeak == 2) f101 = fopen("pfc_3D_cpg.log" , "w+");
 
-  qs = dnrm2_((integer *)&n , q , &incx);
+  qs = DNRM2(n , q , incx);
 
   if (ispeak > 0) printf("\n ||q||= %g \n" , qs);
 
@@ -167,18 +165,18 @@ void pfc_3D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
 
   incy = 1;
 
-  dcopy_((integer *)&n , q , &incx , rr , &incy);
+  DCOPY(n , q , incx , rr , incy);
 
   a1 = -1.;
   b1 = -1.;
 
-  dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z , &incx , &b1 , rr , &incy);
+  DGEMV(LA_NOTRANS , n , n , a1 , vec , n , z , incx , b1 , rr , incy);
 
   /* Initialization of gradients */
   /* rr -> p and rr -> w */
 
-  dcopy_((integer *)&n , rr , &incx , ww , &incy);
-  dcopy_((integer *)&n , rr , &incx , pp , &incy);
+  DCOPY(n , rr , incx , ww , incy);
+  DCOPY(n , rr , incx , pp , incy);
 
   iter = 0;
   err  = 1.0 ;
@@ -193,14 +191,14 @@ void pfc_3D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
     incx = 1;
     incy = 1;
 
-    dcopy_((integer *)&n , pp , &incx , Mp , &incy);
+    DCOPY(n , pp , incx , Mp , incy);
 
     a1 = 1.0;
     b1 = 0.0;
 
-    dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , Mp , &incx , &b1 , w , &incy);
+    DGEMV(LA_NOTRANS , n , n , a1 , vec , n , Mp , incx , b1 , w , incy);
 
-    pMp = ddot_((integer *)&n , pp , &incx , w  , &incy);
+    pMp = DDOT(n , pp , incx , w  , incy);
     //printf( " pWp = %10.4g  \n", pMp );
     if (fabs(pMp) < 1e-16)
     {
@@ -226,7 +224,7 @@ void pfc_3D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
       return;
     }
 
-    rp  = ddot_((integer *)&n , pp , &incx , rr , &incy);
+    rp  = DDOT(n , pp , incx , rr , incy);
     //printf( " rp = %10.4g  \n", rp );
     alpha = rp / pMp;
 
@@ -236,7 +234,7 @@ void pfc_3D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
      *
      */
 
-    daxpy_((integer *)&n , &alpha , pp , &incx , z , &incy);
+    DAXPY(n , alpha , pp , incx , z , incy);
 
     /* Iterate projection*/
 
@@ -244,13 +242,13 @@ void pfc_3D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
 
     /* rr = -Wz + q */
 
-    dcopy_((integer *)&n , rr , &incx , w  , &incy);
-    dcopy_((integer *)&n , q  , &incx , rr , &incy);
+    DCOPY(n , rr , incx , w  , incy);
+    DCOPY(n , q  , incx , rr , incy);
 
     a1 = -1.;
     b1 = -1.;
 
-    dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z , &incx , &b1 , rr , &incy);
+    DGEMV(LA_NOTRANS , n , n , a1 , vec , n , z , incx , b1 , rr , incy);
 
     /* Gradients projection
      * rr --> ww
@@ -261,22 +259,22 @@ void pfc_3D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
 
     /*   beta = -w.Mp / pMp  */
 
-    rp = ddot_((integer *)&n , ww , &incx, w , &incy);
+    rp = DDOT(n , ww , incx, w , incy);
 
     beta = -rp / pMp;
 
-    dcopy_((integer *)&n , ww , &incx , pp , &incy);
-    daxpy_((integer *)&n, &beta , zz , &incx , pp , &incy);
+    DCOPY(n , ww , incx , pp , incy);
+    DAXPY(n, beta , zz , incx , pp , incy);
 
     /* **** Criterium convergence **** */
 
     qs   = -1.0;
-    daxpy_((integer *)&n , &qs , rr , &incx , w , &incy);
+    DAXPY(n , qs , rr , incx , w , incy);
 
     /*
      * Note: the function dnrm2_ leads to the generation of core
      */
-    num = sqrt(ddot_((integer *)&n , w , &incx, w , &incy));
+    num = sqrt(DDOT(n , w , incx, w , incy));
 
     err = num * den;
 
@@ -287,10 +285,10 @@ void pfc_3D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
   iparamLCP[2] = iter;
   dparamLCP[2] = err;
 
-  dcopy_((integer *)&n , rr , &incx , w , &incy);
+  DCOPY(n , rr , incx , w , incy);
 
   qs   = -1.0;
-  dscal_((integer *)&n , &qs , w , &incx);
+  DSCAL(n , qs , w , incx);
 
   if (ispeak > 0)
   {

@@ -72,7 +72,7 @@
 #ifndef MEXFLAG
 #include "NSSpack.h"
 #endif
-#include "blaslapack.h"
+#include "LA.h"
 
 
 
@@ -95,7 +95,7 @@ void dfc_2D2lcp(int *dim_F1 , double *mumu , double *K1 , double *F1, int *ddl_n
   double         *qn, *qt, *Jcn;
   double         *q1, *q0, *q2, *q3;
 
-  char           uplo = 'U';
+  /*  char           uplo='U';*/
 
 
 
@@ -362,7 +362,7 @@ void dfc_2D2lcp(int *dim_F1 , double *mumu , double *K1 , double *F1, int *ddl_n
   /*                        Cholesky                                   */
 
 
-  dpotrf_(&uplo, (integer *)&taille_i, R , (integer *)&taille_i, (integer *)&info2);
+  DPOTRF(LA_UP, taille_i, R , taille_i, info2);
 
 
 
@@ -418,7 +418,7 @@ void dfc_2D2lcp(int *dim_F1 , double *mumu , double *K1 , double *F1, int *ddl_n
   }
 
 
-  dpotri_(&uplo, (integer*)&taille_i, R , (integer*)&taille_i, (integer*)&info2);
+  DPOTRI(LA_UP, taille_i, R , taille_i, info2);
 
   if (info2 != 0)
   {
@@ -816,7 +816,7 @@ void dfc_2D2lcp(int *dim_F1 , double *mumu , double *K1 , double *F1, int *ddl_n
 
 
   alpha = -1.;
-  dscal_((integer *)&n3, &alpha, q, &incx);
+  DSCAL(n3, alpha, q, incx);
 
 
 

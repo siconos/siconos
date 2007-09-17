@@ -64,7 +64,7 @@
 #ifndef MEXFLAG
 #include "NSSpack.h"
 #endif
-#include "blaslapack.h"
+#include "LA.h"
 
 
 
@@ -90,13 +90,6 @@ void dfc_2D2cond_2D(int *dim_F1, double *mumu, double *K1, double *F1, int *ddl_
   double         *R;
   double         *qbis, *Jcn , *temp_ic, *temp_cc, *qi, *Jc;
   double         *q1, *q0, *q2, *q3;
-
-
-  char           uplo = 'U';
-
-
-
-
 
   taille_n  = *dim_nc;
   taille_c  = 2 * taille_n;
@@ -288,7 +281,7 @@ void dfc_2D2cond_2D(int *dim_F1, double *mumu, double *K1, double *F1, int *ddl_
   /*                        Cholesky                                   */
 
 
-  dpotrf_(&uplo, (integer *)&taille_i, R , (integer *)&taille_i, (integer *)&info2);
+  DPOTRF(LA_UP , taille_i, R , taille_i, info2);
 
 
 
@@ -328,7 +321,7 @@ void dfc_2D2cond_2D(int *dim_F1, double *mumu, double *K1, double *F1, int *ddl_
   }
 
 
-  dpotri_(&uplo, (integer*)&taille_i, R , (integer*)&taille_i, (integer*)&info2);
+  DPOTRI(LA_UP, taille_i, R , taille_i, info2);
 
 
   if (info2 != 0)
@@ -489,7 +482,7 @@ void dfc_2D2cond_2D(int *dim_F1, double *mumu, double *K1, double *F1, int *ddl_
 
 
   alpha = -1;
-  dscal_((integer *)&taille_c, &alpha, q, &incx);
+  DSCAL(taille_c, alpha, q, incx);
 
 
 
