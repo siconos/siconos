@@ -1427,4 +1427,6 @@ int main(void)
   test_data();
   test_matrix();
 
+  /* bidon */
+  exit(1);
 }
