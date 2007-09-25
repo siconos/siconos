@@ -96,6 +96,16 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 #define DGEMV(TRANS, M, N, ALPHA, A, LDA, X, INCX, BETA, Y, INCY) \
   BLAS_NAME(dgemv)WITH_ORDER(LA_ORDER, T_TRANS(TRANS), INTEGER(M), INTEGER(N), DOUBLE(ALPHA), A, INTEGER(LDA), X, INTEGER(INCX), DOUBLE(BETA), Y, INTEGER(INCY))
 
+/*  DGEMM  performs one of the matrix-matrix operations
+*
+*     C := alpha*op( A )*op( B ) + beta*C,
+*
+*  where  op( X ) is one of
+*
+*     op( X ) = X   or   op( X ) = X',*/
+#define DGEMM(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC) \
+  BLAS_NAME(dgemm)WITH_ORDER(LA_ORDER, T_TRANS(TRANSA), T_TRANS(TRANSB), INTEGER(M), INTEGER(N), INTEGER(K), DOUBLE(ALPHA), A, INTEGER(LDA), B, INTEGER(LDB), DOUBLE(BETA), C, INTEGER(LDC))
+
 /* DDOT - the dot product of two vectors
  */
 #define DDOT(N, DX, INCX, DY, INCY) \
