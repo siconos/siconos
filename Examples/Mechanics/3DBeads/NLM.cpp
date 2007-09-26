@@ -53,8 +53,7 @@ int main(int argc, char* argv[])
     double h = 0.005;                 // time step
     double PI = 3.14;
 
-    string solverName = "NEWTONFUNCTION";      // solver algorithm used for non-smooth problem
-    //string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
+    string solverName = "NSGS";      // solver algorithm used for non-smooth problem
     //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
     //string solverName = "Lemke";      // solver algorithm used for non-smooth problem
 

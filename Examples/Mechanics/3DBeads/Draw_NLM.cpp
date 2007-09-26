@@ -37,7 +37,7 @@ using namespace std;
 #include <drawstuff/drawstuff.h>
 
 
-#define COUPLE   3      // the number of dynamical systems
+#define COUPLE   72     // the number of dynamical systems
 
 #define WALL 1       // Positions of walls
 #define TOP 1       // Positions of walls
@@ -127,9 +127,42 @@ void DrawCouple(LagrangianDS *lds, float radius)
   dsSetTexture(DS_NONE);
   dsSetColor(0.6f, 0.6f, 1);
   dsDrawSphere(pos22, R, radius);
-
-
 }
+
+void DrawBox(float alpha)
+{
+
+  //  alpha = 0 signifie transparent, alpha = 1 signifie opaque
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glColor4f(0.5, 0.7, 0.9, alpha); // 3 premiers champs = RGB, quatri.ANhme champ = opacitNi
+
+  // Drawing the wall
+  glColor4f(0.5, 0.7, 0.9, alpha); //glColor3f(0.1, 0.1, 0.1);
+  glBegin(GL_QUAD_STRIP);
+
+  glNormal3f(1, 0, 0);
+  glVertex3f(1., -1., 2.);
+  glVertex3f(1., 1., 2.);
+  glVertex3f(1., -1., 0.);
+  glVertex3f(1., 1., 0.);
+
+  glNormal3f(0, 0, -1);
+  glVertex3f(-1., -1., 0.);
+  glVertex3f(-1., 1., 0.);
+
+  glNormal3f(-1, 0, 0);
+  glVertex3f(-1., -1., 2.);
+  glVertex3f(-1., 1., 2.);
+
+  glNormal3f(0, 0, 1);
+  glVertex3f(1., -1., 2.);
+  glVertex3f(1., 1., 2.);
+
+  glEnd();
+  glDisable(GL_BLEND);
+}
+
 void Drawwall()
 {
 
@@ -230,11 +263,15 @@ void SimuLoop(int pause)
 
   // Ball Radius
   radius = 0.1;
-
   for (i = 0; i < COUPLE; i++)
   {
     DrawCouple(GLOB_tabLDS[i], radius);
   }
+
+  //Drawwall();
+
+  float alpha = 0.6; // alpha = 0 signifie transparent, alpha = 1 signifie opaque
+  DrawBox(alpha);
 }
 
 void Command(int cmd)
@@ -304,14 +341,25 @@ void initSiconos()
     double T = 10.;                    // final computation time
     double h = 0.005;                 // time step
 
-    string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
+    //string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
+    string solverName = "NSGS";      // solver algorithm used for non-smooth problem
     //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
     //string solverName = "Lemke";      // solver algorithm used for non-smooth problem
 
     double e  = 0.9;                  // nslaw
     double e2  = 0.5;
-    double mu = 0.;
+    double mu = 0.1;
     double PI = 3.14;
+    double R = 0.1;
+
+    // 1 to take in account the obstacle and  0 no
+
+    int obst_z_p = 0;                    //  for z --> +
+    int obst_z_m = 1;                    //  for z --> -
+    int obst_y_p = 1;                    //  for y --> +
+    int obst_y_m = 1;                    //  for y --> -
+    int obst_x_p = 1;                    //  for x --> +
+    int obst_x_m = 1;                    //  for x --> -
 
 
     // -------------------------
@@ -344,28 +392,61 @@ void initSiconos()
 
     // set values
 
-    (*(q0[0]))(0) = 0.;
-    (*(q0[0]))(1) = 0.;
-    (*(q0[0]))(2) =  0.15;
-    (*(q0[0]))(3) =  PI / 2;
-    (*(v0[0]))(3) =  4.;
-    (*(q0[1]))(0) = 0.;
-    (*(q0[1]))(1) = 0.;
-    (*(q0[1]))(2) =  0.40;
-    (*(q0[1]))(3) =  PI / 2;
-    (*(v0[0]))(3) =  4.;
-    (*(q0[2]))(0) = 0.;
-    (*(q0[2]))(1) = 0.;
-    (*(q0[2]))(2) =  0.65;
-    (*(q0[2]))(3) =  PI / 3;
-    (*(q0[2]))(4) =  PI / 3;
-    (*(v0[2]))(3) =  4.;
+    /* Test of beads Couples in cube*/
+    // 9*etage beads Couples in cube /* !!!!!! When you choose cote and etage you should verify that COUPLE = (cote^2)*etage + 1 (crazy beads couple)!!!!! */
+    unsigned int cote  = 3;
+    unsigned int etage  = 8;
+    unsigned int k = 0;
 
-    //  for (i=0;i<COUPLE;i++)
+    /* !!!!!!!!!!!!!!!!!!Very Important thing is that theta must be different from zero for stablity reason !!!!!!!!!!!!!!!!!!!!!!!*/
+    for (j = 0; j < COUPLE; j++)
+      (*(q0[j]))(3) =  PI / 2;
+
+
+    for (j = 0; j < etage; j++)
+    {
+      for (k = 0; k < cote; k++)
+      {
+        for (i = 0; i < cote; i++)
+        {
+          if (j % 2 == 0)
+          {
+            (*(q0[k * cote + i + j * cote * cote]))(0) = -0.5 + 5 * k * R;
+            (*(q0[k * cote + i + j * cote * cote]))(1) = -0.5 + 5 * i * R;
+            (*(q0[k * cote + i + j * cote * cote]))(2) = 0.12 + (2 * j) * R;
+          }
+          else
+          {
+            (*(q0[k * cote + i + j * cote * cote]))(0) = -0.4 + 5 * k * R;
+            (*(q0[k * cote + i + j * cote * cote]))(1) = -0.4 + 5 * i * R + R / 4;
+            (*(q0[k * cote + i + j * cote * cote]))(2) = 0.12 + (2 * j) * R;
+          }
+        }
+      }
+    }
+
+    //     /*  Crazy beads couple */
+
+    //     (*(q0[COUPLE-1]))(0) = -0.8; (*(q0[COUPLE-1]))(1) = -0.8; (*(q0[COUPLE-1]))(2) =  0.7; (*(q0[COUPLE-1]))(3) =  PI/3; (*(q0[COUPLE-1]))(4) =  PI/3; (*(v0[COUPLE-1]))(2) =  1.; (*(v0[COUPLE-1]))(3) =  4.;
+
+    //    for (i=0;i<COUPLE;i++)
+    //       {
+    //  (*(q0[i]))(0) = 0.; (*(q0[i]))(1) = -0.7 + 0.4*i; (*(q0[i]))(2) =  0.15; (*(q0[i]))(3) =  PI/2; (*(v0[i]))(0) =  4.+0.2*i;(*(v0[i]))(1) =  4.-0.2*i;
+    //       }
+
+    // (*(q0[0]))(0) = 0.; (*(q0[0]))(1) = 0.; (*(q0[0]))(2) =  0.65; (*(q0[0]))(3) =  0.; (*(v0[0]))(0) =  4.;  (*(v0[0]))(2) =  3.;
+    //     (*(q0[1]))(0) = 0.; (*(q0[1]))(1) = 0.; (*(q0[1]))(2) =  0.40; (*(q0[1]))(3) =  PI/2; (*(v0[0]))(3) =  4.;
+    //      (*(q0[2]))(0) = 0.; (*(q0[2]))(1) = 0.; (*(q0[2]))(2) =  0.65; (*(q0[2]))(3) =  PI/3; (*(q0[2]))(4) =  PI/3; (*(v0[2]))(3) =  4.; (*(v0[2]))(2) =  3.;
+    //     (*(q0[3]))(0) = 0.2; (*(q0[3]))(1) = 0.; (*(q0[3]))(2) =  0.25; (*(q0[3]))(3) =  PI/3; (*(v0[3]))(4) =  PI/3; (*(v0[2]))(3) =  4.;
+
+    //    for (i=0;i<COUPLE;i++)
     //       {
     //  (*(q0[i]))(0) = 0.; (*(q0[i]))(1) = 0.5*(i+1.);  (*(q0[i]))(2) =  0.3; (*(q0[i]))(3) =  PI/2;
     //  //  (*(q0[i]))(1) = 0.5*i;
     //       }
+
+    if ((*(q0[0]))(3) ==  0.)
+      (*(q0[0]))(3) = (*(q0[0]))(3) + 0.01;
 
     for (i = 0; i < COUPLE; i++)
     {
@@ -398,33 +479,170 @@ void initSiconos()
     DynamicalSystemsSet dsConcerned22;
 
     vector<Relation*> LLRR(Fact);
-    vector<Relation*> LLR11(COUPLE);
-    vector<Relation*> LLR22(COUPLE);
+    vector<Relation*> LLR11z(COUPLE);
+    vector<Relation*> LLR11z_(COUPLE);
+    vector<Relation*> LLR22z(COUPLE);
+    vector<Relation*> LLR22z_(COUPLE);
+    vector<Relation*> LLR11y(COUPLE);
+    vector<Relation*> LLR11y_(COUPLE);
+    vector<Relation*> LLR22y(COUPLE);
+    vector<Relation*> LLR22y_(COUPLE);
+    vector<Relation*> LLR11x(COUPLE);
+    vector<Relation*> LLR11x_(COUPLE);
+    vector<Relation*> LLR22x(COUPLE);
+    vector<Relation*> LLR22x_(COUPLE);
+
 
     NonSmoothLaw * nslaw11 = new NewtonImpactFrictionNSL(e, e, mu, 3);
 
-    for (i = 0; (int)i < COUPLE; i++)
+    // Z axis
+    if (obst_z_m)
     {
-      dsConcernedii.insert(GLOB_tabLDS[i]);
-      ostringstream ostr;
-      ostr << i;
-      id22[i] = ostr.str();
-      LLR11[i] = new LagrangianScleronomousR("NLMPlugin:h1", "NLMPlugin:G1");
-      checkInter = allInteractions.insert(new Interaction(id22[i], dsConcernedii, i, 3, nslaw11, LLR11[i]));
-      dsConcernedii.clear();
+      for (i = 0; (int)i < COUPLE; i++)
+      {
+        dsConcernedii.insert(GLOB_tabLDS[i]);
+        ostringstream ostr;
+        ostr << i;
+        id22[i] = ostr.str();
+        LLR11z[i] = new LagrangianScleronomousR("NLMPlugin:h1z", "NLMPlugin:G1z");
+        checkInter = allInteractions.insert(new Interaction(id22[i], dsConcernedii, i, 3, nslaw11, LLR11z[i]));
+        dsConcernedii.clear();
+      }
+
+      for (i = 0; (int)i < COUPLE; i++)
+      {
+        dsConcernedii.insert(GLOB_tabLDS[i]);
+        ostringstream ostr;
+        ostr << i;
+        id22[i] = ostr.str();
+        LLR22z[i] = new LagrangianScleronomousR("NLMPlugin:h2z", "NLMPlugin:G2z");
+        checkInter = allInteractions.insert(new Interaction(id22[i], dsConcernedii, i, 3, nslaw11, LLR22z[i]));
+        dsConcernedii.clear();
+      }
+    }
+    if (obst_z_p)
+    {
+      for (i = 0; (int)i < COUPLE; i++)
+      {
+        dsConcernedii.insert(GLOB_tabLDS[i]);
+        ostringstream ostr;
+        ostr << i;
+        id22[i] = ostr.str();
+        LLR11z_[i] = new LagrangianScleronomousR("NLMPlugin:h1z_", "NLMPlugin:G1z_");
+        checkInter = allInteractions.insert(new Interaction(id22[i], dsConcernedii, i, 3, nslaw11, LLR11z_[i]));
+        dsConcernedii.clear();
+      }
+
+      for (i = 0; (int)i < COUPLE; i++)
+      {
+        dsConcernedii.insert(GLOB_tabLDS[i]);
+        ostringstream ostr;
+        ostr << i;
+        id22[i] = ostr.str();
+        LLR22z_[i] = new LagrangianScleronomousR("NLMPlugin:h2z_", "NLMPlugin:G2z_");
+        checkInter = allInteractions.insert(new Interaction(id22[i], dsConcernedii, i, 3, nslaw11, LLR22z_[i]));
+        dsConcernedii.clear();
+      }
+    }
+    // Y axis
+    if (obst_y_m)
+    {
+      for (i = 0; (int)i < COUPLE; i++)
+      {
+        dsConcernedii.insert(GLOB_tabLDS[i]);
+        ostringstream ostr;
+        ostr << i;
+        id22[i] = ostr.str();
+        LLR11y[i] = new LagrangianScleronomousR("NLMPlugin:h1y", "NLMPlugin:G1y");
+        checkInter = allInteractions.insert(new Interaction(id22[i], dsConcernedii, i, 3, nslaw11, LLR11y[i]));
+        dsConcernedii.clear();
+      }
+
+      for (i = 0; (int)i < COUPLE; i++)
+      {
+        dsConcernedii.insert(GLOB_tabLDS[i]);
+        ostringstream ostr;
+        ostr << i;
+        id22[i] = ostr.str();
+        LLR22y[i] = new LagrangianScleronomousR("NLMPlugin:h2y", "NLMPlugin:G2y");
+        checkInter = allInteractions.insert(new Interaction(id22[i], dsConcernedii, i, 3, nslaw11, LLR22y[i]));
+        dsConcernedii.clear();
+      }
+    }
+    if (obst_y_p)
+    {
+      for (i = 0; (int)i < COUPLE; i++)
+      {
+        dsConcernedii.insert(GLOB_tabLDS[i]);
+        ostringstream ostr;
+        ostr << i;
+        id22[i] = ostr.str();
+        LLR11y_[i] = new LagrangianScleronomousR("NLMPlugin:h1y_", "NLMPlugin:G1y_");
+        checkInter = allInteractions.insert(new Interaction(id22[i], dsConcernedii, i, 3, nslaw11, LLR11y_[i]));
+        dsConcernedii.clear();
+      }
+
+      for (i = 0; (int)i < COUPLE; i++)
+      {
+        dsConcernedii.insert(GLOB_tabLDS[i]);
+        ostringstream ostr;
+        ostr << i;
+        id22[i] = ostr.str();
+        LLR22y_[i] = new LagrangianScleronomousR("NLMPlugin:h2y_", "NLMPlugin:G2y_");
+        checkInter = allInteractions.insert(new Interaction(id22[i], dsConcernedii, i, 3, nslaw11, LLR22y_[i]));
+        dsConcernedii.clear();
+      }
     }
 
-    for (i = 0; (int)i < COUPLE; i++)
+    // X axis
+    if (obst_x_m)
     {
-      dsConcernedii.insert(GLOB_tabLDS[i]);
-      ostringstream ostr;
-      ostr << i;
-      id22[i] = ostr.str();
-      LLR22[i] = new LagrangianScleronomousR("NLMPlugin:h2", "NLMPlugin:G2");
-      checkInter = allInteractions.insert(new Interaction(id22[i], dsConcernedii, i, 3, nslaw11, LLR22[i]));
-      dsConcernedii.clear();
-    }
+      for (i = 0; (int)i < COUPLE; i++)
+      {
+        dsConcernedii.insert(GLOB_tabLDS[i]);
+        ostringstream ostr;
+        ostr << i;
+        id22[i] = ostr.str();
+        LLR11x[i] = new LagrangianScleronomousR("NLMPlugin:h1x", "NLMPlugin:G1x");
+        checkInter = allInteractions.insert(new Interaction(id22[i], dsConcernedii, i, 3, nslaw11, LLR11x[i]));
+        dsConcernedii.clear();
+      }
 
+      for (i = 0; (int)i < COUPLE; i++)
+      {
+        dsConcernedii.insert(GLOB_tabLDS[i]);
+        ostringstream ostr;
+        ostr << i;
+        id22[i] = ostr.str();
+        LLR22x[i] = new LagrangianScleronomousR("NLMPlugin:h2x", "NLMPlugin:G2x");
+        checkInter = allInteractions.insert(new Interaction(id22[i], dsConcernedii, i, 3, nslaw11, LLR22x[i]));
+        dsConcernedii.clear();
+      }
+    }
+    if (obst_x_p)
+    {
+      for (i = 0; (int)i < COUPLE; i++)
+      {
+        dsConcernedii.insert(GLOB_tabLDS[i]);
+        ostringstream ostr;
+        ostr << i;
+        id22[i] = ostr.str();
+        LLR11x_[i] = new LagrangianScleronomousR("NLMPlugin:h1x_", "NLMPlugin:G1x_");
+        checkInter = allInteractions.insert(new Interaction(id22[i], dsConcernedii, i, 3, nslaw11, LLR11x_[i]));
+        dsConcernedii.clear();
+      }
+
+      for (i = 0; (int)i < COUPLE; i++)
+      {
+        dsConcernedii.insert(GLOB_tabLDS[i]);
+        ostringstream ostr;
+        ostr << i;
+        id22[i] = ostr.str();
+        LLR22x_[i] = new LagrangianScleronomousR("NLMPlugin:h2x_", "NLMPlugin:G2x_");
+        checkInter = allInteractions.insert(new Interaction(id22[i], dsConcernedii, i, 3, nslaw11, LLR22x_[i]));
+        dsConcernedii.clear();
+      }
+    }
 
     // Interaction between beads
 
@@ -561,10 +779,10 @@ void initSiconos()
 
     //int N = GLOB_T->getNSteps(); // Number of time steps
 
-    dataPlot(k_iter, 0) = k_iter * GLOB_T->getH();
-    // dataPlot(k_iter,1) = (BeadsCOUPLE->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getY(0))(0);
-    dataPlot(k_iter, 1) = GLOB_tabLDS[0]->getQ()(2);
-    dataPlot(k_iter, 2) = GLOB_tabLDS[0]->getVelocity()(2);
+    // dataPlot(k_iter,0) = k_iter*GLOB_T->getH();
+    //     // dataPlot(k_iter,1) = (BeadsCOUPLE->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getY(0))(0);
+    //     dataPlot(k_iter,1) = GLOB_tabLDS[0]->getQ()(2);
+    //     dataPlot(k_iter,2) = GLOB_tabLDS[0]->getVelocity()(2);
 
     cout << "Start computation ... " << endl;
 
@@ -594,12 +812,13 @@ void computeSiconos()
     {
       GLOB_SIM->advanceToEvent();
       GLOB_SIM->processEvents();
+
       // --- Get values to be plotted ---
       k_iter++;
-      dataPlot(k_iter, 0) = k_iter * GLOB_T->getH();
-      //dataPlot(k_iter,1) = (BeadsCOUPLE->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getY(0))(0);
-      dataPlot(k_iter, 1) = GLOB_tabLDS[0]->getQ()(2);
-      dataPlot(k_iter, 2) = GLOB_tabLDS[0]->getVelocity()(2);
+      //   dataPlot(k_iter,0) = k_iter*GLOB_T->getH();
+      //       //dataPlot(k_iter,1) = (BeadsCOUPLE->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getY(0))(0);
+      //       dataPlot(k_iter,1) = GLOB_tabLDS[0]->getQ()(2);
+      //       dataPlot(k_iter,2) = GLOB_tabLDS[0]->getVelocity()(2);
 
     }
     cout << "End of computation - Number of iterations done: " << k_iter << endl;

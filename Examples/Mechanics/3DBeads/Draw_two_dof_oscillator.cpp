@@ -185,7 +185,7 @@ void initSiconos()
     // User-defined main parameters
     unsigned int nDof = 2;           // degrees of freedom for the ball
     double t0 = 0;                   // initial computation time
-    double T = 15.0;                 // final computation time
+    double T = 100.0;                 // final computation time
     double h = 0.005;                 // time step
 
     double pos1 = 0.2;               // initial position for m1.
@@ -194,7 +194,7 @@ void initSiconos()
     double v2   = -0.1;               // initial velocity for m2
 
 
-    string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
+    string solverName = "NSGS";      // solver algorithm used for non-smooth problem
     //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
     // string solverName = "Lemke" ;
 
@@ -321,14 +321,14 @@ void initSiconos()
 
     GLOB_SIM->initialize();
 
-    GLOB_POS = oscillator->getQPtr();
-    GLOB_VELO = oscillator->getVelocityPtr();
-    GLOB_LAMBDA = two_dof_oscillator->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambdaPtr(1);
+    //  GLOB_POS = oscillator->getQPtr();
+    //     GLOB_VELO = oscillator->getVelocityPtr();
+    //     GLOB_LAMBDA = two_dof_oscillator->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambdaPtr(1);
 
-    dataPlot(0, 0) = two_dof_oscillator->getT0();
-    dataPlot(0, 1) = (*GLOB_POS)(0);
-    dataPlot(0, 2) = (*GLOB_VELO)(0);
-    dataPlot(0, 3) = (*GLOB_LAMBDA)(0);
+    //     dataPlot(0,0) = two_dof_oscillator->getT0();
+    //     dataPlot(0,1) = (*GLOB_POS)(0);
+    //     dataPlot(0,2) = (*GLOB_VELO)(0);
+    //     dataPlot(0,3) = (*GLOB_LAMBDA)(0);
 
     // ================================= Computation =================================
 
@@ -358,10 +358,10 @@ void computeSiconos()
       GLOB_SIM->processEvents();
       // --- Get values to be plotted ---
       i++;
-      dataPlot(i, 0) =  s->getStartingTime();
-      dataPlot(i, 1) = (*GLOB_POS)(0);
-      dataPlot(i, 2) = (*GLOB_VELO)(0);
-      dataPlot(i, 3) = (*GLOB_LAMBDA)(0);
+      //  dataPlot(i,0) =  s->getStartingTime();
+      //  dataPlot(i,1) = (*GLOB_POS)(0);
+      //  dataPlot(i,2) = (*GLOB_VELO)(0);
+      //  dataPlot(i,3) = (*GLOB_LAMBDA)(0);
 
     }
 

@@ -29,12 +29,14 @@
 #include <math.h>
 #include <iostream>
 #include <fstream>
+#include <GL/gl.h>
+#include <GL/glu.h>
 
 using namespace std;
 
 #include <drawstuff/drawstuff.h>
 
-#define DSNUMBER   2      // the number of dynamical systems
+#define DSNUMBER   102      // the number of dynamical systems
 
 #define WALL 1       // Positions of walls
 #define TOP 1       // Positions of walls
@@ -106,14 +108,37 @@ void DrawBall(LagrangianDS *lds, float radius)
 
 }
 
-void Drawwall()
+void DrawBox(float alpha)
 {
 
+  //  alpha = 0 signifie transparent, alpha = 1 signifie opaque
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glColor4f(0.5, 0.7, 0.9, alpha); // 3 premiers champs = RGB, quatri.ANhme champ = opacitNi
+
+  // Drawing the wall
+  glColor4f(0.5, 0.7, 0.9, alpha); //glColor3f(0.1, 0.1, 0.1);
+  glBegin(GL_QUAD_STRIP);
+  glVertex3f(1., -1., 1.);
+  glVertex3f(1., 1., 1.);
+  glVertex3f(1., -1., 0.);
+  glVertex3f(1., 1., 0.);
+  glVertex3f(-1., -1., 0.);
+  glVertex3f(-1., 1., 0.);
+  glVertex3f(-1., -1., 1.);
+  glVertex3f(-1., 1., 1.);
+  glVertex3f(1., -1., 1.);
+  glVertex3f(1., 1., 1.);
+  glEnd();
+  glDisable(GL_BLEND);
+}
+void Drawwall()
+{
   int Wall_z_p = 0;                    //  for z --> +
-  int Wall_y_p = 1;                    //  for y --> +
-  int Wall_y_m = 1;                    //  for y --> -
-  int Wall_x_p = 1;                    //  for x --> +
-  int Wall_x_m = 1;                    //  for x --> -
+  int Wall_y_p = 0;                    //  for y --> +
+  int Wall_y_m = 0;                    //  for y --> -
+  int Wall_x_p = 0;                    //  for x --> +
+  int Wall_x_m = 0;                    //  for x --> -
 
   double pos1[3];
   pos1[0] = pos1[1] = WALL;
@@ -211,8 +236,11 @@ void SimuLoop(int pause)
   {
     DrawBall(GLOB_tabLDS[i], radius);
   }
-  Drawwall();
 
+  // Drawwall();
+
+  float alpha = 0.3; // alpha = 0 signifie transparent, alpha = 1 signifie opaque
+  DrawBox(alpha);
 }
 
 void Command(int cmd)
@@ -289,7 +317,7 @@ void initSiconos()
     double h = 0.005;                 // time step
 
 
-    string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
+    string solverName = "NSGS";      // solver algorithm used for non-smooth problem
     //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
     //string solverName = "PGS";      // solver algorithm used for non-smooth problem
     //string solverName = "Lemke";      // solver algorithm used for non-smooth problem
@@ -349,6 +377,9 @@ void initSiconos()
     (*(q0[1]))(0) =  0.0;
     (*(q0[1]))(1) =  0.3;
     (*(q0[1]))(2) =  0.12;
+
+    //   (*(q0[0]))(0) =  0.0;    (*(q0[0]))(1) =  0.;  (*(q0[0]))(2) =  0.12;
+    //     (*(q0[1]))(0) =  0.0;    (*(q0[1]))(1) =  0.3;  (*(q0[1]))(2) =  0.12;
 
     //   (*(q0[0]))(0) =  0.0;    (*(q0[0]))(1) =  0.4;  (*(q0[0]))(2) =  0.1;
     //     (*(v0[0]))(0) =  0.;    (*(v0[0]))(1) =  -1.;  (*(v0[0]))(2) =  0.;
@@ -424,30 +455,47 @@ void initSiconos()
     //     (*(q0[19]))(0)= -0.35;   (*(q0[19]))(1)=-0.35;  (*(q0[19]))(2)=  0.1;
 
 
-    //     // 25*etage beads in cube
-    //     unsigned int cote  = 5;
-    //     unsigned int etage  = 4;
-    //     unsigned int k = 0;
-    //     for (j=0;j<etage;j++){
-    //       for (k=0;k<cote;k++) {
-    //  for (i=0;i<cote;i++) {
-    //    if (j % 2 == 0){
-    //      (*(q0[k*cote+i+j*cote*cote]))(0) = -0.6 + 3*k*R; (*(q0[k*cote+i+j*cote*cote]))(1) = -0.6 + 3*i*R; (*(q0[k*cote+i+j*cote*cote]))(2) = 0.2+(2*j)*R;
-    //    }
-    //    else{
-    //      (*(q0[k*cote+i+j*cote*cote]))(0) = -0.6 + 3*k*R; (*(q0[k*cote+i+j*cote*cote]))(1) = -0.6 + 3*i*R+R/4;(*(q0[k*cote+i+j*cote*cote]))(2) = 0.2+(2*j)*R;
-    //    }
-    //  }
-    //       }
-    //     }
+    // 25*etage beads in cube
+    unsigned int cote  = 5;
+    unsigned int etage  = 4;
+    unsigned int k = 0;
+    for (j = 0; j < etage; j++)
+    {
+      for (k = 0; k < cote; k++)
+      {
+        for (i = 0; i < cote; i++)
+        {
+          if (j % 2 == 0)
+          {
+            (*(q0[k * cote + i + j * cote * cote]))(0) = -0.6 + 3 * k * R;
+            (*(q0[k * cote + i + j * cote * cote]))(1) = -0.6 + 3 * i * R;
+            (*(q0[k * cote + i + j * cote * cote]))(2) = 0.2 + (2 * j) * R;
+          }
+          else
+          {
+            (*(q0[k * cote + i + j * cote * cote]))(0) = -0.6 + 3 * k * R;
+            (*(q0[k * cote + i + j * cote * cote]))(1) = -0.6 + 3 * i * R + R / 4;
+            (*(q0[k * cote + i + j * cote * cote]))(2) = 0.2 + (2 * j) * R;
+          }
+        }
+      }
+    }
 
-    //     (*(q0[DSNUMBER-2]))(0)= 0.;   (*(q0[DSNUMBER-2]))(1)= 0.;   (*(q0[DSNUMBER-2]))(2)=  1.2;    (*(v0[DSNUMBER-2]))(1) =  -1;(*(v0[DSNUMBER-2]))(2) =  -2;
-    //     (*(q0[DSNUMBER-1]))(0)= -0.8;  (*(q0[DSNUMBER-1]))(1)= -0.8;  (*(q0[DSNUMBER-1]))(2)=  0.1;  (*(v0[DSNUMBER-1]))(0) =  10;(*(v0[DSNUMBER-1]))(1) =  10;
+    (*(q0[DSNUMBER - 2]))(0) = 0.;
+    (*(q0[DSNUMBER - 2]))(1) = 0.;
+    (*(q0[DSNUMBER - 2]))(2) =  1.2 * etage / 4;
+    (*(v0[DSNUMBER - 2]))(1) =  -1;
+    (*(v0[DSNUMBER - 2]))(2) =  -2;
+    (*(q0[DSNUMBER - 1]))(0) = -0.8;
+    (*(q0[DSNUMBER - 1]))(1) = -0.8;
+    (*(q0[DSNUMBER - 1]))(2) =  0.1;
+    (*(v0[DSNUMBER - 1]))(0) =  10;
+    (*(v0[DSNUMBER - 1]))(1) =  10;
 
 
     // un grand merci
 
-    //   for (i=0;i<DSNUMBER;i++)
+    //      for (i=0;i<DSNUMBER;i++)
     //  (*(q0[i]))(0) = 0.;
 
     //       // le M
@@ -517,7 +565,7 @@ void initSiconos()
 
     //       (*(q0[30]))(1)=  0.9;    (*(q0[30]))(2) =  0.9;
 
-    // un autre merci
+    // // un autre merci
 
     //       for (i=0;i<DSNUMBER;i++)
     //  (*(q0[i]))(0) = 0.;
@@ -589,9 +637,9 @@ void initSiconos()
 
     //       (*(q0[48]))(1)=  0.9;    (*(q0[48]))(2) =  0.9;
 
-    //   // pour le merci
+    // pour le merci
 
-    //       for (i=0;i<DSNUMBER;i++)
+    //   for (i=0;i<DSNUMBER;i++)
     //       {
     //  GLOB_tabLDS[i]=new LagrangianDS(i,*(q0[i]),*(v0[i]),*Mass);
     //  checkDS = allDS.insert(GLOB_tabLDS[i]);

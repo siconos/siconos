@@ -41,17 +41,6 @@ extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, 
   y[0] =  d - 2 * R;
 }
 
-
-extern "C" void Gcontact(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* param)
-{
-
-  G[0] = -(q[6] - q[0]) / sqrt((q[6] - q[0]) * (q[6] - q[0]) + (q[7] - q[1]) * (q[7] - q[1]) + (q[8] - q[2]) * (q[8] - q[2]));
-  G[1] = -(q[7] - q[1]) / sqrt((q[6] - q[0]) * (q[6] - q[0]) + (q[7] - q[1]) * (q[7] - q[1]) + (q[8] - q[2]) * (q[8] - q[2]));
-  G[2] = -(q[8] - q[2]) / sqrt((q[6] - q[0]) * (q[6] - q[0]) + (q[7] - q[1]) * (q[7] - q[1]) + (q[8] - q[2]) * (q[8] - q[2]));
-  G[6] = (q[6] - q[0]) / sqrt((q[6] - q[0]) * (q[6] - q[0]) + (q[7] - q[1]) * (q[7] - q[1]) + (q[8] - q[2]) * (q[8] - q[2]));
-  G[7] = (q[7] - q[1]) / sqrt((q[6] - q[0]) * (q[6] - q[0]) + (q[7] - q[1]) * (q[7] - q[1]) + (q[8] - q[2]) * (q[8] - q[2]));
-  G[8] = (q[8] - q[2]) / sqrt((q[6] - q[0]) * (q[6] - q[0]) + (q[7] - q[1]) * (q[7] - q[1]) + (q[8] - q[2]) * (q[8] - q[2]));
-}
 extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeZ, double* param)
 {
 

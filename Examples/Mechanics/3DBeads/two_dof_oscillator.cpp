@@ -51,8 +51,7 @@ int main(int argc, char* argv[])
     double pos2 = 0.8;               // initial position for m2
     double v2   = -0.1;               // initial velocity for m2
 
-    string solverName = "NEWTONFUNCTION";      // solver algorithm used for non-smooth problem
-    //string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
+    string solverName = "NSGS";      // solver algorithm used for non-smooth problem
     //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
     // string solverName = "Lemke" ;
 
