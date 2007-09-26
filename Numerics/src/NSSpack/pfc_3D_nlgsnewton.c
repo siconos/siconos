@@ -125,6 +125,65 @@ void matrix_add(int n, double *A , double *B, double *C)
   }
 }
 
+//------ formes a unit matrix A with dimension n------//
+void matrix_I(int n, double *l)
+{
+
+  int i, j ;
+
+  for (i = 0 ; i < n ; i++)
+  {
+    for (j = 0 ; j < n ; j++)
+    {
+      l[ i * n + j ] = 0;
+    }
+  }
+  for (i = 0 ; i < n ; i++)
+  {
+    l[ i * n + i ] = 1;
+  }
+
+}
+
+//_/_/   Inverse Matrix   _/_//
+void matrix_inv(int n, double *a, double *b)
+{
+  int i, j, k;
+  double p, q;
+
+  double *A = matrix_get(n, n);
+  matrix_cpy(n, n, a, A);
+  matrix_I(n, b);
+
+  for (k = 0 ; k < n ; ++k)
+  {
+    p = A[k * n + k];
+
+    for (j = 0 ; j < n ; ++j)
+    {
+      b[k * n + j] /= p;
+      A[k * n + j] /= p;
+    }
+
+    for (i = 0 ; i < n ; ++i)
+    {
+      if (i != k)
+      {
+        q = A[ i * n + k ];
+
+        for (j = 0 ; j < n ; ++j)
+        {
+          A[ i * n + j ] -= q * A[ k * n + j ];
+          b[ i * n + j ] -= q * b[ k * n + j ];
+        }
+      }
+    }
+  }
+  free(A);
+}
+
+
+
 /* Compute function G */
 void G_f(int m, double *G, double *Z , double *x , double *y , double rn, double rt, double coef)
 {

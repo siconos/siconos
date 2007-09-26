@@ -65,17 +65,17 @@
 int pfc_3D_solver(double *vec , double *q , int *n , method *pt , double *z , double *w)
 {
 
-  char pfckey1[10] = "NLGS", pfckey2[10] = "CPG", pfckey3[15] = "NLGSNEWTON";
+  char pfckey1[10] = "NLGS", pfckey2[10] = "CPG", pfckey3[15] = "NSGS", pfckey4[15] = "NLGSNEWTON";
 
   int i, info;
-
-  int     iparamLCP[5];
-  double  dparamLCP[5];
+  int nb = 7;
+  int     iparamLCP[nb];
+  double  dparamLCP[nb];
 
   clock_t t1, t2;
 
-  for (i = 0 ; i < 5 ; ++i) iparamLCP[i] = 0;
-  for (i = 0 ; i < 5 ; ++i) dparamLCP[i] = 0.0;
+  for (i = 0 ; i < nb ; ++i) iparamLCP[i] = 0;
+  for (i = 0 ; i < nb ; ++i) dparamLCP[i] = 0.0;
 
   info    = -1;
 
@@ -111,6 +111,30 @@ int pfc_3D_solver(double *vec , double *q , int *n , method *pt , double *z , do
   }
   */
   else if (strcmp(pt->pfc_3D.name , pfckey3) == 0)
+  {
+
+    iparamLCP[0] = pt->pfc_3D.itermax;
+    iparamLCP[1] = pt->pfc_3D.chat;
+    dparamLCP[0] = pt->pfc_3D.mu;
+    dparamLCP[1] = pt->pfc_3D.tol;
+
+    iparamLCP[3] = pt->pfc_3D.local_itermax;
+    dparamLCP[3] = pt->pfc_3D.local_tol;
+
+    iparamLCP[5] = pt->pfc_3D.local_formulation;   /* ca n'a pas de sens car on ne peut pas les toucher de l'exterieur */
+    iparamLCP[6] = pt->pfc_3D.local_solver;
+
+
+    pfc_3D_nsgs(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+
+    pt->pfc_3D.iter = iparamLCP[2];
+    pt->pfc_3D.err  = dparamLCP[2];
+
+    pt->pfc_3D.local_err = dparamLCP[4] ;
+    pt->pfc_3D.local_iter = iparamLCP[4] ;
+
+  }
+  else if (strcmp(pt->pfc_3D.name , pfckey4) == 0)
   {
 
     iparamLCP[0] = pt->pfc_3D.itermax;
