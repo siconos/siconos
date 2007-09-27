@@ -9,7 +9,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-version=2.1.0
+version=2.1.1
 buildroot=$(CURDIR)/debian/siconos-kernel
 docs=/usr/share/doc/siconos-$(version)
 gdocs=../GeneratedDocs
@@ -77,7 +77,7 @@ install: build
 	mkdir -p $(buildroot)$(docs)/pdf
 	install AUTHORS COPYING ChangeLog NEWS README $(buildroot)$(docs)/$(component)
 	pdfs=`find . -name \*.pdf`; [ x"$$pdfs" = x ] || cp $$pdfs $(buildroot)$(docs)/pdf
-	pushd $(gdocs) ;\
+	cd $(gdocs) ;\
 	rm -rf `find . -name latex -type d` ;\
 	pdfs=`find . -name \*.pdf`; [ x"$$pdfs" = x ] || cp $$pdfs $(buildroot)$(docs)/pdf ;\
 	cp -r $(component) $(buildroot)$(docs)/html

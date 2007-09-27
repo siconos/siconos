@@ -2,12 +2,12 @@ Source: siconos-kernel
 Section: unknown
 Priority: extra
 Maintainer: Maurice Bremond <maurice.bremond@inria.fr>
-Build-Depends: debhelper (>= 5), g++, gfortran, atlas3-base, atlas3-base-dev, libboost-dev, libboost-date-time-dev , libboost-date-time1.33.1, libboost-filesystem-dev, libboost-filesystem1.33.1, libboost-graph-dev, libboost-iostreams-dev, libboost-iostreams1.33.1, libboost-program-options-dev, libboost-program-options1.33.1, libboost-python-dev, libboost-python1.33.1 , libboost-regex-dev, libboost-regex1.33.1, libboost-signals-dev, libboost-signals1.33.1, libboost-test-dev, libboost-test1.33.1, libboost-thread-dev, libboost-thread1.33.1, libboost-wave-dev, libxml2-dev, libgmp3-dev, lapack3-dev, libz-dev
+Build-Depends: debhelper (>= 5), g++, gfortran, atlas3-base, atlas3-base-dev, atlas3-headers, libboost-dev, libboost-date-time-dev , libboost-date-time1.33.1, libboost-filesystem-dev, libboost-filesystem1.33.1, libboost-graph-dev, libboost-iostreams-dev, libboost-iostreams1.33.1, libboost-program-options-dev, libboost-program-options1.33.1, libboost-python-dev, libboost-python1.33.1 , libboost-regex-dev, libboost-regex1.33.1, libboost-signals-dev, libboost-signals1.33.1, libboost-test-dev, libboost-test1.33.1, libboost-thread-dev, libboost-thread1.33.1, libboost-wave-dev, libxml2-dev, libgmp3-dev, lapack3-dev, libz-dev
 Standards-Version: 3.7.2
 
 Package: siconos-kernel
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, g++, gfortran, atlas3-base, atlas3-base-dev, libboost-dev, libboost-date-time-dev , libboost-date-time1.33.1, libboost-filesystem-dev, libboost-filesystem1.33.1, libboost-graph-dev, libboost-iostreams-dev, libboost-iostreams1.33.1, libboost-program-options-dev, libboost-program-options1.33.1, libboost-python-dev, libboost-python1.33.1 , libboost-regex-dev, libboost-regex1.33.1, libboost-signals-dev, libboost-signals1.33.1, libboost-test-dev, libboost-test1.33.1, libboost-thread-dev, libboost-thread1.33.1, libboost-wave-dev, libxml2-dev, libgmp3-dev, lapack3-dev, libz-dev
+Depends: ${shlibs:Depends}, ${misc:Depends}, g++, gfortran, atlas3-base, atlas3-base-dev, atlas3-headers, libboost-dev, libboost-date-time-dev , libboost-date-time1.33.1, libboost-filesystem-dev, libboost-filesystem1.33.1, libboost-graph-dev, libboost-iostreams-dev, libboost-iostreams1.33.1, libboost-program-options-dev, libboost-program-options1.33.1, libboost-python-dev, libboost-python1.33.1 , libboost-regex-dev, libboost-regex1.33.1, libboost-signals-dev, libboost-signals1.33.1, libboost-test-dev, libboost-test1.33.1, libboost-thread-dev, libboost-thread1.33.1, libboost-wave-dev, libxml2-dev, libgmp3-dev, lapack3-dev, libz-dev
 Description: Siconos/Kernel, is dedicated to the modeling and the simulation of NSDS
  The present package, Siconos/Kernel, is dedicated to the modeling and
  the simulation of NSDS, with high level description and numerical
