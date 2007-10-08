@@ -293,11 +293,11 @@ typedef struct
 } SparseBlockStructuredMatrix;
 
 
-typedef void (*Compute_G_function)(int m, double *G, double *C, double *x , double *y , double *b,
-                                   double *param2, double *param3, double *param4, double rn, double rt, double coef);
+typedef void (*Compute_G_function)(int m, double *G, double *x , double *C, double *b,
+                                   double rn, double rt, double coef);
 
-typedef void (*Compute_JacG_function)(int m, double *JacG , double *C , double *x , double *y , double *b ,
-                                      double *A , double *B, double rn, double rt, double coef);
+typedef void (*Compute_JacG_function)(int m, double *JacG , double *x , double *C, double *b ,
+                                      double rn, double rt, double coef);
 
 typedef void (*Linesearch_function)(int n, double *G, double *zz, double *ww, double *www, double *b, double *C,
                                     double *zzzz, double *wwww, double an, double at, double mu, double err1);

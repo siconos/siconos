@@ -65,7 +65,7 @@
 int pfc_3D_solver(double *vec , double *q , int *n , method *pt , double *z , double *w)
 {
 
-  char pfckey1[10] = "NLGS", pfckey2[10] = "CPG", pfckey3[15] = "NSGS", pfckey4[15] = "NLGSNEWTON";
+  char pfckey1[10] = "NLGS", pfckey2[10] = "CPG", pfckey3[15] = "NSGS";
 
   int i, info;
   int nb = 7;
@@ -132,20 +132,6 @@ int pfc_3D_solver(double *vec , double *q , int *n , method *pt , double *z , do
 
     pt->pfc_3D.local_err = dparamLCP[4] ;
     pt->pfc_3D.local_iter = iparamLCP[4] ;
-
-  }
-  else if (strcmp(pt->pfc_3D.name , pfckey4) == 0)
-  {
-
-    iparamLCP[0] = pt->pfc_3D.itermax;
-    iparamLCP[1] = pt->pfc_3D.chat;
-    dparamLCP[0] = pt->pfc_3D.mu;
-    dparamLCP[1] = pt->pfc_3D.tol;
-
-    pfc_3D_nlgsnewton(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
-
-    pt->pfc_3D.iter = iparamLCP[2];
-    pt->pfc_3D.err  = dparamLCP[2];
 
   }
 

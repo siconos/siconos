@@ -50,7 +50,7 @@
  * \param coef    Modified parameter which contains the friction coefficient value.\n
  *
  *
- * \author Houari Khenous (20/09/2007)
+ * \author Houari Khenous last modification (08/10/2007)
  *
  */
 
@@ -67,19 +67,18 @@
 
 
 /* Compute function G */
-void Compute_G_AC(int m, double *G, double *C, double *x , double *y , double *b, double *param2, double *param3, double *param4, double rn, double rt, double coef)
+void Compute_G_AC(int m, double *G, double *x , double *C, double *b, double rn, double rt, double coef)
 {
-  int incx, incy;
-  double qs, zn , zt, zs, num, mrn, coef2, a2, b2, ab;
+
+  double zn , zt, zs, num, mrn, coef2;
+  double *y;
+  y = (double*)malloc(m * sizeof(double));
+
   coef2 = coef * coef;
-  incx =  1;
-  incy =  1;
-  qs = 1.;
 
-
-  DCOPY(m , b , incx , y , incy);
-
-  DGEMV(LA_NOTRANS , m , m , qs , C , m , x , incx , qs , y , incy);
+  y[0] = C[0 * m + 0] * x[0] + C[1 * m + 0] * x[1] + C[2 * m + 0] * x[2] + b[0];
+  y[1] = C[0 * m + 1] * x[0] + C[1 * m + 1] * x[1] + C[2 * m + 1] * x[2] + b[1];
+  y[2] = C[0 * m + 2] * x[0] + C[1 * m + 2] * x[1] + C[2 * m + 2] * x[2] + b[2];
 
   /* Projection on [0, +infty[ and on D(0, mu*zn) */
   zn = x[0] - rn * y[0];
@@ -94,68 +93,57 @@ void Compute_G_AC(int m, double *G, double *C, double *x , double *y , double *b
   zt = x[1] - rt * y[1];
   zs = x[2] - rt * y[2];
 
-  a2 = zt * zt;
-  b2 = zs * zs;
-  ab = zt * zs;
   mrn = zt * zt + zs * zs;
 
-  // if the radius is negative or the vector is null projection on the disk = 0
-  if (mrn < 1e-16)
+  if (mrn <= coef2 * x[0]*x[0])
   {
-    G[1] = x[1] / rt;
-    G[2] = x[2] / rt;
+    G[1] = y[1];
+    G[2] = y[2];
   }
-
-  // if the radius is positive and the vector is non null, we compute projection on the disk
   else
   {
-    if (mrn <= coef2 * x[0]*x[0])
-    {
-      G[1] = y[1];
-      G[2] = y[2];
-    }
-    else
-    {
-      num  = coef / sqrt(mrn);
-      G[1] = (x[1] - zt * x[0] * num) / rt;
-      G[2] = (x[2] - zs * x[0] * num) / rt;
-    }
+    num  = coef / sqrt(mrn);
+    G[1] = (x[1] - zt * x[0] * num) / rt;
+    G[2] = (x[2] - zs * x[0] * num) / rt;
   }
+
+  free(y);
+
+
 }
 
 
 
 /* Compute Jacobian of function G */
-void Compute_JacG_AC(int m, double *JacG , double *C , double *x , double *y , double *b , double *A , double *B, double rn, double rt, double coef)
+void Compute_JacG_AC(int m, double *JacG , double *x , double *C , double *b , double rn, double rt, double coef)
 {
 
-  double a1, qs, zn , zt, zs, mrn, mrn3, coef2, num, a2, b2, ab;
-  double *AC;
-  int mm;
-  int incx, incy;
-  mm = m * m;
-  AC   = (double*)malloc(mm * sizeof(double));
 
-  incx =  1;
-  incy =  1;
-  qs = 1.;
+  double zn , zt, zs, mrn, mrn3, coef2, num, a2, b2, ab;
+  int i, j, mm;
+  double *y;
+  double *A;
+  mm = m * m;
+  y = (double*)malloc(m * sizeof(double));
+  A = (double*)malloc(mm * sizeof(double));
 
   coef2 = coef * coef;
 
-  DCOPY(m , b , incx , y , incy);
-
-  DGEMV(LA_NOTRANS , m , m , qs , C , m , x , incx , qs , y , incy);
+  y[0] = C[0 * m + 0] * x[0] + C[1 * m + 0] * x[1] + C[2 * m + 0] * x[2] + b[0];
+  y[1] = C[0 * m + 1] * x[0] + C[1 * m + 1] * x[1] + C[2 * m + 1] * x[2] + b[1];
+  y[2] = C[0 * m + 2] * x[0] + C[1 * m + 2] * x[1] + C[2 * m + 2] * x[2] + b[2];
 
 
   /* Projection on [0, +infty[ and on D(0, mu*zn) */
   zn = x[0] - rn * y[0];
   if (zn > 0)
   {
-    A[0 * m + 0] = 1.;
+    for (j = 0; j < m; ++j)
+      JacG[j * m + 0] = C[j * m + 0];
   }
   else
   {
-    B[0 * m + 0] = 1. / rn;
+    JacG[0 * m + 0] = 1. / rn;
   }
   zt = x[1] - rt * y[1];
   zs = x[2] - rt * y[2];
@@ -165,38 +153,34 @@ void Compute_JacG_AC(int m, double *JacG , double *C , double *x , double *y , d
   ab = zt * zs;
   mrn = zt * zt + zs * zs;
 
-  // if the radius is negative or the vector is null projection on the disk = 0
-  if (mrn < 1e-16)
-    B[1 * m + 1] = B[2 * m + 2] = 1. / rt;
-  // if the radius is positive and the vector is non null, we compute projection on the disk
+  if (mrn <= coef2 * x[0]*x[0])
+    for (i = 1; i < m; ++i)
+      for (j = 0; j < m; ++j)
+        JacG[j * m + i] = C[j * m + i];
+
   else
   {
-    if (mrn <= coef2 * x[0]*x[0])
-      A[1 * m + 1] = A[2 * m + 2] = 1.;
-    else
-    {
-      num  = coef / sqrt(mrn);
-      B[0 * m + 1] = - num * zt / rt;
-      B[0 * m + 2] = - num * zs / rt;
-      mrn3 = sqrt(mrn) * sqrt(mrn) * sqrt(mrn);
-      A[1 * m + 1] =  coef * x[0] * b2 / mrn3;
-      A[2 * m + 1] = -coef * x[0] * ab / mrn3;
-      A[1 * m + 2] = -coef * x[0] * ab / mrn3;
-      A[2 * m + 2] =  coef * x[0] * a2 / mrn3;
-      B[1 * m + 1] = (1. - rt * coef * x[0] * b2 / mrn3) / rt;
-      B[2 * m + 1] =  coef * x[0] * ab / mrn3;
-      B[1 * m + 2] =  coef * x[0] * ab / mrn3;
-      B[2 * m + 2] = (1. - rt * coef * x[0] * a2 / mrn3) / rt;
-    }
+    num  = 1. / sqrt(mrn);
+    mrn3 = 1. / sqrt(mrn) * sqrt(mrn) * sqrt(mrn);
+    double rcof = coef / rt;
+
+    JacG[0 * m + 1] = -rcof * (num * zt + x[0] * zt * rt * mrn3 * (C[0 * m + 1] * zt + C[0 * m + 2] * zs));
+
+    JacG[0 * m + 2] = -rcof * (num * zs + x[0] * zs * rt * mrn3 * (C[0 * m + 1] * zt + C[0 * m + 2] * zs));
+
+    JacG[1 * m + 1] = (1 - coef * x[0] * (num * (1 - rt * C[1 * m + 1]) - zt * mrn3 * ((1 - rt * C[1 * m + 1]) * zt - rt * C[1 * m + 2] * zs))) / rt;
+
+    JacG[2 * m + 1] =  - rcof * x[0] * ((-num * rt * C[2 * m + 1]) - zt * mrn3 * ((1 - rt * C[2 * m + 2]) * zs - rt * C[2 * m + 1] * zt));
+
+    JacG[1 * m + 2] =  - rcof * x[0] * ((-num * rt * C[1 * m + 2]) - zs * mrn3 * ((1 - rt * C[1 * m + 1]) * zt - rt * C[1 * m + 2] * zs));
+
+    JacG[2 * m + 2] = (1 - coef * x[0] * (num * (1 - rt * C[2 * m + 2]) - zs * mrn3 * ((1 - rt * C[2 * m + 2]) * zs - rt * C[2 * m + 1] * zt))) / rt;
+
   }
 
-  DCOPY(mm , B , incx , JacG , incy);
+  free(y);
+  free(A);
 
-  incx =  3;
-  a1 = 1.0;
-  DGEMM(LA_NOTRANS , LA_NOTRANS , m , m , m , a1 , A , m , C , incx , a1 , JacG , incx);
-
-  free(AC);
 }
 
 //_/_/   Inverse Matrix 3x3  _/_//
@@ -224,13 +208,8 @@ void Linesearch_AC(int n, double *G, double *zz, double *ww, double *www, double
 {
   double err2, alpha, qs, a1;
   int mm, incx, incy;
-  double *A, *B, *AC;
 
   mm = n * n;
-
-  AC   = (double*)malloc(mm * sizeof(double));
-  A    = (double*)malloc(mm * sizeof(double));
-  B    = (double*)malloc(mm * sizeof(double));
 
   incx =  1;
   incy =  1;
@@ -244,7 +223,7 @@ void Linesearch_AC(int n, double *G, double *zz, double *ww, double *www, double
     DCOPY(n , zz , incx , zzzz , incy);
     DAXPY(n , alpha , www , incx , zzzz , incy);
 
-    Compute_G_AC(n , G , C , zzzz , wwww , b , A , B , AC , an , at , mu);
+    Compute_G_AC(n , G , zzzz , C , b , an , at , mu);
 
     err2 = DNRM2(n, G , incx);
 
@@ -257,9 +236,6 @@ void Linesearch_AC(int n, double *G, double *zz, double *ww, double *www, double
 
   DCOPY(n , wwww , incx , ww , incy);
 
-  free(A);
-  free(B);
-  free(AC);
 }
 
 

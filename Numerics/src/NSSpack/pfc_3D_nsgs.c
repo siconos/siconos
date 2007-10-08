@@ -83,15 +83,13 @@ void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int
   FILE *f101;
 
   int local_formulation, local_solver, n, in, it, is, ispeak, itermax, nc, i, j, iter, Gsize, mm;
-  //int nrhs=1,infoDGESV;
   double err, tol, mu;
-  double qs, a1, den, num; //,beta, det;
+  double qs, a1, den, num;
   int incx, incy;
   double *W, *C, *ww, *zz, *zzz;
 
   Compute_G_function Compute_G;
   Compute_JacG_function Compute_JacG;
-  /*   Linesearch_function Linesearch; */
 
   int nb = 5;
   int     iparam_local[nb];
@@ -133,8 +131,6 @@ void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int
   local_formulation = 0;//iparamLCP[5];
   local_solver      = 1;//iparamLCP[6];
 
-  /*   printf("local_formulation = %i\n",local_formulation);  */
-  /*   printf("local_solver = %i\n",local_solver);  */
 
   if (ispeak == 2) f101 = fopen("pfc_3D_nlgs.log" , "w+");
 
@@ -145,7 +141,6 @@ void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int
   /* local_formulation */
   /* 0 for Alart-Curnier formulation */
   /* 1 for Fischer-Burmeister formulation */
-
 
   if (local_solver == 0)
   {
@@ -161,13 +156,13 @@ void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int
       Compute_JacG = &Compute_JacG_AC;
       pfc_3D_local_solver = &pfc_3D_newton;
     }
-    else
-    {
-      Gsize  = 5;
-      Compute_G    = &Compute_G_FB;
-      Compute_JacG = &Compute_JacG_FB;
-      pfc_3D_local_solver = &pfc_3D_newton;
-    }
+
+    /*  else{ */
+    /*       Gsize  = 5; */
+    /*       Compute_G    = &Compute_G_FB; */
+    /*       Compute_JacG = &Compute_JacG_FB; */
+    /*       pfc_3D_local_solver = &pfc_3D_newton; */
+    /*     } */
   }
 
   mm = Gsize * Gsize;
@@ -220,8 +215,6 @@ void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int
     w[i]  = 0.;
   }
 
-
-
   /*start NSGS iterations*/
   iter = 0;
   err  = 1.;
@@ -257,12 +250,9 @@ void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int
       C[2 * Gsize + 1] = vec[(is) * n + it];
       C[2 * Gsize + 2] = vec[(is) * n + is];
 
+
       for (j = 0 ; j < Gsize ; ++j)
         zz[j] = z[Gsize * i + j];
-
-      /*   zz[0] = z[in]; */
-      /*     zz[1] = z[it]; */
-      /*     zz[2] = z[is]; */
 
       incx = n;
       incy = 1;

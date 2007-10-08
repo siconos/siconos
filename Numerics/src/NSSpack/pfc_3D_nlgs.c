@@ -80,10 +80,10 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
   FILE *f101;
 
   int n, in, it, is, ispeak, itermax, nc, i, iter;
-  double err, zn , zt, zs, den, mrn, num, tol, mu, mu2;
+  double zn, zt, zs, err, den, mrn, num, tol, mu, mu2;
   double qs, a1, b1;
   int incx, incy;
-  double *diag, *ww;
+  double *ww;
 
   clock_t t1, t2;
 
@@ -115,9 +115,7 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
   iter = 0;
 
   /* Allocation */
-
   ww   = (double*)malloc(n * sizeof(double));
-  diag = (double*)malloc(n * sizeof(double));
 
   /* Check for non trivial case */
 
@@ -133,9 +131,8 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
       w[i] = 0.;
       z[i] = 0.;
     }
-
     free(ww);
-    free(diag);
+
     *info = 0;
     return;
   }
@@ -147,8 +144,6 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
     ww[i] = 0.;
     w[i]  = 0.;
   }
-
-
 
   /* Preparation of the diagonal of the inverse matrix */
 
@@ -163,18 +158,9 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
         printf(" Warning negative diagonal term \n");
         printf(" The local problem can be solved \n");
       }
-
       *info = 2;
-      free(diag);
       free(ww);
-
       return;
-    }
-    else
-    {
-      diag[in  ] = 1.0 / vec[(in) * n + in  ];
-      diag[in + 1] = 1.0 / vec[(in + 1) * n + in + 1];
-      diag[in + 2] = 1.0 / vec[(in + 2) * n + in + 2];
     }
   }
 
@@ -215,15 +201,16 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
 
       if (zn > 0.0)
       {
-        z[3 * i  ] = 0.0;
-        z[3 * i + 1] = 0.0;
-        z[3 * i + 2] = 0.0;
+        z[in] = 0.0;
+        z[it] = 0.0;
+        z[is] = 0.0;
       }
       else
       {
-        z[in] = -zn * diag[in];
-        z[it] = -zt * diag[it];
-        z[is] = -zs * diag[is];
+
+        z[in] = -zn / vec[in * n + in];
+        z[it] = -zt / vec[it * n + it];
+        z[is] = -zs / vec[is * n + is];
 
         mrn = z[it] * z[it] + z[is] * z[is];
 
@@ -282,7 +269,6 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
     else *info = 0;
   }
 
-  free(diag);
   free(ww);
 
   if (ispeak == 2) fclose(f101);

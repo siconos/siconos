@@ -47,14 +47,16 @@
 
 
 
-void pfc_3D_newton(int n , double *C , double *b , double *zz , double *ww , double mu , Compute_G_function(*Compute_G), Compute_JacG_function(*Compute_JacG), int *iparam_local , double *dparam_local)
+void pfc_3D_newton(int n , double *C , double *b ,  double *zz , double *ww , double mu ,
+                   Compute_G_function(*Compute_G), Compute_JacG_function(*Compute_JacG),
+                   int *iparam_local , double *dparam_local)
 {
 
   int i, j, niter, mm;
   double nerr, nerr1, an, at;
   double a1, qs, alpha, beta, det;
   int incx, incy;
-  double *www, *G, *JacG, *AA , *A, *B, *AC, *wwww, *zzzz;
+  double *www, *G, *JacG, *AA , *wwww, *zzzz;
 
   Linesearch_function Linesearch;
 
@@ -73,9 +75,6 @@ void pfc_3D_newton(int n , double *C , double *b , double *zz , double *ww , dou
 
   JacG = (double*)malloc(mm * sizeof(double));
   AA   = (double*)malloc(mm * sizeof(double));
-  AC   = (double*)malloc(mm * sizeof(double));
-  A    = (double*)malloc(mm * sizeof(double));
-  B    = (double*)malloc(mm * sizeof(double));
 
   G    = (double*)malloc(n * sizeof(double));
   www  = (double*)malloc(n * sizeof(double));
@@ -88,7 +87,7 @@ void pfc_3D_newton(int n , double *C , double *b , double *zz , double *ww , dou
   {
     G[i] = www[i] = 0.;
     for (j = 0 ; j < n ; ++j)
-      JacG[j * n + i] = AA[j * n + i] =  A[j * n + i] = B[j * n + i] = 0.;
+      JacG[j * n + i] = AA[j * n + i] = 0.;
   }
 
   an = 1. / C[0 * n + 0];
@@ -111,30 +110,28 @@ void pfc_3D_newton(int n , double *C , double *b , double *zz , double *ww , dou
   {
     ++niter;
 
-    (*Compute_G)(n , G , C , zz , ww , b , A , B , AC , an , at , mu);
+    (*Compute_G)(n , G , zz , C , b , an , at , mu);
 
-    (*Compute_JacG)(n , JacG , C , zz , ww , b , A , B , an , at , mu);
+    (*Compute_JacG)(n , JacG , zz , C , b , an , at , mu);
 
     nerr1 = DNRM2(n, G , incx);
 
     /***** Criterium convergence *****/
     /* compute the direction www s.t X^{k+1} = X^{k} + www, where X^{k} = za */
-    for (i = 0 ; i < n ; ++i)
-      www[i] = 0.;
-    //matrix_inv( n,JacG, AA);
+
     matrix_inv3(JacG, AA);
 
     DGEMV(LA_NOTRANS , n , n , a1 , AA , n , G , incx , qs , www , incy);
 
     (*Linesearch)(n , G , zz , ww , www , b , C , zzzz, wwww , an , at , mu , nerr1);
     nerr = nerr1;
+    for (i = 0 ; i < n ; ++i)
+      www[i] = 0.;
+    /*  printf("-----------------------------------Iteration Newton %i --------- Newton Error = %14.7e\n",niter,nerr); */
   }
 
 
   free(AA);
-  free(A);
-  free(B);
-  free(AC);
   free(G);
   free(JacG);
   free(www);
