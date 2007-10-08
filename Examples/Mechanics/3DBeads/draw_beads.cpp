@@ -36,15 +36,15 @@ using namespace std;
 
 #include <drawstuff/drawstuff.h>
 
-#define DSNUMBER   102      // the number of dynamical systems
+#define DSNUMBER   2      // the number of dynamical systems
 
 #define WALL 1       // Positions of walls
-#define TOP 1       // Positions of walls
+#define TOP 2.2       // Positions of walls
 #define GROUND 0       // Positions of walls
 
 Simulation * GLOB_SIM;
 TimeDiscretisation * GLOB_T;
-LagrangianDS * GLOB_tabLDS[DSNUMBER];
+LagrangianDS *GLOB_tabLDS[DSNUMBER];
 
 int GLOB_COMPUTE;
 int GLOB_STEP;
@@ -116,20 +116,46 @@ void DrawBox(float alpha)
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glColor4f(0.5, 0.7, 0.9, alpha); // 3 premiers champs = RGB, quatri.ANhme champ = opacitNi
 
-  // Drawing the wall
-  glColor4f(0.5, 0.7, 0.9, alpha); //glColor3f(0.1, 0.1, 0.1);
-  glBegin(GL_QUAD_STRIP);
-  glVertex3f(1., -1., 1.);
-  glVertex3f(1., 1., 1.);
-  glVertex3f(1., -1., 0.);
-  glVertex3f(1., 1., 0.);
-  glVertex3f(-1., -1., 0.);
-  glVertex3f(-1., 1., 0.);
-  glVertex3f(-1., -1., 1.);
-  glVertex3f(-1., 1., 1.);
-  glVertex3f(1., -1., 1.);
-  glVertex3f(1., 1., 1.);
-  glEnd();
+  glBegin(GL_QUADS);
+  // Front Face
+  glNormal3f(0.0f, 0.0f, 1.0f); // Normal Pointing Towards Viewer
+  glTexCoord2f(0.0f, 0.0f);
+  glVertex3f(-1.0f, -1.0f,  TOP);// Point 1 (Front)
+  glVertex3f(1.0f, -1.0f,  TOP); // Point 2 (Front)
+  glVertex3f(1.0f,  1.0f,  TOP); // Point 3 (Front)
+  glVertex3f(-1.0f,  1.0f,  TOP);// Point 4 (Front)
+  // Back Face
+  glNormal3f(0.0f, 0.0f, -1.0f);// Normal Pointing Away From Viewer
+  glVertex3f(-1.0f, -1.0f, 0.0f);// Point 1 (Back)
+  glVertex3f(-1.0f,  1.0f, 0.0f);// Point 2 (Back)
+  glVertex3f(1.0f,  1.0f, 0.0f); // Point 3 (Back)
+  glVertex3f(1.0f, -1.0f, 0.0f); // Point 4 (Back)
+  // Top Face
+  glNormal3f(0.0f, 1.0f, 0.0f); // Normal Pointing Up
+  glVertex3f(-1.0f,  1.0f, 0.0f);// Point 1 (Top)
+  glVertex3f(-1.0f,  1.0f, TOP);// Point 2 (Top)
+  glVertex3f(1.0f,  1.0f, TOP); // Point 3 (Top)
+  glVertex3f(1.0f,  1.0f, 0.0f); // Point 4 (Top)
+  // Bottom Face
+  glNormal3f(0.0f, -1.0f, 0.0f);// Normal Pointing Down
+  glVertex3f(-1.0f, -1.0f, 0.0f);// Point 1 (Bottom)
+  glVertex3f(1.0f, -1.0f, 0.0f); // Point 2 (Bottom)
+  glVertex3f(1.0f, -1.0f, TOP); // Point 3 (Bottom)
+  glVertex3f(-1.0f, -1.0f, TOP);// Point 4 (Bottom)
+  // Right face
+  glNormal3f(1.0f, 0.0f, 0.0f); // Normal Pointing Right
+  glVertex3f(1.0f, -1.0f, 0.0f); // Point 1 (Right)
+  glVertex3f(1.0f,  1.0f, 0.0f); // Point 2 (Right)
+  glVertex3f(1.0f,  1.0f, TOP); // Point 3 (Right)
+  glVertex3f(1.0f, -1.0f, TOP); // Point 4 (Right)
+  // Left Face
+  glNormal3f(-1.0f, 0.0f, 0.0f);// Normal Pointing Left
+  glVertex3f(-1.0f, -1.0f, 0.0f);// Point 1 (Left)
+  glVertex3f(-1.0f, -1.0f, TOP);// Point 2 (Left)
+  glVertex3f(-1.0f,  1.0f, TOP);// Point 3 (Left)
+  glVertex3f(-1.0f,  1.0f, 0.0f);// Point 4 (Left)
+  glEnd();// Done Drawing Quads
+
   glDisable(GL_BLEND);
 }
 void Drawwall()
@@ -317,8 +343,10 @@ void initSiconos()
     double h = 0.005;                 // time step
 
 
-    string solverName = "NSGS";      // solver algorithm used for non-smooth problem
+    //string solverName = "NSGS";      // solver algorithm used for non-smooth problem
     //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
+    string solverName = "NEWTON";      // solver algorithm used for non-smooth problem
+    //string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
     //string solverName = "PGS";      // solver algorithm used for non-smooth problem
     //string solverName = "Lemke";      // solver algorithm used for non-smooth problem
 
@@ -353,7 +381,7 @@ void initSiconos()
 
     SiconosMatrix *Mass = new SimpleMatrix(nDof, nDof);
     (*Mass)(0, 0) = (*Mass)(1, 1) = (*Mass)(2, 2) = m;    ;
-    (*Mass)(3, 3) = (*Mass)(4, 4) = (*Mass)(5, 5) = 3. / 5 * R * R;
+    (*Mass)(3, 3) = (*Mass)(4, 4) = (*Mass)(5, 5) = 3. / 5 * m * R * R;
 
     // -- Initial positions and velocities --
     // q0[i] and v0[i] correspond to position and velocity of ball i.
@@ -371,12 +399,8 @@ void initSiconos()
     }
 
     //    // set values
-    (*(q0[0]))(0) =  0.0;
-    (*(q0[0]))(1) =  0.3;
-    (*(q0[0]))(2) =  0.35;
-    (*(q0[1]))(0) =  0.0;
-    (*(q0[1]))(1) =  0.3;
-    (*(q0[1]))(2) =  0.12;
+    //   (*(q0[0]))(0) =  0.0;    (*(q0[0]))(1) =  0.3;  (*(q0[0]))(2) =  0.35;
+    //   (*(q0[1]))(0) =  0.0;    (*(q0[1]))(1) =  0.3;  (*(q0[1]))(2) =  0.12;
 
     //   (*(q0[0]))(0) =  0.0;    (*(q0[0]))(1) =  0.;  (*(q0[0]))(2) =  0.12;
     //     (*(q0[1]))(0) =  0.0;    (*(q0[1]))(1) =  0.3;  (*(q0[1]))(2) =  0.12;
@@ -454,43 +478,39 @@ void initSiconos()
     //     (*(q0[18]))(0)= -0.35;   (*(q0[18]))(1)= 0.35;  (*(q0[18]))(2)=  0.1;
     //     (*(q0[19]))(0)= -0.35;   (*(q0[19]))(1)=-0.35;  (*(q0[19]))(2)=  0.1;
 
+    (*(q0[0]))(0) =  0.0;
+    (*(q0[0]))(1) =  0.3;
+    (*(q0[0]))(2) =  0.1;
+    (*(v0[0]))(0) =  0.;
+    (*(v0[0]))(1) =  -1.;
+    (*(v0[0]))(2) =  0.12;
 
-    // 25*etage beads in cube
-    unsigned int cote  = 5;
-    unsigned int etage  = 4;
-    unsigned int k = 0;
-    for (j = 0; j < etage; j++)
-    {
-      for (k = 0; k < cote; k++)
-      {
-        for (i = 0; i < cote; i++)
-        {
-          if (j % 2 == 0)
-          {
-            (*(q0[k * cote + i + j * cote * cote]))(0) = -0.6 + 3 * k * R;
-            (*(q0[k * cote + i + j * cote * cote]))(1) = -0.6 + 3 * i * R;
-            (*(q0[k * cote + i + j * cote * cote]))(2) = 0.2 + (2 * j) * R;
-          }
-          else
-          {
-            (*(q0[k * cote + i + j * cote * cote]))(0) = -0.6 + 3 * k * R;
-            (*(q0[k * cote + i + j * cote * cote]))(1) = -0.6 + 3 * i * R + R / 4;
-            (*(q0[k * cote + i + j * cote * cote]))(2) = 0.2 + (2 * j) * R;
-          }
-        }
-      }
-    }
+    (*(q0[1]))(0) =  0.0;
+    (*(q0[1]))(1) =  0.;
+    (*(q0[1]))(2) =  0.1;
+    (*(v0[1]))(0) =  0.;
+    (*(v0[1]))(1) =  1.;
+    (*(v0[1]))(2) =  0.;
 
-    (*(q0[DSNUMBER - 2]))(0) = 0.;
-    (*(q0[DSNUMBER - 2]))(1) = 0.;
-    (*(q0[DSNUMBER - 2]))(2) =  1.2 * etage / 4;
-    (*(v0[DSNUMBER - 2]))(1) =  -1;
-    (*(v0[DSNUMBER - 2]))(2) =  -2;
-    (*(q0[DSNUMBER - 1]))(0) = -0.8;
-    (*(q0[DSNUMBER - 1]))(1) = -0.8;
-    (*(q0[DSNUMBER - 1]))(2) =  0.1;
-    (*(v0[DSNUMBER - 1]))(0) =  10;
-    (*(v0[DSNUMBER - 1]))(1) =  10;
+    //    // 25*etage beads in cube
+    //     unsigned int cote  = 5;
+    //     unsigned int etage  = 10;
+    //     unsigned int k = 0;
+    //     for (j=0;j<etage;j++){
+    //       for (k=0;k<cote;k++) {
+    //  for (i=0;i<cote;i++) {
+    //    if (j % 2 == 0){
+    //      (*(q0[k*cote+i+j*cote*cote]))(0) = -0.6 + 3*k*R; (*(q0[k*cote+i+j*cote*cote]))(1) = -0.6 + 3*i*R; (*(q0[k*cote+i+j*cote*cote]))(2) = 0.11+(2*j)*R;
+    //    }
+    //    else{
+    //      (*(q0[k*cote+i+j*cote*cote]))(0) = -0.5 + 3*k*R; (*(q0[k*cote+i+j*cote*cote]))(1) = -0.5 + 3*i*R+R/4;(*(q0[k*cote+i+j*cote*cote]))(2) = 0.11+(2*j)*R;
+    //    }
+    //  }
+    //       }
+    //     }
+
+    //     (*(q0[DSNUMBER-2]))(0)= -0.8;   (*(q0[DSNUMBER-2]))(1)= -0.8;   (*(q0[DSNUMBER-2]))(2)=  (*(q0[DSNUMBER-3]))(2);    (*(v0[DSNUMBER-2]))(1) =  -1;(*(v0[DSNUMBER-2]))(2) =  -2;
+    //     (*(q0[DSNUMBER-1]))(0)= -0.8;  (*(q0[DSNUMBER-1]))(1)= -0.8;  (*(q0[DSNUMBER-1]))(2)=  0.1;  (*(v0[DSNUMBER-1]))(0) =  10;(*(v0[DSNUMBER-1]))(1) =  10;
 
 
     // un grand merci
@@ -711,7 +731,7 @@ void initSiconos()
     if (obst_z_p)
     {
       SiconosVector *b1_ = new SimpleVector(3);
-      (*b1_)(0) = 1.0 - R;
+      (*b1_)(0) = TOP - R;
       SiconosMatrix *H1_ = new SimpleMatrix(3, nDof);
       (*H1_)(0, 2) = -1.0;
       (*H1_)(1, 0) = 1.0;

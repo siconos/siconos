@@ -17,12 +17,12 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  *
  * Multi-beads 3D frictionl contact problem in presence of a rigid foundations
- * 30/01/2007- Authors: houari khenous & Roger Pissard
+ * 30/01/2007- Authors: houari khenous
 
 */
-// =============================== Multi bouncing beads column simulation ===============================
-//  N beads between a floor and a ceiling ...
-// Keywords: LagrangianLinearDS, LagrangianLinear relation, Moreau TimeStepping, LCP.
+// =============================== Multi beads frictional contact simulation ============================
+
+// Keywords: LagrangianLinearDS, LagrangianLinear relation, Moreau TimeStepping, Non-smooth Newton method.
 //
 // ======================================================================================================
 
@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
 
     // User-defined main parameters
 
-    unsigned int DSNUMBER = 2;       // the number of dynamical systems
+    unsigned int DSNUMBER = 2000;       // the number of dynamical systems
 
     unsigned int nDof = 6;            // degrees of freedom for beads
 
@@ -51,10 +51,11 @@ int main(int argc, char* argv[])
     double R = 0.1;                   // radius of balls
 
     double t0 = 0;                    // initial computation time
-    double T = 10;                    // final computation time
+    double T = 5;                    // final computation time
     double h = 0.005;                 // time step
 
-    string solverName = "NSGS";      // solver algorithm used for non-smooth problem
+    //string solverName = "NSGS";      // solver algorithm used for non-smooth problem
+    string solverName = "NEWTON";      // solver algorithm used for non-smooth problem
     //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
     double e = 0.8;                  // nslaw
     double e2 = 0.8;                  // nslaw2
@@ -62,24 +63,26 @@ int main(int argc, char* argv[])
 
 
     // 1 to take in account the obstacle and  0 no
+    double Top = 200.5;
+    double Wall = 1.;
+    double Ground = 0.;
 
-    int obst_z_p = 1;                    //  for z --> +
-    int obst_z_m = 1;                    //  for z --> -
-    int obst_y_p = 1;                    //  for y --> +
-    int obst_y_m = 1;                    //  for y --> -
-    int obst_x_p = 1;                    //  for x --> +
-    int obst_x_m = 1;                    //  for x --> -
+    unsigned int obst_z_p = 1;                    //  for z --> +
+    unsigned int obst_z_m = 1;                    //  for z --> -
+    unsigned int obst_y_p = 1;                    //  for y --> +
+    unsigned int obst_y_m = 1;                    //  for y --> -
+    unsigned int obst_x_p = 1;                    //  for x --> +
+    unsigned int obst_x_m = 1;                    //  for x --> -
 
 
     // -------------------------
     // --- Dynamical systems ---
     // -------------------------
 
-    int Fact;
+    unsigned int Fact;
     Fact = (DSNUMBER) * (DSNUMBER - 1) / 2;
 
     unsigned int i;
-    unsigned int k;
     unsigned int j;
     unsigned int l;
     DynamicalSystemsSet allDS; // the list of DS
@@ -88,7 +91,7 @@ int main(int argc, char* argv[])
 
     SiconosMatrix *Mass = new SimpleMatrix(nDof, nDof);
     (*Mass)(0, 0) = (*Mass)(1, 1) = (*Mass)(2, 2) = m;    ;
-    (*Mass)(3, 3) = (*Mass)(4, 4) = (*Mass)(5, 5) = 3. / 5 * R * R;
+    (*Mass)(3, 3) = (*Mass)(4, 4) = (*Mass)(5, 5) = 3. / 5 * m * R * R;
 
     // -- Initial positions and velocities --
     // q0[i] and v0[i] correspond to position and velocity of ball i.
@@ -107,15 +110,9 @@ int main(int argc, char* argv[])
 
     // set values
 
-    (*(q0[0]))(0) =  0.0;
-    (*(q0[0]))(1) =  0.3;
-    (*(q0[0]))(2) =  0.1;
-    (*(v0[0]))(0) =  0.;
-    (*(v0[0]))(1) =  -1.;
-    (*(v0[0]))(2) =  0.12;
+    //   (*(q0[0]))(0) =  0.0;    (*(q0[0]))(1) =  0.3;  (*(q0[0]))(2) =  0.12;
+    //     (*(q0[1]))(0) =  0.2;    (*(q0[1]))(1) =  0.3;  (*(q0[1]))(2) =  0.12;
 
-    //     (*(q0[1]))(0) =  0.0;    (*(q0[1]))(1) =  0.;  (*(q0[1]))(2) =  0.1;
-    //     (*(v0[1]))(0) =  0.;    (*(v0[1]))(1) =  1.;  (*(v0[1]))(2) =  0.;
 
     //   (*(q0[2]))(0) =  0.;    (*(q0[2]))(1) =  0.5;  (*(q0[2]))(2) =  0.1;
     //     (*(q0[3]))(0) =  0.;    (*(q0[3]))(1) =  -0.5;  (*(q0[3]))(2) =  0.1;
@@ -176,22 +173,34 @@ int main(int argc, char* argv[])
     //     (*(q0[18]))(0)= -0.35;   (*(q0[18]))(1)= 0.35;  (*(q0[18]))(2)=  0.1;
     //     (*(q0[19]))(0)= -0.35;   (*(q0[19]))(1)=-0.35;  (*(q0[19]))(2)=  0.1;
 
-    // // 25*etage beads in cube
-    //     unsigned int cote  = 5;
-    //     unsigned int etage  = 10;
-    //     for (j=0;j<etage;j++){
-    //       for (k=0;k<cote;k++) {
-    //  for (i=0;i<cote;i++) {
-    //    if (j % 2 == 0){
-    //      (*(q0[k*cote+i+j*cote*cote]))(0) = -0.6 + 3*k*R; (*(q0[k*cote+i+j*cote*cote]))(1) = -0.6 + 3*i*R; (*(q0[k*cote+i+j*cote*cote]))(2) = 0.2+(2*j)*R;
-    //    }
-    //    else{
-    //      (*(q0[k*cote+i+j*cote*cote]))(0) = -0.6 + 3*k*R; (*(q0[k*cote+i+j*cote*cote]))(1) = -0.6 + 3*i*R+R/4;(*(q0[k*cote+i+j*cote*cote]))(2) = 0.2+(2*j)*R;
-    //    }
-    //  }
-    //       }
-    //     }
+    // 25*etage beads in cube
+    unsigned int k;
+    unsigned int cote  = 5;
+    unsigned int etage  = 80;
+    for (j = 0; j < etage; j++)
+    {
+      for (k = 0; k < cote; k++)
+      {
+        for (i = 0; i < cote; i++)
+        {
+          if (j % 2 == 0)
+          {
+            (*(q0[k * cote + i + j * cote * cote]))(0) = -0.6 + 3 * k * R;
+            (*(q0[k * cote + i + j * cote * cote]))(1) = -0.6 + 3 * i * R;
+            (*(q0[k * cote + i + j * cote * cote]))(2) = 0.2 + (2 * j) * R;
+          }
+          else
+          {
+            (*(q0[k * cote + i + j * cote * cote]))(0) = -0.6 + 3 * k * R;
+            (*(q0[k * cote + i + j * cote * cote]))(1) = -0.6 + 3 * i * R + R / 4;
+            (*(q0[k * cote + i + j * cote * cote]))(2) = 0.2 + (2 * j) * R;
+          }
+        }
+      }
+    }
 
+    for (i = 0; i < DSNUMBER; i++)
+      (*(v0[i]))(2) = -1.;
     //     (*(q0[DSNUMBER-2]))(0)= 0.;   (*(q0[DSNUMBER-2]))(1)= 0.;   (*(q0[DSNUMBER-2]))(2)=  1.2*etage/4;    (*(v0[DSNUMBER-2]))(1) =  -1;(*(v0[DSNUMBER-2]))(2) =  -2;
     //     (*(q0[DSNUMBER-1]))(0)= -0.8;  (*(q0[DSNUMBER-1]))(1)= -0.8;  (*(q0[DSNUMBER-1]))(2)=  0.1;  (*(v0[DSNUMBER-1]))(0) =  10;(*(v0[DSNUMBER-1]))(1) =  10;
 
@@ -236,7 +245,7 @@ int main(int argc, char* argv[])
     if (obst_z_m)
     {
       SiconosVector *b1 = new SimpleVector(3);
-      (*b1)(0) = -R;
+      (*b1)(0) = Ground - R;
       SiconosMatrix *H1 = new SimpleMatrix(3, nDof);
       (*H1)(0, 2) = 1.0;
       (*H1)(1, 0) = 1.0;
@@ -261,7 +270,7 @@ int main(int argc, char* argv[])
     if (obst_z_p)
     {
       SiconosVector *b1_ = new SimpleVector(3);
-      (*b1_)(0) = 1.0 - R;
+      (*b1_)(0) = Top - R;
       SiconosMatrix *H1_ = new SimpleMatrix(3, nDof);
       (*H1_)(0, 2) = -1.0;
       (*H1_)(1, 0) = 1.0;
@@ -287,7 +296,7 @@ int main(int argc, char* argv[])
     if (obst_y_p)
     {
       SiconosVector *b2 = new SimpleVector(3);
-      (*b2)(0) = 1. - R;
+      (*b2)(0) = Wall - R;
       SiconosMatrix *H2 = new SimpleMatrix(3, nDof);
       (*H2)(0, 1) = 1.0;
       (*H2)(1, 0) = 1.0;
@@ -312,7 +321,7 @@ int main(int argc, char* argv[])
     if (obst_y_m)
     {
       SiconosVector *b2_ = new SimpleVector(3);
-      (*b2_)(0) = 1. - R;
+      (*b2_)(0) = Wall - R;
       SiconosMatrix *H2_ = new SimpleMatrix(3, nDof);
       (*H2_)(0, 1) = -1.0;
       (*H2_)(1, 0) = 1.0;
@@ -337,7 +346,7 @@ int main(int argc, char* argv[])
     if (obst_x_p)
     {
       SiconosVector *b3 = new SimpleVector(3);
-      (*b3)(0) = 1. - R;
+      (*b3)(0) = Wall - R;
       SiconosMatrix *H3 = new SimpleMatrix(3, nDof);
       (*H3)(0, 0) = 1.0;
       (*H3)(1, 1) = 1.0;
@@ -361,7 +370,7 @@ int main(int argc, char* argv[])
     if (obst_x_m)
     {
       SiconosVector *b3_ = new SimpleVector(3);
-      (*b3_)(0) = 1. - R;
+      (*b3_)(0) = Wall - R;
       SiconosMatrix *H3_ = new SimpleMatrix(3, nDof);
       (*H3_)(0, 0) = -1.0;
       (*H3_)(1, 1) = 1.0;
@@ -455,47 +464,77 @@ int main(int argc, char* argv[])
     unsigned int outputSize = 1 + 2 * DSNUMBER;
     SimpleMatrix dataPlot(N + 1, outputSize);
     int iter_k = 0; // index for output.
-    dataPlot(iter_k, 0) = iter_k * GLOB_T->getH();
-    dataPlot(iter_k, 1) = GLOB_tabLDS[0]->getQ()(2);
-    dataPlot(iter_k, 2) = GLOB_tabLDS[0]->getVelocity()(2);
-    //     dataPlot(iter_k,3) = (multiBeads->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(1)->getLambda(1))(0);
-
-    dataPlot(iter_k, 3) = GLOB_tabLDS[1]->getQ()(2);
-    dataPlot(iter_k, 4) = GLOB_tabLDS[1]->getVelocity()(2);
-    //    dataPlot(iter_k,6) = (multiBeads->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(1)->getLambda(1))(0);
-
-    // --- Time loop ---
-    cout << "Start computation ... " << endl;
-    EventsManager * eventsManager = GLOB_SIM->getEventsManagerPtr();
-
-    while (eventsManager->hasNextEvent())
+    dataPlot(iter_k, 0) = multiBeads->getT0();
+    for (i = 0; i < DSNUMBER; ++i)
     {
-      GLOB_SIM->computeOneStep();
-      //  GLOB_SIM->advanceToEvent();
-      //  GLOB_SIM->processEvents();
-      // --- Get values to be plotted ---
-      iter_k++;
-      dataPlot(iter_k, 0) = iter_k * GLOB_T->getH();
-      dataPlot(iter_k, 1) = GLOB_tabLDS[0]->getQ()(2);
-      dataPlot(iter_k, 2) = GLOB_tabLDS[0]->getVelocity()(2);
-      //  dataPlot(iter_k,3) = (multiBeads->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
-      dataPlot(iter_k, 3) = GLOB_tabLDS[1]->getQ()(2);
-      dataPlot(iter_k, 4) = GLOB_tabLDS[1]->getVelocity()(2);
-      //  dataPlot(k,6) = (multiBeads->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(1)->getLambda(1))(0);
-      GLOB_SIM->nextStep();
-
-      cout << "End of computation - Number of iterations done: " << iter_k << endl;
-
+      dataPlot(iter_k, 1 + 2 * i) = GLOB_tabLDS[i]->getQ()(2);
+      dataPlot(iter_k, 2 + 2 * i) = GLOB_tabLDS[i]->getVelocity()(2);
+      //  dataPlot(iter_k,3+3*i) = (multiBeads->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(1)->getLambda(1))(0);
     }
 
+    // --- Time loop ---
+    cout << "====> Start computation ... " << endl << endl;
+    // ==== Simulation loop - Writing without explicit event handling =====
+    boost::progress_display show_progress(N);
+    for (iter_k = 1 ; iter_k < N + 1  ; ++iter_k)
+    {
+      GLOB_SIM->computeOneStep();
+      // --- Get values to be plotted ---
+      dataPlot(iter_k, 0) =  GLOB_SIM->getNextTime();
+      for (i = 0; i < DSNUMBER; ++i)
+      {
+        dataPlot(iter_k, 1 + 2 * i) = GLOB_tabLDS[i]->getQ()(2);
+        dataPlot(iter_k, 2 + 2 * i) = GLOB_tabLDS[i]->getVelocity()(2);
+        // dataPlot(iter_k,3+3*i)=(multiBeads->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(1)->getLambda(1))(0);
+      }
+      GLOB_SIM->nextStep();
+      ++show_progress;
+    }
+    cout << "End of computation - Number of iterations done: " << iter_k - 1 << endl;
+
+
+
     // --- Output files ---
+    cout << "====> Output file writing ..." << endl;
     ioMatrix io("result.dat", "ascii");
-    io.write(dataPlot, "noDim");
-    //    cout<<"End of computation - Number of iterations done: "<<k<<endl;
+    //    io.write(dataPlot,"noDim");
 
     // --- Free memory ---
+    delete nsds;
+    delete multiBeads;
     delete osnspb;
     delete OSI;
+    delete GLOB_SIM;
+    delete GLOB_T;
+    for (i = 0; i < Fact; ++i)
+      delete LLR[i];
+    for (i = 0; i < DSNUMBER; ++i)
+    {
+      delete GLOB_tabLDS[i];
+      delete q0[i];
+      delete v0[i];
+      delete LLR1[i];
+      delete LLR1_[i];
+      delete LLR2[i];
+      delete LLR2_[i];
+      delete LLR3[i];
+      delete LLR3_[i];
+    }
+    delete Mass;
+    delete nslaw1;
+    delete nslaw2;
+    // delete b1;
+    //     delete H1;
+    //     delete b1_;
+    //     delete H1_;
+    //     delete b2;
+    //     delete H2;
+    //     delete b2_;
+    //     delete H2_;
+    //     delete b3;
+    //     delete H3;
+    //     delete b3_;
+    //     delete H3_;
   }
   catch (SiconosException e)
   {

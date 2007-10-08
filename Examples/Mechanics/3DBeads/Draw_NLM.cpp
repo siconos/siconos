@@ -37,10 +37,10 @@ using namespace std;
 #include <drawstuff/drawstuff.h>
 
 
-#define COUPLE   72     // the number of dynamical systems
+#define COUPLE   90     // the number of dynamical systems
 
 #define WALL 1       // Positions of walls
-#define TOP 1       // Positions of walls
+#define TOP 2.2       // Positions of walls
 #define GROUND 0       // Positions of walls
 
 
@@ -129,6 +129,7 @@ void DrawCouple(LagrangianDS *lds, float radius)
   dsDrawSphere(pos22, R, radius);
 }
 
+
 void DrawBox(float alpha)
 {
 
@@ -137,30 +138,48 @@ void DrawBox(float alpha)
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glColor4f(0.5, 0.7, 0.9, alpha); // 3 premiers champs = RGB, quatri.ANhme champ = opacitNi
 
-  // Drawing the wall
-  glColor4f(0.5, 0.7, 0.9, alpha); //glColor3f(0.1, 0.1, 0.1);
-  glBegin(GL_QUAD_STRIP);
+  glBegin(GL_QUADS);
+  // Front Face
+  glNormal3f(0.0f, 0.0f, 1.0f); // Normal Pointing Towards Viewer
+  glTexCoord2f(0.0f, 0.0f);
+  glVertex3f(-1.0f, -1.0f,  TOP);// Point 1 (Front)
+  glVertex3f(1.0f, -1.0f,  TOP); // Point 2 (Front)
+  glVertex3f(1.0f,  1.0f,  TOP); // Point 3 (Front)
+  glVertex3f(-1.0f,  1.0f,  TOP);// Point 4 (Front)
+  // Back Face
+  glNormal3f(0.0f, 0.0f, -1.0f);// Normal Pointing Away From Viewer
+  glVertex3f(-1.0f, -1.0f, 0.0f);// Point 1 (Back)
+  glVertex3f(-1.0f,  1.0f, 0.0f);// Point 2 (Back)
+  glVertex3f(1.0f,  1.0f, 0.0f); // Point 3 (Back)
+  glVertex3f(1.0f, -1.0f, 0.0f); // Point 4 (Back)
+  // Top Face
+  glNormal3f(0.0f, 1.0f, 0.0f); // Normal Pointing Up
+  glVertex3f(-1.0f,  1.0f, 0.0f);// Point 1 (Top)
+  glVertex3f(-1.0f,  1.0f, TOP);// Point 2 (Top)
+  glVertex3f(1.0f,  1.0f, TOP); // Point 3 (Top)
+  glVertex3f(1.0f,  1.0f, 0.0f); // Point 4 (Top)
+  // Bottom Face
+  glNormal3f(0.0f, -1.0f, 0.0f);// Normal Pointing Down
+  glVertex3f(-1.0f, -1.0f, 0.0f);// Point 1 (Bottom)
+  glVertex3f(1.0f, -1.0f, 0.0f); // Point 2 (Bottom)
+  glVertex3f(1.0f, -1.0f, TOP); // Point 3 (Bottom)
+  glVertex3f(-1.0f, -1.0f, TOP);// Point 4 (Bottom)
+  // Right face
+  glNormal3f(1.0f, 0.0f, 0.0f); // Normal Pointing Right
+  glVertex3f(1.0f, -1.0f, 0.0f); // Point 1 (Right)
+  glVertex3f(1.0f,  1.0f, 0.0f); // Point 2 (Right)
+  glVertex3f(1.0f,  1.0f, TOP); // Point 3 (Right)
+  glVertex3f(1.0f, -1.0f, TOP); // Point 4 (Right)
+  // Left Face
+  glNormal3f(-1.0f, 0.0f, 0.0f);// Normal Pointing Left
+  glVertex3f(-1.0f, -1.0f, 0.0f);// Point 1 (Left)
+  glVertex3f(-1.0f, -1.0f, TOP);// Point 2 (Left)
+  glVertex3f(-1.0f,  1.0f, TOP);// Point 3 (Left)
+  glVertex3f(-1.0f,  1.0f, 0.0f);// Point 4 (Left)
+  glEnd();// Done Drawing Quads
 
-  glNormal3f(1, 0, 0);
-  glVertex3f(1., -1., 2.);
-  glVertex3f(1., 1., 2.);
-  glVertex3f(1., -1., 0.);
-  glVertex3f(1., 1., 0.);
-
-  glNormal3f(0, 0, -1);
-  glVertex3f(-1., -1., 0.);
-  glVertex3f(-1., 1., 0.);
-
-  glNormal3f(-1, 0, 0);
-  glVertex3f(-1., -1., 2.);
-  glVertex3f(-1., 1., 2.);
-
-  glNormal3f(0, 0, 1);
-  glVertex3f(1., -1., 2.);
-  glVertex3f(1., 1., 2.);
-
-  glEnd();
   glDisable(GL_BLEND);
+
 }
 
 void Drawwall()
@@ -268,9 +287,9 @@ void SimuLoop(int pause)
     DrawCouple(GLOB_tabLDS[i], radius);
   }
 
-  //Drawwall();
+  //  Drawwall();
 
-  float alpha = 0.6; // alpha = 0 signifie transparent, alpha = 1 signifie opaque
+  float alpha = 0.3; // alpha = 0 signifie transparent, alpha = 1 signifie opaque
   DrawBox(alpha);
 }
 
@@ -341,6 +360,7 @@ void initSiconos()
     double T = 10.;                    // final computation time
     double h = 0.005;                 // time step
 
+    //string solverName = "NEWTON";      // solver algorithm used for non-smooth problem
     //string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
     string solverName = "NSGS";      // solver algorithm used for non-smooth problem
     //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
@@ -395,7 +415,7 @@ void initSiconos()
     /* Test of beads Couples in cube*/
     // 9*etage beads Couples in cube /* !!!!!! When you choose cote and etage you should verify that COUPLE = (cote^2)*etage + 1 (crazy beads couple)!!!!! */
     unsigned int cote  = 3;
-    unsigned int etage  = 8;
+    unsigned int etage  = 10;
     unsigned int k = 0;
 
     /* !!!!!!!!!!!!!!!!!!Very Important thing is that theta must be different from zero for stablity reason !!!!!!!!!!!!!!!!!!!!!!!*/
@@ -445,8 +465,6 @@ void initSiconos()
     //  //  (*(q0[i]))(1) = 0.5*i;
     //       }
 
-    if ((*(q0[0]))(3) ==  0.)
-      (*(q0[0]))(3) = (*(q0[0]))(3) + 0.01;
 
     for (i = 0; i < COUPLE; i++)
     {
