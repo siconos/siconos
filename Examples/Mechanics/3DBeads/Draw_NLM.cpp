@@ -90,17 +90,6 @@ void DrawCouple(LagrangianDS *lds, float radius)
   phi = lds->getQ()(4);
   psi = lds->getQ()(5);
 
-  // R[0] = cos(psi)*cos(phi) - cos(theta)*sin(psi)*sin(phi);
-  //   R[1] = cos(psi)*sin(phi) + cos(theta)*cos(psi)*sin(phi);
-  //   R[2] = sin(theta)*sin(psi);
-  //   R[4] = -sin(psi)*cos(phi) - cos(theta)*sin(psi)*cos(phi);
-  //   R[5] = -sin(psi)*sin(phi) + cos(theta)*cos(psi)*cos(phi);
-  //   R[6] = sin(theta)*cos(psi);
-  //   R[8] = sin(theta)*sin(phi);
-  //   R[9] = -sin(theta)*cos(phi);
-  //   R[10] = cos(theta);
-  //   R[3]=R[7]=R[11]=0;
-
   R[0] = 1;
   R[1] = 0;
   R[2] = 0;
@@ -141,134 +130,46 @@ void DrawBox(float alpha)
   glBegin(GL_QUADS);
   // Front Face
   glNormal3f(0.0f, 0.0f, 1.0f); // Normal Pointing Towards Viewer
-  glTexCoord2f(0.0f, 0.0f);
   glVertex3f(-1.0f, -1.0f,  TOP);// Point 1 (Front)
   glVertex3f(1.0f, -1.0f,  TOP); // Point 2 (Front)
   glVertex3f(1.0f,  1.0f,  TOP); // Point 3 (Front)
   glVertex3f(-1.0f,  1.0f,  TOP);// Point 4 (Front)
   // Back Face
   glNormal3f(0.0f, 0.0f, -1.0f);// Normal Pointing Away From Viewer
-  glVertex3f(-1.0f, -1.0f, 0.0f);// Point 1 (Back)
-  glVertex3f(-1.0f,  1.0f, 0.0f);// Point 2 (Back)
-  glVertex3f(1.0f,  1.0f, 0.0f); // Point 3 (Back)
-  glVertex3f(1.0f, -1.0f, 0.0f); // Point 4 (Back)
+  glVertex3f(-1.0f, -1.0f, GROUND);// Point 1 (Back)
+  glVertex3f(-1.0f,  1.0f, GROUND);// Point 2 (Back)
+  glVertex3f(1.0f,  1.0f, GROUND); // Point 3 (Back)
+  glVertex3f(1.0f, -1.0f, GROUND); // Point 4 (Back)
   // Top Face
-  glNormal3f(0.0f, 1.0f, 0.0f); // Normal Pointing Up
-  glVertex3f(-1.0f,  1.0f, 0.0f);// Point 1 (Top)
+  glNormal3f(0.0f, 1.0f, GROUND); // Normal Pointing Up
+  glVertex3f(-1.0f,  1.0f, GROUND);// Point 1 (Top)
   glVertex3f(-1.0f,  1.0f, TOP);// Point 2 (Top)
   glVertex3f(1.0f,  1.0f, TOP); // Point 3 (Top)
-  glVertex3f(1.0f,  1.0f, 0.0f); // Point 4 (Top)
+  glVertex3f(1.0f,  1.0f, GROUND); // Point 4 (Top)
   // Bottom Face
-  glNormal3f(0.0f, -1.0f, 0.0f);// Normal Pointing Down
-  glVertex3f(-1.0f, -1.0f, 0.0f);// Point 1 (Bottom)
-  glVertex3f(1.0f, -1.0f, 0.0f); // Point 2 (Bottom)
+  glNormal3f(0.0f, -1.0f, GROUND);// Normal Pointing Down
+  glVertex3f(-1.0f, -1.0f, GROUND);// Point 1 (Bottom)
+  glVertex3f(1.0f, -1.0f, GROUND); // Point 2 (Bottom)
   glVertex3f(1.0f, -1.0f, TOP); // Point 3 (Bottom)
   glVertex3f(-1.0f, -1.0f, TOP);// Point 4 (Bottom)
   // Right face
-  glNormal3f(1.0f, 0.0f, 0.0f); // Normal Pointing Right
-  glVertex3f(1.0f, -1.0f, 0.0f); // Point 1 (Right)
-  glVertex3f(1.0f,  1.0f, 0.0f); // Point 2 (Right)
+  glNormal3f(1.0f, 0.0f, GROUND); // Normal Pointing Right
+  glVertex3f(1.0f, -1.0f, GROUND); // Point 1 (Right)
+  glVertex3f(1.0f,  1.0f, GROUND); // Point 2 (Right)
   glVertex3f(1.0f,  1.0f, TOP); // Point 3 (Right)
   glVertex3f(1.0f, -1.0f, TOP); // Point 4 (Right)
   // Left Face
-  glNormal3f(-1.0f, 0.0f, 0.0f);// Normal Pointing Left
-  glVertex3f(-1.0f, -1.0f, 0.0f);// Point 1 (Left)
+  glNormal3f(-1.0f, 0.0f, GROUND);// Normal Pointing Left
+  glVertex3f(-1.0f, -1.0f, GROUND);// Point 1 (Left)
   glVertex3f(-1.0f, -1.0f, TOP);// Point 2 (Left)
   glVertex3f(-1.0f,  1.0f, TOP);// Point 3 (Left)
-  glVertex3f(-1.0f,  1.0f, 0.0f);// Point 4 (Left)
+  glVertex3f(-1.0f,  1.0f, GROUND);// Point 4 (Left)
   glEnd();// Done Drawing Quads
 
   glDisable(GL_BLEND);
 
 }
 
-void Drawwall()
-{
-
-  int Wall_z_p = 0;                    //  for z --> +
-  int Wall_y_p = 1;                    //  for y --> +
-  int Wall_y_m = 1;                    //  for y --> -
-  int Wall_x_p = 1;                    //  for x --> +
-  int Wall_x_m = 1;                    //  for x --> -
-
-  double pos1[3];
-  pos1[0] = pos1[1] = WALL;
-  pos1[2] = GROUND;
-  double pos2[3];
-  pos2[0] = -WALL;
-  pos2[1] = WALL;
-  pos2[2] = GROUND;
-  double pos3[3];
-  pos3[0] = pos3[1] = -WALL;
-  pos3[2] = GROUND;
-  double pos4[3];
-  pos4[0] = WALL;
-  pos4[1] = -WALL;
-  pos4[2] = GROUND;
-
-  dsSetColor(1, 0.8f, 0.6f);
-  int k;
-
-  //  y-wall of the cube (positive direction)
-  if (Wall_y_p)
-  {
-    pos1[2] = pos2[2] = pos3[2] = pos4[2] = GROUND;
-    for (k = 0; k < 15; ++k)
-    {
-      dsDrawLineD(pos1, pos2);
-      pos1[2] += k * 0.01;
-      pos2[2] += k * 0.01;
-    }
-  }
-  //  x-wall of the cube (negative direction)
-  if (Wall_x_m)
-  {
-    pos1[2] = pos2[2] = GROUND;
-    for (k = 0; k < 15; ++k)
-    {
-      dsDrawLineD(pos2, pos3);
-      pos2[2] += k * 0.01;
-      pos3[2] += k * 0.01;
-    }
-  }
-  //  y-wall of the cube (negative direction)
-  if (Wall_y_m)
-  {
-    pos3[2] = GROUND;
-    for (k = 0; k < 15; ++k)
-    {
-      dsDrawLineD(pos3, pos4);
-      pos3[2] += k * 0.01;
-      pos4[2] += k * 0.01;
-    }
-  }
-  //  x-wall of the cube (positive direction)
-  if (Wall_x_p)
-  {
-    pos4[2] = GROUND;
-    for (k = 0; k < 15; ++k)
-    {
-      dsDrawLineD(pos4, pos1);
-      pos4[2] += k * 0.01;
-      pos1[2] += k * 0.01;
-    }
-  }
-  //  Top wall of the cube
-  if (Wall_z_p)
-  {
-    pos1[2] = pos2[2] = pos3[2] = pos4[2] = TOP;
-    dsDrawLineD(pos1, pos2);
-    dsDrawLineD(pos2, pos3);
-    dsDrawLineD(pos3, pos4);
-    dsDrawLineD(pos4, pos1);
-    for (k = 0; k < 20; ++k)
-    {
-      dsDrawLineD(pos3, pos4);
-      pos3[1] += k * 0.01;
-      pos4[1] += k * 0.01;
-    }
-  }
-}
 
 void SimuLoop(int pause)
 {
@@ -286,8 +187,6 @@ void SimuLoop(int pause)
   {
     DrawCouple(GLOB_tabLDS[i], radius);
   }
-
-  //  Drawwall();
 
   float alpha = 0.3; // alpha = 0 signifie transparent, alpha = 1 signifie opaque
   DrawBox(alpha);
@@ -360,11 +259,7 @@ void initSiconos()
     double T = 10.;                    // final computation time
     double h = 0.005;                 // time step
 
-    //string solverName = "NEWTON";      // solver algorithm used for non-smooth problem
-    //string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
     string solverName = "NSGS";      // solver algorithm used for non-smooth problem
-    //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
-    //string solverName = "Lemke";      // solver algorithm used for non-smooth problem
 
     double e  = 0.9;                  // nslaw
     double e2  = 0.5;
@@ -448,22 +343,6 @@ void initSiconos()
     //     /*  Crazy beads couple */
 
     //     (*(q0[COUPLE-1]))(0) = -0.8; (*(q0[COUPLE-1]))(1) = -0.8; (*(q0[COUPLE-1]))(2) =  0.7; (*(q0[COUPLE-1]))(3) =  PI/3; (*(q0[COUPLE-1]))(4) =  PI/3; (*(v0[COUPLE-1]))(2) =  1.; (*(v0[COUPLE-1]))(3) =  4.;
-
-    //    for (i=0;i<COUPLE;i++)
-    //       {
-    //  (*(q0[i]))(0) = 0.; (*(q0[i]))(1) = -0.7 + 0.4*i; (*(q0[i]))(2) =  0.15; (*(q0[i]))(3) =  PI/2; (*(v0[i]))(0) =  4.+0.2*i;(*(v0[i]))(1) =  4.-0.2*i;
-    //       }
-
-    // (*(q0[0]))(0) = 0.; (*(q0[0]))(1) = 0.; (*(q0[0]))(2) =  0.65; (*(q0[0]))(3) =  0.; (*(v0[0]))(0) =  4.;  (*(v0[0]))(2) =  3.;
-    //     (*(q0[1]))(0) = 0.; (*(q0[1]))(1) = 0.; (*(q0[1]))(2) =  0.40; (*(q0[1]))(3) =  PI/2; (*(v0[0]))(3) =  4.;
-    //      (*(q0[2]))(0) = 0.; (*(q0[2]))(1) = 0.; (*(q0[2]))(2) =  0.65; (*(q0[2]))(3) =  PI/3; (*(q0[2]))(4) =  PI/3; (*(v0[2]))(3) =  4.; (*(v0[2]))(2) =  3.;
-    //     (*(q0[3]))(0) = 0.2; (*(q0[3]))(1) = 0.; (*(q0[3]))(2) =  0.25; (*(q0[3]))(3) =  PI/3; (*(v0[3]))(4) =  PI/3; (*(v0[2]))(3) =  4.;
-
-    //    for (i=0;i<COUPLE;i++)
-    //       {
-    //  (*(q0[i]))(0) = 0.; (*(q0[i]))(1) = 0.5*(i+1.);  (*(q0[i]))(2) =  0.3; (*(q0[i]))(3) =  PI/2;
-    //  //  (*(q0[i]))(1) = 0.5*i;
-    //       }
 
 
     for (i = 0; i < COUPLE; i++)
@@ -792,16 +671,6 @@ void initSiconos()
 
     cout << "End of simulation initialisation" << endl;
 
-    // --- Get the values to be plotted ---
-    // -> saved in a matrix dataPlot
-
-    //int N = GLOB_T->getNSteps(); // Number of time steps
-
-    // dataPlot(k_iter,0) = k_iter*GLOB_T->getH();
-    //     // dataPlot(k_iter,1) = (BeadsCOUPLE->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getY(0))(0);
-    //     dataPlot(k_iter,1) = GLOB_tabLDS[0]->getQ()(2);
-    //     dataPlot(k_iter,2) = GLOB_tabLDS[0]->getVelocity()(2);
-
     cout << "Start computation ... " << endl;
 
     GLOB_EVT = GLOB_SIM->getEventsManagerPtr();
@@ -833,10 +702,6 @@ void computeSiconos()
 
       // --- Get values to be plotted ---
       k_iter++;
-      //   dataPlot(k_iter,0) = k_iter*GLOB_T->getH();
-      //       //dataPlot(k_iter,1) = (BeadsCOUPLE->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getY(0))(0);
-      //       dataPlot(k_iter,1) = GLOB_tabLDS[0]->getQ()(2);
-      //       dataPlot(k_iter,2) = GLOB_tabLDS[0]->getVelocity()(2);
 
     }
     cout << "End of computation - Number of iterations done: " << k_iter << endl;

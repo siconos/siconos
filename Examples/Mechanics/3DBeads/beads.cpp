@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
 
     // User-defined main parameters
 
-    unsigned int DSNUMBER = 2000;       // the number of dynamical systems
+    unsigned int DSNUMBER = 50;       // the number of dynamical systems
 
     unsigned int nDof = 6;            // degrees of freedom for beads
 
@@ -54,8 +54,7 @@ int main(int argc, char* argv[])
     double T = 5;                    // final computation time
     double h = 0.005;                 // time step
 
-    //string solverName = "NSGS";      // solver algorithm used for non-smooth problem
-    string solverName = "NEWTON";      // solver algorithm used for non-smooth problem
+    string solverName = "NSGS";      // solver algorithm used for non-smooth problem
     //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
     double e = 0.8;                  // nslaw
     double e2 = 0.8;                  // nslaw2
@@ -63,11 +62,11 @@ int main(int argc, char* argv[])
 
 
     // 1 to take in account the obstacle and  0 no
-    double Top = 200.5;
+    double Top = 2.2;
     double Wall = 1.;
     double Ground = 0.;
 
-    unsigned int obst_z_p = 1;                    //  for z --> +
+    unsigned int obst_z_p = 0;                    //  for z --> +
     unsigned int obst_z_m = 1;                    //  for z --> -
     unsigned int obst_y_p = 1;                    //  for y --> +
     unsigned int obst_y_m = 1;                    //  for y --> -
@@ -176,7 +175,7 @@ int main(int argc, char* argv[])
     // 25*etage beads in cube
     unsigned int k;
     unsigned int cote  = 5;
-    unsigned int etage  = 80;
+    unsigned int etage  = 2;
     for (j = 0; j < etage; j++)
     {
       for (k = 0; k < cote; k++)
@@ -201,6 +200,7 @@ int main(int argc, char* argv[])
 
     for (i = 0; i < DSNUMBER; i++)
       (*(v0[i]))(2) = -1.;
+
     //     (*(q0[DSNUMBER-2]))(0)= 0.;   (*(q0[DSNUMBER-2]))(1)= 0.;   (*(q0[DSNUMBER-2]))(2)=  1.2*etage/4;    (*(v0[DSNUMBER-2]))(1) =  -1;(*(v0[DSNUMBER-2]))(2) =  -2;
     //     (*(q0[DSNUMBER-1]))(0)= -0.8;  (*(q0[DSNUMBER-1]))(1)= -0.8;  (*(q0[DSNUMBER-1]))(2)=  0.1;  (*(v0[DSNUMBER-1]))(0) =  10;(*(v0[DSNUMBER-1]))(1) =  10;
 

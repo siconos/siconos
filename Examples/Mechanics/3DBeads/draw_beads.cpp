@@ -119,130 +119,43 @@ void DrawBox(float alpha)
   glBegin(GL_QUADS);
   // Front Face
   glNormal3f(0.0f, 0.0f, 1.0f); // Normal Pointing Towards Viewer
-  glTexCoord2f(0.0f, 0.0f);
   glVertex3f(-1.0f, -1.0f,  TOP);// Point 1 (Front)
   glVertex3f(1.0f, -1.0f,  TOP); // Point 2 (Front)
   glVertex3f(1.0f,  1.0f,  TOP); // Point 3 (Front)
   glVertex3f(-1.0f,  1.0f,  TOP);// Point 4 (Front)
   // Back Face
   glNormal3f(0.0f, 0.0f, -1.0f);// Normal Pointing Away From Viewer
-  glVertex3f(-1.0f, -1.0f, 0.0f);// Point 1 (Back)
-  glVertex3f(-1.0f,  1.0f, 0.0f);// Point 2 (Back)
-  glVertex3f(1.0f,  1.0f, 0.0f); // Point 3 (Back)
-  glVertex3f(1.0f, -1.0f, 0.0f); // Point 4 (Back)
+  glVertex3f(-1.0f, -1.0f, GROUND);// Point 1 (Back)
+  glVertex3f(-1.0f,  1.0f, GROUND);// Point 2 (Back)
+  glVertex3f(1.0f,  1.0f, GROUND); // Point 3 (Back)
+  glVertex3f(1.0f, -1.0f, GROUND); // Point 4 (Back)
   // Top Face
-  glNormal3f(0.0f, 1.0f, 0.0f); // Normal Pointing Up
-  glVertex3f(-1.0f,  1.0f, 0.0f);// Point 1 (Top)
+  glNormal3f(0.0f, 1.0f, GROUND); // Normal Pointing Up
+  glVertex3f(-1.0f,  1.0f, GROUND);// Point 1 (Top)
   glVertex3f(-1.0f,  1.0f, TOP);// Point 2 (Top)
   glVertex3f(1.0f,  1.0f, TOP); // Point 3 (Top)
-  glVertex3f(1.0f,  1.0f, 0.0f); // Point 4 (Top)
+  glVertex3f(1.0f,  1.0f, GROUND); // Point 4 (Top)
   // Bottom Face
-  glNormal3f(0.0f, -1.0f, 0.0f);// Normal Pointing Down
-  glVertex3f(-1.0f, -1.0f, 0.0f);// Point 1 (Bottom)
-  glVertex3f(1.0f, -1.0f, 0.0f); // Point 2 (Bottom)
+  glNormal3f(0.0f, -1.0f, GROUND);// Normal Pointing Down
+  glVertex3f(-1.0f, -1.0f, GROUND);// Point 1 (Bottom)
+  glVertex3f(1.0f, -1.0f, GROUND); // Point 2 (Bottom)
   glVertex3f(1.0f, -1.0f, TOP); // Point 3 (Bottom)
   glVertex3f(-1.0f, -1.0f, TOP);// Point 4 (Bottom)
   // Right face
-  glNormal3f(1.0f, 0.0f, 0.0f); // Normal Pointing Right
-  glVertex3f(1.0f, -1.0f, 0.0f); // Point 1 (Right)
-  glVertex3f(1.0f,  1.0f, 0.0f); // Point 2 (Right)
+  glNormal3f(1.0f, 0.0f, GROUND); // Normal Pointing Right
+  glVertex3f(1.0f, -1.0f, GROUND); // Point 1 (Right)
+  glVertex3f(1.0f,  1.0f, GROUND); // Point 2 (Right)
   glVertex3f(1.0f,  1.0f, TOP); // Point 3 (Right)
   glVertex3f(1.0f, -1.0f, TOP); // Point 4 (Right)
   // Left Face
-  glNormal3f(-1.0f, 0.0f, 0.0f);// Normal Pointing Left
-  glVertex3f(-1.0f, -1.0f, 0.0f);// Point 1 (Left)
+  glNormal3f(-1.0f, 0.0f, GROUND);// Normal Pointing Left
+  glVertex3f(-1.0f, -1.0f, GROUND);// Point 1 (Left)
   glVertex3f(-1.0f, -1.0f, TOP);// Point 2 (Left)
   glVertex3f(-1.0f,  1.0f, TOP);// Point 3 (Left)
-  glVertex3f(-1.0f,  1.0f, 0.0f);// Point 4 (Left)
+  glVertex3f(-1.0f,  1.0f, GROUND);// Point 4 (Left)
   glEnd();// Done Drawing Quads
 
   glDisable(GL_BLEND);
-}
-void Drawwall()
-{
-  int Wall_z_p = 0;                    //  for z --> +
-  int Wall_y_p = 0;                    //  for y --> +
-  int Wall_y_m = 0;                    //  for y --> -
-  int Wall_x_p = 0;                    //  for x --> +
-  int Wall_x_m = 0;                    //  for x --> -
-
-  double pos1[3];
-  pos1[0] = pos1[1] = WALL;
-  pos1[2] = GROUND;
-  double pos2[3];
-  pos2[0] = -WALL;
-  pos2[1] = WALL;
-  pos2[2] = GROUND;
-  double pos3[3];
-  pos3[0] = pos3[1] = -WALL;
-  pos3[2] = GROUND;
-  double pos4[3];
-  pos4[0] = WALL;
-  pos4[1] = -WALL;
-  pos4[2] = GROUND;
-
-  dsSetColor(1, 0.8f, 0.6f);
-  int k;
-
-  //  y-wall of the cube (positive direction)
-  if (Wall_y_p)
-  {
-    pos1[2] = pos2[2] = pos3[2] = pos4[2] = GROUND;
-    for (k = 0; k < 15; ++k)
-    {
-      dsDrawLineD(pos1, pos2);
-      pos1[2] += k * 0.01;
-      pos2[2] += k * 0.01;
-    }
-  }
-  //  x-wall of the cube (negative direction)
-  if (Wall_x_m)
-  {
-    pos1[2] = pos2[2] = GROUND;
-    for (k = 0; k < 15; ++k)
-    {
-      dsDrawLineD(pos2, pos3);
-      pos2[2] += k * 0.01;
-      pos3[2] += k * 0.01;
-    }
-  }
-  //  y-wall of the cube (negative direction)
-  if (Wall_y_m)
-  {
-    pos3[2] = GROUND;
-    for (k = 0; k < 15; ++k)
-    {
-      dsDrawLineD(pos3, pos4);
-      pos3[2] += k * 0.01;
-      pos4[2] += k * 0.01;
-    }
-  }
-  //  x-wall of the cube (positive direction)
-  if (Wall_x_p)
-  {
-    pos4[2] = GROUND;
-    for (k = 0; k < 15; ++k)
-    {
-      dsDrawLineD(pos4, pos1);
-      pos4[2] += k * 0.01;
-      pos1[2] += k * 0.01;
-    }
-  }
-  //  Top wall of the cube
-  if (Wall_z_p)
-  {
-    pos1[2] = pos2[2] = pos3[2] = pos4[2] = TOP;
-    dsDrawLineD(pos1, pos2);
-    dsDrawLineD(pos2, pos3);
-    dsDrawLineD(pos3, pos4);
-    dsDrawLineD(pos4, pos1);
-    for (k = 0; k < 20; ++k)
-    {
-      dsDrawLineD(pos3, pos4);
-      pos3[1] += k * 0.01;
-      pos4[1] += k * 0.01;
-    }
-  }
 }
 
 void SimuLoop(int pause)
@@ -262,8 +175,6 @@ void SimuLoop(int pause)
   {
     DrawBall(GLOB_tabLDS[i], radius);
   }
-
-  // Drawwall();
 
   float alpha = 0.3; // alpha = 0 signifie transparent, alpha = 1 signifie opaque
   DrawBox(alpha);
@@ -343,10 +254,8 @@ void initSiconos()
     double h = 0.005;                 // time step
 
 
-    //string solverName = "NSGS";      // solver algorithm used for non-smooth problem
+    string solverName = "NSGS";      // solver algorithm used for non-smooth problem
     //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
-    string solverName = "NEWTON";      // solver algorithm used for non-smooth problem
-    //string solverName = "NLGSNEWTON";      // solver algorithm used for non-smooth problem
     //string solverName = "PGS";      // solver algorithm used for non-smooth problem
     //string solverName = "Lemke";      // solver algorithm used for non-smooth problem
 
