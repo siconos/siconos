@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
 
     // User-defined main parameters
 
-    unsigned int DSNUMBER = 50;       // the number of dynamical systems
+    unsigned int DSNUMBER = 2;       // the number of dynamical systems
 
     unsigned int nDof = 6;            // degrees of freedom for beads
 
@@ -66,12 +66,12 @@ int main(int argc, char* argv[])
     double Wall = 1.;
     double Ground = 0.;
 
-    unsigned int obst_z_p = 0;                    //  for z --> +
-    unsigned int obst_z_m = 1;                    //  for z --> -
-    unsigned int obst_y_p = 1;                    //  for y --> +
-    unsigned int obst_y_m = 1;                    //  for y --> -
-    unsigned int obst_x_p = 1;                    //  for x --> +
-    unsigned int obst_x_m = 1;                    //  for x --> -
+    int obst_z_p = 0;                    //  for z --> +
+    int obst_z_m = 1;                    //  for z --> -
+    int obst_y_p = 1;                    //  for y --> +
+    int obst_y_m = 1;                    //  for y --> -
+    int obst_x_p = 1;                    //  for x --> +
+    int obst_x_m = 1;                    //  for x --> -
 
 
     // -------------------------
@@ -109,8 +109,12 @@ int main(int argc, char* argv[])
 
     // set values
 
-    //   (*(q0[0]))(0) =  0.0;    (*(q0[0]))(1) =  0.3;  (*(q0[0]))(2) =  0.12;
-    //     (*(q0[1]))(0) =  0.2;    (*(q0[1]))(1) =  0.3;  (*(q0[1]))(2) =  0.12;
+    (*(q0[0]))(0) =  0.0;
+    (*(q0[0]))(1) =  0.3;
+    (*(q0[0]))(2) =  0.12;
+    (*(q0[1]))(0) =  0.2;
+    (*(q0[1]))(1) =  0.3;
+    (*(q0[1]))(2) =  0.12;
 
 
     //   (*(q0[2]))(0) =  0.;    (*(q0[2]))(1) =  0.5;  (*(q0[2]))(2) =  0.1;
@@ -172,34 +176,25 @@ int main(int argc, char* argv[])
     //     (*(q0[18]))(0)= -0.35;   (*(q0[18]))(1)= 0.35;  (*(q0[18]))(2)=  0.1;
     //     (*(q0[19]))(0)= -0.35;   (*(q0[19]))(1)=-0.35;  (*(q0[19]))(2)=  0.1;
 
-    // 25*etage beads in cube
-    unsigned int k;
-    unsigned int cote  = 5;
-    unsigned int etage  = 2;
-    for (j = 0; j < etage; j++)
-    {
-      for (k = 0; k < cote; k++)
-      {
-        for (i = 0; i < cote; i++)
-        {
-          if (j % 2 == 0)
-          {
-            (*(q0[k * cote + i + j * cote * cote]))(0) = -0.6 + 3 * k * R;
-            (*(q0[k * cote + i + j * cote * cote]))(1) = -0.6 + 3 * i * R;
-            (*(q0[k * cote + i + j * cote * cote]))(2) = 0.2 + (2 * j) * R;
-          }
-          else
-          {
-            (*(q0[k * cote + i + j * cote * cote]))(0) = -0.6 + 3 * k * R;
-            (*(q0[k * cote + i + j * cote * cote]))(1) = -0.6 + 3 * i * R + R / 4;
-            (*(q0[k * cote + i + j * cote * cote]))(2) = 0.2 + (2 * j) * R;
-          }
-        }
-      }
-    }
+    // // 25*etage beads in cube
+    //     unsigned int k;
+    //     unsigned int cote  = 5;
+    //     unsigned int etage  = 2;
+    //     for (j=0;j<etage;j++){
+    //       for (k=0;k<cote;k++) {
+    //  for (i=0;i<cote;i++) {
+    //    if (j % 2 == 0){
+    //      (*(q0[k*cote+i+j*cote*cote]))(0) = -0.6 + 3*k*R; (*(q0[k*cote+i+j*cote*cote]))(1) = -0.6 + 3*i*R; (*(q0[k*cote+i+j*cote*cote]))(2) = 0.2+(2*j)*R;
+    //    }
+    //    else{
+    //      (*(q0[k*cote+i+j*cote*cote]))(0) = -0.6 + 3*k*R; (*(q0[k*cote+i+j*cote*cote]))(1) = -0.6 + 3*i*R+R/4;(*(q0[k*cote+i+j*cote*cote]))(2) = 0.2+(2*j)*R;
+    //    }
+    //  }
+    //       }
+    //     }
 
-    for (i = 0; i < DSNUMBER; i++)
-      (*(v0[i]))(2) = -1.;
+    //     for (i=0;i<DSNUMBER;i++)
+    //       (*(v0[i]))(2) = -1.;
 
     //     (*(q0[DSNUMBER-2]))(0)= 0.;   (*(q0[DSNUMBER-2]))(1)= 0.;   (*(q0[DSNUMBER-2]))(2)=  1.2*etage/4;    (*(v0[DSNUMBER-2]))(1) =  -1;(*(v0[DSNUMBER-2]))(2) =  -2;
     //     (*(q0[DSNUMBER-1]))(0)= -0.8;  (*(q0[DSNUMBER-1]))(1)= -0.8;  (*(q0[DSNUMBER-1]))(2)=  0.1;  (*(v0[DSNUMBER-1]))(0) =  10;(*(v0[DSNUMBER-1]))(1) =  10;
@@ -523,18 +518,7 @@ int main(int argc, char* argv[])
     delete Mass;
     delete nslaw1;
     delete nslaw2;
-    // delete b1;
-    //     delete H1;
-    //     delete b1_;
-    //     delete H1_;
-    //     delete b2;
-    //     delete H2;
-    //     delete b2_;
-    //     delete H2_;
-    //     delete b3;
-    //     delete H3;
-    //     delete b3_;
-    //     delete H3_;
+
   }
   catch (SiconosException e)
   {

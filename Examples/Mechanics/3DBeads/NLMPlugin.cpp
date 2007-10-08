@@ -355,23 +355,10 @@ extern "C" void G22(unsigned int sizeOfq, const double* q, unsigned int sizeOfY,
   G[3] = ((q[1] - epsilon1 * R * sin(q[3]) * cos(q[4])) - (q[7] - epsilon2 * R * sin(q[9]) * cos(q[10]))) / d;
   G[6] = ((q[2] + epsilon1 * R * cos(q[3])) - (q[8] + epsilon2 * R * cos(q[9]))) / d;
 
-  //  G[9] = epsilon1*R*(((q[0] + epsilon1*R*sin(q[3])*sin(q[4]))-(q[6] + epsilon2*R*sin(q[9])*sin(q[10])))*cos(q[3])*sin(q[4])
-  //         - ((q[1] - epsilon1*R*sin(q[3])*cos(q[4]))-(q[7] - epsilon2*R*sin(q[9])*cos(q[10])))*cos(q[3])*cos(q[4])
-  //         - ((q[2] + epsilon1*R*cos(q[3]))-(q[8] + epsilon2*R*cos(q[9])))*sin(q[3]))/d;
-
-  //   G[12] = epsilon1*R*(((q[0] + epsilon1*R*sin(q[3])*sin(q[4]))-(q[6] + epsilon2*R*sin(q[9])*sin(q[10])))*sin(q[3])*cos(q[4])
-  //         + ((q[1] - epsilon1*R*sin(q[3])*cos(q[4]))-(q[7] - epsilon2*R*sin(q[9])*cos(q[10])))*sin(q[3])*sin(q[4]))/d;
-
   G[18] = -G[0];
   G[21] = -G[3];
   G[24] = -G[6];
 
-  //   G[27] = -epsilon2*R*(((q[0] + epsilon1*R*sin(q[3])*sin(q[4]))-(q[6] + epsilon2*R*sin(q[9])*sin(q[10])))*cos(q[9])*sin(q[10])
-  //           - ((q[1] - epsilon1*R*sin(q[3])*cos(q[4]))-(q[7] - epsilon2*R*sin(q[9])*cos(q[10])))*cos(q[9])*cos(q[10])
-  //           - ((q[2] + epsilon1*R*cos(q[3]))-(q[8] + epsilon2*R*cos(q[9])))*sin(q[9]))/d;
-
-  //   G[30] = -epsilon2*R*(((q[0] + epsilon1*R*sin(q[3])*sin(q[4]))-(q[6] + epsilon2*R*sin(q[9])*sin(q[10])))*sin(q[9])*cos(q[10])
-  //           + ((q[1] - epsilon1*R*sin(q[3])*cos(q[4]))-(q[7] - epsilon2*R*sin(q[9])*cos(q[10])))*sin(q[9])*sin(q[10]))/d;
 
   G[11] =  epsilon1 * R;
   G[13] = -epsilon1 * R;
@@ -409,23 +396,11 @@ extern "C" void G21(unsigned int sizeOfq, const double* q, unsigned int sizeOfY,
   G[3] = ((q[1] - epsilon1 * R * sin(q[3]) * cos(q[4])) - (q[7] - epsilon2 * R * sin(q[9]) * cos(q[10]))) / d;
   G[6] = ((q[2] + epsilon1 * R * cos(q[3])) - (q[8] + epsilon2 * R * cos(q[9]))) / d;
 
-  //   G[9] = epsilon1*R*(((q[0] + epsilon1*R*sin(q[3])*sin(q[4]))-(q[6] + epsilon2*R*sin(q[9])*sin(q[10])))*cos(q[3])*sin(q[4])
-  //         - ((q[1] - epsilon1*R*sin(q[3])*cos(q[4]))-(q[7] - epsilon2*R*sin(q[9])*cos(q[10]))) *cos(q[3])*cos(q[4])
-  //         - ((q[2] + epsilon1*R*cos(q[3]))-(q[8] + epsilon2*R*cos(q[9])))*sin(q[3]))/d;
-
-  //   G[12] = epsilon1*R*(((q[0] + epsilon1*R*sin(q[3])*sin(q[4]))-(q[6] + epsilon2*R*sin(q[9])*sin(q[10])))*sin(q[3])*cos(q[4])
-  //         + ((q[1] - epsilon1*R*sin(q[3])*cos(q[4]))-(q[7] - epsilon2*R*sin(q[9])*cos(q[10])))*sin(q[3])*sin(q[4]))/d;
 
   G[18] = -G[0];
   G[21] = -G[3];
   G[24] = -G[6];
 
-  //   G[27] = -epsilon2*R*(((q[0] + epsilon1*R*sin(q[3])*sin(q[4]))-(q[6] + epsilon2*R*sin(q[9])*sin(q[10])))*cos(q[9])*sin(q[10])
-  //         - ((q[1] - epsilon1*R*sin(q[3])*cos(q[4]))-(q[7] - epsilon2*R*sin(q[9])*cos(q[10]))) *cos(q[9])*cos(q[10])
-  //         - ((q[2] + epsilon1*R*cos(q[3]))-(q[8] + epsilon2*R*cos(q[9])))*sin(q[9]))/d;
-
-  //   G[30] = -epsilon2*R*(((q[0] + epsilon1*R*sin(q[3])*sin(q[4]))-(q[6] + epsilon2*R*sin(q[9])*sin(q[10])))*sin(q[9])*cos(q[10])
-  //         + ((q[1] - epsilon1*R*sin(q[3])*cos(q[4]))-(q[7] - epsilon2*R*sin(q[9])*cos(q[10])))*sin(q[9])*sin(q[10]))/d;
 
   G[11] =  epsilon1 * R;
   G[13] = -epsilon1 * R;
@@ -465,23 +440,11 @@ extern "C" void G12(unsigned int sizeOfq, const double* q, unsigned int sizeOfY,
   G[3] = ((q[1] - epsilon1 * R * sin(q[3]) * cos(q[4])) - (q[7] - epsilon2 * R * sin(q[9]) * cos(q[10]))) / d;
   G[6] = ((q[2] + epsilon1 * R * cos(q[3])) - (q[8] + epsilon2 * R * cos(q[9]))) / d;
 
-  //   G[9] = epsilon1*R*(((q[0] + epsilon1*R*sin(q[3])*sin(q[4]))-(q[6] + epsilon2*R*sin(q[9])*sin(q[10])))*cos(q[3])*sin(q[4])
-  //         - ((q[1] - epsilon1*R*sin(q[3])*cos(q[4]))-(q[7] - epsilon2*R*sin(q[9])*cos(q[10]))) *cos(q[3])*cos(q[4])
-  //         - ((q[2] + epsilon1*R*cos(q[3]))-(q[8] + epsilon2*R*cos(q[9])))*sin(q[3]))/d;
-
-  //   G[12] = epsilon1*R*(((q[0] + epsilon1*R*sin(q[3])*sin(q[4]))-(q[6] + epsilon2*R*sin(q[9])*sin(q[10])))*sin(q[3])*cos(q[4])
-  //         + ((q[1] - epsilon1*R*sin(q[3])*cos(q[4]))-(q[7] - epsilon2*R*sin(q[9])*cos(q[10])))*sin(q[3])*sin(q[4]))/d;
 
   G[18] = -G[0];
   G[21] = -G[3];
   G[24] = -G[6];
 
-  //   G[27] = -epsilon2*R*(((q[0] + epsilon1*R*sin(q[3])*sin(q[4]))-(q[6] + epsilon2*R*sin(q[9])*sin(q[10])))*cos(q[9])*sin(q[10])
-  //         - ((q[1] - epsilon1*R*sin(q[3])*cos(q[4]))-(q[7] - epsilon2*R*sin(q[9])*cos(q[10]))) *cos(q[9])*cos(q[10])
-  //         - ((q[2] + epsilon1*R*cos(q[3]))-(q[8] + epsilon2*R*cos(q[9])))*sin(q[9]))/d;
-
-  //   G[30] = -epsilon2*R*(((q[0] + epsilon1*R*sin(q[3])*sin(q[4]))-(q[6] + epsilon2*R*sin(q[9])*sin(q[10])))*sin(q[9])*cos(q[10])
-  //         + ((q[1] - epsilon1*R*sin(q[3])*cos(q[4]))-(q[7] - epsilon2*R*sin(q[9])*cos(q[10])))*sin(q[9])*sin(q[10]))/d;
 
   G[11] =  epsilon1 * R;
   G[13] = -epsilon1 * R;
@@ -518,23 +481,11 @@ extern "C" void G11(unsigned int sizeOfq, const double* q, unsigned int sizeOfY,
   G[3] = ((q[1] - epsilon1 * R * sin(q[3]) * cos(q[4])) - (q[7] - epsilon2 * R * sin(q[9]) * cos(q[10]))) / d;
   G[6] = ((q[2] + epsilon1 * R * cos(q[3])) - (q[8] + epsilon2 * R * cos(q[9]))) / d;
 
-  //  G[9] = epsilon1*R*(((q[0] + epsilon1*R*sin(q[3])*sin(q[4]))-(q[6] + epsilon2*R*sin(q[9])*sin(q[10])))*cos(q[3])*sin(q[4])
-  //         - ((q[1] - epsilon1*R*sin(q[3])*cos(q[4]))-(q[7] - epsilon2*R*sin(q[9])*cos(q[10]))) *cos(q[3])*cos(q[4])
-  //         - ((q[2] + epsilon1*R*cos(q[3]))-(q[8] + epsilon2*R*cos(q[9])))*sin(q[3]))/d;
-
-  //   G[12] = epsilon1*R*(((q[0] + epsilon1*R*sin(q[3])*sin(q[4]))-(q[6] + epsilon2*R*sin(q[9])*sin(q[10])))*sin(q[3])*cos(q[4])
-  //         + ((q[1] - epsilon1*R*sin(q[3])*cos(q[4]))-(q[7] - epsilon2*R*sin(q[9])*cos(q[10])))*sin(q[3])*sin(q[4]))/d;
 
   G[18] = -G[0];
   G[21] = -G[3];
   G[24] = -G[6];
 
-  //  G[27] = -epsilon2*R*(((q[0] + epsilon1*R*sin(q[3])*sin(q[4]))-(q[6] + epsilon2*R*sin(q[9])*sin(q[10])))*cos(q[9])*sin(q[10])
-  //         - ((q[1] - epsilon1*R*sin(q[3])*cos(q[4]))-(q[7] - epsilon2*R*sin(q[9])*cos(q[10]))) *cos(q[9])*cos(q[10])
-  //         - ((q[2] + epsilon1*R*cos(q[3]))-(q[8] + epsilon2*R*cos(q[9])))*sin(q[9]))/d;
-
-  //   G[30] = -epsilon2*R*(((q[0] + epsilon1*R*sin(q[3])*sin(q[4]))-(q[6] + epsilon2*R*sin(q[9])*sin(q[10])))*sin(q[9])*cos(q[10])
-  //         + ((q[1] - epsilon1*R*sin(q[3])*cos(q[4]))-(q[7] - epsilon2*R*sin(q[9])*cos(q[10])))*sin(q[9])*sin(q[10]))/d;
 
   G[11] =  epsilon1 * R;
   G[13] = -epsilon1 * R;

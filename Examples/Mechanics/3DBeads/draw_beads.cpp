@@ -36,7 +36,7 @@ using namespace std;
 
 #include <drawstuff/drawstuff.h>
 
-#define DSNUMBER   2      // the number of dynamical systems
+#define DSNUMBER   200      // the number of dynamical systems
 
 #define WALL 1       // Positions of walls
 #define TOP 2.2       // Positions of walls
@@ -387,36 +387,37 @@ void initSiconos()
     //     (*(q0[18]))(0)= -0.35;   (*(q0[18]))(1)= 0.35;  (*(q0[18]))(2)=  0.1;
     //     (*(q0[19]))(0)= -0.35;   (*(q0[19]))(1)=-0.35;  (*(q0[19]))(2)=  0.1;
 
-    (*(q0[0]))(0) =  0.0;
-    (*(q0[0]))(1) =  0.3;
-    (*(q0[0]))(2) =  0.1;
-    (*(v0[0]))(0) =  0.;
-    (*(v0[0]))(1) =  -1.;
-    (*(v0[0]))(2) =  0.12;
+    //    (*(q0[0]))(0) =  0.0;    (*(q0[0]))(1) =  0.3;  (*(q0[0]))(2) =  0.1;
+    //     (*(v0[0]))(0) =  0.;    (*(v0[0]))(1) =  -1.;  (*(v0[0]))(2) =  0.12;
 
-    (*(q0[1]))(0) =  0.0;
-    (*(q0[1]))(1) =  0.;
-    (*(q0[1]))(2) =  0.1;
-    (*(v0[1]))(0) =  0.;
-    (*(v0[1]))(1) =  1.;
-    (*(v0[1]))(2) =  0.;
+    //     (*(q0[1]))(0) =  0.0;    (*(q0[1]))(1) =  0.;  (*(q0[1]))(2) =  0.1;
+    //     (*(v0[1]))(0) =  0.;    (*(v0[1]))(1) =  1.;  (*(v0[1]))(2) =  0.;
 
-    //    // 25*etage beads in cube
-    //     unsigned int cote  = 5;
-    //     unsigned int etage  = 10;
-    //     unsigned int k = 0;
-    //     for (j=0;j<etage;j++){
-    //       for (k=0;k<cote;k++) {
-    //  for (i=0;i<cote;i++) {
-    //    if (j % 2 == 0){
-    //      (*(q0[k*cote+i+j*cote*cote]))(0) = -0.6 + 3*k*R; (*(q0[k*cote+i+j*cote*cote]))(1) = -0.6 + 3*i*R; (*(q0[k*cote+i+j*cote*cote]))(2) = 0.11+(2*j)*R;
-    //    }
-    //    else{
-    //      (*(q0[k*cote+i+j*cote*cote]))(0) = -0.5 + 3*k*R; (*(q0[k*cote+i+j*cote*cote]))(1) = -0.5 + 3*i*R+R/4;(*(q0[k*cote+i+j*cote*cote]))(2) = 0.11+(2*j)*R;
-    //    }
-    //  }
-    //       }
-    //     }
+    // 25*etage beads in cube
+    unsigned int cote  = 5;
+    unsigned int etage  = 8;
+    unsigned int k = 0;
+    for (j = 0; j < etage; j++)
+    {
+      for (k = 0; k < cote; k++)
+      {
+        for (i = 0; i < cote; i++)
+        {
+          if (j % 2 == 0)
+          {
+            (*(q0[k * cote + i + j * cote * cote]))(0) = -0.6 + 3 * k * R;
+            (*(q0[k * cote + i + j * cote * cote]))(1) = -0.6 + 3 * i * R;
+            (*(q0[k * cote + i + j * cote * cote]))(2) = 0.11 + (2 * j) * R;
+          }
+          else
+          {
+            (*(q0[k * cote + i + j * cote * cote]))(0) = -0.5 + 3 * k * R;
+            (*(q0[k * cote + i + j * cote * cote]))(1) = -0.5 + 3 * i * R + R / 4;
+            (*(q0[k * cote + i + j * cote * cote]))(2) = 0.11 + (2 * j) * R;
+          }
+        }
+      }
+    }
 
     //     (*(q0[DSNUMBER-2]))(0)= -0.8;   (*(q0[DSNUMBER-2]))(1)= -0.8;   (*(q0[DSNUMBER-2]))(2)=  (*(q0[DSNUMBER-3]))(2);    (*(v0[DSNUMBER-2]))(1) =  -1;(*(v0[DSNUMBER-2]))(2) =  -2;
     //     (*(q0[DSNUMBER-1]))(0)= -0.8;  (*(q0[DSNUMBER-1]))(1)= -0.8;  (*(q0[DSNUMBER-1]))(2)=  0.1;  (*(v0[DSNUMBER-1]))(0) =  10;(*(v0[DSNUMBER-1]))(1) =  10;
