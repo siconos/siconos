@@ -18,20 +18,12 @@
 */
 /*!\file pfc_3D_newton.c
  *
- * \fn  pfc_3D_newton( int n , double *C , double *b , double *zz , \n
- *                     double *ww , double mu , int itermax , double tol )
- *
- * Generic pfc_3D parameters:\n
- *
- * \param nn      Unchanged parameter which represents the dimension of the system.
- * \param vec     Unchanged parameter which contains the components of the matrix with a fortran storage.
- * \param q       Unchanged parameter which contains the components of the right hand side vector.
- * \param z       Modified parameter which contains the initial solution and returns the solution of the problem.
- * \param w       Modified parameter which returns the solution of the problem.
- * \param COEF    Unchanged parameter which represents the friction coefficient
+ * \fn  pfc_3D_newton( int n , double *C , double *b ,  double *zz ,double *ww , double mu ,
+ *        Compute_G_function (*Compute_G), Compute_JacG_function (*Compute_JacG),
+ *        int *iparam_local , double *dparam_local )
  *
  *
- * \author houari khenous 14/09/2007
+ * \author houari khenous last last modification 08/10/2007.
  *
  */
 

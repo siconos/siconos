@@ -34,7 +34,8 @@
  *
  * here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
  *
- * \fn  pfc_3D_projection( int *nn , double *vec , double *q , double *z , double *w , double coef )
+ * \fn  pfc_3D_projection( int n , double *C , double *b , double *zz , double *ww , double coef ,\n
+ *                         void (*Compute_G), void (*Compute_JacG), int *iparam_local , double *dparam_local ) \n
  *
  * Generic pfc_3D parameters:\n
  *
@@ -46,7 +47,7 @@
  * \param coef    Unchanged parameter which represents the friction coefficient
  *
  *
- * \author houari khenous 14/09/2007 .
+ * \author houari khenous last modification 08/10/2007 .
  *
  */
 

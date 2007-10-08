@@ -61,7 +61,7 @@
  * \param dparamLCP[2] = res     Output modified parameter which returns the final error value.
  *
  *
- * \author Houari Khenous.
+ * \author Houari Khenous last modification 08/10/2007
  *
  */
 

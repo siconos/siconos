@@ -18,7 +18,6 @@
 */
 /*!\file pfc_3D_Alart_Curnier.c\n
  *
- * \fn pfc_3D_Alart_Curnier( int *nn , double *vec , double *q , double *z , double *w , double coef)\n
  *
  *
  * This subroutine allows the computation of the equation to be solved (We try to solve G = 0) with Newton method. \n
@@ -35,20 +34,13 @@
  *
  * Inside, we compute G, JacG and the inverse of JacG. \n
  *
- * \fn  void Compute_G( int m, double *G, double *x , double *y , double rn, double rt, double coef )\n
+ * \fn  void Compute_G
  *
- * \fn  void Compute_JacG( int m, double *A, double *B, double *JacG, double *C, double *x , double *y , double rn, double rt, double coef )\n
+ * \fn  void Compute_JacG
  *
- * \fn  void matrix_inv3(double *a, double *b)\n
+ * \fn  void matrix_inv3
  *
- *
- * Generic pfc_3D parameters:\n
- *
- * \param y       Modified parameter which contains the initial solution and returns the solution of the problem.\n
- * \param x       Modified parameter which returns the solution of the problem.\n
- * \param rn, rt  Modified parameter which contains the augmentation parameters values.\n
- * \param coef    Modified parameter which contains the friction coefficient value.\n
- *
+ * \fn void Linesearch_AC
  *
  * \author Houari Khenous last modification (08/10/2007)
  *
