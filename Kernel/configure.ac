@@ -149,6 +149,17 @@ dnl #################################
 
 # required version of the libraries
 
+# Check for atlas in special location
+# this define ATLAS_CPPFLAGS and ATLAS_LDFLAGS
+ACX_ATLAS(,
+  [AC_MSG_ERROR([Atlas was not found. This makes this library unusable.
+*** This makes this library unusable. Please get the atlas library 
+*** installed. If you do have this installed, use the options 
+*** --with-atlas-include=<path of atlas include dir > and 
+*** --with-atlas-lib=<path of atlas libdir> and/or set 
+*** the env variable LDFLAGS to include the appropriate linker 
+*** flags.])])
+
 dnl dnl Check for Blas and Lapack
 ACX_LAPACK([
    dnl action-if-found:    
@@ -164,27 +175,27 @@ dnl action-if-not-found:
  *** flags.])
 ])
 
-dnl Check for Atlas
-AQ_CHECK_ATLAS
-if test "$atlas_available" = "yes"; then
-    AC_MSG_RESULT([Atlas OK])  
- else
-    AC_MSG_ERROR([Cannot find  Atlas. Please install it or use the option  --with-atlas-libs=DIR  to add ATLAS library path.]) 
-fi
-
 case "$target" in
-    *-linux*)
-      ATLAS_LIBS="$atlas_libraries $atlas_lib"
-      ATLAS_INCLUDES=""
-      ;;
     *-apple-darwin*)
       #ATLAS_LIBS="-L/usr/local/lib/atlas/ -latlas -lcblas -lf77blas -llapack -latlas"
       ATLAS_LIBS="/usr/local/lib/atlas/libatlas.a /usr/local/lib/atlas/liblapack.a /usr/local/lib/atlas/libcblas.a /usr/local/lib/atlas/libf77blas.a"
       ATLAS_INCLUDES="-I/usr/local/include/atlas"
-      ;; 
+      ;;
     *)
-      ATLAS_LIBS="$atlas_libraries $atlas_lib"
-      ATLAS_INCLUDES=""     
+      ATLAS_LIBS="$ATLAS_LDFLAGS"
+
+      # Specific solution to Debian packaging bug
+      AC_CHECK_HEADER([atlas/cblas.h],[need_inc_atlas=no],[need_inc_atlas=yes])
+      AC_CHECK_HEADER([atlas/clapack.h],[need_inc_atlas=no],[need_inc_atlas=yes])
+      if test "$need_inc_atlas" = yes; then
+            ATLAS_INCLUDES="$ATLAS_CPPFLAGS"
+            ATLAS_SRC_INCLUDES='-I${abs_top_srcdir}/src/utils/AtlasLocal'
+            ATLAS_LOCAL_INCLUDES='-I$(SICONOSPATH)/include/Siconos/AtlasLocal'
+            AC_SUBST(ATLAS_SRC_INCLUDES)
+            AC_SUBST(ATLAS_LOCAL_INCLUDES)
+      else
+            ATLAS_INCLUDES="$ATLAS_CPPFLAGS"
+      fi
       ;;
 esac
 
@@ -290,8 +301,7 @@ SICONOS_EXT_INCLUDES="$NUMERICS_INCLUDES $ATLAS_INCLUDES $XML_CPPFLAGS $BOOST_CP
 AC_SUBST(SICONOS_EXT_INCLUDES)
 
 
-SICONOS_EXT_LIBS="$NUMERICS_LIBRARIES $FLIBS $ATLAS_LIBS $LAPACK_LIBS $XML_LIBS -ldl"
-SICONOS_EXT_LIBS="$SICONOS_EXT_LIBS $LIBS " dnl  -L/usr/lib/atlas -llapack_atlas"
+SICONOS_EXT_LIBS="$NUMERICS_LIBRARIES $XML_LIBS $LAPACK_LIBS $LIBS -ldl"
 
 AC_SUBST(SICONOS_EXT_LIBS)
 
@@ -339,6 +349,8 @@ AC_CONFIG_FILES([Makefile
                  src/utils/contract/Makefile
 		 src/utils/SiconosTools/Makefile
                  src/utils/boost/Makefile
+                 src/utils/AtlasLocal/Makefile
+                 src/utils/AtlasLocal/atlas/Makefile
 		 src/xml/Makefile
                  src/xml/test/Makefile
 		 global_tests/Makefile])
@@ -356,10 +368,10 @@ echo "
    F77 Compiler:                        ${F77}
    F77 compiler flags:                  ${FFLAGS}
    Preprocessor flags:                  ${CPPFLAGS}
-dnl   Linking flags			${LDFLAGS}
-dnl   Linking flags(2)			${LIBS}
+   Linking flags			${LDFLAGS}
+   Linking flags(2)			${LIBS}
    Siconos external includes:           ${SICONOS_EXT_INCLUDES}
-   Siconos lexternal libs :             ${SICONOS_EXT_LIBS}"
+   Siconos external libs :              ${SICONOS_EXT_LIBS}"
 echo 
 echo Type \'make \' to build the SICONOS platform
 echo Type \'make doc\' to generate the documentation.

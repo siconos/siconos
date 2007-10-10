@@ -21,19 +21,13 @@
 include $(top_srcdir)/config/Make-rules
 
 SUBDIRS = test
-#EXTRA_DIST =
 
-all : DefaultPlugin.so
+pkglib_LTLIBRARIES = DefaultPlugin.la
+DefaultPlugin_la_SOURCES = DefaultPlugin.cpp
+DefaultPlugin_la_LDFLAGS = -module
 
-DefaultPlugin.o: DefaultPlugin.cpp
-	$(CXX) $(CXXFLAGS) -c DefaultPlugin.cpp
-
-DefaultPlugin.so: DefaultPlugin.o
+.o.so:
 	$(CXX) $(CXXFLAGS) $(CXX_DYNLIB) $< -o $@
 
-clean:
-	$(RM) -f DefaultPlugin.o DefaultPlugin.so
-
-pkgdata_DATA = DefaultPlugin.so
 
 

@@ -20,20 +20,10 @@
 
 include $(top_srcdir)/config/Make-rules
 
-#SUBDIRS = 
-#EXTRA_DIST =
+pkglib_LTLIBRARIES = TestPlugin.la
+TestPlugin_la_SOURCES = TestPlugin.cpp
+TestPlugin_la_LDFLAGS = -module
 
-all : TestPlugin.so
-
-TestPlugin.o: TestPlugin.cpp
-	$(CXX) $(CXXFLAGS) -c TestPlugin.cpp
-
-TestPlugin.so: TestPlugin.o
+.o.so:
 	$(CXX) $(CXXFLAGS) $(CXX_DYNLIB) $< -o $@
-
-clean:
-	$(RM) -f TestPlugin.o TestPlugin.so
-
-pkgdata_DATA = TestPlugin.so
-
 

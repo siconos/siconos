@@ -40,13 +40,6 @@ if test $acx_blas_ok = no; then
 	LIBS="$save_LIBS"
 fi
 
-# BLAS in ATLAS library? (http://math-atlas.sourceforge.net/)
-AQ_CHECK_ATLAS
-if test "$atlas_available" = "yes"; then
-  BLAS_LIBS="$atlas_libraries $atlas_lib"
-  acx_blas_ok=yes
-fi
-
 # BLAS in PhiPACK libraries? (requires generic BLAS lib, too)
 if test "$acx_blas_ok" = "no"; then
 	AC_CHECK_LIB(blas, $sgemm,

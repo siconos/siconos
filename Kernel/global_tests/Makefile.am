@@ -9,10 +9,11 @@ siconos_HEADERS = MainTest.h FunctionTest.h GlobalTests.h
 MainTest_INCLUDES = $(CPPUNIT_CFLAGS)
 MainTest_LDFLAGS =  $(CPPUNIT_LIBS)  $(SICONOS_LIBS) $(SICONOS_EXT_LIBS)
 
+pkglib_LTLIBRARIES = gTestPlugin.la
+gTestPlugin_la_SOURCES = gTestPlugin.cpp
+gTestPlugin_la_LDFLAGS = -module
+
 all : gTestPlugin.so
 
-gTestPlugin.o: gTestPlugin.cpp
-	$(CXX) $(CXXFLAGS) -c gTestPlugin.cpp
-
-gTestPlugin.so: gTestPlugin.o
+.o.so:
 	$(CXX) $(CXXFLAGS) $(CXX_DYNLIB) $< -o $@

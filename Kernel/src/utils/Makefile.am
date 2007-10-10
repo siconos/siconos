@@ -20,8 +20,7 @@
 
 include $(top_srcdir)/config/Make-rules
 
-SUBDIRS = SiconosTools SiconosException SiconosSharedLibrary SiconosAlgebra SiconosMemory contract boost
-
+SUBDIRS = SiconosTools SiconosException SiconosSharedLibrary SiconosAlgebra SiconosMemory contract boost AtlasLocal
 EXTRA_DIST = Utils.h
 
 siconos_HEADERS = Utils.h SiconosConst.h
