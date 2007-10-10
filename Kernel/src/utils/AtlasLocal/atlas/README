@@ -1,0 +1,5 @@
+On some distributions, atlas/cblas.h and atlas/clapack.h are missing.y
+
+See:
+
+http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=432860
