@@ -28,6 +28,8 @@
 #  include <boost/type_traits/is_same.hpp>
 #endif
 
+#include <cassert>
+
 
 namespace boost
 {

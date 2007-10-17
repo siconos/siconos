@@ -29,14 +29,8 @@
 using namespace std;
 
 // --- CONSTRUCTORS/DESTRUCTOR ---
-// Default constructor
-OneStepNSProblem::OneStepNSProblem(const string pbType):
-  nspbType(pbType), id(DEFAULT_OSNS_NAME), sizeOutput(0), solver(NULL), isSolverAllocatedIn(false),  simulation(NULL), onestepnspbxml(NULL),
-  OSNSInteractions(NULL), levelMin(0), levelMax(0)
-{}
-
 // xml constructor
-OneStepNSProblem::OneStepNSProblem(const string pbType, OneStepNSProblemXML* osnspbxml, Simulation* newSimu):
+OneStepNSProblem::OneStepNSProblem(const string& pbType, OneStepNSProblemXML* osnspbxml, Simulation* newSimu):
   nspbType(pbType), id(DEFAULT_OSNS_NAME), sizeOutput(0), solver(NULL), isSolverAllocatedIn(false),  simulation(newSimu), onestepnspbxml(osnspbxml),
   OSNSInteractions(NULL), levelMin(0), levelMax(0)
 {
@@ -73,7 +67,7 @@ OneStepNSProblem::OneStepNSProblem(const string pbType, OneStepNSProblemXML* osn
 }
 
 // Constructor with given simulation and a pointer on Solver (Warning, solver is an optional argument)
-OneStepNSProblem::OneStepNSProblem(const string pbType, Simulation * newSimu, string newId, Solver* newSolver):
+OneStepNSProblem::OneStepNSProblem(const string& pbType, Simulation * newSimu, const string& newId, Solver* newSolver):
   nspbType(pbType), id(newId), sizeOutput(0), solver(newSolver), isSolverAllocatedIn(false),  simulation(newSimu), onestepnspbxml(NULL),
   OSNSInteractions(NULL), levelMin(0), levelMax(0)
 {
@@ -87,7 +81,7 @@ OneStepNSProblem::OneStepNSProblem(const string pbType, Simulation * newSimu, st
 
   // === Adds this in the simulation set of OneStepNSProblem ===
   // First checks the id if required.
-  if (!(simulation->getOneStepNSProblems()).empty() && id == DEFAULT_OSNS_NAME) // An id is required if there is more than one OneStepNSProblem in the simulation
+  if (!(simulation->getOneStepNSProblems())->empty() && id == DEFAULT_OSNS_NAME) // An id is required if there is more than one OneStepNSProblem in the simulation
     RuntimeException::selfThrow("OneStepNSProblem::constructor(...). Since the simulation has several one step non smooth problem, an id is required for each of them.");
   simulation->addOneStepNSProblemPtr(this);
 }
@@ -164,7 +158,7 @@ void OneStepNSProblem::computeUnitaryRelationsPositions()
   //
   // positions are saved in a map<UnitaryRelation*, unsigned int>, named blocksPositions.
   //
-  // The map of blocksIndexes (position of a block in the full matrix in number of blocks) is filled simultaneously to match
+  // The map of blocksIndices (position of a block in the full matrix in number of blocks) is filled simultaneously to match
   // the same order as blocksPositions.
   //
   // Move this function in topology? Or simulation?
@@ -179,7 +173,7 @@ void OneStepNSProblem::computeUnitaryRelationsPositions()
   for (it = indexSet->begin(); it != indexSet->end(); ++it)
   {
     blocksPositions[*it] = pos;
-    blocksIndexes[*it] = blIndex;
+    blocksIndices[*it] = blIndex;
     pos += (*it)->getNonSmoothLawSize();
     blIndex++;
   }
@@ -219,7 +213,7 @@ void OneStepNSProblem::updateBlocks()
   //  - If 1==false, 2 is not checked, and the block is computed if 3==true.
   //
   UnitaryRelationsSet * indexSet;
-  bool isTimeInvariant, isBlockRequired;
+  bool isTimeInvariant;
   UnitaryRelationsIterator itUR1, itUR2;
   DynamicalSystemsSet commonDS;
   // Get index set from Simulation
@@ -230,12 +224,9 @@ void OneStepNSProblem::updateBlocks()
   {
     for (itUR2 = indexSet->begin(); itUR2 != indexSet->end(); ++itUR2)
     {
-      intersection(*(*itUR1)->getDynamicalSystemsPtr(), *(*itUR2)->getDynamicalSystemsPtr(), commonDS);
-      isBlockRequired = !(commonDS.isEmpty());
-
-      if (!isTimeInvariant && isBlockRequired)
+      if (!isTimeInvariant)
         computeBlock(*itUR1, *itUR2);
-      else if (isTimeInvariant && isBlockRequired)
+      else // if(isTimeInvariant)
       {
         if ((blocks.find(*itUR1)) != blocks.end())  // if blocks[UR1] exists
         {
@@ -258,18 +249,10 @@ void OneStepNSProblem::computeAllBlocks()
   UnitaryRelationsIterator itUR1, itUR2;
   DynamicalSystemsSet commonDS;
 
-  bool isBlockRequired;
-
   for (itUR1 = indexSet->begin(); itUR1 != indexSet->end(); ++itUR1)
   {
     for (itUR2 = indexSet->begin(); itUR2 != indexSet->end(); ++itUR2)
-    {
-      intersection(*(*itUR1)->getDynamicalSystemsPtr(), *(*itUR2)->getDynamicalSystemsPtr(), commonDS);
-      isBlockRequired = !(commonDS.isEmpty());
-
-      if (isBlockRequired)
-        computeBlock(*itUR1, *itUR2);
-    }
+      computeBlock(*itUR1, *itUR2);
   }
 }
 
@@ -299,7 +282,7 @@ void OneStepNSProblem::saveInMemory()
     (*it)->swapInMemory();
 }
 
-void OneStepNSProblem::compute(const double time)
+void OneStepNSProblem::compute(double time)
 {
   RuntimeException::selfThrow("OneStepNSProblem::compute - not yet implemented for problem type =" + nspbType);
 }
@@ -322,7 +305,7 @@ void OneStepNSProblem::saveNSProblemToXML()
   else RuntimeException::selfThrow("OneStepNSProblem::saveNSProblemToXML - OneStepNSProblemXML object not exists");
 }
 
-void OneStepNSProblem::check_solver(const int info) const
+void OneStepNSProblem::check_solver(int info) const
 {
   string solverName = solver->getSolverAlgorithmName();
   // info = 0 => ok

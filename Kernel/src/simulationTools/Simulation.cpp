@@ -47,19 +47,9 @@ using namespace std;
 //   OneStepNSProblem  * osns = new OneStepNSProblem(...,s,...);
 //   OneStepIntegrator * osi = new OneStepIntegrator(...,s,...);
 
-// --- Default constructor (protected) ---
-Simulation::Simulation(const string& type):
-  name("unnamed"), simulationType(type), timeDiscretisation(NULL), eventsManager(NULL),
-  simulationxml(NULL), model(NULL), levelMin(0), levelMax(0), tolerance(DEFAULT_TOLERANCE), printStat(false)
-{
-  tolerance = DEFAULT_TOLERANCE; // useless but else warning "DEFAULT_TOLERANCE defined but not used when compile ..."
-  isAllocatedIn["eventsManager"] = false;
-  isAllocatedIn["timeDiscretisation"] = false;
-}
-
 // --- Constructor with a TimeDiscretisation (and thus a Model) and an id ---
 Simulation::Simulation(TimeDiscretisation* td, const string& id):
-  name("unnamed"), simulationType(id), timeDiscretisation(td), eventsManager(NULL),
+  name("unnamed"), simulationType(id), timeDiscretisation(td), eventsManager(NULL), allOSI(NULL), allNSProblems(NULL),
   simulationxml(NULL), model(td->getModelPtr()), levelMin(0), levelMax(0), tolerance(DEFAULT_TOLERANCE), printStat(false)
 {
   if (timeDiscretisation == NULL)
@@ -76,11 +66,13 @@ Simulation::Simulation(TimeDiscretisation* td, const string& id):
   // === Events manager creation ===
   eventsManager = new EventsManager(this); //
   isAllocatedIn["eventsManager"] = true;
+  allOSI = new OSISet();
+  allNSProblems = new OneStepNSProblems();
 }
 
 // --- xml constructor ---
 Simulation::Simulation(SimulationXML* strxml, Model *newModel, const string& id):
-  name("unnamed"), simulationType(id), timeDiscretisation(NULL), eventsManager(NULL),
+  name("unnamed"), simulationType(id), timeDiscretisation(NULL), eventsManager(NULL), allOSI(NULL), allNSProblems(NULL),
   simulationxml(strxml), model(newModel), levelMin(0), levelMax(0), tolerance(DEFAULT_TOLERANCE), printStat(false)
 {
   if (simulationxml == NULL)
@@ -100,15 +92,16 @@ Simulation::Simulation(SimulationXML* strxml, Model *newModel, const string& id)
   SetOfOSIXMLIt it;
   CheckInsertOSI checkOSI;
   string typeOfOSI;
+  allOSI = new OSISet();
   for (it = OSIXMLList.begin(); it != OSIXMLList.end(); ++it)
   {
     typeOfOSI = (*it)->getType();
     // if OSI is a Moreau
     if (typeOfOSI == MOREAU_TAG)
-      checkOSI = allOSI.insert(new Moreau(*it, this));
+      checkOSI = allOSI->insert(new Moreau(*it, this));
 
     else if (typeOfOSI == LSODAR_TAG) // if OSI is a Lsodar-type
-      checkOSI = allOSI.insert(new Lsodar(*it, this));
+      checkOSI = allOSI->insert(new Lsodar(*it, this));
 
     else RuntimeException::selfThrow("Simulation::xml constructor - unknown one-step integrator type: " + typeOfOSI);
 
@@ -124,6 +117,7 @@ Simulation::Simulation(SimulationXML* strxml, Model *newModel, const string& id)
   // === Events manager creation ===
   eventsManager = new EventsManager(this); //
   isAllocatedIn["eventsManager"] = true;
+  allNSProblems = new OneStepNSProblems();
 }
 
 // --- Destructor ---
@@ -140,22 +134,24 @@ Simulation::~Simulation()
 
   // == delete OSI ==
   OSIIterator it;
-  for (it = allOSI.begin(); it != allOSI.end(); ++it)
+  for (it = allOSI->begin(); it != allOSI->end(); ++it)
   {
     if (isOSIAllocatedIn[*it]) delete *it;
   }
 
-  allOSI.clear();
+  allOSI->clear();
+  delete allOSI;
   isOSIAllocatedIn.clear();
 
   // == delete OS NS Problems ==
   OSNSIterator itOSNS;
-  for (itOSNS = allNSProblems.begin(); itOSNS != allNSProblems.end(); ++itOSNS)
+  for (itOSNS = allNSProblems->begin(); itOSNS != allNSProblems->end(); ++itOSNS)
   {
     if (isNSProblemAllocatedIn[itOSNS->second]) delete(itOSNS->second);
   }
 
-  allNSProblems.clear();
+  allNSProblems->clear();
+  delete allNSProblems;
   isNSProblemAllocatedIn.clear();
 
   // Delete indexSets ... (starting from 1 since Index0 is part of the Topology and not created in Simulation).
@@ -185,18 +181,18 @@ void Simulation::setOneStepIntegrators(const OSISet& newSet)
 {
   // clear old set
   OSIIterator it;
-  for (it = allOSI.begin(); it != allOSI.end(); ++it)
+  for (it = allOSI->begin(); it != allOSI->end(); ++it)
   {
     if (isOSIAllocatedIn[*it]) delete *it;
   }
 
-  allOSI.clear();
+  allOSI->clear();
   isOSIAllocatedIn.clear();
 
   // Warning: pointers links between osi of newSet and allOSI.
   for (it = newSet.begin(); it != newSet.end(); ++it)
   {
-    allOSI.insert(*it);
+    allOSI->insert(*it);
     isOSIAllocatedIn[*it] = false;
   }
 }
@@ -227,7 +223,7 @@ OneStepIntegrator* Simulation::getIntegratorOfDSPtr(DynamicalSystem * ds) const
 
 void Simulation::addOneStepIntegratorPtr(OneStepIntegrator *osi)
 {
-  allOSI.insert(osi);
+  allOSI->insert(osi);
   isOSIAllocatedIn[osi] = false;
   osi->setSimulationPtr(this);
 
@@ -256,7 +252,7 @@ OneStepNSProblem* Simulation::getOneStepNSProblemPtr(const std::string& name)
   if (!hasOneStepNSProblem(name))
     RuntimeException::selfThrow("Simulation - getOneStepNSProblemPtr(name) - The One Step NS Problem is not in the simulation.");
 
-  return allNSProblems[name];
+  return (*allNSProblems)[name];
 }
 
 void Simulation::setOneStepNSProblems(const OneStepNSProblems& mapOfOSNS)
@@ -264,21 +260,27 @@ void Simulation::setOneStepNSProblems(const OneStepNSProblems& mapOfOSNS)
   clearOneStepNSProblems();
 
   // Warning: pointers links between OneStepNSProblem of each map
-  allNSProblems = mapOfOSNS;
-  OSNSIterator itOSNS;
-  for (itOSNS = allNSProblems.begin(); itOSNS != allNSProblems.end(); ++itOSNS)
+  allNSProblems = new OneStepNSProblems();
+
+  ConstOSNSIterator itOSNS;
+  for (itOSNS = mapOfOSNS.begin(); itOSNS != mapOfOSNS.end(); ++itOSNS)
+  {
+    (*allNSProblems)[itOSNS->first] = itOSNS->second;
     isNSProblemAllocatedIn[itOSNS->second] = false;
+  }
 }
+
 
 void Simulation::clearOneStepNSProblems()
 {
   OSNSIterator itOSNS;
-  for (itOSNS = allNSProblems.begin(); itOSNS != allNSProblems.end(); ++itOSNS)
+  for (itOSNS = allNSProblems->begin(); itOSNS != allNSProblems->end(); ++itOSNS)
   {
     if (isNSProblemAllocatedIn[itOSNS->second] && itOSNS->second != NULL)
       delete(itOSNS->second);
   }
-  allNSProblems.clear();
+  allNSProblems->clear();
+  delete allNSProblems;
   isNSProblemAllocatedIn.clear();
 }
 
@@ -287,8 +289,8 @@ const bool Simulation::hasOneStepNSProblem(OneStepNSProblem* osns) const
 
   bool val = false; // true when osns found.
 
-  ConstOSNSIterator it = allNSProblems.find(osns->getId());
-  if (it != allNSProblems.end()) val = true;
+  ConstOSNSIterator it = allNSProblems->find(osns->getId());
+  if (it != allNSProblems->end()) val = true;
 
   return val;
 }
@@ -297,7 +299,7 @@ const bool Simulation::hasOneStepNSProblem(const string& name) const
 {
   bool val = false;
   ConstOSNSIterator it;
-  for (it = allNSProblems.begin(); it != allNSProblems.end(); ++it)
+  for (it = allNSProblems->begin(); it != allNSProblems->end(); ++it)
     if ((it->second)->getId() == name)
     {
       val = true;
@@ -322,7 +324,7 @@ void Simulation::addOneStepNSProblemPtr(OneStepNSProblem* osns)
     RuntimeException::selfThrow("Simulation - addOneStepNSProblemPtr(osns), the non smooth problem already exists in the Simulation. ");
 
   string name = osns->getId();
-  allNSProblems[name] = osns;
+  (*allNSProblems)[name] = osns;
   isNSProblemAllocatedIn[osns] = false;
 }
 
@@ -342,7 +344,7 @@ void Simulation::initialize()
 
   // === OneStepIntegrators initialization ===
   OSIIterator itOsi;
-  for (itOsi = allOSI.begin(); itOsi != allOSI.end(); ++itOsi)
+  for (itOsi = allOSI->begin(); itOsi != allOSI->end(); ++itOsi)
     (*itOsi)->initialize();
 
   // === IndexSets building ===
@@ -363,7 +365,6 @@ void Simulation::initialize()
     for (unsigned int i = 1; i < indexSets.size(); ++i)
       indexSets[i] = new UnitaryRelationsSet();
   }
-
   // Initialize OneStepNSProblem: in derived classes specific functions.
   initOSNS();
 
@@ -395,20 +396,21 @@ void Simulation::reset()
 {
   // r (or p) is set to zero in all DynamicalSystems.
   OSIIterator itOSI;
-  for (itOSI = allOSI.begin(); itOSI != allOSI.end() ; ++itOSI)
+  for (itOSI = allOSI->begin(); itOSI != allOSI->end() ; ++itOSI)
     (*itOSI)->resetNonSmoothPart();
 }
+
 
 void Simulation::saveInMemory()
 {
   // Save OSI state (DynamicalSystems) in Memory.
   OSIIterator it;
-  for (it = allOSI.begin(); it != allOSI.end() ; ++it)
+  for (it = allOSI->begin(); it != allOSI->end() ; ++it)
     (*it)->saveInMemory();
 
   // Save OSNS state (Interactions) in Memory.
   OSNSIterator itOsns;
-  for (itOsns = allNSProblems.begin(); itOsns != allNSProblems.end(); ++itOsns)
+  for (itOsns = allNSProblems->begin(); itOsns != allNSProblems->end(); ++itOsns)
     (itOsns->second)->saveInMemory();
 }
 
@@ -416,10 +418,16 @@ void Simulation::computeOneStepNSProblem(const std::string& name)
 {
   if (!hasOneStepNSProblem(name))
     RuntimeException::selfThrow("Simulation - computeOneStepNSProblem, OneStepNSProblem does not exist in the simulation. Id:" + name);
-  if (allNSProblems[name] == NULL)
+  if ((*allNSProblems)[name] == NULL)
     RuntimeException::selfThrow("Simulation - computeOneStepNSProblem, OneStepNSProblem == NULL, Id: " + name);
 
-  allNSProblems[name]->compute(model->getCurrentTime());
+  (*allNSProblems)[name]->compute(model->getCurrentTime());
+}
+
+void Simulation::update()
+{
+  for (unsigned int i = 1; i < levelMax; ++i)
+    update(i);
 }
 
 void Simulation::saveSimulationToXML()
@@ -428,7 +436,7 @@ void Simulation::saveSimulationToXML()
   {
     string typeOSI;
     OSIIterator it;
-    for (it = allOSI.begin(); it != allOSI.end() ; ++it)
+    for (it = allOSI->begin(); it != allOSI->end() ; ++it)
     {
       typeOSI = (*it)->getType();
       if (typeOSI == "Moreau")

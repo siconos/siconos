@@ -85,6 +85,8 @@ void LagrangianCompliantR::initComponents()
   LagrangianR::initComponents();
   unsigned int sizeY = interaction->getSizeOfY();
 
+  workL = new SimpleVector(sizeY);
+
   if (G[1] == NULL)
   {
     G[1] = new SimpleMatrix(sizeY, sizeY);
@@ -125,26 +127,22 @@ void LagrangianCompliantR::computeH(double time)
     SiconosVector *lambda = interaction->getLambdaPtr(0);
 
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    SimpleVector * qCopy = new SimpleVector(*data["q0"]);
-    SimpleVector * zCopy = new SimpleVector(*data["z"]);
-    SimpleVector * yCopy = new SimpleVector(*y);
-    SimpleVector * lambdaCopy = new SimpleVector(*lambda);
+    *workX = *data["q0"];
+    *workZ = *data["z"];
+    *workY = *y;
+    *workL = *lambda;
 
-    unsigned int sizeQ = qCopy->size();
+    unsigned int sizeQ = workX->size();
     unsigned int sizeY = y->size();
-    unsigned int sizeZ = zCopy->size();
+    unsigned int sizeZ = workZ->size();
 
     if (hPtr == NULL)
       RuntimeException::selfThrow("LagrangianCompliantR:computeH() failed, h is not linked to a plugin function");
-    hPtr(sizeQ, &(*qCopy)(0), sizeY, &(*lambdaCopy)(0), &(*yCopy)(0), sizeZ, &(*zCopy)(0));
+    hPtr(sizeQ, &(*workX)(0), sizeY, &(*workL)(0), &(*workY)(0), sizeZ, &(*workZ)(0));
 
     // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *zCopy;
-    *y = *yCopy;
-    delete qCopy;
-    delete yCopy;
-    delete zCopy;
-    delete lambdaCopy;
+    *data["z"] = *workZ;
+    *y = *workY;
   }
 }
 
@@ -158,33 +156,29 @@ void LagrangianCompliantR::computeG(double time, unsigned int  index)
   if (isPlugged[name])
   {
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    SimpleVector * qCopy = new SimpleVector(*data["q0"]);
-    SimpleVector * zCopy = new SimpleVector(*data["z"]);
+    *workX = *data["q0"];
+    *workZ = *data["z"];
 
     unsigned int sizeY = G[0]->size(0);
-    unsigned int sizeQ = qCopy->size();
-    unsigned int sizeZ = zCopy->size();
+    unsigned int sizeQ = workX->size();
+    unsigned int sizeZ = workZ->size();
 
     // get vector lambda of the current interaction
-    SiconosVector *lambda = interaction->getLambdaPtr(0);
-    SimpleVector * lambdaCopy = new SimpleVector(*lambda);
+    *workL = *interaction->getLambdaPtr(0);
     if (index == 0)
     {
       if (G0Ptr == NULL)
         RuntimeException::selfThrow("LagrangianCompliantR::computeG() is not linked to a plugin function");
-      G0Ptr(sizeQ, &(*qCopy)(0), sizeY, &(*lambdaCopy)(0), &(*G[0])(0, 0), sizeZ, &(*zCopy)(0));
+      G0Ptr(sizeQ, &(*workX)(0), sizeY, &(*workL)(0), &(*G[0])(0, 0), sizeZ, &(*workZ)(0));
     }
     else if (index == 1)
     {
       if (G1Ptr == NULL)
         RuntimeException::selfThrow("LagrangianCompliantR::computeG() is not linked to a plugin function");
-      G1Ptr(sizeQ, &(*qCopy)(0), sizeY, &(*lambdaCopy)(0), &(*G[1])(0, 0), sizeZ, &(*zCopy)(0));
+      G1Ptr(sizeQ, &(*workX)(0), sizeY, &(*workL)(0), &(*G[1])(0, 0), sizeZ, &(*workZ)(0));
     }
     // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *zCopy;
-    delete lambdaCopy;
-    delete qCopy;
-    delete zCopy;
+    *data["z"] = *workZ;
   }
 }
 
@@ -197,26 +191,22 @@ void LagrangianCompliantR::computeHFree(double time)
     SiconosVector *lambda = interaction->getLambdaPtr(0);
 
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    SimpleVector * qCopy = new SimpleVector(*data["q0Free"]);
-    SimpleVector * zCopy = new SimpleVector(*data["z"]);
-    SimpleVector * yCopy = new SimpleVector(*y);
-    SimpleVector * lambdaCopy = new SimpleVector(*lambda);
+    *workX = *data["q0Free"];
+    *workZ = *data["z"];
+    *workY = *y;
+    *workL = *lambda;
 
-    unsigned int sizeQ = qCopy->size();
+    unsigned int sizeQ = workX->size();
     unsigned int sizeY = y->size();
-    unsigned int sizeZ = zCopy->size();
+    unsigned int sizeZ = workZ->size();
 
     if (hPtr == NULL)
       RuntimeException::selfThrow("LagrangianCompliantR:computeH() failed, h is not linked to a plugin function");
-    hPtr(sizeQ, &(*qCopy)(0), sizeY, &(*lambdaCopy)(0), &(*yCopy)(0), sizeZ, &(*zCopy)(0));
+    hPtr(sizeQ, &(*workX)(0), sizeY, &(*workL)(0), &(*workY)(0), sizeZ, &(*workZ)(0));
 
     // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *zCopy;
-    *y = *yCopy;
-    delete qCopy;
-    delete yCopy;
-    delete zCopy;
-    delete lambdaCopy;
+    *data["z"] = *workZ;
+    *y = *workY;
   }
 }
 
@@ -230,33 +220,29 @@ void LagrangianCompliantR::computeGFree(double time, unsigned int  index)
   if (isPlugged[name])
   {
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    SimpleVector * qCopy = new SimpleVector(*data["q0Free"]);
-    SimpleVector * zCopy = new SimpleVector(*data["z"]);
+    *workX = *data["q0Free"];
+    *workZ = *data["z"];
 
     unsigned int sizeY = G[0]->size(0);
-    unsigned int sizeQ = qCopy->size();
-    unsigned int sizeZ = zCopy->size();
+    unsigned int sizeQ = workX->size();
+    unsigned int sizeZ = workZ->size();
 
     // get vector lambda of the current interaction
-    SiconosVector *lambda = interaction->getLambdaPtr(0);
-    SimpleVector * lambdaCopy = new SimpleVector(*lambda);
+    *workL = *interaction->getLambdaPtr(0);
     if (index == 0)
     {
       if (G0Ptr == NULL)
         RuntimeException::selfThrow("LagrangianCompliantR::computeG() is not linked to a plugin function");
-      G0Ptr(sizeQ, &(*qCopy)(0), sizeY, &(*lambdaCopy)(0), &(*G[0])(0, 0), sizeZ, &(*zCopy)(0));
+      G0Ptr(sizeQ, &(*workX)(0), sizeY, &(*workL)(0), &(*G[0])(0, 0), sizeZ, &(*workZ)(0));
     }
     else if (index == 1)
     {
       if (G1Ptr == NULL)
         RuntimeException::selfThrow("LagrangianCompliantR::computeG() is not linked to a plugin function");
-      G1Ptr(sizeQ, &(*qCopy)(0), sizeY, &(*lambdaCopy)(0), &(*G[1])(0, 0), sizeZ, &(*zCopy)(0));
+      G1Ptr(sizeQ, &(*workX)(0), sizeY, &(*workL)(0), &(*G[1])(0, 0), sizeZ, &(*workZ)(0));
     }
     // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *zCopy;
-    delete lambdaCopy;
-    delete qCopy;
-    delete zCopy;
+    *data["z"] = *workZ;
   }
 }
 

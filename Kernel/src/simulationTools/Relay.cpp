@@ -20,9 +20,6 @@
 #include "Relay.h"
 using namespace std;
 
-Relay::Relay(): OneStepNSProblem("Relay")
-{}
-
 Relay::Relay(OneStepNSProblemXML* osnspbxml, Simulation * newStrat):
   OneStepNSProblem("Relay", osnspbxml, newStrat)
 {}
@@ -30,7 +27,7 @@ Relay::Relay(OneStepNSProblemXML* osnspbxml, Simulation * newStrat):
 Relay::~Relay()
 {}
 
-void Relay::compute(const double& time)
+void Relay::compute(double time)
 {
   RuntimeException::selfThrow("Relay compute: not yet implemented.");
 }

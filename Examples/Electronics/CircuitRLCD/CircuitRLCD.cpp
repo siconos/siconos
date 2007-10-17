@@ -72,9 +72,7 @@ int main(int argc, char* argv[])
     LS_A(0 , 1) = -1.0 / Cvalue;
     LS_A(1 , 0) = 1.0 / Lvalue;
 
-    FirstOrderLinearDS* LSCircuitRLCD = new FirstOrderLinearDS(1, init_state, LS_A);
-
-
+    FirstOrderLinearTIDS* LSCircuitRLCD = new FirstOrderLinearTIDS(1, init_state, LS_A);
 
     // --- Interaction between linear system and non smooth system ---
 
@@ -115,8 +113,8 @@ int main(int argc, char* argv[])
 
     TimeStepping* StratCircuitRLCD = new TimeStepping(TiDiscRLCD);
 
-    //double theta = 0.5000000000001;
-    double theta = 1.0;
+    double theta = 0.5000000000001;
+
     Moreau* OSI_RLCD = new Moreau(LSCircuitRLCD, theta, StratCircuitRLCD);
 
     LCP* LCP_RLCD = new LCP(StratCircuitRLCD, "LCP", solverName, 101, 1e-8);
@@ -126,6 +124,8 @@ int main(int argc, char* argv[])
 
     int N = TiDiscRLCD->getNSteps(); // Number of time steps
     int k = 0;
+
+
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 4) = (InterCircuitRLCD->getLambda(0))(0);
 
       dataPlot(k, 5) = (LSCircuitRLCD->getR())(0);
-
+      dataPlot(k, 5) = OSI_RLCD->computeResidu();
       // transfer of state i+1 into state i and time incrementation
       StratCircuitRLCD->nextStep();
 

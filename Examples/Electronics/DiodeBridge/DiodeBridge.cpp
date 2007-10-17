@@ -137,27 +137,31 @@ int main(int argc, char* argv[])
     // -> saved in a matrix dataPlot
     SimpleMatrix dataPlot(N, 7);
 
+    SiconosVector * x = LSDiodeBridge->getXPtr();
+    SiconosVector * y = InterDiodeBridge->getYPtr(0);
+    SiconosVector * lambda = InterDiodeBridge->getLambdaPtr(0);
+
     // For the initial time step:
     // time
     dataPlot(k, 0) = t0;
 
     // inductor voltage
-    dataPlot(k, 1) = (LSDiodeBridge->getX())(0);
+    dataPlot(k, 1) = (*x)(0);
 
     // inductor current
-    dataPlot(k, 2) = (LSDiodeBridge->getX())(1);
+    dataPlot(k, 2) = (*x)(1);
 
     // diode R1 current
-    dataPlot(k, 3) = (InterDiodeBridge->getY(0))(0);
+    dataPlot(k, 3) = (*y)(0);
 
     // diode R1 voltage
-    dataPlot(k, 4) = -(InterDiodeBridge->getLambda(0))(0);
+    dataPlot(k, 4) = -(*lambda)(0);
 
     // diode F2 voltage
-    dataPlot(k, 5) = -(InterDiodeBridge->getLambda(0))(1);
+    dataPlot(k, 5) = -(*lambda)(1);
 
     // diode F1 current
-    dataPlot(k, 6) = (InterDiodeBridge->getLambda(0))(2);
+    dataPlot(k, 6) = (*lambda)(2);
 
     // --- Compute elapsed time ---
     double t1, t2, elapsed;
@@ -180,22 +184,22 @@ int main(int argc, char* argv[])
       dataPlot(k, 0) = StratDiodeBridge->getNextTime();
 
       // inductor voltage
-      dataPlot(k, 1) = (LSDiodeBridge->getX())(0);
+      dataPlot(k, 1) = (*x)(0);
 
       // inductor current
-      dataPlot(k, 2) = (LSDiodeBridge->getX())(1);
+      dataPlot(k, 2) = (*x)(1);
 
       // diode R1 current
-      dataPlot(k, 3) = (InterDiodeBridge->getY(0))(0);
+      dataPlot(k, 3) = (*y)(0);
 
       // diode R1 voltage
-      dataPlot(k, 4) = -(InterDiodeBridge->getLambda(0))(0);
+      dataPlot(k, 4) = -(*lambda)(0);
 
       // diode F2 voltage
-      dataPlot(k, 5) = -(InterDiodeBridge->getLambda(0))(1);
+      dataPlot(k, 5) = -(*lambda)(1);
 
       // diode F1 current
-      dataPlot(k, 6) = (InterDiodeBridge->getLambda(0))(2);
+      dataPlot(k, 6) = (*lambda)(2);
 
       StratDiodeBridge->nextStep();
 

@@ -26,10 +26,6 @@
 
 using namespace std;
 
-// Default constructor
-FrictionContact3D::FrictionContact3D(): FrictionContact("FrictionContact3D")
-{}
-
 // xml constructor (Simulation is optional)
 FrictionContact3D::FrictionContact3D(OneStepNSProblemXML* osNsPbXml, Simulation* newSimu):
   FrictionContact("FrictionContact3D", osNsPbXml, newSimu)

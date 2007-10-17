@@ -79,14 +79,14 @@ void LagrangianScleronomousRTest::testBuildLagrangianScleronomousR0()
 }
 
 // default constructor:
-void LagrangianScleronomousRTest::testBuildLagrangianScleronomousR1()
-{
-  LagrangianScleronomousR * R1 = new LagrangianScleronomousR();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR2a : ", R1->getType() == "Lagrangian", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR2b : ", R1->getSubType() == "ScleronomousR", true);
-  delete R1;
-  cout << " default Constructor LagrangianScleronomousR ok" << endl;
-}
+// void LagrangianScleronomousRTest::testBuildLagrangianScleronomousR1()
+// {
+//   LagrangianScleronomousR * R1 = new LagrangianScleronomousR();
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR2a : ", R1->getType()=="Lagrangian", true);
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR2b : ", R1->getSubType()=="ScleronomousR", true);
+//   delete R1;
+//   cout << " default Constructor LagrangianScleronomousR ok" << endl;
+// }
 
 // data constructor:
 void LagrangianScleronomousRTest::testBuildLagrangianScleronomousR2()

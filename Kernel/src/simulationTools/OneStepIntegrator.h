@@ -18,19 +18,16 @@
  */
 /*! \file
 
+Basic class to handle with dynamical system integrators over a time step.
  */
 
 #ifndef ONESTEPINTEGRATOR_H
 #define ONESTEPINTEGRATOR_H
 
-
 #include "SiconosConst.h"
 #include "DynamicalSystemsSet.h"
 #include "InteractionsSet.h"
-#include "RuntimeException.h"
 
-class DynamicalSystem;
-class TimeDiscretisation;
 class OneStepIntegratorXML;
 class Simulation;
 
@@ -69,29 +66,34 @@ protected:
   /** the corresponding XML object */
   OneStepIntegratorXML *integratorXml;
 
-  /** default constructor
-   */
-  OneStepIntegrator();
-
   /** basic constructor with Id and simulation
    *  \param string, integrator type/name
    *  \param Simulation * : the simulation that owns the osi
    */
-  OneStepIntegrator(const std::string, Simulation*);
+  OneStepIntegrator(const std::string&, Simulation*);
 
   /** constructor from xml file
    *  \param string, integrator type/name
    *  \param OneStepIntegratorXML* : the corresponding XML object
    *  \param Simulation * : the simulation that owns the osi
    */
-  OneStepIntegrator(const std::string, OneStepIntegratorXML*, Simulation*);
+  OneStepIntegrator(const std::string&, OneStepIntegratorXML*, Simulation*);
 
   /** constructor from a minimum set of data
    *  \param string, integrator type/name
    *  \param DynamicalSystemsSet : a set of DynamicalSystem to be integrated
    *  \param Simulation * : the simulation that owns the osi
    */
-  OneStepIntegrator(const std::string, const DynamicalSystemsSet&, Simulation*);
+  OneStepIntegrator(const std::string&, const DynamicalSystemsSet&, Simulation*);
+
+private:
+
+  /** default constructor
+   */
+  OneStepIntegrator();
+
+  /** copy constructor, private, no copy nor pass-by value allowed */
+  OneStepIntegrator(const OneStepIntegrator&);
 
 public:
 
@@ -112,7 +114,7 @@ public:
   /** set the type of the OneStepIntegrator
    *  \return string : the type of the OneStepIntegrator
    */
-  inline void setType(const std::string newType)
+  inline void setType(const std::string& newType)
   {
     integratorType = newType;
   }
@@ -218,7 +220,7 @@ public:
   /** set sizeMem
    *  \param an unsigned int
    */
-  inline void setSizeMem(const unsigned int newValue)
+  inline void setSizeMem(unsigned int newValue)
   {
     sizeMem = newValue;
   };
@@ -265,6 +267,11 @@ public:
    */
   void saveInMemory();
 
+  /** return the maximum of all norms for the discretized residus of DS
+      \return a double
+   */
+  virtual double computeResidu();
+
   /** integrates the Dynamical System linked to this integrator, without taking constraints
    * into account.
    */
@@ -285,7 +292,7 @@ public:
   /** update the state of the DynamicalSystem attached to this Integrator
    *  \param unsigned int: level of interest for the dynamics
    */
-  virtual void updateState(const unsigned int) = 0;
+  virtual void updateState(unsigned int) = 0;
 
   /** print the data to the screen
    */

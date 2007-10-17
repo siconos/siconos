@@ -50,11 +50,15 @@ bool BallBowl()
     dataPlot(k, 0) =  bouncingBall.getT0();
     // state q for the first dynamical system (ball)
     LagrangianDS* ball = static_cast<LagrangianDS*>(bouncingBall.getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
-    dataPlot(k, 1) = (ball->getQ())(0);
-    dataPlot(k, 2) = (ball->getVelocity())(0);
-    dataPlot(k, 3) = (ball->getQ())(1);
-    dataPlot(k, 4) = (ball->getVelocity())(1);
-    dataPlot(k, 5) = (bouncingBall.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
+    SiconosVector * q = ball->getQPtr();
+    SiconosVector * v = ball->getVelocityPtr();
+    SiconosVector * p = ball->getPPtr(2);
+
+    dataPlot(k, 1) = (*q)(0);
+    dataPlot(k, 2) = (*v)(0);
+    dataPlot(k, 3) = (*q)(1);
+    dataPlot(k, 4) = (*v)(1);
+    dataPlot(k, 5) = (*p)(0);
 
     cout << "Computation ... " << endl;
     // --- Time loop  ---
@@ -67,17 +71,18 @@ bool BallBowl()
 
       // --- Get values to be plotted ---
       //time
-      dataPlot(k, 0) = s->getNextTime();;
+      dataPlot(k, 0) = s->getStartingTime();;
       // Ball: state q
-      dataPlot(k, 1) = (ball->getQ())(0);
+      dataPlot(k, 1) = (*q)(0);
       // Ball: velocity
-      dataPlot(k, 2) = (ball->getVelocity())(0);
+      dataPlot(k, 2) = (*v)(0);
       // Ground: q
-      dataPlot(k, 3) = (ball->getQ())(1);
+      dataPlot(k, 3) = (*q)(1);
       // Ground: velocity
-      dataPlot(k, 4) = (ball->getVelocity())(1);
+      dataPlot(k, 4) = (*v)(1);
       // Reaction
-      dataPlot(k, 5) = (bouncingBall.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
+      dataPlot(k, 5) = (*p)(0);
+
       // transfer of state i+1 into state i and time incrementation
       s->nextStep();
     }

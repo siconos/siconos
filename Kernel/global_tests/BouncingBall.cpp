@@ -57,29 +57,33 @@ bool BouncingBall()
     // time
 
     int k = 0;
-    dataPlot(k, 0) = bouncingBall->getT0();
-    // state q for the ball
-    dataPlot(k, 1) = (ball->getQ())(0);
-    // velocity for the ball
-    dataPlot(k, 2) = (ball->getVelocity())(0);
-    // Reaction
-    dataPlot(k, 3) = (bouncingBall->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
-    // --- Time loop  ---
+    SiconosVector * q = ball->getQPtr();
+    SiconosVector * v = ball->getVelocityPtr();
+    SiconosVector * p = ball->getPPtr(2);
+
+    dataPlot(0, 0) = bouncingBall->getT0();
+    dataPlot(0, 1) = (*q)(0);
+    dataPlot(0, 2) = (*v)(0);
+    dataPlot(0, 3) = (*p)(0);
 
     for (k = 1 ; k < N + 1 ; ++k)
     {
       s->computeOneStep();
       // --- Get values to be plotted ---
-      dataPlot(k, 0) =  s->getNextTime();
-      dataPlot(k, 1) = ball->getQ()(0);
-      dataPlot(k, 2) = ball->getVelocity()(0);
-      dataPlot(k, 3) = (bouncingBall->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
+      dataPlot(k, 0) =  s->getStartingTime();
+      dataPlot(k, 1) = (*q)(0);
+      dataPlot(k, 2) = (*v)(0);
+      dataPlot(k, 3) = (*p)(0);
+
       s->nextStep();
     }
 
     SiconosMatrix * dataRef = new SimpleMatrix("refBouncingBall.dat", true);
     double tol = 1e-9;
     double norm = (dataPlot - (*dataRef)).normInf() ;// diff->normInf();
+    ioMatrix io("result.dat", "ascii");
+    io.write(dataPlot, "noDim");
+
     if (norm < tol)
     {
       cout << " ******** Bouncing Ball global test ended with success ********" << endl;

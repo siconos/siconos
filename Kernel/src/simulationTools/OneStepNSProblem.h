@@ -23,48 +23,20 @@
 #define ONESTEPNSPROBLEM_H
 
 #include "InteractionsSet.h"
-#include "RuntimeException.h"
 #include "Solver.h"
-
-const std::string DEFAULT_OSNSPB = "LCP";
+#include "SimulationTypeDef.h"
 
 class Simulation;
-class SiconosVector;
 class DynamicalSystem;
 class UnitaryRelation;
-class EqualityConstraint;
 class SiconosMatrix;
 class OneStepNSProblemXML;
-class Solver;
 
-/** map of SiconosMatrices with a UnitaryRelations as a key - Used for diagonal block-terms in assembled matrices of LCP etc ...*/
-typedef std::map< UnitaryRelation* , SiconosMatrix*>  MapOfUnitaryMatrices;
-
-/** corresponding iterator */
-typedef MapOfUnitaryMatrices::iterator UnitaryMatrixColumnIterator ;
-typedef MapOfUnitaryMatrices::const_iterator ConstUnitaryMatrixColumnIterator;
-
-/** map of MapOfUnitaryMatrices with a UnitaryRelation as a key - Used for extra-diagonal block-terms in assembled matrices of LCP etc ..*/
-typedef std::map< UnitaryRelation* , MapOfUnitaryMatrices >  MapOfMapOfUnitaryMatrices;
-
-/** corresponding iterators */
-typedef MapOfMapOfUnitaryMatrices::iterator UnitaryMatrixRowIterator ;
-typedef MapOfMapOfUnitaryMatrices::const_iterator ConstUnitaryMatrixRowIterator ;
-
-/** map of map of bools, with UnitaryRelations as keys */
-typedef std::map< UnitaryRelation* , std::map<UnitaryRelation*, bool> >  MapOfMapOfBool;
-
-// Remark: UnitaryMatrixRowIterator will be used to iterate through what corresponds to rows of blocks (a row for a UnitaryRelation, named URrow) and for
-// a row, UnitaryMatrixColumnIterator will be used to iterate through columns, ie through all the UnitaryRelations that are linked to URrow.
-
-/** map of SiconosMatrix; key = the related DS*/
-typedef std::map<DynamicalSystem*, SiconosMatrix*> MapOfMatrices;
-
-/** map of double; key = the related DS */
-typedef std::map<DynamicalSystem*, double> MapOfDouble;
-
-/** default name for One Step NS Problem of the simulation */
+/** default name for the OneStepNSProblem of the simulation */
 const std::string DEFAULT_OSNS_NAME = "unamed";
+
+/** default type for the OneStepNSProblem of the simulation */
+const std::string DEFAULT_OSNSPB = "LCP";
 
 /** Non Smooth Problem Formalization and Simulation
  *
@@ -87,6 +59,8 @@ const std::string DEFAULT_OSNS_NAME = "unamed";
  *
  *  Note: simulation is a required input for construction of a OneStepNSProblem.
  *
+ * Remark: UnitaryMatrixRowIterator will be used to iterate through what corresponds to rows of blocks (a row for a UnitaryRelation, named URrow) and for
+ *  a row, UnitaryMatrixColumnIterator will be used to iterate through columns, ie through all the UnitaryRelations that are linked to URrow.
  */
 class OneStepNSProblem
 {
@@ -119,7 +93,7 @@ protected:
   /** map that links each UnitaryRelation with an int that gives the position of the corresponding block matrix
    *  in the full matrix (M in LCP case) in number of blocks (for use with block matrix storage)
    */
-  std::map< UnitaryRelation* , unsigned int > blocksIndexes;
+  std::map< UnitaryRelation* , unsigned int > blocksIndices;
 
   /** Solver for Non Smooth Problem*/
   Solver* solver;
@@ -149,10 +123,15 @@ protected:
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
 
+private:
+
   /** default constructor
-  *  \param string: problem type
-  */
-  OneStepNSProblem(const std::string = DEFAULT_OSNSPB);
+   */
+  OneStepNSProblem();
+
+  /** copy constructor (private => no copy nor pass-by value)
+   */
+  OneStepNSProblem(const OneStepNSProblem&);
 
 public:
 
@@ -161,7 +140,7 @@ public:
   *  \param OneStepNSProblemXML* : the XML linked-object
   *  \param Simulation *: the simulation that owns the problem
   */
-  OneStepNSProblem(const std::string, OneStepNSProblemXML*, Simulation *);
+  OneStepNSProblem(const std::string&, OneStepNSProblemXML*, Simulation *);
 
   /** constructor from data
   *  \param string: problem type
@@ -169,7 +148,7 @@ public:
   *  \param string : id
   *  \param Solver *: pointer on object that contains solver algorithm definition (optional)
   */
-  OneStepNSProblem(const std::string, Simulation *, const std::string, Solver* = NULL);
+  OneStepNSProblem(const std::string&, Simulation *, const std::string&, Solver* = NULL);
 
   /** destructor
   */
@@ -188,7 +167,7 @@ public:
   /** set the type of the OneStepNSProblem
   *  \param: string
   */
-  inline void setType(const std::string  newVal)
+  inline void setType(const std::string&  newVal)
   {
     nspbType = newVal;
   }
@@ -204,7 +183,7 @@ public:
   /** set the id of the OneStepNSProblem
   *  \param: string
   */
-  inline void setId(const std::string newVal)
+  inline void setId(const std::string& newVal)
   {
     id = newVal;
   }
@@ -305,7 +284,7 @@ public:
   /** set the value of level min
   *  \param an unsigned int
   */
-  inline void setLevelMin(const unsigned int newVal)
+  inline void setLevelMin(unsigned int newVal)
   {
     levelMin = newVal;
   }
@@ -321,7 +300,7 @@ public:
   /** set the value of level  max
   *  \param an unsigned int
   */
-  inline void setLevelMax(const unsigned int newVal)
+  inline void setLevelMax(unsigned int newVal)
   {
     levelMax = newVal;
   }
@@ -330,7 +309,7 @@ public:
   *  \param an unsigned int (levelMin value)
   *  \param an unsigned int (levelMax value)
   */
-  inline void setLevels(const unsigned int newMin, const unsigned int newMax)
+  inline void setLevels(unsigned int newMin, unsigned int newMax)
   {
     levelMin = newMin;
     levelMax = newMax;
@@ -373,26 +352,25 @@ public:
   /** prepare data of the osns for solving
   *  param double : current time
   */
-  virtual void preCompute(const double) = 0;
+  virtual void preCompute(double) = 0;
 
   /** make the computation so solve the NS problem
   *  param double : current time
   */
-  virtual void compute(const double) = 0;
+  virtual void compute(double) = 0;
 
   /** post treatment for output of the solver
    */
   virtual void postCompute() = 0;
 
   /** copy the data of the OneStepNSProblem to the XML tree
-  *  \exception RuntimeException
-  */
+   */
   virtual void saveNSProblemToXML() = 0;
 
   /** return exception and message if solver failed
   *  \param: output from solve_... (Numerics routine)
   */
-  void check_solver(const int) const;
+  void check_solver(int) const;
 
   /** get the OSI-related matrices used to compute the current Unitary Relation block (Ex: for Moreau, W and Theta)
   *  \param a pointer to UnitaryRelation

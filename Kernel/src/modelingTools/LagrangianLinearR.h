@@ -39,6 +39,9 @@ class LagrangianLinearRXML;
  * \f[
  * y= H q + b + D\lambda + Fz
  * \f]
+ * \f[
+ * \dot y= H \dot q + D\lambda
+ * \f]
  *
  * \f[
  * p= H^t \lambda

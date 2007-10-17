@@ -1495,16 +1495,14 @@ LagrangianDS* LagrangianDS::convert(DynamicalSystem* ds)
 double LagrangianDS::dsConvergenceIndicator()
 {
   double dsCvgIndic;
-  // Velocity is used to calculate the indicator.
-  SiconosVector *diff = new SimpleVector(q[0]->size());
+  SimpleVector diff(q[0]->size());
   // Compute difference between present and previous Newton steps
-  SiconosVector * valRef = workVector["LagNLDSMoreau"];
-  *diff =  *(q[0]) - *valRef;
+  SiconosVector * valRef = workVector["NewtonCvg"];
+  sub(*(q[0]), *valRef, diff);
   if (valRef->norm2() != 0)
-    dsCvgIndic = diff->norm2() / (valRef->norm2());
+    dsCvgIndic = diff.norm2() / (valRef->norm2());
   else
-    dsCvgIndic = diff->norm2();
-  delete diff;
+    dsCvgIndic = diff.norm2();
   return (dsCvgIndic);
 }
 

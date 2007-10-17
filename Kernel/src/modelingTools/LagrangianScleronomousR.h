@@ -44,6 +44,12 @@
  * p = G0^t(q,z)\lambda
  * \f]
  *
+ * with
+ *
+ \f[
+ G0(q,z) = \nabla_q h(q,z)
+ \f]
+
  * G0 and h are connected to plug-in functions.
  *
  */
@@ -72,11 +78,13 @@ protected:
    */
   FPtr3 G0Ptr;
 
-public:
+private:
 
   /** default constructor
    */
   LagrangianScleronomousR();
+
+public:
 
   /** constructor from xml file
    *  \param relationXML

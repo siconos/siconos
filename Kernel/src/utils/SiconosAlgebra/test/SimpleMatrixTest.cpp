@@ -28,7 +28,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(SimpleMatrixTest);
 
 void SimpleMatrixTest::setUp()
 {
-  tol = 1e-10;
+  tol = 1e-9;
 
   fic1 = "mat1.dat"; // 2 X 2
   fic2 = "mat2.dat"; // 2 X 3
@@ -3349,7 +3349,9 @@ void SimpleMatrixTest::testGemm()
 
   *C = *backUp;
   gemm(a, *A, *B, b, *C);
+
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm: ", norm_inf(*C->getDensePtr() - a * prod(*A->getDensePtr(), *B->getDensePtr()) - b**backUp->getDensePtr()) < tol, true);
+
 
   *C = *backUp;
   gemm(CblasNoTrans, CblasNoTrans, a, *A, *B, b, *C);

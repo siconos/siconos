@@ -23,12 +23,11 @@ TESTS_ENVIRONMENT = LD_LIBRARY_PATH=$(top_srcdir)/src/plugin/:$(top_builddir)/sr
 
 check_PROGRAMS = test1
 TESTS = $(check_PROGRAMS)
-test1_SOURCES = FirstOrderRTest.cpp FirstOrderLinearRTest.cpp FirstOrderLinearTIRTest.cpp LagrangianScleronomousRTest.cpp LagrangianRheonomousRTest.cpp LagrangianCompliantRTest.cpp \
+test1_SOURCES = FirstOrderType1RTest.cpp FirstOrderLinearRTest.cpp FirstOrderLinearTIRTest.cpp LagrangianScleronomousRTest.cpp LagrangianRheonomousRTest.cpp LagrangianCompliantRTest.cpp \
 		LagrangianLinearRTest.cpp FirstOrderNonLinearDSTest.cpp FirstOrderLinearDSTest.cpp \
 		LagrangianDSTest.cpp LagrangianLinearTIDSTest.cpp TestMain.cpp \
-		FirstOrderRTest.h FirstOrderLinearRTest.h FirstOrderLinearTIRTest.h LagrangianScleronomousRTest.h  LagrangianRheonomousRTest.h LagrangianCompliantRTest.h \
-	        LagrangianLinearRTest.h FirstOrderNonLinearDSTest.h FirstOrderLinearDSTest.h LagrangianDSTest.h LagrangianLinearTIDSTest.h
-siconos_HEADERS =FirstOrderRTest.h FirstOrderLinearRTest.h FirstOrderLinearTIRTest.h LagrangianScleronomousRTest.h LagrangianRheonomousRTest.h LagrangianCompliantRTest.h \
+		FirstOrderType1RTest.h FirstOrderLinearRTest.h FirstOrderLinearTIRTest.h LagrangianScleronomousRTest.h  LagrangianRheonomousRTest.h LagrangianCompliantRTest.h \		LagrangianLinearRTest.h FirstOrderNonLinearDSTest.h FirstOrderLinearDSTest.h LagrangianDSTest.h LagrangianLinearTIDSTest.h
+siconos_HEADERS =FirstOrderType1RTest.h FirstOrderLinearRTest.h FirstOrderLinearTIRTest.h LagrangianScleronomousRTest.h LagrangianRheonomousRTest.h LagrangianCompliantRTest.h \
 		 LagrangianLinearRTest.h FirstOrderNonLinearDSTest.h FirstOrderLinearDSTest.h LagrangianDSTest.h LagrangianLinearTIDSTest.h
 test1_INCLUDES = $(CPPUNIT_CFLAGS)
 test1_LDFLAGS =  $(CPPUNIT_LIBS)  $(SICONOS_LIBS) $(SICONOS_EXT_LIBS)

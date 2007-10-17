@@ -48,10 +48,10 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 2;           // degrees of freedom for robot arm
     double t0 = 0;                   // initial computation time
-    double T = 50.0;                   // final computation time
+    double T = 40.0;                   // final computation time
     double h = 0.0005;                // time step
-    double criterion = 0.00005;
-    unsigned int maxIter = 2000;
+    double criterion = 0.05;
+    unsigned int maxIter = 20000;
     double e = 1.0;                  // nslaw
     double e1 = 0.0;
 
@@ -170,10 +170,10 @@ int main(int argc, char* argv[])
     //double theta=0.500001;
     double theta = 0.500001;
 
-    OneStepIntegrator * OSI =  new Moreau(doublependulum, theta, s);
+    Moreau * OSI =  new Moreau(doublependulum, theta, s);
 
     // -- OneStepNsProblem --
-    OneStepNSProblem * osnspb = new LCP(s, "name", "Lemke", 2001, 0.005);
+    OneStepNSProblem * osnspb = new LCP(s, "name", "Lemke", 2001, 0.0000005);
 
     cout << "=== End of model loading === " << endl;
 
@@ -186,12 +186,14 @@ int main(int argc, char* argv[])
     s->initialize();
     cout << "End of simulation initialisation" << endl;
 
+
+
     int k = 0;
     int N = t->getNSteps(); // Number of time steps
     cout << "Number of time step   " << N << endl;
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 11;
+    unsigned int outputSize = 12;
     SimpleMatrix dataPlot(N + 1, outputSize);
     // For the initial time step:
     // time
@@ -226,7 +228,6 @@ int main(int argc, char* argv[])
 
       // Solve problem
       s->newtonSolve(criterion, maxIter);
-
       // Data Output
       dataPlot(k, 0) =  s->getStartingTime();
       dataPlot(k, 1) = (*q)(0);

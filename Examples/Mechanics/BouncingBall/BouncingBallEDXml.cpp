@@ -56,12 +56,12 @@ int main(int argc, char* argv[])
 
     SiconosVector * q = ball->getQPtr();
     SiconosVector * v = ball->getVelocityPtr();
-    SiconosVector * lambda = bouncingBall->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambdaPtr(1);
+    SiconosVector * p = ball->getPPtr(2);
 
     dataPlot(0, 0) = bouncingBall->getT0();
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
-    dataPlot(0, 3) = (*lambda)(0);
+    dataPlot(0, 3) = (*p)(0);
 
     cout << "====> Start computation ... " << endl << endl;
     // --- Time loop  ---
@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 0) = s->getStartingTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
-      dataPlot(k, 3) = (*lambda)(0);
+      dataPlot(k, 3) = (*p)(0);
       numberOfEvent++;
     }
     // --- Output files ---

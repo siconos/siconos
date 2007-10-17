@@ -25,19 +25,28 @@ using namespace std;
 
 // Default constructor
 Relation::Relation(const string& newType, const string& newSub):
-  relationType(newType), subType(newSub), interaction(NULL), relationxml(NULL)
+  relationType(newType), subType(newSub), interaction(NULL), relationxml(NULL), workX(NULL), workZ(NULL), workY(NULL), workL(NULL)
 {}
 
 // xml constructor
 Relation::Relation(RelationXML* relxml, const string& newType, const string& newSub):
-  relationType(newType), subType(newSub), interaction(NULL), relationxml(relxml)
+  relationType(newType), subType(newSub), interaction(NULL), relationxml(relxml), workX(NULL), workZ(NULL), workY(NULL), workL(NULL)
 {
   if (relationxml == NULL)
     RuntimeException::selfThrow("Relation::fillRelationWithRelationXML - object RelationXML does not exist");
 }
 
 Relation::~Relation()
-{}
+{
+  if (workX != NULL) delete workX;
+  workX = NULL;
+  if (workZ != NULL) delete workZ;
+  workZ = NULL;
+  if (workY != NULL) delete workY;
+  workY = NULL;
+  if (workL != NULL) delete workL;
+  workL = NULL;
+}
 
 void Relation::display() const
 {

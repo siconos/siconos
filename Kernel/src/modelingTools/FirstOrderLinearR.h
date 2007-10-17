@@ -159,7 +159,6 @@ public:
   /** create the Relation from a set of data
    *  \param pointer to SiconosMatrix : the matrix C
    *  \param pointer to SiconosMatrix : the matrix B
-   *  \exception RuntimeException
    */
   FirstOrderLinearR(SiconosMatrix* , SiconosMatrix*);
 
@@ -169,7 +168,6 @@ public:
    *  \param pointer to SiconosMatrix : F
    *  \param pointer to SimpleVector  : e
    *  \param pointer to SiconosMatrix : B
-   *  \exception RuntimeException
    */
   FirstOrderLinearR(SiconosMatrix* , SiconosMatrix* ,
                     SiconosMatrix* , SiconosVector* ,
@@ -392,18 +390,6 @@ public:
    *  \param unsigned int: "derivative" order of lambda used to compute input
    */
   virtual void computeInput(double, unsigned int);
-
-  /** default function to compute jacobianH (from FirstOrderR)
-   *  \param double : current time
-   *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
-   */
-  void computeJacobianH(double, unsigned int);
-
-  /** default function to compute jacobianG according to lambda (from FirstOrderR)
-   *  \param double : current time
-   *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
-   */
-  void computeJacobianG(double, unsigned int = 0);
 
   /** copy the data of the Relation to the XML tree
    */

@@ -32,13 +32,6 @@ void LagrangianLinearR::initAllocationFlags(bool in)
   isAllocatedIn["F"] = in;
 }
 
-// Default (private) constructor
-LagrangianLinearR::LagrangianLinearR():
-  LagrangianR("LinearR"), H(NULL), b(NULL), D(NULL), F(NULL)
-{
-  initAllocationFlags(false);
-}
-
 // Xml constructor
 LagrangianLinearR::LagrangianLinearR(RelationXML* relxml):
   LagrangianR(relxml, "LinearR"), H(NULL), b(NULL), D(NULL), F(NULL)
@@ -157,7 +150,7 @@ void LagrangianLinearR::initComponents()
     if (F->size(0) != sizeY || F->size(1) != sizeZ)
       RuntimeException::selfThrow("LagrangianLinearR::initComponents inconsistent sizes between F matrix and the interaction.");
   }
-
+  workL = new SimpleVector(sizeY);
 }
 
 // Setters
@@ -279,11 +272,9 @@ void LagrangianLinearR::computeInput(double time, const unsigned int level)
   // get lambda of the concerned interaction
   string name = "p" + toString<unsigned int>(level);
 
-  SiconosVector *lambda = new SimpleVector(*interaction->getLambdaPtr(level));
+  *workL = *interaction->getLambdaPtr(level);
   // compute p = Ht lambda
-  prod(*lambda, *H, *data[name], false);
-
-  delete lambda;
+  prod(*workL, *H, *data[name], false);
   //gemv(CblasTrans,1.0,*H,*lambda,1.0, *data[name]); => not yet implemented for BlockVectors.
 }
 

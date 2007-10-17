@@ -33,10 +33,6 @@
 
 using namespace std;
 
-// --- Default constructor ---
-EventDriven::EventDriven(): Simulation("EventDriven"), istate(1), tinit(0), tend(0)
-{}
-
 EventDriven::EventDriven(TimeDiscretisation * td): Simulation(td, "EventDriven"), istate(1), tinit(0), tend(0)
 {}
 
@@ -54,16 +50,16 @@ EventDriven::EventDriven(SimulationXML* strxml, Model *newModel): Simulation(str
     string type = simulationxml->getOneStepNSProblemXMLPtr()->getNSProblemType();
     if (type == LCP_TAG)  // LCP
     {
-      allNSProblems["acceleration"] = new LCP(simulationxml->getOneStepNSProblemXMLPtr(), this);
-      isNSProblemAllocatedIn[ allNSProblems["acceleration"] ] = true;
-      allNSProblems["impact"] = new LCP(simulationxml->getOneStepNSProblemXMLPtr(), this);
-      isNSProblemAllocatedIn[ allNSProblems["impact"] ] = true;
+      (*allNSProblems)["acceleration"] = new LCP(simulationxml->getOneStepNSProblemXMLPtr(), this);
+      isNSProblemAllocatedIn[(*allNSProblems)["acceleration"] ] = true;
+      (*allNSProblems)["impact"] = new LCP(simulationxml->getOneStepNSProblemXMLPtr(), this);
+      isNSProblemAllocatedIn[(*allNSProblems)["impact"] ] = true;
     }
     else
       RuntimeException::selfThrow("EventDriven::xml constructor - wrong type of NSProblem: inexistant or not yet implemented");
 
-    allNSProblems["acceleration"]->setId("acceleration");
-    allNSProblems["impact"]->setId("impact");
+    (*allNSProblems)["acceleration"]->setId("acceleration");
+    (*allNSProblems)["impact"]->setId("impact");
   }
 }
 
@@ -88,9 +84,9 @@ void EventDriven::updateIndexSet(unsigned int i)
   {
     // We get jroot array, output of root information
     // Warning! work only if there is only one osi in the simulation.
-    if (allOSI.size() > 1)
+    if (allOSI->size() > 1)
       RuntimeException::selfThrow("EventDriven::updateIndexSet(i), not yet implemented for several OneStepIntegrators in the same Simulation process.");
-    Lsodar * lsodar = static_cast<Lsodar*>(*(allOSI.begin()));
+    Lsodar * lsodar = static_cast<Lsodar*>(*(allOSI->begin()));
     integer * jroot = lsodar->getJroot();
     unsigned int nsLawSize; // size of each UR, which corresponds to the related nsLaw size
     unsigned int absolutePosition = 0; // global position of the UR in the vector of constraints, ie in jroot.
@@ -124,7 +120,12 @@ void EventDriven::updateIndexSet(unsigned int i)
             break; // if one, at least, of the nsLawSize constraints is active, the UR remains in the set.
           }
         }
-        if (out) indexSets[i]->erase(*it);
+        if (out)
+        {
+          indexSets[i]->erase(*it);
+          (*it)->getLambdaPtr(i)->zero();
+        }
+
       }
       absolutePosition += nsLawSize; // step to next UR ...
     }
@@ -151,7 +152,10 @@ void EventDriven::updateIndexSet(unsigned int i)
       else  // if the UR is already in the set
       {
         if (fabs(y) > tolerance)
+        {
           indexSets[i]->erase(*it);
+          (*it)->getLambdaPtr(i)->zero();
+        }
       }
     }
   }
@@ -180,16 +184,16 @@ void EventDriven::initOSNS()
   tinit = eventsManager->getStartingTime();
   tend =  eventsManager->getNextTime();
 
-  if (!allNSProblems.empty()) // ie if some Interactions have been declared and a Non smooth problem built.
+  if (!allNSProblems->empty()) // ie if some Interactions have been declared and a Non smooth problem built.
   {
     // === OneStepNSProblem initialization. ===
     // First check that there are 2 osns: one "impact" and one "acceleration"
-    if (allNSProblems.size() != 2)
-      RuntimeException::selfThrow(" EventDriven::initialize, \n an EventDriven simulation must have two non smooth problem.\n Here, there are " + allNSProblems.size());
+    if (allNSProblems->size() != 2)
+      RuntimeException::selfThrow(" EventDriven::initialize, \n an EventDriven simulation must have two non smooth problem.\n Here, there are " + allNSProblems->size());
 
-    if (allNSProblems.find("impact") == allNSProblems.end()) // ie if the impact problem does not exist
+    if (allNSProblems->find("impact") == allNSProblems->end()) // ie if the impact problem does not exist
       RuntimeException::selfThrow("EventDriven::initialize, an EventDriven simulation must have an 'impact' non smooth problem.");
-    if (allNSProblems.find("acceleration") == allNSProblems.end()) // ie if the acceleration-level problem does not exist
+    if (allNSProblems->find("acceleration") == allNSProblems->end()) // ie if the acceleration-level problem does not exist
       RuntimeException::selfThrow("EventDriven::initialize, an EventDriven simulation must have an 'acceleration' non smooth problem.");
 
     // At the time, we consider that for all systems, levelMin is equal to the minimum value of the relative degree
@@ -201,10 +205,10 @@ void EventDriven::initOSNS()
     updateIndexSets();
 
     // WARNING: only for Lagrangian systems - To be reviewed for other ones.
-    allNSProblems["impact"]->setLevels(levelMin - 1, levelMax - 1);
-    allNSProblems["impact"]->initialize();
-    allNSProblems["acceleration"]->setLevels(levelMin, levelMax);
-    allNSProblems["acceleration"]->initialize();
+    (*allNSProblems)["impact"]->setLevels(levelMin - 1, levelMax - 1);
+    (*allNSProblems)["impact"]->initialize();
+    (*allNSProblems)["acceleration"]->setLevels(levelMin, levelMax);
+    (*allNSProblems)["acceleration"]->initialize();
   }
 }
 
@@ -235,11 +239,11 @@ void EventDriven::computeF(OneStepIntegrator* osi, integer * sizeOfX, doublereal
   model->setCurrentTime(t);
 
   // solve a LCP at "acceleration" level if required
-  if (!allNSProblems.empty())
+  if (!allNSProblems->empty())
   {
-    if (!(allNSProblems["acceleration"]->getInteractions())->isEmpty())
+    if (!((*allNSProblems)["acceleration"]->getInteractions())->isEmpty())
     {
-      allNSProblems["acceleration"]->compute(t);
+      (*allNSProblems)["acceleration"]->compute(t);
       updateInput(2); // Necessary to compute DS state below
     }
     // Compute the right-hand side ( xdot = f + r in DS) for all the ds, with the new value of input.
@@ -314,7 +318,7 @@ void EventDriven::computeG(OneStepIntegrator* osi, integer * sizeOfX, doublereal
   // IN: - lambda[2] obtained during LCP call in computeF()
   //     - y[0]: need to be updated.
 
-  if (!allNSProblems.empty())
+  if (!allNSProblems->empty())
     updateOutput(0, 0);
 
   // If UR is in IndexSet2, g = lambda[2], else g = y[0]
@@ -344,20 +348,20 @@ void EventDriven::updateImpactState()
   updateInput(1);
 
   // Compute post-impact velocity
-  for (itOSI = allOSI.begin(); itOSI != allOSI.end() ; ++itOSI)
+  for (itOSI = allOSI->begin(); itOSI != allOSI->end() ; ++itOSI)
     (*itOSI)->updateState(1);
 }
 
 void EventDriven::update(unsigned int levelInput)
 {
-  if (!allNSProblems.empty())
+  if (!allNSProblems->empty())
   {
     // compute input (lambda -> r)
     updateInput(levelInput);
 
     // Update dynamical systems states
     OSIIterator itOSI;
-    for (itOSI = allOSI.begin(); itOSI != allOSI.end() ; ++itOSI)
+    for (itOSI = allOSI->begin(); itOSI != allOSI->end() ; ++itOSI)
       (*itOSI)->updateState(levelInput);
 
     // Update output (y)
@@ -388,7 +392,7 @@ void EventDriven::advanceToEvent()
 
   // call integrate method for each OSI, between tinit and tend.
   OSIIterator it;
-  for (it = allOSI.begin(); it != allOSI.end(); ++it)
+  for (it = allOSI->begin(); it != allOSI->end(); ++it)
   {
     (*it)->integrate(tinit, tend, tout, istate); // integrate must return a flag (istate) telling if tend has been reached or not.
 

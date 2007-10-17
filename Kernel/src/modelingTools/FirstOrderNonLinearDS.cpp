@@ -513,6 +513,20 @@ void FirstOrderNonLinearDS::computeF(double time)
   // else nothing!
 }
 
+void FirstOrderNonLinearDS::computeF(double time, SiconosVector* x2)
+{
+  if (isPlugin["f"])
+  {
+    if (computeFPtr == NULL)
+      RuntimeException::selfThrow("FirstOrderNonLinearDS::computeVF() f is not linked to a plugin function");
+    if (x2->size() != n)
+      RuntimeException::selfThrow("FirstOrderNonLinearDS::computeJacobianXF(t,x) x size does not fit with the system size.");
+
+    computeFPtr(time, n, &((*x2)(0)) , &(*f)(0), z->size(), &(*z)(0));
+  }
+  // else nothing!
+}
+
 void FirstOrderNonLinearDS::computeJacobianXF(double time, bool)
 {
   // second argument is useless at the time - Used in derived classes
@@ -521,6 +535,21 @@ void FirstOrderNonLinearDS::computeJacobianXF(double time, bool)
     if (computeJacobianXFPtr == NULL)
       RuntimeException::selfThrow("FirstOrderNonLinearDS::computeJacobianXF() is not linked to a plugin function");
     computeJacobianXFPtr(time, n, &((*(x[0]))(0)), &(*jacobianXF)(0, 0), z->size(), &(*z)(0));
+  }
+  // else nothing!
+}
+
+void FirstOrderNonLinearDS::computeJacobianXF(double time, SiconosVector* x2)
+{
+  // second argument is useless at the time - Used in derived classes
+  if (isPlugin["jacobianXF"])
+  {
+    if (computeJacobianXFPtr == NULL)
+      RuntimeException::selfThrow("FirstOrderNonLinearDS::computeJacobianXF() is not linked to a plugin function");
+    if (x2->size() != n)
+      RuntimeException::selfThrow("FirstOrderNonLinearDS::computeJacobianXF(t,x) x size does not fit with the system size.");
+
+    computeJacobianXFPtr(time, n, &((*x2)(0)), &(*jacobianXF)(0, 0), z->size(), &(*z)(0));
   }
   // else nothing!
 }
@@ -617,6 +646,22 @@ void FirstOrderNonLinearDS::display() const
 void FirstOrderNonLinearDS::resetNonSmoothPart()
 {
   r->zero();
+}
+
+double FirstOrderNonLinearDS::dsConvergenceIndicator()
+{
+  double dsCvgIndic;
+  // Velocity is used to calculate the indicator.
+  SiconosVector *diff = new SimpleVector(x[0]->size());
+  // Compute difference between present and previous Newton steps
+  SiconosVector * valRef = workVector["NewtonCvg"];
+  *diff =  *(x[0]) - *valRef;
+  if (valRef->norm2() != 0)
+    dsCvgIndic = diff->norm2() / (valRef->norm2());
+  else
+    dsCvgIndic = diff->norm2();
+  delete diff;
+  return (dsCvgIndic);
 }
 
 FirstOrderNonLinearDS* FirstOrderNonLinearDS::convert(DynamicalSystem* ds)

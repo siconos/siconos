@@ -10,7 +10,6 @@
 				<Velocity0  vectorSize='3'>
 					0.0 0.0 0.0
 				</Velocity0>
-				<FExt vectorPlugin="TestPlugin:computeFExt"/>
 				<Mass matrixRowSize='3' matrixColSize='3'>	
 					<row>1.0 0.0 0.0</row>
 					<row>0.0 1.0 0.0</row>
@@ -26,16 +25,11 @@
                                </DS_Concerned>									
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>		
-					<FirstOrderRelation>
-					<g plugin="TestPlugin:R"/>
-                                        <jacobianG number='1'>
-					    <matrix matrixPlugin="TestPlugin:Jg0"/>
-                                        </jacobianG>
-					<h plugin="TestPlugin:y"/>
-                                        <jacobianH number='2'>
-					    <matrix matrixPlugin="TestPlugin:Jh0"/>
-					    <matrix matrixPlugin="TestPlugin:Jh1"/>
-                                        </jacobianH>
+					<FirstOrderRelation type="Type1">
+					<g plugin="TestPlugin:gT1"/>
+                                        <jacobianG number='1'><matrix matrixPlugin="TestPlugin:Jg0T1"/></jacobianG>
+					<h plugin="TestPlugin:hT1"/>
+					<jacobianH number='1'><matrix matrixPlugin="TestPlugin:Jh0T1"/></jacobianH>
 					</FirstOrderRelation>			
 					<!-- NS Law of this interaction	-->
 					<NewtonImpactLaw>

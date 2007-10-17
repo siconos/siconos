@@ -116,6 +116,9 @@ void LagrangianR::initComponents()
   else // Check if dimension are consistents with interaction.
     if (sizeY != G[0]->size(0) || sizeQ != G[0]->size(1))
       RuntimeException::selfThrow("LagrangianR:: initComponents failed. Inconsistent sizes between Interaction and Relation matrices.");
+  workX = new SimpleVector(interaction->getSizeOfDS());
+  workZ = new SimpleVector(interaction->getSizeZ());
+  workY = new SimpleVector(sizeY);
 }
 
 void LagrangianR::setGVector(const VectorOfMatrices& newVector)

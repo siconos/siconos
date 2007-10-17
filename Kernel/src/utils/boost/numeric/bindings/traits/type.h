@@ -32,7 +32,8 @@ union
 
 typedef
 struct
-    double cmplx[2] ;
+{
+  double cmplx[2] ;
 } dcomplex_t ;
 
 #endif /* BOOST_NUMERIC_BINDINGS_USE_COMPLEX_STRUCT */

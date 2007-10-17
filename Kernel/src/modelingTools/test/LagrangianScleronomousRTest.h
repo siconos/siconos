@@ -36,7 +36,7 @@ private:
   // tests to be done ...
 
   CPPUNIT_TEST(testBuildLagrangianScleronomousR0);
-  CPPUNIT_TEST(testBuildLagrangianScleronomousR1);
+  //  CPPUNIT_TEST(testBuildLagrangianScleronomousR1);
   CPPUNIT_TEST(testBuildLagrangianScleronomousR2);
   CPPUNIT_TEST(End);
 
@@ -45,7 +45,7 @@ private:
   // \todo exception test
 
   void testBuildLagrangianScleronomousR0();
-  void testBuildLagrangianScleronomousR1();
+  //  void testBuildLagrangianScleronomousR1();
   void testBuildLagrangianScleronomousR2();
   void End();
 

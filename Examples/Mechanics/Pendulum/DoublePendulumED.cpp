@@ -188,7 +188,7 @@ int main(int argc, char* argv[])
     // -> saved in a matrix dataPlot
     unsigned int outputSize = 11;
 
-    SimpleMatrix dataPlot(100191, outputSize);
+    SimpleMatrix dataPlot(10363, outputSize);
     // For the initial time step:
     // time
     SiconosVector * q = doublependulum->getQPtr();

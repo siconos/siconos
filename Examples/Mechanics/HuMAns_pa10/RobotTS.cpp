@@ -211,7 +211,6 @@ int main(int argc, char* argv[])
       // get current time step
       k++;
       s->newtonSolve(criterion, maxIter);
-
       dataPlot(k, 0) =  s->getStartingTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*vel)(0);

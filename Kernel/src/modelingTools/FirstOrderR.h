@@ -40,7 +40,7 @@ typedef void (*InPtr)(unsigned int, const double*, double, unsigned int, double*
  *  Relation for First Order Dynamical Systems, with:
  * \f{eqnarray}
  * y &=& h(X,t,\lambda,Z)\\
- * R &=& g(\lambda,t,Z)
+ * R &=& g(X,t,\lambda,Z)
  * \f}
  *  X, Z, R corresponds to DynamicalSystem variables.
  *  If DS1 and DS2 are involved in the linked Interaction, then X =[x1 x2], Z=[z1 z2] ...
@@ -79,61 +79,22 @@ protected:
   /** matrices of gradients of g. (jacobianG[0]: gradient according to x, jacobianG[1]: gradient according to lambda) */
   VectorOfMatrices jacobianG;
 
-  /** Plug-in to compute h(x,t,lambda,z) (index = 0), \f$ \nabla_x h(x,t,lambda,z)\f$ (index = 1) or \f$ \nabla_\lambda h(x,t,lambda,z)\f$ (index = 2)
-   *  @param the size of the vector x.
-   *  @param x : the pointer to the first element of the vector x.
-   *  @param time : current time.
-   *  @param the size of the vectors y and lambda.
-   *  @param lambda : the pointer to the first element of the vector lambda.
-   *  @param[in,out]  a pointer to the first element of the result (y or its jacobian)
-   *  @param the size of the vectors z.
-   *  @param[in,out] z : a vector of user-defined parameters.
-   */
-  std::vector<OutPtr> output;
-
-  /** Plug-in to compute g(lambda,t,z) (index = 0), \f$ \nabla_X g(lambda,t,z)\f$ (index = 1) or \f$ \nabla_\lambda g(lambda,t,z)\f$ (index = 2).
-   *  @param sizeY : the size of the vector y and lambda.
-   *  @param lambda : the pointer to the first element of the vector lambda.
-   *  @param time : current time.
-   *  @param the size of the vectors R
-   *  @param[in,out] : the pointer to the first element of g or its jacobian.
-   *  @param the size of the vectors z.
-   *  @param[in,out] : a vector of user-defined parameters.
-   */
-  std::vector<InPtr> input;
-
-  /** protected function used to initilized isPlugged map
-      \param : a bool, value for all flags.
-  */
-  virtual void initPluginFlags(bool);
-
-  /** protected function used to initilized isAllocated map
-      \param : a bool, value for all flags.
-  */
-  virtual void initAllocationFlags(bool);
-
   /** default constructor
    *  \param a string that gives the type of the relation (optional)
    */
-  FirstOrderR(const std::string& = "R");
+  FirstOrderR(const std::string& = "FirstOrder");
+
+  /** xml constructor
+   *  \param FirstOrderRXML* : the XML object.
+   *  \param a string that gives the type of the relation
+   */
+  FirstOrderR(RelationXML*, const std::string&);
 
   /** To initialize data member: links to DS variables.
    */
   void initDSLinks();
 
 public:
-
-  /** xml constructor
-   *  \param FirstOrderRXML* : the XML object.
-   *  \param a string that gives the type of the relation (optional)
-   */
-  FirstOrderR(RelationXML*, const std::string& = "R");
-
-  /** data constructor
-   *  \param a string with computeOutput function name.
-   *  \param a string with computeInput function name.
-   */
-  FirstOrderR(const std::string&, const std::string&);
 
   /** destructor
    */
@@ -241,45 +202,45 @@ public:
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    */
-  void setComputeHFunction(const std::string&, const std::string&);
+  virtual void setComputeHFunction(const std::string&, const std::string&);
 
   /** To set a plug-in function to compute jacobianH
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
    */
-  void setComputeJacobianHFunction(const std::string&, const std::string&, unsigned int);
+  virtual void setComputeJacobianHFunction(const std::string&, const std::string&, unsigned int = 0);
 
   /** To set a plug-in function to compute input function g
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    */
-  void setComputeGFunction(const std::string&, const std::string&);
+  virtual void setComputeGFunction(const std::string&, const std::string&);
 
   /** To set a plug-in function to compute the jacobian according to x of the input
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
    */
-  void setComputeJacobianGFunction(const std::string&, const std::string&, unsigned int = 0);
+  virtual void setComputeJacobianGFunction(const std::string&, const std::string&, unsigned int = 0);
 
   /** default function to compute y
    *  \param double : current time
    *  \param unsigned int: number of the derivative to compute, optional, default = 0.
    */
-  virtual void computeOutput(double, unsigned int = 0);
+  virtual void computeOutput(double, unsigned int = 0) = 0;
 
   /** default function to compute y for the free state
    *  \param double : current time
    *  \param unsigned int: number of the derivative to compute, optional, default = 0.
    */
-  virtual void computeFreeOutput(double, unsigned int = 0);
+  virtual void computeFreeOutput(double, unsigned int = 0) = 0 ;
 
   /** default function to compute r
    *  \param double : current time
    *  \param unsigned int: "derivative" order of lambda used to compute input
    */
-  virtual void computeInput(double, unsigned int);
+  virtual void computeInput(double, unsigned int) = 0;
 
   /** default function to compute jacobianH
    *  \param double : current time
@@ -295,13 +256,7 @@ public:
 
   /** main relation members display
    */
-  virtual void display() const;
-
-  /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param Relation * : the relation which must be converted
-   * \return a pointer on the relation if it is of the right type, NULL otherwise
-   */
-  static FirstOrderR* convert(Relation *r);
+  void display() const;
 };
 
 #endif

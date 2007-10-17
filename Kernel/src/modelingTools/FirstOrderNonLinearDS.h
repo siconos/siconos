@@ -431,9 +431,14 @@ public:
 
   /** Default function to compute \f$ f: (x,t)\f$
    * \param double time : current time
-   *  \exception RuntimeException
    */
   virtual void computeF(double);
+
+  /** function to compute \f$ f: (x,t)\f$ with x different from current saved state.
+   * \param double time : current time
+   * \param SiconosVector*
+   */
+  virtual void computeF(double, SiconosVector*);
 
   /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
    *  \param double time : current time
@@ -441,6 +446,12 @@ public:
    *  \exception RuntimeException
    */
   virtual void computeJacobianXF(double, bool  = false);
+
+  /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$ with x different from current saved state.
+   *  \param double time : current time
+   *  \param SiconosVector*
+   */
+  virtual void computeJacobianXF(double, SiconosVector*);
 
   /** Default function to the right-hand side term
    *  \param double time : current time
@@ -471,6 +482,11 @@ public:
   /** set R to zero
    */
   void resetNonSmoothPart();
+
+  /** To compute \f$\frac{|x_{i+1} - xi|}{|x_i|}\f$ where \f$x_{i+1}\f$ represents the present state and \f$x_i\f$ the previous one
+   * \return a double
+   */
+  virtual double dsConvergenceIndicator();
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param DynamicalSystem* : the system which must be converted

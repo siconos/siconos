@@ -113,16 +113,16 @@ public:
    *  \param double : SearchDirection (optional) -> for Latin
    *  \param double : Rho (optional) -> for RPGS (regularization parameter)
    */
-  LCP(Simulation *, const std::string,  const std::string = DEFAULT_SOLVER, const unsigned int = DEFAULT_ITER, const double = DEFAULT_TOL,
-      const unsigned int = DEFAULT_VERBOSE, const std::string = DEFAULT_NORMTYPE, const double = DEFAULT_SEARCHDIR,
-      const double = DEFAULT_RHO);
+  LCP(Simulation *, const std::string&,  const std::string& = DEFAULT_SOLVER, unsigned int = DEFAULT_ITER, double = DEFAULT_TOL,
+      unsigned int = DEFAULT_VERBOSE, const std::string& = DEFAULT_NORMTYPE, double = DEFAULT_SEARCHDIR,
+      double = DEFAULT_RHO);
 
   /** constructor from data
   *  \param Solver* : pointer to object that contains solver algorithm and formulation
   *  \param Simulation *: the simulation that owns this problem
   *  \param String: id of the problem (default = DEFAULT_OSNS_NAME)
   */
-  LCP(Solver*, Simulation*, const std::string = DEFAULT_OSNS_NAME);
+  LCP(Solver*, Simulation*, const std::string& = DEFAULT_OSNS_NAME);
 
   /** destructor
   */
@@ -268,19 +268,19 @@ public:
   /** compute vector q
   *  \param double : current time
   */
-  void computeQ(const double time);
+  void computeQ(double time);
 
   /** pre-treatment for LCP
   *  \param double : current time
   *  \return void
   */
-  void preCompute(const double time);
+  void preCompute(double time);
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
   *  \param double : current time
   *  \return void
   */
-  void compute(const double time);
+  void compute(double time);
 
   /** post-treatment for LCP
   */

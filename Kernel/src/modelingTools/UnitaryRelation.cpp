@@ -28,20 +28,8 @@ using namespace std;
 
 // --- CONSTRUCTORS ---
 
-// Default (private) constructor
-UnitaryRelation::UnitaryRelation(): mainInteraction(NULL), relativePosition(0), number(0)
-{}
-
-// Copy constructor
-UnitaryRelation::UnitaryRelation(const UnitaryRelation& newUR): mainInteraction(NULL), relativePosition(0), number(0)
-{
-  // Copy of Unitary relation is not allowed. Since they are identified/sorted in UnitaryRelationsSet thanks to their address (as pointers)
-  // a copy could results in two differents objects that will correspond to the same relation.
-  RuntimeException::selfThrow("UnitaryRelation copy constructor call: forbidden operation.");
-}
-
 // Data constructor
-UnitaryRelation::UnitaryRelation(Interaction* inter, const unsigned int pos, const unsigned int num): mainInteraction(inter), relativePosition(pos), number(num)
+UnitaryRelation::UnitaryRelation(Interaction* inter, unsigned int pos, unsigned int num): mainInteraction(inter), relativePosition(pos), number(num)
 {}
 
 // --- DESTRUCTOR ---
@@ -64,13 +52,13 @@ const VectorOfVectors UnitaryRelation::getY() const
   return tmp;
 }
 
-SiconosVector* UnitaryRelation::getYPtr(const unsigned int i) const
+SiconosVector* UnitaryRelation::getYPtr(unsigned int i) const
 {
   // i is the derivative number.
   return ((mainInteraction->getYPtr(i))->getVectorPtr(number));
 }
 
-SiconosVector* UnitaryRelation::getYOldPtr(const unsigned int i) const
+SiconosVector* UnitaryRelation::getYOldPtr(unsigned int i) const
 {
   // i is the derivative number.
   return ((mainInteraction->getYOldPtr(i))->getVectorPtr(number));
@@ -89,13 +77,13 @@ const VectorOfVectors UnitaryRelation::getLambda() const
   return tmp;
 }
 
-SiconosVector* UnitaryRelation::getLambdaPtr(const unsigned int i) const
+SiconosVector* UnitaryRelation::getLambdaPtr(unsigned int i) const
 {
   // i is the derivative number.
   return ((mainInteraction->getLambdaPtr(i))->getVectorPtr(number));
 }
 
-const double UnitaryRelation::getYRef(const unsigned int i) const
+const double UnitaryRelation::getYRef(unsigned int i) const
 {
   // get the single value used to build indexSets
   // Warning: the relativePosition depends on NsLawSize and/or type.
@@ -104,7 +92,7 @@ const double UnitaryRelation::getYRef(const unsigned int i) const
   return (*getYPtr(i))(0);
 }
 
-const double UnitaryRelation::getLambdaRef(const unsigned int i) const
+const double UnitaryRelation::getLambdaRef(unsigned int i) const
 {
   // get the single value used to build indexSets
   return (*getLambdaPtr(i))(0);
@@ -135,7 +123,7 @@ DynamicalSystemsSet * UnitaryRelation::getDynamicalSystemsPtr()
   return mainInteraction->getDynamicalSystemsPtr();
 }
 
-void UnitaryRelation::getLeftBlockForDS(DynamicalSystem * ds, SiconosMatrix* Block, const unsigned index) const
+void UnitaryRelation::getLeftBlockForDS(DynamicalSystem * ds, SiconosMatrix* Block, unsigned index) const
 {
   unsigned int k = 0;
   DSIterator itDS;
@@ -158,7 +146,9 @@ void UnitaryRelation::getLeftBlockForDS(DynamicalSystem * ds, SiconosMatrix* Blo
 
   if (relationType == "FirstOrder")
   {
-    if (relationSubType == "LinearTIR")
+    if (relationSubType == "Type1R")
+      originalMatrix = (static_cast<FirstOrderR*>(mainInteraction->getRelationPtr()))->getJacobianHPtr(0);
+    else if (relationSubType == "LinearTIR")
       originalMatrix = (static_cast<FirstOrderLinearTIR*>(mainInteraction->getRelationPtr()))->getCPtr();
     else if (relationSubType == "LinearR")
       originalMatrix = (static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr()))->getCPtr();
@@ -190,7 +180,7 @@ void UnitaryRelation::getLeftBlockForDS(DynamicalSystem * ds, SiconosMatrix* Blo
   setBlock(originalMatrix, Block, subDim, subPos);
 }
 
-void UnitaryRelation::getRightBlockForDS(DynamicalSystem * ds, SiconosMatrix* Block, const unsigned index) const
+void UnitaryRelation::getRightBlockForDS(DynamicalSystem * ds, SiconosMatrix* Block, unsigned index) const
 {
   unsigned int k = 0;
   DSIterator itDS;
@@ -209,7 +199,9 @@ void UnitaryRelation::getRightBlockForDS(DynamicalSystem * ds, SiconosMatrix* Bl
 
   SiconosMatrix * originalMatrix = NULL; // Complete matrix, Relation member.
   string relationType = getRelationType() + getRelationSubType();
-  if (relationType == "FirstOrderLinearTIR")
+  if (relationType == "FirstOrderType1R")
+    originalMatrix = (static_cast<FirstOrderR*>(mainInteraction->getRelationPtr()))->getJacobianGPtr(0);
+  else if (relationType == "FirstOrderLinearTIR")
     originalMatrix = (static_cast<FirstOrderLinearTIR*>(mainInteraction->getRelationPtr()))->getBPtr();
   else if (relationType == "FirstOrderLinearR")
     originalMatrix = (static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr()))->getBPtr();
@@ -218,6 +210,9 @@ void UnitaryRelation::getRightBlockForDS(DynamicalSystem * ds, SiconosMatrix* Bl
   // originalMatrix = (static_cast<LagrangianR*>(mainInteraction->getRelationPtr()))->getGPtr(index);
   // For Lagrangian systems, right block = transpose (left block) so we do not need to use the present function.
   else RuntimeException::selfThrow("UnitaryRelation::getRightBlockForDS, not yet implemented for relation of type " + relationType);
+
+  if (originalMatrix == NULL)
+    RuntimeException::selfThrow("UnitaryRelation::getRightBlockForDS(DS, Block, ...): the right block is a NULL pointer (matrix B in relation) ");
 
   // copy sub-block of originalMatrix into Block
   // dim of the sub-block
@@ -243,12 +238,19 @@ void UnitaryRelation::getExtraBlock(SiconosMatrix* Block) const
 
   string relationSubType = getRelationSubType();
   SiconosMatrix * D = NULL;
-  if (relationSubType == "LinearTIR")
+  if (relationSubType == "Type1R")
+  {
+    // nothing, D = NULL
+  }
+  else if (relationSubType == "LinearTIR")
     D = static_cast<FirstOrderLinearTIR*>(mainInteraction->getRelationPtr())->getDPtr();
   else if (relationSubType == "LinearR")
     D = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getDPtr();
   else
     RuntimeException::selfThrow("UnitaryRelation::getExtraBlock, not yet implemented for first order relations of subtype " + relationSubType);
+  if (D == NULL)
+    return; //ie no extra block
+
   // copy sub-block of originalMatrix into Block
   // dim of the sub-block
   Index subDim(2);
@@ -263,7 +265,7 @@ void UnitaryRelation::getExtraBlock(SiconosMatrix* Block) const
   setBlock(D, Block, subDim, subPos);
 }
 
-void UnitaryRelation::computeEquivalentY(const double time, const unsigned int level, const string simulationType, SiconosVector* yOut)
+void UnitaryRelation::computeEquivalentY(double time, unsigned int level, const string& simulationType, SiconosVector* yOut)
 {
 
   // Get relation and non smooth law types
@@ -310,4 +312,5 @@ void UnitaryRelation::computeEquivalentY(const double time, const unsigned int l
       RuntimeException::selfThrow("UnitaryRelation::computeEquivalentY not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType);
   }
 }
+
 

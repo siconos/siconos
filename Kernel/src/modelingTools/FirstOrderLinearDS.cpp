@@ -91,7 +91,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(DynamicalSystemXML * dsXML, NonSmoothDyna
 }
 
 // From a minimum set of data, A and b connected to a plug-in
-FirstOrderLinearDS::FirstOrderLinearDS(int newNumber, unsigned int newN, const SiconosVector& newX0,
+FirstOrderLinearDS::FirstOrderLinearDS(int newNumber, const SiconosVector& newX0,
                                        const string& APlugin, const string& bPlugin):
   FirstOrderNonLinearDS(newNumber, newX0),
   A(NULL), b(NULL), APtr(NULL), bPtr(NULL)
@@ -234,7 +234,7 @@ void FirstOrderLinearDS::setBPtr(SimpleVector *newPtr)
   isPlugin["b"] = false;
 }
 
-void FirstOrderLinearDS::setComputeAFunction(const string pluginPath, const string functionName)
+void FirstOrderLinearDS::setComputeAFunction(const string& pluginPath, const string& functionName)
 {
   if (A == NULL)
   {
@@ -250,7 +250,7 @@ void FirstOrderLinearDS::setComputeAFunction(const string pluginPath, const stri
   isPlugin["A"] = true;
 }
 
-void FirstOrderLinearDS::setComputeBFunction(const string pluginPath, const string functionName)
+void FirstOrderLinearDS::setComputeBFunction(const string& pluginPath, const string& functionName)
 {
   if (b == NULL)
   {

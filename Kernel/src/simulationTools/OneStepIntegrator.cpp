@@ -26,15 +26,7 @@
 
 using namespace std;
 
-//-- Default constructor --
-OneStepIntegrator::OneStepIntegrator(): integratorType("undefined"), OSIDynamicalSystems(NULL), OSIInteractions(NULL),
-  sizeMem(1), simulationLink(NULL), integratorXml(NULL)
-{
-  OSIDynamicalSystems = new DynamicalSystemsSet();
-  OSIInteractions = new InteractionsSet();
-}
-
-OneStepIntegrator::OneStepIntegrator(const string id, Simulation* newS): integratorType(id), OSIDynamicalSystems(NULL), OSIInteractions(NULL)
+OneStepIntegrator::OneStepIntegrator(const string& id, Simulation* newS): integratorType(id), OSIDynamicalSystems(NULL), OSIInteractions(NULL)
   , sizeMem(1), simulationLink(newS), integratorXml(NULL)
 {
   if (simulationLink == NULL)
@@ -46,7 +38,7 @@ OneStepIntegrator::OneStepIntegrator(const string id, Simulation* newS): integra
 }
 
 // --- Xml constructor ---
-OneStepIntegrator::OneStepIntegrator(const string id, OneStepIntegratorXML* osixml, Simulation* newS):
+OneStepIntegrator::OneStepIntegrator(const string& id, OneStepIntegratorXML* osixml, Simulation* newS):
   integratorType(id), OSIDynamicalSystems(NULL), OSIInteractions(NULL), sizeMem(1), simulationLink(newS), integratorXml(osixml)
 {
   if (integratorXml == NULL)
@@ -106,7 +98,7 @@ OneStepIntegrator::OneStepIntegrator(const string id, OneStepIntegratorXML* osix
 }
 
 // --- Constructors from a minimum set of data ---
-OneStepIntegrator::OneStepIntegrator(const string id, const DynamicalSystemsSet& listOfDs, Simulation* newS):
+OneStepIntegrator::OneStepIntegrator(const string& id, const DynamicalSystemsSet& listOfDs, Simulation* newS):
   integratorType(id), OSIDynamicalSystems(NULL), OSIInteractions(NULL), sizeMem(1), simulationLink(newS), integratorXml(NULL)
 {
   if (simulationLink == NULL)
@@ -163,10 +155,13 @@ void OneStepIntegrator::saveInMemory()
 {
   DSIterator it;
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
-  {
     (*it)->swapInMemory();
-    (*it)->resetNonSmoothPart();
-  }
+}
+
+double OneStepIntegrator::computeResidu()
+{
+  RuntimeException::selfThrow("OneStepIntegrator::computeResidu not implemented for integrator of type " + integratorType);
+  return 0.0;
 }
 
 void OneStepIntegrator::computeFreeState()

@@ -95,7 +95,7 @@ public:
   *  \param unsigned int: gives the relative position of the relation inside the y vector of the interaction
   *  \param unsigned int: gives the number of the block in y vector of the interaction that corresponds to the present unitary relation.
   */
-  UnitaryRelation(Interaction* , const unsigned int, const unsigned int);
+  UnitaryRelation(Interaction* , unsigned int, unsigned int);
 
   /** destructor
   */
@@ -134,12 +134,12 @@ public:
   /** get y[i], derivative number i of output
   *  \return pointer on a SimpleVector
   */
-  SiconosVector* getYPtr(const unsigned int) const;
+  SiconosVector* getYPtr(unsigned int) const;
 
   /** get yOld[i], derivative number i of output
   *  \return pointer on a SimpleVector
   */
-  SiconosVector* getYOldPtr(const unsigned int) const;
+  SiconosVector* getYOldPtr(unsigned int) const;
 
   /** get vector of input derivatives
   *  \return a VectorOfVectors
@@ -149,17 +149,17 @@ public:
   /** get lambda[i], derivative number i of input
   *  \return pointer on a SimpleVector
   */
-  SiconosVector* getLambdaPtr(const unsigned int) const;
+  SiconosVector* getLambdaPtr(unsigned int) const;
 
   /** get y[i], derivative number i of output, value used to compute indexSets
   *  \return a double
   */
-  const double getYRef(const unsigned int) const;
+  const double getYRef(unsigned int) const;
 
   /** get lambda[i], derivative number i of output, value used to compute indexSets
   *  \return a double
   */
-  const double getLambdaRef(const unsigned int) const;
+  const double getLambdaRef(unsigned int) const;
 
   /** returns the size of the embedded non smooth law
   *  \return an unsigned int
@@ -232,7 +232,7 @@ public:
    *  \param a pointer to SiconosMatrix (in-out parameter): the resulting block matrix
    *  \param unsigned int (optional): gradient index (see relations for details)
    */
-  void getLeftBlockForDS(DynamicalSystem *, SiconosMatrix*, const unsigned int = 0) const;
+  void getLeftBlockForDS(DynamicalSystem *, SiconosMatrix*, unsigned int = 0) const;
 
   /** gets the matrix used in block computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to ds.
@@ -240,7 +240,7 @@ public:
    *  \param a pointer to SiconosMatrix (in-out parameter): the resulting block matrix
    *  \param unsigned int (optional): gradient index (see relations for details)
    */
-  void getRightBlockForDS(DynamicalSystem *, SiconosMatrix*, const unsigned int = 0) const;
+  void getRightBlockForDS(DynamicalSystem *, SiconosMatrix*, unsigned int = 0) const;
 
   /** gets extra block corresponding to the present UR (see the top of this files for extra block meaning)
    *  \param a pointer to a SiconosMatrix (in-out parameter)
@@ -253,7 +253,7 @@ public:
    *  \param string: simulation type
    *  \param pointer to SiconosVector (in-out parameter), result
    */
-  void computeEquivalentY(const double, const unsigned int, const std::string, SiconosVector*);
+  void computeEquivalentY(double, unsigned int, const std::string&, SiconosVector*);
 };
 
 #endif // UNITARYRELATION_H

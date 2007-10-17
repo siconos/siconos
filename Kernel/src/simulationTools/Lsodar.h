@@ -28,6 +28,7 @@
 #include"SiconosNumerics.h"
 #include<vector>
 
+class TimeDiscretisation;
 class BlockVector;
 
 /** Lsodar solver (odepack)
@@ -81,7 +82,7 @@ private:
 
   /** default constructor, private
    */
-  Lsodar() {};
+  Lsodar();
 
 public:
 
@@ -203,11 +204,11 @@ public:
 
   /** compute rhs(t) for all dynamical systems in the set
    */
-  void computeRhs(const double) ;
+  void computeRhs(double) ;
 
   /** compute jacobian of the rhs at time t for all dynamical systems in the set
    */
-  void computeJacobianRhs(const double) ;
+  void computeJacobianRhs(double) ;
 
   void f(integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot);
 
@@ -230,7 +231,7 @@ public:
   /** update the state of the DynamicalSystems attached to this Integrator
    *  \param unsigned int: level of interest for the dynamics
    */
-  void updateState(const unsigned int);
+  void updateState(unsigned int);
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param OneStepIntegrator* : the integrator which must be converted

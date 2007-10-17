@@ -59,12 +59,12 @@ FirstOrderLinearR::FirstOrderLinearR(RelationXML* relxml):
   initAllocationFlags(false);
   initPluginFlags(false);
 
+  if (folrXML->hasH())
+    RuntimeException::selfThrow(" FirstOrderLinearR xml constructor failed. Too many inputs: you can not give h or its jacobian.");
+
   string plugin;
   if (folrXML->hasC())
   {
-    if (folrXML->hasH())
-      RuntimeException::selfThrow(" FirstOrderLinearR xml constructor failed. Too many inputs: you can not give C and h or its jacobian.");
-
     if (folrXML->isCPlugin())
     {
       plugin = folrXML->getCPlugin();
@@ -79,9 +79,6 @@ FirstOrderLinearR::FirstOrderLinearR(RelationXML* relxml):
 
   if (folrXML->hasD())
   {
-    if (folrXML->hasH())
-      RuntimeException::selfThrow(" FirstOrderLinearR xml constructor failed. Too many inputs: you can not give D and h or its jacobian.");
-
     if (folrXML->isDPlugin())
     {
       plugin = folrXML->getDPlugin();
@@ -233,26 +230,17 @@ void FirstOrderLinearR::initialize()
   {
     if (C->size(0) != sizeY || C->size(1) != sizeX)
       RuntimeException::selfThrow("FirstOrderLinearR::initialize , inconsistent size between C and Interaction.");
-    if (jacobianH[0] != NULL)
-      RuntimeException::selfThrow("FirstOrderLinearR::initialize failed. Either C and jacobianH are defined: possible conflict.");
-    jacobianH[0] = C;
   }
   if (B != NULL)
   {
     if (B->size(0) != sizeX || B->size(1) != sizeY)
       RuntimeException::selfThrow("FirstOrderLinearR::initialize , inconsistent size between C and B.");
-    if (jacobianG[0] != NULL)
-      RuntimeException::selfThrow("FirstOrderLinearR::initialize failed. Either B and jacobianG are defined: possible conflict.");
-    jacobianG[0] = B;
   }
 
   if (D != NULL)
   {
     if (D->size(0) != sizeY || D->size(1) != sizeY)
       RuntimeException::selfThrow("FirstOrderLinearR::initialize , inconsistent size between C and D.");
-    if (jacobianH[1] != NULL)
-      RuntimeException::selfThrow("FirstOrderLinearR::initialize failed. Either D and jacobianH are defined: possible conflict.");
-    jacobianH[1] = D;
   }
 
   if (F != NULL && (F->size(0) != sizeY))
@@ -291,6 +279,7 @@ void FirstOrderLinearR::initialize()
     B = new SimpleMatrix(sizeX, sizeY);
     isAllocatedIn["B"] = true ;
   }
+  workZ = new SimpleVector(sizeZ);
 }
 
 // setters
@@ -555,11 +544,10 @@ void FirstOrderLinearR::computeC(const double time)
     unsigned int sizeY = interaction->getSizeOfY();
     unsigned int sizeX = interaction->getSizeOfDS();
     unsigned int sizeZ = interaction->getSizeZ();
-    SimpleVector * zCopy = new SimpleVector(*data["z"]);
-    CPtr(time, sizeY, sizeX, &(*C)(0, 0), sizeZ, &(*zCopy)(0));
+    *workZ = *data["z"];
+    CPtr(time, sizeY, sizeX, &(*C)(0, 0), sizeZ, &(*workZ)(0));
     // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *zCopy;
-    delete zCopy;
+    *data["z"] = *workZ;
   }
   // else nothing
 }
@@ -572,11 +560,10 @@ void FirstOrderLinearR::computeD(const double time)
       RuntimeException::selfThrow("computeD() is not linked to a plugin function");
     unsigned int sizeY = interaction->getSizeOfY();
     unsigned int sizeZ = interaction->getSizeZ();
-    SimpleVector * zCopy = new SimpleVector(*data["z"]);
-    DPtr(time, sizeY, &(*D)(0, 0), sizeZ, &(*zCopy)(0));
+    *workZ = *data["z"];
+    DPtr(time, sizeY, &(*D)(0, 0), sizeZ, &(*workZ)(0));
     // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *zCopy;
-    delete zCopy;
+    *data["z"] = *workZ;
   }
   // else nothing
 }
@@ -589,11 +576,10 @@ void FirstOrderLinearR::computeF(const double time)
       RuntimeException::selfThrow("computeF() is not linked to a plugin function");
     unsigned int sizeY = interaction->getSizeOfY();
     unsigned int sizeZ = interaction->getSizeZ();
-    SimpleVector * zCopy = new SimpleVector(*data["z"]);
-    FPtr(time, sizeY, &(*F)(0, 0), sizeZ, &(*zCopy)(0));
+    *workZ = *data["z"];
+    FPtr(time, sizeY, &(*F)(0, 0), sizeZ, &(*workZ)(0));
     // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *zCopy;
-    delete zCopy;
+    *data["z"] = *workZ;
   }
   // else nothing
 }
@@ -606,11 +592,10 @@ void FirstOrderLinearR::computeE(const double time)
       RuntimeException::selfThrow("computeE() is not linked to a plugin function");
     unsigned int sizeY = interaction->getSizeOfY();
     unsigned int sizeZ = interaction->getSizeZ();
-    SimpleVector * zCopy = new SimpleVector(*data["z"]);
-    ePtr(time, sizeY, &(*e)(0), sizeZ, &(*zCopy)(0));
+    *workZ = *data["z"];
+    ePtr(time, sizeY, &(*e)(0), sizeZ, &(*workZ)(0));
     // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *zCopy;
-    delete zCopy;
+    *data["z"] = *workZ;
   }
   // else nothing
 }
@@ -624,28 +609,12 @@ void FirstOrderLinearR::computeB(const double time)
     unsigned int sizeY = interaction->getSizeOfY();
     unsigned int sizeX = interaction->getSizeOfDS();
     unsigned int sizeZ = interaction->getSizeZ();
-    SimpleVector * zCopy = new SimpleVector(*data["z"]);
-    BPtr(time, sizeX, sizeY, &(*B)(0, 0), sizeZ, &(*zCopy)(0));
+    *workZ = *data["z"];
+    BPtr(time, sizeX, sizeY, &(*B)(0, 0), sizeZ, &(*workZ)(0));
     // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *zCopy;
-    delete zCopy;
+    *data["z"] = *workZ;
   }
   // else nothing
-}
-
-void FirstOrderLinearR::computeJacobianH(double time, unsigned int i)
-{
-  if (i == 0)
-    computeC(time);
-  else if (i == 1)
-    computeD(time);
-  else
-    RuntimeException::selfThrow("FirstOrderLinearR::computeJacobianH() failed; index out of range.");
-}
-
-void FirstOrderLinearR::computeJacobianG(double time, unsigned int i)
-{
-  computeB(time);
 }
 
 void FirstOrderLinearR::display() const

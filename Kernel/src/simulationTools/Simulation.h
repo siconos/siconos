@@ -25,10 +25,9 @@ Global interface for simulation process description (Base for TimeStepping or Ev
 
 #include "SiconosConst.h"
 #include "Tools.h"
-#include "RuntimeException.h"
+#include "SimulationTypeDef.h"
 #include "UnitaryRelationsSet.h"
 #include "EventsManager.h"
-#include <vector>
 #include <fstream>
 
 class Model;
@@ -38,42 +37,6 @@ class OneStepIntegrator;
 class OneStepNSProblem;
 class TimeDiscretisation;
 class SimulationXML;
-
-/** vector of OneStepIntegrator */
-typedef std::set<OneStepIntegrator*> OSISet;
-
-/** iterator through vector of OSI*/
-typedef OSISet::iterator OSIIterator;
-
-/** const iterator through vector of OSI*/
-typedef OSISet::const_iterator ConstOSIIterator;
-
-/** return type value for insert function - bool = false if insertion failed. */
-typedef std::pair<OSISet::iterator, bool> CheckInsertOSI;
-
-/** vector that contains a sequel of sets of UnitaryRelations*/
-typedef std::vector< UnitaryRelationsSet* > VectorOfSetOfUnitaryRelations;
-
-/** map of OSNS */
-typedef std::map<std::string, OneStepNSProblem * > OneStepNSProblems;
-
-/** iterator through OneStepNSProblems */
-typedef OneStepNSProblems::iterator OSNSIterator;
-
-/** const iterator through OneStepNSProblems */
-typedef OneStepNSProblems::const_iterator ConstOSNSIterator;
-
-/** A map that links DynamicalSystems and their OneStepIntegrator. */
-typedef std::map<DynamicalSystem*, OneStepIntegrator*> DSOSIMap;
-
-/** Iterator through a DSOSIMap. */
-typedef DSOSIMap::iterator DSOSIIterator;
-
-/** Const Iterator through a DSOSIMap. */
-typedef DSOSIMap::const_iterator DSOSIConstIterator;
-
-/** default tolerance value, used to update index sets */
-const double DEFAULT_TOLERANCE = 10 * MACHINE_PREC;
 
 /** Description of the simulation process (integrators, time discretisation,...) - Base class for TimeStepping or EventDriven.
  *
@@ -113,7 +76,7 @@ protected:
   BoolMap isAllocatedIn;
 
   /** the dynamical systems integrators */
-  OSISet allOSI;
+  OSISet * allOSI;
 
   /** Map to link all DynamicalSystems and their OneStepIntegrator*/
   DSOSIMap osiMap;
@@ -125,7 +88,7 @@ protected:
   VectorOfSetOfUnitaryRelations indexSets;
 
   /** the non smooth problems (each problem is identified thanks to its id) */
-  OneStepNSProblems allNSProblems;
+  OneStepNSProblems * allNSProblems;
 
   /** Inside-class allocation flag for Non Smooth Problem(s) */
   std::map<OneStepNSProblem*, bool >  isNSProblemAllocatedIn;
@@ -151,6 +114,15 @@ protected:
   /**Output file for stats*/
   std::ofstream statOut;
 
+  /** initialisation for OneStepNSProblem.
+   */
+  virtual void initOSNS() = 0;
+
+  /** compute LevelMax */
+  virtual void initLevelMax() = 0;
+
+private:
+
   /** default constructor
    */
   Simulation(const std::string& = "undefined");
@@ -158,13 +130,6 @@ protected:
   /** copy constructor. Private => no copy nor pass-by value.
    */
   Simulation(const Simulation&);
-
-  /** initialisation for OneStepNSProblem.
-   */
-  virtual void initOSNS() = 0;
-
-  /** compute LevelMax */
-  virtual void initLevelMax() = 0;
 
 public:
 
@@ -273,7 +238,7 @@ public:
   /** get all the Integrators of the Simulation
    *  \return an OSISset
    */
-  inline const OSISet getOneStepIntegrators() const
+  inline const OSISet * getOneStepIntegrators() const
   {
     return allOSI;
   };
@@ -298,7 +263,7 @@ public:
    */
   inline const unsigned int getNumberOfOSI() const
   {
-    return allOSI.size();
+    return allOSI->size();
   }
 
   /** add an Integrator into allOSI (pointer link, no copy!)
@@ -318,9 +283,9 @@ public:
   UnitaryRelationsSet * getIndexSetPtr(unsigned int) ;
 
   /** get allNSProblems
-   *  \return a OneStepNSProblems object (container of OneStepNSProblem*)
+   *  \return a pointer to OneStepNSProblems object (container of OneStepNSProblem*)
    */
-  inline const OneStepNSProblems getOneStepNSProblems() const
+  inline const OneStepNSProblems* getOneStepNSProblems() const
   {
     return allNSProblems;
   };
@@ -450,6 +415,10 @@ public:
    *  \param lambda order used to compute input
    */
   virtual void update(unsigned int) = 0;
+
+  /** update input, state of each dynamical system and output for all levels between levelMin and levelMax
+   */
+  virtual void update();
 
   /** run the simulation, from t0 to T
    * \param: simulation option. Used only for TimeStepping.

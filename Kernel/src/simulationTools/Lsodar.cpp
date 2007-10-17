@@ -52,8 +52,6 @@ extern "C" void Lsodar_jacobianF_wrapper(integer * sizeOfX, doublereal * time, d
   return global_object->jacobianF(sizeOfX, time, x, ml, mu, jacob, nrowpd);
 }
 
-// ===== Lsodar methods =====
-
 Lsodar::Lsodar(OneStepIntegratorXML* osiXML, Simulation* newS):
   OneStepIntegrator("Lsodar", osiXML, newS), localTimeDiscretisation(NULL), isLocalTimeDiscretisationAllocatedIn(false),
   rtol(NULL), atol(NULL), rwork(NULL), iwork(NULL), jroot(NULL)
@@ -182,14 +180,14 @@ void Lsodar::fillXWork(integer* sizeOfX, doublereal * x)
     (*xWork)(i) = x[i];
 }
 
-void Lsodar::computeRhs(const double t)
+void Lsodar::computeRhs(double t)
 {
   DSIterator it;
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
     (*it)->computeRhs(t);
 }
 
-void Lsodar::computeJacobianRhs(const double t)
+void Lsodar::computeJacobianRhs(double t)
 {
   DSIterator it;
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
@@ -344,7 +342,7 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
 }
 
 
-void Lsodar::updateState(const unsigned int level)
+void Lsodar::updateState(unsigned int level)
 {
   // Compute all required (ie time-dependent) data for the DS of the OSI.
   DSIterator it;

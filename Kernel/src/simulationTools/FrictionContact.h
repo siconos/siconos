@@ -74,11 +74,13 @@ protected:
   bool isMAllocatedIn;
   bool isQAllocatedIn;
 
-public:
+private:
 
-  /** default constructor
-  */
+  /** default constructor (private)
+   */
   FrictionContact(const std::string pbType = "FrictionContact2D");
+
+public:
 
   /** xml constructor
   *  \param string: problem type

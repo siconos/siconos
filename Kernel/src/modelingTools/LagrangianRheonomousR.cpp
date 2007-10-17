@@ -167,24 +167,21 @@ void LagrangianRheonomousR::computeH(double time)
     SiconosVector *y = interaction->getYPtr(0);
 
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    SimpleVector * qCopy = new SimpleVector(*data["q0"]);
-    SimpleVector * zCopy = new SimpleVector(*data["z"]);
-    SimpleVector * yCopy = new SimpleVector(*y);
+    *workX = *data["q0"];
+    *workZ = *data["z"];
+    *workY = *y;
 
-    unsigned int sizeQ = qCopy->size();
+    unsigned int sizeQ = workX->size();
     unsigned int sizeY = y->size();
-    unsigned int sizeZ = zCopy->size();
+    unsigned int sizeZ = workZ->size();
 
     if (hPtr == NULL)
       RuntimeException::selfThrow("LagrangianRheonomousR:computeH() failed, h is not linked to a plugin function");
-    hPtr(sizeQ, &(*qCopy)(0), time, sizeY,  &(*yCopy)(0), sizeZ, &(*zCopy)(0));
+    hPtr(sizeQ, &(*workX)(0), time, sizeY,  &(*workY)(0), sizeZ, &(*workZ)(0));
 
     // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *zCopy;
-    *y = *yCopy;
-    delete qCopy;
-    delete yCopy;
-    delete zCopy;
+    *data["z"] = *workZ;
+    *y = *workY;
   }
   // else nothing
 }
@@ -194,21 +191,19 @@ void LagrangianRheonomousR::computeHDot(double time)
   if (isPlugged["hDot"])
   {
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    SimpleVector * qCopy = new SimpleVector(*data["q0"]);
-    SimpleVector * zCopy = new SimpleVector(*data["z"]);
+    *workX = *data["q0"];
+    *workZ = *data["z"];
 
-    unsigned int sizeQ = qCopy->size();
+    unsigned int sizeQ = workX->size();
     unsigned int sizeY = hDot->size();
-    unsigned int sizeZ = zCopy->size();
+    unsigned int sizeZ = workZ->size();
 
     if (hDotPtr == NULL)
       RuntimeException::selfThrow("LagrangianRheonomousR:computeHDot() failed, hDot is not linked to a plugin function");
-    hDotPtr(sizeQ, &(*qCopy)(0), time, sizeY,  &(*hDot)(0), sizeZ, &(*zCopy)(0));
+    hDotPtr(sizeQ, &(*workX)(0), time, sizeY,  &(*hDot)(0), sizeZ, &(*workZ)(0));
 
     // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *zCopy;
-    delete qCopy;
-    delete zCopy;
+    *data["z"] = *workZ;
   }
   // else nothing
 }
@@ -219,19 +214,17 @@ void LagrangianRheonomousR::computeG(double time, unsigned int)
   if (isPlugged["G0"])
   {
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    SimpleVector * qCopy = new SimpleVector(*data["q0"]);
-    SimpleVector * zCopy = new SimpleVector(*data["z"]);
+    *workX = *data["q0"];
+    *workZ = *data["z"];
 
     unsigned int sizeY = G[0]->size(0);
-    unsigned int sizeQ = qCopy->size();
-    unsigned int sizeZ = zCopy->size();
+    unsigned int sizeQ = workX->size();
+    unsigned int sizeZ = workZ->size();
     if (G0Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-    G0Ptr(sizeQ, &(*qCopy)(0), time, sizeY, &(*G[0])(0, 0), sizeZ, &(*zCopy)(0));
+    G0Ptr(sizeQ, &(*workX)(0), time, sizeY, &(*G[0])(0, 0), sizeZ, &(*workZ)(0));
     // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *zCopy;
-    delete qCopy;
-    delete zCopy;
+    *data["z"] = *workZ;
   }
   // else nothing.
 }
@@ -244,24 +237,20 @@ void LagrangianRheonomousR::computeHFree(double time)
     SiconosVector *y = interaction->getYPtr(0);
 
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    SimpleVector * qCopy = new SimpleVector(*data["q0Free"]);
-    SimpleVector * zCopy = new SimpleVector(*data["z"]);
-    SimpleVector * yCopy = new SimpleVector(*y);
-
-    unsigned int sizeQ = qCopy->size();
+    *workX = *data["q0Free"];
+    *workZ = *data["z"];
+    *workY = *y;
+    unsigned int sizeQ = workX->size();
     unsigned int sizeY = y->size();
-    unsigned int sizeZ = zCopy->size();
+    unsigned int sizeZ = workZ->size();
 
     if (hPtr == NULL)
       RuntimeException::selfThrow("LagrangianRheonomousR:computeH() failed, h is not linked to a plugin function");
-    hPtr(sizeQ, &(*qCopy)(0), time, sizeY,  &(*yCopy)(0), sizeZ, &(*zCopy)(0));
+    hPtr(sizeQ, &(*workX)(0), time, sizeY,  &(*workY)(0), sizeZ, &(*workZ)(0));
 
     // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *zCopy;
-    *y = *yCopy;
-    delete qCopy;
-    delete yCopy;
-    delete zCopy;
+    *data["z"] = *workZ;
+    *y = *workY;
   }
   // else nothing
 }
@@ -271,21 +260,19 @@ void LagrangianRheonomousR::computeHDotFree(double time)
   if (isPlugged["hDot"])
   {
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    SimpleVector * qCopy = new SimpleVector(*data["q0Free"]);
-    SimpleVector * zCopy = new SimpleVector(*data["z"]);
+    *workX = *data["q0Free"];
+    *workZ = *data["z"];
 
-    unsigned int sizeQ = qCopy->size();
+    unsigned int sizeQ = workX->size();
     unsigned int sizeY = hDot->size();
-    unsigned int sizeZ = zCopy->size();
+    unsigned int sizeZ = workZ->size();
 
     if (hDotPtr == NULL)
       RuntimeException::selfThrow("LagrangianRheonomousR:computeHDot() failed, hDot is not linked to a plugin function");
-    hDotPtr(sizeQ, &(*qCopy)(0), time, sizeY,  &(*hDot)(0), sizeZ, &(*zCopy)(0));
+    hDotPtr(sizeQ, &(*workX)(0), time, sizeY,  &(*hDot)(0), sizeZ, &(*workZ)(0));
 
     // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *zCopy;
-    delete qCopy;
-    delete zCopy;
+    *data["z"] = *workZ;
   }
   // else nothing
 }
@@ -296,19 +283,17 @@ void LagrangianRheonomousR::computeGFree(double time, unsigned int)
   if (isPlugged["G0"])
   {
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    SimpleVector * qCopy = new SimpleVector(*data["q0Free"]);
-    SimpleVector * zCopy = new SimpleVector(*data["z"]);
+    *workX = *data["q0Free"];
+    *workZ = *data["z"];
 
     unsigned int sizeY = G[0]->size(0);
-    unsigned int sizeQ = qCopy->size();
-    unsigned int sizeZ = zCopy->size();
+    unsigned int sizeQ = workX->size();
+    unsigned int sizeZ = workZ->size();
     if (G0Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-    G0Ptr(sizeQ, &(*qCopy)(0), time, sizeY, &(*G[0])(0, 0), sizeZ, &(*zCopy)(0));
+    G0Ptr(sizeQ, &(*workX)(0), time, sizeY, &(*G[0])(0, 0), sizeZ, &(*workZ)(0));
     // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *zCopy;
-    delete qCopy;
-    delete zCopy;
+    *data["z"] = *workZ;
   }
   // else nothing.
 }

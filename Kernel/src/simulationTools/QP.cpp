@@ -62,9 +62,3 @@ QP* QP::convert(OneStepNSProblem* osnsp)
   return qp;
 }
 
-// Default private constructor
-QP::QP(): OneStepNSProblem(), Q(NULL), p(NULL),
-  isQAllocatedIn(false), isPAllocatedIn(false)
-{
-  nspbType = "QP";
-}

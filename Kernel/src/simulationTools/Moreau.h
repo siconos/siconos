@@ -25,32 +25,35 @@
 
 #include "OneStepIntegrator.h"
 #include "SimpleMatrix.h"
+#include "SimulationTypeDef.h"
 
 class Simulation;
-class MoreauXML;
 class SiconosMatrix;
 
 const unsigned int MOREAUSTEPSINMEMORY = 1;
-/** map of SiconosMatrix; key = the related DS*/
-typedef std::map<DynamicalSystem*, SiconosMatrix*> MapOfMatrices;
-
-/** map of SiconosMatrix; key = the related DS*/
-typedef std::map<DynamicalSystem*, bool> MapOfBool;
-
-/** map of double; key = the related DS */
-typedef std::map<DynamicalSystem*, double> MapOfDouble;
-
-/** iterator through a map of matrices */
-typedef MapOfMatrices::iterator matIterator;
-
-/** iterator through a map of double */
-typedef MapOfDouble::iterator doubleIterator;
 
 /**  Moreau Time-Integrator for Dynamical Systems
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 2.1.1.
  *  \date (Creation) Apr 26, 2004
+ *
+ * See User's guide, \ref docSimuMoreauTS for details.
+ *
+ * Moreau class is used to define some time-integrators methods for a list of dynamical systems.
+ * Each DynamicalSystem is associated to a SiconosMatrix, named "W", and a double, "theta", through two
+ * STL maps:
+ * - WMap, with WMap[ds] = a pointer to a SiconosMatrix
+ * - thetaMap, thetaMap[ds] = a double
+ * ds being a DynamicalSystem*
+ *
+ * W matrices are initialized and computed in initW and computeW. Depending on the DS type, they
+ * may depend on time and DS state (x).
+ *
+ * Main functions:
+ *
+ * - computeFreeState(): computes xfree (or vfree), dynamical systems state without taking non-smooth part into account \n
+ * - updateState(): computes x (q,v), the complete dynamical systems states.
  *
  */
 class Moreau : public OneStepIntegrator
@@ -83,14 +86,14 @@ public:
    *  \param Theta value
    *  \param Simulation * : the simulation that owns the osi
    */
-  Moreau(DynamicalSystem*, const double, Simulation*);
+  Moreau(DynamicalSystem*, double, Simulation*);
 
   /** constructor from a minimum set of data
    *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
    *  \param theta value for all these DS.
    *  \param Simulation * : the simulation that owns the osi
    */
-  Moreau(DynamicalSystemsSet&, const double, Simulation*);
+  Moreau(DynamicalSystemsSet&, double, Simulation*);
 
   /** constructor from a minimum set of data
    *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
@@ -176,7 +179,7 @@ public:
    *  \param a double
    *  \param a DynamicalSystem
    */
-  void setTheta(const double, DynamicalSystem*);
+  void setTheta(double, DynamicalSystem*);
 
   // --- OTHER FUNCTIONS ---
 
@@ -184,11 +187,22 @@ public:
    */
   void initialize();
 
+  /** init WMap[ds] Moreau matrix at time t
+   *  \param the time (double)
+   *  \param a pointer to DynamicalSystem
+   */
+  void initW(double, DynamicalSystem*);
+
   /** compute WMap[ds] Moreau matrix at time t
    *  \param the time (double)
    *  \param a pointer to DynamicalSystem
    */
-  void computeW(const double, DynamicalSystem*);
+  void computeW(double, DynamicalSystem*);
+
+  /** return the maximum of all norms for the "Moreau-discretized" residus of DS
+      \return a double
+   */
+  double computeResidu();
 
   /** integrates the Dynamical System linked to this integrator without boring the constraints
    */
@@ -205,7 +219,7 @@ public:
   /** updates the state of the Dynamical Systems
    *  \param unsigned int: level of interest for the dynamics: not used at the time
    */
-  void updateState(const unsigned int);
+  void updateState(unsigned int);
 
   /** copy the matrix W of the OneStepNSProblem to the XML tree
    *  \exception RuntimeException

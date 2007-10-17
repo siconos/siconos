@@ -39,12 +39,49 @@ struct ublas_ordering<boost::numeric::ublas::row_major_tag>
 {
   typedef row_major_t                        type;
   typedef boost::numeric::ublas::row_major   functor_type;
+
+  template <typename M>
+  static int leading_dimension(M const& m)
+  {
+    return m.size2() ;
+  }
+
+  template <typename M>
+  static int stride1(M const& m)
+  {
+    return m.size2() ;
+  }
+
+  template <typename M>
+  static int stride2(M const& m)
+  {
+    return 1 ;
+  }
 };
+
 template<>
 struct ublas_ordering<boost::numeric::ublas::column_major_tag>
 {
   typedef column_major_t                        type;
   typedef boost::numeric::ublas::column_major   functor_type;
+
+  template <typename M>
+  static int leading_dimension(M const& m)
+  {
+    return m.size1() ;
+  }
+
+  template <typename M>
+  static int stride1(M const& m)
+  {
+    return 1 ;
+  }
+
+  template <typename M>
+  static int stride2(M const& m)
+  {
+    return m.size1() ;
+  }
 };
 
 }

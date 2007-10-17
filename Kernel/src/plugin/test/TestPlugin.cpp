@@ -148,29 +148,26 @@ extern "C" void G1Compl(unsigned int, const double*, unsigned int, const double*
   printf("Call of the function 'G1Compl' of the test plugin.\n");
 }
 
-// ========== FirstOrderR ==========
+// ========== FirstOrderType1R ==========
 
-extern "C" void y(unsigned int, const double*, double, unsigned int, const double*, double*, unsigned int, double*)
+extern "C" void hT1(unsigned int, const double*, unsigned int, double*, unsigned int, double*)
 {
-  printf("Warning: call of the function 'y' of the test plugin.\n");
-}
-
-extern "C" void R(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)
-{
-  printf("Warning: call of the function 'R' of the test plugin.\n");
+  printf("Warning: call of the function 'hT1' of the test plugin.\n");
 }
 
-extern "C" void Jh0(unsigned int, const double*, double, unsigned int, const double*, double*, unsigned int, double*)
+extern "C" void gT1(unsigned int, const double*, unsigned int, double*, unsigned int, double*)
 {
-  printf("Warning: call of the function 'Jh0' of the test plugin.\n");
+  printf("Warning: call of the function 'gT1' of the test plugin.\n");
 }
-extern "C" void Jh1(unsigned int, const double*, double, unsigned int, const double*, double*, unsigned int, double*)
+
+extern "C" void Jh0T1(unsigned int, const double*, unsigned int, double*, unsigned int, double*)
 {
-  printf("Warning: call of the function 'Jh1' of the test plugin.\n");
+  printf("Warning: call of the function 'Jh0T1' of the test plugin.\n");
 }
-extern "C" void Jg0(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)
+
+extern "C" void Jg0T1(unsigned int, const double*, unsigned int, double*, unsigned int, double*)
 {
-  printf("Warning: call of the function 'Jg0' of the test plugin.\n");
+  printf("Warning: call of the function 'Jg0T1' of the test plugin.\n");
 }
 
 //==================  FirstOrderLinearR ==================

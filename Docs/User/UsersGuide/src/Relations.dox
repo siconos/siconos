@@ -1,4 +1,4 @@
-/*! \page docRelation Relations
+/*! \page relationsInSiconos Relations
 
 \b What \b is \b a \b Relation? \n
 
@@ -18,12 +18,22 @@ LagrangianScleronomousR, LagrangianCompliantR, LagrangianLinearR.
 \image latex classRelation.eps "" width=10cm
 
 
-\section docRelationNL FirstOrderR
+\section docRelationNL First Order Relations
 
-First order non linear relations. 
+\subsection docRelationFOR First Order Non Linear Relations. 
+
+\b class: FirstOrderR
+
 \f{eqnarray*}
 output &= y =& h(X,t,\lambda,Z)\\
-input &= R =& g(\lambda,t,Z)
+input &= R =& g(X,t,\lambda,Z)
+\f}
+
+We denote: 
+\f{eqnarray*}
+ H_0(X,t,\lambda,Z)=\nabla_X h(X,t,\lambda,Z)&, &  H_1(X,t,\lambda,Z)=\nabla_{\lambda} h(X,t,\lambda,Z) \\
+\\
+ G_0(X,t,\lambda,Z)=\nabla_X g(X,t,\lambda,Z)&, &  G_1(X,t,\lambda,Z)=\nabla_{\lambda} g(X,t,\lambda,Z) 
 \f}
 
 h, g (and their jacobian according to X and lambda) are defined with some plug-in functions. \n
@@ -31,9 +41,8 @@ See the doxygen documentation of the class to have a list of the set/get/compute
 
 <em> Note: for the signification of X, Z, R see \ref doc_Interactions </em>
 
-\section docRelationLR FirstOrderLinearR 
-
-First order linear relations. 
+\subsection docRelationFOLR First Order Linear Relations
+\b Class: FirstOrderLinearR 
 
 \f{eqnarray*}
 y &=& C(t,Z)X + F(t,Z)Z + D(t,Z) \lambda + e(t,Z) \\
@@ -42,72 +51,79 @@ R &=& B(t,Z) \lambda
 
 Plug-in functions are available for all operators.
 
-\section docRelationLTIR FirstOrderLinearTIR 
+\subsection docRelationFOLTIR First Order Linear Relations with Time Invariant Coefficients
 
-First order linear relations with time-invariant coefficients. 
+\b Class FirstOrderLinearTIR 
 
 \f{eqnarray*}
 y &=& CX + FZ + D\lambda + e \\
 R &=& B \lambda
 \f}
 
-\section docRelationLag LagrangianR
+\section docRelationLag Lagrangian (second order) Relations
 
-Lagrangian non linear relations. This class is an abstract interface for the three following cases:
+\subsection docRelationLSR Lagrangian Scleronomous Relations
+\b Class: LagrangianScleronomousR
 
-- scleronomic: the constraints depend only on the state, (class LagrangianScleronomousR)
+The constraints depend only on the state,
  \f{eqnarray*}
 y &=& h(Q,Z) \\
-\dot y &=& G0(Q,Z)\dot Q \\
-P &=& G0^t(Q,Z)\lambda 
+\dot y &=& G_0(Q,Z)\dot Q \\
+P &=& G_0^t(Q,Z)\lambda 
 \f}
+with 
+\f[
+G_0(Q,Z) = \nabla_Q h(Q,Z)
+\f]
 
-- rheonomous: the constraints depend on time and state, (class LagrangianRheonomousR)
+\subsection docRelationLRR Lagrangian Rheonomous Relations
+\b Class: LagrangianRheonomousR
+
+The constraints depend on time and state, 
 \f{eqnarray*}
 y &=& h(Q,t,Z)\\
-\dot y &=& G0(Q,t,Z)\dot Q + \frac{\partial h}{\partial t}(Q,t,Z) \\
-P &=& G0^t(Q,t,Z)\lambda 
+\dot y &=& G_0(Q,t,Z)\dot Q + \frac{\partial h}{\partial t}(Q,t,Z) \\
+P &=& G_0^t(Q,t,Z)\lambda 
 \f}
  with 
- \f[ 
- G0(Q,t,Z) = \nabla_Q h(Q,t,Z) 
- \f]
-and
-\f[ 
-hdot =  \frac{\partial h}{\partial t}(Q,t,Z) 
- \f]
+ \f{eqnarray*} 
+ G_0(Q,t,Z) = \nabla_Q h(Q,t,Z)  \\
+ hdot(Q,t,Z) = \frac{\partial h}{\partial t}(Q,t,Z) 
+ \f}
 
-- compliant: the constraints depends on state and \f$ \lambda \f$, (class LagrangianCompliantR)
+\subsection docRelationLCR Lagrangian Compliant Relations
+\b Class: LagrangianCompliantR
+
+The constraints depends on state and \f$ \lambda \f$, whith a function of time for which \f$ \dot \lambda(t)\f$ has sense.
 \f{eqnarray*}
-y &=& h(Q,\lambda[0],Z) \\
-\dot y &=& G0(Q,\lambda[0],Z)\dot Q + G1(Q,\lambda[0],Z)\lambda[1] \\
-P[i] &=& G0^t(Q,\lambda[0],Z)\lambda[i] 
+y &=& h(Q,\lambda(t),Z) \\
+\dot y &=& G_0(Q,\lambda(t),Z)\dot Q + G_1(Q,\lambda(t),Z)\dot\lambda(t) \\
+P &=& G_0^t(Q,\lambda(t),Z)\lambda(t) 
 \f}
 with 
 \f[ 
-G0(Q,\lambda[0],Z) = \nabla_q h(Q,\lambda[0],Z) 
+G_0(Q,\lambda(t),Z) = \nabla_q h(Q,\lambda(t),Z) 
 \f]
 \f[
-G1(Q,\lambda[0],Z) = \nabla_{\lambda[0]}h(Q,\lambda[0],Z)
+G_1(Q,\lambda(t),Z) = \nabla_{\lambda(t)}h(Q,\lambda(t),Z)
 \f]
 
-<em> Recall that [i] means derivative number i according to time </em>.
-
-\section docRelationLagLin  LagrangianLinearR
+\subsection docRelationLLTIR Lagrangian Linear and Time Invariant Coefficients
+\b Class:  LagrangianLinearR
 
 Lagrangian linear relations with time-invariant coefficients. 
  \f{eqnarray*}
  y&=& H Q + b + D\lambda +FZ \\
- P[i]&=& H^t \lambda[i] 
+ P &=& H^t \lambda 
  \f}
 
 \section doc_relPlugIn Relations plug-in functions
 
 FirstOrderR: \f$ h(X,t,\lambda,Z), \ \ g(\lambda,t,Z) \f$.\n
 FirstOrderLinearR: \f$ C(t,Z), \ \ F(t,Z), \ \ , D(t,Z), \ \ e(t,Z), B(t,Z) \f$.\n
-LagrangianScleronomousR: \f$ h(Q,Z), \ \ G0(Q,Z) \f$. \n
-LagrangianRheonomousR: \f$  h(Q,t,Z), \ \ G0(Q,t,Z), \ \ hdot(Q,t,Z) \f$.\n
-LagrangianCompliantR:  \f$  h(Q,\lambda[0],Z), \ \ G0(Q,\lambda[0],Z), \ \ G1(Q,\lambda[0],Z) \f$.
+LagrangianScleronomousR: \f$ h(Q,Z), \ \ G_0(Q,Z) \f$. \n
+LagrangianRheonomousR: \f$  h(Q,t,Z), \ \ G_0(Q,t,Z), \ \ hdot(Q,t,Z) \f$.\n
+LagrangianCompliantR:  \f$  h(Q,\lambda,Z), \ \ G_0(Q,\lambda,Z), \ \ G_1(Q,\lambda,Z) \f$.
 \f}
 
 */

@@ -131,9 +131,7 @@ int main(int argc, char* argv[])
     s->setPrintStat(true);
     s->initialize();
 
-    cout << "Tolerance is : " << s->getTolerance() << endl;
-
-    int N = 20000;//;12370; // Number of saved points: depends on the number of events ...
+    int N = 1848; // Number of saved points: depends on the number of events ...
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -141,7 +139,7 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlot(N + 1, outputSize);
     SiconosVector * q = ball->getQPtr();
     SiconosVector * v = ball->getVelocityPtr();
-    SiconosVector * lambda = bouncingBall->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambdaPtr(0);
+    SiconosVector * p = ball->getPPtr(1);
     //   SiconosVector * y = bouncingBall->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getYPtr(0);
 
     EventsManager * eventsManager = s->getEventsManagerPtr();
@@ -152,7 +150,7 @@ int main(int argc, char* argv[])
     dataPlot(0, 0) = bouncingBall->getT0();
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
-    dataPlot(0, 3) = (*lambda)(0);
+    dataPlot(0, 3) = (*p)(0);
 
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
@@ -180,7 +178,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 0) = s->getStartingTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
-      dataPlot(k, 3) = (*lambda)(0);
+      dataPlot(k, 3) = (*p)(0);
       numberOfEvent++;
       ++show_progress;
     }

@@ -94,9 +94,17 @@ protected:
   /** Flags to know if pointers have been allocated inside constructors or not */
   BoolMap isAllocatedIn;
 
-  /** copy constructor => private, no copy nor pass-by-value.
-   */
-  Relation(const Relation&);
+  /** work vector for x */
+  SimpleVector * workX;
+
+  /** work vector for z */
+  SimpleVector * workZ;
+
+  /** work vector for y */
+  SimpleVector * workY;
+
+  /** work vector for lambda */
+  SimpleVector * workL;
 
   /** default constructor
    *  \param a string that gives the type of the relation (optional)
@@ -110,6 +118,12 @@ protected:
    *  \param a string that gives the subtype of the relation (optional)
    */
   Relation(RelationXML*, const std::string& = "Undefined", const std::string& = "Undefined");
+
+private:
+
+  /** copy constructor => private, no copy nor pass-by-value.
+   */
+  Relation(const Relation&);
 
 public:
 

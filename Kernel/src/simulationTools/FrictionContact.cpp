@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 #include "FrictionContact.h"
 #include "FrictionContactXML.h"
 #include "Topology.h"
@@ -29,11 +29,6 @@
 #include "NewtonImpactFrictionNSL.h"
 
 using namespace std;
-
-// Default constructor (private)
-FrictionContact::FrictionContact(const string pbType): OneStepNSProblem(pbType), w(NULL), z(NULL), M(NULL), q(NULL),
-  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
-{}
 
 // xml constructor
 FrictionContact::FrictionContact(const string pbType, OneStepNSProblemXML* osNsPbXml, Simulation* newSimu):
@@ -211,74 +206,79 @@ void FrictionContact::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
 {
 
   // Warning: we suppose that at this point, all non linear operators (G for lagrangian relation for example) have been computed through plug-in mechanism.
-
-  // Get dimension of the NonSmoothLaw (ie dim of the block)
-  unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
-  unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
-  // Check allocation
-  if (blocks[UR1][UR2] == NULL)
-    blocks[UR1][UR2] = new SimpleMatrix(nslawSize1, nslawSize2);
-
   // Get DS common between UR1 and UR2
   DynamicalSystemsSet commonDS;
   intersection(*UR1->getDynamicalSystemsPtr(), *UR2->getDynamicalSystemsPtr(), commonDS);
-  DSIterator itDS;
 
-  // Get the W and Theta maps of one of the Unitary Relation - Warning: in the current version, if OSI!=Moreau, this fails.
-  MapOfMatrices W;
-  MapOfDouble Theta;
-  getOSIMaps(UR1, W, Theta);
-
-  SiconosMatrix* currentBlock = blocks[UR1][UR2];
-  SimpleMatrix *work = NULL;
-  currentBlock->zero();
-  SiconosMatrix *leftBlock = NULL, *rightBlock = NULL;
-  unsigned int sizeDS;
-  string relationType1, relationType2;
-  bool flagRightBlock = false;
-
-  // General form of the block is :   block = a*extraBlock + b * leftBlock * OP * rightBlock
-  // a and b are scalars, OP a matrix depending on the integrator, the simulation type ...
-  // left, right and extra depend on the relation type and the non smooth law.
-
-  // loop over the common DS
-  for (itDS = commonDS.begin(); itDS != commonDS.end(); itDS++)
+  if (!commonDS.isEmpty()) // Nothing to be done if there are no common DS between the two UR.
   {
-    sizeDS = (*itDS)->getDim();
-    // get blocks corresponding to the current DS
-    // These blocks depends on the relation type.
-    leftBlock = new SimpleMatrix(nslawSize1, sizeDS);
 
-    UR1->getLeftBlockForDS(*itDS, leftBlock);
-    relationType1 = UR1->getRelationType();
-    relationType2 = UR2->getRelationType();
-    // Computing depends on relation type -> move this in UnitaryRelation method?
-    if (relationType1 == "Lagrangian" || relationType2 == "Lagrangian")
+    // Get dimension of the NonSmoothLaw (ie dim of the block)
+    unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
+    unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
+    // Check allocation
+    if (blocks[UR1][UR2] == NULL)
+      blocks[UR1][UR2] = new SimpleMatrix(nslawSize1, nslawSize2);
+
+    // Get DS common between UR1 and UR2
+    DSIterator itDS;
+
+    // Get the W and Theta maps of one of the Unitary Relation - Warning: in the current version, if OSI!=Moreau, this fails.
+    MapOfMatrices W;
+    MapOfDouble Theta;
+    getOSIMaps(UR1, W, Theta);
+
+    SiconosMatrix* currentBlock = blocks[UR1][UR2];
+    SimpleMatrix *work = NULL;
+    currentBlock->zero();
+    SiconosMatrix *leftBlock = NULL, *rightBlock = NULL;
+    unsigned int sizeDS;
+    string relationType1, relationType2;
+    bool flagRightBlock = false;
+
+    // General form of the block is :   block = a*extraBlock + b * leftBlock * OP * rightBlock
+    // a and b are scalars, OP a matrix depending on the integrator, the simulation type ...
+    // left, right and extra depend on the relation type and the non smooth law.
+
+    // loop over the common DS
+    for (itDS = commonDS.begin(); itDS != commonDS.end(); itDS++)
     {
-      if (UR1 == UR2)
-        rightBlock = leftBlock ;
-      else
-      {
-        rightBlock = new SimpleMatrix(nslawSize2, sizeDS);
-        UR2->getLeftBlockForDS(*itDS, rightBlock);
-        // Warning: we use getLeft for Right block because right = transpose(left) and because of size checking inside the getBlock function,
-        // a getRight call will fail.
-        flagRightBlock = true;
-      }
+      sizeDS = (*itDS)->getDim();
+      // get blocks corresponding to the current DS
+      // These blocks depends on the relation type.
+      leftBlock = new SimpleMatrix(nslawSize1, sizeDS);
 
-      work = new SimpleMatrix(*rightBlock);
-      work->trans();
-      // W contains a lu-factorized matrix and we solve
-      // W * X = rightBlock with PLU
-      // Work is a temporary matrix.
-      W[*itDS]->PLUForwardBackwardInPlace(*work);
-      //*currentBlock +=  *leftBlock * *work; // left = right = G or H
-      gemm(CblasNoTrans, CblasNoTrans, 1.0, *leftBlock, *work, 1.0, *currentBlock);
-      delete work;
-      if (flagRightBlock) delete rightBlock;
+      UR1->getLeftBlockForDS(*itDS, leftBlock);
+      relationType1 = UR1->getRelationType();
+      relationType2 = UR2->getRelationType();
+      // Computing depends on relation type -> move this in UnitaryRelation method?
+      if (relationType1 == "Lagrangian" || relationType2 == "Lagrangian")
+      {
+        if (UR1 == UR2)
+          rightBlock = leftBlock ;
+        else
+        {
+          rightBlock = new SimpleMatrix(nslawSize2, sizeDS);
+          UR2->getLeftBlockForDS(*itDS, rightBlock);
+          // Warning: we use getLeft for Right block because right = transpose(left) and because of size checking inside the getBlock function,
+          // a getRight call will fail.
+          flagRightBlock = true;
+        }
+
+        work = new SimpleMatrix(*rightBlock);
+        work->trans();
+        // W contains a lu-factorized matrix and we solve
+        // W * X = rightBlock with PLU
+        // Work is a temporary matrix.
+        W[*itDS]->PLUForwardBackwardInPlace(*work);
+        //*currentBlock +=  *leftBlock * *work; // left = right = G or H
+        gemm(CblasNoTrans, CblasNoTrans, 1.0, *leftBlock, *work, 1.0, *currentBlock);
+        delete work;
+        if (flagRightBlock) delete rightBlock;
+      }
+      else RuntimeException::selfThrow("FrictionContact::computeBlock not yet implemented for relation of type " + relationType1);
+      delete leftBlock;
     }
-    else RuntimeException::selfThrow("FrictionContact::computeBlock not yet implemented for relation of type " + relationType1);
-    delete leftBlock;
   }
 }
 

@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
     TimeStepping* s = new TimeStepping(t);
 
     // -- OneStepIntegrators --
-    OneStepIntegrator * OSI = new Moreau(ball, theta, s);
+    Moreau * OSI = new Moreau(ball, theta, s);
 
     // -- OneStepNsProblem --
     OneStepNSProblem * osnspb = new LCP(s, "LCP", solverName, 101, 1e-15);
@@ -135,17 +135,17 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 4;
+    unsigned int outputSize = 5;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
     SiconosVector * q = ball->getQPtr();
     SiconosVector * v = ball->getVelocityPtr();
-    SiconosVector * lambda = bouncingBall->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambdaPtr(1);
+    SiconosVector * p = ball->getPPtr(2);
 
     dataPlot(0, 0) = bouncingBall->getT0();
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
-    dataPlot(0, 3) = (*lambda)(0);
+    dataPlot(0, 3) = (*p)(0);
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
     // ==== Simulation loop - Writing without explicit event handling =====
@@ -158,8 +158,10 @@ int main(int argc, char* argv[])
       dataPlot(k, 0) =  s->getNextTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
-      dataPlot(k, 3) = (*lambda)(0);
+      dataPlot(k, 3) = (*p)(0);
+      dataPlot(k, 4) = OSI->computeResidu();
       s->nextStep();
+      s->reset();
       ++show_progress;
     }
     cout << "End of computation - Number of iterations done: " << k - 1 << endl;

@@ -16,35 +16,37 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#ifndef __FirstOrderRTest__
-#define __FirstOrderRTest__
+#ifndef __FirstOrderType1RTest__
+#define __FirstOrderType1RTest__
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "FirstOrderRXML.h"
 #include "NonSmoothDynamicalSystem.h"
 #include "NonSmoothDynamicalSystemXML.h"
-#include "FirstOrderR.h"
+#include "FirstOrderType1R.h"
 
-class FirstOrderRTest : public CppUnit::TestFixture
+class FirstOrderType1RTest : public CppUnit::TestFixture
 {
 
 private:
 
   // Name of the tests suite
-  CPPUNIT_TEST_SUITE(FirstOrderRTest);
+  CPPUNIT_TEST_SUITE(FirstOrderType1RTest);
 
   // tests to be done ...
 
-  CPPUNIT_TEST(testBuildFirstOrderR1);
-  CPPUNIT_TEST(testBuildFirstOrderR2);
+  CPPUNIT_TEST(testBuildFirstOrderType1R1);
+  CPPUNIT_TEST(testBuildFirstOrderType1R2);
+  CPPUNIT_TEST(testBuildFirstOrderType1R3);
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
-  void testBuildFirstOrderR1();
-  void testBuildFirstOrderR2();
+  void testBuildFirstOrderType1R1();
+  void testBuildFirstOrderType1R2();
+  void testBuildFirstOrderType1R3();
   void End();
 
   // Members

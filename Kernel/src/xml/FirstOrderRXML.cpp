@@ -48,6 +48,13 @@ FirstOrderRXML::FirstOrderRXML(xmlNodePtr relationNode): RelationXML(relationNod
     jacobianGNode[0] = SiconosDOMTreeTools::findNodeChild(node, "matrix")  ;
     if (jacobianGNode[0] == NULL)
       XMLException::selfThrow("FirstOrderRXML:: constructor, jacobianG0 is missing");
+
+    for (unsigned int i = 1; i < size; i++)
+    {
+      jacobianGNode[i] =  SiconosDOMTreeTools::findFollowNode(jacobianGNode[i - 1]);
+      if (jacobianGNode[i] == NULL)
+        XMLException::selfThrow("FirstOrderRXML:: constructor, another gradient of G is required");
+    }
   }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "jacobianH")) != NULL)

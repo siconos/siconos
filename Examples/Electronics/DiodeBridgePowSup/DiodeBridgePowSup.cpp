@@ -56,8 +56,6 @@ int main(int argc, char* argv[])
     SimpleMatrix LS_A(1, 1);
     LS_A(0, 0) = -1.0 / (Rvalue * Cfilt);
 
-    cout << " LS matrice A = " << endl;
-    LS_A.display();
     FirstOrderLinearDS* LSDiodeBridgePowSup = new FirstOrderLinearDS(1, init_stateLS, LS_A);
 
     //    //  Source term "u" specification
@@ -130,9 +128,6 @@ int main(int argc, char* argv[])
     Moreau* OSI_LSDiodeBridgePowSup = new Moreau(LSDiodeBridgePowSup, theta, StratDiodeBridgePowSup);
 
     LCP* LCP_DiodeBridgePowSup = new LCP(StratDiodeBridgePowSup, "LCP", "NSQP", 300, 1e-8);
-
-    cout << " -----  Model description ------" << endl;
-    DiodeBridgePowSup.display();
 
     StratDiodeBridgePowSup->initialize();
 

@@ -33,10 +33,10 @@ libSimulationTools_la_SOURCES = TimeDiscretisation.cpp Solver.cpp \
 				Event.h TimeDiscretisationEvent.h NonSmoothEvent.h EventFactory.h EventsManager.h \
 				OneStepNSProblem.h QP.h Relay.h FrictionContact.h FrictionContact2D.h FrictionContact3D.h LCP.h \
 				OneStepIntegrator.h Lsodar.h Moreau.h Simulation.h TimeStepping.h EventDriven.h \
-				SimulationTools.h 
+				SimulationTools.h SimulationTypeDef.h
 libSimulationTools_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 siconos_HEADERS = TimeDiscretisation.h Solver.h \
 		  Event.h TimeDiscretisationEvent.h NonSmoothEvent.h EventFactory.h EventsManager.h \
 		  OneStepNSProblem.h QP.h Relay.h FrictionContact.h FrictionContact2D.h FrictionContact3D.h LCP.h \
 		  OneStepIntegrator.h Lsodar.h Moreau.h Simulation.h TimeStepping.h EventDriven.h \
-		  SimulationTools.h 
+		  SimulationTools.h SimulationTypeDef.h

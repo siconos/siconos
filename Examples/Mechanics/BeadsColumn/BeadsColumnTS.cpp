@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int dsNumber = 10;      // the number of dynamical systems
     unsigned int nDof = 3;           // degrees of freedom for beads
-    double increment_position = 5;   // initial position increment from one DS to the following
+    double increment_position = 1;   // initial position increment from one DS to the following
     double increment_velocity = 0;   // initial velocity increment from one DS to the following
     double t0 = 0;                   // initial computation time
     double T = 4.0;                   // final computation time

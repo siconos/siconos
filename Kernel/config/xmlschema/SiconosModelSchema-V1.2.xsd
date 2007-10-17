@@ -473,8 +473,8 @@
 							<xsd:element name="FirstOrderRelation">
 								<xsd:complexType>
 									<xsd:all>
-										<xsd:element name="h" type="pluginDef" minOccurs='0' maxOccurs='1'/>
-										<xsd:element name="g" type="pluginDef" minOccurs='0' maxOccurs='1'/>
+										<xsd:element name="h" type="pluginDef" minOccurs='1' maxOccurs='1'/>
+										<xsd:element name="g" type="pluginDef" minOccurs='1' maxOccurs='1'/>
 										<xsd:element name="jacobianG" type="listOfMatrices" minOccurs="0" maxOccurs="1"/>
 										<xsd:element name="jacobianH" type="listOfMatrices" minOccurs="0" maxOccurs="1"/>
 									</xsd:all>

@@ -10,8 +10,21 @@ For example if you consider a set of rigid bodies, Interactions will define what
 
 \b Building \b an \b Interaction? \n
 
-An Interaction is applied to a set of Dynamical Systems, then we introduce the following vectors of global coordinates, say X (or Q in the Lagrangian case):
+First of all, we introduce the set of all possible interactions, indeed all interactions declared by user, 
+\f[ \mathcal{I}_0 = \{ \alpha \ / \ I_{\alpha} \in NSDS \}. \f]
+\f$ NSDS \f$ is the non-smooth dynamical system and \f$ I_{\alpha} \f$ a single interaction.\n
+An Interaction is applied to a set of Dynamical Systems, then the set
+\f[ \mathcal{DS}^{\alpha} = \{ d \ / \ ds_{d} \in I_{\alpha} \} \f]
+is the set of all dynamical systems involved in \f$ I_{\alpha} \f$. \n
+Finally, we denote \f$ \mathcal{DS}_{\alpha,\beta} \f$ the set of dynamical systems that are involved in interactions \f$ \alpha \f$ and \f$ \beta \f$;
+\f[
+\mathcal{DS}_{\alpha,\beta} =  \mathcal{DS}_{\alpha}\cap \mathcal{DS}_{\beta}
+\f]
 
+Considering an interaction \f$ I_{\alpha} \f$, upper case letters will be used to represent the concatenation of variables from the dynamical systems of \f$ \mathcal{DS}^{\alpha} \f$. \n
+Note that Index \f$ \alpha \f$ for variables or operators specific to \f$ I_{\alpha} \f$, will be omitted as soon as possible to lighten notations.
+
+Then one get the following vectors of global coordinates, say X (or Q in the Lagrangian case):
 \f[
 X=\left[\begin{array}{c} 
 x_0 \\
@@ -26,18 +39,24 @@ q_1 \\
 \f]
 \f$ x_i \ (or \ q_i)\f$ being the vectors of global coordinates of the Dynamical Systems involved in the Interaction.
 
-Remember also that each DynamicalSystem as a variable called \e r (or \e p in the Lagrangian case), an input vector related to the non smooth behavior or law. \n
-(for example, p may represent the reaction when contact occurs). \n
+Remember also that each DynamicalSystem as a variable called \e r (or \e p in the Lagrangian case), an input vector related to the non smooth behavior or law, with:
+
+\f{eqnarray*}
+r_d = \sum_{\beta \in \mathcal{I}^d} r_d^{\beta} \\
+\\
+\mathcal{I}^d = \{ \alpha \in \mathcal{I}_0 \ / \ d \in \mathcal{DS}_{\alpha} \}
+\f}
+
 Thus we define R for the Interaction as:
 \f[
-R=\left[\begin{array}{c} 
-r_0 \\
-r_1 \\
+R^{\alpha}=\left[\begin{array}{c} 
+r^{\alpha}_0 \\
+r^{\alpha}_1 \\
 ...  
-\end{array}\right], \ or \ R=
+\end{array}\right], \ or \ P^{\alpha}=
 \left[\begin{array}{c} 
-p_0\\
-p_1 \\
+p^{\alpha}_0\\
+p^{\alpha}_1 \\
 ...
 \end{array}\right]
 \f]
@@ -50,8 +69,8 @@ y[i] is a vector that represents the derivative number i of variable y according
 Not that the number of saved derivatives depends on the problem type.
 
 Then an Interaction proposes:
-- a \ref docNSL "Non Smooth Law" that links y and \f$ \lambda \f$
-- a \ref docRelation "Relation" between the local variables \f$ (y,\lambda) \f$ and the global ones (those of the Dynamical Systems), \f$ (X,R) \f$ (the constraints).
+- a \ref nsLawInSiconos "Non Smooth Law" that links y and \f$ \lambda \f$
+- a \ref relationInSiconos "Relation" between the local variables \f$ (y,\lambda) \f$ and the global ones (those of the Dynamical Systems), \f$ (X,R) \f$ (the constraints).
 
 As an example consider again the case of a ball bouncing on the ground:
 - the Interaction will include the two dynamical systems (ball and ground)
@@ -61,7 +80,7 @@ As an example consider again the case of a ball bouncing on the ground:
 
 Definition and description of the different types of relations and non-smooth laws are presented in the sections below.
 
--- \subpage docNSL \n
--- \subpage docRelation
+-- \subpage nsLawInSiconos \n
+-- \subpage relationsInSiconos
 
 */

@@ -1,183 +1,491 @@
 /*! \page docSimuMoreauTS Moreau's Time Stepping scheme
 
-<b> Foreword: </b> <em> At the time, Moreau's Time Stepping scheme is only implemented for first order linear systems and for Lagrangian systems. </em>
-
 \section docSimuTSPrinciple General Principle
 
-Roughtly speaking, this algorithm consists first in the discretisation of the whole system (dynamics + relations + non-smooth laws) over a time step. Then the system is integrated and that leads to the computation of some "free" solutions, ie without any constraints. Finally a Non-Smooth problem (usually a LCP) is formalized and solved to obtain the complete solution.
+Roughtly speaking, the time-stepping method consists in the time-discretisation of the whole system (dynamics + relations + non-smooth laws), \n 
+leading to a so-called one-step non smooth problem (OSNSP) solved at each time step. \n
 
-\section docSimuTSimplem Implementation
+Indeed, the main stages of the process are:
+- integrate the dynamics without constraints, to get some "free" solutions
+- formalize and solve a OSNSP (a LCP for example)
+- update the dynamics with the OSNSP solutions to get the full state.
 
-\b Related \b classes: TimeStepping, Moreau, LCP, FrictionContact
 
-The figure below represents the class architecture for TimeStepping simulation.
+<em> Main Related classes </em>: TimeStepping, Moreau, LCP, FrictionContact
+
+The figure below represents the architecture for classes related to TimeStepping simulation.
 
 \image html classTimeStepping.png
 \image latex classTimeStepping.eps "" width=10cm
 
+\section MTS_contents Contents
 
-We will now describe discretisation process for two differents cases: first order linear systems and then Lagrangian systems, linear and time invariant.
+The whole Time-Stepping process is described in the sections below, starting from first order systems and then going on with second order, Lagrangian, systems. \n
 
-\subsection docSimuTSDiscretisationLDS First order linear systems
+- \ref MTS_FO
+ - \ref MTS_FO_DynamicsDiscretisation
+ - \ref MTS_FO_RelationDiscretisation
+ - \ref MTS_FO_NSLaw
+- \ref MTS_L
+ - \ref MTS_L_DynamicsDiscretisation
+ - \ref MTS_L_RelationDiscretisation
+ - \ref MTS_L_NSLaw
+- \ref MTS_D_Summary 
+- \ref MTS_SimuProcess
 
-This section concerns LinearTIDS DynamicalSystems (see \ref dsInSiconos)
+For each section, the corresponding Siconos/Kernel class is reported at the beginning. \n
+For a complete review of the available dynamical systems, relations and 
+non-smooth laws, see the related chapters: \n
+--> \ref dsInSiconos \n 
+--> \ref relationsInSiconos\n
+--> \ref nsLawInSiconos \n
+
+In the following sections, the systems are integrated over a time step \f$ [t_i,t_{i+1}]\f$  of length \f$ h\f$. \n
+The approximation of any function \f$  F(t,...) \f$ at the time \f$ t_i \f$ is denoted \f$ F_i \f$. \n
+Note that in the relations writing, we use upper case letters for all variables related to DynamicalSystem objects.
+and thus, \f$X , Q, \ldots\f$ are concatenation of \f$x, q,\ldots\f$ of the dynamical systems variables concerned by the relation. \n
+
+Note also that most of the time, the parameter \f$ z \f$ will be omitted, to lighten notations. 
+
+\htmlonly
+<div class=horizontalline>  </div>
+\endhtmlonly
+
+\section MTS_FO First order systems
+
+\subsection MTS_FO_DynamicsDiscretisation Time Discretisation of the Dynamics.
+<em> In this section, we present the discretisation of the various possible dynamics, for the following systems:\n
+\ref MTSDD_FONLDS (class FirstOrderNonLinearDS) \n
+\ref MTSDD_FOLDS  (class FirstOrderLinearDS) \n
+\ref MTSDD_FOLTIDS (class FirstOrderLinearTIDS)
+</em>
+
+\subsubsection MTSDD_FONLDS First Order Non Linear Systems
+
+\b Class: FirstOrderNonLinearDS.
+
 \f{eqnarray*}
-\dot x &=& Ax + Tu + b + r   \\
+M\dot x(t) &=& f(x,t,z) + r   \\
 x(t_0) &=& x_0
 \f}
-with linear relations (LinearTIR): 
+
+with \f$ r = r^d = \sum_{\alpha} r^{\alpha}, \alpha \in I_d \f$, \f$ I_d \f$ being the set of all relations in which the current dynamical system, number \f$ d \f$, is involved.  \n
+In the following, the index "d" will be omitted to lighten notations.
+
+The integration of the ODE over a time step \f$ [t_i,t_{i+1}]\f$  of length \f$ h\f$  is :
+\f[
+M\int_{t_i}^{t_{i+1}}\dot x\,dt = \int_{t_i}^{t_{i+1}} f(t,x,z)dt + \int_{t_i}^{t_{i+1}}r\,dt   
+\f]
+The left-hand term is \f$ M(x(t_{i+1})-x(t_i)) \approx M(x_{i+1} - x_i) \f$ . \n
+
+Right-hand terms are approximated with a \f$ \theta\f$-method:
+
 \f{eqnarray*}
-y &=& CX + FU + D \lambda + e \\
-R &=& B \lambda
+\int_{t_i}^{t_{i+1}} f(t,x,z)dt &\approx& h \theta f(t_{i+1},x_{i+1},z) + h (1-\theta) f(t_i,x_i,z) \\
+&\approx& h \theta f_{i+1} + h (1-\theta) f_i
+\f}
+and the third integral is approximated with:
+\f[
+\int_{t_i}^{t_{i+1}}r\,dt \approx h r(t_{i+1}) \approx hr_{i+1}
+\f]
+
+Then, we get the following "residu"
+\f{eqnarray*}
+\mathcal R(x_{i+1}) &=& M(x_{i+1}-x_i) - h \theta f_{i+1} - h (1-\theta) f_{i} - hr_{i+1} = 0 \\
+	     &=& \mathcal R^{free}(x_{i+1}) - hr_{i+1}
 \f}
 
-\subsubsection docMoreauLDSTD Time Discretisation of the Dynamics
-The integration of the ODE over a time step \f$ [t_i,t_{i+1}]\f$  of length \f$ h\f$  is :
+<em> Note: We introduce the "free" notation for terms related to the smooth part of the system. </em>
+
+We apply a Newton method to solve \f$ \mathcal R(x_{k+1}) = 0 \f$. The gradient of the residu according to \f$ x \f$ is:
 
 \f[
-\int_{t_i}^{t_{i+1}}\dot x\,dt = \int_{t_i}^{t_{i+1}} A \cdot x\,dt + \int_{t_i}^{t_{i+1}}(T \cdot u + b) dt + \int_{t_i}^{t_{i+1}}r\,dt   
+\nabla_{x}\mathcal R(x) = M - h \theta\cdot\nabla_{x}f(t,x)
 \f]
-The left-hand term is \f$ x(t_{i+1})-x(t_i)\f$ . \n
-Right-hand terms are approximated this way :
 
-\f$ \int_{t_i}^{t_{i+1}} A \cdot x\,dt\f$  is approximated using a \f$ \theta\f$ -method
+And we get (index k corresponds to the Newton iteration number):
+
 \f[
-\int_{t_i}^{t_{i+1}} A \cdot x\,dt \approx h \theta (A \cdot x(t_{i+1})) + h (1-\theta) (A \cdot x(t_{i}))
+W_{i+1}^k\cdot (x_{i+1}^{k+1} - x_{i+1}^k) = - \mathcal R(x_{i+1}^k)
 \f]
+with
 
-since the second integral comes from independent sources, it can be evaluated with whatever quadrature method, for
-instance a \f$ \theta\f$ -method 
 \f[
-\int_{t_i}^{t_{i+1}}(T \cdot u + b) dt \approx h \theta (T \cdot u(t_{i+1}) + b(t_{i+1})) + 
-                                                              h (1-\theta) (E \cdot u(t_{i}) + b(t_{i}))
+W_{i+1}^k = M - h \theta\left[\nabla_{x}f\right](t_{i+1},x_{i+1}^k)
 \f]
 
-the third integral is approximated like in an implicit Euler integration
-\f[
-\int_{t_i}^{t_{i+1}}r\,dt \approx h r(t_{i+1})
-\f]
-
-By replacing the accurate solution \f$ x(t_i)\f$  by the approximated value \f$ x_i\f$ , we get :
-\f[
-x_{i+1}-x_i = h \theta (A \cdot x_{i+1}) + h (1-\theta) (A \cdot x_{i}) + 
-              h \theta (T \cdot u(t_{i+1}) + b(t_{i+1})) + h (1-\theta) (T \cdot u(t_{i}) + b(t_{i})) + h r_{i+1}
-\f]
-Assuming that \f$ I - h \theta A\f$  is invertible, matrix \f$ W\f$  is defined as \f$ (I - h \theta A)^{-1}\f$ . We get then :
-\f[
-x_{i+1} = W(I + h (1-\theta) A) \cdot x_{i} + 
-            W (h \theta (T \cdot u(t_{i+1}) + b(t_{i+1})) + h (1-\theta) (T \cdot u(t_{i}) + b(t_{i}))) + h W r_{i+1}
-\f]
-An intermediate variable \f$ x_{free}\f$  related to the smooth part of the system is defined as :
-\f[
-x_{free} = W(I + h (1-\theta) A) \cdot x_{i} + 
-           W (h \theta (T \cdot u(t_{i+1}) + b(t_{i+1})) + h (1-\theta) (T \cdot u(t_{i}) + b(t_{i})))
-\f]
-Thus the calculus of \f$ x_{i+1}\f$  becomes :
-\f[
-x_{i+1} = x_{free} + h W r_{i+1}
-\f]
-
-\subsubsection docMorTDLDSRel Time discretization of the relations
-It comes straightforwardly :\n
-
-\f$ r_{i+1} = B \cdot \lambda_{i+1}\f$ \n
-
-\f$ y_{i+1} = C \cdot x_{i+1} + D \cdot \lambda_{i+1} + F \cdot u(t_{i+1}) + e \f$\n
-
-
-\subsubsection docMorTDLDSNSL Time discretization of the non-smooth law
-It comes straightforwardly :
-\f[
-0 \leq y_{i+1} \, \perp \, \lambda_{i+1} \geq 0
-\f]
-
-\subsubsection docMoreauTDLDSSumup Summary of the time discretized equations 
-These equations are summarized assuming that there is no source term and simplified relations as for the 
-electrical oscillator with full-wave rectifier.
+If we assume that \f$ W_{i+1}^k \f$ is invertible, we get the solution at Newton iteration k+1:
 
 \f{eqnarray*}
-W & = & (I - h \theta A)^{-1} \\
-x_{free} &= & W(I + h (1-\theta) A) \cdot x_{i} \\
-x_{i+1} &= & x_{free} + h W r_{i+1} \\
-r_{i+1} &= & B \cdot \lambda_{i+1}  \\
-y_{i+1} &= & C \cdot x_{i+1} + D \cdot \lambda_{i+1}+ Fu_{i+1}   \\
+x_{i+1}^{k+1} &=& x_{i+1}^k - (W_{i+1}^k)^{-1}\mathcal R^{free}(x_{i+1}^{k}) + h(W_{i+1}^k)^{-1}r_{i+1}^{k+1} \\
+	      &=& x^{free,k}_{i+1} + h(W_{i+1}^k)^{-1}r_{i+1}^{k+1}
+\f}
+
+\subsubsection MTSDD_FOLDS First Order Linear Systems
+
+\b Class: FirstOrderLinearDS.
+
+\f{eqnarray*}
+M\dot x(t) &=& A(t,z)x(t) + b(t) + r   \\
+x(t_0) &=& x_0
+\f}
+
+For the integration of the ODE over a time-step, we proceed as in the previous section for non-linear systems to get:
+
+\f{eqnarray*}
+\mathcal R(x_{i+1}) &=& M(x_{i+1}-x_i) - h \theta(A_{i+1}x_{i+1} + b_{i+1})- h (1-\theta)(A_{i}x_i + b_i) -  hr_{i+1} = 0 \\
+\f}
+or
+\f[
+(M - h\theta A_{i+1}) x_{i+1} = (M + h (1-\theta)A_{i})\cdot x_i + h\theta(b_{i+1}-b_i) + hb_i +  hr_{i+1}  
+\f]
+
+We denote:
+\f[
+W_{i+1} =  (M - h\theta A_{i+1})
+\f]
+and assuming it is invertible, we get:
+
+\f{eqnarray*}
+ x_{i+1} &=& W_{i+1}^{-1}\left[(M + h (1-\theta)A_{i})\cdot x_i + h\theta(b_{i+1}-b_i) + hb_i\right] +  hW_{i+1}^{-1}r_{i+1}  \\
+	&=& x^{free}_{i+1}  +  hW_{i+1}^{-1}r_{i+1} 
+\f}
+
+\subsubsection MTSDD_FOLTIDS First Order Linear Systems with time invariant coefficients
+
+\b Class: FirstOrderLinearTIDS.
+
+\f{eqnarray*}
+M\dot x(t) &=& Ax(t) + b + r   \\
+x(t_0) &=& x_0
+\f}
+
+Using the results of the previous section, the discretisation is straightforward:
+\f{eqnarray*}
+ x_{i+1} &=& x_i + h W^{-1}(A x_i + b) +  hW^{-1}r_{i+1} \\
+	 &=& x^{free}_{i}  +  hW^{-1}r_{i+1} 
+\f}
+with a W that do not depend on time:
+\f[
+W =  (M - h\theta A)
+\f]
+
+\subsection MTS_FO_RelationDiscretisation Time discretization of the relations.
+
+- \ref MTSRD_FOR
+- \ref MTSRD_FOLR
+
+In the following, \f$R \f$ represents the concatenation of all \f$ r^{\alpha} \f$ vectors for the DS involved in the present relation.
+
+\subsubsection MTSRD_FOR First Order (non-linear) Relations
+
+\b Class: FirstOrderR.
+
+\f{eqnarray*}
+ y &=& h(X,t,\lambda,Z)\\
+ R &=& g(X,t,\lambda,Z)
+\f}
+
+Then, for the iteration \f$ k+1 \f$ of the Newton process, we get:
+\f{eqnarray*}
+ y_{i+1}^{k+1} &=& h(X_{i+1}^{k+1},t_{i+1},\lambda_{i+1}^{k+1})\\
+ R_{i+1}^{k+1} &=& g(X_{i+1}^{k+1},t_{i+1},\lambda_{i+1}^{k+1})
+\f}
+
+These constraints are linearized around state \f$(X_{i+1}^{k+1},\lambda_{i+1}^{k+1})\f$:
+\f{eqnarray*}
+y_{i+1}^{k+1} &=& y_{i+1}^k - H_0(S_{i+1}^k)X_{i+1}^{k} - H_1(S_{i+1}^k)\lambda_{i+1}^{k} + H_0(S_{i+1}^k)X_{i+1}^{k+1} + H_1(S_{i+1}^k)\lambda_{i+1}^{k+1}  \\
+\\
+R_{i+1}^{k+1} &=& R_{i+1}^k - G_0(S_{i+1}^k)X_{i+1}^{k} - G_1(S_{i+1}^k)\lambda_{i+1}^{k} + G_0(S_{i+1}^k)X_{i+1}^{k+1} + G_1(S_{i+1}^k)\lambda_{i+1}^{k+1} 
+\f}
+
+Where \f$ S_{i+1}^k \f$ stands for \f$ (X_{i+1}^{k},t_{i+1},\lambda_{i+1}^{k}) \f$ and
+\f{eqnarray*}
+ H_0(X,t,\lambda)=\nabla_X h(X,t,\lambda)&, &  H_1(X,t,\lambda)=\nabla_{\lambda} h(X,t,\lambda) \\
+\\
+ G_0(X,t,\lambda)=\nabla_X g(X,t,\lambda)&, &  G_1(X,t,\lambda)=\nabla_{\lambda} g(X,t,\lambda) 
+\f}
+
+\subsubsection MTSRD_FOLR First Order Linear Relations
+
+\b Classes: FirstOrderLinearR and FirstOrderLinearTIR.
+
+\f{eqnarray*}
+ y &=& C(t,Z)X(t) + F(t,Z)Z + D(t,Z)\lambda + e(t,Z) \\
+ R &=& B(t,Z) \lambda
+\f}
+
+<em> Note: for time-invariant relations, B, C, F, D and e are constant vectors and matrices </em>
+
+The Time discretization of the relations is fully implicit and may be written as :
+\f{eqnarray*}
+y_{i+1} &=& C(t_{i+1})X_{i+1} + D(t_{i+1})\lambda_{i+1} + e(t_{i+1}) + F(t_{i+1})Z \\	
+\\
+R_{i+1} &=& B(t_{i+1})\lambda_{i+1}
+\f}
+
+\subsection MTS_FO_NSLaw Discretisation of the non-smooth law
+
+\subsection MTS_FO_CC Complementarity Condition
+\b class: ComplementarityConditionNSL.
+
+The complementarity condition writes:
+
+\f{eqnarray*}
+0 \leq y \, &\perp& \, \lambda \geq 0 
+\f}
+
+and the discretisation is straightforward:
+\f{eqnarray*}
 0 \leq y_{i+1} \, &\perp& \, \lambda_{i+1} \geq 0 
 \f}
 
-\subsection docMoreauLag Lagrangian Linear Systems case 
+\htmlonly
+<div class=horizontalline>  </div>
+\endhtmlonly
 
-We consider now Lagrangian Linear and Time Invariant systems (LagrangianLinearTIDS, see \ref doc_lagtids):
+\section MTS_L Lagrangian systems
+
+\subsection MTS_L_DynamicsDiscretisation Time Discretisation of the Dynamics.
+
+In this section, we present the discretisation of the following systems:\n
+\ref MTSDD_LNLDS (class LagrangianDS) \n
+\ref MTSDD_LLTIDS (class LagrangianLinearTIDS)
+
+\subsubsection MTSDD_LNLDS Lagrangian (second order) Non Linear Systems
+
+We provide in the following sections a time discretization method of the Lagrangian dynamical systems, consistent with the non smooth character of the solution. \n
+
+\b Class LagrangianDS.
+
 \f{eqnarray*}
-M \ddot q + C \dot q + K q =  F_{Ext}(t) + p \\
- q(t_0) = q0 \\
- \dot q(t_0) = velocity0 
+M(q(t),z) dv &=& f_L(t,v^+(t), q(t), z)dt + dr \\
+ v^+(t) &=& \dot q^+(t) \\
+ q(t_0) &=& q_0 \\
+ \dot q(t_0^-) &=& v_0 
 \f}
-with Lagrangian Linear Relations (LagrangianR, see \ref docRelationLagLin):
- \f{eqnarray*}
- y&=& H q + b + D\lambda \\
- p&=& H^t \lambda 
- \f}
+with 
+\f[
+q(t) = q_0 + \int_{t_0}^t v^+(t)dt
+\f]
 
-\subsubsection docMoreauTDDS Time discretization of the dynamical system
+<em> We recall that \f$ v^+(t) \f$ means \f$ v(t^+) \f$ ie right limit of \f$ v \f$ in t. </em>
 
-We provide in this section a time discretization method of the Lagrange dynmical system, consistent with the non smooth character of the solution. Let us consider here only the linear time invariant case. The equation  may be reformulated equivalently in terms of an integral over a time step \f$ [t_i,t_{i+1}] \f$ of length h such that :
+Left hand side is discretised by assuming that:
+
 \f{eqnarray*}
-  \int_{[t_i,t_{i+1}]} M \ddot q + C \dot q + K q \,dt =  \int_{[t_i,t_{i+1}]} F_{ext}(t)\,dt +  \int_{[t_i,t_{i+1}]} r \,d\nu
-\f}
-
-Due to the non smooth character of the motion, the first term is integrated by an one order scheme( backward Euler-like) such that :
-\f{eqnarray*}
-   \int_{[t_i,t_{i+1}]} M \ddot q  \, dt \approx M (\dot q(t_{i+1})-\dot q(t_{i})) 
-\f}
-
-For simplicity sake, we note the approximation of q and \f$ \dot q \f$:
-\f{eqnarray*}
-  \dot q_{i+1}\approx\dot q(t_{i+1}),  \dot q_{i}\approx \dot q(t_{i})
-\f}
-
- For the other terms, a \f$ \theta \f$-method is used :
- \f{eqnarray*}
-\int_{[t_i,t_{i+1}]}  C \dot q + K q \,dt &\approx& h\left[\theta  (C \dot q_{i+1}+K q_{i+1}) + (1-\theta) (C \dot q_{i}+K q_{i})  \right]\\
- \int_{[t_i,t_{i+1}]} F_{ext}(t) \,dt &\approx& h\left[\theta  F_{ext}(t_{i+1})+(1-\theta)  F_{ext}(t_{i})  \right]
- \f}
-
-For the term which contains the reaction force, we state a new variable such that :
-\f{eqnarray*}
-  R_{i+1} = \frac  1 h \int_{[t_i,t_{i+1}]} r \,d\nu
+   \int_{t_i}^{t_{i+1}} M(q(t),z)dv \approx M(q*,z)(v_{i+1}-v_{i}) 
 \f}
 
+As for first order non-linear systems, we use a \f$ \theta \f$-method to integrate the other terms, and obtain:
+\f{eqnarray*}
+   \int_{t_i}^{t_{i+1}} f_L(t, v^+(t), q(t), z) dt \approx  h\theta f_L(t_{i+1}, v_{i+1}, q_{i+1}, z) + h(1-\theta) f_L(t_{i}, v_{i}, q_{i}, z)
+\f}
+and for the last term, we set a new variable \f$ p_{i+1} \f$ such that:
+\f{eqnarray*}
+   \int_{t_i}^{t_{i+1}} dr \approx p_{i+1}
+\f}
+
+Finally the full system discretisation results in:
+\f{eqnarray*}
+\mathcal R(v_{i+1}, q_{i+1}) &=& M(q*,z)(v_{i+1}-v_{i}) - h\theta {f_L}_{i+1} - h(1-\theta) {f_L}_{i} - p_{i+1} = 0 \\	
+		               &=& \mathcal R^{free}(v_{i+1},q_{i+1}) - p_{i+1} 
+\f}
+
+The "free" notation still stands for terms related to the smooth part of the system. 
 The displacement is integrated through the velocity with :
 \f{eqnarray*}
-  q_{i+1} = q_{i} +  h\left[\theta  \dot q_{i+1}+(1-\theta)  \dot q_{i}  \right]\\
+q_{i+1} &\approx& q_i + h\theta v_{i+1} + h(1 - \theta)v_{i}
+\f}
+Substituing this into the residu leads to a function depending only on \f$ v_{i+1} \f$, since state "i" and "k" are supposed to be known.\n
+A Newton method will be applied to solve \f$ \mathcal R(v_{i+1}) = 0 \f$. \n
+
+That requires to compute the gradient of the residu;
+assuming that the mass matrix evolves slowly with the configuration in a single time step, we get:
+\f{eqnarray*}
+\nabla_{v_{i+1}}\left[M(q*,z)(v_{i+1}-v_{i})\right] \approx M(q^{*},z)
+\f}
+and denoting:
+\f{eqnarray*}
+C_t(t,v,q)=-\left[\frac{\partial{f_L(t,v,q)}}{\partial{v}}\right] \\
+\\
+K_t(t,v,q)=-\left[\frac{\partial{f_L(t,v,q)}}{\partial{q}}\right]
 \f}
 
-Finally, we obtain the time discretized equation of motion:
+we get (index k corresponds to the Newton iteration number):
+
+\f[
+W(t_{i+1}^k,v_{i+1}^k,q_{i+1}^k)\cdot (v_{i+1}^{k+1}-v_{i+1}^k) = - \mathcal R(v_{i+1}^k)
+\f]
+with
+
+\f[
+W(t,v,q) = M(q*,z) + h\theta C_t(t,v,q) + h^2\theta^2 K_t(t,v,q)
+\f]
+As an approximation for \f$ q^* \f$, we choose:
 \f{eqnarray*}
-  \left[M+h\theta C + h^2 \theta^2 K\right] (\dot q_{i+1} - \dot q_{i}) = - h  C \dot q_{i} - h K q_{i} - h^2 \theta  K \dot q_{i}
-+  h\left[\theta  F_{ext}(t_{i+1})+(1-\theta)  F_{ext}(t_{i})  \right]  +h R_{i+1},
-\f}
-which can be written :
+q^* &\approx& (1-\gamma) q_i  + \gamma q_{i+1}^k \\
+&\approx & q_i + h\gamma\left[ (1-\theta) v_i + \theta v_{i+1}^k\right]
+\f} 
+with \f$ \gamma \in \left[0,1\right] \f$.
+Moreover, if \f$ M \f$ is evaluated at the first step of the Newton iteration, with \f$ v_{i+1}^0 = v_i \f$, we get:
+\f[
+M(q^*) \approx M(q_i + h\gamma v_i)
+\f]
+
+Finally, if \f$ W \f$ is invertible, the solution at iteration k+1 is given by, 
 \f{eqnarray*}
-   \dot q_{i+1} = \dot q_{free}  + h W R_{i+1}
-\f}
-where 
-\f{eqnarray*}
-  W &=&   \left[M+h\theta C + h^2 \theta^2 K\right]^{-1}\\
- \dot q_{free} &=& \dot q_{i}+  W \left[   - h  C \dot q_{i} - h K q_{i} - h^2 \theta  K \dot q_{i}
-+  h\left[\theta  F_{ext}(t_{i+1})+(1-\theta)  F_{ext}(t_{i})  \right]       \right]
+v_{i+1}^{k+1} &=& v_{i+1}^k - (W_{i+1}^k)^{-1} \mathcal R^{free}(v_{i+1}^k) + (W_{i+1}^k)^{-1} p_{i+1}^{k+1} \\
+		 &=& v^{free,k}_{i+1} + (W_{i+1}^k)^{-1} p_{i+1}^{k+1}
 \f}
 
-The free velocity \f$ \dot q_{free}  \f$ correponds to the velocity of the system without any constraints.
+\subsubsection MTSDD_LLTIDS Lagrangian (second order) Linear Systems with Time Invariant coefficients
 
-\subsubsection docMoreauTDRel Time discretization of the relations 
-The Time discretization of the relations is fully implicit and may be written as :
+\b Class: LagrangianLinearTIDS.
+
 \f{eqnarray*}
-      y_{i+1} &=& H^{T} q_{i+1} + b\\
-      \dot y_{i+1} &=& H^{T}\dot q_{i+1} \\
-      R_{i+1} &=& H \lambda_{i+1}
+M dv + Cv^+(t) + K q(t) &=& F_{ext}(t,z) + p \\
+ q(t_0) &=& q0 \\
+ \dot q(t_0^-) &=& v_0 
 \f}
 
-\subsubsection docMoreauTDNSlaw Time discretization of the Non Smooth laws
+Proceeding in the same way as in the previous section, with \f$ M \f$ constant and \f$ f_L(t,v^+(t), q(t), z) = F_{ext}(t) - Cv^+(t) - Kq(t) \f$, integration is straightforward:
+
+\f{eqnarray*}
+\mathcal R(v_{i+1}, q_{i+1}) &=& M(v_{i+1}-v_{i}) - h\theta\left[ F_{ext}(t_{i+1}) - Cv_{i+1} - K q_{i+1}\right] - h(1-\theta)\left[ F_{ext}(t_{i}) - Cv_{i} - K q_{i}\right]  - p_{i+1} = 0  
+\f}
+Using the displacement integration through the velocity,
+\f{eqnarray*}
+  q_{i+1} = q_{i} +  h\left[\theta v_{i+1}+(1-\theta) v_{i}  \right]\\
+\f}
+we get:
+\f{eqnarray*}
+W(v_{i+1}-v_{i}) &=& (- hC - h^2\theta  K )v_{i} - h K q_{i} +  h\left[\theta  F_{ext}(t_{i+1})+(1-\theta)  F_{ext}(t_{i})  \right] + p_{i+1} 
+\f}
+with \f$ W\f$ a constant matrix:
+\f[
+W = \left[M + h\theta C + h^2 \theta^2 K \right]
+\f]
+and if \f$ W \f$ is invertible,
+\f{eqnarray*}
+v_{i+1} &=& v_{i} + W^{-1}\left[(- hC - h^2\theta  K )v_{i} - h K q_{i}+  h\theta  F_{ext}(t_{i+1})+h(1-\theta)  F_{ext}(t_{i}) \right] + W^{-1} p_{i+1} \\
+	    &=& v^{free}_i + W^{-1} p_{i+1} 
+\f}
+
+The free velocity \f$ v^{free}  \f$ correponds to the velocity of the system without any constraints.
+
+\subsection MTS_L_RelationDiscretisation Time discretization of the relations.
+
+- \ref MTS_L_RD_S
+- \ref MTS_L_RD_R
+- \ref MTS_L_RD_C
+- \ref MTS_L_RD_L
+
+\subsubsection MTS_L_RD_S Lagrangian Scleronomous Relations
+
+\b Class: LagrangianScleronomousR.
+
+\f{eqnarray*}
+y &=& h(Q,Z) \\
+\dot y &=& G_0(Q,Z)V \\
+P &=& G_0^t(Q,Z)\lambda  
+\f}
+with
+\f{eqnarray*}
+G_0(Q) &=& \nabla_Qh(Q) \\
+\f}
+From now on, to lighten the notations, the parameter \f$ Z \f$ will omitted. \n
+
+Considering the Newton process introduced above for Lagrangian non linear systems, the constraints write:
+\f{eqnarray*}
+\dot y_{i+1}^{k+1} = G_0(Q_{i+1}^{k+1}))V_{i+1}^{k+1} \\
+P_{i+1}^{k+1} = G_0^t(Q_{i+1}^{k+1}))\lambda_{i+1}^{k+1}
+\f}
+
+To evaluate \f$ G_0 \f$ we still use the prediction \f$Q^*\f$ defined in the previous section:
+\f[ Q^*( V_{i+1}^{k+1}) = Q_i + h\gamma \left[ (1-\theta) V_i + \theta  V_{i+1}^{k+1} \right] \f]
+
+Then we get:
+\f{eqnarray*}
+\dot y_{i+1}^{k+1} = G_0(Q^*(V_{i+1}^{k+1}))V_{i+1}^{k+1} \\
+\\
+P_{i+1}^{k+1} = G_0^t(Q^*(V_{i+1}^{k+1}))\lambda_{i+1}^{k+1} 
+\f}
+These constraints are linearized around the point \f$ V_{i+1}^{k}\f$ and we neglect the second order terms in the computation of the jacobians. \n
+It leads to: 
+\f{eqnarray*}
+\dot y_{i+1}^{k+1} = G_0(Q^*(V_{i+1}^k))V_{i+1}^{k+1} \\
+\\
+P_{i+1}^{k+1} = G_0^t(Q^*(V_{i+1}^k))\lambda_{i+1}^{k+1} 
+\f}
+
+As for the evaluation of the mass, the prediction of the position, \f$ Q^* \f$ can be evaluated at the first iteration of the Newton process,
+\f[
+Q^*(V_{i+1}^0) =  Q_i + h\gamma V_i
+\f].
+
+\subsubsection MTS_L_RD_R Lagrangian Rheonomous Relations
+
+\b Class: LagrangianRheonomousR.
+
+\f{eqnarray*}
+y &=& h(Q,t) \\
+\dot y &=& G_0(Q,t)V + G_1(Q,t) \\
+P &=& G_0^t(Q,t)\lambda  
+\f}
+with
+\f{eqnarray*}
+G_0(Q,t) &=& \nabla_Qh(Q,t) \\
+G_1(Q,t) &=& \frac{\partial{h(Q,t)}}{\partial{t}} \\
+\f}
+
+As for scleronomous relations, we get:
+\f{eqnarray*}
+\dot y_{i+1}^{k+1} &=& G_0(Q^*(V_{i+1}^k),t_{i+1})V_{i+1}^{k+1} +  G_1(Q^*(V_{i+1}^k, t_{i+1})) \\
+\\
+P_{i+1}^{k+1} &=& G_0^t(Q^*(V_{i+1}^k),t_{i+1})\lambda_{i+1}^{k+1} 
+\f}
+
+\subsubsection MTS_L_RD_C Lagrangian Compliant Relations
+
+\b Class: LagrangianCompliantR.
+
+\f{eqnarray*}
+y &=& h(Q,\lambda(t)) \\
+\dot y &=& G_0(Q,\lambda(t))V + G_1(Q,\lambda(t))\dot\lambda \\
+P &=& G_0^t(Q,\lambda(t))\lambda
+\f}
+with
+\f{eqnarray*}
+G_0(Q,\lambda(t)) &=& \nabla_Qh(Q,\lambda(t)) \\
+G_1(Q,\lambda(t)) &=& \nabla_\lambda h(Q,\lambda(t)) \\
+\f}
+
+Following the same process as in the paragraph above, it comes: 
+\f{eqnarray*}
+\dot y_{i+1}^{k+1} &=& G_0(Q^*(V_{i+1}^k),\lambda_{i+1}^k)V_{i+1}^{k+1} +  G_1(Q^*(V_{i+1}^k, \lambda_{i+1}^k))\lambda_{i+1}^{k+1} \\
+\\
+P_{i+1}^{k+1} &=& G_0^t(Q^*(V_{i+1}^k),\lambda_{i+1}^k)\lambda_{i+1}^{k+1} 
+\f}
+
+\subsubsection MTS_L_RD_L Lagrangian Linear Relations
+
+\b Class: LagrangianLinearR.
+
+\f{eqnarray*}
+y &=& HQ + D\lambda + FZ + b \\
+\dot y &=& HV + D\lambda \\
+P &=& H^t\lambda  
+\f}
+
+The discretisation is straightforward:
+\f{eqnarray*}
+\dot y_{i+1} &=& HV_{i+1} + D\lambda_{i+1}
+\\
+P_{i+1} &=& H^t\lambda_{i+1}
+\f}
+
+\subsection MTS_L_NSLaw Time discretization of the Non Smooth laws
 
 A natural way of discretizing the unilateral constraint  leads to the following implicit discretization :
 \f{eqnarray*}
@@ -203,9 +511,189 @@ and we apply the constraints directly on this velocity :
     If \ y^{p} \leq 0, \ then \ 0 \leq \dot y^{e}_{i+1} \perp  \lambda_{i+1}  \geq 0
 \f}
 
-\subsubsection docMoreauTDSumup Summary of the time discretized equations 
+\section MTS_D_Summary Summary of the time discretized equations 
+
+- \b First \b Order \b Non \b Linear \b Systems:
 \f{eqnarray*}
-  \dot q_{i+1} &=& \dot q_{free}  + h W R_{i+1} \\
+x_{i+1}^{k+1} &=& x^{free,k}_{i+1} + h(W_{i+1}^k)^{-1}r_{i+1}^{k+1} \\
+W_{i+1}^k &=& M - h \theta\cdot\nabla_{x}f(x_{i+1}^k,t_{i+1}) \\
+x^{free,k}_{i+1}  &=& x_{i+1}^k - (W_{i+1}^k)^{-1}\mathcal R^{free}(x_{i+1}^{k}) \\
+\mathcal R^{free}(x_{i+1}^{k}) &=& M(x_{i+1}^k-x_i) - h \theta f(x_{i+1}^k,t_{i+1}) - h (1-\theta) f(x_{i},t_i)
+\f}
+
+- \b First \b Order \b Linear \b Systems:
+\f{eqnarray*}
+x_{i+1} &=& x^{free}_{i+1}  +  hW_{i+1}^{-1}r_{i+1} \\
+W_{i+1} &=& (M - h\theta A_{i+1}) \\
+x^{free}_{i+1} &=& W_{i+1}^{-1}\left[(M + h (1-\theta)A_{i})\cdot x_i + h\theta(b_{i+1}-b_i) + hb_i\right]
+\f}
+
+- <b> First Order Linear Systems with time-invariant coefficients: </b>
+\f{eqnarray*}
+ x_{i+1} &=& x^{free}_{i}  +  hW^{-1}r_{i+1} \\
+W &=& (M - h\theta A) \\
+x^{free}_i &=&  x_i + h W^{-1}(A x_i + b)
+\f}
+
+- <b> First Order Non Linear Relations </b>
+\f{eqnarray*}
+y_{i+1}^{k+1} &=& y_{i+1}^k - H_0(S_{i+1}^k)X_{i+1}^{k} - H_1(S_{i+1}^k)\lambda_{i+1}^{k} + H_0(S_{i+1}^k)X_{i+1}^{k+1} + H_1(S_{i+1}^k)\lambda_{i+1}^{k+1}  \\
+\\
+R_{i+1}^{k+1} &=& R_{i+1}^k - G_0(S_{i+1}^k)X_{i+1}^{k} - G_1(S_{i+1}^k)\lambda_{i+1}^{k} + G_0(S_{i+1}^k)X_{i+1}^{k+1} + G_1(S_{i+1}^k)\lambda_{i+1}^{k+1} \\
+\\
+S_{i+1}^k \ for \ (X_{i+1}^{k},t_{i+1},\lambda_{i+1}^{k}) \\
+\\
+ H_0(X,t,\lambda)=\nabla_X h(X,t,\lambda)&, &  H_1(X,t,\lambda)=\nabla_{\lambda} h(X,t,\lambda) \\
+\\
+ G_0(X,t,\lambda)=\nabla_X g(X,t,\lambda)&, &  G_1(X,t,\lambda)=\nabla_{\lambda} g(X,t,\lambda) 
+\f}
+- <b> First Order Linear Relations </b>
+\f{eqnarray*}
+y_{i+1} &=& C(t_{i+1})X_{i+1} + D(t_{i+1})\lambda_{i+1} + e(t_{i+1}) + F(t_{i+1})Z \\	
+R_{i+1} &=& B(t_{i+1})\lambda_{i+1}
+\f}
+
+- <b> Lagrangian Non Linear Case </b>
+\f{eqnarray*}
+v_{i+1}^{k+1} &=& v^{free,k}_{i+1} + (W_{i+1}^k)^{-1} p_{i+1}^{k+1} \\
+q_{i+1}^{k+1} &=& q_i + h\theta v_{i+1}^{k+1} + h(1 - \theta)v_{i} \\
+v^{free,k}_{i+1} &=& v_{i+1}^k - (W_{i+1}^k)^{-1} \mathcal R^{free}(v_{i+1}^k) \\
+\mathcal R^{free}(v_{i+1}^k) &=& M(q*)(v_{i+1}^k-v_{i}) - h\theta f_L(t_{i+1},v_{i+1}^k,q_{i+1}^k) - h(1-\theta) f_L(t_i,v_i,q_i) \\
+W_{i+1}^k &=& M(q*) + h\theta C_t(t_{i+1},v_{i+1}^k,q_{i+1}^k) + h^2\theta^2 K_t(t_{i+1},v_{i+1}^k,q_{i+1}^k) \\
+q^* &=& q_i + h\gamma v_i \\
+C_t(t,v,q)&=&-\left[\frac{\partial{f_L(t,v,q)}}{\partial{v}}\right] \\
+K_t(t,v,q)&=&-\left[\frac{\partial{f_L(t,v,q)}}{\partial{q}}\right]
+\f}
+
+- <b> Lagrangian Linear and Time--Invariant Coefficients Case </b>
+\f{eqnarray*}
+v_{i+1} &=& v^{free}_i + W^{-1} p_{i+1} \\
+q_{i+1} &=& q_{i} +  h\left[\theta v_{i+1}+(1-\theta) v_{i}  \right]\\
+v^{free}_i &=& v_{i} + W^{-1}\left[(- hC - h^2\theta  K )v_{i} - h K q_{i}+  h\theta  F_{ext}(t_{i+1})+h(1-\theta)  F_{ext}(t_{i}) \right] \\
+W &=&   \left[M + h\theta C + h^2 \theta^2 K \right]
+\f}
+
+- <b> Lagrangian Scleronomous Relations </b>
+\f{eqnarray*}
+\dot y_{i+1}^{k+1} = G_0(Q^*(V_{i+1}^k))V_{i+1}^{k+1} \\
+P_{i+1}^{k+1} = G_0^t(Q^*(V_{i+1}^k))\lambda_{i+1}^{k+1} 
+\f}
+- <b> Lagrangian Rheonomous Relations </b>
+\f{eqnarray*}
+\dot y_{i+1}^{k+1} &=& G_0(Q^*(V_{i+1}^k),t_{i+1})V_{i+1}^{k+1} +  G_1(Q^*(V_{i+1}^k, t_{i+1})) \\
+P_{i+1}^{k+1} &=& G_0^t(Q^*(V_{i+1}^k),t_{i+1})\lambda_{i+1}^{k+1} 
+\f}
+- <b> Lagrangian Compliant Relations </b>
+\f{eqnarray*}
+\dot y_{i+1}^{k+1} &=& G_0(Q^*(V_{i+1}^k),\lambda_{i+1}^k)V_{i+1}^{k+1} +  G_1(Q^*(V_{i+1}^k, \lambda_{i+1}^k))\lambda_{i+1}^{k+1} \\
+P_{i+1}^{k+1} &=& G_0^t(Q^*(V_{i+1}^k),\lambda_{i+1}^k)\lambda_{i+1}^{k+1} 
+\f}
+- <b> Lagrangian Linear Relations </b>
+\f{eqnarray*}
+\dot y_{i+1} &=& HV_{i+1} + D\lambda_{i+1} \\
+P_{i+1} &=& H^t\lambda_{i+1}
+\f}
+
+\section LCPWriting The LCP formalization (DRAFT)
+
+Let us now consider the whole NSDS, indeed all the dynamical systems and all the interactions. The objective is to write a one-step non-smooth problem using the discretized equations above. Let us introduce the following variables and definitions: \n
+
+\f$ \mathcal{I}_a = \{ \alpha / I_{\alpha} \ is \ active \} \f$, \f$ I_{\alpha} \f$ being the interaction number \f$ \alpha \f$. The index \f$ a \f$ and the sense of "active" depends on the type problem. \n
+At the time, for first order systems in Siconos, all interactions are active and \f$ \mathcal{I}_a = \mathcal{I}_0 \f$ represents all the declared interactions. \n
+For second order system, considering the newton-impact law for example, \f$ \mathcal{I}_a = \mathcal{I}_1 =\{\alpha / y^p_{\alpha} < 0 \} \f$. 
+
+Let \f$ \mathcal{DS} \f$ denotes the set of all dynamical systems declared in the NSDS and \f$ \mathcal{DS}^{\alpha} \subset \mathcal{DS} \f$ the set of systems involved in the interaction \f$ I_{\alpha} \f$. Finally, \f$ \mathcal{DS}^{\alpha,\beta} \f$ represents the set of systems involved in \f$I_{\alpha}\f$ and \f$ I_{\beta} \f$.
+
+\subsection LCPW_FONL First Order fully non-linear case
+
+Let us now consider the first order linear relation case, written for \f$I_{\alpha}\f$:
+\f{eqnarray*}
+y^{\alpha} &=& C^{\alpha}X^{\alpha} + ... \\
+R^{\alpha} &=& D^{\alpha}\lambda^{\alpha}
+\f}
+If \f$ \mathcal{DS}^{\alpha} \f$ holds systems number \f$d,e,\ldots\f$, then:
+\f{eqnarray*}
+X^{\alpha}=\left[\begin{array}{c}
+x_d \\
+x_e \\
+\ldots
+\end{array}\right]&,&
+R^{\alpha}=
+\left[\begin{array}{c}
+r_d^{\alpha} \\
+r_e^{\alpha} \\
+\ldots
+\end{array}\right],
+with r_d = \sum_{\alpha} r_d^{\alpha}
+\f}
+Considering the discretized constraints and dynamics, one can easily reduce the system to the unknown \f$(y,\lambda)\f$. Using the complementarity relation from the non-smooth law, this leads to a LCP formulation. \n
+Before going more into details, let us introduce some new .
+
+
+
+For example, considering linear system and linear relations, one gets:
+\f{eqnarray*}
+Y_{i+1} = q_{LCP} + M_{LCP}\Lambda_{i+1}
+\f}
+\f$Y_{i+1} (resp \Lambda_{i+1})\f$ is a collection of all the \f$ y_{i+1} \f$ vectors for all interactions in the non-smooth system. 
+
+and block \f$ \alpha \f$ (ie corresponding to interaction \f$ \alpha \f$) of \f$ q_{LCP} \f$ is:
+\f{eqnarray*}
+q_{LCP}^{\alpha} = \left[CX^{free}_{i+1} + e + FZ \right]_{\alpha}
+\f}
+
+\f$ M_{LCP} \f$ is a block-matrix, with as diagonal blocks:
+\f{eqnarray*}
+M_{LCP}^{\alpha,\alpha} = \left[ hC\hat W B + D \right]_{\alpha}
+\f}
+
+
+\subsection LCPW_LNL Lagrangian fully non-linear case
+
+
+The relations for a single interaction \f$ I_{\alpha}\f$, writes: 
+\f{eqnarray*}
+\dot y_{i+1}^{k+1,\alpha} = G_0^{\alpha}(Q^*(V_{i+1}^k))V_{i+1}^{k+1,\alpha} \\
+p_{i+1}^{k+1,\alpha} = {G_0^{\alpha}}^t(Q^*(V_{i+1}^k))\lambda_{i+1}^{k+1,\alpha} 
+\f}
+
+with, for a single dynamical system, \f$ d \f$: 
+\f{eqnarray*}
+v_{i+1}^{k+1,d} &=& v^{free,k,d}_{i+1} + (W_{i+1}^{k,d})^{-1} p_{i+1}^{k+1,d} \\
+p_{i+1}^{k+1,d} &=& \sum_{\beta \in \mathcal{I}_d} p_{i+1}^{k+1,\beta}
+\f}
+
+Then if we consider the whole NSDS, we get:
+
+\f{eqnarray*}
+\dot Y_{i+1}^{k+1} = M_{lcp}\Lambda_{i+1}^{k+1} + q_{lcp}
+\f}
+\f$ \dot Y_{i+1}^{k+1} \f$ (resp. \f$\Lambda_{i+1}^{k+1}\f$) represents the vector that collects all \f$ \dot y_{i+1}^{k+1,\alpha} \f$ (resp. \f$\lambda_{i+1}^{k+1,\alpha} \f$) for all interactions in the NSDS. \n
+\f$ q_{lcp} \f$ is a vector where each block \f$ \alpha \f$ is given by:
+
+\f{eqnarray*}
+q_{lcp}^{\alpha} = G_0^{\alpha}(\ldots)V^{free,k,alpha}_{i+1} + e\cdot \dot Y_i
+\f}
+and \f$ M_{lcp} \f$ is a block matrix with for diagonal blocks:
+\f{eqnarray*}
+M_{lcp}^{\alpha,\alpha} = G_0^{\alpha}(\ldots)(W_{i+1}^{k,\alpha})^{-1}{G_0^{\alpha}}^t(\ldots) 
+\f}
+and for extra-diagonal blocks:
+
+\f{eqnarray*}
+M_{lcp}^{\alpha,\beta} = G_0^{\alpha}(\ldots)(W_{i+1}^{k,\alpha})^{-1}{G_0^{\beta}}^t(\ldots) 
+\f}
+
+
+
+\subsection LCPW_LL Lagrangian fully linear case
+
+
+
+
+
+\f{eqnarray*}
+  \dot q_{i+1} &=& \dot q^{free}  + h W R_{i+1} \\
   q_{i+1} &=& q_{i} +  h\left[\theta  \dot q_{i+1}+(1-\theta)  \dot q_{i}  \right] \\
   \dot y_{i+1} &=& H^{T}\dot q_{i+1} \\
   R_{i+1} &=& H \lambda_{i+1}\\
@@ -215,12 +703,16 @@ and we apply the constraints directly on this velocity :
 
 This set of equations can be reduced to a "condensed" system in terms of \f$ \dot y^{e}_{i+1} \f$ and \f$ {\lambda_{i+1}} \f$ :
 \f{eqnarray*}
-  \dot y^{e}_{i+1} &=&  H^{T} \dot q_{free} + h H^{T} W H \lambda_{i+1}  + e \dot y_{i}\\
+  \dot y^{e}_{i+1} &=&  H^{T} \dot q^{free} + h H^{T} W H \lambda_{i+1}  + e \dot y_{i}\\
   y^{p} &=& y_{i} + \frac{h}{2}  \dot y_i\\
   If &y^{p}& \leq 0, \ then \ 0 \leq \dot y^{e}_{i+1} \perp  \lambda_{i+1}  \geq 0
 \f}
 
-\subsection docSimuTSProcess The Simulation process
+\htmlonly
+<div class=horizontalline>  </div>
+\endhtmlonly
+
+\section MTS_SimuProcess The Simulation process
 
 As for Event-Driven, we introduce level index sets, with level = 0 for first order systems and level=1 for second order systems (this is related to the relative degrees but we won't get into details about that here). \n
 

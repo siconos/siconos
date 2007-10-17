@@ -39,7 +39,7 @@ void NonSmoothEvent::process(Simulation* simulation)
   if (simulation->getType() != "EventDriven")
     RuntimeException::selfThrow("NonSmoothEvent::process failed; Simulation is not of EventDriven type.");
 
-  if (!(simulation->getOneStepNSProblems().empty()))
+  if (!(simulation->getOneStepNSProblems()->empty()))
   {
     EventDriven * eventDriven = static_cast<EventDriven*>(simulation);
 
@@ -66,17 +66,17 @@ void NonSmoothEvent::process(Simulation* simulation)
 
       // solve the LCP-impact => y[1],lambda[1]
       eventDriven->computeOneStepNSProblem("impact"); // solveLCPImpact();
-
-      // compute p[1], post-impact velocity, y[1] and indexSet[2]
-      eventDriven->update(1);
-      // Update the corresponding index set ...
-      eventDriven->updateIndexSets();
-
-      // check that IndexSet[1]-IndexSet[2] is now empty
-      //    if( !((*indexSet1-*indexSet2).isEmpty()))
-      //      RuntimeException::selfThrow("NonSmoothEvent::process, error after impact-LCP solving.");
     }
 
+
+    // compute p[1], post-impact velocity, y[1] and indexSet[2]
+    simulation->update();
+    // Update the corresponding index set ...
+    eventDriven->updateIndexSets();
+
+    // check that IndexSet[1]-IndexSet[2] is now empty
+    //    if( !((*indexSet1-*indexSet2).isEmpty()))
+    //      RuntimeException::selfThrow("NonSmoothEvent::process, error after impact-LCP solving.");
     // ---> solve acceleration LCP if IndexSet[2] is not empty
     if (!((indexSet2)->isEmpty()))
     {

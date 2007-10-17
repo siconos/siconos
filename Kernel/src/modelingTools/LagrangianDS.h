@@ -931,7 +931,7 @@ public:
   /** Default function to compute fL
    *  \param double, the current time
    */
-  virtual void computeFL(double time);
+  virtual void computeFL(double);
 
   /** function to compute fL with some specific values for q and velocity (ie not those of the current state).
    *  \param double time : the current time
@@ -959,7 +959,7 @@ public:
   /** initialize the SiconosMemory objects with a positive size.
    *  \param the size of the SiconosMemory. must be >= 0
    */
-  void initMemory(unsigned int steps);
+  void initMemory(unsigned int);
 
   /** push the current values of x, q and r in the stored previous values
    *  xMemory, qMemory, rMemory,
@@ -973,7 +973,7 @@ public:
    */
   static LagrangianDS* convert(DynamicalSystem* ds);
 
-  /** compute \f$\frac{|\dot q_{i+1} - \dot qi|}{|\dot q_i|}\f$ where \f$\dot q_{i+1}\f$ represents the present state and \f$\dot q_i\f$ the previous one
+  /** To compute \f$\frac{|q_{i+1} - qi|}{|q_i|}\f$ where \f$ q_{i+1}\f$ represents the present state and \f$ q_i\f$ the previous one
    * \return a double
    */
   virtual double dsConvergenceIndicator();

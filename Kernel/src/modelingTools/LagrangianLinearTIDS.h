@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 /*! \file LagrangianLinearTIDS.h
 
@@ -82,7 +82,7 @@ class LagrangianLinearTIDS : public LagrangianDS
 private:
 
   /** default constructor
-  */
+   */
   LagrangianLinearTIDS();
 
   /** specific matrix for a LagrangianLinearTIDS */
@@ -94,10 +94,10 @@ private:
 public:
 
   /** constructor from an xml file
-  *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
-  *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
-  *  \exception RuntimeException
-  */
+   *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
+   *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
+   *  \exception RuntimeException
+   */
   LagrangianLinearTIDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* = NULL);
 
   /** constructor from a set of data
@@ -124,8 +124,8 @@ public:
   ~LagrangianLinearTIDS();
 
   /** check that the system is complete (ie all required data are well set)
-  * \return a bool
-  */
+   * \return a bool
+   */
   bool checkDynamicalSystem();
 
   /** Initialization function for the rhs and its jacobian.
@@ -134,80 +134,80 @@ public:
   void initRhs(double) ;
 
   /** dynamical system initialization function: mainly set memory and compute value for initial state values.
-  *  \param string: simulation type
-  *  \param time of initialisation, default value = 0
-  *  \param the size of the memory, default size = 1.
-  */
+   *  \param string: simulation type
+   *  \param time of initialisation, default value = 0
+   *  \param the size of the memory, default size = 1.
+   */
   void initialize(const std::string&, double = 0, unsigned int = 1) ;
 
   // --- GETTERS AND SETTERS ---
 
   // -- K --
   /** get the value of K
-  *  \return SimpleMatrix
-  */
+   *  \return SimpleMatrix
+   */
   inline const SimpleMatrix getK() const
   {
     return *K;
   }
 
   /** get K
-  *  \return pointer on a SiconosMatrix
-  */
+   *  \return pointer on a SiconosMatrix
+   */
   inline SiconosMatrix* getKPtr() const
   {
     return K;
   }
 
   /** set the value of K to newValue
-  *  \param SiconosMatrix newValue
-  */
+   *  \param SiconosMatrix newValue
+   */
   void setK(const SiconosMatrix&);
 
   /** set K to pointer newPtr
-  *  \param SiconosMatrix * newPtr
-  */
+   *  \param SiconosMatrix * newPtr
+   */
   void setKPtr(SiconosMatrix *newPtr);
 
   // -- C --
   /** get the value of C
-  *  \return SimpleMatrix
-  */
+   *  \return SimpleMatrix
+   */
   inline const SimpleMatrix getC() const
   {
     return *C;
   }
 
   /** get C
-  *  \return pointer on a SiconosMatrix
-  */
+   *  \return pointer on a SiconosMatrix
+   */
   inline SiconosMatrix* getCPtr() const
   {
     return C;
   }
 
   /** set the value of C to newValue
-  *  \param SiconosMatrix newValue
-  */
+   *  \param SiconosMatrix newValue
+   */
   void setC(const SiconosMatrix&);
 
   /** set C to pointer newPtr
-  *  \param SiconosMatrix * newPtr
-  */
+   *  \param SiconosMatrix * newPtr
+   */
   void setCPtr(SiconosMatrix *newPtr) ;
 
   /** Default function to the right-hand side term
-  *  \param double time : current time
-  *  \param bool isDSup : flag to avoid recomputation of operators
-  *  \exception RuntimeException
-  */
+   *  \param double time : current time
+   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \exception RuntimeException
+   */
   void computeRhs(double, bool  = false);
 
   /** Default function to jacobian of the right-hand side term according to x
-  *  \param double time : current time
-  *  \param bool isDSup : flag to avoid recomputation of operators
-  *  \exception RuntimeException
-  */
+   *  \param double time : current time
+   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \exception RuntimeException
+   */
   void computeJacobianXRhs(double, bool  = false);
 
   // --- Miscellaneous ---
@@ -223,8 +223,8 @@ public:
   static LagrangianLinearTIDS* convert(DynamicalSystem* ds);
 
   /** overload LagrangianDS corresponding function
-  * \return a double, always zero.
-  */
+   * \return a double, always zero.
+   */
   double dsConvergenceIndicator()
   {
     return 0.0;

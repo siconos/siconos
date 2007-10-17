@@ -39,6 +39,21 @@ class SimpleVector;
  */
 class QP : public OneStepNSProblem
 {
+private:
+
+  /** contains the Q matrix of a QP problem */
+  SiconosMatrix* Q;
+
+  /** contains the p vector of a QP problem */
+  SimpleVector* p;
+
+  //  /** contains the data of the QP, according to siconos/numerics */
+  //  QPStructure QPMethod;
+
+  /** Flags to check wheter pointers were allocated in class constructors or not */
+  bool isQAllocatedIn;
+  bool isPAllocatedIn;
+
 public:
 
   /** xml constructor
@@ -154,23 +169,6 @@ public:
    */
   static QP* convert(OneStepNSProblem* osnsp);
 
-private:
-  /** default constructor
-   */
-  QP();
-
-  /** contains the Q matrix of a QP problem */
-  SiconosMatrix* Q;
-
-  /** contains the p vector of a QP problem */
-  SimpleVector* p;
-
-  //  /** contains the data of the QP, according to siconos/numerics */
-  //  QPStructure QPMethod;
-
-  /** Flags to check wheter pointers were allocated in class constructors or not */
-  bool isQAllocatedIn;
-  bool isPAllocatedIn;
 };
 
 #endif // QP_H

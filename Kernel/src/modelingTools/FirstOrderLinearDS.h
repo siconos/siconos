@@ -118,12 +118,11 @@ public:
 
   /** constructor from a set of data
    *  \param int : reference number of this DynamicalSystem
-   *  \param int : dimension of this DynamicalSystem
    *  \param SiconosVector : the initial state of this DynamicalSystem
    *  \param string: plugin for A (optional)
    *  \param string: plugin for b (optional)
    */
-  FirstOrderLinearDS(int, unsigned int, const SiconosVector&, const std::string& = "DefaultPlugin:computeA",
+  FirstOrderLinearDS(int, const SiconosVector&, const std::string& = "DefaultPlugin:computeA",
                      const std::string& = "DefaultPlugin:computeB");
 
   /** constructor from a set of data
@@ -218,22 +217,22 @@ public:
    *  \param string : the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeAFunction(const std::string , const std::string);
+  void setComputeAFunction(const std::string& , const std::string&);
 
   /** set a specified function to compute the vector b
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeBFunction(const std::string , const std::string);
+  void setComputeBFunction(const std::string& , const std::string&);
 
   /** default function to compute matrix A => same action as computeJacobianXF
    */
-  void computeA(const double);
+  void computeA(double);
 
   /** default function to compute vector b
    */
-  void computeB(const double);
+  void computeB(double);
 
   /** set the value of f to newValue
    *  \param SiconosVector newValue
@@ -308,13 +307,13 @@ public:
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
    */
-  virtual void computeRhs(const double, const bool  = false);
+  virtual void computeRhs(double, bool  = false);
 
   /** Default function to jacobian of the right-hand side term according to x
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
    */
-  virtual void computeJacobianXRhs(const double, const bool  = false);
+  virtual void computeJacobianXRhs(double, bool  = false);
 
   // --- xml related functions ---
 
@@ -325,6 +324,14 @@ public:
   /** data display on screen
    */
   virtual void display() const;
+
+  /** overload LagrangianDS corresponding function
+   * \return a double, always zero.
+   */
+  double dsConvergenceIndicator()
+  {
+    return 0.0;
+  }
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param DynamicalSystem* : the system which must be converted

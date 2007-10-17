@@ -93,6 +93,7 @@
 #include "Interaction.h"
 #include "Relation.h"
 #include "FirstOrderR.h"
+#include "FirstOrderType1R.h"
 #include "FirstOrderLinearR.h"
 #include "FirstOrderLinearTIR.h"
 #include "LagrangianR.h"
@@ -233,6 +234,7 @@ $1 = string(PyString_AsString($input));
 
 %include "Relation.h"
 %include "FirstOrderR.h"
+%include "FirstOrderType1R.h"
 %include "FirstOrderLinearR.h"
 %include "FirstOrderLinearTIR.h"
 %include "LagrangianR.h"

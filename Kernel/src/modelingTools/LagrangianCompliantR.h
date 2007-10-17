@@ -33,23 +33,23 @@ class DynamicalSystem;
  *  \date Apr 27, 2004
  *
  * \f[
- * Y[0] = y = h(q,\lambda[0],z)
+ * Y[0] = y = h(q,\lambda(t),z)
  * \f]
  *
  * \f[
- * Y[1] = \dot y = G0(q,\lambda[0],z)\dot q + G1((q,\lambda[0],z)\lambda[1]
+ * Y[1] = \dot y = G0(q,\lambda(t),z)\dot q + G1((q,\lambda(t),z)\dot\lambda(t)
  * \f]
  *
  * \f[
- * p = G0^t(q,\lambda[0],z)\lambda[0]
+ * p = G0^t(q,\lambda(t),z)\lambda(t)
  * \f]
  *
  * with
  * \f[
- * G0(q,\lambda[0],z) = \nabla_q h(q,\lambda[0],z)
+ * G0(q,\lambda(t),z) = \nabla_q h(q,\lambda(t),z)
  * \f]
  * \f[
- * G1(q,\lambda[0],z) = \nabla_{\lambda[0]}h(q,\lambda[0],z)
+ * G1(q,\lambda(t),z) = \nabla_{\lambda}h(q,\lambda(t),z)
  * \f]
  *
  * h, G0 and G1 are connected to user-defined functions.

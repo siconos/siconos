@@ -107,14 +107,14 @@ public:
    *  \param bool isDSup : flag to avoid recomputation of operators
    *  \exception RuntimeException
    */
-  void computeRhs(const double, const bool  = false);
+  void computeRhs(double, bool  = false);
 
   /** Default function to jacobian of the right-hand side term according to x
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
    *  \exception RuntimeException
    */
-  void computeJacobianXRhs(const double, const bool  = false);
+  void computeJacobianXRhs(double, bool  = false);
 
   /** data display on screen
    */

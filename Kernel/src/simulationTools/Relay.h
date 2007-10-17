@@ -35,23 +35,27 @@
  */
 class Relay : public OneStepNSProblem
 {
-public:
+private:
+
   /** default constructor
-  */
+   */
   Relay();
 
+public:
+
   /** xml constructor
-  *  \param OneStepNSProblemXML* : the XML linked-object
-  *  \param Simulation *: the simulation that owns the problem (optional)
-  */
+   *  \param OneStepNSProblemXML* : the XML linked-object
+   *  \param Simulation *: the simulation that owns the problem (optional)
+   */
   Relay(OneStepNSProblemXML*, Simulation * = NULL);
 
+  /** Destructor */
   ~Relay();
 
   /** make the computation so solve the NS problem
   *  param double : current time
   */
-  void compute(const double&);
+  void compute(double);
 
   /** copy the data of the OneStepNSProblem to the XML tree
   *  \exception RuntimeException

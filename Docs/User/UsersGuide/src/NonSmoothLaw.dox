@@ -1,4 +1,4 @@
-/*! \page docNSL Non Smooth Laws
+/*! \page nsLawInSiconos Non Smooth Laws
 \b What \b is \b a \b Non-Smooth \b Law? \n
 
 A non-smooth law is an object used to define the behavior of the systems involved in an Interaction, when a non-smooth event occurs. \n

@@ -20,6 +20,7 @@
 #include "InteractionXML.h"
 #include "NonSmoothLawXML.h"
 #include "RelationXML.h"
+#include "FirstOrderType1R.h"
 #include "FirstOrderLinearTIR.h"
 #include "LagrangianLinearR.h"
 #include "LagrangianScleronomousR.h"
@@ -101,8 +102,11 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
 
   // First Order Non Linear Relation
   if (relationType == "FirstOrderRelation")
-    relation = new FirstOrderR(interactionxml->getRelationXML());
-
+  {
+    string relationSubType = interactionxml->getRelationXML()->getSubType();
+    if (relationSubType == "Type1")
+      relation = new FirstOrderType1R(interactionxml->getRelationXML());
+  }
   // Linear relation
   else if (relationType == "FirstOrderLinearRelation")
     relation = new FirstOrderLinearR(interactionxml->getRelationXML());
@@ -579,7 +583,6 @@ void Interaction::swapInMemory()
       *(yOld[i]->getVectorPtr(j)) = *(y[i]->getVectorPtr(j)) ;
       *(lambdaOld[i]->getVectorPtr(j)) = *(lambda[i]->getVectorPtr(j));
     }
-    lambda[i]->zero();
   }
 }
 
