@@ -225,43 +225,60 @@ void LCP::initialize()
   // get topology
   Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
+  // The maximum size of the LCP, ie the number of possible scalar constraints declared in the topology.
+  unsigned int maxSize = topology->getNumberOfConstraints();
+
+  // Memory allocation for w, M, z and q
+  if (w == NULL)
+  {
+    w = new SimpleVector(maxSize);
+    isWAllocatedIn = true;
+  }
+  else
+  {
+    if (w->size() != maxSize)
+      w->resize(maxSize);
+  }
+  if (z == NULL)
+  {
+    z = new SimpleVector(maxSize);
+    isZAllocatedIn = true;
+  }
+  else
+  {
+    if (z->size() != maxSize)
+      z->resize(maxSize);
+  }
+  if (M == NULL)
+  {
+    M = new SimpleMatrix(maxSize, maxSize);
+    isMAllocatedIn = true;
+  }
+  else
+  {
+    if (M->size(0) != maxSize || M->size(1) != maxSize)
+      M->resize(maxSize, maxSize);
+  }
+  if (q == NULL)
+  {
+    q = new SimpleVector(maxSize);
+    isQAllocatedIn = true;
+  }
+  else
+  {
+    if (q->size() != maxSize)
+      q->resize(maxSize);
+  }
+  w->zero();
+  z->zero();
+
   // if all relative degrees are equal to 0 or 1
   if (topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty())
   {
     // computeSizeOutput and updateBlocks were already done in OneStepNSProblem::initialize
     if (sizeOutput != 0)
-    {
+
       assembleM();
-      // check z and w sizes and reset if necessary
-      if (z == NULL)
-      {
-        z = new SimpleVector(sizeOutput);
-        isZAllocatedIn = true;
-      }
-      else if (z->size() != sizeOutput)
-      {
-        // reset z if it has a wrong size
-        if (isZAllocatedIn) delete z;
-        z = new SimpleVector(sizeOutput);
-        isZAllocatedIn = true;
-      }
-
-      if (w == NULL)
-      {
-        w = new SimpleVector(sizeOutput);
-        isWAllocatedIn = true;
-      }
-      else if (w->size() != sizeOutput)
-      {
-        // reset w if it has a wrong size
-        if (isWAllocatedIn) delete w;
-        w = new SimpleVector(sizeOutput);
-        isWAllocatedIn = true;
-      }
-
-      w->zero();
-      z->zero();
-    }
   }
 
   // If topology is time-dependant, all the above commands are called during preCompute function.
@@ -284,33 +301,15 @@ void LCP::preCompute(const double time)
       updateBlocks();
       assembleM();
       // check z and w sizes and reset if necessary
-      if (z == NULL)
+      if (z->size() != sizeOutput)
       {
-        z = new SimpleVector(sizeOutput);
-        isZAllocatedIn = true;
-        z->zero();
-      }
-      else if (z->size() != sizeOutput)
-      {
-        // reset z if it has a wrong size
-        if (isZAllocatedIn) delete z;
-        z = new SimpleVector(sizeOutput);
-        isZAllocatedIn = true;
+        z->resize(sizeOutput, false);
         z->zero();
       }
 
-      if (w == NULL)
+      if (w->size() != sizeOutput)
       {
-        w = new SimpleVector(sizeOutput);
-        isWAllocatedIn = true;
-        w->zero();
-      }
-      else if (w->size() != sizeOutput)
-      {
-        // reset w if it has a wrong size
-        if (isWAllocatedIn) delete w;
-        w = new SimpleVector(sizeOutput);
-        isWAllocatedIn = true;
+        w->resize(sizeOutput);
         w->zero();
       }
     }
@@ -345,12 +344,10 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
     getOSIMaps(UR1, centralBlocks, Theta);
 
     SiconosMatrix* currentBlock = blocks[UR1][UR2];
-    currentBlock->zero();
-    SiconosMatrix *leftBlock = NULL, *rightBlock = NULL, *extraBlock = NULL;
+    SiconosMatrix *leftBlock = NULL, *rightBlock = NULL;
     unsigned int sizeDS;
     string relationType1, relationType2;
     double h = simulation->getTimeDiscretisationPtr()->getH();
-    bool flagRightBlock = false;
 
     // General form of the block is :   block = a*extraBlock + b * leftBlock * centralBlocks * rightBlock
     // a and b are scalars, centralBlocks a matrix depending on the integrator (and on the DS), the simulation type ...
@@ -358,13 +355,11 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
     relationType1 = UR1->getRelationType();
     relationType2 = UR2->getRelationType();
     // ==== First Order Relations - Specific treatment for diagonal blocks ===
-    if (UR1 == UR2 &&  relationType1 == "FirstOrder")
-    {
-      extraBlock = new SimpleMatrix(nslawSize1, nslawSize1);
-      UR1->getExtraBlock(extraBlock); // pointer link between UR1->extraBlock and extraBlock
-      *currentBlock += *extraBlock;// specific to LinearTIR, get D matrix added only on blocks of the diagonal.
-      delete extraBlock;
-    }
+    if (UR1 == UR2)
+      UR1->getExtraBlock(currentBlock);
+    else
+      currentBlock->zero();
+
 
     // loop over the common DS
     for (itDS = commonDS.begin(); itDS != commonDS.end(); itDS++)
@@ -387,28 +382,35 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
         //      integration of r with theta method removed
         //      *currentBlock += h *Theta[*itDS]* *leftBlock * (*rightBlock); //left = C, right = W.B
         //gemm(h,*leftBlock,*rightBlock,1.0,*currentBlock);
-        *currentBlock += h * prod(*leftBlock, *rightBlock); //left = C, right = W.B
+        *leftBlock *= h;
+        prod(*leftBlock, *rightBlock, *currentBlock, false);
+        //left = C, right = W.B
         delete rightBlock;
       }
       else if (relationType1 == "Lagrangian" || relationType2 == "Lagrangian")
       {
         if (UR1 == UR2)
-          rightBlock = leftBlock ;
+        {
+          SimpleMatrix * work = new SimpleMatrix(*leftBlock);
+          work->trans();
+          centralBlocks[*itDS]->PLUForwardBackwardInPlace(*work);
+          //*currentBlock +=  *leftBlock ** work;
+          prod(*leftBlock, *work, *currentBlock, false);
+          //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftBlock,*work,1.0,*currentBlock);
+          delete work;
+        }
         else
         {
           rightBlock = new SimpleMatrix(nslawSize2, sizeDS);
           UR2->getLeftBlockForDS(*itDS, rightBlock);
           // Warning: we use getLeft for Right block because right = transpose(left) and because of size checking inside the getBlock function,
           // a getRight call will fail.
-          flagRightBlock = true;
+          rightBlock->trans();
+          centralBlocks[*itDS]->PLUForwardBackwardInPlace(*rightBlock);
+          //*currentBlock +=  *leftBlock ** work;
+          prod(*leftBlock, *rightBlock, *currentBlock, false);
+          delete rightBlock;
         }
-        SimpleMatrix * work = new SimpleMatrix(*rightBlock);
-        work->trans();
-        centralBlocks[*itDS]->PLUForwardBackwardInPlace(*work);
-        //*currentBlock +=  *leftBlock ** work;
-        gemm(CblasNoTrans, CblasNoTrans, 1.0, *leftBlock, *work, 1.0, *currentBlock);
-        if (flagRightBlock) delete rightBlock;
-        delete work;
       }
       else RuntimeException::selfThrow("LCP::computeBlock not yet implemented for relation of type " + relationType1);
       delete leftBlock;
@@ -517,20 +519,9 @@ void LCP::assembleM() //
     // full matrix M assembling
     // === Memory allocation, if required ===
     // Mem. is allocate only if M==NULL or if its size has changed.
-    if (M == NULL)
-    {
-      M = new SimpleMatrix(sizeOutput, sizeOutput);
-      isMAllocatedIn = true;
-    }
-    else if (M->size(0) != sizeOutput || M->size(1) != sizeOutput)
-    {
-      // reset M matrix if it has a wrong size
-      if (isMAllocatedIn) delete M;
-      M = new SimpleMatrix(sizeOutput, sizeOutput);
-      isMAllocatedIn = true;
-    }
-    else
-      M->zero();
+    if (M->size(0) != sizeOutput || M->size(1) != sizeOutput)
+      M->resize(sizeOutput, sizeOutput);
+    M->zero();
     // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
 
     for (itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
@@ -555,68 +546,25 @@ void LCP::assembleM() //
 
 void LCP::computeQ(const double time)
 {
-  // === Memory allocation, if required ===
-  if (q == NULL)
-  {
-    q = new SimpleVector(sizeOutput);
-    isQAllocatedIn = true;
-  }
-  else if (q->size() != sizeOutput)
-  {
-    // reset q if it has a wrong size
-    if (isQAllocatedIn) delete q;
-    q = new SimpleVector(sizeOutput);
-    isQAllocatedIn = true;
-  }
-  else
-    q->zero();
+  if (q->size() != sizeOutput)
+    q->resize(sizeOutput);
+  q->zero();
 
   // === Get index set from Simulation ===
   UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
-  SimpleVector * yOut;
-
   // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
 
   unsigned int pos = 0;
-  unsigned int nsLawSize;
   UnitaryRelationsIterator itCurrent, itLinked;
   string simulationType = simulation->getType();
-
-  //   // ==== First Order Systems ====
-  //   if(indexSet->begin()->getRelationType() == "FirstOrder")
-  //     {
-  //       for(itCurrent = indexSet->begin(); itCurrent!=  indexSet->end(); ++itCurrent)
-  //  {
-  //    if(itCurrent->getRelationType=="R")
-  //      {
-  //        yOut = new SimpleVector(nsLawSize);
-  //        nsLawSize = (*itCurrent)->getNonSmoothLawSize();
-
-
-  //      }
-  //  }
-  //     }
-  //   // ==== Second Order Systems ====
-  //   else
-  //     {
-
   for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
   {
     // *itCurrent is a UnitaryRelation*.
 
-    // Compute free output, this depends on the type of non smooth problem, on the relation type and on the non smooth law
-    nsLawSize = (*itCurrent)->getNonSmoothLawSize();
-    yOut = new SimpleVector(nsLawSize);
-
+    // Compute q, this depends on the type of non smooth problem, on the relation type and on the non smooth law
     pos = blocksPositions[*itCurrent];
-    (*itCurrent)->computeEquivalentY(time, levelMin, simulationType, yOut);
-
-    // Copy yOut at the right position in q.
-    q->setBlock(pos, yOut);
-    delete yOut;
+    (*itCurrent)->computeEquivalentY(time, levelMin, simulationType, q, pos);
   }
-  //     }
-
 }
 
 void LCP::compute(const double time)

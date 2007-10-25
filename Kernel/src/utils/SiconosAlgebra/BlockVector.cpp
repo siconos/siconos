@@ -383,11 +383,6 @@ void BlockVector::setVectorPtr(unsigned int pos, SiconosVector* newV)
   (*isBlockAllocatedIn)[pos] = false;
 }
 
-// void BlockVector::getBlock(unsigned int, SiconosVector *) const
-// {
-//   SiconosVectorException::selfThrow("BlockVector::getBlock(int,SiconosVector): not yet implemented.");
-// }
-
 SiconosVector* BlockVector::operator [](unsigned int pos)
 {
   return  vect[pos];
@@ -396,6 +391,15 @@ SiconosVector* BlockVector::operator [](unsigned int pos)
 const SiconosVector* BlockVector::operator [](unsigned int pos) const
 {
   return  vect[pos];
+}
+
+unsigned int BlockVector::getNumVectorAtPos(unsigned int pos) const
+{
+  unsigned int blockNum = 0;
+
+  while (pos >= (*tabIndex)[blockNum] && blockNum < tabIndex->size() - 1)
+    blockNum ++;
+  return blockNum;
 }
 
 void BlockVector::addSimple(unsigned int& index, const SiconosVector& vIn)

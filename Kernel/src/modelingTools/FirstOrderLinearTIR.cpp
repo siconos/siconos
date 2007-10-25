@@ -110,27 +110,6 @@ void FirstOrderLinearTIR::computeOutput(double time, unsigned int)
     prod(*F, *data["z"], *y, false);
 }
 
-void FirstOrderLinearTIR::computeFreeOutput(double time, unsigned int)
-{
-  // Note that the second argument remains unamed since it is not used: for first order systems, we always compute
-  // y[0]
-
-  SiconosVector *yFree = interaction->getYPtr(0);
-  // warning : yFree is saved in y !!
-
-  // compute yFree
-  if (C != NULL)
-    prod(*C, *data["xFree"], *yFree);
-  else
-    yFree->zero();
-
-  if (e != NULL)
-    *yFree += *e;
-
-  if (F != NULL)
-    prod(*F, *data["z"], *yFree, false);
-}
-
 void FirstOrderLinearTIR::computeInput(double time, unsigned int level)
 {
   if (B != NULL)

@@ -181,6 +181,13 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
 
 void EventDriven::initOSNS()
 {
+  UnitaryRelationsIterator it;
+  // For each Unitary relation in I0 ...
+  for (it = indexSets[0]->begin(); it != indexSets[0]->end(); ++it)
+  {
+    (*it)->initialize("EventDriven");
+  }
+
   tinit = eventsManager->getStartingTime();
   tend =  eventsManager->getNextTime();
 

@@ -570,12 +570,6 @@ public:
    */
   void computeOutput(double, unsigned int = 0);
 
-  /** Computes yFree; depends on the relation type.
-   *  \param double : current time
-   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
-   */
-  void computeFreeOutput(double, unsigned int = 0);
-
   /** Compute input r of all Dynamical Systems involved in the present Interaction.
    *  \param double : current time
    *  \param unsigned int: order of lambda used to compute input.

@@ -205,12 +205,6 @@ public:
    */
   virtual void computeOutput(double, unsigned int = 0) = 0;
 
-  /** default function to compute y for the free state
-   *  \param double : current time
-   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
-   */
-  virtual void computeFreeOutput(double, unsigned int = 0) = 0;
-
   /** default function to compute r
    *  \param double : current time
    *  \param unsigned int: "derivative" order of lambda used to compute input

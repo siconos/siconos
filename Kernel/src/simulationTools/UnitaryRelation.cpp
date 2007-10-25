@@ -16,10 +16,9 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "DynamicalSystem.h"
+#include "LagrangianDS.h"
 #include "UnitaryRelation.h"
-#include "FirstOrderLinearTIR.h"
-#include "LagrangianLinearR.h"
+#include "RelationTypes.h"
 #include "NewtonImpactNSL.h"
 #include "NewtonImpactFrictionNSL.h"
 #include "RuntimeException.h"
@@ -29,13 +28,16 @@ using namespace std;
 // --- CONSTRUCTORS ---
 
 // Data constructor
-UnitaryRelation::UnitaryRelation(Interaction* inter, unsigned int pos, unsigned int num): mainInteraction(inter), relativePosition(pos), number(num)
+UnitaryRelation::UnitaryRelation(Interaction* inter, unsigned int pos, unsigned int num): mainInteraction(inter), relativePosition(pos), number(num),
+  workX(NULL), workZ(NULL)
 {}
 
 // --- DESTRUCTOR ---
 UnitaryRelation::~UnitaryRelation()
 {
   mainInteraction = NULL;
+  delete workX;
+  delete workZ;
 }
 
 const VectorOfVectors UnitaryRelation::getY() const
@@ -123,6 +125,38 @@ DynamicalSystemsSet * UnitaryRelation::getDynamicalSystemsPtr()
   return mainInteraction->getDynamicalSystemsPtr();
 }
 
+void UnitaryRelation::initialize(const std::string& simulationType)
+{
+  if (mainInteraction == NULL)
+    RuntimeException::selfThrow("UnitaryRelation::initialize() failed: the linked interaction is NULL.");
+
+  workX = new BlockVector();
+  workZ = new BlockVector();
+  DSIterator it;
+  for (it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
+    workZ->insertPtr((*it)->getZPtr());
+
+  //   if(simulationType == "TimeStepping")
+  //     {
+  //     }
+  if (simulationType == "EventDriven")
+  {
+    string pbType = getRelationType();
+    if (pbType == "FirstOrder")
+    {
+      for (it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
+        workX->insertPtr((*it)->getXPtr());
+    }
+    else // Lagrangian
+    {
+      for (it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
+        workX->insertPtr((static_cast<LagrangianDS*>(*it))->getVelocityPtr());
+    }
+  }
+  //   else
+  //     RuntimeException::selfThrow("UnitaryRelation::initialize(simulationType) failed: unknown simulation type.");
+}
+
 void UnitaryRelation::getLeftBlockForDS(DynamicalSystem * ds, SiconosMatrix* Block, unsigned index) const
 {
   unsigned int k = 0;
@@ -141,28 +175,21 @@ void UnitaryRelation::getLeftBlockForDS(DynamicalSystem * ds, SiconosMatrix* Blo
     RuntimeException::selfThrow("UnitaryRelation::getLeftBlockForDS(DS, Block, ...): inconsistent sizes between Block and DS");
 
   SiconosMatrix * originalMatrix = NULL; // Complete matrix, Relation member.
-  string relationType = getRelationType();
-  string relationSubType = getRelationSubType();
 
-  if (relationType == "FirstOrder")
-  {
-    if (relationSubType == "Type1R")
-      originalMatrix = (static_cast<FirstOrderR*>(mainInteraction->getRelationPtr()))->getJacobianHPtr(0);
-    else if (relationSubType == "LinearTIR")
-      originalMatrix = (static_cast<FirstOrderLinearTIR*>(mainInteraction->getRelationPtr()))->getCPtr();
-    else if (relationSubType == "LinearR")
-      originalMatrix = (static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr()))->getCPtr();
-    else
-      RuntimeException::selfThrow("UnitaryRelation::getLeftBlockForDS, not yet implemented for first order relations of subtype " + relationSubType);
-  }
-  else if (relationType == "Lagrangian")
-  {
-    if (relationSubType == "LinearR")
-      originalMatrix = (static_cast<LagrangianLinearR*>(mainInteraction->getRelationPtr()))->getHPtr();
-    else
-      originalMatrix = (static_cast<LagrangianR*>(mainInteraction->getRelationPtr()))->getGPtr(index);
-    //      else RuntimeException::selfThrow("UnitaryRelation::getLeftBlockForDS, not yet implemented for Lagrangian relation of subtype "+relationSubType);
-  }
+  string relationType = getRelationType() + getRelationSubType();
+
+  if (relationType == "FirstOrderType1R" || relationType == "FirstOrderType2R" || relationType == "FirstOrderType3R")
+    originalMatrix = (static_cast<FirstOrderR*>(mainInteraction->getRelationPtr()))->getJacobianHPtr(0);
+
+  else if (relationType == "FirstOrderLinearR" || relationType == "FirstOrderLinearTIR")
+    originalMatrix = (static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr()))->getCPtr();
+
+  else if (relationType == "LagrangianScleronomousR" || relationType == "LagrangianRheonomousR" || relationType == "LagrangianCompliantR")
+    originalMatrix = (static_cast<LagrangianR*>(mainInteraction->getRelationPtr()))->getGPtr(index);
+
+  else if (relationType == "LagrangianLinearR")
+    originalMatrix = (static_cast<LagrangianLinearR*>(mainInteraction->getRelationPtr()))->getHPtr();
+
   else
     RuntimeException::selfThrow("UnitaryRelation::getLeftBlockForDS, not yet implemented for relations of type " + relationType);
 
@@ -199,20 +226,23 @@ void UnitaryRelation::getRightBlockForDS(DynamicalSystem * ds, SiconosMatrix* Bl
 
   SiconosMatrix * originalMatrix = NULL; // Complete matrix, Relation member.
   string relationType = getRelationType() + getRelationSubType();
-  if (relationType == "FirstOrderType1R")
+
+  if (relationType == "FirstOrderType1R" || relationType == "FirstOrderType2R" || relationType == "FirstOrderType3R")
     originalMatrix = (static_cast<FirstOrderR*>(mainInteraction->getRelationPtr()))->getJacobianGPtr(0);
-  else if (relationType == "FirstOrderLinearTIR")
-    originalMatrix = (static_cast<FirstOrderLinearTIR*>(mainInteraction->getRelationPtr()))->getBPtr();
-  else if (relationType == "FirstOrderLinearR")
+
+  else if (relationType == "FirstOrderLinearR" || relationType == "FirstOrderLinearTIR")
     originalMatrix = (static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr()))->getBPtr();
 
-  //else if( (relationType == LAGRANGIANRELATION || relationType == LAGRANGIANLINEARRELATION))
-  // originalMatrix = (static_cast<LagrangianR*>(mainInteraction->getRelationPtr()))->getGPtr(index);
-  // For Lagrangian systems, right block = transpose (left block) so we do not need to use the present function.
+  else if (relationType == "LagrangianScleronomousR" || relationType == "LagrangianRheonomousR" || relationType == "LagrangianCompliantR")
+    originalMatrix = (static_cast<LagrangianR*>(mainInteraction->getRelationPtr()))->getGPtr(index);
+
+  else if (relationType == "LagrangianLinearR")
+    originalMatrix = (static_cast<LagrangianLinearR*>(mainInteraction->getRelationPtr()))->getHPtr();
+
   else RuntimeException::selfThrow("UnitaryRelation::getRightBlockForDS, not yet implemented for relation of type " + relationType);
 
   if (originalMatrix == NULL)
-    RuntimeException::selfThrow("UnitaryRelation::getRightBlockForDS(DS, Block, ...): the right block is a NULL pointer (matrix B in relation) ");
+    RuntimeException::selfThrow("UnitaryRelation::getRightBlockForDS(DS, Block, ...): the right block is a NULL pointer (miss matrix B or H or gradients ...in relation ?)");
 
   // copy sub-block of originalMatrix into Block
   // dim of the sub-block
@@ -233,23 +263,31 @@ void UnitaryRelation::getExtraBlock(SiconosMatrix* Block) const
   // !!! Warning: we suppose that D is block diagonal, ie that there is no coupling between UnitaryRelation through D !!!
   // Any coupling between relations through D must be taken into account thanks to the nslaw (by "increasing" its dimension).
 
-  if (getRelationType() != "FirstOrder")
-    RuntimeException::selfThrow("UnitaryRelation::getExtraBlock, forbidden or not yet implemented for relation of type " + getRelationType());
+  string relationType = getRelationType() + getRelationSubType();
 
-  string relationSubType = getRelationSubType();
   SiconosMatrix * D = NULL;
-  if (relationSubType == "Type1R")
+  if (relationType == "FirstOrderType1R" || relationType == "LagrangianScleronomousR" || relationType == "LagrangianRheonomousR")
   {
     // nothing, D = NULL
   }
-  else if (relationSubType == "LinearTIR")
+  else if (relationType == "FirstOrderType2R" || relationType == "FirstOrderType3R")
+    D = static_cast<FirstOrderR*>(mainInteraction->getRelationPtr())->getJacobianHPtr(1);
+  else if (relationType == "FirstOrderLinearTIR")
     D = static_cast<FirstOrderLinearTIR*>(mainInteraction->getRelationPtr())->getDPtr();
-  else if (relationSubType == "LinearR")
+  else if (relationType == "FirstOrderLinearR")
     D = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getDPtr();
+  else if (relationType == "LagrangianCompliantR")
+    D = static_cast<LagrangianCompliantR*>(mainInteraction->getRelationPtr())->getGPtr(1);
+  else if (relationType == "LagrangianLinearR")
+    D = static_cast<LagrangianLinearR*>(mainInteraction->getRelationPtr())->getDPtr();
   else
-    RuntimeException::selfThrow("UnitaryRelation::getExtraBlock, not yet implemented for first order relations of subtype " + relationSubType);
+    RuntimeException::selfThrow("UnitaryRelation::getExtraBlock, not yet implemented for first order relations of subtype " + relationType);
+
   if (D == NULL)
+  {
+    Block->zero();
     return; //ie no extra block
+  }
 
   // copy sub-block of originalMatrix into Block
   // dim of the sub-block
@@ -265,37 +303,121 @@ void UnitaryRelation::getExtraBlock(SiconosMatrix* Block) const
   setBlock(D, Block, subDim, subPos);
 }
 
-void UnitaryRelation::computeEquivalentY(double time, unsigned int level, const string& simulationType, SiconosVector* yOut)
+void UnitaryRelation::computeEquivalentY(double time, unsigned int level, const string& simulationType, SiconosVector* yOut, unsigned int pos)
 {
 
   // Get relation and non smooth law types
-  string relationType = getRelationType();
+  string relationType = getRelationType() + getRelationSubType();
   string nslawType = getNonSmoothLawType();
   // Warning: first version with OneStepNSProblem as an input argument. But this means "inclusion" of simulationTools class into a
   // modelingTools class => no!
   //   string simulationType = osns->getSimulationPtr()->getType();
   // unsigned int level = osns->getLevelMin(); // this corresponds to the derivative order (for y) used to compute yOut.
 
-  if (simulationType == "TimeStepping")
-    mainInteraction->computeFreeOutput(time, level);
-  else  if (simulationType == "EventDriven")
-    mainInteraction->computeOutput(time, level);
 
-  (*yOut) = *(getYPtr(level)); // yOut = yFree
 
-  if (relationType == "Lagrangian")
+  //   if(simulationType == "TimeStepping")
+  //     {
+  unsigned int sizeY = getNonSmoothLawSize();
+  std::vector<unsigned int> coord(8);
+  coord[0] = relativePosition;
+  coord[1] = relativePosition + sizeY;
+  coord[2] = 0;
+  coord[4] = 0;
+  coord[6] = pos;
+  coord[7] = pos + sizeY;
+
+  //mainInteraction->computeFreeOutput(time,level);
+  SiconosMatrix * H = NULL;
+  if (relationType == "FirstOrderType1R" || relationType == "FirstOrderType2R" || relationType == "FirstOrderType3R")
+  {
+    H = static_cast<FirstOrderR*>(mainInteraction->getRelationPtr())->getJacobianHPtr(0);
+    if (H != NULL)
+    {
+      coord[3] = H->size(1);
+      coord[5] = H->size(1);
+      subprod(*H, *workX, *yOut, coord, true);
+    }
+  }
+
+  else if (relationType == "FirstOrderLinearTIR" || relationType == "FirstOrderLinearR")
+  {
+    // yOut = HXfree + e + Fz
+    H = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getCPtr();
+    if (H != NULL)
+    {
+      coord[3] = H->size(1);
+      coord[5] = H->size(1);
+      subprod(*H, *workX, (*yOut), coord, true);
+    }
+    SiconosVector * e = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getEPtr();
+    if (e != NULL)
+      static_cast<SimpleVector*>(yOut)->addBlock(pos, *e);
+
+    H = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getFPtr();
+    if (H != NULL)
+    {
+      coord[3] = H->size(1);
+      coord[5] = H->size(1);
+      subprod(*H, *workZ, *yOut, coord, false);
+    }
+  }
+  else if (relationType == "LagrangianCompliantR" || relationType == "LagrangianScleronomousR" || relationType == "LagrangianRheonomousR")
+  {
+    // yOut = jacobian_q h().v_free
+    H = static_cast<LagrangianR*>(mainInteraction->getRelationPtr())->getGPtr(0);
+    if (H != NULL)
+    {
+      coord[3] = H->size(1);
+      coord[5] = H->size(1);
+      subprod(*H, *workX, *yOut, coord, true);
+    }
+  }
+
+  else if (relationType == "LagrangianLinearR")
+  {
+    // yOut = H.v_free
+    H = static_cast<LagrangianLinearR*>(mainInteraction->getRelationPtr())->getHPtr();
+    if (H != NULL)
+    {
+      coord[3] = H->size(1);
+      coord[5] = H->size(1);
+      subprod(*H, *workX, *yOut, coord, true);
+    }
+  }
+  else
+    RuntimeException::selfThrow("UnitaryRelation::getExtraBlock, not yet implemented for first order relations of subtype " + relationType);
+
+  //     }
+  //   else  if(simulationType == "EventDriven")
+  //     {
+  //       //       mainInteraction->computeOutput(time,level);
+  //       //       (*yOut) = *(getYPtr(level));
+  //     }
+  // Add "non-smooth law effect" on yOut
+  if (getRelationType() == "Lagrangian")
   {
     double e;
-
     if (nslawType == NEWTONIMPACTNSLAW)
     {
       e = (static_cast<NewtonImpactNSL*>(mainInteraction->getNonSmoothLawPtr()))->getE();
+      std::vector<unsigned int> subCoord(4);
       if (simulationType == "TimeStepping")
-        scal(e, *getYOldPtr(level), *yOut, false);
-      //*yOut+=e**getYOldPtr(level);
-      //axpy(e,*getYOldPtr(level),*yOut);  // yOut = e*yOld + yOut
+      {
+        subCoord[0] = 0;
+        subCoord[1] = getNonSmoothLawSize();
+        subCoord[2] = pos;
+        subCoord[3] = pos + subCoord[1];
+        subscal(e, *getYOldPtr(level), *yOut, subCoord, false);
+      }
       else if (simulationType == "EventDriven")
-        *yOut *= (1.0 + e);
+      {
+        subCoord[0] = pos;
+        subCoord[1] = pos + getNonSmoothLawSize();
+        subCoord[2] = pos;
+        subCoord[3] = subCoord[1];
+        subscal(e, *yOut, *yOut, subCoord, false); // yOut = yOut + e * yOut
+      }
       else
         RuntimeException::selfThrow("UnitaryRelation::computeEquivalentY not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
     }
@@ -304,7 +426,8 @@ void UnitaryRelation::computeEquivalentY(double time, unsigned int level, const 
       e = (static_cast<NewtonImpactFrictionNSL*>(mainInteraction->getNonSmoothLawPtr()))->getEn();
       // Only the normal part is multiplied by e
       if (simulationType == "TimeStepping")
-        (*yOut)(0) +=  e * (*getYOldPtr(level))(0);
+        (*yOut)(pos) +=  e * (*getYOldPtr(level))(0);
+
       else RuntimeException::selfThrow("UnitaryRelation::computeEquivalentY not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
 
     }

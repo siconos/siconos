@@ -178,13 +178,8 @@ void LagrangianLinearTIDS::initRhs(double time)
 
 void LagrangianLinearTIDS::initialize(const string& simulationType, double time, unsigned int sizeOfMemory)
 {
-  // Memory allocation for "free" members.
-  initFreeVectors(simulationType);
-
   // Memory allocation for p[0], p[1], p[2].
   initP(simulationType);
-
-  // Warning: ->zero for free vectors must be done before q/q[1] initialization, because for EventDriven, qFree[0]/vFree = q/v (pointers equality)
 
   // set q and q[1] to q0 and velocity0, initialize acceleration.
   *q[0] = *q0;

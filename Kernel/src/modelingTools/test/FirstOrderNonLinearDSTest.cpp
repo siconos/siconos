@@ -185,28 +185,6 @@ void FirstOrderNonLinearDSTest::testSetXPtr()
   cout << "--> setXPtr test ended with success." << endl;
 }
 
-// setXFree
-void FirstOrderNonLinearDSTest::testSetXFree()
-{
-  cout << "--> Test: setXFree." << endl;
-  FirstOrderNonLinearDS * ds1 = new FirstOrderNonLinearDS(tmpxml2);
-  ds1->setXFree(*x0);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetXFree : ", ds1->getXFree() == *x0, true);
-  delete ds1;
-  cout << "--> setXFree test ended with success." << endl;
-}
-
-// setXFreePtr
-void FirstOrderNonLinearDSTest::testSetXFreePtr()
-{
-  cout << "--> Test: setXFreePtr." << endl;
-  FirstOrderNonLinearDS * ds1 = new FirstOrderNonLinearDS(tmpxml2);
-  ds1->setXFreePtr(x0);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetXFreePtr : ", ds1->getXFree() == *x0, true);
-  delete ds1;
-  cout << "--> setXFreePtr test ended with success." << endl;
-}
-
 // setR
 void FirstOrderNonLinearDSTest::testSetR()
 {

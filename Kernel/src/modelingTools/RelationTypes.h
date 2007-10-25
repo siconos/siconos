@@ -16,29 +16,19 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/*! \file SiconosKernel.h
-Include files related to modelingTools
-Note that not all files from the current location are listed below, since some of them are already included inside the ones below.
+/*! \file RelationTypes.h
+Include files related to the different types of relations
 */
 
-#include "ComplementarityConditionNSL.h"
-#include "RelayNSL.h"
-#include "NewtonImpactNSL.h"
-#include "NewtonImpactFrictionNSL.h"
-
-#include "Interaction.h"
+#ifndef RelationTypes_h
+#define RelationTypes_h
 
 #include "FirstOrderType1R.h"
-#include "FirstOrderLinearR.h"
 #include "FirstOrderLinearTIR.h"
-
 #include "LagrangianLinearR.h"
 #include "LagrangianScleronomousR.h"
-#include "LagrangianCompliantR.h"
 #include "LagrangianRheonomousR.h"
+#include "LagrangianCompliantR.h"
 
-#include "LagrangianLinearTIDS.h"
-#include "FirstOrderLinearTIDS.h"
-
-#include "NonSmoothDynamicalSystem.h"
+#endif
 

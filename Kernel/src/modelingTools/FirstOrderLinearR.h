@@ -379,12 +379,6 @@ public:
    */
   virtual void computeOutput(double, unsigned int = 0);
 
-  /** Computes yFree AND save it into y
-   *  \param double : current time
-   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
-   */
-  virtual void computeFreeOutput(double = 0, unsigned int = 0);
-
   /** Computes lambda
    *  \param double : current time
    *  \param unsigned int: "derivative" order of lambda used to compute input

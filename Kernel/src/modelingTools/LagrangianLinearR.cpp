@@ -233,48 +233,60 @@ void LagrangianLinearR::computeOutput(double time, unsigned int derivativeNumber
   SiconosVector *y = interaction->getYPtr(derivativeNumber);
   SiconosVector *lambda = interaction->getLambdaPtr(derivativeNumber);
 
-  string name = "q" + toString<unsigned int>(derivativeNumber);
+  //string name = "q"+toString<unsigned int>(derivativeNumber);
 
-  prod(*H, *data[name], *y);
-  if (derivativeNumber == 0 && b != NULL)
-    *y += *b;
+  if (derivativeNumber == 0)
+  {
+    prod(*H, *data["q0"], *y);
+    if (b != NULL)
+      *y += *b;
+    if (D != NULL)
+      prod(*D, *lambda, *y, false) ;
 
-  if (D != NULL)
-    prod(*D, *lambda, *y, false) ;
+    if (F != NULL)
+      prod(*F, *data["z"], *y, false);
+  }
 
-  if (F != NULL)
-    prod(*F, *data["z"], *y, false);
-}
+  else if (derivativeNumber == 1)
+  {
+    prod(*H, *data["q1"], *y);
+    if (D != NULL)
+      prod(*D, *lambda, *y, false) ;
 
-void LagrangianLinearR::computeFreeOutput(double time, unsigned int derivativeNumber)
-{
-  // get y and lambda of the interaction
-  SiconosVector *y = interaction->getYPtr(derivativeNumber);
-  SiconosVector *lambda = interaction->getLambdaPtr(derivativeNumber);
+    if (F != NULL)
+      prod(*F, *data["z"], *y, false);
+  }
+  else if (derivativeNumber == 2)
+  {
+    prod(*H, *data["q2"], *y);
+    if (D != NULL)
+      prod(*D, *lambda, *y, false) ;
 
-  string name = "q" + toString<unsigned int>(derivativeNumber) + "Free";
+    if (F != NULL)
+      prod(*F, *data["z"], *y, false);
+  }
 
-  if (derivativeNumber == 2) name = "q2";
-
-  prod(*H, *data[name], *y);
-  if (derivativeNumber == 0 && b != NULL)
-    *y += *b;
-
-  if (D != NULL)
-    prod(*D, *lambda, *y, false) ;
-
-  if (F != NULL)
-    prod(*F, *data["z"], *y, false);
 }
 
 void LagrangianLinearR::computeInput(double time, const unsigned int level)
 {
   // get lambda of the concerned interaction
-  string name = "p" + toString<unsigned int>(level);
+  //  string name = "p"+toString<unsigned int>(level);
 
   *workL = *interaction->getLambdaPtr(level);
   // compute p = Ht lambda
-  prod(*workL, *H, *data[name], false);
+  if (level == 0)
+  {
+    prod(*workL, *H, *data["p0"], false);
+  }
+  else if (level == 1)
+  {
+    prod(*workL, *H, *data["p1"], false);
+  }
+  else if (level == 2)
+  {
+    prod(*workL, *H, *data["p2"], false);
+  }
   //gemv(CblasTrans,1.0,*H,*lambda,1.0, *data[name]); => not yet implemented for BlockVectors.
 }
 

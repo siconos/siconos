@@ -21,6 +21,8 @@ Include files related to simulationTools
 Note that not all files from the current location are listed below, since some of them are already included inside the ones below.
 */
 
+#include "UnitaryRelation.h"
+#include "Topology.h"
 #include "EventDriven.h"
 #include "EventsManager.h"
 #include "EventFactory.h"

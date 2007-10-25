@@ -164,12 +164,12 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    SimpleMatrix dataPlot(N + 1, 7);
+    SimpleMatrix dataPlot(N, 7);
 
     // For the initial time step:
 
     // time
-    dataPlot(k, 0) = k * h_step;
+    dataPlot(k, 0) = DiodeBridgeCapFilter.getT0();
 
     // inductor voltage
     dataPlot(k, 1) = (LS1DiodeBridgeCapFilter->getX())(0);
@@ -210,7 +210,7 @@ int main(int argc, char* argv[])
 
       // --- Get values to be plotted ---
       // time
-      dataPlot(k, 0) = k * h_step;
+      dataPlot(k, 0) = StratDiodeBridgeCapFilter->getNextTime();
 
       // inductor voltage
       dataPlot(k, 1) = (LS1DiodeBridgeCapFilter->getX())(0);

@@ -72,6 +72,8 @@ int main(int argc, char* argv[])
     rtn = gettimeofday(&tp, NULL);
     t1 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
 
+    // Moreau * osi = static_cast<Moreau*>(s->getIntegratorOfDSPtr(ball));
+
     cout << "Computation ... " << endl;
     // --- Time loop  ---
     while (k < N)
@@ -94,6 +96,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 4) = (*v)(1);
       // Reaction
       dataPlot(k, 5) = (*p)(0);
+      //  dataPlot(k, 6) = osi->computeResidu();
       // transfer of state i+1 into state i and time incrementation
       s->nextStep();
     }
@@ -111,7 +114,7 @@ int main(int argc, char* argv[])
 
     // dataPlot (ascii) output
     ioMatrix io("result.dat", "ascii");
-    //    io.write(dataPlot,"noDim");
+    //io.write(dataPlot,"noDim");
     io.write(dataPlot);
     // Xml output
     //  bouncingBall.saveToXMLFile("./BouncingBall_TIDS.xml.output");

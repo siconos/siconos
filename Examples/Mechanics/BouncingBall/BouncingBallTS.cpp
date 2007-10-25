@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 3;           // degrees of freedom for the ball
     double t0 = 0;                   // initial computation time
-    double T = 10.0;                   // final computation time
+    double T = 10.0;                  // final computation time
     double h = 0.005;                // time step
     double position_init = 1.0;      // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
@@ -135,8 +135,8 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 5;
-    SimpleMatrix dataPlot(N + 1, outputSize);
+    unsigned int outputSize = 4;
+    SimpleMatrix dataPlot(N, outputSize);
 
     SiconosVector * q = ball->getQPtr();
     SiconosVector * v = ball->getVelocityPtr();
@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
     // ==== Simulation loop - Writing without explicit event handling =====
     int k = 0;
     boost::progress_display show_progress(N);
-    for (k = 1 ; k < N + 1  ; ++k)
+    for (k = 1 ; k < N  ; ++k)
     {
       s->computeOneStep();
       // --- Get values to be plotted ---
@@ -159,7 +159,6 @@ int main(int argc, char* argv[])
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*p)(0);
-      dataPlot(k, 4) = OSI->computeResidu();
       s->nextStep();
       s->reset();
       ++show_progress;

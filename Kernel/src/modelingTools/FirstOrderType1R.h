@@ -171,12 +171,6 @@ public:
    */
   void computeOutput(double, unsigned int = 0);
 
-  /** default function to compute y for the free state
-   *  \param double : not used
-   *  \param unsigned int: not used
-   */
-  void computeFreeOutput(double, unsigned int = 0);
-
   /** default function to compute r
    *  \param double : not used
    *  \param unsigned int: not used

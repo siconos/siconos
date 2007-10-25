@@ -119,7 +119,10 @@ OneStepIntegrator::~OneStepIntegrator()
   integratorXml = NULL;
   delete OSIDynamicalSystems;
   delete OSIInteractions;
+
+  // Note: the destruction workX components is done in derived class destructors.
 }
+
 
 void OneStepIntegrator::setDynamicalSystems(const DynamicalSystemsSet& newSet)
 {
@@ -135,6 +138,13 @@ void OneStepIntegrator::setInteractions(const InteractionsSet& newSet)
   InteractionsIterator it;
   for (it = newSet.begin(); it != newSet.end(); ++it)
     OSIInteractions->insert(*it);
+}
+
+SiconosVector* OneStepIntegrator::getWorkX(DynamicalSystem* ds)
+{
+  if (workX.find(ds) == workX.end())
+    RuntimeException::selfThrow("OneStepIntegrator::getWorkX(ds): this vector does not exists for ds.");
+  return workX[ds];
 }
 
 void OneStepIntegrator::initialize()

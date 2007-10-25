@@ -133,60 +133,6 @@ void LagrangianScleronomousR::computeG(double, unsigned int)
   //  else nothing!
 }
 
-void LagrangianScleronomousR::computeHFree(double)
-{
-  if (isPlugged["h"])
-  {
-    // arg= time. Unused in this function but required for interface.
-
-    // get vector y of the current interaction
-    SiconosVector *y = interaction->getYPtr(0);
-
-    // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    *workX = *data["q0Free"];
-    *workZ = *data["z"];
-    *workY = *y;
-
-    unsigned int sizeQ = workX->size();
-    unsigned int sizeY = y->size();
-    unsigned int sizeZ = workZ->size();
-
-    if (hPtr == NULL)
-      RuntimeException::selfThrow("LagrangianScleronomousR:computeH() is not linked to a plugin function");
-    hPtr(sizeQ, &(*workX)(0) , sizeY, &(*workY)(0), sizeZ, &(*workZ)(0));
-
-    // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *workZ;
-    *y = *workY;
-  }
-  //else nothing
-}
-
-void LagrangianScleronomousR::computeGFree(double, unsigned int)
-{
-  // First arg: time. Useless.
-  // Last arg: index for G - Useless, always equal to 0 for this kind of relation.
-
-  if (isPlugged["G0"])
-  {
-    unsigned int sizeY = interaction->getSizeOfY();
-    unsigned int sizeQ = interaction->getSizeOfDS();
-
-    // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    *workX = *data["q0Free"];
-    *workZ = *data["z"];
-    unsigned int sizeZ = workZ->size();
-
-    if (G0Ptr == NULL)
-      RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-    G0Ptr(sizeQ, &(*workX)(0), sizeY, &(*(G[0]))(0, 0), sizeZ, &(*workZ)(0));
-
-    // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *workZ;
-  }
-  //else nothing
-}
-
 void LagrangianScleronomousR::computeOutput(double time, unsigned int derivativeNumber)
 {
   if (derivativeNumber == 0)
@@ -197,24 +143,6 @@ void LagrangianScleronomousR::computeOutput(double time, unsigned int derivative
     SiconosVector *y = interaction->getYPtr(derivativeNumber) ;
     if (derivativeNumber == 1)
       prod(*G[0], *data["q1"], *y);
-    else if (derivativeNumber == 2)
-      prod(*G[0], *data["q2"], *y);
-    else
-      RuntimeException::selfThrow("LagrangianScleronomousR::computeOutput(t,index), index out of range");
-  }
-}
-
-void LagrangianScleronomousR::computeFreeOutput(double time, unsigned int derivativeNumber)
-{
-  if (derivativeNumber == 0)
-    computeHFree(time);
-
-  else
-  {
-    computeGFree(time);
-    SiconosVector *y = interaction->getYPtr(derivativeNumber) ;
-    if (derivativeNumber == 1)
-      prod(*G[0], *data["q1Free"], *y);
     else if (derivativeNumber == 2)
       prod(*G[0], *data["q2"], *y);
     else

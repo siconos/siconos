@@ -25,6 +25,7 @@ Basic class to handle with dynamical system integrators over a time step.
 #define ONESTEPINTEGRATOR_H
 
 #include "SiconosConst.h"
+#include "SimulationTypeDef.h"
 #include "DynamicalSystemsSet.h"
 #include "InteractionsSet.h"
 
@@ -62,6 +63,9 @@ protected:
 
   /** A link to the simulation that owns this OSI */
   Simulation * simulationLink;
+
+  /** Work map to save state-related data for the dynamical systems of the osi - DSVector: map<DS * , SiconosVector*> */
+  DSVectors workX;
 
   /** the corresponding XML object */
   OneStepIntegratorXML *integratorXml;
@@ -256,6 +260,12 @@ public:
   {
     integratorXml = newIntegratorXml;
   }
+
+  /** get workX vector which corresponds to input ds
+   \param a DynamicalSystem*
+   \return a SiconosVector*
+  */
+  SiconosVector* getWorkX(DynamicalSystem*);
 
   // --- OTHERS ... ---
 

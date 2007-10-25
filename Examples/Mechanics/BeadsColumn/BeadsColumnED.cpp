@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
     double increment_position = 1;   // initial position increment from one DS to the following
     double increment_velocity = 0;   // initial velocity increment from one DS to the following
     double t0 = 0;                   // initial computation time
-    double T = 4;                   // final computation time
+    double T = 3.8;                   // final computation time
     double h = 0.005;                 // time step
     double position_init = 5;     // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
@@ -138,6 +138,7 @@ int main(int argc, char* argv[])
     // A vector that handles all the relations
     vector<Relation*> LLR(interactionNumber - 1);
     SiconosMatrix *H1 = new SimpleMatrix(1, 2 * nDof);
+    (*b)(0) = -2.0 * R;
     if (dsNumber > 1)
     {
       (*H1)(0, 0) = -1.0;
@@ -153,7 +154,7 @@ int main(int argc, char* argv[])
         id[i - 1] = ostr.str();
         // The relations
         // Since Ri=Rj and h=0, we do not need to set b.
-        LLR[i - 1] = new LagrangianLinearR(*H1);
+        LLR[i - 1] = new LagrangianLinearR(*H1, *b);
         checkInter = allInteractions.insert(new Interaction(id[i - 1], dsConcerned, i, interactionSize, nslaw0, LLR[i - 1]));
       }
     }

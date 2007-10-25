@@ -48,9 +48,7 @@ void LagrangianDS::connectToDS()
 
 void LagrangianDS::initAllocationFlags(bool in)
 {
-  isAllocatedIn["qFree"] = false;
   isAllocatedIn["qMemory"] = false;
-  isAllocatedIn["velocityFree"] = false;
   isAllocatedIn["velocityMemory"] = false;
   isAllocatedIn["p0"] = false;
   isAllocatedIn["p1"] = false;
@@ -331,11 +329,6 @@ LagrangianDS::~LagrangianDS()
   q[0] = NULL;
   if (isAllocatedIn["q0"]) delete q0;
   q0 = NULL;
-  if (isAllocatedIn["qFree"]) delete workVector["qFree"];
-  workVector["qFree"] = NULL;
-  if (isAllocatedIn["velocityFree"])delete workVector["velocityFree"] ;
-  workVector["velocityFree"] = NULL;
-
   if (isAllocatedIn["qMemory"]) delete qMemory;
   qMemory = NULL;
   if (isAllocatedIn["velocity"]) delete q[1] ;
@@ -425,24 +418,6 @@ bool LagrangianDS::checkDynamicalSystem()
     output = false;
   }
   return output;
-}
-
-void LagrangianDS::initFreeVectors(const string& type)
-{
-  if (type == "TimeStepping")
-  {
-    workVector["qFree"] = new SimpleVector(ndof);
-    workVector["velocityFree"] = new SimpleVector(ndof);
-    isAllocatedIn["qFree"] = true;
-    isAllocatedIn["velocityFree"] = true;
-  }
-  else
-  {
-    workVector["qFree"] = q[0];
-    workVector["velocityFree"] = q[1];
-    isAllocatedIn["qFree"] = false;
-    isAllocatedIn["velocityFree"] = false;
-  }
 }
 
 // TEMPORARY FUNCTION: Must be called before this->initialize
@@ -571,9 +546,6 @@ void LagrangianDS::initRhs(double time)
 
 void LagrangianDS::initialize(const string& simulationType, double time, unsigned int sizeOfMemory)
 {
-  // Memory allocation for "free" members.
-  initFreeVectors(simulationType);
-
   // Memory allocation for p[0], p[1], p[2].
   initP(simulationType);
 
@@ -655,30 +627,6 @@ void LagrangianDS::setQ0Ptr(SiconosVector *newPtr)
   isAllocatedIn["q0"] = false;
 }
 
-void LagrangianDS::setQFree(const SiconosVector& newValue)
-{
-  if (newValue.size() != ndof)
-    RuntimeException::selfThrow("LagrangianDS - setQFree: inconsistent input vector size ");
-
-  if (workVector["qFree"] == NULL)
-  {
-    workVector["qFree"] = new SimpleVector(newValue);
-    isAllocatedIn["qFree"] = true;
-  }
-  else
-    *workVector["qFree"] = newValue;
-}
-
-void LagrangianDS::setQFreePtr(SiconosVector *newPtr)
-{
-  if (newPtr->size() != ndof)
-    RuntimeException::selfThrow("LagrangianDS - setQFreePtr: inconsistent input vector size ");
-
-  if (isAllocatedIn["qFree"]) delete workVector["qFree"];
-  workVector["qFree"] = newPtr;
-  isAllocatedIn["qFree"] = false;
-}
-
 void LagrangianDS::setQMemory(const SiconosMemory& newValue)
 {
   if (qMemory == NULL)
@@ -743,30 +691,6 @@ void LagrangianDS::setVelocity0Ptr(SiconosVector *newPtr)
   if (isAllocatedIn["velocity0"]) delete velocity0;
   velocity0 = newPtr;
   isAllocatedIn["velocity0"] = false;
-}
-
-void LagrangianDS::setVelocityFree(const SiconosVector& newValue)
-{
-  if (newValue.size() != ndof)
-    RuntimeException::selfThrow("LagrangianDS - setVelocityFree: inconsistent input vector size ");
-
-  if (workVector["velocityFree"] == NULL)
-  {
-    workVector["velocityFree"] = new SimpleVector(newValue);
-    isAllocatedIn["velocityFree"] = true;
-  }
-  else
-    *workVector["velocityFree"] = newValue;
-}
-
-void LagrangianDS::setVelocityFreePtr(SiconosVector *newPtr)
-{
-  if (newPtr->size() != ndof)
-    RuntimeException::selfThrow("LagrangianDS - setVelocityFreePtr: inconsistent input vector size ");
-
-  if (isAllocatedIn["velocityFree"]) delete workVector["velocityFree"];
-  workVector["velocityFree"] = newPtr;
-  isAllocatedIn["velocityFree"] = false;
 }
 
 SiconosVector* LagrangianDS::getAccelerationPtr() const

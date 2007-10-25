@@ -229,75 +229,6 @@ void LagrangianRheonomousR::computeG(double time, unsigned int)
   // else nothing.
 }
 
-void LagrangianRheonomousR::computeHFree(double time)
-{
-  if (isPlugged["h"])
-  {
-    // get vector y of the current interaction
-    SiconosVector *y = interaction->getYPtr(0);
-
-    // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    *workX = *data["q0Free"];
-    *workZ = *data["z"];
-    *workY = *y;
-    unsigned int sizeQ = workX->size();
-    unsigned int sizeY = y->size();
-    unsigned int sizeZ = workZ->size();
-
-    if (hPtr == NULL)
-      RuntimeException::selfThrow("LagrangianRheonomousR:computeH() failed, h is not linked to a plugin function");
-    hPtr(sizeQ, &(*workX)(0), time, sizeY,  &(*workY)(0), sizeZ, &(*workZ)(0));
-
-    // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *workZ;
-    *y = *workY;
-  }
-  // else nothing
-}
-
-void LagrangianRheonomousR::computeHDotFree(double time)
-{
-  if (isPlugged["hDot"])
-  {
-    // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    *workX = *data["q0Free"];
-    *workZ = *data["z"];
-
-    unsigned int sizeQ = workX->size();
-    unsigned int sizeY = hDot->size();
-    unsigned int sizeZ = workZ->size();
-
-    if (hDotPtr == NULL)
-      RuntimeException::selfThrow("LagrangianRheonomousR:computeHDot() failed, hDot is not linked to a plugin function");
-    hDotPtr(sizeQ, &(*workX)(0), time, sizeY,  &(*hDot)(0), sizeZ, &(*workZ)(0));
-
-    // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *workZ;
-  }
-  // else nothing
-}
-
-void LagrangianRheonomousR::computeGFree(double time, unsigned int)
-{
-  // Note that second input arg is useless.
-  if (isPlugged["G0"])
-  {
-    // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    *workX = *data["q0Free"];
-    *workZ = *data["z"];
-
-    unsigned int sizeY = G[0]->size(0);
-    unsigned int sizeQ = workX->size();
-    unsigned int sizeZ = workZ->size();
-    if (G0Ptr == NULL)
-      RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-    G0Ptr(sizeQ, &(*workX)(0), time, sizeY, &(*G[0])(0, 0), sizeZ, &(*workZ)(0));
-    // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *workZ;
-  }
-  // else nothing.
-}
-
 void LagrangianRheonomousR::computeOutput(double time, unsigned int derivativeNumber)
 {
   if (derivativeNumber == 0)
@@ -310,27 +241,6 @@ void LagrangianRheonomousR::computeOutput(double time, unsigned int derivativeNu
     {
       computeHDot(time); // \todo: save hDot directly into y[1] ?
       prod(*G[0], *data["q1"], *y);
-      *y += *hDot;
-    }
-    else if (derivativeNumber == 2)
-      prod(*G[0], *data["q2"], *y); // Approx: y[2] = Gq[2], other terms are neglected ...
-    else
-      RuntimeException::selfThrow("LagrangianRheonomousR::computeOutput(time,index), index out of range or not yet implemented.");
-  }
-}
-
-void LagrangianRheonomousR::computeFreeOutput(double time, unsigned int derivativeNumber)
-{
-  if (derivativeNumber == 0)
-    computeHFree(time);
-  else
-  {
-    SiconosVector *y = interaction->getYPtr(derivativeNumber);
-    computeGFree(time);
-    if (derivativeNumber == 1)
-    {
-      computeHDotFree(time); // \todo: save hDot directly into y[1] ?
-      prod(*G[0], *data["q1Free"], *y);
       *y += *hDot;
     }
     else if (derivativeNumber == 2)

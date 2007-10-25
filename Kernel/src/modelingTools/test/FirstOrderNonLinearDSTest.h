@@ -42,8 +42,6 @@ private:
   CPPUNIT_TEST(testSetX0Ptr);
   CPPUNIT_TEST(testSetX);
   CPPUNIT_TEST(testSetXPtr);
-  CPPUNIT_TEST(testSetXFree);
-  CPPUNIT_TEST(testSetXFreePtr);
   CPPUNIT_TEST(testSetR);
   CPPUNIT_TEST(testSetRPtr);
   CPPUNIT_TEST(testSetJacobianXF);
@@ -63,8 +61,6 @@ private:
   void testSetX0Ptr();
   void testSetX();
   void testSetXPtr();
-  void testSetXFree();
-  void testSetXFreePtr();
   void testSetR();
   void testSetRPtr();
   void testSetJacobianXF();

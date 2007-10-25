@@ -68,6 +68,7 @@ private:
   CPPUNIT_TEST(testOperators6Bis);
   CPPUNIT_TEST(testOperators7);
   CPPUNIT_TEST(testOperators8);
+  CPPUNIT_TEST(testSubscal);
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
@@ -104,6 +105,7 @@ private:
   void testOperators6Bis();
   void testOperators7();
   void testOperators8();
+  void testSubscal();
   void End();
   // Members
 

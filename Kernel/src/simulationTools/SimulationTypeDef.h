@@ -59,7 +59,8 @@ typedef std::vector< UnitaryRelationsSet* > VectorOfSetOfUnitaryRelations;
 
 // ================== Objects to handle OSI or DS ==================
 
-#include "OneStepIntegrator.h"
+//#include "OneStepIntegrator.h"
+class OneStepIntegrator;
 
 /** Map of SiconosMatrix; key = the related DS*/
 typedef std::map<DynamicalSystem*, SiconosMatrix*> MapOfMatrices;
@@ -69,6 +70,15 @@ typedef MapOfMatrices::iterator MatIterator;
 
 /** Const iterator through a map of matrices */
 typedef MapOfMatrices::const_iterator ConstMatIterator;
+
+/** Map of SiconosVector; key = the related DS*/
+typedef std::map<DynamicalSystem*, SiconosVector*> DSVectors;
+
+/** Iterator through a map of matrices */
+typedef DSVectors::iterator DSVectorsIterator;
+
+/** Const iterator through a map of matrices */
+typedef DSVectors::const_iterator ConstDSVectorsIterator;
 
 /** Map of double; key = the related DS */
 typedef std::map<DynamicalSystem*, double> MapOfDouble;

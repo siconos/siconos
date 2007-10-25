@@ -44,7 +44,6 @@ bool BallBowl()
 
     SimpleMatrix dataPlot(N + 1, 6);
 
-    cout << "Prepare data for plotting ... " << endl;
     // For the initial time step:
     // time
     dataPlot(k, 0) =  bouncingBall.getT0();

@@ -75,8 +75,6 @@ void LagrangianR::initialize()
   data["q0"] = new BlockVector(); // displacement
   data["q1"] = new BlockVector(); // velocity
   data["q2"] = new BlockVector(); // acceleration
-  data["q0Free"] = new BlockVector(); // free displacement
-  data["q1Free"] = new BlockVector(); // free velocity
   data["z"] = new BlockVector(); // z vector
   data["p1"] = new BlockVector();
   data["p2"] = new BlockVector();
@@ -97,8 +95,6 @@ void LagrangianR::initialize()
     data["q2"]->insertPtr(lds->getAccelerationPtr());
     data["p1"]->insertPtr(lds->getPPtr(1));
     data["p2"]->insertPtr(lds->getPPtr(2));
-    data["q0Free"]->insertPtr(lds->getQFreePtr());
-    data["q1Free"]->insertPtr(lds->getVelocityFreePtr());
     data["z"]->insertPtr(lds->getZPtr());
   }
 }

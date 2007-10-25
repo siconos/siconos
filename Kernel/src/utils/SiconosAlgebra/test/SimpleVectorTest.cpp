@@ -1121,6 +1121,96 @@ void SimpleVectorTest::testOperators8()
   cout << "--> operators8 test ended with success." << endl;
 }
 
+void SimpleVectorTest::testSubscal()
+{
+  cout << "--> Test: testSubscal." << endl;
+  unsigned int size = 12;
+  SiconosVector * xx = new SimpleVector(size, 1.0);
+  SiconosVector * ys = new SimpleVector(size, 2.0);
+
+  SiconosVector * yy = new BlockVector();
+  SiconosVector * y1 = new SimpleVector(2, 1.0);
+  SiconosVector * y2 = new SimpleVector(3, 2.0);
+  SiconosVector * y3 = new SimpleVector(7, 4.0);
+  yy->insertPtr(y1);
+  yy->insertPtr(y2);
+  yy->insertPtr(y3);
+  SiconosVector * yref = new SimpleVector(*ys);
+
+  double a = 3;
+  std::vector<unsigned int> coord(4) ;
+  coord[0] = 1;
+  coord[1] = 3;
+  coord[2] = 4;
+  coord[3] = 6;
+
+  // xx and yy dense vectors
+  subscal(a, *xx, *ys, coord, true);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(4) - a * (*xx)(1)) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(5) - a * (*xx)(2)) < tol, true);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    if (i != 4 && i != 5)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(i) - (*yref)(i)) < tol, true);
+  }
+
+  // xx dense, y block
+  *yref = *yy;
+  subscal(a, *xx, *yy, coord, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*yy)(4) - a * (*xx)(1)) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*yy)(5) - a * (*xx)(2)) < tol, true);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    if (i != 4 && i != 5)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*yy)(i) - (*yref)(i)) < tol, true);
+  }
+
+  // x block, ys dense
+  *yref = *ys;
+  subscal(a, *yy, *ys, coord, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(4) - a * (*yy)(1)) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(5) - a * (*yy)(2)) < tol, true);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    if (i != 4 && i != 5)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(i) - (*yref)(i)) < tol, true);
+  }
+
+  // xx sparse, ys dense
+  delete xx;
+  xx = new SimpleVector(size, SPARSE);
+  xx->fill(2.0);
+  *yref = *ys;
+  subscal(a, *xx, *ys, coord, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(4) - a * (*xx)(1)) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(5) - a * (*xx)(2)) < tol, true);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    if (i != 4 && i != 5)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(i) - (*yref)(i)) < tol, true);
+  }
+
+  // xx sparse, ys sparse
+  delete ys;
+  ys = new SimpleVector(size, SPARSE);
+  *yref = *ys;
+  subscal(a, *xx, *ys, coord, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(4) - a * (*xx)(1)) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(5) - a * (*xx)(2)) < tol, true);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    if (i != 4 && i != 5)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(i) - (*yref)(i)) < tol, true);
+  }
+  delete ys;
+  delete yy;
+  delete xx;
+  delete y1;
+  delete y2;
+  delete y3;
+  cout << "-->  subscal test ended with success." << endl;
+}
 
 void SimpleVectorTest::End()
 {

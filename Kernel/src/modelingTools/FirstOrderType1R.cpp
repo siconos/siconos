@@ -205,28 +205,6 @@ void FirstOrderType1R::computeOutput(double, unsigned int)
   *data["z"] = *workZ;
 }
 
-void FirstOrderType1R::computeFreeOutput(double, unsigned int)
-{
-  if (output == NULL)
-    RuntimeException::selfThrow("FirstOrderType1R::computeOutput() is not linked to a plugin function");
-
-  SiconosVector *y = interaction->getYPtr(0);
-  // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-  *workX = *data["xFree"];
-  *workZ = *data["z"];
-  *workY = *y;
-
-  unsigned int sizeY = y->size();
-  unsigned int sizeX = data["x"]->size();
-  unsigned int sizeZ = data["z"]->size();
-
-  output(sizeX, &(*workX)(0), sizeY, &(*workY)(0), sizeZ, &(*workZ)(0));
-
-  // Rebuilt y/z from Tmp
-  *y = *workY;
-  *data["z"] = *workZ;
-}
-
 void FirstOrderType1R::computeInput(double, unsigned int level)
 {
   if (input == NULL)

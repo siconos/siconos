@@ -62,7 +62,6 @@ void FirstOrderR::initDSLinks()
   // Get the DS concerned by the interaction of this relation
   DSIterator it;
   data["x"] = new BlockVector(); // displacements
-  data["xFree"] = new BlockVector(); // free displacements
   data["z"] = new BlockVector();
   data["r"] = new BlockVector();
 
@@ -72,7 +71,6 @@ void FirstOrderR::initDSLinks()
     // Put x/r ... of each DS into a block. (Pointers links, no copy!!)
     ds = static_cast<FirstOrderNonLinearDS*>(*it);
     data["x"]->insertPtr(ds->getXPtr());
-    data["xFree"]->insertPtr(ds->getXFreePtr());
     data["z"]->insertPtr(ds->getZPtr());
     data["r"]->insertPtr(ds->getRPtr());
   }

@@ -239,6 +239,15 @@ public:
    */
   virtual const Index * getTabIndexPtr() const ;
 
+  /** get the number of the vector that handles element at position "pos"
+      \param unsigned int, position of the element
+      \return unsigned int number of the searched vector - 0 for SimpleVector, else see Block.
+  */
+  virtual unsigned int getNumVectorAtPos(unsigned int) const
+  {
+    return 0;
+  };
+
   /** put data of the vector into a string
    */
   virtual const std::string toString() const = 0;

@@ -29,7 +29,6 @@ void FirstOrderNonLinearDS::initAllocationFlags(bool in) // default in = true.
   isAllocatedIn["jacobianXF"] = in;
   isAllocatedIn["r"] = in;
   isAllocatedIn["rMemory"] = in;
-  isAllocatedIn["xFree"] = in;
   isAllocatedIn["invM"] = in;
 }
 
@@ -178,8 +177,6 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(int newNumber, const SiconosVector&
 // --- Destructor ---
 FirstOrderNonLinearDS::~FirstOrderNonLinearDS()
 {
-  if (isAllocatedIn["xFree"]) delete workVector["xFree"];
-  workVector["xFree"] = NULL;
   if (isAllocatedIn["r"]) delete r;
   r = NULL;
   if (isAllocatedIn["rMemory"]) delete rMemory;
@@ -212,47 +209,6 @@ bool FirstOrderNonLinearDS::checkDynamicalSystem()
   }
 
   return output;
-}
-
-void FirstOrderNonLinearDS::initFreeVectors(const string& type)
-{
-  if (type == "TimeStepping")
-  {
-    workVector["xFree"] = new SimpleVector(n);
-    isAllocatedIn["xFree"] = true;
-  }
-}
-
-// Setters
-
-void FirstOrderNonLinearDS::setXFree(const SiconosVector& newValue)
-{
-  // check dimensions ...
-  if (newValue.size() != n)
-    RuntimeException::selfThrow("FirstOrderNonLinearDS::setXFree - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
-
-  if (workVector["xFree"] != NULL)
-    *workVector["xFree"] = newValue;
-
-  else
-  {
-    if (newValue.isBlock())
-      workVector["xFree"] = new BlockVector(newValue);
-    else
-      workVector["xFree"] = new SimpleVector(newValue);
-    isAllocatedIn["xFree"] = true;
-  }
-}
-
-void FirstOrderNonLinearDS::setXFreePtr(SiconosVector* newPtr)
-{
-  // check dimensions ...
-  if (newPtr->size() != n)
-    RuntimeException::selfThrow("FirstOrderNonLinearDS::setXFreePtr - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
-
-  if (isAllocatedIn["xFree"]) delete workVector["xFree"];
-  workVector["xFree"] = newPtr;
-  isAllocatedIn["xFree"] = false;
 }
 
 void FirstOrderNonLinearDS::setR(const SiconosVector& newValue)
@@ -425,9 +381,7 @@ void FirstOrderNonLinearDS::initRhs(double time)
 
 void FirstOrderNonLinearDS::initialize(const string& simulationType, double time, unsigned int sizeOfMemory)
 {
-  initFreeVectors(simulationType);
-
-  // reset x to x0, xFree and r to zero.
+  // reset x to x0 and r to zero.
   r->zero();
   *(x[0]) = *x0;
 

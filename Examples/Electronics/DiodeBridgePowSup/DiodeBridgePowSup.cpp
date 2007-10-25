@@ -58,6 +58,8 @@ int main(int argc, char* argv[])
 
     FirstOrderLinearDS* LSDiodeBridgePowSup = new FirstOrderLinearDS(1, init_stateLS, LS_A);
 
+    // TODO: review this example with the new way to set the control.
+
     //    //  Source term "u" specification
     //    LSDiodeBridgePowSup->setUSize(1);
     //    LSDiodeBridgePowSup->setComputeBFunction("./SinPoPlugin.so","SinPo");
@@ -121,7 +123,6 @@ int main(int argc, char* argv[])
     TimeDiscretisation* TiDisc = new TimeDiscretisation(h_step, &DiodeBridgePowSup);
 
     TimeStepping* StratDiodeBridgePowSup = new TimeStepping(TiDisc);
-    //    StratDiodeBridgePowSup->getEventsManagerPtr()->setTick(1e-9);
 
     double theta = 0.5;
 
@@ -157,7 +158,7 @@ int main(int argc, char* argv[])
     v_DR2 = -(InterDiodeBridgePowSup->getY(0))(3) + DiodeThreshold;
 
     // time
-    dataPlot(k, 0) = k * h_step;
+    dataPlot(k, 0) = DiodeBridgePowSup.getT0();
 
     // source voltage
     dataPlot(k, 1) = (LSDiodeBridgePowSup->getZ())(4);
@@ -216,7 +217,7 @@ int main(int argc, char* argv[])
       v_DR2 = -(InterDiodeBridgePowSup->getY(0))(3) + DiodeThreshold;
 
       // time
-      dataPlot(k, 0) = k * h_step;
+      dataPlot(k, 0) = StratDiodeBridgePowSup->getNextTime();
 
       // source voltage
       dataPlot(k, 1) = (LSDiodeBridgePowSup->getZ())(4);

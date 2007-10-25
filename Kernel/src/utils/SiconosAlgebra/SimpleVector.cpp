@@ -562,7 +562,6 @@ void setBlock(const SiconosVector * vIn, SiconosVector * vOut, unsigned int size
   }
 }
 
-
 void SimpleVector::addBlock(unsigned int index, const SiconosVector& vIn)
 {
   // Add vIn to the current vector, starting from position "index".
@@ -1481,5 +1480,262 @@ void scal(double a, const SiconosVector & x, SiconosVector & y, bool init)
   }
 }
 
+void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::vector<unsigned int>& coord, bool init)
+{
+  // To compute sub_y = a *sub_x (init = true) or sub_y += a*sub_x (init = false)
+  // Coord  = [r0x r1x r0y r1y];
+  // subX is the sub-vector of x, for row numbers between r0x and r1x-1.
+  // The same for y with riy.
 
 
+  // Check dimensions
+  unsigned int dimX = coord[1] - coord[0];
+  unsigned int dimY = coord[3] - coord[2];
+  if (dimY != dimX)
+    SiconosVectorException::selfThrow("subscal(a,x,y,...) error: inconsistent sizes between (sub)x and (sub)y.");
+  if (dimY > y.size() || dimX > x.size())
+    SiconosVectorException::selfThrow("subscal(a,x,y,...) error: input index too large.");
+
+  unsigned int numY = y.getNum();
+  unsigned int numX = x.getNum();
+
+  if (&x == &y) // if x and y are the same object
+  {
+    if (numX == 0) // if x and y are block vectors
+    {
+      if (coord[0] != coord[2] || coord[1] != coord[3])
+        SiconosVectorException::selfThrow("subscal(a,x,y,...) error: x=y=blockVector and try to affect different positions in x and y; not yet implemented!");
+
+      ConstBlockVectIterator it;
+      // Number of the subvector of x that handles element at position coord[0]
+      unsigned int firstBlockNum = x.getNumVectorAtPos(coord[0]);
+      // Number of the subvector of x that handles element at position coord[1]
+      unsigned int lastBlockNum = x.getNumVectorAtPos(coord[1]);
+      std::vector<unsigned int> subCoord = coord;
+      SiconosVector * tmp = y[firstBlockNum];
+      unsigned int subSize =  x[firstBlockNum]->size(); // Size of the sub-vector
+      const Index * xTab = x.getTabIndexPtr();
+      if (firstBlockNum != 0)
+        subCoord[0] -= (*xTab)[firstBlockNum - 1];
+      subCoord[1] =  std::min(coord[1] - (*xTab)[firstBlockNum - 1], subSize);
+      subCoord[2] = subCoord[0];
+      subCoord[3] = subCoord[1];
+      if (firstBlockNum == lastBlockNum)
+      {
+        subscal(a, *tmp, *tmp, subCoord, init);
+      }
+      else
+      {
+        unsigned int xPos = 0 ; // Position in x of the current sub-vector of x
+        bool firstLoop = true;
+        for (it = x.begin(); it != x.end(); ++it)
+        {
+          if ((*it)->getNum() == 0)
+            SiconosMatrixException::selfThrow("subscal(a,x,y) error: not yet implemented for x block of blocks ...");
+          if (xPos >= firstBlockNum && xPos <= lastBlockNum)
+          {
+            tmp = y[xPos];
+            if (firstLoop)
+            {
+              subscal(a, *tmp, *tmp, subCoord, init);
+              firstLoop = false;
+            }
+            else
+            {
+              subSize = tmp->size();
+              subCoord[0] = 0;
+              subCoord[1] = std::min(coord[1] - (*xTab)[xPos - 1], subSize);
+              subCoord[2] = subCoord[0];
+              subCoord[3] = subCoord[1];
+              subscal(a, *tmp, *tmp, subCoord, init);
+            }
+          }
+          xPos++;
+        }
+      }
+    }
+
+    else if (numX == 1) // Dense
+    {
+      ublas::vector_range<DenseVect> subY(*y.getDensePtr(), ublas::range(coord[2], coord[3]));
+      if (coord[0] == coord[2])
+      {
+        if (init)
+          subY *= a;
+        else
+          subY *= (1.0 + a);
+      }
+      else
+      {
+        ublas::vector_range<DenseVect> subX(*x.getDensePtr(), ublas::range(coord[0], coord[1]));
+        if (init)
+          subY = a * subX;
+        else
+          subY += a * subX;
+      }
+    }
+    else //if (numX == 4) // Sparse
+    {
+      ublas::vector_range<SparseVect> subY(*y.getSparsePtr(), ublas::range(coord[2], coord[3]));
+      if (coord[0] == coord[2])
+      {
+        if (init)
+          subY *= a;
+        else
+          subY *= (1.0 + a);
+      }
+      else
+      {
+        ublas::vector_range<SparseVect> subX(*x.getSparsePtr(), ublas::range(coord[0], coord[1]));
+        if (init)
+          subY = a * subX;
+        else
+          subY += a * subX;
+      }
+    }
+  }
+  else
+  {
+    if (numX == numY)
+    {
+      if (numX == 0) // ie if both are block vectors
+      {
+        SiconosMatrixException::selfThrow("subscal(a,x,y) error: not yet implemented for x and y block vectors");
+      }
+      else if (numX == 1) // ie if both are Dense
+      {
+        ublas::vector_range<DenseVect> subX(*x.getDensePtr(), ublas::range(coord[0], coord[1]));
+        ublas::vector_range<DenseVect> subY(*y.getDensePtr(), ublas::range(coord[2], coord[3]));
+
+        if (init)
+          noalias(subY) = a * subX;
+        else
+          noalias(subY) += a * subX;
+      }
+      else  // if both are sparse
+      {
+        ublas::vector_range<SparseVect> subX(*x.getSparsePtr(), ublas::range(coord[0], coord[1]));
+        ublas::vector_range<SparseVect> subY(*y.getSparsePtr(), ublas::range(coord[2], coord[3]));
+
+        if (init)
+          noalias(subY) = a * subX;
+        else
+          noalias(subY) += a * subX;
+      }
+    }
+    else // x and y of different types ...
+    {
+      if (numX == 0) // x a block vector
+      {
+        ConstBlockVectIterator it;
+        // Number of the subvector of x that handles element at position coord[0]
+        unsigned int firstBlockNum = x.getNumVectorAtPos(coord[0]);
+        // Number of the subvector of x that handles element at position coord[1]
+        unsigned int lastBlockNum = x.getNumVectorAtPos(coord[1]);
+        std::vector<unsigned int> subCoord = coord;
+        const SiconosVector * tmp = x[firstBlockNum];
+        unsigned int subSize =  x[firstBlockNum]->size(); // Size of the sub-vector
+        const Index * xTab = x.getTabIndexPtr();
+        if (firstBlockNum != 0)
+          subCoord[0] -= (*xTab)[firstBlockNum - 1];
+        subCoord[1] =  std::min(coord[1] - (*xTab)[firstBlockNum - 1], subSize);
+        subCoord[3] = subCoord[2] + subCoord[1] - subCoord[0];
+        if (firstBlockNum == lastBlockNum)
+        {
+          subscal(a, *tmp, y, subCoord, init);
+        }
+        else
+        {
+          unsigned int xPos = 0 ; // Position in x of the current sub-vector of x
+          bool firstLoop = true;
+          for (it = x.begin(); it != x.end(); ++it)
+          {
+            if ((*it)->getNum() == 0)
+              SiconosMatrixException::selfThrow("subscal(a,x,y) error: not yet implemented for x block of blocks ...");
+            if (xPos >= firstBlockNum && xPos <= lastBlockNum)
+            {
+              tmp = x[xPos];
+              if (firstLoop)
+              {
+                subscal(a, *tmp, y, subCoord, init);
+                firstLoop = false;
+              }
+              else
+              {
+                subSize = tmp->size();
+                subCoord[0] = 0;
+                subCoord[1] = std::min(coord[1] - (*xTab)[xPos - 1], subSize);
+                subCoord[2] = subCoord[3];
+                subCoord[3] = subCoord[2] + subCoord[1] - subCoord[0];
+                subscal(a, *tmp, y, subCoord, init);
+              }
+            }
+            xPos++;
+          }
+        }
+      }
+
+      else if (numY == 0) // y a block vector
+      {
+        ConstBlockVectIterator it;
+        // Number of the subvector of y that handles element at position coord[2]
+        unsigned int firstBlockNum = y.getNumVectorAtPos(coord[2]);
+        // Number of the subvector of x that handles element at position coord[3]
+        unsigned int lastBlockNum = y.getNumVectorAtPos(coord[3]);
+        std::vector<unsigned int> subCoord = coord;
+        SiconosVector * tmp = y[firstBlockNum];
+        unsigned int subSize =  y[firstBlockNum]->size(); // Size of the sub-vector
+        const Index * yTab = y.getTabIndexPtr();
+        if (firstBlockNum != 0)
+          subCoord[2] -= (*yTab)[firstBlockNum - 1];
+        subCoord[3] =  std::min(coord[3] - (*yTab)[firstBlockNum - 1], subSize);
+        subCoord[1] = subCoord[0] + subCoord[3] - subCoord[2];
+        if (firstBlockNum == lastBlockNum)
+        {
+          subscal(a, x, *tmp, subCoord, init);
+        }
+        else
+        {
+          unsigned int yPos = 0 ; // Position in x of the current sub-vector of x
+          bool firstLoop = true;
+          for (it = y.begin(); it != y.end(); ++it)
+          {
+            if ((*it)->getNum() == 0)
+              SiconosMatrixException::selfThrow("subscal(a,x,y) error: not yet implemented for y block of blocks ...");
+            if (yPos >= firstBlockNum && yPos <= lastBlockNum)
+            {
+              tmp = y[yPos];
+              if (firstLoop)
+              {
+                subscal(a, x, *tmp, subCoord, init);
+                firstLoop = false;
+              }
+              else
+              {
+                subSize = tmp->size();
+                subCoord[2] = 0;
+                subCoord[3] = std::min(coord[3] - (*yTab)[yPos - 1], subSize);
+                subCoord[0] = subCoord[1];
+                subCoord[1] = subCoord[0] + subCoord[3] - subCoord[2];
+                subscal(a, x, *tmp, subCoord, init);
+              }
+            }
+            yPos++;
+          }
+        }
+      }
+      else if (numY == 1) // y dense, x sparse
+      {
+        ublas::vector_range<DenseVect> subY(*y.getDensePtr(), ublas::range(coord[2], coord[3]));
+        ublas::vector_range<SparseVect> subX(*x.getSparsePtr(), ublas::range(coord[0], coord[1]));
+
+        if (init)
+          noalias(subY) = a * subX;
+        else
+          noalias(subY) += a * subX;
+      }
+      else // y sparse, x dense => fails
+        SiconosVectorException::selfThrow("SiconosVector::subscal(a,dense,sparse) not allowed.");
+    }
+  }
+}

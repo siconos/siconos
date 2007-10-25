@@ -143,30 +143,12 @@ public:
    */
   void computeG(double, unsigned int = 0);
 
-  /** to compute y = h(q,v,t) using plug-in mechanism, with free DS states.
-   * \param: double, current time
-   */
-  void computeHFree(double);
-
-  /** to compute G using plug-in mechanism, with free DS states.. Index shows which G is to be computed
-   * \param: double, current time
-   * \param: unsigned int
-   */
-  void computeGFree(double, unsigned int = 0);
-
   /** to compute output
    *  \param Interaction : the interaction that owns y
    *  \param double : current time
    *  \param unsigned int: number of the derivative to compute, optional, default = 0.
    */
   void computeOutput(double, unsigned int = 0);
-
-  /** to compute y for the free state
-   *  \param Interaction : the interaction that owns y
-   *  \param double : current time
-   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
-   */
-  void computeFreeOutput(double, unsigned int = 0);
 
   /** to compute p
    *  \param Interaction : the interaction that owns lambda

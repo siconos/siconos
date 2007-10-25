@@ -400,6 +400,16 @@ public:
    */
   friend void scal(double, const SiconosVector&, SiconosVector&, bool = true);
 
+  /** multiplication of a vector by a scalar, sub_y = a*sub_x (init = true) or sub_y += a*sub_x (init = false)
+   *  \param a, a double
+   *  \param x, a SiconosVector (IN)
+   *  \param y, a SiconosVector (IN-OUT)
+      \param a std::vector<unsigned int> = [r0x r1x r0y r1y];
+      subX is the sub-vector of x, for row numbers between r0x and r1x-1.
+      The same for y with riy.
+   *  \param init, a bool, default = true
+   */
+  friend void subscal(double, const SiconosVector&, SiconosVector&, const std::vector<unsigned int>&, bool = true);
 
 };
 #endif

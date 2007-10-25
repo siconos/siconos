@@ -72,6 +72,8 @@ private:
   CPPUNIT_TEST(testOperators8Bis);
   CPPUNIT_TEST(testOperators8Ter);
   CPPUNIT_TEST(testOperators8_4);
+  CPPUNIT_TEST(testOperators8_5);
+  CPPUNIT_TEST(testOperators8_6);
   CPPUNIT_TEST(testOperators9);
   CPPUNIT_TEST(testOperators9Bis);
   CPPUNIT_TEST(testOperators9Ter);
@@ -128,6 +130,8 @@ private:
   void testOperators8Bis();
   void testOperators8Ter();
   void testOperators8_4();
+  void testOperators8_5();
+  void testOperators8_6();
   void testOperators9();
   void testOperators9Bis();
   void testOperators9Ter();

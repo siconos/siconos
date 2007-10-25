@@ -182,70 +182,6 @@ void LagrangianCompliantR::computeG(double time, unsigned int  index)
   }
 }
 
-void LagrangianCompliantR::computeHFree(double time)
-{
-  if (isPlugged["h"])
-  {
-    // get vector y of the current interaction
-    SiconosVector *y = interaction->getYPtr(0);
-    SiconosVector *lambda = interaction->getLambdaPtr(0);
-
-    // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    *workX = *data["q0Free"];
-    *workZ = *data["z"];
-    *workY = *y;
-    *workL = *lambda;
-
-    unsigned int sizeQ = workX->size();
-    unsigned int sizeY = y->size();
-    unsigned int sizeZ = workZ->size();
-
-    if (hPtr == NULL)
-      RuntimeException::selfThrow("LagrangianCompliantR:computeH() failed, h is not linked to a plugin function");
-    hPtr(sizeQ, &(*workX)(0), sizeY, &(*workL)(0), &(*workY)(0), sizeZ, &(*workZ)(0));
-
-    // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *workZ;
-    *y = *workY;
-  }
-}
-
-void LagrangianCompliantR::computeGFree(double time, unsigned int  index)
-{
-  if (index >= G.size())
-    RuntimeException::selfThrow("LagrangianCompliantR:: computeG(index), index out of range.");
-
-  string name = "G" + toString<unsigned int>(index);
-
-  if (isPlugged[name])
-  {
-    // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    *workX = *data["q0Free"];
-    *workZ = *data["z"];
-
-    unsigned int sizeY = G[0]->size(0);
-    unsigned int sizeQ = workX->size();
-    unsigned int sizeZ = workZ->size();
-
-    // get vector lambda of the current interaction
-    *workL = *interaction->getLambdaPtr(0);
-    if (index == 0)
-    {
-      if (G0Ptr == NULL)
-        RuntimeException::selfThrow("LagrangianCompliantR::computeG() is not linked to a plugin function");
-      G0Ptr(sizeQ, &(*workX)(0), sizeY, &(*workL)(0), &(*G[0])(0, 0), sizeZ, &(*workZ)(0));
-    }
-    else if (index == 1)
-    {
-      if (G1Ptr == NULL)
-        RuntimeException::selfThrow("LagrangianCompliantR::computeG() is not linked to a plugin function");
-      G1Ptr(sizeQ, &(*workX)(0), sizeY, &(*workL)(0), &(*G[1])(0, 0), sizeZ, &(*workZ)(0));
-    }
-    // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *workZ;
-  }
-}
-
 void LagrangianCompliantR::computeOutput(double time, unsigned int derivativeNumber)
 {
   if (derivativeNumber == 0)
@@ -264,24 +200,6 @@ void LagrangianCompliantR::computeOutput(double time, unsigned int derivativeNum
     }
     else if (derivativeNumber == 2)
       prod(*G[0], *data["q2"], *y); // Approx: y[2] = G0q[2], other terms are neglected ...
-    else
-      RuntimeException::selfThrow("LagrangianR2::computeOutput(time,index), index out of range or not yet implemented.");
-  }
-}
-
-void LagrangianCompliantR::computeFreeOutput(const double time, const unsigned int derivativeNumber)
-{
-  if (derivativeNumber == 0)
-    computeHFree(time);
-  else
-  {
-    SiconosVector *y = interaction->getYPtr(derivativeNumber);
-    computeGFree(time, 0);
-    computeGFree(time, 1);
-    if (derivativeNumber == 1)
-      prod(*G[0], *data["q1Free"], *y);
-    else if (derivativeNumber == 2)
-      prod(*G[0], *data["q2"], *y);
     else
       RuntimeException::selfThrow("LagrangianR2::computeOutput(time,index), index out of range or not yet implemented.");
   }

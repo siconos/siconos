@@ -75,6 +75,12 @@ private:
   /** Absolute position in the "global" vector of constraints (for example, the one handled by lsodar) */
   unsigned int absolutePostion;
 
+  /** work vector to save pointers to state-related data of the dynamical systems involved in the UR.*/
+  SiconosVector* workX;
+
+  /** work vector to save pointers to z data of the dynamical systems involved in the UR.*/
+  SiconosVector* workZ;
+
   /** default constructor
    */
   UnitaryRelation();
@@ -226,6 +232,18 @@ public:
    */
   DynamicalSystemsSet * getDynamicalSystemsPtr() ;
 
+  /** To initialize the UR: mainly to set work vectors.
+   */
+  void initialize(const std::string&);
+
+  /* to set workX content.
+   \param a SiconosVector* to be inserted into workX
+  */
+  inline void insertInWorkX(SiconosVector * newX)
+  {
+    workX->insertPtr(newX);
+  };
+
   /** gets the matrix used in block computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to ds.
    *  \param a pointer to a dynamical system
@@ -247,13 +265,14 @@ public:
    */
   void getExtraBlock(SiconosMatrix *) const;
 
-  /** computes free value of y
+  /** To compute a part of the "q" vector of the OSNS
    *  \param a double (current time)
    *  \param unsigned int: derivative order for y
    *  \param string: simulation type
-   *  \param pointer to SiconosVector (in-out parameter), result
+   *  \param yOut pointer to SiconosVector (in-out parameter), result
+   *  \param unsigned int, the position of the first element of yOut to be set
    */
-  void computeEquivalentY(double, unsigned int, const std::string&, SiconosVector*);
+  void computeEquivalentY(double, unsigned int, const std::string&, SiconosVector*, unsigned int);
 };
 
 #endif // UNITARYRELATION_H

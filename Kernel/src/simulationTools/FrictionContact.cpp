@@ -197,6 +197,54 @@ void FrictionContact::initialize()
   // get topology
   Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
+
+  // The maximum size of the LCP, ie the number of possible scalar constraints declared in the topology.
+  unsigned int maxSize = topology->getNumberOfConstraints();
+
+  // Memory allocation for w, M, z and q
+  if (w == NULL)
+  {
+    w = new SimpleVector(maxSize);
+    isWAllocatedIn = true;
+  }
+  else
+  {
+    if (w->size() != maxSize)
+      w->resize(maxSize);
+  }
+  if (z == NULL)
+  {
+    z = new SimpleVector(maxSize);
+    isZAllocatedIn = true;
+  }
+  else
+  {
+    if (z->size() != maxSize)
+      z->resize(maxSize);
+  }
+  if (M == NULL)
+  {
+    M = new SimpleMatrix(maxSize, maxSize);
+    isMAllocatedIn = true;
+  }
+  else
+  {
+    if (M->size(0) != maxSize || M->size(1) != maxSize)
+      M->resize(maxSize, maxSize);
+  }
+  if (q == NULL)
+  {
+    q = new SimpleVector(maxSize);
+    isQAllocatedIn = true;
+  }
+  else
+  {
+    if (q->size() != maxSize)
+      q->resize(maxSize);
+  }
+  w->zero();
+  z->zero();
+
   // if all relative degrees are equal to 0 or 1
   if (topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty())
     assembleM();
@@ -295,19 +343,8 @@ void FrictionContact::assembleM() //
   //
   // See updateBlocks function for more details.
 
-  // === Memory allocation, if required ===
-  if (M == NULL)
-  {
-    M = new SimpleMatrix(sizeOutput, sizeOutput);
-    isMAllocatedIn = true;
-  }
-  else if (M->size(0) != sizeOutput || M->size(1) != sizeOutput)
-  {
-    // reset M matrix if it has a wrong size
-    if (isMAllocatedIn) delete M;
-    M = new SimpleMatrix(sizeOutput, sizeOutput);
-    isMAllocatedIn = true;
-  }
+  if (M->size(0) != sizeOutput || M->size(1) != sizeOutput)
+    M->resize(sizeOutput, sizeOutput);
   M->zero();
 
   // Get index set 1 from Simulation
@@ -339,46 +376,25 @@ void FrictionContact::assembleM() //
 void FrictionContact::computeQ(const double time)
 {
 
-  // === Memory allocation, if required ===
-  if (q == NULL)
-  {
-    q = new SimpleVector(sizeOutput);
-    isQAllocatedIn = true;
-  }
-  else if (q->size() != sizeOutput)
-  {
-    // reset q if it has a wrong size
-    if (isQAllocatedIn) delete q;
-    q = new SimpleVector(sizeOutput);
-    isQAllocatedIn = true;
-  }
+  if (q->size() != sizeOutput)
+    q->resize(sizeOutput);
   q->zero();
 
   // === Get index set from Simulation ===
   UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
-  SimpleVector * yOut;
 
   // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
 
   unsigned int pos = 0;
-  unsigned int nsLawSize;
   UnitaryRelationsIterator itCurrent, itLiked;
   string simulationType = simulation->getType();
   for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
   {
     // *itCurrent is a UnitaryRelation*.
 
-    // Compute free output, this depends on the type of non smooth problem, on the relation type and on the non smooth law
-    nsLawSize = (*itCurrent)->getNonSmoothLawSize();
-    yOut = new SimpleVector(nsLawSize);
-
-    (*itCurrent)->computeEquivalentY(time, levelMin, simulationType, yOut); // free output is saved in y
-
+    // Compute q, this depends on the type of non smooth problem, on the relation type and on the non smooth law
     pos = blocksPositions[*itCurrent];
-    // Copy yOut at the right position in q.
-    for (unsigned int i = 0; i < yOut->size(); i++)
-      (*q)(i + pos) = (*yOut)(i);
-    delete yOut;
+    (*itCurrent)->computeEquivalentY(time, levelMin, simulationType, q, pos); // free output is saved in y
   }
 }
 
@@ -393,30 +409,14 @@ void FrictionContact::preCompute(const double time)
     assembleM();
     computeQ(time);
     // check z and w sizes and reset if necessary
-    if (z == NULL)
+    if (z->size() != sizeOutput)
     {
-      z = new SimpleVector(sizeOutput);
-      isZAllocatedIn = true;
-    }
-    else if (z->size() != sizeOutput)
-    {
-      // reset z if it has a wrong size
-      if (isZAllocatedIn) delete z;
-      z = new SimpleVector(sizeOutput);
-      isZAllocatedIn = true;
+      z->resize(sizeOutput, false);
     }
 
-    if (w == NULL)
+    if (w->size() != sizeOutput)
     {
-      w = new SimpleVector(sizeOutput);
-      isWAllocatedIn = true;
-    }
-    else if (w->size() != sizeOutput)
-    {
-      // reset w if it has a wrong size
-      if (isWAllocatedIn) delete w;
-      w = new SimpleVector(sizeOutput);
-      isWAllocatedIn = true;
+      w->resize(sizeOutput);
     }
     w->zero();
     z->zero();

@@ -679,6 +679,17 @@ public:
   */
   friend void prod(const SiconosVector&, const SiconosMatrix&, SiconosVector&, bool = true);
 
+  /** subprod(A, x, y) computes sub_y = sub_A*sub_x or sub_y += sub_A*sub_x if init = false
+      \param a SiconosMatrix, A (in)
+      \param a SiconosVector, x (in)
+      \param a SiconosVector, y (in-out)
+      \param a std::vector<unsigned int> = [r0A r1A c0A c1A r0x r1x r0y r1y];
+      subA is the sub-matrix of A, for row numbers between r0A and r1A-1 and columns between c0A and c1A-1;
+      The same for x and y with rix and riy.
+      \param init, a bool (default = true)
+  */
+  friend void subprod(const SiconosMatrix&, const SiconosVector&, SiconosVector&, const std::vector<unsigned int>&, bool = true);
+
   /** computes y = A*x (init = true) or y += A*x (init = false)
       \param a SiconosMatrix, A (in)
       \param a SiconosVector, x (in)

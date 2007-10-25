@@ -104,7 +104,6 @@ class DynamicalSystem;
  * About notation:
  *    - q[i] is the derivative number i of q.
  * Thus: q[0]=\f$ q \f$, global coordinates, q[1]=\f$ \dot q\f$, velocity, q[2]=\f$ \ddot q \f$, acceleration.
- *    - qFree is the state of the system when non-smooth effects are not taken into account. If required they are saved in workVector.
  *
  *
  */
@@ -280,11 +279,6 @@ public:
    */
   virtual bool checkDynamicalSystem();
 
-  /** initialization of qFree, vFree
-   *  \param a string: the simulation type. For TimeStepping: memory allocation. For EventDriven: links (pointers) to q and velocity.
-   */
-  void initFreeVectors(const std::string&);
-
   /** allocate memory for p[...] vectors
    *  \param string: simulation type
    */
@@ -388,34 +382,6 @@ public:
    */
   void setQ0Ptr(SiconosVector *newPtr);
 
-  // -- qFree --
-
-  /** get the value of qFree[0]
-   *  \return SimpleVector
-   */
-  inline const SimpleVector getQFree() const
-  {
-    return *workVector.find("qFree")->second;
-  }
-
-  /** get qFree[0]
-   *  \return pointer on a SiconosVector
-   */
-  inline SiconosVector* getQFreePtr() const
-  {
-    return workVector.find("qFree")->second;
-  }
-
-  /** set the value of qFree[0] to newValue
-   *  \param SiconosVector newValue
-   */
-  void setQFree(const SiconosVector&);
-
-  /** set QFree to pointer newPtr
-   *  \param SiconosVector * newPtr
-   */
-  void setQFreePtr(SiconosVector *newPtr);
-
   // Q memory
 
   /** get the value of qMemory
@@ -499,34 +465,6 @@ public:
    *  \param SiconosVector * newPtr
    */
   void setVelocity0Ptr(SiconosVector *newPtr) ;
-
-  // -- velocityFree --
-
-  /** get the value of velocityFree
-   *  \return SimpleVector
-   */
-  inline const SimpleVector getVelocityFree() const
-  {
-    return *workVector.find("velocityFree")->second;
-  }
-
-  /** get velocityFree
-   *  \return pointer on a SiconosVector
-   */
-  inline SiconosVector* getVelocityFreePtr() const
-  {
-    return workVector.find("velocityFree")->second;
-  }
-
-  /** set the value of velocityFree to newValue
-   *  \param SiconosVector newValue
-   */
-  void setVelocityFree(const SiconosVector&);
-
-  /** set VelocityFree to pointer newPtr
-   *  \param SiconosVector * newPtr
-   */
-  void setVelocityFreePtr(SiconosVector *newPtr);
 
   // -- acceleration --
 

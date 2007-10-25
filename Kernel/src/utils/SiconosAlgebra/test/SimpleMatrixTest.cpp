@@ -2287,6 +2287,322 @@ void SimpleMatrixTest::testOperators8_4() // C += A*B
   cout << "-->  test operators8_4 ended with success." << endl;
 }
 
+void SimpleMatrixTest::testOperators8_5()
+{
+  // == Test subprod ==
+
+  cout << "--> Test: operator8_5." << endl;
+  std::vector<unsigned int> coord(8);
+  SiconosVector * x1 = new SimpleVector(2);
+  SiconosVector * x2 = new SimpleVector(3);
+  SiconosVector * x3 = new SimpleVector(5);
+  SiconosVector * y = new SimpleVector(size);
+  SiconosVector * x = new BlockVector();
+  SiconosVector * v = new SimpleVector(size);
+  x->insertPtr(x1);
+  x->insertPtr(x2);
+  x->insertPtr(x3);
+  for (unsigned int i = 0 ; i < size; ++i)
+  {
+    (*x)(i) = (double)i + 3;
+    (*v)(i) = (double)i + 3;
+  }
+
+  // v == x but x is a 3-blocks vector.
+
+  // Simple = Simple * Simple, all dense
+  // subprod but with full matrix/vectors
+  coord[0] = 0;
+  coord[1] = size;
+  coord[2] = 0;
+  coord[3] = size;
+  coord[4] = 0;
+  coord[5] = size;
+  coord[6] = 0;
+  coord[7] = size;
+  subprod(*A, *v, *y, coord, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", norm_inf(*y->getDensePtr() - prod(*A->getDensePtr(), *v->getDensePtr())) < tol, true);
+
+  // Simple = Simple * Block, all dense
+  // subprod but with full matrix/vectors
+  subprod(*A, *x, *y, coord, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", norm_inf(*y->getDensePtr() - prod(*A->getDensePtr(), *v->getDensePtr())) < tol, true);
+
+  coord[0] = 0;
+  coord[1] = 2;
+  coord[2] = 1;
+  coord[3] = 3;
+  coord[4] = 3;
+  coord[5] = 5;
+  coord[6] = 2;
+  coord[7] = 4;
+  y->zero();
+  // Simple = Simple * Simple, all dense
+  subprod(*A, *v, *y, coord, true);
+  double res = (*A)(0, 1) * (*v)(3) + (*A)(0, 2) * (*v)(4);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(2)) < tol, true);
+  res = (*A)(1, 1) * (*v)(3) + (*A)(1, 2) * (*v)(4);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(3)) < tol, true);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    if (i != 2 && i != 3)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs((*y)(i)) < tol, true);
+  }
+  y->zero();
+  // Simple = Simple * Block, all dense
+  subprod(*A, *x, *y, coord, true);
+  res = (*A)(0, 1) * (*x)(3) + (*A)(0, 2) * (*x)(4);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(2)) < tol, true);
+  res = (*A)(1, 1) * (*x)(3) + (*A)(1, 2) * (*x)(4);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(3)) < tol, true);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    if (i != 2 && i != 3)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs((*y)(i)) < tol, true);
+  }
+  //   // Others ...
+  // Triang
+
+  SiconosMatrix * A2 = new SimpleMatrix(10, 10, TRIANGULAR);
+  for (unsigned i = 0; i < A2->size(0); ++ i)
+    for (unsigned j = i; j < A2->size(1); ++ j)
+      (*A2)(i, j) = 3 * i + j;
+
+  subprod(*A2, *v, *y, coord, true);
+  res = (*A2)(0, 1) * (*v)(3) + (*A2)(0, 2) * (*v)(4);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(2)) < tol, true);
+  res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(3)) < tol, true);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    if (i != 2 && i != 3)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs((*y)(i)) < tol, true);
+  }
+  // Sym
+  delete A2;
+  A2 = new SimpleMatrix(10, 10, SYMMETRIC);
+  for (unsigned i = 0; i < A2->size(0); ++ i)
+    for (unsigned j = i; j < A2->size(1); ++ j)
+      (*A2)(i, j) = 3 * i + j;
+
+  subprod(*A2, *v, *y, coord, true);
+  res = (*A2)(0, 1) * (*v)(3) + (*A2)(0, 2) * (*v)(4);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(2)) < tol, true);
+  res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(3)) < tol, true);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    if (i != 2 && i != 3)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs((*y)(i)) < tol, true);
+  }
+
+  // Sparse
+  delete A2;
+  A2 = new SimpleMatrix(10, 10, SPARSE);
+  for (unsigned i = 0; i < A2->size(0); ++ i)
+    for (unsigned j = i; j < A2->size(1); ++ j)
+      A2->setValue(i, j, 3 * i + j);
+
+  subprod(*A2, *v, *y, coord, true);
+  res = (*A2)(0, 1) * (*v)(3) + (*A2)(0, 2) * (*v)(4);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(2)) < tol, true);
+  res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(3)) < tol, true);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    if (i != 2 && i != 3)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs((*y)(i)) < tol, true);
+  }
+
+  // Banded
+  A2 = new SimpleMatrix(10, 10, BANDED);
+  for (signed i = 0; i < signed(A2->size(0)); ++ i)
+    for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(A2->size(1))); ++ j)
+      (*A2)(i, j) = 3 * i + j;
+  subprod(*A2, *v, *y, coord, true);
+  res = (*A2)(0, 1) * (*v)(3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(2)) < tol, true);
+  res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(3)) < tol, true);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    if (i != 2 && i != 3)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs((*y)(i)) < tol, true);
+  }
+
+  delete A2;
+  delete x1;
+  delete x2;
+  delete x3;
+  delete y;
+  delete v;
+  delete x;
+  cout << "-->  test operators8_5 ended with success." << endl;
+}
+
+void SimpleMatrixTest::testOperators8_6()
+{
+  // == Test subprod, with += ==
+
+  cout << "--> Test: operator8_6." << endl;
+  std::vector<unsigned int> coord(8);
+  SiconosVector * x1 = new SimpleVector(2);
+  SiconosVector * x2 = new SimpleVector(3);
+  SiconosVector * x3 = new SimpleVector(5);
+  SiconosVector * y = new SimpleVector(size);
+  SiconosVector * x = new BlockVector();
+  SiconosVector * v = new SimpleVector(size);
+  x->insertPtr(x1);
+  x->insertPtr(x2);
+  x->insertPtr(x3);
+  for (unsigned int i = 0 ; i < size; ++i)
+  {
+    (*x)(i) = (double)i + 3;
+    (*v)(i) = (double)i + 3;
+  }
+
+  // v == x but x is a 3-blocks vector.
+
+  *y = *v;
+
+  // Simple = Simple * Simple, all dense
+  // subprod but with full matrix/vectors
+  coord[0] = 0;
+  coord[1] = size;
+  coord[2] = 0;
+  coord[3] = size;
+  coord[4] = 0;
+  coord[5] = size;
+  coord[6] = 0;
+  coord[7] = size;
+  subprod(*A, *v, *y, coord, false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", norm_inf(*y->getDensePtr() - prod(*A->getDensePtr(), *v->getDensePtr()) - *v->getDensePtr()) < tol, true);
+
+  // Simple = Simple * Block, all dense
+  // subprod but with full matrix/vectors
+  *y = *v;
+  subprod(*A, *x, *y, coord, false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", norm_inf(*y->getDensePtr() - prod(*A->getDensePtr(), *v->getDensePtr()) - *v->getDensePtr()) < tol, true);
+
+  coord[0] = 0;
+  coord[1] = 2;
+  coord[2] = 1;
+  coord[3] = 3;
+  coord[4] = 3;
+  coord[5] = 5;
+  coord[6] = 2;
+  coord[7] = 4;
+
+  // Simple = Simple * Simple, all dense
+  *y = *v;
+  subprod(*A, *v, *y, coord, false);
+  double res = (*A)(0, 1) * (*v)(3) + (*A)(0, 2) * (*v)(4) + (*v)(2);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(2)) < tol, true);
+  res = (*A)(1, 1) * (*v)(3) + (*A)(1, 2) * (*v)(4) + (*v)(3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(3)) < tol, true);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    if (i != 2 && i != 3)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs((*y)(i) - (*v)(i)) < tol, true);
+  }
+  *y = *v;
+  // Simple = Simple * Block, all dense
+  subprod(*A, *x, *y, coord, false);
+  res = (*A)(0, 1) * (*x)(3) + (*A)(0, 2) * (*x)(4) + (*v)(2);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(2)) < tol, true);
+  res = (*A)(1, 1) * (*x)(3) + (*A)(1, 2) * (*x)(4) + (*v)(3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(3)) < tol, true);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    if (i != 2 && i != 3)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs((*y)(i) - (*v)(i)) < tol, true);
+  }
+
+  //   // Others ...
+  // Triang
+
+  SiconosMatrix * A2 = new SimpleMatrix(10, 10, TRIANGULAR);
+  for (unsigned i = 0; i < A2->size(0); ++ i)
+    for (unsigned j = i; j < A2->size(1); ++ j)
+      (*A2)(i, j) = 3 * i + j;
+
+  *y = *v;
+  subprod(*A2, *v, *y, coord, false);
+  res = (*A2)(0, 1) * (*v)(3) + (*A2)(0, 2) * (*v)(4) + (*v)(2);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(2)) < tol, true);
+  res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4) + (*v)(3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(3)) < tol, true);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    if (i != 2 && i != 3)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs((*y)(i) - (*v)(i)) < tol, true);
+  }
+
+  // Sym
+  delete A2;
+  A2 = new SimpleMatrix(10, 10, SYMMETRIC);
+  for (unsigned i = 0; i < A2->size(0); ++ i)
+    for (unsigned j = i; j < A2->size(1); ++ j)
+      (*A2)(i, j) = 3 * i + j;
+
+  *y = *v;
+  subprod(*A2, *v, *y, coord, false);
+  res = (*A2)(0, 1) * (*v)(3) + (*A2)(0, 2) * (*v)(4) + (*v)(2);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(2)) < tol, true);
+  res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4) + (*v)(3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(3)) < tol, true);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    if (i != 2 && i != 3)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs((*y)(i) - (*v)(i)) < tol, true);
+  }
+
+  // Sparse
+  delete A2;
+  A2 = new SimpleMatrix(10, 10, SPARSE);
+  for (unsigned i = 0; i < A2->size(0); ++ i)
+    for (unsigned j = i; j < A2->size(1); ++ j)
+      A2->setValue(i, j, 3 * i + j);
+
+  *y = *v;
+  subprod(*A2, *v, *y, coord, false);
+  res = (*A2)(0, 1) * (*v)(3) + (*A2)(0, 2) * (*v)(4) + (*v)(2);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(2)) < tol, true);
+  res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4) + (*v)(3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(3)) < tol, true);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    if (i != 2 && i != 3)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs((*y)(i) - (*v)(i)) < tol, true);
+  }
+
+  // Banded
+  A2 = new SimpleMatrix(10, 10, BANDED);
+  for (signed i = 0; i < signed(A2->size(0)); ++ i)
+    for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(A2->size(1))); ++ j)
+      (*A2)(i, j) = 3 * i + j;
+  *y = *v;
+  subprod(*A2, *v, *y, coord, false);
+  res = (*A2)(0, 1) * (*v)(3) + (*v)(2);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(2)) < tol, true);
+  res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4) + (*v)(3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(3)) < tol, true);
+  for (unsigned int i = 0; i < size; ++i)
+  {
+    if (i != 2 && i != 3)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs((*y)(i) - (*v)(i)) < tol, true);
+  }
+
+  delete A2;
+  delete x1;
+  delete x2;
+  delete x3;
+  delete y;
+  delete v;
+  delete x;
+  cout << "-->  test operators8_6 ended with success." << endl;
+}
+
 void SimpleMatrixTest::testOperators9()
 {
   cout << "--> Test: operator9." << endl;

@@ -77,7 +77,8 @@
                      <H matrixRowSize='1' matrixColSize='6'>
                      <row>-1.0  0.0  0.0  1.0  0.0  0.0</row>
                       </H>
-                  </LagrangianLinearRelation>
+    		      <b vectorSize='1'>-0.2</b>
+              </LagrangianLinearRelation>
                   <NewtonImpactLaw>
 		  <size>1</size>
                   <e>0.9</e>
@@ -92,7 +93,8 @@
                      <H matrixRowSize='1' matrixColSize='6'>
                      <row>-1.0  0.0  0.0  1.0  0.0  0.0</row>
                       </H>
-                  </LagrangianLinearRelation>
+         		      <b vectorSize='1'>-0.2</b>
+            </LagrangianLinearRelation>
                   <NewtonImpactLaw>
 		  <size>1</size>
                   <e>0.9</e>

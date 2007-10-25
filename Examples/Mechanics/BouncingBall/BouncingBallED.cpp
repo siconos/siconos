@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
     s->setPrintStat(true);
     s->initialize();
 
-    int N = 1848; // Number of saved points: depends on the number of events ...
+    int N = 1854; // Number of saved points: depends on the number of events ...
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot

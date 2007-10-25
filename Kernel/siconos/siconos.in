@@ -150,9 +150,9 @@ if test "$NUMERICSPATH" = ""; then
     exit 1;
 fi;
 if test "${LD_LIBRARY_PATH}test" = "test"; then
-   export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOS_SHAREPATH:$NUMERICSPATH/lib/:/usr/local/lib;  
+   export LD_LIBRARY_PATH=$SICONOSPATH/lib/siconos-kernel:$SICONOSPATH/lib:$SICONOS_SHAREPATH:$NUMERICSPATH/lib/:/usr/local/lib;  
 else
-   export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOS_SHAREPATH:$LD_LIBRARY_PATH:$NUMERICSPATH/lib:/usr/local/lib; 
+   export LD_LIBRARY_PATH=$SICONOSPATH/lib/siconos-kernel:$SICONOSPATH/lib:$SICONOS_SHAREPATH:$LD_LIBRARY_PATH:$NUMERICSPATH/lib:/usr/local/lib; 
 fi;	 
 
 if test "${silent}" = "false"; then

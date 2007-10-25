@@ -167,40 +167,6 @@ public:
    */
   virtual bool checkDynamicalSystem();
 
-  /** initialization of xFree, state of the system when non-smooth effects are ignored. Only required for Time-Stepping.
-   *  \param a string: the simulation type. For TimeStepping: memory allocation. For EventDriven: links (pointers) to q and velocity.
-   */
-  void initFreeVectors(const std::string&);
-
-  // --- XFree ---
-
-  /** get the value of xFree
-   *  \return SimpleVector
-   * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
-   */
-  inline const SimpleVector getXFree() const
-  {
-    return *workVector.find("xFree")->second;
-  }
-
-  /** get xFree
-   *  \return pointer on a SiconosVector
-   */
-  inline SiconosVector* getXFreePtr() const
-  {
-    return workVector.find("xFree")->second;
-  }
-
-  /** set the value of xFree to newValue
-   *  \param SiconosVector newValue
-   */
-  void setXFree(const SiconosVector&);
-
-  /** set xFree to pointer newPtr
-   *  \param SiconosVector * newPtr
-   */
-  void setXFreePtr(SiconosVector *);
-
   // --- R ---
 
   /** get the value of r

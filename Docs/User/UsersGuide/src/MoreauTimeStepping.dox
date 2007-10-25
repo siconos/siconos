@@ -179,7 +179,14 @@ In the following, \f$R \f$ represents the concatenation of all \f$ r^{\alpha} \f
 
 \subsubsection MTSRD_FOR First Order (non-linear) Relations
 
-\b Class: FirstOrderR.
+\b Class: FirstOrderType1R
+
+\b Class: FirstOrderType2R
+
+\b Class: FirstOrderType3R
+
+\b Class: FirstOrderType4R
+
 
 \f{eqnarray*}
  y &=& h(X,t,\lambda,Z)\\
@@ -604,7 +611,37 @@ For second order system, considering the newton-impact law for example, \f$ \mat
 
 Let \f$ \mathcal{DS} \f$ denotes the set of all dynamical systems declared in the NSDS and \f$ \mathcal{DS}^{\alpha} \subset \mathcal{DS} \f$ the set of systems involved in the interaction \f$ I_{\alpha} \f$. Finally, \f$ \mathcal{DS}^{\alpha,\beta} \f$ represents the set of systems involved in \f$I_{\alpha}\f$ and \f$ I_{\beta} \f$.
 
+Note that lower case letters are used to refer to dynamical systems and Greek letters to interactions.
+
 \subsection LCPW_FONL First Order fully non-linear case
+
+The dynamics write: 
+
+\f{eqnarray*}
+(d)\left\lbrace\begin{array}{ccl}
+x_{i+1}^{k+1} &=& x^{free,k}_{i+1} + h(W_{i+1}^k)^{-1}r_{i+1}^{k+1} \\
+\\
+r_{i+1}^{k+1} &=& \displaystyle\sum_{\beta\in \mathcal{I}_d} {r_{i+1}^{k+1}}^\beta
+\end{array}\right.
+\f}
+The index "(d)" means these relations apply for dynamical system d. 
+
+\f{eqnarray*}
+X^{\alpha}=\left[\begin{array}{c}
+x_d \\
+x_e \\
+\ldots
+\end{array}\right]&,&
+R^{\alpha}=
+\left[\begin{array}{c}
+r_d^{\alpha} \\
+r_e^{\alpha} \\
+\ldots
+\end{array}\right],
+with r_d = \sum_{\alpha} r_d^{\alpha}
+\f}
+
+
 
 Let us now consider the first order linear relation case, written for \f$I_{\alpha}\f$:
 \f{eqnarray*}

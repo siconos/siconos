@@ -496,35 +496,6 @@ void FirstOrderLinearR::computeOutput(double time, unsigned int)
     prod(*F, *data["z"], *y, false);
 }
 
-void FirstOrderLinearR::computeFreeOutput(double time, unsigned int)
-{
-  if (isPlugged["C"])
-    computeC(time);
-  if (isPlugged["D"])
-    computeD(time);
-  if (isPlugged["F"])
-    computeF(time);
-  if (isPlugged["e"])
-    computeE(time);
-  // Note that the second argument remains unamed since it is not used: for first order systems, we always compute
-  // y[0]
-
-  SiconosVector *yFree = interaction->getYPtr(0);
-  // warning : yFree is saved in y !!
-
-  // compute yFree
-  if (C != NULL)
-    prod(*C, *data["xFree"], *yFree);
-  else
-    yFree->zero();
-
-  if (e != NULL)
-    *yFree += *e;
-
-  if (F != NULL)
-    prod(*F, *data["z"], *yFree, false);
-}
-
 void FirstOrderLinearR::computeInput(double time, unsigned int level)
 {
   if (isPlugged["B"])

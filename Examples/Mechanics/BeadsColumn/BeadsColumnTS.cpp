@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
   {
 
     // User-defined main parameters
-    unsigned int dsNumber = 10;      // the number of dynamical systems
+    unsigned int dsNumber = 100;      // the number of dynamical systems
     unsigned int nDof = 3;           // degrees of freedom for beads
     double increment_position = 1;   // initial position increment from one DS to the following
     double increment_velocity = 0;   // initial velocity increment from one DS to the following
@@ -140,6 +140,7 @@ int main(int argc, char* argv[])
     // A vector that handles all the relations
     vector<Relation*> LLR(interactionNumber - 1);
     SiconosMatrix *H1 = new SimpleMatrix(1, 2 * nDof);
+    (*b)(0) = -2 * R;
     if (dsNumber > 1)
     {
       (*H1)(0, 0) = -1.0;
@@ -155,7 +156,7 @@ int main(int argc, char* argv[])
         id[i - 1] = ostr.str();
         // The relations
         // Since Ri=Rj and h=0, we do not need to set b.
-        LLR[i - 1] = new LagrangianLinearR(*H1);
+        LLR[i - 1] = new LagrangianLinearR(*H1, *b);
         checkInter = allInteractions.insert(new Interaction(id[i - 1], dsConcerned, i, interactionSize, nslaw0, LLR[i - 1]));
       }
     }

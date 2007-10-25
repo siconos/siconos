@@ -131,6 +131,24 @@ void TimeStepping::addOneStepNSProblemPtr(OneStepNSProblem* osns)
 
 void TimeStepping::initOSNS()
 {
+  // === creates links between workVector in OSI and work vector in Unitary Relations
+  OneStepIntegrator * osi;
+
+  ConstDSIterator itDS;
+  UnitaryRelationsIterator it;
+  // For each Unitary relation in I0 ...
+  for (it = indexSets[0]->begin(); it != indexSets[0]->end(); ++it)
+  {
+    (*it)->initialize("TimeStepping");
+    // creates a POINTER link between workX[ds] (xfree) and the corresponding block in each UR for each ds of the current UR.
+    for (itDS = (*it)->dynamicalSystemsBegin(); itDS != (*it)->dynamicalSystemsEnd(); ++itDS)
+    {
+      osi = osiMap[*itDS];
+      (*it)->insertInWorkX(osi->getWorkX(*itDS));
+    }
+  }
+
+
   if (!allNSProblems->empty()) // ie if some Interactions have been declared and a Non smooth problem built.
   {
     if (allNSProblems->size() > 1)

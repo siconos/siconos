@@ -206,6 +206,19 @@ However, if you give as a second argument to \e write function "noDim", the firs
 
 \subsection SAusing Using SiconosMatrix and SiconosVector
 
+<em> Important note: in many of the operators described below, a boolean argument "init" can be set. \n If equal to true (default value) then the operator used "=" and if set to 
+false, "+=". \n
+For example:</em>
+\code
+// To compute C = A*B
+prod(A,B,C,true);
+// or
+prod(A,B,C);
+
+// To compute C += A*B
+prod(A,B,C,false);
+\endcode
+
 - Matrix/vector dimension(s):
 \code
 
@@ -215,10 +228,8 @@ m->size(1), // number of columns
 m->resize(a,b); // resize m, available also for vectors
 
 \endcode
-
 - Single elements access or assignment: operator "()" or \e get/setValue functions.
 \code
-
 SiconosVector * v = new SimpleVector(3); // v = [0 0 0]
 SimpleVector w(4);  			 // w = [0 0 0 0]
 (*v)(0) = 4;				 // v = [4 0 0] 
@@ -232,7 +243,6 @@ w.setValue( 2,v->getValue(0) );
 \endcode	
 In the same way for matrices:
 \code
-
 SiconosMatrix * M = new SimpleMatrix(3,3); // M = [ 0 0 0 ]
 					   //     [ 0 0 0 ]
 					   //     [ 0 0 0 ]
@@ -247,20 +257,23 @@ M->setValue(2,0,3.6);			   // M = [  0  0  0  ]
 cout << P.getValue(0,1); // display 12.0
 
 \endcode
+<em> Note: for sparse matrices, assignment with operator "()" fails. It is then necessary to use setValue function.</em>
+\code
+SiconosMatrix * A = new SimpleMatrix(10,10,SPARSE);
+(*A)(0,0) = 12; // WRONG
+A->setValue(0,0,12); // OK
+\endcode
 For BlockVector:
 "()" and \e get/setValue functions have the same action as for SimpleVectors:
 \code
-
 // We suppose that v1 and v2 are two pointers to SimpleVector of size 3 and 4.
 SiconosVector * vB = new BlockVector(v1,v2); // vB = [ [1 2 3] [4 5 6 7] ]
 (*vB)(4) = 12; 				     // vB = [ [1 2 3] [4 12 6 7] ]
 vB->setValue(6,8.6); 		             // vB = [ [1 2 3] [4 12 6 8.6] ]	
 // Warning: the given input for position is an "absolute" one, not a block position.
-
 \endcode
 Remark: \e get/setValue functions are equivalent to "()" operator but mainly useful in Siconos-Python, since in that case operators can not be overloaded and thus
 "()" is not available. The same remark applies for "[ ]" and \e get/setVector and in a general way for all operators overloading.
-
 - Set vector or matrix to zero or identity
 \code
 x->zero();
@@ -368,6 +381,22 @@ prod(A,B,C); // Based on atlas gemm for Dense matrices and ublas::prod for other
 gemm(A,B,C); // Only for denses matrices.
 
 \endcode
+
+It is also possible to compute product of sub-blocks of matrices or vectors:
+
+\code
+
+// Declare A, x, y ...
+// 
+std::vector<unsigned int> coord;
+// Set coord values ...
+bool init = false;
+subprod(A,x,y,coord,init);
+\endcode
+
+Coord vector is equal to [r0A, r1A,, c0A, c1A, r0x, r1x, r0y, r1y]. The sub-matrix A is the matrix between row positions
+r0A and r1A, column position between c0A and c1A. Same thing for x and y with rix, riy.
+Then subprod computes suby = subA*subx if init = true, or suby += subA*subx if init = false.
 
 - Matrix transpose:
 	- in place: \f$ A = A^t \f$

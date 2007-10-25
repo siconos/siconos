@@ -25,7 +25,6 @@
 
 #include "OneStepIntegrator.h"
 #include "SimpleMatrix.h"
-#include "SimulationTypeDef.h"
 
 class Simulation;
 class SiconosMatrix;

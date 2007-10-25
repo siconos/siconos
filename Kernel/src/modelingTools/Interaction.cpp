@@ -618,11 +618,6 @@ void Interaction::computeOutput(double time, unsigned int level)
   relation->computeOutput(time, level);
 }
 
-void Interaction::computeFreeOutput(double time, unsigned int level)
-{
-  relation->computeFreeOutput(time, level);
-}
-
 void Interaction::computeInput(double time, unsigned int level)
 {
   relation->computeInput(time, level);

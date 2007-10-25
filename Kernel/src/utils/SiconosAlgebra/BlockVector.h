@@ -273,12 +273,6 @@ public:
    */
   const SiconosVector* operator [](unsigned int) const;
 
-  /** get block starting at pos (first arg) and write it into second argument.
-   *  \param an int, position of the first element of the required block
-   *  \param a SiconosVector*, in-out parameter.
-   */
-  //  void getBlock(unsigned int, SiconosVector*) const;
-
   /** get the index tab
    * \return a standard vector of int
    */
@@ -326,6 +320,12 @@ public:
   {
     return tabIndex->end();
   }
+
+  /** get the number of the vector that handles element at position "pos"
+      \param unsigned int, position of the element
+      \return unsigned int number of the searched vector
+  */
+  unsigned int getNumVectorAtPos(unsigned int) const;
 
   /** add a part of the input vector (starting from pos. i) to the current vector
    *  \param an unsigned int i (in-out)

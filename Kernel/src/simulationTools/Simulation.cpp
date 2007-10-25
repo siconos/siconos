@@ -365,6 +365,7 @@ void Simulation::initialize()
     for (unsigned int i = 1; i < indexSets.size(); ++i)
       indexSets[i] = new UnitaryRelationsSet();
   }
+
   // Initialize OneStepNSProblem: in derived classes specific functions.
   initOSNS();
 
