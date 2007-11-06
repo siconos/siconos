@@ -34,13 +34,13 @@
  *
  * Inside, we compute G, JacG and the inverse of JacG. \n
  *
- * \fn  void Compute_G
+ *   void Compute_G_AC
  *
- * \fn  void Compute_JacG
+ *   void Compute_JacG_AC
  *
- * \fn  void matrix_inv3
+ *   void matrix_inv3
  *
- * \fn void Linesearch_AC
+ *   void Linesearch_AC
  *
  * \author Houari Khenous last modification (08/10/2007)
  *
@@ -59,12 +59,10 @@
 
 
 /* Compute function G */
-void Compute_G_AC(int m, double *G, double *x , double *C, double *b, double rn, double rt, double coef)
+void Compute_G_AC(int m, double *G, double *x , double *C, double *y , double *b, double *param1, double *param2, double *param3, double rn, double rt, double coef)
 {
 
   double zn , zt, zs, num, mrn, coef2;
-  double *y;
-  y = (double*)malloc(m * sizeof(double));
 
   coef2 = coef * coef;
 
@@ -98,26 +96,17 @@ void Compute_G_AC(int m, double *G, double *x , double *C, double *b, double rn,
     G[1] = (x[1] - zt * x[0] * num) / rt;
     G[2] = (x[2] - zs * x[0] * num) / rt;
   }
-
-  free(y);
-
-
 }
 
 
 
 /* Compute Jacobian of function G */
-void Compute_JacG_AC(int m, double *JacG , double *x , double *C , double *b , double rn, double rt, double coef)
+void Compute_JacG_AC(int m, double *JacG , double *x , double *C, double *y  , double *b, double *param1, double *param2, double *param3 , double rn, double rt, double coef)
 {
 
 
   double zn , zt, zs, mrn, mrn3, coef2, num, a2, b2, ab;
-  int i, j, mm;
-  double *y;
-  double *A;
-  mm = m * m;
-  y = (double*)malloc(m * sizeof(double));
-  A = (double*)malloc(mm * sizeof(double));
+  int i, j;
 
   coef2 = coef * coef;
 
@@ -169,13 +158,9 @@ void Compute_JacG_AC(int m, double *JacG , double *x , double *C , double *b , d
     JacG[2 * m + 2] = (1 - coef * x[0] * (num * (1 - rt * C[2 * m + 2]) - zs * mrn3 * ((1 - rt * C[2 * m + 2]) * zs - rt * C[2 * m + 1] * zt))) / rt;
 
   }
-
-  free(y);
-  free(A);
-
 }
 
-//_/_/   Inverse Matrix 3x3  _/_//
+/*  Inverse Matrix 3x3  */
 void matrix_inv3(double *a, double *b)
 {
   double det;
@@ -196,12 +181,18 @@ void matrix_inv3(double *a, double *b)
 
 }
 
-void Linesearch_AC(int n, double *G, double *zz, double *ww, double *www, double *b, double *C, double *zzzz, double *wwww, double an, double at, double mu, double err1)
+/* Lineserach */
+void Linesearch_AC(int n, double *zz, double *ww, double *www, double *b, double *C, double *param1, double *param2, double *param3, double an, double at, double mu, double err1)
 {
   double err2, alpha, qs, a1;
-  int mm, incx, incy;
+  int i, incx, incy;
+  double *zzzz, *wwww, *G;
+  zzzz = (double*)malloc(n * sizeof(double));
+  wwww = (double*)malloc(n * sizeof(double));
+  G    = (double*)malloc(n * sizeof(double));
 
-  mm = n * n;
+  for (i = 0 ; i < n ; ++i)
+    zzzz[i] = wwww[i] = G[i] = 0.;
 
   incx =  1;
   incy =  1;
@@ -215,7 +206,7 @@ void Linesearch_AC(int n, double *G, double *zz, double *ww, double *www, double
     DCOPY(n , zz , incx , zzzz , incy);
     DAXPY(n , alpha , www , incx , zzzz , incy);
 
-    Compute_G_AC(n , G , zzzz , C , b , an , at , mu);
+    Compute_G_AC(n , G , zzzz , C , ww , b, param1, param2, param3 , an , at , mu);
 
     err2 = DNRM2(n, G , incx);
 
@@ -227,6 +218,11 @@ void Linesearch_AC(int n, double *G, double *zz, double *ww, double *www, double
   DCOPY(n , zzzz , incx , zz , incy);
 
   DCOPY(n , wwww , incx , ww , incy);
+
+  free(zzzz);
+  free(wwww);
+  free(G);
+
 
 }
 

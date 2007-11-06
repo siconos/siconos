@@ -78,7 +78,7 @@ int pfc_3D_solver(double *vec , double *q , int *n , method *pt , double *z , do
   for (i = 0 ; i < nb ; ++i) dparamLCP[i] = 0.0;
 
   info    = -1;
-
+  /*   printf("---------------- contact points %i -----------------\n",*n);  */
   t1 = clock();
 
   if (strcmp(pt->pfc_3D.name , pfckey1) == 0)
@@ -138,8 +138,8 @@ int pfc_3D_solver(double *vec , double *q , int *n , method *pt , double *z , do
   else printf("Warning : Unknown solving method : %s\n", pt->pfc_3D.name);
 
   t2 = clock();
-
-  //printf("%.4lf seconds of processing\n", (t2-t1)/(double)CLOCKS_PER_SEC);
+  /* printf("%.4lf seconds of processing\n", (t2-t1)/(double)CLOCKS_PER_SEC); */
+  /* printf("%.4lf \n", (t2-t1)/(double)CLOCKS_PER_SEC); */
 
   return info;
 

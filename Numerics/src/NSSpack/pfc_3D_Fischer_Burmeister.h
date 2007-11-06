@@ -22,8 +22,16 @@
  *
  *
  *
+ *   void Compute_G_FB
  *
- * \author Houari Khenous (24/09/2007)
+ *   void Compute_JacG_FB
+ *
+ *   void matrix_inv2
+ *
+ *   void Linesearch_FB
+ *
+ *
+ * \author Houari Khenous last modification (08/10/2007)
  *
  */
 
@@ -38,15 +46,15 @@
 
 
 /* Compute function G */
-void Compute_G_FB(int m, double *G, double *C, double *y , double *x , double *b, double *Ip, double *IP, double *I3, double coef21 , double r, double coef);
+void Compute_G_FB(int m, double *G , double *y , double *C , double *x , double *b, double *Ip , double *IP, double *I3, double coef3 , double coef21, double coef);
 
 
 
 /* Compute Jacobian of function G */
-void Compute_JacG_FB(int m, double *JacG , double *C , double *y , double *x , double *Ip , double *IP, double *I3, double coef3 , double coef21, double coef);
+void Compute_JacG_FB(int m, double *JacG , double *y , double *C , double *x , double *b, double *Ip , double *IP, double *I3, double coef3 , double coef21, double coef);
 
-//_/_/   Inverse Matrix 3x3  _/_//
+/*  Inverse Matrix 2x2  */
 void matrix_inv2(double *a, double *b);
 
-
-void Linesearch_FB(int n, double *Ip, double *zz, double *ww, double *www, double *b, double *C, double *IP, double *I3, double coef21, double coef3, double mu, double err1);
+/* Lineserach */
+void Linesearch_FB(int n, double *zz, double *ww, double *www, double *b, double *C, double *Ip, double *IP, double *I3, double coef21, double coef3, double mu, double err1);

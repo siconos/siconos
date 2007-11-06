@@ -59,7 +59,7 @@
 #include <time.h>
 
 
-void pfc_3D_projection(int n , double *C , double *b , double *zz , double *ww , double coef , void (*Compute_G), void (*Compute_JacG), int *iparam_local , double *dparam_local)
+void pfc_3D_projection(int n , double *C , double *b , double *zz , double *ww , double coef , void (*Compute_G), void (*Compute_JacG), double *param1, double *param2, double *param3, int *iparam_local , double *dparam_local)
 {
 
   double mrn, num, coef2;

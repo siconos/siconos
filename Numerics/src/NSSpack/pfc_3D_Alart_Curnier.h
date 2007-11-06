@@ -43,14 +43,15 @@
 
 
 /* Compute function G */
-void Compute_G_AC(int m, double *G, double *x , double *C, double *b, double rn, double rt, double coef);
+void Compute_G_AC(int m, double *G, double *x , double *C, double *y, double *b, double *param1, double *param2, double *param3, double rn, double rt, double coef);
 
 /* Compute Jacobian of function G */
-void Compute_JacG_AC(int m, double *JacG , double *x ,  double *C , double *b , double rn, double rt, double coef);
+void Compute_JacG_AC(int m, double *JacG , double *x ,  double *C , double *y, double *b , double *param1, double *param2, double *param3, double rn, double rt, double coef);
 
 
-//_/_/   Inverse Matrix 3x3  _/_//
+/*  Inverse Matrix 3x3  */
 void matrix_inv3(double *a, double *b);
 
 
-void Linesearch_AC(int n, double *G, double *zz, double *ww, double *www, double *b, double *C, double *zzzz, double *wwww, double an, double at, double mu, double err1);
+/* Lineserach */
+void Linesearch_AC(int n, double *zz, double *ww, double *www, double *b, double *C, double *param1, double *param2, double *param3, double an, double at, double mu, double err1);

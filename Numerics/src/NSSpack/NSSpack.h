@@ -293,14 +293,14 @@ typedef struct
 } SparseBlockStructuredMatrix;
 
 
-typedef void (*Compute_G_function)(int m, double *G, double *x , double *C, double *b,
-                                   double rn, double rt, double coef);
+typedef void (*Compute_G_function)(int m, double *G, double *x , double *C, double *ww, double *b,
+                                   double *param1, double *param2, double *param3,  double rn, double rt, double coef);
 
-typedef void (*Compute_JacG_function)(int m, double *JacG , double *x , double *C, double *b ,
-                                      double rn, double rt, double coef);
+typedef void (*Compute_JacG_function)(int m, double *JacG , double *x , double *C, double *ww , double *b ,
+                                      double *param1, double *param2, double *param3,   double rn, double rt, double coef);
 
-typedef void (*Linesearch_function)(int n, double *G, double *zz, double *ww, double *www, double *b, double *C,
-                                    double *zzzz, double *wwww, double an, double at, double mu, double err1);
+typedef void (*Linesearch_function)(int n, double *zz, double *ww, double *www, double *b, double *C,
+                                    double *param1, double *param2, double *param3, double an, double at, double mu, double err1);
 
 
 /*
@@ -402,9 +402,9 @@ extern "C" void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z 
 
 extern "C" void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
 
-extern "C" void pfc_3D_newton(int n , double *C , double *b , double *zz , double *ww , double mu , Compute_G_function(*Compute_G), Compute_JacG_function(*Compute_JacG), int *iparam_local , double *dparam_local);
+extern "C" void pfc_3D_newton(int n , double *C , double *b , double *zz , double *ww , double mu , Compute_G_function(*Compute_G), Compute_JacG_function(*Compute_JacG), double *param1, double *param2, double *param3, int *iparam_local , double *dparam_local);
 
-extern "C" void pfc_3D_projection(int n , double *C , double *b , double *zz , double *ww , double mu , Compute_G_function(*Compute_G), Compute_JacG_function(*Compute_JacG), int *iparam_local , double *dparam_local);
+extern "C" void pfc_3D_projection(int n , double *C , double *b , double *zz , double *ww , double mu , Compute_G_function(*Compute_G), Compute_JacG_function(*Compute_JacG), double *param1, double *param2, double *param3, int *iparam_local , double *dparam_local);
 
 /* ******************************************* */
 extern "C" int pr_solver(double* , double* , int* , method* , double* , double*);
@@ -739,9 +739,9 @@ extern void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , do
 
 extern void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
 
-extern void pfc_3D_newton(int n , double *C , double *b , double *zz , double *ww , double mu ,  Compute_G_function(*Compute_G), Compute_JacG_function(*Compute_JacG), int *iparam_local , double *dparam_local);
+extern void pfc_3D_newton(int n , double *C , double *b , double *zz , double *ww , double mu ,  Compute_G_function(*Compute_G), Compute_JacG_function(*Compute_JacG), double *param1, double *param2, double *param3, int *iparam_local , double *dparam_local);
 
-extern void pfc_3D_projection(int n , double *C , double *b , double *zz , double *ww , double mu , Compute_G_function(*Compute_G), Compute_JacG_function(*Compute_JacG), int *iparam_local , double *dparam_local);
+extern void pfc_3D_projection(int n , double *C , double *b , double *zz , double *ww , double mu , Compute_G_function(*Compute_G), Compute_JacG_function(*Compute_JacG), double *param1, double *param2, double *param3, int *iparam_local , double *dparam_local);
 
 /* ************************* DFC 2D **************************************** */
 

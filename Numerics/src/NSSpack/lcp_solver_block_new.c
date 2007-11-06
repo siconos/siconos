@@ -119,7 +119,7 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
   /*  double *ww;*/
 
   *it_end   = 0;
-  *itt_end   = 0;
+  *itt_end  = 0;
   *res      = 0.0;
   info      = 1;
   info1     = 1;

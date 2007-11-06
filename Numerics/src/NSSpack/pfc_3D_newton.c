@@ -41,7 +41,7 @@
 
 void pfc_3D_newton(int n , double *C , double *b ,  double *zz , double *ww , double mu ,
                    Compute_G_function(*Compute_G), Compute_JacG_function(*Compute_JacG),
-                   int *iparam_local , double *dparam_local)
+                   double *param1, double *param2, double *param3, int *iparam_local , double *dparam_local)
 {
 
   int i, j, niter, mm;
@@ -49,6 +49,9 @@ void pfc_3D_newton(int n , double *C , double *b ,  double *zz , double *ww , do
   double a1, qs, alpha, beta, det;
   int incx, incy;
   double *www, *G, *JacG, *AA , *wwww, *zzzz;
+  int nrhs = 1, infoDGESV;
+  int *ipiv;
+  ipiv = (int *)malloc(n * sizeof(int));
 
   Linesearch_function Linesearch;
 
@@ -102,24 +105,56 @@ void pfc_3D_newton(int n , double *C , double *b ,  double *zz , double *ww , do
   {
     ++niter;
 
-    (*Compute_G)(n , G , zz , C , b , an , at , mu);
+    (*Compute_G)(n , G , zz , C , ww , b , param1, param2, param3 , an , at , mu);
 
-    (*Compute_JacG)(n , JacG , zz , C , b , an , at , mu);
+    (*Compute_JacG)(n , JacG , zz , C , ww , b , param1, param2, param3 , an , at , mu);
 
     nerr1 = DNRM2(n, G , incx);
 
     /***** Criterium convergence *****/
     /* compute the direction www s.t X^{k+1} = X^{k} + www, where X^{k} = za */
 
-    matrix_inv3(JacG, AA);
+    incx =  1;
+    incy =  1;
+    a1   = -1.0;
+    qs   = 1.0;
 
-    DGEMV(LA_NOTRANS , n , n , a1 , AA , n , G , incx , qs , www , incy);
+    /* compute the direction www s.t X^{k+1} = X^{k} + www, where X^{k} = ww = (wa,za) */
 
-    (*Linesearch)(n , G , zz , ww , www , b , C , zzzz, wwww , an , at , mu , nerr1);
+    DCOPY(n , G , incx , www , incy);
+    DSCAL(n , a1 , www, incx);
+    DCOPY(mm , JacG , incx , AA , incy);
+
+
+    DGESV(n, nrhs, AA, n, ipiv, www, n, infoDGESV);
+
+    /*    printf("INFO =  %i \n",infoDGESV); */
+
+    if (infoDGESV)
+    {
+      /*  printf("Problem in DGESV\n");   */
+
+      free(AA);
+      free(G);
+      free(JacG);
+      free(www);
+      free(wwww);
+      free(zzzz);
+      free(ipiv);
+
+      return;
+
+    }
+
+    /*   /\* direct inverse of 3x3 matrix *\/ */
+    /*     matrix_inv3( JacG, AA); */
+    /*     DGEMV( LA_NOTRANS , n , n , a1 , AA , n , G , incx , qs , www , incy ); */
+
+    (*Linesearch)(n , zz , ww , www , b , C , param1, param2, param3 , an , at , mu , nerr1);
     nerr = nerr1;
     for (i = 0 ; i < n ; ++i)
       www[i] = 0.;
-    /*  printf("-----------------------------------Iteration Newton %i --------- Newton Error = %14.7e\n",niter,nerr); */
+    /*     printf("-----------------------------------Iteration Newton %i --------- Newton Error = %14.7e\n",niter,nerr); */
   }
 
 
@@ -129,4 +164,5 @@ void pfc_3D_newton(int n , double *C , double *b ,  double *zz , double *ww , do
   free(www);
   free(wwww);
   free(zzzz);
+  free(ipiv);
 }
