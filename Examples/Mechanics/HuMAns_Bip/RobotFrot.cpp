@@ -221,6 +221,7 @@ int main(int argc, char* argv[])
       k++;
       cout << k << endl;
       s->newtonSolve(criterion, maxIter);
+      s->nextStep();
       dataPlot(k, 0) = s->getStartingTime();
 
       for (unsigned int i = 1; i < 22; i++)

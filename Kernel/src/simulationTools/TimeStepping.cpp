@@ -251,12 +251,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     if (!allNSProblems->empty())
       computeOneStepNSProblem("timeStepping");
     update(levelMin);
-
-    //advanceToEvent();
-    // Process all events simultaneous to nextEvent.
-    //  eventsManager->process();
     isNewtonConverge = newtonCheckConvergence(criterion);
-    // When convergence is ok, we check if all residus are lower than the criterion.
   }
 
   if (!isNewtonConverge)
@@ -264,8 +259,6 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
   updateIndexSets();
   // Process NextEvent (Save OSI (DS) and OSNS (Interactions) states into Memory vectors ...)
-  eventsManager->processEvents();
-
 }
 
 bool TimeStepping::newtonCheckConvergence(double criterion)
@@ -301,14 +294,15 @@ void TimeStepping::run(const std::string& opt, double criterion, unsigned int ma
   while (eventsManager->hasNextEvent())
   {
     if (opt == "linear")
-    {
       advanceToEvent();
-      eventsManager->processEvents();
-    }
+
     else if (opt == "Newton")
       newtonSolve(criterion, maxIter);
+
     else
       RuntimeException::selfThrow("TimeStepping::run(opt) failed. Unknow simulation option: " + opt);
+
+    eventsManager->processEvents();
     count++;
   }
   cout << "===== End of " << simulationType << "simulation. " << count << " events have been processed. ==== " << endl;

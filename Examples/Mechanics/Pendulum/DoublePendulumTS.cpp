@@ -228,6 +228,7 @@ int main(int argc, char* argv[])
 
       // Solve problem
       s->newtonSolve(criterion, maxIter);
+      s->nextStep();
       // Data Output
       dataPlot(k, 0) =  s->getStartingTime();
       dataPlot(k, 1) = (*q)(0);

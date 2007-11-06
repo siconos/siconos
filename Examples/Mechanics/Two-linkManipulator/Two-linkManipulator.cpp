@@ -195,13 +195,14 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 11;
+    unsigned int outputSize = 13;
     SimpleMatrix dataPlot(N + 1, outputSize);
     // For the initial time step:
     // time
 
     SiconosVector * q = arm->getQPtr();
     SiconosVector * v = arm->getVelocityPtr();
+    SiconosVector * p = arm->getPPtr(1);
     // EventsManager * eventsManager = s->getEventsManagerPtr();
 
     dataPlot(k, 0) =  Manipulator->getT0();
@@ -215,10 +216,8 @@ int main(int argc, char* argv[])
     dataPlot(k, 8) = (*z)(6);
     dataPlot(k, 9) = (*z)(4);
     dataPlot(k, 10) = test;
-
-    bool isNewtonConverge = false;
-    unsigned int nbNewtonStep = 0; // number of Newton iterations
-
+    dataPlot(k, 11) = (*p)(0);
+    dataPlot(k, 12) = (*p)(1);
 
     while (s->hasNextEvent())
     {
@@ -242,11 +241,10 @@ int main(int argc, char* argv[])
       dataPlot(k, 9) = (*z)(4);
       dataPlot(k, 10) = test;
 
-      isNewtonConverge = false;
-      nbNewtonStep = 0; // number of Newton iterations
-
-
       s->newtonSolve(criterion, maxIter);
+      dataPlot(k, 11) = (*p)(0);
+      dataPlot(k, 12) = (*p)(1);
+      s->nextStep();
       (*z)(4) = (inter->getLambdaOld(1))(1);
       //  controller during impacts accumulation phase before the first impact
       if ((- dataPlot(k, 0) + trunc(dataPlot(k, 0) / (*z)(11)) * (*z)(11) + (*z)(11) / 2 <= 0.1) &&

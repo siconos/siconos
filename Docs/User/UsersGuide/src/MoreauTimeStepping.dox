@@ -60,8 +60,7 @@ Note also that most of the time, the parameter \f$ z \f$ will be omitted, to lig
 \ref MTSDD_FOLTIDS (class FirstOrderLinearTIDS)
 </em>
 
-\subsubsection MTSDD_FONLDS First Order Non Linear Systems
-
+\subsubsection MTSDD_FONLDS First Order Non Linear Systems 
 \b Class: FirstOrderNonLinearDS.
 
 \f{eqnarray*}

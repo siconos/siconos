@@ -33,14 +33,12 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-  boost::timer t;
-  t.restart();
   // Exception handling
   try
   {
 
     // User-defined main parameters
-    unsigned int dsNumber = 100;      // the number of dynamical systems
+    unsigned int dsNumber = 500;      // the number of dynamical systems
     unsigned int nDof = 3;           // degrees of freedom for beads
     double increment_position = 1;   // initial position increment from one DS to the following
     double increment_velocity = 0;   // initial velocity increment from one DS to the following
@@ -218,6 +216,8 @@ int main(int argc, char* argv[])
 
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
+    boost::timer tt;
+    tt.restart();
     while (k < N)
     {
       k++;
@@ -256,6 +256,7 @@ int main(int argc, char* argv[])
 
     }
     cout << "End of computation - Number of iterations done: " << k - 1 << endl;
+    cout << "Computation Time " << tt.elapsed()  << endl;
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
     ioMatrix io("result.dat", "ascii");
@@ -295,6 +296,5 @@ int main(int argc, char* argv[])
   {
     cout << "Exception caught in \'sample/MultiBeadsColumn\'" << endl;
   }
-  cout << "Computation Time " << t.elapsed()  << endl;
 
 }
