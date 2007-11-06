@@ -42,7 +42,7 @@
 namespace ublas = boost::numeric::ublas;
 namespace atlas = boost::numeric::bindings::atlas;
 
-const int MAX_SIZE = 1000;
+//const int MAX_SIZE = 1000;
 
 /** type of object used to save indices */
 typedef std::vector<unsigned int> Index;
@@ -51,8 +51,8 @@ typedef std::vector<unsigned int> Index;
 
 /** DenseMat is a typedef of boost::ublas::numeric::matrix<double, column_major, std::vector<double> >
  */
-//typedef ublas::matrix<double, ublas::column_major, std::vector<double> > DenseMat;
-typedef ublas::matrix<double, ublas::column_major, ublas::bounded_array<double, 1000> > DenseMat;
+typedef ublas::matrix<double, ublas::column_major, std::vector<double> > DenseMat;
+//typedef ublas::matrix<double, ublas::column_major, ublas::bounded_array<double, 10000> > DenseMat;
 /** TriangMat is a typedef of boost::ublas::numeric::triangular_matrix<double, upper, column_major, std::vector<double> >
  */
 typedef ublas::triangular_matrix<double, ublas::upper, ublas::column_major> TriangMat;
