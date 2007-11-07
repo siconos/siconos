@@ -61,7 +61,7 @@
  * \param dparamLCP[2] = res     Output modified parameter which returns the final error value.
  *
  *
- * \author Houari Khenous last modification 08/10/2007
+ * \author Houari Khenous last modification 07/11/2007
  *
  */
 
@@ -82,7 +82,7 @@ void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int
 
   FILE *f101;
 
-  int local_formulation, local_solver, n, in, it, is, ispeak, itermax, nc, i, j, ii, iter, Gsize, mm;
+  int n, in, it, is, ispeak, itermax, nc, i, j, ii, iter, Gsize, mm;
   double err, tol, mu;
   double qs, a1, den, num;
   int incx, incy;
@@ -122,17 +122,12 @@ void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int
   iparamLCP[2] = 0;
   dparamLCP[2] = 0.0;
 
-  dparam_local[0] = dparamLCP[3];
-  dparam_local[1] = dparamLCP[4];
+  dparam_local[0] = tol;  //dparamLCP[3]; /* local tolerance */
+  dparam_local[1] = dparamLCP[4]; /* local error     */
 
-  iparam_local[0] = iparamLCP[3];
-  iparam_local[1] = iparamLCP[4];
+  iparam_local[0] = itermax; //iparamLCP[3]; /* local itermax   */
+  iparam_local[1] = iparamLCP[4]; /* local iteration */
 
-  local_formulation = 0;//iparamLCP[5];
-  local_solver      = 1;//iparamLCP[6];
-
-
-  if (ispeak == 2) f101 = fopen("pfc_3D_nlgs.log" , "w+");
 
   /* local_solver */
   /* 0 for projection */
@@ -142,14 +137,21 @@ void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int
   /* 0 for Alart-Curnier formulation */
   /* 1 for Fischer-Burmeister formulation */
 
-  if (local_solver == 0)
+
+  iparam_local[3] = 1; //iparamLCP[5]; /* local formulation */
+  iparam_local[4] = 1; //iparamLCP[6]; /* local solver      */
+
+
+  if (ispeak == 2) f101 = fopen("pfc_3D_nlgs.log" , "w+");
+
+  if (iparam_local[4] == 0)
   {
     pfc_3D_local_solver = &pfc_3D_projection;
     Gsize  = 3;
   }
   else
   {
-    if (local_formulation == 0)
+    if (iparam_local[3] == 0)
     {
       Gsize  = 3;
       Compute_G    = &Compute_G_AC;
@@ -255,7 +257,7 @@ void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int
       C[2 * 3 + 1] = vec[(is) * n + it];
       C[2 * 3 + 2] = vec[(is) * n + is];
 
-      if (local_formulation == 0)
+      if (iparam_local[3] == 0)
       {
 
         for (j = 0 ; j < Gsize ; ++j)
@@ -312,78 +314,78 @@ void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int
             Ip[j * 2 + ii] = 0.;
         }
 
-        double PI = 3.14;
-        double alpha1 = PI / 6;
-        double alpha2 = 5 * PI / 6;
-        double alpha3 = 3 * PI / 2;
+        /*  double PI = 3.14; */
+        /*  double alpha1 = PI/6; */
+        /*  double alpha2 = 5*PI/6; */
+        /*  double alpha3 = 3*PI/2; */
 
-        double deter = cos(alpha1) * sin(alpha2) - sin(alpha1) * cos(alpha2);
+        /*  double deter = cos(alpha1)*sin(alpha2) - sin(alpha1)*cos(alpha2); */
 
-        /* Ip = matrix_inv2(Ip`)*/
-        /* IP = matrix_inv2(Ip`)*mup */
-        /* I3 = matrix_inv2(Ip)*e3 */
+        /*  /\* Ip = matrix_inv2(Ip`)*\/ */
+        /*  /\* IP = matrix_inv2(Ip`)*mup *\/ */
+        /*  /\* I3 = matrix_inv2(Ip)*e3 *\/ */
 
-        IP[0] = mu * (sin(alpha2) - sin(alpha1)) / deter;
-        IP[1] = mu * (cos(alpha1) - cos(alpha2)) / deter;
+        /*  IP[0] = mu*(sin(alpha2)-sin(alpha1))/deter; */
+        /*  IP[1] = mu*(cos(alpha1)-cos(alpha2))/deter; */
 
-        I3[0] = (cos(alpha3) * sin(alpha2) - sin(alpha3) * cos(alpha2)) / deter;
-        I3[1] = (sin(alpha3) * cos(alpha1) - cos(alpha3) * sin(alpha1)) / deter;
+        /*  I3[0] = (cos(alpha3)*sin(alpha2) - sin(alpha3)*cos(alpha2))/deter; */
+        /*  I3[1] = (sin(alpha3)*cos(alpha1) - cos(alpha3)*sin(alpha1))/deter; */
 
-        Ip[0 * 2 + 0] =  sin(alpha2) / deter;
-        Ip[1 * 2 + 0] = -sin(alpha1) / deter;
-        Ip[0 * 2 + 1] = -cos(alpha2) / deter;
-        Ip[1 * 2 + 1] =  cos(alpha1) / deter;
+        /*  Ip[0*2+0] =  sin(alpha2)/deter; */
+        /*  Ip[1*2+0] = -sin(alpha1)/deter; */
+        /*  Ip[0*2+1] = -cos(alpha2)/deter; */
+        /*  Ip[1*2+1] =  cos(alpha1)/deter; */
 
-        /*  zz[0] = z[3*i+0]; */
-        /*  zz[1] = mu*z[3*i+0] - cos(alpha1)*z[3*i+1] - sin(alpha1)*z[3*i+2]; */
-        /*  zz[2] = mu*z[3*i+0] - cos(alpha2)*z[3*i+1] - sin(alpha2)*z[3*i+2]; */
-        /*  zz[3] = 0.; */
-        /*  zz[4] = 0.; */
+        IP[0] = 0.;
+        IP[1] = 2.*mu;
 
-        incx = n;
-        incy = 1;
+        I3[0] = -1.;
+        I3[1] = -1.;
 
-        z[in] = 0.0;
-        z[it] = 0.0;
-        z[is] = 0.0;
+        Ip[0 * 2 + 0] =  1. / sqrt(3.);
+        Ip[1 * 2 + 0] = -1. / sqrt(3.);
+        Ip[0 * 2 + 1] =  1.;
+        Ip[1 * 2 + 1] =  1.;
 
-        zzz[0] = q[in] +  DDOT(n , &vec[in] , incy , z , incy);
-        zzz[1] = -(Ip[0 * 2 + 0] * (q[it] + DDOT(n , &vec[it] , incx , z , incy)) + Ip[0 * 2 + 1] * (q[is] + DDOT(n , &vec[is] , incx , z , incy)));
-        zzz[2] = -(Ip[1 * 2 + 0] * (q[it] + DDOT(n , &vec[it] , incx , z , incy)) + Ip[1 * 2 + 1] * (q[is] + DDOT(n , &vec[is] , incx , z , incy)));
+
+        zz[0] = z[3 * i + 0];
+        zz[1] = mu * z[3 * i + 0] - sqrt(3) * z[3 * i + 1] / 2. - z[3 * i + 2] / 2.;
+        zz[2] = mu * z[3 * i + 0] + sqrt(3) * z[3 * i + 1] / 2. - z[3 * i + 2] / 2.;
+        zz[3] = 0.;
+        zz[4] = 0.;
+
+
+        zzz[0] = q[in];
+        /*  zzz[1] = -(Ip[0*2+0]*q[it] +Ip[0*2+1]*q[is]); */
+        /*  zzz[2] = -(Ip[1*2+0]*q[it] +Ip[1*2+1]*q[is]); */
 
         /*     for( ii = 0 ; ii < Gsize ; ++ii ) */
         /*  printf("b[%i] =  %14.7e\n",ii,zzz[ii]); printf("\n"); */
 
         (*pfc_3D_local_solver)(Gsize , C , zzz , zz , ww , mu , &Compute_G, &Compute_JacG, Ip, IP, I3, iparam_local , dparam_local);
 
-        /*    for( ii = 0 ; ii < Gsize ; ++ii ) */
-        /*  printf("zz[%i] =  %14.7e\n",ii,zz[ii]); printf("\n"); */
-        /*       for( ii = 0 ; ii < Gsize ; ++ii ) */
-        /*  printf("ww[%i] =  %14.7e\n",ii,ww[ii]); printf("\n"); */
 
         z[in] = zz[0];
         z[it] = Ip[0 * 2 + 0] * (mu * zz[0] - zz[1]) + Ip[1 * 2 + 0] * (mu * zz[0] - zz[2]);
         z[is] = Ip[0 * 2 + 1] * (mu * zz[0] - zz[1]) + Ip[1 * 2 + 1] * (mu * zz[0] - zz[2]);
 
-        /*  for( ii = 0 ; ii < 3 ; ++ii ) */
-        /*    printf("z[%i] =  %14.7e\n",ii,z[3*i+ii]); printf("\n"); */
 
-        /* double nrm = sqrt(z[it]*z[it]+z[is]*z[is]); */
-        /*  printf("nrm =  %14.7e\n",nrm); */
+        /*  double nrm = sqrt(z[it]*z[it]+z[is]*z[is]); */
+        /*  /\* printf("nrm =  %14.7e\n",nrm); *\/ */
         /*  if(nrm){ */
         /*    V[0] = z[it]/nrm; */
         /*    V[1] = z[is]/nrm; */
         /*  } */
         /*  else{ */
-        /*    V[0] = cos(alpha3); */
-        /*    V[1] = sin(alpha3); */
+        /*    V[0] = 0.; */
+        /*    V[1] = -1.; */
         /*  } */
         /*  /\*   for( ii = 0 ; ii < 2 ; ++ii ) *\/ */
         /*  /\*   printf("V[%i] =  %14.7e\n",ii,V[ii]); printf("\n"); *\/ */
 
         /*  w[in] = ww[0]; */
-        /*  w[it] = -(cos(alpha1)*ww[1] + cos(alpha2)*ww[2] + V[0]*ww[4]); */
-        /*  w[is] = -(sin(alpha1)*ww[1] + sin(alpha2)*ww[2] + V[1]*ww[4]); */
+        /*  w[it] = -(sqrt(3)*ww[1]/2. - sqrt(3)*ww[2]/2. + V[0]*ww[4]); */
+        /*  w[is] = -(ww[1]/2. + ww[2]/2. + V[1]*ww[4]); */
 
         free(IP);
         free(Ip);
@@ -405,7 +407,7 @@ void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int
     DAXPY(n , qs , w , incx , W , incy);
     num = DNRM2(n, W , incx);
     err = num * den;
-    /*     printf("-----------------------------------Iteration %i Erreur = %14.7e\n",iter,err); */
+    /*    printf("-----------------------------------Iteration %i Erreur = %14.7e\n",iter,err); */
   }
 
   iparamLCP[2] = iter;

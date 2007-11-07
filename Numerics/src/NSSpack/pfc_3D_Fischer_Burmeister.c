@@ -23,7 +23,7 @@
  *
  *
  *
- * \author Houari Khenous (24/09/2007)
+ * \author Houari Khenous (07/11/2007)
  *
  */
 
@@ -63,8 +63,8 @@ void Compute_G_FB(int m, double *G, double *y , double *C, double *x , double *b
   /* I3 = matrix_inv2(Ip)*e3 */
 
   A[0 * m + 0] =  C[0 * 3 + 0] + (C[1 * 3 + 0] * IP[0] + C[2 * 3 + 0] * IP[1]);
-  A[1 * m + 0] = -(C[1 * 3 + 0] * Ip[0 * 2 + 0] + C[2 * 3 + 0] * Ip[1 * 2 + 0]);
-  A[2 * m + 0] = -(C[1 * 3 + 0] * Ip[0 * 2 + 1] + C[2 * 3 + 0] * Ip[1 * 2 + 1]);
+  A[1 * m + 0] = -(C[1 * 3 + 0] * Ip[0 * 2 + 0] + C[2 * 3 + 0] * Ip[0 * 2 + 1]);
+  A[2 * m + 0] = -(C[1 * 3 + 0] * Ip[1 * 2 + 0] + C[2 * 3 + 0] * Ip[1 * 2 + 1]);
 
   A[0 * m + 1] =  -(C[0 * 3 + 1] * Ip[0 * 2 + 0] + C[0 * 3 + 2] * Ip[0 * 2 + 1] + (C[1 * 3 + 1] * IP[0] + C[2 * 3 + 1] * IP[1]) * Ip[0 * 2 + 0] + (C[1 * 3 + 2] * IP[0] + C[2 * 3 + 2] * IP[1]) * Ip[0 * 2 + 1]);
   A[0 * m + 2] =  -(C[0 * 3 + 1] * Ip[1 * 2 + 0] + C[0 * 3 + 2] * Ip[1 * 2 + 1] + (C[1 * 3 + 1] * IP[0] + C[2 * 3 + 1] * IP[1]) * Ip[1 * 2 + 0] + (C[1 * 3 + 2] * IP[0] + C[2 * 3 + 2] * IP[1]) * Ip[1 * 2 + 1]);
@@ -105,6 +105,14 @@ void Compute_G_FB(int m, double *G, double *y , double *C, double *x , double *b
       x[i] += (A[j * m + i] + B[j * m + i]) * y[j];
   }
 
+  /*   for( i = 0 ; i < m ; ++i ) */
+  /*     printf("b[%i] =  %14.7e\n",i,b[i]); printf("\n"); */
+
+  /*    for( i = 0 ; i < m ; ++i ) */
+  /*     printf("y[%i] =  %14.7e\n",i,y[i]); printf("\n"); */
+
+  for (i = 0; i < m; i++)
+    x[i] = (A[0 * m + i] + B[0 * m + i]) * y[0] + (A[1 * m + i] + B[1 * m + i]) * y[1] + (A[2 * m + i] + B[2 * m + i]) * y[2] + (A[3 * m + i] + B[3 * m + i]) * y[3] + (A[4 * m + i] + B[4 * m + i]) * y[4] + b[i];
 
   for (i = 0 ; i < m ; ++i)
   {
@@ -112,12 +120,27 @@ void Compute_G_FB(int m, double *G, double *y , double *C, double *x , double *b
   }
 
 
-  /*   for( i = 0 ; i < m ; ++i ) */
-  /*     printf("y[%i] =  %14.7e\n",i,y[i]); printf("\n"); */
+  /*  for( i = 0 ; i < m ; ++i ){ */
+  /*     for( j = 0 ; j < m ; ++j ){ */
+  /*       printf("A[%i,%i] =  %14.7e\t",i,j,A[j*m+i]); */
+  /*     } */
+  /*     printf("\n"); */
+  /*   } */
+  /*   printf("\n"); */
+  /*   for( i = 0 ; i < m ; ++i ){ */
+  /*     for( j = 0 ; j < m ; ++j ){ */
+  /*       printf("B[%i,%i] =  %14.7e\t",i,j,B[j*m+i]); */
+  /*     } */
+  /*     printf("\n"); */
+  /*   } */
+  /*   printf("\n"); */
+
   /*   for( i = 0 ; i < m ; ++i ) */
   /*     printf("x[%i] =  %14.7e\n",i,x[i]); printf("\n"); */
   /*   for( i = 0 ; i < m ; ++i ) */
-  /*     printf("G[%i] =  %14.7e\n",i,G[i]); printf("\n"); */
+  /*     printf("G[%i] =  %14.7e\n",i,sqrt(x[i]*x[i] +  y[i]*y[i]) - (x[i] + y[i])); printf("\n"); */
+
+
 
 
   free(A);
@@ -154,8 +177,8 @@ void Compute_JacG_FB(int m, double *JacG , double *y , double *C , double *x , d
   /* I3 = matrix_inv2(Ip)*e3 */
 
   A[0 * m + 0] =  C[0 * 3 + 0] + (C[1 * 3 + 0] * IP[0] + C[2 * 3 + 0] * IP[1]);
-  A[1 * m + 0] = -(C[1 * 3 + 0] * Ip[0 * 2 + 0] + C[2 * 3 + 0] * Ip[1 * 2 + 0]);
-  A[2 * m + 0] = -(C[1 * 3 + 0] * Ip[0 * 2 + 1] + C[2 * 3 + 0] * Ip[1 * 2 + 1]);
+  A[1 * m + 0] = -(C[1 * 3 + 0] * Ip[0 * 2 + 0] + C[2 * 3 + 0] * Ip[0 * 2 + 1]);
+  A[2 * m + 0] = -(C[1 * 3 + 0] * Ip[1 * 2 + 0] + C[2 * 3 + 0] * Ip[1 * 2 + 1]);
 
   A[0 * m + 1] =  -(C[0 * 3 + 1] * Ip[0 * 2 + 0] + C[0 * 3 + 2] * Ip[0 * 2 + 1] + (C[1 * 3 + 1] * IP[0] + C[2 * 3 + 1] * IP[1]) * Ip[0 * 2 + 0] + (C[1 * 3 + 2] * IP[0] + C[2 * 3 + 2] * IP[1]) * Ip[0 * 2 + 1]);
   A[0 * m + 2] =  -(C[0 * 3 + 1] * Ip[1 * 2 + 0] + C[0 * 3 + 2] * Ip[1 * 2 + 1] + (C[1 * 3 + 1] * IP[0] + C[2 * 3 + 1] * IP[1]) * Ip[1 * 2 + 0] + (C[1 * 3 + 2] * IP[0] + C[2 * 3 + 2] * IP[1]) * Ip[1 * 2 + 1]);
@@ -189,13 +212,14 @@ void Compute_JacG_FB(int m, double *JacG , double *y , double *C , double *x , d
   B[1 * m + 4] =  2 * ((Ip[0 * 2 + 0] * Ip[0 * 2 + 0] + Ip[0 * 2 + 1] * Ip[0 * 2 + 1]) * (coef * y[0] - y[1]) + (Ip[0 * 2 + 0] * Ip[1 * 2 + 0] + Ip[0 * 2 + 1] * Ip[1 * 2 + 1]) * (coef * y[0] - y[2]));
   B[2 * m + 4] =  2 * ((Ip[1 * 2 + 0] * Ip[0 * 2 + 0] + Ip[1 * 2 + 1] * Ip[0 * 2 + 1]) * (coef * y[0] - y[1]) + (Ip[1 * 2 + 0] * Ip[1 * 2 + 0] + Ip[1 * 2 + 1] * Ip[1 * 2 + 1]) * (coef * y[0] - y[2]));
 
-  for (i = 0; i < m; i++)
-  {
-    x[i] = b[i];
-    for (j = 0; j < m; j++)
-      x[i] += (A[j * m + i] + B[j * m + i]) * y[j];
-  }
+  /* for (i=0;i<m;i++){ */
+  /*     x[i] = b[i]; */
+  /*     for (j=0;j<m;j++) */
+  /*       x[i] += (A[j*m+i]+ B[j*m+i])*y[j]; */
+  /*   } */
 
+  for (i = 0; i < m; i++)
+    x[i] = (A[0 * m + i] + B[0 * m + i]) * y[0] + (A[1 * m + i] + B[1 * m + i]) * y[1] + (A[2 * m + i] + B[2 * m + i]) * y[2] + (A[3 * m + i] + B[3 * m + i]) * y[3] + (A[4 * m + i] + B[4 * m + i]) * y[4] + b[i];
 
   for (i = 0; i < m; i++)
     delta[i * m + i] = 1.;
@@ -212,6 +236,33 @@ void Compute_JacG_FB(int m, double *JacG , double *y , double *C , double *x , d
         JacG[j * m + i] =  - (A[j * m + i] + B[j * m + i] + delta[j * m + i]);
     }
   }
+
+  /*    for( i = 0 ; i < m ; ++i ) */
+  /*     printf("b[%i] =  %14.7e\n",i,b[i]); printf("\n"); */
+
+  /*    for( i = 0 ; i < m ; ++i ) */
+  /*     printf("y[%i] =  %14.7e\n",i,y[i]); printf("\n"); */
+
+  /*   for( i = 0 ; i < m ; ++i ){ */
+  /*     for( j = 0 ; j < m ; ++j ){ */
+  /*       printf("A[%i,%i] =  %14.7e\t",i,j,A[j*m+i]); */
+  /*     } */
+  /*     printf("\n"); */
+  /*   } */
+  /*   printf("\n"); */
+  /*   for( i = 0 ; i < m ; ++i ){ */
+  /*     for( j = 0 ; j < m ; ++j ){ */
+  /*       printf("B[%i,%i] =  %14.7e\t",i,j,B[j*m+i]); */
+  /*     } */
+  /*     printf("\n"); */
+  /*   } */
+  /*   printf("\n"); */
+
+  /*   for( i = 0 ; i < m ; ++i ) */
+  /*     printf("x[%i] =  %14.7e\n",i,x[i]); printf("\n"); */
+  /*   for( i = 0 ; i < m ; ++i ) */
+  /*     printf("G[%i] =  %14.7e\n",i,sqrt(x[i]*x[i] +  y[i]*y[i]) - (x[i] + y[i])); printf("\n"); */
+
 
 
   /*  for( i = 0 ; i < m ; ++i ){ */

@@ -23,7 +23,7 @@
  *        int *iparam_local , double *dparam_local )
  *
  *
- * \author houari khenous last last modification 08/10/2007.
+ * \author houari khenous last last modification 07/11/2007.
  *
  */
 
@@ -44,8 +44,8 @@ void pfc_3D_newton(int n , double *C , double *b ,  double *zz , double *ww , do
                    double *param1, double *param2, double *param3, int *iparam_local , double *dparam_local)
 {
 
-  int i, j, niter, mm;
-  double nerr, nerr1, an, at;
+  int i, j, niter, mm, local_itermax;
+  double nerr, nerr1, an, at, local_tol;
   double a1, qs, alpha, beta, det;
   int incx, incy;
   double *www, *G, *JacG, *AA , *wwww, *zzzz;
@@ -55,12 +55,16 @@ void pfc_3D_newton(int n , double *C , double *b ,  double *zz , double *ww , do
 
   Linesearch_function Linesearch;
 
-  int local_formulation = 0;
-
-  if (local_formulation == 0)
+  if (iparam_local[3] == 0)
     Linesearch = &Linesearch_AC;
   else
     Linesearch = &Linesearch_FB;
+
+
+  local_itermax = iparam_local[0];
+  local_tol     = dparam_local[0];
+
+
 
   mm   = n * n;
   incx =  1;
@@ -101,10 +105,10 @@ void pfc_3D_newton(int n , double *C , double *b ,  double *zz , double *ww , do
 
   /* Newton loop */
 
-  while ((niter < 2000) && (nerr > 1.e-3))
+  while ((niter < local_itermax) && (nerr > local_tol))
   {
     ++niter;
-
+    /*     printf("-----------------------------------Iteration Newton %i \n",niter); */
     (*Compute_G)(n , G , zz , C , ww , b , param1, param2, param3 , an , at , mu);
 
     (*Compute_JacG)(n , JacG , zz , C , ww , b , param1, param2, param3 , an , at , mu);
@@ -152,9 +156,10 @@ void pfc_3D_newton(int n , double *C , double *b ,  double *zz , double *ww , do
 
     (*Linesearch)(n , zz , ww , www , b , C , param1, param2, param3 , an , at , mu , nerr1);
     nerr = nerr1;
+
     for (i = 0 ; i < n ; ++i)
       www[i] = 0.;
-    /*     printf("-----------------------------------Iteration Newton %i --------- Newton Error = %14.7e\n",niter,nerr); */
+    /*    printf("-----------------------------------Iteration Newton %i --------- Newton Error = %14.7e\n",niter,nerr); */
   }
 
 
