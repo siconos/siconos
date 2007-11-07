@@ -65,6 +65,7 @@ private:
 
   /** contains the matrix M of a LCP system */
   SiconosMatrix *M;
+  //ublas::matrix<double, ublas::column_major, ublas::bounded_array<double, 1000> * M;
 
   /** contains the vector q of a LCP system */
   SimpleVector *q;
