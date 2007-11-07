@@ -130,7 +130,6 @@ if test "$local_installation" = "yes" ; then
 fi
 echo "PYTHON_DIR=" $PYTHON_DIR
 echo "PYTHONPATH=" $PYTHONPATH
-
 AC_SUBST(PYTHON_DIR)
 AC_SUBST(PYTHONPATH)
 

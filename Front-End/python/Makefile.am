@@ -53,7 +53,7 @@ pySiconos_wrap.o:pySiconos_wrap.cxx
 lib:_pySiconos.so
 
 _pySiconos.so:pySiconos_wrap.o
-	$(CXX) $(CXX_DYNLIB)  $(SICONOS_LDFLAGS)  pySiconos_wrap.o -o _pySiconos.so
+	$(CXX) $(CXX_DYNLIB) $(SICONOS_LDFLAGS) pySiconos_wrap.o -o _pySiconos.so
 
 #	g++ -shared $(SICONOS_LDFLAGS) $(SICONOS_LDADD) $(LIBS) libSiconos.so pySiconos_wrap.o -o _pySiconos.so 
 
