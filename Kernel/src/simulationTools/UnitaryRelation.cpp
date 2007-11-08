@@ -132,8 +132,8 @@ void UnitaryRelation::initialize(const std::string& simulationType)
 
   workX = new BlockVector();
   workZ = new BlockVector();
-  DSIterator it;
-  for (it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
+
+  for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
     workZ->insertPtr((*it)->getZPtr());
 
   //   if(simulationType == "TimeStepping")
@@ -144,12 +144,12 @@ void UnitaryRelation::initialize(const std::string& simulationType)
     string pbType = getRelationType();
     if (pbType == "FirstOrder")
     {
-      for (it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
+      for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
         workX->insertPtr((*it)->getXPtr());
     }
     else // Lagrangian
     {
-      for (it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
+      for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
         workX->insertPtr((static_cast<LagrangianDS*>(*it))->getVelocityPtr());
     }
   }

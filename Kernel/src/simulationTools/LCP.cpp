@@ -33,7 +33,7 @@ using namespace std;
 LCP::LCP(OneStepNSProblemXML* onestepnspbxml, Simulation* newSimu):
   OneStepNSProblem("LCP", onestepnspbxml, newSimu), w(NULL), z(NULL), M(NULL), q(NULL),
   isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false) ,
-  isMSparseBlock(false) , Mspbl(NULL)
+  Mspbl(NULL)
 {
   LCPXML * xmllcp = (static_cast<LCPXML*>(onestepnspbxml));
 
@@ -67,8 +67,7 @@ LCP::LCP(OneStepNSProblemXML* onestepnspbxml, Simulation* newSimu):
 LCP::LCP(Simulation* newSimu, const string& newId, const string& newSolver, unsigned int MaxIter,
          double Tolerance, unsigned int Verbose,  const string&  NormType, double  SearchDirection, double Rho):
   OneStepNSProblem("LCP", newSimu, newId), w(NULL), z(NULL), M(NULL), q(NULL),
-  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false) ,
-  isMSparseBlock(false) , Mspbl(NULL)
+  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), Mspbl(NULL)
 {
   // set solver:
   solver = new Solver(nspbType, newSolver, MaxIter, Tolerance, Verbose, NormType, SearchDirection, Rho);
@@ -79,8 +78,7 @@ LCP::LCP(Simulation* newSimu, const string& newId, const string& newSolver, unsi
 // Constructor from a set of data
 LCP::LCP(Solver* newSolver, Simulation* newSimu, const string& newId):
   OneStepNSProblem("LCP", newSimu, newId, newSolver), w(NULL), z(NULL), M(NULL), q(NULL),
-  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false) ,
-  isMSparseBlock(false) , Mspbl(NULL)
+  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), Mspbl(NULL)
 {}
 
 // destructor
@@ -91,7 +89,7 @@ LCP::~LCP()
   if (isZAllocatedIn) delete z;
   z = NULL;
   if (isMAllocatedIn)
-    if (isMSparseBlock) freeSpBlMat(Mspbl);
+    if (solver->useBlocks()) freeSpBlMat(Mspbl);
     else delete M;
   M = NULL;
   Mspbl = NULL;
@@ -156,7 +154,7 @@ void LCP::setZPtr(SimpleVector* newPtr)
 
 void LCP::setM(const SiconosMatrix& newValue)
 {
-  if (isMSparseBlock)
+  if (solver->useBlocks())
     RuntimeException::selfThrow("LCP: setM, impossible since M is sparse by blocks.");
   if (sizeOutput != newValue.size(0) || sizeOutput != newValue.size(1))
     RuntimeException::selfThrow("LCP: setM, inconsistent size between given M size and problem size. You should set sizeOutput before");
@@ -172,7 +170,7 @@ void LCP::setM(const SiconosMatrix& newValue)
 
 void LCP::setMPtr(SiconosMatrix* newPtr)
 {
-  if (isMSparseBlock)
+  if (solver->useBlocks())
     RuntimeException::selfThrow("LCP: setMPtr, impossible since M is sparse by blocks.");
   if (sizeOutput != newPtr->size(0) || sizeOutput != newPtr->size(1))
     RuntimeException::selfThrow("LCP: setMPtr, inconsistent size between given M size and problem size. You should set sizeOutput before");
@@ -437,7 +435,7 @@ void LCP::assembleM() //
   unsigned int pos = 0, col = 0; // index position used for block copy into M, see below.
   UnitaryMatrixColumnIterator itCol;
 
-  if (isMSparseBlock)
+  if (solver->useBlocks())
   {
     // sparse block matrix Mspbl assembling
     int i;
@@ -447,7 +445,9 @@ void LCP::assembleM() //
     Mspbl->blocksize = (int*) malloc(Mspbl->size * sizeof(int));
     for (itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
       Mspbl->blocksize[blocksIndices[*itRow]] = blocksPositions[*itRow];
-    for (i = 0; i < Mspbl->size - 1; i++) Mspbl->blocksize[i] = Mspbl->blocksize[i + 1] - Mspbl->blocksize[i];
+    for (i = 0; i < Mspbl->size - 1; i++)
+      Mspbl->blocksize[i] = Mspbl->blocksize[i + 1] - Mspbl->blocksize[i];
+
     Mspbl->blocksize[Mspbl->size - 1] = sizeOutput - Mspbl->blocksize[Mspbl->size - 1];
     isMAllocatedIn = true;
 
@@ -536,7 +536,7 @@ void LCP::assembleM() //
           pos = blocksPositions[*itRow];
           col = blocksPositions[(*itCol).first];
           // copy the block into Mlcp - pos/col: position in M (row and column) of first element of the copied block
-          static_cast<SimpleMatrix*>(M)->setBlock(pos, col, (blocks[*itRow][(*itCol).first])); // \todo avoid copy
+          static_cast<SimpleMatrix*>(M)->setBlock(pos, col, *(blocks[*itRow][(*itCol).first])); // \todo avoid copy
         }
       }
     }
@@ -590,7 +590,7 @@ void LCP::compute(const double time)
     zprev = *z;
     wprev = *w;
 
-    if (isMSparseBlock)
+    if (solver->useBlocks())
     {
       startLCPsolve = clock();
       startLCPuni = clock();
@@ -657,7 +657,7 @@ void LCP::compute(const double time)
       LCP_CPUtime += (clock() - startLCPsolve);
       statnbsolve++;
 
-    } // end if (isMSparseBlock)
+    }
 
     if (info != 0)
     {
@@ -720,36 +720,34 @@ void LCP::postCompute()
 
 void LCP::display() const
 {
-  cout << "======= LCP display ======" << endl;
-  cout << "| sizeOutput : " << sizeOutput << endl;
-  cout << "| LCP Matrix M  : " << endl;
-  if (isMSparseBlock)
+  cout << "======= LCP of size " << sizeOutput << " with: " << endl;
+  cout << "M  ";
+  if (solver->useBlocks())
   {
-    cout << "| The matrix is Sparse Block." << endl;
+    cout << "a Sparse Block matrix." << endl;
     if (Mspbl != NULL)
     {
-      cout << "| nbblocks (total number of non null blocks)            " << Mspbl->nbblocks << endl;
-      cout << "| size (number of blocks along a row (or column))       " << Mspbl->size << endl;
+      cout << "The total number of non null blocks is " << Mspbl->nbblocks << endl;
+      cout << "with " <<  Mspbl->size << " blocks in a row." << endl;
       for (int i = 0; i < Mspbl->size; i++)
-        cout << "| size of the diagonal square block                     " << i << " = " <<  Mspbl->blocksize[i] << endl;
+        cout << "- size of the diagonal square block number " << i << ": " << Mspbl->blocksize[i] << endl;
       for (int i = 0; i < Mspbl->nbblocks; i++)
       {
-        cout << "|  Row index of the  block                              " << i << " = " <<  Mspbl->RowIndex[i] << endl;
-        cout << "|  Column index of the  block                           " << i << " = " <<  Mspbl->ColumnIndex[i] << endl;
+        cout << "- Row index of the  block " << i << ": " << Mspbl->RowIndex[i] << endl;
+        cout << "- Column index of the  block " << i << ": " << Mspbl->ColumnIndex[i] << endl;
       }
     }
-    else cout << "-> NULL" << endl;
+    else cout << "M is NULL" << endl;
   }
   else
   {
     if (M != NULL) M->display();
     else cout << "-> NULL" << endl;
   }
-  cout << "| LCP vector q : " << endl;
+  cout << endl << " q : " ;
   if (q != NULL) q->display();
   else cout << "-> NULL" << endl;
   cout << "==========================" << endl;
-
 }
 
 void LCP::saveNSProblemToXML()

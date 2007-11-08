@@ -253,9 +253,9 @@ public:
 
   /** set the elements starting from position i with input vector
    *  \param an unsigned int i
-   *  \param a SiconosVector
+   *  \param a ref to a SiconosVector
    */
-  void setBlock(unsigned int, const SiconosVector *);
+  void setBlock(unsigned int, const SiconosVector&);
 
   /** add the input vector to the elements starting from position i.
    *  \param an unsigned int i

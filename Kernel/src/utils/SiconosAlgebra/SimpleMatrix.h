@@ -408,9 +408,9 @@ public:
   /** set block starting at row "posRow" (first argument) and column "posCol" (second argument) with m (last arg)
    *  \param posRow an int, row-position of the first element of the required block
    *  \param posCol an int, col-position of the first element of the required block
-   *  \param a SiconosMatrix*  m
+   *  \param a ref to a SiconosMatrix  m
    */
-  void setBlock(unsigned int, unsigned int, const SiconosMatrix *);
+  void setBlock(unsigned int, unsigned int, const SiconosMatrix&);
 
   /** Copy a subBlock of MIn into a sub-block of MOut - Dim and positions of the sub-block are given in dim and start.
    * \param MIn, a SiconosMatrix*

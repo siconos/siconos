@@ -24,7 +24,6 @@
 
 #include "Tools.h"
 #include "SiconosAlgebra.h"
-//#include "DynamicalSystemsSet.h"
 #include "Interaction.h"
 
 /** Interface to single relations from Interactions
@@ -85,16 +84,11 @@ private:
    */
   UnitaryRelation();
 
-public:
-
-  // === PUBLIC FUNCTIONS ===
-
-  // === CONSTRUCTORS/DESTRUCTOR ===
-
-  /** copy constructor
-  *  \param UnitaryRelation* : the object to copy
-  */
+  /** copy constructor: private, no copy cor pass-by value
+   */
   UnitaryRelation(const UnitaryRelation&);
+
+public:
 
   /** constructor from a pointer to Interaction
   *  \param Interaction * : Interaction object from which a list of relation will be "extracted"

@@ -72,6 +72,11 @@ public:
   */
   std::string getType() const;
 
+  /** Check if a "solver-block" is used
+  *  \return a bool
+  */
+  const bool isBlock() const;
+
   /** Return the maximum number of iteration the algorithm can do
   *  \return unsigned int
   */

@@ -1200,8 +1200,9 @@ void SimpleVectorTest::testSubscal()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(5) - a * (*xx)(2)) < tol, true);
   for (unsigned int i = 0; i < size; ++i)
   {
+    cout << i << endl;
     if (i != 4 && i != 5)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(i) - (*yref)(i)) < tol, true);
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys->getSparsePtr())(i) - (*yref->getDensePtr())(i)) < tol, true);
   }
   delete ys;
   delete yy;

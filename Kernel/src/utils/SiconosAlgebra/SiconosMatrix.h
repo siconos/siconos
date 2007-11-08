@@ -70,7 +70,7 @@ protected:
   unsigned int num;
 
   /** default constructor */
-  SiconosMatrix() {};
+  SiconosMatrix();
 
   /** basic constructor
       \param unsigned int, type-number of the vector
@@ -338,21 +338,6 @@ public:
    *  \param the value
    */
   virtual void setValue(unsigned int, unsigned int, double) = 0;
-
-  /** get block corresponding to lines given in numRow and columns in numCol
-   *  \param unsigned int, row index
-   *  \param unsigned int, col index
-   *  \param a SiconosMatrix* (in-out paramater)
-   */
-  //  virtual void getBlock (unsigned int, unsigned int, SiconosMatrix*) const = 0;
-
-  /** set block starting at row "posRow" (first argument) and column "posCol" (second argument) with m (last arg)
-   * Warning: for BlockMatrix, posRow and posCol are block-coordinates.
-   *  \param posRow an int, row-position of the first element of the required block
-   *  \param posCol an int, col-position of the first element of the required block
-   *  \param a SiconosMatrix*  m
-   */
-  // virtual void setBlock(unsigned int, unsigned int, const SiconosMatrix *) = 0;
 
   /** get block at position row-col if BlockMatrix, else if SimpleMatrix return this
    *  \param unsigned int row

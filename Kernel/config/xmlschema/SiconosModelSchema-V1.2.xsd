@@ -247,6 +247,7 @@
     		<xsd:attribute name="verbose" type="xsd:positiveInteger" use="optional"/>
 		<xsd:attribute name="normType" type="NormTypeValues" use="optional"/>
 		<xsd:attribute name="searchDirection" type="xsd:double" use="optional"/>
+		<xsd:attribute name="isBlock" type="xsd:boolean" use="optional default="false"/>
 	</xsd:complexType>
 </xsd:element>
 

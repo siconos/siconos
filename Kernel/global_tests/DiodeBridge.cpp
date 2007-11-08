@@ -54,7 +54,7 @@ bool DiodeBridge()
   cout << " ******** Start diode bridge *********" << endl << endl << endl;
 
   double t0 = 0.0;
-  double T = 5e-3;        // Total simulation time
+  double T = 5.0e-3;        // Total simulation time
   double h_step = 1.0e-6;  // Time step
   double Lvalue = 1e-2;   // inductance
   double Cvalue = 1e-6;   // capacitance

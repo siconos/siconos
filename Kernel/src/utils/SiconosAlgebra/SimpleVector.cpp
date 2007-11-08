@@ -110,7 +110,7 @@ SimpleVector::SimpleVector(const SiconosVector &v): SiconosVector(1, v.size()) /
     unsigned int pos = 0;
     for (it = v.begin(); it != v.end(); ++it)
     {
-      setBlock(pos, *it);
+      setBlock(pos, **it);
       pos += (*it)->size();
     }
   }
@@ -356,30 +356,30 @@ const double SimpleVector::operator()(unsigned int row) const
 // Access (get or set) to blocks of elements
 //============================================
 
-void SimpleVector::setBlock(unsigned int index, const SiconosVector * vIn)
+void SimpleVector::setBlock(unsigned int index, const SiconosVector& vIn)
 {
   // Set current vector elements, starting from position "index", to the values of vector vIn
   // vIn may be a BlockVector.
 
   // Exceptions ...
-  if (vIn == this)
+  if (&vIn == this)
     SiconosVectorException::selfThrow("SimpleVector::this->setBlock(pos,vIn): vIn = this.");
 
   if (index > sizeV)
     SiconosVectorException::selfThrow("SimpleVector::setBlock : invalid ranges");
 
-  unsigned int end = vIn->size() + index;
+  unsigned int end = vIn.size() + index;
   if (end > sizeV)
     SiconosVectorException::selfThrow("SimpleVector::setBlock : invalid ranges");
 
-  unsigned int numVin = vIn->getNum();
+  unsigned int numVin = vIn.getNum();
   if (numVin == 0) // if vIn is a BlockVector
   {
     ConstBlockVectIterator it;
     unsigned int pos = index;
-    for (it = vIn->begin(); it != vIn->end(); ++it)
+    for (it = vIn.begin(); it != vIn.end(); ++it)
     {
-      setBlock(pos, *it);
+      setBlock(pos, **it);
       pos += (*it)->size();
     }
   }
@@ -388,9 +388,9 @@ void SimpleVector::setBlock(unsigned int index, const SiconosVector * vIn)
     if (numVin != num) SiconosVectorException::selfThrow("SimpleVector::setBlock: inconsistent types.");
 
     if (num == 1)
-      noalias(ublas::subrange(*vect.Dense, index, end)) = *vIn->getDensePtr();
+      noalias(ublas::subrange(*vect.Dense, index, end)) = *vIn.getDensePtr();
     else
-      noalias(ublas::subrange(*vect.Sparse, index, end)) = *vIn->getSparsePtr();
+      noalias(ublas::subrange(*vect.Sparse, index, end)) = *vIn.getSparsePtr();
   }
 }
 
@@ -648,7 +648,7 @@ SimpleVector& SimpleVector::operator = (const SiconosVector& vIn)
     unsigned int pos = 0;
     for (it = vIn.begin(); it != vIn.end(); ++it)
     {
-      setBlock(pos, *it);
+      setBlock(pos, **it);
       pos += (*it)->size();
     }
   }

@@ -33,6 +33,13 @@ string SolverXML::getType() const
   return SiconosDOMTreeTools::getStringAttributeValue(rootNode, "type");
 }
 
+const bool SolverXML::isBlock() const
+{
+  if (xmlHasProp(rootNode, (xmlChar *)"isBlock"))
+    return SiconosDOMTreeTools::getAttributeValue<bool>(rootNode, "isBlock");
+  else return false;
+}
+
 unsigned int SolverXML::getMaxIter() const
 {
   if (xmlHasProp(rootNode, (xmlChar *)"maxIter"))

@@ -233,9 +233,6 @@ void TimeStepping::advanceToEvent()
 
   // Update
   update(levelMin);
-
-  // Update index sets
-  updateIndexSets();
 }
 
 void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
@@ -256,8 +253,6 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
   if (!isNewtonConverge)
     cout << "Newton process stopped: max. steps number reached." << endl ;
-
-  updateIndexSets();
   // Process NextEvent (Save OSI (DS) and OSNS (Interactions) states into Memory vectors ...)
 }
 

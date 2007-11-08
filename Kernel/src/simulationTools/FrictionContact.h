@@ -74,6 +74,9 @@ protected:
   bool isMAllocatedIn;
   bool isQAllocatedIn;
 
+  /** Specific structure required when a (Numerics) solver block is used */
+  SparseBlockStructuredMatrix *Mspbl;
+
 private:
 
   /** default constructor (private)
@@ -193,6 +196,14 @@ public:
   *  \param SiconosMatrix * newPtr
   */
   void setMPtr(SiconosMatrix *);
+
+  /** get the structure used to save M as a list of blocks
+   *  \return a SparseBlockStructuredMatrix
+   */
+  inline SparseBlockStructuredMatrix* getMspblPtr() const
+  {
+    return Mspbl;
+  }
 
   // --- Q ---
   /** get the value of q, the initial state of the DynamicalSystem

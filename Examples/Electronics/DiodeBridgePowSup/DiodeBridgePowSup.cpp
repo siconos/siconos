@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
     SiconosVector * tmp = new SimpleVector(4) ;
     prod(*Int_D, Offset_lambda, *tmp);
     *tmp -= Offset_y;
-    Int_z->setBlock(0, tmp);
+    Int_z->setBlock(0, *tmp);
     delete tmp;
     LSDiodeBridgePowSup->setZPtr(Int_z);
 

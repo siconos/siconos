@@ -20,24 +20,15 @@
 #include "SimpleMatrix.h"
 #include "SimpleVector.h"
 #include "ioMatrix.h"
-//#include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include "boost/numeric/bindings/atlas/clapack.hpp"
-// #include "boost/numeric/bindings/traits/std_vector.hpp"
 #include "boost/numeric/bindings/traits/ublas_matrix.hpp"
-// #include "boost/numeric/bindings/traits/ublas_vector2.hpp" // vector considered as matrix => necessary for bindings atlas-lapack
 #include "boost/numeric/bindings/atlas/cblas1.hpp"
 #include "boost/numeric/bindings/atlas/cblas2.hpp"
 #include "boost/numeric/bindings/atlas/cblas3.hpp"
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/operation.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
-
-// #include <boost/numeric/ublas/matrix.hpp>
-//#include <boost/numeric/ublas/vector.hpp>
-// #include <boost/numeric/ublas/matrix_proxy.hpp>
-// #include <boost/numeric/ublas/io.hpp>
-
 
 // =================================================
 //                CONSTRUCTORS
@@ -195,7 +186,7 @@ SimpleMatrix::SimpleMatrix(const SiconosMatrix &m): SiconosMatrix(m.getNum(), m.
     {
       for (it2 = it.begin(); it2 != it.end(); ++it2)
       {
-        setBlock(posRow, posCol, *it2);
+        setBlock(posRow, posCol, **it2);
         posCol += (*it2)->size(1);
       }
       posRow += (*it)->size(0);
@@ -672,13 +663,13 @@ void SimpleMatrix::setValue(unsigned int row, unsigned int col, double value)
 // Access (get or set) to blocks of elements
 //============================================
 
-void SimpleMatrix::setBlock(unsigned int row_min, unsigned int col_min, const SiconosMatrix* m)
+void SimpleMatrix::setBlock(unsigned int row_min, unsigned int col_min, const SiconosMatrix& m)
 {
   // Set current matrix elements, starting from row row_min and column col_min, with the values of the matrix m.
   // m may be a BlockMatrix.
 
   // Exceptions ...
-  if (m == this)
+  if (&m == this)
     SiconosMatrixException::selfThrow("SimpleMatrix::setBlock(pos,..., m): m = this.");
 
   if (row_min >= dimRow)
@@ -688,8 +679,8 @@ void SimpleMatrix::setBlock(unsigned int row_min, unsigned int col_min, const Si
     SiconosMatrixException::selfThrow("SimpleMatrix::setBloc(row,col)k: col is out of range");
 
   unsigned int row_max, col_max;
-  row_max = m->size(0) + row_min;
-  col_max = m->size(1) + col_min;
+  row_max = m.size(0) + row_min;
+  col_max = m.size(1) + col_min;
 
   if (row_max > dimRow)
     SiconosMatrixException::selfThrow("SimpleMatrix::setBlock(row,col,m): m.row + row is out of range.");
@@ -697,7 +688,7 @@ void SimpleMatrix::setBlock(unsigned int row_min, unsigned int col_min, const Si
   if (col_max > dimCol)
     SiconosMatrixException::selfThrow("SimpleMatrix::setBlock(row,col,m): m.col + col is out of range.");
 
-  unsigned int numM = m->getNum();
+  unsigned int numM = m.getNum();
 
   if (numM == 0) // if m is a block matrix ...
   {
@@ -706,11 +697,11 @@ void SimpleMatrix::setBlock(unsigned int row_min, unsigned int col_min, const Si
     unsigned int posRow = row_min;
     unsigned int posCol = col_min;
 
-    for (it = m->begin(); it != m->end(); ++it)
+    for (it = m.begin(); it != m.end(); ++it)
     {
       for (it2 = it.begin(); it2 != it.end(); ++it2)
       {
-        setBlock(posRow, posCol, *it2);
+        setBlock(posRow, posCol, **it2);
         posCol += (*it2)->size(1);
       }
       posRow += (*it)->size(0);
@@ -723,15 +714,15 @@ void SimpleMatrix::setBlock(unsigned int row_min, unsigned int col_min, const Si
       SiconosMatrixException::selfThrow("SimpleMatrix::setBlock(i,j,m), inconsistent types.");
 
     if (num == 1)
-      noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) = *(m->getDensePtr());
+      noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) = *(m.getDensePtr());
     else if (num == 2)
-      noalias(ublas::subrange(*mat.Triang, row_min, row_max, col_min, col_max)) = *(m->getTriangPtr());
+      noalias(ublas::subrange(*mat.Triang, row_min, row_max, col_min, col_max)) = *(m.getTriangPtr());
     else if (num == 3)
-      noalias(ublas::subrange(*mat.Sym, row_min, row_max, col_min, col_max)) = *(m->getSymPtr());
+      noalias(ublas::subrange(*mat.Sym, row_min, row_max, col_min, col_max)) = *(m.getSymPtr());
     else if (num == 4)
-      noalias(ublas::subrange(*mat.Sparse, row_min, row_max, col_min, col_max)) = *(m->getSparsePtr());
+      noalias(ublas::subrange(*mat.Sparse, row_min, row_max, col_min, col_max)) = *(m.getSparsePtr());
     else if (num == 5)
-      noalias(ublas::subrange(*mat.Banded, row_min, row_max, col_min, col_max)) = *(m->getBandedPtr());
+      noalias(ublas::subrange(*mat.Banded, row_min, row_max, col_min, col_max)) = *(m.getBandedPtr());
     else // if(num==6) or num == 7 nothing to do
     {}
     resetLU();
@@ -1764,7 +1755,7 @@ SimpleMatrix& SimpleMatrix::operator = (const SiconosMatrix& m)
     {
       for (it2 = it.begin(); it2 != it.end(); ++it2)
       {
-        setBlock(posRow, posCol, *it2);
+        setBlock(posRow, posCol, **it2);
         posCol += (*it2)->size(1);
       }
       posRow += (*it)->size(0);
@@ -4761,8 +4752,12 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
       unsigned int subSize =  x[firstBlockNum]->size(); // Size of the sub-vector
       const Index * xTab = x.getTabIndexPtr();
       if (firstBlockNum != 0)
+      {
         subCoord[4] -= (*xTab)[firstBlockNum - 1];
-      subCoord[5] =  std::min(coord[5] - (*xTab)[firstBlockNum - 1], subSize);
+        subCoord[5] =  std::min(coord[5] - (*xTab)[firstBlockNum - 1], subSize);
+      }
+      else
+        subCoord[5] =  std::min(coord[5], subSize);
 
       if (firstBlockNum == lastBlockNum)
       {

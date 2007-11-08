@@ -21,12 +21,12 @@
 
 using namespace std;
 
-Solver::Solver(): nonSmoothPbType("undefined"), solverAlgorithmName(DEFAULT_SOLVER), solvingMethod(NULL), maxIter(DEFAULT_ITER), tolerance(DEFAULT_TOL), verbose(DEFAULT_VERBOSE), normType(DEFAULT_NORMTYPE), searchDirection(DEFAULT_SEARCHDIR), Rho(DEFAULT_RHO)
+Solver::Solver(): nonSmoothPbType("undefined"), solverAlgorithmName(DEFAULT_SOLVER), solvingMethod(NULL), isBlock(false), maxIter(DEFAULT_ITER), tolerance(DEFAULT_TOL), verbose(DEFAULT_VERBOSE), normType(DEFAULT_NORMTYPE), searchDirection(DEFAULT_SEARCHDIR), Rho(DEFAULT_RHO)
 {}
 
 Solver::Solver(const string& nspType, const string& algoName, const unsigned int & iter, const double & tol,
                const unsigned int & verb, const string & norm, const double & searchDir, const double & rho):
-  nonSmoothPbType(nspType), solverAlgorithmName(algoName), solvingMethod(NULL), maxIter(iter), tolerance(tol), verbose(verb),
+  nonSmoothPbType(nspType), solverAlgorithmName(algoName), solvingMethod(NULL), isBlock(false), maxIter(iter), tolerance(tol), verbose(verb),
   normType(norm), searchDirection(searchDir), Rho(rho)
 {
   solvingMethod = new method();
@@ -34,7 +34,7 @@ Solver::Solver(const string& nspType, const string& algoName, const unsigned int
 }
 
 Solver::Solver(const Solver& newS):
-  nonSmoothPbType(newS.getNonSmoothPbType()), solverAlgorithmName(newS.getSolverAlgorithmName()), solvingMethod(NULL),
+  nonSmoothPbType(newS.getNonSmoothPbType()), solverAlgorithmName(newS.getSolverAlgorithmName()), solvingMethod(NULL), isBlock(false),
   maxIter(newS.getMaxIter()), tolerance(newS.getTolerance()),  verbose(newS.getVerbose()), normType(newS.getNormType()),
   searchDirection(newS.getSearchDirection()), Rho(newS.getRho())
 {
@@ -43,20 +43,21 @@ Solver::Solver(const Solver& newS):
 }
 
 Solver::Solver(SolverXML* solvXml, const string& nspbType):
-  nonSmoothPbType(nspbType), solverAlgorithmName("undefined"), solvingMethod(NULL), maxIter(DEFAULT_ITER), tolerance(DEFAULT_TOL),
+  nonSmoothPbType(nspbType), solverAlgorithmName("undefined"), solvingMethod(NULL), isBlock(false), maxIter(DEFAULT_ITER), tolerance(DEFAULT_TOL),
   verbose(DEFAULT_VERBOSE), normType(DEFAULT_NORMTYPE), searchDirection(DEFAULT_SEARCHDIR), Rho(DEFAULT_RHO)
 {
-  if (solvXml != NULL)
-  {
-    solverAlgorithmName = solvXml->getType();
-    maxIter = solvXml->getMaxIter();
-    tolerance = solvXml->getTolerance();
-    normType = solvXml->getNormType();
-    searchDirection = solvXml->getSearchDirection();
-    verbose = solvXml->getVerbose();
-    Rho = solvXml->getRho();
-  }
-  else RuntimeException::selfThrow("Solver:: xml constructor, xml file=NULL");
+  if (solvXml == NULL)
+    RuntimeException::selfThrow("Solver:: xml constructor, xml file=NULL");
+
+  solverAlgorithmName = solvXml->getType();
+  maxIter = solvXml->getMaxIter();
+  tolerance = solvXml->getTolerance();
+  normType = solvXml->getNormType();
+  searchDirection = solvXml->getSearchDirection();
+  verbose = solvXml->getVerbose();
+  Rho = solvXml->getRho();
+  isBlock = solvXml->isBlock();
+
   solvingMethod = new method();
   setSolvingMethod();
 }
@@ -69,8 +70,8 @@ Solver::~Solver()
 
 void Solver::display() const
 {
-  cout << "=== Solver data display ===" << endl;
-  cout << " - Solver algorithm is: " << solverAlgorithmName << endl;
+  cout << "=== The Solver is based on algorithm of type " << solverAlgorithmName << " with:" << endl;
+  cout << "Solver block? (0: false, 1: true) : " << isBlock << endl;
   cout << " - MaxIter: " << maxIter << endl;
   cout << " - Tolerance: " << tolerance << endl;
   cout << " - Verbose: " << verbose << endl;

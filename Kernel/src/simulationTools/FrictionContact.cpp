@@ -33,7 +33,7 @@ using namespace std;
 // xml constructor
 FrictionContact::FrictionContact(const string pbType, OneStepNSProblemXML* osNsPbXml, Simulation* newSimu):
   OneStepNSProblem(pbType, osNsPbXml, newSimu), w(NULL), z(NULL), M(NULL), q(NULL),
-  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
+  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), Mspbl(NULL)
 {
   FrictionContactXML * xmllcp = (static_cast<FrictionContactXML*>(osNsPbXml));
 
@@ -69,7 +69,7 @@ FrictionContact::FrictionContact(const string pbType, Simulation* newSimu, const
 // Constructor from a set of data
 FrictionContact::FrictionContact(const string pbType, Solver*  newSolver, Simulation* newSimu, const string newId):
   OneStepNSProblem(pbType, newSimu, newId, newSolver), w(NULL), z(NULL), M(NULL), q(NULL),
-  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
+  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), Mspbl(NULL)
 {}
 
 // destructor
@@ -79,8 +79,11 @@ FrictionContact::~FrictionContact()
   w = NULL;
   if (isZAllocatedIn) delete z;
   z = NULL;
-  if (isMAllocatedIn) delete M;
+  if (isMAllocatedIn)
+    if (solver->useBlocks()) freeSpBlMat(Mspbl);
+    else delete M;
   M = NULL;
+  Mspbl = NULL;
   if (isQAllocatedIn) delete q;
   q = NULL;
 }
@@ -366,7 +369,7 @@ void FrictionContact::assembleM() //
         pos = blocksPositions[*itRow];
         col = blocksPositions[(*itCol).first];
         // copy the block into Mlcp - pos/col: position in M (row and column) of first element of the copied block
-        static_cast<SimpleMatrix*>(M)->setBlock(pos, col, (blocks[*itRow][(*itCol).first])); // \todo avoid copy
+        static_cast<SimpleMatrix*>(M)->setBlock(pos, col, *(blocks[*itRow][(*itCol).first])); // \todo avoid copy
       }
     }
   }

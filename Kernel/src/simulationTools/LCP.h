@@ -76,9 +76,7 @@ private:
   bool isMAllocatedIn;
   bool isQAllocatedIn;
 
-  /** Flag telling if the LCP matrix is full or sparse by blocks */
-  bool isMSparseBlock;
-
+  /** Specific structure required when a (Numerics) solver block is used */
   SparseBlockStructuredMatrix *Mspbl;
 
   clock_t LCP_CPUtime;
@@ -209,15 +207,13 @@ public:
   void setM(const SiconosMatrix&);
 
   /** set M to pointer newPtr
-  *  \param SiconosMatrix * newPtr
-  */
+   *  \param SiconosMatrix * newPtr
+   */
   void setMPtr(SiconosMatrix *);
 
-  inline void setisMSparseBlock(bool val)
-  {
-    isMSparseBlock = val;
-  }
-
+  /** get the structure used to save M as a list of blocks
+   *  \return a SparseBlockStructuredMatrix
+   */
   inline SparseBlockStructuredMatrix* getMspblPtr() const
   {
     return Mspbl;

@@ -79,6 +79,9 @@ protected:
       object. */
   method* solvingMethod;
 
+  /** flag telling if a (Numerics) solver applied on a list of blocks is used.*/
+  bool isBlock;
+
   // Warning: some of the following data may be useless, depending on the solver type.
   // See full documentation for more details.
 
@@ -88,7 +91,7 @@ protected:
   /** algorithm tolerance */
   double tolerance;
 
-  /** Verbose mode chat > 0*/
+  /** Verbose mode */
   unsigned int verbose;
 
   /** */
@@ -97,6 +100,7 @@ protected:
   /**  */
   double searchDirection;
 
+  /**  */
   double Rho;
 
   /** default constructor
@@ -172,6 +176,22 @@ public:
   inline method* getSolvingMethodPtr() const
   {
     return solvingMethod;
+  };
+
+  /** check if a "solver-block" is used
+   *  \return a bool
+   */
+  inline const bool useBlocks() const
+  {
+    return isBlock;
+  };
+
+  /** To set the type of solver (block if init = true)
+   *  \param a bool
+   */
+  inline void setSolverBlock(bool init)
+  {
+    isBlock = init;
   };
 
   /** get maximum iterations number

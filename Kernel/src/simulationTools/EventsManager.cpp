@@ -252,6 +252,9 @@ void EventsManager::processEvents()
   // Process all events simultaneous to nextEvent.
   process();
 
+  // Update index sets
+  simulation->updateIndexSets();
+
   // Shift current to next ...
   shiftEvents();
 
