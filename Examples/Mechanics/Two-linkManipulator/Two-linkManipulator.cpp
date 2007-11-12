@@ -45,12 +45,13 @@ int main(int argc, char* argv[])
     unsigned int nDof = 2;           // degrees of freedom for robot arm
     double t0 = 0;                   // initial computation time
     double T = 30;                   // final computation time
-    double h = 0.001;                // time step
-    double criterion = 0.0001;
+    double h = 1e-4;                // time step
+    double criterion = 0.00001;
     unsigned int maxIter = 20000;
     double e = 0.7;                  // nslaw
     double e2 = 0.0;
     int test = 0;
+    int nimpact = 0;
 
     // -> mind to set the initial conditions below.
 
@@ -71,7 +72,7 @@ int main(int argc, char* argv[])
     v0.zero();
     q0(0) = 0.9;
     q0(1) = -1.6;
-    SiconosVector * z = new SimpleVector(nDof * 7);
+    SiconosVector * z = new SimpleVector(nDof * 11);
     (*z)(0) = q0(0);
     (*z)(1) = q0(1);
     (*z)(2) = v0(0);
@@ -83,10 +84,13 @@ int main(int argc, char* argv[])
     (*z)(8) = 0;
     (*z)(9) = 0;
     (*z)(10) = 0;
-    (*z)(11) = 0;
+    (*z)(11) = PI;
     (*z)(12) = 0;
     (*z)(13) = 0;
-
+    (*z)(14) = 0;
+    (*z)(15) = 0;
+    (*z)(16) = 0;
+    (*z)(17) = 0;
 
     LagrangianDS * arm = new LagrangianDS(1, q0, v0);
 
@@ -95,7 +99,9 @@ int main(int argc, char* argv[])
     arm->setComputeNNLFunction("Two-linkPlugin.so", "NNL");
     arm->setComputeJacobianNNLFunction(1, "Two-linkPlugin.so", "jacobianVNNL");
     arm->setComputeJacobianNNLFunction(0, "Two-linkPlugin.so", "jacobianQNNL");
-    arm->setComputeFExtFunction("Two-linkPlugin.so", "U");
+    arm->setComputeFIntFunction("Two-linkPlugin.so", "U");
+    arm->setComputeJacobianFIntFunction(1, "Two-linkPlugin.so", "jacobFintV");
+    arm->setComputeJacobianFIntFunction(0, "Two-linkPlugin.so", "jacobFintQ");
     arm->setZPtr(z);
 
     allDS.insert(arm);
@@ -141,10 +147,6 @@ int main(int argc, char* argv[])
 
     Relation * relation2 = new LagrangianLinearR(H2, b2);
     Interaction * inter2 =  new Interaction("singular-points", allDS, 2, 2, nslaw2, relation2);
-
-    //  NonSmoothLaw * nslaw = new NewtonImpactNSL(e);
-    //      Relation * relation = new LagrangianScleronomousR("Two-linkPlugin:h0","Two-linkPlugin:G0");
-    //      Interaction * inter = new Interaction("floor-arm", allDS,0,1, nslaw, relation);
 
     allInteractions.insert(inter);
     allInteractions.insert(inter1);
@@ -195,29 +197,32 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 13;
+    unsigned int outputSize = 12;
     SimpleMatrix dataPlot(N + 1, outputSize);
     // For the initial time step:
     // time
 
     SiconosVector * q = arm->getQPtr();
     SiconosVector * v = arm->getVelocityPtr();
-    SiconosVector * p = arm->getPPtr(1);
+    SiconosVector * p = arm->getPPtr(2);
     // EventsManager * eventsManager = s->getEventsManagerPtr();
 
     dataPlot(k, 0) =  Manipulator->getT0();
     dataPlot(k, 1) = (*q)(0);
     dataPlot(k, 2) = (*q)(1);
+    //  dataPlot(k,3) = nimpact;//(inter->getY(1))(1);
+    //     dataPlot(k,4) = (*z)(6);
+    //     dataPlot(k,5) = (*p)(1);
     dataPlot(k, 3) = (inter->getY(0))(1);
     dataPlot(k, 4) = (*v)(0);
     dataPlot(k, 5) = (*v)(1);
     dataPlot(k, 6) = (inter->getY(0))(0) - 2;
-    dataPlot(k, 7) = (inter->getY(1))(1);
+    dataPlot(k, 7) = nimpact; //(inter->getY(1))(1);
     dataPlot(k, 8) = (*z)(6);
     dataPlot(k, 9) = (*z)(4);
     dataPlot(k, 10) = test;
-    dataPlot(k, 11) = (*p)(0);
-    dataPlot(k, 12) = (*p)(1);
+    dataPlot(k, 11) = (*p)(1);
+    // dataPlot(k,12) = (*p)(1);
 
     while (s->hasNextEvent())
     {
@@ -225,6 +230,10 @@ int main(int argc, char* argv[])
       (*z)(1) = (*q)(1);
       (*z)(2) = (*v)(0);
       (*z)(3) = (*v)(1);
+      (*z)(16) = (*z)(14);
+      (*z)(17) = (*z)(15);
+      (*z)(20) = (*z)(18);
+      (*z)(21) = (*z)(19);
 
       // get current time step
       k++;
@@ -232,46 +241,97 @@ int main(int argc, char* argv[])
       dataPlot(k, 0) =  s->getNextTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*q)(1);
+      //  dataPlot(k,3) = nimpact;//(inter->getY(1))(1);
+      //  dataPlot(k,4) = (*z)(6);
+      //  dataPlot(k,5) = (*p)(1);
       dataPlot(k, 3) = (inter->getY(0))(1);
       dataPlot(k, 4) = (*v)(0);
       dataPlot(k, 5) = (*v)(1);
       dataPlot(k, 6) = (inter->getY(0))(0) - 2;
-      dataPlot(k, 7) = (inter->getY(1))(1);
+      dataPlot(k, 7) = nimpact; //(inter->getY(1))(1);
       dataPlot(k, 8) = (*z)(6);
       dataPlot(k, 9) = (*z)(4);
       dataPlot(k, 10) = test;
 
+
       s->newtonSolve(criterion, maxIter);
-      dataPlot(k, 11) = (*p)(0);
-      dataPlot(k, 12) = (*p)(1);
+      dataPlot(k, 11) = (*p)(1);
+      //  dataPlot(k,12) = (*p)(1);
+      (*z)(4) = (inter->getLambda(1))(1);
       s->nextStep();
-      (*z)(4) = (inter->getLambdaOld(1))(1);
-      //  controller during impacts accumulation phase before the first impact
+      // if((- dataPlot(k,0)+trunc(dataPlot(k,0)/(*z)(11))*(*z)(11)+(*z)(11)/2<=0.1) &&
+      //     (test==0))
+      //    {
+      //      (*z)(8) = dataPlot(k,0);
+      //      (*z)(5) =  0.65+0.1*cos(2*PI*((*z)(8))/(*z)(11));
+      //      (*z)(7) = (*z)(9);
+      //      arm->setComputeFIntFunction("Two-linkPlugin.so","U10");
+      //      test = 1;
+      //    }
+
+      // //  controller during impacts accumulation phase after the first impact
+      //  if((dataPlot(k,5)>0) &&  (test==1))
+      //    {
+      //      (*z)(8) = dataPlot(k,0);
+      //      arm->setComputeFIntFunction("Two-linkPlugin.so","U11");
+      //      test = 2;
+      //    }
+      //  if ((dataPlot(k,5)>0) &&  (test==2))
+      //        nimpact = nimpact+1;
+
+      // // controller during constraint-motion phase.
+      //  if((dataPlot(k,5)>0) && (test==2) && (dataPlot(k,3)-dataPlot(k-1,3)==1))
+      //    {
+      //      (*z)(8) = dataPlot(k,0);
+      //      arm->setComputeFIntFunction("Two-linkPlugin.so","U2");
+      //      test = 3;
+      //      nimpact= 0;
+      //    }
+
+      // // change of control law with a particular design of the desired trajectory that guarantee the take-off
+      //    if((trunc((dataPlot(k,0)+h)/(*z)(11))>trunc((dataPlot(k,0))/(*z)(11))) && (test==3))
+      //    {
+      //      (*z)(10) = dataPlot(k,0)+h;
+      //      (*z)(8) = (*z)(12);
+      //      arm->setComputeFIntFunction("Two-linkPlugin.so","U3");
+      //      test = 4;
+      //    }
+
+      // // change of desired trajectory during free-motion phase
+      //  if(((*z)(13)-0.1>=0) && (test==4))
+      //    {
+      //      arm->setComputeFIntFunction("Two-linkPlugin.so","U");
+      //      test = 0;
+      //      (*z)(13)=0;
+      //    }
+      //    controller during impacts accumulation phase before the first impact
       if ((- dataPlot(k, 0) + trunc(dataPlot(k, 0) / (*z)(11)) * (*z)(11) + (*z)(11) / 2 <= 0.1) &&
           (test == 0))
       {
-        (*z)(8) = dataPlot(k, 0) + h;
-        (*z)(5) =  0.65 + 0.1 * cos(2 * PI * (*z)(8) / (*z)(11));
-        (*z)(10) =  0.1 * sin(2 * PI * (*z)(8) / (*z)(11));
-        (*z)(13) = 2 * 0.1 * (PI / (*z)(11)) * cos(2 * PI * (*z)(8) / (*z)(11));
+        (*z)(8) = dataPlot(k, 0);
+        (*z)(5) =  0.65 + 0.1 * cos(2 * PI * ((*z)(8)) / (*z)(11));
         (*z)(7) = (*z)(9);
-        arm->setComputeFExtFunction("Two-linkPlugin.so", "U10");
+        arm->setComputeFIntFunction("Two-linkPlugin.so", "U10");
         test = 1;
       }
 
       //  controller during impacts accumulation phase after the first impact
-      if (((*z)(4) >= 1e-12) && (test == 1))
-      {
-        arm->setComputeFExtFunction("Two-linkPlugin.so", "U11");
-        test = 2;
-      }
-
-      // controller during constraint-motion phase.
-      if ((fabs((inter->getY(1))(1)) <= 1e-4) && (test == 2) && ((inter->getY(0))(1) <= 1e-6))
+      if ((dataPlot(k, 11) > 0) && (test == 1))
       {
         (*z)(8) = dataPlot(k, 0);
-        arm->setComputeFExtFunction("Two-linkPlugin.so", "U2");
+        arm->setComputeFIntFunction("Two-linkPlugin.so", "U11");
+        test = 2;
+      }
+      if ((dataPlot(k, 11) > 0) && (test == 2))
+        nimpact = nimpact + 1;
+
+      // controller during constraint-motion phase.
+      if ((dataPlot(k, 11) > 0) && (test == 2) && (dataPlot(k, 7) - dataPlot(k - 1, 7) == 1))
+      {
+        (*z)(8) = dataPlot(k, 0);
+        arm->setComputeFIntFunction("Two-linkPlugin.so", "U2");
         test = 3;
+        nimpact = 0;
       }
 
       // change of control law with a particular design of the desired trajectory that guarantee the take-off
@@ -279,16 +339,16 @@ int main(int argc, char* argv[])
       {
         (*z)(10) = dataPlot(k, 0) + h;
         (*z)(8) = (*z)(12);
-        arm->setComputeFExtFunction("Two-linkPlugin.so", "U3");
+        arm->setComputeFIntFunction("Two-linkPlugin.so", "U3");
         test = 4;
       }
 
       // change of desired trajectory during free-motion phase
-      if (((*z)(9) > 0.999) && (test == 4))
+      if (((*z)(13) - 0.1 >= 0) && (test == 4))
       {
-        arm->setComputeFExtFunction("Two-linkPlugin.so", "U");
+        arm->setComputeFIntFunction("Two-linkPlugin.so", "U");
         test = 0;
-        (*z)(9) = 0;
+        (*z)(13) = 0;
       }
     }
 
