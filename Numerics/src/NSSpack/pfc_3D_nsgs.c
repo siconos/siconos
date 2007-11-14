@@ -75,7 +75,7 @@
 #include <pfc_3D_Alart_Curnier.h>
 #include <pfc_3D_Fischer_Burmeister.h>
 
-void (*pfc_3D_local_solver)(int n , double *C , double *zzz , double *zz , double *ww , double mu , Compute_G_function(*Compute_G), Compute_JacG_function(*Compute_JacG), double *param1, double *param2, double *param3, int *iparam_local , double *dparam_local) = NULL;
+void (*pfc_3D_local_solver)(int n , double *C , double *zzz , double *zz , double *ww , double mu , pfc3D_fPtr(*Compute_G), pfc3D_fPtr(*Compute_JacG), double *param1, double *param2, double *param3, int *iparam_local , double *dparam_local) = NULL;
 
 void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int *info, int *iparamLCP , double *dparamLCP)
 {
@@ -88,8 +88,8 @@ void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int
   int incx, incy;
   double *W, *C, *ww, *zz, *zzz;
 
-  Compute_G_function Compute_G;
-  Compute_JacG_function Compute_JacG;
+  pfc3D_fPtr Compute_G;
+  pfc3D_fPtr Compute_JacG;
 
   int nb = 5;
   int     iparam_local[nb];

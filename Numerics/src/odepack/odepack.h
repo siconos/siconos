@@ -23,10 +23,15 @@ typedef void (*fpointer)(integer *, doublereal *, doublereal *, doublereal *);
 typedef void (*gpointer)(integer *, doublereal *, doublereal*, integer *, doublereal *);
 typedef void (*jacopointer)(integer *, doublereal *, doublereal *, integer* , integer *,  doublereal *, integer *);
 
+#ifdef __cplusplus
 extern "C" {
-  void F77NAME(DLSODE)(fpointer, integer * neq, doublereal * y, doublereal *t, doublereal *tout, integer * itol, doublereal * rtol, doublereal *atol, integer * itask, integer *istate, integer * iopt, doublereal * rwork, integer * lrw, integer * iwork, integer * liw, jacopointer, integer * mf);
-}
+#endif
 
-extern "C" {
+  void F77NAME(DLSODE)(fpointer, integer * neq, doublereal * y, doublereal *t, doublereal *tout, integer * itol, doublereal * rtol, doublereal *atol, integer * itask, integer *istate, integer * iopt, doublereal * rwork, integer * lrw, integer * iwork, integer * liw, jacopointer, integer * mf);
+
   void F77NAME(dlsodar)(fpointer, integer * neq, doublereal * y, doublereal *t, doublereal *tout, integer * itol, doublereal * rtol, doublereal *atol, integer * itask, integer *istate, integer * iopt, doublereal * rwork, integer * lrw, integer * iwork, integer * liw, jacopointer, integer * jt, gpointer, integer* ng, integer * jroot);
+
+#ifdef __cplusplus
 }
+#endif
+

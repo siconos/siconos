@@ -28,6 +28,10 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 Notes:
 
 Changes:
+2007-11-12 Franck Perignon <Franck.Perignon@inrialpes.fr>
+                                                                               
+	* NSSPack.h: split into lcp_solvers.h, pfc_3D_solvers.h ...
+	* Add utilities to handle with blocks-matrices in pfc_3D solvers
 	
 --------------------------------------------------------------------------------
   v2.1.1 - August, 23rd 2007 (release 839)

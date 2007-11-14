@@ -64,7 +64,7 @@
 
 int pfc_3D_solver(double *vec , double *q , int *n , method *pt , double *z , double *w)
 {
-
+  /* Solver name */
   char pfckey1[10] = "NLGS", pfckey2[10] = "CPG", pfckey3[15] = "NSGS";
 
   int i, info;
@@ -123,7 +123,6 @@ int pfc_3D_solver(double *vec , double *q , int *n , method *pt , double *z , do
 
     iparamLCP[5] = pt->pfc_3D.local_formulation;   /* ca n'a pas de sens car on ne peut pas les toucher de l'exterieur */
     iparamLCP[6] = pt->pfc_3D.local_solver;
-
 
     pfc_3D_nsgs(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 

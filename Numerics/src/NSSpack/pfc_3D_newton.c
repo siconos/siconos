@@ -40,7 +40,7 @@
 
 
 void pfc_3D_newton(int n , double *C , double *b ,  double *zz , double *ww , double mu ,
-                   Compute_G_function(*Compute_G), Compute_JacG_function(*Compute_JacG),
+                   pfc3D_fPtr(*Compute_G), pfc3D_fPtr(*Compute_JacG),
                    double *param1, double *param2, double *param3, int *iparam_local , double *dparam_local)
 {
 
