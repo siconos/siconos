@@ -39,6 +39,13 @@ LCP_SOURCES = lcp_solver.c lcp_solver_block.c \
 LCP_SOLVERS = lcp_lexicolemke.c lcp_pgs.c lcp_nsqp.c lcp_cpg.c \
 	lcp_qp.c lcp_latin.c lcp_latin_w.c lcp_newton_min.c \
 	lcp_newton_FB.c lcp_sor.c lcp_rpgs.c
+### MLCP #####################################################
+
+MLCP_SOURCES = mlcp_solver.c  \
+	mlcp_filter_result.c  \
+	mlcp_compute_error.c $(MLCP_SOLVERS) mlcp_solvers.h 
+
+MLCP_SOLVERS =  mlcp_pgs.c
 
 ### PFC ######################################################
 
@@ -85,6 +92,7 @@ libNSSpack_la_SOURCES = NSSpack.h \
 	minf.c maxf.c \
         clapack_dtrtrs.c \
 	$(LCP_SOURCES) \
+	$(MLCP_SOURCES) \
 	$(PFC_SOURCES) \
 	$(DFC_SOURCES) \
 	$(SWITCH) \
@@ -96,4 +104,4 @@ libNSSpack_la_SOURCES = NSSpack.h \
 
 libNSSpack_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 
-numerics_HEADERS = lcp_solvers.h pfc_2D_solvers.h pfc_3D_solvers.h dfc_solvers.h dr_solvers.h pr_solvers.h NSSpack.h SiconosNumerics_lab.h
+numerics_HEADERS = lcp_solvers.h mlcp_solvers.h pfc_2D_solvers.h pfc_3D_solvers.h dfc_solvers.h dr_solvers.h pr_solvers.h NSSpack.h SiconosNumerics_lab.h

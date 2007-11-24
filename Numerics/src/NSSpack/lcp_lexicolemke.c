@@ -111,7 +111,7 @@ void lcp_lexicolemke(int *nn , double *vec , double *q , double *zlem , double *
       A[ic][jc] = 0.0;
 
   /* construction of A matrix such as
-   * A = [ Id | -d | -M | q ] with d = (1,...1)
+   * A = [ q | Id | -d | -M ] with d = (1,...1)
    */
 
   for (ic = 0 ; ic < dim; ++ic)

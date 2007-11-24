@@ -180,10 +180,10 @@ void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
       {
 
 
-        z[2 * i]   = 0.0;
-        w[2 * i]   = -zn;
-        z[2 * i + 1] = 0.0;
-        w[2 * i + 1] = -zt;
+        z[2 * i]   = 0.0; // PN
+        w[2 * i]   = -zn; // UN
+        z[2 * i + 1] = 0.0; // PT
+        w[2 * i + 1] = -zt; // UT
 
 
       }

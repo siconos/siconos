@@ -22,6 +22,7 @@
 #include "blaslapack.h"
 
 #include "lcp_solvers.h"
+#include "mlcp_solvers.h"
 #include "pfc_3D_solvers.h"
 #include "pfc_2D_solvers.h"
 #include "dfc_solvers.h"
@@ -43,6 +44,7 @@
   \param method_pr     : pr is a method_pr structure .
   \param method_dr     : dr is a method_dr structure .
   \param method_lcp    : lcp is a method_lcp structure .
+  \param method_mlcp    : mlcp is a method_mlcp structure .
   \param method_pfc_2D : pfc_2D is a method_pfc_2D structure .
   \param method_dfc_2D : dfc_2D is a method_dfc_2D structure .
   \param method_qp     : qp is a method_qp structure (not yet available).
@@ -55,6 +57,7 @@ typedef union
   method_pr  pr;
   method_dr  dr;
   method_lcp lcp;
+  method_mlcp mlcp;
   method_pfc_2D pfc_2D;
   method_pfc_3D pfc_3D;
   method_dfc_2D dfc_2D;
@@ -100,6 +103,9 @@ extern "C" {
   /** General interface to solver for lcp problems, with M given as a list of blocks */
   int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt , double *z , double *w , int *it_end ,
                        int *itt_end , double *res);
+
+  /** General interface to solver for lcp problems */
+  int mlcp_solver(double *A , double *B , double *C , double *D , double *a, double *b, int *n , int* m, method *pt ,  double *u, double *v, double *w);
 
   /** General interface to solver for pfc 3D problems */
   int pfc_3D_solver(double *M , double *q , int *n , method *pt , double *z , double *w);

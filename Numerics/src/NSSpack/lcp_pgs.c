@@ -131,8 +131,8 @@ void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , int *in
 
       if (verbose > 0)
       {
-        printf(" Warning negative diagonal term \n");
-        printf(" The local problem cannot be solved \n");
+        printf(" Vanishing diagonal term \n");
+        printf(" The problem cannot be solved with this method \n");
       }
 
       *info = 2;

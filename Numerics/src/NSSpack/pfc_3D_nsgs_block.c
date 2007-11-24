@@ -275,7 +275,7 @@ void pfc_3D_nsgs_block(int *nn , SparseBlockStructuredMatrix *M , double *q , do
         /* qLocal computation*/
         //        incx = n;
 
-        DGEMV(LA_NOTRANS, 3, n, 1.0, MBlock, n, z , incx , 1.0, qLocal, incy);
+        //        DGEMV(LA_NOTRANS, 3, n, 1.0, MBlock, n, z , incx , 1.0, qLocal, incy );
         /*        qLocal[0] = q[in] + DDOT( n , &M[in] , incx , z , incy ); */
         /*        qLocal[1] = q[it] + DDOT( n , &M[it] , incx , z , incy ); */
         /*        qLocal[2] = q[is] + DDOT( n , &M[is] , incx , z , incy ); */
@@ -390,7 +390,7 @@ void pfc_3D_nsgs_block(int *nn , SparseBlockStructuredMatrix *M , double *q , do
 
     /* Compute w_(iter) = M*z_(iter) + q */
     DCOPY(n , q , incx , w , incy);
-    DGEMV(LA_NOTRANS , n , n , a1 , M , n , z , incx , a1 , w , incy);
+    //      DGEMV( LA_NOTRANS , n , n , a1 , M , n , z , incx , a1 , w , incy );
 
     /* Compute err = norm2(w_(iter) - w_(iter-1)) / norm2(q) */
     qs   = -1.0;

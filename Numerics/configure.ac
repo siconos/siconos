@@ -140,14 +140,14 @@ AC_ARG_ENABLE(error-on-warning,[  --enable-erroronwarning     treat all compile 
 
 # Check for atlas
 #this define ATLAS_CPPFLAGS and ATLAS_LDFLAGS
-ACX_CHECK_ATLAS(,
-  [AC_MSG_ERROR([Atlas was not found. This makes this library unusable.
-*** This makes this library unusable. Please get the atlas library 
-*** installed. If you do have this installed, use the options 
-*** --with-atlas-include=<path of atlas include dir > and 
-*** --with-atlas-lib=<path of atlas libdir> and/or set 
-*** the env variable LDFLAGS to include the appropriate linker 
-*** flags.])])
+#ACX_CHECK_ATLAS(,
+#  [AC_MSG_ERROR([Atlas was not found. This makes this library unusable.
+#*** This makes this library unusable. Please get the atlas library 
+#*** installed. If you do have this installed, use the options 
+#*** --with-atlas-include=<path of atlas include dir > and 
+#*** --with-atlas-lib=<path of atlas libdir> and/or set 
+#*** the env variable LDFLAGS to include the appropriate linker 
+#*** flags.])])
 
 # Check for Lapack
 # This defines LAPACK_LIBS, BLAS_LIBS, and FLIBS

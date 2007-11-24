@@ -20,7 +20,7 @@
 
 include $(top_srcdir)/config/Make-rules
 
-check_PROGRAMS = test1 test2 test3  test4  test5
+check_PROGRAMS = test1 test2 test3  test4  test5 test7
 
 #TESTS = $(check_PROGRAMS)
 #XFAIL_TESTS = $(check_PROGRAMS)
@@ -51,7 +51,7 @@ all: links
 links: $(DATADIRS)
 
 
-TESTS = test1 test2 test3  test4  test5
+TESTS = test1 test2 test7 test3  test4  test5 
 XFAIL_TESTS =   test5
 
 
@@ -63,6 +63,10 @@ test1_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(NSSPACK_LIB) $(SICONOS_EXT_LDFLAGS)
 test2_SOURCES =  main_dr.c
 test2_INCLUDES = $(CPPUNIT_INCLUDES)
 test2_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(NSSPACK_LIB) $(SICONOS_EXT_LDFLAGS)
+
+test7_SOURCES =  main_mlcp.c
+test7_INCLUDES = $(CPPUNIT_INCLUDES)
+test7_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(NSSPACK_LIB) $(SICONOS_EXT_LDFLAGS)
 
 test3_SOURCES = main_pr.c 
 test3_INCLUDES = $(CPPUNIT_INCLUDES)
