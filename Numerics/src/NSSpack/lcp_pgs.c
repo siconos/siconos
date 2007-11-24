@@ -31,12 +31,12 @@
 
   where M is an (\f$nn \times nn\f$)-matrix, q , w and z nn-vectors.
 */
-/*!\fn  void lcp_pgs( int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP )
+/*!\fn  void lcp_pgs( int *nn , double *M , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP )
 
   lcp_pgs (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver for LCP.\n
 
   \param nn      On enter, an integer which represents the dimension of the system.
-  \param vec     On enter, a (\f$nn \times nn\f$)-vector of doubles which contains the components of the matrix with a fortran storage.
+  \param M     On enter, a (\f$nn \times nn\f$)-vector of doubles which contains the components of the matrix with a fortran storage.
   \param q       On enter, a nn-vector of doubles which contains the components of the right hand side vector.
   \param z       On return, a nn-vector of doubles which contains the solution of the problem.
   \param w       On return, a nn-vector of doubles which contains the solution of the problem.
@@ -66,10 +66,9 @@
 #include <string.h>
 #include "LA.h"
 #include <math.h>
+#include "lcp_solvers.h"
 
-int lcp_compute_error(int n, double *vec , double *q , double *z , int chat, double *w, double *err);
-
-void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
+void lcp_pgs(int *nn , double *M , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
 {
 
 
@@ -126,7 +125,7 @@ void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , int *in
 
   for (i = 0 ; i < n ; ++i)
   {
-    if (fabs(vec[i * n + i]) < 1e-16)
+    if (fabs(M[i * n + i]) < 1e-16)
     {
 
       if (verbose > 0)
@@ -141,7 +140,7 @@ void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , int *in
 
       return;
     }
-    else diag[i] = 1.0 / vec[i * n + i];
+    else diag[i] = 1.0 / M[i * n + i];
   }
 
   /*start iterations*/
@@ -173,12 +172,12 @@ void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , int *in
 
       z[i] = 0.0;
 
-      zi = -(q[i] + DDOT(n , &vec[i] , incx , z , incy)) * diag[i];
+      zi = -(q[i] + DDOT(n , &M[i] , incx , z , incy)) * diag[i];
 
       if (zi < 0) z[i] = 0.0;
       else z[i] = zi;
 
-      /* z[i]=fmax(0.0,-( q[i] + ddot_( (integer *)&n , &vec[i] , (integer *)&incxn , z , (integer *)&incy ))*diag[i]);*/
+      /* z[i]=fmax(0.0,-( q[i] + ddot_( (integer *)&n , &M[i] , (integer *)&incxn , z , (integer *)&incy ))*diag[i]);*/
 
     }
 
@@ -190,7 +189,7 @@ void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , int *in
     /*     a1 = 1.0; */
     /*     b1 = 1.0; */
 
-    /*     dgemv_( &NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z , (integer *)&incx , &b1 , w , (integer *)&incy ); */
+    /*     dgemv_( &NOTRANS , (integer *)&n , (integer *)&n , &a1 , M , (integer *)&n , z , (integer *)&incx , &b1 , w , (integer *)&incy ); */
 
     /*     qs   = -1.0; */
     /*     daxpy_( (integer *)&n , &qs , w , (integer *)&incx , ww , (integer *)&incy ); */
@@ -203,7 +202,7 @@ void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , int *in
 
 
 
-    lcp_compute_error(n, vec, q, z, verbose, w, &err);
+    lcp_compute_error(n, M, q, z, verbose, w, &err);
 
     //err = err ;
 

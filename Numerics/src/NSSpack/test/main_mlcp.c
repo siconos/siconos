@@ -82,6 +82,10 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
 
   static method_mlcp method_mlcp1 = { "PGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1 , 0 , 0.0 };
 
+  /* Method definition */
+
+  static method_mlcp method_mlcp2 = { "RPGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1 , 0 , 0.0 };
+
   /*   nonsymmetric = 0; */
 
   /*   /\* Is M symmetric ? *\/ */
@@ -117,7 +121,6 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
   info1 = mlcp_solver(A, B, C, D, a, b, &n , &m, &method_mlcp1 , u1 , v1, w1);
 
 
-
 #ifdef BAVARD
   /*  printf(" *** ************************************** ***\n"); */
 
@@ -133,9 +136,59 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
     printf("PGS: %14.7e  \n", w1[i]);
 
 
+  /*   nonsymmetric = 0; */
 
+  /*   /\* Is M symmetric ? *\/ */
+
+  /*   for( i = 0 ; i < n ; ++i ){ */
+  /*     for( j = 0 ; j < i ; ++j ){ */
+  /*       if( abs( vec[i*n+j] - vec[j*n+i] ) > 1e-16 ){ */
+  /*  nonsymmetric = 1; */
+  /*  break; */
+  /*       } */
+  /*     } */
+  /*   } */
+
+#ifdef BAVARD
+  if (nonsymmetric) printf("\n !! WARNING !!\n M is a non symmetric matrix \n");
+  else printf(" M is a symmetric matrix \n");
+#endif
+
+
+  /* #1 RPGS TEST */
+#ifdef BAVARD
+  printf("**** RPGS TEST ****\n");
+#endif
+  for (i = 0 ; i < m ; ++i)
+  {
+    v1[i] = 0.0;
+    w1[i] = 0.0;
+  }
+  for (i = 0 ; i < n ; ++i)
+  {
+    u1[i] = 0.0;
+  }
+
+  info1 = mlcp_solver(A, B, C, D, a, b, &n , &m, &method_mlcp2 , u1 , v1, w1);
+
+
+#ifdef BAVARD
+  /*  printf(" *** ************************************** ***\n"); */
+
+  printf(" ****** z = ********************************\n");
+  for (i = 0 ; i < n ; i++)
+    printf("RPGS: %14.7e  \n", u1[i]);
+
+  for (i = 0 ; i < m ; i++)
+    printf("RPGS: %14.7e  \n", v1[i]);
+
+  printf(" ****** w = ********************************\n");
+  for (i = 0 ; i < m ; i++)
+    printf("RPGS: %14.7e  \n", w1[i]);
 
 #endif
+#endif
+
   free(u1);
   free(v1);
   free(w1);
@@ -147,7 +200,7 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
 void test_matrix(void)
 {
 
-  FILE *LCPfile;
+  FILE *MLCPfile;
 
   int i, j, itest, NBTEST;
   int isol;
@@ -175,7 +228,7 @@ void test_matrix(void)
 
   /****************************************************************/
 #ifdef BAVARD
-  printf("\n ********** BENCHMARK FOR LCP_SOLVER ********** \n\n");
+  printf("\n ********** BENCHMARK FOR MLCP_SOLVER ********** \n\n");
 #endif
   /****************************************************************/
 
@@ -185,25 +238,25 @@ void test_matrix(void)
     switch (itest)
     {
     case 0:
-      printf("\n\n 2x2 LCP ");
-      if ((LCPfile = fopen("MATRIX/deudeu_mlcp.dat", "r")) == NULL)
+      printf("\n\n 2x2 MLCP ");
+      if ((MLCPfile = fopen("MATRIX/deudeu_mlcp.dat", "r")) == NULL)
       {
-        perror("fopen LCPfile: deudeu.dat");
+        perror("fopen MLCPfile: deudeu.dat");
         exit(1);
       }
       break;
     case 1:
-      printf("\n\n DIAGONAL LCP ");
-      if ((LCPfile = fopen("MATRIX/trivial.dat", "r")) == NULL)
+      printf("\n\n DIAGONAL MLCP ");
+      if ((MLCPfile = fopen("MATRIX/trivial.dat", "r")) == NULL)
       {
-        perror("fopen LCPfile: trivial.dat");
+        perror("fopen MLCPfile: trivial.dat");
         exit(1);
       }
       break;
     }
 
-    fscanf(LCPfile , "%d" , &n);
-    fscanf(LCPfile , "%d" , &m);
+    fscanf(MLCPfile , "%d" , &n);
+    fscanf(MLCPfile , "%d" , &m);
 
     n2 = n * n;
     m2 = m * m;
@@ -233,7 +286,7 @@ void test_matrix(void)
     {
       for (j = 0 ; j < n ; ++j)
       {
-        fscanf(LCPfile, "%s", val);
+        fscanf(MLCPfile, "%s", val);
         vecA[ n * j + i ] = atof(val);
       }
     }
@@ -241,7 +294,7 @@ void test_matrix(void)
     {
       for (j = 0 ; j < m ; ++j)
       {
-        fscanf(LCPfile, "%s", val);
+        fscanf(MLCPfile, "%s", val);
         vecB[ n * j + i ] = atof(val);
       }
     }
@@ -249,7 +302,7 @@ void test_matrix(void)
     {
       for (j = 0 ; j < m ; ++j)
       {
-        fscanf(LCPfile, "%s", val);
+        fscanf(MLCPfile, "%s", val);
         vecC[ n * j + i ] = atof(val);
       }
     }
@@ -257,32 +310,32 @@ void test_matrix(void)
     {
       for (j = 0 ; j < n ; ++j)
       {
-        fscanf(LCPfile, "%s", val);
+        fscanf(MLCPfile, "%s", val);
         vecD[ n * j + i ] = atof(val);
       }
     }
 
     for (i = 0 ; i < n ; ++i)
     {
-      fscanf(LCPfile , "%s" , val);
+      fscanf(MLCPfile , "%s" , val);
       a[i] = atof(val);
     }
     for (i = 0 ; i < m ; ++i)
     {
-      fscanf(LCPfile , "%s" , val);
+      fscanf(MLCPfile , "%s" , val);
       b[i] = atof(val);
     }
 
-    fscanf(LCPfile , "%s" , val);
+    fscanf(MLCPfile , "%s" , val);
 
-    if (!feof(LCPfile))
+    if (!feof(MLCPfile))
     {
 
       sol[0] = atof(val);
 
       for (i = 1 ; i < dim ; ++i)
       {
-        fscanf(LCPfile , "%s" , val);
+        fscanf(MLCPfile , "%s" , val);
         sol[i] = atof(val);
       }
     }
@@ -292,7 +345,7 @@ void test_matrix(void)
       for (i = 0 ; i < (n + m) ; ++i) sol[i] = 0.0;
     }
 
-    fclose(LCPfile);
+    fclose(MLCPfile);
 
 #ifdef BAVARD
     printf("\n exact solution : ");

@@ -45,7 +45,7 @@ MLCP_SOURCES = mlcp_solver.c  \
 	mlcp_filter_result.c  \
 	mlcp_compute_error.c $(MLCP_SOLVERS) mlcp_solvers.h 
 
-MLCP_SOLVERS =  mlcp_pgs.c
+MLCP_SOLVERS =  mlcp_pgs.c mlcp_rpgs.c
 
 ### PFC ######################################################
 

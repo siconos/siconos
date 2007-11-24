@@ -59,6 +59,7 @@
                 - dparamLCP[3] = res     On return, the final error value.
 
   \author Mathieu Renouf & Pascal Denoyelle
+  \todo Sizing the regularization paramter and apply it only on null diagnal term
 
  */
 
@@ -68,10 +69,11 @@
 
 #include "LA.h"
 #include <math.h>
+#include "lcp_solvers.h"
 
 #define EPSDIAG 1e-16
 
-void lcp_rpgs(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
+void lcp_rpgs(int *nn , double *M , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
 {
 
   int n, incx, incy;
@@ -81,7 +83,7 @@ void lcp_rpgs(int *nn , double *vec , double *q , double *z , double *w , int *i
   double tol, omega, rho;
   double *diag;
   double a1, b1;
-  double vecii, ziprev;
+  double Mii, ziprev;
 
   /*  double *buffer_errors;
     FILE *ficbuffer_errors;*/
@@ -127,7 +129,7 @@ void lcp_rpgs(int *nn , double *vec , double *q , double *z , double *w , int *i
   /* Preparation of the diagonal of the inverse matrix */
   /*  maxdiag = 0.0;
     for( i = 0 ; i < n ; i++ ){
-      if (vec[i*(n+1)] > maxdiag) maxdiag = vec[i*(n+1)];
+      if (M[i*(n+1)] > maxdiag) maxdiag = M[i*(n+1)];
     }
 
     if (maxdiag > EPSDIAG) rho = maxdiag;
@@ -135,8 +137,8 @@ void lcp_rpgs(int *nn , double *vec , double *q , double *z , double *w , int *i
 
   for (i = 0 ; i < n ; ++i)
   {
-    vecii = vec[i * (n + 1)];
-    if (vecii < -EPSDIAG)
+    Mii = M[i * (n + 1)];
+    if (Mii < -EPSDIAG)
     {
       if (ispeak > 0)
       {
@@ -154,14 +156,14 @@ void lcp_rpgs(int *nn , double *vec , double *q , double *z , double *w , int *i
     }
     else
     {
-      diag[i] = 1.0 / (vecii + rho);
+      diag[i] = 1.0 / (Mii + rho);
       /*        qs += pow(q[i]*diag[i],2);*/
-      /*        if (vecii < EPSDIAG ){
+      /*        if (Mii < EPSDIAG ){
                   diag[i] = invrho;
                   diagprev[i] = 1;
               }
               else {
-                  diag[i] = 1.0/vecii;
+                  diag[i] = 1.0/Mii;
                   diagprev[i] = 0;
               }
       */
@@ -186,7 +188,7 @@ void lcp_rpgs(int *nn , double *vec , double *q , double *z , double *w , int *i
       ziprev = z[i];
       z[i] = 0.0;
 
-      zi = -(q[i] - (rho * ziprev) + DDOT(n , &vec[i] , incx , z , incy)) * diag[i];
+      zi = -(q[i] - (rho * ziprev) + DDOT(n , &M[i] , incx , z , incy)) * diag[i];
 
       if (zi > 0) z[i] = zi;
 
@@ -199,7 +201,7 @@ void lcp_rpgs(int *nn , double *vec , double *q , double *z , double *w , int *i
     /*     a1 = 1.0; */
     /*     b1 = 1.0; */
 
-    /*     dgemv_( &NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z , (integer *)&incx , &b1 , w , (integer *)&incy ); */
+    /*     dgemv_( &NOTRANS , (integer *)&n , (integer *)&n , &a1 , M , (integer *)&n , z , (integer *)&incx , &b1 , w , (integer *)&incy ); */
 
     /*     a1   = -1.0;
          daxpy_( (integer *)&n , &a1 , z , (integer *)&incx , zprev , (integer *)&incy );
@@ -209,31 +211,8 @@ void lcp_rpgs(int *nn , double *vec , double *q , double *z , double *w , int *i
     /*     err = sqrt(num)*den;*/
 
     /* **** Criterium convergence compliant with filter_result_LCP **** */
+    lcp_compute_error(n, M, q, z, ispeak, w, &err);
 
-    incx = 1;
-    incy = 1;
-    DCOPY(n , q , incx , w , incy);
-
-    a1 = 1.;
-    b1 = 1.;
-    DGEMV(LA_NOTRANS , n , n , a1 , vec , n , z ,
-          incx , b1 , w , incy);
-
-    err = 0.;
-    for (i = 0 ; i < n ; i++)
-    {
-      zi = z[i];
-      wi = w[i];
-      if (zi < 0.0)
-      {
-        err += -zi;
-        if (wi < 0.0) err += zi * wi;
-      }
-      if (wi < 0.0) err += -wi;
-      if ((zi > 0.0) && (wi > 0.0)) err += zi * wi;
-    }
-
-    err = err * den;
 
     /*    buffer_errors[iter-1] = err;*/
 

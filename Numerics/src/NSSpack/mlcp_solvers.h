@@ -37,6 +37,8 @@
 The C routines that solve MLCP:
 
 mlcp_pgs.c
+
+mlcp_rpgs.c
 */
 
 /**@defgroup group2 Block MLCP (Mixed Linear Complementary Problem)
@@ -79,9 +81,11 @@ extern "C" {
 
   void mlcp_pgs(int* nn , int* mm, double *A , double *B , double *C , double *D , double *a , double *b, double *u, double *v, double *w , int *info , int *iparamMLCP , double *dparamMLCP);
 
+  void mlcp_rpgs(int* nn , int* mm, double *A , double *B , double *C , double *D , double *a , double *b, double *u, double *v, double *w , int *info , int *iparamMLCP , double *dparamMLCP);
+
   int mlcp_filter_result(int* n, int* mm, double *A , double *B , double *C , double *D , double *a , double *b, double *u, double *v,  double tol, int chat, double *w);
 
-  int mlcp_compute_error(int* n, int* mm,  double *A , double *B , double *C , double *D , double *a , double *b, double *u, double *v,  int chat, double *w, double error);
+  int mlcp_compute_error(int* n, int* mm,  double *A , double *B , double *C , double *D , double *a , double *b, double *u, double *v,  int chat, double *w, double * error);
 
 #ifdef __cplusplus
 }

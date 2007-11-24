@@ -99,42 +99,42 @@ typedef struct
 extern "C" {
 #endif
 
-  void lcp_qp(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+  void lcp_qp(int *nn , double *M , double *q , double *z , double *w , int *info ,
               int *iparamLCP , double *dparamLCP);
 
-  void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+  void lcp_cpg(int *nn , double *M , double *q , double *z , double *w , int *info ,
                int *iparamLCP , double *dparamLCP);
 
-  void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+  void lcp_pgs(int *nn , double *M , double *q , double *z , double *w , int *info ,
                int *iparamLCP , double *dparamLCP);
 
-  void lcp_rpgs(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+  void lcp_rpgs(int *nn , double *M , double *q , double *z , double *w , int *info ,
                 int *iparamLCP , double *dparamLCP);
 
-  void lcp_psor(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+  void lcp_psor(int *nn , double *M , double *q , double *z , double *w , int *info ,
                 int *iparamLCP , double *dparamLCP);
 
-  void lcp_nsqp(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+  void lcp_nsqp(int *nn , double *M , double *q , double *z , double *w , int *info ,
                 int *iparamLCP , double *dparamLCP);
 
-  void lcp_latin(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+  void lcp_latin(int *nn , double *M , double *q , double *z , double *w , int *info ,
                  int *iparamLCP , double *dparamLCP);
 
-  void lcp_latin_w(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+  void lcp_latin_w(int *nn , double *M , double *q , double *z , double *w , int *info ,
                    int *iparamLCP , double *dparamLCP);
 
-  void lcp_lexicolemke(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+  void lcp_lexicolemke(int *nn , double *M , double *q , double *z , double *w , int *info ,
                        int *iparamLCP , double *dparamLCP);
 
-  void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+  void lcp_newton_min(int *nn , double *M , double *q , double *z , double *w , int *info ,
                       int *iparamLCP , double *dparamLCP);
 
-  void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+  void lcp_newton_FB(int *nn , double *M , double *q , double *z , double *w , int *info ,
                      int *iparamLCP , double *dparamLCP);
 
-  int filter_result_LCP(int n, double *vec , double *q , double *z , double tol, int chat, double *w);
+  int filter_result_LCP(int n, double *M , double *q , double *z , double tol, int chat, double *w);
 
-  int lcp_compute_error(int n, double *vec , double *q , double *z , int chat, double *w, double error);
+  int lcp_compute_error(int n, double *M , double *q , double *z , int chat, double *w, double * error);
 
 #ifdef __cplusplus
 }
