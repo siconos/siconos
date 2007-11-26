@@ -62,7 +62,6 @@ dnl AC_PROG_INSURE
 dnl Comment the following lines to compile with insure
 AC_PROG_CC
 AC_PROG_CXX
-AC_PROG_F77
 
 CFLAGS=""
 CXXFLAGS=""
@@ -151,14 +150,45 @@ dnl #################################
 
 # Check for atlas in special location
 # this define ATLAS_CPPFLAGS and ATLAS_LDFLAGS
-ACX_ATLAS(,
-  [AC_MSG_ERROR([Atlas was not found. This makes this library unusable.
-*** This makes this library unusable. Please get the atlas library 
-*** installed. If you do have this installed, use the options 
-*** --with-atlas-include=<path of atlas include dir > and 
-*** --with-atlas-lib=<path of atlas libdir> and/or set 
-*** the env variable LDFLAGS to include the appropriate linker 
-*** flags.])])
+
+case "$target" in
+    *-apple-darwin*)
+      #ATLAS_LIBS="-L/usr/local/lib/atlas/ -latlas -lcblas -lf77blas -llapack -latlas"
+      ATLAS_LIBS="/usr/local/lib/atlas/libatlas.a /usr/local/lib/atlas/liblapack.a /usr/local/lib/atlas/libcblas.a /usr/local/lib/atlas/libf77blas.a"
+      ATLAS_INCLUDES="-I/usr/local/include/atlas"
+      ATLAS_LDFLAGS="-L/usr/local/lib/atlas/"
+      #ATLAS_CPPFLAGS=""   
+      #AC_SUBST(ATLAS_CPPFLAGS)
+      AC_SUBST(ATLAS_LDFLAGS)
+      
+      ;;
+    *)
+        ACX_ATLAS(,
+	[AC_MSG_ERROR([Atlas was not found. This makes this library unusable.
+	*** This makes this library unusable. Please get the atlas library 
+	*** installed. If you do have this installed, use the options 
+	*** --with-atlas-include=<path of atlas include dir > and 
+	*** --with-atlas-lib=<path of atlas libdir> and/or set 
+	*** the env variable LDFLAGS to include the appropriate linker 
+	*** flags.])])
+	ATLAS_LIBS="$ATLAS_LDFLAGS"
+
+      # Specific solution to Debian packaging bug
+      AC_CHECK_HEADER([atlas/cblas.h],[need_inc_atlas=no],[need_inc_atlas=yes])
+      AC_CHECK_HEADER([atlas/clapack.h],[need_inc_atlas=no],[need_inc_atlas=yes])
+      if test "$need_inc_atlas" = yes; then
+            ATLAS_INCLUDES="$ATLAS_CPPFLAGS"
+            ATLAS_SRC_INCLUDES='-I${abs_top_srcdir}/src/utils/AtlasLocal'
+            ATLAS_LOCAL_INCLUDES='-I$(SICONOSPATH)/include/Siconos/AtlasLocal'
+            AC_SUBST(ATLAS_SRC_INCLUDES)
+            AC_SUBST(ATLAS_LOCAL_INCLUDES)
+      else
+            ATLAS_INCLUDES="$ATLAS_CPPFLAGS"
+      fi
+      ;;
+esac
+
+
 
 dnl dnl Check for Blas and Lapack
 ACX_LAPACK([
@@ -175,29 +205,6 @@ dnl action-if-not-found:
  *** flags.])
 ])
 
-case "$target" in
-    *-apple-darwin*)
-      #ATLAS_LIBS="-L/usr/local/lib/atlas/ -latlas -lcblas -lf77blas -llapack -latlas"
-      ATLAS_LIBS="/usr/local/lib/atlas/libatlas.a /usr/local/lib/atlas/liblapack.a /usr/local/lib/atlas/libcblas.a /usr/local/lib/atlas/libf77blas.a"
-      ATLAS_INCLUDES="-I/usr/local/include/atlas"
-      ;;
-    *)
-      ATLAS_LIBS="$ATLAS_LDFLAGS"
-
-      # Specific solution to Debian packaging bug
-      AC_CHECK_HEADER([atlas/cblas.h],[need_inc_atlas=no],[need_inc_atlas=yes])
-      AC_CHECK_HEADER([atlas/clapack.h],[need_inc_atlas=no],[need_inc_atlas=yes])
-      if test "$need_inc_atlas" = yes; then
-            ATLAS_INCLUDES="$ATLAS_CPPFLAGS"
-            ATLAS_SRC_INCLUDES='-I${abs_top_srcdir}/src/utils/AtlasLocal'
-            ATLAS_LOCAL_INCLUDES='-I$(SICONOSPATH)/include/Siconos/AtlasLocal'
-            AC_SUBST(ATLAS_SRC_INCLUDES)
-            AC_SUBST(ATLAS_LOCAL_INCLUDES)
-      else
-            ATLAS_INCLUDES="$ATLAS_CPPFLAGS"
-      fi
-      ;;
-esac
 
 
 # Boost
@@ -301,7 +308,7 @@ SICONOS_EXT_INCLUDES="$NUMERICS_INCLUDES $ATLAS_INCLUDES $XML_CPPFLAGS $BOOST_CP
 AC_SUBST(SICONOS_EXT_INCLUDES)
 
 
-SICONOS_EXT_LIBS="$NUMERICS_LIBRARIES $XML_LIBS -ldl $ATLAS_LIBS $LAPACK_LIBS $LIBS "
+SICONOS_EXT_LIBS="$NUMERICS_LIBRARIES $XML_LIBS -ldl $ATLAS_LIBS $LAPACK_LIBS $LIBS"
 
 AC_SUBST(SICONOS_EXT_LIBS)
 

@@ -1,6 +1,10 @@
 AC_DEFUN([ACX_CHECK_NUMERICS], [
 AC_PREREQ(2.57)
 
+
+
+AC_PROG_F77
+
 # Numerics: no include files (FORTRAN libraries)
 if test "$with_numerics" = no -o "$with_numerics" = yes -o "$with_numerics" = ""; then
     AC_MSG_RESULT(option --with-numerics not selected : installed numerics used)
@@ -34,7 +38,7 @@ for ac_dir in $list_dir;
 	do  AC_MSG_CHECKING([for libSiconosNumerics.$libsuffix in $ac_dir])
 		   if test -r "$ac_dir/lib/libSiconosNumerics.$libsuffix" && test -r "$ac_dir/include/Siconos/SiconosNumerics.h" ; then
        			NUMERICS_INCLUDES="-I$ac_dir/include/Siconos"
-       			NUMERICS_LIBRARIES="-L$ac_dir/lib -lSiconosNumerics"
+       			NUMERICS_LIBRARIES="-L$ac_dir/lib -lSiconosNumerics $FLIBS"
        			NUMERICS_PATH="$ac_dir"
        			numerics_lib="yes"
 			dynlib="yes"
@@ -52,7 +56,7 @@ if test "$numerics_lib" = "no" ; then
         if test -r "$ac_dir/lib/libSiconosNumerics.a" ; then
 	    	numerics_lib="yes"
 		NUMERICS_INCLUDES="-I$ac_dir/include/Siconos"
-       		NUMERICS_LIBRARIES="-L$ac_dir/lib -lSiconosNumerics"
+       		NUMERICS_LIBRARIES="-L$ac_dir/lib -lSiconosNumerics $FLIBS"
        		NUMERICS_PATH="$ac_dir"	    	   
 	    	AC_MSG_RESULT([yes, library $ac_dir/lib/libNumerics.a selected])
 	    break
