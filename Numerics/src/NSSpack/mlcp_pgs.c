@@ -228,8 +228,15 @@ void mlcp_pgs(int *nn , int* mm, double *A , double *B , double *C , double *D ,
     /* **** Criterium convergence compliant with filter_result_MLCP **** */
 
     //mlcp_compute_error(n,vec,q,z,verbose,w, &err);
-    mlcp_compute_error(nn, mm,  A , B , C , D , a , b, u, v, verbose, w,  &err);
 
+    if (n >= 1)
+    {
+      mlcp_compute_error(nn, mm,  A , B , C , D , a , b, u, v, verbose, w,  &err);
+    }
+    else
+    {
+      lcp_compute_error(mm,   B , b, u, verbose, w ,  &err);
+    }
     //err = err ;
 
 

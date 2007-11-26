@@ -56,9 +56,9 @@ int mlcp_compute_error(int* nn, int* mm,  double *A , double *B , double *C , do
   incx = 1;
   incy = 1;
 
-  a1 = 1.;
-  b1 = 1.;
-  we   = (double*)malloc(m * sizeof(double));
+  a1 = -1.;
+  b1 = -1.;
+  we   = (double*)calloc(n, sizeof(double));
   DCOPY(n , a , incx , we , incy);  //  we <-- a
   DCOPY(m , b , incx , w , incy);  //  w <-- b
 
@@ -68,7 +68,7 @@ int mlcp_compute_error(int* nn, int* mm,  double *A , double *B , double *C , do
 
   if (param == 1)
   {
-    DGEMV(LA_NOTRANS , m, n , a1 , D , n , u ,
+    DGEMV(LA_NOTRANS , m, n , a1 , D , m , u ,
           incx , b1 , w , incy);  // w <-- D*u+ w
     DGEMV(LA_NOTRANS , m , m , a1 , B , m , v ,
           incx , b1 , w , incy);  // w <-- B*v + w
@@ -76,7 +76,7 @@ int mlcp_compute_error(int* nn, int* mm,  double *A , double *B , double *C , do
 
   DGEMV(LA_NOTRANS , n, n , a1 , A , n , u ,
         incx , b1 , we , incy);  // we <-- A*u+ we
-  DGEMV(LA_NOTRANS , n , m , a1 , C , m , v ,
+  DGEMV(LA_NOTRANS , n , m , a1 , C , n , v ,
         incx , b1 , we , incy);  // we <-- C*v + we
 
 
@@ -117,7 +117,7 @@ int mlcp_compute_error(int* nn, int* mm,  double *A , double *B , double *C , do
   {
     *err = errore / norma;
   }
-
+  free(we);
   if (verbose > 0) printf("Siconos/Numerics: mlcp_compute_error: Error evaluation = %g \n", *err);
   return 0;
 

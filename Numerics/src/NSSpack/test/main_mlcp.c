@@ -57,7 +57,7 @@
  ******************************************************************************
  */
 
-void test_mlcp_series(int n , int m, double *A , double *B , double *C , double *D , double *a , double *b)
+void test_mlcp_series(int n , int m, double *A , double *B , double *C , double *D , double *a , double *b, double *sol)
 {
 
   int i, j;
@@ -84,7 +84,7 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
 
   /* Method definition */
 
-  static method_mlcp method_mlcp2 = { "RPGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1 , 0 , 0.0 };
+  static method_mlcp method_mlcp2 = { "RPGS"       , 1001 , 1e-8 , 0.6 , .1 , 1 , 0 , 0.0 };
 
   /*   nonsymmetric = 0; */
 
@@ -110,12 +110,12 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
 #endif
   for (i = 0 ; i < m ; ++i)
   {
-    v1[i] = 0.0;
+    v1[i] = sol[i + n];
     w1[i] = 0.0;
   }
   for (i = 0 ; i < n ; ++i)
   {
-    u1[i] = 0.0;
+    u1[i] = sol[i];
   }
 
   info1 = mlcp_solver(A, B, C, D, a, b, &n , &m, &method_mlcp1 , u1 , v1, w1);
@@ -224,7 +224,7 @@ void test_matrix(void)
   iter  = 0;
   criteria = 0.0;
 
-  NBTEST = 1;
+  NBTEST = 2;
 
   /****************************************************************/
 #ifdef BAVARD
@@ -246,10 +246,18 @@ void test_matrix(void)
       }
       break;
     case 1:
-      printf("\n\n DIAGONAL MLCP ");
-      if ((MLCPfile = fopen("MATRIX/trivial.dat", "r")) == NULL)
+      printf("\n\n diodeBridge MLCP ");
+      if ((MLCPfile = fopen("MATRIX/diodeBridge_mlcp.dat", "r")) == NULL)
       {
-        perror("fopen MLCPfile: trivial.dat");
+        perror("fopen MLCPfile: diodeBridge_mlcp.dat");
+        exit(1);
+      }
+      break;
+    case 2:
+      printf("\n\n trivial MLCP ");
+      if ((MLCPfile = fopen("MATRIX/trivial_mlcp.dat", "r")) == NULL)
+      {
+        perror("fopen MLCPfile: diodeBridge_mlcp.dat");
         exit(1);
       }
       break;
@@ -262,25 +270,16 @@ void test_matrix(void)
     m2 = m * m;
     isol = 1;
 
-    vecA = (double*)malloc(n2 * sizeof(double));
-    vecB = (double*)malloc(m2 * sizeof(double));
-    vecC = (double*)malloc(n * m * sizeof(double));
-    vecD = (double*)malloc(m * m * sizeof(double));
-    a    = (double*)malloc(n * sizeof(double));
-    b    = (double*)malloc(m * sizeof(double));
-    sol  = (double*)malloc((n + m) * sizeof(double));
-
-    for (i = 0 ; i < n ; ++i)  a[i]    = 0.0;
-    for (i = 0 ; i < n ; ++i)  b[i]    = 0.0;
-
-    for (i = 0 ; i < n2 ; ++i) vecA[i] = 0.0;
-    for (i = 0 ; i < m2 ; ++i) vecB[i] = 0.0;
-    for (i = 0 ; i < n * m ; ++i) vecC[i] = 0.0;
-    for (i = 0 ; i < m * n ; ++i) vecD[i] = 0.0;
+    vecA = (double*)calloc(n2, sizeof(double));
+    vecB = (double*)calloc(m2, sizeof(double));
+    vecC = (double*)calloc(n * m, sizeof(double));
+    vecD = (double*)calloc(m * n, sizeof(double));
+    a    = (double*)calloc(n, sizeof(double));
+    b    = (double*)calloc(m, sizeof(double));
+    sol  = (double*)calloc((n + m), sizeof(double));
 
 
 
-    for (i = 0 ; i < m ; ++i)  sol[i]  = 0.0;
 
     for (i = 0 ; i < n ; ++i)
     {
@@ -295,7 +294,9 @@ void test_matrix(void)
       for (j = 0 ; j < m ; ++j)
       {
         fscanf(MLCPfile, "%s", val);
-        vecB[ n * j + i ] = atof(val);
+        vecB[ m * j + i ] = atof(val);
+
+
       }
     }
     for (i = 0 ; i < n ; ++i)
@@ -311,7 +312,7 @@ void test_matrix(void)
       for (j = 0 ; j < n ; ++j)
       {
         fscanf(MLCPfile, "%s", val);
-        vecD[ n * j + i ] = atof(val);
+        vecD[ m * j + i ] = atof(val);
       }
     }
 
@@ -333,7 +334,7 @@ void test_matrix(void)
 
       sol[0] = atof(val);
 
-      for (i = 1 ; i < dim ; ++i)
+      for (i = 1 ; i < n + m ; ++i)
       {
         fscanf(MLCPfile , "%s" , val);
         sol[i] = atof(val);
@@ -354,7 +355,7 @@ void test_matrix(void)
     printf("\n");
 #endif
 
-    test_mlcp_series(n, m , vecA, vecB, vecC , vecD, a, b);
+    test_mlcp_series(n, m , vecA, vecB, vecC , vecD, a, b, sol);
 
     free(sol);
     free(vecA);

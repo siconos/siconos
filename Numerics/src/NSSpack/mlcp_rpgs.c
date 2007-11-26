@@ -197,6 +197,17 @@ void mlcp_rpgs(int *nn , int* mm, double *A , double *B , double *C , double *D 
 
   DCOPY(m , b , incx , w , incy);       //  q --> w
 
+  //mlcp_compute_error(n,vec,q,z,verbose,w, &err);
+  if (n >= 1)
+  {
+    mlcp_compute_error(nn, mm,  A , B , C , D , a , b, u, v, verbose, w,  &err);
+  }
+  else
+  {
+    lcp_compute_error(mm,   B , b, u, verbose, w ,  &err);
+  }
+  printf("Error = %12.8e\n", err);
+
   while ((iter < itermax) && (err > tol))
   {
 
@@ -205,15 +216,15 @@ void mlcp_rpgs(int *nn , int* mm, double *A , double *B , double *C , double *D 
     incx = 1;
     incy = 1;
 
-    DCOPY(n , w , incx , wOld , incy);   //  w --> wOld
-    DCOPY(n , b , incx , w , incy);    //  b --> w
+    DCOPY(m , w , incx , wOld , incy);   //  w --> wOld
+    DCOPY(m , b , incx , w , incy);    //  b --> w
 
     for (i = 0 ; i < n ; ++i)
     {
       uiprev = u[i];
       u[i] = 0.0;
       //zi = -( q[i] + DDOT( n , &vec[i] , incx , z , incy ))*diag[i];
-      u[i] = -(a[i]  - (rho * uiprev) + DDOT(n , &A[i] , incAx , u , incAy)   + DDOT(m , &C[i] , incBx , v , incBy)) * diagA[i];
+      u[i] = -(a[i]  - (rho * uiprev) + DDOT(n , &A[i] , n , u , 1)   + DDOT(m , &C[i] , n , v , 1)) * diagA[i];
     }
 
     for (i = 0 ; i < m ; ++i)
@@ -221,7 +232,8 @@ void mlcp_rpgs(int *nn , int* mm, double *A , double *B , double *C , double *D 
       viprev = v[i];
       v[i] = 0.0;
       //zi = -( q[i] + DDOT( n , &vec[i] , incx , z , incy ))*diag[i];
-      vi = -(b[i] - (rho * viprev) + DDOT(n , &D[i] , incAx , u , incAy)   + DDOT(m , &B[i] , incBx , v , incBy)) * diagB[i];
+      vi = -(b[i] - (rho * viprev) + DDOT(n , &D[i] , m , u , 1)   + DDOT(m , &B[i] , m , v , 1)) * diagB[i];
+
 
       if (vi < 0) v[i] = 0.0;
       else v[i] = vi;
@@ -232,8 +244,14 @@ void mlcp_rpgs(int *nn , int* mm, double *A , double *B , double *C , double *D 
     /* **** Criterium convergence compliant with filter_result_MLCP **** */
 
     //mlcp_compute_error(n,vec,q,z,verbose,w, &err);
-    mlcp_compute_error(nn, mm,  A , B , C , D , a , b, u, v, verbose, w,  &err);
-
+    if (n >= 1)
+    {
+      mlcp_compute_error(nn, mm,  A , B , C , D , a , b, u, v, verbose, w,  &err);
+    }
+    else
+    {
+      lcp_compute_error(mm,   B , b, u, verbose, w ,  &err);
+    }
     //err = err ;
 
 
