@@ -84,7 +84,7 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
 
   /* Method definition */
 
-  static method_mlcp method_mlcp2 = { "RPGS"       , 1001 , 1e-8 , 0.6 , .1 , 1 , 0 , 0.0 };
+  static method_mlcp method_mlcp2 = { "RPGS"       , 1001 , 1e-15 , 0.6 , 1.0 , 1 , 0 , 0.0 };
 
   /*   nonsymmetric = 0; */
 
@@ -99,30 +99,37 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
   /*     } */
   /*   } */
 
-#ifdef BAVARD
-  if (nonsymmetric) printf("\n !! WARNING !!\n M is a non symmetric matrix \n");
-  else printf(" M is a symmetric matrix \n");
-#endif
+  /* #ifdef BAVARD */
+  /*   if( nonsymmetric ) printf("\n !! WARNING !!\n M is a non symmetric matrix \n"); */
+  /*   else printf(" M is a symmetric matrix \n"); */
+  /* #endif */
 
-  /* #1 PGS TEST */
-#ifdef BAVARD
-  printf("**** PGS TEST ****\n");
-#endif
+  /*   /\* #1 PGS TEST *\/ */
+  /*   #ifdef BAVARD */
+  /*   printf("**** PGS TEST ****\n"); */
+  /* #endif */
+
+
+  /*   printf("\n exact solution : "); */
+  /*   for( i = 0 ; i < (n) ; ++i ) printf(" u1 = %10.4g " , u1[i] ); */
+  /*   for( i = 0 ; i < (m) ; ++i ) printf(" v1 = %10.4g " , v1[i] ); */
+  /*   for( i = 0 ; i < (m) ; ++i ) printf(" w1 = %10.4g " , w1[i] ); */
+  /*   printf("\n"); */
+
   for (i = 0 ; i < m ; ++i)
   {
     v1[i] = sol[i + n];
-    w1[i] = 0.0;
+    w1[i] = sol[n + m + i];
   }
   for (i = 0 ; i < n ; ++i)
   {
     u1[i] = sol[i];
   }
-
   info1 = mlcp_solver(A, B, C, D, a, b, &n , &m, &method_mlcp1 , u1 , v1, w1);
 
 
 #ifdef BAVARD
-  /*  printf(" *** ************************************** ***\n"); */
+  printf(" *** ************************************** ***\n");
 
   printf(" ****** z = ********************************\n");
   for (i = 0 ; i < n ; i++)
@@ -149,10 +156,10 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
   /*     } */
   /*   } */
 
-#ifdef BAVARD
-  if (nonsymmetric) printf("\n !! WARNING !!\n M is a non symmetric matrix \n");
-  else printf(" M is a symmetric matrix \n");
-#endif
+  /* #ifdef BAVARD */
+  /*   if( nonsymmetric ) printf("\n !! WARNING !!\n M is a non symmetric matrix \n"); */
+  /*   else printf(" M is a symmetric matrix \n"); */
+  /* #endif */
 
 
   /* #1 RPGS TEST */
@@ -161,12 +168,12 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
 #endif
   for (i = 0 ; i < m ; ++i)
   {
-    v1[i] = 0.0;
-    w1[i] = 0.0;
+    v1[i] = sol[i + n];
+    w1[i] = sol[n + m + i];
   }
   for (i = 0 ; i < n ; ++i)
   {
-    u1[i] = 0.0;
+    u1[i] = sol[i];
   }
 
   info1 = mlcp_solver(A, B, C, D, a, b, &n , &m, &method_mlcp2 , u1 , v1, w1);
@@ -207,6 +214,7 @@ void test_matrix(void)
   int dim , dim2;
   int n , n2;
   int m, m2;
+  int withSol = 0;
 
   double *a, *b, *sol;
   double *vecA, *vecB, *vecC, *vecD;
@@ -224,7 +232,7 @@ void test_matrix(void)
   iter  = 0;
   criteria = 0.0;
 
-  NBTEST = 2;
+  NBTEST = 7;
 
   /****************************************************************/
 #ifdef BAVARD
@@ -253,11 +261,50 @@ void test_matrix(void)
         exit(1);
       }
       break;
+      /*     case 2: */
+      /*       printf("\n\n trivial MLCP "); */
+      /*       if( ( MLCPfile = fopen( "MATRIX/trivial_mlcp.dat","r" ) ) == NULL ){ */
+      /*  perror("fopen MLCPfile: diodeBridge_mlcp.dat"); */
+      /*  exit(1); */
+      /*       } */
+      /*       break; */
     case 2:
-      printf("\n\n trivial MLCP ");
-      if ((MLCPfile = fopen("MATRIX/trivial_mlcp.dat", "r")) == NULL)
+      printf("\n\n RCD ");
+      if ((MLCPfile = fopen("MATRIX/RCD_mlcp.dat", "r")) == NULL)
       {
-        perror("fopen MLCPfile: diodeBridge_mlcp.dat");
+        perror("fopen MLCPfile: RCD_mlcp.dat");
+        exit(1);
+      }
+      break;
+    case 3:
+      printf("\n\n PD ");
+      if ((MLCPfile = fopen("MATRIX/PD_mlcp.dat", "r")) == NULL)
+      {
+        perror("fopen MLCPfile: PD_mlcp.dat");
+        exit(1);
+      }
+      break;
+    case 4:
+      printf("\n\n m2n1_mlcp.dat ");
+      if ((MLCPfile = fopen("MATRIX/m2n1_mlcp.dat", "r")) == NULL)
+      {
+        perror("fopen MLCPfile: m2n1SOL_mlcp.dat");
+        exit(1);
+      }
+      break;
+    case 5:
+      printf("\n\n m3n2_mlcp.dat ");
+      if ((MLCPfile = fopen("MATRIX/m3n2_mlcp.dat", "r")) == NULL)
+      {
+        perror("fopen MLCPfile: m3n2SOL_mlcp.dat");
+        exit(1);
+      }
+      break;
+    case 6:
+      printf("\n\n m3n2bis_mlcp.dat ");
+      if ((MLCPfile = fopen("MATRIX/m3n2bis_mlcp.dat", "r")) == NULL)
+      {
+        perror("fopen MLCPfile: m3n2bisSOL_mlcp.dat");
         exit(1);
       }
       break;
@@ -276,7 +323,7 @@ void test_matrix(void)
     vecD = (double*)calloc(m * n, sizeof(double));
     a    = (double*)calloc(n, sizeof(double));
     b    = (double*)calloc(m, sizeof(double));
-    sol  = (double*)calloc((n + m), sizeof(double));
+    sol  = (double*)calloc((n + m + m), sizeof(double));
 
 
 
@@ -328,13 +375,14 @@ void test_matrix(void)
     }
 
     fscanf(MLCPfile , "%s" , val);
-
+    withSol = 0;
     if (!feof(MLCPfile))
     {
+      withSol = 1;
 
       sol[0] = atof(val);
 
-      for (i = 1 ; i < n + m ; ++i)
+      for (i = 1 ; i < n + m + m ; ++i)
       {
         fscanf(MLCPfile , "%s" , val);
         sol[i] = atof(val);
@@ -349,12 +397,20 @@ void test_matrix(void)
     fclose(MLCPfile);
 
 #ifdef BAVARD
-    printf("\n exact solution : ");
-    if (isol) for (i = 0 ; i < (n + m) ; ++i) printf(" %10.4g " , sol[i]);
+    printf("\n With exact solution : ");
+    printf("\n ------------------- : \n");
+    if (isol) for (i = 0 ; i < (n + m + m) ; ++i) printf(" %10.4g " , sol[i]);
     else printf(" unknown ");
     printf("\n");
 #endif
-
+    if (withSol)
+    {
+      test_mlcp_series(n, m , vecA, vecB, vecC , vecD, a, b, sol);
+      printf("\n Without exact solution : ");
+      printf("\n ---------------------- : \n");
+    }
+    for (i = 0; i < n + m + m; i++)
+      sol[i] = 0;
     test_mlcp_series(n, m , vecA, vecB, vecC , vecD, a, b, sol);
 
     free(sol);

@@ -56,8 +56,8 @@ int mlcp_compute_error(int* nn, int* mm,  double *A , double *B , double *C , do
   incx = 1;
   incy = 1;
 
-  a1 = -1.;
-  b1 = -1.;
+  a1 = 1.;
+  b1 = 1.;
   we   = (double*)calloc(n, sizeof(double));
   DCOPY(n , a , incx , we , incy);  //  we <-- a
   DCOPY(m , b , incx , w , incy);  //  w <-- b
@@ -74,19 +74,19 @@ int mlcp_compute_error(int* nn, int* mm,  double *A , double *B , double *C , do
           incx , b1 , w , incy);  // w <-- B*v + w
   }
 
+
+
   DGEMV(LA_NOTRANS , n, n , a1 , A , n , u ,
         incx , b1 , we , incy);  // we <-- A*u+ we
+
+
   DGEMV(LA_NOTRANS , n , m , a1 , C , n , v ,
         incx , b1 , we , incy);  // we <-- C*v + we
 
 
 
   errore = 0.;
-
-  for (i = 0 ; i < n ; i++)
-  {
-    errore += fabs(we[i]);
-  }
+  errore =  DNRM2(n , we , incx);;
 
   error = 0.0;
   for (i = 0 ; i < m; i++)
@@ -101,21 +101,22 @@ int mlcp_compute_error(int* nn, int* mm,  double *A , double *B , double *C , do
     if ((v[i] > 0.0) && (w[i] > 0.0)) error += v[i] * w[i];
   }
 
+
   incx  = 1;
   normb = DNRM2(m , b , incx);
   norma = DNRM2(n , a , incx);
 
-  if (fabs(normb) < 1e-16) normb = 1.0;
-  if (fabs(norma) < 1e-16) norma = 1.0;
+
+
 
 
   if (error / normb >= errore / norma)
   {
-    *err = error / normb;
+    *err = error / (1.0 + normb);
   }
   else
   {
-    *err = errore / norma;
+    *err = errore / (1.0 + norma);
   }
   free(we);
   if (verbose > 0) printf("Siconos/Numerics: mlcp_compute_error: Error evaluation = %g \n", *err);

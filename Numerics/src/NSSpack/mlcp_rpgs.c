@@ -221,22 +221,21 @@ void mlcp_rpgs(int *nn , int* mm, double *A , double *B , double *C , double *D 
 
     for (i = 0 ; i < n ; ++i)
     {
-      uiprev = u[i];
-      u[i] = 0.0;
+      //uiprev=u[i];
+      //u[i]= 0.0;
       //zi = -( q[i] + DDOT( n , &vec[i] , incx , z , incy ))*diag[i];
-      u[i] = -(a[i]  - (rho * uiprev) + DDOT(n , &A[i] , n , u , 1)   + DDOT(m , &C[i] , n , v , 1)) * diagA[i];
+      u[i] = u[i] - (a[i]  - (rho * u[i]) + DDOT(n , &A[i] , n , u , 1)   + DDOT(m , &C[i] , n , v , 1)) * diagA[i];
     }
 
     for (i = 0 ; i < m ; ++i)
     {
-      viprev = v[i];
-      v[i] = 0.0;
+      //viprev = v[i];
+      //v[i]= 0.0;
       //zi = -( q[i] + DDOT( n , &vec[i] , incx , z , incy ))*diag[i];
-      vi = -(b[i] - (rho * viprev) + DDOT(n , &D[i] , m , u , 1)   + DDOT(m , &B[i] , m , v , 1)) * diagB[i];
+      v[i] = v[i] - (b[i] - (rho * v[i]) + DDOT(n , &D[i] , m , u , 1)   + DDOT(m , &B[i] , m , v , 1)) * diagB[i];
 
-
-      if (vi < 0) v[i] = 0.0;
-      else v[i] = vi;
+      if (v[i] < 0)
+        v[i] = 0.0;
     }
 
 
