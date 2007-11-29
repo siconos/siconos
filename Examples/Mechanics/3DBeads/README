@@ -54,12 +54,9 @@ $(SAMPLE_EXE):$(SAMPLE_OBJ)
 
 With this changes, siconos allows to compile with external 3D libraries : X11/opengl/glut/drawstuff
 
+Note: 1) the directory "textutes" contains the textures used for the visualization
 
-In draw_beads.cpp you can find some examples of 3D frictional contact of beads.
-
-
-For any question, please contact me: houari.khenous@inrialpes.fr
-
+      2) details about the mechanical behaviour of beads and the mathematical computations are given in postdoc.pdf
 
 
 
