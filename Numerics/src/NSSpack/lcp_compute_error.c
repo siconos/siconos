@@ -72,6 +72,7 @@ int lcp_compute_error(int n, double *vec , double *q , double *z , int verbose, 
     }
     if (w[i] < 0.0) error += -w[i];
     if ((z[i] > 0.0) && (w[i] > 0.0)) error += z[i] * w[i];
+
   }
 
   incx  = 1;

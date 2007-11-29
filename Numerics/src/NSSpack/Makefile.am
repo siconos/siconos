@@ -55,10 +55,11 @@ PFC_SOLVERS = pfc_2D_cpg.c pfc_2D_latin.c pfc_2D_nlgs.c \
 	pfc_3D_cpg.c pfc_3D_nlgs.c projc.c projf.c \
 	pfc_3D_nlgsnewton.c pfc_3D_nsgs.c pfc_3D_newton.c \
 	pfc_3D_Alart_Curnier.c pfc_3D_projection.c\
-	pfc_3D_Fischer_Burmeister.c \
+	pfc_3D_Fischer_Burmeister.c NCP_compute_error.c\
 	pfc_2D_projc.c pfc_2D_projf.c \
 	max_part.c min_part.c abs_part.c pos_part.c \
-	pfc_3D_projc.c pfc_3D_projf.c pfc_3D_nsgs_block.c pfc_3D_nsgs_new.c
+	pfc_3D_projc.c pfc_3D_projf.c pfc_3D_nsgs_block.c pfc_3D_nsgs_new.c 
+
 
 ### DFC ######################################################
 

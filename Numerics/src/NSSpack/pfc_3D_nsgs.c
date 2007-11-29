@@ -61,7 +61,22 @@
  * \param dparamLCP[2] = res     Output modified parameter which returns the final error value.
  *
  *
- * \author Houari Khenous last modification 07/11/2007
+ * \param dparamLCP[0] = local_tol         Input unchanged parameter which represents the local tolerance required for Newton Method used to solve local Problem.
+ *
+ * \param iparamLCP[0] = lical_itermax     Input unchanged parameter which represents the maximum number of iterations allowed for Newton method.
+ * \param iparamLCP[3] = local_formulation Formulaton of frictional contact problem (Alart-Curnier: 0 and Fischer-Burmeister: 1)
+ * \param iparamLCP[4] = local_solver      Solution method used to solve the frictional contact problem (projection: 0 and Newton: 1)
+ *
+ * Note that the problem is solved with the Non-Smooth Gauss-Seidel method
+ *
+ * Important: The projection method is done only with Alart-Curnier formulation
+ *
+ * In progress: The Fischer-Burmeister formulation is nore ready to be used and is in progress
+ *
+ * This formulation is based on the idea of C. Glocker: Formulation of spatial contact situations
+ * in rigid multibodiy systems, Comp. Meth. Appl. Mech. Engrg, 177 (1999), 199-214.
+ *
+ * Last modification 27/11/2007, H. Khenous
  *
  */
 
@@ -82,7 +97,7 @@ void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int
 
   FILE *f101;
 
-  int n, in, it, is, ispeak, itermax, nc, i, j, ii, iter, Gsize, mm;
+  int n, in, it, is, ispeak, itermax, nc, i, j, ii, iter, Gsize;
   double err, tol, mu;
   double qs, a1, den, num;
   int incx, incy;
@@ -128,24 +143,15 @@ void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int
   iparam_local[0] = itermax; //iparamLCP[3]; /* local itermax   */
   iparam_local[1] = iparamLCP[4]; /* local iteration */
 
-
-  /* local_solver */
-  /* 0 for projection */
-  /* 1 for newton with AC formulation */
-
-  /* local_formulation */
-  /* 0 for Alart-Curnier formulation */
-  /* 1 for Fischer-Burmeister formulation */
-
-
-  iparam_local[3] = 1; //iparamLCP[5]; /* local formulation */
+  iparam_local[3] = 0; //iparamLCP[5]; /* local formulation */
   iparam_local[4] = 1; //iparamLCP[6]; /* local solver      */
-
 
   if (ispeak == 2) f101 = fopen("pfc_3D_nlgs.log" , "w+");
 
   if (iparam_local[4] == 0)
   {
+    /* NSGS with projection is done only for Alart-Curnier formulation, then if local_solver = 1 then local_formulation = 0 */
+    iparam_local[3] = 0;
     pfc_3D_local_solver = &pfc_3D_projection;
     Gsize  = 3;
   }
@@ -168,11 +174,9 @@ void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int
     }
   }
 
-  mm = Gsize * Gsize;
-
   /* Allocation */
 
-  C    = (double*)malloc(mm * sizeof(double));
+  C    = (double*)malloc(3 * 3 * sizeof(double));
   W    = (double*)malloc(n * sizeof(double));
   ww   = (double*)malloc(Gsize * sizeof(double));
   zz   = (double*)malloc(Gsize * sizeof(double));
@@ -182,9 +186,12 @@ void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int
   for (i = 0 ; i < Gsize ; ++i)
   {
     ww[i] =  zz[i] = zzz[i] = 0.;
-    for (j = 0 ; j < Gsize ; ++j)
-      C[j * Gsize + i] = 0.;
   }
+
+  for (i = 0 ; i < 3 ; ++i)
+    for (j = 0 ; j < 3 ; ++j)
+      C[j * 3 + i] = 0.;
+
 
   /* Check for non trivial case */
 
@@ -226,6 +233,8 @@ void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int
   incy = 1;
 
   DCOPY(n , q , incx , w , incy);
+
+  printf("---------------- number of contact points =  %i -----------------\n", nc);
 
   while ((iter < itermax) && (err > tol))
   {
@@ -276,9 +285,9 @@ void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int
 
         double *param1, *param2, *param3;
 
-        param1  = (double*)malloc(mm * sizeof(double));
-        param2  = (double*)malloc(mm * sizeof(double));
-        param3  = (double*)malloc(mm * sizeof(double));
+        param1  = (double*)malloc(Gsize * sizeof(double));
+        param2  = (double*)malloc(Gsize * sizeof(double));
+        param3  = (double*)malloc(Gsize * sizeof(double));
 
         /* Intialization of G, JacG, ww and www */
         for (j = 0 ; j < Gsize ; ++j)
@@ -300,41 +309,23 @@ void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int
       else
       {
 
-        double *IP, *Ip, *I3, *V;
+        double *IP, *Ip, *I3;
 
         IP = (double*)malloc(2 * sizeof(double));
         Ip = (double*)malloc(2 * 2 * sizeof(double));
         I3 = (double*)malloc(2 * sizeof(double));
-        V  = (double*)malloc(2 * sizeof(double));
 
         for (ii = 0 ; ii < 2 ; ++ii)
         {
-          IP[ii] = I3[ii] = V[ii] =  0.;
+          IP[ii] = I3[ii] = 0.;
           for (j = 0 ; j < 2 ; ++j)
             Ip[j * 2 + ii] = 0.;
         }
 
-        /*  double PI = 3.14; */
-        /*  double alpha1 = PI/6; */
-        /*  double alpha2 = 5*PI/6; */
-        /*  double alpha3 = 3*PI/2; */
 
-        /*  double deter = cos(alpha1)*sin(alpha2) - sin(alpha1)*cos(alpha2); */
-
-        /*  /\* Ip = matrix_inv2(Ip`)*\/ */
-        /*  /\* IP = matrix_inv2(Ip`)*mup *\/ */
-        /*  /\* I3 = matrix_inv2(Ip)*e3 *\/ */
-
-        /*  IP[0] = mu*(sin(alpha2)-sin(alpha1))/deter; */
-        /*  IP[1] = mu*(cos(alpha1)-cos(alpha2))/deter; */
-
-        /*  I3[0] = (cos(alpha3)*sin(alpha2) - sin(alpha3)*cos(alpha2))/deter; */
-        /*  I3[1] = (sin(alpha3)*cos(alpha1) - cos(alpha3)*sin(alpha1))/deter; */
-
-        /*  Ip[0*2+0] =  sin(alpha2)/deter; */
-        /*  Ip[1*2+0] = -sin(alpha1)/deter; */
-        /*  Ip[0*2+1] = -cos(alpha2)/deter; */
-        /*  Ip[1*2+1] =  cos(alpha1)/deter; */
+        /* Ip = matrix_inv2(Ip`)*/
+        /* IP = matrix_inv2(Ip`)*mup */
+        /* I3 = matrix_inv2(Ip)*e3 */
 
         IP[0] = 0.;
         IP[1] = 2.*mu;
@@ -355,12 +346,16 @@ void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int
         zz[4] = 0.;
 
 
-        zzz[0] = q[in];
-        /*  zzz[1] = -(Ip[0*2+0]*q[it] +Ip[0*2+1]*q[is]); */
-        /*  zzz[2] = -(Ip[1*2+0]*q[it] +Ip[1*2+1]*q[is]); */
+        incx = n;
+        incy = 1;
 
-        /*     for( ii = 0 ; ii < Gsize ; ++ii ) */
-        /*  printf("b[%i] =  %14.7e\n",ii,zzz[ii]); printf("\n"); */
+        z[in] = 0.0;
+        z[it] = 0.0;
+        z[is] = 0.0;
+
+        zzz[0] = q[in] + DDOT(n , &vec[in] , incx , z , incy);
+        zzz[1] = -(Ip[0 * 2 + 0] * (q[it] + DDOT(n , &vec[it] , incx , z , incy)) + Ip[0 * 2 + 1] * (q[is] + DDOT(n , &vec[is] , incx , z , incy)));
+        zzz[2] = -(Ip[1 * 2 + 0] * (q[it] + DDOT(n , &vec[it] , incx , z , incy)) + Ip[1 * 2 + 1] * (q[is] + DDOT(n , &vec[is] , incx , z , incy)));
 
         (*pfc_3D_local_solver)(Gsize , C , zzz , zz , ww , mu , &Compute_G, &Compute_JacG, Ip, IP, I3, iparam_local , dparam_local);
 
@@ -369,45 +364,24 @@ void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int
         z[it] = Ip[0 * 2 + 0] * (mu * zz[0] - zz[1]) + Ip[1 * 2 + 0] * (mu * zz[0] - zz[2]);
         z[is] = Ip[0 * 2 + 1] * (mu * zz[0] - zz[1]) + Ip[1 * 2 + 1] * (mu * zz[0] - zz[2]);
 
-
-        /*  double nrm = sqrt(z[it]*z[it]+z[is]*z[is]); */
-        /*  /\* printf("nrm =  %14.7e\n",nrm); *\/ */
-        /*  if(nrm){ */
-        /*    V[0] = z[it]/nrm; */
-        /*    V[1] = z[is]/nrm; */
-        /*  } */
-        /*  else{ */
-        /*    V[0] = 0.; */
-        /*    V[1] = -1.; */
-        /*  } */
-        /*  /\*   for( ii = 0 ; ii < 2 ; ++ii ) *\/ */
-        /*  /\*   printf("V[%i] =  %14.7e\n",ii,V[ii]); printf("\n"); *\/ */
-
         /*  w[in] = ww[0]; */
-        /*  w[it] = -(sqrt(3)*ww[1]/2. - sqrt(3)*ww[2]/2. + V[0]*ww[4]); */
-        /*  w[is] = -(ww[1]/2. + ww[2]/2. + V[1]*ww[4]); */
+        /*  w[it] = -(sqrt(3)*ww[1]/2. - sqrt(3)*ww[2]/2. + 2*z[it]*ww[4]); */
+        /*  w[is] = -(ww[1]/2. + ww[2]/2. - ww[3] + 2*z[is]*ww[4]); */
 
         free(IP);
         free(Ip);
         free(I3);
-        free(V);
 
       }
     }
 
     /* **** Criterium convergence **** */
 
-    incx =  1;
-    incy =  1;
-    a1 = 1.0;
+    NCP_compute_error(n , vec , q , z , ispeak , w , &err);
 
-    DGEMV(LA_NOTRANS , n , n , a1 , vec , n , z , incx , a1 , w , incy);
+    //lcp_compute_error( n , vec , q , z , ispeak , w , &err);
 
-    qs   = -1.0;
-    DAXPY(n , qs , w , incx , W , incy);
-    num = DNRM2(n, W , incx);
-    err = num * den;
-    /*    printf("-----------------------------------Iteration %i Erreur = %14.7e\n",iter,err); */
+    printf("-----------------------------------Iteration %i Erreur NSGS = %14.7e\n", iter, err);
   }
 
   iparamLCP[2] = iter;
@@ -417,13 +391,13 @@ void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int
   {
     if (err > tol)
     {
-      printf(" No convergence of NLGSNEWTON after %i iterations\n" , iter);
+      printf(" No convergence of NSGS after %i iterations\n" , iter);
       printf(" The residue is : %e \n", err);
       *info = 1;
     }
     else
     {
-      printf(" Convergence of NLGSNEWTON after %i iterations\n" , iter);
+      printf(" Convergence of NSGS after %i iterations\n" , iter);
       printf(" The residue is : %e \n", err);
       *info = 0;
     }

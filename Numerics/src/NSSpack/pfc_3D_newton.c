@@ -22,8 +22,18 @@
  *        Compute_G_function (*Compute_G), Compute_JacG_function (*Compute_JacG),
  *        int *iparam_local , double *dparam_local )
  *
+ * The method is done as follows:
+ * 1) Take x0;
+ * 2) Compute G(x{k}), Jac_G(x{k});
+ * 3) if || G(x{k}) || < tolerance then stop
+ * 4) else Solve Jac_G(x{k}) d = -G(x{k});
+ *         Do linesearch to obtain a decent direction D depending on d
+ *         x{k+1} = x{k} + D
+ *         Compute G(x{k+1})
+ *         if || G(x{k+1}) || < tolerance then stop
+ *         else go to 2)
  *
- * \author houari khenous last last modification 07/11/2007.
+ * \author houari khenous last modification 27/11/2007.
  *
  */
 
@@ -153,13 +163,17 @@ void pfc_3D_newton(int n , double *C , double *b ,  double *zz , double *ww , do
     /*   /\* direct inverse of 3x3 matrix *\/ */
     /*     matrix_inv3( JacG, AA); */
     /*     DGEMV( LA_NOTRANS , n , n , a1 , AA , n , G , incx , qs , www , incy ); */
-
-    (*Linesearch)(n , zz , ww , www , b , C , param1, param2, param3 , an , at , mu , nerr1);
-    nerr = nerr1;
+    if (nerr1 < local_tol)
+      nerr = nerr1;
+    else
+    {
+      (*Linesearch)(n , zz , ww , www , b , C , param1, param2, param3 , an , at , mu , nerr1);
+      nerr = nerr1;
+    }
 
     for (i = 0 ; i < n ; ++i)
       www[i] = 0.;
-    /*    printf("-----------------------------------Iteration Newton %i --------- Newton Error = %14.7e\n",niter,nerr); */
+    printf("-----------------------------------Iteration Newton %i --------- Newton Error = %14.7e\n", niter, nerr);
   }
 
 
