@@ -1,0 +1,50 @@
+1.0D-15                            CONVERGENCE TOLERANCE
+1.0D+1                             SCALED RESIDUAL TOLERANCE
+CG     T PUT F FOR NO TEST.        ALGORITHMS TO BE TESTED
+CHEBY  T PUT F FOR NO TEST.
+SOR    T PUT F FOR NO TEST.
+BICG   T PUT F FOR NO TEST.
+CGS    T PUT F FOR NO TEST.
+BICGS  T PUT F FOR NO TEST.
+GMRES  T PUT F FOR NO TEST.
+QMR    T PUT F FOR NO TEST.
+JACOB  T PUT F FOR NO TEST.
+3                                  NUMBER OF SPD MATRICES TO BE GENERATED
+'F2SH'  6, 6, 1, 'SUMR', 'ZERO'
+'WATH'  2, 2, 1, 'ONES', 'ZERO'    MATRIX, NX, NY, NZ, RHS, INITIAL GUESS
+'F3SH'  3, 3, 3, 'ONES', 'ZERO' 
+BICG   T  PUT F FOR NO TEST.       ALGORITHMS TO BE TESTED
+CGS    T  PUT F FOR NO TEST.
+BICGS  T  PUT F FOR NO TEST.
+GMRES  T  PUT F FOR NO TEST.
+QMR    T  PUT F FOR NO TEST.
+4                                  NUMBER OF MATRICES TO BE GENERATED
+'PDE1', 5, 5, 5, 'SUMR' , 'ZERO'   MATRIX, NX, NY, NZ, RHS, INITIAL GUESS
+'PDE2', 5, 5, 5, 'SUMR' , 'ZERO' 
+'PDE3', 5, 5, 5, 'ONES' , 'ZERO' 
+'PDE4', 6, 6, 1, 'ONES' , 'ZERO' 
+---------------------------
+MATRIX OPTIONS:
+
+   SPD matrices:
+
+   WATH   spd "consistentmass matrix" 
+   F2SH   2-d Poisson problem -u_xx - u_yy
+   F3SH   3-d Poisson problem -u_xx - u_yy - u_zz
+
+   Nonsymmetric matrices.
+
+   PDE1   u_xx + u_yy + au_x + (a/2)u_x for a = 20exp[3.5( x^2+y^2 )]
+             for a = 20( epx^( 3.5(X^2 + Y^2 )))
+
+   PDE2   u_xx + u_yy + u_zz + 1000u_x
+   PDE3   u_xx + u_yy + u_zz - 10^5x^2(u_x + u_y + u_z )
+   PDE4   u_xx + u_yy + u_zz + 1000exp(xyz)( u_x + u_y - u_z )
+
+NX, NY, NZ defines the domain grid in the X, Y, and Z directions, resp.
+
+RHS and INITIAL GUESS OPTIONS:
+
+   ZERO   zero vector 
+   ONES   unit vector
+   SUMR   row sum

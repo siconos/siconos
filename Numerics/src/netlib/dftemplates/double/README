@@ -1,0 +1,63 @@
+=======================
+SFTEMPLATES README FILE
+=======================
+
+
+This directory contains DOUBLE PRECISION code for the algorithms
+discussed in the Templates book, implemented using the Reverse
+Communicaiton mechanism.
+
+Unpack the shar file as:
+ /bin/sh dftemplates.shar
+
+There is are 3 driver programs, 
+  Tester.f - main driver,
+  dspdchk.f - driver for symmetric positive definite matrix tests,
+  dnsychk.f - driver for non-symmetric matrix tests,
+
+The source code corresponding to each iterative method (itmeth) 
+resides in 2 files;
+  itmeth.f
+  itmethREVCOM.f
+
+Iterative methods implemented are:
+  BiCG
+  BiCGSTAB
+  CG
+  CGS
+  Chebyshev
+  GMRES
+  Jacobi
+  QMR
+  SOR
+ 
+Code for 1 stopping test is given in STOPTEST2.f. It corresponds
+to the second stopping test discussed in the book.
+
+There is no separate documentation for the code, hopefully the
+inline comments will suffice.
+
+The programs can be compiled using the Makefile, which only
+requires the standard Fortran 77 compiler (f77). The executable
+is called "xdtest". The driver is driven by a data file called
+"test.data". Each line of data is commented. Output is generated 
+onto stdout, and file "test.results".
+
+So far, the code has only been tested on SUN machines.
+
+Before making your modifications to the code make sure you under-
+stand the reverse communication mechanism. Shouldn't take more than
+an hour.
+
+Future plans include additional preconditioners, iterative methods,
+storage formats, etc.
+
+The software and documentation is available by:
+
+1. sending mail as follows:
+  	echo "send index from templates" | mail netlib@www.netlib.org
+
+2. via http:
+    http://www.netlib.org/templates/index.html
+
+                x----------------x

@@ -1,0 +1,103 @@
+============= README file for testing the Iterative Templates ==================
+
+This directory contains the double precision C version of the Iterative 
+Templates, along with a test routine that the user can compile and execute 
+in order to verify that the routines are working. 
+
+================================================================================
+A test routine has been included with the template code. The user should run
+the test to make sure that the code has been successfully downloaded and
+unpacked. To do this, follow the following directions:
+
+0. This code was generated from the FORTRAN-77 source using f2c. Therefore,
+   in addition to the template and test routines, one needs to have
+   f2c.h available to compile C source; this is in F2CLIBS. The library
+   F2CLIBS/libF77.a needs to be linked with all routines as well.
+   Build the f2c libraries by doing:
+
+   cd TEMPLATES/F2CLIBS/libF77; make   
+   cd TEMPLATES/F2CLIBS/libI77; make
+
+##############################################################################
+WARNING:  If your system lacks onexit() and you are not using an ANSI C
+          compiler, then you should uncomment the following two lines
+          found within /F2CLIBS/libF77; makefile (for compiling main.o):
+                main.o: main.c
+                $(CC) -c -DNO_ONEXIT -DSkip_f2c_Undefs main.c
+          On at least some Sun systems, it is more appropriate to
+          uncomment the following two lines:
+                main.o: main.c
+                $(CC) -c -Donexit=on_exit -DSkip_f2c_Undefs main.c
+##############################################################################
+
+1. Compile the templates and testing code:
+
+   cd TEMPLATES; make
+
+   - This should result in an exectuable file named "xtest". You may have
+     to make some changes to the makefile, such as the compiler name (here
+     it is gcc), applicable flags, etc.
+
+2. Type "xtest". 
+
+   - This causes the executable to generate and loop over a
+     set of test matrices, using no preconditioning and diagonal scaling
+     preconditioning. Each system is solved by the applicable routines
+     (CG and Chebyshev are for SPD matrices only, Jacobi is only tested using
+     strictly diagonally dominant matrices), the solution is checked against
+     the scaled residual |A*x-b|/|b|, and results are written to file (see 
+     below).
+
+   - The specific information concerning the test is read in from 
+     file test.data.
+
+3. General results are printed to the screen:
+
+   - Either: Test passed, or messages are printed reporting which methods
+     did not pass. Details are written to file (see below).
+
+================================================================================
+Included are two files containing routines that you may already have.
+But you must use the version provided since they were generated using
+the f2c translator as part of the entire package.
+
+* dblas.c    double precision BLAS routines
+
+* dlapack.c  double precision LAPACK routines
+
+The basic template routines are:
+
+* CG.c        Conjugate Gradient method
+
+* BiCG.c      Bi-conjugate Gradient method
+
+* CGS.c       Conjugate Gradient squared method
+
+* BiCGSTAB.c  Bi-conjugate Gradient stabilized method
+
+* GMRES.c     Generalized Minimal Residual method
+
+* QMR.c       Quasi-Minimal residual method
+
+* Cheby.c     Chebyshev method
+
+* Jacobi.c    Jacobi method
+
+* SOR.c       Successive Over-Relaxation method
+
+The following routines are provided in order to execute the test routine,
+but the user should provide these routines customized to their particular
+data structure.
+
+* MatVec.c      Performs the matrix-vector product. This is really just
+                a mask to the BLAS routine sgemv.
+
+* PSolve.c      This routine performs the preconditioning options.
+
+* Utils.c       This file contains routines needed by the Jacobi, SOR
+                and Chebyshev methods.
+
+* MatGen.c      This file contains a matrix generator routine adapted
+                from SPARSEKIT, along with various PDE coefficient functions.
+
+Details of the test runs are written to file test.results 
