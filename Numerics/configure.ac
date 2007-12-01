@@ -334,8 +334,9 @@ AC_SUBST(DOXYGEN_CFG)
 AC_CONFIG_FILES([Makefile
 		 src/Makefile
                  src/utils/Makefile
-		 src/odepack/Makefile
-		 src/odepack/test/Makefile
+		 src/netlib/Makefile
+		 src/netlib/odepack/Makefile
+		 src/netlib/odepack/test/Makefile
 		 src/NSSpack/Makefile
 		 src/NSSpack/test/Makefile])
 AC_OUTPUT

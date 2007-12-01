@@ -21,7 +21,7 @@
 # INTERNAL LIBRARIES
 
 #--- Odepack --------------------------------------
-ODEPACK_PATH = src/odepack
+ODEPACK_PATH = src/netlib/odepack
 ODEPACK_INC = $(top_srcdir)/$(ODEPACK_PATH)
 ODEPACK_LIB = -L$(top_builddir)/$(ODEPACK_PATH) -lodepack
 
