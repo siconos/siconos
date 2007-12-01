@@ -337,6 +337,8 @@ AC_CONFIG_FILES([Makefile
 		 src/netlib/Makefile
 		 src/netlib/odepack/Makefile
 		 src/netlib/odepack/test/Makefile
+		 src/netlib/dftemplates/Makefile
+		 src/netlib/dftemplates/double/Makefile
 		 src/NSSpack/Makefile
 		 src/NSSpack/test/Makefile])
 AC_OUTPUT

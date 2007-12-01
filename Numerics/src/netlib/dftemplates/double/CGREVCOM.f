@@ -22,7 +22,7 @@
       DOUBLE PRECISION   X( * ), B( * ),  WORK( LDW,* )
 *
 *     (output) for matvec and solve. These index into WORK[]
-      INTEGER NDX1, NDX2
+*      INTEGER NDX1, NDX2
 *     ..
 *
 *  Purpose

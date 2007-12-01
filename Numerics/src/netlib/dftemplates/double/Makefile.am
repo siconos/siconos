@@ -16,15 +16,39 @@
 #
 # Contact: Vincent ACARY vincent.acary@inrialpes.fr 
 #	
-# Makefile.am --- SICONOS - src
+# Makefile.am --- SICONOS - ModelingTools
 
 include $(top_srcdir)/config/Make-rules
 
-SUBDIRS =  NSSpack utils netlib
-EXTRA_DIST = 
+.f.o:
+	$(F77COMPILE) -c $<
 
-lib_LTLIBRARIES = libSiconosNumerics.la 
-libSiconosNumerics_la_LDFLAGS=  $(CXX_DYNLIB) -version-info $(SICONOSNUMERICS_SO_CURRENT):$(SICONOSNUMERICS_SO_REVISION):$(SICONOSNUMERICS_SO_AGE) -release $(PACKAGE_VERSION)
-libSiconosNumerics_la_SOURCES= dummy.cpp
-libSiconosNumerics_la_LIBADD = $(top_builddir)/src/netlib/odepack/libodepack.la $(top_builddir)/src/netlib/dftemplates/double/libdftemplates.la $(top_builddir)/src/NSSpack/libNSSpack.la
-numerics_HEADERS = SiconosNumerics.h
+SUBDIRS =  
+
+noinst_LTLIBRARIES = libdftemplates.la
+libdftemplates_la_SOURCES =  Utils.f \
+            MatVec.f PSolve.f \
+			CG.f CGREVCOM.f \
+			BiCG.f BiCGREVCOM.f \
+			BiCGSTAB.f BiCGSTABREVCOM.f \
+			CGS.f CGSREVCOM.f \
+			Cheby.f ChebyREVCOM.f \
+			GMRES.f GMRESREVCOM.f \
+			Jacobi.f JacobiREVCOM.f \
+			QMR.f QMRREVCOM.f \
+			SOR.f SORREVCOM.f \
+			STOPTEST2.f
+
+libdftemplates_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
+
+numerics_HEADERS = dftemplates.h
+
+
+
+check_PROGRAMS = test1 
+
+TESTS = $(check_PROGRAMS)
+include_HEADERS = 
+test1_SOURCES = Tester.f dnsychk.f dspdchk.f dutils.f  Matgen.f
+test1_INCLUDES = 
+test1_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(DFTEMPLATES_LIB) $(SICONOS_EXT_LDFLAGS)
