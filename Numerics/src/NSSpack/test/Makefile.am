@@ -52,7 +52,7 @@ links: $(DATADIRS)
 
 
 TESTS = test1 test2 test7 test3  test4  test5 
-XFAIL_TESTS =   test5
+XFAIL_TESTS =   test5 test7
 
 
 test1_SOURCES = main_lcp_new.c
