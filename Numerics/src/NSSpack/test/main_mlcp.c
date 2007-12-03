@@ -52,6 +52,18 @@
 #include "LA.h"
 
 #define BAVARD
+#define NBTEST 7
+#define NBMETHODS 4
+
+typedef struct
+{
+  char file[124];
+  char cv[5][NBMETHODS];
+  int nbSteps[NBMETHODS];
+} dataSummary;
+
+static dataSummary summary[NBTEST];
+static int itest;
 
 /*
  ******************************************************************************
@@ -80,11 +92,18 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
 
   /* Method definition */
 
-  static method_mlcp method_mlcp1 = { "PGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1 , 0 , 0.0 };
+  static method_mlcp method_mlcp1 = { "PGS"       , 101 , 1e-8 , 0.6 , 1.0 , 1 , 0 , 0.0 };
 
   /* Method definition */
 
-  static method_mlcp method_mlcp2 = { "RPGS"       , 1001 , 1e-15 , 0.6 , 1.0 , 1 , 0 , 0.0 };
+  static method_mlcp method_mlcp2 = { "RPGS"       , 101 , 1e-8 , 0.6 , 1.0 , 1 , 0 , 0.0 };
+
+  /* Method definition */
+
+  static method_mlcp method_mlcp3 = { "PSOR"       , 101 , 1e-8 , 2.0 , 1.0 , 1 , 0 , 0.0 };
+  /* Method definition */
+
+  static method_mlcp method_mlcp4 = { "RPSOR"       , 101 , 1e-8 , 2.0 , 1.0 , 1 , 0 , 0.0 };
 
   /*   nonsymmetric = 0; */
 
@@ -126,6 +145,10 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
     u1[i] = sol[i];
   }
   info1 = mlcp_solver(A, B, C, D, a, b, &n , &m, &method_mlcp1 , u1 , v1, w1);
+
+  strcpy(summary[itest].cv[0], "CV");
+  if (info1 > 0)
+    strcpy(summary[itest].cv[0], "NO");
 
 
 #ifdef BAVARD
@@ -177,6 +200,9 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
   }
 
   info1 = mlcp_solver(A, B, C, D, a, b, &n , &m, &method_mlcp2 , u1 , v1, w1);
+  strcpy(summary[itest].cv[1], "CV");
+  if (info1 > 0)
+    strcpy(summary[itest].cv[1], "NO");
 
 
 #ifdef BAVARD
@@ -194,6 +220,79 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
     printf("RPGS: %14.7e  \n", w1[i]);
 
 #endif
+
+  /* #1 PSOR TEST */
+#ifdef BAVARD
+  printf("**** PSOR TEST ****\n");
+#endif
+  for (i = 0 ; i < m ; ++i)
+  {
+    v1[i] = sol[i + n];
+    w1[i] = sol[n + m + i];
+  }
+  for (i = 0 ; i < n ; ++i)
+  {
+    u1[i] = sol[i];
+  }
+
+  info1 = mlcp_solver(A, B, C, D, a, b, &n , &m, &method_mlcp3 , u1 , v1, w1);
+  strcpy(summary[itest].cv[2], "CV");
+  if (info1 > 0)
+    strcpy(summary[itest].cv[2], "NO");
+
+
+#ifdef BAVARD
+  /*  printf(" *** ************************************** ***\n"); */
+
+  printf(" ****** z = ********************************\n");
+  for (i = 0 ; i < n ; i++)
+    printf("PSOR: %14.7e  \n", u1[i]);
+
+  for (i = 0 ; i < m ; i++)
+    printf("PSOR: %14.7e  \n", v1[i]);
+
+  printf(" ****** w = ********************************\n");
+  for (i = 0 ; i < m ; i++)
+    printf("PSOR: %14.7e  \n", w1[i]);
+
+#endif
+
+  /* #1 RPSOR TEST */
+#ifdef BAVARD
+  printf("**** RPSOR TEST ****\n");
+#endif
+  for (i = 0 ; i < m ; ++i)
+  {
+    v1[i] = sol[i + n];
+    w1[i] = sol[n + m + i];
+  }
+  for (i = 0 ; i < n ; ++i)
+  {
+    u1[i] = sol[i];
+  }
+
+  info1 = mlcp_solver(A, B, C, D, a, b, &n , &m, &method_mlcp4 , u1 , v1, w1);
+  strcpy(summary[itest].cv[3], "CV");
+  if (info1 > 0)
+    strcpy(summary[itest].cv[3], "NO");
+
+
+#ifdef BAVARD
+  printf(" *** ************************************** ***\n");
+
+  printf(" ****** z = ********************************\n");
+  for (i = 0 ; i < n ; i++)
+    printf("RPSOR: %14.7e  \n", u1[i]);
+
+  for (i = 0 ; i < m ; i++)
+    printf("RPSOR: %14.7e  \n", v1[i]);
+
+  printf(" ****** w = ********************************\n");
+  for (i = 0 ; i < m ; i++)
+    printf("RPSOR: %14.7e  \n", w1[i]);
+
+#endif
+
 #endif
 
   free(u1);
@@ -209,7 +308,7 @@ void test_matrix(void)
 
   FILE *MLCPfile;
 
-  int i, j, itest, NBTEST;
+  int i, j;
   int isol;
   int dim , dim2;
   int n , n2;
@@ -232,7 +331,6 @@ void test_matrix(void)
   iter  = 0;
   criteria = 0.0;
 
-  NBTEST = 7;
 
   /****************************************************************/
 #ifdef BAVARD
@@ -247,67 +345,69 @@ void test_matrix(void)
     {
     case 0:
       printf("\n\n 2x2 MLCP ");
+      strcpy(summary[itest].file, "2x2 MLCP");
       if ((MLCPfile = fopen("MATRIX/deudeu_mlcp.dat", "r")) == NULL)
       {
-        perror("fopen MLCPfile: deudeu.dat");
+        perror("fopen MLCPfile: deudeu_mlcp.dat");
         exit(1);
       }
       break;
     case 1:
-      printf("\n\n diodeBridge MLCP ");
-      if ((MLCPfile = fopen("MATRIX/diodeBridge_mlcp.dat", "r")) == NULL)
-      {
-        perror("fopen MLCPfile: diodeBridge_mlcp.dat");
-        exit(1);
-      }
-      break;
-      /*     case 2: */
-      /*       printf("\n\n trivial MLCP "); */
-      /*       if( ( MLCPfile = fopen( "MATRIX/trivial_mlcp.dat","r" ) ) == NULL ){ */
-      /*  perror("fopen MLCPfile: diodeBridge_mlcp.dat"); */
-      /*  exit(1); */
-      /*       } */
-      /*       break; */
-    case 2:
-      printf("\n\n RCD ");
-      if ((MLCPfile = fopen("MATRIX/RCD_mlcp.dat", "r")) == NULL)
-      {
-        perror("fopen MLCPfile: RCD_mlcp.dat");
-        exit(1);
-      }
-      break;
-    case 3:
       printf("\n\n PD ");
+      strcpy(summary[itest].file, "PD");
       if ((MLCPfile = fopen("MATRIX/PD_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: PD_mlcp.dat");
         exit(1);
       }
       break;
-    case 4:
+    case 2:
       printf("\n\n m2n1_mlcp.dat ");
+      strcpy(summary[itest].file, "m2n1_mlcp");
       if ((MLCPfile = fopen("MATRIX/m2n1_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: m2n1SOL_mlcp.dat");
         exit(1);
       }
       break;
-    case 5:
+    case 3:
       printf("\n\n m3n2_mlcp.dat ");
+      strcpy(summary[itest].file, "m3n2_mlcp");
       if ((MLCPfile = fopen("MATRIX/m3n2_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: m3n2SOL_mlcp.dat");
         exit(1);
       }
       break;
-    case 6:
-      printf("\n\n m3n2bis_mlcp.dat ");
-      if ((MLCPfile = fopen("MATRIX/m3n2bis_mlcp.dat", "r")) == NULL)
+    case 4:
+      printf("\n\n PDSym_mlcp.dat ");
+      strcpy(summary[itest].file, "PDSym_mlcp");
+      if ((MLCPfile = fopen("MATRIX/PDSym_mlcp.dat", "r")) == NULL)
       {
-        perror("fopen MLCPfile: m3n2bisSOL_mlcp.dat");
+        perror("fopen MLCPfile: PDSym_mlcp.dat");
         exit(1);
       }
       break;
+    case 5:
+      printf("\n\n diodeBridge MLCP ");
+      strcpy(summary[itest].file, "diodeBridge MLCP");
+      if ((MLCPfile = fopen("MATRIX/diodeBridge_mlcp.dat", "r")) == NULL)
+      {
+        perror("fopen MLCPfile: diodeBridge_mlcp.dat");
+        exit(1);
+      }
+      break;
+    case 6:
+      printf("\n\n RCD ");
+      strcpy(summary[itest].file, "RCD");
+      if ((MLCPfile = fopen("MATRIX/RCD_mlcp.dat", "r")) == NULL)
+      {
+        perror("fopen MLCPfile: RCD_mlcp.dat");
+        exit(1);
+      }
+      break;
+    default :
+      exit(1);
     }
 
     fscanf(MLCPfile , "%d" , &n);
@@ -422,6 +522,18 @@ void test_matrix(void)
     free(b);
   }
   printf("* *** ******************** *** * \n");
+  printf("* *** SUMMARY             *** * \n");
+  printf("* *** ******************** *** * \n");
+
+  for (itest = 0; itest < NBTEST ; ++itest)
+  {
+    printf(" test %s  :\n", summary[itest].file);
+    printf(" PGS %s  \t", summary[itest].cv[0]);
+    printf("| RPGS %s  \t", summary[itest].cv[1]);
+    printf("| PSOR %s  \t", summary[itest].cv[2]);
+    printf("| RPSOR %s  \n", summary[itest].cv[3]);
+  }
+  printf("* *** ******************** *** * \n");
   printf("* *** END OF TEST MATRIX   *** * \n");
   printf("* *** ******************** *** * \n");
 
@@ -430,7 +542,6 @@ void test_matrix(void)
 
 int main(void)
 {
-
 
   test_matrix();
 

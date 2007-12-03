@@ -148,7 +148,7 @@ void mlcp_pgs(int *nn , int* mm, double *A , double *B , double *C , double *D ,
       free(diagA);
       free(diagB);
       free(wOld);
-
+      *info = 1;
       return;
     }
     else
@@ -216,17 +216,18 @@ void mlcp_pgs(int *nn , int* mm, double *A , double *B , double *C , double *D ,
 
     for (i = 0 ; i < n ; ++i)
     {
-      //u[i]= 0.0;
+      u[i] = 0.0;
+
       //zi = -( q[i] + DDOT( n , &vec[i] , incx , z , incy ))*diag[i];
-      u[i] = u[i] - (a[i] + DDOT(n , &A[i] , incAx , u , incAy)   + DDOT(m , &C[i] , incBx , v , incBy)) * diagA[i];
+      u[i] =  - (a[i] + DDOT(n , &A[i] , incAx , u , incAy)   + DDOT(m , &C[i] , incAx , v , incBy)) * diagA[i];
     }
 
     for (i = 0 ; i < m ; ++i)
     {
       //prevvi = v[i];
-      //v[i]= 0.0;
+      v[i] = 0.0;
       //zi = -( q[i] + DDOT( n , &vec[i] , incx , z , incy ))*diag[i];
-      vi = v[i] - (b[i] + DDOT(n , &D[i] , incAx , u , incAy)   + DDOT(m , &B[i] , incBx , v , incBy)) * diagB[i];
+      vi = -(b[i] + DDOT(n , &D[i] , incBx , u , incAy)   + DDOT(m , &B[i] , incBx , v , incBy)) * diagB[i];
 
       if (vi < 0) v[i] = 0.0;
       else v[i] = vi;

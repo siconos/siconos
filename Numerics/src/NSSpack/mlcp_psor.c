@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/*!\file lcp_rpgs.c
+/*!\file lcp_psor.c
 
   This subroutine allows the resolution of MLCP (Mixed Linear Complementary Problem).\n
   Try \f$(u,v,w)\f$ such that:\n
@@ -31,10 +31,10 @@
   \f$
   where  A is an (\f$ n \times n\f$ ) matrix, B is an (\f$ m \times m\f$ ) matrix,  C is an (\f$ n \times m\f$ ) matrix, D is an (\f$ m \times n\f$ ) matrix,    a and u is an (\f$ n \f$ ) vectors b,v and w is an (\f$ m \f$ ) vectors.
 */
-/*!\fn   void mlcp_rpgs( int *nn , int* mm, double *A , double *B , double *C , double *D , double *a  double *b, double *u, double *v, double *w , int *info ,  int *iparamMLCP , double *dparamMLCP );
+/*!\fn   void mlcp_pgs( int *nn , int* mm, double *A , double *B , double *C , double *D , double *a  double *b, double *u, double *v, double *w , int *info ,   int *iparamMLCP , double *dparamMLCP );
 
 
-  mlcp_rpgs (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver for MLCP.\n
+  mlcp_psor (projected successive overrelaxation method) is a solver for MLCP.\n
 
   \param A            On enter, a (\f$n \times n\f$)-vector of doubles which contains the components of the "A" MLCP matrix with a Fortran storage.
   \param B            On enter, a (\f$m \times m\f$)-vector of doubles which contains the components of the "B" MLCP matrix with a Fortran storage.
@@ -74,11 +74,10 @@
 #include <string.h>
 #include "LA.h"
 #include <math.h>
-#define EPSDIAG 1e-16
 
 int mlcp_compute_error(int* n, int* mm,  double *A , double *B , double *C , double *D , double *a , double *b, double *u, double *v,  int chat, double *w, double * error);
 
-void mlcp_rpgs(int *nn , int* mm, double *A , double *B , double *C , double *D , double *a, double *b, double *u, double *v, double *w , int *info ,  int *iparamMLCP , double *dparamMLCP)
+void mlcp_psor(int *nn , int* mm, double *A , double *B , double *C , double *D , double *a, double *b, double *u, double *v, double *w , int *info ,  int *iparamMLCP , double *dparamMLCP)
 {
 
 
@@ -86,8 +85,8 @@ void mlcp_rpgs(int *nn , int* mm, double *A , double *B , double *C , double *D 
   int i, iter;
   int itermax, verbose;
   int incxn;
-  double err, vi, viprev, uiprev;
-  double tol, omega, rho;
+  double qs, err, den, vi;
+  double tol, omega;
   double *wOld, *diagA, *diagB;
 
   n = *nn;
@@ -101,8 +100,8 @@ void mlcp_rpgs(int *nn , int* mm, double *A , double *B , double *C , double *D 
   verbose  = iparamMLCP[1];
 
   tol   = dparamMLCP[0];
-  rho   = dparamMLCP[1];
   omega = dparamMLCP[2];
+  printf("omega %f\n", omega);
 
   /* Initialize output */
 
@@ -137,12 +136,12 @@ void mlcp_rpgs(int *nn , int* mm, double *A , double *B , double *C , double *D 
 
   for (i = 0 ; i < n ; ++i)
   {
-    if (A[i * n + i] < -EPSDIAG)
+    if ((fabs(A[i * n + i]) < 1e-16))
     {
 
       if (verbose > 0)
       {
-        printf(" Negative diagonal term \n");
+        printf(" Vanishing diagonal term \n");
         printf(" The local problem cannot be solved \n");
       }
 
@@ -150,23 +149,23 @@ void mlcp_rpgs(int *nn , int* mm, double *A , double *B , double *C , double *D 
       free(diagA);
       free(diagB);
       free(wOld);
-
+      *info = 1;
       return;
     }
     else
     {
-      diagA[i] = 1.0 / (A[i * n + i] + rho);
+      diagA[i] = omega / A[i * n + i];
 
     }
   }
   for (i = 0 ; i < m ; ++i)
   {
-    if (B[i * m + i] < -EPSDIAG)
+    if ((fabs(B[i * m + i]) < 1e-16))
     {
 
       if (verbose > 0)
       {
-        printf(" Negative diagonal term \n");
+        printf(" Vanishing diagonal term \n");
         printf(" The local problem cannot be solved \n");
       }
 
@@ -179,7 +178,7 @@ void mlcp_rpgs(int *nn , int* mm, double *A , double *B , double *C , double *D 
     }
     else
     {
-      diagB[i] = 1.0 / (B[i * m + i] + rho);
+      diagB[i] = omega / B[i * m + i];
 
     }
   }
@@ -196,8 +195,6 @@ void mlcp_rpgs(int *nn , int* mm, double *A , double *B , double *C , double *D 
   incBy = 1;
 
   DCOPY(m , b , incx , w , incy);       //  q --> w
-
-  //mlcp_compute_error(n,vec,q,z,verbose,w, &err);
   if (n >= 1)
   {
     mlcp_compute_error(nn, mm,  A , B , C , D , a , b, u, v, verbose, w,  &err);
@@ -206,7 +203,6 @@ void mlcp_rpgs(int *nn , int* mm, double *A , double *B , double *C , double *D 
   {
     lcp_compute_error(mm,   B , b, u, verbose, w ,  &err);
   }
-  printf("Error = %12.8e\n", err);
 
   while ((iter < itermax) && (err > tol))
   {
@@ -216,32 +212,33 @@ void mlcp_rpgs(int *nn , int* mm, double *A , double *B , double *C , double *D 
     incx = 1;
     incy = 1;
 
-    DCOPY(m , w , incx , wOld , incy);   //  w --> wOld
-    DCOPY(m , b , incx , w , incy);    //  b --> w
+    DCOPY(n , w , incx , wOld , incy);   //  w --> wOld
+    DCOPY(n , b , incx , w , incy);    //  b --> w
 
     for (i = 0 ; i < n ; ++i)
     {
-      uiprev = u[i];
       u[i] = 0.0;
+      //uiprev = u[i];
       //zi = -( q[i] + DDOT( n , &vec[i] , incx , z , incy ))*diag[i];
-      //u[i] = -( a[i]  - (rho*uiprev) +DDOT( n , &A[i] , n , u , 1 )   + DDOT( m , &C[i] , n , v , 1 )         )*diagA[i];
-      u[i] = -(a[i]   - (rho * uiprev) + DDOT(n , &A[i] , incAx , u , 1)   + DDOT(m , &C[i] , incAx , v , 1)) * diagA[i];
+      u[i] =  - (a[i] + DDOT(n , &A[i] , incAx , u , 1)   + DDOT(m , &C[i] , incAx , v , 1)) * diagA[i];
     }
 
     for (i = 0 ; i < m ; ++i)
     {
-      viprev = v[i];
+      //prevvi = v[i];
       v[i] = 0.0;
       //zi = -( q[i] + DDOT( n , &vec[i] , incx , z , incy ))*diag[i];
-      //v[i] = -( b[i] -(rho*viprev) + DDOT( n , &D[i] , m , u , 1 )   + DDOT( m , &B[i] , m , v , 1 )         )*diagB[i];
-      vi = -(b[i] - (rho * viprev) + DDOT(n , &D[i] , incBx , u , 1)   + DDOT(m , &B[i] , incBx , v , 1)) * diagB[i];
-      if (vi > 0)
-        v[i] = vi;
+      vi = -(b[i] + DDOT(n , &D[i] , incBx , u , 1)   + DDOT(m , &B[i] , incBx , v , 1)) * diagB[i];
+
+      if (vi < 0) v[i] = 0.0;
+      else v[i] = vi;
     }
 
 
 
     /* **** Criterium convergence compliant with filter_result_MLCP **** */
+
+    //mlcp_compute_error(n,vec,q,z,verbose,w, &err);
 
     if (n >= 1)
     {
@@ -273,16 +270,16 @@ void mlcp_rpgs(int *nn , int* mm, double *A , double *B , double *C , double *D 
 
   if (err > tol)
   {
-    printf("Siconos/Numerics: mlcp_rpgs: No convergence of RPGS after %d iterations\n" , iter);
-    printf("Siconos/Numerics: mlcp_rpgs: The residue is : %g \n", err);
+    printf("Siconos/Numerics: mlcp_psor: No convergence of PGS after %d iterations\n" , iter);
+    printf("Siconos/Numerics: mlcp_psor: The residue is : %g \n", err);
     *info = 1;
   }
   else
   {
     if (verbose > 0)
     {
-      printf("Siconos/Numerics: mlcp_rpgs: Convergence of RPGS after %d iterations\n" , iter);
-      printf("Siconos/Numerics: mlcp_rpgs: The residue is : %g \n", err);
+      printf("Siconos/Numerics: mlcp_psor: Convergence of PGS after %d iterations\n" , iter);
+      printf("Siconos/Numerics: mlcp_psor: The residue is : %g \n", err);
     }
     *info = 0;
   }
