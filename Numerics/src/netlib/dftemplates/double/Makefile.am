@@ -27,7 +27,7 @@ SUBDIRS =
 
 noinst_LTLIBRARIES = libdftemplates.la
 libdftemplates_la_SOURCES =  Utils.f \
-            MatVec.f PSolve.f \
+			MatVec.f PSolve.f \
 			CG.f CGREVCOM.f \
 			BiCG.f BiCGREVCOM.f \
 			BiCGSTAB.f BiCGSTABREVCOM.f \
@@ -37,7 +37,8 @@ libdftemplates_la_SOURCES =  Utils.f \
 			Jacobi.f JacobiREVCOM.f \
 			QMR.f QMRREVCOM.f \
 			SOR.f SORREVCOM.f \
-			STOPTEST2.f
+			STOPTEST2.f\
+			GetBreak.f Matnorm.f
 
 libdftemplates_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 

@@ -104,7 +104,8 @@ am_libdftemplates_la_OBJECTS = Utils.lo MatVec.lo PSolve.lo CG.lo \
 	CGREVCOM.lo BiCG.lo BiCGREVCOM.lo BiCGSTAB.lo \
 	BiCGSTABREVCOM.lo CGS.lo CGSREVCOM.lo Cheby.lo ChebyREVCOM.lo \
 	GMRES.lo GMRESREVCOM.lo Jacobi.lo JacobiREVCOM.lo QMR.lo \
-	QMRREVCOM.lo SOR.lo SORREVCOM.lo STOPTEST2.lo
+	QMRREVCOM.lo SOR.lo SORREVCOM.lo STOPTEST2.lo GetBreak.lo \
+	Matnorm.lo
 libdftemplates_la_OBJECTS = $(am_libdftemplates_la_OBJECTS)
 am_test1_OBJECTS = Tester.$(OBJEXT) dnsychk.$(OBJEXT) \
 	dspdchk.$(OBJEXT) dutils.$(OBJEXT) Matgen.$(OBJEXT)
@@ -304,7 +305,7 @@ numericsdir = $(includedir)/Siconos
 SUBDIRS = 
 noinst_LTLIBRARIES = libdftemplates.la
 libdftemplates_la_SOURCES = Utils.f \
-            MatVec.f PSolve.f \
+			MatVec.f PSolve.f \
 			CG.f CGREVCOM.f \
 			BiCG.f BiCGREVCOM.f \
 			BiCGSTAB.f BiCGSTABREVCOM.f \
@@ -314,7 +315,8 @@ libdftemplates_la_SOURCES = Utils.f \
 			Jacobi.f JacobiREVCOM.f \
 			QMR.f QMRREVCOM.f \
 			SOR.f SORREVCOM.f \
-			STOPTEST2.f
+			STOPTEST2.f\
+			GetBreak.f Matnorm.f
 
 libdftemplates_la_LDFLAGS = -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 numerics_HEADERS = dftemplates.h
