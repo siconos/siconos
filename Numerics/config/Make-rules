@@ -30,6 +30,11 @@ DFTEMPLATES_PATH = src/netlib/dftemplates/double
 DFTEMPLATES_INC = $(top_srcdir)/$(DFTEMPLATES_PATH)
 DFTEMPLATES_LIB = -L$(top_builddir)/$(DFTEMPLATES_PATH) -ldftemplates
 
+#--- PATHSOLVER --------------------------------------
+PATHSOLVER_PATH = src/NSSpack/path
+PATHSOLVER_INC = $(top_srcdir)/$(PATHSOLVER_PATH)
+PATHSOLVER_LIB = -L$(top_builddir)/$(PATHSOLVER_PATH) -lmlcppath
+
 #--- NSSpack --------------------------------------
 NSSPACK_PATH = src/NSSpack
 NSSPACK_INC = $(top_srcdir)/$(NSSPACK_PATH)
