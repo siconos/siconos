@@ -38,7 +38,7 @@ LCP_SOURCES = lcp_solver.c lcp_solver_block.c \
 
 LCP_SOLVERS = lcp_lexicolemke.c lcp_pgs.c lcp_nsqp.c lcp_cpg.c \
 	lcp_qp.c lcp_latin.c lcp_latin_w.c lcp_newton_min.c \
-	lcp_newton_FB.c lcp_sor.c lcp_rpgs.c
+	lcp_newton_FB.c lcp_sor.c lcp_rpgs.c lcp_path.c
 ### MLCP #####################################################
 
 MLCP_SOURCES = mlcp_solver.c  \
