@@ -37,7 +37,7 @@
  * This system of equations and inequalities is solved thanks to @ref pfc_2D solvers.
  * The routine's call is due to the function pfc_2D_solver.c.\n\n
  *
- * !\fn int pfc_2D_solver( double *vec , double *q ,int *n , method *pt , double *z , double *w )
+ * !\fn int pfc_2D_solver(int n, double *vec, double *q , method *pt , double *z , double *w )
  *
  *
  *
@@ -66,20 +66,20 @@
 #include "NSSpack.h"
 #endif
 
-int pfc_2D_solver(double *vec , double *q , int *n , method *pt , double *z , double *w)
+int pfc_2D_solver(int n, double *vec, double *q, method *pt , double *z , double *w, double* mu)
 {
 
   char pfckey1[10] = "NLGS", pfckey2[10] = "CPG", pfckey3[10] = "Latin";
 
   int i, info;
 
-  int     iparamLCP[5];
-  double  dparamLCP[5];
+  int     iparam[5];
+  double  dparam[4];
 
   clock_t t1, t2;
 
-  for (i = 0 ; i < 5 ; ++i) iparamLCP[i] = 0;
-  for (i = 0 ; i < 5 ; ++i) dparamLCP[i] = 0.0;
+  for (i = 0 ; i < 5 ; ++i) iparam[i] = 0;
+  for (i = 0 ; i < 5 ; ++i) dparam[i] = 0.0;
 
   info    = -1;
 
@@ -88,44 +88,41 @@ int pfc_2D_solver(double *vec , double *q , int *n , method *pt , double *z , do
   if (strcmp(pt->pfc_2D.name , pfckey1) == 0)
   {
 
-    iparamLCP[0] = pt->pfc_2D.itermax;
-    iparamLCP[1] = pt->pfc_2D.chat;
-    dparamLCP[0] = pt->pfc_2D.mu;
-    dparamLCP[1] = pt->pfc_2D.tol;
+    iparam[0] = pt->pfc_2D.itermax;
+    iparam[1] = pt->pfc_2D.chat;
+    dparam[0] = pt->pfc_2D.tol;
 
-    pfc_2D_nlgs(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+    pfc_2D_nlgs(n , vec , q , z , w , mu, &info , iparam , dparam);
 
-    pt->pfc_2D.iter = iparamLCP[2];
-    pt->pfc_2D.err  = dparamLCP[2];
+    pt->pfc_2D.iter = iparam[2];
+    pt->pfc_2D.err  = dparam[1];
 
   }
   else if (strcmp(pt->pfc_2D.name , pfckey2) == 0)
   {
 
-    iparamLCP[0] = pt->pfc_2D.itermax;
-    iparamLCP[1] = pt->pfc_2D.chat;
-    dparamLCP[0] = pt->pfc_2D.mu;
-    dparamLCP[1] = pt->pfc_2D.tol;
+    iparam[0] = pt->pfc_2D.itermax;
+    iparam[1] = pt->pfc_2D.chat;
+    dparam[0] = pt->pfc_2D.tol;
 
-    pfc_2D_cpg(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+    pfc_2D_cpg(n , vec , q , z , w , mu, &info , iparam , dparam);
 
-    pt->pfc_2D.iter = iparamLCP[2];
-    pt->pfc_2D.err  = dparamLCP[2];
+    pt->pfc_2D.iter = iparam[2];
+    pt->pfc_2D.err  = dparam[1];
 
   }
   else if (strcmp(pt->pfc_2D.name , pfckey3) == 0)
   {
 
-    iparamLCP[0] = pt->pfc_2D.itermax;
-    iparamLCP[1] = pt->pfc_2D.chat;
-    dparamLCP[0] = pt->pfc_2D.mu;
-    dparamLCP[1] = pt->pfc_2D.tol;
-    dparamLCP[2] = pt->pfc_2D.k_latin;
+    iparam[0] = pt->pfc_2D.itermax;
+    iparam[1] = pt->pfc_2D.chat;
+    dparam[0] = pt->pfc_2D.tol;
+    dparam[1] = pt->pfc_2D.k_latin;
 
-    pfc_2D_latin(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+    pfc_2D_latin(n , vec , q , z , w , mu, &info , iparam , dparam);
 
-    pt->pfc_2D.iter = iparamLCP[2];
-    pt->pfc_2D.err  = dparamLCP[3];
+    pt->pfc_2D.iter = iparam[2];
+    pt->pfc_2D.err  = dparam[2];
 
   }
   else printf("Warning : Unknown solving method : %s\n", pt->pfc_2D.name);

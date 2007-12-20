@@ -288,7 +288,7 @@ public:
     std::cout << "=============================================================================================" << std::endl;
   };
 
-  /*   computes in s3 the intersection of s1 and s2 (-> set_intersection stl function) */
+  /**   computes in s3 the intersection of s1 and s2 (-> set_intersection stl function) */
   /*       \param SiconosSet, s1 */
   /*       \param SiconosSet, s2 */
   /*       \param SiconosSet, s3 */

@@ -35,7 +35,7 @@ w - M z = q\\
 
 */
 
-/*!\fn void dfc_2D_latin(double *vec,double *qq,int *nn, double * k_latin,double *mumu,int * itermax, double * tol, int *chat,double *z,double *w,int *it_end,double * res,int *info)
+/*!\fn void dfc_2D_latin(double *vec,double *qq,int *nn, double * k_latin,double *mu,int * itermax, double * tol, int *chat,double *z,double *w,int *it_end,double * res,int *info)
 
    cfd_latin  is a specific latin solver for dual contact problem with friction in the 2D case.\n
 
@@ -47,7 +47,7 @@ w - M z = q\\
 
    \param k_latin  On enter a double, the latin coefficient (strictly nonnegative).
 
-   \param mumu     On enter a positive double, the friction coefficient.
+   \param mu     On enter a positive double, the friction coefficient.
 
    \param itermax  On enter an integer, the maximum iterations required.
 
@@ -81,7 +81,7 @@ w - M z = q\\
 
 /*
   void dfc_2D_latin(double vec[],double *qq,int *nn, double * k_latin,double *mumu,int * itermax, double * tol, int *chat,double z[],double w[],int *it_end,double * res,int *info) */
-void dfc_2D_latin(double *vec, double *qq, int *nn, double * k_latin, double *mumu, int * itermax, double * tol, int *chat, double *z, double *w, int *it_end, double * res, int *info)
+void dfc_2D_latin(double *vec, double *qq, int *nn, double * k_latin, double *mu, int * itermax, double * tol, int *chat, double *z, double *w, int *it_end, double * res, int *info)
 {
 
 
@@ -92,7 +92,7 @@ void dfc_2D_latin(double *vec, double *qq, int *nn, double * k_latin, double *mu
   int incx = 1, incy = 1;
 
 
-  double    errmax = *tol, alpha, beta, maxa, aa, nt, wn, tc, zc0, mu = *mumu;
+  double    errmax = *tol, alpha, beta, maxa, aa, nt, wn, tc, zc0;
   double    err1, num11, err0;
   double    den11, den22, knz0, ktz0, *ktz, *wf;
   double    *wc, *zc, *maxwt, *wnum1, *znum1;
@@ -518,7 +518,7 @@ void dfc_2D_latin(double *vec, double *qq, int *nn, double * k_latin, double *mu
 
       wn = wc[ddln[ino]];
 
-      aa = nt - mu * wn;
+      aa = nt - mu[ino] * wn;
 
       if (aa < 0.0)
       {
@@ -531,7 +531,7 @@ void dfc_2D_latin(double *vec, double *qq, int *nn, double * k_latin, double *mu
 
       zc[ddl] = (maxa / (-1 * kt[ino + nc * ino])) * tc;
 
-      aa = -nt + mu * wn;
+      aa = -nt + mu[ino] * wn;
 
       if (aa < 0.0)
       {
@@ -542,7 +542,7 @@ void dfc_2D_latin(double *vec, double *qq, int *nn, double * k_latin, double *mu
         maxa = aa;
       }
 
-      wc[ddl] = (mu * wn - maxa) * tc;
+      wc[ddl] = (mu[ino] * wn - maxa) * tc;
     }
 
 

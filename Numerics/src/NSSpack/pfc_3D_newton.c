@@ -15,12 +15,13 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 /*!\file pfc_3D_newton.c
  *
  * \fn  pfc_3D_newton( int n , double *C , double *b ,  double *zz ,double *ww , double mu ,
  *        Compute_G_function (*Compute_G), Compute_JacG_function (*Compute_JacG),
- *        int *iparam_local , double *dparam_local )
+ *        int *iparam , double *dparam)
+ *
  *
  * The method is done as follows:
  * 1) Take x0;
@@ -51,7 +52,7 @@
 
 void pfc_3D_newton(int n , double *C , double *b ,  double *zz , double *ww , double mu ,
                    pfc3D_fPtr(*Compute_G), pfc3D_fPtr(*Compute_JacG),
-                   double *param1, double *param2, double *param3, int *iparam_local , double *dparam_local)
+                   double *param1, double *param2, double *param3, int *iparam , double *dparam)
 {
 
   int i, j, niter, mm, local_itermax;
@@ -65,16 +66,20 @@ void pfc_3D_newton(int n , double *C , double *b ,  double *zz , double *ww , do
 
   Linesearch_function Linesearch;
 
-  if (iparam_local[3] == 0)
+  if (iparam[5] == 0)
     Linesearch = &Linesearch_AC;
-  else
+  else if (iparam[5] == 1)
     Linesearch = &Linesearch_FB;
+  else
+  {
+    fprintf(stderr, "Numerics, pfc_3D_newton failed. Unknown formulation type (iparam[5]).\n");
+    exit(EXIT_FAILURE);
+  }
 
+  local_itermax = iparam[0];
+  local_tol = dparam[0];
 
-  local_itermax = iparam_local[0];
-  local_tol     = dparam_local[0];
-
-
+  double ispeak = iparam[1];
 
   mm   = n * n;
   incx =  1;
@@ -118,7 +123,8 @@ void pfc_3D_newton(int n , double *C , double *b ,  double *zz , double *ww , do
   while ((niter < local_itermax) && (nerr > local_tol))
   {
     ++niter;
-    /*     printf("-----------------------------------Iteration Newton %i \n",niter); */
+    if (ispeak > 0)
+      printf("-----------------------------------Iteration Newton %i \n", niter);
     (*Compute_G)(n , G , zz , C , ww , b , param1, param2, param3 , an , at , mu);
 
     (*Compute_JacG)(n , JacG , zz , C , ww , b , param1, param2, param3 , an , at , mu);
@@ -142,7 +148,8 @@ void pfc_3D_newton(int n , double *C , double *b ,  double *zz , double *ww , do
 
     DGESV(n, nrhs, AA, n, ipiv, www, n, infoDGESV);
 
-    /*    printf("INFO =  %i \n",infoDGESV); */
+    if (ispeak > 0)
+      printf("INFO =  %i \n", infoDGESV);
 
     if (infoDGESV)
     {
@@ -170,12 +177,16 @@ void pfc_3D_newton(int n , double *C , double *b ,  double *zz , double *ww , do
       (*Linesearch)(n , zz , ww , www , b , C , param1, param2, param3 , an , at , mu , nerr1);
       nerr = nerr1;
     }
-
     for (i = 0 ; i < n ; ++i)
       www[i] = 0.;
-    printf("-----------------------------------Iteration Newton %i --------- Newton Error = %14.7e\n", niter, nerr);
+    if (ispeak > 0)
+      printf("Error = %14.7e\n", niter, nerr);
   }
 
+  /* Total number of iteration */
+  iparam[2] = niter;
+  /* Final error */
+  dparam[1] = nerr;
 
   free(AA);
   free(G);

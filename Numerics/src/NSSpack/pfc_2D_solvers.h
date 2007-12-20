@@ -51,7 +51,6 @@ pfc_2D_cpg.c
 
 \param name       name of the solver.
 \param itermax    maximum number of iterations.
-\param mu         friction coefficient.
 \param tol        convergence criteria value.
 \param k_latin    search direction of the latin metod.
 \param chat       output boolean ( 0 = no output log ).
@@ -66,7 +65,6 @@ typedef struct
   char   name[64];
   int    itermax;
   double tol;
-  double mu;
   double k_latin;
   int    chat;
   char   normType[64];
@@ -79,11 +77,11 @@ typedef struct
 extern "C" {
 #endif
 
-  void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
+  void pfc_2D_cpg(int, double *vec , double *q , double *z , double *w , double *mu , int *info , int *iparamLCP , double *dparamLCP);
 
-  void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
+  void pfc_2D_nlgs(int, double *vec , double *q , double *z , double *w, double *mu  , int *info , int *iparamLCP , double *dparamLCP);
 
-  void pfc_2D_latin(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
+  void pfc_2D_latin(int, double *vec , double *q , double *z , double *w , double *mu , int *info , int *iparamLCP , double *dparamLCP);
 
   /*void pfc_2D_projc( int nc , double mu , double *z , double *p , int *status );
     void pfc_2D_projf( int n , double *ww , double *zz , double *rr , double *pp , int *status )

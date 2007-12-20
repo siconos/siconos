@@ -2359,14 +2359,23 @@ void SimpleMatrix::PLUFactorizationInPlace()
   if (num != 1)
     SiconosMatrixException::selfThrow(" SimpleMatrix::PLUFactorizationInPlace: only implemented for dense matrices.");
 
+  if (isPLUFactorized)
+  {
+    std::cout << "SimpleMatrix::PLUFactorizationInPlace warning: this matrix is already PLUFactorized. " << std::endl;
+    return;
+  }
   if (ipiv == NULL)
     ipiv = new std::vector<int>(dimRow);
   else
     ipiv->resize(dimRow);
   int info = boost::numeric::bindings::atlas::getrf(*mat.Dense, *ipiv);
   if (info != 0)
-    std::cout << "SimpleMatrix::PLUFactorizationInPlace warning: the matrix is singular." << std::endl;
-  isPLUFactorized = true;
+  {
+    isPLUFactorized = false;
+    SiconosMatrixException::selfThrow("SimpleMatrix::PLUFactorizationInPlace failed: the matrix is singular.");
+  }
+  //std::cout<<"SimpleMatrix::PLUFactorizationInPlace warning: the matrix is singular." << std::endl;
+  else isPLUFactorized = true;
 }
 
 void SimpleMatrix::PLUInverseInPlace()

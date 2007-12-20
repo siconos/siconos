@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 /*!\file lcp_solver_block.c
  *
  * This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
@@ -29,65 +29,65 @@
  * This system of equalities and inequalities is solved thanks to @ref block_lcp solvers. */
 
 /*!\fn int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt , double *z , double *w , int *it_end ,               int *itt_end ,double *res )
-*  lcp_solver_block is a generic interface allowing the call of one of the block LCP solvers.\n
-*
-* \param blmat    On enter, the sparse block matrix M of the LCP
-* \param q        On enter, the vector of doubles of the LCP
-* \param pt       On enter, a union which contains a LCP structure
-*
-* \param z        On enter/return, a vector of doubles which contains the initial iterate for the LCP(q,M) and returns the solution of the problem.
-* \param w        On return, a vector of doubles which returns the solution of the problem.
-* \param it_end   On return, an integer which returns the final number of block iterations
-* \param itt_end  On return, an integer which returns the total number of local LCP iterations or pivots
-* \param res      On return, a double which returns the final value of error criteria.
-*
-* \return info    Integer identifiant for the solver result\n
-*                 0 : convergence\n
-*                 >0 : no convergence (see solver for specific info value)\n
-*
-* lcp_solver_block is a generic interface which consider LCP with a sparse block structure. The global LCP is solved
-* as a succession of local LCP solved via lcp_solver.\n
-*
-* list Keywords to call solvers:
-*
-*   - Lemke    for lcp_lexicolemke
-*   - PGS      for lcp_pgs
-*   - RPGS     for lcp_rpgs
-*   - CPG      for lcp_cpg
-*   - QP       for lcp_qp
-*   - NSQP     for lcp_nsqp
-*   - Latin    for lcp_latin
-*   - Newton   for lcp_newton_min
-*
-* Data file example:\n
-* If we consider the matrix M and the right-hand-side q defined as
-*
-* \f$
-* M=\left[\begin{array}{cccc|cc|cc}
-*          1 & 2 & 0 & 4   & 3 &-1   & 0 & 0\\
-*          2 & 1 & 0 & 0   & 4 & 1   & 0 & 0\\
-*          0 & 0 & 1 &-1   & 0 & 0   & 0 & 0\\
-*          5 & 0 &-1 & 6   & 0 & 6   & 0 & 0\\
-*          \hline
-*          0 & 0 & 0 & 0   & 1 & 0   & 0 & 5\\
-*          0 & 0 & 0 & 0   & 0 & 2   & 0 & 2\\
-*          \hline
-*          0 & 0 & 2 & 1   & 0 & 0   & 2 & 2\\
-*          0 & 0 & 2 & 2   & 0 & 0   & -1 & 2\\
-*        \end{array}\right] \quad, q=\left[\begin{array}{c}-1\\-1\\0\\-1\\\hline 1\\0\\\hline -1\\2\end{array}\right].
-* \f$
-*
-* then
-* - the number of non null blocks is 6 (blmat.nbblocks) and the number of diagonal blocks is 3 (blmat.size)
-* - the vector blmat.blocksize of diagonal blocks sizes is equal to [4,2,2]
-* - the vectors blmat.ColumnIndex and blmat.RowIndex of non null blocks indices are equal to [0,1,1,2,0,2] and [0,0,1,1,2,2]
-* - the blmat.block contains all non null block matrices stored in Fortran order (column by column) as\n
-*   blmat.block[0] = {1,2,0,5,2,1,0,0,0,0,1,-1,4,0,-1,6}\n
-*   blmat.block[1] = {3,4,0,0,-1,1,0,6}\n
-*   ...\n
-*   blmat.block[5] = {2,-1,2,2}
-* \author Mathieu Renouf & Pascal Denoyelle
-*/
+ *  lcp_solver_block is a generic interface allowing the call of one of the block LCP solvers.\n
+ *
+ * \param blmat    On enter, the sparse block matrix M of the LCP
+ * \param q        On enter, the vector of doubles of the LCP
+ * \param pt       On enter, a union which contains a LCP structure
+ *
+ * \param z        On enter/return, a vector of doubles which contains the initial iterate for the LCP(q,M) and returns the solution of the problem.
+ * \param w        On return, a vector of doubles which returns the solution of the problem.
+ * \param it_end   On return, an integer which returns the final number of block iterations
+ * \param itt_end  On return, an integer which returns the total number of local LCP iterations or pivots
+ * \param res      On return, a double which returns the final value of error criteria.
+ *
+ * \return info    Integer identifiant for the solver result\n
+ *                 0 : convergence\n
+ *                 >0 : no convergence (see solver for specific info value)\n
+ *
+ * lcp_solver_block is a generic interface which consider LCP with a sparse block structure. The global LCP is solved
+ * as a succession of local LCP solved via lcp_solver.\n
+ *
+ * list Keywords to call solvers:
+ *
+ *   - Lemke    for lcp_lexicolemke
+ *   - PGS      for lcp_pgs
+ *   - RPGS     for lcp_rpgs
+ *   - CPG      for lcp_cpg
+ *   - QP       for lcp_qp
+ *   - NSQP     for lcp_nsqp
+ *   - Latin    for lcp_latin
+ *   - Newton   for lcp_newton_min
+ *
+ * Data file example:\n
+ * If we consider the matrix M and the right-hand-side q defined as
+ *
+ * \f$
+ * M=\left[\begin{array}{cccc|cc|cc}
+ *          1 & 2 & 0 & 4   & 3 &-1   & 0 & 0\\
+ *          2 & 1 & 0 & 0   & 4 & 1   & 0 & 0\\
+ *          0 & 0 & 1 &-1   & 0 & 0   & 0 & 0\\
+ *          5 & 0 &-1 & 6   & 0 & 6   & 0 & 0\\
+ *          \hline
+ *          0 & 0 & 0 & 0   & 1 & 0   & 0 & 5\\
+ *          0 & 0 & 0 & 0   & 0 & 2   & 0 & 2\\
+ *          \hline
+ *          0 & 0 & 2 & 1   & 0 & 0   & 2 & 2\\
+ *          0 & 0 & 2 & 2   & 0 & 0   & -1 & 2\\
+ *        \end{array}\right] \quad, q=\left[\begin{array}{c}-1\\-1\\0\\-1\\\hline 1\\0\\\hline -1\\2\end{array}\right].
+ * \f$
+ *
+ * then
+ * - the number of non null blocks is 6 (blmat.nbblocks) and the number of diagonal blocks is 3 (blmat.size)
+ * - the vector blmat.blocksize of diagonal blocks sizes is equal to [4,2,2]
+ * - the vectors blmat.ColumnIndex and blmat.RowIndex of non null blocks indices are equal to [0,1,1,2,0,2] and [0,0,1,1,2,2]
+ * - the blmat.block contains all non null block matrices stored in Fortran order (column by column) as\n
+ *   blmat.block[0] = {1,2,0,5,2,1,0,0,0,0,1,-1,4,0,-1,6}\n
+ *   blmat.block[1] = {3,4,0,0,-1,1,0,6}\n
+ *   ...\n
+ *   blmat.block[5] = {2,-1,2,2}
+ * \author Mathieu Renouf & Pascal Denoyelle
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -160,9 +160,6 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
     return 0;
   }
 
-  /*  ww   = ( double* )malloc(         n * sizeof( double ) );*/
-  rhs  = (double*)malloc(blsizemax * sizeof(double));
-
   incx = 1;
   qs = DNRM2(n , q , incx);
   den = 1.0 / qs;
@@ -176,7 +173,7 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
   //   dcopy_( (integer *)&n , q , (integer *)&incx , w , (integer *)&incy );
 
 
-  /*   test on matrix structure : is there null blocks rows ? */
+  /*   test on matrix structure : are there some null blocks in the rows ? */
   rowprecbl = -1;
   for (i = 0 ; i < nbbl ; i++)
   {
@@ -184,7 +181,6 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
     if (rowcurbl > rowprecbl + 1)
     {
       printf(" Null blocks row in LCP matrix !!!\n");
-      free(rhs);
       return 1;
     }
     rowprecbl = rowcurbl;
@@ -192,22 +188,22 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
   if (rowcurbl != nbblrow - 1)
   {
     printf(" Null blocks row in LCP matrix !!!\n");
-    free(rhs);
     return 1;
   }
+
+  rhs  = (double*)malloc(blsizemax * sizeof(double));
 
   iter = 0;
   err  = 1.;
 
-  /*  while( ( iter < itermax ) && ( err > tol ) ){*/
   while ((iter < itermax) && (info))
   {
 
     iter++;
 
     /*    incx = 1;
-        incy = 1;
-        dcopy_( (integer *)&n , w , (integer *)&incx , ww , (integer *)&incy );*/
+    incy = 1;
+    dcopy_( (integer *)&n , w , (integer *)&incx , ww , (integer *)&incy );*/
 
     rowprecbl = -1;
     rowsize = 0;
@@ -316,13 +312,13 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
 
     info = filter_result_LCP_block(blmat, q, z, tol, pt->lcp.chat, w);
     /*    qs   = -1;
-        incx =  1;
-        incy =  1;
+    incx =  1;
+    incy =  1;
 
-        daxpy_( (integer *)&n , &qs , w , (integer *)&incx , ww , (integer *)&incy );
+    daxpy_( (integer *)&n , &qs , w , (integer *)&incx , ww , (integer *)&incy );
 
-        num = dnrm2_( (integer *)&n, ww , (integer *)&incx );
-        err = num*den;*/
+    num = dnrm2_( (integer *)&n, ww , (integer *)&incx );
+    err = num*den;*/
     /* **** ********************* **** */
   }
 
@@ -350,7 +346,7 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
   }
   /*  else{
       if( err > tol ) return 1;
-    }*/
+      }*/
 
   /*  info = filter_result_LCP_block(blmat,q,z,tol,pt->lcp.chat,w);*/
 

@@ -26,6 +26,7 @@ Linear Complementarity Problem
 #include "OneStepNSProblem.h"
 #include "SimpleVector.h"
 #include "SimpleMatrix.h"
+#include "SparseBlockMatrix.h"
 #include <sys/time.h>
 
 class OneStepNSProblem;
@@ -58,17 +59,17 @@ class LCP : public OneStepNSProblem
 private:
 
   /** contains the vector w of a LCP system */
-  SimpleVector *w;
+  SiconosVector *w;
 
   /** contains the vector z of a LCP system */
-  SimpleVector *z;
+  SiconosVector *z;
 
   /** contains the matrix M of a LCP system */
   SiconosMatrix *M;
   //ublas::matrix<double, ublas::column_major, ublas::bounded_array<double, 1000> * M;
 
   /** contains the vector q of a LCP system */
-  SimpleVector *q;
+  SiconosVector *q;
 
   /** Flags to check wheter pointers were allocated in class constructors or not */
   bool isWAllocatedIn;
@@ -76,22 +77,14 @@ private:
   bool isMAllocatedIn;
   bool isQAllocatedIn;
 
-  /** Specific structure required when a (Numerics) solver block is used */
-  SparseBlockStructuredMatrix *Mspbl;
+  /** Sparse-Block Boost Matrix. Each block is a SiconosMatrix**/
+  SparseBlockMatrix *MSparseBlock;
 
-  clock_t LCP_CPUtime;
-  clock_t LCP_CPUtime_std;
-  clock_t LCP_CPUtime_bck;
+  /** pointer to function, called to prepare M matrix. If solver-block, connected to collectBlocks, else to assembleM*/
+  void (LCP::*prepareM)();
 
-  int statnbsolve;
-  int statsolverstd;
-  int nbiterstd;
-  int nbiterbck;
-
-  Solver* solverBackup;
-
-  /** default constructor
-  */
+  /** default constructor (private)
+   */
   LCP();
 
 public:
@@ -140,20 +133,20 @@ public:
   /** get w, the initial state of the DynamicalSystem
   *  \return pointer on a SimpleVector
   */
-  inline SimpleVector* getWPtr() const
+  inline SiconosVector* getWPtr() const
   {
     return w;
   }
 
   /** set the value of w to newValue
-  *  \param SimpleVector newValue
+  *  \param SiconosVector newValue
   */
-  void setW(const SimpleVector&);
+  void setW(const SiconosVector&);
 
   /** set w to pointer newPtr
-  *  \param SimpleVector * newPtr
+  *  \param SiconosVector * newPtr
   */
-  void setWPtr(SimpleVector*);
+  void setWPtr(SiconosVector*);
 
   // --- Z ---
   /** get the value of z, the initial state of the DynamicalSystem
@@ -166,22 +159,22 @@ public:
   }
 
   /** get z, the initial state of the DynamicalSystem
-  *  \return pointer on a SimpleVector
+  *  \return pointer on a SiconosVector
   */
-  inline SimpleVector* getZPtr() const
+  inline SiconosVector* getZPtr() const
   {
     return z;
   }
 
   /** set the value of z to newValue
-  *  \param SimpleVector newValue
+  *  \param SiconosVector newValue
   */
-  void setZ(const SimpleVector&);
+  void setZ(const SiconosVector&);
 
   /** set z to pointer newPtr
-  *  \param SimpleVector * newPtr
+  *  \param SiconosVector * newPtr
   */
-  void setZPtr(SimpleVector*) ;
+  void setZPtr(SiconosVector*) ;
 
   // --- M ---
 
@@ -212,11 +205,11 @@ public:
   void setMPtr(SiconosMatrix *);
 
   /** get the structure used to save M as a list of blocks
-   *  \return a SparseBlockStructuredMatrix
+   *  \return a SparseBlockMatrix
    */
-  inline SparseBlockStructuredMatrix* getMspblPtr() const
+  inline SparseBlockMatrix* getMSparsePtr() const
   {
-    return Mspbl;
+    return MSparseBlock;
   }
 
   // --- Q ---
@@ -230,25 +223,34 @@ public:
   }
 
   /** get q, the initial state of the DynamicalSystem
-  *  \return pointer on a SimpleVector
+  *  \return pointer on a SiconosVector
   */
-  inline SimpleVector* getQPtr() const
+  inline SiconosVector* getQPtr() const
   {
     return q;
   }
 
   /** set the value of q to newValue
-  *  \param SimpleVector newValue
+  *  \param SiconosVector newValue
   */
-  void setQ(const SimpleVector&);
+  void setQ(const SiconosVector&);
 
   /** set q to pointer newPtr
-  *  \param SimpleVector * newPtr
+  *  \param SiconosVector * newPtr
   */
-  void setQPtr(SimpleVector*);
+  void setQPtr(SiconosVector*);
 
-  /** initialize the LCP problem(compute topology ...)
-  */
+  /** set the Solver of the OneStepNSProblem
+   *  \param: a pointer on Solver
+   */
+  void setSolverPtr(Solver*);
+
+  /** used (required) in case of a switch from a solver to a solver block
+   */
+  void initSolver();
+
+  /** To initialize the LCP problem(computes topology ...)
+   */
   void initialize();
 
   /** computes extra diagonal block-matrix that corresponds to UR1 and UR2
@@ -258,6 +260,10 @@ public:
   */
   void computeBlock(UnitaryRelation*, UnitaryRelation*);
 
+  /** built sparse-block structured matrix M using already computed blocks
+   */
+  void collectMBlocks();
+
   /** built matrix M using already computed blocks
   */
   void assembleM();
@@ -265,19 +271,19 @@ public:
   /** compute vector q
   *  \param double : current time
   */
-  void computeQ(double time);
+  void computeQ(double);
 
   /** pre-treatment for LCP
   *  \param double : current time
   *  \return void
   */
-  void preCompute(double time);
+  void preCompute(double);
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
   *  \param double : current time
-  *  \return void
+  *  \return int, information about the solver convergence.
   */
-  void compute(double time);
+  int compute(double);
 
   /** post-treatment for LCP
   */
@@ -308,22 +314,8 @@ public:
   */
   static LCP* convert(OneStepNSProblem* osnsp);
 
-  inline clock_t getCPUtime()
-  {
-    return LCP_CPUtime;
-  }
-
-  inline void resetStat()
-  {
-    statnbsolve = 0;
-    statsolverstd = 0;
-    LCP_CPUtime = 0;
-    LCP_CPUtime_std = 0;
-    LCP_CPUtime_bck = 0;
-    nbiterstd = 0;
-    nbiterbck = 0;
-  }
-
+  /** display stat. info (CPU time and nb of iterations achieved)
+   */
   void printStat();
 
 };

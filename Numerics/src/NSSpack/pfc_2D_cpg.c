@@ -31,20 +31,20 @@ w - M z = q \\
 \right.
 \f$
 
- here M is an (nn \f$\times\f$nn)-matrix, q an nn-dimensional vector, z an nn-dimensional  vector and w an nn-dimensional vector.
+ here M is an (n \f$\times\f$n)-matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
 
 */
-/*!\fn void pfc_2D_cpg( int *nn , double *vec , double *b , double *x , double *rout , int *info,
+/*!\fn void pfc_2D_cpg( int nc , double *vec , double *b , double *x , double *rout , double *mu, int *info,
      int *iparamPFC , double *dparamPFC )
 
 
    cfp_cpg is a specific cpg (conjugated projected gradient) solver for primal contact problems with friction in the 2D case.
 
-   \param vec         On enter a (nn\f$\times\f$nn)-vector of doubles containing the components of the double matrix with a fortran90 allocation ( M ).
-   \param b           On enter a nn-vector of doubles containing the components of the double vector ( q ).
-   \param nn          On enter an integer, the dimension of the second member.
+   \param nc          On enter an integer, the number of contacst. The dimension of the system is n=2*nc.
+   \param vec         On enter a (n\f$\times\f$n)-vector of doubles containing the components of the double matrix with a fortran90 allocation ( M ).
+   \param b           On enter a n-vector of doubles containing the components of the double vector ( q ).
 
-
+   \param mu          On enter, the vector of friction coefficients (mu[i] corresponds to contact i)
    \param iparamPFC   On enter/return a vector of integers:\n
                        - iparamPFC[0] = on enter, the maximum number of iterations allowed,
                        - iparamPFC[1] = on enter, the parameter which represents the output log identifiant,\n
@@ -53,14 +53,13 @@ w - M z = q \\
            - iparamPFC[2] =  on return, the number of iterations performed by the algorithm.
 
   \param dparamPFC    On enter/return a vector of doubles:\n
-                       - dparamPFC[0] = on enter, a positive double which represents the friction coefficient,
-                       - dparamPFC[1] = on enter, a positive double which represents the tolerance required,
-                       - dparamPFC[2] = on return, a positive double which represents the residu.
+                       - dparamPFC[0] = on enter, a positive double which represents the tolerance required,
+                       - dparamPFC[1] = on return, a positive double which represents the residu.
 
 
 
-   \param x           On return a nn-vector of doubles, the solution of the problem ( z ).
-   \param rout        On return a nn-vector of doubles, the solution of the problem ( w ).
+   \param x           On return a n-vector of doubles, the solution of the problem ( z ).
+   \param rout        On return a n-vector of doubles, the solution of the problem ( w ).
    \param info        On return an integer, the termination reason:\n
                        0 = convergence,\n
            1 = no convergence,\n
@@ -83,18 +82,18 @@ void pfc_2D_projf(int *, int *, double *, double *, double *);
 
 
 
-void pfc_2D_cpg(int *nn , double *vec , double *b , double *x , double *rout , int *info,
+void pfc_2D_cpg(int nc , double *vec , double *b , double *x , double *rout , double *mu, int *info,
                 int *iparamPFC , double *dparamPFC)
 {
 
 
-  int       n = *nn, maxit, ispeak;
-  int       nc = n / 2, i, iter;
+  int       maxit, ispeak;
+  int       n = 2 * nc, i, iter;
   int       incx = 1, incy = 1;
   int       *stat, *statusi, it_end;
 
 
-  double    mu, eps = 1.e-12;
+  double    eps = 1.e-12;
   double    pAp, alpha, beta, wAp, rp, normr, tol;
   double    alphaf, betaf, den, num, res;
 
@@ -105,12 +104,11 @@ void pfc_2D_cpg(int *nn , double *vec , double *b , double *x , double *rout , i
   maxit         = iparamPFC[0];
   ispeak        = iparamPFC[1];
 
-  mu            = dparamPFC[0];
-  tol           = dparamPFC[1];
+  tol           = dparamPFC[0];
 
   iparamPFC[2]  = 0;
 
-  dparamPFC[2]  = 0.0;
+  dparamPFC[1]  = 0.0;
 
 
   r       = (double*) malloc(n * sizeof(double));
@@ -142,7 +140,7 @@ void pfc_2D_cpg(int *nn , double *vec , double *b , double *x , double *rout , i
     Ap[i]    = 0.0;
     z[i]     = 0.0;
     fric1[i] = 1.0;
-    fric[i]  = mu * fric1[i];
+    fric[i]  = mu[i] * fric1[i];
 
     if (i < nc)
     {
@@ -171,18 +169,18 @@ void pfc_2D_cpg(int *nn , double *vec , double *b , double *x , double *rout , i
 
   for (i = 0; i < nc; i++)
   {
-    mu = fric[i];
+    mu[i] = fric[i];
     if (x[2 * i] <= eps)
     {
       /*       No contact            */
       stat[i] = 0;
     }
-    else if (x[2 * i + 1] <=  -mu * x[2 * i])
+    else if (x[2 * i + 1] <=  -mu[i]*x[2 * i])
     {
       /*     Slide backward         */
       stat[i] = 1;
     }
-    else if (x[2 * i + 1] >=  mu * x[2 * i])
+    else if (x[2 * i + 1] >=  mu[i]*x[2 * i])
     {
       /*   Slide forward          */
       stat[i] = 3;
@@ -314,7 +312,7 @@ void pfc_2D_cpg(int *nn , double *vec , double *b , double *x , double *rout , i
 
 
     iparamPFC[2] = it_end;
-    dparamPFC[2] = res;
+    dparamPFC[1] = res;
 
 
     iter = iter + 1;

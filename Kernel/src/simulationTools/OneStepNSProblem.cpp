@@ -32,7 +32,7 @@ using namespace std;
 // xml constructor
 OneStepNSProblem::OneStepNSProblem(const string& pbType, OneStepNSProblemXML* osnspbxml, Simulation* newSimu):
   nspbType(pbType), id(DEFAULT_OSNS_NAME), sizeOutput(0), solver(NULL), isSolverAllocatedIn(false),  simulation(newSimu), onestepnspbxml(osnspbxml),
-  OSNSInteractions(NULL), levelMin(0), levelMax(0)
+  OSNSInteractions(NULL), levelMin(0), levelMax(0), maxSize(0), CPUtime(0), nbIter(0)
 {
   if (onestepnspbxml == NULL)
     RuntimeException::selfThrow("OneStepNSProblem::xml constructor, xml file == NULL");
@@ -69,7 +69,7 @@ OneStepNSProblem::OneStepNSProblem(const string& pbType, OneStepNSProblemXML* os
 // Constructor with given simulation and a pointer on Solver (Warning, solver is an optional argument)
 OneStepNSProblem::OneStepNSProblem(const string& pbType, Simulation * newSimu, const string& newId, Solver* newSolver):
   nspbType(pbType), id(newId), sizeOutput(0), solver(newSolver), isSolverAllocatedIn(false),  simulation(newSimu), onestepnspbxml(NULL),
-  OSNSInteractions(NULL), levelMin(0), levelMax(0)
+  OSNSInteractions(NULL), levelMin(0), levelMax(0), maxSize(0), CPUtime(0), nbIter(0)
 {
   // === Checks simulation ===
   if (newSimu == NULL)
@@ -273,6 +273,11 @@ void OneStepNSProblem::initialize()
     updateBlocks();
     computeSizeOutput();
   }
+
+  Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  // The maximum size of the problem (for example, the dim. of M in LCP or Friction problems).
+  // Set to the number of possible scalar constraints declared in the topology.
+  maxSize = topology->getNumberOfConstraints();
 }
 
 void OneStepNSProblem::saveInMemory()
@@ -280,11 +285,6 @@ void OneStepNSProblem::saveInMemory()
   InteractionsIterator it;
   for (it = OSNSInteractions->begin(); it != OSNSInteractions->end(); it++)
     (*it)->swapInMemory();
-}
-
-void OneStepNSProblem::compute(double time)
-{
-  RuntimeException::selfThrow("OneStepNSProblem::compute - not yet implemented for problem type =" + nspbType);
 }
 
 void OneStepNSProblem::saveNSProblemToXML()
@@ -303,40 +303,6 @@ void OneStepNSProblem::saveNSProblemToXML()
     //onestepnspbxml->setSolver(solvingFormalisation, methodName, normType, tolerance, maxIter, searchDirection );
   }
   else RuntimeException::selfThrow("OneStepNSProblem::saveNSProblemToXML - OneStepNSProblemXML object not exists");
-}
-
-void OneStepNSProblem::check_solver(int info) const
-{
-  string solverName = solver->getSolverAlgorithmName();
-  // info = 0 => ok
-  // else: depend on solver
-  // \todo: chose a standard output for solver parameter "info", that do not depend on the solver -> Numerics part
-  if (info != 0)
-  {
-    cout << "OneStepNS::check_solver warning: output message from solver is equal to " << info << endl;
-    cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." << endl;
-    RuntimeException::selfThrow(" Non smooth problem, solver convergence failed");
-    /*      if(info == 1)
-    cout <<" reach max iterations number with solver " << solverName << endl;
-    else if (info == 2)
-    {
-    if (solverName == "LexicoLemke" || solverName == "CPG" || solverName == "NLGS")
-    RuntimeException::selfThrow(" negative diagonal term with solver "+solverName);
-    else if (solverName == "QP" || solverName == "NSQP" )
-    RuntimeException::selfThrow(" can not satisfy convergence criteria for solver "+solverName);
-    else if (solverName == "Latin")
-    RuntimeException::selfThrow(" Choleski factorisation failed with solver Latin");
-    }
-    else if (info == 3 && solverName == "CPG")
-       cout << "pWp null in solver CPG" << endl;
-    else if (info == 3 && solverName == "Latin")
-    RuntimeException::selfThrow("Null diagonal term with solver Latin");
-    else if (info == 5 && (solverName == "QP" || solverName == "NSQP"))
-    RuntimeException::selfThrow("Length of working array insufficient in solver "+solverName);
-    else
-    RuntimeException::selfThrow("Unknown error type in solver "+ solverName);
-    */
-  }
 }
 
 void OneStepNSProblem::getOSIMaps(UnitaryRelation* UR, MapOfMatrices& centralBlocks, MapOfDouble& Theta)
@@ -371,3 +337,10 @@ void OneStepNSProblem::getOSIMaps(UnitaryRelation* UR, MapOfMatrices& centralBlo
     ++itDS;
   }
 }
+
+void OneStepNSProblem::printStat()
+{
+  cout << " CPU time for solving : " << CPUtime / (double)CLOCKS_PER_SEC << endl;
+  cout << " Number of iterations done: " << nbIter << endl;
+}
+

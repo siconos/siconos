@@ -117,9 +117,17 @@ public:
     return relativePosition;
   } ;
 
+  /** get id of the parent interaction
+   *  \return a string
+   */
+  inline const std::string getId() const
+  {
+    return mainInteraction->getId();
+  };
+
   /** get number of the Unitary Relation
-  *  \return an unsigned int
-  */
+   *  \return an unsigned int
+   */
   inline const unsigned int getNumber() const
   {
     return number;

@@ -134,7 +134,7 @@ for ii in range(no_par+1):
 		t = s.getTimeDiscretisationPtr();	
 		t.setK(0);
 		model.setCurrentT(0);
-		k++;
+		k=k+1;
 		N = t.getNSteps();
 #		print " **** time management OK ****";
 
@@ -143,7 +143,7 @@ for ii in range(no_par+1):
 #			print "SOLVER ITERATION1", k
 
 	#		print 'NextStep done';
-			k++;
+			k=k+1;
 			s.computeOneStep();
 			print '1andra = ', (ImpOsc.getQPtr()).getValue(0),(ImpOsc.getVelocityPtr()).getValue(0), ' time = ',(t.getTkPtr()).getValue(k);
 			print '2andra = ', (ImpOsc.getQPtr()).getValue(1),(ImpOsc.getVelocityPtr()).getValue(1), ' time = ',(t.getTkPtr()).getValue(k);
@@ -190,7 +190,7 @@ for ii in range(no_par+1):
 		while k < N :
 	#		print "SOLVER ITERATION1", k
 	#		print 'NextStep done';
-			k++;
+			k=k+1;
 			s.computeOneStep();
 			s.nextStep();
 		

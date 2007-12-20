@@ -69,7 +69,7 @@ This problem can be solved thanks to @ref dfc_2D solvers or thanks to @ref lcp s
 #include "NSSpack.h"
 #endif
 
-int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , double *F2)
+int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , double *F2 , double *mu)
 {
 
 
@@ -116,14 +116,14 @@ int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
     }
 
 
-    dfc_2D2cond_2D(n , &pt->dfc_2D.mu , K1 , F1, pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
+    dfc_2D2cond_2D(n , mu , K1 , F1, pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
                    pt->dfc_2D.ddl_d , &pt->dfc_2D.dim_d ,  pt->dfc_2D.J1 , MM , q);
 
 
     t1 = clock();
 
 
-    dfc_2D_latin(MM , q , &dim_q , &pt->dfc_2D.k_latin , &pt->dfc_2D.mu , &pt->dfc_2D.itermax ,
+    dfc_2D_latin(MM , q , &dim_q , &pt->dfc_2D.k_latin , mu , &pt->dfc_2D.itermax ,
                  & pt->dfc_2D.tol , &pt->dfc_2D.chat, z , w , &it_end, &res , &info);
 
     t2 = clock();
@@ -162,7 +162,7 @@ int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
 
     }
 
-    dfc_2D2lcp(n , &pt->dfc_2D.mu , K1 , F1, pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
+    dfc_2D2lcp(n , mu , K1 , F1, pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
                pt->dfc_2D.ddl_d , &pt->dfc_2D.dim_d ,  pt->dfc_2D.J1 , MM , q);
 
 
@@ -214,7 +214,7 @@ int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
 
     }
 
-    dfc_2D2lcp(n , &pt->dfc_2D.mu , K1 , F1, pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
+    dfc_2D2lcp(n , mu , K1 , F1, pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
                pt->dfc_2D.ddl_d , &pt->dfc_2D.dim_d ,  pt->dfc_2D.J1 , MM , q);
 
 
@@ -271,7 +271,7 @@ int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
     }
 
 
-    dfc_2D2lcp(n , &pt->dfc_2D.mu , K1 , F1, pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
+    dfc_2D2lcp(n , mu , K1 , F1, pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
                pt->dfc_2D.ddl_d , &pt->dfc_2D.dim_d ,  pt->dfc_2D.J1 , MM , q);
 
 

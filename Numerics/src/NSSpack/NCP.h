@@ -15,85 +15,39 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ */
+
+#ifndef NCP_H
+#define NCP_H
+
+/*!\file NCP.h
+  Functions related to NCP formulation and solvers.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-typedef struct
-{
-  char * nom_method;
-  int itermax;
-  double tol;
-  double mu;
-  double k_latin;
-} methode_cfp;
 
 
-typedef struct
-{
-  char *name;
-  int itermax;
-  double tol;
-  double mu;
-  double k_latin;
-  double *J1;
-  int *ddl_i;
-  int *ddl_n;
-  int *ddl_tt;
-  int *ddl_c;
-  int dim_i;
-  int dim_c;
-  int dim_tt;
-  int dim_n;
-} method_dfc_2D;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+  /** NCP Fischer Burmeister function, \f$ \phi(z,F(z)) \f$
+      \param size of vector z
+      \param vector z
+      \param vector F(z)
+      \param vector \f$ \phi(z,F(z)) \f$, in-out arg.
+   */
+  void phi_FB(int, double*, double*, double*);
 
-typedef struct
-{
-  char * name;
-  int itermax;
-  double tol;
-  double k_latin;
-} method_lcp;
+  /** Jacobian of NCP Fischer Burmeister function, \f$ \nabla_z \phi(z,F(z)) \f$
+      \param size of vector z
+      \param vector z
+      \param vector F(z)
+      \param \f$ \nabla_z F(z) \f$
+      \param \f$ \nabla_z \phi(z,F(z)) \f$, in-out arg.
+   */
+  void jacobianPhi_FB(int, double*, double*, double*, double*);
 
+#ifdef __cplusplus
+}
+#endif
 
-typedef struct
-{
-  char * nom_method;
-  int itermax;
-  double tol;
-  double *a;
-  double *b;
-  double k_latin;
-} methode_rp;
-
-
-
-typedef struct
-{
-  char * nom_method;
-  int itermax;
-  double tol;
-  double *a;
-  double *b;
-  double k_latin;
-} methode_rd;
-
-
-
-
-typedef union
-{
-  methode_cfp cfp;
-  methode_cfd cfd;
-  methode_lcp lcp;
-  methode_rp rp;
-  methode_rd rd;
-
-} methode;
-
-
-
-
-
+#endif

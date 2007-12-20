@@ -33,7 +33,7 @@
 #include "LA.h"
 #include <math.h>
 
-int NCP_compute_error(int n, double *vec , double *q , double *z , int verbose, double *w, double *err)
+void NCP_compute_error(int n, double *vec , double *q , double *z , int verbose, double *w, double *err)
 {
   double error, normq;
   double a1, b1;
@@ -71,6 +71,4 @@ int NCP_compute_error(int n, double *vec , double *q , double *z , int verbose, 
   *err = error / normq;
 
   if (verbose > 0) printf("Siconos/Numerics: NCP_compute_error: Error evaluation = %g \n", *err);
-  return 0;
-
 }

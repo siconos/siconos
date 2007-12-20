@@ -24,7 +24,7 @@
 
 
 
-   \fn void dfc_2D2lcp( int *dim_F1 , double *mumu , double *K1 , double *F1, int *ddl_n ,
+   \fn void dfc_2D2lcp( int *dim_F1 , double *mu , double *K1 , double *F1, int *ddl_n ,
         int *ddl_tt ,int * dim_nc, int *ddl_d, int *dim_d , double *J1 , double *MM , double *q )
 
 
@@ -32,7 +32,7 @@
 
    \param dim_F1    On enter a pointer over integers, the dimension of the DFC_2D problem,
 
-   \param mumu      On enter a pointer over doubles, the friction coefficient,
+   \param mu      On enter a pointer over doubles, the friction coefficient,
 
    \param K1        On enter a pointer over doubles containing the components of the
                      rigidity matrix with a fortran90 storage,
@@ -79,14 +79,14 @@
 void sortsn_(int *ddl_i, int *sort, int *n);
 
 
-void dfc_2D2lcp(int *dim_F1 , double *mumu , double *K1 , double *F1, int *ddl_n , int *ddl_tt , int * dim_nc, int *ddl_d, int *dim_d , double *J1 , double *MM , double *q)
+void dfc_2D2lcp(int *dim_F1 , double *mu , double *K1 , double *F1, int *ddl_n , int *ddl_tt , int * dim_nc, int *ddl_d, int *dim_d , double *J1 , double *MM , double *q)
 {
   int            i, j, taille_i, taille_n, taille_tt, taille_c, taille_F1, kk, taille_sort;
   int            info2,  nnn, ind1, ind2, taille_d;
   int            *sort, *sort1, *sort2, *ddl_c, *vecF1, *vec_i, n3, *ddl_i, dim_nn, dim_i;
   integer incx = 1;
 
-  double         mu = *mumu, alpha, invKii0;
+  double         alpha, invKii0;
   double         *M;
   double         *Kii, *Kin, *Kit, *Knn, *Knt, *Ktn, *Ktt;
   double         *Kni, *Kti, *Knn_bis, *Ktn_bis, *Knt_bis, *Ktt_bis;
@@ -701,17 +701,17 @@ void dfc_2D2lcp(int *dim_F1 , double *mumu , double *K1 , double *F1, int *ddl_n
 
       M[i + 3 * taille_tt * (2 * taille_n + j)] = Knt[i + taille_n * j];
 
-      M[taille_n + i + 3 * taille_tt * j] = -Ktn[i + taille_tt * j] + mu * Knn[i + taille_n * j];
+      M[taille_n + i + 3 * taille_tt * j] = -Ktn[i + taille_tt * j] + mu[i] * Knn[i + taille_n * j];
 
-      M[taille_n + i + 3 * taille_tt * (taille_n + j)] = Ktt[i + taille_tt * j] - mu * Knt[i + taille_n * j];
+      M[taille_n + i + 3 * taille_tt * (taille_n + j)] = Ktt[i + taille_tt * j] - mu[i] * Knt[i + taille_n * j];
 
-      M[taille_n + i + 3 * taille_tt * (2 * taille_n + j)] = mu * Knt[i + taille_n * j] - Ktt[i + taille_tt * j];
+      M[taille_n + i + 3 * taille_tt * (2 * taille_n + j)] = mu[i] * Knt[i + taille_n * j] - Ktt[i + taille_tt * j];
 
-      M[2 * taille_n + i + 3 * taille_tt * j] = Ktn[i + taille_tt * j] + mu * Knn[i + taille_n * j];
+      M[2 * taille_n + i + 3 * taille_tt * j] = Ktn[i + taille_tt * j] + mu[i] * Knn[i + taille_n * j];
 
-      M[2 * taille_n + i + 3 * taille_tt * (taille_n + j)] = -Ktt[i + taille_tt * j] - mu * Knt[i + taille_n * j];
+      M[2 * taille_n + i + 3 * taille_tt * (taille_n + j)] = -Ktt[i + taille_tt * j] - mu[i] * Knt[i + taille_n * j];
 
-      M[2 * taille_n + i + 3 * taille_tt * (2 * taille_n + j)] = mu * Knt[i + taille_n * j] + Ktt[i + taille_tt * j];
+      M[2 * taille_n + i + 3 * taille_tt * (2 * taille_n + j)] = mu[i] * Knt[i + taille_n * j] + Ktt[i + taille_tt * j];
     }
 
 
@@ -747,7 +747,7 @@ void dfc_2D2lcp(int *dim_F1 , double *mumu , double *K1 , double *F1, int *ddl_n
   {
     for (j = 0; j < taille_tt; j++)
     {
-      tempo_tn[i + taille_tt * j] = mu * Knn[i + taille_n * j] - Ktn[i + taille_tt * j];
+      tempo_tn[i + taille_tt * j] = mu[i] * Knn[i + taille_n * j] - Ktn[i + taille_tt * j];
 
     }
   }
@@ -762,7 +762,7 @@ void dfc_2D2lcp(int *dim_F1 , double *mumu , double *K1 , double *F1, int *ddl_n
       q0[i] = tempo_tn[i + taille_tt * kk] * Jcn[kk] + invKii0;
       invKii0 = q0[i];
     }
-    q0[i] = -q0[i] + mu * qn[i];
+    q0[i] = -q0[i] + mu[i] * qn[i];
 
   }
 
@@ -778,7 +778,7 @@ void dfc_2D2lcp(int *dim_F1 , double *mumu , double *K1 , double *F1, int *ddl_n
   {
     for (j = 0; j < taille_tt; j++)
     {
-      tempo_tn[i + taille_tt * j] = mu * Knn[i + taille_n * j] + Ktn[i + taille_tt * j];
+      tempo_tn[i + taille_tt * j] = mu[i] * Knn[i + taille_n * j] + Ktn[i + taille_tt * j];
     }
   }
 
@@ -794,7 +794,7 @@ void dfc_2D2lcp(int *dim_F1 , double *mumu , double *K1 , double *F1, int *ddl_n
       invKii0 = q3[i];
     }
 
-    q3[i] = -q3[i] + mu * qn[i];
+    q3[i] = -q3[i] + mu[i] * qn[i];
 
   }
 

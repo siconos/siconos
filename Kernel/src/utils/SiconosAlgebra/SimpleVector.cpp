@@ -1117,7 +1117,7 @@ void sub(const SiconosVector& x, const SiconosVector& y, SiconosVector& z)
   // Computes z = x - y in an "optimized" way (in comparison with operator +)
 
   if (x.size() != y.size() || x.size() != z.size())
-    SiconosVectorException::selfThrow("add(x,y,z): inconsistent sizes");
+    SiconosVectorException::selfThrow("sub(x,y,z): inconsistent sizes");
 
   unsigned int numX = x.getNum();
   unsigned int numY = y.getNum();
@@ -1161,7 +1161,7 @@ void sub(const SiconosVector& x, const SiconosVector& y, SiconosVector& z)
         if (numX == 1)
         {
           if (numZ != 1)
-            SiconosVectorException::selfThrow("SiconosVector addition, add(x,y,z) failed - Addition of two dense vectors into a sparse.");
+            SiconosVectorException::selfThrow("SiconosVector addition, sub(x,y,z) failed - Addition of two dense vectors into a sparse.");
           noalias(*z.getDensePtr()) = *x.getDensePtr() - *y.getDensePtr() ;
         }
         else
@@ -1175,7 +1175,7 @@ void sub(const SiconosVector& x, const SiconosVector& y, SiconosVector& z)
       else if (numX != 0 && numY != 0) // x and y of different types => z must be dense.
       {
         if (numZ != 1)
-          SiconosVectorException::selfThrow("SiconosVector addition, add(x,y,z) failed - z can not be sparse.");
+          SiconosVectorException::selfThrow("SiconosVector addition, sub(x,y,z) failed - z can not be sparse.");
         if (numX == 1)
           noalias(*z.getDensePtr()) = *x.getDensePtr() - *y.getSparsePtr();
         else

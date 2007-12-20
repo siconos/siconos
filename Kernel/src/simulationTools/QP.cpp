@@ -30,10 +30,10 @@ QP::QP(OneStepNSProblemXML* osnspbxml, Simulation* newStrat):
 QP::~QP()
 {}
 
-void QP::compute(const double& time)
+int QP::compute(double)
 {
   RuntimeException::selfThrow("QP::compute not yet implemented");
-
+  return 1;
 }
 
 void QP::display() const

@@ -33,16 +33,17 @@
  *
  * here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
  *
- * \fn  pfc_3D_nlgs( int *nn , double *vec , double *q , double *z , double *w , int *info\n,
+ * \fn  pfc_3D_nlgs( int nc , double *vec , double *q , double *z , double *w , double *mu, int *info\n,
  *                   int *iparamLCP , double *dparamLCP )
  *
  * Generic pfc_3D parameters:\n
  *
- * \param nn      Unchanged parameter which represents the dimension of the system.
+ * \param nc      Unchanged parameter which represents the number of contacts. The dimension of the system is 3*nc.
  * \param vec     Unchanged parameter which contains the components of the matrix with a fortran storage.
  * \param q       Unchanged parameter which contains the components of the right hand side vector.
  * \param z       Modified parameter which contains the initial solution and returns the solution of the problem.
  * \param w       Modified parameter which returns the solution of the problem.
+ * \param mu   the list of friction coefficients. mu[i] corresponds to contact number i.
  * \param info    Modified parameter which returns the termination value\n
  *                0 - convergence\n
  *                1 - iter = itermax\n
@@ -56,9 +57,8 @@
  *                       0 < active screen output\n
  * \param iparamLCP[2] = it_end  Output modified parameter which returns the number of iterations performed by the algorithm.
  *
- * \param dparamLCP[0] = mu      Input unchanged parameter which represents the friction coefficient.
- * \param dparamLCP[1] = tol     Input unchanged parameter which represents the tolerance required.
- * \param dparamLCP[2] = res     Output modified parameter which returns the final error value.
+ * \param dparamLCP[0] = tol     Input unchanged parameter which represents the tolerance required.
+ * \param dparamLCP[1] = res     Output modified parameter which returns the final error value.
  *
  *
  * \author Mathieu Renouf & Nineb Sheherazade .
@@ -72,6 +72,7 @@
 #include "LA.h"
 #include <time.h>
 #include "blaslapack.h"
+#include "pfc_3D_Alart_Curnier.h"
 
 
 
@@ -324,15 +325,14 @@ void JacG_f(int m, double *JacG, double *A, double *B , double *x , double *y , 
 }
 
 
-void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w , int *info,
+void pfc_3D_nlgsnewton(int nc , double *vec , double *q , double *z , double *w , double *mu, int *info,
                        int *iparamLCP , double *dparamLCP)
 {
 
 
   FILE *f101;
-  int n, in, it, is, ispeak, itermax, nc, i, j, ii, niter, iter, Gsize, mm, newton_method;
-  int nrhs = 1, infoDGESV;
-  double err, nerr, nerr1, nerr2, tol, mu, mu2, an, at, sigma;
+  int n, in, it, is, ispeak, itermax, i, j, niter, iter, Gsize, mm;
+  double err, nerr, nerr1, nerr2, tol, an, at;
   double qs, a1, b1, alpha, den, num, beta, det;
   int incx, incy;
   double *ww, *www, *wwww, *G, *JacG, *A, *AA, *B, *zz, *W, *zzz, *zzzz, *C, *AC, *diag;
@@ -343,7 +343,6 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
   t1 = clock();
 
   ispeak = 0;
-  nc     = *nn;
   incx   = 1;
   incy   = 1;
   n      = 3 * nc;
@@ -355,14 +354,12 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
   itermax = iparamLCP[0];
   ispeak  = iparamLCP[1];
 
-  mu  = dparamLCP[0];
-  tol = dparamLCP[1];
-  mu2 = mu * mu;
+  tol = dparamLCP[0];
 
   /* Initialize output */
 
   iparamLCP[2] = 0;
-  dparamLCP[2] = 0.0;
+  dparamLCP[1] = 0.0;
 
 
   if (ispeak == 2) f101 = fopen("pfc_3D_nlgs.log" , "w+");
@@ -563,8 +560,8 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
       {
         ++niter;
 
-        G_f(Gsize , G , zz , ww , C , zzz, an , at , mu);
-        JacG_f(Gsize , JacG, A , B , zz , ww , C, zzz, an , at , mu);
+        G_f(Gsize , G , zz , ww , C , zzz, an , at , mu[i]);
+        JacG_f(Gsize , JacG, A , B , zz , ww , C, zzz, an , at , mu[i]);
         incx = 1;
         nerr1 = DNRM2(Gsize, G , incx);
 
@@ -591,7 +588,7 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
           DCOPY(Gsize , zz , incx , zzzz , incy);
           DAXPY(Gsize , alpha , www , incx , zzzz , incy);
 
-          G_f(Gsize , G , zzzz , wwww , C, zzz, an , at , mu);
+          G_f(Gsize , G , zzzz , wwww , C, zzz, an , at , mu[i]);
           nerr2 = DNRM2(Gsize, G , incx);
 
           if (nerr2 < nerr1) break;
@@ -635,7 +632,7 @@ void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w
   }
 
   iparamLCP[2] = iter;
-  dparamLCP[2] = err;
+  dparamLCP[1] = err;
 
   if (ispeak > 0)
   {

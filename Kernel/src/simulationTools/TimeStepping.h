@@ -24,6 +24,9 @@
 
 #include "Simulation.h"
 
+/** type of function used to post-treat output info from solver. */
+typedef void (*CheckSolverFPtr)(int, Simulation*);
+
 /** Time-Stepping scheme
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -34,6 +37,7 @@
 class TimeStepping : public Simulation
 {
 private:
+
   /** Default Constructor
    */
   TimeStepping();
@@ -116,6 +120,15 @@ public:
    * \return a pointer on the Simulation if it is of the right type, NULL otherwise
    */
   static TimeStepping* convert(Simulation* str);
+
+  /** check returning value from computeOneStepNSProblem and process
+   *  \param: an int
+   */
+  void DefaultCheckSolverOutput(int);
+
+  /** Set CheckSolverOutput function */
+  void setCheckSolverFunction(CheckSolverFPtr);
+
 };
 
 #endif // TIMESTEPPING_H

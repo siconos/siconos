@@ -16,11 +16,10 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#ifndef SOLVERPACK_H
-#define SOLVERPACK_H
+#ifndef NSSPACK_H
+#define NSSPACK_H
 
 #include "blaslapack.h"
-
 #include "lcp_solvers.h"
 #include "mlcp_solvers.h"
 #include "pfc_3D_solvers.h"
@@ -28,6 +27,7 @@
 #include "dfc_solvers.h"
 #include "dr_solvers.h"
 #include "pr_solvers.h"
+
 
 /*!\file solverpack.h
   \author Nineb Sheherazade and Dubois Frederic.
@@ -64,31 +64,6 @@ typedef union
 
 } method;
 
-/*!\struct SparseBlockStructuredMatrix
-
-    \brief To store sparse block matrices with square diagonal blocks
-
-    \param nbblocks         : the total number of non null blocks
-    \param **block          : *block contains the double values of one block in Fortran storage (column by column)
-                              **block is the list of non null blocks
-    \param size             : the number of blocks along a row (or column)
-    \param *blocksize       : the list of the sizes of diagonal (square) blocks
-    \param *RowIndex        : the list of *block row indices (first row = 0)
-    \param *ColumnIndex     : the list of *block column indices (first column = 0)
-*/
-
-typedef struct
-{
-  int nbblocks;
-  double **block;
-  int size;
-  int *blocksize;
-  int *RowIndex;
-  int *ColumnIndex;
-} SparseBlockStructuredMatrix;
-
-
-
 /*
  * header for C++ compiling / and C compiling
  */
@@ -108,13 +83,13 @@ extern "C" {
   int mlcp_solver(double *A , double *B , double *C , double *D , double *a, double *b, int *n , int* m, method *pt ,  double *u, double *v, double *w);
 
   /** General interface to solver for pfc 3D problems */
-  int pfc_3D_solver(double *M , double *q , int *n , method *pt , double *z , double *w);
+  int pfc_3D_solver(int, double*, double*, method*, double*, double*, double*);
 
-  /** NSGS-Newton pfc3D solver, M given as a list of blocks. */
-  void pfc_3D_nsgs_block(int *nn , SparseBlockStructuredMatrix *M , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
+  /** General interface to solvers for primal friction 3D problem, with a sparse block storage for M. */
+  int pfc_3D_solver_block(int, SparseBlockStructuredMatrix*, double*, method*, double*, double*, double*);
 
   /** General interface to solver for pfc 2D problems */
-  int pfc_2D_solver(double *M , double *q , int *n , method *pt , double *z , double *w);
+  int pfc_2D_solver(int, double*, double*, method*, double*, double*, double*);
 
   /** General interface to solver for dual-relay problems */
   int dr_solver(double* , double* , int* , method* , double* , double*);
@@ -123,13 +98,7 @@ extern "C" {
   int pr_solver(double* , double* , int* , method* , double* , double*);
 
   /** General interface to solver for dual friction-contact problems */
-  int dfc_2D_solver(double* , double* , int* , method* , double* , double*);
-
-  /** Function to check convergence after LCP computation */
-  int filter_result_LCP_block(SparseBlockStructuredMatrix *blmat, double *q , double *z , double tol, int chat, double *w);
-
-  /** Destructor for SparseBlockStructuredMatrix objects */
-  void freeSpBlMat(SparseBlockStructuredMatrix *blmat);
+  int dfc_2D_solver(double* , double* , int* , method* , double* , double*, double*);
 
 #ifdef __cplusplus
 }

@@ -33,7 +33,7 @@
  *
  * here M is an (n x n) matrix, q, z and w n-vector.
  *
- * \fn  pfc_3D_cpg( int *nn , double *vec , double *q , double *z , double *w , int *info\n,
+ * \fn  pfc_3D_cpg( int nc , double *vec , double *q , double *z , double *w, double *mu, int *info\n,
  *                  int *iparamLCP , double *dparamLCP )
  *
  * pfc_3D_cpg is a specific cpg (conjugated projected gradient) for primal contact problem with friction.\n
@@ -41,11 +41,12 @@
  *
  * Generic pfc_3D parameters:\n
  *
- * \param nn      Unchanged parameter which represents the dimension of the system.
+ * \param nc      Unchanged parameter which represents the number of contatcs. The dimension of the system is n = 3*nc.
  * \param vec     Unchanged parameter which contains the components of the matrix with a fortran storage.
  * \param q       Unchanged parameter which contains the components of the right hand side vector.
  * \param z       Modified parameter which contains the initial solution and returns the solution of the problem.
  * \param w       Modified parameter which returns the solution of the problem.
+ * \param mu   the list of friction coefficients. mu[i] corresponds to contact number i.
  * \param info    Modified parameter which returns the termination value\n
  *                0 - convergence\n
  *                1 - iter = itermax\n
@@ -58,9 +59,8 @@
  *                       0 < active screen output\n
  * \param iparamLCP[2] = it_end  Output modified parameter which returns the number of iterations performed by the algorithm.
  *
- * \param dparamLCP[0] = mu      Input unchanged parameter which represents the friction coefficient.
- * \param dparamLCP[1] = tol     Input unchanged parameter which represents the tolerance required.
- * \param dparamLCP[2] = res     Output modified parameter which returns the final error value.
+ * \param dparamLCP[0] = tol     Input unchanged parameter which represents the tolerance required.
+ * \param dparamLCP[1] = res     Output modified parameter which returns the final error value.
  *
  *
  * \author Nineb Sheherazade & Mathieu Renouf.
@@ -73,22 +73,22 @@
 #include <math.h>
 #include "LA.h"
 void pfc_3D_projf(int  , double * , double * , double * , double * , int *);
-void pfc_3D_projc(int  , double , double *z , double * , int *);
+void pfc_3D_projc(int  , double* , double *z , double * , int *);
 
 
-void pfc_3D_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info,
+void pfc_3D_cpg(int nc , double *vec , double *q , double *z , double *w , double *mu, int *info,
                 int *iparamLCP , double *dparamLCP)
 {
 
   FILE *f101;
-  int n, nc;
+  int n;
   int incx, incy;
   int i, iter, itermax, ispeak;
 
   double err, a1, b1, qs;
 
   double alpha, beta, rp, pMp;
-  double den, num, tol, mu;
+  double den, num, tol;
 
   int *status;
   double *zz , *pp , *rr , *ww , *Mp;
@@ -96,7 +96,6 @@ void pfc_3D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
   printf("pfc_3D_* Algorithms are not reliable yet, report to siconos.gforge.inria.fr if you need it soon \n");
   return ;
 
-  nc   = *nn;
   incx = 1;
   incy = 1;
   n    = 3 * nc;
@@ -106,13 +105,12 @@ void pfc_3D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
   itermax = iparamLCP[0];
   ispeak  = iparamLCP[1];
 
-  mu  = dparamLCP[0];
-  tol = dparamLCP[1];
+  tol = dparamLCP[0];
 
   /* Initialize output */
 
   iparamLCP[2] = 0;
-  dparamLCP[2] = 0.0;
+  dparamLCP[1] = 0.0;
 
   if (ispeak == 2) f101 = fopen("pfc_3D_cpg.log" , "w+");
 
@@ -217,7 +215,7 @@ void pfc_3D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
       free(status);
 
       iparamLCP[2] = iter;
-      dparamLCP[2] = err;
+      dparamLCP[1] = err;
 
       if (ispeak == 2) fclose(f101);
       *info = 3;
@@ -283,7 +281,7 @@ void pfc_3D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
   }
 
   iparamLCP[2] = iter;
-  dparamLCP[2] = err;
+  dparamLCP[1] = err;
 
   DCOPY(n , rr , incx , w , incy);
 

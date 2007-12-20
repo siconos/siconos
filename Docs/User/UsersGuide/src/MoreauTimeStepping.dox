@@ -790,4 +790,33 @@ s->nextStep();
 
 Note that all time-independent operators are computed during simulation initialisation.
 
+\section MTS_Misc Misc.
+
+This section is just a (draft) list of various unsorted topics related to Moreau Time Stepping.
+
+- <b> How to set the behavior of the simulation according to the output value from the non-smooth solver call?</b>\n
+Each time ComputeOneStepNS function, ie the Numerics solver, is called, it returns an int, \n
+giving some information about the convergence of the solver:
+output = 0 => solver succeeded. Else, the meaning of output depends on the solver called (see Numerics doc).\n
+By default, when the convergence is not achieved, an exception is throwed and the process stops. \n
+If you want to change that, it's possible by defining a specific function of the form:
+\code
+//
+// your inputFile.cpp
+//
+void myF(int info, Simulation* s)
+{
+// ...
+}
+
+int main(int argc, char* argv[])
+{
+// 
+// ...
+TimeStepping * s = ...
+s->setCheckSolverFunction(&myF);
+\endcode
+Then after each call to s->computeOneStepNS(...), your function myF will be called. \n
+That may be usefull to change the solver type, the tolerance or whatever you want. 
+
 */

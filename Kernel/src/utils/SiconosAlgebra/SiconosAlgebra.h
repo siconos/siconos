@@ -69,6 +69,12 @@ typedef ublas::banded_matrix<double, ublas::column_major > BandedMat;
  */
 typedef ublas::compressed_matrix<double, ublas::column_major, 0, Index > SparseMat;
 
+/** iterator (type1) through a sparse mat */
+typedef SparseMat::iterator1 SpMatIt1;
+
+/** iterator (type2) through a sparse mat */
+typedef SparseMat::iterator2 SpMatIt2;
+
 /** ZeroMat is a typedef of boost::ublas::numeric::zero_matrix, ie null matrix.
  */
 typedef ublas::zero_matrix<double> ZeroMat;

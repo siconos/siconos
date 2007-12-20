@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 /*! \file
   3-dimensional Friction-Contact Problem
 */
@@ -41,34 +41,34 @@ class FrictionContact3D : public FrictionContact
 private:
 
   /** default constructor
-  */
+   */
   FrictionContact3D();
 
 public:
 
   /** xml constructor
-  *  \param OneStepNSProblemXML* : the XML linked-object
-  *  \param Simulation *: the simulation that owns the problem
-  */
+   *  \param OneStepNSProblemXML* : the XML linked-object
+   *  \param Simulation *: the simulation that owns the problem
+   */
   FrictionContact3D(OneStepNSProblemXML*, Simulation*);
 
   /** constructor from data
-  *  \param Simulation *: the simulation that owns this problem
-  *  \param string: id of the problem
-  *  \param string: solver name (optional)
-  *  \param int : MaxIter (optional) required if a solver is given
-  *  \param double : Tolerance (optional) -> for NLGS, Gcp, Latin
-  *  \param string : NormType (optional) -> never used at the time
-  *  \param double : SearchDirection (optional) -> for Latin
-  */
+   *  \param Simulation *: the simulation that owns this problem
+   *  \param string: id of the problem
+   *  \param string: solver name (optional)
+   *  \param int : MaxIter (optional) required if a solver is given
+   *  \param double : Tolerance (optional) -> for NLGS, Gcp, Latin
+   *  \param string : NormType (optional) -> never used at the time
+   *  \param double : SearchDirection (optional) -> for Latin
+   */
   FrictionContact3D(Simulation * ,  const std::string, const std::string = DEFAULT_SOLVER, const unsigned int = DEFAULT_ITER, const double = DEFAULT_TOL,
                     const unsigned int = DEFAULT_VERBOSE, const std::string  = DEFAULT_NORMTYPE, const double  = DEFAULT_SEARCHDIR);
 
   /** constructor from data
-  *  \param Solver* : pointer to object that contains solver algorithm and formulation
-  *  \param Simulation *: the simulation that owns this problem
-  *  \param String: id of the problem (default = DEFAULT_OSNS_NAME)
-  */
+   *  \param Solver* : pointer to object that contains solver algorithm and formulation
+   *  \param Simulation *: the simulation that owns this problem
+   *  \param String: id of the problem (default = DEFAULT_OSNS_NAME)
+   */
   FrictionContact3D(Solver*, Simulation *, const std::string = DEFAULT_OSNS_NAME);
 
   // --- Destructror ---
@@ -77,15 +77,15 @@ public:
   // --- Others functions ---
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
-  *  \param double : current time
-  *  \return void
-  */
-  void compute(const double time);
+   *  \param double : current time
+   *  \return int, information about the solver convergence.
+   */
+  int compute(double);
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
-  *  \param OneStepNSProblem* : the one step problem which must be converted
-  * \return a pointer on the problem if it is of the right type, NULL otherwise
-  */
+   *  \param OneStepNSProblem* : the one step problem which must be converted
+   * \return a pointer on the problem if it is of the right type, NULL otherwise
+   */
   static FrictionContact3D* convert(OneStepNSProblem* osnsp);
 };
 

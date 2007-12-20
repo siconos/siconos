@@ -33,16 +33,17 @@
  *
  * here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
  *
- * \fn  pfc_3D_nlgs( int *nn , double *vec , double *q , double *z , double *w , int *info\n,
+ * \fn  pfc_3D_nlgs( int nc , double *vec , double *q , double *z , double *w , double *mu, int *info\n,
  *                   int *iparamLCP , double *dparamLCP )
  *
  * Generic pfc_3D parameters:\n
  *
- * \param nn      Unchanged parameter which represents the dimension of the system.
+ * \param nc      Unchanged parameter which represents the number of contacts. The dimension of the system is then n=3*nc.
  * \param vec     Unchanged parameter which contains the components of the matrix with a fortran storage.
  * \param q       Unchanged parameter which contains the components of the right hand side vector.
  * \param z       Modified parameter which contains the initial solution and returns the solution of the problem.
  * \param w       Modified parameter which returns the solution of the problem.
+ * \param mu   the list of friction coefficients. mu[i] corresponds to contact number i.
  * \param info    Modified parameter which returns the termination value\n
  *                0 - convergence\n
  *                1 - iter = itermax\n
@@ -56,9 +57,8 @@
  *                       0 < active screen output\n
  * \param iparamLCP[2] = it_end  Output modified parameter which returns the number of iterations performed by the algorithm.
  *
- * \param dparamLCP[0] = mu      Input unchanged parameter which represents the friction coefficient.
- * \param dparamLCP[1] = tol     Input unchanged parameter which represents the tolerance required.
- * \param dparamLCP[2] = res     Output modified parameter which returns the final error value.
+ * \param dparamLCP[0] = tol     Input unchanged parameter which represents the tolerance required.
+ * \param dparamLCP[1] = res     Output modified parameter which returns the final error value.
  *
  *
  * \author Mathieu Renouf & Nineb Sheherazade (Houari Khenous last modification (08/10/2007)).
@@ -72,15 +72,15 @@
 #include "LA.h"
 #include <time.h>
 
-void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info,
+void pfc_3D_nlgs(int nc , double *vec , double *q , double *z , double *w , double* mu, int *info,
                  int *iparamLCP , double *dparamLCP)
 {
 
 
   FILE *f101;
 
-  int n, in, it, is, ispeak, itermax, nc, i, iter;
-  double zn, zt, zs, err, den, mrn, num, tol, mu, mu2;
+  int n, in, it, is, ispeak, itermax, i, iter;
+  double zn, zt, zs, err, den, mrn, num, tol;
   double qs, a1, b1;
   int incx, incy;
   double *ww;
@@ -90,7 +90,6 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
   t1 = clock();
 
   ispeak = 0;
-  nc     = *nn;
   incx   = 1;
   incy   = 1;
   n      = 3 * nc;
@@ -100,14 +99,12 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
   itermax = iparamLCP[0];
   ispeak  = iparamLCP[1];
 
-  mu  = dparamLCP[0];
-  tol = dparamLCP[1];
-  mu2 = mu * mu;
+  tol = dparamLCP[0];
 
   /* Initialize output */
 
   iparamLCP[2] = 0;
-  dparamLCP[2] = 0.0;
+  dparamLCP[1] = 0.0;
 
 
   if (ispeak == 2) f101 = fopen("pfc_3D_nlgs.log" , "w+");
@@ -214,9 +211,9 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
 
         mrn = z[it] * z[it] + z[is] * z[is];
 
-        if (mrn > mu2 * z[in]*z[in])
+        if (mrn > mu[i]*mu[i]*z[in]*z[in])
         {
-          num = mu * z[in] / sqrt(mrn);
+          num = mu[i] * z[in] / sqrt(mrn);
           z[it] = z[it] * num;
           z[is] = z[is] * num;
         }
@@ -246,7 +243,7 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
   }
 
   iparamLCP[2] = iter;
-  dparamLCP[2] = err;
+  dparamLCP[1] = err;
 
   if (ispeak > 0)
   {

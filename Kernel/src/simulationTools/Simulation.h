@@ -408,8 +408,9 @@ public:
 
   /** computes a one step NS problem
    *  \param a string, the id of the OneStepNSProblem to be computed
+   *  \return an int, information about the solver convergence.
    */
-  virtual void computeOneStepNSProblem(const std::string&);
+  int computeOneStepNSProblem(const std::string&);
 
   /** update input, state of each dynamical system and output
    *  \param lambda order used to compute input

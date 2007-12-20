@@ -34,8 +34,15 @@
 
 using namespace std;
 
+/** Pointer to function, used to set the behavior of simulation when ns solver failed.
+    If equal to null, use DefaultCheckSolverOutput else (set with setCheckSolverFunction) call the pointer below).
+    Note FP: (temporary) bad method to set checkSolverOutput but it works ... It may be better to use plug-in?
+ */
+static CheckSolverFPtr checkSolverOutput = NULL;
+
 TimeStepping::TimeStepping(TimeDiscretisation * td): Simulation(td, "TimeStepping")
-{}
+{
+}
 
 // --- XML constructor ---
 TimeStepping::TimeStepping(SimulationXML* strxml, Model *newModel): Simulation(strxml, newModel, "TimeStepping")
@@ -71,7 +78,9 @@ TimeStepping::TimeStepping(SimulationXML* strxml, Model *newModel): Simulation(s
 
 // --- Destructor ---
 TimeStepping::~TimeStepping()
-{}
+{
+  checkSolverOutput = NULL;
+}
 
 void TimeStepping::updateIndexSet(unsigned int i)
 {
@@ -228,9 +237,14 @@ void TimeStepping::advanceToEvent()
 {
   // solve ...
   computeFreeState();
+  int info = 0;
   if (!allNSProblems->empty())
-    computeOneStepNSProblem("timeStepping");
-
+    info = computeOneStepNSProblem("timeStepping");
+  // Check output from solver (convergence or not ...)
+  if (checkSolverOutput == NULL)
+    DefaultCheckSolverOutput(info);
+  else
+    checkSolverOutput(info, this);
   // Update
   update(levelMin);
 }
@@ -240,13 +254,19 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
   bool isNewtonConverge = false;
   unsigned int nbNewtonStep = 0; // number of Newton iterations
   //double residu = 0;
-
+  int info = 0;
   while ((!isNewtonConverge) && (nbNewtonStep <= maxStep))
   {
     nbNewtonStep++;
     computeFreeState();
     if (!allNSProblems->empty())
-      computeOneStepNSProblem("timeStepping");
+      info = computeOneStepNSProblem("timeStepping");
+    // Check output from solver (convergence or not ...)
+    if (checkSolverOutput == NULL)
+      DefaultCheckSolverOutput(info);
+    else
+      checkSolverOutput(info, this);
+
     update(levelMin);
     isNewtonConverge = newtonCheckConvergence(criterion);
   }
@@ -309,3 +329,39 @@ TimeStepping* TimeStepping::convert(Simulation *str)
   return ts;
 }
 
+void TimeStepping::DefaultCheckSolverOutput(int info)
+{
+  // info = 0 => ok
+  // else: depend on solver
+  if (info != 0)
+  {
+    cout << "TimeStepping::check non smooth solver output warning: output message from solver is equal to " << info << endl;
+    cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." << endl;
+    RuntimeException::selfThrow(" Non smooth problem, solver convergence failed");
+    /*      if(info == 1)
+    cout <<" reach max iterations number with solver " << solverName << endl;
+    else if (info == 2)
+    {
+    if (solverName == "LexicoLemke" || solverName == "CPG" || solverName == "NLGS")
+    RuntimeException::selfThrow(" negative diagonal term with solver "+solverName);
+    else if (solverName == "QP" || solverName == "NSQP" )
+    RuntimeException::selfThrow(" can not satisfy convergence criteria for solver "+solverName);
+    else if (solverName == "Latin")
+    RuntimeException::selfThrow(" Choleski factorisation failed with solver Latin");
+    }
+    else if (info == 3 && solverName == "CPG")
+       cout << "pWp null in solver CPG" << endl;
+    else if (info == 3 && solverName == "Latin")
+    RuntimeException::selfThrow("Null diagonal term with solver Latin");
+    else if (info == 5 && (solverName == "QP" || solverName == "NSQP"))
+    RuntimeException::selfThrow("Length of working array insufficient in solver "+solverName);
+    else
+    RuntimeException::selfThrow("Unknown error type in solver "+ solverName);
+    */
+  }
+}
+
+void TimeStepping::setCheckSolverFunction(CheckSolverFPtr newF)
+{
+  checkSolverOutput = newF;
+}

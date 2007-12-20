@@ -50,29 +50,33 @@ FrictionContact2D::FrictionContact2D(Solver*  newSolver, Simulation* newSimu, co
 FrictionContact2D::~FrictionContact2D()
 {}
 
-void FrictionContact2D::compute(const double time)
+int FrictionContact2D::compute(double time)
 {
   // --- Prepare data for FrictionContact2D computing ---
   preCompute(time);
 
+  int info = 0;
   // --- Call Numerics solver ---
   if (sizeOutput != 0)
   {
 
-    int info;
-    int SizeOutput = (int)sizeOutput;
-    // get solving method and friction coefficient value.
+    clock_t startSolve;
+    // get solving method.
     method solvingMethod = *(solver->getSolvingMethodPtr());
-    Interaction * currentInteraction = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0);
-    // call Numerics method for 2D or 3D problem:
+    startSolve = clock();
+    if (solver->useBlocks()) // Use solver block
+      //  info = pfc_2D_solver_block((int)sizeOutput/2, Mspbl , q->getArray() , &solvingMethod , z->getArray() , w->getArray() ,mu->getArray());
+      RuntimeException::selfThrow("FrictionContact2D::compute - Solver block not yet available.");
+    else // Use classical solver
+      info = pfc_2D_solver((int)sizeOutput / 2, M->getArray(), q->getArray(), &solvingMethod  , z->getArray(), w->getArray(), mu->getArray());
+    CPUtime += (clock() - startSolve);
+    nbIter++;
 
-    solvingMethod.pfc_2D.mu = static_cast<NewtonImpactFrictionNSL*>(currentInteraction->getNonSmoothLawPtr())->getMu();
-    info = pfc_2D_solver(M->getArray(), q->getArray(), &SizeOutput, &solvingMethod  , z->getArray(), w->getArray());
-
-    check_solver(info);
+    // Remark : the output result, info, from solver is treated when this function is call from Simulation
     // --- Recover the desired variables from FrictionContact2D output ---
     postCompute();
   }
+  return info;
 }
 
 FrictionContact2D* FrictionContact2D::convert(OneStepNSProblem* osnsp)

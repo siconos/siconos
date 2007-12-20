@@ -28,7 +28,7 @@
    @{
 */
 
-/** \fn int extern dfc_2D_solver( double *vec , double *q , int *n , method *pt , double *z , double *w )
+/** \fn int extern dfc_2D_solver( double *vec , double *q , int *n , method *pt , double *z , double *w, double *mu )
 
 * \brief dfc_2D_solver() is a generic interface allowing the call of one of the @ref dfc solvers.
 
@@ -49,7 +49,6 @@ dfc_2D_latin.c
 \param itermax    maximum number of iterations.
 \param normType   name norm (not yet available).
 \param tol        convergence criteria value.
-\param mu         friction coefficient.
 \param k_latin    latin coefficient
 \param J1         gap in normal contact direction.
 \param ddl_n      the contact in normal direction dof (not prescribed),
@@ -70,7 +69,6 @@ typedef struct
   int    itermax;
   char   normType[64];
   double tol;
-  double mu;
   double k_latin;
 
   double *J1;

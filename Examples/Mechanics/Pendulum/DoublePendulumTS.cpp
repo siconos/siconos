@@ -140,8 +140,6 @@ int main(int argc, char* argv[])
     allInteractions.insert(inter);
     allInteractions.insert(inter1);
 
-
-
     // --------------------------------
     // --- NonSmoothDynamicalSystem ---
     // --------------------------------
@@ -185,8 +183,6 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
     s->initialize();
     cout << "End of simulation initialisation" << endl;
-
-
 
     int k = 0;
     int N = t->getNSteps(); // Number of time steps

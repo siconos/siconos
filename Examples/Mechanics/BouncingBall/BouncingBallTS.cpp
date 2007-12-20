@@ -31,9 +31,6 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-  boost::timer time;
-  time.restart();
-
   try
   {
 
@@ -42,7 +39,7 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 3;           // degrees of freedom for the ball
     double t0 = 0;                   // initial computation time
-    double T = 10.0;                  // final computation time
+    double T = 10;                  // final computation time
     double h = 0.005;                // time step
     double position_init = 1.0;      // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
@@ -93,7 +90,6 @@ int main(int argc, char* argv[])
 
     Interaction * inter = new Interaction("floor-ball", allDS, 0, 1, nslaw0, relation0);
     allInteractions.insert(inter);
-
     // --------------------------------
     // --- NonSmoothDynamicalSystem ---
     // --------------------------------
@@ -119,7 +115,8 @@ int main(int argc, char* argv[])
     Moreau * OSI = new Moreau(ball, theta, s);
 
     // -- OneStepNsProblem --
-    OneStepNSProblem * osnspb = new LCP(s, "LCP", solverName, 101, 1e-15);
+    OneStepNSProblem * osnspb = new LCP(s, "LCP", solverName, 100, 1e-15);
+    osnspb->getSolverPtr()->setSolverBlock(true);
 
     // =========================== End of model definition ===========================
 
@@ -135,35 +132,49 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 4;
+    unsigned int outputSize = 5;
     SimpleMatrix dataPlot(N, outputSize);
 
     SiconosVector * q = ball->getQPtr();
     SiconosVector * v = ball->getVelocityPtr();
     SiconosVector * p = ball->getPPtr(2);
+    SiconosVector * lambda = inter->getLambdaPtr(1);
 
     dataPlot(0, 0) = bouncingBall->getT0();
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
     dataPlot(0, 3) = (*p)(0);
+    dataPlot(0, 4) = (*lambda)(0);
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
     // ==== Simulation loop - Writing without explicit event handling =====
     int k = 0;
     boost::progress_display show_progress(N);
+
+
+    UnitaryRelationsSet * I0 = s->getIndexSetPtr(1);
+    UnitaryRelationsIterator it1;
+
+    boost::timer time;
+    time.restart();
+
     for (k = 1 ; k < N  ; ++k)
     {
       s->computeOneStep();
+      I0 = s->getIndexSetPtr(1);
+      for (it1 = I0->begin(); it1 != I0->end(); ++it1)
+        cout << (*it1)->getNumber() << endl;
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->getNextTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*p)(0);
+      dataPlot(k, 4) = (*lambda)(0);
       s->nextStep();
-      s->reset();
       ++show_progress;
     }
-    cout << "End of computation - Number of iterations done: " << k - 1 << endl;
+    cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
+    cout << "Computation Time " << time.elapsed()  << endl;
 
     // == Simulation loop - Writing with explicit event handling =====
     //     while(s->hasNextEvent())
@@ -183,7 +194,6 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     ioMatrix io("result.dat", "ascii");
     io.write(dataPlot, "noDim");
-
     // --- Free memory ---
     delete osnspb;
     delete t;
@@ -191,6 +201,7 @@ int main(int argc, char* argv[])
     delete OSI;
     delete bouncingBall;
     delete nsds;
+
     delete inter;
     delete relation0;
     delete nslaw0;
@@ -210,7 +221,5 @@ int main(int argc, char* argv[])
   {
     cout << "Exception caught in BouncingBallTS.cpp" << endl;
   }
-  cout << "Computation Time " << time.elapsed()  << endl;
-
 
 }

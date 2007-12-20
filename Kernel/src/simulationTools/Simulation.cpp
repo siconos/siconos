@@ -415,14 +415,14 @@ void Simulation::saveInMemory()
     (itOsns->second)->saveInMemory();
 }
 
-void Simulation::computeOneStepNSProblem(const std::string& name)
+int Simulation::computeOneStepNSProblem(const std::string& name)
 {
   if (!hasOneStepNSProblem(name))
     RuntimeException::selfThrow("Simulation - computeOneStepNSProblem, OneStepNSProblem does not exist in the simulation. Id:" + name);
   if ((*allNSProblems)[name] == NULL)
     RuntimeException::selfThrow("Simulation - computeOneStepNSProblem, OneStepNSProblem == NULL, Id: " + name);
 
-  (*allNSProblems)[name]->compute(model->getCurrentTime());
+  return (*allNSProblems)[name]->compute(model->getCurrentTime());
 }
 
 void Simulation::update()

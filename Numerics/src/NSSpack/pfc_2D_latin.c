@@ -31,17 +31,18 @@ w - M z = q\\
 \right.
 \f$
 
- here M is an (nn \f$\times\f$nn)-matrix, q an nn-dimensional vector, z an nn-dimensional  vector and w an nn-dimensional vector.
+ here M is an (n \f$\times\f$n)-matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
 
 */
-/*!\fn pfc_2D_latin(int *nn, double *vec, double *qq, double *z, double *w, int *info, int *iparamPFC, double *dparamPFC)
+/*!\fn pfc_2D_latin(int *n, double *vec, double *qq, double *z, double *w, double *mu, int *info, int *iparamPFC, double *dparamPFC)
 
 
    pfc_2D_latin  is a specific latin solver for primal contact problem with friction in the 2D case.
 
-   \param vec         On enter a (nn \f$\times\f$nn)-vector of doubles containing the components of the double matrix with a fortran90 allocation.
-   \param qq          On enter a nn-vector of doubles containing the components of the second member.
-   \param nn          On enter an integer, the dimension of the second member.
+   \param nc          On enter an integer, the number of contacst. The dimension of the system is n=2*nc.
+   \param vec         On enter a (n \f$\times\f$n)-vector of doubles containing the components of the double matrix with a fortran90 allocation.
+   \param qq          On enter a n-vector of doubles containing the components of the second member.
+   \param mu          On enter, the vector of friction coefficients (mu[i] corresponds to contact i)
    \param iparamPFC   On enter/return a vector of integers:\n
                        - iparamPFC[0] = on enter, the maximum number of iterations allowed,\n
                        - iparamPFC[1] = on enter, the parameter which represents the output log identifiant:\n
@@ -50,13 +51,12 @@ w - M z = q\\
            - iparamPFC[2] =  on return, the number of iterations performed by the algorithm.\n
 
   \param dparamPFC   On enter/return a vector of doubles:\n
-                       - dparamPFC[0] = on enter, a positive double which represents the friction coefficient,
-                       - dparamPFC[1] = on enter, a positive double which represents the tolerance required,
-                       - dparamPFC[2] = on enter, a strictly nonnegative double which represents the search parameter,\n
-                       - dparamPFC[3] = on return, a positive double which represents the residu.
+                       - dparamPFC[0] = on enter, a positive double which represents the tolerance required,
+                       - dparamPFC[1] = on enter, a strictly nonnegative double which represents the search parameter,\n
+                       - dparamPFC[2] = on return, a positive double which represents the residu.
 
-   \param z           On return a nn-vector of doubles, the solution of the problem.
-   \param w           On return a nn-vector of doubles, the solution of the problem.
+   \param z           On return a n-vector of doubles, the solution of the problem.
+   \param w           On return a n-vector of doubles, the solution of the problem.
    \param info        On return an integer, the termination reason:
                        0 = Convergence,\n
            1 = no convergence,\n
@@ -78,20 +78,20 @@ w - M z = q\\
 
 
 
-void pfc_2D_latin(int *nn, double *vec, double *qq, double *z, double *w, int *info, int *iparamPFC, double *dparamPFC)
+void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double *mu, int *info, int *iparamPFC, double *dparamPFC)
 {
 
 
 
   int    i, j, kk, iter1, ino, ddl, info2, info77, nrhs, ispeak;
-  int    n = *nn, nc = n / 2, idim, jdim, nbno, it_end;
+  int    n = 2 * nc, idim, jdim, nbno, it_end;
   int    incx = 1, incy = 1;
   int    taille, taillet, taillen, itt;
   int    *ddln;
   int    *ddlt, *vectnt;
 
   double  errmax, alpha, beta, maxa, k_latin, res;
-  double  aa, nt, wn, tc, zc0, mu;
+  double  aa, nt, wn, tc, zc0;
   double  err1, num11, err0;
   double  den11, den22, knz0, ktz0, *ktz, *wf;
   double  *wc, *zc, *wt, *maxwt, *wnum1, *znum1;
@@ -115,9 +115,8 @@ void pfc_2D_latin(int *nn, double *vec, double *qq, double *z, double *w, int *i
   itt     = iparamPFC[0];
   ispeak  = iparamPFC[1];
 
-  mu      = dparamPFC[0];
-  errmax  = dparamPFC[1];
-  k_latin = dparamPFC[2];
+  errmax  = dparamPFC[0];
+  k_latin = dparamPFC[1];
 
 
 
@@ -126,7 +125,7 @@ void pfc_2D_latin(int *nn, double *vec, double *qq, double *z, double *w, int *i
 
 
   iparamPFC[2] = 0;
-  dparamPFC[3] = 0.0;
+  dparamPFC[2] = 0.0;
 
 
   /*               Allocations                      */
@@ -503,7 +502,7 @@ void pfc_2D_latin(int *nn, double *vec, double *qq, double *z, double *w, int *i
 
       wn = zc[ddlt[ino]];
 
-      aa = nt - mu * wn;
+      aa = nt - mu[ino] * wn;
 
       if (aa > 0.0)
       {
@@ -516,7 +515,7 @@ void pfc_2D_latin(int *nn, double *vec, double *qq, double *z, double *w, int *i
 
       wc[ddl] = (maxa / (-1 * kn[ino + nc * ino])) * tc;
 
-      aa = -nt + mu * wn;
+      aa = -nt + mu[ino] * wn;
 
       if (aa > 0.0)
       {
@@ -527,7 +526,7 @@ void pfc_2D_latin(int *nn, double *vec, double *qq, double *z, double *w, int *i
         maxa = 0.0;
       }
 
-      zc[ddl] = (mu * wn - maxa) * tc;
+      zc[ddl] = (mu[ino] * wn - maxa) * tc;
 
     }
 
@@ -591,7 +590,7 @@ void pfc_2D_latin(int *nn, double *vec, double *qq, double *z, double *w, int *i
     res    = err1;
 
     iparamPFC[2] = iter1;
-    dparamPFC[3] = err1;
+    dparamPFC[2] = err1;
 
     iter1   = iter1 + 1;
 

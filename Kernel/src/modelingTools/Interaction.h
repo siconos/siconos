@@ -29,7 +29,6 @@
 #include "BlockVector.h"
 #include "DynamicalSystemsSet.h"
 #include "Tools.h"
-//class DynamicalSystemsSet;
 class NonSmoothLaw;
 class DynamicalSystem;
 class Relation;

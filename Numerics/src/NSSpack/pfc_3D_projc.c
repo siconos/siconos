@@ -18,7 +18,7 @@
 */
 /*!\file pfc_2D_projc.c
  *
- * \fn  pfc_2D_projc( int n , double mu , double *z , double *p , int *status )
+ * \fn  pfc_2D_projc( int n , double* mu , double *z , double *p , int *status )
  *
  * pfc_2D_projc is a specific projection operator related to CPG (conjugated projected gradient) algorithm
  *              for primal contact problem with friction.\n
@@ -26,7 +26,7 @@
  * Ref: Renouf, M. and Alart, P. "" Comp. Method Appl. Mech. Engrg. (2004).
  *
  * \param n       Unchanged parameter which represents the half dimension of the system.
- * \param mu      Unchanged parameter which represents the friction coefficient
+ * \param mu      Unchanged parameter which represents the friction coefficients list
  * \param z       Modified parameter which retruns the corrected iterate.
  * \param p       Unchanged parameter which contains the components of the descent direction.
  * \param status  Unchanged parameter which contains the vector status
@@ -40,7 +40,7 @@
 #include <string.h>
 #include <math.h>
 
-void pfc_3D_projc(int nc , double mu , double *z , double *p , int *status)
+void pfc_3D_projc(int nc , double* mu , double *z , double *p , int *status)
 {
 
   int i;
@@ -65,27 +65,27 @@ void pfc_3D_projc(int nc , double mu , double *z , double *p , int *status)
         /* sliding contact */
         if (z[2 * i + 1] > 0.0)
         {
-          z[2 * i + 1] = mu * z[2 * i];
+          z[2 * i + 1] = mu[i] * z[2 * i];
           status[i] = 2;
         }
         else
         {
-          z[2 * i + 1] = -mu * z[2 * i];
+          z[2 * i + 1] = -mu[i] * z[2 * i];
           status[i] = 3;
         }
       }
       else
       {
         /* slide forward */
-        if (z[2 * i + 1] < -mu * z[2 * i])
+        if (z[2 * i + 1] < -mu[i]*z[2 * i])
         {
-          z[2 * i + 1]  = -mu * z[2 * i];
+          z[2 * i + 1]  = -mu[i] * z[2 * i];
           status[i] = 3;
         }
         /* slide backward */
-        else if (z[2 * i + 1] > mu * z[2 * i])
+        else if (z[2 * i + 1] > mu[i]*z[2 * i])
         {
-          z[2 * i + 1] = mu * z[2 * i];
+          z[2 * i + 1] = mu[i] * z[2 * i];
           status[i] = 2;
         }
         /* sticking contact */

@@ -24,6 +24,8 @@
   Last Modifications : Mathieu Renouf , Pascal Denoyelle, Franck Perignon
 */
 
+#include "NSSTools.h"
+
 /**@defgroup group1 LCP (Linear Complementary Problem)
    @{
 */
@@ -135,6 +137,9 @@ extern "C" {
   int filter_result_LCP(int n, double *M , double *q , double *z , double tol, int chat, double *w);
 
   int lcp_compute_error(int n, double *M , double *q , double *z , int chat, double *w, double * error);
+
+  /** Function to check convergence after LCP computation */
+  int filter_result_LCP_block(SparseBlockStructuredMatrix *blmat, double *q , double *z , double tol, int chat, double *w);
 
 #ifdef __cplusplus
 }

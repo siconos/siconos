@@ -48,8 +48,8 @@ int main(int argc, char* argv[])
 
     // User-defined main parameters
 
-    unsigned int DSNUMBER = 200;       // the number of dynamical systems
-    unsigned int etage  = 8;
+    unsigned int DSNUMBER = 400;       // the number of dynamical systems
+    unsigned int etage  = 16;
 
     unsigned int nDof = 6;            // degrees of freedom for beads
 

@@ -33,7 +33,7 @@ using namespace std;
 LCP::LCP(OneStepNSProblemXML* onestepnspbxml, Simulation* newSimu):
   OneStepNSProblem("LCP", onestepnspbxml, newSimu), w(NULL), z(NULL), M(NULL), q(NULL),
   isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false) ,
-  Mspbl(NULL)
+  MSparseBlock(NULL), prepareM(NULL)
 {
   LCPXML * xmllcp = (static_cast<LCPXML*>(onestepnspbxml));
 
@@ -67,18 +67,17 @@ LCP::LCP(OneStepNSProblemXML* onestepnspbxml, Simulation* newSimu):
 LCP::LCP(Simulation* newSimu, const string& newId, const string& newSolver, unsigned int MaxIter,
          double Tolerance, unsigned int Verbose,  const string&  NormType, double  SearchDirection, double Rho):
   OneStepNSProblem("LCP", newSimu, newId), w(NULL), z(NULL), M(NULL), q(NULL),
-  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), Mspbl(NULL)
+  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), MSparseBlock(NULL), prepareM(NULL)
 {
   // set solver:
   solver = new Solver(nspbType, newSolver, MaxIter, Tolerance, Verbose, NormType, SearchDirection, Rho);
-  solverBackup = new Solver(nspbType, "LexicoLemke", MaxIter, Tolerance, Verbose, NormType, SearchDirection, Rho);
   isSolverAllocatedIn = true;
 }
 
 // Constructor from a set of data
 LCP::LCP(Solver* newSolver, Simulation* newSimu, const string& newId):
   OneStepNSProblem("LCP", newSimu, newId, newSolver), w(NULL), z(NULL), M(NULL), q(NULL),
-  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), Mspbl(NULL)
+  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), MSparseBlock(NULL), prepareM(NULL)
 {}
 
 // destructor
@@ -89,19 +88,23 @@ LCP::~LCP()
   if (isZAllocatedIn) delete z;
   z = NULL;
   if (isMAllocatedIn)
-    if (solver->useBlocks()) freeSpBlMat(Mspbl);
+  {
+    if (solver->useBlocks())
+    {
+      delete MSparseBlock;
+    }
     else delete M;
+  }
   M = NULL;
-  Mspbl = NULL;
+  MSparseBlock = NULL;
   if (isQAllocatedIn) delete q;
   q = NULL;
-  if (solverBackup != NULL) delete solverBackup;
-  solverBackup = NULL;
+  prepareM = NULL;
 }
 
 // Setters
 
-void LCP::setW(const SimpleVector& newValue)
+void LCP::setW(const SiconosVector& newValue)
 {
   if (sizeOutput != newValue.size())
     RuntimeException::selfThrow("LCP: setW, inconsistent size between given w size and problem size. You should set sizeOutput before");
@@ -117,7 +120,7 @@ void LCP::setW(const SimpleVector& newValue)
   *w = newValue;
 }
 
-void LCP::setWPtr(SimpleVector* newPtr)
+void LCP::setWPtr(SiconosVector* newPtr)
 {
   if (sizeOutput != newPtr->size())
     RuntimeException::selfThrow("LCP: setWPtr, inconsistent size between given w size and problem size. You should set sizeOutput before");
@@ -128,7 +131,7 @@ void LCP::setWPtr(SimpleVector* newPtr)
 }
 
 
-void LCP::setZ(const SimpleVector& newValue)
+void LCP::setZ(const SiconosVector& newValue)
 {
   if (sizeOutput != newValue.size())
     RuntimeException::selfThrow("LCP: setZ, inconsistent size between given z size and problem size. You should set sizeOutput before");
@@ -142,7 +145,7 @@ void LCP::setZ(const SimpleVector& newValue)
   *z = newValue;
 }
 
-void LCP::setZPtr(SimpleVector* newPtr)
+void LCP::setZPtr(SiconosVector* newPtr)
 {
   if (sizeOutput != newPtr->size())
     RuntimeException::selfThrow("LCP: setZPtr, inconsistent size between given z size and problem size. You should set sizeOutput before");
@@ -181,7 +184,7 @@ void LCP::setMPtr(SiconosMatrix* newPtr)
 }
 
 
-void LCP::setQ(const SimpleVector& newValue)
+void LCP::setQ(const SiconosVector& newValue)
 {
   if (sizeOutput != newValue.size())
     RuntimeException::selfThrow("LCP: setQ, inconsistent size between given q size and problem size. You should set sizeOutput before");
@@ -195,7 +198,7 @@ void LCP::setQ(const SimpleVector& newValue)
   *q = newValue;
 }
 
-void LCP::setQPtr(SimpleVector* newPtr)
+void LCP::setQPtr(SiconosVector* newPtr)
 {
   if (sizeOutput != newPtr->size())
     RuntimeException::selfThrow("LCP: setQPtr, inconsistent size between given q size and problem size. You should set sizeOutput before");
@@ -205,6 +208,20 @@ void LCP::setQPtr(SimpleVector* newPtr)
   isQAllocatedIn = false;
 }
 
+void LCP::setSolverPtr(Solver * newSolv)
+{
+  OneStepNSProblem::setSolverPtr(newSolv);
+  initSolver();
+}
+
+void LCP::initSolver()
+{
+  if (solver->useBlocks())
+    prepareM = &LCP::collectMBlocks;
+  else
+    prepareM = &LCP::assembleM;
+}
+
 void LCP::initialize()
 {
   // This function performs all steps that are not time dependant
@@ -212,77 +229,58 @@ void LCP::initialize()
   // General initialize for OneStepNSProblem
   OneStepNSProblem::initialize();
 
-  // ensure a large number of pivots for LexicoLemke backup solver
-  // SolverBackup stuff: to be removed ...
-  bool Pascal = false;
-  if (Pascal)
-  {
-    if ((10 * sizeOutput) > solverBackup->getMaxIter()) solverBackup->setMaxIter(10 * sizeOutput);
-    solverBackup->setSolvingMethod();
-  }
-  // get topology
-  Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
-
-  // The maximum size of the LCP, ie the number of possible scalar constraints declared in the topology.
-  unsigned int maxSize = topology->getNumberOfConstraints();
-
-  // Memory allocation for w, M, z and q
+  // Memory allocation for w, M, z and q.
+  // If one of them has already been allocated, nothing is done.
+  // We suppose that user choose a correct size.
   if (w == NULL)
   {
     w = new SimpleVector(maxSize);
     isWAllocatedIn = true;
-  }
-  else
-  {
-    if (w->size() != maxSize)
-      w->resize(maxSize);
   }
   if (z == NULL)
   {
     z = new SimpleVector(maxSize);
     isZAllocatedIn = true;
   }
-  else
-  {
-    if (z->size() != maxSize)
-      z->resize(maxSize);
-  }
-  if (M == NULL)
+  if (M == NULL && !solver->useBlocks())
   {
     M = new SimpleMatrix(maxSize, maxSize);
     isMAllocatedIn = true;
   }
-  else
+
+  if (MSparseBlock == NULL && solver->useBlocks())
   {
-    if (M->size(0) != maxSize || M->size(1) != maxSize)
-      M->resize(maxSize, maxSize);
+    int nc = simulation->getIndexSetPtr(0)->size();
+    MSparseBlock = new SparseBlockMatrix(nc, nc);
+    isMAllocatedIn = true;
   }
+
   if (q == NULL)
   {
     q = new SimpleVector(maxSize);
     isQAllocatedIn = true;
   }
-  else
-  {
-    if (q->size() != maxSize)
-      q->resize(maxSize);
-  }
-  w->zero();
-  z->zero();
+  //   w->zero();
+  //   z->zero();
 
   // if all relative degrees are equal to 0 or 1
+
+  initSolver();
+
+  // get topology
+  Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+
   if (topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty())
   {
     // computeSizeOutput and updateBlocks were already done in OneStepNSProblem::initialize
     if (sizeOutput != 0)
-
-      assembleM();
+      (*this.*prepareM)();
   }
 
   // If topology is time-dependant, all the above commands are called during preCompute function.
 }
 
-void LCP::preCompute(const double time)
+void LCP::preCompute(double time)
 {
   // compute M and q operators for LCP problem
 
@@ -297,7 +295,9 @@ void LCP::preCompute(const double time)
     if (!topology->isTimeInvariant())
     {
       updateBlocks();
-      assembleM();
+      // Assemble or collect M
+      (*this.*prepareM)();
+
       // check z and w sizes and reset if necessary
       if (z->size() != sizeOutput)
       {
@@ -416,6 +416,24 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
   }
 }
 
+void LCP::collectMBlocks()
+{
+  // === Description ===
+  // This routine is used to fill in the SparseBlockStructuredMatrix Mspbl.
+  //
+  // For each Unitary Relation which is active (ie which is in indexSet[1] of the Simulation), named itRow (it corresponds to a row of block in M),
+  // and for each Unitary Relation connected to itRow and active, named itCol, we get the block[itRow][itCol] and add the embedded double** into Mspbl.
+  //
+  if (!solver->useBlocks())
+    RuntimeException::selfThrow("LCP::collectMBlocks failed. The linked solver does not fit to sparse block storage. Maybe you change your solver and forget to call initSolver.");
+
+  // Get index set 1 from Simulation
+  UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
+
+  MSparseBlock->fill(indexSet, blocks);
+  MSparseBlock->convert();
+}
+
 void LCP::assembleM() //
 {
   // === Description ===
@@ -436,115 +454,37 @@ void LCP::assembleM() //
   UnitaryMatrixColumnIterator itCol;
 
   if (solver->useBlocks())
+    RuntimeException::selfThrow("LCP::assembleM failed. The linked solver does not fit to non sparse block storage. Maybe you change your solver and forget to call initSolver.");
+
+  // full matrix M assembling
+  // === Memory allocation, if required ===
+  // Mem. is allocate only if M==NULL or if its size has changed.
+
+  if (M->size(0) != sizeOutput || M->size(1) != sizeOutput)
+    M->resize(sizeOutput, sizeOutput);
+  M->zero();
+  // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
+
+  for (itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
   {
-    // sparse block matrix Mspbl assembling
-    int i;
-
-    Mspbl = new SparseBlockStructuredMatrix();
-    Mspbl->size = blocksPositions.size();
-    Mspbl->blocksize = (int*) malloc(Mspbl->size * sizeof(int));
-    for (itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
-      Mspbl->blocksize[blocksIndices[*itRow]] = blocksPositions[*itRow];
-    for (i = 0; i < Mspbl->size - 1; i++)
-      Mspbl->blocksize[i] = Mspbl->blocksize[i + 1] - Mspbl->blocksize[i];
-
-    Mspbl->blocksize[Mspbl->size - 1] = sizeOutput - Mspbl->blocksize[Mspbl->size - 1];
-    isMAllocatedIn = true;
-
-    // computation of the number of non-null blocks
-    Mspbl->nbblocks = 0;
-    for (itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
-      for (itCol = blocks[*itRow].begin(); itCol != blocks[*itRow].end(); ++itCol)
-        if ((indexSet->find((*itCol).first)) != indexSet->end())
-        {
-          if (blocks[*itRow][(*itCol).first] != NULL)(Mspbl->nbblocks)++;
-        }
-
-    // allocation of Mspbl coordinates vectors and non null block pointers vector
-    Mspbl->RowIndex = (int*)malloc(Mspbl->nbblocks * sizeof(int));
-    Mspbl->ColumnIndex = (int*)malloc(Mspbl->nbblocks * sizeof(int));
-    Mspbl->block = (double**)malloc(Mspbl->nbblocks * sizeof(double*));
-
-    // insertion of non null blocks pointers
-    // each one is set to SimpleMatrix "mat" address : only pointer copy
-    int nblins = 0;     // counter of blocks already inserted
-    int rowind, colind;
-    bool isMoreFar;
-
-    for (itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
+    for (itCol = blocks[*itRow].begin(); itCol != blocks[*itRow].end(); ++itCol)
     {
-      for (itCol = blocks[*itRow].begin(); itCol != blocks[*itRow].end(); ++itCol)
-      {
-        if ((indexSet->find((*itCol).first)) != indexSet->end())
-        {
-          if (blocks[*itRow][(*itCol).first] != NULL)
-          {
-            i = 0;
-            isMoreFar = true;
-            rowind = blocksIndices[*itRow];
-            colind = blocksIndices[(*itCol).first];
-            while (i < nblins && isMoreFar)
-            {
-              isMoreFar = (rowind > Mspbl->RowIndex[i]) || (rowind == Mspbl->RowIndex[i] && colind > Mspbl->ColumnIndex[i]);
-              i++;
-            }
+      // *itRow and itCol are UnitaryRelation*.
 
-            if (!isMoreFar)  // insert new block among existing blocks
-            {
-              for (int j = nblins ; j >= i ; j--)
-              {
-                Mspbl->RowIndex[j] = Mspbl->RowIndex[j - 1];
-                Mspbl->ColumnIndex[j] = Mspbl->ColumnIndex[j - 1];
-                Mspbl->block[j] = Mspbl->block[j - 1];
-              }
-              Mspbl->RowIndex[i - 1] = rowind;
-              Mspbl->ColumnIndex[i - 1] = colind;
-              Mspbl->block[i - 1] = (blocks[*itRow][(*itCol).first])->getArray();
-            }
-            else      // insert new block at the end of existing blocks (i == nblins)
-            {
-              Mspbl->RowIndex[i] = rowind;
-              Mspbl->ColumnIndex[i] = colind;
-              Mspbl->block[i] = (blocks[*itRow][(*itCol).first])->getArray();
-            }
-            nblins++;
-          }
-        }
+      // Check that itCol is in Index set 1
+      if ((indexSet->find((*itCol).first)) != indexSet->end())
+      {
+        pos = blocksPositions[*itRow];
+        col = blocksPositions[(*itCol).first];
+        // copy the block into Mlcp - pos/col: position in M (row and column) of first element of the copied block
+        static_cast<SimpleMatrix*>(M)->setBlock(pos, col, *(blocks[*itRow][(*itCol).first])); // \todo avoid copy
       }
     }
-
   }
-  else
-  {
-    // full matrix M assembling
-    // === Memory allocation, if required ===
-    // Mem. is allocate only if M==NULL or if its size has changed.
-    if (M->size(0) != sizeOutput || M->size(1) != sizeOutput)
-      M->resize(sizeOutput, sizeOutput);
-    M->zero();
-    // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
-
-    for (itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
-    {
-      for (itCol = blocks[*itRow].begin(); itCol != blocks[*itRow].end(); ++itCol)
-      {
-        // *itRow and itCol are UnitaryRelation*.
-
-        // Check that itCol is in Index set 1
-        if ((indexSet->find((*itCol).first)) != indexSet->end())
-        {
-          pos = blocksPositions[*itRow];
-          col = blocksPositions[(*itCol).first];
-          // copy the block into Mlcp - pos/col: position in M (row and column) of first element of the copied block
-          static_cast<SimpleMatrix*>(M)->setBlock(pos, col, *(blocks[*itRow][(*itCol).first])); // \todo avoid copy
-        }
-      }
-    }
-    // === end of UnitaryRelations loop ===
-  }
+  // === end of UnitaryRelations loop ===
 }
 
-void LCP::computeQ(const double time)
+void LCP::computeQ(double time)
 {
   if (q->size() != sizeOutput)
     q->resize(sizeOutput);
@@ -567,119 +507,39 @@ void LCP::computeQ(const double time)
   }
 }
 
-void LCP::compute(const double time)
+int LCP::compute(double time)
 {
-  clock_t startLCPsolve, startLCPuni, timeLCPuni;
-  // SolverBackup stuff: to be removed ...
-  bool Pascal = false;
-
   // --- Prepare data for LCP computing ---
   preCompute(time);
 
+  int info = 0;
   // --- Call Numerics solver ---
   if (sizeOutput != 0)
   {
-    int info;
     int Nlcp = (int)sizeOutput;
     int iter, titer;
     double err;
+    clock_t startLCPsolve;
 
     method solvingMethod = *(solver->getSolvingMethodPtr());
 
-    SimpleVector zprev(sizeOutput), wprev(sizeOutput);
-    zprev = *z;
-    wprev = *w;
-
-    if (solver->useBlocks())
+    startLCPsolve = clock();
+    if (solver->useBlocks()) // Use solver block
     {
-      startLCPsolve = clock();
-      startLCPuni = clock();
-      info = lcp_solver_block(Mspbl , q->getArray() , &solvingMethod , z->getArray() , w->getArray() , &iter , &titer , &err);
-      timeLCPuni = clock() - startLCPuni;
-
-      if (info != 0)
-      {
-        if (Pascal)
-        {
-          solvingMethod = *(solverBackup->getSolvingMethodPtr());
-          *z = zprev;
-          *w = wprev;
-
-          startLCPuni = clock();
-          info = lcp_solver_block(Mspbl , q->getArray() , &solvingMethod , z->getArray() , w->getArray() , &iter , &titer , &err);
-          timeLCPuni = clock() - startLCPuni;
-
-          LCP_CPUtime_bck += timeLCPuni;
-          nbiterbck += iter;
-        }
-      }
-      else
-      {
-        LCP_CPUtime_std += timeLCPuni;
-        nbiterstd += iter;
-        statsolverstd++;
-      }
-
-      LCP_CPUtime += (clock() - startLCPsolve);
-      statnbsolve++;
+      info = lcp_solver_block(MSparseBlock->getNumericsMatSparse() , q->getArray() , &solvingMethod , z->getArray() , w->getArray() , &iter , &titer , &err);
     }
-    else
-    {
 
-      startLCPsolve = clock();
-      startLCPuni = clock();
+    else // Use classical solver
       info = lcp_solver(M->getArray(), q->getArray(), &Nlcp, &solvingMethod, z->getArray(), w->getArray());
-      timeLCPuni = clock() - startLCPuni;
 
-      if (info != 0)
-      {
-        if (Pascal)
-        {
-          solvingMethod = *(solverBackup->getSolvingMethodPtr());
-          *z = zprev;
-          *w = wprev;
+    CPUtime += (clock() - startLCPsolve);
+    nbIter++;
+    // Remark : the output result, info, from solver is treated when this function is call from Simulation
 
-          startLCPuni = clock();
-          info = lcp_solver(M->getArray(), q->getArray(), &Nlcp, &solvingMethod, z->getArray(), w->getArray());
-          timeLCPuni = clock() - startLCPuni;
-
-          LCP_CPUtime_bck += timeLCPuni;
-          nbiterbck += solvingMethod.lcp.iter;
-        }
-      }
-      else
-      {
-        LCP_CPUtime_std += timeLCPuni;
-        nbiterstd += solvingMethod.lcp.iter;
-        statsolverstd++;
-      }
-
-      LCP_CPUtime += (clock() - startLCPsolve);
-      statnbsolve++;
-
-    }
-
-    if (info != 0)
-    {
-      cout << " Pb LCP !!! " << endl;
-
-      cout << "q = [ ";
-      for (unsigned int i = 0; i < sizeOutput - 1; i++) cout << (*q)(i) << " ; ";
-      cout << (*q)(sizeOutput - 1) << " ]" << endl;
-
-      cout << "z = [ ";
-      for (unsigned int i = 0; i < sizeOutput - 1; i++) cout << (*z)(i) << " ; ";
-      cout << (*z)(sizeOutput - 1) << " ]" << endl;
-
-      cout << "w = [ ";
-      for (unsigned int i = 0; i < sizeOutput - 1; i++) cout << (*w)(i) << " ; ";
-      cout << (*w)(sizeOutput - 1) << " ]" << endl;
-    }
-    // \warning : info value and signification depend on solver type ...
-    check_solver(info);
     // --- Recover the desired variables from LCP output ---
     postCompute();
   }
+  return info;
 }
 
 void LCP::postCompute()
@@ -688,7 +548,6 @@ void LCP::postCompute()
   UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
 
   // y and lambda vectors
-  //  vector< SimpleVector* >  Y, Lambda;
   SiconosVector *lambda, *y;
 
   // === Loop through "active" Unitary Relations (ie present in indexSets[1]) ===
@@ -706,10 +565,6 @@ void LCP::postCompute()
     pos = blocksPositions[*itCurrent];
 
     // Get Y and Lambda for the current Unitary Relation
-
-    //y = static_cast<SimpleVector*>((*itCurrent)-> getYPtr(levelMin));
-    //      lambda = static_cast<SimpleVector*>((*itCurrent)->getLambdaPtr(levelMin));
-
     y = (*itCurrent)->getYPtr(levelMin);
     lambda = (*itCurrent)->getLambdaPtr(levelMin);
     // Copy w/z values, starting from index pos into y/lambda.
@@ -725,18 +580,8 @@ void LCP::display() const
   if (solver->useBlocks())
   {
     cout << "a Sparse Block matrix." << endl;
-    if (Mspbl != NULL)
-    {
-      cout << "The total number of non null blocks is " << Mspbl->nbblocks << endl;
-      cout << "with " <<  Mspbl->size << " blocks in a row." << endl;
-      for (int i = 0; i < Mspbl->size; i++)
-        cout << "- size of the diagonal square block number " << i << ": " << Mspbl->blocksize[i] << endl;
-      for (int i = 0; i < Mspbl->nbblocks; i++)
-      {
-        cout << "- Row index of the  block " << i << ": " << Mspbl->RowIndex[i] << endl;
-        cout << "- Column index of the  block " << i << ": " << Mspbl->ColumnIndex[i] << endl;
-      }
-    }
+    if (MSparseBlock != NULL)
+      MSparseBlock->display();
     else cout << "M is NULL" << endl;
   }
   else
@@ -783,23 +628,6 @@ LCP* LCP::convert(OneStepNSProblem* osnsp)
 {
   LCP* lcp = dynamic_cast<LCP*>(osnsp);
   return lcp;
-}
-
-void LCP::printStat()
-{
-  cout << " CPU time for LCP solving : " << LCP_CPUtime / (double)CLOCKS_PER_SEC << endl;
-  cout << " Percentage of LCP solved with standard solver ( " << solver->getSolverAlgorithmName() << " ) = ";
-  cout << (100.0 * statsolverstd) / (double)statnbsolve << endl;
-  if (statsolverstd)
-  {
-    cout << " CPU time per LCP standard solving : " << LCP_CPUtime_std / (statsolverstd * (double)CLOCKS_PER_SEC) << endl;
-    cout << " Iterations per LCP standard solving : " << (double)(nbiterstd) / (double)(statsolverstd) << endl;
-  }
-  if (statnbsolve - statsolverstd)
-  {
-    cout << " CPU time per LCP backup solving : " << LCP_CPUtime_bck / ((statnbsolve - statsolverstd) * (double)CLOCKS_PER_SEC) << endl;
-    cout << " Iterations per LCP backup solving : " << (double)(nbiterbck) / (double)(statnbsolve - statsolverstd) << endl;
-  }
 }
 
 

@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
 {
 
   double t0 = 0.0;
-  double T = 5e-3;        // Total simulation time
+  double T = 5.0e-3;        // Total simulation time
   double h_step = 1.0e-6;  // Time step
   double Lvalue = 1e-2;   // inductance
   double Cvalue = 1e-6;   // capacitance
@@ -132,7 +132,6 @@ int main(int argc, char* argv[])
 
     int k = 0;
     int N = TiDiscRLCD->getNSteps(); // Number of time steps
-
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
     SimpleMatrix dataPlot(N, 7);

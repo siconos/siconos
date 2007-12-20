@@ -79,10 +79,9 @@ void lcp_rpgs(int *nn , double *M , double *q , double *z , double *w , int *inf
   int n, incx, incy;
   int i, iter;
   int itermax, ispeak;
-  double qs, err, den, zi, wi;
+  double qs, err, den, zi;
   double tol, omega, rho;
   double *diag;
-  double a1, b1;
   double Mii, ziprev;
 
   /*  double *buffer_errors;

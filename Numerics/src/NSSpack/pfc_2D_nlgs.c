@@ -35,15 +35,16 @@ w - M z = q\\
 
 */
 
-/*!\fn  void pfc_2D_nlgs( int *nn , double *vec , double *q , double *z , double *w , int *info,
+/*!\fn  void pfc_2D_nlgs( int n, double *vec , double *q , double *z , double *w , double *mu, int *info,
       int *iparamPFC , double *dparamPFC )
 
 
    pfc_2D_gsnl is a specific nlgs (Non Linear Gauss Seidel ) solver for primal contact problem with friction in 2D case.
 
+   \param nc          On enter an integer, the number of contacst. The dimension of the system is n=2*nc.
    \param vec         On enter a (nn\f$\times\f$nn)-vector of doubles containing the components of the double matrix with a fortran90 allocation.
    \param qq          On enter a nn-vector of doubles containing the components of the second member.
-   \param nn          On enter an integer, the dimension of the second member.
+   \param mu          On enter, the vector of friction coefficients (mu[i] corresponds to contact i)
    \param iparamPFC   On enter/return a vector of integers:\n
                        - iparamPFC[0] = on enter, the maximum number of iterations allowed,
                        - iparamPFC[1] = on enter, the parameter which represents the output log identifiant:\n
@@ -52,9 +53,8 @@ w - M z = q\\
            - iparamPFC[2] =  on return, the number of iterations performed by the algorithm.\n
 
   \param dparamPFC    On enter/return a vector of doubles:\n
-                       - dparamPFC[0] = on enter, a positive double which represents the friction coefficient,
-                       - dparamPFC[1] = on enter, a positive double which represents the tolerance required,
-                       - dparamPFC[2] = on return, a positive double which represents the residu.
+                       - dparamPFC[0] = on enter, a positive double which represents the tolerance required,
+                       - dparamPFC[1] = on return, a positive double which represents the residu.
 
 
    \param z           On return a nn-vector of doubles, the solution of the problem.
@@ -81,15 +81,15 @@ w - M z = q\\
 #include "LA.h"
 
 
-void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info, int *iparamPFC , double *dparamPFC)
+void pfc_2D_nlgs(int nc , double *vec , double *q , double *z , double *w, double *mu, int *info, int *iparamPFC , double *dparamPFC)
 {
 
   int i, j, k, iter, maxit;
-  int n = *nn, nc = n / 2;
+  int n = 2 * nc;
   int ispeak, it_end;
   int  incx, incy;
 
-  double errmax, alpha, beta, mu;
+  double errmax, alpha, beta;
   double *y, res;
   double normr, eps, avn, avt, det, gplus, gmoins;
   double apn, apt, zn , zt, den1, num1;
@@ -98,12 +98,11 @@ void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
   ispeak       = iparamPFC[1];
 
 
-  mu           = dparamPFC[0];
-  errmax       = dparamPFC[1];
+  errmax       = dparamPFC[0];
 
 
   iparamPFC[2] = 0;
-  dparamPFC[2] = 0.0;
+  dparamPFC[1] = 0.0;
 
 
   iter         = 0;
@@ -217,7 +216,7 @@ void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
 
         }
 
-        if ((z[2 * i] >= 0.0) && ((fabs(z[2 * i + 1]) - mu * z[2 * i]) <= 0.0))
+        if ((z[2 * i] >= 0.0) && ((fabs(z[2 * i + 1]) - mu[i] * z[2 * i]) <= 0.0))
         {
 
           /*  printf("Stick status \n");*/
@@ -229,7 +228,7 @@ void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
           w[2 * i]   = 0.0;
 
 
-          gplus  = vec[2 * i + 2 * i * n] + mu * vec[(2 * i) + (2 * i + 1) * n];
+          gplus  = vec[2 * i + 2 * i * n] + mu[i] * vec[(2 * i) + (2 * i + 1) * n];
 
 
           if (fabs(gplus) < 1e-12)
@@ -247,11 +246,11 @@ void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
           else
           {
 
-            w[2 * i + 1] = -zt + (zn / gplus) * (vec[2 * i + (2 * i + 1) * n] + mu * vec[(2 * i + 1) + (2 * i + 1) * n]);
+            w[2 * i + 1] = -zt + (zn / gplus) * (vec[2 * i + (2 * i + 1) * n] + mu[i] * vec[(2 * i + 1) + (2 * i + 1) * n]);
 
 
             z[2 * i]   = zn / gplus;
-            z[2 * i + 1] = mu * z[2 * i];
+            z[2 * i + 1] = mu[i] * z[2 * i];
 
           }
 
@@ -266,7 +265,7 @@ void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
 
             w[2 * i]   = 0.0;
 
-            gmoins = vec[2 * i + 2 * i * n] - mu * vec[(2 * i) + (2 * i + 1) * n];
+            gmoins = vec[2 * i + 2 * i * n] - mu[i] * vec[(2 * i) + (2 * i + 1) * n];
 
 
             if (fabs(gmoins) < 1e-12)
@@ -285,10 +284,10 @@ void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
             {
 
 
-              w[2 * i + 1] = -zt + (zn / gmoins) * (vec[2 * i + (2 * i + 1) * n] - mu * vec[(2 * i + 1) + (2 * i + 1) * n]);
+              w[2 * i + 1] = -zt + (zn / gmoins) * (vec[2 * i + (2 * i + 1) * n] - mu[i] * vec[(2 * i + 1) + (2 * i + 1) * n]);
 
               z[2 * i]   = zn / gmoins;
-              z[2 * i + 1] = -mu * z[2 * i];
+              z[2 * i + 1] = -mu[i] * z[2 * i];
             }
 
             /* printf("Slip- status\n");*/
@@ -331,7 +330,7 @@ void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
 
 
   iparamPFC[2] = it_end;
-  dparamPFC[2] = res;
+  dparamPFC[1] = res;
 
 
 

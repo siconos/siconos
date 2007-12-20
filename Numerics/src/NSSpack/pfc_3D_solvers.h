@@ -25,6 +25,8 @@
   Last Modifications : Mathieu Renouf , Pascal Denoyelle, Franck Perignon
 */
 
+#include "NSSTools.h"
+
 /**@defgroup group6 3D PFC (Three-dimensional Primal Frictional Contact)
    @{
 */
@@ -63,7 +65,6 @@ pfc_3D_projection.c
 
 \param name       name of the solver.
 \param itermax    maximum number of iterations.
-\param mu         friction coefficient.
 \param tol        convergence criteria value.
 \param k_latin    search direction of the latin metod.
 \param chat       output boolean ( 0 = no output log ).
@@ -81,7 +82,6 @@ typedef struct
   int    local_solver;
   int    local_itermax;
   double local_tol;
-  double mu;
   double k_latin;
   int    chat;
   char   normType[64];
@@ -108,25 +108,46 @@ extern "C" {
   /************ PFC_3D Related Functions and Definitions ******************************* */
 
   /** conjugate-projected gradient pfc3D solver */
-  void pfc_3D_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
+  void pfc_3D_cpg(int, double *vec , double *q , double *z , double *w , double *mu, int *info , int *iparamLCP , double *dparamLCP);
 
   /** Non linear Gauss-Seidel pfc3D solver */
-  void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
+  void pfc_3D_nlgs(int, double *vec , double *q , double *z , double *w , double* mu, int *info , int *iparamLCP , double *dparamLCP);
 
   /** NLGS-Newton pfc3D solver */
-  void pfc_3D_nlgsnewton(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
+  void pfc_3D_nlgsnewton(int, double *vec , double *q , double *z , double *w , double *mu, int *info , int *iparamLCP , double *dparamLCP);
 
   /** NSGS-Newton pfc3D solver */
-  void pfc_3D_nsgs(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
+  void pfc_3D_nsgs(int, double *vec , double *q , double *z , double *w , double *mu,  int *info , int *iparamLCP , double *dparamLCP);
 
   /** NSGS-Newton pfc3D solver new (temporary) version */
-  void pfc_3D_nsgs_new(int *nn, double *M , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
+  void pfc_3D_nsgs_new(int, double *M , double *q , double *z , double *w , double *mu, int *info , int *iparamLCP , double *dparamLCP);
 
   /** Newton pfc3D solver */
   void pfc_3D_newton(int n , double *C , double *b , double *zz , double *ww , double mu , pfc3D_fPtr* Compute_G, pfc3D_fPtr* Compute_JacG, double *param1, double *param2, double *param3, int *iparam_local , double *dparam_local);
 
   /** projection-type pfc3D solver */
   void pfc_3D_projection(int n , double *C , double *b , double *zz , double *ww , double mu , pfc3D_fPtr* Compute_G, pfc3D_fPtr* Compute_JacG, double *param1, double *param2, double *param3, int *iparam_local , double *dparam_local);
+
+  /** NSGS pfc3D solver, sparse block storage for M. */
+  void pfc_3D_nsgs_block(int, SparseBlockStructuredMatrix*, double*, double *, double*, double*, int*, int*, double*);
+
+  /** NSGS pfc3D solver, sparse block storage for M. */
+  void pfc_3D_nsgs_block2(int, SparseBlockStructuredMatrix*, double*, double *, double*, double*, int*, int*, double*);
+
+  /** Function to check convergence after PFC computation */
+  int filter_result_pfc_block(int, int, double*, SparseBlockStructuredMatrix *, double* , double*, pfc3D_fPtr*, double*, int*, double*);
+
+  /** Function to check convergence after PFC computation */
+  int filter_result_pfc_block2(int, int, double*, SparseBlockStructuredMatrix *, double* , double*, pfc3D_fPtr*, double*, int*, double*, double*);
+
+  /** Function to check convergence after PFC computation */
+  int filter_result_pfc(int, int, double*, double*, double* , double*, pfc3D_fPtr*, double*, int*, double*, double**);
+
+  /** Compute error function */
+  void NCP_compute_error(int, double*, double*, double*, int, double*, double*);
+
+  /** Compute error function */
+  void NCP_block_compute_error(int, SparseBlockStructuredMatrix*, double*, double*, int, double*, double*);
 
 #ifdef __cplusplus
 }

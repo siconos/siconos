@@ -59,7 +59,7 @@
 #include <time.h>
 #include "pfc_3D_solvers.h"
 
-void pfc_3D_projection(int n , double *C , double *b , double *zz , double *ww , double coef , pfc3D_fPtr* Compute_G, pfc3D_fPtr* Compute_JacG, double *param1, double *param2, double *param3, int *iparam_local , double *dparam_local)
+void pfc_3D_projection(int n , double *C , double *b , double *zz , double *ww , double coef , pfc3D_fPtr* Compute_G, pfc3D_fPtr* Compute_JacG, double* param1, double *param2, double *param3, int *iparam_local , double *dparam_local)
 {
 
   double mrn, num, coef2;

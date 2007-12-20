@@ -21,13 +21,13 @@
 
    This file allows the formulation in the condensed form of a 2D contact problem with friction (DFC_2D).\n
 
-  \fn void dfc_2D2cond_2D (int *dim_F1, double *mumu, double *K1, double *F1, int *ddl_n, int * ddl_tt,
+  \fn void dfc_2D2cond_2D (int *dim_F1, double *mu, double *K1, double *F1, int *ddl_n, int * ddl_tt,
                 int *dim_nc, int *ddl_d, int *dim_d, double * J1, double *MM, double *q)
 
 
    \param dim_F1    On enter a pointer over integers, the dimension of the DFC_2D problem,
 
-   \param mumu      On enter a pointer over doubles, the friction coefficient,
+   \param mu      On enter a pointer over doubles, the friction coefficient,
 
    \param K1        On enter a pointer over doubles containing the components of the
                      rigidity matrix with a fortran90 storage,
@@ -72,7 +72,7 @@ void sortsn_(int *ddl_i, int *sort, int *n);
 
 /*void diffns( int *taille_F1,int * vecF1, int *taille_sort,int * sort, int *taille_i, int *vec_i);*/
 
-void dfc_2D2cond_2D(int *dim_F1, double *mumu, double *K1, double *F1, int *ddl_n, int * ddl_tt, int *dim_nc, int *ddl_d, int *dim_d, double * J1, double *MM, double *q)
+void dfc_2D2cond_2D(int *dim_F1, double *mu, double *K1, double *F1, int *ddl_n, int * ddl_tt, int *dim_nc, int *ddl_d, int *dim_d, double * J1, double *MM, double *q)
 {
 
 

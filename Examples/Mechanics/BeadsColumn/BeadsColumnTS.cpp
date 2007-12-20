@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
   {
 
     // User-defined main parameters
-    unsigned int dsNumber = 500;      // the number of dynamical systems
+    unsigned int dsNumber = 200;      // the number of dynamical systems
     unsigned int nDof = 3;           // degrees of freedom for beads
     double increment_position = 1;   // initial position increment from one DS to the following
     double increment_velocity = 0;   // initial velocity increment from one DS to the following
@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
     double position_init = 5.5;     // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
     double R = 0.1;                  // balls radius
-    string solverName = "Lemke";     // solver algorithm used for non-smooth problem
+    string solverName = "PGS";     // solver algorithm used for non-smooth problem
 
     // ================= Creation of the model =======================
 
@@ -186,8 +186,9 @@ int main(int argc, char* argv[])
     // That means that all systems in allDS have the same theta value.
 
     // -- OneStepNsProblem --
-    LCP * osnspb = new LCP(s, "LCP", solverName, 10001, 0.0001);
-    //    osnspb->setisMSparseBlock(true);
+    LCP * osnspb = new LCP(s, "LCP", solverName, 10000, 0.01, 0);
+    osnspb->getSolverPtr()->setSolverBlock(true);
+
     // =========================== End of model definition =================================
     // ================================= Computation =================================
     // --- Simulation initialization ---
@@ -213,7 +214,7 @@ int main(int argc, char* argv[])
       if ((*it)->getNumber() == 9)
         break;
     }
-
+    double cpuTime = 0;
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
     boost::timer tt;
@@ -224,21 +225,21 @@ int main(int argc, char* argv[])
       //   if (!(div(k,10).rem))  cout <<"Step number "<< k << "\n";
 
       // solve ...
-
       try
       {
         s->computeOneStep();
+        cpuTime += osnspb-> getCPUtime();
+        //      osnspb-> display();
       }
       catch (SiconosException e)
       {
         cout << e.report() << endl;
         osnspb-> display();
-        ioMatrix io("M.dat", "ascii");
-        io.write(osnspb->getM(), "noDim");
-        cout << k << endl;
-        ioVector io2("q.dat", "ascii");
-        io2.write(osnspb->getQ(), "noDim");
-        cout << k << endl;
+        return 0;
+        ///        ioMatrix io("M.dat", "ascii");
+        //       io.write(osnspb->getM(),"noDim");       cout << k << endl;
+        //       ioVector io2("q.dat", "ascii");
+        //       io2.write(osnspb->getQ(),"noDim");      cout << k << endl;
       }
       // --- Get values to be plotted ---
       dataPlot(k, 0) = s->getNextTime();
@@ -256,7 +257,7 @@ int main(int argc, char* argv[])
 
     }
     cout << "End of computation - Number of iterations done: " << k - 1 << endl;
-    cout << "Computation Time " << tt.elapsed()  << endl;
+    cout << "Computation Time " << tt.elapsed()  << "( " << cpuTime << " )" << endl;
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
     ioMatrix io("result.dat", "ascii");

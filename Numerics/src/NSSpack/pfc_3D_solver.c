@@ -32,21 +32,22 @@
  *    \right.
  *   \f$
  *
- *  here M is an (3n x 3n) matrix, q, z and w 3n-vectors.\n
+ *  here M is an (n x n) matrix, q, z and w n-vectors.\n
  *
  *  This system of equations and inequalities is solved thanks to @ref pfc_3D solvers.
  *  The routine's call is due to the function pfc_3D_solver.c.
  *
- *  \fn int pfc_3D_solver( double *vec , double *q ,int *n , method *pt , double *z , double *w )
+ *  \fn int pfc_3D_solver( int nc, double *vec, double *q ,method *pt , double *z , double *w, double *mu )
  *
  *  \brief pfc_3D_solver is a generic interface allowing the call of one of the PFC solvers.
  *
+ *  \param nc   the number of contacts. The dimension of the system is 3*nc.
  *  \param vec  components of the double matrix with a fortran allocation.
  *  \param q    the components of the second member of the system.
- *  \param 3*n  the dimension of the second member.
  *  \param pt   structure
  *  \param z    the solution of the problem.
  *  \param w    the complementarity solution of the problem.
+ *  \param mu   the list of friction coefficients. mu[i] corresponds to contact number i.
  *
  *  \return     result (0 is successful otherwise 1).
  *
@@ -62,20 +63,33 @@
 #include "NSSpack.h"
 #endif
 
-int pfc_3D_solver(double *vec , double *q , int *n , method *pt , double *z , double *w)
+int pfc_3D_solver(int nc, double *vec , double *q , method *pt , double *z , double *w, double *mu)
 {
   /* Solver name */
-  char pfckey1[10] = "NLGS", pfckey2[10] = "CPG", pfckey3[15] = "NSGS";
+  char pfckey1[10] = "NLGS", /*pfckey2[10]="CPG",*/ pfckey3[15] = "NSGS";
 
-  int i, info;
-  int nb = 7;
-  int     iparamLCP[nb];
-  double  dparamLCP[nb];
+  int info;
+  /*
+   *  iparam[0] = itermax, the maximum number of iterations allowed.
+   *  iparam[1] = ispeak, the output log identifiant\n
+   *                       0 - no output\n
+   *                       1 - active screen output\n
+   *  iparam[2] = the number of iterations performed by the algorithm.
+   *  iparam[3] = local value for itermax
+   *  iparam[4] = local number of iterations perfomed
+   *  iparam[5] = local formulation
+   *  iparam[6] = local solver
+   */
+  int iparam[7];
+  /*
+   *  dparam[0] = tol     Input unchanged parameter which represents the tolerance required.
+   *  dparam[1] = error   Output modified parameter which returns the final error value.
+   *  dparam[2] = local tolerance
+   *  dparam[3] = local error
+   */
+  double  dparam[4];
 
-  clock_t t1, t2;
-
-  for (i = 0 ; i < nb ; ++i) iparamLCP[i] = 0;
-  for (i = 0 ; i < nb ; ++i) dparamLCP[i] = 0.0;
+  clock_t t1;
 
   info    = -1;
   /*   printf("---------------- contact points %i -----------------\n",*n);  */
@@ -84,59 +98,61 @@ int pfc_3D_solver(double *vec , double *q , int *n , method *pt , double *z , do
   if (strcmp(pt->pfc_3D.name , pfckey1) == 0)
   {
 
-    iparamLCP[0] = pt->pfc_3D.itermax;
-    iparamLCP[1] = pt->pfc_3D.chat;
-    dparamLCP[0] = pt->pfc_3D.mu;
-    dparamLCP[1] = pt->pfc_3D.tol;
+    iparam[0] = pt->pfc_3D.itermax;
+    iparam[1] = pt->pfc_3D.chat;
+    dparam[0] = pt->pfc_3D.tol;
 
-    pfc_3D_nlgs(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+    pfc_3D_nlgs(nc, vec , q , z , w , mu, &info , iparam , dparam);
 
-    pt->pfc_3D.iter = iparamLCP[2];
-    pt->pfc_3D.err  = dparamLCP[2];
+    pt->pfc_3D.iter = iparam[2];
+    pt->pfc_3D.err  = dparam[1];
 
   }
   /*
   else if( strcmp( pt->pfc_3D.name , pfckey2 ) == 0 ){
 
-    iparamLCP[0] = pt->pfc_3D.itermax;
-    iparamLCP[1] = pt->pfc_3D.chat;
-    dparamLCP[0] = pt->pfc_3D.mu;
-    dparamLCP[1] = pt->pfc_3D.tol;
+    iparam[0] = pt->pfc_3D.itermax;
+    iparam[1] = pt->pfc_3D.chat;
+    dparam[0] = pt->pfc_3D.tol;
 
-    pfc_3D_cpg( n , vec , q , z , w , &info , iparamLCP , dparamLCP );
+    pfc_3D_cpg(nc, vec , q , z , w , mu, &info , iparam , dparam );
 
-    pt->pfc_3D.iter = iparamLCP[2];
-    pt->pfc_3D.err  = dparamLCP[2];
+    pt->pfc_3D.iter = iparam[2];
+    pt->pfc_3D.err  = dparam[1];
 
   }
   */
   else if (strcmp(pt->pfc_3D.name , pfckey3) == 0)
   {
 
-    iparamLCP[0] = pt->pfc_3D.itermax;
-    iparamLCP[1] = pt->pfc_3D.chat;
-    dparamLCP[0] = pt->pfc_3D.mu;
-    dparamLCP[1] = pt->pfc_3D.tol;
+    iparam[0] = pt->pfc_3D.itermax;
+    iparam[1] = pt->pfc_3D.chat;
+    dparam[0] = pt->pfc_3D.tol;
 
-    iparamLCP[3] = pt->pfc_3D.local_itermax;
-    dparamLCP[3] = pt->pfc_3D.local_tol;
+    /* Local tolerance and max number of iterations are set to global ones.*/
+    iparam[3] = iparam[0];
+    dparam[2] = dparam[0];
+    /* \todo: set them in Kernel */
+    /*     iparam[3] = pt->pfc_3D.local_itermax; */
+    /*     dparam[2] = pt->pfc_3D.local_tol; */
 
-    iparamLCP[5] = pt->pfc_3D.local_formulation;   /* ca n'a pas de sens car on ne peut pas les toucher de l'exterieur */
-    iparamLCP[6] = pt->pfc_3D.local_solver;
+    iparam[5] = pt->pfc_3D.local_formulation;
+    iparam[6] = pt->pfc_3D.local_solver;
+    /* \todo: set [5] and [6] in Kernel */
 
-    pfc_3D_nsgs(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+    pfc_3D_nsgs(nc, vec , q , z , w , mu, &info , iparam , dparam);
 
-    pt->pfc_3D.iter = iparamLCP[2];
-    pt->pfc_3D.err  = dparamLCP[2];
-
-    pt->pfc_3D.local_err = dparamLCP[4] ;
-    pt->pfc_3D.local_iter = iparamLCP[4] ;
-
+    /* Get output informations: local/global number of iterations and errors. */
+    pt->pfc_3D.iter = iparam[2];
+    pt->pfc_3D.err  = dparam[1];
+    pt->pfc_3D.local_err = dparam[3] ;
+    pt->pfc_3D.local_iter = iparam[4] ;
+    /** Note: at the time the last computed value of local number of iterations and local error are saved in i/dparam[4].*/
   }
 
   else printf("Warning : Unknown solving method : %s\n", pt->pfc_3D.name);
 
-  t2 = clock();
+  /*  t2 = clock(); */
   /* printf("%.4lf seconds of processing\n", (t2-t1)/(double)CLOCKS_PER_SEC); */
   /* printf("%.4lf \n", (t2-t1)/(double)CLOCKS_PER_SEC); */
 

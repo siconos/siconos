@@ -27,9 +27,10 @@ Relay::Relay(OneStepNSProblemXML* osnspbxml, Simulation * newStrat):
 Relay::~Relay()
 {}
 
-void Relay::compute(double time)
+int Relay::compute(double)
 {
   RuntimeException::selfThrow("Relay compute: not yet implemented.");
+  return 1;
 }
 
 void Relay::saveNSProblemToXML()

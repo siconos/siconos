@@ -40,18 +40,24 @@
 #include <time.h>
 #include <NSSpack.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
-/* Compute function G */
-void Compute_G_AC(int m, double *G, double *x , double *C, double *y, double *b, double *param1, double *param2, double *param3, double rn, double rt, double coef);
+  /* Compute function G */
+  void Compute_G_AC(int m, double *G, double *x , double *C, double *y, double *b, double *param1, double *param2, double *param3, double rn, double rt, double coef);
 
-/* Compute Jacobian of function G */
-void Compute_JacG_AC(int m, double *JacG , double *x ,  double *C , double *y, double *b , double *param1, double *param2, double *param3, double rn, double rt, double coef);
-
-
-/*  Inverse Matrix 3x3  */
-void matrix_inv3(double *a, double *b);
+  /* Compute Jacobian of function G */
+  void Compute_JacG_AC(int m, double *JacG , double *x ,  double *C , double *y, double *b , double *param1, double *param2, double *param3, double rn, double rt, double coef);
 
 
-/* Lineserach */
-void Linesearch_AC(int n, double *zz, double *ww, double *www, double *b, double *C, double *param1, double *param2, double *param3, double an, double at, double mu, double err1);
+  /*  Inverse Matrix 3x3  */
+  void matrix_inv3(double *a, double *b);
+
+
+  /* Lineserach */
+  void Linesearch_AC(int n, double *zz, double *ww, double *www, double *b, double *C, double *param1, double *param2, double *param3, double an, double at, double mu, double err1);
+#ifdef __cplusplus
+}
+#endif

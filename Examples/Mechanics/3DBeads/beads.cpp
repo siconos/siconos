@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
 
     // User-defined main parameters
 
-    unsigned int DSNUMBER = 2;       // the number of dynamical systems
+    unsigned int DSNUMBER = 5;       // the number of dynamical systems
 
     unsigned int nDof = 6;            // degrees of freedom for beads
 
@@ -176,22 +176,31 @@ int main(int argc, char* argv[])
     //     (*(q0[18]))(0)= -0.35;   (*(q0[18]))(1)= 0.35;  (*(q0[18]))(2)=  0.1;
     //     (*(q0[19]))(0)= -0.35;   (*(q0[19]))(1)=-0.35;  (*(q0[19]))(2)=  0.1;
 
-    // // 25*etage beads in cube
-    //     unsigned int k;
-    //     unsigned int cote  = 5;
-    //     unsigned int etage  = 2;
-    //     for (j=0;j<etage;j++){
-    //       for (k=0;k<cote;k++) {
-    //  for (i=0;i<cote;i++) {
-    //    if (j % 2 == 0){
-    //      (*(q0[k*cote+i+j*cote*cote]))(0) = -0.6 + 3*k*R; (*(q0[k*cote+i+j*cote*cote]))(1) = -0.6 + 3*i*R; (*(q0[k*cote+i+j*cote*cote]))(2) = 0.2+(2*j)*R;
-    //    }
-    //    else{
-    //      (*(q0[k*cote+i+j*cote*cote]))(0) = -0.6 + 3*k*R; (*(q0[k*cote+i+j*cote*cote]))(1) = -0.6 + 3*i*R+R/4;(*(q0[k*cote+i+j*cote*cote]))(2) = 0.2+(2*j)*R;
-    //    }
-    //  }
-    //       }
-    //     }
+    // 25*etage beads in cube
+    unsigned int k;
+    unsigned int cote  = 5;
+    unsigned int etage  = 4;
+    for (j = 0; j < etage; j++)
+    {
+      for (k = 0; k < cote; k++)
+      {
+        for (i = 0; i < cote; i++)
+        {
+          if (j % 2 == 0)
+          {
+            (*(q0[k * cote + i + j * cote * cote]))(0) = -0.6 + 3 * k * R;
+            (*(q0[k * cote + i + j * cote * cote]))(1) = -0.6 + 3 * i * R;
+            (*(q0[k * cote + i + j * cote * cote]))(2) = 0.2 + (2 * j) * R;
+          }
+          else
+          {
+            (*(q0[k * cote + i + j * cote * cote]))(0) = -0.6 + 3 * k * R;
+            (*(q0[k * cote + i + j * cote * cote]))(1) = -0.6 + 3 * i * R + R / 4;
+            (*(q0[k * cote + i + j * cote * cote]))(2) = 0.2 + (2 * j) * R;
+          }
+        }
+      }
+    }
 
     //     for (i=0;i<DSNUMBER;i++)
     //       (*(v0[i]))(2) = -1.;
@@ -526,7 +535,7 @@ int main(int argc, char* argv[])
   }
   catch (...)
   {
-    cout << "Exception caught in \'sample/MultiBeadsColumn Init\'" << endl;
+    cout << "Exception caught in beads.cpp" << endl;
   }
   cout << "Computation Time: " << time.elapsed()  << endl << endl;
 }

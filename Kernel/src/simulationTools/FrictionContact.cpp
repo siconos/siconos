@@ -32,7 +32,7 @@ using namespace std;
 
 // xml constructor
 FrictionContact::FrictionContact(const string pbType, OneStepNSProblemXML* osNsPbXml, Simulation* newSimu):
-  OneStepNSProblem(pbType, osNsPbXml, newSimu), w(NULL), z(NULL), M(NULL), q(NULL),
+  OneStepNSProblem(pbType, osNsPbXml, newSimu), w(NULL), z(NULL), M(NULL), q(NULL), mu(NULL),
   isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), Mspbl(NULL)
 {
   FrictionContactXML * xmllcp = (static_cast<FrictionContactXML*>(osNsPbXml));
@@ -62,13 +62,13 @@ FrictionContact::FrictionContact(const string pbType, OneStepNSProblemXML* osNsP
 
 // Constructor from a set of data
 FrictionContact::FrictionContact(const string pbType, Simulation* newSimu, const string newId):
-  OneStepNSProblem(pbType, newSimu, newId), w(NULL), z(NULL), M(NULL), q(NULL),
+  OneStepNSProblem(pbType, newSimu, newId), w(NULL), z(NULL), M(NULL), q(NULL), mu(NULL),
   isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
 {}
 
 // Constructor from a set of data
 FrictionContact::FrictionContact(const string pbType, Solver*  newSolver, Simulation* newSimu, const string newId):
-  OneStepNSProblem(pbType, newSimu, newId, newSolver), w(NULL), z(NULL), M(NULL), q(NULL),
+  OneStepNSProblem(pbType, newSimu, newId, newSolver), w(NULL), z(NULL), M(NULL), q(NULL), mu(NULL),
   isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), Mspbl(NULL)
 {}
 
@@ -86,6 +86,8 @@ FrictionContact::~FrictionContact()
   Mspbl = NULL;
   if (isQAllocatedIn) delete q;
   q = NULL;
+  if (mu != NULL) delete mu;
+  mu = NULL;
 }
 
 // Setters
@@ -197,13 +199,6 @@ void FrictionContact::initialize()
   // General initialize for OneStepNSProblem
   OneStepNSProblem::initialize();
 
-  // get topology
-  Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
-
-
-  // The maximum size of the LCP, ie the number of possible scalar constraints declared in the topology.
-  unsigned int maxSize = topology->getNumberOfConstraints();
-
   // Memory allocation for w, M, z and q
   if (w == NULL)
   {
@@ -248,9 +243,27 @@ void FrictionContact::initialize()
   w->zero();
   z->zero();
 
-  // if all relative degrees are equal to 0 or 1
-  if (topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty())
-    assembleM();
+  // if all relative degrees are equal to 0 or 1 and if if we do not use a solver block
+  // get topology
+  Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+
+  if (topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty() && !solver->useBlocks())
+  {
+    // computeSizeOutput and updateBlocks were already done in OneStepNSProblem::initialize
+    if (sizeOutput != 0)
+      assembleM();
+  }
+
+  // Fill vector of friction coefficients
+  // For each Unitary relation in index set 0, we get the corresponding non smooth law and its mu.
+  UnitaryRelationsSet* I0 = topology->getIndexSet0Ptr();
+  ConstUnitaryRelationsIterator itUR;
+  unsigned int i = 0;
+  mu = new SimpleVector(I0->size());
+  for (itUR = I0->begin(); itUR != I0->end(); ++itUR)
+    (*mu)(i++) = static_cast<NewtonImpactFrictionNSL*>((*itUR)->getInteractionPtr()->getNonSmoothLawPtr())->getMu();
+
+
 }
 
 void FrictionContact::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
@@ -423,40 +436,6 @@ void FrictionContact::preCompute(const double time)
     }
     w->zero();
     z->zero();
-  }
-}
-
-void FrictionContact::compute(const double time)
-{
-  // --- Prepare data for FrictionContact2D computing ---
-  preCompute(time);
-
-  // --- Call Numerics solver ---
-  if (sizeOutput != 0)
-  {
-
-    int info = 0;
-    int SizeOutput = (int)sizeOutput;
-    // get solving method and friction coefficient value.
-    method solvingMethod = *(solver->getSolvingMethodPtr());
-    Interaction * currentInteraction = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0);
-    // call Numerics method for 2D or 3D problem:
-    if (nspbType == "FrictionContact2D")
-    {
-      solvingMethod.pfc_2D.mu = static_cast<NewtonImpactFrictionNSL*>(currentInteraction->getNonSmoothLawPtr())->getMu();
-      info = pfc_2D_solver(M->getArray(), q->getArray(), &SizeOutput, &solvingMethod  , z->getArray(), w->getArray());
-    }
-    else if (nspbType == "FrictionContact3D")
-    {
-      SizeOutput = SizeOutput / 3; // in pfc_3D, SizeOutput is the number of contact points.
-      solvingMethod.pfc_3D.mu = static_cast<NewtonImpactFrictionNSL*>(currentInteraction->getNonSmoothLawPtr())->getMu();
-      info = pfc_3D_solver(M->getArray(), q->getArray(), &SizeOutput, &solvingMethod  , z->getArray(), w->getArray());
-    }
-    else
-      RuntimeException::selfThrow("FrictionContact::compute, unknown or unconsistent non smooth problem type: " + nspbType);
-    check_solver(info);
-    // --- Recover the desired variables from FrictionContact2D output ---
-    postCompute();
   }
 }
 

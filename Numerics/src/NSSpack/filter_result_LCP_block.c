@@ -32,12 +32,9 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "LA.h"
 #include <math.h>
 #include "NSSpack.h"
+#include "LA.h"
 
 int filter_result_LCP_block(SparseBlockStructuredMatrix *blmat, double *q , double *z , double tol, int chat, double *w)
 {

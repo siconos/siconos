@@ -3,7 +3,7 @@ OBJPATH = lib$(SYSTYPE)
 
 ifeq ($(SYSTYPE), Linux)
 ifndef SCIDIR
-  SCIDIR=/usr/lib/scilab-4.1.2
+  SCIDIR=/usr/lib/scilab-4.1.1
 endif
 CC = gcc
 CFLAGS = -O3 -Wall -I$(SCIDIR)/routines

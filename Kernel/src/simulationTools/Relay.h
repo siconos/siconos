@@ -53,9 +53,10 @@ public:
   ~Relay();
 
   /** make the computation so solve the NS problem
-  *  param double : current time
+  *  \param double : current time
+  *  \return int, information about the solver convergence.
   */
-  void compute(double);
+  int compute(double);
 
   /** copy the data of the OneStepNSProblem to the XML tree
   *  \exception RuntimeException
