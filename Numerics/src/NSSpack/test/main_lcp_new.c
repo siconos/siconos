@@ -59,7 +59,12 @@
 #include "LA.h"
 
 #define BAVARD
+#define PATH_SOLVER
 
+#ifdef PATH_SOLVER
+const unsigned short int *__ctype_b;
+const __int32_t *__ctype_tolower ;
+#endif /*PATH_SOLVER*/
 /*
  ******************************************************************************
  */
@@ -70,12 +75,12 @@ void test_lcp_series(int n , double *vec , double *q)
   int i, j;
   int nonsymmetric;
   int incx = 1, incy = 1;
-  int info1 = -1, info2 = -1, info3 = -1, info4 = -1, info5 = -1, info6 = -1, info7 = -1, info8 = -1, info9 = -1;
+  int info1 = -1, info2 = -1, info3 = -1, info4 = -1, info5 = -1, info6 = -1, info7 = -1, info8 = -1, info9 = -1, info10 = -1;
 
   double comp, diff, alpha, beta;
 
-  double *z1, *z2, *z3, *z4, *z5, *z6, *z7, *z8, *z9;
-  double *w1, *w2, *w3, *w4, *w5, *w6, *w7, *w8, *w9;
+  double *z1, *z2, *z3, *z4, *z5, *z6, *z7, *z8, *z9, *z10;
+  double *w1, *w2, *w3, *w4, *w5, *w6, *w7, *w8, *w9, *w10;
 
   char NT = 'N';
 
@@ -97,6 +102,8 @@ void test_lcp_series(int n , double *vec , double *q)
   w8 = malloc(n * sizeof(double));
   z9 = malloc(n * sizeof(double));
   w9 = malloc(n * sizeof(double));
+  z10 = malloc(n * sizeof(double));
+  w10 = malloc(n * sizeof(double));
 
   /* Method definition */
 
@@ -109,6 +116,7 @@ void test_lcp_series(int n , double *vec , double *q)
   static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
   static method_lcp method_lcp7 = { "NewtonMin",   10   , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
   static method_lcp method_lcp9 = { "RPGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp10 = { "Path",   0   , 1e-8 , 0.0 , 0.0 , 0 , "" , 0 , 0.0 };
 
   nonsymmetric = 0;
 
@@ -240,25 +248,37 @@ void test_lcp_series(int n , double *vec , double *q)
 
   info9 = lcp_solver(vec , q , &n , &method_lcp9 , z9 , w9);
 
+#ifdef PATH_SOLVER
+  /* #8 PATH TEST */
+#ifdef BAVARD
+  printf("**** PATH TEST ***\n");
+#endif
+  for (i = 0 ; i < n ; ++i)
+  {
+    z10[i] = 0.0;
+    w10[i] = 0.0;
+  }
 
+  info10 = lcp_solver(vec , q , &n , &method_lcp10 , z10 , w10);
+#endif /*PATH_SOLVER*/
 #ifdef BAVARD
   /*  printf(" *** ************************************** ***\n"); */
 
   printf(" ****** z = ********************************\n");
   for (i = 0 ; i < n ; i++)
-    printf("PGS: %14.7e    CPG: %14.7e   LATIN: %14.7e    LATIN_w %14.7e \n", z1[i], z2[i], z3[i], z8[i]);
+    printf("PGS: %14.7e    CPG: %14.7e   LATIN: %14.7e    LATIN_w %14.7e    PATH %14.7e \n", z1[i], z2[i], z3[i], z8[i], z10[i]);
 
   printf(" ****** w = ********************************\n");
   for (i = 0 ; i < n ; i++)
-    printf("PGS: %14.7e    CPG: %14.7e   LATIN: %14.7e    LATIN_w %14.7e \n", w1[i], w2[i], w3[i], w8[i]);
+    printf("PGS: %14.7e    CPG: %14.7e   LATIN: %14.7e    LATIN_w %14.7e    PATH %14.7e \n", w1[i], w2[i], w3[i], w8[i], w10[i]);
 
   printf(" ****** z = ********************************\n");
   for (i = 0 ; i < n ; i++)
-    printf("QP: %14.7e     NSQP: %14.7e   Lemke: %14.7e    Newton: %14.7e    RPGS: %14.7e \n", z4[i], z5[i], z6[i], z7[i], z9[i]);
+    printf("QP: %14.7e     NSQP: %14.7e   Lemke: %14.7e    Newton: %14.7e    RPGS: %14.7e    PATH %14.7e \n", z4[i], z5[i], z6[i], z7[i], z9[i], z10[i]);
 
   printf(" ****** w = ********************************\n");
   for (i = 0 ; i < n ; i++)
-    printf("QP: %14.7e     NSQP: %14.7e   Lemke: %14.7e    Newton: %14.7e    RPGS: %14.7e \n", w4[i], w5[i], w6[i], w7[i], w9[i]);
+    printf("QP: %14.7e     NSQP: %14.7e   Lemke: %14.7e    Newton: %14.7e    RPGS: %14.7e    PATH %14.7e \n", w4[i], w5[i], w6[i], w7[i], w9[i], w10[i]);
 
   printf("\n\n");
   printf(" INFO RESULT\n");
@@ -333,7 +353,16 @@ void test_lcp_series(int n , double *vec , double *q)
   DGEMV(LA_NOTRANS , n , n , beta , vec , n , z9 , incx , alpha , w9 , incy);
   diff = DNRM2(n , w9 , incx);
 
-  printf("\n    RPGS   (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g | \n \n ", info9, method_lcp9.iter, method_lcp9.err, comp, diff);
+  printf("\n    RPGS   (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info9, method_lcp9.iter, method_lcp9.err, comp, diff);
+
+#ifdef PATH_SOLVER
+  comp = DDOT(n , z10 , incx , w10 , incy);
+  DAXPY(n , alpha , q , incx , w10 , incy);
+  DGEMV(LA_NOTRANS , n , n , beta , vec , n , z10 , incx , alpha , w10 , incy);
+  diff = DNRM2(n , w10 , incx);
+
+  printf("\n    PATH (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g | \n \n ", info10, method_lcp10.iter, method_lcp10.err, comp, diff);
+#endif /*PATH_SOLVER*/
 
 #endif
   free(z1);
@@ -354,6 +383,8 @@ void test_lcp_series(int n , double *vec , double *q)
   free(w8);
   free(z9);
   free(w9);
+  free(z10);
+  free(w10);
 
 
 }

@@ -52,8 +52,16 @@
 #include "LA.h"
 
 #define BAVARD
-#define NBTEST 7
-#define NBMETHODS 4
+#define NBTEST 10
+#define NBMETHODS 5
+
+#define PATH_SOLVER
+
+#ifdef PATH_SOLVER
+const unsigned short int *__ctype_b;
+const __int32_t *__ctype_tolower ;
+#endif /*PATH_SOLVER*/
+
 
 typedef struct
 {
@@ -68,7 +76,21 @@ static int itest;
 /*
  ******************************************************************************
  */
-
+void printSolution(char *name, int n, int m, double *u1, double *v1, double *w1)
+{
+  int i;
+#ifdef BAVARD
+  printf(" *** ************************************** ***\n");
+  printf(" ****** z = ********************************\n");
+  for (i = 0 ; i < n ; i++)
+    printf("%s: %14.7e  \n", name, u1[i]);
+  for (i = 0 ; i < m ; i++)
+    printf("%s: %14.7e  \n", name, v1[i]);
+  printf(" ****** w = ********************************\n");
+  for (i = 0 ; i < m ; i++)
+    printf("%s: %14.7e  \n", name, w1[i]);
+#endif
+}
 void test_mlcp_series(int n , int m, double *A , double *B , double *C , double *D , double *a , double *b, double *sol)
 {
 
@@ -91,50 +113,18 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
   w1 = malloc(m * sizeof(double));
 
   /* Method definition */
-
   static method_mlcp method_mlcp1 = { "PGS"       , 101 , 1e-8 , 0.6 , 1.0 , 1 , 0 , 0.0 };
-
-  /* Method definition */
-
   static method_mlcp method_mlcp2 = { "RPGS"       , 101 , 1e-8 , 0.6 , 1.0 , 1 , 0 , 0.0 };
-
-  /* Method definition */
-
   static method_mlcp method_mlcp3 = { "PSOR"       , 101 , 1e-8 , 2.0 , 1.0 , 1 , 0 , 0.0 };
-  /* Method definition */
-
   static method_mlcp method_mlcp4 = { "RPSOR"       , 101 , 1e-8 , 2.0 , 1.0 , 1 , 0 , 0.0 };
-
-  /*   nonsymmetric = 0; */
-
-  /*   /\* Is M symmetric ? *\/ */
-
-  /*   for( i = 0 ; i < n ; ++i ){ */
-  /*     for( j = 0 ; j < i ; ++j ){ */
-  /*       if( abs( vec[i*n+j] - vec[j*n+i] ) > 1e-16 ){ */
-  /*  nonsymmetric = 1; */
-  /*  break; */
-  /*       } */
-  /*     } */
-  /*   } */
-
-  /* #ifdef BAVARD */
-  /*   if( nonsymmetric ) printf("\n !! WARNING !!\n M is a non symmetric matrix \n"); */
-  /*   else printf(" M is a symmetric matrix \n"); */
-  /* #endif */
-
-  /*   /\* #1 PGS TEST *\/ */
-  /*   #ifdef BAVARD */
-  /*   printf("**** PGS TEST ****\n"); */
-  /* #endif */
+  static method_mlcp method_mlcp5 = { "PATH"       , 0 , 1e-8 , 0.0 , 0.0 , 0 , 0 , 0.0 };
 
 
-  /*   printf("\n exact solution : "); */
-  /*   for( i = 0 ; i < (n) ; ++i ) printf(" u1 = %10.4g " , u1[i] ); */
-  /*   for( i = 0 ; i < (m) ; ++i ) printf(" v1 = %10.4g " , v1[i] ); */
-  /*   for( i = 0 ; i < (m) ; ++i ) printf(" w1 = %10.4g " , w1[i] ); */
-  /*   printf("\n"); */
 
+  /* #1 PGS TEST */
+#ifdef BAVARD
+  printf("**** PGS TEST ****\n");
+#endif
   for (i = 0 ; i < m ; ++i)
   {
     v1[i] = sol[i + n];
@@ -149,40 +139,8 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
   strcpy(summary[itest].cv[0], "CV");
   if (info1 > 0)
     strcpy(summary[itest].cv[0], "NO");
+  printSolution("PGS", n, m, u1, v1, w1);
 
-
-#ifdef BAVARD
-  printf(" *** ************************************** ***\n");
-
-  printf(" ****** z = ********************************\n");
-  for (i = 0 ; i < n ; i++)
-    printf("PGS: %14.7e  \n", u1[i]);
-
-  for (i = 0 ; i < m ; i++)
-    printf("PGS: %14.7e  \n", v1[i]);
-
-  printf(" ****** w = ********************************\n");
-  for (i = 0 ; i < m ; i++)
-    printf("PGS: %14.7e  \n", w1[i]);
-
-
-  /*   nonsymmetric = 0; */
-
-  /*   /\* Is M symmetric ? *\/ */
-
-  /*   for( i = 0 ; i < n ; ++i ){ */
-  /*     for( j = 0 ; j < i ; ++j ){ */
-  /*       if( abs( vec[i*n+j] - vec[j*n+i] ) > 1e-16 ){ */
-  /*  nonsymmetric = 1; */
-  /*  break; */
-  /*       } */
-  /*     } */
-  /*   } */
-
-  /* #ifdef BAVARD */
-  /*   if( nonsymmetric ) printf("\n !! WARNING !!\n M is a non symmetric matrix \n"); */
-  /*   else printf(" M is a symmetric matrix \n"); */
-  /* #endif */
 
 
   /* #1 RPGS TEST */
@@ -203,23 +161,7 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
   strcpy(summary[itest].cv[1], "CV");
   if (info1 > 0)
     strcpy(summary[itest].cv[1], "NO");
-
-
-#ifdef BAVARD
-  /*  printf(" *** ************************************** ***\n"); */
-
-  printf(" ****** z = ********************************\n");
-  for (i = 0 ; i < n ; i++)
-    printf("RPGS: %14.7e  \n", u1[i]);
-
-  for (i = 0 ; i < m ; i++)
-    printf("RPGS: %14.7e  \n", v1[i]);
-
-  printf(" ****** w = ********************************\n");
-  for (i = 0 ; i < m ; i++)
-    printf("RPGS: %14.7e  \n", w1[i]);
-
-#endif
+  printSolution("RPGS", n, m, u1, v1, w1);
 
   /* #1 PSOR TEST */
 #ifdef BAVARD
@@ -239,23 +181,7 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
   strcpy(summary[itest].cv[2], "CV");
   if (info1 > 0)
     strcpy(summary[itest].cv[2], "NO");
-
-
-#ifdef BAVARD
-  /*  printf(" *** ************************************** ***\n"); */
-
-  printf(" ****** z = ********************************\n");
-  for (i = 0 ; i < n ; i++)
-    printf("PSOR: %14.7e  \n", u1[i]);
-
-  for (i = 0 ; i < m ; i++)
-    printf("PSOR: %14.7e  \n", v1[i]);
-
-  printf(" ****** w = ********************************\n");
-  for (i = 0 ; i < m ; i++)
-    printf("PSOR: %14.7e  \n", w1[i]);
-
-#endif
+  printSolution("PSOR", n, m, u1, v1, w1);
 
   /* #1 RPSOR TEST */
 #ifdef BAVARD
@@ -275,25 +201,26 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
   strcpy(summary[itest].cv[3], "CV");
   if (info1 > 0)
     strcpy(summary[itest].cv[3], "NO");
-
-
+  printSolution("RPSOR", n, m, u1, v1, w1);
+  /* PATH TEST */
 #ifdef BAVARD
-  printf(" *** ************************************** ***\n");
-
-  printf(" ****** z = ********************************\n");
-  for (i = 0 ; i < n ; i++)
-    printf("RPSOR: %14.7e  \n", u1[i]);
-
-  for (i = 0 ; i < m ; i++)
-    printf("RPSOR: %14.7e  \n", v1[i]);
-
-  printf(" ****** w = ********************************\n");
-  for (i = 0 ; i < m ; i++)
-    printf("RPSOR: %14.7e  \n", w1[i]);
-
+  printf("**** PATH TEST ****\n");
 #endif
+  for (i = 0 ; i < m ; ++i)
+  {
+    v1[i] = sol[i + n];
+    w1[i] = sol[n + m + i];
+  }
+  for (i = 0 ; i < n ; ++i)
+  {
+    u1[i] = sol[i];
+  }
 
-#endif
+  info1 = mlcp_solver(A, B, C, D, a, b, &n , &m, &method_mlcp5 , u1 , v1, w1);
+  strcpy(summary[itest].cv[4], "CV");
+  if (info1 > 0)
+    strcpy(summary[itest].cv[4], "NO");
+  printSolution("PATH", n, m, u1, v1, w1);
 
   free(u1);
   free(v1);
@@ -397,6 +324,34 @@ void test_matrix(void)
         exit(1);
       }
       break;
+    case 7:
+      printf("\n\n diodeBridge 20 MLCP ");
+      strcpy(summary[itest].file, "diodeBridge 20 MLCP");
+      if ((MLCPfile = fopen("MATRIX/diodeBridge20_mlcp.dat", "r")) == NULL)
+      {
+        perror("fopen MLCPfile: diodeBridge20_mlcp.dat");
+        exit(1);
+      }
+      break;
+    case 9:
+      printf("\n\n diodeBridge 40 MLCP ");
+      strcpy(summary[itest].file, "diodeBridge 40 MLCP");
+      if ((MLCPfile = fopen("MATRIX/diodeBridge40_mlcp.dat", "r")) == NULL)
+      {
+        perror("fopen MLCPfile: diodeBridge40_mlcp.dat");
+        exit(1);
+      }
+      break;
+    case 8:
+      printf("\n\n Buck converter MLCP ");
+      strcpy(summary[itest].file, "Buck converter MLCP");
+      if ((MLCPfile = fopen("MATRIX/BuckConverterRegul2.dat", "r")) == NULL)
+      {
+        perror("fopen MLCPfile: BuckConverterRegul2.dat");
+        exit(1);
+      }
+      break;
+
     case 6:
       printf("\n\n RCD ");
       strcpy(summary[itest].file, "RCD");
@@ -531,7 +486,8 @@ void test_matrix(void)
     printf(" PGS %s  \t", summary[itest].cv[0]);
     printf("| RPGS %s  \t", summary[itest].cv[1]);
     printf("| PSOR %s  \t", summary[itest].cv[2]);
-    printf("| RPSOR %s  \n", summary[itest].cv[3]);
+    printf("| RPSOR %s  \t", summary[itest].cv[3]);
+    printf("| PATH %s  \n", summary[itest].cv[4]);
   }
   printf("* *** ******************** *** * \n");
   printf("* *** END OF TEST MATRIX   *** * \n");
