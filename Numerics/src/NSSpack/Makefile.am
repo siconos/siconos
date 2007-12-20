@@ -28,7 +28,7 @@ AM_CFLAGS=-std=c99
 .f.o:
 	$(F77COMPILE) -c $<
 
-SUBDIRS = test
+SUBDIRS = test 
 
 ### LCP #####################################################
 
@@ -45,7 +45,7 @@ MLCP_SOURCES = mlcp_solver.c  \
 	mlcp_filter_result.c  \
 	mlcp_compute_error.c $(MLCP_SOLVERS) mlcp_solvers.h 
 
-MLCP_SOLVERS =  mlcp_pgs.c mlcp_rpgs.c mlcp_psor.c mlcp_rpsor.c
+MLCP_SOLVERS =  mlcp_pgs.c mlcp_rpgs.c mlcp_psor.c mlcp_rpsor.c mlcp_path.c
 
 ### PFC ######################################################
 
