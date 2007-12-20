@@ -345,9 +345,9 @@ void test_matrix(void)
     case 8:
       printf("\n\n Buck converter MLCP ");
       strcpy(summary[itest].file, "Buck converter MLCP");
-      if ((MLCPfile = fopen("MATRIX/BuckConverterRegul2.dat", "r")) == NULL)
+      if ((MLCPfile = fopen("MATRIX/buckconverterregul2.dat", "r")) == NULL)
       {
-        perror("fopen MLCPfile: BuckConverterRegul2.dat");
+        perror("fopen MLCPfile: buckconverterregul2.dat");
         exit(1);
       }
       break;

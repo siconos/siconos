@@ -50,6 +50,12 @@ all: links
 
 links: $(DATADIRS)
 
+PATHDIR = /home/bipop/bonnefon/download/path/pathlib
+PATHINC = $(PATHDIR)/include
+PATHLIB = $(PATHDIR)/lib/linux
+
+LIB_PATHSOLVER = 
+#LIB_PATHSOLVER = -L../path/ -lmlcppath -lpath46
 
 TESTS = test1 test2 test7 test3  test4  test5 
 XFAIL_TESTS =   test5 test7
@@ -58,7 +64,7 @@ XFAIL_TESTS =   test5 test7
 test1_SOURCES = main_lcp_new.c
 include_HEADERS = 
 test1_INCLUDES = $(CPPUNIT_INCLUDES)
-test1_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(NSSPACK_LIB) $(SICONOS_EXT_LDFLAGS)
+test1_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(NSSPACK_LIB) $(SICONOS_EXT_LDFLAGS) $(LIB_PATHSOLVER)
 
 test2_SOURCES =  main_dr.c
 test2_INCLUDES = $(CPPUNIT_INCLUDES)
@@ -66,7 +72,7 @@ test2_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(NSSPACK_LIB) $(SICONOS_EXT_LDFLAGS)
 
 test7_SOURCES =  main_mlcp.c
 test7_INCLUDES = $(CPPUNIT_INCLUDES)
-test7_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(NSSPACK_LIB) $(SICONOS_EXT_LDFLAGS)
+test7_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(NSSPACK_LIB) $(SICONOS_EXT_LDFLAGS) $(LIB_PATHSOLVER)
 
 test3_SOURCES = main_pr.c 
 test3_INCLUDES = $(CPPUNIT_INCLUDES)
