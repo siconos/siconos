@@ -3,16 +3,17 @@
 
 #include "SimpleLCP.h"
 
-#include "MCP_Interface.h"
 
-#include "Path.h"
-#include "PathOptions.h"
+#include "include/MCP_Interface.h"
 
-#include "Error.h"
-#include "Macros.h"
-#include "Memory.h"
-#include "Output.h"
-#include "Options.h"
+#include "include/Path.h"
+#include "include/PathOptions.h"
+
+#include "include/Error.h"
+#include "include/Macros.h"
+#include "include/Memory.h"
+#include "include/Output.h"
+#include "include/Options.h"
 
 typedef struct
 {
