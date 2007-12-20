@@ -73,6 +73,7 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
   const char lcpkey9[15] = "Latin_w", lcpkey10[15] = "NewtonFB", lcpkey11[15] = "PSOR";
   const char lcpkey12[10] = "NLGS";
   const char lcpkey13[10] = "RPGS";
+  const char lcpkey14[10] = "Path";
 
   // Remark: Lemke = LexicoLemke. Only one solver is called: lexicoLemke.
 
@@ -280,6 +281,23 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
     /* dparamLCP[2] = pt->lcp.relax;*/
 
     lcp_rpgs(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+
+    pt->lcp.iter = iparamLCP[2];
+    pt->lcp.err  = dparamLCP[3];
+
+  }
+  /* **** PATH Solver **** */
+
+  else if (strcmp(pt->lcp.name , lcpkey14) == 0)
+  {
+
+    iparamLCP[0] = pt->lcp.itermax;
+    iparamLCP[1] = pt->lcp.chat;
+    dparamLCP[0] = pt->lcp.tol;
+    dparamLCP[1] = pt->lcp.rho;
+    /* dparamLCP[2] = pt->lcp.relax;*/
+
+    lcp_path(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
     pt->lcp.iter = iparamLCP[2];
     pt->lcp.err  = dparamLCP[3];

@@ -78,7 +78,7 @@
 int mlcp_solver(double *A , double *B , double *C , double *D , double *a , double *b, int *n , int* m, method *pt ,  double *u, double *v, double *w)
 {
 
-  const char  mlcpkey1[10] = "PGS", mlcpkey2[10] = "RPGS", mlcpkey3[10] = "PSOR" , mlcpkey4[10] = "RPSOR" ;
+  const char  mlcpkey1[10] = "PGS", mlcpkey2[10] = "RPGS", mlcpkey3[10] = "PSOR" , mlcpkey4[10] = "RPSOR", mlcpkey5[10] = "PATH" ;
 
 
   int i, j, info = 1;
@@ -146,7 +146,23 @@ int mlcp_solver(double *A , double *B , double *C , double *D , double *a , doub
     dparamMLCP[2] = pt->mlcp.relax;
 
 
-    mlcp_rpsor(n , m, A , B , C , D , a  , b, u, v, w , &info , iparamMLCP , dparamMLCP);
+    /*      mlcp_rpsor( n ,m, A , B , C , D , a  , b, u, v, w , &info , iparamMLCP , dparamMLCP ); */
+
+    pt->mlcp.iter = iparamMLCP[2];
+    pt->mlcp.err  = dparamMLCP[2];
+
+
+  }
+  else if (strcmp(pt->mlcp.name , mlcpkey5) == 0)
+  {
+    iparamMLCP[0] = pt->mlcp.itermax;
+    iparamMLCP[1] = pt->mlcp.chat;
+    dparamMLCP[0] = pt->mlcp.tol;
+    dparamMLCP[1] = pt->mlcp.rho;
+    dparamMLCP[2] = pt->mlcp.relax;
+
+
+    mlcp_path(n , m, A , B , C , D , a  , b, u, v, w , &info , iparamMLCP , dparamMLCP);
 
     pt->mlcp.iter = iparamMLCP[2];
     pt->mlcp.err  = dparamMLCP[2];
