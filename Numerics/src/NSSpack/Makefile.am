@@ -38,7 +38,7 @@ LCP_SOURCES = lcp_solver.c lcp_solver_block.c \
 
 LCP_SOLVERS = lcp_lexicolemke.c lcp_pgs.c lcp_nsqp.c lcp_cpg.c \
 	lcp_qp.c lcp_latin.c lcp_latin_w.c lcp_newton_min.c \
-	lcp_newton_FB.c lcp_sor.c lcp_rpgs.c lcp_path.c
+	lcp_newton_FB.c lcp_psor.c lcp_rpgs.c lcp_path.c
 ### MLCP #####################################################
 
 MLCP_SOURCES = mlcp_solver.c  \
@@ -55,13 +55,13 @@ PFC_SOLVERS = pfc_2D_cpg.c pfc_2D_latin.c pfc_2D_nlgs.c \
 	pfc_3D_cpg.c pfc_3D_nlgs.c projc.c projf.c \
 	pfc_3D_nlgsnewton.c pfc_3D_nsgs.c pfc_3D_newton.c \
 	pfc_3D_Alart_Curnier.c pfc_3D_projection.c\
-	pfc_3D_Fischer_Burmeister.c  NCP_compute_error.c NCP_block_compute_error.c NCP_block_compute_error2.c\
+	pfc_3D_Fischer_Burmeister.c  NCP_compute_error.c NCP_block_compute_error.c\
 	pfc_2D_projc.c pfc_2D_projf.c \
 	max_part.c min_part.c abs_part.c pos_part.c \
-	pfc_3D_projc.c pfc_3D_projf.c pfc_3D_nsgs_block.c pfc_3D_nsgs_block2.c pfc_3D_nsgs_new.c
+	pfc_3D_projc.c pfc_3D_projf.c pfc_3D_nsgs_block.c pfc_3D_nsgs_new.c
 
 FRICTION_CONTACT3D_SOURCES = NonSmoothNewton.c FrictionContact3DSolvers.c $(FRICTION_CONTACT3D_SOLVERS) FrictionContact3DSolvers.h NonSmoothNewton.h
-FRICTION_CONTACT3D_SOLVERS = FrictionContact3D_nsgs.c FrictionContact3D_nsgs_SB.c FrictionContact3D_projection.c FrictionContact3D_Newton.c FrictionContact3D_AlartCurnier.c \
+FRICTION_CONTACT3D_SOLVERS = FrictionContact3D_nsgs.c FrictionContact3D_projection.c FrictionContact3D_Newton.c FrictionContact3D_AlartCurnier.c \
 			     FrictionContact3D_projection.h FrictionContact3D_Newton.h FrictionContact3D_AlartCurnier.h
 NCP_SOURCES = NCP_FischerBurmeister.c NCP.h FrictionContact3D2NCP_Glocker.c FrictionContact3D2NCP_Glocker.h  
 
