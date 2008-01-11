@@ -152,7 +152,7 @@ case "$target" in
       ;;
 
    *)
-ACX_CHECK_ATLAS(,
+ACX_ATLAS(,
   [AC_MSG_ERROR([Atlas was not found. This makes this library unusable.
 *** This makes this library unusable. Please get the atlas library 
 *** installed. If you do have this installed, use the options 
@@ -164,19 +164,20 @@ ACX_CHECK_ATLAS(,
 AC_CHECK_HEADER([atlas/cblas.h],[need_inc_atlas=no],[need_inc_atlas=yes])
 AC_CHECK_HEADER([atlas/clapack.h],[need_inc_atlas=no],[need_inc_atlas=yes])
 if test "$need_inc_atlas" = yes; then
-ATLAS_INCLUDES="$ATLAS_CPPFLAGS"
-ATLAS_SRC_INCLUDES='-I${abs_top_srcdir}/src/utils/AtlasLocal'
-ATLAS_LOCAL_INCLUDES='-I$(SICONOSPATH)/include/Siconos/AtlasLocal'
-AC_SUBST(ATLAS_SRC_INCLUDES)
-AC_SUBST(ATLAS_LOCAL_INCLUDES)
-else
-ATLAS_INCLUDES="$ATLAS_CPPFLAGS"
+  ATLAS_SRC_INCLUDES='-I${abs_top_srcdir}/src/utils/AtlasLocal'
+  ATLAS_LOCAL_INCLUDES='-I$(SICONOSPATH)/include/Siconos/AtlasLocal'
+  AC_SUBST(ATLAS_SRC_INCLUDES)
+  AC_SUBST(ATLAS_LOCAL_INCLUDES)
 fi
 ;;
 esac
 
 # Check for Lapack
 # This defines LAPACK_LIBS, BLAS_LIBS, and FLIBS
+CPPFLAGS_SAVED=$CPPFLAGS
+LDFLAGS_SAVED=$LDFLAGS
+CPPFLAGS="$CPPFLAGS $ATLAS_CPPFLAGS"
+LDFLAGS="$LDFLAGS $ATLAS_LDFLAGS"
 ACX_LAPACK(,
   [AC_MSG_ERROR([Blas/Lapack was not found. 
 *** This means Lapack and matrix support cannot be compiled. 
@@ -185,6 +186,8 @@ ACX_LAPACK(,
 *** --with-blas=<libname> or --with-lapack=<libname> and/or set 
 *** the env variable LDFLAGS to include the appropriate linker 
 *** flags.])])
+CPPFLAGS=$CPPFLAGS_SAVED
+LDFLAGS=$LDFLAGS_SAVED
 
 # Cppunit : Warning, by default we skip ccpunit
 AC_MSG_CHECKING([cppunit])
@@ -281,10 +284,9 @@ AC_SUBST(CXX_DYNLIB)
 ## LINK FLAGS
 #################################
 #SICONOS_EXT_INCLUDES
-SICONOS_EXT_INCLUDES=""
+SICONOS_EXT_INCLUDES="$ATLAS_INCLUDES"
 case "$target" in
     *-linux*)
-      
       ;;
     *-apple-darwin*)
       SICONOS_EXT_INCLUDES="-I/sw/include/ $SICONOS_EXT_INCLUDES"
@@ -296,7 +298,7 @@ AC_SUBST(SICONOS_EXT_INCLUDES)
 #SICONOS_EXT_LDFLAGS
 
 
-SICONOS_EXT_LDFLAGS="$LAPACK_LIBS $BLAS_LIBS "
+SICONOS_EXT_LDFLAGS="$LAPACK_LIBS $BLAS_LIBS $ATLAS_LDFLAGS $ATLAS_LIBS"
 
 dnl case "$target" in
 dnl     *-linux*)
