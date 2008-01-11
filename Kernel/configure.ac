@@ -163,6 +163,7 @@ case "$target" in
       
       ;;
     *)
+        # Try to understand ATLAS installation
         ACX_ATLAS(,
 	[AC_MSG_ERROR([Atlas was not found. This makes this library unusable.
 	*** This makes this library unusable. Please get the atlas library 
@@ -171,26 +172,24 @@ case "$target" in
 	*** --with-atlas-lib=<path of atlas libdir> and/or set 
 	*** the env variable LDFLAGS to include the appropriate linker 
 	*** flags.])])
-	ATLAS_LIBS="$ATLAS_LDFLAGS"
 
       # Specific solution to Debian packaging bug
       AC_CHECK_HEADER([atlas/cblas.h],[need_inc_atlas=no],[need_inc_atlas=yes])
       AC_CHECK_HEADER([atlas/clapack.h],[need_inc_atlas=no],[need_inc_atlas=yes])
       if test "$need_inc_atlas" = yes; then
-            ATLAS_INCLUDES="$ATLAS_CPPFLAGS"
             ATLAS_SRC_INCLUDES='-I${abs_top_srcdir}/src/utils/AtlasLocal'
             ATLAS_LOCAL_INCLUDES='-I$(SICONOSPATH)/include/Siconos/AtlasLocal'
             AC_SUBST(ATLAS_SRC_INCLUDES)
             AC_SUBST(ATLAS_LOCAL_INCLUDES)
-      else
-            ATLAS_INCLUDES="$ATLAS_CPPFLAGS"
       fi
       ;;
 esac
 
-
-
-dnl dnl Check for Blas and Lapack
+dnl Check for Blas and Lapack (Maybe in ATLAS, so with check with ATLAS context)
+CPPFLAGS_SAVED=$CPPFLAGS
+LDFLAGS_SAVED=$LDFLAGS
+CPPFLAGS="$CPPFLAGS $ATLAS_CPPFLAGS"
+LDFLAGS="$LDFLAGS $ATLAS_LDFLAGS"
 ACX_LAPACK([
    dnl action-if-found:    
 # This defines LAPACK_LIBS, BLAS_LIBS, and FLIBS
@@ -204,8 +203,8 @@ dnl action-if-not-found:
  *** the env variable LDFLAGS to include the appropriate linker 
  *** flags.])
 ])
-
-
+CPPFLAGS=$CPPFLAGS_SAVED
+LDFLAGS=$LDFLAGS_SAVED
 
 # Boost
 AC_MSG_CHECKING([for Boost])
@@ -308,7 +307,7 @@ SICONOS_EXT_INCLUDES="$NUMERICS_INCLUDES $ATLAS_INCLUDES $XML_CPPFLAGS $BOOST_CP
 AC_SUBST(SICONOS_EXT_INCLUDES)
 
 
-SICONOS_EXT_LIBS="$NUMERICS_LIBRARIES $XML_LIBS -ldl $ATLAS_LIBS $LAPACK_LIBS $LIBS"
+SICONOS_EXT_LIBS="$NUMERICS_LIBRARIES $XML_LIBS -ldl $LAPACK_LIBS $BLAS_LIBS $ATLAS_LIBS"
 
 AC_SUBST(SICONOS_EXT_LIBS)
 

@@ -1,4 +1,4 @@
-dnl Available from the GNU Autoconf Macro Archive at:
+dnl Available from the GNU Autoconf Macro Archive at
 dnl http://www.gnu.org/software/ac-archive/htmldoc/acx_blas.html
 dnl
 AC_DEFUN([ACX_BLAS], [
@@ -48,6 +48,17 @@ if test "$acx_blas_ok" = "no"; then
 			[acx_blas_ok=yes; BLAS_LIBS="-lsgemm -ldgemm -lblas"],
 			[], [-lblas])],
 			[], [-lblas])])
+fi
+
+# BLAS in ATLAS library? (http://math-atlas.sourceforge.net/)
+if test $acx_blas_ok = no; then
+	AC_CHECK_LIB(atlas, ATL_xerbla,
+		[AC_CHECK_LIB(f77blas, $sgemm,
+		[AC_CHECK_LIB(cblas, cblas_dgemm,
+			[acx_blas_ok=yes
+			 BLAS_LIBS="-lcblas -lf77blas -latlas"],
+			[], [-lf77blas -latlas])],
+			[], [-latlas])])
 fi
 
 # BLAS in Alpha CXML library?
