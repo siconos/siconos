@@ -199,7 +199,7 @@ bool DiodeBridge()
 
     // dataPlot (ascii) output
     SiconosMatrix * dataRef = new SimpleMatrix("refDiodeBridge.dat", true);
-
+    cout << dataRef->size(0) << " " << dataPlot.size(0) << endl;
     double tol = 1e-9;
     double norm = (dataPlot - (*dataRef)).normInf() ;
     cout << endl << endl ;

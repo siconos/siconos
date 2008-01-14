@@ -444,7 +444,7 @@ void SimpleMatrixTest::testSetBlock2()
     for (unsigned int j = 0 ; j < 5; ++j)
       (*MIn)(i, j) = i + j;
 
-  MOut->setBlock(2, 3, MIn);
+  MOut->setBlock(2, 3, *MIn);
 
   for (unsigned int i = 2; i < 7; ++i)
     for (unsigned int j = 3 ; j < 8; ++j)
@@ -455,7 +455,7 @@ void SimpleMatrixTest::testSetBlock2()
   // Copy of a Block into a sub-block of Simple
 
   MIn = new BlockMatrix(m4, m4, m4, m4);
-  MOut->setBlock(2, 3, MIn);
+  MOut->setBlock(2, 3, *MIn);
 
   for (unsigned int i = 2; i < 6; ++i)
     for (unsigned int j = 3 ; j < 7; ++j)

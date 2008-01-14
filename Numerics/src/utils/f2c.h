@@ -53,7 +53,7 @@
 //        avoid conflicts with C++ complex class.
 */
 
-/** @file f2c.h
+/** @file utils/f2c.h
  * @brief Standard Fortran to C header file
  *
  * This file includes many declarations of types and headers that are

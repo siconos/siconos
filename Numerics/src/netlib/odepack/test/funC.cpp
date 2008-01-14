@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 #include <stdio.h>
 #include "blaslapack.h"
 
@@ -37,7 +37,7 @@ extern "C" void F77NAME(f1)(integer *sizeOfX, doublereal *time, doublereal *x, d
   }
   else
   {
-    printf("OscillatorPlugin:vectorField --- Bad size of x. %i -- %i\n", *sizeOfX, sizeOfX);
+    printf("OscillatorPlugin:vectorField --- Bad size of x. %d -- %d\n", (int)*sizeOfX, (int)sizeOfX);
   }
 
 }

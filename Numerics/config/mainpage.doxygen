@@ -2,13 +2,17 @@
 \anchor doxyNumerics
 \section doxyNumericsIntro Introduction
 
-Siconos is a free (GNU license) software, dedicated to modeling, simulation and control of Non Smooth Dynamical Systems. 
-
-This API documentation is automatically generated from the software sources thanks to doxygen tools. 
+\b Numerics is a package of Siconos dedicated to low-level algorithms, written in C and Fortran. \n
+It can be used as a stand alone library but its functions are rather supposed to be called from Kernel. 
 
 To get access to other documents, see tab list on top of this page or Documentation tab on Home Page.
 
-The Numerics Package is dedicated to low-level algorithms, written in C and Fortran.
+\section doxyNumericsContents Contents
+	- \b netlib: routines imported from netlib collection (see http://www.netlib.org/)\n
+	- The   \subpage NSSPACK
+
+\section doxyNumericsAbout About 
+This API documentation is automatically generated from the software sources thanks to doxygen tools. 
 
 Contact: <a href="mailto:franck.perignon@inrialpes.fr">Franck Pérignon</a> 
 

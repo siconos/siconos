@@ -341,8 +341,17 @@ AC_CONFIG_FILES([Makefile
 		 src/netlib/odepack/test/Makefile
 		 src/netlib/dftemplates/Makefile
 		 src/netlib/dftemplates/double/Makefile
-		 src/NSSpack/Makefile
-		 src/NSSpack/path/Makefile
+                 src/NSSpack/Makefile
+                 src/NSSpack/NSSTools/Makefile
+		 src/NSSpack/LCP/Makefile
+		 src/NSSpack/QP/Makefile
+		 src/NSSpack/MLCP/Makefile
+		 src/NSSpack/NCP/Makefile
+		 src/NSSpack/FrictionContact2D/Makefile
+		 src/NSSpack/FrictionContact3D/Makefile
+		 src/NSSpack/pfc3D/Makefile
+		 src/NSSpack/Relay/Makefile
+		 src/NSSpack/InterfaceToPathFerris/Makefile
 		 src/NSSpack/test/Makefile])
 AC_OUTPUT
 

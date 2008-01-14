@@ -28,87 +28,24 @@ AM_CFLAGS=-std=c99
 .f.o:
 	$(F77COMPILE) -c $<
 
-SUBDIRS = test 
-
-### LCP #####################################################
-
-LCP_SOURCES = lcp_solver.c lcp_solver_block.c \
-	filter_result_LCP.c filter_result_LCP_block.c filter_result_pfc_block.c filter_result_pfc_block2.c filter_result_pfc.c \
-	lcp_compute_error.c $(LCP_SOLVERS) lcp_solvers.h 
-
-LCP_SOLVERS = lcp_lexicolemke.c lcp_pgs.c lcp_nsqp.c lcp_cpg.c \
-	lcp_qp.c lcp_latin.c lcp_latin_w.c lcp_newton_min.c \
-	lcp_newton_FB.c lcp_psor.c lcp_rpgs.c lcp_path.c
-### MLCP #####################################################
-
-MLCP_SOURCES = mlcp_solver.c  \
-	mlcp_filter_result.c  \
-	mlcp_compute_error.c $(MLCP_SOLVERS) mlcp_solvers.h 
-
-MLCP_SOLVERS =  mlcp_pgs.c mlcp_rpgs.c mlcp_psor.c mlcp_rpsor.c mlcp_path.c
-
-### PFC ######################################################
-
-PFC_SOURCES = pfc_2D_solver.c pfc_3D_solver.c $(PFC_SOLVERS) pfc_3D_solver_block.c pfc_3D_solvers.h pfc_2D_solvers.h
-
-PFC_SOLVERS = pfc_2D_cpg.c pfc_2D_latin.c pfc_2D_nlgs.c \
-	pfc_3D_cpg.c pfc_3D_nlgs.c projc.c projf.c \
-	pfc_3D_nlgsnewton.c pfc_3D_nsgs.c pfc_3D_newton.c \
-	pfc_3D_Alart_Curnier.c pfc_3D_projection.c\
-	pfc_3D_Fischer_Burmeister.c  NCP_compute_error.c NCP_block_compute_error.c\
-	pfc_2D_projc.c pfc_2D_projf.c \
-	max_part.c min_part.c abs_part.c pos_part.c \
-	pfc_3D_projc.c pfc_3D_projf.c pfc_3D_nsgs_block.c pfc_3D_nsgs_new.c
-
-FRICTION_CONTACT3D_SOURCES = NonSmoothNewton.c FrictionContact3DSolvers.c $(FRICTION_CONTACT3D_SOLVERS) FrictionContact3DSolvers.h NonSmoothNewton.h
-FRICTION_CONTACT3D_SOLVERS = FrictionContact3D_nsgs.c FrictionContact3D_projection.c FrictionContact3D_Newton.c FrictionContact3D_AlartCurnier.c \
-			     FrictionContact3D_projection.h FrictionContact3D_Newton.h FrictionContact3D_AlartCurnier.h
-NCP_SOURCES = NCP_FischerBurmeister.c NCP.h FrictionContact3D2NCP_Glocker.c FrictionContact3D2NCP_Glocker.h  
-
-### DFC ######################################################
-
-DFC_SOURCES = dfc_2D_solver.c $(DFC_SOLVERS) dfc_solvers.h
-
-DFC_SOLVERS = dfc_2D_latin.c   
-
-### LCP <--> DFC 2D ##########################################
-
-SWITCH = lcp2dfc_2D.c dfc_2D2lcp.c cond_2D2dfc_2D.c \
-	dfc_2D2cond_2D.c 	
-
-
-### PR #######################################################
-
-PR_SOURCES = pr_solver.c $(PR_SOLVERS) pr_solvers.h
-
-PR_SOLVERS = pr_nlgs.c pr_latin.c
-
-### DR #######################################################
-
-DR_SOURCES = dr_solver.c $(DR_SOLVERS) dr_solvers.h
-
-DR_SOLVERS = dr_latin.c dr_nlgs.c
+SUBDIRS = NSSTools LCP QP MLCP NCP Relay FrictionContact2D FrictionContact3D pfc3D
 
 ##############################################################
 
 noinst_LTLIBRARIES = libNSSpack.la
 
-libNSSpack_la_SOURCES = NSSpack.h \
-	minf.c maxf.c \
-        clapack_dtrtrs.c \
-	$(LCP_SOURCES) \
-	$(MLCP_SOURCES) \
-	$(PFC_SOURCES) \
-	$(NCP_SOURCES) \
-	$(FRICTION_CONTACT3D_SOURCES) \
-	$(DFC_SOURCES) \
-	$(SWITCH) \
-	$(PR_SOURCES) \
-	$(DR_SOURCES) \
-	ql0001.f sortsn.f diffns.c  \
-	freeSpBlMat.c NSSTools.h
+libNSSpack_la_SOURCES = NonSmoothNewton.c NonSmoothNewton.h NSSpack.h
 
+libNSSpack_la_LIBADD =  $(top_builddir)/src/NSSpack/NSSTools/libNSSTools.la \
+			$(top_builddir)/src/NSSpack/LCP/libLCP.la  \
+			$(top_builddir)/src/NSSpack/QP/libQP.la  \
+			$(top_builddir)/src/NSSpack/MLCP/libMLCP.la  \
+			$(top_builddir)/src/NSSpack/NCP/libNCP.la  \
+			$(top_builddir)/src/NSSpack/Relay/libRelay.la  \
+			$(top_builddir)/src/NSSpack/FrictionContact2D/libFrictionContact2D.la  \
+			$(top_builddir)/src/NSSpack/FrictionContact3D/libFrictionContact3D.la  \
+			$(top_builddir)/src/NSSpack/pfc3D/libPFC_3D.la 
 
 libNSSpack_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 
-numerics_HEADERS = lcp_solvers.h mlcp_solvers.h pfc_2D_solvers.h pfc_3D_solvers.h dfc_solvers.h dr_solvers.h pr_solvers.h NSSpack.h NSSTools.h NCP.h
+numerics_HEADERS = NSSpack.h NonSmoothNewton.h 

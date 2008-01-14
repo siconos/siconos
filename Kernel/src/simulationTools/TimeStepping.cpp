@@ -273,7 +273,6 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
   if (!isNewtonConverge)
     cout << "Newton process stopped: max. steps number reached." << endl ;
-  // Process NextEvent (Save OSI (DS) and OSNS (Interactions) states into Memory vectors ...)
 }
 
 bool TimeStepping::newtonCheckConvergence(double criterion)

@@ -393,7 +393,7 @@ void SimpleVectorTest::testSetBlock4()
   unsigned int sizeB = 9;
   SimpleVector * subBlock = new SimpleVector(sizeB);
   unsigned int pos = 1;
-  subBlock->setBlock(pos, ref);
+  subBlock->setBlock(pos, *ref);
 
   for (unsigned int i = pos; i < pos + 5; ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("test setBlock : ", fabs((*subBlock)(i) - (*ref)(i - pos)) < tol, true);
@@ -410,7 +410,7 @@ void SimpleVectorTest::testSetBlock4()
   BSV->insertPtr(ref2);
 
   pos = 2;
-  subBlock->setBlock(pos, BSV);
+  subBlock->setBlock(pos, *BSV);
 
   for (unsigned int i = pos; i < pos + 6; ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("test setBlock : ", fabs((*BSV)(i - pos) - (*subBlock)(i)) < tol, true);
@@ -1200,7 +1200,6 @@ void SimpleVectorTest::testSubscal()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(5) - a * (*xx)(2)) < tol, true);
   for (unsigned int i = 0; i < size; ++i)
   {
-    cout << i << endl;
     if (i != 4 && i != 5)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys->getSparsePtr())(i) - (*yref->getDensePtr())(i)) < tol, true);
   }

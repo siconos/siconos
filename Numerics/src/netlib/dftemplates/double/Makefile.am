@@ -46,10 +46,10 @@ numerics_HEADERS = dftemplates.h
 
 
 
-check_PROGRAMS = test1 
+# check_PROGRAMS = test1 
 
-TESTS = $(check_PROGRAMS)
-include_HEADERS = 
-test1_SOURCES = Tester.f dnsychk.f dspdchk.f dutils.f  Matgen.f
-test1_INCLUDES = 
-test1_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(DFTEMPLATES_LIB) $(SICONOS_EXT_LDFLAGS)
+# TESTS = $(check_PROGRAMS)
+# include_HEADERS = 
+# test1_SOURCES = Tester.f dnsychk.f dspdchk.f dutils.f MatGen.f
+# test1_INCLUDES = $(CPPUNIT_INCLUDES)
+# test1_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(DFTEMPLATES_LIB) $(SICONOS_EXT_LDFLAGS) -llapack

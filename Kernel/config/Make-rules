@@ -100,7 +100,7 @@ SICONOS_LIBS=-L$(top_srcdir)/src/ -lSiconosKernel
 
 #--- Directory for include files ---
 
-siconosdir = $(includedir)/Siconos
-boostdir = $(siconosdir)/boost
+siconosdir = $(includedir)/Siconos/Kernel
+boostdir = $(includedir)/Siconos/boost
 
 

@@ -40,6 +40,7 @@ typedef void (*UpdateSolverPtr)(int, double*);
 #ifdef __cplusplus
 extern "C" {
 #endif
+
   /** Newton solver
    \param size of the vector z
    \param the vector z, unknown vector, in-out argument
@@ -47,6 +48,16 @@ extern "C" {
    \param pointer to \f$ \nabla_z \phi(z) \f$ function
   */
   int nonSmoothNewton(int, double*, NewtonFunctionPtr*, NewtonFunctionPtr*, int*, double*);
+
+  /** Armijo Linesearch
+      \param n, size of the vector z
+      \param z,
+      \param dir, search direction
+      \param psi_k, initial value of the merit function
+      \param , descent condition
+      \param , pointer to function used to compute phi(z)
+  */
+  void linesearch_Armijo(int, double*, double*, double, double, NewtonFunctionPtr*);
 
 #ifdef __cplusplus
 }

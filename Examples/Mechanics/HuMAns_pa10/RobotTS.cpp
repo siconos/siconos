@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
     double t0 = 0;                   // initial computation time
     double T = 1.9;                   // final computation time
     double h = 0.005;                // time step
-    double criterion = 0.000005;
+    double criterion = 0.0005;
     unsigned int maxIter = 20000;
     double e = 0.9;                  // restit. coef. for impact on the ground.
     double e2 = 0.0;                 // restit. coef for angular stops impacts.
@@ -220,6 +220,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 6) = (*vel)(2);
       dataPlot(k, 7) = (*y)(0);
       dataPlot(k, 8) = (*y)(1);
+      s->nextStep();
     }
 
     cout << "End of computation - Number of iterations done: " << k << endl;

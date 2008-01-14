@@ -53,3 +53,5 @@ install-data-local:
 	    fi; \
 	    $(CP) -r $(top_srcdir)/doc/ @prefix@/doc/Siconos_Numerics; \
 	  fi; 
+
+numerics_HEADERS = config.h
