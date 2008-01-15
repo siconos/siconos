@@ -21,81 +21,81 @@
 # INTERNAL LIBRARIES
 
 #--- SiconosTemplates --------------------------------------
-SICONOSTOOLS_PATH = $(top_srcdir)/src/utils/SiconosTools
-SICONOSTOOLS_INC = $(SICONOSTOOLS_PATH)
+SICONOSTOOLS_PATH = src/utils/SiconosTools
+SICONOSTOOLS_INC = $(top_srcdir)/$(SICONOSTOOLS_PATH)
 
 #--- SiconosException --------------------------------------
-SICONOSEXCEPTION_PATH = $(top_srcdir)/src/utils/SiconosException
-SICONOSEXCEPTION_INC = $(SICONOSEXCEPTION_PATH)
-SICONOSEXCEPTION_LIB = -L$(SICONOSEXCEPTION_PATH) -lSiconosException
+SICONOSEXCEPTION_PATH = src/utils/SiconosException
+SICONOSEXCEPTION_INC = $(top_srcdir)/$(SICONOSEXCEPTION_PATH)
+SICONOSEXCEPTION_LIB = -L$(top_builddir)/$(SICONOSEXCEPTION_PATH) -lSiconosException
 
 #--- SiconosSharedLibrary --------------------------------------
-SICONOSSHAREDLIBRARY_PATH = $(top_srcdir)/src/utils/SiconosSharedLibrary
-SICONOSSHAREDLIBRARY_INC = $(SICONOSSHAREDLIBRARY_PATH)
-SICONOSSHAREDLIBRARY_LIB = -L$(SICONOSSHAREDLIBRARY_PATH) -lSiconosSharedLibrary
+SICONOSSHAREDLIBRARY_PATH = src/utils/SiconosSharedLibrary
+SICONOSSHAREDLIBRARY_INC = $(top_srcdir)/$(SICONOSSHAREDLIBRARY_PATH)
+SICONOSSHAREDLIBRARY_LIB = -L$(top_builddir)/$(SICONOSSHAREDLIBRARY_PATH) -lSiconosSharedLibrary
 
 #--- SiconosMatrixVector --------------------------------------
-SICONOSALGEBRA_PATH = $(top_srcdir)/src/utils/SiconosAlgebra
-SICONOSALGEBRA_INC = $(SICONOSALGEBRA_PATH)
-SICONOSALGEBRA_LIB = -L$(SICONOSALGEBRA_PATH) -lSiconosAlgebra
+SICONOSALGEBRA_PATH = src/utils/SiconosAlgebra
+SICONOSALGEBRA_INC = $(top_srcdir)/$(SICONOSALGEBRA_PATH)
+SICONOSALGEBRA_LIB = -L$(top_builddir)/$(SICONOSALGEBRA_PATH) -lSiconosAlgebra
 
 #--- SiconosMemory --------------------------------------
-SICONOSMEMORY_PATH = $(top_srcdir)/src/utils/SiconosMemory
-SICONOSMEMORY_INC = $(SICONOSMEMORY_PATH)
-SICONOSMEMORY_LIB = -L$(SICONOSMEMORY_PATH) -lSiconosMemory
+SICONOSMEMORY_PATH = src/utils/SiconosMemory
+SICONOSMEMORY_INC =$(top_srcdir)/$(SICONOSMEMORY_PATH)
+SICONOSMEMORY_LIB = -L$(top_builddir)/$(SICONOSMEMORY_PATH) -lSiconosMemory
 
 #--- contract --------------------------------------
-SICONOSCONTRACT_PATH = $(top_srcdir)/src/utils/contract
-SICONOSCONTRACT_INC = $(SICONOSCONTRACT_PATH)
+SICONOSCONTRACT_PATH = src/utils/contract
+SICONOSCONTRACT_INC = $(top_srcdir)/$(SICONOSCONTRACT_PATH)
 
 #--- boost bindings --------------------------------------
-BINDINGS_PATH = $(top_srcdir)/src/utils/src/utils/boost/numeric/bindings/
-BINDINGS_INC = $(BINDINGS_PATH)
-BINDINGSATLAS_PATH = $(top_srcdir)/src/utils/src/utils/boost/numeric/bindings/atlas/
-BINDINGSATLAS_INC = $(BINDINGSATLAS_PATH)
+BINDINGS_PATH = src/utils/boost/numeric/bindings/
+BINDINGS_INC = $(top_srcdir)/$(BINDINGS_PATH)
+BINDINGSATLAS_PATH = src/utils/boost/numeric/bindings/atlas/
+BINDINGSATLAS_INC = $(top_srcdir)/$(BINDINGSATLAS_PATH)
 
 #--- SiconosXml --------------------------------------
-SICONOSXML_PATH = $(top_srcdir)/src/xml
-SICONOSXML_INC = $(SICONOSXML_PATH)
-SICONOSXML_LIB = -L$(SICONOSXML_PATH) -lSiconosXml
+SICONOSXML_PATH = src/xml
+SICONOSXML_INC = $(top_srcdir)/$(SICONOSXML_PATH)
+SICONOSXML_LIB = -L$(top_builddir)/$(SICONOSXML_PATH) -lSiconosXml
 
 #--- ModelingTools --------------------------------------
-MODELINGTOOLS_PATH = $(top_srcdir)/src/modelingTools
-MODELINGTOOLS_INC = $(MODELINGTOOLS_PATH)
-MODELINGTOOLS_LIB = -L$(MODELINGTOOLS_PATH) -lModelingTools
+MODELINGTOOLS_PATH = src/modelingTools
+MODELINGTOOLS_INC = $(top_srcdir)/$(MODELINGTOOLS_PATH)
+MODELINGTOOLS_LIB = -L$(top_builddir)/$(MODELINGTOOLS_PATH) -lModelingTools
 
 #--- SimulationTools --------------------------------------
-SIMULATIONTOOLS_PATH = $(top_srcdir)/src/simulationTools
-SIMULATIONTOOLS_INC = $(SIMULATIONTOOLS_PATH)
-SIMULATIONTOOLS_LIB = -L$(SIMULATIONTOOLS_PATH) -lSimulationTools
+SIMULATIONTOOLS_PATH = src/simulationTools
+SIMULATIONTOOLS_INC = $(top_srcdir)/$(SIMULATIONTOOLS_PATH)
+SIMULATIONTOOLS_LIB = -L$(top_builddir)/$(SIMULATIONTOOLS_PATH) -lSimulationTools
 
 #--- ControlTools --------------------------------------
-CONTROLTOOLS_PATH = $(top_srcdir)/src/controlTools
-CONTROLTOOLS_INC = $(CONTROLTOOLS_PATH)
-CONTROLTOOLS_LIB = -L$(CONTROLTOOLS_PATH) -lcontrolTools
+CONTROLTOOLS_PATH = src/controlTools
+CONTROLTOOLS_INC = $(top_srcdir)/$(CONTROLTOOLS_PATH)
+CONTROLTOOLS_LIB = -L$(top_builddir)/$(CONTROLTOOLS_PATH) -lcontrolTools
 
 #--- Model --------------------------------------
-MODEL_PATH = $(top_srcdir)/src/model
-MODEL_INC = $(MODEL_PATH)
-MODEL_LIB = -L$(MODEL_PATH) -lModel
+MODEL_PATH = src/model
+MODEL_INC = $(top_srcdir)/$(MODEL_PATH)
+MODEL_LIB = -L$(top_builddir)/$(MODEL_PATH) -lModel
 
 #--- ApiC --------------------------------------
-APIC_PATH = $(top_srcdir)/api/C
-APIC_INC = $(APIC_PATH)
-APIC_LIB = -L$(APIC_PATH) -lSiconosApiC
+APIC_PATH = api/C
+APIC_INC = $(top_srcdir)/$(APIC_PATH)
+APIC_LIB = -L$(top_builddir)/$(APIC_PATH) -lSiconosApiC
 
 # INCLUDES
 
 #--- INCLUDE -----------------------------------
-SICONOS_INCLUDES = -I$(top_srcdir)/src/utils/ -I$(SICONOSTOOLS_INC) -I$(SICONOSEXCEPTION_INC) -I$(SICONOSSHAREDLIBRARY_INC) -I$(SICONOSALGEBRA_INC)  -I$(SICONOSMEMORY_INC) -I$(SICONOSCONTRACT_INC) \
--I$(SICONOSXML_INC) -I$(MODELINGTOOLS_INC) -I$(SIMULATIONTOOLS_INC) -I$(CONTROLTOOLS_INC) -I$(MODEL_INC) -I$(APIC_INC) -I$(top_srcdir)/src/
+SICONOS_INCLUDES = -I$(top_srcdir)/src/utils/ -I$(SICONOSTOOLS_INC) -I$(SICONOSEXCEPTION_INC) -I$(SICONOSSHAREDLIBRARY_INC) -I$(SICONOSALGEBRA_INC)  -I$(SICONOSMEMORY_INC) -I$(SICONOSCONTRACT_INC) -I$(BINDINGS_INC) -I$(BINDINGSATLAS_INC) \
+-I$(SICONOSXML_INC) -I$(MODELINGTOOLS_INC) -I$(SIMULATIONTOOLS_INC) -I$(CONTROLTOOLS_INC) -I$(MODEL_INC) -I$(APIC_INC) -I$(top_srcdir)/src/ -I$(top_srcdir)
 
 # COMPILE FLAGS
 
 INCLUDES = $(SICONOS_INCLUDES) $(SICONOS_EXT_INCLUDES) $(ATLAS_SRC_INCLUDES)
 CXXCOMPILE = $(CXX) $(CXXFLAGS) $(INCLUDES)
 
-SICONOS_LIBS=-L$(top_srcdir)/src/ -lSiconosKernel
+SICONOS_LIBS=-L$(top_builddir)/src/ -lSiconosKernel
 
 
 #--- Directory for include files ---
