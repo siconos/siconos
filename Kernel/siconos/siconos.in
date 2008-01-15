@@ -95,7 +95,7 @@ cartridge;
 clean="false";
 silent="true";
 sample="false";
-while getopts chv OPTION
+while getopts chvx OPTION
   do
   case "$OPTION" in
       c) clean=true;;
@@ -115,8 +115,10 @@ while getopts chv OPTION
 	 echo "     -c : to clean the current directory (deletes binary files, etc.)";
 	 echo "     -h : to print this help.";
 	 echo "     -v : to print 'make' commands as they are executed.";
+         echo "     -x : compile only.";
 	 exit 0;
-	 ;;
+         ;;
+      x) sample="true" ; target="sample";;
   esac
 done
 
