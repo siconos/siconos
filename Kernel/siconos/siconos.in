@@ -95,6 +95,7 @@ cartridge;
 clean="false";
 silent="true";
 sample="false";
+target="sample run";
 while getopts chvx OPTION
   do
   case "$OPTION" in
@@ -206,12 +207,12 @@ if [ ! -d $DIR_SAMPLE ]; then
 else
     cd $DIR_SAMPLE;
     if test "${silent}" = "true"; then
-	make -s -f $SICONOS_SHAREPATH/MakefilePluginSample OBJ=`basename $lastarg` sample run
+	make -s -f $SICONOS_SHAREPATH/MakefilePluginSample OBJ=`basename $lastarg` $target
     else
 	echo;
 	echo " ***** Current sample compilation and linking *****"
 	echo;
-	make -f $SICONOS_SHAREPATH/MakefilePluginSample OBJ=`basename $lastarg` sample run
+	make -f $SICONOS_SHAREPATH/MakefilePluginSample OBJ=`basename $lastarg` $target
     fi;
     cd $DIR;
 fi;
