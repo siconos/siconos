@@ -277,7 +277,8 @@ void OneStepNSProblem::initialize()
   Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
   // The maximum size of the problem (for example, the dim. of M in LCP or Friction problems).
   // Set to the number of possible scalar constraints declared in the topology.
-  maxSize = topology->getNumberOfConstraints();
+  if (maxSize == 0) // if maxSize not set explicitely by user before initialize
+    maxSize = topology->getNumberOfConstraints();
 }
 
 void OneStepNSProblem::saveInMemory()
