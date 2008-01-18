@@ -11,14 +11,14 @@ if test "$enable_atlas" = "no"; then
     return
 fi
 
-AC_ARG_WITH(atlas-include,,
+AC_ARG_WITH(atlas-include,
 	[  --with-atlas-include=<dir>   Use this ATLAS include directory],
         [case $withval in 
            yes | "") ;;
            *) ATLAS_CPPFLAGS="$ATLAS_CPPFLAGS -I$withval/atlas -I$withval";; 
          esac])
 
-AC_ARG_WITH(atlas-lib,,
+AC_ARG_WITH(atlas-lib,
 	[  --with-atlas-lib=<dir>   Use this ATLAS library directory],
         [case $withval in 
            yes | "") ;;
