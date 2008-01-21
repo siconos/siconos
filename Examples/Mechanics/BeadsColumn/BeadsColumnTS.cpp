@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
   {
 
     // User-defined main parameters
-    unsigned int dsNumber = 200;      // the number of dynamical systems
+    unsigned int dsNumber = 100;      // the number of dynamical systems
     unsigned int nDof = 3;           // degrees of freedom for beads
     double increment_position = 1;   // initial position increment from one DS to the following
     double increment_velocity = 0;   // initial velocity increment from one DS to the following
@@ -187,7 +187,7 @@ int main(int argc, char* argv[])
 
     // -- OneStepNsProblem --
     LCP * osnspb = new LCP(s, "LCP", solverName, 10000, 0.01, 0);
-    osnspb->getSolverPtr()->setSolverBlock(true);
+    //    osnspb->getSolverPtr()->setSolverBlock(true);
 
     // =========================== End of model definition =================================
     // ================================= Computation =================================

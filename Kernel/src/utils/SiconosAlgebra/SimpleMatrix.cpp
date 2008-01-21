@@ -729,7 +729,7 @@ void SimpleMatrix::setBlock(unsigned int row_min, unsigned int col_min, const Si
   }
 }
 
-void setBlock(const SiconosMatrix * MIn, SiconosMatrix * MOut, const Index& dim, const Index& start)
+void setBlock(const SiconosMatrix *  MIn, SiconosMatrix * MOut, const Index& dim, const Index& start)
 {
   // To copy a subBlock of MIn into a subBlock of MOut.
   // dim[0], dim[1]: number of rows and columns of the sub-block

@@ -117,11 +117,12 @@ void SparseBlockMatrix::fill(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMat
   rowPos->resize(0);
   colPos->resize(0);
   blocksList->resize(0);
-
+  int sizeV = 0;
   for (itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
   {
-    // Size of the current diagonal block
-    (*diagSizes)[row] = (*itRow)->getNonSmoothLawSize();
+    // Size of the current diagonal block is added into diagSizes
+    sizeV  += (*itRow)->getNonSmoothLawSize();
+    (*diagSizes)[row] = sizeV;
     // Look for connected non null blocks
     for (itCol = indexSet->begin(); itCol != indexSet->end(); ++itCol)
     {
@@ -169,7 +170,7 @@ void SparseBlockMatrix::display() const
   cout << endl;
   std::copy(colPos->begin(), colPos->end(), std::ostream_iterator<unsigned int>(cout, " "));
   cout << endl;
-  cout << "Sizes of the diagonal blocks:" << endl;
+  cout << "Sum of sizes of the diagonal blocks:" << endl;
   std::copy(diagSizes->begin(), diagSizes->end(), std::ostream_iterator<unsigned int>(cout, " "));
   cout << endl;
 }

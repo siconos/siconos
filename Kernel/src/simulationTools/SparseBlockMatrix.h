@@ -66,7 +66,7 @@ typedef  boost::numeric::ublas::compressed_matrix<SiconosMatrix*> SparseMat2;
     \f}
  *
  * with nc = 4, nbNonNullBlocks = 8, RowPos = [0 0 0 1 1 2 3 3], RowCol = [0 1 3 0 1 2 0 3]\n
- * and diagSizes = [3 3 3 3].
+ * and diagSizes = [3 6 9 12].
  *
  * We use stl::vector (which may seems redundent with the double* of the numerics SparseBlockStructuredMatrix) because memory can be
  * reserved during construction or initialized and then vectors are resized when the object is filled in. This avoid some call to
@@ -95,7 +95,7 @@ private:
   /** vector of the addresses of the non-null blocks. */
   std::vector<double*> * blocksList;
 
-  /** Vector used to save dim of diagonal blocks of M */
+  /** Vector used to save the sum of dim of diagonal blocks of M: diagSizes[i] = diagSizes[i-1] + ni, ni being the size of the diagonal block at row(block) i */
   IndexInt* diagSizes;
 
   /** List of non null blocks positions (in row) */

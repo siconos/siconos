@@ -19,14 +19,14 @@
 
 #include <stdio.h>
 #include <math.h>
-#include "NSSTools.h"
+#include "LCP_Solvers.h"
 #include "LA.h"
 
 int filter_result_LCP_block(SparseBlockStructuredMatrix *blmat, double *q , double *z , double tol, int chat, double *w)
 {
   double error, normq;
   double a1, b1;
-  int i, j, incx, incy;
+  int i, incx, incy;
   int n, nbbl, nbblrow;
   int rowprecbl, rowcurbl, indicrow, rowsize;
   int colprecbl, colcurbl, indiccol, colsize;
@@ -35,8 +35,7 @@ int filter_result_LCP_block(SparseBlockStructuredMatrix *blmat, double *q , doub
 
   nbbl = blmat->nbblocks;
   nbblrow = blmat->size;
-  n = 0;
-  for (i = 0 ; i < nbblrow ; i++) n += blmat->blocksize[i];
+  n = blmat->blocksize[nbblrow - 1];
 
   a1 = 1.;
   b1 = 1.;
@@ -55,21 +54,22 @@ int filter_result_LCP_block(SparseBlockStructuredMatrix *blmat, double *q , doub
     colcurbl = blmat->ColumnIndex[i];
     if (rowcurbl != rowprecbl)   /*  new row  */
     {
-      indiccol = 0;
-      for (j = 0 ; j < colcurbl ; j++) indiccol += blmat->blocksize[j];
+      indiccol = blmat->blocksize[colcurbl - 1];
       colprecbl = colcurbl;
 
       indicrow += rowsize;
-      for (j = rowprecbl + 1 ; j < rowcurbl ; j++) indicrow += blmat->blocksize[j];
+      indicrow += blmat->blocksize[rowcurbl - 1];
+      indicrow -= blmat->blocksize[rowprecbl];
 
       rowprecbl = rowcurbl;
       rowsize = blmat->blocksize[rowcurbl];
     }
-    for (j = colprecbl ; j < colcurbl ; j++) indiccol += blmat->blocksize[j];
+    indiccol += blmat->blocksize[colcurbl - 1];
+    indiccol -= blmat->blocksize[colprecbl - 1];
     colprecbl = colcurbl;
 
-    rowsize = blmat->blocksize[rowcurbl];
-    colsize = blmat->blocksize[colcurbl];
+    rowsize = blmat->blocksize[rowcurbl] - blmat->blocksize[rowcurbl - 1];
+    colsize = blmat->blocksize[colcurbl] - blmat->blocksize[colcurbl - 1];
     adrcurbl = blmat->block[i];
 
     DGEMV(LA_NOTRANS , rowsize , colsize , a1 , adrcurbl , rowsize , &z[indiccol] ,

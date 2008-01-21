@@ -19,7 +19,6 @@
 #ifndef FRICTIONCONTACT3DSOLVERS_H
 #define FRICTIONCONTACT3DSOLVERS_H
 
-#include "NSSTools.h" /* for SparseBlockStructuredMatrix structure */
 #include "FrictionContact3D_AlartCurnier.h"
 #include "FrictionContact3D_projection.h"
 #include "FrictionContact3D_Newton.h"
@@ -48,6 +47,7 @@
   Use the generic function frictionContact3DSolvers(), to call one the the specific solvers listed below:
 
   - frictionContact3D_nsgs() : non-smooth Gauss-Seidel solver
+  - frictionContact3D_nsgs_SBS() : non-smooth Gauss-Seidel solver with Sparse Block Storage (SBS) for M
 
   The structure method, argument of frictionContact3DSolvers(), is used to give the name and parameters of the required solver.
 
@@ -75,6 +75,34 @@ typedef void (*ComputeErrorPtr)(int, double*, double*, double*);
 /** pointer to function used to free memory for objects used in solvers */
 typedef void (*FreeSolverPtr)();
 
+/** Structure used to send/get parameters for Friction Contact 3D problems
+    \param chat       verbose mode ( 0: off, >0: on)
+    \param name       name of the solver.
+    \param itermax    maximum number of iterations.
+    \param tol        convergence criteria value.
+    \param iter       final number of iterations.
+    \param err      final value of error criteria
+    \param local_name int that characterize the local solver or formulation
+    \param local_itermax local maximum number of iterations.
+    \param local_tol   local convergence criteria value.
+    \param local_iter       final number of iterations.
+    \param local_err        final value of error criteria
+*/
+typedef struct
+{
+  int    chat;
+  char   name[64];
+  int    itermax;
+  double tol;
+  int    iter;
+  double err;
+  int    local_name;
+  int    local_itermax;
+  double local_tol;
+  int    local_iter;
+  double local_err;
+} method_frictionContact_3D;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -92,18 +120,34 @@ extern "C" {
   */
   void frictionContact3D_nsgs(int, double*, double*, double*, double*, double*, int *, int *, double*);
 
-  /** Non-Smooth Gauss Seidel solver for friction-contact 3D problem
+  /** Non-Smooth Gauss Seidel solver for friction-contact 3D problem, with sparse-block storage for M
       \param nc, number of contacts (dim of the problem n = 3*nc)
       \param M global matrix (n*n)
       \param q global vector (n)
       \param reaction global vector (n), in-out parameter
       \param velocity global vector (n), in-out parameter
       \param mu, vector of the friction coefficients (size nc)
-      \param information about solver result
-      \param int vector of parameters (max. iteration number ...)
-      \param double vector of parameters (tolerance ...)
+      \param information about solver result:\n
+      0 - convergence\n
+      1 - iter = itermax, ie the simulation reached the maximum number of iterations allowed\n
+      2 - negative diagonal term(s) in M.\n
+      \param int vector of parameters (max. iteration number ...)\n
+      iparam[0] = itermax Input unchanged parameter which represents the maximum number of iterations allowed.\n
+      iparam[1] = ispeak  Input unchanged parameter which represents the output log identifiant\n
+      0 - no output\n
+      1 - active screen output\n
+      iparam[2] = it_end  Output modified parameter which returns the number of iterations performed by the algorithm.\n
+      iparam[3] = local iter_max\n
+      iparam[4] = iter local (output)\n
+      iparam[5] = local formulation (0: Alart-Curnier, 1: Fischer-Burmeister)\n
+      iparam[6] = local solver (0: projection, 1: Newton). Projection only for AC case.\n
+      \param double vector of parameters (tolerance ...)\n
+      dparam[0] = tol     Input unchanged parameter which represents the tolerance required.\n
+      dparam[1] = error   Output modified parameter which returns the final error value.\n
+      dparam[2] = local tolerance\n
+      dparam[3] = Output modified parameter which returns the local error\n
   */
-  void frictionContact3D_nsgs_SB(int, SparseBlockStructuredMatrix*, double*, double*, double*, double*, int *, int *, double*);
+  void frictionContact3D_nsgs_SBS(int, SparseBlockStructuredMatrix*, double*, double*, double*, double*, int *, int *, double*);
 
   /** Check for trivial solution in the friction-contact 3D problem
       \param dim of the problem

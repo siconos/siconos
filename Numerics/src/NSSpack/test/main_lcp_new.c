@@ -407,8 +407,7 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
   double *z1, *z2, *z3, *z4, *z5, *z6, *z7, *z8;
   double *w1, *w2, *w3, *w4, *w5, *w6, *w7, *w8;
 
-  dim = 0;
-  for (i = 0; i < blmat->size; i++) dim += blmat->blocksize[i];
+  dim = blmat->blocksize[blmat->size - 1];
 
   z1 = malloc(dim * sizeof(double));
   w1 = malloc(dim * sizeof(double));
@@ -1016,14 +1015,19 @@ void test_blockmatrix(void)
       blmat.ColumnIndex[i]--;
     }
 
-    dim = 0;
-    for (i = 0; i < blmat.size; i++) dim += blmat.blocksize[i];
+    dim = blmat.blocksize[blmat.size - 1];
 
     q = (double*)malloc(dim * sizeof(double));
     blmat.block = (double**)malloc(blmat.nbblocks * sizeof(double*));
+    int numberOfRows, numberOfColumns, pos;
+
     for (i = 0 ; i < blmat.nbblocks ; i++)
     {
-      sizebl = blmat.blocksize[blmat.RowIndex[i]] * blmat.blocksize[blmat.ColumnIndex[i]];
+      pos = blmat.RowIndex[i];
+      numberOfRows = blmat.blocksize[pos] - blmat.blocksize[pos - 1];
+      pos = blmat.ColumnIndex[i]
+            numberOfColumns = blmat.blocksize[pos] - blmat.blocksize[pos - 1];
+      sizebl = numberOfRows * numberOfColumns;
       blmat.block[i] = (double*)malloc(sizebl * sizeof(double));
       for (j = 0 ; j < sizebl ; j++)
       {

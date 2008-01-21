@@ -46,7 +46,7 @@
   *
   */
 
-
+#include "SparseBlockMatrix.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -78,6 +78,12 @@ extern "C" {
    \warning temporary function - To be reviewed
   */
   void NCP_compute_error(int n, double *vec , double *q , double *z , int verbose, double *w, double *err);
+
+  /** This function adapts the NCP_compute_error routine for M saved as a SparseBlockStructuredMatrix.
+   * TEMPORARY FUNCTION, used to compare pfc3D and FrictionContact3D functions.
+   * \author Franck Perignon
+   */
+  void NCP_block_compute_error(int n, SparseBlockStructuredMatrix *M , double *q , double *z , int verbose, double *w, double *err);
 
 #ifdef __cplusplus
 }

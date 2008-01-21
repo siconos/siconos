@@ -18,22 +18,27 @@
 */
 
 #include "LA.h"
-#include "NSSTools.h"
+#include "FrictionContact3D_Solvers.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 
-/**Static variables */
+/*Static variables */
+
+/* The global problem of size n= 3*nc, nc being the number of contacts, is locally saved in MGlobal and qGlobal */
+/* mu corresponds to the vector of friction coefficients */
+/* note that either MGlobal or MBGlobal is used, depending on the chosen storage */
 static int n = 0;
-static const double* M = NULL;
-static const SparseBlockStructuredMatrix* MB = NULL;
-static const double* q = NULL;
+static const double* MGlobal = NULL;
+static const SparseBlockStructuredMatrix* MBGlobal = NULL;
+static const double* qGlobal = NULL;
 static const double* mu = NULL;
 
-static const int nBlock = 3;
-static double* MBlock;
-static double reactionBlock[3];
-static double velocityBlock[3];
+/* Local problem operators */
+static const int nLocal = 3;
+static double* MLocal;
+static int isMAllocatedIn = 0; /* True if a malloc is done for MLocal, else false */
+static double velocityLocal[3];
 static double qLocal[3];
 static double mu_i = 0.0;
 static double an;
@@ -42,23 +47,18 @@ static double projN;
 static double projT;
 static double projS;
 
-/* update pointer to function, used to switch to the function adapted to the storage for M. */
+/* update pointer to function, used to switch to the function adapted to the storage for MGlobal. */
 static void (*update)(int, double*);
 
-void updateWithSparse(int contact, double * reaction)
+void AC_updateWithSparse(int contact, double * reaction)
 {
   int in = 3 * contact, it = in + 1, is = it + 1;
-  int j;
   int numberOfContact = n / 3;
-  /* The part of M which corresponds to the current block is copied into MBlock */
+  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
   int diagPos = numberOfContact * contact + contact;
-  MBlock = MB->block[diagPos];
+  MLocal = MBGlobal->block[diagPos];
 
-  /* reactionBlock */
-  for (j = 0 ; j < nBlock ; ++j)
-    reactionBlock[j] = reaction[in + j];
-
-  /****  Computation of qLocal = qBlock + sum over a row of blocks in M of the products MBlock.reactionBlock,
+  /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
    excluding the block corresponding to the current contact. ****/
 
   /* reaction current block set to zero, to exclude current contact block */
@@ -66,45 +66,36 @@ void updateWithSparse(int contact, double * reaction)
   reaction[it] = 0.0;
   reaction[is] = 0.0;
   /* qLocal computation*/
-  int incx = n, incy = 1;
-  qLocal[0] = q[in];
-  qLocal[1] = q[it];
-  qLocal[2] = q[is];
-  /* Loop through the columns(blocks) of M to compute qLocal */
-  int blockNum = contact * numberOfContact;
-  for (j = 0; j < numberOfContact ; ++j)
-  {
-    if (j != contact)
-    {
-      DGEMV(LA_NOTRANS, 3, 3, 1.0, MB->block[blockNum], 3, &reaction[3 * j], incx , 1.0, qLocal, incy);
-    }
-    blockNum = blockNum + 1;
-  }
+  qLocal[0] = qGlobal[in];
+  qLocal[1] = qGlobal[it];
+  qLocal[2] = qGlobal[is];
+
+  /* qLocal += rowMB * reaction
+     with rowMB the row of blocks of MBGlobal which corresponds to the current contact
+   */
+  subRowProd(n, 3, contact, MBGlobal, reaction, qLocal, 0);
+
 }
 
-void updateNoSparse(int contact, double * reaction)
+void AC_updateNoSparse(int contact, double * reaction)
 {
   int in = 3 * contact, it = in + 1, is = it + 1;
-  int j, inc = n * in;
+  int inc = n * in;
 
-  /* The part of M which corresponds to the current block is copied into MBlock */
-  MBlock[0] = M[inc + in];
-  MBlock[1] = M[inc + it];
-  MBlock[2] = M[inc + is];
+  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
+  MLocal[0] = MGlobal[inc + in];
+  MLocal[1] = MGlobal[inc + it];
+  MLocal[2] = MGlobal[inc + is];
   inc += n;
-  MBlock[3] = M[inc + in];
-  MBlock[4] = M[inc + it];
-  MBlock[5] = M[inc + is];
+  MLocal[3] = MGlobal[inc + in];
+  MLocal[4] = MGlobal[inc + it];
+  MLocal[5] = MGlobal[inc + is];
   inc += n;
-  MBlock[6] = M[inc + in];
-  MBlock[7] = M[inc + it];
-  MBlock[8] = M[inc + is];
+  MLocal[6] = MGlobal[inc + in];
+  MLocal[7] = MGlobal[inc + it];
+  MLocal[8] = MGlobal[inc + is];
 
-  /* reactionBlock */
-  for (j = 0 ; j < nBlock ; ++j)
-    reactionBlock[j] = reaction[in + j];
-
-  /****  Computation of qLocal = qBlock + sum over a contact of blocks in M of the products MBlock.reactionBlock,
+  /****  Computation of qLocal = qBlock + sum over a contact of blocks in MGlobal of the products MLocal.reactionBlock,
    excluding the block corresponding to the current contact. ****/
 
   /* reaction current block set to zero, to exclude current contact block */
@@ -113,33 +104,53 @@ void updateNoSparse(int contact, double * reaction)
   reaction[is] = 0.0;
   /* qLocal computation*/
   int incx = n, incy = 1;
-  qLocal[0] = q[in] + DDOT(n , &M[in] , incx , reaction , incy);
-  qLocal[1] = q[it] + DDOT(n , &M[it] , incx , reaction , incy);
-  qLocal[2] = q[is] + DDOT(n , &M[is] , incx , reaction , incy);
+  qLocal[0] = qGlobal[in] + DDOT(n , &MGlobal[in] , incx , reaction , incy);
+  qLocal[1] = qGlobal[it] + DDOT(n , &MGlobal[it] , incx , reaction , incy);
+  qLocal[2] = qGlobal[is] + DDOT(n , &MGlobal[is] , incx , reaction , incy);
 }
 
-void initializeSolver_AC(int n0, const double*const M0, const double*const q0, const double*const mu0)
+void frictionContact3D_AC_initialize(int n0, const double*const M0, const double*const q0, const double*const mu0)
 {
+  /*
+    INPUT: the global problem operators: n0 (size), M0, q0 and mu0, vector of friction coefficients.
+    In initialize, these operators are "connected" to their corresponding static variables, that will be used to build local problem
+    for each considered contact.
+    Local problem is built during call to update (which depends on the storage type for M).
+  */
+
   n = n0;
-  M = M0;
-  q = q0;
+  MGlobal = M0;
+  qGlobal = q0;
   mu = mu0;
-  update = &updateNoSparse;
-  MBlock = (double*)malloc(nBlock * nBlock * sizeof(*MBlock));
+  /* Connect to update function for dense storage */
+  update = &AC_updateNoSparse;
+  MLocal = (double*)malloc(nLocal * nLocal * sizeof(*MLocal));
+  isMAllocatedIn = 1;
 }
 
-void initializeSolver_AC_SB(int n0, const SparseBlockStructuredMatrix*const M0, const double*const q0, const double*const mu0)
+void frictionContact3D_AC_initialize_SBS(int n0, const SparseBlockStructuredMatrix*const M0, const double*const q0, const double*const mu0)
 {
+  /*
+    INPUT: the global problem operators: n0 (size), M0, q0 and mu0, vector of friction coefficients.
+    In initialize, these operators are "connected" to their corresponding static variables, that will be used to build local problem
+    for each considered contact.
+    Local problem is built during call to update (which depends on the storage type for M).
+  */
   n = n0;
-  MB = M0;
-  q = q0;
+  MBGlobal = M0;
+  qGlobal = q0;
   mu = mu0;
-  update = &updateWithSparse;
+  update = &AC_updateWithSparse;
+  isMAllocatedIn = 0;
 }
 
-void updateSolver_AC(int contact, double * reaction)
+void frictionContact3D_AC_update(int contact, double * reaction)
 {
-  /* Call the update function which depends on the storage for M/MB */
+  /* Build a local problem for a specific contact
+     reaction corresponds to the global vector (size n) of the global problem.
+  */
+
+  /* Call the update function which depends on the storage for MGlobal/MBGlobal */
   (*update)(contact, reaction);
 
   /* Friction coefficient for current block*/
@@ -147,91 +158,105 @@ void updateSolver_AC(int contact, double * reaction)
 }
 
 /* Compute function F(Reaction) */
-void F_AC(int Fsize, double *reactionTmp , double *F, int up2Date)
+void F_AC(int Fsize, double *reaction , double *F, int up2Date)
 {
-  /* Warning: input reactionTmp is not necessary equal to the last computed value of reactionBlock */
-
-  if (Fsize != nBlock)
+  if (F == NULL)
+  {
+    fprintf(stderr, "FrictionContact3D_AlartCurnier::F_AC error:  F == NULL.\n");
+    exit(EXIT_FAILURE);
+  }
+  if (Fsize != nLocal)
   {
     fprintf(stderr, "FrictionContact3D_AlartCurnier::F error, wrong block size.\n");
     exit(EXIT_FAILURE);
   }
 
-  velocityBlock[0] = MBlock[0] * reactionTmp[0] + MBlock[Fsize] * reactionTmp[1] + MBlock[2 * Fsize] * reactionTmp[2] + qLocal[0];
-  velocityBlock[1] = MBlock[1] * reactionTmp[0] + MBlock[Fsize + 1] * reactionTmp[1] + MBlock[2 * Fsize + 1] * reactionTmp[2] + qLocal[1];
-  velocityBlock[2] = MBlock[2] * reactionTmp[0] + MBlock[Fsize + 2] * reactionTmp[1] + MBlock[2 * Fsize + 2] * reactionTmp[2] + qLocal[2];
+  /* up2Date = 1 = true if jacobianF(n, reaction,jacobianF) has been called just before jacobianFMatrix(...). In that case the computation of
+     velocityLocal is not required again.
+  */
+  if (up2Date == 0)
+  {
+    /* velocityLocal = M.reaction + qLocal */
+    int incx = 1, incy = 1;
+    DCOPY(Fsize, qLocal, incx, velocityLocal, incy);
+    DGEMV(LA_NOTRANS, nLocal, nLocal, 1.0, MLocal, 3, reaction, incx, 1.0, velocityLocal, incy);
+    /*   velocityLocal[0] = MLocal[0]*reaction[0] + MLocal[Fsize]*reaction[1] + MLocal[2*Fsize]*reaction[2] + qLocal[0]; */
+    /*   velocityLocal[1] = MLocal[1]*reaction[0] + MLocal[Fsize+1]*reaction[1] + MLocal[2*Fsize+1]*reaction[2] + qLocal[1]; */
+    /*   velocityLocal[2] = MLocal[2]*reaction[0] + MLocal[Fsize+2]*reaction[1] + MLocal[2*Fsize+2]*reaction[2] + qLocal[2]; */
 
-  an = 1. / MBlock[0];
-  double alpha = MBlock[Fsize + 1] + MBlock[2 * Fsize + 2];
-  double det = MBlock[1 * Fsize + 1] * MBlock[2 * Fsize + 2] - MBlock[2 * Fsize + 1] + MBlock[1 * Fsize + 2];
-  double beta = alpha * alpha - 4 * det;
-  at = 2 * (alpha - beta) / ((alpha + beta) * (alpha + beta));
+    an = 1. / MLocal[0];
+    double alpha = MLocal[Fsize + 1] + MLocal[2 * Fsize + 2];
+    double det = MLocal[1 * Fsize + 1] * MLocal[2 * Fsize + 2] - MLocal[2 * Fsize + 1] + MLocal[1 * Fsize + 2];
+    double beta = alpha * alpha - 4 * det;
+    at = 2 * (alpha - beta) / ((alpha + beta) * (alpha + beta));
+
+    /* Projection on [0, +infty[ and on D(0, mu*reactionn) */
+    projN = reaction[0] - an * velocityLocal[0];
+    projT = reaction[1] - at * velocityLocal[1];
+    projS = reaction[2] - at * velocityLocal[2];
+  }
 
   double num;
   double coef2 = mu_i * mu_i;
-  /* Projection on [0, +infty[ and on D(0, mu*reactionn) */
-  projN = reactionTmp[0] - an * velocityBlock[0];
-  projT = reactionTmp[1] - at * velocityBlock[1];
-  projS = reactionTmp[2] - at * velocityBlock[2];
-
   if (projN > 0)
   {
-    F[0] = velocityBlock[0];
+    F[0] = velocityLocal[0];
   }
   else
   {
-    F[0] = reactionTmp[0] / an;
+    F[0] = reaction[0] / an;
   }
 
   double mrn = projT * projT + projS * projS;
-  if (mrn <= coef2 * reactionTmp[0]*reactionTmp[0])
+  if (mrn <= coef2 * reaction[0]*reaction[0])
   {
-    F[1] = velocityBlock[1];
-    F[2] = velocityBlock[2];
+    F[1] = velocityLocal[1];
+    F[2] = velocityLocal[2];
   }
   else
   {
     num  = mu_i / sqrt(mrn);
-    F[1] = (reactionTmp[1] - projT * reactionTmp[0] * num) / at;
-    F[2] = (reactionTmp[2] - projS * reactionTmp[0] * num) / at;
+    F[1] = (reaction[1] - projT * reaction[0] * num) / at;
+    F[2] = (reaction[2] - projS * reaction[0] * num) / at;
   }
 }
 
 /* Compute Jacobian of function F */
-void jacobianF_AC(int Fsize, double *reactionTmp, double *jacobianFMatrix, int up2Date)
+void jacobianF_AC(int Fsize, double *reaction, double *jacobianFMatrix, int up2Date)
 {
   if (jacobianFMatrix == NULL)
   {
     fprintf(stderr, "FrictionContact3D_AlartCurnier::jacobianF_AC error: jacobianMatrix == NULL.\n");
     exit(EXIT_FAILURE);
   }
-  if (Fsize != nBlock)
+  if (Fsize != nLocal)
   {
     fprintf(stderr, "FrictionContact3D_AlartCurnier::jacobianF_AC error, wrong block size.\n");
     exit(EXIT_FAILURE);
   }
 
-  /* Warning: input reactionTmp is not necessary equal to the last computed value of reactionBlock */
+  /* Warning: input reaction is not necessary equal to the last computed value of reactionBlock */
 
-  /* up2Date = 1 = true if F(n, reactionTmp,F) has been called just before jacobianFMatrix(...). In that case the computation of
-     velocityBlock is not required again.
+  /* up2Date = 1 = true if F(n, reaction,F) has been called just before jacobianFMatrix(...). In that case the computation of
+     velocityLocal is not required again.
   */
   if (up2Date == 0)
   {
-    velocityBlock[0] = MBlock[0] * reactionTmp[0] + MBlock[Fsize] * reactionTmp[1] + MBlock[2 * Fsize] * reactionTmp[2] + qLocal[0];
-    velocityBlock[1] = MBlock[1] * reactionTmp[0] + MBlock[Fsize + 1] * reactionTmp[1] + MBlock[2 * Fsize + 1] * reactionTmp[2] + qLocal[1];
-    velocityBlock[2] = MBlock[2] * reactionTmp[0] + MBlock[Fsize + 2] * reactionTmp[1] + MBlock[2 * Fsize + 2] * reactionTmp[2] + qLocal[2];
+    /* velocityLocal = M.reaction + qLocal */
+    int incx = 1, incy = 1;
+    DCOPY(Fsize, qLocal, incx, velocityLocal, incy);
+    DGEMV(LA_NOTRANS, nLocal, nLocal, 1.0, MLocal, 3, reaction, incx, 1.0, velocityLocal, incy);
 
-    an = 1. / MBlock[0];
-    double alpha = MBlock[Fsize + 1] + MBlock[2 * Fsize + 2];
-    double det = MBlock[1 * Fsize + 1] * MBlock[2 * Fsize + 2] - MBlock[2 * Fsize + 1] + MBlock[1 * Fsize + 2];
+    an = 1. / MLocal[0];
+    double alpha = MLocal[Fsize + 1] + MLocal[2 * Fsize + 2];
+    double det = MLocal[1 * Fsize + 1] * MLocal[2 * Fsize + 2] - MLocal[2 * Fsize + 1] + MLocal[1 * Fsize + 2];
     double beta = alpha * alpha - 4 * det;
     at = 2 * (alpha - beta) / ((alpha + beta) * (alpha + beta));
 
     /* Projection on [0, +infty[ and on D(0, mu*reactionn) */
-    projN = reactionTmp[0] - an * velocityBlock[0];
-    projT = reactionTmp[1] - at * velocityBlock[1];
-    projS = reactionTmp[2] - at * velocityBlock[2];
+    projN = reaction[0] - an * velocityLocal[0];
+    projT = reaction[1] - at * velocityLocal[1];
+    projS = reaction[2] - at * velocityLocal[2];
   }
 
   double coef2 = mu_i * mu_i;
@@ -240,7 +265,7 @@ void jacobianF_AC(int Fsize, double *reactionTmp, double *jacobianFMatrix, int u
   if (projN > 0)
   {
     for (j = 0; j < Fsize; ++j)
-      jacobianFMatrix[j * Fsize] = MBlock[j * Fsize];
+      jacobianFMatrix[j * Fsize] = MLocal[j * Fsize];
   }
   else
   {
@@ -250,30 +275,30 @@ void jacobianF_AC(int Fsize, double *reactionTmp, double *jacobianFMatrix, int u
   double mrn = projT * projT + projS * projS;
   double num, rcof, mrn3;
   double tmp;
-  if (mrn <= coef2 * reactionTmp[0]*reactionTmp[0])
+  if (mrn <= coef2 * reaction[0]*reaction[0])
     for (i = 1; i < Fsize; ++i)
       for (j = 0; j < Fsize; ++j)
-        jacobianFMatrix[j * Fsize + i] = MBlock[j * Fsize + i];
+        jacobianFMatrix[j * Fsize + i] = MLocal[j * Fsize + i];
   else
   {
     num  = 1. / sqrt(mrn);
     mrn3 = 1. / sqrt(mrn) * sqrt(mrn) * sqrt(mrn);
     rcof = mu_i / at;
-    tmp = at * mrn3 * (MBlock[1] * projT + MBlock[2] * projS);
-    jacobianFMatrix[1] = -rcof * (num * projT + reactionTmp[0] * projT * tmp);
-    jacobianFMatrix[2] = -rcof * (num * projS + reactionTmp[0] * projS * tmp);
+    tmp = at * mrn3 * (MLocal[1] * projT + MLocal[2] * projS);
+    jacobianFMatrix[1] = -rcof * (num * projT + reaction[0] * projT * tmp);
+    jacobianFMatrix[2] = -rcof * (num * projS + reaction[0] * projS * tmp);
 
-    tmp = mrn3 * ((1 - at * MBlock[Fsize + 1]) * projT - at * MBlock[Fsize + 2] * projS);
-    jacobianFMatrix[1 * Fsize + 1] = (1 - mu_i * reactionTmp[0] * (num * (1 - at * MBlock[Fsize + 1]) - projT * tmp)) / at;
-    jacobianFMatrix[1 * Fsize + 2] =  - rcof * reactionTmp[0] * ((-num * at * MBlock[Fsize + 2]) - projS * tmp);
+    tmp = mrn3 * ((1 - at * MLocal[Fsize + 1]) * projT - at * MLocal[Fsize + 2] * projS);
+    jacobianFMatrix[1 * Fsize + 1] = (1 - mu_i * reaction[0] * (num * (1 - at * MLocal[Fsize + 1]) - projT * tmp)) / at;
+    jacobianFMatrix[1 * Fsize + 2] =  - rcof * reaction[0] * ((-num * at * MLocal[Fsize + 2]) - projS * tmp);
 
-    tmp = mrn3 * ((1 - at * MBlock[2 * Fsize + 2]) * projS - at * MBlock[2 * Fsize + 1] * projT);
-    jacobianFMatrix[2 * Fsize + 1] =  - rcof * reactionTmp[0] * ((-num * at * MBlock[2 * Fsize + 1]) - projT * tmp);
-    jacobianFMatrix[2 * Fsize + 2] = (1 - mu_i * reactionTmp[0] * (num * (1 - at * MBlock[2 * Fsize + 2]) - projS * tmp)) / at;
+    tmp = mrn3 * ((1 - at * MLocal[2 * Fsize + 2]) * projS - at * MLocal[2 * Fsize + 1] * projT);
+    jacobianFMatrix[2 * Fsize + 1] =  - rcof * reaction[0] * ((-num * at * MLocal[2 * Fsize + 1]) - projT * tmp);
+    jacobianFMatrix[2 * Fsize + 2] = (1 - mu_i * reaction[0] * (num * (1 - at * MLocal[2 * Fsize + 2]) - projS * tmp)) / at;
   }
 }
 
-void postSolver_AC(int contact, double* reaction)
+void frictionContact3D_AC_post(int contact, double* reaction)
 {
   /* This function is required in the interface but useless in Alart-Curnier case */
 }
@@ -282,72 +307,83 @@ void computeFGlobal_AC(double* reaction, double* FGlobal)
 {
   int contact, numberOfContacts = n / 3, diagPos = 0, position;
   int in, it, is, inc, incx;
-  double * reactionTmp;
+  double * reactionLocal;
   double alpha, det, beta, num, coef2, mrn;
   for (contact = 0; contact < numberOfContacts; ++contact)
   {
     position = 3 * contact;
-    if (MB != NULL) /* Sparse storage */
+    if (MBGlobal != NULL) /* Sparse storage */
     {
-      /* The part of M which corresponds to the current block is copied into MBlock */
+      /* The part of MGlobal which corresponds to the current block is copied into MLocal */
       diagPos = numberOfContacts * contact + contact;
-      MBlock = MB->block[diagPos];
+      MLocal = MBGlobal->block[diagPos];
     }
-    else if (M != NULL)
+    else if (MGlobal != NULL)
     {
       in = 3 * contact;
       it = in + 1;
       is = it + 1;
       inc = n * in;
 
-      /* The part of M which corresponds to the current block is copied into MBlock */
-      MBlock[0] = M[inc + in];
-      MBlock[1] = M[inc + it];
-      MBlock[2] = M[inc + is];
+      /* The part of MGlobal which corresponds to the current block is copied into MLocal */
+      MLocal[0] = MGlobal[inc + in];
+      MLocal[1] = MGlobal[inc + it];
+      MLocal[2] = MGlobal[inc + is];
       inc += n;
-      MBlock[3] = M[inc + in];
-      MBlock[4] = M[inc + it];
-      MBlock[5] = M[inc + is];
+      MLocal[3] = MGlobal[inc + in];
+      MLocal[4] = MGlobal[inc + it];
+      MLocal[5] = MGlobal[inc + is];
       inc += n;
-      MBlock[6] = M[inc + in];
-      MBlock[7] = M[inc + it];
-      MBlock[8] = M[inc + is];
+      MLocal[6] = MGlobal[inc + in];
+      MLocal[7] = MGlobal[inc + it];
+      MLocal[8] = MGlobal[inc + is];
     }
 
-    reactionTmp = &reaction[3 * contact];
+    reactionLocal = &reaction[3 * contact];
     incx = 3;
-    velocityBlock[0] = DDOT(3 , MBlock , incx , reactionTmp , 1) + qLocal[0];
-    velocityBlock[1] = DDOT(3 , MBlock , incx , reactionTmp , 1) + qLocal[1];
-    velocityBlock[2] = DDOT(3 , MBlock , incx , reactionTmp , 1) + qLocal[2];
-    an = 1. / MBlock[0];
-    alpha = MBlock[4] + MBlock[8];
-    det = MBlock[4] * MBlock[8] - MBlock[7] + MBlock[5];
+    velocityLocal[0] = DDOT(3 , MLocal , incx , reactionLocal , 1) + qLocal[0];
+    velocityLocal[1] = DDOT(3 , MLocal , incx , reactionLocal , 1) + qLocal[1];
+    velocityLocal[2] = DDOT(3 , MLocal , incx , reactionLocal , 1) + qLocal[2];
+    an = 1. / MLocal[0];
+    alpha = MLocal[4] + MLocal[8];
+    det = MLocal[4] * MLocal[8] - MLocal[7] + MLocal[5];
     beta = alpha * alpha - 4 * det;
     at = 2 * (alpha - beta) / ((alpha + beta) * (alpha + beta));
-    projN = reactionTmp[0] - an * velocityBlock[0];
-    projT = reactionTmp[1] - at * velocityBlock[1];
-    projS = reactionTmp[2] - at * velocityBlock[2];
+    projN = reactionLocal[0] - an * velocityLocal[0];
+    projT = reactionLocal[1] - at * velocityLocal[1];
+    projS = reactionLocal[2] - at * velocityLocal[2];
     coef2 = mu[contact] * mu[contact];
     if (projN > 0)
     {
-      FGlobal[position] = velocityBlock[0];
+      FGlobal[position] = velocityLocal[0];
     }
     else
     {
-      FGlobal[position] = reactionTmp[0] / an;
+      FGlobal[position] = reactionLocal[0] / an;
     }
 
     mrn = projT * projT + projS * projS;
-    if (mrn <= coef2 * reactionTmp[0]*reactionTmp[0])
+    if (mrn <= coef2 * reactionLocal[0]*reactionLocal[0])
     {
-      FGlobal[position + 1] = velocityBlock[1];
-      FGlobal[position + 2] = velocityBlock[2];
+      FGlobal[position + 1] = velocityLocal[1];
+      FGlobal[position + 2] = velocityLocal[2];
     }
     else
     {
       num  = mu[contact] / sqrt(mrn);
-      FGlobal[position + 1] = (reactionTmp[1] - projT * reactionTmp[0] * num) / at;
-      FGlobal[position + 2] = (reactionTmp[2] - projS * reactionTmp[0] * num) / at;
+      FGlobal[position + 1] = (reactionLocal[1] - projT * reactionLocal[0] * num) / at;
+      FGlobal[position + 2] = (reactionLocal[2] - projS * reactionLocal[0] * num) / at;
     }
   }
+}
+
+void frictionContact3D_AC_free()
+{
+  MGlobal = NULL;
+  MBGlobal = NULL;
+  qGlobal = NULL;
+  mu = NULL;
+  if (isMAllocatedIn == 1)
+    free(MLocal);
+  MLocal = NULL;
 }

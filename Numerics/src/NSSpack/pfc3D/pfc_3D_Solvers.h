@@ -50,6 +50,7 @@ primal resolution of contact problems with friction.\n
 */
 
 #include "NSSTools.h"
+#include "SparseBlockMatrix.h"
 #include "pfc_3D_Alart_Curnier.h"
 #include "pfc_3D_Fischer_Burmeister.h"
 

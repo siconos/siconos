@@ -110,7 +110,7 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
   double rho = 1e-8;
   double descentCondition, criterion, norm_jacobian_psi, normPhi;
   double p = 2.1;
-  double terminationCriteron = 1;
+  double terminationCriterion = 1;
   if (jacobian_psi == NULL)
   {
     fprintf(stderr, "NonSmoothNewton, memory allocation failed for jacobian_psi.\n");
@@ -118,7 +118,7 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
   }
 
   /** Iterations ... */
-  while ((niter < itermax) && (terminationCriteron > tolerance))
+  while ((niter < itermax) && (terminationCriterion > tolerance))
   {
     ++niter;
     /** Computes phi and its jacobian */
@@ -134,8 +134,8 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
     psi = 0.5 * normPhi * normPhi;
 
     /* Stops if the termination criterion is satisfied */
-    terminationCriteron = norm_jacobian_psi;
-    if (terminationCriteron < tolerance)
+    terminationCriterion = norm_jacobian_psi;
+    if (terminationCriterion < tolerance)
       break;
 
     /* Search direction calculation
@@ -164,7 +164,7 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
 
     if (ispeak > 0)
     {
-      printf("Non Smooth Newton, iteration number %i, error equal to %14.7e .\n", niter, terminationCriteron);
+      printf("Non Smooth Newton, iteration number %i, error equal to %14.7e .\n", niter, terminationCriterion);
       printf(" -----------------------------------------------------------------------");
     }
   }
@@ -172,7 +172,7 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
   /* Total number of iterations */
   iparam[2] = niter;
   /* Final error */
-  dparam[1] = terminationCriteron;
+  dparam[1] = terminationCriterion;
 
   /** Free memory*/
   free(phiVector);

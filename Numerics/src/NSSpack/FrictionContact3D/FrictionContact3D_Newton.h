@@ -30,7 +30,7 @@
   - free
 
 */
-#include "NSSTools.h"
+#include "SparseBlockMatrix.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,7 +51,7 @@ extern "C" {
       \param vector of the friction coefficients
       \param vector of int parameters
    */
-  void frictionContact3D_Newton_initialize_SB(int, const SparseBlockStructuredMatrix *const, const double*const, const double*const, int*);
+  void frictionContact3D_Newton_initialize_SBS(int, const SparseBlockStructuredMatrix *const, const double*const, const double*const, int*);
 
   /** solve friction-contact 3D problem with Newton
       \param number (position in global matrix) of the considered contact

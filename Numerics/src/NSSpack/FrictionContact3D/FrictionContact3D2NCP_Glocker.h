@@ -36,6 +36,7 @@
   Chapter 13, part 4.3 p 450.
 
 */
+#include "SparseBlockMatrix.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,23 +48,23 @@ extern "C" {
      \param the global vector q
      \param the global vector mu of the friction coefficients (size = n/3)
   */
-  void initializeNCPGlocker(int, const double*const, const double*const, const double*const);
+  void NCPGlocker_initialize(int, const double*const, const double*const, const double*const);
 
   /**  */
-  void initializeNCPGlocker_SB(int n0, const SparseBlockStructuredMatrix*const M0, const double*const q0, const double*const mu0);
+  void NCPGlocker_initialize_SBS(int n0, const SparseBlockStructuredMatrix*const M0, const double*const q0, const double*const mu0);
 
   /** Pick the required sub-blocks in q, M ... according to the considered contact and write the
      operators required for the Glocker formulation
      \param the number of the considered contact (its position in global M)
      \param the global reaction vector (size n)
   */
-  void updateNCPGlocker(int, double*);
+  void NCPGlocker_update(int, double*);
 
   /** Retrieve global reaction values after solving, from computed "reactionGlocker".
      \param the number of the considered contact
      \param the global reaction (in-out parameter)
   */
-  void postSolverNCPGlocker(int, double *);
+  void NCPGlocker_post(int, double *);
 
   /** To compute F
      \param the resulting FOut, in-out parameter (warning: must be null on input)
@@ -79,9 +80,11 @@ extern "C" {
   */
   void computeJacobianFGlocker(double **, int);
 
+  /** free memory for friction contact to NCP-Glocker */
+  void NCPGlocker_free();
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* NSSPACK_H */
+#endif

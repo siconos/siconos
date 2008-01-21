@@ -25,37 +25,9 @@
 
 */
 
-/*!\struct SparseBlockStructuredMatrix
-
-\brief To store sparse block matrices with square diagonal blocks
-
-\param nbblocks         : the total number of non null blocks
-\param **block          : *block contains the double values of one block in Fortran storage (column by column)
-**block is the list of non null blocks
-\param size             : the number of blocks along a row (or column)
-\param *blocksize       : the list of the sizes of diagonal (square) blocks
-\param *RowIndex        : the list of *block row indices (first row = 0)
-\param *ColumnIndex     : the list of *block column indices (first column = 0)
-*/
-
-typedef struct
-{
-  int nbblocks;
-  double **block;
-  int size;
-  int *blocksize;
-  int *RowIndex;
-  int *ColumnIndex;
-} SparseBlockStructuredMatrix;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-  /** Destructor for SparseBlockStructuredMatrix objects
-      \param SparseBlockStructuredMatrix, the matrix to be destroyed.
-   */
-  void freeSpBlMat(SparseBlockStructuredMatrix *blmat);
 
   /** Search for the max. element of a vector
       \param[in] x, the vector
@@ -115,4 +87,4 @@ extern "C" {
 }
 #endif
 
-#endif /* NSSPACK_H */
+#endif

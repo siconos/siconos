@@ -32,7 +32,7 @@ AM_CFLAGS=-std=c99
 
 noinst_LTLIBRARIES = libNCP.la
 
-libNCP_la_SOURCES = NCP_compute_error.c NCP_FischerBurmeister.c NCP.h 		     
+libNCP_la_SOURCES = NCP_compute_error.c NCP_block_compute_error.c NCP_FischerBurmeister.c NCP.h 		     
 libNCP_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 
 numerics_HEADERS = NCP.h

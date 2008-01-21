@@ -30,8 +30,10 @@ AM_CFLAGS=-std=c99
 
 noinst_LTLIBRARIES = libNSSTools.la
 
-libNSSTools_la_SOURCES = abs_part.c diffns.c freeSpBlMat.c maxf.c max_part.c minf.c min_part.c NSSTools.h pos_part.c sortsn.f clapack_dtrtrs.c
+libNSSTools_la_SOURCES = abs_part.c diffns.c maxf.c max_part.c minf.c min_part.c pos_part.c sortsn.f clapack_dtrtrs.c \
+			 SparseBlockMatrix.c \
+			 SparseBlockMatrix.h NSSTools.h
 
 libNSSTools_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 
-numerics_HEADERS = NSSTools.h
+numerics_HEADERS = NSSTools.h SparseBlockMatrix.h

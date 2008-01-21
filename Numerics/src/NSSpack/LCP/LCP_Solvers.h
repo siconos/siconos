@@ -64,7 +64,7 @@
   Last Modifications : Mathieu Renouf , Pascal Denoyelle, Franck Perignon
 */
 
-#include "NSSTools.h"
+#include "SparseBlockMatrix.h"
 
 /** specific method for LCP
     \param name       name of the solver.
@@ -74,7 +74,6 @@
     \param relax      relaxation coefficient.
     \param rho        regularization coefficient
     \param chat       output boolean ( 0 = no output log ).
-    \param normType   name norm (not yet available).
     \param iter       final number of iterations.
     \param err        final value of error criteria.
 */
@@ -88,7 +87,6 @@ typedef struct
   double relax;
   double rho;
   int    chat;
-  char   normType[64];
   int    iter;
   double err;
 

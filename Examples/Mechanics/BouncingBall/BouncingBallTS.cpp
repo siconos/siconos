@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
 
     // -- OneStepNsProblem --
     OneStepNSProblem * osnspb = new LCP(s, "LCP", solverName, 100, 1e-15);
-    osnspb->getSolverPtr()->setSolverBlock(true);
+    //osnspb->getSolverPtr()->setSolverBlock(true);
 
     // =========================== End of model definition ===========================
 

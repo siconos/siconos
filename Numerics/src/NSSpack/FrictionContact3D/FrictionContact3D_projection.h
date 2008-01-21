@@ -21,29 +21,43 @@
 
 /*!\file FrictionContact3D_projection.h
   Typedef and functions declarations related to projection solver for 3 dimension frictional contact problems
-  \author Franck Perignon
 
   Each solver must have 4 functions in its interface:
-  - initialize: link local static variables to the global ones (M,q,...)
+  - initialize: link global static variables to the considered problem (M,q,...)
   - update: link/fill the local variables corresponding to sub-blocks of the full problem, for a specific contact
   - solve: solve the local problem
   - free
 
-  \author Houari Khenous and Franck Perignon last modification 05/12/2007 .
+  We consider a "global" (ie for several contacts) problem, used to initialize the static global variables.
+  Then a "local" (ie for one contact => size = 3) problem is built (update function) and solved (solve function).
+
+  Two different storages are available for M: dense and sparse block. Initialize and update calls depend on this storage.
+  SBS (Sparse Block Storage) is added to the name of functions dedicated to Sparse storage for M.
+
+  \author Houari Khenous and Franck Perignon
 
 */
+#include "SparseBlockMatrix.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-  /** Initialize friction-contact 3D projection solver
+  /** Initialize friction-contact 3D projection
       \param dim. of the global problem
       \param matrix M of the global problem
       \param vector q of the global problem
       \param vector of the friction coefficients
    */
   void frictionContact3D_projection_initialize(int, const double*const, const double*const, const double*const);
+
+  /** Initialize friction-contact 3D projection, using sparse-block storage for M
+      \param dim. of the global problem
+      \param matrix M of the global problem
+      \param vector q of the global problem
+      \param vector of the friction coefficients
+   */
+  void frictionContact3D_projection_initialize_SBS(int, const SparseBlockStructuredMatrix*const, const double*const, const double*const);
 
   /** Update friction-contact 3D projection solver: formalize local problem for one contact.
       \param number (position in global matrix) of the considered contact

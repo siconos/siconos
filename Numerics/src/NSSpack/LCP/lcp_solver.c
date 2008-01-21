@@ -31,31 +31,30 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
 
   const char lcpkey1[10] = "Lemke", lcpkey2[10] = "PGS", lcpkey3[10] = "CPG";
   const char lcpkey4[10] = "Latin", lcpkey5[10] = "QP", lcpkey6[10] = "NSQP";
-  const char lcpkey7[15] = "LexicoLemke", lcpkey8[15] = "NewtonMin";
+  const char lcpkey8[15] = "NewtonMin";
   const char lcpkey9[15] = "Latin_w", lcpkey10[15] = "NewtonFB", lcpkey11[15] = "PSOR";
-  const char lcpkey12[10] = "NLGS";
   const char lcpkey13[10] = "RPGS";
   const char lcpkey14[10] = "Path";
 
-  // Remark: Lemke = LexicoLemke. Only one solver is called: lexicoLemke.
+  /* Output result
+     0: ok
+     >0: problem (depends on solver)
+  */
+  int info = 1;
 
-  int i, j, info = 1;
-
-  int     iparamLCP[5];
-  double  dparamLCP[5];
-
-  for (i = 0 ; i < 5 ; ++i) iparamLCP[i] = 0;
-  for (i = 0 ; i < 5 ; ++i) dparamLCP[i] = 0.0;
+  /******************************************
+   *  1 - Check for trivial solution
+   ******************************************/
 
   /*  limqpos = -1e-16 / sqrt((double) *n); */
-  i = 0;
+  int i = 0;
   while ((i < (*n - 1)) && (q[i] >= 0.)) i++;
   if ((i == (*n - 1)) && (q[*n - 1] >= 0.))
   {
     /* TRIVIAL CASE : q >= 0
      * z = 0 and w = q is solution of LCP(q,M)
      */
-    for (j = 0 ; j < *n; j++)
+    for (int j = 0 ; j < *n; j++)
     {
       z[j] = 0.0;
       w[j] = q[j];
@@ -63,27 +62,74 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
     info = 0;
     pt->lcp.iter = 0;
     pt->lcp.err  = 0.;
-    if (pt->lcp.chat > 0) printf("Trivial case of LCP : positive vector q \n");
+    if (pt->lcp.chat > 0) printf("LCP_solver: trivial solution for LCP (positive vector q)  \n");
     return info;
   }
 
+  /*************************************************
+   *  2 - Call specific solver (if no trivial sol.)
+   *************************************************/
+
+  /* Lists of parameters for solvers
+     iparamLCP[0] = maximum iterations number
+     iparamLCP[1] = verbose mode (0:off, >0:on)
+     iparamLCP[2] = number of iterations done (output)
+
+     dparamLCP[0] = tolerance
+     dparamLCP[1] = depends on solver
+     dparamLCP[2] = depends on solver
+     dparamLCP[3] = depends on solver
+  */
+  int     iparamLCP[3];
+  double  dparamLCP[4];
+  iparamLCP[1] = pt->lcp.chat;
+
+  /****** Lemke algorithm ******/
+  /* IN: itermax
+     OUT: iter */
   if (strcmp(pt->lcp.name , lcpkey1) == 0)
   {
-
     iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
-
     lcp_lexicolemke(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
     pt->lcp.iter = iparamLCP[2];
   }
-  /* **** Latin Solver **** */
 
+  /****** PGS Solver ******/
+  /* IN: itermax, tolerance
+     OUT: iter, error */
+  else if (strcmp(pt->lcp.name , lcpkey2) == 0)
+  {
+    iparamLCP[0] = pt->lcp.itermax;
+    dparamLCP[0] = pt->lcp.tol;
+
+    lcp_pgs(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+
+    pt->lcp.iter = iparamLCP[2];
+    pt->lcp.err  = dparamLCP[2];
+  }
+
+  /****** CPG Solver ******/
+  /* IN: itermax, tolerance
+     OUT: iter, error */
+  else if (strcmp(pt->lcp.name , lcpkey3) == 0)
+  {
+    iparamLCP[0] = pt->lcp.itermax;
+    dparamLCP[0] = pt->lcp.tol;
+
+    lcp_cpg(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+
+    pt->lcp.iter = iparamLCP[2];
+    pt->lcp.err  = dparamLCP[1];
+  }
+
+  /****** Latin Solver ******/
+  /* IN: itermax, tolerance, k_latin
+     OUT: iter, error */
   else if (strcmp(pt->lcp.name , lcpkey4) == 0)
   {
 
     iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
     dparamLCP[0] = pt->lcp.tol;
     dparamLCP[1] = pt->lcp.k_latin;
 
@@ -94,13 +140,13 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
 
   }
 
-  /* **** Latin_w Solver **** */
-
+  /****** Latin_w Solver ******/
+  /* IN: itermax, tolerance, k_latin, relax
+     OUT: iter, error */
   else if (strcmp(pt->lcp.name , lcpkey9) == 0)
   {
 
     iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
     dparamLCP[0] = pt->lcp.tol;
     dparamLCP[1] = pt->lcp.k_latin;
     dparamLCP[3] = pt->lcp.relax;
@@ -113,67 +159,12 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
 
   }
 
-  /* **** PGS Solver **** */
-
-  else if (strcmp(pt->lcp.name , lcpkey2) == 0)
-  {
-
-    iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
-    dparamLCP[0] = pt->lcp.tol;
-    /* dparamLCP[1] = pt->lcp.relax;*/
-
-    lcp_pgs(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
-
-    pt->lcp.iter = iparamLCP[2];
-    pt->lcp.err  = dparamLCP[2];
-
-  }
-  /* **** NLGS Solver **** */
-
-  else if (strcmp(pt->lcp.name , lcpkey12) == 0)
-  {
-
-    printf("Warning: NLGS method is obsolete. Use PGS instead.\n");
-
-  }
-  /* **** SOR Solver **** */
-
-  else if (strcmp(pt->lcp.name , lcpkey11) == 0)
-  {
-
-    iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
-    dparamLCP[0] = pt->lcp.tol;
-    dparamLCP[1] = pt->lcp.relax;
-
-    lcp_psor(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
-
-    pt->lcp.iter = iparamLCP[2];
-    pt->lcp.err  = dparamLCP[2];
-
-  }
-  /* **** CPG Solver **** */
-
-  else if (strcmp(pt->lcp.name , lcpkey3) == 0)
-  {
-
-    iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
-    dparamLCP[0] = pt->lcp.tol;
-
-    lcp_cpg(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
-
-    pt->lcp.iter = iparamLCP[2];
-    pt->lcp.err  = dparamLCP[1];
-
-  }
-
-  /* ***** QP Solver ***** */
-
+  /****** QP Solver ******/
+  /* IN: tolerance
+     OUT:
+  */
   else if (strcmp(pt->lcp.name , lcpkey5) == 0)
   {
-
     /* We assume that the LCP matrix M is symmetric*/
 
     dparamLCP[0] = pt->lcp.tol;
@@ -182,62 +173,76 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
 
   }
 
-  /* **** NSQP Solver **** */
-
+  /****** NSQP Solver ******/
+  /* IN: tolerance
+     OUT:
+  */
   else if (strcmp(pt->lcp.name , lcpkey6) == 0)
   {
-
     /* We assume that the LCP matrix M is not symmetric*/
 
     dparamLCP[0] = pt->lcp.tol;
 
     lcp_nsqp(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
-
   }
-  else if (strcmp(pt->lcp.name , lcpkey7) == 0)
-  {
 
-    iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
-
-    lcp_lexicolemke(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
-
-    pt->lcp.iter = iparamLCP[2];
-
-  }
+  /****** Newton min ******/
+  /* IN: itermax, tolerance
+     OUT: iter, error
+  */
   else if (strcmp(pt->lcp.name , lcpkey8) == 0)
   {
 
     iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
     dparamLCP[0] = pt->lcp.tol;
 
     lcp_newton_min(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
     pt->lcp.iter = iparamLCP[2];
     pt->lcp.err  = dparamLCP[1];
-
   }
+
+  /****** Newton Fischer-Burmeister ******/
+  /* IN: itermax, tolerance
+     OUT: iter, error
+  */
   else if (strcmp(pt->lcp.name , lcpkey10) == 0)
   {
 
     iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
     dparamLCP[0] = pt->lcp.tol;
 
     lcp_newton_FB(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
     pt->lcp.iter = iparamLCP[2];
     pt->lcp.err  = dparamLCP[1];
-
   }
-  /* **** RPGS (Regularized Projected Gauss-Seidel) Solver **** */
 
+  /****** PSOR Solver ******/
+  /* IN: itermax, tolerance, relax
+     OUT: iter, error
+  */
+  else if (strcmp(pt->lcp.name , lcpkey11) == 0)
+  {
+
+    iparamLCP[0] = pt->lcp.itermax;
+    dparamLCP[0] = pt->lcp.tol;
+    dparamLCP[1] = pt->lcp.relax;
+
+    lcp_psor(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+
+    pt->lcp.iter = iparamLCP[2];
+    pt->lcp.err  = dparamLCP[2];
+  }
+
+  /****** RPGS (Regularized Projected Gauss-Seidel) Solver ******/
+  /* IN: itermax, tolerance, rho
+     OUT: iter, error
+  */
   else if (strcmp(pt->lcp.name , lcpkey13) == 0)
   {
 
     iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
     dparamLCP[0] = pt->lcp.tol;
     dparamLCP[1] = pt->lcp.rho;
     /* dparamLCP[2] = pt->lcp.relax;*/
@@ -246,32 +251,39 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
 
     pt->lcp.iter = iparamLCP[2];
     pt->lcp.err  = dparamLCP[3];
-
   }
-  /* **** PATH Solver **** */
 
+
+  /****** PATH (Ferris) Solver ******/
+  /* IN: itermax, tolerance, rho
+     OUT: iter, error
+  */
   else if (strcmp(pt->lcp.name , lcpkey14) == 0)
   {
 
     iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
     dparamLCP[0] = pt->lcp.tol;
     dparamLCP[1] = pt->lcp.rho;
-    /* dparamLCP[2] = pt->lcp.relax;*/
 
     lcp_path(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
     pt->lcp.iter = iparamLCP[2];
     pt->lcp.err  = dparamLCP[3];
-
   }
 
-  else printf("Warning : Unknown solver : %s\n", pt->lcp.name);
+  else
+    printf("LCP_solver error: unknown solver named: %s\n", pt->lcp.name);
 
-  /* Checking validity of z found  */
-  /*  if (info == 0) info = filter_result_LCP(*n,vec,q,z,pt->lcp.tol,pt->lcp.chat,w);*/
+  /*************************************************
+   *  3 - Check solution validity
+   *************************************************/
+
+  /* Warning: it depends on the chosen solver */
+
+  /* Not done for:  PGS, RPGS */
   if ((strcmp(pt->lcp.name , lcpkey2) != 0) && (strcmp(pt->lcp.name , lcpkey13) != 0))
     info = filter_result_LCP(*n, vec, q, z, pt->lcp.tol, pt->lcp.chat, w);
+
 
   return info;
 

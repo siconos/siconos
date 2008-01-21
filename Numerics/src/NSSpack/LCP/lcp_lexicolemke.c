@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 
 #include <math.h>
@@ -25,7 +25,6 @@
 
 void lcp_lexicolemke(int *nn , double *vec , double *q , double *zlem , double *wlem , int *info , int *iparamLCP , double *dparamLCP)
 {
-
   int i, drive, block, Ifound;
   int ic, jc;
   int dim, dim2, ITER;

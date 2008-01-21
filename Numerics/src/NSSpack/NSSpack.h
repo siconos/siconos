@@ -74,6 +74,7 @@ typedef union
   method_pfc_2D pfc_2D;
   method_pfc_3D pfc_3D;
   method_dfc_2D dfc_2D;
+  method_frictionContact_3D fc3D_parameters;
 } method;
 
 #ifdef __cplusplus
@@ -226,6 +227,18 @@ extern "C" {
       \return result (0 if successful otherwise 1).
   */
   int frictionContact3D_solver(int, double*, double*, method*, double*, double*, double*);
+
+  /** General interface to solvers for friction-contact 3D problem with sparse-block storage for M
+      \param[in] , number of contacts (dim of the problem n = 3*nc)
+      \param[in] , M global matrix (n*n)
+      \param[in] , q global vector (n)
+      \param[in] , method
+      \param[in-out] , reaction global vector (n)
+      \param[in-out] , velocity global vector (n)
+      \param[in] , mu vector of the friction coefficients (size nc)
+      \return result (0 if successful otherwise 1).
+  */
+  int frictionContact3D_solver_SBS(int, SparseBlockStructuredMatrix*, double*, method*, double*, double*, double*);
 
 #ifdef __cplusplus
 }

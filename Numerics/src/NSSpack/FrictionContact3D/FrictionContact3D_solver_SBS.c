@@ -21,13 +21,13 @@
 #include <string.h>
 #include <time.h>
 #include <LA.h>
-#include "FrictionContact3D_Solvers.h"
 #include "NSSpack.h"
+#include "FrictionContact3D_Solvers.h"
 
-int frictionContact3D_solver(int nc, double *vec , double *q , method *pt , double *reaction , double *velocity, double *mu)
+int frictionContact3D_solver_SBS(int nc, SparseBlockStructuredMatrix* M , double *q , method *pt , double *reaction , double *velocity, double *mu)
 {
   /* Solver name */
-  char pfckey3[15] = "NSGS";
+  char /* pfckey1[10]="NLGS", pfckey2[10]="CPG",*/ pfckey3[15] = "NSGS";
 
   int info = -1 ;
   /*
@@ -37,7 +37,7 @@ int frictionContact3D_solver(int nc, double *vec , double *q , method *pt , doub
    *                       1 - active screen output\n
    *  iparam[2] = the number of iterations performed by the algorithm.
    *  iparam[3] = local value for itermax
-   *  iparam[4] = local number of iterations perfomed
+   *  iparam[4] = local number of iterations performed
    *  iparam[5] = local formulation
    *  iparam[6] = local solver
    */
@@ -69,7 +69,7 @@ int frictionContact3D_solver(int nc, double *vec , double *q , method *pt , doub
     iparam[6] = pt->pfc_3D.local_solver;
     /* \todo: set [5] and [6] in Kernel */
 
-    frictionContact3D_nsgs(nc, vec , q , reaction , velocity , mu, &info , iparam , dparam);
+    frictionContact3D_nsgs_SBS(nc, M , q , reaction , velocity , mu, &info , iparam , dparam);
 
     /* Get output informations: local/global number of iterations and errors. */
     pt->pfc_3D.iter = iparam[2];
@@ -83,30 +83,4 @@ int frictionContact3D_solver(int nc, double *vec , double *q , method *pt , doub
 
   return info;
 
-}
-
-int checkTrivialCase(int n, double* q, double* velocity, double* reaction, int* iparam, double* dparam)
-{
-  /* norm of vector q */
-  double qs = DNRM2(n , q , 1);
-  int i;
-  int info = -1;
-  if (qs <= 1e-16)
-  {
-    // q norm equal to zero (less than 1e-16)
-    // -> trivial solution: reaction = 0 and velocity = q
-    for (i = 0 ; i < n ; ++i)
-    {
-      velocity[i] = q[i];
-      reaction[i] = 0.;
-    }
-    iparam[2] = 0;
-    iparam[4] = 0;
-    dparam[1] = 0.0;
-    dparam[3] = 0.0;
-    info = 0;
-    if (iparam[1] > 0)
-      printf("FrictionContact3D solver, norm(q) = 0, trivial solution reaction = 0, velocity = q.\n");
-  }
-  return info;
 }
