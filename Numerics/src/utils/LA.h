@@ -84,18 +84,33 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
    that DNRM2 := sqrt( x'*x )
 */
 #define DNRM2(N, X, INCX) \
-  BLAS_NAME(dnrm2)(INTEGER(N), X, INTEGER(INCX))
+  ({ int C_N=N; \
+     int C_INCX = INCX; \
+     BLAS_NAME(dnrm2)(INTEGER(C_N), X, INTEGER(C_INCX)); \
+  })
 
 /* DCOPY - a vector, x, to a vector, y
 */
 #define DCOPY(N, X, INCX, Y, INCY) \
-  BLAS_NAME(dcopy)(INTEGER(N), X, INTEGER(INCX), Y, INTEGER(INCY))
+  ({ int C_N=N; \
+     int C_INCX=INCX; \
+     int C_INCY=INCY; \
+     BLAS_NAME(dcopy)(INTEGER(C_N), X, INTEGER(C_INCX), Y, INTEGER(C_INCY)); \
+  })
 
 /* DGEMV - one of the matrix-vector operations y := alpha*A*x +
    beta*y, or y := alpha*A'*x + xbeta*y,
 */
 #define DGEMV(TRANS, M, N, ALPHA, A, LDA, X, INCX, BETA, Y, INCY) \
-  BLAS_NAME(dgemv)WITH_ORDER(LA_ORDER, T_TRANS(TRANS), INTEGER(M), INTEGER(N), DOUBLE(ALPHA), A, INTEGER(LDA), X, INTEGER(INCX), DOUBLE(BETA), Y, INTEGER(INCY))
+  ({ int C_M = M; \
+     int C_N = N; \
+     double C_ALPHA = ALPHA; \
+     int C_LDA = LDA; \
+     int C_INCX = INCX; \
+     double C_BETA = BETA; \
+     int C_INCY = INCY; \
+     BLAS_NAME(dgemv)WITH_ORDER(LA_ORDER, T_TRANS(TRANS), INTEGER(C_M), INTEGER(C_N), DOUBLE(C_ALPHA), A, INTEGER(C_LDA), X, INTEGER(C_INCX), DOUBLE(C_BETA), Y, INTEGER(C_INCY)); \
+  })
 
 /*  DGEMM  performs one of the matrix-matrix operations
 *
@@ -105,45 +120,86 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 *
 *     op( X ) = X   or   op( X ) = X',*/
 #define DGEMM(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC) \
-  BLAS_NAME(dgemm)WITH_ORDER(LA_ORDER, T_TRANS(TRANSA), T_TRANS(TRANSB), INTEGER(M), INTEGER(N), INTEGER(K), DOUBLE(ALPHA), A, INTEGER(LDA), B, INTEGER(LDB), DOUBLE(BETA), C, INTEGER(LDC))
+  ({ int C_M = M; \
+     int C_N = N; \
+     int C_K = K; \
+     double C_ALPHA = ALPHA; \
+     int C_LDA = LDA; \
+     int C_LDB = LDB; \
+     double C_BETA = BETA; \
+     int C_LDC; \
+     BLAS_NAME(dgemm)WITH_ORDER(LA_ORDER, T_TRANS(TRANSA), T_TRANS(TRANSB), INTEGER(C_M), INTEGER(C_N), INTEGER(C_K), DOUBLE(C_ALPHA), A, INTEGER(C_LDA), B, INTEGER(C_LDB), DOUBLE(C_BETA), C, INTEGER(C_LDC)); \
+  })
 
 /* DDOT - the dot product of two vectors
  */
 #define DDOT(N, DX, INCX, DY, INCY) \
-  BLAS_NAME(ddot)(INTEGER(N), DX, INTEGER(INCX), DY, INTEGER(INCY))
-
+  ({ int C_N = N; \
+     int C_INCX = INCX; \
+     int C_INCY = INCY; \
+     BLAS_NAME(ddot)(INTEGER(C_N), DX, INTEGER(C_INCX), DY, INTEGER(C_INCY)); \
+  })
 /* DAXPY - time a vector plus a vector
  */
 #define DAXPY(N, DA, DX, INCX, DY, INCY) \
-  BLAS_NAME(daxpy)(INTEGER(N), DOUBLE(DA), DX, INTEGER(INCX), DY, INTEGER(INCY))
+  ({ int C_N = N; \
+     double C_DA = DA; \
+     int C_INCX = INCX; \
+     int C_INCY = INCY; \
+     BLAS_NAME(daxpy)(INTEGER(C_N), DOUBLE(C_DA), DX, INTEGER(C_INCX), DY, INTEGER(C_INCY)); \
+  })
 
 
 /* DSCAL - a vector by a constant
  */
 #define DSCAL(N,DA,DX,INCX) \
-  BLAS_NAME(dscal)(INTEGER(N), DOUBLE(DA), DX, INTEGER(INCX))
+  ({ int C_N = N; \
+     double C_DA = DA; \
+     int C_INCX = INCX; \
+     BLAS_NAME(dscal)(INTEGER(C_N), DOUBLE(C_DA), DX, INTEGER(C_INCX)); \
+  })
 
 /* DPOTRF - compute the Cholesky factorization of a real symmetric
    positive definite matrix A
  */
 #define DPOTRF( UPLO, N, A, LDA, INFO ) \
-  LAPACK_4(LAPACK_NAME(dpotrf), T_UPLO(UPLO), INTEGER(N), A , INTEGER(LDA), INTEGER(INFO))
+  ({ int C_N = N; \
+     int C_LDA = LDA; \
+     int C_INFO = INFO; \
+     LAPACK_4(LAPACK_NAME(dpotrf), T_UPLO(UPLO), INTEGER(C_N), A , INTEGER(C_LDA), INTEGER(C_INFO)); \
+  })
 
 /* DPOTRI - compute the inverse of a real symmetric positive definite
    matrix A using the Cholesky factorization A = U**T*U or A = L*L**T
    computed by DPOTRF
 */
 #define DPOTRI( UPLO, N, A, LDA, INFO) \
-  LAPACK_4(LAPACK_NAME(dpotri), T_UPLO(UPLO), INTEGER(N), A, INTEGER(LDA), INTEGER(INFO))
+  ({ int C_N = N; \
+     int C_LDA = LDA; \
+     int C_INFO = INFO; \
+     LAPACK_4(LAPACK_NAME(dpotri), T_UPLO(UPLO), INTEGER(C_N), A, INTEGER(C_LDA), INTEGER(C_INFO)); \
+  })
 
 /* DGESV - compute the solution to a real system of linear equations A * X = B,
  */
 #define DGESV( N, NRHS, A, LDA, IPIV, B, LDB, INFO ) \
-  LAPACK_7(LAPACK_NAME(dgesv), INTEGER(N), INTEGER(NRHS), A, INTEGER(LDA), INTEGERP(IPIV), B, INTEGER(LDB), INTEGER(INFO))
+  ({ int C_N = N; \
+     int C_NRHS = NRHS; \
+     int C_LDA = LDA; \
+     int C_LDB = LDB; \
+     int C_INFO = INFO; \
+     LAPACK_7(LAPACK_NAME(dgesv), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), INTEGERP(IPIV), B, INTEGER(C_LDB), INTEGER(C_INFO)); \
+  })
 
 /* DTRTRS - solve a triangular system of the form  A * X = B or A**T * X = B,
  */
 #define DTRTRS( UPLO, TRANS, DIAG, N, NRHS, A, LDA, B, LDB, INFO ) \
-  LAPACK_9_SIDED(LAPACK_NAME(dtrtrs), T_UPLO(UPLO), T_TRANS(TRANS), T_DIAG(DIAG), INTEGER(N), INTEGER(NRHS), A, INTEGER(LDA), B, INTEGER(LDB), INTEGER(INFO) )
+  ({ int C_N = N; \
+     int C_NRHS = NRHS; \
+     int C_LDA = A; \
+     int C_LDB = B; \
+     int C_INFO = INFO; \
+     LAPACK_9_SIDED(LAPACK_NAME(dtrtrs), T_UPLO(UPLO), T_TRANS(TRANS), T_DIAG(DIAG), INTEGER(N), INTEGER(NRHS), A, INTEGER(LDA), B, INTEGER(LDB), INTEGER(INFO) ); \
+  })
 
 #endif /* LA_H */
