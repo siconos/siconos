@@ -21,56 +21,56 @@
 # INTERNAL LIBRARIES
 
 #--- NSSTools --------------------------------------
-NSSTools_PATH = src/NSSpack/NSSTools
+NSSTools_PATH = src/NonSmoothSolvers/NSSTools
 NSSTools_INC = $(top_srcdir)/$(NSSTools_PATH)
 NSSTools_LIB = -L$(top_builddir)/$(NSSTools_PATH) -lNSSTools
 
 #--- LCPSolvers --------------------------------------
-LCP_PATH = src/NSSpack/LCP
+LCP_PATH = src/NonSmoothSolvers/LCP
 LCP_INC = $(top_srcdir)/$(LCP_PATH)
 LCP_LIB = -L$(top_builddir)/$(LCP_PATH) -lLCP
 
 #--- LCPSolvers --------------------------------------
-QP_PATH = src/NSSpack/QP
+QP_PATH = src/NonSmoothSolvers/QP
 QP_INC = $(top_srcdir)/$(QP_PATH)
 QP_LIB = -L$(top_builddir)/$(QP_PATH) -lQP
 
 #--- MLCPSolvers --------------------------------------
-MLCP_PATH = src/NSSpack/MLCP
+MLCP_PATH = src/NonSmoothSolvers/MLCP
 MLCP_INC = $(top_srcdir)/$(MLCP_PATH)
 MLCP_LIB = -L$(top_builddir)/$(MLCP_PATH) -lMLCP
 
 #--- NCPSolvers --------------------------------------
-NCP_PATH = src/NSSpack/NCP
+NCP_PATH = src/NonSmoothSolvers/NCP
 NCP_INC = $(top_srcdir)/$(NCP_PATH)
 NCP_LIB = -L$(top_builddir)/$(NCP_PATH) -lNCP
 
 #--- RelaySolvers --------------------------------------
-Relay_PATH = src/NSSpack/Relay
+Relay_PATH = src/NonSmoothSolvers/Relay
 Relay_INC = $(top_srcdir)/$(Relay_PATH)
 Relay_LIB = -L$(top_builddir)/$(Relay_PATH) -lRelay
 
 #--- FrictionContact2DSolvers --------------------------------------
-FrictionContact2D_PATH = src/NSSpack/FrictionContact2D
+FrictionContact2D_PATH = src/NonSmoothSolvers/FrictionContact2D
 FrictionContact2D_INC = $(top_srcdir)/$(FrictionContact2D_PATH)
 FrictionContact2D_LIB = -L$(top_builddir)/$(FrictionContact2D_PATH) -lFrictionContact2D
 
 #--- FrictionContact3DSolvers --------------------------------------
-FrictionContact3D_PATH = src/NSSpack/FrictionContact3D
+FrictionContact3D_PATH = src/NonSmoothSolvers/FrictionContact3D
 FrictionContact3D_INC = $(top_srcdir)/$(FrictionContact3D_PATH)
 FrictionContact3D_LIB = -L$(top_builddir)/$(FrictionContact3D_PATH) -lFrictionContact3D
 
 #--- PFC_3DSolvers --------------------------------------
-PFC_3D_PATH = src/NSSpack/pfc3D
+PFC_3D_PATH = src/NonSmoothSolvers/pfc3D
 PFC_3D_INC = $(top_srcdir)/$(PFC_3D_PATH)
 PFC_3D_LIB = -L$(top_builddir)/$(PFC_3D_PATH) -lPFC_3D
 
 SOLVER_INC = -I$(NSSTools_INC) -I$(LCP_INC) -I$(QP_INC) -I$(MLCP_INC) -I$(NCP_INC) -I$(FrictionContact2D_INC) -I$(FrictionContact3D_INC) -I$(Relay_INC) -I$(PFC_3D_INC)
 
-#--- NSSpack --------------------------------------
-NSSPACK_PATH = src/NSSpack
-NSSPACK_INC = $(top_srcdir)/$(NSSPACK_PATH)
-NSSPACK_LIB = -L$(top_builddir)/$(NSSPACK_PATH) -lNSSpack
+#--- NonSmoothSolvers --------------------------------------
+NONSMOOTHSOLVERS_PATH = src/NonSmoothSolvers
+NONSMOOTHSOLVERS_INC = $(top_srcdir)/$(NONSMOOTHSOLVERS_PATH)
+NONSMOOTHSOLVERS_LIB = -L$(top_builddir)/$(NONSMOOTHSOLVERS_PATH) -lNonSmoothSolvers
 
 #--- Odepack --------------------------------------
 ODEPACK_PATH = src/netlib/odepack
@@ -85,9 +85,9 @@ DFTEMPLATES_LIB = -L$(top_builddir)/$(DFTEMPLATES_PATH) -ldftemplates
 #--- utils --------------------------------------
 UTILS_PATH = src/utils
 UTILS_INC = $(top_srcdir)/$(UTILS_PATH)
-UTILS_LIB = 
+UTILS_LIB = -L$(top_builddir)/$(UTILS_PATH) -lNumericsUtils
 
-SICONOS_INCLUDES = -I$(UTILS_INC) $(SOLVER_INC) -I$(NSSPACK_INC) -I$(ODEPACK_INC) -I$(DFTEMPLATES_INC) -I$(top_srcdir)
+SICONOS_INCLUDES = -I$(UTILS_INC) $(SOLVER_INC) -I$(NONSMOOTHSOLVERS_INC) -I$(ODEPACK_INC) -I$(DFTEMPLATES_INC) -I$(top_srcdir)
 
 # COMPILE FLAGS
 INCLUDES = $(SICONOS_INCLUDES) $(SICONOS_EXT_INCLUDES)	

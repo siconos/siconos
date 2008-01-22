@@ -4,7 +4,7 @@
 #include "LA.h"
 
 
-void prod(int size, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init)
+void prodSBM(int size, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init)
 {
   /* Product SparseMat - vector, y = A*x (init = 1 = true) or y += A*x (init = 0 = false) */
 
@@ -71,7 +71,7 @@ void prod(int size, const SparseBlockStructuredMatrix* const A, const double* co
 
 }
 
-void subRowProd(int sizeX, int sizeY, int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init)
+void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init)
 {
   /*
      Product (Row of blocks of a SparseMat) - vector, y = rowA*x (init = 1 = true) or y += rowA*x (init = 0 = false)
@@ -101,7 +101,7 @@ void subRowProd(int sizeX, int sizeY, int currentRowNumber, const SparseBlockStr
 
   int incx = 1, incy = 1;
 
-  /* Check if currentRowNumber is lower or equal to the number of rows in A */
+  /* Check if currentRowNumber fits with A dimensions */
   if (currentRowNumber > A->size)
   {
     fprintf(stderr, "Numerics, SparseBlockMatrix, product (Row of a sparse matrix)-vector subRowProd(rowPos,A,x,y) failed, rowPos is out of range.\n");

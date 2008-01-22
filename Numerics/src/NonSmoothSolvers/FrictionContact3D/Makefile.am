@@ -28,12 +28,14 @@ AM_CFLAGS=-std=c99
 
 ##############################################################
 
-noinst_LTLIBRARIES = libNSSTools.la
+noinst_LTLIBRARIES = libFrictionContact3D.la
 
-libNSSTools_la_SOURCES = abs_part.c diffns.c maxf.c max_part.c minf.c min_part.c pos_part.c sortsn.f clapack_dtrtrs.c \
-			 SparseBlockMatrix.c \
-			 SparseBlockMatrix.h NSSTools.h
+libFrictionContact3D_la_SOURCES = FrictionContact3D2NCP_Glocker.c FrictionContact3D_Newton.c \
+				  FrictionContact3D_AlartCurnier.c FrictionContact3D_projection.c FrictionContact3D_nsgs.c FrictionContact3D_nsgs_SBS.c\
+			 	  FrictionContact3D_solver.c  FrictionContact3D_solver_SBS.c\
+				  FrictionContact3D2NCP_Glocker.h FrictionContact3D_Newton.h FrictionContact3D_projection.h \
+				  FrictionContact3D_AlartCurnier.h FrictionContact3D_Solvers.h FrictionContact3D_Problem.h
+libFrictionContact3D_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 
-libNSSTools_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
-
-numerics_HEADERS = NSSTools.h SparseBlockMatrix.h
+numerics_HEADERS = FrictionContact3D2NCP_Glocker.h FrictionContact3D_Newton.h FrictionContact3D_projection.h \
+		   FrictionContact3D_AlartCurnier.h FrictionContact3D_Solvers.h FrictionContact3D_Problem.h

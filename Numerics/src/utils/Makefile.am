@@ -20,7 +20,20 @@
 
 include $(top_srcdir)/config/Make-rules
 
+.c.o:
+	$(CCCOMPILE) -c $<
+.f.o:
+	$(F77COMPILE) -c $<
+
 SUBDIRS = 
+
+noinst_LTLIBRARIES = libNumericsUtils.la
+
+libNumericsUtils_la_SOURCES = Numerics_Options.c
+
+libNumericsUtils_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
+
+numerics_HEADERS = blaslapack.h f2c.h LA.h Numerics_Options.h
+
 EXTRA_DIST = 
 
-numerics_HEADERS = blaslapack.h f2c.h LA.h

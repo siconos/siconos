@@ -73,7 +73,7 @@ void AC_updateWithSparse(int contact, double * reaction)
   /* qLocal += rowMB * reaction
      with rowMB the row of blocks of MBGlobal which corresponds to the current contact
    */
-  subRowProd(n, 3, contact, MBGlobal, reaction, qLocal, 0);
+  subRowProdSBM(n, 3, contact, MBGlobal, reaction, qLocal, 0);
 
 }
 

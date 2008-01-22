@@ -24,38 +24,6 @@
 #include "FrictionContact3D_Newton.h"
 #include "FrictionContact3D2NCP_Glocker.h"
 
-/*! \page fc3DSolvers Friction-contact problems (3-dimensional)
-  \section fc3Dintro The problem
-  Find \f$(reaction,velocity)\f$ such that:\n
-
-  \f$
-  \left\lbrace
-  \begin{array}{l}
-  M \ reaction + q = velocity \\
-  0 \le reaction_n \perp velocity_n \ge 0 \\
-  -velocity_t \in \partial\psi_{[-\mu.reaction_n, \mu.reaction_n]}(reaction_t)\\
-  \end{array}
-  \right.
-  \f$
-
-  \f$ reaction, velocity, q\f$ are vectors of size n and \f$ M \f$ is a nXn matrix, with \f$ n = 3*nc \f$, nc being the number of contacts. \n
-  \f$ reaction_n\f$ represents the normal part of the reaction while \f$ reaction_t\f$ is its tangential part.
-
-  \f$ \mu \f$ is the friction coefficient (may be different for each contact).
-
-  \section fc3DSolversList Available solvers
-  Use the generic function frictionContact3DSolvers(), to call one the the specific solvers listed below:
-
-  - frictionContact3D_nsgs() : non-smooth Gauss-Seidel solver
-  - frictionContact3D_nsgs_SBS() : non-smooth Gauss-Seidel solver with Sparse Block Storage (SBS) for M
-
-  The structure method, argument of frictionContact3DSolvers(), is used to give the name and parameters of the required solver.
-
-  (see the functions/solvers list in FrictionContact3DSolvers.h)
-
-
-*/
-
 /*!\file FrictionContact3D_Solvers.h
   Subroutines for the resolution of contact problems with friction (3-dimensional case).\n
 
@@ -103,6 +71,12 @@ typedef struct
   double local_err;
 } method_frictionContact_3D;
 
+
+#include "FrictionContact3D_Problem.h"
+#include "Numerics_Options.h"
+#include "Solver_Options.h"
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -118,7 +92,8 @@ extern "C" {
       \param int vector of parameters (max. iteration number ...)
       \param double vector of parameters (tolerance ...)
   */
-  void frictionContact3D_nsgs(int, double*, double*, double*, double*, double*, int *, int *, double*);
+  //  void frictionContact3D_nsgs(int, double*, double*, double*, double*, double*, int *, int *, double*);
+  void frictionContact3D_nsgs(FrictionContact3D_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options);
 
   /** Non-Smooth Gauss Seidel solver for friction-contact 3D problem, with sparse-block storage for M
       \param nc, number of contacts (dim of the problem n = 3*nc)

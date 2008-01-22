@@ -32,20 +32,20 @@ SUBDIRS = NSSTools LCP QP MLCP NCP Relay FrictionContact2D FrictionContact3D pfc
 
 ##############################################################
 
-noinst_LTLIBRARIES = libNSSpack.la
+noinst_LTLIBRARIES = libNonSmoothSolvers.la
 
-libNSSpack_la_SOURCES = NonSmoothNewton.c NonSmoothNewton.h NSSpack.h
+libNonSmoothSolvers_la_SOURCES = NonSmoothNewton.c NonSmoothNewton.h NonSmoothSolvers.h
 
-libNSSpack_la_LIBADD =  $(top_builddir)/src/NSSpack/NSSTools/libNSSTools.la \
-			$(top_builddir)/src/NSSpack/LCP/libLCP.la  \
-			$(top_builddir)/src/NSSpack/QP/libQP.la  \
-			$(top_builddir)/src/NSSpack/MLCP/libMLCP.la  \
-			$(top_builddir)/src/NSSpack/NCP/libNCP.la  \
-			$(top_builddir)/src/NSSpack/Relay/libRelay.la  \
-			$(top_builddir)/src/NSSpack/FrictionContact2D/libFrictionContact2D.la  \
-			$(top_builddir)/src/NSSpack/FrictionContact3D/libFrictionContact3D.la  \
-			$(top_builddir)/src/NSSpack/pfc3D/libPFC_3D.la 
+libNonSmoothSolvers_la_LIBADD =  $(top_builddir)/src/NonSmoothSolvers/NSSTools/libNSSTools.la \
+			$(top_builddir)/src/NonSmoothSolvers/LCP/libLCP.la  \
+			$(top_builddir)/src/NonSmoothSolvers/QP/libQP.la  \
+			$(top_builddir)/src/NonSmoothSolvers/MLCP/libMLCP.la  \
+			$(top_builddir)/src/NonSmoothSolvers/NCP/libNCP.la  \
+			$(top_builddir)/src/NonSmoothSolvers/Relay/libRelay.la  \
+			$(top_builddir)/src/NonSmoothSolvers/FrictionContact2D/libFrictionContact2D.la  \
+			$(top_builddir)/src/NonSmoothSolvers/FrictionContact3D/libFrictionContact3D.la  \
+			$(top_builddir)/src/NonSmoothSolvers/pfc3D/libPFC_3D.la 
 
-libNSSpack_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
+libNonSmoothSolvers_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 
-numerics_HEADERS = NSSpack.h NonSmoothNewton.h 
+numerics_HEADERS = NSSpack.h NonSmoothNewton.h Solver_Options.h

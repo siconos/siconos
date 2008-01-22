@@ -82,8 +82,17 @@ void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, C
   *computeError = &fake_compute_error;
 }
 
-void frictionContact3D_nsgs(int nc, double *M, double *q, double *reaction, double *velocity, double *mu, int *info, int *iparam, double *dparam)
+//void frictionContact3D_nsgs(int nc, double *M, double *q, double *reaction, double *velocity, double *mu, int *info, int *iparam, double *dparam)
+void frictionContact3D_nsgs(FrictionContact3D_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options)
 {
+  /* int and double parameters */
+  int* iparam = options->iparam;
+  double* dparam = options->dparam;
+  /* Number of contacts */
+  int nc = problem->numberOfContacts;
+  double* q = problem->q;
+  double* M = problem->M->matrix0;
+  double* mu = problem->mu;
   /* Dimension of the problem */
   int n = 3 * nc;
   /* Maximum number of iterations */

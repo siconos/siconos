@@ -55,7 +55,7 @@ extern "C" {
       \param[in-out] y, the resulting vector
       \param[in] init, = 0 for y += Ax, =1 for y = Ax
   */
-  void prod(int size, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init);
+  void prodSBM(int size, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init);
 
   /** Row of a SparseMatrix - vector product y = rowA*x or y += rowA*x, rowA being a row of blocks of A
       \param[in] sizeX, dim of the vector x
@@ -66,7 +66,7 @@ extern "C" {
       \param[in-out] y, the resulting vector
       \param[in] init, = 0 for y += Ax, =1 for y = Ax
   */
-  void subRowProd(int sizeX, int sizeY, int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init);
+  void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init);
 
   /** Destructor for SparseBlockStructuredMatrix objects
       \param SparseBlockStructuredMatrix, the matrix to be destroyed.

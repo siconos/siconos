@@ -226,7 +226,8 @@ extern "C" {
       \param[in] , mu vector of the friction coefficients (size nc)
       \return result (0 if successful otherwise 1).
   */
-  int frictionContact3D_solver(int, double*, double*, method*, double*, double*, double*);
+  int frictionContact3D_solver(FrictionContact3D_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options);
+  //int frictionContact3D_solver(int, double*, double*, method*, double*, double*, double*);
 
   /** General interface to solvers for friction-contact 3D problem with sparse-block storage for M
       \param[in] , number of contacts (dim of the problem n = 3*nc)

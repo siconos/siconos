@@ -341,18 +341,18 @@ AC_CONFIG_FILES([Makefile
 		 src/netlib/odepack/test/Makefile
 		 src/netlib/dftemplates/Makefile
 		 src/netlib/dftemplates/double/Makefile
-                 src/NSSpack/Makefile
-                 src/NSSpack/NSSTools/Makefile
-		 src/NSSpack/LCP/Makefile
-		 src/NSSpack/QP/Makefile
-		 src/NSSpack/MLCP/Makefile
-		 src/NSSpack/NCP/Makefile
-		 src/NSSpack/FrictionContact2D/Makefile
-		 src/NSSpack/FrictionContact3D/Makefile
-		 src/NSSpack/pfc3D/Makefile
-		 src/NSSpack/Relay/Makefile
-		 src/NSSpack/InterfaceToPathFerris/Makefile
-		 src/NSSpack/test/Makefile])
+                 src/NonSmoothSolvers/Makefile
+                 src/NonSmoothSolvers/NSSTools/Makefile
+		 src/NonSmoothSolvers/LCP/Makefile
+		 src/NonSmoothSolvers/QP/Makefile
+		 src/NonSmoothSolvers/MLCP/Makefile
+		 src/NonSmoothSolvers/NCP/Makefile
+		 src/NonSmoothSolvers/FrictionContact2D/Makefile
+		 src/NonSmoothSolvers/FrictionContact3D/Makefile
+		 src/NonSmoothSolvers/pfc3D/Makefile
+		 src/NonSmoothSolvers/Relay/Makefile
+		 src/NonSmoothSolvers/InterfaceToPathFerris/Makefile
+		 src/NonSmoothSolvers/test/Makefile])
 AC_OUTPUT
 
 
