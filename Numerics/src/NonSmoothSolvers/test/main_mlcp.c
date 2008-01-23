@@ -39,28 +39,28 @@
  *  where info shows the termination result (0 for success) and iparam and dparam are respectivelly
  *  pointer over integer and pointer over double which contain specific parameters of each solver.
  *
- *  The solver's call is performed via the function mlcp_solver:
+ *  The solver's call is performed via the function mlcp_driver:
  *
- *  int mlcp_solver(double *A , double *B , double *C , double *D , double *a , double *b, int *n , int* m, method *pt ,  double *u, double *v, double *w  )
+ *  int mlcp_driver(double *A , double *B , double *C , double *D , double *a , double *b, int *n , int* m, method *pt ,  double *u, double *v, double *w  )
  *
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "NSSpack.h"
+#include "NonSmoothDrivers.h"
 #include "LA.h"
 
 #define BAVARD
 #define NBTEST 10
 #define NBMETHODS 5
 
-#define PATH_SOLVER
+#define PATH_DRIVER
 
-#ifdef PATH_SOLVER
+#ifdef PATH_DRIVER
 const unsigned short int *__ctype_b;
 const __int32_t *__ctype_tolower ;
-#endif /*PATH_SOLVER*/
+#endif /*PATH_DRIVER*/
 
 
 typedef struct
@@ -134,7 +134,7 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
   {
     u1[i] = sol[i];
   }
-  info1 = mlcp_solver(A, B, C, D, a, b, &n , &m, &method_mlcp1 , u1 , v1, w1);
+  info1 = mlcp_driver(A, B, C, D, a, b, &n , &m, &method_mlcp1 , u1 , v1, w1);
 
   strcpy(summary[itest].cv[0], "CV");
   if (info1 > 0)
@@ -157,7 +157,7 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
     u1[i] = sol[i];
   }
 
-  info1 = mlcp_solver(A, B, C, D, a, b, &n , &m, &method_mlcp2 , u1 , v1, w1);
+  info1 = mlcp_driver(A, B, C, D, a, b, &n , &m, &method_mlcp2 , u1 , v1, w1);
   strcpy(summary[itest].cv[1], "CV");
   if (info1 > 0)
     strcpy(summary[itest].cv[1], "NO");
@@ -177,7 +177,7 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
     u1[i] = sol[i];
   }
 
-  info1 = mlcp_solver(A, B, C, D, a, b, &n , &m, &method_mlcp3 , u1 , v1, w1);
+  info1 = mlcp_driver(A, B, C, D, a, b, &n , &m, &method_mlcp3 , u1 , v1, w1);
   strcpy(summary[itest].cv[2], "CV");
   if (info1 > 0)
     strcpy(summary[itest].cv[2], "NO");
@@ -197,7 +197,7 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
     u1[i] = sol[i];
   }
 
-  info1 = mlcp_solver(A, B, C, D, a, b, &n , &m, &method_mlcp4 , u1 , v1, w1);
+  info1 = mlcp_driver(A, B, C, D, a, b, &n , &m, &method_mlcp4 , u1 , v1, w1);
   strcpy(summary[itest].cv[3], "CV");
   if (info1 > 0)
     strcpy(summary[itest].cv[3], "NO");
@@ -216,7 +216,7 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
     u1[i] = sol[i];
   }
 
-  info1 = mlcp_solver(A, B, C, D, a, b, &n , &m, &method_mlcp5 , u1 , v1, w1);
+  info1 = mlcp_driver(A, B, C, D, a, b, &n , &m, &method_mlcp5 , u1 , v1, w1);
   strcpy(summary[itest].cv[4], "CV");
   if (info1 > 0)
     strcpy(summary[itest].cv[4], "NO");

@@ -21,7 +21,7 @@
 #include <string.h>
 #include <time.h>
 #include <LA.h>
-#include "NSSpack.h"
+#include "NonSmoothDrivers.h"
 #include "FrictionContact3D_Solvers.h"
 
 int frictionContact3D_solver_SBS(int nc, SparseBlockStructuredMatrix* M , double *q , method *pt , double *reaction , double *velocity, double *mu)

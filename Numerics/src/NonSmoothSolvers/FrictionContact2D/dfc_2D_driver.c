@@ -23,10 +23,10 @@
 #include <string.h>
 #include <time.h>
 #ifndef MEXFLAG
-#include "NSSpack.h"
+#include "NonSmoothDrivers.h"
 #endif
 
-int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , double *F2 , double *mu)
+int dfc_2D_driver(double *K1, double *F1, int *n, method *pt, double *U2 , double *F2 , double *mu)
 {
 
 

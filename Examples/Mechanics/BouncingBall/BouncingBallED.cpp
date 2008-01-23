@@ -1,4 +1,3 @@
-
 /* Siconos-sample version 2.1.1, Copyright INRIA 2005-2007.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
@@ -27,7 +26,6 @@
 */
 
 #include "SiconosKernel.h"
-#include "NSSpack.h"
 
 using namespace std;
 

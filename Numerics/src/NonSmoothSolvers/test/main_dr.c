@@ -57,7 +57,7 @@
 //  where M       is an n by n matrix,
 //        q       an n-dimensional vector,
 //        n       is the row dimension of M,
-//        pt      a pointer other a union ( methode see "NSSpack.h").
+//        pt      a pointer other a union ( methode see "NonSmoothDrivers.h").
 //        z and w are n-dimensional  vectors solution.
 //
 //        methode is a variable with a union type; in this union you find the structure (method_dr) that gives to the function
@@ -71,7 +71,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "NSSpack.h"
+#include "NonSmoothDrivers.h"
 #include "LA.h"
 
 #define CHAT
@@ -274,13 +274,13 @@ int test_mmc(void)
   printf("**** NLGS TEST ****\n \n");
 #endif
 
-  info1 = dr_solver(vec, q, &n, &meth_dr1, z1, w1);
+  info1 = dr_driver(vec, q, &n, &meth_dr1, z1, w1);
 
 #ifdef CHAT
   printf("\n**** LATIN TEST ***\n \n");
 #endif
 
-  info2 = dr_solver(vec, q, &n, &meth_dr2, z2, w2);
+  info2 = dr_driver(vec, q, &n, &meth_dr2, z2, w2);
 
 
   if (info1 >= info2)

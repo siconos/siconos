@@ -16,11 +16,11 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-/*! \page NSSPACK Non-Smooth Solvers Pack
+/*! \page NSDrivers Non-Smooth Solvers
 
 Numerics package proposes a set of non-smooth solvers dedicated to some specific formulations.\n
 
-For each type of problem, a generic interface function is provided (see NSSpack.h for the complete list).\n
+For each type of problem, a generic interface function (driver) is provided (see NonSmoothDrivers.h for the complete list).\n
 The main arguments of this function are the vectors and matrices used to formalize the problem, \n
 the unknowns and a structure method, used to defined the solver type and its parameters. \n
 To get more details on this, check for each type of problem in \ref NSSpackContents below.
@@ -33,19 +33,19 @@ To get more details on this, check for each type of problem in \ref NSSpackConte
 \subpage RelaySolvers\n
 \subpage QPSolvers\n
 
-Other functions and useful tools related to NSSpack are listed in NSSTools.h.
+Other functions and useful tools related to NonSmoothSolvers are listed in NSSTools.h.
 
 */
 
-/*!\file NSSpack.h
- * \brief This file provides all generic functions, interfaces to the different solvers available in Numerics.
+/*!\file NonSmoothSolvers.h
+ * \brief This file provides all generic functions (drivers), interfaces to the different solvers available in Numerics.
  *  \author Nineb Sheherazade and Dubois Frederic.
  *  Last Modifications : Mathieu Renouf , Pascal Denoyelle, Franck Perignon
  *  \todo solve_qp does not exist
  *
  */
-#ifndef NSSPACK_H
-#define NSSPACK_H
+#ifndef NonSmoothSolvers_H
+#define NonSmoothSolvers_H
 
 #include "blaslapack.h"
 #include "Relay_Solvers.h"
@@ -93,10 +93,10 @@ extern "C" {
       - >0 : otherwise see each solver for more information about the log info
       \author Nineb Sheherazade & Mathieu Renouf
   */
-  int lcp_solver(double*, double*, int*, method*, double*, double*);
+  int lcp_driver(double*, double*, int*, method*, double*, double*);
 
   /** General interface to solver for LCP problems, with M given as a list of blocks */
-  int lcp_solver_block(SparseBlockStructuredMatrix *, double *, method *, double *, double *, int *, int *, double*);
+  int lcp_driver_block(SparseBlockStructuredMatrix *, double *, method *, double *, double *, int *, int *, double*);
 
   /** General interface to solver for MLCP problems
       \param[in] , a (\f$n \times n\f$)-vector of doubles which contains the components of the "A" MLCP matrix with a Fortran storage.
@@ -118,10 +118,10 @@ extern "C" {
       \author V. Acary
       \todo Sizing the regularization paramter and apply it only on null diagnal term
   */
-  int mlcp_solver(double*, double*, double*, double*, double*, double*, int*, int*, method*, double*, double*, double*);
+  int mlcp_driver(double*, double*, double*, double*, double*, double*, int*, int*, method*, double*, double*, double*);
 
   /** General interface to solver for pfc 3D problems */
-  int pfc_3D_solver(int, double*, double*, method*, double*, double*, double*);
+  int pfc_3D_driver(int, double*, double*, method*, double*, double*, double*);
 
   /** General interface to solvers for primal friction 3D problem, with a sparse block storage for M.
    *   \param n    Dimension of the system. Then, the number of contacts is n/3.
@@ -144,7 +144,7 @@ extern "C" {
    *   - NSGS for non-smooth Gauss Seidel
    *
    */
-  int pfc_3D_solver_block(int, SparseBlockStructuredMatrix*, double*, method*, double*, double*, double*);
+  int pfc_3D_driver_block(int, SparseBlockStructuredMatrix*, double*, method*, double*, double*, double*);
 
   /** General interface to solver for pfc 2D problems
    *  \param[in] , a (n \f$\times\f$n)-vector of doubles which contains the components of the double matrix with a fortran allocation.
@@ -159,7 +159,7 @@ extern "C" {
    *                           termination reason).
    * \author Nineb Sheherazade.
    */
-  int pfc_2D_solver(int, double*, double*, method*, double*, double*, double*);
+  int pfc_2D_driver(int, double*, double*, method*, double*, double*, double*);
 
   /** General interface to solver for dual friction-contact problems
       \param[in] , the stiffness, a vector of double (in which the components
@@ -189,7 +189,7 @@ extern "C" {
       0 >  - otherwise (see specific solvers for more information about the log info)
       \author Nineb Sheherazade
   */
-  int dfc_2D_solver(double* , double* , int* , method* , double* , double*, double*);
+  int dfc_2D_driver(double* , double* , int* , method* , double* , double*, double*);
 
   /** General interface to solver for dual-relay problems
    * \param[in] , (nn \f$\times\f$nn)-vector of doubles containing the components of the double matrix with a fortran90 allocation.
@@ -200,7 +200,7 @@ extern "C" {
    * \param[out] , a nn-vector of doubles, the solution of the problem.
    * \author Nineb Sheherazade.
    */
-  int dr_solver(double* , double* , int* , method* , double* , double*);
+  int dr_driver(double* , double* , int* , method* , double* , double*);
 
   /** General interface to solver for primal-relay problems
    *  \param[in] , a (\f$nn \times nn\f$)-vector of doubles containing the components of the  matrix with a fortran90 allocation.
@@ -214,7 +214,7 @@ extern "C" {
    *                    - otherwise : see specific solvers for more information about the log info.
    *   \author Nineb Sheherazade.
    */
-  int pr_solver(double* , double* , int* , method* , double* , double*);
+  int pr_driver(double* , double* , int* , method* , double* , double*);
 
   /** General interface to solvers for friction-contact 3D problem
       \param[in] , number of contacts (dim of the problem n = 3*nc)
@@ -226,8 +226,8 @@ extern "C" {
       \param[in] , mu vector of the friction coefficients (size nc)
       \return result (0 if successful otherwise 1).
   */
-  int frictionContact3D_solver(FrictionContact3D_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options);
-  //int frictionContact3D_solver(int, double*, double*, method*, double*, double*, double*);
+  int frictionContact3D_driver(FrictionContact3D_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options);
+  //int frictionContact3D_driver(int, double*, double*, method*, double*, double*, double*);
 
   /** General interface to solvers for friction-contact 3D problem with sparse-block storage for M
       \param[in] , number of contacts (dim of the problem n = 3*nc)
@@ -239,10 +239,10 @@ extern "C" {
       \param[in] , mu vector of the friction coefficients (size nc)
       \return result (0 if successful otherwise 1).
   */
-  int frictionContact3D_solver_SBS(int, SparseBlockStructuredMatrix*, double*, method*, double*, double*, double*);
+  int frictionContact3D_driver_SBS(int, SparseBlockStructuredMatrix*, double*, method*, double*, double*, double*);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* NSSPACK_H */
+#endif

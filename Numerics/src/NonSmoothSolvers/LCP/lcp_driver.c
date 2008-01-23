@@ -23,10 +23,10 @@
 #include <math.h>
 
 #ifndef MEXFLAG
-#include "NSSpack.h"
+#include "NonSmoothDrivers.h"
 #endif
 
-int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double *w)
+int lcp_driver(double *vec, double *q , int *n , method *pt , double *z , double *w)
 {
 
   const char lcpkey1[10] = "Lemke", lcpkey2[10] = "PGS", lcpkey3[10] = "CPG";
@@ -62,7 +62,7 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
     info = 0;
     pt->lcp.iter = 0;
     pt->lcp.err  = 0.;
-    if (pt->lcp.chat > 0) printf("LCP_solver: trivial solution for LCP (positive vector q)  \n");
+    if (pt->lcp.chat > 0) printf("LCP_driver: trivial solution for LCP (positive vector q)  \n");
     return info;
   }
 
@@ -272,7 +272,7 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
   }
 
   else
-    printf("LCP_solver error: unknown solver named: %s\n", pt->lcp.name);
+    printf("LCP_driver error: unknown solver named: %s\n", pt->lcp.name);
 
   /*************************************************
    *  3 - Check solution validity

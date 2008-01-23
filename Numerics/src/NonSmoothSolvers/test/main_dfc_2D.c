@@ -64,9 +64,9 @@
 //
 //
 //
-//  The subroutine's call is due to the function dfc_2D_solver:
+//  The subroutine's call is due to the function dfc_2D_driver:
 //
-//   int dfc_2D_solver (double (*M)[maxcols],double *q,int n,method *pt,double z[],double w[])
+//   int dfc_2D_driver (double (*M)[maxcols],double *q,int n,method *pt,double z[],double w[])
 //
 //  where M is an n by n matrix, q an n-dimensional vector, n is the row
 //  dimension of M, and pt a pointer other a structure ( method).
@@ -82,7 +82,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "NSSpack.h"
+#include "NonSmoothDrivers.h"
 
 int main(void)
 {
@@ -260,7 +260,7 @@ int main(void)
 
 
 
-  info = dfc_2D_solver(K1, F1, &dimM, &meth_dfc_2D, U2, F2);
+  info = dfc_2D_driver(K1, F1, &dimM, &meth_dfc_2D, U2, F2);
 
 
   printf("\n\n we go out the function and info is %d\n", info);

@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "NSSpack.h"
+#include "NonSmoothDrivers.h"
 
 int filter_result_pfc_block(int nc, int Gsize, double * w, SparseBlockStructuredMatrix *M, double *z , double *q , pfc3D_fPtr* G, double* mu, int* iparam, double* dparam)
 {

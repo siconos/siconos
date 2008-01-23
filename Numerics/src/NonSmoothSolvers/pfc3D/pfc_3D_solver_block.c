@@ -22,10 +22,10 @@
 #include <string.h>
 #include <time.h>
 #ifndef MEXFLAG
-#include "NSSpack.h"
+#include "NonSmoothDrivers.h"
 #endif
 
-int pfc_3D_solver_block(int n, SparseBlockStructuredMatrix *M , double *q , method *pt , double *z , double *w, double *mu)
+int pfc_3D_driver_block(int n, SparseBlockStructuredMatrix *M , double *q , method *pt , double *z , double *w, double *mu)
 {
   /* Solver name */
   char pfckey1[10] = "NSGS";

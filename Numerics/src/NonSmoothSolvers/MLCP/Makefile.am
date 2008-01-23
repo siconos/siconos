@@ -34,7 +34,7 @@ noinst_LTLIBRARIES = libMLCP.la
 
 libMLCP_la_SOURCES = mlcp_path.c mlcp_psor.c mlcp_rpsor.c mlcp_pgs.c mlcp_rpgs.c \
 		     mlcp_compute_error.c mlcp_filter_result.c \
-		     mlcp_solver.c \
+		     mlcp_driver.c \
 		     MLCP_Solvers.h
 
 libMLCP_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)

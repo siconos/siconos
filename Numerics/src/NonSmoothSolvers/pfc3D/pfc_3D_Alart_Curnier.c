@@ -23,8 +23,8 @@
 #include <math.h>
 #include "LA.h"
 #include <time.h>
-#include <NSSpack.h>
-#include <pfc_3D_Alart_Curnier.h>
+#include "NonSmoothDrivers.h"
+#include "pfc_3D_Alart_Curnier.h"
 
 /* Compute function G */
 void Compute_G_AC(int m, double *G, double *x , double *C, double *y , double *b, double *param1, double *param2, double *param3, double rn, double rt, double coef)

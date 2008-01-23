@@ -94,11 +94,11 @@
 #include <string.h>
 #include <time.h>
 #ifndef MEXFLAG
-#include "NSSpack.h"
+#include "NonSmoothDrivers.h"
 #endif
 #include "LA.h"
 
-int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt , double *z , double *w , int *it_end ,
+int lcp_driver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt , double *z , double *w , int *it_end ,
                      int *itt_end , double *res)
 {
 
@@ -221,7 +221,7 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
           {
             /* Local LCP resolution  */
             pt->lcp.iter = 0;
-            info1 = lcp_solver(adrbldiag , rhs , &rowsize , pt , &z[indicrow] , &w[indicrow]);
+            info1 = lcp_driver(adrbldiag , rhs , &rowsize , pt , &z[indicrow] , &w[indicrow]);
             totaliter += pt->lcp.iter;
             if (info1 > 0)
             {
@@ -285,7 +285,7 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
       /*strcpy(pt->lcp.name,"NLGS"); */
 
       pt->lcp.iter = 0;
-      info1 = lcp_solver(adrbldiag , rhs , &rowsize , pt , &z[indicrow] , &w[indicrow]);
+      info1 = lcp_driver(adrbldiag , rhs , &rowsize , pt , &z[indicrow] , &w[indicrow]);
 
       /* strcpy(pt->lcp.name,savename); */
 

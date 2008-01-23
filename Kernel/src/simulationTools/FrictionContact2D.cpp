@@ -68,7 +68,7 @@ int FrictionContact2D::compute(double time)
       //  info = pfc_2D_solver_block((int)sizeOutput/2, Mspbl , q->getArray() , &solvingMethod , z->getArray() , w->getArray() ,mu->getArray());
       RuntimeException::selfThrow("FrictionContact2D::compute - Solver block not yet available.");
     else // Use classical solver
-      info = pfc_2D_solver((int)sizeOutput / 2, M->getArray(), q->getArray(), &solvingMethod  , z->getArray(), w->getArray(), mu->getArray());
+      info = pfc_2D_driver((int)sizeOutput / 2, M->getArray(), q->getArray(), &solvingMethod  , z->getArray(), w->getArray(), mu->getArray());
     CPUtime += (clock() - startSolve);
     nbIter++;
 

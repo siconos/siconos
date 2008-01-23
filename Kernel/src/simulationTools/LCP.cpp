@@ -526,11 +526,11 @@ int LCP::compute(double time)
     startLCPsolve = clock();
     if (solver->useBlocks()) // Use solver block
     {
-      info = lcp_solver_block(MSparseBlock->getNumericsMatSparse() , q->getArray() , &solvingMethod , z->getArray() , w->getArray() , &iter , &titer , &err);
+      info = lcp_driver_block(MSparseBlock->getNumericsMatSparse() , q->getArray() , &solvingMethod , z->getArray() , w->getArray() , &iter , &titer , &err);
     }
 
     else // Use classical solver
-      info = lcp_solver(M->getArray(), q->getArray(), &Nlcp, &solvingMethod, z->getArray(), w->getArray());
+      info = lcp_driver(M->getArray(), q->getArray(), &Nlcp, &solvingMethod, z->getArray(), w->getArray());
 
     CPUtime += (clock() - startLCPsolve);
     nbIter++;

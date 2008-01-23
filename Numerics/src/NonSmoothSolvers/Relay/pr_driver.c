@@ -22,12 +22,12 @@
 #include <stdlib.h>
 #include <string.h>
 #ifndef MEXFLAG
-#include "NSSpack.h"
+#include "NonSmoothDrivers.h"
 #endif
 #include <time.h>
 
 
-int pr_solver(double *vec, double *q, int *nn, method *pt, double *z, double *w)
+int pr_driver(double *vec, double *q, int *nn, method *pt, double *z, double *w)
 {
 
 

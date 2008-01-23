@@ -346,7 +346,6 @@ void dfc_2D_latin(double *vec, double *qq, int *nn, double * k_latin, double *mu
     DAXPY(n, alpha, wc, incx, znum1, incy);
 
     nrhs = 1;
-
     DTRTRS(LA_UP, LA_TRANS, LA_NONUNIT, n, nrhs, R, n, znum1, n, info2);
 
     DTRTRS(LA_UP, LA_NOTRANS, LA_NONUNIT, n, nrhs, R, n, znum1, n, info2);

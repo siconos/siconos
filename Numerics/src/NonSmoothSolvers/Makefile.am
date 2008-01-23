@@ -48,4 +48,4 @@ libNonSmoothSolvers_la_LIBADD =  $(top_builddir)/src/NonSmoothSolvers/NSSTools/l
 
 libNonSmoothSolvers_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 
-numerics_HEADERS = NSSpack.h NonSmoothNewton.h Solver_Options.h
+numerics_HEADERS = NonSmoothDrivers.h NonSmoothNewton.h

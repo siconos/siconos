@@ -20,18 +20,31 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <LA.h>
+#include "LA.h"
 #include "FrictionContact3D_Solvers.h"
-#include "NSSpack.h"
+#include "NonSmoothDrivers.h"
 
-/* int frictionContact3D_solver(int nc, double *vec , double *q , method *pt , double *reaction , double *velocity, double *mu ) */
-int frictionContact3D_solver(FrictionContact3D_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options)
+/* int frictionContact3D_driver(int nc, double *vec , double *q , method *pt , double *reaction , double *velocity, double *mu ) */
+int frictionContact3D_driver(FrictionContact3D_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options)
 {
   /* Solver name */
   char * name = options->solverName;
 
   /* Set global options */
   setNumericsOptions(global_options);
+
+  /* If the options for solver have not been set, read default values in .opt file */
+  int defaultOptions = options->notSet; /* true(1) if the Solver_Options structure has been filled in else false(0) */
+
+  printf("Solver opt %60s\n", options->solverName);
+  printf("Solver opt %d\n", options->iparam[0]);
+  printf("Solver opt %d\n", options->iparam[1]);
+
+  if (defaultOptions)
+    readSolverOptions(3, options);
+  printf("Solver opt %60s\n", options->solverName);
+  printf("Solver opt %d\n", options->iparam[0]);
+  printf("Solver opt %d\n", options->iparam[1]);
 
   /* Non Smooth Gauss Seidel (NSGS) */
   int info = -1 ;
@@ -118,7 +131,7 @@ int checkTrivialCase(int n, double* q, double* velocity, double* reaction, int* 
     dparam[3] = 0.0;
     info = 0;
     if (iparam[1] > 0)
-      printf("FrictionContact3D solver, norm(q) = 0, trivial solution reaction = 0, velocity = q.\n");
+      printf("FrictionContact3D driver, norm(q) = 0, trivial solution reaction = 0, velocity = q.\n");
   }
   return info;
 }

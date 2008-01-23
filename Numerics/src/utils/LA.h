@@ -98,8 +98,9 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      BLAS_NAME(dcopy)(INTEGER(C_N), X, INTEGER(C_INCX), Y, INTEGER(C_INCY)); \
   })
 
-/* DGEMV - one of the matrix-vector operations y := alpha*A*x +
+/** DGEMV - one of the matrix-vector operations y := alpha*A*x +
    beta*y, or y := alpha*A'*x + xbeta*y,
+   \param TRANS
 */
 #define DGEMV(TRANS, M, N, ALPHA, A, LDA, X, INCX, BETA, Y, INCY) \
   ({ int C_M = M; \
@@ -196,10 +197,10 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 #define DTRTRS( UPLO, TRANS, DIAG, N, NRHS, A, LDA, B, LDB, INFO ) \
   ({ int C_N = N; \
      int C_NRHS = NRHS; \
-     int C_LDA = A; \
-     int C_LDB = B; \
+     int C_LDA = LDA; \
+     int C_LDB = LDB; \
      int C_INFO = INFO; \
-     LAPACK_9_SIDED(LAPACK_NAME(dtrtrs), T_UPLO(UPLO), T_TRANS(TRANS), T_DIAG(DIAG), INTEGER(N), INTEGER(NRHS), A, INTEGER(LDA), B, INTEGER(LDB), INTEGER(INFO) ); \
+     LAPACK_9_SIDED(LAPACK_NAME(dtrtrs), T_UPLO(UPLO), T_TRANS(TRANS), T_DIAG(DIAG), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), B, INTEGER(C_LDB), INTEGER(C_INFO) ); \
   })
 
 #endif /* LA_H */

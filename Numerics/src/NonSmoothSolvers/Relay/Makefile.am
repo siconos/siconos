@@ -33,9 +33,9 @@ AM_CFLAGS=-std=c99
 noinst_LTLIBRARIES = libRelay.la
 
 libRelay_la_SOURCES = dr_latin.c dr_nlgs.c \
-		      dr_solver.c \
+		      dr_driver.c \
 		      pr_gsnl.c pr_latin.c pr_nlgs.c \
-		      pr_solver.c \
+		      pr_driver.c \
 		      Relay_Solvers.h
 
 libRelay_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)

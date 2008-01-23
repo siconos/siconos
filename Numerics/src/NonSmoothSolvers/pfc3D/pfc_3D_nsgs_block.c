@@ -23,9 +23,9 @@
 #include <math.h>
 #include "LA.h"
 #include <time.h>
-#include <NSSpack.h>
-#include <pfc_3D_Alart_Curnier.h>
-#include <pfc_3D_Fischer_Burmeister.h>
+#include "NonSmoothDrivers.h"
+#include "pfc_3D_Alart_Curnier.h"
+#include "pfc_3D_Fischer_Burmeister.h"
 
 void pfc_3D_nsgs_block(int nc , SparseBlockStructuredMatrix *M, double *q , double *z , double *w, double *mu , int *info, int *iparam , double *dparam)
 {

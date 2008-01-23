@@ -65,10 +65,10 @@ int FrictionContact3D::compute(double time)
     startSolve = clock();
 
     if (solver->useBlocks()) // Use solver block
-      info = pfc_3D_solver_block((int)sizeOutput / 3, Mspbl , q->getArray(), &solvingMethod, z->getArray(), w->getArray(), mu->getArray());
+      info = pfc_3D_driver_block((int)sizeOutput / 3, Mspbl , q->getArray(), &solvingMethod, z->getArray(), w->getArray(), mu->getArray());
 
     else // Use classical solver
-      info = pfc_3D_solver((int)sizeOutput / 3, M->getArray(), q->getArray(), &solvingMethod, z->getArray(), w->getArray(), mu->getArray());
+      info = pfc_3D_driver((int)sizeOutput / 3, M->getArray(), q->getArray(), &solvingMethod, z->getArray(), w->getArray(), mu->getArray());
 
     CPUtime += (clock() - startSolve);
     nbIter++;

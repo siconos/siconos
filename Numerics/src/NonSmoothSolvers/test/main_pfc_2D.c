@@ -53,7 +53,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "NSSpack.h"
+#include "NonSmoothDrivers.h"
 #include "LA.h"
 
 #define BAVARD
@@ -183,7 +183,7 @@ void pfc_2D_series(int n , double *vec , double *q)
     w1[i] = 0.0;
   }
 
-  info[0] = pfc_2D_solver(vec , q , &n , &meth_pfc_2D1 , z1 , w1);
+  info[0] = pfc_2D_driver(vec , q , &n , &meth_pfc_2D1 , z1 , w1);
 
 
 #ifdef BAVARD
@@ -195,7 +195,7 @@ void pfc_2D_series(int n , double *vec , double *q)
     w2[i] = 0.;
   }
 
-  info[1] = pfc_2D_solver(vec , q , &n , &meth_pfc_2D2 , z2 , w2);
+  info[1] = pfc_2D_driver(vec , q , &n , &meth_pfc_2D2 , z2 , w2);
 
 
 #ifdef BAVARD
@@ -207,7 +207,7 @@ void pfc_2D_series(int n , double *vec , double *q)
     w3[i] = 0.0;
   }
 
-  info[2] = pfc_2D_solver(vec , q , &n , &meth_pfc_2D3 , z3 , w3);
+  info[2] = pfc_2D_driver(vec , q , &n , &meth_pfc_2D3 , z3 , w3);
 
 
 #ifdef BAVARD

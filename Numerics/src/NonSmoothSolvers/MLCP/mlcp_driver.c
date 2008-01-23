@@ -24,11 +24,11 @@
 #include <math.h>
 
 #ifndef MEXFLAG
-#include "NSSpack.h"
+#include "NonSmoothDrivers.h"
 #endif
 
 
-int mlcp_solver(double *A , double *B , double *C , double *D , double *a , double *b, int *n , int* m, method *pt ,  double *u, double *v, double *w)
+int mlcp_driver(double *A , double *B , double *C , double *D , double *a , double *b, int *n , int* m, method *pt ,  double *u, double *v, double *w)
 {
 
   const char  mlcpkey1[10] = "PGS", mlcpkey2[10] = "RPGS", mlcpkey3[10] = "PSOR" , mlcpkey4[10] = "RPSOR", mlcpkey5[10] = "PATH" ;
@@ -122,7 +122,7 @@ int mlcp_solver(double *A , double *B , double *C , double *D , double *a , doub
 
 
   }
-  else printf("Warning : Unknown solver : %s\n", pt->mlcp.name);
+  else printf("Warning : Unknown driver : %s\n", pt->mlcp.name);
 
   /* Checking validity of z found  */
 

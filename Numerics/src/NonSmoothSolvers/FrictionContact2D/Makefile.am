@@ -32,9 +32,9 @@ AM_CFLAGS=-std=c99
 noinst_LTLIBRARIES = libFrictionContact2D.la
 
 libFrictionContact2D_la_SOURCES = cond_2D2dfc_2D.c dfc_2D2lcp.c lcp2dfc_2D.c pfc_2D_latin.c  pfc_2D_projc.c dfc_2D2cond_2D.c dfc_2D_latin.c\
-				  dfc_2D_solver.c \
+				  dfc_2D_driver.c \
 				  pfc_2D_cpg.c pfc_2D_nlgs.c pfc_2D_projf.c projc.c projf.c \
-				  pfc_2D_solver.c \
+				  pfc_2D_driver.c \
 				  FrictionContact2D_Solvers.h  
 libFrictionContact2D_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 

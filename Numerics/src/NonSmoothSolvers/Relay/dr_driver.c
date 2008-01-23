@@ -21,10 +21,10 @@
 #include <string.h>
 #include <time.h>
 #ifndef MEXFLAG
-#include "NSSpack.h"
+#include "NonSmoothDrivers.h"
 #endif
 
-int dr_solver(double *vec , double *q , int *nn , method *pt , double *z , double *w)
+int dr_driver(double *vec , double *q , int *nn , method *pt , double *z , double *w)
 {
 
   int info = -1, it_end;

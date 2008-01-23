@@ -46,25 +46,25 @@
  *  where info shows the termination result (0 for success) and iparam and dparam are respectivelly
  *  pointer over integer and pointer over double which contain specific parameters of each solver.
  *
- *  The solver's call is performed via the function lcp_solver:
+ *  The solver's call is performed via the function lcp_driver:
  *
- *  int lcp_solver( double *vec , double *q , int *nn , method *pt , double *z , double *w , int *it_end , double *res )
+ *  int lcp_driver( double *vec , double *q , int *nn , method *pt , double *z , double *w , int *it_end , double *res )
  *
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "NSSpack.h"
+#include "NonSmoothDrivers.h"
 #include "LA.h"
 
 #define BAVARD
-#define PATH_SOLVER
+#define PATH_DRIVER
 
-#ifdef PATH_SOLVER
+#ifdef PATH_DRIVER
 const unsigned short int *__ctype_b;
 const __int32_t *__ctype_tolower ;
-#endif /*PATH_SOLVER*/
+#endif /*PATH_DRIVER*/
 /*
  ******************************************************************************
  */
@@ -149,7 +149,7 @@ void test_lcp_series(int n , double *vec , double *q)
     w1[i] = 0.0;
   }
 
-  info1 = lcp_solver(vec , q , &n , &method_lcp1 , z1 , w1);
+  info1 = lcp_driver(vec , q , &n , &method_lcp1 , z1 , w1);
 
   /* #2 CPG TEST */
 #ifdef BAVARD
@@ -161,7 +161,7 @@ void test_lcp_series(int n , double *vec , double *q)
     w2[i] = 0.0;
   }
 
-  info2 = lcp_solver(vec , q , &n , &method_lcp2 , z2 , w2);
+  info2 = lcp_driver(vec , q , &n , &method_lcp2 , z2 , w2);
 
   /* #4 QP TEST */
 #ifdef BAVARD
@@ -173,7 +173,7 @@ void test_lcp_series(int n , double *vec , double *q)
     w4[i] = 0.0;
   }
 
-  info4 = lcp_solver(vec , q , &n , &method_lcp4 , z4 , w4);
+  info4 = lcp_driver(vec , q , &n , &method_lcp4 , z4 , w4);
 
   /* #5 NSQP TEST */
 #ifdef BAVARD
@@ -185,7 +185,7 @@ void test_lcp_series(int n , double *vec , double *q)
     w5[i] = 0.0;
   }
 
-  info5 = lcp_solver(vec , q , &n , &method_lcp5 , z5 , w5);
+  info5 = lcp_driver(vec , q , &n , &method_lcp5 , z5 , w5);
 
   /* #6 LEXICO LEMKE TEST */
 #ifdef BAVARD
@@ -197,7 +197,7 @@ void test_lcp_series(int n , double *vec , double *q)
     w6[i] = 0.0;
   }
 
-  info6 = lcp_solver(vec , q , &n , &method_lcp6 , z6 , w6);
+  info6 = lcp_driver(vec , q , &n , &method_lcp6 , z6 , w6);
 
   /* #7 NEWTONMIN TEST */
 #ifdef BAVARD
@@ -209,7 +209,7 @@ void test_lcp_series(int n , double *vec , double *q)
     w7[i] = 0.0;
   }
 
-  info7 = lcp_solver(vec , q , &n , &method_lcp7 , z7 , w7);
+  info7 = lcp_driver(vec , q , &n , &method_lcp7 , z7 , w7);
 
   /* #3 LATIN TEST */
 #ifdef BAVARD
@@ -221,7 +221,7 @@ void test_lcp_series(int n , double *vec , double *q)
     w3[i] = 0.0;
   }
 
-  info3 = lcp_solver(vec , q , &n , &method_lcp3 , z3 , w3);
+  info3 = lcp_driver(vec , q , &n , &method_lcp3 , z3 , w3);
 
 
   /* #8 LATIN_W TEST */
@@ -234,7 +234,7 @@ void test_lcp_series(int n , double *vec , double *q)
     w8[i] = 0.0;
   }
 
-  info8 = lcp_solver(vec , q , &n , &method_lcp8 , z8 , w8);
+  info8 = lcp_driver(vec , q , &n , &method_lcp8 , z8 , w8);
 
   /* #9 RPGS TEST */
 #ifdef BAVARD
@@ -246,9 +246,9 @@ void test_lcp_series(int n , double *vec , double *q)
     w9[i] = 0.0;
   }
 
-  info9 = lcp_solver(vec , q , &n , &method_lcp9 , z9 , w9);
+  info9 = lcp_driver(vec , q , &n , &method_lcp9 , z9 , w9);
 
-#ifdef PATH_SOLVER
+#ifdef PATH_DRIVER
   /* #8 PATH TEST */
 #ifdef BAVARD
   printf("**** PATH TEST ***\n");
@@ -259,8 +259,8 @@ void test_lcp_series(int n , double *vec , double *q)
     w10[i] = 0.0;
   }
 
-  info10 = lcp_solver(vec , q , &n , &method_lcp10 , z10 , w10);
-#endif /*PATH_SOLVER*/
+  info10 = lcp_driver(vec , q , &n , &method_lcp10 , z10 , w10);
+#endif /*PATH_DRIVER*/
 #ifdef BAVARD
   /*  printf(" *** ************************************** ***\n"); */
 
@@ -355,14 +355,14 @@ void test_lcp_series(int n , double *vec , double *q)
 
   printf("\n    RPGS   (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info9, method_lcp9.iter, method_lcp9.err, comp, diff);
 
-#ifdef PATH_SOLVER
+#ifdef PATH_DRIVER
   comp = DDOT(n , z10 , incx , w10 , incy);
   DAXPY(n , alpha , q , incx , w10 , incy);
   DGEMV(LA_NOTRANS , n , n , beta , vec , n , z10 , incx , alpha , w10 , incy);
   diff = DNRM2(n , w10 , incx);
 
   printf("\n    PATH (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g | \n \n ", info10, method_lcp10.iter, method_lcp10.err, comp, diff);
-#endif /*PATH_SOLVER*/
+#endif /*PATH_DRIVER*/
 
 #endif
   free(z1);
@@ -445,7 +445,7 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 
   for (i = 0 ; i < dim ; ++i) z1[i] = 0.0;
 
-  info1 = lcp_solver_block(blmat , q , &method_lcp1 , z1 , w1 , &iter1 , &titer1 , &err1);
+  info1 = lcp_driver_block(blmat , q , &method_lcp1 , z1 , w1 , &iter1 , &titer1 , &err1);
 
   /* #2 CPG TEST */
 #ifdef BAVARD
@@ -453,7 +453,7 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 #endif
   for (i = 0 ; i < dim ; ++i) z2[i] = 0.0;
 
-  info2 = lcp_solver_block(blmat , q , &method_lcp2 , z2 , w2 , &iter2 , &titer2 , &err2);
+  info2 = lcp_driver_block(blmat , q , &method_lcp2 , z2 , w2 , &iter2 , &titer2 , &err2);
 
   /* #3 QP TEST */
 #ifdef BAVARD
@@ -461,7 +461,7 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 #endif
   for (i = 0 ; i < dim ; ++i) z4[i] = 0.0;
 
-  info4 = lcp_solver_block(blmat , q , &method_lcp4 , z4 , w4 , &iter4 , &titer4 , &err4);
+  info4 = lcp_driver_block(blmat , q , &method_lcp4 , z4 , w4 , &iter4 , &titer4 , &err4);
 
   /* #4 NSQP TEST */
 #ifdef BAVARD
@@ -469,7 +469,7 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 #endif
   for (i = 0 ; i < dim ; ++i) z5[i] = 0.0;
 
-  info5 = lcp_solver_block(blmat , q , &method_lcp5 , z5 , w5 , &iter5 , &titer5 , &err5);
+  info5 = lcp_driver_block(blmat , q , &method_lcp5 , z5 , w5 , &iter5 , &titer5 , &err5);
 
   /* #5 LEXICO LEMKE TEST */
 #ifdef BAVARD
@@ -485,7 +485,7 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
   titer6 = 0;
   err6 = 0.;
 
-  info6 = lcp_solver_block(blmat , q , &method_lcp6 , z6 , w6 , &iter6 , &titer6 , &err6);
+  info6 = lcp_driver_block(blmat , q , &method_lcp6 , z6 , w6 , &iter6 , &titer6 , &err6);
 
   /* #6 NEWTONMIN TEST */
 #ifdef BAVARD
@@ -493,7 +493,7 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 #endif
   for (i = 0 ; i < dim ; ++i) z7[i] = 0.0;
 
-  info7 = lcp_solver_block(blmat , q , &method_lcp7 , z7 , w7 , &iter7 , &titer7 , &err7);
+  info7 = lcp_driver_block(blmat , q , &method_lcp7 , z7 , w7 , &iter7 , &titer7 , &err7);
 
   /* #7 LATIN TEST */
 #ifdef BAVARD
@@ -501,7 +501,7 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 #endif
   for (i = 0 ; i < dim ; ++i) z3[i] = 0.0;
 
-  info3 = lcp_solver_block(blmat , q , &method_lcp3 , z3 , w3 , &iter3 , &titer3 , &err3);
+  info3 = lcp_driver_block(blmat , q , &method_lcp3 , z3 , w3 , &iter3 , &titer3 , &err3);
 
   /* #8 RPGS TEST */
 #ifdef BAVARD
@@ -510,7 +510,7 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 
   for (i = 0 ; i < dim ; ++i) z8[i] = 0.0;
 
-  info8 = lcp_solver_block(blmat , q , &method_lcp8 , z8 , w8 , &iter8 , &titer8 , &err8);
+  info8 = lcp_driver_block(blmat , q , &method_lcp8 , z8 , w8 , &iter8 , &titer8 , &err8);
 
 
 #ifdef BAVARD
@@ -739,7 +739,7 @@ void test_matrix(void)
 
   /****************************************************************/
 #ifdef BAVARD
-  printf("\n ********** BENCHMARK FOR LCP_SOLVER ********** \n\n");
+  printf("\n ********** BENCHMARK FOR LCP_DRIVER ********** \n\n");
 #endif
   /****************************************************************/
 
@@ -933,7 +933,7 @@ void test_blockmatrix(void)
 
   /****************************************************************/
 #ifdef BAVARD
-  printf("\n\n ******** BENCHMARK FOR LCP_SOLVER_BLOCK ******** \n\n");
+  printf("\n\n ******** BENCHMARK FOR LCP_DRIVER_BLOCK ******** \n\n");
 #endif
   /****************************************************************/
 

@@ -60,10 +60,10 @@
 #include <string.h>
 #include <time.h>
 #ifndef MEXFLAG
-#include "NSSpack.h"
+#include "NonSmoothDrivers.h"
 #endif
 
-int pfc_3D_solver(int nc, double *vec , double *q , method *pt , double *z , double *w, double *mu)
+int pfc_3D_driver(int nc, double *vec , double *q , method *pt , double *z , double *w, double *mu)
 {
   /* Solver name */
   char pfckey1[10] = "NLGS", /*pfckey2[10]="CPG",*/ pfckey3[15] = "NSGS";

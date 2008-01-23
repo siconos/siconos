@@ -22,8 +22,8 @@
 #include <math.h>
 #include "LA.h"
 #include <time.h>
-#include <NSSpack.h>
-#include <pfc_3D_Fischer_Burmeister.h>
+#include "NonSmoothDrivers.h"
+#include "pfc_3D_Fischer_Burmeister.h"
 
 /* Compute function G */
 void Compute_G_FB(int m, double *G, double *y , double *C, double *x , double *b, double *Ip, double *IP, double *I3, double coef21 , double r, double coef)

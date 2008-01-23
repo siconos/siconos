@@ -21,10 +21,10 @@
 #include <string.h>
 #include <time.h>
 #ifndef MEXFLAG
-#include "NSSpack.h"
+#include "NonSmoothDrivers.h"
 #endif
 
-int pfc_2D_solver(int n, double *vec, double *q, method *pt , double *z , double *w, double* mu)
+int pfc_2D_driver(int n, double *vec, double *q, method *pt , double *z , double *w, double* mu)
 {
 
   char pfckey1[10] = "NLGS", pfckey2[10] = "CPG", pfckey3[10] = "Latin";

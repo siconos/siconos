@@ -46,16 +46,16 @@
  *  where info shows the termination result (0 for success) and iparam and dparam are respectivelly
  *  pointer over integer and pointer over double which contain specific parameters of each solver.
  *
- *  The solver's call is performed via the function lcp_solver:
+ *  The solver's call is performed via the function lcp_driver:
  *
- *  int lcp_solver( double *vec , double *q , int *nn , method *pt , double *z , double *w , int *it_end , double *res )
+ *  int lcp_driver( double *vec , double *q , int *nn , method *pt , double *z , double *w , int *it_end , double *res )
  *
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "NSSpack.h"
+#include "NonSmoothDrivers.h"
 #include "LA.h"
 
 #define BAVARD
@@ -138,7 +138,7 @@ void test_lcp_series(int n , double *vec , double *q)
     w1[i] = 0.0;
   }
 
-  info1 = lcp_solver(vec , q , &n , &method_lcp1 , z1 , w1);
+  info1 = lcp_driver(vec , q , &n , &method_lcp1 , z1 , w1);
 
   /* #2 CPG TEST */
 #ifdef BAVARD
@@ -150,7 +150,7 @@ void test_lcp_series(int n , double *vec , double *q)
     w2[i] = 0.0;
   }
 
-  info2 = lcp_solver(vec , q , &n , &method_lcp2 , z2 , w2);
+  info2 = lcp_driver(vec , q , &n , &method_lcp2 , z2 , w2);
 
   /* #4 QP TEST */
 #ifdef BAVARD
@@ -162,7 +162,7 @@ void test_lcp_series(int n , double *vec , double *q)
     w4[i] = 0.0;
   }
 
-  info4 = lcp_solver(vec , q , &n , &method_lcp4 , z4 , w4);
+  info4 = lcp_driver(vec , q , &n , &method_lcp4 , z4 , w4);
 
   /* #5 NSQP TEST */
 #ifdef BAVARD
@@ -174,7 +174,7 @@ void test_lcp_series(int n , double *vec , double *q)
     w5[i] = 0.0;
   }
 
-  info5 = lcp_solver(vec , q , &n , &method_lcp5 , z5 , w5);
+  info5 = lcp_driver(vec , q , &n , &method_lcp5 , z5 , w5);
 
   /* #6 LEXICO LEMKE TEST */
 #ifdef BAVARD
@@ -186,7 +186,7 @@ void test_lcp_series(int n , double *vec , double *q)
     w6[i] = 0.0;
   }
 
-  info6 = lcp_solver(vec , q , &n , &method_lcp6 , z6 , w6);
+  info6 = lcp_driver(vec , q , &n , &method_lcp6 , z6 , w6);
 
   /* #7 NEWTONMIN TEST */
 #ifdef BAVARD
@@ -198,7 +198,7 @@ void test_lcp_series(int n , double *vec , double *q)
     w7[i] = 0.0;
   }
 
-  info7 = lcp_solver(vec , q , &n , &method_lcp7 , z7 , w7);
+  info7 = lcp_driver(vec , q , &n , &method_lcp7 , z7 , w7);
 
   /* #3 LATIN TEST */
 #ifdef BAVARD
@@ -210,7 +210,7 @@ void test_lcp_series(int n , double *vec , double *q)
     w3[i] = 0.0;
   }
 
-  info3 = lcp_solver(vec , q , &n , &method_lcp3 , z3 , w3);
+  info3 = lcp_driver(vec , q , &n , &method_lcp3 , z3 , w3);
 
 
   /* #8 LATIN_W TEST */
@@ -223,7 +223,7 @@ void test_lcp_series(int n , double *vec , double *q)
     w8[i] = 0.0;
   }
 
-  info8 = lcp_solver(vec , q , &n , &method_lcp8 , z8 , w8);
+  info8 = lcp_driver(vec , q , &n , &method_lcp8 , z8 , w8);
 
 
 #ifdef BAVARD
@@ -375,7 +375,7 @@ void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM
 
   for (i = 0 ; i < dim ; ++i) z1[i] = 0.0;
 
-  info1 = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp1 , z1 , w1 , &iter1 , &titer1 , &err1);
+  info1 = lcp_driver_block(inb , iid , vecM , q , &dn , &db , &method_lcp1 , z1 , w1 , &iter1 , &titer1 , &err1);
 
   /* #2 CPG TEST */
 #ifdef BAVARD
@@ -383,7 +383,7 @@ void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM
 #endif
   for (i = 0 ; i < dim ; ++i) z2[i] = 0.0;
 
-  info2 = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp2 , z2 , w2 , &iter2 , &titer2 , &err2);
+  info2 = lcp_driver_block(inb , iid , vecM , q , &dn , &db , &method_lcp2 , z2 , w2 , &iter2 , &titer2 , &err2);
 
   /* #3 QP TEST */
 #ifdef BAVARD
@@ -391,7 +391,7 @@ void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM
 #endif
   for (i = 0 ; i < dim ; ++i) z4[i] = 0.0;
 
-  info4 = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp4 , z4 , w4 , &iter4 , &titer4 , &err4);
+  info4 = lcp_driver_block(inb , iid , vecM , q , &dn , &db , &method_lcp4 , z4 , w4 , &iter4 , &titer4 , &err4);
 
   /* #4 NSQP TEST */
 #ifdef BAVARD
@@ -399,7 +399,7 @@ void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM
 #endif
   for (i = 0 ; i < dim ; ++i) z5[i] = 0.0;
 
-  info5 = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp5 , z5 , w5 , &iter5 , &titer5 , &err5);
+  info5 = lcp_driver_block(inb , iid , vecM , q , &dn , &db , &method_lcp5 , z5 , w5 , &iter5 , &titer5 , &err5);
 
   /* #5 LEXICO LEMKE TEST */
 #ifdef BAVARD
@@ -415,7 +415,7 @@ void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM
   titer6 = 0;
   err6 = 0.;
 
-  info6 = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp6 , z6 , w6 , &iter6 , &titer6 , &err6);
+  info6 = lcp_driver_block(inb , iid , vecM , q , &dn , &db , &method_lcp6 , z6 , w6 , &iter6 , &titer6 , &err6);
 
   /* #7 NEWTONMIN TEST */
 #ifdef BAVARD
@@ -423,7 +423,7 @@ void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM
 #endif
   for (i = 0 ; i < dim ; ++i) z7[i] = 0.0;
 
-  info7 = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp7 , z7 , w7 , &iter7 , &titer7 , &err7);
+  info7 = lcp_driver_block(inb , iid , vecM , q , &dn , &db , &method_lcp7 , z7 , w7 , &iter7 , &titer7 , &err7);
 
   /* #8 LATIN TEST */
 #ifdef BAVARD
@@ -431,7 +431,7 @@ void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM
 #endif
   for (i = 0 ; i < dim ; ++i) z3[i] = 0.0;
 
-  info3 = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp3 , z3 , w3 , &iter3 , &titer3 , &err3);
+  info3 = lcp_driver_block(inb , iid , vecM , q , &dn , &db , &method_lcp3 , z3 , w3 , &iter3 , &titer3 , &err3);
 
 #ifdef BAVARD
   printf(" *** ************************************** ***\n");
@@ -790,7 +790,7 @@ void test_blockmatrix(void)
 
   /****************************************************************/
 #ifdef BAVARD
-  printf("\n\n ******** BENCHMARK FOR LCP_SOLVER_BLOCK ******** \n\n");
+  printf("\n\n ******** BENCHMARK FOR LCP_DRIVER_BLOCK ******** \n\n");
 #endif
   /****************************************************************/
 

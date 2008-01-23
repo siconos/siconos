@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "NSSpack.h"
+#include "NonSmoothDrivers.h"
 
 #include "odepack.h"
 
