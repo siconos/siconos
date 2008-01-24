@@ -34,13 +34,13 @@ int frictionContact3D_driver(FrictionContact3D_Problem* problem, double *reactio
   setNumericsOptions(global_options);
 
   /* If the options for solver have not been set, read default values in .opt file */
-  int defaultOptions = options->notSet; /* true(1) if the Solver_Options structure has been filled in else false(0) */
+  int NoDefaultOptions = options->isSet; /* true(1) if the Solver_Options structure has been filled in else false(0) */
 
   printf("Solver opt %60s\n", options->solverName);
   printf("Solver opt %d\n", options->iparam[0]);
   printf("Solver opt %d\n", options->iparam[1]);
 
-  if (defaultOptions)
+  if (!NoDefaultOptions)
     readSolverOptions(3, options);
   printf("Solver opt %60s\n", options->solverName);
   printf("Solver opt %d\n", options->iparam[0]);

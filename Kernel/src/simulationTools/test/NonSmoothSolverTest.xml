@@ -1,0 +1,6 @@
+<SiconosModel>
+	<NonSmoothSolver Name="NSGS">
+	  <iparam vectorSize='5'>1 2 3 4 5</iparam>
+	  <dparam vectorSize='5'>1.2 3.2 5.2 7.2 9.2</dparam>
+	</NonSmoothSolver>
+</SiconosModel>

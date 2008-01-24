@@ -21,16 +21,6 @@
 <!-- SICONOS Model XML file -->
 
 <SiconosModel>
-	<Title>title</Title>
-  <Author>author</Author>
-  <Description>description</Description>
-  <Date>date</Date>
-  <SchemaXML>/share/SICONOS/SiconosModelSchema-V1.2.xsd</SchemaXML>
-	<Time>
-		<t0>0.0</t0>
-		<T>10.0</T>
-	</Time>
-
 	<NSDS bvp='false'>
 	
 		<!-- DSs defined in the problem -->

@@ -26,16 +26,19 @@
 */
 
 /** Structure used to send options (name, parameters ...) to a specific solver-driver (mainly from Kernel to Numerics).
-    \param notSet, int equal to false(0) if the parameters below have not been set (ie need to read default values) else true(1)
+    \param isSet, int equal to false(0) if the parameters below have not been set (ie need to read default values) else true(1)
     \param name of the solver
+    \param size of vectors iparam and dparam \n
+    (to simplify, this size is the same for both of them and whatever the non-smooth problem is).
     \param a list of int parameters (depends on each solver, see solver doc.)
     \param a list of double parameters (depends on each solver, see solver doc.)
     \param int to check storage type (0: double*, 1: SparseBlockStructuredMatrix)
 */
 typedef struct
 {
-  int notSet;
+  int isSet;
   char solverName[64];
+  int nbParam;
   int * iparam;
   double * dparam;
   int storageType;

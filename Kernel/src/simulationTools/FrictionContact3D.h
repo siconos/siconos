@@ -23,6 +23,7 @@
 #define FrictionContact3D_H
 
 #include "FrictionContact.h"
+#include "FrictionContact3D_Problem.h" // Numerics header
 
 /** Formalization and Resolution of a 3-dimensional Friction-Contact Problem
  *
@@ -39,6 +40,9 @@ class FrictionContact3D : public FrictionContact
 {
 
 private:
+
+  /** Numerics structure to handle the friction-contact3D problem */
+  FrictionContact3D_Problem * numerics_problem;
 
   /** default constructor
    */

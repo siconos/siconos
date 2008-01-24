@@ -28,23 +28,31 @@ using namespace std;
 
 // xml constructor (Simulation is optional)
 FrictionContact3D::FrictionContact3D(OneStepNSProblemXML* osNsPbXml, Simulation* newSimu):
-  FrictionContact("FrictionContact3D", osNsPbXml, newSimu)
-{}
+  FrictionContact("FrictionContact3D", osNsPbXml, newSimu), numerics_problem(NULL)
+{
+  numerics_problem = new FrictionContact3D_Problem();
+  numerics_problem->isComplete = 0;
+}
 
 // From data (the only required argument is the simulation)
 FrictionContact3D::FrictionContact3D(Simulation * newSimu, const string newId, const string newSolver, const unsigned int MaxIter,
                                      const double  Tolerance, const unsigned int Verbose,  const string  NormType,
-                                     const double  SearchDirection): FrictionContact("FrictionContact3D", newSimu, newId)
+                                     const double  SearchDirection): FrictionContact("FrictionContact3D", newSimu, newId), numerics_problem(NULL)
 {
   // set solver:
-  solver = new Solver(nspbType, newSolver, MaxIter, Tolerance, Verbose, NormType, SearchDirection);
-  isSolverAllocatedIn = true;
+  nsSolver = new NonSmoothSolver();
+  isSolverAllocatedIn = false;
+  numerics_problem = new FrictionContact3D_Problem();
+  numerics_problem->isComplete = 0;
 }
 
 // Constructor from a set of data
 FrictionContact3D::FrictionContact3D(Solver*  newSolver, Simulation* newSimu, const string newId):
-  FrictionContact("FrictionContact3D", newSolver, newSimu, newId)
-{}
+  FrictionContact("FrictionContact3D", newSolver, newSimu, newId), numerics_problem(NULL)
+{
+  numerics_problem = new FrictionContact3D_Problem();
+  numerics_problem->isComplete = 0;
+}
 
 // destructor
 FrictionContact3D::~FrictionContact3D()
@@ -64,11 +72,21 @@ int FrictionContact3D::compute(double time)
     method solvingMethod = *(solver->getSolvingMethodPtr());
     startSolve = clock();
 
-    if (solver->useBlocks()) // Use solver block
-      info = pfc_3D_driver_block((int)sizeOutput / 3, Mspbl , q->getArray(), &solvingMethod, z->getArray(), w->getArray(), mu->getArray());
+    // Temp: to be moved in a fillNumericsProblem function
+    numerics_problem->q = q->getArray();
+    numerics_problem->mu = mu->getArray();
 
-    else // Use classical solver
-      info = pfc_3D_driver((int)sizeOutput / 3, M->getArray(), q->getArray(), &solvingMethod, z->getArray(), w->getArray(), mu->getArray());
+
+    info = frictionContact3D_driver(numerics_problem, reaction->getArray(), velocity->getArray(), nsSolver->getNumericsSolverOptionsPtr(), numerics_options);
+
+
+
+
+    //       if (solver->useBlocks()) // Use solver block
+    //  info = pfc_3D_driver_block((int)sizeOutput/3, Mspbl , q->getArray(), &solvingMethod, reaction->getArray(), velocity->getArray(), mu->getArray());
+
+    //       else // Use classical solver
+    //  info = pfc_3D_driver((int)sizeOutput/3, M->getArray(), q->getArray(), &solvingMethod, reaction->getArray(), velocity->getArray(), mu->getArray());
 
     CPUtime += (clock() - startSolve);
     nbIter++;

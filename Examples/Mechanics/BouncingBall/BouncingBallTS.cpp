@@ -161,9 +161,6 @@ int main(int argc, char* argv[])
     for (k = 1 ; k < N  ; ++k)
     {
       s->computeOneStep();
-      I0 = s->getIndexSetPtr(1);
-      for (it1 = I0->begin(); it1 != I0->end(); ++it1)
-        cout << (*it1)->getNumber() << endl;
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->getNextTime();
       dataPlot(k, 1) = (*q)(0);

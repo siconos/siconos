@@ -25,6 +25,8 @@
 #include "InteractionsSet.h"
 #include "Solver.h"
 #include "SimulationTypeDef.h"
+#include "Numerics_Options.h"
+#include "NonSmoothSolver.h"
 
 class Simulation;
 class DynamicalSystem;
@@ -98,6 +100,9 @@ protected:
   /** Solver for Non Smooth Problem*/
   Solver* solver;
 
+  /** Solver for Non Smooth Problem*/
+  NonSmoothSolver* nsSolver;
+
   /** bool to check whether solver has been allocated inside the class or not */
   bool isSolverAllocatedIn;
 
@@ -132,6 +137,9 @@ protected:
 
   /** Number of calls to the solver */
   unsigned int nbIter;
+
+  /** Numerics (C) structure used to define global options for Numerics functions calls */
+  Numerics_Options * numerics_options;
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
 
@@ -371,7 +379,11 @@ public:
    */
   void printStat();
 
-  // --- OTHER FUNCTIONS ---
+  /** get Numerics structure used to set options */
+  inline Numerics_Options * getNumericsOptions()
+  {
+    return numerics_options;
+  };
 
   /** fills in blocksPositions map, ie computes variables blocks positions in the full matrix (M in LCP case ...)
    */

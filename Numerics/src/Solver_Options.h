@@ -37,6 +37,6 @@ typedef struct
   int * iparam;
   double * dparam;
   int storageType;
-} solver_options;
+} Solver_Options;
 
 #endif

@@ -7,7 +7,7 @@
  * (at your option) any later version.
  * Siconos is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY ory FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -32,8 +32,8 @@ using namespace std;
 
 // xml constructor
 FrictionContact::FrictionContact(const string pbType, OneStepNSProblemXML* osNsPbXml, Simulation* newSimu):
-  OneStepNSProblem(pbType, osNsPbXml, newSimu), w(NULL), z(NULL), M(NULL), q(NULL), mu(NULL),
-  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), Mspbl(NULL)
+  OneStepNSProblem(pbType, osNsPbXml, newSimu), velocity(NULL), reaction(NULL), M(NULL), q(NULL), mu(NULL),
+  isVelocityAllocatedIn(false), isReactionAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), Mspbl(NULL)
 {
   FrictionContactXML * xmllcp = (static_cast<FrictionContactXML*>(osNsPbXml));
 
@@ -62,23 +62,23 @@ FrictionContact::FrictionContact(const string pbType, OneStepNSProblemXML* osNsP
 
 // Constructor from a set of data
 FrictionContact::FrictionContact(const string pbType, Simulation* newSimu, const string newId):
-  OneStepNSProblem(pbType, newSimu, newId), w(NULL), z(NULL), M(NULL), q(NULL), mu(NULL),
-  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
+  OneStepNSProblem(pbType, newSimu, newId), velocity(NULL), reaction(NULL), M(NULL), q(NULL), mu(NULL),
+  isVelocityAllocatedIn(false), isReactionAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
 {}
 
 // Constructor from a set of data
 FrictionContact::FrictionContact(const string pbType, Solver*  newSolver, Simulation* newSimu, const string newId):
-  OneStepNSProblem(pbType, newSimu, newId, newSolver), w(NULL), z(NULL), M(NULL), q(NULL), mu(NULL),
-  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), Mspbl(NULL)
+  OneStepNSProblem(pbType, newSimu, newId, newSolver), velocity(NULL), reaction(NULL), M(NULL), q(NULL), mu(NULL),
+  isVelocityAllocatedIn(false), isReactionAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), Mspbl(NULL)
 {}
 
 // destructor
 FrictionContact::~FrictionContact()
 {
-  if (isWAllocatedIn) delete w;
-  w = NULL;
-  if (isZAllocatedIn) delete z;
-  z = NULL;
+  if (isVelocityAllocatedIn) delete velocity;
+  velocity = NULL;
+  if (isReactionAllocatedIn) delete reaction;
+  reaction = NULL;
   if (isMAllocatedIn)
     if (solver->useBlocks()) freeSpBlMat(Mspbl);
     else delete M;
@@ -92,55 +92,55 @@ FrictionContact::~FrictionContact()
 
 // Setters
 
-void FrictionContact::setW(const SimpleVector& newValue)
+void FrictionContact::setVelocity(const SimpleVector& newValue)
 {
   if (sizeOutput != newValue.size())
-    RuntimeException::selfThrow("FrictionContact: setW, inconsistent size between given w size and problem size. You should set sizeOutput before");
+    RuntimeException::selfThrow("FrictionContact: setVelocity, inconsistent size between given velocity size and problem size. You should set sizeOutput before");
 
-  if (w == NULL)
+  if (velocity == NULL)
   {
-    w = new SimpleVector(sizeOutput);
-    isWAllocatedIn = true;
+    velocity = new SimpleVector(sizeOutput);
+    isVelocityAllocatedIn = true;
   }
-  else if (w->size() != sizeOutput)
-    RuntimeException::selfThrow("FrictionContact: setW, w size differs from sizeOutput");
+  else if (velocity->size() != sizeOutput)
+    RuntimeException::selfThrow("FrictionContact: setVelocity, velocity size differs from sizeOutput");
 
-  *w = newValue;
+  *velocity = newValue;
 }
 
-void FrictionContact::setWPtr(SimpleVector* newPtr)
+void FrictionContact::setVelocityPtr(SimpleVector* newPtr)
 {
   if (sizeOutput != newPtr->size())
-    RuntimeException::selfThrow("FrictionContact: setWPtr, inconsistent size between given w size and problem size. You should set sizeOutput before");
+    RuntimeException::selfThrow("FrictionContact: setVelocityPtr, inconsistent size between given velocity size and problem size. You should set sizeOutput before");
 
-  if (isWAllocatedIn) delete w;
-  w = newPtr;
-  isWAllocatedIn = false;
+  if (isVelocityAllocatedIn) delete velocity;
+  velocity = newPtr;
+  isVelocityAllocatedIn = false;
 }
 
 
-void FrictionContact::setZ(const SimpleVector& newValue)
+void FrictionContact::setReaction(const SimpleVector& newValue)
 {
   if (sizeOutput != newValue.size())
-    RuntimeException::selfThrow("FrictionContact: setZ, inconsistent size between given z size and problem size. You should set sizeOutput before");
+    RuntimeException::selfThrow("FrictionContact: setReaction, inconsistent size between given reaction size and problem size. You should set sizeOutput before");
 
-  if (z == NULL)
+  if (reaction == NULL)
   {
-    z = new SimpleVector(sizeOutput);
-    isZAllocatedIn = true;
+    reaction = new SimpleVector(sizeOutput);
+    isReactionAllocatedIn = true;
   }
 
-  *z = newValue;
+  *reaction = newValue;
 }
 
-void FrictionContact::setZPtr(SimpleVector* newPtr)
+void FrictionContact::setReactionPtr(SimpleVector* newPtr)
 {
   if (sizeOutput != newPtr->size())
-    RuntimeException::selfThrow("FrictionContact: setZPtr, inconsistent size between given z size and problem size. You should set sizeOutput before");
+    RuntimeException::selfThrow("FrictionContact: setReactionPtr, inconsistent size between given reaction size and problem size. You should set sizeOutput before");
 
-  if (isZAllocatedIn) delete z;
-  z = newPtr;
-  isZAllocatedIn = false;
+  if (isReactionAllocatedIn) delete reaction;
+  reaction = newPtr;
+  isReactionAllocatedIn = false;
 }
 
 void FrictionContact::setM(const SiconosMatrix& newValue)
@@ -199,26 +199,26 @@ void FrictionContact::initialize()
   // General initialize for OneStepNSProblem
   OneStepNSProblem::initialize();
 
-  // Memory allocation for w, M, z and q
-  if (w == NULL)
+  // Memory allocation for velocity, M, reaction and q
+  if (velocity == NULL)
   {
-    w = new SimpleVector(maxSize);
-    isWAllocatedIn = true;
+    velocity = new SimpleVector(maxSize);
+    isVelocityAllocatedIn = true;
   }
   else
   {
-    if (w->size() != maxSize)
-      w->resize(maxSize);
+    if (velocity->size() != maxSize)
+      velocity->resize(maxSize);
   }
-  if (z == NULL)
+  if (reaction == NULL)
   {
-    z = new SimpleVector(maxSize);
-    isZAllocatedIn = true;
+    reaction = new SimpleVector(maxSize);
+    isReactionAllocatedIn = true;
   }
   else
   {
-    if (z->size() != maxSize)
-      z->resize(maxSize);
+    if (reaction->size() != maxSize)
+      reaction->resize(maxSize);
   }
   if (M == NULL)
   {
@@ -240,8 +240,8 @@ void FrictionContact::initialize()
     if (q->size() != maxSize)
       q->resize(maxSize);
   }
-  w->zero();
-  z->zero();
+  velocity->zero();
+  reaction->zero();
 
   // if all relative degrees are equal to 0 or 1 and if if we do not use a solver block
   // get topology
@@ -424,18 +424,18 @@ void FrictionContact::preCompute(const double time)
     updateBlocks();
     assembleM();
     computeQ(time);
-    // check z and w sizes and reset if necessary
-    if (z->size() != sizeOutput)
+    // check reaction and velocity sizes and reset if necessary
+    if (reaction->size() != sizeOutput)
     {
-      z->resize(sizeOutput, false);
+      reaction->resize(sizeOutput, false);
     }
 
-    if (w->size() != sizeOutput)
+    if (velocity->size() != sizeOutput)
     {
-      w->resize(sizeOutput);
+      velocity->resize(sizeOutput);
     }
-    w->zero();
-    z->zero();
+    velocity->zero();
+    reaction->zero();
   }
 }
 
@@ -459,20 +459,17 @@ void FrictionContact::postCompute()
     // *itCurrent is a UnitaryRelation*.
     // size if a block that corresponds to the current UnitaryRelation
     nsLawSize = (*itCurrent)->getNonSmoothLawSize();
-    // Get the relative position of UR-block in the vector w or z
+    // Get the relative position of UR-block in the vector velocity or reaction
     pos = blocksPositions[*itCurrent];
 
     // Get Y and Lambda for the current Unitary Relation
     y = static_cast<SimpleVector*>((*itCurrent)-> getYPtr(levelMin));
     lambda = static_cast<SimpleVector*>((*itCurrent)->getLambdaPtr(levelMin));
 
-    //      static_cast<SimpleVector*>(w)->getBlock(pos,nsLawSize, *y) ;
-    //      static_cast<SimpleVector*>(z)->getBlock(pos,nsLawSize, *lambda) ;
+    // Copy velocity/reaction values, starting from index pos into y/lambda.
 
-    // Copy w/z values, starting from index pos into y/lambda.
-
-    setBlock(w, y, y->size(), pos, 0);
-    setBlock(z, lambda, lambda->size(), pos, 0);
+    setBlock(velocity, y, y->size(), pos, 0);
+    setBlock(reaction, lambda, lambda->size(), pos, 0);
 
   }
 }

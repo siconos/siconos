@@ -250,6 +250,15 @@
 		<xsd:attribute name="isBlock" type="xsd:boolean" use="optional" default="false"/>
 	</xsd:complexType>
 </xsd:element>
+<xsd:element name="NonSmoothSolver">
+	<xsd:complexType>
+		<xsd:all>
+		  <xsd:element name="iparam" type="vector" minOccurs="1" maxOccurs="1"/>
+		  <xsd:element name="dparam" type="vector" minOccurs="1" maxOccurs="1"/>
+		</xsd:all>
+    		<xsd:attribute name="Name" type="xsd:string" use="required"/>
+	</xsd:complexType>
+</xsd:element>
 
 <!--~~~~~~ special type to provide a list of indexes for DS (for interaction, OSI ...), interaction (for OneStepNS, ...) or anything else ~~~~~~~~-->
 <xsd:complexType name="index_list">
@@ -694,7 +703,7 @@
 							<xsd:element name="M" type="matrix" minOccurs="0" maxOccurs="1"/>
 							<xsd:element name="q" type="vector" minOccurs="0" maxOccurs="1"/>
 							<!--~~~~~~ list of interactions concerned ~~~~~~-->
-  							<xsd:element ref="Solver" minOccurs="0" maxOccurs="1"/>
+  							<xsd:element ref="NonSmoothSolver" minOccurs="0" maxOccurs="1"/>
              						<xsd:element name="Interaction_Concerned" type="index_list" minOccurs='0' maxOccurs="1"/>
 						</xsd:all>
 					</xsd:complexType>

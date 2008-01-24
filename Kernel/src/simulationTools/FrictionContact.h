@@ -37,15 +37,15 @@
  * This class is devoted to the formalization and the resolution of
  * friction contact problems defined by :
  * \f[
- * w =  q + M z
+ * velocity =  q + M reaction
  * \f]
  * \f[
- * w \geq 0, z \geq 0,  z^{T} w =0
+ * velocity \geq 0, reaction \geq 0,  reaction^{T} velocity =0
  * \f]
  * and a Coulomb friction law.
  *
  * With:
- *    - \f$w \in R^{n} \f$  and \f$z \in R^{n} \f$ are the unknown,
+ *    - \f$velocity \in R^{n} \f$  and \f$reaction \in R^{n} \f$ are the unknown,
  *    - \f$M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
  *
  * The present formulation corresponds to pfc2D and 3D of Numerics package.
@@ -56,11 +56,11 @@ class FrictionContact : public OneStepNSProblem
 {
 protected:
 
-  /** contains the vector w of a FrictionContact system */
-  SimpleVector *w;
+  /** contains the vector velocity of a FrictionContact system */
+  SimpleVector *velocity;
 
-  /** contains the vector z of a FrictionContact system */
-  SimpleVector *z;
+  /** contains the vector reaction of a FrictionContact system */
+  SimpleVector *reaction;
 
   /** contains the matrix M of a FrictionContact system */
   SiconosMatrix *M;
@@ -72,8 +72,8 @@ protected:
   SiconosVector *mu;
 
   /** Flags to check wheter pointers were allocated in class constructors or not */
-  bool isWAllocatedIn;
-  bool isZAllocatedIn;
+  bool isVelocityAllocatedIn;
+  bool isReactionAllocatedIn;
   bool isMAllocatedIn;
   bool isQAllocatedIn;
 
@@ -116,61 +116,61 @@ public:
 
   // GETTERS/SETTERS
 
-  // --- W ---
-  /** get the value of w, the initial state of the DynamicalSystem
+  // --- Velocity ---
+  /** get the value of velocity, the initial state of the DynamicalSystem
    *  \return SimpleVector
    *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
    */
-  inline const SimpleVector getW() const
+  inline const SimpleVector getVelocity() const
   {
-    return *w;
+    return *velocity;
   }
 
-  /** get w, the initial state of the DynamicalSystem
+  /** get velocity, the initial state of the DynamicalSystem
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getWPtr() const
+  inline SimpleVector* getVelocityPtr() const
   {
-    return w;
+    return velocity;
   }
 
-  /** set the value of w to newValue
+  /** set the value of velocity to newValue
    *  \param SimpleVector newValue
    */
-  void setW(const SimpleVector&);
+  void setVelocity(const SimpleVector&);
 
-  /** set w to pointer newPtr
+  /** set velocity to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  void setWPtr(SimpleVector*);
+  void setVelocityPtr(SimpleVector*);
 
-  // --- Z ---
-  /** get the value of z, the initial state of the DynamicalSystem
+  // --- Reaction ---
+  /** get the value of reaction, the initial state of the DynamicalSystem
    *  \return SimpleVector
    *  \warning: SimpleVector is an abstract class => can not be an lvalue => return SimpleVector
    */
-  inline const SimpleVector getZ() const
+  inline const SimpleVector getReaction() const
   {
-    return *z;
+    return *reaction;
   }
 
-  /** get z, the initial state of the DynamicalSystem
+  /** get reaction, the initial state of the DynamicalSystem
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getZPtr() const
+  inline SimpleVector* getReactionPtr() const
   {
-    return z;
+    return reaction;
   }
 
-  /** set the value of z to newValue
+  /** set the value of reaction to newValue
    *  \param SimpleVector newValue
    */
-  void setZ(const SimpleVector&);
+  void setReaction(const SimpleVector&);
 
-  /** set z to pointer newPtr
+  /** set reaction to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  void setZPtr(SimpleVector*) ;
+  void setReactionPtr(SimpleVector*) ;
 
   // --- M ---
 
@@ -290,7 +290,7 @@ public:
    */
   void preCompute(const double time);
 
-  /** Compute the unknown z and w and update the Interaction (y and lambda )
+  /** Compute the unknown reaction and velocity and update the Interaction (y and lambda )
    *  \param double : current time
    *  \return int, information about the solver convergence.
    */

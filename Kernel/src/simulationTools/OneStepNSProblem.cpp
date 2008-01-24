@@ -32,7 +32,7 @@ using namespace std;
 // xml constructor
 OneStepNSProblem::OneStepNSProblem(const string& pbType, OneStepNSProblemXML* osnspbxml, Simulation* newSimu):
   nspbType(pbType), id(DEFAULT_OSNS_NAME), sizeOutput(0), solver(NULL), isSolverAllocatedIn(false),  simulation(newSimu), onestepnspbxml(osnspbxml),
-  OSNSInteractions(NULL), levelMin(0), levelMax(0), maxSize(0), CPUtime(0), nbIter(0)
+  OSNSInteractions(NULL), levelMin(0), levelMax(0), maxSize(0), CPUtime(0), nbIter(0), numerics_options(NULL)
 {
   if (onestepnspbxml == NULL)
     RuntimeException::selfThrow("OneStepNSProblem::xml constructor, xml file == NULL");
@@ -64,12 +64,15 @@ OneStepNSProblem::OneStepNSProblem(const string& pbType, OneStepNSProblemXML* os
   // === Link to the Interactions of the Non Smooth Dynamical System (through the Simulation) ===
   // Warning: this means that all Interactions of the NSProblem are included in the OSNS !!
   OSNSInteractions = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
+
+  numerics_options = new Numerics_Options();
+  numerics_options->verbose = 0; // turn verbose mode to off by default
 }
 
 // Constructor with given simulation and a pointer on Solver (Warning, solver is an optional argument)
 OneStepNSProblem::OneStepNSProblem(const string& pbType, Simulation * newSimu, const string& newId, Solver* newSolver):
   nspbType(pbType), id(newId), sizeOutput(0), solver(newSolver), isSolverAllocatedIn(false),  simulation(newSimu), onestepnspbxml(NULL),
-  OSNSInteractions(NULL), levelMin(0), levelMax(0), maxSize(0), CPUtime(0), nbIter(0)
+  OSNSInteractions(NULL), levelMin(0), levelMax(0), maxSize(0), CPUtime(0), nbIter(0), numerics_options(NULL)
 {
   // === Checks simulation ===
   if (newSimu == NULL)
@@ -84,6 +87,8 @@ OneStepNSProblem::OneStepNSProblem(const string& pbType, Simulation * newSimu, c
   if (!(simulation->getOneStepNSProblems())->empty() && id == DEFAULT_OSNS_NAME) // An id is required if there is more than one OneStepNSProblem in the simulation
     RuntimeException::selfThrow("OneStepNSProblem::constructor(...). Since the simulation has several one step non smooth problem, an id is required for each of them.");
   simulation->addOneStepNSProblemPtr(this);
+  numerics_options = new Numerics_Options();
+  numerics_options->verbose = 0; // turn verbose mode to off by default
 }
 
 OneStepNSProblem::~OneStepNSProblem()
@@ -95,6 +100,8 @@ OneStepNSProblem::~OneStepNSProblem()
   clearBlocks();
   OSNSInteractions->clear();
   OSNSInteractions = NULL;
+  delete numerics_options;
+  numerics_options = NULL;
 }
 
 SiconosMatrix* OneStepNSProblem::getBlockPtr(UnitaryRelation* UR1, UnitaryRelation* UR2) const

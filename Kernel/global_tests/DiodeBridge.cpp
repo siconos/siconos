@@ -133,7 +133,9 @@ bool DiodeBridge()
     StratDiodeBridge->initialize();
 
     int k = 0;
-    int N = TiDiscRLCD->getNSteps(); // Number of time steps
+    // dataPlot (ascii) output
+    SiconosMatrix * dataRef = new SimpleMatrix("refDiodeBridge.dat", true);
+    int N = dataRef->size(0) ;
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -197,9 +199,6 @@ bool DiodeBridge()
 
     }
 
-    // dataPlot (ascii) output
-    SiconosMatrix * dataRef = new SimpleMatrix("refDiodeBridge.dat", true);
-    cout << dataRef->size(0) << " " << dataPlot.size(0) << endl;
     double tol = 1e-9;
     double norm = (dataPlot - (*dataRef)).normInf() ;
     cout << endl << endl ;

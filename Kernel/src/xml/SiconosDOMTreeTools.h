@@ -75,7 +75,7 @@ public:
 
   /** read a vector-type node and save value of type T into a vector<T>
   *   \param xmlNodePtr: the vector node to be read
-  *   \param vector<T> in-out parameter
+  *   \param vector<T> in-out parameter (warning: initial size must be 0, since this function uses push_back)
   *   \return a vector<int>
   */
   template<class T> static void getVector(const xmlNodePtr vectorNode, std::vector<T>& outputVector)

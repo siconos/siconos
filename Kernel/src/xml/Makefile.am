@@ -27,14 +27,14 @@ include $(top_srcdir)/config/Make-rules
 
 
 noinst_LTLIBRARIES = libSiconosXml.la
-libSiconosXml_la_SOURCES = SiconosDOMTreeTools.cpp SiconosMemoryXML.cpp SolverXML.cpp DynamicalSystemXML.cpp FirstOrderNonLinearDSXML.cpp \
+libSiconosXml_la_SOURCES = SiconosDOMTreeTools.cpp SiconosMemoryXML.cpp SolverXML.cpp NonSmoothSolverXML.cpp DynamicalSystemXML.cpp FirstOrderNonLinearDSXML.cpp \
 		FirstOrderLinearDSXML.cpp LagrangianDSXML.cpp LagrangianLinearTIDSXML.cpp NonSmoothLawXML.cpp NewtonImpactNSLXML.cpp \
 		NewtonImpactFrictionNSLXML.cpp ComplementarityConditionNSLXML.cpp RelationXML.cpp FirstOrderRXML.cpp FirstOrderLinearRXML.cpp \
 		LagrangianRXML.cpp LagrangianLinearRXML.cpp\
 		InteractionXML.cpp NonSmoothDynamicalSystemXML.cpp SimulationXML.cpp TimeDiscretisationXML.cpp OneStepIntegratorXML.cpp \
 		LsodarXML.cpp MoreauXML.cpp OneStepNSProblemXML.cpp LCPXML.cpp FrictionContactXML.cpp QPXML.cpp RelayNSLXML.cpp \
 		SiconosModelXML.cpp\
-		XMLTagsName.h SiconosDOMTreeTools.h SiconosMemoryXML.h SolverXML.h DynamicalSystemXML.h FirstOrderNonLinearDSXML.h FirstOrderLinearDSXML.h \
+		XMLTagsName.h SiconosDOMTreeTools.h SiconosMemoryXML.h SolverXML.h NonSmoothSolverXML.h DynamicalSystemXML.h FirstOrderNonLinearDSXML.h FirstOrderLinearDSXML.h \
 		LagrangianDSXML.h LagrangianLinearTIDSXML.h NonSmoothLawXML.h NewtonImpactNSLXML.h NewtonImpactFrictionNSLXML.h \
 		ComplementarityConditionNSLXML.h RelationXML.h FirstOrderRXML.h FirstOrderLinearRXML.h LagrangianRXML.h LagrangianLinearRXML.h\
 		InteractionXML.h NonSmoothDynamicalSystemXML.h SimulationXML.h TimeDiscretisationXML.h OneStepIntegratorXML.h \
@@ -42,7 +42,7 @@ libSiconosXml_la_SOURCES = SiconosDOMTreeTools.cpp SiconosMemoryXML.cpp SolverXM
 		SiconosModelXML.h XmlTools.h
 
 libSiconosXml_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
-siconos_HEADERS = XMLTagsName.h SiconosDOMTreeTools.h SiconosMemoryXML.h SolverXML.h DynamicalSystemXML.h FirstOrderNonLinearDSXML.h FirstOrderLinearDSXML.h \
+siconos_HEADERS = XMLTagsName.h SiconosDOMTreeTools.h SiconosMemoryXML.h SolverXML.h NonSmoothSolverXML.h DynamicalSystemXML.h FirstOrderNonLinearDSXML.h FirstOrderLinearDSXML.h \
 		LagrangianDSXML.h LagrangianLinearTIDSXML.h NonSmoothLawXML.h NewtonImpactNSLXML.h NewtonImpactFrictionNSLXML.h \
 		ComplementarityConditionNSLXML.h RelationXML.h FirstOrderRXML.h FirstOrderLinearRXML.h LagrangianRXML.h LagrangianLinearRXML.h\
 		InteractionXML.h NonSmoothDynamicalSystemXML.h SimulationXML.h TimeDiscretisationXML.h OneStepIntegratorXML.h \
