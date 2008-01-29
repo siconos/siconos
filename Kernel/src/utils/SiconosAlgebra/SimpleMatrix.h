@@ -56,13 +56,13 @@ class SimpleVector;
  */
 class SimpleMatrix: public SiconosMatrix
 {
-private:
-
+protected:
   /** Union of The Boost Matrices : DenseMat, TriangMat, SymMat ...
       (See SiconosMatrix.h for more details on MATRIX_UBLAS_TYPE);
   */
   MATRIX_UBLAS_TYPE mat;
 
+private:
   /** std::vector<int> ipiv;
    * The pivot indices obtained from DGETRF (PLUFactorizationInPlace)
    */

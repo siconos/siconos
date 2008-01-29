@@ -42,13 +42,13 @@ class SimpleMatrix;
  */
 class SimpleVector: public SiconosVector
 {
-private:
-
+protected:
   /**
    * Union of pointers to the ublas vector type (dense or sparse)
    */
   VECTOR_UBLAS_TYPE vect;
 
+private:
   /** Default constructor
    */
   SimpleVector() {};

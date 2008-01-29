@@ -29,6 +29,7 @@
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/operation.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
+#include <boost/numeric/ublas/operation_sparse.hpp>
 
 // =================================================
 //                CONSTRUCTORS
@@ -629,7 +630,13 @@ const double SimpleMatrix::getValue(unsigned int row, unsigned int col) const
   else if (num == 3)
     return (*mat.Sym)(row, col);
   else if (num == 4)
-    return (*mat.Sparse)(row, col);
+  {
+    double * d = (*mat.Sparse).find_element(row, col);
+    if (d)
+      return *d;
+    else
+      return 0.0;
+  }
   else if (num == 5)
     return (*mat.Banded)(row, col);
   else if (num == 6)
@@ -650,7 +657,17 @@ void SimpleMatrix::setValue(unsigned int row, unsigned int col, double value)
   else if (num == 3)
     (*mat.Sym)(row, col) = value ;
   else if (num == 4)
-    (*mat.Sparse)(row, col) = value;
+  {
+    double * d = (*mat.Sparse).find_element(row, col);
+    if (d)
+    {
+      *d = value;
+    }
+    else
+    {
+      (*mat.Sparse).insert_element(row, col, value);
+    }
+  }
   else if (num == 5)
     (*mat.Banded)(row, col) = value;
   else if (num == 6 || num == 7)
@@ -4081,9 +4098,9 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
         //ublas::axpy_prod(*A.getSymPtr(), *B.getSymPtr(),*C.getSymPtr(),init);
         break;
       case 4:
-        //        if(numA!= 4 || numB != 4)
-        SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
-        //ublas::axpy_prod(*A.getSparsePtr(), *B.getSparsePtr(),*C.getSparsePtr(),init);
+        if (numA != 4 || numB != 4)
+          SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
+        ublas::sparse_prod(*A.getSparsePtr(), *B.getSparsePtr(), *C.getSparsePtr(), init);
         break;
       default:
         SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
