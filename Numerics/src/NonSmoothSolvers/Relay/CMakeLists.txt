@@ -2,9 +2,6 @@
 PROJECT(Relay)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.4.5)
 
-# ######### General setup ##########
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
-
 # ########## Relay library ##########
 # Sources:
 SET(Relay_library_SRCS
@@ -26,7 +23,7 @@ CONFIGURE_FILE(Makefile.in ${CMAKE_BINARY_DIR}/Makefile)
 
 
 # actual target:
-ADD_LIBRARY(Relay ${Relay_library}_SCRS ${Relay_library_HDRS})
+ADD_LIBRARY(Relay ${Relay_library_HDRS} ${Relay_library_SRCS})
 SET_TARGET_PROPERTIES(Relay PROPERTIES VERSION 0.0.0)
 
 # add install target:

@@ -2,9 +2,6 @@
 PROJECT(NSSTools)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.4.5)
 
-# ######### General setup ##########
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
-
 # ########## NSSTools library ##########
 # Sources:
 SET(NSSTools_library_SRCS
@@ -30,11 +27,8 @@ SET(NSSTools_library_HDRS
     NSSTools.h
 )
 
-CONFIGURE_FILE(Makefile.in ${CMAKE_BINARY_DIR}/Makefile)
-
-
 # actual target:
-ADD_LIBRARY(NSSTools ${NSSTools_library}_SCRS ${NSSTools_library_HDRS})
+ADD_LIBRARY(NSSTools ${NSSTools_library_HDRS} ${NSSTools_library_SRCS})
 SET_TARGET_PROPERTIES(NSSTools PROPERTIES VERSION 0.0.0)
 
 # add install target:

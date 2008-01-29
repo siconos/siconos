@@ -2,8 +2,6 @@
 PROJECT(MLCP)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.4.5)
 
-# ######### General setup ##########
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
 # ########## MLCP library ##########
 # Sources:
@@ -23,11 +21,8 @@ SET(MLCP_library_HDRS
     MLCP_Solvers.h
 )
 
-CONFIGURE_FILE(Makefile.in ${CMAKE_BINARY_DIR}/Makefile)
-
-
 # actual target:
-ADD_LIBRARY(MLCP ${MLCP_library}_SCRS ${MLCP_library_HDRS})
+ADD_LIBRARY(MLCP  ${MLCP_library_HDRS} ${MLCP_library_SRCS})
 SET_TARGET_PROPERTIES(MLCP PROPERTIES VERSION 0.0.0)
 
 # add install target:

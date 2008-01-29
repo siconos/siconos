@@ -1,15 +1,11 @@
 # ########## Project setup ##########
-PROJECT(src)
-CMAKE_MINIMUM_REQUIRED(VERSION 2.4.5)
+PROJECT(Numerics)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.4.4)
 
 # ######### General setup ##########
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
+INCLUDE_DIRECTORIES(utils)
 
-# ########## src library ##########
-# Sources:
-SET(src_library_SRCS
-    dummy.cpp
-)
+SUBDIRS(utils NonSmoothSolvers netlib)
 
 # Headers:
 SET(src_library_HDRS
@@ -17,12 +13,7 @@ SET(src_library_HDRS
     SiconosNumerics.h
 )
 
-CONFIGURE_FILE(Makefile.in ${CMAKE_BINARY_DIR}/Makefile)
+ADD_LIBRARY(Numerics ${src_library_HDRS})
+SET_TARGET_PROPERTIES(Numerics PROPERTIES VERSION 0.0.0 LINKER_LANGUAGE C)
 
-
-# actual target:
-ADD_LIBRARY(src ${src_library}_SCRS ${src_library_HDRS})
-SET_TARGET_PROPERTIES(src PROPERTIES VERSION 0.0.0)
-
-# add install target:
-INSTALL(TARGETS src DESTINATION lib)
+TARGET_LINK_LIBRARIES(Numerics NonSmoothSolvers/NonSmoothSolvers.a)

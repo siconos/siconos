@@ -2,9 +2,6 @@
 PROJECT(FrictionContact2D)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.4.5)
 
-# ######### General setup ##########
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
-
 # ########## FrictionContact2D library ##########
 # Sources:
 SET(FrictionContact2D_library_SRCS
@@ -29,11 +26,8 @@ SET(FrictionContact2D_library_HDRS
     FrictionContact2D_Solvers.h
 )
 
-CONFIGURE_FILE(Makefile.in ${CMAKE_BINARY_DIR}/Makefile)
-
-
 # actual target:
-ADD_LIBRARY(FrictionContact2D ${FrictionContact2D_library}_SCRS ${FrictionContact2D_library_HDRS})
+ADD_LIBRARY(FrictionContact2D  ${FrictionContact2D_library_HDRS} ${FrictionContact2D_library_SRCS})
 SET_TARGET_PROPERTIES(FrictionContact2D PROPERTIES VERSION 0.0.0)
 
 # add install target:

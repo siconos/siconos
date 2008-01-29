@@ -2,8 +2,6 @@
 PROJECT(NCP)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.4.5)
 
-# ######### General setup ##########
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
 # ########## NCP library ##########
 # Sources:
@@ -18,11 +16,8 @@ SET(NCP_library_HDRS
     NCP.h
 )
 
-CONFIGURE_FILE(Makefile.in ${CMAKE_BINARY_DIR}/Makefile)
-
-
 # actual target:
-ADD_LIBRARY(NCP ${NCP_library}_SCRS ${NCP_library_HDRS})
+ADD_LIBRARY(NCP ${NCP_library_HDRS} ${NCP_library_SRCS} )
 SET_TARGET_PROPERTIES(NCP PROPERTIES VERSION 0.0.0)
 
 # add install target:

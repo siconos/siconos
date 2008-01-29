@@ -34,11 +34,9 @@ SET(pfc3D_library_HDRS
     pfc_3D_Alart_Curnier.h
 )
 
-CONFIGURE_FILE(Makefile.in ${CMAKE_BINARY_DIR}/Makefile)
-
 
 # actual target:
-ADD_LIBRARY(pfc3D ${pfc3D_library}_SCRS ${pfc3D_library_HDRS})
+ADD_LIBRARY(pfc3D ${pfc3D_library_HDRS} ${pfc3D_library_SRCS})
 SET_TARGET_PROPERTIES(pfc3D PROPERTIES VERSION 0.0.0)
 
 # add install target:

@@ -28,11 +28,8 @@ SET(FrictionContact3D_library_HDRS
     FrictionContact3D2NCP_Glocker.h
 )
 
-CONFIGURE_FILE(Makefile.in ${CMAKE_BINARY_DIR}/Makefile)
-
-
 # actual target:
-ADD_LIBRARY(FrictionContact3D ${FrictionContact3D_library}_SCRS ${FrictionContact3D_library_HDRS})
+ADD_LIBRARY(FrictionContact3D ${FrictionContact3D_library_HDRS} ${FrictionContact3D_library_SRCS})
 SET_TARGET_PROPERTIES(FrictionContact3D PROPERTIES VERSION 0.0.0)
 
 # add install target:

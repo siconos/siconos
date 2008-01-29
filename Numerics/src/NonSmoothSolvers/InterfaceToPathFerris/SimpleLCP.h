@@ -22,7 +22,7 @@
 #ifndef SIMPLELCP_H
 #define SIMPLELCP_H
 
-#include "path/include/Types.h"
+#include "include/Types.h"
 
 void SimpleLCP(int variables,
                int m_nnz, int *m_i, int *m_j, double *m_ij, double *q,

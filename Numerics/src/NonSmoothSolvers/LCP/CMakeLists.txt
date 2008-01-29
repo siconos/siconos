@@ -1,9 +1,8 @@
 # ########## Project setup ##########
 PROJECT(LCP)
-CMAKE_MINIMUM_REQUIRED(VERSION 2.4.5)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.0)
 
 # ######### General setup ##########
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
 # ########## LCP library ##########
 # Sources:
@@ -32,11 +31,8 @@ SET(LCP_library_HDRS
     LCP_Solvers.h
 )
 
-CONFIGURE_FILE(Makefile.in ${CMAKE_BINARY_DIR}/Makefile)
-
-
 # actual target:
-ADD_LIBRARY(LCP ${LCP_library}_SCRS ${LCP_library_HDRS})
+ADD_LIBRARY(LCP ${LCP_library_HDRS} ${LCP_library_SRCS})
 SET_TARGET_PROPERTIES(LCP PROPERTIES VERSION 0.0.0)
 
 # add install target:
