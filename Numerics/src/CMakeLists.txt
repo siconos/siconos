@@ -1,19 +1,35 @@
-# ########## Project setup ##########
+#
+# Numerics
+#
 PROJECT(Numerics)
-CMAKE_MINIMUM_REQUIRED(VERSION 2.4.4)
 
-# ######### General setup ##########
-INCLUDE_DIRECTORIES(utils)
-
-SUBDIRS(utils NonSmoothSolvers netlib)
-
-# Headers:
-SET(src_library_HDRS
-    Solver_Options.h
-    SiconosNumerics.h
+SET(Numerics_library_HDRS
+  Solver_Options.h
+  SiconosNumerics.h
 )
 
-ADD_LIBRARY(Numerics ${src_library_HDRS})
+FILE(GLOB NS_FILES NonSmoothSolvers/*)
+
+FILE(GLOB NETLIB_ODEPACK_SRCS netlib/odepack/*.[hcf])
+
+FILE(GLOB NETLIB_DFTEMPLATES_SRCS netlib/dftemplates/*.[hcf])
+
+FOREACH(SOLV ${NS_FILES})
+  IF(IS_DIRECTORY ${SOLV})
+    LIST(APPEND SOLVERS ${SOLV})
+    FILE(GLOB SOLV_SRCS ${SOLV}/*.[hcf])
+    IF(SOLV_SRCS)
+      LIST(APPEND SOLVERS_SRCS ${SOLV_SRCS})
+    ENDIF(SOLV_SRCS)
+  ENDIF(IS_DIRECTORY ${SOLV})
+ENDFOREACH(SOLV)
+
+INCLUDE_DIRECTORIES(utils NonSmoothSolvers netlib/odepack netlib/dftemplates ${SOLVERS})
+
+#ADD_DEFINITIONS(-std=c99) : warning with f95
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+
+ADD_LIBRARY(Numerics ${Numerics_library_HDRS} ${SOLVERS_SRCS} ${NETLIB_ODEPACK_SRCS} ${NETLIB_DFTEMPLATES_SRCS})
 SET_TARGET_PROPERTIES(Numerics PROPERTIES VERSION 0.0.0 LINKER_LANGUAGE C)
 
-TARGET_LINK_LIBRARIES(Numerics NonSmoothSolvers/NonSmoothSolvers.a)
+

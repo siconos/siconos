@@ -1,9 +1,3 @@
-# ########## Project setup ##########
-PROJECT(NonSmoothSolvers)
-CMAKE_MINIMUM_REQUIRED(VERSION 2.4.4)
-
-# ######### General setup ##########
-
 SET(SOLVDIRS
   NSSTools
   Relay
@@ -21,8 +15,6 @@ INCLUDE_DIRECTORIES(
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${SOLVDIRS}) 
   
-
-ADD_DEFINITIONS(-std=c99)
 
 SUBDIRS(${SOLVDIRS})
 
@@ -42,6 +34,4 @@ SET(NonSmoothSolvers_library_HDRS
 # actual target:
 ADD_LIBRARY(NonSmoothSolvers ${NonSmoothSolvers_library_HDRS} ${NonSmoothSolvers_library_SRCS})
 SET_TARGET_PROPERTIES(NonSmoothSolvers PROPERTIES VERSION 0.0.0)
-
-# add install target:
-INSTALL(TARGETS NonSmoothSolvers DESTINATION lib)
+ADD_DEPENDENCIES(NonSmoothSolvers ${SOLVDIRS})

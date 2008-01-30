@@ -1,11 +1,3 @@
-# ########## Project setup ##########
-PROJECT(LCP)
-CMAKE_MINIMUM_REQUIRED(VERSION 2.0)
-
-# ######### General setup ##########
-
-# ########## LCP library ##########
-# Sources:
 SET(LCP_library_SRCS
     lcp_newton_FB.c
     filter_result_LCP_block.c
