@@ -94,19 +94,13 @@ void printSolution(char *name, int n, int m, double *u1, double *v1, double *w1)
 void test_mlcp_series(int n , int m, double *A , double *B , double *C , double *D , double *a , double *b, double *sol)
 {
 
-  int i, j;
-  int nonsymmetric;
-  int incx = 1, incy = 1;
+  int i;
   int info1 = -1;
-
-  double comp, diff, alpha, beta;
 
   double *u1;
   double *v1;
   double *w1;
 
-
-  char NT = 'N';
 
   u1 = malloc(n * sizeof(double));
   v1 = malloc(m * sizeof(double));
@@ -119,7 +113,7 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
   static method_mlcp method_mlcp4 = { "RPSOR"       , 101 , 1e-8 , 2.0 , 1.0 , 1 , 0 , 0.0 };
   static method_mlcp method_mlcp5 = { "PATH"       , 0 , 1e-8 , 0.0 , 0.0 , 0 , 0 , 0.0 };
 
-
+  method myMethod;
 
   /* #1 PGS TEST */
 #ifdef BAVARD
@@ -134,7 +128,8 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
   {
     u1[i] = sol[i];
   }
-  info1 = mlcp_driver(A, B, C, D, a, b, &n , &m, &method_mlcp1 , u1 , v1, w1);
+  myMethod.mlcp =  method_mlcp1;
+  info1 = mlcp_driver(A, B, C, D, a, b, &n , &m, &myMethod , u1 , v1, w1);
 
   strcpy(summary[itest].cv[0], "CV");
   if (info1 > 0)
@@ -157,7 +152,8 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
     u1[i] = sol[i];
   }
 
-  info1 = mlcp_driver(A, B, C, D, a, b, &n , &m, &method_mlcp2 , u1 , v1, w1);
+  myMethod.mlcp =  method_mlcp2;
+  info1 = mlcp_driver(A, B, C, D, a, b, &n , &m, &myMethod , u1 , v1, w1);
   strcpy(summary[itest].cv[1], "CV");
   if (info1 > 0)
     strcpy(summary[itest].cv[1], "NO");
@@ -177,7 +173,8 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
     u1[i] = sol[i];
   }
 
-  info1 = mlcp_driver(A, B, C, D, a, b, &n , &m, &method_mlcp3 , u1 , v1, w1);
+  myMethod.mlcp =  method_mlcp3;
+  info1 = mlcp_driver(A, B, C, D, a, b, &n , &m, &myMethod , u1 , v1, w1);
   strcpy(summary[itest].cv[2], "CV");
   if (info1 > 0)
     strcpy(summary[itest].cv[2], "NO");
@@ -197,7 +194,8 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
     u1[i] = sol[i];
   }
 
-  info1 = mlcp_driver(A, B, C, D, a, b, &n , &m, &method_mlcp4 , u1 , v1, w1);
+  myMethod.mlcp =  method_mlcp4;
+  info1 = mlcp_driver(A, B, C, D, a, b, &n , &m, &myMethod , u1 , v1, w1);
   strcpy(summary[itest].cv[3], "CV");
   if (info1 > 0)
     strcpy(summary[itest].cv[3], "NO");
@@ -216,7 +214,8 @@ void test_mlcp_series(int n , int m, double *A , double *B , double *C , double 
     u1[i] = sol[i];
   }
 
-  info1 = mlcp_driver(A, B, C, D, a, b, &n , &m, &method_mlcp5 , u1 , v1, w1);
+  myMethod.mlcp =  method_mlcp5;
+  info1 = mlcp_driver(A, B, C, D, a, b, &n , &m, &myMethod , u1 , v1, w1);
   strcpy(summary[itest].cv[4], "CV");
   if (info1 > 0)
     strcpy(summary[itest].cv[4], "NO");
@@ -237,7 +236,6 @@ void test_matrix(void)
 
   int i, j;
   int isol;
-  int dim , dim2;
   int n , n2;
   int m, m2;
   int withSol = 0;
@@ -499,8 +497,8 @@ void test_matrix(void)
 int main(void)
 {
 
-  test_matrix();
+  /*   test_matrix(); */
 
-  return 0;
+  return 1;
 }
 

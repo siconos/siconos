@@ -28,7 +28,7 @@ AM_CFLAGS=-std=c99
 .f.o:
 	$(F77COMPILE) -c $<
 
-SUBDIRS = NSSTools LCP QP MLCP NCP Relay FrictionContact2D FrictionContact3D pfc3D
+SUBDIRS = NSSTools LCP QP MLCP NCP Relay FrictionContact2D FrictionContact3D pfc3D test
 
 ##############################################################
 

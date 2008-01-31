@@ -82,8 +82,6 @@ void test_lcp_series(int n , double *vec , double *q)
   double *z1, *z2, *z3, *z4, *z5, *z6, *z7, *z8, *z9, *z10;
   double *w1, *w2, *w3, *w4, *w5, *w6, *w7, *w8, *w9, *w10;
 
-  char NT = 'N';
-
   z1 = malloc(n * sizeof(double));
   w1 = malloc(n * sizeof(double));
   z2 = malloc(n * sizeof(double));
@@ -107,16 +105,18 @@ void test_lcp_series(int n , double *vec , double *q)
 
   /* Method definition */
 
-  static method_lcp method_lcp1 = { "PGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-6 , 0.3 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp8 = { "Latin_w"    , 1000 , 1e-6 , 0.3 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp7 = { "NewtonMin",   10   , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp9 = { "RPGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp10 = { "Path",   0   , 1e-8 , 0.0 , 0.0 , 0 , "" , 0 , 0.0 };
+  static method_lcp method_lcp1 = { "PGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , 0 , 0.0 };
+  static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , 0 , 0.0 };
+  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-6 , 0.3 , 1.0 , 1.0 , 1 , 0 , 0.0 };
+  static method_lcp method_lcp8 = { "Latin_w"    , 1000 , 1e-6 , 0.3 , 1.0 , 1.0 , 1 , 0 , 0.0 };
+  static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , 0 , 0.0 };
+  static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , 0 , 0.0 };
+  static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , 0 , 0.0 };
+  static method_lcp method_lcp7 = { "NewtonMin",   10   , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , 0 , 0.0 };
+  static method_lcp method_lcp9 = { "RPGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , 0 , 0.0 };
+  static method_lcp method_lcp10 = { "Path",   0   , 1e-8 , 0.0 , 0.0 , 0 , 0 , 0.0 };
+
+  method myMethod;
 
   nonsymmetric = 0;
 
@@ -149,7 +149,8 @@ void test_lcp_series(int n , double *vec , double *q)
     w1[i] = 0.0;
   }
 
-  info1 = lcp_driver(vec , q , &n , &method_lcp1 , z1 , w1);
+  myMethod.lcp =  method_lcp1;
+  info1 = lcp_driver(vec , q , &n , &myMethod , z1 , w1);
 
   /* #2 CPG TEST */
 #ifdef BAVARD
@@ -161,7 +162,8 @@ void test_lcp_series(int n , double *vec , double *q)
     w2[i] = 0.0;
   }
 
-  info2 = lcp_driver(vec , q , &n , &method_lcp2 , z2 , w2);
+  myMethod.lcp =  method_lcp2;
+  info2 = lcp_driver(vec , q , &n , &myMethod , z2 , w2);
 
   /* #4 QP TEST */
 #ifdef BAVARD
@@ -173,7 +175,8 @@ void test_lcp_series(int n , double *vec , double *q)
     w4[i] = 0.0;
   }
 
-  info4 = lcp_driver(vec , q , &n , &method_lcp4 , z4 , w4);
+  myMethod.lcp =  method_lcp4;
+  info4 = lcp_driver(vec , q , &n , &myMethod , z4 , w4);
 
   /* #5 NSQP TEST */
 #ifdef BAVARD
@@ -185,7 +188,8 @@ void test_lcp_series(int n , double *vec , double *q)
     w5[i] = 0.0;
   }
 
-  info5 = lcp_driver(vec , q , &n , &method_lcp5 , z5 , w5);
+  myMethod.lcp =  method_lcp5;
+  info5 = lcp_driver(vec , q , &n , &myMethod , z5 , w5);
 
   /* #6 LEXICO LEMKE TEST */
 #ifdef BAVARD
@@ -197,7 +201,8 @@ void test_lcp_series(int n , double *vec , double *q)
     w6[i] = 0.0;
   }
 
-  info6 = lcp_driver(vec , q , &n , &method_lcp6 , z6 , w6);
+  myMethod.lcp =  method_lcp6;
+  info6 = lcp_driver(vec , q , &n , &myMethod , z6 , w6);
 
   /* #7 NEWTONMIN TEST */
 #ifdef BAVARD
@@ -209,7 +214,8 @@ void test_lcp_series(int n , double *vec , double *q)
     w7[i] = 0.0;
   }
 
-  info7 = lcp_driver(vec , q , &n , &method_lcp7 , z7 , w7);
+  myMethod.lcp =  method_lcp7;
+  info7 = lcp_driver(vec , q , &n , &myMethod , z7 , w7);
 
   /* #3 LATIN TEST */
 #ifdef BAVARD
@@ -221,7 +227,8 @@ void test_lcp_series(int n , double *vec , double *q)
     w3[i] = 0.0;
   }
 
-  info3 = lcp_driver(vec , q , &n , &method_lcp3 , z3 , w3);
+  myMethod.lcp =  method_lcp3;
+  info3 = lcp_driver(vec , q , &n , &myMethod , z3 , w3);
 
 
   /* #8 LATIN_W TEST */
@@ -234,7 +241,8 @@ void test_lcp_series(int n , double *vec , double *q)
     w8[i] = 0.0;
   }
 
-  info8 = lcp_driver(vec , q , &n , &method_lcp8 , z8 , w8);
+  myMethod.lcp =  method_lcp8;
+  info8 = lcp_driver(vec , q , &n , &myMethod , z8 , w8);
 
   /* #9 RPGS TEST */
 #ifdef BAVARD
@@ -246,7 +254,8 @@ void test_lcp_series(int n , double *vec , double *q)
     w9[i] = 0.0;
   }
 
-  info9 = lcp_driver(vec , q , &n , &method_lcp9 , z9 , w9);
+  myMethod.lcp =  method_lcp9;
+  info9 = lcp_driver(vec , q , &n , &myMethod , z9 , w9);
 
 #ifdef PATH_DRIVER
   /* #8 PATH TEST */
@@ -259,7 +268,8 @@ void test_lcp_series(int n , double *vec , double *q)
     w10[i] = 0.0;
   }
 
-  info10 = lcp_driver(vec , q , &n , &method_lcp10 , z10 , w10);
+  myMethod.lcp =  method_lcp10;
+  info10 = lcp_driver(vec , q , &n , &myMethod , z10 , w10);
 #endif /*PATH_DRIVER*/
 #ifdef BAVARD
   /*  printf(" *** ************************************** ***\n"); */
@@ -428,15 +438,16 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 
   /* Method definition */
 
-  static method_lcp method_lcp1 = { "PGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp7 = { "NewtonMin"  , 10   , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp8 = { "RPGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp1 = { "PGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , 0 , 0.0 };
+  static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , 0 , 0.0 };
+  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , 0 , 0.0 };
+  static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , 0 , 0.0 };
+  static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , 0 , 0.0 };
+  static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , 0 , 0.0 };
+  static method_lcp method_lcp7 = { "NewtonMin"  , 10   , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , 0 , 0.0 };
+  static method_lcp method_lcp8 = { "RPGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , 0 , 0.0 };
 
+  method myMethod;
 
   /* #1 PGS TEST */
 #ifdef BAVARD
@@ -445,7 +456,8 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 
   for (i = 0 ; i < dim ; ++i) z1[i] = 0.0;
 
-  info1 = lcp_driver_block(blmat , q , &method_lcp1 , z1 , w1 , &iter1 , &titer1 , &err1);
+  myMethod.lcp =  method_lcp1;
+  info1 = lcp_driver_block(blmat , q , &myMethod , z1 , w1 , &iter1 , &titer1 , &err1);
 
   /* #2 CPG TEST */
 #ifdef BAVARD
@@ -453,7 +465,8 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 #endif
   for (i = 0 ; i < dim ; ++i) z2[i] = 0.0;
 
-  info2 = lcp_driver_block(blmat , q , &method_lcp2 , z2 , w2 , &iter2 , &titer2 , &err2);
+  myMethod.lcp =  method_lcp2;
+  info2 = lcp_driver_block(blmat , q , &myMethod , z2 , w2 , &iter2 , &titer2 , &err2);
 
   /* #3 QP TEST */
 #ifdef BAVARD
@@ -461,7 +474,8 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 #endif
   for (i = 0 ; i < dim ; ++i) z4[i] = 0.0;
 
-  info4 = lcp_driver_block(blmat , q , &method_lcp4 , z4 , w4 , &iter4 , &titer4 , &err4);
+  myMethod.lcp =  method_lcp4;
+  info4 = lcp_driver_block(blmat , q , &myMethod , z4 , w4 , &iter4 , &titer4 , &err4);
 
   /* #4 NSQP TEST */
 #ifdef BAVARD
@@ -469,7 +483,8 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 #endif
   for (i = 0 ; i < dim ; ++i) z5[i] = 0.0;
 
-  info5 = lcp_driver_block(blmat , q , &method_lcp5 , z5 , w5 , &iter5 , &titer5 , &err5);
+  myMethod.lcp =  method_lcp5;
+  info5 = lcp_driver_block(blmat , q , &myMethod , z5 , w5 , &iter5 , &titer5 , &err5);
 
   /* #5 LEXICO LEMKE TEST */
 #ifdef BAVARD
@@ -485,7 +500,8 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
   titer6 = 0;
   err6 = 0.;
 
-  info6 = lcp_driver_block(blmat , q , &method_lcp6 , z6 , w6 , &iter6 , &titer6 , &err6);
+  myMethod.lcp =  method_lcp6;
+  info6 = lcp_driver_block(blmat , q , &myMethod , z6 , w6 , &iter6 , &titer6 , &err6);
 
   /* #6 NEWTONMIN TEST */
 #ifdef BAVARD
@@ -493,7 +509,8 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 #endif
   for (i = 0 ; i < dim ; ++i) z7[i] = 0.0;
 
-  info7 = lcp_driver_block(blmat , q , &method_lcp7 , z7 , w7 , &iter7 , &titer7 , &err7);
+  myMethod.lcp =  method_lcp7;
+  info7 = lcp_driver_block(blmat , q , &myMethod , z7 , w7 , &iter7 , &titer7 , &err7);
 
   /* #7 LATIN TEST */
 #ifdef BAVARD
@@ -501,7 +518,8 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 #endif
   for (i = 0 ; i < dim ; ++i) z3[i] = 0.0;
 
-  info3 = lcp_driver_block(blmat , q , &method_lcp3 , z3 , w3 , &iter3 , &titer3 , &err3);
+  myMethod.lcp =  method_lcp3;
+  info3 = lcp_driver_block(blmat , q , &myMethod , z3 , w3 , &iter3 , &titer3 , &err3);
 
   /* #8 RPGS TEST */
 #ifdef BAVARD
@@ -510,7 +528,8 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 
   for (i = 0 ; i < dim ; ++i) z8[i] = 0.0;
 
-  info8 = lcp_driver_block(blmat , q , &method_lcp8 , z8 , w8 , &iter8 , &titer8 , &err8);
+  myMethod.lcp =  method_lcp8;
+  info8 = lcp_driver_block(blmat , q , &myMethod, z8 , w8 , &iter8 , &titer8 , &err8);
 
 
 #ifdef BAVARD
@@ -908,7 +927,7 @@ void test_blockmatrix(void)
 
   FILE *LCPfile;
 
-  int i, j, k, isol, NBTEST, itest;
+  int i, j, isol, NBTEST, itest;
   int dim;
   int sizebl;
 
@@ -1025,8 +1044,8 @@ void test_blockmatrix(void)
     {
       pos = blmat.RowIndex[i];
       numberOfRows = blmat.blocksize[pos] - blmat.blocksize[pos - 1];
-      pos = blmat.ColumnIndex[i]
-            numberOfColumns = blmat.blocksize[pos] - blmat.blocksize[pos - 1];
+      pos = blmat.ColumnIndex[i];
+      numberOfColumns = blmat.blocksize[pos] - blmat.blocksize[pos - 1];
       sizebl = numberOfRows * numberOfColumns;
       blmat.block[i] = (double*)malloc(sizebl * sizeof(double));
       for (j = 0 ; j < sizebl ; j++)
@@ -1092,7 +1111,7 @@ int main(void)
 
   test_mmc();
   test_matrix();
-  test_blockmatrix();
+  //  test_blockmatrix();
 
   return 0;
 }

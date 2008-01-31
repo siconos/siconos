@@ -87,7 +87,7 @@ int lcp_driver(double *vec, double *q , int *n , method *pt , double *z , double
   /****** Lemke algorithm ******/
   /* IN: itermax
      OUT: iter */
-  if (strcmp(pt->lcp.name , lcpkey1) == 0)
+  if (strcmp(pt->lcp.name , lcpkey1) == 0 || strcmp(pt->lcp.name , "LexicoLemke") == 0)
   {
     iparamLCP[0] = pt->lcp.itermax;
     lcp_lexicolemke(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
