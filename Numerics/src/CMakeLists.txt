@@ -1,35 +1,72 @@
 #
-# Numerics
+# Here comes Numerics
 #
 PROJECT(Numerics)
 
-SET(Numerics_library_HDRS
+#
+# Major, Minor and patch versions defined in top-level CMakeLists.txt
+#
+SET(Numerics_VERSION "${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}")
+
+#
+# Published headers
+#
+SET(Numerics_HDRS
   Solver_Options.h
   SiconosNumerics.h
 )
 
-FILE(GLOB NS_FILES NonSmoothSolvers/*)
+#
+# Project directories 
+#
+SET(Numerics_DIRS
+  netlib/odepack
+  netlib/dftemplates
+  NonSmoothSolvers
+  NonSmoothSolvers/LCP
+  NonSmoothSolvers/MLCP
+  NonSmoothSolvers/InterfaceToPathFerris
+  NonSmoothSolvers/pfc3D
+  NonSmoothSolvers/QP
+  NonSmoothSolvers/Relay
+  NonSmoothSolvers/FrictionContact2D
+  NonSmoothSolvers/FrictionContact3D
+  NonSmoothSolvers/NCP
+  NonSmoothSolvers/NSSTools
+  NonSmoothSolvers/test
+  utils)
 
-FILE(GLOB NETLIB_ODEPACK_SRCS netlib/odepack/*.[hcf])
+#
+# Unstable sources
+#
+SET(Numerics_Unstable_SRCS
+  NonSmoothSolvers/NSSTools/freeSpBlMat.c
+  NonSmoothSolvers/test/main_pfc_2D.c
+  NonSmoothSolvers/test/main_lcp.c
+  NonSmoothSolvers/test/main_dfc_2D.c
+  NonSmoothSolvers/test/main_pr.c
+  NonSmoothSolvers/test/main_lcp_new.c
+  NonSmoothSolvers/test/main_dr.c)
 
-FILE(GLOB NETLIB_DFTEMPLATES_SRCS netlib/dftemplates/*.[hcf])
+#
+# Installation layout
+#
+SET(Numerics_include_dir include/Siconos)
 
-FOREACH(SOLV ${NS_FILES})
-  IF(IS_DIRECTORY ${SOLV})
-    LIST(APPEND SOLVERS ${SOLV})
-    FILE(GLOB SOLV_SRCS ${SOLV}/*.[hcf])
-    IF(SOLV_SRCS)
-      LIST(APPEND SOLVERS_SRCS ${SOLV_SRCS})
-    ENDIF(SOLV_SRCS)
-  ENDIF(IS_DIRECTORY ${SOLV})
-ENDFOREACH(SOLV)
+#
+# compilation setup 
+#
+LIBRARY_PROJECT_SETUP()
 
-INCLUDE_DIRECTORIES(utils NonSmoothSolvers netlib/odepack netlib/dftemplates ${SOLVERS})
 
 #ADD_DEFINITIONS(-std=c99) : warning with f95
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 
-ADD_LIBRARY(Numerics ${Numerics_library_HDRS} ${SOLVERS_SRCS} ${NETLIB_ODEPACK_SRCS} ${NETLIB_DFTEMPLATES_SRCS})
-SET_TARGET_PROPERTIES(Numerics PROPERTIES VERSION 0.0.0 LINKER_LANGUAGE C)
-
-
+# F95 Cmake Bug
+CONFIGURE_FILE(SiconosNumerics.h  DPCG.mod.proxy COPYONLY) 
+CONFIGURE_FILE(SiconosNumerics.h  DPCGS.mod.proxy COPYONLY) 
+CONFIGURE_FILE(SiconosNumerics.h  DSOLBT.mod.proxy COPYONLY) 
+CONFIGURE_FILE(SiconosNumerics.h  DUSOL.mod.proxy COPYONLY) 
+CONFIGURE_FILE(SiconosNumerics.h  if.mod.proxy COPYONLY) 
+CONFIGURE_FILE(SiconosNumerics.h  in.mod.proxy COPYONLY) 
+CONFIGURE_FILE(SiconosNumerics.h  the.mod.proxy COPYONLY) 

@@ -1,18 +1,26 @@
-# ########## Project setup ##########
+#
+# Siconos Numerics : general configuration
+#
+CMAKE_MINIMUM_REQUIRED(VERSION 2.4.4)
 PROJECT(Siconos_Numerics Fortran)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.4.4)
+SET(MAJOR_VERSION 2)
+SET(MINOR_VERSION 2)
+SET(PATCH_VERSION 1)
 
+# Cmake modules
 SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 INCLUDE(fortran)
+
+INCLUDE(LibraryProjectSetup)
 
 FIND_PACKAGE(LAPACK REQUIRED)
 
 MESSAGE(STATUS "LAPACK_LINKER_FLAGS = ${LAPACK_LINKER_FLAGS}")
 MESSAGE(STATUS "LAPACK_LIBRARIES = ${LAPACK_LIBRARIES}")
 
-# config.h 
+# Minimal config.h generation (cf autoheaders)
 IF(BLAS_FOUND)
   SET(HAVE_BLAS 1)
 ENDIF(BLAS_FOUND)
@@ -28,4 +36,5 @@ ENDIF(ATLAS_FOUND)
 CONFIGURE_FILE(config.h.cmake config.h)
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
+# Library sources
 SUBDIRS(src)
