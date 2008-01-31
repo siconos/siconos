@@ -91,6 +91,7 @@ void lcp_rpgs(int *nn , double *M , double *q , double *z , double *w , int *inf
   for (i = 0 ; i < n ; ++i)
   {
     Mii = M[i * (n + 1)];
+    /* if(abs(Mii+rho)<EPSDIAG){   */ /* Version of Pascal */
     if (Mii < -EPSDIAG)
     {
       if (ispeak > 0)

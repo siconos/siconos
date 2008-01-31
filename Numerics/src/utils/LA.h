@@ -46,13 +46,16 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
   (ORDER, args)
 #define LAPACK_4(F,A1,A2,A3,A4,INFO) \
   INFO = F(LA_ORDER,A1,A2,A3,A4)
+#define LAPACK_5(F,A1,A2,A3,A4,A5,INFO)   \
+  INFO = F(LA_ORDER,A1,A2,A3,A4,A5)
+#define LAPACK_6(F,A1,A2,A3,A4,A5,A6,INFO)  \
+  INFO = F(LA_ORDER,A1,A2,A3,A4,A5,A6)
 #define LAPACK_7(F,A1,A2,A3,A4,A5,A6,A7,INFO) \
   INFO = F(LA_ORDER,A1,A2,A3,A4,A5,A6,A7)
 #define LAPACK_9(F,A1,A2,A3,A4,A5,A6,A7,A8,A9,INFO) \
   INFO = F(LA_ORDER,A1,A2,A3,A4,A5,A6,A7,A8,A9)
 #define LAPACK_9_SIDED(F,A1,A2,A3,A4,A5,A6,A7,A8,A9,INFO) \
   INFO = F(LA_ORDER,LA_SIDE,A1,A2,A3,A4,A5,A6,A7,A8,A9)
-
 
 #else /* f2c or g2c + blaslapack.h */
 #include "blaslapack.h"
@@ -75,6 +78,8 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 #define WITH_ORDER(ORDER, args...) (args)
 #define APPLY(F,args...) F(args)
 #define LAPACK_4 APPLY
+#define LAPACK_5 APPLY
+#define LAPACK_6 APPLY
 #define LAPACK_7 APPLY
 #define LAPACK_9 APPLY
 #define LAPACK_9_SIDED APPLY
@@ -202,5 +207,25 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      int C_INFO = INFO; \
      LAPACK_9_SIDED(LAPACK_NAME(dtrtrs), T_UPLO(UPLO), T_TRANS(TRANS), T_DIAG(DIAG), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), B, INTEGER(C_LDB), INTEGER(C_INFO) ); \
   })
+
+/* DGETRF - LU factorization
+ */
+#define DGETRF(M,N,A,LDA,IPIV,INFO) \
+  ({ int C_M = M; \
+     int C_N = N; \
+     int C_LDA = LDA; \
+     int C_INFO = INFO; \
+     LAPACK_5(LAPACK_NAME(dgetrf), INTEGER(C_M), INTEGER(C_N), A, INTEGER(C_LDA), INTEGERP(IPIV), INTEGER(C_INFO)); \
+  })
+
+/* DGETRF - matrix inversion
+ */
+#define DGETRI(N,A,LDA,IPIV,INFO) \
+  ({ int C_N = N; \
+     int C_LDA = LDA; \
+     int C_INFO = INFO; \
+     LAPACK_4(LAPACK_NAME(dgetri), INTEGER(C_N), A, INTEGER(C_LDA), INTEGERP(IPIV),INTEGER(C_INFO)); \
+  })
+
 
 #endif /* LA_H */

@@ -42,7 +42,25 @@ typedef struct
   int *blocksize;
   int *RowIndex;
   int *ColumnIndex;
+  double* vec;
 } SparseBlockStructuredMatrix;
+
+typedef struct
+{
+  int nbbldiag;
+  int **indic;
+  int **indicop;
+  double **submatlcp;
+  double **submatlcpop;
+  int **ipiv;
+  int *sizesublcp;
+  int *sizesublcpop;
+  double **subq;
+  double **bufz;
+  double **newz;
+  double **workspace;
+} SparseBlockStructuredMatrixPred;
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -72,6 +90,8 @@ extern "C" {
       \param SparseBlockStructuredMatrix, the matrix to be destroyed.
    */
   void freeSpBlMat(SparseBlockStructuredMatrix *);
+
+  void freeSpBlMatPred(SparseBlockStructuredMatrixPred *);
 
 #ifdef __cplusplus
 }

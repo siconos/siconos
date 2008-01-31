@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 #ifndef BLASLAPACK_H
 #define BLASLAPACK_H
@@ -376,6 +376,9 @@ extern  doublereal F77NAME(dopla)(char *subname, integer *m, integer *n, integer
 // ******************* LU Factorization Routines **********************
 
 extern void F77NAME(dgetrf)(integer *m, integer *n, doublereal *A, integer *lda, integer *ipiv,
+                            integer *info);
+
+extern void F77NAME(dgetri)(integer *n, doublereal* A, integer *lda, integer* ipiv, doublereal* work, integer *lwork,
                             integer *info);
 
 extern void F77NAME(dgetf2)(integer *m, integer *n, doublereal *A, integer *lda, integer *ipiv,

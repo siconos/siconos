@@ -89,7 +89,6 @@ typedef struct
   int    chat;
   int    iter;
   double err;
-
 } method_lcp;
 
 #ifdef __cplusplus
@@ -502,14 +501,38 @@ extern "C" {
    * with \f$ x_{pos} = max(0,x) \f$ and \f$ xneg = max(0,-x)\f$. \n
    * This sum is divided by \f$ \|q\| \f$ and then compared to tol.\n
    * It changes the input vector w by storing \f$ Mz + q \f$ in it.\n
-   * \author Vincent Acary form the routine  filter_result_LCP.c of Pascal Denoyelle
+   * \author Vincent Acary from the routine  filter_result_LCP.c of Pascal Denoyelle
    */
   int lcp_compute_error(int n, double *M , double *q , double *z , int chat, double *w, double * error);
 
-  /** Function to check convergence after LCP computation
-  * \author Franck Perignon
+  /** This function checks the validity of the vector z as a solution \n
+   * of the LCP : \n
+   * \f$
+   *    0 \le z \perp Mz + q \ge 0
+   * \f$
+   * where M is a sparse block matrix defined in argument blmat.\n
+   * The criterion is based on \f$ \sum [ (z[i]*(Mz+q)[i])_{pos} + (z[i])_{neg} + (Mz+q)[i])_{neg} ] \f$ \n
+   * with \f$ x_{pos} = max(0,x) \f$ and \f$ xneg = max(0,-x)\f$. \n
+   * This sum is divided by \f$ \|q\| \f$ and then compared to tol.\n
+   * It changes the input vector w by storing \f$ Mz + q \f$ in it.\n
+   * \author Pascal Denoyelle
    */
   int filter_result_LCP_block(SparseBlockStructuredMatrix *blmat, double *q , double *z , double tol, int chat, double *w);
+
+  /** Function used to extract from LCP matrix the part which corresponds to non null z
+   */
+  int extractLCP(double *vec , int *n , double *z , double *w ,
+                 int *indic , int *indicop , double *submatlcp , double *submatlcpop ,
+                 int *ipiv , int *sizesublcp , int *sizesublcpop , double *workspace);
+
+  /** Function used to solve the problem with sub-matrices from extractLCP
+   */
+  int predictLCP(double *q , int *n , double *z , double *w , double tol,
+                 int *indic , int *indicop , double *submatlcp , double *submatlcpop ,
+                 int *ipiv , int *sizesublcp , int *sizesublcpop , double *subq , double *bufz , double *newz);
+
+
+
 
 #ifdef __cplusplus
 }

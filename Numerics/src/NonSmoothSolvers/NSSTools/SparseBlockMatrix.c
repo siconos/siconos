@@ -174,3 +174,33 @@ void freeSpBlMat(SparseBlockStructuredMatrix *blmat)
   free(blmat->block);
 }
 
+void freeSpBlMatPred(SparseBlockStructuredMatrixPred *blmatpred)
+{
+
+  int i;
+
+  for (i = 0 ; i < blmatpred->nbbldiag ; i++)
+  {
+    free(blmatpred->indic[i]);
+    free(blmatpred->indicop[i]);
+    free(blmatpred->submatlcp[i]);
+    free(blmatpred->submatlcpop[i]);
+    free(blmatpred->ipiv[i]);
+    free(blmatpred->subq[i]);
+    free(blmatpred->bufz[i]);
+    free(blmatpred->newz[i]);
+    free(blmatpred->workspace[i]);
+  }
+  free(blmatpred->indic);
+  free(blmatpred->indicop);
+  free(blmatpred->submatlcp);
+  free(blmatpred->submatlcpop);
+  free(blmatpred->ipiv);
+  free(blmatpred->sizesublcp);
+  free(blmatpred->sizesublcpop);
+  free(blmatpred->subq);
+  free(blmatpred->bufz);
+  free(blmatpred->newz);
+  free(blmatpred->workspace);
+
+}

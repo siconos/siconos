@@ -28,7 +28,7 @@ int lcp_compute_error(int n, double *vec , double *q , double *z , int verbose, 
   double a1, b1;
   int i, incx, incy;
   int param = 1;
-
+  double zi, wi;
   incx = 1;
   incy = 1;
   DCOPY(n , q , incx , w , incy);
@@ -51,14 +51,15 @@ int lcp_compute_error(int n, double *vec , double *q , double *z , int verbose, 
   error = 0.;
   for (i = 0 ; i < n ; i++)
   {
-    if (z[i] < 0.0)
+    zi = z[i];
+    wi = w[i];
+    if (zi < 0.0)
     {
-      error += -z[i];
-      if (w[i] < 0.0) error += z[i] * w[i];
+      error += -zi;
+      if (wi < 0.0) error += zi * wi;
     }
-    if (w[i] < 0.0) error += -w[i];
-    if ((z[i] > 0.0) && (w[i] > 0.0)) error += z[i] * w[i];
-
+    if (wi < 0.0) error += -wi;
+    if ((zi > 0.0) && (wi > 0.0)) error += zi * wi;
   }
 
   incx  = 1;

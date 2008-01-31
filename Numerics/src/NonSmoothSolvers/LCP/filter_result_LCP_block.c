@@ -28,8 +28,11 @@ int filter_result_LCP_block(SparseBlockStructuredMatrix *blmat, double *q , doub
   double a1, b1;
   int i, incx, incy;
   int n, nbbl, nbblrow;
-  int rowprecbl, rowcurbl, indicrow, rowsize;
-  int colprecbl, colcurbl, indiccol, colsize;
+  int rowprecbl, rowcurbl, rowsize;
+  int colprecbl, colcurbl, colsize;
+
+  /* Position (row/col) of the first element of the current block */
+  int indiccol, indicrow;
 
   double *adrcurbl;
 
@@ -50,26 +53,35 @@ int filter_result_LCP_block(SparseBlockStructuredMatrix *blmat, double *q , doub
 
   for (i = 0 ; i < nbbl ; i++)
   {
+    /* Get positions of the current block */
     rowcurbl = blmat->RowIndex[i];
     colcurbl = blmat->ColumnIndex[i];
-    if (rowcurbl != rowprecbl)   /*  new row  */
+
+    /* Update indicrow if the row is a new one */
+    if (rowcurbl != rowprecbl)
     {
-      indiccol = blmat->blocksize[colcurbl - 1];
-      colprecbl = colcurbl;
-
-      indicrow += rowsize;
-      indicrow += blmat->blocksize[rowcurbl - 1];
-      indicrow -= blmat->blocksize[rowprecbl];
-
+      indicrow = 0;
+      if (rowcurbl > 0)
+        indicrow = blmat->blocksize[rowcurbl - 1];
       rowprecbl = rowcurbl;
-      rowsize = blmat->blocksize[rowcurbl];
     }
-    indiccol += blmat->blocksize[colcurbl - 1];
-    indiccol -= blmat->blocksize[colprecbl - 1];
+
+    /* Update indiccol */
+    indiccol = 0;
+    if (colcurbl > 0)
+      indiccol = blmat->blocksize[colcurbl - 1];
+
     colprecbl = colcurbl;
 
-    rowsize = blmat->blocksize[rowcurbl] - blmat->blocksize[rowcurbl - 1];
-    colsize = blmat->blocksize[colcurbl] - blmat->blocksize[colcurbl - 1];
+    /* Get dim of the current block */
+    rowsize = blmat->blocksize[rowcurbl];
+    if (rowcurbl > 0)
+      rowsize -= blmat->blocksize[rowcurbl - 1];
+
+    colsize = blmat->blocksize[colcurbl];
+    if (colcurbl > 0)
+      colsize -= blmat->blocksize[colcurbl - 1];
+
     adrcurbl = blmat->block[i];
 
     DGEMV(LA_NOTRANS , rowsize , colsize , a1 , adrcurbl , rowsize , &z[indiccol] ,

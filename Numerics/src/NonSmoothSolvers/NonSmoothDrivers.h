@@ -95,6 +95,17 @@ extern "C" {
   */
   int lcp_driver(double*, double*, int*, method*, double*, double*);
 
+  /** Solver with extract-predict mechanism */
+  int lcp_solver_pred(double *vec, double *q , int *n , method *pt , double *z , double *w ,
+                      int firsttime, int *soltype , int *indic , int *indicop , double *submatlcp , double *submatlcpop ,
+                      int *ipiv , int *sizesublcp , int *sizesublcpop ,
+                      double *subq , double *bufz , double *newz , double *workspace);
+
+  /** Solver with extract-predict mechanism */
+  int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat, SparseBlockStructuredMatrixPred *blmatpred, int nbmethod,
+                                int maxiterglob, double tolglob,
+                                double *q, method **pt , double *z , double *w , int *it_end , int *itt_end , double *res);
+
   /** General interface to solver for LCP problems, with M given as a list of blocks */
   int lcp_driver_block(SparseBlockStructuredMatrix *, double *, method *, double *, double *, int *, int *, double*);
 

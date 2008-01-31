@@ -34,7 +34,7 @@ void lcp_pgs(int *nn , double *M , double *q , double *z , double *w , int *info
   int incxn;
   double qs, err, den, zi;
   double tol, omega;
-  double *ww, *diag;
+  double *diag;
 
   n = *nn;
   incx = 1;
@@ -55,7 +55,6 @@ void lcp_pgs(int *nn , double *M , double *q , double *z , double *w , int *info
 
   /* Allocation */
 
-  ww   = (double*)malloc(n * sizeof(double));
   diag = (double*)malloc(n * sizeof(double));
 
   /* Check for non trivial case */
@@ -64,12 +63,6 @@ void lcp_pgs(int *nn , double *M , double *q , double *z , double *w , int *info
   if (verbose > 0) printf("\n ||q||= %g \n", qs);
 
   den = 1.0 / qs;
-
-  for (i = 0 ; i < n ; ++i)
-  {
-    ww[i] = 0.;
-    w[i] = 0.;
-  }
 
   /* Intialization of w */
 
@@ -92,7 +85,6 @@ void lcp_pgs(int *nn , double *M , double *q , double *z , double *w , int *info
 
       *info = 2;
       free(diag);
-      free(ww);
 
       return;
     }
@@ -117,7 +109,6 @@ void lcp_pgs(int *nn , double *M , double *q , double *z , double *w , int *info
     incx = 1;
     incy = 1;
 
-    DCOPY(n , w , incx , ww , incy);
     DCOPY(n , q , incx , w , incy);
 
     for (i = 0 ; i < n ; ++i)
@@ -195,7 +186,6 @@ void lcp_pgs(int *nn , double *M , double *q , double *z , double *w , int *info
     *info = 0;
   }
 
-  free(ww);
   free(diag);
 
   return;
