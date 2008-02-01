@@ -9,6 +9,9 @@
 
 macro(LIBRARY_PROJECT_SETUP)
 
+message("-- ")
+message("-- Setting up ${PROJECT_NAME} library build")
+
 set(_ALL_DIRS ${${PROJECT_NAME}_DIRS})
 
 foreach(_DIR ${_ALL_DIRS})
@@ -19,15 +22,19 @@ foreach(_DIR ${_ALL_DIRS})
 endforeach(_DIR ${_ALL_DIRS} ${_ALL_SUBDIRS})
 
 if(NOT UNSTABLE)
-  foreach(_FILE ${${PROJECT_NAME}_Unstable_SRCS})
-    file(GLOB _GFILE ${_FILE})
-    if(_GFILE)
-      message("++ excluded : ${_GFILE}")
-      list(REMOVE_ITEM _ALL_FILES ${_GFILE})
-    else(_GFILE)
-      message("++ WARNING : Unstable file NOT FOUND : ${_FILE}")
-    endif(_GFILE)
-  endforeach(_FILE ${${PROJECT_NAME}_Unstable_SRCS})
+  if(${PROJECT_NAME}_Unstable_SRCS)
+    message("-- Some unstables sources files are going to be excluded")
+    message("-- To configure an unstable build, run : `cmake -DUNSTABLE=ON .'")
+    foreach(_FILE ${${PROJECT_NAME}_Unstable_SRCS})
+      file(GLOB _GFILE ${_FILE})
+      if(_GFILE)
+        message("++ excluded : ${_GFILE}")
+        list(REMOVE_ITEM _ALL_FILES ${_GFILE})
+      else(_GFILE)
+        message("++ WARNING : Unstable file NOT FOUND : ${_FILE}")
+      endif(_GFILE)
+    endforeach(_FILE ${${PROJECT_NAME}_Unstable_SRCS})
+  endif(${PROJECT_NAME}_Unstable_SRCS)
 endif(NOT UNSTABLE)
 
 set(${PROJECT_NAME}_SRCS ${_ALL_FILES})
@@ -44,11 +51,13 @@ set_target_properties(${PROJECT_NAME}_static PROPERTIES
   LINKER_LANGUAGE C)
 
 set_target_properties(${PROJECT_NAME}_shared PROPERTIES
-  OUTPUT_NAME "Numerics" 
+  OUTPUT_NAME "${PROJECT_NAME}" 
   VERSION "${${PROJECT_NAME}_VERSION}" 
   CLEAN_DIRECT_OUTPUT 1
   LINKER_LANGUAGE C)
 
+target_link_libraries(${PROJECT_NAME}_static ${${PROJECT_NAME}_LINK})
+target_link_libraries(${PROJECT_NAME}_shared ${${PROJECT_NAME}_LINK})
 
 # Installation
 if(${PROJECT_NAME}_lib_dir)
@@ -68,5 +77,8 @@ install(TARGETS
   ARCHIVE DESTINATION ${_install_lib}
   LIBRARY DESTINATION ${_install_lib})
 install(FILES ${${PROJECT_NAME}_HDRS} DESTINATION ${_install_include})
+
+message("-- ${PROJECT_NAME} library setup done")
+message("-- ")
 
 endmacro(LIBRARY_PROJECT_SETUP)
