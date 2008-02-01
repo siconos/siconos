@@ -46,8 +46,10 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
   (ORDER, args)
 #define LAPACK_4(F,A1,A2,A3,A4,INFO) \
   INFO = F(LA_ORDER,A1,A2,A3,A4)
+INFO = F(LA_ORDER, A1, A2, A3, A4)
 #define LAPACK_5(F,A1,A2,A3,A4,A5,INFO)   \
   INFO = F(LA_ORDER,A1,A2,A3,A4,A5)
+       INFO = F(LA_ORDER, A1, A2, A3, A4, A5)
 #define LAPACK_6(F,A1,A2,A3,A4,A5,A6,INFO)  \
   INFO = F(LA_ORDER,A1,A2,A3,A4,A5,A6)
 #define LAPACK_7(F,A1,A2,A3,A4,A5,A6,A7,INFO) \
@@ -56,6 +58,8 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
   INFO = F(LA_ORDER,A1,A2,A3,A4,A5,A6,A7,A8,A9)
 #define LAPACK_9_SIDED(F,A1,A2,A3,A4,A5,A6,A7,A8,A9,INFO) \
   INFO = F(LA_ORDER,LA_SIDE,A1,A2,A3,A4,A5,A6,A7,A8,A9)
+#define LAPACK_4_W LAPACK_4
+#define LAPACK_5_W LAPACK_5
 
 #else /* f2c or g2c + blaslapack.h */
 #include "blaslapack.h"
@@ -83,19 +87,42 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 #define LAPACK_7 APPLY
 #define LAPACK_9 APPLY
 #define LAPACK_9_SIDED APPLY
+#define LAPACK_4_W(F,A1,A2,A3,A4,INFO) \
+ ({ int C_LWORK=-1; \
+    double * C_WORK; \
+    C_WORK = malloc(sizeof *C_WORK); \
+    if (C_WORK == NULL) -1; else { \
+      F(A1,A2,A3,A4,C_WORK,INTEGER(C_LWORK),INFO); \
+      C_LWORK = (int) (C_WORK[0]); \
+      C_WORK = realloc(C_WORK, C_LWORK * sizeof *C_WORK); \
+      F(A1,A2,A3,A4,C_WORK,INTEGER(C_LWORK),INFO); \
+    } \
+ })
+#define LAPACK_5_W(F,A1,A2,A3,A4,A5,INFO) \
+ ({ int C_LWORK=-1; \
+    double * C_WORK; \
+    C_WORK = malloc(sizeof *C_WORK); \
+    if (C_WORK == NULL) -1; else { \
+      F(A1,A2,A3,A4,A5,C_WORK,INTEGER(C_LWORK),INFO); \
+      C_LWORK = (int) (C_WORK[0]); \
+      C_WORK = realloc(C_WORK, C_LWORK * sizeof *C_WORK); \
+      F(A1,A2,A3,A4,A5,C_WORK,INTEGER(C_LWORK),INFO); \
+    } \
+ })
+
 #endif /* HAVE_CBLAS */
 
-/* DNRM2 - the euclidean norm of a vector via the function name, so
-   that DNRM2 := sqrt( x'*x )
-*/
+              /* DNRM2 - the euclidean norm of a vector via the function name, so
+                 that DNRM2 := sqrt( x'*x )
+              */
 #define DNRM2(N, X, INCX) \
   ({ int C_N=N; \
      int C_INCX = INCX; \
      BLAS_NAME(dnrm2)(INTEGER(C_N), X, INTEGER(C_INCX)); \
   })
 
-/* DCOPY - a vector, x, to a vector, y
-*/
+              /* DCOPY - a vector, x, to a vector, y
+              */
 #define DCOPY(N, X, INCX, Y, INCY) \
   ({ int C_N=N; \
      int C_INCX=INCX; \
@@ -103,10 +130,10 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      BLAS_NAME(dcopy)(INTEGER(C_N), X, INTEGER(C_INCX), Y, INTEGER(C_INCY)); \
   })
 
-/** DGEMV - one of the matrix-vector operations y := alpha*A*x +
-   beta*y, or y := alpha*A'*x + xbeta*y,
-   \param TRANS
-*/
+              /** DGEMV - one of the matrix-vector operations y := alpha*A*x +
+                 beta*y, or y := alpha*A'*x + xbeta*y,
+                 \param TRANS
+              */
 #define DGEMV(TRANS, M, N, ALPHA, A, LDA, X, INCX, BETA, Y, INCY) \
   ({ int C_M = M; \
      int C_N = N; \
@@ -118,13 +145,13 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      BLAS_NAME(dgemv)WITH_ORDER(LA_ORDER, T_TRANS(TRANS), INTEGER(C_M), INTEGER(C_N), DOUBLE(C_ALPHA), A, INTEGER(C_LDA), X, INTEGER(C_INCX), DOUBLE(C_BETA), Y, INTEGER(C_INCY)); \
   })
 
-/*  DGEMM  performs one of the matrix-matrix operations
-*
-*     C := alpha*op( A )*op( B ) + beta*C,
-*
-*  where  op( X ) is one of
-*
-*     op( X ) = X   or   op( X ) = X',*/
+              /*  DGEMM  performs one of the matrix-matrix operations
+              *
+              *     C := alpha*op( A )*op( B ) + beta*C,
+              *
+              *  where  op( X ) is one of
+              *
+              *     op( X ) = X   or   op( X ) = X',*/
 #define DGEMM(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC) \
   ({ int C_M = M; \
      int C_N = N; \
@@ -137,16 +164,16 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      BLAS_NAME(dgemm)WITH_ORDER(LA_ORDER, T_TRANS(TRANSA), T_TRANS(TRANSB), INTEGER(C_M), INTEGER(C_N), INTEGER(C_K), DOUBLE(C_ALPHA), A, INTEGER(C_LDA), B, INTEGER(C_LDB), DOUBLE(C_BETA), C, INTEGER(C_LDC)); \
   })
 
-/* DDOT - the dot product of two vectors
- */
+              /* DDOT - the dot product of two vectors
+               */
 #define DDOT(N, DX, INCX, DY, INCY) \
   ({ int C_N = N; \
      int C_INCX = INCX; \
      int C_INCY = INCY; \
      BLAS_NAME(ddot)(INTEGER(C_N), DX, INTEGER(C_INCX), DY, INTEGER(C_INCY)); \
   })
-/* DAXPY - time a vector plus a vector
- */
+              /* DAXPY - time a vector plus a vector
+               */
 #define DAXPY(N, DA, DX, INCX, DY, INCY) \
   ({ int C_N = N; \
      double C_DA = DA; \
@@ -156,8 +183,8 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
   })
 
 
-/* DSCAL - a vector by a constant
- */
+              /* DSCAL - a vector by a constant
+               */
 #define DSCAL(N,DA,DX,INCX) \
   ({ int C_N = N; \
      double C_DA = DA; \
@@ -165,9 +192,9 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      BLAS_NAME(dscal)(INTEGER(C_N), DOUBLE(C_DA), DX, INTEGER(C_INCX)); \
   })
 
-/* DPOTRF - compute the Cholesky factorization of a real symmetric
-   positive definite matrix A
- */
+              /* DPOTRF - compute the Cholesky factorization of a real symmetric
+                 positive definite matrix A
+               */
 #define DPOTRF( UPLO, N, A, LDA, INFO ) \
   ({ int C_N = N; \
      int C_LDA = LDA; \
@@ -175,10 +202,10 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      LAPACK_4(LAPACK_NAME(dpotrf), T_UPLO(UPLO), INTEGER(C_N), A , INTEGER(C_LDA), INTEGER(C_INFO)); \
   })
 
-/* DPOTRI - compute the inverse of a real symmetric positive definite
-   matrix A using the Cholesky factorization A = U**T*U or A = L*L**T
-   computed by DPOTRF
-*/
+              /* DPOTRI - compute the inverse of a real symmetric positive definite
+                 matrix A using the Cholesky factorization A = U**T*U or A = L*L**T
+                 computed by DPOTRF
+              */
 #define DPOTRI( UPLO, N, A, LDA, INFO) \
   ({ int C_N = N; \
      int C_LDA = LDA; \
@@ -186,8 +213,8 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      LAPACK_4(LAPACK_NAME(dpotri), T_UPLO(UPLO), INTEGER(C_N), A, INTEGER(C_LDA), INTEGER(C_INFO)); \
   })
 
-/* DGESV - compute the solution to a real system of linear equations A * X = B,
- */
+              /* DGESV - compute the solution to a real system of linear equations A * X = B,
+               */
 #define DGESV( N, NRHS, A, LDA, IPIV, B, LDB, INFO ) \
   ({ int C_N = N; \
      int C_NRHS = NRHS; \
@@ -197,8 +224,8 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      LAPACK_7(LAPACK_NAME(dgesv), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), INTEGERP(IPIV), B, INTEGER(C_LDB), INTEGER(C_INFO)); \
   })
 
-/* DTRTRS - solve a triangular system of the form  A * X = B or A**T * X = B,
- */
+              /* DTRTRS - solve a triangular system of the form  A * X = B or A**T * X = B,
+               */
 #define DTRTRS( UPLO, TRANS, DIAG, N, NRHS, A, LDA, B, LDB, INFO ) \
   ({ int C_N = N; \
      int C_NRHS = NRHS; \
@@ -208,8 +235,8 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      LAPACK_9_SIDED(LAPACK_NAME(dtrtrs), T_UPLO(UPLO), T_TRANS(TRANS), T_DIAG(DIAG), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), B, INTEGER(C_LDB), INTEGER(C_INFO) ); \
   })
 
-/* DGETRF - LU factorization
- */
+              /* DGETRF - LU factorization
+               */
 #define DGETRF(M,N,A,LDA,IPIV,INFO) \
   ({ int C_M = M; \
      int C_N = N; \
@@ -218,13 +245,13 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      LAPACK_5(LAPACK_NAME(dgetrf), INTEGER(C_M), INTEGER(C_N), A, INTEGER(C_LDA), INTEGERP(IPIV), INTEGER(C_INFO)); \
   })
 
-/* DGETRF - matrix inversion
- */
+              /* DGETRI - matrix inversion
+               */
 #define DGETRI(N,A,LDA,IPIV,INFO) \
   ({ int C_N = N; \
      int C_LDA = LDA; \
      int C_INFO = INFO; \
-     LAPACK_4(LAPACK_NAME(dgetri), INTEGER(C_N), A, INTEGER(C_LDA), INTEGERP(IPIV),INTEGER(C_INFO)); \
+     LAPACK_4_W(LAPACK_NAME(dgetri), INTEGER(C_N), A, INTEGER(C_LDA), INTEGERP(IPIV),INTEGER(C_INFO)); \
   })
 
 
