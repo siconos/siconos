@@ -65,7 +65,6 @@ endif(${PROJECT_NAME}_include_dir)
 
 install(TARGETS 
   ${PROJECT_NAME}_static ${PROJECT_NAME}_shared 
-  CONFIGURATIONS Debug Release
   ARCHIVE DESTINATION ${_install_lib}
   LIBRARY DESTINATION ${_install_lib})
 install(FILES ${${PROJECT_NAME}_HDRS} DESTINATION ${_install_include})
