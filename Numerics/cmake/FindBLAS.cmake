@@ -93,7 +93,7 @@ if(NOT BLAS_LIBRARIES)
   "cblas;f77blas;atlas"
   )
   if (BLAS_LIBRARIES)
-    set (ATLAS_FOUND)
+    set (ATLAS_FOUND TRUE)
   endif(BLAS_LIBRARIES)
 endif(NOT BLAS_LIBRARIES)
 
