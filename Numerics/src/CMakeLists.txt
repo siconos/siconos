@@ -1,7 +1,7 @@
 #
 # Here comes Numerics
 #
-PROJECT(SiconosNumerics)
+PROJECT(SiconosNumerics C CXX Fortran)
 
 #
 # VERSION defined in top-level CMakeLists.txt
@@ -25,7 +25,7 @@ SET(SiconosNumerics_DIRS
   NonSmoothSolvers
   NonSmoothSolvers/LCP
   NonSmoothSolvers/MLCP
-#  NonSmoothSolvers/InterfaceToPathFerris
+  NonSmoothSolvers/InterfaceToPathFerris
   NonSmoothSolvers/pfc3D
   NonSmoothSolvers/QP
   NonSmoothSolvers/Relay
@@ -40,17 +40,14 @@ SET(SiconosNumerics_DIRS
 #
 SET(SiconosNumerics_Unstable_SRCS
   NonSmoothSolvers/NSSTools/freeSpBlMat.c
-  NonSmoothSolvers/test/main_pfc_2D.c
-  NonSmoothSolvers/test/main_lcp.c
-  NonSmoothSolvers/test/main_dfc_2D.c
-  NonSmoothSolvers/test/main_pr.c
-  NonSmoothSolvers/test/main_lcp_new.c
-  NonSmoothSolvers/test/main_dr.c)
+  NonSmoothSolvers/InterfaceToPathFerris/SimpleLCP.h
+  NonSmoothSolvers/InterfaceToPathFerris/SimpleLCP_Path.c
+)
 
 #
 # Installation layout
 #
-SET(SiconosNumerics_include_dir include/Siconos)
+SET(SiconosNumerics_INCLUDE_DIR include/Siconos)
 
 #
 # compilation setup 
@@ -72,4 +69,5 @@ CONFIGURE_FILE(SiconosNumerics.h  in.mod.proxy COPYONLY)
 CONFIGURE_FILE(SiconosNumerics.h  the.mod.proxy COPYONLY) 
 
 # test directories
+SUBDIRS(netlib/odepack/test)
 SUBDIRS(NonSmoothSolvers/test)

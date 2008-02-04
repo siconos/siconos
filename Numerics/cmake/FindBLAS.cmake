@@ -1,6 +1,3 @@
-# this file comes from http://freeeos.sourceforge.net/
-#
-# - Find BLAS library
 # This module finds an installed fortran library that implements the BLAS 
 # linear-algebra interface (see http://www.netlib.org/blas/).  
 # The list of libraries searched for is taken
@@ -35,11 +32,23 @@ set(${LIBRARIES})
 set(_combined_name)
 foreach(_library ${_list})
   set(_combined_name ${_combined_name}_${_library})
+
   if(_libraries_work)
+    
+   if ( APPLE ) 
     find_library(${_prefix}_${_library}_LIBRARY
     NAMES ${_library}
-    PATHS /usr/local/lib /usr/lib
+    PATHS /usr/local/lib /usr/lib /usr/local/lib64 /usr/lib64 ENV DYLD_LIBRARY_PATH 
+    PATH_SUFFIXES atlas
     )
+   
+   else ( APPLE )
+    find_library(${_prefix}_${_library}_LIBRARY
+    NAMES ${_library} ${_library}
+    PATHS /usr/local/lib /usr/lib /usr/local/lib64 /usr/lib64 ENV LD_LIBRARY_PATH 
+    PATH_SUFFIXES atlas
+    )
+   endif( APPLE )
     mark_as_advanced(${_prefix}_${_library}_LIBRARY)
     set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARY})
     set(_libraries_work ${${_prefix}_${_library}_LIBRARY})
@@ -63,25 +72,7 @@ endmacro(Check_Fortran_Libraries)
 set(BLAS_LINKER_FLAGS)
 set(BLAS_LIBRARIES)
 
-# Apple BLAS library?
-if(APPLE AND NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
-  BLAS_LIBRARIES
-  BLAS
-  cblas_dgemm
-  ""
-  "Accelerate"
-  )
-  if ( NOT BLAS_LIBRARIES )
-    check_fortran_libraries(
-    BLAS_LIBRARIES
-    BLAS
-    cblas_dgemm
-    ""
-    "vecLib"
-    )
-  endif ( NOT BLAS_LIBRARIES )
-endif(APPLE AND NOT BLAS_LIBRARIES)
+
 
 if(NOT BLAS_LIBRARIES)
   # BLAS in ATLAS library? (http://math-atlas.sourceforge.net/)
@@ -96,6 +87,7 @@ if(NOT BLAS_LIBRARIES)
     set (ATLAS_FOUND TRUE)
   endif(BLAS_LIBRARIES)
 endif(NOT BLAS_LIBRARIES)
+
 
 # BLAS in PhiPACK libraries? (requires generic BLAS lib, too)
 if(NOT BLAS_LIBRARIES)
@@ -178,6 +170,79 @@ if(NOT BLAS_LIBRARIES)
   )
 endif(NOT BLAS_LIBRARIES)
 
+
+
+
+# BLAS in intel mkl library? (shared)
+if(NOT BLAS_LIBRARIES)
+  check_fortran_libraries(
+  BLAS_LIBRARIES
+  BLAS
+  sgemm
+  ""
+  "mkl;guide;pthread"
+  )
+endif(NOT BLAS_LIBRARIES)
+
+#BLAS in intel mkl library? (static, 32bit)
+if(NOT BLAS_LIBRARIES)
+check_fortran_libraries(
+BLAS_LIBRARIES
+BLAS
+sgemm
+""
+"mkl_ia32;guide;pthread"
+)
+endif(NOT BLAS_LIBRARIES)
+
+#BLAS in intel mkl library? (static, em64t 64bit)
+if(NOT BLAS_LIBRARIES)
+check_fortran_libraries(
+BLAS_LIBRARIES
+BLAS
+sgemm
+""
+"mkl_em64t;guide;pthread"
+)
+endif(NOT BLAS_LIBRARIES)
+
+
+#BLAS in acml library? 
+if(NOT BLAS_LIBRARIES)
+check_fortran_libraries(
+BLAS_LIBRARIES
+BLAS
+sgemm
+""
+"acml"
+)
+endif(NOT BLAS_LIBRARIES)
+
+
+
+# Apple BLAS library?
+if(NOT BLAS_LIBRARIES)
+  check_fortran_libraries(
+  BLAS_LIBRARIES
+  BLAS
+  cblas_dgemm
+  ""
+  "Accelerate"
+  )
+  
+  endif(NOT BLAS_LIBRARIES)
+  
+  if ( NOT BLAS_LIBRARIES )
+    check_fortran_libraries(
+    BLAS_LIBRARIES
+    BLAS
+    cblas_dgemm
+    ""
+    "vecLib"
+    )
+  endif ( NOT BLAS_LIBRARIES )
+
+
 # Generic BLAS library?
 if(NOT BLAS_LIBRARIES)
   check_fortran_libraries(
@@ -188,6 +253,7 @@ if(NOT BLAS_LIBRARIES)
   "blas"
   )
 endif(NOT BLAS_LIBRARIES)
+
 
 if(BLAS_LIBRARIES)
   set(BLAS_FOUND TRUE)
@@ -201,7 +267,7 @@ if(NOT BLAS_FIND_QUIETLY)
   else(BLAS_FOUND)
     if(BLAS_FIND_REQUIRED)
       message(FATAL_ERROR 
-      "A library with BLAS API not found. Please specify library location."
+      "A required library with BLAS API not found. Please specify library location."
       )
     else(BLAS_FIND_REQUIRED)
       message(STATUS

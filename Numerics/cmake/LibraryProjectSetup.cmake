@@ -9,8 +9,8 @@
 
 macro(LIBRARY_PROJECT_SETUP)
 
-message("-- ")
-message("-- Setting up ${PROJECT_NAME} library build")
+message(STATUS "")
+message(STATUS "Setting up ${PROJECT_NAME} library build")
 
 set(_ALL_DIRS ${${PROJECT_NAME}_DIRS})
 
@@ -23,15 +23,15 @@ endforeach(_DIR ${_ALL_DIRS} ${_ALL_SUBDIRS})
 
 if(NOT UNSTABLE)
   if(${PROJECT_NAME}_Unstable_SRCS)
-    message("-- Some unstables sources files are going to be excluded")
-    message("-- To configure an unstable build, run : `cmake -DUNSTABLE=ON .'")
+    message(STATUS "Some unstables sources files are going to be excluded")
+    message(STATUS "To configure an unstable build, run : `cmake -DUNSTABLE=ON .'")
     foreach(_FILE ${${PROJECT_NAME}_Unstable_SRCS})
       file(GLOB _GFILE ${_FILE})
       if(_GFILE)
-        message("++ excluded : ${_GFILE}")
+        message(STATUS "excluded : ${_GFILE}")
         list(REMOVE_ITEM _ALL_FILES ${_GFILE})
       else(_GFILE)
-        message("++ WARNING : Unstable file NOT FOUND : ${_FILE}")
+        message(STATUS "WARNING : Unstable file NOT FOUND : ${_FILE}")
       endif(_GFILE)
     endforeach(_FILE ${${PROJECT_NAME}_Unstable_SRCS})
   endif(${PROJECT_NAME}_Unstable_SRCS)
@@ -59,18 +59,24 @@ set_target_properties(${PROJECT_NAME}_shared PROPERTIES
 target_link_libraries(${PROJECT_NAME}_static ${${PROJECT_NAME}_LINK})
 target_link_libraries(${PROJECT_NAME}_shared ${${PROJECT_NAME}_LINK})
 
-# Installation
-if(${PROJECT_NAME}_lib_dir)
-  set(_install_lib ${${PROJECT_NAME}_lib_dir})
-else(${PROJECT_NAME}_lib_dir)
-  set(_install_lib lib)
-endif(${PROJECT_NAME}_lib_dir)
 
-if(${PROJECT_NAME}_include_dir)
-  set(_install_include ${${PROJECT_NAME}_include_dir})
-else(${PROJECT_NAME}_include_dir)
+# output in ${PROJECT_NAME}_STATIC|SHARED_LIB the path of the libraries
+GET_TARGET_PROPERTY(${PROJECT_NAME}_STATIC_LIB ${PROJECT_NAME}_static LOCATION)
+GET_TARGET_PROPERTY(${PROJECT_NAME}_SHARED_LIB ${PROJECT_NAME}_shared LOCATION)
+
+
+# Installation
+if(${PROJECT_NAME}_LIB_DIR)
+  set(_install_lib ${${PROJECT_NAME}_LIB_DIR})
+else(${PROJECT_NAME}_LIB_DIR)
+  set(_install_lib lib)
+endif(${PROJECT_NAME}_LIB_DIR)
+
+if(${PROJECT_NAME}_INCLUDE_DIR)
+  set(_install_include ${${PROJECT_NAME}_INCLUDE_DIR})
+else(${PROJECT_NAME}_INCLUDE_DIR)
   set(_install_include include)
-endif(${PROJECT_NAME}_include_dir)
+endif(${PROJECT_NAME}_INCLUDE_DIR)
 
 install(TARGETS 
   ${PROJECT_NAME}_static ${PROJECT_NAME}_shared 
@@ -78,7 +84,7 @@ install(TARGETS
   LIBRARY DESTINATION ${_install_lib})
 install(FILES ${${PROJECT_NAME}_HDRS} DESTINATION ${_install_include})
 
-message("-- ${PROJECT_NAME} library setup done")
-message("-- ")
+message(STATUS "${PROJECT_NAME} library setup done")
+message(STATUS "")
 
 endmacro(LIBRARY_PROJECT_SETUP)

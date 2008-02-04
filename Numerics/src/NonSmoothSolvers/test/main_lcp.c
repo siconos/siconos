@@ -98,14 +98,14 @@ void test_lcp_series(int n , double *vec , double *q)
 
   /* Method definition */
 
-  static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-6 , 0.3 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp8 = { "Latin_w"    , 1000 , 1e-6 , 0.3 , 1.0 , 0.75 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp7 = { "NewtonMin",   10   , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 0 , 0 , 0 , 0.0 };
+  static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 0 , 0 , 0 , 0.0 };
+  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-6 , 0.3 , 1.0 , 0 , 0 , 0 , 0.0 };
+  static method_lcp method_lcp8 = { "Latin_w"    , 1000 , 1e-6 , 0.3 , 1.0 , 0.75 , 0 , 0 , 0.0 };
+  static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 0 , 0 , 0 , 0.0 };
+  static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 0 , 0 , 0 , 0.0 };
+  static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 0 , 0 , 0 , 0.0 };
+  static method_lcp method_lcp7 = { "NewtonMin",   10   , 1e-8 , 0.7 , 1.0 , 0 , 0 , 0 , 0.0 };
 
   nonsymmetric = 0;
 
@@ -359,13 +359,13 @@ void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM
 
   /* Method definition */
 
-  static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp7 = { "NewtonMin"  , 10   , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 0 , 0 , 0 , 0.0 };
+  static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 0 , 0 , 0 , 0.0 };
+  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-8 , 0.7 , 1.0 , 0 , 0 , 0 , 0.0 };
+  static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 0 , 0 , 0 , 0.0 };
+  static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 0 , 0 , 0 , 0.0 };
+  static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 0 , 0 , 0 , 0.0 };
+  static method_lcp method_lcp7 = { "NewtonMin"  , 10   , 1e-8 , 0.7 , 1.0 , 0 , 0 , 0 , 0.0 };
 
 
   /* #1 NLGS TEST */
