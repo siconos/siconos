@@ -38,16 +38,19 @@ SET(VERSION "${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}")
 # SVN revision number
 #
 SET( ENV{LC_ALL} C )
-IF(EXISTS .svn)
+IF(EXISTS ${CMAKE_SOURCE_DIR}/.svn)
   FIND_PACKAGE(Subversion)
   IF(Subversion_FOUND)
     Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
     IF(Project_WC_REVISION)
       SET(SVN_REVISION ${Project_WC_REVISION})
+      MESSAGE(STATUS "This is a build from sources under svn")
       MESSAGE(STATUS "Current svn revision is ${SVN_REVISION}")
     ENDIF(Project_WC_REVISION)
   ENDIF(Subversion_FOUND)
-ENDIF(EXISTS .svn)
+ELSE(EXISTS ${CMAKE_SOURCE_DIR}/.svn)
+  MESSAGE(STATUS "This is a build out of svn")
+ENDIF(EXISTS ${CMAKE_SOURCE_DIR}/.svn)
 
 #
 # Standard modules
@@ -65,11 +68,34 @@ INCLUDE(fortran)
 INCLUDE(FortranLibraries)
 INCLUDE(LibraryProjectSetup)
 
+
+#
+# Documentation with Doxygen 
+#
+
+# Style sheet
+FILE(GLOB CSS_FILES config/css/*.* config/css/*)
+FOREACH(FILE ${CSS_FILES})
+  IF(NOT IS_DIRECTORY ${FILE})
+    FILE(RELATIVE_PATH RFILE ${CMAKE_SOURCE_DIR} ${FILE})
+    CONFIGURE_FILE(${FILE} ${CMAKE_BINARY_DIR}/${RFILE} COPYONLY)
+  ENDIF(NOT IS_DIRECTORY ${FILE})
+ENDFOREACH(FILE ${CSS_FILES})
+
+# If we are under svn the output should go in GeneratedDocs 
+IF(SVN_REVISION)
+  SET(DOXYGEN_OUTPUT ${CMAKE_SOURCE_DIR}/../GeneratedDocs)
+ELSE(SVN_REVISION)
+  SET(DOXYGEN_OUTPUT html)
+ENDIF(SVN_REVISION)
+
+INCLUDE(TargetDoc OPTIONAL)
+
+
 #
 # Required packages 
 #
 FIND_PACKAGE(LAPACK REQUIRED)
-
 #
 # Current state information
 #
@@ -138,7 +164,6 @@ ENABLE_TESTING()
 
 SUBDIRS(src)
 
-
 #
 # Packaging
 #
@@ -151,4 +176,3 @@ SET(CPACK_PACKAGE_VERSION_MAJOR "${MAJOR_VERSION}")
 SET(CPACK_PACKAGE_VERSION_MINOR "${MINOR_VERSION}")
 SET(CPACK_PACKAGE_VERSION_PATCH "${PATCH_VERSION}")
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
-
