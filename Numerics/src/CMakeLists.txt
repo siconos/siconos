@@ -11,10 +11,7 @@ SET(SiconosNumerics_VERSION "${VERSION}")
 #
 # Published headers
 #
-SET(SiconosNumerics_HDRS
-  Solver_Options.h
-  SiconosNumerics.h
-)
+# if <PROJECT>_HDRS unset -> all headers under <PROJECT>_DIRS
 
 #
 # Project directories 
@@ -47,7 +44,7 @@ SET(SiconosNumerics_Unstable_SRCS
 #
 # Installation layout
 #
-SET(SiconosNumerics_INCLUDE_DIR include/Siconos)
+SET(SiconosNumerics_INCLUDE_DIR include/Siconos/Numerics)
 
 #
 # compilation setup 

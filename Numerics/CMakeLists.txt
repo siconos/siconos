@@ -161,8 +161,11 @@ INSTALL(FILES AUTHORS ChangeLog COPYING INSTALL NEWS README
 # Library sources
 #
 ENABLE_TESTING()
+INCLUDE(DartConfig)
+INCLUDE(Dart)
 
 SUBDIRS(src)
+
 
 #
 # Packaging
