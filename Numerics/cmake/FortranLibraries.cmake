@@ -86,7 +86,11 @@ WHILE(${iopt} LESS ${imax})
     
     IF(NOT FORT_LIBS_WORK)
       # let's find it in some potentiallink directories
-      FILE(GLOB _LIBDIRS_MAYBE /lib /usr/lib /lib/* /usr/*/lib /usr/lib/* /opt/lib /opt/*/lib)
+      FILE(GLOB _LIBDIRS_MAYBE 
+        /lib /lib/* 
+        /usr/lib /usr/*/lib /usr/lib/* 
+        /usr/local/lib /usr/local/*/lib /usr/local/lib/* 
+        /opt/lib /opt/*/lib /opt/lib/*)
       FOREACH(_F ${_LIBDIRS_MAYBE})
         IF(IS_DIRECTORY ${_F})
           LIST(APPEND _LIBDIRS ${_F})
