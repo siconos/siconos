@@ -66,22 +66,54 @@ WHILE(${iopt} LESS ${imax})
         OUTPUT_VARIABLE MY_OUTPUT)
     #message("${MY_OUTPUT}")
     if(NOT FTEST_OK)
-        MESSAGE(FATAL_ERROR "Failed to compile simple fortran library")
+      MESSAGE(FATAL_ERROR "Failed to compile simple fortran library")
     endif(NOT FTEST_OK)
-
+    
     SET(trial_libraries "${fc_libraries}\;flib")
-    SET(trial_lib_paths "${FORTRAN_COMPILER_LIB_DIRECTORY}\;${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp")
-
+    
+    LIST(APPEND trial_lib_paths "${FORTRAN_COMPILER_LIB_DIRECTORY}")
+    LIST(APPEND trial_lib_paths "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp")    
+    
     MESSAGE(STATUS "trying libraries ${fc_libraries_t}")
-
+    
     TRY_COMPILE(FORT_LIBS_WORK ${CMAKE_BINARY_DIR}
-         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testF77libs.c
-         CMAKE_FLAGS
-         -DLINK_LIBRARIES:STRING=${trial_libraries}
-         -DLINK_DIRECTORIES:STRING=${trial_lib_paths}
-         OUTPUT_VARIABLE FORT_LIBS_BUILD_OUT
-         )
+      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testF77libs.c
+      CMAKE_FLAGS
+      -DLINK_LIBRARIES:STRING=${trial_libraries}
+      -DLINK_DIRECTORIES="${trial_lib_paths}"
+      OUTPUT_VARIABLE FORT_LIBS_BUILD_OUT)
     #MESSAGE(STATUS ${FORT_LIBS_BUILD_OUT})
+    
+    IF(NOT FORT_LIBS_WORK)
+      # let's find it in some potentiallink directories
+      FILE(GLOB _LIBDIRS_MAYBE /lib /usr/lib /lib/* /usr/*/lib /usr/lib/* /opt/lib /opt/*/lib)
+      FOREACH(_F ${_LIBDIRS_MAYBE})
+        IF(IS_DIRECTORY ${_F})
+          LIST(APPEND _LIBDIRS ${_F})
+        ENDIF(IS_DIRECTORY ${_F})
+      ENDFOREACH(_F ${_LIBDIRS_MAYBE})
+      LIST(APPEND _LIBDIRS "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp")
+
+      #string -> list
+      SET(_libs ${trial_libraries})
+      FIND_LIBRARY(_LFIND NAMES ${_libs} PATHS "${_LIBDIRS}")
+
+      MESSAGE("LFIND = ${_LFIND}")
+
+      IF(_LFIND)
+        GET_FILENAME_COMPONENT(_LFINDDIR ${_LFIND} PATH)
+        LIST(APPEND _LFINDDIRLIST ${_LFINDDIR})
+        LIST(APPEND _LFINDDIRLIST "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp")
+        TRY_COMPILE(FORT_LIBS_WORK ${CMAKE_BINARY_DIR}
+          ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testF77libs.c
+          CMAKE_FLAGS
+          -DLINK_LIBRARIES:STRING=${trial_libraries}
+          -DLINK_DIRECTORIES="${_LFINDDIRLIST}"
+          OUTPUT_VARIABLE FORT_LIBS_BUILD_OUT
+          )
+        #MESSAGE(STATUS ${FORT_LIBS_BUILD_OUT})
+      ENDIF(_LFIND)
+    ENDIF(NOT FORT_LIBS_WORK)
 
     IF(FORT_LIBS_WORK)
         # the goal is to set this to something useful
