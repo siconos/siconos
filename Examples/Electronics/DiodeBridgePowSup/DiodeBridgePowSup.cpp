@@ -128,7 +128,13 @@ int main(int argc, char* argv[])
 
     Moreau* OSI_LSDiodeBridgePowSup = new Moreau(LSDiodeBridgePowSup, theta, StratDiodeBridgePowSup);
 
-    LCP* LCP_DiodeBridgePowSup = new LCP(StratDiodeBridgePowSup, "LCP", "NSQP", 300, 1e-8);
+    IntParameters iparam(5);
+    iparam[0] = 300; // Max number of iteration
+    DoubleParameters dparam(5);
+    dparam[0] = 1e-8; // Tolerance
+    string solverName = "NSQP" ;
+    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
+    LCP* LCP_DiodeBridgePowSup = new LCP(StratDiodeBridgePowSup, mySolver, "LCP");
 
     StratDiodeBridgePowSup->initialize();
 

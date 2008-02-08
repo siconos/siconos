@@ -138,11 +138,10 @@ extern "C" {
   y version:    1.5  (june, 1991)
 
   */
-  void F77NAME(ql0001)(m, me, mmax, n, nmax, mnn, c, d, a, b, xl, xu, 1      x, u, iout, ifail, iprint, war, lwar, iwar, liwar, eps);
+  void F77NAME(ql0001)(integer m, integer me, integer mmax, integer n, integer nmax, integer mnn, double *c, double *d, double *a, double *b, double *xl, double *xu, double *x, double *u, integer iout, integer ifail, integer iprint, double* war, integer lwar, integer* iwar, integer liwar, double eps);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-

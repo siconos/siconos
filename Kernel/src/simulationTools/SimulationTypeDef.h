@@ -57,6 +57,12 @@ typedef std::map< UnitaryRelation* , std::map<UnitaryRelation*, bool> >  MapOfMa
 /** Vector that contains a sequel of sets of UnitaryRelations*/
 typedef std::vector< UnitaryRelationsSet* > VectorOfSetOfUnitaryRelations;
 
+/** Map to link UnitaryRelation* with an int - Used for example in blocksPositions for OSNSMatrix */
+typedef std::map< UnitaryRelation* , unsigned int > UR_int;
+
+/** list of indices */
+typedef std::vector<int> IndexInt;
+
 // ================== Objects to handle OSI or DS ==================
 
 //#include "OneStepIntegrator.h"

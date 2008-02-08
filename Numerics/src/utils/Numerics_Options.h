@@ -25,17 +25,21 @@
   \author Franck Perignon
 */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 /** Structure used to set general options of Numerics functions, structures and so on.
     \param verbose mode (0: off, 1: on)
 */
 typedef struct
 {
-  int verbose;
+  int verboseMode;
 } Numerics_Options;
 
 
 /* Verbose mode */
-extern int Verb;
+extern int verbose;
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,6 +49,18 @@ extern "C" {
      \param opt, a Numerics_Options structure
    */
   void setNumericsOptions(Numerics_Options* opt);
+
+  /* message output and exit with error
+     \param name of the function where error occurs
+     \param output message
+  */
+  void numericsError(char* functionName, char* message);
+
+  /* message output without exit
+     \param name of the function where warning occurs
+     \param output message
+  */
+  void numericsWarning(char* functionName, char* message);
 
 #ifdef __cplusplus
 }

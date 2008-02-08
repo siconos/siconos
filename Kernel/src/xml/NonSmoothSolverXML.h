@@ -38,12 +38,13 @@
  *     - a list (vector) of double parameters \n
  *
  *  In the XML file, NonSmoothSolver must look like:
- *  \code
- *  <NonSmoothSolver name="Lemke">
- *  <iparam  vectorSize='3'>1 3 4</iparam>
- *  <dparam  vectorSize='3'>1.3 1e-17 1e-12</dparam>
- *  </NonSmoothSolver>
  *
+ \code
+   <NonSmoothSolver Name="Lemke">
+   <iparam  vectorSize='3'>1 3 4</iparam>
+   <dparam  vectorSize='3'>1.3 1e-17 1e-12</dparam>
+   </NonSmoothSolver>
+ \endcode
  *
  * The tag NonSmoothSolver is optional and, if omitted, solver type and parameters are set during the call to the Numerics driver
  * by reading a default parameters file.

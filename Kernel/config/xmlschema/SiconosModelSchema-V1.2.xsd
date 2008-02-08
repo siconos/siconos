@@ -78,16 +78,6 @@
    	</xsd:restriction>
 </xsd:simpleType>
 
-<xsd:simpleType name="PossibleOneStepNSProblemValues">
-   <xsd:restriction base="xsd:string">
-	<xsd:enumeration value="LCP"/>
-	<xsd:enumeration value="FrictionContact2D"/>
-	<xsd:enumeration value="FrictionContact3D"/>
-	<xsd:enumeration value="QP"/>
-	<xsd:enumeration value="Relay"/>
-   </xsd:restriction>
-</xsd:simpleType>
-
 <xsd:simpleType name="BoundaryConditionValues">
    <xsd:restriction base="xsd:string">
 	<xsd:enumeration value="Linear"/>
@@ -239,17 +229,6 @@
 
 
 <!-- Non smooth problem solver definition tag: -->
-<xsd:element name="Solver">
-	<xsd:complexType>
-    		<xsd:attribute name="type" type="xsd:string" use="required"/>
-    		<xsd:attribute name="maxIter" type="xsd:positiveInteger" use="optional"/>
-		<xsd:attribute name="tolerance" type="xsd:double" use="optional"/>
-    		<xsd:attribute name="verbose" type="xsd:positiveInteger" use="optional"/>
-		<xsd:attribute name="normType" type="NormTypeValues" use="optional"/>
-		<xsd:attribute name="searchDirection" type="xsd:double" use="optional"/>
-		<xsd:attribute name="isBlock" type="xsd:boolean" use="optional" default="false"/>
-	</xsd:complexType>
-</xsd:element>
 <xsd:element name="NonSmoothSolver">
 	<xsd:complexType>
 		<xsd:all>
@@ -267,66 +246,6 @@
 	</xsd:sequence>
 	<xsd:attribute name="all" type="boolean" use="optional" default="false"/>
 </xsd:complexType>
-
-<!--~~~~~~ DS_Concerned for DSInputOutput ~~~~~~~~-->
-<xsd:complexType name="DSIO_DS_ConcernedType">
-	<xsd:sequence>
-	<!--~~~~~~~~~  DS ~~~~~~~~~~-->
-		<xsd:element name="DS" minOccurs="1" maxOccurs="unbounded">
-			<xsd:complexType>
-				<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
-			</xsd:complexType>
-<!--			<xsd:keyref name="DSInputOutputDSKeyRef" refer="DSIOKey">
-				<xsd:selector xpath='.//DSInputOutput'/>
-				<xsd:field xpath='@number'/>
-			</xsd:keyref> -->
-		</xsd:element>
-	</xsd:sequence>
-	<xsd:attribute name="size" type="xsd:positiveInteger" use="optional"/>
-	<xsd:attribute name="all" type="boolean" use="optional"/>
-</xsd:complexType>
-
-
-<!--~~~~~~ DSInputOutput_Concerned ~~~~~~~~-->
-<xsd:complexType name="EC_DSIO_ConcernedType">
-	<xsd:sequence>
-	<!--~~~~~~~~~  DSIO ~~~~~~~~~~-->
-		<xsd:element name="DSInputOutput" minOccurs="1" maxOccurs="unbounded">
-			<xsd:complexType>
-				<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
-			</xsd:complexType>
-<!--			<xsd:keyref name="EqualityConstraintDSIOKeyRef" refer="DSIOKey">
-				<xsd:selector xpath='.//DSInputOutput'/>
-				<xsd:field xpath='@number'/>
-			</xsd:keyref> -->
-		</xsd:element>
-	</xsd:sequence>
-	<xsd:attribute name="size" type="xsd:positiveInteger" use="optional"/>
-	<xsd:attribute name="all" type="boolean" use="optional"/>
-</xsd:complexType>
-
-
-
-<!--~~~~~~ Interaction_Concerned for OneStepNSProblem~~~~~~~~-->
-<xsd:complexType name="InteractionConcernedType">
-	<xsd:sequence>
-	<!--~~~~~  Interaction ~~~~~-->
-		<xsd:element name="Interaction" minOccurs="0" maxOccurs="unbounded">
-		<xsd:complexType>
-				<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
-				<xsd:attribute name="id" type="xsd:string" use="optional"/>
-		</xsd:complexType>
-<!--		<xsd:keyref name="OneStepNSProblemInteractionKeyRef" refer="InteractionKey">
-			<xsd:selector xpath='.//Interaction'/>
-			<xsd:field xpath='@number'/>
-		</xsd:keyref> -->
-		</xsd:element>
-	</xsd:sequence>
-	<xsd:attribute name="size" type="xsd:positiveInteger" use="optional"/>
-	<xsd:attribute name="all" type="boolean" use="optional"/>
-</xsd:complexType>
-
-
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~ Model ~~~~~~~~~~~~~~~~~~~~~~~~~-->
 <xsd:element name="SiconosModel">
@@ -667,70 +586,63 @@
 
 
  		<!--~~~~~~~~~~~~~ OneStepNSProblem ~~~~~~~~~~~~~~-->
-	<xsd:element name="OneStepNSProblem" minOccurs="0" maxOccurs="1">
+	<xsd:element name="OneStepNSProblems_List" minOccurs="0" maxOccurs="1">
 	<xsd:complexType>
 		<xsd:sequence>
 	 		<xsd:choice minOccurs="1" maxOccurs="1">
 				<xsd:element name="LCP">
 					<xsd:complexType>
 						<xsd:all>
-							<xsd:element name="n" type="xsd:positiveInteger" minOccurs="0" maxOccurs="1"/>
-							<xsd:element name="M" type="matrix" minOccurs="0" maxOccurs="1"/>
-							<xsd:element name="q" type="vector" minOccurs="0" maxOccurs="1"/>
+							<xsd:element name="size" type="xsd:positiveInteger" minOccurs="0" maxOccurs="1"/>
 							<!--~~~~~~ list of interactions concerned ~~~~~~-->
-               						<xsd:element name="Interaction_Concerned" type="index_list" minOccurs='0' maxOccurs="1"/>
-							<xsd:element ref="Solver" minOccurs="0" maxOccurs="1"/>
+               						<xsd:element name="Interactions_Concerned" type="index_list" minOccurs='0' maxOccurs="1"/>
+							<xsd:element ref="NonSmoothSolver" minOccurs="0" maxOccurs="1"/>
 						</xsd:all>
+    						<xsd:attribute name="StorageType" type="xsd:positiveInteger" use="optional"/>
+   						<xsd:attribute name="Id" type="xsd:string" use="optional"/>
 					</xsd:complexType>
 				</xsd:element>
 				
-				<xsd:element name="FrictionContact2D">
+				<xsd:element name="FrictionContact">
 					<xsd:complexType>
 						<xsd:all>
-							<xsd:element name="n" type="xsd:positiveInteger" minOccurs="0" maxOccurs="1"/>
-							<xsd:element name="M" type="matrix" minOccurs="0" maxOccurs="1"/>
-							<xsd:element name="q" type="vector" minOccurs="0" maxOccurs="1"/>
+							<xsd:element name="size" type="xsd:positiveInteger" minOccurs="0" maxOccurs="1"/>
 							<!--~~~~~~ list of interactions concerned ~~~~~~-->
-               						<xsd:element name="Interaction_Concerned" type="index_list" minOccurs='0' maxOccurs="1"/>
-							<xsd:element ref="Solver" minOccurs="0" maxOccurs="1"/>
+               						<xsd:element name="Interactions_Concerned" type="index_list" minOccurs='0' maxOccurs="1"/>
+							<xsd:element ref="NonSmoothSolver" minOccurs="0" maxOccurs="1"/>
 						</xsd:all>
-					</xsd:complexType>
-				</xsd:element>
-				<xsd:element name="FrictionContact3D">
-					<xsd:complexType>
-						<xsd:all>
-							<xsd:element name="n" type="xsd:positiveInteger" minOccurs="0" maxOccurs="1"/>
-							<xsd:element name="M" type="matrix" minOccurs="0" maxOccurs="1"/>
-							<xsd:element name="q" type="vector" minOccurs="0" maxOccurs="1"/>
-							<!--~~~~~~ list of interactions concerned ~~~~~~-->
-  							<xsd:element ref="NonSmoothSolver" minOccurs="0" maxOccurs="1"/>
-             						<xsd:element name="Interaction_Concerned" type="index_list" minOccurs='0' maxOccurs="1"/>
-						</xsd:all>
+    						<xsd:attribute name="StorageType" type="xsd:positiveInteger" use="optional"/>
+   						<xsd:attribute name="Id" type="xsd:string" use="optional"/>
+   						<xsd:attribute name="Type" type="xsd:positiveInteger" use="required"/>
 					</xsd:complexType>
 				</xsd:element>
 	
 				<xsd:element name="QP">
 					<xsd:complexType>
 						<xsd:all>
-							<xsd:element name="n" type="xsd:positiveInteger" minOccurs="0" maxOccurs="1"/>
+							<xsd:element name="size" type="xsd:positiveInteger" minOccurs="0" maxOccurs="1"/>
 							<xsd:element name="Q" type="matrix" minOccurs="0" maxOccurs="1"/>
 							<xsd:element name="p" type="vector" minOccurs="0" maxOccurs="1"/>
 							<!--~~~~~~ list of interactions concerned ~~~~~~-->
-               						<xsd:element name="Interaction_Concerned" type="index_list" minOccurs='0' maxOccurs="1"/>
-							<xsd:element ref="Solver" minOccurs="0" maxOccurs="1"/>
+               						<xsd:element name="Interactions_Concerned" type="index_list" minOccurs='0' maxOccurs="1"/>
+							<xsd:element ref="NonSmoothSolver" minOccurs="0" maxOccurs="1"/>
 						</xsd:all>
+    						<xsd:attribute name="StorageType" type="xsd:positiveInteger" use="optional"/>
+   						<xsd:attribute name="Id" type="xsd:string" use="optional"/>
 					</xsd:complexType>
 				</xsd:element>
 				<xsd:element name="Relay">
 					<xsd:complexType>
 		 				<xsd:all>
-							<xsd:element name="n" type="xsd:positiveInteger" minOccurs="0" maxOccurs="1"/>
+							<xsd:element name="size" type="xsd:positiveInteger" minOccurs="0" maxOccurs="1"/>
 							<xsd:element name="M" type="matrix" minOccurs="0" maxOccurs="1"/>
 							<xsd:element name="q" type="vector" minOccurs="0" maxOccurs="1"/>
 							<!--~~~~~~ list of interactions concerned ~~~~~~-->
-               						<xsd:element name="Interaction_Concerned" type="index_list" minOccurs='0' maxOccurs="1"/>
-							<xsd:element ref="Solver" minOccurs="0" maxOccurs="1"/>
+               						<xsd:element name="Interactions_Concerned" type="index_list" minOccurs='0' maxOccurs="1"/>
+							<xsd:element ref="NonSmoothSolver" minOccurs="0" maxOccurs="1"/>
 						</xsd:all>
+    						<xsd:attribute name="StorageType" type="xsd:positiveInteger" use="optional"/>
+   						<xsd:attribute name="Id" type="xsd:string" use="optional"/>
 					</xsd:complexType>
 				</xsd:element>
 			</xsd:choice>

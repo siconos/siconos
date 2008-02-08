@@ -27,49 +27,35 @@
 #include "DynamicalSystem.h"
 #include "Relation.h"
 #include "NewtonImpactFrictionNSL.h"
+#include "FrictionContact_Problem.h" // Numerics Header
 
 using namespace std;
 
 // xml constructor
-FrictionContact::FrictionContact(const string pbType, OneStepNSProblemXML* osNsPbXml, Simulation* newSimu):
-  OneStepNSProblem(pbType, osNsPbXml, newSimu), velocity(NULL), reaction(NULL), M(NULL), q(NULL), mu(NULL),
-  isVelocityAllocatedIn(false), isReactionAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), Mspbl(NULL)
+FrictionContact::FrictionContact(OneStepNSProblemXML* osNsPbXml, Simulation* newSimu):
+  OneStepNSProblem("FrictionContact", osNsPbXml, newSimu), contactProblemDim(3), velocity(NULL), reaction(NULL), M(NULL), q(NULL), mu(NULL),
+  isVelocityAllocatedIn(false), isReactionAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), MStorageType(0)
 {
-  FrictionContactXML * xmllcp = (static_cast<FrictionContactXML*>(osNsPbXml));
+  FrictionContactXML * xmlFC = (static_cast<FrictionContactXML*>(osNsPbXml));
 
-  // If both q and M are given in xml file, check if sizes are consistent
-  if (xmllcp->hasQ() && xmllcp->hasM() && ((xmllcp->getM()).size(0) != (xmllcp->getQ()).size()))
-    RuntimeException::selfThrow("FrictionContact: xml constructor, inconsistent sizes between given q and M");
+  // Read dimension of the problem (required parameter)
+  if (!xmlFC->hasProblemDim())
+    RuntimeException::selfThrow("FrictionContact: xml constructor failed, attribute for dimension of the problem (2D or 3D) is missing.");
 
-  // first dimension is given by M matrix size in xml file
-  if (xmllcp->hasM())
-  {
-    sizeOutput = (xmllcp->getM()).size(0);
-    M = new SimpleMatrix(xmllcp->getM());
-    isMAllocatedIn = true;
-  }
+  contactProblemDim = xmlFC->getProblemDim();
 
-  if (xmllcp->hasQ())
-  {
-    // get sizeOutput if necessary
-    if (M == NULL)
-      sizeOutput = (xmllcp->getQ()).size();
+  // Read storage type if given (optional , default = dense)
+  if (onestepnspbxml->hasStorageType())
+    MStorageType = onestepnspbxml->getStorageType();
 
-    q = new SimpleVector(xmllcp->getQ());
-    isQAllocatedIn = true;
-  }
 }
 
 // Constructor from a set of data
-FrictionContact::FrictionContact(const string pbType, Simulation* newSimu, const string newId):
-  OneStepNSProblem(pbType, newSimu, newId), velocity(NULL), reaction(NULL), M(NULL), q(NULL), mu(NULL),
-  isVelocityAllocatedIn(false), isReactionAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
-{}
-
-// Constructor from a set of data
-FrictionContact::FrictionContact(const string pbType, Solver*  newSolver, Simulation* newSimu, const string newId):
-  OneStepNSProblem(pbType, newSimu, newId, newSolver), velocity(NULL), reaction(NULL), M(NULL), q(NULL), mu(NULL),
-  isVelocityAllocatedIn(false), isReactionAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), Mspbl(NULL)
+// Required input: simulation
+// Optional: NonSmoothSolver and id
+FrictionContact::FrictionContact(Simulation* newSimu, int dimPb, NonSmoothSolver*  newSolver, const string& newId):
+  OneStepNSProblem("FrictionContact", newSimu, newId, newSolver), contactProblemDim(dimPb), velocity(NULL), reaction(NULL), M(NULL), q(NULL), mu(NULL),
+  isVelocityAllocatedIn(false), isReactionAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), MStorageType(0)
 {}
 
 // destructor
@@ -80,10 +66,8 @@ FrictionContact::~FrictionContact()
   if (isReactionAllocatedIn) delete reaction;
   reaction = NULL;
   if (isMAllocatedIn)
-    if (solver->useBlocks()) freeSpBlMat(Mspbl);
-    else delete M;
+    delete M;
   M = NULL;
-  Mspbl = NULL;
   if (isQAllocatedIn) delete q;
   q = NULL;
   if (mu != NULL) delete mu;
@@ -143,30 +127,20 @@ void FrictionContact::setReactionPtr(SimpleVector* newPtr)
   isReactionAllocatedIn = false;
 }
 
-void FrictionContact::setM(const SiconosMatrix& newValue)
+void FrictionContact::setM(const OSNSMatrix& newValue)
 {
-  if (sizeOutput != newValue.size(0) || sizeOutput != newValue.size(1))
-    RuntimeException::selfThrow("FrictionContact: setM, inconsistent size between given M size and problem size. You should set sizeOutput before");
-
-  if (M == NULL)
-  {
-    M = new SimpleMatrix(sizeOutput, sizeOutput);
-    isMAllocatedIn = true;
-  }
-
-  *M = newValue;
+  // Useless ?
+  RuntimeException::selfThrow("FrictionContact::setM, forbidden operation. Try setMPtr().");
 }
 
-void FrictionContact::setMPtr(SiconosMatrix* newPtr)
+void FrictionContact::setMPtr(OSNSMatrix* newPtr)
 {
-  if (sizeOutput != newPtr->size(0) || sizeOutput != newPtr->size(1))
-    RuntimeException::selfThrow("FrictionContact: setMPtr, inconsistent size between given M size and problem size. You should set sizeOutput before");
-
-  if (isMAllocatedIn) delete M;
+  // Note we do not test if newPtr and M sizes are equal. Not necessary?
+  if (isMAllocatedIn)
+    delete M;
   M = newPtr;
   isMAllocatedIn = false;
 }
-
 
 void FrictionContact::setQ(const SimpleVector& newValue)
 {
@@ -194,12 +168,24 @@ void FrictionContact::setQPtr(SimpleVector* newPtr)
 
 void FrictionContact::initialize()
 {
+  // - Checks memory allocation for main variables (M,q,w,z)
+  // - Formalizes the problem if the topology is time-invariant
 
-  // This function performs all steps that are not time dependant
+  // This function performs all steps that are time-invariant
+
   // General initialize for OneStepNSProblem
   OneStepNSProblem::initialize();
 
-  // Memory allocation for velocity, M, reaction and q
+
+  // Connect to the right function according to dim. of the problem
+  //   if(contactProblemDim == 2)
+  //     frictionContact_driver = &frictionContact2D_driver;
+  //   else // if(contactProblemDim == 3)
+  frictionContact_driver = &frictionContact3D_driver;
+
+  // Memory allocation for reaction, and velocity
+  // If one of them has already been allocated, nothing is done.
+  // We suppose that user has chosen a correct size.
   if (velocity == NULL)
   {
     velocity = new SimpleVector(maxSize);
@@ -220,16 +206,7 @@ void FrictionContact::initialize()
     if (reaction->size() != maxSize)
       reaction->resize(maxSize);
   }
-  if (M == NULL)
-  {
-    M = new SimpleMatrix(maxSize, maxSize);
-    isMAllocatedIn = true;
-  }
-  else
-  {
-    if (M->size(0) != maxSize || M->size(1) != maxSize)
-      M->resize(maxSize, maxSize);
-  }
+
   if (q == NULL)
   {
     q = new SimpleVector(maxSize);
@@ -240,34 +217,56 @@ void FrictionContact::initialize()
     if (q->size() != maxSize)
       q->resize(maxSize);
   }
-  velocity->zero();
-  reaction->zero();
 
-  // if all relative degrees are equal to 0 or 1 and if if we do not use a solver block
   // get topology
   Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
-  if (topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty() && !solver->useBlocks())
-  {
-    // computeSizeOutput and updateBlocks were already done in OneStepNSProblem::initialize
-    if (sizeOutput != 0)
-      assembleM();
-  }
+  // Note that blocks is up to date since updateBlocks has been called during OneStepNSProblem::initialize()
 
   // Fill vector of friction coefficients
-  // For each Unitary relation in index set 0, we get the corresponding non smooth law and its mu.
   UnitaryRelationsSet* I0 = topology->getIndexSet0Ptr();
-  ConstUnitaryRelationsIterator itUR;
-  unsigned int i = 0;
-  mu = new SimpleVector(I0->size());
-  for (itUR = I0->begin(); itUR != I0->end(); ++itUR)
-    (*mu)(i++) = static_cast<NewtonImpactFrictionNSL*>((*itUR)->getInteractionPtr()->getNonSmoothLawPtr())->getMu();
+  mu = new std::vector<double>();
+  mu->reserve(I0->size());
 
+  // If the topology is TimeInvariant ie if M structure does not change during simulation:
+  if (topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty())
+  {
+    // Get index set from Simulation
+    UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
+    if (M == NULL)
+    {
+      // Creates and fills M using UR of indexSet
+      M = new OSNSMatrix(indexSet, blocks, MStorageType);
+      isMAllocatedIn = true;
+    }
+    else
+    {
+      M->setStorageType(MStorageType);
+      M->fill(indexSet, blocks);
+    }
 
+    for (ConstUnitaryRelationsIterator itUR = indexSet->begin(); itUR != indexSet->end(); ++itUR)
+      mu->push_back(static_cast<NewtonImpactFrictionNSL*>((*itUR)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
+  }
+  else // in that case, M and mu will be updated during preCompute
+  {
+    // Default size for M = maxSize
+    if (M == NULL)
+    {
+      if (MStorageType == 0)
+        M = new OSNSMatrix(maxSize, 0);
+      else // if(MStorageType == 1) size = number of blocks = number of UR in the largest considered indexSet
+        M = new OSNSMatrix(simulation->getIndexSetPtr(levelMin)->size(), 1);
+      isMAllocatedIn = true;
+    }
+  }
 }
 
 void FrictionContact::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
 {
+
+  // Computes matrix blocks[UR1][UR2] (and allocates memory if necessary) if UR1 and UR2 have commond DynamicalSystem.
+  // How blocks are computed depends explicitely on the type of Relation of each UR.
 
   // Warning: we suppose that at this point, all non linear operators (G for lagrangian relation for example) have been computed through plug-in mechanism.
   // Get DS common between UR1 and UR2
@@ -346,52 +345,8 @@ void FrictionContact::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
   }
 }
 
-void FrictionContact::assembleM() //
-{
-  // === Description ===
-  // For each Unitary Relation which is active (ie which is in indexSet[1] of the Simulation), named itRow (it corresponds to a row of block in M),
-  // and for each Unitary Relation connected to itRow and active, named itCol, we get the block[itRow][itCol] and copy it at the right place in M matrix
-  //
-  // Note that if a Unitary Relation is connected to another one (ie if they have common DS), the corresponding block must be in blocks map. This is the role of
-  // updateBlocks() to ensure this.
-  // But the presence of a block in the map does not imply that its corresponding UR are active, since this block may have been computed at a previous time step.
-  // That is why we need to check if itCol is in indexSet1.
-  //
-  // See updateBlocks function for more details.
-
-  if (M->size(0) != sizeOutput || M->size(1) != sizeOutput)
-    M->resize(sizeOutput, sizeOutput);
-  M->zero();
-
-  // Get index set 1 from Simulation
-  UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
-  // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
-
-  unsigned int pos = 0, col = 0; // index position used for block copy into M, see below.
-  UnitaryRelationsIterator itRow;
-  UnitaryMatrixColumnIterator itCol;
-  for (itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
-  {
-    for (itCol = blocks[*itRow].begin(); itCol != blocks[*itRow].end(); ++itCol)
-    {
-      // *itRow and itCol are UnitaryRelation*.
-
-      // Check that itCol is in Index set 1
-      if ((indexSet->find((*itCol).first)) != indexSet->end())
-      {
-        pos = blocksPositions[*itRow];
-        col = blocksPositions[(*itCol).first];
-        // copy the block into Mlcp - pos/col: position in M (row and column) of first element of the copied block
-        static_cast<SimpleMatrix*>(M)->setBlock(pos, col, *(blocks[*itRow][(*itCol).first])); // \todo avoid copy
-      }
-    }
-  }
-  // === end of UnitaryRelations loop ===
-}
-
 void FrictionContact::computeQ(const double time)
 {
-
   if (q->size() != sizeOutput)
     q->resize(sizeOutput);
   q->zero();
@@ -409,66 +364,113 @@ void FrictionContact::computeQ(const double time)
     // *itCurrent is a UnitaryRelation*.
 
     // Compute q, this depends on the type of non smooth problem, on the relation type and on the non smooth law
-    pos = blocksPositions[*itCurrent];
+    pos = M->getPositionOfBlock(*itCurrent);
     (*itCurrent)->computeEquivalentY(time, levelMin, simulationType, q, pos); // free output is saved in y
   }
 }
 
 void FrictionContact::preCompute(const double time)
 {
-  // compute M and q operators for Friction problem
+  // This function is used to prepare data for the FrictionContact problem
+  // - computation of M and q
+  // - set sizeOutput
+  // - check dim. for z,w
 
-  computeSizeOutput();
-  if (sizeOutput != 0)
+  // If the topology is time-invariant, only q needs to be computed at each time step.
+  // M, sizeOutput have been computed in initialize and are uptodate.
+
+  // Get topology
+  Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  if (!topology->isTimeInvariant())
   {
+    // Computes new blocks if required
     updateBlocks();
-    assembleM();
-    computeQ(time);
-    // check reaction and velocity sizes and reset if necessary
+
+    // Updates matrix M
+    UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
+    M->fill(indexSet, blocks);
+    sizeOutput = M->size();
+
+    // Checks z and w sizes and reset if necessary
     if (reaction->size() != sizeOutput)
     {
       reaction->resize(sizeOutput, false);
+      reaction->zero();
     }
 
     if (velocity->size() != sizeOutput)
     {
       velocity->resize(sizeOutput);
+      velocity->zero();
     }
-    velocity->zero();
-    reaction->zero();
+
+    // Update mu
+    mu->clear();
+    for (ConstUnitaryRelationsIterator itUR = indexSet->begin(); itUR != indexSet->end(); ++itUR)
+      mu->push_back(static_cast<NewtonImpactFrictionNSL*>((*itUR)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
   }
+
+  // Computes q
+  computeQ(time);
+}
+
+int FrictionContact::compute(double time)
+{
+  int info = 0;
+  // --- Prepare data for FrictionContact computing ---
+  preCompute(time);
+
+  // --- Call Numerics solver ---
+  if (sizeOutput != 0)
+  {
+    // The FrictionContact Problem in Numerics format
+    FrictionContact_Problem numerics_problem;
+    numerics_problem.M = M->getNumericsMatrix();
+    numerics_problem.q = q->getArray();
+    numerics_problem.numberOfContacts = sizeOutput / contactProblemDim;
+    numerics_problem.isComplete = 1;
+    numerics_problem.mu = mu->data();
+    // Call Numerics Driver for FrictionContact
+    info = (*frictionContact_driver)(&numerics_problem, reaction->getArray() , velocity->getArray() , solver->getNumericsSolverOptionsPtr(), numerics_options);
+
+    // --- Recovering of the desired variables from LCP output ---
+    postCompute();
+
+  }
+
+  return info;
 }
 
 void FrictionContact::postCompute()
 {
+  // This function is used to set y/lambda values using output from lcp_driver (w,z).
+  // Only UnitaryRelations (ie Interactions) of indexSet(leveMin) are concerned.
+
   // === Get index set from Topology ===
   UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
 
   // y and lambda vectors
-  //  vector< SimpleVector* >  Y, Lambda;
   SiconosVector * y, *lambda;
 
-  // === Loop through "active" Unitary Relations (ie present in indexSets[1]) ===
+  //   // === Loop through "active" Unitary Relations (ie present in indexSets[1]) ===
 
   unsigned int pos = 0;
   unsigned int nsLawSize;
-  UnitaryRelationsIterator itCurrent, itLinked;
 
-  for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
+  for (UnitaryRelationsIterator itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
   {
-    // *itCurrent is a UnitaryRelation*.
-    // size if a block that corresponds to the current UnitaryRelation
+    // size of the block that corresponds to the current UnitaryRelation
     nsLawSize = (*itCurrent)->getNonSmoothLawSize();
     // Get the relative position of UR-block in the vector velocity or reaction
-    pos = blocksPositions[*itCurrent];
+    pos = M->getPositionOfBlock(*itCurrent);
 
     // Get Y and Lambda for the current Unitary Relation
-    y = static_cast<SimpleVector*>((*itCurrent)-> getYPtr(levelMin));
-    lambda = static_cast<SimpleVector*>((*itCurrent)->getLambdaPtr(levelMin));
+    y = (*itCurrent)->getYPtr(levelMin);
+    lambda = (*itCurrent)->getLambdaPtr(levelMin);
 
     // Copy velocity/reaction values, starting from index pos into y/lambda.
 
-    setBlock(velocity, y, y->size(), pos, 0);
+    setBlock(velocity, y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
     setBlock(reaction, lambda, lambda->size(), pos, 0);
 
   }
@@ -476,45 +478,30 @@ void FrictionContact::postCompute()
 
 void FrictionContact::display() const
 {
-  cout << "======= FrictionContact display ======" << endl;
-  cout << "| sizeOutput : " << sizeOutput << endl;
-  cout << "| FrictionContact Matrix M  : " << endl;
+  cout << "===== " << contactProblemDim << "D Friction Contact Problem " << endl;
+  cout << "of size " << sizeOutput << "(ie " << sizeOutput / contactProblemDim << " contacts)." << endl;
+  cout << " - Matrix M  : " << endl;
   if (M != NULL) M->display();
   else cout << "-> NULL" << endl;
-  cout << "| FrictionContact vector q : " << endl;
+  cout << " - Vector q : " << endl;
   if (q != NULL) q->display();
   else cout << "-> NULL" << endl;
-  cout << "==========================" << endl;
-
+  cout << " Friction coefficients: " << endl;
+  if (mu != NULL) print(mu->begin(), mu->end());
+  else cout << "-> NULL" << endl;
+  cout << "============================================================" << endl;
 }
 
 void FrictionContact::saveNSProblemToXML()
 {
-  OneStepNSProblem::saveNSProblemToXML();
-  if (onestepnspbxml != NULL)
-  {
-    (static_cast<FrictionContactXML*>(onestepnspbxml))->setM(*M);
-    (static_cast<FrictionContactXML*>(onestepnspbxml))->setQ(*q);
-  }
-  else RuntimeException::selfThrow("FrictionContact::saveNSProblemToXML - OneStepNSProblemXML object not exists");
-}
-
-void FrictionContact::saveMToXML()
-{
-  if (onestepnspbxml != NULL)
-  {
-    (static_cast<FrictionContactXML*>(onestepnspbxml))->setM(*M);
-  }
-  else RuntimeException::selfThrow("FrictionContact::saveMToXML - OneStepNSProblemXML object not exists");
-}
-
-void FrictionContact::saveQToXML()
-{
-  if (onestepnspbxml != NULL)
-  {
-    (static_cast<FrictionContactXML*>(onestepnspbxml))->setQ(*q);
-  }
-  else RuntimeException::selfThrow("FrictionContact::saveQToXML - OneStepNSProblemXML object not exists");
+  //   OneStepNSProblem::saveNSProblemToXML();
+  //   if(onestepnspbxml != NULL)
+  //     {
+  //       (static_cast<FrictionContactXML*>(onestepnspbxml))->setM(*M);
+  //       (static_cast<FrictionContactXML*>(onestepnspbxml))->setQ(*q);
+  //     }
+  //   else RuntimeException::selfThrow("FrictionContact::saveNSProblemToXML - OneStepNSProblemXML object not exists");
+  RuntimeException::selfThrow("FrictionContact::saveNSProblemToXML - Not yet implemented.");
 }
 
 FrictionContact* FrictionContact::convert(OneStepNSProblem* osnsp)

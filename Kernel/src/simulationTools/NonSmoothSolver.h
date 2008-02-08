@@ -32,6 +32,12 @@
 */
 const unsigned int NB_PARAM = 5;
 
+/** Object used to send parameters of type int */
+typedef std::vector<int> IntParameters;
+
+/** Object used to send parameters of type double */
+typedef std::vector<double> DoubleParameters;
+
 /** Non Smooth Solver parameters definition for One Step Non Smooth Problem.
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -56,7 +62,7 @@ const unsigned int NB_PARAM = 5;
  * Indeed a Solver is composed of:\n
  *      - a Solver_Options structure\n
  *      - a string, name of the algorithm/solver. The available solvers depends on the type of problem. \n
- *      - a std::vector<double> and a std::vector<int>, lists of double/int parameters
+ *      - a DoubleParameters and a IntParameters, lists of double/int parameters
  *
  * For details on what are the available solvers and which parameters they need see the documentation of Numerics for " \ref NonSmoothSolvers ".\n
  *
@@ -73,10 +79,10 @@ private:
   std::string name;
 
   /** Vector of double parameters */
-  std::vector<int> * int_parameters;
+  IntParameters * int_parameters;
 
   /** Vector of int parameters */
-  std::vector<double> * double_parameters;
+  DoubleParameters * double_parameters;
 
   /** Numerics structure used to solve solver options */
   Solver_Options * numerics_solver_options;
@@ -105,7 +111,7 @@ public:
       \param vector of int parameters
       \param vector of double parameters
   */
-  NonSmoothSolver(const std::string&, std::vector<int>&, std::vector<double>&);
+  NonSmoothSolver(const std::string&, IntParameters&, DoubleParameters&);
 
   /** Constructor from XML object
    *  \param a pointer to NonSmoothSolverXML
@@ -137,9 +143,9 @@ public:
   };
 
   /** To get the list of int. parameters
-   *  \return a vector<int>*
+   *  \return an IntParameters*
    */
-  inline std::vector<int>* getIntParametersPtr() const
+  inline IntParameters* getIntParametersPtr() const
   {
     return int_parameters;
   };
@@ -151,9 +157,9 @@ public:
   void setIntParameter(unsigned int i, int val);
 
   /** To get the list of double parameters
-   *  \return a vector<double>*
+   *  \return a DoubleParameters*
    */
-  inline std::vector<double>* getDoubleParametersPtr() const
+  inline DoubleParameters* getDoubleParametersPtr() const
   {
     return double_parameters;
   };

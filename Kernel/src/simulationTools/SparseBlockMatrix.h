@@ -23,11 +23,9 @@ Definition of a sparse block matrix of SiconosMatrix*
 #ifndef SBM_H
 #define SBM_H
 
-#include "SimpleMatrix.h"
 #include "SiconosNumerics.h"
 #include "SimulationTypeDef.h"
 
-typedef std::vector<int> IndexInt;
 typedef  boost::numeric::ublas::compressed_matrix<SiconosMatrix*> SparseMat2;
 
 /** Definition of a sparse block matrix of SiconosMatrix*, used in OneStepNSProblem to save matrix M.
@@ -116,11 +114,10 @@ public:
    */
   SparseBlockMatrix();
 
-  /** Constructor with dim.
-      \param nrow, int, number of blocks in a row
-      \param ncol, int, number of blocks in a column (note that at the time we only authorize nrow = ncol).
+  /** Constructor with dimension (number of blocks)
+      \param n number of blocks in a row/column (only square matrices allowed)
   */
-  SparseBlockMatrix(unsigned int, unsigned int);
+  SparseBlockMatrix(unsigned int);
 
   /** Constructor from index set and map
       \param UnitaryRelation*, the index set of the active constraints
@@ -132,8 +129,8 @@ public:
    */
   ~SparseBlockMatrix();
 
-  /** get number of blocks in a row */
-  inline const unsigned int size() const
+  /** get size (in block-components) */
+  inline const unsigned int getNumberOfBlocksInARow() const
   {
     return nc;
   };
@@ -162,10 +159,13 @@ public:
     return blocksList;
   };
 
-  /** get the index of dimension of diagonale blocks */
-  inline IndexInt * getDiagSizes()
+  /** get the dimension of the square-diagonal block number num
+      \param num block position
+  */
+  unsigned int getSizeOfDiagonalBlock(int i) const
   {
-    return diagSizes;
+    if (i == 0) return diagSizes->at(0);
+    else return (diagSizes->at(i) - diagSizes->at(i - 1));
   };
 
   /** get the index of blocks position (i=0 -> rows, i=1 -> columns)

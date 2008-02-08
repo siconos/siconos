@@ -18,60 +18,32 @@
  */
 
 #include "OneStepNSProblemXML.h"
-#include "SolverXML.h"
+#include "NonSmoothSolverXML.h"
 
 using namespace std;
 
-
-OneStepNSProblemXML::OneStepNSProblemXML():
-  rootNode(NULL), problemTypeNode(NULL), dimNode(NULL), interactionConcernedNode(NULL),
-  interactionListNode(NULL), solverNode(NULL), solverXML(NULL), isSolverXMLAllocatedIn(false)
-{}
-
-OneStepNSProblemXML::OneStepNSProblemXML(xmlNode * oneStepNSProblemXMLNode):
-  rootNode(oneStepNSProblemXMLNode), problemTypeNode(NULL), dimNode(NULL), interactionConcernedNode(NULL),
-  interactionListNode(NULL), solverNode(NULL), solverXML(NULL), isSolverXMLAllocatedIn(false)
+OneStepNSProblemXML::OneStepNSProblemXML(xmlNodePtr oneStepNSProblemXMLNode):
+  rootNode(oneStepNSProblemXMLNode), dimNode(NULL), interactionsConcernedNode(NULL),
+  solverNode(NULL), solverXML(NULL), isSolverXMLAllocatedIn(false)
 {
-  // Two steps in OneStepNSProblem xml loading:
-  //  - problem formalisation part ( LCP, FrictionContact ...) => partly done in derived class constructor
-  //  - solver data loading => done in OneStepNS top class constructor.
+  // rootNode == formalisation type (LCP ...)
 
-  // rootNode == OneStepNSProblem
-  // problemTypeNode == formalisation type (LCP ...)
-
-  // === non smooth problem formalisation part ===
-  problemTypeNode = SiconosDOMTreeTools::findNodeChild(rootNode);
-  if (problemTypeNode == NULL)
-    XMLException::selfThrow("OneStepNSProblemXML - constructor : tag NonSmooth Problem type not found");
-
-  xmlNode *node;
-  if ((node = SiconosDOMTreeTools::findNodeChild(problemTypeNode, "n")) != NULL)
+  xmlNodePtr node;
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "size")) != NULL)
     dimNode = node;
 
-  // interactionConcerned
-  if ((node = SiconosDOMTreeTools::findNodeChild(problemTypeNode, "Interaction_Concerned")) != NULL)
-  {
-    interactionConcernedNode = node;
-    // Check if all interactions are concerned or not
-    if (! hasAll())
-    {
-      // Get the indexList node
-      if ((node = SiconosDOMTreeTools::findNodeChild(interactionConcernedNode, INDEX_LIST)) != NULL)
-        interactionListNode = node;
-      else
-        XMLException::selfThrow("Tag indexList not found in Interaction.");
-    }
-  }
-  // interaction list not required => all interactions are concerned by the problem.
+  // get interactionsConcerned
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "Interactions_Concerned")) != NULL)
+    interactionsConcernedNode = node;
 
-  // === Solver part ===
-  if ((node = SiconosDOMTreeTools::findNodeChild(problemTypeNode, "Solver")) != NULL)
+  // Solver
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "NonSmoothSolver")) != NULL)
   {
     solverNode = node;
-    solverXML = new SolverXML(solverNode); // Is it really usefull to have a solverXML class?
+    solverXML = new NonSmoothSolverXML(solverNode);
     isSolverXMLAllocatedIn = true;
   }
-  //  else -> solver = default one
+  //  else -> nothing, it's up to OneStepNSProblem constructor to deal with the fact that no solver has been given
 }
 
 OneStepNSProblemXML::~OneStepNSProblemXML()
@@ -80,133 +52,50 @@ OneStepNSProblemXML::~OneStepNSProblemXML()
   solverXML = NULL;
 }
 
-void OneStepNSProblemXML::setDimNSProblem(const int& n)
+void OneStepNSProblemXML::setDimNSProblem(int n)
 {
   if (! hasDim())
-    dimNode = SiconosDOMTreeTools::createIntegerNode(problemTypeNode, "n", n);
+    dimNode = SiconosDOMTreeTools::createIntegerNode(rootNode, "size", n);
   else SiconosDOMTreeTools::setIntegerContentValue(dimNode, n);
 }
 
-bool OneStepNSProblemXML::hasAll() const
+bool OneStepNSProblemXML::hasAllInteractions() const
 {
-  if (SiconosDOMTreeTools::hasAttributeValue(interactionConcernedNode, ALL_ATTRIBUTE))
-    return SiconosDOMTreeTools::getAttributeValue<bool>(interactionConcernedNode, ALL_ATTRIBUTE);
+  if (SiconosDOMTreeTools::hasAttributeValue(interactionsConcernedNode, ALL_ATTRIBUTE))
+    return SiconosDOMTreeTools::getAttributeValue<bool>(interactionsConcernedNode, ALL_ATTRIBUTE);
   else return false;
 }
-void OneStepNSProblemXML::setAll(const bool& all)
+
+void OneStepNSProblemXML::setAllInteractions(const bool& all)
 {
-  if (!hasAll())
+  if (!hasAllInteractions())
   {
     if (all == true)
-      xmlNewProp(interactionConcernedNode, (xmlChar*)ALL_ATTRIBUTE.c_str(), (xmlChar*)"true");
+      xmlNewProp(interactionsConcernedNode, (xmlChar*)ALL_ATTRIBUTE.c_str(), (xmlChar*)"true");
   }
   else
   {
     if (all == false)
-      xmlRemoveProp(xmlHasProp(interactionConcernedNode, (xmlChar*)ALL_ATTRIBUTE.c_str()));
+      xmlRemoveProp(xmlHasProp(interactionsConcernedNode, (xmlChar*)ALL_ATTRIBUTE.c_str()));
   }
 }
 
-void OneStepNSProblemXML::setSolverXMLPtr(SolverXML * solv)
+void OneStepNSProblemXML::setNonSmoothSolverXMLPtr(NonSmoothSolverXML * solv)
 {
   if (isSolverXMLAllocatedIn) delete solverXML;
   solverXML = solv;
   isSolverXMLAllocatedIn = false;
 }
 
-// \warning: following routine has to been checked and updated
-void OneStepNSProblemXML::setSolver(const string& name, const string& normType,
-                                    double tolerance, unsigned int maxIter, double searchDirection, double Rho)
-{
-  XMLException::selfThrow("OneStepNSProblemXML::setSolver, not yet implemented.");
-  //   char tmpChar[128];
-  //   xmlNode *node;
-  //   xmlNodePtr solverAlgorithmNode;
-  //   if( solverNode == NULL )
-  //     {
-  //       solverNode = xmlNewChild( rootNode, NULL, (xmlChar*)"Solver", NULL );
-  //       node = xmlNewChild( solverNode, NULL, (xmlChar*)name.c_str(), NULL );
-  //       solverAlgorithmNode = xmlNewChild( node, NULL, (xmlChar*)name.c_str(), NULL );
-
-  //       sprintf(tmpChar, "%d", maxIter);
-  //       if( maxIter != DEFAULT_ITER )
-  //  xmlNewProp(solverAlgorithmNode, (xmlChar*)"maxIter", (xmlChar*)tmpChar );
-
-  //       sprintf(tmpChar, "%f", tolerance);
-  //       if( tolerance != DEFAULT_TOL )
-  //  xmlNewProp(solverAlgorithmNode, (xmlChar*)"tolerance", (xmlChar*)tmpChar );
-
-  //       /*
-  //        *       /!\ normType not yet implemented in SICONOS/Numerics
-  //        */
-  //       if( normType != DEFAULT_NORMTYPE )
-  //  xmlNewProp(solverAlgorithmNode, (xmlChar*)"normType", (xmlChar*)normType.c_str() );
-
-  //       sprintf(tmpChar, "%f", searchDirection);
-  //       if( searchDirection != DEFAULT_SEARCHDIR )
-  //  xmlNewProp(solverAlgorithmNode, (xmlChar*)"searchDirection", (xmlChar*)tmpChar );
-  //     }
-  //   else
-  //     {
-  //       node = solverNode->next;
-  //       if( node != NULL )
-  //  node->name = (xmlChar*)name.c_str();
-  //       else
-  //  node = xmlNewChild( solverNode, NULL, (xmlChar*)name.c_str(), NULL );
-
-
-  //       if( solverAlgorithmNode == NULL )
-  //  {
-  //    solverAlgorithmNode = xmlNewChild( node, NULL, (xmlChar*)name.c_str(), NULL );
-
-  //    sprintf(tmpChar, "%d", maxIter);
-  //    if( maxIter != DEFAULT_ITER )
-  //      xmlNewProp(solverAlgorithmNode, (xmlChar*)"maxIter", (xmlChar*)tmpChar );
-
-  //    sprintf(tmpChar, "%f", tolerance);
-  //    if( tolerance != DEFAULT_TOL )
-  //      xmlNewProp(solverAlgorithmNode, (xmlChar*)"tolerance", (xmlChar*)tmpChar );
-
-  //    /*
-  //     *       /!\ normType not yet implemented in SICONOS/Numerics
-  //     */
-  //    if( normType != DEFAULT_NORMTYPE )
-  //      xmlNewProp(solverAlgorithmNode, (xmlChar*)"normType", (xmlChar*)normType.c_str() );
-
-  //    sprintf(tmpChar, "%f", searchDirection);
-  //    if( searchDirection != DEFAULT_SEARCHDIR )
-  //      xmlNewProp(solverAlgorithmNode, (xmlChar*)"searchDirection", (xmlChar*)tmpChar );
-  //  }
-  //       else
-  //  {
-  //    xmlNode *node;
-  //    node  = xmlNewNode( NULL, (xmlChar*)name.c_str() );
-
-  //    sprintf(tmpChar, "%d", maxIter);
-  //    if( maxIter != DEFAULT_ITER )
-  //      xmlNewProp(solverAlgorithmNode, (xmlChar*)"maxIter", (xmlChar*)tmpChar );
-
-  //    sprintf(tmpChar, "%f", tolerance);
-  //    if( tolerance != DEFAULT_TOL )
-  //      xmlNewProp(solverAlgorithmNode, (xmlChar*)"tolerance", (xmlChar*)tmpChar );
-
-  //    /*
-  //     *       /!\ normType not yet implemented in SICONOS/Numerics
-  //     */
-  //    if( normType != DEFAULT_NORMTYPE )
-  //      xmlNewProp(solverAlgorithmNode, (xmlChar*)"normType", (xmlChar*)normType.c_str() );
-
-  //    sprintf(tmpChar, "%f", searchDirection);
-  //    if( searchDirection != DEFAULT_SEARCHDIR )
-  //      xmlNewProp(solverAlgorithmNode, (xmlChar*)"searchDirection", (xmlChar*)tmpChar );
-
-  //    xmlReplaceNode( solverAlgorithmNode, node );
-  //  }
-  //     }
-}
-
 void OneStepNSProblemXML::updateOneStepNSProblemXML(xmlNode* node, OneStepNSProblem* osnspb)
 {
   rootNode = node;
-  problemTypeNode = SiconosDOMTreeTools::findNodeChild(rootNode);
+}
+
+void OneStepNSProblemXML::getInteractionsNumbers(vector<int>& inNumbers)
+{
+  if (!hasAllInteractions())
+    SiconosDOMTreeTools::getVector(interactionsConcernedNode, inNumbers);
+  else
+    XMLException::selfThrow("OneStepNSProblemXML::getInteractionsNumbers - The list of interactions is missing.");
 }

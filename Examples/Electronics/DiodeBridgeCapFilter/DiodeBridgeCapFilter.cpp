@@ -150,7 +150,13 @@ int main(int argc, char* argv[])
     //Moreau* OSI_LS2DiodeBridgeCapFilter = new Moreau(LS2DiodeBridgeCapFilter,theta,StratDiodeBridgeCapFilter);
     Moreau* OSI_LS1DiodeBridgeCapFilter = new Moreau(Inter_DS, theta, StratDiodeBridgeCapFilter);
 
-    LCP* LCP_DiodeBridgeCapFilter = new LCP(StratDiodeBridgeCapFilter, "LCP", "Lemke", 10000, 1e-7);
+    IntParameters iparam(5);
+    iparam[0] = 10000; // Max number of iteration
+    DoubleParameters dparam(5);
+    dparam[0] = 1e-7; // Tolerance
+    string solverName = "Lemke" ;
+    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
+    LCP* LCP_DiodeBridgeCapFilter = new LCP(StratDiodeBridgeCapFilter, mySolver, "LCP");
 
     cout << " -----  Model description ------" << endl;
     DiodeBridgeCapFilter.display();

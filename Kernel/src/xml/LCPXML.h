@@ -16,7 +16,8 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-/*! \file
+/*! \file LCPXML.h
+  \brief XML management for Linear Complementarity Problems
 */
 
 #ifndef __LCPXML__
@@ -26,7 +27,6 @@
 #include "SimpleVector.h"
 #include "SimpleMatrix.h"
 
-class OneStepNSProblem;
 /** XML management for LCP
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -40,68 +40,19 @@ class OneStepNSProblem;
  */
 class LCPXML : public OneStepNSProblemXML
 {
-private:
-
-  //Nodes
-  xmlNode * MNode;
-  xmlNode * qNode;
-
 public:
-  /** Default constructor
-  */
-  LCPXML();
 
-  /** Build a LCPXML object from a DOM tree describing a LCP
-  *   \param LCPNode : the LCP DOM tree
-  *   \exception XMLException : if a property of the LCP lacks in the DOM tree
-  */
-  LCPXML(xmlNode * LCPNode);
+  /** Default constructor */
+  LCPXML() : OneStepNSProblemXML() {}
 
-  /** Destructor
+  /** Basic constructor, using xml node
+      \param LCP node, tag ="LCP"
   */
-  ~LCPXML();
+  LCPXML(xmlNodePtr LCPNOde) : OneStepNSProblemXML(LCPNOde) {}
 
-  /** Return M
-  *   \return The M SimpleMatrix of the LCP
-  */
-  inline SimpleMatrix getM() const
-  {
-    return  SiconosDOMTreeTools::getSiconosMatrixValue(MNode);
-  }
+  /** Destructor */
+  ~LCPXML() {}
 
-  /** Return vector q
-  *   \return SimpleVector : q vector of the LCP
-  */
-  inline SimpleVector getQ() const
-  {
-    return SiconosDOMTreeTools::getSiconosVectorValue(qNode);
-  }
-
-  /** set matrix M
-  *   \param The M SiconosMatrix to set
-  */
-  void setM(const SiconosMatrix &);
-
-  /** set vector q
-  *   \param The q SiconosVector to set
-  */
-  void setQ(const SiconosVector&);
-
-  /** returns true if MNode is defined
-  *  \return true if MNode is defined
-  */
-  inline bool hasM() const
-  {
-    return (MNode != NULL);
-  }
-
-  /** returns true if qNode is defined
-  *  \return true if qNode is defined
-  */
-  inline bool hasQ() const
-  {
-    return (qNode != NULL);
-  }
 };
 
 

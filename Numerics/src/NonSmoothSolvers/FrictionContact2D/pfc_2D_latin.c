@@ -26,8 +26,6 @@
 void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double *mu, int *info, int *iparamPFC, double *dparamPFC)
 {
 
-
-
   int    i, j, kk, iter1, ino, ddl, info2, info77, nrhs, ispeak;
   int    n = 2 * nc, idim, jdim, nbno, it_end;
   int    incx = 1, incy = 1;
@@ -63,9 +61,6 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
   errmax  = dparamPFC[0];
   k_latin = dparamPFC[1];
 
-
-
-
   /*               Initialize output                */
 
 
@@ -75,8 +70,6 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
 
   /*               Allocations                      */
 
-
-
   k         = (double*) malloc(n * n * sizeof(double));
   DPO       = (double*) malloc(n * n * sizeof(double));
   kf        = (double*) malloc(n * n * sizeof(double));
@@ -85,9 +78,6 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
   kninv     = (double*) malloc(nc * nc * sizeof(double));
   kn        = (double*) malloc(nc * nc * sizeof(double));
   kt        = (double*) malloc(nc * nc * sizeof(double));
-
-
-
 
   kinvwden1 = (double*) malloc(n  * sizeof(double));
   kzden1    = (double*) malloc(n  * sizeof(double));
@@ -112,8 +102,6 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
 
   ddln      = (int*) malloc(nc * sizeof(int));
   ddlt      = (int*) malloc(nc * sizeof(int));
-
-
 
   /*                    Initialization                   */
 
@@ -158,11 +146,6 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
 
     }
   }
-
-
-
-
-
 
 
   for (i = 0; i < n; i++)
@@ -216,9 +199,6 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
   }
 
 
-
-
-
   for (i = 0; i < nc; i++)
   {
     ddln[i] = vectnt[2 * i];
@@ -226,10 +206,6 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
     else ddlt[i] = 0;
 
   }
-
-
-
-
 
 
   for (i = 0; i < nc; i++)
@@ -257,16 +233,11 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
   nbno = taille / idim;
 
 
-
-
   for (i = 0; i < nc; i++)
   {
     kf[ddln[i] + n * ddln[i]] = kn[i + nc * i];
     kf[ddlt[i] + n * ddlt[i]] = kt[i + nc * i];
   }
-
-
-
 
 
   for (i = 0; i < n; i++)
@@ -279,7 +250,6 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
   }
 
 
-
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++)
       DPO[i + n * j] = vec[j * n + i] + kfinv[i + n * j];
@@ -287,8 +257,6 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
 
 
   DPOTRF(LA_UP, n, DPO , n, info2);
-
-
 
   if (info2 != 0)
   {
@@ -320,12 +288,9 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
     free(ddln);
     free(ddlt);
 
-
     *info = 2;
     return;
   }
-
-
 
   /*                Iteration loops                  */
 
@@ -339,7 +304,6 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
   {
 
     /*               Linear stage (zc,wc) -> (z,w)         */
-
 
     alpha  = 1.;
     beta   = 1.;
@@ -371,13 +335,11 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
     /*               Local stage (z,w)->(zc,wc)          */
 
 
-
     for (i = 0; i < n; i++)
     {
       zc[i] = 0.;
       wc[i] = 0.0;
     }
-
 
 
     /*           Normal party                           */
@@ -407,7 +369,6 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
       }
     }
 
-
     for (i = 0; i < nc; i++)
     {
       zc0 = 0.;
@@ -424,7 +385,6 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
 
 
     /*             Loop other nodes              */
-
 
 
     for (ino = 0; ino < nbno; ino++)
@@ -474,8 +434,6 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
       zc[ddl] = (mu[ino] * wn - maxa) * tc;
 
     }
-
-
 
     /*               Convergence criterium                */
 
@@ -529,8 +487,6 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
 
     err1   = sqrt(err0);
 
-
-
     it_end = iter1;
     res    = err1;
 
@@ -560,7 +516,6 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
     *info = 0;
   }
 
-
   free(k);
   free(DPO);
   free(kf);
@@ -585,11 +540,6 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
   free(vectnt);
   free(ddln);
   free(ddlt);
-
-
-
-
-
 
 
 

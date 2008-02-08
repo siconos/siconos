@@ -19,17 +19,20 @@
 #ifndef FRICTIONCONTACT3DSOLVERS_H
 #define FRICTIONCONTACT3DSOLVERS_H
 
-#include "FrictionContact3D_AlartCurnier.h"
-#include "FrictionContact3D_projection.h"
-#include "FrictionContact3D_Newton.h"
-#include "FrictionContact3D2NCP_Glocker.h"
-
 /*!\file FrictionContact3D_Solvers.h
   Subroutines for the resolution of contact problems with friction (3-dimensional case).\n
 
   \author Mathieu Renouf, Franck Perignon.
 
 */
+
+#include "FrictionContact_Problem.h"
+#include "Numerics_Options.h"
+#include "Solver_Options.h"
+#include "FrictionContact3D_AlartCurnier.h"
+#include "FrictionContact3D_projection.h"
+#include "FrictionContact3D_Newton.h"
+#include "FrictionContact3D2NCP_Glocker.h"
 
 /** pointer to function used to call local solver */
 typedef void (*SolverPtr)(int, int, double*, int*, double*);
@@ -71,12 +74,6 @@ typedef struct
   double local_err;
 } method_frictionContact_3D;
 
-
-#include "FrictionContact3D_Problem.h"
-#include "Numerics_Options.h"
-#include "Solver_Options.h"
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -93,7 +90,7 @@ extern "C" {
       \param double vector of parameters (tolerance ...)
   */
   //  void frictionContact3D_nsgs(int, double*, double*, double*, double*, double*, int *, int *, double*);
-  void frictionContact3D_nsgs(FrictionContact3D_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options);
+  void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options);
 
   /** Non-Smooth Gauss Seidel solver for friction-contact 3D problem, with sparse-block storage for M
       \param nc, number of contacts (dim of the problem n = 3*nc)

@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 
 #include <stdio.h>
@@ -23,23 +23,32 @@
 #include <string.h>
 #include <math.h>
 #include "LA.h"
+#include "LCP_Solvers.h"
 
-void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
+void lcp_newton_FB(LinearComplementarity_Problem* problem, double *z, double *w, int *info , Solver_Options* options)
 {
+  /* matrix M/vector q of the lcp */
+  double * M = problem->M->matrix0;
 
+  double * q = problem->q;
+
+  /* size of the LCP */
+  int n = problem->size;
 
   int i, j, iter;
-  int n = *nn, m, k;
-  int itermax, ispeak;
+  int m, k;
 
   int incx, incy;
-  double err, tol, a1, b1;
+  double err, a1, b1;
   double alpha, normi;
   int infoDGESV;
 
   int *ipiv;
   double *beta, *mbeta;
   double *JacPhi, *JacPhi_copy, *Phi;
+  int itermax = options->iparam[0];
+  double tol = options->dparam[0];
+
 
   printf("The Algorithm lcp_newton_FB is not reliable yet, report to siconos.gforge.inria.fr if you need it soon \n");
   return ;
@@ -47,20 +56,10 @@ void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , i
 
   incx = 1;
   incy = 1;
-  /*input*/
-
-  itermax = iparamLCP[0];
-  ispeak  = iparamLCP[1];
-
-  tol   = dparamLCP[0];
-
-
-
-
   /*output*/
 
-  iparamLCP[2] = 0;
-  dparamLCP[1] = 0.0;
+  options->iparam[2] = 0;
+  options->dparam[1] = 0.0;
 
   for (i = 0; i < n; i++) z[i] = 0.0;
 
@@ -96,7 +95,7 @@ void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , i
     // Mz+q --> w
     a1 = 1.;
     b1 = 1.;
-    DGEMV(LA_TRANS , n , n , a1 , vec , n , z , incx , b1 , w , incy);
+    DGEMV(LA_TRANS , n , n , a1 , M , n , z , incx , b1 , w , incy);
     for (i = 0; i < n; i++) printf("z[%i]=%e", i, z[i]);
     printf("\n");
     for (i = 0; i < n; i++) printf("w[%i]=%e", i, w[i]);
@@ -122,7 +121,7 @@ void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , i
     // M^T.beta --> mbeta
     a1 = 1.;
     b1 = 0.0;
-    DGEMV(LA_NOTRANS , n , n , a1 , vec , n , beta , incx , b1 , mbeta  , incy);
+    DGEMV(LA_NOTRANS , n , n , a1 , M , n , beta , incx , b1 , mbeta  , incy);
     for (i = 0; i < n; i++) printf("mbeta[%i]=%e", i, mbeta[i]);
     printf("\n");
 
@@ -136,7 +135,7 @@ void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , i
         normi = sqrt(beta[i] * beta[i] + mbeta[i] * mbeta[i]);
         for (j = 0; j < n; j++)
         {
-          JacPhi[j * n + i] = (mbeta[i] / normi - 1.0) * vec[j * n + i];
+          JacPhi[j * n + i] = (mbeta[i] / normi - 1.0) * M[j * n + i];
         }
         JacPhi[i * n + i] += (beta[i] / normi - 1.0);
 
@@ -147,7 +146,7 @@ void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , i
         printf("normi=%e", normi);
         for (j = 0; j < n; j++)
         {
-          JacPhi[j * n + i] = (w[i] / normi - 1.0) * vec[j * n + i];
+          JacPhi[j * n + i] = (w[i] / normi - 1.0) * M[j * n + i];
 
         }
         JacPhi[i * n + i] += (z[i] / normi - 1.0);
@@ -180,12 +179,12 @@ void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , i
 
     if (infoDGESV)
     {
-      if (ispeak > 0)
+      if (verbose > 0)
       {
         printf("Problem in DGESV\n");
       }
-      iparamLCP[2] = iter;
-      dparamLCP[1] = err;
+      options->iparam[2] = iter;
+      options->dparam[1] = err;
       *info = 2;
 
       return ;
@@ -204,7 +203,7 @@ void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , i
     // Mz+q --> w
     a1 = 1.;
     b1 = 1.;
-    DGEMV(LA_TRANS , n , n , a1 , vec , n , z , incx , b1 , w , incy);
+    DGEMV(LA_TRANS , n , n , a1 , M , n , z , incx , b1 , w , incy);
 
     for (i = 0; i < n; i++)
     {
@@ -222,10 +221,10 @@ void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , i
 
   }
 
-  iparamLCP[2] = iter;
-  dparamLCP[1] = err;
+  options->iparam[2] = iter;
+  options->dparam[1] = err;
 
-  if (ispeak > 0)
+  if (verbose > 0)
   {
     if (err > tol)
     {

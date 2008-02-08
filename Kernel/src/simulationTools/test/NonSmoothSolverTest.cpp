@@ -158,7 +158,6 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver3()
   std::vector<int> i0 = *NSS->getIntParametersPtr();
   std::vector<double> d0 = *NSS->getDoubleParametersPtr();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverA : ", NSS->isSolverSet(), true);
-  cout << "JJJJJJJJ" << NSS->getName() << endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverB : ", NSS->getName() == "NSGS", true);
   for (unsigned int i = 0; i < NB_PARAM; ++i)
   {

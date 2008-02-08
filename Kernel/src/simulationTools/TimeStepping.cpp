@@ -22,8 +22,6 @@
 #include "OneStepNSProblemXML.h"
 #include "Topology.h"
 #include "LCP.h"
-#include "FrictionContact2D.h"
-#include "FrictionContact3D.h"
 #include "Model.h"
 #include "TimeDiscretisation.h"
 #include "NonSmoothDynamicalSystem.h"
@@ -31,6 +29,7 @@
 #include "OneStepIntegrator.h"
 #include "Interaction.h"
 #include "EventsManager.h"
+#include "FrictionContact.h"
 
 using namespace std;
 
@@ -41,31 +40,30 @@ using namespace std;
 static CheckSolverFPtr checkSolverOutput = NULL;
 
 TimeStepping::TimeStepping(TimeDiscretisation * td): Simulation(td, "TimeStepping")
-{
-}
+{}
 
 // --- XML constructor ---
 TimeStepping::TimeStepping(SimulationXML* strxml, Model *newModel): Simulation(strxml, newModel, "TimeStepping")
 {
   // === One Step NS Problem ===
   // For time stepping, only one non smooth problem is built.
-  if (simulationxml->hasOneStepNSProblemXML())
+  if (simulationxml->hasOneStepNSProblemXML())  // ie if OSNSList is not empty
   {
+    SetOfOSNSPBXML OSNSList = simulationxml->getOneStepNSProblemsXML();
+    if (OSNSList.size() != 1)
+      RuntimeException::selfThrow("TimeStepping::xml constructor - Two many inputs for OSNS problems (only one problem is required).");
+
+    OneStepNSProblemXML* osnsXML = *(OSNSList.begin());
     // OneStepNSProblem - Memory allocation/construction
-    string type = simulationxml->getOneStepNSProblemXMLPtr()->getNSProblemType();
+    string type = osnsXML->getNSProblemType();
     if (type == LCP_TAG)  // LCP
     {
-      (*allNSProblems)["timeStepping"] = new LCP(simulationxml->getOneStepNSProblemXMLPtr(), this);
+      (*allNSProblems)["timeStepping"] = new LCP(osnsXML, this);
       isNSProblemAllocatedIn[(*allNSProblems)["timeStepping"] ] = true;
     }
-    else if (type == FrictionContact2D_TAG) // Friction 2D
+    else if (type == FRICTIONCONTACT_TAG)
     {
-      (*allNSProblems)["timeStepping"] = new FrictionContact2D(simulationxml->getOneStepNSProblemXMLPtr(), this);
-      isNSProblemAllocatedIn[(*allNSProblems)["timeStepping"] ] = true;
-    }
-    else if (type == FrictionContact3D_TAG) // Friction 3D
-    {
-      (*allNSProblems)["timeStepping"] = new FrictionContact3D(simulationxml->getOneStepNSProblemXMLPtr(), this);
+      (*allNSProblems)["timeStepping"] = new FrictionContact(osnsXML, this);
       isNSProblemAllocatedIn[(*allNSProblems)["timeStepping"] ] = true;
     }
     else RuntimeException::selfThrow("TimeStepping::xml constructor - wrong type of NSProblem: inexistant or not yet implemented");

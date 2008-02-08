@@ -83,7 +83,7 @@ void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, C
 }
 
 //void frictionContact3D_nsgs(int nc, double *M, double *q, double *reaction, double *velocity, double *mu, int *info, int *iparam, double *dparam)
-void frictionContact3D_nsgs(FrictionContact3D_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options)
+void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options)
 {
   /* int and double parameters */
   int* iparam = options->iparam;

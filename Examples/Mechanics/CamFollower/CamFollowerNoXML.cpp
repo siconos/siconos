@@ -53,7 +53,6 @@ int main(int argc, char* argv[])
     double position_init = 0.;//;40;      // initial position for lowest bead.
     double velocity_init = 0.;//4;      // initial velocity for lowest bead.
     double theta = 0.5;              // theta for Moreau integrator
-    string solverName = "QP" ;
     // -------------------------
     // --- Dynamical systems ---
     // -------------------------
@@ -136,7 +135,13 @@ int main(int argc, char* argv[])
     OneStepIntegrator*  OSI = new Moreau(lds, theta, S);
 
     // -- OneStepNsProblem --
-    OneStepNSProblem * osnspb = new LCP(S, "name", solverName, 101, 0.0001);
+    IntParameters iparam(5);
+    iparam[0] = 101; // Max number of iteration
+    DoubleParameters dparam(5);
+    dparam[0] = 1e-5; // Tolerance
+    string solverName = "QP" ;
+    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
+    OneStepNSProblem * osnspb = new LCP(S, mySolver);
 
     cout << "=== End of model loading === " << endl;
     // =========================== End of model definition ===========================

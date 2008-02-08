@@ -15,27 +15,29 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
-
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include "LA.h"
+#include "LCP_Solvers.h"
 
-int lcp_compute_error(int n, double *vec , double *q , double *z , int verbose, double *w, double *err);
-
-void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
+void lcp_newton_min(LinearComplementarity_Problem* problem, double *z, double *w, int *info , Solver_Options* options)
 {
+  /* matrix M/vector q of the lcp */
+  double * M = problem->M->matrix0;
+  double * q = problem->q;
 
+  /* size of the LCP */
+  int n = problem->size;
 
   int i, j, iter;
-  int n = *nn, m, mm, k;
-  int itermax, verbose;
+  int m, mm, k;
 
   int  incx, incy;
-  double err, tol, a1, b1;
+  double err, a1, b1;
   double alpha;
   int infoDGESV;
 
@@ -44,20 +46,17 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
   double *JacH, *H, *A;
 
   double *rho;
+  int itermax = options->iparam[0];
+  double tol = options->dparam[0];
 
   incx = 1;
   incy = 1;
   /*input*/
 
-  itermax = iparamLCP[0];
-  verbose  = iparamLCP[1];
-
-  tol   = dparamLCP[0];
-
   /*output*/
 
-  iparamLCP[2] = 0;
-  dparamLCP[1] = 0.0;
+  options->iparam[2] = 0;
+  options->dparam[1] = 0.0;
 
   for (i = 0; i < n; i++)
   {
@@ -67,7 +66,7 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
 
   /* rho*/
   rho = (double *)malloc(n * sizeof(double));
-  for (i = 0; i < n; i++) rho[i] = 1.0 / vec[i * n + i] ;
+  for (i = 0; i < n; i++) rho[i] = 1.0 / M[i * n + i] ;
   /* /for (i=0;i<n;i++) rho[i]=1.0/n ;
   // Sizw of the problem*/
   m = 2 * n;
@@ -79,7 +78,7 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
 
   for (j = 0; j < n; j++)
   {
-    for (i = 0; i < n; i++) JacH[j * m + i] = -vec[j * n + i]; /* / should be replaced by a tricky use of BLAS*/
+    for (i = 0; i < n; i++) JacH[j * m + i] = -M[j * n + i]; /* / should be replaced by a tricky use of BLAS*/
   }
   for (j = n; j < m; j++)
   {
@@ -100,7 +99,7 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
   /* / q --> H*/
   DCOPY(n , q , incx , H , incy);
   /* / -Mz-q --> H*/
-  DGEMV(LA_NOTRANS , n , n , a1 , vec , n , z , incx , b1 , H , incy);
+  DGEMV(LA_NOTRANS , n , n , a1 , M , n , z , incx , b1 , H , incy);
   /* / w+H --> H*/
   alpha = 1.0;
   DAXPY(n , alpha , w , incx , H , incy);     /* / c'est faux*/
@@ -153,8 +152,8 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
       {
         printf("Problem in DGESV\n");
       }
-      iparamLCP[2] = iter;
-      dparamLCP[1] = err;
+      options->iparam[2] = iter;
+      options->dparam[1] = err;
 
       free(H);
       free(A);
@@ -176,7 +175,7 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
     a1 = 1.;
     b1 = 1.;
     DCOPY(n , q , incx , H , incy);                                         /* / q --> H*/
-    DGEMV(LA_NOTRANS , n , n , a1 , vec , n , z , incx , b1 , H , incy);  /* / Mz+q --> H*/
+    DGEMV(LA_NOTRANS , n , n , a1 , M , n , z , incx , b1 , H , incy);  /* / Mz+q --> H*/
     alpha = -1.0;
     DAXPY(n , alpha , w , incx , H , incy);                                /* / w-Mz-q --> H*/
 
@@ -189,14 +188,13 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
     /* / Error Evaluation*/
 
     // err = dnrm2_( (integer *)&m , H , &incx ); // necessary ?
-    lcp_compute_error(n, vec, q, z, verbose, w, &err);
+    lcp_compute_error(n, M, q, z, verbose, w, &err);
 
 
   }
 
-  iparamLCP[2] = iter;
-  dparamLCP[1] = err;
-
+  options->iparam[2] = iter;
+  options->dparam[1] = err;
 
   if (err > tol)
   {

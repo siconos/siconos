@@ -47,9 +47,9 @@ static void (*update)(int, double*);
 void proj_updateWithSparse(int contact, double * reaction)
 {
   int in = 3 * contact, it = in + 1, is = it + 1;
-  int numberOfContact = n / 3;
+  int numberOfContacts = n / 3;
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  int diagPos = numberOfContact * contact + contact;
+  int diagPos = numberOfContacts * contact + contact;
   MLocal = MBGlobal->block[diagPos];
 
   /****  Computation of qLocal = qLocal + sum over a row of blocks in M of the products MLocal.reactionLocal,

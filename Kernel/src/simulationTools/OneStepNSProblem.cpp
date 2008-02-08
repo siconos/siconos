@@ -51,32 +51,36 @@ OneStepNSProblem::OneStepNSProblem(const string& pbType, OneStepNSProblemXML* os
   //RuntimeException::selfThrow("OneStepNSProblem::xml constructor, an id is required for the one step non smooth problem.");
 
   // === read solver related data ===
-  if (onestepnspbxml->hasSolver())
-    solver = new Solver(onestepnspbxml->getSolverXMLPtr(), nspbType);
+  if (onestepnspbxml->hasNonSmoothSolver())
+    solver = new NonSmoothSolver(onestepnspbxml->getNonSmoothSolverXMLPtr());
   else // solver = default one
-  {
-    solver = new Solver(nspbType, DEFAULT_SOLVER, DEFAULT_ITER, DEFAULT_TOL, DEFAULT_VERBOSE, DEFAULT_NORMTYPE, DEFAULT_SEARCHDIR, DEFAULT_RHO);
-    cout << " Warning, no solver defined in non-smooth problem - Default one is used" << endl;
-    solver->display();
-  }
+    solver = new NonSmoothSolver();
+
   isSolverAllocatedIn = true;
 
   // === Link to the Interactions of the Non Smooth Dynamical System (through the Simulation) ===
   // Warning: this means that all Interactions of the NSProblem are included in the OSNS !!
   OSNSInteractions = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
 
+  // Numerics general options
   numerics_options = new Numerics_Options();
-  numerics_options->verbose = 0; // turn verbose mode to off by default
 }
 
 // Constructor with given simulation and a pointer on Solver (Warning, solver is an optional argument)
-OneStepNSProblem::OneStepNSProblem(const string& pbType, Simulation * newSimu, const string& newId, Solver* newSolver):
+OneStepNSProblem::OneStepNSProblem(const string& pbType, Simulation * newSimu, const string& newId, NonSmoothSolver* newSolver):
   nspbType(pbType), id(newId), sizeOutput(0), solver(newSolver), isSolverAllocatedIn(false),  simulation(newSimu), onestepnspbxml(NULL),
   OSNSInteractions(NULL), levelMin(0), levelMax(0), maxSize(0), CPUtime(0), nbIter(0), numerics_options(NULL)
 {
   // === Checks simulation ===
   if (newSimu == NULL)
-    RuntimeException::selfThrow("OneStepNSProblem::xml constructor(..., simulation), simulation == NULL");
+    RuntimeException::selfThrow("OneStepNSProblem:: constructor(..., newSolver, ...), newSolver == NULL");
+  if (newSolver == NULL)
+  {
+    // If the user does not provide any Solver, an empty one is built.
+    // Data will be read from XXX.opt file in Numerics.
+    solver = new NonSmoothSolver();
+    isSolverAllocatedIn = true;
+  }
 
   // === Link to the Interactions of the Non Smooth Dynamical System (through the Simulation) ===
   // Warning: this means that all Interactions of the NSProblem are included in the OSNS !!
@@ -87,8 +91,9 @@ OneStepNSProblem::OneStepNSProblem(const string& pbType, Simulation * newSimu, c
   if (!(simulation->getOneStepNSProblems())->empty() && id == DEFAULT_OSNS_NAME) // An id is required if there is more than one OneStepNSProblem in the simulation
     RuntimeException::selfThrow("OneStepNSProblem::constructor(...). Since the simulation has several one step non smooth problem, an id is required for each of them.");
   simulation->addOneStepNSProblemPtr(this);
+
+  // Numerics general options
   numerics_options = new Numerics_Options();
-  numerics_options->verbose = 0; // turn verbose mode to off by default
 }
 
 OneStepNSProblem::~OneStepNSProblem()
@@ -123,15 +128,16 @@ SiconosMatrix* OneStepNSProblem::getBlockPtr(UnitaryRelation* UR1, UnitaryRelati
 
 void OneStepNSProblem::setBlocks(const MapOfMapOfUnitaryMatrices& newMap)
 {
-  clearBlocks();
-  blocks = newMap;
-  UnitaryMatrixRowIterator itRow;
-  UnitaryMatrixColumnIterator itCol;
-  for (itRow = blocks.begin(); itRow != blocks.end() ; ++itRow)
-  {
-    for (itCol = (itRow->second).begin(); itCol != (itRow->second).end(); ++itCol)
-      isBlockAllocatedIn[itRow->first][itCol->first] = false;
-  }
+  //   clearBlocks();
+  //   blocks = newMap;
+  //   UnitaryMatrixRowIterator itRow;
+  //   UnitaryMatrixColumnIterator itCol;
+  //   for(itRow = blocks.begin(); itRow!= blocks.end() ; ++itRow)
+  //     {
+  //       for(itCol = (itRow->second).begin(); itCol!=(itRow->second).end(); ++itCol)
+  //  isBlockAllocatedIn[itRow->first][itCol->first] = false;
+  //     }
+  RuntimeException::selfThrow("OneStepNSProblem::setBlocks - Not implemented: forbidden operation.");
 }
 
 void OneStepNSProblem::clearBlocks()
@@ -150,55 +156,11 @@ void OneStepNSProblem::clearBlocks()
   isBlockAllocatedIn.clear();
 }
 
-void OneStepNSProblem::setSolverPtr(Solver * newSolv)
+void OneStepNSProblem::setNonSmoothSolverPtr(NonSmoothSolver * newSolv)
 {
   if (isSolverAllocatedIn) delete solver;
   solver = newSolv;
   isSolverAllocatedIn = false;
-}
-
-void OneStepNSProblem::computeUnitaryRelationsPositions()
-{
-  // === Description ===
-  // For a block (diagonal or extra diagonal) corresponding to a Unitary Relation, we need to know the position of its first element
-  // in the full-matrix M of the LCP. (see assembleM, variable pos and col). This position depends on the previous blocks sizes.
-  //
-  // positions are saved in a map<UnitaryRelation*, unsigned int>, named blocksPositions.
-  //
-  // The map of blocksIndices (position of a block in the full matrix in number of blocks) is filled simultaneously to match
-  // the same order as blocksPositions.
-  //
-  // Move this function in topology? Or simulation?
-
-  // Get index sets from Topology
-  UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
-  UnitaryRelationsIterator it;
-  unsigned int pos = 0;
-  unsigned int blIndex = 0;
-
-  // For each Unitary Relation in indexSets[levelMin], the position is given by the sum of the dimensions of non smooth laws of all previous Unitary Relations.
-  for (it = indexSet->begin(); it != indexSet->end(); ++it)
-  {
-    blocksPositions[*it] = pos;
-    blocksIndices[*it] = blIndex;
-    pos += (*it)->getNonSmoothLawSize();
-    blIndex++;
-  }
-}
-
-void OneStepNSProblem::computeSizeOutput()
-{
-  // Get required index sets from Simulation
-  UnitaryRelationsSet * indexSet;
-  sizeOutput = 0;
-  // For all UnitaryRelations in indexSets[levelMin...levelMax], we sum non smooth laws dimensions
-  UnitaryRelationsIterator it;
-  for (unsigned int i = levelMin; i <= levelMax; ++i)
-  {
-    indexSet = simulation->getIndexSetPtr(i);
-    for (it = indexSet->begin(); it != indexSet->end(); ++it)
-      sizeOutput += (*it)->getNonSmoothLawSize();
-  }
 }
 
 void OneStepNSProblem::updateBlocks()
@@ -244,9 +206,6 @@ void OneStepNSProblem::updateBlocks()
       }
     }
   }
-
-  computeUnitaryRelationsPositions();
-
 }
 
 void OneStepNSProblem::computeAllBlocks()
@@ -270,16 +229,15 @@ void OneStepNSProblem::computeBlock(UnitaryRelation*, UnitaryRelation*)
 
 void OneStepNSProblem::initialize()
 {
+  // Numerics general options
+  numerics_options->verboseMode = 0; // turn verbose mode to off by default
   // Checks that the set of Interactions is not empty -
   // Empty set is not forbidden, then we just display a warning message.
   if (OSNSInteractions->isEmpty())
     //RuntimeException::selfThrow("OneStepNSProblem::initialize - The set of Interactions of this problem is empty.");
     cout << "Warning, OneStepNSProblem::initialize, the set of Interactions of this problem is empty." << endl;
   else
-  {
     updateBlocks();
-    computeSizeOutput();
-  }
 
   Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
   // The maximum size of the problem (for example, the dim. of M in LCP or Friction problems).
@@ -299,18 +257,19 @@ void OneStepNSProblem::saveNSProblemToXML()
 {
   // OUT OF DATE - TO BE REVIEWED
 
-  if (onestepnspbxml != NULL)
-  {
-    onestepnspbxml->setDimNSProblem(sizeOutput);
-    vector<int> v;
-    InteractionsIterator it;
-    for (it = OSNSInteractions->begin(); it != OSNSInteractions->end(); ++it)
-      v.push_back((*it)->getNumber());
-    //onestepnspbxml->setInteractionConcerned( v, allInteractionConcerned() );
+  //   if(onestepnspbxml != NULL)
+  //     {
+  //       onestepnspbxml->setDimNSProblem(sizeOutput);
+  //       vector<int> v;
+  //       InteractionsIterator it;
+  //       for(it=OSNSInteractions->begin(); it!=OSNSInteractions->end();++it)
+  //  v.push_back((*it)->getNumber());
+  //       //onestepnspbxml->setInteractionConcerned( v, allInteractionConcerned() );
 
-    //onestepnspbxml->setSolver(solvingFormalisation, methodName, normType, tolerance, maxIter, searchDirection );
-  }
-  else RuntimeException::selfThrow("OneStepNSProblem::saveNSProblemToXML - OneStepNSProblemXML object not exists");
+  //       //onestepnspbxml->setSolver(solvingFormalisation, methodName, normType, tolerance, maxIter, searchDirection );
+  //     }
+  //   else RuntimeException::selfThrow("OneStepNSProblem::saveNSProblemToXML - OneStepNSProblemXML object not exists");
+  RuntimeException::selfThrow("OneStepNSProblem::saveNSProblemToXML - Not yet implemented");
 }
 
 void OneStepNSProblem::getOSIMaps(UnitaryRelation* UR, MapOfMatrices& centralBlocks, MapOfDouble& Theta)

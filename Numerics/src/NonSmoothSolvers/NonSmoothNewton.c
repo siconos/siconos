@@ -71,7 +71,10 @@ void linesearch_Armijo(int n, double *z, double* dir, double psi_k, double desce
 int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr* jacobianPhi, int* iparam, double* dparam)
 {
   if (phi == NULL || jacobianPhi == NULL)
-    printf("NonSmoothNewton error: phi or its jacobian function = NULL pointer.\n");
+  {
+    fprintf(stderr, "NonSmoothNewton error: phi or its jacobian function = NULL pointer.\n");
+    exit(EXIT_FAILURE);
+  }
 
   int itermax = iparam[0]; // maximum number of iterations allowed
   int niter = 0; // current iteration number
@@ -99,7 +102,6 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
     fprintf(stderr, "NonSmoothNewton, memory allocation failed.\n");
     exit(EXIT_FAILURE);
   }
-
 
   /** The algorithm is alg 4.1 of the paper of Kanzow and Kleinmichel, "A new class of semismooth Newton-type methods
       for nonlinear complementarity problems", in Computational Optimization and Applications, 11, 227-251 (1998).

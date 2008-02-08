@@ -131,7 +131,8 @@ int dfc_2D_driver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
     dparamLCP[0] = pt->dfc_2D.tol;
     dparamLCP[1] = 1.0;
 
-    lcp_lexicolemke(&dim_q , MM , q , z , w , &info , iparamLCP , dparamLCP);
+    /* \WARNING TMP Comment */
+    //    lcp_lexicolemke( &dim_q , MM , q , z , w , &info , iparamLCP , dparamLCP );
 
     t2 = clock();
 
@@ -183,7 +184,8 @@ int dfc_2D_driver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
     dparamLCP[0] = pt->dfc_2D.tol;
     dparamLCP[1] = 1.0;
 
-    lcp_pgs(&dim_q , MM , q , z , w , &info , iparamLCP , dparamLCP);
+    /* \WARNING TMP Comment */
+    /*     lcp_pgs( &dim_q , MM , q , z , w , &info , iparamLCP , dparamLCP ); */
 
     it_end = iparamLCP[2];
     res    = dparamLCP[2];
@@ -240,8 +242,8 @@ int dfc_2D_driver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
     dparamLCP[0] = pt->dfc_2D.tol;
     dparamLCP[1] = 1.0;
 
-
-    lcp_cpg(&dim_q , MM , q , z , w , &info , iparamLCP , dparamLCP);
+    /* \WARNING TMP COMMENT */
+    //    lcp_cpg( &dim_q , MM , q , z , w , &info , iparamLCP , dparamLCP );
 
     it_end = iparamLCP[2];
     res    = dparamLCP[2];

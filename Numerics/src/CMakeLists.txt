@@ -17,6 +17,7 @@ SET(SiconosNumerics_VERSION "${VERSION}")
 # Project directories 
 #
 SET(SiconosNumerics_DIRS
+  .
   netlib/odepack
   netlib/dftemplates
   NonSmoothSolvers

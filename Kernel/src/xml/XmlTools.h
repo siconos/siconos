@@ -44,6 +44,6 @@ Note that not all files from the current location are listed below, since some o
 #include "TimeDiscretisationXML.h"
 #include "NonSmoothDynamicalSystemXML.h"
 #include "SimulationXML.h"
-#include "SolverXML.h"
+#include "NonSmoothSolverXML.h"
 #include "InteractionXML.h"
 

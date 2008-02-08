@@ -15,10 +15,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 /*! \file
-*/
+ */
 
 /** XML management for OneStepIntegrator
  *
@@ -56,65 +56,65 @@ public:
   OneStepIntegratorXML();
 
   /** Build a OneStepIntegratorXML object from the DOM tree
-  *   \param OneStepIntegratorNode : the OneStepIntegrator DOM tree
-  */
-  OneStepIntegratorXML(xmlNodePtr OneStepIntegratorNode);
+   *   \param OneStepIntegratorNode : the OneStepIntegrator DOM tree
+   */
+  OneStepIntegratorXML(xmlNodePtr);
 
   /** destructor
-  */
+   */
   virtual ~OneStepIntegratorXML() {};
 
   /** get the root node of the OneStepIntegratorXML
-  *   \return xmlNodePtr
-  */
+   *   \return xmlNodePtr
+   */
   inline xmlNodePtr getRootNode() const
   {
     return rootNode;
   }
 
   /** get the DSConcerned node of the OneStepIntegratorXML
-  *   \return xmlNodePtr
-  */
+   *   \return xmlNodePtr
+   */
   inline xmlNodePtr getDSConcernedNode() const
   {
     return DSConcernedNode;
   }
 
   /** get the interactionsConcerned node of the OneStepIntegratorXML
-  *   \return xmlNodePtr
-  */
+   *   \return xmlNodePtr
+   */
   inline xmlNodePtr getInteractionsConcernedNode() const
   {
     return interactionsConcernedNode;
   }
 
   /** Return the type of the OneStepIntegratorXML
-  *   \return a string
-  */
+   *   \return a string
+   */
   inline const std::string getType() const
   {
     return (char*)rootNode->name;
   }
 
   /** true if tag DSConcerned is present
-  *  \return a bool
-  */
+   *  \return a bool
+   */
   inline bool hasDSList()
   {
     return !(DSConcernedNode == NULL);
   }
 
   /** true if tag interactionsConcernedNode is present
-  *  \return a bool
-  */
+   *  \return a bool
+   */
   inline bool hasInteractionsList()
   {
     return !(interactionsConcernedNode == NULL);
   }
 
   /** attribute of the DSConcerned tag - True if all DS of the NSDS are concerned
-  *  \return a bool
-  */
+   *  \return a bool
+   */
   inline bool hasAllDS() const
   {
     if (SiconosDOMTreeTools::hasAttributeValue(DSConcernedNode, ALL_ATTRIBUTE))
@@ -123,8 +123,8 @@ public:
   }
 
   /** attribute of the interactionsConcerned tag - True if all the interactions of the nsds are concerned
-  *  \return a bool
-  */
+   *  \return a bool
+   */
   inline bool hasAllInteractions() const
   {
     if (SiconosDOMTreeTools::hasAttributeValue(interactionsConcernedNode, ALL_ATTRIBUTE))
@@ -133,13 +133,13 @@ public:
   }
 
   /** return a vector<int> of ds numbers related to the OSI
-  *  \param in-out vector<int>
-  */
+   *  \param in-out vector<int>
+   */
   void getDSNumbers(std::vector<int>&);
 
   /** return a vector<int> of interactions numbers related to the OSI
-  *  \param in-out vector<int>
-  */
+   *  \param in-out vector<int>
+   */
   void getInteractionsNumbers(std::vector<int>&);
 };
 

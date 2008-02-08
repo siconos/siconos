@@ -26,37 +26,39 @@
 #include "LCP_Solvers.h"
 
 #define EPSDIAG 1e-16
-
-void lcp_rpgs(int *nn , double *M , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
+void lcp_rpgs(LinearComplementarity_Problem* problem, double *z, double *w, int *info , Solver_Options* options)
 {
+  /* matrix M/vector q of the lcp */
+  double * M = problem->M->matrix0;
 
-  int n, incx, incy;
+  double * q = problem->q;
+
+  /* size of the LCP */
+  int n = problem->size;
+
+  int incx, incy;
   int i, iter;
-  int itermax, ispeak;
   double qs, err, den, zi;
-  double tol, omega, rho;
   double *diag;
   double Mii, ziprev;
 
   /*  double *buffer_errors;
     FILE *ficbuffer_errors;*/
-
-  n = *nn;
   /* Recup input */
 
-  itermax = iparamLCP[0];
-  ispeak  = iparamLCP[1];
+  int itermax = options->iparam[0];
 
   /*  buffer_errors = malloc( itermax*sizeof( double ) );*/
 
-  tol   = dparamLCP[0];
-  rho   = dparamLCP[1];
-  omega = dparamLCP[2];
+  double tol = options->dparam[0];
+  double rho = options->dparam[1];
+  // double omega = options->dparam[2]; // Not yet used
+
 
   /* Initialize output */
 
-  iparamLCP[2] = 0;
-  dparamLCP[3] = 0.0;
+  options->iparam[2] = 0;
+  options->dparam[3] = 0.0;
 
   /* Allocation */
 
@@ -68,7 +70,7 @@ void lcp_rpgs(int *nn , double *M , double *q , double *z , double *w , int *inf
   /*  qs = 0.;*/
   incx = 1;
   qs = DNRM2(n , q , incx);
-  if (ispeak > 0) printf("\n ||q||= %g \n", qs);
+  if (verbose > 0) printf("\n ||q||= %g \n", qs);
   den = 1.0 / qs;
 
   /* Initialization of z & w */
@@ -94,7 +96,7 @@ void lcp_rpgs(int *nn , double *M , double *q , double *z , double *w , int *inf
     /* if(abs(Mii+rho)<EPSDIAG){   */ /* Version of Pascal */
     if (Mii < -EPSDIAG)
     {
-      if (ispeak > 0)
+      if (verbose > 0)
       {
         printf(" RPGS : Warning negative diagonal term \n");
         printf(" The local problem cannot be solved \n");
@@ -165,12 +167,12 @@ void lcp_rpgs(int *nn , double *M , double *q , double *z , double *w , int *inf
     /*     err = sqrt(num)*den;*/
 
     /* **** Criterium convergence compliant with filter_result_LCP **** */
-    lcp_compute_error(n, M, q, z, ispeak, w, &err);
+    lcp_compute_error(n, M, q, z, verbose, w, &err);
 
 
     /*    buffer_errors[iter-1] = err;*/
 
-    if (ispeak == 2)
+    if (verbose == 2)
     {
       printf(" # i%d -- %g : ", iter, err);
       for (i = 0 ; i < n ; ++i) printf(" %g", z[i]);
@@ -182,10 +184,10 @@ void lcp_rpgs(int *nn , double *M , double *q , double *z , double *w , int *inf
 
   }
 
-  iparamLCP[2] = iter;
-  dparamLCP[3] = err;
+  options->iparam[2] = iter;
+  options->dparam[3] = err;
 
-  if (ispeak > 0)
+  if (verbose > 0)
   {
     if (err > tol)
     {

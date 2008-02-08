@@ -148,7 +148,13 @@ int main(int argc, char* argv[])
     OneStepIntegrator* vOSI = new Moreau(dynamicalSystem, theta, s);
 
     // -- OneStepNsProblem --
-    OneStepNSProblem* osnspb = new FrictionContact2D(s, "fc2d", "NLGS", 1000, 0.00001);
+    IntParameters iparam(5);
+    iparam[0] = 1001; // Max number of iteration
+    DoubleParameters dparam(5);
+    dparam[0] = 0.00001; // Tolerance
+    string solverName = "PGS" ;
+    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
+    OneStepNSProblem * osnspb = new FrictionContact(s, 2, mySolver, "fc2d");
 
     // OneStepNSProblem* osnspb = new FrictionContact2D(s, "Latin", 1000, 0.00001, "max", 0.6);
     // OneStepNSProblem* osnspb = new FrictionContact2D(s, "CPG", 10000, 0.00001, "max", 0.6);

@@ -25,6 +25,9 @@ void readSolverOptions(int driverType, Solver_Options* options)
 {
   /* To each problem, corresponds a XXX_parameters.opt file where default parameters can be read, XXX being the problem name (LCP, FrictionContact3D ...) */
 
+  if (verbose > 0)
+    printf("\n ========== Numerics Non Smooth Solver - Read default parameters for the solver.\n ==========");
+
   // Checks if NUMERICSSPATH is set.
   if (getenv("SICONOSPATH") == NULL)
   {
@@ -51,6 +54,8 @@ void readSolverOptions(int driverType, Solver_Options* options)
   case 3:
     strcat(name, "FrictionContact3D_parameters.opt");
     ficin = fopen(name, "r");
+    if (verbose > 0)
+      printf("The default-parameters file is: %s\n", name);
     if (!ficin)
     {
       printf("Numerics, readSolverOptions error. Can not open file %60s", name);
@@ -85,4 +90,24 @@ void readSolverOptions(int driverType, Solver_Options* options)
     fprintf(stderr, "Numerics, readSolverOptions error, unknown problem type.\n");
     exit(EXIT_FAILURE);
   }
+}
+
+void printSolverOptions(Solver_Options* options)
+{
+  printf("\n ========== Numerics Non Smooth Solver parameters: \n");
+  if (options->isSet == 0)
+    printf("The solver parameters have not been set.\n");
+  else
+  {
+    printf("The solver is named %s \n", options->solverName);
+    printf(" - int parameters (see %s documentation to known what is each parameter): ", options->solverName);
+    for (int i = 0; i < options->nbParam; ++i)
+      printf("%d\t", options->iparam[i]);
+    printf("\n");
+    printf(" - double parameters (see %s documentation to known what is each parameter): ", options->solverName);
+    for (int i = 0; i < options->nbParam; ++i)
+      printf("%lf\t", options->dparam[i]);
+    printf("\n");
+  }
+  printf("\n ================================================== \n");
 }

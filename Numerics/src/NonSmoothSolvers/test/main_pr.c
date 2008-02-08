@@ -88,7 +88,7 @@ int test_mmc(void)
   double  qi, Mij, diff1, diff2, num, den, alpha, beta, max11, max22;
   double  comp11, comp22, comp111, comp222, comp1111, comp2222;
 
-  char    val[50], vall[50], NT = 'T';
+  char    val[50], vall[50];
   method  meth_pr1, meth_pr2;
 
 
@@ -275,8 +275,8 @@ int test_mmc(void)
   printf("\n**** LATIN TEST ***\n \n");
 #endif
 
-  info2 = pr_driver(vec, q, &n, &meth_pr2, z2, w2);
-
+  //  info2 = pr_driver (vec,q,&n,&meth_pr2,z2,w2);
+  info2 = 0;
 
   if (info1 >= info2)
   {
@@ -329,24 +329,24 @@ int test_mmc(void)
 
   /*      zt in interval [-d,d]       */
 
-  abs_part(zt1, abso1, &n);
+  abs_part(zt1, abso1, n);
 
-  abs_part(d, abso2, &n);
+  abs_part(d, abso2, n);
 
   alpha = -1.0;
   DAXPY(n , alpha , abso1 , incx , abso2 , incy);
 
-  min_part(abso2, &mini, &n);
+  min_part(abso2, &mini, n);
 
   mini = - mini;
 
   dim = 1;
-  pos_part(&mini, &mini, &dim) ;
+  pos_part(&mini, &mini, dim) ;
 
 
-  abs_part(zt1, abso2, &n);
+  abs_part(zt1, abso2, n);
 
-  max_part(abso2 , &max11 , &n);
+  max_part(abso2 , &max11 , n);
 
   max11 = mini / max11;
 
@@ -355,27 +355,27 @@ int test_mmc(void)
 
 
 
-  abs_part(zt1, abso1, &n);
+  abs_part(zt1, abso1, n);
 
-  abs_part(d, abso2, &n);
+  abs_part(d, abso2, n);
 
   alpha = -1.0;
   DAXPY(n , alpha , abso1 , incx , abso2 , incy);
 
-  abs_part(abso2, abso1, &n);
+  abs_part(abso2, abso1, n);
 
-  abs_part(w1, abso2, &n);
+  abs_part(w1, abso2, n);
 
   comp11 = DDOT(n , abso1 , incx , abso2 , incy);
 
 
-  abs_part(zt1, abso2, &n);
+  abs_part(zt1, abso2, n);
 
-  max_part(abso2 , &max2 , &n);
+  max_part(abso2 , &max2 , n);
 
-  abs_part(w1, abso2, &n);
+  abs_part(w1, abso2, n);
 
-  max_part(abso2 , &max1 , &n);
+  max_part(abso2 , &max1 , n);
 
 
   if (max1 > 1e-10)
@@ -387,11 +387,11 @@ int test_mmc(void)
   else
   {
 
-    abs_part(w1, abso2, &n);
-    max_part(abso2, &maxi_1, &n);
+    abs_part(w1, abso2, n);
+    max_part(abso2, &maxi_1, n);
 
-    abs_part(q, abso1, &n);
-    max_part(abso1, &maxi_2, &n);
+    abs_part(q, abso1, n);
+    max_part(abso1, &maxi_2, n);
 
     if (maxi_1 > maxi_2)
       max1 = maxi_1;
@@ -412,19 +412,19 @@ int test_mmc(void)
   alpha = 1.0;
   DAXPY(n , alpha , d , incx , abso1 , incy);
 
-  abs_part(abso1, abso2, &n);
+  abs_part(abso1, abso2, n);
 
-  pos_part(w1, abso1, &n) ;
+  pos_part(w1, abso1, n) ;
 
   comp111 = DDOT(n , abso1 , incx , abso2 , incy);
 
-  abs_part(zt1, abso2, &n);
+  abs_part(zt1, abso2, n);
 
-  max_part(abso2 , &max2 , &n);
+  max_part(abso2 , &max2 , n);
 
-  abs_part(w1, abso2, &n);
+  abs_part(w1, abso2, n);
 
-  max_part(abso2 , &max1 , &n);
+  max_part(abso2 , &max1 , n);
 
 
 
@@ -437,11 +437,11 @@ int test_mmc(void)
   else
   {
 
-    abs_part(w1, abso2, &n);
-    max_part(abso2, &maxi_1, &n);
+    abs_part(w1, abso2, n);
+    max_part(abso2, &maxi_1, n);
 
-    abs_part(q, abso1, &n);
-    max_part(abso1, &maxi_2, &n);
+    abs_part(q, abso1, n);
+    max_part(abso1, &maxi_2, n);
 
     if (maxi_1 > maxi_2)
       max1 = maxi_1;
@@ -465,24 +465,24 @@ int test_mmc(void)
   alpha = -1.0;
   DAXPY(n , alpha , d , incx , abso1 , incy);
 
-  abs_part(abso1, abso2, &n);
+  abs_part(abso1, abso2, n);
 
   DCOPY(n, w1, incx, abso1, incy);
 
   alpha = -1.;
   DSCAL(n , alpha , abso1 , incx);
 
-  pos_part(abso1, abso1, &n) ;
+  pos_part(abso1, abso1, n) ;
 
   comp1111 = DDOT(n , abso1 , incx , abso2 , incy);
 
-  abs_part(zt1, abso2, &n);
+  abs_part(zt1, abso2, n);
 
-  max_part(abso2 , &max2 , &n);
+  max_part(abso2 , &max2 , n);
 
-  abs_part(w1, abso2, &n);
+  abs_part(w1, abso2, n);
 
-  max_part(abso2 , &max1 , &n);
+  max_part(abso2 , &max1 , n);
 
 
 
@@ -495,11 +495,11 @@ int test_mmc(void)
   else
   {
 
-    abs_part(w1, abso2, &n);
-    max_part(abso2, &maxi_1, &n);
+    abs_part(w1, abso2, n);
+    max_part(abso2, &maxi_1, n);
 
-    abs_part(q, abso1, &n);
-    max_part(abso1, &maxi_2, &n);
+    abs_part(q, abso1, n);
+    max_part(abso1, &maxi_2, n);
 
     if (maxi_1 > maxi_2)
       max1 = maxi_1;
@@ -535,24 +535,24 @@ int test_mmc(void)
   /*      zt in interval [-d,d]       */
 
 
-  abs_part(zt2, abso1, &n);
+  abs_part(zt2, abso1, n);
 
-  abs_part(d, abso2, &n);
+  abs_part(d, abso2, n);
 
   alpha = -1.0;
   DAXPY(n , alpha , abso1 , incx , abso2 , incy);
 
-  min_part(abso2, &mini, &n);
+  min_part(abso2, &mini, n);
 
   mini = - mini;
 
   dim = 1;
-  pos_part(&mini, &mini, &dim) ;
+  pos_part(&mini, &mini, dim) ;
 
 
-  abs_part(zt2, abso2, &n);
+  abs_part(zt2, abso2, n);
 
-  max_part(abso2 , &max22 , &n);
+  max_part(abso2 , &max22 , n);
 
   max22 = mini / max22;
 
@@ -561,27 +561,27 @@ int test_mmc(void)
 
 
 
-  abs_part(zt2, abso1, &n);
+  abs_part(zt2, abso1, n);
 
-  abs_part(d, abso2, &n);
+  abs_part(d, abso2, n);
 
   alpha = -1.0;
   DAXPY(n , alpha , abso1 , incx , abso2 , incy);
 
-  abs_part(abso2, abso1, &n);
+  abs_part(abso2, abso1, n);
 
-  abs_part(w2, abso2, &n);
+  abs_part(w2, abso2, n);
 
   comp22 = DDOT(n , abso1 , incx , abso2 , incy);
 
 
-  abs_part(zt2, abso2, &n);
+  abs_part(zt2, abso2, n);
 
-  max_part(abso2 , &max2 , &n);
+  max_part(abso2 , &max2 , n);
 
-  abs_part(w2, abso2, &n);
+  abs_part(w2, abso2, n);
 
-  max_part(abso2 , &max1 , &n);
+  max_part(abso2 , &max1 , n);
 
 
 
@@ -594,11 +594,11 @@ int test_mmc(void)
   else
   {
 
-    abs_part(w2, abso2, &n);
-    max_part(abso2, &maxi_1, &n);
+    abs_part(w2, abso2, n);
+    max_part(abso2, &maxi_1, n);
 
-    abs_part(q, abso1, &n);
-    max_part(abso1, &maxi_2, &n);
+    abs_part(q, abso1, n);
+    max_part(abso1, &maxi_2, n);
 
     if (maxi_1 > maxi_2)
       max1 = maxi_1;
@@ -620,19 +620,19 @@ int test_mmc(void)
   alpha = 1.0;
   DAXPY(n , alpha , d , incx , abso1 , incy);
 
-  abs_part(abso1, abso2, &n);
+  abs_part(abso1, abso2, n);
 
-  pos_part(w2, abso1, &n) ;
+  pos_part(w2, abso1, n) ;
 
   comp222 = DDOT(n , abso1 , incx , abso2 , incy);
 
-  abs_part(zt2, abso2, &n);
+  abs_part(zt2, abso2, n);
 
-  max_part(abso2 , &max2 , &n);
+  max_part(abso2 , &max2 , n);
 
-  abs_part(w2, abso2, &n);
+  abs_part(w2, abso2, n);
 
-  max_part(abso2 , &max1 , &n);
+  max_part(abso2 , &max1 , n);
 
 
 
@@ -645,11 +645,11 @@ int test_mmc(void)
   else
   {
 
-    abs_part(w2, abso2, &n);
-    max_part(abso2, &maxi_1, &n);
+    abs_part(w2, abso2, n);
+    max_part(abso2, &maxi_1, n);
 
-    abs_part(q, abso1, &n);
-    max_part(abso1, &maxi_2, &n);
+    abs_part(q, abso1, n);
+    max_part(abso1, &maxi_2, n);
 
     if (maxi_1 > maxi_2)
       max1 = maxi_1;
@@ -668,24 +668,24 @@ int test_mmc(void)
   alpha = -1.0;
   DAXPY(n , alpha , d , incx , abso1 , incy);
 
-  abs_part(abso1, abso2, &n);
+  abs_part(abso1, abso2, n);
 
   DCOPY(n, w2, incx, abso1, incy);
 
   alpha = -1.;
   DSCAL(n , alpha , abso1 , incx);
 
-  pos_part(abso1, abso1, &n) ;
+  pos_part(abso1, abso1, n) ;
 
   comp2222 = DDOT(n , abso1 , incx , abso2 , incy);
 
-  abs_part(zt2, abso2, &n);
+  abs_part(zt2, abso2, n);
 
-  max_part(abso2 , &max2 , &n);
+  max_part(abso2 , &max2 , n);
 
-  abs_part(w2, abso2, &n);
+  abs_part(w2, abso2, n);
 
-  max_part(abso2 , &max1 , &n);
+  max_part(abso2 , &max1 , n);
 
 
 
@@ -698,11 +698,11 @@ int test_mmc(void)
   else
   {
 
-    abs_part(w2, abso2, &n);
-    max_part(abso2, &maxi_1, &n);
+    abs_part(w2, abso2, n);
+    max_part(abso2, &maxi_1, n);
 
-    abs_part(q, abso1, &n);
-    max_part(abso1, &maxi_2, &n);
+    abs_part(q, abso1, n);
+    max_part(abso1, &maxi_2, n);
 
     if (maxi_1 > maxi_2)
       max1 = maxi_1;

@@ -104,10 +104,13 @@
 			</Moreau>
 			</OneStepIntegrator_Definition>
 		<!-- One Step NS Problem of th Simulation-->
-		<OneStepNSProblem>
-		 	<LCP>
-		 	<Solver type="Lemke" maxIter="1001" tolerance="0.000001"/> 
-			 </LCP>
-		 </OneStepNSProblem>
+		<OneStepNSProblems_List>
+		 	<LCP StorageType="0" Id="myLCP">
+			   <NonSmoothSolver Name="Lemke">
+			      <iparam  vectorSize='5'>1000 0 0 0 0</iparam>
+			      <dparam  vectorSize='5'>1e-6 0 0 0 0</dparam>
+			   </NonSmoothSolver>
+	                 </LCP>
+		 </OneStepNSProblems_List>
 	</Simulation>	
 </SiconosModel>

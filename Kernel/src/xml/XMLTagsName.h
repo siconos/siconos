@@ -87,7 +87,7 @@ const std::string SIMULATION_TAG = "Simulation";
 // Simulation
 const std::string ONESTEPINTEGRATOR_DEFINITION_TAG = "OneStepIntegrator_Definition";
 const std::string ONESTEPINTEGRATOR_TAG = "OneStepIntegrator";
-const std::string ONESTEPNSPROBLEM_TAG = "OneStepNSProblem";
+const std::string ONESTEPNSPROBLEM_TAG = "OneStepNSProblems_List";
 
 const std::string TIMEDISCRETISATION_TAG = "TimeDiscretisation";
 const std::string TIMESTEPPING_TAG = "TimeStepping";
@@ -100,8 +100,7 @@ const std::string ADAMS_TAG = "Adams";
 
 /*Types of OneStepNSProblem defined*/
 const std::string LCP_TAG = "LCP";
-const std::string FrictionContact2D_TAG = "FrictionContact2D";
-const std::string FrictionContact3D_TAG = "FrictionContact3D";
+const std::string FRICTIONCONTACT_TAG = "FrictionContact";
 const std::string QP_TAG = "QP";
 const std::string RELAY_TAG = "Relay";
 

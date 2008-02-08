@@ -15,37 +15,38 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "LCP_Solvers.h"
+#include "QP_Solvers.h"
 
-void ql0001_(int *m , int *me , int *mmax , int *n , int *nmax , int *mnn ,
-             double *c , double *d , double *a , double *b , double *xl , double *xu ,
-             double *x , double *u , int *iout , int *ifail , int *iprint , double *war ,
-             int *lwar , int *iwar , int *liwar , double *eps);
-
-void lcp_nsqp(int *nn , double *vec , double *qq , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
+void lcp_nsqp(LinearComplementarity_Problem* problem, double *z, double *w, int *info , Solver_Options* options)
 {
-
+  /* matrix M/vector q of the lcp */
+  double * M = problem->M->matrix0;
+  double * q = problem->q;
+  /* size of the LCP */
+  int n = problem->size;
 
   int i, j;
 
-  int n = *nn, nmax;
+  int nmax;
   int m, me, mmax, mnn;
 
   double *Q, *A;
   double *p, *b, *xl, *xu;
 
-  double *lambda, tol;
+  double *lambda;
 
   int lwar, liwar, iout, un;
-  int *iwar;
+  integer *iwar;
   double *war;
 
-  tol   = dparamLCP[0];
+  double tol = options->dparam[0];
 
   /* / m :        total number of constraints.*/
   m = n;
@@ -72,26 +73,26 @@ void lcp_nsqp(int *nn , double *vec , double *qq , double *z , double *w , int *
   Q = (double *)malloc(nmax * nmax * sizeof(double));
   for (i = 0; i < n; i++)
   {
-    for (j = 0; j < n; j++) Q[j * n + i] = (vec[j * n + i] + vec[i * n + j]);
+    for (j = 0; j < n; j++) Q[j * n + i] = (M[j * n + i] + M[i * n + j]);
   }
   /* /for (i=0;i<n*n;i++) printf("Q[%i] = %g\n",i,Q[i]);*/
 
   p = (double *)malloc(nmax * sizeof(double));
   for (i = 0; i < n; i++)
-    p[i] = qq[i] ;
+    p[i] = q[i] ;
   /* /for (i=0;i<n;i++) printf("p[%i] = %g\n",i,p[i]);*/
 
   /* / Creation of the data matrix of the linear constraints, A and  the constant data of the linear constraints b*/
   A = (double *)malloc(mmax * nmax * sizeof(double));
   for (i = 0; i < m; i++)
   {
-    for (j = 0; j < n; j++) A[j * mmax + i] = vec[j * n + i];
+    for (j = 0; j < n; j++) A[j * mmax + i] = M[j * n + i];
   }
 
   /* /for (i=0;i<mmax*mmax;i++) printf("A[%i] = %g\n",i,A[i]);*/
 
   b = (double *)malloc(mmax * sizeof(double));
-  for (i = 0; i < m; i++) b[i] = qq[i] ;
+  for (i = 0; i < m; i++) b[i] = q[i] ;
 
   /* /for (i=0;i<m;i++) printf("b[%i] = %g\n",i,b[i]);*/
 
@@ -116,13 +117,13 @@ void lcp_nsqp(int *nn , double *vec , double *qq , double *z , double *w , int *
   war = (double *)malloc(lwar * sizeof(double));
   /* / integer working array. */
   liwar = n ;
-  iwar = (int *)malloc(liwar * sizeof(int));
+  iwar = (integer *)malloc(liwar * sizeof(int));
   iwar[0] = 1;
 
 
   /* / call ql0001_*/
-  ql0001_(&m, &me, &mmax, &n, &nmax, &mnn, Q, p, A, b, xl, xu,
-          z, lambda, &iout, info , &un, war, &lwar, iwar, &liwar, &tol);
+  F77NAME(ql0001)(m, me, mmax, n, nmax, mnn, Q, p, A, b, xl, xu,
+                  z, lambda, iout, *info , un, war, lwar, iwar, liwar, tol);
 
   /* /    printf("tol = %10.4e\n",*tol);
   // for (i=0;i<mnn;i++)printf("lambda[%i] = %g\n",i,lambda[i]);

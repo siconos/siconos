@@ -209,12 +209,14 @@
 				<Theta vectorSize='3'>0.5 0.5 0.5 1.0 1.0</Theta>
 			</Moreau>					
 		</OneStepIntegrator_Definition>
-
-		<OneStepNSProblem>
-		 	<LCP>
-                        <Solver type="NSQP" maxIter="10" tolerance="0.0001"/>
-		 	</LCP>
-		 </OneStepNSProblem>
+		<OneStepNSProblems_List>
+		 	<LCP StorageType="0" Id="myLCP">
+			   <NonSmoothSolver Name="NSQP">
+			      <iparam  vectorSize='5'>1000 0 0 0 0</iparam>
+			      <dparam  vectorSize='5'>0 0 0 0 0</dparam>
+			   </NonSmoothSolver>
+	                 </LCP>
+		 </OneStepNSProblems_List>
 	</Simulation>
 	
 </SiconosModel>

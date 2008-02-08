@@ -29,16 +29,22 @@
 #include "path/SimpleLCP.h"
 #endif /*PATH_SOLVER*/
 
-void lcp_path(int *nn , double *M , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
+void lcp_path(LinearComplementarity_Problem* problem, double *z, double *w, int *info , Solver_Options* options)
 {
-
-  double tol ;
   *info = 1;
-  tol   = dparamLCP[0];
 #ifdef PATH_SOLVER
+  /* matrix M/vector q of the lcp */
+  double * M = problem->M->matrix0;
+
+  double * q = problem->q;
+
+  /* size of the LCP */
+  int n = problem->size;
+
+  double tol = options->dparam[0];
   MCP_Termination termination;
 
-  nnz = nbNonNulElems(*nn, M, 1.0e-18);
+  nnz = nbNonNulElems(n, M, 1.0e-18);
   m_i = (int *)calloc(nnz + 1, sizeof(int));
   m_j = (int *)calloc(nnz + 1, sizeof(int));
   m_ij = (double *)calloc(nnz + 1, sizeof(double));
@@ -46,7 +52,7 @@ void lcp_path(int *nn , double *M , double *q , double *z , double *w , int *inf
   ub = (double *)calloc(n + 1, sizeof(double));
 
 
-  FortranToPathSparse(*nn, M, 1.0e-18, m_i, m_j, m_ij);
+  FortranToPathSparse(n, M, 1.0e-18, m_i, m_j, m_ij);
   for (i = 0; i < n; i++)
   {
     lb[i] = -tol;

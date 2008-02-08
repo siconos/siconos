@@ -91,12 +91,12 @@ void Solver::setSolvingMethod()
 {
   if (nonSmoothPbType == "LCP")
   {
-    strcpy(solvingMethod->lcp.name, solverAlgorithmName.c_str());
-    solvingMethod->lcp.itermax = maxIter;
-    solvingMethod->lcp.tol = tolerance;
-    solvingMethod->lcp.k_latin = searchDirection;
-    solvingMethod->lcp.chat = verbose;
-    solvingMethod->lcp.rho = Rho;
+    //       strcpy( solvingMethod->lcp.name, solverAlgorithmName.c_str() );
+    //       solvingMethod->lcp.itermax = maxIter;
+    //       solvingMethod->lcp.tol = tolerance;
+    //       solvingMethod->lcp.k_latin = searchDirection;
+    //       solvingMethod->lcp.chat = verbose;
+    //       solvingMethod->lcp.rho = Rho;
   }
   else if (nonSmoothPbType == "Relay")
   {

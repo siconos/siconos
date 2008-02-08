@@ -30,22 +30,18 @@ void NonSmoothSolver::fillSolverOptions()
 {
   numerics_solver_options = new Solver_Options;
   if (!isSet)
-  {
     numerics_solver_options->isSet = 0;
-    numerics_solver_options->nbParam = NB_PARAM;
-    // No memory allocation for iparam and dparam of numerics_solver_options, just pointer links
-    numerics_solver_options->iparam = NULL;
-    numerics_solver_options->dparam = NULL;
-  }
+
   else
   {
     numerics_solver_options->isSet = 1;
     strcpy(numerics_solver_options->solverName, name.c_str());
-    numerics_solver_options->nbParam = NB_PARAM;
     // No memory allocation for iparam and dparam of numerics_solver_options, just pointer links
-    numerics_solver_options->iparam = int_parameters->data();
-    numerics_solver_options->dparam = double_parameters->data();
   }
+  // Link is required for iparam and dparam even when isSet == 0, since we need to recover output parameters (error ...)
+  numerics_solver_options->nbParam = NB_PARAM;
+  numerics_solver_options->iparam = int_parameters->data();
+  numerics_solver_options->dparam = double_parameters->data();
 }
 
 
@@ -53,8 +49,8 @@ void NonSmoothSolver::fillSolverOptions()
 // Parameters will be read in the default input parameters file during Numerics driver call.
 NonSmoothSolver::NonSmoothSolver(): name("undefined"), int_parameters(NULL), double_parameters(NULL), numerics_solver_options(NULL), isSet(false)
 {
-  int_parameters = new std::vector<int>(NB_PARAM);
-  double_parameters = new std::vector<double>(NB_PARAM);
+  int_parameters = new IntParameters(NB_PARAM);
+  double_parameters = new DoubleParameters(NB_PARAM);
   fillSolverOptions();
 }
 
@@ -62,20 +58,20 @@ NonSmoothSolver::NonSmoothSolver(): name("undefined"), int_parameters(NULL), dou
 NonSmoothSolver::NonSmoothSolver(const NonSmoothSolver& newS):
   name(newS.getName()), int_parameters(NULL), double_parameters(NULL), numerics_solver_options(NULL), isSet(newS.isSolverSet())
 {
-  int_parameters = new std::vector<int>(*newS.getIntParametersPtr());
-  double_parameters = new std::vector<double>(*newS.getDoubleParametersPtr());
+  int_parameters = new IntParameters(*newS.getIntParametersPtr());
+  double_parameters = new DoubleParameters(*newS.getDoubleParametersPtr());
   fillSolverOptions();
 }
 
 // Constructor from a set of data
-NonSmoothSolver::NonSmoothSolver(const std::string& newName, std::vector<int>& iparam, std::vector<double>& dparam):
+NonSmoothSolver::NonSmoothSolver(const std::string& newName, IntParameters& iparam, DoubleParameters& dparam):
   name(newName), int_parameters(NULL), double_parameters(NULL), numerics_solver_options(NULL), isSet(true)
 {
   if (iparam.size() != NB_PARAM || dparam.size() != NB_PARAM)
     RuntimeException::selfThrow("NonSmoothSolver: constructor from vector<int> and vector<double> failed. Wrong size for input vector(s).");
 
-  int_parameters = new std::vector<int>(iparam);
-  double_parameters = new std::vector<double>(dparam);
+  int_parameters = new IntParameters(iparam);
+  double_parameters = new DoubleParameters(dparam);
   fillSolverOptions();
 }
 
@@ -89,8 +85,8 @@ NonSmoothSolver::NonSmoothSolver(NonSmoothSolverXML* solvXML):
   // Read name
   name = solvXML->getName();
   // Built and read int_parameters and double_parameters
-  int_parameters = new std::vector<int>;
-  double_parameters = new std::vector<double>;
+  int_parameters = new IntParameters;
+  double_parameters = new DoubleParameters;
   if (!solvXML->hasIparam() || !solvXML->hasDparam())
     RuntimeException::selfThrow("NonSmoothSolver, XML constructor, missing input in XML file (int or double vector)");
   solvXML->getIParam(*int_parameters);

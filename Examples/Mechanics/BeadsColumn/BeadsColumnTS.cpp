@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
   {
 
     // User-defined main parameters
-    unsigned int dsNumber = 100;      // the number of dynamical systems
+    unsigned int dsNumber = 10;      // the number of dynamical systems
     unsigned int nDof = 3;           // degrees of freedom for beads
     double increment_position = 1;   // initial position increment from one DS to the following
     double increment_velocity = 0;   // initial velocity increment from one DS to the following
@@ -48,7 +48,6 @@ int main(int argc, char* argv[])
     double position_init = 5.5;     // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
     double R = 0.1;                  // balls radius
-    string solverName = "PGS";     // solver algorithm used for non-smooth problem
 
     // ================= Creation of the model =======================
 
@@ -186,7 +185,13 @@ int main(int argc, char* argv[])
     // That means that all systems in allDS have the same theta value.
 
     // -- OneStepNsProblem --
-    LCP * osnspb = new LCP(s, "LCP", solverName, 10000, 0.01, 0);
+    IntParameters iparam(5);
+    iparam[0] = 1000; // Max number of iteration
+    DoubleParameters dparam(5);
+    dparam[0] = 1e-5; // Tolerance
+    string solverName = "Lemke" ;
+    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
+    LCP * osnspb = new LCP(s, mySolver);
     //    osnspb->getSolverPtr()->setSolverBlock(true);
 
     // =========================== End of model definition =================================

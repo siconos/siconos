@@ -16,11 +16,11 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#ifndef FRICTIONCONTACT3DPROBLEM_H
-#define FRICTIONCONTACT3DPROBLEM_H
+#ifndef FRICTIONCONTACTPROBLEM_H
+#define FRICTIONCONTACTPROBLEM_H
 
-/*! \page fc3Dproblem Friction-contact problems (3-dimensional)
-  \section fc3Dintro The problem
+/*! \page fcProblem Friction-contact problems (2 or 3-dimensional)
+  \section fcIntro The problem
   Find \f$(reaction,velocity)\f$ such that:\n
 
   \f$
@@ -38,7 +38,7 @@
 
   \f$ \mu \f$ is the friction coefficient (may be different for each contact).
 
-  \section fc3DSolversList Available solvers
+  \section fc3DSolversList Available solvers for Friction Contact 3D
   Use the generic function frictionContact3DSolvers(), to call one the the specific solvers listed below:
 
   - frictionContact3D_nsgs() : non-smooth Gauss-Seidel solver
@@ -59,16 +59,16 @@
 
 */
 
-/*!\file FrictionContact3D_Problem.h
-  \brief Definition of a structure to handle with friction-contact 3D problems.
+/*!\file FrictionContact_Problem.h
+  \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
   \author Franck Perignon.
 */
 
 #include "NumericsMatrix.h"
 
-/** The structure that defines a Friction-Contact 3D problem
+/** The structure that defines a Friction-Contact (3D or 2D)problem
     \param numberOfContacts, the number of contacts
-    \param M matrix (n X n, with n = 3*numberOfContacts)
+    \param M matrix (n X n, with n = 2 or 3*numberOfContacts)
     \param q vector (n)
     \param mu, vector of friction coefficients (size: numberOfContacts)
     \param isComplete, equal to 0 if some information is missing or wrong for the problem (M or q = NULL, inconsistent sizes), else equal to 1.
@@ -80,6 +80,6 @@ typedef struct
   double* q;
   double* mu;
   int isComplete;
-} FrictionContact3D_Problem;
+} FrictionContact_Problem;
 
 #endif

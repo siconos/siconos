@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 
 #include <stdio.h>
@@ -23,22 +23,32 @@
 #include <string.h>
 #include <math.h>
 #include "LA.h"
+#include "LCP_Solvers.h"
 
-
-
-void lcp_latin_w(int *nn, double *vec, double *qq,  double *z, double *w, int *info, int *iparamLCP, double *dparamLCP)
+void lcp_latin_w(LinearComplementarity_Problem* problem, double *z, double *w, int *info , Solver_Options* options)
 {
+  /* matrix M/vector q of the lcp */
+  double * M = problem->M->matrix0;
 
+  double * q = problem->q;
 
-  int      i, j,  iter1, info2, nrhs, iout;
-  int      n, n2;
-  int      itermax, itt, it_end;
+  /* size of the LCP */
+  int n = problem->size;
+  int n2 = n * n;
+
+  int itermax = options->iparam[0];
+  double tol = options->dparam[0];
+  double k_latin = options->dparam[1];
+  double omega = options->dparam[3];
+
+  int      i, j,  iter1, info2, nrhs;
+  int      itt, it_end;
   int incx, incy;
 
   double   alpha, beta;
   double   err1, num11, err0;
-  double   k_latin, res, tol, errmax;
-  double   den11, den22, omega;
+  double   res, errmax;
+  double   den11, den22;
   double   *wc, *zc, *kinvden1, *kinvden2, *wt;
   double   *maxwt, *wnum1, *znum1, *ww, *zz;
   double   *num1, *kinvnum1, *den1, *den2, *wden1, *zden1;
@@ -48,22 +58,9 @@ void lcp_latin_w(int *nn, double *vec, double *qq,  double *z, double *w, int *i
 
   /*  char trans='T', notrans='N', uplo='U', diag='N';  */
 
-
-
-  n = *nn;
   n2 = n * n;
   incx = 1;
   incy = 1;
-
-  /* Recup input */
-
-  itermax = iparamLCP[0];
-  iout    = iparamLCP[1];
-
-  k_latin = dparamLCP[1];
-  tol     = dparamLCP[0];
-  omega   = dparamLCP[3];
-
 
   errmax = tol;
   itt = itermax;
@@ -71,8 +68,8 @@ void lcp_latin_w(int *nn, double *vec, double *qq,  double *z, double *w, int *i
 
   /* Initialize output */
 
-  iparamLCP[2] = 0;
-  dparamLCP[2] = 0.0;
+  options->iparam[2] = 0;
+  options->dparam[2] = 0.0;
 
   /* Allocations */
 
@@ -146,12 +143,12 @@ void lcp_latin_w(int *nn, double *vec, double *qq,  double *z, double *w, int *i
   for (i = 0 ; i < n ; i++)
   {
 
-    k[i * n + i] =  k_latin * vec[i * n + i];
+    k[i * n + i] =  k_latin * M[i * n + i];
 
     if (fabs(k[i * n + i]) < 1e-12)
     {
 
-      if (iout > 0)
+      if (verbose > 0)
       {
         printf(" Warning nul diagonal term in k matrix \n");
       }
@@ -196,7 +193,7 @@ void lcp_latin_w(int *nn, double *vec, double *qq,  double *z, double *w, int *i
 
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++)
-      DPO[i + n * j] = vec[j * n + i] + k[i + n * j];
+      DPO[i + n * j] = M[j * n + i] + k[i + n * j];
 
 
 
@@ -264,7 +261,7 @@ void lcp_latin_w(int *nn, double *vec, double *qq,  double *z, double *w, int *i
     DGEMV(LA_TRANS, n, n, alpha, k, n, zc, incx, beta, wc, incy);
 
 
-    DCOPY(n, qq, incx, znum1, incy);
+    DCOPY(n, q, incx, znum1, incy);
 
 
     alpha = -1.;
@@ -400,11 +397,8 @@ void lcp_latin_w(int *nn, double *vec, double *qq,  double *z, double *w, int *i
 
     iter1  = iter1 + 1;
 
-    iparamLCP[2] = it_end;
-    dparamLCP[2] = res;
-
-
-
+    options->iparam[2] = it_end;
+    options->dparam[2] =  res;
 
   }
 
@@ -413,12 +407,12 @@ void lcp_latin_w(int *nn, double *vec, double *qq,  double *z, double *w, int *i
 
   if (err1 > errmax)
   {
-    if (iout > 0) printf("No convergence of LATIN_W after %d iterations, the residue is %g\n", iter1, err1);
+    if (verbose > 0) printf("No convergence of LATIN_W after %d iterations, the residue is %g\n", iter1, err1);
     *info = 1;
   }
   else
   {
-    if (iout > 0) printf("Convergence of LATIN_W after %d iterations, the residue is %g \n", iter1, err1);
+    if (verbose > 0) printf("Convergence of LATIN_W after %d iterations, the residue is %g \n", iter1, err1);
     *info = 0;
   }
 

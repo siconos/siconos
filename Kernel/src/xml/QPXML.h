@@ -75,7 +75,7 @@ public:
   {
     if (this->hasQ() == false)
     {
-      this->QNode = SiconosDOMTreeTools::createMatrixNode(this->problemTypeNode, QP_Q, m);
+      this->QNode = SiconosDOMTreeTools::createMatrixNode(this->rootNode, QP_Q, m);
     }
     else SiconosDOMTreeTools::setSiconosMatrixNodeValue(this->QNode, m);
   }
@@ -87,7 +87,7 @@ public:
   {
     if (this->hasP() == false)
     {
-      this->pNode = SiconosDOMTreeTools::createVectorNode(this->problemTypeNode, QP_P, v);
+      this->pNode = SiconosDOMTreeTools::createVectorNode(this->rootNode, QP_P, v);
     }
     else SiconosDOMTreeTools::setSiconosVectorNodeValue(this->pNode, v);
   }

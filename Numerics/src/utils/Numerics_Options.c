@@ -18,10 +18,32 @@
  */
 #include "Numerics_Options.h"
 
-/* Default value for verbose mode: turned to off */
-int Verb = 0;
+/* Default value for verbose mode: turned to off
+Warning: global variable
+*/
+int verbose = 0;
 
 void setNumericsOptions(Numerics_Options* opt)
 {
-  Verb = opt->verbose;
+  verbose = opt->verboseMode;
+}
+
+void numericsError(char * functionName, char* message)
+{
+  char* output = "Numerics error - ";
+  strcat(output, functionName);
+  strcat(output, message);
+  strcat(output, ".\n");
+  fprintf(stderr, output);
+  exit(EXIT_FAILURE);
+}
+
+void numericsWarning(char * functionName, char* message)
+{
+  char* output = "Numerics warning - ";
+  strcat(output, functionName);
+  strcat(output, message);
+  strcat(output, ".\n");
+  fprintf(stderr, output);
+  exit(EXIT_FAILURE);
 }

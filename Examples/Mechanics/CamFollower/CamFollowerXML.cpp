@@ -118,7 +118,6 @@ int main(int argc, char* argv[])
       k++;
 
       S->computeOneStep();
-
       // --- Get values to be plotted ---
       DataPlot(k, 0) = k * t->getH();
       //  DataPlot(k, 1) = (Follower->getQ())(0);

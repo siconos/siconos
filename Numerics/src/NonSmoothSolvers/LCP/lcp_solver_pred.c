@@ -15,57 +15,57 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 /*!\file lcp_solver_pred.c
 
-  This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
-  Try \f$(z,w)\f$ such that:\n
+This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
+Try \f$(z,w)\f$ such that:\n
 
-  \f$
-   \left\lbrace
-    \begin{array}{l}
-     w - M z = q\\
-     0 \le z \perp  w \ge 0\\
-    \end{array}
-   \right.
-  \f$
+\f$
+\left\lbrace
+\begin{array}{l}
+w - M z = q\\
+0 \le z \perp  w \ge 0\\
+\end{array}
+\right.
+\f$
 
-  M is an (\f$ n \times n\f$ ) matrix, q , w and z n-vector. This system of equalities and inequalities
-  is solved by a prediction on the non-zero z values and linear system solving or thanks to @ref lcp solvers.
+M is an (\f$ n \times n\f$ ) matrix, q , w and z n-vector. This system of equalities and inequalities
+is solved by a prediction on the non-zero z values and linear system solving or thanks to @ref lcp solvers.
 */
 
 /**
-  lcp_solver_pred is a generic interface allowing the call of one of the LCP solvers.
-  - At first, the signs of q elements are checked to detect the trivial case of positive q.\n
-  - Then it tries to find z by assuming that the indices of the non-zero elements
-  are the same as the previous solution (previous solutions with trivial case of q positive excepted of course).\n
-  - If q is not positive and prediction failed, the regular LCP solver is called.\n
+   lcp_solver_pred is a generic interface allowing the call of one of the LCP solvers.
+   - At first, the signs of q elements are checked to detect the trivial case of positive q.\n
+   - Then it tries to find z by assuming that the indices of the non-zero elements
+   are the same as the previous solution (previous solutions with trivial case of q positive excepted of course).\n
+   - If q is not positive and prediction failed, the regular LCP solver is called.\n
 
-  \param[in] vec          On enter, a (\f$n \times n\f$)-vector of doubles which contains the components of the LCP matrix with a Fortran storage.
-  \param[in] q            On enter, a n-vector of doubles which contains the components of the constant right hand side vector.
-  \param[in] n            On enter, an integer which represents the dimension of the LCP problem.
-  \param[in] pt           On enter, a union containing the LCP structure.
-  \n \n
-  \param[in,out] z        On enter, an initial guess for iterative LCP solvers.\n
-                          On return, a n-vector of doubles which contains the solution of the problem.
-  \param[out] w           On return, a n-vector of doubles which contains the complementary solution of the problem.
-  \n
-  \param[in]     firsttime      At 1, forces the regular LCP solver to be used (for initialization purpose).
-  \param[out]    soltype        On return, indicates how the solution was found (0 : no sol,1 : q positive,2 : prediction,3 : LCP solver)
-  \param[in,out] indic          The set of indices of non-zero z values in ascending order
-  \param[in,out] indicop        The complementary set of indices of "indic".
-  \param[in,out] submatlcp      The submatrix of M defined by "indic".
-  \param[in,out] submatlcpop    The submatrix of M defined by "indicop".
-  \param[in,out] ipiv           Pivot indices in LU factorization of "submatlcp".
-  \param[in,out] sizesublcp     "submatlcp" size.
-  \param[in,out] sizesublcpop   "submatlcpop" size.
+   \param[in] vec          On enter, a (\f$n \times n\f$)-vector of doubles which contains the components of the LCP matrix with a Fortran storage.
+   \param[in] q            On enter, a n-vector of doubles which contains the components of the constant right hand side vector.
+   \param[in] n            On enter, an integer which represents the dimension of the LCP problem.
+   \param[in] pt           On enter, a union containing the LCP structure.
+   \n \n
+   \param[in,out] z        On enter, an initial guess for iterative LCP solvers.\n
+   On return, a n-vector of doubles which contains the solution of the problem.
+   \param[out] w           On return, a n-vector of doubles which contains the complementary solution of the problem.
+   \n
+   \param[in]     firsttime      At 1, forces the regular LCP solver to be used (for initialization purpose).
+   \param[out]    soltype        On return, indicates how the solution was found (0 : no sol,1 : q positive,2 : prediction,3 : LCP solver)
+   \param[in,out] indic          The set of indices of non-zero z values in ascending order
+   \param[in,out] indicop        The complementary set of indices of "indic".
+   \param[in,out] submatlcp      The submatrix of M defined by "indic".
+   \param[in,out] submatlcpop    The submatrix of M defined by "indicop".
+   \param[in,out] ipiv           Pivot indices in LU factorization of "submatlcp".
+   \param[in,out] sizesublcp     "submatlcp" size.
+   \param[in,out] sizesublcpop   "submatlcpop" size.
 
-  \return integer
-                   - 0 : successful\n
-                   - >0 : otherwise (see specific solvers for more information about the log info)
+   \return integer
+   - 0 : successful\n
+   - >0 : otherwise (see specific solvers for more information about the log info)
 
-  \author Nineb Sheherazade & Mathieu Renouf & Pascal Denoyelle
- */
+   \author Nineb Sheherazade & Mathieu Renouf & Pascal Denoyelle
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -78,6 +78,10 @@
 #include "NonSmoothDrivers.h"
 #endif
 int lcp_solver_pred(double *vec, double *q , int *n , method *pt , double *z , double *w ,
+                    int firsttime, int *soltype , int *indic , int *indicop , double *submatlcp , double *submatlcpop ,
+                    int *ipiv , int *sizesublcp , int *sizesublcpop ,
+                    double *subq , double *bufz , double *newz , double *workspace)
+int lcp_solver_pred(n , method *pt , double *z , double *w ,
                     int firsttime, int *soltype , int *indic , int *indicop , double *submatlcp , double *submatlcpop ,
                     int *ipiv , int *sizesublcp , int *sizesublcpop ,
                     double *subq , double *bufz , double *newz , double *workspace)
@@ -111,8 +115,8 @@ int lcp_solver_pred(double *vec, double *q , int *n , method *pt , double *z , d
     if ((i == (*n - 1)) && (q[*n - 1] >= 0.))
     {
       /* TRIVIAL CASE : q >= 0
-      * z = 0 and w = q is solution of LCP(q,M)
-      */
+       * z = 0 and w = q is solution of LCP(q,M)
+       */
       for (j = 0 ; j < *n; j++)
       {
         z[j] = 0.0;
@@ -139,198 +143,110 @@ int lcp_solver_pred(double *vec, double *q , int *n , method *pt , double *z , d
     else info = 1;
   }
 
-  if (strcmp(pt->lcp.name , lcpkey1) == 0)
-  {
+  /* Solver name */
+  char * name = options->solverName;
+
+  if (verbose == 1)
+    printf(" ========================== Call %s solver for Linear Complementarity problem ==========================\n", name);
+
+  /****** Lemke algorithm ******/
+  /* IN: itermax
+     OUT: iter */
+  if (strcmp(name, "Lemke") == 0 || strcmp(name, "LexicoLemke") == 0)
+    lcp_lexicolemke(problem, z , w , &info , options);
+
+  /****** PGS Solver ******/
+  /* IN: itermax, tolerance
+     OUT: iter, error */
+  else if (strcmp(name, "PGS") == 0)
+    lcp_pgs(problem, z , w , &info , options);
+
+  /****** CPG Solver ******/
+  /* IN: itermax, tolerance
+     OUT: iter, error */
+  else if (strcmp(name, "CPG") == 0)
+    lcp_cpg(problem, z , w , &info , options);
+
+  /****** Latin Solver ******/
+  /* IN: itermax, tolerance, k_latin
+     OUT: iter, error */
+  else if (strcmp(name, "Latin") == 0)
+    lcp_latin(problem, z , w , &info , options);
+
+  /****** Latin_w Solver ******/
+  /* IN: itermax, tolerance, k_latin, relax
+     OUT: iter, error */
+  else if (strcmp(name, "Latin_w") == 0)
+    lcp_latin_w(problem, z , w , &info , options);
+
+  /****** QP Solver ******/
+  /* IN: tolerance
+     OUT:
+     We assume that the LCP matrix M is symmetric
+  */
+  else if (strcmp(name, "QP") == 0)
+    lcp_qp(problem, z , w , &info , options);
+
+  /****** NSQP Solver ******/
+  /* IN: tolerance
+     OUT:
+  */
+  else if (strcmp(name, "NSQP") == 0)
+    lcp_nsqp(problem, z , w , &info , options);
+
+  /****** Newton min ******/
+  /* IN: itermax, tolerance
+     OUT: iter, error
+  */
+  else if (strcmp(name, "NewtonMin") == 0)
+    lcp_newton_min(problem, z , w , &info , options);
+
+  /****** Newton Fischer-Burmeister ******/
+  /* IN: itermax, tolerance
+     OUT: iter, error
+  */
+  else if (strcmp(name, "Newton_FB") == 0)
+    lcp_newton_FB(problem, z , w , &info , options);
+
+  /****** PSOR Solver ******/
+  /* IN: itermax, tolerance, relax
+     OUT: iter, error
+  */
+  else if (strcmp(name, "PSOR") == 0)
+    lcp_psor(problem, z , w , &info , options);
+
+  /****** RPGS (Regularized Projected Gauss-Seidel) Solver ******/
+  /* IN: itermax, tolerance, rho
+     OUT: iter, error
+  */
+  else if (strcmp(name, "RPGS") == 0)
+    lcp_rpgs(problem, z , w , &info , options);
+
+  /****** PATH (Ferris) Solver ******/
+  /* IN: itermax, tolerance, rho
+     OUT: iter, error
+  */
+  else if (strcmp(name, "Path") == 0)
+    lcp_path(problem, z , w , &info , options);
+
+  else
+    printf("LCP_driver error: unknown solver named: %s\n", pt->lcp.name);
+
+  /*************************************************
+   *  3 - Check solution validity
+   *************************************************/
+
+  /* Warning: it depends on the chosen solver */
+
+  /* Not done for:  PGS, RPGS */
+  if ((strcmp(name, "PGS") != 0) && (strcmp(name, "RPGS") != 0))
+    info = filter_result_LCP(problem, z, w, options->dparam[0]);
 
-    iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
 
-    lcp_lexicolemke(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
-
-    pt->lcp.iter = iparamLCP[2];
-  }
-  /* **** Latin Solver **** */
-
-  else if (strcmp(pt->lcp.name , lcpkey4) == 0)
-  {
-
-    iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
-    dparamLCP[0] = pt->lcp.tol;
-    dparamLCP[1] = pt->lcp.k_latin;
-
-    lcp_latin(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
-
-    pt->lcp.iter = iparamLCP[2];
-    pt->lcp.err  = dparamLCP[2];
-
-  }
-
-  /* **** Latin_w Solver **** */
-
-  else if (strcmp(pt->lcp.name , lcpkey9) == 0)
-  {
-
-    iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
-    dparamLCP[0] = pt->lcp.tol;
-    dparamLCP[1] = pt->lcp.k_latin;
-    dparamLCP[3] = pt->lcp.relax;
-
-
-    lcp_latin_w(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
-
-    pt->lcp.iter = iparamLCP[2];
-    pt->lcp.err  = dparamLCP[2];
-
-  }
-
-  /* **** PGS Solver **** */
-
-  else if (strcmp(pt->lcp.name , lcpkey2) == 0)
-  {
-
-    iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
-    dparamLCP[0] = pt->lcp.tol;
-    /* dparamLCP[1] = pt->lcp.relax;*/
-
-    lcp_pgs(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
-
-    pt->lcp.iter = iparamLCP[2];
-    pt->lcp.err  = dparamLCP[2];
-
-  }
-  /* **** NLGS Solver **** */
-
-  else if (strcmp(pt->lcp.name , lcpkey12) == 0)
-  {
-
-    printf("Warning: NLGS method is obsolete. Use PGS instead.\n");
-
-  }
-  /* **** SOR Solver **** */
-
-  else if (strcmp(pt->lcp.name , lcpkey11) == 0)
-  {
-
-    iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
-    dparamLCP[0] = pt->lcp.tol;
-    dparamLCP[1] = pt->lcp.relax;
-
-    lcp_psor(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
-
-    pt->lcp.iter = iparamLCP[2];
-    pt->lcp.err  = dparamLCP[2];
-
-  }
-  /* **** CPG Solver **** */
-
-  else if (strcmp(pt->lcp.name , lcpkey3) == 0)
-  {
-
-    iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
-    dparamLCP[0] = pt->lcp.tol;
-
-    lcp_cpg(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
-
-    pt->lcp.iter = iparamLCP[2];
-    pt->lcp.err  = dparamLCP[1];
-
-  }
-
-  /* ***** QP Solver ***** */
-
-  else if (strcmp(pt->lcp.name , lcpkey5) == 0)
-  {
-
-    /* We assume that the LCP matrix M is symmetric*/
-
-    dparamLCP[0] = pt->lcp.tol;
-
-    lcp_qp(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
-
-  }
-
-  /* **** NSQP Solver **** */
-
-  else if (strcmp(pt->lcp.name , lcpkey6) == 0)
-  {
-
-    /* We assume that the LCP matrix M is not symmetric*/
-
-    dparamLCP[0] = pt->lcp.tol;
-
-    lcp_nsqp(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
-
-  }
-  else if (strcmp(pt->lcp.name , lcpkey7) == 0)
-  {
-
-    iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
-
-    lcp_lexicolemke(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
-
-    pt->lcp.iter = iparamLCP[2];
-
-  }
-  else if (strcmp(pt->lcp.name , lcpkey8) == 0)
-  {
-
-    iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
-    dparamLCP[0] = pt->lcp.tol;
-
-    lcp_newton_min(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
-
-    pt->lcp.iter = iparamLCP[2];
-    pt->lcp.err  = dparamLCP[1];
-
-  }
-  else if (strcmp(pt->lcp.name , lcpkey10) == 0)
-  {
-
-    iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
-    dparamLCP[0] = pt->lcp.tol;
-
-    lcp_newton_FB(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
-
-    pt->lcp.iter = iparamLCP[2];
-    pt->lcp.err  = dparamLCP[1];
-
-  }
-  /* **** RPGS (Regularized Projected Gauss-Seidel) Solver **** */
-
-  else if (strcmp(pt->lcp.name , lcpkey13) == 0)
-  {
-
-    iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
-    dparamLCP[0] = pt->lcp.tol;
-    dparamLCP[1] = pt->lcp.rho;
-    /* dparamLCP[2] = pt->lcp.relax;*/
-
-    lcp_rpgs(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
-
-    pt->lcp.iter = iparamLCP[2];
-    pt->lcp.err  = dparamLCP[3];
-
-  }
-
-  else printf("Warning : Unknown solver : %s\n", pt->lcp.name);
-
-  /* Checking validity of z found  */
-  /*  if (info == 0) info = filter_result_LCP(*n,vec,q,z,pt->lcp.tol,pt->lcp.chat,w);*/
-  if ((strcmp(pt->lcp.name , lcpkey2) != 0) && (strcmp(pt->lcp.name , lcpkey13) != 0))
-    info = filter_result_LCP(*n, vec, q, z, pt->lcp.tol, pt->lcp.chat, w);
 
   if (info == 0)
   {
-    info = extractLCP(vec , n , z , w , indic , indicop , submatlcp , submatlcpop , ipiv , sizesublcp , sizesublcpop , workspace);
+    info = extractLCP(problem->M , z, indic , indicop , submatlcp , submatlcpop , ipiv , sizesublcp , sizesublcpop);
     *soltype = 3;
   }
 
@@ -338,25 +254,35 @@ int lcp_solver_pred(double *vec, double *q , int *n , method *pt , double *z , d
 
 }
 
-int extractLCP(double *vec, int *n , double *z , double *w ,
-               int *indic , int *indicop , double *submatlcp , double *submatlcpop ,
-               int *ipiv , int *sizesublcp , int *sizesublcpop , double *workspace)
+int extractLCP(NumericsMatrix* MGlobal, double *z , int *indic, int *indicop, double *submatlcp , double *submatlcpop,
+               int *ipiv , int *sizesublcp , int *sizesublcpop)
 {
+  if (MGlobal == NULL || z == NULL)
+    numericsError("extractLCP", "Null input for one arg (problem, z, ...)");
 
-  int i, j, k, sizelcp, info;
-  /*  double *workspace; */
+  int info;
   /*  double epsdiag = 1e-16;*/
 
-  sizelcp = *n;
-  /*  workspace = (double*)malloc(sizelcp * sizeof(double)); */
+  /* Extract data from problem */
+  if (MGlobal->storageType == 1)
+    numericsError("extractLCP", "Not yet implemented for sparse storage");
+  double * M = MGlobal->matrix0;
+  int sizelcp = MGlobal->size0;
+  if (M == NULL)
+    numericsError("extractLCP", "Null input matrix M");
 
+  /*  workspace = (double*)malloc(sizelcp * sizeof(double)); */
   /*    printf("recalcul_submat\n");*/
-  j = 0;
-  k = 0;
+
+
+  /* indic = set of indices for which z[i] is positive */
+  /* indicop = set of indices for which z[i] is null */
+
+  /* test z[i] sign */
+  int i, j = 0, k = 0;
   for (i = 0; i < sizelcp; i++)
   {
-    if (z[i] > w[i])
-      /*        if (z[i] >= epsdiag)*/
+    if (z[i] > w[i]) /* if (z[i] >= epsdiag)*/
     {
       indic[j] = i;
       j++;
@@ -367,85 +293,83 @@ int extractLCP(double *vec, int *n , double *z , double *w ,
       k++;
     }
   }
+
+  /* size of the sub-matrix that corresponds to indic */
   *sizesublcp = j;
+  /* size of the sub-matrix that corresponds to indicop */
   *sizesublcpop = k;
 
+  /* If indic is non-empty, copy corresponding M sub-matrix into submatlcp */
   if (*sizesublcp != 0)
   {
     for (j = 0; j < *sizesublcp; j++)
     {
       for (i = 0; i < *sizesublcp; i++)
-      {
-        submatlcp[(j * (*sizesublcp)) + i] = vec[(indic[j] * sizelcp) + indic[i]];
-      }
+        submatlcp[(j * (*sizesublcp)) + i] = M[(indic[j] * sizelcp) + indic[i]];
     }
 
+    /* LU factorization and inverse in place for submatlcp */
     DGETRF(*sizesublcp, *sizesublcp, submatlcp, *sizesublcp, ipiv, info);
     if (info != 0)
     {
-      printf("LU pb in extractLCP !\n"); /*free(workspace)*/;
-      return 1;
-    }
-    /*        DGETRI(*sizesublcp, submatlcp, *sizesublcp, ipiv, workspace , *sizesublcp , info); */
-    DGETRI(*sizesublcp, submatlcp, *sizesublcp, ipiv , info);
-    if (info != 0)
-    {
-      printf("LU pb in extractLCP !\n"); /*free(workspace)*/;
+      numericsWarning("extractLCP", "LU factorization failed") ;
       return 1;
     }
 
+    DGETRI(*sizesublcp, submatlcp, *sizesublcp, ipiv , info);
+    if (info != 0)
+    {
+      numericsWarning("extractLCP", "LU inversion failed");
+      return 1;
+    }
+
+    /* if indicop is not empty, copy corresponding M sub-matrix into submatlcpop */
     if (*sizesublcpop != 0)
     {
       for (j = 0; j < *sizesublcp; j++)
       {
         for (i = 0; i < *sizesublcpop; i++)
-        {
           submatlcpop[(j * (*sizesublcpop)) + i] = vec[(indic[j] * sizelcp) + indicop[i]];
-        }
       }
     }
-
   }
-  /*    free(workspace);*/
+
   return 0;
 }
 
-int predictLCP(double *q , int *n , double *z , double *w , double tol,
+int predictLCP(int sizeLCP, double* q, double *z , double *w , double tol,
                int *indic , int *indicop , double *submatlcp , double *submatlcpop ,
                int *ipiv , int *sizesublcp , int *sizesublcpop , double *subq , double *bufz , double *newz)
 {
+  if (q == NULL ||  z == NULL || w == NULL)
+    numericsError("predictLCP", "Null input for one arg (problem, q,w ...)");
 
   int i, sizelcp, info, incx;
-  /*  double *subq;
-  double *bufz;
-  double *newz;*/
-  double a1 = 1;
-  double b1 = 0;
   double error, normq;
   double zi, wi;
+  int incx = 1;
 
-  sizelcp = *n;
-  /*  subq = (double*)malloc(sizelcp * sizeof(double));
-    bufz = (double*)malloc(sizelcp * sizeof(double));
-    newz = (double*)malloc(sizelcp * sizeof(double));*/
+  /* Copy of z into a buffer for restart if predict failed */
+  DCOPY(sizeLCP, z , incx , bufz , incx);   /* Saving z on enter. */
 
-  incx = 1;
-  DCOPY(*n , z , incx , bufz , incx);   /* Saving z on enter. */
-  for (i = 0; i < sizelcp; i++)
+  /* Sets z and w to 0*/
+  for (i = 0; i < sizeLCP; i++)
   {
     z[i] = 0.;
     w[i] = 0.;
   }
 
+  /* if indic is not empty, computes solution of newz of submatlcp.newz = subq */
   if (*sizesublcp != 0)
   {
+    /* Gets subq */
     for (i = 0; i < *sizesublcp; i++)
-    {
       subq[i] = -q[indic[i]];
-    }
 
-    DGEMV(LA_NOTRANS, *sizesublcp , *sizesublcp , a1 , submatlcp , *sizesublcp , subq , incx , b1 , newz , incx);
 
+    DGEMV(LA_NOTRANS, *sizesublcp , *sizesublcp , 1.0 , submatlcp , *sizesublcp , subq , incx , 0.0 , newz , incx);
+
+    /* Copy of newz into z for i in indic */
     for (i = 0; i < *sizesublcp; i++)
     {
       /*        z[indic[i]] = subq[i];*/
@@ -454,28 +378,24 @@ int predictLCP(double *q , int *n , double *z , double *w , double tol,
     }
   }
 
+  /* if indicop is not empty, computes subw = submatlcpop.newz + subq - subw saved in subq */
   if (*sizesublcpop != 0)
   {
+    /* Gets subq */
     for (i = 0; i < *sizesublcpop; i++)
-    {
       subq[i] = q[indicop[i]];
-    }
 
     if (*sizesublcp != 0)
-    {
-      a1 = 1.;
-      b1 = 1.;
-      DGEMV(LA_NOTRANS, *sizesublcpop , *sizesublcp , a1, submatlcpop, *sizesublcpop, newz, incx, b1, subq, incx);
-    }
+      DGEMV(LA_NOTRANS, *sizesublcpop , *sizesublcp , 1.0, submatlcpop, *sizesublcpop, newz, incx, 1.0, subq, incx);
 
+    /* Copy of subq=subw into w for indices in indicop */
     for (i = 0; i < *sizesublcpop; i++)
-    {
       w[indicop[i]] = subq[i];
-    }
   }
 
+  /* Error evaluation */
   error = 0.;
-  for (i = 0 ; i < sizelcp ; i++)
+  for (i = 0 ; i < sizeLCP ; i++)
   {
     zi = z[i];
     wi = w[i];
@@ -488,17 +408,19 @@ int predictLCP(double *q , int *n , double *z , double *w , double tol,
     if ((zi > 0.0) && (wi > 0.0)) error += zi * wi;
   }
 
-  normq = DNRM2(sizelcp, q, incx);
+  normq = DNRM2(sizeLCP, q, incx);
   error = error / normq;
 
-  if (error > tol) info = -1;
+  if (error > tol)
+  {
+    printf("Numerics warning - predictLCP failed, error = %g > tolerance = %g - Reset z to starting value.\n", error, tol);
+    info = -1;
+  }
   else info = *sizesublcp;
 
-  if (info < 0) DCOPY(*n , bufz , incx, z, incx);
-
-  /*  free(subq);
-    free(bufz);
-    free(newz);*/
+  /* If failed, reset z to starting value (saved in bufz) */
+  if (info < 0)
+    DCOPY(sizeLCP , bufz , incx, z, incx);
 
   return info;
 

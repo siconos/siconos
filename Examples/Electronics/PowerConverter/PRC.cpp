@@ -120,10 +120,13 @@ int main(int argc, char* argv[])
     OneStepIntegrator* OSI_RLCD = new Moreau(LSPRC, theta, StratPRC);
 
     // -- OneStepNsProblem --
-    string solverName = "Lemke";
-    OneStepNSProblem * LCP_RLCD = new LCP(StratPRC, "LCP", solverName, 10000, 0.000001, 1);
-    // Note that not all the parameters are usefull, this depends on solverName. But it´s not a
-    // problem to give all of them, the useless ones will be ignored.
+    IntParameters iparam(5);
+    iparam[0] = 10001; // Max number of iteration
+    DoubleParameters dparam(5);
+    dparam[0] = 0.000001; // Tolerance
+    string solverName = "Lemke" ;
+    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
+    OneStepNSProblem * LCP_RLCD = new LCP(StratPRC, mySolver, "LCP");
 
     // =========================== End of model definition ===========================
 

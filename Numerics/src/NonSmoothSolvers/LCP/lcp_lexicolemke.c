@@ -22,14 +22,23 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "LCP_Solvers.h"
 
-void lcp_lexicolemke(int *nn , double *vec , double *q , double *zlem , double *wlem , int *info , int *iparamLCP , double *dparamLCP)
+void lcp_lexicolemke(LinearComplementarity_Problem* problem, double *zlem , double *wlem , int *info , Solver_Options* options)
 {
+  /* matrix M of the lcp */
+  double * M = problem->M->matrix0;
+
+  /* size of the LCP */
+  int dim = problem->size;
+  int dim2 = 2 * (dim + 1);
+
+
   int i, drive, block, Ifound;
   int ic, jc;
-  int dim, dim2, ITER;
+  int ITER;
   int nobasis;
-  int itermax, ispeak;
+  int itermax = options->iparam[0];
 
   double z0, zb, dblock;
   double pivot, tovip;
@@ -37,17 +46,9 @@ void lcp_lexicolemke(int *nn , double *vec , double *q , double *zlem , double *
   int *basis;
   double** A;
 
-  dim = *nn;
-  dim2 = 2 * (dim + 1);
-
-  /*input*/
-
-  itermax = iparamLCP[0];
-  ispeak  = iparamLCP[1];
-
   /*output*/
 
-  iparamLCP[2] = 0;
+  options->iparam[2] = 0;
 
   /* Allocation */
 
@@ -61,15 +62,15 @@ void lcp_lexicolemke(int *nn , double *vec , double *q , double *zlem , double *
     for (jc = 0 ; jc < dim2; ++jc)
       A[ic][jc] = 0.0;
 
-  /* construction of A matrix such as
+  /* construction of A matrix such that
    * A = [ q | Id | -d | -M ] with d = (1,...1)
    */
 
   for (ic = 0 ; ic < dim; ++ic)
     for (jc = 0 ; jc < dim; ++jc)
-      A[ic][jc + dim + 2] = -vec[dim * jc + ic];
+      A[ic][jc + dim + 2] = -M[dim * jc + ic];
 
-  for (ic = 0 ; ic < dim; ++ic) A[ic][0] = q[ic];
+  for (ic = 0 ; ic < dim; ++ic) A[ic][0] = problem->q[ic];
 
   for (ic = 0 ; ic < dim; ++ic) A[ic][ic + 1 ] =  1.0;
   for (ic = 0 ; ic < dim; ++ic) A[ic][dim + 1] = -1.0;
@@ -229,7 +230,7 @@ void lcp_lexicolemke(int *nn , double *vec , double *q , double *zlem , double *
   }
 
 
-  iparamLCP[2] = ITER;
+  options->iparam[2] = ITER;
 
   if (Ifound) *info = 0;
   else *info = 1;

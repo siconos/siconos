@@ -20,7 +20,7 @@
 
 include $(top_srcdir)/config/Make-rules
 
-check_PROGRAMS = testLCP testMLCP
+check_PROGRAMS = testNumericsMatrix testLCP testMLCP
 
 #TESTS = $(check_PROGRAMS)
 #XFAIL_TESTS = $(check_PROGRAMS)
@@ -57,8 +57,12 @@ PATHLIB = $(PATHDIR)/lib/linux
 LIB_PATHSOLVER = 
 #LIB_PATHSOLVER = -L../path/ -lmlcppath -lpath46
 
-TESTS = testLCP testMLCP
+TESTS = testNumericsMatrix testLCP testMLCP
 XFAIL_TESTS =  testMLCP
+
+testNumericsMatrix_SOURCES = main_NumericsMatrix.c
+testNumericsMatrix_INCLUDES = $(CPPUNIT_INCLUDES)
+testNumericsMatrix_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(NONSMOOTHSOLVERS_LIB) $(SICONOS_EXT_LDFLAGS) $(LIB_PATHSOLVER)
 
 testLCP_SOURCES = main_lcp_new.c
 testLCP_INCLUDES = $(CPPUNIT_INCLUDES)

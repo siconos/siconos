@@ -9,7 +9,7 @@ To get access to other documents, see tab list on top of this page or Documentat
 
 \section doxyNumericsContents Contents
 	- \b netlib: routines imported from netlib collection (see http://www.netlib.org/)\n
-	- The   \subpage NSSPACK
+	- The   \subpage NSDrivers
 
 \section doxyNumericsAbout About 
 This API documentation is automatically generated from the software sources thanks to doxygen tools. 

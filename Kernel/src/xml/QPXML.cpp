@@ -30,7 +30,7 @@ QPXML::QPXML(xmlNode * QPNode)
   qpModelNode = SiconosDOMTreeTools::findNodeChild(QPNode);
   if (qpModelNode != NULL)
   {
-    if (strcmp((char*)qpModelNode->name, "Solver") == 0)
+    if (strcmp((char*)qpModelNode->name, "NonSmoothSolver") == 0)
       qpModelNode = SiconosDOMTreeTools::findFollowNode(qpModelNode);
   }
 
@@ -59,6 +59,5 @@ QPXML::~QPXML() {}
 void QPXML::updateOneStepNSProblemXML(xmlNode* node, OneStepNSProblem* osnspb)
 {
   rootNode = node;
-  problemTypeNode = SiconosDOMTreeTools::findNodeChild(rootNode);
 }
 

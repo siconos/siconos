@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,38 +24,32 @@
 #include <math.h>
 #include "LCP_Solvers.h"
 
-void lcp_pgs(int *nn , double *M , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
+void lcp_pgs(LinearComplementarity_Problem* problem, double *z, double *w, int *info , Solver_Options* options)
 {
+  /* matrix M/vector q of the lcp */
+  double * M = problem->M->matrix0;
 
+  double * q = problem->q;
 
-  int n, incx, incy;
+  /* size of the LCP */
+  int n = problem->size;
+
+  int incx = 1, incy = 1;
   int i, iter;
-  int itermax, verbose;
-  int incxn;
+  int itermax = options->iparam[0];
+
+  /*  int incxn = n; */
   double qs, err, den, zi;
-  double tol, omega;
-  double *diag;
-
-  n = *nn;
-  incx = 1;
-  incy = 1;
-  incxn = n;
-  /* Recup input */
-
-  itermax = iparamLCP[0];
-  verbose  = iparamLCP[1];
-
-  tol   = dparamLCP[0];
-  omega = dparamLCP[1];
-
-  /* Initialize output */
-
-  iparamLCP[2] = 0;
-  dparamLCP[2] = 0.0;
+  double tol = options->dparam[0];
 
   /* Allocation */
 
-  diag = (double*)malloc(n * sizeof(double));
+  double * diag = (double*)malloc(n * sizeof(double));
+
+  /* Initialize output */
+
+  options->iparam[2] = 0;
+  options->dparam[2] = 0.0;
 
   /* Check for non trivial case */
   qs = DNRM2(n , q , incx);
@@ -167,8 +161,8 @@ void lcp_pgs(int *nn , double *M , double *q , double *z , double *w , int *info
 
   }
 
-  iparamLCP[2] = iter;
-  dparamLCP[2] = err;
+  options->iparam[2] = iter;
+  options->dparam[2] = err;
 
   if (err > tol)
   {

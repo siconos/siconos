@@ -17,7 +17,6 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "LCP.h"
-#include "LCPXML.h"
 #include "Topology.h"
 #include "UnitaryRelation.h"
 #include "Simulation.h"
@@ -26,58 +25,20 @@
 #include "Relation.h"
 #include "DynamicalSystem.h"
 #include "TimeDiscretisation.h"
+#include "LinearComplementarity_Problem.h" // Numerics structure
 
 using namespace std;
 
 // xml constructor
 LCP::LCP(OneStepNSProblemXML* onestepnspbxml, Simulation* newSimu):
   OneStepNSProblem("LCP", onestepnspbxml, newSimu), w(NULL), z(NULL), M(NULL), q(NULL),
-  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false) ,
-  MSparseBlock(NULL), prepareM(NULL)
-{
-  LCPXML * xmllcp = (static_cast<LCPXML*>(onestepnspbxml));
-
-  // If both q and M are given in xml file, check if sizes are consistent
-  if (xmllcp->hasQ() && xmllcp->hasM() && ((xmllcp->getM()).size(0) != (xmllcp->getQ()).size()))
-    RuntimeException::selfThrow("LCP: xml constructor, inconsistent sizes between given q and M");
-
-  // The dim of the problem is given by M if given in the xml input file.
-  if (xmllcp->hasM())
-  {
-    sizeOutput = (xmllcp->getM()).size(0);
-    M = new SimpleMatrix(xmllcp->getM());
-    isMAllocatedIn = true;
-  }
-
-  if (xmllcp->hasQ())
-  {
-    // get sizeOutput if necessary
-    if (M == NULL)
-      sizeOutput = (xmllcp->getQ()).size();
-
-    q = new SimpleVector(xmllcp->getQ());
-    isQAllocatedIn = true;
-  }
-
-  // Note that M and q are allocated only if given in the xml file.
-
-}
-
-// Constructor from a set of data (appart from Simulation and id, all arguments are optional)
-LCP::LCP(Simulation* newSimu, const string& newId, const string& newSolver, unsigned int MaxIter,
-         double Tolerance, unsigned int Verbose,  const string&  NormType, double  SearchDirection, double Rho):
-  OneStepNSProblem("LCP", newSimu, newId), w(NULL), z(NULL), M(NULL), q(NULL),
-  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), MSparseBlock(NULL), prepareM(NULL)
-{
-  // set solver:
-  solver = new Solver(nspbType, newSolver, MaxIter, Tolerance, Verbose, NormType, SearchDirection, Rho);
-  isSolverAllocatedIn = true;
-}
+  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), MStorageType(0)
+{}
 
 // Constructor from a set of data
-LCP::LCP(Solver* newSolver, Simulation* newSimu, const string& newId):
+LCP::LCP(Simulation* newSimu, NonSmoothSolver* newSolver, const string& newId):
   OneStepNSProblem("LCP", newSimu, newId, newSolver), w(NULL), z(NULL), M(NULL), q(NULL),
-  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), MSparseBlock(NULL), prepareM(NULL)
+  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), MStorageType(0)
 {}
 
 // destructor
@@ -88,18 +49,10 @@ LCP::~LCP()
   if (isZAllocatedIn) delete z;
   z = NULL;
   if (isMAllocatedIn)
-  {
-    if (solver->useBlocks())
-    {
-      delete MSparseBlock;
-    }
-    else delete M;
-  }
+    delete M;
   M = NULL;
-  MSparseBlock = NULL;
   if (isQAllocatedIn) delete q;
   q = NULL;
-  prepareM = NULL;
 }
 
 // Setters
@@ -155,34 +108,20 @@ void LCP::setZPtr(SiconosVector* newPtr)
   isZAllocatedIn = false;
 }
 
-void LCP::setM(const SiconosMatrix& newValue)
+void LCP::setM(const OSNSMatrix& newValue)
 {
-  if (solver->useBlocks())
-    RuntimeException::selfThrow("LCP: setM, impossible since M is sparse by blocks.");
-  if (sizeOutput != newValue.size(0) || sizeOutput != newValue.size(1))
-    RuntimeException::selfThrow("LCP: setM, inconsistent size between given M size and problem size. You should set sizeOutput before");
-
-  if (M == NULL)
-  {
-    M = new SimpleMatrix(sizeOutput, sizeOutput);
-    isMAllocatedIn = true;
-  }
-
-  *M = newValue;
+  // Useless ?
+  RuntimeException::selfThrow("LCP: setM, forbidden operation. Try setMPtr().");
 }
 
-void LCP::setMPtr(SiconosMatrix* newPtr)
+void LCP::setMPtr(OSNSMatrix* newPtr)
 {
-  if (solver->useBlocks())
-    RuntimeException::selfThrow("LCP: setMPtr, impossible since M is sparse by blocks.");
-  if (sizeOutput != newPtr->size(0) || sizeOutput != newPtr->size(1))
-    RuntimeException::selfThrow("LCP: setMPtr, inconsistent size between given M size and problem size. You should set sizeOutput before");
-
-  if (isMAllocatedIn) delete M;
+  // Note we do not test if newPtr and M sizes are equal. Not necessary?
+  if (isMAllocatedIn)
+    delete M;
   M = newPtr;
   isMAllocatedIn = false;
 }
-
 
 void LCP::setQ(const SiconosVector& newValue)
 {
@@ -208,51 +147,38 @@ void LCP::setQPtr(SiconosVector* newPtr)
   isQAllocatedIn = false;
 }
 
-void LCP::setSolverPtr(Solver * newSolv)
-{
-  OneStepNSProblem::setSolverPtr(newSolv);
-  initSolver();
-}
-
-void LCP::initSolver()
-{
-  if (solver->useBlocks())
-    prepareM = &LCP::collectMBlocks;
-  else
-    prepareM = &LCP::assembleM;
-}
-
 void LCP::initialize()
 {
-  // This function performs all steps that are not time dependant
+  // - Checks memory allocation for main variables (M,q,w,z)
+  // - Formalizes the problem if the topology is time-invariant
+
+  // This function performs all steps that are time-invariant
 
   // General initialize for OneStepNSProblem
   OneStepNSProblem::initialize();
 
   // Memory allocation for w, M, z and q.
   // If one of them has already been allocated, nothing is done.
-  // We suppose that user choose a correct size.
+  // We suppose that user has chosen a correct size.
   if (w == NULL)
   {
     w = new SimpleVector(maxSize);
     isWAllocatedIn = true;
+  }
+  else
+  {
+    if (w->size() != maxSize)
+      w->resize(maxSize);
   }
   if (z == NULL)
   {
     z = new SimpleVector(maxSize);
     isZAllocatedIn = true;
   }
-  if (M == NULL && !solver->useBlocks())
+  else
   {
-    M = new SimpleMatrix(maxSize, maxSize);
-    isMAllocatedIn = true;
-  }
-
-  if (MSparseBlock == NULL && solver->useBlocks())
-  {
-    int nc = simulation->getIndexSetPtr(0)->size();
-    MSparseBlock = new SparseBlockMatrix(nc, nc);
-    isMAllocatedIn = true;
+    if (z->size() != maxSize)
+      z->resize(maxSize);
   }
 
   if (q == NULL)
@@ -260,63 +186,49 @@ void LCP::initialize()
     q = new SimpleVector(maxSize);
     isQAllocatedIn = true;
   }
-  //   w->zero();
-  //   z->zero();
-
-  // if all relative degrees are equal to 0 or 1
-
-  initSolver();
 
   // get topology
   Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
+  // Note that blocks is up to date since updateBlocks has been called during OneStepNSProblem::initialize()
+
+  // If the topology is TimeInvariant ie if M structure does not change during simulation:
   if (topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty())
   {
-    // computeSizeOutput and updateBlocks were already done in OneStepNSProblem::initialize
-    if (sizeOutput != 0)
-      (*this.*prepareM)();
-  }
-
-  // If topology is time-dependant, all the above commands are called during preCompute function.
-}
-
-void LCP::preCompute(double time)
-{
-  // compute M and q operators for LCP problem
-
-  // get topology
-  Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
-
-  if (!topology->isTimeInvariant())
-    computeSizeOutput();
-
-  if (sizeOutput != 0)
-  {
-    if (!topology->isTimeInvariant())
+    // Get index set from Simulation
+    UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
+    if (M == NULL)
     {
-      updateBlocks();
-      // Assemble or collect M
-      (*this.*prepareM)();
-
-      // check z and w sizes and reset if necessary
-      if (z->size() != sizeOutput)
-      {
-        z->resize(sizeOutput, false);
-        z->zero();
-      }
-
-      if (w->size() != sizeOutput)
-      {
-        w->resize(sizeOutput);
-        w->zero();
-      }
+      // Creates and fills M using UR of indexSet
+      M = new OSNSMatrix(indexSet, blocks, MStorageType);
+      isMAllocatedIn = true;
     }
-    computeQ(time);
+    else
+    {
+      M->setStorageType(MStorageType);
+      M->fill(indexSet, blocks);
+    }
+    sizeOutput = M->size();
+  }
+  else // in that case, M will be updated during preCompute
+  {
+    // Default size for M = maxSize
+    if (M == NULL)
+    {
+      if (MStorageType == 0)
+        M = new OSNSMatrix(maxSize, 0);
+      else // if(MStorageType == 1) size = number of blocks = number of UR in the largest considered indexSet
+        M = new OSNSMatrix(simulation->getIndexSetPtr(levelMin)->size(), 1);
+      isMAllocatedIn = true;
+    }
   }
 }
 
 void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
 {
+
+  // Computes matrix blocks[UR1][UR2] (and allocates memory if necessary) if UR1 and UR2 have commond DynamicalSystem.
+  // How blocks are computed depends explicitely on the type of Relation of each UR.
 
   // Get DS common between UR1 and UR2
   DynamicalSystemsSet commonDS;
@@ -416,74 +328,6 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
   }
 }
 
-void LCP::collectMBlocks()
-{
-  // === Description ===
-  // This routine is used to fill in the SparseBlockStructuredMatrix Mspbl.
-  //
-  // For each Unitary Relation which is active (ie which is in indexSet[1] of the Simulation), named itRow (it corresponds to a row of block in M),
-  // and for each Unitary Relation connected to itRow and active, named itCol, we get the block[itRow][itCol] and add the embedded double** into Mspbl.
-  //
-  if (!solver->useBlocks())
-    RuntimeException::selfThrow("LCP::collectMBlocks failed. The linked solver does not fit to sparse block storage. Maybe you change your solver and forget to call initSolver.");
-
-  // Get index set 1 from Simulation
-  UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
-
-  MSparseBlock->fill(indexSet, blocks);
-  MSparseBlock->convert();
-}
-
-void LCP::assembleM() //
-{
-  // === Description ===
-  // For each Unitary Relation which is active (ie which is in indexSet[1] of the Simulation), named itRow (it corresponds to a row of block in M),
-  // and for each Unitary Relation connected to itRow and active, named itCol, we get the block[itRow][itCol] and copy it at the right place in M matrix of the LCP
-  //
-  // Note that if a Unitary Relation is connected to another one (ie if they have common DS), the corresponding block must be in blocks map. This is the role of
-  // updateBlocks() to ensure this.
-  // But the presence of a block in the map does not imply that its corresponding UR are active, since this block may have been computed at a previous time step.
-  // That is why we need to check if itCol is in indexSet1.
-  //
-  // See updateBlocks function for more details.
-
-  // Get index set 1 from Simulation
-  UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
-  UnitaryRelationsIterator itRow;
-  unsigned int pos = 0, col = 0; // index position used for block copy into M, see below.
-  UnitaryMatrixColumnIterator itCol;
-
-  if (solver->useBlocks())
-    RuntimeException::selfThrow("LCP::assembleM failed. The linked solver does not fit to non sparse block storage. Maybe you change your solver and forget to call initSolver.");
-
-  // full matrix M assembling
-  // === Memory allocation, if required ===
-  // Mem. is allocate only if M==NULL or if its size has changed.
-
-  if (M->size(0) != sizeOutput || M->size(1) != sizeOutput)
-    M->resize(sizeOutput, sizeOutput);
-  M->zero();
-  // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
-
-  for (itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
-  {
-    for (itCol = blocks[*itRow].begin(); itCol != blocks[*itRow].end(); ++itCol)
-    {
-      // *itRow and itCol are UnitaryRelation*.
-
-      // Check that itCol is in Index set 1
-      if ((indexSet->find((*itCol).first)) != indexSet->end())
-      {
-        pos = blocksPositions[*itRow];
-        col = blocksPositions[(*itCol).first];
-        // copy the block into Mlcp - pos/col: position in M (row and column) of first element of the copied block
-        static_cast<SimpleMatrix*>(M)->setBlock(pos, col, *(blocks[*itRow][(*itCol).first])); // \todo avoid copy
-      }
-    }
-  }
-  // === end of UnitaryRelations loop ===
-}
-
 void LCP::computeQ(double time)
 {
   if (q->size() != sizeOutput)
@@ -502,9 +346,51 @@ void LCP::computeQ(double time)
     // *itCurrent is a UnitaryRelation*.
 
     // Compute q, this depends on the type of non smooth problem, on the relation type and on the non smooth law
-    pos = blocksPositions[*itCurrent];
+    pos = M->getPositionOfBlock(*itCurrent);
     (*itCurrent)->computeEquivalentY(time, levelMin, simulationType, q, pos);
   }
+}
+
+void LCP::preCompute(double time)
+{
+  // This function is used to prepare data for the LinearComplementarity_Problem
+  // - computation of M and q
+  // - set sizeOutput
+  // - check dim. for z,w
+
+  // If the topology is time-invariant, only q needs to be computed at each time step.
+  // M, sizeOutput have been computed in initialize and are uptodate.
+
+  // Get topology
+  Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+
+  if (!topology->isTimeInvariant())
+  {
+    // Computes new blocks if required
+    updateBlocks();
+
+    // Updates matrix M
+    UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
+    M->fill(indexSet, blocks);
+    sizeOutput = M->size();
+
+    // Checks z and w sizes and reset if necessary
+    if (z->size() != sizeOutput)
+    {
+      z->resize(sizeOutput, false);
+      z->zero();
+    }
+
+    if (w->size() != sizeOutput)
+    {
+      w->resize(sizeOutput);
+      w->zero();
+    }
+  }
+
+  // Computes q of LCP
+  computeQ(time);
+
 }
 
 int LCP::compute(double time)
@@ -513,37 +399,37 @@ int LCP::compute(double time)
   preCompute(time);
 
   int info = 0;
-  // --- Call Numerics solver ---
+  // --- Call Numerics driver ---
+  // Inputs:
+  // - the problem (M,q ...)
+  // - the unknowns (z,w)
+  // - the options for the solver (name, max iteration number ...)
+  // - the global options for Numerics (verbose mode ...)
+
   if (sizeOutput != 0)
   {
-    int Nlcp = (int)sizeOutput;
-    int iter, titer;
-    double err;
-    clock_t startLCPsolve;
+    // The LCP in Numerics format
+    LinearComplementarity_Problem numerics_problem;
+    numerics_problem.M = M->getNumericsMatrix();
+    numerics_problem.q = q->getArray();
+    numerics_problem.size = sizeOutput;
 
-    method solvingMethod = *(solver->getSolvingMethodPtr());
+    // Call LCP Driver
+    info = lcp_driver(&numerics_problem, z->getArray() , w->getArray() , solver->getNumericsSolverOptionsPtr(), numerics_options);
 
-    startLCPsolve = clock();
-    if (solver->useBlocks()) // Use solver block
-    {
-      info = lcp_driver_block(MSparseBlock->getNumericsMatSparse() , q->getArray() , &solvingMethod , z->getArray() , w->getArray() , &iter , &titer , &err);
-    }
-
-    else // Use classical solver
-      info = lcp_driver(M->getArray(), q->getArray(), &Nlcp, &solvingMethod, z->getArray(), w->getArray());
-
-    CPUtime += (clock() - startLCPsolve);
-    nbIter++;
-    // Remark : the output result, info, from solver is treated when this function is call from Simulation
-
-    // --- Recover the desired variables from LCP output ---
+    // --- Recovering of the desired variables from LCP output ---
     postCompute();
+
   }
+
   return info;
 }
 
 void LCP::postCompute()
 {
+  // This function is used to set y/lambda values using output from lcp_driver (w,z).
+  // Only UnitaryRelations (ie Interactions) of indexSet(leveMin) are concerned.
+
   // === Get index set from Topology ===
   UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
 
@@ -554,15 +440,13 @@ void LCP::postCompute()
 
   unsigned int pos = 0;
   unsigned int nsLawSize;
-  UnitaryRelationsIterator itCurrent, itLinked;
 
-  for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
+  for (UnitaryRelationsIterator itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
   {
-    // *itCurrent is a UnitaryRelation*.
-    // size if a block that corresponds to the current UnitaryRelation
+    // size of the block that corresponds to the current UnitaryRelation
     nsLawSize = (*itCurrent)->getNonSmoothLawSize();
     // Get the relative position of UR-block in the vector w or z
-    pos = blocksPositions[*itCurrent];
+    pos = M->getPositionOfBlock(*itCurrent);
 
     // Get Y and Lambda for the current Unitary Relation
     y = (*itCurrent)->getYPtr(levelMin);
@@ -577,18 +461,8 @@ void LCP::display() const
 {
   cout << "======= LCP of size " << sizeOutput << " with: " << endl;
   cout << "M  ";
-  if (solver->useBlocks())
-  {
-    cout << "a Sparse Block matrix." << endl;
-    if (MSparseBlock != NULL)
-      MSparseBlock->display();
-    else cout << "M is NULL" << endl;
-  }
-  else
-  {
-    if (M != NULL) M->display();
-    else cout << "-> NULL" << endl;
-  }
+  if (M != NULL) M->display();
+  else cout << "-> NULL" << endl;
   cout << endl << " q : " ;
   if (q != NULL) q->display();
   else cout << "-> NULL" << endl;
@@ -598,30 +472,13 @@ void LCP::display() const
 void LCP::saveNSProblemToXML()
 {
   OneStepNSProblem::saveNSProblemToXML();
-  if (onestepnspbxml != NULL)
-  {
-    (static_cast<LCPXML*>(onestepnspbxml))->setM(*M);
-    (static_cast<LCPXML*>(onestepnspbxml))->setQ(*q);
-  }
-  else RuntimeException::selfThrow("LCP::saveNSProblemToXML - OneStepNSProblemXML object not exists");
-}
-
-void LCP::saveMToXML()
-{
-  if (onestepnspbxml != NULL)
-  {
-    (static_cast<LCPXML*>(onestepnspbxml))->setM(*M);
-  }
-  else RuntimeException::selfThrow("LCP::saveMToXML - OneStepNSProblemXML object not exists");
-}
-
-void LCP::saveQToXML()
-{
-  if (onestepnspbxml != NULL)
-  {
-    (static_cast<LCPXML*>(onestepnspbxml))->setQ(*q);
-  }
-  else RuntimeException::selfThrow("LCP::saveQToXML - OneStepNSProblemXML object not exists");
+  //   if(onestepnspbxml != NULL)
+  //     {
+  // //       (static_cast<LCPXML*>(onestepnspbxml))->setM(*M);
+  //       (static_cast<LCPXML*>(onestepnspbxml))->setQ(*q);
+  //     }
+  //   else RuntimeException::selfThrow("LCP::saveNSProblemToXML - OneStepNSProblemXML object not exists");
+  RuntimeException::selfThrow("LCP::saveNSProblemToXML - Not yet implemented.");
 }
 
 LCP* LCP::convert(OneStepNSProblem* osnsp)

@@ -16,20 +16,17 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-/*!\file lcp_solver_block.c
- *
- * This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
- * Try \f$(z,w)\f$ such that:\n
- * \f$
- *    0 \le z \perp Mz + q = w \ge 0
- * \f$
- *
- * Here M is an (\f$dn \times dn\f$) matrix , q , w and z dn-vector.\n
- *
- * This system of equalities and inequalities is solved thanks to @ref block_lcp solvers. */
 
-/*!\fn int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt , double *z , double *w , int *it_end ,               int *itt_end ,double *res )
- *  lcp_solver_block is a generic interface allowing the call of one of the block LCP solvers.\n
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#ifndef MEXFLAG
+#include "NonSmoothDrivers.h"
+#endif
+#include "LA.h"
+
+/** lcp_solver_block is a generic interface allowing the call of one of the block LCP solvers.\n
  *
  * \param blmat    On enter, the sparse block matrix M of the LCP
  * \param q        On enter, the vector of doubles of the LCP
@@ -59,297 +56,296 @@
  *   - Latin    for lcp_latin
  *   - Newton   for lcp_newton_min
  *
- * Data file example:\n
- * If we consider the matrix M and the right-hand-side q defined as
- *
- * \f$
- * M=\left[\begin{array}{cccc|cc|cc}
- *          1 & 2 & 0 & 4   & 3 &-1   & 0 & 0\\
- *          2 & 1 & 0 & 0   & 4 & 1   & 0 & 0\\
- *          0 & 0 & 1 &-1   & 0 & 0   & 0 & 0\\
- *          5 & 0 &-1 & 6   & 0 & 6   & 0 & 0\\
- *          \hline
- *          0 & 0 & 0 & 0   & 1 & 0   & 0 & 5\\
- *          0 & 0 & 0 & 0   & 0 & 2   & 0 & 2\\
- *          \hline
- *          0 & 0 & 2 & 1   & 0 & 0   & 2 & 2\\
- *          0 & 0 & 2 & 2   & 0 & 0   & -1 & 2\\
- *        \end{array}\right] \quad, q=\left[\begin{array}{c}-1\\-1\\0\\-1\\\hline 1\\0\\\hline -1\\2\end{array}\right].
- * \f$
- *
- * then
- * - the number of non null blocks is 6 (blmat.nbblocks) and the number of diagonal blocks is 3 (blmat.size)
- * - the vector blmat.blocksize of diagonal blocks sizes is equal to [4,2,2]
- * - the vectors blmat.ColumnIndex and blmat.RowIndex of non null blocks indices are equal to [0,1,1,2,0,2] and [0,0,1,1,2,2]
- * - the blmat.block contains all non null block matrices stored in Fortran order (column by column) as\n
- *   blmat.block[0] = {1,2,0,5,2,1,0,0,0,0,1,-1,4,0,-1,6}\n
- *   blmat.block[1] = {3,4,0,0,-1,1,0,6}\n
- *   ...\n
- *   blmat.block[5] = {2,-1,2,2}
  * \author Mathieu Renouf & Pascal Denoyelle
  */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#ifndef MEXFLAG
-#include "NonSmoothDrivers.h"
-#endif
-#include "LA.h"
-
-int lcp_driver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt , double *z , double *w , int *it_end ,
-                     int *itt_end , double *res)
+int lcp_GS_SBM(LinearComplementarity_Problem* problem, double *z, double *w, Solver_Options* options, Numerics_Options* global_options, int *it_end, int *itt_end , double *res)
 {
+  /*   /\* Notes:  */
+  /*      - we suppose that the trivial solution case has been checked before, */
+  /*      since this function is supposed to be called from lcp_driver(). */
+  /*      - Input matrix M of the problem is supposed to be sparse-block with no null row (ie no rows with all blocks equal to null) */
+  /*   *\/ */
 
-  int info;
-  int n, nbbl, nbblrow, blsizemax;
-  int rowprecbl, rowcurbl, indicrow, rowsize;
-  int colprecbl, colcurbl, indiccol, colsize;
-  int i, j, k;
-  int iter, itermax, totaliter;
-  int info1;
-  int incx, incy;
+  /*   if(problem->M->storageType!=1) */
+  /*     { */
+  /*       fprintf(stderr,"lcp_GS_SBS error: wrong storage type for input matrix M of the LCP.\n"); */
+  /*       exit(EXIT_FAILURE); */
+  /*     } */
+  /*   /\* Number of non-null blocks in blmat *\/ */
+  /*   int nbOfNonNullBlocks = blmat->nbblocks; */
+  /*   if (nbOfNonNullBlocks < 1)  */
+  /*     { */
+  /*       fprintf(stderr,"Numerics lcp_solver_SBM error: empty M matrix (all blocks = NULL).\n"); */
+  /*       exit(EXIT_FAILURE); */
+  /*     } */
 
-  double a1, b1, tol;
-  double qs, err, den;
+  /*   /\* Solver parameters*\/ */
+  /*   int itermax = options->iparam[0]; */
+  /*   double tol = options->dparam[0]; */
 
-  double *adrcurbl, *adrbldiag;
-  double *rhs;
-  /*  double *ww;*/
+  /*   /\* Matrix M/vector q of the LCP *\/ */
+  /*   SparseBlockStructuredMatrix* blmat = problem->M->matrix1;  */
+  /*   double * q = problem->q; */
 
-  *it_end   = 0;
-  *itt_end  = 0;
-  *res      = 0.0;
-  info      = 1;
-  info1     = 1;
-  itermax   = pt->lcp.itermax;
-  tol       = pt->lcp.tol;
-  totaliter = 0;
-
-  nbbl = blmat->nbblocks;
-  if (nbbl < 1)
-  {
-    printf(" Problem : Null LCP block matrix !!! \n");
-    return 1;
-  }
-
-  nbblrow = blmat->size;
-  n = 0;
-  blsizemax = 0;
-  for (i = 0 ; i < nbblrow ; i++)
-  {
-    k = blmat->blocksize[i];
-    n += k;
-    if (k > blsizemax) blsizemax = k;
-  }
-
-  i = 0;
-  while ((i < (n - 1)) && (q[i] >= 0.)) i++;
-  if ((i == (n - 1)) && (q[n - 1] >= 0.))
-  {
-    /* TRIVIAL CASE : q >= 0
-     * z = 0 and w = q is solution of LCP(q,M)
-     */
-    for (j = 0 ; j < n; j++)
-    {
-      z[j] = 0.0;
-      w[j] = q[j];
-    }
-    if (pt->lcp.chat > 0) printf("Trivial case of block LCP : positive vector q \n");
-    return 0;
-  }
-
-  incx = 1;
-  qs = DNRM2(n , q , incx);
-  den = 1.0 / qs;
-
-  /* Initialization of z and w */
-
-  //   for( i = 0 ; i < n ; i++ ) z[i] = 0.;
-
-  incx = 1;
-  incy = 1;
-  //   dcopy_( (integer *)&n , q , (integer *)&incx , w , (integer *)&incy );
+  /*   /\* Local problem *\/ */
+  /*   LinearComplementarity_Problem * local_problem = malloc(sizeof(*local_problem)); */
+  /*   local_problem->storageType = 0; // dense storage */
+  /*   local_problem->M->matrix0 = NULL; */
+  /*   local_problem->q = NULL; */
 
 
-  /*   test on matrix structure : are there some null blocks in the rows ? */
-  rowprecbl = -1;
-  for (i = 0 ; i < nbbl ; i++)
-  {
-    rowcurbl = blmat->RowIndex[i];
-    if (rowcurbl > rowprecbl + 1)
-    {
-      printf(" Null blocks row in LCP matrix !!!\n");
-      return 1;
-    }
-    rowprecbl = rowcurbl;
-  }
-  if (rowcurbl != nbblrow - 1)
-  {
-    printf(" Null blocks row in LCP matrix !!!\n");
-    return 1;
-  }
+  /*   /\* Loop over the rows of blocks in blmat *\/ */
+  /*   for( i = 0, i< blmat->size; ++i) */
+  /*     { */
+  /*       /\* row/col positions of the current block *\/ */
+  /*       rowcurbl = blmat->RowIndex[i]; */
+  /*       colcurbl = blmat->ColumnIndex[i]; */
 
-  rhs  = (double*)malloc(blsizemax * sizeof(double));
+  /*       /\* Gets diagonal block *\/ */
+  /*       if (rowcurbl == colcurbl)  */
+  /*  adrbldiag = blmat->block[i]; */
 
-  iter = 0;
-  err  = 1.;
+  /*       /\* extra diagonal blocks *\/ */
+  /*       else  */
+  /*  { */
 
-  while ((iter < itermax) && (info))
-  {
-
-    iter++;
-
-    /*    incx = 1;
-    incy = 1;
-    dcopy_( (integer *)&n , w , (integer *)&incx , ww , (integer *)&incy );*/
-
-    rowprecbl = -1;
-    rowsize = 0;
-    indicrow = 0;
-
-    for (i = 0 ; i < nbbl ; i++)
-    {
-      rowcurbl = blmat->RowIndex[i];
-      colcurbl = blmat->ColumnIndex[i];
-      if (rowcurbl != rowprecbl)   /*  new row  */
-      {
-        if (rowprecbl != -1)
-        {
-          if (adrbldiag != NULL)
-          {
-            /* Local LCP resolution  */
-            pt->lcp.iter = 0;
-            info1 = lcp_driver(adrbldiag , rhs , &rowsize , pt , &z[indicrow] , &w[indicrow]);
-            totaliter += pt->lcp.iter;
-            if (info1 > 0)
-            {
-              if (pt->lcp.chat > 0)
-              {
-                printf(" Sub LCP solver failed at global iteration %d in lcp_solver_block", iter);
-                printf(" for block(%d,%d)\n", rowprecbl, rowprecbl);
-              }
-              free(rhs);
-              return 1;
-            }
-          }
-          else
-          {
-            printf("NULL diagonal block in LCP !!!\n");
-            free(rhs);
-            return 1;
-          }
-        }
-        adrbldiag = NULL;
-
-        indiccol = 0;
-        for (j = 0 ; j < colcurbl ; j++) indiccol += blmat->blocksize[j];
-        colprecbl = colcurbl;
-
-        indicrow += rowsize;
-        for (j = rowprecbl + 1 ; j < rowcurbl ; j++) indicrow += blmat->blocksize[j];
-
-        rowprecbl = rowcurbl;
-        rowsize = blmat->blocksize[rowcurbl];
-        for (j = 0 ; j < rowsize ; j++) rhs[j] = q[indicrow + j];
-      }
-      if (rowcurbl == colcurbl)   /* diagonal block  */
-      {
-        adrbldiag = blmat->block[i];
-      }
-      else                        /* extra diagonal block  */
-      {
-        for (j = colprecbl ; j < colcurbl ; j++) indiccol += blmat->blocksize[j];
-        colprecbl = colcurbl;
-
-        rowsize = blmat->blocksize[rowcurbl];
-        colsize = blmat->blocksize[colcurbl];
-        adrcurbl = blmat->block[i];
-
-        a1 = 1.;
-        b1 = 1.;
-        incx = 1;
-        incy = 1;
-        DGEMV(LA_NOTRANS , rowsize , colsize , a1 , adrcurbl , rowsize , &z[indiccol] ,
-              incx , b1 , rhs , incy);
-      }
-    }
-
-    if (adrbldiag != NULL)
-    {
-      /* Local LCP resolution  */
+  /*  } */
 
 
-      /* strcpy(savename,pt->lcp.name); */
-      /*strcpy(pt->lcp.name,"NLGS"); */
+  /*     } */
 
-      pt->lcp.iter = 0;
-      info1 = lcp_driver(adrbldiag , rhs , &rowsize , pt , &z[indicrow] , &w[indicrow]);
 
-      /* strcpy(pt->lcp.name,savename); */
 
-      totaliter += pt->lcp.iter;
-      if (info1 > 0)
-      {
-        if (pt->lcp.chat > 0)
-        {
-          printf(" Sub LCP solver failed at global iteration %d in lcp_solver_block", iter);
-          printf(" for block(%d,%d)\n", rowprecbl, rowprecbl);
-        }
-        free(rhs);
-        return 1;
-      }
-    }
-    else
-    {
-      printf("NULL diagonal block in LCP !!!\n");
-      free(rhs);
-      return 1;
-    }
 
-    /* **** Criterium convergence **** */
 
-    info = filter_result_LCP_block(blmat, q, z, tol, pt->lcp.chat, w);
-    /*    qs   = -1;
-    incx =  1;
-    incy =  1;
 
-    daxpy_( (integer *)&n , &qs , w , (integer *)&incx , ww , (integer *)&incy );
 
-    num = dnrm2_( (integer *)&n, ww , (integer *)&incx );
-    err = num*den;*/
-    /* **** ********************* **** */
-  }
 
-  *it_end  = iter;
-  *itt_end = totaliter;
-  *res     = err;
 
-  /*  free(ww);*/
-  free(rhs);
 
-  if (pt->lcp.chat > 0)
-  {
-    /*    if( err > tol ){*/
-    /*      printf( " The residue is : %g \n", err );*/
-    /*      return 1;*/
-    if (info)
-    {
-      printf(" No convergence of lcp_solver_block after %d iterations\n" , iter);
-    }
-    else
-    {
-      printf(" Convergence of lcp_solver_block after %d iterations\n" , iter);
-      /*      printf( " The residue is : %g \n", err );*/
-    }
-  }
-  /*  else{
-      if( err > tol ) return 1;
-      }*/
 
-  /*  info = filter_result_LCP_block(blmat,q,z,tol,pt->lcp.chat,w);*/
 
-  return info;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+  /*   double *adrbldiag; */
+
+  /*   int rowprecbl,rowcurbl,indicrow,rowsize; */
+  /*   int colprecbl,colcurbl,indiccol,colsize; */
+  /*   int i,j,k; */
+
+  /*   /\* Initialize output *\/ */
+  /*   *it_end   = 0; */
+  /*   *itt_end  = 0; */
+  /*   *res      = 0.0; */
+  /*   int totaliter = 0; */
+
+  /*   /\* Number of blocks in a row *\/ */
+  /*   int nbBlocksInARow = blmat->size; */
+
+  /*   /\* Dim. of the Matrix M (number of scalar elements (not blocks!) in a row *\/ */
+  /*   int n = blmat->blocksize[nbBlocksInARow-1]; */
+
+  /*   /\* Size of the biggest block - Used to allocate memory for rhs *\/ */
+  /*   int blsizemax = 0;  */
+  /*   for( i = 0 ; i < nbBlocksInARow ; i++ )  */
+  /*     { */
+  /*       k = blmat->blocksize[i]; */
+  /*       if (k > blsizemax) blsizemax = k; */
+  /*     } */
+
+
+  /*   /\* Unused ... *\/ */
+  /*   /\*   double qs = DNRM2( n , q , incx ); *\/ */
+  /*   /\*   double den = 1.0/qs; *\/ */
+  /*   /\* Initialization of z and w *\/ */
+  /*   //   for( i = 0 ; i < n ; i++ ) z[i] = 0.; */
+  /*   //   dcopy_( (integer *)&n , q , (integer *)&incx , w , (integer *)&incy ); */
+
+
+  /*   /\* Memory allocation for RHS *\/ */
+  /*   double *rhs = ( double* )malloc( blsizemax * sizeof( double ) ); */
+  /*   { */
+  /*     fprintf(stderr,"lcp_GS_SBS error: allocation failed for rhs.\n"); */
+  /*     exit(EXIT_FAILURE); */
+  /*   } */
+
+  /*   /\* Termination value *\/ */
+  /*   int info= 1; */
+  /*   int info1 = 1; */
+  /*   /\* Current iteration number *\/ */
+  /*   int iter = 0; */
+  /*   /\* resulting error *\/ */
+  /*   double err  = 1.; */
+
+  /*   int incx = 1,incy = 1; */
+
+  /*   /\* ========== Iterations loop ==========*\/ */
+  /*   while( ( iter < itermax ) && ( info ) ) */
+  /*     { */
+  /*       iter++; */
+
+  /*       /\* dcopy_( (integer *)&n , w , (integer *)&incx , ww , (integer *)&incy );*\/ */
+
+  /*       rowprecbl = -1; */
+  /*       rowsize = 0; */
+  /*       indicrow = 0; */
+
+  /*       /\* ==== Iterations over non null blocks ==== *\/ */
+  /*       for( i = 0 ; i < nbOfNonNullBlocks ; i++ ) */
+  /*  { */
+  /*    /\* row/col positions of the current block *\/ */
+  /*    rowcurbl = blmat->RowIndex[i]; */
+  /*    colcurbl = blmat->ColumnIndex[i]; */
+
+  /*    /\* == First case: new row of blocks == *\/ */
+  /*    if  (rowcurbl != rowprecbl)  */
+  /*      { */
+  /*        /\* If not the first row of blocks ... *\/ */
+  /*        if (rowprecbl != -1) */
+  /*    { */
+  /*      if (adrbldiag != NULL) */
+  /*        { */
+  /*          /\* Local LCP resolution  *\/ */
+
+  /*          options->iparam[1] = 0; */
+  /*          local_problem->M->matrix0 = adrbldiag; */
+  /*          local_problem->M->size0 = rowsize; */
+  /*          local_problem->M->size1 = rowsize; */
+  /*          local_problem->q = rhs; */
+
+  /*          info1 = lcp_driver(local_problem, , &z[indicrow] , &w[indicrow], options, global_options); */
+  /*          totaliter += options->iparam[1]; */
+  /*          /\* If solver failed ...*\/ */
+  /*          if (info1 > 0)  */
+  /*      { */
+  /*        free(rhs); */
+  /*        fprintf(stderr,"lcp_GS_SBS error: local LCP solver failed at global iteration %d.\n for block(%d,%d).n", iter,rowprecbl,rowprecbl); */
+  /*        exit(EXIT_FAILURE); */
+  /*      } */
+  /*        } */
+  /*      else // if the diagonal block is null  */
+  /*        { */
+  /*          free(rhs); */
+  /*          fprintf(stderr,"lcp_GS_SBS error: null diagonal block for row number %d.\n", rowcurbl); */
+  /*          exit(EXIT_FAILURE); */
+  /*        } */
+  /*    } */
+
+  /*        adrbldiag = NULL; */
+  /*        indiccol = blmat->blocksize[colcurbl-1]; */
+  /*        colprecbl = colcurbl; */
+
+  /*        indicrow += rowsize; */
+  /*        indicrow += blmat->blocksize[rowcurbl-1]; */
+  /*        indicrow -= blmat->blocksize[rowprecbl]; */
+
+  /*        rowprecbl = rowcurbl; */
+  /*        rowsize = blmat->blocksize[rowcurbl] -  blmat->blocksize[rowcurbl-1]; */
+  /*        DCOPY(rowsize, &q[indicrow], incx, rhs, incy); */
+  /*      } */
+
+  /*    /\* Gets diagonal block *\/ */
+  /*    if (rowcurbl == colcurbl)  */
+  /*      adrbldiag = blmat->block[i]; */
+
+  /*    /\* extra diagonal blocks *\/ */
+  /*    else  */
+  /*      {    */
+  /*        indiccol += blmat->blocksize[colcurbl-1]; */
+  /*        indiccol -=  blmat->blocksize[colprecbl]; */
+  /*        colprecbl = colcurbl; */
+
+  /*        /\* Dim of the current block *\/ */
+  /*        rowsize = blmat->blocksize[rowcurbl] - blmat->blocksize[rowcurbl-1]; */
+  /*        colsize = blmat->blocksize[colcurbl] - blmat->blocksize[colcurbl-1]; */
+
+  /*        DGEMV( LA_NOTRANS , rowsize , colsize , 1.0 , blmat->block[i], rowsize , &z[indiccol], incx , 1.0 , rhs , incy ); */
+  /*      } */
+  /*  } */
+  /*       /\* ==== End of iterations over non null blocks ==== *\/ */
+
+  /*       if (adrbldiag != NULL) */
+  /*  { */
+  /*    /\* Local LCP resolution  *\/ */
+  /*    options->iparam[1] = 0; */
+  /*    /\* Local_problem */
+  /*       M = adrbldiag */
+  /*       q = rhs  */
+  /*       size = rowsize */
+  /*       options = pt */
+  /*    *\/ */
+  /*    info1 = lcp_driver(local_problem, , &z[indicrow] , &w[indicrow], options, global_options); */
+
+  /*    totaliter += options->iparam[1]; */
+
+  /*    if (info1 > 0)  */
+  /*      { */
+  /*        if (verbose > 0)  */
+  /*    { */
+  /*      printf(" Sub LCP solver failed at global iteration %d in lcp_solver_block",iter); */
+  /*      printf(" for block(%d,%d)\n",rowprecbl,rowprecbl); */
+  /*    } */
+  /*        free(rhs); */
+  /*        return 1; */
+  /*      } */
+  /*  } */
+  /*       else  */
+  /*  { */
+  /*    printf("NULL diagonal block in LCP !!!\n"); */
+  /*    free(rhs); */
+  /*    return 1; */
+  /*  } */
+
+  /*       /\* **** Criterium convergence **** *\/ */
+
+  /*       info = filter_result_LCP_block(blmat,q,z,tol,verbose,w); */
+  /*       /\*    qs   = -1; */
+
+  /*       daxpy_( (integer *)&n , &qs , w , (integer *)&incx , ww , (integer *)&incy ); */
+
+  /*       num = dnrm2_( (integer *)&n, ww , (integer *)&incx ); */
+  /*       err = num*den;*\/ */
+  /*       /\* **** ********************* **** *\/ */
+  /*     } */
+  /*   /\* ========== End of Iterations loop ==========*\/ */
+
+  /*   *it_end  = iter; */
+  /*   *itt_end = totaliter; */
+  /*   *res     = err; */
+
+  /*   /\*  free(ww);*\/ */
+  /*   free(rhs); */
+
+  /*   if(verbose > 0 ) */
+  /*     { */
+  /*       /\*    if( err > tol ){*\/ */
+  /*       /\*      printf( " The residue is : %g \n", err );*\/ */
+  /*       /\*      return 1;*\/ */
+  /*       if (info) */
+  /*  printf( " No convergence of lcp_solver_block after %d iterations\n" , iter ); */
+
+  /*       else */
+  /*  printf(" Convergence of lcp_solver_block after %d iterations\n" , iter ); */
+  /*       /\*      printf( " The residue is : %g \n", err );*\/ */
+  /*     } */
+  /*   /\*  else{ */
+  /*       if( err > tol ) return 1; */
+  /*       }*\/ */
+
+  /*   /\*  info = filter_result_LCP_block(blmat,q,z,tol,pt->lcp.chat,w);*\/ */
+
+  /*   return info; */
+  return 0;
 }

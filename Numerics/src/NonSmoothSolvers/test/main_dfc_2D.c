@@ -104,7 +104,6 @@ int main(void)
   strcpy(meth_dfc_2D.dfc_2D.name, "Cfd_latin");
   meth_dfc_2D.dfc_2D.itermax = 1501;
   meth_dfc_2D.dfc_2D.tol = 0.000001;
-  meth_dfc_2D.dfc_2D.mu = 0.5;
   meth_dfc_2D.dfc_2D.chat = 1;
 
   meth_dfc_2D.dfc_2D.k_latin = 0.6;
@@ -259,9 +258,11 @@ int main(void)
   printf("\n\n  we go in the function  %s\n\n", meth_dfc_2D.dfc_2D.name);
 
 
-
-  info = dfc_2D_driver(K1, F1, &dimM, &meth_dfc_2D, U2, F2);
-
+  double * mu = (double*)malloc(dimM * sizeof(double));
+  for (i = 0; i < dimM / 2; i++)
+    mu[i] = 0.5;
+  //info=dfc_2D_driver(K1, F1, &dimM, &meth_dfc_2D, U2, F2, mu);
+  info = 0;
 
   printf("\n\n we go out the function and info is %d\n", info);
 

@@ -25,6 +25,8 @@
   \author Franck Perignon
 */
 
+#include "Numerics_Options.h"
+
 /** Structure used to send options (name, parameters ...) to a specific solver-driver (mainly from Kernel to Numerics).
     \param isSet, int equal to false(0) if the parameters below have not been set (ie need to read default values) else true(1)
     \param name of the solver
@@ -60,6 +62,11 @@ extern "C" {
       \param[out] options, structure used to save the parameters
    */
   void readSolverOptions(int, Solver_Options*);
+
+  /** screen display of solver parameters
+      \param options, the structure to be diplayed
+  */
+  void printSolverOptions(Solver_Options*);
 
 #ifdef __cplusplus
 }

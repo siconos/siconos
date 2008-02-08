@@ -95,10 +95,13 @@
 		</OneStepIntegrator_Definition>
 
 		<!-- One Step NS Problem of th Simulation-->
-		<OneStepNSProblem>
+		<OneStepNSProblems_List>
 		 	<LCP>
-	                  <Solver type="QP" maxIter="101" />
-		 	</LCP>
-		 </OneStepNSProblem>
-	</Simulation>	
+			   <NonSmoothSolver Name="Lemke">
+			      <iparam  vectorSize='5'>101 0 0 0 0</iparam>
+			      <dparam  vectorSize='5'>1e-5 0 0 0 0</dparam>
+			   </NonSmoothSolver>
+	                 </LCP>
+		 </OneStepNSProblems_List>
+		 </Simulation>	
 </SiconosModel>

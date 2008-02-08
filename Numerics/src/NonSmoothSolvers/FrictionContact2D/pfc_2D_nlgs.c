@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,7 +26,6 @@
 
 void pfc_2D_nlgs(int nc , double *vec , double *q , double *z , double *w, double *mu, int *info, int *iparamPFC , double *dparamPFC)
 {
-
   int i, j, k, iter, maxit;
   int n = 2 * nc;
   int ispeak, it_end;
@@ -69,8 +68,6 @@ void pfc_2D_nlgs(int nc , double *vec , double *q , double *z , double *w, doubl
 
   normr    =   1.;
 
-
-
   while ((iter < maxit) && (normr > errmax))
   {
 
@@ -100,13 +97,9 @@ void pfc_2D_nlgs(int nc , double *vec , double *q , double *z , double *w, doubl
 
       for (k = 2 * i + 2; k < n; k++)
       {
-
         apn = apn + vec[k * n + 2 * i] * z[k];
         apt = apt + vec[n * k + 2 * i + 1] * z[k];
-
       }
-
-
 
       zn    = -q[2 * i] - avn - apn;
       zt    = -q[2 * i + 1] - avt - apt;
@@ -190,7 +183,6 @@ void pfc_2D_nlgs(int nc , double *vec , double *q , double *z , double *w, doubl
           {
 
             w[2 * i + 1] = -zt + (zn / gplus) * (vec[2 * i + (2 * i + 1) * n] + mu[i] * vec[(2 * i + 1) + (2 * i + 1) * n]);
-
 
             z[2 * i]   = zn / gplus;
             z[2 * i + 1] = mu[i] * z[2 * i];

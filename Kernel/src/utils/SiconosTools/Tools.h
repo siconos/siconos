@@ -24,6 +24,7 @@
 #ifndef TOOLS
 #define TOOLS
 
+#include "blaslapack.h"
 #include<string>
 #include <sstream>
 #include <vector>
@@ -113,11 +114,8 @@ template<class InpIt> void purge(InpIt begin, InpIt end, const std::vector<bool>
   }
 }
 
-/** atlas/lapack function to determine double precision machine parameters.*/
-extern "C" double dlamch_(char*);
-
 /** double precision machine */
-const double MACHINE_PREC = dlamch_("e");
+const double MACHINE_PREC = 1e-14;//dlamch_("e");
 
 #endif
 

@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-/*! \page NSDrivers Non-Smooth Solvers
+/*! \page NSDrivers  Non-Smooth Solvers
 
 Numerics package proposes a set of non-smooth solvers dedicated to some specific formulations.\n
 
@@ -32,6 +32,9 @@ To get more details on this, check for each type of problem in \ref NSSpackConte
 \subpage fc3DSolvers \n
 \subpage RelaySolvers\n
 \subpage QPSolvers\n
+
+Details on matrix storage in Numerics can be found in:
+\subpage NumericsMatrixPage \n
 
 Other functions and useful tools related to NonSmoothSolvers are listed in NSSTools.h.
 
@@ -69,7 +72,6 @@ typedef union
 {
   method_pr  pr;
   method_dr  dr;
-  method_lcp lcp;
   method_mlcp mlcp;
   method_pfc_2D pfc_2D;
   method_pfc_3D pfc_3D;
@@ -93,7 +95,10 @@ extern "C" {
       - >0 : otherwise see each solver for more information about the log info
       \author Nineb Sheherazade & Mathieu Renouf
   */
-  int lcp_driver(double*, double*, int*, method*, double*, double*);
+  int lcp_driver(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options, Numerics_Options* global_options);
+
+  /** General interface to solver for LCP problems, with M given as a list of blocks */
+  int lcp_driver_block(SparseBlockStructuredMatrix *, double *, method *, double *, double *, int *, int *, double*);
 
   /** Solver with extract-predict mechanism */
   int lcp_solver_pred(double *vec, double *q , int *n , method *pt , double *z , double *w ,
@@ -105,9 +110,6 @@ extern "C" {
   int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat, SparseBlockStructuredMatrixPred *blmatpred, int nbmethod,
                                 int maxiterglob, double tolglob,
                                 double *q, method **pt , double *z , double *w , int *it_end , int *itt_end , double *res);
-
-  /** General interface to solver for LCP problems, with M given as a list of blocks */
-  int lcp_driver_block(SparseBlockStructuredMatrix *, double *, method *, double *, double *, int *, int *, double*);
 
   /** General interface to solver for MLCP problems
       \param[in] , a (\f$n \times n\f$)-vector of doubles which contains the components of the "A" MLCP matrix with a Fortran storage.
@@ -237,7 +239,7 @@ extern "C" {
       \param[in] , mu vector of the friction coefficients (size nc)
       \return result (0 if successful otherwise 1).
   */
-  int frictionContact3D_driver(FrictionContact3D_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options);
+  int frictionContact3D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options);
   //int frictionContact3D_driver(int, double*, double*, method*, double*, double*, double*);
 
   /** General interface to solvers for friction-contact 3D problem with sparse-block storage for M

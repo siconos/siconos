@@ -44,7 +44,6 @@ int main(int argc, char* argv[])
     double h = 0.005;                // time step
     double position_init = 1.0;      // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
-    string solverName = "Lemke" ;
     double R = 0.1; // Ball radius
     double m = 1; // Ball mass
     double g = 9.81; // Gravity
@@ -117,8 +116,14 @@ int main(int argc, char* argv[])
     // -- OneStepIntegrators --
     Lsodar * OSI = new Lsodar(ball, s);
     // -- OneStepNsProblem --
-    OneStepNSProblem * impact = new LCP(s, "impact", solverName, 101, 1e-12);
-    OneStepNSProblem * acceleration = new LCP(s, "acceleration", solverName, 101, 1e-12);
+    IntParameters iparam(5);
+    iparam[0] = 1000; // Max number of iteration
+    DoubleParameters dparam(5);
+    dparam[0] = 1e-15; // Tolerance
+    string solverName = "Lemke" ;
+    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
+    OneStepNSProblem * impact = new LCP(s, mySolver, "impact");
+    OneStepNSProblem * acceleration = new LCP(s, mySolver, "acceleration");
 
     // =========================== End of model definition ===========================
 

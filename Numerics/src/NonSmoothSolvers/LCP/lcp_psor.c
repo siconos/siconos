@@ -15,44 +15,40 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include "LA.h"
+#include "LCP_Solvers.h"
 
-int lcp_compute_error(int n, double *vec , double *q , double *z , int verbose, double *w, double *err);
-
-
-void lcp_psor(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
+void lcp_psor(LinearComplementarity_Problem* problem, double *z, double *w, int *info , Solver_Options* options)
 {
+  /* matrix M/vector q of the lcp */
+  double * M = problem->M->matrix0;
 
-  int n;
+  double * q = problem->q;
+
+  /* size of the LCP */
+  int n = problem->size;
   int incx = 1, incy = 1;
   int incxn;
   int i, iter;
-  int itermax, verbose;
 
   double qs, err, den;
-  double tol, omega;
   double *ww, *diag;
+  int itermax = options->iparam[0];
+  double tol = options->dparam[0];
+  //  double omega = options->dparam[1]; // Not yet used
 
-  n = *nn;
   incxn = n;
-  /* Recup input */
-
-  itermax = iparamLCP[0];
-  verbose  = iparamLCP[1];
-
-  tol   = dparamLCP[0];
-  omega = dparamLCP[1];
 
   /* Initialize output */
 
-  iparamLCP[2] = 0;
-  dparamLCP[2] = 0.0;
+  options->iparam[2] = 0;
+  options->dparam[2] = 0.0;
 
   /* Allocation */
 
@@ -98,7 +94,7 @@ void lcp_psor(int *nn , double *vec , double *q , double *z , double *w , int *i
 
   for (i = 0 ; i < n ; ++i)
   {
-    if (fabs(vec[i * n + i]) < 1e-16)
+    if (fabs(M[i * n + i]) < 1e-16)
     {
 
       if (verbose > 0)
@@ -113,7 +109,7 @@ void lcp_psor(int *nn , double *vec , double *q , double *z , double *w , int *i
 
       return;
     }
-    else diag[i] = 1.0 / vec[i * n + i];
+    else diag[i] = 1.0 / M[i * n + i];
   }
 
   /*start iterations*/
@@ -138,25 +134,24 @@ void lcp_psor(int *nn , double *vec , double *q , double *z , double *w , int *i
 
       z[i] = 0.0;
 
-      /*      zi = -( q[i] + ddot_( (integer *)&n , &vec[i] , (integer *)&incxn , z , (integer *)&incy ))*diag[i]; */
+      /*      zi = -( q[i] + ddot_( (integer *)&n , &M[i] , (integer *)&incxn , z , (integer *)&incy ))*diag[i]; */
 
       /*       if( zi < 0 ) z[i] = 0.0;  */
       /*       else z[i] = zi; */
 
-      z[i] = fmax(0.0, -(q[i] + DDOT(n , &vec[i] , incxn , z , incy)) * diag[i]);
+      z[i] = fmax(0.0, -(q[i] + DDOT(n , &M[i] , incxn , z , incy)) * diag[i]);
 
     }
 
     /* **** Criterium convergence **** */
 
-    lcp_compute_error(n, vec, q, z, verbose, w, &err);
+    lcp_compute_error(n, M, q, z, verbose, w, &err);
 
     /* **** ********************* **** */
   }
 
-  iparamLCP[2] = iter;
-  dparamLCP[2] = err;
-
+  options->iparam[2] = iter;
+  options->dparam[2] = err;
 
   if (err > tol)
   {

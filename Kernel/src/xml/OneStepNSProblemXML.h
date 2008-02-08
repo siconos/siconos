@@ -16,7 +16,8 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-/*! \file
+/*! \file OneStepNSProblemXML.h
+  XML management for One Step Non Smooth Problem interface
 */
 
 #ifndef __OneStepNSProblemXML__
@@ -25,164 +26,187 @@
 #include "SiconosDOMTreeTools.h"
 
 class OneStepNSProblem;
-class SolverXML;
+class NonSmoothSolverXML;
 /** XML management for OneStepNSProblem
  *
  *  \author SICONOS Development Team - copyright INRIA
  *   \version 2.1.1.
  *   \date 05/14/2004
  *
- * OneStepNSProblemXML class id dedicated data management for OneStepNSProblem DOM.
+ * XML management for classes derived from OneStepNSProblem
  *
- * There are two steps in OneStepNSProblem xml loading:
- *  - Problem formalisation part ( LCP, FrictionContact ...) => done in derived class constructor
- *    This is the way the problem is written in Siconos Kernel. Two each formalisation corresponds
- *    a OneStepNSProblem derived class.
  *
- *  - Solver data loading => done in OneStepNS top class constructor.
- *    First data is the solving formalisation, ie how to problem is written in order to be solved:
- *    LcpSolving, PrimalRelaySolving etc ...
- *    This formalisation can be different from the one used in Siconos Kernel, ie from the OneStepNSProblem
- *    type.
- *    Second data is the solver type (NLGS ...) and its parameters.
- *
- */
+ * XML tag for OneStepNSProblem (example for a LCP problem)
+
+ \code
+ <OneStepNSProblems_List>
+ <LCP StorageType="0" Id="myLCP">
+ <size>52</size>
+ <Interactions_Concerned vectorSize='3'>1 4 5</Interactions_Concerned>
+ <NonSmoothSolver Name="Lemke">
+ <iparam  vectorSize='3'>1 3 4</iparam>
+ <dparam  vectorSize='3'>1.3 1e-17 1e-12</dparam>
+ </NonSmoothSolver>
+ </LCP>
+ </OneStepNSProblems_List>
+ \endcode
+ Interactions_Concerned is optional (default: all). \n
+ NonSmoothSolver is optional (default: read XXX.opt file in Numerics, XXX being the formulation type (LCP ...) \n
+ size optional (computed during preCompute() in OneStepNSProblem, according to simulation info).
+
+ => minimum input in XML:
+ \code
+ <OneStepNSProblems_List>
+ <LCP></LCP>
+ </OneStepNSProblems_List>
+ \endcode
+
+ Remark: it is possible to define several OSNS for one Simulation like this:
+ \code
+ <OneStepNSProblems_List>
+ <LCP>...</LCP>
+ <FrictionContact>...</FrictionContact>
+ </OneStepNSProblems_List>
+ \endcode
+
+*/
 class OneStepNSProblemXML
 {
 protected:
 
-  /** root node named "OneStepNSProblem" */
-  xmlNode* rootNode;
-
-  /** root node for formalisation type of the problem in Siconos/Kernel (LCP, QP ...)
-   * This corresponds to the OneStepNSProblem type - Child of rootNode */
-  xmlNode* problemTypeNode;
-  /** dimension of the problem - Child of problemTypeNode */
-  xmlNode* dimNode;
-  /** node named interaction_Concerned  - Child of problemTypeNode */
-  xmlNode* interactionConcernedNode;
-  /** Interactions list (those concerned by the problem) - Child of interactionConcernedNode */
-  xmlNode* interactionListNode;
-
-  /** node named Solver - Child of rootNode */
-  xmlNode* solverNode;
+  /** root node, name of the OSNS (LCP, FrictionContact ...) */
+  xmlNodePtr rootNode;
+  /** dimension of the problem (tag: size) */
+  xmlNodePtr dimNode;
+  /** node used to list the interactions involved in the OSNSS (tag Interactions_Concerned) */
+  xmlNodePtr interactionsConcernedNode;
+  /** node used to define solver (tag: NonSmoothSolver) - Child of rootNode */
+  xmlNodePtr solverNode;
   /** solverXML object */
-  SolverXML* solverXML;
+  NonSmoothSolverXML* solverXML;
   /** bool to check whether solverXML has been allocated inside the class or not*/
   bool isSolverXMLAllocatedIn;
 
 public:
 
-  /** Default constructor
-  */
-  OneStepNSProblemXML();
+  /** Default constructor */
+  inline OneStepNSProblemXML(): rootNode(NULL), dimNode(NULL), interactionsConcernedNode(NULL),
+    solverNode(NULL), solverXML(NULL), isSolverXMLAllocatedIn(false) {};
 
   /** Build a OneStepNSProblemXML object from a DOM tree describing a OneStepNSProblem
-  *   \param OneStepNSProblemNode : the OneStepNSProblem DOM tree
-  *   \exception XMLException : if a property of the OneStepNSProblemXML lacks in the DOM tree
-  */
-  OneStepNSProblemXML(xmlNode *);
+   *   \param OneStepNSProblemNode : the OneStepNSProblem DOM tree
+   *   \exception XMLException : if a property of the OneStepNSProblemXML lacks in the DOM tree
+   */
+  OneStepNSProblemXML(xmlNodePtr);
 
   /** Destructor
-  */
+   */
   virtual ~OneStepNSProblemXML();
 
   /** Return the type of the OneStepNSProblem
-  *   \return a string
-  */
+   *   \return a string
+   */
   inline std::string  getNSProblemType() const
   {
     //std::string  type((char*)problemTypeNode->name);
-    return (char*)problemTypeNode->name;
+    return (char*)rootNode->name;
   }
 
   /** Return the dimension of the OneStepNSProblem
-  *   \return an integer
-  */
+   *   \return an integer
+   */
   inline int getDimNSProblem() const
   {
     return SiconosDOMTreeTools::getContentValue<int>(dimNode);
   }
 
   /** set dimension of the OneStepNSProblem
-  *   \param an integer
-  */
-  void setDimNSProblem(const int&);
+   *   \param an integer
+   */
+  void setDimNSProblem(int);
 
   /** returns true if dimNode is defined
-  *  \return a bool
-  */
+   *  \return a bool
+   */
   inline bool hasDim() const
   {
     return (dimNode != NULL);
   }
 
-  /** All is an attribute of the DS_Concerned tag
-  *  \return bool : true if attribute all is defined
-  */
-  bool hasAll() const;
+  /** All is an attribute of the Interactions_Concerned tag
+   *  \return bool : true if attribute all is defined
+   */
+  bool hasAllInteractions() const;
 
   /** to set the attribute "all" of the Interaction_concerned tag
-  *   \param bool : the value to assign to the attribute
-  */
-  void setAll(const bool&);
+   *   \param bool : the value to assign to the attribute
+   */
+  void setAllInteractions(const bool&);
 
   /** to xml object that handles solver
-  *   \return a pointer to a SolverXML
-  */
-  inline SolverXML* getSolverXMLPtr() const
+   *   \return a pointer to a NonSmoothSolverXML
+   */
+  inline NonSmoothSolverXML* getNonSmoothSolverXMLPtr() const
   {
     return solverXML;
   }
 
   /** set xml object that handles solver
-  *   \param a pointer to a SolverXML
-  */
-  void setSolverXMLPtr(SolverXML *);
+   *   \param a pointer to a NonSmoothSolverXML
+   */
+  void setNonSmoothSolverXMLPtr(NonSmoothSolverXML *);
 
-  //============================================================
-  //      Solver tags and attributes of the OneStepNSProblem
-  //               ( according to SICONOS/Numerics )
-  //============================================================
+  /** Checks if attribute "storageType" is given in formalization tag
+   *  \return a bool
+   */
+  inline bool hasStorageType() const
+  {
+    return (SiconosDOMTreeTools::hasAttributeValue(rootNode, "StorageType"));
+  }
+
+  /** Returns the value of attribute "storageType" in formalization tag
+   *  \return an integer
+   */
+  inline int getStorageType() const
+  {
+    if (!hasStorageType())
+      XMLException::selfThrow("OneStepNSProblemXML::getStorageType - Attribute named storageType does not exists in tag formalization.");
+    return SiconosDOMTreeTools::getAttributeValue<int>(rootNode, "StorageType");
+  }
+
   /** checks if tag Solver exists
-  *  \return bool : true if tag Solver exists
-  */
-  inline bool hasSolver() const
+   *  \return bool : true if tag Solver exists
+   */
+  inline bool hasNonSmoothSolver() const
   {
     return (solverNode != NULL);
   }
 
-  /** set the solver for the OneStepNSProblem
-  *   \param string : the type of solver
-  *   \param string : the norm type used by the solver
-  *   \param double : the tolerance parameter used by the solver
-  *   \param unsigned int : the maximum iteration parameter used by the solver
-  *   \param double : the search direction parameter used by the solver
-  *   \param double : the regularization parameter
-  */
-  void setSolver(const std::string&, const std::string&, double, unsigned int, double, double);
-
   /** makes the operations to create a OneStepNSProblemXML to the SimulationXML
-  *   \param xmlNode* : the root node of the OneStepNSProblemXML
-  *   \param OneStepNSProblem* : the OneStepNSProblem of this OneStepNSProblemXML
-  */
-  void updateOneStepNSProblemXML(xmlNode* , OneStepNSProblem*);
+   *   \param xmlNodePtr : the root node of the OneStepNSProblemXML
+   *   \param OneStepNSProblem* : the OneStepNSProblem of this OneStepNSProblemXML
+   */
+  void updateOneStepNSProblemXML(xmlNodePtr , OneStepNSProblem*);
 
   /** Return the id of the OneStepNSProblem (attribute of the root node)
-  *   \return a string
-  */
+   *   \return a string
+   */
   inline std::string getId() const
   {
-    return SiconosDOMTreeTools::getStringAttributeValue(rootNode, "id");
+    return SiconosDOMTreeTools::getStringAttributeValue(rootNode, "Id");
   }
 
   /** Return true if the id attribute of the rootNode is present.
-  *   \return a bool   */
+   *   \return a bool   */
   inline bool hasId() const
   {
-    return SiconosDOMTreeTools::hasAttributeValue(rootNode, "id");
+    return SiconosDOMTreeTools::hasAttributeValue(rootNode, "Id");
   }
 
+  /** return a vector<int> of the number of the interactions related to the OSNS
+   *  \param in-out vector<int>
+   */
+  void getInteractionsNumbers(std::vector<int>&);
 };
 
 

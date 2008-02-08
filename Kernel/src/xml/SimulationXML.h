@@ -15,15 +15,15 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
-/*! \file
-*/
+ */
+/*! \file SimulationXML.h
+  \brief XML management for simulation-type objects
+ */
 
 #ifndef __SIMULATIONXML__
 #define __SIMULATIONXML__
 
 #include "SiconosDOMTreeTools.h"
-
 #include <set>
 
 class Simulation;
@@ -34,8 +34,14 @@ class TimeDiscretisationXML;
 /** set of OneStepIntegratorXML */
 typedef std::set<OneStepIntegratorXML*> SetOfOSIXML;
 
-/** iterator through SetOfInteractionXML */
+/** iterator through set of OneStepIntegratorXML */
 typedef SetOfOSIXML::iterator SetOfOSIXMLIt;
+
+/** set of OneStepNSProblemXML */
+typedef std::set<OneStepNSProblemXML*> SetOfOSNSPBXML;
+
+/** iterator through  set of OneStepNSProblemXML*/
+typedef SetOfOSNSPBXML::iterator SetOfOSNSPBXMLIt;
 
 /** XML management for Simulation
  *
@@ -43,104 +49,123 @@ typedef SetOfOSIXML::iterator SetOfOSIXMLIt;
  *   \version 2.1.1.
  *   \date 05/17/2004
  *
+ *  XML interface for XML reading in classes TimeStepping and EventDriven.
  *
+ * Attributes for Simulation tag:
+ *  - type (required), simulation type, either TimeStepping or EventDriven.
  *
- * SimulationXML allows to get OneStepIntegratorXMLs and OneStepNSProblemXMLs from a DOM tree.
+ * Tags for Simulation:
+ *  - TimeDiscretisation (required): the time discretisation scheme
+ *  - OneStepIntegrator_Definition (required): a list of one-step integrators
+ *  - OneStepNSProblem (optional): a list of one-step non-smooth problems
+ *
+ * Template for XML input:
+ \code
+<Simulation type='EventDriven'>  <!-- Type = EventDriven or TimeStepping  -->
+<TimeDiscretisation>
+<h>0.05</h>
+</TimeDiscretisation>
+<OneStepIntegrator_Definition>
+<!-- A list of OneStepIntegrators - See documentation of this class for details on XML input  -->
+</OneStepIntegrator_Definition>
+<OneStepNSProblem>
+<!-- A list of OneStepNSProblem - See documentation of this class for details on XML input  -->
+</OneStepNSProblem>
+</Simulation>
+\endcode
+ *
  */
 class SimulationXML
 {
 
 private:
 
-  /* root node for simulation */
+  /* root node for simulation - Tag: Simulation */
   xmlNodePtr rootNode;
 
   /* set of OneStepIntegratorXML* */
   SetOfOSIXML OSIXMLSet;
 
-  /* OneStepNSProblemXML - Optional value, default = NULL */
-  OneStepNSProblemXML *oneStepNSProblemXML;
+  /* set of OneStepIntegratorXML* */
+  SetOfOSNSPBXML OSNSPBXMLSet;
 
   /* TimeDiscretisationXML */
   TimeDiscretisationXML *timeDiscretisationXML;
 
 public:
 
-  /** Default constructor
-  */
-  SimulationXML();
+  /** Default constructor */
+  inline SimulationXML(): rootNode(NULL), timeDiscretisationXML(NULL) {};
 
   /** Build a SimulationXML object from a DOM tree describing a Simulation
-  *   \param the Simulation xml node
-  */
-  SimulationXML(xmlNodePtr rootSimulationNode);
+   *   \param the Simulation xml node
+   */
+  SimulationXML(xmlNodePtr);
 
   /** destructor
-  */
+   */
   ~SimulationXML();
 
-  // --- GETTERS/SETTERS ---
-
   /** Return the root node of the Simulation -> tag "Simulation"
-  *  \return xmlNodePtr  : the root node
-  */
+   *  \return xmlNodePtr  : the root node
+   */
   inline xmlNodePtr getRootNode()
   {
     return rootNode;
   };
 
   /** get the set of OneStepIntegratorXML
-  *   \return a SetOfOSIXML
-  */
+   *   \return a SetOfOSIXML
+   */
   inline const SetOfOSIXML getOneStepIntegratorsXML() const
   {
     return OSIXMLSet;
   };
 
   /** true if set of OneStepIntegratorXML is not empty
-  *   \return a bool
-  */
+   *   \return a bool
+   */
   inline const bool hasOneStepIntegratorXML() const
   {
     return !(OSIXMLSet.empty());
   }
 
-  /** Return the OneStepNSProblemXML pointer of the SimulationXML
-  *   \return the OneStepNSProblemXML pointer of the SimulationXML ; NULL if SimulationXML does not have
-  */
-  inline OneStepNSProblemXML * getOneStepNSProblemXMLPtr()
+  /** get the set of OneStepNSProblemXML
+   *  \return a SetOfOSNSPBXML
+   */
+  inline const SetOfOSNSPBXML getOneStepNSProblemsXML() const
   {
-    return oneStepNSProblemXML;
+    return OSNSPBXMLSet;
+  };
+
+  /** true if set of OneStepNSProblemXML is not empty
+   *  \return a bool
+   */
+  inline const bool hasOneStepNSProblemXML() const
+  {
+    return !(OSNSPBXMLSet.empty());
   }
 
   /** Return the TimeDiscretisationXML of the SimulationXML
-  *   \return the TimeDiscretisationXML of the SimulationXML
-  */
+   *   \return the TimeDiscretisationXML of the SimulationXML
+   */
   inline TimeDiscretisationXML* getTimeDiscretisationXMLPtr()
   {
     return timeDiscretisationXML;
   }
 
   /** Return the type of the Simulation
-  *   \return the type of the SimulationXML
-  */
+   *   \return the type of the SimulationXML
+   */
   inline std::string  getSimulationXMLType()
   {
     return SiconosDOMTreeTools::getStringAttributeValue(rootNode, TYPE_ATTRIBUTE);
   }
 
-  /** determines if the Simulation has a OneStepNSProblemXML
-  *   \return bool :  false if the oneStepNSProblemXML* is NULL
-  */
-  inline const bool hasOneStepNSProblemXML() const
-  {
-    return (oneStepNSProblemXML != NULL);
-  }
-
   /** save data of str into the DOM tree
-  *   \param xmlNodePtr  : the root node of the SimulationXML
-  *   \param Simulation* : the Simulation of this SimulationXML
-  */
+   *   \param xmlNodePtr  : the root node of the SimulationXML
+   *   \param Simulation* : the Simulation of this SimulationXML
+   */
   void saveSimulation2XML(xmlNodePtr  , Simulation*);
 };
 

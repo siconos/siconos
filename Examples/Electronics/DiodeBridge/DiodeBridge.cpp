@@ -58,7 +58,6 @@ int main(int argc, char* argv[])
   double Rvalue = 1e3;    // resistance
   double Vinit = 10.0;    // initial voltage
   string Modeltitle = "DiodeBridge";
-  string solverName = "Lemke"; // non smooth problem solver algo name.
 
   boost::timer time;
   time.restart();
@@ -124,7 +123,13 @@ int main(int argc, char* argv[])
     Moreau* OSI_RLCD = new Moreau(LSDiodeBridge, theta, StratDiodeBridge);
 
     // One Step non smooth problem
-    LCP* LCP_RLCD = new LCP(StratDiodeBridge, "LCP", solverName, 1001, 0.0001);
+    IntParameters iparam(5);
+    iparam[0] = 1001; // Max number of iteration
+    DoubleParameters dparam(5);
+    dparam[0] = 0.0001; // Tolerance
+    string solverName = "Lemke" ;
+    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
+    LCP* LCP_RLCD = new LCP(StratDiodeBridge, mySolver, "LCP");
 
     // Initialization
     StratDiodeBridge->initialize();

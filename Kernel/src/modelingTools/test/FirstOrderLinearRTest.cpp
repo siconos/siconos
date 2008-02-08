@@ -47,7 +47,6 @@ void FirstOrderLinearRTest::setUp()
     XMLException::selfThrow("empty document");
     xmlFreeDoc(doc);
   }
-
   // get rootNode
 
   if (xmlStrcmp(cur->name, (const xmlChar *) "SiconosModel"))
@@ -64,6 +63,7 @@ void FirstOrderLinearRTest::setUp()
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Definition");
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction");
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Content");
+
   // get relation
   node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "FirstOrderLinearRelation");
   tmpxml1 = new FirstOrderLinearRXML(node1);

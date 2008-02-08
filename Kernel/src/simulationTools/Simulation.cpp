@@ -34,8 +34,6 @@
 
 // One Step Non Smooth Problems
 #include "LCP.h"
-#include "FrictionContact2D.h"
-#include "FrictionContact3D.h"
 #include "QP.h"
 #include "Relay.h"
 
@@ -452,7 +450,7 @@ void Simulation::saveSimulationToXML()
     //    string NSPType = nsProblem->getType();
     //    if( NSPType == "LCP" )
     //      (static_cast<LCP*>(nsProblem))->saveNSProblemToXML();
-    //    else if( NSPType == "FrictionContact2D" || NSPType == "FrictionContact3D")
+    //    else if( NSPType == "FrictionContact")
     //      (static_cast<FrictionContact*>(nsProblem))->saveNSProblemToXML();
     //    else if( NSPType == "QP")
     //      (static_cast<QP*>(nsProblem))->saveNSProblemToXML();

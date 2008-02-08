@@ -77,12 +77,18 @@ void subRowProd(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix
   if (storage == 0)
   {
     int incx = A->size0, incy = 1;
-    double coef = 0.0; /* y = subAx */
     double* mat = A->matrix0;
     if (init == 0) /* y += subAx */
-      coef = 1.0;
-    for (int row = currentRowNumber; row < sizeY + currentRowNumber; row++)
-      DDOT(sizeX, &mat[row], incx, x, incy);
+    {
+      for (int row = 0; row < sizeY; row++)
+        y[row] += DDOT(sizeX, &mat[currentRowNumber + row], incx, x, incy);
+    }
+    else
+    {
+      for (int row = 0; row < sizeY; row++)
+        y[row] = DDOT(sizeX, &mat[currentRowNumber + row], incx, x, incy);
+    }
+
   }
   /* SparseBlock storage */
   else if (storage == 1)
@@ -93,4 +99,89 @@ void subRowProd(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix
     exit(EXIT_FAILURE);
   }
 
+}
+
+void rowProdNoDiag(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* A, const double* const x, double* y, int init)
+{
+  /* Checks inputs */
+  if (A == NULL || x == NULL || y == NULL)
+  {
+    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector rowProdNoDiag(A,x,y) failed, A or x or y == NULL.\n");
+    exit(EXIT_FAILURE);
+  }
+  /* Check dim */
+  if (A->size1 != sizeX || sizeY > A->size0)
+  {
+    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector rowProdNoDiag(A,x,y) failed, unconsistent sizes.\n");
+    exit(EXIT_FAILURE);
+  }
+
+
+  /* Checks storage type */
+  int storage = A->storageType;
+
+  /* double* storage */
+  if (storage == 0)
+  {
+    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector rowProdNoDiag(A,x,y) failed, not yet implemented for matrix not sparse.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  /*    exit(EXIT_FAILURE); */
+  /*       if( currentRowNumber > A->size0 || (currentRowNumber+sizeY) > A->size0 ) */
+  /*  { */
+  /*    fprintf(stderr,"Numerics, NumericsMatrix, product matrix - vector rowProdNoDiag(A,x,y) failed, unconsistent sizes.\n"); */
+  /*    exit(EXIT_FAILURE); */
+  /*  } */
+  /*       int incx = A->size0, incy = 1; */
+  /*       double coef = 0.0; /\* y = subAx *\/ */
+  /*       double* mat = A->matrix0; */
+  /*       if(init==0) /\* y += subAx *\/ */
+  /*  coef = 1.0; */
+  /*       for(int row = currentRowNumber; row < sizeY+currentRowNumber; row++) */
+  /*  DDOT(sizeX, &mat[row], incx, x, incy); */
+
+  /* SparseBlock storage */
+  else if (storage == 1)
+    rowProdNoDiagSBM(sizeX, sizeY, currentRowNumber, A->matrix1, x, y, init);
+  else
+  {
+    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector rowProdNoDiag(A,x,y) failed, unknown storage type for A.\n");
+    exit(EXIT_FAILURE);
+  }
+}
+
+
+void freeNumericsMatrix(NumericsMatrix* m)
+{
+  if (m->storageType == 0)
+  {
+    if (m->matrix0 != NULL)
+      free(m->matrix0);
+    m->matrix0 = NULL;
+  }
+  else
+    freeSBM(m->matrix1);
+}
+
+
+void display(const NumericsMatrix* const m)
+{
+  if (m == NULL)
+  {
+    fprintf(stderr, "Numerics, NumericsMatrix display failed, NULL input.\n");
+    exit(EXIT_FAILURE);
+  }
+  int storageType = m->storageType;
+  if (storageType == 0)
+  {
+    printf("\n ========== Numerics Matrix of dim %dX%d\n", m->size0, m->size1);
+    printf("[");
+    for (int i = 0; i < m->size1 * m->size0; i++)
+      printf("%lf ", m->matrix0[i]);
+    printf("]");
+    printf("\n (warning: column-major) \n");
+  }
+  else if (storageType == 1)
+    printSBM(m->matrix1);
 }

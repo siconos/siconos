@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 /*! \file LCP.h
-Linear Complementarity Problem
+\brief Linear Complementarity Problem formulation and solving
 */
 
 #ifndef LCP_H
@@ -37,6 +37,8 @@ class OneStepNSProblem;
  *  \version 2.1.1.
  *  \date (Creation) Apr 26, 2004
  *
+ * \section LCPintro Aim of the LCP class
+ *
  * This class is devoted to the formalization and the resolution of the
  * Linear Complementarity Problem (LCP) defined by :
  *  * \f[
@@ -49,10 +51,30 @@ class OneStepNSProblem;
  *    - \f$ w \in R^{n} \f$  and \f$z \in R^{n} \f$ are the unknowns,
  *    - \f$ M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
  *
- * \todo Correct the computation of M with a correct concatenation process
- * \todo : add "recover" function to start from old values of z and w.
- * \todo Change the assembleM for a Sparse Block Matrix by a Boost Sparse Matrix of Dense Matrix. Creation of the Class of Sparse Block Matrix
+ *  The LCP main components are:
+ *  - a problem (variables M,q and size of the problem), which directly corresponds to the LinearComplementarityProblem structure of Numerics
+ *  - the unknowns z and w
+ *  - a NonSmoothSolver, used to define a solver and its parameters (connected to Solver_Options structure of Numerics)
  *
+ *  A LCP is connected to a simulation that handles a NonSmoothDynamicalSystem and its Topology. \n
+ *  IndexSets from simulation are used to know which constraints (UnitaryRelation) are active or not. \n
+ *
+ * \b Construction:
+ *   - XML reading (inputs = xml node with tag "OneStepNSProblem" and a Simulation*)
+ *   - Constructor from data (inputs = Simulations*, id, NonSmoothSolver*) - The solver is optional.
+ * Main functions:
+ *
+ * \b Main functions:
+ *  - formalization of the problem: computes M,q using the set of "active" UnitaryRelations from the simulation and \n
+ *  the block-matrices saved in the field blocks.\n
+ *  Functions: initialize(), computeBlock(), preCompute()
+ *  - solving of the FrictionContact problem: function compute(), used to call solvers from Numerics through \n
+ * the lcp_driver() interface of Numerics.
+ *  - post-treatment of data: set values of y/lambda variables of the active UR (ie Interactions) using \n
+ *  ouput results from the solver (z,w); function postCompute().
+ *
+ *
+ * \todo : add "recover" function to start from old values of z and w.
  */
 class LCP : public OneStepNSProblem
 {
@@ -65,8 +87,7 @@ private:
   SiconosVector *z;
 
   /** contains the matrix M of a LCP system */
-  SiconosMatrix *M;
-  //ublas::matrix<double, ublas::column_major, ublas::bounded_array<double, 1000> * M;
+  OSNSMatrix *M;
 
   /** contains the vector q of a LCP system */
   SiconosVector *q;
@@ -77,11 +98,8 @@ private:
   bool isMAllocatedIn;
   bool isQAllocatedIn;
 
-  /** Sparse-Block Boost Matrix. Each block is a SiconosMatrix**/
-  SparseBlockMatrix *MSparseBlock;
-
-  /** pointer to function, called to prepare M matrix. If solver-block, connected to collectBlocks, else to assembleM*/
-  void (LCP::*prepareM)();
+  /** Storage type for M - 0: SiconosMatrix (dense), 1: Sparse Storage (embedded into OSNSMatrix) */
+  int MStorageType;
 
   /** default constructor (private)
    */
@@ -96,25 +114,12 @@ public:
   LCP(OneStepNSProblemXML*, Simulation*);
 
   /** constructor from data
-   *  \param Simulation *: the simulation that owns this problem
-   *  \param string : id
-   *  \param string: solver name (optional)
-   *  \param unsigned int   : MaxIter (optional) required if a solver is given
-   *  \param double : Tolerance (optional) -> for NLGS, Gcp, Latin
-   *  \param string : NormType (optional) -> never used at the time
-   *  \param double : SearchDirection (optional) -> for Latin
-   *  \param double : Rho (optional) -> for RPGS (regularization parameter)
-   */
-  LCP(Simulation *, const std::string&,  const std::string& = DEFAULT_SOLVER, unsigned int = DEFAULT_ITER, double = DEFAULT_TOL,
-      unsigned int = DEFAULT_VERBOSE, const std::string& = DEFAULT_NORMTYPE, double = DEFAULT_SEARCHDIR,
-      double = DEFAULT_RHO);
-
-  /** constructor from data
-  *  \param Solver* : pointer to object that contains solver algorithm and formulation
   *  \param Simulation *: the simulation that owns this problem
-  *  \param String: id of the problem (default = DEFAULT_OSNS_NAME)
+  *  \param Solver* pointer to object that contains solver algorithm and formulation \n
+  *  (optional, default = NULL => read .opt file in Numerics)
+  *  \param String: id of the problem (default = "unamed")
   */
-  LCP(Solver*, Simulation*, const std::string& = DEFAULT_OSNS_NAME);
+  LCP(Simulation*, NonSmoothSolver* = NULL, const std::string& = "unamed_lcp");
 
   /** destructor
   */
@@ -178,39 +183,23 @@ public:
 
   // --- M ---
 
-  /** get the value of M
-  *  \return SimpleMatrix
-  */
-  inline const SimpleMatrix getM() const
-  {
-    return *M;
-  }
-
   /** get M
-  *  \return pointer on a SiconosMatrix
+  *  \return pointer on a OSNSMatrix
   */
-  inline SiconosMatrix* getMPtr() const
+  inline OSNSMatrix* getMPtr() const
   {
     return M;
   }
 
   /** set the value of M to newValue
-  *  \param SiconosMatrix newValue
+  *  \param newValue OSNSMatrix
   */
-  void setM(const SiconosMatrix&);
+  void setM(const OSNSMatrix&);
 
   /** set M to pointer newPtr
-   *  \param SiconosMatrix * newPtr
+   *  \param newPtr OSNSMatrix*
    */
-  void setMPtr(SiconosMatrix *);
-
-  /** get the structure used to save M as a list of blocks
-   *  \return a SparseBlockMatrix
-   */
-  inline SparseBlockMatrix* getMSparsePtr() const
-  {
-    return MSparseBlock;
-  }
+  void setMPtr(OSNSMatrix *);
 
   // --- Q ---
   /** get the value of q, the initial state of the DynamicalSystem
@@ -240,14 +229,18 @@ public:
   */
   void setQPtr(SiconosVector*);
 
-  /** set the Solver of the OneStepNSProblem
-   *  \param: a pointer on Solver
-   */
-  void setSolverPtr(Solver*);
+  /** get the type of storage for M */
+  inline const int getMStorageType() const
+  {
+    return MStorageType;
+  };
 
-  /** used (required) in case of a switch from a solver to a solver block
-   */
-  void initSolver();
+  /** set which type of storage will be used for M - Note that this function does not
+      allocate any memory for M, it just sets an indicator for future use */
+  inline void setMStorageType(int i)
+  {
+    MStorageType = i;
+  };
 
   /** To initialize the LCP problem(computes topology ...)
    */
@@ -259,14 +252,6 @@ public:
   *  \param a pointer to UnitaryRelation
   */
   void computeBlock(UnitaryRelation*, UnitaryRelation*);
-
-  /** built sparse-block structured matrix M using already computed blocks
-   */
-  void collectMBlocks();
-
-  /** built matrix M using already computed blocks
-  */
-  void assembleM();
 
   /** compute vector q
   *  \param double : current time
@@ -298,25 +283,11 @@ public:
   */
   void saveNSProblemToXML();
 
-  /** copy the matrix M of the OneStepNSProblem to the XML tree
-  *  \exception RuntimeException
-  */
-  void saveMToXML();
-
-  /** copy the vector q of the OneStepNSProblem to the XML tree
-  *  \exception RuntimeException
-  */
-  void saveQToXML();
-
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
   *  \param OneStepNSProblem* : the one step problem which must be converted
   * \return a pointer on the problem if it is of the right type, NULL otherwise
   */
   static LCP* convert(OneStepNSProblem* osnsp);
-
-  /** display stat. info (CPU time and nb of iterations achieved)
-   */
-  void printStat();
 
 };
 

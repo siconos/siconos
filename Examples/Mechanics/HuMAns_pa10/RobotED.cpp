@@ -161,8 +161,14 @@ int main(int argc, char* argv[])
     // -- OneStepIntegrators --
     Lsodar * OSI =  new Lsodar(arm, s);
     // -- OneStepNsProblem --
-    OneStepNSProblem * impact = new LCP(s, "impact", "PGS", 20001, 0.005);
-    OneStepNSProblem * acceleration = new LCP(s, "acceleration", "PGS", 20001, 0.005);
+    IntParameters iparam(5);
+    iparam[0] = 20001; // Max number of iteration
+    DoubleParameters dparam(5);
+    dparam[0] =  0.005; // Tolerance
+    string solverName = "PGS" ;
+    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
+    OneStepNSProblem * impact = new LCP(s, mySolver, "impact");
+    OneStepNSProblem * acceleration = new LCP(s, mySolver, "acceleration");
 
     cout << "=== End of model loading === " << endl;
 

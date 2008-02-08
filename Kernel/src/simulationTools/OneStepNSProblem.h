@@ -16,17 +16,19 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-/*! \file
+/*! \file OneStepNSProblem.h
+  \brief Interface to formalize and solve Non-Sooth problems
  */
 
 #ifndef ONESTEPNSPROBLEM_H
 #define ONESTEPNSPROBLEM_H
 
 #include "InteractionsSet.h"
-#include "Solver.h"
 #include "SimulationTypeDef.h"
 #include "Numerics_Options.h"
+#include "NumericsMatrix.h"
 #include "NonSmoothSolver.h"
+#include "OSNSMatrix.h"
 
 class Simulation;
 class DynamicalSystem;
@@ -36,9 +38,6 @@ class OneStepNSProblemXML;
 
 /** default name for the OneStepNSProblem of the simulation */
 const std::string DEFAULT_OSNS_NAME = "unamed";
-
-/** default type for the OneStepNSProblem of the simulation */
-const std::string DEFAULT_OSNSPB = "LCP";
 
 /** Non Smooth Problem Formalization and Simulation
  *
@@ -61,8 +60,20 @@ const std::string DEFAULT_OSNSPB = "LCP";
  *
  *  Note: simulation is a required input for construction of a OneStepNSProblem.
  *
+ * \section osns_options Options for Numerics and the driver for solvers
+ *
+ *  When the Numerics driver is called, two input arguments are required to set specific options:
+ *  - one for general options in Numerics (verbose mode ...)
+ *  - the other to set the solver options (name, tolerance, max. number of iterations ...)
+ *
+ *  The second one is a member of the NonSmoothSolver, and thus filled during its construction. \n
+ *  The general options are set thanks to specific functions (only setNumericsVerboseMode() at the time).
+ *
+ *
+ *
  * Remark: UnitaryMatrixRowIterator will be used to iterate through what corresponds to rows of blocks (a row for a UnitaryRelation, named URrow) and for
  *  a row, UnitaryMatrixColumnIterator will be used to iterate through columns, ie through all the UnitaryRelations that are linked to URrow.
+ *
  */
 class OneStepNSProblem
 {
@@ -87,21 +98,8 @@ protected:
       the block has been allocated in OneStepNSProblem, else false. */
   MapOfMapOfBool isBlockAllocatedIn;
 
-  /** map that links each UnitaryRelation with an int that gives the position of the corresponding block matrix
-   *  in the full matrix (M in LCP case) in number of single elements
-   */
-  std::map< UnitaryRelation* , unsigned int > blocksPositions;
-
-  /** map that links each UnitaryRelation with an int that gives the position of the corresponding block matrix
-   *  in the full matrix (M in LCP case) in number of blocks (for use with block matrix storage)
-   */
-  std::map< UnitaryRelation* , unsigned int > blocksIndices;
-
   /** Solver for Non Smooth Problem*/
-  Solver* solver;
-
-  /** Solver for Non Smooth Problem*/
-  NonSmoothSolver* nsSolver;
+  NonSmoothSolver* solver;
 
   /** bool to check whether solver has been allocated inside the class or not */
   bool isSolverAllocatedIn;
@@ -168,7 +166,7 @@ public:
    *  \param string : id
    *  \param Solver *: pointer on object that contains solver algorithm definition (optional)
    */
-  OneStepNSProblem(const std::string&, Simulation *, const std::string&, Solver* = NULL);
+  OneStepNSProblem(const std::string&, Simulation *, const std::string&, NonSmoothSolver* = NULL);
 
   /** destructor
    */
@@ -248,18 +246,18 @@ public:
    */
   void clearBlocks();
 
-  /** get the Solver
-   *  \return a pointer on Solver
+  /** get the NonSmoothSolver
+   *  \return a pointer on NonSmoothSolver
    */
-  inline Solver* getSolverPtr() const
+  inline NonSmoothSolver* getNonSmoothSolverPtr() const
   {
     return solver;
   }
 
-  /** set the Solver of the OneStepNSProblem
-   *  \param: a pointer on Solver
+  /** set the NonSmoothSolver of the OneStepNSProblem
+   *  \param: a pointer on NonSmoothSolver
    */
-  virtual void setSolverPtr(Solver*);
+  void setNonSmoothSolverPtr(NonSmoothSolver*);
 
   /** get the Simulation
    *  \return a pointer on Simulation
@@ -269,28 +267,12 @@ public:
     return simulation;
   }
 
-  /** get the OneStepNSProblemXML
-   *  \return a pointer on OneStepNSProblemXML
-   */
-  inline OneStepNSProblemXML* getOneStepNSProblemXML() const
-  {
-    return onestepnspbxml;
-  }
-
   /** get the Interactions set
    *  \return an InteractionsSet
    */
   inline InteractionsSet * getInteractions() const
   {
     return OSNSInteractions;
-  }
-
-  /** set the OneStepNSProblemXML
-   *  \param a pointer on OneStepNSProblemXML
-   */
-  inline void setOneStepNSProblemXML(OneStepNSProblemXML* osnspb)
-  {
-    onestepnspbxml = osnspb;
   }
 
   /** get level min value
@@ -367,6 +349,14 @@ public:
     return nbIter;
   };
 
+  /** set Numerics verbose mode
+      \param a boolean = 1 for on, = 0 for off
+   */
+  inline void setNumericsVerboseMode(bool vMode)
+  {
+    numerics_options->verboseMode = vMode;
+  };
+
   /** reset stat (nbIter and CPUtime)
    */
   inline void resetStat()
@@ -378,21 +368,6 @@ public:
   /** display stat. info (CPU time and nb of iterations achieved)
    */
   void printStat();
-
-  /** get Numerics structure used to set options */
-  inline Numerics_Options * getNumericsOptions()
-  {
-    return numerics_options;
-  };
-
-  /** fills in blocksPositions map, ie computes variables blocks positions in the full matrix (M in LCP case ...)
-   */
-  void computeUnitaryRelationsPositions();
-
-  /** compute SizeOutput, ie count the total number
-   *  of relations constrained
-   */
-  void computeSizeOutput();
 
   /** compute blocks if necessary (this depends on the type of OSNS, on the indexSets ...)
    */

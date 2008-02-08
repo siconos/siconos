@@ -44,19 +44,29 @@ EventDriven::EventDriven(SimulationXML* strxml, Model *newModel): Simulation(str
   // both one step ns problems ("acceleration" and "impact").
   // At the time, only LCP is available for Event Driven.
 
-  if (simulationxml->hasOneStepNSProblemXML())
+  if (simulationxml->hasOneStepNSProblemXML()) // ie if OSNSList is not empty
   {
-    // OneStepNSProblem - Memory allocation/construction
-    string type = simulationxml->getOneStepNSProblemXMLPtr()->getNSProblemType();
-    if (type == LCP_TAG)  // LCP
+    SetOfOSNSPBXML OSNSList = simulationxml->getOneStepNSProblemsXML();
+    OneStepNSProblemXML* osnsXML = NULL;
+    string type;
+    // For EventDriven, two OSNSPb are required, "acceleration" and "impact"
+
+    if (OSNSList.size() != 2)
+      RuntimeException::selfThrow("EventDriven::xml constructor - Wrong number of OSNS problems: 2 are required.");
+    string id = "impact";
+    for (SetOfOSNSPBXMLIt it = OSNSList.begin(); it != OSNSList.end(); ++it)
     {
-      (*allNSProblems)["acceleration"] = new LCP(simulationxml->getOneStepNSProblemXMLPtr(), this);
-      isNSProblemAllocatedIn[(*allNSProblems)["acceleration"] ] = true;
-      (*allNSProblems)["impact"] = new LCP(simulationxml->getOneStepNSProblemXMLPtr(), this);
-      isNSProblemAllocatedIn[(*allNSProblems)["impact"] ] = true;
+      osnsXML = *it;
+      type = osnsXML->getNSProblemType();
+      if (type == LCP_TAG)  // LCP
+      {
+        (*allNSProblems)[id] = new LCP(osnsXML, this);
+        isNSProblemAllocatedIn[(*allNSProblems)[id] ] = true;
+      }
+      else
+        RuntimeException::selfThrow("EventDriven::xml constructor - wrong type of NSProblem: inexistant or not yet implemented");
+      id = "acceleration";
     }
-    else
-      RuntimeException::selfThrow("EventDriven::xml constructor - wrong type of NSProblem: inexistant or not yet implemented");
 
     (*allNSProblems)["acceleration"]->setId("acceleration");
     (*allNSProblems)["impact"]->setId("impact");

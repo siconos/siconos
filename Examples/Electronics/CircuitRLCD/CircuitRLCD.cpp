@@ -58,7 +58,6 @@ int main(int argc, char* argv[])
   double Rvalue = 1e3;    // resistance
   double Vinit = 10.0;    // initial voltage
   string Modeltitle = "CircuitRLCD";
-  string solverName = "NSQP"; // solver algorithm name for NS problem
 
   try
   {
@@ -117,7 +116,16 @@ int main(int argc, char* argv[])
 
     Moreau* OSI_RLCD = new Moreau(LSCircuitRLCD, theta, StratCircuitRLCD);
 
-    LCP* LCP_RLCD = new LCP(StratCircuitRLCD, "LCP", solverName, 101, 1e-8);
+
+    IntParameters iparam(5);
+    iparam[0] = 101; // Max number of iteration
+    DoubleParameters dparam(5);
+    dparam[0] = 1e-8; // Tolerance
+    string solverName = "Lemke" ;
+    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
+    // -- OneStepNsProblem --
+
+    LCP* LCP_RLCD = new LCP(StratCircuitRLCD, mySolver, "LCP");
 
     StratCircuitRLCD->initialize();
     cout << " -----> End of initialization." << endl;

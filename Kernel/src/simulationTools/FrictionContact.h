@@ -26,35 +26,52 @@
 #include "SimpleVector.h"
 #include "SimpleMatrix.h"
 
+// Pointer to function of the type used for drivers for FrictionContact problems in Numerics
+typedef int (*Driver)(FrictionContact_Problem*, double*, double*, Solver_Options*, Numerics_Options*);
+
 /** Formalization and Resolution of a Friction-Contact Problem
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 2.1.1.
  *  \date (Creation) Dec 15, 2005
  *
- *  WARNING !!! This is a virtual class -> derived class = FrictionContact2D and 3D !!!
- *
  * This class is devoted to the formalization and the resolution of
  * friction contact problems defined by :
- * \f[
- * velocity =  q + M reaction
- * \f]
- * \f[
+ * \f{eqnarray*}
+ * velocity =  q + M reaction \\
+ * \\
  * velocity \geq 0, reaction \geq 0,  reaction^{T} velocity =0
- * \f]
+ * \f}
  * and a Coulomb friction law.
  *
  * With:
- *    - \f$velocity \in R^{n} \f$  and \f$reaction \in R^{n} \f$ are the unknown,
+ *    - \f$velocity \in R^{n} \f$  and \f$reaction \in R^{n} \f$ the unknowns,
  *    - \f$M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
  *
- * The present formulation corresponds to pfc2D and 3D of Numerics package.
+ * The dimension of the problem (2D or 3D) is given by the variable contactProblemDim and the right
+ * Numerics driver will be called according to this value.
  *
- * \todo Correct the computation of M with a correct concatenation process
+ * \b Construction:
+ *   - XML reading (inputs = xml node with tag "OneStepNSProblem" and a Simulation*)
+ *   - Constructor from data (inputs = Simulations*, id, NonSmoothSolver*) - The solver is optional.
+ * Main functions:
+ *
+ * \b Main functions:
+ *  - formalization of the problem: computes M,q using the set of "active" UnitaryRelations from the simulation and \n
+ *  the block-matrices saved in the field blocks.\n
+ *  Functions: initialize(), computeBlock(), preCompute()
+ *  - solving of the FrictionContact problem: function compute(), used to call solvers from Numerics through \n
+ * the frictionContact2D_driver() or frictionContact3D_driver() interface of Numerics.
+ *  - post-treatment of data: set values of y/lambda variables of the active UR (ie Interactions) using \n
+ *  ouput results from the solver (velocity,reaction); function postCompute().
+ *
  */
 class FrictionContact : public OneStepNSProblem
 {
 protected:
+
+  /** Type (dimension) of the contact problem (2D or 3D) */
+  int contactProblemDim;
 
   /** contains the vector velocity of a FrictionContact system */
   SimpleVector *velocity;
@@ -63,13 +80,13 @@ protected:
   SimpleVector *reaction;
 
   /** contains the matrix M of a FrictionContact system */
-  SiconosMatrix *M;
+  OSNSMatrix *M;
 
   /** contains the vector q of a FrictionContact system */
   SimpleVector *q;
 
   /** contains the vector q of a FrictionContact system */
-  SiconosVector *mu;
+  std::vector<double>* mu;
 
   /** Flags to check wheter pointers were allocated in class constructors or not */
   bool isVelocityAllocatedIn;
@@ -77,44 +94,48 @@ protected:
   bool isMAllocatedIn;
   bool isQAllocatedIn;
 
-  /** Specific structure required when a (Numerics) solver block is used */
-  SparseBlockStructuredMatrix *Mspbl;
+  /** Storage type for M - 0: SiconosMatrix (dense), 1: Sparse Storage (embedded into OSNSMatrix) */
+  int MStorageType;
+
+  /** Pointer to the function used to call the Numerics driver to solve the problem */
+  Driver frictionContact_driver;
 
 private:
 
   /** default constructor (private)
    */
-  FrictionContact(const std::string pbType = "FrictionContact2D");
+  FrictionContact(const std::string& pbType = "FrictionContact2D");
 
 public:
 
   /** xml constructor
-   *  \param string: problem type
    *  \param OneStepNSProblemXML* : the XML linked-object
-   *  \param Simulation *: the simulation that owns the problem
+   *  \param Simulation * the simulation that owns the problem
    */
-  FrictionContact(const std::string, OneStepNSProblemXML*, Simulation*);
+  FrictionContact(OneStepNSProblemXML*, Simulation*);
 
   /** constructor from data
-   *  \param string: problem type
-   *  \param Simulation *: the simulation that owns this problem
-   *  \param string: id
+   *  \param Simulation* the simulation that owns this problem
+   *  \param int dim (2D or 3D) of the friction-contact problem
+   *  \param Solver* pointer to object that contains solver algorithm and formulation \n
+   *  (optional, default = NULL => read .opt file in Numerics)
+   *  \param string id of the problem (optional)
    */
-  FrictionContact(const std::string pbType, Simulation *, const std::string);
-
-  /** constructor from data
-   *  \param string: problem type
-   *  \param Solver* : pointer to object that contains solver algorithm and formulation
-   *  \param Simulation *: the simulation that owns this problem
-   *  \param string: id
-   */
-  FrictionContact(const std::string pbType, Solver*, Simulation *, const std::string);
+  FrictionContact(Simulation *, int, NonSmoothSolver* = NULL, const std::string& = "unamed_friction_contact_problem");
 
   /** destructor
    */
-  virtual ~FrictionContact();
+  ~FrictionContact();
 
   // GETTERS/SETTERS
+
+  /** get the type of FrictionContact problem (2D or 3D)
+   *  \return an int (2 or 3)
+   */
+  inline int getFrictionContactDim() const
+  {
+    return contactProblemDim;
+  }
 
   // --- Velocity ---
   /** get the value of velocity, the initial state of the DynamicalSystem
@@ -174,39 +195,23 @@ public:
 
   // --- M ---
 
-  /** get the value of M
-   *  \return SimpleMatrix
-   */
-  inline const SimpleMatrix getM() const
-  {
-    return *M;
-  }
-
   /** get M
-   *  \return pointer on a SiconosMatrix
+   *  \return pointer on a OSNSMatrix
    */
-  inline SiconosMatrix* getMPtr() const
+  inline OSNSMatrix* getMPtr() const
   {
     return M;
   }
 
   /** set the value of M to newValue
-   *  \param SiconosMatrix newValue
+   *  \param  newValue
    */
-  void setM(const SiconosMatrix&);
+  void setM(const OSNSMatrix &);
 
   /** set M to pointer newPtr
-   *  \param SiconosMatrix * newPtr
+   *  \param  OSNSMatrix* newPtr
    */
-  void setMPtr(SiconosMatrix *);
-
-  /** get the structure used to save M as a list of blocks
-   *  \return a SparseBlockStructuredMatrix
-   */
-  inline SparseBlockStructuredMatrix* getMspblPtr() const
-  {
-    return Mspbl;
-  }
+  void setMPtr(OSNSMatrix*);
 
   // --- Q ---
   /** get the value of q, the initial state of the DynamicalSystem
@@ -238,17 +243,17 @@ public:
 
   // --- Mu ---
   /** get the vector mu, list of the friction coefficients
-   *  \return SimpleVector
+   *  \return a vector of double
    */
-  inline const SimpleVector getMu() const
+  inline const std::vector<double> getMu() const
   {
     return *mu;
   }
 
   /** get a pointer to mu, the list of the friction coefficients
-   *  \return pointer on a SimpleVector
+   *  \return pointer on a std::vector<double>
    */
-  inline SiconosVector* getMuPtr() const
+  inline std::vector<double>* getMuPtr() const
   {
     return mu;
   }
@@ -259,8 +264,29 @@ public:
    */
   inline const double getMu(unsigned int i) const
   {
-    return (*mu)(i);
+    return (*mu)[i];
   }
+
+  /** get the type of storage for M */
+  inline const int getMStorageType() const
+  {
+    return MStorageType;
+  };
+
+  /** set which type of storage will be used for M - Note that this function does not
+      allocate any memory for M, it just sets an indicator for future use */
+  inline void setMStorageType(int i)
+  {
+    MStorageType = i;
+  };
+
+  /** set the driver-function used to solve the problem
+      \param a function of prototype Driver
+  */
+  inline void setNumericsDriver(Driver newFunction)
+  {
+    frictionContact_driver = newFunction;
+  };
 
   // --- Others functions ---
 
@@ -275,48 +301,31 @@ public:
    */
   void computeBlock(UnitaryRelation*, UnitaryRelation*);
 
-  /** built matrix M using already computed blocks
-   */
-  void assembleM();
-
   /** compute vector q
    *  \param double : current time
    */
-  void computeQ(const double time);
+  void computeQ(double time);
 
   /** pre-treatment for LCP
    *  \param double : current time
-   *  \return void
    */
-  void preCompute(const double time);
+  void preCompute(double time);
 
   /** Compute the unknown reaction and velocity and update the Interaction (y and lambda )
-   *  \param double : current time
-   *  \return int, information about the solver convergence.
+   *  \param double current time
+   *  \return int information about the solver convergence (0: ok, >0 problem, see Numerics documentation)
    */
-  virtual int compute(const double time) = 0;
+  int compute(double time);
 
-  /** post-treatment for LCP
+  /** post-treatment of output from Numerics solver: \n
+   *  set values of the unknowns of Interactions using (velocity,reaction)
    */
   void postCompute();
 
-  /** copy the data of the OneStepNSProblem to the XML tree
-   *  \exception RuntimeException
-   */
+  /** copy the data of the OneStepNSProblem to the XML tree */
   void saveNSProblemToXML();
 
-  /** copy the matrix M of the OneStepNSProblem to the XML tree
-   *  \exception RuntimeException
-   */
-  void saveMToXML();
-
-  /** copy the vector q of the OneStepNSProblem to the XML tree
-   *  \exception RuntimeException
-   */
-  void saveQToXML();
-
-  /** print the data to the screen
-   */
+  /** print the data to the screen */
   void display() const;
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.

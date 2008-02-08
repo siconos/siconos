@@ -15,29 +15,40 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
+#include "LA.h"
+#include "Numerics_Options.h" // for global options
+#include "LCP_Solvers.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "LA.h"
 #include <math.h>
 
-int filter_result_LCP(int n, double *vec , double *q , double *z , double tol, int chat, double *w)
+
+int filter_result_LCP(LinearComplementarity_Problem* problem, double *z , double *w, double tolerance)
 {
+
+  /* Checks inputs */
+  if (problem == NULL || z == NULL || w == NULL)
+    numericsError("filter_result_LCP", "null input for problem and/or z and/or w");
+
+  if (problem->M->storageType == 1)
+    numericsError("filter_result_LCP", "Not yet implemented for sparse storage");
+
   double error, normq;
-  double a1, b1;
   int i, incx, incy;
   double zi, wi;
+
+  /* get var. from problem (pointer links, no copy!)*/
+  double *q = problem->q;
+  double *M = problem->M->matrix0;
+  int n = problem->size;
 
   incx = 1;
   incy = 1;
   DCOPY(n , q , incx , w , incy);
-
-  a1 = 1.;
-  b1 = 1.;
-  DGEMV(LA_NOTRANS , n , n , a1 , vec , n , z , incx , b1 , w , incy);
+  DGEMV(LA_NOTRANS , n , n , 1.0 , M , n , z , incx , 1.0 , w , incy);
 
   error = 0.;
   for (i = 0 ; i < n ; i++)
@@ -57,12 +68,11 @@ int filter_result_LCP(int n, double *vec , double *q , double *z , double tol, i
   normq = DNRM2(n , q , incx);
 
   error = error / normq;
-  chat = 1;
-  if (error > tol)
+  if (error > tolerance)
   {
-    if (chat > 0) printf(" Wrong LCP result , error = %g \n", error);
+    if (verbose > 0) printf(" Numerics - filter_result_LCP failed: error = %g > tolerance = %g.\n", error, tolerance);
     return 1;
   }
-  else return 0;
-
+  else
+    return 0;
 }

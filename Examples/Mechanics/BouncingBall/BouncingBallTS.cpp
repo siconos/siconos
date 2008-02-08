@@ -34,6 +34,7 @@ int main(int argc, char* argv[])
   try
   {
 
+
     // ================= Creation of the model =======================
 
     // User-defined main parameters
@@ -44,7 +45,6 @@ int main(int argc, char* argv[])
     double position_init = 1.0;      // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
     double theta = 0.5;              // theta for Moreau integrator
-    string solverName = "Lemke" ;
     double R = 0.1; // Ball radius
     double m = 1; // Ball mass
     double g = 9.81; // Gravity
@@ -114,9 +114,14 @@ int main(int argc, char* argv[])
     // -- OneStepIntegrators --
     Moreau * OSI = new Moreau(ball, theta, s);
 
+    IntParameters iparam(5);
+    iparam[0] = 1000; // Max number of iteration
+    DoubleParameters dparam(5);
+    dparam[0] = 1e-15; // Tolerance
+    string solverName = "Lemke" ;
+    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
     // -- OneStepNsProblem --
-    OneStepNSProblem * osnspb = new LCP(s, "LCP", solverName, 100, 1e-15);
-    //osnspb->getSolverPtr()->setSolverBlock(true);
+    OneStepNSProblem * osnspb = new LCP(s, mySolver);
 
     // =========================== End of model definition ===========================
 
@@ -151,16 +156,13 @@ int main(int argc, char* argv[])
     int k = 0;
     boost::progress_display show_progress(N);
 
-
-    UnitaryRelationsSet * I0 = s->getIndexSetPtr(1);
-    UnitaryRelationsIterator it1;
-
     boost::timer time;
     time.restart();
 
     for (k = 1 ; k < N  ; ++k)
     {
       s->computeOneStep();
+
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->getNextTime();
       dataPlot(k, 1) = (*q)(0);
@@ -195,6 +197,7 @@ int main(int argc, char* argv[])
     delete osnspb;
     delete t;
     delete s;
+    delete mySolver;
     delete OSI;
     delete bouncingBall;
     delete nsds;

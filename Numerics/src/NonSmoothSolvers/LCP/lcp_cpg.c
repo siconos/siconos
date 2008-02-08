@@ -21,38 +21,39 @@
 #include <string.h>
 #include <math.h>
 #include "LA.h"
+#include "LCP_Solvers.h"
 
-void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
+void lcp_cpg(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {
+  /* matrix M/vector q of the lcp */
+  double * M = problem->M->matrix0;
 
-  int n;
+  double * q = problem->q;
+
+  /* size of the LCP */
+  int n = problem->size;
+
   int incx, incy;
   int i, iter;
-  int itermax, ispeak;
+  int itermax = options->iparam[0];
+
 
   double err, a1, b1 , qs;
 
   double alpha, beta, rp, pMp;
-  double den, num, tol;
+  double den, num;
+  double tol = options->dparam[0];
 
   int *status;
   double *zz , *pp , *rr, *ww, *Mp;
 
   *info = 1;
-  n     = *nn;
   incx  = 1;
-
-  /*input*/
-
-  itermax = iparamLCP[0];
-  ispeak  = iparamLCP[1];
-
-  tol = dparamLCP[0];
 
   /*output*/
 
-  iparamLCP[2] = 0;
-  dparamLCP[1] = 0.0;
+  options->iparam[2] = 0;
+  options->dparam[1] = 0.0;
 
   qs = DNRM2(n , q , incx);
 
@@ -97,7 +98,7 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
   a1 = -1.;
   b1 = -1.;
 
-  DGEMV(LA_NOTRANS, n, n, a1, vec, n, z, incx, b1, rr, incy);
+  DGEMV(LA_NOTRANS, n, n, a1, M, n, z, incx, b1, rr, incy);
 
   /* Initialization of gradients */
   /* rr -> p and rr -> w */
@@ -123,14 +124,14 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
     a1 = 1.0;
     b1 = 0.0;
 
-    DGEMV(LA_NOTRANS, n, n, a1, vec, n, Mp, incx, b1, w, incy);
+    DGEMV(LA_NOTRANS, n, n, a1, M, n, Mp, incx, b1, w, incy);
 
     pMp = DDOT(n, pp, incx, w, incy);
 
     if (fabs(pMp) < 1e-16)
     {
 
-      if (ispeak > 0)
+      if (verbose > 0)
       {
         printf(" Operation no conform at the iteration %d \n", iter);
         printf(" Alpha can be obtained with pWp = %10.4g  \n", pMp);
@@ -143,8 +144,8 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
       free(zz);
       free(status);
 
-      iparamLCP[2] = iter;
-      dparamLCP[1] = err;
+      options->iparam[2] = iter;
+      options->dparam[1] = err;
       *info = 3;
       return;
     }
@@ -184,7 +185,7 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
     a1 = -1.;
     b1 = -1.;
 
-    DGEMV(LA_NOTRANS, n, n, a1, vec, n, z, incx, b1, rr, incy);
+    DGEMV(LA_NOTRANS, n, n, a1, M, n, z, incx, b1, rr, incy);
 
     /* Gradients projection
      * rr --> ww
@@ -233,8 +234,8 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
 
   }
 
-  iparamLCP[2] = iter;
-  dparamLCP[1] = err;
+  options->iparam[2] = iter;
+  options->dparam[1] = err;
 
   DCOPY(n, rr, incx, w, incy);
 
@@ -243,7 +244,7 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
 
 
   *info = 1;
-  if (ispeak > 0)
+  if (verbose > 0)
   {
     if (err > tol)
     {

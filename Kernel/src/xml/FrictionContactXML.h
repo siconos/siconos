@@ -15,9 +15,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
-/*! \file
-*/
+ */
+/*! \file FrictionContactXML.h
+  \brief XML management for FrictionContact problems
+ */
 
 #ifndef __FrictionContactXML__
 #define __FrictionContactXML__
@@ -28,97 +29,63 @@
 
 class OneStepNSProblem;
 
-const std::string  FrictionContact_M = "M";
-const std::string  FrictionContact_Q = "q";
-
-
 /** XML management for FrictionContact
  *  \author SICONOS Development Team - copyright INRIA
  *   \version 2.1.1.
  *   \date 05/18/2004
  *
- */
+ *  XML tag for FrictionContact (example for 3D case)
+
+ \code
+ <OneStepNSProblems_List>
+ <FrictionContact Type="3D" StorageType="0">
+ <NonSmoothSolver name="Lemke">
+ <iparam  vectorSize='3'>1 3 4</iparam>
+ <dparam  vectorSize='3'>1.3 1e-17 1e-12</dparam>
+ </NonSmoothSolver>
+ </FrictionContact>
+ </OneStepNSProblems_List>
+
+ \endcode
+
+ attributes type is required. \n
+ storageType is optional.
+
+ Compared to base-class OneStepNSProblem, the present one just add the attribute "type".
+
+*/
 class FrictionContactXML : public OneStepNSProblemXML
 {
 public:
-  FrictionContactXML();
+  FrictionContactXML() : OneStepNSProblemXML() {}
 
   /** Build a FrictionContactXML object from a DOM tree describing a FrictionContact
-  *   \param FrictionContactNode : the FrictionContact DOM tree
-  *   \exception XMLException : if a property of the FrictionContact lacks in the DOM tree
-  */
-  FrictionContactXML(xmlNode * FrictionContactNode);
+   *   \param FrictionContactNode : the FrictionContact DOM tree
+   *   \exception XMLException : if a property of the FrictionContact lacks in the DOM tree
+   */
+  FrictionContactXML(xmlNodePtr FrictionContactNode) : OneStepNSProblemXML(FrictionContactNode) {}
 
-  ~FrictionContactXML();
+  /** Destructor */
+  ~FrictionContactXML() {}
 
-  /** Return M
-  *   \return The M SimpleMatrix of the FrictionContact
-  */
-  inline SimpleMatrix getM()
+  /** Checks if attribute "type" is given in FrictionContact tag
+   *  \return a bool
+   */
+  inline bool hasProblemDim() const
   {
-    return  SiconosDOMTreeTools::getSiconosMatrixValue(MNode);
+    return (SiconosDOMTreeTools::hasAttributeValue(rootNode, "Type"));
   }
 
-  /** Return vector q
-  *   \return SimpleVector : q vector of the FrictionContact
-  */
-  inline SimpleVector getQ()
+  /** Returns the value of attribute "type" in FrictionContact tag (ie dim of the problem, 2D or 3D)
+   *  \return an integer (2 or 3)
+   */
+  inline int getProblemDim() const
   {
-    return SiconosDOMTreeTools::getSiconosVectorValue(qNode);
+    if (!hasProblemDim())
+      XMLException::selfThrow("FrictionContactXML::getDimNSProblem - Attribute named type does not exists in tag FrictionContact.");
+    return SiconosDOMTreeTools::getAttributeValue<int>(rootNode, "Type");
   }
 
-  /** save M
-  *   \param The M SiconosMatrix to save
-  */
-  inline void setM(const SiconosMatrix &m)
-  {
-    if (hasM() == false)
-    {
-      MNode = SiconosDOMTreeTools::createMatrixNode(problemTypeNode, FrictionContact_M, m);
-    }
-    else SiconosDOMTreeTools::setSiconosMatrixNodeValue(MNode, m);
-  }
-
-  /** save q
-  *   \param The q SiconosVector to save
-  */
-  inline void setQ(const SiconosVector& q)
-  {
-    if (hasQ() == false)
-    {
-      qNode = SiconosDOMTreeTools::createVectorNode(problemTypeNode, FrictionContact_Q, q);
-    }
-    else SiconosDOMTreeTools::setSiconosVectorNodeValue(qNode, q);
-  }
-
-  /** returns true if MNode is defined
-  *  \return true if MNode is defined
-  */
-  inline bool hasM()
-  {
-    return (MNode != NULL);
-  }
-
-  /** returns true if qNode is defined
-  *  \return true if qNode is defined
-  */
-  inline bool hasQ()
-  {
-    return (qNode != NULL);
-  }
-
-  /** makes the operations to create a OneStepNSProblemXML to the SimulationXML
-  *   \param xmlNode* : the root node of the OneStepNSProblemXML
-  *   \param OneStepNSProblem* : the OneStepNSProblem of this OneStepNSProblemXML
-  */
-  void updateOneStepNSProblemXML(xmlNode* node, OneStepNSProblem* osnspb);
-
-
-private:
-
-  //Nodes
-  xmlNode * MNode;
-  xmlNode * qNode;
 };
 
 

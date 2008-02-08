@@ -31,7 +31,7 @@ OneStepIntegratorXML::OneStepIntegratorXML(xmlNodePtr OneStepIntegratorNode):
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DS_CONCERNED)) != NULL)
     DSConcernedNode = node;
 
-  // get interactionConcerned
+  // get interactionsConcerned
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, INTERACTIONS_CONCERNED)) != NULL)
     interactionsConcernedNode = node;
 }
@@ -41,7 +41,7 @@ void OneStepIntegratorXML::getDSNumbers(vector<int>& dsNumbers)
   if (!hasAllDS())
     SiconosDOMTreeTools::getVector(DSConcernedNode, dsNumbers);
   else
-    XMLException::selfThrow("OneStepIntegratorXML::getDSNumbers - No list of ds, all parameter = true.");
+    XMLException::selfThrow("OneStepIntegratorXML::getDSNumbers - The list of dynamical systems is missing.");
 }
 
 void OneStepIntegratorXML::getInteractionsNumbers(vector<int>& inNumbers)
@@ -49,5 +49,5 @@ void OneStepIntegratorXML::getInteractionsNumbers(vector<int>& inNumbers)
   if (!hasAllInteractions())
     SiconosDOMTreeTools::getVector(interactionsConcernedNode, inNumbers);
   else
-    XMLException::selfThrow("OneStepIntegratorXML::getDSConcerned - No list of ds, all parameter = true.");
+    XMLException::selfThrow("OneStepIntegratorXML::getInteractionsNumbers - The list of interactions is missing.");
 }

@@ -32,12 +32,7 @@
 
 using namespace std;
 
-SimulationXML::SimulationXML():
-  rootNode(NULL), oneStepNSProblemXML(NULL), timeDiscretisationXML(NULL)
-{}
-
-SimulationXML::SimulationXML(xmlNodePtr rootSimulationNode):
-  rootNode(rootSimulationNode), oneStepNSProblemXML(NULL), timeDiscretisationXML(NULL)
+SimulationXML::SimulationXML(xmlNodePtr rootSimulationNode): rootNode(rootSimulationNode), timeDiscretisationXML(NULL)
 {
   xmlNodePtr node;
 
@@ -81,44 +76,46 @@ SimulationXML::SimulationXML(xmlNodePtr rootSimulationNode):
   // === OneStepNSProblem data loading ===
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, ONESTEPNSPROBLEM_TAG)) != NULL)
   {
-    xmlNodePtr NSnode = SiconosDOMTreeTools::findNodeChild(node);
+    xmlNodePtr OSNSPBNode = SiconosDOMTreeTools::findNodeChild(node);
 
-    // !!! first node MUST be formulation for solving ie NSPB type!!!
-    if (NSnode != NULL)
+    string typeOSNS; // OneStepNSPb type
+    while (OSNSPBNode != NULL)
     {
-      string type((char*)NSnode->name);
-      if (type == LCP_TAG)
-        oneStepNSProblemXML = new LCPXML(node);
+      typeOSNS = (char*)OSNSPBNode->name;
+      if (typeOSNS == LCP_TAG)
+        OSNSPBXMLSet.insert(new LCPXML(OSNSPBNode));
 
-      else if (type == QP_TAG)
-        oneStepNSProblemXML = new QPXML(node);
+      else if (typeOSNS == QP_TAG)
+        OSNSPBXMLSet.insert(new QPXML(OSNSPBNode));
 
-      else if (type == FrictionContact2D_TAG || type == FrictionContact3D_TAG)
-        oneStepNSProblemXML = new FrictionContactXML(node);
+      else if (typeOSNS == "FrictionContact")
+        OSNSPBXMLSet.insert(new FrictionContactXML(OSNSPBNode));
 
-      else if (type == RELAY_TAG) //--Not implemented for the moment
-        XMLException::selfThrow("SimulationXML constructor, following OneStepNSProblem is not yet implemented: " + type);
+      else // if (typeOSNS == RELAY_TAG) //--Not implemented for the moment
+        XMLException::selfThrow("SimulationXML constructor, undefined (or not yet implemented) OneStepNSProblem of type: " + typeOSNS);
 
-      else
-        XMLException::selfThrow("SimulationXML constructor, undefined OneStepNSProblem type : " + type);
+      // go to next node
+      OSNSPBNode = SiconosDOMTreeTools::findFollowNode(OSNSPBNode);
     }
   }
+  // Else nothing: it is possible to define a simulation without any OneStepNSProblem
 }
-
 
 SimulationXML::~SimulationXML()
 {
   if (timeDiscretisationXML != NULL)
     delete timeDiscretisationXML;
 
-  if (oneStepNSProblemXML != NULL)
-    delete oneStepNSProblemXML;
-
   // Delete OSIXML set ...
   SetOfOSIXMLIt it;
   for (it = OSIXMLSet.begin(); it != OSIXMLSet.end(); ++it)
     if ((*it) != NULL) delete(*it);
   OSIXMLSet.clear();
+  // Delete OSNSPBXMLSet set ...
+  SetOfOSNSPBXMLIt it2;
+  for (it2 = OSNSPBXMLSet.begin(); it2 != OSNSPBXMLSet.end(); ++it2)
+    if ((*it2) != NULL) delete(*it2);
+  OSNSPBXMLSet.clear();
 }
 
 // To be reviewed ...

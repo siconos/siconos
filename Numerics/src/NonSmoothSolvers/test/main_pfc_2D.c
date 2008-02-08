@@ -64,7 +64,9 @@ void pfc_2D_series(int n , double *vec , double *q)
   int         i, j;
   int         nonsymmetric;
   int         info[3];
-  int         nc;
+  int         nc = n / 2;
+
+  ;
   int         incx = 1, incy = 1, dim;
 
   double      den, num, alpha, beta , diff;
@@ -78,8 +80,6 @@ void pfc_2D_series(int n , double *vec , double *q)
   double      r1, r2, comp11, comp22, comp33, comp111, comp222, comp333;
   double      comp1111, comp2222, comp3333;
 
-  char        NT = 'N';
-
   method      meth_pfc_2D1, meth_pfc_2D2, meth_pfc_2D3;
 
 
@@ -89,27 +89,25 @@ void pfc_2D_series(int n , double *vec , double *q)
 
   for (i = 0 ; i < 3 ; ++i) info[i] = -1;
 
-
+  double * mu = (double*)malloc(nc * sizeof(double));
+  for (i = 0; i < nc; i++)
+    mu[i] = 0.3;
 
   strcpy(meth_pfc_2D1.pfc_2D.name, "NLGS");
   meth_pfc_2D1.pfc_2D.itermax  =  10000;
   meth_pfc_2D1.pfc_2D.tol      =  0.0000001;
   meth_pfc_2D1.pfc_2D.chat     =  1;
-  meth_pfc_2D1.pfc_2D.mu       =  0.3;
 
 
   strcpy(meth_pfc_2D2.pfc_2D.name, "CPG");
   meth_pfc_2D2.pfc_2D.itermax  =  7000;
   meth_pfc_2D2.pfc_2D.tol      =  0.0000001;
   meth_pfc_2D2.pfc_2D.chat     =  1;
-  meth_pfc_2D2.pfc_2D.mu       =  0.3;
-
 
   strcpy(meth_pfc_2D3.pfc_2D.name, "Latin");
   meth_pfc_2D3.pfc_2D.itermax  =  15000;
   meth_pfc_2D3.pfc_2D.tol      =  0.0000001;
   meth_pfc_2D3.pfc_2D.chat     =  1;
-  meth_pfc_2D3.pfc_2D.mu       =  0.3;
   meth_pfc_2D3.pfc_2D.k_latin  =  5.5;
 
 
@@ -183,7 +181,7 @@ void pfc_2D_series(int n , double *vec , double *q)
     w1[i] = 0.0;
   }
 
-  info[0] = pfc_2D_driver(vec , q , &n , &meth_pfc_2D1 , z1 , w1);
+  info[0] = pfc_2D_driver(nc, vec , q , &meth_pfc_2D1 , z1 , w1 , mu);
 
 
 #ifdef BAVARD
@@ -195,7 +193,7 @@ void pfc_2D_series(int n , double *vec , double *q)
     w2[i] = 0.;
   }
 
-  info[1] = pfc_2D_driver(vec , q , &n , &meth_pfc_2D2 , z2 , w2);
+  info[1] = pfc_2D_driver(nc, vec , q , &meth_pfc_2D2 , z2 , w2 , mu);
 
 
 #ifdef BAVARD
@@ -207,7 +205,7 @@ void pfc_2D_series(int n , double *vec , double *q)
     w3[i] = 0.0;
   }
 
-  info[2] = pfc_2D_driver(vec , q , &n , &meth_pfc_2D3 , z3 , w3);
+  info[2] = pfc_2D_driver(nc, vec , q , &meth_pfc_2D3 , z3 , w3, mu);
 
 
 #ifdef BAVARD
@@ -223,8 +221,6 @@ void pfc_2D_series(int n , double *vec , double *q)
 
   /*  TEST of behavior laws  and  equilibrium */
 
-
-  nc = n / 2;
 
   for (i = 0; i < nc ; i ++)
   {
@@ -260,30 +256,30 @@ void pfc_2D_series(int n , double *vec , double *q)
 
   /*         zn            */
 
-  min_part(zn1, &mini, &nc);
+  min_part(zn1, &mini, nc);
 
   mini = - mini;
 
   dim = 1;
-  pos_part(&mini, &mini, &dim) ;
+  pos_part(&mini, &mini, dim) ;
 
-  abs_part(zn1, abso, &nc);
+  abs_part(zn1, abso, nc);
 
-  max_part(abso , &maxi , &nc);
+  max_part(abso , &maxi , nc);
 
   r1 = mini / maxi;
 
   /*       wn                */
 
-  min_part(wn1, &mini, &nc);
+  min_part(wn1, &mini, nc);
 
   mini = - mini;
 
-  pos_part(&mini, &mini, &dim) ;
+  pos_part(&mini, &mini, dim) ;
 
-  abs_part(wn1, abso, &nc);
+  abs_part(wn1, abso, nc);
 
-  max_part(abso , &maxi , &nc);
+  max_part(abso , &maxi , nc);
 
 
   if (maxi > 1e-10)
@@ -295,11 +291,11 @@ void pfc_2D_series(int n , double *vec , double *q)
   else
   {
 
-    abs_part(w1, absow, &n);
-    max_part(absow, &maxi_1, &n);
+    abs_part(w1, absow, n);
+    max_part(absow, &maxi_1, n);
 
-    abs_part(q, absow, &n);
-    max_part(absow, &maxi_2, &n);
+    abs_part(q, absow, n);
+    max_part(absow, &maxi_2, n);
 
     if (maxi_1 > maxi_2)
       maxi = maxi_1;
@@ -313,16 +309,16 @@ void pfc_2D_series(int n , double *vec , double *q)
 
   /*        zn^t wn                  */
 
-  abs_part(wn1, abso1, &nc);
+  abs_part(wn1, abso1, nc);
 
-  abs_part(zn1, abso2, &nc);
+  abs_part(zn1, abso2, nc);
 
 
   comp1 = DDOT(nc , abso1 , incx , abso2 , incy);
 
-  max_part(abso1 , &max1 , &nc);
+  max_part(abso1 , &max1 , nc);
 
-  max_part(abso2 , &max2 , &nc);
+  max_part(abso2 , &max2 , nc);
 
 
 
@@ -336,11 +332,11 @@ void pfc_2D_series(int n , double *vec , double *q)
   else
   {
 
-    abs_part(w1, absow, &n);
-    max_part(absow, &maxi_1, &n);
+    abs_part(w1, absow, n);
+    max_part(absow, &maxi_1, n);
 
-    abs_part(q, absow, &n);
-    max_part(absow, &maxi_2, &n);
+    abs_part(q, absow, n);
+    max_part(absow, &maxi_2, n);
 
     if (maxi_1 > maxi_2)
       max1 = maxi_1;
@@ -360,29 +356,29 @@ void pfc_2D_series(int n , double *vec , double *q)
   /*           Test in interval             */
 
 
-  abs_part(zt1, abso1, &nc);
+  abs_part(zt1, abso1, nc);
 
   DCOPY(nc, zn1, incx, muzn1, incy);
 
   alpha = 0.3;
   DSCAL(nc , alpha , muzn1 , incx);
 
-  abs_part(muzn1, abso2, &nc);
+  abs_part(muzn1, abso2, nc);
 
 
   alpha = -1.0;
   DAXPY(nc , alpha , abso1 , incx , abso2 , incy);
 
-  min_part(abso2, &mini, &nc);
+  min_part(abso2, &mini, nc);
 
   mini = - mini;
 
-  pos_part(&mini, &mini, &dim) ;
+  pos_part(&mini, &mini, dim) ;
 
 
-  abs_part(z1, absoz, &n);
+  abs_part(z1, absoz, n);
 
-  max_part(absoz , &max11 , &n);
+  max_part(absoz , &max11 , n);
 
   max11 = mini / max11;
 
@@ -391,38 +387,38 @@ void pfc_2D_series(int n , double *vec , double *q)
 
 
 
-  abs_part(zt1, abso1, &nc);
+  abs_part(zt1, abso1, nc);
 
   DCOPY(nc, zn1, incx, muzn1, incy);
 
   alpha = 0.3;
   DSCAL(nc , alpha , muzn1 , incx);
 
-  abs_part(muzn1, abso2, &nc);
+  abs_part(muzn1, abso2, nc);
 
 
   alpha = -1.0;
   DAXPY(nc , alpha , abso1 , incx , abso2 , incy);
 
-  abs_part(abso2, abso1, &nc);
+  abs_part(abso2, abso1, nc);
 
-  abs_part(wt1, abso2, &nc);
+  abs_part(wt1, abso2, nc);
 
 
 
   comp11 = DDOT(nc , abso1 , incx , abso2 , incy);
 
 
-  abs_part(z1, absoz, &n);
+  abs_part(z1, absoz, n);
 
-  max_part(absoz , &max2 , &n);
-
-
+  max_part(absoz , &max2 , n);
 
 
-  abs_part(w1, absow, &n);
 
-  max_part(absow , &max1 , &n);
+
+  abs_part(w1, absow, n);
+
+  max_part(absow , &max1 , n);
 
 
 
@@ -436,11 +432,11 @@ void pfc_2D_series(int n , double *vec , double *q)
   else
   {
 
-    abs_part(w1, absow, &n);
-    max_part(absow, &maxi_1, &n);
+    abs_part(w1, absow, n);
+    max_part(absow, &maxi_1, n);
 
-    abs_part(q, absow, &n);
-    max_part(absow, &maxi_2, &n);
+    abs_part(q, absow, n);
+    max_part(absow, &maxi_2, n);
 
     if (maxi_1 > maxi_2)
       max1 = maxi_1;
@@ -464,19 +460,19 @@ void pfc_2D_series(int n , double *vec , double *q)
   alpha = -1.0;
   DAXPY(nc , alpha , zt1 , incx , muzn1 , incy);
 
-  abs_part(muzn1, abso1, &nc);
+  abs_part(muzn1, abso1, nc);
 
-  pos_part(wt1, abso2, &nc) ;
+  pos_part(wt1, abso2, nc) ;
 
   comp111 = DDOT(nc , abso1 , incx , abso2 , incy);
 
-  abs_part(z1, absoz, &n);
+  abs_part(z1, absoz, n);
 
-  max_part(absoz , &max2 , &n);
+  max_part(absoz , &max2 , n);
 
-  abs_part(w1, absow, &n);
+  abs_part(w1, absow, n);
 
-  max_part(absow , &max1 , &n);
+  max_part(absow , &max1 , n);
 
 
   if (max1 > 1e-10)
@@ -489,11 +485,11 @@ void pfc_2D_series(int n , double *vec , double *q)
   else
   {
 
-    abs_part(w1, absow, &n);
-    max_part(absow, &maxi_1, &n);
+    abs_part(w1, absow, n);
+    max_part(absow, &maxi_1, n);
 
-    abs_part(q, absow, &n);
-    max_part(absow, &maxi_2, &n);
+    abs_part(q, absow, n);
+    max_part(absow, &maxi_2, n);
 
     if (maxi_1 > maxi_2)
       max1 = maxi_1;
@@ -518,24 +514,24 @@ void pfc_2D_series(int n , double *vec , double *q)
   alpha = 1.0;
   DAXPY(nc , alpha , zt1 , incx , muzn1 , incy);
 
-  abs_part(muzn1, abso1, &nc);
+  abs_part(muzn1, abso1, nc);
 
   DCOPY(nc, wt1, incx, muzn1, incy);
 
   alpha = -1.;
   DSCAL(nc , alpha , muzn1 , incx);
 
-  pos_part(muzn1, abso2, &nc) ;
+  pos_part(muzn1, abso2, nc) ;
 
   comp1111 = DDOT(nc , abso1 , incx , abso2 , incy);
 
-  abs_part(z1, absoz, &n);
+  abs_part(z1, absoz, n);
 
-  max_part(absoz , &max2 , &n);
+  max_part(absoz , &max2 , n);
 
-  abs_part(w1, absow, &n);
+  abs_part(w1, absow, n);
 
-  max_part(absow , &max1 , &n);
+  max_part(absow , &max1 , n);
 
 
 
@@ -549,11 +545,11 @@ void pfc_2D_series(int n , double *vec , double *q)
   else
   {
 
-    abs_part(w1, absow, &n);
-    max_part(absow, &maxi_1, &n);
+    abs_part(w1, absow, n);
+    max_part(absow, &maxi_1, n);
 
-    abs_part(q, absow, &n);
-    max_part(absow, &maxi_2, &n);
+    abs_part(q, absow, n);
+    max_part(absow, &maxi_2, n);
 
     if (maxi_1 > maxi_2)
       max1 = maxi_1;
@@ -588,15 +584,15 @@ void pfc_2D_series(int n , double *vec , double *q)
 
   /*              zn             */
 
-  min_part(zn2, &mini, &nc);
+  min_part(zn2, &mini, nc);
 
   mini = - mini;
 
-  pos_part(&mini, &mini, &dim) ;
+  pos_part(&mini, &mini, dim) ;
 
-  abs_part(zn2, abso, &nc);
+  abs_part(zn2, abso, nc);
 
-  max_part(abso , &maxi , &nc);
+  max_part(abso , &maxi , nc);
 
   r1 = mini / maxi;
 
@@ -604,15 +600,15 @@ void pfc_2D_series(int n , double *vec , double *q)
   /*              wn                 */
 
 
-  min_part(wn2, &mini, &nc);
+  min_part(wn2, &mini, nc);
 
   mini = - mini;
 
-  pos_part(&mini, &mini, &dim) ;
+  pos_part(&mini, &mini, dim) ;
 
-  abs_part(wn2, abso, &nc);
+  abs_part(wn2, abso, nc);
 
-  max_part(abso , &maxi , &nc);
+  max_part(abso , &maxi , nc);
 
 
   if (maxi > 1e-10)
@@ -624,11 +620,11 @@ void pfc_2D_series(int n , double *vec , double *q)
   else
   {
 
-    abs_part(w2, absow, &n);
-    max_part(absow, &maxi_1, &n);
+    abs_part(w2, absow, n);
+    max_part(absow, &maxi_1, n);
 
-    abs_part(q, absow, &n);
-    max_part(absow, &maxi_2, &n);
+    abs_part(q, absow, n);
+    max_part(absow, &maxi_2, n);
 
     if (maxi_1 > maxi_2)
       maxi = maxi_1;
@@ -642,15 +638,15 @@ void pfc_2D_series(int n , double *vec , double *q)
   /*          zn^t wn              */
 
 
-  abs_part(wn2, abso1, &nc);
+  abs_part(wn2, abso1, nc);
 
-  abs_part(zn2, abso2, &nc);
+  abs_part(zn2, abso2, nc);
 
   comp2 = DDOT(nc , abso1 , incx , abso2 , incy);
 
-  max_part(abso1 , &max1 , &nc);
+  max_part(abso1 , &max1 , nc);
 
-  max_part(abso2 , &max2 , &nc);
+  max_part(abso2 , &max2 , nc);
 
 
   if (max1 > 1e-10)
@@ -663,11 +659,11 @@ void pfc_2D_series(int n , double *vec , double *q)
   else
   {
 
-    abs_part(w2, absow, &n);
-    max_part(absow, &maxi_1, &n);
+    abs_part(w2, absow, n);
+    max_part(absow, &maxi_1, n);
 
-    abs_part(q, absow, &n);
-    max_part(absow, &maxi_2, &n);
+    abs_part(q, absow, n);
+    max_part(absow, &maxi_2, n);
 
     if (maxi_1 > maxi_2)
       max1 = maxi_1;
@@ -685,64 +681,64 @@ void pfc_2D_series(int n , double *vec , double *q)
 
   /*           Test in interval             */
 
-  abs_part(zt2, abso1, &nc);
+  abs_part(zt2, abso1, nc);
 
   DCOPY(nc, zn2, incx, muzn2, incy);
 
   alpha = 0.3;
   DSCAL(nc , alpha , muzn2 , incx);
 
-  abs_part(muzn2, abso2, &nc);
+  abs_part(muzn2, abso2, nc);
 
 
   alpha = -1.0;
   DAXPY(nc , alpha , abso1 , incx , abso2 , incy);
 
-  min_part(abso2, &mini, &nc);
+  min_part(abso2, &mini, nc);
 
   mini = - mini;
 
-  pos_part(&mini, &mini, &dim) ;
+  pos_part(&mini, &mini, dim) ;
 
 
-  abs_part(z2, absow, &n);
+  abs_part(z2, absow, n);
 
-  max_part(absow , &max22 , &n);
+  max_part(absow , &max22 , n);
 
   max22 = mini / max22;
 
   /*                  Test of |wt| = 0                 */
 
 
-  abs_part(zt2, abso1, &nc);
+  abs_part(zt2, abso1, nc);
 
   DCOPY(nc, zn2, incx, muzn2, incy);
 
   alpha = 0.3;
   DSCAL(nc , alpha , muzn2 , incx);
 
-  abs_part(muzn2, abso2, &nc);
+  abs_part(muzn2, abso2, nc);
 
 
   alpha = -1.0;
   DAXPY(nc , alpha , abso1 , incx , abso2 , incy);
 
-  abs_part(abso2, abso1, &nc);
+  abs_part(abso2, abso1, nc);
 
-  abs_part(wt2, abso2, &nc);
+  abs_part(wt2, abso2, nc);
 
 
 
   comp22 = DDOT(nc , abso1 , incx , abso2 , incy);
 
 
-  abs_part(z2, absoz, &n);
+  abs_part(z2, absoz, n);
 
-  max_part(absoz , &max2 , &n);
+  max_part(absoz , &max2 , n);
 
-  abs_part(w2, absow, &n);
+  abs_part(w2, absow, n);
 
-  max_part(absow , &max1 , &n);
+  max_part(absow , &max1 , n);
 
 
   if (max1 > 1e-10)
@@ -755,11 +751,11 @@ void pfc_2D_series(int n , double *vec , double *q)
   else
   {
 
-    abs_part(w2, absow, &n);
-    max_part(absow, &maxi_1, &n);
+    abs_part(w2, absow, n);
+    max_part(absow, &maxi_1, n);
 
-    abs_part(q, absow, &n);
-    max_part(absow, &maxi_2, &n);
+    abs_part(q, absow, n);
+    max_part(absow, &maxi_2, n);
 
     if (maxi_1 > maxi_2)
       max1 = maxi_1;
@@ -783,19 +779,19 @@ void pfc_2D_series(int n , double *vec , double *q)
   alpha = -1.0;
   DAXPY(nc , alpha , zt2 , incx , muzn2 , incy);
 
-  abs_part(muzn2, abso1, &nc);
+  abs_part(muzn2, abso1, nc);
 
-  pos_part(wt2, abso2, &nc) ;
+  pos_part(wt2, abso2, nc) ;
 
   comp222 = DDOT(nc , abso1 , incx , abso2 , incy);
 
-  abs_part(z2, absoz, &n);
+  abs_part(z2, absoz, n);
 
-  max_part(absoz , &max2 , &n);
+  max_part(absoz , &max2 , n);
 
-  abs_part(w2, absow, &n);
+  abs_part(w2, absow, n);
 
-  max_part(absow , &max1 , &n);
+  max_part(absow , &max1 , n);
 
 
 
@@ -809,11 +805,11 @@ void pfc_2D_series(int n , double *vec , double *q)
   else
   {
 
-    abs_part(w2, absow, &n);
-    max_part(absow, &maxi_1, &n);
+    abs_part(w2, absow, n);
+    max_part(absow, &maxi_1, n);
 
-    abs_part(q, absow, &n);
-    max_part(absow, &maxi_2, &n);
+    abs_part(q, absow, n);
+    max_part(absow, &maxi_2, n);
 
     if (maxi_1 > maxi_2)
       max1 = maxi_1;
@@ -836,24 +832,24 @@ void pfc_2D_series(int n , double *vec , double *q)
   alpha = 1.0;
   DAXPY(nc , alpha , zt2 , incx , muzn2 , incy);
 
-  abs_part(muzn2, abso1, &nc);
+  abs_part(muzn2, abso1, nc);
 
   DCOPY(nc, wt2, incx, muzn2, incy);
 
   alpha = -1.;
   DSCAL(nc , alpha , muzn2 , incx);
 
-  pos_part(muzn2, abso2, &nc) ;
+  pos_part(muzn2, abso2, nc) ;
 
   comp2222 = DDOT(nc , abso1 , incx , abso2 , incy);
 
-  abs_part(z2, absoz, &n);
+  abs_part(z2, absoz, n);
 
-  max_part(absoz , &max2 , &n);
+  max_part(absoz , &max2 , n);
 
-  abs_part(w2, absow, &n);
+  abs_part(w2, absow, n);
 
-  max_part(absow , &max1 , &n);
+  max_part(absow , &max1 , n);
 
 
   if (max1 > 1e-10)
@@ -866,11 +862,11 @@ void pfc_2D_series(int n , double *vec , double *q)
   else
   {
 
-    abs_part(w2, absow, &n);
-    max_part(absow, &maxi_1, &n);
+    abs_part(w2, absow, n);
+    max_part(absow, &maxi_1, n);
 
-    abs_part(q, absow, &n);
-    max_part(absow, &maxi_2, &n);
+    abs_part(q, absow, n);
+    max_part(absow, &maxi_2, n);
 
     if (maxi_1 > maxi_2)
       max1 = maxi_1;
@@ -903,28 +899,28 @@ void pfc_2D_series(int n , double *vec , double *q)
 
   /*        Complementary of normal part            */
 
-  min_part(zn3, &mini, &nc);
+  min_part(zn3, &mini, nc);
 
   mini = - mini;
 
-  pos_part(&mini, &mini, &dim) ;
+  pos_part(&mini, &mini, dim) ;
 
-  abs_part(zn3, abso, &nc);
+  abs_part(zn3, abso, nc);
 
-  max_part(abso , &maxi , &nc);
+  max_part(abso , &maxi , nc);
 
   r1 = mini / maxi;
 
 
-  min_part(wn3, &mini, &nc);
+  min_part(wn3, &mini, nc);
 
   mini = - mini;
 
-  pos_part(&mini, &mini, &dim) ;
+  pos_part(&mini, &mini, dim) ;
 
-  abs_part(wn3, abso, &nc);
+  abs_part(wn3, abso, nc);
 
-  max_part(abso , &maxi , &nc);
+  max_part(abso , &maxi , nc);
 
 
   if (maxi > 1e-10)
@@ -936,11 +932,11 @@ void pfc_2D_series(int n , double *vec , double *q)
   else
   {
 
-    abs_part(w3, absow, &n);
-    max_part(absow, &maxi_1, &n);
+    abs_part(w3, absow, n);
+    max_part(absow, &maxi_1, n);
 
-    abs_part(q, absow, &n);
-    max_part(absow, &maxi_2, &n);
+    abs_part(q, absow, n);
+    max_part(absow, &maxi_2, n);
 
     if (maxi_1 > maxi_2)
       maxi = maxi_1;
@@ -952,15 +948,15 @@ void pfc_2D_series(int n , double *vec , double *q)
 
 
 
-  abs_part(wn3, abso1, &nc);
+  abs_part(wn3, abso1, nc);
 
-  abs_part(zn3, abso2, &nc);
+  abs_part(zn3, abso2, nc);
 
   comp3 = DDOT(nc , abso1 , incx , abso2 , incy);
 
-  max_part(abso1 , &max1 , &nc);
+  max_part(abso1 , &max1 , nc);
 
-  max_part(abso2 , &max2 , &nc);
+  max_part(abso2 , &max2 , nc);
 
 
 
@@ -974,11 +970,11 @@ void pfc_2D_series(int n , double *vec , double *q)
   else
   {
 
-    abs_part(w3, absow, &n);
-    max_part(absow, &maxi_1, &n);
+    abs_part(w3, absow, n);
+    max_part(absow, &maxi_1, n);
 
-    abs_part(q, absow, &n);
-    max_part(absow, &maxi_2, &n);
+    abs_part(q, absow, n);
+    max_part(absow, &maxi_2, n);
 
     if (maxi_1 > maxi_2)
       max1 = maxi_1;
@@ -997,29 +993,29 @@ void pfc_2D_series(int n , double *vec , double *q)
 
   /*         Test in interval           */
 
-  abs_part(zt3, abso1, &nc);
+  abs_part(zt3, abso1, nc);
 
   DCOPY(nc, zn3, incx, muzn3, incy);
 
   alpha = 0.3;
   DSCAL(nc , alpha , muzn3 , incx);
 
-  abs_part(muzn3, abso2, &nc);
+  abs_part(muzn3, abso2, nc);
 
 
   alpha = -1.0;
   DAXPY(nc , alpha , abso1 , incx , abso2 , incy);
 
-  min_part(abso2, &mini, &nc);
+  min_part(abso2, &mini, nc);
 
   mini = - mini;
 
-  pos_part(&mini, &mini, &dim) ;
+  pos_part(&mini, &mini, dim) ;
 
 
-  abs_part(z3, absoz, &n);
+  abs_part(z3, absoz, n);
 
-  max_part(absoz , &max33 , &n);
+  max_part(absoz , &max33 , n);
 
   max33 = mini / max33;
 
@@ -1027,33 +1023,33 @@ void pfc_2D_series(int n , double *vec , double *q)
 
   /*            Test of |wt| = 0               */
 
-  abs_part(zt3, abso1, &nc);
+  abs_part(zt3, abso1, nc);
 
   DCOPY(nc, zn3, incx, muzn3, incy);
 
   alpha = 0.3;
   DSCAL(nc , alpha , muzn3 , incx);
 
-  abs_part(muzn3, abso2, &nc);
+  abs_part(muzn3, abso2, nc);
 
 
   alpha = -1.0;
   DAXPY(nc , alpha , abso1 , incx , abso2 , incy);
 
-  abs_part(abso2, abso1, &nc);
+  abs_part(abso2, abso1, nc);
 
-  abs_part(wt3, abso2, &nc);
+  abs_part(wt3, abso2, nc);
 
   comp33 = DDOT(nc , abso1 , incx , abso2 , incy);
 
 
-  abs_part(z3, absoz, &n);
+  abs_part(z3, absoz, n);
 
-  max_part(absoz , &max2 , &n);
+  max_part(absoz , &max2 , n);
 
-  abs_part(w3, absow, &n);
+  abs_part(w3, absow, n);
 
-  max_part(absow , &max1 , &n);
+  max_part(absow , &max1 , n);
 
 
 
@@ -1067,11 +1063,11 @@ void pfc_2D_series(int n , double *vec , double *q)
   else
   {
 
-    abs_part(w3, absow, &n);
-    max_part(absow, &maxi_1, &n);
+    abs_part(w3, absow, n);
+    max_part(absow, &maxi_1, n);
 
-    abs_part(q, absow, &n);
-    max_part(absow, &maxi_2, &n);
+    abs_part(q, absow, n);
+    max_part(absow, &maxi_2, n);
 
     if (maxi_1 > maxi_2)
       max1 = maxi_1;
@@ -1095,19 +1091,19 @@ void pfc_2D_series(int n , double *vec , double *q)
   alpha = -1.0;
   DAXPY(nc , alpha , zt3 , incx , muzn3 , incy);
 
-  abs_part(muzn3, abso1, &nc);
+  abs_part(muzn3, abso1, nc);
 
-  pos_part(wt3, abso2, &nc) ;
+  pos_part(wt3, abso2, nc) ;
 
   comp333 = DDOT(nc , abso1 , incx , abso2 , incy);
 
-  abs_part(z3, absoz, &n);
+  abs_part(z3, absoz, n);
 
-  max_part(absoz , &max2 , &n);
+  max_part(absoz , &max2 , n);
 
-  abs_part(w3, absow, &n);
+  abs_part(w3, absow, n);
 
-  max_part(absow , &max1 , &n);
+  max_part(absow , &max1 , n);
 
 
   if (max1 > 1e-10)
@@ -1120,11 +1116,11 @@ void pfc_2D_series(int n , double *vec , double *q)
   else
   {
 
-    abs_part(w3, absow, &n);
-    max_part(absow, &maxi_1, &n);
+    abs_part(w3, absow, n);
+    max_part(absow, &maxi_1, n);
 
-    abs_part(q, absow, &n);
-    max_part(absow, &maxi_2, &n);
+    abs_part(q, absow, n);
+    max_part(absow, &maxi_2, n);
 
     if (maxi_1 > maxi_2)
       max1 = maxi_1;
@@ -1151,24 +1147,24 @@ void pfc_2D_series(int n , double *vec , double *q)
   alpha = 1.0;
   DAXPY(nc , alpha , zt3 , incx , muzn3 , incy);
 
-  abs_part(muzn3, abso1, &nc);
+  abs_part(muzn3, abso1, nc);
 
   DCOPY(nc, wt3, incx, muzn3, incy);
 
   alpha = -1.;
   DSCAL(nc , alpha , muzn3 , incx);
 
-  pos_part(muzn3, abso2, &nc) ;
+  pos_part(muzn3, abso2, nc) ;
 
   comp3333 = DDOT(nc , abso1 , incx , abso2 , incy);
 
-  abs_part(z3, absoz, &n);
+  abs_part(z3, absoz, n);
 
-  max_part(absoz , &max2 , &n);
+  max_part(absoz , &max2 , n);
 
-  abs_part(w3, absow, &n);
+  abs_part(w3, absow, n);
 
-  max_part(absow , &max1 , &n);
+  max_part(absow , &max1 , n);
 
 
   if (max1 > 1e-10)
@@ -1181,11 +1177,11 @@ void pfc_2D_series(int n , double *vec , double *q)
   else
   {
 
-    abs_part(w3, absow, &n);
-    max_part(absow, &maxi_1, &n);
+    abs_part(w3, absow, n);
+    max_part(absow, &maxi_1, n);
 
-    abs_part(q, absow, &n);
-    max_part(absow, &maxi_2, &n);
+    abs_part(q, absow, n);
+    max_part(absow, &maxi_2, n);
 
     if (maxi_1 > maxi_2)
       max1 = maxi_1;
@@ -1426,7 +1422,6 @@ int main(void)
 
   test_data();
   test_matrix();
-
   /* bidon */
-  exit(1);
+  return 1;
 }

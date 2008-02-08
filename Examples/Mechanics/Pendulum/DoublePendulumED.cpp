@@ -51,7 +51,6 @@ int main(int argc, char* argv[])
     double h = 0.005;                // time step
     double e = 1.0;                  // nslaw
     double e1 = 0.0;
-    string solverName = "Lemke" ;
 
     // -> mind to set the initial conditions below.
 
@@ -166,8 +165,14 @@ int main(int argc, char* argv[])
 
     // -- OneStepNsProblem --
     //OneStepNSProblem * osnspb = new LCP(s,"name","Lemke",2001, 0.005);
-    OneStepNSProblem * impact = new LCP(s, "impact", solverName, 101, 0.0001);
-    OneStepNSProblem * acceleration = new LCP(s, "acceleration", solverName, 101, 0.0001);
+    IntParameters iparam(5);
+    iparam[0] = 1010; // Max number of iteration
+    DoubleParameters dparam(5);
+    dparam[0] = 0.0001; // Tolerance
+    string solverName = "Lemke" ;
+    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
+    OneStepNSProblem * impact = new LCP(s, mySolver, "impact");
+    OneStepNSProblem * acceleration = new LCP(s, mySolver, "acceleration");
 
 
     cout << "=== End of model loading === " << endl;

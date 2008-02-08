@@ -30,9 +30,11 @@
     \param **block          : *block contains the double values of one block in Fortran storage (column by column)
     **block is the list of non null blocks
     \param size             : the number of blocks along a row (or column)
-    \param *blocksize       : the list of the sizes of diagonal (square) blocks
+    \param *blocksize       : the list of the sum of dim of diagonal blocks of M: blocksize[i] = blocksize[i-1] + ni,\n
+    ni being the size of the diagonal block at row(block) i
     \param *RowIndex        : the list of *block row indices (first row = 0)
     \param *ColumnIndex     : the list of *block column indices (first column = 0)
+    Related functions: prodSBM(), subRowProdSBM(), freeSBM(), printSBM
 */
 typedef struct
 {
@@ -61,7 +63,6 @@ typedef struct
   double **workspace;
 } SparseBlockStructuredMatrixPred;
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -86,15 +87,36 @@ extern "C" {
   */
   void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init);
 
+  /** Row of a SparseMatrix - vector product y = rowA*x or y += rowA*x, rowA being a row of blocks of A
+      \param[in] sizeX, dim of the vector x
+      \param[in] sizeY, dim of the vector y
+      \param[in] currentRowNumber, number of the required row of blocks
+      \param[in] A, the matrix to be multiplied
+      \param[in] x, the vector to be multiplied
+      \param[in-out] y, the resulting vector
+      \param[in] init, = 0 for y += Ax, =1 for y = Ax
+  */
+  void rowProdNoDiagSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init);
+
   /** Destructor for SparseBlockStructuredMatrix objects
       \param SparseBlockStructuredMatrix, the matrix to be destroyed.
    */
-  void freeSpBlMat(SparseBlockStructuredMatrix *);
+  void freeSBM(SparseBlockStructuredMatrix *);
 
-  void freeSpBlMatPred(SparseBlockStructuredMatrixPred *);
+  /** Screen display of the matrix content
+      \param M the matrix to be displayed
+   */
+  void printSBM(const SparseBlockStructuredMatrix* const M);
+
+  /** Destructor for SparseBlockStructuredMatrixPred objects
+      \param SparseBlockStructuredMatrix, the matrix to be destroyed.
+   */
+  void freeSpBlMatPred(SparseBlockStructuredMatrixPred *blmatpred);
+
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* NSSPACK_H */
+

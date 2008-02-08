@@ -160,7 +160,7 @@ extern "C" {
           2 = Operation of alpha no conform.\n
       \author Nineb Sheherazade.
   */
-  void pfc_2D_cpg(int, double *vec , double *q , double *reaction , double *velocity , double *mu , int *info , int *iparamLCP , double *dparamLCP);
+  void pfc_2D_cpg(int nc, double *vec , double *q , double *reaction , double *velocity , double *mu , int *info , int *iparamLCP , double *dparamLCP);
 
   /**   pfc_2D_gsnl is a specific nlgs (Non Linear Gauss Seidel ) solver for primal contact problem with friction in 2D case.
   \param nc          On enter an integer, the number of contacst. The dimension of the system is n=2*nc.
@@ -187,7 +187,7 @@ extern "C" {
   void pfc_2D_nlgs(int, double *vec , double *q , double *reaction , double *velocity, double *mu  , int *info , int *iparamLCP , double *dparamLCP);
 
   /**   pfc_2D_latin  is a specific latin solver for primal contact problem with friction in the 2D case.
-  \param nc          On enter an integer, the number of contacst. The dimension of the system is n=2*nc.
+  \param nc          On enter an integer, the number of contacts. The dimension of the system is n=2*nc.
   \param vec         On enter a ( \f$ n\times n \f$)-vector of doubles containing the components of the double matrix with a fortran90 allocation.
   \param qq          On enter a n-vector of doubles containing the components of the second member.
   \param mu          On enter, the vector of friction coefficients (mu[i] corresponds to contact i)
