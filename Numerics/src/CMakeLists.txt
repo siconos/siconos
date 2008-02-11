@@ -37,7 +37,8 @@ SET(SiconosNumerics_DIRS
 # Unstable sources
 #
 SET(SiconosNumerics_Unstable_SRCS
-  NonSmoothSolvers/NSSTools/freeSpBlMat.c
+  NonSmoothSolvers/LCP/lcp_solver_block_pred_vec.c
+  NonSmoothSolvers/LCP/lcp_solver_pred.c
   NonSmoothSolvers/InterfaceToPathFerris/SimpleLCP.h
   NonSmoothSolvers/InterfaceToPathFerris/SimpleLCP_Path.c
 )
