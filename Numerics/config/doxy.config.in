@@ -3,9 +3,9 @@
 #---------------------------------------------------------------------------
 # Project related configuration options
 #---------------------------------------------------------------------------
-PROJECT_NAME           = "Siconos - v @VERSION@ - Numerics Package"
+PROJECT_NAME           = "Siconos - v @VERSION@ - @PROJECT_SHORT_NAME@ Package"
 PROJECT_NUMBER         = @VERSION@
-OUTPUT_DIRECTORY       = @DOXYGEN_OUTPUT@/Numerics
+OUTPUT_DIRECTORY       = @DOXYGEN_OUTPUT@/@PROJECT_SHORT_NAME@
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
 USE_WINDOWS_ENCODING   = NO
@@ -242,7 +242,7 @@ SKIP_FUNCTION_MACROS   = YES
 #---------------------------------------------------------------------------
 TAGFILES               = @DOXYGEN_OUTPUT@/Tags/HomePage.tag=../ \
                          @DOXYGEN_OUTPUT@/Tags/InstallGuide.tag=../InstallGuide
-GENERATE_TAGFILE       = @DOXYGEN_OUTPUT@/Tags/Numerics.tag
+GENERATE_TAGFILE       = @DOXYGEN_OUTPUT@/Tags/@PROJECT_SHORT_NAME@.tag
 ALLEXTERNALS           = NO
 EXTERNAL_GROUPS        = YES
 PERL_PATH              = /usr/bin/perl

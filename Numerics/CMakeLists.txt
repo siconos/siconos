@@ -89,6 +89,8 @@ ELSE(SVN_REVISION)
   SET(DOXYGEN_OUTPUT html)
 ENDIF(SVN_REVISION)
 
+SET(PROJECT_SHORT_NAME Numerics)
+
 INCLUDE(TargetDoc OPTIONAL)
 
 
@@ -155,7 +157,7 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 # Top level install
 #
 INSTALL(FILES AUTHORS ChangeLog COPYING INSTALL NEWS README 
-  DESTINATION share/doc/siconos-${VERSION}/)
+  DESTINATION share/doc/siconos-${VERSION}/Numerics)
 
 #
 # Library sources
