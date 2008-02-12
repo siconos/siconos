@@ -6,6 +6,7 @@
 # <PROJECT_NAME>_DIRS : sources directories
 # <PROJECT_NAME>_Unstable_SRCS : built only if -DUNSTABLE=ON
 # <PROJECT_NAME>_VERSION
+# <PROJECT_NAME>_SOURCE_FILE_EXENSIONS may contains the wanted sources extensions (default: all extensions)
 
 macro(LIBRARY_PROJECT_SETUP)
 
@@ -14,10 +15,36 @@ message(STATUS "Setting up ${PROJECT_NAME} library build")
 
 set(_ALL_DIRS ${${PROJECT_NAME}_DIRS})
 
+#
+
+#
+
+if(NOT ${PROJECT_NAME}_SOURCE_FILE_EXTENSIONS)
+  # all extensions we know (should be done only with the project languages)
+  foreach(_EXT ${CMAKE_CXX_SOURCE_FILE_EXTENSIONS} ${CMAKE_C_SOURCE_FILE_EXTENSIONS} ${CMAKE_Fortran_SOURCE_FILE_EXTENSIONS} ${CMAKE_Java_SOURCE_FILE_EXTENSIONS} ${CMAKE_RC_SOURCE_FILE_EXTENSIONS})
+    list(APPEND _ALL_EXTS *.${_EXT})
+  endforeach(_EXT ${CMAKE_CXX_SOURCE_FILE_EXTENSIONS} ${CMAKE_C_SOURCE_FILE_EXTENSIONS} ${CMAKE_Fortran_SOURCE_FILE_EXTENSIONS} ${CMAKE_Java_SOURCE_FILE_EXTENSIONS} ${CMAKE_RC_SOURCE_FILE_EXTENSIONS})
+else(NOT ${PROJECT_NAME}_SOURCE_FILE_EXTENSIONS)
+  # specified extensions
+  foreach(_EXT ${${PROJECT_NAME}_SOURCE_FILE_EXTENSIONS})
+    list(APPEND _ALL_EXTS *.${_EXT})
+  endforeach(_EXT ${${PROJECT_NAME}_SOURCE_FILE_EXTENSIONS})
+endif(NOT ${PROJECT_NAME}_SOURCE_FILE_EXTENSIONS)
+
 foreach(_DIR ${_ALL_DIRS})
-  file(GLOB _DIR_FILES ${_DIR}/*.[hcf])
+  set(_DIR_FILES)
+  foreach(_EXT ${_ALL_EXTS})
+    file(GLOB _DIR_FILES_EXT ${_DIR}/${_EXT})
+    if(_DIR_FILES_EXT)
+      list(APPEND _DIR_FILES ${_DIR_FILES_EXT})
+    endif(_DIR_FILES_EXT)
+  endforeach(_EXT ${_ALL_EXTS})
   if(_DIR_FILES)
-    list(APPEND _ALL_FILES ${_DIR_FILES})
+    # this prevents duplication
+    if(NOT "${_DIR_FILES}_T")
+      set(${_DIR_FILES}_T T)
+      list(APPEND _ALL_FILES ${_DIR_FILES})
+    endif(NOT "${_DIR_FILES}_T")
   endif(_DIR_FILES)
 endforeach(_DIR ${_ALL_DIRS})
 
