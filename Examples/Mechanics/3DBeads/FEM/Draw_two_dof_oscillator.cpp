@@ -204,10 +204,6 @@ void initSiconos()
     double v2   = -0.1;               // initial velocity for m2
 
 
-    string solverName = "NSGS";      // solver algorithm used for non-smooth problem
-    //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
-    // string solverName = "Lemke" ;
-
     double k = 0.2; // stiffness coefficient
     double L = 0.5; // initial lenth
     double m1 = 1.; //  m1
@@ -320,12 +316,16 @@ void initSiconos()
     OneStepIntegrator * OSI = new Moreau(allDS , 0.5000001 , GLOB_SIM);
 
     // -- OneStepNsProblem --
+    string solverName = "NSGS";      // solver algorithm used for non-smooth problem
+    IntParameters iparam(5);
+    iparam[0] = 100010; // Max number of iteration
+    iparam[4] = 0; // Solver/formulation  0: projection, 1: Newton/AlartCurnier, 2: Newton/Fischer-Burmeister
 
-
-    //OneStepNSProblem * osnspb = new LCP(GLOB_SIM ,"FrictionContact3D",solverName,101, 0.001);
-
-    OneStepNSProblem * osnspb = new FrictionContact3D(GLOB_SIM , "FrictionContact3D", solverName, 1000001, 0.001);
-
+    DoubleParameters dparam(5);
+    dparam[0] = 1e-7; // Tolerance
+    NonSmoothSolver * Mysolver = new NonSmoothSolver(solverName, iparam, dparam);
+    FrictionContact* osnspb = new FrictionContact(GLOB_SIM, 3, Mysolver);
+    osnspb->setNumericsVerboseMode(0);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================

@@ -64,15 +64,10 @@ int main(int argc, char* argv[])
     double pos2 = 0.8;               // initial position for m2
     double v2   = -0.1;               // initial velocity for m2
 
-    string solverName = "NSGS";      // solver algorithm used for non-smooth problem
-    //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
-    // string solverName = "Lemke" ;
-
     double k = 0.2; // stiffness coefficient
     double L = 0.5; // initial lenth
     double m1 = 1.; //  m1
     double m2 = 1.; //  m2
-    double g = 9.81; // Gravity
 
     // -------------------------
     // --- Dynamical systems ---
@@ -105,7 +100,8 @@ int main(int argc, char* argv[])
 
     // -- Set external forces (weight) --
     SiconosVector * weight = new SimpleVector(nDof);
-    (*weight)(0) = -m * g;
+    double g = 9.81;
+    (*weight)(0) = -m1 * g;
     oscillator->setFExtPtr(weight);
 
     // -- Set internal forces (stiffness) --
@@ -175,11 +171,20 @@ int main(int argc, char* argv[])
     TimeStepping* GLOB_SIM = new TimeStepping(GLOB_T);
 
     // -- OneStepIntegrators --
-    OneStepIntegrator * OSI = new Moreau(oscillator, 0.5000001 , GLOB_SIM);
+    OneStepIntegrator * OSI;
+    OSI = new Moreau(oscillator, 0.5000001 , GLOB_SIM);
 
     // -- OneStepNsProblem --
-    OneStepNSProblem * osnspb = new FrictionContact3D(GLOB_SIM , "FrictionContact3D", solverName, 1000001, 0.001);
-    //OneStepNSProblem * osnspb = new LCP(GLOB_SIM,"LCP",solverName,101, 0.0001);
+    string solverName = "NSGS";      // solver algorithm used for non-smooth problem
+    IntParameters iparam(5);
+    iparam[0] = 1010; // Max number of iteration
+    iparam[4] = 0; // Solver/formulation  0: projection, 1: Newton/AlartCurnier, 2: Newton/Fischer-Burmeister
+
+    DoubleParameters dparam(5);
+    dparam[0] = 1e-3; // Tolerance
+    NonSmoothSolver * Mysolver = new NonSmoothSolver(solverName, iparam, dparam);
+    FrictionContact* osnspb = new FrictionContact(GLOB_SIM, 3, Mysolver);
+    osnspb->setNumericsVerboseMode(0);
 
     // =========================== End of model definition ===========================
 
@@ -218,7 +223,7 @@ int main(int argc, char* argv[])
     {
       GLOB_SIM->computeOneStep();
       // --- Get values to be plotted ---
-      dataPlot(i, 0) = s->getNextTime();
+      dataPlot(i, 0) = GLOB_SIM->getNextTime();
       dataPlot(i, 1) = (*q)(0);
       dataPlot(i, 2) = (*v)(0);
       dataPlot(i, 3) = (*lambda)(0);

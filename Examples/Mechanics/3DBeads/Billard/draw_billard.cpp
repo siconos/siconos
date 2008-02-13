@@ -255,12 +255,7 @@ void initSiconos()
 
     double t0 = 0;                    // initial computation time
     double T = 10.;                    // final computation time
-    double h = 0.005;                 // time step
-
-
-    //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
-    //string solverName = "PGS";      // solver algorithm used for non-smooth problem
-    //string solverName = "Lemke";      // solver algorithm used for non-smooth problem
+    double h = 0.0005;                 // time step
 
     double e  = 0.9;                  // nslaw
     double e2 = 0.9;                  // nslaw2

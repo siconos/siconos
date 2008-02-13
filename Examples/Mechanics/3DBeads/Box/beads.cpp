@@ -60,8 +60,6 @@ int main(int argc, char* argv[])
     double T = 10.;                    // final computation time
     double h = 0.005;                 // time step
 
-    string solverName = "NSGS";      // solver algorithm used for non-smooth problem
-    //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
     double e = 0.9;                  // nslaw
     double e2 = 0.9;                  // nslaw2
     double mu = 0.;
@@ -341,14 +339,17 @@ int main(int argc, char* argv[])
     OneStepIntegrator * OSI = new Moreau(allDS , 0.5000001 , GLOB_SIM);
 
     // -- OneStepNsProblem --
-    //OneStepNSProblem * osnspb = new LCP(GLOB_SIM,"FrictionContact3D",solverName,101,0.001);
 
-    Solver * Mysolver = new Solver("FrictionContact3D", solverName, 101, 0.001);
+    string solverName = "NSGS";      // solver algorithm used for non-smooth problem
+    IntParameters iparam(5);
+    iparam[0] = 1010; // Max number of iteration
+    iparam[4] = 0; // Solver/formulation  0: projection, 1: Newton/AlartCurnier, 2: Newton/Fischer-Burmeister
 
-    OneStepNSProblem * osnspb = new FrictionContact3D(Mysolver, GLOB_SIM);
-
-
-
+    DoubleParameters dparam(5);
+    dparam[0] = 1e-3; // Tolerance
+    NonSmoothSolver * Mysolver = new NonSmoothSolver(solverName, iparam, dparam);
+    FrictionContact* osnspb = new FrictionContact(GLOB_SIM, 3, Mysolver);
+    osnspb->setNumericsVerboseMode(0);
     cout << "=== End of model loading === " << endl;
 
     // =========================== End of model definition

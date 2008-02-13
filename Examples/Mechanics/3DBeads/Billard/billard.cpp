@@ -393,12 +393,7 @@ int main(int argc, char* argv[])
     OneStepIntegrator * OSI = new Moreau(allDS , 0.5000001 , GLOB_SIM);
 
     // -- OneStepNsProblem --
-    //OneStepNSProblem * osnspb = new LCP(GLOB_SIM,"FrictionContact3D",solverName,101,0.001);
     string solverName = "NSGS";      // solver algorithm used for non-smooth problem
-    //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
-    //string solverName = "PGS";      // solver algorithm used for non-smooth problem
-    //string solverName = "Lemke";      // solver algorithm used for non-smooth problem
-
     IntParameters iparam(5);
     iparam[0] = 1010; // Max number of iteration
     iparam[4] = 0; // Solver/formulation  0: projection, 1: Newton/AlartCurnier, 2: Newton/Fischer-Burmeister

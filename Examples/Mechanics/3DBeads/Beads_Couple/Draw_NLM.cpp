@@ -53,7 +53,7 @@ using namespace std;
 #define GROUND 0       // Positions of walls
 
 
-Simulation* GLOB_SIM;
+TimeStepping* GLOB_SIM;
 TimeDiscretisation * GLOB_T;
 LagrangianDS * GLOB_tabLDS[COUPLE];
 //Model * BeadsCOUPLE;
@@ -129,7 +129,7 @@ void DrawBox(float alpha)
   //  alpha = 0 signifie transparent, alpha = 1 signifie opaque
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glColor4f(0.5, 0.7, 0.9, alpha); // 3 premiers champs = RGB, quatri.ANhme champ = opacitNi
+  glColor4f(0.5, 0.7, 0.9, alpha); // 3 premiers champs = RGB, quatriNhme champ = opacitNi
 
   glBegin(GL_QUADS);
   // Front Face
@@ -263,14 +263,10 @@ void initSiconos()
     double T = 10.;                    // final computation time
     double h = 0.005;                 // time step
 
-    string solverName = "NSGS";      // solver algorithm used for non-smooth problem
-
     double e  = 0.9;                  // nslaw
     double e2 = 0.5;
     double mu = 0.;
     double PI = 3.14;
-    double R  = 0.1;
-
     // 1 to take in account the obstacle and  0 no
 
     int obst_z_p = 0;                    //  for z --> +
@@ -660,12 +656,20 @@ void initSiconos()
     GLOB_SIM = new TimeStepping(GLOB_T);
 
     // -- OneStepIntegrators --
-    OneStepIntegrator * OSI = new Moreau(allDS , 0.5000001 , GLOB_SIM);
+    OneStepIntegrator * OSI;
+    OSI = new Moreau(allDS , 0.5000001 , GLOB_SIM);
 
     // -- OneStepNsProblem --
-    OneStepNSProblem * osnspb = new FrictionContact3D(GLOB_SIM , "FrictionContact3D", solverName, 10000000, 0.001);
-    //OneStepNSProblem * osnspb = new LCP(GLOB_SIM,"name",solverName,100, 0.001,1);
+    string solverName = "NSGS";      // solver algorithm used for non-smooth problem
+    IntParameters iparam(5);
+    iparam[0] = 1010; // Max number of iteration
+    iparam[4] = 0; // Solver/formulation  0: projection, 1: Newton/AlartCurnier, 2: Newton/Fischer-Burmeister
 
+    DoubleParameters dparam(5);
+    dparam[0] = 1e-7; // Tolerance
+    NonSmoothSolver * Mysolver = new NonSmoothSolver(solverName, iparam, dparam);
+    FrictionContact* osnspb = new FrictionContact(GLOB_SIM, 3, Mysolver);
+    osnspb->setNumericsVerboseMode(0);
     cout << "=== End of model loading === " << endl;
 
     // =========================== End of model definition
