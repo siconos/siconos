@@ -22,14 +22,10 @@
  *
  *
  * iparam[0] = itermax Input unchanged parameter which represents the maximum number of iterations allowed.
- * iparam[1] = ispeak  Input unchanged parameter which represents the output log identifiant\n
- *                       0 - no output\n
- *                       1 - active screen output\n
- * iparam[2] = it_end  Output modified parameter which returns the number of iterations performed by the algorithm.
- * iparam[3] = local iter_max
- * iparam[4] = iter local (output)
- * iparam[5] = local formulation (0: Alart-Curnier, 1: Fischer-Burmeister)
- * iparam[6] = local solver (0: projection, 1: Newton). Projection only for AC case.
+ * iparam[1] = it_end  Output modified parameter which returns the number of iterations performed by the algorithm.
+ * iparam[2] = local iter_max
+ * iparam[3] = iter local (output)
+ * iparam[4] = local formulation/solver (0: Projection, 1: Newton/Alart-Curnier 2: Newton/Fischer-Burmeister)
  *
  * dparam[0] = tol     Input unchanged parameter which represents the tolerance required.
  * dparam[1] = error   Output modified parameter which returns the final error value.
@@ -51,6 +47,7 @@
 #include "FrictionContact3D_projection.h"
 #include "FrictionContact3D_Solvers.h"
 #include "NCP.h"
+#include "LA.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -61,14 +58,14 @@ void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, C
 {
   /** Connect to local solver */
   /* Projection */
-  if (iparam[6] == 0)
+  if (iparam[4] == 0)
   {
     *solve = &frictionContact3D_projection_solve;
     *freeSolver = &frictionContact3D_projection_free;
     frictionContact3D_projection_initialize(n, M, q, mu);
   }
-  /* Newton solver */
-  else if (iparam[6] == 1)
+  /* Newton solver (Alart-Curnier or Fischer-Burmeister)*/
+  else if (iparam[4] == 1 || iparam[4] == 2)
   {
     *solve = &frictionContact3D_Newton_solve;
     *freeSolver = &frictionContact3D_Newton_free;
@@ -102,6 +99,11 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
 
   /* Check for trivial case */
   *info = checkTrivialCase(n, q, velocity, reaction, iparam, dparam);
+
+  int incx = 1;
+  double  qs = DNRM2(n , q , incx);
+  double den = 1. / qs;
+
   if (*info == 0)
     return;
 
@@ -116,9 +118,17 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
   int iter = 0; /* Current iteration number */
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
+
+
+  double * W    = (double*)malloc(n * sizeof(double));
+
+  int incy = 1;
+  double num;
   int contact; /* Number of the current row of blocks in M */
   while ((iter < itermax) && (hasNotConverged > 0))
   {
+    DCOPY(n , velocity , incx , W , incy);
+    DCOPY(n , q , incx , velocity , incy);
     ++iter;
     /* Loop through the contact points */
     for (contact = 0 ; contact < nc ; ++contact)
@@ -127,7 +137,15 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
     /* **** Criterium convergence **** */
     //   (*computeError)(n,velocity,reaction,&error);
 
-    NCP_compute_error(n , M , q , reaction , iparam[1] , velocity, &error);
+    //NCP_compute_error( n , M , q , reaction , verbose , velocity, &error );
+    //     lcp_compute_error( n , M , q , reaction, verbose, velocity , &error);
+    DGEMV(LA_NOTRANS , n , n , 1.0 , M , n , reaction , incx , 1.0 , velocity , incy);
+    qs = -1.0;
+    DAXPY(n , qs , velocity , incx , W , incy);
+    num = DNRM2(n, W , incx);
+    error = num * den;
+    if (verbose > 0)
+      printf("-----------------------------------Iteration %i Erreur = %14.7e\n", iter, error);
 
     if (error < tolerance) hasNotConverged = 0;
 

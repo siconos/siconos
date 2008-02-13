@@ -314,9 +314,17 @@ void pfc_3D_nsgs(int nc , double *vec , double *q , double *z , double *w , doub
 
     /* **** Criterium convergence **** */
 
-    NCP_compute_error(n , vec , q , z , ispeak , w , &err);
+    //NCP_compute_error( n , vec , q , z , ispeak , w , &err );
 
     //lcp_compute_error( n , vec , q , z , ispeak , w , &err);
+    incx = 1;
+    incx = 1;
+    DGEMV(LA_NOTRANS , n , n , 1.0 , vec , n , z , incx , 1.0 , w , incy);
+
+    qs   = -1.0;
+    DAXPY(n , qs , w , incx , W , incy);
+    double num = DNRM2(n, W , incx);
+    err = num * den;
 
     /*    printf("-----------------------------------Iteration %i Erreur = %14.7e\n",iter,err); */
   }

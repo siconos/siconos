@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "NonSmoothNewton.h"
+#include "Numerics_Options.h"
 #include "LA.h"
 #include "math.h"
 #include "stdio.h"
@@ -79,8 +80,7 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
   int itermax = iparam[0]; // maximum number of iterations allowed
   int niter = 0; // current iteration number
   double tolerance = dparam[0];
-  int ispeak = iparam[1]; // verbose mode
-  if (ispeak > 0)
+  if (verbose > 0)
   {
     printf(" ============= Starting of Newton process =============\n");
     printf(" - tolerance: %f\n - maximum number of iterations: %i\n", tolerance, itermax);
@@ -164,7 +164,7 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
     /* Step-3 Line search: computes z_k+1 */
     linesearch_Armijo(n, z, phiVector, psi, descentCondition, phi);
 
-    if (ispeak > 0)
+    if (verbose > 0)
     {
       printf("Non Smooth Newton, iteration number %i, error equal to %14.7e .\n", niter, terminationCriterion);
       printf(" -----------------------------------------------------------------------");
@@ -172,7 +172,7 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
   }
 
   /* Total number of iterations */
-  iparam[2] = niter;
+  iparam[1] = niter;
   /* Final error */
   dparam[1] = terminationCriterion;
 
@@ -182,7 +182,7 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
   free(jacobian_psi);
   free(ipiv);
 
-  if (ispeak > 0)
+  if (verbose > 0)
   {
     if (dparam[1] > tolerance)
       printf("Non Smooth Newton warning: no convergence after %i iterations\n" , niter);

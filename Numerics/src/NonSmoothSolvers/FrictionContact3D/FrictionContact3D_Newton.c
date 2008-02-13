@@ -74,7 +74,7 @@ void frictionContact3D_Newton_initialize(int n0, const double*const M0, const do
   */
 
   /* Alart-Curnier formulation */
-  if (iparam[5] == 0)
+  if (iparam[4] == 1)
   {
     Fsize = 3;
     frictionContact3D_AC_initialize(n0, M0, q0, mu0);
@@ -86,7 +86,7 @@ void frictionContact3D_Newton_initialize(int n0, const double*const M0, const do
 
   }
   /* Glocker formulation - Fischer-Burmeister function used in Newton */
-  else if (iparam[5] == 1)
+  else if (iparam[4] == 2)
   {
     Fsize = 5;
     NCPGlocker_initialize(n0, M0, q0, mu0);
@@ -110,7 +110,7 @@ void frictionContact3D_Newton_initialize_SBS(int n0, const SparseBlockStructured
   */
 
   /* Alart-Curnier formulation */
-  if (iparam[5] == 0)
+  if (iparam[4] == 1)
   {
     Fsize = 3;
     F = &F_AC;
@@ -121,7 +121,7 @@ void frictionContact3D_Newton_initialize_SBS(int n0, const SparseBlockStructured
 
   }
   /* Glocker formulation - Fischer-Burmeister function used in Newton */
-  else if (iparam[5] == 1)
+  else if (iparam[4] == 2)
   {
     Fsize = 5;
     NCPGlocker_initialize_SBS(n0, M0, q0, mu0);

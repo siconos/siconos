@@ -36,20 +36,18 @@
   \f$ reaction, velocity, q\f$ are vectors of size n and \f$ M \f$ is a nXn matrix, with \f$ n = 3*nc \f$, nc being the number of contacts. \n
   \f$ reaction_n\f$ represents the normal part of the reaction while \f$ reaction_t\f$ is its tangential part.
 
-  \f$ \mu \f$ is the friction coefficient (may be different for each contact).
+  \f$ \mu \f$ is the friction coefficient (it may be different for each contact).
 
   \section fc3DSolversList Available solvers for Friction Contact 3D
-  Use the generic function frictionContact3DSolvers(), to call one the the specific solvers listed below:
+  Use the generic function frictionContact3D_driver() to call one the the specific solvers listed below:
 
   - frictionContact3D_nsgs() : non-smooth Gauss-Seidel solver
   - frictionContact3D_nsgs_SBS() : non-smooth Gauss-Seidel solver with Sparse Block Storage (SBS) for M
 
-  The structure method, argument of frictionContact3DSolvers(), is used to give the name and parameters of the required solver.
-
-  (see the functions/solvers list in FrictionContact3DSolvers.h)
+  (see the functions/solvers list in FrictionContact3D_Solvers.h)
 
   \section fc3DParam Required and optional parameters
-  FrictionContact3D problems needs some specific parameters, given to the FrictionContact3D_Driver() function thanks to a Solver_Options structure. \n
+  FrictionContact3D problems needs some specific parameters, given to the FrictionContact3D_driver() function thanks to a Solver_Options structure. \n
   They are:\n
      - the name of the solver (ex: NSGS), used to switch to the right solver function
      - iparam[0]: max. number of iterations allowed

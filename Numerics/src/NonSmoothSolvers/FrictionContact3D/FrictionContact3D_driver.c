@@ -34,8 +34,6 @@ int frictionContact3D_driver(FrictionContact_Problem* problem, double *reaction 
   /* If the options for solver have not been set, read default values in .opt file */
   int NoDefaultOptions = options->isSet; /* true(1) if the Solver_Options structure has been filled in else false(0) */
 
-  printSolverOptions(options);
-
   if (!NoDefaultOptions)
     readSolverOptions(3, options);
 

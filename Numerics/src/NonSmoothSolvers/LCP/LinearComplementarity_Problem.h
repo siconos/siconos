@@ -51,8 +51,6 @@
   - lcp_newton_min(), nonsmooth Newton method based on the min formulation  (or max formulation) of the LCP
   - lcp_newton_FB(), uses a nonsmooth newton method based on the Fischer-Bursmeister convex function
 
-  The structure method, argument of lcp_driver(), is used to give the name and parameters of the required solver.
-
   (see the functions/solvers list in LCP_Solvers.h)
 
   \section LCPParam Parameters (in-out) for Linear Complementarity Problems
@@ -78,10 +76,10 @@
 #include "NumericsMatrix.h"
 
 /** Linear Complementarity Problem elements
-    \param size, dim of the problem
-    \param M, matrix of the LCP
-    \param q, vector
-    \param isComplete, equal to 0 if some information is missing or wrong for the problem (M or q = NULL, inconsistent sizes), else equal to 1.
+    \param size dim of the problem
+    \param M matrix of the LCP
+    \param q vector
+    \param isComplete equal to 0 if some information is missing or wrong for the problem (M or q = NULL, inconsistent sizes), else equal to 1.
  */
 typedef struct
 {

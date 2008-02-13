@@ -61,13 +61,8 @@ int main(int argc, char* argv[])
     double R = 0.1;                   // radius of balls
 
     double t0 = 0;                    // initial computation time
-    double T = 10.;                    // final computation time
+    double T = 0.2;                    // final computation time
     double h = 0.05;                 // time step
-
-    string solverName = "NSGS";      // solver algorithm used for non-smooth problem
-    //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
-    //string solverName = "PGS";      // solver algorithm used for non-smooth problem
-    //string solverName = "Lemke";      // solver algorithm used for non-smooth problem
 
     double e = 0.9;                  // nslaw
     double e2 = 0.9;                  // nslaw2
@@ -179,6 +174,9 @@ int main(int argc, char* argv[])
     (*(q0[15]))(1) = -0.8;
     (*(q0[15]))(2) =  0.1;
 
+    //     SiconosVector * weight = new SimpleVector(nDof);
+    //     (*weight)(0) = -m*g;
+    //     ball->setFExtPtr(weight);
 
     for (i = 0; i < DSNUMBER; i++)
     {
@@ -396,11 +394,20 @@ int main(int argc, char* argv[])
 
     // -- OneStepNsProblem --
     //OneStepNSProblem * osnspb = new LCP(GLOB_SIM,"FrictionContact3D",solverName,101,0.001);
+    string solverName = "NSGS";      // solver algorithm used for non-smooth problem
+    //string solverName = "NLGS";      // solver algorithm used for non-smooth problem
+    //string solverName = "PGS";      // solver algorithm used for non-smooth problem
+    //string solverName = "Lemke";      // solver algorithm used for non-smooth problem
 
-    Solver * Mysolver = new Solver("FrictionContact3D", solverName, 101, 0.001);
+    IntParameters iparam(5);
+    iparam[0] = 1010; // Max number of iteration
+    iparam[4] = 0; // Solver/formulation  0: projection, 1: Newton/AlartCurnier, 2: Newton/Fischer-Burmeister
 
-    OneStepNSProblem * osnspb = new FrictionContact3D(Mysolver, GLOB_SIM);
-
+    DoubleParameters dparam(5);
+    dparam[0] = 1e-3; // Tolerance
+    NonSmoothSolver * Mysolver = new NonSmoothSolver(solverName, iparam, dparam);
+    FrictionContact* osnspb = new FrictionContact(GLOB_SIM, 3, Mysolver);
+    osnspb->setNumericsVerboseMode(1);
 
 
     cout << "=== End of model loading === " << endl;
@@ -440,8 +447,8 @@ int main(int argc, char* argv[])
     for (iter_k = 1 ; iter_k < N + 1  ; ++iter_k)
     {
 
-      GLOB_SIM->computeOneStep();
 
+      GLOB_SIM->computeOneStep();
 
       // --- Get values to be plotted ---
       dataPlot(iter_k, 0) =  GLOB_SIM->getNextTime();

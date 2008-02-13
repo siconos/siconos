@@ -431,8 +431,36 @@ int FrictionContact::compute(double time)
     numerics_problem.isComplete = 1;
     numerics_problem.mu = mu->data();
     // Call Numerics Driver for FrictionContact
-    info = (*frictionContact_driver)(&numerics_problem, reaction->getArray() , velocity->getArray() , solver->getNumericsSolverOptionsPtr(), numerics_options);
+    //  {
+    //    int info2 = -1;
+    //    int iparam2[7];
+    //    iparam2[0] = 100000;
+    //    iparam2[1] = 1;
+    //    iparam2[3] = iparam2[0];
+    //    iparam2[5] = 0;
+    //    iparam2[6] = 0;// 0: proj 1: AC/FB
 
+    //    double dparam2[5];
+    //    dparam2[0] = 1e-6;
+    //    dparam2[2] = 1e-6;
+    //    SimpleVector * z= new SimpleVector(sizeOutput);
+    //    SimpleVector * w= new SimpleVector(sizeOutput);
+    //    M->display();
+    //    q->display();
+
+    //    pfc_3D_nsgs(numerics_problem.numberOfContacts, numerics_problem.M->matrix0, numerics_problem.q , z->getArray() , w->getArray(), mu->data(), &info2, iparam2 , dparam2 );
+    //    cout << " ... " << info2 << " " << dparam2[1] << endl;
+    //    z->display();
+    //    w->display();
+
+
+    //  }
+    //       M->display();
+    //       q->display();
+    info = (*frictionContact_driver)(&numerics_problem, reaction->getArray() , velocity->getArray() , solver->getNumericsSolverOptionsPtr(), numerics_options);
+    //  cout << " step 2 "<< info << endl;
+    //  reaction->display();
+    //  velocity->display();
     // --- Recovering of the desired variables from LCP output ---
     postCompute();
 

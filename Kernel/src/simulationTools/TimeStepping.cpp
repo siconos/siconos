@@ -334,7 +334,7 @@ void TimeStepping::DefaultCheckSolverOutput(int info)
   {
     cout << "TimeStepping::check non smooth solver output warning: output message from solver is equal to " << info << endl;
     cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." << endl;
-    RuntimeException::selfThrow(" Non smooth problem, solver convergence failed");
+    //      RuntimeException::selfThrow(" Non smooth problem, solver convergence failed");
     /*      if(info == 1)
     cout <<" reach max iterations number with solver " << solverName << endl;
     else if (info == 2)

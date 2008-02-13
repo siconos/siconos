@@ -21,20 +21,20 @@
 #define Solver_Options_H
 
 /*!\file Solver_Options.h
-  \brief Structure used to send options (name, parameters ...) to a specific solver-driver (mainly from Kernel to Numerics).
+  \brief Structure used to send options (name, parameters and so on) to a specific solver-driver (mainly from Kernel to Numerics).
   \author Franck Perignon
 */
 
 #include "Numerics_Options.h"
 
-/** Structure used to send options (name, parameters ...) to a specific solver-driver (mainly from Kernel to Numerics).
+/** Structure used to send options (name, parameters and so on) to a specific solver-driver (mainly from Kernel to Numerics).
     \param isSet, int equal to false(0) if the parameters below have not been set (ie need to read default values) else true(1)
-    \param name of the solver
-    \param size of vectors iparam and dparam \n
+    \param solverName name of the solver
+    \param nbParam size of vectors iparam and dparam \n
     (to simplify, this size is the same for both of them and whatever the non-smooth problem is).
-    \param a list of int parameters (depends on each solver, see solver doc.)
-    \param a list of double parameters (depends on each solver, see solver doc.)
-    \param int to check storage type (0: double*, 1: SparseBlockStructuredMatrix)
+    \param iparam a list of int parameters (depends on each solver, see solver doc.)
+    \param dparam a list of double parameters (depends on each solver, see solver doc.)
+    \param storageType int to check storage type (0: double*, 1: SparseBlockStructuredMatrix)
 */
 typedef struct
 {

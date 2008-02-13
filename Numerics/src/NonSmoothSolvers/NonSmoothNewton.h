@@ -46,6 +46,12 @@ extern "C" {
    \param the vector z, unknown vector, in-out argument
    \param pointer to \f$ \phi \f$ function
    \param pointer to \f$ \nabla_z \phi(z) \f$ function
+   \param iparam vector of int parameters:\n
+     - [0] : max. number of iterations
+     - [1] : number of iterations processed
+   \param dparam vector of double parameters:\n
+     - [0]: tolerance
+     - [1]: error
   */
   int nonSmoothNewton(int, double*, NewtonFunctionPtr*, NewtonFunctionPtr*, int*, double*);
 

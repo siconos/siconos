@@ -29,6 +29,9 @@ Typedef for simulation-related objects
 #include <map>
 #include <set>
 
+/** double precision machine */
+const double MACHINE_PREC = 1e-14;//dlamch_("e");
+
 // ================== Objects to handle UnitaryRelations ==================
 
 #include "UnitaryRelationsSet.h"

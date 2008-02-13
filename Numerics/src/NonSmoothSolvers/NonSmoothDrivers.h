@@ -18,22 +18,25 @@
  */
 /*! \page NSDrivers  Non-Smooth Solvers
 
-Numerics package proposes a set of non-smooth solvers dedicated to some specific formulations.\n
+Numerics package proposes a set of non-smooth solvers dedicated to some specific formulations for a non-smooth problem.\n
 
-For each type of problem, a generic interface function (driver) is provided (see NonSmoothDrivers.h for the complete list).\n
-The main arguments of this function are the vectors and matrices used to formalize the problem, \n
-the unknowns and a structure method, used to defined the solver type and its parameters. \n
-To get more details on this, check for each type of problem in \ref NSSpackContents below.
+For each type of problem, a generic interface function (driver) is provided (see contents table below for description and the file NonSmoothDrivers.h for a complete list of all interfaces).\n
+The main arguments of this driver are:
+ - a structure of type XXX_Problem (XXX being the formulation type: LinearComplementarity_Problem, FrictionContact_Problem ...), which holds the vectors and matrices used to formalize the problem, \n
+ - the unknowns
+ - a structure of type Solver_Options, used to defined the solver type and its parameters. \n
+
+To get more details on each formulation, check for each type of problem in \ref NSSpackContents below.
 
 \section NSSpackContents Contents
-\subpage LCPSolvers \n
+\subpage LCProblem \n
 \subpage MLCPSolvers \n
 \subpage fc2DSolvers \n
-\subpage fc3DSolvers \n
+\subpage fcProblem \n
 \subpage RelaySolvers\n
 \subpage QPSolvers\n
 
-Details on matrix storage in Numerics can be found in:
+Moreover, details on matrix storage in Numerics can be found in:
 \subpage NumericsMatrixPage \n
 
 Other functions and useful tools related to NonSmoothSolvers are listed in NSSTools.h.
@@ -41,7 +44,7 @@ Other functions and useful tools related to NonSmoothSolvers are listed in NSSTo
 */
 
 /*!\file NonSmoothSolvers.h
- * \brief This file provides all generic functions (drivers), interfaces to the different solvers available in Numerics.
+ * \brief This file provides all generic functions (drivers), interfaces to the different formulations for Non-Smooth Problems available in Numerics.
  *  \author Nineb Sheherazade and Dubois Frederic.
  *  Last Modifications : Mathieu Renouf , Pascal Denoyelle, Franck Perignon
  *  \todo solve_qp does not exist
