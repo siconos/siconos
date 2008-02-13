@@ -1,9 +1,6 @@
 # cache result to avoid re-running
 #
-
-message("###")
-if(NOT HAVE_FORTRAN_LIBRARIES)
-
+IF(NOT HAVE_FORTRAN_LIBRARIES)
 # search for libraries required to link with fortran
 # placed in the variable
 #  FORTRAN_LIBRARIES
@@ -36,104 +33,91 @@ SET(iopt 0)
 
 # Try to link against fortran libraries
 WHILE(${iopt} LESS ${imax})
-    # Get the current list entry (current scheme)
-    LIST(GET KNOWN_FORTRAN_LIBRARIES ${iopt} fc_libraries_t)
 
-    STRING(REGEX REPLACE ";" "\\\;" fc_libraries "${fc_libraries_t}")
-
-    FILE(WRITE ${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testF77libs.c
-        "        void main(int argc, char ** argv) {}\n"
+  # Get the current list entry (current scheme)
+  LIST(GET KNOWN_FORTRAN_LIBRARIES ${iopt} fc_libraries_t)
+  
+  STRING(REGEX REPLACE ";" "\\\;" fc_libraries "${fc_libraries_t}")
+  
+  # Create a simple Fortran library source
+  FILE(WRITE ${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/FLIB/ftest.f
+    "        FUNCTION fortransub()\n"
+    "        print *, 'hello world'\n"
+    "        print *, ' value = ', atan(-1.0)\n"
+    "        RETURN\n"
+    "        END\n"
     )
+
+  # a call to the Fortran library from C
+  FILE(WRITE ${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/FLIB/testF77libs.c
+    "        int main(int argc, char ** argv) { fortransub_();}\n"
+    )
+  
+  # let's find it in some potential libraries directories
+  MESSAGE(STATUS "Seeking fortran library directory")
+  
+  FILE(GLOB _LIBDIRS_MAYBE 
+    /opt /opt/* /opt/lib/*
+    /usr/local/* /usr/local/lib/*
+    /usr/* /usr/lib/*)
+  
+  FOREACH(_F ${_LIBDIRS_MAYBE})
+    IF(IS_DIRECTORY ${_F})
+      LIST(APPEND _LIBDIRS ${_F})
+    ENDIF(IS_DIRECTORY ${_F})
+  ENDFOREACH(_F ${_LIBDIRS_MAYBE})
+
+  LIST(APPEND _LIBDIRS "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp")
+  
+  #string -> list
+  SET(_libs ${fc_libraries})
+
+  FIND_LIBRARY(_LFIND NAMES ${_libs} PATHS ${_LIBDIRS} PATH_SUFFIXES lib)
+      
+  IF(_LFIND)
+
+    MESSAGE(STATUS "Found ${_LFIND}, trying to link mixed C/fortran stuff...")
+    GET_FILENAME_COMPONENT(_LFINDDIR ${_LFIND} PATH)
+    
     # Create a CMakeLists.txt file which will generate the "flib" library
-    FILE(WRITE ${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CMakeLists.txt
-        "PROJECT(FortranTest Fortran)\n"
-        "SET(CMAKE_Fortran_FLAGS \"${TMP_Fortran_FLAGS}\")\n"
-        "ADD_LIBRARY(flib ftest.f)\n"
-        )
-    # Create a simple Fortran source
-    FILE(WRITE ${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/ftest.f
-        "        PROGRAM fortransub\n"
-        "        print *, 'hello world'\n"
-        "        print *, ' value = ', atan(-1.0)\n"
-        "        STOP\n"
-        "        END\n"
-    )
+    FILE(WRITE ${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/FLIB/CMakeLists.txt
+      "PROJECT(FortranTest C Fortran)\n"
+      "SET(CMAKE_Fortran_FLAGS \"${TMP_Fortran_FLAGS}\")\n"
+      "LINK_DIRECTORIES(${_LFINDDIR})\n"
+      "ADD_LIBRARY(flib ftest.f)\n"
+      "ADD_EXECUTABLE(testF77libs testF77libs.c)\n"
+      "TARGET_LINK_LIBRARIES(testF77libs flib ${fc_libraries})\n")
+    
 
     # Use TRY_COMPILE to make the target "flib"
-    TRY_COMPILE(
-        FTEST_OK
-        ${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
-        ${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
-        flib
-        OUTPUT_VARIABLE MY_OUTPUT)
-    #message("${MY_OUTPUT}")
-    if(NOT FTEST_OK)
-      MESSAGE(FATAL_ERROR "Failed to compile simple fortran library")
-    endif(NOT FTEST_OK)
+    TRY_COMPILE(FORT_LIBS_WORK
+      ${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/FLIB
+      ${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/FLIB
+      flib
+      OUTPUT_VARIABLE MY_OUTPUT)
     
-    SET(trial_libraries "${fc_libraries}\;flib")
-    
-    LIST(APPEND trial_lib_paths "${FORTRAN_COMPILER_LIB_DIRECTORY}")
-    LIST(APPEND trial_lib_paths "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp")    
-    
-    MESSAGE(STATUS "trying libraries ${fc_libraries_t}")
-    
-    TRY_COMPILE(FORT_LIBS_WORK ${CMAKE_BINARY_DIR}
-      ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testF77libs.c
-      CMAKE_FLAGS
-      -DLINK_LIBRARIES:STRING=${trial_libraries}
-      -DLINK_DIRECTORIES=${trial_lib_paths}
-      OUTPUT_VARIABLE FORT_LIBS_BUILD_OUT)
-    MESSAGE(STATUS ${FORT_LIBS_BUILD_OUT})
-    
-    IF(NOT FORT_LIBS_WORK)
-      # let's find it in some potential libraries directories
-      FILE(GLOB _LIBDIRS_MAYBE 
-        /opt /opt/* /opt/lib/*
-        /usr/local/* /usr/local/lib/*
-        /usr/* /usr/lib/*)
-      FOREACH(_F ${_LIBDIRS_MAYBE})
-        IF(IS_DIRECTORY ${_F})
-          LIST(APPEND _LIBDIRS ${_F})
-        ENDIF(IS_DIRECTORY ${_F})
-      ENDFOREACH(_F ${_LIBDIRS_MAYBE})
-      LIST(APPEND _LIBDIRS "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp")
-
-      #string -> list
-      SET(_libs ${trial_libraries})
-
-      FIND_LIBRARY(_LFIND NAMES ${_libs} PATHS "${_LIBDIRS}" PATH_SUFFIXES lib)
-
-      IF(_LFIND)
-        GET_FILENAME_COMPONENT(_LFINDDIR ${_LFIND} PATH)
-        TRY_COMPILE(FORT_LIBS_WORK ${CMAKE_BINARY_DIR}
-          ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testF77libs.c
-          CMAKE_FLAGS
-          -DLINK_LIBRARIES:STRING=${trial_libraries}
-          -DLINK_DIRECTORIES=${_LFINDDIR}\;${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
-          OUTPUT_VARIABLE FORT_LIBS_BUILD_OUT
-          )
-        MESSAGE(STATUS ${FORT_LIBS_BUILD_OUT})
-      ENDIF(_LFIND)
-    ENDIF(NOT FORT_LIBS_WORK)
-
     IF(FORT_LIBS_WORK)
-        # the goal is to set this to something useful
-        SET(FORTRAN_LIBRARIES ${fc_libraries} CACHE STRING "fortran libraries required to link with f90 generated code" FORCE)
-
-        MESSAGE(STATUS "Using FORTRAN_LIBRARIES ${FORTRAN_LIBRARIES}")
-        MESSAGE(STATUS "Using FORTRAN_COMPILER_LIB_DIRECTORY ${FORTRAN_COMPILER_LIB_DIRECTORY}")
-
-        SET(HAVE_FORTRAN_LIBRARIES TRUE CACHE INTERNAL "successfully found fortran libraries")
-        SET(iopt ${imax})
-        LINK_DIRECTORIES(${FORTRAN_COMPILER_LIB_DIRECTORY})
-    ELSE(FORT_LIBS_WORK)
-        MATH(EXPR iopt ${iopt}+1)
+      MESSAGE(STATUS "Ok, mixed C/Fortran can be linked with ${fc_libraries}")
+      SET(FORTRAN_COMPILER_LIB_DIRECTORY ${_LFINDDIR})
     ENDIF(FORT_LIBS_WORK)
+  ENDIF(_LFIND)
+    
+  IF(FORT_LIBS_WORK)
+    # the goal is to set this to something useful
+    SET(FORTRAN_LIBRARIES ${fc_libraries} CACHE STRING "fortran libraries required to link with f90 generated code" FORCE)
+    MESSAGE(STATUS "Using FORTRAN_LIBRARIES ${FORTRAN_LIBRARIES}")
+    MESSAGE(STATUS "Using FORTRAN_COMPILER_LIB_DIRECTORY ${FORTRAN_COMPILER_LIB_DIRECTORY}")
+    
+    SET(HAVE_FORTRAN_LIBRARIES TRUE CACHE INTERNAL "successfully found fortran libraries")
+    SET(iopt ${imax})
+    LINK_DIRECTORIES(${FORTRAN_COMPILER_LIB_DIRECTORY})
+  ELSE(FORT_LIBS_WORK)
+    MATH(EXPR iopt ${iopt}+1)
+  ENDIF(FORT_LIBS_WORK)
 ENDWHILE(${iopt} LESS ${imax})
+  
+IF(NOT HAVE_FORTRAN_LIBRARIES)
+  MESSAGE(FATAL_ERROR "Could not find valid fortran link libraries. Try setting FORTRAN_COMPILER_DIRECTORY or FORTRAN_LIBRARIES")
+ENDIF(NOT HAVE_FORTRAN_LIBRARIES)
 
-  IF(NOT HAVE_FORTRAN_LIBRARIES)
-    MESSAGE(FATAL_ERROR "Could not find valid fortran link libraries. Try setting FORTRAN_COMPILER_DIRECTORY or FORTRAN_LIBRARIES")
-  ENDIF(NOT HAVE_FORTRAN_LIBRARIES)
-
-endif(NOT HAVE_FORTRAN_LIBRARIES)
+ENDIF(NOT HAVE_FORTRAN_LIBRARIES)

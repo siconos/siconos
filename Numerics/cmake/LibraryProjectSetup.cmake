@@ -6,7 +6,7 @@
 # <PROJECT_NAME>_DIRS : sources directories
 # <PROJECT_NAME>_Unstable_SRCS : built only if -DUNSTABLE=ON
 # <PROJECT_NAME>_VERSION
-# <PROJECT_NAME>_SOURCE_FILE_EXENSIONS may contains the wanted sources extensions (default: all extensions)
+# <PROJECT_NAME>_SOURCE_FILE_EXTENSIONS may contains the wanted sources extensions (default: all extensions)
 
 macro(LIBRARY_PROJECT_SETUP)
 
@@ -29,6 +29,8 @@ else(NOT ${PROJECT_NAME}_SOURCE_FILE_EXTENSIONS)
   foreach(_EXT ${${PROJECT_NAME}_SOURCE_FILE_EXTENSIONS})
     list(APPEND _ALL_EXTS *.${_EXT})
   endforeach(_EXT ${${PROJECT_NAME}_SOURCE_FILE_EXTENSIONS})
+  list(APPEND _ALL_EXTS *.h)
+  list(APPEND _ALL_EXTS *.hpp)
 endif(NOT ${PROJECT_NAME}_SOURCE_FILE_EXTENSIONS)
 
 foreach(_DIR ${_ALL_DIRS})

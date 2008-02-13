@@ -88,6 +88,9 @@ if(BLAS_FOUND)
   set(LAPACK_LINKER_FLAGS ${BLAS_LINKER_FLAGS})
 
   if(ATLAS_FOUND)
+    #
+    # lapack_atlas or lapack
+    #
     check_lapack_libraries(
       LAPACK_LIBRARIES
       LAPACK
@@ -95,6 +98,15 @@ if(BLAS_FOUND)
       ""
       "lapack_atlas"
       "${BLAS_LIBRARIES}")
+    if(NOT LAPACK_LIBRARIES)
+      check_lapack_libraries(
+        LAPACK_LIBRARIES
+        LAPACK
+        clapack_dgetrf  # checked with fortran!
+        ""
+        "lapack"
+        "${BLAS_LIBRARIES}")
+    endif(NOT LAPACK_LIBRARIES)
   endif(ATLAS_FOUND)
 
 #intel lapack

@@ -51,7 +51,7 @@ SET(SiconosNumerics_INCLUDE_DIR include/Siconos/Numerics)
 #
 # compilation setup 
 #
-SET(SiconosNumerics_LINK ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+SET(SiconosNumerics_LINK ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} ${FORTRAN_LIBRARIES})
 
 LIBRARY_PROJECT_SETUP()
 
