@@ -59,6 +59,8 @@ WHILE(${iopt} LESS ${imax})
   FILE(GLOB _LIBDIRS_MAYBE 
     /opt /opt/* /opt/lib/*
     /usr/local/* /usr/local/lib/*
+    /usr/lib/gcc/*/*
+    /usr/local/lib/gcc/*/*
     /usr/* /usr/lib/*)
   
   FOREACH(_F ${_LIBDIRS_MAYBE})
