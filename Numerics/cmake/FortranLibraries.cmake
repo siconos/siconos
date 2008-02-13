@@ -1,5 +1,7 @@
 # cache result to avoid re-running
 #
+
+message("###")
 if(NOT HAVE_FORTRAN_LIBRARIES)
 
 # search for libraries required to link with fortran
@@ -80,17 +82,16 @@ WHILE(${iopt} LESS ${imax})
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testF77libs.c
       CMAKE_FLAGS
       -DLINK_LIBRARIES:STRING=${trial_libraries}
-      -DLINK_DIRECTORIES="${trial_lib_paths}"
+      -DLINK_DIRECTORIES=${trial_lib_paths}
       OUTPUT_VARIABLE FORT_LIBS_BUILD_OUT)
-    #MESSAGE(STATUS ${FORT_LIBS_BUILD_OUT})
+    MESSAGE(STATUS ${FORT_LIBS_BUILD_OUT})
     
     IF(NOT FORT_LIBS_WORK)
-      # let's find it in some potentiallink directories
+      # let's find it in some potential libraries directories
       FILE(GLOB _LIBDIRS_MAYBE 
-        /lib /lib/* 
-        /usr/lib /usr/*/lib /usr/lib/* 
-        /usr/local/lib /usr/local/*/lib /usr/local/lib/* 
-        /opt/lib /opt/*/lib /opt/lib/*)
+        /opt /opt/* /opt/lib/*
+        /usr/local/* /usr/local/lib/*
+        /usr/* /usr/lib/*)
       FOREACH(_F ${_LIBDIRS_MAYBE})
         IF(IS_DIRECTORY ${_F})
           LIST(APPEND _LIBDIRS ${_F})
@@ -100,22 +101,19 @@ WHILE(${iopt} LESS ${imax})
 
       #string -> list
       SET(_libs ${trial_libraries})
-      FIND_LIBRARY(_LFIND NAMES ${_libs} PATHS "${_LIBDIRS}")
 
-      MESSAGE("LFIND = ${_LFIND}")
+      FIND_LIBRARY(_LFIND NAMES ${_libs} PATHS "${_LIBDIRS}" PATH_SUFFIXES lib)
 
       IF(_LFIND)
         GET_FILENAME_COMPONENT(_LFINDDIR ${_LFIND} PATH)
-        LIST(APPEND _LFINDDIRLIST ${_LFINDDIR})
-        LIST(APPEND _LFINDDIRLIST "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp")
         TRY_COMPILE(FORT_LIBS_WORK ${CMAKE_BINARY_DIR}
           ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testF77libs.c
           CMAKE_FLAGS
           -DLINK_LIBRARIES:STRING=${trial_libraries}
-          -DLINK_DIRECTORIES="${_LFINDDIRLIST}"
+          -DLINK_DIRECTORIES=${_LFINDDIR}\;${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp
           OUTPUT_VARIABLE FORT_LIBS_BUILD_OUT
           )
-        #MESSAGE(STATUS ${FORT_LIBS_BUILD_OUT})
+        MESSAGE(STATUS ${FORT_LIBS_BUILD_OUT})
       ENDIF(_LFIND)
     ENDIF(NOT FORT_LIBS_WORK)
 
