@@ -15,43 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
-/*!
- ******************************************************************************
- *
- * This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
- *
- * Try \f$(z,w)\f$ such that:\n
- * \f$
- *  \left\lbrace
- *   \begin{array}{l}
- *    w - M z = q\\
- *    0 \le z \perp w \ge 0\\
- *   \end{array}
- *  \right.
- * \f$
- *
- * where M is an (n x n)-matrix, q , w and z n-vectors.\n
- *
- *  This system of equations and inequalities is solved thanks to lcp solvers\n
- *
- *        lcp_nlgs( n , M , q , z , w , info , iparam , dparam )
- *        lcp_cpg ( n , M , q , z , w , info , iparam , dparam )
- *        lcp_latin ( n , M , q , z , w , info , iparam , dparam )
- *        lcp_latin_w ( n , M , q , z , w , info , iparam , dparam )
- *        lcp_lexicolemke( n , M , q , z , w , info , iparam , dparam )
- *        lcp_qp( n , M , q , z , w , info , iparam , dparam )
- *        lcp_nsqp( n , M , q , z , w , info , iparam , dparam )
- *
- *  where info shows the termination result (0 for success) and iparam and dparam are respectivelly
- *  pointer over integer and pointer over double which contain specific parameters of each solver.
- *
- *  The solver's call is performed via the function lcp_driver:
- *
- *  int lcp_driver( double *vec , double *q , int *nn , method *pt , double *z , double *w , int *it_end , double *res )
- *
  */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -66,10 +30,10 @@ const unsigned short int *__ctype_b;
 const __int32_t *__ctype_tolower ;
 #endif /*PATH_DRIVER*/
 /*
- ******************************************************************************
- */
+******************************************************************************
+*/
 
-void test_lcp_series(int n , double *vec , double *q)
+void test_lcp_series(LinearComplementarity_Problem * problem)
 {
 
   int i, j;
@@ -81,6 +45,9 @@ void test_lcp_series(int n , double *vec , double *q)
 
   double *z1, *z2, *z3, *z4, *z5, *z6, *z7, *z8, *z9, *z10;
   double *w1, *w2, *w3, *w4, *w5, *w6, *w7, *w8, *w9, *w10;
+
+  int n = problem->size;
+  double * vec = problem->M->matrix0;
 
   z1 = malloc(n * sizeof(double));
   w1 = malloc(n * sizeof(double));
@@ -103,20 +70,113 @@ void test_lcp_series(int n , double *vec , double *q)
   z10 = malloc(n * sizeof(double));
   w10 = malloc(n * sizeof(double));
 
-  /* Method definition */
+  /* Solvers definitions */
+  int maxIter = 1001;
+  double tolerance = 1e-8;
+  /* PGS Solver*/
+  Solver_Options optionsPGS;
+  strcpy(optionsPGS.solverName, "PGS");
+  int iparam1[2] = {maxIter, 0};
+  double dparam1[2] = {tolerance, 0.0};
+  optionsPGS.iparam = iparam1;
+  optionsPGS.dparam = dparam1;
+  optionsPGS.isSet = 1;
+  optionsPGS.storageType = 0;
 
-  static method_lcp method_lcp1 = { "PGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , 0 , 0.0 };
-  static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , 0 , 0.0 };
-  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-6 , 0.3 , 1.0 , 1.0 , 1 , 0 , 0.0 };
-  static method_lcp method_lcp8 = { "Latin_w"    , 1000 , 1e-6 , 0.3 , 1.0 , 1.0 , 1 , 0 , 0.0 };
-  static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , 0 , 0.0 };
-  static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , 0 , 0.0 };
-  static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , 0 , 0.0 };
-  static method_lcp method_lcp7 = { "NewtonMin",   10   , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , 0 , 0.0 };
-  static method_lcp method_lcp9 = { "RPGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , 0 , 0.0 };
-  static method_lcp method_lcp10 = { "Path",   0   , 1e-8 , 0.0 , 0.0 , 0 , 0 , 0.0 };
+  /* CPG Solver*/
+  Solver_Options optionsCPG;
+  strcpy(optionsCPG.solverName, "CPG");
+  int iparam2[2] = {maxIter, 0};
+  double dparam2[2] = {tolerance, 0.0};
+  optionsCPG.iparam = iparam2;
+  optionsCPG.dparam = dparam2;
+  optionsCPG.isSet = 1;
+  optionsCPG.storageType = 0;
 
-  method myMethod;
+  /* Latin */
+  Solver_Options optionsLatin;
+  strcpy(optionsLatin.solverName, "Latin");
+  int iparam3[2] = {maxIter, 0};
+  double dparam3[3] = {tolerance, 0.0, 0.3};
+  optionsLatin.iparam = iparam3;
+  optionsLatin.dparam = dparam3;
+  optionsLatin.isSet = 1;
+  optionsLatin.storageType = 0;
+
+  /* Latin_w */
+  Solver_Options optionsLatin_w;
+  strcpy(optionsLatin_w.solverName, "Latin_w");
+  int iparam4[2] = {maxIter, 0};
+  double dparam4[4] = {tolerance, 0.0, 0.3, 1.0};
+  optionsLatin_w.iparam = iparam4;
+  optionsLatin_w.dparam = dparam4;
+  optionsLatin_w.isSet = 1;
+  optionsLatin_w.storageType = 0;
+
+  /* QP */
+  Solver_Options optionsQP;
+  strcpy(optionsQP.solverName, "QP");
+  double dparam5[1] = {tolerance};
+  optionsQP.dparam = dparam5;
+  optionsQP.isSet = 1;
+  optionsQP.storageType = 0;
+
+  /* NSQP */
+  Solver_Options optionsNSQP;
+  strcpy(optionsNSQP.solverName, "NSQP");
+  double dparam6[1] = {tolerance};
+  optionsNSQP.dparam = dparam6;
+  optionsNSQP.isSet = 1;
+  optionsNSQP.storageType = 0;
+
+  /* Lemke */
+  Solver_Options optionsLemke;
+  strcpy(optionsLemke.solverName, "LexicoLemke");
+  int iparam7[2] = {maxIter, 0};
+  optionsLemke.iparam = iparam7;
+  optionsLemke.isSet = 1;
+  optionsLemke.storageType = 0;
+
+  /* Newton Min */
+  Solver_Options optionsNewtonMin;
+  strcpy(optionsNewtonMin.solverName, "NewtonMin");
+  int iparam8[2] = {10, 0};
+  double dparam8[2] = {tolerance, 0};
+  optionsNewtonMin.iparam = iparam8;
+  optionsNewtonMin.dparam = dparam8;
+  optionsNewtonMin.isSet = 1;
+  optionsNewtonMin.storageType = 0;
+
+  /* Newton FB */
+  Solver_Options optionsNewtonFB;
+  strcpy(optionsNewtonFB.solverName, "NewtonFB");
+  int iparam9[2] = {10, 0};
+  double dparam9[2] = {tolerance, 0};
+  optionsNewtonFB.iparam = iparam9;
+  optionsNewtonFB.dparam = dparam9;
+  optionsNewtonFB.isSet = 1;
+  optionsNewtonFB.storageType = 0;
+
+  /* RPGS */
+  Solver_Options optionsRPGS;
+  strcpy(optionsRPGS.solverName, "RPGS");
+  int iparam10[2] = {maxIter, 0};
+  double dparam10[3] = {tolerance, 0.0, 1.0};
+  optionsRPGS.iparam = iparam10;
+  optionsRPGS.dparam = dparam10;
+  optionsRPGS.isSet = 1;
+  optionsRPGS.storageType = 0;
+
+  /* Path */
+  Solver_Options optionsPath;
+  strcpy(optionsPath.solverName, "path");
+  double dparam11[1] = {tolerance};
+  optionsPath.dparam = dparam11;
+  optionsPath.isSet = 1;
+  optionsPath.storageType = 0;
+
+  Numerics_Options global_options;
+  global_options.verboseMode = 0;
 
   nonsymmetric = 0;
 
@@ -126,13 +186,14 @@ void test_lcp_series(int n , double *vec , double *q)
   {
     for (j = 0 ; j < i ; ++j)
     {
-      if (abs(vec[i * n + j] - vec[j * n + i]) > 1e-16)
+      if (abs(problem->M->matrix0[i * n + j] - problem->M->matrix0[j * n + i]) > 1e-16)
       {
         nonsymmetric = 1;
         break;
       }
     }
   }
+
 
 #ifdef BAVARD
   if (nonsymmetric) printf("\n !! WARNING !!\n M is a non symmetric matrix \n");
@@ -148,9 +209,7 @@ void test_lcp_series(int n , double *vec , double *q)
     z1[i] = 0.0;
     w1[i] = 0.0;
   }
-
-  myMethod.lcp =  method_lcp1;
-  info1 = lcp_driver(vec , q , &n , &myMethod , z1 , w1);
+  info1 = lcp_driver(problem, z1 , w1, &optionsPGS, &global_options);
 
   /* #2 CPG TEST */
 #ifdef BAVARD
@@ -161,9 +220,7 @@ void test_lcp_series(int n , double *vec , double *q)
     z2[i] = 0.0;
     w2[i] = 0.0;
   }
-
-  myMethod.lcp =  method_lcp2;
-  info2 = lcp_driver(vec , q , &n , &myMethod , z2 , w2);
+  info2 = lcp_driver(problem, z2 , w2, &optionsCPG, &global_options);
 
   /* #4 QP TEST */
 #ifdef BAVARD
@@ -174,9 +231,7 @@ void test_lcp_series(int n , double *vec , double *q)
     z4[i] = 0.0;
     w4[i] = 0.0;
   }
-
-  myMethod.lcp =  method_lcp4;
-  info4 = lcp_driver(vec , q , &n , &myMethod , z4 , w4);
+  info4 = lcp_driver(problem, z4 , w4, &optionsQP, &global_options);
 
   /* #5 NSQP TEST */
 #ifdef BAVARD
@@ -187,9 +242,7 @@ void test_lcp_series(int n , double *vec , double *q)
     z5[i] = 0.0;
     w5[i] = 0.0;
   }
-
-  myMethod.lcp =  method_lcp5;
-  info5 = lcp_driver(vec , q , &n , &myMethod , z5 , w5);
+  info5 = lcp_driver(problem, z5 , w5, &optionsNSQP, &global_options);
 
   /* #6 LEXICO LEMKE TEST */
 #ifdef BAVARD
@@ -200,9 +253,7 @@ void test_lcp_series(int n , double *vec , double *q)
     z6[i] = 0.0;
     w6[i] = 0.0;
   }
-
-  myMethod.lcp =  method_lcp6;
-  info6 = lcp_driver(vec , q , &n , &myMethod , z6 , w6);
+  info6 = lcp_driver(problem, z6 , w6, &optionsLemke, &global_options);
 
   /* #7 NEWTONMIN TEST */
 #ifdef BAVARD
@@ -213,9 +264,8 @@ void test_lcp_series(int n , double *vec , double *q)
     z7[i] = 0.0;
     w7[i] = 0.0;
   }
+  info7 = lcp_driver(problem, z7 , w7, &optionsNewtonMin, &global_options);
 
-  myMethod.lcp =  method_lcp7;
-  info7 = lcp_driver(vec , q , &n , &myMethod , z7 , w7);
 
   /* #3 LATIN TEST */
 #ifdef BAVARD
@@ -227,9 +277,7 @@ void test_lcp_series(int n , double *vec , double *q)
     w3[i] = 0.0;
   }
 
-  myMethod.lcp =  method_lcp3;
-  info3 = lcp_driver(vec , q , &n , &myMethod , z3 , w3);
-
+  info3 = lcp_driver(problem, z3 , w3, &optionsLatin, &global_options);
 
   /* #8 LATIN_W TEST */
 #ifdef BAVARD
@@ -240,9 +288,7 @@ void test_lcp_series(int n , double *vec , double *q)
     z8[i] = 0.0;
     w8[i] = 0.0;
   }
-
-  myMethod.lcp =  method_lcp8;
-  info8 = lcp_driver(vec , q , &n , &myMethod , z8 , w8);
+  info8 = lcp_driver(problem, z8 , w8, &optionsLatin_w, &global_options);
 
   /* #9 RPGS TEST */
 #ifdef BAVARD
@@ -253,9 +299,7 @@ void test_lcp_series(int n , double *vec , double *q)
     z9[i] = 0.0;
     w9[i] = 0.0;
   }
-
-  myMethod.lcp =  method_lcp9;
-  info9 = lcp_driver(vec , q , &n , &myMethod , z9 , w9);
+  info9 = lcp_driver(problem, z9 , w9, &optionsRPGS, &global_options);
 
 #ifdef PATH_DRIVER
   /* #8 PATH TEST */
@@ -267,9 +311,8 @@ void test_lcp_series(int n , double *vec , double *q)
     z10[i] = 0.0;
     w10[i] = 0.0;
   }
+  info10 = lcp_driver(problem, z10 , w10, &optionsPath, &global_options);
 
-  myMethod.lcp =  method_lcp10;
-  info10 = lcp_driver(vec , q , &n , &myMethod , z10 , w10);
 #endif /*PATH_DRIVER*/
 #ifdef BAVARD
   /*  printf(" *** ************************************** ***\n"); */
@@ -299,79 +342,79 @@ void test_lcp_series(int n , double *vec , double *q)
   printf(" -- SOLVEUR ------ ITER/PIVOT ----- ERR ----- COMP ----- SOL?");
 
   comp = DDOT(n , z1 , incx , w1 , incy);
-  DAXPY(n , alpha , q , incx , w1 , incy);
+  DAXPY(n , alpha , problem->q , incx , w1 , incy);
   DGEMV(LA_NOTRANS , n , n , beta , vec , n , z1 , incx , alpha , w1 , incy);
   diff = DNRM2(n , w1 , incx);
 
-  printf("\n    PGS   (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info1, method_lcp1.iter, method_lcp1.err, comp, diff);
+  printf("\n    PGS   (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info1, optionsPGS.iparam[1], optionsPGS.dparam[1], comp, diff);
 
   comp = DDOT(n , z2 , incx , w2 , incy);
-  DAXPY(n , alpha , q , incx , w2 , incy);
+  DAXPY(n , alpha , problem->q , incx , w2 , incy);
   DGEMV(LA_NOTRANS , n , n , beta , vec , n , z2 , incx , alpha , w2 , incy);
   diff = DNRM2(n , w2 , incx);
 
-  printf("\n    CPG    (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info2, method_lcp2.iter, method_lcp2.err, comp, diff);
+  printf("\n    CPG    (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info2, optionsCPG.iparam[1], optionsCPG.dparam[1], comp, diff);
 
   comp = DDOT(n , z3 , incx , w3 , incy);
-  DAXPY(n , alpha , q , incx , w3 , incy);
+  DAXPY(n , alpha , problem->q , incx , w3 , incy);
   DGEMV(LA_NOTRANS , n , n , beta , vec , n , z3 , incx , alpha , w3 , incy);
   diff = DNRM2(n , w3 , incx);
 
-  printf("\n    LATIN  (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info3, method_lcp3.iter, method_lcp3.err, comp, diff);
+  printf("\n    LATIN  (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info3, optionsLatin.iparam[1], optionsLatin.dparam[1], comp, diff);
 
 
 
 
   comp = DDOT(n , z8 , incx , w8 , incy);
-  DAXPY(n , alpha , q , incx , w8 , incy);
+  DAXPY(n , alpha , problem->q , incx , w8 , incy);
   DGEMV(LA_NOTRANS , n , n , beta , vec , n , z8 , incx , alpha , w8 , incy);
   diff = DNRM2(n , w8 , incx);
 
-  printf("\n  LATIN_W  (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info8, method_lcp8.iter, method_lcp8.err, comp, diff);
+  printf("\n  LATIN_W  (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info8, optionsLatin_w.iparam[1], optionsLatin_w.dparam[1], comp, diff);
 
   comp = DDOT(n , z4 , incx , w4 , incy);
-  DAXPY(n , alpha , q , incx , w4 , incy);
+  DAXPY(n , alpha , problem->q , incx , w4 , incy);
   DGEMV(LA_NOTRANS , n , n , beta , vec , n , z4 , incx , alpha , w4 , incy);
   diff = DNRM2(n , w4 , incx);
 
 
-  printf("\n    QP     (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info4, method_lcp4.iter, method_lcp4.err, comp, diff);
+  printf("\n    QP     (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info4, optionsQP.iparam[1], optionsQP.dparam[1], comp, diff);
 
   comp = DDOT(n , z5 , incx , w5 , incy);
-  DAXPY(n , alpha , q , incx , w5 , incy);
+  DAXPY(n , alpha , problem->q , incx , w5 , incy);
   DGEMV(LA_NOTRANS , n , n , beta , vec , n , z5 , incx , alpha , w5 , incy);
   diff = DNRM2(n , w5 , incx);
 
-  printf("\n    NSQP   (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info5, method_lcp5.iter, method_lcp5.err, comp, diff);
+  printf("\n    NSQP   (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info5, optionsNSQP.iparam[1], optionsNSQP.dparam[1], comp, diff);
 
   comp = DDOT(n , z6 , incx , w6 , incy);
-  DAXPY(n , alpha , q , incx , w6 , incy);
+  DAXPY(n , alpha , problem->q , incx , w6 , incy);
   DGEMV(LA_NOTRANS , n , n , beta , vec , n , z6 , incx , alpha , w6 , incy);
   diff = DNRM2(n , w6 , incx);
 
-  printf("\n    Lemke  (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info6, method_lcp6.iter, method_lcp6.err, comp, diff);
+  printf("\n    Lemke  (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info6, optionsLemke.iparam[1], optionsLemke.dparam[1], comp, diff);
 
   comp = DDOT(n , z7 , incx , w7 , incy);
-  DAXPY(n , alpha , q , incx , w7 , incy);
+  DAXPY(n , alpha , problem->q , incx , w7 , incy);
   DGEMV(LA_NOTRANS , n , n , beta , vec , n , z7 , incx , alpha , w7 , incy);
   diff = DNRM2(n , w7 , incx);
 
-  printf("\n    Newton (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info7, method_lcp7.iter, method_lcp7.err, comp, diff);
+  printf("\n    Newton (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info7, optionsNewtonMin.iparam[1], optionsNewtonMin.dparam[1], comp, diff);
 
   comp = DDOT(n , z9 , incx , w9 , incy);
-  DAXPY(n , alpha , q , incx , w9 , incy);
+  DAXPY(n , alpha , problem->q , incx , w9 , incy);
   DGEMV(LA_NOTRANS , n , n , beta , vec , n , z9 , incx , alpha , w9 , incy);
   diff = DNRM2(n , w9 , incx);
 
-  printf("\n    RPGS   (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info9, method_lcp9.iter, method_lcp9.err, comp, diff);
+  printf("\n    RPGS   (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info9, optionsRPGS.iparam[1], optionsRPGS.dparam[1], comp, diff);
 
 #ifdef PATH_DRIVER
   comp = DDOT(n , z10 , incx , w10 , incy);
-  DAXPY(n , alpha , q , incx , w10 , incy);
+  DAXPY(n , alpha , problem->q , incx , w10 , incy);
   DGEMV(LA_NOTRANS , n , n , beta , vec , n , z10 , incx , alpha , w10 , incy);
   diff = DNRM2(n , w10 , incx);
 
-  printf("\n    PATH (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g | \n \n ", info10, method_lcp10.iter, method_lcp10.err, comp, diff);
+  printf("\n    PATH (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g | \n \n ", info10, optionsPath.iparam[1], optionsPath.dparam[1], comp, diff);
 #endif /*PATH_DRIVER*/
 
 #endif
@@ -399,241 +442,221 @@ void test_lcp_series(int n , double *vec , double *q)
 
 }
 /*
- ******************************************************************************
- */
+******************************************************************************
+*/
 
 void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 {
 
-  int i, dim;
-  int incx = 1, incy = 1;
-  int info1 = -1, info2 = -1, info3 = -1, info4 = -1, info5 = -1, info6 = -1, info7 = -1, info8 = -1;
-  int iter1, iter2, iter3, iter4, iter5, iter6, iter7, iter8;
-  int titer1, titer2, titer3, titer4, titer5, titer6, titer7, titer8;
+  /*   int i,dim; */
+  /*   int incx=1,incy=1; */
+  /*   int info1=-1,info2=-1,info3=-1,info4=-1,info5=-1,info6=-1,info7=-1,info8=-1; */
+  /*   int iter1,iter2,iter3,iter4,iter5,iter6,iter7,iter8; */
+  /*   int titer1,titer2,titer3,titer4,titer5,titer6,titer7,titer8; */
 
-  double comp;
-  double err1, err2, err3, err4, err5, err6, err7, err8;
+  /*   double comp; */
+  /*   double err1,err2,err3,err4,err5,err6,err7,err8; */
 
-  double *z1, *z2, *z3, *z4, *z5, *z6, *z7, *z8;
-  double *w1, *w2, *w3, *w4, *w5, *w6, *w7, *w8;
+  /*   double *z1,*z2,*z3,*z4,*z5,*z6,*z7,*z8; */
+  /*   double *w1,*w2,*w3,*w4,*w5,*w6,*w7,*w8; */
 
-  dim = blmat->blocksize[blmat->size - 1];
+  /*   dim = blmat->blocksize[blmat->size-1]; */
 
-  z1 = malloc(dim * sizeof(double));
-  w1 = malloc(dim * sizeof(double));
-  z2 = malloc(dim * sizeof(double));
-  w2 = malloc(dim * sizeof(double));
-  z3 = malloc(dim * sizeof(double));
-  w3 = malloc(dim * sizeof(double));
-  z4 = malloc(dim * sizeof(double));
-  w4 = malloc(dim * sizeof(double));
-  z5 = malloc(dim * sizeof(double));
-  w5 = malloc(dim * sizeof(double));
-  z6 = malloc(dim * sizeof(double));
-  w6 = malloc(dim * sizeof(double));
-  z7 = malloc(dim * sizeof(double));
-  w7 = malloc(dim * sizeof(double));
-  z8 = malloc(dim * sizeof(double));
-  w8 = malloc(dim * sizeof(double));
+  /*   z1 = malloc( dim*sizeof( double ) ); */
+  /*   w1 = malloc( dim*sizeof( double ) ); */
+  /*   z2 = malloc( dim*sizeof( double ) ); */
+  /*   w2 = malloc( dim*sizeof( double ) ); */
+  /*   z3 = malloc( dim*sizeof( double ) ); */
+  /*   w3 = malloc( dim*sizeof( double ) ); */
+  /*   z4 = malloc( dim*sizeof( double ) ); */
+  /*   w4 = malloc( dim*sizeof( double ) ); */
+  /*   z5 = malloc( dim*sizeof( double ) ); */
+  /*   w5 = malloc( dim*sizeof( double ) ); */
+  /*   z6 = malloc( dim*sizeof( double ) ); */
+  /*   w6 = malloc( dim*sizeof( double ) ); */
+  /*   z7 = malloc( dim*sizeof( double ) ); */
+  /*   w7 = malloc( dim*sizeof( double ) ); */
+  /*   z8 = malloc( dim*sizeof( double ) ); */
+  /*   w8 = malloc( dim*sizeof( double ) ); */
 
-  /* Method definition */
+  /*   /\* Method definition *\/ */
 
-  static method_lcp method_lcp1 = { "PGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , 0 , 0.0 };
-  static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , 0 , 0.0 };
-  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , 0 , 0.0 };
-  static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , 0 , 0.0 };
-  static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , 0 , 0.0 };
-  static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , 0 , 0.0 };
-  static method_lcp method_lcp7 = { "NewtonMin"  , 10   , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , 0 , 0.0 };
-  static method_lcp method_lcp8 = { "RPGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , 0 , 0.0 };
+  /*   static method_lcp method_lcp1 = { "PGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , 0 , 0.0 }; */
+  /*   static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , 0 , 0.0 }; */
+  /*   static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , 0 , 0.0 }; */
+  /*   static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , 0 , 0.0 }; */
+  /*   static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , 0 , 0.0 }; */
+  /*   static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , 0 , 0.0 }; */
+  /*   static method_lcp method_lcp7 = { "NewtonMin"  , 10   , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , 0 , 0.0 }; */
+  /*   static method_lcp method_lcp8 = { "RPGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , 0 , 0.0 }; */
 
-  method myMethod;
+  /*   method myMethod; */
 
-  /* #1 PGS TEST */
-#ifdef BAVARD
-  printf("**** PGS TEST ****\n");
-#endif
+  /*   /\* #1 PGS TEST *\/ */
+  /* #ifdef BAVARD */
+  /*   printf("**** PGS TEST ****\n"); */
+  /* #endif */
 
-  for (i = 0 ; i < dim ; ++i) z1[i] = 0.0;
+  /*   for( i = 0 ; i < dim ; ++i ) z1[i] = 0.0; */
 
-  myMethod.lcp =  method_lcp1;
-  info1 = lcp_driver_block(blmat , q , &myMethod , z1 , w1 , &iter1 , &titer1 , &err1);
+  /*   myMethod.lcp =  method_lcp1; */
+  /*   info1 = lcp_driver_block( blmat , q , &myMethod , z1 , w1 , &iter1 , &titer1 , &err1 ); */
 
-  /* #2 CPG TEST */
-#ifdef BAVARD
-  printf("**** CPG TEST *****\n");
-#endif
-  for (i = 0 ; i < dim ; ++i) z2[i] = 0.0;
+  /*   /\* #2 CPG TEST *\/ */
+  /* #ifdef BAVARD */
+  /*   printf("**** CPG TEST *****\n"); */
+  /* #endif */
+  /*   for( i = 0 ; i < dim ; ++i ) z2[i] = 0.0; */
 
-  myMethod.lcp =  method_lcp2;
-  info2 = lcp_driver_block(blmat , q , &myMethod , z2 , w2 , &iter2 , &titer2 , &err2);
+  /*   myMethod.lcp =  method_lcp2; */
+  /*   info2 = lcp_driver_block( blmat , q , &myMethod , z2 , w2 , &iter2 , &titer2 , &err2 ); */
 
-  /* #3 QP TEST */
-#ifdef BAVARD
-  printf("**** QP TEST ******\n");
-#endif
-  for (i = 0 ; i < dim ; ++i) z4[i] = 0.0;
+  /*   /\* #3 QP TEST *\/ */
+  /* #ifdef BAVARD */
+  /*   printf("**** QP TEST ******\n"); */
+  /* #endif */
+  /*   for( i = 0 ; i < dim ; ++i ) z4[i] = 0.0; */
 
-  myMethod.lcp =  method_lcp4;
-  info4 = lcp_driver_block(blmat , q , &myMethod , z4 , w4 , &iter4 , &titer4 , &err4);
+  /*   myMethod.lcp =  method_lcp4; */
+  /*   info4 = lcp_driver_block( blmat , q , &myMethod , z4 , w4 , &iter4 , &titer4 , &err4 ); */
 
-  /* #4 NSQP TEST */
-#ifdef BAVARD
-  printf("**** NSQP TEST ****\n");
-#endif
-  for (i = 0 ; i < dim ; ++i) z5[i] = 0.0;
+  /*   /\* #4 NSQP TEST *\/ */
+  /* #ifdef BAVARD */
+  /*   printf("**** NSQP TEST ****\n"); */
+  /* #endif */
+  /*   for( i = 0 ; i < dim ; ++i ) z5[i] = 0.0; */
 
-  myMethod.lcp =  method_lcp5;
-  info5 = lcp_driver_block(blmat , q , &myMethod , z5 , w5 , &iter5 , &titer5 , &err5);
+  /*   myMethod.lcp =  method_lcp5; */
+  /*   info5 = lcp_driver_block( blmat , q , &myMethod , z5 , w5 , &iter5 , &titer5 , &err5 ); */
 
-  /* #5 LEXICO LEMKE TEST */
-#ifdef BAVARD
-  printf("**** Lemke TEST ***\n");
-#endif
-  for (i = 0 ; i < dim ; ++i)
-  {
-    z6[i] = 0.0;
-    w6[i] = 0.0;
-  }
+  /*   /\* #5 LEXICO LEMKE TEST *\/ */
+  /* #ifdef BAVARD */
+  /*   printf("**** Lemke TEST ***\n"); */
+  /* #endif */
+  /*   for( i = 0 ; i < dim ; ++i ) {z6[i] = 0.0; w6[i] = 0.0; } */
 
-  iter6 = 0;
-  titer6 = 0;
-  err6 = 0.;
+  /*   iter6 = 0; */
+  /*   titer6 = 0; */
+  /*   err6 = 0.; */
 
-  myMethod.lcp =  method_lcp6;
-  info6 = lcp_driver_block(blmat , q , &myMethod , z6 , w6 , &iter6 , &titer6 , &err6);
+  /*   myMethod.lcp =  method_lcp6; */
+  /*   info6 = lcp_driver_block( blmat , q , &myMethod , z6 , w6 , &iter6 , &titer6 , &err6 ); */
 
-  /* #6 NEWTONMIN TEST */
-#ifdef BAVARD
-  printf("**** Newton TEST **\n");
-#endif
-  for (i = 0 ; i < dim ; ++i) z7[i] = 0.0;
+  /*   /\* #6 NEWTONMIN TEST *\/ */
+  /* #ifdef BAVARD */
+  /*   printf("**** Newton TEST **\n"); */
+  /* #endif */
+  /*   for( i = 0 ; i < dim ; ++i ) z7[i] = 0.0; */
 
-  myMethod.lcp =  method_lcp7;
-  info7 = lcp_driver_block(blmat , q , &myMethod , z7 , w7 , &iter7 , &titer7 , &err7);
+  /*   myMethod.lcp =  method_lcp7; */
+  /*   info7 = lcp_driver_block( blmat , q , &myMethod , z7 , w7 , &iter7 , &titer7 , &err7 ); */
 
-  /* #7 LATIN TEST */
-#ifdef BAVARD
-  printf("**** LATIN TEST ***\n");
-#endif
-  for (i = 0 ; i < dim ; ++i) z3[i] = 0.0;
+  /*   /\* #7 LATIN TEST *\/ */
+  /* #ifdef BAVARD */
+  /*   printf("**** LATIN TEST ***\n"); */
+  /* #endif */
+  /*   for( i = 0 ; i < dim ; ++i ) z3[i] = 0.0; */
 
-  myMethod.lcp =  method_lcp3;
-  info3 = lcp_driver_block(blmat , q , &myMethod , z3 , w3 , &iter3 , &titer3 , &err3);
+  /*   myMethod.lcp =  method_lcp3; */
+  /*   info3 = lcp_driver_block( blmat , q , &myMethod , z3 , w3 , &iter3 , &titer3 , &err3 ); */
 
-  /* #8 RPGS TEST */
-#ifdef BAVARD
-  printf("**** RPGS TEST ****\n");
-#endif
+  /*   /\* #8 RPGS TEST *\/ */
+  /* #ifdef BAVARD */
+  /*   printf("**** RPGS TEST ****\n"); */
+  /* #endif */
 
-  for (i = 0 ; i < dim ; ++i) z8[i] = 0.0;
+  /*   for( i = 0 ; i < dim ; ++i ) z8[i] = 0.0; */
 
-  myMethod.lcp =  method_lcp8;
-  info8 = lcp_driver_block(blmat , q , &myMethod, z8 , w8 , &iter8 , &titer8 , &err8);
+  /*   myMethod.lcp =  method_lcp8; */
+  /*   info8 = lcp_driver_block( blmat , q , &myMethod, z8 , w8 , &iter8 , &titer8 , &err8 ); */
 
 
-#ifdef BAVARD
-  printf(" *** z ************************************** ***\n");
-  printf("\n   PGS RESULT : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , z1[i]);
-  printf("\n    CPG RESULT : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , z2[i]);
-  printf("\n     QP RESULT : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , z4[i]);
-  printf("\n   NSQP RESULT : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , z5[i]);
-  printf("\n  Lemke RESULT : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , z6[i]);
-  printf("\n Newton RESULT : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , z7[i]);
-  printf("\n  LATIN RESULT : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , z3[i]);
-  printf("\n   RPGS RESULT : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , z8[i]);
-  printf("\n\n");
-  printf(" *** w ************************************** ***\n");
-  printf("\n   PGS RESULT : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , w1[i]);
-  printf("\n    CPG RESULT : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , w2[i]);
-  printf("\n     QP RESULT : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , w4[i]);
-  printf("\n   NSQP RESULT : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , w5[i]);
-  printf("\n  Lemke RESULT : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , w6[i]);
-  printf("\n Newton RESULT : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , w7[i]);
-  printf("\n  LATIN RESULT : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , w3[i]);
-  printf("\n   RPGS RESULT : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , w8[i]);
-  printf("\n\n");
-  printf(" INFO RESULT\n");
+  /* #ifdef BAVARD */
+  /*   printf(" *** z ************************************** ***\n"); */
+  /*   printf("\n   PGS RESULT : ");  for( i = 0 ; i < dim ; ++i ) printf(" %14.7e " , z1[i] ); */
+  /*   printf("\n    CPG RESULT : ");  for( i = 0 ; i < dim ; ++i ) printf(" %14.7e " , z2[i] ); */
+  /*   printf("\n     QP RESULT : ");  for( i = 0 ; i < dim ; ++i ) printf(" %14.7e " , z4[i] ); */
+  /*   printf("\n   NSQP RESULT : ");  for( i = 0 ; i < dim ; ++i ) printf(" %14.7e " , z5[i] ); */
+  /*   printf("\n  Lemke RESULT : ");  for( i = 0 ; i < dim ; ++i ) printf(" %14.7e " , z6[i] ); */
+  /*   printf("\n Newton RESULT : ");  for( i = 0 ; i < dim ; ++i ) printf(" %14.7e " , z7[i] ); */
+  /*   printf("\n  LATIN RESULT : ");  for( i = 0 ; i < dim ; ++i ) printf(" %14.7e " , z3[i] ); */
+  /*   printf("\n   RPGS RESULT : ");  for( i = 0 ; i < dim ; ++i ) printf(" %14.7e " , z8[i] ); */
+  /*   printf("\n\n"); */
+  /*   printf(" *** w ************************************** ***\n"); */
+  /*   printf("\n   PGS RESULT : ");  for( i = 0 ; i < dim ; ++i ) printf(" %14.7e " , w1[i] ); */
+  /*   printf("\n    CPG RESULT : ");  for( i = 0 ; i < dim ; ++i ) printf(" %14.7e " , w2[i] ); */
+  /*   printf("\n     QP RESULT : ");  for( i = 0 ; i < dim ; ++i ) printf(" %14.7e " , w4[i] ); */
+  /*   printf("\n   NSQP RESULT : ");  for( i = 0 ; i < dim ; ++i ) printf(" %14.7e " , w5[i] ); */
+  /*   printf("\n  Lemke RESULT : ");  for( i = 0 ; i < dim ; ++i ) printf(" %14.7e " , w6[i] ); */
+  /*   printf("\n Newton RESULT : ");  for( i = 0 ; i < dim ; ++i ) printf(" %14.7e " , w7[i] ); */
+  /*   printf("\n  LATIN RESULT : ");  for( i = 0 ; i < dim ; ++i ) printf(" %14.7e " , w3[i] ); */
+  /*   printf("\n   RPGS RESULT : ");  for( i = 0 ; i < dim ; ++i ) printf(" %14.7e " , w8[i] ); */
+  /*   printf("\n\n"); */
+  /*   printf(" INFO RESULT\n"); */
 
-  printf(" -- SOLVEUR ------ BLOCK I/P ----- TOTAL I/P ----- ERR ----- COMP ");
+  /*   printf(" -- SOLVEUR ------ BLOCK I/P ----- TOTAL I/P ----- ERR ----- COMP "); */
 
-  comp = DDOT(dim , z1 , incx , w1 , incy);
+  /*   comp = DDOT( dim , z1 , incx , w1 , incy ); */
 
-  printf("\n    PGS   (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info1, iter1, titer1, err1, comp);
+  /*   printf("\n    PGS   (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |",info1,iter1,titer1,err1,comp); */
 
-  comp = DDOT(dim , z2 , incx , w2 , incy);
+  /*   comp = DDOT( dim , z2 , incx , w2 , incy ); */
 
-  printf("\n    CPG    (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info2, iter2, titer2, err2, comp);
+  /*   printf("\n    CPG    (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |",info2,iter2,titer2,err2,comp); */
 
-  comp = DDOT(dim , z4 , incx , w4 , incy);
+  /*   comp = DDOT( dim , z4 , incx , w4 , incy ); */
 
-  printf("\n    QP     (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info4, iter4, titer4, err4, comp);
+  /*   printf("\n    QP     (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |",info4,iter4,titer4,err4,comp); */
 
-  comp = DDOT(dim , z5 , incx , w5 , incy);
+  /*   comp = DDOT( dim , z5 , incx , w5 , incy ); */
 
-  printf("\n    NSQP   (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info5, iter5, titer5, err5, comp);
+  /*   printf("\n    NSQP   (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |",info5,iter5,titer5,err5,comp); */
 
-  comp = DDOT(dim , z6 , incx , w6 , incy);
+  /*   comp = DDOT( dim , z6 , incx , w6 , incy ); */
 
-  /*  printf("\n    Lemke  (LOG:%1d)|",info6);
-  printf("\n    Lemke    %5d ",iter6);
-  printf("\n    Lemke %5d |",titer6);
-  printf("\n    Lemke %10.4g",err6);
-  printf("\n    Lemke %10.4g |",comp);*/
-  printf("\n    Lemke  (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info6, iter6, titer6, err6, comp);
+  /*   /\*  printf("\n    Lemke  (LOG:%1d)|",info6); */
+  /*       printf("\n    Lemke    %5d ",iter6); */
+  /*       printf("\n    Lemke %5d |",titer6); */
+  /*       printf("\n    Lemke %10.4g",err6); */
+  /*       printf("\n    Lemke %10.4g |",comp);*\/ */
+  /*   printf("\n    Lemke  (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |",info6,iter6,titer6,err6,comp); */
 
-  comp = DDOT(dim , z7 , incx , w7 , incy);
+  /*   comp = DDOT( dim , z7 , incx , w7 , incy ); */
 
-  printf("\n    Newton (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info7, iter7, titer7, err7, comp);
+  /*   printf("\n    Newton (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |",info7,iter7,titer7,err7,comp); */
 
-  comp = DDOT(dim , z3 , incx , w3 , incy);
+  /*   comp = DDOT( dim , z3 , incx , w3 , incy ); */
 
-  printf("\n    LATIN  (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info3, iter3, titer3, err3, comp);
+  /*   printf("\n    LATIN  (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |",info3,iter3,titer3,err3,comp); */
 
-  comp = DDOT(dim , z8 , incx , w8 , incy);
+  /*   comp = DDOT( dim , z8 , incx , w8 , incy ); */
 
-  printf("\n    RPGS   (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info8, iter8, titer8, err8, comp);
+  /*   printf("\n    RPGS   (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |",info8,iter8,titer8,err8,comp); */
 
-  printf("\n \n");
+  /*   printf("\n \n"); */
 
-#endif
+  /* #endif */
 
-  free(z1);
-  free(w1);
-  free(z2);
-  free(w2);
-  free(z3);
-  free(w3);
-  free(z4);
-  free(w4);
-  free(z5);
-  free(w5);
-  free(z6);
-  free(w6);
-  free(z7);
-  free(w7);
-  free(z8);
-  free(w8);
+  /*   free( z1 ); */
+  /*   free( w1 ); */
+  /*   free( z2 ); */
+  /*   free( w2 ); */
+  /*   free( z3 ); */
+  /*   free( w3 ); */
+  /*   free( z4 ); */
+  /*   free( w4 ); */
+  /*   free( z5 ); */
+  /*   free( w5 ); */
+  /*   free( z6 ); */
+  /*   free( w6 ); */
+  /*   free( z7 ); */
+  /*   free( w7 ); */
+  /*   free( z8 ); */
+  /*   free( w8 ); */
 }
 /*
- ******************************************************************************
- */
+******************************************************************************
+*/
 
 void test_mmc(void)
 {
@@ -716,8 +739,18 @@ void test_mmc(void)
 
   fclose(f2);
   fclose(f1);
+  LinearComplementarity_Problem problem;
+  problem.size = n;
+  problem.q = q;
+  NumericsMatrix MM;
+  MM.matrix0 = vecM;
+  MM.size0 = n;
+  MM.size1 = n;
+  MM.storageType = 0;
 
-  test_lcp_series(n , vecM , q);
+  problem.M = &MM;
+
+  test_lcp_series(&problem);
 
   free(vecM);
   free(q);
@@ -905,7 +938,18 @@ void test_matrix(void)
     printf("\n");
 #endif
 
-    test_lcp_series(dim , vecM , q);
+    LinearComplementarity_Problem problem;
+    problem.size = dim;
+    problem.q = q;
+    NumericsMatrix MM;
+    MM.matrix0 = vecM;
+    MM.size0 = dim;
+    MM.size1 = dim;
+    MM.storageType = 0;
+
+    problem.M = &MM;
+
+    test_lcp_series(&problem);
 
     free(sol);
     free(vecM);
@@ -919,8 +963,8 @@ void test_matrix(void)
 }
 
 /*
- ******************************************************************************
- */
+******************************************************************************
+*/
 
 void test_blockmatrix(void)
 {
@@ -1103,8 +1147,8 @@ void test_blockmatrix(void)
 }
 
 /*
- ******************************************************************************
- */
+******************************************************************************
+*/
 
 int main(void)
 {

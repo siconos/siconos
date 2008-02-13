@@ -19,55 +19,6 @@
 #ifndef FrictionContact2DSolvers_H
 #define FrictionContact2DSolvers_H
 
-/*! \page fc2DSolvers Friction-contact problems (2-dimensional)
-  Resolution of contact problems with friction in the 2 dimensional case
-  \section fc3DIntro The problem
-  Two formulations are available, primal and dual problems.
-
-  Try \f$(reaction,velocity)\f$ such that:
-
-  <em>primal problem:</em>\n
-  \f$
-  \left\lbrace
-  \begin{array}{l}
-  velocity - M reaction = q \\
-  0 \le reaction_n \perp velocity_n \ge 0\\
-  -velocity_t \in \partial\psi_{[-\mu reaction_n, \mu reaction_n]}(reaction_t)\\
-  \end{array}
-  \right.
-  \f$
-
-  or \n
-
-  <em>dual problem:</em>\n
-  \f$
-  \left\lbrace
-  \begin{array}{l}
-  velocity - M reaction = q \\
-  0 \le reaction_n \perp velocity_n \ge 0 \\
-  -reaction_t \in \partial\psi_{[-\mu velocity_n, \mu velocity_n]}(velocity_t)\\
-  \end{array}
-  \right.
-  \f$
-
-  M is an (\f$ n\times n \f$)-matrix, q, reaction and velocity some n-dimensional vectors.
-
-  \section fc2DSolversList Available solvers
-  <em> For primal problem: </em>\n
-  Use the generic function pfc_2D_solver(), to call one the the specific solvers listed below:
-  - pfc_2D_latin(), latin solver
-  - pfc_2D_nlgs(), Non Linear Gauss Seidel solver
-  - pfc_2D_cpg(), conjugated projected gradient solver
-
-  <em>For dual problem: </em>\n
-  Use the generic function dfc_2D_solver(), to call one the the specific solvers listed below:
-  - dfc_2D_latin(), latin solver
-
-  The structure method, argument of pfc_2D_solver() or dfc_2D_solver(), is used to give the name and parameters of the required solver.
-  (see the functions/solvers list in FrictionContact2D_solvers.h)
-
-*/
-
 /*!\file FrictionContact2D_Solvers.h
   \author Nineb Sheherazade and Dubois Frederic.
   Last Modifications : Mathieu Renouf , Pascal Denoyelle, Franck Perignon

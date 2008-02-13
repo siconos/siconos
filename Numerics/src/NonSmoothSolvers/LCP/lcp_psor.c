@@ -41,14 +41,14 @@ void lcp_psor(LinearComplementarity_Problem* problem, double *z, double *w, int 
   double *ww, *diag;
   int itermax = options->iparam[0];
   double tol = options->dparam[0];
-  //  double omega = options->dparam[1]; // Not yet used
+  //  double omega = options->dparam[2]; // Not yet used
 
   incxn = n;
 
   /* Initialize output */
 
-  options->iparam[2] = 0;
-  options->dparam[2] = 0.0;
+  options->iparam[1] = 0;
+  options->dparam[1] = 0.0;
 
   /* Allocation */
 
@@ -150,8 +150,8 @@ void lcp_psor(LinearComplementarity_Problem* problem, double *z, double *w, int 
     /* **** ********************* **** */
   }
 
-  options->iparam[2] = iter;
-  options->dparam[2] = err;
+  options->iparam[1] = iter;
+  options->dparam[1] = err;
 
   if (err > tol)
   {

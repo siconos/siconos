@@ -38,7 +38,7 @@ void lcp_latin_w(LinearComplementarity_Problem* problem, double *z, double *w, i
 
   int itermax = options->iparam[0];
   double tol = options->dparam[0];
-  double k_latin = options->dparam[1];
+  double k_latin = options->dparam[2];
   double omega = options->dparam[3];
 
   int      i, j,  iter1, info2, nrhs;
@@ -68,8 +68,8 @@ void lcp_latin_w(LinearComplementarity_Problem* problem, double *z, double *w, i
 
   /* Initialize output */
 
-  options->iparam[2] = 0;
-  options->dparam[2] = 0.0;
+  options->iparam[1] = 0;
+  options->dparam[1] = 0.0;
 
   /* Allocations */
 
@@ -397,8 +397,8 @@ void lcp_latin_w(LinearComplementarity_Problem* problem, double *z, double *w, i
 
     iter1  = iter1 + 1;
 
-    options->iparam[2] = it_end;
-    options->dparam[2] =  res;
+    options->iparam[1] = it_end;
+    options->dparam[1] =  res;
 
   }
 

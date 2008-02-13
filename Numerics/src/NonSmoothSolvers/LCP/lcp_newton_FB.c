@@ -58,7 +58,7 @@ void lcp_newton_FB(LinearComplementarity_Problem* problem, double *z, double *w,
   incy = 1;
   /*output*/
 
-  options->iparam[2] = 0;
+  options->iparam[1] = 0;
   options->dparam[1] = 0.0;
 
   for (i = 0; i < n; i++) z[i] = 0.0;
@@ -183,7 +183,7 @@ void lcp_newton_FB(LinearComplementarity_Problem* problem, double *z, double *w,
       {
         printf("Problem in DGESV\n");
       }
-      options->iparam[2] = iter;
+      options->iparam[1] = iter;
       options->dparam[1] = err;
       *info = 2;
 
@@ -221,7 +221,7 @@ void lcp_newton_FB(LinearComplementarity_Problem* problem, double *z, double *w,
 
   }
 
-  options->iparam[2] = iter;
+  options->iparam[1] = iter;
   options->dparam[1] = err;
 
   if (verbose > 0)

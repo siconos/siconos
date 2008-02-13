@@ -55,7 +55,7 @@ void lcp_newton_min(LinearComplementarity_Problem* problem, double *z, double *w
 
   /*output*/
 
-  options->iparam[2] = 0;
+  options->iparam[1] = 0;
   options->dparam[1] = 0.0;
 
   for (i = 0; i < n; i++)
@@ -152,7 +152,7 @@ void lcp_newton_min(LinearComplementarity_Problem* problem, double *z, double *w
       {
         printf("Problem in DGESV\n");
       }
-      options->iparam[2] = iter;
+      options->iparam[1] = iter;
       options->dparam[1] = err;
 
       free(H);
@@ -193,7 +193,7 @@ void lcp_newton_min(LinearComplementarity_Problem* problem, double *z, double *w
 
   }
 
-  options->iparam[2] = iter;
+  options->iparam[1] = iter;
   options->dparam[1] = err;
 
   if (err > tol)

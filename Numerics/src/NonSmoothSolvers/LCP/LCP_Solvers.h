@@ -26,6 +26,134 @@
   Last Modifications : Mathieu Renouf , Pascal Denoyelle, Franck Perignon
 */
 
+/*! \page LCPSolver Linear Complementarity Problems Solvers
+
+This page gives an overview of the available solvers for LCP and their required parameters.
+
+For each solver, the input argument are:
+ - a LinearComplementarity_Problem
+ - the unknowns (z,w)
+ - info, the termination value (0: convergence, >0 problem which depends on the solver)
+ - a Solver_Options structure, which handles iparam and dparam
+
+\section lcpLemke lexico Lemke
+
+Direct solver for LCP based on pivoting method principle for degenerated problem.
+
+\bf function: lcp_lexicolemke() \n
+\bf parameters:
+ - iparam[0] (in) : max. number of iterations
+ - iparam[1] (out): number of iterations processed
+
+\section lcpQP QP Solver
+
+quadratic programm formulation for solving a LCP
+
+\bf function: lcp_qp() \n
+\bf parameters:
+ - dparam[0] (in): tolerance
+
+\section lcpNSQP NSQP Solver
+
+quadratic programm formulation for solving an non symmetric LCP
+
+\bf function: lcp_nsqp() \n
+\bf parameters:
+ - dparam[0] (in): tolerance
+
+\section lcpCPG CPG Solver
+Conjugated Projected Gradient solver for LCP based on quadratic minimization.
+
+\bf function: lcp_cpg() \n
+\bf parameters:
+ - iparam[0] (in): maximum number of iterations allowed
+ - iparam[1] (out): number of iterations processed
+ - dparam[0] (in): tolerance
+ - dparam[1] (out): resulting error
+
+
+\section lcpPGS PGS Solver
+Projected Gauss-Seidel solver
+
+\bf function: lcp_pgs() \n
+\bf parameters:
+ - iparam[0] (in): maximum number of iterations allowed
+ - iparam[1] (out): number of iterations processed
+ - dparam[0] (in): tolerance
+ - dparam[1] (out): resulting error
+
+\section lcpRPGS RPGS Solver
+Regularized Projected Gauss-Seidel, solver for LCP, able to handle with matrices with null diagonal terms
+
+\bf function: lcp_rpgs() \n
+\bf parameters:
+ - iparam[0] (in): maximum number of iterations allowed
+ - iparam[1] (out): number of iterations processed
+ - dparam[0] (in): tolerance
+ - dparam[1] (out): resulting error
+ - dparam[2] (in): rho
+
+\section lcpPSOR PSOR Solver
+Projected Succesive over relaxation solver for LCP. See cottle, Pang Stone Chap 5
+\bf function: lcp_psor() \n
+\bf parameters:
+ - iparam[0] (in): maximum number of iterations allowed
+ - iparam[1] (out): number of iterations processed
+ - dparam[0] (in): tolerance
+ - dparam[1] (out): resulting error
+ - dparam[2] (in): relaxation parameter
+
+\section lcpNewtonMin  NewtonMin Solver
+a nonsmooth Newton method based on the min formulation  (or max formulation) of the LCP
+
+\bf function: lcp_newton_min() \n
+\bf parameters:
+ - iparam[0] (in): maximum number of iterations allowed
+ - iparam[1] (out): number of iterations processed
+ - dparam[0] (in): tolerance
+ - dparam[1] (out): resulting error
+
+\section lcpNewtonFB  NewtonFB Solver
+a nonsmooth Newton method based based on the Fischer-Bursmeister convex function
+
+\bf function: lcp_newton_FB() \n
+\bf parameters:
+ - iparam[0] (in): maximum number of iterations allowed
+ - iparam[1] (out): number of iterations processed
+ - dparam[0] (in): tolerance
+ - dparam[1] (out): resulting error
+
+\section lcpPath Path (Ferris) Solver
+
+\bf function: lcp_path() \n
+\bf parameters:
+ - dparam[0] (in): tolerance
+
+\section lcpLatin Latin Solver
+LArge Time INcrements solver
+
+\bf function: lcp_latin() \n
+\bf parameters:
+ - iparam[0] (in): maximum number of iterations allowed
+ - iparam[1] (out): number of iterations processed
+ - dparam[0] (in): tolerance
+ - dparam[1] (out): resulting error
+ - dparam[2] (in): latin parameter
+
+\section lcpLatinW Latin_w Solver
+LArge Time INcrements solver with relaxation
+
+\bf function: lcp_latin_w() \n
+\bf parameters:
+ - iparam[0] (in): maximum number of iterations allowed
+ - iparam[1] (out): number of iterations processed
+ - dparam[0] (in): tolerance
+ - dparam[1] (out): resulting error
+ - dparam[2] (in): latin parameter
+ - dparam[3] (in): relaxation parameter
+
+*/
+
 #include "Numerics_Options.h"
 #include "LinearComplementarity_Problem.h"
 #include "Solver_Options.h"

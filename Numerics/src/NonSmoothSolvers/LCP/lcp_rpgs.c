@@ -51,14 +51,14 @@ void lcp_rpgs(LinearComplementarity_Problem* problem, double *z, double *w, int 
   /*  buffer_errors = malloc( itermax*sizeof( double ) );*/
 
   double tol = options->dparam[0];
-  double rho = options->dparam[1];
-  // double omega = options->dparam[2]; // Not yet used
+  double rho = options->dparam[2];
+  // double omega = options->dparam[3]; // Not yet used
 
 
   /* Initialize output */
 
-  options->iparam[2] = 0;
-  options->dparam[3] = 0.0;
+  options->iparam[1] = 0;
+  options->dparam[1] = 0.0;
 
   /* Allocation */
 
@@ -184,8 +184,8 @@ void lcp_rpgs(LinearComplementarity_Problem* problem, double *z, double *w, int 
 
   }
 
-  options->iparam[2] = iter;
-  options->dparam[3] = err;
+  options->iparam[1] = iter;
+  options->dparam[1] = err;
 
   if (verbose > 0)
   {

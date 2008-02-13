@@ -48,8 +48,8 @@ void lcp_pgs(LinearComplementarity_Problem* problem, double *z, double *w, int *
 
   /* Initialize output */
 
-  options->iparam[2] = 0;
-  options->dparam[2] = 0.0;
+  options->iparam[1] = 0;
+  options->dparam[1] = 0.0;
 
   /* Check for non trivial case */
   qs = DNRM2(n , q , incx);
@@ -161,8 +161,8 @@ void lcp_pgs(LinearComplementarity_Problem* problem, double *z, double *w, int *
 
   }
 
-  options->iparam[2] = iter;
-  options->dparam[2] = err;
+  options->iparam[1] = iter;
+  options->dparam[1] = err;
 
   if (err > tol)
   {

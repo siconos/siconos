@@ -17,7 +17,6 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-
 #include <math.h>
 #include <string.h>
 #include <stdio.h>
@@ -48,7 +47,7 @@ void lcp_lexicolemke(LinearComplementarity_Problem* problem, double *zlem , doub
 
   /*output*/
 
-  options->iparam[2] = 0;
+  options->iparam[1] = 0;
 
   /* Allocation */
 
@@ -230,7 +229,7 @@ void lcp_lexicolemke(LinearComplementarity_Problem* problem, double *zlem , doub
   }
 
 
-  options->iparam[2] = ITER;
+  options->iparam[1] = ITER;
 
   if (Ifound) *info = 0;
   else *info = 1;

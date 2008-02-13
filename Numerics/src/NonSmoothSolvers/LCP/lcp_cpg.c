@@ -52,7 +52,7 @@ void lcp_cpg(LinearComplementarity_Problem* problem, double *z, double *w, int *
 
   /*output*/
 
-  options->iparam[2] = 0;
+  options->iparam[1] = 0;
   options->dparam[1] = 0.0;
 
   qs = DNRM2(n , q , incx);
@@ -144,7 +144,7 @@ void lcp_cpg(LinearComplementarity_Problem* problem, double *z, double *w, int *
       free(zz);
       free(status);
 
-      options->iparam[2] = iter;
+      options->iparam[1] = iter;
       options->dparam[1] = err;
       *info = 3;
       return;
@@ -234,7 +234,7 @@ void lcp_cpg(LinearComplementarity_Problem* problem, double *z, double *w, int *
 
   }
 
-  options->iparam[2] = iter;
+  options->iparam[1] = iter;
   options->dparam[1] = err;
 
   DCOPY(n, rr, incx, w, incy);

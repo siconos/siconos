@@ -38,6 +38,33 @@
 
   \f$ \mu \f$ is the friction coefficient (it may be different for each contact).
 
+
+  \bf Note: for 2-dimensional friction-contact problems, two formulation are available:\n
+  <em>primal problem:</em>\n
+  \f$
+  \left\lbrace
+  \begin{array}{l}
+  velocity - M reaction = q \\
+  0 \le reaction_n \perp velocity_n \ge 0\\
+  -velocity_t \in \partial\psi_{[-\mu reaction_n, \mu reaction_n]}(reaction_t)\\
+  \end{array}
+  \right.
+  \f$
+
+  or \n
+
+  <em>dual problem:</em>\n
+  \f$
+  \left\lbrace
+  \begin{array}{l}
+  velocity - M reaction = q \\
+  0 \le reaction_n \perp velocity_n \ge 0 \\
+  -reaction_t \in \partial\psi_{[-\mu velocity_n, \mu velocity_n]}(velocity_t)\\
+  \end{array}
+  \right.
+  \f$
+
+
   \section fc3DSolversList Available solvers for Friction Contact 3D
   Use the generic function frictionContact3D_driver() to call one the the specific solvers listed below:
 
@@ -54,6 +81,13 @@
      - iparam[1]:
      - dparam[0]: tolerance
      - isStorageSparse: 1 if a SparseBlockStructuredMatrix is used for M, else 0 (double* storage)
+
+  \section fc2DSolversList Available solvers for Friction Contact 2D
+
+  - pfc_2D_latin(), latin solver
+  - pfc_2D_nlgs(), Non Linear Gauss Seidel solver
+  - pfc_2D_cpg(), conjugated projected gradient solver
+  - dfc_2D_latin(), latin solver
 
 */
 

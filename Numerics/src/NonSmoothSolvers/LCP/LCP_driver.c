@@ -21,6 +21,7 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
+#include "Numerics_Options.h"
 #include "NonSmoothDrivers.h"
 
 int lcp_driver(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options, Numerics_Options* global_options)
