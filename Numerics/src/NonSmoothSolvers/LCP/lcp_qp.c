@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,7 +41,7 @@ void lcp_qp(LinearComplementarity_Problem* problem, double *z, double *w, int *i
   double *lambda;
 
   int lwar, liwar, iout, un;
-  integer *iwar;
+  int *iwar;
   double *war;
 
   double tol = options->dparam[0];
@@ -64,17 +64,15 @@ void lcp_qp(LinearComplementarity_Problem* problem, double *z, double *w, int *i
     w[i] = 0.0;
   }
 
-
-
   /*/ Creation of objective function matrix Q and the the constant vector of the objective function p
 
   // Q= M;*/
+  double * vec = problem->M->matrix0;
   Q = (double *)malloc(nmax * nmax * sizeof(double));
   for (j = 0; j < n; j++)
   {
-    for (i = 0; i < n; i++) Q[j * nmax + i] = (problem->M->matrix0[j * n + i]);
+    for (i = 0; i < n; i++) Q[j * nmax + i] = vec[j * n + i];
   }
-
 
   p = (double *)malloc(nmax * sizeof(double));
   for (i = 0; i < n; i++)
@@ -110,14 +108,13 @@ void lcp_qp(LinearComplementarity_Problem* problem, double *z, double *w, int *i
   war = (double *)malloc(lwar * sizeof(double));
   /* / integer working array. */
   liwar = n ;
-  iwar = (integer *)malloc(liwar * sizeof(int));
+  iwar = (int *)malloc(liwar * sizeof(int));
   iwar[0] = 1;
 
 
   /* / call ql0001_ */
-  F77NAME(ql0001)(m, me, mmax, n, nmax, mnn, Q, p, A, b, xl, xu,
-                  z, lambda, iout, *info, un, war, lwar, iwar, liwar, tol);
-
+  ql0001_(&m, &me, &mmax, &n, &nmax, &mnn, Q, p, A, b, xl, xu,
+          z, lambda, &iout, info, &un, war, &lwar, iwar, &liwar, &tol);
   /* /    printf("tol = %10.4e\n",*tol);
   //for (i=0;i<mnn;i++) printf("lambda[%i] = %g\n",i,lambda[i]);
 

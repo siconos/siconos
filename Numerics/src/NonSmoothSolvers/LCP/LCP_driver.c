@@ -24,30 +24,94 @@
 #include "Numerics_Options.h"
 #include "NonSmoothDrivers.h"
 
-int lcp_driver(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options, Numerics_Options* global_options)
-{
-  if (options == NULL || global_options == NULL)
-    numericsError("lcp_driver", "null input for solver and/or global options");
 
-  /* Set global options */
-  setNumericsOptions(global_options);
+int lcp_driver_global(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options, int numberOfSolvers)
+{
+  /* Checks storage type for the matrix M of the LCP */
+  if (problem->M->storageType == 0)
+    numericsError("lcp_driver_global", "forbidden type of storage for the matrix M of the LCP");
+
+  /*
+    The options for the global "block" solver are defined in options[0].\n
+    options[i], for 0<i<numberOfSolvers-1 correspond to local solvers.
+   */
+
+  /* Output info. : 0: ok -  >0: problem (depends on solver) */
+  int sizeInfo = problem->M->matrix1->size + 1;
+  int info = -1;
+
+  /******************************************
+   *  1 - Check for trivial solution
+   ******************************************/
+  int i = 0;
+  int n = problem->size;
+  double *q = problem->q;
+  while ((i < (n - 1)) && (q[i] >= 0.)) i++;
+  if ((i == (n - 1)) && (q[n - 1] >= 0.))
+  {
+    /* TRIVIAL CASE : q >= 0
+     * z = 0 and w = q is solution of LCP(q,M)
+     */
+    for (int j = 0 ; j < n; j++)
+    {
+      z[j] = 0.0;
+      w[j] = q[j];
+    }
+    info = 0;
+    options[0].iparam[1] = 0;   /* Number of iterations done */
+    options[0].dparam[1] = 0.0; /* Error */
+    if (verbose > 0)
+      printf("LCP_driver_global: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
+    return info;
+  }
+
+  /*************************************************
+  *  2 - Call specific solver (if no trivial sol.)
+  *************************************************/
+
+  /* Solver name */
+  char * name = options[0].solverName;
+  if (verbose == 1)
+    printf(" ========================== Call %s global solver for Linear Complementarity problem ==========================\n", name);
+
+  /****** Gauss Seidel block solver ******/
+  if (strcmp(name , "GaussSeidel_SBM") == 0)
+    lcp_GaussSeidel_SBM(problem, z , w , &info , options, numberOfSolvers);
+  else
+    printf("LCP_driver_global error: unknown solver named: %s\n", name);
+
+  /*************************************************
+   *  3 - Computes w = Mz + q and checks validity
+   *************************************************/
+  if (options[0].filterOn > 0)
+    info = lcp_compute_error(problem, z, w, options[0].dparam[0], &(options[0].dparam[1]));
+
+  return info;
+
+}
+
+int lcp_driver_local(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options)
+{
+  /* Note: inputs are not checked since it is supposed to be done in lcp_driver() function which calls the present one. */
+
+  /* Checks storage type for the matrix M of the LCP */
+  if (problem->M->storageType == 1)
+    numericsError("lcp_driver_local", "forbidden type of storage for the matrix M of the LCP");
 
   /* If the options for solver have not been set, read default values in .opt file */
   int NoDefaultOptions = options->isSet; /* true(1) if the Solver_Options structure has been filled in else false(0) */
 
-  if (!NoDefaultOptions)
+  if (NoDefaultOptions == 0)
+  {
     readSolverOptions(0, options);
+    options->filterOn = 1;
+  }
 
   if (verbose > 0)
     printSolverOptions(options);
 
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = 1;
-
-  /* Checks inputs */
-  if (problem == NULL || z == NULL || w == NULL)
-    numericsError("lcp_driver", "null input for LinearComplementarity_Problem and/or unknowns (z,w)");
-
   /******************************************
    *  1 - Check for trivial solution
    ******************************************/
@@ -67,10 +131,9 @@ int lcp_driver(LinearComplementarity_Problem* problem, double *z , double *w, So
       w[j] = q[j];
     }
     info = 0;
-    options->iparam[2] = 0;   /* Number of iterations done */
-    options->dparam[2] = 0.0; /* Error */
+    options->dparam[1] = 0.0; /* Error */
     if (verbose > 0)
-      printf("LCP_driver: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
+      printf("LCP_driver_local: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
     return info;
   }
 
@@ -87,7 +150,7 @@ int lcp_driver(LinearComplementarity_Problem* problem, double *z , double *w, So
   /****** Lemke algorithm ******/
   /* IN: itermax
      OUT: iter */
-  if (strcmp(name , "Lemke") == 0)
+  if (strcmp(name , "Lemke") == 0 || strcmp(name , "LexicoLemke") == 0)
     lcp_lexicolemke(problem, z , w , &info , options);
 
   /****** PGS Solver ******/
@@ -169,17 +232,47 @@ int lcp_driver(LinearComplementarity_Problem* problem, double *z , double *w, So
     printf("LCP_driver error: unknown solver named: %s\n", name);
 
   /*************************************************
-   *  3 - Check solution validity
+   *  3 - Computes w = Mz + q and checks validity
    *************************************************/
+  if (options->filterOn > 0)
+    lcp_compute_error(problem, z, w, options->dparam[0], &(options->dparam[1]));
 
-  /* Warning: it depends on the chosen solver */
-
-  /* Not done for:  PGS, RPGS */
-  if ((strcmp(name , "PGS") != 0) && (strcmp(name , "CPG") != 0))
-  {
-    double tolerance = options->dparam[0];
-    info = filter_result_LCP(problem, z, w, tolerance);
-  }
   return info;
 
 }
+
+int lcp_driver(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options, int numberOfSolvers, Numerics_Options* global_options)
+{
+  if (options == NULL || global_options == NULL)
+    numericsError("lcp_driver", "null input for solver and/or global options");
+
+  /* Set global options */
+  setNumericsOptions(global_options);
+
+  /* Checks inputs */
+  if (problem == NULL || z == NULL || w == NULL)
+    numericsError("lcp_driver", "null input for LinearComplementarity_Problem and/or unknowns (z,w)");
+
+  /* Output info. : 0: ok -  >0: problem (depends on solver) */
+  int info = -1;
+
+  /* Switch to local or global (block) solver according to the type of storage for M */
+  /* Storage type for the matrix M of the LCP */
+  int storageType = problem->M->storageType;
+
+  /* Sparse Block Storage */
+  if (storageType == 1)
+  {
+    if (numberOfSolvers < 2)
+      printf(" ========================== LCP_driver warning: only global solver has been defined.\n");
+    info = lcp_driver_global(problem, z , w, options, numberOfSolvers);
+  }
+  else
+  {
+    if (numberOfSolvers > 1)
+      printf(" ========================== LCP_driver warning: more than one solver have been defined. All but the first one will be ignored.\n");
+    info = lcp_driver_local(problem, z , w, options);
+  }
+  return info;
+}
+

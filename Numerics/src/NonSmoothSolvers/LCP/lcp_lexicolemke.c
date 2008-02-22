@@ -32,12 +32,12 @@ void lcp_lexicolemke(LinearComplementarity_Problem* problem, double *zlem , doub
   int dim = problem->size;
   int dim2 = 2 * (dim + 1);
 
-
   int i, drive, block, Ifound;
   int ic, jc;
   int ITER;
   int nobasis;
   int itermax = options->iparam[0];
+
 
   double z0, zb, dblock;
   double pivot, tovip;
@@ -228,7 +228,6 @@ void lcp_lexicolemke(LinearComplementarity_Problem* problem, double *zlem , doub
     }
   }
 
-
   options->iparam[1] = ITER;
 
   if (Ifound) *info = 0;
@@ -238,5 +237,4 @@ void lcp_lexicolemke(LinearComplementarity_Problem* problem, double *zlem , doub
 
   for (i = 0 ; i < dim ; ++i) free(A[i]);
   free(A);
-
 }

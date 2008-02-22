@@ -121,15 +121,16 @@ typedef struct
 #ifdef __cplusplus
 extern "C" {
 #endif
-  /** Matrix - vector product y = A*x or y += Ax
+  /** Matrix - vector product y = alpha*A*x + beta*y
       \param[in] sizeX dim of the vector x
       \param[in] sizeY dim of the vector y
+      \param[in] alpha coefficient
       \param[in] A the matrix to be multiplied
       \param[in] x the vector to be multiplied
+      \param[in] beta coefficient
       \param[in,out] y the resulting vector
-      \param[in] init = 0 for y += Ax, =1 for y = Ax
   */
-  void prod(int sizeX, int sizeY, const NumericsMatrix* const A, const double* const x, double* y, int init);
+  void prod(int sizeX, int sizeY, double alpha, const NumericsMatrix* const A, const double* const x, double beta, double* y);
 
   /** Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (sizeY rows and sizeX columns)
       \param[in] sizeX dim of the vector x

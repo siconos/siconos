@@ -22,7 +22,7 @@
 #include "LA.h"
 
 
-void prod(int sizeX, int sizeY, const NumericsMatrix* const A, const double* const x, double* y, int init)
+void prod(int sizeX, int sizeY, double alpha, const NumericsMatrix* const A, const double* const x, double beta, double* y)
 {
   if (A == NULL)
   {
@@ -42,14 +42,11 @@ void prod(int sizeX, int sizeY, const NumericsMatrix* const A, const double* con
   if (storage == 0)
   {
     int incx = 1, incy = 1;
-    double coef = 0.0; /* y = Ax */
-    if (init == 0) /* y += Ax */
-      coef = 1.0;
-    DGEMV(LA_NOTRANS, sizeY, sizeX, 1.0, A->matrix0, sizeX, x, incx, coef, y, incy);
+    DGEMV(LA_NOTRANS, sizeY, sizeX, alpha, A->matrix0, sizeX, x, incx, beta, y, incy);
   }
   /* SparseBlock storage */
   else if (storage == 1)
-    prodSBM(sizeY, A->matrix1, x, y, init);
+    prodSBM(sizeY, alpha, A->matrix1, x, beta, y);
   else
   {
     fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector prod(A,x,y) failed, unknown storage type for A.\n");

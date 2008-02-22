@@ -34,7 +34,7 @@
     ni being the size of the diagonal block at row(block) i
     \param *RowIndex        : the list of *block row indices (first row = 0)
     \param *ColumnIndex     : the list of *block column indices (first column = 0)
-    Related functions: prodSBM(), subRowProdSBM(), freeSBM(), printSBM
+    Related functions: prodSBM(), subRowProdSBM(), freeSBM(), printSBM, getDiagonalBlockPos()
 */
 typedef struct
 {
@@ -67,14 +67,15 @@ typedef struct
 extern "C" {
 #endif
 
-  /** SparseMatrix - vector product y = A*x or y += Ax
+  /** SparseMatrix - vector product y = alpha*A*x + beta*y
       \param[in] size, dim of the vectors x and y
+      \param[in] alpha coefficient
       \param[in] A, the matrix to be multiplied
       \param[in] x, the vector to be multiplied
+      \param[in] beta coefficient
       \param[in-out] y, the resulting vector
-      \param[in] init, = 0 for y += Ax, =1 for y = Ax
   */
-  void prodSBM(int size, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init);
+  void prodSBM(int size, double alpha, const SparseBlockStructuredMatrix* const A, const double* const x, double beta, double* y);
 
   /** Row of a SparseMatrix - vector product y = rowA*x or y += rowA*x, rowA being a row of blocks of A
       \param[in] sizeX, dim of the vector x
@@ -112,6 +113,13 @@ extern "C" {
       \param SparseBlockStructuredMatrix, the matrix to be destroyed.
    */
   void freeSpBlMatPred(SparseBlockStructuredMatrixPred *blmatpred);
+
+  /** Find index position in blocks of the diagonal block of row num
+      \param M the SparseBlockStructuredMatrix matrix
+      \param num the row of the required block
+      \return pos the position of the block
+  */
+  int getDiagonalBlockPos(const SparseBlockStructuredMatrix* const M, int num);
 
 
 #ifdef __cplusplus

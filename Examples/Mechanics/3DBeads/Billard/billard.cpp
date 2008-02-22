@@ -398,7 +398,7 @@ int main(int argc, char* argv[])
     iparam[0] = 1010; // Max number of iteration
     iparam[4] = 0; // Solver/formulation  0: projection, 1: Newton/AlartCurnier, 2: Newton/Fischer-Burmeister
 
-    DoubleParameters dparam(5);
+    DoubleParameters dparam(2);
     dparam[0] = 1e-3; // Tolerance
     NonSmoothSolver * Mysolver = new NonSmoothSolver(solverName, iparam, dparam);
     FrictionContact* osnspb = new FrictionContact(GLOB_SIM, 3, Mysolver);

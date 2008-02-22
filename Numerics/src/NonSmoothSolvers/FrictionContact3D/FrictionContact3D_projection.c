@@ -49,16 +49,11 @@ void proj_updateWithSparse(int contact, double * reaction)
   int in = 3 * contact, it = in + 1, is = it + 1;
   int numberOfContacts = n / 3;
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  int diagPos = numberOfContacts * contact + contact;
+  int diagPos = getDiagonalBlockPos(MBGlobal, contact);
   MLocal = MBGlobal->block[diagPos];
-
   /****  Computation of qLocal = qLocal + sum over a row of blocks in M of the products MLocal.reactionLocal,
    excluding the block corresponding to the current contact. ****/
 
-  /* reaction current block set to zero, to exclude current contact block */
-  reaction[in] = 0.0;
-  reaction[it] = 0.0;
-  reaction[is] = 0.0;
   /* qLocal computation*/
   qLocal[0] = qGlobal[in];
   qLocal[1] = qGlobal[it];
@@ -67,8 +62,7 @@ void proj_updateWithSparse(int contact, double * reaction)
   /* qLocal += rowMB * reaction
      with rowMB the row of blocks of MBGlobal which corresponds to the current contact
    */
-  subRowProdSBM(n, 3, contact, MBGlobal, reaction, qLocal, 0);
-
+  rowProdNoDiagSBM(n, 3, contact, MBGlobal, reaction, qLocal, 0);
 }
 
 void proj_updateNoSparse(int contact, double * reaction)

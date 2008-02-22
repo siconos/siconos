@@ -79,7 +79,8 @@ void lcp_path(LinearComplementarity_Problem* problem, double *z, double *w, int 
       w[i] = val;
     }
     *info = 0;
-    lcp_compute_error(n, M, q, z, verbose, w, &err);
+    /* **** Criterium convergence **** */
+    lcp_compute_error(problem, z, w, tol, &err);
 
     if (verbose > 0)
       printf("PATH : LCP Solved, error %10.7f.\n", err);

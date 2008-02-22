@@ -1,7 +1,7 @@
 #ifndef LA_H
 #define LA_H
 
-#include "config.h"
+#include <config.h>
 
 #define FCAST(T,X) (T *) (& X)
 #define FCASTP(T,X) (T *) X

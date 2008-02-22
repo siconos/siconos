@@ -348,8 +348,8 @@ void initSiconos()
     (*(q0[8]))(1) =  0.8;
     (*(q0[8]))(2) =  0.1;
 
-    (*(v0[8]))(0) = -1;
-    (*(v0[8]))(1) = -20.;
+    (*(v0[8]))(0) = -10;
+    (*(v0[8]))(1) = -200.;
 
     (*(q0[9]))(0) =  0.3;
     (*(q0[9]))(1) = -0.6;
@@ -617,7 +617,7 @@ void initSiconos()
     iparam[0] = 1010; // Max number of iteration
     iparam[4] = 0; // Solver/formulation  0: projection, 1: Newton/AlartCurnier, 2: Newton/Fischer-Burmeister
 
-    DoubleParameters dparam(5);
+    DoubleParameters dparam(2);
     dparam[0] = 1e-7; // Tolerance
     NonSmoothSolver * Mysolver = new NonSmoothSolver(solverName, iparam, dparam);
     FrictionContact* osnspb = new FrictionContact(GLOB_SIM, 3, Mysolver);

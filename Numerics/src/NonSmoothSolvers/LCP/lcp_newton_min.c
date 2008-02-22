@@ -185,11 +185,8 @@ void lcp_newton_min(LinearComplementarity_Problem* problem, double *z, double *w
       else H[i] = w[i - n];
     }
 
-    /* / Error Evaluation*/
-
-    // err = dnrm2_( (integer *)&m , H , &incx ); // necessary ?
-    lcp_compute_error(n, M, q, z, verbose, w, &err);
-
+    /* **** Criterium convergence **** */
+    lcp_compute_error(problem, z, w, tol, &err);
 
   }
 

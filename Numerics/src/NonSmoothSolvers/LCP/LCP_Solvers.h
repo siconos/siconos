@@ -26,15 +26,20 @@
   Last Modifications : Mathieu Renouf , Pascal Denoyelle, Franck Perignon
 */
 
-/*! \page LCPSolver Linear Complementarity Problems Solvers
+/*! \page LCPSolvers Linear Complementarity Problems Solvers
 
 This page gives an overview of the available solvers for LCP and their required parameters.
 
 For each solver, the input argument are:
- - a LinearComplementarity_Problem
- - the unknowns (z,w)
- - info, the termination value (0: convergence, >0 problem which depends on the solver)
- - a Solver_Options structure, which handles iparam and dparam
+- a LinearComplementarity_Problem
+- the unknowns (z,w)
+- info, the termination value (0: convergence, >0 problem which depends on the solver)
+- a Solver_Options structure, which handles iparam and dparam
+
+Remark: when filterOn parameter (from Solver_Options) is different from 0, lcp_compute_error() is called at the end of the
+process to check the validity of the solution. This function needs a tolerance value and returns an error. \n
+In that case, tolerance is dparam[0] and error output dparam[1]. Thus, in the following solvers, when dparam[0,1] are omitted, that \n
+means that they are not required inputs, and that if filter is on, some default values will be used.
 
 \section lcpLemke lexico Lemke
 
@@ -42,8 +47,8 @@ Direct solver for LCP based on pivoting method principle for degenerated problem
 
 \bf function: lcp_lexicolemke() \n
 \bf parameters:
- - iparam[0] (in) : max. number of iterations
- - iparam[1] (out): number of iterations processed
+- iparam[0] (in) : max. number of iterations
+- iparam[1] (out): number of iterations processed
 
 \section lcpQP QP Solver
 
@@ -51,7 +56,7 @@ quadratic programm formulation for solving a LCP
 
 \bf function: lcp_qp() \n
 \bf parameters:
- - dparam[0] (in): tolerance
+- dparam[0] (in): tolerance
 
 \section lcpNSQP NSQP Solver
 
@@ -59,17 +64,17 @@ quadratic programm formulation for solving an non symmetric LCP
 
 \bf function: lcp_nsqp() \n
 \bf parameters:
- - dparam[0] (in): tolerance
+- dparam[0] (in): tolerance
 
 \section lcpCPG CPG Solver
 Conjugated Projected Gradient solver for LCP based on quadratic minimization.
 
 \bf function: lcp_cpg() \n
 \bf parameters:
- - iparam[0] (in): maximum number of iterations allowed
- - iparam[1] (out): number of iterations processed
- - dparam[0] (in): tolerance
- - dparam[1] (out): resulting error
+- iparam[0] (in): maximum number of iterations allowed
+- iparam[1] (out): number of iterations processed
+- dparam[0] (in): tolerance
+- dparam[1] (out): resulting error
 
 
 \section lcpPGS PGS Solver
@@ -77,80 +82,94 @@ Projected Gauss-Seidel solver
 
 \bf function: lcp_pgs() \n
 \bf parameters:
- - iparam[0] (in): maximum number of iterations allowed
- - iparam[1] (out): number of iterations processed
- - dparam[0] (in): tolerance
- - dparam[1] (out): resulting error
+- iparam[0] (in): maximum number of iterations allowed
+- iparam[1] (out): number of iterations processed
+- dparam[0] (in): tolerance
+- dparam[1] (out): resulting error
 
 \section lcpRPGS RPGS Solver
 Regularized Projected Gauss-Seidel, solver for LCP, able to handle with matrices with null diagonal terms
 
 \bf function: lcp_rpgs() \n
 \bf parameters:
- - iparam[0] (in): maximum number of iterations allowed
- - iparam[1] (out): number of iterations processed
- - dparam[0] (in): tolerance
- - dparam[1] (out): resulting error
- - dparam[2] (in): rho
+- iparam[0] (in): maximum number of iterations allowed
+- iparam[1] (out): number of iterations processed
+- dparam[0] (in): tolerance
+- dparam[1] (out): resulting error
+- dparam[2] (in): rho
 
 \section lcpPSOR PSOR Solver
 Projected Succesive over relaxation solver for LCP. See cottle, Pang Stone Chap 5
 \bf function: lcp_psor() \n
 \bf parameters:
- - iparam[0] (in): maximum number of iterations allowed
- - iparam[1] (out): number of iterations processed
- - dparam[0] (in): tolerance
- - dparam[1] (out): resulting error
- - dparam[2] (in): relaxation parameter
+- iparam[0] (in): maximum number of iterations allowed
+- iparam[1] (out): number of iterations processed
+- dparam[0] (in): tolerance
+- dparam[1] (out): resulting error
+- dparam[2] (in): relaxation parameter
 
 \section lcpNewtonMin  NewtonMin Solver
 a nonsmooth Newton method based on the min formulation  (or max formulation) of the LCP
 
 \bf function: lcp_newton_min() \n
 \bf parameters:
- - iparam[0] (in): maximum number of iterations allowed
- - iparam[1] (out): number of iterations processed
- - dparam[0] (in): tolerance
- - dparam[1] (out): resulting error
+- iparam[0] (in): maximum number of iterations allowed
+- iparam[1] (out): number of iterations processed
+- dparam[0] (in): tolerance
+- dparam[1] (out): resulting error
 
 \section lcpNewtonFB  NewtonFB Solver
 a nonsmooth Newton method based based on the Fischer-Bursmeister convex function
 
 \bf function: lcp_newton_FB() \n
 \bf parameters:
- - iparam[0] (in): maximum number of iterations allowed
- - iparam[1] (out): number of iterations processed
- - dparam[0] (in): tolerance
- - dparam[1] (out): resulting error
+- iparam[0] (in): maximum number of iterations allowed
+- iparam[1] (out): number of iterations processed
+- dparam[0] (in): tolerance
+- dparam[1] (out): resulting error
 
 \section lcpPath Path (Ferris) Solver
 
 \bf function: lcp_path() \n
 \bf parameters:
- - dparam[0] (in): tolerance
+- dparam[0] (in): tolerance
 
 \section lcpLatin Latin Solver
 LArge Time INcrements solver
 
 \bf function: lcp_latin() \n
 \bf parameters:
- - iparam[0] (in): maximum number of iterations allowed
- - iparam[1] (out): number of iterations processed
- - dparam[0] (in): tolerance
- - dparam[1] (out): resulting error
- - dparam[2] (in): latin parameter
+- iparam[0] (in): maximum number of iterations allowed
+- iparam[1] (out): number of iterations processed
+- dparam[0] (in): tolerance
+- dparam[1] (out): resulting error
+- dparam[2] (in): latin parameter
 
 \section lcpLatinW Latin_w Solver
 LArge Time INcrements solver with relaxation
 
 \bf function: lcp_latin_w() \n
 \bf parameters:
- - iparam[0] (in): maximum number of iterations allowed
- - iparam[1] (out): number of iterations processed
- - dparam[0] (in): tolerance
- - dparam[1] (out): resulting error
- - dparam[2] (in): latin parameter
- - dparam[3] (in): relaxation parameter
+- iparam[0] (in): maximum number of iterations allowed
+- iparam[1] (out): number of iterations processed
+- dparam[0] (in): tolerance
+- dparam[1] (out): resulting error
+- dparam[2] (in): latin parameter
+- dparam[3] (in): relaxation parameter
+
+\section lcpGS Block solver (Gauss Seidel)
+Gauss-Seidel for Sparse-Block matrices. \n
+Matrix M of the LCP must be a SparseBlockStructuredMatrix. \n
+This solver first build a local problem for each row of blocks and then call any of the other solvers through lcp_driver().
+
+\bf function: lcp_GaussSeidel_SBM() \n
+\bf parameters:
+- iparam[0] (in): maximum number of iterations allowed for GS process
+- iparam[1] (out): number of GS iterations processed
+- iparam[2] (out): sum of all local number of iterations (if it has sense for the local solver)
+- dparam[0] (in): tolerance
+- dparam[1] (out): resulting error
+- dparam[2] (in): sum of all local error values
 
 */
 
@@ -163,31 +182,31 @@ extern "C" {
 #endif
 
   /** lcp_qp uses a quadratic programm formulation for solving a LCP
-   * \param[in] problem, structure that represents the LCP (M, q...)
-   * \param[in-out] z, a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w, a n-vector of doubles which returns the solution of the problem.
-   * \param[out] info, an integer which returns the termination value:\n
+   * \param[in] problem structure that represents the LCP (M, q...)
+   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
    *                0 : convergence  / minimization sucessfull\n
    *                1 : Too Many iterations\n
    *              2 : Accuracy insuficient to satisfy convergence criterion\n
    *                5 : Length of working array insufficient\n
    *                Other : The constraints are inconstent\n
-   * \param[in-out] options, structure used to define the solver and its parameters.
+   * \param[in-out] options structure used to define the solver and its parameters.
    *
    * \author Vincent Acary
    */
   void lcp_qp(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
   /** lcp_cpg is a CPG (Conjugated Projected Gradient) solver for LCP based on quadratic minimization.
-   * \param[in] problem, structure that represents the LCP (M, q...)
-   * \param[in-out] z, a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w, a n-vector of doubles which returns the solution of the problem.
-   * \param[out] info, an integer which returns the termination value:\n
+   * \param[in] problem structure that represents the LCP (M, q...)
+   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
    0: convergence\n
    1: iter = itermax\n
    2: negative diagonal term\n
    3: pWp nul
-   * \param[in-out] options, structure used to define the solver and its parameters.
+   * \param[in-out] options structure used to define the solver and its parameters.
    *
 
    \author Mathieu Renouf.
@@ -195,27 +214,27 @@ extern "C" {
   void lcp_cpg(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
   /** lcp_pgs (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver for LCP.\n
-   * \param[in] problem, structure that represents the LCP (M, q...)
-   * \param[in-out] z, a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w, a n-vector of doubles which returns the solution of the problem.
-   * \param[out] info, an integer which returns the termination value:\n
+   * \param[in] problem structure that represents the LCP (M, q...)
+   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
    0 : convergence\n
    1 : iter = itermax\n
    2 : negative diagonal term
-   \param[in-out] options, structure used to define the solver and its parameters.
+   \param[in-out] options structure used to define the solver and its parameters.
    \author Mathieu Renouf
   */
   void lcp_pgs(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
   /** lcp_rpgs (Regularized Projected Gauss-Seidel ) is a solver for LCP, able to handle matrices with null diagonal terms.\n
-   * \param[in] problem, structure that represents the LCP (M, q...)
-   * \param[in-out] z, a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w, a n-vector of doubles which returns the solution of the problem.
-   * \param[out] info, an integer which returns the termination value:\n
+   * \param[in] problem structure that represents the LCP (M, q...)
+   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
    0 : convergence\n
    1 : iter = itermax\n
    2 : negative diagonal term
-   * \param[in-out] options, structure used to define the solver and its parameters.
+   * \param[in-out] options structure used to define the solver and its parameters.
    *
 
    \author Mathieu Renouf & Pascal Denoyelle
@@ -225,14 +244,14 @@ extern "C" {
   void lcp_rpgs(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
   /** lcp_psor Projected Succesive over relaxation solver for LCP. See cottle, Pang Stone Chap 5
-   * \param[in] problem, structure that represents the LCP (M, q...)
-   * \param[in-out] z, a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w, a n-vector of doubles which returns the solution of the problem.
-   * \param[out] info, an integer which returns the termination value:\n
+   * \param[in] problem structure that represents the LCP (M, q...)
+   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
    0 : convergence\n
    1 : iter = itermax\n
    2 : negative diagonal term
-   * \param[in-out] options, structure used to define the solver and its parameters.
+   * \param[in-out] options structure used to define the solver and its parameters.
 
    \author  Vincent Acary
 
@@ -244,16 +263,16 @@ extern "C" {
   void lcp_psor(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
   /** lcp_nsqp use a quadratic programm formulation for solving an non symmetric LCP
-   * \param[in] problem, structure that represents the LCP (M, q...)
-   * \param[in-out] z, a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w, a n-vector of doubles which returns the solution of the problem.
-   * \param[out] info, an integer which returns the termination value:\n
+   * \param[in] problem structure that represents the LCP (M, q...)
+   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
    *                0 : convergence  / minimization sucessfull\n
    *                1 : Too Many iterations\n
    *            2 : Accuracy insuficient to satisfy convergence criterion\n
    *                5 : Length of working array insufficient\n
    *                Other : The constraints are inconstent\n
-   * \param[in-out] options, structure used to define the solver and its parameters.
+   * \param[in-out] options structure used to define the solver and its parameters.
    *
    * \author Vincent Acary
    *
@@ -261,30 +280,30 @@ extern "C" {
   void lcp_nsqp(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
   /** lcp_latin (LArge Time INcrements) is a basic latin solver for LCP.
-   * \param[in] problem, structure that represents the LCP (M, q...)
-   * \param[in-out] z, a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w, a n-vector of doubles which returns the solution of the problem.
-   * \param[out] info, an integer which returns the termination value:\n
+   * \param[in] problem structure that represents the LCP (M, q...)
+   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
    0 : convergence\n
    1 : iter = itermax\n
    2 : Cholesky Factorization failed \n
    3 : nul diagonal term\n
-   * \param[in-out] options, structure used to define the solver and its parameters.
+   * \param[in-out] options structure used to define the solver and its parameters.
 
    \author Nineb Sheherazade.
   */
   void lcp_latin(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
   /** lcp_latin_w (LArge Time INcrements) is a basic latin solver with relaxation for LCP.\n
-   * \param[in] problem, structure that represents the LCP (M, q...)
-   * \param[in-out] z, a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w, a n-vector of doubles which returns the solution of the problem.
-   * \param[out] info, an integer which returns the termination value:\n
+   * \param[in] problem structure that represents the LCP (M, q...)
+   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
    0 : convergence\n
    1 : iter = itermax\n
    2 : Cholesky Factorization failed \n
    3 : nul diagonal term\n
-   * \param[in-out] options, structure used to define the solver and its parameters.
+   * \param[in-out] options structure used to define the solver and its parameters.
    *
 
    \author Nineb Sheherazade.
@@ -294,16 +313,16 @@ extern "C" {
   /** lcp_lexicolemke is a direct solver for LCP based on pivoting method principle for degenerate problem \n
       Choice of pivot variable is performed via lexicographic ordering \n
       Ref: "The Linear Complementarity Problem" Cottle, Pang, Stone (1992)\n
-      * \param[in] problem, structure that represents the LCP (M, q...)
-      * \param[in-out] z, a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-      * \param[in-out] w, a n-vector of doubles which returns the solution of the problem.
-      * \param[out] info, an integer which returns the termination value:\n
+      * \param[in] problem structure that represents the LCP (M, q...)
+      * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+      * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+      * \param[out] info an integer which returns the termination value:\n
       0 : convergence\n
       1 : iter = itermax\n
       2 : negative diagonal term\n
-      * \param[in-out] options, structure used to define the solver and its parameters.
+      * \param[in-out] options structure used to define the solver and its parameters.
       *
-      \param dparamLCP  On enter/return, a vetor of doubles (not used).\n
+      \param dparamLCP  On enter/return a vetor of doubles (not used).\n
 
 
       \author Mathieu Renouf
@@ -322,10 +341,10 @@ extern "C" {
 
 
       References: Alart & Curnier 1990, Pang 1990
-      * \param[in] problem, structure that represents the LCP (M, q...)
-      * \param[in-out] z, a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-      * \param[in-out] w, a n-vector of doubles which returns the solution of the problem.
-      * \param[out] info, an integer which returns the termination value:\n
+      * \param[in] problem structure that represents the LCP (M, q...)
+      * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+      * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+      * \param[out] info an integer which returns the termination value:\n
       0 : convergence\n
       1 : iter = itermax\n
       2 : Problem in resolution in DGESV\n
@@ -334,7 +353,7 @@ extern "C" {
       *               2 : Accuracy insuficient to satisfy convergence criterion\n
       *                5 : Length of working array insufficient\n
       *                Other : The constraints are inconstent\n
-      * \param[in-out] options, structure used to define the solver and its parameters.
+      * \param[in-out] options structure used to define the solver and its parameters.
       *
       \author Vincent Acary
 
@@ -358,15 +377,15 @@ extern "C" {
    *
    * References: Alart & Curnier 1990, Pang 1990
    *
-   * \param[in] problem, structure that represents the LCP (M, q...)
-   * \param[in-out] z, a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w, a n-vector of doubles which returns the solution of the problem.
-   * \param[out] info, an integer which returns the termination value:\n
+   * \param[in] problem structure that represents the LCP (M, q...)
+   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
    *                0 - convergence\n
    *                1 - iter = itermax\n
    *                2 - negative diagonal term\n
    *
-   * \param[in-out] options, structure used to define the solver and its parameters.
+   * \param[in-out] options structure used to define the solver and its parameters.
    * \author Vincent Acary
    *
    * \todo Optimizing the memory allocation (Try to avoid the copy of JacH into A)
@@ -376,20 +395,35 @@ extern "C" {
   void lcp_newton_FB(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
   /**
-   * \param[in] problem, structure that represents the LCP (M, q...)
-   * \param[in-out] z, a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w, a n-vector of doubles which returns the solution of the problem.
-   * \param[out] info, an integer which returns the termination value:\n
+   * \param[in] problem structure that represents the LCP (M, q...)
+   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
    0 : convergence\n
    1 : iter = itermax\n
    2 : negative diagonal term
-   * \param[in-out] options, structure used to define the solver and its parameters.
+   * \param[in-out] options structure used to define the solver and its parameters.
 
    \author Olivier Bonnefon
   */
   void lcp_path(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
-  /** This function checks the validity of the vector z as a solution \n
+  /** generic interface used to call any LCP solver applied on a Sparse-Block structured matrix M, with a Gauss-Seidel process
+   * to solve the global problem (formulation/solving of local problems for each row of blocks)
+   * \param[in] problem structure that represents the LCP (M, q...). M must be a SparseBlockStructuredMatrix
+   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param info an integer which returns the termination value:\n
+   0 : convergence\n
+   >0 : failed, depends on local solver
+   * \param[in-out] options structure used to define the solver and its parameters.
+   \param[in] numberOfSolvers size of the vector options, ie number of solvers \n
+   (if numberOfSolvers>1, options[0] represent the global (block) solver and options[i>0] the local ones).
+   * \author Mathieu Renouf, Pascal Denoyelle, Franck Perignon
+   */
+  void lcp_GaussSeidel_SBM(LinearComplementarity_Problem* problem, double *z, double *w, int* info, Solver_Options* options, int numberOfSolvers);
+
+  /** This function computes the input vector \f$ w = Mz + q \f$ and checks the validity of the vector z as a solution \n
    * of the LCP : \n
    * \f$
    *    0 \le z \perp Mz + q \ge 0
@@ -397,43 +431,15 @@ extern "C" {
    * The criterion is based on \f$ \sum [ (z[i]*(Mz+q)[i])_{pos} + (z[i])_{neg} + (Mz+q)[i])_{neg} ] \f$ \n
    * with \f$ x_{pos} = max(0,x) \f$ and \f$ xneg = max(0,-x)\f$. \n
    * This sum is divided by \f$ \|q\| \f$ and then compared to tol.\n
-   * It changes the input vector w by storing \f$ Mz + q \f$ in it.\n
-   * \param[in] problem, structure that represents the LCP (M, q...)
-   * \param[in,out] z, a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in,out] w, a n-vector of doubles which returns the solution of the problem.
+   * \param[in] problem structure that represents the LCP (M, q...)
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
    * \param[in] tolerance
+   * \param[in,out] error
    * \return status: 0 : convergence, 1: error > tolerance
-   * \author Pascal Denoyelle
+   * \author Pascal Denoyelle, Franck Perignon
    */
-  int filter_result_LCP(LinearComplementarity_Problem* problem, double *z , double *w, double tolerance);
-
-  /**
-   * This function checks the validity of the vector z as a solution \n
-   * of the LCP : \n
-   * \f$
-   *    0 \le z \perp Mz + q \ge 0
-   * \f$
-   * The criterion is based on \f$ \sum [ (z[i]*(Mz+q)[i])_{pos} + (z[i])_{neg} + (Mz+q)[i])_{neg} ] \f$ \n
-   * with \f$ x_{pos} = max(0,x) \f$ and \f$ xneg = max(0,-x)\f$. \n
-   * This sum is divided by \f$ \|q\| \f$ and then compared to tol.\n
-   * It changes the input vector w by storing \f$ Mz + q \f$ in it.\n
-   * \author Vincent Acary form the routine  filter_result_LCP.c of Pascal Denoyelle
-   */
-  int lcp_compute_error(int n, double *M , double *q , double *z , int chat, double *w, double * error);
-
-  /** This function checks the validity of the vector z as a solution \n
-   * of the LCP : \n
-   * \f$
-   *    0 \le z \perp Mz + q \ge 0
-   * \f$
-   * where M is a sparse block matrix defined in argument blmat.\n
-   * The criterion is based on \f$ \sum [ (z[i]*(Mz+q)[i])_{pos} + (z[i])_{neg} + (Mz+q)[i])_{neg} ] \f$ \n
-   * with \f$ x_{pos} = max(0,x) \f$ and \f$ xneg = max(0,-x)\f$. \n
-   * This sum is divided by \f$ \|q\| \f$ and then compared to tol.\n
-   * It changes the input vector w by storing \f$ Mz + q \f$ in it.\n
-   * \author Pascal Denoyelle
-   */
-  int filter_result_LCP_block(SparseBlockStructuredMatrix *blmat, double *q , double *z , double tol, int chat, double *w);
+  int lcp_compute_error(LinearComplementarity_Problem* problem, double *z , double *w, double tolerance, double* error);
 
   /*   /\** Function used to extract from LCP matrix the part which corresponds to non null z */
   /*    *\/ */

@@ -413,9 +413,9 @@ int LCP::compute(double time)
     numerics_problem.M = M->getNumericsMatrix();
     numerics_problem.q = q->getArray();
     numerics_problem.size = sizeOutput;
-
+    int nbSolvers = 1;
     // Call LCP Driver
-    info = lcp_driver(&numerics_problem, z->getArray() , w->getArray() , solver->getNumericsSolverOptionsPtr(), numerics_options);
+    info = lcp_driver(&numerics_problem, z->getArray() , w->getArray() , solver->getNumericsSolverOptionsPtr(), nbSolvers, numerics_options);
 
     // --- Recovering of the desired variables from LCP output ---
     postCompute();

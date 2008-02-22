@@ -34,7 +34,7 @@ void NCP_block_compute_error(int n, SparseBlockStructuredMatrix *M , double *q ,
   DCOPY(n , q , incx , w , incy);
 
   /* Computes w += Mz */
-  prodSBM(n, M, z, w, 0);
+  prodSBM(n, 1.0, M, z, 1.0, w);
 
   /* Computes error */
   for (int i = 0 ; i < n ; i++)

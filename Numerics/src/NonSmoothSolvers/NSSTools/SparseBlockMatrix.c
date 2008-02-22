@@ -3,7 +3,7 @@
 #include "SparseBlockMatrix.h"
 #include "LA.h"
 
-void prodSBM(int size, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init)
+void prodSBM(int size, double alpha, const SparseBlockStructuredMatrix* const A, const double* const x, double beta, double* y)
 {
   /* Product SparseMat - vector, y = A*x (init = 1 = true) or y += A*x (init = 0 = false) */
 
@@ -35,12 +35,9 @@ void prodSBM(int size, const SparseBlockStructuredMatrix* const A, const double*
   int incx = 1, incy = 1;
   /* Loop over all non-null blocks
      Works whatever the ordering order of the block is, in A->block
-     But it requires a set to 0 of all y components
   */
 
-  /* Set y to 0 */
-  if (init == 1)
-    DSCAL(size, 0.0, y, incy);
+  DSCAL(size, beta, y, incy);
 
   for (int blockNum = 0; blockNum < nbblocks; ++blockNum)
   {
@@ -65,7 +62,7 @@ void prodSBM(int size, const SparseBlockStructuredMatrix* const A, const double*
     if (currentRowNumber != 0)
       posInY += A->blocksize[currentRowNumber - 1];
     /* Computes y[] += currentBlock*x[] */
-    DGEMV(LA_NOTRANS, nbRows, nbColumns, 1.0, A->block[blockNum], nbRows, &x[posInX], incx, 1.0, &y[posInY], incy);
+    DGEMV(LA_NOTRANS, nbRows, nbColumns, alpha, A->block[blockNum], nbRows, &x[posInX], incx, 1.0, &y[posInY], incy);
   }
 
 }
@@ -350,4 +347,16 @@ void freeSpBlMatPred(SparseBlockStructuredMatrixPred *blmatpred)
   free(blmatpred->newz);
   free(blmatpred->workspace);
 
+}
+
+int getDiagonalBlockPos(const SparseBlockStructuredMatrix* const M, int num)
+{
+  // Todo: save positions of diagonal blocks in the structure?
+  int pos = 0;
+  int blockNum = 0;
+  /* Look for the first block of row number num */
+  while (M->RowIndex[blockNum] != num) blockNum++;
+  pos = blockNum;
+  while (M->ColumnIndex[pos] != M->RowIndex[blockNum]) pos++;
+  return pos;
 }

@@ -150,25 +150,7 @@ void lcp_rpgs(LinearComplementarity_Problem* problem, double *z, double *w, int 
 
     }
     /* **** Criterium convergence **** */
-
-    /*     incx =  1;
-         incy =  1;
-    */
-    /*     a1 = 1.0; */
-    /*     b1 = 1.0; */
-
-    /*     dgemv_( &NOTRANS , (integer *)&n , (integer *)&n , &a1 , M , (integer *)&n , z , (integer *)&incx , &b1 , w , (integer *)&incy ); */
-
-    /*     a1   = -1.0;
-         daxpy_( (integer *)&n , &a1 , z , (integer *)&incx , zprev , (integer *)&incy );
-         num = dnrm2_( (integer *)&n, zprev , (integer *)&incx );*/
-    /*     daxpy_( (integer *)&n , &a1 , w , (integer *)&incx , ww , (integer *)&incy ); */
-    /*     num = dnrm2_( (integer *)&n, ww , (integer *)&incx ); */
-    /*     err = sqrt(num)*den;*/
-
-    /* **** Criterium convergence compliant with filter_result_LCP **** */
-    lcp_compute_error(n, M, q, z, verbose, w, &err);
-
+    lcp_compute_error(problem, z, w, tol, &err);
 
     /*    buffer_errors[iter-1] = err;*/
 

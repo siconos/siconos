@@ -35,6 +35,8 @@
   \f$ w, z, q\f$ are vectors of size n and \f$ M \f$ is a nXn matrix.
 
   \section lcpSolversList Available solvers
+
+  The solvers and their parameters are described in \ref LCPSolvers . \n
   Use the generic function lcp_driver() to call one the the specific solvers listed below:
 
   - lcp_qp(), quadratic programm formulation
@@ -50,20 +52,9 @@
   Ref: "The Linear Complementarity Problem" Cottle, Pang, Stone (1992)\n
   - lcp_newton_min(), nonsmooth Newton method based on the min formulation  (or max formulation) of the LCP
   - lcp_newton_FB(), uses a nonsmooth newton method based on the Fischer-Bursmeister convex function
+  - lcp_GaussSeidel_SBM(), Gauss-Seidel solver based on a Sparse-Block storage for the matrix M of the LCP.
 
   (see the functions/solvers list in LCP_Solvers.h)
-
-  \section LCPParam Parameters (in-out) for Linear Complementarity Problems
-
-  int parameters (iparam):\n
-     - [0] = max. number of iterations allowed
-     - [1] =
-     - [2] (out) = number of iterations processed.
-
-  double parameters (dparam):\n
-     - [0] = tolerance
-     - [1] =
-     - [2] (out) = error.
 
 */
 
@@ -91,7 +82,6 @@ typedef struct
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 #ifdef __cplusplus
 }

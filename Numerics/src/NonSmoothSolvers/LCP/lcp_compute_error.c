@@ -15,59 +15,48 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+ */
+
 #include "LA.h"
-#include <math.h>
+#include "Numerics_Options.h" // for global options
+#include "LinearComplementarity_Problem.h"
 
-int lcp_compute_error(int n, double *vec , double *q , double *z , int verbose, double *w, double *err)
+int lcp_compute_error(LinearComplementarity_Problem* problem, double *z , double *w, double tolerance, double * error)
 {
-  double error, normq;
-  double a1, b1;
-  int i, incx, incy;
-  int param = 1;
+  /* Checks inputs */
+  if (problem == NULL || z == NULL || w == NULL)
+    numericsError("lcp_compute_error", "null input for problem and/or z and/or w");
+
+  /* Computes w = Mz + q */
+  int incx = 1, incy = 1;
+  int n = problem->size;
+  DCOPY(n , problem->q , incx , w , incy);
+  prod(n, n, 1.0, problem->M, z, 1.0, w);
+
+  /* Checks complementarity */
+  *error = 0.;
   double zi, wi;
-  incx = 1;
-  incy = 1;
-  DCOPY(n , q , incx , w , incy);
-
-  a1 = 1.;
-  b1 = 1.;
-
-
-  // following int param, we recompute the product w = M*z+q
-  // The test is then more severe if we compute w because it checks that the linear equation is satisfied
-
-  if (param == 1)
-  {
-    DGEMV(LA_NOTRANS , n , n , a1 , vec , n , z ,
-          incx , b1 , w , incy);
-  }
-
-
-
-  error = 0.;
-  for (i = 0 ; i < n ; i++)
+  for (int i = 0 ; i < n ; i++)
   {
     zi = z[i];
     wi = w[i];
     if (zi < 0.0)
     {
-      error += -zi;
-      if (wi < 0.0) error += zi * wi;
+      *error += -zi;
+      if (wi < 0.0) *error += zi * wi;
     }
-    if (wi < 0.0) error += -wi;
-    if ((zi > 0.0) && (wi > 0.0)) error += zi * wi;
+    if (wi < 0.0) *error += -wi;
+    if ((zi > 0.0) && (wi > 0.0)) *error += zi * wi;
   }
 
-  incx  = 1;
-  normq = DNRM2(n , q , incx);
-
-  *err = error / normq;
-
-  if (verbose > 0) printf("Siconos/Numerics: lcp_compute_error: Error evaluation = %g \n", *err);
-  return 0;
-
+  /* Computes error */
+  double normq = DNRM2(n , problem->q , incx);
+  *error = *error / normq;
+  if (*error > tolerance)
+  {
+    if (verbose > 0) printf(" Numerics - lcp_compute_error failed: error = %g > tolerance = %g.\n", *error, tolerance);
+    return 1;
+  }
+  else
+    return 0;
 }

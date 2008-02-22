@@ -46,6 +46,12 @@ void readSolverOptions(int driverType, Solver_Options* options)
   /* Return value for reading */
   int nval;
 
+  // set default size to 4 ...
+  if (options->iparam == NULL)
+    options->iparam = (int*)malloc(4 * sizeof(*options->iparam));
+  if (options->dparam == NULL)
+    options->dparam = (double*)malloc(4 * sizeof(*options->dparam));
+
   switch (driverType)
   {
 
@@ -100,14 +106,20 @@ void printSolverOptions(Solver_Options* options)
   else
   {
     printf("The solver is named %s \n", options->solverName);
-    printf(" - int parameters (see %s documentation to known what is each parameter): ", options->solverName);
-    for (int i = 0; i < options->nbParam; ++i)
-      printf("%d\t", options->iparam[i]);
-    printf("\n");
-    printf(" - double parameters (see %s documentation to known what is each parameter): ", options->solverName);
-    for (int i = 0; i < options->nbParam; ++i)
-      printf("%lf\t", options->dparam[i]);
-    printf("\n");
+    if (options->iparam != NULL)
+    {
+      printf(" - int parameters (see %s documentation to know what is each parameter): ", options->solverName);
+      for (int i = 0; i < options->iSize; ++i)
+        printf("%d\t", options->iparam[i]);
+      printf("\n");
+    }
+    if (options->dparam != NULL)
+    {
+      printf(" - double parameters (see %s documentation to know what is each parameter): ", options->solverName);
+      for (int i = 0; i < options->dSize; ++i)
+        printf("%.10lf\t", options->dparam[i]);
+      printf("\n");
+    }
   }
   printf("\n ================================================== \n");
 }

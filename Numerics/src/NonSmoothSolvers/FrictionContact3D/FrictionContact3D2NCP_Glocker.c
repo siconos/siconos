@@ -128,7 +128,7 @@ void NCPGlocker_updateWithSparse(int contact, double* reaction)
   int in = 3 * contact, it = in + 1, is = it + 1;
   int numberOfContact = n / 3;
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  int diagPos = numberOfContact * contact + contact;
+  int diagPos = getDiagonalBlockPos(MBGlobal, contact);
   MLocal = MBGlobal->block[diagPos];
 
   /***** Friction coefficient for current block *****/

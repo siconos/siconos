@@ -1,13 +1,14 @@
 #
 # 
 #
+ADD_EXECUTABLE(NumericsMatrixTest main_NumericsMatrix.c)
+ADD_EXECUTABLE(LCPtest main_lcp.c)
 ADD_EXECUTABLE(MLCPtest main_mlcp.c)
-ADD_EXECUTABLE(LCPtest main_lcp_new.c)
 
 #
 #
 #
-TARGET_LINK_LIBRARIES(MLCPtest 
+TARGET_LINK_LIBRARIES( NumericsMatrixTest
   ${SiconosNumerics_SHARED_LIB}
   ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES}
   ${FORTRAN_LIBRARIES})
@@ -16,10 +17,17 @@ TARGET_LINK_LIBRARIES(LCPtest
   ${SiconosNumerics_SHARED_LIB}
   ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES}
   ${FORTRAN_LIBRARIES})
+
+TARGET_LINK_LIBRARIES(MLCPtest 
+  ${SiconosNumerics_SHARED_LIB}
+  ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES}
+  ${FORTRAN_LIBRARIES})
+
 #
 #
 #
+ADD_TEST(NumericsMatrixTest NumericsMatrixTest)
+ADD_TEST(LCPtest LCPtest)
 ADD_TEST(MLCPtest MLCPtest)
 SET_TESTS_PROPERTIES(MLCPtest PROPERTIES WILL_FAIL TRUE)
-ADD_TEST(LCPtest LCPtest)
 

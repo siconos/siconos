@@ -26,6 +26,24 @@
 
 */
 
+/*! \page FC3DSolvers Friction-Contact 3D problems Solvers
+
+This page gives an overview of the available solvers for friction-contact (3D) problems and their required parameters.
+
+For each solver, the input argument are:
+- a FrictionContact_Problem
+- the unknowns (reaction,velocity)
+- info, the termination value (0: convergence, >0 problem which depends on the solver)
+- a Solver_Options structure, which handles iparam and dparam
+
+\section fc3Dnsgs Non-Smooth Gauss Seidel Solver
+
+\bf function: frictionContact3D_nsgs()
+\bf parameters:
+
+
+*/
+
 #include "FrictionContact_Problem.h"
 #include "Numerics_Options.h"
 #include "Solver_Options.h"
@@ -45,34 +63,6 @@ typedef void (*ComputeErrorPtr)(int, double*, double*, double*);
 
 /** pointer to function used to free memory for objects used in solvers */
 typedef void (*FreeSolverPtr)();
-
-/** Structure used to send/get parameters for Friction Contact 3D problems
-    \param chat       verbose mode ( 0: off, >0: on)
-    \param name       name of the solver.
-    \param itermax    maximum number of iterations.
-    \param tol        convergence criteria value.
-    \param iter       final number of iterations.
-    \param err      final value of error criteria
-    \param local_name int that characterize the local solver or formulation
-    \param local_itermax local maximum number of iterations.
-    \param local_tol   local convergence criteria value.
-    \param local_iter       final number of iterations.
-    \param local_err        final value of error criteria
-*/
-typedef struct
-{
-  int    chat;
-  char   name[64];
-  int    itermax;
-  double tol;
-  int    iter;
-  double err;
-  int    local_name;
-  int    local_itermax;
-  double local_tol;
-  int    local_iter;
-  double local_err;
-} method_frictionContact_3D;
 
 #ifdef __cplusplus
 extern "C" {

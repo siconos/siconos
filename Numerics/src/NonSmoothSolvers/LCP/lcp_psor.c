@@ -144,8 +144,7 @@ void lcp_psor(LinearComplementarity_Problem* problem, double *z, double *w, int 
     }
 
     /* **** Criterium convergence **** */
-
-    lcp_compute_error(n, M, q, z, verbose, w, &err);
+    lcp_compute_error(problem, z, w, tol, &err);
 
     /* **** ********************* **** */
   }

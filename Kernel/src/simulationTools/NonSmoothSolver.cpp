@@ -39,7 +39,8 @@ void NonSmoothSolver::fillSolverOptions()
     // No memory allocation for iparam and dparam of numerics_solver_options, just pointer links
   }
   // Link is required for iparam and dparam even when isSet == 0, since we need to recover output parameters (error ...)
-  numerics_solver_options->nbParam = NB_PARAM;
+  numerics_solver_options->iSize = int_parameters->size();
+  numerics_solver_options->dSize = double_parameters->size();
   numerics_solver_options->iparam = int_parameters->data();
   numerics_solver_options->dparam = double_parameters->data();
 }
@@ -67,9 +68,6 @@ NonSmoothSolver::NonSmoothSolver(const NonSmoothSolver& newS):
 NonSmoothSolver::NonSmoothSolver(const std::string& newName, IntParameters& iparam, DoubleParameters& dparam):
   name(newName), int_parameters(NULL), double_parameters(NULL), numerics_solver_options(NULL), isSet(true)
 {
-  if (iparam.size() != NB_PARAM || dparam.size() != NB_PARAM)
-    RuntimeException::selfThrow("NonSmoothSolver: constructor from vector<int> and vector<double> failed. Wrong size for input vector(s).");
-
   int_parameters = new IntParameters(iparam);
   double_parameters = new DoubleParameters(dparam);
   fillSolverOptions();
@@ -91,11 +89,11 @@ NonSmoothSolver::NonSmoothSolver(NonSmoothSolverXML* solvXML):
     RuntimeException::selfThrow("NonSmoothSolver, XML constructor, missing input in XML file (int or double vector)");
   solvXML->getIParam(*int_parameters);
   solvXML->getDParam(*double_parameters);
-  if (int_parameters->size() > NB_PARAM || double_parameters->size() > NB_PARAM)
-  {
-    std::cout << "NonSmoothSolver xml constructor warning: too large number of provided int and/or double parameters. " << std::endl;
-    std::cout << "Some of them might be ignored. Check in the solver documentation to know what are the required parameters." << std::endl;
-  }
+  //   if(int_parameters->size()>NB_PARAM || double_parameters->size()>NB_PARAM)
+  //     {
+  //       std::cout << "NonSmoothSolver xml constructor warning: too large number of provided int and/or double parameters. "<< std::endl;
+  //       std::cout << "Some of them might be ignored. Check in the solver documentation to know what are the required parameters." << std::endl;
+  //     }
   fillSolverOptions();
 
 }

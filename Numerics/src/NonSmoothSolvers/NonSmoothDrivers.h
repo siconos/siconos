@@ -24,7 +24,7 @@ For each type of problem, a generic interface function (driver) is provided (see
 The main arguments of this driver are:
  - a structure of type XXX_Problem (XXX being the formulation type: LinearComplementarity_Problem, FrictionContact_Problem ...), which holds the vectors and matrices used to formalize the problem, \n
  - the unknowns
- - a structure of type Solver_Options, used to defined the solver type and its parameters. \n
+ - a structure of type Solver_Options, used to defined the solver type and its parameters (see \ref NumericsSolver). \n
 
 To get more details on each formulation, check for each type of problem in \ref NSSpackContents below.
 
@@ -79,29 +79,38 @@ typedef union
   method_pfc_2D pfc_2D;
   method_pfc_3D pfc_3D;
   method_dfc_2D dfc_2D;
-  method_frictionContact_3D fc3D_parameters;
 } method;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-  /** General interface to solver for LCP problems
-      \param[in] , a (\f$n \times n\f$)-vector of doubles which contains the components of the LCP matrix with a Fortran storage.
-      \param[in] , a n-vector of doubles which contains the components of the constant right hand side vector.
-      \param[in] , an integer which represents the dimension of the LCP problem.
-      \param[in] , a union containing the LCP structure.
-      \param[in-out] , a n-vector of doubles which contains the solution of the problem.
-      \param[in-out] , a n-vector of doubles which contains the complementary solution of the problem.
-      \return integer
+  /** General interface to solvers for Linear Complementarity Problems
+      \param[in] problem the LinearComplementarity_Problem structure which handles the problem (M,q)
+      \param[in,out] z a n-vector of doubles which contains the solution of the problem.
+      \param[in,out] w a n-vector of doubles which contains the solution of the problem.
+      \param[in,out] options structure used to define the solver(s) and their parameters
+      \param[in] numberOfSolvers size of the vector options, ie number of solvers \n
+      (if numberOfSolvers>1, options[0] represent the global (block) solver and options[i>0] the local ones).
+      \param[in] general options for Numerics (verbose mode ...)
+      \return info termination value
       - 0 : successful\n
       - >0 : otherwise see each solver for more information about the log info
-      \author Nineb Sheherazade & Mathieu Renouf
+      \author Franck Perignon
   */
-  int lcp_driver(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options, Numerics_Options* global_options);
+  int lcp_driver(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options, int numberOfSolvers, Numerics_Options* global_options);
 
-  /** General interface to solver for LCP problems, with M given as a list of blocks */
-  int lcp_driver_block(SparseBlockStructuredMatrix *, double *, method *, double *, double *, int *, int *, double*);
+  /** General interface to solvers for Linear Complementarity Problems
+      \param[in] problem the LinearComplementarity_Problem structure which handles the problem (M,q)
+      \param[in,out] z a n-vector of doubles which contains the solution of the problem.
+      \param[in,out] w a n-vector of doubles which contains the solution of the problem.
+      \param[in,out] options structure used to define the solver(s) and their parameters
+      \return info termination value
+      - 0 : successful\n
+      - >0 : otherwise see each solver for more information about the log info
+      \author Nineb Sheherazade, Mathieu Renouf, Franck Perignon
+  */
+  int lcp_driver_local(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options);
 
   /** Solver with extract-predict mechanism */
   int lcp_solver_pred(double *vec, double *q , int *n , method *pt , double *z , double *w ,

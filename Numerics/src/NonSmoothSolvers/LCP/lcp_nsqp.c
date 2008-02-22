@@ -43,7 +43,7 @@ void lcp_nsqp(LinearComplementarity_Problem* problem, double *z, double *w, int 
   double *lambda;
 
   int lwar, liwar, iout, un;
-  integer *iwar;
+  int *iwar;
   double *war;
 
   double tol = options->dparam[0];
@@ -117,13 +117,15 @@ void lcp_nsqp(LinearComplementarity_Problem* problem, double *z, double *w, int 
   war = (double *)malloc(lwar * sizeof(double));
   /* / integer working array. */
   liwar = n ;
-  iwar = (integer *)malloc(liwar * sizeof(int));
+  iwar = (int *)malloc(liwar * sizeof(int));
   iwar[0] = 1;
 
 
   /* / call ql0001_*/
-  F77NAME(ql0001)(m, me, mmax, n, nmax, mnn, Q, p, A, b, xl, xu,
-                  z, lambda, iout, *info , un, war, lwar, iwar, liwar, tol);
+  /*   F77NAME(ql0001)(m, me, mmax, n, nmax, mnn, Q, p, A, b, xl, xu, */
+  /*    z, lambda, iout, *info , un, war, lwar, iwar, liwar, tol); */
+  F77NAME(ql0001)(&m, &me, &mmax, &n, &nmax, &mnn, Q, p, A, b, xl, xu,
+                  z, lambda, &iout, info, &un, war, &lwar, iwar, &liwar, &tol);
 
   /* /    printf("tol = %10.4e\n",*tol);
   // for (i=0;i<mnn;i++)printf("lambda[%i] = %g\n",i,lambda[i]);

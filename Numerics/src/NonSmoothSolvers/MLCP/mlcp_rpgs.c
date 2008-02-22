@@ -144,6 +144,12 @@ void mlcp_rpgs(int *nn , int* mm, double *A , double *B , double *C , double *D 
   incBx = m;
   incBy = 1;
 
+  /* LinearComplementarity_Problem for calls to lcp_compute_error */
+  LinearComplementarity_Problem problem;
+  problem.M = malloc(sizeof(*problem.M));
+  problem.M->matrix0 = B;
+  problem.q = b;
+  problem.size = m;
   DCOPY(m , b , incx , w , incy);       //  q --> w
 
   //mlcp_compute_error(n,vec,q,z,verbose,w, &err);
@@ -153,7 +159,7 @@ void mlcp_rpgs(int *nn , int* mm, double *A , double *B , double *C , double *D 
   }
   else
   {
-    lcp_compute_error(m,   B , b, u, verbose, w ,  &err);
+    lcp_compute_error(&problem, u, w , tol,  &err);
   }
   printf("Error = %12.8e\n", err);
 
@@ -198,7 +204,7 @@ void mlcp_rpgs(int *nn , int* mm, double *A , double *B , double *C , double *D 
     }
     else
     {
-      lcp_compute_error(m,   B , b, u, verbose, w ,  &err);
+      lcp_compute_error(&problem, u, w , tol, &err);
     }
     //err = err ;
 
@@ -239,6 +245,6 @@ void mlcp_rpgs(int *nn , int* mm, double *A , double *B , double *C , double *D 
   free(wOld);
   free(diagA);
   free(diagB);
-
+  free(problem.M);
   return;
 }

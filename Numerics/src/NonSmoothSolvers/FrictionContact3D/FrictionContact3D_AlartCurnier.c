@@ -55,7 +55,7 @@ void AC_updateWithSparse(int contact, double * reaction)
   int in = 3 * contact, it = in + 1, is = it + 1;
   int numberOfContact = n / 3;
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  int diagPos = numberOfContact * contact + contact;
+  int diagPos = getDiagonalBlockPos(MBGlobal, contact);
   MLocal = MBGlobal->block[diagPos];
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,

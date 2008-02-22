@@ -30,7 +30,7 @@
 /** Size of the vectors of parameters int_parameters and double_parameters. We set this size to NB_PARAM
     whatever the associated OneStepNSProblem is, to simplify the memory management for the Solver_Options structure fields.
 */
-const unsigned int NB_PARAM = 5;
+const unsigned int NB_PARAM = 4;
 
 /** Object used to send parameters of type int */
 typedef std::vector<int> IntParameters;
