@@ -31,7 +31,6 @@ To get more details on each formulation, check for each type of problem in \ref 
 \section NSSpackContents Contents
 \subpage LCProblem \n
 \subpage MLCPSolvers \n
-\subpage fc2DSolvers \n
 \subpage fcProblem \n
 \subpage RelaySolvers\n
 \subpage QPSolvers\n
@@ -66,19 +65,14 @@ Other functions and useful tools related to NonSmoothSolvers are listed in NSSTo
 /** Union of specific methods (one for each type of problem)
     \param method_pr     : pr is a method_pr structure .
     \param method_dr     : dr is a method_dr structure .
-    \param method_lcp    : lcp is a method_lcp structure .
     \param method_mlcp    : mlcp is a method_mlcp structure .
-    \param method_pfc_2D : pfc_2D is a method_pfc_2D structure .
-    \param method_dfc_2D : dfc_2D is a method_dfc_2D structure .
 */
 typedef union
 {
   method_pr  pr;
   method_dr  dr;
   method_mlcp mlcp;
-  method_pfc_2D pfc_2D;
   method_pfc_3D pfc_3D;
-  method_dfc_2D dfc_2D;
 } method;
 
 #ifdef __cplusplus
@@ -110,7 +104,7 @@ extern "C" {
       - >0 : otherwise see each solver for more information about the log info
       \author Nineb Sheherazade, Mathieu Renouf, Franck Perignon
   */
-  int lcp_driver_local(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options);
+  int lcp_driver_DenseMatrix(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options);
 
   /** Solver with extract-predict mechanism */
   int lcp_solver_pred(double *vec, double *q , int *n , method *pt , double *z , double *w ,
@@ -171,50 +165,54 @@ extern "C" {
    */
   int pfc_3D_driver_block(int, SparseBlockStructuredMatrix*, double*, method*, double*, double*, double*);
 
-  /** General interface to solver for pfc 2D problems
-   *  \param[in] , a (n \f$\times\f$n)-vector of doubles which contains the components of the double matrix with a fortran allocation.
-   *  \param[in] , a n-vector of doubles containing the components of the second member of the system.
-   *  \param[in] , an integer, the dimension of the second member.
-   *  \param[in] , a union (::method) containing the PFC_2D structure.
-   *  \param[out] , a n-vector of doubles containing the solution of the problem.
-   *  \param[out] , a n-vector of doubles containing the solution of the problem.
-   *  \return     integer
-   *                       - 0: successful,
-   *                       - otherwise (see specific solvers for more information about the
-   *                           termination reason).
-   * \author Nineb Sheherazade.
-   */
-  int pfc_2D_driver(int, double*, double*, method*, double*, double*, double*);
+  /** General interface to solvers for primal friction-contact 2D problem
+      \param[in] , number of contacts (dim of the problem n = 2*nc)
+      \param[in] , M global matrix (n*n)
+      \param[in] , q global vector (n)
+      \param[in] , method
+      \param[in-out] , reaction global vector (n)
+      \param[in-out] , velocity global vector (n)
+      \param[in] , mu vector of the friction coefficients (size nc)
+      \return result (0 if successful otherwise 1).
+      * \author Nineb Sheherazade.
+  */
+  int pfc_2D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options);
 
   /** General interface to solver for dual friction-contact problems
-      \param[in] , the stiffness, a vector of double (in which the components
-      of the matrix have a Fortran storage),
-      \param[in] , the right hand side, a vector of double,
-      \param[in] , the dimension of the DFC_2D problem, an integer,
-      \param[in] , the union (::method) containing the DFC_2D structure, with the following parameters:\n
-      - char   name:      the name of the solver we want to use (on enter),
-      - int    itermax:   the maximum number of iteration required (on enter)
-      - double tol:       the tolerance required (on enter)
-      - double  mu:       the friction coefficient (on enter)
-      - int    *ddl_n:    contact in normal direction dof (not prescribed) (on enter)
-      - int    *ddl_tt:   contact in tangential direction dof (not prescribed) (on enter)
-      - int    *ddl_d:    prescribed dof (on enter)
-      - int    dim_tt:    dimension of ddl_tt (= dimension of ddl_n) (on enter)
-      - int    dim_d:     dimension of ddl_d (on enter)
-      - double *J1:       gap in normal contact direction (on enter)
-      - int    chat:      an integer that can make on or off the chattering (0=off, >0=on)(on enter)
-      - int    iter:      the number of iteration carry out (on return)
-      - double err:       the residue (on return) \n\n
+      \param[in] , number of contacts (dim of the problem n = 2*nc)
+      \param[in] , M global matrix (n*n)
+      \param[in] , q global vector (n)
+      \param[in] , method
+      \param[in-out] , reaction global vector (n)
+      \param[in-out] , velocity global vector (n)
+      \param[in] , mu vector of the friction coefficients (size nc)
+      \param[in,out] iparamDFC vector of dfc specific parameters (int):
+         - [0] ddl_n:    contact in normal direction dof (not prescribed) (on enter)
+         - [1] ddl_tt:   contact in tangential direction dof (not prescribed) (on enter)
+         - [2] ddl_d:    prescribed dof (on enter)
+         - [3] dim_tt:    dimension of ddl_tt (= dimension of ddl_n) (on enter)
+         - [4] dim_d:     dimension of ddl_d (on enter)
+      \param[in] J1 gap in normal contact direction
+      \return result (0 if successful otherwise 1).
       This problem can be solved thanks to dfc_2D solvers or thanks to lcp solvers after:\n
       - either a condensation makes thanks to dfc_2D2cond_2D.c and cond_2D2dfc_2D.c,
       - or a new formulation of this problem in the LCP form due to the dfc_2D2lcp.c and lcp2dfc_2D.c routines.
-      \param[out] , the solution of the problem, vector of double.
-      \param[out] , the solution of the problem, vector of double.
-      \return integer     0 - successful\n
-      0 >  - otherwise (see specific solvers for more information about the log info)
       \author Nineb Sheherazade
   */
-  int dfc_2D_driver(double* , double* , int* , method* , double* , double*, double*);
+  int dfc_2D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options, int* iparamDFC, double* J1);
+
+  /*   /\** General interface to solvers for dual friction-contact 2D problem */
+  /*       \param[in] , number of contacts (dim of the problem n = 2*nc) */
+  /*       \param[in] , M global matrix (n*n) */
+  /*       \param[in] , q global vector (n) */
+  /*       \param[in] , method */
+  /*       \param[in-out] , reaction global vector (n) */
+  /*       \param[in-out] , velocity global vector (n) */
+  /*       \param[in] , mu vector of the friction coefficients (size nc) */
+  /*       \return result (0 if successful otherwise 1). */
+  /*       * \author Nineb Sheherazade. */
+  /*   *\/  */
+  /*   int dfc_2D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options); */
 
   /** General interface to solver for dual-relay problems
    * \param[in] , (nn \f$\times\f$nn)-vector of doubles containing the components of the double matrix with a fortran90 allocation.
@@ -252,7 +250,6 @@ extern "C" {
       \return result (0 if successful otherwise 1).
   */
   int frictionContact3D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options);
-  //int frictionContact3D_driver(int, double*, double*, method*, double*, double*, double*);
 
   /** General interface to solvers for friction-contact 3D problem with sparse-block storage for M
       \param[in] , number of contacts (dim of the problem n = 3*nc)

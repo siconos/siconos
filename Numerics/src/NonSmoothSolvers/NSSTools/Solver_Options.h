@@ -41,6 +41,7 @@ As an example, consider \ref LCProblem : \n
 M is a NumericsMatrix and can be saved as a double* or as a SparseBlockStructuredMatrix.\n
 One needs to define a Solver_Options, say "options", by choosing one solver among those given in \ref LCPSolvers and set:
 \code
+int nbSolvers = 1;
 Solver_Options options;
 strcpy(options.solverName,"PGS");
 int iparam[2] ={maxIter, 0};
@@ -53,7 +54,7 @@ options.isSet = 1;
 \endcode
 And then call the driver:
 \code
-int info = lcp_driver(myProblem, z,w, &options, &global_options);
+int info = lcp_driver(myProblem, z,w, &options, nbSolvers, &global_options);
 \endcode
 which will result in the resolution of the LCP defined in myProblem thanks to a PGS solver.
 
@@ -66,7 +67,8 @@ In that case options must be a vector of Solver_Options, with:\n
 \bf Example with a LCP:
 \code
 // First define a vector of options
-Solver_Options options[3];
+int nbSolvers = 3;
+Solver_Options options[nbSolvers];
 
 // The global solver:
 strcpy(options[0].solverName,"GaussSeidel_SBM");
@@ -98,12 +100,12 @@ options[2].isSet = 1;
 \endcode
 The call of the driver remains the same:
 \code
-int info = lcp_driver(myProblem, z,w, options, &global_options);
+int info = lcp_driver(myProblem, z,w, options,nbSolvers, &global_options);
 \endcode
 
 In this case, if the matrix M has N rows of blocks, the global problem will be solved thanks to the Gauss-Seidel block solver, \n
 with the first local problem (first row) solved thanks to a PGS and the others with a Lemke. \n
-Note that options[i+1] is used for row i of M, while i<nbSolvers-1 and options[nbSolvers-1] for row i when i>=nbSolvers; nbSolvers being the size of options.
+Note that options[i+1] is used for row i of M, while i<nbSolvers-1 and options[nbSolvers-1] for row i when i>=nbSolvers.
 
 
 */

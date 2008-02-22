@@ -25,7 +25,6 @@
 #include "FrictionContact3D_Solvers.h"
 #include "NonSmoothDrivers.h"
 
-/* int frictionContact3D_driver(int nc, double *vec , double *q , method *pt , double *reaction , double *velocity, double *mu ) */
 int frictionContact3D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options)
 {
   /* Set global options */
@@ -53,57 +52,6 @@ int frictionContact3D_driver(FrictionContact_Problem* problem, double *reaction 
       printf(" ========================== Call NSGS solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_nsgs(problem, reaction , velocity , &info , options);
   }
-
-  /*   /\* */
-  /*    *  iparam[0] = itermax, the maximum number of iterations allowed. */
-  /*    *  iparam[1] = ispeak, the output log identifiant\n */
-  /*    *                       0 - no output\n */
-  /*    *                       1 - active screen output\n  */
-  /*    *  iparam[2] = the number of iterations performed by the algorithm. */
-  /*    *  iparam[3] = local value for itermax */
-  /*    *  iparam[4] = local number of iterations perfomed */
-  /*    *  iparam[5] = local formulation */
-  /*    *  iparam[6] = local solver */
-  /*    *\/ */
-  /*   int iparam[7]; */
-  /*   /\* */
-  /*    *  dparam[0] = tol     Input unchanged parameter which represents the tolerance required. */
-  /*    *  dparam[1] = error   Output modified parameter which returns the final error value. */
-  /*    *  dparam[2] = local tolerance */
-  /*    *  dparam[3] = local error */
-  /*    *\/ */
-  /*   double  dparam[4]; */
-
-  /*   /\* Non Smooth Gauss Seidel (NSGS) *\/ */
-  /*   if( strcmp( pt->pfc_3D.name , pfckey3 ) == 0 ) */
-  /*     {  */
-
-  /*       iparam[0] = pt->pfc_3D.itermax; */
-  /*       iparam[1] = pt->pfc_3D.chat; */
-  /*       dparam[0] = pt->pfc_3D.tol; */
-
-  /*       /\* Local tolerance and max number of iterations are set to global ones.*\/ */
-  /*       iparam[3] = iparam[0]; */
-  /*       dparam[2] = dparam[0]; */
-  /*       /\* \todo: set them in Kernel *\/ */
-  /*       /\*     iparam[3] = pt->pfc_3D.local_itermax; *\/ */
-  /*       /\*     dparam[2] = pt->pfc_3D.local_tol; *\/ */
-
-  /*       iparam[5] = pt->pfc_3D.local_formulation; */
-  /*       iparam[6] = pt->pfc_3D.local_solver; */
-  /*       /\* \todo: set [5] and [6] in Kernel *\/ */
-
-  /*       frictionContact3D_nsgs(nc, vec , q , reaction , velocity , mu, &info , iparam , dparam ); */
-
-  /*       /\* Get output informations: local/global number of iterations and errors. *\/ */
-  /*       pt->pfc_3D.iter = iparam[2]; */
-  /*       pt->pfc_3D.err  = dparam[1]; */
-  /*       pt->pfc_3D.local_err = dparam[3] ; */
-  /*       pt->pfc_3D.local_iter= iparam[4] ; */
-  /*       /\* Note: at the time the last computed value of local number of iterations and local error are saved in i/dparam[4].*\/ */
-  /*     } */
-
-  /*   else printf("Warning : Unknown solving method : %s\n", pt->pfc_3D.name ); */
 
   return info;
 

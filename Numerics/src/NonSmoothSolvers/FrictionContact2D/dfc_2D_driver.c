@@ -26,247 +26,158 @@
 #include "NonSmoothDrivers.h"
 #endif
 
-int dfc_2D_driver(double *K1, double *F1, int *n, method *pt, double *U2 , double *F2 , double *mu)
+int dfc_2D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options, int* iparamDFC, double* J1)
 {
+  if (options == NULL || global_options == NULL)
+    numericsError("dfc_2D_driver", "null input for solver and/or global options");
 
+  /* Set global options */
+  setNumericsOptions(global_options);
 
-  int           i, info, it_end;
-  int           dim_q, dim_MM;
-  int           iparamLCP[5];
-  double        dparamLCP[5];
+  /* Checks inputs */
+  if (problem == NULL || reaction == NULL || velocity == NULL)
+    numericsError("dfc_2D_driver", "null input for FrictionContact_Problem and/or unknowns (reaction,velocity)");
 
-  double        res;
-  double        *MM, *q, *z, *w;
+  /* Output info. : 0: ok -  >0: problem (depends on solver) */
+  int info = -1;
 
-  clock_t       t1, t2;
+  int storageType = problem->M->storageType;
+  if (storageType == 1)
+    numericsError("dfc_2D_driver", "not yet implemented for Sparse Block Storage");
 
-  const char    dfckey1[10] = "Cfd_latin", dfckey2[10] = "Lemke";
-  const char    dfckey3[10] = "PGS",  dfckey4[10] = "CPG";
-  const char    dfckey13[10] = "NLGS";
+  /* If the options for solver have not been set, read default values in .opt file */
+  int NoDefaultOptions = options->isSet; /* true(1) if the Solver_Options structure has been filled in else false(0) */
 
-
-  info = -1;
-
-  for (i = 0 ; i < 5 ; ++i) iparamLCP[i] = 0;
-  for (i = 0 ; i < 5 ; ++i) dparamLCP[i] = 0.0;
-
-
-
-  if (strcmp(pt->dfc_2D.name , dfckey1) == 0)
+  if (NoDefaultOptions == 0)
   {
+    readSolverOptions(1, options);
+    options->filterOn = 1;
+  }
 
-    dim_q  = 2 * pt->dfc_2D.dim_tt;
-    dim_MM = dim_q * dim_q;
+  if (verbose > 0)
+    printSolverOptions(options);
 
-    q      = (double *)malloc(dim_q * sizeof(double));
-    z      = (double *)malloc(dim_q * sizeof(double));
-    w      = (double *)malloc(dim_q * sizeof(double));
-    MM     = (double *)malloc(dim_MM * sizeof(double));
+  /*************************************************
+   *  1 - Call specific solver
+   *************************************************/
 
+  /* Solver name */
+  char * name = options->solverName;
+
+  if (verbose == 1)
+    printf(" ========================== Call %s solver for dual Friction Contact 2D problem ==========================\n", name);
+
+  int i;
+  int n = problem->numberOfContacts * 2;
+  /****** CFD Latin algorithm ******/
+  if (strcmp(name , "Cfd_latin") == 0)
+  {
+    FrictionContact_Problem newProblem;
+    newProblem.numberOfContacts = iparamDFC[3];
+    int dim_q  = 2 * iparamDFC[3];
+    int dim_MM = dim_q * dim_q;
+    newProblem.M = malloc(sizeof(*newProblem.M));
+    newProblem.M->matrix0 = malloc(dim_MM * sizeof(double));
+    newProblem.q = malloc(dim_q * sizeof(double));
+    newProblem.mu = problem->mu;
+    double * z = malloc(dim_q * sizeof(double));
+    double * w = malloc(dim_q * sizeof(double));
     for (i = 0; i < dim_q; i++)
     {
-      q[i] = 0.0;
+      problem->q[i] = 0.0;
       z[i] = 0.0;
       w[i] = 0.0;
-
-
     }
 
+    dfc_2D2cond_2D(&n , problem->mu , problem->M->matrix0 , problem->q, &iparamDFC[0] , &iparamDFC[1] , &iparamDFC[3] ,
+                   &iparamDFC[2] , &iparamDFC[4] ,  J1 , newProblem.M->matrix0 , newProblem.q);
 
-    dfc_2D2cond_2D(n , mu , K1 , F1, pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
-                   pt->dfc_2D.ddl_d , &pt->dfc_2D.dim_d ,  pt->dfc_2D.J1 , MM , q);
+    dfc_2D_latin(&newProblem, z, w, &info, options);
 
+    cond_2D2dfc_2D(&n , z , w ,  problem->M->matrix0 , problem->q , J1 ,  &iparamDFC[0] , &iparamDFC[1] , &iparamDFC[3] ,
+                   &iparamDFC[2] , &iparamDFC[4], reaction , velocity);
 
-    t1 = clock();
-
-
-    dfc_2D_latin(MM , q , &dim_q , &pt->dfc_2D.k_latin , mu , &pt->dfc_2D.itermax ,
-                 & pt->dfc_2D.tol , &pt->dfc_2D.chat, z , w , &it_end, &res , &info);
-
-    t2 = clock();
-
-    printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
-
-
-    cond_2D2dfc_2D(n , z , w ,  K1 , F1 , pt->dfc_2D.J1 ,  pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
-                   pt->dfc_2D.ddl_d , &pt->dfc_2D.dim_d, U2 , F2);
-
-
-
-    free(MM);
-    free(q);
     free(z);
     free(w);
-
+    newProblem.mu = NULL;
+    free(newProblem.q);
+    free(newProblem.M->matrix0);
+    free(newProblem.M);
   }
-  else if (strcmp(pt->dfc_2D.name , dfckey2) == 0)
+
+
+  /****** Lemke algorithm ******/
+  else if (strcmp(name , "Lemke")  == 0 || (strcmp(name , "PGS")) == 0 || (strcmp(name , "CPG")) == 0)
   {
+    /* Convert fc2D to LCP */
+    LinearComplementarity_Problem LCP;
+    LCP.size = 3 * iparamDFC[3];
+    int dim_q  =  LCP.size ;
+    int dim_MM = dim_q * dim_q;
+    LCP.M = malloc(sizeof(*LCP.M));
+    LCP.M->matrix0 = malloc(dim_MM * sizeof(double));
+    LCP.q = malloc(dim_q * sizeof(double));
 
-    dim_q  = 3 * pt->dfc_2D.dim_tt;
-    dim_MM = dim_q * dim_q;
+    double *z      = (double *)malloc(dim_q * sizeof(double));
+    double* w      = (double *)malloc(dim_q * sizeof(double));
 
-    q      = (double *)malloc(dim_q * sizeof(double));
-    z      = (double *)malloc(dim_q * sizeof(double));
-    w      = (double *)malloc(dim_q * sizeof(double));
-    MM     = (double *)malloc(dim_MM * sizeof(double));
-
-    for (i = 0; i < dim_q; i++)
+    for (int i = 0; i < dim_q; i++)
     {
-      q[i] = 0.0;
+      LCP.q[i] = 0.0;
       z[i] = 0.0;
       w[i] = 0.0;
-
-
     }
 
-    dfc_2D2lcp(n , mu , K1 , F1, pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
-               pt->dfc_2D.ddl_d , &pt->dfc_2D.dim_d ,  pt->dfc_2D.J1 , MM , q);
+    dfc_2D2lcp(&n , problem->mu , problem->M->matrix0 , problem->q, &iparamDFC[0] , &iparamDFC[1] , &iparamDFC[3] ,
+               &iparamDFC[2] , &iparamDFC[4] ,  J1 , LCP.M->matrix0 , LCP.q);
 
-
-    t1 = clock();
-
-
-    iparamLCP[0] = pt->dfc_2D.itermax;
-    iparamLCP[1] = 1;
-    dparamLCP[0] = pt->dfc_2D.tol;
-    dparamLCP[1] = 1.0;
-
-    /* \WARNING TMP Comment */
-    //    lcp_lexicolemke( &dim_q , MM , q , z , w , &info , iparamLCP , dparamLCP );
-
-    t2 = clock();
-
-    printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
-
-    lcp2dfc_2D(n , z , w ,  K1 , F1 , pt->dfc_2D.J1 ,  pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
-               pt->dfc_2D.ddl_d , &pt->dfc_2D.dim_d, U2 , F2);
-
-
-
-    free(MM);
-    free(q);
-    free(z);
-    free(w);
-
-
-
-  }
-  else if (strcmp(pt->dfc_2D.name , dfckey3) == 0)
-  {
-
-    dim_q  = 3 * pt->dfc_2D.dim_tt;
-    dim_MM = dim_q * dim_q;
-
-    q      = (double *)malloc(dim_q * sizeof(double));
-    z      = (double *)malloc(dim_q * sizeof(double));
-    w      = (double *)malloc(dim_q * sizeof(double));
-    MM     = (double *)malloc(dim_MM * sizeof(double));
-
-
-    for (i = 0; i < dim_q; i++)
+    /* Options for the LCP solver */
+    Solver_Options optionsLCP;
+    strcpy(optionsLCP.solverName, name);
+    int iparam[2] = {options->iparam[0], 0};
+    double dparam[2] = {options->dparam[0], 1.0};
+    optionsLCP.iSize = 2;
+    optionsLCP.dSize = 2;
+    optionsLCP.iparam = iparam;
+    optionsLCP.dparam = dparam ;
+    optionsLCP.isSet = 1;
+    optionsLCP.filterOn = 1;
+    /* Call LCP solver */
+    if (strcmp(name , "Lemke") == 0)
     {
-      q[i] = 0.0;
-      z[i] = 0.0;
-      w[i] = 0.0;
-
-
+      lcp_lexicolemke(&LCP, z, w, &info, &optionsLCP);
     }
-
-    dfc_2D2lcp(n , mu , K1 , F1, pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
-               pt->dfc_2D.ddl_d , &pt->dfc_2D.dim_d ,  pt->dfc_2D.J1 , MM , q);
-
-
-    t1 = clock();
-
-
-    iparamLCP[0] = pt->dfc_2D.itermax;
-    iparamLCP[1] = 1;
-    dparamLCP[0] = pt->dfc_2D.tol;
-    dparamLCP[1] = 1.0;
-
-    /* \WARNING TMP Comment */
-    /*     lcp_pgs( &dim_q , MM , q , z , w , &info , iparamLCP , dparamLCP ); */
-
-    it_end = iparamLCP[2];
-    res    = dparamLCP[2];
-
-    t2     = clock();
-
-    printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
-
-    lcp2dfc_2D(n , z , w ,  K1 , F1 , pt->dfc_2D.J1 ,  pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
-               pt->dfc_2D.ddl_d , &pt->dfc_2D.dim_d, U2 , F2);
-
-
-    free(MM);
-    free(q);
-    free(z);
-    free(w);
-  }
-  else if (strcmp(pt->dfc_2D.name , dfckey13) == 0)
-  {
-    printf("Warning: NLGS method is obsolete. Use PGS instead.\n");
-
-  }
-  else if (strcmp(pt->dfc_2D.name , dfckey4) == 0)
-  {
-
-
-    dim_q  = 3 * pt->dfc_2D.dim_tt;
-    dim_MM = dim_q * dim_q;
-
-    q      = (double *)malloc(dim_q * sizeof(double));
-    z      = (double *)malloc(dim_q * sizeof(double));
-    w      = (double *)malloc(dim_q * sizeof(double));
-    MM     = (double *)malloc(dim_MM * sizeof(double));
-
-    for (i = 0; i < dim_q; i++)
+    else if (strcmp(name , "PGS") == 0)
     {
-      q[i] = 0.0;
-      z[i] = 0.0;
-      w[i] = 0.0;
-
-
+      lcp_pgs(&LCP, z, w, &info, &optionsLCP);
+      options->dparam[1] = optionsLCP.dparam[1];
+      options->iparam[1] = optionsLCP.iparam[1];
+    }
+    else if (strcmp(name , "CPG") == 0)
+    {
+      lcp_cpg(&LCP, z, w, &info, &optionsLCP);
+      options->dparam[1] = optionsLCP.dparam[1];
+      options->iparam[1] = optionsLCP.iparam[1];
     }
 
+    lcp2dfc_2D(&n , z , w ,  problem->M->matrix0 , problem->q , J1 ,  &iparamDFC[0] , &iparamDFC[1] , &iparamDFC[3] ,
+               &iparamDFC[2] , &iparamDFC[4],  reaction , velocity);
 
-    dfc_2D2lcp(n , mu , K1 , F1, pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
-               pt->dfc_2D.ddl_d , &pt->dfc_2D.dim_d ,  pt->dfc_2D.J1 , MM , q);
-
-
-    t1 = clock();
-
-
-    iparamLCP[0] = pt->dfc_2D.itermax;
-    iparamLCP[1] = 1;
-    dparamLCP[0] = pt->dfc_2D.tol;
-    dparamLCP[1] = 1.0;
-
-    /* \WARNING TMP COMMENT */
-    //    lcp_cpg( &dim_q , MM , q , z , w , &info , iparamLCP , dparamLCP );
-
-    it_end = iparamLCP[2];
-    res    = dparamLCP[2];
-
-    t2     = clock();
-
-    printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
-
-    lcp2dfc_2D(n , z , w ,  K1 , F1 , pt->dfc_2D.J1 ,  pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
-               pt->dfc_2D.ddl_d , &pt->dfc_2D.dim_d, U2 , F2);
-
-
-    free(MM);
-    free(q);
     free(z);
     free(w);
-
-
-
-
+    free(LCP.q);
+    free(LCP.M->matrix0);
+    free(LCP.M);
   }
-  else printf(" Warning !! Solver name unknown : %s\n", pt->dfc_2D.name);
+
+  /*error */
+  else
+  {
+    fprintf(stderr, "dfc_2D_driver error: unknown solver named: %s\n", name);
+    exit(EXIT_FAILURE);
+  }
 
   return info;
+
 }
 

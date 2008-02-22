@@ -25,11 +25,11 @@
 #include "NonSmoothDrivers.h"
 
 
-int lcp_driver_global(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options, int numberOfSolvers)
+int lcp_driver_SparseBlockMatrix(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options, int numberOfSolvers)
 {
   /* Checks storage type for the matrix M of the LCP */
   if (problem->M->storageType == 0)
-    numericsError("lcp_driver_global", "forbidden type of storage for the matrix M of the LCP");
+    numericsError("lcp_driver_SparseBlockMatrix", "forbidden type of storage for the matrix M of the LCP");
 
   /*
     The options for the global "block" solver are defined in options[0].\n
@@ -61,7 +61,7 @@ int lcp_driver_global(LinearComplementarity_Problem* problem, double *z , double
     options[0].iparam[1] = 0;   /* Number of iterations done */
     options[0].dparam[1] = 0.0; /* Error */
     if (verbose > 0)
-      printf("LCP_driver_global: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
+      printf("LCP_driver_SparseBlockMatrix: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
     return info;
   }
 
@@ -72,13 +72,16 @@ int lcp_driver_global(LinearComplementarity_Problem* problem, double *z , double
   /* Solver name */
   char * name = options[0].solverName;
   if (verbose == 1)
-    printf(" ========================== Call %s global solver for Linear Complementarity problem ==========================\n", name);
+    printf(" ========================== Call %s SparseBlockMatrix solver for Linear Complementarity problem ==========================\n", name);
 
   /****** Gauss Seidel block solver ******/
   if (strcmp(name , "GaussSeidel_SBM") == 0)
     lcp_GaussSeidel_SBM(problem, z , w , &info , options, numberOfSolvers);
   else
-    printf("LCP_driver_global error: unknown solver named: %s\n", name);
+  {
+    fprintf(stderr, "LCP_driver_SparseBlockMatrix error: unknown solver named: %s\n", name);
+    exit(EXIT_FAILURE);
+  }
 
   /*************************************************
    *  3 - Computes w = Mz + q and checks validity
@@ -90,13 +93,13 @@ int lcp_driver_global(LinearComplementarity_Problem* problem, double *z , double
 
 }
 
-int lcp_driver_local(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options)
+int lcp_driver_DenseMatrix(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options)
 {
   /* Note: inputs are not checked since it is supposed to be done in lcp_driver() function which calls the present one. */
 
   /* Checks storage type for the matrix M of the LCP */
   if (problem->M->storageType == 1)
-    numericsError("lcp_driver_local", "forbidden type of storage for the matrix M of the LCP");
+    numericsError("lcp_driver_DenseMatrix", "forbidden type of storage for the matrix M of the LCP");
 
   /* If the options for solver have not been set, read default values in .opt file */
   int NoDefaultOptions = options->isSet; /* true(1) if the Solver_Options structure has been filled in else false(0) */
@@ -133,7 +136,7 @@ int lcp_driver_local(LinearComplementarity_Problem* problem, double *z , double 
     info = 0;
     options->dparam[1] = 0.0; /* Error */
     if (verbose > 0)
-      printf("LCP_driver_local: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
+      printf("LCP_driver_DenseMatrix: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
     return info;
   }
 
@@ -229,7 +232,10 @@ int lcp_driver_local(LinearComplementarity_Problem* problem, double *z , double 
 
   /*error */
   else
-    printf("LCP_driver error: unknown solver named: %s\n", name);
+  {
+    fprintf(stderr, "lcp_driver_DenseMatrix error: unknown solver named: %s\n", name);
+    exit(EXIT_FAILURE);
+  }
 
   /*************************************************
    *  3 - Computes w = Mz + q and checks validity
@@ -256,7 +262,7 @@ int lcp_driver(LinearComplementarity_Problem* problem, double *z , double *w, So
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
 
-  /* Switch to local or global (block) solver according to the type of storage for M */
+  /* Switch to DenseMatrix or SparseBlockMatrix solver according to the type of storage for M */
   /* Storage type for the matrix M of the LCP */
   int storageType = problem->M->storageType;
 
@@ -264,14 +270,14 @@ int lcp_driver(LinearComplementarity_Problem* problem, double *z , double *w, So
   if (storageType == 1)
   {
     if (numberOfSolvers < 2)
-      printf(" ========================== LCP_driver warning: only global solver has been defined.\n");
-    info = lcp_driver_global(problem, z , w, options, numberOfSolvers);
+      printf(" ========================== LCP_driver warning: only SparseBlockMatrix solver has been defined.\n");
+    info = lcp_driver_SparseBlockMatrix(problem, z , w, options, numberOfSolvers);
   }
   else
   {
     if (numberOfSolvers > 1)
       printf(" ========================== LCP_driver warning: more than one solver have been defined. All but the first one will be ignored.\n");
-    info = lcp_driver_local(problem, z , w, options);
+    info = lcp_driver_DenseMatrix(problem, z , w, options);
   }
   return info;
 }

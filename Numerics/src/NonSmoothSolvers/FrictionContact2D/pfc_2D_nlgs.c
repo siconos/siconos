@@ -22,57 +22,46 @@
 #include <string.h>
 #include <math.h>
 #include "LA.h"
+#include "FrictionContact2D_Solvers.h"
 
-
-void pfc_2D_nlgs(int nc , double *vec , double *q , double *z , double *w, double *mu, int *info, int *iparamPFC , double *dparamPFC)
+void pfc_2D_nlgs(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, Solver_Options* options)
 {
-  int i, j, k, iter, maxit;
+  int nc = problem->numberOfContacts;
+  double * vec = problem->M->matrix0;
+  double *q = problem->q;
+  double * mu = problem->mu;
+
+  int i, j, k, iter;
   int n = 2 * nc;
-  int ispeak, it_end;
+  int it_end;
   int  incx, incy;
 
-  double errmax, alpha, beta;
+  double alpha, beta;
   double *y, res;
   double normr, eps, avn, avt, det, gplus, gmoins;
   double apn, apt, zn , zt, den1, num1;
 
-  maxit        = iparamPFC[0];
-  ispeak       = iparamPFC[1];
-
-
-  errmax       = dparamPFC[0];
-
-
-  iparamPFC[2] = 0;
-  dparamPFC[1] = 0.0;
-
+  int maxit = options->iparam[0];
+  double errmax = options->dparam[0];
+  options->iparam[1]  = 0;
+  options->dparam[1]  = 0.0;
 
   iter         = 0;
   eps          = 1.e-08;
 
-
-
   y       = (double*) malloc(n  * sizeof(double));
-
-
-
-
 
   for (i = 0; i < n; i++)
   {
 
-    z[i]  = 0.0 ;
-    w[i]  = 0.0 ;
+    reaction[i]  = 0.0 ;
+    velocity[i]  = 0.0 ;
   }
-
 
   normr    =   1.;
 
   while ((iter < maxit) && (normr > errmax))
   {
-
-
-
     iter = iter + 1 ;
 
 
@@ -90,15 +79,15 @@ void pfc_2D_nlgs(int nc , double *vec , double *q , double *z , double *w, doubl
       for (j = 0; j <= 2 * i - 1; j++)
       {
 
-        avn = avn + vec[j * n + 2 * i] * z[j];
-        avt = avt + vec[j * n + 2 * i + 1] * z[j];
+        avn = avn + vec[j * n + 2 * i] * reaction[j];
+        avt = avt + vec[j * n + 2 * i + 1] * reaction[j];
 
       }
 
       for (k = 2 * i + 2; k < n; k++)
       {
-        apn = apn + vec[k * n + 2 * i] * z[k];
-        apt = apt + vec[n * k + 2 * i + 1] * z[k];
+        apn = apn + vec[k * n + 2 * i] * reaction[k];
+        apt = apt + vec[n * k + 2 * i + 1] * reaction[k];
       }
 
       zn    = -q[2 * i] - avn - apn;
@@ -115,18 +104,18 @@ void pfc_2D_nlgs(int nc , double *vec , double *q , double *z , double *w, doubl
       {
 
 
-        z[2 * i]   = 0.0; // PN
-        w[2 * i]   = -zn; // UN
-        z[2 * i + 1] = 0.0; // PT
-        w[2 * i + 1] = -zt; // UT
+        reaction[2 * i]   = 0.0; // PN
+        velocity[2 * i]   = -zn; // UN
+        reaction[2 * i + 1] = 0.0; // PT
+        velocity[2 * i + 1] = -zt; // UT
 
 
       }
       else
       {
 
-        w[2 * i]   = 0.0;
-        w[2 * i + 1] = 0.0;
+        velocity[2 * i]   = 0.0;
+        velocity[2 * i + 1] = 0.0;
 
 
         det    = vec[2 * i + 2 * i * n] * vec[(2 * i + 1) + (2 * i + 1) * n] - vec[(2 * i) + (2 * i + 1) * n] * vec[(2 * i) + (2 * i + 1) * n];
@@ -134,7 +123,7 @@ void pfc_2D_nlgs(int nc , double *vec , double *q , double *z , double *w, doubl
         if (fabs(det) < 1e-12)
         {
 
-          if (ispeak > 0)
+          if (verbose > 0)
             printf(" Warning denominator nul\n");
 
           free(y);
@@ -147,12 +136,12 @@ void pfc_2D_nlgs(int nc , double *vec , double *q , double *z , double *w, doubl
         {
 
 
-          z[2 * i]   = (zn * vec[(2 * i + 1) + n * (2 * i + 1)] - zt * vec[2 * i + (2 * i + 1) * n]) / det;
-          z[2 * i + 1] = (-zn * vec[(2 * i) + n * (2 * i + 1)] + zt * vec[2 * i + (2 * i) * n]) / det;
+          reaction[2 * i]   = (zn * vec[(2 * i + 1) + n * (2 * i + 1)] - zt * vec[2 * i + (2 * i + 1) * n]) / det;
+          reaction[2 * i + 1] = (-zn * vec[(2 * i) + n * (2 * i + 1)] + zt * vec[2 * i + (2 * i) * n]) / det;
 
         }
 
-        if ((z[2 * i] >= 0.0) && ((fabs(z[2 * i + 1]) - mu[i] * z[2 * i]) <= 0.0))
+        if ((reaction[2 * i] >= 0.0) && ((fabs(reaction[2 * i + 1]) - mu[i] * reaction[2 * i]) <= 0.0))
         {
 
           /*  printf("Stick status \n");*/
@@ -161,7 +150,7 @@ void pfc_2D_nlgs(int nc , double *vec , double *q , double *z , double *w, doubl
         {
 
 
-          w[2 * i]   = 0.0;
+          velocity[2 * i]   = 0.0;
 
 
           gplus  = vec[2 * i + 2 * i * n] + mu[i] * vec[(2 * i) + (2 * i + 1) * n];
@@ -170,7 +159,7 @@ void pfc_2D_nlgs(int nc , double *vec , double *q , double *z , double *w, doubl
           if (fabs(gplus) < 1e-12)
           {
 
-            if (ispeak > 0)
+            if (verbose > 0)
               printf(" Warning denominator nul\n");
 
             free(y);
@@ -182,14 +171,14 @@ void pfc_2D_nlgs(int nc , double *vec , double *q , double *z , double *w, doubl
           else
           {
 
-            w[2 * i + 1] = -zt + (zn / gplus) * (vec[2 * i + (2 * i + 1) * n] + mu[i] * vec[(2 * i + 1) + (2 * i + 1) * n]);
+            velocity[2 * i + 1] = -zt + (zn / gplus) * (vec[2 * i + (2 * i + 1) * n] + mu[i] * vec[(2 * i + 1) + (2 * i + 1) * n]);
 
-            z[2 * i]   = zn / gplus;
-            z[2 * i + 1] = mu[i] * z[2 * i];
+            reaction[2 * i]   = zn / gplus;
+            reaction[2 * i + 1] = mu[i] * reaction[2 * i];
 
           }
 
-          if ((z[2 * i] >= 0.0) && (w[2 * i + 1] <= 0.0))
+          if ((reaction[2 * i] >= 0.0) && (velocity[2 * i + 1] <= 0.0))
           {
 
             /*    printf("Slip+ status\n");*/
@@ -198,7 +187,7 @@ void pfc_2D_nlgs(int nc , double *vec , double *q , double *z , double *w, doubl
           else
           {
 
-            w[2 * i]   = 0.0;
+            velocity[2 * i]   = 0.0;
 
             gmoins = vec[2 * i + 2 * i * n] - mu[i] * vec[(2 * i) + (2 * i + 1) * n];
 
@@ -206,7 +195,7 @@ void pfc_2D_nlgs(int nc , double *vec , double *q , double *z , double *w, doubl
             if (fabs(gmoins) < 1e-12)
             {
 
-              if (ispeak > 0)
+              if (verbose > 0)
                 printf(" Warning denominator nul\n");
 
               free(y);
@@ -219,10 +208,10 @@ void pfc_2D_nlgs(int nc , double *vec , double *q , double *z , double *w, doubl
             {
 
 
-              w[2 * i + 1] = -zt + (zn / gmoins) * (vec[2 * i + (2 * i + 1) * n] - mu[i] * vec[(2 * i + 1) + (2 * i + 1) * n]);
+              velocity[2 * i + 1] = -zt + (zn / gmoins) * (vec[2 * i + (2 * i + 1) * n] - mu[i] * vec[(2 * i + 1) + (2 * i + 1) * n]);
 
-              z[2 * i]   = zn / gmoins;
-              z[2 * i + 1] = -mu[i] * z[2 * i];
+              reaction[2 * i]   = zn / gmoins;
+              reaction[2 * i + 1] = -mu[i] * reaction[2 * i];
             }
 
             /* printf("Slip- status\n");*/
@@ -243,12 +232,12 @@ void pfc_2D_nlgs(int nc , double *vec , double *q , double *z , double *w, doubl
 
     alpha = 1.;
     beta  = 1.;
-    DGEMV(LA_NOTRANS, n, n, alpha, vec, n, z, incx, beta, y, incy);
+    DGEMV(LA_NOTRANS, n, n, alpha, vec, n, reaction, incx, beta, y, incy);
 
 
 
     alpha = -1.;
-    DAXPY(n, alpha, w, incx, y, incy);
+    DAXPY(n, alpha, velocity, incx, y, incy);
 
 
     num1 = DDOT(n, y, incx, y, incy);
@@ -264,14 +253,14 @@ void pfc_2D_nlgs(int nc , double *vec , double *q , double *z , double *w, doubl
   }
 
 
-  iparamPFC[2] = it_end;
-  dparamPFC[1] = res;
+  options->iparam[1] = it_end;
+  options->dparam[1] = res;
 
 
 
   if (normr > errmax)
   {
-    if (ispeak > 0)
+    if (verbose > 0)
       printf("No convergence after %d iterations, the residue is %g\n", iter, normr);
 
     *info = 1;
@@ -279,7 +268,7 @@ void pfc_2D_nlgs(int nc , double *vec , double *q , double *z , double *w, doubl
   else
   {
 
-    if (ispeak > 0)
+    if (verbose > 0)
       printf("Convergence after %d iterations, the residue is %g \n", iter, normr);
 
     *info = 0;

@@ -178,10 +178,10 @@ void FrictionContact::initialize()
 
 
   // Connect to the right function according to dim. of the problem
-  //   if(contactProblemDim == 2)
-  //     frictionContact_driver = &frictionContact2D_driver;
-  //   else // if(contactProblemDim == 3)
-  frictionContact_driver = &frictionContact3D_driver;
+  if (contactProblemDim == 2)
+    frictionContact_driver = &pfc_2D_driver;
+  else // if(contactProblemDim == 3)
+    frictionContact_driver = &frictionContact3D_driver;
 
   // Memory allocation for reaction, and velocity
   // If one of them has already been allocated, nothing is done.

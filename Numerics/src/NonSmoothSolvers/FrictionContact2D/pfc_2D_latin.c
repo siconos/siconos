@@ -15,18 +15,25 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include "LA.h"
+#include "FrictionContact2D_Solvers.h"
 
-void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double *mu, int *info, int *iparamPFC, double *dparamPFC)
+void pfc_2D_latin(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, Solver_Options* options)
 {
+  int nc = problem->numberOfContacts;
+  double * vec = problem->M->matrix0;
+  double *qq = problem->q;
+  double * mu = problem->mu;
 
-  int    i, j, kk, iter1, ino, ddl, info2, info77, nrhs, ispeak;
+
+
+  int    i, j, kk, iter1, ino, ddl, info2, info77, nrhs;
   int    n = 2 * nc, idim, jdim, nbno, it_end;
   int    incx = 1, incy = 1;
   int    taille, taillet, taillen, itt;
@@ -55,17 +62,15 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
   /*                Recup input                    */
 
 
-  itt     = iparamPFC[0];
-  ispeak  = iparamPFC[1];
-
-  errmax  = dparamPFC[0];
-  k_latin = dparamPFC[1];
+  itt     = options->iparam[0];
+  errmax  = options->dparam[0];
+  k_latin = options->dparam[2];
 
   /*               Initialize output                */
 
 
-  iparamPFC[2] = 0;
-  dparamPFC[2] = 0.0;
+  options->iparam[1] = 0;
+  options->dparam[1] = 0.0;
 
 
   /*               Allocations                      */
@@ -125,8 +130,8 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
       {
         wc[i]    = 0.0;
         zc[i]    = 0.;
-        z[i]     = 0.;
-        w[i]     = 0.;
+        reaction[i]     = 0.;
+        velocity[i]     = 0.;
         znum1[i] = 0.;
         wnum1[i] = 0.;
         wt[i]    = 0.;
@@ -154,7 +159,7 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
     if (fabs(vec[i * n + i]) < 1e-16)
     {
 
-      if (ispeak > 0)
+      if (verbose > 0)
         printf("\n Warning nul diagonal term in M matrix \n");
 
       free(k);
@@ -260,7 +265,7 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
 
   if (info2 != 0)
   {
-    if (ispeak > 0)
+    if (verbose > 0)
       printf("\n Matter with Cholesky factorization \n");
 
     free(k);
@@ -322,13 +327,13 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
 
     DTRTRS(LA_UP, LA_NOTRANS, LA_NONUNIT, n, nrhs, DPO, n, znum1, n, info77);
 
-    DCOPY(n, znum1, incx, z, incy);
+    DCOPY(n, znum1, incx, reaction, incy);
 
     alpha = -1.;
     beta = 1.;
-    DGEMV(LA_NOTRANS, n, n, alpha, kfinv, n, z, incx, beta, wc, incy);
+    DGEMV(LA_NOTRANS, n, n, alpha, kfinv, n, reaction, incx, beta, wc, incy);
 
-    DCOPY(n, wc, incx, w, incy);
+    DCOPY(n, wc, incx, velocity, incy);
 
 
 
@@ -351,11 +356,11 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
       knz0 = 0.;
       for (kk = 0; kk < nc; kk++)
       {
-        knz[i] = kt[i + nc * kk] * w[ddlt[kk]] + knz0;
+        knz[i] = kt[i + nc * kk] * velocity[ddlt[kk]] + knz0;
         knz0 = knz[i];
       }
 
-      zt[i] = z[ddlt[i]] - knz[i];
+      zt[i] = reaction[ddlt[i]] - knz[i];
 
       if (zt[i] > 0.0)
       {
@@ -377,10 +382,10 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
       {
         wc[ddlt[i]] = kninv[i + nc * j] * maxzt[j] + zc0;
         zc0 = wc[ddlt[i]];
-        ktz[i] = kn[i + nc * j] * w[ddln[j]] + ktz0;
+        ktz[i] = kn[i + nc * j] * velocity[ddln[j]] + ktz0;
         ktz0 =  ktz[i];
       }
-      wf[i] = z[ddln[i]] - ktz[i];
+      wf[i] = reaction[ddln[i]] - ktz[i];
     }
 
 
@@ -439,12 +444,12 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
 
 
 
-    DCOPY(n, z, incx, znum1, incy);
+    DCOPY(n, reaction, incx, znum1, incy);
 
     alpha = -1.;
     DAXPY(n, alpha, zc, incx, znum1, incy);
 
-    DCOPY(n, w, incx, wnum1, incy);
+    DCOPY(n, velocity, incx, wnum1, incy);
 
     DAXPY(n, alpha, wc, incx, wnum1, incy);
 
@@ -459,11 +464,11 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
 
     num11 = DDOT(n, wnum1, incx, znum1, incy);
 
-    DCOPY(n, z, incx, znum1, incy);
+    DCOPY(n, reaction, incx, znum1, incy);
 
     alpha  = 1.;
     beta   = 1.;
-    DGEMV(LA_NOTRANS, n, n, alpha, kf, n, w, incx, beta, znum1, incy);
+    DGEMV(LA_NOTRANS, n, n, alpha, kf, n, velocity, incx, beta, znum1, incy);
 
     alpha  = 1.;
     beta   = 0.;
@@ -490,8 +495,8 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
     it_end = iter1;
     res    = err1;
 
-    iparamPFC[2] = iter1;
-    dparamPFC[2] = err1;
+    options->iparam[1] = iter1;
+    options->dparam[1] = err1;
 
     iter1   = iter1 + 1;
 
@@ -502,7 +507,7 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
   if (err1 > errmax)
   {
 
-    if (ispeak > 0)
+    if (verbose > 0)
       printf("No convergence after %d iterations, the residue is %g\n", iter1, err1);
 
     *info = 1;
@@ -510,7 +515,7 @@ void pfc_2D_latin(int nc, double *vec, double *qq, double *z, double *w, double 
   else
   {
 
-    if (ispeak > 0)
+    if (verbose > 0)
       printf("Convergence after %d iterations, the residue is %g \n", iter1, err1);
 
     *info = 0;

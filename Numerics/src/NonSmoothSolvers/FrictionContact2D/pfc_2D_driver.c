@@ -24,68 +24,64 @@
 #include "NonSmoothDrivers.h"
 #endif
 
-int pfc_2D_driver(int n, double *vec, double *q, method *pt , double *z , double *w, double* mu)
+int pfc_2D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options)
 {
+  if (options == NULL || global_options == NULL)
+    numericsError("pfc_2D_driver", "null input for solver and/or global options");
 
-  char pfckey1[10] = "NLGS", pfckey2[10] = "CPG", pfckey3[10] = "Latin";
+  /* Set global options */
+  setNumericsOptions(global_options);
 
-  int i, info;
+  /* Checks inputs */
+  if (problem == NULL || reaction == NULL || velocity == NULL)
+    numericsError("pfc_2D_driver", "null input for FrictionContact_Problem and/or unknowns (reaction,velocity)");
 
-  int     iparam[5];
-  double  dparam[4];
+  /* Output info. : 0: ok -  >0: problem (depends on solver) */
+  int info = -1;
 
-  clock_t t1, t2;
+  int storageType = problem->M->storageType;
+  if (storageType == 1)
+    numericsError("pfc_2D_driver", "not yet implemented for Sparse Block Storage");
 
-  for (i = 0 ; i < 5 ; ++i) iparam[i] = 0;
-  for (i = 0 ; i < 5 ; ++i) dparam[i] = 0.0;
+  /* If the options for solver have not been set, read default values in .opt file */
+  int NoDefaultOptions = options->isSet; /* true(1) if the Solver_Options structure has been filled in else false(0) */
 
-  info    = -1;
-
-  t1 = clock();
-
-  if (strcmp(pt->pfc_2D.name , pfckey1) == 0)
+  if (NoDefaultOptions == 0)
   {
-
-    iparam[0] = pt->pfc_2D.itermax;
-    iparam[1] = pt->pfc_2D.chat;
-    dparam[0] = pt->pfc_2D.tol;
-
-    pfc_2D_nlgs(n , vec , q , z , w , mu, &info , iparam , dparam);
-
-    pt->pfc_2D.iter = iparam[2];
-    pt->pfc_2D.err  = dparam[1];
-
+    readSolverOptions(2, options);
+    options->filterOn = 1;
   }
-  else if (strcmp(pt->pfc_2D.name , pfckey2) == 0)
+
+  if (verbose > 0)
+    printSolverOptions(options);
+
+  /*************************************************
+   *  1 - Call specific solver
+   *************************************************/
+
+  /* Solver name */
+  char * name = options->solverName;
+  if (verbose == 1)
+    printf(" ========================== Call %s solver for primal Friction Contact 2D problem ==========================\n", name);
+
+  /****** NLGS algorithm ******/
+  if (strcmp(name , "NLGS") == 0 || strcmp(name , "PGS") == 0)
+    pfc_2D_nlgs(problem, reaction, velocity, &info, options);
+
+  /****** CPG algorithm ******/
+  else if (strcmp(name , "CPG") == 0)
+    pfc_2D_cpg(problem, reaction, velocity, &info, options);
+
+  /****** Latin algorithm ******/
+  else if (strcmp(name , "Latin") == 0)
+    pfc_2D_latin(problem, reaction, velocity, &info, options);
+
+  /*error */
+  else
   {
-
-    iparam[0] = pt->pfc_2D.itermax;
-    iparam[1] = pt->pfc_2D.chat;
-    dparam[0] = pt->pfc_2D.tol;
-
-    pfc_2D_cpg(n , vec , q , z , w , mu, &info , iparam , dparam);
-
-    pt->pfc_2D.iter = iparam[2];
-    pt->pfc_2D.err  = dparam[1];
-
+    fprintf(stderr, "pfc_2D_driver error: unknown solver named: %s\n", name);
+    exit(EXIT_FAILURE);
   }
-  else if (strcmp(pt->pfc_2D.name , pfckey3) == 0)
-  {
-
-    iparam[0] = pt->pfc_2D.itermax;
-    iparam[1] = pt->pfc_2D.chat;
-    dparam[0] = pt->pfc_2D.tol;
-    dparam[1] = pt->pfc_2D.k_latin;
-
-    pfc_2D_latin(n , vec , q , z , w , mu, &info , iparam , dparam);
-
-    pt->pfc_2D.iter = iparam[2];
-    pt->pfc_2D.err  = dparam[2];
-
-  }
-  else printf("Warning : Unknown solving method : %s\n", pt->pfc_2D.name);
-
-  t2 = clock();
 
   return info;
 

@@ -136,7 +136,7 @@ void lcp_GaussSeidel_SBM(LinearComplementarity_Problem* problem, double *z, doub
       /* Local problem formalization */
       buildLocalProblem(rowNumber, blmat, local_problem, q, z);
       /* Solve local problem */
-      infoLocal = lcp_driver_local(local_problem, &z[pos], &w[pos], &options[localSolverNum]);
+      infoLocal = lcp_driver_DenseMatrix(local_problem, &z[pos], &w[pos], &options[localSolverNum]);
       pos += local_problem->size;
       /* sum of local number of iterations (output from local_driver)*/
       if (options[localSolverNum].iparam != NULL)

@@ -15,46 +15,36 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
+#include "FrictionContact2D_Solvers.h"
 #include "LA.h"
+#include <math.h>
 
-void pfc_2D_projc(double *, int *, int *  , double *, double *, double *, int *) ;
-void pfc_2D_projf(int *, int *, double *, double *, double *);
-
-
-
-void pfc_2D_cpg(int nc , double *vec , double *b , double *x , double *rout , double *mu, int *info,
-                int *iparamPFC , double *dparamPFC)
+void pfc_2D_cpg(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, Solver_Options* options)
 {
+  int nc = problem->numberOfContacts;
+  double * vec = problem->M->matrix0;
+  double *q = problem->q;
+  double * mu = problem->mu;
 
-
-  int       maxit, ispeak;
   int       n = 2 * nc, i, iter;
   int       incx = 1, incy = 1;
   int       *stat, *statusi, it_end;
 
 
   double    eps = 1.e-12;
-  double    pAp, alpha, beta, wAp, rp, normr, tol;
+  double    pAp, alpha, beta, wAp, rp, normr;
   double    alphaf, betaf, den, num, res;
 
   double    *p, *fric, *r;
   double    *fric1, *v, *w, *Ap, *xi, *z;
 
 
-  maxit         = iparamPFC[0];
-  ispeak        = iparamPFC[1];
-
-  tol           = dparamPFC[0];
-
-  iparamPFC[2]  = 0;
-
-  dparamPFC[1]  = 0.0;
+  int maxit = options->iparam[0];
+  double tol = options->dparam[0];
+  options->iparam[1]  = 0;
+  options->dparam[1]  = 0.0;
 
 
   r       = (double*) malloc(n * sizeof(double));
@@ -77,7 +67,7 @@ void pfc_2D_cpg(int nc , double *vec , double *b , double *x , double *rout , do
 
   for (i = 0; i < n ; i++)
   {
-    x[i]     = 0.0;
+    reaction[i]     = 0.0;
     xi[i]    = 0.0;
     r[i]     = 0.0;
     v[i]     = 0.0;
@@ -99,12 +89,12 @@ void pfc_2D_cpg(int nc , double *vec , double *b , double *x , double *rout , do
 
 
 
-  DCOPY(n, b, incx, r, incy);
+  DCOPY(n, problem->q, incx, r, incy);
 
   alphaf = -1.;
   betaf  = -1.;
 
-  DGEMV(LA_NOTRANS, n, n, alphaf, vec, n, x, incx, betaf, r, incy);
+  DGEMV(LA_NOTRANS, n, n, alphaf, vec, n, reaction, incx, betaf, r, incy);
 
 
 
@@ -116,17 +106,17 @@ void pfc_2D_cpg(int nc , double *vec , double *b , double *x , double *rout , do
   for (i = 0; i < nc; i++)
   {
     mu[i] = fric[i];
-    if (x[2 * i] <= eps)
+    if (reaction[2 * i] <= eps)
     {
       /*       No contact            */
       stat[i] = 0;
     }
-    else if (x[2 * i + 1] <=  -mu[i]*x[2 * i])
+    else if (reaction[2 * i + 1] <=  -mu[i]*reaction[2 * i])
     {
       /*     Slide backward         */
       stat[i] = 1;
     }
-    else if (x[2 * i + 1] >=  mu[i]*x[2 * i])
+    else if (reaction[2 * i + 1] >=  mu[i]*reaction[2 * i])
     {
       /*   Slide forward          */
       stat[i] = 3;
@@ -169,7 +159,7 @@ void pfc_2D_cpg(int nc , double *vec , double *b , double *x , double *rout , do
     pAp    = DDOT(n, p, incx, Ap, incy);
 
     /*}
-      else
+    else
     {
     alphaf = 1.0;
     betaf  = 0.0;
@@ -179,7 +169,7 @@ void pfc_2D_cpg(int nc , double *vec , double *b , double *x , double *rout , do
 
     if (pAp == 0)
     {
-      if (ispeak > 0)
+      if (verbose > 0)
         printf("\n Operation non conform alpha at the iteration %d \n", iter);
 
       free(r);
@@ -205,21 +195,21 @@ void pfc_2D_cpg(int nc , double *vec , double *b , double *x , double *rout , do
 
     alpha  = rp / pAp;
 
-    DCOPY(n, x, incx, xi, incy);
+    DCOPY(n, reaction, incx, xi, incy);
 
     alphaf = alpha;
     DAXPY(n, alphaf, p, incx, xi, incy);
 
-    pfc_2D_projc(xi, &n, statusi, p, fric, x, stat);
+    pfc_2D_projc(xi, &n, statusi, p, fric, reaction, stat);
 
 
     /*         r(:)=b(:)-matmul(A,x)          */
 
-    DCOPY(n, b, incx, r, incy);
+    DCOPY(n, problem->q, incx, r, incy);
 
     alphaf = -1.;
     betaf  = -1.;
-    DGEMV(LA_NOTRANS, n, n, alphaf, vec, n, x, incx, betaf, r, incy);
+    DGEMV(LA_NOTRANS, n, n, alphaf, vec, n, reaction, incx, betaf, r, incy);
 
     pfc_2D_projf(statusi, &n, r, fric, w);
 
@@ -257,8 +247,8 @@ void pfc_2D_cpg(int nc , double *vec , double *b , double *x , double *rout , do
     res     = normr;
 
 
-    iparamPFC[2] = it_end;
-    dparamPFC[1] = res;
+    options->iparam[1] = it_end;
+    options->dparam[1] = res;
 
 
     iter = iter + 1;
@@ -271,7 +261,7 @@ void pfc_2D_cpg(int nc , double *vec , double *b , double *x , double *rout , do
   if (normr < tol)
   {
 
-    if (ispeak > 0)
+    if (verbose > 0)
       printf("convergence after %d iterations with a residual %g\n", iter - 1, normr);
 
     *info = 0;
@@ -280,7 +270,7 @@ void pfc_2D_cpg(int nc , double *vec , double *b , double *x , double *rout , do
   }
   else
   {
-    if (ispeak > 0)
+    if (verbose > 0)
       printf("no convergence after %d iterations with a residual %g\n", iter - 1, normr);
 
     *info = 1;
@@ -290,7 +280,7 @@ void pfc_2D_cpg(int nc , double *vec , double *b , double *x , double *rout , do
   alpha = -1.;
   DSCAL(n , alpha , r , incx);
 
-  DCOPY(n, r, incx, rout, incy);
+  DCOPY(n, r, incx, velocity, incy);
 
 
 

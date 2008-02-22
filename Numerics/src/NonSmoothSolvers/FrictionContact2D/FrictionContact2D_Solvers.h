@@ -25,143 +25,64 @@
   Subroutines for the resolution of contact problems with friction (2-dimensional case).\n
 */
 
+/*! \page FC2DSolvers Friction-Contact 2D problems Solvers
 
-/** A type definition for a structure method_pfc_2D.
-    \param name       name of the solver.
-    \param itermax    maximum number of iterations.
-    \param tol        convergence criteria value.
-    \param k_latin    search direction of the latin metod.
-    \param chat       output boolean ( 0 = no output log ).
-    \param normType   name norm (not yet available).
-    \param iter       final number of iterations.
-    \param err        final value of error criteria
+This page gives an overview of the available solvers for friction-contact (2D) problems and their required parameters.
+
+For each solver, the input argument are:
+- a FrictionContact_Problem
+- the unknowns (reaction,velocity)2
+- info, the termination value (0: convergence, >0 problem which depends on the solver)
+- a Solver_Options structure, which handles iparam and dparam
+
+\section fc2Dcpg CPG Solver
+
+\bf function: pfc_2D_cpg()
+\bf parameters:
+  - iparam[0] (in), the maximum number of iterations allowed,
+  - iparam[1] (out), the number of iterations performed by the algorithm.
+  - dparam[0] (in), the tolerance required,
+  - dparam[1] (out), the residu.
+
 */
-typedef struct
-{
-  char   name[64];
-  int    itermax;
-  double tol;
-  double k_latin;
-  int    chat;
-  char   normType[64];
-  int    iter;
-  double err;
 
-} method_pfc_2D;
+#include "FrictionContact_Problem.h"
+#include "Numerics_Options.h"
+#include "Solver_Options.h"
 
-/** A type definition for a structure method_dfc_2D
-    \param name       name of the solver.
-    \param itermax    maximum number of iterations.
-    \param normType   name norm (not yet available).
-    \param tol        convergence criteria value.
-    \param k_latin    latin coefficient
-    \param J1         gap in normal contact direction.
-    \param ddl_n      the contact in normal direction dof (not prescribed),
-    \param ddl_tt     the contact in tangential direction dof (not prescribed)
-    \param ddl_d      the prescribed dof.
-    \param dim_tt     the dimension of the vector ddl_tt.
-    \param dim_d      the dimension of the vector ddl_d.
-    \param chat       output boolean ( 0 = no output log ).
-    \param iter       final number of iteration
-    \param err        final value of error criteria
-*/
-typedef struct
-{
-
-  char   name[64];
-  int    itermax;
-  char   normType[64];
-  double tol;
-  double k_latin;
-  double *J1;
-  int    *ddl_n;
-  int    *ddl_tt;
-  int    *ddl_d;
-  int    dim_tt;
-  int    dim_d;
-
-  int   chat;
-  int    iter;
-  double err;
-
-} method_dfc_2D;
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-  /** specific cpg (conjugated projected gradient) solver for primal contact problems with friction in the 2D case.
-      \param nc          On enter an integer, the number of contacst. The dimension of the system is n=2*nc.
-      \param vec         On enter a (\f$ n\times n \f$)-vector of doubles containing the components of the double matrix with a fortran90 allocation ( M ).
-      \param b           On enter a n-vector of doubles containing the components of the double vector ( q ).
-      \param mu          On enter, the vector of friction coefficients (mu[i] corresponds to contact i)
-      \param iparamPFC   On enter/return a vector of integers:\n
-          - iparamPFC[0] = on enter, the maximum number of iterations allowed,
-          - iparamPFC[1] = on enter, the parameter which represents the output log identifiant,\n
-             0 - no output\n
-             >0 - active screen output\n
-          - iparamPFC[2] =  on return, the number of iterations performed by the algorithm.
-      \param dparamPFC    On enter/return a vector of doubles:\n
-          - dparamPFC[0] = on enter, a positive double which represents the tolerance required,
-          - dparamPFC[1] = on return, a positive double which represents the residu.
-      \param x           On return a n-vector of doubles, the solution of the problem ( z ).
-      \param rout        On return a n-vector of doubles, the solution of the problem ( w ).
-      \param info        On return an integer, the termination reason:\n
-          0 = convergence,\n
-          1 = no convergence,\n
-          2 = Operation of alpha no conform.\n
-      \author Nineb Sheherazade.
+  /**  cpg (conjugated projected gradient) solver for primal contact problems with friction (2D)
+       \param[in] problem the friction-contact problem
+       \param[out] reaction global vector
+       \param[out] velocity global vector
+       \param[in,out] info termination value
+       \param[in,out] options Solver_Options structure
+       \author Nineb Sheherazade.
   */
-  void pfc_2D_cpg(int nc, double *vec , double *q , double *reaction , double *velocity , double *mu , int *info , int *iparamLCP , double *dparamLCP);
+  void pfc_2D_cpg(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, Solver_Options* options);
 
-  /**   pfc_2D_gsnl is a specific nlgs (Non Linear Gauss Seidel ) solver for primal contact problem with friction in 2D case.
-  \param nc          On enter an integer, the number of contacst. The dimension of the system is n=2*nc.
-  \param vec         On enter a (\f$ n\times n \f$)-vector of doubles containing the components of the double matrix with a fortran90 allocation.
-  \param qq          On enter a nn-vector of doubles containing the components of the second member.
-  \param mu          On enter, the vector of friction coefficients (mu[i] corresponds to contact i)
-  \param iparamPFC   On enter/return a vector of integers:\n
-  - iparamPFC[0] = on enter, the maximum number of iterations allowed,
-  - iparamPFC[1] = on enter, the parameter which represents the output log identifiant:\n
-  0 - no output\n
-  >0 - active screen output\n
-  - iparamPFC[2] =  on return, the number of iterations performed by the algorithm.\n
-  \param dparamPFC    On enter/return a vector of doubles:\n
-  - dparamPFC[0] = on enter, a positive double which represents the tolerance required,
-  - dparamPFC[1] = on return, a positive double which represents the residu.
-  \param z           On return a nn-vector of doubles, the solution of the problem.
-  \param w           On return a nn-vector of doubles, the solution of the problem.
-  \param info        On return an integer, the termination reason:\n
-  0 = convergence,\n
-  1 = no convergence,\n
-  2 = nul term in denominator.
-  \author Nineb Sheherazade.
+  /**  Non Linear Gauss Seidel solver for primal contact problem with friction in 2D case.
+       \param[in] problem the friction-contact problem
+       \param[out] reaction global vector
+       \param[out] velocity global vector
+       \param[in,out] info termination value
+       \param[in,out] options Solver_Options structure
+       \author Nineb Sheherazade.
   */
-  void pfc_2D_nlgs(int, double *vec , double *q , double *reaction , double *velocity, double *mu  , int *info , int *iparamLCP , double *dparamLCP);
+  void pfc_2D_nlgs(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, Solver_Options* options);
 
-  /**   pfc_2D_latin  is a specific latin solver for primal contact problem with friction in the 2D case.
-  \param nc          On enter an integer, the number of contacts. The dimension of the system is n=2*nc.
-  \param vec         On enter a ( \f$ n\times n \f$)-vector of doubles containing the components of the double matrix with a fortran90 allocation.
-  \param qq          On enter a n-vector of doubles containing the components of the second member.
-  \param mu          On enter, the vector of friction coefficients (mu[i] corresponds to contact i)
-  \param iparamPFC   On enter/return a vector of integers:\n
-  - iparamPFC[0] = on enter, the maximum number of iterations allowed,\n
-  - iparamPFC[1] = on enter, the parameter which represents the output log identifiant:\n
-  0 - no output\n
-  >0 -  active screen output\n
-  - iparamPFC[2] =  on return, the number of iterations performed by the algorithm.\n
-  \param dparamPFC   On enter/return a vector of doubles:\n
-  - dparamPFC[0] = on enter, a positive double which represents the tolerance required,
-  - dparamPFC[1] = on enter, a strictly nonnegative double which represents the search parameter,\n
-  - dparamPFC[2] = on return, a positive double which represents the residu.
-  \param z           On return a n-vector of doubles, the solution of the problem.
-  \param w           On return a n-vector of doubles, the solution of the problem.
-  \param info        On return an integer, the termination reason:
-  0 = Convergence,\n
-  1 = no convergence,\n
-  2 = Cholesky factorizayion failed,\n
-  3 = Nul term in diagonal of M.\n
-  \author Nineb Sheherazade.
+  /**  latin solver for primal contact problem with friction in the 2D case.
+       \param[in] problem the friction-contact problem
+       \param[out] reaction global vector
+       \param[out] velocity global vector
+       \param[in,out] info termination value
+       \param[in,out] options Solver_Options structure
+       \author Nineb Sheherazade.
   */
-  void pfc_2D_latin(int, double *, double *, double *, double *, double *, int *, int *, double *);
+  void pfc_2D_latin(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, Solver_Options* options);
 
   /** pfc_2D_projc is a specific projection operator related to CPG (conjugated projected gradient) algorithm for primal contact problem with friction.\n
    *
@@ -177,7 +98,7 @@ extern "C" {
    * \author Sheherazade Nineb.
    *
    */
-  void pfc_2D_projc(int nc , double mu , double *reaction , double *p , int *status);
+  void pfc_2D_projc(double* xi, int* n, int* statusi, double* p, double* fric, double *reaction, int *status);
 
   /** pfc_2D_projf is a specific projection operator related to CPG (conjugated projected gradient) algorithm
    *              for primal contact problem with friction.\n
@@ -192,30 +113,17 @@ extern "C" {
    * \author Shéhérazade Nineb.
    *
    */
-  void pfc_2D_projf(int n , double *ww , double *zz , double *rr , double *pp , int *status);
+  void pfc_2D_projf(int* statusi, int* n , double *y , double *fric, double *projf1);
 
-
-  /**   cfd_latin  is a specific latin solver for dual contact problem with friction in the 2D case.\n
-       \param vec      On enter a (\f$ n \times n\f$)-vector of doubles containing the components of the double matrix with a fortran storage.
-       \param qq       On enter a nn-vector of doubles containing the components of the second member.
-       \param nn       On enter an integer, the dimension of the second member.
-       \param k_latin  On enter a double, the latin coefficient (strictly nonnegative).
-       \param mu     On enter a positive double, the friction coefficient.
-       \param itermax  On enter an integer, the maximum iterations required.
-       \param tol      On enter a double, the tolerance required.
-       \param z        On return a nn-vector of doubles, the solution of the problem.
-       \param w        On return a nn-vector of doubles, the solution of the problem.
-       \param it_end   On enter an integer, the number of iterations carried out.
-       \param res      On return a double, the error value.
-       \param info     On return an integer, the termination reason:\n
-       0 = successful, \n
-       1 = no convergence, \n
-       2 = Cholesky failed, \n
-       3 = nul diagonal term, \n
-       4 = nul diagonal term, \n
+  /**  specific latin solver for dual contact problem with friction in the 2D case.\n
+       \param[in] problem the friction-contact problem
+       \param[out] reaction global vector
+       \param[out] velocity global vector
+       \param[in,out] info termination value
+       \param[in,out] options Solver_Options structure
        \author Nineb Sheherazade.
   */
-  void dfc_2D_latin(double* , double* , int* , double* , double* , int* , double* , int *, double* , double* , int* , double* , int*);
+  void dfc_2D_latin(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, Solver_Options* options);
 
   /**   This subroutine allows the formulation in the LCP (Linear  Complementary Problem) form
        of a 2D contact problem with friction.\n
