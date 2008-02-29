@@ -1,0 +1,102 @@
+#
+# Common setup
+#
+
+# before everything
+CMAKE_MINIMUM_REQUIRED(VERSION 2.4.4)
+
+# An encourage to out of source builds 
+INCLUDE(OutOfSourcesBuild)
+
+MACRO(SICONOS_PROJECT 
+    _PROJECT_NAME 
+    MAJOR_VERSION MINOR_VERSION PATCH_VERSION
+    _PACKAGE_INFO)
+  
+  STRING(TOLOWER _PROJECT_NAME _LPROJECT_NAME)
+  
+  SET(PROJECT_SHORT_NAME ${_PROJECT_NAME})
+  
+  SET(PROJECT_PACKAGE_NAME "siconos-${_LPROJECT_NAME}")
+  
+  # PACKAGE PROJECT SETUP
+  PROJECT(${PROJECT_PACKAGE_NAME})
+
+  SET(VERSION "${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}")  
+  
+  # try to get the SVN revision number
+  INCLUDE(SVNRevisionNumber)
+
+  # Some macros needed to check compilers environment
+  INCLUDE(CheckSymbolExists)
+  INCLUDE(CheckFunctionExists)
+
+
+  # Compilers environment
+  IF(CMAKE_C_COMPILER)
+    INCLUDE(CheckCCompilerFlag)
+    CHECK_C_COMPILER_FLAG("-std=c99" C_HAVE_C99)
+  ENDIF(CMAKE_C_COMPILER)
+
+  IF(CMAKE_CXX_COMPILER)
+    INCLUDE(TestCXXAcceptsFlag)
+    CHECK_CXX_ACCEPTS_FLAG(-ffriend-injection CXX_HAVE_FRIEND_INJECTION)
+  ENDIF(CMAKE_CXX_COMPILER)
+
+  IF(CMAKE_Fortran_COMPILER)
+    INCLUDE(fortran)
+    INCLUDE(FortranLibraries)
+    INCLUDE(LibraryProjectSetup)
+  ENDIF(CMAKE_Fortran_COMPILER)
+
+
+
+  # Tests+Dashboard configuration
+  ENABLE_TESTING()
+  INCLUDE(DartConfig)
+  INCLUDE(Dart)
+  
+  # The library build stuff
+  INCLUDE(LibraryProjectSetup)
+  
+  # Doxygen documentation
+  INCLUDE(SiconosDoc)
+
+  # config.h and include
+  CONFIGURE_FILE(config.h.cmake config.h)
+  INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
+  
+  # Top level install
+  SET(CMAKE_INCLUDE_CURRENT_DIR ON)
+  INSTALL(FILES AUTHORS ChangeLog COPYING INSTALL NEWS README 
+    DESTINATION share/doc/siconos-${VERSION}/${_PROJECT_NAME})
+  
+  
+  # Sources
+  IF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src)
+    SUBDIRS(src)
+  ENDIF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src)
+
+  # Packaging
+  INCLUDE(CPack)
+  INCLUDE(InstallRequiredSystemLibraries)
+  
+  SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY ${_PACKAGE_INFO})
+  SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README")
+  SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
+  SET(CPACK_PACKAGE_VERSION_MAJOR "${MAJOR_VERSION}")
+  SET(CPACK_PACKAGE_VERSION_MINOR "${MINOR_VERSION}")
+  SET(CPACK_PACKAGE_VERSION_PATCH "${PATCH_VERSION}")
+  SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
+
+  IF(PRINT_ENV)
+    INCLUDE(CMakeLog)
+  ENDIF(PRINT_ENV)
+  
+ENDMACRO(SICONOS_PROJECT)
+
+#Some convenience macros
+MACRO(APPEND_FLAG _V _F)
+  SET(${_V} "${${_V}} ${_F}")
+ENDMACRO(APPEND_FLAG _V _F)
+

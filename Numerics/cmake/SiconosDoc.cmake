@@ -1,0 +1,21 @@
+#
+# Siconos documentation with Doxygen 
+#
+
+# Style sheet
+FILE(GLOB CSS_FILES config/css/*.* config/css/*)
+FOREACH(FILE ${CSS_FILES})
+  IF(NOT IS_DIRECTORY ${FILE})
+    FILE(RELATIVE_PATH RFILE ${CMAKE_SOURCE_DIR} ${FILE})
+    CONFIGURE_FILE(${FILE} ${CMAKE_BINARY_DIR}/${RFILE} COPYONLY)
+  ENDIF(NOT IS_DIRECTORY ${FILE})
+ENDFOREACH(FILE ${CSS_FILES})
+
+# If we are under svn the output should go in GeneratedDocs 
+IF(SVN_REVISION)
+  SET(DOXYGEN_OUTPUT ${CMAKE_SOURCE_DIR}/../GeneratedDocs)
+ELSE(SVN_REVISION)
+  SET(DOXYGEN_OUTPUT html)
+ENDIF(SVN_REVISION)
+
+INCLUDE(TargetDoc OPTIONAL)

@@ -29,10 +29,6 @@ else(NOT ${PROJECT_NAME}_SOURCE_FILE_EXTENSIONS)
   foreach(_EXT ${${PROJECT_NAME}_SOURCE_FILE_EXTENSIONS})
     list(APPEND _ALL_EXTS *.${_EXT})
   endforeach(_EXT ${${PROJECT_NAME}_SOURCE_FILE_EXTENSIONS})
-  list(APPEND _ALL_EXTS *.h)
-  list(APPEND _ALL_EXTS *.hpp)
-else(NOT ${PROJECT_NAME}_SOURCE_FILE_EXTENSIONS)
-  set(_ALL_EXTS ${${PROJECT_NAME}_SOURCE_FILE_EXTENSIONS})
 endif(NOT ${PROJECT_NAME}_SOURCE_FILE_EXTENSIONS)
 
 foreach(_DIR ${_ALL_DIRS})
@@ -44,7 +40,7 @@ foreach(_DIR ${_ALL_DIRS})
     endif(_DIR_FILES_EXT)
   endforeach(_EXT ${_ALL_EXTS})
   if(_DIR_FILES)
-    # this prevents duplication
+    # this prevents duplication (seems to fail on MAC OSX?)
     if(NOT "${_DIR_FILES}_T")
       set(${_DIR_FILES}_T T)
       list(APPEND _ALL_FILES ${_DIR_FILES})
@@ -77,6 +73,20 @@ if(NOT UNSTABLE)
   endif(${PROJECT_NAME}_Unstable_SRCS)
 endif(NOT UNSTABLE)
 
+#if(${PROJECT_NAME}_SOURCES_PROPERTIES)
+#  foreach(_PROPERTY ${${PROJECT_NAME}_SOURCES_PROPERTIES})
+#    foreach(_FILE ${_ALL_FILES})
+#      if(${${PROJECT_NAME}_${_PROPERTY}_REGEX})
+#        if(${_FILE} MATCHES ${${PROJECT_NAME}_${_PROPERTY}}_REGEX})
+#          if(${${PROJECT_NAME}_${_PROPERTY})
+#            set_source_files_properties(${_FILE} ${${PROJECT_NAME}_${_PROPERTY}})
+#          endif(${${PROJECT_NAME}_${_PROPERTY})
+#        endif(${_FILE} MATCHES ${${PROJECT_NAME}_${_PROPERTY}}_REGEX})
+#      endif(${${PROJECT_NAME}_${_PROPERTY}_REGEX})
+#    endforeach(_FILE ${_ALL_FILES})
+#  endforeach(_PROPERTY ${${PROJECT_NAME}_SOURCES_PROPERTIES})
+#endif(${PROJECT_NAME}_SOURCES_PROPERTIES)
+
 set(${PROJECT_NAME}_SRCS ${_ALL_FILES})
 
 include_directories(${_ALL_DIRS})
@@ -96,8 +106,8 @@ set_target_properties(${PROJECT_NAME}_shared PROPERTIES
   CLEAN_DIRECT_OUTPUT 1
   LINKER_LANGUAGE C)
 
-target_link_libraries(${PROJECT_NAME}_static ${${PROJECT_NAME}_LINK})
-target_link_libraries(${PROJECT_NAME}_shared ${${PROJECT_NAME}_LINK})
+target_link_libraries(${PROJECT_NAME}_static ${${PROJECT_NAME}_LINK_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}_shared ${${PROJECT_NAME}_LINK_LIBRARIES})
 
 
 # output in ${PROJECT_NAME}_STATIC|SHARED_LIB the path of the libraries
@@ -112,11 +122,11 @@ else(${PROJECT_NAME}_LIB_DIR)
   set(_install_lib lib)
 endif(${PROJECT_NAME}_LIB_DIR)
 
-if(${PROJECT_NAME}_INCLUDE_DIR)
-  set(_install_include ${${PROJECT_NAME}_INCLUDE_DIR})
-else(${PROJECT_NAME}_INCLUDE_DIR)
+if(${PROJECT_NAME}_INSTALL_INCLUDE_DIR)
+  set(_install_include ${${PROJECT_NAME}_INSTALL_INCLUDE_DIR})
+else(${PROJECT_NAME}_INSTALL_INCLUDE_DIR)
   set(_install_include include)
-endif(${PROJECT_NAME}_INCLUDE_DIR)
+endif(${PROJECT_NAME}_INSTALL_INCLUDE_DIR)
 
 install(TARGETS 
   ${PROJECT_NAME}_static ${PROJECT_NAME}_shared 
@@ -128,3 +138,11 @@ message(STATUS "${PROJECT_NAME} library setup done")
 message(STATUS "")
 
 endmacro(LIBRARY_PROJECT_SETUP)
+
+macro(PROJECT_SET)
+  set(_args ${ARGV})
+  list(GET ${_args} 1 _VAR)
+  list(REMOVE_AT ${_args} 1)
+  set(${PROJECT_NAME}_${_VAR} ${_args})
+  message("XXX setting ${PROJECT_NAME}_${_VAR} to ${ARGV} : ${${PROJECT_NAME}_${_VAR}}")
+endmacro(PROJECT_SET)

@@ -46,17 +46,18 @@ SET(SiconosNumerics_Unstable_SRCS
 #
 # Installation layout
 #
-SET(SiconosNumerics_INCLUDE_DIR include/Siconos/Numerics)
+SET(SiconosNumerics_INSTALL_INCLUDE_DIR include/Siconos/Numerics)
 
 #
 # compilation setup 
 #
-SET(SiconosNumerics_LINK ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} ${FORTRAN_LIBRARIES})
+SET(SiconosNumerics_LINK_LIBRARIES ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} ${FORTRAN_LIBRARIES})
 
 LIBRARY_PROJECT_SETUP()
 
-#ADD_DEFINITIONS(-std=c99) : warning with f95
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+IF(C_HAVE_C99)
+  APPEND_FLAG(CMAKE_C_FLAGS "-std=c99")
+ENDIF(C_HAVE_C99)
 
 # F95 Cmake Bug
 CONFIGURE_FILE(SiconosNumerics.h  DPCG.mod.proxy COPYONLY) 
