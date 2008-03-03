@@ -93,13 +93,13 @@ SET_TEST(test8 DLSODKR-test.f)
 SET_TEST(test9 DLSOIBT-test.f)
 SET_TEST(test10 test-funcC-inC.cpp funC.cpp)
 
-TARGET_LINK_LIBRARIES(netlib/odepack/test/test10 ${FORTRAN_LIBRARIES})
 
 TEST_DIRECTORY(NonSmoothSolvers/test)
-#SET_TEST(NumericsMatrixTest main_NumericsMatrix.c)
-#SET_TEST(LCPtest main_lcp.c)
-#SET_TEST(MLCPtest main_mlcp.c)
-#SET_TESTS_PROPERTIES(NonSmoothSolvers/test/MLCPtest PROPERTIES WILL_FAIL TRUE)
+
+SET_TEST(NumericsMatrixTest main_NumericsMatrix.c)
+SET_TEST(LCPtest main_lcp.c)
+SET_TEST(MLCPtest main_mlcp.c)
+SET_TESTS_PROPERTIES(NonSmoothSolvers/test/MLCPtest PROPERTIES WILL_FAIL TRUE)
 
 IF(PRINT_ENV)
   INCLUDE(CMakeLog)
