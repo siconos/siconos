@@ -1,5 +1,5 @@
 #
-# Here comes Numerics
+# Here comes Kernel
 #
 PROJECT(SiconosKernel C CXX)
 
@@ -31,29 +31,60 @@ SET(SiconosKernel_DIRS
   utils/SiconosTools
   xml)
 
-
 #
 # Unstable sources
 #
-SET(SiconosKernel_Unstable_SRCS)
+SET(SiconosKernel_Unstable_SRCS simulationTools/Solver.cpp)
 
 #
 # Installation layout
 #
-SET(SiconosKernel_INCLUDE_DIR include/Siconos/Kernel)
+SET(SiconosKernel_INSTALL_INCLUDE_DIR include/Siconos/Kernel)
 
 #
 # compilation setup 
 #
-SET(SiconosKernel_LINK ${SiconosNumerics_LIBRARIES} ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} ${LIBXML2_LIBRARIES})
+IF(CXX_HAVE_FRIEND_INJECTION)
+  APPEND_FLAGS(CMAKE_CXX_FLAGS "-ffriend-injection")
+ENDIF(CXX_HAVE_FRIEND_INJECTION)
+
+COMPILE_WITH(SiconosNumerics REQUIRED)
+COMPILE_WITH(Boost REQUIRED)
+COMPILE_WITH(LibXml2 REQUIRED)
+COMPILE_WITH(BLAS REQUIRED)
+COMPILE_WITH(LAPACK REQUIRED)
+COMPILE_WITH(ATLAS REQUIRED)
+COMPILE_WITH(GMP REQUIRED)
+COMPILE_WITH(CppUnit)
 
 LIBRARY_PROJECT_SETUP()
 
-#ADD_DEFINITIONS(-std=c99) : warning with f95
-#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIRS} ${SiconosNumerics_INCLUDE_DIRS})
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
+#
+# tests
+#
 
-# test directories
-#SUBDIRS(netlib/odepack/test)
-#SUBDIRS(NonSmoothSolvers/test)
+# model
+TEST_DIRECTORY(model/test)
+SET_TEST(test1 ModelTest.cpp TestMain.cpp)
+
+# modeling tools 
+TEST_DIRECTORY(modelingTools/test)
+
+SET_TEST(test1 
+  FirstOrderType1RTest.cpp FirstOrderLinearRTest.cpp FirstOrderLinearTIRTest.cpp 
+  LagrangianScleronomousRTest.cpp LagrangianRheonomousRTest.cpp LagrangianCompliantRTest.cpp 
+  LagrangianLinearRTest.cpp FirstOrderNonLinearDSTest.cpp FirstOrderLinearDSTest.cpp 
+  LagrangianDSTest.cpp LagrangianLinearTIDSTest.cpp TestMain.cpp)
+
+# xml
+TEST_DIRECTORY(xml/test)
+SET_TEST(test1 BoundaryConditionXMLTest.cpp LagrangianDSXMLTest.cpp
+  OneStepIntegratorXMLTest.cpp SiconosMemoryXMLTest.cpp
+  DynamicalSystemXMLTest.cpp LinearDSXMLTest.cpp RelayNSLXMLTest.cpp
+  InteractionXMLTest.cpp LinearTIRXMLTest.cpp
+  SiconosDOMTreeToolsTest.cpp TimeDiscretisationXMLTest.cpp TestMain.cpp)
+
+IF(PRINT_ENV)
+  INCLUDE(CMakeLog)
+ENDIF(PRINT_ENV)
+
