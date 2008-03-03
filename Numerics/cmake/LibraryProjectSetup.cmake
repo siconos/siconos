@@ -48,6 +48,9 @@ foreach(_DIR ${_ALL_DIRS})
   endif(_DIR_FILES)
 endforeach(_DIR ${_ALL_DIRS})
 
+#
+# headers
+#
 if(NOT ${PROJECT_NAME}_HDRS)
   foreach(_DIR ${_ALL_DIRS})
     file(GLOB _HDRS  ${_DIR}/*.h)
@@ -57,6 +60,9 @@ if(NOT ${PROJECT_NAME}_HDRS)
   endforeach(_DIR ${_ALL_DIRS})
 endif(NOT ${PROJECT_NAME}_HDRS)
 
+#
+# Unstable sources
+#
 if(NOT UNSTABLE)
   if(${PROJECT_NAME}_Unstable_SRCS)
     message(STATUS "Some unstables sources files are going to be excluded")
@@ -72,6 +78,10 @@ if(NOT UNSTABLE)
     endforeach(_FILE ${${PROJECT_NAME}_Unstable_SRCS})
   endif(${PROJECT_NAME}_Unstable_SRCS)
 endif(NOT UNSTABLE)
+
+#
+# Attempt to specify file properties
+#
 
 #if(${PROJECT_NAME}_SOURCES_PROPERTIES)
 #  foreach(_PROPERTY ${${PROJECT_NAME}_SOURCES_PROPERTIES})
@@ -111,8 +121,8 @@ target_link_libraries(${PROJECT_NAME}_shared ${${PROJECT_NAME}_LINK_LIBRARIES})
 
 
 # output in ${PROJECT_NAME}_STATIC|SHARED_LIB the path of the libraries
-GET_TARGET_PROPERTY(${PROJECT_NAME}_STATIC_LIB ${PROJECT_NAME}_static LOCATION)
-GET_TARGET_PROPERTY(${PROJECT_NAME}_SHARED_LIB ${PROJECT_NAME}_shared LOCATION)
+get_target_property(${PROJECT_NAME}_STATIC_LIB ${PROJECT_NAME}_static LOCATION)
+get_target_property(${PROJECT_NAME}_SHARED_LIB ${PROJECT_NAME}_shared LOCATION)
 
 
 # Installation
@@ -139,10 +149,3 @@ message(STATUS "")
 
 endmacro(LIBRARY_PROJECT_SETUP)
 
-macro(PROJECT_SET)
-  set(_args ${ARGV})
-  list(GET ${_args} 1 _VAR)
-  list(REMOVE_AT ${_args} 1)
-  set(${PROJECT_NAME}_${_VAR} ${_args})
-  message("XXX setting ${PROJECT_NAME}_${_VAR} to ${ARGV} : ${${PROJECT_NAME}_${_VAR}}")
-endmacro(PROJECT_SET)
