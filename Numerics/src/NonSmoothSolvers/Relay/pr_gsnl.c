@@ -21,13 +21,22 @@
 #include <string.h>
 #include <math.h>
 #include <LA.h>
+#include "Relay_Solvers.h"
 
-void pr_gsnl(double vec[], double *q, int *nn, double a[], double b[], int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
+void pr_gsnl(Relay_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {
+  double* vec = problem->M->matrix0;
+  double* q = problem->q;
+  int n = problem -> size;
+  double *a = problem->a;
+  double *b = problem->b;
+
+  int itt = options->iparam[0];
+  double errmax = options->dparam[0];
 
   int i, j, iter1, k;
-  int n = *nn, incx = 1, incy = 1, itt = *itermax;
-  double errmax = *tol, alpha, beta, mina;
+  int incx = 1, incy = 1;
+  double alpha, beta, mina;
   double err1, num, den, avn, apn, xn;
   double *zt, *wnum1;
   double M[n][n];
@@ -99,8 +108,8 @@ void pr_gsnl(double vec[], double *q, int *nn, double a[], double b[], int * ite
     den = DDOT(n , q , incx , q , incy);
 
     err1 = sqrt(num) / sqrt(den);
-    *it_end = iter1;
-    *res = err1;
+    options->iparam[1] = iter1;
+    options->dparam[1] = err1;
   }
 
 

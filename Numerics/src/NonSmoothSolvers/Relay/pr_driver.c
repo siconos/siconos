@@ -26,45 +26,57 @@
 #endif
 #include <time.h>
 
-
-int pr_driver(double *vec, double *q, int *nn, method *pt, double *z, double *w)
+int pr_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* options, Numerics_Options* global_options)
 {
+  if (options == NULL || global_options == NULL)
+    numericsError("pr_driver", "null input for solver and/or global options");
 
+  /* Set global options */
+  setNumericsOptions(global_options);
 
-  int info = -1, it_end;
+  /* Checks inputs */
+  if (problem == NULL || z == NULL || w == NULL)
+    numericsError("pr_driver", "null input for LinearComplementarity_Problem and/or unknowns (z,w)");
 
-  char prkey1[10] = "NLGS", prkey2[10] = "Latin";
+  /* Output info. : 0: ok -  >0: problem (depends on solver) */
+  int info = -1;
 
-  double res;
+  /* Switch to DenseMatrix or SparseBlockMatrix solver according to the type of storage for M */
+  /* Storage type for the matrix M of the LCP */
+  int storageType = problem->M->storageType;
 
-  clock_t t1, t2;
-
-
-  t1 = clock();
-
-
-  if (strcmp(pt->pr.name , prkey1) == 0)
+  /* Sparse Block Storage */
+  if (storageType == 1)
   {
-    pr_nlgs(vec, q, nn, pt->pr.a, pt->pr.b, & pt->pr.itermax, & pt->pr.tol, &pt->pr.chat, z, w, &it_end, &res, &info);
-
-    pt->pr.err = res;
-    pt->pr.iter = it_end;
-
+    numericsError("pr_driver", "not yet implemented for sparse storage.");
   }
-  else if (strcmp(pt->pr.name, prkey2) == 0)
+  // else
+
+  /*************************************************
+   *  2 - Call specific solver (if no trivial sol.)
+   *************************************************/
+
+  /* Solver name */
+  char * name = options->solverName;
+
+  if (verbose == 1)
+    printf(" ========================== Call %s solver for Relayproblem ==========================\n", name);
+
+  /****** NLGS algorithm ******/
+  if (strcmp(name , "NLGS") == 0)
+    pr_nlgs(problem, z , w , &info , options);
+
+  /****** Latin algorithm ******/
+  else if (strcmp(name , "Latin") == 0)
+    pr_latin(problem, z , w , &info , options);
+
+  /*error */
+  else
   {
-    pr_latin(vec, q, nn, &pt->pr.k_latin, pt->pr.a, pt->pr.b, &pt->pr.itermax, &pt->pr.tol, &pt->pr.chat, z, w, &it_end, &res, &info);
-
-    pt->pr.err = res;
-    pt->pr.iter = it_end;
+    fprintf(stderr, "pr_driver error: unknown solver named: %s\n", name);
+    exit(EXIT_FAILURE);
   }
-
-  else printf("Warning : Unknown solving method : %s\n", pt->pr.name);
-
-  t2 = clock();
-
-
-  printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
 
   return info;
 }
+

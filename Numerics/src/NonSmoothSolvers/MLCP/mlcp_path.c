@@ -16,13 +16,12 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-
+#include "LA.h"
+#include "MLCP_Solvers.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "LA.h"
 #include <math.h>
-#include "MLCP_Solvers.h"
 
 /*#define PATH_SOLVER*/
 
@@ -30,19 +29,20 @@
 #include "path/SimpleLCP.h"
 #endif /*PATH_SOLVER*/
 
-void mlcp_path(int *nn , int* mm, double *A , double *B , double *C , double *D , double *a, double *b, double *u, double *v, double *w , int *info ,  int *iparamMLCP , double *dparamMLCP)
+/*
+Warning: this function requires MLCP with M and q, not (A,B,C,D).
+The input structure MixedLinearComplementarity_Problem is supposed to fit with this form.
+*/
+
+void mlcp_path(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {
-  double tol ;
+  double tol = options->dparam[0];
   *info = 1;
-  tol   = dparamMLCP[0];
 #ifdef PATH_SOLVER
   MCP_Termination termination;
 
-  M = (double*) malloc((dim * dim) * sizeof(double));
-  q = (double*) malloc(dim * sizeof(double));
-  z = (double*) calloc(dim, sizeof(double));
-  ABCDtoM(n , m, A , B , C , D , a, b, M, q);
-
+  M = problem->M->matrix0;
+  q = problem->q;
 
   nnz = nbNonNulElems(dim, M, 1.0e-18);
   m_i = (int *)calloc(nnz + 1, sizeof(int));
@@ -90,7 +90,7 @@ void mlcp_path(int *nn , int* mm, double *A , double *B , double *C , double *D 
     }
 
     *info = 0;
-    mlcp_compute_error(nn, mm,  A , B , C , D , a , b, u, v, verbose, w,  &err);
+    mlcp_compute_error(problem, z, w, tol, &err);
 
     if (verbose > 0)
       printf("PATH : MLCP Solved, error %10.7f.\n", err);
@@ -109,9 +109,6 @@ void mlcp_path(int *nn , int* mm, double *A , double *B , double *C , double *D 
   free(m_ij);
   free(lb);
   free(ub);
-  free(M);
-  free(q);
-  free(z);
 
 #endif /*PATH_SOLVER*/
 

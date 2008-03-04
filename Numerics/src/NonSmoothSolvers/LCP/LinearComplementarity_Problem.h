@@ -19,6 +19,12 @@
 #ifndef LCP_PROBLEM_H
 #define LCP_PROBLEM_H
 
+/*!\file LinearComplementarity_Problem.h
+  \brief Structure used to define a Linear Complementarity Problem
+
+  \author Franck Perignon
+*/
+
 /*! \page LCProblem Linear Complementarity problems (LCP)
   \section lcpIntro The problem
   Find \f$(z,w)\f$ such that:\n
@@ -56,12 +62,6 @@
 
   (see the functions/solvers list in LCP_Solvers.h)
 
-*/
-
-/*!\file LinearComplementarity_Problem.h
-  \brief Structure used to define a Linear Complementarity Problem
-
-  \author Franck Perignon
 */
 
 #include "NumericsMatrix.h"

@@ -30,9 +30,9 @@ To get more details on each formulation, check for each type of problem in \ref 
 
 \section NSSpackContents Contents
 \subpage LCProblem \n
-\subpage MLCPSolvers \n
+\subpage MLCProblem \n
 \subpage fcProblem \n
-\subpage RelaySolvers\n
+\subpage RelayProblem \n
 \subpage QPSolvers\n
 
 Moreover, details on matrix storage in Numerics can be found in:
@@ -63,15 +63,9 @@ Other functions and useful tools related to NonSmoothSolvers are listed in NSSTo
 
 
 /** Union of specific methods (one for each type of problem)
-    \param method_pr     : pr is a method_pr structure .
-    \param method_dr     : dr is a method_dr structure .
-    \param method_mlcp    : mlcp is a method_mlcp structure .
 */
 typedef union
 {
-  method_pr  pr;
-  method_dr  dr;
-  method_mlcp mlcp;
   method_pfc_3D pfc_3D;
 } method;
 
@@ -118,26 +112,18 @@ extern "C" {
                                 double *q, method **pt , double *z , double *w , int *it_end , int *itt_end , double *res);
 
   /** General interface to solver for MLCP problems
-      \param[in] , a (\f$n \times n\f$)-vector of doubles which contains the components of the "A" MLCP matrix with a Fortran storage.
-      \param[in] , a (\f$m \times m\f$)-vector of doubles which contains the components of the "B" MLCP matrix with a Fortran storage.
-      \param[in] , a (\f$n \times m\f$)-vector of doubles which contains the components of the "C" MLCP matrix with a Fortran storage.
-      \param[in] , a (\f$m \times n\f$)-vector of doubles which contains the components of the "D" MLCP matrix with a Fortran storage.
-      \param[in] , a n-vector of doubles which contains the components of the constant right hand side vector.
-      \param[in] , a m-vector of doubles which contains the components of the constant right hand side vector.
-      \param[in] , an integer which represents one the dimension of the MLCP problem.
-      \param[in] , an integer which represents one the dimension of the MLCP problem.
-      \param[in] , a union containing the MLCP structure.
-      \n \n
-      \param[out] , a n-vector of doubles which contains the solution of the problem.
-      \param[out] , a m-vector of doubles which contains the solution of the problem.
-      \param[out] , a m-vector of doubles which contains the complementary solution of the problem.
-      \return integer
+      \param[in] problem the MixedLinearComplementarity_Problem structure which handles the problem (M,q)
+      \param[in,out] z a n-vector of doubles which contains the solution of the problem.
+      \param[in,out] w a n-vector of doubles which contains the solution of the problem.
+      \param[in,out] options structure used to define the solver(s) and their parameters
+      \param[in] general options for Numerics (verbose mode ...)
+      \return info termination value
       - 0 : successful\n
-      - >0 : otherwise (see specific solvers for more information about the log info)
-      \author V. Acary
-      \todo Sizing the regularization paramter and apply it only on null diagnal term
+      - >0 : otherwise see each solver for more information about the log info
+      \todo Sizing the regularization parameter and apply it only on null diagnal term
+      \author Vincent Acary
   */
-  int mlcp_driver(double*, double*, double*, double*, double*, double*, int*, int*, method*, double*, double*, double*);
+  int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *w, Solver_Options* options, Numerics_Options* global_options);
 
   /** General interface to solver for pfc 3D problems */
   int pfc_3D_driver(int, double*, double*, method*, double*, double*, double*);
@@ -201,43 +187,29 @@ extern "C" {
   */
   int dfc_2D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options, int* iparamDFC, double* J1);
 
-  /*   /\** General interface to solvers for dual friction-contact 2D problem */
-  /*       \param[in] , number of contacts (dim of the problem n = 2*nc) */
-  /*       \param[in] , M global matrix (n*n) */
-  /*       \param[in] , q global vector (n) */
-  /*       \param[in] , method */
-  /*       \param[in-out] , reaction global vector (n) */
-  /*       \param[in-out] , velocity global vector (n) */
-  /*       \param[in] , mu vector of the friction coefficients (size nc) */
-  /*       \return result (0 if successful otherwise 1). */
-  /*       * \author Nineb Sheherazade. */
-  /*   *\/  */
-  /*   int dfc_2D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options); */
-
   /** General interface to solver for dual-relay problems
-   * \param[in] , (nn \f$\times\f$nn)-vector of doubles containing the components of the double matrix with a fortran90 allocation.
-   * \param[in] , a nn-vector of doubles containing the components of the second member of the system.
-   * \param[in] , an integer, the dimension of the second member.
-   * \param[in] , a union (::method) containing the DR structure.\n \n
-   * \param[out] , a nn-vector of doubles, the solution of the problem.
-   * \param[out] , a nn-vector of doubles, the solution of the problem.
+      \param[in] problem the Relay_Problem structure which handles the problem (M,q)
+      \param[in,out] z a n-vector of doubles which contains the solution of the problem.
+      \param[in,out] w a n-vector of doubles which contains the solution of the problem.
+      \param[in,out] options structure used to define the solver(s) and their parameters
+      \return info termination value
+      - 0 : successful\n
+      - >0 : otherwise see each solver for more information about the log info
    * \author Nineb Sheherazade.
    */
-  int dr_driver(double* , double* , int* , method* , double* , double*);
+  int dr_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* options, Numerics_Options* global_options);
 
   /** General interface to solver for primal-relay problems
-   *  \param[in] , a (\f$nn \times nn\f$)-vector of doubles containing the components of the  matrix with a fortran90 allocation.
-   *  \param[in] , a nn-vector of doubles containing the components of the second member of the system.
-   *  \param[in] , an integer which represents the dimension of the second member.
-   *  \param[in] , a union (::method) containing the PR structure.
-   *  \param[out] , a nn-vector of doubles which contains the solution of the problem.
-   *  \param[out] , a nn-vector of doubles which contains the solution of the problem.
-   *   \return integer : the termination reason\n
-   *                    - 0 : successful\n
-   *                    - otherwise : see specific solvers for more information about the log info.
-   *   \author Nineb Sheherazade.
+      \param[in] problem the Relay_Problem structure which handles the problem (M,q)
+      \param[in,out] z a n-vector of doubles which contains the solution of the problem.
+      \param[in,out] w a n-vector of doubles which contains the solution of the problem.
+      \param[in,out] options structure used to define the solver(s) and their parameters
+      \return info termination value
+      - 0 : successful\n
+      - >0 : otherwise see each solver for more information about the log info
+   * \author Nineb Sheherazade.
    */
-  int pr_driver(double* , double* , int* , method* , double* , double*);
+  int pr_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* options, Numerics_Options* global_options);
 
   /** General interface to solvers for friction-contact 3D problem
       \param[in] , number of contacts (dim of the problem n = 3*nc)

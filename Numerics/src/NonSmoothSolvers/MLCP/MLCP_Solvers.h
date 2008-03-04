@@ -19,225 +19,143 @@
 #ifndef MLCP_SOLVERS_H
 #define MLCP_SOLVERS_H
 
-/*! \page MLCPSolvers Mixed Linear Complementary Problems (MCLP)
-  \section mlcpIntro The problem
-  Try \f$(u,v,w)\f$ such that:\n
-  \f$
-  \left\lbrace
-  \begin{array}{l}
-  A u + Cv +a =0\\
-  D u + Bv +b = w \\
-  0 \le v \perp  w \ge 0\\
-  \end{array}
-  \right.
-  \f$
-
-  where  A is an (\f$ n \times n\f$ ) matrix, B is an (\f$ m \times m\f$ ) matrix,  C is an (\f$ n \times m\f$ ) matrix,\n
-  D is an (\f$ m \times n\f$ ) matrix,    a and u is an (\f$ n \f$ ) vectors b,v and w is an (\f$ m \f$ ) vectors.
-
-  \section mlcpSolversList Available solvers
-  Use the generic function mlcp_solver(), to call one the the specific solvers listed below:
-  - mlcp_pgs(), (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver for MLCP
-  - mlcp_rpgs(), (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver for MLCP
-  - mlcp_psor(), (projected successive overrelaxation method) is a solver for MLCP
-  - mlcp_rpsor(),(regularized projected successive overrelaxation method) is a solver for MLCP
-  - mlcp_path(), path solver
-
-  The structure method, argument of mlcp_solver(), is used to give the name and parameters of the required solver.
-
-  (see the functions/solvers list in mlcp_solvers.h)
-
-*/
-
 /*!\file MLCP_Solvers.h
   Solvers for Mixed Linear Complementary Problems (MCLP)
   \author Vincent Acary
 */
 
+/*! \page MLCPSolvers Mixed Linear Complementary Problems Solvers
 
-/** A type definition for a structure method_mlcp.
-    \param name       name of the solver.
-    \param itermax    maximum number of iterations.
-    \param tol        convergence criteria value.
-    \param relax      relaxation coefficient.
-    \param rho        regularization coefficient
-    \param chat       output boolean ( 0 = no output log ).
-    \param iter       final number of iterations.
-    \param err        final value of error criteria.
+This page gives an overview of the available solvers for MLCP and their required parameters.
+
+For each solver, the input argument are:
+- a MixedLinearComplementarity_Problem
+- the unknowns (z,w)
+- info, the termination value (0: convergence, >0 problem which depends on the solver)
+- a Solver_Options structure, which handles iparam and dparam
+
+\section mlcpPGS PGS Solver
+Projected Gauss-Seidel solver
+
+\bf function: mlcp_pgs() \n
+\bf parameters:
+- iparam[0] (in): maximum number of iterations allowed
+- iparam[1] (out): number of iterations processed
+- dparam[0] (in): tolerance
+- dparam[1] (out): resulting error
+
+\section mlcpRPGS RPGS Solver
+Regularized Projected Gauss-Seidel, solver for MLCP, able to handle with matrices with null diagonal terms
+
+\bf function: mlcp_rpgs() \n
+\bf parameters:
+- iparam[0] (in): maximum number of iterations allowed
+- iparam[1] (out): number of iterations processed
+- dparam[0] (in): tolerance
+- dparam[1] (out): resulting error
+- dparam[2] (in): rho
+
+\section mlcpPSOR PSOR Solver
+Projected Succesive over relaxation solver for MLCP. See cottle, Pang Stone Chap 5
+\bf function: mlcp_psor() \n
+\bf parameters:
+- iparam[0] (in): maximum number of iterations allowed
+- iparam[1] (out): number of iterations processed
+- dparam[0] (in): tolerance
+- dparam[1] (out): resulting error
+- dparam[2] (in): omega
+
+\section mlcpRPSOR RPSOR Solver
+Regularized Projected Succesive over relaxation solver for MLCP
+\bf function: mlcp_rpsor() \n
+\bf parameters:
+- iparam[0] (in): maximum number of iterations allowed
+- iparam[1] (out): number of iterations processed
+- dparam[0] (in): tolerance
+- dparam[1] (out): resulting error
+- dparam[2] (in): omega
+- dparam[3] (in): rho
+
+\section mlcpPath Path (Ferris) Solver
+
+\bf function: mlcp_path() \n
+\bf parameters:
+- dparam[0] (in): tolerance
+
 */
-typedef struct
-{
-  char   name[64];
-  int    itermax;
-  double tol;
-  double relax;
-  double rho;
-  int    chat;
-  int    iter;
-  double err;
-} method_mlcp;
+
+#include "Numerics_Options.h"
+#include "Solver_Options.h"
+#include "MixedLinearComplementarity_Problem.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-  /** mlcp_pgs (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver for MLCP.
-      \param A            On enter, a (\f$n \times n\f$)-vector of doubles which contains the components of the "A" MLCP matrix with a Fortran storage.
-      \param B            On enter, a (\f$m \times m\f$)-vector of doubles which contains the components of the "B" MLCP matrix with a Fortran storage.
-      \param C            On enter, a (\f$n \times m\f$)-vector of doubles which contains the components of the "C" MLCP matrix with a Fortran storage.
-      \param D            On enter, a (\f$m \times n\f$)-vector of doubles which contains the components of the "D" MLCP matrix with a Fortran storage.
-      \param a            On enter, a n-vector of doubles which contains the components of the constant right hand side vector.
-      \param b            On enter, a m-vector of doubles which contains the components of the constant right hand side vector.
-      \param nn           On enter, an integer which represents one the dimension of the MLCP problem.
-      \param mm           On enter, an integer which represents one the dimension of the MLCP problem.
-      \param u            On return, a n-vector of doubles which contains the solution of the problem.
-      \param v            On return, a m-vector of doubles which contains the solution of the problem.
-      \param w            On return, a m-vector of doubles which contains the complementary solution of the problem.
-      \param info    On return, an integer which returns the termination value:\n
-      0 : convergence\n
-      1 : iter = itermax\n
-      2 : negative diagonal term
-      \param iparamMLCP  On enter/return a vector of integers:\n
-      - iparamMLCP[0] = itermax On enter, the maximum number of iterations allowed.
-      - iparamMLCP[1] = verbose  On enter, the output log identifiant:\n
-      0 : no output\n
-      >0: active screen output\n
-      - iparamMLCP[2] = it_end  On enter, the number of iterations performed by the algorithm.
-      \param dparamMLCP  On enter/return a vector of doubles:\n
-      - dparamMLCP[0] = tol     On enter, the tolerance required.
-      - dparamMLCP[1] = omega   On enter, the relaxation parameter (not yet available).
-      - dparamMLCP[2] = res     On return, the final error value.
-      \author Vincent Acary
+  /**  mlcp_pgs (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver for MLCP.
+   * \param[in] problem structure that represents the LCP (M, q...)
+   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
+   0 : convergence\n
+   1 : iter = itermax\n
+   2 : negative diagonal term
+   \param[in-out] options structure used to define the solver and its parameters.
+   \author Vincent Acary
   */
-  void mlcp_pgs(int* nn , int* mm, double *A , double *B , double *C , double *D , double *a , double *b, double *u, double *v, double *w , int *info , int *iparamMLCP , double *dparamMLCP);
+  void mlcp_pgs(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
-  /** mlcp_rpgs (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver for MLCP.
-      \param A            On enter, a (\f$n \times n\f$)-vector of doubles which contains the components of the "A" MLCP matrix with a Fortran storage.
-      \param B            On enter, a (\f$m \times m\f$)-vector of doubles which contains the components of the "B" MLCP matrix with a Fortran storage.
-      \param C            On enter, a (\f$n \times m\f$)-vector of doubles which contains the components of the "C" MLCP matrix with a Fortran storage.
-      \param D            On enter, a (\f$m \times n\f$)-vector of doubles which contains the components of the "D" MLCP matrix with a Fortran storage.
-      \param a            On enter, a n-vector of doubles which contains the components of the constant right hand side vector.
-      \param b            On enter, a m-vector of doubles which contains the components of the constant right hand side vector.
-      \param nn           On enter, an integer which represents one the dimension of the MLCP problem.
-      \param mm           On enter, an integer which represents one the dimension of the MLCP problem.
-      \param u            On return, a n-vector of doubles which contains the solution of the problem.
-      \param v            On return, a m-vector of doubles which contains the solution of the problem.
-      \param w            On return, a m-vector of doubles which contains the complementary solution of the problem.
-      \param info    On return, an integer which returns the termination value:\n
-      0 : convergence\n
-      1 : iter = itermax\n
-      2 : negative diagonal term
-      \param iparamMLCP  On enter/return a vector of integers:\n
-      - iparamMLCP[0] = itermax On enter, the maximum number of iterations allowed.
-      - iparamMLCP[1] = verbose  On enter, the output log identifiant:\n
-      0 : no output\n
-      >0: active screen output\n
-      - iparamMLCP[2] = it_end  On enter, the number of iterations performed by the algorithm.
-      \param dparamMLCP  On enter/return a vector of doubles:\n
-      - dparamMLCP[0] = tol     On enter, the tolerance required.
-      - dparamMLCP[1] = omega   On enter, the relaxation parameter (not yet available).
-      - dparamMLCP[2] = res     On return, the final error value.
-      \author Vincent Acary
+  /**  mlcp_rpgs (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver for MLCP.
+   * \param[in] problem structure that represents the LCP (M, q...)
+   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
+   0 : convergence\n
+   1 : iter = itermax\n
+   2 : negative diagonal term
+   \param[in-out] options structure used to define the solver and its parameters.
+   \author Vincent Acary
   */
-  void mlcp_rpgs(int* nn , int* mm, double *A , double *B , double *C , double *D , double *a , double *b, double *u, double *v, double *w , int *info , int *iparamMLCP , double *dparamMLCP);
+  void mlcp_rpgs(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
   /** mlcp_psor (projected successive overrelaxation method) is a solver for MLCP.
-      \param A            On enter, a (\f$n \times n\f$)-vector of doubles which contains the components of the "A" MLCP matrix with a Fortran storage.
-      \param B            On enter, a (\f$m \times m\f$)-vector of doubles which contains the components of the "B" MLCP matrix with a Fortran storage.
-      \param C            On enter, a (\f$n \times m\f$)-vector of doubles which contains the components of the "C" MLCP matrix with a Fortran storage.
-      \param D            On enter, a (\f$m \times n\f$)-vector of doubles which contains the components of the "D" MLCP matrix with a Fortran storage.
-      \param a            On enter, a n-vector of doubles which contains the components of the constant right hand side vector.
-      \param b            On enter, a m-vector of doubles which contains the components of the constant right hand side vector.
-      \param nn           On enter, an integer which represents one the dimension of the MLCP problem.
-      \param mm           On enter, an integer which represents one the dimension of the MLCP problem.
-      \param u            On return, a n-vector of doubles which contains the solution of the problem.
-      \param v            On return, a m-vector of doubles which contains the solution of the problem.
-      \param w            On return, a m-vector of doubles which contains the complementary solution of the problem.
-      \param info    On return, an integer which returns the termination value:\n
-      0 : convergence\n
-      1 : iter = itermax\n
-      2 : negative diagonal term
-      \param iparamMLCP  On enter/return a vector of integers:\n
-      - iparamMLCP[0] = itermax On enter, the maximum number of iterations allowed.
-      - iparamMLCP[1] = verbose  On enter, the output log identifiant:\n
-      0 : no output\n
-      >0: active screen output\n
-      - iparamMLCP[2] = it_end  On enter, the number of iterations performed by the algorithm.
-      \param dparamMLCP  On enter/return a vector of doubles:\n
-      - dparamMLCP[0] = tol     On enter, the tolerance required.
-      - dparamMLCP[1] = omega   On enter, the relaxation parameter (not yet available).
-      - dparamMLCP[2] = res     On return, the final error value.
-      \author Vincent Acary
+   * \param[in] problem structure that represents the LCP (M, q...)
+   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
+   0 : convergence\n
+   1 : iter = itermax\n
+   2 : negative diagonal term
+   \param[in-out] options structure used to define the solver and its parameters.
+   \author Vincent Acary
   */
-  void mlcp_psor(int* nn , int* mm, double *A , double *B , double *C , double *D , double *a , double *b, double *u, double *v, double *w , int *info , int *iparamMLCP , double *dparamMLCP);
+  void mlcp_psor(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
   /** mlcp_rpsor (regularized projected successive overrelaxation method) is a solver for MLCP.
-      \param A            On enter, a (\f$n \times n\f$)-vector of doubles which contains the components of the "A" MLCP matrix with a Fortran storage.
-      \param B            On enter, a (\f$m \times m\f$)-vector of doubles which contains the components of the "B" MLCP matrix with a Fortran storage.
-      \param C            On enter, a (\f$n \times m\f$)-vector of doubles which contains the components of the "C" MLCP matrix with a Fortran storage.
-      \param D            On enter, a (\f$m \times n\f$)-vector of doubles which contains the components of the "D" MLCP matrix with a Fortran storage.
-      \param a            On enter, a n-vector of doubles which contains the components of the constant right hand side vector.
-      \param b            On enter, a m-vector of doubles which contains the components of the constant right hand side vector.
-      \param nn           On enter, an integer which represents one the dimension of the MLCP problem.
-      \param mm           On enter, an integer which represents one the dimension of the MLCP problem.
-      \param u            On return, a n-vector of doubles which contains the solution of the problem.
-      \param v            On return, a m-vector of doubles which contains the solution of the problem.
-      \param w            On return, a m-vector of doubles which contains the complementary solution of the problem.
-      \param info    On return, an integer which returns the termination value:\n
-      0 : convergence\n
-      1 : iter = itermax\n
-      2 : negative diagonal term
-      \param iparamMLCP  On enter/return a vector of integers:\n
-      - iparamMLCP[0] = itermax On enter, the maximum number of iterations allowed.
-      - iparamMLCP[1] = verbose  On enter, the output log identifiant:\n
-      0 : no output\n
-      >0: active screen output\n
-      - iparamMLCP[2] = it_end  On enter, the number of iterations performed by the algorithm.
-      \param dparamMLCP  On enter/return a vector of doubles:\n
-      - dparamMLCP[0] = tol     On enter, the tolerance required.
-      - dparamMLCP[1] = omega   On enter, the relaxation parameter (not yet available).
-      - dparamMLCP[2] = res     On return, the final error value.
-      \author Vincent Acary
+   * \param[in] problem structure that represents the LCP (M, q...)
+   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
+   0 : convergence\n
+   1 : iter = itermax\n
+   2 : negative diagonal term
+   \param[in-out] options structure used to define the solver and its parameters.
+   \author Vincent Acary
   */
-  void mlcp_rpsor(int* nn , int* mm, double *A , double *B , double *C , double *D , double *a , double *b, double *u, double *v, double *w , int *info , int *iparamMLCP , double *dparamMLCP);
+  void mlcp_rpsor(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
   /** path solver
-      \param nn      On enter, an integer which represents the dimension of the system.
-      \param M     On enter, a (\f$nn \times nn\f$)-vector of doubles which contains the components of the matrix with a fortran storage.
-      \param q       On enter, a nn-vector of doubles which contains the components of the right hand side vector.
-      \param z       On return, a nn-vector of doubles which contains the solution of the problem.
-      \param w       On return, a nn-vector of doubles which contains the solution of the problem.
-      \param info    On return, an integer which returns the termination value:\n
-      0 : convergence\n
-      1 : iter = itermax\n
-      2 : negative diagonal term
-      \param iparamLCP  On enter/return a vector of integers:\n
-      - iparamLCP[0] = itermax On enter, the maximum number of iterations allowed.
-      - iparamLCP[1] = verbose  On enter, the output log identifiant:\n
-      0 : no output\n
-      >0: active screen output\n
-      - iparamLCP[2] = it_end  On enter, the number of iterations performed by the algorithm.
-      \param dparamLCP  On enter/return a vector of doubles:\n
-      - dparamLCP[0] = tol     On enter, the tolerance required.
-      - dparamLCP[1] = omega   On enter, the relaxation parameter (not yet available).
-      - dparamLCP[2] = res     On return, the final error value.
-      \author Olivier Bonnefon
+   * \param[in] problem structure that represents the LCP (M, q...)
+   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
+   0 : convergence\n
+   1 : iter = itermax\n
+   2 : negative diagonal term
+   \param[in-out] options structure used to define the solver and its parameters.
+   \author Olivier Bonnefon
   */
-  void mlcp_path(int* nn , int* mm, double *A , double *B , double *C , double *D , double *a , double *b, double *u, double *v, double *w , int *info , int *iparamMLCP , double *dparamMLCP);
-
-  /**
-   * This function checks the validity of the vector z as a solution \n
-   * of the LCP : \n
-   * \f$
-   *    0 \le z \perp Mz + q \ge 0
-   * \f$
-   * The criterion is based on \f$ \sum [ (z[i]*(Mz+q)[i])_{pos} + (z[i])_{neg} + (Mz+q)[i])_{neg} ] \f$ \n
-   * with \f$ x_{pos} = max(0,x) \f$ and \f$ xneg = max(0,-x)\f$. \n
-   * This sum is divided by \f$ \|q\| \f$ and then compared to tol.\n
-   * It changes the input vector w by storing \f$ Mz + q \f$ in it.\n
-   * \author Pascal Denoyelle
-   */
-  int mlcp_filter_result(int* n, int* mm, double *A , double *B , double *C , double *D , double *a , double *b, double *u, double *v,  double tol, int chat, double *w);
+  void mlcp_path(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
   /**
    * This function checks the validity of the vector z as a solution \n
@@ -255,9 +173,15 @@ extern "C" {
    * with \f$ x_{pos} = max(0,x) \f$ and \f$ xneg = max(0,-x)\f$. \n
    * This sum is divided by \f$ \|q\| \f$ and then compared to tol.\n
    * It changes the input vector w by storing \f$ Mz + q \f$ in it.\n
+   * \param[in] problem structure that represents the MLCP (M, q... or (A,B,C...))
+   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[in] tolerance
+   * \param[in,out] error
+   * \return status: 0 : convergence, 1: error > tolerance
    * \author Vincent Acary form the routine  filter_result_LCP.c of Pascal Denoyelle
    */
-  int mlcp_compute_error(int* n, int* mm,  double *A , double *B , double *C , double *D , double *a , double *b, double *u, double *v,  int chat, double *w, double * error);
+  int mlcp_compute_error(MixedLinearComplementarity_Problem* problem, double *z, double *w, double tolerance, double * error);
 
 #ifdef __cplusplus
 }

@@ -16,90 +16,112 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+#include "LA.h"
+#include "MLCP_Solvers.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "LA.h"
 #include <math.h>
 
-int mlcp_compute_error(int* nn, int* mm,  double *A , double *B , double *C , double *D , double *a , double *b, double *u, double *v,  int verbose, double *w, double *err)
+int mlcp_compute_error(MixedLinearComplementarity_Problem* problem, double *z, double *w, double tolerance, double * error)
 {
-  double error, normb;
-  double errore, norma;
-  double a1, b1;
-  double *we;
-  int i, incx, incy, n, m;
+  /* Checks inputs */
+  if (problem == NULL || z == NULL || w == NULL)
+    numericsError("mlcp_compute_error", "null input for problem and/or z and/or w");
+
   int param = 1;
-  n = *nn;
-  m = *mm;
+  int n = problem->n; /* Equalities */
+  int m = problem->m; /* Inequalities */
+  int incx = 1, incy = 1;
+  int size = n + m;
 
-  incx = 1;
-  incy = 1;
+  /* Computation of w: depends on the way the problem is written */
 
-  a1 = 1.;
-  b1 = 1.;
-  we   = (double*)calloc(n, sizeof(double));
-  DCOPY(n , a , incx , we , incy);  //  we <-- a
-  DCOPY(m , b , incx , w , incy);  //  w <-- b
-
-
-  // following int param, we recompute the product w = Du+BV +b and we = Au+CV +a
-  // The test is then more severe if we compute w because it checks that the linear equation is satisfied
-
-  if (param == 1)
+  /* Problem in the form (M,q) */
+  if (problem->problemType == 0)
   {
-    DGEMV(LA_NOTRANS , m, n , a1 , D , m , u ,
-          incx , b1 , w , incy);  // w <-- D*u+ w
-    DGEMV(LA_NOTRANS , m , m , a1 , B , m , v ,
-          incx , b1 , w , incy);  // w <-- B*v + w
+    if (problem->M == NULL)
+      numericsError("mlcp_compute_error", "null input for M");
+
+    /* Computes w = Mz + q */
+    DCOPY(size , problem->q , incx , w , incy);
+    prod(size, size, 1.0, problem->M, z, 1.0, w);
+
   }
-
-
-
-  DGEMV(LA_NOTRANS , n, n , a1 , A , n , u ,
-        incx , b1 , we , incy);  // we <-- A*u+ we
-
-
-  DGEMV(LA_NOTRANS , n , m , a1 , C , n , v ,
-        incx , b1 , we , incy);  // we <-- C*v + we
-
-
-
-  errore = 0.;
-  errore =  DNRM2(n , we , incx);;
-
-  error = 0.0;
-  for (i = 0 ; i < m; i++)
+  /* Problem in the form ABCD */
+  else // if(problem->problemType == 1)
   {
 
-    if (v[i] < 0.0)
+    /* Checks inputs */
+    if (problem->A == NULL || problem->B == NULL || problem->C == NULL  || problem->D == NULL);
+    numericsError("mlcp_compute_error", "null input for A, B,C or D");
+
+    /* Links to problem data */
+    double *a = &problem->q[0];
+    double *b = &problem->q[n];
+    double *A = problem->A;
+    double *B = problem->B;
+    double *C = problem->C;
+    double *D = problem->D;
+
+    /* Compute "equalities" part, we = Au + Cv + a - Must be equal to 0 */
+    DCOPY(n , a , incx , w , incy);  //  we = w[0..n-1] <-- a
+    DGEMV(LA_NOTRANS , n, n , 1.0 , A , n , &z[0] , incx , 1.0 , w , incy);   // we <-- A*u + we
+    DGEMV(LA_NOTRANS , n, m , 1.0 , C , n , &z[n] , incx , 1.0 , w , incy);   // we <-- C*v + we
+
+    /* Computes part which corresponds to complementarity */
+    double * wi = &w[n]; // No copy!!
+    DCOPY(m , b , incx , wi , incy);  //  wi = w[n..m] <-- b
+    // following int param, we recompute the product wi = Du+BV +b and we = Au+CV +a
+    // The test is then more severe if we compute w because it checks that the linear equation is satisfied
+    if (param == 1)
     {
-      error += -v[i];
-      if (w[i] < 0.0) error += v[i] * w[i];
+      DGEMV(LA_NOTRANS , m, n , 1.0 , D , m , &z[0] , incx , 1.0 , wi , incy);   // wi <-- D*u+ w
+      DGEMV(LA_NOTRANS , m , m , 1.0 , B , m , &z[n] , incx , 1.0 , wi , incy);  // wi <-- B*v + w
     }
-    if (w[i] < 0.0) error += -w[i];
-    if ((v[i] > 0.0) && (w[i] > 0.0)) error += v[i] * w[i];
   }
 
+  /* Error on equalities part */
+  double error_e = DNRM2(n , w , incx);;
 
-  incx  = 1;
-  normb = DNRM2(m , b , incx);
-  norma = DNRM2(n , a , incx);
-
-
-
-
-
-  if (error / normb >= errore / norma)
+  /* Checks complementarity (only for rows number n to size) */
+  double error_i = 0.;
+  double zi, wi;
+  for (int i = n ; i < size ; i++)
   {
-    *err = error / (1.0 + normb);
+    zi = z[i];
+    wi = w[i];
+    if (zi < 0.0)
+    {
+      error_i += -zi;
+      if (wi < 0.0) error_i += zi * wi;
+    }
+    if (wi < 0.0) error_i += -wi;
+    if ((zi > 0.0) && (wi > 0.0)) error_i += zi * wi;
+  }
+
+  /* Computes error */
+  double *q = problem->q;
+  double normb = DNRM2(m , &q[n] , incx);
+  double norma = DNRM2(n , &q[0] , incx);
+
+  if (error_i / normb >= error_e / norma)
+  {
+    *error = error_i / (1.0 + normb);
   }
   else
   {
-    *err = errore / (1.0 + norma);
+    *error = error_e / (1.0 + norma);
   }
-  free(we);
-  if (verbose > 0) printf("Siconos/Numerics: mlcp_compute_error: Error evaluation = %g \n", *err);
-  return 0;
 
+  if (*error > tolerance)
+  {
+    if (verbose > 0) printf(" Numerics - mlcp_compute_error failed: error = %g > tolerance = %g.\n", *error, tolerance);
+    return 1;
+  }
+  else
+  {
+    if (verbose > 0) printf("Siconos/Numerics: mlcp_compute_error: Error evaluation = %g \n", *error);
+    return 0;
+  }
 }

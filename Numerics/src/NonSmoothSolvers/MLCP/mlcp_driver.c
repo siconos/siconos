@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
+#include "MLCP_Solvers.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,109 +28,71 @@
 #include "NonSmoothDrivers.h"
 #endif
 
-
-int mlcp_driver(double *A , double *B , double *C , double *D , double *a , double *b, int *n , int* m, method *pt ,  double *u, double *v, double *w)
+int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *w, Solver_Options* options, Numerics_Options* global_options)
 {
+  if (options == NULL || global_options == NULL)
+    numericsError("mlcp_driver", "null input for solver and/or global options");
 
-  const char  mlcpkey1[10] = "PGS", mlcpkey2[10] = "RPGS", mlcpkey3[10] = "PSOR" , mlcpkey4[10] = "RPSOR", mlcpkey5[10] = "PATH" ;
+  /* Set global options */
+  setNumericsOptions(global_options);
 
+  /* Checks inputs */
+  if (problem == NULL || z == NULL || w == NULL)
+    numericsError("mlcp_driver", "null input for LinearComplementarity_Problem and/or unknowns (z,w)");
 
-  int i, info = 1;
+  /* Output info. : 0: ok -  >0: problem (depends on solver) */
+  int info = -1;
 
-  int     iparamMLCP[5];
-  double  dparamMLCP[5];
+  /* Switch to DenseMatrix or SparseBlockMatrix solver according to the type of storage for M */
+  /* Storage type for the matrix M of the LCP */
+  int storageType = problem->M->storageType;
 
-  for (i = 0 ; i < 5 ; ++i) iparamMLCP[i] = 0;
-  for (i = 0 ; i < 5 ; ++i) dparamMLCP[i] = 0.0;
-
-
-  if (strcmp(pt->mlcp.name , mlcpkey1) == 0)
+  /* Sparse Block Storage */
+  if (storageType == 1)
   {
-
-    iparamMLCP[0] = pt->mlcp.itermax;
-    iparamMLCP[1] = pt->mlcp.chat;
-    dparamMLCP[0] = pt->mlcp.tol;
-    /* dparamMLCP[1] = pt->mlcp.relax;*/
-
-
-    mlcp_pgs(n , m, A , B , C , D , a  , b, u, v, w , &info , iparamMLCP , dparamMLCP);
-
-    pt->mlcp.iter = iparamMLCP[2];
-    pt->mlcp.err  = dparamMLCP[2];
-
+    numericsError("mlcp_driver", "not yet implemented for sparse storage.");
   }
-  else if (strcmp(pt->mlcp.name , mlcpkey2) == 0)
+  // else
+
+  /*************************************************
+   *  2 - Call specific solver (if no trivial sol.)
+   *************************************************/
+
+  /* Solver name */
+  char * name = options->solverName;
+
+  if (verbose == 1)
+    printf(" ========================== Call %s solver for Relayproblem ==========================\n", name);
+
+  /****** PGS algorithm ******/
+  if (strcmp(name , "PGS") == 0)
+    mlcp_pgs(problem, z , w , &info , options);
+
+  /****** RPGS algorithm ******/
+  else if (strcmp(name , "RPGS") == 0)
+    mlcp_rpgs(problem, z , w , &info , options);
+
+  /****** PSOR algorithm ******/
+  else if (strcmp(name , "PSOR") == 0)
+    mlcp_psor(problem, z , w , &info , options);
+
+  /****** RPSOR algorithm ******/
+  else if (strcmp(name , "RPSOR") == 0)
+    mlcp_rpsor(problem, z , w , &info , options);
+
+  /****** PATH algorithm ******/
+  else if (strcmp(name , "PATH") == 0)
+    mlcp_path(problem, z , w , &info , options);
+
+  /*error */
+  else
   {
-
-    iparamMLCP[0] = pt->mlcp.itermax;
-    iparamMLCP[1] = pt->mlcp.chat;
-    dparamMLCP[0] = pt->mlcp.tol;
-    dparamMLCP[1] = pt->mlcp.rho;
-    /* dparamMLCP[1] = pt->mlcp.relax;*/
-
-
-    mlcp_rpgs(n , m, A , B , C , D , a  , b, u, v, w , &info , iparamMLCP , dparamMLCP);
-
-    pt->mlcp.iter = iparamMLCP[2];
-    pt->mlcp.err  = dparamMLCP[2];
-
+    fprintf(stderr, "mlcp_driver error: unknown solver named: %s\n", name);
+    exit(EXIT_FAILURE);
   }
-  else if (strcmp(pt->mlcp.name , mlcpkey3) == 0)
-  {
-    iparamMLCP[0] = pt->mlcp.itermax;
-    iparamMLCP[1] = pt->mlcp.chat;
-    dparamMLCP[0] = pt->mlcp.tol;
-    dparamMLCP[1] = pt->mlcp.rho;
-    dparamMLCP[2] = pt->mlcp.relax;
-
-
-    mlcp_psor(n , m, A , B , C , D , a  , b, u, v, w , &info , iparamMLCP , dparamMLCP);
-
-    pt->mlcp.iter = iparamMLCP[2];
-    pt->mlcp.err  = dparamMLCP[2];
-
-
-  }
-  else if (strcmp(pt->mlcp.name , mlcpkey4) == 0)
-  {
-    iparamMLCP[0] = pt->mlcp.itermax;
-    iparamMLCP[1] = pt->mlcp.chat;
-    dparamMLCP[0] = pt->mlcp.tol;
-    dparamMLCP[1] = pt->mlcp.rho;
-    dparamMLCP[2] = pt->mlcp.relax;
-
-
-    /*      mlcp_rpsor( n ,m, A , B , C , D , a  , b, u, v, w , &info , iparamMLCP , dparamMLCP ); */
-
-    pt->mlcp.iter = iparamMLCP[2];
-    pt->mlcp.err  = dparamMLCP[2];
-
-
-  }
-  else if (strcmp(pt->mlcp.name , mlcpkey5) == 0)
-  {
-    iparamMLCP[0] = pt->mlcp.itermax;
-    iparamMLCP[1] = pt->mlcp.chat;
-    dparamMLCP[0] = pt->mlcp.tol;
-    dparamMLCP[1] = pt->mlcp.rho;
-    dparamMLCP[2] = pt->mlcp.relax;
-
-
-    mlcp_path(n , m, A , B , C , D , a  , b, u, v, w , &info , iparamMLCP , dparamMLCP);
-
-    pt->mlcp.iter = iparamMLCP[2];
-    pt->mlcp.err  = dparamMLCP[2];
-
-
-  }
-  else printf("Warning : Unknown driver : %s\n", pt->mlcp.name);
-
-  /* Checking validity of z found  */
-
-  /*  if (info == 0) info = filter_result_MLCP(*n,vec,q,z,pt->mlcp.tol,pt->mlcp.chat,w);*/
-
-  //   info= mlcp_filter_result(n,  m, A ,B , C ,D ,a ,b,u, v,  pt->mlcp.tol, pt->mlcp.chat, w);
 
   return info;
-
 }
+
+
+

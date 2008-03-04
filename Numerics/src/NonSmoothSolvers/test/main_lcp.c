@@ -1086,116 +1086,6 @@ int test_matrix(void)
 
 }
 
-/* int test_blockmatrix( void ) */
-/* /\* { *\/ */
-/*   printf("===================================================== \n"); */
-/*   printf("       LCP Solvers tests (function: test_blockmatrix)  \n"); */
-/*   printf("=====================================================\n"); */
-/*   /\* */
-/*     Other tests for sparse matrices. */
-/*     It works like test_matrix, with solversList. */
-/*   *\/ */
-
-/*   FILE *LCPfile; */
-
-/*   int i,j,itest; */
-/*   int iter = 0; */
-/*   double criteria = 0.0; */
-
-/*   int NBTEST = 6; */
-
-/*   /\* Building of the LCP *\/ */
-/*   LinearComplementarity_Problem * problem = malloc(sizeof(*problem)); */
-/*   problem->M = malloc(sizeof(*(problem->M))); */
-/*   problem->M->storageType = 1; */
-/*   problem->M->matrix0 = NULL; */
-/*   problem->M->matrix1 = malloc(sizeof(*( problem->M->matrix1))); */
-
-/*   /\* List of working solvers *\/ */
-/*   int * solversList = NULL; */
-
-/*   /\* List of unstable solvers (failed or wrong termination value) *\/ */
-/*   int * solversList2 = NULL; */
-
-/*   int info = -1; */
-/*   for( itest = 0 ; itest < NBTEST ; ++itest ) */
-/*     { */
-
-/*       /\* Gets input file *\/ */
-/*       switch(itest){ */
-/*       case 2: */
-/*  getProblemSBM("MATRIX/ortiz_monoblock.dat", problem); */
-/*  { */
-/*    int l1[11] = {1,1,0,1,0,0,1,1,1,0,0}; */
-/*    int l2[11] = {0,0,1,0,1,1,0,0,0,1,1}; */
-/*    solversList = l1; */
-/*    solversList2 = l2; */
-/*  } */
-/*  break; */
-
-/*       case 3: */
-/*  getProblemSBM("MATRIX/ortiz_block.dat", problem); */
-/*  { */
-/*    int l1[11] = {1,1,0,1,0,0,1,1,1,0,0}; */
-/*    int l2[11] = {0,0,1,0,1,1,0,0,0,1,1}; */
-/*    solversList = l1; */
-/*    solversList2 = l2; */
-/*  } */
-/*  break; */
-
-/*       case 4: */
-/*  getProblemSBM("MATRIX/ortiz_block31.dat", problem); */
-/*  { */
-/*    int l1[11] = {1,1,0,1,0,0,1,1,1,0,0}; */
-/*    int l2[11] = {0,0,1,0,1,1,0,0,0,1,1}; */
-/*    solversList = l1; */
-/*    solversList2 = l2; */
-/*  } */
-/*  break; */
-
-/*       case 5: */
-/*  getProblemSBM("MATRIX/bloc3333_mathieu2.dat", problem); */
-/*  { */
-/*    int l1[11] = {0,1,0,0,0,0,0,0,0,0,0}; */
-/*    int l2[11] = {1,0,1,1,1,1,1,1,1,1,1}; */
-/*    solversList = l1; */
-/*    solversList2 = l2; */
-/*  } */
-/*  break; */
-
-/*       } */
-
-/*       printf(" ----------------------------------------------------------\n"); */
-/*       printf("Run working tests ...\n"); */
-/*       /\* Stable: *\/ */
-/*       int infoTmp = test_lcp_series(problem, solversList); */
-/*       printf(" ----------------------------------------------------------\n\n"); */
-
-/*       /\* Fail or unstable: *\/ */
-/*       printf("---------------------------------------------------------- \n"); */
-/*       printf("\n Run unstable tests (results may be wrong or log !=0)...\n"); */
-/*       // int infoFail = test_lcp_series(problem, solversList2); */
-/*       printf("--------- End of unstable tests --------------------------- \n\n"); */
-
-/*      /\* Free memory *\/ */
-/*       freeSBM(problem->M->matrix1); */
-/*       free(problem->q); */
-/*       info = infoTmp; */
-/*       /\*       if(infoTmp!=0) *\/ */
-/*       /\*  break; *\/ */
-/*     } */
-/*   free(problem->M); */
-/*   free(problem); */
-/*   printf("===================================================== \n"); */
-/*   printf("                END OF TEST MATRIX BLOCK  \n"); */
-/*   printf("===================================================== \n"); */
-
-/*   return info; */
-/* } */
-
-/*
-******************************************************************************
-*/
 
 int main(void)
 {
@@ -1207,25 +1097,19 @@ int main(void)
   */
 
   int info1 = test_mmc();
+
   if (info1 != 0)
   {
+    // printf("Warning: test_mmc log output different from 0 for some solvers.\n");
     return info1;
-    //        printf("Warning: test_mmc log output different from 0 for some solvers.\n");
   }
 
   int info2 = test_matrix();
   if (info2 != 0)
   {
+    // printf("Warning: test_mmc log output different from 0 for some solvers.\n");
     return info2;
-    //        printf("Warning: test_mmc log output different from 0 for some solvers.\n");
   }
-
-  /*   int info3 = test_blockmatrix(); */
-  /*   if(info3!=0) */
-  /*     { */
-  /*       return info3; */
-  /*       //printf("Warning: test_blockmatrix log output different from 0 for some solvers.\n"); */
-  /*     } */
 
   return 0;
 }

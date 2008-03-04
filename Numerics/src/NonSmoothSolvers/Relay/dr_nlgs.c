@@ -21,19 +21,22 @@
 #include <string.h>
 #include <math.h>
 #include "LA.h"
+#include "Relay_Solvers.h"
 
-
-
-
-void dr_nlgs(double *vec, double *q, int *nn, double *a, double *b, int * itermax, double * tol, int *chat, double *z, double *w, int *it_end, double * res, int *info)
+void dr_nlgs(Relay_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {
+  double* vec = problem->M->matrix0;
+  double* q = problem->q;
+  int n = problem -> size;
+  double *a = problem->a;
+  double *b = problem->b;
 
+  int itt = options->iparam[0];
+  double errmax = options->dparam[0];
 
-
-  int i, j, iter1, k, ispeak = *chat;
-  int n = *nn,  itt = *itermax;
+  int i, j, iter1, k;
   int incx = 1, incy = 1;
-  double errmax = *tol, alpha, beta, mina;
+  double alpha, beta, mina;
   double err1, num, den, avn, xn, apn;
   double *zt, *wnum1;
 
@@ -125,25 +128,22 @@ void dr_nlgs(double *vec, double *q, int *nn, double *a, double *b, int * iterma
     den = DDOT(n, q, incx, q, incy);
 
     err1 = sqrt(num) / sqrt(den);
-    *it_end = iter1;
-    *res = err1;
-
-
-
+    options->iparam[1] = iter1;
+    options->dparam[1] = err1;
 
   }
 
 
   if (err1 > errmax)
   {
-    if (ispeak > 0)
+    if (verbose > 0)
       printf("No convergence after %d iterations, the residue is %g\n", iter1, err1);
 
     *info = 1;
   }
   else
   {
-    if (ispeak > 0)
+    if (verbose > 0)
       printf("Convergence after %d iterations, the residue is %g \n", iter1, err1);
 
     *info = 0;

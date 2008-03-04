@@ -22,15 +22,25 @@
 #include <string.h>
 #include <math.h>
 #include "LA.h"
+#include "Relay_Solvers.h"
 
-void dr_latin(double *vec, double *qq, int *nn, double * k_latin, double *a, double *b, int * itermax, double * tol, int * chat, double *z, double *w, int *it_end, double * res, int *info)
+void dr_latin(Relay_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {
 
-  int i, j, iter1, nrhs, info2, ispeak = *chat;
-  int n = *nn;
+  double* vec = problem->M->matrix0;
+  double* qq = problem->q;
+  int n = problem -> size;
+  double *a = problem->a;
+  double *b = problem->b;
+
+  double k_latin = options->dparam[2];
+  int itermax = options->iparam[0];
+  double errmax = options->dparam[0];
+
+  int i, j, iter1, nrhs, info2;
   int incx = 1, incy = 1;
 
-  double errmax = *tol, alpha, beta, mina, aa;
+  double alpha, beta, mina, aa;
   double err1, num11, err0;
   double den11, den22;
   double *wc, *zc, *wt, *wnum1, *znum1;
@@ -84,12 +94,12 @@ void dr_latin(double *vec, double *qq, int *nn, double * k_latin, double *a, dou
 
   for (i = 0; i < n; i++)
   {
-    k[i + n * i] = *k_latin * vec[i * n + i];
+    k[i + n * i] = k_latin * vec[i * n + i];
 
     if (fabs(k[i + n * i]) < 1e-16)
     {
 
-      if (ispeak > 0)
+      if (verbose > 0)
         printf("\n Warning nul diagonal term in k matrix \n");
 
       free(k);
@@ -135,7 +145,7 @@ void dr_latin(double *vec, double *qq, int *nn, double * k_latin, double *a, dou
   if (info2 != 0)
   {
 
-    if (ispeak > 0)
+    if (verbose > 0)
       printf("\n Matter with Cholesky factorization \n");
 
     free(k);
@@ -169,7 +179,7 @@ void dr_latin(double *vec, double *qq, int *nn, double * k_latin, double *a, dou
   err1   = 1.;
 
 
-  while ((iter1 < *itermax) && (err1 > errmax))
+  while ((iter1 < itermax) && (err1 > errmax))
   {
 
     /*   Linear stage (zc,wc) -> (z,w)       */
@@ -294,10 +304,8 @@ void dr_latin(double *vec, double *qq, int *nn, double * k_latin, double *a, dou
     iter1 = iter1 + 1;
 
 
-    *it_end = iter1;
-    *res = err1;
-
-
+    options->iparam[1] = iter1;
+    options->dparam[1] = err1;
 
 
 
@@ -306,14 +314,14 @@ void dr_latin(double *vec, double *qq, int *nn, double * k_latin, double *a, dou
 
   if (err1 > errmax)
   {
-    if (ispeak > 0)
+    if (verbose > 0)
       printf("No convergence after %d iterations, the residue is %g\n", iter1, err1);
 
     *info = 1;
   }
   else
   {
-    if (ispeak > 0)
+    if (verbose > 0)
       printf("Convergence after %d iterations, the residue is %g \n", iter1, err1);
     *info = 0;
   }

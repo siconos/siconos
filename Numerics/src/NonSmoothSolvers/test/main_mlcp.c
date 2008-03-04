@@ -91,139 +91,107 @@ void printSolution(char *name, int n, int m, double *u1, double *v1, double *w1)
     printf("%s: %14.7e  \n", name, w1[i]);
 #endif
 }
+
+
+
 void test_mlcp_series(int n , int m, double *A , double *B , double *C , double *D , double *a , double *b, double *sol)
 {
 
-  int i;
-  int info1 = -1;
+  /*   int i; */
+  /*   int info1=-1; */
 
-  double *u1;
-  double *v1;
-  double *w1;
+  /*   double *u1; */
+  /*   double *v1; */
+  /*   double *w1; */
 
 
-  u1 = malloc(n * sizeof(double));
-  v1 = malloc(m * sizeof(double));
-  w1 = malloc(m * sizeof(double));
+  /*   u1 = malloc( n*sizeof( double ) ); */
+  /*   v1 = malloc( m*sizeof( double ) ); */
+  /*   w1 = malloc( m*sizeof( double ) ); */
 
-  /* Method definition */
-  static method_mlcp method_mlcp1 = { "PGS"       , 101 , 1e-8 , 0.6 , 1.0 , 1 , 0 , 0.0 };
-  static method_mlcp method_mlcp2 = { "RPGS"       , 101 , 1e-8 , 0.6 , 1.0 , 1 , 0 , 0.0 };
-  static method_mlcp method_mlcp3 = { "PSOR"       , 101 , 1e-8 , 2.0 , 1.0 , 1 , 0 , 0.0 };
-  static method_mlcp method_mlcp4 = { "RPSOR"       , 101 , 1e-8 , 2.0 , 1.0 , 1 , 0 , 0.0 };
-  static method_mlcp method_mlcp5 = { "PATH"       , 0 , 1e-8 , 0.0 , 0.0 , 0 , 0 , 0.0 };
+  /*   /\* Method definition *\/ */
+  /*   static method_mlcp method_mlcp1 = { "PGS"       , 101 , 1e-8 , 0.6 , 1.0 , 1 , 0 , 0.0 }; */
+  /*   static method_mlcp method_mlcp2 = { "RPGS"       , 101 , 1e-8 , 0.6 , 1.0 , 1 , 0 , 0.0 }; */
+  /*   static method_mlcp method_mlcp3 = { "PSOR"       , 101 , 1e-8 , 2.0 , 1.0 , 1 , 0 , 0.0 }; */
+  /*   static method_mlcp method_mlcp4 = { "RPSOR"       , 101 , 1e-8 , 2.0 , 1.0 , 1 , 0 , 0.0 }; */
+  /*   static method_mlcp method_mlcp5 = { "PATH"       , 0 , 1e-8 , 0.0 , 0.0 , 0 , 0 , 0.0 }; */
 
-  method myMethod;
+  /*   method myMethod; */
 
-  /* #1 PGS TEST */
-#ifdef BAVARD
-  printf("**** PGS TEST ****\n");
-#endif
-  for (i = 0 ; i < m ; ++i)
-  {
-    v1[i] = sol[i + n];
-    w1[i] = sol[n + m + i];
-  }
-  for (i = 0 ; i < n ; ++i)
-  {
-    u1[i] = sol[i];
-  }
-  myMethod.mlcp =  method_mlcp1;
-  info1 = mlcp_driver(A, B, C, D, a, b, &n , &m, &myMethod , u1 , v1, w1);
+  /*   /\* #1 PGS TEST *\/ */
+  /* #ifdef BAVARD */
+  /*   printf("**** PGS TEST ****\n"); */
+  /* #endif */
+  /*   for( i = 0 ; i < m ; ++i ) {v1[i] = sol[i+n]; w1[i]=sol[n+m+i];} */
+  /*   for( i = 0 ; i < n ; ++i ) {u1[i] = sol[i]; } */
+  /*   myMethod.mlcp =  method_mlcp1; */
+  /*   info1 = mlcp_driver( A,B,C,D, a,b, &n ,&m, &myMethod , u1 , v1, w1 ); */
 
-  strcpy(summary[itest].cv[0], "CV");
-  if (info1 > 0)
-    strcpy(summary[itest].cv[0], "NO");
-  printSolution("PGS", n, m, u1, v1, w1);
+  /*   strcpy(summary[itest].cv[0],"CV"); */
+  /*   if (info1>0) */
+  /*     strcpy(summary[itest].cv[0],"NO"); */
+  /*   printSolution("PGS",n,m,u1,v1,w1); */
 
 
 
-  /* #1 RPGS TEST */
-#ifdef BAVARD
-  printf("**** RPGS TEST ****\n");
-#endif
-  for (i = 0 ; i < m ; ++i)
-  {
-    v1[i] = sol[i + n];
-    w1[i] = sol[n + m + i];
-  }
-  for (i = 0 ; i < n ; ++i)
-  {
-    u1[i] = sol[i];
-  }
+  /*   /\* #1 RPGS TEST *\/ */
+  /* #ifdef BAVARD */
+  /*   printf("**** RPGS TEST ****\n"); */
+  /* #endif */
+  /*   for( i = 0 ; i < m ; ++i ) {v1[i] = sol[i+n]; w1[i]=sol[n+m+i];} */
+  /*   for( i = 0 ; i < n ; ++i ) {u1[i] = sol[i]; } */
 
-  myMethod.mlcp =  method_mlcp2;
-  info1 = mlcp_driver(A, B, C, D, a, b, &n , &m, &myMethod , u1 , v1, w1);
-  strcpy(summary[itest].cv[1], "CV");
-  if (info1 > 0)
-    strcpy(summary[itest].cv[1], "NO");
-  printSolution("RPGS", n, m, u1, v1, w1);
+  /*   myMethod.mlcp =  method_mlcp2; */
+  /*   info1 = mlcp_driver( A,B,C,D, a,b, &n ,&m, &myMethod , u1 , v1, w1 ); */
+  /*   strcpy(summary[itest].cv[1],"CV"); */
+  /*   if (info1>0) */
+  /*     strcpy(summary[itest].cv[1],"NO"); */
+  /*   printSolution("RPGS",n,m,u1,v1,w1); */
 
-  /* #1 PSOR TEST */
-#ifdef BAVARD
-  printf("**** PSOR TEST ****\n");
-#endif
-  for (i = 0 ; i < m ; ++i)
-  {
-    v1[i] = sol[i + n];
-    w1[i] = sol[n + m + i];
-  }
-  for (i = 0 ; i < n ; ++i)
-  {
-    u1[i] = sol[i];
-  }
+  /* /\* #1 PSOR TEST *\/ */
+  /* #ifdef BAVARD */
+  /*   printf("**** PSOR TEST ****\n"); */
+  /* #endif */
+  /*   for( i = 0 ; i < m ; ++i ) {v1[i] = sol[i+n]; w1[i]=sol[n+m+i];} */
+  /*   for( i = 0 ; i < n ; ++i ) {u1[i] = sol[i]; } */
 
-  myMethod.mlcp =  method_mlcp3;
-  info1 = mlcp_driver(A, B, C, D, a, b, &n , &m, &myMethod , u1 , v1, w1);
-  strcpy(summary[itest].cv[2], "CV");
-  if (info1 > 0)
-    strcpy(summary[itest].cv[2], "NO");
-  printSolution("PSOR", n, m, u1, v1, w1);
+  /*   myMethod.mlcp =  method_mlcp3; */
+  /*   info1 = mlcp_driver( A,B,C,D, a,b, &n ,&m, &myMethod , u1 , v1, w1 ); */
+  /*   strcpy(summary[itest].cv[2],"CV"); */
+  /*   if (info1>0) */
+  /*     strcpy(summary[itest].cv[2],"NO"); */
+  /*   printSolution("PSOR",n,m,u1,v1,w1); */
 
-  /* #1 RPSOR TEST */
-#ifdef BAVARD
-  printf("**** RPSOR TEST ****\n");
-#endif
-  for (i = 0 ; i < m ; ++i)
-  {
-    v1[i] = sol[i + n];
-    w1[i] = sol[n + m + i];
-  }
-  for (i = 0 ; i < n ; ++i)
-  {
-    u1[i] = sol[i];
-  }
+  /* /\* #1 RPSOR TEST *\/ */
+  /* #ifdef BAVARD */
+  /*   printf("**** RPSOR TEST ****\n"); */
+  /* #endif */
+  /*   for( i = 0 ; i < m ; ++i ) {v1[i] = sol[i+n]; w1[i]=sol[n+m+i];} */
+  /*   for( i = 0 ; i < n ; ++i ) {u1[i] = sol[i]; } */
 
-  myMethod.mlcp =  method_mlcp4;
-  info1 = mlcp_driver(A, B, C, D, a, b, &n , &m, &myMethod , u1 , v1, w1);
-  strcpy(summary[itest].cv[3], "CV");
-  if (info1 > 0)
-    strcpy(summary[itest].cv[3], "NO");
-  printSolution("RPSOR", n, m, u1, v1, w1);
-  /* PATH TEST */
-#ifdef BAVARD
-  printf("**** PATH TEST ****\n");
-#endif
-  for (i = 0 ; i < m ; ++i)
-  {
-    v1[i] = sol[i + n];
-    w1[i] = sol[n + m + i];
-  }
-  for (i = 0 ; i < n ; ++i)
-  {
-    u1[i] = sol[i];
-  }
+  /*   myMethod.mlcp =  method_mlcp4; */
+  /*   info1 = mlcp_driver( A,B,C,D, a,b, &n ,&m, &myMethod , u1 , v1, w1 ); */
+  /*   strcpy(summary[itest].cv[3],"CV"); */
+  /*   if (info1>0) */
+  /*     strcpy(summary[itest].cv[3],"NO"); */
+  /*   printSolution("RPSOR",n,m,u1,v1,w1); */
+  /* /\* PATH TEST *\/ */
+  /* #ifdef BAVARD */
+  /*   printf("**** PATH TEST ****\n"); */
+  /* #endif */
+  /*   for( i = 0 ; i < m ; ++i ) {v1[i] = sol[i+n]; w1[i]=sol[n+m+i];} */
+  /*   for( i = 0 ; i < n ; ++i ) {u1[i] = sol[i]; } */
 
-  myMethod.mlcp =  method_mlcp5;
-  info1 = mlcp_driver(A, B, C, D, a, b, &n , &m, &myMethod , u1 , v1, w1);
-  strcpy(summary[itest].cv[4], "CV");
-  if (info1 > 0)
-    strcpy(summary[itest].cv[4], "NO");
-  printSolution("PATH", n, m, u1, v1, w1);
+  /*   myMethod.mlcp =  method_mlcp5; */
+  /*   info1 = mlcp_driver( A,B,C,D, a,b, &n ,&m, &myMethod , u1 , v1, w1 ); */
+  /*   strcpy(summary[itest].cv[4],"CV"); */
+  /*   if (info1>0) */
+  /*     strcpy(summary[itest].cv[4],"NO"); */
+  /*   printSolution("PATH",n,m,u1,v1,w1); */
 
-  free(u1);
-  free(v1);
-  free(w1);
+  /*   free( u1 ); */
+  /*   free( v1 ); */
+  /*   free( w1 ); */
 
 
 

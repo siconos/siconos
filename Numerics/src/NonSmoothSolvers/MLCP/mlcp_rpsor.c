@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-#include "LCP_Solvers.h"
+#include "MLCP_Solvers.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,39 +25,42 @@
 #include <math.h>
 #define EPSDIAG 1e-16
 
-int mlcp_compute_error(int* n, int* mm,  double *A , double *B , double *C , double *D , double *a , double *b, double *u, double *v,  int chat, double *w, double * error);
-
-void mlcp_rpsor(int *nn , int* mm, double *A , double *B , double *C , double *D , double *a, double *b, double *u, double *v, double *w , int *info ,   int *iparamMLCP , double *dparamMLCP)
+void mlcp_rpsor(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {
+  double* A = problem->A;
+  double* B = problem->B;
+  double* C = problem->C;
+  double* D = problem->D;
+  double* a = problem->a;
+  double* b = problem->b;
+  int n = problem->n;
+  int m = problem->m;
+  double *u = &z[0];
+  double *v = &z[n];
 
-
-  int n, m, incx, incy, incAx, incAy, incBx, incBy;
+  int incx, incy, incAx, incAy, incBx, incBy;
   int i, iter;
   int itermax, verbose;
   int incxn;
   double err, vi, viprev, uiprev;
   double tol, omega, rho;
   double *wOld, *diagA, *diagB;
-  n = *nn;
-  m = *mm;
   incx = 1;
   incy = 1;
   incxn = n;
   /* Recup input */
 
-  itermax = iparamMLCP[0];
-  verbose  = iparamMLCP[1];
-
-  tol   = dparamMLCP[0];
-  rho   = dparamMLCP[1];
-  omega = dparamMLCP[2];
+  itermax = options->iparam[0];
+  tol   = options->dparam[0];
+  rho   = options->dparam[2];
+  omega = options->dparam[3];
   printf("omega %f\n", omega);
   printf("rho %f\n", rho);
 
   /* Initialize output */
 
-  iparamMLCP[2] = 0;
-  dparamMLCP[2] = 0.0;
+  options->iparam[1] = 0;
+  options->dparam[1] = 0.0;
 
   /* Allocation */
 
@@ -144,21 +147,9 @@ void mlcp_rpsor(int *nn , int* mm, double *A , double *B , double *C , double *D
   incBx = m;
   incBy = 1;
 
-  /* LinearComplementarity_Problem for calls to lcp_compute_error */
-  LinearComplementarity_Problem problem;
-  problem.M = malloc(sizeof(*problem.M));
-  problem.M->matrix0 = B;
-  problem.q = b;
-  problem.size = m;
   DCOPY(m , b , incx , w , incy);       //  q --> w
-  if (n >= 1)
-  {
-    mlcp_compute_error(nn, mm,  A , B , C , D , a , b, u, v, verbose, w,  &err);
-  }
-  else
-  {
-    lcp_compute_error(&problem, u, w ,  tol, &err);
-  }
+  mlcp_compute_error(problem, z, w, tol, &err);
+
 
   while ((iter < itermax) && (err > tol))
   {
@@ -192,18 +183,7 @@ void mlcp_rpsor(int *nn , int* mm, double *A , double *B , double *C , double *D
 
     /* **** Criterium convergence compliant with filter_result_MLCP **** */
 
-
-    if (n >= 1)
-    {
-      mlcp_compute_error(nn, mm,  A , B , C , D , a , b, u, v, verbose, w,  &err);
-    }
-    else
-    {
-      lcp_compute_error(&problem, u, w , tol, &err);
-    }
-    //err = err ;
-
-
+    mlcp_compute_error(problem, z, w, tol, &err);
 
     if (verbose == 2)
     {
@@ -218,8 +198,8 @@ void mlcp_rpsor(int *nn , int* mm, double *A , double *B , double *C , double *D
 
   }
 
-  iparamMLCP[2] = iter;
-  dparamMLCP[2] = err;
+  options->iparam[1] = iter;
+  options->dparam[1] = err;
 
   if (err > tol)
   {
@@ -240,6 +220,5 @@ void mlcp_rpsor(int *nn , int* mm, double *A , double *B , double *C , double *D
   free(wOld);
   free(diagA);
   free(diagB);
-  free(problem.M);
   return;
 }

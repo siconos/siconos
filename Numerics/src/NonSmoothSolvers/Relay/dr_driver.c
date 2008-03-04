@@ -21,48 +21,60 @@
 #include <string.h>
 #include <time.h>
 #ifndef MEXFLAG
+#include "Numerics_Options.h"
 #include "NonSmoothDrivers.h"
 #endif
 
-int dr_driver(double *vec , double *q , int *nn , method *pt , double *z , double *w)
+int dr_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* options, Numerics_Options* global_options)
 {
+  if (options == NULL || global_options == NULL)
+    numericsError("dr_driver", "null input for solver and/or global options");
 
-  int info = -1, it_end;
+  /* Set global options */
+  setNumericsOptions(global_options);
 
-  double res;
+  /* Checks inputs */
+  if (problem == NULL || z == NULL || w == NULL)
+    numericsError("dr_driver", "null input for LinearComplementarity_Problem and/or unknowns (z,w)");
 
-  char drkey1[10] = "NLGS" , drkey2[10] = "Latin"/*,drkey3[10] = "CPG"*/;
+  /* Output info. : 0: ok -  >0: problem (depends on solver) */
+  int info = -1;
 
+  /* Switch to DenseMatrix or SparseBlockMatrix solver according to the type of storage for M */
+  /* Storage type for the matrix M of the LCP */
+  int storageType = problem->M->storageType;
 
-
-
-  clock_t t1, t2;
-
-  t1 = clock();
-
-  if (strcmp(pt->dr.name , drkey2) == 0)
+  /* Sparse Block Storage */
+  if (storageType == 1)
   {
-
-    dr_latin(vec , q , nn , &pt->dr.k_latin , pt->dr.a , pt->dr.b , &pt->dr.itermax , &pt->dr.tol , &pt->dr.chat, z , w , &it_end , &res , &info);
-
-    pt->dr.err = res;
-    pt->dr.iter = it_end;
-
-
+    numericsError("dr_driver", "not yet implemented for sparse storage.");
   }
-  else if (strcmp(pt->dr.name , drkey1) == 0)
+  // else
+
+  /*************************************************
+   *  2 - Call specific solver (if no trivial sol.)
+   *************************************************/
+
+  /* Solver name */
+  char * name = options->solverName;
+
+  if (verbose == 1)
+    printf(" ========================== Call %s solver for Relayproblem ==========================\n", name);
+
+  /****** NLGS algorithm ******/
+  if (strcmp(name , "NLGS") == 0)
+    dr_nlgs(problem, z , w , &info , options);
+
+  /****** Latin algorithm ******/
+  else if (strcmp(name , "Latin") == 0)
+    dr_latin(problem, z , w , &info , options);
+
+  /*error */
+  else
   {
-
-    dr_nlgs(vec , q , nn , pt->dr.a , pt->dr.b , &pt->dr.itermax , &pt->dr.tol , &pt->dr.chat, z , w , &it_end , &res , &info);
-
-    pt->dr.err = res;
-    pt->dr.iter = it_end;
+    fprintf(stderr, "dr_driver error: unknown solver named: %s\n", name);
+    exit(EXIT_FAILURE);
   }
-  else printf("Warning : Unknown solving method : %s\n", pt->dr.name);
-
-  t2 = clock();
-  printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
 
   return info;
-
 }

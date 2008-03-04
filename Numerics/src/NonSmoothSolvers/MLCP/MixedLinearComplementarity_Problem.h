@@ -19,6 +19,11 @@
 #ifndef MLCP_PROBLEM_H
 #define MLCP_PROBLEM_H
 
+/*!\file MixedLinearComplementarity_Problem.h
+  \brief Structure used to define a Mixed Linear Complementarity Problem
+
+*/
+
 /*! \page MLCProblem Mixed Linear Complementarity problems (MLCP)
   \section lcpIntro The problem
   Find \f$(z,w)\f$ such that:\n
@@ -57,18 +62,34 @@
   \f$ w_1=0\f$.
   \f$ 0 \le w_{2} \perp v \ge 0 \f$
 
+  Old version (?):
+
+  Try \f$(u,v,w)\f$ such that:\n
+  \f$
+  \left\lbrace
+  \begin{array}{l}
+  A u + Cv +a =0\\
+  D u + Bv +b = w \\
+  0 \le v \perp  w \ge 0\\
+  \end{array}
+  \right.
+  \f$
+
+  where  A is an (\f$ n \times n\f$ ) matrix, B is an (\f$ m \times m\f$ ) matrix,  C is an (\f$ n \times m\f$ ) matrix,\n
+  D is an (\f$ m \times n\f$ ) matrix,    a and u is an (\f$ n \f$ ) vectors b,v and w is an (\f$ m \f$ ) vectors.
+
   \section mlcpSolversList Available solvers
 
   The solvers and their parameters are described in \ref MLCPSolvers . \n
-  Use the generic function mlcp_driver() to call one the the specific solvers listed below:
 
+  Use the generic function mlcp_solver(), to call one the the specific solvers listed below:
+  - mlcp_pgs(), (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver
+  - mlcp_rpgs(), (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver
+  - mlcp_psor(), projected successive overrelaxation method
+  - mlcp_rpsor(), regularized projected successive overrelaxation method
+  - mlcp_path(), path solver
 
-  (see the functions/solvers list in MLCP_Solvers.h)
-
-*/
-
-/*!\file MixedLinearComplementarity_Problem.h
-  \brief Structure used to define a Mixed Linear Complementarity Problem
+  (see the functions/solvers list in MLCP_solvers.h)
 
 */
 
@@ -79,6 +100,13 @@
     \param m dim of the Complementarity constraints
     \param M matrix of the MLCP
     \param q vector
+    \param A matrix of the MLCP
+    \param B matrix of the MLCP
+    \param C matrix of the MLCP
+    \param D matrix of the MLCP
+    \param a vector
+    \param b vector
+    \param problemType 0 if the problem is saved using (M) and 1 if (A,B,C,D)
  */
 typedef struct
 {
@@ -86,6 +114,13 @@ typedef struct
   int m;
   NumericsMatrix* M;
   double * q;
+  double *A;
+  double *B;
+  double *C;
+  double *D;
+  double *a;
+  double *b;
+  int problemType;
 } MixedLinearComplementarity_Problem;
 
 #ifdef __cplusplus
