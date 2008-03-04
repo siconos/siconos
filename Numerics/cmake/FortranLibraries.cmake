@@ -18,13 +18,12 @@ GET_FILENAME_COMPONENT(fortran_comp_dir ${fortran_comp_bin_dir}       PATH)
 SET(FORTRAN_COMPILER_DIRECTORY ${fortran_comp_dir} CACHE PATH "location of fortran compiler top directory")
 SET(FORTRAN_COMPILER_LIB_DIRECTORY ${fortran_comp_dir}/lib CACHE PATH "location of fortran compiler lib directory")
 
-SET(KNOWN_FORTRAN_LIBRARIES
-   ""
-   "gfortran"
+SET(KNOWN_FORTRAN_LIBRARIES "gfortran\;gfortranbegin"
    "fio\;f90math\;f77math"
    "afio\;af90math\;af77math\;amisc"
    "g2c"
 )
+
 
 # Define the list "options" of all possible schemes that we want to consider
 # Get its length and initialize the counter "iopt" to zero
@@ -36,9 +35,9 @@ WHILE(${iopt} LESS ${imax})
 
   # Get the current list entry (current scheme)
   LIST(GET KNOWN_FORTRAN_LIBRARIES ${iopt} fc_libraries_t)
-  
+
   STRING(REGEX REPLACE ";" "\\\;" fc_libraries "${fc_libraries_t}")
-  
+
   # Create a simple Fortran library source
   FILE(WRITE ${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/FLIB/ftest.f
     "        FUNCTION fortransub()\n"
@@ -59,6 +58,7 @@ WHILE(${iopt} LESS ${imax})
   FILE(GLOB _LIBDIRS_MAYBE 
     /opt /opt/* /opt/lib/*
     /usr/local/* /usr/local/lib/*
+    /usr/local/*/lib/gcc/*/*
     /usr/lib/gcc/*/*
     /usr/local/lib/gcc/*/*
     /usr/* /usr/lib/*)
@@ -73,23 +73,52 @@ WHILE(${iopt} LESS ${imax})
   
   #string -> list
   SET(_libs ${fc_libraries})
+  SET(_LFIND)
+  FOREACH(_l ${_libs})
+    MESSAGE(STATUS "Searching for the library ${_l}")
+    FIND_LIBRARY(_LFIND_${_l} NAMES ${_l} PATHS ${_LIBDIRS} PATH_SUFFIXES lib)
+    IF(_LFIND_${_l})
+      MESSAGE(STATUS "Found ${_LFIND_${_l}}")
+      SET(_LFIND TRUE)
+    ENDIF(_LFIND_${_l})
+  ENDFOREACH(_l ${_libs})
 
-  FIND_LIBRARY(_LFIND NAMES ${_libs} PATHS ${_LIBDIRS} PATH_SUFFIXES lib)
       
   IF(_LFIND)
 
-    MESSAGE(STATUS "Found ${_LFIND}, trying to link mixed C/fortran stuff...")
-    GET_FILENAME_COMPONENT(_LFINDDIR ${_LFIND} PATH)
-    
+    MESSAGE( STATUS  "Trying to link mixed C/Fortran stuff...")
+
+    SET(_CMAKELISTS ${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/FLIB/CMakeLists.txt)
+
     # Create a CMakeLists.txt file which will generate the "flib" library
-    FILE(WRITE ${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/FLIB/CMakeLists.txt
+
+    # I
+    FILE(WRITE ${_CMAKELISTS}
       "PROJECT(FortranTest C Fortran)\n"
-      "SET(CMAKE_Fortran_FLAGS \"${TMP_Fortran_FLAGS}\")\n"
-      "LINK_DIRECTORIES(${_LFINDDIR})\n"
+      "SET(CMAKE_Fortran_FLAGS \"${TMP_Fortran_FLAGS}\")\n")
+
+    # II
+    FOREACH(_l ${_libs})
+      IF(_LFIND_${_l})
+        GET_FILENAME_COMPONENT(_LFINDDIR_l ${_LFIND_${_l}} PATH)
+        FILE(APPEND ${_CMAKELISTS}
+          "LINK_DIRECTORIES(${_LFINDDIR_l})\n")
+      ENDIF(_LFIND_${_l})
+    ENDFOREACH(_l ${_libs})
+
+    # III
+    FILE(APPEND ${_CMAKELISTS}
       "ADD_LIBRARY(flib ftest.f)\n"
-      "ADD_EXECUTABLE(testF77libs testF77libs.c)\n"
-      "TARGET_LINK_LIBRARIES(testF77libs flib ${fc_libraries})\n")
-    
+      "ADD_EXECUTABLE(testF77libs testF77libs.c)\n")
+
+    # IV Pfff...
+    FOREACH(_l ${_libs})
+      IF(_LFIND_${_l})
+        FILE(APPEND ${_CMAKELISTS}
+          "TARGET_LINK_LIBRARIES(testF77libs flib ${_l})\n")
+      ENDIF(_LFIND_${_l})
+    ENDFOREACH(_l ${_libs})
+
 
     # Use TRY_COMPILE to make the target "flib"
     TRY_COMPILE(FORT_LIBS_WORK
@@ -100,19 +129,31 @@ WHILE(${iopt} LESS ${imax})
     
     IF(FORT_LIBS_WORK)
       MESSAGE(STATUS "Ok, mixed C/Fortran can be linked with ${fc_libraries}")
-      SET(FORTRAN_COMPILER_LIB_DIRECTORY ${_LFINDDIR})
+
+      SET(FORTRAN_COMPILER_LIB_DIRECTORIES)
+      SET(FORTRAN_LIBRARIES)
+      FOREACH(_l ${_libs})
+        IF(_LFIND_${_l})
+          GET_FILENAME_COMPONENT(_LFINDDIR_l ${_LFIND_${_l}} PATH)
+          LIST(APPEND FORTRAN_COMPILER_LIB_DIRECTORIES ${_LFINDDIR_l})
+          LIST(APPEND FORTRAN_LIBRARIES ${_l})
+        ENDIF(_LFIND_${_l})
+      ENDFOREACH(_l ${_libs})
+      
+    ELSE(FORT_LIBS_WORK)
+      MESSAGE(STATUS "No, mixed C/Fortran cannot be linked with ${fc_libraries}")
     ENDIF(FORT_LIBS_WORK)
   ENDIF(_LFIND)
     
   IF(FORT_LIBS_WORK)
     # the goal is to set this to something useful
-    SET(FORTRAN_LIBRARIES ${fc_libraries} CACHE STRING "fortran libraries required to link with f90 generated code" FORCE)
+    SET(FORTRAN_LIBRARIES ${FORTRAN_LIBRARIES} CACHE STRING "fortran libraries required to link with f90 generated code" FORCE)
     MESSAGE(STATUS "Using FORTRAN_LIBRARIES ${FORTRAN_LIBRARIES}")
-    MESSAGE(STATUS "Using FORTRAN_COMPILER_LIB_DIRECTORY ${FORTRAN_COMPILER_LIB_DIRECTORY}")
+    MESSAGE(STATUS "Using FORTRAN_COMPILER_LIB_DIRECTORIES ${FORTRAN_COMPILER_LIB_DIRECTORIES}")
     
     SET(HAVE_FORTRAN_LIBRARIES TRUE CACHE INTERNAL "successfully found fortran libraries")
     SET(iopt ${imax})
-    LINK_DIRECTORIES(${FORTRAN_COMPILER_LIB_DIRECTORY})
+    LINK_DIRECTORIES(${FORTRAN_COMPILER_LIB_DIRECTORIES})
   ELSE(FORT_LIBS_WORK)
     MATH(EXPR iopt ${iopt}+1)
   ENDIF(FORT_LIBS_WORK)
