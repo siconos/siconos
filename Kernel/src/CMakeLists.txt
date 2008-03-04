@@ -34,7 +34,7 @@ SET(SiconosKernel_DIRS
 #
 # Unstable sources
 #
-SET(SiconosKernel_Unstable_SRCS simulationTools/Solver.cpp)
+SET(SiconosKernel_Unstable_SRCS )
 
 #
 # Installation layout
@@ -78,11 +78,8 @@ SET_TEST(test1
 
 # xml
 TEST_DIRECTORY(xml/test)
-SET_TEST(test1 BoundaryConditionXMLTest.cpp LagrangianDSXMLTest.cpp
-  OneStepIntegratorXMLTest.cpp SiconosMemoryXMLTest.cpp
-  DynamicalSystemXMLTest.cpp LinearDSXMLTest.cpp RelayNSLXMLTest.cpp
-  InteractionXMLTest.cpp LinearTIRXMLTest.cpp
-  SiconosDOMTreeToolsTest.cpp TimeDiscretisationXMLTest.cpp TestMain.cpp)
+SET_TEST(test1 
+  TestMain.cpp)
 
 IF(PRINT_ENV)
   INCLUDE(CMakeLog)
