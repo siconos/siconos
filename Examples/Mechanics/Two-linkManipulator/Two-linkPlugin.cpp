@@ -29,14 +29,15 @@ double m2 = 1; //mass of the second link
 double I1 = 1;// the moment of inertia of the first link about the axis that passes through the center of mass (parallel to the Z axis)
 double I2 = 1;// the moment of inertia of the second link about the axis that passes through the center of mass (parallel to the Z axis)
 double g = 9.8;//gravitational acceleration
-double gamma2 = 25;
-double gamma1 = 35;
-double Kf = 5;
-double P = 5;
+double gamma2 = 5;
+double gamma1 = 8;
+double Kf = 0.5;
+double P = 10;
 double ep = 0.1;
-double delta = 0.02;
+double delta = 0.4;
+double Del = 1;
 double eps = 0.1;
-double alpha = 10;
+double alpha = 100;
 
 
 extern "C" void mass(unsigned int sizeOfq, const double *q, double *mass, unsigned int sizeZ, double* z)
@@ -151,6 +152,8 @@ extern "C" void U(double time, unsigned int sizeOfq, const double *q, const  dou
   z[15] = qr12;
   z[18] = qr21;
   z[19] = qr22;
+  z[22] = -U[0] + g * (l1 * cos(q[0]) * (m2 + m1 / 2) + m2 * l2 * cos(q[0] + q[1]) / 2);
+  z[23] = -U[1] + g * m2 * l2 * cos(q[0] + q[1]) / 2;
 }
 
 
@@ -195,31 +198,35 @@ extern "C" void U10(double time, unsigned int sizeOfq, const double *q, const  d
   double qd2 = 0;
   double qd12 = 0;
   double qd22 = 0;
-  double t3 = (time - z[8] - delta);
+  double t3 = (time - z[8] - delta) / Del;
 
-  double b0 = 0.1 * sin(2 * PI * (z[8] + delta) / P);
-  double b1 = (2 * PI / P) * 0.1 * cos(2 * PI * (z[8] + delta) / P);
-  double b2 = -2 * b1 - 3 * b0 - 3 * sqrt(z[7]) * alpha;
-  double b3 = b1 + 2 * b0 + 2 * sqrt(z[7]) * alpha;
+  double b0 = 0.1 * sin(2 * PI * z[8] / P);
+  double b2 = -3 * b0 - 3 * sqrt(z[7]) * alpha;
+  double b3 = 2 * b0 + 2 * sqrt(z[7]) * alpha;
 
   if (t2 < delta)
   {
     qd1 = 0.65 + 0.1 * cos(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P);
     qd11 = -(2 * PI / P) * 0.1 * sin(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) / (delta * delta);
     qd21 = -(2 * PI / P) * (2 * PI / P) * 0.1 * cos(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * ((2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta))) / (delta * delta * delta * delta) - (2 * PI / P) * 0.1 * sin(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (2 * t2 + 4 * (t2 - delta)) / (delta * delta);
-    qd2 = 0.1 * sin(2 * PI * time / P);
-    qd12 = (2 * PI / P) * 0.1 * cos(2 * PI * time / P);
-    qd22 = -(2 * PI / P) * (2 * PI / P) * 0.1 * sin(2 * PI * time / P);
-
+    qd2 = 0.1 * sin(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P);
+    qd12 = (2 * PI / P) * 0.1 * cos(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) / (delta * delta);
+    qd22 = -(2 * PI / P) * (2 * PI / P) * 0.1 * sin(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * ((2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta))) / (delta * delta * delta * delta) + (2 * PI / P) * 0.1 * cos(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (2 * t2 + 4 * (t2 - delta)) / (delta * delta);
+    // qd1 = 0.65+0.1*cos(2*PI*(z[8]+tf*tf*tf*tf*t2/(delta*delta*delta*delta))/P);
+    //     qd11 = -(2*PI/P)*0.1*sin(2*PI*(z[8]+tf*tf*tf*tf*t2/(delta*delta*delta*delta))/P)*(4*tf*tf*tf*t2+tf*tf*tf*tf)/(delta*delta*delta*delta);
+    //     qd21 = -(2*PI/P)*(2*PI/P)*0.1*cos(2*PI*(z[8]+tf*tf*tf*tf*t2/(delta*delta*delta*delta))/P)*(4*tf*tf*tf*t2+tf*tf*tf*tf)*(4*tf*tf*tf*t2+tf*tf*tf*tf)/(delta*delta*delta*delta*delta*delta*delta*delta)+(2*PI/P)*0.1*sin(2*PI*(z[8]+tf*tf*tf*tf*t2/(delta*delta*delta*delta))/P)*(12*tf*tf*t2+4*tf*tf*tf)/(delta*delta*delta*delta);
+    //       qd2 = 0.1*sin(2*PI*(z[8]+tf*tf*tf*tf*t2/(delta*delta*delta*delta))/P);
+    //       qd12 = (2*PI/P)*0.1*cos(2*PI*(z[8]+tf*tf*tf*tf*t2/(delta*delta*delta*delta))/P)*(4*tf*tf*tf*t2+tf*tf*tf*tf)/(delta*delta*delta*delta);
+    //       qd22 = -(2*PI/P)*(2*PI/P)*0.1*sin(2*PI*(z[8]+tf*tf*tf*tf*t2/(delta*delta*delta*delta))/P)*(4*tf*tf*tf*t2+tf*tf*tf*tf)*(4*tf*tf*tf*t2+tf*tf*tf*tf)/(delta*delta*delta*delta*delta*delta*delta*delta)-(2*PI/P)*0.1*cos(2*PI*(z[8]+tf*tf*tf*tf*t2/(delta*delta*delta*delta))/P)*(12*tf*tf*t2+4*tf*tf*tf)/(delta*delta*delta*delta);
   }
   else
   {
     qd1 = z[5];
     qd11 = 0;
     qd21 = 0;
-    qd2 = b3 * t3 * t3 * t3 + b2 * t3 * t3 + b1 * t3 + b0;
-    qd12 = 3 * b3 * t3 * t3 + 2 * b2 * t3 + b1;
-    qd22 = 6 * b3 * t3 + 2 * b2;
+    qd2 = b3 * t3 * t3 * t3 + b2 * t3 * t3 + b0;
+    qd12 = (3 * b3 * t3 * t3 + 2 * b2 * t3) / Del;
+    qd22 = (6 * b3 * t3 + 2 * b2) / (Del * Del);
   }
 
   //  double qd2 = 0.1*sin(2*PI*time/P);
@@ -266,12 +273,13 @@ extern "C" void U10(double time, unsigned int sizeOfq, const double *q, const  d
   double V1 = (s1 * s1 * (d11 * mc11 + d21 * mc21) + 2 * s1 * s2ly * (d12 * mc11 + d22 * mc21) + s2ly * s2ly * (d12 * mc12 + d22 * mc22)) / 2;
   z[6] = V1 + gamma1 * gamma2 * ((x - qd1) * (x - qd1) + (y - qd2c) * (y - qd2c));
 
-  z[9] = 0;
   z[11] = P;
   z[14] = qr11;
   z[15] = qr12;
   z[18] = qr21;
   z[19] = qr22;
+  z[22] = -U[0] + g * (l1 * cos(q[0]) * (m2 + m1 / 2) + m2 * l2 * cos(q[0] + q[1]) / 2);
+  z[23] = -U[1] + g * m2 * l2 * cos(q[0] + q[1]) / 2;
 }
 
 extern "C" void U11(double time, unsigned int sizeOfq, const double *q, const  double *velocity, double *U, unsigned int sizeZ, double* z)
@@ -308,14 +316,15 @@ extern "C" void U11(double time, unsigned int sizeOfq, const double *q, const  d
   double mc22 = m12 * d12 + m22 * d22;
 
   double qr11 = -gamma2 * (x - z[5]);
-  double qr12 = -gamma2 * (y + sqrt(z[7]) * alpha);
+  double qr12 = -gamma2 * y;
 
   double qr21 = -gamma2 * x1;
   double qr22 = -gamma2 * y1;
 
   double s1 = x1 - qr11;
   double s2 = y1 - qr12;
-  double s2ly = y1 + gamma2 * y;
+  // double s2ly = y1+gamma2*y;
+  double s2bar = y1 + gamma2 * (y + sqrt(z[7]) * alpha);
 
   double a11 = m11 * dd11 + m12 * dd21;
   double a12 = m11 * dd12 + m12 * dd22;
@@ -329,23 +338,25 @@ extern "C" void U11(double time, unsigned int sizeOfq, const double *q, const  d
 
   double T01 = mc11 * qr21 + mc12 * qr22;
   double T02 = a1 + a2;
-  double T03 = grad11 * gamma1 * s1 + grad21 * gamma1 * s2;
+  double T03 = grad11 * gamma1 * s1 + grad21 * gamma1 * s2bar;
 
   double T11 = mc21 * qr21 + mc22 * qr22;
   double T12 = a3 + a4;
-  double T13 = grad12 * gamma1 * s1 + grad22 * gamma1 * s2;
+  double T13 = grad12 * gamma1 * s1 + grad22 * gamma1 * s2bar;
 
   U[0] = -(T01 + T02 - T03);
   U[1] = -(T11 + T12 - T13);
 
 
-  double V1 = (s1 * s1 * (d11 * mc11 + d21 * mc21) + 2 * s1 * s2ly * (d12 * mc11 + d22 * mc21) + s2ly * s2ly * (d12 * mc12 + d22 * mc22)) / 2;
+  double V1 = (s1 * s1 * (d11 * mc11 + d21 * mc21) + 2 * s1 * s2 * (d12 * mc11 + d22 * mc21) + s2 * s2 * (d12 * mc12 + d22 * mc22)) / 2;
   z[6] = V1 + gamma1 * gamma2 * ((x - z[5]) * (x - z[5]) + y * y);
   z[11] = P;
   z[14] = qr11;
   z[15] = qr12;
   z[18] = qr21;
   z[19] = qr22;
+  z[22] = -U[0] + g * (l1 * cos(q[0]) * (m2 + m1 / 2) + m2 * l2 * cos(q[0] + q[1]) / 2);
+  z[23] = -U[1] + g * m2 * l2 * cos(q[0] + q[1]) / 2;
 }
 
 extern "C" void U2(double time, unsigned int sizeOfq, const double *q, const  double *velocity, double *U, unsigned int sizeZ, double* z)
@@ -410,7 +421,7 @@ extern "C" void U2(double time, unsigned int sizeOfq, const double *q, const  do
   double a3 = m2 * l1 * l2 * sin(q[1]) * velocity[0] * (d11 * qr11 + d12 * qr12) / 2;
   double a4 =  a21 * qr11 + a22 * qr12;
 
-  double ld = (m2 * l1 * l2 * sin(q[1]) * velocity[1] * (d11 + d21 / 2) - a21 + (mc21 / mc22) * (m2 * l1 * l2 * sin(q[1]) * velocity[0] * d11 / 2 - a11)) * s1 + gamma1 * mc21 * s1 / mc22 - (mc11 * mc22 - mc12 * mc21) * 0.1 * (k * P - time) / mc22;
+  double ld = (m2 * l1 * l2 * sin(q[1]) * velocity[0] * (d12 - d22 / 2) - a21 - (mc21 / mc11) * (m2 * l1 * l2 * sin(q[1]) * velocity[0] * (d11 - d21 / 2) - a11)) * s1 - gamma1 * mc21 * s1 / mc11 + (k * P - time) * (1 + Kf);
   z[12] = 5 + (-mc22 * ld + fabs(mc22 * ld)) / 2;
 
   double T01 = mc11 * qr21 + mc12 * qr22;
@@ -427,10 +438,13 @@ extern "C" void U2(double time, unsigned int sizeOfq, const double *q, const  do
   double V1 = (s1 * s1 * (d11 * mc11 + d21 * mc21) + 2 * s1 * s2 * (d12 * mc11 + d22 * mc21) + s2 * s2 * (d12 * mc12 + d22 * mc22)) / 2;
   z[6] = V1 + gamma1 * gamma2 * ((x - qd1) * (x - qd1) + y * y);
   z[11] = P;
+  z[7] = 0;
   z[14] = qr11;
   z[15] = qr12;
   z[18] = qr21;
   z[19] = qr22;
+  z[22] = -U[0] + g * (l1 * cos(q[0]) * (m2 + m1 / 2) + m2 * l2 * cos(q[0] + q[1]) / 2);
+  z[23] = -U[1] + g * m2 * l2 * cos(q[0] + q[1]) / 2; //(k*P-time)*(1+Kf);
 }
 
 extern "C" void U3(double time, unsigned int sizeOfq, const double *q, const  double *velocity, double *U, unsigned int sizeZ, double* z)
@@ -517,6 +531,8 @@ extern "C" void U3(double time, unsigned int sizeOfq, const double *q, const  do
   z[15] = qr12;
   z[18] = qr21;
   z[19] = qr22;
+  z[22] = -U[0] + g * (l1 * cos(q[0]) * (m2 + m1 / 2) + m2 * l2 * cos(q[0] + q[1]) / 2);
+  z[23] = -U[1] + g * m2 * l2 * cos(q[0] + q[1]) / 2;
 }
 
 
