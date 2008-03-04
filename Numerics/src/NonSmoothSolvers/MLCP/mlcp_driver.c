@@ -84,6 +84,10 @@ int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *
   else if (strcmp(name , "PATH") == 0)
     mlcp_path(problem, z , w , &info , options);
 
+  /****** ENUM algorithm ******/
+  else if (strcmp(name , "ENUM") == 0)
+    mlcp_enum(problem, z , w , &info , options);
+
   /*error */
   else
   {

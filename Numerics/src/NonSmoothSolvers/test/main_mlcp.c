@@ -94,8 +94,26 @@ void printSolution(char *name, int n, int m, double *u1, double *v1, double *w1)
 
 
 
-void test_mlcp_series(int n , int m, double *A , double *B , double *C , double *D , double *a , double *b, double *sol)
+void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, double *w)
 {
+  int info;
+  Solver_Options mlcpOptions;
+  Numerics_Options global_options;
+  int n = problem->n;
+  int m = problem->m;
+  strcpy(mlcpOptions.solverName, "ENUM");
+  mlcpOptions.iSize = 1;
+  mlcpOptions.iparam = (int*)malloc(sizeof(int));
+  mlcpOptions.dSize = 1;
+  mlcpOptions.floatWorkingMem = (double*)malloc(((n + m) * (n + m) + 2 * (n + m)) * sizeof(double));
+  mlcpOptions.intWorkingMem = (int*)malloc(2 * (n + m) * sizeof(int));
+
+  //info = mlcp_driver( problem,z,w, &mlcpOptions,&global_options);
+  displayMLCP(problem);
+
+  free(mlcpOptions.floatWorkingMem);
+  free(mlcpOptions.intWorkingMem);
+
 
   /*   int i; */
   /*   int info1=-1; */
@@ -208,13 +226,25 @@ void test_matrix(void)
   int m, m2;
   int withSol = 0;
 
-  double *a, *b, *sol;
-  double *vecA, *vecB, *vecC, *vecD;
+  double *a, *b, *sol, *z, *w;
+  double *vecA, *vecB, *vecC, *vecD, *vecM, *vecQ;
+  NumericsMatrix M;
+  M.storageType = 0;
 
   char val[20];
 
   int iter;
   double criteria;
+  MixedLinearComplementarity_Problem problem;
+  problem.M = &M;
+  problem.q = vecQ;
+  problem.A = vecA;
+  problem.B = vecB;
+  problem.C = vecC;
+  problem.D = vecD;
+  problem.a = a;
+  problem.b = b;
+  problem.problemType = 0;
 
   printf("* *** ******************** *** * \n");
   printf("* *** STARTING TEST MATRIX *** * \n");
@@ -338,14 +368,22 @@ void test_matrix(void)
     m2 = m * m;
     isol = 1;
 
-    vecA = (double*)calloc(n2, sizeof(double));
-    vecB = (double*)calloc(m2, sizeof(double));
-    vecC = (double*)calloc(n * m, sizeof(double));
-    vecD = (double*)calloc(m * n, sizeof(double));
-    a    = (double*)calloc(n, sizeof(double));
-    b    = (double*)calloc(m, sizeof(double));
-    sol  = (double*)calloc((n + m + m), sizeof(double));
+    vecM = (double*)malloc((n + m) * (n + m) * sizeof(double));
+    vecQ = (double*)malloc((n + m) * sizeof(double));
+    z = (double*)malloc((n + m) * sizeof(double));
+    w = (double*)malloc((n + m) * sizeof(double));
+    vecA = (double*)malloc(n2 * sizeof(double));
+    vecB = (double*)malloc(m2 * sizeof(double));
+    vecC = (double*)malloc(n * m * sizeof(double));
+    vecD = (double*)malloc(m * n * sizeof(double));
+    a    = (double*)malloc(n * sizeof(double));
+    b    = (double*)malloc(m * sizeof(double));
+    sol  = (double*)malloc((n + m + m) * sizeof(double));
 
+    problem.n = n;
+    problem.m = m;
+    M.size0 = n + m;
+    M.size1 = n + m;
 
 
 
@@ -355,6 +393,7 @@ void test_matrix(void)
       {
         fscanf(MLCPfile, "%s", val);
         vecA[ n * j + i ] = atof(val);
+        vecM[(n + m)*j + i ] = atof(val);
       }
     }
     for (i = 0 ; i < m ; ++i)
@@ -363,6 +402,7 @@ void test_matrix(void)
       {
         fscanf(MLCPfile, "%s", val);
         vecB[ m * j + i ] = atof(val);
+        vecM[ n * (m + n) + (n + m)*j + n + i ] = atof(val);
 
 
       }
@@ -373,6 +413,7 @@ void test_matrix(void)
       {
         fscanf(MLCPfile, "%s", val);
         vecC[ n * j + i ] = atof(val);
+        vecM[(n + m) * (n + j) + i ] = atof(val);
       }
     }
     for (i = 0 ; i < m ; ++i)
@@ -381,6 +422,7 @@ void test_matrix(void)
       {
         fscanf(MLCPfile, "%s", val);
         vecD[ m * j + i ] = atof(val);
+        vecM[(n + m)*j + i + n ] = atof(val);
       }
     }
 
@@ -388,11 +430,13 @@ void test_matrix(void)
     {
       fscanf(MLCPfile , "%s" , val);
       a[i] = atof(val);
+      vecQ[i] = atof(val);
     }
     for (i = 0 ; i < m ; ++i)
     {
       fscanf(MLCPfile , "%s" , val);
       b[i] = atof(val);
+      vecQ[i + n] = atof(val);
     }
 
     fscanf(MLCPfile , "%s" , val);
@@ -426,13 +470,13 @@ void test_matrix(void)
 #endif
     if (withSol)
     {
-      test_mlcp_series(n, m , vecA, vecB, vecC , vecD, a, b, sol);
+      //      test_mlcp_series( n,m , vecA,vecB,vecC ,vecD,a,b,sol);
       printf("\n Without exact solution : ");
       printf("\n ---------------------- : \n");
     }
     for (i = 0; i < n + m + m; i++)
       sol[i] = 0;
-    test_mlcp_series(n, m , vecA, vecB, vecC , vecD, a, b, sol);
+    test_mlcp_series(&problem, z, w);
 
     free(sol);
     free(vecA);
@@ -441,6 +485,8 @@ void test_matrix(void)
     free(vecD);
     free(a);
     free(b);
+    free(z);
+    free(w);
   }
   printf("* *** ******************** *** * \n");
   printf("* *** SUMMARY             *** * \n");

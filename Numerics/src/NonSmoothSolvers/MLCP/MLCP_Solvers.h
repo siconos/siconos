@@ -82,6 +82,15 @@ Regularized Projected Succesive over relaxation solver for MLCP
 \bf parameters:
 - dparam[0] (in): tolerance
 
+\section mlcpENUM ENUM Solver
+Enumeratif solver
+\bf function: mlcp_enum() \n
+\bf parameters:
+- iparam[0] (in/out): (in) initial value (could be 0). (out) It contains the code of the solution.
+- iparam[1] (in): verbose.
+- dparam[0] (in): a positive value, tolerane about the sign.
+- floatWorkingMem : working float zone size : (n+m)*(n+m) + 2*(n+m). MUST BE ALLOCATED BY THE USER.
+- intWorkingMem : working int zone size : 2(n+m). MUST BE ALLOCATED BY THE USER.
 */
 
 #include "Numerics_Options.h"
@@ -145,7 +154,7 @@ extern "C" {
   void mlcp_rpsor(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
   /** path solver
-   * \param[in] problem structure that represents the LCP (M, q...)
+   * \param[in] problem structure that represents the MLCP (M, q...)
    * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:\n
@@ -156,6 +165,18 @@ extern "C" {
    \author Olivier Bonnefon
   */
   void mlcp_path(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+
+  /** enum solver
+   * \param[in] problem structure that represents the MLCP (M, q...)
+   * \param[out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
+   0 : success,it found a solution\n
+   1 : echec,it did not find any solution\n
+   \param[in-out] options structure used to define the solver and its parameters.
+   \author Olivier Bonnefon
+  */
+  void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
   /**
    * This function checks the validity of the vector z as a solution \n

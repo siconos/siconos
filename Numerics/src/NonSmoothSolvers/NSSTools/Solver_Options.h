@@ -119,10 +119,10 @@ Note that options[i+1] is used for row i of M, while i<nbSolvers-1 and options[n
     \param iparam a list of int parameters (depends on each solver, see solver doc.)
     \param dSize size of vector dparam \n
     \param dparam a list of double parameters (depends on each solver, see solver doc.)
-    \param storageType int to check storage type (0: double*, 1: SparseBlockStructuredMatrix)
     \param filterOn 1 to check solution validity after the driver call, else 0. Default = 1. (For example if \n
     filterOn = 1 for a LCP, lcp_compute_error() will be called at the end of the process)
-    \param localSolver a list of local solvers, used only when the problem is written with SparseBlockStructuredMatrix .
+    \param floatWorkingMem is a pointer on a working memory zone reseved for the solver .
+    \param intWorkingMem is a pointer on a working memory zone reseved for the solver .
 */
 typedef struct
 {
@@ -133,6 +133,8 @@ typedef struct
   int dSize;
   double * dparam;
   int filterOn;
+  double * floatWorkingMem;
+  int * intWorkingMem;
 } Solver_Options;
 
 #ifdef __cplusplus

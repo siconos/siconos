@@ -175,9 +175,34 @@ void display(const NumericsMatrix* const m)
     printf("\n ========== Numerics Matrix of dim %dX%d\n", m->size0, m->size1);
     printf("[");
     for (int i = 0; i < m->size1 * m->size0; i++)
+    {
       printf("%lf ", m->matrix0[i]);
+      if (i % m->size1 == 0)
+        printf("\n");
+    }
     printf("]");
     printf("\n (warning: column-major) \n");
+  }
+  else if (storageType == 1)
+    printSBM(m->matrix1);
+}
+void displayRawbyRaw(const NumericsMatrix* const m)
+{
+  if (m == NULL)
+  {
+    fprintf(stderr, "Numerics, NumericsMatrix display failed, NULL input.\n");
+    exit(EXIT_FAILURE);
+  }
+  int storageType = m->storageType;
+  if (storageType == 0)
+  {
+    printf("\n ========== Numerics Matrix of dim %dX%d\n", m->size0, m->size1);
+    for (int lin = 0; lin < m->size0; lin++)
+    {
+      for (int col = 0; col < m->size1; col++)
+        printf("%lf ", m->matrix0[lin + col * m->size1]);
+      printf("\n");
+    }
   }
   else if (storageType == 1)
     printSBM(m->matrix1);

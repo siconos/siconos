@@ -123,6 +123,8 @@ typedef struct
   int problemType;
 } MixedLinearComplementarity_Problem;
 
+void displayMLCP(MixedLinearComplementarity_Problem* p);
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -33,7 +33,7 @@ noinst_LTLIBRARIES = libLCP.la
 
 libLCP_la_SOURCES = lcp_cpg.c lcp_lexicolemke.c lcp_qp.c lcp_nsqp.c lcp_psor.c lcp_latin.c lcp_latin_w.c \
 		    lcp_newton_FB.c lcp_path.c lcp_newton_min.c lcp_pgs.c lcp_rpgs.c \
-		    filter_result_LCP_block.c filter_result_LCP.c lcp_compute_error.c \
+		    filter_result_LCP.c lcp_compute_error.c \
 		    LCP_driver.c lcp_solver_block.c \
 		    LCP_Solvers.h LinearComplementarity_Problem.h
 
