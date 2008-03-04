@@ -122,6 +122,14 @@ set_target_properties(${PROJECT_NAME}_shared PROPERTIES
 target_link_libraries(${PROJECT_NAME}_static ${${PROJECT_NAME}_LINK_LIBRARIES})
 target_link_libraries(${PROJECT_NAME}_shared ${${PROJECT_NAME}_LINK_LIBRARIES})
 
+if(APPLE)
+  set(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} -Wl,-search_paths_first")
+  if(FORTRAN_LIBRARIES)
+    link_directories(${FORTRAN_COMPILER_LIB_DIRECTORY})
+    target_link_libraries(${PROJECT_NAME}_static ${FORTRAN_LIBRARIES})
+    target_link_libraries(${PROJECT_NAME}_shared ${FORTRAN_LIBRARIES})
+  endif(FORTRAN_LIBRARIES)
+endif(APPLE)
 
 # output in ${PROJECT_NAME}_STATIC|SHARED_LIB the path of the libraries
 get_target_property(${PROJECT_NAME}_STATIC_LIB ${PROJECT_NAME}_static LOCATION)
