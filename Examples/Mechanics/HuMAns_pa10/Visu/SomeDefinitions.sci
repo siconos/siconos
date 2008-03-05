@@ -40,7 +40,7 @@
 // Revision 1.2  2005/04/07 11:41:30  wieber
 // Added the variables ContactSolids (for use in Visu) and LagrangianModelName (for later use).
 //
-// Revision 2.1.1.1  2005/02/08 13:05:30  rpissard
+// Revision 3.0.0.1  2005/02/08 13:05:30  rpissard
 // version start HuMAnS
 //
 // 

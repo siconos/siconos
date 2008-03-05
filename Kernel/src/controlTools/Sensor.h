@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2007.
+/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -39,7 +39,7 @@ typedef std::map<Event*, VectorMap>  DataSet;
 /** Sensor Base Class
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 2.1.1.
+ *  \version 3.0.0.
  *  \date (Creation) February 01, 2007
  *
  *  This class is dedicated to data capture. It gives an interface for User who can implement its own Sensor to

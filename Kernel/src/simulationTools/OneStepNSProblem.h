@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2007.
+/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -42,7 +42,7 @@ const std::string DEFAULT_OSNS_NAME = "unamed";
 /** Non Smooth Problem Formalization and Simulation
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 2.1.1.
+ *  \version 3.0.0.
  *  \date (Creation) Apr 26, 2004
  *
  * This is an abstract class, that provides an interface to define a non smooth problem:

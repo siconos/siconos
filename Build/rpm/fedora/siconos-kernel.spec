@@ -1,6 +1,6 @@
 Summary: Siconos/Kernel, is dedicated to the modeling and the simulation of NSDS
 Name: siconos-kernel
-Version: 2.1.1
+Version: 3.0.0
 Release: 1.fc6
 License: GNU LGPL
 Group: Development/Libraries

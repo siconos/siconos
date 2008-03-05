@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2007.
+/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -429,7 +429,7 @@ int FrictionContact::compute(double time)
     numerics_problem.q = q->getArray();
     numerics_problem.numberOfContacts = sizeOutput / contactProblemDim;
     numerics_problem.isComplete = 1;
-    numerics_problem.mu = mu->data();
+    numerics_problem.mu = &((*mu)[0]);
     // Call Numerics Driver for FrictionContact
     //  {
     //    int info2 = -1;

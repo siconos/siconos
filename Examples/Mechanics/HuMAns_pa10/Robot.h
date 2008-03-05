@@ -21,7 +21,7 @@
 **
 ** Modifications:
 ** $Log: LagrangianModel.h,v $
-** Revision 2.1.1.1  2005/02/08 13:05:22  rpissard
+** Revision 3.0.0.1  2005/02/08 13:05:22  rpissard
 ** version start HuMAnS
 **
 */

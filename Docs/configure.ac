@@ -1,4 +1,4 @@
- # Siconos-Docs version 2.1.1, Copyright INRIA 2005-2007.
+ # Siconos-Docs version 3.0.0, Copyright INRIA 2005-2008.
  # Siconos is a program dedicated to modeling, simulation and control
  # of non smooth dynamical systems.	
  # Siconos is a free software; you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 dnl configure script for SICONOS Docs
 
 AC_PREREQ(2.59)
-AC_INIT([Siconos-Docs],[2.1.1],[siconos.gforge.inria.fr])
+AC_INIT([Siconos-Docs],[3.0.0],[siconos.gforge.inria.fr])
 
 dnl Checking host/target/build systems, for make, install etc.
 AC_CANONICAL_TARGET([])

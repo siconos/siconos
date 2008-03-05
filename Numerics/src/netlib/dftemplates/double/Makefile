@@ -14,7 +14,7 @@
 
 
 
-# Siconos-Numerics version 2.1.1, Copyright INRIA 2005-2007.
+# Siconos-Numerics version 3.0.0, Copyright INRIA 2005-2008.
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -34,7 +34,7 @@
 #	
 # Makefile.am --- SICONOS - ModelingTools
 
-# Siconos-Numerics version 2.1.1, Copyright INRIA 2005-2007.
+# Siconos-Numerics version 3.0.0, Copyright INRIA 2005-2008.
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -202,9 +202,9 @@ OBJEXT = o
 PACKAGE = siconos-numerics
 PACKAGE_BUGREPORT = siconos.gforge.inria.fr
 PACKAGE_NAME = Siconos-Numerics
-PACKAGE_STRING = Siconos-Numerics 2.1.1
+PACKAGE_STRING = Siconos-Numerics 3.0.0
 PACKAGE_TARNAME = siconos-numerics
-PACKAGE_VERSION = 2.1.1
+PACKAGE_VERSION = 3.0.0
 PATH_SEPARATOR = :
 RANLIB = ranlib
 RM = /bin/rm
@@ -217,7 +217,7 @@ SICONOSNUMERICS_SO_REVISION = 0
 SICONOS_EXT_INCLUDES = 
 SICONOS_EXT_LDFLAGS = -llapack_atlas -lcblas -lf77blas -latlas  -latlas   -L/usr/lib/atlas -L/usr/lib/gcc/i386-redhat-linux/4.1.2 -L/usr/lib/gcc/i386-redhat-linux/4.1.2/../../.. -latlas -lgfortranbegin -lgfortran -lm -lgcc_s
 STRIP = strip
-VERSION = 2.1.1
+VERSION = 3.0.0
 ac_ct_AR = ar
 ac_ct_CC = gcc
 ac_ct_CXX = g++

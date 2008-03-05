@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2007.
+/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -31,7 +31,7 @@ typedef  boost::numeric::ublas::compressed_matrix<SiconosMatrix*> SparseMat2;
 /** Definition of a sparse block matrix of SiconosMatrix*, used in OneStepNSProblem to save matrix M.
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 2.1.1.
+ *  \version 3.0.0.
  *  \date (Creation) 29/11/2007
  *
  * This class defines a specific sparse storage for blocks matrices, each block being a SiconosMatrix*.

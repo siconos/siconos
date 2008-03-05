@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2007.
+/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -43,7 +43,7 @@ union VECTOR_UBLAS_TYPE
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \date (creation) 07/21/2006
- *  \version 2.1.1.
+ *  \version 3.0.0.
  *
  *  In Siconos, a "vector" can be either a SimpleVector or a BlockVector, ie a container of several pointers to SiconosVector.
  *

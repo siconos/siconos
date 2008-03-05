@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2007.
+/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -33,7 +33,7 @@
 /** Set (STL) of pointers to T -
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 2.1.1.
+ *  \version 3.0.0.
  *  \date (Creation) May 17, 2006
  *
  * A SiconosSet<T,U> handles a set of pointers to T, sorted in growing \n

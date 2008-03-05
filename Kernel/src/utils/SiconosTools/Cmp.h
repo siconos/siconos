@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2007.
+/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -27,7 +27,7 @@ Classes related to object ordering in SiconosSet.
 /**  Virtual functors class
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 2.1.1.
+ *  \version 3.0.0.
  *  \date (Creation) April 25, 2006
  *
  *  Note: this is strongly inspired from tutorial http://www.newty.de/fpt/functor.html
@@ -49,7 +49,7 @@ public:
 
 /** derived template class for functors
 *  \author SICONOS Development Team - copyright INRIA
-*  \version 2.1.1.
+*  \version 3.0.0.
 *  \date (Creation) April 25, 2006
 *
 *  Note: this is strongly inspired from tutorial http://www.newty.de/fpt/functor.html
@@ -89,7 +89,7 @@ public:
  * used in SiconosSet to compare objects; See STL doc or
  * SiconosSet.h class for example of use.
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 2.1.1.
+ *  \version 3.0.0.
  *  \date (Creation) April 25, 2006
  *
  *  \code

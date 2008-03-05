@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 1.2.0, Copyright INRIA 2005-2007.
+/* Siconos-Kernel version 1.2.0, Copyright INRIA 2005-2008.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -52,7 +52,7 @@ template<class SubType> Event* factory(double time, const std::string& type)
 /** Registry Class for Events.
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 2.1.1.
+ *  \version 3.0.0.
  *  \date (Creation) February 01, 2007
  *
  */
@@ -86,7 +86,7 @@ public :
 /** Registration Class for Events.
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 2.1.1.
+ *  \version 3.0.0.
  *  \date (Creation) February 01, 2007
  *
  * Class used for auto-registration of Event-type objects.

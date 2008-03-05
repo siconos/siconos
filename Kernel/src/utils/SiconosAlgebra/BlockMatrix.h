@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2007.
+/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -30,7 +30,7 @@
 /** Object to handle block-matrices (ie lists of SiconosMatrix*)
  *
  * \author SICONOS Development Team - copyright INRIA
- *   \version 2.1.1.
+ *   \version 3.0.0.
  *   \date (Creation) 21/07/2006
  *
  *  A BlockMatrix is a boost::ublas::compressed_matrix of SiconosMatrix*.

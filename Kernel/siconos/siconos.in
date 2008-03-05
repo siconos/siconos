@@ -1,5 +1,5 @@
 #!/bin/bash
-# Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2007.
+# Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -78,7 +78,7 @@ function cleanAll() {
 function cartridge() {
     echo;
     echo "|=============================================================================|";
-    echo "| Siconos-Kernel version 2.1.2 (temporary release), Copyright INRIA 2005-2007.|";
+    echo "| Siconos-Kernel version 2.1.2 (temporary release), Copyright INRIA 2005-2008.|";
     echo "|                                                                             |";
     echo "|     Free software under GNU General Public License.                         |";
     echo "|=============================================================================|"; 

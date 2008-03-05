@@ -726,6 +726,106 @@ div.title_links { text-align: left }
 	vertical-align: baseline;
 
 }
+
+
+/** Left vertical menus for Home Page - Enlighted **/
+.enlight {
+
+	margin: -10px 0 15px 0;
+
+}
+
+.enlight ul {
+
+	margin: 0;
+
+	padding: 0;
+ 
+	list-style-type: none;
+
+	display: block;
+
+}
+
+.enlight ul a {
+
+	text-decoration: blink;	
+	
+	border: none;
+
+	color: red;
+
+	display: block;
+
+}
+
+.enlight ul a:hover {
+
+	color: #000000;
+
+}
+
+.enlight ul li {
+
+	padding: 8px 5px 10px 5px;
+
+	border-bottom: #DDDDDD solid 1px;
+
+}
+
+.enlight ul li .title {
+
+	color: #333333;
+
+	font-weight: bold;
+
+	display: block;
+
+}
+
+.enlight ul li .date {
+
+	color: #999999;
+
+	font-size: 10px;
+
+	display: block;
+
+}
+
+.enlight ul li .more {
+
+	margin: -5px 0;
+
+	font-size: 10px;
+
+	text-align: right;
+
+	display: block;
+
+}
+
+.enlight ul li .more a {
+
+	color: #333333;
+
+	display: inline;
+
+}
+
+.enlight ul li .more a:hover {
+
+	color: #FF9900;
+
+}
+
+.enlight ul li .more a img {
+
+	padding-left: 3px;
+
+	vertical-align: baseline;
+
+}
 #side {
 
 	padding: 10px;
@@ -755,6 +855,7 @@ div.title_links { text-align: left }
 	display: block;
 
 }
+
 
 #menu {
 
