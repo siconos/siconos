@@ -63,6 +63,22 @@ LIBRARY_PROJECT_SETUP()
 # tests
 #
 
+# Siconos Algebra
+BEGIN_TEST(utils/SiconosAlgebra/test)
+
+NEW_TEST(testSiconosAlgebra
+  BlockMatrixTest.cpp  SimpleMatrixTest.cpp BlockVectorTest.cpp  SimpleVectorTest.cpp TestMain.cpp)
+
+END_TEST()
+
+# Siconos Memory
+BEGIN_TEST(utils/SiconosMemory/test)
+
+NEW_TEST(testSiconosMemory
+  SiconosMemoryTest.cpp TestMain.cpp)
+
+END_TEST()
+
 # model
 BEGIN_TEST(model/test)
 

@@ -596,14 +596,15 @@ int test_mmc(void)
   printf(" ----------------------------------------------------------\n");
   printf("Run working tests ...\n");
   /* Stable: */
-  int solversList[11] = {1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0};
+  //  int solversList[11] ={1,1,1,1,0,0,0,1,1,0,0};
+  int solversList[11] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
   int info = test_lcp_series(problem, solversList);
   printf(" ----------------------------------------------------------\n");
 
   /* Fail or unstable: */
   printf("---------------------------------------------------------- \n");
   printf("\n Run unstable tests (results may be wrong or log !=0)...\n");
-  int solversList2[11] = {0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1};
+  int solversList2[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
   int infoFail = test_lcp_series(problem, solversList2);
   printf("--------- End of unstable tests --------------------------- \n");
 
@@ -850,9 +851,10 @@ int test_matrix(void)
       hasDense = 1;
       hasUnstable = 1;
       {
-        int l1[11] = {1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0};
-        int l2[11] = {0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1};
-        int l3[11] = {1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0};
+        int l1[11] = {1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0};
+        int l2[11] = {0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1};
+        //int l3[11] = {1,1,0,1,0,0,0,1,1,0,0};
+        int * l3 = l1;
         solversList = l1;
         solversList2 = l2;
         solversListSBM = l3;
@@ -865,9 +867,9 @@ int test_matrix(void)
       hasDense = 1;
       hasUnstable = 1;
       {
-        int l1[11] = {1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0};
-        int l2[11] = {0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1};
-        int l3[11] = {1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0};
+        int l1[11] = {1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0};
+        int l2[11] = {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1};
+        int l3[11] = {1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0};
         solversList = l1;
         solversList2 = l2;
         solversListSBM = l3;
@@ -880,9 +882,9 @@ int test_matrix(void)
       hasDense = 1;
       hasUnstable = 1;
       {
-        int l1[11] = {1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0};
-        int l2[11] = {0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1};
-        int l3[11] = {1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0};
+        int l1[11] = {1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0};
+        int l2[11] = {0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 1};
+        int l3[11] = {1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0};
         solversList = l1;
         solversList2 = l2;
         solversListSBM = l3;
@@ -894,7 +896,7 @@ int test_matrix(void)
       hasDense = 0;
       hasUnstable = 0;
       {
-        int l3[11] = {1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0};
+        int l3[11] = {1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0};
         solversListSBM = l3;
       }
       break;
@@ -904,7 +906,7 @@ int test_matrix(void)
       hasDense = 0;
       hasUnstable = 0;
       {
-        int l3[11] = {1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0};
+        int l3[11] = {1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0};
         solversListSBM = l3;
       }
       break;
@@ -967,11 +969,12 @@ int test_matrix(void)
       hasDense = 1;
       hasUnstable = 1;
       {
-        int l1[11] = {1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0};
-        int l2[11] = {0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1};
+        int l1[11] = {1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0};
+        int l2[11] = {0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1};
+        int l3[11] = {1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0};
         solversList = l1;
         solversList2 = l2;
-        solversListSBM = l1;
+        solversListSBM = l3;
       }
       break;
     case 10: /* Same as above with sparse storage (one block) */
@@ -980,7 +983,7 @@ int test_matrix(void)
       hasDense = 0;
       hasUnstable = 0;
       {
-        int l1[11] = {1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0};
+        int l1[11] = {1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0};
         solversListSBM = l1;
       }
       break;
