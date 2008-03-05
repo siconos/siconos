@@ -198,8 +198,7 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 #define DPOTRF( UPLO, N, A, LDA, INFO ) \
   ({ int C_N = N; \
      int C_LDA = LDA; \
-     int C_INFO = INFO; \
-     LAPACK_4(LAPACK_NAME(dpotrf), T_UPLO(UPLO), INTEGER(C_N), A , INTEGER(C_LDA), INTEGER(C_INFO)); \
+     LAPACK_4(LAPACK_NAME(dpotrf), T_UPLO(UPLO), INTEGER(C_N), A , INTEGER(C_LDA), INTEGER(INFO)); \
   })
 
 /* DPOTRI - compute the inverse of a real symmetric positive definite
@@ -209,8 +208,7 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 #define DPOTRI( UPLO, N, A, LDA, INFO) \
   ({ int C_N = N; \
      int C_LDA = LDA; \
-     int C_INFO = INFO; \
-     LAPACK_4(LAPACK_NAME(dpotri), T_UPLO(UPLO), INTEGER(C_N), A, INTEGER(C_LDA), INTEGER(C_INFO)); \
+     LAPACK_4(LAPACK_NAME(dpotri), T_UPLO(UPLO), INTEGER(C_N), A, INTEGER(C_LDA), INTEGER(INFO)); \
   })
 
 /* DGESV - compute the solution to a real system of linear equations A * X = B,
@@ -220,8 +218,7 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      int C_NRHS = NRHS; \
      int C_LDA = LDA; \
      int C_LDB = LDB; \
-     int C_INFO = INFO; \
-     LAPACK_7(LAPACK_NAME(dgesv), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), INTEGERP(IPIV), B, INTEGER(C_LDB), INTEGER(C_INFO)); \
+     LAPACK_7(LAPACK_NAME(dgesv), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), INTEGERP(IPIV), B, INTEGER(C_LDB), INTEGER(INFO)); \
   })
 
 /* DTRTRS - solve a triangular system of the form  A * X = B or A**T * X = B,
@@ -231,8 +228,7 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      int C_NRHS = NRHS; \
      int C_LDA = LDA; \
      int C_LDB = LDB; \
-     int C_INFO = INFO; \
-     LAPACK_9_SIDED(LAPACK_NAME(dtrtrs), T_UPLO(UPLO), T_TRANS(TRANS), T_DIAG(DIAG), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), B, INTEGER(C_LDB), INTEGER(C_INFO) ); \
+     LAPACK_9_SIDED(LAPACK_NAME(dtrtrs), T_UPLO(UPLO), T_TRANS(TRANS), T_DIAG(DIAG), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), B, INTEGER(C_LDB), INTEGER(INFO) ); \
   })
 
 /* DGETRF - LU factorization
@@ -241,8 +237,7 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
   ({ int C_M = M; \
      int C_N = N; \
      int C_LDA = LDA; \
-     int C_INFO = INFO; \
-     LAPACK_5(LAPACK_NAME(dgetrf), INTEGER(C_M), INTEGER(C_N), A, INTEGER(C_LDA), INTEGERP(IPIV), INTEGER(C_INFO)); \
+     LAPACK_5(LAPACK_NAME(dgetrf), INTEGER(C_M), INTEGER(C_N), A, INTEGER(C_LDA), INTEGERP(IPIV), INTEGER(INFO)); \
   })
 
 /* DGETRI - matrix inversion
@@ -250,8 +245,7 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 #define DGETRI(N,A,LDA,IPIV,INFO) \
   ({ int C_N = N; \
      int C_LDA = LDA; \
-     int C_INFO = INFO; \
-     LAPACK_4_W(LAPACK_NAME(dgetri), INTEGER(C_N), A, INTEGER(C_LDA), INTEGERP(IPIV),INTEGER(C_INFO)); \
+     LAPACK_4_W(LAPACK_NAME(dgetri), INTEGER(C_N), A, INTEGER(C_LDA), INTEGERP(IPIV),INTEGER(INFO)); \
   })
 
 
