@@ -64,24 +64,30 @@ LIBRARY_PROJECT_SETUP()
 #
 
 # model
-TEST_DIRECTORY(model/test)
-SET_TEST(test1 ModelTest.cpp TestMain.cpp)
+BEGIN_TEST(model/test)
 
+NEW_TEST(test1 ModelTest.cpp TestMain.cpp)
+
+END_TEST()
 # modeling tools 
-TEST_DIRECTORY(modelingTools/test)
+BEGIN_TEST(modelingTools/test)
 
-SET_TEST(test1 
+NEW_TEST(test1 
   FirstOrderType1RTest.cpp FirstOrderLinearRTest.cpp FirstOrderLinearTIRTest.cpp 
   LagrangianScleronomousRTest.cpp LagrangianRheonomousRTest.cpp LagrangianCompliantRTest.cpp 
   LagrangianLinearRTest.cpp FirstOrderNonLinearDSTest.cpp FirstOrderLinearDSTest.cpp 
   LagrangianDSTest.cpp LagrangianLinearTIDSTest.cpp TestMain.cpp)
 
+END_TEST()
+
+
 # xml
-TEST_DIRECTORY(xml/test)
-SET_TEST(test1 
-  TestMain.cpp)
+BEGIN_TEST(xml/test)
+NEW_TEST(test1 
+    TestMain.cpp)
+
+END_TEST()
 
 IF(PRINT_ENV)
   INCLUDE(CMakeLog)
 ENDIF(PRINT_ENV)
-
