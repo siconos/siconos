@@ -21,7 +21,6 @@ SET(SiconosKernel_DIRS
   controlTools
   model
   modelingTools
-  plugin
   simulationTools
   utils
   utils/contract
@@ -58,7 +57,23 @@ COMPILE_WITH(ATLAS REQUIRED)
 COMPILE_WITH(GMP REQUIRED)
 COMPILE_WITH(CppUnit)
 
+FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/plugin/test)
+ADD_LIBRARY(DefaultPlugin SHARED plugin/DefaultPlugin.cpp)
+SET_TARGET_PROPERTIES(DefaultPlugin 
+  PROPERTIES PREFIX ""
+  LINK_FLAGS -module
+  OUTPUT_NAME plugin/DefaultPlugin)
+
+ADD_LIBRARY(TestPlugin SHARED plugin/test/TestPlugin.cpp)
+SET_TARGET_PROPERTIES(TestPlugin 
+  PROPERTIES PREFIX ""
+  LINK_FLAGS -module
+  OUTPUT_NAME plugin/test/TestPlugin)
+
+INSTALL(TARGETS DefaultPlugin TestPlugin DESTINATION share/${PROJECT_PACKAGE_NAME})
+
 LIBRARY_PROJECT_SETUP()
+
 
 #
 # tests
@@ -108,10 +123,23 @@ END_TEST()
 # Global tests
 BEGIN_TEST(global_tests)
 
+ADD_LIBRARY(gTestPlugin SHARED global_tests/gTestPlugin.cpp)
+SET_TARGET_PROPERTIES(gTestPlugin 
+  PROPERTIES PREFIX "" 
+  LINK_FLAGS -module
+  OUTPUT_NAME global_tests/gTestPlugin)
+
+
+
 NEW_TEST(testGlobal
-  gTestPlugin.cpp  BallBowl.cpp  BouncingBall.cpp  DiodeBridge.cpp  FunctionTest.cpp  GlobalTests.cpp  MainTest.cpp)
+  BallBowl.cpp  BouncingBall.cpp  DiodeBridge.cpp  FunctionTest.cpp  GlobalTests.cpp  MainTest.cpp)
 
 END_TEST()
+
+
+#
+#
+#
 
 IF(PRINT_ENV)
   INCLUDE(CMakeLog)
