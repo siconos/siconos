@@ -41,6 +41,7 @@ Projected Gauss-Seidel solver
 \bf parameters:
 - iparam[0] (in): maximum number of iterations allowed
 - iparam[1] (out): number of iterations processed
+- iparam[2] (in): 0 for implicit, 1 for explicit
 - dparam[0] (in): tolerance
 - dparam[1] (out): resulting error
 

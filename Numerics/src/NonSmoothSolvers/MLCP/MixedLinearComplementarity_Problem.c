@@ -29,7 +29,7 @@ void displayMat(double * M, int Nblin, int Nbcol)
   for (lin = 0; lin < Nblin; lin++)
   {
     for (col = 0; col < Nbcol; col++)
-      printf("%lf", M[lin + col * Nblin]);
+      printf(" %lf", M[lin + col * Nblin]);
     printf("\n");
   }
 

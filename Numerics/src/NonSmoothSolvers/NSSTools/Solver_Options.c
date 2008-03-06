@@ -127,3 +127,13 @@ void printSolverOptions(Solver_Options* options)
   }
   printf("\n ================================================== \n");
 }
+
+void deleteSolverOptions(Solver_Options* op)
+{
+  if (op->iparam)
+    free(op->iparam);
+  if (op->dparam)
+    free(op->dparam);
+  op->iparam = 0;
+  op->dparam = 0;
+}

@@ -37,9 +37,9 @@ static double * sColNul = 0;
 static double * sM = 0;
 static double * sMref = 0;
 static double * sQref = 0;
-static unsigned long sCurrentEnum = 0;
-static unsigned long sCmpEnum = 0;
-static unsigned long sNbCase = 0;
+static unsigned long  int sCurrentEnum = 0;
+static unsigned long  int sCmpEnum = 0;
+static unsigned long  int sNbCase = 0;
 static double sProgress = 0;
 static int sVerbose = 0;
 static int sNn = 0;
@@ -63,7 +63,7 @@ static double* sU;
  */
 void affectW2V()
 {
-  unsigned long aux = sCurrentEnum;
+  unsigned long  int aux = sCurrentEnum;
   for (unsigned int i = 0; i < sMm; i++)
   {
     sW2V[i] = aux & 1;
@@ -73,8 +73,11 @@ void affectW2V()
 }
 void initEnum()
 {
+  int cmp;
   sCmpEnum = 0;
-  sNbCase = (unsigned long) powl(2, (long)sMm);
+  sNbCase = 1;
+  for (cmp = 0; cmp < sMm; cmp++)
+    sNbCase = sNbCase << 1;
   sProgress = 0;
 }
 int nextEnum()
@@ -85,13 +88,15 @@ int nextEnum()
   {
     sCurrentEnum = 0;
   }
+  if (sVerbose)
+    printf("try enum :%d\n", (int)sCurrentEnum);
   affectW2V();
   sCurrentEnum++;
   sCmpEnum++;
   if (sVerbose && sCmpEnum > sProgress * sNbCase)
   {
     sProgress += 0.001;
-    printf(" %f %d \n", sProgress, (int) sCurrentEnum);
+    printf(" progress %f %d \n", sProgress, (int) sCurrentEnum);
   }
 
   return 1;
@@ -138,24 +143,45 @@ void buildM()
     else
     {
       memcpy(sM + (sNn + col)*npm, sColNul, npm * sizeof(double));
-      sM[(sNn + col)*npm + col] = -1;
+      sM[(sNn + col)*npm + col + sNn] = -1;
     }
   }
+  /*  printf("builM:\n");
+  displayMat(sM,npm,npm);
+
+  printf("sColNul\n");
+  displayMat(sColNul,npm,1);*/
 }
 void buildQ()
 {
   memcpy(sQ, sQref, (sMm + sNn)*sizeof(double));
 }
-
+void printCurrentSystem()
+{
+  int npm = sNn + sMm;
+  printf("printCurrentSystemM:\n");
+  displayMat(sM, npm, npm);
+  printf("printCurrentSystemQ:\n");
+  displayMat(sQ, sMm + sNn, 1);
+}
+void printRefSystem()
+{
+  int npm = sNn + sMm;
+  printf("ref M n %d  m %d :\n", sNn, sMm);
+  displayMat(sMref, npm, npm);
+  printf("ref Q:\n");
+  displayMat(sQref, sMm + sNn, 1);
+}
 /*
  * The are no memory allocation in mlcp_enum, all necessary memory must be allocated by the user.
  *
  *options:
  * iparam[0] : (in) verbose.
  * dparam[0] : (in) a positive value, tolerane about the sign.
- * floatWorkingMem : working float zone size : (nn+mm)*(nn+mm) + 2*(nn+mm). MUST BE ALLOCATED BY THE USER.
+ * floatWorkingMem : working float zone size : (nn+mm)*(nn+mm) + 3*(nn+mm). MUST BE ALLOCATED BY THE USER.
  * intWorkingMem : working int zone size : 2(nn+mm). MUST BE ALLOCATED BY THE USER.
- *
+ * double *z : size n+m
+ * double *w : size n+m
  */
 
 void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
@@ -167,8 +193,11 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
   int npm = (problem->n) + (problem->m);
   int npm2 = npm * npm;
   int NRHS = 1;
+  int one = 1;
   int * ipiv;
   int check;
+  int DGESVinfo = 14;
+
   /*OUTPUT param*/
   sW2 = w;
   sU = z;
@@ -177,17 +206,25 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
   tol = options->dparam[0];
 
   sMref = problem->M->matrix0;
-  sQref = problem->q;
+
   sNn = problem->n;
   sMm = problem->m;
   sVerbose = options->iparam[0];
+  if (sVerbose)
+    printf("mlcp_enum begin, n %d m %d tol %lf\n", sNn, sMm, tol);
 
   sM = workingFloat;
   sQ = sM + npm2;
   sColNul = sQ + sMm + sNn;
+  sQref = sColNul + sMm + sNn;
+  for (lin = 0; lin < sMm + sNn; lin++)
+    sQref[lin] =  - problem->q[lin];
   for (lin = 0; lin < npm; lin++)
     sColNul[lin] = 0;
-
+  /*  printf("sColNul\n");
+      displayMat(sColNul,npm,1);*/
+  if (sVerbose)
+    printRefSystem();
   sW2V = workingInt;
   ipiv = sW2V + sMm;
   *info = 0;
@@ -196,11 +233,18 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
   {
     buildM();
     buildQ();
+    if (sVerbose)
+      printCurrentSystem();
+    DGESV(npm, NRHS, sM, npm, ipiv, sQ, npm, DGESVinfo);
 
-    DGESV(npm, NRHS, sM, npm, ipiv, sQ, npm, info);
-
-    if (!info)
+    if (!DGESVinfo)
     {
+      if (sVerbose)
+      {
+        printf("LU foctorization success, solution:\n");
+        displayMat(sQ, npm, 1);
+      }
+
       check = 1;
       for (lin = 0 ; lin < sMm; lin++)
       {
@@ -214,6 +258,8 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
         continue;
       else
       {
+        if (sVerbose)
+          printf("mlcp_enum find a solution!\n");
         fillSolution();
         options->iparam[0] = sCurrentEnum;
         return;
@@ -221,4 +267,6 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
     }
   }
   *info = 1;
+  if (sVerbose)
+    printf("mlcp_enum failed!\n");
 }

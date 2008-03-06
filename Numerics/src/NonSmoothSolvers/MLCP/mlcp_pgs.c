@@ -23,7 +23,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
+/*
+ *
+ * double *z : size n+m
+ * double *w : size n+m
+ */
 void mlcp_pgs(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {
 
@@ -37,14 +41,17 @@ void mlcp_pgs(MixedLinearComplementarity_Problem* problem, double *z, double *w,
   int m = problem->m;
   double *u = &z[0];
   double *v = &z[n];
+  double *Buf;
 
   int incx, incy, incAx, incAy, incBx, incBy;
   int i, iter;
   int itermax, verbose;
   int incxn;
+  int pgsExplicit;
   double err, vi;
   double tol;
-  double *wOld, *diagA, *diagB;
+  double prev;
+  double *diagA, *diagB;
 
   incx = 1;
   incy = 1;
@@ -52,6 +59,7 @@ void mlcp_pgs(MixedLinearComplementarity_Problem* problem, double *z, double *w,
   /* Recup input */
 
   itermax = options->iparam[0];
+  pgsExplicit = options->iparam[2];
   tol   = options->dparam[0];
 
   /* Initialize output */
@@ -61,27 +69,13 @@ void mlcp_pgs(MixedLinearComplementarity_Problem* problem, double *z, double *w,
 
   /* Allocation */
 
-  wOld   = (double*)malloc(m * sizeof(double));
   diagA = (double*)malloc(n * sizeof(double));
   diagB = (double*)malloc(m * sizeof(double));
 
-  /* Check for non trivial case */
-  /*   qs = DNRM2( n , q , incx ); */
 
-  /*   if( verbose > 0 ) printf("\n ||q||= %g \n",qs); */
-
-  /*   den = 1.0/qs; */
-
-  /*   for( i = 0 ; i < n ; ++i ){ */
-  /*     wOld[i] = 0.; */
-  /*     w[i] = 0.; */
-  /*   } */
-
-  /* Intialization of w */
 
   incx = 1;
   incy = 1;
-  DCOPY(m , b , incx , w , incy);   // b -> w
 
   /* Preparation of the diagonal of the inverse matrix */
 
@@ -99,7 +93,6 @@ void mlcp_pgs(MixedLinearComplementarity_Problem* problem, double *z, double *w,
       *info = 2;
       free(diagA);
       free(diagB);
-      free(wOld);
       *info = 1;
       return;
     }
@@ -123,7 +116,6 @@ void mlcp_pgs(MixedLinearComplementarity_Problem* problem, double *z, double *w,
       *info = 2;
       free(diagA);
       free(diagB);
-      free(wOld);
 
       return;
     }
@@ -145,7 +137,6 @@ void mlcp_pgs(MixedLinearComplementarity_Problem* problem, double *z, double *w,
   incBx = m;
   incBy = 1;
 
-  DCOPY(m , b , incx , w , incy);       //  q --> w
 
   mlcp_compute_error(problem, z, w, tol, &err);
 
@@ -157,29 +148,51 @@ void mlcp_pgs(MixedLinearComplementarity_Problem* problem, double *z, double *w,
     incx = 1;
     incy = 1;
 
-    DCOPY(n , w , incx , wOld , incy);   //  w --> wOld
-    DCOPY(n , b , incx , w , incy);    //  b --> w
-
-    for (i = 0 ; i < n ; ++i)
+    if (pgsExplicit)
     {
-      u[i] = 0.0;
+      /*Use w like a buffer*/
+      DCOPY(n , w , incx , u , incy);  //w <- q
+      Buf = w;
 
-      //zi = -( q[i] + DDOT( n , &vec[i] , incx , z , incy ))*diag[i];
-      u[i] =  - (a[i] + DDOT(n , &A[i] , incAx , u , incAy)   + DDOT(m , &C[i] , incAx , v , incBy)) * diagA[i];
+      for (i = 0 ; i < n ; ++i)
+      {
+        prev = Buf[i];
+        Buf[i] = 0;
+        //zi = -( q[i] + DDOT( n , &vec[i] , incx , z , incy ))*diag[i];
+        u[i] =  - (a[i] + DDOT(n , &A[i] , incAx , Buf , incAy)   + DDOT(m , &C[i] , incAx , v , incBy)) * diagA[i];
+        Buf[i] = prev;
+      }
+      for (i = 0 ; i < m ; ++i)
+      {
+        v[i] = 0.0;
+        //zi = -( q[i] + DDOT( n , &vec[i] , incx , z , incy ))*diag[i];
+        vi = -(b[i] + DDOT(n , &D[i] , incBx , u , incAy)   + DDOT(m , &B[i] , incBx , v , incBy)) * diagB[i];
+
+        if (vi < 0) v[i] = 0.0;
+        else v[i] = vi;
+      }
     }
-
-    for (i = 0 ; i < m ; ++i)
+    else
     {
-      //prevvi = v[i];
-      v[i] = 0.0;
-      //zi = -( q[i] + DDOT( n , &vec[i] , incx , z , incy ))*diag[i];
-      vi = -(b[i] + DDOT(n , &D[i] , incBx , u , incAy)   + DDOT(m , &B[i] , incBx , v , incBy)) * diagB[i];
 
-      if (vi < 0) v[i] = 0.0;
-      else v[i] = vi;
+      for (i = 0 ; i < n ; ++i)
+      {
+        u[i] = 0.0;
+
+        //zi = -( q[i] + DDOT( n , &vec[i] , incx , z , incy ))*diag[i];
+        u[i] =  - (a[i] + DDOT(n , &A[i] , incAx , u , incAy)   + DDOT(m , &C[i] , incAx , v , incBy)) * diagA[i];
+      }
+
+      for (i = 0 ; i < m ; ++i)
+      {
+        v[i] = 0.0;
+        //zi = -( q[i] + DDOT( n , &vec[i] , incx , z , incy ))*diag[i];
+        vi = -(b[i] + DDOT(n , &D[i] , incBx , u , incAy)   + DDOT(m , &B[i] , incBx , v , incBy)) * diagB[i];
+
+        if (vi < 0) v[i] = 0.0;
+        else v[i] = vi;
+      }
     }
-
-
 
     /* **** Criterium convergence compliant with filter_result_MLCP **** */
 
@@ -217,7 +230,6 @@ void mlcp_pgs(MixedLinearComplementarity_Problem* problem, double *z, double *w,
     *info = 0;
   }
 
-  free(wOld);
   free(diagA);
   free(diagB);
   return;

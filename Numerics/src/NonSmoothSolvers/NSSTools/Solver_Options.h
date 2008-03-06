@@ -159,6 +159,11 @@ extern "C" {
   */
   void printSolverOptions(Solver_Options*);
 
+  /** delete the solver parameters :
+      delete iparam and dparam;
+  */
+  void deleteSolverOptions(Solver_Options*);
+
 #ifdef __cplusplus
 }
 #endif

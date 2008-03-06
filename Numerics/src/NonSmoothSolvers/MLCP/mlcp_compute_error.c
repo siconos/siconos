@@ -22,7 +22,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
+/*
+ * (input) double *z : size n+m
+ * (output)double *w : size n+m
+ *
+ *
+ */
 int mlcp_compute_error(MixedLinearComplementarity_Problem* problem, double *z, double *w, double tolerance, double * error)
 {
   /* Checks inputs */
@@ -70,14 +75,14 @@ int mlcp_compute_error(MixedLinearComplementarity_Problem* problem, double *z, d
     DGEMV(LA_NOTRANS , n, m , 1.0 , C , n , &z[n] , incx , 1.0 , w , incy);   // we <-- C*v + we
 
     /* Computes part which corresponds to complementarity */
-    double * wi = &w[n]; // No copy!!
-    DCOPY(m , b , incx , wi , incy);  //  wi = w[n..m] <-- b
+    double * pwi = w + n; // No copy!!
+    DCOPY(m , b , incx , pwi , incy); //  wi = w[n..m] <-- b
     // following int param, we recompute the product wi = Du+BV +b and we = Au+CV +a
     // The test is then more severe if we compute w because it checks that the linear equation is satisfied
     if (param == 1)
     {
-      DGEMV(LA_NOTRANS , m, n , 1.0 , D , m , &z[0] , incx , 1.0 , wi , incy);   // wi <-- D*u+ w
-      DGEMV(LA_NOTRANS , m , m , 1.0 , B , m , &z[n] , incx , 1.0 , wi , incy);  // wi <-- B*v + w
+      DGEMV(LA_NOTRANS , m, n , 1.0 , D , m , &z[0] , incx , 1.0 , pwi , incy);   // wi <-- D*u+ wi
+      DGEMV(LA_NOTRANS , m , m , 1.0 , B , m , &z[n] , incx , 1.0 , pwi , incy);  // wi <-- B*v + wi
     }
   }
 

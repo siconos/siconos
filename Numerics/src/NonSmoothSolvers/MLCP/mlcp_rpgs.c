@@ -23,7 +23,11 @@
 #include <string.h>
 #include <math.h>
 #define EPSDIAG 1e-16
-
+/*
+ *
+ * double *z : size n+m
+ * double *w : size n+m
+ */
 void mlcp_rpgs(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {
   double* A = problem->A;
@@ -43,7 +47,7 @@ void mlcp_rpgs(MixedLinearComplementarity_Problem* problem, double *z, double *w
   int incxn;
   double err, vi, viprev, uiprev;
   double tol, rho;
-  double *wOld, *diagA, *diagB;
+  double *diagA, *diagB;
 
   incx = 1;
   incy = 1;
@@ -61,27 +65,13 @@ void mlcp_rpgs(MixedLinearComplementarity_Problem* problem, double *z, double *w
 
   /* Allocation */
 
-  wOld   = (double*)malloc(m * sizeof(double));
   diagA = (double*)malloc(n * sizeof(double));
   diagB = (double*)malloc(m * sizeof(double));
 
-  /* Check for non trivial case */
-  /*   qs = DNRM2( n , q , incx ); */
 
-  /*   if( verbose > 0 ) printf("\n ||q||= %g \n",qs); */
-
-  /*   den = 1.0/qs; */
-
-  /*   for( i = 0 ; i < n ; ++i ){ */
-  /*     wOld[i] = 0.; */
-  /*     w[i] = 0.; */
-  /*   } */
-
-  /* Intialization of w */
 
   incx = 1;
   incy = 1;
-  DCOPY(m , b , incx , w , incy);   // b -> w
 
   /* Preparation of the diagonal of the inverse matrix */
 
@@ -99,7 +89,6 @@ void mlcp_rpgs(MixedLinearComplementarity_Problem* problem, double *z, double *w
       *info = 2;
       free(diagA);
       free(diagB);
-      free(wOld);
 
       return;
     }
@@ -123,7 +112,6 @@ void mlcp_rpgs(MixedLinearComplementarity_Problem* problem, double *z, double *w
       *info = 2;
       free(diagA);
       free(diagB);
-      free(wOld);
 
       return;
     }
@@ -145,7 +133,6 @@ void mlcp_rpgs(MixedLinearComplementarity_Problem* problem, double *z, double *w
   incBx = m;
   incBy = 1;
 
-  DCOPY(m , b , incx , w , incy);       //  q --> w
 
   mlcp_compute_error(problem, z, w, tol, &err);
   printf("Error = %12.8e\n", err);
@@ -158,8 +145,6 @@ void mlcp_rpgs(MixedLinearComplementarity_Problem* problem, double *z, double *w
     incx = 1;
     incy = 1;
 
-    DCOPY(m , w , incx , wOld , incy);   //  w --> wOld
-    DCOPY(m , b , incx , w , incy);    //  b --> w
 
     for (i = 0 ; i < n ; ++i)
     {
@@ -218,7 +203,6 @@ void mlcp_rpgs(MixedLinearComplementarity_Problem* problem, double *z, double *w
     *info = 0;
   }
 
-  free(wOld);
   free(diagA);
   free(diagB);
   return;
