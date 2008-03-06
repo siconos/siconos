@@ -1,5 +1,5 @@
 #
-# SVN revision number
+# SVN_REVISION : SVN revision number 
 #
 SET( ENV{LC_ALL} C )
 IF(EXISTS ${CMAKE_SOURCE_DIR}/.svn)
