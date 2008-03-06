@@ -24,6 +24,7 @@ SET(SiconosKernel_DIRS
   plugin
   simulationTools
   utils
+  utils/contract
   utils/SiconosAlgebra
   utils/SiconosException
   utils/SiconosMemory
@@ -82,13 +83,13 @@ END_TEST()
 # model
 BEGIN_TEST(model/test)
 
-NEW_TEST(test1 ModelTest.cpp TestMain.cpp)
+NEW_TEST(testModel ModelTest.cpp TestMain.cpp)
 
 END_TEST()
 # modeling tools 
 BEGIN_TEST(modelingTools/test)
 
-NEW_TEST(test1 
+NEW_TEST(testModelingTools
   FirstOrderType1RTest.cpp FirstOrderLinearRTest.cpp FirstOrderLinearTIRTest.cpp 
   LagrangianScleronomousRTest.cpp LagrangianRheonomousRTest.cpp LagrangianCompliantRTest.cpp 
   LagrangianLinearRTest.cpp FirstOrderNonLinearDSTest.cpp FirstOrderLinearDSTest.cpp 
@@ -99,8 +100,16 @@ END_TEST()
 
 # xml
 BEGIN_TEST(xml/test)
-NEW_TEST(test1 
+NEW_TEST(testXMLTools
     TestMain.cpp)
+
+END_TEST()
+
+# Global tests
+BEGIN_TEST(global_tests)
+
+NEW_TEST(testGlobal
+  gTestPlugin.cpp  BallBowl.cpp  BouncingBall.cpp  DiodeBridge.cpp  FunctionTest.cpp  GlobalTests.cpp  MainTest.cpp)
 
 END_TEST()
 

@@ -73,6 +73,11 @@ int main(int argc, char* argv[])
     cout << " Among them, " << GTest->getNumberOfFailedTests() << " has failed." << endl;
     cout << " See "  << logFile << " for details." << endl;
     cout << " ===================================================" << endl;
+
+    if (GTest->getNumberOfFailedTests() != 0)
+      return 1;
+    return 0;
+
   }
 
   // --- Exceptions handling ---
