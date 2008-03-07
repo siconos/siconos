@@ -28,7 +28,7 @@
 #include "TimeDiscretisation.h"
 #include "MixedLinearComplementarity_Problem.h" // Numerics structure
 #include "NumericsMatrix.h"
-#include "mlcpDefaultSolver.h"
+//#include "mlcpDefaultSolver.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -455,7 +455,7 @@ int MLCP::compute(double time)
     //printf("n %d m %d",n,m);
     //displayNM(numerics_problem.M);
     //      exit(1);
-    mlcpDefaultSolver *pSolver = new mlcpDefaultSolver(m, n);
+    //mlcpDefaultSolver *pSolver = new mlcpDefaultSolver(m,n);
     displayMLCP(&numerics_problem);
     info = mlcp_driver(&numerics_problem, z->getArray(), w->getArray(), solver->getNumericsSolverOptionsPtr(), numerics_options);
     //info = lcp_driver(&numerics_problem, z->getArray() , w->getArray() , solver->getNumericsSolverOptionsPtr(), nbSolvers, numerics_options);
