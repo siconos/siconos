@@ -41,7 +41,7 @@ void displayMLCP(MixedLinearComplementarity_Problem* p)
   int m = p->m;
   printf("MLCP DISPLAY:\n-------------\n");
   printf("n :%d m: %d\n", p->n, p->m);
-  printf(p->problemType ? "using (M)\n" : "using (A,B,C,D)\n");
+  printf(p->problemType ? "using (ABCD)\n" : "using (M)\n");
   if (p->M)
   {
     printf("M matrix:\n");

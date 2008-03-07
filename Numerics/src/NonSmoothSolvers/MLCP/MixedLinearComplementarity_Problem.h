@@ -123,12 +123,12 @@ typedef struct
   int problemType;
 } MixedLinearComplementarity_Problem;
 
-void displayMLCP(MixedLinearComplementarity_Problem* p);
 void displayMat(double * M, int Nblin, int Nbcol);
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+  void displayMLCP(MixedLinearComplementarity_Problem* p);
 
 #ifdef __cplusplus
 }

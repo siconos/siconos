@@ -87,10 +87,10 @@ Regularized Projected Succesive over relaxation solver for MLCP
 Enumeratif solver
 \bf function: mlcp_enum() \n
 \bf parameters:
-- iparam[0] (in/out): (in) initial value (could be 0). (out) It contains the code of the solution.
-- iparam[1] (in): verbose.
+- iparam[0] (in): verbose.
+- iparam[1] (in/out): (in) initial value (could be 0). (out) It contains the code of the solution.
 - dparam[0] (in): a positive value, tolerane about the sign.
-- floatWorkingMem : working float zone size : (n+m)*(n+m) + 2*(n+m). MUST BE ALLOCATED BY THE USER.
+- floatWorkingMem : working float zone size : (n+m)*(n+m) + 3*(n+m). MUST BE ALLOCATED BY THE USER.
 - intWorkingMem : working int zone size : 2(n+m). MUST BE ALLOCATED BY THE USER.
 */
 
