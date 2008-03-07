@@ -129,8 +129,6 @@ SET_TARGET_PROPERTIES(gTestPlugin
   LINK_FLAGS -module
   OUTPUT_NAME global_tests/gTestPlugin)
 
-
-
 NEW_TEST(testGlobal
   BallBowl.cpp  BouncingBall.cpp  DiodeBridge.cpp  FunctionTest.cpp  GlobalTests.cpp  MainTest.cpp)
 
