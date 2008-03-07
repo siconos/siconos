@@ -63,7 +63,7 @@ void Topology::computeRelativeDegrees()
   for (it = indexSet0->begin(); it != indexSet0->end(); it++)
   {
     nslawType = (*it)->getNonSmoothLawType();
-    if (nslawType == COMPLEMENTARITYCONDITIONNSLAW)
+    if (nslawType == COMPLEMENTARITYCONDITIONNSLAW || nslawType == MIXEDCOMPLEMENTARITYCONDITIONNSLAW)
       relativeDegrees[*it] = 0;
 
     else if (nslawType == NEWTONIMPACTNSLAW)

@@ -64,6 +64,9 @@ class FirstOrderNonLinearDS;
  *   => setComputeBFunction
  *
  **/
+typedef   void (*bPtrFunction)(double, unsigned int, double*, unsigned int, double*);
+
+
 class FirstOrderLinearDS : public FirstOrderNonLinearDS
 {
 protected:
@@ -225,6 +228,10 @@ public:
    *  \exception SiconosSharedLibraryException
    */
   void setComputeBFunction(const std::string& , const std::string&);
+  /** set a specified function to compute the vector b
+   *  \param bPtrFunction : a pointer on the plugin function
+   */
+  void setComputeBFunction(bPtrFunction fct);
 
   /** default function to compute matrix A => same action as computeJacobianXF
    */

@@ -72,6 +72,15 @@ NonSmoothSolver::NonSmoothSolver(const std::string& newName, IntParameters& ipar
   double_parameters = new DoubleParameters(dparam);
   fillSolverOptions();
 }
+NonSmoothSolver::NonSmoothSolver(const std::string& newName, IntParameters& iparam, DoubleParameters& dparam, double * dWork, int * iWork):
+  name(newName), int_parameters(NULL), double_parameters(NULL), numerics_solver_options(NULL), isSet(true)
+{
+  int_parameters = new IntParameters(iparam);
+  double_parameters = new DoubleParameters(dparam);
+  fillSolverOptions();
+  numerics_solver_options->floatWorkingMem = dWork;
+  numerics_solver_options->intWorkingMem = iWork;
+}
 
 // Construction using XML object
 NonSmoothSolver::NonSmoothSolver(NonSmoothSolverXML* solvXML):

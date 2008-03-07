@@ -415,6 +415,11 @@ void FirstOrderLinearR::setEPtr(SiconosVector* newPtr)
   isAllocatedIn["e"] = false;
   isPlugged["e"] = false;
 }
+void FirstOrderLinearR::setComputeEFunction(FOVecPtr ptrFunct)
+{
+  ePtr = ptrFunct;
+  isPlugged["e"] = true;
+}
 
 void FirstOrderLinearR::setComputeEFunction(const string& pluginPath, const string& functionName)
 {

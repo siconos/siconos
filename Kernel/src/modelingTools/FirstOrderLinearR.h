@@ -318,6 +318,10 @@ public:
    *  \param string : the function name to use in this plugin
    */
   void setComputeEFunction(const std::string& , const std::string&);
+  /** set a specified function to compute the vector e
+   *  \param FOVecPtr : a pointer function
+   */
+  void setComputeEFunction(FOVecPtr ptrFunct);
 
   // -- B --
 

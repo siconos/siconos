@@ -567,7 +567,6 @@ void SimpleMatrix::display() const
   else if (num == 7)
     std::cout << *mat.Identity << std::endl;
 }
-
 //=============================
 // Elements access (get or set)
 //=============================

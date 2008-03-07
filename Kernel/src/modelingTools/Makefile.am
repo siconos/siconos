@@ -30,11 +30,11 @@ libModelingTools_la_SOURCES = DynamicalSystem.cpp FirstOrderNonLinearDS.cpp Firs
 			      LagrangianLinearTIDS.cpp Relation.cpp FirstOrderR.cpp FirstOrderType1R.cpp FirstOrderLinearR.cpp FirstOrderLinearTIR.cpp LagrangianR.cpp \
 			      LagrangianLinearR.cpp LagrangianScleronomousR.cpp LagrangianRheonomousR.cpp LagrangianCompliantR.cpp \
 			      NonSmoothLaw.cpp NewtonImpactFrictionNSL.cpp NewtonImpactNSL.cpp RelayNSL.cpp ComplementarityConditionNSL.cpp \
-			      Interaction.cpp NonSmoothDynamicalSystem.cpp \
+			      Interaction.cpp NonSmoothDynamicalSystem.cpp MixedComplementarityConditionNSL.cpp \
 			      DynamicalSystem.h FirstOrderNonLinearDS.h FirstOrderLinearDS.h FirstOrderLinearTIDS.h LagrangianDS.h \
 			      LagrangianLinearTIDS.h Relation.h FirstOrderR.h FirstOrderType1R.h FirstOrderLinearR.h FirstOrderLinearTIR.h LagrangianR.h LagrangianLinearR.h \
 			      LagrangianScleronomousR.h LagrangianRheonomousR.h LagrangianCompliantR.h\
-			      NonSmoothLaw.h NewtonImpactFrictionNSL.h NewtonImpactNSL.h RelayNSL.h ComplementarityConditionNSL.h \
+			      NonSmoothLaw.h NewtonImpactFrictionNSL.h NewtonImpactNSL.h RelayNSL.h ComplementarityConditionNSL.h MixedComplementarityConditionNSL.h \
 			      Interaction.h InteractionsSet.h DynamicalSystemsSet.h NonSmoothDynamicalSystem.h \
 			      RelationTypes.h ModelingTools.h 
 libModelingTools_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
@@ -42,7 +42,7 @@ libModelingTools_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_RE
 siconos_HEADERS = DynamicalSystem.h FirstOrderNonLinearDS.h FirstOrderLinearDS.h FirstOrderLinearTIDS.h LagrangianDS.h \
 		  LagrangianLinearTIDS.h Relation.h FirstOrderR.h FirstOrderType1R.h FirstOrderLinearR.h  FirstOrderLinearTIR.h LagrangianR.h LagrangianLinearR.h \
 		  LagrangianScleronomousR.h LagrangianRheonomousR.h LagrangianCompliantR.h\
-		  NonSmoothLaw.h NewtonImpactFrictionNSL.h NewtonImpactNSL.h RelayNSL.h ComplementarityConditionNSL.h \
+		  NonSmoothLaw.h NewtonImpactFrictionNSL.h NewtonImpactNSL.h RelayNSL.h ComplementarityConditionNSL.h MixedComplementarityConditionNSL.h \
 		  Interaction.h InteractionsSet.h DynamicalSystemsSet.h NonSmoothDynamicalSystem.h \
 		  RelationTypes.h ModelingTools.h 
 

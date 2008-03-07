@@ -29,16 +29,16 @@ noinst_LTLIBRARIES = libSimulationTools.la
 libSimulationTools_la_SOURCES =  UnitaryRelation.cpp Topology.cpp TimeDiscretisation.cpp NonSmoothSolver.cpp\
 				Event.cpp TimeDiscretisationEvent.cpp NonSmoothEvent.cpp EventFactory.cpp EventsManager.cpp \
 				OneStepNSProblem.cpp QP.cpp Relay.cpp \
-				FrictionContact.cpp LCP.cpp \
+				FrictionContact.cpp LCP.cpp MLCP.cpp mlcpDefaultSolver.cpp\
 				OneStepIntegrator.cpp Lsodar.cpp Moreau.cpp Simulation.cpp TimeStepping.cpp EventDriven.cpp SparseBlockMatrix.cpp OSNSMatrix.cpp\
 				UnitaryRelation.h UnitaryRelationsSet.h Topology.h TimeDiscretisation.h NonSmoothSolver.h\
 				Event.h TimeDiscretisationEvent.h NonSmoothEvent.h EventFactory.h EventsManager.h \
-				OneStepNSProblem.h QP.h Relay.h FrictionContact.h LCP.h \
+				OneStepNSProblem.h QP.h Relay.h FrictionContact.h LCP.h MLCP.h mlcpDefaultSolver.h\
 				OneStepIntegrator.h Lsodar.h Moreau.h Simulation.h TimeStepping.h EventDriven.h \
 				SimulationTools.h SimulationTypeDef.h SparseBlockMatrix.h OSNSMatrix.h
 libSimulationTools_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 siconos_HEADERS = UnitaryRelation.h UnitaryRelationsSet.h Topology.h TimeDiscretisation.h NonSmoothSolver.h\
 		  Event.h TimeDiscretisationEvent.h NonSmoothEvent.h EventFactory.h EventsManager.h \
-		  OneStepNSProblem.h QP.h Relay.h FrictionContact.h LCP.h \
+		  OneStepNSProblem.h QP.h Relay.h FrictionContact.h LCP.h MLCP.h mlcpDefaultSolver.h\
 		  OneStepIntegrator.h Lsodar.h Moreau.h Simulation.h TimeStepping.h EventDriven.h \
 		  SimulationTools.h SimulationTypeDef.h SparseBlockMatrix.h OSNSMatrix.h

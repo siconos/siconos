@@ -210,7 +210,7 @@ void TimeStepping::update(unsigned int levelInput)
     (*itOSI)->updateState(levelInput);
 
   // 3 - compute output ( x ... -> y)
-  if (!allNSProblems->empty() && levelMin > 0)
+  if (!allNSProblems->empty())
   {
     updateOutput(0, levelMax);
   }

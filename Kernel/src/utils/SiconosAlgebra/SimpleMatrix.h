@@ -375,6 +375,7 @@ public:
    */
   void display() const;
 
+
   /** get or set the element matrix[i,j]
    *  \param an unsigned int i
    *  \param an unsigned int j

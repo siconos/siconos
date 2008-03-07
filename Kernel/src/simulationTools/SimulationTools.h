@@ -30,6 +30,8 @@ Note that not all files from the current location are listed below, since some o
 #include "TimeDiscretisation.h"
 #include "TimeStepping.h"
 #include "LCP.h"
+#include "MLCP.h"
+#include "mlcpDefaultSolver.h"
 #include "QP.h"
 #include "Lsodar.h"
 #include "Moreau.h"

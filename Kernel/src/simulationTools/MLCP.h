@@ -86,8 +86,9 @@ class MLCP : public OneStepNSProblem
 {
 private:
 
-
+  /** n is the number of equality */
   int n;
+  /** m is the size of the complementarity conditions */
   int m;
   /** contains the matrix M of a MLCP system */
   OSNSMatrix *M;

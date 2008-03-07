@@ -28,6 +28,7 @@
 #include "RuntimeException.h"
 
 const std::string COMPLEMENTARITYCONDITIONNSLAW = "ComplementarityNSL";
+const std::string MIXEDCOMPLEMENTARITYCONDITIONNSLAW = "MixedComplementarityNSL";
 const std::string NEWTONIMPACTNSLAW = "NewtonImpactNSL";
 const std::string RELAYNSLAW = "RelayNSL";
 const std::string NEWTONIMPACTFRICTIONNSLAW = "NewtonImpactFrictionNSL";

@@ -263,6 +263,17 @@ void FirstOrderLinearDS::setComputeBFunction(const string& pluginPath, const str
   pluginNames["b"] = plugin + ":" + functionName;
   isPlugin["b"] = true;
 }
+void   FirstOrderLinearDS::setComputeBFunction(bPtrFunction fct)
+{
+  if (b == NULL)
+  {
+    b = new SimpleVector(n);
+    isAllocatedIn["b"] = true;
+  }
+  bPtr = fct;
+  isPlugin["b"] = true;
+}
+
 
 void FirstOrderLinearDS::computeA(const double time)
 {

@@ -113,6 +113,15 @@ public:
   */
   NonSmoothSolver(const std::string&, IntParameters&, DoubleParameters&);
 
+  /** Constructor from a set of data
+       \param algorithm/solver name
+       \param vector of int parameters
+       \param vector of double parameters
+       \param double * memory working zone
+       \param int * memory working zone
+   */
+  NonSmoothSolver(const std::string&, IntParameters&, DoubleParameters&, double * dWork, int * iWork);
+
   /** Constructor from XML object
    *  \param a pointer to NonSmoothSolverXML
    */

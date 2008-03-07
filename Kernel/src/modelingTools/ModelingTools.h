@@ -22,6 +22,7 @@ Note that not all files from the current location are listed below, since some o
 */
 
 #include "ComplementarityConditionNSL.h"
+#include "MixedComplementarityConditionNSL.h"
 #include "RelayNSL.h"
 #include "NewtonImpactNSL.h"
 #include "NewtonImpactFrictionNSL.h"

@@ -19,6 +19,7 @@
 #include "MLCP.h"
 #include "Topology.h"
 #include "UnitaryRelation.h"
+#include "MixedComplementarityConditionNSL.h"
 #include "Simulation.h"
 #include "Model.h"
 #include "NonSmoothDynamicalSystem.h"
@@ -27,6 +28,7 @@
 #include "TimeDiscretisation.h"
 #include "MixedLinearComplementarity_Problem.h" // Numerics structure
 #include "NumericsMatrix.h"
+#include "mlcpDefaultSolver.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -236,15 +238,21 @@ void MLCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
   // Get DS common between UR1 and UR2
   DynamicalSystemsSet commonDS;
   intersection(*UR1->getDynamicalSystemsPtr(), *UR2->getDynamicalSystemsPtr(), commonDS);
-
+  m = 0;
+  n = 0;
   if (!commonDS.isEmpty()) // Nothing to be done if there are no common DS between the two UR.
   {
     DSIterator itDS;
     // Warning: we suppose that at this point, all non linear operators (G for lagrangian relation for example) have been computed through plug-in mechanism.
 
     // Get dimension of the NonSmoothLaw (ie dim of the block)
-    unsigned int nslawSize1 = UR1->getInteractionPtr()->getSizeOfY() ;//UR1->getNonSmoothLawSize();
-    unsigned int nslawSize2 = UR2->getInteractionPtr()->getSizeOfY();//UR2->getNonSmoothLawSize();
+    unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
+    unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
+    unsigned int equalitySize1 =  MixedComplementarityConditionNSL::convert(UR1->getInteractionPtr()->getNonSmoothLawPtr())->getEqualitySize();
+    unsigned int equalitySize2 = MixedComplementarityConditionNSL::convert(UR1->getInteractionPtr()->getNonSmoothLawPtr())->getEqualitySize();
+
+
+
     // Check allocation
     if (blocks[UR1][UR2] == NULL)
       blocks[UR1][UR2] = new SimpleMatrix(nslawSize1, nslawSize2);
@@ -270,7 +278,11 @@ void MLCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
     relationType2 = UR2->getRelationType();
     // ==== First Order Relations - Specific treatment for diagonal blocks ===
     if (UR1 == UR2)
+    {
       UR1->getExtraBlock(currentBlock);
+      m += nslawSize1 - equalitySize1;
+      n += equalitySize1;
+    }
     else
       currentBlock->zero();
 
@@ -292,13 +304,26 @@ void MLCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
 
         // centralBlock contains a lu-factorized matrix and we solve
         // centralBlock * X = rightBlock with PLU
+        //        printf("right bloc: ie B \n");
+        //        rightBlock->display();
         centralBlocks[*itDS]->PLUForwardBackwardInPlace(*rightBlock);
+        //        printf("W \n");
+        //        centralBlocks[*itDS]->display();
+        //        printf("inv(W)B \n");
+        //        rightBlock->display();
         //      integration of r with theta method removed
         //      *currentBlock += h *Theta[*itDS]* *leftBlock * (*rightBlock); //left = C, right = W.B
         //gemm(h,*leftBlock,*rightBlock,1.0,*currentBlock);
         *leftBlock *= h;
+        //        printf("currentbloc : ie D \n");
+        //        currentBlock->display();
+        //        printf("leftBlock : ie C \n");
+        //        leftBlock->display();
+
         prod(*leftBlock, *rightBlock, *currentBlock, false);
         //left = C, right = W.B
+        //        printf("finalbloc \n");
+        //        currentBlock->display();
         delete rightBlock;
       }
       else RuntimeException::selfThrow("MLCP::computeBlock not yet implemented for relation of type " + relationType1);
@@ -414,19 +439,29 @@ int MLCP::compute(double time)
     // The MLCP in Numerics format
     MixedLinearComplementarity_Problem numerics_problem;
     numerics_problem.M = M->getNumericsMatrix();
+    numerics_problem.A = 0;
+    numerics_problem.B = 0;
+    numerics_problem.C = 0;
+    numerics_problem.D = 0;
+    numerics_problem.a = 0;
+    numerics_problem.b = 0;
+    numerics_problem.problemType = 0;
     numerics_problem.q = q->getArray();
-    numerics_problem.n = (*(getInteractions()->begin()))->getSizeOfY();
-    numerics_problem.m = M->size() - m;
+    numerics_problem.n = n;
+    numerics_problem.m = m;
     int nbSolvers = 1;
     // Call MLCP Driver
-    printf("MLCP display");
-    printf("n %d m %d", n, m);
-    displayNM(numerics_problem.M);
-    exit(1);
+    //printf("MLCP display");
+    //printf("n %d m %d",n,m);
+    //displayNM(numerics_problem.M);
+    //      exit(1);
+    mlcpDefaultSolver *pSolver = new mlcpDefaultSolver(m, n);
+    displayMLCP(&numerics_problem);
+    info = mlcp_driver(&numerics_problem, z->getArray(), w->getArray(), solver->getNumericsSolverOptionsPtr(), numerics_options);
     //info = lcp_driver(&numerics_problem, z->getArray() , w->getArray() , solver->getNumericsSolverOptionsPtr(), nbSolvers, numerics_options);
 
     // --- Recovering of the desired variables from MLCP output ---
-    //postCompute();
+    postCompute();
 
   }
 
