@@ -9,3 +9,4 @@
 #cmakedefine HAVE_CLAPACK_H
 #cmakedefine HAVE_CBLAS_H
 #cmakedefine HAVE_XERBLA
+#cmakedefine HAVE_PATHFERRIS

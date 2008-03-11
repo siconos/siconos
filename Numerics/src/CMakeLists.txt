@@ -58,6 +58,8 @@ COMPILE_WITH(ATLAS)
 COMPILE_WITH(LAPACK REQUIRED)
 COMPILE_WITH(BLAS REQUIRED)
 
+COMPILE_WITH(PathFerris)
+
 IF(C_HAVE_C99)
   APPEND_FLAGS(CMAKE_C_FLAGS "-std=c99")
 ENDIF(C_HAVE_C99)
@@ -76,9 +78,7 @@ CONFIGURE_FILE(SiconosNumerics.h  in.mod.proxy COPYONLY)
 CONFIGURE_FILE(SiconosNumerics.h  the.mod.proxy COPYONLY) 
 CONFIGURE_FILE(SiconosNumerics.h  unit.mod.proxy COPYONLY) 
 
-# test directories
-#SUBDIRS(netlib/odepack/test)
-#SUBDIRS(NonSmoothSolvers/test)
+# The library tests
 
 BEGIN_TEST(netlib/odepack/test)
 
