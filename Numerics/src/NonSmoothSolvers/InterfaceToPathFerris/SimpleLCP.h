@@ -23,6 +23,9 @@
 #define SIMPLELCP_H
 
 #include "include/Types.h"
+/*because libpath46.so*/
+const unsigned short int *__ctype_b;
+const __int32_t *__ctype_tolower ;
 
 void SimpleLCP(int variables,
                int m_nnz, int *m_i, int *m_j, double *m_ij, double *q,

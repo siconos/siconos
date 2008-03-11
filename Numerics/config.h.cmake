@@ -1,4 +1,5 @@
 
+
 #define WITH_CMAKE
 
 #cmakedefine SVN_REVISION ${SVN_REVISION}
@@ -10,3 +11,4 @@
 #cmakedefine HAVE_CBLAS_H
 #cmakedefine HAVE_XERBLA
 #cmakedefine HAVE_PATHFERRIS
+#cmakedefine HAVE_MLCPSIMPLEX

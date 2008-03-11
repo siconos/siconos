@@ -3,6 +3,7 @@
 
 #include "SimpleLCP.h"
 
+#ifdef HAVE_PATHFERRIS
 
 #include "include/MCP_Interface.h"
 
@@ -461,3 +462,32 @@ void SimpleLCP(int variables,
   Options_Destroy(o);
   return;
 }
+#else
+void SimpleLCP(int variables,
+               int m_nnz, int *m_i, int *m_j, double *m_ij, double *q,
+               double *lb, double *ub,
+               MCP_Termination *status, double *z)
+{
+  ;
+}
+void printLCP(int variables,
+              int m_nnz, int *m_i, int *m_j, double *m_ij, double *q,
+              double *lb, double *ub)
+{
+  ;
+}
+
+int nbNonNulElems(int n, double *M, double tol)
+{
+  return 0;
+}
+void FortranToPathSparse(int n, double *M, double tol, int *m_i, int *m_j, double *m_ij)
+{
+  ;
+}
+void ABCDtoM(int n , int m, double *A , double *B , double *C , double *D , double *a, double *b, double *M, double *q)
+{
+  ;
+}
+
+#endif

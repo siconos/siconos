@@ -49,6 +49,8 @@ static int* sW2V = 0;
 /*OUTPUT */
 /*sW2 is a pointer on the output w*/
 static double* sW2;
+/*sW1 is a pointer on the output w*/
+static double* sW1;
 /*sV is a pointer on the output v*/
 static double* sV;
 /*sU is a pointer on the output u*/
@@ -106,7 +108,10 @@ void   fillSolution()
 {
   int lin;
   for (lin = 0; lin < sNn; lin++)
+  {
     sU[lin] = sQ[lin];
+    sW1[lin] = 0;
+  }
 
 
   for (lin = 0; lin < sMm; lin++)
@@ -199,7 +204,8 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
   int DGESVinfo = 14;
 
   /*OUTPUT param*/
-  sW2 = w;
+  sW1 = w;
+  sW2 = w + problem->n;
   sU = z;
   sV = z + problem->n;
   sCurrentEnum = 0;

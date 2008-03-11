@@ -17,17 +17,15 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "LA.h"
+#include "config.h"
 #include "MLCP_Solvers.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 
-/*#define PATH_SOLVER*/
 
-#ifdef PATH_SOLVER
-#include "path/SimpleLCP.h"
-#endif /*PATH_SOLVER*/
+#include "InterfaceToPathFerris/SimpleLCP.h"
 
 /*
 Warning: this function requires MLCP with M and q, not (A,B,C,D).
@@ -36,20 +34,28 @@ The input structure MixedLinearComplementarity_Problem is supposed to fit with t
 
 void mlcp_path(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {
-  double tol = options->dparam[0];
   *info = 1;
-#ifdef PATH_SOLVER
+#ifdef HAVE_PATHFERRIS
   MCP_Termination termination;
+  double tol = options->dparam[0];
 
-  M = problem->M->matrix0;
-  q = problem->q;
+  double * M = problem->M->matrix0;
+  double * q = problem->q;
+  int nnz, i, j, n, m, dim;
+  n = problem->n;
+  m = problem->m;
+  dim = m + n;
 
   nnz = nbNonNulElems(dim, M, 1.0e-18);
-  m_i = (int *)calloc(nnz + 1, sizeof(int));
-  m_j = (int *)calloc(nnz + 1, sizeof(int));
-  m_ij = (double *)calloc(nnz + 1, sizeof(double));
-  lb = (double *)calloc(dim + 1, sizeof(double));
-  ub = (double *)calloc(dim + 1, sizeof(double));
+  int * m_i = (int *)calloc(nnz + 1, sizeof(int));
+  int * m_j = (int *)calloc(nnz + 1, sizeof(int));
+  double * m_ij = (double *)calloc(nnz + 1, sizeof(double));
+  double * lb = (double *)calloc(dim + 1, sizeof(double));
+  double * ub = (double *)calloc(dim + 1, sizeof(double));
+  double * u = z;
+  double * v = z + n;
+  double err;
+
 
 
   FortranToPathSparse(dim, M, 1.0e-18, m_i, m_j, m_ij);
@@ -110,7 +116,7 @@ void mlcp_path(MixedLinearComplementarity_Problem* problem, double *z, double *w
   free(lb);
   free(ub);
 
-#endif /*PATH_SOLVER*/
+#endif /*HAVE_PATHFERRIS*/
 
 
   return;

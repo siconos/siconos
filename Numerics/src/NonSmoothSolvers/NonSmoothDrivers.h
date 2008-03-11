@@ -113,8 +113,8 @@ extern "C" {
 
   /** General interface to solver for MLCP problems
       \param[in] problem the MixedLinearComplementarity_Problem structure which handles the problem (M,q)
-      \param[in,out] z a n-vector of doubles which contains the solution of the problem.
-      \param[in,out] w a n-vector of doubles which contains the solution of the problem.
+      \param[in,out] z a m+n-vector of doubles which contains the solution of the problem.
+      \param[in,out] w a m+n-vector of doubles which contains the solution of the problem.
       \param[in,out] options structure used to define the solver(s) and their parameters
       \param[in] general options for Numerics (verbose mode ...)
       \return info termination value

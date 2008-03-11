@@ -10,9 +10,9 @@
 # PathFerris_LIBRARY_DIRECTORY before FIND_PACKAGE(PathFerris)
 
 IF(PathFerris_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(PathFerris_FOUND PathFerris PATHS "${PathFerris_LIBRARY_DIRECTORY}")
+  FIND_LIBRARY(PathFerris_FOUND path46 PATHS "${PathFerris_LIBRARY_DIRECTORY}")
 ELSE(PathFerris_LIBRARY_DIRECTORY)
-  FIND_LIBRARY(PathFerris_FOUND PathFerris)
+  FIND_LIBRARY(PathFerris_FOUND path46)
 ENDIF(PathFerris_LIBRARY_DIRECTORY)
 
 IF(PathFerris_FOUND)
@@ -24,8 +24,7 @@ IF(PathFerris_FOUND)
 ELSE(PathFerris_FOUND)
   IF(PathFerris_REQUIRED)
     MESSAGE(FATAL_ERROR
-      "Required Siconos Numerics library not found. Please specify library location in PathFerris_LIBRARY_DIRECTORY")
+      "Required path46 library not found. Please specify library location in PathFerris_LIBRARY_DIRECTORY")
   ENDIF(PathFerris_REQUIRED)
   
-
 ENDIF(PathFerris_FOUND)

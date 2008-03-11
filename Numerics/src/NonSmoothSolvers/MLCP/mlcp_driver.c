@@ -88,6 +88,10 @@ int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *
   else if (strcmp(name , "ENUM") == 0)
     mlcp_enum(problem, z , w , &info , options);
 
+  /****** SIMPLEX algorithm ******/
+  else if (strcmp(name , "SIMPLEX") == 0)
+    mlcp_simplex(problem, z , w , &info , options);
+
   /*error */
   else
   {
