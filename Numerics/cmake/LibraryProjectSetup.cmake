@@ -5,7 +5,10 @@
 #
 # <PROJECT_NAME>_DIRS : sources directories
 # <PROJECT_NAME>_Unstable_SRCS : built only if -DUNSTABLE=ON
-# <PROJECT_NAME>_VERSION
+# <PROJECT_NAME>_VERSION : version of the library
+# <PROJECT_NAME>_HDRS : installation headers  (if none all headers)
+# <PROJECT_NAME>_INSTALL_INCLUDE_DIR : where to install headers
+# <PROJECT_NAME>_INSTALL_LIB_DIR     : where to install the build libraries
 # <PROJECT_NAME>_SOURCE_FILE_EXTENSIONS may contains the wanted sources extensions (default: all extensions)
 
 MACRO(LIBRARY_PROJECT_SETUP)
@@ -51,7 +54,7 @@ MACRO(LIBRARY_PROJECT_SETUP)
   #
   IF(NOT ${PROJECT_NAME}_HDRS)
     FOREACH(_DIR ${_ALL_DIRS})
-      FILE(GLOB _HDRS  ${_DIR}/*.h)
+      FILE(GLOB _HDRS  ${_DIR}/*.h ${_DIR}/*.hpp)
       IF(_HDRS)
         LIST(APPEND ${PROJECT_NAME}_HDRS ${_HDRS})
       ENDIF(_HDRS)
@@ -130,6 +133,9 @@ MACRO(LIBRARY_PROJECT_SETUP)
   GET_TARGET_PROPERTY(${PROJECT_NAME}_STATIC_LIB ${PROJECT_NAME}_static LOCATION)
   GET_TARGET_PROPERTY(${PROJECT_NAME}_SHARED_LIB ${PROJECT_NAME}_shared LOCATION)
 
+  # just the names of the libraries
+  GET_FILENAME_COMPONENT(${PROJECT_NAME}_STATIC_LIB_NAME ${${PROJECT_NAME}_STATIC_LIB} NAME)
+  GET_FILENAME_COMPONENT(${PROJECT_NAME}_SHARED_LIB_NAME ${${PROJECT_NAME}_SHARED_LIB} NAME)
 
   # Installation
   IF(${PROJECT_NAME}_INSTALL_LIB_DIR)
@@ -150,8 +156,27 @@ MACRO(LIBRARY_PROJECT_SETUP)
     LIBRARY DESTINATION ${_install_lib})
   INSTALL(FILES ${${PROJECT_NAME}_HDRS} DESTINATION ${_install_include})
 
-  EXPORT_LIBRARY_DEPENDENCIES(DEPEND.cmake)
 
+  #
+  # Export
+  #
+
+  # standard export macros
+  EXPORT_LIBRARY_DEPENDENCIES(LibraryDependencies.cmake)
+  CMAKE_EXPORT_BUILD_SETTINGS(BuildSettings.cmake)
+  
+  # specific settings
+  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/Settings.cmake.in 
+    ${CMAKE_BINARY_DIR}/Settings.cmake)
+
+
+  # installation of exported files
+  INSTALL(FILES 
+    ${CMAKE_BINARY_DIR}/LibraryDependencies.cmake 
+    ${CMAKE_BINARY_DIR}/BuildSettings.cmake 
+    ${CMAKE_BINARY_DIR}/Settings.cmake
+    DESTINATION share/${PROJECT_PACKAGE_NAME}/cmake)
+  
   MESSAGE(STATUS "${PROJECT_NAME} library setup done")
   MESSAGE(STATUS "")
 
