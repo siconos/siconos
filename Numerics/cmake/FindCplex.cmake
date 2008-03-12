@@ -2,9 +2,9 @@
 # The following variables are set if libcplex is found.  If libcplex is not
 # found, Cplex_FOUND is set to false.
 #  Cplex_FOUND        - True when the Cplex include directory is found.
-#  Cplex_INCLUDE_DIRS - the path to where the Path Ferris include files are.
-#  Cplex_LIBRARY_DIRS - The path to where the Path library files are.
-#  Cplex_LIBRARIES    - The libraries to link against Path Ferris
+#  Cplex_INCLUDE_DIRS - the path to where the Cplex include files are.
+#  Cplex_LIBRARY_DIRS - The path to where the Cplex library files are.
+#  Cplex_LIBRARIES    - The libraries to link against Cplex
 
 # One may want to use a specific Ferris Library by setting
 # Cplex_LIBRARY_DIRECTORY before FIND_PACKAGE(Cplex)

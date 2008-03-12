@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 #include "SimpleLCP.h"
-
+#include "config.h"
 #ifdef HAVE_PATHFERRIS
 
 #include "include/MCP_Interface.h"

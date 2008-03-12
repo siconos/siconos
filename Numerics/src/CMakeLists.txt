@@ -40,8 +40,6 @@ SET(SiconosNumerics_DIRS
 SET(SiconosNumerics_Unstable_SRCS
   NonSmoothSolvers/LCP/lcp_solver_block_pred_vec.c
   NonSmoothSolvers/LCP/lcp_solver_pred.c
-  NonSmoothSolvers/InterfaceToPathFerris/SimpleLCP.h
-  NonSmoothSolvers/InterfaceToPathFerris/SimpleLCP_Path.c
 )
 
 #
@@ -60,6 +58,7 @@ COMPILE_WITH(BLAS REQUIRED)
 
 COMPILE_WITH(PathFerris)
 COMPILE_WITH(MlcpSimplex)
+COMPILE_WITH(Pthread)
 COMPILE_WITH(Cplex)
 IF(C_HAVE_C99)
   APPEND_FLAGS(CMAKE_C_FLAGS "-std=c99")

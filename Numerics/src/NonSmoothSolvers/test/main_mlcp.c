@@ -65,15 +65,16 @@
 #define PSOR_2_ID 7
 #define RPSOR_ID 8
 #define PATH_ID 9
-#define NBMETHODS 10
+#define SIMPLEX_ID 10
+#define NBMETHODS 11
 
 #define PATH_DRIVER
 #define MAX_DIM_ENUM 20
-#ifdef PATH_DRIVER
+/*#ifdef PATH_DRIVER
 const unsigned short int *__ctype_b;
 const __int32_t *__ctype_tolower ;
-#endif /*PATH_DRIVER*/
-
+#endif
+*/
 
 typedef struct
 {
@@ -317,6 +318,56 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     mlcp_compute_error(problem, z, w, tol1,  &error);
     printf("find a solution with error %lf \n", error);
     printSolution("RPSOR", n, m, z, w);
+  }
+  /*SOLVER PATH*/
+  solTozw(n, m, z, w, sol);
+  strcpy(mlcpOptions.solverName, "PATH");
+  mlcpOptions.iSize = 1;
+  mlcpOptions.iparam[0] = 101;
+  mlcpOptions.dSize = 1;
+  mlcpOptions.dparam[0] = tol2;
+
+  startTimer();
+  info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+  stopTimer();
+  summary[itest].times[PATH_ID] = sDt.mCumul;
+  strcpy(summary[itest].cv[PATH_ID], "CV");
+  if (info > 0)
+  {
+    printf("Can't find a solution\n");
+    strcpy(summary[itest].cv[PATH_ID], "NO");
+  }
+  else
+  {
+    mlcp_compute_error(problem, z, w, tol1,  &error);
+    printf("find a solution with error %lf \n", error);
+    printSolution("PATH", n, m, z, w);
+  }
+  /*SOLVER SIMPLEX*/
+  solTozw(n, m, z, w, sol);
+  strcpy(mlcpOptions.solverName, "SIMPLEX");
+  mlcpOptions.iSize = 1;
+  mlcpOptions.iparam[0] = 1000000;
+  mlcpOptions.dSize = 3;
+  mlcpOptions.dparam[0] = 1e-12;
+  mlcpOptions.dparam[0] = 1e-12;
+  mlcpOptions.dparam[0] = 1e-9;
+
+  startTimer();
+  info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+  stopTimer();
+  summary[itest].times[SIMPLEX_ID] = sDt.mCumul;
+  strcpy(summary[itest].cv[SIMPLEX_ID], "CV");
+  if (info > 0)
+  {
+    printf("Can't find a solution\n");
+    strcpy(summary[itest].cv[SIMPLEX_ID], "NO");
+  }
+  else
+  {
+    mlcp_compute_error(problem, z, w, tol1,  &error);
+    printf("find a solution with error %lf \n", error);
+    printSolution("SIMPLEX", n, m, z, w);
   }
 
   deleteSolverOptions(&mlcpOptions);
@@ -618,6 +669,7 @@ void test_matrix(void)
     printf(" PSOR 2 %s %d \t", summary[itest].cv[PSOR_2_ID], summary[itest].times[PSOR_2_ID]);
     printf(" RPSOR %s %d \t", summary[itest].cv[RPSOR_ID], summary[itest].times[RPSOR_ID]);
     printf(" PATH %s %d \n", summary[itest].cv[PATH_ID], summary[itest].times[PATH_ID]);
+    printf(" SIMPLEX %s %d \n", summary[itest].cv[SIMPLEX_ID], summary[itest].times[SIMPLEX_ID]);
   }
   printf("* *** ******************** *** * \n");
   printf("* *** END OF TEST MATRIX   *** * \n");
