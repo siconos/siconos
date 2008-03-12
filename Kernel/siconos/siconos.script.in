@@ -1,0 +1,100 @@
+#!/bin/sh
+# Siconos-Kernel version @VERSION@, Copyright INRIA 2005-2008.
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.	
+# Siconos is a free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# Siconos is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Siconos; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+#
+# Contact: Vincent ACARY vincent.acary@inrialpes.fr 
+
+NUMERICS_PREFIX=${NUMERICSPATH:-@NUMERICS_PREFIX@}
+KERNEL_PREFIX=${SICONOSPATH:-@KERNEL_PREFIX@}
+
+cartridge() {
+    echo;
+    echo "|=============================================================================|";
+    echo "| Siconos-Kernel version @VERSION@ (temporary release), Copyright INRIA 2005-2008.|";
+    echo "|                                                                             |";
+    echo "|     Free software under GNU General Public License.                         |";
+    echo "|=============================================================================|"; 
+    echo;
+}
+
+usage() { 
+    echo "Usage: $0 [-c|-v|-h|-x] [YourSample.cpp|location/YourSample.cpp] [SourcesDirectory]";
+    echo "The siconos command compile, link and run a Siconos program.";
+    echo "Options are: ";
+    echo "     -c : to clean the current directory (deletes binary files, etc.)";
+    echo "     -h : to print this help.";
+    echo "     -v : to print 'make' commands as they are executed.";
+    echo "     -x : compile only.";
+}
+
+exec=true
+pwd=`pwd`
+while getopts chvx OPTION
+  do
+  case "$OPTION" in
+      c) make_args=clean; exec=false;;
+      v) make_args="VERBOSE=1";;
+      h) usage; exit 0;;
+      x) exec=false;;
+  esac
+done
+
+shift `expr $OPTIND - 1`
+
+if test ! "$make_args" = "clean"; then
+    case :$1 in
+        :) usage; exit 1;;
+        :/*) main_source=$1;;
+        :*) main_source=$pwd/$1;;
+    esac
+    
+    case :$2 in
+        :);;
+        :/*) sources_directory=$2;;
+        :*) sources_directory=$pwd/$2;;
+    esac;
+
+    if test ! -z "$main_source"; then
+        exe=`expr "\`basename $main_source\`" : "\(.*\).cpp"`
+        plugin_source=`expr "$main_source" : "\(.*\).cpp"`Plugin.cpp
+    fi
+
+    case $exe in
+        *TS) ext_plugin_source=`expr "$main_source" : "\(.*\)TS.cpp"`Plugin.cpp;;
+        *ED) ext_plugin_source=`expr "$main_source" : "\(.*\)ED.cpp"`Plugin.cpp;;
+    esac
+    if test -f $ext_plugin_source; then
+        plugin_source=$ext_plugin_source
+    fi
+
+    if ! cmake $KERNEL_PREFIX/share/siconos-kernel/ \
+        -DMAIN_SOURCE=$main_source \
+        -DPLUGIN_SOURCE=$plugin_source \
+        -DSOURCES_DIRECTORY=$sources_directory; then
+        echo "$0: $exe build configuration failed" >&2
+        exit 1
+    fi
+fi
+
+if test -f ./Makefile; then
+    make $make_args
+else
+    echo "$0: nothing to clean" 
+fi
+
+if test $exec = true; then
+    LD_LIBRARY_PATH=$NUMERICS_PREFIX/lib:$KERNEL_PREFIX/lib:$KERNEL_PREFIX/share/siconos-kernel:. ./$exe
+fi

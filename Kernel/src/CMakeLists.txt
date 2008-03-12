@@ -23,6 +23,8 @@ SET(SiconosKernel_DIRS
   modelingTools
   simulationTools
   utils
+  utils/AtlasLocal/atlas
+  utils/boost/numeric/bindings/atlas
   utils/contract
   utils/SiconosAlgebra
   utils/SiconosException
