@@ -60,6 +60,7 @@ void mlcp_simplex_reset()
  *  tolComp = options->dparam[1];      tolerance to consider that complementarity holds
  *  tolNegVar = options->dparam[2];     tolerance to consider a value is negative
  *  nIterMax = options->iparam[0];     max number of nodes to consider in tree search
+ *  options->iparam[1];    verbose if not 0
 */
 void mlcp_simplex(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {
@@ -81,9 +82,7 @@ void mlcp_simplex(MixedLinearComplementarity_Problem* problem, double *z, double
   if (!sIsInitialize)
     extern_mlcp_simplex_init_with_M(&nn , &mm, problem->M->matrix0);
 
-  extern_mlcp_simplex(problem->q, problem->q + nn, z, z + nn, w + nn , info ,  options->iparam , options->dparam);
-  for (lin = 0; lin < nn; lin++)
-    w[lin] = 0;
+  extern_mlcp_simplex(problem->q, problem->q + nn, z, z + nn, w , info ,   options->iparam , options->dparam);
 
   if (!sIsInitialize)
     extern_mlcp_simplex_stop();
