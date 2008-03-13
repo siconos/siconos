@@ -42,13 +42,14 @@ usage() {
 
 exec=true
 pwd=`pwd`
-while getopts chvx OPTION
+while getopts chvD:x OPTION
   do
   case "$OPTION" in
       c) make_args=clean; exec=false;;
       v) make_args="VERBOSE=1";;
       h) usage; exit 0;;
       x) exec=false;;
+      D) definitions="$definitions $OPTARG";;
   esac
 done
 
@@ -76,14 +77,21 @@ if test ! "$make_args" = "clean"; then
         *TS) ext_plugin_source=`expr "$main_source" : "\(.*\)TS.cpp"`Plugin.cpp;;
         *ED) ext_plugin_source=`expr "$main_source" : "\(.*\)ED.cpp"`Plugin.cpp;;
     esac
-    if test -f $ext_plugin_source; then
+    if test -f "$ext_plugin_source"; then
         plugin_source=$ext_plugin_source
     fi
+
+    for d in $definitions; do
+        case $d in
+            *=*) extra_defs="$extra_defs -D$d";;
+            *) extra_defs="$extra_defs -D$d=1";;
+        esac
+    done
 
     if ! cmake $KERNEL_PREFIX/share/siconos-kernel/ \
         -DMAIN_SOURCE=$main_source \
         -DPLUGIN_SOURCE=$plugin_source \
-        -DSOURCES_DIRECTORY=$sources_directory; then
+        -DSOURCES_DIRECTORY=$sources_directory $extra_defs; then
         echo "`basename $0`: $exe build configuration failed" >&2
         exit 1
     fi
