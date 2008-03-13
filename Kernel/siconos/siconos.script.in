@@ -84,7 +84,7 @@ if test ! "$make_args" = "clean"; then
         -DMAIN_SOURCE=$main_source \
         -DPLUGIN_SOURCE=$plugin_source \
         -DSOURCES_DIRECTORY=$sources_directory; then
-        echo "$0: $exe build configuration failed" >&2
+        echo "`basename $0`: $exe build configuration failed" >&2
         exit 1
     fi
 fi
@@ -92,7 +92,7 @@ fi
 if test -f ./Makefile; then
     make $make_args
 else
-    echo "$0: nothing to clean" 
+    echo "`basename $0`: nothing to clean" 
 fi
 
 if test $exec = true; then
