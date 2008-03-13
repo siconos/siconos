@@ -17,8 +17,8 @@
 #
 # Contact: Vincent ACARY vincent.acary@inrialpes.fr 
 
-NUMERICS_PREFIX=${NUMERICSPATH:-@NUMERICS_PREFIX@}
-KERNEL_PREFIX=${SICONOSPATH:-@KERNEL_PREFIX@}
+NUMERICS_PREFIX=${NUMERICSPATH:-@SiconosNumerics_LIBRARY_DIRS_DIR@}
+KERNEL_PREFIX=${SICONOSPATH:-@CMAKE_INSTALL_PREFIX@}
 
 cartridge() {
     echo;
@@ -31,7 +31,7 @@ cartridge() {
 }
 
 usage() { 
-    echo "Usage: $0 [-c|-v|-h|-x] [YourSample.cpp|location/YourSample.cpp] [SourcesDirectory]";
+    echo "Usage: `basename $0` [-c|-v|-h|-x] [YourSample.cpp|location/YourSample.cpp] [SourcesDirectory]";
     echo "The siconos command compile, link and run a Siconos program.";
     echo "Options are: ";
     echo "     -c : to clean the current directory (deletes binary files, etc.)";

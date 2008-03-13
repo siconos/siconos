@@ -23,8 +23,6 @@ SET(SiconosKernel_DIRS
   modelingTools
   simulationTools
   utils
-  utils/AtlasLocal/atlas
-  utils/boost/numeric/bindings/atlas
   utils/contract
   utils/SiconosAlgebra
   utils/SiconosException
@@ -42,6 +40,9 @@ SET(SiconosKernel_Unstable_SRCS )
 # Installation layout
 #
 SET(SiconosKernel_INSTALL_INCLUDE_DIR include/Siconos/Kernel)
+
+# Atlas and boost headers
+SUBDIRS(utils)
 
 #
 # compilation setup 
@@ -137,8 +138,30 @@ NEW_TEST(testGlobal
 END_TEST()
 
 
+
 #
+# Export
 #
+
+# standard export macros
+EXPORT_LIBRARY_DEPENDENCIES(LibraryDependencies.cmake)
+CMAKE_EXPORT_BUILD_SETTINGS(BuildSettings.cmake)
+
+# specific settings
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/Settings.cmake.in 
+  ${CMAKE_BINARY_DIR}/Settings.cmake)
+
+
+# installation of exported files
+INSTALL(FILES 
+  ${CMAKE_BINARY_DIR}/LibraryDependencies.cmake 
+  ${CMAKE_BINARY_DIR}/BuildSettings.cmake 
+  ${CMAKE_BINARY_DIR}/Settings.cmake
+  DESTINATION share/${PROJECT_PACKAGE_NAME}/cmake)
+
+
+#
+# Log 
 #
 
 IF(PRINT_ENV)
