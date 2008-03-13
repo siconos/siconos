@@ -42,7 +42,17 @@ SET(SiconosKernel_Unstable_SRCS )
 SET(SiconosKernel_INSTALL_INCLUDE_DIR include/Siconos/Kernel)
 
 # Atlas and boost headers
-SUBDIRS(utils)
+FILE(GLOB ATLAS_HDRS utils/AtlasLocal/atlas/*.h)
+INSTALL(FILES ${ATLAS_HDRS} 
+  DESTINATION include/Siconos/Kernel/AtlasLocal/atlas)
+FOREACH(_D amos;atlas;blas;cblas;lapack;traits;traits/detail;umfpack)
+  FILE(GLOB BOOST_HDRS_${_D} utils/boost/numeric/bindings/${_D}/*.hpp)
+  INSTALL(FILES ${BOOST_HDRS_${_D}} 
+    DESTINATION include/Siconos/Kernel/boost/numeric/bindings/${_D})
+ENDFOREACH(_D amos;atlas;blas;cblas;lapack;traits;umfpack)
+
+# config.h
+INSTALL(FILES ${CMAKE_BINARY_DIR}/config.h DESTINATION include/Siconos/Kernel)
 
 #
 # compilation setup 
