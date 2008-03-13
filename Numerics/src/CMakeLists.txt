@@ -102,9 +102,10 @@ BEGIN_TEST(NonSmoothSolvers/test)
 NEW_TEST(NumericsMatrixTest main_NumericsMatrix.c)
 NEW_TEST(LCPtest main_lcp.c)
 
+if(HAVE_PATHFERRIS)
 NEW_TEST(MLCPtest main_mlcp.cpp)
+ENDIF(HAVE_PATHFERRIS)
 END_TEST()
-
 
 IF(PRINT_ENV)
   INCLUDE(CMakeLog)
