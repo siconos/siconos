@@ -53,7 +53,7 @@
 #include "LA.h"
 
 #define BAVARD
-#define NBTEST 9
+#define NBTEST 10
 
 #define ENUM_ID 0
 #define PGS_EX_ID 1
@@ -69,7 +69,7 @@
 #define NBMETHODS 11
 
 #define PATH_DRIVER
-#define MAX_DIM_ENUM 20
+#define MAX_DIM_ENUM 40
 /*#ifdef PATH_DRIVER
 const unsigned short int *__ctype_b;
 const __int32_t *__ctype_tolower ;
@@ -423,12 +423,21 @@ void test_matrix(void)
 
     switch (itest)
     {
-    case 5:
+    case 0:
       printf("\n\n 2x2 MLCP ");
       strcpy(summary[itest].file, "2x2 MLCP");
       if ((MLCPfile = fopen("MATRIX/deudeu_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: deudeu_mlcp.dat");
+        exit(1);
+      }
+      break;
+    case 9:
+      printf("\n\n Buck converter ");
+      strcpy(summary[itest].file, "BuckConverter_mlcp");
+      if ((MLCPfile = fopen("MATRIX/BuckConverter_mlcp.dat", "r")) == NULL)
+      {
+        perror("fopen MLCPfile: BuckConverter_mlcp.dat");
         exit(1);
       }
       break;
@@ -468,7 +477,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 0:
+    case 5:
       printf("\n\n diodeBridge MLCP ");
       strcpy(summary[itest].file, "diodeBridge MLCP");
       if ((MLCPfile = fopen("MATRIX/diodeBridge_mlcp.dat", "r")) == NULL)
@@ -495,16 +504,6 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 9:
-      printf("\n\n Buck converter MLCP ");
-      strcpy(summary[itest].file, "Buck converter MLCP");
-      if ((MLCPfile = fopen("MATRIX/buckconverterregul2.dat", "r")) == NULL)
-      {
-        perror("fopen MLCPfile: buckconverterregul2.dat");
-        exit(1);
-      }
-      break;
-
     case 6:
       printf("\n\n RCD ");
       strcpy(summary[itest].file, "RCD");
