@@ -157,26 +157,6 @@ MACRO(LIBRARY_PROJECT_SETUP)
   INSTALL(FILES ${${PROJECT_NAME}_HDRS} DESTINATION ${_install_include})
 
 
-  #
-  # Export
-  #
-
-  # standard export macros
-  EXPORT_LIBRARY_DEPENDENCIES(LibraryDependencies.cmake)
-  CMAKE_EXPORT_BUILD_SETTINGS(BuildSettings.cmake)
-  
-  # specific settings
-  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/Settings.cmake.in 
-    ${CMAKE_BINARY_DIR}/Settings.cmake)
-
-
-  # installation of exported files
-  INSTALL(FILES 
-    ${CMAKE_BINARY_DIR}/LibraryDependencies.cmake 
-    ${CMAKE_BINARY_DIR}/BuildSettings.cmake 
-    ${CMAKE_BINARY_DIR}/Settings.cmake
-    DESTINATION share/${PROJECT_PACKAGE_NAME}/cmake)
-  
   MESSAGE(STATUS "${PROJECT_NAME} library setup done")
   MESSAGE(STATUS "")
 

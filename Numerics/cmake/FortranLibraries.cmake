@@ -148,6 +148,7 @@ WHILE(${iopt} LESS ${imax})
   IF(FORT_LIBS_WORK)
     # the goal is to set this to something useful
     SET(FORTRAN_LIBRARIES ${FORTRAN_LIBRARIES} CACHE STRING "fortran libraries required to link with f90 generated code" FORCE)
+    SET(FORTRAN_COMPILER_LIB_DIRECTORIES ${FORTRAN_COMPILER_LIB_DIRECTORIES} CACHE STRING "directories where fortran libraries can be found")
     MESSAGE(STATUS "Using FORTRAN_LIBRARIES ${FORTRAN_LIBRARIES}")
     MESSAGE(STATUS "Using FORTRAN_COMPILER_LIB_DIRECTORIES ${FORTRAN_COMPILER_LIB_DIRECTORIES}")
     
