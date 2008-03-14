@@ -114,6 +114,11 @@ MACRO(SICONOS_PROJECT
     ENDFOREACH(_F ${_SFILES})
   ENDIF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/config/xmlschema)
 
+  # needed cmake macros
+  IF(EXISTS ${CMAKE_SOURCE_DIR}/cmake/FindQGLViewer.cmake)
+    INSTALL(FILES ${CMAKE_SOURCE_DIR}/cmake/FindQGLViewer.cmake DESTINATION share/${PROJECT_PACKAGE_NAME}/cmake)
+  ENDIF(EXISTS ${CMAKE_SOURCE_DIR}/cmake/FindQGLViewer.cmake) 
+  
   # Sources
   IF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/src)
     SUBDIRS(src)

@@ -35,6 +35,8 @@ usage() {
     echo "The siconos command compile, link and run a Siconos program.";
     echo "Options are: ";
     echo "     -c : to clean the current directory (deletes binary files, etc.)";
+    echo "     -D key | -D key=value : to define a cmake and a cpp variable";
+    echo "     -a : find and compile all sources files in YourSample directory";
     echo "     -h : to print this help.";
     echo "     -v : to print 'make' commands as they are executed.";
     echo "     -x : compile only.";
@@ -42,14 +44,15 @@ usage() {
 
 exec=true
 pwd=`pwd`
-while getopts chvD:x OPTION
+while getopts acD:hvx OPTION
   do
   case "$OPTION" in
+      a) all_srcs=true;;
       c) make_args=clean; exec=false;;
-      v) make_args="VERBOSE=1";;
-      h) usage; exit 0;;
-      x) exec=false;;
       D) definitions="$definitions $OPTARG";;
+      h) usage; exit 0;;
+      v) make_args="VERBOSE=1";;
+      x) exec=false;;
   esac
 done
 
@@ -62,12 +65,10 @@ if test ! "$make_args" = "clean"; then
         :*) main_source=$pwd/$1;;
     esac
     
-    case :$2 in
-        :);;
-        :/*) sources_directory=$2;;
-        :*) sources_directory=$pwd/$2;;
-    esac;
-
+    if test "$all_srcs" = "true"; then
+        sources_directory=`dirname $main_source`
+    fi
+    
     if test ! -z "$main_source"; then
         exe=`expr "\`basename $main_source\`" : "\(.*\).cpp"`
         plugin_source=`expr "$main_source" : "\(.*\).cpp"`Plugin.cpp
@@ -83,15 +84,21 @@ if test ! "$make_args" = "clean"; then
 
     for d in $definitions; do
         case $d in
-            *=*) extra_defs="$extra_defs -D$d";;
-            *) extra_defs="$extra_defs -D$d=1";;
+            *=*) 
+                extra_defs="$extra_defs -D$d" 
+                ndef=`expr "$d" : "\(.*\)=.*"`
+                all_extra_defs="$all_extra_defs;$ndef";;
+            *)  extra_defs="$extra_defs -D$d=1"
+                all_extra_defs="$all_extra_defs;$d";;
         esac
     done
 
     if ! cmake $KERNEL_PREFIX/share/siconos-kernel/ \
         -DMAIN_SOURCE=$main_source \
         -DPLUGIN_SOURCE=$plugin_source \
-        -DSOURCES_DIRECTORY=$sources_directory $extra_defs; then
+        -DSOURCES_DIRECTORY=$sources_directory \
+        -DALL_EXTRA_DEFINITIONS=$all_extra_defs \
+        $extra_defs; then
         echo "`basename $0`: $exe build configuration failed" >&2
         exit 1
     fi
