@@ -6,17 +6,35 @@ siconos \- The Siconos C++ Front-End.
 .SH SYNOPSIS
 .B siconos
 [
+.B \-a
+]
+[
 .B \-c
 ]
 [
-.BI \-v
+.B \-D 
+.I KEY [=VALUE]
 ]
 [
-.BI \-h
+.B \-g
+]
+[
+.B \-h
+]
+[
+.B \-P
+.I PREFIX COMMAND
+]
+[
+.B \-v
 ]
 [
 .I sample.cpp
 ]
+[
+.I arguments
+]
+
 .SH DESCRIPTION
 
 The
@@ -31,8 +49,27 @@ simulation and control of Non Smooth Dynamical Systems.
 The following command-line options are recognized by
 .BR siconos (1).
 .TP
+.BI \-a
+ find and compile all sources files in 
+.I sample.cpp
+ directory.
+.TP
 .BI \-c
  clean the current directory (deletes binary files, etc.)
+.TP
+.BI -D 
+.I KEY [=VALUE]
+ define a 'cmake' and a 'cpp' variable.
+.TP
+.BI \-g
+ compile with debug informations.
+.TP
+.BI \-h
+ print help
+.TP
+.BI \-P
+.I PREFIX COMMAND
+ run a prefix command 
 .TP
 .BI \-v
  print 
@@ -42,9 +79,13 @@ commands as they are executed.
 .BI \-h
  print help
 
+.SH EXAMPLES
+
+ siconos -gv -P "time --format '%U'" BouncingBallTS.cpp 
+
 
 .SH SEE ALSO
 .I The Siconos Software Documentation
 .TP
-in the directory @prefix@/share/doc/siconos-@PACKAGE_VERSION@/html
+in the directory @CMAKE_INSTALL_PREFIX@/share/doc/siconos-@PACKAGE_VERSION@/html
 

@@ -31,26 +31,30 @@ cartridge() {
 }
 
 usage() { 
-    echo "Usage: `basename $0` [-c|-v|-h|-x] [YourSample.cpp|location/YourSample.cpp] [SourcesDirectory]";
+    echo "Usage: `basename $0` [-acDgvhPx] [YourSample.cpp|location/YourSample.cpp] [Arguments]";
     echo "The siconos command compile, link and run a Siconos program.";
     echo "Options are: ";
+    echo "     -a : find and compile all sources files in YourSample.cpp directory.";
     echo "     -c : to clean the current directory (deletes binary files, etc.)";
-    echo "     -D key | -D key=value : to define a cmake and a cpp variable";
-    echo "     -a : find and compile all sources files in YourSample directory";
+    echo "     -D key | -D key=value : to define a 'cmake' and a 'cpp' variable.";
+    echo "     -g : to compile with debug informations."
     echo "     -h : to print this help.";
+    echo "     -P prefix_command : to add a prefix command."
     echo "     -v : to print 'make' commands as they are executed.";
     echo "     -x : compile only.";
 }
 
 exec=true
 pwd=`pwd`
-while getopts acD:hvx OPTION
+while getopts acD:ghP:vx OPTION
   do
   case "$OPTION" in
       a) all_srcs=true;;
       c) make_args=clean; exec=false;;
       D) definitions="$definitions $OPTARG";;
+      g) definitions="$definitions CMAKE_BUILD_TYPE=Debug";;
       h) usage; exit 0;;
+      P) exec_prefix=$OPTARG;;
       v) make_args="VERBOSE=1";;
       x) exec=false;;
   esac
@@ -64,6 +68,8 @@ if test ! "$make_args" = "clean"; then
         :/*) main_source=$1;;
         :*) main_source=$pwd/$1;;
     esac
+
+    shift
     
     if test "$all_srcs" = "true"; then
         sources_directory=`dirname $main_source`
@@ -111,5 +117,5 @@ else
 fi
 
 if test $exec = true; then
-    LD_LIBRARY_PATH=$NUMERICS_PREFIX/lib:$KERNEL_PREFIX/lib:$KERNEL_PREFIX/share/siconos-kernel:. ./$exe
+    eval LD_LIBRARY_PATH=$NUMERICS_PREFIX/lib:$KERNEL_PREFIX/lib:$KERNEL_PREFIX/share/siconos-kernel:. $exec_prefix ./$exe $@
 fi
