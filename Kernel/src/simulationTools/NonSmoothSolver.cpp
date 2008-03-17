@@ -41,8 +41,8 @@ void NonSmoothSolver::fillSolverOptions()
   // Link is required for iparam and dparam even when isSet == 0, since we need to recover output parameters (error ...)
   numerics_solver_options->iSize = int_parameters->size();
   numerics_solver_options->dSize = double_parameters->size();
-  numerics_solver_options->iparam = int_parameters->data();
-  numerics_solver_options->dparam = double_parameters->data();
+  numerics_solver_options->iparam = &((*int_parameters)[0]);
+  numerics_solver_options->dparam = &((*double_parameters)[0]);
 }
 
 

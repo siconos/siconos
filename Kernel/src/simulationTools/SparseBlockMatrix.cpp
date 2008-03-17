@@ -165,10 +165,10 @@ void SparseBlockMatrix::convert()
   numericsMatSparse->size = nc;
   numericsMatSparse->nbblocks = nbNonNullBlocks;
   // Next copies: pointer links!!
-  numericsMatSparse->blocksize = diagSizes->data();
-  numericsMatSparse->RowIndex = rowPos->data();
-  numericsMatSparse->ColumnIndex = colPos->data();
-  numericsMatSparse->block = blocksList->data();
+  numericsMatSparse->blocksize =  &((*diagSizes)[0]);
+  numericsMatSparse->RowIndex = &((*rowPos)[0]);
+  numericsMatSparse->ColumnIndex = &((*colPos)[0]);
+  numericsMatSparse->block =  &((*blocksList)[0]);
   //   // Loop through the non-null blocks
   //   for (SpMatIt1 i1 = MSparseBlock->begin1(); i1 != MSparseBlock->end1(); ++i1)
   //     {
@@ -189,3 +189,5 @@ void SparseBlockMatrix::display() const
   cout << "Sum of sizes of the diagonal blocks:" << endl;
   print(diagSizes->begin(), diagSizes->end());
 }
+
+
