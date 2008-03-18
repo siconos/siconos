@@ -154,7 +154,6 @@ WHILE(${iopt} LESS ${imax})
     
     SET(HAVE_FORTRAN_LIBRARIES TRUE CACHE INTERNAL "successfully found fortran libraries")
     SET(iopt ${imax})
-    LINK_DIRECTORIES(${FORTRAN_COMPILER_LIB_DIRECTORIES})
   ELSE(FORT_LIBS_WORK)
     MATH(EXPR iopt ${iopt}+1)
   ENDIF(FORT_LIBS_WORK)
