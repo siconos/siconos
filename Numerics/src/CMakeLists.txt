@@ -64,6 +64,9 @@ IF(C_HAVE_C99)
   APPEND_FLAGS(CMAKE_C_FLAGS "-std=c99")
 ENDIF(C_HAVE_C99)
 
+# CXX may be needed with MlcpSimplex
+SET(SiconosNumerics_LINKER_LANGUAGE C)
+
 LIBRARY_PROJECT_SETUP()
 
 
