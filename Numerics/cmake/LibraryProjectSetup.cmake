@@ -80,31 +80,19 @@ MACRO(LIBRARY_PROJECT_SETUP)
     ENDIF(${PROJECT_NAME}_Unstable_SRCS)
   ENDIF(NOT UNSTABLE)
   
-  #
-  # Attempt to specify file properties
-  #
-  
-  #if(${PROJECT_NAME}_SOURCES_PROPERTIES)
-  #  foreach(_PROPERTY ${${PROJECT_NAME}_SOURCES_PROPERTIES})
-  #    foreach(_FILE ${_ALL_FILES})
-  #      if(${${PROJECT_NAME}_${_PROPERTY}_REGEX})
-  #        if(${_FILE} MATCHES ${${PROJECT_NAME}_${_PROPERTY}}_REGEX})
-  #          if(${${PROJECT_NAME}_${_PROPERTY})
-  #            set_source_files_properties(${_FILE} ${${PROJECT_NAME}_${_PROPERTY}})
-  #          endif(${${PROJECT_NAME}_${_PROPERTY})
-  #        endif(${_FILE} MATCHES ${${PROJECT_NAME}_${_PROPERTY}}_REGEX})
-  #      endif(${${PROJECT_NAME}_${_PROPERTY}_REGEX})
-  #    endforeach(_FILE ${_ALL_FILES})
-  #  endforeach(_PROPERTY ${${PROJECT_NAME}_SOURCES_PROPERTIES})
-  #endif(${PROJECT_NAME}_SOURCES_PROPERTIES)
-  
   SET(${PROJECT_NAME}_SRCS ${_ALL_FILES})
   
   INCLUDE_DIRECTORIES(${_ALL_DIRS})
 
+  #
+  # On Mac OS : 
+  #
   IF(APPLE)
+    # 1 : do not use defaults system libraries (i.e not fortran lapack lib but atlas/lapack lib)
     SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} -Wl,-search_paths_first")
+    SET(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS} -Wl,-search_paths_first")
     IF(FORTRAN_COMPILER_LIB_DIRECTORIES)
+      # 2 : the runtime libraries of the fortran compiler are needed
       REMEMBER_LINK_DIRECTORIES("${FORTRAN_COMPILER_LIB_DIRECTORIES}")
     ENDIF(FORTRAN_COMPILER_LIB_DIRECTORIES)
   ENDIF(APPLE)
@@ -122,14 +110,12 @@ MACRO(LIBRARY_PROJECT_SETUP)
   SET_TARGET_PROPERTIES(${PROJECT_NAME}_static PROPERTIES 
     OUTPUT_NAME "${PROJECT_NAME}" 
     VERSION "${${PROJECT_NAME}_VERSION}" 
-    CLEAN_DIRECT_OUTPUT 1 # no clobbering
-    LINKER_LANGUAGE C)
+    CLEAN_DIRECT_OUTPUT 1) # no clobbering
   
   SET_TARGET_PROPERTIES(${PROJECT_NAME}_shared PROPERTIES
     OUTPUT_NAME "${PROJECT_NAME}" 
     VERSION "${${PROJECT_NAME}_VERSION}" 
-    CLEAN_DIRECT_OUTPUT 1
-    LINKER_LANGUAGE C)
+    CLEAN_DIRECT_OUTPUT 1)
   
   TARGET_LINK_LIBRARIES(${PROJECT_NAME}_static ${${PROJECT_NAME}_LINK_LIBRARIES})
   TARGET_LINK_LIBRARIES(${PROJECT_NAME}_shared ${${PROJECT_NAME}_LINK_LIBRARIES})

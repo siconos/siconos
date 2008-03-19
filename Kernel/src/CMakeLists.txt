@@ -67,8 +67,8 @@ ADD_DEFINITIONS(-DNDEBUG)
 COMPILE_WITH(SiconosNumerics REQUIRED)
 COMPILE_WITH(Boost REQUIRED)
 COMPILE_WITH(LibXml2 REQUIRED)
-COMPILE_WITH(BLAS REQUIRED)
 COMPILE_WITH(LAPACK REQUIRED)
+COMPILE_WITH(BLAS REQUIRED)
 COMPILE_WITH(ATLAS REQUIRED)
 COMPILE_WITH(GMP REQUIRED)
 COMPILE_WITH(CppUnit)
@@ -92,65 +92,66 @@ LIBRARY_PROJECT_SETUP()
 
 
 #
-# tests
+# tests with cppunit
 #
+IF(CPPUNIT_FOUND)
 
-# Siconos Algebra
-BEGIN_TEST(utils/SiconosAlgebra/test)
+  # Siconos Algebra
+  BEGIN_TEST(utils/SiconosAlgebra/test)
 
-NEW_TEST(testSiconosAlgebra
-  BlockMatrixTest.cpp  SimpleMatrixTest.cpp BlockVectorTest.cpp  SimpleVectorTest.cpp TestMain.cpp)
-
-END_TEST()
-
-# Siconos Memory
-BEGIN_TEST(utils/SiconosMemory/test)
-
-NEW_TEST(testSiconosMemory
-  SiconosMemoryTest.cpp TestMain.cpp)
-
-END_TEST()
-
-# model
-BEGIN_TEST(model/test)
-
-NEW_TEST(testModel ModelTest.cpp TestMain.cpp)
-
-END_TEST()
-# modeling tools 
-BEGIN_TEST(modelingTools/test)
-
-NEW_TEST(testModelingTools
-  FirstOrderType1RTest.cpp FirstOrderLinearRTest.cpp FirstOrderLinearTIRTest.cpp 
-  LagrangianScleronomousRTest.cpp LagrangianRheonomousRTest.cpp LagrangianCompliantRTest.cpp 
-  LagrangianLinearRTest.cpp FirstOrderNonLinearDSTest.cpp FirstOrderLinearDSTest.cpp 
-  LagrangianDSTest.cpp LagrangianLinearTIDSTest.cpp TestMain.cpp)
-
-END_TEST()
-
-
-# xml
-BEGIN_TEST(xml/test)
-NEW_TEST(testXMLTools
+  NEW_TEST(testSiconosAlgebra
+    BlockMatrixTest.cpp  SimpleMatrixTest.cpp BlockVectorTest.cpp  SimpleVectorTest.cpp TestMain.cpp)
+  
+  END_TEST()
+  
+  # Siconos Memory
+  BEGIN_TEST(utils/SiconosMemory/test)
+  
+  NEW_TEST(testSiconosMemory
+    SiconosMemoryTest.cpp TestMain.cpp)
+  
+  END_TEST()
+  
+  # model
+  BEGIN_TEST(model/test)
+  
+  NEW_TEST(testModel ModelTest.cpp TestMain.cpp)
+  
+  END_TEST()
+  # modeling tools 
+  BEGIN_TEST(modelingTools/test)
+  
+  NEW_TEST(testModelingTools
+    FirstOrderType1RTest.cpp FirstOrderLinearRTest.cpp FirstOrderLinearTIRTest.cpp 
+    LagrangianScleronomousRTest.cpp LagrangianRheonomousRTest.cpp LagrangianCompliantRTest.cpp 
+    LagrangianLinearRTest.cpp FirstOrderNonLinearDSTest.cpp FirstOrderLinearDSTest.cpp 
+    LagrangianDSTest.cpp LagrangianLinearTIDSTest.cpp TestMain.cpp)
+  
+  END_TEST()
+  
+  
+  # xml
+  BEGIN_TEST(xml/test)
+  NEW_TEST(testXMLTools
     TestMain.cpp)
-
-END_TEST()
-
-# Global tests
-BEGIN_TEST(global_tests)
-
-ADD_LIBRARY(gTestPlugin SHARED global_tests/gTestPlugin.cpp)
-SET_TARGET_PROPERTIES(gTestPlugin 
-  PROPERTIES PREFIX "" 
-  LINK_FLAGS -module
-  OUTPUT_NAME global_tests/gTestPlugin)
-
-NEW_TEST(testGlobal
-  BallBowl.cpp  BouncingBall.cpp  DiodeBridge.cpp  FunctionTest.cpp  GlobalTests.cpp  MainTest.cpp)
-
-END_TEST()
-
-
+  
+  END_TEST()
+  
+  # Global tests
+  BEGIN_TEST(global_tests)
+  
+  ADD_LIBRARY(gTestPlugin SHARED global_tests/gTestPlugin.cpp)
+  SET_TARGET_PROPERTIES(gTestPlugin 
+    PROPERTIES PREFIX "" 
+    LINK_FLAGS -module
+    OUTPUT_NAME global_tests/gTestPlugin)
+  
+  NEW_TEST(testGlobal
+    BallBowl.cpp  BouncingBall.cpp  DiodeBridge.cpp  FunctionTest.cpp  GlobalTests.cpp  MainTest.cpp)
+  
+  END_TEST()
+  
+ENDIF(CPPUNIT_FOUND)
 
 #
 # Export
