@@ -17,7 +17,7 @@ ENDIF(SiconosNumerics_LIBRARY_DIRECTORY)
 
 IF(SiconosNumerics_FOUND)
   GET_FILENAME_COMPONENT(SiconosNumerics_LIBRARY_DIRS ${SiconosNumerics_FOUND} PATH)
-  GET_FILENAME_COMPONENT(SiconosNumerics_LIBRARIES ${SiconosNumerics_FOUND} NAME)
+  SET(SiconosNumerics_LIBRARIES ${SiconosNumerics_FOUND})
   GET_FILENAME_COMPONENT(SiconosNumerics_LIBRARY_DIRS_DIR ${SiconosNumerics_LIBRARY_DIRS} PATH)
   SET(SiconosNumerics_INCLUDE_DIRS ${SiconosNumerics_LIBRARY_DIRS_DIR}/include/Siconos/Numerics)
 ELSE(SiconosNumerics_FOUND)
