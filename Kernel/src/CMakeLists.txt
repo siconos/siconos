@@ -86,7 +86,16 @@ SET_TARGET_PROPERTIES(TestPlugin
   LINK_FLAGS -module
   OUTPUT_NAME plugin/test/TestPlugin)
 
-INSTALL(TARGETS DefaultPlugin TestPlugin DESTINATION share/${PROJECT_PACKAGE_NAME})
+# I do not understand something here...
+IF(APPLE)
+  INSTALL(DIRECTORY 
+    ${CMAKE_CURRENT_BINARY_DIR}/plugin 
+    ${CMAKE_CURRENT_BINARY_DIR}/plugin/test 
+    DESTINATION share/${PROJECT_PACKAGE_NAME})
+ELSE(APPLE)
+  INSTALL(TARGETS DefaultPlugin TestPlugin 
+    LIBRARY DESTINATION share/${PROJECT_PACKAGE_NAME})
+ENDIF(APPLE)
 
 SET(SiconosKernel_LINKER_LANGUAGE CXX)
 
