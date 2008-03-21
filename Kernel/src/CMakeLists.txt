@@ -74,28 +74,18 @@ COMPILE_WITH(GMP REQUIRED)
 COMPILE_WITH(CppUnit)
 
 FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/plugin/test)
-ADD_LIBRARY(DefaultPlugin SHARED plugin/DefaultPlugin.cpp)
+ADD_LIBRARY(DefaultPlugin MODULE plugin/DefaultPlugin.cpp)
 SET_TARGET_PROPERTIES(DefaultPlugin 
   PROPERTIES PREFIX ""
-  LINK_FLAGS -module
   OUTPUT_NAME plugin/DefaultPlugin)
 
-ADD_LIBRARY(TestPlugin SHARED plugin/test/TestPlugin.cpp)
+ADD_LIBRARY(TestPlugin MODULE plugin/test/TestPlugin.cpp)
 SET_TARGET_PROPERTIES(TestPlugin 
   PROPERTIES PREFIX ""
-  LINK_FLAGS -module
   OUTPUT_NAME plugin/test/TestPlugin)
 
-# I do not understand something here...
-IF(APPLE)
-  INSTALL(DIRECTORY 
-    ${CMAKE_CURRENT_BINARY_DIR}/plugin 
-    ${CMAKE_CURRENT_BINARY_DIR}/plugin/test 
-    DESTINATION share/${PROJECT_PACKAGE_NAME})
-ELSE(APPLE)
-  INSTALL(TARGETS DefaultPlugin TestPlugin 
-    LIBRARY DESTINATION share/${PROJECT_PACKAGE_NAME})
-ENDIF(APPLE)
+INSTALL(TARGETS DefaultPlugin TestPlugin 
+  LIBRARY DESTINATION share/${PROJECT_PACKAGE_NAME})
 
 SET(SiconosKernel_LINKER_LANGUAGE CXX)
 
@@ -151,10 +141,9 @@ IF(CPPUNIT_FOUND)
   # Global tests
   BEGIN_TEST(global_tests)
   
-  ADD_LIBRARY(gTestPlugin SHARED global_tests/gTestPlugin.cpp)
+  ADD_LIBRARY(gTestPlugin MODULE global_tests/gTestPlugin.cpp)
   SET_TARGET_PROPERTIES(gTestPlugin 
     PROPERTIES PREFIX "" 
-    LINK_FLAGS -module
     OUTPUT_NAME global_tests/gTestPlugin)
   
   NEW_TEST(testGlobal
