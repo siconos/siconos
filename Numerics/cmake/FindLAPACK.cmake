@@ -94,7 +94,7 @@ if(BLAS_FOUND)
     check_lapack_libraries(
       LAPACK_LIBRARIES
       LAPACK
-      clapack_dgetrf  # checked with fortran!
+      ATL_dgetrf  # checked with fortran!
       ""
       "lapack_atlas"
       "${BLAS_LIBRARIES}")
@@ -102,11 +102,19 @@ if(BLAS_FOUND)
       check_lapack_libraries(
         LAPACK_LIBRARIES
         LAPACK
-        clapack_dgetrf  # checked with fortran!
+        ATL_dgetrf  # checked with fortran!
         ""
         "lapack"
         "${BLAS_LIBRARIES}")
     endif(NOT LAPACK_LIBRARIES)
+
+    check_lapack_libraries(
+      COMPLETE_LAPACK_LIBRARIES
+      LAPACK
+      cgesvd  # checked with fortran!
+      ""
+      "lapack"
+      "${BLAS_LIBRARIES}")
   endif(ATLAS_FOUND)
 
 #intel lapack
