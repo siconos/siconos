@@ -704,6 +704,7 @@ void test_matrix(void)
   for (itest = 0; itest < NBTEST ; ++itest)
   {
     printf(" test %s  :\n", summary[itest].file);
+    printf(" ===================================================  \n");
     printf(" ENUM %s %d \t", summary[itest].cv[ENUM_ID], summary[itest].times[ENUM_ID]);
     printf(" PGS IM %s %d \t", summary[itest].cv[PGS_IM_ID], summary[itest].times[PGS_IM_ID]);
     printf(" PGS EX %s %d \t", summary[itest].cv[PGS_EX_ID], summary[itest].times[PGS_EX_ID]);
@@ -713,8 +714,8 @@ void test_matrix(void)
     printf(" PSOR 15 %s %d \t",summary[itest].cv[PSOR_15_ID],summary[itest].times[PSOR_15_ID]);
     printf(" PSOR 2 %s %d \t",summary[itest].cv[PSOR_2_ID],summary[itest].times[PSOR_2_ID]);
     printf(" RPSOR %s %d \t",summary[itest].cv[RPSOR_ID],summary[itest].times[RPSOR_ID]);*/
-    printf(" PATH %s %d \n", summary[itest].cv[PATH_ID], summary[itest].times[PATH_ID]);
-    printf(" SIMPLEX %s %d \n", summary[itest].cv[SIMPLEX_ID], summary[itest].times[SIMPLEX_ID]);
+    printf(" PATH %s %d \t", summary[itest].cv[PATH_ID], summary[itest].times[PATH_ID]);
+    printf(" SIMPLEX %s %d \t", summary[itest].cv[SIMPLEX_ID], summary[itest].times[SIMPLEX_ID]);
     printf(" DIR_ENUM %s %d \n", summary[itest].cv[DIRECT_ENUM_ID], summary[itest].times[DIRECT_ENUM_ID]);
   }
   printf("* *** ******************** *** * \n");
