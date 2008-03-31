@@ -30,7 +30,16 @@ dim(v)=nn
 #include <string.h>
 #include "LA.h"
 #include "MLCP_Solvers.h"
+#include "mlcp_tool.h"
 #include <math.h>
+#include "mlcp_enum.h"
+
+
+
+#ifdef MLCP_DEBUG
+static int *sLastIWork;
+static double *sLastIWork;
+#endif
 
 static double * sQ = 0;
 static double * sColNul = 0;
@@ -104,59 +113,7 @@ int nextEnum()
   return 1;
 }
 
-void   fillSolution()
-{
-  int lin;
-  for (lin = 0; lin < sNn; lin++)
-  {
-    sU[lin] = sQ[lin];
-    sW1[lin] = 0;
-  }
 
-
-  for (lin = 0; lin < sMm; lin++)
-  {
-    if (sW2V[lin] == 0)
-    {
-      sW2[lin] = 0;
-      sV[lin] = sQ[sNn + lin];
-    }
-    else
-    {
-      sV[lin] = 0;
-      sW2[lin] = sQ[sNn + lin];
-    }
-  }
-}
-/*
- *if sW2V[i]==0
- *  v[i] not null w2[i] null
- *else
- *  v[i] null and w2[i] not null
- */
-void buildM()
-{
-  int col;
-  int npm = sNn + sMm;
-  memcpy(sM, sMref, sNn * npm * sizeof(double));
-  for (col = 0; col < sMm; col++)
-  {
-    if (sW2V[col] == 0)
-    {
-      memcpy(sM + (sNn + col)*npm, sMref + (sNn + col)*npm, npm * sizeof(double));
-    }
-    else
-    {
-      memcpy(sM + (sNn + col)*npm, sColNul, npm * sizeof(double));
-      sM[(sNn + col)*npm + col + sNn] = -1;
-    }
-  }
-  /*  printf("builM:\n");
-  displayMat(sM,npm,npm);
-
-  printf("sColNul\n");
-  displayMat(sColNul,npm,1);*/
-}
 void buildQ()
 {
   memcpy(sQ, sQref, (sMm + sNn)*sizeof(double));
@@ -177,14 +134,23 @@ void printRefSystem()
   printf("ref Q:\n");
   displayMat(sQref, sMm + sNn, 1);
 }
+int mlcp_enum_getNbIWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
+{
+  return 2 * (problem->n + problem->m);
+}
+int mlcp_enum_getNbDWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
+{
+  return 3 * (problem->n + problem->m) + (problem->n + problem->m) * (problem->n + problem->m);
+}
+
 /*
  * The are no memory allocation in mlcp_enum, all necessary memory must be allocated by the user.
  *
  *options:
  * iparam[0] : (in) verbose.
  * dparam[0] : (in) a positive value, tolerane about the sign.
- * floatWorkingMem : working float zone size : (nn+mm)*(nn+mm) + 3*(nn+mm). MUST BE ALLOCATED BY THE USER.
- * intWorkingMem : working int zone size : 2(nn+mm). MUST BE ALLOCATED BY THE USER.
+ * dWork : working float zone size : (nn+mm)*(nn+mm) + 3*(nn+mm). MUST BE ALLOCATED BY THE USER.
+ * iWork : working int zone size : 2(nn+mm). MUST BE ALLOCATED BY THE USER.
  * double *z : size n+m
  * double *w : size n+m
  */
@@ -192,8 +158,8 @@ void printRefSystem()
 void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {
   double tol ;
-  double * workingFloat = options->floatWorkingMem;
-  int * workingInt = options->intWorkingMem;
+  double * workingFloat = options->dWork;
+  int * workingInt = options->iWork;
   int lin;
   int npm = (problem->n) + (problem->m);
   int npm2 = npm * npm;
@@ -201,7 +167,7 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
   int one = 1;
   int * ipiv;
   int check;
-  int DGESVinfo = 14;
+  int DGESVinfo;
 
   /*OUTPUT param*/
   sW1 = w;
@@ -237,7 +203,7 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
   initEnum();
   while (nextEnum())
   {
-    buildM();
+    mlcp_buildM(sW2V, sM, sMref, sNn, sMm);
     buildQ();
     if (sVerbose)
       printCurrentSystem();
@@ -266,7 +232,7 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
       {
         if (sVerbose)
           printf("mlcp_enum find a solution!\n");
-        fillSolution();
+        mlcp_fillSolution(sU, sV, sW1, sW2, sNn, sMm, sW2V, sQ);
         options->iparam[1] = sCurrentEnum - 1;
         return;
       }

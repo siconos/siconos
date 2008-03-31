@@ -92,6 +92,10 @@ int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *
   else if (strcmp(name , "SIMPLEX") == 0)
     mlcp_simplex(problem, z , w , &info , options);
 
+  /****** DIRECT ENUM algorithm ******/
+  else if (strcmp(name , "DIRECT_ENUM") == 0)
+    mlcp_direct_enum(problem, z , w , &info , options);
+
   /*error */
   else
   {

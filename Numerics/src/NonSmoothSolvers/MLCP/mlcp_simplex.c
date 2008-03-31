@@ -61,13 +61,14 @@ void mlcp_simplex_reset()
  *  tolNegVar = options->dparam[2];     tolerance to consider a value is negative
  *  nIterMax = options->iparam[0];     max number of nodes to consider in tree search
  *  options->iparam[1];    verbose if not 0
+ *  info : output. info == 0 if success.
 */
 void mlcp_simplex(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {
 #ifdef HAVE_MLCPSIMPLEX
   double tol ;
-  double * workingFloat = options->floatWorkingMem;
-  int * workingInt = options->intWorkingMem;
+  double * workingFloat = options->dWork;
+  int * workingInt = options->iWork;
   int lin;
   int npm = (problem->n) + (problem->m);
   int npm2 = npm * npm;

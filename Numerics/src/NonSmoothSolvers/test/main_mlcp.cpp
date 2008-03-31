@@ -66,7 +66,8 @@
 #define RPSOR_ID 8
 #define PATH_ID 9
 #define SIMPLEX_ID 10
-#define NBMETHODS 11
+#define DIRECT_ENUM_ID 11
+#define NBMETHODS 12
 
 #define PATH_DRIVER
 #define MAX_DIM_ENUM 40
@@ -149,8 +150,8 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
   int _ID = PSOR_05_ID - 1;
 
 
-  mlcpOptions.iparam = (int*)malloc(5 * sizeof(int));
-  mlcpOptions.dparam = (double*)malloc(5 * sizeof(double));
+  mlcpOptions.iparam = (int*)malloc(10 * sizeof(int));
+  mlcpOptions.dparam = (double*)malloc(10 * sizeof(double));
 
   /*SOLVER ENUM*/
   solTozw(n, m, z, w, sol);
@@ -160,8 +161,8 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
   mlcpOptions.dSize = 1;
   mlcpOptions.dparam[0] = tol1;
 
-  mlcpOptions.floatWorkingMem = (double*)malloc(((n + m) * (n + m) + 3 * (n + m)) * sizeof(double));
-  mlcpOptions.intWorkingMem = (int*)malloc(2 * (n + m) * sizeof(int));
+  mlcpOptions.dWork = (double*)malloc(mlcp_enum_getNbDWork(problem, 0) * sizeof(double));
+  mlcpOptions.iWork = (int*)malloc(mlcp_enum_getNbIWork(problem, 0) * sizeof(int));
   startTimer();
   info = 1;
   if (n + m < MAX_DIM_ENUM)
@@ -180,8 +181,8 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     printf("find a solution with error %lf \n", error);
     printSolution("ENUM", n, m, z, w);
   }
-  free(mlcpOptions.floatWorkingMem);
-  free(mlcpOptions.intWorkingMem);
+  free(mlcpOptions.dWork);
+  free(mlcpOptions.iWork);
   /*SOLVER PGS*/
   solTozw(n, m, z, w, sol);
   strcpy(mlcpOptions.solverName, "PGS");
@@ -374,7 +375,47 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     printf("find a solution with error %lf \n", error);
     printSolution("SIMPLEX", n, m, z, w);
   }
+  /*SOLVER DIRECT ENUM*/
+  solTozw(n, m, z, w, sol);
+  strcpy(mlcpOptions.solverName, "DIRECT_ENUM");
+  mlcpOptions.iSize = 6;
+  mlcpOptions.iparam[5] = 3; /*Number of registered configurations*/
+  mlcpOptions.iparam[0] = 0; /*VERBOSE*/
+  mlcpOptions.dSize = 6;
+  mlcpOptions.dparam[0] = 1e-12;
+  mlcpOptions.dparam[5] = 1e-12;
+  int aux = mlcp_direct_enum_getNbDWork(problem, &mlcpOptions);
+  double * daux = (double*)malloc(aux * sizeof(double));
+  mlcpOptions.dWork = daux;
+  aux = mlcp_direct_enum_getNbIWork(problem, &mlcpOptions);
+  int * iaux = (int*)malloc(aux * sizeof(int));
+  mlcpOptions.iWork = iaux;
 
+  mlcp_direct_enum_init(problem, &mlcpOptions);
+
+  info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+  startTimer();
+  info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+  stopTimer();
+  summary[itest].times[DIRECT_ENUM_ID] = sDt.mCumul;
+  strcpy(summary[itest].cv[DIRECT_ENUM_ID], "CV");
+  if (info > 0)
+  {
+    printf("Can't find a solution\n");
+    strcpy(summary[itest].cv[DIRECT_ENUM_ID], "NO");
+  }
+  else
+  {
+    mlcp_compute_error(problem, z, w, tol1,  &error);
+    if (error > 1e-9)
+      strcpy(summary[itest].cv[DIRECT_ENUM_ID], "NO");
+    printf("find a solution with error %lf \n", error);
+    printSolution("DIRECT_ENUM_ID", n, m, z, w);
+  }
+
+  free(daux);
+  free(iaux);
+  mlcp_direct_enum_reset();
   deleteSolverOptions(&mlcpOptions);
 
 
@@ -667,13 +708,14 @@ void test_matrix(void)
     printf(" PGS IM %s %d \t", summary[itest].cv[PGS_IM_ID], summary[itest].times[PGS_IM_ID]);
     printf(" PGS EX %s %d \t", summary[itest].cv[PGS_EX_ID], summary[itest].times[PGS_EX_ID]);
     printf(" RPGS %s %d \t", summary[itest].cv[RPGS_ID], summary[itest].times[RPGS_ID]);
-    printf(" PSOR 05 %s %d \t", summary[itest].cv[PSOR_05_ID], summary[itest].times[PSOR_05_ID]);
-    printf(" PSOR 1 %s %d \t", summary[itest].cv[PSOR_1_ID], summary[itest].times[PSOR_1_ID]);
-    printf(" PSOR 15 %s %d \t", summary[itest].cv[PSOR_15_ID], summary[itest].times[PSOR_15_ID]);
-    printf(" PSOR 2 %s %d \t", summary[itest].cv[PSOR_2_ID], summary[itest].times[PSOR_2_ID]);
-    printf(" RPSOR %s %d \t", summary[itest].cv[RPSOR_ID], summary[itest].times[RPSOR_ID]);
+    /*printf(" PSOR 05 %s %d \t",summary[itest].cv[PSOR_05_ID],summary[itest].times[PSOR_05_ID]);
+    printf(" PSOR 1 %s %d \t",summary[itest].cv[PSOR_1_ID],summary[itest].times[PSOR_1_ID]);
+    printf(" PSOR 15 %s %d \t",summary[itest].cv[PSOR_15_ID],summary[itest].times[PSOR_15_ID]);
+    printf(" PSOR 2 %s %d \t",summary[itest].cv[PSOR_2_ID],summary[itest].times[PSOR_2_ID]);
+    printf(" RPSOR %s %d \t",summary[itest].cv[RPSOR_ID],summary[itest].times[RPSOR_ID]);*/
     printf(" PATH %s %d \n", summary[itest].cv[PATH_ID], summary[itest].times[PATH_ID]);
     printf(" SIMPLEX %s %d \n", summary[itest].cv[SIMPLEX_ID], summary[itest].times[SIMPLEX_ID]);
+    printf(" DIR_ENUM %s %d \n", summary[itest].cv[DIRECT_ENUM_ID], summary[itest].times[DIRECT_ENUM_ID]);
   }
   printf("* *** ******************** *** * \n");
   printf("* *** END OF TEST MATRIX   *** * \n");

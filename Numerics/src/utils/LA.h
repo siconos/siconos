@@ -54,6 +54,8 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
   INFO = F(LA_ORDER,A1,A2,A3,A4,A5,A6)
 #define LAPACK_7(F,A1,A2,A3,A4,A5,A6,A7,INFO) \
   INFO = F(LA_ORDER,A1,A2,A3,A4,A5,A6,A7)
+#define LAPACK_8(F,A1,A2,A3,A4,A5,A6,A7,A8,INFO)  \
+  INFO = F(LA_ORDER,A1,A2,A3,A4,A5,A6,A7,A8)
 #define LAPACK_9(F,A1,A2,A3,A4,A5,A6,A7,A8,A9,INFO) \
   INFO = F(LA_ORDER,A1,A2,A3,A4,A5,A6,A7,A8,A9)
 #define LAPACK_9_SIDED(F,A1,A2,A3,A4,A5,A6,A7,A8,A9,INFO) \
@@ -238,6 +240,19 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      int C_N = N; \
      int C_LDA = LDA; \
      LAPACK_5(LAPACK_NAME(dgetrf), INTEGER(C_M), INTEGER(C_N), A, INTEGER(C_LDA), INTEGERP(IPIV), INTEGER(INFO)); \
+  })
+
+/* DGETRS solves a system of linear equations
+*     A * X = B  or  A' * X = B
+*  with a general N-by-N matrix A using the LU factorization computed
+*  by DGETRF.
+ */
+#define DGETRS(TRANS,N,NRHS,A,LDA,IPIV,B,LDB,INFO)  \
+    ({ int C_N = N; \
+     int C_NRHS = NRHS; \
+     int C_LDA = LDA; \
+     int C_LDB = LDB; \
+     LAPACK_8(LAPACK_NAME(dgetrs), T_TRANS(TRANS), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), INTEGERP(IPIV),B, INTEGER(C_LDB), INTEGER(INFO) ); \
   })
 
 /* DGETRI - matrix inversion
