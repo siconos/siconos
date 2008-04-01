@@ -87,12 +87,25 @@ CONFIGURE_FILE(SiconosNumerics.h  unit.mod.proxy COPYONLY)
 
 BEGIN_TEST(netlib/odepack/test)
  
+NEW_TEST(test1 DLSODES-test.f)
+NEW_TEST(test2 DLSODAR-test.f)
+NEW_TEST(test3 DLSODI-test.f)
+NEW_TEST(test4 DLSODPK-test.f)
+NEW_TEST(test5 DLSODA-test.f)
+NEW_TEST(test6 DLSODE-test.f)
+NEW_TEST(test7 DLSODIS-test.f)
+NEW_TEST(test8 DLSODKR-test.f)
+NEW_TEST(test9 DLSOIBT-test.f)
+NEW_TEST(test10 test-funcC-inC.cpp funC.cpp)
  
 END_TEST()
  
 BEGIN_TEST(NonSmoothSolvers/test)
  
+NEW_TEST(NumericsMatrixTest main_NumericsMatrix.c)
+NEW_TEST(LCPtest main_lcp.c)
 
+SET(MLCPtest_PROPERTIES WILL_FAIL TRUE)
 NEW_TEST(MLCPtest main_mlcp.cpp)
 
 END_TEST()
