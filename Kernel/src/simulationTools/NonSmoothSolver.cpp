@@ -78,8 +78,8 @@ NonSmoothSolver::NonSmoothSolver(const std::string& newName, IntParameters& ipar
   int_parameters = new IntParameters(iparam);
   double_parameters = new DoubleParameters(dparam);
   fillSolverOptions();
-  numerics_solver_options->floatWorkingMem = dWork;
-  numerics_solver_options->intWorkingMem = iWork;
+  numerics_solver_options->dWork = dWork;
+  numerics_solver_options->iWork = iWork;
 }
 
 // Construction using XML object

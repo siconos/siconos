@@ -207,11 +207,23 @@ void MLCP::initialize()
       // Creates and fills M using UR of indexSet
       M = new OSNSMatrix(indexSet, blocks, MStorageType);
       isMAllocatedIn = true;
+      numerics_problem.M = M->getNumericsMatrix();
+      numerics_problem.A = 0;
+      numerics_problem.B = 0;
+      numerics_problem.C = 0;
+      numerics_problem.D = 0;
+      numerics_problem.a = 0;
+      numerics_problem.b = 0;
+      numerics_problem.problemType = 0;
+      numerics_problem.n = n;
+      numerics_problem.m = m;
+
     }
     else
     {
       M->setStorageType(MStorageType);
       M->fill(indexSet, blocks);
+
     }
     sizeOutput = M->size();
   }
@@ -227,6 +239,10 @@ void MLCP::initialize()
       isMAllocatedIn = true;
     }
   }
+}
+void  MLCP::reset()
+{
+  mlcp_driver_reset(&numerics_problem, solver->getNumericsSolverOptionsPtr());
 }
 
 void MLCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
@@ -357,7 +373,7 @@ void MLCP::computeQ(double time)
 
 void MLCP::preCompute(double time)
 {
-  // This function is used to prepare data for the LinearComplementarity_Problem
+  // This function is used to prepare data for the MixedLinearComplementarity_Problem
   // - computation of M and q
   // - set sizeOutput
   // - check dim. for z,w
@@ -436,19 +452,7 @@ int MLCP::compute(double time)
 
   if (sizeOutput != 0)
   {
-    // The MLCP in Numerics format
-    MixedLinearComplementarity_Problem numerics_problem;
-    numerics_problem.M = M->getNumericsMatrix();
-    numerics_problem.A = 0;
-    numerics_problem.B = 0;
-    numerics_problem.C = 0;
-    numerics_problem.D = 0;
-    numerics_problem.a = 0;
-    numerics_problem.b = 0;
-    numerics_problem.problemType = 0;
     numerics_problem.q = q->getArray();
-    numerics_problem.n = n;
-    numerics_problem.m = m;
     int nbSolvers = 1;
     // Call MLCP Driver
     //printf("MLCP display");
@@ -456,9 +460,8 @@ int MLCP::compute(double time)
     //displayNM(numerics_problem.M);
     //      exit(1);
     //mlcpDefaultSolver *pSolver = new mlcpDefaultSolver(m,n);
-    displayMLCP(&numerics_problem);
+    //      displayMLCP(&numerics_problem);
     info = mlcp_driver(&numerics_problem, z->getArray(), w->getArray(), solver->getNumericsSolverOptionsPtr(), numerics_options);
-    //info = lcp_driver(&numerics_problem, z->getArray() , w->getArray() , solver->getNumericsSolverOptionsPtr(), nbSolvers, numerics_options);
 
     // --- Recovering of the desired variables from MLCP output ---
     postCompute();

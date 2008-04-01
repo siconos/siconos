@@ -358,8 +358,7 @@ AC_CONFIG_FILES([Makefile
                  src/utils/AtlasLocal/Makefile
                  src/utils/AtlasLocal/atlas/Makefile
 		 src/xml/Makefile
-                 src/xml/test/Makefile
-		 global_tests/Makefile])
+                 src/xml/test/Makefile])
 AC_OUTPUT
 
 

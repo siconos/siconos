@@ -98,6 +98,9 @@ private:
   SiconosVector *z;
   /** contains the vector w of a MLCP system */
   SiconosVector *w;
+  /** The MLCP instance */
+  MixedLinearComplementarity_Problem numerics_problem;
+
 
   /** Flags to check wheter pointers were allocated in class constructors or not */
   bool isWAllocatedIn;
@@ -139,6 +142,15 @@ public:
   inline int getn() const
   {
     return n;
+  }
+
+  // --- numerics MLCP ---
+  /** get the pointer on the Numerics MLCP,
+  *  \return MixedLinearComplementarity_Problem*
+  */
+  inline MixedLinearComplementarity_Problem* getNumericsMLCP()
+  {
+    return &numerics_problem;
   }
 
 
@@ -262,6 +274,7 @@ public:
   /** To initialize the MLCP problem(computes topology ...)
    */
   void initialize();
+  void reset();
 
   /** computes extra diagonal block-matrix that corresponds to UR1 and UR2
   *  Move this to Unitary Relation class?

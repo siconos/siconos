@@ -22,10 +22,10 @@ include $(top_srcdir)/config/Make-rules
 
 ACLOCAL AMFLAGS = -I macros
 
-SUBDIRS = config src siconos global_tests man #src must be compiled before main program
+SUBDIRS = config src siconos man #src must be compiled before main program
 
 # make dist with svn export
-EXTRA_DIST = config src siconos global_tests test
+EXTRA_DIST = config src siconos test
 
 doc:
 	@if ! test -d $(top_srcdir)/../Docs; then \
