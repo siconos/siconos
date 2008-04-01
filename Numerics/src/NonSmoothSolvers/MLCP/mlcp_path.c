@@ -27,6 +27,7 @@
 
 #include "InterfaceToPathFerris/SimpleLCP.h"
 
+static int sVerbose = 0;
 /*
 Warning: this function requires MLCP with M and q, not (A,B,C,D).
 The input structure MixedLinearComplementarity_Problem is supposed to fit with this form.
@@ -38,6 +39,7 @@ void mlcp_path(MixedLinearComplementarity_Problem* problem, double *z, double *w
 #ifdef HAVE_PATHFERRIS
   MCP_Termination termination;
   double tol = options->dparam[0];
+  sVerbose = options->iparam[0];
 
   double * M = problem->M->matrix0;
   double * q = problem->q;
@@ -69,27 +71,28 @@ void mlcp_path(MixedLinearComplementarity_Problem* problem, double *z, double *w
     lb[i] = 0;
     ub[i] = 1e20;
   }
-  printLCP(dim, nnz, m_i, m_j, m_ij, q, lb, ub);
+  if (sVerbose)
+    printLCP(dim, nnz, m_i, m_j, m_ij, q, lb, ub);
   SimpleLCP(dim, nnz, m_i, m_j, m_ij, q, lb, ub,
             &termination, z);
 
   if (termination == MCP_Error)
   {
     *info = 1;
-    if (verbose > 0)
+    if (sVerbose)
       printf("PATH : Error in the solution.\n");
   }
   else if (termination == MCP_Solved)
   {
+    /*     for (i=0;i<n;i++){ */
+    /*       u[i]=z[i]; */
+    /*     } */
     for (i = 0; i < n; i++)
+      w[i] = 0;
+    for (i = n; i < n + m; i++)
     {
-      u[i] = z[i];
-    }
-    for (i = 0; i < m; i++)
-    {
-      v[i] = z[n + i];
-      w[i] = q[n + i];
-      for (j = 0; j < dim; j++)
+      w[i] = -q[i];
+      for (j = 0; j < n + m; j++)
       {
         w[i] += M[i + dim * j] * z[j];
       }
@@ -97,13 +100,19 @@ void mlcp_path(MixedLinearComplementarity_Problem* problem, double *z, double *w
 
     *info = 0;
     mlcp_compute_error(problem, z, w, tol, &err);
+    for (i = 0; i < m; i++)
+    {
+      if (z[n + i] > w[n + i])
+        w[n + i] = 0;
+    }
 
-    if (verbose > 0)
+
+    if (sVerbose)
       printf("PATH : MLCP Solved, error %10.7f.\n", err);
   }
   else
   {
-    if (verbose > 0)
+    if (sVerbose)
       printf("PATH : MLCP Other error: %d\n", termination);
   }
 

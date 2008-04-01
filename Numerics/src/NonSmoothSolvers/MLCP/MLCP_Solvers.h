@@ -103,7 +103,10 @@ extern "C" {
 #endif
 
 #include "mlcp_enum.h"
+#include "mlcp_simplex.h"
 #include "mlcp_direct_enum.h"
+#include "mlcp_direct_simplex.h"
+#include "mlcp_direct_path.h"
 
   /**  mlcp_pgs (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver for MLCP.
    * \param[in] problem structure that represents the MLCP (n,m,M, q...)
@@ -205,6 +208,30 @@ extern "C" {
   \author Olivier Bonnefon
   */
   void mlcp_direct_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+
+  /** direct-simplex solver
+  * \param[in] problem structure that represents the MLCP (n,mM, q...)
+  * \param[out] z a m+n-vector of doubles which contains the initial solution and returns the solution of the problem.
+  * \param[out] w a m+n-vector of doubles which returns the solution of the problem.
+  * \param[out] info an integer which returns the termination value:\n
+  0 : success,it found a solution\n
+  1 : echec,it did not find any solution\n
+  \param[in-out] options structure used to define the solver and its parameters.
+  \author Olivier Bonnefon
+  */
+  void mlcp_direct_simplex(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+
+  /** direct-path solver
+  * \param[in] problem structure that represents the MLCP (n,mM, q...)
+  * \param[out] z a m+n-vector of doubles which contains the initial solution and returns the solution of the problem.
+  * \param[out] w a m+n-vector of doubles which returns the solution of the problem.
+  * \param[out] info an integer which returns the termination value:\n
+  0 : success,it found a solution\n
+  1 : echec,it did not find any solution\n
+  \param[in-out] options structure used to define the solver and its parameters.
+  \author Olivier Bonnefon
+  */
+  void mlcp_direct_path(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
 
   /** simplex solver

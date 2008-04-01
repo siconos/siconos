@@ -52,7 +52,8 @@ static int sNumberOfCC = 0;
 static int sMaxNumberOfCC = 0;
 static struct dataComplementarityConf * spFirstCC = 0;
 static struct dataComplementarityConf * spCurCC = 0;
-static double sTol = 0;
+static double sTolneg = 0;
+static double sTolpos = 0;
 static int sN;
 static int sM;
 static int sNpM;
@@ -95,7 +96,8 @@ void mlcp_direct_init(MixedLinearComplementarity_Problem* problem, Solver_Option
   spCurInt = options->iWork;
   sMaxNumberOfCC = options->iparam[5];
   sVerbose = options->iparam[6];
-  sTol = options->dparam[5];
+  sTolneg = options->dparam[5];
+  sTolpos = options->dparam[6];
   sN = problem->n;
   sM = problem->m;
   sNpM = sN + sM;
@@ -143,7 +145,7 @@ int internalAddConfig(MixedLinearComplementarity_Problem* problem, int * zw, int
   DGETRF(sNpM, sNpM, spFirstCC->M, sNpM, spFirstCC->IPV, INFO);
   if (INFO)
   {
-    printf("mlcp_direct error, LU impossible");
+    printf("mlcp_direct error, LU impossible\n");
     return 0;
   }
   return 1;
@@ -191,7 +193,7 @@ void mlcp_direct_addConfigFromWSolution(MixedLinearComplementarity_Problem* prob
 
   for (i = 0; i < sM; i++)
   {
-    if (wSol[i] > 0)
+    if (wSol[i] > sTolpos)
       spIntBuf[i] = 1;
     else
       spIntBuf[i] = 0;
@@ -219,7 +221,7 @@ int solveWithCurConfig(MixedLinearComplementarity_Problem* problem)
   {
     for (lin = 0 ; lin < sM; lin++)
     {
-      if (sQ[sN + lin] < - sTol)
+      if (sQ[sN + lin] < - sTolneg)
       {
         if (sVerbose)
           printf("solveWithCurConfig Sol not in the positive cone\n");

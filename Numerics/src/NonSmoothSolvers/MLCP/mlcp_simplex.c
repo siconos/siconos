@@ -40,7 +40,7 @@ dim(v)=nn
 static int sIsInitialize = 0;
 #endif
 
-void mlcp_simplex_initialize(MixedLinearComplementarity_Problem* problem)
+void mlcp_simplex_init(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
 {
 #ifdef HAVE_MLCPSIMPLEX
   int nn = problem->n;
