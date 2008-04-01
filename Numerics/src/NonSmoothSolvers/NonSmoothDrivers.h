@@ -124,6 +124,11 @@ extern "C" {
       \author Vincent Acary
   */
   int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *w, Solver_Options* options, Numerics_Options* global_options);
+  void mlcp_driver_init(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
+  void mlcp_driver_reset(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
+  int mlcp_driver_get_iwork(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
+  int mlcp_driver_get_dwork(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
+
 
   /** General interface to solver for pfc 3D problems */
   int pfc_3D_driver(int, double*, double*, method*, double*, double*, double*);

@@ -57,6 +57,7 @@ static int sN;
 static int sM;
 static int sNpM;
 static int* spIntBuf;
+static int sVerbose = 0;
 
 double * mydMalloc(int n)
 {
@@ -93,6 +94,7 @@ void mlcp_direct_init(MixedLinearComplementarity_Problem* problem, Solver_Option
   spCurDouble = options->dWork;
   spCurInt = options->iWork;
   sMaxNumberOfCC = options->iparam[5];
+  sVerbose = options->iparam[6];
   sTol = options->dparam[5];
   sN = problem->n;
   sM = problem->m;
@@ -119,6 +121,14 @@ int internalAddConfig(MixedLinearComplementarity_Problem* problem, int * zw, int
   int i;
   int npm;
   int INFO;
+  if (sVerbose)
+  {
+    printf("mlcp_direct internalAddConfig\n");
+    printf("-----------------------------\n");
+    for (i = 0; i < problem->m; i++)
+      printf("zw[%d]=%d\t", i, zw[i]);
+    printf("\n");
+  }
   if (init)
   {
     spFirstCC->zw = myiMalloc(sM);
@@ -201,6 +211,8 @@ int solveWithCurConfig(MixedLinearComplementarity_Problem* problem)
   DGETRS(LA_NOTRANS, sNpM, one, spCurCC->M, sNpM, spCurCC->IPV, sQ, sNpM, INFO);
   if (INFO)
   {
+    if (sVerbose)
+      printf("solveWithCurConfig DGETRS failed\n");
     return 0;
   }
   else
@@ -209,10 +221,14 @@ int solveWithCurConfig(MixedLinearComplementarity_Problem* problem)
     {
       if (sQ[sN + lin] < - sTol)
       {
+        if (sVerbose)
+          printf("solveWithCurConfig Sol not in the positive cone\n");
         return 0;
       }
     }
   }
+  if (sVerbose)
+    printf("solveWithCurConfig Success\n");
   return 1;
 }
 /*
