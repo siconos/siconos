@@ -20,6 +20,10 @@
 NUMERICS_PREFIX=${NUMERICSPATH:-@SiconosNumerics_LIBRARY_DIRS_DIR@}
 KERNEL_PREFIX=${SICONOSPATH:-@CMAKE_INSTALL_PREFIX@}
 
+exec=true
+pwd=`pwd`
+myname=`basename $0`
+
 cartridge() {
     echo;
     echo "|=============================================================================|";
@@ -31,62 +35,127 @@ cartridge() {
 }
 
 usage() { 
-    echo "Usage: `basename $0` [-acDgvhPx] [YourSample.cpp|location/YourSample.cpp] [Arguments]";
+    echo "Usage: $myname [options] [YourSample.cpp|location/YourSample.cpp] [Arguments]";
     echo "The siconos command compile, link and run a Siconos program.";
     echo "Options are: ";
     echo "     -a : find and compile all sources files in YourSample.cpp directory.";
-    echo "     -c : to clean the current directory (deletes binary files, etc.)";
+    echo "     -c | -clean : to clean the current directory (deletes binary files, etc.).";
     echo "     -D key | -D key=value : to define a 'cmake' and a 'cpp' variable.";
     echo "     -g : to compile with debug informations."
-    echo "     -h : to print this help.";
-    echo "     -P prefix_command : to add a prefix command."
+    echo "     -h | -help : to print this help.";
+    echo "     -noexec : compile only.";
+    echo "     -opt <opt> : add option <opt> to compiler." 
+    echo "     -P prefix_command : to add a prefix command (time, valgrind, gdb, etc.)."
+    echo "     -plugin_dir <plugin_directory> : "
+    echo "         create <plugin_directory>.so "
+    echo "         with plugin sources under <plugin_directory>." 
+    echo "     -plugins_dir <plugins_directory> : "
+    echo "         for each source file <name_src>.[c|f|cpp] under <plugins_directory>"
+    echo "         create a plugin <name_src>.so"
+    echo "     -src_dir <source_directory> : add all sources files under <source_directory>."
     echo "     -v : to print 'make' commands as they are executed.";
-    echo "     -x : compile only.";
+
 }
 
-exec=true
-pwd=`pwd`
-while getopts acD:ghP:vx OPTION
-  do
-  case "$OPTION" in
-      a) all_srcs=true;;
-      c) make_args=clean; exec=false;;
-      D) definitions="$definitions $OPTARG";;
-      g) definitions="$definitions CMAKE_BUILD_TYPE=Debug";;
-      h) usage; exit 0;;
-      P) exec_prefix=$OPTARG;;
-      v) make_args="VERBOSE=1";;
-      x) exec=false;;
-  esac
+with_arg() { 
+    if test -z "$2"; then
+        usage
+        exit 1
+    else
+        return 0
+    fi
+}
+
+
+
+if `getopt -T >/dev/null 2>&1` ; [ $? = 4 ] ; then
+    args=`getopt -n $myname -a \
+ -o aghD:P:v \
+ -l clean,help,noexec,src_dir:,opt:,plugin_dir:,plugins_dir: \
+ -- "$@"`
+    if test $? -ne 0; then
+        usage
+        exit 1
+    fi
+    eval set -- "$args"
+else
+    no_parsing=true
+    true
+fi
+
+while [ $# -gt 0 ] ; do
+    case "$1" in
+        -a) all_srcs=true;;
+        --clean) make_args=clean; exec=false;;
+        -D) with_arg $@; shift; definitions="$definitions $1";;
+        -g) definitions="$definitions CMAKE_BUILD_TYPE=Debug";;
+        -h|-help) usage; exit 0;;
+        --noexec) exec=false;;
+        -P) with_arg $@; shift; exec_prefix=$1;;
+        --opt) with_arg $@; shift;
+            case :$1,:$compiler_options in
+                :*,:) compiler_options=$1;;
+                :*,:*) compiler_options="$compiler_options;$1";;
+            esac;;
+        --plugin_dir) with_arg $@; shift
+            case :$1,:$plugin_directories in
+                :*,:) plugin_directories=$1;;
+                :*,:*) plugin_directories="$plugin_directories;$1";;
+            esac;;
+        --plugins_dir) with_arg $@; shift
+            case :$1,:$plugins_directories in
+                :*,:) plugins_directories=$1;;
+                :*,:*) plugins_directories="$plugins_directories;$1";;
+            esac;;
+        --src_dir) with_arg $@; shift
+            all_srcs=true
+            case :$1,:$sources_directories in
+                :*,:) sources_directories=$1;;
+                :*,:*) sources_directories="$sources_directories;$1";;
+            esac;;
+        -v) make_args="VERBOSE=1";;
+        --) shift; break;;
+        *) case $no_parsing in true) break;; *) usage; exit 1;; esac
+    esac
+    shift
 done
 
-shift `expr $OPTIND - 1`
-
 if test ! "$make_args" = "clean"; then
-    case :$1 in
-        :) usage; exit 1;;
-        :/*) main_source=$1;;
-        :*) main_source=$pwd/$1;;
+
+    case :$1,:$sources_directories in
+        :,:) usage; exit 1;;
+        :/*,*) main_source=$1;;
+        :*,*) main_source=$pwd/$1;;
     esac
 
     shift
-    
-    if test "$all_srcs" = "true"; then
-        sources_directory=`dirname $main_source`
+
+    if test -z "$sources_directories"; then 
+        if test "$all_srcs" = "true"; then
+            sources_directories=`dirname $main_source`
+        fi
     fi
-    
+
     if test ! -z "$main_source"; then
         exe=`expr "\`basename $main_source\`" : "\(.*\).cpp"`
-        plugin_source=`expr "$main_source" : "\(.*\).cpp"`Plugin.cpp
+    else
+        exe=`basename $sources_directory`
+    fi
+
+    tmp=`expr "$main_source" : "\(.*\).cpp"`Plugin.cpp
+    if test -f "$tmp"; then
+        plugins_sources="$tmp"
     fi
 
     case $exe in
         *TS) ext_plugin_source=`expr "$main_source" : "\(.*\)TS.cpp"`Plugin.cpp;;
         *ED) ext_plugin_source=`expr "$main_source" : "\(.*\)ED.cpp"`Plugin.cpp;;
     esac
-    if test -f "$ext_plugin_source"; then
-        plugin_source=$ext_plugin_source
-    fi
+    case :$ext_plugin_source,:$plugins_sources in
+        :,:*);;
+        :*,:) plugins_sources=$ext_plugin_source;;
+        :*,:*) plugins_sources="$ext_plugin_source;$ext_plugin_source";;
+    esac
 
     for d in $definitions; do
         case $d in
@@ -101,8 +170,11 @@ if test ! "$make_args" = "clean"; then
 
     if ! cmake $KERNEL_PREFIX/share/siconos-kernel/ \
         -DMAIN_SOURCE=$main_source \
-        -DPLUGIN_SOURCE=$plugin_source \
-        -DSOURCES_DIRECTORY=$sources_directory \
+        -DPLUGINS_SOURCES=$plugins_sources \
+        -DPLUGINS_DIRECTORIES=$plugins_directories \
+        -DPLUGIN_DIRECTORIES=$plugin_directories \
+        -DSOURCES_DIRECTORIES=$sources_directories \
+        -DCOMPILER_OPTIONS=$compiler_options \
         -DALL_EXTRA_DEFINITIONS=$all_extra_defs \
         $extra_defs; then
         echo "`basename $0`: $exe build configuration failed" >&2

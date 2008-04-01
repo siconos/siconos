@@ -9,7 +9,7 @@ siconos \- The Siconos C++ Front-End.
 .B \-a
 ]
 [
-.B \-c
+.B \-clean
 ]
 [
 .B \-D 
@@ -19,11 +19,30 @@ siconos \- The Siconos C++ Front-End.
 .B \-g
 ]
 [
-.B \-h
+.B \-h | \-help
+]
+[
+.B \-noexec
+]
+[
+.B \-opt 
+.I C++ COMPILER OPTION
 ]
 [
 .B \-P
 .I PREFIX COMMAND
+]
+[
+.B \-plugin_dir
+.I PLUGIN DIRECTORY
+]
+[
+.B \-plugins_dir
+.I PLUGINS DIRECTORY
+]
+[
+.B \-src_dir
+.I SOURCES DIRECTORY
 ]
 [
 .B \-v
@@ -50,34 +69,53 @@ The following command-line options are recognized by
 .BR siconos (1).
 .TP
 .BI \-a
- find and compile all sources files in 
+ Find and compile all sources files in 
 .I sample.cpp
  directory.
 .TP
-.BI \-c
- clean the current directory (deletes binary files, etc.)
+.BI \-clean
+ Clean the current directory (deletes binary files, etc.).
 .TP
 .BI -D 
 .I KEY [=VALUE]
- define a 'cmake' and a 'cpp' variable.
+ Define a 'cmake' and a 'cpp' variable.
 .TP
 .BI \-g
- compile with debug informations.
+ Compile with debug informations.
 .TP
-.BI \-h
- print help
+.BI \-h 
+|
+.B \-help
+ Print help.
 .TP
+.BI \-noexec
+ Do not run executable after compilation.
+.TP
+.BI \-opt 
+.I COMPILER OPTION
+ Add option to compiler.
+.TP 
 .BI \-P
 .I PREFIX COMMAND
- run a prefix command 
+ Run a prefix command (time, valgrind, gdb, etc.).
+.TP
+.BI \-plugin_dir
+.I PLUGIN DIRECTORY
+ Compile a plugin with the sources under the specified plugin directory.
+ The name of the compiled plugin is the name of the directory. The default is a directory named plugin.
+.TP
+.BI \-plugins_dir
+.I PLUGINS DIRECTORY
+ For each source file under the specified directory, compile a plugin. The default is a directory named plugins.
+.TP
+.BI \-src_dir
+.I SOURCES DIRECTORY
+ add all source files under the specified directory to the compilation of the executable.
 .TP
 .BI \-v
- print 
+ Print 
 .BR make (1) 
 commands as they are executed.
-.TP
-.BI \-h
- print help
 
 .SH EXAMPLES
 
