@@ -32,7 +32,6 @@ MACRO(SICONOS_PROJECT
   INCLUDE(CheckSymbolExists)
   INCLUDE(CheckFunctionExists)
 
-
   # Compilers environment
   IF(CMAKE_C_COMPILER)
     INCLUDE(CheckCCompilerFlag)
@@ -290,6 +289,7 @@ MACRO(BEGIN_TEST _D)
   # configure test CMakeLists.txt (needed for a chdir before running test)
   CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/CMakeListsForTests.cmake 
     ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/CMakeLists.txt @ONLY)
+
   SET(_EXE_LIST_${_CURRENT_TEST_DIRECTORY})
 ENDMACRO(BEGIN_TEST _D)
 
@@ -303,6 +303,10 @@ MACRO(NEW_TEST)
   FOREACH(_F ${_SOURCES})
     LIST(APPEND ${_EXE}_FSOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${_CURRENT_TEST_DIRECTORY}/${_F})
   ENDFOREACH(_F ${_SOURCES})
+  
+  # pb env in ctest, see http://www.vtk.org/Bug/view.php?id=6391#bugnotes
+  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/ldwrap.c.in 
+    ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${_EXE}.ldwrap.c)
   
 ENDMACRO(NEW_TEST)
 
