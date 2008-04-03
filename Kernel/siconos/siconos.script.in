@@ -177,15 +177,15 @@ if test ! "$make_args" = "clean"; then
         -DCOMPILER_OPTIONS=$compiler_options \
         -DALL_EXTRA_DEFINITIONS=$all_extra_defs \
         $extra_defs; then
-        echo "`basename $0`: $exe build configuration failed" >&2
+        echo "$myname: $exe build configuration failed" >&2
         exit 1
     fi
 fi
 
 if test -f ./Makefile; then
-    make $make_args
+    make $make_args || exit 1
 else
-    echo "`basename $0`: nothing to clean" 
+    echo "$myname: nothing to clean" 
 fi
 
 if test $exec = true; then
