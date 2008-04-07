@@ -230,6 +230,13 @@ int lcp_driver_DenseMatrix(LinearComplementarity_Problem* problem, double *z , d
   else   if (strcmp(name , "Path") == 0)
     lcp_path(problem, z , w , &info , options);
 
+  /****** Enumeratif Solver ******/
+  /* IN:  tolerance,
+     OUT: key
+  */
+  else   if (strcmp(name , "ENUM") == 0)
+    lcp_enum(problem, z , w , &info , options);
+
   /*error */
   else
   {

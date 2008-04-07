@@ -23,20 +23,20 @@
 #include <math.h>
 #include "LCP_Solvers.h"
 
-/*#define PATH_SOLVER*/
-
-#ifdef PATH_SOLVER
-#include "path/SimpleLCP.h"
-#endif /*PATH_SOLVER*/
+static int sVerbose = 0;
+#ifdef HAVE_PATHFERRIS
+#include "InterfaceToPathFerris/SimpleLCP.h"
+#endif /*HAVE_PATHFERRIS*/
 
 void lcp_path(LinearComplementarity_Problem* problem, double *z, double *w, int *info , Solver_Options* options)
 {
   *info = 1;
-#ifdef PATH_SOLVER
+#ifdef HAVE_PATHFERRIS
   /* matrix M/vector q of the lcp */
   double * M = problem->M->matrix0;
 
   double * q = problem->q;
+  int nnz, i, j, dim;
 
   /* size of the LCP */
   int n = problem->size;
@@ -45,11 +45,12 @@ void lcp_path(LinearComplementarity_Problem* problem, double *z, double *w, int 
   MCP_Termination termination;
 
   nnz = nbNonNulElems(n, M, 1.0e-18);
-  m_i = (int *)calloc(nnz + 1, sizeof(int));
-  m_j = (int *)calloc(nnz + 1, sizeof(int));
-  m_ij = (double *)calloc(nnz + 1, sizeof(double));
-  lb = (double *)calloc(n + 1, sizeof(double));
-  ub = (double *)calloc(n + 1, sizeof(double));
+  int * m_i = (int *)calloc(nnz + 1, sizeof(int));
+  int * m_j = (int *)calloc(nnz + 1, sizeof(int));
+  double * m_ij = (double *)calloc(nnz + 1, sizeof(double));
+  double * lb = (double *)calloc(n + 1, sizeof(double));
+  double * ub = (double *)calloc(n + 1, sizeof(double));
+  double err, val;
 
 
   FortranToPathSparse(n, M, 1.0e-18, m_i, m_j, m_ij);
@@ -90,17 +91,13 @@ void lcp_path(LinearComplementarity_Problem* problem, double *z, double *w, int 
     if (verbose > 0)
       printf("PATH : Other error: %d\n", termination);
   }
-
-
-
-
   free(m_i);
   free(m_j);
   free(m_ij);
   free(lb);
   free(ub);
 
-#endif /*PATH_SOLVER*/
+#endif /*HAVE_PATHFERRIS*/
 
 
   return;

@@ -134,6 +134,14 @@ a nonsmooth Newton method based based on the Fischer-Bursmeister convex function
 \bf parameters:
 - dparam[0] (in): tolerance
 
+\section lcpEnum Enumeratif Solver
+
+\bf function: lcp_enum() \n
+\bf parameters:
+- dparam[0] (in): tolerance
+- iparam[0] (in): verbose
+- iparam[1] (out) : key of the solution
+
 \section lcpLatin Latin Solver
 LArge Time INcrements solver
 
@@ -407,6 +415,20 @@ extern "C" {
    \author Olivier Bonnefon
   */
   void lcp_path(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+
+  /**
+  * \param[in] problem structure that represents the LCP (M, q...)
+  * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+  * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+  * \param[out] info an integer which returns the termination value:\n
+  0 : success\n
+  1 : failed\n
+  * \param[in-out] options structure used to define the solver and its parameters.
+
+  \author Olivier Bonnefon
+  */
+  void lcp_enum(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+
 
   /** generic interface used to call any LCP solver applied on a Sparse-Block structured matrix M, with a Gauss-Seidel process
    * to solve the global problem (formulation/solving of local problems for each row of blocks)

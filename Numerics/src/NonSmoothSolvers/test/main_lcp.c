@@ -50,12 +50,13 @@ int test_lcp_series(LinearComplementarity_Problem * problem, int* solversList)
      8: NSQP
      9: Newton_Min
      10: Newton FB
+     11: Enumeratif
 
      MIND TO CHANGE totalNBSolver if you add a new solver in the list
 
   */
 
-  int totalNBSolver = 11;
+  int totalNBSolver = 12;
   int nbSolvers = 0; /* Real number of solvers called in the tests */
   int i, j;
   for (i = 0; i < totalNBSolver; ++i)
@@ -434,8 +435,48 @@ int test_lcp_series(LinearComplementarity_Problem * problem, int* solversList)
       info = info1;
     k++;
   }
-  /* Newton Fischer-Burmeister */
+
+  /*Enumeratif solver*/
   if (solversList[10] == 1)
+  {
+    strcat(nameList, "   ENUM |");
+    strcpy(local_options->solverName, "ENUM");
+    int iparam[2] = {0, 0};
+    double dparam[1] = {tolerance};
+    local_options->iSize = 2;
+    local_options->dSize = 1;
+    local_options->iparam = iparam;
+    local_options->dparam = dparam;
+    int info1 = 1;
+    if (problem->size < 20)
+    {
+      local_options->dWork = (double*) malloc((3 * problem->size + problem->size * problem->size) * sizeof(double));
+      local_options->iWork = (int*) malloc(2 * problem->size * sizeof(int));
+      info1 = lcp_driver(problem, z[k] , w[k], options, numberOfSolvers, &global_options);
+      free(local_options->dWork);
+      free(local_options->iWork);
+      comp = DDOT(n , z[k] , incx , w[k] , incy);
+      DCOPY(n , w[k], incx, wBuffer , incy);
+      DAXPY(n , alpha , problem->q , incx , wBuffer , incy);
+      prod(n, n, beta, problem->M, z[k], alpha, wBuffer);
+      diff = DNRM2(n , wBuffer , incx);
+    }
+    else
+    {
+      comp = 1;
+      diff = 1;
+    }
+
+    printf("    ENUM    (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |\n", info1, local_options->iparam[1], local_options->dparam[1], comp, diff);
+
+    if (info1 != 0)
+      info = info1;
+    k++;
+  }
+
+
+  /* Newton Fischer-Burmeister */
+  if (solversList[11] == 1)
   {
     strcat(nameList, "   Newton FB |");
     strcpy(local_options->solverName, "NewtonFB");
@@ -462,6 +503,7 @@ int test_lcp_series(LinearComplementarity_Problem * problem, int* solversList)
       info = info1;
     k++;
   }
+
 
   printf("\n\n");
 
@@ -597,14 +639,14 @@ int test_mmc(void)
   printf("Run working tests ...\n");
   /* Stable: */
   //  int solversList[11] ={1,1,1,1,0,0,0,1,1,0,0};
-  int solversList[11] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0};
+  int solversList[12] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0};
   int info = test_lcp_series(problem, solversList);
   printf(" ----------------------------------------------------------\n");
 
   /* Fail or unstable: */
   printf("---------------------------------------------------------- \n");
   printf("\n Run unstable tests (results may be wrong or log !=0)...\n");
-  int solversList2[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+  int solversList2[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1};
   int infoFail = test_lcp_series(problem, solversList2);
   printf("--------- End of unstable tests --------------------------- \n");
 
@@ -851,8 +893,8 @@ int test_matrix(void)
       hasDense = 1;
       hasUnstable = 1;
       {
-        int l1[11] = {1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0};
-        int l2[11] = {0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1};
+        int l1[12] = {1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0};
+        int l2[12] = {0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1};
         //int l3[11] = {1,1,0,1,0,0,0,1,1,0,0};
         int * l3 = l1;
         solversList = l1;
@@ -867,9 +909,9 @@ int test_matrix(void)
       hasDense = 1;
       hasUnstable = 1;
       {
-        int l1[11] = {1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0};
-        int l2[11] = {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1};
-        int l3[11] = {1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0};
+        int l1[12] = {1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0};
+        int l2[12] = {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+        int l3[12] = {1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0};
         solversList = l1;
         solversList2 = l2;
         solversListSBM = l3;
@@ -882,9 +924,9 @@ int test_matrix(void)
       hasDense = 1;
       hasUnstable = 1;
       {
-        int l1[11] = {1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0};
-        int l2[11] = {0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 1};
-        int l3[11] = {1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0};
+        int l1[12] = {1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0};
+        int l2[12] = {0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1};
+        int l3[12] = {1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0};
         solversList = l1;
         solversList2 = l2;
         solversListSBM = l3;
@@ -896,7 +938,7 @@ int test_matrix(void)
       hasDense = 0;
       hasUnstable = 0;
       {
-        int l3[11] = {1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0};
+        int l3[12] = {1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0};
         solversListSBM = l3;
       }
       break;
@@ -906,7 +948,7 @@ int test_matrix(void)
       hasDense = 0;
       hasUnstable = 0;
       {
-        int l3[11] = {1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0};
+        int l3[12] = {1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0};
         solversListSBM = l3;
       }
       break;
@@ -916,8 +958,8 @@ int test_matrix(void)
       hasDense = 1;
       hasUnstable = 1;
       {
-        int l1[11] = {0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0};
-        int l2[11] = {1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1};
+        int l1[12] = {0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0};
+        int l2[12] = {1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1};
         solversList = l1;
         solversList2 = l2;
       }
@@ -928,8 +970,8 @@ int test_matrix(void)
       hasDense = 1;
       hasUnstable = 1;
       {
-        int l1[11] = {0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0};
-        int l2[11] = {1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1};
+        int l1[12] = {0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0};
+        int l2[12] = {1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1};
         solversList = l1;
         solversList2 = l2;
       }
@@ -940,8 +982,8 @@ int test_matrix(void)
       hasDense = 1;
       hasUnstable = 1;
       {
-        int l1[11] = {0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0};
-        int l2[11] = {1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1};
+        int l1[12] = {0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 1, 0};
+        int l2[12] = {1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1};
         solversList = l1;
         solversList2 = l2;
       }
@@ -954,9 +996,9 @@ int test_matrix(void)
       hasDense = 1;
       hasUnstable = 1;
       {
-        int l1[11] = {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0};
-        int l2[11] = {1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1};
-        int l3[11] = {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0};
+        int l1[12] = {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0};
+        int l2[12] = {1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1};
+        int l3[12] = {0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0};
         solversList = l1;
         solversList2 = l2;
         solversListSBM = l3;
@@ -969,9 +1011,9 @@ int test_matrix(void)
       hasDense = 1;
       hasUnstable = 1;
       {
-        int l1[11] = {1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0};
-        int l2[11] = {0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1};
-        int l3[11] = {1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0};
+        int l1[12] = {1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0};
+        int l2[12] = {0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+        int l3[12] = {1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0};
         solversList = l1;
         solversList2 = l2;
         solversListSBM = l3;
@@ -983,7 +1025,7 @@ int test_matrix(void)
       hasDense = 0;
       hasUnstable = 0;
       {
-        int l1[11] = {1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0};
+        int l1[12] = {1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0};
         solversListSBM = l1;
       }
       break;
@@ -995,9 +1037,9 @@ int test_matrix(void)
       hasDense = 1;
       hasUnstable = 1;
       {
-        int l1[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        int l2[11] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-        int l3[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        int l1[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        int l2[12] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+        int l3[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         solversList = l1;
         solversList2 = l2;
         solversListSBM = l3;
@@ -1011,9 +1053,9 @@ int test_matrix(void)
       hasDense = 1;
       hasUnstable = 1;
       {
-        int l1[11] = {1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1};
-        int l2[11] = {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
-        int l3[11] = {1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1};
+        int l1[12] = {1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1};
+        int l2[12] = {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0};
+        int l3[12] = {1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1};
         solversList = l1;
         solversList2 = l2;
         solversListSBM = l3;
@@ -1026,9 +1068,9 @@ int test_matrix(void)
       hasDense = 1;
       hasUnstable = 1;
       {
-        int l1[11] = {0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0};
-        int l2[11] = {1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1};
-        int l3[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        int l1[12] = {0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0};
+        int l2[12] = {1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1};
+        int l3[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         solversList = l1;
         solversList2 = l2;
         solversListSBM = l3;
