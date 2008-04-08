@@ -86,7 +86,7 @@ fi
 while [ $# -gt 0 ] ; do
     case "$1" in
         -a) all_srcs=true;;
-        --clean) make_args=clean; exec=false;;
+        --clean|-c) make_args=clean; exec=false;;
         -D) with_arg $@; shift; definitions="$definitions $1";;
         -g) definitions="$definitions CMAKE_BUILD_TYPE=Debug";;
         -h|-help) usage; exit 0;;
