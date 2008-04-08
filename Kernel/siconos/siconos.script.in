@@ -130,6 +130,16 @@ if test ! "$make_args" = "clean"; then
 
     shift
 
+    case :$plugin_directories in
+        /*|:);;
+        *) plugin_directories=$pwd/$plugin_directories;;
+    esac
+
+    case :$plugins_directories in
+        /*|:);;
+        *) plugins_directories=$pwd/$plugins_directories;;
+    esac
+
     if test -z "$sources_directories"; then 
         if test "$all_srcs" = "true"; then
             sources_directories=`dirname $main_source`
