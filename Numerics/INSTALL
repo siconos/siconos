@@ -43,6 +43,27 @@
 
 ---++ INSTALL 
 
+- with cmake
+
+The command `cmake' is needed (http://www.cmake.org/).
+The compilation is done out of the source directory:
+
+	- create a build directory <build>
+	- cd <build>
+	- cmake <path of the source directory> [CMAKE OPTIONS]
+        - make [MAKE OPTIONS]
+        - make test
+        - make install
+
+some CMAKE OPTIONS that may be usefull:
+	- to build a debug library (compilation with -g) : -DCMAKE_BUILD_TYPE=Debug
+	- to see cmake state : -DPRINT_ENV=1
+
+some MAKE OPTIONS that may be usefull:
+        - to see make command as executed : VERBOSE=1
+
+-- with autotools (deprecated)
+
 in Numerics directory:
 	
 	- ./autogen.sh
