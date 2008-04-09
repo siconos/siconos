@@ -29,6 +29,8 @@
 #include "SparseBlockMatrix.h"
 #include <sys/time.h>
 
+#include "SiconosPointers.h"
+
 class OneStepNSProblem;
 
 /** Formalization and Resolution of a Linear Complementarity Problem (LCP)
@@ -81,22 +83,24 @@ class LCP : public OneStepNSProblem
 private:
 
   /** contains the vector w of a LCP system */
-  SiconosVector *w;
+  SiconosVectorSPtr w;
 
   /** contains the vector z of a LCP system */
-  SiconosVector *z;
+  SiconosVectorSPtr z;
 
   /** contains the matrix M of a LCP system */
-  OSNSMatrix *M;
+  OSNSMatrixSPtr M;
 
   /** contains the vector q of a LCP system */
-  SiconosVector *q;
+  SiconosVectorSPtr q;
 
-  /** Flags to check wheter pointers were allocated in class constructors or not */
+#ifndef WithSmartPtr
+  /** Flags to check whether pointers were allocated in class constructors or not */
   bool isWAllocatedIn;
   bool isZAllocatedIn;
   bool isMAllocatedIn;
   bool isQAllocatedIn;
+#endif
 
   /** Storage type for M - 0: SiconosMatrix (dense), 1: Sparse Storage (embedded into OSNSMatrix) */
   int MStorageType;
@@ -138,7 +142,7 @@ public:
   /** get w, the initial state of the DynamicalSystem
   *  \return pointer on a SimpleVector
   */
-  inline SiconosVector* getWPtr() const
+  inline SiconosVectorSPtr getWPtr() const
   {
     return w;
   }
@@ -151,7 +155,7 @@ public:
   /** set w to pointer newPtr
   *  \param SiconosVector * newPtr
   */
-  void setWPtr(SiconosVector*);
+  void setWPtr(SiconosVectorSPtr);
 
   // --- Z ---
   /** get the value of z, the initial state of the DynamicalSystem
@@ -166,7 +170,7 @@ public:
   /** get z, the initial state of the DynamicalSystem
   *  \return pointer on a SiconosVector
   */
-  inline SiconosVector* getZPtr() const
+  inline SiconosVectorSPtr getZPtr() const
   {
     return z;
   }
@@ -179,14 +183,14 @@ public:
   /** set z to pointer newPtr
   *  \param SiconosVector * newPtr
   */
-  void setZPtr(SiconosVector*) ;
+  void setZPtr(SiconosVectorSPtr) ;
 
   // --- M ---
 
   /** get M
   *  \return pointer on a OSNSMatrix
   */
-  inline OSNSMatrix* getMPtr() const
+  inline OSNSMatrixSPtr getMPtr() const
   {
     return M;
   }
@@ -199,7 +203,7 @@ public:
   /** set M to pointer newPtr
    *  \param newPtr OSNSMatrix*
    */
-  void setMPtr(OSNSMatrix *);
+  void setMPtr(OSNSMatrixSPtr);
 
   // --- Q ---
   /** get the value of q, the initial state of the DynamicalSystem
@@ -214,7 +218,7 @@ public:
   /** get q, the initial state of the DynamicalSystem
   *  \return pointer on a SiconosVector
   */
-  inline SiconosVector* getQPtr() const
+  inline SiconosVectorSPtr getQPtr() const
   {
     return q;
   }
@@ -227,7 +231,7 @@ public:
   /** set q to pointer newPtr
   *  \param SiconosVector * newPtr
   */
-  void setQPtr(SiconosVector*);
+  void setQPtr(SiconosVectorSPtr);
 
   /** get the type of storage for M */
   inline const int getMStorageType() const

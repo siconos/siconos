@@ -31,19 +31,33 @@ using namespace std;
 
 // xml constructor
 LCP::LCP(OneStepNSProblemXML* onestepnspbxml, Simulation* newSimu):
-  OneStepNSProblem("LCP", onestepnspbxml, newSimu), w(NULL), z(NULL), M(NULL), q(NULL),
-  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), MStorageType(0)
+  OneStepNSProblem("LCP", onestepnspbxml, newSimu),
+
+#ifndef WithSmartPtr
+  w(NULL), z(NULL), M(NULL), q(NULL),
+  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false),
+#endif
+
+  MStorageType(0)
 {}
 
 // Constructor from a set of data
 LCP::LCP(Simulation* newSimu, NonSmoothSolver* newSolver, const string& newId):
-  OneStepNSProblem("LCP", newSimu, newId, newSolver), w(NULL), z(NULL), M(NULL), q(NULL),
-  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false), MStorageType(0)
+  OneStepNSProblem("LCP", newSimu, newId, newSolver),
+
+#ifndef WithSmartPtr
+  w(NULL), z(NULL), M(NULL), q(NULL),
+  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false),
+#endif
+
+  MStorageType(0)
 {}
 
 // destructor
 LCP::~LCP()
 {
+
+#ifndef WithSmartPtr
   if (isWAllocatedIn) delete w;
   w = NULL;
   if (isZAllocatedIn) delete z;
@@ -53,6 +67,8 @@ LCP::~LCP()
   M = NULL;
   if (isQAllocatedIn) delete q;
   q = NULL;
+#endif
+
 }
 
 // Setters
@@ -62,10 +78,14 @@ void LCP::setW(const SiconosVector& newValue)
   if (sizeOutput != newValue.size())
     RuntimeException::selfThrow("LCP: setW, inconsistent size between given w size and problem size. You should set sizeOutput before");
 
-  if (w == NULL)
+  if (! w)
   {
+#ifndef WithSmartPtr
     w = new SimpleVector(sizeOutput);
     isWAllocatedIn = true;
+#else
+    w.reset(new SimpleVector(sizeOutput));
+#endif
   }
   else if (w->size() != sizeOutput)
     RuntimeException::selfThrow("LCP: setW, w size differs from sizeOutput");
@@ -73,14 +93,18 @@ void LCP::setW(const SiconosVector& newValue)
   *w = newValue;
 }
 
-void LCP::setWPtr(SiconosVector* newPtr)
+void LCP::setWPtr(SiconosVectorSPtr newPtr)
 {
   if (sizeOutput != newPtr->size())
     RuntimeException::selfThrow("LCP: setWPtr, inconsistent size between given w size and problem size. You should set sizeOutput before");
 
+#ifndef WithSmartPtr
   if (isWAllocatedIn) delete w;
-  w = newPtr;
   isWAllocatedIn = false;
+#endif
+
+  w = newPtr;
+
 }
 
 
@@ -89,23 +113,33 @@ void LCP::setZ(const SiconosVector& newValue)
   if (sizeOutput != newValue.size())
     RuntimeException::selfThrow("LCP: setZ, inconsistent size between given z size and problem size. You should set sizeOutput before");
 
-  if (z == NULL)
+  if (! z)
   {
+
+#ifndef WithSmartPtr
     z = new SimpleVector(sizeOutput);
     isZAllocatedIn = true;
+#else
+    z.reset(new SimpleVector(sizeOutput));
+#endif
+
   }
 
   *z = newValue;
 }
 
-void LCP::setZPtr(SiconosVector* newPtr)
+void LCP::setZPtr(SiconosVectorSPtr newPtr)
 {
   if (sizeOutput != newPtr->size())
     RuntimeException::selfThrow("LCP: setZPtr, inconsistent size between given z size and problem size. You should set sizeOutput before");
 
+#ifndef WithSmartPtr
   if (isZAllocatedIn) delete z;
-  z = newPtr;
   isZAllocatedIn = false;
+#endif
+
+  z = newPtr;
+
 }
 
 void LCP::setM(const OSNSMatrix& newValue)
@@ -114,13 +148,18 @@ void LCP::setM(const OSNSMatrix& newValue)
   RuntimeException::selfThrow("LCP: setM, forbidden operation. Try setMPtr().");
 }
 
-void LCP::setMPtr(OSNSMatrix* newPtr)
+void LCP::setMPtr(OSNSMatrixSPtr newPtr)
 {
+
+#ifndef WithSmartPtr
   // Note we do not test if newPtr and M sizes are equal. Not necessary?
   if (isMAllocatedIn)
     delete M;
-  M = newPtr;
   isMAllocatedIn = false;
+#endif
+
+  M = newPtr;
+
 }
 
 void LCP::setQ(const SiconosVector& newValue)
@@ -128,23 +167,34 @@ void LCP::setQ(const SiconosVector& newValue)
   if (sizeOutput != newValue.size())
     RuntimeException::selfThrow("LCP: setQ, inconsistent size between given q size and problem size. You should set sizeOutput before");
 
-  if (q == NULL)
+  if (! q)
   {
+
+#ifndef WithSmartPtr
     q = new SimpleVector(sizeOutput);
     isQAllocatedIn = true;
+#else
+    q.reset(new SimpleVector(sizeOutput));
+#endif
+
   }
 
   *q = newValue;
 }
 
-void LCP::setQPtr(SiconosVector* newPtr)
+void LCP::setQPtr(SiconosVectorSPtr newPtr)
 {
   if (sizeOutput != newPtr->size())
     RuntimeException::selfThrow("LCP: setQPtr, inconsistent size between given q size and problem size. You should set sizeOutput before");
 
+#ifndef WithSmartPtr
   if (isQAllocatedIn) delete q;
-  q = newPtr;
   isQAllocatedIn = false;
+#endif
+
+  q = newPtr;
+
+
 }
 
 void LCP::initialize()
@@ -160,20 +210,32 @@ void LCP::initialize()
   // Memory allocation for w, M, z and q.
   // If one of them has already been allocated, nothing is done.
   // We suppose that user has chosen a correct size.
-  if (w == NULL)
+  if (! w)
   {
+
+#ifndef WithSmartPtr
     w = new SimpleVector(maxSize);
     isWAllocatedIn = true;
+#else
+    w.reset(new SimpleVector(maxSize));
+#endif
+
   }
   else
   {
     if (w->size() != maxSize)
       w->resize(maxSize);
   }
-  if (z == NULL)
+  if (! z)
   {
+
+#ifndef WithSmartPtr
     z = new SimpleVector(maxSize);
     isZAllocatedIn = true;
+#else
+    z.reset(new SimpleVector(maxSize));
+#endif
+
   }
   else
   {
@@ -181,10 +243,16 @@ void LCP::initialize()
       z->resize(maxSize);
   }
 
-  if (q == NULL)
+  if (! q)
   {
+
+#ifndef WithSmartPtr
     q = new SimpleVector(maxSize);
     isQAllocatedIn = true;
+#else
+    q.reset(new SimpleVector(maxSize));
+#endif
+
   }
 
   // get topology
@@ -197,11 +265,16 @@ void LCP::initialize()
   {
     // Get index set from Simulation
     UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
-    if (M == NULL)
+    if (! M)
     {
       // Creates and fills M using UR of indexSet
+
+#ifndef WithSmartPtr
       M = new OSNSMatrix(indexSet, blocks, MStorageType);
       isMAllocatedIn = true;
+#else
+      M.reset(new OSNSMatrix(indexSet, blocks, MStorageType));
+#endif
     }
     else
     {
@@ -213,13 +286,28 @@ void LCP::initialize()
   else // in that case, M will be updated during preCompute
   {
     // Default size for M = maxSize
-    if (M == NULL)
+    if (! M)
     {
       if (MStorageType == 0)
+      {
+
+#ifndef WithSmartPtr
         M = new OSNSMatrix(maxSize, 0);
-      else // if(MStorageType == 1) size = number of blocks = number of UR in the largest considered indexSet
+#else
+        M.reset(new OSNSMatrix(maxSize, 0));
+#endif
+      }
+
+      else   // if(MStorageType == 1) size = number of blocks = number of UR in the largest considered indexSet
+      {
+
+#ifndef WithSmartPtr
         M = new OSNSMatrix(simulation->getIndexSetPtr(levelMin)->size(), 1);
-      isMAllocatedIn = true;
+        isMAllocatedIn = true;
+#else
+        M.reset(new OSNSMatrix(maxSize, 0));
+#endif
+      }
     }
   }
 }
@@ -347,7 +435,12 @@ void LCP::computeQ(double time)
 
     // Compute q, this depends on the type of non smooth problem, on the relation type and on the non smooth law
     pos = M->getPositionOfBlock(*itCurrent);
+
+#ifndef WithSmartPtr
     (*itCurrent)->computeEquivalentY(time, levelMin, simulationType, q, pos);
+#else
+    (*itCurrent)->computeEquivalentY(time, levelMin, simulationType, q.get(), pos);
+#endif
   }
 }
 
@@ -452,8 +545,15 @@ void LCP::postCompute()
     y = (*itCurrent)->getYPtr(levelMin);
     lambda = (*itCurrent)->getLambdaPtr(levelMin);
     // Copy w/z values, starting from index pos into y/lambda.
+
+#ifndef WithSmartPtr
     setBlock(w, y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
     setBlock(z, lambda, lambda->size(), pos, 0);
+#else
+    setBlock(w.get(), y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
+    setBlock(z.get(), lambda, lambda->size(), pos, 0);
+#endif
+
   }
 }
 
@@ -461,10 +561,10 @@ void LCP::display() const
 {
   cout << "======= LCP of size " << sizeOutput << " with: " << endl;
   cout << "M  ";
-  if (M != NULL) M->display();
+  if (M) M->display();
   else cout << "-> NULL" << endl;
   cout << endl << " q : " ;
-  if (q != NULL) q->display();
+  if (q) q->display();
   else cout << "-> NULL" << endl;
   cout << "==========================" << endl;
 }
