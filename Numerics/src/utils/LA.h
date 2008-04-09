@@ -87,6 +87,7 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 #define LAPACK_5 APPLY
 #define LAPACK_6 APPLY
 #define LAPACK_7 APPLY
+#define LAPACK_8 APPLY
 #define LAPACK_9 APPLY
 #define LAPACK_9_SIDED APPLY
 #define LAPACK_4_W(F,A1,A2,A3,A4,INFO) \
