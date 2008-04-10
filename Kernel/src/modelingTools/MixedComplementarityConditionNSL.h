@@ -28,6 +28,8 @@
 
 #include "NonSmoothLaw.h"
 
+#include "SiconosPointers.h"
+
 class NonSmoothLaw;
 
 /** Complementarity NonSmoothLaw
@@ -87,7 +89,8 @@ public:
   *  \param NonSmoothLaw* : the law which must be converted
   * \return a pointer on the law if it is of the right type, NULL otherwise
   */
-  static MixedComplementarityConditionNSL* convert(NonSmoothLaw* nsl);
+
+  static MixedComplementarityConditionNSLSPtr convert(NonSmoothLawSPtr nsl);
 };
 
 #endif // MIXEDCOMPLEMENTARITYCONDITIONNSLAW_H

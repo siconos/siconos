@@ -41,5 +41,8 @@ NonSmoothLaw::NonSmoothLaw(const string& newType, NonSmoothLawXML* newNsLawXml):
   size = nslawxml->getSize();
 }
 
+
 NonSmoothLaw::~NonSmoothLaw()
 {}
+
+

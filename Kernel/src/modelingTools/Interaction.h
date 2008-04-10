@@ -29,6 +29,9 @@
 #include "BlockVector.h"
 #include "DynamicalSystemsSet.h"
 #include "Tools.h"
+
+#include "SiconosPointers.h"
+
 class NonSmoothLaw;
 class DynamicalSystem;
 class Relation;
@@ -112,7 +115,7 @@ private:
   DynamicalSystemsSet * involvedDS;
 
   /** the Non-smooth Law of the interaction*/
-  NonSmoothLaw *nslaw;
+  NonSmoothLawSPtr nslaw;
 
   /** the type of Relation of the interaction */
   Relation *relation;
@@ -166,7 +169,12 @@ public:
   *  \param NonSmoothLaw* : a pointer to the non smooth law
   *  \param Relation* : a pointer to the Relation
   */
-  Interaction(const std::string&, DynamicalSystemsSet&, int, int, NonSmoothLaw*, Relation*);
+  Interaction(const std::string&, DynamicalSystemsSet&, int, int, NonSmoothLawSPtr, Relation*);
+
+#ifdef WithSmartPtr
+  /* backward compatibility*/
+  Interaction(const std::string&, DynamicalSystemsSet&, int, int, NonSmoothLaw *, Relation*);
+#endif
 
   /** destructor
    */
@@ -515,7 +523,7 @@ public:
   /** get the NonSmoothLaw of this Interaction
   *  \return a pointer on this NonSmoothLaw
   */
-  inline NonSmoothLaw* getNonSmoothLawPtr() const
+  inline NonSmoothLawSPtr getNonSmoothLawPtr() const
   {
     return nslaw;
   }
@@ -523,7 +531,7 @@ public:
   /** set the NonSmoothLaw of this Interaction
   *  \param the NonSmoothLaw* to set
   */
-  void setNonSmoothLawPtr(NonSmoothLaw* newNslaw) ;
+  void setNonSmoothLawPtr(NonSmoothLawSPtr newNslaw) ;
 
   /** get the NonSmoothDynamicalSystem that contains the current Interaction
   *  \return NonSmoothDynamicalSystem*

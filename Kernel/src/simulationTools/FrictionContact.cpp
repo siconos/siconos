@@ -246,7 +246,15 @@ void FrictionContact::initialize()
     }
 
     for (ConstUnitaryRelationsIterator itUR = indexSet->begin(); itUR != indexSet->end(); ++itUR)
+    {
+
+#ifndef WithSmartPtr
       mu->push_back(static_cast<NewtonImpactFrictionNSL*>((*itUR)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
+#else
+      mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL> ((*itUR)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
+#endif
+
+    }
   }
   else // in that case, M and mu will be updated during preCompute
   {
@@ -407,7 +415,15 @@ void FrictionContact::preCompute(const double time)
     // Update mu
     mu->clear();
     for (ConstUnitaryRelationsIterator itUR = indexSet->begin(); itUR != indexSet->end(); ++itUR)
+    {
+
+#ifndef WithSmartPtr
       mu->push_back(static_cast<NewtonImpactFrictionNSL*>((*itUR)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
+#else
+      mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL>((*itUR)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
+#endif
+    }
+
   }
 
   // Computes q

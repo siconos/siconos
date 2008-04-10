@@ -39,9 +39,14 @@ bool MixedComplementarityConditionNSL::isVerified() const
   return res;
 }
 
-MixedComplementarityConditionNSL* MixedComplementarityConditionNSL::convert(NonSmoothLaw* nsl)
+MixedComplementarityConditionNSLSPtr MixedComplementarityConditionNSL::convert(NonSmoothLawSPtr nsl)
 {
+#ifndef WithSmartPtr
   MixedComplementarityConditionNSL* mccnsl = dynamic_cast<MixedComplementarityConditionNSL*>(nsl);
+#else
+  MixedComplementarityConditionNSLSPtr mccnsl = boost::dynamic_pointer_cast<MixedComplementarityConditionNSL>(nsl);
+#endif
+
   return mccnsl;
 }
 

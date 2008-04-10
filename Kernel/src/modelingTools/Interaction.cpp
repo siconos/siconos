@@ -40,7 +40,10 @@ using namespace std;
 // --- XML constructor ---
 Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * nsds):
   id("undefined"), number(0), interactionSize(0), numberOfRelations(0), sizeOfDS(0), sizeZ(0), involvedDS(NULL),
-  nslaw(NULL), relation(NULL), NSDS(nsds), interactionxml(interxml)
+#ifndef WithSmartPtr
+  nslaw(NULL),
+#endif
+  relation(NULL), NSDS(nsds), interactionxml(interxml)
 {
   if (interactionxml == NULL)
     RuntimeException::selfThrow("Interaction::xml constructor, xmlfile = NULL");
@@ -56,18 +59,51 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
   string NslawType = interactionxml->getNonSmoothLawXML()->getType();
   // ComplementarityConditionNSL
   if (NslawType == COMPLEMENTARITY_CONDITION_NSLAW_TAG)
+  {
+
+#ifndef WithSmartPtr
     nslaw = new ComplementarityConditionNSL(interactionxml->getNonSmoothLawXML());
+#else
+    nslaw.reset(new ComplementarityConditionNSL(interactionxml->getNonSmoothLawXML()));
+#endif
+  }
+
   // RelayNSL
   else if (NslawType == RELAY_NSLAW_TAG)
+  {
+
+#ifndef WithSmartPtr
     nslaw = new RelayNSL(interactionxml->getNonSmoothLawXML());
+#else
+    nslaw.reset(new RelayNSL(interactionxml->getNonSmoothLawXML()));
+#endif
+  }
+
   // NewtonImpactNSL
   else if (NslawType == NEWTON_IMPACT_NSLAW_TAG)
+  {
+
+#ifndef WithSmartPtr
     nslaw = new NewtonImpactNSL(interactionxml->getNonSmoothLawXML());
+#else
+    nslaw.reset(new NewtonImpactNSL(interactionxml->getNonSmoothLawXML()));
+#endif
+  }
   // Newton impact friction law
   else if (NslawType == NEWTON_IMPACT_FRICTION_NSLAW_TAG)
+  {
+
+#ifndef WithSmartPtr
     nslaw = new NewtonImpactFrictionNSL(interactionxml->getNonSmoothLawXML());
+#else
+    nslaw.reset(new NewtonImpactFrictionNSL(interactionxml->getNonSmoothLawXML()));
+#endif
+  }
   else RuntimeException::selfThrow("Interaction::xml constructor, unknown NSLAW type :" + nslaw->getType());
+
+#ifndef WithSmartPtr
   isAllocatedIn["nsLaw"] = true;
+#endif
 
   // --- Dynamical Systems ---
   unsigned int sizeDS ;
@@ -145,7 +181,7 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
 
 // --- Constructor from a set of data ---
 
-Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, int newNumber, int nInter, NonSmoothLaw* newNSL, Relation* newRel):
+Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, int newNumber, int nInter, NonSmoothLawSPtr newNSL, Relation* newRel):
   id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0), involvedDS(NULL),
   nslaw(newNSL), relation(newRel), NSDS(NULL), interactionxml(NULL)
 {
@@ -154,8 +190,26 @@ Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, 
   for (itDS = dsConcerned.begin(); itDS != dsConcerned.end(); ++itDS)
     involvedDS->insert(*itDS); // Warning: insert pointers to DS!!
   isAllocatedIn["relation"] = false;
+
+#ifndef WithSmartPtr
   isAllocatedIn["nsLaw"] = false;
+#endif
 }
+
+#ifdef WithSmartPtr
+Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, int newNumber, int nInter, NonSmoothLaw* newNSL, Relation* newRel):
+  id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0), involvedDS(NULL), relation(newRel), NSDS(NULL), interactionxml(NULL)
+{
+  nslaw.reset(newNSL);
+  involvedDS = new DynamicalSystemsSet();
+  DSIterator itDS;
+  for (itDS = dsConcerned.begin(); itDS != dsConcerned.end(); ++itDS)
+    involvedDS->insert(*itDS); // Warning: insert pointers to DS!!
+  isAllocatedIn["relation"] = false;
+}
+
+
+#endif
 
 // --- DESTRUCTOR ---
 Interaction::~Interaction()
@@ -178,8 +232,13 @@ Interaction::~Interaction()
 
   if (isAllocatedIn["relation"]) delete relation;
   relation = NULL;
+
+#ifndef WithSmartPtr
   if (isAllocatedIn["nsLaw"]) delete nslaw;
   nslaw = NULL;
+#endif
+
+
   NSDS = NULL;
   involvedDS->clear();
   delete involvedDS;
@@ -552,11 +611,15 @@ void Interaction::setRelationPtr(Relation* newRelation)
   isAllocatedIn["relation"] = false;
 }
 
-void Interaction::setNonSmoothLawPtr(NonSmoothLaw* newNslaw)
+void Interaction::setNonSmoothLawPtr(NonSmoothLawSPtr newNslaw)
 {
+#ifndef WithSmartPtr
   if (isAllocatedIn["nsLaw"]) delete nslaw;
   nslaw = newNslaw;
   isAllocatedIn["nsLaw"] = false;
+#else
+  nslaw = newNslaw;
+#endif
 }
 
 // --- OTHER FUNCTIONS ---
@@ -676,13 +739,43 @@ void Interaction::saveInteractionToXML()
    */
 
   if (nslaw->getType() == COMPLEMENTARITYCONDITIONNSLAW)
+  {
+
+#ifndef WithSmartPtr
     (static_cast<ComplementarityConditionNSL*>(nslaw))->saveNonSmoothLawToXML();
+#else
+    (boost::static_pointer_cast<ComplementarityConditionNSL>(nslaw))->saveNonSmoothLawToXML();
+#endif
+  }
   else if (nslaw->getType() == RELAYNSLAW)
+  {
+
+#ifndef WithSmartPtr
     (static_cast<RelayNSL*>(nslaw))->saveNonSmoothLawToXML();
+#else
+    (boost::static_pointer_cast<RelayNSL>(nslaw))->saveNonSmoothLawToXML();
+#endif
+  }
   else if (nslaw->getType() == NEWTONIMPACTNSLAW)
+  {
+
+#ifndef WithSmartPtr
     (static_cast<NewtonImpactNSL*>(nslaw))->saveNonSmoothLawToXML();
+#else
+    (boost::static_pointer_cast<NewtonImpactNSL>(nslaw))->saveNonSmoothLawToXML();
+#endif
+  }
+
   else if (nslaw->getType() == NEWTONIMPACTFRICTIONNSLAW)
+  {
+
+#ifndef WithSmartPtr
     (static_cast<NewtonImpactFrictionNSL*>(nslaw))->saveNonSmoothLawToXML();
+#else
+    (boost::static_pointer_cast<NewtonImpactFrictionNSL>(nslaw))->saveNonSmoothLawToXML();
+#endif
+  }
+
   else RuntimeException::selfThrow("Interaction::saveInteractionToXML - bad kind of NonSmoothLaw : " + nslaw->getType());
 }
 

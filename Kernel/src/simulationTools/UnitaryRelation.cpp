@@ -400,7 +400,13 @@ void UnitaryRelation::computeEquivalentY(double time, unsigned int level, const 
     double e;
     if (nslawType == NEWTONIMPACTNSLAW)
     {
+
+#ifndef WithSmartPtr
       e = (static_cast<NewtonImpactNSL*>(mainInteraction->getNonSmoothLawPtr()))->getE();
+#else
+      e = (boost::static_pointer_cast<NewtonImpactNSL>(mainInteraction->getNonSmoothLawPtr()))->getE();
+#endif
+
       std::vector<unsigned int> subCoord(4);
       if (simulationType == "TimeStepping")
       {
@@ -423,7 +429,13 @@ void UnitaryRelation::computeEquivalentY(double time, unsigned int level, const 
     }
     else if (nslawType == NEWTONIMPACTFRICTIONNSLAW)
     {
+
+#ifndef WithSmartPtr
       e = (static_cast<NewtonImpactFrictionNSL*>(mainInteraction->getNonSmoothLawPtr()))->getEn();
+#else
+      e = (boost::static_pointer_cast<NewtonImpactFrictionNSL>(mainInteraction->getNonSmoothLawPtr()))->getEn();
+#endif
+
       // Only the normal part is multiplied by e
       if (simulationType == "TimeStepping")
         (*yOut)(pos) +=  e * (*getYOldPtr(level))(0);
