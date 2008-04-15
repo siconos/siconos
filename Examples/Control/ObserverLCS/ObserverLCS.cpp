@@ -1,12 +1,5 @@
-/ Header files
-#include "Model.h"
-#include "FirstOrderLinearTIDS.h"
-#include "LinearTIR.h"
-#include "ComplementarityConditionNSL.h"
-#include "TimeStepping.h"
-#include "ioMatrix.h"
-#include <string>
-#include <iostream>
+
+#include "SiconosKernel.h"
 
 using namespace std;
 
@@ -19,9 +12,10 @@ int main(int argc, char* argv[])
     // == User-defined parameters ==
     unsigned int ndof = 2;  // number of degrees of freedom of your system
     double t0 = 0.0;
-    double T = 5e-3;        // Total simulation time
-    double h = 1.0e-6;      // Time step
-    string solverName = "Lemke"; // non smooth problem solver algo name.
+    double T = 1;        // Total simulation time
+    double h = 1.0e-3;      // Time step
+    double Vinit = 1.0;
+
 
     // ================= Creation of the model =======================
 
@@ -34,9 +28,10 @@ int main(int argc, char* argv[])
     (*A)(1, 1) = 1.0;
     SiconosVector * x0 = new SimpleVector(ndof);
     (*x0)(0) = Vinit;
-    DynamicalSystem * process  = new FirstOrderLinearDS(1, *x0, *A);
+    FirstOrderLinearDS * process  = new FirstOrderLinearDS(0, *x0, *A);
 
-    process->setComputeBFunction("ObserverPlugin.so", "computeU");
+    process->setComputeBFunction("ObserverLCSPlugin.so", "computeU");
+
 
     DynamicalSystemsSet allDS;
     allDS.insert(process);
@@ -54,9 +49,9 @@ int main(int argc, char* argv[])
     SiconosMatrix * C = new SimpleMatrix(ninter, ndof);
     (*C)(0, 0) = -1.0;
     (*C)(0, 1) = 1.0;
-    LinearTIR * myProcessRelation = new LinearTIR(*C, *B);
+    FirstOrderLinearR * myProcessRelation = new FirstOrderLinearR(C, B);
 
-    myProcessrelation->setComputeEFunction("ObserverPlugin.so", "computeE");
+    myProcessRelation->setComputeEFunction("ObserverLCSPlugin.so", "computeE");
 
 
     SiconosMatrix* D = new SimpleMatrix(ninter, ninter);
@@ -69,20 +64,28 @@ int main(int argc, char* argv[])
     (*E)(1, 0) = 2.0;
     SiconosMatrix * L = new SimpleMatrix(ndof, noutput);
     (*L)(0, 0) = 1.0;
-    (*L)(1.0) = 1.0;
+    (*L)(1, 0) = 1.0;
     SiconosMatrix * G = new SimpleMatrix(noutput, ndof);
     (*G)(0, 0) = 2.0;
     (*G)(0, 1) = 2.0;
     SiconosMatrix * hatA = new SimpleMatrix(ndof, ndof);
 
-    (*hatA) = *A - *L *  *G;
-
-    DynamicalSystem * Observer = new FirstOrderLinearDS(1, *x0, *hatA);
 
 
-    LinearTIR * myObserverRelation = new LinearTIR(*C, *B);
 
-    myObserverRelation->setComputeEFunction("ObserverPlugin.so", "computeE");
+    (*hatA) = (*A)     -   prod(*L, *G);
+
+    FirstOrderLinearDS* observer = new FirstOrderLinearDS(1, *x0, *hatA);
+    //observer->setComputeBFunction("ObserverLCSPlugin.so","computebobserver");
+
+
+
+    allDS.insert(observer);
+
+
+    FirstOrderLinearR * myObserverRelation = new FirstOrderLinearR(C, B);
+
+    myObserverRelation->setComputeEFunction("ObserverLCSPlugin.so", "computeE");
 
     myObserverRelation->setDPtr(D);
 
@@ -97,77 +100,113 @@ int main(int argc, char* argv[])
     // Choose a name and a number for your Interaction
     string nameInter = "processInteraction";
     unsigned int numInter = 1;
-    Interaction* myProcessInteraction = new Interaction(nameInter, process, numInter, ninter, myNslaw, myProcessRelation);
+    cout << "tutu " << endl;
+
+    allDS.display();
+
+
+    DynamicalSystemsSet dsObserverConcerned;
+    dsObserverConcerned.insert(allDS.getPtr(0));
+    cout << "tutu " << endl;
+
+    Interaction* myProcessInteraction = new Interaction(nameInter, dsObserverConcerned, numInter, ninter, myNslaw, myProcessRelation);
     InteractionsSet allInteractions;
     allInteractions.insert(myProcessInteraction);
+    cout << "tutu " << endl;
 
 
-    string nameInter = "observerInteraction";
-    unsigned int numInter = 2;
-    Interaction* myObserverInteraction = new Interaction(nameInter, observer, numInter, ninter, myNslaw, myObserverRelation);
+    string nameInter2 = "observerInteraction";
+    unsigned int numInter2 = 2;
+
+    DynamicalSystemsSet dsProcessConcerned;
+    dsProcessConcerned.insert(allDS.getPtr(1));
+
+    Interaction* myObserverInteraction = new Interaction(nameInter2, dsProcessConcerned, numInter2, ninter, myNslaw, myObserverRelation);
 
     allInteractions.insert(myObserverInteraction);
+
+
+
 
     // NonSmoothDynamicalSystem
     NonSmoothDynamicalSystem* myNSDS = new NonSmoothDynamicalSystem(allDS, allInteractions);
 
+    cout << "toto " << endl;
 
 
     // Model
     Model * ObserverLCS = new Model(t0, T);
-    Observer->setNonSmoothDynamicalSystemPtr(myNSDS);
-    // == Creation of the Simulation ==
-    Simulation * s = new TimeStepping(ObserverLCS);
+    ObserverLCS->setNonSmoothDynamicalSystemPtr(myNSDS);
     // TimeDiscretisation
-    TimeDiscretisation * td = new TimeDiscretisation(h, s);
+    TimeDiscretisation * td = new TimeDiscretisation(h, ObserverLCS);
+    // == Creation of the Simulation ==
+    TimeStepping * s = new TimeStepping(td);
+
+
     // OneStepIntegrator
     double theta = 0.5;
     // One Step Integrator
     Moreau* myIntegrator = new Moreau(allDS, theta, s);
     // OneStepNSProblem
+
+
+
     // One Step non smooth problem
-    OneStepNSProblem* myLCP = new LCP(s, "LCP", solverName, 101, 0.0001, "max", 0.6);
+    IntParameters iparam(5);
+    iparam[0] = 1000; // Max number of iteration
+    DoubleParameters dparam(5);
+    dparam[0] = 1e-5; // Tolerance
+    string solverName = "Lemke" ;
+    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
+    LCP * osnspb = new LCP(s, mySolver);
+
     // ================================= Computation =================================
 
     // --- Initialisation of the simulation ---
     s->initialize();
 
-    int k = td->getK(); // Current step
+    myProcessInteraction->getYPtr(0)->display();
+
+    observer->setZPtr(myProcessInteraction->getYPtr(0));
+
+    int k = 0; // Current step
     int N = td->getNSteps(); // Number of time steps
     unsigned int outputSize = 7; // number of required data
     SimpleMatrix dataPlot(N, outputSize);
-    SimpleVector * processLambda = myProcessInteraction->getLambdaPtr(0);
-    SimpleVector * observerLambda = myObserverInteraction->getLambdaPtr(0);
+    SiconosVector * processLambda = myProcessInteraction->getLambdaPtr(0);
+    SiconosVector * observerLambda = myObserverInteraction->getLambdaPtr(0);
     // We get values for the initial time step:
     // time
-    dataPlot(k, 0) = k * h;
+    dataPlot(k, 0) = s->getNextTime();
     dataPlot(k, 1) = (observer->getX())(0);
     dataPlot(k, 2) = (observer->getX())(1);
     dataPlot(k, 3) = (process->getX())(0);
     dataPlot(k, 4) = (process->getX())(1);
-    dataPlot(k, 5) = processLambda(0);
-    dataPlot(k, 6) = observerLambda(0);
+    dataPlot(k, 5) = (*processLambda)(0);
+    dataPlot(k, 6) = (*observerLambda)(0);
 
 
     // Simulation loop
     while (k < N - 1)
     {
+      k++;
+
       s->nextStep();
       // get current time step
-      k = td->getK();
+
       s->computeOneStep();
-      dataPlot(k, 0) = k * h;
+      dataPlot(k, 0) = s->getNextTime();;
       dataPlot(k, 1) = (observer->getX())(0);
       dataPlot(k, 2) = (observer->getX())(1);
       dataPlot(k, 3) = (process->getX())(0);
       dataPlot(k, 4) = (process->getX())(1);
-      dataPlot(k, 5) = processLambda(0);
-      dataPlot(k, 6) = observerLambda(0);
+      dataPlot(k, 5) = (*processLambda)(0);
+      dataPlot(k, 6) = (*observerLambda)(0);
     }
 
     // Write the results into the file "ObserverLCS.dat"
     ioMatrix io("ObserverLCS.dat", "ascii");
-    io.write(dataPlot);
+    io.write(dataPlot, "noDim");
 
     // --- Time loop ---
 
