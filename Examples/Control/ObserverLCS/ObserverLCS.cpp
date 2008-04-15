@@ -77,7 +77,8 @@ int main(int argc, char* argv[])
 
     FirstOrderLinearDS* observer = new FirstOrderLinearDS(1, *x0, *hatA);
     //observer->setComputeBFunction("ObserverLCSPlugin.so","computebobserver");
-
+    SimpleVector * z = new SimpleVector(1);
+    observer->setZPtr(z);
 
 
     allDS.insert(observer);
@@ -110,6 +111,7 @@ int main(int argc, char* argv[])
     cout << "tutu " << endl;
 
     Interaction* myProcessInteraction = new Interaction(nameInter, dsObserverConcerned, numInter, ninter, myNslaw, myProcessRelation);
+
     InteractionsSet allInteractions;
     allInteractions.insert(myProcessInteraction);
     cout << "tutu " << endl;
@@ -123,7 +125,7 @@ int main(int argc, char* argv[])
 
     Interaction* myObserverInteraction = new Interaction(nameInter2, dsProcessConcerned, numInter2, ninter, myNslaw, myObserverRelation);
 
-    allInteractions.insert(myObserverInteraction);
+    //allInteractions.insert(myObserverInteraction);
 
 
 
@@ -165,10 +167,7 @@ int main(int argc, char* argv[])
     // --- Initialisation of the simulation ---
     s->initialize();
 
-    myProcessInteraction->getYPtr(0)->display();
-
-    observer->setZPtr(myProcessInteraction->getYPtr(0));
-
+    *z = *(myProcessInteraction->getYPtr(0)->getVectorPtr(0));
     int k = 0; // Current step
     int N = td->getNSteps(); // Number of time steps
     unsigned int outputSize = 7; // number of required data
@@ -195,6 +194,7 @@ int main(int argc, char* argv[])
       // get current time step
 
       s->computeOneStep();
+      *z = *(myProcessInteraction->getYPtr(0)->getVectorPtr(0));
       dataPlot(k, 0) = s->getNextTime();;
       dataPlot(k, 1) = (observer->getX())(0);
       dataPlot(k, 2) = (observer->getX())(1);

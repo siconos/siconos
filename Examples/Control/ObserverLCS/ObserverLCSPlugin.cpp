@@ -25,7 +25,7 @@ extern "C"   void computeU(double time, unsigned int sizeOfB, double* b, unsigne
 
   if ((oddoreven / 2) == 0) u = alpha;
   else u = 0;
-  u = 0.0;
+  u = 1.0;
 
   b[0] = u ;
   b[1] = 2.0 * u;
@@ -59,7 +59,7 @@ extern "C"   void computebobserver(double time, unsigned int sizeOfB, double* b,
 
   if ((oddoreven / 2) == 0) u = alpha;
   else u = 0;
-  u = 0.0;
+  u = 1.0;
 
   b[0] = u + L[0] * z[0];
   b[1] = 2.0 * u + L[1] * z[0];
