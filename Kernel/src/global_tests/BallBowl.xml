@@ -52,7 +52,6 @@
 			</LagrangianLinearTIDS>
 			<LagrangianLinearTIDS number='2'> 
 				<Id> Ground </Id>
-				<StepsInMemory>1</StepsInMemory>				
 				<q0 vectorSize='1'>
 					0.0
 				</q0>	
@@ -107,10 +106,13 @@
 			</Moreau>
 			</OneStepIntegrator_Definition>
 		<!-- One Step NS Problem of th Simulation-->
-		<OneStepNSProblem>
-		 	<LCP>
-		 	<Solver type="PGS" maxIter="1001" tolerance="0.000001"/> 
-			 </LCP>
-		 </OneStepNSProblem>
+		<OneStepNSProblems_List>
+		 	<LCP StorageType="0" Id="myLCP">
+			   <NonSmoothSolver Name="Lemke">
+			      <iparam  vectorSize='5'>1000 0 0 0 0</iparam>
+			      <dparam  vectorSize='5'>1e-6 0 0 0 0</dparam>
+			   </NonSmoothSolver>
+	                 </LCP>
+		 </OneStepNSProblems_List>
 	</Simulation>	
 </SiconosModel>
