@@ -46,10 +46,7 @@ MACRO(SICONOS_PROJECT
   IF(CMAKE_Fortran_COMPILER)
     INCLUDE(fortran)
     INCLUDE(FortranLibraries)
-    INCLUDE(LibraryProjectSetup)
   ENDIF(CMAKE_Fortran_COMPILER)
-
-
 
   # Tests+Dashboard configuration
   ENABLE_TESTING()

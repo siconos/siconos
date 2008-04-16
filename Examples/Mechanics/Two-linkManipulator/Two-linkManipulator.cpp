@@ -182,7 +182,13 @@ int main(int argc, char* argv[])
     OneStepIntegrator * OSI =  new Moreau(arm, 0.500001, s);
 
     // -- OneStepNsProblem --
-    OneStepNSProblem * osnspb = new LCP(s, "name", "Lemke", 200001, 0.00001);
+    IntParameters iparam(5);
+    iparam[0] = 200001; // Max number of iteration
+    DoubleParameters dparam(5);
+    dparam[0] =  0.00001; // Tolerance
+    string solverName = "Lemke" ;
+    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
+    OneStepNSProblem * osnspb = new LCP(s, mySolver);
 
     cout << "=== End of model loading === " << endl;
 

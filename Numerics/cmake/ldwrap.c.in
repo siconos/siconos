@@ -7,5 +7,4 @@ int main() {
 
   setenv("LD_LIBRARY_PATH", "@LD_LIBRARY_PATH@",1);
   execlp("@CMAKE_CURRENT_BINARY_DIR@/@_CURRENT_TEST_DIRECTORY@/@_EXE@",NULL);
-
 }

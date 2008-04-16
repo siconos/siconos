@@ -227,7 +227,6 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     ioMatrix io("ObserverLCS.dat", "ascii");
     io.write(dataPlot, "noDim");
-
   }
 
   catch (SiconosException e)

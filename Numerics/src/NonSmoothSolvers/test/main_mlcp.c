@@ -683,6 +683,6 @@ int main(void)
 
   test_matrix();
 
-  return 1;
+  return 0;
 }
 
