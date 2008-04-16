@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
     // == User-defined parameters ==
     unsigned int ndof = 2;  // number of degrees of freedom of your system
     double t0 = 0.0;
-    double T = 1;        // Total simulation time
+    double T = 10;        // Total simulation time
     double h = 1.0e-3;      // Time step
     double Vinit = 1.0;
 
@@ -106,11 +106,11 @@ int main(int argc, char* argv[])
     allDS.display();
 
 
-    DynamicalSystemsSet dsObserverConcerned;
-    dsObserverConcerned.insert(allDS.getPtr(0));
+    DynamicalSystemsSet dsProcessConcerned;
+    dsProcessConcerned.insert(allDS.getPtr(0));
     cout << "tutu " << endl;
 
-    Interaction* myProcessInteraction = new Interaction(nameInter, dsObserverConcerned, numInter, ninter, myNslaw, myProcessRelation);
+    Interaction* myProcessInteraction = new Interaction(nameInter, dsProcessConcerned, numInter, ninter, myNslaw, myProcessRelation);
 
     InteractionsSet allInteractions;
     allInteractions.insert(myProcessInteraction);
@@ -120,12 +120,12 @@ int main(int argc, char* argv[])
     string nameInter2 = "observerInteraction";
     unsigned int numInter2 = 2;
 
-    DynamicalSystemsSet dsProcessConcerned;
-    dsProcessConcerned.insert(allDS.getPtr(1));
+    DynamicalSystemsSet dsObserverConcerned;
+    dsObserverConcerned.insert(allDS.getPtr(1));
 
-    Interaction* myObserverInteraction = new Interaction(nameInter2, dsProcessConcerned, numInter2, ninter, myNslaw, myObserverRelation);
+    Interaction* myObserverInteraction = new Interaction(nameInter2, dsObserverConcerned, numInter2, ninter, myNslaw, myObserverRelation);
 
-    //allInteractions.insert(myObserverInteraction);
+    allInteractions.insert(myObserverInteraction);
 
 
 
