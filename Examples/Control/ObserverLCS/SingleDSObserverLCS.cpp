@@ -44,7 +44,12 @@ int main(int argc, char* argv[])
     (*G)(0, 1) = 2.0;
 
     SiconosMatrix * hatA = new SimpleMatrix(2, 2);
-    (*hatA) = (*A)     -   prod(*L, *G);
+    //   (*hatA) = (*A)     -   prod(*L,*G);
+    (*hatA)(0, 0) = -1.0;
+    (*hatA)(0, 1) = -1.0;
+    (*hatA)(1, 0) = 1.0;
+    (*hatA)(1, 1) = -1.0;
+
     cout << "A-LG" << endl;
     hatA->display();
     (*TildeA)(2, 2) = (*hatA)(0, 0);
@@ -53,11 +58,11 @@ int main(int argc, char* argv[])
     (*TildeA)(3, 3) = (*hatA)(1, 1);
 
     SiconosMatrix * LG = new SimpleMatrix(2, 2);
-    (*LG) =  prod(*L, *G);
-    (*TildeA)(2, 0) = (*LG)(0, 0);
-    (*TildeA)(3, 0) = (*LG)(1, 0);
-    (*TildeA)(2, 1) = (*LG)(0, 1);
-    (*TildeA)(3, 1) = (*LG)(1, 1);
+    // (*LG) =  prod(*L,*G);
+    (*TildeA)(2, 0) = 2.0;
+    (*TildeA)(3, 0) = 2.0;
+    (*TildeA)(2, 1) = 2.0;
+    (*TildeA)(3, 1) = 2.0;
     TildeA-> display();
 
     SiconosVector * x0 = new SimpleVector(ndof);
@@ -190,7 +195,7 @@ int main(int argc, char* argv[])
     }
 
     // Write the results into the file "ObserverLCS.dat"
-    ioMatrix io("ObserverLCS.dat", "ascii");
+    ioMatrix io("SingleDSObserverLCS.dat", "ascii");
     io.write(dataPlot, "noDim");
 
     // --- Time loop ---

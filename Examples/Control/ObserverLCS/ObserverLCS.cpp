@@ -12,9 +12,9 @@ int main(int argc, char* argv[])
     // == User-defined parameters ==
     unsigned int ndof = 2;  // number of degrees of freedom of your system
     double t0 = 0.0;
-    double T = 3;        // Total simulation time
-    double h = 1.0e-3;      // Time step
-    double Vinit = 1.0;
+    double T = 2;        // Total simulation time
+    double h = 1.0e-4;      // Time step
+    double Vinit = 10.0;
 
 
     // ================= Creation of the model =======================
@@ -65,12 +65,13 @@ int main(int argc, char* argv[])
     (*hatA)(0, 0) = -1.0;
     (*hatA)(0, 1) = -1.0;
     (*hatA)(1, 0) = 1.0;
-    (*hatA)(1, 1) = 1.0;
+    (*hatA)(1, 1) = -1.0;
 
-    FirstOrderLinearDS* observer = new FirstOrderLinearDS(1, *x0, *hatA);
+    SiconosVector * obsX0 = new SimpleVector(ndof);
+    FirstOrderLinearDS* observer = new FirstOrderLinearDS(1, *obsX0, *hatA);
     observer->setComputeBFunction("ObserverLCSPlugin.so", "uObserver");
-    SimpleVector * z = new SimpleVector(1);
-    observer->setZPtr(z);
+    //    SimpleVector * z = new SimpleVector(1);
+    observer->setZPtr(process->getXPtr());
     // The set of all DynamicalSystems
     DynamicalSystemsSet allDS;
     allDS.insert(process);
@@ -152,7 +153,7 @@ int main(int argc, char* argv[])
     IntParameters iparam(5);
     iparam[0] = 1000; // Max number of iteration
     DoubleParameters dparam(5);
-    dparam[0] = 1e-5; // Tolerance
+    dparam[0] = 1e-6; // Tolerance
     string solverName = "Lemke" ;
     NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
     LCP * osnspb = new LCP(s, mySolver);
@@ -168,7 +169,7 @@ int main(int argc, char* argv[])
     s->initialize();
 
     // --- Get the values to be plotted ---
-    unsigned int outputSize = 7; // number of required data
+    unsigned int outputSize = 10; // number of required data
     int N = td->getNSteps(); // Number of time steps
     SimpleMatrix dataPlot(N, outputSize);
 
@@ -176,6 +177,9 @@ int main(int argc, char* argv[])
     SiconosVector * xObs = observer->getXPtr();
     SiconosVector * lambdaProc = myProcessInteraction->getLambdaPtr(0);
     SiconosVector * lambdaObs = myObserverInteraction->getLambdaPtr(0);
+    SiconosVector * yProc = myProcessInteraction->getYPtr(0);
+    SiconosVector * yObs = myObserverInteraction->getYPtr(0);
+    SiconosVector * z = observer->getZPtr();
 
     // -> saved in a matrix dataPlot
     dataPlot(0, 0) = ObserverLCS->getT0(); // Initial time of the model
@@ -185,12 +189,15 @@ int main(int argc, char* argv[])
     dataPlot(0, 4) = (*xObs)(1);
     dataPlot(0, 5) = (*lambdaProc)(0);
     dataPlot(0, 6) = (*lambdaObs)(0);
+    dataPlot(0, 7) = (*yProc)(0);
+    dataPlot(0, 8) = (*yObs)(0);
+    dataPlot(0, 9) = (*z)(0);
 
 
     // ==== Simulation loop =====
     cout << "====> Start computation ... " << endl << endl;
 
-    *z = *(myProcessInteraction->getYPtr(0)->getVectorPtr(0));
+    // *z = *(myProcessInteraction->getYPtr(0)->getVectorPtr(0));
     int k = 0; // Current step
 
     // Simulation loop
@@ -199,8 +206,8 @@ int main(int argc, char* argv[])
     while (k < N - 1)
     {
       k++;
+      //  *z = *(myProcessInteraction->getYPtr(0)->getVectorPtr(0));
       s->computeOneStep();
-      *z = *(myProcessInteraction->getYPtr(0)->getVectorPtr(0));
       dataPlot(k, 0) = s->getNextTime();
       dataPlot(k, 1) = (*xProc)(0);
       dataPlot(k, 2) = (*xProc)(1);
@@ -208,6 +215,9 @@ int main(int argc, char* argv[])
       dataPlot(k, 4) = (*xObs)(1);
       dataPlot(k, 5) = (*lambdaProc)(0);
       dataPlot(k, 6) = (*lambdaObs)(0);
+      dataPlot(k, 7) = (*yProc)(0);
+      dataPlot(k, 8) = (*yObs)(0);
+      dataPlot(k, 9) = (*z)(0);
       s->nextStep();
     }
     cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
