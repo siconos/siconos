@@ -161,14 +161,24 @@ public:
    */
   Interaction(InteractionXML*, NonSmoothDynamicalSystem* = NULL);
 
+  /** constructor with a set of data (only one DS in the Interaction)
+   *  \param string: the id of this Interaction
+   *  \param a DynamicalSystem*: the DS involved in the Interaction
+   *  \param int : the number of this Interaction
+   *  \param int : the value of interactionSize
+   *  \param NonSmoothLaw* : a pointer to the non smooth law
+   *  \param Relation* : a pointer to the Relation
+   */
+  Interaction(const std::string&, DynamicalSystem*, int, int, NonSmoothLawSPtr, Relation*);
+
   /** constructor with a set of data
-  *  \param string: the id of this Interaction
-  *  \param a DynamicalSystemsSet: the set of DS involved in the Interaction
-  *  \param int : the number of this Interaction
-  *  \param int : the value of interactionSize
-  *  \param NonSmoothLaw* : a pointer to the non smooth law
-  *  \param Relation* : a pointer to the Relation
-  */
+   *  \param string: the id of this Interaction
+   *  \param a DynamicalSystemsSet: the set of DS involved in the Interaction
+   *  \param int : the number of this Interaction
+   *  \param int : the value of interactionSize
+   *  \param NonSmoothLaw* : a pointer to the non smooth law
+   *  \param Relation* : a pointer to the Relation
+   */
   Interaction(const std::string&, DynamicalSystemsSet&, int, int, NonSmoothLawSPtr, Relation*);
 
 #ifdef WithSmartPtr

@@ -1,5 +1,6 @@
 
 #define WITH_CMAKE
+#define XML_SCHEMA "@CMAKE_INSTALL_PREFIX@/share/@PROJECT_PACKAGE_NAME@/SiconosModelSchema-V1.2.xsd"
 
 #cmakedefine SVN_REVISION ${SVN_REVISION}
 

@@ -91,12 +91,10 @@ SET(SiconosKernel_LINKER_LANGUAGE CXX)
 
 LIBRARY_PROJECT_SETUP()
 
-
 #
 # tests with cppunit
 #
 IF(CPPUNIT_FOUND)
-
   # used in ldwrap.c.in
   SET(LD_LIBRARY_PATH ".:${CMAKE_CURRENT_BINARY_DIR}/plugin:${CMAKE_CURRENT_BINARY_DIR}/plugin/test")
 

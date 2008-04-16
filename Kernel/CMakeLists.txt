@@ -6,7 +6,7 @@ ENABLE_LANGUAGE(C)
 ENABLE_LANGUAGE(CXX)
 ENABLE_LANGUAGE(Fortran) # see lapack macros
 
-SICONOS_PROJECT(Kernel 2 2 1 
+SICONOS_PROJECT(Kernel 3 0 0
   "Siconos/Kernel is dedicated to the modeling and the simulation of NSDS"
 
   "The present package, Siconos/Kernel, is dedicated to the modeling

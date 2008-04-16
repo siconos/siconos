@@ -90,11 +90,7 @@ SiconosModelXML::SiconosModelXML(char * siconosModelXMLFilePath):
     {
       // Second case: no schema is given by user -> default one is used: SICONOSPATH/XML_SCHEMA
 
-      // Check that SICONOSPATH is set.
-      if (getenv("SICONOSPATH") == NULL)
-        RuntimeException::selfThrow("SiconosModel constructor: environment variable SICONOSPATH is undefined.");
-
-      xmlSchemaFile = getenv("SICONOSPATH") + XML_SCHEMA;
+      xmlSchemaFile = XML_SCHEMA;
     }
 
     string schemaFile = xmlSchemaFile; //getenv("SICONOSPATH") + (string)"/share/SICONOS/";

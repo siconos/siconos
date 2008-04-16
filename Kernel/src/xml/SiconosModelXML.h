@@ -23,7 +23,7 @@
 #define __MODELXML__
 
 #include "SiconosDOMTreeTools.h"
-
+#include "config.h"
 #include <libxml/parser.h>
 #include <libxml/xmlschemas.h>
 
@@ -34,7 +34,7 @@ class SimulationXML;
 // warning: the xml_schema location must corresponds to the package name
 // provided in configure.ac (AC_INIT(package name ...)).
 // Here : siconos-kernel
-const std::string XML_SCHEMA = "/share/siconos-kernel/SiconosModelSchema-V1.2.xsd";
+//const std::string XML_SCHEMA = "/share/siconos-kernel/SiconosModelSchema-V1.2.xsd";
 const std::string  ISO = "ISO-8859-1";
 const std::string  SM_T_CURRENT = "t";
 const std::string  SM_T = "T";

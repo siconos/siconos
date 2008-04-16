@@ -179,10 +179,36 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
     RuntimeException::selfThrow("Interaction::xml constructor, y or lambda download is forbidden.");
 }
 
-// --- Constructor from a set of data ---
+// --- Constructors from a set of data ---
+
+Interaction::Interaction(const string& newId, DynamicalSystem* ds, int newNumber, int nInter, NonSmoothLawSPtr newNSL, Relation* newRel):
+  id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0), y(1), involvedDS(NULL),
+  nslaw(newNSL), relation(newRel), NSDS(NULL), interactionxml(NULL)
+{
+  involvedDS = new DynamicalSystemsSet();
+  involvedDS->insert(ds); // Warning: insert pointer to DS!!
+  isAllocatedIn["relation"] = false;
+
+#ifndef WithSmartPtr
+  isAllocatedIn["nsLaw"] = false;
+#endif
+}
+
+#ifdef WithSmartPtr
+Interaction::Interaction(const string& newId, DynamicalSystem* ds, int newNumber, int nInter, NonSmoothLaw* newNSL, Relation* newRel):
+  id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0), involvedDS(NULL), relation(newRel), NSDS(NULL), interactionxml(NULL)
+{
+  nslaw.reset(newNSL);
+  involvedDS = new DynamicalSystemsSet();
+  involvedDS->insert(ds); // Warning: insert pointer to DS!!
+  isAllocatedIn["relation"] = false;
+}
+
+
+#endif
 
 Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, int newNumber, int nInter, NonSmoothLawSPtr newNSL, Relation* newRel):
-  id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0), involvedDS(NULL),
+  id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0), y(1), involvedDS(NULL),
   nslaw(newNSL), relation(newRel), NSDS(NULL), interactionxml(NULL)
 {
   involvedDS = new DynamicalSystemsSet();

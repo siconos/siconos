@@ -19,6 +19,7 @@
 
 #include "Model.h"
 #include "SiconosModelXML.h"
+#include "config.h"
 #include "SimulationXML.h"
 #include "NonSmoothDynamicalSystem.h"
 #include "NonSmoothDynamicalSystemXML.h"
