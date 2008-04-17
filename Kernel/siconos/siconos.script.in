@@ -27,7 +27,7 @@ myname=`basename $0`
 cartridge() {
     echo;
     echo "|=============================================================================|";
-    echo "| Siconos-Kernel version @VERSION@ (temporary release), Copyright INRIA 2005-2008.|";
+    echo "|          Siconos-Kernel version @VERSION@, Copyright INRIA 2005-2008.       |";
     echo "|                                                                             |";
     echo "|     Free software under GNU General Public License.                         |";
     echo "|=============================================================================|"; 
@@ -35,25 +35,47 @@ cartridge() {
 }
 
 usage() { 
-    echo "Usage: $myname [options] [YourSample.cpp|location/YourSample.cpp] [Arguments]";
-    echo "The siconos command compile, link and run a Siconos program.";
+    echo " ";
+    echo "The siconos command compiles, links and runs a Siconos program.";
+    echo " ";
+    echo "Usage: $myname [options] [YourExample.cpp|location/YourExample.cpp] [Arguments]";
+    echo " ";
+    echo " --> To use other source files (*.c, *.cpp, *.f), put them in ./src or see option -src_dir below ";
+    echo " --> To create a library and link it with the siconos program, create a ./plugin directory ";
+    echo " or use -plugin_dir option below. ";
+    echo " --> To create some libraries and link them with the siconos program, create a ./plugins directory ";
+    echo " or use -plugins_dir option below. ";
+    echo " ";
     echo "Options are: ";
-    echo "     -a : find and compile all sources files in YourSample.cpp directory.";
+    echo "     -a : To find and compile all sources files in YourExample.cpp directory.";
+    echo " ";
     echo "     -c | -clean : to clean the current directory (deletes binary files, etc.).";
+    echo " ";
     echo "     -D key | -D key=value : to define a 'cmake' and a 'cpp' variable.";
+    echo " ";
     echo "     -g : to compile with debug informations."
+    echo " ";
     echo "     -h | -help : to print this help.";
+    echo " ";
     echo "     -noexec : compile only.";
+    echo " ";
     echo "     -opt <opt> : add option <opt> to compiler." 
+    echo " ";
     echo "     -P prefix_command : to add a prefix command (time, valgrind, gdb, etc.)."
-    echo "     -plugin_dir <plugin_directory> : "
+    echo " ";
+    echo "     -plugin_dir <plugin_directory> (Default = plugin): "
     echo "         create <plugin_directory>.so "
     echo "         with plugin sources under <plugin_directory>." 
-    echo "     -plugins_dir <plugins_directory> : "
+    echo " ";
+    echo "     -plugins_dir <plugins_directory> (Default = plugins): "
     echo "         for each source file <name_src>.[c|f|cpp] under <plugins_directory>"
-    echo "         create a plugin <name_src>.so"
-    echo "     -src_dir <source_directory> : add all sources files under <source_directory>."
+    echo "        it creates a plugin <name_src>.so"
+    echo " ";
+    echo "     -src_dir <source_directory> (Default = src):  all sources files under <source_directory> (Warning: absolute path!!)"
+    echo " to the executable.";
+    echo " ";
     echo "     -v : to print 'make' commands as they are executed.";
+    echo " ";
 
 }
 
@@ -177,7 +199,6 @@ if test ! "$make_args" = "clean"; then
                 all_extra_defs="$all_extra_defs;$d";;
         esac
     done
-
     if ! cmake $KERNEL_PREFIX/share/siconos-kernel/ \
         -DMAIN_SOURCE=$main_source \
         -DPLUGINS_SOURCES=$plugins_sources \
@@ -197,7 +218,6 @@ if test -f ./Makefile; then
 else
     echo "$myname: nothing to clean" 
 fi
-
 if test $exec = true; then
     eval LD_LIBRARY_PATH=$NUMERICS_PREFIX/lib:$KERNEL_PREFIX/lib:$KERNEL_PREFIX/share/siconos-kernel:. $exec_prefix ./$exe $@
 fi
