@@ -98,10 +98,13 @@
 			</Moreau>					
 		</OneStepIntegrator_Definition>
 		<!-- One Step NS Problem of th Simulation-->
-		<OneStepNSProblem>
+		<OneStepNSProblems_List>
 		 	<FrictionContact2D>
-                        <Solver type="NLGS" maxIter="101" tolerance="0.0001" directionSearch="0.6"/>
+  			   <NonSmoothSolver Name="NLGS">
+			      <iparam  vectorSize='5'>1000 0 0 0 0</iparam>
+			      <dparam  vectorSize='5'>1e-4 0 0 0 0</dparam>
+			   </NonSmoothSolver>
 		 	</FrictionContact2D>
-		 </OneStepNSProblem>
+		 </OneStepNSProblems_List>
 	</Simulation>	
 </SiconosModel>
