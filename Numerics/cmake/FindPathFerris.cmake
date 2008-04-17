@@ -22,9 +22,9 @@ IF(PathFerris_FOUND)
   SET(PathFerris_INCLUDE_DIRS ${PathFerris_LIBRARY_DIRS_DIR}/include)
   SET(HAVE_PATHFERRIS 1)
 ELSE(PathFerris_FOUND)
-  IF(PathFerris_REQUIRED)
+  IF(PathFerris_FIND_REQUIRED)
     MESSAGE(FATAL_ERROR
       "Required path46 library not found. Please specify library location in PathFerris_LIBRARY_DIRECTORY")
-  ENDIF(PathFerris_REQUIRED)
+  ENDIF(PathFerris_FIND_REQUIRED)
   
 ENDIF(PathFerris_FOUND)

@@ -22,9 +22,9 @@ IF(MlcpSimplex_FOUND)
   SET(MlcpSimplex_INCLUDE_DIRS ${MlcpSimplex_LIBRARY_DIRS_DIR}/include)
   SET(HAVE_MLCPSIMPLEX 1)
 ELSE(MlcpSimplex_FOUND)
-  IF(MlcpSimplex_REQUIRED)
+  IF(MlcpSimplex_FIND_REQUIRED)
     MESSAGE(FATAL_ERROR
       "Required MlcpSimplex library not found. Please specify library location in MlcpSimplex_LIBRARY_DIRECTORY")
-  ENDIF(MlcpSimplex_REQUIRED)
+  ENDIF(MlcpSimplex_FIND_REQUIRED)
   
 ENDIF(MlcpSimplex_FOUND)

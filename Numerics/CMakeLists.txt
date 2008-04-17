@@ -6,7 +6,7 @@ ENABLE_LANGUAGE(Fortran)
 
 INCLUDE(SiconosProject)
 
-SICONOS_PROJECT(Numerics 2 2 1 
+SICONOS_PROJECT(Numerics 3 0 0 
   "Siconos/Numerics provides low-level algorithms (NSDS field)."
 
   "Siconos is a program dedicated to modeling, simulation and control

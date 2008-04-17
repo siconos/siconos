@@ -21,9 +21,9 @@ IF(Pthread_FOUND)
   GET_FILENAME_COMPONENT(Pthread_LIBRARY_DIRS_DIR ${Pthread_LIBRARY_DIRS} PATH)
   SET(Pthread_INCLUDE_DIRS ${Pthread_LIBRARY_DIRS_DIR}/include)
 ELSE(Pthread_FOUND)
-  IF(Pthread_REQUIRED)
+  IF(Pthread_FIND_REQUIRED)
     MESSAGE(FATAL_ERROR
       "Required Pthread library not found. Please specify library location in Pthread_LIBRARY_DIRECTORY")
-  ENDIF(Pthread_REQUIRED)
+  ENDIF(Pthread_FIND_REQUIRED)
 
 ENDIF(Pthread_FOUND)

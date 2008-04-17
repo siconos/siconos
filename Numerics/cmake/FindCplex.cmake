@@ -21,9 +21,9 @@ IF(Cplex_FOUND)
   GET_FILENAME_COMPONENT(Cplex_LIBRARY_DIRS_DIR ${Cplex_LIBRARY_DIRS} PATH)
   SET(Cplex_INCLUDE_DIRS ${Cplex_LIBRARY_DIRS_DIR}/include)
 ELSE(Cplex_FOUND)
-  IF(Cplex_REQUIRED)
+  IF(Cplex_FIND_REQUIRED)
     MESSAGE(FATAL_ERROR
       "Required Cplex library not found. Please specify library location in Cplex_LIBRARY_DIRECTORY")
-  ENDIF(Cplex_REQUIRED)
+  ENDIF(Cplex_FIND_REQUIRED)
 
 ENDIF(Cplex_FOUND)
