@@ -88,7 +88,7 @@ with_arg() {
     fi
 }
 
-
+cartridge
 
 if `getopt -T >/dev/null 2>&1` ; [ $? = 4 ] ; then
     args=`getopt -n $myname -a \
@@ -174,15 +174,6 @@ if test ! "$make_args" = "clean"; then
         exe=`basename $sources_directory`
     fi
 
-    tmp=`expr "$main_source" : "\(.*\).cpp"`Plugin.cpp
-    if test -f "$tmp"; then
-        plugins_sources="$tmp"
-    fi
-
-    case $exe in
-        *TS) ext_plugin_source=`expr "$main_source" : "\(.*\)TS.cpp"`Plugin.cpp;;
-        *ED) ext_plugin_source=`expr "$main_source" : "\(.*\)ED.cpp"`Plugin.cpp;;
-    esac
     case :$ext_plugin_source,:$plugins_sources in
         :,:*);;
         :*,:) plugins_sources=$ext_plugin_source;;
