@@ -2,7 +2,7 @@
 #include <math.h>
 
 
-extern "C"   double computeControl(double time)
+extern "C"   double computeControl1(double time)
 {
 
 
@@ -12,11 +12,84 @@ extern "C"   double computeControl(double time)
   int oddoreven = 1 ;
 
   oddoreven = int(time / T);
-
-
   if ((oddoreven / 2) == 0) u = alpha;
   else u = -alpha;
   u = 30 * sin(50 * time);
+
+  return u;
+}
+
+
+
+extern "C"   double computeControl2(double time)
+{
+
+
+  double u;
+  double alpha = -50.0;
+  int oddoreven = 1 ;
+  int njump;
+
+  if (time <= 1) u = -0.0;
+  if (time >= 3) u = -alpha;
+  if (time > 1 & time <= 3)
+  {
+    njump = int(log(1.0 / (3.0 - time)) / log(2.0)) + 1.0;
+
+
+    //printf("njump = %i\n",njump);
+    if (njump % 2 == 0)
+    {
+      u = -alpha;
+    }
+    else
+    {
+      u = alpha;
+    }
+  };
+
+
+  return u;
+}
+extern "C"   double computeControl(double time)
+{
+
+
+  double u;
+  double alpha = 50.0;
+  int oddoreven = 1 ;
+  int njump;
+
+  if (time < 1) u = -0.0;
+  if (time >= 3) u = 0.0;
+  if (time >= 1 & time < 2)
+  {
+    njump = 0;
+    u =  alpha * pow(2, njump + 1) * time - alpha * (1.0 + pow(2, njump + 1)
+         * (3.0 -
+            pow(2, -njump + 1)
+           )
+                                                    ) ;
+    printf("njump = %i\n", njump);
+    printf("time = %e\n", time);
+    //u =  -alpha*(1.0+pow(2,njump+1)*(3.0-1.0/(pow(2,njump-1))));
+    printf("u = %e\n", u);
+  }
+
+  if (time >= 2 & time < 3)
+  {
+    njump = int(log(1.0 / (3.0 - time)) / log(2.0)) + 1.0;
+    u =  alpha * pow(2, njump + 1) * time - alpha * (1.0 + pow(2, njump + 1)
+         * (3.0 -
+            pow(2, -njump + 1)
+           )
+                                                    ) ;
+    printf("njump = %i\n", njump);
+    printf("time = %e\n", time);
+    //u =  -alpha*(1.0+pow(2,njump+1)*(3.0-1.0/(pow(2,njump-1))));
+    printf("u = %e\n", u);
+  };
+
 
   return u;
 }
@@ -27,10 +100,10 @@ extern "C"   void computeU(double time, unsigned int sizeOfB, double* b, unsigne
 
   double u;
   u = computeControl(time);
-  b[0] = u ;
-  b[1] = 2.0 * u;
-  b[2] = u ;
-  b[3] = 2.0 * u;
+  b[0] = 0.1 * u ;
+  b[1] = 0.2 * u;
+  b[2] = 0.1 * u ;
+  b[3] = 0.2 * u;
 
 }
 

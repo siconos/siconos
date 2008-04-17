@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
     // == User-defined parameters ==
     unsigned int ndof = 4;  // number of degrees of freedom of your system
     double t0 = 0.0;
-    double T = 2;        // Total simulation time
+    double T = 25;        // Total simulation time
     double h = 1.0e-4;      // Time step
     double Vinit = 10.0;
     unsigned int noutput = 1;
@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
     (*A)(0, 1) = 1.0;
     (*A)(1, 0) = 3.0;
     (*A)(1, 1) = 1.0;
-
+    (*A) = 0.2 * (*A);
     SiconosMatrix * TildeA = new SimpleMatrix(ndof, ndof); // All components of A are automatically set to 0.
     (*TildeA)(0, 0) = (*A)(0, 0);
     (*TildeA)(0, 1) = (*A)(0, 1);
@@ -39,17 +39,13 @@ int main(int argc, char* argv[])
     SiconosMatrix * L = new SimpleMatrix(2, noutput);
     (*L)(0, 0) = 1.0;
     (*L)(1, 0) = 1.0;
+    (*L) = 0.2 * (*L);
     SiconosMatrix * G = new SimpleMatrix(noutput, 2);
     (*G)(0, 0) = 2.0;
     (*G)(0, 1) = 2.0;
 
     SiconosMatrix * hatA = new SimpleMatrix(2, 2);
-    //   (*hatA) = (*A)     -   prod(*L,*G);
-    (*hatA)(0, 0) = -1.0;
-    (*hatA)(0, 1) = -1.0;
-    (*hatA)(1, 0) = 1.0;
-    (*hatA)(1, 1) = -1.0;
-
+    (*hatA) = (*A)     -   prod(*L, *G);
     cout << "A-LG" << endl;
     hatA->display();
     (*TildeA)(2, 2) = (*hatA)(0, 0);
@@ -58,11 +54,12 @@ int main(int argc, char* argv[])
     (*TildeA)(3, 3) = (*hatA)(1, 1);
 
     SiconosMatrix * LG = new SimpleMatrix(2, 2);
-    // (*LG) =  prod(*L,*G);
-    (*TildeA)(2, 0) = 2.0;
-    (*TildeA)(3, 0) = 2.0;
-    (*TildeA)(2, 1) = 2.0;
-    (*TildeA)(3, 1) = 2.0;
+    (*LG) =  prod(*L, *G);
+    (*TildeA)(2, 0) = (*LG)(0, 0);
+    (*TildeA)(3, 0) = (*LG)(1, 0);
+    (*TildeA)(2, 1) = (*LG)(0, 1);
+    (*TildeA)(3, 1) = (*LG)(1, 1);
+
     TildeA-> display();
 
     SiconosVector * x0 = new SimpleVector(ndof);
@@ -95,7 +92,7 @@ int main(int argc, char* argv[])
     SiconosMatrix* D = new SimpleMatrix(ninter, ninter);
     (*D)(0, 0) = 1.0;
     (*D)(1, 1) = 1.0;
-    myProcessRelation->setDPtr(D);
+    //myProcessRelation->setDPtr(D);
     D->display();
     //return 0;
 
@@ -159,7 +156,7 @@ int main(int argc, char* argv[])
 
     int k = 0; // Current step
     int N = td->getNSteps(); // Number of time steps
-    unsigned int outputSize = 7; // number of required data
+    unsigned int outputSize = 8; // number of required data
     SimpleMatrix dataPlot(N, outputSize);
     SiconosVector * processLambda = myProcessInteraction->getLambdaPtr(0);
 
@@ -173,13 +170,16 @@ int main(int argc, char* argv[])
     dataPlot(k, 4) = (processObserver->getX())(3);
     dataPlot(k, 5) = (*processLambda)(0);
     dataPlot(k, 6) = (*processLambda)(1);
+    dataPlot(k, 7) = (processObserver->getB())(0);
+    boost::progress_display show_progress(N);
 
-
+    boost::timer time;
+    time.restart();
     // Simulation loop
     while (k < N - 1)
     {
       k++;
-      cout << "k = " << k << endl;
+
       s->nextStep();
       // get current time step
 
@@ -192,6 +192,9 @@ int main(int argc, char* argv[])
       dataPlot(k, 4) = (processObserver->getX())(3);
       dataPlot(k, 5) = (*processLambda)(0);
       dataPlot(k, 6) = (*processLambda)(1);
+      dataPlot(k, 7) = (processObserver->getB())(0);
+      ++show_progress;
+
     }
 
     // Write the results into the file "ObserverLCS.dat"
