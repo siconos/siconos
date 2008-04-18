@@ -21,15 +21,24 @@
 #include "SimpleVector.h"
 #include "ioMatrix.h"
 #include <boost/numeric/ublas/matrix_proxy.hpp>
-#include "boost/numeric/bindings/atlas/clapack.hpp"
 #include "boost/numeric/bindings/traits/ublas_matrix.hpp"
 #include "boost/numeric/bindings/atlas/cblas1.hpp"
 #include "boost/numeric/bindings/atlas/cblas2.hpp"
 #include "boost/numeric/bindings/atlas/cblas3.hpp"
+
+#ifdef HAVE_ATLAS
+#include "boost/numeric/bindings/atlas/clapack.hpp"
+namespace lapack = boost::numeric::bindings::atlas;
+#else
+#include "boost/numeric/bindings/lapack/lapack.hpp"
+namespace lapack = boost::numeric::bindings::lapack;
+#endif
+
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/ublas/operation.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
 #include <boost/numeric/ublas/operation_sparse.hpp>
+
 
 // =================================================
 //                CONSTRUCTORS
@@ -2408,7 +2417,7 @@ void SimpleMatrix::PLUFactorizationInPlace()
     ipiv = new std::vector<int>(dimRow);
   else
     ipiv->resize(dimRow);
-  int info = boost::numeric::bindings::atlas::getrf(*mat.Dense, *ipiv);
+  int info = lapack::getrf(*mat.Dense, *ipiv);
   if (info != 0)
   {
     isPLUFactorized = false;
@@ -2423,11 +2432,16 @@ void SimpleMatrix::PLUInverseInPlace()
   if (!isPLUFactorized)
     PLUFactorizationInPlace();
 
-  int info = boost::numeric::bindings::atlas::getri(*mat.Dense, *ipiv);   // solve from factorization
+#ifdef HAVE_ATLASE
+  int info = lapack::getri(*mat.Dense, *ipiv);   // solve from factorization
+
   if (info != 0)
     SiconosMatrixException::selfThrow("SimpleMatrix::PLUInverseInPlace failed, the matrix is singular.");
 
   isPLUInversed = true;
+#else
+  SiconosMatrixException::selfThrow("SimpleMatrix::PLUInverseInPlace not implemented with lapack.");
+#endif
 }
 
 void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
@@ -2442,12 +2456,12 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
       ipiv = new std::vector<int>(dimRow);
     else
       ipiv->resize(dimRow);
-    info = boost::numeric::bindings::atlas::gesv(*mat.Dense, *ipiv, *(B.getDensePtr()));
+    info = lapack::gesv(*mat.Dense, *ipiv, *(B.getDensePtr()));
     isPLUFactorized = true;
     // B now contains solution:
   }
   else // call getrs: only solve using previous lu-factorization
-    info = boost::numeric::bindings::atlas::getrs(*mat.Dense, *ipiv, *(B.getDensePtr()));
+    info = lapack::getrs(*mat.Dense, *ipiv, *(B.getDensePtr()));
 
   if (info != 0)
     SiconosMatrixException::selfThrow("SimpleMatrix::PLUForwardBackwardInPlace failed.");
@@ -2467,12 +2481,12 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
       ipiv = new std::vector<int>(dimRow);
     else
       ipiv->resize(dimRow);
-    info = boost::numeric::bindings::atlas::gesv(*mat.Dense, *ipiv, tmpB);
+    info = lapack::gesv(*mat.Dense, *ipiv, tmpB);
     isPLUFactorized = true;
     // B now contains solution:
   }
   else // call getrs: only solve using previous lu-factorization
-    info = boost::numeric::bindings::atlas::getrs(*mat.Dense, *ipiv, tmpB);
+    info = lapack::getrs(*mat.Dense, *ipiv, tmpB);
 
   if (info != 0)
     SiconosMatrixException::selfThrow("SimpleMatrix::PLUForwardBackwardInPlace failed.");
@@ -4878,8 +4892,8 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
               SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for MacOs.");
 #else
               ublas::matrix_range<SparseMat> subA(*A.getSparsePtr(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
-#endif
               noalias(subY) = ublas::prod(subA, subX);
+#endif
             }
             else //if(numA==5)
             {
