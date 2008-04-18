@@ -1384,7 +1384,7 @@ void SimpleMatrix::getSubRow(unsigned int r, unsigned int pos, SiconosVector *vO
       else if (num == 4)
       {
 #ifdef __APPLE__
-        RuntimeException("SimpleMatrix::getSubRow warning - ublas::matrix_vector_slice<SparseMat> does not exist for MacOS.");
+        SiconosMatrixException("SimpleMatrix::getSubRow warning - ublas::matrix_vector_slice<SparseMat> does not exist for MacOS.");
 #else
         noalias(*(vOut->getDensePtr())) = ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl));
 #endif
@@ -1397,7 +1397,7 @@ void SimpleMatrix::getSubRow(unsigned int r, unsigned int pos, SiconosVector *vO
       if (num == 4)
       {
 #ifdef __APPLE__
-        RuntimeException("SimpleMatrix::getSubRow warning - ublas::matrix_vector_slice<SparseMat> does not exist for MacOs.");
+        SiconosMatrixException("SimpleMatrix::getSubRow warning - ublas::matrix_vector_slice<SparseMat> does not exist for MacOs.");
 #else
         noalias(*(vOut->getSparsePtr())) = ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl));
 #endif
@@ -1448,7 +1448,7 @@ void SimpleMatrix::setSubRow(unsigned int r, unsigned int pos, SiconosVector *vI
     }
     else if (num == 4 && numV == 4)
 #ifdef __APPLE__
-      RuntimeException("SimpleMatrix::setSubRow warning - ublas::matrix_vector_slice<SparseMat> does not exist for MacOs.");
+      SiconosMatrixException("SimpleMatrix::setSubRow warning - ublas::matrix_vector_slice<SparseMat> does not exist for MacOs.");
 #else
       ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl)) = *vIn->getSparsePtr();
 #endif
@@ -1509,7 +1509,7 @@ void SimpleMatrix::getSubCol(unsigned int r, unsigned int pos, SiconosVector *vO
       else if (num == 4)
       {
 #ifdef __APPLE__
-        RuntimeException("SimpleMatrix::getSubCol warning - ublas::matrix_vector_slice<SparseMat> does not exist for MacOs.");
+        SiconosMatrixException("SimpleMatrix::getSubCol warning - ublas::matrix_vector_slice<SparseMat> does not exist for MacOs.");
 #else
         noalias(*(vOut->getDensePtr())) = ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl));
 #endif
@@ -1522,7 +1522,7 @@ void SimpleMatrix::getSubCol(unsigned int r, unsigned int pos, SiconosVector *vO
       if (num == 4)
       {
 #ifdef __APPLE__
-        RuntimeException("SimpleMatrix::getSubCol warning - ublas::matrix_vector_slice<SparseMat> does not exist for MacOs.");
+        SiconosMatrixException("SimpleMatrix::getSubCol warning - ublas::matrix_vector_slice<SparseMat> does not exist for MacOs.");
 #else
         noalias(*(vOut->getSparsePtr())) = ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl));
 #endif
@@ -1573,7 +1573,7 @@ void SimpleMatrix::setSubCol(unsigned int r, unsigned int pos, SiconosVector *vI
     }
     else if (num == 4 && numV == 4)
 #ifdef __APPLE__
-      RuntimeException("SimpleMatrix::setSubCol warning - ublas::matrix_vector_slice<SparseMat> does not exist for MacOs.");
+      SiconosMatrixException("SimpleMatrix::setSubCol warning - ublas::matrix_vector_slice<SparseMat> does not exist for MacOs.");
 #else
       ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl)) = *vIn->getSparsePtr();
 #endif
@@ -4875,7 +4875,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
             else if (numA == 4)
             {
 #ifdef __APPLE__
-              RuntimeException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for MacOs.");
+              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for MacOs.");
 #else
               ublas::matrix_range<SparseMat> subA(*A.getSparsePtr(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
 #endif
@@ -4914,7 +4914,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
             else if (numA == 4)
             {
 #ifdef __APPLE__
-              RuntimeException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for MacOs.");
+              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for MacOs.");
 #else
               ublas::matrix_range<SparseMat> subA(*A.getSparsePtr(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
 
@@ -4961,7 +4961,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
             else if (numA == 4)
             {
 #ifdef __APPLE__
-              RuntimeException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> and vector_range<SparseVect> does not exist for MacOs.");
+              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> and vector_range<SparseVect> does not exist for MacOs.");
 #else
               ublas::matrix_range<SparseMat> subA(*A.getSparsePtr(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               subY = ublas::prod(subA, subY);
@@ -4994,7 +4994,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
             else if (numA == 4)
             {
 #ifdef __APPLE__
-              RuntimeException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for MacOs.");
+              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for MacOs.");
 #else
               ublas::matrix_range<SparseMat> subA(*A.getSparsePtr(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               subY = ublas::prod(subA, subY);
@@ -5038,7 +5038,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
             else if (numA == 4)
             {
 #ifdef __APPLE__
-              RuntimeException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for MacOs.");
+              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for MacOs.");
 #else
               ublas::matrix_range<SparseMat> subA(*A.getSparsePtr(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               noalias(subY) += ublas::prod(subA, subX);
@@ -5077,7 +5077,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
             else if (numA == 4)
             {
 #ifdef __APPLE__
-              RuntimeException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for MacOs.");
+              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for MacOs.");
 #else
               ublas::matrix_range<SparseMat> subA(*A.getSparsePtr(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               if (numY == 1)
@@ -5123,7 +5123,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
             else if (numA == 4)
             {
 #ifdef __APPLE__
-              RuntimeException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for MacOs.");
+              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for MacOs.");
 #else
               ublas::matrix_range<SparseMat> subA(*A.getSparsePtr(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               subY += ublas::prod(subA, subY);
@@ -5156,7 +5156,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
             else if (numA == 4)
             {
 #ifdef __APPLE__
-              RuntimeException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for MacOs.");
+              SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for MacOs.");
 #else
               ublas::matrix_range<SparseMat> subA(*A.getSparsePtr(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               subY += ublas::prod(subA, subY);
