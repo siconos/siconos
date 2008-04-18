@@ -32,22 +32,22 @@ Registry& Registry::get()
   return instance;
 }
 
-void Registry::add(const string& name, object_creator creator)
+void Registry::add(int name, object_creator creator)
 {
   factory_map[name] = creator;
 }
 
-Event* Registry::instantiate(double time, const std::string& name)
+Event* Registry::instantiate(double time, int name)
 {
   MapFactoryIt it = factory_map.find(name) ;
 
   if (it == factory_map.end())
-    RuntimeException::selfThrow("Registry::instantiate (EventFactory) failed, no class named: " + name);
+    RuntimeException::selfThrow("Registry::instantiate (EventFactory) failed, no class with id: " + name);
 
   return (it->second)(time, name) ; // run our factory
 }
 
-Registration::Registration(const string& name, object_creator creator)
+Registration::Registration(int name, object_creator creator)
 {
   //cout << endl << "Registration of " << name << endl << endl ;
   Registry::get().add(name, creator) ;

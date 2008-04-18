@@ -20,6 +20,7 @@
 #include "TimeDiscretisationXML.h"
 #include "RuntimeException.h"
 #include "Model.h"
+#include "Tools.h"
 using namespace std;
 
 // PRIVATE METHODS
@@ -166,6 +167,7 @@ void TimeDiscretisation::initialize()
     double t0 = model->getT0();
     double T;
     double tol = 1e-12;
+    int tmp = 0;
     switch (tdCase)
     {
     case 1: // Given: tk, possibly T - Compute h, nSteps
@@ -214,11 +216,20 @@ void TimeDiscretisation::initialize()
       T  = model->getFinalT();
       nSteps = (unsigned int)ceil((T - t0) / h);
       // Compute tk
-      if (isTkAllocatedIn) delete tk;
+      if (isTkAllocatedIn)
+      {
+        delete tk;
+        cout << "TD free tk..." << TRM() << endl;
+      }
       tk = new SimpleVector(nSteps + 1);
+      cout << "TD build tk..." << TRM() << endl;
       isTkAllocatedIn = true;
       for (unsigned int i = 0; i < nSteps; i++)(*tk)(i) = t0 + i * h;
-      (*tk)(nSteps) = T;
+      {
+        (*tk)(nSteps) = T;
+        tmp += TRM();
+      }
+      cout << "TD fill tk..." << tmp << endl;
       break;
     default:
       RuntimeException::selfThrow("TimeDiscretisation::initialize - wrong scheme, wrong number of input data");

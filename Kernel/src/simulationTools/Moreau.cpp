@@ -21,8 +21,6 @@
 #include "Simulation.h"
 #include "Model.h"
 #include "NonSmoothDynamicalSystem.h"
-#include "TimeDiscretisation.h"
-
 #include "LagrangianLinearTIDS.h"
 #include "FirstOrderLinearTIDS.h"
 

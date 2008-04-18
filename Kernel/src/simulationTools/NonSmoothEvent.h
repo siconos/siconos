@@ -47,9 +47,9 @@ public:
 
   /** constructor with time value as a parameter
   *  \param a double
-  *  \param a string, type of Event
+  *  \param an int, type of Event
   */
-  NonSmoothEvent(double, const std::string&);
+  NonSmoothEvent(double, int);
 
   /** destructor
   */

@@ -98,7 +98,7 @@ void Actuator::initialize()
   // == Create Events linked to the present Actuator. ==
 
   EventsContainerIterator it; // to check if insertion succeed or not.
-  string type = "ActuatorEvent";
+  int type = 3;
 
   // Uses the events factory to insert the new event.
   EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;

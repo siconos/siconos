@@ -423,7 +423,7 @@ void EventDriven::advanceToEvent()
     {
       isNewEventOccur = true;
       // Add an event into the events manager list
-      eventsManager->scheduleEvent("NonSmoothEvent", tout);
+      eventsManager->scheduleEvent(2, tout);
       if (printStat)
         statOut << " -----------> New non-smooth event at time " << tout << endl;
     }

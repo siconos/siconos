@@ -25,12 +25,9 @@
 
 #include "SiconosConst.h"
 #include<gmp.h>
-#include<string>
 #include<iostream>
 
 class Simulation;
-
-const std::string DEFAULT_EVENT_TYPE = "undefined";
 
 // tick default value
 const double DEFAULT_TICK = 1e-16;
@@ -50,6 +47,13 @@ const double DEFAULT_TICK = 1e-16;
  * - NonSmoothEvent: specific events, detected during simulation, when constraints are violated (thanks to roots-finding algorithm)
  * - SensorEvent: event dedicated to data capture through user-defined sensors.
  *
+ *
+ * Existing types of events:
+ *  0 -> undef
+ *  1 -> TimeDiscretisation
+ *  2 -> NonSmooth
+ *  3 -> Actuator
+ *  4 -> Sensor
  */
 
 class Event
@@ -61,7 +65,7 @@ protected:
   mpz_t timeOfEvent;
 
   /** Id or type of the Event */
-  const std::string type;
+  const int type;
 
   /** Date of the present event,
    *  represented with a double */
@@ -82,9 +86,9 @@ public:
 
   /** constructor with time value and type as input
   *  \param double
-  *  \param a string
+  *  \param an int
   */
-  Event(double, const std::string & = DEFAULT_EVENT_TYPE);
+  Event(double, int = 0);
 
   /** destructor
    */
@@ -126,7 +130,7 @@ public:
   /** get a type of the present event
    *  \return an std::string
    */
-  inline const std::string getType() const
+  inline const int getType() const
   {
     return type ;
   };

@@ -51,7 +51,7 @@ public:
    *  \param a double
    *  \param a string, type of Event
    */
-  SensorEvent(double, const std::string&);
+  SensorEvent(double, int);
 
   /** destructor
   */

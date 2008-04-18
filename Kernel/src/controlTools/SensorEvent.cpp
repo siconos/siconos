@@ -23,10 +23,10 @@ using namespace std;
 using namespace EventFactory;
 
 // Default constructor
-SensorEvent::SensorEvent(): Event(0.0, "SensorEvent")
+SensorEvent::SensorEvent(): Event(0.0, 4)
 {}
 
-SensorEvent::SensorEvent(double time, const std::string& name): Event(time, name)
+SensorEvent::SensorEvent(double time, int name): Event(time, name)
 {}
 
 SensorEvent::~SensorEvent()
@@ -37,4 +37,4 @@ void SensorEvent::process(Simulation*)
   sensor->capture();
 }
 
-AUTO_REGISTER_EVENT("SensorEvent", SensorEvent);
+AUTO_REGISTER_EVENT(4, SensorEvent);

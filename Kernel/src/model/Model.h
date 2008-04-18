@@ -28,7 +28,6 @@
 class NonSmoothDynamicalSystem;
 class Simulation;
 class SiconosModelXML;
-class TimeDiscretisation;
 
 /** Objects that links the NonSmoothDynamicalSystem with its Simulation.
  *

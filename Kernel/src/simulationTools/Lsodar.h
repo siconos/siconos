@@ -28,7 +28,6 @@
 #include"SiconosNumerics.h"
 #include<vector>
 
-class TimeDiscretisation;
 class BlockVector;
 
 /** Lsodar solver (odepack)
@@ -51,17 +50,6 @@ class BlockVector;
 class Lsodar : public OneStepIntegrator
 {
 private:
-
-  /** The time discretisation, specific to Lsodar
-   *  This discretisation must include each time step of the simulation time
-   *  discretisation, plus all event detection time steps.
-   */
-  TimeDiscretisation *localTimeDiscretisation;
-
-  /** a bool to check whether localTimeDiscretisation
-   * has been allocated inside the current class or not
-   */
-  bool isLocalTimeDiscretisationAllocatedIn;
 
   /** neq, ng, itol, itask, istate, iopt, lrw, liw, jt
    * See opkdmain.f and lsodar routine for details on those variables.
@@ -107,19 +95,6 @@ public:
   /** destructor
    */
   ~Lsodar();
-
-  /** get the TimeDiscretisation of lsodar
-   *  \return the TimeDiscretisation
-   */
-  inline TimeDiscretisation* getTimeDiscretisationPtr() const
-  {
-    return localTimeDiscretisation;
-  };
-
-  /** set timeDiscretisation of lsodar
-   *  \param the TimeDiscretisation to set
-   */
-  void setTimeDiscretisationPtr(TimeDiscretisation*);
 
   /** get vector of integer parameters for lsodar
    *  \return a vector<integer>

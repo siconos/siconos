@@ -44,7 +44,7 @@ void Sensor::initialize()
   // == Create Events linked to the present Sensor. ==
 
   EventsContainerIterator it; // to check if insertion succeed or not.
-  string type = "SensorEvent";
+  int type = 4;
 
   // Uses the events factory to insert the new event.
   EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;

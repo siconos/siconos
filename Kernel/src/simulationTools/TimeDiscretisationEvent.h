@@ -43,9 +43,9 @@ public:
 
   /** constructor with time value as a parameter
   *  \param a double
-  *  \param a string, type of Event
+  *  \param an int, type of Event
   */
-  TimeDiscretisationEvent(double, const std::string&);
+  TimeDiscretisationEvent(double, int);
 
   /** destructor
   */

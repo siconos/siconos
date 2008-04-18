@@ -72,37 +72,32 @@ class EventsManager
 {
 protected:
 
-  /** list of events already processed.
-   *  At the end of the process, currentEvent is inserted in this set.
-   */
-  EventsContainer pastEvents;
-
   /** list of future, not processed, events.
    *  This list is not fixed and can be updated at any time
    *  depending on the simulation, user add ...
    *  The first event of this set is currentEvent, and the second is nextEvent.
    * ("first" and "second" defined according to event comparison operator)
    */
-  EventsContainer unProcessedEvents;
+  EventsContainer allEvents;
 
   /** Pointer to currentEvent, ie the simulation starting point.
-    * It correponds to the first object in unProcessedEvents.
+    * It correponds to the first object in allEvents.
     */
   Event * currentEvent;
 
   /** Pointer to nextEvent, ie the simulation ending point.
     * It correponds to the event following currentEvent and so
-    * to the second object in unProcessedEvents.
+    * to the second object in allEvents.
     */
   Event * nextEvent;
 
   /* link to the simulation that owns this manager*/
   Simulation * simulation;
 
-  /** add a new Event in the unProcessedEvents list
+  /** add a new Event in the allEvents list
   *  \return false if Event already exists
   */
-  const bool insertEvent(const std::string&, double);
+  const bool insertEvent(int, double);
 
   /** copy constructor => private: no copy nor pass-by-value.
    *  \param the eventsManager to be copied
@@ -124,29 +119,19 @@ public:
    */
   void initialize();
 
-  /** insert time discretisation into unProcessedEvents
+  /** insert time discretisation into allEvents
    * \param a pointer to the TimeDiscretisation object to schedule.
-   * \param a string, the type of Event associated to this discretisation.
+   * \param an int, the type of Event associated to this discretisation.
    */
-  void scheduleTimeDiscretisation(TimeDiscretisation*, const std::string&);
+  void scheduleTimeDiscretisation(TimeDiscretisation*, int);
 
-  /** add a set of Events into unProcessedEvents list
+  /** add a set of Events into allEvents list
    *  \param an EventsContainer
    *  \return a bool, false if insertion failed.
    */
   const bool insertEvents(const EventsContainer&);
 
-  // GETTERS/SETTERS
-
-  /** get the list of past Events
-  *  \return a set of Events*
-  */
-  inline const EventsContainer getPastEvents() const
-  {
-    return pastEvents ;
-  };
-
-  /* No setter for member pastEvents or unProcessedEvents-> depends on simulation and can not be set in another way.
+  /* No setter for member allEvents-> depends on simulation and can not be set in another way.
    * Moreover, only EventsManager can create new Events.
    */
 
@@ -155,7 +140,7 @@ public:
   */
   inline const EventsContainer getUnProcessedEvents() const
   {
-    return unProcessedEvents ;
+    return allEvents ;
   };
 
   /** get the event that occurs at time inputTime
@@ -208,12 +193,12 @@ public:
     simulation = str;
   }
 
-  /** check if event is present in past of unProcessedEvents list
+  /** check if event is present in allEvents list
   *  \return a bool
   */
   const bool hasEvent(Event*) const ;
 
-  /** check if some events remain in unProcessedEvents list
+  /** check if some events remain in allEvents list
   *  \return a bool
   */
   const bool hasNextEvent() const ;
@@ -237,10 +222,10 @@ public:
   */
   void display() const ;
 
-  /** add a new Event in the unProcessedEvents list and update nextEvent value
+  /** add a new Event in the allEvents list and update nextEvent value
   *  \return false if Event already exists
   */
-  const bool scheduleEvent(const std::string&, double);
+  const bool scheduleEvent(int, double);
 
   /** remove an Event from the unProcessed events list
   */

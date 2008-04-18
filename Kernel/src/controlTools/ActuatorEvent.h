@@ -51,7 +51,7 @@ public:
    *  \param a double
    *  \param a string, type of Event
    */
-  ActuatorEvent(double, const std::string&);
+  ActuatorEvent(double, int);
 
   /** destructor
    */

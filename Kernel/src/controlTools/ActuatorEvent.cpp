@@ -24,10 +24,10 @@ using namespace std;
 using namespace EventFactory;
 
 // Default constructor
-ActuatorEvent::ActuatorEvent(): Event(0.0, "ActuatorEvent")
+ActuatorEvent::ActuatorEvent(): Event(0.0, 3)
 {}
 
-ActuatorEvent::ActuatorEvent(double time, const std::string& name): Event(time, name)
+ActuatorEvent::ActuatorEvent(double time, int name): Event(time, name)
 {}
 
 ActuatorEvent::~ActuatorEvent()
@@ -38,4 +38,4 @@ void ActuatorEvent::process(Simulation*)
   actuator->actuate();
 }
 
-AUTO_REGISTER_EVENT("ActuatorEvent", ActuatorEvent);
+AUTO_REGISTER_EVENT(3, ActuatorEvent);

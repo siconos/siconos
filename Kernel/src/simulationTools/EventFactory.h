@@ -25,7 +25,6 @@
 #define EventFactory_H
 
 # include "Event.h"
-# include <string>
 # include <map>
 
 class Event;
@@ -35,16 +34,16 @@ namespace EventFactory
 {
 
 /** A pointer to function, returning a pointer to Event, built with its type (ie class name) and a pointer to Model.*/
-typedef Event* (*object_creator)(double, const std::string&);
+typedef Event* (*object_creator)(double, int);
 
 /** The type of the factory map */
-typedef std::map<const std::string, object_creator> MapFactory;
+typedef std::map<int, object_creator> MapFactory;
 
 /** An iterator through the MapFactory */
 typedef MapFactory::iterator MapFactoryIt;
 
 /** Template function to return a new object of type SubType*/
-template<class SubType> Event* factory(double time, const std::string& type)
+template<class SubType> Event* factory(double time, int type)
 {
   return new SubType(time, type);
 }
@@ -70,16 +69,16 @@ public :
   static Registry& get() ;
 
   /** Add an object_creator into the factory_map, factory_map[name] = object.
-   * \param a string, the name of the object added
+   * \param an int which identifies the type of the object added
    * \param an object creator
    */
-  void add(const std::string&, object_creator);
+  void add(int, object_creator);
 
   /**
    *  \param a double, time of Event
-   *  \param a string, type of Event
+   *  \param an int, type of Event
    */
-  Event* instantiate(double, const std::string&);
+  Event* instantiate(double, int);
 
 } ;
 
@@ -98,10 +97,10 @@ class Registration
 public :
 
   /** To register some new object into the factory
-   * \param a string, the name of the object to be registered
+   * \param an int which identifies the type of the object added
    * \param an object creator
    */
-  Registration(const std::string&, object_creator) ;
+  Registration(int, object_creator) ;
 } ;
 
 #define AUTO_REGISTER_EVENT(class_name,class_type) Registration _registration_## class_type(class_name,&factory<class_type>);

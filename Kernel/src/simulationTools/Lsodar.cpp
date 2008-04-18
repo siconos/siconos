@@ -20,7 +20,6 @@
 #include "Lsodar.h"
 #include "EventDriven.h"
 #include "LagrangianLinearTIDS.h"
-#include "TimeDiscretisation.h"
 #include "BlockVector.h"
 #include "NonSmoothDynamicalSystem.h"
 #include "Model.h"
@@ -53,24 +52,18 @@ extern "C" void Lsodar_jacobianF_wrapper(integer * sizeOfX, doublereal * time, d
 }
 
 Lsodar::Lsodar(OneStepIntegratorXML* osiXML, Simulation* newS):
-  OneStepIntegrator("Lsodar", osiXML, newS), localTimeDiscretisation(NULL), isLocalTimeDiscretisationAllocatedIn(false),
-  rtol(NULL), atol(NULL), rwork(NULL), iwork(NULL), jroot(NULL)
+  OneStepIntegrator("Lsodar", osiXML, newS), rtol(NULL), atol(NULL), rwork(NULL), iwork(NULL), jroot(NULL)
 {
   // local time discretisation is set by default to those of the simulation.
-  localTimeDiscretisation = simulationLink->getTimeDiscretisationPtr(); // warning: pointer link!
   intData.resize(9);
   sizeMem = 2;
 }
 
 Lsodar::Lsodar(DynamicalSystem* ds, Simulation* newS):
-  OneStepIntegrator("Lsodar", newS), localTimeDiscretisation(NULL), isLocalTimeDiscretisationAllocatedIn(false),
-  rtol(NULL), atol(NULL), rwork(NULL), iwork(NULL), jroot(NULL)
+  OneStepIntegrator("Lsodar", newS), rtol(NULL), atol(NULL), rwork(NULL), iwork(NULL), jroot(NULL)
 {
   if (simulationLink == NULL)
     RuntimeException::selfThrow("Lsodar:: constructor(ds,simulation) - simulation == NULL");
-
-  // local time discretisation is set by default to those of the simulation.
-  localTimeDiscretisation = simulationLink->getTimeDiscretisationPtr(); // warning: pointer link!
 
   // add ds in the set
   OSIDynamicalSystems->insert(ds);
@@ -80,14 +73,10 @@ Lsodar::Lsodar(DynamicalSystem* ds, Simulation* newS):
 }
 
 Lsodar::Lsodar(DynamicalSystemsSet& newDS, Simulation* newS):
-  OneStepIntegrator("Lsodar", newDS, newS), localTimeDiscretisation(NULL), isLocalTimeDiscretisationAllocatedIn(false),
-  rtol(NULL), atol(NULL), rwork(NULL), iwork(NULL), jroot(NULL)
+  OneStepIntegrator("Lsodar", newDS, newS), rtol(NULL), atol(NULL), rwork(NULL), iwork(NULL), jroot(NULL)
 {
   if (simulationLink == NULL)
     RuntimeException::selfThrow("Lsodar:: constructor(DSSet,simulation) - simulation == NULL");
-
-  // local time discretisation is set by default to those of the simulation.
-  localTimeDiscretisation = simulationLink->getTimeDiscretisationPtr(); // warning: pointer link!
 
   intData.resize(9);
   sizeMem = 2;
@@ -96,9 +85,6 @@ Lsodar::Lsodar(DynamicalSystemsSet& newDS, Simulation* newS):
 Lsodar::~Lsodar()
 {
   global_object = NULL;
-  if (isLocalTimeDiscretisationAllocatedIn) delete localTimeDiscretisation;
-  localTimeDiscretisation = NULL;
-
   if (rtol != NULL) delete rtol;
   rtol = NULL;
   if (atol != NULL) delete atol;
@@ -109,13 +95,6 @@ Lsodar::~Lsodar()
   if (iwork != NULL) delete iwork;
   iwork = NULL;
   if (xWork != NULL) delete xWork;
-}
-
-void Lsodar::setTimeDiscretisationPtr(TimeDiscretisation* td)
-{
-  if (isLocalTimeDiscretisationAllocatedIn) delete localTimeDiscretisation;
-  localTimeDiscretisation = td;
-  isLocalTimeDiscretisationAllocatedIn = false;
 }
 
 void Lsodar::setTol(integer newItol, doublereal* newRtol, doublereal* newAtol)
