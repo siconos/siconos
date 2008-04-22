@@ -384,6 +384,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
   mlcpOptions.dSize = 6;
   mlcpOptions.dparam[0] = 1e-12;
   mlcpOptions.dparam[5] = 1e-12;
+  mlcpOptions.dparam[6] = 1e-12;
   int aux = mlcp_direct_enum_getNbDWork(problem, &mlcpOptions);
   double * daux = (double*)malloc(aux * sizeof(double));
   mlcpOptions.dWork = daux;
@@ -392,13 +393,18 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
   mlcpOptions.iWork = iaux;
 
   mlcp_direct_enum_init(problem, &mlcpOptions);
-
+  printf("Solver direct, precompute solution.\n");
   info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
-  startTimer();
-  info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
-  stopTimer();
-  summary[itest].times[DIRECT_ENUM_ID] = sDt.mCumul;
-  strcpy(summary[itest].cv[DIRECT_ENUM_ID], "CV");
+  if (info == 0)
+  {
+    printf("Solver direct, solution computed. ");
+    printf("Now, run direct solver.\n");
+    startTimer();
+    info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+    stopTimer();
+    summary[itest].times[DIRECT_ENUM_ID] = sDt.mCumul;
+    strcpy(summary[itest].cv[DIRECT_ENUM_ID], "CV");
+  }
   if (info > 0)
   {
     printf("Can't find a solution\n");

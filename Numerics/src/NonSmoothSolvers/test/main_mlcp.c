@@ -149,8 +149,8 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
   int _ID = PSOR_05_ID - 1;
 
 
-  mlcpOptions.iparam = (int*)malloc(5 * sizeof(int));
-  mlcpOptions.dparam = (double*)malloc(5 * sizeof(double));
+  mlcpOptions.iparam = (int*)malloc(10 * sizeof(int));
+  mlcpOptions.dparam = (double*)malloc(10 * sizeof(double));
 
   /*SOLVER ENUM*/
   solTozw(n, m, z, w, sol);

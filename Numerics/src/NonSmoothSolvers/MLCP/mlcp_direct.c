@@ -34,10 +34,12 @@ dim(v)=nn
 #include "mlcp_direct.h"
 #include "mlcp_tool.h"
 
+#define DIRECT_SOLVER_USE_DGETRI
+double * sVBuf;
 
 struct dataComplementarityConf
 {
-  int * zw; /*zw[i] == 0 if w null and z >=0*/
+  int * zw; /*zw[i] == 0 means w null and z >=0*/
   double * M;
   struct dataComplementarityConf * next;
   struct dataComplementarityConf * prev;
@@ -78,7 +80,7 @@ int mlcp_direct_getNbIWork(MixedLinearComplementarity_Problem* problem, Solver_O
 }
 int mlcp_direct_getNbDWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
 {
-  return  problem->n + problem->m + (options->iparam[5]) * (problem->n + problem->m) * (problem->n + problem->m);
+  return  problem->n + problem->m + (options->iparam[5]) * ((problem->n + problem->m) * (problem->n + problem->m)) + (problem->n + problem->m);
 }
 
 /*
@@ -100,11 +102,14 @@ void mlcp_direct_init(MixedLinearComplementarity_Problem* problem, Solver_Option
   sTolpos = options->dparam[6];
   sN = problem->n;
   sM = problem->m;
+  if (sVerbose) printf("n= %d  m= %d /n sTolneg= %lf sTolpos= %lf \n", sN, sM, sTolneg, sTolpos);
+
   sNpM = sN + sM;
   spCurCC = 0;
   spFirstCC = 0;
   sNumberOfCC = 0;
   sQ = mydMalloc(sNpM);
+  sVBuf = mydMalloc(sNpM);
   spIntBuf = myiMalloc(sNpM);
 }
 void mlcp_direct_reset()
@@ -148,6 +153,14 @@ int internalAddConfig(MixedLinearComplementarity_Problem* problem, int * zw, int
     printf("mlcp_direct error, LU impossible\n");
     return 0;
   }
+#ifdef DIRECT_SOLVER_USE_DGETRI
+  DGETRI(sNpM, spFirstCC->M, sNpM, spFirstCC->IPV, INFO);
+  if (INFO)
+  {
+    printf("mlcp_direct error, DGETRI impossible\n");
+    return 0;
+  }
+#endif
   return 1;
 }
 /*memory management about dataComplementarityConf*/
@@ -207,10 +220,21 @@ int solveWithCurConfig(MixedLinearComplementarity_Problem* problem)
 {
   int one = 1;
   int lin;
-  int INFO;
+  int INFO = 0;
+  double ALPHA = 1;
+  double BETA = 0;
+  int INCX = 1;
+  int INCY = 1;
+  double * solTest = 0;
+#ifdef DIRECT_SOLVER_USE_DGETRI
+  DGEMV(LA_NOTRANS, sNpM, sNpM, ALPHA, spCurCC->M, sNpM, sQ, INCX, BETA, sVBuf, INCY);
+  solTest = sVBuf;
+#else
   for (lin = 0; lin < sNpM; lin++)
     sQ[lin] =  - problem->q[lin];
   DGETRS(LA_NOTRANS, sNpM, one, spCurCC->M, sNpM, spCurCC->IPV, sQ, sNpM, INFO);
+  solTest = sQ;
+#endif
   if (INFO)
   {
     if (sVerbose)
@@ -221,7 +245,7 @@ int solveWithCurConfig(MixedLinearComplementarity_Problem* problem)
   {
     for (lin = 0 ; lin < sM; lin++)
     {
-      if (sQ[sN + lin] < - sTolneg)
+      if (solTest[sN + lin] < - sTolneg)
       {
         if (sVerbose)
           printf("solveWithCurConfig Sol not in the positive cone\n");
@@ -248,6 +272,7 @@ int solveWithCurConfig(MixedLinearComplementarity_Problem* problem)
 void mlcp_direct(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {
   int find = 0;
+  int lin = 0;
   if (!spFirstCC)
   {
     (*info) = 1;
@@ -255,12 +280,20 @@ void mlcp_direct(MixedLinearComplementarity_Problem* problem, double *z, double 
   else
   {
     spCurCC = spFirstCC;
+#ifdef DIRECT_SOLVER_USE_DGETRI
+    for (lin = 0; lin < sNpM; lin++)
+      sQ[lin] =  - problem->q[lin];
+#endif
     do
     {
       find = solveWithCurConfig(problem);
       if (find)
       {
+#ifdef DIRECT_SOLVER_USE_DGETRI
+        mlcp_fillSolution(z, z + sN, w, w + sN, sN, sM, spCurCC->zw, sVBuf);
+#else
         mlcp_fillSolution(z, z + sN, w, w + sN, sN, sM, spCurCC->zw, sQ);
+#endif
         /*Current becomes forst for the next step.*/
         if (spCurCC != spFirstCC)
         {
