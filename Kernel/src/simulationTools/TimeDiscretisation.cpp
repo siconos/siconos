@@ -219,17 +219,17 @@ void TimeDiscretisation::initialize()
       if (isTkAllocatedIn)
       {
         delete tk;
-        cout << "TD free tk..." << TRM() << endl;
+        //        cout << "TD free tk..." << TRM() << endl;
       }
       tk = new SimpleVector(nSteps + 1);
-      cout << "TD build tk..." << TRM() << endl;
+      //cout << "TD build tk..." << TRM() << endl;
       isTkAllocatedIn = true;
       for (unsigned int i = 0; i < nSteps; i++)(*tk)(i) = t0 + i * h;
       {
         (*tk)(nSteps) = T;
-        tmp += TRM();
+        //tmp += TRM();
       }
-      cout << "TD fill tk..." << tmp << endl;
+      //cout << "TD fill tk..." << tmp << endl;
       break;
     default:
       RuntimeException::selfThrow("TimeDiscretisation::initialize - wrong scheme, wrong number of input data");
