@@ -58,6 +58,7 @@ Other functions and useful tools related to NonSmoothSolvers are listed in NSSTo
 #include "MLCP_Solvers.h"
 #include "FrictionContact2D_Solvers.h"
 #include "FrictionContact3D_Solvers.h"
+#include "PrimalFrictionContact3D_Solvers.h"
 #include "pfc_3D_Solvers.h"
 #include "NonSmoothNewton.h"
 
