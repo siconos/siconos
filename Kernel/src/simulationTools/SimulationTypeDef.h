@@ -119,6 +119,12 @@ typedef MapOfUnitaryMapOfDSMatrices::const_iterator ConstUnitaryDSMatrixRowItera
 /** Map of map of bools, with UnitaryRelations as keys */
 typedef std::map< UnitaryRelation* , std::map<UnitaryRelation*, bool> >  MapOfMapOfUnitaryBool;
 
+/** Map of map of bools, with UnitaryRelations as keys */
+typedef std::map< UnitaryRelation* , MapOfDSBool >  MapOfUnitaryMapOfDSBool;
+
+/** Map of map of bools, with UnitaryRelations as keys */
+typedef std::map< DynamicalSystem* , std::map<UnitaryRelation*, bool> >  MapOfDSMapOfUnitaryBool;
+
 /** Vector that contains a sequel of sets of UnitaryRelations*/
 typedef std::vector< UnitaryRelationsSet* > VectorOfSetOfUnitaryRelations;
 

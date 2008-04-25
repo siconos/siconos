@@ -112,16 +112,16 @@ protected:
 
   /** inside-class allocation flags. To each couple of Unitary Relations corresponds a bool, true if
       the unitaryDSBlock has been allocated in OneStepNSProblem, else false. */
-  MapOfMapOfUnitaryBool isUnitaryDSBlockAllocatedIn;
+  MapOfUnitaryMapOfDSBool isUnitaryDSBlockAllocatedIn;
 
   /** map that links each DynamicalSystem and UnitaryRelation with the corresponding DSunitaryBlocks
       map < DynamicalSystemA * , map < UnitaryRelationB* , DSunitaryBlockMatrixAB > >
       Dynamical A and UnitaryRelation B are coupled through DSunitaryBlockMatrixAB.  */
-  MapOfDSMapOfUnitaryMatrices DSunitaryBlocks;
+  MapOfDSMapOfUnitaryMatrices DSUnitaryBlocks;
 
   /** inside-class allocation flags. To each couple of Unitary Relations corresponds a bool, true if
       the DSunitaryBlock has been allocated in OneStepNSProblem, else false. */
-  MapOfMapOfUnitaryBool isDSUnitaryBlockAllocatedIn;
+  MapOfDSMapOfUnitaryBool isDSUnitaryBlockAllocatedIn;
 
   /** Solver for Non Smooth Problem*/
   NonSmoothSolver* solver;
@@ -314,8 +314,8 @@ public:
    */
   SiconosMatrix* getUnitaryDSBlockPtr(UnitaryRelation*, DynamicalSystem*) const ;
 
-  /** set the map of unitary matrices
-   *  \param a MapOfMapOfUnitaryMatrices
+  /** set the map of unitaryDS matrices
+   *  \param a MapOfUnitaryMapOfDSMatrices
    */
   void setUnitaryDSBlocks(const MapOfUnitaryMapOfDSMatrices&);
 
@@ -323,8 +323,29 @@ public:
    */
   void clearUnitaryDSBlocks();
 
+  /** get the DSunitaryBlocks matrices map
+    *  \return a MapOfDSMapOfUnitaryMatrices
+    */
+  inline const MapOfDSMapOfUnitaryMatrices getDSUnitaryBlocks() const
+  {
+    return DSUnitaryBlocks;
+  };
 
+  /** get the DSunitaryBlock corresponding to DS1 and UR2
+   *  \param a pointer to UnitaryRelation, UR2
+   *  \param a pointer to DynamicalSystem DS1
+   *  \return a pointer to SiconosMatrix
+   */
+  SiconosMatrix* getDSUnitaryBlockPtr(DynamicalSystem*, UnitaryRelation*) const ;
 
+  /** set the map of DSUnitary matrices
+   *  \param a MapOfDSMapOfUnitaryMatrices
+   */
+  void setDSUnitaryBlocks(const MapOfDSMapOfUnitaryMatrices&);
+
+  /** clear the map of unitaryBlocks (ie release memory)
+   */
+  void clearDSUnitaryBlocks();
 
   /** get the NonSmoothSolver
    *  \return a pointer on NonSmoothSolver
@@ -464,8 +485,59 @@ public:
    */
   virtual void computeUnitaryBlock(UnitaryRelation*, UnitaryRelation*);
 
-  /** initialize the problem(compute topology ...)
+  /** compute DSBlocks if necessary (this depends on the type of OSNS, on the indexSets ...)
+  */
+  void updateDSBlocks();
+
+  /** computes all  DSBlock-matrices
    */
+  void computeAllDSBlocks();
+
+  /** computes DSBlock-matrix that corresponds to DS1
+   *  Move this to Unitary Relation class?
+   *  \param a pointer to DynamicalSystem DS1
+   */
+  virtual void computeDSBlock(DynamicalSystem*);
+
+
+  /** compute UnitaryDSBlocks if necessary (this depends on the type of OSNS, on the indexSets ...)
+  */
+  void updateUnitaryDSBlocks();
+
+  /** computes all unitaryDSBlock-matrices
+   */
+  void computeAllUnitaryDSBlocks();
+
+  /** computes  unitaryBlock-matrix that corresponds to UR1 and DS2
+   *  Move this to Unitary Relation class?
+   *  \param a pointer to UnitaryRelation UR1
+   *  \param a pointer to DynamicalSystems DS2
+   */
+  virtual void computeUnitaryDSBlock(UnitaryRelation* , DynamicalSystem*);
+
+
+  /** compute DSUnitaryBlocks if necessary (this depends on the type of OSNS, on the indexSets ...)
+  */
+  void updateDSUnitaryBlocks();
+
+  /** computes all DSunitaryBlock-matrices
+   */
+  void computeAllDSUnitaryBlocks();
+
+  /** computes  DSUnitaryBlock-matrix that corresponds to UR1 and DS2
+   *  Move this to Unitary Relation class?
+   *  \param a pointer to UnitaryRelation UR1
+   *  \param a pointer to DynamicalSystems DS2
+   */
+  virtual void computeDSUnitaryBlock(DynamicalSystem*, UnitaryRelation*);
+
+
+
+
+
+
+  /** initialize the problem(compute topology ...)
+    */
   virtual void initialize();
 
   /** save Interactions states in Memory
