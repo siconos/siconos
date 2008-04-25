@@ -58,8 +58,8 @@ void NonSmoothEvent::process(Simulation* simulation)
     if (!(commonSet).isEmpty())
     {
 
-      // For Event-Driven algo., memories vectors are of size 2 (ie 2 blocks).
-      // First block (pos 0, last in) for post-event values and last block (pos 1, first in) for
+      // For Event-Driven algo., memories vectors are of size 2 (ie 2 unitaryBlocks).
+      // First unitaryBlock (pos 0, last in) for post-event values and last unitaryBlock (pos 1, first in) for
       // pre-event values.
 
       simulation->saveInMemory();  // To save pre-impact values

@@ -102,7 +102,7 @@ OneStepNSProblem::~OneStepNSProblem()
   solver = NULL;
   simulation = NULL;
   onestepnspbxml = NULL;
-  clearBlocks();
+  clearUnitaryBlocks();
   OSNSInteractions->clear();
   OSNSInteractions = NULL;
   delete numerics_options;
@@ -111,16 +111,16 @@ OneStepNSProblem::~OneStepNSProblem()
 
 SiconosMatrix* OneStepNSProblem::getBlockPtr(UnitaryRelation* UR1, UnitaryRelation* UR2) const
 {
-  // if UR2 is not given or NULL, UR2=UR1, ie we get the diagonal block.
+  // if UR2 is not given or NULL, UR2=UR1, ie we get the diagonal unitaryBlock.
   if (UR2 == NULL) UR2 = UR1;
 
-  ConstUnitaryMatrixRowIterator itRow = blocks.find(UR1);
-  // itRow: we get the map of blocks that corresponds to UR1.
-  // Then, thanks to itCol, we iterate through this map to find UR2 and the block that corresonds to UR1 and UR2
+  ConstUnitaryMatrixRowIterator itRow = unitaryBlocks.find(UR1);
+  // itRow: we get the map of unitaryBlocks that corresponds to UR1.
+  // Then, thanks to itCol, we iterate through this map to find UR2 and the unitaryBlock that corresonds to UR1 and UR2
   ConstUnitaryMatrixColumnIterator itCol = (itRow->second).find(UR2);
 
   if (itCol == (itRow->second).end()) // if UR1 and UR2 are not connected
-    RuntimeException::selfThrow("OneStepNSProblem - getBlockPtr(UR1,UR2) : no block corresonds to UR1 and UR2, ie the Unitary Relations are not connected.");
+    RuntimeException::selfThrow("OneStepNSProblem - getBlockPtr(UR1,UR2) : no unitaryBlock corresonds to UR1 and UR2, ie the Unitary Relations are not connected.");
 
   return itCol->second;
 
@@ -128,32 +128,32 @@ SiconosMatrix* OneStepNSProblem::getBlockPtr(UnitaryRelation* UR1, UnitaryRelati
 
 void OneStepNSProblem::setBlocks(const MapOfMapOfUnitaryMatrices& newMap)
 {
-  //   clearBlocks();
-  //   blocks = newMap;
+  //   clearUnitaryBlocks();
+  //   unitaryBlocks = newMap;
   //   UnitaryMatrixRowIterator itRow;
   //   UnitaryMatrixColumnIterator itCol;
-  //   for(itRow = blocks.begin(); itRow!= blocks.end() ; ++itRow)
+  //   for(itRow = unitaryBlocks.begin(); itRow!= unitaryBlocks.end() ; ++itRow)
   //     {
   //       for(itCol = (itRow->second).begin(); itCol!=(itRow->second).end(); ++itCol)
-  //  isBlockAllocatedIn[itRow->first][itCol->first] = false;
+  //  isUnitaryBlockAllocatedIn[itRow->first][itCol->first] = false;
   //     }
   RuntimeException::selfThrow("OneStepNSProblem::setBlocks - Not implemented: forbidden operation.");
 }
 
-void OneStepNSProblem::clearBlocks()
+void OneStepNSProblem::clearUnitaryBlocks()
 {
   UnitaryMatrixRowIterator itRow;
   UnitaryMatrixColumnIterator itCol;
-  for (itRow = blocks.begin(); itRow != blocks.end() ; ++itRow)
+  for (itRow = unitaryBlocks.begin(); itRow != unitaryBlocks.end() ; ++itRow)
   {
     for (itCol = (itRow->second).begin(); itCol != (itRow->second).end(); ++itCol)
     {
-      if (isBlockAllocatedIn[itRow->first][itCol->first])
-        delete blocks[itRow->first][itCol->first];
+      if (isUnitaryBlockAllocatedIn[itRow->first][itCol->first])
+        delete unitaryBlocks[itRow->first][itCol->first];
     }
   }
-  blocks.clear();
-  isBlockAllocatedIn.clear();
+  unitaryBlocks.clear();
+  isUnitaryBlockAllocatedIn.clear();
 }
 
 void OneStepNSProblem::setNonSmoothSolverPtr(NonSmoothSolver * newSolv)
@@ -163,23 +163,23 @@ void OneStepNSProblem::setNonSmoothSolverPtr(NonSmoothSolver * newSolv)
   isSolverAllocatedIn = false;
 }
 
-void OneStepNSProblem::updateBlocks()
+void OneStepNSProblem::updateUnitaryBlocks()
 {
-  // The present functions checks various conditions and possibly compute blocks matrices.
+  // The present functions checks various conditions and possibly compute unitaryBlocks matrices.
   //
   // Let URi and URj be two Unitary Relations.
   //
   // Things to be checked are:
   //  1 - is the topology time invariant?
-  //  2 - does blocks[URi][URj] already exists (ie has been computed in a previous time step)?
-  //  3 - do we need to compute this block? A block is to be computed if URi and URj are in IndexSet1 AND if URi and URj have common DynamicalSystems.
+  //  2 - does unitaryBlocks[URi][URj] already exists (ie has been computed in a previous time step)?
+  //  3 - do we need to compute this unitaryBlock? A unitaryBlock is to be computed if URi and URj are in IndexSet1 AND if URi and URj have common DynamicalSystems.
   //
   // The possible cases are:
   //
   //  - If 1 and 2 are true then it does nothing. 3 is not checked.
   //  - If 1 == true, 2 == false, 3 == false, it does nothing.
-  //  - If 1 == true, 2 == false, 3 == true, it computes the block.
-  //  - If 1==false, 2 is not checked, and the block is computed if 3==true.
+  //  - If 1 == true, 2 == false, 3 == true, it computes the unitaryBlock.
+  //  - If 1==false, 2 is not checked, and the unitaryBlock is computed if 3==true.
   //
   UnitaryRelationsSet * indexSet;
   bool isTimeInvariant;
@@ -194,21 +194,21 @@ void OneStepNSProblem::updateBlocks()
     for (itUR2 = indexSet->begin(); itUR2 != indexSet->end(); ++itUR2)
     {
       if (!isTimeInvariant)
-        computeBlock(*itUR1, *itUR2);
+        computeUnitaryBlock(*itUR1, *itUR2);
       else // if(isTimeInvariant)
       {
-        if ((blocks.find(*itUR1)) != blocks.end())  // if blocks[UR1] exists
+        if ((unitaryBlocks.find(*itUR1)) != unitaryBlocks.end())  // if unitaryBlocks[UR1] exists
         {
-          if ((blocks[*itUR1].find(*itUR2)) == (blocks[*itUR1].end()))   // if blocks[UR1][UR2] does not exist
-            computeBlock(*itUR1, *itUR2);
+          if ((unitaryBlocks[*itUR1].find(*itUR2)) == (unitaryBlocks[*itUR1].end()))   // if unitaryBlocks[UR1][UR2] does not exist
+            computeUnitaryBlock(*itUR1, *itUR2);
         }
-        else computeBlock(*itUR1, *itUR2);
+        else computeUnitaryBlock(*itUR1, *itUR2);
       }
     }
   }
 }
 
-void OneStepNSProblem::computeAllBlocks()
+void OneStepNSProblem::computeAllUnitaryBlocks()
 {
   UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(0);
 
@@ -218,13 +218,13 @@ void OneStepNSProblem::computeAllBlocks()
   for (itUR1 = indexSet->begin(); itUR1 != indexSet->end(); ++itUR1)
   {
     for (itUR2 = indexSet->begin(); itUR2 != indexSet->end(); ++itUR2)
-      computeBlock(*itUR1, *itUR2);
+      computeUnitaryBlock(*itUR1, *itUR2);
   }
 }
 
-void OneStepNSProblem::computeBlock(UnitaryRelation*, UnitaryRelation*)
+void OneStepNSProblem::computeUnitaryBlock(UnitaryRelation*, UnitaryRelation*)
 {
-  RuntimeException::selfThrow("OneStepNSProblem::computeBlock - not yet implemented for problem type =" + nspbType);
+  RuntimeException::selfThrow("OneStepNSProblem::computeUnitaryBlock - not yet implemented for problem type =" + nspbType);
 }
 
 void OneStepNSProblem::initialize()
@@ -237,7 +237,7 @@ void OneStepNSProblem::initialize()
     //RuntimeException::selfThrow("OneStepNSProblem::initialize - The set of Interactions of this problem is empty.");
     cout << "Warning, OneStepNSProblem::initialize, the set of Interactions of this problem is empty." << endl;
   else
-    updateBlocks();
+    updateUnitaryBlocks();
 
   Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
   // The maximum size of the problem (for example, the dim. of M in LCP or Friction problems).
@@ -272,7 +272,7 @@ void OneStepNSProblem::saveNSProblemToXML()
   RuntimeException::selfThrow("OneStepNSProblem::saveNSProblemToXML - Not yet implemented");
 }
 
-void OneStepNSProblem::getOSIMaps(UnitaryRelation* UR, MapOfDSMatrices& centralBlocks, MapOfDouble& Theta)
+void OneStepNSProblem::getOSIMaps(UnitaryRelation* UR, MapOfDSMatrices& centralUnitaryBlocks, MapOfDouble& Theta)
 {
   // === OSI = MOREAU : gets W matrices and scalar Theta of each DS concerned by the UnitaryRelation ===
   // === OSI = LSODAR : gets M matrices of each DS concerned by the UnitaryRelation, Theta remains empty ===
@@ -287,7 +287,7 @@ void OneStepNSProblem::getOSIMaps(UnitaryRelation* UR, MapOfDSMatrices& centralB
     osiType = Osi->getType();
     if (osiType == "Moreau")
     {
-      centralBlocks[*itDS] = (static_cast<Moreau*>(Osi))->getWPtr(*itDS);  // get its W matrix ( pointer link!)
+      centralUnitaryBlocks[*itDS] = (static_cast<Moreau*>(Osi))->getWPtr(*itDS);  // get its W matrix ( pointer link!)
       Theta[*itDS] = (static_cast<Moreau*>(Osi))->getTheta(*itDS);
     }
     else if (osiType == "Lsodar") // Warning: LagrangianDS only at the time !!!
@@ -297,7 +297,7 @@ void OneStepNSProblem::getOSIMaps(UnitaryRelation* UR, MapOfDSMatrices& centralB
         RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for Lsodar Integrator with dynamical system of type " + dsType);
 
       // get lu-factorized mass
-      centralBlocks[*itDS] = (static_cast<LagrangianDS*>(*itDS))->getMassLUPtr();
+      centralUnitaryBlocks[*itDS] = (static_cast<LagrangianDS*>(*itDS))->getMassLUPtr();
     }
     else
       RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for Integrator of type " + osiType);

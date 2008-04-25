@@ -318,7 +318,7 @@ void PrimalFrictionContact::initialize()
   //  // get topology
   //   Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
-  //   // Note that blocks is up to date since updateBlocks has been called during OneStepNSProblem::initialize()
+  //   // Note that unitaryBlocks is up to date since updateUnitaryBlocks has been called during OneStepNSProblem::initialize()
 
   //   // Fill vector of friction coefficients
   //   UnitaryRelationsSet* I0 = topology->getIndexSet0Ptr();
@@ -337,7 +337,7 @@ void PrimalFrictionContact::initialize()
   //       osiType = Osi->getType();
   //       if(osiType == "Moreau")
   //  {
-  //    centralBlocks[*itDS] = (static_cast<Moreau*> (Osi))->getWPtr(*itDS); // get its W matrix ( pointer link!)
+  //    centralUnitaryBlocks[*itDS] = (static_cast<Moreau*> (Osi))->getWPtr(*itDS); // get its W matrix ( pointer link!)
   //    Theta[*itDS] = (static_cast<Moreau*> (Osi))->getTheta(*itDS);
   //  }
   //       else
@@ -350,14 +350,14 @@ void PrimalFrictionContact::initialize()
   //       if(M==NULL)
   //  {
   //    // Creates and fills M using UR of indexSet
-  //          //    M = new OSNSMatrix(indexSet,blocks,MStorageType);
-  //      M = new OSNSMatrix(allDS,blocks,MStorageType);
+  //          //    M = new OSNSMatrix(indexSet,unitaryBlocks,MStorageType);
+  //      M = new OSNSMatrix(allDS,unitaryBlocks,MStorageType);
   //      isMAllocatedIn = true;
   //  }
   //       else
   //  {
   //    M->setStorageType(MStorageType);
-  //    M->fill(allDS,blocks);
+  //    M->fill(allDS,unitaryBlocks);
   //  }
 
   //       for(ConstUnitaryRelationsIterator itUR = indexSet->begin(); itUR!=indexSet->end(); ++itUR) {
@@ -379,17 +379,17 @@ void PrimalFrictionContact::initialize()
   //  {
   //    if(MStorageType == 0)
   //      M = new OSNSMatrix(maxSize,0);
-  //    else // if(MStorageType == 1) size = number of blocks = number of UR in the largest considered indexSet
+  //    else // if(MStorageType == 1) size = number of unitaryBlocks = number of UR in the largest considered indexSet
   //      M = new OSNSMatrix(simulation->getIndexSetPtr(levelMin)->size(),1);
   //    isMAllocatedIn = true;
   //  }
   //     }
 }
 
-void PrimalFrictionContact::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
+void PrimalFrictionContact::computeUnitaryBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
 {
-  // Computes matrix blocks[UR1][UR2] (and allocates memory if necessary) if UR1 and UR2 have commond DynamicalSystem.
-  // How blocks are computed depends explicitely on the type of Relation of each UR.
+  // Computes matrix unitaryBlocks[UR1][UR2] (and allocates memory if necessary) if UR1 and UR2 have commond DynamicalSystem.
+  // How unitaryBlocks are computed depends explicitely on the type of Relation of each UR.
 
   // Warning: we suppose that at this point, all non linear operators (G for lagrangian relation for example) have been computed through plug-in mechanism.
   // Get DS common between UR1 and UR2
@@ -399,12 +399,12 @@ void PrimalFrictionContact::computeBlock(UnitaryRelation* UR1, UnitaryRelation* 
   if (!commonDS.isEmpty()) // Nothing to be done if there are no common DS between the two UR.
   {
 
-    // Get dimension of the NonSmoothLaw (ie dim of the block)
+    // Get dimension of the NonSmoothLaw (ie dim of the unitaryBlock)
     unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
     unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
     // Check allocation
-    if (blocks[UR1][UR2] == NULL)
-      blocks[UR1][UR2] = new SimpleMatrix(nslawSize1, nslawSize2);
+    if (unitaryBlocks[UR1][UR2] == NULL)
+      unitaryBlocks[UR1][UR2] = new SimpleMatrix(nslawSize1, nslawSize2);
 
     // Get DS common between UR1 and UR2
     DSIterator itDS;
@@ -414,15 +414,15 @@ void PrimalFrictionContact::computeBlock(UnitaryRelation* UR1, UnitaryRelation* 
     MapOfDouble Theta;
     getOSIMaps(UR1, W, Theta);
 
-    SiconosMatrix* currentBlock = blocks[UR1][UR2];
+    SiconosMatrix* currentUnitaryBlock = unitaryBlocks[UR1][UR2];
     SimpleMatrix *work = NULL;
-    currentBlock->zero();
-    SiconosMatrix *leftBlock = NULL, *rightBlock = NULL;
+    currentUnitaryBlock->zero();
+    SiconosMatrix *leftUnitaryBlock = NULL, *rightUnitaryBlock = NULL;
     unsigned int sizeDS;
     string relationType1, relationType2;
-    bool flagRightBlock = false;
+    bool flagRightUnitaryBlock = false;
 
-    // General form of the block is :   block = a*extraBlock + b * leftBlock * OP * rightBlock
+    // General form of the unitaryBlock is :   unitaryBlock = a*extraUnitaryBlock + b * leftUnitaryBlock * OP * rightUnitaryBlock
     // a and b are scalars, OP a matrix depending on the integrator, the simulation type ...
     // left, right and extra depend on the relation type and the non smooth law.
 
@@ -430,40 +430,40 @@ void PrimalFrictionContact::computeBlock(UnitaryRelation* UR1, UnitaryRelation* 
     for (itDS = commonDS.begin(); itDS != commonDS.end(); itDS++)
     {
       sizeDS = (*itDS)->getDim();
-      // get blocks corresponding to the current DS
-      // These blocks depends on the relation type.
-      leftBlock = new SimpleMatrix(nslawSize1, sizeDS);
+      // get unitaryBlocks corresponding to the current DS
+      // These unitaryBlocks depends on the relation type.
+      leftUnitaryBlock = new SimpleMatrix(nslawSize1, sizeDS);
 
-      UR1->getLeftBlockForDS(*itDS, leftBlock);
+      UR1->getLeftUnitaryBlockForDS(*itDS, leftUnitaryBlock);
       relationType1 = UR1->getRelationType();
       relationType2 = UR2->getRelationType();
       // Computing depends on relation type -> move this in UnitaryRelation method?
       if (relationType1 == "Lagrangian" || relationType2 == "Lagrangian")
       {
         if (UR1 == UR2)
-          rightBlock = leftBlock ;
+          rightUnitaryBlock = leftUnitaryBlock ;
         else
         {
-          rightBlock = new SimpleMatrix(nslawSize2, sizeDS);
-          UR2->getLeftBlockForDS(*itDS, rightBlock);
-          // Warning: we use getLeft for Right block because right = transpose(left) and because of size checking inside the getBlock function,
+          rightUnitaryBlock = new SimpleMatrix(nslawSize2, sizeDS);
+          UR2->getLeftUnitaryBlockForDS(*itDS, rightUnitaryBlock);
+          // Warning: we use getLeft for Right unitaryBlock because right = transpose(left) and because of size checking inside the getBlock function,
           // a getRight call will fail.
-          flagRightBlock = true;
+          flagRightUnitaryBlock = true;
         }
 
-        work = new SimpleMatrix(*rightBlock);
+        work = new SimpleMatrix(*rightUnitaryBlock);
         work->trans();
         // W contains a lu-factorized matrix and we solve
-        // W * X = rightBlock with PLU
+        // W * X = rightUnitaryBlock with PLU
         // Work is a temporary matrix.
         W[*itDS]->PLUForwardBackwardInPlace(*work);
-        //*currentBlock +=  *leftBlock * *work; // left = right = G or H
-        gemm(CblasNoTrans, CblasNoTrans, 1.0, *leftBlock, *work, 1.0, *currentBlock);
+        //*currentUnitaryBlock +=  *leftUnitaryBlock * *work; // left = right = G or H
+        gemm(CblasNoTrans, CblasNoTrans, 1.0, *leftUnitaryBlock, *work, 1.0, *currentUnitaryBlock);
         delete work;
-        if (flagRightBlock) delete rightBlock;
+        if (flagRightUnitaryBlock) delete rightUnitaryBlock;
       }
-      else RuntimeException::selfThrow("PrimalFrictionContact::computeBlock not yet implemented for relation of type " + relationType1);
-      delete leftBlock;
+      else RuntimeException::selfThrow("PrimalFrictionContact::computeUnitaryBlock not yet implemented for relation of type " + relationType1);
+      delete leftUnitaryBlock;
     }
   }
 }
@@ -487,7 +487,7 @@ void PrimalFrictionContact::computeQ(const double time)
     // *itCurrent is a UnitaryRelation*.
 
     // Compute q, this depends on the type of non smooth problem, on the relation type and on the non smooth law
-    pos = M->getPositionOfBlock(*itCurrent);
+    pos = M->getPositionOfUnitaryBlock(*itCurrent);
     (*itCurrent)->computeEquivalentY(time, levelMin, simulationType, q, pos); // free output is saved in y
   }
 }
@@ -506,12 +506,12 @@ void PrimalFrictionContact::preCompute(const double time)
   Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
   if (!topology->isTimeInvariant())
   {
-    // Computes new blocks if required
-    updateBlocks();
+    // Computes new unitaryBlocks if required
+    updateUnitaryBlocks();
 
     // Updates matrix M
     UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
-    M->fill(indexSet, blocks);
+    M->fill(indexSet, unitaryBlocks);
     sizeOutput = M->size();
 
     // Checks z and w sizes and reset if necessary
@@ -618,10 +618,10 @@ void PrimalFrictionContact::postCompute()
 
   for (UnitaryRelationsIterator itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
   {
-    // size of the block that corresponds to the current UnitaryRelation
+    // size of the unitaryBlock that corresponds to the current UnitaryRelation
     nsLawSize = (*itCurrent)->getNonSmoothLawSize();
-    // Get the relative position of UR-block in the vector velocity or reaction
-    pos = M->getPositionOfBlock(*itCurrent);
+    // Get the relative position of UR-unitaryBlock in the vector velocity or reaction
+    pos = M->getPositionOfUnitaryBlock(*itCurrent);
 
     // Get Y and Lambda for the current Unitary Relation
     y = (*itCurrent)->getYPtr(levelMin);

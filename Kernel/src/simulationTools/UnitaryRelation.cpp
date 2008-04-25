@@ -46,10 +46,10 @@ const VectorOfVectors UnitaryRelation::getY() const
   // thus there is no copy of the "basic" SimpleVectors.
 
   VectorOfVectors tmp;
-  VectorOfVectors interactionBlocks = mainInteraction->getY();
+  VectorOfVectors interactionUnitaryBlocks = mainInteraction->getY();
 
-  for (unsigned int i = 0; i < interactionBlocks.size(); ++i)
-    tmp[i] = interactionBlocks[i]->getVectorPtr(number);
+  for (unsigned int i = 0; i < interactionUnitaryBlocks.size(); ++i)
+    tmp[i] = interactionUnitaryBlocks[i]->getVectorPtr(number);
 
   return tmp;
 }
@@ -71,10 +71,10 @@ const VectorOfVectors UnitaryRelation::getLambda() const
   // A new object of type VectorOfVectors is created but it handles pointers to BlockVectors,
   // thus there is no copy of the "basic" SimpleVectors.
   VectorOfVectors tmp;
-  VectorOfVectors interactionBlocks = mainInteraction->getLambda();
+  VectorOfVectors interactionUnitaryBlocks = mainInteraction->getLambda();
 
-  for (unsigned int i = 0; i < interactionBlocks.size(); ++i)
-    tmp[i] = interactionBlocks[i]->getVectorPtr(number);
+  for (unsigned int i = 0; i < interactionUnitaryBlocks.size(); ++i)
+    tmp[i] = interactionUnitaryBlocks[i]->getVectorPtr(number);
 
   return tmp;
 }
@@ -89,7 +89,7 @@ const double UnitaryRelation::getYRef(unsigned int i) const
 {
   // get the single value used to build indexSets
   // Warning: the relativePosition depends on NsLawSize and/or type.
-  // This means that at the time, for the block of y that corresponds to the present relation, the first scalar value is used.
+  // This means that at the time, for the unitaryBlock of y that corresponds to the present relation, the first scalar value is used.
   // For example, for friction, normal part is in first position, followed by the tangential parts.
   return (*getYPtr(i))(0);
 }
@@ -157,7 +157,7 @@ void UnitaryRelation::initialize(const std::string& simulationType)
   //     RuntimeException::selfThrow("UnitaryRelation::initialize(simulationType) failed: unknown simulation type.");
 }
 
-void UnitaryRelation::getLeftBlockForDS(DynamicalSystem * ds, SiconosMatrix* Block, unsigned index) const
+void UnitaryRelation::getLeftUnitaryBlockForDS(DynamicalSystem * ds, SiconosMatrix* UnitaryBlock, unsigned index) const
 {
   unsigned int k = 0;
   DSIterator itDS;
@@ -171,8 +171,8 @@ void UnitaryRelation::getLeftBlockForDS(DynamicalSystem * ds, SiconosMatrix* Blo
   }
 
   // check dimension (1)
-  if ((*itDS)->getDim() != Block->size(1))
-    RuntimeException::selfThrow("UnitaryRelation::getLeftBlockForDS(DS, Block, ...): inconsistent sizes between Block and DS");
+  if ((*itDS)->getDim() != UnitaryBlock->size(1))
+    RuntimeException::selfThrow("UnitaryRelation::getLeftUnitaryBlockForDS(DS, UnitaryBlock, ...): inconsistent sizes between UnitaryBlock and DS");
 
   SiconosMatrix * originalMatrix = NULL; // Complete matrix, Relation member.
 
@@ -191,23 +191,23 @@ void UnitaryRelation::getLeftBlockForDS(DynamicalSystem * ds, SiconosMatrix* Blo
     originalMatrix = (static_cast<LagrangianLinearR*>(mainInteraction->getRelationPtr()))->getHPtr();
 
   else
-    RuntimeException::selfThrow("UnitaryRelation::getLeftBlockForDS, not yet implemented for relations of type " + relationType);
+    RuntimeException::selfThrow("UnitaryRelation::getLeftUnitaryBlockForDS, not yet implemented for relations of type " + relationType);
 
-  // copy sub-block of originalMatrix into Block
-  // dim of the sub-block
+  // copy sub-unitaryBlock of originalMatrix into UnitaryBlock
+  // dim of the sub-unitaryBlock
   Index subDim(2);
-  subDim[0] = Block->size(0);
-  subDim[1] = Block->size(1);
-  // Position (row,col) of first element to be read in originalMatrix and of first element to be set in Block
+  subDim[0] = UnitaryBlock->size(0);
+  subDim[1] = UnitaryBlock->size(1);
+  // Position (row,col) of first element to be read in originalMatrix and of first element to be set in UnitaryBlock
   Index subPos(4);
   subPos[0] = relativePosition;
   subPos[1] = k;
   subPos[2] = 0;
   subPos[3] = 0;
-  setBlock(originalMatrix, Block, subDim, subPos);
+  setBlock(originalMatrix, UnitaryBlock, subDim, subPos);
 }
 
-void UnitaryRelation::getRightBlockForDS(DynamicalSystem * ds, SiconosMatrix* Block, unsigned index) const
+void UnitaryRelation::getRightUnitaryBlockForDS(DynamicalSystem * ds, SiconosMatrix* UnitaryBlock, unsigned index) const
 {
   unsigned int k = 0;
   DSIterator itDS;
@@ -221,8 +221,8 @@ void UnitaryRelation::getRightBlockForDS(DynamicalSystem * ds, SiconosMatrix* Bl
   }
 
   // check dimension (1)
-  if ((*itDS)->getDim() != Block->size(0))
-    RuntimeException::selfThrow("UnitaryRelation::getRightBlockForDS(DS, Block, ...): inconsistent sizes between Block and DS");
+  if ((*itDS)->getDim() != UnitaryBlock->size(0))
+    RuntimeException::selfThrow("UnitaryRelation::getRightUnitaryBlockForDS(DS, UnitaryBlock, ...): inconsistent sizes between UnitaryBlock and DS");
 
   SiconosMatrix * originalMatrix = NULL; // Complete matrix, Relation member.
   string relationType = getRelationType() + getRelationSubType();
@@ -239,28 +239,28 @@ void UnitaryRelation::getRightBlockForDS(DynamicalSystem * ds, SiconosMatrix* Bl
   else if (relationType == "LagrangianLinearR")
     originalMatrix = (static_cast<LagrangianLinearR*>(mainInteraction->getRelationPtr()))->getHPtr();
 
-  else RuntimeException::selfThrow("UnitaryRelation::getRightBlockForDS, not yet implemented for relation of type " + relationType);
+  else RuntimeException::selfThrow("UnitaryRelation::getRightUnitaryBlockForDS, not yet implemented for relation of type " + relationType);
 
   if (originalMatrix == NULL)
-    RuntimeException::selfThrow("UnitaryRelation::getRightBlockForDS(DS, Block, ...): the right block is a NULL pointer (miss matrix B or H or gradients ...in relation ?)");
+    RuntimeException::selfThrow("UnitaryRelation::getRightUnitaryBlockForDS(DS, UnitaryBlock, ...): the right unitaryBlock is a NULL pointer (miss matrix B or H or gradients ...in relation ?)");
 
-  // copy sub-block of originalMatrix into Block
-  // dim of the sub-block
+  // copy sub-unitaryBlock of originalMatrix into UnitaryBlock
+  // dim of the sub-unitaryBlock
   Index subDim(2);
-  subDim[0] = Block->size(0);
-  subDim[1] = Block->size(1);
-  // Position (row,col) of first element to be read in originalMatrix and of first element to be set in Block
+  subDim[0] = UnitaryBlock->size(0);
+  subDim[1] = UnitaryBlock->size(1);
+  // Position (row,col) of first element to be read in originalMatrix and of first element to be set in UnitaryBlock
   Index subPos(4);
   subPos[0] = k;
   subPos[1] = relativePosition;
   subPos[2] = 0;
   subPos[3] = 0;
-  setBlock(originalMatrix, Block, subDim, subPos);
+  setBlock(originalMatrix, UnitaryBlock, subDim, subPos);
 }
 
-void UnitaryRelation::getExtraBlock(SiconosMatrix* Block) const
+void UnitaryRelation::getExtraUnitaryBlock(SiconosMatrix* UnitaryBlock) const
 {
-  // !!! Warning: we suppose that D is block diagonal, ie that there is no coupling between UnitaryRelation through D !!!
+  // !!! Warning: we suppose that D is unitaryBlock diagonal, ie that there is no coupling between UnitaryRelation through D !!!
   // Any coupling between relations through D must be taken into account thanks to the nslaw (by "increasing" its dimension).
 
   string relationType = getRelationType() + getRelationSubType();
@@ -281,26 +281,26 @@ void UnitaryRelation::getExtraBlock(SiconosMatrix* Block) const
   else if (relationType == "LagrangianLinearR")
     D = static_cast<LagrangianLinearR*>(mainInteraction->getRelationPtr())->getDPtr();
   else
-    RuntimeException::selfThrow("UnitaryRelation::getExtraBlock, not yet implemented for first order relations of subtype " + relationType);
+    RuntimeException::selfThrow("UnitaryRelation::getExtraUnitaryBlock, not yet implemented for first order relations of subtype " + relationType);
 
   if (D == NULL)
   {
-    Block->zero();
-    return; //ie no extra block
+    UnitaryBlock->zero();
+    return; //ie no extra unitaryBlock
   }
 
-  // copy sub-block of originalMatrix into Block
-  // dim of the sub-block
+  // copy sub-unitaryBlock of originalMatrix into UnitaryBlock
+  // dim of the sub-unitaryBlock
   Index subDim(2);
-  subDim[0] = Block->size(0);
-  subDim[1] = Block->size(1);
-  // Position (row,col) of first element to be read in originalMatrix and of first element to be set in Block
+  subDim[0] = UnitaryBlock->size(0);
+  subDim[1] = UnitaryBlock->size(1);
+  // Position (row,col) of first element to be read in originalMatrix and of first element to be set in UnitaryBlock
   Index subPos(4);
   subPos[0] = relativePosition;
   subPos[1] = relativePosition;
   subPos[2] = 0;
   subPos[3] = 0;
-  setBlock(D, Block, subDim, subPos);
+  setBlock(D, UnitaryBlock, subDim, subPos);
 }
 
 void UnitaryRelation::computeEquivalentY(double time, unsigned int level, const string& simulationType, SiconosVector* yOut, unsigned int pos)
@@ -386,7 +386,7 @@ void UnitaryRelation::computeEquivalentY(double time, unsigned int level, const 
     }
   }
   else
-    RuntimeException::selfThrow("UnitaryRelation::getExtraBlock, not yet implemented for first order relations of subtype " + relationType);
+    RuntimeException::selfThrow("UnitaryRelation::getExtraUnitaryBlock, not yet implemented for first order relations of subtype " + relationType);
 
   //     }
   //   else  if(simulationType == "EventDriven")

@@ -71,7 +71,7 @@ const std::string DEFAULT_OSNS_NAME = "unamed";
  *
  *
  *
- * Remark: UnitaryMatrixRowIterator will be used to iterate through what corresponds to rows of blocks (a row for a UnitaryRelation, named URrow) and for
+ * Remark: UnitaryMatrixRowIterator will be used to iterate through what corresponds to rows of unitaryBlocks (a row for a UnitaryRelation, named URrow) and for
  *  a row, UnitaryMatrixColumnIterator will be used to iterate through columns, ie through all the UnitaryRelations that are linked to URrow.
  *
  */
@@ -89,14 +89,14 @@ protected:
   /** size of the problem to solve */
   unsigned int sizeOutput;
 
-  /** map that links each UnitaryRelation with the corresponding blocks
-      map < UnitaryRelationA * , map < UnitaryRelationB* , blockMatrixAB > >
-      UnitaryRelations A and B are coupled through blockMatrixAB.  */
-  MapOfMapOfUnitaryMatrices blocks;
+  /** map that links each UnitaryRelation with the corresponding unitaryBlocks
+      map < UnitaryRelationA * , map < UnitaryRelationB* , unitaryBlockMatrixAB > >
+      UnitaryRelations A and B are coupled through unitaryBlockMatrixAB.  */
+  MapOfMapOfUnitaryMatrices unitaryBlocks;
 
   /** inside-class allocation flags. To each couple of Unitary Relations corresponds a bool, true if
-      the block has been allocated in OneStepNSProblem, else false. */
-  MapOfMapOfBool isBlockAllocatedIn;
+      the unitaryBlock has been allocated in OneStepNSProblem, else false. */
+  MapOfMapOfBool isUnitaryBlockAllocatedIn;
 
   /** Solver for Non Smooth Problem*/
   NonSmoothSolver* solver;
@@ -222,17 +222,17 @@ public:
     sizeOutput = newVal;
   }
 
-  /** get the blocks matrices map
+  /** get the unitaryBlocks matrices map
    *  \return a MapOfMapOfUnitaryMatrices
    */
   inline const MapOfMapOfUnitaryMatrices getBlocks() const
   {
-    return blocks;
+    return unitaryBlocks;
   };
 
-  /** get the block orresponding to UR1 and UR2
+  /** get the unitaryBlock orresponding to UR1 and UR2
    *  \param a pointer to UnitaryRelation, UR1
-   *  \param a pointer to UnitaryRelation, optional, default value = NULL, in that case UR2 = UR1 (ie get "diagonal" block)
+   *  \param a pointer to UnitaryRelation, optional, default value = NULL, in that case UR2 = UR1 (ie get "diagonal" unitaryBlock)
    *  \return a pointer to SiconosMatrix
    */
   SiconosMatrix* getBlockPtr(UnitaryRelation*, UnitaryRelation* = NULL) const ;
@@ -242,9 +242,9 @@ public:
    */
   void setBlocks(const MapOfMapOfUnitaryMatrices&);
 
-  /** clear the map of blocks (ie release memory)
+  /** clear the map of unitaryBlocks (ie release memory)
    */
-  void clearBlocks();
+  void clearUnitaryBlocks();
 
   /** get the NonSmoothSolver
    *  \return a pointer on NonSmoothSolver
@@ -369,20 +369,20 @@ public:
    */
   void printStat();
 
-  /** compute blocks if necessary (this depends on the type of OSNS, on the indexSets ...)
+  /** compute unitaryBlocks if necessary (this depends on the type of OSNS, on the indexSets ...)
    */
-  void updateBlocks();
+  void updateUnitaryBlocks();
 
-  /** computes all diagonal and extra-diagonal block-matrices
+  /** computes all diagonal and extra-diagonal unitaryBlock-matrices
    */
-  void computeAllBlocks();
+  void computeAllUnitaryBlocks();
 
-  /** computes extra diagonal block-matrix that corresponds to UR1 and UR2
+  /** computes extra diagonal unitaryBlock-matrix that corresponds to UR1 and UR2
    *  Move this to Unitary Relation class?
    *  \param a pointer to UnitaryRelation
    *  \param a pointer to UnitaryRelation
    */
-  virtual void computeBlock(UnitaryRelation*, UnitaryRelation*);
+  virtual void computeUnitaryBlock(UnitaryRelation*, UnitaryRelation*);
 
   /** initialize the problem(compute topology ...)
    */
@@ -411,7 +411,7 @@ public:
    */
   virtual void saveNSProblemToXML() = 0;
 
-  /** get the OSI-related matrices used to compute the current Unitary Relation block (Ex: for Moreau, W and Theta)
+  /** get the OSI-related matrices used to compute the current Unitary Relation unitaryBlock (Ex: for Moreau, W and Theta)
    *  \param a pointer to UnitaryRelation
    *  \param a MapOfDSMatrices(in-out parameter)
    *  \param a MapOfDouble(in-out parameter)

@@ -147,7 +147,7 @@ void TimeStepping::initOSNS()
   for (it = indexSets[0]->begin(); it != indexSets[0]->end(); ++it)
   {
     (*it)->initialize("TimeStepping");
-    // creates a POINTER link between workX[ds] (xfree) and the corresponding block in each UR for each ds of the current UR.
+    // creates a POINTER link between workX[ds] (xfree) and the corresponding unitaryBlock in each UR for each ds of the current UR.
     for (itDS = (*it)->dynamicalSystemsBegin(); itDS != (*it)->dynamicalSystemsEnd(); ++itDS)
     {
       osi = osiMap[*itDS];

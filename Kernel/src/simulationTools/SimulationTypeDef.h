@@ -69,7 +69,7 @@ typedef std::map<DynamicalSystem*, bool> MapOfBool;
 
 // ================== Objects to handle UnitaryRelations ==================
 
-/** Map of SiconosMatrices with a UnitaryRelations as a key - Used for diagonal block-terms in assembled matrices of LCP etc ...*/
+/** Map of SiconosMatrices with a UnitaryRelations as a key - Used for diagonal unitaryBlock-terms in assembled matrices of LCP etc ...*/
 typedef std::map< UnitaryRelation* , SiconosMatrix*>  MapOfUnitaryMatrices;
 
 /** Iterator through a MapOfUnitaryMatrices */
@@ -78,7 +78,7 @@ typedef MapOfUnitaryMatrices::iterator UnitaryMatrixColumnIterator ;
 /** Const iterator through a MapOfUnitaryMatrices */
 typedef MapOfUnitaryMatrices::const_iterator ConstUnitaryMatrixColumnIterator;
 
-/** Map of MapOfUnitaryMatrices with a UnitaryRelation as a key - Used for extra-diagonal block-terms in assembled matrices of LCP etc ..*/
+/** Map of MapOfUnitaryMatrices with a UnitaryRelation as a key - Used for extra-diagonal unitaryBlock-terms in assembled matrices of LCP etc ..*/
 typedef std::map< UnitaryRelation* , MapOfUnitaryMatrices >  MapOfMapOfUnitaryMatrices;
 
 /** Iterator through a MapOfMapOfUnitaryMatrices */
@@ -87,7 +87,7 @@ typedef MapOfMapOfUnitaryMatrices::iterator UnitaryMatrixRowIterator ;
 /** Const iterator through a MapOfMapOfUnitaryMatrices */
 typedef MapOfMapOfUnitaryMatrices::const_iterator ConstUnitaryMatrixRowIterator ;
 
-/** Map of MapOfDSUnitaryMatrices with a DynamicalSystem as a key - Used for block-terms indexed by a DynamicalSystem and an UnitaryRelation in assembled matrices of LCP etc ..*/
+/** Map of MapOfDSUnitaryMatrices with a DynamicalSystem as a key - Used for unitaryBlock-terms indexed by a DynamicalSystem and an UnitaryRelation in assembled matrices of LCP etc ..*/
 typedef std::map< DynamicalSystem* , MapOfUnitaryMatrices >  MapOfDSMapOfUnitaryMatrices;
 
 /** Iterator through a MapOfDSMapOfUnitaryMatrices */
@@ -96,7 +96,7 @@ typedef MapOfDSMapOfUnitaryMatrices::iterator DSUnitaryMatrixRowIterator ;
 /** Const iterator through a MapOfDSMapOfUnitaryMatrices */
 typedef MapOfDSMapOfUnitaryMatrices::const_iterator ConstDSUnitaryMatrixRowIterator ;
 
-/** Map of MapOfUnitaryMapOfDSMatrices with a DynamicalSystem as a key - Used for block-terms indexed by a DynamicalSystem and an UnitaryRelation in assembled matrices of LCP etc ..*/
+/** Map of MapOfUnitaryMapOfDSMatrices with a DynamicalSystem as a key - Used for unitaryBlock-terms indexed by a DynamicalSystem and an UnitaryRelation in assembled matrices of LCP etc ..*/
 typedef std::map< UnitaryRelation* , MapOfDSMatrices >  MapOfUnitaryMapOfDSMatrices;
 
 /** Iterator through a MapOfUnitaryMapOfDSMatrices */
@@ -113,7 +113,7 @@ typedef std::map< UnitaryRelation* , std::map<UnitaryRelation*, bool> >  MapOfMa
 /** Vector that contains a sequel of sets of UnitaryRelations*/
 typedef std::vector< UnitaryRelationsSet* > VectorOfSetOfUnitaryRelations;
 
-/** Map to link UnitaryRelation* with an int - Used for example in blocksPositions for OSNSMatrix */
+/** Map to link UnitaryRelation* with an int - Used for example in unitaryBlocksPositions for OSNSMatrix */
 typedef std::map< UnitaryRelation* , unsigned int > UR_int;
 
 /** list of indices */

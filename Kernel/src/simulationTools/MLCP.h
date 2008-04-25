@@ -73,8 +73,8 @@ class OneStepNSProblem;
  *
  * \b Main functions:
  *  - formalization of the problem: computes A,B,C,D,a,b using the set of "active" UnitaryRelations from the simulation and \n
- *  the block-matrices saved in the field blocks.\n
- *  Functions: initialize(), computeBlock(), preCompute()
+ *  the unitaryBlock-matrices saved in the field unitaryBlocks.\n
+ *  Functions: initialize(), computeUnitaryBlock(), preCompute()
  *  - solving of the problem: function compute(), used to call solvers from Numerics through \n
  * the mlcp_driver() interface of Numerics.
  *  - post-treatment of data: set values of y/lambda variables of the active UR (ie Interactions) using \n
@@ -276,12 +276,12 @@ public:
   void initialize();
   void reset();
 
-  /** computes extra diagonal block-matrix that corresponds to UR1 and UR2
+  /** computes extra diagonal unitaryBlock-matrix that corresponds to UR1 and UR2
   *  Move this to Unitary Relation class?
   *  \param a pointer to UnitaryRelation
   *  \param a pointer to UnitaryRelation
   */
-  void computeBlock(UnitaryRelation*, UnitaryRelation*);
+  void computeUnitaryBlock(UnitaryRelation*, UnitaryRelation*);
 
   /** compute vector q
   *  \param double : current time

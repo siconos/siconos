@@ -48,9 +48,9 @@ class SimulationXML;
  *
  * The available simulations are TimeStepping and EventDriven. See derived classes for more details.
  *
- * "Unitary block matrices" are saved in the simulation (using stl maps). They will be used to save block matrices corresponding
+ * "Unitary unitaryBlock matrices" are saved in the simulation (using stl maps). They will be used to save unitaryBlock matrices corresponding
  * to diagonal or extra diagonal terms in OneStepNSProblem "complete" matrices, such as M in LCP formulation.
- * Each block corresponds to one UnitaryRelation (diagonal terms) or two UnitaryRelations (extra diagonal terms);
+ * Each unitaryBlock corresponds to one UnitaryRelation (diagonal terms) or two UnitaryRelations (extra diagonal terms);
  * Their dimensions are NSLawSize X NSLawSize, NSLawSize being the dimension of the NonSmoothLaw corresponding to the concerned UnitaryRelation.
  *
  * Rules:

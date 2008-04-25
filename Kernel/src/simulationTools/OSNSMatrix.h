@@ -42,17 +42,17 @@ class SparseBlockMatrix;
  * The idea is to remove all matrix storage management problems from OSNS classes (LCP ...) and to leave it into this class. \n
  *
  * Two main functions:
- * - fill(indexSet, blocks): fill the matrix using a list of "active" UnitaryRelation, in indexSet, and a MapOfMapOfUnitaryMatrices, blocks, \n
+ * - fill(indexSet, unitaryBlocks): fill the matrix using a list of "active" UnitaryRelation, in indexSet, and a MapOfMapOfUnitaryMatrices, unitaryBlocks, \n
  *   which determines which UR are connected or not (ie have common DynamicalSystem).
  * - convert(): fill the NumericsMatrix structure (indeed only pointers links to the components of the present class)
  *
  * Note that OSNSMatrix are square.
  *
  *  For example, if in a LCP, constraints of interest are indexSet={UR2,UR3,UR8,UR12}, whith common DynamicalSystem between 2 and 3, 2 and 8 and 8 and 12. \n
- *  blocks contains matrices for all (URi,URj) which have common DS, for (URi,URj) in I0, the set of all UnitaryRelation.\n
- *  (for details on how blocks is computed see OneStepNSProblem.h). \n
- * We denote blocks[URi][URj] = mij \n
- * Then, a call to fill(indexSet, block) results in a matrix which looks like:
+ *  unitaryBlocks contains matrices for all (URi,URj) which have common DS, for (URi,URj) in I0, the set of all UnitaryRelation.\n
+ *  (for details on how unitaryBlocks is computed see OneStepNSProblem.h). \n
+ * We denote unitaryBlocks[URi][URj] = mij \n
+ * Then, a call to fill(indexSet, unitaryBlock) results in a matrix which looks like:
  *
  * \f{eqnarray*}
    M=\left\lbrace\begin{array}{cccc}
@@ -66,9 +66,9 @@ class SparseBlockMatrix;
  *
  * Note: at the time the available storage types are:
  *  - full matrix in a SiconosMatrix (storageType = 0). In this case, for each call to fill(), the SiconosMatrix M is resized according\n
- *  to the sizes of the UR present in indexSet and then all the required blocks mij are COPIED into M.
- *  - Sparse Block Storage (storageType = 1): corresponds to SparseBlockStructuredMatrix structure of Numerics. Only non-null blocks are saved in the matrix M \n
- *  and there is no copy of sub-blocks, only links thanks to pointers.
+ *  to the sizes of the UR present in indexSet and then all the required unitaryBlocks mij are COPIED into M.
+ *  - Sparse Block Storage (storageType = 1): corresponds to SparseBlockStructuredMatrix structure of Numerics. Only non-null unitaryBlocks are saved in the matrix M \n
+ *  and there is no copy of sub-unitaryBlocks, only links thanks to pointers.
  *
  */
 class OSNSMatrix
@@ -81,11 +81,11 @@ protected:
   /** Storage type used for the present matrix */
   int storageType;
 
-  /** map that links each UnitaryRelation with an int that gives the position (in number of scalar elements, not blocks) \n
-   * of the corresponding block matrix in the full matrix (M in LCP case) - Warning: it depends on the considered index set \n
+  /** map that links each UnitaryRelation with an int that gives the position (in number of scalar elements, not unitaryBlocks) \n
+   * of the corresponding unitaryBlock matrix in the full matrix (M in LCP case) - Warning: it depends on the considered index set \n
    * (ie on which constraints are "active")
    */
-  UR_int* blocksPositions;
+  UR_int* unitaryBlocksPositions;
 
   /** Numerics structure to be filled  */
   NumericsMatrix* numericsMat;
@@ -102,7 +102,7 @@ protected:
   /** Private assignment -> forbidden */
   OSNSMatrix& operator=(const OSNSMatrix&);
 
-  /** To update dim and blocksPositions for a new set of UnitaryRelation
+  /** To update dim and unitaryBlocksPositions for a new set of UnitaryRelation
       \param UnitaryRelationsSet* the index set of the active constraints
   */
   void updateSizeAndPositions(UnitaryRelationsSet*);
@@ -115,7 +115,7 @@ public:
 
   /** Constructor with dim. of the matrix
       \param n size of the square matrix
-      \param stor storage type (0:dense, 1:sparse block)
+      \param stor storage type (0:dense, 1:sparse unitaryBlock)
   */
   OSNSMatrix(unsigned int, int);
 
@@ -153,10 +153,10 @@ public:
     storageType = i;
   };
 
-  /** get the position (real, not block) of the first element of the block which corresponds to UR
+  /** get the position (real, not unitaryBlock) of the first element of the unitaryBlock which corresponds to UR
       \param UR UnitaryRelation from which position is required
   */
-  unsigned int getPositionOfBlock(UnitaryRelation*) const;
+  unsigned int getPositionOfUnitaryBlock(UnitaryRelation*) const;
 
   /** get the numerics-readable structure */
   inline NumericsMatrix* getNumericsMatrix()
@@ -170,7 +170,7 @@ public:
     return M1;
   };
 
-  /** fill the current class using an index set and a map of blocks
+  /** fill the current class using an index set and a map of unitaryBlocks
       \param UnitaryRelationsSet*, the index set of the active constraints
       \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
   */

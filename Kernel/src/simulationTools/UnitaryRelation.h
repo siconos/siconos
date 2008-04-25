@@ -37,19 +37,19 @@
  * to handle single relations, this for IndexSets used in Topology.
  * Each UnitaryRelation has a pointer to its "mother" Interaction  and methods to compute y, lambda and so on.
  *
- * - Blocks computation: in OneStepNSProblem, some operators/matrices are required to compute the blocks matrices (used for example for the assembly
+ * - UnitaryBlocks computation: in OneStepNSProblem, some operators/matrices are required to compute the unitaryBlocks matrices (used for example for the assembly
  * of Mlcp matrix).
- * In the present class, three methods are available to get the required blocks:
- *  getLeftBlockForDS, getRightBlockForDS and getExtraBlock, with the general model for block computation:
+ * In the present class, three methods are available to get the required unitaryBlocks:
+ *  getLeftUnitaryBlockForDS, getRightUnitaryBlockForDS and getExtraUnitaryBlock, with the general model for unitaryBlock computation:
  *
- * block = getExtraBlock  +  getLeftBlockForDS * W * getRightBlockForDS
+ * unitaryBlock = getExtraUnitaryBlock  +  getLeftUnitaryBlockForDS * W * getRightUnitaryBlockForDS
  *
  * Examples:
- *   => LinearTIR, block = D + h*theta*C*W*B  (D != NULL only for blocks on the diagonal of the full-assembled matrix)
- *    and thus getExtraBlock = D, getLeftBlockForDS = C, getRightBlockForDS = B.
+ *   => LinearTIR, unitaryBlock = D + h*theta*C*W*B  (D != NULL only for unitaryBlocks on the diagonal of the full-assembled matrix)
+ *    and thus getExtraUnitaryBlock = D, getLeftUnitaryBlockForDS = C, getRightUnitaryBlockForDS = B.
  *
- *   => Lagrangian, block = G* W* transpose(G)  (G=H for lagrangian linear)
- *     ie getExtraBlock = NULL, getLeftBlockForDS = getRightBlockForDS = G (transpose is done using matMultTranspose)
+ *   => Lagrangian, unitaryBlock = G* W* transpose(G)  (G=H for lagrangian linear)
+ *     ie getExtraUnitaryBlock = NULL, getLeftUnitaryBlockForDS = getRightUnitaryBlockForDS = G (transpose is done using matMultTranspose)
  *
  * Moreover, for, G, B, etc ... we only get the part corresponding to a specific DynamicalSystem (which belongs to the UnitaryRelation)
  *
@@ -68,7 +68,7 @@ private:
    of mainInteraction, the relative position is equal to 2. */
   unsigned int relativePosition;
 
-  /** number of the relation, ie the number of the corresponding block vector in the main Interaction.*/
+  /** number of the relation, ie the number of the corresponding unitaryBlock vector in the main Interaction.*/
   unsigned int number;
 
   /** Absolute position in the "global" vector of constraints (for example, the one handled by lsodar) */
@@ -93,7 +93,7 @@ public:
   /** constructor from a pointer to Interaction
   *  \param Interaction * : Interaction object from which a list of relation will be "extracted"
   *  \param unsigned int: gives the relative position of the relation inside the y vector of the interaction
-  *  \param unsigned int: gives the number of the block in y vector of the interaction that corresponds to the present unitary relation.
+  *  \param unsigned int: gives the number of the unitaryBlock in y vector of the interaction that corresponds to the present unitary relation.
   */
   UnitaryRelation(Interaction* , unsigned int, unsigned int);
 
@@ -246,26 +246,26 @@ public:
     workX->insertPtr(newX);
   };
 
-  /** gets the matrix used in block computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
+  /** gets the matrix used in unitaryBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to ds.
    *  \param a pointer to a dynamical system
-   *  \param a pointer to SiconosMatrix (in-out parameter): the resulting block matrix
+   *  \param a pointer to SiconosMatrix (in-out parameter): the resulting unitaryBlock matrix
    *  \param unsigned int (optional): gradient index (see relations for details)
    */
-  void getLeftBlockForDS(DynamicalSystem *, SiconosMatrix*, unsigned int = 0) const;
+  void getLeftUnitaryBlockForDS(DynamicalSystem *, SiconosMatrix*, unsigned int = 0) const;
 
-  /** gets the matrix used in block computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
+  /** gets the matrix used in unitaryBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to ds.
    *  \param a pointer to a dynamical system
-   *  \param a pointer to SiconosMatrix (in-out parameter): the resulting block matrix
+   *  \param a pointer to SiconosMatrix (in-out parameter): the resulting unitaryBlock matrix
    *  \param unsigned int (optional): gradient index (see relations for details)
    */
-  void getRightBlockForDS(DynamicalSystem *, SiconosMatrix*, unsigned int = 0) const;
+  void getRightUnitaryBlockForDS(DynamicalSystem *, SiconosMatrix*, unsigned int = 0) const;
 
-  /** gets extra block corresponding to the present UR (see the top of this files for extra block meaning)
+  /** gets extra unitaryBlock corresponding to the present UR (see the top of this files for extra unitaryBlock meaning)
    *  \param a pointer to a SiconosMatrix (in-out parameter)
    */
-  void getExtraBlock(SiconosMatrix *) const;
+  void getExtraUnitaryBlock(SiconosMatrix *) const;
 
   /** To compute a part of the "q" vector of the OSNS
    *  \param a double (current time)
