@@ -272,7 +272,7 @@ void OneStepNSProblem::saveNSProblemToXML()
   RuntimeException::selfThrow("OneStepNSProblem::saveNSProblemToXML - Not yet implemented");
 }
 
-void OneStepNSProblem::getOSIMaps(UnitaryRelation* UR, MapOfMatrices& centralBlocks, MapOfDouble& Theta)
+void OneStepNSProblem::getOSIMaps(UnitaryRelation* UR, MapOfDSMatrices& centralBlocks, MapOfDouble& Theta)
 {
   // === OSI = MOREAU : gets W matrices and scalar Theta of each DS concerned by the UnitaryRelation ===
   // === OSI = LSODAR : gets M matrices of each DS concerned by the UnitaryRelation, Theta remains empty ===

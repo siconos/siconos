@@ -60,7 +60,7 @@ class Moreau : public OneStepIntegrator
 private:
 
   /** Stl map that associates a W Moreau matrix to each DynamicalSystem of the OSI */
-  MapOfMatrices WMap;
+  MapOfDSMatrices WMap;
 
   /** Stl map that associates a theta parameter for the integration scheme to each DynamicalSystem of the OSI */
   MapOfDouble thetaMap;
@@ -109,9 +109,9 @@ public:
   // -- W --
 
   /** get W map
-   *  \return a MapOfMatrices
+   *  \return a MapOfDSMatrices
    */
-  inline MapOfMatrices getWMap() const
+  inline MapOfDSMatrices getWMap() const
   {
     return WMap;
   };
@@ -125,9 +125,9 @@ public:
   };
 
   /** set W map to newMap
-   *  \param a MapOfMatrices
+   *  \param a MapOfDSMatrices
    */
-  void setWMap(const MapOfMatrices&);
+  void setWMap(const MapOfDSMatrices&);
 
   /** get the value of W corresponding to DynamicalSystem ds
    * \param a pointer to DynamicalSystem, optional, default = NULL. get W[0] in that case

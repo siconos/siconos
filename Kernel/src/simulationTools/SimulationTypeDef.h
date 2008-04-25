@@ -29,12 +29,45 @@ Typedef for simulation-related objects
 #include <map>
 #include <set>
 
+#include "UnitaryRelationsSet.h"
+
 /** double precision machine */
 const double MACHINE_PREC = 1e-14;//dlamch_("e");
+//#include "OneStepIntegrator.h"
+class OneStepIntegrator;
+
+
+
+// ================== Objects to handle DS ==================
+
+/** Map of SiconosMatrix; key = the related DS*/
+typedef std::map<DynamicalSystem*, SiconosMatrix*> MapOfDSMatrices;
+
+/** Iterator through a map of matrices */
+typedef MapOfDSMatrices::iterator MatIterator;
+
+/** Const iterator through a map of matrices */
+typedef MapOfDSMatrices::const_iterator ConstMatIterator;
+
+/** Map of SiconosVector; key = the related DS*/
+typedef std::map<DynamicalSystem*, SiconosVector*> DSVectors;
+
+/** Iterator through a map of matrices */
+typedef DSVectors::iterator DSVectorsIterator;
+
+/** Const iterator through a map of matrices */
+typedef DSVectors::const_iterator ConstDSVectorsIterator;
+
+/** Map of double; key = the related DS */
+typedef std::map<DynamicalSystem*, double> MapOfDouble;
+
+/** Iterator through a map of double */
+typedef MapOfDouble::iterator DoubleIterator;
+
+/** Map of bool; key = the related DS */
+typedef std::map<DynamicalSystem*, bool> MapOfBool;
 
 // ================== Objects to handle UnitaryRelations ==================
-
-#include "UnitaryRelationsSet.h"
 
 /** Map of SiconosMatrices with a UnitaryRelations as a key - Used for diagonal block-terms in assembled matrices of LCP etc ...*/
 typedef std::map< UnitaryRelation* , SiconosMatrix*>  MapOfUnitaryMatrices;
@@ -54,6 +87,26 @@ typedef MapOfMapOfUnitaryMatrices::iterator UnitaryMatrixRowIterator ;
 /** Const iterator through a MapOfMapOfUnitaryMatrices */
 typedef MapOfMapOfUnitaryMatrices::const_iterator ConstUnitaryMatrixRowIterator ;
 
+/** Map of MapOfDSUnitaryMatrices with a DynamicalSystem as a key - Used for block-terms indexed by a DynamicalSystem and an UnitaryRelation in assembled matrices of LCP etc ..*/
+typedef std::map< DynamicalSystem* , MapOfUnitaryMatrices >  MapOfDSMapOfUnitaryMatrices;
+
+/** Iterator through a MapOfDSMapOfUnitaryMatrices */
+typedef MapOfDSMapOfUnitaryMatrices::iterator DSUnitaryMatrixRowIterator ;
+
+/** Const iterator through a MapOfDSMapOfUnitaryMatrices */
+typedef MapOfDSMapOfUnitaryMatrices::const_iterator ConstDSUnitaryMatrixRowIterator ;
+
+/** Map of MapOfUnitaryMapOfDSMatrices with a DynamicalSystem as a key - Used for block-terms indexed by a DynamicalSystem and an UnitaryRelation in assembled matrices of LCP etc ..*/
+typedef std::map< UnitaryRelation* , MapOfDSMatrices >  MapOfUnitaryMapOfDSMatrices;
+
+/** Iterator through a MapOfUnitaryMapOfDSMatrices */
+typedef MapOfUnitaryMapOfDSMatrices::iterator UnitaryDSMatrixRowIterator ;
+
+/** Const iterator through a MapOfUnitaryMapOfDSMatrices */
+typedef MapOfMapOfUnitaryMatrices::const_iterator ConstUnitaryDSMatrixRowIterator ;
+
+
+
 /** Map of map of bools, with UnitaryRelations as keys */
 typedef std::map< UnitaryRelation* , std::map<UnitaryRelation*, bool> >  MapOfMapOfBool;
 
@@ -66,37 +119,8 @@ typedef std::map< UnitaryRelation* , unsigned int > UR_int;
 /** list of indices */
 typedef std::vector<int> IndexInt;
 
-// ================== Objects to handle OSI or DS ==================
+// ================== Objects to handle OSI ==================
 
-//#include "OneStepIntegrator.h"
-class OneStepIntegrator;
-
-/** Map of SiconosMatrix; key = the related DS*/
-typedef std::map<DynamicalSystem*, SiconosMatrix*> MapOfMatrices;
-
-/** Iterator through a map of matrices */
-typedef MapOfMatrices::iterator MatIterator;
-
-/** Const iterator through a map of matrices */
-typedef MapOfMatrices::const_iterator ConstMatIterator;
-
-/** Map of SiconosVector; key = the related DS*/
-typedef std::map<DynamicalSystem*, SiconosVector*> DSVectors;
-
-/** Iterator through a map of matrices */
-typedef DSVectors::iterator DSVectorsIterator;
-
-/** Const iterator through a map of matrices */
-typedef DSVectors::const_iterator ConstDSVectorsIterator;
-
-/** Map of double; key = the related DS */
-typedef std::map<DynamicalSystem*, double> MapOfDouble;
-
-/** Iterator through a map of double */
-typedef MapOfDouble::iterator DoubleIterator;
-
-/** Map of bool; key = the related DS */
-typedef std::map<DynamicalSystem*, bool> MapOfBool;
 
 /** Vector of OneStepIntegrator */
 typedef std::set<OneStepIntegrator*> OSISet;

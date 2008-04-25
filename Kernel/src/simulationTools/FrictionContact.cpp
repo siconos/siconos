@@ -295,7 +295,7 @@ void FrictionContact::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
     DSIterator itDS;
 
     // Get the W and Theta maps of one of the Unitary Relation - Warning: in the current version, if OSI!=Moreau, this fails.
-    MapOfMatrices W;
+    MapOfDSMatrices W;
     MapOfDouble Theta;
     getOSIMaps(UR1, W, Theta);
 

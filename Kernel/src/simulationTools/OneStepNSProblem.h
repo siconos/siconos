@@ -413,10 +413,10 @@ public:
 
   /** get the OSI-related matrices used to compute the current Unitary Relation block (Ex: for Moreau, W and Theta)
    *  \param a pointer to UnitaryRelation
-   *  \param a MapOfMatrices(in-out parameter)
+   *  \param a MapOfDSMatrices(in-out parameter)
    *  \param a MapOfDouble(in-out parameter)
    */
-  virtual void getOSIMaps(UnitaryRelation*, MapOfMatrices&, MapOfDouble&);
+  virtual void getOSIMaps(UnitaryRelation*, MapOfDSMatrices&, MapOfDouble&);
 
 };
 

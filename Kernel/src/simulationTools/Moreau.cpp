@@ -143,7 +143,7 @@ Moreau::~Moreau()
   }
 }
 
-void Moreau::setWMap(const MapOfMatrices& newMap)
+void Moreau::setWMap(const MapOfDSMatrices& newMap)
 {
   // check sizes.
   if (newMap.size() != OSIDynamicalSystems->size())

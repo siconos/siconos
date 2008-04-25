@@ -276,7 +276,7 @@ void MLCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
     // Get the W and Theta maps of one of the Unitary Relation - Warning: in the current version, if OSI!=Moreau, this fails.
     // If OSI = MOREAU, centralBlocks = W
     // if OSI = LSODAR, centralBlocks = M (mass matrices)
-    MapOfMatrices centralBlocks;
+    MapOfDSMatrices centralBlocks;
     MapOfDouble Theta; // If OSI = LSODAR, Theta remains empty
     getOSIMaps(UR1, centralBlocks, Theta);
 

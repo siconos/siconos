@@ -251,11 +251,12 @@ void PrimalFrictionContact::initialize()
 
 
   // Connect to the right function according to dim. of the problem
-  // if(contactProblemDim == 2)
+  if (contactProblemDim == 2)
+    ;
   //    primalFrictionContact_driver = &pfc_2D_driver;
-  //else // if(contactProblemDim == 3)
-  //primalFrictionContact_driver = &frictionContact3D_driver;
-
+  else // if(contactProblemDim == 3)
+    //primalFrictionContact_driver = &frictionContact3D_driver;
+    ;
   // Memory allocation for reaction, and velocity
   // If one of them has already been allocated, nothing is done.
   // We suppose that user has chosen a correct size.
@@ -269,10 +270,33 @@ void PrimalFrictionContact::initialize()
     if (velocity->size() != maxSize)
       velocity->resize(maxSize);
   }
+
   if (reaction == NULL)
   {
     reaction = new SimpleVector(maxSize);
     isReactionAllocatedIn = true;
+  }
+  else
+  {
+    if (reaction->size() != maxSize)
+      reaction->resize(maxSize);
+  }
+
+  if (localVelocity == NULL)
+  {
+    localVelocity = new SimpleVector(maxSize);
+    isLocalVelocityAllocatedIn = true;
+  }
+  else
+  {
+    if (localVelocity->size() != maxSize)
+      localVelocity->resize(maxSize);
+  }
+
+  if (localReaction == NULL)
+  {
+    localReaction = new SimpleVector(maxSize);
+    isLocalReactionAllocatedIn = true;
   }
   else
   {
@@ -291,61 +315,79 @@ void PrimalFrictionContact::initialize()
       q->resize(maxSize);
   }
 
-  // get topology
-  Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  //  // get topology
+  //   Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
-  // Note that blocks is up to date since updateBlocks has been called during OneStepNSProblem::initialize()
+  //   // Note that blocks is up to date since updateBlocks has been called during OneStepNSProblem::initialize()
 
-  // Fill vector of friction coefficients
-  UnitaryRelationsSet* I0 = topology->getIndexSet0Ptr();
-  mu = new std::vector<double>();
-  mu->reserve(I0->size());
+  //   // Fill vector of friction coefficients
+  //   UnitaryRelationsSet* I0 = topology->getIndexSet0Ptr();
+  //   mu = new std::vector<double>();
+  //   mu->reserve(I0->size());
 
-  // If the topology is TimeInvariant ie if M structure does not change during simulation:
-  if (topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty())
-  {
-    // Get index set from Simulation
-    UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
-    if (M == NULL)
-    {
-      // Creates and fills M using UR of indexSet
-      M = new OSNSMatrix(indexSet, blocks, MStorageType);
-      isMAllocatedIn = true;
-    }
-    else
-    {
-      M->setStorageType(MStorageType);
-      M->fill(indexSet, blocks);
-    }
+  //   // If the topology is TimeInvariant ie if M structure does not change during simulation:
+  //   if( topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty())
+  //     {
+  //    DynamicalSystemsSet * allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  //    DSIterator itDS= allDS.begin();
 
-    for (ConstUnitaryRelationsIterator itUR = indexSet->begin(); itUR != indexSet->end(); ++itUR)
-    {
+  //    while(itDS != (allDS.end()))
+  //     {
+  //       Osi = simulation->getIntegratorOfDSPtr(*itDS); // get OneStepIntegrator of current dynamical system
+  //       osiType = Osi->getType();
+  //       if(osiType == "Moreau")
+  //  {
+  //    centralBlocks[*itDS] = (static_cast<Moreau*> (Osi))->getWPtr(*itDS); // get its W matrix ( pointer link!)
+  //    Theta[*itDS] = (static_cast<Moreau*> (Osi))->getTheta(*itDS);
+  //  }
+  //       else
+  //  RuntimeException::selfThrow("PrimalFrictionContact::initialize not yet implemented for One step integrator  of type:"+ osiType );
+  //     }
 
-#ifndef WithSmartPtr
-      mu->push_back(static_cast<NewtonImpactFrictionNSL*>((*itUR)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
-#else
-      mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL> ((*itUR)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
-#endif
 
-    }
-  }
-  else // in that case, M and mu will be updated during preCompute
-  {
-    // Default size for M = maxSize
-    if (M == NULL)
-    {
-      if (MStorageType == 0)
-        M = new OSNSMatrix(maxSize, 0);
-      else // if(MStorageType == 1) size = number of blocks = number of UR in the largest considered indexSet
-        M = new OSNSMatrix(simulation->getIndexSetPtr(levelMin)->size(), 1);
-      isMAllocatedIn = true;
-    }
-  }
+  //       // Get index set from Simulation
+  //       UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
+  //       if(M==NULL)
+  //  {
+  //    // Creates and fills M using UR of indexSet
+  //          //    M = new OSNSMatrix(indexSet,blocks,MStorageType);
+  //      M = new OSNSMatrix(allDS,blocks,MStorageType);
+  //      isMAllocatedIn = true;
+  //  }
+  //       else
+  //  {
+  //    M->setStorageType(MStorageType);
+  //    M->fill(allDS,blocks);
+  //  }
+
+  //       for(ConstUnitaryRelationsIterator itUR = indexSet->begin(); itUR!=indexSet->end(); ++itUR) {
+
+  // #ifndef WithSmartPtr
+  //  mu->push_back(static_cast<NewtonImpactFrictionNSL*>( (*itUR)->getInteractionPtr()->getNonSmoothLawPtr() )->getMu());
+  // #else
+  //         mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL> ( (*itUR)->getInteractionPtr()->getNonSmoothLawPtr() )->getMu());
+  // #endif
+
+  //       }
+  //     }
+  //   else // in that case, M and mu will be updated during preCompute
+  //     {
+
+
+  //       // Default size for M = maxSize
+  //       if(M==NULL)
+  //  {
+  //    if(MStorageType == 0)
+  //      M = new OSNSMatrix(maxSize,0);
+  //    else // if(MStorageType == 1) size = number of blocks = number of UR in the largest considered indexSet
+  //      M = new OSNSMatrix(simulation->getIndexSetPtr(levelMin)->size(),1);
+  //    isMAllocatedIn = true;
+  //  }
+  //     }
 }
 
 void PrimalFrictionContact::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
 {
-
   // Computes matrix blocks[UR1][UR2] (and allocates memory if necessary) if UR1 and UR2 have commond DynamicalSystem.
   // How blocks are computed depends explicitely on the type of Relation of each UR.
 
@@ -368,7 +410,7 @@ void PrimalFrictionContact::computeBlock(UnitaryRelation* UR1, UnitaryRelation* 
     DSIterator itDS;
 
     // Get the W and Theta maps of one of the Unitary Relation - Warning: in the current version, if OSI!=Moreau, this fails.
-    MapOfMatrices W;
+    MapOfDSMatrices W;
     MapOfDouble Theta;
     getOSIMaps(UR1, W, Theta);
 
