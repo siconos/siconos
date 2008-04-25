@@ -27,7 +27,7 @@
 #include "SimpleMatrix.h"
 
 // Pointer to function of the type used for drivers for PrimalFrictionContact problems in Numerics
-typedef int (*Driver)(PrimalFrictionContact_Problem*, double*, double*, Solver_Options*, Numerics_Options*);
+typedef int (*PFC_Driver)(PrimalFrictionContact_Problem*, double*, double*, Solver_Options*, Numerics_Options*);
 
 /** Formalization and Resolution of a Friction-Contact Problem
  *
@@ -113,7 +113,7 @@ protected:
   int MStorageType;
 
   /** Pointer to the function used to call the Numerics driver to solve the problem */
-  Driver primalFrictionContact_driver;
+  PFC_Driver primalFrictionContact_driver;
 
 private:
 
@@ -376,7 +376,7 @@ public:
   /** set the driver-function used to solve the problem
       \param a function of prototype Driver
   */
-  inline void setNumericsDriver(Driver newFunction)
+  inline void setNumericsDriver(PFC_Driver newFunction)
   {
     primalFrictionContact_driver = newFunction;
   };

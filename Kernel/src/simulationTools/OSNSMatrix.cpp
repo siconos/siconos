@@ -32,29 +32,29 @@ void OSNSMatrix::updateSizeAndPositions(UnitaryRelationsSet* indexSet)
   //
 
   // Computes real size of the current matrix = sum of the dim. of all UR in indexSet
-  dim = 0;
+  dimRow = 0;
   for (UnitaryRelationsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
   {
-    (*unitaryBlocksPositions)[*it] = dim;
-    dim += (*it)->getNonSmoothLawSize();
+    (*unitaryBlocksPositions)[*it] = dimRow;
+    dimRow += (*it)->getNonSmoothLawSize();
   }
 }
 
 // Default constructor: empty matrix, default storage
 // No allocation for M1 or M2
 OSNSMatrix::OSNSMatrix():
-  dim(0), storageType(0), unitaryBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+  dimRow(0), storageType(0), unitaryBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
 {
   unitaryBlocksPositions = new UR_int();
   numericsMat = new NumericsMatrix;
 }
 
-// Constructor with dimensions (one input: square matrix only)
+// Constructor with dimRowensions (one input: square matrix only)
 OSNSMatrix::OSNSMatrix(unsigned int n, int stor):
-  dim(n), storageType(stor), unitaryBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+  dimRow(n), storageType(stor), unitaryBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
 {
   // Note:
-  // for storageType = 0 (dense) n represents the real dimension of the matrix
+  // for storageType = 0 (dense) n represents the real dimRowension of the matrix
   // and for sparse storage (storageType == 1) the number of unitaryBlocks in a row or column.
 
   if (storageType == 0)
@@ -68,10 +68,29 @@ OSNSMatrix::OSNSMatrix(unsigned int n, int stor):
   unitaryBlocksPositions = new UR_int();
   numericsMat = new NumericsMatrix;
 }
+OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
+  dimRow(n),  dimColumn(m), storageType(stor), unitaryBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+{
+  // Note:
+  // for storageType = 0 (dense) n represents the real dimRowension of the matrix
+  // and for sparse storage (storageType == 1) the number of unitaryBlocks in a row or column.
+
+  if (storageType == 0)
+  {
+    // A zero matrix M of size nXn is built.
+    // unitaryBlocksPositions remains empty (=NULL) since we have no information concerning the UR.
+    M1 = new SimpleMatrix(n, m);
+  }
+  else // if(storageType == 1)
+    //  M2 = new SparseBlockMatrix(n);
+
+    unitaryBlocksPositions = new UR_int();
+  numericsMat = new NumericsMatrix;
+}
 
 // Basic constructor
 OSNSMatrix::OSNSMatrix(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMatrices& unitaryBlocks, int stor):
-  dim(0), storageType(stor), unitaryBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+  dimRow(0), storageType(stor), unitaryBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
 {
   unitaryBlocksPositions = new UR_int();
   numericsMat = new NumericsMatrix;
@@ -79,9 +98,49 @@ OSNSMatrix::OSNSMatrix(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMatrices&
   fill(indexSet, unitaryBlocks);
 }
 
+OSNSMatrix::OSNSMatrix(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSBlocks, int stor):
+  dimRow(0), storageType(stor), unitaryBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+{
+  unitaryBlocksPositions = new UR_int();
+  numericsMat = new NumericsMatrix;
+
+  fill(DSSet, DSBlocks);
+}
+OSNSMatrix::OSNSMatrix(DynamicalSystemsSet* DSSet, UnitaryRelationsSet* indexSet, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks, int stor):
+  dimRow(0), storageType(stor), unitaryBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+{
+  unitaryBlocksPositions = new UR_int();
+  numericsMat = new NumericsMatrix;
+
+  fill(DSSet, indexSet, DSUnitaryBlocks);
+}
+
+OSNSMatrix::OSNSMatrix(UnitaryRelationsSet* indexSet, DynamicalSystemsSet* DSSet,  MapOfUnitaryMapOfDSMatrices& unitaryDSBlocks, int stor):
+  dimRow(0), storageType(stor), unitaryBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+{
+  unitaryBlocksPositions = new UR_int();
+  numericsMat = new NumericsMatrix;
+
+  fill(indexSet, DSSet, unitaryDSBlocks);
+}
+
+OSNSMatrix::OSNSMatrix(UnitaryRelationsSet* indexSet, DynamicalSystemsSet* DSSet, MapOfMapOfUnitaryMatrices& unitaryBlocks,   MapOfDSMatrices& DSBlocks, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks, MapOfUnitaryMapOfDSMatrices& unitaryDSBlocks, int stor):
+  dimRow(0), storageType(stor), unitaryBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+{
+  unitaryBlocksPositions = new UR_int();
+  numericsMat = new NumericsMatrix;
+
+  fill(indexSet, DSSet, unitaryBlocks, DSBlocks, DSUnitaryBlocks, unitaryDSBlocks);
+}
+
+
+
+
+
+
 // Copy of a SiconosMatrix (used when OSNS xml constructor is called with M input in XML file)
 OSNSMatrix::OSNSMatrix(const SiconosMatrix& MSource):
-  dim(MSource.size(0)), storageType(0), unitaryBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+  dimRow(MSource.size(0)), storageType(0), unitaryBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
 {
   unitaryBlocksPositions = new UR_int();
   numericsMat = new NumericsMatrix;
@@ -118,7 +177,7 @@ void OSNSMatrix::fill(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMatrices& 
   if (indexSet == NULL)
     RuntimeException::selfThrow("OSNSMatrix::fill(IndexInt* i, ...), i is a null pointer");
 
-  // Computes dim and unitaryBlocksPositions according to indexSet
+  // Computes dimRow and unitaryBlocksPositions according to indexSet
   updateSizeAndPositions(indexSet);
 
   if (storageType == 0)
@@ -126,11 +185,11 @@ void OSNSMatrix::fill(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMatrices& 
     // === Memory allocation, if required ===
     // Mem. is allocate only if M==NULL or if its size has changed.
     if (M1 == NULL)
-      M1 = new SimpleMatrix(dim, dim);
+      M1 = new SimpleMatrix(dimRow, dimRow);
     else
     {
-      if (M1->size(0) != dim || M1->size(1) != dim)
-        M1->resize(dim, dim);
+      if (M1->size(0) != dimRow || M1->size(1) != dimRow)
+        M1->resize(dimRow, dimRow);
       M1->zero();
     }
 
@@ -169,13 +228,30 @@ void OSNSMatrix::fill(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMatrices& 
   }
   convert();
 }
+void OSNSMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSBlocks)
+{
+  RuntimeException::selfThrow("OSNSMatrix::fill(DynamicalSystemsSet*, MapOfDSMatrices&), Not Yet Implemented");
+}
+void OSNSMatrix::fill(DynamicalSystemsSet* DSSet, UnitaryRelationsSet* indexSet, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks)
+{
+  RuntimeException::selfThrow("OSNSMatrix::fill(DynamicalSystemsSet* , UnitaryRelationsSet* , MapOfDSMapOfUnitaryMatrices& ), Not Yet Implemented");
+}
+void OSNSMatrix::fill(UnitaryRelationsSet* indexSet, DynamicalSystemsSet* DSSet,  MapOfUnitaryMapOfDSMatrices& unitaryDSBlocks)
+{
+  RuntimeException::selfThrow("OSNSMatrix::fill( UnitaryRelationsSet* , DynamicalSystemsSet* , MapOfUnitaryMapOfDSMatrices& ), Not Yet Implemented");
+}
+void OSNSMatrix::fill(UnitaryRelationsSet* indexSet, DynamicalSystemsSet* DSSet,  MapOfMapOfUnitaryMatrices& unitaryBlocks,  MapOfDSMatrices& DSBlocks, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks ,  MapOfUnitaryMapOfDSMatrices& unitaryDSBlocks)
+{
+  RuntimeException::selfThrow("OSNSMatrix::fill(UnitaryRelationsSet*, DynamicalSystemsSet*,  MapOfMapOfUnitaryMatrices&,  MapOfDSMatrices&, MapOfDSMapOfUnitaryMatrices& ,  MapOfUnitaryMapOfDSMatrices&  ), Not Yet Implemented");
+}
+
 
 // convert current matrix to NumericsMatrix structure
 void OSNSMatrix::convert()
 {
   numericsMat->storageType = storageType;
-  numericsMat->size0 = dim;
-  numericsMat->size1 = dim;
+  numericsMat->size0 = dimRow;
+  numericsMat->size1 = dimRow;
   if (storageType == 0)
   {
     numericsMat->matrix0 = M1->getArray(); // Pointer link

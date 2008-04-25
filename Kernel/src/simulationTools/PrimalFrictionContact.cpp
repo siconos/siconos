@@ -249,6 +249,9 @@ void PrimalFrictionContact::initialize()
   // General initialize for OneStepNSProblem
   OneStepNSProblem::initialize();
 
+  updateDSBlocks(); //blocks of M
+  // updateUnitaryDSBlocks(); This computation is not made because, we that UnitaryDSBlocks =H^T
+  updateDSUnitaryBlocks(); // blocks of H
 
   // Connect to the right function according to dim. of the problem
   if (contactProblemDim == 2)
@@ -257,6 +260,7 @@ void PrimalFrictionContact::initialize()
   else // if(contactProblemDim == 3)
     //primalFrictionContact_driver = &frictionContact3D_driver;
     ;
+
   // Memory allocation for reaction, and velocity
   // If one of them has already been allocated, nothing is done.
   // We suppose that user has chosen a correct size.
@@ -315,75 +319,85 @@ void PrimalFrictionContact::initialize()
       q->resize(maxSize);
   }
 
-  //  // get topology
-  //   Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  // get topology
+  Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
-  //   // Note that unitaryBlocks is up to date since updateUnitaryBlocks has been called during OneStepNSProblem::initialize()
+  // Note that unitaryBlocks is up to date since updateUnitaryBlocks has been called during OneStepNSProblem::initialize()
 
-  //   // Fill vector of friction coefficients
-  //   UnitaryRelationsSet* I0 = topology->getIndexSet0Ptr();
-  //   mu = new std::vector<double>();
-  //   mu->reserve(I0->size());
-
-  //   // If the topology is TimeInvariant ie if M structure does not change during simulation:
-  //   if( topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty())
-  //     {
-  //    DynamicalSystemsSet * allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
-  //    DSIterator itDS= allDS.begin();
-
-  //    while(itDS != (allDS.end()))
-  //     {
-  //       Osi = simulation->getIntegratorOfDSPtr(*itDS); // get OneStepIntegrator of current dynamical system
-  //       osiType = Osi->getType();
-  //       if(osiType == "Moreau")
-  //  {
-  //    centralUnitaryBlocks[*itDS] = (static_cast<Moreau*> (Osi))->getWPtr(*itDS); // get its W matrix ( pointer link!)
-  //    Theta[*itDS] = (static_cast<Moreau*> (Osi))->getTheta(*itDS);
-  //  }
-  //       else
-  //  RuntimeException::selfThrow("PrimalFrictionContact::initialize not yet implemented for One step integrator  of type:"+ osiType );
-  //     }
+  // Fill vector of friction coefficients
+  UnitaryRelationsSet* I0 = topology->getIndexSet0Ptr();
+  mu = new std::vector<double>();
+  mu->reserve(I0->size());
 
 
-  //       // Get index set from Simulation
-  //       UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
-  //       if(M==NULL)
-  //  {
-  //    // Creates and fills M using UR of indexSet
-  //          //    M = new OSNSMatrix(indexSet,unitaryBlocks,MStorageType);
-  //      M = new OSNSMatrix(allDS,unitaryBlocks,MStorageType);
-  //      isMAllocatedIn = true;
-  //  }
-  //       else
-  //  {
-  //    M->setStorageType(MStorageType);
-  //    M->fill(allDS,unitaryBlocks);
-  //  }
-
-  //       for(ConstUnitaryRelationsIterator itUR = indexSet->begin(); itUR!=indexSet->end(); ++itUR) {
-
-  // #ifndef WithSmartPtr
-  //  mu->push_back(static_cast<NewtonImpactFrictionNSL*>( (*itUR)->getInteractionPtr()->getNonSmoothLawPtr() )->getMu());
-  // #else
-  //         mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL> ( (*itUR)->getInteractionPtr()->getNonSmoothLawPtr() )->getMu());
-  // #endif
-
-  //       }
-  //     }
-  //   else // in that case, M and mu will be updated during preCompute
-  //     {
+  DynamicalSystemsSet *allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();;
 
 
-  //       // Default size for M = maxSize
-  //       if(M==NULL)
-  //  {
-  //    if(MStorageType == 0)
-  //      M = new OSNSMatrix(maxSize,0);
-  //    else // if(MStorageType == 1) size = number of unitaryBlocks = number of UR in the largest considered indexSet
-  //      M = new OSNSMatrix(simulation->getIndexSetPtr(levelMin)->size(),1);
-  //    isMAllocatedIn = true;
-  //  }
-  //     }
+  // If the topology is TimeInvariant ie if M structure does not change during simulation:
+  if (topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty())
+  {
+
+    if (M == NULL)
+    {
+      // Creates and fills M using UR of indexSet
+      M = new OSNSMatrix(allDS, DSBlocks, MStorageType);
+      isMAllocatedIn = true;
+    }
+    else
+    {
+      M->setStorageType(MStorageType);
+      M->fill(allDS, DSBlocks);
+    }
+    // Get index set from Simulation
+    UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
+    if (H == NULL)
+    {
+      // Creates and fills M using UR of indexSet
+      H = new OSNSMatrix(allDS, indexSet, DSUnitaryBlocks, MStorageType);
+      isHAllocatedIn = true;
+    }
+    else
+    {
+      H->setStorageType(MStorageType);
+      H->fill(allDS, indexSet, DSUnitaryBlocks);
+    }
+
+
+
+
+    for (ConstUnitaryRelationsIterator itUR = indexSet->begin(); itUR != indexSet->end(); ++itUR)
+    {
+
+#ifndef WithSmartPtr
+      mu->push_back(static_cast<NewtonImpactFrictionNSL*>((*itUR)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
+#else
+      mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL> ((*itUR)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
+#endif
+
+    }
+  }
+  else // in that case, M and mu will be updated during preCompute
+  {
+    // Default size for M = maxSize
+    if (M == NULL)
+    {
+      if (MStorageType == 0)
+        M = new OSNSMatrix(maxSize, 0);
+      else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered DynamicalSystemsSet
+        M = new OSNSMatrix(simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems()->size(), 1);
+      isMAllocatedIn = true;
+    }
+    if (H == NULL)
+    {
+      if (MStorageType == 0)
+        H = new OSNSMatrix(maxSize, 0);
+      else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered DynamicalSystemsSet
+
+
+        H = new OSNSMatrix(simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems()->size(), simulation->getIndexSetPtr(levelMin)->size()   , 1);
+      isMAllocatedIn = true;
+    }
+  }
 }
 
 void PrimalFrictionContact::computeUnitaryBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)

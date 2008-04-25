@@ -27,6 +27,7 @@ Note that not all files from the current location are listed below, since some o
 #include "EventsManager.h"
 #include "EventFactory.h"
 #include "FrictionContact.h"
+#include "PrimalFrictionContact.h"
 #include "TimeDiscretisation.h"
 #include "TimeStepping.h"
 #include "LCP.h"

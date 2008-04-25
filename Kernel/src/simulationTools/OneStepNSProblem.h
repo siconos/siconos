@@ -532,10 +532,6 @@ public:
   virtual void computeDSUnitaryBlock(DynamicalSystem*, UnitaryRelation*);
 
 
-
-
-
-
   /** initialize the problem(compute topology ...)
     */
   virtual void initialize();
