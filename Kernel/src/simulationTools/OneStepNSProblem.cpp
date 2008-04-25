@@ -109,7 +109,7 @@ OneStepNSProblem::~OneStepNSProblem()
   numerics_options = NULL;
 }
 
-SiconosMatrix* OneStepNSProblem::getBlockPtr(UnitaryRelation* UR1, UnitaryRelation* UR2) const
+SiconosMatrix* OneStepNSProblem::getUnitaryBlockPtr(UnitaryRelation* UR1, UnitaryRelation* UR2) const
 {
   // if UR2 is not given or NULL, UR2=UR1, ie we get the diagonal unitaryBlock.
   if (UR2 == NULL) UR2 = UR1;
@@ -126,7 +126,7 @@ SiconosMatrix* OneStepNSProblem::getBlockPtr(UnitaryRelation* UR1, UnitaryRelati
 
 }
 
-void OneStepNSProblem::setBlocks(const MapOfMapOfUnitaryMatrices& newMap)
+void OneStepNSProblem::setUnitaryBlocks(const MapOfMapOfUnitaryMatrices& newMap)
 {
   //   clearUnitaryBlocks();
   //   unitaryBlocks = newMap;
@@ -155,6 +155,75 @@ void OneStepNSProblem::clearUnitaryBlocks()
   unitaryBlocks.clear();
   isUnitaryBlockAllocatedIn.clear();
 }
+
+SiconosMatrix* OneStepNSProblem::getDSBlockPtr(DynamicalSystem* DS1) const
+{
+
+  ConstMatIterator itDS = DSBlocks.find(DS1);
+  return itDS->second;
+
+}
+
+
+void OneStepNSProblem::setDSBlocks(const MapOfDSMatrices& newMap)
+{
+  RuntimeException::selfThrow("OneStepNSProblem::setBlocks - Not implemented: forbidden operation.");
+}
+
+void OneStepNSProblem::clearDSBlocks()
+{
+  MatIterator itDS;
+  for (itDS = DSBlocks.begin(); itDS != DSBlocks.end() ; ++itDS)
+  {
+    if (isDSBlockAllocatedIn[itDS->first])
+      delete DSBlocks[itDS->first];
+  }
+  DSBlocks.clear();
+  isDSBlockAllocatedIn.clear();
+}
+
+
+
+SiconosMatrix* OneStepNSProblem::getUnitaryDSBlockPtr(UnitaryRelation* UR1, DynamicalSystem* DS2) const
+{
+  ConstUnitaryDSMatrixRowIterator itRow = unitaryDSBlocks.find(UR1);
+
+  // itRow: we get the map of DSBlocks that corresponds to UR1.
+  // Then, thanks to itCol, we iterate through this map to find DS2 and the UnitaryDSBlock that corresonds to UR1 and DS2
+  ConstMatIterator itCol = (itRow->second).find(DS2);
+
+  if (itCol == (itRow->second).end()) // if UR1 and DS2 are not connected
+    RuntimeException::selfThrow("OneStepNSProblem - getUnitaryDSBlockPtr(UR1,DS2) : no unitaryDSBlock corresonds to UR1 and DS2, ie the Unitary Relation and the DynamicalSystem are not connected.");
+
+  return itCol->second;
+
+}
+
+void OneStepNSProblem::setUnitaryDSBlocks(const MapOfUnitaryMapOfDSMatrices& newMap)
+{
+  RuntimeException::selfThrow("OneStepNSProblem::setBlocks - Not implemented: forbidden operation.");
+}
+
+void OneStepNSProblem::clearUnitaryDSBlocks()
+{
+  UnitaryDSMatrixRowIterator itRow;
+  MatIterator itCol;
+  //   for(itRow = unitaryDSBlocks.begin(); itRow!= unitaryDSBlocks.end() ; ++itRow)
+  //     {
+  //       for(itCol = (itRow->second).begin(); itCol!=(itRow->second).end(); ++itCol)
+  //  {
+  //    if(isUnitaryDSBlockAllocatedIn[itRow->first][itCol->first])
+  //      delete unitaryDSBlocks[itRow->first][itCol->first];
+  //  }
+  //     }
+  //   unitaryDSBlocks.clear();
+  //   isUnitaryDSBlockAllocatedIn.clear();
+}
+
+
+
+
+
 
 void OneStepNSProblem::setNonSmoothSolverPtr(NonSmoothSolver * newSolv)
 {

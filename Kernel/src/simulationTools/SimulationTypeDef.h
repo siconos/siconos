@@ -78,6 +78,9 @@ typedef MapOfUnitaryMatrices::iterator UnitaryMatrixColumnIterator ;
 /** Const iterator through a MapOfUnitaryMatrices */
 typedef MapOfUnitaryMatrices::const_iterator ConstUnitaryMatrixColumnIterator;
 
+
+
+
 /** Map of MapOfUnitaryMatrices with a UnitaryRelation as a key - Used for extra-diagonal unitaryBlock-terms in assembled matrices of LCP etc ..*/
 typedef std::map< UnitaryRelation* , MapOfUnitaryMatrices >  MapOfMapOfUnitaryMatrices;
 
@@ -86,6 +89,9 @@ typedef MapOfMapOfUnitaryMatrices::iterator UnitaryMatrixRowIterator ;
 
 /** Const iterator through a MapOfMapOfUnitaryMatrices */
 typedef MapOfMapOfUnitaryMatrices::const_iterator ConstUnitaryMatrixRowIterator ;
+
+
+
 
 /** Map of MapOfDSUnitaryMatrices with a DynamicalSystem as a key - Used for unitaryBlock-terms indexed by a DynamicalSystem and an UnitaryRelation in assembled matrices of LCP etc ..*/
 typedef std::map< DynamicalSystem* , MapOfUnitaryMatrices >  MapOfDSMapOfUnitaryMatrices;
@@ -96,6 +102,9 @@ typedef MapOfDSMapOfUnitaryMatrices::iterator DSUnitaryMatrixRowIterator ;
 /** Const iterator through a MapOfDSMapOfUnitaryMatrices */
 typedef MapOfDSMapOfUnitaryMatrices::const_iterator ConstDSUnitaryMatrixRowIterator ;
 
+
+
+
 /** Map of MapOfUnitaryMapOfDSMatrices with a DynamicalSystem as a key - Used for unitaryBlock-terms indexed by a DynamicalSystem and an UnitaryRelation in assembled matrices of LCP etc ..*/
 typedef std::map< UnitaryRelation* , MapOfDSMatrices >  MapOfUnitaryMapOfDSMatrices;
 
@@ -103,7 +112,7 @@ typedef std::map< UnitaryRelation* , MapOfDSMatrices >  MapOfUnitaryMapOfDSMatri
 typedef MapOfUnitaryMapOfDSMatrices::iterator UnitaryDSMatrixRowIterator ;
 
 /** Const iterator through a MapOfUnitaryMapOfDSMatrices */
-typedef MapOfMapOfUnitaryMatrices::const_iterator ConstUnitaryDSMatrixRowIterator ;
+typedef MapOfUnitaryMapOfDSMatrices::const_iterator ConstUnitaryDSMatrixRowIterator ;
 
 
 

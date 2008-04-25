@@ -98,6 +98,31 @@ protected:
       the unitaryBlock has been allocated in OneStepNSProblem, else false. */
   MapOfMapOfBool isUnitaryBlockAllocatedIn;
 
+  /** map that links each DynamicalSystem with the corresponding DSBlocks
+      map < DynamicalSystem* , SiconosMatrix * > */
+  MapOfDSMatrices DSBlocks;
+  /** inside-class allocation flags. To each couple of Unitary Relations corresponds a bool, true if
+      the unitaryBlock has been allocated in OneStepNSProblem, else false. */
+  MapOfBool isDSBlockAllocatedIn;
+
+  /** map that links each UnitaryRelation and DynamicalSystem with the corresponding unitaryDSBlocks
+      map < UnitaryRelationA * , map < DynamicalSystemB * , unitaryDSBlockMatrixAB > >
+      UnitaryRelation A and DynamicalSystem B are coupled through unitaryDSBlockMatrixAB.  */
+  MapOfUnitaryMapOfDSMatrices unitaryDSBlocks;
+
+  /** inside-class allocation flags. To each couple of Unitary Relations corresponds a bool, true if
+      the unitaryDSBlock has been allocated in OneStepNSProblem, else false. */
+  MapOfMapOfBool isUnitaryDSBlockAllocatedIn;
+
+  /** map that links each DynamicalSystem and UnitaryRelation with the corresponding DSunitaryBlocks
+      map < DynamicalSystemA * , map < UnitaryRelationB* , DSunitaryBlockMatrixAB > >
+      Dynamical A and UnitaryRelation B are coupled through DSunitaryBlockMatrixAB.  */
+  MapOfDSMapOfUnitaryMatrices DSunitaryBlocks;
+
+  /** inside-class allocation flags. To each couple of Unitary Relations corresponds a bool, true if
+      the DSunitaryBlock has been allocated in OneStepNSProblem, else false. */
+  MapOfMapOfBool isDSUnitaryBlockAllocatedIn;
+
   /** Solver for Non Smooth Problem*/
   NonSmoothSolver* solver;
 
@@ -222,10 +247,14 @@ public:
     sizeOutput = newVal;
   }
 
+
+
+
+
   /** get the unitaryBlocks matrices map
    *  \return a MapOfMapOfUnitaryMatrices
    */
-  inline const MapOfMapOfUnitaryMatrices getBlocks() const
+  inline const MapOfMapOfUnitaryMatrices getUnitaryBlocks() const
   {
     return unitaryBlocks;
   };
@@ -235,16 +264,67 @@ public:
    *  \param a pointer to UnitaryRelation, optional, default value = NULL, in that case UR2 = UR1 (ie get "diagonal" unitaryBlock)
    *  \return a pointer to SiconosMatrix
    */
-  SiconosMatrix* getBlockPtr(UnitaryRelation*, UnitaryRelation* = NULL) const ;
+  SiconosMatrix* getUnitaryBlockPtr(UnitaryRelation*, UnitaryRelation* = NULL) const ;
 
   /** set the map of unitary matrices
    *  \param a MapOfMapOfUnitaryMatrices
    */
-  void setBlocks(const MapOfMapOfUnitaryMatrices&);
+  void setUnitaryBlocks(const MapOfMapOfUnitaryMatrices&);
 
   /** clear the map of unitaryBlocks (ie release memory)
    */
   void clearUnitaryBlocks();
+
+  /** get the DSBlocks matrices map
+   *  \return a MapOfDSMatrices
+   */
+  inline const MapOfDSMatrices getDSBlocks() const
+  {
+    return DSBlocks;
+  };
+
+  /** get the DSBlock orresponding to DS1
+   *  \param a pointer to DynamicalSystem, DS1
+   *  \return a pointer to SiconosMatrix
+   */
+  SiconosMatrix* getDSBlockPtr(DynamicalSystem*) const ;
+
+  /** set the map of DS matrices
+   *  \param a MapOfDSMatrices
+   */
+  void setDSBlocks(const MapOfDSMatrices&);
+
+  /** clear the map of DSBlocks (ie release memory)
+   */
+  void clearDSBlocks();
+
+
+  /** get the unitaryDSBlocks matrices map
+   *  \return a MapOfUnitaryMapOfDSMatrices
+   */
+  inline const MapOfUnitaryMapOfDSMatrices getUnitaryDSBlocks() const
+  {
+    return unitaryDSBlocks;
+  };
+
+  /** get the unitaryDSBlock corresponding to UR1 and DS2
+   *  \param a pointer to UnitaryRelation, UR1
+   *  \param a pointer to DynamicalSystem DS2
+   *  \return a pointer to SiconosMatrix
+   */
+  SiconosMatrix* getUnitaryDSBlockPtr(UnitaryRelation*, DynamicalSystem*) const ;
+
+  /** set the map of unitary matrices
+   *  \param a MapOfMapOfUnitaryMatrices
+   */
+  void setUnitaryDSBlocks(const MapOfUnitaryMapOfDSMatrices&);
+
+  /** clear the map of unitaryBlocks (ie release memory)
+   */
+  void clearUnitaryDSBlocks();
+
+
+
 
   /** get the NonSmoothSolver
    *  \return a pointer on NonSmoothSolver
