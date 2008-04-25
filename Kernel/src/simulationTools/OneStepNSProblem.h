@@ -96,14 +96,14 @@ protected:
 
   /** inside-class allocation flags. To each couple of Unitary Relations corresponds a bool, true if
       the unitaryBlock has been allocated in OneStepNSProblem, else false. */
-  MapOfMapOfBool isUnitaryBlockAllocatedIn;
+  MapOfMapOfUnitaryBool isUnitaryBlockAllocatedIn;
 
   /** map that links each DynamicalSystem with the corresponding DSBlocks
       map < DynamicalSystem* , SiconosMatrix * > */
   MapOfDSMatrices DSBlocks;
   /** inside-class allocation flags. To each couple of Unitary Relations corresponds a bool, true if
       the unitaryBlock has been allocated in OneStepNSProblem, else false. */
-  MapOfBool isDSBlockAllocatedIn;
+  MapOfDSBool isDSBlockAllocatedIn;
 
   /** map that links each UnitaryRelation and DynamicalSystem with the corresponding unitaryDSBlocks
       map < UnitaryRelationA * , map < DynamicalSystemB * , unitaryDSBlockMatrixAB > >
@@ -112,7 +112,7 @@ protected:
 
   /** inside-class allocation flags. To each couple of Unitary Relations corresponds a bool, true if
       the unitaryDSBlock has been allocated in OneStepNSProblem, else false. */
-  MapOfMapOfBool isUnitaryDSBlockAllocatedIn;
+  MapOfMapOfUnitaryBool isUnitaryDSBlockAllocatedIn;
 
   /** map that links each DynamicalSystem and UnitaryRelation with the corresponding DSunitaryBlocks
       map < DynamicalSystemA * , map < UnitaryRelationB* , DSunitaryBlockMatrixAB > >
@@ -121,7 +121,7 @@ protected:
 
   /** inside-class allocation flags. To each couple of Unitary Relations corresponds a bool, true if
       the DSunitaryBlock has been allocated in OneStepNSProblem, else false. */
-  MapOfMapOfBool isDSUnitaryBlockAllocatedIn;
+  MapOfMapOfUnitaryBool isDSUnitaryBlockAllocatedIn;
 
   /** Solver for Non Smooth Problem*/
   NonSmoothSolver* solver;

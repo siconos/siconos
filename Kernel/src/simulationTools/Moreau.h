@@ -66,7 +66,7 @@ private:
   MapOfDouble thetaMap;
 
   /** Stl map that associates a bool to each DynamicalSystem of the OSI - If true, then W has been allocated inside the class.*/
-  MapOfBool isWAllocatedInMap;
+  MapOfDSBool isWAllocatedInMap;
 
   /** Default constructor
    */
@@ -117,9 +117,9 @@ public:
   };
 
   /** get isWAllocatedIn map
-   *  \return a MapOfBool
+   *  \return a MapOfDSBool
    */
-  inline MapOfBool getIsWAllocatedInMap() const
+  inline MapOfDSBool getIsWAllocatedInMap() const
   {
     return isWAllocatedInMap;
   };

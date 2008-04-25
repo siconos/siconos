@@ -65,7 +65,7 @@ typedef std::map<DynamicalSystem*, double> MapOfDouble;
 typedef MapOfDouble::iterator DoubleIterator;
 
 /** Map of bool; key = the related DS */
-typedef std::map<DynamicalSystem*, bool> MapOfBool;
+typedef std::map<DynamicalSystem*, bool> MapOfDSBool;
 
 // ================== Objects to handle UnitaryRelations ==================
 
@@ -117,7 +117,7 @@ typedef MapOfUnitaryMapOfDSMatrices::const_iterator ConstUnitaryDSMatrixRowItera
 
 
 /** Map of map of bools, with UnitaryRelations as keys */
-typedef std::map< UnitaryRelation* , std::map<UnitaryRelation*, bool> >  MapOfMapOfBool;
+typedef std::map< UnitaryRelation* , std::map<UnitaryRelation*, bool> >  MapOfMapOfUnitaryBool;
 
 /** Vector that contains a sequel of sets of UnitaryRelations*/
 typedef std::vector< UnitaryRelationsSet* > VectorOfSetOfUnitaryRelations;
