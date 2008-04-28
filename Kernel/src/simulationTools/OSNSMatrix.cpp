@@ -170,6 +170,13 @@ unsigned int OSNSMatrix::getPositionOfUnitaryBlock(UnitaryRelation* UR) const
     RuntimeException::selfThrow("OSNSMatrix::getPositionOfUnitaryBlock(UnitaryRelation ur), ur does not belong to the index set used to built the OSNS matrix.");
   return it->second;
 }
+unsigned int OSNSMatrix::getPositionOfDSBlock(DynamicalSystem* DS) const
+{
+  DS_int::const_iterator it = DSBlocksPositions->find(DS);
+  if (it == DSBlocksPositions->end())
+    RuntimeException::selfThrow("OSNSMatrix::getPositionOfUnitaryBlock(UnitaryRelation ur), ur does not belong to the index set used to built the OSNS matrix.");
+  return it->second;
+}
 
 // Fill the SparseMat
 void OSNSMatrix::fill(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMatrices& unitaryBlocks)
@@ -228,6 +235,7 @@ void OSNSMatrix::fill(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMatrices& 
   }
   convert();
 }
+
 void OSNSMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSBlocks)
 {
   RuntimeException::selfThrow("OSNSMatrix::fill(DynamicalSystemsSet*, MapOfDSMatrices&), Not Yet Implemented");

@@ -90,6 +90,12 @@ protected:
    */
   UR_int* unitaryBlocksPositions;
 
+  /** map that links each DynamicalSystem with an int that gives the position (in number of scalar elements, not DSBlocks) \n
+   * of the corresponding DSBlock matrix in the full matrix (M in PrimalFrictionalCase case) - Warning: it depends on the considered index set \n
+   * (ie on which constraints are "active")
+   */
+  DS_int* DSBlocksPositions;
+
   /** Numerics structure to be filled  */
   NumericsMatrix* numericsMat;
 
@@ -202,6 +208,11 @@ public:
 
   /** get the position (real, not unitaryBlock) of the first element of the unitaryBlock which corresponds to UR
       \param UR UnitaryRelation from which position is required
+  */
+  unsigned int getPositionOfDSBlock(DynamicalSystem*) const;
+
+  /** get the position (real, not DSBlock) of the first element of the DSBlock which corresponds to DS
+      \param DS DynamicalSystem  from which position is required
   */
   unsigned int getPositionOfUnitaryBlock(UnitaryRelation*) const;
 

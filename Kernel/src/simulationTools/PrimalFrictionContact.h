@@ -76,6 +76,9 @@ protected:
   /** Type (dimension) of the contact problem (2D or 3D) */
   int contactProblemDim;
 
+  /** size of the local problem to solve */
+  unsigned int sizeLocalOutput;
+
   /** contains the vector velocity of a PrimalFrictionContact system */
   SimpleVector *velocity;
 
@@ -150,6 +153,22 @@ public:
   inline int getPrimalFrictionContactDim() const
   {
     return contactProblemDim;
+  }
+
+  /** get dimension of the problem
+   *  \return an unsigned ing
+   */
+  inline const unsigned int getLocalSizeOutput() const
+  {
+    return sizeLocalOutput;
+  }
+
+  /** set the value of sizeOutput
+   *  \param an unsigned int
+   */
+  inline void setLocalSizeOutput(const unsigned int newVal)
+  {
+    sizeLocalOutput = newVal;
   }
 
   // --- Velocity ---
@@ -393,6 +412,19 @@ public:
    *  \param a pointer to UnitaryRelation
    */
   void computeUnitaryBlock(UnitaryRelation*, UnitaryRelation*);
+
+  /** computes DSBlock-matrix that corresponds to DS1
+   *  Move this to Unitary Relation class?
+   *  \param a pointer to DynamicalSystem DS1
+   */
+  void computeDSBlock(DynamicalSystem*);
+
+  /** computes  UnitaryDSBlock-matrix that corresponds to UR1 and DS2
+   *  Move this to Unitary Relation class?
+   *  \param a pointer to UnitaryRelation UR1
+   *  \param a pointer to DynamicalSystems DS2
+   */
+  void computeUnitaryDSBlock(UnitaryRelation*, DynamicalSystem*);
 
   /** compute vector q
    *  \param double : current time

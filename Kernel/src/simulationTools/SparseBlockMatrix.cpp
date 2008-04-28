@@ -22,7 +22,7 @@ using namespace std;
 
 // Default constructor: empty matrix
 SparseBlockMatrix::SparseBlockMatrix():
-  nc(0), nbNonNullBlocks(0), numericsMatSparse(NULL), MSparseBlock(NULL), blocksList(NULL), diagSizes(NULL), rowPos(NULL), colPos(NULL)
+  nr(0), nbNonNullBlocks(0), numericsMatSparse(NULL), MSparseBlock(NULL), blocksList(NULL), diagSizes(NULL), rowPos(NULL), colPos(NULL)
 {
   MSparseBlock = new SparseMat2();
   numericsMatSparse = new SparseBlockStructuredMatrix();
@@ -34,43 +34,43 @@ SparseBlockMatrix::SparseBlockMatrix():
 
 // Constructor with dimensions
 SparseBlockMatrix::SparseBlockMatrix(unsigned int nRow):
-  nc(nRow), nbNonNullBlocks(0), numericsMatSparse(NULL), MSparseBlock(NULL), blocksList(NULL), diagSizes(NULL), rowPos(NULL), colPos(NULL)
+  nr(nRow), nbNonNullBlocks(0), numericsMatSparse(NULL), MSparseBlock(NULL), blocksList(NULL), diagSizes(NULL), rowPos(NULL), colPos(NULL)
 {
-  // Only square-blocks matrices for the moment (ie nRow = nc = nCol)
+  // Only square-blocks matrices for the moment (ie nRow = nr = nrol)
 
   // Allocate memory and fill in the matrix
-  nbNonNullBlocks = nc;
-  // rowPos, rowCol ... are initialized with nc to reserve at first step the maximum possible (according to given nc) space in memory.
+  nbNonNullBlocks = nr;
+  // rowPos, rowCol ... are initialized with nr to reserve at first step the maximum possible (according to given nr) space in memory.
   // Thus a future resize will not require memory allocation or copy.
 
-  MSparseBlock = new SparseMat2(nc, nc);
+  MSparseBlock = new SparseMat2(nr, nr);
   numericsMatSparse = new SparseBlockStructuredMatrix;
   blocksList = new std::vector<double*>();
   diagSizes = new IndexInt();
   rowPos = new IndexInt();
   colPos = new IndexInt();
-  blocksList->reserve(nc);
-  diagSizes->reserve(nc);
-  rowPos->reserve(nc);
-  colPos->reserve(nc);
+  blocksList->reserve(nr);
+  diagSizes->reserve(nr);
+  rowPos->reserve(nr);
+  colPos->reserve(nr);
 }
 
 // Basic constructor
 SparseBlockMatrix::SparseBlockMatrix(UnitaryRelationsSet* I, MapOfMapOfUnitaryMatrices& blocks):
-  nc(0), nbNonNullBlocks(0), numericsMatSparse(NULL), MSparseBlock(NULL), blocksList(NULL), diagSizes(NULL), rowPos(NULL), colPos(NULL)
+  nr(0), nbNonNullBlocks(0), numericsMatSparse(NULL), MSparseBlock(NULL), blocksList(NULL), diagSizes(NULL), rowPos(NULL), colPos(NULL)
 {
   // Allocate memory and fill in the matrix
-  nc = I->size();
-  MSparseBlock = new SparseMat2(nc, nc);
+  nr = I->size();
+  MSparseBlock = new SparseMat2(nr, nr);
   numericsMatSparse = new SparseBlockStructuredMatrix();
   blocksList = new std::vector<double*>;
-  blocksList->reserve(nc);
+  blocksList->reserve(nr);
   diagSizes = new IndexInt();
-  diagSizes->reserve(nc);
+  diagSizes->reserve(nr);
   rowPos = new IndexInt();
-  rowPos->reserve(nc);
+  rowPos->reserve(nr);
   colPos = new IndexInt();
-  colPos->reserve(nc);
+  colPos->reserve(nr);
   fill(I, blocks);
 }
 
@@ -105,11 +105,11 @@ void SparseBlockMatrix::fill(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMat
     RuntimeException::selfThrow("SparseBlockMatrix::fill(IndexInt* i, ...), i is a null pointer");
 
   // Number of blocks in a row = number of active constraints.
-  nc = indexSet->size();
+  nr = indexSet->size();
 
   // (re)allocate memory for ublas matrix
-  //MSparseBlock->resize(nc,nc,false);
-  diagSizes->resize(nc);
+  //MSparseBlock->resize(nr,nr,false);
+  diagSizes->resize(nr);
 
   size_t row = 0; // (block) row position
   size_t col = 0; // (block) col. position
@@ -162,7 +162,7 @@ void SparseBlockMatrix::fill(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMat
 // convert MSparseBlock to numerics structure
 void SparseBlockMatrix::convert()
 {
-  numericsMatSparse->size = nc;
+  numericsMatSparse->size = nr;
   numericsMatSparse->nbblocks = nbNonNullBlocks;
   // Next copies: pointer links!!
   numericsMatSparse->blocksize =  &((*diagSizes)[0]);
@@ -182,7 +182,7 @@ void SparseBlockMatrix::convert()
 // Display data
 void SparseBlockMatrix::display() const
 {
-  cout << "----- Sparse Block Matrix with " << nc << " blocks in a row/col and " << nbNonNullBlocks << " non-null blocks" << endl;
+  cout << "----- Sparse Block Matrix with " << nr << " blocks in a row/col and " << nbNonNullBlocks << " non-null blocks" << endl;
   cout << "Non null blocks positions are (row index and columns index):" << endl;
   print(rowPos->begin(), rowPos->end());
   print(colPos->begin(), colPos->end());

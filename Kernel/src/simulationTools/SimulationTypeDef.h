@@ -64,6 +64,12 @@ typedef std::map<DynamicalSystem*, double> MapOfDouble;
 /** Iterator through a map of double */
 typedef MapOfDouble::iterator DoubleIterator;
 
+/** Map of double; key = the related DS */
+typedef std::map<DynamicalSystem*, unsigned  int> DS_int;
+
+/** Iterator through a map of double */
+typedef MapOfDouble::iterator DoubleIterator;
+
 /** Map of bool; key = the related DS */
 typedef std::map<DynamicalSystem*, bool> MapOfDSBool;
 

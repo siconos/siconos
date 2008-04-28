@@ -77,8 +77,10 @@ typedef  boost::numeric::ublas::compressed_matrix<SiconosMatrix*> SparseMat2;
 class SparseBlockMatrix
 {
 private:
+  /** Number of blocks in  row*/
+  unsigned int nr;
 
-  /** Number of blocks in a row/col*/
+  /** Number of blocks in  col*/
   unsigned int nc;
 
   /** Total number of non-null blocks in the matrix */
@@ -132,7 +134,7 @@ public:
   /** get size (in block-components) */
   inline const unsigned int getNumberOfBlocksInARow() const
   {
-    return nc;
+    return nr;
   };
 
   /** get total number of non-null blocks */
