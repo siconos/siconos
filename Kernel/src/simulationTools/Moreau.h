@@ -57,7 +57,7 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
  */
 class Moreau : public OneStepIntegrator
 {
-private:
+protected:
 
   /** Stl map that associates a W Moreau matrix to each DynamicalSystem of the OSI */
   MapOfDSMatrices WMap;
@@ -68,6 +68,7 @@ private:
   /** Stl map that associates a bool to each DynamicalSystem of the OSI - If true, then W has been allocated inside the class.*/
   MapOfDSBool isWAllocatedInMap;
 
+private:
   /** Default constructor
    */
   Moreau();
@@ -103,7 +104,7 @@ public:
 
   /** destructor
    */
-  ~Moreau();
+  virtual ~Moreau();
 
   // --- GETTERS/SETTERS ---
   // -- W --
@@ -205,7 +206,7 @@ public:
 
   /** integrates the Dynamical System linked to this integrator without boring the constraints
    */
-  void computeFreeState();
+  virtual void computeFreeState();
 
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
    *  \param double: tinit, initial time
@@ -218,7 +219,7 @@ public:
   /** updates the state of the Dynamical Systems
    *  \param unsigned int: level of interest for the dynamics: not used at the time
    */
-  void updateState(unsigned int);
+  virtual void updateState(unsigned int);
 
   /** copy the matrix W of the OneStepNSProblem to the XML tree
    *  \exception RuntimeException
