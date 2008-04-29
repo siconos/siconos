@@ -465,6 +465,11 @@ public:
    */
   void computeQ(double time);
 
+  /** compute vector tildeLocalVelocity
+   *  \param double : current time
+   */
+  void computeTildeLocalVelocity(double time);
+
   /** pre-treatment for LCP
    *  \param double : current time
    */

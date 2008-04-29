@@ -30,6 +30,7 @@
 #include "NewtonImpactFrictionNSL.h"
 #include "NewtonImpactFrictionNSL.h"
 #include "Moreau.h" // Numerics Header
+#include "LagrangianDS.h"
 
 using namespace std;
 
@@ -337,7 +338,16 @@ void PrimalFrictionContact::initialize()
     if (reaction->size() != maxSize)
       reaction->resize(maxSize);
   }
-
+  if (tildeLocalVelocity == NULL)
+  {
+    tildeLocalVelocity = new SimpleVector(maxSize);
+    isTildeLocalVelocityAllocatedIn = true;
+  }
+  else
+  {
+    if (tildeLocalVelocity->size() != maxSize)
+      tildeLocalVelocity->resize(maxSize);
+  }
   if (q == NULL)
   {
     q = new SimpleVector(maxSize);
@@ -489,19 +499,20 @@ void PrimalFrictionContact::computeQ(const double time)
 
   DynamicalSystemsSet *allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();;
   DSIterator itDS;
+  unsigned int sizeDS;
   OneStepIntegrator * Osi;
   string osiType; // type of the current one step integrator
   string dsType; // type of the current Dynamical System
-
   unsigned int pos = 0;
   for (itDS = allDS->begin(); itDS !=  allDS->end(); ++itDS)
   {
     pos = M->getPositionOfDSBlock(*itDS);
     Osi = simulation->getIntegratorOfDSPtr(*itDS);
     osiType = Osi->getType();
-    if (osiType == "Moreau")
+    if (osiType == "Moreau2")
     {
-      // =(static_cast<Moreau*> (Osi))->getForceFreePtr(DS);
+      sizeDS = (*itDS)->getDim();
+      setBlock(Osi->getWorkX(*itDS)  , q, sizeDS, 0, pos);
     }
     else
     {
@@ -510,12 +521,35 @@ void PrimalFrictionContact::computeQ(const double time)
   }
 }
 
+void PrimalFrictionContact::computeTildeLocalVelocity(const double time)
+{
+  if (tildeLocalVelocity->size() != sizeLocalOutput)
+    tildeLocalVelocity->resize(sizeLocalOutput);
+  tildeLocalVelocity->zero();
+  // === Get index set from Simulation ===
+  UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
+
+  // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
+
+  unsigned int pos = 0;
+  UnitaryRelationsIterator itCurrent, itLiked;
+  string simulationType = simulation->getType();
+  for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
+  {
+    // *itCurrent is a UnitaryRelation*.
+
+    // Compute q, this depends on the type of non smooth problem, on the relation type and on the non smooth law
+    pos = M->getPositionOfUnitaryBlock(*itCurrent);
+    (*itCurrent)->computeEquivalentY(time, levelMin, simulationType, tildeLocalVelocity, pos); // free output is saved in y
+  }
+
+}
+
 void PrimalFrictionContact::preCompute(const double time)
 {
   // This function is used to prepare data for the PrimalFrictionContact problem
-  // - computation of M and q
-  // - set sizeOutput
-  // - check dim. for z,w
+  // - computation of M, H tildeLocalVelocity and q
+  // - set sizeOutput, sizeLocalOutput
 
   // If the topology is time-invariant, only q needs to be computed at each time step.
   // M, sizeOutput have been computed in initialize and are uptodate.
@@ -582,6 +616,8 @@ void PrimalFrictionContact::preCompute(const double time)
 
   // Computes q
   computeQ(time);
+  computeTildeLocalVelocity(time);
+
 }
 
 int PrimalFrictionContact::compute(double time)
@@ -641,7 +677,7 @@ int PrimalFrictionContact::compute(double time)
 
 void PrimalFrictionContact::postCompute()
 {
-  // This function is used to set y/lambda values using output from lcp_driver (w,z).
+  // This function is used to set y/lambda values using output from primalfrictioncontact_driver
   // Only UnitaryRelations (ie Interactions) of indexSet(leveMin) are concerned.
 
   // === Get index set from Topology ===
@@ -668,10 +704,30 @@ void PrimalFrictionContact::postCompute()
 
     // Copy velocity/reaction values, starting from index pos into y/lambda.
 
-    setBlock(velocity, y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
-    setBlock(reaction, lambda, lambda->size(), pos, 0);
+    setBlock(localVelocity, y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
+    setBlock(localReaction, lambda, lambda->size(), pos, 0);
 
   }
+  DynamicalSystemsSet *allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();;
+  DSIterator itDS;
+  unsigned int sizeDS;
+  OneStepIntegrator * Osi;
+  string osiType; // type of the current one step integrator
+  string dsType; // type of the current Dynamical System
+  for (itDS = allDS->begin(); itDS !=  allDS->end(); ++itDS)
+  {
+    dsType = (*itDS) -> getType();
+    if (dsType != LNLDS && dsType != LLTIDS)
+      RuntimeException::selfThrow("PrimalFrictionContact::postCompute not yet implemented for dynamical system of types " + dsType);
+
+    pos = M->getPositionOfDSBlock(*itDS);
+    sizeDS = (*itDS)->getDim();
+    setBlock((static_cast<LagrangianDS*>(*itDS))->getVelocityPtr(), velocity, sizeDS, pos, 0);
+
+  }
+
+
+
 }
 
 void PrimalFrictionContact::display() const
