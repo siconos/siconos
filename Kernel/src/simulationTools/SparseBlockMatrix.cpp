@@ -73,7 +73,41 @@ SparseBlockMatrix::SparseBlockMatrix(UnitaryRelationsSet* I, MapOfMapOfUnitaryMa
   colPos->reserve(nr);
   fill(I, blocks);
 }
-
+SparseBlockMatrix::SparseBlockMatrix(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSblocks):
+  nr(0), nbNonNullBlocks(0), numericsMatSparse(NULL), MSparseBlock(NULL), blocksList(NULL), diagSizes(NULL), rowPos(NULL), colPos(NULL)
+{
+  // Allocate memory and fill in the matrix
+  nr = DSSet->size();
+  MSparseBlock = new SparseMat2(nr, nr);
+  numericsMatSparse = new SparseBlockStructuredMatrix();
+  blocksList = new std::vector<double*>;
+  blocksList->reserve(nr);
+  diagSizes = new IndexInt();
+  diagSizes->reserve(nr);
+  rowPos = new IndexInt();
+  rowPos->reserve(nr);
+  colPos = new IndexInt();
+  colPos->reserve(nr);
+  fill(DSSet, DSblocks);
+}
+SparseBlockMatrix::SparseBlockMatrix(UnitaryRelationsSet* I, DynamicalSystemsSet* DSSet, MapOfUnitaryMapOfDSMatrices& unitaryDSblocks):
+  nr(0), nbNonNullBlocks(0), numericsMatSparse(NULL), MSparseBlock(NULL), blocksList(NULL), diagSizes(NULL), rowPos(NULL), colPos(NULL)
+{
+  // Allocate memory and fill in the matrix
+  nr = I->size();
+  nc = DSSet->size();
+  MSparseBlock = new SparseMat2(nr, nc);
+  numericsMatSparse = new SparseBlockStructuredMatrix();
+  blocksList = new std::vector<double*>;
+  blocksList->reserve(nr);
+  diagSizes = new IndexInt();
+  diagSizes->reserve(nr);
+  rowPos = new IndexInt();
+  rowPos->reserve(nr);
+  colPos = new IndexInt();
+  colPos->reserve(nr);
+  fill(I, DSSet, unitaryDSblocks);
+}
 // Destructor
 SparseBlockMatrix::~SparseBlockMatrix()
 {
@@ -158,6 +192,17 @@ void SparseBlockMatrix::fill(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMat
   }
   convert();
 }
+// Fill the SparseMat
+void SparseBlockMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSblocks)
+{
+  RuntimeException::selfThrow(" SparseBlockMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSblocks), Not Yet Implemented");
+}
+// Fill the SparseMat
+void SparseBlockMatrix::fill(UnitaryRelationsSet* indexSet, DynamicalSystemsSet* DSSet, MapOfUnitaryMapOfDSMatrices& unitaryDSblocks)
+{
+  RuntimeException::selfThrow(" SparseBlockMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSblocks), Not Yet Implemented");
+}
+
 
 // convert MSparseBlock to numerics structure
 void SparseBlockMatrix::convert()

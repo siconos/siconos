@@ -127,6 +127,19 @@ public:
   */
   SparseBlockMatrix(UnitaryRelationsSet*, MapOfMapOfUnitaryMatrices&);
 
+  /** Constructor from DynamicalSystemsSet and map
+      \param DynamicalSystemsSet*, the index set of the active constraints
+      \param MapOfDSMatrices, the list of matrices linked to a couple of UR*
+  */
+  SparseBlockMatrix(DynamicalSystemsSet*, MapOfDSMatrices&);
+
+  /** Constructor from DynamicalSystemsSet and map
+    \param UnitaryRelation*, the index set of the active constraints
+     \param DynamicalSystemsSet*, the index set of the active constraints
+     \param MapOfDSMatrices, the list of matrices linked to a couple of UR*
+  */
+  SparseBlockMatrix(UnitaryRelationsSet *, DynamicalSystemsSet*, MapOfUnitaryMapOfDSMatrices&);
+
   /** destructor
    */
   ~SparseBlockMatrix();
@@ -184,6 +197,19 @@ public:
       \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
   */
   void fill(UnitaryRelationsSet*, MapOfMapOfUnitaryMatrices&);
+
+  /** fill the current class using an index set and a map of DSblocks
+       \param DynamicalSystemsSet*, the  set of DynamicalSystem
+       \param MapOfDSMatrices, the list of matrices linked to a DynamicalSystem
+   */
+  void fill(DynamicalSystemsSet*, MapOfDSMatrices&);
+
+  /** fill the current class using an index set and a map of DSblocks
+       \param DynamicalSystemsSet*, the  set of DynamicalSystem
+       \param UnitaryRelationsSet*, the index set of the active constraints
+       \param MapOfUnitaryMapOfDSMatrices, the list of matrices linked to a DynamicalSystem
+   */
+  void fill(UnitaryRelationsSet*, DynamicalSystemsSet*, MapOfUnitaryMapOfDSMatrices&);
 
   /** fill the numerics structure numericsMatSparse using MSparseBlock */
   void convert();

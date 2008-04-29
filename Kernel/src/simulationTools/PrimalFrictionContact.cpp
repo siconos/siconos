@@ -732,14 +732,20 @@ void PrimalFrictionContact::postCompute()
 
 void PrimalFrictionContact::display() const
 {
-  cout << "===== " << contactProblemDim << "D Friction Contact Problem " << endl;
+  cout << "===== " << contactProblemDim << "D Primal Friction Contact Problem " << endl;
   cout << "of size " << sizeOutput << "(ie " << sizeOutput / contactProblemDim << " contacts)." << endl;
   cout << " - Matrix M  : " << endl;
   if (M != NULL) M->display();
   else cout << "-> NULL" << endl;
+  cout << " - Matrix H : " << endl;
+  if (H != NULL) H->display();
+  else cout << "-> NULL" << endl;
   cout << " - Vector q : " << endl;
   if (q != NULL) q->display();
   else cout << "-> NULL" << endl;
+  if (tildeLocalVelocity != NULL) tildeLocalVelocity->display();
+  else cout << "-> NULL" << endl;
+
   cout << " Friction coefficients: " << endl;
   if (mu != NULL) print(mu->begin(), mu->end());
   else cout << "-> NULL" << endl;
