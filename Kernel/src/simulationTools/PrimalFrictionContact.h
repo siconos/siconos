@@ -39,7 +39,7 @@ typedef int (*PFC_Driver)(PrimalFrictionContact_Problem*, double*, double*, Solv
  * primal friction contact problems defined by :
  * \f{eqnarray*}
  *  M velocity =  q +  reaction \\
- *  localVelocity = H^T velocity\\
+ *  localVelocity = H^T velocity + tildeLocalVelocity\\
  *  reaction = H localReaction \\
  * \f}
  * and \f$localVelocity,localReaction\f$ belongs to the Coulomb friction law with unilateral contact.
@@ -48,6 +48,7 @@ typedef int (*PFC_Driver)(PrimalFrictionContact_Problem*, double*, double*, Solv
  *    - \f$velocity \in R^{n} \f$  and \f$reaction \in R^{n} \f$ the unknowns,
  *    - \f$M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
  *    - \f$localVelocity \in R^{m} \f$  and \f$localReaction \in R^{m} \f$ the unknowns,
+ *    - \f$tildeLocalVelocity \in R^{m} \f$ is the modified local velocity (\f$ e U_{N,k}\f$)
  *    - \f$M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
  *    - \f$H \in R^{n \times m } \f$
  *
@@ -91,6 +92,9 @@ protected:
   /** contains the vector localReaction of a PrimalFrictionContact system */
   SimpleVector *localReaction;
 
+  /** contains the vector localVelocity of a PrimalFrictionContact system */
+  SimpleVector *tildeLocalVelocity;
+
   /** contains the matrix M of a PrimalFrictionContact system */
   OSNSMatrix *M;
 
@@ -108,6 +112,7 @@ protected:
   bool isReactionAllocatedIn;
   bool isLocalVelocityAllocatedIn;
   bool isLocalReactionAllocatedIn;
+  bool isTildeLocalVelocityAllocatedIn;
   bool isMAllocatedIn;
   bool isHAllocatedIn;
   bool isQAllocatedIn;
@@ -283,6 +288,35 @@ public:
    *  \param SimpleVector * newPtr
    */
   void setLocalReactionPtr(SimpleVector*) ;
+  // --- TildeLocalVelocity ---
+
+  /** get the value of tildeLocalVelocity, the initial state of the DynamicalSystem
+   *  \return SimpleVector
+   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
+   */
+  inline const SimpleVector getTildeLocalVelocity() const
+  {
+    return *tildeLocalVelocity;
+  }
+
+  /** get tildeLocalVelocity
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getTildeLocalVelocityPtr() const
+  {
+    return tildeLocalVelocity;
+  }
+
+  /** set the value of tildeLocalVelocity to newValue
+   *  \param SimpleVector newValue
+   */
+  void setTildeLocalVelocity(const SimpleVector&);
+
+  /** set tildeLocalVelocity to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  void setTildeLocalVelocityPtr(SimpleVector*);
+
 
   // --- M ---
 

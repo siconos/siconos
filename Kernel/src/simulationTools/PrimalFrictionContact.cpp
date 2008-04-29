@@ -35,8 +35,8 @@ using namespace std;
 
 // xml constructor
 PrimalFrictionContact::PrimalFrictionContact(OneStepNSProblemXML* osNsPbXml, Simulation* newSimu):
-  OneStepNSProblem("PrimalFrictionContact", osNsPbXml, newSimu), contactProblemDim(3), velocity(NULL), reaction(NULL), localVelocity(NULL), localReaction(NULL), M(NULL), H(NULL), q(NULL), mu(NULL),
-  isVelocityAllocatedIn(false), isReactionAllocatedIn(false), isLocalVelocityAllocatedIn(false), isLocalReactionAllocatedIn(false), isMAllocatedIn(false), isHAllocatedIn(false), isQAllocatedIn(false), MStorageType(0)
+  OneStepNSProblem("PrimalFrictionContact", osNsPbXml, newSimu), contactProblemDim(3), velocity(NULL), reaction(NULL), localVelocity(NULL), localReaction(NULL), tildeLocalVelocity(NULL), M(NULL), H(NULL), q(NULL), mu(NULL),
+  isVelocityAllocatedIn(false), isReactionAllocatedIn(false), isLocalVelocityAllocatedIn(false), isLocalReactionAllocatedIn(false), isTildeLocalVelocityAllocatedIn(false), isMAllocatedIn(false), isHAllocatedIn(false), isQAllocatedIn(false), MStorageType(0)
 {
   PrimalFrictionContactXML * xmlFC = (static_cast<PrimalFrictionContactXML*>(osNsPbXml));
 
@@ -56,8 +56,8 @@ PrimalFrictionContact::PrimalFrictionContact(OneStepNSProblemXML* osNsPbXml, Sim
 // Required input: simulation
 // Optional: NonSmoothSolver and id
 PrimalFrictionContact::PrimalFrictionContact(Simulation* newSimu, int dimPb, NonSmoothSolver*  newSolver, const string& newId):
-  OneStepNSProblem("PrimalFrictionContact", newSimu, newId, newSolver), contactProblemDim(dimPb), velocity(NULL), reaction(NULL), localVelocity(NULL), localReaction(NULL), M(NULL), H(NULL), q(NULL), mu(NULL),
-  isVelocityAllocatedIn(false), isReactionAllocatedIn(false), isLocalVelocityAllocatedIn(false), isLocalReactionAllocatedIn(false), isMAllocatedIn(false), isHAllocatedIn(false), isQAllocatedIn(false), MStorageType(0)
+  OneStepNSProblem("PrimalFrictionContact", newSimu, newId, newSolver), contactProblemDim(dimPb), velocity(NULL), reaction(NULL), localVelocity(NULL), localReaction(NULL), tildeLocalVelocity(NULL), M(NULL), H(NULL), q(NULL), mu(NULL),
+  isVelocityAllocatedIn(false), isReactionAllocatedIn(false), isLocalVelocityAllocatedIn(false), isLocalReactionAllocatedIn(false), isTildeLocalVelocityAllocatedIn(false), isMAllocatedIn(false), isHAllocatedIn(false), isQAllocatedIn(false), MStorageType(0)
 {}
 
 // destructor
@@ -71,6 +71,8 @@ PrimalFrictionContact::~PrimalFrictionContact()
   localVelocity = NULL;
   if (isLocalReactionAllocatedIn) delete localReaction;
   localReaction = NULL;
+  if (isTildeLocalVelocityAllocatedIn) delete tildeLocalVelocity;
+  tildeLocalVelocity = NULL;
   if (isMAllocatedIn)
     delete M;
   M = NULL;
@@ -186,6 +188,32 @@ void PrimalFrictionContact::setLocalReactionPtr(SimpleVector* newPtr)
   localReaction = newPtr;
   isLocalReactionAllocatedIn = false;
 }
+void PrimalFrictionContact::setTildeLocalVelocity(const SimpleVector& newValue)
+{
+  if (sizeOutput != newValue.size())
+    RuntimeException::selfThrow("PrimalFrictionContact: setTildeLocalVelocity, inconsistent size between given velocity size and problem size. You should set sizeOutput before");
+
+  if (tildeLocalVelocity == NULL)
+  {
+    tildeLocalVelocity = new SimpleVector(sizeOutput);
+    isTildeLocalVelocityAllocatedIn = true;
+  }
+  else if (tildeLocalVelocity->size() != sizeOutput)
+    RuntimeException::selfThrow("PrimalFrictionContact: setTildeLocalVelocity, velocity size differs from sizeOutput");
+
+  *tildeLocalVelocity = newValue;
+}
+
+void PrimalFrictionContact::setTildeLocalVelocityPtr(SimpleVector* newPtr)
+{
+  if (sizeOutput != newPtr->size())
+    RuntimeException::selfThrow("PrimalFrictionContact: setTildeLocalVelocityPtr, inconsistent size between given velocity size and problem size. You should set sizeOutput before");
+
+  if (isTildeLocalVelocityAllocatedIn) delete tildeLocalVelocity;
+  tildeLocalVelocity = newPtr;
+  isTildeLocalVelocityAllocatedIn = false;
+}
+
 
 void PrimalFrictionContact::setM(const OSNSMatrix& newValue)
 {
@@ -461,11 +489,24 @@ void PrimalFrictionContact::computeQ(const double time)
 
   DynamicalSystemsSet *allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();;
   DSIterator itDS;
+  OneStepIntegrator * Osi;
+  string osiType; // type of the current one step integrator
+  string dsType; // type of the current Dynamical System
+
   unsigned int pos = 0;
   for (itDS = allDS->begin(); itDS !=  allDS->end(); ++itDS)
   {
     pos = M->getPositionOfDSBlock(*itDS);
-    // (*itcurrent)->computeEquivalentY(time, levelMin, simulationType, q, pos); // free output is saved in y
+    Osi = simulation->getIntegratorOfDSPtr(*itDS);
+    osiType = Osi->getType();
+    if (osiType == "Moreau")
+    {
+      // =(static_cast<Moreau*> (Osi))->getForceFreePtr(DS);
+    }
+    else
+    {
+      RuntimeException::selfThrow("PrimalFrictionContact::computeQ. Not yet implemented for Integrator type : " + osiType);
+    }
   }
 }
 

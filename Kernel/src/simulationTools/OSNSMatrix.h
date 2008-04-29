@@ -116,6 +116,17 @@ protected:
   */
   void updateSizeAndPositions(UnitaryRelationsSet*);
 
+  /** To update dim and DSBlocksPositions for a new set of DynamicalSystem
+      \param DynamicalSystemsSet* the DyncamicalSystemsSet
+  */
+  void updateSizeAndPositions(DynamicalSystemsSet*);
+
+  /** To update dim, DSBlocksPositions and unitaryBlocksPositions for a new set of DynamicalSystem and  a new set of UnitaryRelation
+      \param DynamicalSystemsSet* the DynamicalSystemsSet
+      \param UnitaryRelationsSet* the index set of the active constraints
+  */
+  void updateSizeAndPositions(DynamicalSystemsSet*, UnitaryRelationsSet*);
+
 public:
 
   /** Default constructor -> empty matrix

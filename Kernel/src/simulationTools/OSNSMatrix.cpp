@@ -39,19 +39,56 @@ void OSNSMatrix::updateSizeAndPositions(UnitaryRelationsSet* indexSet)
     dimRow += (*it)->getNonSmoothLawSize();
   }
 }
+void OSNSMatrix::updateSizeAndPositions(DynamicalSystemsSet* DSSet)
+{
+  // === Description ===
+  // For a DSBlock (diagonal or extra diagonal) corresponding to a DynamicalSet, we need to know the position of its first element
+  // in the full-matrix M. This position depends on the previous DSBlocks sizes.
+  //
+  // positions are saved in a map<DynamicalSystem*, unsigned int>, named DSBlocksPositions.
+  //
 
+  // Computes real size of the current matrix = sum of the dim. of all UR in indexSet
+  dimRow = 0;
+  for (DSIterator it = DSSet->begin(); it != DSSet->end(); ++it)
+  {
+    (*DSBlocksPositions)[*it] = dimRow;
+    dimRow += (*it)->getDim();
+  }
+}
+void OSNSMatrix::updateSizeAndPositions(DynamicalSystemsSet* DSSet, UnitaryRelationsSet* indexSet)
+{
+  // === Description ===
+  // positions are saved in a map<UnitaryRelation*, unsigned int>, named unitaryBlocksPositions.
+  // positions are saved in a map<DynamicalSystem*, unsigned int>, named DSBlocksPositions.
+  //
+
+  // Computes real size of the current matrix = sum of the dim. of all UR in indexSet
+  dimRow = 0;
+  for (DSIterator it = DSSet->begin(); it != DSSet->end(); ++it)
+  {
+    (*DSBlocksPositions)[*it] = dimRow;
+    dimRow += (*it)->getDim();
+  }
+  for (UnitaryRelationsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
+  {
+    (*unitaryBlocksPositions)[*it] = dimRow;
+    dimRow += (*it)->getNonSmoothLawSize();
+  }
+}
 // Default constructor: empty matrix, default storage
 // No allocation for M1 or M2
 OSNSMatrix::OSNSMatrix():
-  dimRow(0), storageType(0), unitaryBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+  dimRow(0), storageType(0), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
 {
   unitaryBlocksPositions = new UR_int();
+  DSBlocksPositions = new DS_int();
   numericsMat = new NumericsMatrix;
 }
 
-// Constructor with dimRowensions (one input: square matrix only)
+// Constructor with dimensions (one input: square matrix only)
 OSNSMatrix::OSNSMatrix(unsigned int n, int stor):
-  dimRow(n), storageType(stor), unitaryBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+  dimRow(n), storageType(stor), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL),  numericsMat(NULL), M1(NULL), M2(NULL)
 {
   // Note:
   // for storageType = 0 (dense) n represents the real dimRowension of the matrix
@@ -66,10 +103,11 @@ OSNSMatrix::OSNSMatrix(unsigned int n, int stor):
   else // if(storageType == 1)
     M2 = new SparseBlockMatrix(n);
   unitaryBlocksPositions = new UR_int();
+  DSBlocksPositions = new DS_int();
   numericsMat = new NumericsMatrix;
 }
 OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
-  dimRow(n),  dimColumn(m), storageType(stor), unitaryBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+  dimRow(n),  dimColumn(m), storageType(stor), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
 {
   // Note:
   // for storageType = 0 (dense) n represents the real dimRowension of the matrix
@@ -85,49 +123,55 @@ OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
     //  M2 = new SparseBlockMatrix(n);
 
     unitaryBlocksPositions = new UR_int();
+  DSBlocksPositions = new DS_int();
   numericsMat = new NumericsMatrix;
 }
 
 // Basic constructor
 OSNSMatrix::OSNSMatrix(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMatrices& unitaryBlocks, int stor):
-  dimRow(0), storageType(stor), unitaryBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+  dimRow(0), storageType(stor), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
 {
   unitaryBlocksPositions = new UR_int();
+  DSBlocksPositions = new DS_int();
   numericsMat = new NumericsMatrix;
 
   fill(indexSet, unitaryBlocks);
 }
 
 OSNSMatrix::OSNSMatrix(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSBlocks, int stor):
-  dimRow(0), storageType(stor), unitaryBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+  dimRow(0), storageType(stor), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
 {
   unitaryBlocksPositions = new UR_int();
+  DSBlocksPositions = new DS_int();
   numericsMat = new NumericsMatrix;
 
   fill(DSSet, DSBlocks);
 }
 OSNSMatrix::OSNSMatrix(DynamicalSystemsSet* DSSet, UnitaryRelationsSet* indexSet, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks, int stor):
-  dimRow(0), storageType(stor), unitaryBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+  dimRow(0), storageType(stor), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
 {
   unitaryBlocksPositions = new UR_int();
+  DSBlocksPositions = new DS_int();
   numericsMat = new NumericsMatrix;
 
   fill(DSSet, indexSet, DSUnitaryBlocks);
 }
 
 OSNSMatrix::OSNSMatrix(UnitaryRelationsSet* indexSet, DynamicalSystemsSet* DSSet,  MapOfUnitaryMapOfDSMatrices& unitaryDSBlocks, int stor):
-  dimRow(0), storageType(stor), unitaryBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+  dimRow(0), storageType(stor), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
 {
   unitaryBlocksPositions = new UR_int();
+  DSBlocksPositions = new DS_int();
   numericsMat = new NumericsMatrix;
 
   fill(indexSet, DSSet, unitaryDSBlocks);
 }
 
 OSNSMatrix::OSNSMatrix(UnitaryRelationsSet* indexSet, DynamicalSystemsSet* DSSet, MapOfMapOfUnitaryMatrices& unitaryBlocks,   MapOfDSMatrices& DSBlocks, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks, MapOfUnitaryMapOfDSMatrices& unitaryDSBlocks, int stor):
-  dimRow(0), storageType(stor), unitaryBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+  dimRow(0), storageType(stor), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
 {
   unitaryBlocksPositions = new UR_int();
+  DSBlocksPositions = new DS_int();
   numericsMat = new NumericsMatrix;
 
   fill(indexSet, DSSet, unitaryBlocks, DSBlocks, DSUnitaryBlocks, unitaryDSBlocks);
@@ -140,9 +184,10 @@ OSNSMatrix::OSNSMatrix(UnitaryRelationsSet* indexSet, DynamicalSystemsSet* DSSet
 
 // Copy of a SiconosMatrix (used when OSNS xml constructor is called with M input in XML file)
 OSNSMatrix::OSNSMatrix(const SiconosMatrix& MSource):
-  dimRow(MSource.size(0)), storageType(0), unitaryBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+  dimRow(MSource.size(0)), storageType(0), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
 {
   unitaryBlocksPositions = new UR_int();
+  DSBlocksPositions = new DS_int();
   numericsMat = new NumericsMatrix;
   M1 = new SimpleMatrix(MSource);
   // Warning: unitaryBlocksPositions remains empty since we have no information concerning indexSet and unitaryBlocks in MSource
@@ -155,6 +200,9 @@ OSNSMatrix::~OSNSMatrix()
   unitaryBlocksPositions->clear();
   delete unitaryBlocksPositions;
   unitaryBlocksPositions = NULL;
+  DSBlocksPositions->clear();
+  delete DSBlocksPositions;
+  DSBlocksPositions = NULL;
   delete numericsMat;
   numericsMat = NULL;
   if (M1 != NULL) delete M1;
@@ -174,7 +222,7 @@ unsigned int OSNSMatrix::getPositionOfDSBlock(DynamicalSystem* DS) const
 {
   DS_int::const_iterator it = DSBlocksPositions->find(DS);
   if (it == DSBlocksPositions->end())
-    RuntimeException::selfThrow("OSNSMatrix::getPositionOfUnitaryBlock(UnitaryRelation ur), ur does not belong to the index set used to built the OSNS matrix.");
+    RuntimeException::selfThrow("OSNSMatrix::getPositionOfDSBlock(DynamicalSystems ds), ds does not belong to the DynamicalSet used to built the OSNS matrix.");
   return it->second;
 }
 
