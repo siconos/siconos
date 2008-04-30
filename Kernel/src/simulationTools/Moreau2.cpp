@@ -136,7 +136,6 @@ void Moreau2::computeFreeState()
         prod(h * (1 - theta), *A, *xold, *ffree, true); // ffree = h*(1-theta)*A*xi
       else
         ffree->zero();
-      4
       SiconosVector *b = d->getBPtr();
       if (b != NULL)
         scal(h, *b, *ffree, false); // ffree += hb
