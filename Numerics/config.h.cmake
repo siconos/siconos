@@ -2,7 +2,9 @@
 
 #define WITH_CMAKE
 
+#ifndef SVN_REVISION
 #cmakedefine SVN_REVISION ${SVN_REVISION}
+#endif
 
 #cmakedefine HAVE_BLAS
 #cmakedefine HAVE_LAPACK
