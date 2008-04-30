@@ -243,34 +243,41 @@ public:
       \param UnitaryRelationsSet*, the index set of the active constraints
       \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
   */
-  void fill(UnitaryRelationsSet*, MapOfMapOfUnitaryMatrices&);
+  void fill(UnitaryRelationsSet*, MapOfMapOfUnitaryMatrices&, bool updateSize = true);
+
+  /** fill diagonal of thecurrent class using an index set and a map of unitaryBlocks
+      \param UnitaryRelationsSet*, the index set of the active constraints
+      \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
+  */
+  void fillDiagonal(UnitaryRelationsSet* , MapOfMapOfUnitaryMatrices& , bool updateSize = true);
+
 
   /** fill the current class using an DynamicalSystemsSet and a map of DSBlocks
        \param DynamicalSystemsSet*, the Dynamical set
        \param MapOfDSMatrices, the list of matrices linked to a DynamicalSystems
    */
-  void fill(DynamicalSystemsSet*, MapOfDSMatrices&);
+  void fill(DynamicalSystemsSet*, MapOfDSMatrices&, bool updateSize = true);
 
   /** fill the current class using an index set , a DynamicalSystemsSet and a map of unitaryBlocks
         \param UnitaryRelationsSet*, the index set of the active constraints
          \param DynamicalSystemsSet*, the Dynamical set
         \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
     */
-  void fill(DynamicalSystemsSet*, UnitaryRelationsSet*, MapOfDSMapOfUnitaryMatrices&);
+  void fill(DynamicalSystemsSet*, UnitaryRelationsSet*, MapOfDSMapOfUnitaryMatrices&, bool updateSize = true);
 
   /** fill the current class using an index set and a map of unitaryBlocks
       \param UnitaryRelationsSet*, the index set of the active constraints
       \param DynamicalSystemsSet*, the Dynamical set
       \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
    */
-  void fill(UnitaryRelationsSet*, DynamicalSystemsSet*, MapOfUnitaryMapOfDSMatrices&);
+  void fill(UnitaryRelationsSet*, DynamicalSystemsSet*, MapOfUnitaryMapOfDSMatrices&, bool updateSize = true);
 
   /** fill the current class using an index set and  maps of Blocks
        \param UnitaryRelationsSet*, the index set of the active constraints
        \param DynamicalSystemsSet*, the Dynamical set
        \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
     */
-  void fill(UnitaryRelationsSet*, DynamicalSystemsSet*, MapOfMapOfUnitaryMatrices&,  MapOfDSMatrices&, MapOfDSMapOfUnitaryMatrices&,  MapOfUnitaryMapOfDSMatrices&);
+  void fill(UnitaryRelationsSet*, DynamicalSystemsSet*, MapOfMapOfUnitaryMatrices&,  MapOfDSMatrices&, MapOfDSMapOfUnitaryMatrices&,  MapOfUnitaryMapOfDSMatrices&, bool updateSize = true);
 
 
 

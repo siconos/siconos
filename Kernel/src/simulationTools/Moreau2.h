@@ -25,6 +25,8 @@
 
 #include "Moreau.h"
 #include "SimpleMatrix.h"
+#include "SiconosVector.h"
+#include "FirstOrderLinearDS.h"
 
 
 /**  Moreau Time-Integrator for Dynamical Systems
@@ -76,12 +78,15 @@ public:
    */
   virtual void computeFreeState();
 
+
   /** updates the state of the Dynamical Systems
    *  \param unsigned int: level of interest for the dynamics: not used at the time
    */
   virtual void updateState(unsigned int);
+  SiconosVector * getWorkX(DynamicalSystem *d);
 
   static Moreau2* convert(OneStepIntegrator* osi);
+
 
 };
 

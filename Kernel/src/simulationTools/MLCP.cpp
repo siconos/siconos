@@ -200,32 +200,7 @@ void MLCP::initialize()
   // If the topology is TimeInvariant ie if M structure does not change during simulation:
   if (topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty())
   {
-    // Get index set from Simulation
-    UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
-    if (M == NULL)
-    {
-      // Creates and fills M using UR of indexSet
-      M = new OSNSMatrix(indexSet, unitaryBlocks, MStorageType);
-      isMAllocatedIn = true;
-      numerics_problem.M = M->getNumericsMatrix();
-      numerics_problem.A = 0;
-      numerics_problem.B = 0;
-      numerics_problem.C = 0;
-      numerics_problem.D = 0;
-      numerics_problem.a = 0;
-      numerics_problem.b = 0;
-      numerics_problem.problemType = 0;
-      numerics_problem.n = n;
-      numerics_problem.m = m;
-
-    }
-    else
-    {
-      M->setStorageType(MStorageType);
-      M->fill(indexSet, unitaryBlocks);
-
-    }
-    sizeOutput = M->size();
+    updateM();
   }
   else // in that case, M will be updated during preCompute
   {
@@ -239,6 +214,35 @@ void MLCP::initialize()
       isMAllocatedIn = true;
     }
   }
+}
+void MLCP::updateM()
+{
+  // Get index set from Simulation
+  UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
+
+  if (M == NULL)
+  {
+    // Creates and fills M using UR of indexSet
+    M = new OSNSMatrix(indexSet, unitaryBlocks, MStorageType);
+    isMAllocatedIn = true;
+    numerics_problem.M = M->getNumericsMatrix();
+    numerics_problem.A = 0;
+    numerics_problem.B = 0;
+    numerics_problem.C = 0;
+    numerics_problem.D = 0;
+    numerics_problem.a = 0;
+    numerics_problem.b = 0;
+    numerics_problem.problemType = 0;
+    numerics_problem.n = n;
+    numerics_problem.m = m;
+  }
+  else
+  {
+    M->setStorageType(MStorageType);
+    M->fill(indexSet, unitaryBlocks);
+
+  }
+  sizeOutput = M->size();
 }
 void  MLCP::reset()
 {

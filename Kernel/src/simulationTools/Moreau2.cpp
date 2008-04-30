@@ -30,6 +30,7 @@ using namespace std;
 // --- constructor from a minimum set of data ---
 Moreau2::Moreau2(DynamicalSystem* newDS, double newTheta, Simulation* newS): Moreau(newDS, newTheta, newS)
 {
+  integratorType = "Moreau2";
 }
 
 
@@ -37,9 +38,10 @@ Moreau2::~Moreau2()
 {
 }
 
-// SiconosVector * Moreau2::getFfree(FirstOrderLinearDS *d){
-//   return workX[d];
-// }
+SiconosVector * Moreau2::getWorkX(DynamicalSystem *d)
+{
+  return workX[d];
+}
 
 void Moreau2::computeFreeState()
 {

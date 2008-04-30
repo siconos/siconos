@@ -26,6 +26,7 @@
 #include "boost/numeric/bindings/atlas/cblas2.hpp"
 #include "boost/numeric/bindings/atlas/cblas3.hpp"
 
+#include "config.h"
 #ifdef HAVE_ATLAS
 #include "boost/numeric/bindings/atlas/clapack.hpp"
 namespace lapack = boost::numeric::bindings::atlas;
@@ -2432,7 +2433,7 @@ void SimpleMatrix::PLUInverseInPlace()
   if (!isPLUFactorized)
     PLUFactorizationInPlace();
 
-#ifdef HAVE_ATLASE
+#ifdef HAVE_ATLAS
   int info = lapack::getri(*mat.Dense, *ipiv);   // solve from factorization
 
   if (info != 0)

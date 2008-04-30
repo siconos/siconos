@@ -84,7 +84,7 @@ class OneStepNSProblem;
  */
 class MLCP : public OneStepNSProblem
 {
-private:
+protected:
 
   /** n is the number of equality */
   int n;
@@ -102,14 +102,15 @@ private:
   MixedLinearComplementarity_Problem numerics_problem;
 
 
+  /** Storage type for M - 0: SiconosMatrix (dense), 1: Sparse Storage (embedded into OSNSMatrix) */
+  int MStorageType;
+
   /** Flags to check wheter pointers were allocated in class constructors or not */
   bool isWAllocatedIn;
   bool isZAllocatedIn;
   bool isMAllocatedIn;
   bool isQAllocatedIn;
 
-  /** Storage type for M - 0: SiconosMatrix (dense), 1: Sparse Storage (embedded into OSNSMatrix) */
-  int MStorageType;
 
   /** default constructor (private)
    */
@@ -273,7 +274,9 @@ public:
 
   /** To initialize the MLCP problem(computes topology ...)
    */
-  void initialize();
+  virtual void initialize();
+  virtual void updateM();
+
   void reset();
 
   /** computes extra diagonal unitaryBlock-matrix that corresponds to UR1 and UR2
