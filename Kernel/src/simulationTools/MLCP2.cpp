@@ -42,6 +42,8 @@ MLCP2::MLCP2(Simulation* newSimu, NonSmoothSolver* newSolver, const string& newI
   MLCP(newSimu, newSolver, newId)
 {
   mFirstCall = true;
+  m = 0;
+  n = 0;
 
 }
 
@@ -51,10 +53,27 @@ MLCP2::~MLCP2()
 }
 void MLCP2::initialize()
 {
+  DynamicalSystemsSet * DSSet = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  if (DSSet->begin() == DSSet->end())
+    printf("DSSet is empty\n");
+  else
+    printf("DSSet is not empty\n");
   updateDSBlocks();
-  updateUnitaryDSBlocks();
   updateDSUnitaryBlocks();
+  DSSet = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  if (DSSet->begin() == DSSet->end())
+    printf("DSSet is empty\n");
+  else
+    printf("DSSet is not empty\n");
+  updateUnitaryDSBlocks();
+  DSSet = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  if (DSSet->begin() == DSSet->end())
+    printf("DSSet is empty\n");
+  else
+    printf("DSSet is not empty\n");
   MLCP::initialize();
+  w->resize(n + m);
+  z->resize(n + m);
 }
 void MLCP2::updateM()
 {
@@ -73,8 +92,8 @@ void MLCP2::updateM()
     numerics_problem.a = 0;
     numerics_problem.b = 0;
     numerics_problem.problemType = 0;
-    numerics_problem.n = n;
-    numerics_problem.m = m;
+    numerics_problem.n = n; //size of the dynamical systems
+    numerics_problem.m = m; //size of the NSlaw
   }
   else
   {
@@ -128,6 +147,8 @@ void MLCP2::computeDSBlock(DynamicalSystem* DS)
   if (osiType == "Moreau2")
   {
     DSBlocks[DS] = (static_cast<Moreau2*>(Osi))->getWPtr(DS);  // get its W matrix ( pointer link!)
+    (*DSBlocks[DS]) *= -1.0;
+    DSBlocks[DS]->display();
   }
 }
 
@@ -137,6 +158,7 @@ void MLCP2::computeUnitaryBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
   if (unitaryBlocks[UR1][UR1] == NULL)
   {
     unitaryBlocks[UR1][UR1] = new SimpleMatrix(UR1->getNonSmoothLawSize(), UR1->getNonSmoothLawSize());
+    m += UR1->getNonSmoothLawSize();
   }
   UR1->getExtraUnitaryBlock(unitaryBlocks[UR1][UR1]);
 }
@@ -155,11 +177,13 @@ void MLCP2::computeUnitaryDSBlock(UnitaryRelation* UR, DynamicalSystem* DS)
 //fill DSUnitaryBlocks with B
 void MLCP2::computeDSUnitaryBlock(DynamicalSystem* DS, UnitaryRelation* UR)
 {
+  double h = simulation->getTimeDiscretisationPtr()->getH();
   if (DSUnitaryBlocks[DS][UR] == NULL)
   {
     DSUnitaryBlocks[DS][UR] = new SimpleMatrix(DS->getDim(), UR->getNonSmoothLawSize());
   }
   UR->getRightUnitaryBlockForDS(DS, DSUnitaryBlocks[DS][UR]);
+  *(DSUnitaryBlocks[DS][UR]) *= h;
 
 }
 
@@ -248,6 +272,31 @@ void MLCP2::preCompute(double time)
   computeQ(time);
 
 }
+void displayNM_(const NumericsMatrix* const m)
+{
+  if (m == NULL)
+  {
+    fprintf(stderr, "Numerics, NumericsMatrix display failed, NULL input.\n");
+    exit(EXIT_FAILURE);
+  }
+  int storageType = m->storageType;
+  if (storageType == 0)
+  {
+    printf("\n ========== Numerics Matrix of dim %dX%d\n", m->size0, m->size1);
+    printf("[");
+    for (int i = 0; i < m->size1 * m->size0; i++)
+    {
+      printf("%lf ", m->matrix0[i]);
+      if ((i + 1) % m->size1 == 0)
+        printf("\n");
+    }
+    printf("]");
+    printf("\n (warning: column-major) \n");
+  }
+  else if (storageType == 1)
+    fprintf(stderr, "storageType NumericsdisplayNM.\n");
+
+}
 
 int MLCP2::compute(double time)
 {
@@ -269,7 +318,7 @@ int MLCP2::compute(double time)
     // Call MLCP2 Driver
     //printf("MLCP2 display");
     //printf("n %d m %d",n,m);
-    //displayNM(numerics_problem.M);
+    //displayNM_(numerics_problem.M);
     //      exit(1);
     //mlcpDefaultSolver *pSolver = new mlcpDefaultSolver(m,n);
     //      displayMLCP2(&numerics_problem);

@@ -419,7 +419,7 @@ void OneStepNSProblem::updateUnitaryDSBlocks()
   bool isTimeInvariant;
   UnitaryRelationsIterator itUR;
   DSIterator itDS;
-  DynamicalSystemsSet concernedDS;
+  DynamicalSystemsSet* concernedDS;
 
 
   // Get index set from Simulation
@@ -429,8 +429,8 @@ void OneStepNSProblem::updateUnitaryDSBlocks()
 
   for (itUR = indexSet->begin(); itUR != indexSet->end(); ++itUR)
   {
-    concernedDS = *((*itUR)->getDynamicalSystemsPtr());
-    for (itDS = concernedDS.begin(); itDS != concernedDS.end(); itDS++)
+    concernedDS = (*itUR)->getDynamicalSystemsPtr();
+    for (itDS = concernedDS->begin(); itDS != concernedDS->end(); itDS++)
     {
       if (!isTimeInvariant)
         computeUnitaryDSBlock(*itUR, *itDS);
@@ -490,7 +490,7 @@ void OneStepNSProblem::updateDSUnitaryBlocks()
   bool isTimeInvariant;
   UnitaryRelationsIterator itUR;
   DSIterator itDS;
-  DynamicalSystemsSet concernedDS;
+  DynamicalSystemsSet* concernedDS;
 
 
   // Get index set from Simulation
@@ -500,8 +500,8 @@ void OneStepNSProblem::updateDSUnitaryBlocks()
 
   for (itUR = indexSet->begin(); itUR != indexSet->end(); ++itUR)
   {
-    concernedDS = *((*itUR)->getDynamicalSystemsPtr());
-    for (itDS = concernedDS.begin(); itDS != concernedDS.end(); itDS++)
+    concernedDS = (*itUR)->getDynamicalSystemsPtr();
+    for (itDS = concernedDS->begin(); itDS != concernedDS->end(); itDS++)
     {
       if (!isTimeInvariant)
         computeDSUnitaryBlock(*itDS, *itUR);
@@ -523,12 +523,12 @@ void OneStepNSProblem::computeAllDSUnitaryBlocks()
   UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(0);
   DSIterator itDS;
   UnitaryRelationsIterator itUR;
-  DynamicalSystemsSet concernedDS;
+  DynamicalSystemsSet* concernedDS;
 
   for (itUR = indexSet->begin(); itUR != indexSet->end(); ++itUR)
   {
-    concernedDS =  *((*itUR)->getDynamicalSystemsPtr());
-    for (itDS = concernedDS.begin(); itDS != concernedDS.end(); itDS++)
+    concernedDS = (*itUR)->getDynamicalSystemsPtr();
+    for (itDS = concernedDS->begin(); itDS != concernedDS->end(); itDS++)
       computeDSUnitaryBlock(*itDS, *itUR);
   }
 }

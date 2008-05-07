@@ -394,9 +394,11 @@ void FirstOrderNonLinearDS::initialize(const string& simulationType, double time
 
   // Initialize memory vectors
   initMemory(sizeOfMemory);
-
-  // Rhs and its jacobian
-  initRhs(time);
+  if (simulationType == "EventDriven")
+  {
+    // Rhs and its jacobian
+    initRhs(time);
+  }
 }
 
 // ===== MEMORY MANAGEMENT FUNCTIONS =====

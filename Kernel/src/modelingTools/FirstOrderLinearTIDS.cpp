@@ -132,6 +132,11 @@ void FirstOrderLinearTIDS::display() const
   cout << "- b " << endl;
   if (b != NULL) b->display();
   else cout << "-> NULL" << endl;
+
+  cout << "- M: " << endl;
+  if (M != NULL) M->display();
+  else cout << "-> NULL" << endl;
+
   cout << "============================================" << endl;
 }
 
