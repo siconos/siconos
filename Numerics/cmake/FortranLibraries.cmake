@@ -22,6 +22,7 @@ SET(KNOWN_FORTRAN_LIBRARIES "gfortran\;gfortranbegin"
    "fio\;f90math\;f77math"
    "afio\;af90math\;af77math\;amisc"
    "g2c"
+   "f95"
 )
 
 
@@ -56,7 +57,7 @@ WHILE(${iopt} LESS ${imax})
   MESSAGE(STATUS "Seeking fortran library directory")
   
   FILE(GLOB _LIBDIRS_MAYBE 
-    /opt /opt/* /opt/lib/*
+    /opt /opt/* /opt/local/lib/gcc-lib/*/* /opt/lib/*
     /usr/local/* /usr/local/lib/*
     /usr/local/*/lib/gcc/*/*
     /usr/lib/gcc/*/*
