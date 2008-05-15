@@ -176,11 +176,11 @@ MACRO(ADD_DEBIAN_PACKAGE DEBNAME)
       
       ADD_CUSTOM_COMMAND( OUTPUT ${CONTROL_FILE}
         COMMAND   ${CMAKE_COMMAND} -E echo
-         "Description: ${PACKAGE_DESCRIPTION_SUMMARY}" >> ${CONTROL_FILE}
+         "Description: \"${PACKAGE_DESCRIPTION_SUMMARY}\"" >> ${CONTROL_FILE}
         COMMAND   ${CMAKE_COMMAND} -E echo
          " ." >> ${CONTROL_FILE}
         COMMAND   ${CMAKE_COMMAND} -E echo
-         " ${PACKAGE_DESCRIPTION}" >> ${CONTROL_FILE}
+         " \"${PACKAGE_DESCRIPTION}\"" >> ${CONTROL_FILE}
         COMMAND   ${CMAKE_COMMAND} -E echo
          " ." >> ${CONTROL_FILE}
         COMMAND   ${CMAKE_COMMAND} -E echo

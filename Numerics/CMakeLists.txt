@@ -6,11 +6,21 @@ ENABLE_LANGUAGE(Fortran)
 
 INCLUDE(SiconosProject)
 
-SICONOS_PROJECT(Numerics 3 0 0 
-  "Siconos/Numerics provides low-level algorithms (NSDS field)."
+SET(PACKAGE_DESCRIPTION_SUMMARY 
+  "Siconos/Numerics provides low-level algorithms (NSDS field).")
 
-  "Siconos is a program dedicated to modeling, simulation and control
-of Non Smooth Dynamical Systems (NSDS). The present package,
+SET(PACKAGE_DESCRIPTION 
+  "Siconos is a program dedicated to modeling, simulation and control of
+Non Smooth Dynamical Systems (NSDS). The present package,
 Siconos/Numerics provides low-level algorithms to compute basic
 well-identified problems.")
+
+SET(DEBIAN_PACKAGE_DEPENDS 
+  "g++, gfortran, atlas3-base, atlas3-base-dev, atlas3-headers, doxygen")
+
+
+SICONOS_PROJECT(Numerics 3 0 0)
+
+
+  
 
