@@ -695,40 +695,41 @@ void PrimalFrictionContact::postCompute()
   unsigned int pos = 0;
   unsigned int nsLawSize;
 
-  for (UnitaryRelationsIterator itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
-  {
-    // size of the unitaryBlock that corresponds to the current UnitaryRelation
-    nsLawSize = (*itCurrent)->getNonSmoothLawSize();
-    // Get the relative position of UR-unitaryBlock in the vector velocity or reaction
-    pos = H->getPositionOfUnitaryBlock(*itCurrent);
+  //   for(UnitaryRelationsIterator itCurrent = indexSet->begin(); itCurrent!=  indexSet->end(); ++itCurrent)
+  //     {
+  //       // size of the unitaryBlock that corresponds to the current UnitaryRelation
+  //       nsLawSize = (*itCurrent)->getNonSmoothLawSize();
+  //       // Get the relative position of UR-unitaryBlock in the vector velocity or reaction
+  //       pos = H->getPositionOfUnitaryBlock(*itCurrent);
 
-    // Get Y and Lambda for the current Unitary Relation
-    y = (*itCurrent)->getYPtr(levelMin);
-    lambda = (*itCurrent)->getLambdaPtr(levelMin);
+  //       // Get Y and Lambda for the current Unitary Relation
+  //       y = (*itCurrent)->getYPtr(levelMin);
+  //       lambda = (*itCurrent)->getLambdaPtr(levelMin);
 
-    // Copy velocity/reaction values, starting from index pos into y/lambda.
+  //       // Copy velocity/reaction values, starting from index pos into y/lambda.
 
-    setBlock(localVelocity, y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
-    setBlock(localReaction, lambda, lambda->size(), pos, 0);
+  //       setBlock(localVelocity, y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
+  //       setBlock(localReaction, lambda, lambda->size(), pos, 0);
 
-  }
+  //     }
+
   DynamicalSystemsSet *allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();;
   DSIterator itDS;
   unsigned int sizeDS;
   OneStepIntegrator * Osi;
   string osiType; // type of the current one step integrator
   string dsType; // type of the current Dynamical System
-  for (itDS = allDS->begin(); itDS !=  allDS->end(); ++itDS)
-  {
-    dsType = (*itDS) -> getType();
-    if (dsType != LNLDS && dsType != LLTIDS)
-      RuntimeException::selfThrow("PrimalFrictionContact::postCompute not yet implemented for dynamical system of types " + dsType);
+  //   for(itDS = allDS->begin(); itDS!=  allDS->end(); ++itDS)
+  //     {
+  //       dsType = (*itDS) -> getType();
+  //       if(dsType!=LNLDS && dsType!=LLTIDS)
+  //      RuntimeException::selfThrow("PrimalFrictionContact::postCompute not yet implemented for dynamical system of types "+dsType);
 
-    pos = M->getPositionOfDSBlock(*itDS);
-    sizeDS = (*itDS)->getDim();
-    setBlock((static_cast<LagrangianDS*>(*itDS))->getVelocityPtr(), velocity, sizeDS, pos, 0);
+  //       pos = M->getPositionOfDSBlock(*itDS);
+  //       sizeDS = (*itDS)->getDim();
+  //       setBlock((static_cast<LagrangianDS*>(*itDS))->getVelocityPtr(),velocity,sizeDS, pos, 0 );
 
-  }
+  //     }
 
 
 
