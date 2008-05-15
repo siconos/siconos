@@ -61,8 +61,10 @@ using namespace std;
 
 #include <drawstuff/drawstuff.h>
 
-#define etage     4 // etage must be >= 2 and even
-#define DSNUMBER 20 // the number of dynamical systems = SUM(etage) defined in the file utilities.h
+// #define etage     7 // etage must be >= 2 and even
+// #define DSNUMBER 84 // the number of dynamical systems = SUM(etage) defined in the file utilities.h
+#define etage     2 // etage must be >= 2 and even
+#define DSNUMBER 4 // the number of dynamical systems = SUM(etage) defined in the file utilities.h
 
 #define WALL 1        // Positions of walls
 #define TOP 2.2       // Positions of walls
@@ -598,7 +600,7 @@ void initSiconos()
     string solverName = "NSGS";      // solver algorithm used for non-smooth problem
     IntParameters iparam(5);
     iparam[0] = 100010; // Max number of iteration
-    iparam[4] = 0; // Solver/formulation  0: projection, 1: Newton/AlartCurnier, 2: Newton/Fischer-Burmeister
+    iparam[4] = 1; // Solver/formulation  0: projection, 1: Newton/AlartCurnier, 2: Newton/Fischer-Burmeister
 
     DoubleParameters dparam(5);
     dparam[0] = 1e-7; // Tolerance

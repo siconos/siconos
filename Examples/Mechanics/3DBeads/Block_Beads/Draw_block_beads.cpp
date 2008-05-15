@@ -683,7 +683,7 @@ void initSiconos()
     string solverName = "NSGS";      // solver algorithm used for non-smooth problem
     IntParameters iparam(5);
     iparam[0] = 1010; // Max number of iteration
-    iparam[4] = 0; // Solver/formulation  0: projection, 1: Newton/AlartCurnier, 2: Newton/Fischer-Burmeister
+    iparam[4] = 1; // Solver/formulation  0: projection, 1: Newton/AlartCurnier, 2: Newton/Fischer-Burmeister
 
     DoubleParameters dparam(5);
     dparam[0] = 1e-7; // Tolerance
