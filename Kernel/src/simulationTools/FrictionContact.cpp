@@ -320,6 +320,7 @@ void FrictionContact::computeUnitaryBlock(UnitaryRelation* UR1, UnitaryRelation*
       leftUnitaryBlock = new SimpleMatrix(nslawSize1, sizeDS);
 
       UR1->getLeftUnitaryBlockForDS(*itDS, leftUnitaryBlock);
+
       relationType1 = UR1->getRelationType();
       relationType2 = UR2->getRelationType();
       // Computing depends on relation type -> move this in UnitaryRelation method?
@@ -331,11 +332,11 @@ void FrictionContact::computeUnitaryBlock(UnitaryRelation* UR1, UnitaryRelation*
         {
           rightUnitaryBlock = new SimpleMatrix(nslawSize2, sizeDS);
           UR2->getLeftUnitaryBlockForDS(*itDS, rightUnitaryBlock);
+
           // Warning: we use getLeft for Right unitaryBlock because right = transpose(left) and because of size checking inside the getBlock function,
           // a getRight call will fail.
           flagRightUnitaryBlock = true;
         }
-
         work = new SimpleMatrix(*rightUnitaryBlock);
         work->trans();
         // W contains a lu-factorized matrix and we solve
@@ -344,6 +345,7 @@ void FrictionContact::computeUnitaryBlock(UnitaryRelation* UR1, UnitaryRelation*
         W[*itDS]->PLUForwardBackwardInPlace(*work);
         //*currentUnitaryBlock +=  *leftUnitaryBlock * *work; // left = right = G or H
         gemm(CblasNoTrans, CblasNoTrans, 1.0, *leftUnitaryBlock, *work, 1.0, *currentUnitaryBlock);
+
         delete work;
         if (flagRightUnitaryBlock) delete rightUnitaryBlock;
       }

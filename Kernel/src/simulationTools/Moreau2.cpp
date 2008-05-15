@@ -32,6 +32,12 @@ Moreau2::Moreau2(DynamicalSystem* newDS, double newTheta, Simulation* newS): Mor
 {
   integratorType = "Moreau2";
 }
+Moreau2::Moreau2(DynamicalSystemsSet& newDS, double newTheta, Simulation* newS): Moreau(newDS, newTheta, newS)
+{
+  integratorType = "Moreau2";
+}
+
+
 
 
 Moreau2::~Moreau2()

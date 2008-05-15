@@ -297,9 +297,12 @@ void OneStepNSProblem::updateUnitaryBlocks()
   // Get index set from Simulation
 
   indexSet = simulation->getIndexSetPtr(levelMin);
+
+
   isTimeInvariant = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->isTimeInvariant();
   for (itUR1 = indexSet->begin(); itUR1 != indexSet->end(); ++itUR1)
   {
+
     for (itUR2 = indexSet->begin(); itUR2 != indexSet->end(); ++itUR2)
     {
       if (!isTimeInvariant)
@@ -425,26 +428,42 @@ void OneStepNSProblem::updateUnitaryDSBlocks()
   // Get index set from Simulation
 
   indexSet = simulation->getIndexSetPtr(levelMin);
+
+
   isTimeInvariant = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->isTimeInvariant();
+
+  itUR = indexSet->begin();
 
   for (itUR = indexSet->begin(); itUR != indexSet->end(); ++itUR)
   {
     concernedDS = (*itUR)->getDynamicalSystemsPtr();
+
     for (itDS = concernedDS->begin(); itDS != concernedDS->end(); itDS++)
     {
       if (!isTimeInvariant)
+      {
+
         computeUnitaryDSBlock(*itUR, *itDS);
+      }
       else // if(isTimeInvariant)
       {
         if ((unitaryDSBlocks.find(*itUR)) != unitaryDSBlocks.end())  // if unitaryBlocks[UR] exists
         {
           if ((unitaryDSBlocks[*itUR].find(*itDS)) == (unitaryDSBlocks[*itUR].end()))   // if unitaryBlocks[UR][DS2] does not exist
+          {
+
             computeUnitaryDSBlock(*itUR, *itDS);
+          }
         }
-        else computeUnitaryDSBlock(*itUR, *itDS);
+        else
+        {
+          computeUnitaryDSBlock(*itUR, *itDS);
+
+        }
       }
     }
   }
+
 }
 
 void OneStepNSProblem::computeAllUnitaryDSBlocks()

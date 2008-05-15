@@ -141,24 +141,24 @@ void PrimalFrictionContact::setReactionPtr(SimpleVector* newPtr)
 
 void PrimalFrictionContact::setLocalVelocity(const SimpleVector& newValue)
 {
-  if (sizeOutput != newValue.size())
+  if (sizeLocalOutput != newValue.size())
     RuntimeException::selfThrow("PrimalFrictionContact: setLocalVelocity, inconsistent size between given velocity size and problem size. You should set sizeOutput before");
 
   if (localVelocity == NULL)
   {
-    localVelocity = new SimpleVector(sizeOutput);
+    localVelocity = new SimpleVector(sizeLocalOutput);
     isLocalVelocityAllocatedIn = true;
   }
-  else if (localVelocity->size() != sizeOutput)
-    RuntimeException::selfThrow("PrimalFrictionContact: setLocalVelocity, velocity size differs from sizeOutput");
+  else if (localVelocity->size() != sizeLocalOutput)
+    RuntimeException::selfThrow("PrimalFrictionContact: setLocalVelocity, velocity size differs from sizeLocalOutput");
 
   *localVelocity = newValue;
 }
 
 void PrimalFrictionContact::setLocalVelocityPtr(SimpleVector* newPtr)
 {
-  if (sizeOutput != newPtr->size())
-    RuntimeException::selfThrow("PrimalFrictionContact: setLocalVelocityPtr, inconsistent size between given velocity size and problem size. You should set sizeOutput before");
+  if (sizeLocalOutput != newPtr->size())
+    RuntimeException::selfThrow("PrimalFrictionContact: setLocalVelocityPtr, inconsistent size between given velocity size and problem size. You should set sizeLocalOutput before");
 
   if (isVelocityAllocatedIn) delete localVelocity;
   localVelocity = newPtr;
@@ -168,12 +168,12 @@ void PrimalFrictionContact::setLocalVelocityPtr(SimpleVector* newPtr)
 
 void PrimalFrictionContact::setLocalReaction(const SimpleVector& newValue)
 {
-  if (sizeOutput != newValue.size())
-    RuntimeException::selfThrow("PrimalFrictionContact: setLocalReaction, inconsistent size between given reaction size and problem size. You should set sizeOutput before");
+  if (sizeLocalOutput != newValue.size())
+    RuntimeException::selfThrow("PrimalFrictionContact: setLocalReaction, inconsistent size between given reaction size and problem size. You should set sizeLocalOutput before");
 
   if (localReaction == NULL)
   {
-    localReaction = new SimpleVector(sizeOutput);
+    localReaction = new SimpleVector(sizeLocalOutput);
     isLocalReactionAllocatedIn = true;
   }
 
@@ -182,8 +182,8 @@ void PrimalFrictionContact::setLocalReaction(const SimpleVector& newValue)
 
 void PrimalFrictionContact::setLocalReactionPtr(SimpleVector* newPtr)
 {
-  if (sizeOutput != newPtr->size())
-    RuntimeException::selfThrow("PrimalFrictionContact: setLocalReactionPtr, inconsistent size between given reaction size and problem size. You should set sizeOutput before");
+  if (sizeLocalOutput != newPtr->size())
+    RuntimeException::selfThrow("PrimalFrictionContact: setLocalReactionPtr, inconsistent size between given reaction size and problem size. You should set sizeLocalOutput before");
 
   if (isLocalReactionAllocatedIn) delete localReaction;
   localReaction = newPtr;
@@ -191,24 +191,24 @@ void PrimalFrictionContact::setLocalReactionPtr(SimpleVector* newPtr)
 }
 void PrimalFrictionContact::setTildeLocalVelocity(const SimpleVector& newValue)
 {
-  if (sizeOutput != newValue.size())
-    RuntimeException::selfThrow("PrimalFrictionContact: setTildeLocalVelocity, inconsistent size between given velocity size and problem size. You should set sizeOutput before");
+  if (sizeLocalOutput != newValue.size())
+    RuntimeException::selfThrow("PrimalFrictionContact: setTildeLocalVelocity, inconsistent size between given velocity size and problem size. You should set sizeLocalOutput before");
 
   if (tildeLocalVelocity == NULL)
   {
-    tildeLocalVelocity = new SimpleVector(sizeOutput);
+    tildeLocalVelocity = new SimpleVector(sizeLocalOutput);
     isTildeLocalVelocityAllocatedIn = true;
   }
-  else if (tildeLocalVelocity->size() != sizeOutput)
-    RuntimeException::selfThrow("PrimalFrictionContact: setTildeLocalVelocity, velocity size differs from sizeOutput");
+  else if (tildeLocalVelocity->size() != sizeLocalOutput)
+    RuntimeException::selfThrow("PrimalFrictionContact: setTildeLocalVelocity, velocity size differs from sizeLocalOutput");
 
   *tildeLocalVelocity = newValue;
 }
 
 void PrimalFrictionContact::setTildeLocalVelocityPtr(SimpleVector* newPtr)
 {
-  if (sizeOutput != newPtr->size())
-    RuntimeException::selfThrow("PrimalFrictionContact: setTildeLocalVelocityPtr, inconsistent size between given velocity size and problem size. You should set sizeOutput before");
+  if (sizeLocalOutput != newPtr->size())
+    RuntimeException::selfThrow("PrimalFrictionContact: setTildeLocalVelocityPtr, inconsistent size between given velocity size and problem size. You should set sizeLocalOutput before");
 
   if (isTildeLocalVelocityAllocatedIn) delete tildeLocalVelocity;
   tildeLocalVelocity = newPtr;
@@ -283,6 +283,9 @@ void PrimalFrictionContact::initialize()
   updateDSBlocks(); //blocks of M
   // updateUnitaryDSBlocks(); This computation is not made because, we that UnitaryDSBlocks =H^T
   updateUnitaryDSBlocks(); // blocks of H
+
+
+
 
   // Connect to the right function according to dim. of the problem
   if (contactProblemDim == 2)
@@ -458,9 +461,11 @@ void PrimalFrictionContact::computeDSBlock(DynamicalSystem* DS)
 
   Osi = simulation->getIntegratorOfDSPtr(DS); // get OneStepIntegrator of current dynamical system
   osiType = Osi->getType();
-  if (osiType == "Moreau")
+  if (osiType == "Moreau" || osiType == "Moreau2")
   {
     DSBlocks[DS] = (static_cast<Moreau*>(Osi))->getWPtr(DS);  // get its W matrix ( pointer link!)
+    //       cout << "PrimalFrictionContact::computeDSBlock(DynamicalSystem* DS) " << endl;
+    //       DSBlocks[DS]->display();
   }
   else if (osiType == "Lsodar") // Warning: LagrangianDS only at the time !!!
   {
@@ -479,14 +484,12 @@ void PrimalFrictionContact::computeUnitaryDSBlock(UnitaryRelation* UR, Dynamical
 {
   unsigned int sizeDS = (DS)->getDim();
   unsigned int nslawSize = UR->getNonSmoothLawSize();
-  SiconosMatrix* currentunitaryDSBlock = unitaryDSBlocks[UR][DS];
   string relationType = UR->getRelationType();
-
 
   if (relationType == "Lagrangian")
   {
-    currentunitaryDSBlock = new SimpleMatrix(nslawSize, sizeDS);
-    UR->getLeftUnitaryBlockForDS(DS, currentunitaryDSBlock);
+    unitaryDSBlocks[UR][DS] = new SimpleMatrix(nslawSize, sizeDS);
+    UR->getLeftUnitaryBlockForDS(DS, unitaryDSBlocks[UR][DS]);
   }
   else RuntimeException::selfThrow("PrimalFrictionContact::computeUnitaryDSBlock not yet implemented for relation of type " + relationType);
 }
@@ -528,7 +531,6 @@ void PrimalFrictionContact::computeTildeLocalVelocity(const double time)
   tildeLocalVelocity->zero();
   // === Get index set from Simulation ===
   UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
-
   // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
 
   unsigned int pos = 0;
@@ -537,9 +539,9 @@ void PrimalFrictionContact::computeTildeLocalVelocity(const double time)
   for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
   {
     // *itCurrent is a UnitaryRelation*.
-
     // Compute q, this depends on the type of non smooth problem, on the relation type and on the non smooth law
-    pos = M->getPositionOfUnitaryBlock(*itCurrent);
+    pos = H->getPositionOfUnitaryBlock(*itCurrent);
+
     (*itCurrent)->computeEquivalentY(time, levelMin, simulationType, tildeLocalVelocity, pos); // free output is saved in y
   }
 
@@ -567,6 +569,8 @@ void PrimalFrictionContact::preCompute(const double time)
     updateDSBlocks(); //blocks of M
     // updateUnitaryDSBlocks(); This computation is not made because, we that UnitaryDSBlocks =H^T
     updateUnitaryDSBlocks(); // blocks of H
+
+
 
     // Updates matrix M
     UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
@@ -663,7 +667,7 @@ int PrimalFrictionContact::compute(double time)
     //  }
     //       M->display();
     //       q->display();
-    info = (*primalFrictionContact_driver)(&numerics_problem, reaction->getArray() , velocity->getArray() , solver->getNumericsSolverOptionsPtr(), numerics_options);
+    //      info = (*primalFrictionContact_driver)(&numerics_problem, reaction->getArray() , velocity->getArray() , solver->getNumericsSolverOptionsPtr(), numerics_options);
     //  cout << " step 2 "<< info << endl;
     //  reaction->display();
     //  velocity->display();
@@ -696,7 +700,7 @@ void PrimalFrictionContact::postCompute()
     // size of the unitaryBlock that corresponds to the current UnitaryRelation
     nsLawSize = (*itCurrent)->getNonSmoothLawSize();
     // Get the relative position of UR-unitaryBlock in the vector velocity or reaction
-    pos = M->getPositionOfUnitaryBlock(*itCurrent);
+    pos = H->getPositionOfUnitaryBlock(*itCurrent);
 
     // Get Y and Lambda for the current Unitary Relation
     y = (*itCurrent)->getYPtr(levelMin);
@@ -733,7 +737,8 @@ void PrimalFrictionContact::postCompute()
 void PrimalFrictionContact::display() const
 {
   cout << "===== " << contactProblemDim << "D Primal Friction Contact Problem " << endl;
-  cout << "of size " << sizeOutput << "(ie " << sizeOutput / contactProblemDim << " contacts)." << endl;
+  cout << "size (sizeOutput) " << sizeOutput << endl;
+  cout << "and  size (sizeLocalOutput) " << sizeLocalOutput << "(ie " << sizeLocalOutput / contactProblemDim << " contacts)." << endl;
   cout << " - Matrix M  : " << endl;
   if (M != NULL) M->display();
   else cout << "-> NULL" << endl;
@@ -743,9 +748,9 @@ void PrimalFrictionContact::display() const
   cout << " - Vector q : " << endl;
   if (q != NULL) q->display();
   else cout << "-> NULL" << endl;
+  cout << " - Vector tildeLocalVelocity : " << endl;
   if (tildeLocalVelocity != NULL) tildeLocalVelocity->display();
   else cout << "-> NULL" << endl;
-
   cout << " Friction coefficients: " << endl;
   if (mu != NULL) print(mu->begin(), mu->end());
   else cout << "-> NULL" << endl;

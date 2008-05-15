@@ -111,6 +111,8 @@ protected:
   /** Private assignment -> forbidden */
   OSNSMatrix& operator=(const OSNSMatrix&);
 
+
+
   /** To update dim and unitaryBlocksPositions for a new set of UnitaryRelation
       \param UnitaryRelationsSet* the index set of the active constraints
   */

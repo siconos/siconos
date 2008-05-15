@@ -70,6 +70,13 @@ public:
    */
   Moreau2(DynamicalSystem*, double, Simulation*);
 
+  /** constructor from a minimum set of data: one DS and its theta
+   *  \param DynamicalSystemSet* : the DynamicalSystem set linked to the OneStepIntegrator
+   *  \param Theta value
+   *  \param Simulation * : the simulation that owns the osi
+   */
+  Moreau2(DynamicalSystemsSet&, double, Simulation*);
+
   virtual ~Moreau2();
 
   //  SiconosVector * getFfree(FirstOrderLinearDS *d);
