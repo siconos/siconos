@@ -1,3 +1,11 @@
+#set(CTEST_PROJECT_NAME "Siconos")
+#set(CTEST_NIGHTLY_START_TIME "00:00:00 EST")
+
+#set(CTEST_DROP_METHOD "http")
+#set(CTEST_DROP_SITE "cdash.irisa.fr")
+#set(CTEST_DROP_LOCATION "/CDash/submit.php?project=Siconos")
+#set(CTEST_DROP_SITE_CDASH TRUE)
+
 SET (DROP_METHOD "xmlrpc")
 SET (DROP_SITE "http://dart.irisa.fr")
 SET (DROP_LOCATION "Siconos")
