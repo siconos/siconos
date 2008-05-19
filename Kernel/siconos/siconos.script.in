@@ -27,7 +27,8 @@ myname=`basename $0`
 cartridge() {
     echo;
     echo "|=============================================================================|";
-    echo "|          Siconos-Kernel version @VERSION@, Copyright INRIA 2005-2008.       |";
+#   echo "|          Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.           |";
+    echo "|          Siconos-Kernel version @VERSION@, Copyright INRIA 2005-2008.           |";
     echo "|                                                                             |";
     echo "|     Free software under GNU General Public License.                         |";
     echo "|=============================================================================|"; 
@@ -61,6 +62,8 @@ usage() {
     echo " ";
     echo "     -opt <opt> : add option <opt> to compiler." 
     echo " ";
+    echo "     -ldopt <opt> : add option <opt> to linker." 
+    echo " ";
     echo "     -P prefix_command : to add a prefix command (time, valgrind, gdb, etc.)."
     echo " ";
     echo "     -plugin_dir <plugin_directory> (Default = plugin): "
@@ -93,7 +96,7 @@ cartridge
 if `getopt -T >/dev/null 2>&1` ; [ $? = 4 ] ; then
     args=`getopt -n $myname -a \
  -o aghD:P:v \
- -l clean,help,noexec,src_dir:,opt:,plugin_dir:,plugins_dir: \
+ -l clean,help,noexec,src_dir:,opt:,ldopt:,plugin_dir:,plugins_dir: \
  -- "$@"`
     if test $? -ne 0; then
         usage
@@ -118,6 +121,11 @@ while [ $# -gt 0 ] ; do
             case :$1,:$compiler_options in
                 :*,:) compiler_options=$1;;
                 :*,:*) compiler_options="$compiler_options;$1";;
+            esac;;
+        --ldopt) with_arg $@; shift;
+            case :$1,:$linker_options in
+                :*,:) linker_options=$1;;
+                :*,:*) linker_options="$linker_options;$1";;
             esac;;
         --plugin_dir) with_arg $@; shift
             case :$1,:$plugin_directories in
@@ -197,6 +205,7 @@ if test ! "$make_args" = "clean"; then
         -DPLUGIN_DIRECTORIES=$plugin_directories \
         -DSOURCES_DIRECTORIES=$sources_directories \
         -DCOMPILER_OPTIONS=$compiler_options \
+        -DLINKER_OPTIONS=$linker_options \
         -DALL_EXTRA_DEFINITIONS=$all_extra_defs \
         $extra_defs; then
         echo "$myname: $exe build configuration failed" >&2

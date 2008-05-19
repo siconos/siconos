@@ -29,6 +29,10 @@ siconos \- The Siconos C++ Front-End.
 .I C++ COMPILER OPTION
 ]
 [
+.B \-ldopt 
+.I LINKER OPTION
+]
+[
 .B \-P
 .I PREFIX COMMAND
 ]
@@ -94,6 +98,10 @@ The following command-line options are recognized by
 .BI \-opt 
 .I COMPILER OPTION
  Add option to compiler.
+.TP
+.BI \-ldopt 
+.I LINKER OPTION
+ Add option to linker.
 .TP 
 .BI \-P
 .I PREFIX COMMAND
