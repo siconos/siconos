@@ -95,7 +95,7 @@ cartridge
 
 if `getopt -T >/dev/null 2>&1` ; [ $? = 4 ] ; then
     args=`getopt -n $myname -a \
- -o aghD:P:v \
+ -o aghl:D:P:v \
  -l clean,help,noexec,src_dir:,opt:,ldopt:,plugin_dir:,plugins_dir: \
  -- "$@"`
     if test $? -ne 0; then
@@ -116,6 +116,11 @@ while [ $# -gt 0 ] ; do
         -g) definitions="$definitions CMAKE_BUILD_TYPE=Debug";;
         -h|-help) usage; exit 0;;
         --noexec) exec=false;;
+        -l) with_arg $@; shift; 
+            case :$1,:$linker_libraries in
+                :*,:) linker_libraries=$1;;
+                :*,:*) linker_libraries="$linker_libraries;$1";;
+            esac;;
         -P) with_arg $@; shift; exec_prefix=$1;;
         --opt) with_arg $@; shift;
             case :$1,:$compiler_options in
@@ -206,6 +211,7 @@ if test ! "$make_args" = "clean"; then
         -DSOURCES_DIRECTORIES=$sources_directories \
         -DCOMPILER_OPTIONS=$compiler_options \
         -DLINKER_OPTIONS=$linker_options \
+        -DLINKER_LIBRARIES=$linker_libraries \
         -DALL_EXTRA_DEFINITIONS=$all_extra_defs \
         $extra_defs; then
         echo "$myname: $exe build configuration failed" >&2
