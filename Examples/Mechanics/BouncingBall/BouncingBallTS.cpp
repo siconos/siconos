@@ -40,8 +40,8 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 3;           // degrees of freedom for the ball
     double t0 = 0;                   // initial computation time
-    double T = 2;                  // final computation time
-    double h = 0.0005;                // time step
+    double T = 10;                  // final computation time
+    double h = 0.005;                // time step
     double position_init = 1.0;      // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
     double theta = 0.5;              // theta for Moreau integrator
@@ -130,15 +130,13 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
     cout << "====> Simulation initialisation ..." << endl << endl;
-
     s->initialize();
-
-    int N = t->getNSteps(); // Number of time steps
+    int N = (int)((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
     unsigned int outputSize = 5;
-    SimpleMatrix dataPlot(N, outputSize);
+    SimpleMatrix dataPlot(N + 1, outputSize);
 
     SiconosVector * q = ball->getQPtr();
     SiconosVector * v = ball->getVelocityPtr();
@@ -153,13 +151,13 @@ int main(int argc, char* argv[])
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
     // ==== Simulation loop - Writing without explicit event handling =====
-    int k = 0;
+    int k = 1;
     boost::progress_display show_progress(N);
 
     boost::timer time;
     time.restart();
 
-    for (k = 1 ; k < N  ; ++k)
+    while (s->getNextTime() < T)
     {
       s->computeOneStep();
 
@@ -171,46 +169,15 @@ int main(int argc, char* argv[])
       dataPlot(k, 4) = (*lambda)(0);
       s->nextStep();
       ++show_progress;
+      k++;
     }
     cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
     cout << "Computation Time " << time.elapsed()  << endl;
-
-    // == Simulation loop - Writing with explicit event handling =====
-    //     while(s->hasNextEvent())
-    //       {
-    //  s->computeOneStep();
-    //  k++;
-    //  dataPlot(k, 0) =  bouncingBall->getCurrentT();
-    //  dataPlot(k,1) = (*q)(0);
-    //  dataPlot(k,2) = (*v)(0);
-    //  dataPlot(k, 3) = (*lambda)(0);
-    //  s->nextStep();
-    //  // --- Get values to be plotted ---
-    //       }
-    //     cout<<"End of computation - Number of iterations done: "<<k<<endl;
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
     ioMatrix io("result.dat", "ascii");
     io.write(dataPlot, "noDim");
-    // --- Free memory ---
-    delete osnspb;
-    delete t;
-    delete s;
-    delete mySolver;
-    delete OSI;
-    delete bouncingBall;
-    delete nsds;
-
-    delete inter;
-    delete relation0;
-    delete nslaw0;
-    delete H;
-    delete weight;
-    delete ball;
-    delete q0;
-    delete v0;
-    delete Mass;
   }
 
   catch (SiconosException e)

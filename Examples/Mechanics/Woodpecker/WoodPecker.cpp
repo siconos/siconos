@@ -170,12 +170,12 @@ int main(int argc, char* argv[])
 
 
     int k = 0;
-    int N = t->getNSteps(); // Number of time steps
+    int N = (int)((T - t0) / h);
 
     // --- Get the values to be plotted ---
     unsigned int outputSize = 7;
     SimpleMatrix dataPlot(N + 1, outputSize);
-    dataPlot(k, 0) = k * t->getH();
+    dataPlot(k, 0) = t0;
     for (int i = 0; i < (int)nDof; i++)
     {
       dataPlot(k, 2 * i + 1) = dynamicalSystem->getQ()(i);
@@ -194,7 +194,7 @@ int main(int argc, char* argv[])
       s->computeOneStep();
 
       // get values
-      dataPlot(k, 0) = k * t->getH();
+      dataPlot(k, 0) = s->getNextTime();
       for (int i = 0; i < (int)nDof; i++)
       {
         dataPlot(k, 2 * i + 1) = dynamicalSystem->getQ()(i);

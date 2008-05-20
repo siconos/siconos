@@ -38,9 +38,10 @@ int main(int argc, char* argv[])
     // --- Get the time discretisation scheme ---
     TimeDiscretisation* t = s->getTimeDiscretisationPtr();
     int k = 0;
-    int N = t->getNSteps(); // Number of time steps
-
-    //t->display();
+    double T = bouncingBall.getFinalT();
+    double t0 = bouncingBall.getT0();
+    double h = s->getTimeStep();
+    int N = (int)((T - t0) / h);
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -63,29 +64,16 @@ int main(int argc, char* argv[])
     dataPlot(k, 5) = (*p)(0);
 
     // --- Compute elapsed time ---
-    double t1, t2, elapsed;
-    struct timeval tp;
-    int rtn;
-    clock_t start, end;
-    double elapsed2;
-    start = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t1 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-
-    // Moreau * osi = static_cast<Moreau*>(s->getIntegratorOfDSPtr(ball));
-
     cout << "Computation ... " << endl;
     // --- Time loop  ---
-    while (k < N)
+    while (s->getNextTime() <= bouncingBall.getFinalT())
     {
-      // get current time step
-      k++;
       // solve ...
       s->computeOneStep();
 
       // --- Get values to be plotted ---
       //time
-      dataPlot(k, 0) = s->getStartingTime();;
+      dataPlot(k, 0) = s->getNextTime();;
       // Ball: state q
       dataPlot(k, 1) = (*q)(0);
       // Ball: velocity
@@ -99,15 +87,8 @@ int main(int argc, char* argv[])
       //  dataPlot(k, 6) = osi->computeResidu();
       // transfer of state i+1 into state i and time incrementation
       s->nextStep();
+      k++;
     }
-
-    // --- elapsed time computing ---
-    end = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t2 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-    elapsed = t2 - t1;
-    elapsed2 = (end - start) / (double)CLOCKS_PER_SEC;
-    cout << "time = " << elapsed << " --- cpu time " << elapsed2 << endl;
 
     // Number of time iterations
     cout << "Number of iterations done: " << k << endl;
@@ -116,8 +97,6 @@ int main(int argc, char* argv[])
     ioMatrix io("result.dat", "ascii");
     //io.write(dataPlot,"noDim");
     io.write(dataPlot);
-    // Xml output
-    //  bouncingBall.saveToXMLFile("./BouncingBall_TIDS.xml.output");
   }
 
   // --- Exceptions handling ---

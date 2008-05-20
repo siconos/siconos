@@ -99,12 +99,12 @@
 		</OneStepIntegrator_Definition>
 		<!-- One Step NS Problem of th Simulation-->
 		<OneStepNSProblems_List>
-		 	<FrictionContact2D>
+		 	<FrictionContact Type='2'>
   			   <NonSmoothSolver Name="NLGS">
 			      <iparam  vectorSize='5'>1000 0 0 0 0</iparam>
 			      <dparam  vectorSize='5'>1e-4 0 0 0 0</dparam>
 			   </NonSmoothSolver>
-		 	</FrictionContact2D>
+		 	</FrictionContact>
 		 </OneStepNSProblems_List>
 	</Simulation>	
 </SiconosModel>

@@ -204,7 +204,7 @@ int main(int argc, char* argv[])
     cout << "End of simulation initialisation" << endl;
 
     int k = 0;
-    int N = t->getNSteps(); // Number of time steps
+    int N = (int)((T - t0) / h) + 1; // Number of time steps
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -234,7 +234,7 @@ int main(int argc, char* argv[])
     dataPlot(k, 13) = (*z)(23);
 
 
-    while (s->hasNextEvent())
+    while (s->getNextTime() < T)
     {
       (*z)(0) = (*q)(0);
       (*z)(1) = (*q)(1);

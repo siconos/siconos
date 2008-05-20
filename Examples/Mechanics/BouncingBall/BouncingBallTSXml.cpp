@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
     // --- Get the time discretisation scheme ---
     TimeDiscretisation* t = s->getTimeDiscretisationPtr();
 
-    int N = t->getNSteps(); // Number of time steps
+    int N = 2000; // Number of time steps
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
 
@@ -69,16 +69,17 @@ int main(int argc, char* argv[])
 
     cout << "====> Start computation ... " << endl << endl;
     // --- Time loop  ---
-    int k = 0;
-    for (k = 1 ; k < N + 1 ; ++k)
+    int k = 1;
+    while (s->getNextTime() <= bouncingBall->getFinalT())
     {
       s->computeOneStep();
       // --- Get values to be plotted ---
-      dataPlot(k, 0) =  s->getStartingTime();
+      dataPlot(k, 0) =  s->getNextTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*p)(0);
       s->nextStep();
+      k++;
     }
     cout << "End of computation - Number of iterations done: " << k - 1 << endl << endl;
 

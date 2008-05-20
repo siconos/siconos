@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 2;           // degrees of freedom for robot arm
     double t0 = 0;                   // initial computation time
-    double T = 40.0;                   // final computation time
+    double T = 6.0;                   // final computation time
     double h = 0.0005;                // time step
     double criterion = 0.05;
     unsigned int maxIter = 20000;
@@ -191,7 +191,7 @@ int main(int argc, char* argv[])
     cout << "End of simulation initialisation" << endl;
 
     int k = 0;
-    int N = t->getNSteps(); // Number of time steps
+    int N = (int)((T - t0) / h) + 1;
     cout << "Number of time step   " << N << endl;
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -202,7 +202,7 @@ int main(int argc, char* argv[])
     SiconosVector * q = doublependulum->getQPtr();
     SiconosVector * v = doublependulum->getVelocityPtr();
 
-    dataPlot(k, 0) =  Pendulum->getT0();
+    dataPlot(k, 0) =  t0;
     dataPlot(k, 1) = (*q)(0);
     dataPlot(k, 2) = (*v)(0);
     dataPlot(k, 3) = (*q)(1);
@@ -222,7 +222,7 @@ int main(int argc, char* argv[])
 
     boost::progress_display show_progress(N);
 
-    while (s->hasNextEvent())
+    while (s->getNextTime() <= Pendulum->getFinalT())
     {
       k++;
       ++show_progress;
@@ -230,9 +230,8 @@ int main(int argc, char* argv[])
 
       // Solve problem
       s->newtonSolve(criterion, maxIter);
-      s->nextStep();
       // Data Output
-      dataPlot(k, 0) =  s->getStartingTime();
+      dataPlot(k, 0) =  s->getNextTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*q)(1);
@@ -243,6 +242,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 8) = -l1 * cos((*q)(0)) - l2 * cos((*q)(1));
       dataPlot(k, 9) =  l1 * cos((*q)(0)) * ((*v)(0));
       dataPlot(k, 10) = l1 * cos((*q)(0)) * ((*v)(0)) + l2 * cos((*q)(1)) * ((*v)(1));
+      s->nextStep();
     }
 
     cout << "End of computation - Number of iterations done: " << k << endl;

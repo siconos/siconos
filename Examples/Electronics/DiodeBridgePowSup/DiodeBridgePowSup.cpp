@@ -139,7 +139,8 @@ int main(int argc, char* argv[])
     StratDiodeBridgePowSup->initialize();
 
     k = 0;
-    int N = TiDisc->getNSteps(); // Number of time steps
+    double h = StratDiodeBridgePowSup->getTimeStep();
+    int N = (int)((T - t0) / h); // Number of time steps
     cout << "Number of time steps = " << N << endl;
     tinst = k * h_step;
 

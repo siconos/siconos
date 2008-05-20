@@ -157,25 +157,27 @@ int main(int argc, char* argv[])
 
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
-
+    bool nonSmooth = false;
     unsigned int numberOfEvent = 0 ;
     int k = 0;
     boost::progress_display show_progress(N);
-    while (s->hasNextEvent())
+    while (s->getNextTime() < T)
     {
       k++;
 
       s->advanceToEvent();
+      if (eventsManager->getNextEventPtr()->getType() == 2)
+        nonSmooth = true;
 
       s->processEvents();
-
       // If the treated event is non smooth, the pre-impact state has been solved in memory vectors during process.
-      if (eventsManager->getStartingEventPtr()->getType() == "NonSmoothEvent")
+      if (nonSmooth)
       {
         dataPlot(k, 0) = s->getStartingTime();
         dataPlot(k, 1) = (*ball->getQMemoryPtr()->getSiconosVector(1))(0);
         dataPlot(k, 2) = (*ball->getVelocityMemoryPtr()->getSiconosVector(1))(0);
         k++;
+        nonSmooth = false;
         ++show_progress;
       }
       dataPlot(k, 0) = s->getStartingTime();
@@ -193,24 +195,6 @@ int main(int argc, char* argv[])
     ioMatrix io("result.dat", "ascii");
     io.write(dataPlot, "noDim");
 
-    // --- Free memory ---
-
-    delete impact;
-    delete acceleration;
-    delete t;
-    delete s;
-    delete OSI;
-    delete bouncingBall;
-    delete nsds;
-    delete inter;
-    delete relation0;
-    delete nslaw0;
-    delete H;
-    delete weight;
-    delete ball;
-    delete q0;
-    delete v0;
-    delete Mass;
   }
 
   catch (SiconosException e)

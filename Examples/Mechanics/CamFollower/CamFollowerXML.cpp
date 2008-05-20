@@ -53,7 +53,10 @@ int main(int argc, char* argv[])
     // --- Get the time discretisation scheme ---
     TimeDiscretisation* t = S->getTimeDiscretisationPtr();
     int k = 0;
-    int N = t->getNSteps(); // Number of time steps
+    double T = CamFollower.getFinalT();
+    double t0 = CamFollower.getT0();
+    double h = S->getTimeStep();
+    int N = (int)((T - t0) / h);
 
     //t->display();
 
@@ -64,7 +67,7 @@ int main(int argc, char* argv[])
     cout << "Prepare data for plotting ... " << endl;
     // For the initial time step:
     // time
-    DataPlot(k, 0) = k * t->getH();
+    DataPlot(k, 0) = t0;
 
     // state q for the ball
     //  LagrangianDS* ball = static_cast<LagrangianDS*> (bouncingBall.getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
@@ -89,7 +92,7 @@ int main(int argc, char* argv[])
     double rpm = 358;
     double CamEqForce, CamPosition, CamVelocity, CamAcceleration;
 
-    CamEqForce = CamState(k * t->getH(), rpm, CamPosition, CamVelocity, CamAcceleration);
+    CamEqForce = CamState(t0, rpm, CamPosition, CamVelocity, CamAcceleration);
     // Position of the Cam
     DataPlot(k, 5) = CamPosition;
     // Velocity of the Cam
@@ -119,7 +122,7 @@ int main(int argc, char* argv[])
 
       S->computeOneStep();
       // --- Get values to be plotted ---
-      DataPlot(k, 0) = k * t->getH();
+      DataPlot(k, 0) = S->getNextTime();
       //  DataPlot(k, 1) = (Follower->getQ())(0);
       //  DataPlot(k, 2) = (ball->getVelocity())(0);
       //  DataPlot(k, 3) = (bouncingBall.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
@@ -128,7 +131,7 @@ int main(int argc, char* argv[])
       DataPlot(k, 3) = (CamFollower.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
       DataPlot(k, 4) = (Follower->getFExt())(0);
 
-      CamEqForce = CamState(k * t->getH(), rpm, CamPosition, CamVelocity, CamAcceleration);
+      CamEqForce = CamState(S->getNextTime(), rpm, CamPosition, CamVelocity, CamAcceleration);
 
       DataPlot(k, 5) = CamPosition;
       DataPlot(k, 6) = CamVelocity;

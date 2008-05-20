@@ -187,13 +187,13 @@ int main(int argc, char* argv[])
     cout << "End of simulation initialisation" << endl;
 
     int k = 0;
-    int N = t->getNSteps(); // Number of time steps
+    int N = 10363; // Number of time steps
     cout << "Number of time step" << N << endl;
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
     unsigned int outputSize = 11;
 
-    SimpleMatrix dataPlot(10363, outputSize);
+    SimpleMatrix dataPlot(N, outputSize);
     // For the initial time step:
     // time
     SiconosVector * q = doublependulum->getQPtr();
@@ -215,17 +215,20 @@ int main(int argc, char* argv[])
     time.restart();
     // --- Time loop ---
     cout << "Start computation ... " << endl;
+    bool nonSmooth = false;
 
     EventsManager * eventsManager = s->getEventsManagerPtr();
-    while (s->hasNextEvent())
+    while (s->getNextTime() < T)
     {
       k++;
       //  if (!(div(k,1000).rem))  cout <<"Step number "<< k << "\n";
 
       s->advanceToEvent();
+      if (eventsManager->getNextEventPtr()->getType() == 2)
+        nonSmooth = true;
       s->processEvents();
 
-      if (eventsManager->getStartingEventPtr()->getType() == "NonSmoothEvent")
+      if (nonSmooth)
       {
         dataPlot(k, 0) =  s->getStartingTime();
         dataPlot(k, 1) = (*q)(0);

@@ -184,7 +184,7 @@ int main(int argc, char* argv[])
     cout << "End of simulation initialisation" << endl;
 
     int k = 0;
-    int N = t->getNSteps(); // Number of time steps
+    int N = (int)((T - t0) / h) + 1;
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -212,12 +212,12 @@ int main(int argc, char* argv[])
     boost::timer boostTimer;
     boostTimer.restart();
 
-    while (s->hasNextEvent())
+    while (s->getNextTime() < T)
     {
       // get current time step
       k++;
       s->newtonSolve(criterion, maxIter);
-      dataPlot(k, 0) =  s->getStartingTime();
+      dataPlot(k, 0) =  s->getNextTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*vel)(0);
       dataPlot(k, 3) = (*q)(1);

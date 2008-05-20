@@ -154,7 +154,8 @@ int main(int argc, char* argv[])
 
 
     int k = 0;
-    int N = t->getNSteps(); // Number of time steps
+    int N = (int)((T - t0) / h); // Number of time steps
+
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -162,7 +163,7 @@ int main(int argc, char* argv[])
     SimpleMatrix DataPlot(N + 1, outputSize);
     // For the initial time step:
     // time
-    DataPlot(k, 0) = k * t->getH();
+    DataPlot(k, 0) = t0;
     DataPlot(k, 1) = lds->getQ()(0);
     DataPlot(k, 2) = lds->getVelocity()(0);
     DataPlot(k, 3) = (Follower->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
@@ -172,7 +173,7 @@ int main(int argc, char* argv[])
     //    double rpm=358;
     double CamEqForce, CamPosition, CamVelocity, CamAcceleration;
 
-    CamEqForce = CamState(k * t->getH(), rpm, CamPosition, CamVelocity, CamAcceleration);
+    CamEqForce = CamState(t0, rpm, CamPosition, CamVelocity, CamAcceleration);
     // Position of the Cam
     DataPlot(k, 5) = CamPosition;
     // Velocity of the Cam
@@ -191,13 +192,13 @@ int main(int argc, char* argv[])
 
       // --- Get values to be plotted ---
 
-      DataPlot(k, 0) = k * t->getH();
+      DataPlot(k, 0) = S->getNextTime();
       DataPlot(k, 1) = lds->getQ()(0);
       DataPlot(k, 2) = lds->getVelocity()(0);
       DataPlot(k, 3) = (Follower->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
       DataPlot(k, 4) = lds->getFExt()(0);
 
-      CamEqForce = CamState(k * t->getH(), rpm, CamPosition, CamVelocity, CamAcceleration);
+      CamEqForce = CamState(S->getNextTime(), rpm, CamPosition, CamVelocity, CamAcceleration);
       DataPlot(k, 5) = CamPosition;
       DataPlot(k, 6) = CamVelocity;
       DataPlot(k, 7) = CamPosition + lds->getQ()(0);

@@ -37,75 +37,41 @@ int main(int argc, char* argv[])
     // --- Get the time discretisation scheme ---
     TimeDiscretisation* t = s->getTimeDiscretisationPtr();
     int k = 0;
-    int N = t->getNSteps(); // Number of time steps
-
-    //t->display();
+    double t0 = oscillator.getT0();
+    double T = oscillator.getFinalT();
+    double h = s->getTimeStep();
+    int N = (int)((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    SimpleMatrix dataPlot(N + 1, 5);
+    SimpleMatrix dataPlot(N, 3);
 
     cout << "Prepare data for plotting ... " << endl;
     // For the initial time step:
-    // time
-    dataPlot(k, 0) = k * t->getH();
-    // state q for the first dynamical system (ball)
     LagrangianDS* oscillo = static_cast<LagrangianDS*>(oscillator.getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
-    dataPlot(k, 1) = (oscillo->getQ())(0);
+    SiconosVector * q = oscillo->getQPtr();
+    SiconosVector * v = oscillo->getVelocityPtr();
+    SiconosVector * p = oscillo->getPPtr(2);
+
+    dataPlot(k, 0) = t0;
+    dataPlot(0, 1) = (*q)(0);
     // velocity for the oscillo
-    dataPlot(k, 2) = (oscillo->getVelocity())(0);
-    dataPlot(k, 3) = (oscillator.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
-    dataPlot(k, 4) = (oscillator.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(1);
-
-    // reaction (lambda)
-    //dataPlot(k, 5) =    (oscillator.getNonSmoothDynamicalSystem()->getInteractionOnNumber(0)->getLambda())(0);
-    //dataPlot(k,5) =0.0;
-
-    // --- Get interaction between DSs ---
-    //cout << "Get interaction ... " << endl;
-    //Interaction* I =  oscillator.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0);
-    //I->display();
-
-    // --- Compute elapsed time ---
-    double t1, t2, elapsed;
-    struct timeval tp;
-    int rtn;
-    clock_t start, end;
-    double elapsed2;
-    start = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t1 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
+    dataPlot(0, 2) = (*v)(0);
 
     cout << "Computation ... " << endl;
     // --- Time loop  ---
-    while (k < N)
+    while (s->getNextTime() <= oscillator.getFinalT())
     {
-      // get current time step
-      k++;
-      //  cout << " Pas " << k;
       // solve ...
       s->computeOneStep();
-
       // --- Get values to be plotted ---
-      //time
-      dataPlot(k, 0) = k * t->getH();
-      // Oscillo: state q
+      dataPlot(k, 0) = s->getNextTime();
       dataPlot(k, 1) = (oscillo->getQ())(0);
-      // Oscillo: velocity
       dataPlot(k, 2) = (oscillo->getVelocity())(0);
-      dataPlot(k, 3) = (oscillator.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
-      dataPlot(k, 4) = (oscillator.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(1);
       // transfer of state i+1 into state i and time incrementation
       s->nextStep();
+      k++;
     }
-
-    // --- elapsed time computing ---
-    end = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t2 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-    elapsed = t2 - t1;
-    elapsed2 = (end - start) / (double)CLOCKS_PER_SEC;
-    cout << "time = " << elapsed << " --- cpu time " << elapsed2 << endl;
 
     // Number of time iterations
     cout << "Number of iterations done: " << k << endl;
@@ -113,9 +79,6 @@ int main(int argc, char* argv[])
     // dataPlot (ascii) output
     ioMatrix io("result.dat", "ascii");
     io.write(dataPlot, "noDim");
-
-    // Xml output
-    //  oscillator.saveToXMLFile("./BouncingOscillo_TIDS.xml.output");
   }
 
   // --- Exceptions handling ---

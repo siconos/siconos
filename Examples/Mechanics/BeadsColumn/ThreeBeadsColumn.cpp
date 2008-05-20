@@ -39,11 +39,14 @@ int main(int argc, char* argv[])
     // --- Get the time discretisation scheme ---
     TimeDiscretisation* t = s->getTimeDiscretisationPtr();
     int k = 0;
-    int N = t->getNSteps(); // Number of time steps
+    double t0 = BeadsModel->getT0();
+    double T = BeadsModel->getFinalT();
+    double h = s->getTimeStep();
+    int N = (int)((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    SimpleMatrix dataPlot(N + 1, 7);
+    SimpleMatrix dataPlot(N, 7);
 
     cout << "Prepare data for plotting ... " << endl;
     // For the initial time step:
@@ -72,10 +75,8 @@ int main(int argc, char* argv[])
     dataPlot(k, 6) = (*v3)(0);
 
     cout << " Computation ... " << endl;
-    while (k < N)
+    while (s->getNextTime() <= BeadsModel->getFinalT())
     {
-      // get current time step
-      k++;
       // solve ...
       s->computeOneStep();
 
@@ -91,6 +92,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 6) = (*v3)(0);
       // transfer of state i+1 into state i and time incrementation
       s->nextStep();
+      k++;
 
     }
     ioMatrix io("result.dat", "ascii");

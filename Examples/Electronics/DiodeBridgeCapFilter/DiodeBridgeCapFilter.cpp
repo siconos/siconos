@@ -166,7 +166,8 @@ int main(int argc, char* argv[])
 
 
     int k = 0;
-    int N = TiDisc->getNSteps(); // Number of time steps
+    double h = StratDiodeBridgeCapFilter->getTimeStep();
+    int N = (int)((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot

@@ -129,8 +129,8 @@ int main(int argc, char* argv[])
 
     StratCircuitRLCD->initialize();
     cout << " -----> End of initialization." << endl;
-
-    int N = TiDiscRLCD->getNSteps(); // Number of time steps
+    double h = StratCircuitRLCD->getTimeStep();
+    int N = (int)((T - t0) / h); // Number of time steps
     int k = 0;
 
 

@@ -174,7 +174,7 @@ int main(int argc, char* argv[])
     cout << "End of simulation initialisation" << endl;
 
     int k = 0;
-    int N = t->getNSteps(); // Number of time steps
+    int N = (int)((T - t0) / h);
     cout << "Number of time step" << N << endl;
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -203,21 +203,21 @@ int main(int argc, char* argv[])
     // --- Time loop ---
     cout << "Start computation ... " << endl;
     cout << "Number of time step" << N << "\n";
-    while (s->hasNextEvent())
+    while (s->getNextTime() <= Pendulum->getFinalT())
     {
       k++;
       if (!(div(k, 1000).rem))  cout << "Step number " << k << "\n";
 
       // Solve problem
       s->newtonSolve(criterion, maxIter);
-      s->nextStep();
       // Data Output
-      dataPlot(k, 0) =  s->getStartingTime();
+      dataPlot(k, 0) =  s->getNextTime();
       dataPlot(k, 1) = simplependulum->getQ()(0);
       dataPlot(k, 2) = simplependulum->getVelocity()(0);
       dataPlot(k, 3) =  l1 * sin(simplependulum->getQ()(0));
       dataPlot(k, 4) = -l1 * cos(simplependulum->getQ()(0));
       dataPlot(k, 5) =  l1 * cos(simplependulum->getQ()(0)) * (simplependulum->getVelocity()(0));
+      s->nextStep();
     }
 
     end = clock();

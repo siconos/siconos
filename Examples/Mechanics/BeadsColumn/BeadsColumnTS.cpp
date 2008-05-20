@@ -201,7 +201,7 @@ int main(int argc, char* argv[])
     s->initialize();
 
     int k = 0;
-    int N = t->getNSteps(); // Number of time steps
+    int N = (int)((T - t0) / h); // Number of time steps
 
     // Prepare output and save value for the initial time
     unsigned int outputSize = dsNumber * 2 + 1;
@@ -224,11 +224,8 @@ int main(int argc, char* argv[])
     cout << "====> Start computation ... " << endl << endl;
     boost::timer tt;
     tt.restart();
-    while (k < N)
+    while (s->getNextTime() <= multiBeads->getFinalT())
     {
-      k++;
-      //   if (!(div(k,10).rem))  cout <<"Step number "<< k << "\n";
-
       // solve ...
       try
       {
@@ -259,7 +256,7 @@ int main(int argc, char* argv[])
       }
       // transfer of state i+1 into state i and time incrementation
       s->nextStep();
-
+      k++;
     }
     cout << "End of computation - Number of iterations done: " << k - 1 << endl;
     cout << "Computation Time " << tt.elapsed()  << "( " << cpuTime << " )" << endl;

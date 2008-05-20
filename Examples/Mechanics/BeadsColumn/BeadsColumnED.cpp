@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
   {
 
     // User-defined main parameters
-    unsigned int dsNumber = 10;      // the number of dynamical systems
+    unsigned int dsNumber = 5;      // the number of dynamical systems
     unsigned int nDof = 3;           // degrees of freedom for beads
     double increment_position = 1;   // initial position increment from one DS to the following
     double increment_velocity = 0;   // initial velocity increment from one DS to the following
@@ -197,21 +197,20 @@ int main(int argc, char* argv[])
     cout << "====> Simulation initialisation ..." << endl << endl;
     s->initialize();
 
-    int k = 0; // Current step
     int N = 14692;// Number of Events
 
     // Prepare output and save value for the initial time
     unsigned int outputSize = dsNumber * 2 + 1;
     SimpleMatrix dataPlot(N + 1, outputSize);
     // time
-    dataPlot(k, 0) =   multiBeads->getT0();
+    dataPlot(0, 0) =   multiBeads->getT0();
     // Positions and velocities
     i = 0; // Remember that DS are sorted in a growing order according to their number.
     DSIterator it;
     for (it = allDS.begin(); it != allDS.end(); ++it)
     {
-      dataPlot(k, (int)i * 2 + 1) = static_cast<LagrangianLinearTIDS*>(*it)->getQ()(0);
-      dataPlot(k, (int)i * 2 + 2) = static_cast<LagrangianLinearTIDS*>(*it)->getVelocity()(0);
+      dataPlot(0, (int)i * 2 + 1) = static_cast<LagrangianLinearTIDS*>(*it)->getQ()(0);
+      dataPlot(0, (int)i * 2 + 2) = static_cast<LagrangianLinearTIDS*>(*it)->getVelocity()(0);
       i++;
       if ((*it)->getNumber() == 9)
         break;
@@ -219,16 +218,19 @@ int main(int argc, char* argv[])
 
     // --- Time loop ---
     cout << "Start computation ... " << endl;
+    bool nonSmooth = false;
     EventsManager * eventsManager = s->getEventsManagerPtr();
     unsigned int numberOfEvent = 0 ;
-    while (eventsManager->hasNextEvent())
+    int k = 1;
+    while (s->getNextTime() < multiBeads->getFinalT())
     {
-      k++;
       s->advanceToEvent();
+      if (eventsManager->getNextEventPtr()->getType() == 2)
+        nonSmooth = true;
 
       s->processEvents();
 
-      if (eventsManager->getStartingEventPtr()->getType() == "NonSmoothEvent")
+      if (nonSmooth)
       {
         i = 0; // Remember that DS are sorted in a growing order according to their number.
         dataPlot(k, 0) = s->getStartingTime();
@@ -255,6 +257,7 @@ int main(int argc, char* argv[])
           break;
       }
       numberOfEvent++;
+      k++;
     }
     cout << "===== End of Event Driven simulation. " << numberOfEvent << " events have been processed. ==== " << endl;
     cout << k - numberOfEvent << " impacts detected." << endl;

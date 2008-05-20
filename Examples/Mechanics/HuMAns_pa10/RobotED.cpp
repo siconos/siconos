@@ -221,15 +221,18 @@ int main(int argc, char* argv[])
 
     unsigned int numberOfEvent = 0 ;
     EventsManager * eventsManager = s->getEventsManagerPtr();
-    while (s->hasNextEvent())
+    bool nonSmooth = false;
+    while (s->getNextTime() < T)
     {
       // get current time step
       k++;
       s->advanceToEvent();
+      if (eventsManager->getNextEventPtr()->getType() == 2)
+        nonSmooth = true;
 
       s->processEvents();
       // If the treated event is non smooth, we get the pre-impact state.
-      if (eventsManager->getStartingEventPtr()->getType() == "NonSmoothEvent")
+      if (nonSmooth)
       {
         dataPlot(k, 0) =  s->getStartingTime();
         dataPlot(k, 1) = (*qMem)(0);

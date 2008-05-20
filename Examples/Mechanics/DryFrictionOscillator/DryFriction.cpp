@@ -44,7 +44,10 @@ int main(int argc, char* argv[])
     // --- Get the time discretisation scheme ---
     TimeDiscretisation* t = s->getTimeDiscretisationPtr();
     int k = 0;
-    int N = t->getNSteps(); // Number of time steps
+    double T = oscillator.getFinalT();
+    double t0 = oscillator.getT0();
+    double h = s->getTimeStep();
+    int N = (int)((T - t0) / h);
 
     //t->display();
 
@@ -55,7 +58,7 @@ int main(int argc, char* argv[])
     cout << "Prepare data for plotting ... " << endl;
     // For the initial time step:
     // time
-    dataPlot(k, 0) = k * t->getH();
+    dataPlot(k, 0) = t0;
     // state q for the first dynamical system (ball)
     LagrangianDS* oscillo = static_cast<LagrangianDS*>(oscillator.getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
     dataPlot(k, 1) = (oscillo->getQ())(0);
@@ -85,7 +88,7 @@ int main(int argc, char* argv[])
       s->computeOneStep();
       // --- Get values to be plotted ---
       //time
-      dataPlot(k, 0) = k * t->getH();
+      dataPlot(k, 0) = s->getNextTime();
       // Oscillo: state q
       dataPlot(k, 1) = (oscillo->getQ())(0);
       // Oscillo: velocity
