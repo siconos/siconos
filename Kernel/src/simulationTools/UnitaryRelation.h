@@ -246,6 +246,18 @@ public:
     workX->insertPtr(newX);
   };
 
+  /** Get a pointer to workX */
+  inline SiconosVector* getWorkXPtr()
+  {
+    return workX;
+  };
+
+  /** Get a pointer to workX */
+  inline SiconosVector* getWorkZPtr()
+  {
+    return workZ;
+  };
+
   /** gets the matrix used in unitaryBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to ds.
    *  \param a pointer to a dynamical system
@@ -267,14 +279,6 @@ public:
    */
   void getExtraUnitaryBlock(SiconosMatrix *) const;
 
-  /** To compute a part of the "q" vector of the OSNS
-   *  \param a double (current time)
-   *  \param unsigned int: derivative order for y
-   *  \param string: simulation type
-   *  \param yOut pointer to SiconosVector (in-out parameter), result
-   *  \param unsigned int, the position of the first element of yOut to be set
-   */
-  void computeEquivalentY(double, unsigned int, const std::string&, SiconosVector*, unsigned int);
 };
 
 #endif // UNITARYRELATION_H

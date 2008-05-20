@@ -524,6 +524,11 @@ void PrimalFrictionContact::computeQ(const double time)
   }
 }
 
+void PrimalFrictionContact::computeQBlock(UnitaryRelation* UR, unsigned int pos)
+{
+  RuntimeException::selfThrow("PrimalFrictionContact::computeQBlock() not yet implemented");
+}
+
 void PrimalFrictionContact::computeTildeLocalVelocity(const double time)
 {
   if (tildeLocalVelocity->size() != sizeLocalOutput)
@@ -542,7 +547,7 @@ void PrimalFrictionContact::computeTildeLocalVelocity(const double time)
     // Compute q, this depends on the type of non smooth problem, on the relation type and on the non smooth law
     pos = H->getPositionOfUnitaryBlock(*itCurrent);
 
-    (*itCurrent)->computeEquivalentY(time, levelMin, simulationType, tildeLocalVelocity, pos); // free output is saved in y
+    computeQBlock((*itCurrent), pos); // free output is saved in y
   }
 
 }

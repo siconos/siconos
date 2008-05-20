@@ -28,7 +28,9 @@
 #include "Relation.h"
 #include "NewtonImpactFrictionNSL.h"
 #include "FrictionContact_Problem.h" // Numerics Header
-
+#include "RelationTypes.h"
+#include "NewtonImpactNSL.h"
+#include "OneStepIntegrator.h"
 using namespace std;
 
 // xml constructor
@@ -355,6 +357,156 @@ void FrictionContact::computeUnitaryBlock(UnitaryRelation* UR1, UnitaryRelation*
   }
 }
 
+void FrictionContact::computeQBlock(UnitaryRelation* UR, unsigned int pos)
+{
+
+  // Get relation and non smooth law types
+  string relationType = UR->getRelationType() + UR->getRelationSubType();
+  string nslawType = UR->getNonSmoothLawType();
+
+  string simulationType = simulation->getType();
+
+  DynamicalSystem* ds = *(UR->dynamicalSystemsBegin());
+  string osiType = simulation->getIntegratorOfDSPtr(ds)->getType();
+
+  unsigned int sizeY = UR->getNonSmoothLawSize();
+  std::vector<unsigned int> coord(8);
+
+  unsigned int relativePosition = UR->getRelativePosition();
+  Interaction * mainInteraction = UR->getInteractionPtr();
+  coord[0] = relativePosition;
+  coord[1] = relativePosition + sizeY;
+  coord[2] = 0;
+  coord[4] = 0;
+  coord[6] = pos;
+  coord[7] = pos + sizeY;
+
+  SiconosMatrix * H = NULL;
+  SiconosVector* workX = UR->getWorkXPtr();
+  if (osiType == "Moreau" || osiType == "Lsodar")
+  {
+    if (relationType == "FirstOrderType1R" || relationType == "FirstOrderType2R" || relationType == "FirstOrderType3R")
+    {
+      H = static_cast<FirstOrderR*>(mainInteraction->getRelationPtr())->getJacobianHPtr(0);
+      if (H != NULL)
+      {
+        coord[3] = H->size(1);
+        coord[5] = H->size(1);
+        subprod(*H, *workX, *q, coord, true);
+      }
+    }
+
+    else if (relationType == "FirstOrderLinearTIR" || relationType == "FirstOrderLinearR")
+    {
+      // q = HXfree + e + Fz
+      H = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getCPtr();
+      if (H != NULL)
+      {
+        coord[3] = H->size(1);
+        coord[5] = H->size(1);
+        subprod(*H, *workX, (*q), coord, true);
+      }
+      SiconosVector * e = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getEPtr();
+      if (e != NULL)
+        static_cast<SimpleVector*>(q)->addBlock(pos, *e);
+
+      H = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getFPtr();
+      if (H != NULL)
+      {
+        SiconosVector * workZ = UR->getWorkZPtr();
+        coord[3] = H->size(1);
+        coord[5] = H->size(1);
+        subprod(*H, *workZ, *q, coord, false);
+      }
+    }
+    else if (relationType == "LagrangianCompliantR" || relationType == "LagrangianScleronomousR" || relationType == "LagrangianRheonomousR")
+    {
+      // q = jacobian_q h().v_free
+      H = static_cast<LagrangianR*>(mainInteraction->getRelationPtr())->getGPtr(0);
+      if (H != NULL)
+      {
+        coord[3] = H->size(1);
+        coord[5] = H->size(1);
+        subprod(*H, *workX, *q, coord, true);
+      }
+    }
+
+    else if (relationType == "LagrangianLinearR")
+    {
+      // q = H.v_free
+      H = static_cast<LagrangianLinearR*>(mainInteraction->getRelationPtr())->getHPtr();
+      if (H != NULL)
+      {
+        coord[3] = H->size(1);
+        coord[5] = H->size(1);
+        subprod(*H, *workX, *q, coord, true);
+      }
+    }
+    else
+      RuntimeException::selfThrow("FrictionContact::computeQBlock, not yet implemented for first order relations of subtype " + relationType);
+
+  }
+  else if (osiType == "Moreau2")
+  {
+  }
+  else
+    RuntimeException::selfThrow("FrictionContact::computeQBlock not yet implemented for OSI of type " + osiType);
+
+  // Add "non-smooth law effect" on q
+  if (UR->getRelationType() == "Lagrangian")
+  {
+    double e;
+    if (nslawType == NEWTONIMPACTNSLAW)
+    {
+
+#ifndef WithSmartPtr
+      e = (static_cast<NewtonImpactNSL*>(mainInteraction->getNonSmoothLawPtr()))->getE();
+#else
+      e = (boost::static_pointer_cast<NewtonImpactNSL>(mainInteraction->getNonSmoothLawPtr()))->getE();
+#endif
+
+      std::vector<unsigned int> subCoord(4);
+      if (simulationType == "TimeStepping")
+      {
+        subCoord[0] = 0;
+        subCoord[1] = UR->getNonSmoothLawSize();
+        subCoord[2] = pos;
+        subCoord[3] = pos + subCoord[1];
+        subscal(e, *UR->getYOldPtr(levelMin), *q, subCoord, false);
+      }
+      else if (simulationType == "EventDriven")
+      {
+        subCoord[0] = pos;
+        subCoord[1] = pos + UR->getNonSmoothLawSize();
+        subCoord[2] = pos;
+        subCoord[3] = subCoord[1];
+        subscal(e, *q, *q, subCoord, false); // q = q + e * q
+      }
+      else
+        RuntimeException::selfThrow("FrictionContact::computeQBlock not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
+    }
+    else if (nslawType == NEWTONIMPACTFRICTIONNSLAW)
+    {
+
+#ifndef WithSmartPtr
+      e = (static_cast<NewtonImpactFrictionNSL*>(mainInteraction->getNonSmoothLawPtr()))->getEn();
+#else
+      e = (boost::static_pointer_cast<NewtonImpactFrictionNSL>(mainInteraction->getNonSmoothLawPtr()))->getEn();
+#endif
+
+      // Only the normal part is multiplied by e
+      if (simulationType == "TimeStepping")
+        (*q)(pos) +=  e * (*UR->getYOldPtr(levelMin))(0);
+
+      else RuntimeException::selfThrow("FrictionContact::computeQBlock not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
+
+    }
+    else
+      RuntimeException::selfThrow("FrictionContact::computeQBlock not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType);
+  }
+}
+
+
 void FrictionContact::computeQ(const double time)
 {
   if (q->size() != sizeOutput)
@@ -375,7 +527,7 @@ void FrictionContact::computeQ(const double time)
 
     // Compute q, this depends on the type of non smooth problem, on the relation type and on the non smooth law
     pos = M->getPositionOfUnitaryBlock(*itCurrent);
-    (*itCurrent)->computeEquivalentY(time, levelMin, simulationType, q, pos); // free output is saved in y
+    computeQBlock((*itCurrent), pos); // free output is saved in y
   }
 }
 
