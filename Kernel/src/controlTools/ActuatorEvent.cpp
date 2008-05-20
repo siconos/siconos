@@ -19,23 +19,22 @@
 #include "ActuatorEvent.h"
 #include "EventFactory.h"
 #include "Actuator.h"
-
+#include "TimeDiscretisation.h"
 using namespace std;
 using namespace EventFactory;
-
-// Default constructor
-ActuatorEvent::ActuatorEvent(): Event(0.0, 3)
-{}
-
-ActuatorEvent::ActuatorEvent(double time, int name): Event(time, name)
-{}
-
-ActuatorEvent::~ActuatorEvent()
-{}
 
 void ActuatorEvent::process(Simulation*)
 {
   actuator->actuate();
 }
 
+void ActuatorEvent::update()
+{
+  // Increment actuator time discr. to next step
+  actuator->getTimeDiscretisationPtr()->increment();
+  // set actuator event time to new current time value
+  setTime(actuator->getTimeDiscretisationPtr()->getCurrentTime());
+}
+
 AUTO_REGISTER_EVENT(3, ActuatorEvent);
+

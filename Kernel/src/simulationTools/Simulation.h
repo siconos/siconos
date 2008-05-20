@@ -17,8 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 /*! \file Simulation.h
-Global interface for simulation process description (Base for TimeStepping or EventDriven).
- */
+  \brief Global interface for simulation process description.
+*/
 
 #ifndef SIMULATION_H
 #define SIMULATION_H
@@ -26,6 +26,7 @@ Global interface for simulation process description (Base for TimeStepping or Ev
 #include "SiconosConst.h"
 #include "Tools.h"
 #include "SimulationTypeDef.h"
+#include "TimeDiscretisation.h"
 #include "UnitaryRelationsSet.h"
 #include "EventsManager.h"
 #include <fstream>
@@ -38,24 +39,21 @@ class OneStepNSProblem;
 class TimeDiscretisation;
 class SimulationXML;
 
-/** Description of the simulation process (integrators, time discretisation,...) - Base class for TimeStepping or EventDriven.
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 26, 2004
- *
- * !!! This is an abstract class !!!
- *
- * The available simulations are TimeStepping and EventDriven. See derived classes for more details.
- *
- * "Unitary unitaryBlock matrices" are saved in the simulation (using stl maps). They will be used to save unitaryBlock matrices corresponding
- * to diagonal or extra diagonal terms in OneStepNSProblem "complete" matrices, such as M in LCP formulation.
- * Each unitaryBlock corresponds to one UnitaryRelation (diagonal terms) or two UnitaryRelations (extra diagonal terms);
- * Their dimensions are NSLawSize X NSLawSize, NSLawSize being the dimension of the NonSmoothLaw corresponding to the concerned UnitaryRelation.
- *
- * Rules:
- *     - A Model* must be given to the constructor, else => exception.
- */
+/** Description of the simulation process (integrators, time discretisation and so on) - Base class for TimeStepping or EventDriven.
+
+   \author SICONOS Development Team - copyright INRIA
+   \version 3.0.0.
+   \date (Creation) Apr 26, 2004
+
+  !!! This is an abstract class !!!
+
+  The available simulations are TimeStepping and EventDriven. See derived classes for more details.
+
+
+
+  Rules:
+  - A Model must be given to the constructor, else => exception.
+*/
 class Simulation
 {
 protected:
@@ -66,11 +64,23 @@ protected:
   /** the type of the Simulation, ie the derived class type (TimeStepping, EventDriven ...) */
   std::string simulationType;
 
-  /** the time discretisation scheme */
+  /** the default time discretisation scheme */
   TimeDiscretisation *timeDiscretisation;
 
   /** tool to manage all events */
   EventsManager* eventsManager;
+
+  /** current starting time for integration */
+  double tinit;
+
+  /** current ending time for integration */
+  double tend;
+
+  /** real ending time for integration
+      (different from tend in case of stop during integrate, for example when a root is found
+      in Lsodar procedur)
+  */
+  double tout;
 
   /** Inside-class allocation flags */
   BoolMap isAllocatedIn;
@@ -185,7 +195,7 @@ public:
   /** get the TimeDiscretisation of the Simulation
    *  \return the TimeDiscretisation
    */
-  inline TimeDiscretisation* getTimeDiscretisationPtr() const
+  inline TimeDiscretisation* getTimeDiscretisationPtr()
   {
     return timeDiscretisation;
   };
@@ -194,6 +204,23 @@ public:
    *  \param the TimeDiscretisation
    */
   void setTimeDiscretisationPtr(TimeDiscretisation*);
+
+  /** get time instant k of the time discretisation
+   *  \return a double.
+   */
+  inline const double getTk() const
+  {
+    return timeDiscretisation->getCurrentTime();
+  };
+
+  /** get time instant k+1 of the time discretisation - Warning: this instant may be different
+      from getNextTime(), if for example some non-smooth events or some sensor events are present
+      \return a double.
+  */
+  inline const double getTkp1() const
+  {
+    return timeDiscretisation->getNextTime();
+  };
 
   /** get the EventsManager
    *  \return a pointer to EventsManager

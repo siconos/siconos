@@ -33,11 +33,8 @@
 
 using namespace std;
 
-EventDriven::EventDriven(TimeDiscretisation * td): Simulation(td, "EventDriven"), istate(1), tinit(0), tend(0)
-{}
-
 // --- XML constructor ---
-EventDriven::EventDriven(SimulationXML* strxml, Model *newModel): Simulation(strxml, newModel, "EventDriven"), istate(1), tinit(0), tend(0)
+EventDriven::EventDriven(SimulationXML* strxml, Model *newModel): Simulation(strxml, newModel, "EventDriven"), istate(1)
 {
   // === One Step NS Problem ===
   // We read data in the xml output (mainly Interactions concerned and solver) and assign them to
@@ -72,10 +69,6 @@ EventDriven::EventDriven(SimulationXML* strxml, Model *newModel): Simulation(str
     (*allNSProblems)["impact"]->setId("impact");
   }
 }
-
-// --- Destructor ---
-EventDriven::~EventDriven()
-{}
 
 void EventDriven::updateIndexSet(unsigned int i)
 {
@@ -194,12 +187,7 @@ void EventDriven::initOSNS()
   UnitaryRelationsIterator it;
   // For each Unitary relation in I0 ...
   for (it = indexSets[0]->begin(); it != indexSets[0]->end(); ++it)
-  {
     (*it)->initialize("EventDriven");
-  }
-
-  tinit = eventsManager->getStartingTime();
-  tend =  eventsManager->getNextTime();
 
   if (!allNSProblems->empty()) // ie if some Interactions have been declared and a Non smooth problem built.
   {
@@ -404,7 +392,7 @@ void EventDriven::advanceToEvent()
     tend =  eventsManager->getNextTime();
   }
 
-  double tout = tend;
+  tout = tend;
   bool isNewEventOccur = false;  // set to true if a new event occur during integration
 
   // call integrate method for each OSI, between tinit and tend.
@@ -423,7 +411,7 @@ void EventDriven::advanceToEvent()
     {
       isNewEventOccur = true;
       // Add an event into the events manager list
-      eventsManager->scheduleEvent(2, tout);
+      eventsManager->scheduleNonSmoothEvent(tout);
       if (printStat)
         statOut << " -----------> New non-smooth event at time " << tout << endl;
     }

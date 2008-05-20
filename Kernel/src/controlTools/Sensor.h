@@ -18,7 +18,7 @@
 */
 
 /*! \file Sensor.h
-  General interface to define a sensor ...
+  \brief General interface to define a sensor
 */
 
 #ifndef Sensor_H
@@ -37,41 +37,56 @@ class Event;
 typedef std::map<Event*, VectorMap>  DataSet;
 
 /** Sensor Base Class
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) February 01, 2007
- *
- *  This class is dedicated to data capture. It gives an interface for User who can implement its own Sensor to
- *  clearly define which data he needs to save.
- *  A Sensor is linked to a set of Events, and each time an Event occurs, capture() function is called.
- *  Then to define a Sensor, you need:
- *  - a link to a Model, where from data will be caught,
- *  - a TimeDiscretisation, to set instants of capture,
- *
- *  Moreover, a Sensor is identified thanks to an id and a type (the derived class type indeed).
- *
- *  The TimeDiscretisation object is used to build a set of SensorEvent, which determines when data will be captured.
- *  More precisely, for each tk in the TimeDiscretisation, an Event is added into the EventsManager of the Simulation.
- *  And a simulation->processEvents called leads to SensorEvent->process and thus Sensor->capture() call.
- *
- * The data are saved in a DataSet object named data, a map which associate to each Event another map.
- * This second map links a string, used to identify the data, and a SiconosVector.
- * As an example consider the case where you need to save the state vector x of a DynamicalSystem, then you can define
- * a Data object, with "myDS_X" as an id and yourDS->getXPtr() as the SiconosVector*. For myEvent being an Event where you
- * need to save data, you get:
- *  (data[myEvent])["myDS_X] = model->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr()->getXPtr()
- *
- * See \ref UMSiconosControl for details on how to define its own Sensor.
- *
- *
+
+   \author SICONOS Development Team - copyright INRIA
+   \version 3.0.0.
+   \date (Creation) February 01, 2007
+
+   Abstract class, interface to user-defined sensors.
+
+   A Sensor is dedicated to data capture. It gives an interface for User who can implement its own Sensor to
+   clearly define which data he needs to save.
+
+   A Sensor handles a TimeDiscretisation, which defines the set of all instants where the sensor must operate \n
+   (i.e. each times where capture() function will be called). An Event, inserted into the EventsManager of the Simulation, is linked to this TimeDiscretisation.
+
+   Moreover, a Sensor is identified thanks to an id and a type (a number associated to the derived class type indeed).
+
+   \section BSensor Construction
+   To build a Sensor it is necessary to use the factory. Inputs are a number which identify the derived class type and
+   a TimeDiscretisation:
+   \code
+   // Get the registry
+   SensorFactory::Registry& regSensor(SensorFactory::Registry::get()) ;
+   // Build a Sensor of type "myType" with t as a TimeDiscretisation.
+   regSensor.instantiate(myType, t);
+   \endcode
+
+   The best way is to use the controlManager:
+   \code
+   // cm a ControlManager
+   cm->addSensor(myType,t);
+   // or if cm has already been initialized:
+   cm->addAndRecordSensor(myType,t)
+   \endcode
+
+
+   The data are saved in a DataSet object named data, a map which associate to each Event another map.
+   This second map links a string, used to identify the data, and a SiconosVector.
+   As an example consider the case where you need to save the state vector x of a DynamicalSystem, then you can define
+   a Data object, with "myDS_X" as an id and yourDS->getXPtr() as the SiconosVector. For myEvent being an Event where you
+   need to save data, you get:
+   (data[myEvent])["myDS_X] = model->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr()->getXPtr()
+
+   See \ref UMSiconosControl for details on how to define its own Sensor.
+
  */
 class Sensor
 {
 protected:
 
   /** type of the Sensor */
-  std::string type;
+  int type;
 
   /** id of the Sensor */
   std::string id;
@@ -85,8 +100,8 @@ protected:
   /** A time discretisation scheme */
   TimeDiscretisation *timeDiscretisation;
 
-  /** The set of Events (SensorEvents) linked to this sensor */
-  EventsContainer eventsSet;
+  /** The event which will linked this sensor to the eventsManager of the simulation */
+  Event * eSensor;
 
   /** default constructor
    */
@@ -100,10 +115,10 @@ protected:
 public:
 
   /** Constructor with a TimeDiscretisation.
-   * \param a string, the type of the Sensor, which corresponds to the class type
+   * \param int, the type of the Sensor, which corresponds to the class type
    * \param a TimeDiscretisation*, (linked to a model).
    */
-  Sensor(const std::string&, TimeDiscretisation*);
+  Sensor(int, TimeDiscretisation*);
 
   /** destructor
    */
@@ -126,9 +141,9 @@ public:
   };
 
   /** get the type of the Sensor
-   *  \return a string
+   *  \return an int
    */
-  inline const std::string getType() const
+  inline const int getType() const
   {
     return type;
   };
@@ -149,17 +164,17 @@ public:
     return timeDiscretisation;
   };
 
-  /** get the list of Events associated to this sensor
-  *  \return an EventsContainer.
-  */
-  inline const EventsContainer getEvents() const
+  /** get the Event associated with this sensor
+   *  \return an Event*
+   */
+  inline const Event* getEventPtr() const
   {
-    return eventsSet ;
+    return eSensor;
   };
 
   /** get all the data saved for this sensor
-  *  \return a DataSet
-  */
+   *  \return a DataSet
+   */
   inline const DataSet getData() const
   {
     return data;
@@ -168,6 +183,10 @@ public:
   /** initialize sensor data.
    */
   virtual void initialize();
+
+  /** Add the sensor into the simulation EventsManager.
+   */
+  void recordInSimulation();
 
   /** capture data when the SensorEvent is processed => set data[SensorEvent]=...
    */

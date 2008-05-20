@@ -49,17 +49,16 @@ private:
   /** counter */
   unsigned int k;
 
-  /** Default constructor
-   */
-  SensorPosition();
-
 public:
 
+  /** Number of time steps*/
+  unsigned int nSteps;
+
   /** Constructor with a TimeDiscretisation.
-   * \param a string, the type of the Sensor, which corresponds to the class type
+   * \param an int, the type of the Sensor, which corresponds to the class type
    * \param a TimeDiscretisation*, (linked to a model).
    */
-  SensorPosition(const std::string&, TimeDiscretisation*);
+  SensorPosition(int, TimeDiscretisation*);
 
   /** Destructor
    */

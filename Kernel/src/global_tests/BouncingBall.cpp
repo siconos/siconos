@@ -39,8 +39,6 @@ bool BouncingBall()
     cout << " ******** Start Bouncing Ball *********" << endl << endl << endl;
     // --- Model loading from xml file ---
     Model * bouncingBall = new Model("./Ball.xml");
-    cout << "\n *** BallTS.xml file loaded ***" << endl;
-
     // --- Get and initialize the simulation ---
     TimeStepping* s = static_cast<TimeStepping*>(bouncingBall->getSimulationPtr());
     LagrangianDS* ball = static_cast<LagrangianDS*>(bouncingBall->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
@@ -49,14 +47,13 @@ bool BouncingBall()
     // --- Get the time discretisation scheme ---
     TimeDiscretisation* t = s->getTimeDiscretisationPtr();
 
-    int N = t->getNSteps(); // Number of time steps
+    int N = 2000; // Number of time steps
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
     SimpleMatrix dataPlot(N + 1, 4);
     // For the initial time step:
     // time
 
-    int k = 0;
     SiconosVector * q = ball->getQPtr();
     SiconosVector * v = ball->getVelocityPtr();
     SiconosVector * p = ball->getPPtr(2);
@@ -66,16 +63,17 @@ bool BouncingBall()
     dataPlot(0, 2) = (*v)(0);
     dataPlot(0, 3) = (*p)(0);
 
-    for (k = 1 ; k < N + 1 ; ++k)
+    int k = 1;
+    while (s->getNextTime() < bouncingBall->getFinalT())
     {
       s->computeOneStep();
       // --- Get values to be plotted ---
-      dataPlot(k, 0) =  s->getStartingTime();
+      dataPlot(k, 0) =  s->getNextTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*p)(0);
-
       s->nextStep();
+      k++;
     }
 
     SiconosMatrix * dataRef = new SimpleMatrix("refBouncingBall.dat", true);

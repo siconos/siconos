@@ -18,18 +18,11 @@
 */
 
 #include "TimeDiscretisationXML.h"
-using namespace std;
 
-TimeDiscretisationXML::TimeDiscretisationXML():
-  rootNode(NULL), hNode(NULL), NNode(NULL), tkNode(NULL),
-  hMinNode(NULL), hMaxNode(NULL)
-{}
-
-TimeDiscretisationXML::TimeDiscretisationXML(xmlNode * timeDiscretisationNode):
-  rootNode(timeDiscretisationNode), hNode(NULL), NNode(NULL), tkNode(NULL),
-  hMinNode(NULL), hMaxNode(NULL)
+TimeDiscretisationXML::TimeDiscretisationXML(xmlNodePtr timeDiscretisationNode):
+  rootNode(timeDiscretisationNode), hNode(NULL), NNode(NULL), tkNode(NULL)
 {
-  xmlNode *node;
+  xmlNodePtr node;
   if ((node = SiconosDOMTreeTools::findNodeChild(timeDiscretisationNode, TD_H)) != NULL)
     hNode = node;
 
@@ -39,13 +32,9 @@ TimeDiscretisationXML::TimeDiscretisationXML(xmlNode * timeDiscretisationNode):
   if ((node = SiconosDOMTreeTools::findNodeChild(timeDiscretisationNode, TD_TK)) != NULL)
     tkNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(timeDiscretisationNode, TD_HMIN)) != NULL)
-    hMinNode = node;
-  if ((node = SiconosDOMTreeTools::findNodeChild(timeDiscretisationNode, TD_HMAX)) != NULL)
-    hMaxNode = node;
 }
 
-void TimeDiscretisationXML::updateTimeDiscretisationXML(xmlNode* node, TimeDiscretisation* td)
+void TimeDiscretisationXML::updateTimeDiscretisationXML(xmlNodePtr node, TimeDiscretisation* td)
 {
   rootNode = node;
 }

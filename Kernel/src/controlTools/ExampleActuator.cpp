@@ -23,13 +23,7 @@
 using namespace std;
 using namespace ActuatorFactory;
 
-ExampleActuator::ExampleActuator(): Actuator()
-{}
-
-ExampleActuator::ExampleActuator(const std::string& name, TimeDiscretisation* t): Actuator(name, t)
-{}
-
-ExampleActuator::~ExampleActuator()
+ExampleActuator::ExampleActuator(int name, TimeDiscretisation* t): Actuator(name, t)
 {}
 
 void ExampleActuator::initialize()
@@ -58,6 +52,6 @@ ExampleActuator* ExampleActuator::convert(Actuator* s)
   return sp;
 }
 
-AUTO_REGISTER_ACTUATOR("ExampleActuator", ExampleActuator);
+AUTO_REGISTER_ACTUATOR(1, ExampleActuator);
 
 

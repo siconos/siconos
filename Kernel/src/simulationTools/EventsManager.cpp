@@ -25,31 +25,45 @@
 #include <limits> // for ULONG_MAX
 using namespace std;
 
-// insert event functions (PRIVATE).
-// schedule is required by simulation.
-//  -> necessary to insert a new event AND to update current/past event
-// There are two different functions, to avoid multiple nextEvent update during initialize calls of insertEvent.
-const bool EventsManager::insertEvent(int type, double time)
+
+// Creation and insertion of a new event into allEvents set.
+const bool EventsManager::createAndInsertEvent(int type, double time)
 {
-  EventsContainerIterator it; // to check if insertion succeed or not.
   // Uses the events factory to insert the new event.
   EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;
-  it = allEvents.insert(regEvent.instantiate(time, type));
-
-  return (it != allEvents.end());
+  return ((allEvents.insert(regEvent.instantiate(time, type)))  != allEvents.end());
 }
 
-// PUBLIC METHODS
+EventsManager::EventsManager(Simulation* newSimu):
+  currentEvent(NULL), nextEvent(NULL), ETD(NULL), ENonSmooth(NULL), simulation(newSimu), hasNS(false), hasCM(false)
+{
+  //  === Checks connection with a simulation ===
+  if (simulation == NULL)
+    RuntimeException::selfThrow("EventsManager initialize, no simulation linked to the manager.");
 
-// Default/from data constructor
-EventsManager::EventsManager(Simulation * newSimu):
-  currentEvent(NULL), nextEvent(NULL), simulation(newSimu)
-{}
+  //  === Creates and inserts two events corresponding
+  // to times tk and tk+1 of the simulation time-discretisation  ===
+  EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;
+  currentEvent = regEvent.instantiate(simulation->getTk(), 1);
+  allEvents.insert(currentEvent);
+  ETD = regEvent.instantiate(simulation->getTkp1(), 1);
+  allEvents.insert(ETD);
+  // === Set nextEvent ===
+  nextEvent = ETD;
+}
 
 EventsManager::~EventsManager()
 {
-  currentEvent = NULL;
   nextEvent = NULL;
+  allEvents.erase(currentEvent);
+  allEvents.erase(ETD);
+  allEvents.erase(ENonSmooth);
+  delete currentEvent;
+  currentEvent = NULL;
+  delete ETD;
+  ETD = NULL;
+  delete ENonSmooth;
+  ENonSmooth = NULL;
   EventsContainer::iterator it;
   for (it = allEvents.begin(); it != allEvents.end(); ++it)
   {
@@ -60,44 +74,29 @@ EventsManager::~EventsManager()
 
 void EventsManager::initialize()
 {
-  if (simulation == NULL)
-    RuntimeException::selfThrow("EventsManager initialize, no simulation linked to the manager.");
+  pair<EventsContainerIterator, EventsContainerIterator> rangeNew = allEvents.equal_range(currentEvent);
+  // Note: a backup is required for rangeNew since any erase/insert in loop over equal range
+  // may result in invalidation of iterator and hazardous results.
+  // Moreover, any "setTime" of an event need an erase/insert of the event to force resorting of the set.
 
-  // === get original, user, time discretisation from Simulation object. ===
-  TimeDiscretisation * td = simulation->getTimeDiscretisationPtr();
+  EventsContainer bckUp(rangeNew.first, rangeNew.second);
 
-  // === insert TimeDiscretisation into the allEvents set. ===
-  scheduleTimeDiscretisation(td, 1);
+  allEvents.erase(allEvents.lower_bound(currentEvent), allEvents.upper_bound(currentEvent));
+  for (EventsContainerIterator it = bckUp.begin(); it != bckUp.end() ; ++it)
+  {
+    (*it)->process(simulation);
+    // "synchronise" actuators/sensors events with nextEvent
+    if ((*it)->getType() == 3 || (*it)->getType() == 4)
+      (*it)->update();
 
-  // Todo: allow external events (provided by user -> xml reading or anything else) addition.
-  // Mind to check that new time-events are superior to t0/currentEvent ...
-
-  // === Set current and nextEvent ===
-  currentEvent = *(allEvents.begin()); // First event in the set, normally the one at t0.
-  nextEvent = getFollowingEventPtr(currentEvent);
-  if (nextEvent == NULL)
-    RuntimeException::selfThrow("EventsManager initialize, can not find next event since there is only one event in the set!");
+    allEvents.insert(*it);
+  }
+  bckUp.clear();
 }
 
-void EventsManager::scheduleTimeDiscretisation(TimeDiscretisation* td, int type)
+void EventsManager::insertEvents(const EventsContainer& e)
 {
-  // === get tk ===
-  SiconosVector * tk = td->getTkPtr();
-  unsigned int nSteps = tk->size(); // number of time steps
-
-  // === insert tk into the allEvents set ===
-  // Create unProcessed events list, by adding time discretisation events.
-  bool isInsertOk;
-  // isInsertOk is not really usefull: no test at the time.
-  for (unsigned int i = 0 ; i < nSteps ; ++i)
-    isInsertOk = insertEvent(type, (*tk)(i));
-}
-
-const bool EventsManager::insertEvents(const EventsContainer& e)
-{
-  EventsContainerIterator it;
   allEvents.insert(e.begin(), e.end());
-  return (it != allEvents.end());
 }
 
 Event* EventsManager::getEventPtr(const mpz_t& inputTime) const
@@ -113,9 +112,6 @@ Event* EventsManager::getEventPtr(const mpz_t& inputTime) const
       break;
     }
   }
-  if (searchedEvent == NULL)
-    RuntimeException::selfThrow("EventsManager getEventPtr(inputTime), no Event corresponding to that time in the set.");
-
   return searchedEvent;
 }
 
@@ -193,28 +189,43 @@ void EventsManager::display() const
   cout << "===== End of EventsManager display =====" << endl;
 }
 
-const bool EventsManager::scheduleEvent(int type, double time)
+// Insertion of a new EXISTING event. Warning: no update of nextEvent
+// This function is mainly useful to record new Actuators or Sensors
+void EventsManager::insertEvent(Event* newE)
 {
-  // Check that the new time is inside Model time-bounds.
-  double t0 = simulation->getModelPtr()->getT0();
-  double finalT = simulation->getModelPtr()->getFinalT();
-  if (time < t0 || time > finalT)
-    RuntimeException::selfThrow("EventsManager scheduleEvent(..., time), time out of bounds ([t0,T]).");
-
-  double currentTime = currentEvent->getDoubleTimeOfEvent();
-  if (time < currentTime)
-    RuntimeException::selfThrow("EventsManager scheduleEvent(..., time), time is lower than current event time while it is forbidden to step back.");
-
-  // === Insert the event into the list ===
-  bool isInsertOk = insertEvent(type, time);
-
-  if (!isInsertOk)
-    RuntimeException::selfThrow("EventsManager scheduleEvent(..., time): insertion of a new event failed.");
-
-  // update nextEvent value (may have change because of insertion).
-  nextEvent = getFollowingEventPtr(currentEvent);
-  return isInsertOk;
+  if (newE->getDoubleTimeOfEvent() < currentEvent->getDoubleTimeOfEvent())
+    RuntimeException::selfThrow("EventsManager insertEvent(), time is lower than current event time while it is forbidden to step back.");
+  allEvents.insert(newE);
+  update();
+  hasCM = true;
 }
+
+void EventsManager::update()
+{
+  // update nextEvent value (may have change because of an insertion).
+  nextEvent = getFollowingEventPtr(currentEvent);
+}
+
+// Creates (if required) and update the non smooth event of the set
+// Useful during simulation when a new event is detected.
+void EventsManager::scheduleNonSmoothEvent(double time)
+{
+  if (ENonSmooth == NULL)
+  {
+    EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;
+    ENonSmooth = regEvent.instantiate(time, 2);
+  }
+  else
+  {
+    //allEvents.erase(ENonSmooth);
+    ENonSmooth->setTime(time);
+  }
+  allEvents.insert(ENonSmooth);
+
+  update();
+  hasNS = true;
+}
+
 
 void EventsManager::removeEvent(Event* event)
 {
@@ -226,64 +237,89 @@ void EventsManager::removeEvent(Event* event)
 
   EventsContainer::iterator it = allEvents.find(event);
   if (it != allEvents.end())
-  {
-    //if ((*it)!=NULL) delete (*it);  // causes exception. Is erase enough to free memory?
     allEvents.erase(event);
-  }
   else
     RuntimeException::selfThrow("EventsManager removeEvent(input), input is not present in the set.");
 
-  // update nextEvent value (may have change because of removal)
-  //unsigned long int t = currentEvent->getTimeOfEvent();
-  nextEvent = getFollowingEventPtr(currentEvent);
+  update();
 }
 
 void EventsManager::processEvents()
 {
-  // Process all events simultaneous to nextEvent.
-  process();
+  // No non-smooth events and no control manager
+  if (!hasNS && !hasCM)
+    OptimizedProcessEvents();
+  else
+    GeneralProcessEvents();
+}
 
-  // Update index sets
+void EventsManager::OptimizedProcessEvents()
+{
+  // ==== Valid only when no Non Smooth event occurs and without control manager ====
+
+  nextEvent->process(simulation);
+  simulation->updateIndexSets();
+  currentEvent->setTime(nextEvent->getDoubleTimeOfEvent());
+  simulation->getTimeDiscretisationPtr()->increment();
+  ETD->setTime(simulation->getTkp1());
+  update();
+
+  // Set Model current time
+  if (nextEvent != NULL)
+    simulation->getModelPtr()->setCurrentTime(getTimeOfEvent(nextEvent));
+
+}
+
+void EventsManager::GeneralProcessEvents()
+{
+  // 1 - Process all events simultaneous to nextEvent.
+  //  We get a range of all the Events at time tnext and process them.
+  pair<EventsContainerIterator, EventsContainerIterator> rangeNew = allEvents.equal_range(nextEvent);
+  for (EventsContainerIterator it = rangeNew.first; it != rangeNew.second ; ++it)
+    (*it)->process(simulation);
+
+  // 2 - Update index sets of the simulation
   simulation->updateIndexSets();
 
-  // Shift current to next ...
-  shiftEvents();
+  allEvents.erase(currentEvent);
+  currentEvent->setTime(nextEvent->getDoubleTimeOfEvent());
+
+  // Note: a backup is required for rangeNew since any erase/insert in loop over equal range
+  // may result in invalidation of iterator and hazardous results.
+  // Moreover, any "setTime" of an event need an erase/insert of the event to force resorting of the set.
+  EventsContainer bckUp(rangeNew.first, rangeNew.second);
+  allEvents.erase(allEvents.lower_bound(nextEvent), allEvents.upper_bound(nextEvent));
+
+  // 3 - update events at time tnext.
+  for (EventsContainerIterator it = bckUp.begin(); it != bckUp.end() ; ++it)
+  {
+    // If the event is the end of the Simulation Time Discretisation time step
+    if ((*it) == ETD)
+    {
+      simulation->getTimeDiscretisationPtr()->increment();
+      ETD->setTime(simulation->getTkp1());
+      allEvents.insert(*it);
+
+    }
+    // Non Smooth Event
+    else if ((*it) == ENonSmooth)
+    {
+      hasNS = false; // false until next insertion
+    }
+    // Actuator or or Sensor event
+    else
+    {
+      (*it)->update();
+      allEvents.insert(*it);
+    }
+  }
+  bckUp.clear();
+  allEvents.insert(currentEvent);
+  update();
 
   // Set Model current time
   if (nextEvent != NULL)
     simulation->getModelPtr()->setCurrentTime(getTimeOfEvent(nextEvent));
 }
-
-void EventsManager::process()
-{
-  // 4 - We get a range of all the Events at time tnext and process them.
-  pair<EventsContainerIterator, EventsContainerIterator> rangeNew = allEvents.equal_range(nextEvent);
-  EventsContainerIterator it;
-  for (it = rangeNew.first; it != rangeNew.second ; ++it)
-    (*it)->process(simulation);
-}
-
-void EventsManager::shiftEvents()
-{
-  // === update current and next event pointed values ===
-
-  // new current event = old next event.
-
-  EventsContainerIterator check; // to check if insertion succeed or not.
-  // 1 - Get time of current event
-  const mpz_t * told = currentEvent->getTimeOfEvent();
-
-  // 2 - Get new currentEvent. currentEvent is shifted to the next event in time.
-  currentEvent = getFollowingEventPtr(*told);
-
-  // 3 - We get a range of all the Events at time told.
-  pair<EventsContainerIterator, EventsContainerIterator> rangeOld = allEvents.equal_range(getEventPtr(*told));
-  // Remove events that occur at time told (ie old current event) from allEvents set
-  allEvents.erase(rangeOld.first, rangeOld.second);
-
-  // Get new nextEvent (return NULL if currentEvent is the last one)
-  nextEvent = getFollowingEventPtr(*currentEvent->getTimeOfEvent());
-}
-
 
 

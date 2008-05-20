@@ -15,24 +15,25 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
-/*! \file
- General Event
+ */
+/*! \file Event.h
+  General interface for Events
 */
 
 #ifndef EVENT_H
 #define EVENT_H
 
-#include "SiconosConst.h"
+#include<math.h>
 #include<gmp.h>
 #include<iostream>
+#include "SiconosConst.h"
 
 class Simulation;
 
 // tick default value
 const double DEFAULT_TICK = 1e-16;
 
-/** virtual class that represents generic time events.
+/** Abstract class that represents generic time events.
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
@@ -65,29 +66,36 @@ protected:
   mpz_t timeOfEvent;
 
   /** Id or type of the Event */
-  const int type;
+  int type;
 
   /** Date of the present event,
    *  represented with a double */
-  const double dTime;
+  double dTime;
 
   /** confidence interval used to convert double time value to mpz_t
    */
   static double tick;
 
   /** Default constructor */
-  Event();
+  Event(): type(0), dTime(0.0)
+  {
+    mpz_init(timeOfEvent);
+  };
 
   /** copy constructor ; private => no copy nor pass-by-value.
-  */
+   */
   Event(const Event&);
+
+  /** assignment operator private => no assign allowed
+   */
+  Event& operator = (const Event&);
 
 public:
 
   /** constructor with time value and type as input
-  *  \param double
-  *  \param an int
-  */
+   *  \param double
+   *  \param an int
+   */
   Event(double, int = 0);
 
   /** destructor
@@ -95,16 +103,16 @@ public:
   virtual ~Event();
 
   /** get tick value
-  *  \return a double
-  */
+   *  \return a double
+   */
   inline const double getTick() const
   {
     return tick ;
   };
 
   /** set tick value
-  *  \param a double
-  */
+   *  \param a double
+   */
   inline void setTick(double newTick)
   {
     std::cout << "Warning: you change tick value for EventsManager -> a new initialization of the object is required. " << std::endl;
@@ -127,12 +135,29 @@ public:
     return dTime;
   }
 
+  /** set the time of the present event (double format)
+   *  \param a double
+   */
+  inline void setTime(double time)
+  {
+    dTime = time ;
+    mpz_init_set_d(timeOfEvent, ceil(dTime / tick));
+  };
+
   /** get a type of the present event
    *  \return an std::string
    */
   inline const int getType() const
   {
     return type ;
+  };
+
+  /** set a new type for the present event
+   *  \param a string
+   */
+  inline void setType(int newType)
+  {
+    type = newType;
   };
 
   /** display Event data
@@ -143,6 +168,10 @@ public:
    * \param Simulation*, the simulation that owns this Event (through the EventsManager)
    */
   virtual void process(Simulation*) = 0;
+
+  /** virtual function which actions depends on event type */
+  virtual void update();
+
 };
 
 #endif // Event_H

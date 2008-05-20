@@ -15,9 +15,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
-/*! \file
- Management of a Set (STL) of Events
+ */
+/*! \file EventsManager.h
+  \brief Management of a Set (STL) of Events for the Simulation process
 */
 
 #ifndef EVENTSMANAGER_H
@@ -40,7 +40,7 @@ struct compareEvent
     const mpz_t *t1 = e1->getTimeOfEvent();
     const mpz_t *t2 = e2->getTimeOfEvent();
 
-    int res = mpz_cmpabs(*t1, *t2); // res>0 if t1<t2, 0 if t1=t2 else res<0.
+    int res = mpz_cmp(*t1, *t2); // res>0 if t1>t2, 0 if t1=t2 else res<0.
     return (res < 0);
   }
 };
@@ -53,21 +53,40 @@ typedef std::multiset<Event*, compareEvent > EventsContainer; // sort in a chron
 /** Iterator through a set of Events */
 typedef EventsContainer::iterator EventsContainerIterator;
 
-/** Tools to handle a set of Events
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) February 22, 2006
- *
- * Some rules:
- *     - Events can be removed or insert anywhere in the list
- *     - An event can not be modified (but removed!) => no setEvent(Event) function
- *     - All Events are created inside this class
- *       That means user can not create an Event and then insert it. He is forced to
- *       scheduleEvent method.
- *     - Tick must be set at construction, and can not be change after.
- *
- */
+/** Tools to handle a set of Events for the Simulation
+
+   \author SICONOS Development Team - copyright INRIA
+   \version 3.0.0.
+   \date (Creation) February 22, 2006
+
+   The EventsManager handles a set of events (from user time-discretisation, sensors, non-smooth ...),
+   and is supposed to provide to the simulation the values of "current" and "next" events to define
+   the time-integration interval.
+
+   Events:
+   - currentEvent: starting time for integration. Initialized with t0 of the simulation time-discretisation.
+   - ETD: corresponds to the instant t[k+1] of the Simulation (user) TimeDiscretisation.
+   - ENonSmooth: for EventDriven simulation only. Present only if one or more non-smooth events have been
+   detected between currentEvent and ETD.
+   - Sensor or Actuators Events. To each Sensor or Actuator declared in the ControlManager, corresponds
+   an Event in the manager. When this event is processed, its time value is increased to next instant
+   in the time-discretisation of the sensor/actuator.
+
+   Examples:
+   - for a TimeStepping, with one Sensor, the EventsManager looks like:\n
+   {currentEvent(tk), ESensor(tsensor), ETD(tk+1)}
+   - for an EventDriven, with one actuator, an non-smooth event detected at time tns: \n
+   {currentEvent(tk), EActuator(tact), ENonSmooth(tns), ETD(tk+1)}.
+
+   After each process, the time values of each event are updated and nextEvent points to the first event after currentEvent.
+
+   \section EMMfunc Main functions
+   - initialize(): process all events which have the same time as currentEvent
+   - processEvents(): process all events simultaneous to nextEvent, increment them to next step, update index sets,
+   increment currentEvent.
+
+
+*/
 class EventsManager
 {
 protected:
@@ -81,23 +100,40 @@ protected:
   EventsContainer allEvents;
 
   /** Pointer to currentEvent, ie the simulation starting point.
-    * It correponds to the first object in allEvents.
-    */
+   * It correponds to the first object in allEvents.
+   */
   Event * currentEvent;
 
   /** Pointer to nextEvent, ie the simulation ending point.
-    * It correponds to the event following currentEvent and so
-    * to the second object in allEvents.
-    */
+   * It correponds to the event following currentEvent and so
+   * to the second object in allEvents.
+   */
   Event * nextEvent;
+
+  /** Event which corresponds to time tk+h of the simulation time discretisation */
+  Event * ETD;
+
+  /** Non Smooth Event: corresponds to the last non-smooth event detected*/
+  Event * ENonSmooth;
 
   /* link to the simulation that owns this manager*/
   Simulation * simulation;
 
-  /** add a new Event in the allEvents list
-  *  \return false if Event already exists
-  */
-  const bool insertEvent(int, double);
+  /** bool to check if some NonSmooth events has already been inserted */
+  bool hasNS;
+
+  /** bool to check if a ControlManager is associated to the simulation */
+  bool hasCM;
+
+  /** Creates and adds a new Event in the allEvents list
+   *  \return false if Event already exists
+   */
+  const bool createAndInsertEvent(int, double);
+
+  /** default constructor => private
+   *  \param the simulation that owns this manager
+   */
+  EventsManager();
 
   /** copy constructor => private: no copy nor pass-by-value.
    *  \param the eventsManager to be copied
@@ -106,142 +142,140 @@ protected:
 
 public:
 
-  /** default constructor
-  *  \param the simulation that owns this manager
-  */
-  EventsManager(Simulation* = NULL);
+  /**  constructor with Simulation
+   *  \param the simulation that owns this manager
+   */
+  EventsManager(Simulation*);
 
   /** destructor
-  */
+   */
   ~EventsManager();
 
-  /** manager initialization function
+  /** Run process of all events simultaneous to currentEvent. manager initialization function
    */
   void initialize();
 
-  /** insert time discretisation into allEvents
-   * \param a pointer to the TimeDiscretisation object to schedule.
-   * \param an int, the type of Event associated to this discretisation.
-   */
-  void scheduleTimeDiscretisation(TimeDiscretisation*, int);
-
-  /** add a set of Events into allEvents list
+  /** add a set of existing Events into allEvents list
    *  \param an EventsContainer
-   *  \return a bool, false if insertion failed.
    */
-  const bool insertEvents(const EventsContainer&);
+  void insertEvents(const EventsContainer&);
 
-  /* No setter for member allEvents-> depends on simulation and can not be set in another way.
-   * Moreover, only EventsManager can create new Events.
+  /** get the list of all Events in the set
+   *  \return a set of Events*
    */
-
-  /** get the list of unProcessed Events
-  *  \return a set of Events*
-  */
-  inline const EventsContainer getUnProcessedEvents() const
+  inline const EventsContainer getEvents() const
   {
     return allEvents ;
   };
 
   /** get the event that occurs at time inputTime
-  *  \param a mpz_t
-  *  \return a pointer to Event
-  */
+   *  \param a mpz_t
+   *  \return a pointer to Event
+   */
   Event* getEventPtr(const mpz_t& inputTime) const;
 
   /** get the current event
-  *  \return a pointer to Event
-  */
+   *  \return a pointer to Event
+   */
   inline Event* getStartingEventPtr() const
   {
     return currentEvent;
   };
 
   /** get the next event to be processed.
-  *  \return a pointer to Event
-  */
+   *  \return a pointer to Event
+   */
   inline Event* getNextEventPtr() const
   {
     return nextEvent;
   };
 
   /** get the event following inputEvent  ("following" defined with operator(s) comparison of events)
-  *  \param a pointer to Event
-  *  \return a pointer to Events
-  */
+   *  \param a pointer to Event
+   *  \return a pointer to Events
+   */
   Event* getFollowingEventPtr(Event*) const;
 
   /** get the event that follows the event at time inputTime  ("following" defined with operator(s) comparison of events)
-  *  \param a mpz_t
-  *  \return a pointer to Event
-  */
+   *  \param a mpz_t
+   *  \return a pointer to Event
+   */
   Event* getFollowingEventPtr(const mpz_t& inputTime) const;
 
   /** get the Simulation
-  *  \return a pointer to Simulation
-  */
+   *  \return a pointer to Simulation
+   */
   inline Simulation* getSimulationPtr() const
   {
     return simulation;
   }
 
   /** set the Simulation of the OneStepNSProblem
-  *  \param: a pointer on Simulation
-  */
+   *  \param: a pointer on Simulation
+   */
   inline void setSimulationPtr(Simulation* str)
   {
     simulation = str;
   }
 
   /** check if event is present in allEvents list
-  *  \return a bool
-  */
+   *  \return a bool
+   */
   const bool hasEvent(Event*) const ;
 
   /** check if some events remain in allEvents list
-  *  \return a bool
-  */
+   *  \return a bool
+   */
   const bool hasNextEvent() const ;
 
   /** get the time (double format) of an event
-  *  \return a double
-  */
+   *  \return a double
+   */
   const double getTimeOfEvent(Event*) const;
 
   /** get the time of current event, in double format
-  *  \return a double
-  */
+   *  \return a double
+   */
   const double getStartingTime() const ;
 
   /** get the time of next event, in double format
-  *  \return a double
-  */
+   *  \return a double
+   */
   const double getNextTime() const ;
 
   /** display EventsManager data
-  */
+   */
   void display() const ;
 
+  /** Insert an existing event into the set
+      \param Event*, the event to be nserted
+   */
+  void insertEvent(Event*);
+
+  /** Update nextEvent (useful in case of a new insertion)
+   */
+  void update();
+
   /** add a new Event in the allEvents list and update nextEvent value
-  *  \return false if Event already exists
-  */
-  const bool scheduleEvent(int, double);
+   * \param the time (double format) of occurence of the event
+   */
+  void scheduleNonSmoothEvent(double);
 
   /** remove an Event from the unProcessed events list
-  */
+   */
   void removeEvent(Event*);
 
   /** update current and next event positions and run process functions of current event
-  */
+   */
   void processEvents();
 
-  /** run process functions of current event and all simultaneous events.
-  */
-  void process();
+  /** processEvents when neither non-smooth events nor control-related events are present.
+   */
+  void OptimizedProcessEvents();
 
-  /** update current and next event positions.
-  */
-  void shiftEvents();
+  /** processEvents for general case
+   */
+  void GeneralProcessEvents();
 };
 
 #endif // EventsManager_H

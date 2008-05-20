@@ -15,58 +15,70 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
-/*! \file
-*/
+ */
+/*! \file TimeDiscretisation.h
+
+  \brief A time-discretisation scheme for a given interval.
+ */
 #ifndef TIMEDISCRETISATION_H
 #define TIMEDISCRETISATION_H
 
-#include "SimpleVector.h"
+#include "TimeDiscretisationXML.h"
+#include <vector>
 
 class Model;
 class TimeDiscretisationXML;
-class SiconosVector;
-class SimpleVector;
 
 /** A time discretisation scheme
- *
- * \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 26, 2004
- *
- * This object is a discretization of [t0,T] defined in Model. It can belong to the Simulation, a Sensor, an Actuator ...
- *
- * Two types of constructors:
- * - IO (at the time only xml)
- * - straightforward
- *
- *  The construction process is always the same:
- *   - data loading (from io or as arguments of the straightforward constructor function)
- *   - Sets the value of tdCase which determines how the timeDiscretisation will be initialized, depending on the input.
- *  Initialization takes place during initialize of the object that owns the timeDiscretisation (simulation, sensor ...)
- *
- *
+
+    \author SICONOS Development Team - copyright INRIA
+    \version 3.0.0.
+    \date (Creation) Apr 26, 2004
+
+    A TimeDiscretisation object is used to discretized a given time interval. \n
+    TimeDiscretisation are used:
+    - in the simulation, as a user-input to discretized [t0,T]
+    - in Sensor and Actuator, to define the set of time instants where the sensor or actuator
+    must operate.
+
+    A TimeDiscretisation is defined with a starting time (t0), a time step size (h, non necessarily constant),
+    the number of the current time step (k). \n
+    The time instant values are saved in a vector tk. Depending on the way of construction of the TimeDiscretisation,
+    all or only current and next times are saved in tk. The difference is just a question of saving memory. \n
+
+    Note that the TimeDiscretisation is linked to a Model. This is useful to synchronise it with initial and final
+    times of the Model.
+
+    \section tdMfunc Main functions:
+    - setCurrentTimeStep(), to set current h. This value will be used for all future time steps, until next change.
+    - increment(), shift to next time step (increment k, and shift t[k] and t[k+1])
+    - getCurrentTime(), return t[k]
+
+    \section tdBuild Construction
+
+    - input = the complete vector tk. This defines t0, T, number of time steps and time step size
+    (which is not necessarily constant). In this case, the whole vector is saved in the memory.
+    - inputs = number of time steps and the Model. t0 and T are given by the input model, and the time step
+    size h is computed with t0,T and nSteps. Only two values are saved: t[k] and t[k+1] = t[k] + h.
+    h can be changed at any time.
+    - inputs = h and the Model. t0 is given by the input model. Only two values are saved: t[k] and t[k+1] = t[k] + h.
+    h can be changed at any time.
+    - inputs = t0 and h.  Only two values are saved: t[k] and t[k+1] = t[k] + h.
+    h can be changed at any time.
+
  */
 class TimeDiscretisation
 {
 private:
-  /** Time step */
+
+  /** Default value for the time step (tk+1 - tk) */
   double h;
 
-  /** Number of time step */
-  unsigned int nSteps;
+  /** Number of current time step (Simulation runs between steps k and k+1) */
+  unsigned int k;
 
-  /** vector of time values at each step (=> size = nSteps+1) */
-  SiconosVector* tk;
-
-  /** contains the lowest possible time step value */
-  double hMin;
-
-  /** contains the highest possible time step value */
-  double hMax;
-
-  /** true if all the Integrator have the same time step */
-  bool constant;
+  /** vector of time values at each step (=> size = n1+n2+1 - Default size = 2 - Max size= nSteps+1) */
+  TkVector tk;
 
   /** the XML object linked to the TimeDiscretisation to read XML data */
   TimeDiscretisationXML* timeDiscretisationXML;
@@ -74,60 +86,58 @@ private:
   /* the model linked to this discretisation (used to set t0 and possibly final T) */
   Model* model;
 
-  /** Flags to know if pointers have been allocated inside present class constructors or not */
-  bool isTkAllocatedIn;
-
-  /** indicator of the way of construction for this time discretisation.
-      Obtained with a call to checkCase(...) during construction.*/
-  int tdCase;
-
   /** Flag to check if all data are up to date (ie if it is necessary to initialize or not) */
   bool isUpToDate;
 
-  /** default constructor
+  /** Indic. flag which sets the way the time-discretisation is built.*/
+  int tdCase;
+
+  /** index in tk which corresponds to the current time step (tk[pos] = t[k]) -
+      Required since the size of tk depends on tdCase.
+      tdCase = 1 => pos = k - tdCase = 2 => pos = 0 .
+  */
+  int pos;
+
+  /** default constructor (private => no copy nor pass-by value)
    */
   TimeDiscretisation();
 
-  /** determine the way to compute TD values, according to which data are provided => set tdCase
-  *  \param booleans indicated if tk, h and nSteps are present or not
-  */
-  void setCase(bool, bool, bool);
+  /** Assignment Operator (private => forbidden) */
+  TimeDiscretisation& operator =(const TimeDiscretisation&);
 
 public:
 
-  // --- CONSTRUCTORS/DESTRUCTOR ---
-  // IO constructor -> xml
   /** constructor with XML
-  *  \param TimeDiscretisationXML* : the XML object corresponding
-  *  \param Model* : the model that owns this discretisation
-  */
+   *  \param TimeDiscretisationXML* : the XML object corresponding
+   *  \param Model* : the model that owns this discretisation
+   */
   TimeDiscretisation(TimeDiscretisationXML*, Model *);
 
   // --- Straightforward constructors ---
 
   /** constructor with tk and model as given data
-  *  \param pointer on  a SiconosVector that describes the discretisation
-  *  \param Model* : the model that owns this discretisation
-  */
-  TimeDiscretisation(SiconosVector *, Model*);
+   *  \param a TkVector that describes the discretisation
+   *  \param Model* : the model that owns this discretisation
+   */
+  TimeDiscretisation(const TkVector&, Model*);
 
-  /** constructor with h, nSteps and model as given data
-  *  \param double (h), unsigned int (nSteps)
-  *  \param Model* : the model that owns this discretisation
-  */
-  TimeDiscretisation(double, unsigned int, Model*);
-
-  /** constructor with nSteps and model as given data
-  *  \param int (nSteps)
-  *  \param Model* : the model that owns this discretisation
-  */
+  /** constructor with the number of time steps
+   *  \param int (nb steps)
+   *  \param Model* : the model that owns this discretisation
+   */
   TimeDiscretisation(unsigned int, Model*);
 
-  /** constructor with h and model as given data
-  *  \param double (h)
-  *  \param Model* : the model that owns this discretisation
-  */
+  /** constructor with the size of the default time step
+   *  \param double, the time step
+   *  \param Model* : the model that owns this discretisation
+   */
   TimeDiscretisation(double, Model*);
+
+  /** constructor with the size of the default time step and t0
+   *  \param double, initial time value
+   *  \param double, the time step
+   */
+  TimeDiscretisation(double, double);
 
   // Destructor
   ~TimeDiscretisation();
@@ -135,148 +145,86 @@ public:
   // --- GETTERS/SETTERS ---
 
   /** get the time step
-  *  \return the value of h
-  */
-  inline const double getH() const
+   *  \return the value of t[k+1] - t[k], the current time step
+   */
+  const double getCurrentTimeStep() const
   {
     return h;
   };
 
-  /** get the number of time steps
-  *  \return the value of nSteps
-  */
-  inline const unsigned int getNSteps() const
-  {
-    return nSteps;
-  };
-
-  /** get the value of tk
-  *  \return SimpleVector
-  */
-  inline const SimpleVector getTk() const
-  {
-    return *tk;
-  }
+  /** set current h (ie tk+1 - tk)
+   *  \param the new value for h.
+   *  Warning: if the TimeDiscretisation has been built
+   *  with a complete tk vector (tdCase = 1), a call to this function
+   *  will switch to tdCase = 2, ie h = newH for all future steps (until a new set of h)
+   */
+  void setCurrentTimeStep(double);
 
   /** get the value of tk at step k
-  *  \return a double
-  */
-  inline const double getTk(unsigned int  k) const
+   *  \return a double
+   */
+  inline const double getTk(unsigned int ind) const
   {
-    return (*tk)(k);
+    return tk.at(ind);
   }
 
-  /** get tk
-  *  \return pointer on a SiconosVector
-  */
-  inline SiconosVector* getTkPtr() const
+  /** set current h (ie tk+1 - tk)
+   *  \param the new value for h.
+   *  Warning: if the TimeDiscretisation has been built
+   *  with a complete tk vector (tdCase = 1), a call to this function
+   *  will switch to tdCase = 2, ie h = newH for all future steps (until a new set of h)
+   */
+  void setTk(const TkVector&);
+
+  /** Get the current time instant value ( tk[pos] ) */
+  double getCurrentTime() const
   {
-    return tk;
-  }
-
-  /** set the value of tk to newValue
-  *  \param SiconosVector newValue
-  */
-  void setTk(const SiconosVector& newValue);
-
-  /** set tk to pointer newPtr
-  *  \param SiconosVector * newPtr
-  */
-  void setTkPtr(SiconosVector *newPtr) ;
-
-  /** get hMin
-  *  \return a double
-  */
-  inline const double getHMin() const
-  {
-    return hMin;
+    return tk[pos];
   };
 
-  /** set hMin
-  *  \param the new value for hMin
-  */
-  inline void setHMin(double newhMin)
+  /** Get time instant value at index k+1 ( tk[pos+1] ) */
+  double getNextTime() const
   {
-    hMin = newhMin;
-  };
-
-  /** get hMax
-  *  \return a double
-  */
-  inline const double getHMax() const
-  {
-    return hMax;
-  };
-
-  /** set hMax
-  *  \param the new value for hMax
-  */
-  inline void setHMax(double newhMax)
-  {
-    hMax = newhMax;
-  };
-
-  /** get the value of "constant", true if the TimeDiscretisation is constant
-  *  \return a boolean
-  */
-  inline const bool isConstant() const
-  {
-    return constant;
-  };
-
-  /** set the value of "constant"
-  *  \param a boolean
-  */
-  inline void setConstant(bool newConstant)
-  {
-    constant = newConstant;
+    return tk[pos + 1];
   };
 
   /** get the TimeDiscretisationXML of the TimeDiscretisation
-  *  \return a pointer on the TimeDiscretisationXML of the TimeDiscretisation
-  */
+   *  \return a pointer on the TimeDiscretisationXML of the TimeDiscretisation
+   */
   inline TimeDiscretisationXML* getTimeDiscretisationXMLPtr() const
   {
     return timeDiscretisationXML;
   }
 
   /** set the TimeDiscretisationXML of the TimeDiscretisation
-  *  \param TimeDiscretisationXML* : the pointer to set the TimeDiscretisationXML
-  */
+   *  \param TimeDiscretisationXML* : the pointer to set the TimeDiscretisationXML
+   */
   inline void setTimeDiscretisationXMLPtr(TimeDiscretisationXML* timediscrxml)
   {
     timeDiscretisationXML = timediscrxml;
   }
 
   /** get the Model
-  *  \return a pointer to Model
-  */
+   *  \return a pointer to Model
+   */
   inline Model* getModelPtr() const
   {
     return model;
   };
 
-  // Getters and setters for time boundary value from model
-
-  /** check if T, time max value is in the model or not
-   *  \return a bool
-   */
-  const bool hasT() const;
-
-  /** To compute members values, depending on the input given by user at construction (ie tdCase value)
-   */
-  void initialize();
+  /** Steps to next time step. */
+  void increment();
 
   // --- OTHER FUNCTIONS ---
-  /** print the data to the screen
+  /** print the discretisation data to the screen
    */
   void display() const;
 
   // --- XML Functions ---
 
   /** saves the TimeDiscretisation to the XML tree
-  *  \exception RuntimeException
-  */
+   *  \exception RuntimeException
+   */
   void saveTimeDiscretisationToXML();
 };
 

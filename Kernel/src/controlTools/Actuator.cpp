@@ -24,22 +24,23 @@
 #include "TimeDiscretisation.h"
 #include "EventFactory.h"
 #include "DynamicalSystem.h"
+#include "Simulation.h"
 #include <iostream>
 using namespace std;
 
-Actuator::Actuator(): type("generic"), id("none"), allSensors(NULL), allDS(NULL),  model(NULL), timeDiscretisation(NULL), eventsSet()
+Actuator::Actuator(): type(0), id("none"), allSensors(NULL), allDS(NULL),  model(NULL), timeDiscretisation(NULL), eActuator(NULL)
 {
   allDS = new DynamicalSystemsSet();
   allSensors = new Sensors();
 }
 
-Actuator::Actuator(const std::string& name, TimeDiscretisation* t): type(name), id("none"), allSensors(NULL), allDS(NULL), model(t->getModelPtr()), timeDiscretisation(t), eventsSet()
+Actuator::Actuator(int name, TimeDiscretisation* t): type(name), id("none"), allSensors(NULL), allDS(NULL), model(t->getModelPtr()), timeDiscretisation(t), eActuator(NULL)
 {
   allDS = new DynamicalSystemsSet();
   allSensors = new Sensors();
 }
 
-Actuator::Actuator(const std::string& name, TimeDiscretisation* t, const Sensors& sensorList): type(name), id("none"), allSensors(NULL), allDS(NULL), model(t->getModelPtr()), timeDiscretisation(t), eventsSet()
+Actuator::Actuator(int name, TimeDiscretisation* t, const Sensors& sensorList): type(name), id("none"), allSensors(NULL), allDS(NULL), model(t->getModelPtr()), timeDiscretisation(t), eActuator(NULL)
 {
   allDS = new DynamicalSystemsSet();
   allSensors = new Sensors();
@@ -90,26 +91,20 @@ void Actuator::addDynamicalSystemPtr(DynamicalSystem * newDS)
 
 void Actuator::initialize()
 {
-  // == Init. time discretisation data. ==
-  timeDiscretisation->initialize();
-  SiconosVector * tk = timeDiscretisation->getTkPtr();
-  unsigned int sizeTk = tk->size();
-
-  // == Create Events linked to the present Actuator. ==
-
-  EventsContainerIterator it; // to check if insertion succeed or not.
-  int type = 3;
-
+  // == Create an event linked to the present Actuator. ==
   // Uses the events factory to insert the new event.
-  EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;
-  for (unsigned int i = 0; i < sizeTk; ++i)
-    it = eventsSet.insert(regEvent.instantiate((*tk)(i), type));
-
-  // == Set Actuator object of all Events to this ==
-  for (it = eventsSet.begin(); it != eventsSet.end(); ++it)
-    static_cast<ActuatorEvent*>((*it))->setActuatorPtr(this);
+  EventFactory::Registry& regEvent(EventFactory::Registry::get());
+  eActuator = regEvent.instantiate(timeDiscretisation->getCurrentTime(), 3);
+  static_cast<ActuatorEvent*>(eActuator)->setActuatorPtr(this);
 
   // Warning: no Sensors initialization. They are supposed to be up to date when added in the Actuator.
+}
+
+// Add the present actuator into the Simulation process
+// i.e. add eActuator into the EventsManager of the simulation
+void Actuator::recordInSimulation()
+{
+  model->getSimulationPtr()->getEventsManagerPtr()->insertEvent(eActuator);
 }
 
 void Actuator::display() const
@@ -120,12 +115,11 @@ void Actuator::display() const
   else
     cout << " and not linked to a model." << endl;
   cout << "The associated Sensors are: " << endl;
-  SensorsIterator itS;
-  for (itS = allSensors->begin(); itS != allSensors->end(); ++itS)
+  for (SensorsIterator itS = allSensors->begin(); itS != allSensors->end(); ++itS)
     (*itS)->display();
+
   cout << "The associated DynamicalSystems are: " << endl;
-  DSIterator itDS;
-  for (itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
+  for (DSIterator itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
     cout << " - Number and Id: " << (*itDS)->getNumber() << ", " << (*itDS)->getId() << endl;
   cout << "======" << endl;
   cout << endl;

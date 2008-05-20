@@ -345,7 +345,7 @@ void LCP::computeUnitaryBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
     SiconosMatrix *leftUnitaryBlock = NULL, *rightUnitaryBlock = NULL;
     unsigned int sizeDS;
     string relationType1, relationType2;
-    double h = simulation->getTimeDiscretisationPtr()->getH();
+    double h = simulation->getTimeDiscretisationPtr()->getCurrentTimeStep();
 
     // General form of the unitaryBlock is :   unitaryBlock = a*extraUnitaryBlock + b * leftUnitaryBlock * centralUnitaryBlocks * rightUnitaryBlock
     // a and b are scalars, centralUnitaryBlocks a matrix depending on the integrator (and on the DS), the simulation type ...

@@ -22,13 +22,14 @@
 #include "Model.h"
 #include "TimeDiscretisation.h"
 #include "EventFactory.h"
+#include "Simulation.h"
 #include <iostream>
 using namespace std;
 
-Sensor::Sensor(): type("generic"), id("none"), model(NULL), timeDiscretisation(NULL), eventsSet()
+Sensor::Sensor(): type(0), id("none"), model(NULL), timeDiscretisation(NULL), eSensor(NULL)
 {}
 
-Sensor::Sensor(const std::string& name, TimeDiscretisation* t): type(name), id("none"), model(t->getModelPtr()), timeDiscretisation(t), eventsSet()
+Sensor::Sensor(int name, TimeDiscretisation* t): type(name), id("none"), model(t->getModelPtr()), timeDiscretisation(t), eSensor(NULL)
 {}
 
 Sensor::~Sensor()
@@ -36,25 +37,18 @@ Sensor::~Sensor()
 
 void Sensor::initialize()
 {
-  // == Init. time discretisation data. ==
-  timeDiscretisation->initialize();
-  SiconosVector * tk = timeDiscretisation->getTkPtr();
-  unsigned int sizeTk = tk->size();
-
-  // == Create Events linked to the present Sensor. ==
-
-  EventsContainerIterator it; // to check if insertion succeed or not.
-  int type = 4;
-
+  // == Create an event linked to the present Actuator. ==
   // Uses the events factory to insert the new event.
-  EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;
-  for (unsigned int i = 0; i < sizeTk; ++i)
-  {
-    it = eventsSet.insert(regEvent.instantiate((*tk)(i), type));
-  }
-  // == Set Sensor object of all Events to this ==
-  for (it = eventsSet.begin(); it != eventsSet.end(); ++it)
-    static_cast<SensorEvent*>((*it))->setSensorPtr(this);
+  EventFactory::Registry& regEvent(EventFactory::Registry::get());
+  eSensor = regEvent.instantiate(timeDiscretisation->getCurrentTime(), 4);
+  static_cast<SensorEvent*>(eSensor)->setSensorPtr(this);
+}
+
+// Add the present sensor into the Simulation process
+// i.e. add eSensor into the EventsManager of the simulation
+void Sensor::recordInSimulation()
+{
+  model->getSimulationPtr()->getEventsManagerPtr()->insertEvent(eSensor);
 }
 
 void Sensor::display() const

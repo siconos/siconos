@@ -113,16 +113,19 @@ template<class InpIt> void purge(InpIt begin, InpIt end, const std::vector<bool>
   }
 }
 
-/* #include <malloc.h> */
-/* static struct mallinfo malloc_info1, malloc_info2; */
-/* static int malldelta; */
-/* /\** Tool to compute the increase of memory alloc *\/ */
-/* static int TRM() {  */
-/*   malloc_info1 = malloc_info2; */
-/*   malloc_info2 = mallinfo (); */
-/*   malldelta = malloc_info2.uordblks - malloc_info1.uordblks; */
-/*   return(malldelta); */
-/* } */
+#ifndef __APPLE__
+#include <malloc.h>
+static struct mallinfo malloc_info1, malloc_info2;
+static int malldelta;
+/** Tool to compute the increase of memory alloc */
+static int TRM()
+{
+  malloc_info1 = malloc_info2;
+  malloc_info2 = mallinfo();
+  malldelta = malloc_info2.uordblks - malloc_info1.uordblks;
+  return(malldelta);
+}
+#endif
 
 #endif
 

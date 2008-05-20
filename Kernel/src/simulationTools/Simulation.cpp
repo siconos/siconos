@@ -24,7 +24,6 @@
 #include "Interaction.h"
 #include "Relation.h"
 #include "OneStepIntegratorXML.h"
-#include "TimeDiscretisation.h"
 #include "Model.h"
 #include "EventsManager.h"
 
@@ -47,7 +46,8 @@ using namespace std;
 
 // --- Constructor with a TimeDiscretisation (and thus a Model) and an id ---
 Simulation::Simulation(TimeDiscretisation* td, const string& id):
-  name("unnamed"), simulationType(id), timeDiscretisation(td), eventsManager(NULL), allOSI(NULL), allNSProblems(NULL),
+  name("unnamed"), simulationType(id), timeDiscretisation(td), eventsManager(NULL), tinit(0.0), tend(0.0), tout(0.0),
+  allOSI(NULL), allNSProblems(NULL),
   simulationxml(NULL), model(td->getModelPtr()), levelMin(0), levelMax(0), tolerance(DEFAULT_TOLERANCE), printStat(false)
 {
   if (timeDiscretisation == NULL)
@@ -63,14 +63,14 @@ Simulation::Simulation(TimeDiscretisation* td, const string& id):
 
   // === Events manager creation ===
   eventsManager = new EventsManager(this); //
-  isAllocatedIn["eventsManager"] = true;
   allOSI = new OSISet();
   allNSProblems = new OneStepNSProblems();
 }
 
 // --- xml constructor ---
 Simulation::Simulation(SimulationXML* strxml, Model *newModel, const string& id):
-  name("unnamed"), simulationType(id), timeDiscretisation(NULL), eventsManager(NULL), allOSI(NULL), allNSProblems(NULL),
+  name("unnamed"), simulationType(id), timeDiscretisation(NULL), eventsManager(NULL), tinit(0.0), tend(0.0), tout(0.0),
+  allOSI(NULL), allNSProblems(NULL),
   simulationxml(strxml), model(newModel), levelMin(0), levelMax(0), tolerance(DEFAULT_TOLERANCE), printStat(false)
 {
   if (simulationxml == NULL)
@@ -114,7 +114,6 @@ Simulation::Simulation(SimulationXML* strxml, Model *newModel, const string& id)
 
   // === Events manager creation ===
   eventsManager = new EventsManager(this); //
-  isAllocatedIn["eventsManager"] = true;
   allNSProblems = new OneStepNSProblems();
 }
 
@@ -122,7 +121,7 @@ Simulation::Simulation(SimulationXML* strxml, Model *newModel, const string& id)
 Simulation::~Simulation()
 {
   // == EventsManager ==
-  if (isAllocatedIn["eventsManager"])
+  if (eventsManager != NULL)
     delete eventsManager;
   eventsManager = NULL;
 
@@ -328,15 +327,12 @@ void Simulation::addOneStepNSProblemPtr(OneStepNSProblem* osns)
 
 void Simulation::initialize()
 {
+  TRM();
   if (model == NULL)
     RuntimeException::selfThrow("Simulation initialization - model = NULL.");
 
-  // Initialize the user time discretisation.
-  timeDiscretisation->initialize();
-
   // === Events manager initialization ===
-  eventsManager->initialize();
-
+  tinit = eventsManager->getStartingTime();
   // We first need to initialize the topology (computes UnitaryRelation sets, relative degrees ...)
   model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->initialize();
 
@@ -348,14 +344,13 @@ void Simulation::initialize()
   // === IndexSets building ===
   // The number of indexSets is given by the maximum value of relative degrees of the unitary relations.
   InteractionsSet * allInteractions = model->getNonSmoothDynamicalSystemPtr()->getInteractions();
-  double t0 = model->getT0();
   if (!allInteractions->isEmpty()) // ie if some Interactions have been declared
   {
     initLevelMax();
 
     InteractionsIterator it;
     for (it = allInteractions->begin(); it != allInteractions->end(); ++it)
-      (*it)->initialize(t0, levelMax + 1);
+      (*it)->initialize(tinit, levelMax + 1);
 
     indexSets.resize(levelMax + 1);
     // Link with index0 of the Topology.
@@ -367,16 +362,20 @@ void Simulation::initialize()
   // Initialize OneStepNSProblem: in derived classes specific functions.
   initOSNS();
 
-  // == Call process functions of events (usefull to save initial values for example) ==
-  eventsManager->process();
+  // Process events at time tinit. Useful to save values in memories for example.
+  // Warning: can not be called during eventsManager->initialize, because it needs
+  // the initialization of OSI, OSNS ...
+  eventsManager->initialize();
+  tend =  eventsManager->getNextTime();
+
   // Set Model current time (warning: current time of the model corresponds to the time of the next event to be treated).
   model->setCurrentTime(getNextTime());
 
   // End of initialize:
-  //  - all OSI and OSNS (ie DS and Interactions) states are computed for time t0 and saved into memories.
-  //  - Sensors or related objects are updated for t=t0.
-  //  - current time of the model is equal to t1, time of the first event after t0.
-  //  - currentEvent of the simu. corresponds to t0 and nextEvent to t1.
+  //  - all OSI and OSNS (ie DS and Interactions) states are computed for time tinit and saved into memories.
+  //  - Sensors or related objects are updated for t=tinit.
+  //  - current time of the model is equal to t1, time of the first event after tinit.
+  //  - currentEvent of the simu. corresponds to tinit and nextEvent to tend.
 
 
   // If printStat is true, open output file.
@@ -505,9 +504,8 @@ void Simulation::run(const std::string&, double, unsigned int)
   // Note that input arg. are useless in general case. Only useful for timeStepping.
 
   unsigned int count = 0; // events counter.
-  // do simulation while events remains in the "future events" list of events manager.
   cout << " ==== Start of " << simulationType << " simulation - This may take a while ... ====" << endl;
-  while (eventsManager->hasNextEvent())
+  while (getNextTime() <= model->getFinalT())
   {
     advanceToEvent();
     eventsManager->processEvents();

@@ -27,10 +27,7 @@
 using namespace std;
 using namespace SensorFactory;
 
-SensorPosition::SensorPosition(): Sensor()
-{}
-
-SensorPosition::SensorPosition(const std::string& name, TimeDiscretisation* t): Sensor(name, t)
+SensorPosition::SensorPosition(int name, TimeDiscretisation* t): Sensor(name, t), nSteps(2000)
 {}
 
 SensorPosition::~SensorPosition()
@@ -48,14 +45,13 @@ void SensorPosition::initialize()
   // --- Get the values to be plotted ---
   // -> saved in a matrix dataPlot
   unsigned int outputSize = 3;
-  int N = timeDiscretisation->getNSteps(); // Number of time steps
-  dataPlot = new SimpleMatrix(N + 10, outputSize);
+  dataPlot = new SimpleMatrix(nSteps, outputSize);
   k = 0;
 }
 
 void SensorPosition::capture()
 {
-  (*dataPlot)(k, 0) = k * timeDiscretisation->getH();
+  (*dataPlot)(k, 0) = timeDiscretisation->getCurrentTime();
   (*dataPlot)(k, 1) = (*model->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0)->getXPtr())(0);
   (*dataPlot)(k, 2) = (*model->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0)->getXPtr())(3);
   k++;
@@ -67,6 +63,7 @@ SensorPosition* SensorPosition::convert(Sensor* s)
   return sp;
 }
 
-AUTO_REGISTER_SENSOR("SensorPosition", SensorPosition);
+
+AUTO_REGISTER_SENSOR(1, SensorPosition);
 
 

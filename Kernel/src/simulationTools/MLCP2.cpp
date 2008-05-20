@@ -177,7 +177,7 @@ void MLCP2::computeUnitaryDSBlock(UnitaryRelation* UR, DynamicalSystem* DS)
 //fill DSUnitaryBlocks with B
 void MLCP2::computeDSUnitaryBlock(DynamicalSystem* DS, UnitaryRelation* UR)
 {
-  double h = simulation->getTimeDiscretisationPtr()->getH();
+  double h = simulation->getTimeStep();
   if (DSUnitaryBlocks[DS][UR] == NULL)
   {
     DSUnitaryBlocks[DS][UR] = new SimpleMatrix(DS->getDim(), UR->getNonSmoothLawSize());

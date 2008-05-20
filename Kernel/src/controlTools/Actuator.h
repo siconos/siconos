@@ -18,7 +18,7 @@
 */
 
 /*! \file Actuator.h
-  General interface to define an actuator ...
+  \brief General interface to define an actuator
 */
 
 #ifndef Actuator_H
@@ -28,7 +28,6 @@
 #include"EventsManager.h"
 #include<string>
 
-class SiconosVector;
 class TimeDiscretisation;
 class Model;
 class Event;
@@ -44,40 +43,63 @@ typedef Sensors::iterator SensorsIterator;
 /** Return-type for Actuators insertion. */
 typedef std::pair<SensorsIterator, bool> SensorsCheckInsert;
 
-/** Actuator Base Class
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) February 09, 2007
- *
- * See \ref UMSiconosControl for details on how to define its own Actuator.
- *
- *
- */
+/** Actuators Base Class
+
+   \author SICONOS Development Team - copyright INRIA
+   \version 3.0.0.
+   \date (Creation) February 09, 2007
+
+   Abstract class, interface to user-defined actuators.
+
+   An Actuator is dedicated to act on parameters of the Model (especially z param. in DynamicalSystem) according to some specific values recorded thanks to sensors. It gives an interface for User who can implement its own Actuator.
+   clearly define which data he needs to save.
+
+   An Actuator handles a TimeDiscretisation, which defines the set of all instants where the Actuator must operate \n
+   (i.e. each times where actuate() function will be called). An Event, inserted into the EventsManager of the Simulation, is linked to this TimeDiscretisation.
+
+   Moreover, an Actuator is identified thanks to an id and a type (a number associated to the derived class type indeed).
+
+   \section BActuator Construction
+   To build an Actuator it is necessary to use the factory. Inputs are a number which identify the derived class type and a TimeDiscretisation:
+   \code
+   // Get the registry
+   ActuatorFactory::Registry& regActuator(ActuatorFactory::Registry::get()) ;
+   // Build an Actuator of type "myType" with t as a TimeDiscretisation.
+   regActuator.instantiate(myType, t);
+   \endcode
+
+   The best way is to use the controlManager:
+   \code
+   // cm a ControlManager
+   cm->addActuator(myType,t);
+   // or if cm has already been initialized:
+   cm->addAndRecordActuator(myType,t)
+   \endcode
+*/
 class Actuator
 {
 protected:
 
   /** type of the Actuator */
-  std::string type;
+  int type;
 
   /** id of the Actuator */
   std::string id;
 
-  /** data list - Each vector of data is identified with a string. */
+  /** Sensors linked to this actuator */
   Sensors * allSensors;
 
   /** Dynamical Systems list: all the systems on which this actuator may act. */
   DynamicalSystemsSet * allDS;
 
-  /** The model linked to this sensor */
+  /** The model linked to this actuator */
   Model * model;
 
   /** A time discretisation scheme */
   TimeDiscretisation *timeDiscretisation;
 
-  /** The set of Events (ActuatorEvents) linked to this sensor */
-  EventsContainer eventsSet;
+  /** The event which will linked this actuator to the eventsManager of the simulation */
+  Event * eActuator;
 
   /** default constructor
    */
@@ -94,14 +116,14 @@ public:
    * \param a string, the type of the Actuator, which corresponds to the class type
    * \param a TimeDiscretisation*, (linked to a model).
    */
-  Actuator(const std::string&, TimeDiscretisation*);
+  Actuator(int, TimeDiscretisation*);
 
   /** Constructor with a TimeDiscretisation.
    * \param a string, the type of the Actuator, which corresponds to the class type
    * \param a TimeDiscretisation*, (linked to a model).
-   * \param a list of Sensors linked to this Actuator.
+   * \param a Sensor linked to this Actuator.
    */
-  Actuator(const std::string&, TimeDiscretisation*, const Sensors&);
+  Actuator(int, TimeDiscretisation*, const Sensors&);
 
   /** destructor
    */
@@ -126,7 +148,7 @@ public:
   /** get the type of the Actuator (ie class name)
    *  \return a string
    */
-  inline const std::string getType() const
+  inline const int getType() const
   {
     return type;
   };
@@ -183,17 +205,21 @@ public:
     return timeDiscretisation;
   };
 
-  /** get the list of Events associated to this sensor
-  *  \return an EventsContainer.
-  */
-  inline const EventsContainer getEvents() const
+  /** get the Event associated with this actuator
+   *  \return an Event*
+   */
+  inline const Event* getEventPtr() const
   {
-    return eventsSet ;
+    return eActuator;
   };
 
-  /** initialize sensor data.
+  /** initialize actuator data.
    */
   virtual void initialize();
+
+  /** Add the actuator into the simulation EventsManager.
+   */
+  void recordInSimulation();
 
   /** capture data when the ActuatorEvent is processed => set data[ActuatorEvent]=...
    */

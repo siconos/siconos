@@ -18,7 +18,7 @@
  */
 
 /*! \file ExampleActuator.h
-  An example on how to implement a user-defined actuator.
+  \brief An example on how to implement a user-defined actuator.
 */
 
 #ifndef ExampleActuator_H
@@ -38,23 +38,18 @@ class SiconosMatrix;
  */
 class ExampleActuator : public Actuator
 {
-private:
-
-  /** Default constructor
-   */
-  ExampleActuator();
 
 public:
 
   /** Constructor with a TimeDiscretisation.
-   * \param a string, the type of the Actuator, which corresponds to the class type
+   * \param an int, the type of the Actuator, which corresponds to the class type
    * \param a TimeDiscretisation*, (linked to a model).
    */
-  ExampleActuator(const std::string&, TimeDiscretisation*);
+  ExampleActuator(int, TimeDiscretisation*);
 
   /** Destructor
    */
-  ~ExampleActuator();
+  ~ExampleActuator() {};
 
   /** initialize sensor data.
    */

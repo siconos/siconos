@@ -15,9 +15,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 /*! \file SensorEvent.h
-Sensor Events
+  Sensor Events
 */
 #ifndef SensorEvent_H
 #define SensorEvent_H
@@ -43,7 +43,7 @@ private:
   Sensor* sensor;
 
   /** Default constructor */
-  SensorEvent();
+  SensorEvent(): Event(0.0, 4) {};
 
 public:
 
@@ -51,11 +51,11 @@ public:
    *  \param a double
    *  \param a string, type of Event
    */
-  SensorEvent(double, int);
+  SensorEvent(double time, int name): Event(time, name) {};
 
   /** destructor
-  */
-  ~SensorEvent();
+   */
+  ~SensorEvent() {};
 
   /** get the Sensor linked to this Event
    *  \return a pointer to Sensor
@@ -77,6 +77,11 @@ public:
    *  \param Simulation*, the simulation that owns this Event (through the EventsManager)
    */
   void process(Simulation*);
+
+  /** Increment time of the present event according to
+      the time discretisation of the linked Actuator
+  */
+  void update();
 };
 
 #endif // SensorEvent_H

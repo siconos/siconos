@@ -17,14 +17,9 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "Event.h"
+#include "RuntimeException.h"
 #include <math.h>
 using namespace std;
-
-// Default constructor (protected)
-Event::Event(): type(0), dTime(0.0)
-{
-  mpz_init(timeOfEvent);
-}
 
 double Event::tick = DEFAULT_TICK;
 
@@ -49,3 +44,7 @@ void Event::display() const
   cout << "===== End of Event display =====" << endl;
 }
 
+void Event::update()
+{
+  RuntimeException::selfThrow("Event::update, not yet implemented or forbidden for this type of event.");
+}

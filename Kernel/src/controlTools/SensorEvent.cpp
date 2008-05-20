@@ -19,22 +19,21 @@
 #include "SensorEvent.h"
 #include "Sensor.h"
 #include "EventFactory.h"
+#include "TimeDiscretisation.h"
 using namespace std;
 using namespace EventFactory;
-
-// Default constructor
-SensorEvent::SensorEvent(): Event(0.0, 4)
-{}
-
-SensorEvent::SensorEvent(double time, int name): Event(time, name)
-{}
-
-SensorEvent::~SensorEvent()
-{}
 
 void SensorEvent::process(Simulation*)
 {
   sensor->capture();
+}
+
+void SensorEvent::update()
+{
+  // Increment sensor time discr. to next step
+  sensor->getTimeDiscretisationPtr()->increment();
+  // set sensor event time to new current time value
+  setTime(sensor->getTimeDiscretisationPtr()->getCurrentTime());
 }
 
 AUTO_REGISTER_EVENT(4, SensorEvent);

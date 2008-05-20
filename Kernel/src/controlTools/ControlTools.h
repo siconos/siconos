@@ -18,7 +18,6 @@
 */
 /*! \file SiconosKernel.h
 \brief Include files related to controlTools.
-Note that not all files from the current location are listed below, since some of them are already included inside the ones below.
 */
 
 #include "SensorFactory.h"

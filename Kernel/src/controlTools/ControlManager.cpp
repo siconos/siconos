@@ -53,39 +53,52 @@ ControlManager::~ControlManager()
 
 void ControlManager::initialize()
 {
-  EventsManager * eventsManager = model->getSimulationPtr()->getEventsManagerPtr();
   // Initialize all the Sensors and insert their events into the EventsManager of the Simulation.
-  SensorsIterator itS;
-  for (itS = allSensors.begin(); itS != allSensors.end(); ++itS)
+  for (SensorsIterator itS = allSensors.begin(); itS != allSensors.end(); ++itS)
   {
     (*itS)->initialize();
-    eventsManager->insertEvents((*itS)->getEvents());
+    (*itS)->recordInSimulation();
   }
   // Initialize all the Actuators and insert their events into the EventsManager of the Simulation.
-  ActuatorsIterator itA;
-  for (itA = allActuators.begin(); itA != allActuators.end(); ++itA)
+  for (ActuatorsIterator itA = allActuators.begin(); itA != allActuators.end(); ++itA)
   {
     (*itA)->initialize();
-    eventsManager->insertEvents((*itA)->getEvents());
+    (*itA)->recordInSimulation();
   }
 }
 
-Sensor* ControlManager::addSensor(const string& type, TimeDiscretisation* t)
+Sensor* ControlManager::addSensor(int type, TimeDiscretisation* t)
 {
-  if (t->getModelPtr() != model)
-    RuntimeException::selfThrow("ControlManager::addSensor(...,timeDiscretisation) failed. The Model linked to the controlManager is different from the one of the TimeDiscretisation.");
-
   SensorFactory::Registry& regSensor(SensorFactory::Registry::get()) ;
   return (* (allSensors.insert(regSensor.instantiate(type, t))).first);
 }
 
-Actuator* ControlManager::addActuator(const string& type, TimeDiscretisation* t)
+Sensor* ControlManager::addAndRecordSensor(int type, TimeDiscretisation* t)
 {
-  if (t->getModelPtr() != model)
-    RuntimeException::selfThrow("ControlManager::addActuator(...,timeDiscretisation) failed. The Model linked to the controlManager is different from the one of the TimeDiscretisation.");
+  double currentTime = model->getSimulationPtr()->getNextTime();
+  while (t->getCurrentTime() < currentTime)
+    t->increment();
+  SensorFactory::Registry& regSensor(SensorFactory::Registry::get()) ;
+  Sensor* tmp = *(allSensors.insert(regSensor.instantiate(type, t))).first;
+  tmp->initialize();
+  tmp->recordInSimulation();
 
+  return tmp;
+}
+
+Actuator* ControlManager::addActuator(int type, TimeDiscretisation* t)
+{
   ActuatorFactory::Registry& regActuator(ActuatorFactory::Registry::get()) ;
   return (* (allActuators.insert(regActuator.instantiate(type, t))).first);
+}
+
+Actuator* ControlManager::addAndRecordActuator(int type, TimeDiscretisation* t)
+{
+  ActuatorFactory::Registry& regActuator(ActuatorFactory::Registry::get()) ;
+  Actuator* tmp = *(allActuators.insert(regActuator.instantiate(type, t))).first;
+  tmp->initialize();
+  tmp->recordInSimulation();
+  return tmp;
 }
 
 void ControlManager::display() const

@@ -31,12 +31,12 @@ Registry& Registry::get()
   return instance;
 }
 
-void Registry::add(const string& name, object_creator creator)
+void Registry::add(int name, object_creator creator)
 {
   factory_map[name] = creator;
 }
 
-Actuator* Registry::instantiate(const std::string& name, TimeDiscretisation* t)
+Actuator* Registry::instantiate(int name, TimeDiscretisation* t)
 {
   MapFactoryIt it = factory_map.find(name) ;
 
@@ -47,7 +47,7 @@ Actuator* Registry::instantiate(const std::string& name, TimeDiscretisation* t)
   return (it->second)(name, t) ; // run our factory
 }
 
-Registration::Registration(const string& name, object_creator creator)
+Registration::Registration(int name, object_creator creator)
 {
   //  cout << endl << "Registration of " << name << endl << endl ;
   // Add creator into the factory of Actuators

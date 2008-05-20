@@ -35,16 +35,16 @@ namespace ActuatorFactory
 {
 
 /** A pointer to function, returning a pointer to Actuator, built with its type (ie class name) and a pointer to Model.*/
-typedef Actuator* (*object_creator)(const std::string&, TimeDiscretisation*) ;
+typedef Actuator* (*object_creator)(int, TimeDiscretisation*) ;
 
 /** The type of the factory map */
-typedef std::map<const std::string, object_creator> MapFactory;
+typedef std::map<int, object_creator> MapFactory;
 
 /** An iterator through the MapFactory */
 typedef MapFactory::iterator MapFactoryIt;
 
 /** Template function to return a new object of type SubType*/
-template<class SubType> Actuator* factory(const std::string& name, TimeDiscretisation* t)
+template<class SubType> Actuator* factory(int name, TimeDiscretisation* t)
 {
   return new SubType(name, t);
 }
@@ -76,16 +76,16 @@ public :
   static Registry& get() ;
 
   /** Add an object_creator into the factory_map, factory_map[name] = object.
-   * \param a string, the name of the object added
+   * \param an int, the name of the object added
    * \param an object creator
    */
-  void add(const std::string&, object_creator);
+  void add(int, object_creator);
 
   /** Function to instantiate a new Actuator
-   * \param a string, the name of the object added (type name!)
+   * \param an int, the name of the object added (type name!)
    * \param a pointer to a TimeDiscretisation.
    */
-  Actuator* instantiate(const std::string&, TimeDiscretisation*);
+  Actuator* instantiate(int, TimeDiscretisation*);
 } ;
 
 /** Registration Class for sensors.
@@ -103,10 +103,10 @@ class Registration
 public :
 
   /** To register some new object into the factory
-   * \param a string, the name of the object to be registered
+   * \param an int, the name of the object to be registered
    * \param an object creator
    */
-  Registration(const std::string&, object_creator) ;
+  Registration(int, object_creator) ;
 } ;
 
 #define AUTO_REGISTER_ACTUATOR(class_name,class_type) Registration _registration_## class_type(class_name,&factory<class_type>);

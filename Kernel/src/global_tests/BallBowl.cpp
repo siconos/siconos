@@ -37,12 +37,9 @@ bool BallBowl()
     // --- Get the time discretisation scheme ---
     TimeDiscretisation* t = s->getTimeDiscretisationPtr();
     int k = 0; // Current step
-    int N = t->getNSteps(); // Number of time steps
-    // --- Get the values to be plotted ---
-    // -> saved in a matrix dataPlot
-
-
-    SimpleMatrix dataPlot(N + 1, 6);
+    SiconosMatrix * dataRef = new SimpleMatrix("refBallBowl.dat", true);
+    int N = dataRef->size(0);
+    SimpleMatrix dataPlot(N, 6);
 
     // For the initial time step:
     // time
@@ -61,16 +58,14 @@ bool BallBowl()
 
     cout << "Computation ... " << endl;
     // --- Time loop  ---
-    while (k < N)
+    while (s->getNextTime() < bouncingBall.getFinalT())
     {
-      // get current time step
-      k++;
       // solve ...
       s->computeOneStep();
 
       // --- Get values to be plotted ---
       //time
-      dataPlot(k, 0) = s->getStartingTime();;
+      dataPlot(k, 0) = s->getNextTime();;
       // Ball: state q
       dataPlot(k, 1) = (*q)(0);
       // Ball: velocity
@@ -84,8 +79,8 @@ bool BallBowl()
 
       // transfer of state i+1 into state i and time incrementation
       s->nextStep();
+      k++;
     }
-    SiconosMatrix * dataRef = new SimpleMatrix("refBallBowl.dat", true);
     double tol = 1e-7;
     double norm = (dataPlot - (*dataRef)).normInf() ;
     cout << endl << endl;

@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 /*! \file ActuatorEvent.h
-  Actuator Events
+  \brief Actuator Events
 */
 #ifndef ActuatorEvent_H
 #define ActuatorEvent_H
@@ -39,11 +39,11 @@ class ActuatorEvent : public Event
 
 private:
 
-  /** The sensor linked to the present event */
+  /** The actuator linked to the present event */
   Actuator* actuator;
 
   /** Default constructor */
-  ActuatorEvent();
+  ActuatorEvent(): Event(0.0, 3) {};
 
 public:
 
@@ -51,11 +51,11 @@ public:
    *  \param a double
    *  \param a string, type of Event
    */
-  ActuatorEvent(double, int);
+  ActuatorEvent(double time, int name): Event(time, name) {};
 
   /** destructor
    */
-  ~ActuatorEvent();
+  ~ActuatorEvent() {};
 
   /** get the Actuator linked to this Event
    *  \return a pointer to Actuator
@@ -77,6 +77,11 @@ public:
    *  \param Simulation*, the simulation that owns this Event (through the EventsManager)
    */
   void process(Simulation*);
+
+  /** Increment time of the present event according to
+      the time discretisation of the linked Actuator
+  */
+  void update();
 };
 
 #endif // ActuatorEvent_H

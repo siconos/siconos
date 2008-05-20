@@ -18,10 +18,10 @@ SET(SiconosKernel_VERSION "${VERSION}")
 #
 SET(SiconosKernel_DIRS
   .
-  controlTools
   model
   modelingTools
   simulationTools
+  controlTools
   utils
   utils/contract
   utils/SiconosAlgebra

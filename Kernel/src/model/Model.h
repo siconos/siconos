@@ -17,7 +17,9 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-/*! \file*/
+/*! \file Model.h
+  \brief The general Siconos Model
+*/
 
 #ifndef MODEL_H
 #define MODEL_H
@@ -29,7 +31,7 @@ class NonSmoothDynamicalSystem;
 class Simulation;
 class SiconosModelXML;
 
-/** Objects that links the NonSmoothDynamicalSystem with its Simulation.
+/** Model: object that links the NonSmoothDynamicalSystem with a Simulation.
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
@@ -72,6 +74,10 @@ private:
    */
   Model(const Model&) {};
 
+  /** assignment operator => forbidden
+   */
+  Model& operator=(const Model&);
+
 public:
 
   /** create the Model from an xml file
@@ -88,7 +94,6 @@ public:
    *  \param string : the description of the Model (optional parameter)
    *  \param string : the date of the Model (optional parameter)
    *  \param string : the xml schema of the Model (optional parameter)
-   *  \exception RuntimeException
    */
   Model(double, double = -1, const std::string& = "none", const std::string& = "nobody",
         const std::string& = "none", const std::string& = "none", const std::string& = "none");
