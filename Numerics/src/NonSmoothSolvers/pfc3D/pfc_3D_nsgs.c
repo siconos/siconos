@@ -24,7 +24,7 @@
 #include "LA.h"
 #include <time.h>
 #include "pfc_3D_Solvers.h"
-#include "NCP.h"
+#include "NCP_Solvers.h"
 
 void (*pfc_3D_local_solver)(int n , double *C , double *zzz , double *zz , double *ww , double mu , pfc3D_fPtr(*Compute_G), pfc3D_fPtr(*Compute_JacG), double *param1, double *param2, double *param3, int *iparam_local , double *dparam_local) = NULL;
 

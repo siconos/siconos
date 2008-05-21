@@ -25,7 +25,7 @@
  * iparam[1] = it_end  Output modified parameter which returns the number of iterations performed by the algorithm.
  * iparam[2] = local iter_max
  * iparam[3] = iter local (output)
- * iparam[4] = local formulation/solver (0: Projection, 1: Newton/Alart-Curnier 2: Newton/Fischer-Burmeister)
+ * iparam[4] = local formulation/solver (0: Projection, 1: Newton/Alart-Curnier 2: Newton/Fischer-Burmeister 3: Glocker/Path)
  *
  * dparam[0] = tol     Input unchanged parameter which represents the tolerance required.
  * dparam[1] = error   Output modified parameter which returns the final error value.
@@ -46,7 +46,7 @@
 #include "FrictionContact3D_Newton.h"
 #include "FrictionContact3D_projection.h"
 #include "FrictionContact3D_Solvers.h"
-#include "NCP.h"
+#include "NCP_Solvers.h"
 #include "LA.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -70,6 +70,11 @@ void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, C
     *solve = &frictionContact3D_Newton_solve;
     *freeSolver = &frictionContact3D_Newton_free;
     frictionContact3D_Newton_initialize(n, M, q, mu, iparam);
+  }
+  /* Path solver */
+  else if (iparam[4] == 3)
+  {
+
   }
   else
   {

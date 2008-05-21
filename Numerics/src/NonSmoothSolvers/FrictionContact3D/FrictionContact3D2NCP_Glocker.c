@@ -158,8 +158,8 @@ void NCPGlocker_updateWithSparse(int contact, double* reaction)
   subRowProdSBM(n, 3, contact, MBGlobal, reaction, qLocal, 0);
   /* qGlocker computation (saved in FGlocker) */
   FGlocker[0] = qLocal[0];
-  FGlocker[1] = -sqrt(3.) / 3 * qLocal[0] - qLocal[1];
-  FGlocker[2] =  sqrt(3.) / 3 * qLocal[0] - qLocal[1];
+  FGlocker[1] = -sqrt(3.) / 3 * qLocal[1] - qLocal[2];
+  FGlocker[2] =  sqrt(3.) / 3 * qLocal[1] - qLocal[2];
   FGlocker[3] = 0.0;
   FGlocker[4] = 0.0;
 

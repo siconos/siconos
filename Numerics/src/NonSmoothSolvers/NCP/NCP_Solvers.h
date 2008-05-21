@@ -20,53 +20,22 @@
 #ifndef NCP_H
 #define NCP_H
 
-/*!\file NCP.h
+/*!\file NCP_Solvers.h
   Functions related to NCP formulation and solvers.
-  *
-  *
-  * It provides routines to compute Fischer-Burmeister function and its jacobian,
-  * written as a NCP-function:
-  *
-  *  \f[
-  *    \phi(z,F(z)) = \sqrt( z^2 + F(z)^2) - z - F(z)
-  *  \f]
-  *
-  * For details see the paper of Kanzow and Kleinmichel, "A New Class of Semismooth Newton-type Methods for Nonlinear
-  * Complementarity Problems", Computational Optimization and Applications 11, 227-251 (1998).
-  *
-  * The notations below are more or less those of this paper.
-  *
-  * Functions:
-  *
-  * phi_FB(int size, double* z, double* F, double* phiVector)
-  *
-  * jacobianPhi_FB(int size, double* z, double* F, double* jacobianF, double* phiVector)
-  *
-  * \author Houari Khenous, Franck Perignon last modification (13/12/2007)
-  *
-  */
+  \author Franck Perignon, last modification: 21/05/2008
+
+  - Fischer-Burmeister
+  - Interface to Path (Ferris)
+
+*/
 
 #include "SparseBlockMatrix.h"
+#include "NCP_FischerBurmeister.h"
+#include "NCP_Path.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-  /** NCP Fischer Burmeister function, \f$ \phi(z,F(z)) \f$
-      \param size of vector z
-      \param vector z
-      \param vector F(z)
-      \param vector \f$ \phi(z,F(z)) \f$, in-out arg.
-  */
-  void phi_FB(int, double*, double*, double*);
-
-  /** Jacobian of NCP Fischer Burmeister function, \f$ \nabla_z \phi(z,F(z)) \f$
-      \param size of vector z
-      \param vector z
-      \param vector F(z)
-      \param \f$ \nabla_z F(z) \f$
-      \param \f$ \nabla_z \phi(z,F(z)) \f$, in-out arg.
-  */
-  void jacobianPhi_FB(int, double*, double*, double*, double*);
 
   /**
    * This function checks the validity of the vector z as a solution \n

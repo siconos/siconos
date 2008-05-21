@@ -15,27 +15,31 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ */
+
+#ifndef NCPPath_H
+#define NCPPath_H
+
+#include "Standalone_Path.h"
+
+/*!\file NCP_Path.h
+  \brief Interface to Path Solver for NCP problems
+
+  \author Franck Perignon, 21/05/2008
+
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
 
-void max_part(double* x, double *sol, int n)
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-{
-  int     i;
-  double  max;
-  max = x[0];
+  /** Path solver for NCP problem
 
-  for (i = 1 ; i < n ; i++)
-  {
+   */
+  int NCP_Path(int n, double* z, FuncEvalPtr* F, JacEvalPtr* jacobianF, int* iparam, double* dparam);
 
-    if (max < x[i]) max = x[i] ;
-
-  }
-
-
-  *sol = max;
-
+#ifdef __cplusplus
 }
+#endif
+
+#endif

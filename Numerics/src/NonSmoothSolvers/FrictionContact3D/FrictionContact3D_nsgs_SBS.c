@@ -18,7 +18,7 @@
  */
 
 #include "FrictionContact3D_Solvers.h"
-#include "NCP.h"
+#include "NCP_Solvers.h"
 #include <stdio.h>
 #include <stdlib.h>
 

@@ -24,7 +24,7 @@
 #include "LA.h"
 #include <time.h>
 #include "pfc_3D_Solvers.h"
-#include "NCP.h"
+#include "NCP_Solvers.h"
 
 void pfc_3D_nsgs_new(int nc , double *M , double *q , double *z , double *w, double *mu , int *info, int *iparam , double *dparam)
 {
