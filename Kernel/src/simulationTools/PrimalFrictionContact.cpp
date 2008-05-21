@@ -31,7 +31,7 @@
 #include "NewtonImpactFrictionNSL.h"
 #include "Moreau.h" // Numerics Header
 #include "LagrangianDS.h"
-
+#include "NewtonImpactNSL.h"
 using namespace std;
 
 // xml constructor
@@ -502,33 +502,117 @@ void PrimalFrictionContact::computeQ(const double time)
 
   DynamicalSystemsSet *allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();;
   DSIterator itDS;
-  unsigned int sizeDS;
-  OneStepIntegrator * Osi;
-  string osiType; // type of the current one step integrator
-  string dsType; // type of the current Dynamical System
+
+  // type of the current one step integrator
   unsigned int pos = 0;
   for (itDS = allDS->begin(); itDS !=  allDS->end(); ++itDS)
   {
     pos = M->getPositionOfDSBlock(*itDS);
-    Osi = simulation->getIntegratorOfDSPtr(*itDS);
-    osiType = Osi->getType();
-    if (osiType == "Moreau2")
-    {
-      sizeDS = (*itDS)->getDim();
-      setBlock(Osi->getWorkX(*itDS)  , q, sizeDS, 0, pos);
-    }
-    else
-    {
-      RuntimeException::selfThrow("PrimalFrictionContact::computeQ. Not yet implemented for Integrator type : " + osiType);
-    }
+    computeQBlock((*itDS), pos);
   }
 }
 
-void PrimalFrictionContact::computeQBlock(UnitaryRelation* UR, unsigned int pos)
+void PrimalFrictionContact::computeQBlock(DynamicalSystem* DS, unsigned int pos)
 {
-  RuntimeException::selfThrow("PrimalFrictionContact::computeQBlock() not yet implemented");
+  OneStepIntegrator * Osi = simulation->getIntegratorOfDSPtr(DS);
+  string osiType = Osi->getType();
+  unsigned int sizeDS;
+  if (osiType == "Moreau2")
+  {
+    sizeDS = (DS)->getDim();
+    setBlock(Osi->getWorkX(DS), q, sizeDS, 0, pos);
+  }
+  else
+  {
+    RuntimeException::selfThrow("PrimalFrictionContact::computeQ. Not yet implemented for Integrator type : " + osiType);
+  }
 }
+void PrimalFrictionContact::computeTildeLocalVelocityBlock(UnitaryRelation* UR, unsigned int pos)
+{
+  // Get relation and non smooth law types
+  string relationType = UR->getRelationType() + UR->getRelationSubType();
+  string nslawType = UR->getNonSmoothLawType();
 
+  string simulationType = simulation->getType();
+
+  DynamicalSystem* ds = *(UR->dynamicalSystemsBegin());
+  string osiType = simulation->getIntegratorOfDSPtr(ds)->getType();
+
+  unsigned int sizeY = UR->getNonSmoothLawSize();
+  std::vector<unsigned int> coord(8);
+
+  unsigned int relativePosition = UR->getRelativePosition();
+  Interaction * mainInteraction = UR->getInteractionPtr();
+  coord[0] = relativePosition;
+  coord[1] = relativePosition + sizeY;
+  coord[2] = 0;
+  coord[4] = 0;
+  coord[6] = pos;
+  coord[7] = pos + sizeY;
+
+  SiconosMatrix * H = NULL;
+  SiconosVector* workX = UR->getWorkXPtr();
+  if (osiType == "Moreau2")
+  {
+  }
+  else
+    RuntimeException::selfThrow("PrimalFrictionContact::computeTildeLocalVelocityBlock not yet implemented for OSI of type " + osiType);
+
+  // Add "non-smooth law effect" on q
+  if (UR->getRelationType() == "Lagrangian")
+  {
+    double e;
+    if (nslawType == NEWTONIMPACTNSLAW)
+    {
+
+#ifndef WithSmartPtr
+      e = (static_cast<NewtonImpactNSL*>(mainInteraction->getNonSmoothLawPtr()))->getE();
+#else
+      e = (boost::static_pointer_cast<NewtonImpactNSL>(mainInteraction->getNonSmoothLawPtr()))->getE();
+#endif
+
+      std::vector<unsigned int> subCoord(4);
+      if (simulationType == "TimeStepping")
+      {
+        subCoord[0] = 0;
+        subCoord[1] = UR->getNonSmoothLawSize();
+        subCoord[2] = pos;
+        subCoord[3] = pos + subCoord[1];
+        subscal(e, *UR->getYOldPtr(levelMin), *q, subCoord, false);
+      }
+      else if (simulationType == "EventDriven")
+      {
+        subCoord[0] = pos;
+        subCoord[1] = pos + UR->getNonSmoothLawSize();
+        subCoord[2] = pos;
+        subCoord[3] = subCoord[1];
+        subscal(e, *tildeLocalVelocity, *tildeLocalVelocity, subCoord, false); // tildeLocalVelocity = tildeLocalVelocity + e * tildeLocalVelocity
+      }
+      else
+        RuntimeException::selfThrow("FrictionContact::computetildeLocalVelocityBlock not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
+    }
+    else if (nslawType == NEWTONIMPACTFRICTIONNSLAW)
+    {
+
+#ifndef WithSmartPtr
+      e = (static_cast<NewtonImpactFrictionNSL*>(mainInteraction->getNonSmoothLawPtr()))->getEn();
+#else
+      e = (boost::static_pointer_cast<NewtonImpactFrictionNSL>(mainInteraction->getNonSmoothLawPtr()))->getEn();
+#endif
+
+      // Only the normal part is multiplied by e
+      if (simulationType == "TimeStepping")
+        (*tildeLocalVelocity)(pos) +=  e * (*UR->getYOldPtr(levelMin))(0);
+
+      else RuntimeException::selfThrow("FrictionContact::computetildeLocalVelocityBlock not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
+
+    }
+    else
+      RuntimeException::selfThrow("FrictionContact::computeTILDELOCALVELOCITYBlock not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType);
+  }
+
+
+}
 void PrimalFrictionContact::computeTildeLocalVelocity(const double time)
 {
   if (tildeLocalVelocity->size() != sizeLocalOutput)
@@ -539,15 +623,11 @@ void PrimalFrictionContact::computeTildeLocalVelocity(const double time)
   // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
 
   unsigned int pos = 0;
-  UnitaryRelationsIterator itCurrent, itLiked;
-  string simulationType = simulation->getType();
+  UnitaryRelationsIterator itCurrent;
   for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
   {
-    // *itCurrent is a UnitaryRelation*.
-    // Compute q, this depends on the type of non smooth problem, on the relation type and on the non smooth law
     pos = H->getPositionOfUnitaryBlock(*itCurrent);
-
-    computeQBlock((*itCurrent), pos); // free output is saved in y
+    computeTildeLocalVelocityBlock((*itCurrent), pos);
   }
 
 }

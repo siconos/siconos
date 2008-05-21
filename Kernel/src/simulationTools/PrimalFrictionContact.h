@@ -464,12 +464,18 @@ public:
       \param UnitaryRelation*, the UR which corresponds to the considered block
        \param unsigned int, the position of the first element of yOut to be set
   */
-  void computeQBlock(UnitaryRelation*, unsigned int);
+  void computeQBlock(DynamicalSystem*, unsigned int);
 
   /** compute vector q
    *  \param double : current time
    */
   void computeQ(double time);
+
+  /** To compute a part of the "tildeLovalVelocity" vector of the OSNS
+      \param UnitaryRelation*, the UR which corresponds to the considered block
+       \param unsigned int, the position of the first element of yOut to be set
+  */
+  void computeTildeLocalVelocityBlock(UnitaryRelation*, unsigned int);
 
   /** compute vector tildeLocalVelocity
    *  \param double : current time

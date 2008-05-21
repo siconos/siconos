@@ -327,7 +327,7 @@ void Simulation::addOneStepNSProblemPtr(OneStepNSProblem* osns)
 
 void Simulation::initialize()
 {
-  TRM();
+
   if (model == NULL)
     RuntimeException::selfThrow("Simulation initialization - model = NULL.");
 
