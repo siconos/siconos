@@ -181,7 +181,8 @@ void Moreau2::computeFreeState()
 
       SiconosMatrix *M = d->getMassPtr();
       SiconosVector *v = d->getVelocityPtr(); // v = v_k,i+1
-      prod(*M, *vold, *ffree); // ffree = M (vold)
+      prod(*M, *vold, *ffree); // ffree =  M (vold)
+      *ffree *= -1.0;
 
       if (d->getFLPtr() != NULL) // if fL exists
       {
@@ -197,7 +198,9 @@ void Moreau2::computeFreeState()
         // ffree += coef * fL_k,i+1
         scal(coef, *d->getFLPtr(), *ffree, false);
       }
-
+      *ffree *= -1.0;
+      //     cout << "Compute ffree" << endl;
+      //ffree->display();
     }
     // 4 - Lagrangian Linear Systems
     else if (dsType == LLTIDS)

@@ -317,6 +317,14 @@ public:
     return allNSProblems;
   };
 
+  /** get levelMin
+   *  \return the value of LevelMin
+   */
+  inline const int getLevelMin() const
+  {
+    return levelMin;
+  };
+
   /** get allNSProblems[name], a specific OneStepNSProblem
    *  \param a string, the name of the osns
    *  \return a pointer to OneStepNSProblem

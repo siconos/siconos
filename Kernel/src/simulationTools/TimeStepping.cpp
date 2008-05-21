@@ -129,7 +129,7 @@ void TimeStepping::addOneStepNSProblemPtr(OneStepNSProblem* osns)
   // A the time, a time stepping simulation can only have one non smooth problem.
   if (!allNSProblems->empty())
     RuntimeException::selfThrow("TimeStepping, addOneStepNSProblemPtr - A non smooth problem already exist. You can not have more than one.");
-
+  //cout <<" WARNING : TimeStepping, addOneStepNSProblemPtr - A non smooth problem already exist. You have more than one non smooth problem  " << endl;
   string name = "timeStepping"; // osns->getId();
   osns->setId(name);
   (*allNSProblems)[name] = osns;

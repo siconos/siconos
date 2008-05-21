@@ -956,6 +956,8 @@ void Moreau::computeFreeState()
       //    coeff = h*theta;
       //    scal(coeff,*vfree,*qfree,false); // qfree += coeff*vfree
       //    *qfree  += *qold;
+      // cout << "Compute vfree" << endl;
+      //vfree->display();
     }
     // 4 - Lagrangian Linear Systems
     else if (dsType == LLTIDS)
