@@ -730,7 +730,7 @@ void Moreau::computeFreeState()
   double t = simulationLink->getNextTime(); // End of the time step
   double told = simulationLink->getStartingTime(); // Beginning of the time step
   double h = t - told; // time step length
-
+  //h=0.0100000;
   // Operators computed at told have index i, and (i+1) at t.
 
   //  Note: integration of r with a theta method has been removed
@@ -956,8 +956,8 @@ void Moreau::computeFreeState()
       //    coeff = h*theta;
       //    scal(coeff,*vfree,*qfree,false); // qfree += coeff*vfree
       //    *qfree  += *qold;
-      // cout << "Compute vfree" << endl;
-      //vfree->display();
+      //  cout << "vfree :" << endl;
+      //    vfree->display();
     }
     // 4 - Lagrangian Linear Systems
     else if (dsType == LLTIDS)

@@ -58,7 +58,7 @@ void Moreau2::computeFreeState()
   double t = simulationLink->getNextTime(); // End of the time step
   double told = simulationLink->getStartingTime(); // Beginning of the time step
   double h = t - told; // time step length
-
+  //h=0.0100000;
   // Operators computed at told have index i, and (i+1) at t.
 
   //  Note: integration of r with a theta method has been removed
@@ -162,14 +162,14 @@ void Moreau2::computeFreeState()
       // "i" values are saved in memory vectors.
 
 
-      // fFree =  M(q_k,i+1)(v_i) - h*theta*fL(t,v_k,i+1, q_k,i+1) - h*(1-theta)*fL(ti,vi,qi)
+      // fFree =  W v_k,i+1 -M(q_k,i+1)(v_k,i+1- v_i) - h*theta*fL(t,v_k,i+1, q_k,i+1) - h*(1-theta)*fL(ti,vi,qi)
 
       // -- Convert the DS into a Lagrangian one.
       LagrangianDS* d = static_cast<LagrangianDS*>(ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       SiconosVector* qold = d->getQMemoryPtr()->getSiconosVector(0);
-      SiconosVector* vold = d->getVelocityMemoryPtr()->getSiconosVector(0);
+      SiconosVector* vold = d->getVelocityMemoryPtr()->getSiconosVector(0); // vol =v_i
 
       // --- ResiduFree computation ---
       // vFree pointer is used to compute and save ResiduFree in this first step.
@@ -181,26 +181,28 @@ void Moreau2::computeFreeState()
 
       SiconosMatrix *M = d->getMassPtr();
       SiconosVector *v = d->getVelocityPtr(); // v = v_k,i+1
-      prod(*M, *vold, *ffree); // ffree =  M (vold)
-      *ffree *= -1.0;
+      prod(*M, (*v - *vold), *ffree); // ffree = M(v - vold)
 
+      *ffree *= -1.0;
       if (d->getFLPtr() != NULL) // if fL exists
       {
         // computes fL(ti,vi,qi)
         d->computeFL(told, qold, vold);
-        double coef = -h * (1 - theta);
+        double coef = h * (1 - theta);
         // ffree += coef * fL_i
         scal(coef, *d->getFLPtr(), *ffree, false);
 
         // computes fL(ti+1, v_k,i+1, q_k,i+1) = fL(t,v,q)
         d->computeFL(t);
-        coef = -h * theta;
+        coef = h * theta;
         // ffree += coef * fL_k,i+1
         scal(coef, *d->getFLPtr(), *ffree, false);
       }
-      *ffree *= -1.0;
-      //     cout << "Compute ffree" << endl;
-      //ffree->display();
+
+      SiconosVector * ftmp = new SimpleVector(*ffree);
+      prod(*W, (*v), *ftmp);
+      *ffree += *ftmp;
+      delete(ftmp);
     }
     // 4 - Lagrangian Linear Systems
     else if (dsType == LLTIDS)
@@ -212,7 +214,7 @@ void Moreau2::computeFreeState()
       // Note: indices i/i+1 corresponds to value at the beginning/end of the time step.
       // "i" values are saved in memory vectors.
 
-      // fFree = +M v_i + (-h*C -h^2*theta*K)*vi - h*K*qi + h*theta * Fext_i+1 + h*(1-theta)*Fext_i
+      // fFree = +W v_i + (-h*C -h^2*theta*K)*vi - h*K*qi + h*theta * Fext_i+1 + h*(1-theta)*Fext_i
 
       // -- Convert the DS into a Lagrangian one.
       LagrangianLinearTIDS* d = static_cast<LagrangianLinearTIDS*>(ds);
@@ -227,11 +229,11 @@ void Moreau2::computeFreeState()
 
       SiconosMatrix *M = d->getMassPtr();
       SiconosVector *v = d->getVelocityPtr(); // v = v_k,i+1
-      prod(*M, *vold, *ffree); // ffree = M (vold)
+      prod(*W, (*v - *vold), *ffree); // ffree = W (vold)
 
       // vFree pointer is used to compute and save ResiduFree in this first step.
       double coeff;
-      // -- No need to update W --
+
       SiconosMatrix * C = d->getCPtr();
       if (C != NULL)
         prod(-h, *C, *vold, *ffree, false); // ffree += -h*C*vi
