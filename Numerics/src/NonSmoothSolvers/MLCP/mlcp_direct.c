@@ -240,7 +240,6 @@ int solveWithCurConfig(MixedLinearComplementarity_Problem* problem)
 #endif
   if (INFO)
   {
-    options->iparam[7]++;
     if (sVerbose)
       printf("solveWithCurConfig DGETRS failed\n");
     return 0;
@@ -253,7 +252,6 @@ int solveWithCurConfig(MixedLinearComplementarity_Problem* problem)
       {
         if (sVerbose)
           printf("solveWithCurConfig Sol not in the positive cone\n");
-        options->iparam[7]++;
         return 0;
       }
     }
@@ -319,6 +317,9 @@ void mlcp_direct(MixedLinearComplementarity_Problem* problem, double *z, double 
     if (find)
       *info = 0;
     else
+    {
+      options->iparam[7]++;
       *info = 1;
+    }
   }
 }
