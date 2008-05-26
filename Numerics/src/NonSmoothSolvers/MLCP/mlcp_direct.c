@@ -86,6 +86,8 @@ int mlcp_direct_getNbDWork(MixedLinearComplementarity_Problem* problem, Solver_O
 /*
  *options->iparam[5] : n0 number of possible configuration
  *options->dparam[5] : tol
+ *options->iparam[6] : verbose
+ *options->iparam[7] : number of failed
  *options->iWork : double work memory of size (n + m)*(n0+1) + nO*m
  *options->dWork : double work memory of size n + m + n0*(n+m)*(n+m)
  *
@@ -100,6 +102,7 @@ void mlcp_direct_init(MixedLinearComplementarity_Problem* problem, Solver_Option
   sVerbose = options->iparam[6];
   sTolneg = options->dparam[5];
   sTolpos = options->dparam[6];
+  options->iparam[7] = 0;
   sN = problem->n;
   sM = problem->m;
   if (sVerbose) printf("n= %d  m= %d /n sTolneg= %lf sTolpos= %lf \n", sN, sM, sTolneg, sTolpos);
@@ -237,6 +240,7 @@ int solveWithCurConfig(MixedLinearComplementarity_Problem* problem)
 #endif
   if (INFO)
   {
+    options->iparam[7]++;
     if (sVerbose)
       printf("solveWithCurConfig DGETRS failed\n");
     return 0;
@@ -249,6 +253,7 @@ int solveWithCurConfig(MixedLinearComplementarity_Problem* problem)
       {
         if (sVerbose)
           printf("solveWithCurConfig Sol not in the positive cone\n");
+        options->iparam[7]++;
         return 0;
       }
     }

@@ -233,7 +233,7 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
         if (sVerbose)
           printf("mlcp_enum find a solution!\n");
         mlcp_fillSolution(sU, sV, sW1, sW2, sNn, sMm, sW2V, sQ);
-        options->iparam[1] = sCurrentEnum - 1;
+        //  options->iparam[1]=sCurrentEnum-1;
         return;
       }
     }

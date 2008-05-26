@@ -22,6 +22,7 @@
 /*!\file MixedLinearComplementarity_Problem.h
   \brief Structure used to define a Mixed Linear Complementarity Problem
 
+  \author Olivier Bonnefon
 */
 
 /*! \page MLCProblem Mixed Linear Complementarity problems (MLCP)
@@ -88,6 +89,11 @@
   - mlcp_psor(), projected successive overrelaxation method
   - mlcp_rpsor(), regularized projected successive overrelaxation method
   - mlcp_path(), path solver
+  - mlcp_enum(), enumeratif solver
+  - mlcp_simplex(), solver based on the simplex algorithm
+  - mlcp_direct_path(), use the last solution to find the solution. If it failed the mlcp_path is called.
+  - mlcp_direct_enum(), use the last solution to find the solution. If it failed the mlcp_enum is called.
+  - mlcp_direct_simplex(), use the last solution to find the solution. If it failed the mlcp_simplex is called.
 
   (see the functions/solvers list in MLCP_solvers.h)
 
