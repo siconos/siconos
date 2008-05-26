@@ -23,10 +23,15 @@
 #include "Standalone_Path.h"
 
 /*!\file NCP_Path.h
+
   \brief Interface to Path Solver for NCP problems
 
-  \author Franck Perignon, 21/05/2008
+  Solves the following Nonlinear Complementarity Problem with Path Solver:
+  \f{eqnarray*}
+  0 \le F(z) \perp z \ge 0 \\
+  \f}
 
+  \author Franck Perignon, 21/05/2008
 */
 
 #ifdef __cplusplus
@@ -34,9 +39,14 @@ extern "C" {
 #endif
 
   /** Path solver for NCP problem
-
-   */
-  int NCP_Path(int n, double* z, FuncEvalPtr* F, JacEvalPtr* jacobianF, int* iparam, double* dparam);
+      \param n size of the vector z
+      \param z vector
+      \param F pointer to function used to compute \f$ F(z) \f$
+      \param jacobianF pointer to function used to compute \f$ \nabla_zF(z) \f$
+      \param iparam vector of int parameters (useless at the time)
+      \param dparam vector of double parameters (useless at the time)
+  */
+  int NCP_Path(int n, double* z, FuncEvalPtr F, JacEvalPtr jacobianF, int* iparam, double* dparam);
 
 #ifdef __cplusplus
 }

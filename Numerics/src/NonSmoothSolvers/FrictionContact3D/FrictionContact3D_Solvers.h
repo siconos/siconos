@@ -79,7 +79,6 @@ extern "C" {
       \param int vector of parameters (max. iteration number ...)
       \param double vector of parameters (tolerance ...)
   */
-  //  void frictionContact3D_nsgs(int, double*, double*, double*, double*, double*, int *, int *, double*);
   void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options);
 
   /** Non-Smooth Gauss Seidel solver for friction-contact 3D problem, with sparse-block storage for M

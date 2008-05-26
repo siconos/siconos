@@ -126,7 +126,7 @@ void frictionContact3D_Path_solve(int contact, int dimReaction, double* reaction
   (*updateSolver)(contact, reaction);
   int pos = Fsize * contact; /* Current block position */
   double * reactionBlock = &reaction[pos];
-  int info = NCP_Path(Fsize, reactionBlock, &F, &jacobianF, iparam, dparam);
+  int info = NCP_Path(Fsize, reactionBlock, F, jacobianF, iparam, dparam);
   if (info > 0)
   {
     fprintf(stderr, "Numerics, FrictionContact3D_Newton failed, reached max. number of iterations without convergence. Error = %f\n", dparam[1]);

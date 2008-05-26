@@ -29,11 +29,12 @@ The main arguments of this driver are:
 To get more details on each formulation, check for each type of problem in \ref NSSpackContents below.
 
 \section NSSpackContents Contents
-\subpage LCProblem \n
-\subpage MLCProblem \n
-\subpage fcProblem \n
-\subpage RelayProblem \n
-\subpage QPSolvers\n
+\subpage LCProblem \n\n
+\subpage MLCProblem \n\n
+\subpage NCProblem \n\n
+\subpage fcProblem \n\n
+\subpage RelayProblem \n\n
+\subpage QPSolvers\n\n
 
 Moreover, details on matrix storage in Numerics can be found in:
 \subpage NumericsMatrixPage \n

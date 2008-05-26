@@ -22,6 +22,8 @@
 
 /*!\file NCP_FischerBurmeister.h
 
+  \brief Fischer Burmeister function for NCP
+
    It provides routines to compute Fischer-Burmeister function and its jacobian,
    written as a NCP-function:
 
@@ -44,7 +46,6 @@
 
 */
 
-#include "SparseBlockMatrix.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

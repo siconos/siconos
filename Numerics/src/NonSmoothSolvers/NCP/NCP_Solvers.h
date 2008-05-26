@@ -20,13 +20,23 @@
 #ifndef NCP_H
 #define NCP_H
 
+/*! \page NCProblem Nonlinear Complementarity Problems (NCP)
+
+  \section ncpIntro The problem
+  Find \f$z \in \mathcal{R}^n\f$ such that:\n\n
+  \f$
+  0 \le F(z) \perp z \ge 0 \\
+  \f$
+
+  \section ncpSolvers Available solvers/formulations:
+   - Fischer-Burmeister (see NCP_FischerBurmeister.h)\n\n
+   - NCP_Path() Interface to Path (Ferris)
+
+*/
+
 /*!\file NCP_Solvers.h
-  Functions related to NCP formulation and solvers.
+  \brief Functions related to NCP formulation and solvers.
   \author Franck Perignon, last modification: 21/05/2008
-
-  - Fischer-Burmeister
-  - Interface to Path (Ferris)
-
 */
 
 #include "SparseBlockMatrix.h"

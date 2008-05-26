@@ -19,7 +19,7 @@
 #ifndef PRIMALFRICTIONCONTACTPROBLEM_H
 #define PRIMALFRICTIONCONTACTPROBLEM_H
 
-/*! \page fcProblem Friction-contact problems (2 or 3-dimensional)
+/*! \page primalFcProblem Primal-Friction-contact problems (2 or 3-dimensional)
   \section fcIntro The problem
   Find \f$(reaction,velocity)\f$ such that:\n
 
@@ -93,7 +93,7 @@
 
 /*!\file PrimalFrictionContact_Problem.h
   \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
-  \author Franck Perignon.
+  \author Vincent Acary.
 */
 
 #include "NumericsMatrix.h"

@@ -26,6 +26,7 @@ void setJacEval(JacEvalPtr myJac)
   jacEval = myJac;
 }
 
+#ifdef HAVE_PATHFERRIS
 typedef struct
 {
   int n;
@@ -187,3 +188,10 @@ void pathMain(int n, int nnz, int *status,
   return;
 }
 
+#else
+void pathMain(int n, int nnz, int *status,
+              double *z, double *f, double *lb, double *ub)
+{
+  numericsError("Standalone_Path:pathMain", "Path lib not found");
+}
+#endif

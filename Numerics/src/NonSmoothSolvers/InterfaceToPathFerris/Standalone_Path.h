@@ -3,21 +3,33 @@
 
 /*! \page PathFerrisInterface Interface to Path Solver
 
+  For details on Path Solver, see:
+  "The Path Solver: A Non-Monotone Stabilization Scheme for Mixed Complementarity Problems",\n
+  S.P. Dirkse, M.C. Ferris, Sept. 93 \n
+  or
+  "Algorithms and Environments for Complementarity", Todd S. Munson
 
-  You must provide the following two functions:
 
-  funcEval - evaluate the function at z, placing the result in f.
-  Return the number of domain violations.
+  To call Path Solver, you must: \n\n
+   - provide the following two functions:\n\n
+    - funcEval - evaluate the function at z, placing the result in f.
+      Return the number of domain violations. \n\n
+    - jacEval  - evaluate the Jacobian at z, placing the result in
+      col_start, col_len, row, and data.  Return the number
+      of domain violations.
+   - call pathMain() with the right arguments
 
-  jacEval  - evaluate the Jacobian at z, placing the result in
-  col_start, col_len, row, and data.  Return the number
-  of domain violations.
+ Note: all indices in the Jacobian begin with one.  The Jacobian is stored
+ by columns.  Finally, if the structure of the Jacobian remains constant,
+ col_start, col_len, and row need only be filled once.
 
-  Note: all indices in the Jacobian begin with one.  The Jacobian is stored
-  by columns.  Finally, if the structure of the Jacobian remains constant,
-  col_start, col_len, and row need only be filled once.
 
 */
+
+/*!\file Standalone_Path.h
+  \brief general interface to call Path Solver
+
+ */
 
 /** pointer to function used to call funcEval */
 typedef int (*FuncEvalPtr)(int, double*, double*);
