@@ -43,15 +43,15 @@ Other functions and useful tools related to NonSmoothSolvers are listed in NSSTo
 
 */
 
-/*!\file NonSmoothSolvers.h
+/*!\file NonSmoothDrivers.h
  * \brief This file provides all generic functions (drivers), interfaces to the different formulations for Non-Smooth Problems available in Numerics.
  *  \author Nineb Sheherazade and Dubois Frederic.
  *  Last Modifications : Mathieu Renouf , Pascal Denoyelle, Franck Perignon
  *  \todo solve_qp does not exist
  *
  */
-#ifndef NonSmoothSolvers_H
-#define NonSmoothSolvers_H
+#ifndef NonSmoothDrivers_H
+#define NonSmoothDrivers_H
 
 #include "blaslapack.h"
 #include "Relay_Solvers.h"
@@ -126,9 +126,68 @@ extern "C" {
       \author Vincent Acary
   */
   int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *w, Solver_Options* options, Numerics_Options* global_options);
+
+
+  /** General interface to initialize a solver.\n
+      Must be call for the following solvers:\n
+      - mlcp_enum
+      - mlcp_path
+      - mlcp_simplex
+      - mlcp_direct_enum
+      - mlcp_direct_path
+      - mlcp_direct_simplex
+
+      \param[in] problem the MixedLinearComplementarity_Problem structure which handles the problem (M,q)
+      \param[in] options structure used to define the solver(s) and their parameters
+      \author Olivier Bonnefon
+  */
   void mlcp_driver_init(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
+  /** General interface to reset a solver.\n
+      Must be call for the following solvers:\n
+      - mlcp_enum
+      - mlcp_path
+      - mlcp_simplex
+      - mlcp_direct_enum
+      - mlcp_direct_path
+      - mlcp_direct_simplex
+
+      \param[in] problem the MixedLinearComplementarity_Problem structure which handles the problem (M,q)
+      \param[in] options structure used to define the solver(s) and their parameters
+      \author Olivier Bonnefon
+  */
   void mlcp_driver_reset(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
+
+  /** General interface to get the number of integers that must be allocated for the solver.\n
+      Must be use for the following solvers:\n
+      - mlcp_enum
+      - mlcp_path
+      - mlcp_simplex
+      - mlcp_direct_enum
+      - mlcp_direct_path
+      - mlcp_direct_simplex
+
+      \param[in] problem the MixedLinearComplementarity_Problem structure which handles the problem (M,q)
+      \param[in] options structure used to define the solver(s) and their parameters
+      \return the number of integers that must be allocated by the user.
+
+      \author Olivier Bonnefon
+  */
   int mlcp_driver_get_iwork(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
+  /** General interface to get the number of doubles that must be allocated for the solver.\n
+      Must be use for the following solvers:\n
+      - mlcp_enum
+      - mlcp_path
+      - mlcp_simplex
+      - mlcp_direct_enum
+      - mlcp_direct_path
+      - mlcp_direct_simplex
+
+      \param[in] problem the MixedLinearComplementarity_Problem structure which handles the problem (M,q)
+      \param[in] options structure used to define the solver(s) and their parameters
+      \return the number of doubles that must be allocated by the user.
+
+      \author Olivier Bonnefon
+  */
   int mlcp_driver_get_dwork(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
 
 

@@ -57,10 +57,10 @@
   \right.
   \f$
 
-  \f$ u, w_{1}\f$ are vectors of size n.
+  \f$ u, w_{1}\f$ are vectors of size n.\n
   \f$ v, w_{2}\f$ are vectors of size m.
 
-  \f$ w_1=0\f$.
+  \f$ w_1=0\f$.\n
   \f$ 0 \le w_{2} \perp v \ge 0 \f$
 
   Old version (?):

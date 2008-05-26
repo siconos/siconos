@@ -21,7 +21,7 @@
 
 /*!\file MLCP_Solvers.h
   Solvers for Mixed Linear Complementary Problems (MCLP)
-  \author Vincent Acary
+  \author Vincent Acary \n
   Last Modifications : Olivier Bonnefon
 
 */
@@ -80,34 +80,58 @@ Regularized Projected Succesive over relaxation solver for MLCP
 - dparam[3] (in): rho
 
 \section mlcpPath Path (Ferris) Solver
-Must be in
+The path solver must be initialize:\n
+1) Initialize the solver with \bf mlcp_driver_init() \bf.\n
+2) Use a lot with \bf mlcp_driver() \bf.\n
+3) Reset the solver with \bf mlcp_driver_reset() \bf.\n
 \bf function: mlcp_path() \n
 \bf parameters:
 - dparam[0] (in): tolerance
 
 \section mlcpENUM ENUM Solver
-Enumeratif solver
+The enumeratif solver must be initialize:\n
+1) Initialize the solver with \bf mlcp_driver_init() \bf.\n
+2) Use a lot with \bf mlcp_driver() \bf.\n
+3) Reset the solver with \bf mlcp_driver_reset() \bf.\n
+
 \bf function: mlcp_enum() \n
+The enumeratif solver must be initialize: \n
+1) Initialize the solver with \bf mlcp_driver_init() \bf.\n
+2) Use a lot with \bf mlcp_driver() \bf.\n
+3) Reset the solver with \bf mlcp_driver_reset() \bf.\n
 \bf parameters:
 - iparam[0] (in): Verbose.
 - dparam[0] (in): a positive value, tolerane about the sign.
-- dWork : working float zone size : The number of doubles is retruned by the function mlcp_driver_get_dwork. MUST BE ALLOCATED BY THE USER.
-- iWork : working int zone size : . The number of double is retruned by the function mlcp_driver_get_iwork. MUST BE ALLOCATED BY THE USER.
+- dWork : working float zone size : The number of doubles is retruned by the function \bf mlcp_driver_get_dwork() \bf. MUST BE ALLOCATED BY THE USER.
+- iWork : working int zone size : . The number of double is retruned by the function \bf mlcp_driver_get_iwork() \bf. MUST BE ALLOCATED BY THE USER.
 
 \section mlcpSIMPLEX SIMPLEX Solver
-Simplex solver
+The simplex solver must be initialize:\n
+1) Initialize the solver with \bf mlcp_driver_init() \bf.\n
+2) Use a lot with \bf mlcp_driver() \bf.\n
+3) Reset the solver with \bf mlcp_driver_reset() \bf.\n
+
 \bf function: mlcp_simplex() \n
+The simplex solver must be initialize: \n
+1) Initialize the solver with \bf mlcp_driver_init() \bf.\n
+2) Use a lot with \bf mlcp_driver() \bf.\n
+3) Reset the solver with \bf mlcp_driver_reset() \bf.\n
+
 \bf parameters:
 - iparam[0] (in): Max number of iteration (example: 1000000).
 - iparam[1] (in): Verbose.
 - dparam[0] (in): A positive value, tolerance to consider that a var is null(ex: 10e-12).
 - dparam[1] (in): A positive value, tolerance to consider that complementarity holds(ex: 10e-12).
 - dparam[2] (in): A positive value, tolerance to consider that a var is negative(ex: 10e-9).
-- dWork : working float zone size : The number of doubles is retruned by the function mlcp_driver_get_dwork. MUST BE ALLOCATED BY THE USER.
-- iWork : working int zone size : . The number of double is retruned by the function mlcp_driver_get_iwork. MUST BE ALLOCATED BY THE USER.
+- dWork : working float zone size : The number of doubles is retruned by the function \bf mlcp_driver_get_dwork() \bf. MUST BE ALLOCATED BY THE USER.
+- iWork : working int zone size : . The number of double is retruned by the function \bf mlcp_driver_get_iwork() \bf. MUST BE ALLOCATED BY THE USER.
 
 \section mlcpDIRECT_ENUM DIRECT_ENUM Solver
-Direct and enumeratif solver
+The direct and enumeratif solver must be initialize: \n
+1) Initialize the solver with \bf mlcp_driver_init() \bf.\n
+2) Use a lot with \bf mlcp_driver() \bf.\n
+3) Reset the solver with \bf mlcp_driver_reset() \bf.\n
+
 \bf function: mlcp_direct_enum() \n
 \bf parameters:
 - iparam[0] (in): Verbose.
@@ -116,11 +140,15 @@ Direct and enumeratif solver
 - dparam[0] (in): A positive value, tolerane about the sign.
 - dparam[5] (in): A tolerance for the direct solver to consider that a var is negative(ex: 1e-12).
 - dparam[6] (in): A tolerance for the direct solver to consider that a var is positive(ex: 1e-12).
-- dWork : working float zone size : The number of doubles is retruned by the function mlcp_driver_get_dwork. MUST BE ALLOCATED BY THE USER.
-- iWork : working int zone size : . The number of double is retruned by the function mlcp_driver_get_iwork. MUST BE ALLOCATED BY THE USER.
+- dWork : working float zone size : The number of doubles is retruned by the function \bf mlcp_driver_get_dwork() \bf. MUST BE ALLOCATED BY THE USER.
+- iWork : working int zone size : . The number of double is retruned by the function \bf mlcp_driver_get_iwork() \bf. MUST BE ALLOCATED BY THE USER.
 
 \section mlcpDIRECT_PATH DIRECT_PATH Solver
-Direct and path solver
+The path solver must be initialize: \n
+1) Initialize the solver with \bf mlcp_driver_init() \bf.\n
+2) Use a lot with \bf mlcp_driver() \bf.\n
+3) Reset the solver with \bf mlcp_driver_reset() \bf.\n
+
 \bf function: mlcp_direct_path() \n
 \bf parameters:
 - iparam[5] (in): Number of registered configurations.
@@ -128,11 +156,14 @@ Direct and path solver
 - dparam[0] (in): Tolerance.
 - dparam[5] (in): A tolerance for the direct solver to consider that a var is negative(ex: 1e-12).
 - dparam[6] (in): A tolerance for the direct solver to consider that a var is positive(ex: 1e-12).
-- dWork : working float zone size : The number of doubles is retruned by the function mlcp_driver_get_dwork. MUST BE ALLOCATED BY THE USER.
-- iWork : working int zone size : . The number of double is retruned by the function mlcp_driver_get_iwork. MUST BE ALLOCATED BY THE USER.
+- dWork : working float zone size : The number of doubles is retruned by the function \bf mlcp_driver_get_dwork() \bf. MUST BE ALLOCATED BY THE USER.
+- iWork : working int zone size : . The number of double is retruned by the function \bf mlcp_driver_get_iwork() \bf. MUST BE ALLOCATED BY THE USER.
 
 \section mlcpDIRECT_SIMPLEX DIRECT_SIMPLEX Solver
-Direct and simplex solver
+The direct and simplex solver must be initialize: \n
+1) Initialize the solver with \bf mlcp_driver_init() \bf.\n
+2) Use a lot with \bf mlcp_driver() \bf.\n
+3) Reset the solver with \bf mlcp_driver_reset() \bf.\n
 \bf function: mlcp_direct_simplex() \n
 \bf parameters:
 - iparam[0] (in): Max number of iteration (example: 1000000).
@@ -144,8 +175,8 @@ Direct and simplex solver
 - dparam[2] (in): A positive value, tolerance to consider that a var is negative(ex: 10e-9).
 - dparam[5] (in): A tolerance for the direct solver to consider that a var is negative(ex: 1e-12).
 - dparam[6] (in): A tolerance for the direct solver to consider that a var is positive(ex: 1e-12).
-- dWork : working float zone size : The number of doubles is retruned by the function mlcp_driver_get_dwork. MUST BE ALLOCATED BY THE USER.
-- iWork : working int zone size : . The number of double is retruned by the function mlcp_driver_get_iwork. MUST BE ALLOCATED BY THE USER.
+- dWork : working float zone size : The number of doubles is retruned by the function \bf mlcp_driver_get_dwork() \bf. MUST BE ALLOCATED BY THE USER.
+- iWork : working int zone size : . The number of double is retruned by the function \bf mlcp_driver_get_iwork() \bf. MUST BE ALLOCATED BY THE USER.
 
 */
 
