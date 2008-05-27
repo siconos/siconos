@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "LA.h"
-#include "config.h"
+#include "NumericsConfig.h"
 #include "MLCP_Solvers.h"
 #include <stdio.h>
 #include <stdlib.h>

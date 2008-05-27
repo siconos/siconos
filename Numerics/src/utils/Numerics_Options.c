@@ -30,7 +30,7 @@ void setNumericsOptions(Numerics_Options* opt)
 
 void numericsError(char * functionName, char* message)
 {
-  char* output = "Numerics error - ";
+  char output[200] = "Numerics error - ";
   strcat(output, functionName);
   strcat(output, message);
   strcat(output, ".\n");
@@ -40,7 +40,7 @@ void numericsError(char * functionName, char* message)
 
 void numericsWarning(char * functionName, char* message)
 {
-  char* output = "Numerics warning - ";
+  char output[200] = "Numerics warning - ";
   strcat(output, functionName);
   strcat(output, message);
   strcat(output, ".\n");

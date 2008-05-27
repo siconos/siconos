@@ -21,7 +21,7 @@
 #define NCPPath_H
 
 #include "Standalone_Path.h"
-
+#include "PathAlgebra.h"
 /*!\file NCP_Path.h
 
   \brief Interface to Path Solver for NCP problems

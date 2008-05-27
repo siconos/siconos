@@ -20,7 +20,7 @@
 #define FRICTIONCONTACT3DSOLVERS_H
 
 /*!\file FrictionContact3D_Solvers.h
-  Subroutines for the resolution of contact problems with friction (3-dimensional case).\n
+  \brief Subroutines for the resolution of contact problems with friction (3-dimensional case).\n
 
   \author Mathieu Renouf, Franck Perignon.
 

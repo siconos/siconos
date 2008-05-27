@@ -20,7 +20,7 @@
 #define FRICTIONCONTACT3DPath_H
 
 /*!\file FrictionContact3D_Path.h
-  Typedef and functions declarations related to NCP-Path solver for 3 dimension frictional contact problems.
+  \brief Typedef and functions declarations related to NCP-Path solver for 3 dimension frictional contact problems.
   \author Franck Perignon
 
   Each solver must have 4 functions in its interface:

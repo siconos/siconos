@@ -20,7 +20,7 @@
 #define FRICTIONCONTACT3Projection_H
 
 /*!\file FrictionContact3D_projection.h
-  Typedef and functions declarations related to projection solver for 3 dimension frictional contact problems
+  \brief Typedef and functions declarations related to projection solver for 3 dimension frictional contact problems
 
   Each solver must have 4 functions in its interface:
   - initialize: link global static variables to the considered problem (M,q,...)

@@ -44,16 +44,15 @@ Other functions and useful tools related to NonSmoothSolvers are listed in NSSTo
 */
 
 /*!\file NonSmoothDrivers.h
- * \brief This file provides all generic functions (drivers), interfaces to the different formulations for Non-Smooth Problems available in Numerics.
- *  \author Nineb Sheherazade and Dubois Frederic.
- *  Last Modifications : Mathieu Renouf , Pascal Denoyelle, Franck Perignon
- *  \todo solve_qp does not exist
- *
- */
-#ifndef NonSmoothDrivers_H
-#define NonSmoothDrivers_H
+  \brief This file provides all generic functions (drivers), interfaces to the different formulations for Non-Smooth Problems available in Numerics.
+  \author Nineb Sheherazade and Dubois Frederic.
+  Last Modifications : Mathieu Renouf , Pascal Denoyelle, Franck Perignon
+  \todo solve_qp does not exist
 
-#include "blaslapack.h"
+*/
+#ifndef NonSmoothSolvers_H
+#define NonSmoothSolvers_H
+
 #include "Relay_Solvers.h"
 #include "LCP_Solvers.h"
 #include "MLCP_Solvers.h"
@@ -126,8 +125,6 @@ extern "C" {
       \author Vincent Acary
   */
   int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *w, Solver_Options* options, Numerics_Options* global_options);
-
-
   /** General interface to initialize a solver.\n
       Must be call for the following solvers:\n
       - mlcp_enum

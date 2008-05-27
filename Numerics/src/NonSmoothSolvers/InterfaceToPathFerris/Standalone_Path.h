@@ -16,7 +16,7 @@
       Return the number of domain violations. \n\n
     - jacEval  - evaluate the Jacobian at z, placing the result in
       col_start, col_len, row, and data.  Return the number
-      of domain violations.
+      of domain violations.\n\n
    - call pathMain() with the right arguments
 
  Note: all indices in the Jacobian begin with one.  The Jacobian is stored
@@ -44,20 +44,20 @@ extern "C" {
       The main path routine takes the following as arguments:
       \param[in] n      - the number of variables in the problem
       \param[in] nnz    - the number of nonzeros in the jacobian
-      \param[in,out] status - final status of the problem, one of the following:
-      1 - solved
-      2 - stationary point found
-      3 - major iteration limit
-      4 - cumulative minor iteration limit
-      5 - time limit
-      6 - user interrupt
-      7 - bound error (lb is not less than ub)
-      8 - domain error (could not find a starting point)
-      9 - internal error
+      \param[in,out] status - final status of the problem, one of the following:\n
+      1 - solved \n
+      2 - stationary point found\n
+      3 - major iteration limit\n
+      4 - cumulative minor iteration limit\n
+      5 - time limit\n
+      6 - user interrupt\n
+      7 - bound error (lb is not less than ub)\n
+      8 - domain error (could not find a starting point\n)
+      9 - internal error\n
       \param[in,out] z  IN: a starting point for the problem OUT: final point
       \param[in,out] f - final function evaluation
       \param[in] lb     - lower bounds on the variables
-      \param[in] ub     - upper bounds on the variables
+      \param[in] ub     - upper bounds on the variables\n
       On input, z, f, lb, and ub must be vectors with at least n elements.
       For infinity, use 1e20.
   */
@@ -65,12 +65,12 @@ extern "C" {
                 double *z, double *f, double *lb, double *ub);
 
   /** Set the function used to compute f(z)
-      \param fPtr a FuncEvalPtr
+      \param fPtr the pointed function
    */
   void setFuncEval(FuncEvalPtr);
 
   /** Set the function used to compute \f$ \nabla_zf(z) \f$
-      \param jfPtr a JacEvalPtr
+      \param jfPtr the pointed function
   */
   void setJacEval(JacEvalPtr);
 

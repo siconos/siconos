@@ -47,6 +47,9 @@ SET(SiconosNumerics_Unstable_SRCS
 #
 SET(SiconosNumerics_INSTALL_INCLUDE_DIR include/Siconos/Numerics)
 
+# NumericsConfig.h
+INSTALL(FILES ${CMAKE_BINARY_DIR}/NumericsConfig.h DESTINATION include/Siconos/Numerics)
+
 #
 # compilation setup 
 #

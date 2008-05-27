@@ -1,6 +1,5 @@
 /* Subroutine */
 
-//#include <config.h>
 #include "LA.h"
 
 #ifdef HAVE_CLAPACK_H

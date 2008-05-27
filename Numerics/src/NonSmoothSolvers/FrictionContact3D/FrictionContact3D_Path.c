@@ -34,7 +34,7 @@ static int Fsize;
 
 /** writes \f$ F(z) \f$ using Glocker formulation
  */
-int F_Glocker(int sizeF, double* reaction, double* FVector)
+int F_GlockerPath(int sizeF, double* reaction, double* FVector)
 {
   /* Glocker formulation */
   int up2Date = 0;
@@ -53,7 +53,7 @@ int F_Glocker(int sizeF, double* reaction, double* FVector)
 
 /** writes \f$ \nabla_z F(z) \f$  using Glocker formulation and the Fischer-Burmeister function.
  */
-int jacobianF_Glocker(int sizeF, int nnz, double* reaction, int* col_start, int* col_len, int* row, double* jacobianFMatrix)
+int jacobianF_GlockerPath(int sizeF, int nnz, double* reaction, int* col_start, int* col_len, int* row, double* jacobianFMatrix)
 {
   int up2Date = 0;
   /* Glocker formulation */
@@ -64,8 +64,8 @@ int jacobianF_Glocker(int sizeF, int nnz, double* reaction, int* col_start, int*
    the present file.
   */
 
-  /* TMP COPY: review memory management for FGlocker ...*/
-  DCOPY(sizeF , jacobianFGlocker , 1, jacobianFMatrix, 1);
+  /* Write jacobianFGlocker in a Path-Sparse format */
+  convertToPathSparse(sizeF, sizeF, jacobianFGlocker, col_start, col_len, row, jacobianFMatrix);
 
   FGlocker = NULL;
   jacobianFGlocker = NULL;
@@ -85,8 +85,8 @@ void frictionContact3D_Path_initialize(int n0, const double*const M0, const doub
   {
     Fsize = 5;
     NCPGlocker_initialize(n0, M0, q0, mu0);
-    F = &F_Glocker;
-    jacobianF = &jacobianF_Glocker;
+    F = &F_GlockerPath;
+    jacobianF = &jacobianF_GlockerPath;
     updateSolver = &NCPGlocker_update;
     postSolver = &NCPGlocker_post;
     freeSolver = &NCPGlocker_free;
@@ -109,8 +109,8 @@ void frictionContact3D_Path_initialize_SBS(int n0, const SparseBlockStructuredMa
   {
     Fsize = 5;
     NCPGlocker_initialize_SBS(n0, M0, q0, mu0);
-    F = &F_Glocker;
-    jacobianF = &jacobianF_Glocker;
+    F = &F_GlockerPath;
+    jacobianF = &jacobianF_GlockerPath;
     updateSolver = &NCPGlocker_update;
     postSolver = &NCPGlocker_post;
   }
@@ -129,7 +129,7 @@ void frictionContact3D_Path_solve(int contact, int dimReaction, double* reaction
   int info = NCP_Path(Fsize, reactionBlock, F, jacobianF, iparam, dparam);
   if (info > 0)
   {
-    fprintf(stderr, "Numerics, FrictionContact3D_Newton failed, reached max. number of iterations without convergence. Error = %f\n", dparam[1]);
+    fprintf(stderr, "Numerics, FrictionContact3D_Path failed");
     exit(EXIT_FAILURE);
   }
 

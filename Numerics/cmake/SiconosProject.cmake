@@ -111,10 +111,10 @@ MACRO(SICONOS_PROJECT
   # Doxygen documentation
   INCLUDE(SiconosDoc)
 
-  # config.h and include
+  # NumericsConfig.h and include
   IF(NOT CONFIG_H_GLOBAL_CONFIGURED)
-    SET(CONFIG_H_GLOBAL_CONFIGURED 1 CACHE BOOL "config.h global generation." )
-    CONFIGURE_FILE(config.h.cmake config.h)
+    SET(CONFIG_H_GLOBAL_CONFIGURED 1 CACHE BOOL "NumericsConfig.h global generation." )
+    CONFIGURE_FILE(config.h.cmake NumericsConfig.h)
   ENDIF(NOT CONFIG_H_GLOBAL_CONFIGURED)
   INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
@@ -309,10 +309,10 @@ MACRO(COMPILE_WITH)
     ENDIF(_FOUND)
   ENDIF(_REQ STREQUAL REQUIRED)
 
-  # update config.h
+  # update NumericsConfig.h
   IF(NOT CONFIG_H_${_NAME}_CONFIGURED)
-    SET(CONFIG_H_${_NAME}_CONFIGURED 1 CACHE BOOL "config.h generation for package ${_NAME}")
-    CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/config.h.cmake ${CMAKE_BINARY_DIR}/config.h)
+    SET(CONFIG_H_${_NAME}_CONFIGURED 1 CACHE BOOL "NumericsConfig.h generation for package ${_NAME}")
+    CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/config.h.cmake ${CMAKE_BINARY_DIR}/NumericsConfig.h)
   ENDIF(NOT CONFIG_H_${_NAME}_CONFIGURED)
   SET(_N)
   SET(_NAME) 

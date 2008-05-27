@@ -20,7 +20,7 @@
 #define FRICTIONCONTACT3DNewton_H
 
 /*!\file FrictionContact3D_Newton.h
-  Typedef and functions declarations related to Newton solver for 3 dimension frictional contact problems.
+  \brief Typedef and functions declarations related to Newton solver for 3 dimension frictional contact problems.
   \author Houari Khenous, Franck Perignon
 
   Each solver must have 4 functions in its interface:

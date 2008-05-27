@@ -1,8 +1,5 @@
-#include <limits.h>
-#include <stdio.h>
-
 #include "Standalone_Path.h"
-
+#include "Numerics_Options.h"
 #include "include/MCP_Interface.h"
 
 #include "include/Path.h"
@@ -12,6 +9,9 @@
 #include "include/Output.h"
 #include "include/Output_Interface.h"
 #include "include/Options.h"
+#include "NumericsConfig.h"
+#include <limits.h>
+#include <stdio.h>
 
 static FuncEvalPtr funcEval = NULL;
 static JacEvalPtr jacEval = NULL;
@@ -107,6 +107,28 @@ static void install_interface(MCP *m)
   return;
 }
 
+void create(int n, int nnz, double *z, double *f, double *lb, double *ub)
+{
+  problem.n = n;
+  problem.nnz = nnz;
+  problem.z = z;
+  problem.f = f;
+  problem.lb = lb;
+  problem.ub = ub;
+}
+
+void postMCP(int n, MCP *m, double *z, double *f)
+{
+  double *tempZ = MCP_GetX(m);
+  double *tempF = MCP_GetF(m);
+
+  for (int i = 0; i < n; i++)
+  {
+    z[i] = tempZ[i];
+    f[i] = tempF[i];
+  }
+}
+
 void pathMain(int n, int nnz, int *status,
               double *z, double *f, double *lb, double *ub)
 {
@@ -120,7 +142,12 @@ void pathMain(int n, int nnz, int *status,
   double dnnz;
   int i;
 
-  Output_SetLog(stdout);
+  /* File name for output log */
+  char name[9] = "path.log";
+  FILE* pathLog = fopen(name, "w");
+  Output_SetLog(pathLog);
+
+  //  Output_SetLog(stdout);
 
   o = Options_Create();
   Path_AddOptions(o);
@@ -154,13 +181,10 @@ void pathMain(int n, int nnz, int *status,
                 n, nnz, 100.0 * nnz / (1.0 * n * n));
   nnz++;
 
-  problem.n = n;
-  problem.nnz = nnz;
-  problem.z = z;
-  problem.f = f;
-  problem.lb = lb;
-  problem.ub = ub;
+  /* Form the problem */
+  create(n, nnz, z, f, lb, ub);
 
+  /* Create and setup an MCP structure */
   m = MCP_Create(n, nnz);
   install_interface(m);
 
@@ -171,16 +195,13 @@ void pathMain(int n, int nnz, int *status,
   info.use_start = True;
   info.use_basics = True;
 
+  /*** SOLVE THE PROBLEM ***/
   t = Path_Solve(m, &info);
 
-  tempZ = MCP_GetX(m);
-  tempF = MCP_GetF(m);
+  /** Work with the results **/
+  postMCP(n, m, z, f);
+  *status = t;
 
-  for (i = 0; i < n; i++)
-  {
-    z[i] = tempZ[i];
-    f[i] = tempF[i];
-  }
   *status = t;
 
   MCP_Destroy(m);
@@ -189,9 +210,8 @@ void pathMain(int n, int nnz, int *status,
 }
 
 #else
-void pathMain(int n, int nnz, int *status,
-              double *z, double *f, double *lb, double *ub)
+void pathMain(int n, int nnz, int *status, double *z, double *f, double *lb, double *ub)
 {
-  numericsError("Standalone_Path:pathMain", "Path lib not found");
+  numericsError("Standalone_Path:pathMain - ", "Path lib not found");
 }
 #endif

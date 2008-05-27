@@ -20,9 +20,9 @@
 #define FrictionContact2DSolvers_H
 
 /*!\file FrictionContact2D_Solvers.h
+  \brief Subroutines for the resolution of contact problems with friction (2-dimensional case).\n
   \author Nineb Sheherazade and Dubois Frederic.
   Last Modifications : Mathieu Renouf , Pascal Denoyelle, Franck Perignon
-  Subroutines for the resolution of contact problems with friction (2-dimensional case).\n
 */
 
 /*! \page FC2DSolvers Friction-Contact 2D problems Solvers

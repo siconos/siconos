@@ -20,7 +20,8 @@
 #include <stdio.h>
 
 #include "SimpleLCP.h"
-#include "config.h"
+#include "NumericsConfig.h"
+
 #ifdef HAVE_PATHFERRIS
 
 #include "include/MCP_Interface.h"

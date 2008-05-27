@@ -33,7 +33,7 @@
   \right.
   \f$
 
-  \f$ reaction, velocity, q\f$ are vectors of size n and \f$ M \f$ is a nXn matrix, with \f$ n = 3*nc \f$, nc being the number of contacts. \n
+  \f$ reaction, velocity, q\f$ are vectors of size n and \f$ M \f$ is a nXn matrix, with \f$ n = 2 or 3*nc \f$, nc being the number of contacts. \n
   \f$ reaction_n\f$ represents the normal part of the reaction while \f$ reaction_t\f$ is its tangential part.
 
   \f$ \mu \f$ is the friction coefficient (it may be different for each contact).

@@ -16,33 +16,6 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-/*!\file FrictionContact3D_nsgs.c
- *
- * This subroutine allows the resolution of contact problems with friction (see \ref fc3DSolvers), using a non-smooth Gauss Seidel method.\n
- *
- *
- * iparam[0] = itermax Input unchanged parameter which represents the maximum number of iterations allowed.
- * iparam[1] = it_end  Output modified parameter which returns the number of iterations performed by the algorithm.
- * iparam[2] = local iter_max
- * iparam[3] = iter local (output)
- * iparam[4] = local formulation/solver (0: Projection, 1: Newton/Alart-Curnier 2: Newton/Fischer-Burmeister 3: Glocker/Path)
- *
- * dparam[0] = tol     Input unchanged parameter which represents the tolerance required.
- * dparam[1] = error   Output modified parameter which returns the final error value.
- * dparam[2] = local tolerance
- * dparam[3] = Output modified parameter which returns the local error
- *
- * Steps:
- *  1 - Check for trivial case (if norm(q) = 0 -> obvious sol. and return)
- *  2 - If no trivial solution
- *    a - connect to local solver according to iparam[6]
- *    b - iterations until error<tolerance or max iteration number reached
- *             -> loop over through the contact points, call to the local solver.
- *             -> compute error
- *
- * \author Houari Khenous and Franck Perignon - Creation: 12/11/2007 - Last modification 03/12/2007.
- */
-
 #include "FrictionContact3D_Newton.h"
 #include "FrictionContact3D_projection.h"
 #include "FrictionContact3D_Solvers.h"
@@ -84,7 +57,6 @@ void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, C
   *computeError = &fake_compute_error;
 }
 
-//void frictionContact3D_nsgs(int nc, double *M, double *q, double *reaction, double *velocity, double *mu, int *info, int *iparam, double *dparam)
 void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options)
 {
   /* int and double parameters */
