@@ -49,14 +49,52 @@ MACRO(SICONOS_PROJECT
   # Tests+Dashboard configuration
   ENABLE_TESTING()
   INCLUDE(Pipol)
-  IF(PIPOL_IMAGE)
-    SET(BUILDNAME "${_PROJECT_NAME} ${PIPOL_IMAGE_NAME}")
-    SET(SITE ${PIPOL_SITE})
-  ELSE(PIPOL_IMAGE)
+
+  IF(BUILDNAME_OPTIONS)
+    SET(BUILDNAME "${_PROJECT_NAME}-${BUILDNAME_OPTIONS}")
+  ELSE(BUILDNAME_OPTIONS)
     SET(BUILDNAME "${_PROJECT_NAME}")
+  ENDIF(BUILDNAME_OPTIONS)
+  
+  IF(CMAKE_BUILD_TYPE)
+    SET(BUILDNAME "${BUILDNAME}-${CMAKE_BUILD_TYPE}")
+  ENDIF(CMAKE_BUILD_TYPE)
+  
+  IF(PIPOL_IMAGE)
+    SET(BUILDNAME "${BUILDNAME}-${PIPOL_IMAGE_NAME}")
+    SET(SITE ${PIPOL_SITE})
   ENDIF(PIPOL_IMAGE)
+  
   INCLUDE(DartConfig)
   INCLUDE(Dart)
+
+  # Static and shared libs : defaults
+  OPTION(BUILD_SHARED_LIBS "Building of shared libraries" ON)
+
+  # Tests coverage (taken from ViSp)
+  IF(WITH_TESTS_COVERAGE)
+    # Add build options for test coverage. Currently coverage is only supported
+    # on gcc compiler
+    # Because using -fprofile-arcs with shared lib can cause problems like:
+    # hidden symbol `__bb_init_func', we add this option only for static
+    # library build
+    SET(BUILD_SHARED_LIBS)
+    SET(CMAKE_BUILD_TYPE Debug)
+    CHECK_CXX_ACCEPTS_FLAG(-ftest-coverage CXX_HAVE_FTEST_COVERAGE)
+    CHECK_CXX_ACCEPTS_FLAG(-fprofile-arcs CXX_HAVE_PROFILE_ARCS)
+    CHECK_C_COMPILER_FLAG(-ftest-coverage C_HAVE_FTEST_COVERAGE)
+    CHECK_C_COMPILER_FLAG(-fprofile-arcs C_HAVE_PROFILE_ARCS)
+    IF(CXX_HAVE_FTEST_COVERAGE AND CXX_HAVE_PROFILE_ARCS)
+      MESSAGE("Adding test coverage flags to CXX compiler : -ftest-coverage -fprofile-arcs")
+      SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ftest-coverage -fprofile-arcs")
+    ENDIF(CXX_HAVE_FTEST_COVERAGE AND CXX_HAVE_PROFILE_ARCS)
+
+    IF(C_HAVE_FTEST_COVERAGE)
+      MESSAGE("Adding test coverage flags to C compiler : -ftest-coverage")
+      SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -ftest-coverage")
+    ENDIF(C_HAVE_FTEST_COVERAGE)
+    
+  ENDIF(WITH_TESTS_COVERAGE)
   
   # The library build stuff
   INCLUDE(LibraryProjectSetup)
