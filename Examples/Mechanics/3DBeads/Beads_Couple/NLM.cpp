@@ -480,12 +480,12 @@ int main(int argc, char* argv[])
     // -> saved in a matrix dataPlot
 
     int k = 0; // index for output.
-    int N = GLOB_T->getNSteps(); // Number of time steps
+    int N = (int)((T - t0) / h); // Number of time steps
 
     unsigned int outputSize = 1 + 2 * COUPLE;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
-    dataPlot(k, 0) = k * GLOB_T->getH();
+    dataPlot(k, 0) = t0;
     dataPlot(k, 1) = (BeadsCOUPLE->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getY(0))(0); //GLOB_tabLDS->getQ()(2);
     //    dataPlot(k,2) = GLOB_tabLDS[0]->getVelocity()(2);
 
@@ -493,18 +493,16 @@ int main(int argc, char* argv[])
     cout << "Start computation ... " << endl;
     EventsManager * eventsManager = GLOB_SIM->getEventsManagerPtr();
 
-    while (eventsManager->hasNextEvent())
+    while (GLOB_SIM->getNextTime() < T)
     {
       GLOB_SIM->computeOneStep();
-      GLOB_SIM->advanceToEvent();
-      GLOB_SIM->processEvents();
       // --- Get values to be plotted ---
-      k++;
-      dataPlot(k, 0) = k * GLOB_T->getH();
+      dataPlot(k, 0) = GLOB_SIM->getNextTime();
       dataPlot(k, 1) = (BeadsCOUPLE->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getY(0))(0); //GLOB_tabLDS->getQ()(2);
       //dataPlot(k,2) = GLOB_tabLDS[0]->getVelocity()(2);
 
       GLOB_SIM->nextStep();
+      k++;
     }
     cout << "End of computation - Number of iterations done: " << k << endl;
 

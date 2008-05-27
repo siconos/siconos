@@ -423,7 +423,7 @@ int main(int argc, char* argv[])
     // -> saved in a matrix dataPlot
 
     int iter_k = 0; // index for output.
-    int N = GLOB_T->getNSteps(); // Number of time steps
+    int N = (int)((T - t0) / h); // Number of time steps
     unsigned int outputSize = 1 + 3 * DSNUMBER;
     SimpleMatrix dataPlot(N + 1, outputSize);
 

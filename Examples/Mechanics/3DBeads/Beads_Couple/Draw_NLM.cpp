@@ -63,6 +63,9 @@ int GLOB_COMPUTE;
 int GLOB_STEP;
 EventsManager * GLOB_EVT;
 
+// Final time for simulation
+double T = 10.0;
+
 // Global variables for computation of CPU time, number of iterations and for curves ploting
 
 #define PLOTMAX 2000
@@ -260,7 +263,6 @@ void initSiconos()
     unsigned int nDof = 6;            // degrees of freedom for beads
 
     double t0 = 0;                    // initial computation time
-    double T = 10.;                    // final computation time
     double h = 0.005;                 // time step
 
     double e  = 0.9;                  // nslaw
@@ -707,10 +709,10 @@ void computeSiconos()
     //  cout << "Start computation ... " << endl;
 
     // --- simulation solver ---
-    if (GLOB_EVT->hasNextEvent())
+    if (GLOB_SIM->getNextTime() < T)
     {
-      GLOB_SIM->advanceToEvent();
-      GLOB_SIM->processEvents();
+      GLOB_SIM->computeOneStep();
+      GLOB_SIM->nextStep();
 
       // --- Get values to be plotted ---
       k_iter++;

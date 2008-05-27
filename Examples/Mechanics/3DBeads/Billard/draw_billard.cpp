@@ -65,6 +65,7 @@ EventsManager * GLOB_EVT;
 unsigned int outputSize = 1 + 2 * DSNUMBER;
 SimpleMatrix dataPlot(PLOTMAX + 1, outputSize);
 int iter_k = 0; // index for output.
+double T = 10.;                    // final computation time
 
 extern void initSiconos();
 extern void computeSiconos();
@@ -254,7 +255,6 @@ void initSiconos()
     double R = 0.1;                   // radius of balls
 
     double t0 = 0;                    // initial computation time
-    double T = 10.;                    // final computation time
     double h = 0.0005;                 // time step
 
     double e  = 0.9;                  // nslaw
@@ -664,10 +664,9 @@ void computeSiconos()
   try
   {
     // --- simulation solver ---
-    if (GLOB_EVT->hasNextEvent())
+    if (GLOB_SIM->getNextTime() < T)
     {
-      GLOB_SIM->advanceToEvent();
-      GLOB_SIM->processEvents();
+      GLOB_SIM->computeOneStep();
       // --- Get values to be plotted ---
 
       iter_k++;
@@ -676,7 +675,10 @@ void computeSiconos()
       {
         dataPlot(iter_k, 1 + 2 * i) = GLOB_tabLDS[i]->getQ()(2);
         dataPlot(iter_k, 2 + 2 * i) = GLOB_tabLDS[i]->getVelocity()(2);
+
       }
+      GLOB_SIM->nextStep();
+
     }
     cout << "End of computation - Number of iterations done: " << iter_k << endl;
 

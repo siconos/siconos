@@ -61,6 +61,7 @@ LagrangianDS *block_DS;
 int GLOB_COMPUTE;
 int GLOB_STEP;
 EventsManager * GLOB_EVT;
+double T = 100;                    // final computation time
 
 // Global variables for computation of CPU time, number of iterations and for curves ploting
 
@@ -328,7 +329,6 @@ void initSiconos()
     double R = 0.1;                   // radius of balls
 
     double t0 = 0;                    // initial computation time
-    double T = 100;                    // final computation time
     double h = 0.005;                 // time step
 
 
@@ -732,10 +732,10 @@ void computeSiconos()
   try
   {
     // --- simulation solver ---
-    if (GLOB_EVT->hasNextEvent())
+    if (GLOB_SIM->getNextTime() < T)
     {
-      GLOB_SIM->advanceToEvent();
-      GLOB_SIM->processEvents();
+      GLOB_SIM->computeOneStep();
+      GLOB_SIM->nextStep();
       // --- Get values to be plotted ---
       //     cout <<"ground = " << block_DS-> getQ()(0) << endl;
       k_iter++;

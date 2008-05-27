@@ -78,6 +78,7 @@ LagrangianDS *GLOB_tabLDS[DSNUMBER];
 int GLOB_COMPUTE;
 int GLOB_STEP;
 EventsManager * GLOB_EVT;
+double T = 10.;                    // final computation time
 
 // Global variables for computation of CPU time, number of iterations and for curves ploting
 
@@ -274,7 +275,6 @@ void initSiconos()
     double R = 0.1;                   // radius of balls
 
     double t0 = 0;                    // initial computation time
-    double T = 10.;                    // final computation time
     double h = 0.005;                 // time step
     double e  = 0.9;                  // nslaw
     double e2 = 0.9;                  // nslaw2
@@ -619,7 +619,7 @@ void initSiconos()
 
     cout << "End of simulation initialisation" << endl;
 
-    dataPlot(iter_k, 0) = iter_k * GLOB_T->getH(); // Number of time steps
+    dataPlot(iter_k, 0) = t0; // Number of time steps
 
     for (i = 0; i < DSNUMBER; ++i)
     {
@@ -649,10 +649,9 @@ void computeSiconos()
   try
   {
     // --- simulation solver ---
-    if (GLOB_EVT->hasNextEvent())
+    if (GLOB_SIM->getNextTime() < T)
     {
-      GLOB_SIM->advanceToEvent();
-      GLOB_SIM->processEvents();
+      GLOB_SIM->computeOneStep();
       // --- Get values to be plotted ---
 
       iter_k++;
@@ -662,6 +661,7 @@ void computeSiconos()
         dataPlot(iter_k, 1 + 2 * i) = GLOB_tabLDS[i]->getQ()(2);
         dataPlot(iter_k, 2 + 2 * i) = GLOB_tabLDS[i]->getVelocity()(2);
       }
+      GLOB_SIM->nextStep();
     }
     cout << "End of computation - Number of iterations done: " << iter_k << endl;
 
