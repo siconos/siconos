@@ -52,7 +52,7 @@ using namespace std;
 #define TOP 3.5       // Positions of walls
 #define GROUND 0       // Positions of walls
 
-Simulation * GLOB_SIM;
+TimeStepping * GLOB_SIM;
 TimeDiscretisation * GLOB_T;
 LagrangianDS *GLOB_tabLDS[DSNUMBER];
 

@@ -71,7 +71,7 @@ using namespace std;
 #define GROUND 0      // Positions of walls
 #define PI 3.1415926535
 
-Simulation * GLOB_SIM;
+TimeStepping * GLOB_SIM;
 TimeDiscretisation * GLOB_T;
 LagrangianDS *GLOB_tabLDS[DSNUMBER];
 

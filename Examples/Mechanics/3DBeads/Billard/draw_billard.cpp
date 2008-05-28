@@ -51,7 +51,7 @@ using namespace std;
 #define TOP 2.2       // Positions of walls
 #define GROUND 0       // Positions of walls
 
-Simulation * GLOB_SIM;
+TimeStepping * GLOB_SIM;
 TimeDiscretisation * GLOB_T;
 LagrangianDS *GLOB_tabLDS[DSNUMBER];
 
@@ -634,7 +634,7 @@ void initSiconos()
 
     cout << "End of simulation initialisation" << endl;
 
-    dataPlot(iter_k, 0) = iter_k * GLOB_T->getH(); // Number of time steps
+    dataPlot(iter_k, 0) = t0;
 
     for (i = 0; i < DSNUMBER; ++i)
     {
