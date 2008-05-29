@@ -52,7 +52,7 @@ FOREACH(_D amos;atlas;blas;cblas;lapack;traits;traits/detail;umfpack)
 ENDFOREACH(_D amos;atlas;blas;cblas;lapack;traits;umfpack)
 
 # config.h
-INSTALL(FILES ${CMAKE_BINARY_DIR}/config.h DESTINATION include/Siconos/Kernel)
+INSTALL(FILES ${CMAKE_BINARY_DIR}/KernelConfig.h DESTINATION include/Siconos/Kernel)
 
 #
 # compilation setup 
