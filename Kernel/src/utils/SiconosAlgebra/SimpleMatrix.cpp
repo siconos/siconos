@@ -26,7 +26,7 @@
 #include "boost/numeric/bindings/atlas/cblas2.hpp"
 #include "boost/numeric/bindings/atlas/cblas3.hpp"
 
-#include "config.h"
+#include "KernelConfig.h"
 #ifdef HAVE_ATLAS
 #include "boost/numeric/bindings/atlas/clapack.hpp"
 namespace lapack = boost::numeric::bindings::atlas;

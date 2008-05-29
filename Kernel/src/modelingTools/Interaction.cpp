@@ -181,6 +181,18 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
 
 // --- Constructors from a set of data ---
 
+Interaction::Interaction(DynamicalSystem* ds, int newNumber, int nInter, NonSmoothLawSPtr newNSL, Relation* newRel):
+  id("none"), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0), y(1), involvedDS(NULL),
+  nslaw(newNSL), relation(newRel), NSDS(NULL), interactionxml(NULL)
+{
+  involvedDS = new DynamicalSystemsSet();
+  involvedDS->insert(ds); // Warning: insert pointer to DS!!
+  isAllocatedIn["relation"] = false;
+
+#ifndef WithSmartPtr
+  isAllocatedIn["nsLaw"] = false;
+#endif
+}
 Interaction::Interaction(const string& newId, DynamicalSystem* ds, int newNumber, int nInter, NonSmoothLawSPtr newNSL, Relation* newRel):
   id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0), y(1), involvedDS(NULL),
   nslaw(newNSL), relation(newRel), NSDS(NULL), interactionxml(NULL)
@@ -207,6 +219,21 @@ Interaction::Interaction(const string& newId, DynamicalSystem* ds, int newNumber
 
 #endif
 
+Interaction::Interaction(DynamicalSystemsSet& dsConcerned, int newNumber, int nInter, NonSmoothLawSPtr newNSL, Relation* newRel):
+  id("none"), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0), y(1), involvedDS(NULL),
+  nslaw(newNSL), relation(newRel), NSDS(NULL), interactionxml(NULL)
+{
+  involvedDS = new DynamicalSystemsSet();
+  DSIterator itDS;
+  for (itDS = dsConcerned.begin(); itDS != dsConcerned.end(); ++itDS)
+    involvedDS->insert(*itDS); // Warning: insert pointers to DS!!
+  isAllocatedIn["relation"] = false;
+
+#ifndef WithSmartPtr
+  isAllocatedIn["nsLaw"] = false;
+#endif
+}
+
 Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, int newNumber, int nInter, NonSmoothLawSPtr newNSL, Relation* newRel):
   id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0), y(1), involvedDS(NULL),
   nslaw(newNSL), relation(newRel), NSDS(NULL), interactionxml(NULL)
@@ -223,6 +250,16 @@ Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, 
 }
 
 #ifdef WithSmartPtr
+Interaction::Interaction(DynamicalSystemsSet& dsConcerned, int newNumber, int nInter, NonSmoothLaw* newNSL, Relation* newRel):
+  id(newId"none"), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0), involvedDS(NULL), relation(newRel), NSDS(NULL), interactionxml(NULL)
+{
+  nslaw.reset(newNSL);
+  involvedDS = new DynamicalSystemsSet();
+  DSIterator itDS;
+  for (itDS = dsConcerned.begin(); itDS != dsConcerned.end(); ++itDS)
+    involvedDS->insert(*itDS); // Warning: insert pointers to DS!!
+  isAllocatedIn["relation"] = false;
+}
 Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, int newNumber, int nInter, NonSmoothLaw* newNSL, Relation* newRel):
   id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0), involvedDS(NULL), relation(newRel), NSDS(NULL), interactionxml(NULL)
 {

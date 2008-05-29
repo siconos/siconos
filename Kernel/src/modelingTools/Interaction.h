@@ -161,6 +161,14 @@ public:
    */
   Interaction(InteractionXML*, NonSmoothDynamicalSystem* = NULL);
 
+  /** constructor with a set of data (only one DS in the Interaction) - Note: no id.
+   *  \param a DynamicalSystem*: the DS involved in the Interaction
+   *  \param int : the number of this Interaction
+   *  \param int : the value of interactionSize
+   *  \param NonSmoothLaw* : a pointer to the non smooth law
+   *  \param Relation* : a pointer to the Relation
+   */
+  Interaction(DynamicalSystem*, int, int, NonSmoothLawSPtr, Relation*);
   /** constructor with a set of data (only one DS in the Interaction)
    *  \param string: the id of this Interaction
    *  \param a DynamicalSystem*: the DS involved in the Interaction
@@ -170,6 +178,15 @@ public:
    *  \param Relation* : a pointer to the Relation
    */
   Interaction(const std::string&, DynamicalSystem*, int, int, NonSmoothLawSPtr, Relation*);
+
+  /** constructor with a set of data - Note: no id.
+   *  \param a DynamicalSystemsSet: the set of DS involved in the Interaction
+   *  \param int : the number of this Interaction
+   *  \param int : the value of interactionSize
+   *  \param NonSmoothLaw* : a pointer to the non smooth law
+   *  \param Relation* : a pointer to the Relation
+   */
+  Interaction(DynamicalSystemsSet&, int, int, NonSmoothLawSPtr, Relation*);
 
   /** constructor with a set of data
    *  \param string: the id of this Interaction
@@ -183,6 +200,7 @@ public:
 
 #ifdef WithSmartPtr
   /* backward compatibility*/
+  Interaction(DynamicalSystemsSet&, int, int, NonSmoothLaw *, Relation*);
   Interaction(const std::string&, DynamicalSystemsSet&, int, int, NonSmoothLaw *, Relation*);
 #endif
 

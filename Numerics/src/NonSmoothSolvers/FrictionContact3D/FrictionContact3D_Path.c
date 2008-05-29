@@ -81,7 +81,7 @@ void frictionContact3D_Path_initialize(int n0, const double*const M0, const doub
   */
 
   /* Glocker formulation */
-  if (iparam[4] == 2)
+  if (iparam[4] == 3)
   {
     Fsize = 5;
     NCPGlocker_initialize(n0, M0, q0, mu0);

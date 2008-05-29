@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "FrictionContact3D_Newton.h"
+#include "FrictionContact3D_Path.h"
 #include "FrictionContact3D_projection.h"
 #include "FrictionContact3D_Solvers.h"
 #include "NCP_Solvers.h"
@@ -44,10 +45,12 @@ void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, C
     *freeSolver = &frictionContact3D_Newton_free;
     frictionContact3D_Newton_initialize(n, M, q, mu, iparam);
   }
-  /* Path solver */
+  /* Path solver (Fischer-Burmeister) */
   else if (iparam[4] == 3)
   {
-
+    *solve = &frictionContact3D_Path_solve;
+    *freeSolver = &frictionContact3D_Path_free;
+    frictionContact3D_Path_initialize(n, M, q, mu, iparam);
   }
   else
   {

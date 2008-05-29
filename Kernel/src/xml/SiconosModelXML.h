@@ -23,7 +23,7 @@
 #define __MODELXML__
 
 #include "SiconosDOMTreeTools.h"
-#include "config.h"
+#include "KernelConfig.h"
 #include <libxml/parser.h>
 #include <libxml/xmlschemas.h>
 
