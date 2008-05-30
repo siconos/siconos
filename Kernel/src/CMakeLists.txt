@@ -161,18 +161,24 @@ ENDIF(CPPUNIT_FOUND)
 EXPORT_LIBRARY_DEPENDENCIES(LibraryDependencies.cmake)
 CMAKE_EXPORT_BUILD_SETTINGS(BuildSettings.cmake)
 
+# installation of exported files
+CHECK_INSTALL_INCLUDE_DIRECTORIES()
+
 # specific settings
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/Settings.cmake.in 
   ${CMAKE_BINARY_DIR}/Settings.cmake)
 
-
-# installation of exported files
+# generated cmake macros
 INSTALL(FILES 
   ${CMAKE_BINARY_DIR}/LibraryDependencies.cmake 
   ${CMAKE_BINARY_DIR}/BuildSettings.cmake 
   ${CMAKE_BINARY_DIR}/Settings.cmake
   DESTINATION share/${PROJECT_PACKAGE_NAME}/cmake)
 
+# other needed cmake macros
+INSTALL(FILES 
+  ${CMAKE_SOURCE_DIR}/cmake/FindQGLViewer.cmake
+  DESTINATION share/${PROJECT_PACKAGE_NAME}/cmake)
 
 #
 # Log 
