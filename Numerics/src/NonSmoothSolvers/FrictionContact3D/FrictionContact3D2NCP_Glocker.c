@@ -36,30 +36,49 @@
 /* The global problem of size n= 3*nc, nc being the number of contacts, is locally saved in MGlobal and qGlobal */
 /* mu corresponds to the vector of friction coefficients */
 /* note that either MGlobal or MBGlobal is used, depending on the chosen storage */
+
+/* Global problem */
 static int n = 0;
 static const double* MGlobal = NULL;
 static const SparseBlockStructuredMatrix* MBGlobal = NULL;
 static const double* qGlobal = NULL;
 static const double* mu = NULL;
 
-/* Local problem operators */
-static const int Gsize = 5;
+/* Local FC3D problem */
 static double* MLocal;
 static int isMAllocatedIn = 0; /* True if a malloc is done for MLocal, else false */
-static double reactionGlocker[5];
+static double qLocal[3];
 
+/* Local "Glocker" variables */
+static const int Gsize = 5;
+static double reactionGlocker[5];
+static double MGlocker[25];
+static double qGlocker[5];
+static double gGlocker[5];
+
+/* Output */
 static double jacobianFGlocker[25];
 static double FGlocker[5];
+
 static double mu_i = 0.0;
 
-static double e3[2];
+static double e1[3], e2[3], e3[2];
 static double IpInv[4];
 static double IpInvTranspose[4];
 static double I[4];
+# define PI 3.14159265358979323846  /* pi */
 
 /* update pointer to function, used to switch to the function adapted to the storage for MGlobal. */
 static void (*update)(int, double*);
 
+void computeE(unsigned int i, double* e)
+{
+  double alpha = (4 * i - 3) * PI / 6.0;
+  e[0] = cos(alpha);
+  e[1] = sin(alpha);
+}
+
+/* Compute and save MGlocker */
 void computeMGlocker()
 {
   /* Local function used in update */
@@ -67,39 +86,39 @@ void computeMGlocker()
   /* Requires: MLocal and mu_i*/
 
   int i;
-  /* jacobianFGlocker is used to save MGlocker */
+  /* MGlocker is used to save MGlocker */
 
   /* row 0 */
-  jacobianFGlocker[0]      =   MLocal[0] + 2 * mu_i * MLocal[6];
-  jacobianFGlocker[Gsize]   =  -MLocal[6] - sqrt(3.) / 3 * MLocal[3] ;
-  jacobianFGlocker[2 * Gsize] = sqrt(3.) / 3 * MLocal[3] - MLocal[6];
-  jacobianFGlocker[3 * Gsize] = 0.0;
-  jacobianFGlocker[4 * Gsize] = 0.0;
+  MGlocker[0]      =   MLocal[0] + 2 * mu_i * MLocal[6];
+  MGlocker[Gsize]   =  -MLocal[6] - sqrt(3.) / 3 * MLocal[3] ;
+  MGlocker[2 * Gsize] = sqrt(3.) / 3 * MLocal[3] - MLocal[6];
+  MGlocker[3 * Gsize] = 0.0;
+  MGlocker[4 * Gsize] = 0.0;
 
   /* row 1 */
-  jacobianFGlocker[1]        = - MLocal[2] - sqrt(3.) / 3 * MLocal[1] - 2 * mu_i * MLocal[8]  - 2 * sqrt(3.) / 3 * mu_i * MLocal[7];
-  jacobianFGlocker[Gsize + 1]   =   MLocal[8] + 1. / 3 * MLocal[4] + sqrt(3.) / 3 * (MLocal[5] + MLocal[7]) ;
-  jacobianFGlocker[2 * Gsize + 1] =   MLocal[8] - 1. / 3 * MLocal[4] - sqrt(3.) / 3 * (MLocal[5] - MLocal[7]) ;
-  jacobianFGlocker[3 * Gsize + 1] = 1.0;
-  jacobianFGlocker[4 * Gsize + 1] = 0.0;
+  MGlocker[1]        = - MLocal[2] - sqrt(3.) / 3 * MLocal[1] - 2 * mu_i * MLocal[8]  - 2 * sqrt(3.) / 3 * mu_i * MLocal[7];
+  MGlocker[Gsize + 1]   =   MLocal[8] + 1. / 3 * MLocal[4] + sqrt(3.) / 3 * (MLocal[5] + MLocal[7]) ;
+  MGlocker[2 * Gsize + 1] =   MLocal[8] - 1. / 3 * MLocal[4] - sqrt(3.) / 3 * (MLocal[5] - MLocal[7]) ;
+  MGlocker[3 * Gsize + 1] = 1.0;
+  MGlocker[4 * Gsize + 1] = 0.0;
 
   /* row 2 */
-  jacobianFGlocker[2]        =  - MLocal[2] + sqrt(3.) / 3 * MLocal[1] - 2 * mu_i * MLocal[8] + 2 * sqrt(3.) / 3 * mu_i * MLocal[7];
-  jacobianFGlocker[Gsize + 2]   =    MLocal[8] - 1. / 3 * MLocal[4] + sqrt(3.) / 3 * (MLocal[5] - MLocal[7]) ;
-  jacobianFGlocker[2 * Gsize + 2] =    MLocal[8] + 1. / 3 * MLocal[4] - sqrt(3.) / 3 * (MLocal[5] + MLocal[7]) ;;
-  jacobianFGlocker[3 * Gsize + 2] = 1.0;
-  jacobianFGlocker[4 * Gsize + 2] = 0.0;
+  MGlocker[2]        =  - MLocal[2] + sqrt(3.) / 3 * MLocal[1] - 2 * mu_i * MLocal[8] + 2 * sqrt(3.) / 3 * mu_i * MLocal[7];
+  MGlocker[Gsize + 2]   =    MLocal[8] - 1. / 3 * MLocal[4] + sqrt(3.) / 3 * (MLocal[5] - MLocal[7]) ;
+  MGlocker[2 * Gsize + 2] =    MLocal[8] + 1. / 3 * MLocal[4] - sqrt(3.) / 3 * (MLocal[5] + MLocal[7]) ;;
+  MGlocker[3 * Gsize + 2] = 1.0;
+  MGlocker[4 * Gsize + 2] = 0.0;
 
   /* row 3 */
-  jacobianFGlocker[3]        = 3 * mu_i;
-  jacobianFGlocker[Gsize + 3]   = -1.0;
-  jacobianFGlocker[2 * Gsize + 3] = -1.0;
-  jacobianFGlocker[3 * Gsize + 3] = 0.0;
-  jacobianFGlocker[4 * Gsize + 3] = 0.0;
+  MGlocker[3]        = 3 * mu_i;
+  MGlocker[Gsize + 3]   = -1.0;
+  MGlocker[2 * Gsize + 3] = -1.0;
+  MGlocker[3 * Gsize + 3] = 0.0;
+  MGlocker[4 * Gsize + 3] = 0.0;
 
   /* row 4 */
   for (i = 0; i < Gsize; ++i)
-    jacobianFGlocker[i * Gsize + 4] = 0.0;
+    MGlocker[i * Gsize + 4] = 0.0;
 }
 
 void computeGGlocker()
@@ -127,22 +146,23 @@ void NCPGlocker_updateWithSparse(int contact, double* reaction)
 
   int in = 3 * contact, it = in + 1, is = it + 1;
   int numberOfContact = n / 3;
+  // === Friction coefficient for current block ===
+  mu_i = mu[contact]; /* required in computeMGlocker */
+
+  // === Fill MLocal(3,3) according to the current contact number ===
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
   int diagPos = getDiagonalBlockPos(MBGlobal, contact);
   MLocal = MBGlobal->block[diagPos];
 
-  /***** Friction coefficient for current block *****/
-  mu_i = mu[contact]; /* required in computeMGlocker */
-
-  /****** computation of M (saved into jacobianFGlocker) ******/
+  // === computation of MGlocker = function(MLocal, mu_i, I, IpInvTranspose, IpInv, e3) ===/
   computeMGlocker();
 
-  /****** Computation of qGlocker (saved into FGlocker) ******/
-  /****** Computation of qGlocker (saved into FGlocker) ******/
-  /*   - computes qLocal = qGlobal[in] + sum over a row of blocks in MGlobal of the products MLocal.reaction,
-   excluding the block corresponding to the current contact.
-   - computes qGlocker using qLocal values
-  ****/
+  // === computation of qGlocker = function(qLocal, IpInv)
+  // saved in FGlocker which is also initialized here ===
+  //  - step 1: computes qLocal = qGlobal[in] + sum over a row of blocks in MGlobal of the products MLocal.reaction,
+  //            excluding the block corresponding to the current contact.
+  //  - step 2: computes qGlocker using qLocal values
+
   /* reaction current block set to zero, to exclude current contact block */
   reaction[in] = 0.0;
   reaction[it] = 0.0;
@@ -156,21 +176,28 @@ void NCPGlocker_updateWithSparse(int contact, double* reaction)
      with rowMB the row of blocks of MBGlobal which corresponds to the current contact
    */
   subRowProdSBM(n, 3, contact, MBGlobal, reaction, qLocal, 0);
-  /* qGlocker computation (saved in FGlocker) */
+  /* qGlocker (saved in FGlocker) */
   FGlocker[0] = qLocal[0];
   FGlocker[1] = -sqrt(3.) / 3 * qLocal[1] - qLocal[2];
   FGlocker[2] =  sqrt(3.) / 3 * qLocal[1] - qLocal[2];
   FGlocker[3] = 0.0;
   FGlocker[4] = 0.0;
 
-  /****** initialize reactionGlocker ******/
+  // === initialize reactionGlocker with reaction[currentContact] ===
+  // reactionGlocker = function(reaction, mu_i)
   reactionGlocker[0] = reaction[in]; /* Pn */
   reactionGlocker[1] = mu_i * reaction[in] - sqrt(3) * reaction[it] / 2. - reaction[is] / 2.; /* SigmaP_1 */
   reactionGlocker[2] = mu_i * reaction[in] + sqrt(3) * reaction[it] / 2. - reaction[is] / 2.; /* SigmaP_2 */
   reactionGlocker[3] = 0.; /* k3 */
   reactionGlocker[4] = 0.; /* kD */
-  /****** Computation of gGlocker (added to FGlocker) ******/
+
+  // === Computation of gGlocker = function(reactionGlocker, I, mu_i) (added to FGlocker) ===/
   computeGGlocker();
+
+  // End of this function:
+  // - reactionGlocker is up to date
+  // - MGlocker is up to date
+  // - FGlocker = qGlocker + gGlocker
 }
 
 void NCPGlocker_updateNoSparse(int contact, double* reaction)
@@ -179,7 +206,10 @@ void NCPGlocker_updateNoSparse(int contact, double* reaction)
 
   int in = 3 * contact, it = in + 1, is = it + 1;
   int inc = n * in;
+  // === Friction coefficient for current block ===
+  mu_i = mu[contact]; /* required in computeMGlocker */
 
+  // === Fill MLocal(3,3) according to the current contact number ===
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
   MLocal[0] = MGlobal[inc + in];
   MLocal[1] = MGlobal[inc + it];
@@ -193,17 +223,15 @@ void NCPGlocker_updateNoSparse(int contact, double* reaction)
   MLocal[7] = MGlobal[inc + it];
   MLocal[8] = MGlobal[inc + is];
 
-  /***** Friction coefficient for current block *****/
-  mu_i = mu[contact]; /* required in computeMGlocker */
-
-  /****** computation of M (saved into jacobianFGlocker) ******/
+  // === computation of MGlocker = function(MLocal, mu_i, I, IpInvTranspose, IpInv, e3) ===/
   computeMGlocker();
 
-  /****** Computation of qGlocker (saved into FGlocker) ******/
-  /*   - computes qLocal = qGlobal[in] + sum over a row of blocks in MGlobal of the products MLocal.reaction,
-   excluding the block corresponding to the current contact.
-   - computes qGlocker using qLocal values
-  ****/
+  // === computation of qGlocker = function(qLocal, IpInv)
+  // saved in FGlocker which is also initialized here ===
+  //  - step 1: computes qLocal = qGlobal[in] + sum over a row of blocks in MGlobal of the products MLocal.reaction,
+  //            excluding the block corresponding to the current contact.
+  //  - step 2: computes qGlocker using qLocal values
+
   /* reaction current block set to zero, to exclude current contact block */
   reaction[in] = 0.0;
   reaction[it] = 0.0;
@@ -215,20 +243,26 @@ void NCPGlocker_updateNoSparse(int contact, double* reaction)
   qLocal[0] = qGlobal[it] + DDOT(n , &MGlobal[it] , incx , reaction , incy);
   qLocal[1] = qGlobal[is] + DDOT(n , &MGlobal[is] , incx , reaction , incy);
   /* FGlocker[1 ..2] = -IpInv * qLocal */
-  /*   DGEMV(LA_NOTRANS,2,2,-1.0,IpInv,2,qLocal,incx,0.0,&FGlocker[1],incy); */
   FGlocker[1] = -sqrt(3.) / 3 * qLocal[0] - qLocal[1];
   FGlocker[2] =  sqrt(3.) / 3 * qLocal[0] - qLocal[1];
   FGlocker[3] = 0.0;
   FGlocker[4] = 0.0;
 
-  /****** initialize reactionGlocker ******/
+  // === initialize reactionGlocker with reaction[currentContact] ===
+  // reactionGlocker = function(reaction, mu_i)
   reactionGlocker[0] = reaction[in]; /* Pn */
   reactionGlocker[1] = mu_i * reaction[in] - sqrt(3) * reaction[it] / 2. - reaction[is] / 2.; /* SigmaP_1 */
   reactionGlocker[2] = mu_i * reaction[in] + sqrt(3) * reaction[it] / 2. - reaction[is] / 2.; /* SigmaP_2 */
   reactionGlocker[3] = 0.; /* k3 */
   reactionGlocker[4] = 0.; /* kD */
-  /****** Computation of gGlocker (added to FGlocker) ******/
+
+  // === Computation of gGlocker = function(reactionGlocker, I, mu_i) (added to FGlocker) ===/
   computeGGlocker();
+
+  // End of this function:
+  // - reactionGlocker is up to date
+  // - MGlocker is up to date
+  // - FGlocker = qGlocker + gGlocker
 }
 
 void NCPGlocker_initialize(int n0, const double*const M0, const double*const q0, const double*const mu0)
@@ -242,23 +276,25 @@ void NCPGlocker_initialize(int n0, const double*const M0, const double*const q0,
     Fill vectors/matrices of parameters: Ip, Ipinv ...
   */
 
+  /* Connect static var to input (global problem) */
   n = n0;
   MGlobal = M0;
   qGlobal = q0;
   mu = mu0;
+
   /* Connect to update function for dense storage */
   update = &NCPGlocker_updateNoSparse;
-  MLocal = (double*)malloc(Gsize * Gsize * sizeof(*MLocal));
+  MLocal = (double*)malloc(3 * 3 * sizeof(*MLocal));
   isMAllocatedIn = 1;
 
   /* ei = [cos((4i-3)Pi/6), sin-((4i-3)Pi/6)]
      Ip = [e1 e2]
   */
+  //computeE(1,e1);  computeE(2,e2);
+  computeE(3, e3);
 
-  e3[0] = 0.;
-  e3[1] = -1.;
-
-  /* inverse of Ip */
+  /* compute I and inverse of Ip */
+  //  computeI(e1,e2,e3, IpInv, I)
   IpInv[0] =  sqrt(3.) / 3 ;
   IpInv[2] =  1.;
   IpInv[1] =  -sqrt(3.) / 3 ;
@@ -338,6 +374,10 @@ void computeJacobianGGlocker()
   /* We compute jacobianFGlocker += jacobian of g */
   /* row 0 = 0 */
   /* row 1 */
+
+  // === jacobianFGlocker = MGlocker + jacobian_r g(r) ===
+  DCOPY(Gsize * Gsize, MGlocker, 1, jacobianFGlocker, 1);
+
   double muR0 = 4.*mu_i * reactionGlocker[0];
   jacobianFGlocker[1]  -= 4.*mu_i * reactionGlocker[4];
   jacobianFGlocker[6]  += 8. / 3 * reactionGlocker[4];
@@ -384,7 +424,7 @@ void computeFGlocker(double** FOut, int up2Date)
   /* At this point, FGlocker = gGlocker + qGlocker */
   /* and jacobianFGlocker contains MGlocker */
   /* F = M.reaction + g(reaction) + q */
-  DGEMV(LA_NOTRANS, Gsize, Gsize, 1.0, jacobianFGlocker, Gsize, reactionGlocker, 1, 1.0, FGlocker, 1);
+  DGEMV(LA_NOTRANS, Gsize, Gsize, 1.0, MGlocker, Gsize, reactionGlocker, 1, 1.0, FGlocker, 1);
   *FOut = FGlocker; /* pointer link */
 }
 

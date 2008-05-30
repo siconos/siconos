@@ -24,16 +24,28 @@
   \brief interface to functions used to write the Friction-Contact 3D problem
   as a NCP, using Glocker formulation.
 
+  The idea is to write the Friction Contact problem as a NCP:
   The input problem looks like:
   \f[
   velocity = M.reaction +q
   \f]
   velocity, reaction (the unknowns) and q are vectors of size n. M is a nXn matrix.
 
-  All details concerning this formulation are given in:
+  and is formulate as:
+  Find \f$reaction_G \in \mathcal{R}^5\f$ such that:\n\n
+  \f$
+  0 \le F_G(reaction_G) \perp reaction_G \ge 0 \\
+  \f$
+  with
+  \f$ F_G(reaction_G) = M_G.reaction_G + g(reaction_G) + q_G \f$
+  index \f$ G \f$ stands for "Glocker" in all related operators.
+
+  The relations between \$_G\$ operators and input Friction-Contact problem, plus all other details, are given in:
   Acary, V. and B. Brogliato (2008). Numerical Methods for Nonsmooth Dynamical Systems: Applications
   in Mechanics and Electronics. Vol. 35 of LNACM. Springer Verlag.
-  Chapter 13, part 4.3 p 450.
+  Chapter 13, part 4.3 p 420.
+
+
 
 */
 #include "SparseBlockMatrix.h"

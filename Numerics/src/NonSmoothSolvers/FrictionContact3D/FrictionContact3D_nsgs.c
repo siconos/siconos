@@ -45,7 +45,7 @@ void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, C
     *freeSolver = &frictionContact3D_Newton_free;
     frictionContact3D_Newton_initialize(n, M, q, mu, iparam);
   }
-  /* Path solver (Fischer-Burmeister) */
+  /* Path solver (Glocker Formulation) */
   else if (iparam[4] == 3)
   {
     *solve = &frictionContact3D_Path_solve;
