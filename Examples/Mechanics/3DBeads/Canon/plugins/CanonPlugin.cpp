@@ -23,17 +23,7 @@
 using namespace std;
 
 const double R = 0.1; // beads radius
-const double m = 1.; // beads mass
 const double g = 9.81; // gravity
-
-extern "C" void gravity(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* param)
-{
-  for (unsigned int i = 0; i < sizeOfq; i++)
-    fExt[i] = 0.0;
-
-  fExt[2] = -m * g;
-}
-
 
 extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeZ, double* param)
 {
