@@ -37,6 +37,15 @@ SET(SiconosKernel_DIRS
 SET(SiconosKernel_Unstable_SRCS )
 
 #
+# Drawstuff sources
+#
+SET(SiconosKernel_Drawstuff_SRCS 
+  multiBodyTools
+  multiBodyTools/drawstuff
+  multiBodyTools/textures
+  )
+
+#
 # Installation layout
 #
 SET(SiconosKernel_INSTALL_INCLUDE_DIR include/Siconos/Kernel)
@@ -71,6 +80,11 @@ COMPILE_WITH(BLAS REQUIRED)
 COMPILE_WITH(ATLAS)
 COMPILE_WITH(GMP REQUIRED)
 COMPILE_WITH(CppUnit)
+COMPILE_WITH(OpenGL)
+
+IF(OPENGL_FOUND)
+  SET(SiconosKernel_DIRS ${SiconosKernel_DIRS} ${SiconosKernel_Drawstuff_SRCS})
+ENDIF(OPENGL_FOUND)
 
 FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/plugin/test)
 ADD_LIBRARY(DefaultPlugin MODULE plugin/DefaultPlugin.cpp)

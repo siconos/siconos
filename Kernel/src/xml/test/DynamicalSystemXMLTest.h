@@ -55,7 +55,6 @@ private:
   CPPUNIT_TEST(testGetN);
   CPPUNIT_TEST(testGetStepsInMemory);
   CPPUNIT_TEST(testGetX);
-  CPPUNIT_TEST(testGetPluginName);
 
   //CPPUNIT_TEST_EXCEPTION(testIfTagIsNotPresent, XMLException);
 
@@ -69,7 +68,6 @@ private:
   void testGetN();
   void testGetStepsInMemory();
   void testGetX();
-  void testGetPluginName();
 
 public:
   void setUp();

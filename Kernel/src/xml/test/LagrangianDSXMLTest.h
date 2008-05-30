@@ -55,7 +55,6 @@ private:
   CPPUNIT_TEST(testGetQVelocity);
   CPPUNIT_TEST(testGetMass);
   CPPUNIT_TEST(testIsPlugin);
-  CPPUNIT_TEST(testGetPluginName);
   CPPUNIT_TEST(testGetMemory);
 
   //CPPUNIT_TEST_EXCEPTION(testIfTagIsNotPresent, XMLException);
@@ -69,7 +68,6 @@ private:
   void testGetMemory();
   void testGetMass();
   void testIsPlugin();
-  void testGetPluginName();
 
 public:
   void setUp();

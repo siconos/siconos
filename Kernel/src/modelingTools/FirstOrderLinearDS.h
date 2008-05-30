@@ -122,11 +122,10 @@ public:
   /** constructor from a set of data
    *  \param int : reference number of this DynamicalSystem
    *  \param SiconosVector : the initial state of this DynamicalSystem
-   *  \param string: plugin for A (optional)
-   *  \param string: plugin for b (optional)
+   *  \param string: plugin for A
+   *  \param string: plugin for b
    */
-  FirstOrderLinearDS(int, const SiconosVector&, const std::string& = "DefaultPlugin:computeA",
-                     const std::string& = "DefaultPlugin:computeB");
+  FirstOrderLinearDS(int, const SiconosVector&, const std::string&, const std::string&);
 
   /** constructor from a set of data
    *  \param int : reference number of the DynamicalSystem

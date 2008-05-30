@@ -111,12 +111,4 @@ void DynamicalSystemXMLTest::testGetX()
   cout << "DynamicalSystemXMLTest >>> testGetX ................................. OK\n ";
 }
 
-void DynamicalSystemXMLTest::testGetPluginName()
-{
-  CPPUNIT_ASSERT_MESSAGE("test getVectorFieldPlugin : ", ds.getVectorFieldPlugin() == "DefaultPlugin:vectorField");
-  CPPUNIT_ASSERT_MESSAGE("test getComputeJacobianXPlugin : ", ds.getComputeJacobianXPlugin() == "DefaultPlugin:computeJacobianX");
-  cout << "DynamicalSystemXMLTest >>> testGetPluginName ........................ OK\n ";
-}
-
-
 

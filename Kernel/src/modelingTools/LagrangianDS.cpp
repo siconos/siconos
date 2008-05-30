@@ -46,6 +46,32 @@ void LagrangianDS::connectToDS()
   // Everything concerning rhs and its jacobian is handled in initRhs and computeXXX related functions.
 }
 
+LagrangianDS::LagrangianDS(int newNumber, const SiconosVector& newQ0, const SiconosVector& newVelocity0):
+  DynamicalSystem(LNLDS, newNumber, 2 * newQ0.size()), ndof(newQ0.size()), q0(NULL), velocity0(NULL), qMemory(NULL), velocityMemory(NULL), mass(NULL), fInt(NULL), fExt(NULL),
+  NNL(NULL), fL(NULL), computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL)
+{
+  // -- Memory allocation for vector and matrix members --
+  // Initial conditions
+  q0 = new SimpleVector(newQ0);
+  velocity0 = new SimpleVector(newVelocity0);
+
+  // Current state
+  q.resize(3, NULL);
+  q[0] = new SimpleVector(*q0);
+  q[1] = new SimpleVector(*velocity0);
+  q[2] = new SimpleVector(ndof);
+
+  // set allocation flags: true for required input, false for others
+  initAllocationFlags(); // Default
+  initPluginFlags(false);
+  isAllocatedIn["mass"] = false;
+  jacobianFInt.resize(2, NULL);
+  jacobianNNL.resize(2, NULL);
+  p.resize(3, NULL);
+  computeJacobianFIntPtr.resize(2, NULL);
+  computeJacobianNNLPtr.resize(2, NULL);
+}
+
 void LagrangianDS::initAllocationFlags(bool in)
 {
   isAllocatedIn["qMemory"] = false;

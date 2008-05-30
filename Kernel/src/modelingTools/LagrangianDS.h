@@ -245,6 +245,13 @@ protected:
    */
   LagrangianDS();
 
+  /** constructor from a minimum set of data
+   *  \param int : the number for this DynamicalSystem
+   *  \param SiconosVector : initial coordinates of this DynamicalSystem
+   *  \param SiconosVector : initial velocity of this DynamicalSystem
+   */
+  LagrangianDS(int, const SiconosVector&, const SiconosVector&);
+
 public:
 
   // === CONSTRUCTORS - DESTRUCTOR ===
@@ -269,7 +276,7 @@ public:
    *  \param SiconosVector : initial velocity of this DynamicalSystem
    *  \param string: plugin path to compute mass matrix
    */
-  LagrangianDS(int, const SiconosVector& , const SiconosVector&, const std::string& = "DefaultPlugin:computeMass");
+  LagrangianDS(int, const SiconosVector& , const SiconosVector&, const std::string&);
 
   /** destructor */
   virtual ~LagrangianDS();

@@ -26,6 +26,7 @@ Include files related to Siconos Kernel
 #include "SimulationTools.h"
 #include "ControlTools.h"
 #include "XmlTools.h"
+#include "drawstuff.h"
 #include <sys/time.h>
 #include <boost/timer.hpp>
 #include <boost/progress.hpp>

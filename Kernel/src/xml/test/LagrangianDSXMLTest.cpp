@@ -106,16 +106,4 @@ void LagrangianDSXMLTest::testIsPlugin()
   cout << "LagrangianDSXMLTest >>> testIsPlugin .............................. OK\n ";
 }
 
-void LagrangianDSXMLTest::testGetPluginName()
-{
-  CPPUNIT_ASSERT_MESSAGE("test getQNLInertiaPlugin : ", ds.getQNLInertiaPlugin() == "DefaultPlugin:computeQNLInertia");
-  CPPUNIT_ASSERT_MESSAGE("test getFintPlugin : ", ds.getFintPlugin() == "DefaultPlugin:computeFInt");
-  CPPUNIT_ASSERT_MESSAGE("test getFextPlugin : ", ds.getFextPlugin() == "DefaultPlugin:computeFExt");
-  CPPUNIT_ASSERT_MESSAGE("test getJacobianQFintPlugin : ", ds.getJacobianQFintPlugin() == "DefaultPlugin:computeJacobianQFInt");
-  CPPUNIT_ASSERT_MESSAGE("test getJacobianVelocityFintPlugin : ", ds.getJacobianVelocityFintPlugin() == "DefaultPlugin:computeJacobianVelocityFInt");
-  CPPUNIT_ASSERT_MESSAGE("test getJacobianQQNLInertiaPlugin : ", ds.getJacobianQQNLInertiaPlugin() == "DefaultPlugin:computeJacobianQQNLInertia");
-  CPPUNIT_ASSERT_MESSAGE("test getJacobianVelocityQNLInertiaPlugin : ", ds.getJacobianVelocityQNLInertiaPlugin() == "DefaultPlugin:computeJacobianVelocityQNLInertia");
-
-  cout << "LagrangianDSXMLTest >>> testGetPluginName ......................... OK\n ";
-}
 
