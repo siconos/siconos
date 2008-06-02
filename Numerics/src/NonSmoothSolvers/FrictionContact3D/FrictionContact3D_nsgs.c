@@ -18,6 +18,7 @@
  */
 #include "FrictionContact3D_Newton.h"
 #include "FrictionContact3D_Path.h"
+#include "FrictionContact3D_FixedP.h"
 #include "FrictionContact3D_projection.h"
 #include "FrictionContact3D_Solvers.h"
 #include "NCP_Solvers.h"
@@ -51,6 +52,13 @@ void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, C
     *solve = &frictionContact3D_Path_solve;
     *freeSolver = &frictionContact3D_Path_free;
     frictionContact3D_Path_initialize(n, M, q, mu, iparam);
+  }
+  /* Fixed Point solver (Glocker Formulation) */
+  else if (iparam[4] == 4)
+  {
+    *solve = &frictionContact3D_FixedP_solve;
+    *freeSolver = &frictionContact3D_FixedP_free;
+    frictionContact3D_FixedP_initialize(n, M, q, mu, iparam);
   }
   else
   {

@@ -46,7 +46,7 @@ primal resolution of contact problems with friction.\n
 /*!\file pfc_3D_Solvers.h
   Typedef and functions declarations related to primal frictional contact problems.
   \author Nineb Sheherazade and Dubois Frederic.
-  Last Modifications : Mathieu Renouf , Pascal Denoyelle, Franck Perignon
+  Last Modifications : Mathieu Renouf , Pascal Denoyelle, Franck Perignon, Houari Khenous
 */
 
 #include "NSSTools.h"

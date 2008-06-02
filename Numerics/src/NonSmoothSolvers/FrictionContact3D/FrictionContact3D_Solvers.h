@@ -50,6 +50,7 @@ For each solver, the input argument are:
 #include "FrictionContact3D_AlartCurnier.h"
 #include "FrictionContact3D_projection.h"
 #include "FrictionContact3D_Newton.h"
+#include "FrictionContact3D_FixedP.h"
 #include "FrictionContact3D2NCP_Glocker.h"
 
 /** pointer to function used to call local solver */
