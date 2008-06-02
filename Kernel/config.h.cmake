@@ -6,6 +6,10 @@
 #cmakedefine SVN_REVISION ${SVN_REVISION}
 #endif
 
+#if ( defined(__amd64__) || defined(_M_X64) || defined(__ia64__) || defined(__ia64) || defined(_M_IA64) || defined(__APPLE__) )
+#define BOOST_LIMITATION
+#endif
+
 #cmakedefine HAVE_BLAS
 #cmakedefine HAVE_LAPACK
 #cmakedefine HAVE_ATLAS
