@@ -19,6 +19,7 @@ SET(FORTRAN_COMPILER_DIRECTORY ${fortran_comp_dir} CACHE PATH "location of fortr
 SET(FORTRAN_COMPILER_LIB_DIRECTORY ${fortran_comp_dir}/lib CACHE PATH "location of fortran compiler lib directory")
 
 SET(KNOWN_FORTRAN_LIBRARIES "gfortran\;gfortranbegin"
+   "imf\;ifcore\;dl" 
    "fio\;f90math\;f77math"
    "afio\;af90math\;af77math\;amisc"
    "g2c"
@@ -58,7 +59,9 @@ WHILE(${iopt} LESS ${imax})
   
   FILE(GLOB _LIBDIRS_MAYBE 
     /opt /opt/* /opt/local/lib/gcc-lib/*/* /opt/lib/*
+    /*/intel/fc/*/lib /*/intel/cc/*/lib 
     /usr/local/* /usr/local/lib/*
+    /usr/local/intel/fc/*/lib /usr/local/intel/cc/*/lib
     /usr/local/*/lib/gcc/*/*
     /usr/lib/gcc/*/*
     /usr/local/lib/gcc/*/*
@@ -161,7 +164,7 @@ WHILE(${iopt} LESS ${imax})
 ENDWHILE(${iopt} LESS ${imax})
   
 IF(NOT HAVE_FORTRAN_LIBRARIES)
-  MESSAGE(FATAL_ERROR "Could not find valid fortran link libraries. Try setting FORTRAN_COMPILER_DIRECTORY or FORTRAN_LIBRARIES")
+  MESSAGE(FATAL_ERROR "Could not find valid fortran link libraries. Try setting FORTRAN_COMPILER_DIRECTORIES and FORTRAN_LIBRARIES")
 ENDIF(NOT HAVE_FORTRAN_LIBRARIES)
 
 ENDIF(NOT HAVE_FORTRAN_LIBRARIES)
