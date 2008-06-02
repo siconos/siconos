@@ -35,7 +35,13 @@ void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, C
   /* Projection */
   if (iparam[4] == 0)
   {
-    *solve = &frictionContact3D_projection_solve;
+    *solve = &frictionContact3D_projectionDiag_solve;
+    *freeSolver = &frictionContact3D_projection_free;
+    frictionContact3D_projection_initialize(n, M, q, mu);
+  }
+  else if (iparam[4] == 4)
+  {
+    *solve = &frictionContact3D_projectionOnCone_solve;
     *freeSolver = &frictionContact3D_projection_free;
     frictionContact3D_projection_initialize(n, M, q, mu);
   }
@@ -125,13 +131,8 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
     /* **** Criterium convergence **** */
     //   (*computeError)(n,velocity,reaction,&error);
 
-    //NCP_compute_error( n , M , q , reaction , verbose , velocity, &error );
-    //     lcp_compute_error( n , M , q , reaction, verbose, velocity , &error);
-    DGEMV(LA_NOTRANS , n , n , 1.0 , M , n , reaction , incx , 1.0 , velocity , incy);
-    qs = -1.0;
-    DAXPY(n , qs , velocity , incx , W , incy);
-    num = DNRM2(n, W , incx);
-    error = num * den;
+    FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, &error);
+
     if (verbose > 0)
       printf("-----------------------------------Iteration %i Erreur = %14.7e\n", iter, error);
 
