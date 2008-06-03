@@ -124,6 +124,7 @@ void frictionContact3D_Path_initialize_SBS(int n0, const SparseBlockStructuredMa
 void frictionContact3D_Path_solve(int contact, int dimReaction, double* reaction, int* iparam, double* dparam)
 {
   (*updateSolver)(contact, reaction);
+  printf(" ============= je suis la =============\n");
   int pos = Fsize * contact; /* Current block position */
   double * reactionBlock = &reaction[pos];
   int info = NCP_Path(Fsize, reactionBlock, F, jacobianF, iparam, dparam);

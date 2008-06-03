@@ -60,7 +60,7 @@ void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, C
     frictionContact3D_Path_initialize(n, M, q, mu, iparam);
   }
   /* Fixed Point solver (Glocker Formulation) */
-  else if (iparam[4] == 4)
+  else if (iparam[4] == 5)
   {
     *solve = &frictionContact3D_FixedP_solve;
     *freeSolver = &frictionContact3D_FixedP_free;

@@ -64,7 +64,7 @@ void frictionContact3D_FixedP_initialize(int n0, const double*const M0, const do
   */
 
   /* Glocker formulation */
-  if (iparam[4] == 4)
+  if (iparam[4] == 5)
   {
     Fsize = 5;
     NCPGlocker_initialize(n0, M0, q0, mu0);
@@ -86,7 +86,7 @@ void frictionContact3D_FixedP_initialize_SBS(int n0, const SparseBlockStructured
   */
 
   /* Glocker formulation */
-  if (iparam[4] == 4)
+  if (iparam[4] == 5)
   {
     Fsize = 5;
     NCPGlocker_initialize_SBS(n0, M0, q0, mu0);
