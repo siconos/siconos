@@ -69,7 +69,6 @@
   Use the generic function frictionContact3D_driver() to call one the the specific solvers listed below:
 
   - frictionContact3D_nsgs() : non-smooth Gauss-Seidel solver
-  - frictionContact3D_nsgs_SBS() : non-smooth Gauss-Seidel solver with Sparse Block Storage (SBS) for M
 
   (see the functions/solvers list in FrictionContact3D_Solvers.h)
 

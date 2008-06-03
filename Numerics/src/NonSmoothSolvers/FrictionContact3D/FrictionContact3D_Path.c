@@ -73,7 +73,7 @@ int jacobianF_GlockerPath(int sizeF, int nnz, double* reaction, int* col_start, 
 }
 
 
-void frictionContact3D_Path_initialize(int n0, const double*const M0, const double*const q0, const double*const mu0, int* iparam)
+void frictionContact3D_Path_initialize(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0, int* iparam)
 {
 
   /*
@@ -90,29 +90,6 @@ void frictionContact3D_Path_initialize(int n0, const double*const M0, const doub
     updateSolver = &NCPGlocker_update;
     postSolver = &NCPGlocker_post;
     freeSolver = &NCPGlocker_free;
-  }
-  else
-  {
-    fprintf(stderr, "Numerics, FrictionContact3D_Path failed. Unknown formulation type.\n");
-    exit(EXIT_FAILURE);
-  }
-}
-
-void frictionContact3D_Path_initialize_SBS(int n0, const SparseBlockStructuredMatrix*const M0, const double*const q0, const double*const mu0, int* iparam)
-{
-  /*
-     Initialize solver (Connect F and its jacobian, set local size ...) according to the chosen formulation.
-  */
-
-  /* Glocker formulation  */
-  if (iparam[4] == 2)
-  {
-    Fsize = 5;
-    NCPGlocker_initialize_SBS(n0, M0, q0, mu0);
-    F = &F_GlockerPath;
-    jacobianF = &jacobianF_GlockerPath;
-    updateSolver = &NCPGlocker_update;
-    postSolver = &NCPGlocker_post;
   }
   else
   {

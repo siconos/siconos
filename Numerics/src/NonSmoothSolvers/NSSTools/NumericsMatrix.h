@@ -164,6 +164,7 @@ extern "C" {
       \param M the matrix to be displayed
    */
   void display(const NumericsMatrix* const M);
+
   /** Screen display raw by raw of the matrix content
       \param M the matrix to be displayed
   */

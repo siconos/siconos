@@ -37,8 +37,7 @@
   We consider a "global" (ie for several contacts) problem, used to initialize the static global variables.
   Then a "local" (ie for one contact => size = 3) problem is built (update function) and solved (solve function).
 
-  Two different storages are available for M: dense and sparse block. Initialize and update calls depend on this storage.
-  SBS (Sparse Block Storage) is added to the name of functions dedicated to Sparse storage for M.
+  Two different storages are available for M: dense and sparse block.
 
   \author Houari Khenous, Franck Perignon
 
@@ -55,15 +54,7 @@ extern "C" {
       \param vector q of the global problem
       \param vector of the friction coefficients
   */
-  void frictionContact3D_AC_initialize(int, const double*const, const double*const, const double*const);
-
-  /** Initialize friction-contact 3D Alart-Curnier formulation, using sparse-block storage for M
-      \param dim. of the global problem
-      \param matrix M of the global problem, a SparseBlockStructuredMatrix
-      \param vector q of the global problem
-      \param vector of the friction coefficients
-  */
-  void frictionContact3D_AC_initialize_SBS(int, const SparseBlockStructuredMatrix*const, const double*const, const double*const);
+  void frictionContact3D_AC_initialize(int, const NumericsMatrix*const, const double*const, const double*const);
 
   /** Update friction-contact 3D problem: formalize local problem for one contact
       \param number (position in global matrix) of the considered contact

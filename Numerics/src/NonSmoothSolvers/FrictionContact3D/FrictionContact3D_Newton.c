@@ -66,7 +66,7 @@ void jacobianF_GlockerFischerBurmeister(int sizeF, double* reaction, double* jac
 }
 
 
-void frictionContact3D_Newton_initialize(int n0, const double*const M0, const double*const q0, const double*const mu0, int* iparam)
+void frictionContact3D_Newton_initialize(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0, int* iparam)
 {
 
   /*
@@ -95,40 +95,6 @@ void frictionContact3D_Newton_initialize(int n0, const double*const M0, const do
     updateSolver = &NCPGlocker_update;
     postSolver = &NCPGlocker_post;
     freeSolver = &NCPGlocker_free;
-  }
-  else
-  {
-    fprintf(stderr, "Numerics, FrictionContact3D_nsgs failed. Unknown formulation type.\n");
-    exit(EXIT_FAILURE);
-  }
-}
-
-void frictionContact3D_Newton_initialize_SBS(int n0, const SparseBlockStructuredMatrix*const M0, const double*const q0, const double*const mu0, int* iparam)
-{
-  /*
-     Initialize solver (Connect F and its jacobian, set local size ...) according to the chosen formulation.
-  */
-
-  /* Alart-Curnier formulation */
-  if (iparam[4] == 1)
-  {
-    Fsize = 3;
-    F = &F_AC;
-    jacobianF = &jacobianF_AC;
-    frictionContact3D_AC_initialize_SBS(n0, M0, q0, mu0);
-    updateSolver = &frictionContact3D_AC_update;
-    postSolver = &frictionContact3D_AC_post;
-
-  }
-  /* Glocker formulation - Fischer-Burmeister function used in Newton */
-  else if (iparam[4] == 2)
-  {
-    Fsize = 5;
-    NCPGlocker_initialize_SBS(n0, M0, q0, mu0);
-    F = &F_GlockerFischerBurmeister;
-    jacobianF = &jacobianF_GlockerFischerBurmeister;
-    updateSolver = &NCPGlocker_update;
-    postSolver = &NCPGlocker_post;
   }
   else
   {

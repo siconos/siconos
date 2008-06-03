@@ -29,7 +29,7 @@
   - free
 
 */
-#include "SparseBlockMatrix.h"
+#include "NumericsMatrix.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,16 +42,7 @@ extern "C" {
       \param vector of the friction coefficients
       \param vector of int parameters
   */
-  void frictionContact3D_FixedP_initialize(int , const double*const , const double*const , const double*const , int*);
-
-  /** Initialize friction-contact 3D Fixed Point solver
-      \param dim. of the global problem
-      \param matrix M of the global problem, saved as a SparseBlockStructuredMatrix
-      \param vector q of the global problem
-      \param vector of the friction coefficients
-      \param vector of int parameters
-  */
-  void frictionContact3D_FixedP_initialize_SBS(int , const SparseBlockStructuredMatrix*const , const double*const , const double*const, int*);
+  void frictionContact3D_FixedP_initialize(int , const NumericsMatrix*const , const double*const , const double*const , int*);
 
   /** solve friction-contact 3D problem with Fixed Point
       \param number (position in global matrix) of the considered contact

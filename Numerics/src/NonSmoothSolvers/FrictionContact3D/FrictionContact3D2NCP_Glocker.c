@@ -27,6 +27,7 @@
 
 #include "LA.h"
 #include "FrictionContact3D_Solvers.h"
+#include "Numerics_Options.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -35,12 +36,11 @@
 
 /* The global problem of size n= 3*nc, nc being the number of contacts, is locally saved in MGlobal and qGlobal */
 /* mu corresponds to the vector of friction coefficients */
-/* note that either MGlobal or MBGlobal is used, depending on the chosen storage */
+
 
 /* Global problem */
 static int n = 0;
-static const double* MGlobal = NULL;
-static const SparseBlockStructuredMatrix* MBGlobal = NULL;
+static const NumericsMatrix* MGlobal = NULL;
 static const double* qGlobal = NULL;
 static const double* mu = NULL;
 
@@ -67,9 +67,6 @@ static double IpInv[4];
 static double IpInvTranspose[4];
 static double I[4];
 # define PI 3.14159265358979323846  /* pi */
-
-/* update pointer to function, used to switch to the function adapted to the storage for MGlobal. */
-static void (*update)(int, double*);
 
 void computeE(unsigned int i, double* e)
 {
@@ -140,132 +137,39 @@ void computeGGlocker()
 
 }
 
-void NCPGlocker_updateWithSparse(int contact, double* reaction)
+void NCPGlocker_fillMLocal(int contact)
 {
-  /* Update glocker/local M,q,reaction ... (functions of global M,q ...) depending on the considered contact */
+  int storageType = MGlobal->storageType;
+  if (storageType == 0)
+  {
+    int in = 3 * contact, it = in + 1, is = it + 1;
+    int inc = n * in;
+    // === Fill MLocal(3,3) according to the current contact number ===
+    /* The part of MGlobal which corresponds to the current block is copied into MLocal */
+    double * MM = MGlobal->matrix0;
+    MLocal[0] = MM[inc + in];
+    MLocal[1] = MM[inc + it];
+    MLocal[2] = MM[inc + is];
+    inc += n;
+    MLocal[3] = MM[inc + in];
+    MLocal[4] = MM[inc + it];
+    MLocal[5] = MM[inc + is];
+    inc += n;
+    MLocal[6] = MM[inc + in];
+    MLocal[7] = MM[inc + it];
+    MLocal[8] = MM[inc + is];
+  }
+  else if (storageType == 1)
+  {
+    int diagPos = getDiagonalBlockPos(MGlobal->matrix1, contact);
+    MLocal = MGlobal->matrix1->block[diagPos];
+  }
+  else
+    numericsError("FrictionContact3D2NCP_Glocker::NCPGlocker_fillMLocal() -", "unknown storage type for matrix M");
 
-  int in = 3 * contact, it = in + 1, is = it + 1;
-  int numberOfContact = n / 3;
-  // === Friction coefficient for current block ===
-  mu_i = mu[contact]; /* required in computeMGlocker */
-
-  // === Fill MLocal(3,3) according to the current contact number ===
-  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  int diagPos = getDiagonalBlockPos(MBGlobal, contact);
-  MLocal = MBGlobal->block[diagPos];
-
-  // === computation of MGlocker = function(MLocal, mu_i, I, IpInvTranspose, IpInv, e3) ===/
-  computeMGlocker();
-
-  // === computation of qGlocker = function(qLocal, IpInv)
-  // saved in FGlocker which is also initialized here ===
-  //  - step 1: computes qLocal = qGlobal[in] + sum over a row of blocks in MGlobal of the products MLocal.reaction,
-  //            excluding the block corresponding to the current contact.
-  //  - step 2: computes qGlocker using qLocal values
-
-  /* reaction current block set to zero, to exclude current contact block */
-  reaction[in] = 0.0;
-  reaction[it] = 0.0;
-  reaction[is] = 0.0;
-  /* qLocal computation*/
-  double qLocal[3];
-  qLocal[0] = qGlobal[in];
-  qLocal[1] = qGlobal[it];
-  qLocal[2] = qGlobal[is];
-  /* qLocal += rowMB * reaction
-     with rowMB the row of blocks of MBGlobal which corresponds to the current contact
-   */
-  subRowProdSBM(n, 3, contact, MBGlobal, reaction, qLocal, 0);
-  /* qGlocker (saved in FGlocker) */
-  FGlocker[0] = qLocal[0];
-  FGlocker[1] = -sqrt(3.) / 3 * qLocal[1] - qLocal[2];
-  FGlocker[2] =  sqrt(3.) / 3 * qLocal[1] - qLocal[2];
-  FGlocker[3] = 0.0;
-  FGlocker[4] = 0.0;
-
-  // === initialize reactionGlocker with reaction[currentContact] ===
-  // reactionGlocker = function(reaction, mu_i)
-  reactionGlocker[0] = reaction[in]; /* Pn */
-  reactionGlocker[1] = mu_i * reaction[in] - sqrt(3) * reaction[it] / 2. - reaction[is] / 2.; /* SigmaP_1 */
-  reactionGlocker[2] = mu_i * reaction[in] + sqrt(3) * reaction[it] / 2. - reaction[is] / 2.; /* SigmaP_2 */
-  reactionGlocker[3] = 0.; /* k3 */
-  reactionGlocker[4] = 0.; /* kD */
-
-  // === Computation of gGlocker = function(reactionGlocker, I, mu_i) (added to FGlocker) ===/
-  computeGGlocker();
-
-  // End of this function:
-  // - reactionGlocker is up to date
-  // - MGlocker is up to date
-  // - FGlocker = qGlocker + gGlocker
 }
 
-void NCPGlocker_updateNoSparse(int contact, double* reaction)
-{
-  /* Update glocker/local M,q,reaction ... (functions of global M,q ...) depending on the considered contact */
-
-  int in = 3 * contact, it = in + 1, is = it + 1;
-  int inc = n * in;
-  // === Friction coefficient for current block ===
-  mu_i = mu[contact]; /* required in computeMGlocker */
-
-  // === Fill MLocal(3,3) according to the current contact number ===
-  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  MLocal[0] = MGlobal[inc + in];
-  MLocal[1] = MGlobal[inc + it];
-  MLocal[2] = MGlobal[inc + is];
-  inc += n;
-  MLocal[3] = MGlobal[inc + in];
-  MLocal[4] = MGlobal[inc + it];
-  MLocal[5] = MGlobal[inc + is];
-  inc += n;
-  MLocal[6] = MGlobal[inc + in];
-  MLocal[7] = MGlobal[inc + it];
-  MLocal[8] = MGlobal[inc + is];
-
-  // === computation of MGlocker = function(MLocal, mu_i, I, IpInvTranspose, IpInv, e3) ===/
-  computeMGlocker();
-
-  // === computation of qGlocker = function(qLocal, IpInv)
-  // saved in FGlocker which is also initialized here ===
-  //  - step 1: computes qLocal = qGlobal[in] + sum over a row of blocks in MGlobal of the products MLocal.reaction,
-  //            excluding the block corresponding to the current contact.
-  //  - step 2: computes qGlocker using qLocal values
-
-  /* reaction current block set to zero, to exclude current contact block */
-  reaction[in] = 0.0;
-  reaction[it] = 0.0;
-  reaction[is] = 0.0;
-  /* qGlocker computation*/
-  double qLocal[2];
-  int incx = n, incy = 1;
-  FGlocker[0] = qGlobal[in] + DDOT(n , &MGlobal[in] , incx , reaction , incy);
-  qLocal[0] = qGlobal[it] + DDOT(n , &MGlobal[it] , incx , reaction , incy);
-  qLocal[1] = qGlobal[is] + DDOT(n , &MGlobal[is] , incx , reaction , incy);
-  /* FGlocker[1 ..2] = -IpInv * qLocal */
-  FGlocker[1] = -sqrt(3.) / 3 * qLocal[0] - qLocal[1];
-  FGlocker[2] =  sqrt(3.) / 3 * qLocal[0] - qLocal[1];
-  FGlocker[3] = 0.0;
-  FGlocker[4] = 0.0;
-
-  // === initialize reactionGlocker with reaction[currentContact] ===
-  // reactionGlocker = function(reaction, mu_i)
-  reactionGlocker[0] = reaction[in]; /* Pn */
-  reactionGlocker[1] = mu_i * reaction[in] - sqrt(3) * reaction[it] / 2. - reaction[is] / 2.; /* SigmaP_1 */
-  reactionGlocker[2] = mu_i * reaction[in] + sqrt(3) * reaction[it] / 2. - reaction[is] / 2.; /* SigmaP_2 */
-  reactionGlocker[3] = 0.; /* k3 */
-  reactionGlocker[4] = 0.; /* kD */
-
-  // === Computation of gGlocker = function(reactionGlocker, I, mu_i) (added to FGlocker) ===/
-  computeGGlocker();
-
-  // End of this function:
-  // - reactionGlocker is up to date
-  // - MGlocker is up to date
-  // - FGlocker = qGlocker + gGlocker
-}
-
-void NCPGlocker_initialize(int n0, const double*const M0, const double*const q0, const double*const mu0)
+void NCPGlocker_initialize(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0)
 {
   /*
     INPUT: the global problem operators: n0 (size), M0, q0 and mu0, vector of friction coefficients.
@@ -282,10 +186,13 @@ void NCPGlocker_initialize(int n0, const double*const M0, const double*const q0,
   qGlobal = q0;
   mu = mu0;
 
-  /* Connect to update function for dense storage */
-  update = &NCPGlocker_updateNoSparse;
-  MLocal = (double*)malloc(3 * 3 * sizeof(*MLocal));
-  isMAllocatedIn = 1;
+  if (MGlobal->storageType == 0)
+  {
+    MLocal = (double*)malloc(3 * 3 * sizeof(*MLocal));
+    isMAllocatedIn = 1;
+  }
+  else
+    isMAllocatedIn = 0;
 
   /* ei = [cos((4i-3)Pi/6), sin-((4i-3)Pi/6)]
      Ip = [e1 e2]
@@ -314,60 +221,88 @@ void NCPGlocker_initialize(int n0, const double*const M0, const double*const q0,
 
 }
 
-void NCPGlocker_initialize_SBS(int n0, const SparseBlockStructuredMatrix*const M0, const double*const q0, const double*const mu0)
-{
-  /*
-    INPUT: the global problem operators: n0 (size), M0, q0 and mu0, vector of friction coefficients.
-    In initialize, these operators are "connected" to their corresponding static variables, that will be used to build local problem
-    for each considered contact.
-    Local problem is built during call to update (which depends on the storage type for M).
-
-    Fill vectors/matrices of parameters: Ip, Ipinv ...
-  */
-
-  n = n0;
-  MBGlobal = M0;
-  qGlobal = q0;
-  mu = mu0;
-  /* Connect to update function for dense storage */
-  update = &NCPGlocker_updateWithSparse;
-  isMAllocatedIn = 0;
-
-  /* ei = [cos((4i-3)Pi/6), sin-((4i-3)Pi/6)]
-     Ip = [e1 e2]
-  */
-
-  e3[0] = 0.;
-  e3[1] = -1.;
-
-  /* inverse of Ip */
-  IpInv[0] =  sqrt(3.) / 3 ;
-  IpInv[2] =  1.;
-  IpInv[1] =  -sqrt(3.) / 3 ;
-  IpInv[3] =  1.;
-
-  /* transpose of IpInv */
-  IpInvTranspose[0] =  sqrt(3.) / 3;
-  IpInvTranspose[2] = -sqrt(3.) / 3;
-  IpInvTranspose[1] = 1.;
-  IpInvTranspose[3] =  1.;
-
-  /* I = IpInv * IpInvTranspose */
-  I[0] = 4.0 / 3;
-  I[1] = 2.0 / 3;
-  I[2] = 2.0 / 3;
-  I[3] = 4.0 / 3;
-}
-
 void NCPGlocker_update(int contact, double * reaction)
 {
   /* Build a local problem for a specific contact
      reaction corresponds to the global vector (size n) of the global problem.
   */
+  /* Update glocker/local M,q,reaction ... (functions of global M,q ...) depending on the considered contact */
 
-  /* Call the update function which depends on the storage for MGlobal/MBGlobal */
-  (*update)(contact, reaction);
+  int in = 3 * contact, it = in + 1, is = it + 1;
+
+  // === Friction coefficient for current block ===
+  mu_i = mu[contact]; /* required in computeMGlocker */
+
+  // === Fill MLocal(3,3) according to the current contact number ===
+  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
+  NCPGlocker_fillMLocal(contact);
+
+  // === computation of MGlocker = function(MLocal, mu_i, I, IpInvTranspose, IpInv, e3) ===/
+  computeMGlocker();
+
+  // === computation of qGlocker = function(qLocal, IpInv)
+  // saved in FGlocker which is also initialized here ===
+  //  - step 1: computes qLocal = qGlobal[in] + sum over a row of blocks in MGlobal of the products MLocal.reaction,
+  //            excluding the block corresponding to the current contact.
+  //  - step 2: computes qGlocker using qLocal values
+
+  /* reaction current block set to zero, to exclude current contact block */
+
+  double rin = reaction[in] ;
+  double rit = reaction[it] ;
+  double ris = reaction[is] ;
+  reaction[in] = 0.0;
+  reaction[it] = 0.0;
+  reaction[is] = 0.0;
+  /* qLocal computation*/
+  double qLocal[3];
+  qLocal[0] = qGlobal[in];
+  qLocal[1] = qGlobal[it];
+  qLocal[2] = qGlobal[is];
+  int storageType = MGlobal->storageType;
+  int incx = n, incy = 1;
+  if (storageType == 0)
+  {
+    double * MM = MGlobal->matrix0;
+    qLocal[0] += DDOT(n , &MM[in] , incx , reaction , incy);
+    qLocal[1] += DDOT(n , &MM[it] , incx , reaction , incy);
+    qLocal[2] += DDOT(n , &MM[is] , incx , reaction , incy);
+  }
+  else if (storageType == 1)
+  {
+    /* qLocal += rowMB * reaction
+    with rowMB the row of blocks of MGlobal which corresponds to the current contact
+    */
+    subRowProdSBM(n, 3, contact, MGlobal->matrix1, reaction, qLocal, 0);
+  }
+
+  reaction[in] = rin;
+  reaction[it] = rit;
+  reaction[is] = ris;
+  /* qGlocker (saved in FGlocker) */
+  FGlocker[0] = qLocal[0];
+  FGlocker[1] = -sqrt(3.) / 3 * qLocal[1] - qLocal[2];
+  FGlocker[2] =  sqrt(3.) / 3 * qLocal[1] - qLocal[2];
+  FGlocker[3] = 0.0;
+  FGlocker[4] = 0.0;
+
+  // === initialize reactionGlocker with reaction[currentContact] ===
+  // reactionGlocker = function(reaction, mu_i)
+  reactionGlocker[0] = reaction[in]; /* Pn */
+  reactionGlocker[1] = mu_i * reaction[in] - sqrt(3) * reaction[it] / 2. - reaction[is] / 2.; /* SigmaP_1 */
+  reactionGlocker[2] = mu_i * reaction[in] + sqrt(3) * reaction[it] / 2. - reaction[is] / 2.; /* SigmaP_2 */
+  reactionGlocker[3] = 0.; /* k3 */
+  reactionGlocker[4] = 0.; /* kD */
+
+  // === Computation of gGlocker = function(reactionGlocker, I, mu_i) (added to FGlocker) ===/
+  computeGGlocker();
+
+  // End of this function:
+  // - reactionGlocker is up to date
+  // - MGlocker is up to date
+  // - FGlocker = qGlocker + gGlocker
 }
+
 void computeJacobianGGlocker()
 {
   /* At this point, jacobianFGlocker = M */
@@ -443,7 +378,6 @@ void computeJacobianFGlocker(double** jacobianFOut, int up2Date)
 void NCPGlocker_free()
 {
   MGlobal = NULL;
-  MBGlobal = NULL;
   qGlobal = NULL;
   mu = NULL;
   if (isMAllocatedIn == 1)

@@ -48,7 +48,7 @@
 
 
 */
-#include "SparseBlockMatrix.h"
+#include "NumericsMatrix.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -60,10 +60,7 @@ extern "C" {
      \param the global vector q
      \param the global vector mu of the friction coefficients (size = n/3)
   */
-  void NCPGlocker_initialize(int, const double*const, const double*const, const double*const);
-
-  /**  */
-  void NCPGlocker_initialize_SBS(int n0, const SparseBlockStructuredMatrix*const M0, const double*const q0, const double*const mu0);
+  void NCPGlocker_initialize(int, const NumericsMatrix*const, const double*const, const double*const);
 
   /** Pick the required sub-blocks in q, M ... according to the considered contact and write the
      operators required for the Glocker formulation

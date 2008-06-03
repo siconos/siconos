@@ -31,13 +31,12 @@
   We consider a "global" (ie for several contacts) problem, used to initialize the static global variables.
   Then a "local" (ie for one contact => size = 3) problem is built (update function) and solved (solve function).
 
-  Two different storages are available for M: dense and sparse block. Initialize and update calls depend on this storage.
-  SBS (Sparse Block Storage) is added to the name of functions dedicated to Sparse storage for M.
+  Two different storages are available for M: dense and sparse block.
 
   \author INRIA Siconos Team
 
 */
-#include "SparseBlockMatrix.h"
+#include "NumericsMatrix.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,16 +47,8 @@ extern "C" {
       \param matrix M of the global problem
       \param vector q of the global problem
       \param vector of the friction coefficients
-   */
-  void frictionContact3D_projection_initialize(int, const double*const, const double*const, const double*const);
-
-  /** Initialize friction-contact 3D projection, using sparse-block storage for M
-      \param dim. of the global problem
-      \param matrix M of the global problem
-      \param vector q of the global problem
-      \param vector of the friction coefficients
-   */
-  void frictionContact3D_projection_initialize_SBS(int, const SparseBlockStructuredMatrix*const, const double*const, const double*const);
+  */
+  void frictionContact3D_projection_initialize(int, const NumericsMatrix*const, const double*const, const double*const);
 
   /** Update friction-contact 3D projection solver: formalize local problem for one contact.
       \param number (position in global matrix) of the considered contact
@@ -72,25 +63,25 @@ extern "C" {
       \param global reaction (only the block corresponding to the current contact will be modified,
       \param vector of int parameters (max iteration numnber ...)
       \param vector of double parameters (tolerance ...)
-   */
+  */
   void frictionContact3D_projectionWithDiagonalization_solve(int, int, double*, int*, double*);
 
   /** solve friction-contact 3D problem with projection on the Cone
-       \param number (position in global matrix) of the considered contact
-       \param dim. of the global problem
-       \param global reaction (only the block corresponding to the current contact will be modified,
-       \param vector of int parameters (max iteration numnber ...)
-       \param vector of double parameters (tolerance ...)
-    */
+      \param number (position in global matrix) of the considered contact
+      \param dim. of the global problem
+      \param global reaction (only the block corresponding to the current contact will be modified,
+      \param vector of int parameters (max iteration numnber ...)
+      \param vector of double parameters (tolerance ...)
+  */
   void frictionContact3D_projectionOnCone_solve(int, int, double*, int*, double*);
 
   /** solve friction-contact 3D problem with projection on the Cone with local
-  iteration up to convergence of the local problem
-    \param number (position in global matrix) of the considered contact
-    \param dim. of the global problem
-    \param global reaction (only the block corresponding to the current contact will be modified,
-    \param vector of int parameters (max iteration numnber ...)
-    \param vector of double parameters (tolerance ...)
+      iteration up to convergence of the local problem
+      \param number (position in global matrix) of the considered contact
+      \param dim. of the global problem
+      \param global reaction (only the block corresponding to the current contact will be modified,
+      \param vector of int parameters (max iteration numnber ...)
+      \param vector of double parameters (tolerance ...)
   */
   void frictionContact3D_projectionOnConeWithLocalIteration_solve(int, int, double*, int*, double*);
 
@@ -99,9 +90,9 @@ extern "C" {
 
 
   /** Implement the projection on the Coulomb cone
-  \param a pointrt to the 3D vector of Reaction
-  \param the coefficient of friction
-   */
+      \param a pointrt to the 3D vector of Reaction
+      \param the coefficient of friction
+  */
   void projectionOnCone(double* reaction, double  mu);
 
 

@@ -20,8 +20,8 @@
 #ifndef FrictionContact3D_compute_error_H
 #define FrictionContact3D_compute_error_H
 
-/*!\file NCP_block_compute_error.h
-  \brief Computation of the NCP error fpr a block formulation
+/*!\file FrictionContact3D_compute_error.h
+  \brief functions related to error computation for friction-contact problems
 
   \author Vincent Acary, 26/05/2008
 
@@ -31,8 +31,12 @@
 extern "C" {
 #endif
 
-  /** Computation of the error
-
+  /** Error computation for friction-contact 3D problem
+      \param problem the structure which defines the friction-contact problem
+      \param z vector
+      \param w vector
+      \param tolerance value for error computation
+      \param[in,out] error value
    */
   void FrictionContact3D_compute_error(FrictionContact_Problem* problem, double *z , double *w, double tolerance, double * error);
 

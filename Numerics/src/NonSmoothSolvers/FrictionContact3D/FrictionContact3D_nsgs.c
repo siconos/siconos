@@ -30,7 +30,7 @@
 void fake_compute_error(int n, double* velocity, double* reaction, double* error)
 {}
 
-void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, const double* const M, const double* const q, const double* const mu, int* iparam)
+void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, int* iparam)
 {
   /** Connect to local solver */
   /* Projection */
@@ -89,7 +89,7 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
   /* Number of contacts */
   int nc = problem->numberOfContacts;
   double* q = problem->q;
-  double* M = problem->M->matrix0;
+  NumericsMatrix* M = problem->M;
   double* mu = problem->mu;
   /* Dimension of the problem */
   int n = 3 * nc;

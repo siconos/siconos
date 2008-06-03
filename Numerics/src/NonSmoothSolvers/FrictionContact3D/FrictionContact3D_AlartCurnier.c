@@ -29,8 +29,7 @@
 /* mu corresponds to the vector of friction coefficients */
 /* note that either MGlobal or MBGlobal is used, depending on the chosen storage */
 static int n = 0;
-static const double* MGlobal = NULL;
-static const SparseBlockStructuredMatrix* MBGlobal = NULL;
+static const NumericsMatrix* MGlobal = NULL;
 static const double* qGlobal = NULL;
 static const double* mu = NULL;
 
@@ -47,69 +46,38 @@ static double projN;
 static double projT;
 static double projS;
 
-/* update pointer to function, used to switch to the function adapted to the storage for MGlobal. */
-static void (*update)(int, double*);
-
-void AC_updateWithSparse(int contact, double * reaction)
+void AC_fillMLocal(int contact)
 {
-  int in = 3 * contact, it = in + 1, is = it + 1;
-  int numberOfContact = n / 3;
-  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  int diagPos = getDiagonalBlockPos(MBGlobal, contact);
-  MLocal = MBGlobal->block[diagPos];
-
-  /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
-   excluding the block corresponding to the current contact. ****/
-
-  /* reaction current block set to zero, to exclude current contact block */
-  reaction[in] = 0.0;
-  reaction[it] = 0.0;
-  reaction[is] = 0.0;
-  /* qLocal computation*/
-  qLocal[0] = qGlobal[in];
-  qLocal[1] = qGlobal[it];
-  qLocal[2] = qGlobal[is];
-
-  /* qLocal += rowMB * reaction
-     with rowMB the row of blocks of MBGlobal which corresponds to the current contact
-   */
-  subRowProdSBM(n, 3, contact, MBGlobal, reaction, qLocal, 0);
-
+  // Dense storage
+  int storageType = MGlobal->storageType;
+  if (storageType == 0)
+  {
+    int in = 3 * contact, it = in + 1, is = it + 1;
+    int inc = n * in;
+    double * MM = MGlobal->matrix0;
+    /* The part of MM which corresponds to the current block is copied into MLocal */
+    MLocal[0] = MM[inc + in];
+    MLocal[1] = MM[inc + it];
+    MLocal[2] = MM[inc + is];
+    inc += n;
+    MLocal[3] = MM[inc + in];
+    MLocal[4] = MM[inc + it];
+    MLocal[5] = MM[inc + is];
+    inc += n;
+    MLocal[6] = MM[inc + in];
+    MLocal[7] = MM[inc + it];
+    MLocal[8] = MM[inc + is];
+  }
+  else if (storageType == 1)
+  {
+    int diagPos = getDiagonalBlockPos(MGlobal->matrix1, contact);
+    MLocal = MGlobal->matrix1->block[diagPos];
+  }
+  else
+    numericsError("FrictionContact3D_AlartCurnier:AC_fillMLocal() -", "unknown storage type for matrix M");
 }
 
-void AC_updateNoSparse(int contact, double * reaction)
-{
-  int in = 3 * contact, it = in + 1, is = it + 1;
-  int inc = n * in;
-
-  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  MLocal[0] = MGlobal[inc + in];
-  MLocal[1] = MGlobal[inc + it];
-  MLocal[2] = MGlobal[inc + is];
-  inc += n;
-  MLocal[3] = MGlobal[inc + in];
-  MLocal[4] = MGlobal[inc + it];
-  MLocal[5] = MGlobal[inc + is];
-  inc += n;
-  MLocal[6] = MGlobal[inc + in];
-  MLocal[7] = MGlobal[inc + it];
-  MLocal[8] = MGlobal[inc + is];
-
-  /****  Computation of qLocal = qBlock + sum over a contact of blocks in MGlobal of the products MLocal.reactionBlock,
-   excluding the block corresponding to the current contact. ****/
-
-  /* reaction current block set to zero, to exclude current contact block */
-  reaction[in] = 0.0;
-  reaction[it] = 0.0;
-  reaction[is] = 0.0;
-  /* qLocal computation*/
-  int incx = n, incy = 1;
-  qLocal[0] = qGlobal[in] + DDOT(n , &MGlobal[in] , incx , reaction , incy);
-  qLocal[1] = qGlobal[it] + DDOT(n , &MGlobal[it] , incx , reaction , incy);
-  qLocal[2] = qGlobal[is] + DDOT(n , &MGlobal[is] , incx , reaction , incy);
-}
-
-void frictionContact3D_AC_initialize(int n0, const double*const M0, const double*const q0, const double*const mu0)
+void frictionContact3D_AC_initialize(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0)
 {
   /*
     INPUT: the global problem operators: n0 (size), M0, q0 and mu0, vector of friction coefficients.
@@ -123,25 +91,13 @@ void frictionContact3D_AC_initialize(int n0, const double*const M0, const double
   qGlobal = q0;
   mu = mu0;
   /* Connect to update function for dense storage */
-  update = &AC_updateNoSparse;
-  MLocal = (double*)malloc(nLocal * nLocal * sizeof(*MLocal));
-  isMAllocatedIn = 1;
-}
+  if (MGlobal->storageType == 0)
+  {
+    MLocal = (double*)malloc(nLocal * nLocal * sizeof(*MLocal));
+    isMAllocatedIn = 1;
+  }
+  else isMAllocatedIn = 0;
 
-void frictionContact3D_AC_initialize_SBS(int n0, const SparseBlockStructuredMatrix*const M0, const double*const q0, const double*const mu0)
-{
-  /*
-    INPUT: the global problem operators: n0 (size), M0, q0 and mu0, vector of friction coefficients.
-    In initialize, these operators are "connected" to their corresponding static variables, that will be used to build local problem
-    for each considered contact.
-    Local problem is built during call to update (which depends on the storage type for M).
-  */
-  n = n0;
-  MBGlobal = M0;
-  qGlobal = q0;
-  mu = mu0;
-  update = &AC_updateWithSparse;
-  isMAllocatedIn = 0;
 }
 
 void frictionContact3D_AC_update(int contact, double * reaction)
@@ -149,12 +105,50 @@ void frictionContact3D_AC_update(int contact, double * reaction)
   /* Build a local problem for a specific contact
      reaction corresponds to the global vector (size n) of the global problem.
   */
+  int in = 3 * contact, it = in + 1, is = it + 1;
+  int numberOfContact = n / 3;
 
-  /* Call the update function which depends on the storage for MGlobal/MBGlobal */
-  (*update)(contact, reaction);
+  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
+  AC_fillMLocal(contact);
+
+  /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
+   excluding the block corresponding to the current contact. ****/
+
+  /* reaction current block set to zero, to exclude current contact block */
+  double rin = reaction[in] ;
+  double rit = reaction[it] ;
+  double ris = reaction[is] ;
+  reaction[in] = 0.0;
+  reaction[it] = 0.0;
+  reaction[is] = 0.0;
+  /* qLocal computation*/
+  qLocal[0] = qGlobal[in];
+  qLocal[1] = qGlobal[it];
+  qLocal[2] = qGlobal[is];
+
+  if (MGlobal->storageType == 0)
+  {
+    double * MM = MGlobal->matrix0;
+    int incx = n, incy = 1;
+    qLocal[0] += DDOT(n , &MM[in] , incx , reaction , incy);
+    qLocal[1] += DDOT(n , &MM[it] , incx , reaction , incy);
+    qLocal[2] += DDOT(n , &MM[is] , incx , reaction , incy);
+  }
+  else if (MGlobal->storageType == 1)
+  {
+    /* qLocal += rowMB * reaction
+    with rowMB the row of blocks of MGlobal which corresponds to the current contact
+    */
+    rowProdNoDiagSBM(n, 3, contact, MGlobal->matrix1, reaction, qLocal, 0);
+  }
+
+  reaction[in] = rin;
+  reaction[it] = rit;
+  reaction[is] = ris;
 
   /* Friction coefficient for current block*/
   mu_i = mu[contact];
+
 }
 
 /* Compute function F(Reaction) */
@@ -312,31 +306,31 @@ void computeFGlobal_AC(double* reaction, double* FGlobal)
   for (contact = 0; contact < numberOfContacts; ++contact)
   {
     position = 3 * contact;
-    if (MBGlobal != NULL) /* Sparse storage */
+    if (MGlobal->storageType == 1) /* Sparse storage */
     {
       /* The part of MGlobal which corresponds to the current block is copied into MLocal */
       diagPos = numberOfContacts * contact + contact;
-      MLocal = MBGlobal->block[diagPos];
+      MLocal = MGlobal->matrix1->block[diagPos];
     }
-    else if (MGlobal != NULL)
+    else if (MGlobal->storageType == 0)
     {
       in = 3 * contact;
       it = in + 1;
       is = it + 1;
       inc = n * in;
-
-      /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-      MLocal[0] = MGlobal[inc + in];
-      MLocal[1] = MGlobal[inc + it];
-      MLocal[2] = MGlobal[inc + is];
+      double *MM = MGlobal->matrix0;
+      /* The part of MM which corresponds to the current block is copied into MLocal */
+      MLocal[0] = MM[inc + in];
+      MLocal[1] = MM[inc + it];
+      MLocal[2] = MM[inc + is];
       inc += n;
-      MLocal[3] = MGlobal[inc + in];
-      MLocal[4] = MGlobal[inc + it];
-      MLocal[5] = MGlobal[inc + is];
+      MLocal[3] = MM[inc + in];
+      MLocal[4] = MM[inc + it];
+      MLocal[5] = MM[inc + is];
       inc += n;
-      MLocal[6] = MGlobal[inc + in];
-      MLocal[7] = MGlobal[inc + it];
-      MLocal[8] = MGlobal[inc + is];
+      MLocal[6] = MM[inc + in];
+      MLocal[7] = MM[inc + it];
+      MLocal[8] = MM[inc + is];
     }
 
     reactionLocal = &reaction[3 * contact];
@@ -380,7 +374,6 @@ void computeFGlobal_AC(double* reaction, double* FGlobal)
 void frictionContact3D_AC_free()
 {
   MGlobal = NULL;
-  MBGlobal = NULL;
   qGlobal = NULL;
   mu = NULL;
   if (isMAllocatedIn == 1)

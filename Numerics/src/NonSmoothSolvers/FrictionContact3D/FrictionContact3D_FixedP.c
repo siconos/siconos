@@ -56,7 +56,7 @@ int F_GlockerFixedP(int sizeF, double* reaction, double* FVector)
 /** writes \f$ \nabla_z F(z) \f$  using Glocker formulation and the Fischer-Burmeister function.
  */
 
-void frictionContact3D_FixedP_initialize(int n0, const double*const M0, const double*const q0, const double*const mu0, int* iparam)
+void frictionContact3D_FixedP_initialize(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0, int* iparam)
 {
 
   /*
@@ -71,28 +71,6 @@ void frictionContact3D_FixedP_initialize(int n0, const double*const M0, const do
     F = &F_GlockerFixedP;
     postSolver = &NCPGlocker_post;
     freeSolver = &NCPGlocker_free;
-  }
-  else
-  {
-    fprintf(stderr, "Numerics, FrictionContact3D_nsgs failed. Unknown formulation type.\n");
-    exit(EXIT_FAILURE);
-  }
-}
-
-void frictionContact3D_FixedP_initialize_SBS(int n0, const SparseBlockStructuredMatrix*const M0, const double*const q0, const double*const mu0, int* iparam)
-{
-  /*
-     Initialize solver (Compute F) according to the chosen formulation.
-  */
-
-  /* Glocker formulation */
-  if (iparam[4] == 5)
-  {
-    Fsize = 5;
-    NCPGlocker_initialize_SBS(n0, M0, q0, mu0);
-    F = &F_GlockerFixedP;
-    updateSolver = &NCPGlocker_update;
-    postSolver = &NCPGlocker_post;
   }
   else
   {

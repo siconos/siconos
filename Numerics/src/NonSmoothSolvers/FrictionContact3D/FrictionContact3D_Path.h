@@ -42,16 +42,7 @@ extern "C" {
       \param vector of the friction coefficients
       \param vector of int parameters
    */
-  void frictionContact3D_Path_initialize(int, const double*const, const double*const, const double*const, int*);
-
-  /** Initialize friction-contact 3D Path solver
-      \param dim. of the global problem
-      \param matrix M of the global problem, saved as a SparseBlockStructuredMatrix
-      \param vector q of the global problem
-      \param vector of the friction coefficients
-      \param vector of int parameters
-   */
-  void frictionContact3D_Path_initialize_SBS(int, const SparseBlockStructuredMatrix *const, const double*const, const double*const, int*);
+  void frictionContact3D_Path_initialize(int, const NumericsMatrix*const, const double*const, const double*const, int*);
 
   /** solve friction-contact 3D problem with Path
       \param number (position in global matrix) of the considered contact
