@@ -276,6 +276,11 @@ public:
   /** processEvents for general case
    */
   void GeneralProcessEvents();
+
+  /** used when event's time has changed to resort it properly in allEvents set
+      \param the event to be sorted
+   */
+  void SortEvent(Event*);
 };
 
 #endif // EventsManager_H

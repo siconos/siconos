@@ -189,8 +189,7 @@ void EventsManager::display() const
   cout << "===== End of EventsManager display =====" << endl;
 }
 
-// Insertion of a new EXISTING event. Warning: no update of nextEvent
-// This function is mainly useful to record new Actuators or Sensors
+// Insertion of a new EXISTING event.
 void EventsManager::insertEvent(Event* newE)
 {
   if (newE->getDoubleTimeOfEvent() < currentEvent->getDoubleTimeOfEvent())
@@ -322,4 +321,9 @@ void EventsManager::GeneralProcessEvents()
     simulation->getModelPtr()->setCurrentTime(getTimeOfEvent(nextEvent));
 }
 
-
+void SortEvent(Event* e)
+{
+  // Temporary function to deal with add/remove events with actuators and sensors.
+  allEvents.erase(e);
+  allEvents.insert(e);
+}
