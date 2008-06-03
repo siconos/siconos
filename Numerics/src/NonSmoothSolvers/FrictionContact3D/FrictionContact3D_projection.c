@@ -152,7 +152,7 @@ void frictionContact3D_projection_update(int contact, double* reaction)
   mu_i = mu[contact];
 }
 
-void frictionContact3D_projectionDiag_solve(int contact, int dimReaction, double* reaction, int* iparam, double* dparam)
+void frictionContact3D_projectionWithDiagonalization_solve(int contact, int dimReaction, double* reaction, int* iparam, double* dparam)
 {
   /* Current block position */
   int pos = contact * nLocal;
@@ -194,7 +194,7 @@ void frictionContact3D_projectionDiag_solve(int contact, int dimReaction, double
 }
 
 
-void frictionContact3D_projectionOnCone_solve(int contact, int dimReaction, double* reaction, int* iparam, double* dparam)
+void frictionContact3D_projectionOnConeWithLocalIteration_solve(int contact, int dimReaction, double* reaction, int* iparam, double* dparam)
 {
   /* Current block position */
   int pos = contact * nLocal;
@@ -202,20 +202,19 @@ void frictionContact3D_projectionOnCone_solve(int contact, int dimReaction, doub
   /* Builds local problem for the current contact */
   frictionContact3D_projection_update(contact, reaction);
 
-  double mrn, num, mu2 = mu_i * mu_i;
+  double  mu2 = mu_i * mu_i;
 
   /*double an = 1./(MLocal[0]);*/
+  /*   double alpha = MLocal[nLocal+1] + MLocal[2*nLocal+2]; */
+  /*   double det = MLocal[1*nLocal+1]*MLocal[2*nLocal+2] - MLocal[2*nLocal+1] + MLocal[1*nLocal+2]; */
+  /*   double beta = alpha*alpha - 4*det; */
+  /*   double at = 2*(alpha - beta)/((alpha + beta)*(alpha + beta)); */
 
-  double alpha = MLocal[nLocal + 1] + MLocal[2 * nLocal + 2];
-  double det = MLocal[1 * nLocal + 1] * MLocal[2 * nLocal + 2] - MLocal[2 * nLocal + 1] + MLocal[1 * nLocal + 2];
-  double beta = alpha * alpha - 4 * det;
-  double at = 2 * (alpha - beta) / ((alpha + beta) * (alpha + beta));
+  double an = 1. / (MLocal[0] + mu_i);
+
   int incx = 1, incy = 1;
-  double an = 1. / (MLocal[0] + mu_i * at);
 
-  //an=0.5; at=0.5;
-  printf("an = %14.7e\n", an);
-  printf("at = %14.7e\n", at);
+
 
   double worktmp[3];
   double normUT;
@@ -253,46 +252,87 @@ void frictionContact3D_projectionOnCone_solve(int contact, int dimReaction, doub
     /*    printf ("Modified velocity[1] = %14.7e\n",worktmp[1]); */
     /*    printf ("Modified velocity[2] = %14.7e\n",worktmp[2]); */
 
-    //    an=1.0;at=1.0;
-
 
 
     reaction[pos] -= an * (worktmp[0] + mu_i * normUT);
-    reaction[pos + 1] -= at * worktmp[1];
-    reaction[pos + 2] -= at * worktmp[2];
+    reaction[pos + 1] -= an * worktmp[1];
+    reaction[pos + 2] -= an * worktmp[2];
     worktmp[0] = reaction[pos] + an * (worktmp[0] + mu_i * normUT);
-    worktmp[1] = reaction[pos + 1] + at * worktmp[1];
-    worktmp[2] = reaction[pos + 2] + at * worktmp[2];
-
+    worktmp[1] = reaction[pos + 1] + an * worktmp[1];
+    worktmp[2] = reaction[pos + 2] + an * worktmp[2];
 
 
     projectionOnCone(&reaction[pos], mu_i);
 
-
     localerror =  sqrt((worktmp[0] - reaction[pos]) * (worktmp[0] - reaction[pos]) +
                        (worktmp[1] - reaction[pos + 1]) * (worktmp[1] - reaction[pos + 1]) +
                        (worktmp[2] - reaction[pos + 2]) * (worktmp[2] - reaction[pos + 2]));
-    printf("localerror = %14.7e\n", localerror);
+    /*      printf ("localerror = %14.7e\n",localerror );  */
     /*    printf ("worktmp[0] = %14.7e\n",worktmp[0]); */
     /*    printf ("worktmp[1] = %14.7e\n",worktmp[1]); */
     /*    printf ("worktmp[2] = %14.7e\n",worktmp[2]); */
-    /*    printf ("reaction[pos] = %14.7e\n",reaction[pos]); */
-    /*    printf ("reaction[pos+1] = %14.7e\n",reaction[pos+1]); */
-    /*    printf ("reaction[pos+2] = %14.7e\n",reaction[pos+2]); */
+    printf("reaction[pos] = %14.7e\n", reaction[pos]);
+    printf("reaction[pos+1] = %14.7e\n", reaction[pos + 1]);
+    printf("reaction[pos+2] = %14.7e\n", reaction[pos + 2]);
     /*    DCOPY( nLocal , qLocal, incx , worktmp , incy ); */
     /*    DGEMV(LA_NOTRANS, nLocal, nLocal, 1.0, MLocal, 3, &reaction[pos], incx, 1.0, worktmp, incy ); */
     /*    normUT = sqrt(worktmp[1]*worktmp[1]+worktmp[2]*worktmp[2]); */
-    /*    printf ("velocity[0] = %14.7e\n",worktmp[0]); */
-    /*    printf ("velocity[1] = %14.7e\n",worktmp[1]); */
-    /*    printf ("velocity[2] = %14.7e\n",worktmp[2]); */
-    /*    printf ("normUT = %14.7e\n",normUT); */
-    /*    printf ("Modified velocity[0] = %14.7e\n",worktmp[0]+mu_i*normUT); */
-    /*    printf ("Modified velocity[1] = %14.7e\n",worktmp[1]); */
-    /*    printf ("Modified velocity[2] = %14.7e\n",worktmp[2]); */
+    /*    worktmp[0] = reaction[pos] - (worktmp[0]+mu_i*normUT); */
+    /*    worktmp[1] = reaction[pos+1] - worktmp[1]; */
+    /*    worktmp[2] = reaction[pos+2] - worktmp[2]; */
+
+    /*    projectionOnCone(worktmp, mu_i);   */
+    /*    localerror2 =  sqrt( (worktmp[0]-reaction[pos])*(worktmp[0]-reaction[pos]) + */
+    /*            (worktmp[1]-reaction[pos+1])*(worktmp[1]-reaction[pos+1])+ */
+    /*            (worktmp[2]-reaction[pos+2])*(worktmp[2]-reaction[pos+2]) ); */
+    /*      printf ("localerror2 = %14.7e\n",localerror2 );  */
+
+
+    /* /\*    printf ("velocity[0] = %14.7e\n",worktmp[0]); *\/ */
+    /* /\*    printf ("velocity[1] = %14.7e\n",worktmp[1]); *\/ */
+    /* /\*    printf ("velocity[2] = %14.7e\n",worktmp[2]); *\/ */
+    /* /\*    printf ("normUT = %14.7e\n",normUT); *\/ */
+    /* /\*    printf ("Modified velocity[0] = %14.7e\n",worktmp[0]+mu_i*normUT); *\/ */
+    /* /\*    printf ("Modified velocity[1] = %14.7e\n",worktmp[1]); *\/ */
+    /* /\*    printf ("Modified velocity[2] = %14.7e\n",worktmp[2]); *\/ */
+
+
+
 
 
 
   }
+}
+void frictionContact3D_projectionOnCone_solve(int contact, int dimReaction, double* reaction, int* iparam, double* dparam)
+{
+  /* Current block position */
+  int pos = contact * nLocal;
+
+  /* Builds local problem for the current contact */
+  frictionContact3D_projection_update(contact, reaction);
+
+  double  mu2 = mu_i * mu_i;
+
+  /*double an = 1./(MLocal[0]);*/
+  /*   double alpha = MLocal[nLocal+1] + MLocal[2*nLocal+2]; */
+  /*   double det = MLocal[1*nLocal+1]*MLocal[2*nLocal+2] - MLocal[2*nLocal+1] + MLocal[1*nLocal+2]; */
+  /*   double beta = alpha*alpha - 4*det; */
+  /*   double at = 2*(alpha - beta)/((alpha + beta)*(alpha + beta)); */
+
+  double an = 1. / (MLocal[0] + mu_i);
+
+  int incx = 1, incy = 1;
+  double worktmp[3];
+  double normUT;
+  DCOPY(nLocal , qLocal, incx , worktmp , incy);
+  DGEMV(LA_NOTRANS, nLocal, nLocal, 1.0, MLocal, 3, &reaction[pos], incx, 1.0, worktmp, incy);
+  normUT = sqrt(worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2]);
+  reaction[pos] -= an * (worktmp[0] + mu_i * normUT);
+  reaction[pos + 1] -= an * worktmp[1];
+  reaction[pos + 2] -= an * worktmp[2];
+
+  projectionOnCone(&reaction[pos], mu_i);
+
 }
 
 

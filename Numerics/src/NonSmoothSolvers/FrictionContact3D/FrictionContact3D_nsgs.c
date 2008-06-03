@@ -21,6 +21,7 @@
 #include "FrictionContact3D_FixedP.h"
 #include "FrictionContact3D_projection.h"
 #include "FrictionContact3D_Solvers.h"
+#include "FrictionContact3D_compute_error.h"
 #include "NCP_Solvers.h"
 #include "LA.h"
 #include <stdio.h>
@@ -35,13 +36,19 @@ void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, C
   /* Projection */
   if (iparam[4] == 0)
   {
-    *solve = &frictionContact3D_projectionDiag_solve;
+    *solve = &frictionContact3D_projectionWithDiagonalization_solve;
     *freeSolver = &frictionContact3D_projection_free;
     frictionContact3D_projection_initialize(n, M, q, mu);
   }
   else if (iparam[4] == 4)
   {
     *solve = &frictionContact3D_projectionOnCone_solve;
+    *freeSolver = &frictionContact3D_projection_free;
+    frictionContact3D_projection_initialize(n, M, q, mu);
+  }
+  else if (iparam[4] == 6)
+  {
+    *solve = &frictionContact3D_projectionOnConeWithLocalIteration_solve;
     *freeSolver = &frictionContact3D_projection_free;
     frictionContact3D_projection_initialize(n, M, q, mu);
   }
@@ -119,6 +126,8 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
   int incy = 1;
   double num;
   int contact; /* Number of the current row of blocks in M */
+
+  int pos;
   while ((iter < itermax) && (hasNotConverged > 0))
   {
     DCOPY(n , velocity , incx , W , incy);
@@ -132,7 +141,12 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
     //   (*computeError)(n,velocity,reaction,&error);
 
     FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, &error);
-
+    /*       for( contact = 0 ; contact < nc ; ++contact ){ */
+    /*    pos = contact*3; */
+    /*    printf ("reaction[pos] = %14.7e\n",reaction[pos]); */
+    /*    printf ("reaction[pos+1] = %14.7e\n",reaction[pos+1]); */
+    /*    printf ("reaction[pos+2] = %14.7e\n",reaction[pos+2]); */
+    /*       } */
     if (verbose > 0)
       printf("-----------------------------------Iteration %i Erreur = %14.7e\n", iter, error);
 

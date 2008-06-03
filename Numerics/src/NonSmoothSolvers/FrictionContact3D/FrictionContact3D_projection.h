@@ -73,9 +73,9 @@ extern "C" {
       \param vector of int parameters (max iteration numnber ...)
       \param vector of double parameters (tolerance ...)
    */
-  void frictionContact3D_projectionDiag_solve(int, int, double*, int*, double*);
+  void frictionContact3D_projectionWithDiagonalization_solve(int, int, double*, int*, double*);
 
-  /** solve friction-contact 3D problem with projection
+  /** solve friction-contact 3D problem with projection on the Cone
        \param number (position in global matrix) of the considered contact
        \param dim. of the global problem
        \param global reaction (only the block corresponding to the current contact will be modified,
@@ -83,6 +83,16 @@ extern "C" {
        \param vector of double parameters (tolerance ...)
     */
   void frictionContact3D_projectionOnCone_solve(int, int, double*, int*, double*);
+
+  /** solve friction-contact 3D problem with projection on the Cone with local
+  iteration up to convergence of the local problem
+    \param number (position in global matrix) of the considered contact
+    \param dim. of the global problem
+    \param global reaction (only the block corresponding to the current contact will be modified,
+    \param vector of int parameters (max iteration numnber ...)
+    \param vector of double parameters (tolerance ...)
+  */
+  void frictionContact3D_projectionOnConeWithLocalIteration_solve(int, int, double*, int*, double*);
 
   /** free memory for friction contact 3D projection solver */
   void frictionContact3D_projection_free();

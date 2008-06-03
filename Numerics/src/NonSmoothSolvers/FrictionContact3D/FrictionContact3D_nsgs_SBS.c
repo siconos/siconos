@@ -29,7 +29,7 @@ void initializeLocalSolver_SBS(int n, SolverPtr* solve, FreeSolverPtr* freeSolve
   /* Projection */
   if (iparam[6] == 0)
   {
-    *solve = &frictionContact3D_projectionDiag_solve;
+    *solve = &frictionContact3D_projectionWithDiagonalization_solve;
     *freeSolver = &frictionContact3D_projection_free;
     frictionContact3D_projection_initialize_SBS(n, M, q, mu);
     /*       computeError = & */
