@@ -321,7 +321,7 @@ void EventsManager::GeneralProcessEvents()
     simulation->getModelPtr()->setCurrentTime(getTimeOfEvent(nextEvent));
 }
 
-void SortEvent(Event* e)
+void EventsManager::SortEvent(Event* e)
 {
   // Temporary function to deal with add/remove events with actuators and sensors.
   allEvents.erase(e);
