@@ -38,7 +38,7 @@ void Start()
 {
   GLOB_STEP = false;
   GLOB_COMPUTE = false;
-  canon = new CanonBallsModel(2);
+  canon = new CanonBallsModel(NBFloors);
   canon->initialize();
 }
 

@@ -43,7 +43,7 @@ class CanonBallsModel
 {
 private:
 
-  /** Number of floors of beads */
+  /** Number of floors of beads (min value = 1, which corresponds to one bead - Top floor = floor number 0) */
   unsigned int numberOfFloors;
 
   /** Total Number of Spheres */

@@ -58,7 +58,7 @@ void CanonBallsModel::initialize()
   // initial computation time
   double t0 = 0.0;
   // final computation time
-  double T = 10.;
+  double T = 1.;
   // Default time step
   double h = 0.005;
   // ================= Creation of the model =======================
@@ -106,15 +106,17 @@ void CanonBallsModel::initialize()
   // -- OneStepNsProblem --
   string solverName = "NSGS";      // solver algorithm used for non-smooth problem
   IntParameters iparam(5);
-  iparam[0] = 100010; // Max number of iteration
+  iparam[0] = 10100; // Max number of iteration
   // Solver/formulation
   // 0: projection, 1: Newton/AlartCurnier, 2: Newton/Fischer-Burmeister, 3: Path/Glocker
-  iparam[4] = 1;
+  iparam[4] = 3;
   DoubleParameters dparam(5);
   dparam[0] = 1e-7; // Tolerance
+  dparam[2] = 1e-7; // Local Tolerance
   NonSmoothSolver * Mysolver = new NonSmoothSolver(solverName, iparam, dparam);
   FrictionContact* osnspb = new FrictionContact(s, 3, Mysolver);
-  osnspb->setNumericsVerboseMode(0);
+  //osnspb->setNumericsVerboseMode(1);
+  //  osnspb->setMStorageType(1);
   cout << "=== End of model loading === " << endl;
 
   // =========================== End of model definition
@@ -126,7 +128,7 @@ void CanonBallsModel::initialize()
   cout << "=== End of simulation initialisation ===" << endl;
 
   unsigned int N = int((T - t0) / h);
-  unsigned int outputSize = 1 + 2 * numberOfSpheres;
+  unsigned int outputSize = 1 + 3 * numberOfSpheres;
   // Output matrix
   dataPlot = new SimpleMatrix(N + 1, outputSize);
 
@@ -134,8 +136,10 @@ void CanonBallsModel::initialize()
   unsigned int i = 0;
   for (DSLIST::iterator it = allSpheres.begin(); it != allSpheres.end(); ++it)
   {
-    (*dataPlot)(0, 1 + 2 * i) = (*it)->getQ(2); // q(2)
-    (*dataPlot)(0, 2 + 2 * i) = (*it)->getVelocity(2); // v(2)
+    (*dataPlot)(0, 1 + 3 * i) = (*it)->getQ(0); // q(2)
+    (*dataPlot)(0, 2 + 3 * i) = (*it)->getQ(1); // v(2)
+    (*dataPlot)(0, 3 + 3 * i) = (*it)->getQ(2); // v(2)
+    // (*dataPlot)(0,2+2*i) = (*it)->getVelocity(2); // v(2)
     i++;
   }
 }
@@ -145,10 +149,13 @@ void CanonBallsModel::compute()
   canonballs->getSimulationPtr()->advanceToEvent();
   unsigned int i = 0;
 
+  (*dataPlot)(iter_k, 0) =  canonballs->getSimulationPtr()->getNextTime(); // time
   for (DSLIST::iterator it = allSpheres.begin(); it != allSpheres.end(); ++it)
   {
-    (*dataPlot)(iter_k, 1 + 2 * i) = (*it)->getQ(2); // q(2)
-    (*dataPlot)(iter_k, 2 + 2 * i) = (*it)->getVelocity(2); // v(2)
+    (*dataPlot)(iter_k, 1 + 3 * i) = (*it)->getQ(0); // q(2)
+    (*dataPlot)(iter_k, 2 + 3 * i) = (*it)->getQ(1); // v(2)
+    (*dataPlot)(iter_k, 3 + 3 * i) = (*it)->getQ(2); // v(2)
+    //     (*dataPlot)(iter_k,2+2*i) = (*it)->getVelocity(2); // v(2)
     i++;
   }
   canonballs->getSimulationPtr()->processEvents();
@@ -168,25 +175,27 @@ void CanonBallsModel::draw()
 
 void CanonBallsModel::computeInitialPositions(Vectors q0, Vectors v0, double Radius)
 {
-  double *X = (double*)malloc(3 * sizeof(double));
-  double d = 0.16;
-  unsigned int K;
 
+  double *X = (double*)malloc(3 * sizeof(double));
+  unsigned int K;
   // Initial position of the first bead
+  double RR = Radius * 1.00001; //  Radius + x% for "almost" contact
   (*(q0[0]))(0) =  0.;
   (*(q0[0]))(1) =  0.;
-  (*(q0[0]))(2) =  Radius + (numberOfFloors - 1) * d;
-  // Loop over all numberOfFloorss
+  (*(q0[0]))(2) = (numberOfFloors - 1) * 2.0 * sqrt(2.0 / 3.0) * RR + GROUND + RR;
+  // Loop over all Floors
   for (unsigned int i = 2 ; i < numberOfFloors + 1 ; ++i)
   {
     for (unsigned int j = SUM(i - 2) ; j < SUM(i - 1) ; ++j)
     {
       for (unsigned int l = 0 ; l < 3 ; l++)
       {
-        Q(i, j,  l , X, (*(q0[j]))(0), (*(q0[j]))(1), (*(q0[j]))(2), d);
+        // Compute current ball position according to those of the floor above
+        Q(i, j,  l , X, (*(q0[j]))(0), (*(q0[j]))(1), (*(q0[j]))(2), RR);
 
         if (l == 0) K = 0;
-        else K = qlq(i, j);
+        else
+          K = qlq(i, j);
 
         for (unsigned int k = 0 ; k < 3 ; k++)
           (*(q0[j + sum(i) - l - K]))(k) = X[k];
@@ -208,7 +217,6 @@ void CanonBallsModel::buildDynamicalSystems()
   Vectors q0, v0;
   q0.resize(numberOfSpheres, NULL);
   v0.resize(numberOfSpheres, NULL);
-
   // Memory allocation for q0[i] and v0[i]
   for (unsigned int i = 0; i < numberOfSpheres; i++)
   {
@@ -218,10 +226,6 @@ void CanonBallsModel::buildDynamicalSystems()
 
   // Computation of the position of all beads of the pyramid
   computeInitialPositions(q0, v0, Radius);
-
-  //  // External forces = gravity
-  //   SimpleVector * weight = new SimpleVector(nDof);
-  //   (*weight)(2) = -m*g;
 
   // Build and insert the DS into allDS
 
@@ -263,7 +267,7 @@ void CanonBallsModel::buildInteractions(InteractionsSet* allInteractions)
   SimpleMatrix Hground(3, nDof), Hceil(3, nDof), HwallYp(3, nDof), HwallYm(3, nDof), HwallXp(3, nDof), HwallXm(3, nDof) ;
   if (hasGround)
   {
-    bground(0) = GROUND - Radius;
+    bground(0) =  - GROUND - Radius;
     Hground(0, 2) = 1.0;
     Hground(1, 0) = 1.0;
     Hground(1, 4) = -Radius;

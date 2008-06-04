@@ -2,7 +2,9 @@
 #include "utilities.h"
 unsigned int sum(unsigned int et)
 {
-  return et * (et + 1) / 2;
+  if (et == 0) return 0;
+  else
+    return et * (et + 1) / 2;
 }
 
 unsigned int SUM(unsigned int et)
@@ -19,35 +21,23 @@ unsigned int SUM(unsigned int et)
 
 unsigned int qlq(unsigned int et, unsigned int j)
 {
-  if (j == 0 || j == SUM(et - 1) - 1)
+  int val = SUM(et - 1) - 1;
+  if (j == 0 || j == val)
     return 0;
   else
   {
     for (unsigned int k = 1 ; k < et ; k++)
     {
-      if (SUM(et - 1) - 1 - j < sum(k + 1) && SUM(et - 1) - 1 - j >= sum(k)) return k;
+      if (val - j < sum(k + 1) && val - j >= sum(k)) return k;
     }
   }
 }
 
-unsigned int L(unsigned int et, unsigned j)
+void Q(unsigned int et, unsigned int j, unsigned int i, double * x, double qx, double qy, double qz, double RR)
 {
-  if (j == 0) return et - 1;
-  else
-  {
-    for (unsigned int k = 1 ; k < et ; k++)
-    {
-      for (j = SUM(k) ; j < SUM(k + 1) ; ++j)
-        return k;
-    }
-  }
-}
-
-void Q(unsigned int et, unsigned int j, unsigned int i, double * x, double a, double b, double c, double d)
-{
-  double ti;
-  ti = PI * (9 - 4 * i) / 6;
-  x[0] = 0.12 * cos(ti) + a;
-  x[1] = 0.12 * sin(ti) + b;
-  x[2] = c - L(et, j) * d;
+  double coef = 2.0 / sqrt(3.0) * RR;
+  double ti = PI * (9 - 4 * i) / 6.0;
+  x[0] = coef * cos(ti) + qx;
+  x[1] = coef * sin(ti) + qy;
+  x[2] = qz - 2 * sqrt(2.0 / 3.0) * RR;
 }
