@@ -87,8 +87,8 @@ void readSolverOptions(int driverType, Solver_Options* options)
 
     }
     /* dparam */
-    nval = fscanf(ficin, "%lf%lf", &(options->dparam[0]), &(options->dparam[1]));
-    if (nval != 2)
+    nval = fscanf(ficin, "%lf%lf%lf", &(options->dparam[0]), &(options->dparam[1]), &(options->dparam[2]));
+    if (nval != 3)
     {
       fprintf(stderr, "Numerics, readSolverOptions error, wrong number of parameters for dparam.\n");
       exit(EXIT_FAILURE);

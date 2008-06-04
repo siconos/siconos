@@ -134,6 +134,7 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
     DCOPY(n , q , incx , velocity , incy);
     ++iter;
     /* Loop through the contact points */
+    dparam[0] = dparam[2]; // set the tolerance for the local solver
     for (contact = 0 ; contact < nc ; ++contact)
       (*local_solver)(contact, n, reaction, iparam, dparam);
 
@@ -151,7 +152,7 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
       printf("-----------------------------------Iteration %i Erreur = %14.7e\n", iter, error);
 
     if (error < tolerance) hasNotConverged = 0;
-
+    dparam[0] = tolerance;
     *info = hasNotConverged;
   }
 
