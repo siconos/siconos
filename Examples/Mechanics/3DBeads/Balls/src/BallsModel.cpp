@@ -108,7 +108,7 @@ void BallsModel::initialize()
   IntParameters iparam(5);
   iparam[0] = 100010; // Max number of iteration
   // Solver/formulation
-  // 0: projection, 1: Newton/AlartCurnier, 2: Newton/Fischer-Burmeister, 3: Path/Glocker, 4:Projection_modifiee, 5:Fixed Point/Glocker
+  // 0: projection, 1: Newton/AlartCurnier, 2: Newton/Fischer-Burmeister, 3: Path/Glocker, 4:Projection_modifiee, 5:Fixed Point/Glocker, 6: ProjectionOnConeWithLocalIteration
   iparam[4] = 5;
   DoubleParameters dparam(5);
   dparam[0] = 1e-7; // Tolerance
@@ -170,15 +170,15 @@ void BallsModel::computeInitialPositions(Vectors q0, Vectors v0, double Radius)
 {
 
   //    // set values
-  //  (*(q0[0]))(0) =  0.0;    (*(q0[0]))(1) =  0.3;  (*(q0[0]))(2) =  0.35;
-  //   (*(q0[1]))(0) =  0.0;    (*(q0[1]))(1) =  0.3;  (*(q0[1]))(2) =  0.12;
-
   (*(q0[0]))(0) =  0.0;
-  (*(q0[0]))(1) =  0.;
-  (*(q0[0]))(2) =  0.12;
+  (*(q0[0]))(1) =  0.3;
+  (*(q0[0]))(2) =  0.35;
   (*(q0[1]))(0) =  0.0;
   (*(q0[1]))(1) =  0.3;
   (*(q0[1]))(2) =  0.12;
+
+  //     (*(q0[0]))(0) =  0.0;    (*(q0[0]))(1) =  0.;  (*(q0[0]))(2) =  0.12;
+  //     (*(q0[1]))(0) =  0.0;    (*(q0[1]))(1) =  0.3;  (*(q0[1]))(2) =  0.12;
 
   //   (*(q0[0]))(0) =  0.0;    (*(q0[0]))(1) =  0.4;  (*(q0[0]))(2) =  0.1;
   //     (*(v0[0]))(0) =  0.;    (*(v0[0]))(1) =  -1.;  (*(v0[0]))(2) =  0.;
@@ -367,26 +367,29 @@ void BallsModel::buildInteractions(InteractionsSet* allInteractions)
     }
   }
 
-  //   // Interaction between beads
+  // Interaction between beads
 
-  //   // frictional contact condition between beads
-  //   double e2 = 0.9;
-  //   NonSmoothLaw * nslaw2 = new NewtonImpactFrictionNSL(e2, e2, mu, 3);
-  //   unsigned int l = 0;
-  //   DynamicalSystemsSet dsConcerned;
-  //   for (unsigned int i=0;i<numberOfSpheres;i++){
-  //     dsConcerned.insert(allSpheres[i]);
-  //     for (unsigned int j=0;j<numberOfSpheres;j++){
-  //       if (j > i){
-  //  dsConcerned.insert(allSpheres[j]);
-  //  LLR[l] = new LagrangianScleronomousR("BallsPlugin:h0","BallsPlugin:G0");
-  //  allInteractions->insert( new Interaction(dsConcerned,l,3, nslaw2, LLR[l]));
-  //  dsConcerned.erase(allSpheres[j]);
-  //  l++;
-  //       }
-  //     }
-  //     dsConcerned.clear();
-  //   }
+  // frictional contact condition between beads
+  double e2 = 0.9;
+  NonSmoothLaw * nslaw2 = new NewtonImpactFrictionNSL(e2, e2, mu, 3);
+  unsigned int l = 0;
+  DynamicalSystemsSet dsConcerned;
+  for (unsigned int i = 0; i < numberOfSpheres; i++)
+  {
+    dsConcerned.insert(allSpheres[i]);
+    for (unsigned int j = 0; j < numberOfSpheres; j++)
+    {
+      if (j > i)
+      {
+        dsConcerned.insert(allSpheres[j]);
+        LLR[l] = new LagrangianScleronomousR("BallsPlugin:h0", "BallsPlugin:G0");
+        allInteractions->insert(new Interaction(dsConcerned, l, 3, nslaw2, LLR[l]));
+        dsConcerned.erase(allSpheres[j]);
+        l++;
+      }
+    }
+    dsConcerned.clear();
+  }
 
 }
 

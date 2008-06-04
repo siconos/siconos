@@ -94,7 +94,6 @@ void computeSiconos()
 {
   try
   {
-
     // --- simulation solver ---
     if (!Ball->isSimulationFinished())
       Ball->compute();
