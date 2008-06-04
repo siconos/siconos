@@ -184,11 +184,6 @@ void frictionContact3D_projectionWithDiagonalization_solve(int contact, int dimR
       reaction[pos + 2] = reaction[pos + 2] * num;
     }
   }
-  int i;
-  for (i = 0; i < nLocal ; ++i)
-  {
-    printf(" z[%i] = %14.7e\n", i, reaction[i]);
-  }
 }
 
 

@@ -54,7 +54,7 @@ Let us consider a NumericsMatrix named M used to save the matrix above.\n
 The first classical storage results in: \n
  - M.storageType = 0\n
  - M.size0 = 8, M.size1 = 8
- - M.matrix0 = [1 2 0 5 0 0 0 0 0 0 1 1 ...]\n
+ - M.matrix0 = [1 2 0 5 0 0 0 0 2 1 0 0 ...]\n
 matrix0 being a double* of size 64.
  - M.matrix1 = NULL
 

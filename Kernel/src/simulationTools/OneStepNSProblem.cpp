@@ -65,6 +65,7 @@ OneStepNSProblem::OneStepNSProblem(const string& pbType, OneStepNSProblemXML* os
 
   // Numerics general options
   numerics_options = new Numerics_Options();
+  numerics_options->verboseMode = 0; // turn verbose mode to off by default
 }
 
 // Constructor with given simulation and a pointer on Solver (Warning, solver is an optional argument)
@@ -95,6 +96,7 @@ OneStepNSProblem::OneStepNSProblem(const string& pbType, Simulation * newSimu, c
 
   // Numerics general options
   numerics_options = new Numerics_Options();
+  numerics_options->verboseMode = 0; // turn verbose mode to off by default
 }
 
 OneStepNSProblem::~OneStepNSProblem()
@@ -558,8 +560,6 @@ void OneStepNSProblem::computeDSUnitaryBlock(DynamicalSystem*, UnitaryRelation*)
 }
 void OneStepNSProblem::initialize()
 {
-  // Numerics general options
-  numerics_options->verboseMode = 0; // turn verbose mode to off by default
   // Checks that the set of Interactions is not empty -
   // Empty set is not forbidden, then we just display a warning message.
   if (OSNSInteractions->isEmpty())

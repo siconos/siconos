@@ -247,10 +247,6 @@ public:
     sizeOutput = newVal;
   }
 
-
-
-
-
   /** get the unitaryBlocks matrices map
    *  \return a MapOfMapOfUnitaryMatrices
    */

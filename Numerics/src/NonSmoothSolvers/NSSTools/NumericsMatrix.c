@@ -177,7 +177,7 @@ void display(const NumericsMatrix* const m)
     for (int i = 0; i < m->size1 * m->size0; i++)
     {
       printf("%lf ", m->matrix0[i]);
-      if (i % m->size1 == 0)
+      if ((i + 1) % m->size1 == 0)
         printf("\n");
     }
     printf("]");

@@ -281,6 +281,11 @@ void printSBM(const SparseBlockStructuredMatrix* const m)
     fprintf(stderr, "Numerics, SparseBlockStructuredMatrix display failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
+  if (m->size == 0)
+  {
+    printf("Numerics, SparseBlockStructuredMatrix display: matrix dim = 0.");
+    return;
+  }
   int size = m->blocksize[m->size - 1];
   printf("Sparse-Block structured matrix of size %dX%d, with %d blocks in a row(or column)\n", size, size, m->size);
   printf("and %d non null blocks\n", m->nbblocks);

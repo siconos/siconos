@@ -78,7 +78,7 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int * dim, DynamicalSystemsSet*
 // Default constructor: empty matrix, default storage
 // No allocation for M1 or M2
 OSNSMatrix::OSNSMatrix():
-  dimRow(0), storageType(0), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+  dimRow(0),  dimColumn(0), storageType(0), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
 {
   unitaryBlocksPositions = new UR_int();
   DSBlocksPositions = new DS_int();
@@ -87,7 +87,7 @@ OSNSMatrix::OSNSMatrix():
 
 // Constructor with dimensions (one input: square matrix only)
 OSNSMatrix::OSNSMatrix(unsigned int n, int stor):
-  dimRow(n), storageType(stor), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL),  numericsMat(NULL), M1(NULL), M2(NULL)
+  dimRow(n),  dimColumn(n), storageType(stor), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL),  numericsMat(NULL), M1(NULL), M2(NULL)
 {
   // Note:
   // for storageType = 0 (dense) n represents the real dimRowension of the matrix
@@ -109,7 +109,7 @@ OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
   dimRow(n),  dimColumn(m), storageType(stor), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
 {
   // Note:
-  // for storageType = 0 (dense) n represents the real dimRowension of the matrix
+  // for storageType = 0 (dense) n represents the real dimension of the matrix
   // and for sparse storage (storageType == 1) the number of unitaryBlocks in a row or column.
 
   if (storageType == 0)
@@ -128,7 +128,7 @@ OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
 
 // Basic constructor
 OSNSMatrix::OSNSMatrix(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMatrices& unitaryBlocks, int stor):
-  dimRow(0), storageType(stor), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+  dimRow(0), dimColumn(0), storageType(stor), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
 {
   unitaryBlocksPositions = new UR_int();
   DSBlocksPositions = new DS_int();
@@ -138,7 +138,7 @@ OSNSMatrix::OSNSMatrix(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMatrices&
 }
 
 OSNSMatrix::OSNSMatrix(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSBlocks, int stor):
-  dimRow(0), storageType(stor), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+  dimRow(0), dimColumn(0), storageType(stor), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
 {
   unitaryBlocksPositions = new UR_int();
   DSBlocksPositions = new DS_int();
@@ -147,7 +147,7 @@ OSNSMatrix::OSNSMatrix(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSBlocks, in
   fill(DSSet, DSBlocks);
 }
 OSNSMatrix::OSNSMatrix(DynamicalSystemsSet* DSSet, UnitaryRelationsSet* indexSet, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks, int stor):
-  dimRow(0), storageType(stor), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+  dimRow(0), dimColumn(0), storageType(stor), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
 {
   unitaryBlocksPositions = new UR_int();
   DSBlocksPositions = new DS_int();
@@ -157,7 +157,7 @@ OSNSMatrix::OSNSMatrix(DynamicalSystemsSet* DSSet, UnitaryRelationsSet* indexSet
 }
 
 OSNSMatrix::OSNSMatrix(UnitaryRelationsSet* indexSet, DynamicalSystemsSet* DSSet,  MapOfUnitaryMapOfDSMatrices& unitaryDSBlocks, int stor):
-  dimRow(0), storageType(stor), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+  dimRow(0), dimColumn(0), storageType(stor), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
 {
   unitaryBlocksPositions = new UR_int();
   DSBlocksPositions = new DS_int();
@@ -167,7 +167,7 @@ OSNSMatrix::OSNSMatrix(UnitaryRelationsSet* indexSet, DynamicalSystemsSet* DSSet
 }
 
 OSNSMatrix::OSNSMatrix(UnitaryRelationsSet* indexSet, DynamicalSystemsSet* DSSet, MapOfMapOfUnitaryMatrices& unitaryBlocks,   MapOfDSMatrices& DSBlocks, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks, MapOfUnitaryMapOfDSMatrices& unitaryDSBlocks, int stor):
-  dimRow(0), storageType(stor), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+  dimRow(0), dimColumn(0), storageType(stor), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
 {
   unitaryBlocksPositions = new UR_int();
   DSBlocksPositions = new DS_int();
@@ -183,7 +183,7 @@ OSNSMatrix::OSNSMatrix(UnitaryRelationsSet* indexSet, DynamicalSystemsSet* DSSet
 
 // Copy of a SiconosMatrix (used when OSNS xml constructor is called with M input in XML file)
 OSNSMatrix::OSNSMatrix(const SiconosMatrix& MSource):
-  dimRow(MSource.size(0)), storageType(0), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
+  dimRow(MSource.size(0)), dimColumn(MSource.size(1)), storageType(0), unitaryBlocksPositions(NULL), DSBlocksPositions(NULL), numericsMat(NULL), M1(NULL), M2(NULL)
 {
   unitaryBlocksPositions = new UR_int();
   DSBlocksPositions = new DS_int();
@@ -225,7 +225,7 @@ unsigned int OSNSMatrix::getPositionOfDSBlock(DynamicalSystem* DS) const
   return it->second;
 }
 
-// Fill the SparseMat
+// Fill the matrix
 void OSNSMatrix::fill(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMatrices& unitaryBlocks, bool update)
 {
   if (indexSet == NULL)
@@ -234,6 +234,7 @@ void OSNSMatrix::fill(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMatrices& 
   if (update)
   {
     // Computes dimRow and unitaryBlocksPositions according to indexSet
+    updateSizeAndPositions(&dimColumn, indexSet);
     updateSizeAndPositions(&dimRow, indexSet);
   }
 
@@ -244,11 +245,11 @@ void OSNSMatrix::fill(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMatrices& 
     if (update)
     {
       if (M1 == NULL)
-        M1 = new SimpleMatrix(dimRow, dimRow);
+        M1 = new SimpleMatrix(dimRow, dimColumn);
       else
       {
-        if (M1->size(0) != dimRow || M1->size(1) != dimRow)
-          M1->resize(dimRow, dimRow);
+        if (M1->size(0) != dimRow || M1->size(1) != dimColumn)
+          M1->resize(dimRow, dimColumn);
         M1->zero();
       }
     }
@@ -297,6 +298,7 @@ void OSNSMatrix::fillDiagonal(UnitaryRelationsSet* URSet, MapOfMapOfUnitaryMatri
   if (update)
   {
     // Computes dimRow and unitaryBlocksPositions according to indexSet
+    updateSizeAndPositions(&dimColumn, URSet);
     updateSizeAndPositions(&dimRow, URSet);
   }
 
@@ -307,11 +309,11 @@ void OSNSMatrix::fillDiagonal(UnitaryRelationsSet* URSet, MapOfMapOfUnitaryMatri
     if (update)
     {
       if (M1 == NULL)
-        M1 = new SimpleMatrix(dimRow, dimRow);
+        M1 = new SimpleMatrix(dimRow, dimColumn);
       else
       {
-        if (M1->size(0) != dimRow || M1->size(1) != dimRow)
-          M1->resize(dimRow, dimRow);
+        if (M1->size(0) != dimRow || M1->size(1) != dimColumn)
+          M1->resize(dimRow, dimColumn);
         M1->zero();
       }
     }
@@ -348,6 +350,7 @@ void OSNSMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSBlocks, boo
   {
     // Computes dimRow and unitaryBlocksPositions according to indexSet
     updateSizeAndPositions(&dimRow, DSSet);
+    updateSizeAndPositions(&dimColumn, DSSet);
   }
   if (storageType == 0)
   {
@@ -356,11 +359,11 @@ void OSNSMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSBlocks, boo
     if (update)
     {
       if (M1 == NULL)
-        M1 = new SimpleMatrix(dimRow, dimRow);
+        M1 = new SimpleMatrix(dimRow, dimColumn);
       else
       {
-        if (M1->size(0) != dimRow || M1->size(1) != dimRow)
-          M1->resize(dimRow, dimRow);
+        if (M1->size(0) != dimRow || M1->size(1) != dimColumn)
+          M1->resize(dimRow, dimColumn);
         M1->zero();
       }
     }
@@ -558,7 +561,7 @@ void OSNSMatrix::convert()
 {
   numericsMat->storageType = storageType;
   numericsMat->size0 = dimRow;
-  numericsMat->size1 = dimRow;
+  numericsMat->size1 = dimColumn;
   if (storageType == 0)
   {
     numericsMat->matrix0 = M1->getArray(); // Pointer link

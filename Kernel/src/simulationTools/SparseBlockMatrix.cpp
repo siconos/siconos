@@ -164,34 +164,42 @@ void SparseBlockMatrix::fill(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMat
     (*diagSizes)[row] = sizeV;
     // Look for UR connected (ie with common DS) to the current one
     // The connection is checked thanks to blocks map
-    for (UnitaryMatrixColumnIterator itCol = blocks[*itRow].begin(); itCol != blocks[*itRow].end(); ++itCol)
+    for (UnitaryRelationsIterator itCol = indexSet->begin(); itCol != indexSet->end(); ++itCol)
     {
-      // We keep connected UR only if they are also in indexSets[level] and if the block is not NULL
-      if ((indexSet->find((*itCol).first)) != indexSet->end() && blocks[*itRow][(*itCol).first] != NULL)
+      //for(UnitaryMatrixColumnIterator itCol = blocks[*itRow].begin(); itCol!=blocks[*itRow].end(); ++itCol)
+      //{
+
+      if ((blocks[*itRow]).find(*itCol) != (blocks[*itRow]).end())
       {
-        // UR1 = *itRow
-        // UR2 = *itCol
-        // corresponding matrix = blocks[*itRow][(*itCol).first]
+        if (blocks[*itRow][*itCol] != NULL)
+        {
+          // We keep connected UR only if they are also in indexSets[level] and if the block is not NULL
+          //   if( (indexSet->find((*itCol).first))!= indexSet->end() && blocks[*itRow][(*itCol).first] != NULL)
+          {
+            // UR1 = *itRow
+            // UR2 = *itCol
+            // corresponding matrix = blocks[*itRow][(*itCol).first]
 
-        // Increment the number of non-null blocks
-        nbNonNullBlocks++;
+            // Increment the number of non-null blocks
+            nbNonNullBlocks++;
 
-        // Insert block into the list
-        (blocksList)->push_back(blocks[*itRow][(*itCol).first]->getArray());
+            // Insert block into the list
+            (blocksList)->push_back(blocks[*itRow][*itCol]->getArray());
 
-        // Insert block positions into rowPos and colPos
-        (rowPos)->push_back(row);
-        (colPos)->push_back(col);
+            // Insert block positions into rowPos and colPos
+            (rowPos)->push_back(row);
+            (colPos)->push_back(col);
 
+          }
+        }
       }
-
       col++;// increment col position
     }
     col = 0;
     row++;// increment row position
   }
-  convert();
 }
+
 // Fill the SparseMat
 void SparseBlockMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSblocks)
 {
@@ -214,6 +222,7 @@ void SparseBlockMatrix::convert()
   numericsMatSparse->RowIndex = &((*rowPos)[0]);
   numericsMatSparse->ColumnIndex = &((*colPos)[0]);
   numericsMatSparse->block =  &((*blocksList)[0]);
+  printSBM(numericsMatSparse);
   //   // Loop through the non-null blocks
   //   for (SpMatIt1 i1 = MSparseBlock->begin1(); i1 != MSparseBlock->end1(); ++i1)
   //     {
