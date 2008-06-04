@@ -71,10 +71,13 @@ void AC_fillMLocal(int contact)
   else if (storageType == 1)
   {
     int diagPos = getDiagonalBlockPos(MGlobal->matrix1, contact);
-    MLocal = MGlobal->matrix1->block[diagPos];
+    //MLocal = MGlobal->matrix1->block[diagPos];
+    DCOPY(9, MGlobal->matrix1->block[diagPos], 1, MLocal, 1);
+
   }
   else
     numericsError("FrictionContact3D_AlartCurnier:AC_fillMLocal() -", "unknown storage type for matrix M");
+
 }
 
 void frictionContact3D_AC_initialize(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0)
@@ -90,14 +93,13 @@ void frictionContact3D_AC_initialize(int n0, const NumericsMatrix*const M0, cons
   MGlobal = M0;
   qGlobal = q0;
   mu = mu0;
-  /* Connect to update function for dense storage */
-  if (MGlobal->storageType == 0)
-  {
-    MLocal = (double*)malloc(nLocal * nLocal * sizeof(*MLocal));
-    isMAllocatedIn = 1;
-  }
-  else isMAllocatedIn = 0;
-
+  /*  if(MGlobal->storageType == 0) */
+  /*     { */
+  MLocal = (double*)malloc(nLocal * nLocal * sizeof(*MLocal));
+  isMAllocatedIn = 1;
+  /*     } */
+  /*   else */
+  /*     isMAllocatedIn = 0; */
 }
 
 void frictionContact3D_AC_update(int contact, double * reaction)
@@ -105,8 +107,10 @@ void frictionContact3D_AC_update(int contact, double * reaction)
   /* Build a local problem for a specific contact
      reaction corresponds to the global vector (size n) of the global problem.
   */
-  int in = 3 * contact, it = in + 1, is = it + 1;
-  int numberOfContact = n / 3;
+  /* Call the update function which depends on the storage for MGlobal/MBGlobal */
+  /* Build a local problem for a specific contact
+   reaction corresponds to the global vector (size n) of the global problem.
+  */
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
   AC_fillMLocal(contact);
@@ -114,6 +118,7 @@ void frictionContact3D_AC_update(int contact, double * reaction)
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
    excluding the block corresponding to the current contact. ****/
 
+  int in = 3 * contact, it = in + 1, is = it + 1;
   /* reaction current block set to zero, to exclude current contact block */
   double rin = reaction[in] ;
   double rit = reaction[it] ;
@@ -141,14 +146,12 @@ void frictionContact3D_AC_update(int contact, double * reaction)
     */
     rowProdNoDiagSBM(n, 3, contact, MGlobal->matrix1, reaction, qLocal, 0);
   }
-
   reaction[in] = rin;
   reaction[it] = rit;
   reaction[is] = ris;
 
   /* Friction coefficient for current block*/
   mu_i = mu[contact];
-
 }
 
 /* Compute function F(Reaction) */
@@ -213,6 +216,10 @@ void F_AC(int Fsize, double *reaction , double *F, int up2Date)
     F[1] = (reaction[1] - projT * reaction[0] * num) / at;
     F[2] = (reaction[2] - projS * reaction[0] * num) / at;
   }
+  /*   for(int l = 0; l < 3 ; ++l) */
+  /*     printf(" %lf", F[l]); */
+  /*   printf("\n"); */
+
 }
 
 /* Compute Jacobian of function F */
@@ -290,6 +297,9 @@ void jacobianF_AC(int Fsize, double *reaction, double *jacobianFMatrix, int up2D
     jacobianFMatrix[2 * Fsize + 1] =  - rcof * reaction[0] * ((-num * at * MLocal[2 * Fsize + 1]) - projT * tmp);
     jacobianFMatrix[2 * Fsize + 2] = (1 - mu_i * reaction[0] * (num * (1 - at * MLocal[2 * Fsize + 2]) - projS * tmp)) / at;
   }
+  /*   for(int l = 0; l < 9 ; ++l) */
+  /*     printf(" %lf", jacobianFMatrix[l]); */
+  /*   printf("\n"); */
 }
 
 void frictionContact3D_AC_post(int contact, double* reaction)
