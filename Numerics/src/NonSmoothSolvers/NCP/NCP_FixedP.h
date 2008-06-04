@@ -30,7 +30,7 @@
 extern "C" {
 #endif
 
-  int Fixe(int n, double* z, FuncEvalPtr F, int* iparam, double* dparam);
+  int Fixe(int n, double* z, int* iparam, double* dparam);
 
 #ifdef __cplusplus
 }

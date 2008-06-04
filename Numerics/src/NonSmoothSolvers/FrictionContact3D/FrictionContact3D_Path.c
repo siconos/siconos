@@ -46,7 +46,6 @@ int F_GlockerPath(int sizeF, double* reaction, double* FVector)
 
   /* TMP COPY: review memory management for FGlocker ...*/
   DCOPY(sizeF , FGlocker , 1, FVector , 1);
-
   FGlocker = NULL;
   return 1;
 }
@@ -101,7 +100,6 @@ void frictionContact3D_Path_initialize(int n0, const NumericsMatrix*const M0, co
 void frictionContact3D_Path_solve(int contact, int dimReaction, double* reaction, int* iparam, double* dparam)
 {
   (*updateSolver)(contact, reaction);
-  printf(" ============= je suis la =============\n");
   int pos = Fsize * contact; /* Current block position */
   double * reactionBlock = &reaction[pos];
   int info = NCP_Path(Fsize, reactionBlock, F, jacobianF, iparam, dparam);

@@ -16,9 +16,8 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-
 #include "NCP_Path.h"
-//#include "NonSmoothNewton.h"
+#include "FrictionContact3D_FixedP.h"
 #include "Numerics_Options.h"
 #include "LA.h"
 #include "FrictionContact3D2NCP_Glocker.h"
@@ -26,9 +25,31 @@
 #include "stdio.h"
 #include "stdlib.h"
 
+/** writes \f$ F(z) \f$ using Glocker formulation
+ */
+int F_GlockerFixedP(int sizeF, double* reaction, double* FVector)
+{
+  /* Glocker formulation */
+  int up2Date = 0;
+  double* FGlocker = NULL;
+  computeFGlocker(&FGlocker, up2Date);
+  /* Note that FGlocker is a static var. in FrictionContact3D2NCP_Glocker and thus there is no memory allocation in
+     the present file.
+  */
+
+  /* TMP COPY: review memory management for FGlocker ...*/
+  DCOPY(sizeF , FGlocker , 1, FVector , 1);
+  FGlocker = NULL;
+  return 1;
+}
+
+/** writes \f$ \nabla_z F(z) \f$  using Glocker formulation and the Fischer-Burmeister function.
+ */
+
+
 /*============================ Fixed point Solver ==================================*/
 
-int Fixe(int n, double* z, FuncEvalPtr phi, int* iparam, double* dparam)
+int Fixe(int n, double* z, int* iparam, double* dparam)
 {
 
   int itermax = iparam[0]; // maximum number of iterations allowed
@@ -43,14 +64,14 @@ int Fixe(int n, double* z, FuncEvalPtr phi, int* iparam, double* dparam)
   int incx = 1, i;
   int n2 = n * n;
 
+  /* Connect F and its jacobian to input functions */
+  //  setFuncEval(F);
+
   /* Memory allocation for phi and its jacobian */
-  static FuncEvalPtr F = NULL;
-  double* FVector = (double*)malloc(n * sizeof(*FVector));
-  double * www = (double*)malloc(n * sizeof(*FVector));
+  double* FVector = (double*)malloc(sizeof(double) * n);
+  double * www = (double*)malloc(sizeof(double) * n);
 
-  double rho = 1.;
-  double descentCondition, criterion, norm_jacobian_psi, normPhi;
-
+  double rho = 10.;
   double terminationCriterion = 1;
 
   /** Iterations ... */
@@ -58,26 +79,23 @@ int Fixe(int n, double* z, FuncEvalPtr phi, int* iparam, double* dparam)
   {
     ++niter;
     /** Computes Fz */
-    int up2Date = 1;
-    computeFGlocker(&FVector, up2Date);
+    F_GlockerFixedP(n, z, FVector);
 
-    printf(" ============= je suis la =============\n");
-
-    /* Computes the jacobian of the merit function, jacobian_psi = transpose(jacobianPhiMatrix).phiVector */
+    printf(" ============= Fixed Point Iteration ============= %i\n", niter);
 
     for (i = 0; i < n ; ++i)
     {
       printf(" z[%i] = %14.7e\n", i, z[i]);
-      printf(" FVector[%i] = %14.7e\n", i, FVector[i]);
+      printf(" F[%i] = %14.7e\n", i, FVector[i]);
       if (z[i] - rho * FVector[i] > 0.)
       {
-        z[i] = z[i] - FVector[i];
-        www[i] = -rho * FVector[i];
+        www[i] = rho * FVector[i] - z[i];
+        z[i] = rho * FVector[i];
       }
       else
       {
-        www[i] = -z[i];
-        z[i] = 0.;
+        z[i] = z[i];
+        www[i] = 0.;
       }
     }
 

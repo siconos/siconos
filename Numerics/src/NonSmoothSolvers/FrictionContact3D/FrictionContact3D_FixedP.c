@@ -25,36 +25,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-static FuncEvalPtr F = NULL;
-static JacEvalPtr jacobianF = NULL;
 static UpdateSolverPtr updateSolver = NULL;
 static PostSolverPtr postSolver = NULL;
 static FreeSolverPtr freeSolver = NULL;
 
 /* size of a block */
 static int Fsize;
-
-/** writes \f$ F(z) \f$ using Glocker formulation
- */
-int F_GlockerFixedP(int sizeF, double* reaction, double* FVector)
-{
-  /* Glocker formulation */
-  int up2Date = 0;
-  double* FGlocker = NULL;
-  computeFGlocker(&FGlocker, up2Date);
-  /* Note that FGlocker is a static var. in FrictionContact3D2NCP_Glocker and thus there is no memory allocation in
-     the present file.
-  */
-
-  /* TMP COPY: review memory management for FGlocker ...*/
-  DCOPY(sizeF , FGlocker , 1, FVector , 1);
-
-  FGlocker = NULL;
-  return 1;
-}
-
-/** writes \f$ \nabla_z F(z) \f$  using Glocker formulation and the Fischer-Burmeister function.
- */
 
 void frictionContact3D_FixedP_initialize(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0, int* iparam)
 {
@@ -68,7 +44,7 @@ void frictionContact3D_FixedP_initialize(int n0, const NumericsMatrix*const M0, 
   {
     Fsize = 5;
     NCPGlocker_initialize(n0, M0, q0, mu0);
-    F = &F_GlockerFixedP;
+    updateSolver = &NCPGlocker_update;
     postSolver = &NCPGlocker_post;
     freeSolver = &NCPGlocker_free;
   }
@@ -85,11 +61,11 @@ void frictionContact3D_FixedP_solve(int contact, int dimReaction, double* reacti
   int pos = Fsize * contact; /* Current block position */
   double * reactionBlock = &reaction[pos];
 
-  int info = Fixe(Fsize, reactionBlock, F, iparam, dparam);
+  int info = Fixe(Fsize, reactionBlock, iparam, dparam);
 
   if (info > 0)
   {
-    fprintf(stderr, "Numerics, FrictionContact3D_Newton failed, reached max. number of iterations without convergence. Error = %f\n", dparam[1]);
+    fprintf(stderr, "Numerics, FrictionContact3D_FixedP failed, reached max. number of iterations without convergence. Error = %f\n", dparam[1]);
     exit(EXIT_FAILURE);
   }
 
@@ -98,8 +74,6 @@ void frictionContact3D_FixedP_solve(int contact, int dimReaction, double* reacti
 
 void frictionContact3D_FixedP_free()
 {
-  F = NULL;
-  jacobianF = NULL;
   updateSolver = NULL;
   postSolver = NULL;
   (*freeSolver)();
@@ -107,26 +81,5 @@ void frictionContact3D_FixedP_free()
 
 void frictionContact3D_FixedP_computeError(int n, double* velocity, double*reaction, double * error)
 {
-  /*   int numberOfContacts = n/3; */
-  /*   int sizeGlobal = numberOfContacts*FSize; */
-  /*   //  double * FGlobal = (double*)malloc(sizeGlobal*sizeof(*FGlobal));  */
-  /*   (*computeFGlobal)(reaction,velocity); */
-  /*   int i; */
-  /*   double Fz; */
-  /*   *error = 0; */
-  /*   for(i=0;i<sizeGlobal;++i) */
-  /*     { */
-  /*       Fz = velocity[i]*reaction[i]; */
-  /*       if(Fz>0) */
-  /*  *error+=Fz; */
-  /*       if(reaction[i]<0) */
-  /*  *error+=reaction[i]; */
-  /*       if(velocity[i]<0) */
-  /*  *error+=velocity[i]; */
-  /*     } */
-
-  /*   // (*computeVelocity)(FGlobal); */
-
-  /*   free(FGlobal); */
 
 }
