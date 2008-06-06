@@ -1,0 +1,62 @@
+# cmake -DCMAKE_INSTALL_PREFIX=<your installation dir> <path>
+CMAKE_MINIMUM_REQUIRED(VERSION 2.4)
+SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+INCLUDE(SiconosProject)
+
+SET(EXAMPLES_DIRECTORIES
+  Electronics
+  Mechanics
+  Mechanics/3DBeads
+)
+
+SET(NO_TEST_FILES
+  Mechanics/3DBeads/Billard/draw_billard.cpp
+  Mechanics/3DBeads/Beads_Couple/Draw_NLM.cpp
+  Mechanics/3DBeads/Beads_Couple/Draw_NLM.cpp
+  Mechanics/3DBeads/Block_Beads/Draw_block_beads.cpp
+  Mechanics/3DBeads/Canon/main.cpp)
+
+SICONOS_PROJECT(Examples 3 0 0)
+
+#
+# Internals
+#
+
+SET(SICCOM "${CMAKE_INSTALL_PREFIX}/bin/siconos")
+
+SET(SICWRAP ${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/Siconos/wrap)
+
+FILE(WRITE ${SICWRAP}
+  "cd ${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/Siconos/; ${SICCOM} $@")
+
+ENABLE_TESTING()
+
+MACRO(ADD_EXAMPLE _N _EX)
+  MESSAGE("Adding example ${_N} (${_EX})")
+  ADD_TEST(${_N} /bin/sh -x ${SICWRAP} ${_EX})
+ENDMACRO(ADD_EXAMPLE _EX _N)
+
+FOREACH(_D ${EXAMPLES_DIRECTORIES})
+  FILE(GLOB EXAMPLES_P ${CMAKE_SOURCE_DIR}/${_D}/*/*.cpp )
+  IF(EXAMPLES_P)
+    FOREACH(_P ${EXAMPLES_P})
+      GET_FILENAME_COMPONENT(_RP ${_P} ABSOLUTE)
+      LIST(APPEND EXAMPLES ${_RP})
+    ENDFOREACH(_P ${EXAMPLES_P})
+  ENDIF(EXAMPLES_P)
+ENDFOREACH(_D ${EXAMPLES_DIRECTORIES})
+
+FOREACH(EXAMPLE ${EXAMPLES})
+  IF(NOT EXAMPLE MATCHES Plugin)
+    SET(TEST_ME TRUE)
+    FOREACH(_NT ${NO_TEST_FILES})
+      IF(EXAMPLE MATCHES "${_NT}")
+        SET(TEST_ME FALSE)
+      ENDIF(EXAMPLE MATCHES "${_NT}")
+    ENDFOREACH(_NT ${NO_TEST_FILES})
+    IF(TEST_ME)
+      GET_FILENAME_COMPONENT(EXAMPLE_NAME ${EXAMPLE} NAME_WE)
+      ADD_EXAMPLE(${EXAMPLE_NAME} ${EXAMPLE})
+    ENDIF(TEST_ME)
+  ENDIF(NOT EXAMPLE MATCHES Plugin)
+ENDFOREACH(EXAMPLE ${EXAMPLES})
