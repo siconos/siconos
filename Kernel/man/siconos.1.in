@@ -22,6 +22,10 @@ siconos \- The Siconos C++ Front-End.
 .B \-h | \-help
 ]
 [
+.B \-l  
+.I LIBRARY
+]
+[
 .B \-noexec
 ]
 [
@@ -91,6 +95,10 @@ The following command-line options are recognized by
 |
 .B \-help
  Print help.
+.TP
+.BI \-l
+.I LIBRARY
+ Link with a library
 .TP
 .BI \-noexec
  Do not run executable after compilation.

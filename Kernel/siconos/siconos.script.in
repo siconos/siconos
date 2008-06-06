@@ -58,12 +58,13 @@ usage() {
     echo " ";
     echo "     -h | -help : to print this help.";
     echo " ";
+    echo "     -l<lib> : link with library <lib>."
+    echo " ";
     echo "     -noexec : compile only.";
     echo " ";
     echo "     -opt <opt> : add option <opt> to compiler." 
     echo " ";
     echo "     -ldopt <opt> : add option <opt> to linker." 
-    echo " ";
     echo "     -P prefix_command : to add a prefix command (time, valgrind, gdb, etc.)."
     echo " ";
     echo "     -plugin_dir <plugin_directory> (Default = plugin): "
