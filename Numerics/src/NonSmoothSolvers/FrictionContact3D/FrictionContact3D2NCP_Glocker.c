@@ -380,7 +380,7 @@ void computeJacobianFGlocker(double** jacobianFOut, int up2Date)
 
 /*  error = sum_i [(zi*F(zi)_+ + (zi)_- + (F(zi))_-] */
 
-double compute_NCP_error1(int i, double error)
+double Compute_NCP_error1(int i, double error)
 {
   printf("----------------------------------contact =  %i\n", i);
 
@@ -400,7 +400,7 @@ double compute_NCP_error1(int i, double error)
 
 /*  error = sum_i sqrt[((zi*F(zi)_+)^2 + (sqrt(zi^2 + (F(zi))^2) - zi - F(zi))^2 ] */
 
-double compute_NCP_error2(int i, double error)
+double Compute_NCP_error2(int i, double error)
 {
   double Fz;
   //      printf(" z[%i] = %14.7e\n", i, reactionGlocker[i]);

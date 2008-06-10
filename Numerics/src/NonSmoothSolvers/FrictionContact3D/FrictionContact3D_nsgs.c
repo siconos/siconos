@@ -34,7 +34,10 @@ void fake_compute_error(int n, double* velocity, double* reaction, double *error
   m = 5 * n / 3;
   double err;
   for (i = 0 ; i < m ; ++i)
-    *error += compute_NCP_error1(i, err);
+  {
+    *error += Compute_NCP_error1(i, err);
+    //*error += Compute_NCP_error2(i, err);
+  }
 }
 
 void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, int* iparam)

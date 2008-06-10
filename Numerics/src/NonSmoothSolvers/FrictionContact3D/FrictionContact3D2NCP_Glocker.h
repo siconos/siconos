@@ -90,8 +90,8 @@ extern "C" {
   void computeJacobianFGlocker(double **, int);
 
   /** compute NCP error for Fischer-Burmeister formulation **/
-  double compute_NCP_error1(int contact, double error);
-  double compute_NCP_error2(int contact, double error);
+  double Compute_NCP_error1(int contact, double error);
+  double Compute_NCP_error2(int contact, double error);
 
   /** compute Fixed Point Solution for the NCP formulation  **/
   void compute_Z_GlockerFixedP(int contact, double *reactionstep);
