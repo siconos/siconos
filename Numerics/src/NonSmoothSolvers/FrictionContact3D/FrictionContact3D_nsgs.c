@@ -27,8 +27,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void fake_compute_error(int n, double* velocity, double* reaction, double* error)
-{}
+void fake_compute_error(int n, double* velocity, double* reaction, double *error)
+{
+  *error = 0.;
+  int i, m;
+  m = 5 * n / 3;
+  double err;
+  for (i = 0 ; i < m ; ++i)
+    *error += compute_NCP_error1(i, err);
+}
 
 void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, int* iparam)
 {
@@ -139,9 +146,9 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
       (*local_solver)(contact, n, reaction, iparam, dparam);
 
     /* **** Criterium convergence **** */
-    //   (*computeError)(n,velocity,reaction,&error);
-
-    FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, &error);
+    (*computeError)(n, velocity, reaction, &error);
+    printf("-----------------------------------Iteration %i Erreur = %14.7e\n", iter, error);
+    //FrictionContact3D_compute_error(problem, reaction ,velocity, tolerance, &error);
     /*       for( contact = 0 ; contact < nc ; ++contact ){ */
     /*    pos = contact*3; */
     /*    printf ("reaction[pos] = %14.7e\n",reaction[pos]); */

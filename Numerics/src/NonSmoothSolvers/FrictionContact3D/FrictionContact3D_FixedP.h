@@ -35,6 +35,8 @@
 extern "C" {
 #endif
 
+  void F_GlockerFixedP(int sizeF, double* reaction, double* FVector, int up2Date);
+
   /** Initialize friction-contact 3D Fixed Point solver
       \param dim. of the global problem
       \param matrix M of the global problem

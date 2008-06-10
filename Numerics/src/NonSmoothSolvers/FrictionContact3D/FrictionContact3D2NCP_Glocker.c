@@ -15,6 +15,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ *
+ * Authors: H. Khenous, F. Perignan
  */
 
 /*
@@ -335,6 +337,7 @@ void computeJacobianGGlocker()
 
 void  NCPGlocker_post(int contact, double * reaction0)
 {
+
   /* Retrieve original vector reaction from reactionGlocker formulation
      Rn = reaction[0] =  reactionGlocker[0]
 
@@ -350,8 +353,6 @@ void  NCPGlocker_post(int contact, double * reaction0)
   reaction0[it] = IpInvTranspose[0] * tmp1 + IpInvTranspose[2] * tmp2;
   reaction0[is] = IpInvTranspose[1] * tmp1 + IpInvTranspose[3] * tmp2;
 }
-
-
 
 void computeFGlocker(double** FOut, int up2Date)
 {
@@ -374,6 +375,61 @@ void computeJacobianFGlocker(double** jacobianFOut, int up2Date)
   computeJacobianGGlocker(); /* add jacobianG to previously computed M in jacobianF */
   *jacobianFOut = jacobianFGlocker; /* pointer link */
 }
+
+/* Compute error for the NCP formulation*/
+
+/*  error = sum_i [(zi*F(zi)_+ + (zi)_- + (F(zi))_-] */
+
+double compute_NCP_error1(int i, double error)
+{
+  printf("----------------------------------contact =  %i\n", i);
+
+  double Fz;
+  printf(" z[%i] = %14.7e\n", i, reactionGlocker[i]);
+  printf(" F[%i] = %14.7e\n", i, FGlocker[i]);
+
+  Fz = FGlocker[i] * reactionGlocker[i];
+  if (Fz > 0)
+    error += Fz;
+  if (reactionGlocker[i] < 0)
+    error += reactionGlocker[i];
+  if (FGlocker[i] < 0)
+    error += FGlocker[i];
+  return error;
+}
+
+/*  error = sum_i sqrt[((zi*F(zi)_+)^2 + (sqrt(zi^2 + (F(zi))^2) - zi - F(zi))^2 ] */
+
+double compute_NCP_error2(int i, double error)
+{
+  double Fz;
+  //      printf(" z[%i] = %14.7e\n", i, reactionGlocker[i]);
+  //      printf(" F[%i] = %14.7e\n", i, FGlocker[i]);
+
+  Fz = FGlocker[i] * reactionGlocker[i];
+  if (Fz > 0)
+    error += Fz * Fz;
+  error += (sqrt(FGlocker[i] * FGlocker[i] + reactionGlocker[i] * reactionGlocker[i]) - FGlocker[i] - reactionGlocker[i]) * (sqrt(FGlocker[i] * FGlocker[i] + reactionGlocker[i] * reactionGlocker[i]) - FGlocker[i] - reactionGlocker[i]);
+  error = sqrt(error);
+  return error;
+}
+
+void compute_Z_GlockerFixedP(int i, double *reactionstep)
+{
+
+  double rho = 1.;
+  if (reactionGlocker[i] - rho * FGlocker[i] > 0.)
+  {
+    reactionstep[i] = rho * FGlocker[i] - reactionGlocker[i];
+    reactionGlocker[i] = rho * FGlocker[i];
+  }
+  else
+  {
+    reactionGlocker[i] = reactionGlocker[i];
+    reactionstep[i] = 0.;
+  }
+}
+
 
 void NCPGlocker_free()
 {

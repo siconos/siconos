@@ -19,8 +19,10 @@
 
 #include "NCP_Path.h"
 #include "NCP_FixedP.h"
+#include "NCP_FischerBurmeister.h"
 #include "NonSmoothNewton.h"
 #include "FrictionContact3D_Solvers.h"
+#include "FrictionContact3D2NCP_Glocker.h"
 #include "LA.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -31,6 +33,26 @@ static FreeSolverPtr freeSolver = NULL;
 
 /* size of a block */
 static int Fsize;
+
+/** writes \f$ F(z) \f$ using Glocker formulation
+ */
+void F_GlockerFixedP(int sizeF, double* reaction, double* FVector, int up2Date)
+{
+  /* Glocker formulation */
+  double* FGlocker = NULL;
+  computeFGlocker(&FGlocker, up2Date);
+  /* Note that FGlocker is a static var. in FrictionContact3D2NCP_Glocker and thus there is no memory allocation in
+     the present file.
+  */
+
+  /* TMP COPY: review memory management for FGlocker ...*/
+  DCOPY(sizeF , FGlocker , 1, FVector , 1);
+  FGlocker = NULL;
+}
+
+/** writes \f$ \nabla_z F(z) \f$  using Glocker formulation and the Fischer-Burmeister function.
+ */
+
 
 void frictionContact3D_FixedP_initialize(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0, int* iparam)
 {
@@ -57,6 +79,7 @@ void frictionContact3D_FixedP_initialize(int n0, const NumericsMatrix*const M0, 
 
 void frictionContact3D_FixedP_solve(int contact, int dimReaction, double* reaction, int* iparam, double* dparam)
 {
+
   (*updateSolver)(contact, reaction);
   int pos = Fsize * contact; /* Current block position */
   double * reactionBlock = &reaction[pos];
@@ -79,7 +102,7 @@ void frictionContact3D_FixedP_free()
   (*freeSolver)();
 }
 
-void frictionContact3D_FixedP_computeError(int n, double* velocity, double*reaction, double * error)
+double frictionContact3D_FixedP_computeError(int contact, int dimReaction, double* reaction, double * error)
 {
 
 }
