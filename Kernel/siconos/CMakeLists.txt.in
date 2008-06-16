@@ -2,15 +2,22 @@
 
 SET(CMAKE_MODULE_PATH @CMAKE_INSTALL_PREFIX@/share/siconos-kernel/cmake)
 
-INCLUDE(CMakeImportBuildSettings)
-CMAKE_IMPORT_BUILD_SETTINGS(BuildSettings)
+# Build settings are not mandatory (failure on cmake versions mismatch)
+IF(IMPORT_BUILD_SETTINGS)
+  INCLUDE(CMakeImportBuildSettings)
+  CMAKE_IMPORT_BUILD_SETTINGS(BuildSettings)
+ENDIF(IMPORT_BUILD_SETTINGS)
+
+# Siconos settings
 INCLUDE(LibraryDependencies)
 INCLUDE(Settings)
 
+# Compiler options (given with --opt)
 FOREACH(_O ${COMPILER_OPTIONS})
   ADD_DEFINITIONS(${_O})
 ENDFOREACH(_O ${COMPILER_OPTIONS})
 
+# Definitions (given with -D) are passed to the preprocessor
 FOREACH(_DEF ${ALL_EXTRA_DEFINITIONS})
   IF(DEFINED ${_DEF})
     ADD_DEFINITIONS(-D${_DEF}=${${_DEF}})
@@ -132,7 +139,10 @@ IF(_EXE)
   FOREACH(_L ${PROJECT_FORTRAN_LIBRARIES})
     TARGET_LINK_LIBRARIES(${_EXE} ${_L})
   ENDFOREACH(_L ${PROJECT_FORTRAN_LIBRARIES})
-  
+
+  #
+  # Some specifities
+  #
   IF(WithQGLViewer)
     TARGET_LINK_LIBRARIES(${_EXE} ${QGLVIEWER_LIBRARY})
     TARGET_LINK_LIBRARIES(${_EXE} ${QT_QTXML_LIBRARY})
