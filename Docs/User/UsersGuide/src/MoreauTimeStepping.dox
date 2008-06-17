@@ -212,6 +212,33 @@ Where \f$ S_{i+1}^k \f$ stands for \f$ (X_{i+1}^{k},t_{i+1},\lambda_{i+1}^{k}) \
  G_0(X,t,\lambda)=\nabla_X g(X,t,\lambda)&, &  G_1(X,t,\lambda)=\nabla_{\lambda} g(X,t,\lambda) 
 \f}
 
+In the case where :
+
+\f[
+x_{i+1}^{k+1} = x^{free,k}_{i+1} + (w_{i+1}^k)^{-1}r_{i+1}^{k+1}
+\f]
+
+We can write
+
+\f[
+X_{i+1}^{k+1} = X^{free,k}_{i+1} + (W_{i+1}^k)^{-1}R_{i+1}^{k+1}
+\f]
+
+where \f$(W_{i+1}^k)^{-1}\f$, is a diagonal block matrix holding the \f$(w_{i+1}^k)^{-1}\f$,
+then, if there is one and only one interaction we have:
+
+\f[
+(1-(W_{i+1}^k)^{-1}G_{0,i+1}^k) X_{i+1}^{k+1} = X_{i+1}^{free,k} + (W_{i+1}^k)^{-1} (R_{i+1}^k - G_{0,i+1}^k X_{i+1}^k - G_{1,i+1}^k \lambda_{i+1}^k + G_{1,i+1}^k \lambda_{i+1}^{k+1})
+\f]
+and finally: 
+
+\f{eqnarray*}
+y_{i+1}^{k+1} &=& M_{lcp}\lambda_{i+1}^{k+1} + q_{lcp} \\
+M_{lcp} &=& H_{1,i+1}^k + H_{0,i+1}^k (1-(W_{i+1}^k)^{-1} G_{0,i+1}^k)^{-1} (W_{i+1}^k)^{-1} G_{1,i+1}^k \\
+q_{lcp} &=& y_{i+1} -H_{0,i+1}^k X_{i+1}^k - H_{1,i+1}^k \lambda_{i+1}^k + H_{0,i+1}^k (1-(W_{i+1}^k)^{-1} G_{0,i+1}^k)^{-1}
+[X_{i+1}^{free,k} + (W_{i+1}^k)^{-1} (R_{i+1}^k - G_{0,i+1}^k X_{i+1}^k - G_{1,i+1}^k \lambda_{i+1}^k)]
+\f}
+
 \subsubsection MTSRD_FOLR First Order Linear Relations
 
 \b Classes: FirstOrderLinearR and FirstOrderLinearTIR.
