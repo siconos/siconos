@@ -1,0 +1,2 @@
+siconos -plugin_dir RX90Plugin RX90CircleED.cpp
+
