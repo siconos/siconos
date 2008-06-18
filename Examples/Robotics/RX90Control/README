@@ -1,0 +1,4 @@
+siconos -src_dir /scratch/mozul/siconos/RX90Control/DelayedSampling -plugin_dir RX90Plugin RX90CircleED.cpp
+
+-src_dir prend un chemin absolu uniquement !!!
+
