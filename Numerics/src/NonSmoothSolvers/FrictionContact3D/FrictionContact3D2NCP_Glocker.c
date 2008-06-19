@@ -164,7 +164,8 @@ void NCPGlocker_fillMLocal(int contact)
   else if (storageType == 1)
   {
     int diagPos = getDiagonalBlockPos(MGlobal->matrix1, contact);
-    MLocal = MGlobal->matrix1->block[diagPos];
+    //MLocal = MGlobal->matrix1->block[diagPos];
+    DCOPY(9, MGlobal->matrix1->block[diagPos], 1, MLocal, 1);
   }
   else
     numericsError("FrictionContact3D2NCP_Glocker::NCPGlocker_fillMLocal() -", "unknown storage type for matrix M");
@@ -188,13 +189,13 @@ void NCPGlocker_initialize(int n0, const NumericsMatrix*const M0, const double*c
   qGlobal = q0;
   mu = mu0;
 
-  if (MGlobal->storageType == 0)
-  {
-    MLocal = (double*)malloc(3 * 3 * sizeof(*MLocal));
-    isMAllocatedIn = 1;
-  }
-  else
-    isMAllocatedIn = 0;
+  /*   if(MGlobal->storageType == 0) */
+  /*     { */
+  MLocal = (double*)malloc(3 * 3 * sizeof(*MLocal));
+  isMAllocatedIn = 1;
+  /*     } */
+  /*   else  */
+  /*     isMAllocatedIn = 0; */
 
   /* ei = [cos((4i-3)Pi/6), sin-((4i-3)Pi/6)]
      Ip = [e1 e2]

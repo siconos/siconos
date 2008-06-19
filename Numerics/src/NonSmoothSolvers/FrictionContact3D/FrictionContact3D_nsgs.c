@@ -88,7 +88,6 @@ void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, C
     fprintf(stderr, "Numerics, FrictionContact3D_nsgs failed. Unknown solver.\n");
     exit(EXIT_FAILURE);
   }
-  *computeError = &fake_compute_error;
 }
 
 void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options)
@@ -149,9 +148,9 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
       (*local_solver)(contact, n, reaction, iparam, dparam);
 
     /* **** Criterium convergence **** */
-    (*computeError)(n, velocity, reaction, &error);
+    //      (*computeError)(n,velocity,reaction,&error);
     printf("-----------------------------------Iteration %i Erreur = %14.7e\n", iter, error);
-    //FrictionContact3D_compute_error(problem, reaction ,velocity, tolerance, &error);
+    FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, &error);
     /*       for( contact = 0 ; contact < nc ; ++contact ){ */
     /*    pos = contact*3; */
     /*    printf ("reaction[pos] = %14.7e\n",reaction[pos]); */
