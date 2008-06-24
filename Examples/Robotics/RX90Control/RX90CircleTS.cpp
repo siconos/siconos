@@ -255,23 +255,6 @@ int main(int argc, char* argv[])
     ioMatrix out("result.dat", "ascii");
     out.write(dataPlot, "noDim");
 
-    // --- Free memory ---
-    delete arm;
-    delete torques;
-    delete nslaw;
-    delete relation;
-    delete inter;
-    delete nsds;
-    delete RX90;
-    delete t;
-    delete sampling;
-    delete tmp;
-    delete delay;
-    delete control;
-    delete OSI;
-    delete mySolver;
-    delete osnsp;
-    //delete s;
   }
 
   catch (SiconosException e)
