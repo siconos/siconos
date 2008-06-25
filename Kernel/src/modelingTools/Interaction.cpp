@@ -206,18 +206,6 @@ Interaction::Interaction(const string& newId, DynamicalSystem* ds, int newNumber
 #endif
 }
 
-#ifdef WithSmartPtr
-Interaction::Interaction(const string& newId, DynamicalSystem* ds, int newNumber, int nInter, NonSmoothLaw* newNSL, Relation* newRel):
-  id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0), involvedDS(NULL), relation(newRel), NSDS(NULL), interactionxml(NULL)
-{
-  nslaw.reset(newNSL);
-  involvedDS = new DynamicalSystemsSet();
-  involvedDS->insert(ds); // Warning: insert pointer to DS!!
-  isAllocatedIn["relation"] = false;
-}
-
-
-#endif
 
 Interaction::Interaction(DynamicalSystemsSet& dsConcerned, int newNumber, int nInter, NonSmoothLawSPtr newNSL, Relation* newRel):
   id("none"), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0), y(1), involvedDS(NULL),
