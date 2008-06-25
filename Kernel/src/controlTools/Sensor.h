@@ -167,7 +167,7 @@ public:
   /** get the Event associated with this sensor
    *  \return an Event*
    */
-  inline const Event* getEventPtr() const
+  inline Event* getEventPtr() const
   {
     return eSensor;
   };

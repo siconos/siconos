@@ -208,7 +208,7 @@ public:
   /** get the Event associated with this actuator
    *  \return an Event*
    */
-  inline const Event* getEventPtr() const
+  inline Event* getEventPtr() const
   {
     return eActuator;
   };
