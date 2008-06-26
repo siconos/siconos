@@ -1,6 +1,0 @@
-The src/utils/boost directory is a copy of the boost bindings
-and can be updated thanks to cvs utilities.
-
-About bindings, see:
-- http://boost.cvs.sourceforge.net/boost-sandbox/boost-sandbox/libs/numeric/bindings/
-- http://news.tiker.net/software/boost-bindings*
