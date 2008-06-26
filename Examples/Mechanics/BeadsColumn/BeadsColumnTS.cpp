@@ -37,8 +37,10 @@ int main(int argc, char* argv[])
   try
   {
 
+    boost::timer time;
+    time.restart();
     // User-defined main parameters
-    unsigned int dsNumber = 10;      // the number of dynamical systems
+    unsigned int dsNumber = 50;      // the number of dynamical systems
     unsigned int nDof = 3;           // degrees of freedom for beads
     double increment_position = 1;   // initial position increment from one DS to the following
     double increment_velocity = 0;   // initial velocity increment from one DS to the following
@@ -265,30 +267,7 @@ int main(int argc, char* argv[])
     ioMatrix io("result.dat", "ascii");
     io.write(dataPlot, "noDim");
 
-    // --- Free memory ---
-    delete osnspb;
-    delete OSI;
-    delete t;
-    delete s;
-    delete multiBeads;
-    delete nsds;
-
-    for (i = 0; i < LLR.size(); i++)
-      delete LLR[i];
-    delete H1;
-    delete inter0;
-    delete relation0;
-    delete nslaw0;
-    delete b;
-    delete H;
-
-    delete gravity;
-    for (i = 0; i < dsNumber; i++)
-    {
-      delete q0[i];
-      delete v0[i];
-    }
-    delete Mass;
+    cout << "Total time:" << time.elapsed() << endl;
   }
 
   catch (SiconosException e)

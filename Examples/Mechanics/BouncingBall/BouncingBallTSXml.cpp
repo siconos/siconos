@@ -39,6 +39,7 @@ int main(int argc, char* argv[])
 
     // --- Model loading from xml file ---
     cout << "====> Model loading (XML) ..." << endl << endl;
+
     Model * bouncingBall = new Model("./BallTS.xml");
     cout << "\n *** BallTS.xml file loaded ***" << endl << endl;
 

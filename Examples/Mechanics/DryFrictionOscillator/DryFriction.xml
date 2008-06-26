@@ -66,12 +66,12 @@
                                 </DS_Concerned>									
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>		
-				 <LagrangianLinearRelation>
+				 <LagrangianRelation type="Linear">
 				  <H matrixRowSize='2' matrixColSize='2'>
   	                            <row> 0.0 1.0 </row>
   	                            <row> 1.0 0.0 </row>
                                   </H>
-  				 </LagrangianLinearRelation>			
+  				 </LagrangianRelation>			
 				<!-- NS Law of this interaction	-->
 				<NewtonImpactFrictionLaw>
   				  <en>0.0</en>				

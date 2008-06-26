@@ -109,13 +109,13 @@ void CanonBallsModel::initialize()
   iparam[0] = 10100; // Max number of iteration
   // Solver/formulation
   // 0: projection, 1: Newton/AlartCurnier, 2: Newton/Fischer-Burmeister, 3: Path/Glocker
-  iparam[4] = 3;
+  iparam[4] = 2;
   DoubleParameters dparam(5);
-  dparam[0] = 1e-7; // Tolerance
-  dparam[2] = 1e-7; // Local Tolerance
+  dparam[0] = 1e-5; // Tolerance
+  dparam[2] = 1e-8; // Local Tolerance
   NonSmoothSolver * Mysolver = new NonSmoothSolver(solverName, iparam, dparam);
   FrictionContact* osnspb = new FrictionContact(s, 3, Mysolver);
-  //osnspb->setNumericsVerboseMode(1);
+  // osnspb->setNumericsVerboseMode(1);
   //  osnspb->setMStorageType(1);
   cout << "=== End of model loading === " << endl;
 

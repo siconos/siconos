@@ -139,12 +139,12 @@
                 <size> 1 </size>
                <DS_Concerned vectorSize='2'>1 2</DS_Concerned>
                <Interaction_Content>
-                  <LagrangianLinearRelation>
+                  <LagrangianRelation type="LinearTI">
                      <H matrixRowSize='1' matrixColSize='6'>
                      <row>-1.0  0.0  0.0  1.0  0.0  0.0</row>
                       </H>
                 	<b vectorSize='1'>	-0.1	</b>
-                  </LagrangianLinearRelation>
+                  </LagrangianRelation>
                   <NewtonImpactLaw>
                   <e>0.9</e>
                   </NewtonImpactLaw>
@@ -154,12 +154,12 @@
                <size> 1 </size>
                <DS_Concerned vectorSize='2'>2 3</DS_Concerned>
                <Interaction_Content>
-                  <LagrangianLinearRelation>
+                  <LagrangianRelation type="LinearTI">
                      <H matrixRowSize='1' matrixColSize='6'>
                      <row>-1.0  0.0  0.0  1.0  0.0  0.0</row>
                       </H>
                     	<b vectorSize='1'>	-0.1	</b>
-                  </LagrangianLinearRelation>
+                  </LagrangianRelation>
                   <NewtonImpactLaw>
                   <e>0.9</e>
                   </NewtonImpactLaw>
@@ -169,12 +169,12 @@
                <size> 1 </size>
                <DS_Concerned vectorSize='2'>1 4</DS_Concerned>
                <Interaction_Content>
-                  <LagrangianLinearRelation>
+                  <LagrangianRelation type="LinearTI">
                      <H matrixRowSize='1' matrixColSize='4'>
                      <row>1.0  0.0  0.0  -1.0</row>
                       </H>
                 	<b vectorSize='1'>	-0.1	</b>
-                  </LagrangianLinearRelation>
+                  </LagrangianRelation>
                   <NewtonImpactLaw>
                   <e>0.9</e>
                   </NewtonImpactLaw>
@@ -184,12 +184,12 @@
                 <size> 1 </size>
                <DS_Concerned vectorSize='2'>3 5</DS_Concerned>
                <Interaction_Content>
-                  <LagrangianLinearRelation>
+                  <LagrangianRelation type="LinearTI">
                      <H matrixRowSize='1' matrixColSize='4'>
                      <row>-1.0  0.0  0.0  1.0</row>
                       </H>
 	              <b vectorSize='1'>	-0.1	</b>
-                  </LagrangianLinearRelation>
+                  </LagrangianRelation>
                   <NewtonImpactLaw>
                   <e>0.9</e>
                   </NewtonImpactLaw>
