@@ -301,7 +301,7 @@ void Moreau::initW(double t, DynamicalSystem* ds)
   SiconosMatrix * W = WMap[ds];
   double h = simulationLink->getTimeStep();
   double theta = thetaMap[ds];
-  string dsType = ds->getType();
+  DSTYPES dsType = ds->getType();
 
   // 1 - First order non linear systems
   if (dsType == FONLDS)
@@ -385,7 +385,7 @@ void Moreau::computeW(double t, DynamicalSystem* ds)
 
   double h = simulationLink->getTimeStep();
   double theta = thetaMap[ds];
-  string dsType = ds->getType();
+  DSTYPES dsType = ds->getType();
 
   SiconosMatrix * W = WMap[ds];
 
@@ -472,7 +472,7 @@ double Moreau::computeResidu()
   //
   DSIterator it;
   DynamicalSystem* ds; // Current Dynamical System.
-  string dsType ; // Type of the current DS.
+  DSTYPES dsType ; // Type of the current DS.
   double theta; // Theta parameter of the current ds.
 
   double maxResidu = 0;
@@ -742,7 +742,7 @@ void Moreau::computeFreeState()
 
   DynamicalSystem* ds; // Current Dynamical System.
   SiconosMatrix * W; // W Moreau matrix of the current DS.
-  string dsType ; // Type of the current DS.
+  DSTYPES dsType ; // Type of the current DS.
   double theta; // Theta parameter of the current ds.
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
@@ -1049,7 +1049,7 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
     DynamicalSystem* ds = *it;
     W = WMap[ds];
     theta = thetaMap[ds];
-    string dsType = ds->getType();
+    DSTYPES dsType = ds->getType();
 
     if (dsType == LLTIDS)
     {
@@ -1118,7 +1118,7 @@ void Moreau::updateState(unsigned int level)
     theta = thetaMap[ds];
     // Get the DS type
 
-    std::string dsType = ds->getType();
+    DSTYPES dsType = ds->getType();
 
     // 1 - First Order Systems
     if (dsType == FONLDS || dsType == FOLDS || dsType == FOLTIDS)

@@ -25,6 +25,7 @@
 #define RelationXML_H
 
 #include "SiconosDOMTreeTools.h"
+#include "RelationTypes.hpp"
 
 class Relation;
 
@@ -61,20 +62,45 @@ public:
   /** Returns the type of the RelationXML
    *  \return a string.
    */
-  inline const std::string  getType() const
+  inline const RELATIONTYPES getType() const
   {
     std::string type((char*)rootNode->name);
-    return type;
+    if (type == "LagrangianRelation")
+      return Lagrangian;
+    else if (type == "FirstOrderRelation")
+      return FirstOrder;
+    else
+    {
+      XMLException::selfThrow("RelationXML - getType: unknown type of Relation.");
+      return Lagrangian;
+    }
   }
 
   /** Returns the sub-type of the Relation
    *  \return a string.
    */
-  const std::string getSubType() const
+  const RELATIONSUBTYPES getSubType() const
   {
-    if (SiconosDOMTreeTools::hasAttributeValue(rootNode, "type"))
-      return SiconosDOMTreeTools::getStringAttributeValue(rootNode, "type");
-    else return "Undefined";
+    std::string res = SiconosDOMTreeTools::getStringAttributeValue(rootNode, "type");
+    if (res == "NonLinear")
+      return NonLinearR;
+    else if (res == "Linear")
+      return LinearR;
+    else if (res == "Type1")
+      return Type1R;
+    else if (res == "LinearTI")
+      return LinearTIR;
+    else if (res == "Scleronomous")
+      return ScleronomousR;
+    else if (res == "Rheonomous")
+      return RheonomousR;
+    else if (res == "Compliant")
+      return CompliantR;
+    else
+    {
+      XMLException::selfThrow("RelationXML - getType: unknown type of Relation.");
+      return NonLinearR;
+    }
   }
 
   /** Returns the node of the RelationXML

@@ -70,8 +70,8 @@ void LagrangianRheonomousRTest::testBuildLagrangianRheonomousR0()
   cout << "==== LagrangianRheonomousR tests start ...==== " << endl;
   cout << "==============================================" << endl;
   LagrangianRheonomousR * R1 = new LagrangianRheonomousR(tmpxml1);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR1a : ", R1->getType() == "Lagrangian", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR1b : ", R1->getSubType() == "RheonomousR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR1a : ", R1->getType() == Lagrangian, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR1b : ", R1->getSubType() == RheonomousR, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR1c : ", R1->getFunctionName("h") == "TestPlugin:hRheo", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR1d : ", R1->getFunctionName("G0") == "TestPlugin:G0Rheo", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR1e : ", R1->getFunctionName("hDot") == "TestPlugin:hDot", true);
@@ -83,8 +83,8 @@ void LagrangianRheonomousRTest::testBuildLagrangianRheonomousR0()
 void LagrangianRheonomousRTest::testBuildLagrangianRheonomousR1()
 {
   LagrangianRheonomousR * R1 = new LagrangianRheonomousR();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR2a : ", R1->getType() == "Lagrangian", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR2b : ", R1->getSubType() == "RheonomousR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR2a : ", R1->getType() == Lagrangian, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR2b : ", R1->getSubType() == RheonomousR, true);
   delete R1;
   cout << " default Constructor LagrangianRheonomousR ok" << endl;
 }
@@ -93,8 +93,8 @@ void LagrangianRheonomousRTest::testBuildLagrangianRheonomousR1()
 void LagrangianRheonomousRTest::testBuildLagrangianRheonomousR2()
 {
   LagrangianRheonomousR * R1 = new LagrangianRheonomousR("TestPlugin:hRheo", "TestPlugin:hDot", "TestPlugin:G0Rheo");
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3a : ", R1->getType() == "Lagrangian", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3b : ", R1->getSubType() == "RheonomousR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3a : ", R1->getType() == Lagrangian, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3b : ", R1->getSubType() == RheonomousR, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3c : ", R1->getFunctionName("h") == "TestPlugin:hRheo", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3d : ", R1->getFunctionName("G0") == "TestPlugin:G0Rheo", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3e : ", R1->getFunctionName("hDot") == "TestPlugin:hDot", true);

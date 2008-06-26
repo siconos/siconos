@@ -43,6 +43,7 @@ InteractionXML::InteractionXML(xmlNodePtr  interactionNode):
 {
   xmlNodePtr node, node2;
   string type;
+  string subType;
   // size (required)
   if ((node = SiconosDOMTreeTools::findNodeChild(interactionNode, "size")) != NULL)
     sizeNode = node;
@@ -70,14 +71,22 @@ InteractionXML::InteractionXML(xmlNodePtr  interactionNode):
       relationNode = node2;
       // get Relation type
       type = (char*)node2->name;
+      subType = SiconosDOMTreeTools::getStringAttributeValue(node2, "type");
+
       if (type == "FirstOrderRelation")
-        relationXML = new FirstOrderRXML(node2);
-      else if (type == "FirstOrderLinearRelation" || type == "FirstOrderLinearTimeInvariantRelation")
-        relationXML = new FirstOrderLinearRXML(node2);
+      {
+        if (subType == "NonLinear" || subType == "Type1")
+          relationXML = new FirstOrderRXML(node2);
+        else if (subType == "Linear" || subType == "LinearTI")
+          relationXML = new FirstOrderLinearRXML(node2);
+      }
       else if (type == "LagrangianRelation")
-        relationXML = new LagrangianRXML(node2);
-      else if (type == "LagrangianLinearRelation")
-        relationXML = new LagrangianLinearRXML(node2);
+      {
+        if (subType == "Linear" || subType == "LinearTI")
+          relationXML = new LagrangianLinearRXML(node2);
+        else
+          relationXML = new LagrangianRXML(node2);
+      }
       else
         XMLException::selfThrow("InteractionXML : undefined Relation type : " + type);
       isRelationXMLAllocatedIn = true;

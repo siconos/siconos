@@ -65,7 +65,7 @@ void FirstOrderLinearRTest::setUp()
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Content");
 
   // get relation
-  node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "FirstOrderLinearRelation");
+  node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "FirstOrderRelation");
   tmpxml1 = new FirstOrderLinearRXML(node1);
 }
 
@@ -87,8 +87,8 @@ void FirstOrderLinearRTest::testBuildFirstOrderLinearR0()
   cout << "==== FirstOrderLinearR tests start ...====" << endl;
   cout << "==========================================" << endl;
   FirstOrderLinearR * folr = new FirstOrderLinearR(tmpxml1);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR0 : ", folr->getType() == "FirstOrder", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR0 : ", folr->getSubType() == "LinearR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR0 : ", folr->getType() == FirstOrder, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR0 : ", folr->getSubType() == LinearR, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR0 : ", folr->getFunctionName("C") == "TestPlugin:C", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR0 : ", folr->getFunctionName("D") == "TestPlugin:D", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR0 : ", folr->getFunctionName("F") == "TestPlugin:F", true);
@@ -103,8 +103,8 @@ void FirstOrderLinearRTest::testBuildFirstOrderLinearR1()
 {
   cout << "--> Test: constructor 1." << endl;
   FirstOrderLinearR * folr = new FirstOrderLinearR("TestPlugin:C", "TestPlugin:B");
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR1 : ", folr->getType() == "FirstOrder", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR1 : ", folr->getSubType() == "LinearR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR1 : ", folr->getType() == FirstOrder, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR1 : ", folr->getSubType() == LinearR, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR1 : ", folr->getFunctionName("C") == "TestPlugin:C", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR1 : ", folr->getFunctionName("B") == "TestPlugin:B", true);
   delete folr;
@@ -116,8 +116,8 @@ void FirstOrderLinearRTest::testBuildFirstOrderLinearR2()
 {
   cout << "--> Test: constructor 2." << endl;
   FirstOrderLinearR * folr = new FirstOrderLinearR("TestPlugin:e");
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR2 : ", folr->getType() == "FirstOrder", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR2 : ", folr->getSubType() == "LinearR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR2 : ", folr->getType() == FirstOrder, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR2 : ", folr->getSubType() == LinearR, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR2 : ", folr->getFunctionName("e") == "TestPlugin:e", true);
   delete folr;
   cout << "--> Constructor 2 test ended with success." << endl;
@@ -128,8 +128,8 @@ void FirstOrderLinearRTest::testBuildFirstOrderLinearR3()
   cout << "--> Test: constructor 3." << endl;
 
   FirstOrderLinearR * folr = new FirstOrderLinearR("TestPlugin:C", "TestPlugin:D", "TestPlugin:F", "TestPlugin:e", "TestPlugin:B");
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR3 : ", folr->getType() == "FirstOrder", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR3 : ", folr->getSubType() == "LinearR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR3 : ", folr->getType() == FirstOrder, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR3 : ", folr->getSubType() == LinearR, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR3 : ", folr->getFunctionName("C") == "TestPlugin:C", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR3 : ", folr->getFunctionName("D") == "TestPlugin:D", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR3 : ", folr->getFunctionName("F") == "TestPlugin:F", true);
@@ -146,8 +146,8 @@ void FirstOrderLinearRTest::testBuildFirstOrderLinearR4()
   FirstOrderLinearR * folr = new FirstOrderLinearR(C, B);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR4a : ", folr->getCPtr() == C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR4b : ", folr->getBPtr() == B, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR4c : ", folr->getType() == "FirstOrder", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR4d : ", folr->getSubType() == "LinearR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR4c : ", folr->getType() == FirstOrder, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR4d : ", folr->getSubType() == LinearR, true);
   delete folr;
   cout << "--> Constructor 4 test ended with success." << endl;
 }
@@ -162,8 +162,8 @@ void FirstOrderLinearRTest::testBuildFirstOrderLinearR5()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5c : ", folr->getFPtr() == F, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5d : ", folr->getEPtr() == e, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5e : ", folr->getBPtr() == B, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5f : ", folr->getType() == "FirstOrder", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5g : ", folr->getSubType() == "LinearR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5f : ", folr->getType() == FirstOrder, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5g : ", folr->getSubType() == LinearR, true);
   delete folr;
   cout << "--> Constructor 5 test ended with success." << endl;
 }

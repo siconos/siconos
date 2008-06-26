@@ -60,7 +60,7 @@ typedef void (*SolverPtr)(int, int, double*, int*, double*);
 typedef void (*PostSolverPtr)(int, double*);
 
 /** pointer to function used to update velocity and compute error */
-typedef void (*ComputeErrorPtr)(int, double*, double*, double*);
+typedef void (*ComputeErrorPtr)(FrictionContact_Problem*, double*, double*, double, double*);
 
 /** pointer to function used to free memory for objects used in solvers */
 typedef void (*FreeSolverPtr)();

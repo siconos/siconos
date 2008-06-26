@@ -25,6 +25,7 @@
 #include "Tools.h"
 #include "SiconosAlgebra.h"
 #include "Interaction.h"
+#include "RelationTypes.hpp"
 
 /** Interface to single relations from Interactions
  *
@@ -180,14 +181,12 @@ public:
   const std::string getNonSmoothLawType() const;
 
   /** returns the type of the embedded relation.
-  *  \return a string
-  */
-  const std::string getRelationType() const;
+   */
+  const RELATIONTYPES getRelationType() const;
 
   /** returns the subtype of the embedded relation.
-   *  \return a string
    */
-  const std::string getRelationSubType() const;
+  const RELATIONSUBTYPES getRelationSubType() const;
 
   /** function used to sort UnitaryRelation in SiconosSet<UnitaryRelation*>
    *  \return an int

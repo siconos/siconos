@@ -39,7 +39,7 @@ void FirstOrderType1R::initPluginFlags(bool in)
 
 // xml constructor
 FirstOrderType1R::FirstOrderType1R(RelationXML* relxml):
-  FirstOrderR(relxml, "Type1R"), output(NULL), jXOutput(NULL), input(NULL), jLInput(NULL)
+  FirstOrderR(relxml, Type1R), output(NULL), jXOutput(NULL), input(NULL), jLInput(NULL)
 {
   FirstOrderRXML * FORxml = static_cast<FirstOrderRXML*>(relationxml);
 
@@ -91,7 +91,7 @@ FirstOrderType1R::FirstOrderType1R(RelationXML* relxml):
 }
 
 FirstOrderType1R::FirstOrderType1R(const string& computeOut, const string& computeIn):
-  FirstOrderR("Type1R"), output(NULL), jXOutput(NULL), input(NULL), jLInput(NULL)
+  FirstOrderR(Type1R), output(NULL), jXOutput(NULL), input(NULL), jLInput(NULL)
 {
   initAllocationFlags(false);
   initPluginFlags(false);
@@ -106,7 +106,7 @@ FirstOrderType1R::FirstOrderType1R(const string& computeOut, const string& compu
 }
 
 FirstOrderType1R::FirstOrderType1R(const string& computeOut, const string& computeIn, const string& computeJX, const string& computeJL):
-  FirstOrderR("Type1R"), output(NULL), jXOutput(NULL), input(NULL), jLInput(NULL)
+  FirstOrderR(Type1R), output(NULL), jXOutput(NULL), input(NULL), jLInput(NULL)
 {
   initAllocationFlags(false);
   initPluginFlags(false);

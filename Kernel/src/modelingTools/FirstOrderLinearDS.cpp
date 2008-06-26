@@ -353,7 +353,7 @@ void FirstOrderLinearDS::computeJacobianXRhs(const double time, const bool)
 
 void FirstOrderLinearDS::display() const
 {
-  cout << "=== Linear system display, " << number << ", id: " << id << ")." << endl;
+  cout << "=== Linear system display, " << number << endl;
   NamesConstIterator it;
   cout << "The following operators are linked to plug-in: " << endl;
   for (it = pluginNames.begin(); it != pluginNames.end(); ++it)

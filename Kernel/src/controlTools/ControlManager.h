@@ -80,12 +80,12 @@ protected:
 
   /** default constructor
    */
-  ControlManager();
+  ControlManager() {};
 
   /** copy constructor
    * Private => no copy nor pass-by value allowed.
    */
-  ControlManager(const ControlManager&);
+  ControlManager(const ControlManager&) {};
 
 public:
 

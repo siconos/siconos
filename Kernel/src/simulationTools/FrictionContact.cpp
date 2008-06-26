@@ -306,7 +306,7 @@ void FrictionContact::computeUnitaryBlock(UnitaryRelation* UR1, UnitaryRelation*
     currentUnitaryBlock->zero();
     SiconosMatrix *leftUnitaryBlock = NULL, *rightUnitaryBlock = NULL;
     unsigned int sizeDS;
-    string relationType1, relationType2;
+    RELATIONTYPES relationType1, relationType2;
     bool flagRightUnitaryBlock = false;
 
     // General form of the unitaryBlock is :   unitaryBlock = a*extraUnitaryBlock + b * leftUnitaryBlock * OP * rightUnitaryBlock
@@ -326,7 +326,7 @@ void FrictionContact::computeUnitaryBlock(UnitaryRelation* UR1, UnitaryRelation*
       relationType1 = UR1->getRelationType();
       relationType2 = UR2->getRelationType();
       // Computing depends on relation type -> move this in UnitaryRelation method?
-      if (relationType1 == "Lagrangian" || relationType2 == "Lagrangian")
+      if (relationType1 == Lagrangian || relationType2 == Lagrangian)
       {
         if (UR1 == UR2)
           rightUnitaryBlock = leftUnitaryBlock ;
@@ -361,7 +361,8 @@ void FrictionContact::computeQBlock(UnitaryRelation* UR, unsigned int pos)
 {
 
   // Get relation and non smooth law types
-  string relationType = UR->getRelationType() + UR->getRelationSubType();
+  RELATIONTYPES relationType = UR->getRelationType();
+  RELATIONSUBTYPES relationSubType = UR->getRelationSubType();
   string nslawType = UR->getNonSmoothLawType();
 
   string simulationType = simulation->getType();
@@ -385,61 +386,66 @@ void FrictionContact::computeQBlock(UnitaryRelation* UR, unsigned int pos)
   SiconosVector* workX = UR->getWorkXPtr();
   if (osiType == "Moreau" || osiType == "Lsodar")
   {
-    if (relationType == "FirstOrderType1R" || relationType == "FirstOrderType2R" || relationType == "FirstOrderType3R")
+    if (relationType == FirstOrder)
     {
-      H = static_cast<FirstOrderR*>(mainInteraction->getRelationPtr())->getJacobianHPtr(0);
-      if (H != NULL)
+      if (relationSubType == Type1R)//|| relationType =="FirstOrderType2R" || relationType =="FirstOrderType3R")
       {
-        coord[3] = H->size(1);
-        coord[5] = H->size(1);
-        subprod(*H, *workX, *q, coord, true);
+        H = static_cast<FirstOrderR*>(mainInteraction->getRelationPtr())->getJacobianHPtr(0);
+        if (H != NULL)
+        {
+          coord[3] = H->size(1);
+          coord[5] = H->size(1);
+          subprod(*H, *workX, *q, coord, true);
+        }
+      }
+
+      else if (relationSubType == LinearTIR || relationSubType == LinearR)
+      {
+        // q = HXfree + e + Fz
+        H = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getCPtr();
+        if (H != NULL)
+        {
+          coord[3] = H->size(1);
+          coord[5] = H->size(1);
+          subprod(*H, *workX, (*q), coord, true);
+        }
+        SiconosVector * e = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getEPtr();
+        if (e != NULL)
+          static_cast<SimpleVector*>(q)->addBlock(pos, *e);
+
+        H = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getFPtr();
+        if (H != NULL)
+        {
+          SiconosVector * workZ = UR->getWorkZPtr();
+          coord[3] = H->size(1);
+          coord[5] = H->size(1);
+          subprod(*H, *workZ, *q, coord, false);
+        }
       }
     }
-
-    else if (relationType == "FirstOrderLinearTIR" || relationType == "FirstOrderLinearR")
+    else if (relationType == Lagrangian)
     {
-      // q = HXfree + e + Fz
-      H = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getCPtr();
-      if (H != NULL)
+      if (relationSubType == CompliantR || relationSubType == ScleronomousR || relationSubType == RheonomousR)
       {
-        coord[3] = H->size(1);
-        coord[5] = H->size(1);
-        subprod(*H, *workX, (*q), coord, true);
+        // q = jacobian_q h().v_free
+        H = static_cast<LagrangianR*>(mainInteraction->getRelationPtr())->getGPtr(0);
+        if (H != NULL)
+        {
+          coord[3] = H->size(1);
+          coord[5] = H->size(1);
+          subprod(*H, *workX, *q, coord, true);
+        }
       }
-      SiconosVector * e = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getEPtr();
-      if (e != NULL)
-        static_cast<SimpleVector*>(q)->addBlock(pos, *e);
-
-      H = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getFPtr();
-      if (H != NULL)
+      else if (relationSubType == LinearR || relationSubType == LinearTIR)
       {
-        SiconosVector * workZ = UR->getWorkZPtr();
-        coord[3] = H->size(1);
-        coord[5] = H->size(1);
-        subprod(*H, *workZ, *q, coord, false);
-      }
-    }
-    else if (relationType == "LagrangianCompliantR" || relationType == "LagrangianScleronomousR" || relationType == "LagrangianRheonomousR")
-    {
-      // q = jacobian_q h().v_free
-      H = static_cast<LagrangianR*>(mainInteraction->getRelationPtr())->getGPtr(0);
-      if (H != NULL)
-      {
-        coord[3] = H->size(1);
-        coord[5] = H->size(1);
-        subprod(*H, *workX, *q, coord, true);
-      }
-    }
-
-    else if (relationType == "LagrangianLinearR")
-    {
-      // q = H.v_free
-      H = static_cast<LagrangianLinearR*>(mainInteraction->getRelationPtr())->getHPtr();
-      if (H != NULL)
-      {
-        coord[3] = H->size(1);
-        coord[5] = H->size(1);
-        subprod(*H, *workX, *q, coord, true);
+        // q = H.v_free
+        H = static_cast<LagrangianLinearR*>(mainInteraction->getRelationPtr())->getHPtr();
+        if (H != NULL)
+        {
+          coord[3] = H->size(1);
+          coord[5] = H->size(1);
+          subprod(*H, *workX, *q, coord, true);
+        }
       }
     }
     else
@@ -453,7 +459,7 @@ void FrictionContact::computeQBlock(UnitaryRelation* UR, unsigned int pos)
     RuntimeException::selfThrow("FrictionContact::computeQBlock not yet implemented for OSI of type " + osiType);
 
   // Add "non-smooth law effect" on q
-  if (UR->getRelationType() == "Lagrangian")
+  if (UR->getRelationType() == Lagrangian)
   {
     double e;
     if (nslawType == NEWTONIMPACTNSLAW)
@@ -483,7 +489,7 @@ void FrictionContact::computeQBlock(UnitaryRelation* UR, unsigned int pos)
         subscal(e, *q, *q, subCoord, false); // q = q + e * q
       }
       else
-        RuntimeException::selfThrow("FrictionContact::computeQBlock not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
+        RuntimeException::selfThrow("FrictionContact::computeQBlock not yet implemented for this type of relation and a non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
     }
     else if (nslawType == NEWTONIMPACTFRICTIONNSLAW)
     {
@@ -498,11 +504,11 @@ void FrictionContact::computeQBlock(UnitaryRelation* UR, unsigned int pos)
       if (simulationType == "TimeStepping")
         (*q)(pos) +=  e * (*UR->getYOldPtr(levelMin))(0);
 
-      else RuntimeException::selfThrow("FrictionContact::computeQBlock not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
+      else RuntimeException::selfThrow("FrictionContact::computeQBlock not yet implemented for this type of relation and a non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
 
     }
     else
-      RuntimeException::selfThrow("FrictionContact::computeQBlock not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType);
+      RuntimeException::selfThrow("FrictionContact::computeQBlock not yet implemented for this type of relation and a non smooth law of type " + nslawType);
   }
 }
 

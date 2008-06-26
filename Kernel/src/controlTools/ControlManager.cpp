@@ -28,9 +28,6 @@
 
 using namespace std;
 
-ControlManager::ControlManager(): model(NULL)
-{}
-
 ControlManager::ControlManager(Model* m): model(m)
 {
   if (model == NULL)

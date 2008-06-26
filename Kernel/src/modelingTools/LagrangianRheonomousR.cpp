@@ -27,7 +27,7 @@
 using namespace std;
 
 // Default constructor
-LagrangianRheonomousR::LagrangianRheonomousR(): LagrangianR("RheonomousR"), hPtr(NULL), hDotPtr(NULL), G0Ptr(NULL)
+LagrangianRheonomousR::LagrangianRheonomousR(): LagrangianR(RheonomousR), hPtr(NULL), hDotPtr(NULL), G0Ptr(NULL)
 {
   isPlugged["G0"] = false ;
   isAllocatedIn["G0"] = false;
@@ -37,7 +37,7 @@ LagrangianRheonomousR::LagrangianRheonomousR(): LagrangianR("RheonomousR"), hPtr
 }
 
 // xml constructor
-LagrangianRheonomousR::LagrangianRheonomousR(RelationXML* relxml): LagrangianR(relxml, "RheonomousR"), hPtr(NULL), hDotPtr(NULL), G0Ptr(NULL)
+LagrangianRheonomousR::LagrangianRheonomousR(RelationXML* relxml): LagrangianR(relxml, RheonomousR), hPtr(NULL), hDotPtr(NULL), G0Ptr(NULL)
 {
   LagrangianRXML * LRxml = static_cast<LagrangianRXML *>(relationxml);
   // h plug-in
@@ -72,7 +72,7 @@ LagrangianRheonomousR::LagrangianRheonomousR(RelationXML* relxml): LagrangianR(r
 
 // constructor from a set of data
 LagrangianRheonomousR::LagrangianRheonomousR(const string& computeH, const string& computeHDot, const string& computeG):
-  LagrangianR("RheonomousR"), hPtr(NULL), hDotPtr(NULL), G0Ptr(NULL)
+  LagrangianR(RheonomousR), hPtr(NULL), hDotPtr(NULL), G0Ptr(NULL)
 {
   // h
   setComputeHFunction(cShared.getPluginName(computeH), cShared.getPluginFunctionName(computeH));

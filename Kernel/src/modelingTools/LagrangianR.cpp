@@ -27,11 +27,16 @@
 using namespace std;
 
 // Default constructor
-LagrangianR::LagrangianR(const string& lagType):
-  Relation("Lagrangian", lagType), LagrangianRelationType(lagType)
+LagrangianR::LagrangianR():
+  Relation(Lagrangian, NonLinearR), LagrangianRelationType(NonLinearR)
 {}
 
-LagrangianR::LagrangianR(RelationXML* relxml, const string& newSubType): Relation(relxml, "Lagrangian", newSubType), LagrangianRelationType()
+// Basic constructor
+LagrangianR::LagrangianR(RELATIONSUBTYPES lagType):
+  Relation(Lagrangian, lagType), LagrangianRelationType(lagType)
+{}
+
+LagrangianR::LagrangianR(RelationXML* relxml, RELATIONSUBTYPES newSubType): Relation(relxml, Lagrangian, newSubType), LagrangianRelationType()
 {}
 
 void LagrangianR::readGInXML(LagrangianRXML * LRxml, unsigned int i)
@@ -79,7 +84,7 @@ void LagrangianR::initialize()
   data["p1"] = new BlockVector();
   data["p2"] = new BlockVector();
   LagrangianDS* lds;
-  string type;
+  DSTYPES type;
   for (it = interaction->dynamicalSystemsBegin(); it != interaction->dynamicalSystemsEnd(); ++it)
   {
     type = (*it)->getType();

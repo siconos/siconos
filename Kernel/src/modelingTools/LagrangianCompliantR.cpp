@@ -27,7 +27,7 @@
 using namespace std;
 
 // Default constructor
-LagrangianCompliantR::LagrangianCompliantR(): LagrangianR("CompliantR"), hPtr(NULL), G0Ptr(NULL), G1Ptr(NULL)
+LagrangianCompliantR::LagrangianCompliantR(): LagrangianR(CompliantR), hPtr(NULL), G0Ptr(NULL), G1Ptr(NULL)
 {
   isPlugged["G0"] = false ;
   isAllocatedIn["G0"] = false;
@@ -37,7 +37,7 @@ LagrangianCompliantR::LagrangianCompliantR(): LagrangianR("CompliantR"), hPtr(NU
 }
 
 // xml constructor
-LagrangianCompliantR::LagrangianCompliantR(RelationXML* relxml): LagrangianR(relxml, "CompliantR"), hPtr(NULL), G0Ptr(NULL), G1Ptr(NULL)
+LagrangianCompliantR::LagrangianCompliantR(RelationXML* relxml): LagrangianR(relxml, CompliantR), hPtr(NULL), G0Ptr(NULL), G1Ptr(NULL)
 {
   LagrangianRXML * LRxml = static_cast<LagrangianRXML *>(relationxml);
   // h plug-in
@@ -56,7 +56,7 @@ LagrangianCompliantR::LagrangianCompliantR(RelationXML* relxml): LagrangianR(rel
 }
 
 // constructor from a set of data
-LagrangianCompliantR::LagrangianCompliantR(const string& computeH, const std::vector<string> & computeG): LagrangianR("CompliantR"), hPtr(NULL), G0Ptr(NULL), G1Ptr(NULL)
+LagrangianCompliantR::LagrangianCompliantR(const string& computeH, const std::vector<string> & computeG): LagrangianR(CompliantR), hPtr(NULL), G0Ptr(NULL), G1Ptr(NULL)
 {
   // h
   setComputeHFunction(cShared.getPluginName(computeH), cShared.getPluginFunctionName(computeH));

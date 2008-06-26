@@ -24,7 +24,7 @@
 	<NSDS bvp='false'>
 	<!-- DSs defined in the problem -->
 		<DS_Definition>		
-			<LagrangianDS number='13' Id="testLAGDS1">
+			<LagrangianDS number='13'>
 				<StepsInMemory>2</StepsInMemory>				
 				<q0 vectorSize='3'>
 					1.0 2.0 3.0
@@ -38,7 +38,7 @@
 					<row>0.0 0.0 1.0</row>
 				</Mass>			
 			</LagrangianDS>
-			<LagrangianDS number='8' Id="testLAGDS2">
+			<LagrangianDS number='8'>
 				<StepsInMemory>1</StepsInMemory>				
 				<q0 vectorSize='3'>
 					1 2.0 3.0
@@ -55,7 +55,7 @@
 				<JacobianQNNL matrixPlugin="TestPlugin:computeJacobianQNNL"/>
 				<JacobianVelocityNNL matrixPlugin="TestPlugin:computeJacobianVelocityNNL"/>
 			</LagrangianDS>
-			<LagrangianDS number='4' Id="testLAGDS3">
+			<LagrangianDS number='4'>
 				<StepsInMemory>1</StepsInMemory>				
 				<q0 vectorSize='3'>
 					1 2.0 3.0

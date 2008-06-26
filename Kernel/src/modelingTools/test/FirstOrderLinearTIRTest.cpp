@@ -65,7 +65,7 @@ void FirstOrderLinearTIRTest::setUp()
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction");
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Content");
   // get relation
-  node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "FirstOrderLinearTimeInvariantRelation");
+  node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "FirstOrderRelation");
   tmpxml1 = new FirstOrderLinearRXML(node1);
 }
 
@@ -93,8 +93,8 @@ void FirstOrderLinearTIRTest::testBuildFirstOrderLinearTIR0()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR0c : ", ltir->getD() == *D, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR0d : ", ltir->getE() == *e, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR0e : ", ltir->getF() == *F, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR0f : ", ltir->getType() == "FirstOrder", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR0g : ", ltir->getSubType() == "LinearTIR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR0f : ", ltir->getType() == FirstOrder, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR0g : ", ltir->getSubType() == LinearTIR, true);
   delete ltir;
   cout << "--> Constructor xml test ended with success." << endl;
 }
@@ -106,8 +106,8 @@ void FirstOrderLinearTIRTest::testBuildFirstOrderLinearTIR1()
   FirstOrderLinearTIR * ltir = new FirstOrderLinearTIR(*C, *B);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR1a : ", ltir->getC() == *C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR1b : ", ltir->getB() == *B, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR1c : ", ltir->getType() == "FirstOrder", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR1d : ", ltir->getSubType() == "LinearTIR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR1c : ", ltir->getType() == FirstOrder, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR1d : ", ltir->getSubType() == LinearTIR, true);
   delete ltir;
   cout << "--> Constructor 1 test ended with success." << endl;
 }
@@ -122,8 +122,8 @@ void FirstOrderLinearTIRTest::testBuildFirstOrderLinearTIR2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR2c : ", ltir->getF() == *F, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR2d : ", ltir->getE() == *e, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR2e : ", ltir->getB() == *B, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR2f : ", ltir->getType() == "FirstOrder", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR2g : ", ltir->getSubType() == "LinearTIR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR2f : ", ltir->getType() == FirstOrder, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR2g : ", ltir->getSubType() == LinearTIR, true);
   delete ltir;
   cout << "--> Constructor 2 test ended with success." << endl;
 }

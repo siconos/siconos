@@ -27,8 +27,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void fake_compute_error(int n, double* velocity, double* reaction, double *error)
+void fake_compute_error(FrictionContact_Problem* problem, double *reaction, double *velocity, double tolerance, double* error)
 {
+  int n = 3 * problem->numberOfContacts;
   *error = 0.;
   int i, m;
   m = 5 * n / 3;
@@ -36,7 +37,6 @@ void fake_compute_error(int n, double* velocity, double* reaction, double *error
   for (i = 0 ; i < m ; ++i)
   {
     *error += Compute_NCP_error1(i, err);
-    //*error += Compute_NCP_error2(i, err);
   }
 }
 
@@ -48,25 +48,37 @@ void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, C
   {
     *solve = &frictionContact3D_projectionWithDiagonalization_solve;
     *freeSolver = &frictionContact3D_projection_free;
+    *computeError = &FrictionContact3D_compute_error;
     frictionContact3D_projection_initialize(n, M, q, mu);
   }
   else if (iparam[4] == 4)
   {
     *solve = &frictionContact3D_projectionOnCone_solve;
     *freeSolver = &frictionContact3D_projection_free;
+    *computeError = &FrictionContact3D_compute_error;
     frictionContact3D_projection_initialize(n, M, q, mu);
   }
   else if (iparam[4] == 6)
   {
     *solve = &frictionContact3D_projectionOnConeWithLocalIteration_solve;
     *freeSolver = &frictionContact3D_projection_free;
+    *computeError = &FrictionContact3D_compute_error;
     frictionContact3D_projection_initialize(n, M, q, mu);
   }
-  /* Newton solver (Alart-Curnier or Fischer-Burmeister)*/
-  else if (iparam[4] == 1 || iparam[4] == 2)
+  /* Newton solver (Alart-Curnier) */
+  else if (iparam[4] == 1)
   {
     *solve = &frictionContact3D_Newton_solve;
     *freeSolver = &frictionContact3D_Newton_free;
+    *computeError = &FrictionContact3D_compute_error;
+    frictionContact3D_Newton_initialize(n, M, q, mu, iparam);
+  }
+  /* Newton solver (Glocker-Fischer-Burmeister)*/
+  else if (iparam[4] == 2)
+  {
+    *solve = &frictionContact3D_Newton_solve;
+    *freeSolver = &frictionContact3D_Newton_free;
+    *computeError = &fake_compute_error;
     frictionContact3D_Newton_initialize(n, M, q, mu, iparam);
   }
   /* Path solver (Glocker Formulation) */
@@ -74,6 +86,7 @@ void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, C
   {
     *solve = &frictionContact3D_Path_solve;
     *freeSolver = &frictionContact3D_Path_free;
+    *computeError = &fake_compute_error;
     frictionContact3D_Path_initialize(n, M, q, mu, iparam);
   }
   /* Fixed Point solver (Glocker Formulation) */
@@ -81,6 +94,7 @@ void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, C
   {
     *solve = &frictionContact3D_FixedP_solve;
     *freeSolver = &frictionContact3D_FixedP_free;
+    *computeError = &fake_compute_error;
     frictionContact3D_FixedP_initialize(n, M, q, mu, iparam);
   }
   else
@@ -148,17 +162,10 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
       (*local_solver)(contact, n, reaction, iparam, dparam);
 
     /* **** Criterium convergence **** */
-    //      (*computeError)(n,velocity,reaction,&error);
-    printf("-----------------------------------Iteration %i Erreur = %14.7e\n", iter, error);
-    FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, &error);
-    /*       for( contact = 0 ; contact < nc ; ++contact ){ */
-    /*    pos = contact*3; */
-    /*    printf ("reaction[pos] = %14.7e\n",reaction[pos]); */
-    /*    printf ("reaction[pos+1] = %14.7e\n",reaction[pos+1]); */
-    /*    printf ("reaction[pos+2] = %14.7e\n",reaction[pos+2]); */
-    /*       } */
+    (*computeError)(problem, reaction , velocity, tolerance, &error);
+
     if (verbose > 0)
-      printf("-----------------------------------Iteration %i Erreur = %14.7e\n", iter, error);
+      printf("-----------------------------------Iteration %i Error = %14.7e\n", iter, error);
 
     if (error < tolerance) hasNotConverged = 0;
     dparam[0] = tolerance;

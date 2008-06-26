@@ -15,43 +15,28 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ */
+
+/*! \file DynamicalSystemTypes.hpp
+  \brief enum of the available types for dynamical systems
 */
-#include "ExampleActuator.h"
-#include "DynamicalSystem.h"
-#include "ActuatorFactory.h"
-#include "ioMatrix.h"
-using namespace std;
-using namespace ActuatorFactory;
 
-ExampleActuator::ExampleActuator(int name, TimeDiscretisation* t): Actuator(name, t)
-{}
+#ifndef DYNAMICALSYSTEMTYPES_HPP
+#define DYNAMICALSYSTEMTYPES_HPP
 
-void ExampleActuator::initialize()
+/** List of possible DynamicalSystems types*/
+enum DSTYPES
 {
-  // Call initialize of base class
-  Actuator::initialize();
-}
+  /** First Order Non Linear DS */
+  FONLDS,
+  /** First Order Linear DS */
+  FOLDS,
+  /** First Order Linear and Time-Invariant Coefficients DS */
+  FOLTIDS,
+  /** Lagrangian, Second Order,  Non Linear DS */
+  LNLDS,
+  /** Lagrangian, Second Order,  Linear and Time-Invariant Coefficients DS */
+  LLTIDS
+};
 
-void ExampleActuator::actuate()
-{
-  cout << "Actuator action ... " << endl;
-  DSIterator itDS;
-  SiconosVector * myZ = new SimpleVector(3);
-  (*myZ)(0) = 12;
-  (*myZ)(1) = 132;
-  (*myZ)(2) = 212;
-
-  for (itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
-    (*itDS)->setZPtr(myZ);
-
-}
-
-ExampleActuator* ExampleActuator::convert(Actuator* s)
-{
-  ExampleActuator* sp = dynamic_cast<ExampleActuator*>(s);
-  return sp;
-}
-
-AUTO_REGISTER_ACTUATOR(1, ExampleActuator);
-
-
+#endif

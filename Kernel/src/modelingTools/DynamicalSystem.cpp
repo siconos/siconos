@@ -45,8 +45,8 @@ void DynamicalSystem::initPluginFlags(bool val)
 // ===== CONSTRUCTORS =====
 
 // Default constructor (protected)
-DynamicalSystem::DynamicalSystem(const string& type):
-  DSType(type), number(0), id("none"), nsds(NULL), n(0), x0(NULL), jacobianXRhs(NULL), z(NULL), g(NULL), computeGPtr(NULL),
+DynamicalSystem::DynamicalSystem(DSTYPES type):
+  DSType(type), number(0), nsds(NULL), n(0), x0(NULL), jacobianXRhs(NULL), z(NULL), g(NULL), computeGPtr(NULL),
   xMemory(NULL), stepsInMemory(1), dsxml(NULL)
 {
   initAllocationFlags(false);
@@ -55,22 +55,19 @@ DynamicalSystem::DynamicalSystem(const string& type):
 
 // From XML file (warning: newNsds is optional, default = NULL)
 DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds):
-  DSType(dsXML->getType()), number(dsXML->getNumber()), id("none"), nsds(newNsds), n(0), x0(NULL), jacobianXRhs(NULL), z(NULL), g(NULL), computeGPtr(NULL),
+  DSType(dsXML->getType()), number(dsXML->getNumber()), nsds(newNsds), n(0), x0(NULL), jacobianXRhs(NULL), z(NULL), g(NULL), computeGPtr(NULL),
   xMemory(NULL), stepsInMemory(1), dsxml(dsXML)
 {
   if (dsXML == NULL)  // Not really useful: if NULL, error in init. list of the present constructor ... It is also tested in NSDS xml constructor.
     RuntimeException::selfThrow("DynamicalSystem::DynamicalSystem - DynamicalSystemXML paramater must not be NULL");
 
   // Only the following data are set in this general constructor:
-  //  - DSType
-  //  - number and Id
+  //  - DSTye
+  //  - number
   //  - nsds
   //  - z
   //  - stepsInMemory
   // All others are dependent of the derived class type.
-
-  // === Id ===
-  if (dsxml->hasId()) id = dsxml->getId();
 
   // === Initial conditions ===
   // Warning: n is set thanks to vector of initial conditions size. That will be set in derived classes constructor.
@@ -89,8 +86,8 @@ DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalS
 }
 
 // From a minimum set of data
-DynamicalSystem::DynamicalSystem(const string& type, int newNumber, unsigned int newN):
-  DSType(type), number(newNumber), id("none"), nsds(NULL), n(newN), x0(NULL), jacobianXRhs(NULL), z(NULL), g(NULL), computeGPtr(NULL),
+DynamicalSystem::DynamicalSystem(DSTYPES type, int newNumber, unsigned int newN):
+  DSType(type), number(newNumber), nsds(NULL), n(newN), x0(NULL), jacobianXRhs(NULL), z(NULL), g(NULL), computeGPtr(NULL),
   xMemory(NULL), stepsInMemory(1), dsxml(NULL)
 {
   initAllocationFlags(false);

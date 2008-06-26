@@ -222,7 +222,6 @@ void SparseBlockMatrix::convert()
   numericsMatSparse->RowIndex = &((*rowPos)[0]);
   numericsMatSparse->ColumnIndex = &((*colPos)[0]);
   numericsMatSparse->block =  &((*blocksList)[0]);
-  printSBM(numericsMatSparse);
   //   // Loop through the non-null blocks
   //   for (SpMatIt1 i1 = MSparseBlock->begin1(); i1 != MSparseBlock->end1(); ++i1)
   //     {

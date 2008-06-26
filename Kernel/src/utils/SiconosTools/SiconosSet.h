@@ -280,10 +280,10 @@ public:
    */
   void display() const
   {
-    std::cout << "====> Set display - The following objects are present in the set ( id - number):" << std::endl;
+    std::cout << "====> Set display - The following objects are present in the set (number):" << std::endl;
     TIterator it;
     for (it = setOfT->begin(); it != setOfT->end(); ++it)
-      std::cout << "(" << (*it)->getId() << "," << (*it)->getNumber() << "), ";
+      std::cout << "(" << (*it)->getNumber() << "), ";
     std::cout << std::endl;
     std::cout << "=============================================================================================" << std::endl;
   };

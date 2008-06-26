@@ -28,9 +28,7 @@
 ---++ Optional external libraries
 
    * cppunit
-      * actual version used with the platform: 1.10.2
-      * last version : 1.10.2
-      * known problems : none
+      * last tested version in Siconos: 1.12
       * location : http://cppunit.sourceforge.net/cgi-bin/moin.cgi
 
 ---++ Getting the sources
@@ -61,24 +59,6 @@ some CMAKE OPTIONS that may be usefull:
 
 some MAKE OPTIONS that may be usefull:
         - to see make command as executed : VERBOSE=1
-
--- with autotools (deprecated)
-
-in Numerics directory:
-	
-	- ./autogen.sh
-	- ./configure --prefix="the path where you want to install the platform" --other_options
-	- make
-	- make install (default install location: /usr/local) 
-
-for more details on configure options, type configure --help. 
-
-To run tests : make check
-
-To generate doc: make doc or launch doxywizard, load config/DoxygenNumerics.cfg and "start".
-Generated html or latex files are in ../Docs/htdocs/DoxygenNumerics. 
-      
-   * If you have a local installation of an external library, you can give its path to configure with the option --with-[library name]. You can get the possible options typing = ./configure --help. 
 
 INSTALLATION ON MACOSX
 

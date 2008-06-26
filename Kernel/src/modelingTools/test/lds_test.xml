@@ -24,7 +24,7 @@
 	<NSDS bvp='false'>
 	<!-- DSs defined in the problem -->
 		<DS_Definition>		
-			<FirstOrderLinearDS number='13'  Id="testDS1">
+			<FirstOrderLinearDS number='13'>
 	 			<StepsInMemory>2</StepsInMemory>				
 				<x0 vectorSize='3'>
 					1.0 2.0 3.0
@@ -38,7 +38,7 @@
 					<row>6.0 6.0 6.0</row>
 				</A>			
 			</FirstOrderLinearDS>
-			<FirstOrderLinearDS number='2' Id="testDS2">
+			<FirstOrderLinearDS number='2'>
 				<x0 vectorSize='3'>
 					2.0 4.0 6.0
 				</x0>

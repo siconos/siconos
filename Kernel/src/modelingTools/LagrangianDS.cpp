@@ -1387,7 +1387,7 @@ void LagrangianDS::saveSpecificDataToXML()
 
 void LagrangianDS::display() const
 {
-  cout << "=====> Lagrangian System display (number: " << number << ", id: " << id << ")." << endl;
+  cout << "=====> Lagrangian System display (number: " << number << ")." << endl;
   cout << "- ndof : " << ndof << endl;
   cout << "- q " << endl;
   if (q[0] != NULL) q[0]->display();

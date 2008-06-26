@@ -30,6 +30,7 @@
 #include "SimpleVector.h"
 #include "SimpleMatrix.h"
 #include "SiconosMemory.h"
+#include "DynamicalSystemTypes.hpp"
 
 class NonSmoothDynamicalSystem;
 class DynamicalSystemXML;
@@ -39,18 +40,6 @@ class SimpleMatrix;
 class SimpleVector;
 class SiconosMemory;
 class SiconosSharedLibrary;
-
-/** Names used to identify Dynamical Systems */
-/** First Order Non Linear DS */
-const std::string FONLDS = "FirstOrderNonLinearDS";
-/** First Order Linear DS */
-const std::string FOLDS = "FirstOrderLinearDS";
-/** First Order Linear and Time-Invariant Coefficients DS */
-const std::string FOLTIDS = "FirstOrderLinearDS";
-/** Lagrangian, Second Order,  Non Linear DS */
-const std::string LNLDS = "LagrangianDS";
-/** Lagrangian, Second Order,  Linear and Time-Invariant Coefficients DS */
-const std::string LLTIDS = "LagrangianLinearTIDS";
 
 /** A map to save temporary working vectors */
 typedef std::map<const std::string , SiconosVector*> WorkMap;
@@ -128,14 +117,11 @@ class DynamicalSystem
 {
 protected:
 
-  /** Dynamical System type - See possible types in description of this file.*/
-  std::string  DSType;
+  /** Dynamical System type - See possible types in the enum DSTypes above.*/
+  DSTYPES  DSType;
 
   /** An id number for the DynamicalSystem */
   int number;
-
-  /** the name of the DS ("ball", "solid1254", etc)*/
-  std::string  id;
 
   /** NonSmoothDynamicalSystem owner of this DynamicalSystem */
   NonSmoothDynamicalSystem* nsds;
@@ -229,9 +215,9 @@ protected:
   // ===== CONSTRUCTORS =====
 
   /** default constructor
-   * \param string: the type of the system, default=FONLDS, non-linear first order system.
+   * \param DSTYPES the type of the system, default=FONLDS, non-linear first order system.
    */
-  DynamicalSystem(const std::string& = FONLDS);
+  DynamicalSystem(DSTYPES = FONLDS);
 
   /** copy constructor => private, no copy nor pass-by-value.
    */
@@ -246,11 +232,11 @@ public:
   DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* = NULL);
 
   /** constructor from a set of data
-   *  \param string : type of the system
+   *  \param type of the system
    *  \param int : reference number for this DynamicalSystem
    *  \param int : size of the system (n)
    */
-  DynamicalSystem(const std::string&, int, unsigned int newN);
+  DynamicalSystem(DSTYPES, int, unsigned int newN);
 
   // ===== DESTRUCTOR =====
 
@@ -268,17 +254,17 @@ public:
   // --- type of DS ---
 
   /** get the type of a DynamicalSystem
-   *  \return string : the type of the DynamicalSystem
+   *  \return the type of the DynamicalSystem
    */
-  inline const std::string  getType() const
+  inline const DSTYPES getType() const
   {
     return DSType;
   }
 
   /** set the type of a DynamicalSystem
-   *  \param string : the type of the DynamicalSystem
+   *  \param the type of the DynamicalSystem
    */
-  inline void setType(const std::string& newType)
+  inline void setType(DSTYPES newType)
   {
     DSType = newType;
   }
@@ -307,24 +293,6 @@ public:
   inline void setNumber(int newNumber)
   {
     number = newNumber;
-  }
-
-  // --- Id ---
-
-  /** allows to get the id of the DynamicalSystem
-   *  \return the value of ths id
-   */
-  inline const std::string  getId() const
-  {
-    return id;
-  }
-
-  /** allows to set the value of id
-   *  \param a string to set the value of id
-   */
-  inline void setId(const std::string&  newId)
-  {
-    id = newId;
   }
 
   // --- NonSmoothDynamicalSystem ---

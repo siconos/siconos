@@ -27,7 +27,7 @@
 using namespace std;
 
 // xml constructor
-LagrangianScleronomousR::LagrangianScleronomousR(RelationXML* relxml): LagrangianR(relxml, "ScleronomousR"), hPtr(NULL), G0Ptr(NULL)
+LagrangianScleronomousR::LagrangianScleronomousR(RelationXML* relxml): LagrangianR(relxml, ScleronomousR), hPtr(NULL), G0Ptr(NULL)
 {
   LagrangianRXML * LRxml = static_cast<LagrangianRXML *>(relationxml);
   // h plug-in
@@ -45,7 +45,7 @@ LagrangianScleronomousR::LagrangianScleronomousR(RelationXML* relxml): Lagrangia
 
 // constructor from a set of data
 LagrangianScleronomousR::LagrangianScleronomousR(const string& computeH, const std::string& computeG):
-  LagrangianR("ScleronomousR"), hPtr(NULL), G0Ptr(NULL)
+  LagrangianR(ScleronomousR), hPtr(NULL), G0Ptr(NULL)
 {
   setComputeHFunction(cShared.getPluginName(computeH), cShared.getPluginFunctionName(computeH));
   // Note that in this case, G is not allocated since we do not have its dimensions.

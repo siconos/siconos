@@ -21,17 +21,17 @@
 #include "SimpleVector.h"
 #include "ioMatrix.h"
 #include <boost/numeric/ublas/matrix_proxy.hpp>
-#include "boost/numeric/bindings/traits/ublas_matrix.hpp"
-#include "boost/numeric/bindings/atlas/cblas1.hpp"
-#include "boost/numeric/bindings/atlas/cblas2.hpp"
-#include "boost/numeric/bindings/atlas/cblas3.hpp"
+#include <boost/numeric/bindings/traits/ublas_matrix.hpp>
+#include <boost/numeric/bindings/atlas/cblas1.hpp>
+#include <boost/numeric/bindings/atlas/cblas2.hpp>
+#include <boost/numeric/bindings/atlas/cblas3.hpp>
 
 #include "KernelConfig.h"
 #ifdef HAVE_ATLAS
-#include "boost/numeric/bindings/atlas/clapack.hpp"
+#include <boost/numeric/bindings/atlas/clapack.hpp>
 namespace lapack = boost::numeric::bindings::atlas;
 #else
-#include "boost/numeric/bindings/lapack/lapack.hpp"
+#include <boost/numeric/bindings/lapack/lapack.hpp>
 namespace lapack = boost::numeric::bindings::lapack;
 #endif
 

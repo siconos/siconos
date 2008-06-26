@@ -60,20 +60,24 @@ class LagrangianR : public Relation
 protected:
 
   /** To define the type of constraints (scleronomic ...), ie the variables on which depend h and G*/
-  std::string LagrangianRelationType;
+  RELATIONSUBTYPES LagrangianRelationType;
 
   /** G matrices of gradients of h. */
   VectorOfMatrices G;
 
   /** default constructor
    */
-  LagrangianR(const std::string& = "Lagrangian");
+  LagrangianR();
+
+  /** basic constructor
+   */
+  LagrangianR(RELATIONSUBTYPES);
 
   /** constructor from xml file
    *  \param relationXML
    *  \param string: relation subType
    */
-  LagrangianR(RelationXML*, const std::string&);
+  LagrangianR(RelationXML*, RELATIONSUBTYPES);
 
 public:
 
@@ -94,7 +98,7 @@ public:
   /** get the type of constraints of the relation (scleronomic ...)
    *  \return a string
    */
-  inline const std::string getLagrangianRelationType() const
+  inline const RELATIONSUBTYPES getLagrangianRelationType() const
   {
     return LagrangianRelationType;
   }

@@ -36,14 +36,12 @@ A complete Installation Guide is available at siconos.gforge.inria.fr/SiconosIns
 ---++ Optional external libraries (advised for developers)
 
    * cppunit
-      * actual version used with the platform: 1.10.2
-      * last version : 1.10.2
-      * known problems : none
+      * last version used with the platform: 1.12
       * location : http://cppunit.sourceforge.net/cgi-bin/moin.cgi
 
    * Boost
-      * actual version used with the platform: 1.33.1
-      * last version : 1.33.1
+      * actual version used with the platform: 1.34.1
+      * last version : 1.34.1
       * known problems : none
       * location : http://sourceforge.net/project/showfiles.php?group_id=7586
       * you can read the "quick installation notes of Boost" at the end of this document
@@ -77,51 +75,12 @@ some CMAKE OPTIONS that may be usefull:
 some MAKE OPTIONS that may be usefull:
         - to see make command as executed : VERBOSE=1
 
--- with autotools (deprecated)
-
-For each package (Numerics, Kernel, Front-End, in this order), in the corresponding main directory:
-	
-	- ./autogen.sh
-	- configure --prefix="the path where you want to install the platform" --other_options
-	- make
-	- make install (default install location: /usr/local) 
-
-!!! WARNING: any local installation of a library (libxml2, cppunit ...) may require that you set properly 
-	     the LD_LIBRARY_PATH.
-
-for more details on configure options, type configure --help. 
-
-To run tests ( require --enable-cppunit option in configure) : make check
-
-To generate doc: make doc or launch doxywizard, load config/DoxygenSiconos.cfg and "start".
-Generated html or latex files are in ../Docs/htdocs/Doxygen. 
       
 ---+++ Is the installation of the Kernel OK ?
    * You can try to run : cd /path/to/your/source/code/sample/Mechanics/BouncingBall ; siconos BouncingBall.cpp
 
 ---+++ Is the installation of the Front-End OK ?
    * You can try to run : cd /path/to/your/source/code/sample/Mechanics/BouncingBall ; pySiconos BouncingBall.py
-
-Examples: 
-=========
-
-	* classic default install:
-
-		- ./autogen.sh
-	        - ./configure         (-> kernel will be installed in /usr/local)
-	        - make
-	        - make install (as root) 
-
-	* install in a local directory, using cppunit also in a local directory. 
-
-		- ./autogen.sh
-	        - ./configure --enable-cppunit --with-cppunit-prefix=/enm/local/ --prefix=/mySiconos/  
-	        - make
-	        - make install 
-		
-	  + run tests: 
-	        
-	        - make check 
 
 
          

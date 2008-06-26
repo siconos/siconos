@@ -120,7 +120,7 @@ void Actuator::display() const
 
   cout << "The associated DynamicalSystems are: " << endl;
   for (DSIterator itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
-    cout << " - Number and Id: " << (*itDS)->getNumber() << ", " << (*itDS)->getId() << endl;
+    cout << " - Numbers : " << (*itDS)->getNumber()  << endl;
   cout << "======" << endl;
   cout << endl;
 }

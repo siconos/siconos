@@ -47,10 +47,7 @@
 <xsd:simpleType name="PossibleRelationValues">
   	<xsd:restriction base="xsd:string">
 		<xsd:enumeration value="FirstOrderRelation"/>
-		<xsd:enumeration value="FirstOrderLinearRelation"/>
-		<xsd:enumeration value="FirstOrderLinearTimeInvariantRelation"/>
 		<xsd:enumeration value="LagrangianRelation"/>
-		<xsd:enumeration value="LagrangianLinearRelation"/>
    	</xsd:restriction>
 </xsd:simpleType>
 
@@ -291,7 +288,6 @@
 						<xsd:element name="jacobianXF" type="matrix" minOccurs="1" maxOccurs="1"/>
 					</xsd:all>
 				<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
-				<xsd:attribute name="Id" type="xsd:positiveInteger" use="optional"/>
 				</xsd:complexType>
 			</xsd:element>
 						
@@ -306,7 +302,6 @@
 						<xsd:element name="b" type="vector" minOccurs="0" maxOccurs="1"/>
 					</xsd:all>
 				  	<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
-					<xsd:attribute name="Id" type="xsd:positiveInteger" use="optional"/>
 				</xsd:complexType>
 			</xsd:element>
 						
@@ -321,7 +316,6 @@
 						<xsd:element name="b" type="vector" minOccurs="0" maxOccurs="1"/>
 					</xsd:all>
 				  	<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
-					<xsd:attribute name="Id" type="xsd:positiveInteger" use="optional"/>
 				</xsd:complexType>
 			</xsd:element>
 
@@ -345,7 +339,6 @@
 						<xsd:element name="JacobianVelocityNNL" type="matrix" minOccurs="0" maxOccurs="1"/>
 					</xsd:all>
 					<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
-					<xsd:attribute name="Id" type="xsd:positiveInteger" use="optional"/>
 				</xsd:complexType>
 			</xsd:element>
 			<xsd:element name="LagrangianLinearTIDS">
@@ -364,7 +357,6 @@
 						<xsd:element name="C" type="matrix" minOccurs="0" maxOccurs="1"/>
 					</xsd:all>
 					<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
-					<xsd:attribute name="Id" type="xsd:positiveInteger" use="optional"/>
 				</xsd:complexType>
 			</xsd:element>
 						

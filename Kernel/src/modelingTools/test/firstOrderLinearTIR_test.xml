@@ -2,7 +2,7 @@
 	<NSDS bvp='false'>
 		<!-- DSs defined in the problem -->
 		<DS_Definition>		
-			<LagrangianLinearTIDS number='3' Id="Ball">
+			<LagrangianLinearTIDS number='3'>
 	 			<StepsInMemory>1</StepsInMemory>				
 				<q0 vectorSize='3'>
 					1.0 0.0 0.0
@@ -41,13 +41,13 @@
 				<!-- Relation of this interaction -->				
 					<DS_Concerned all='true'/>
 					<Interaction_Content>		
-					<FirstOrderLinearTimeInvariantRelation>
+					<FirstOrderRelation type ="LinearTI">
                                         <C matrixFile="matC.dat"/>
                                         <D matrixFile="matD.dat"/>
 	                                <B matrixFile="matB.dat"/>
   	                                <F matrixFile="matF.dat"/>
                                         <e vectorSize = '2'>0.1 0.1</e>
-                                       </FirstOrderLinearTimeInvariantRelation>			
+                                       </FirstOrderRelation>			
 					<!-- NS Law of this interaction	-->
 					<NewtonImpactLaw>
 						<e>0.9</e>

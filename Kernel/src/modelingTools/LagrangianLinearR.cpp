@@ -34,7 +34,7 @@ void LagrangianLinearR::initAllocationFlags(bool in)
 
 // Xml constructor
 LagrangianLinearR::LagrangianLinearR(RelationXML* relxml):
-  LagrangianR(relxml, "LinearR"), H(NULL), b(NULL), D(NULL), F(NULL)
+  LagrangianR(relxml, LinearR), H(NULL), b(NULL), D(NULL), F(NULL)
 {
   LagrangianLinearRXML* LLRxml = (static_cast<LagrangianLinearRXML*>(relationxml));
 
@@ -68,7 +68,7 @@ LagrangianLinearR::LagrangianLinearR(RelationXML* relxml):
 
 // Constructor from data: H, b.
 LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVector& newB):
-  LagrangianR("LinearR"), H(NULL), b(NULL), D(NULL), F(NULL)
+  LagrangianR(LinearR), H(NULL), b(NULL), D(NULL), F(NULL)
 {
   H = new SimpleMatrix(newH);
   isAllocatedIn["H"] = true;
@@ -81,7 +81,7 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVect
 
 // Constructor from data: H.
 LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH):
-  LagrangianR("LinearR"), H(NULL), b(NULL), D(NULL), F(NULL)
+  LagrangianR(LinearR), H(NULL), b(NULL), D(NULL), F(NULL)
 {
   H = new SimpleMatrix(newH);
   isAllocatedIn["H"] = true;
@@ -92,7 +92,7 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH):
 
 // Constructor from data: H, b, and D.
 LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVector& newB, const SiconosMatrix& newD):
-  LagrangianR("LinearR"), H(NULL), b(NULL), D(NULL)
+  LagrangianR(LinearR), H(NULL), b(NULL), D(NULL)
 {
   H = new SimpleMatrix(newH);
   isAllocatedIn["H"] = true;
@@ -105,7 +105,7 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVect
 
 // Constructor from data: H, b, D and F.
 LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVector& newB, const SiconosMatrix& newD, const SiconosMatrix& newF):
-  LagrangianR("LinearR"), H(NULL), b(NULL), D(NULL)
+  LagrangianR(LinearR), H(NULL), b(NULL), D(NULL)
 {
   H = new SimpleMatrix(newH);
   isAllocatedIn["H"] = true;

@@ -29,6 +29,7 @@
 #include "RuntimeException.h"
 #include "Tools.h"
 #include "SiconosSharedLibrary.h"
+#include "RelationTypes.hpp"
 
 class Interaction;
 class RelationXML;
@@ -53,7 +54,8 @@ class SimpleVector;
  *   - FirstOrder, for FirstOrderDS and derived classes.
  *   - Lagrangian, for LagrangianDS and derived classes.
  *
- *  The specific type (Linear, Scleronomous ...) is then given by the "subType". See Relation derived classes for details.
+ *  The specific type (Linear, Scleronomous ...) is then given by the "subType". \n
+    The list of available types and subtypes is given in RelationTypes.hpp.
  *
  * The relation holds also:
  *  - a pointer to the Interaction that owns the present relation.
@@ -67,10 +69,10 @@ class Relation
 protected:
 
   /** type of the Relation: FirstOrder or Lagrangian */
-  std::string  relationType;
+  RELATIONTYPES  relationType;
 
   /** sub-type of the Relation (exple: LinearTIR or ScleronomousR ...) */
-  std::string  subType;
+  RELATIONSUBTYPES  subType;
 
   /** The Interaction linked to this Relation */
   Interaction * interaction;
@@ -107,17 +109,21 @@ protected:
   SimpleVector * workL;
 
   /** default constructor
-   *  \param a string that gives the type of the relation (optional)
-   *  \param a string that gives the subtype of the relation (optional)
    */
-  Relation(const std::string& = "Undefined", const std::string& = "Undefined");
+  Relation();
+
+  /** basic constructor
+   *  \param a string that gives the type of the relation
+   *  \param a string that gives the subtype of the relation
+   */
+  Relation(RELATIONTYPES, RELATIONSUBTYPES);
 
   /** xml constructor
    *  \param RelationXML* : the XML object corresponding
-   *  \param a string that gives the type of the relation (optional)
-   *  \param a string that gives the subtype of the relation (optional)
+   *  \param a string that gives the type of the relation
+   *  \param a string that gives the subtype of the relation
    */
-  Relation(RelationXML*, const std::string& = "Undefined", const std::string& = "Undefined");
+  Relation(RelationXML*, RELATIONTYPES, RELATIONSUBTYPES);
 
 private:
 
@@ -168,17 +174,17 @@ public:
   }
 
   /** To get the type of the Relation (FirstOrder or Lagrangian)
-   *  \return string : the type of the Relation
+   *  \return the type of the Relation
    */
-  inline const std::string  getType() const
+  inline const RELATIONTYPES  getType() const
   {
     return relationType;
   }
 
   /** To get the subType of the Relation
-   *  \return string : the sub-type of the Relation
+   *  \return the sub-type of the Relation
    */
-  inline const std::string  getSubType() const
+  inline const RELATIONSUBTYPES  getSubType() const
   {
     return subType;
   }

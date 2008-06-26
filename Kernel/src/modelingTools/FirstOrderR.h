@@ -71,7 +71,7 @@ class FirstOrderR : public Relation
 protected:
 
   /** type of the FirstOrderR */
-  std::string  firstOrderType;
+  RELATIONSUBTYPES  firstOrderType;
 
   /** matrices of gradients of h. (jacobianH[0]: gradient according to x, jacobianH[1]: gradient according to lambda) */
   VectorOfMatrices jacobianH;
@@ -80,15 +80,19 @@ protected:
   VectorOfMatrices jacobianG;
 
   /** default constructor
-   *  \param a string that gives the type of the relation (optional)
    */
-  FirstOrderR(const std::string& = "FirstOrder");
+  FirstOrderR();
+
+  /** basic constructor
+   *  \param the type of the relation
+   */
+  FirstOrderR(RELATIONSUBTYPES);
 
   /** xml constructor
    *  \param FirstOrderRXML* : the XML object.
-   *  \param a string that gives the type of the relation
+   *  \param the type of the relation
    */
-  FirstOrderR(RelationXML*, const std::string&);
+  FirstOrderR(RelationXML*, RELATIONSUBTYPES);
 
   /** To initialize data member: links to DS variables.
    */
@@ -101,9 +105,9 @@ public:
   virtual ~FirstOrderR();
 
   /** To get the type of the FirstOrderR
-   *  \return string : the type of the FirstOrderR
+   *  \return the type of the FirstOrderR
    */
-  inline const std::string  getFirstOrderRelationType() const
+  inline const RELATIONSUBTYPES getFirstOrderRelationType() const
   {
     return firstOrderType;
   }

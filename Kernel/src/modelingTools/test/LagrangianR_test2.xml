@@ -24,7 +24,7 @@
 	<NSDS bvp='false'>
 		<!-- DSs defined in the problem -->
 		<DS_Definition>		
-			<LagrangianLinearTIDS number='3' Id="Ball">
+			<LagrangianLinearTIDS number='3'>
 	 			<StepsInMemory>1</StepsInMemory>				
 				<q0 vectorSize='3'>
 					1.0 0.0 0.0
@@ -48,7 +48,7 @@
                                </DS_Concerned>									
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>		
-					<LagrangianRelation type="rhenomorous">
+					<LagrangianRelation type="Rheonomous">
                                              <h plugin="TestPlugin:h1"/>
                                              <G number='2'>
                                               <matrix matrixPlugin="TestPlugin:G10"/>

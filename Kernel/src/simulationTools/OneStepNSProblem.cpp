@@ -610,7 +610,7 @@ void OneStepNSProblem::getOSIMaps(UnitaryRelation* UR, MapOfDSMatrices& centralU
 
   OneStepIntegrator * Osi;
   string osiType; // type of the current one step integrator
-  string dsType; // type of the current Dynamical System
+  DSTYPES dsType; // type of the current Dynamical System
   DSIterator itDS = UR->dynamicalSystemsBegin();
   while (itDS != (UR->dynamicalSystemsEnd()))
   {

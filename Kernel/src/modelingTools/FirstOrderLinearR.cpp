@@ -41,7 +41,7 @@ void FirstOrderLinearR::initPluginFlags(bool in)
 }
 
 // Default (private) constructor
-FirstOrderLinearR::FirstOrderLinearR(): FirstOrderR("LinearR"), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL),
+FirstOrderLinearR::FirstOrderLinearR(): FirstOrderR(LinearR), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL),
   CPtr(NULL), DPtr(NULL), FPtr(NULL), ePtr(NULL), BPtr(NULL)
 {
   initPluginFlags(false);
@@ -50,7 +50,7 @@ FirstOrderLinearR::FirstOrderLinearR(): FirstOrderR("LinearR"), C(NULL), D(NULL)
 
 // xml constructor
 FirstOrderLinearR::FirstOrderLinearR(RelationXML* relxml):
-  FirstOrderR(relxml, "LinearR"), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL),
+  FirstOrderR(relxml, LinearR), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL),
   CPtr(NULL), DPtr(NULL), FPtr(NULL), ePtr(NULL), BPtr(NULL)
 {
   FirstOrderLinearRXML * folrXML = static_cast<FirstOrderLinearRXML *>(relationxml);
@@ -139,7 +139,7 @@ FirstOrderLinearR::FirstOrderLinearR(RelationXML* relxml):
 
 // Constructor with C and B plug-in names
 FirstOrderLinearR::FirstOrderLinearR(const string& CName, const string& BName):
-  FirstOrderR("LinearR"), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL),
+  FirstOrderR(LinearR), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL),
   CPtr(NULL), DPtr(NULL), FPtr(NULL), ePtr(NULL), BPtr(NULL)
 {
   initPluginFlags(false);
@@ -150,7 +150,7 @@ FirstOrderLinearR::FirstOrderLinearR(const string& CName, const string& BName):
 
 // Constructor with e plug-in name
 FirstOrderLinearR::FirstOrderLinearR(const string& EName):
-  FirstOrderR("LinearR"), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL),
+  FirstOrderR(LinearR), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL),
   CPtr(NULL), DPtr(NULL), FPtr(NULL), ePtr(NULL), BPtr(NULL)
 {
   initPluginFlags(false);
@@ -160,7 +160,7 @@ FirstOrderLinearR::FirstOrderLinearR(const string& EName):
 
 // Constructor from a complete set of data (plugin)
 FirstOrderLinearR::FirstOrderLinearR(const string& CName, const string& DName, const string& FName, const string& EName, const string& BName):
-  FirstOrderR("LinearR"), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL),
+  FirstOrderR(LinearR), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL),
   CPtr(NULL), DPtr(NULL), FPtr(NULL), ePtr(NULL), BPtr(NULL)
 {
   initPluginFlags(true);
@@ -174,7 +174,7 @@ FirstOrderLinearR::FirstOrderLinearR(const string& CName, const string& DName, c
 
 // Minimum data (C, B as pointers) constructor
 FirstOrderLinearR::FirstOrderLinearR(SiconosMatrix * newC, SiconosMatrix * newB):
-  FirstOrderR("LinearR"), C(newC), D(NULL), F(NULL), e(NULL), B(newB),
+  FirstOrderR(LinearR), C(newC), D(NULL), F(NULL), e(NULL), B(newB),
   CPtr(NULL), DPtr(NULL), FPtr(NULL), ePtr(NULL), BPtr(NULL)
 {
   initPluginFlags(false);
@@ -183,7 +183,7 @@ FirstOrderLinearR::FirstOrderLinearR(SiconosMatrix * newC, SiconosMatrix * newB)
 
 // Constructor from a complete set of data
 FirstOrderLinearR::FirstOrderLinearR(SiconosMatrix* newC, SiconosMatrix* newD, SiconosMatrix* newF, SiconosVector* newE, SiconosMatrix* newB):
-  FirstOrderR("LinearR"), C(newC), D(newD), F(newF), e(newE), B(newB),
+  FirstOrderR(LinearR), C(newC), D(newD), F(newF), e(newE), B(newB),
   CPtr(NULL), DPtr(NULL), FPtr(NULL), ePtr(NULL), BPtr(NULL)
 {
   initPluginFlags(false);

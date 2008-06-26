@@ -125,7 +125,7 @@ void FirstOrderLinearTIDS::computeJacobianXRhs(const double time, const bool)
 
 void FirstOrderLinearTIDS::display() const
 {
-  cout << "===> Linear Time-invariant First Order System display, " << number << ", id: " << id << ")." << endl;
+  cout << "===> Linear Time-invariant First Order System display, " << number << ")." << endl;
   cout << "- A " << endl;
   if (A != NULL) A->display();
   else cout << "-> NULL" << endl;

@@ -24,12 +24,12 @@
 using namespace std;
 
 // Default constructor
-Relation::Relation(const string& newType, const string& newSub):
+Relation::Relation(RELATIONTYPES newType, RELATIONSUBTYPES newSub):
   relationType(newType), subType(newSub), interaction(NULL), relationxml(NULL), workX(NULL), workZ(NULL), workY(NULL), workL(NULL)
 {}
 
 // xml constructor
-Relation::Relation(RelationXML* relxml, const string& newType, const string& newSub):
+Relation::Relation(RelationXML* relxml, RELATIONTYPES newType, RELATIONSUBTYPES newSub):
   relationType(newType), subType(newSub), interaction(NULL), relationxml(relxml), workX(NULL), workZ(NULL), workY(NULL), workL(NULL)
 {
   if (relationxml == NULL)

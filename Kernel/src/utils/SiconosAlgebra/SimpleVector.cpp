@@ -22,7 +22,7 @@
 #include "ioVector.h"
 #include <boost/numeric/ublas/io.hpp>            // for >> 
 #include <boost/numeric/ublas/vector_proxy.hpp>  // for project
-#include "boost/numeric/bindings/atlas/cblas1.hpp"
+#include <boost/numeric/bindings/atlas/cblas1.hpp>
 
 // =================================================
 //                CONSTRUCTORS

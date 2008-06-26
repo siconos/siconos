@@ -23,21 +23,16 @@
 
 using namespace std;
 
-// void FirstOrderR::initAllocationFlags(bool in)
-// {
-// }
-
-// void FirstOrderR::initPluginFlags(bool in)
-// {
-// }
-
 // Default constructor
-FirstOrderR::FirstOrderR(const string& newType): Relation("FirstOrder", newType), firstOrderType(newType)
+FirstOrderR::FirstOrderR(): Relation(FirstOrder, NonLinearR), firstOrderType(NonLinearR)
+{}
+// Basic constructor
+FirstOrderR::FirstOrderR(RELATIONSUBTYPES newType): Relation(FirstOrder, newType), firstOrderType(newType)
 {}
 
 // xml constructor
-FirstOrderR::FirstOrderR(RelationXML* relxml, const string& newType):
-  Relation(relxml, "FirstOrder", newType), firstOrderType(newType)
+FirstOrderR::FirstOrderR(RelationXML* relxml, RELATIONSUBTYPES newType):
+  Relation(relxml, FirstOrder, newType), firstOrderType(newType)
 {}
 
 FirstOrderR::~FirstOrderR()

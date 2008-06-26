@@ -70,8 +70,8 @@ void LagrangianCompliantRTest::testBuildLagrangianCompliantR0()
   cout << "=== LagrangianCompliantR tests start ...=== " << endl;
   cout << "==============================================" << endl;
   LagrangianCompliantR * R1 = new LagrangianCompliantR(tmpxml1);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1a : ", R1->getType() == "Lagrangian", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1b : ", R1->getSubType() == "CompliantR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1a : ", R1->getType() == Lagrangian, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1b : ", R1->getSubType() == CompliantR, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1c : ", R1->getFunctionName("h") == "TestPlugin:hCompl", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1d : ", R1->getFunctionName("G0") == "TestPlugin:G0Compl", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1e : ", R1->getFunctionName("G1") == "TestPlugin:G1Compl", true);
@@ -83,8 +83,8 @@ void LagrangianCompliantRTest::testBuildLagrangianCompliantR0()
 void LagrangianCompliantRTest::testBuildLagrangianCompliantR1()
 {
   LagrangianCompliantR * R1 = new LagrangianCompliantR();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR2a : ", R1->getType() == "Lagrangian", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR2b : ", R1->getSubType() == "CompliantR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR2a : ", R1->getType() == Lagrangian, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR2b : ", R1->getSubType() == CompliantR, true);
   delete R1;
   cout << " default Constructor LagrangianCompliantR ok" << endl;
 }
@@ -98,8 +98,8 @@ void LagrangianCompliantRTest::testBuildLagrangianCompliantR2()
   G.push_back("TestPlugin:G1Compl");
 
   LagrangianCompliantR * R1 = new LagrangianCompliantR("TestPlugin:hCompl", G);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3a : ", R1->getType() == "Lagrangian", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3b : ", R1->getSubType() == "CompliantR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3a : ", R1->getType() == Lagrangian, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3b : ", R1->getSubType() == CompliantR, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3c : ", R1->getFunctionName("h") == "TestPlugin:hCompl", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3d : ", R1->getFunctionName("G0") == "TestPlugin:G0Compl", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3d : ", R1->getFunctionName("G1") == "TestPlugin:G1Compl", true);

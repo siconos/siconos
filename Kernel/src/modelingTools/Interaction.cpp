@@ -134,38 +134,36 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
   else cout << "Interaction constructor, warning: no dynamical systems linked to the interaction!" << endl;
 
   // --- Relation ---
-  string relationType = interactionxml->getRelationXML()->getType();
+  RELATIONTYPES relationType = interactionxml->getRelationXML()->getType();
 
   // First Order Non Linear Relation
-  if (relationType == "FirstOrderRelation")
+  if (relationType == FirstOrder)
   {
-    string relationSubType = interactionxml->getRelationXML()->getSubType();
-    if (relationSubType == "Type1")
+    RELATIONSUBTYPES relationSubType = interactionxml->getRelationXML()->getSubType();
+    if (relationSubType == Type1R)
       relation = new FirstOrderType1R(interactionxml->getRelationXML());
+    // Linear relation
+    else if (relationSubType == LinearR)
+      relation = new FirstOrderLinearR(interactionxml->getRelationXML());
+    // Linear time-invariant coef. relation
+    else if (relationSubType == LinearTIR)
+      relation = new FirstOrderLinearTIR(interactionxml->getRelationXML());
   }
-  // Linear relation
-  else if (relationType == "FirstOrderLinearRelation")
-    relation = new FirstOrderLinearR(interactionxml->getRelationXML());
-
-  // Linear time-invariant coef. relation
-  else if (relationType == "FirstOrderLinearTimeInvariantRelation")
-    relation = new FirstOrderLinearTIR(interactionxml->getRelationXML());
-
   // Lagrangian non-linear relation
-  else if (relationType == "LagrangianRelation")
+  else if (relationType == Lagrangian)
   {
-    string relationSubType = interactionxml->getRelationXML()->getSubType();
+    RELATIONSUBTYPES relationSubType = interactionxml->getRelationXML()->getSubType();
     // \todo create a factory to avoid "if" list for Relation construction according to subType.
-    if (relationSubType == "Scleronomous")
+    if (relationSubType == ScleronomousR)
       relation = new LagrangianScleronomousR(interactionxml->getRelationXML());
-    else if (relationSubType == "Rheonomous")
+    else if (relationSubType == RheonomousR)
       relation = new LagrangianRheonomousR(interactionxml->getRelationXML());
-    else if (relationSubType == "Compliant")
+    else if (relationSubType == CompliantR)
       relation = new LagrangianCompliantR(interactionxml->getRelationXML());
+    // Lagrangian linear relation
+    else if (relationSubType == LinearR || relationSubType == LinearTIR)
+      relation = new LagrangianLinearR(interactionxml->getRelationXML());
   }
-  // Lagrangian linear relation
-  else if (relationType == "LagrangianLinearRelation")
-    relation = new LagrangianLinearR(interactionxml->getRelationXML());
   else RuntimeException::selfThrow("Interaction::xml constructor, unknown relation type " + relation->getType());
   isAllocatedIn["relation"] = true;
 
@@ -760,24 +758,24 @@ void Interaction::saveInteractionToXML()
    * save the data of the Relation
    */
   // Main type of the relation: FirstOrder or Lagrangian
-  string type = relation->getType();
+  RELATIONTYPES type = relation->getType();
   // Subtype of the relation
-  string subType = relation->getSubType();
+  RELATIONSUBTYPES subType = relation->getSubType();
 
-  if (type == "FirstOrderRelation")
+  if (type == FirstOrder)
   {
-    if (subType == "NonLinearR")
+    if (subType == NonLinearR)
       relation->saveRelationToXML();
-    else if (subType == "LinearR")
+    else if (subType == LinearR)
       (static_cast<FirstOrderLinearR*>(relation))->saveRelationToXML();
-    else if (subType == "LinearTIR")
+    else if (subType == LinearTIR)
       (static_cast<FirstOrderLinearTIR*>(relation))->saveRelationToXML();
     else
       RuntimeException::selfThrow("Interaction::saveInteractionToXML - Unknown relation subtype: " + subType);
   }
-  else if (type == "Lagrangian")
+  else if (type == Lagrangian)
   {
-    if (subType == "LinearR")
+    if (subType == LinearR)
       (static_cast<LagrangianLinearR*>(relation))->saveRelationToXML();
     else
       RuntimeException::selfThrow("Interaction::saveInteractionToXML - Not yet implemented for relation subtype " + subType);

@@ -95,7 +95,6 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS1()
   LagrangianLinearTIDS * ds = new LagrangianLinearTIDS(tmpxml1);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1A : ", ds->getType() == LLTIDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1B : ", ds->getNumber() == 13, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1C : ", ds->getId() == "testLAGTIDS1", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1D : ", ds->getStepsInMemory() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1D : ", ds->getNdof() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1E : ", ds->getQ0() == *q0, true);

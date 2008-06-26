@@ -2,7 +2,7 @@
 	<NSDS bvp='false'>
 		<!-- DSs defined in the problem -->
 		<DS_Definition>		
-			<LagrangianLinearTIDS number='3' Id="Ball">
+			<LagrangianLinearTIDS number='3'>
 	 			<StepsInMemory>1</StepsInMemory>				
 				<q0 vectorSize='3'>
 					1.0 0.0 0.0

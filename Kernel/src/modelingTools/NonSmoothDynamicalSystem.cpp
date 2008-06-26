@@ -39,20 +39,20 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NonSmoothDynamicalSystemXML* 
   SetOfDSXML dsList = nsdsxml->getDynamicalSystemsXML();
   SetOfDSXMLIt it;
   CheckInsertDS checkDS;
-  string type;
+  DSTYPES type;
   allDS = new DynamicalSystemsSet();
   for (it = dsList.begin(); it != dsList.end(); ++it)
   {
     type = (*it)->getType();
-    if (type  == LAGRANGIAN_NON_LINEARDS_TAG)  // LagrangianDS
+    if (type  == LNLDS)  // LagrangianDS
       checkDS = allDS->insert(new LagrangianDS(*it , this));
-    else if (type == LAGRANGIAN_TIDS_TAG)  // Lagrangian Linear Time Invariant
+    else if (type == LLTIDS)  // Lagrangian Linear Time Invariant
       checkDS = allDS->insert(new LagrangianLinearTIDS(*it, this));
-    else if (type == LINEAR_DS_TAG)  // Linear DS
+    else if (type == FOLDS)  // Linear DS
       checkDS = allDS->insert(new FirstOrderLinearDS(*it, this));
-    else if (type == LINEAR_TIDS_TAG)  // Linear DS
+    else if (type == FOLTIDS)  // Linear Time Invariant DS
       checkDS = allDS->insert(new FirstOrderLinearTIDS(*it, this));
-    else if (type == NON_LINEAR_DS_TAG)  // Non linear DS
+    else if (type == FONLDS)  // Non linear DS
       checkDS = allDS->insert(new FirstOrderNonLinearDS(*it, this));
     else RuntimeException::selfThrow("NonSmoothDynamicalSystem::xml constructor, wrong Dynamical System type" + type);
     // checkDS.first is an iterator that points to the DS inserted into the set.

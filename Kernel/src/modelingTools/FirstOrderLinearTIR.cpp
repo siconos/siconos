@@ -24,21 +24,21 @@ using namespace std;
 // Default (private) constructor
 FirstOrderLinearTIR::FirstOrderLinearTIR(): FirstOrderLinearR()
 {
-  subType = "LinearTIR";
+  subType = LinearTIR;
 }
 
 // xml constructor
 FirstOrderLinearTIR::FirstOrderLinearTIR(RelationXML* relxml):
   FirstOrderLinearR(relxml)
 {
-  subType = "LinearTIR";
+  subType = LinearTIR;
 }
 
 // Minimum data (C, B) constructor
 FirstOrderLinearTIR::FirstOrderLinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newB):
   FirstOrderLinearR()
 {
-  subType = "LinearTIR";
+  subType = LinearTIR;
   C = new SimpleMatrix(newC);
   isAllocatedIn["C"] = true;
 
@@ -50,7 +50,7 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(const SiconosMatrix& newC, const Sicono
 FirstOrderLinearTIR::FirstOrderLinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newD,
     const SiconosMatrix& newF, const SimpleVector& newE, const SiconosMatrix& newB): FirstOrderLinearR()
 {
-  subType = "LinearTIR";
+  subType = LinearTIR;
   C = new SimpleMatrix(newC);
   isAllocatedIn["C"] = true;
 
@@ -72,14 +72,14 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(const SiconosMatrix& newC, const Sicono
 FirstOrderLinearTIR::FirstOrderLinearTIR(SiconosMatrix * newC, SiconosMatrix * newB):
   FirstOrderLinearR(newC, newB)
 {
-  subType = "LinearTIR";
+  subType = LinearTIR;
 }
 
 // Constructor from a complete set of data
 FirstOrderLinearTIR::FirstOrderLinearTIR(SiconosMatrix* newC, SiconosMatrix* newD, SiconosMatrix* newF, SimpleVector* newE, SiconosMatrix* newB):
   FirstOrderLinearR(newC, newD, newF, newE, newB)
 {
-  subType = "LinearTIR";
+  subType = LinearTIR;
 }
 
 FirstOrderLinearTIR::~FirstOrderLinearTIR()

@@ -71,7 +71,7 @@ void Moreau2::computeFreeState()
   DynamicalSystem* ds; // Current Dynamical System.
   SiconosMatrix * W; // W Moreau matrix of the current DS.
   SiconosMatrix * M; // W Moreau matrix of the current DS.
-  string dsType ; // Type of the current DS.
+  DSTYPES dsType ; // Type of the current DS.
   double theta; // Theta parameter of the current ds.
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {

@@ -24,7 +24,7 @@
 	<NSDS bvp='false'>
 		<!-- DSs defined in the problem -->
 		<DS_Definition>		
-			<LagrangianLinearTIDS number='3' Id="Ball">
+			<LagrangianLinearTIDS number='3'>
 	 			<StepsInMemory>1</StepsInMemory>				
 				<q0 vectorSize='3'>
 					1.0 0.0 0.0
@@ -47,7 +47,7 @@
 		               <DS_Concerned all='true'></DS_Concerned>
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>		
-					<LagrangianLinearRelation>
+					<LagrangianRelation type="Linear">
                                          <H matrixRowSize='1' matrixColSize='4'>
 				         <row>1.0  0.0  0.0 4.0</row>
 					</H>
@@ -58,7 +58,7 @@
 				         <row>8</row>
 					</F>
 					<b vectorSize='1'>12.0</b>
-					</LagrangianLinearRelation>			
+					</LagrangianRelation>			
 					<!-- NS Law of this interaction	-->
 					<NewtonImpactLaw>
 						<e>0.9</e>				

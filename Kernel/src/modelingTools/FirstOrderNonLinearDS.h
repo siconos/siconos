@@ -132,9 +132,9 @@ protected:
   virtual void initPluginFlags(bool);
 
   /** default constructor
-   * \param string: the type of the system
+   * \param the type of the system
    */
-  FirstOrderNonLinearDS(const std::string&);
+  FirstOrderNonLinearDS(DSTYPES);
 
 public:
 

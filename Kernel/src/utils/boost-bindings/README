@@ -1,0 +1,5 @@
+How to obtain a new version:
+svn co http://svn.boost.org/svn/boost/sandbox/boost/numeric/bindings
+
+Make a patch:
+diff -x '.svn' -x '*~' -wruN boost/numeric/bindings ~/tmp/bindings > my.patch

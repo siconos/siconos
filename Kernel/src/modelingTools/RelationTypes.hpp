@@ -15,43 +15,40 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ */
+
+/*! \file DynamicalSystemTypes.hpp
+  \brief enum of the available types and subtypes for relations
 */
-#include "ExampleActuator.h"
-#include "DynamicalSystem.h"
-#include "ActuatorFactory.h"
-#include "ioMatrix.h"
-using namespace std;
-using namespace ActuatorFactory;
 
-ExampleActuator::ExampleActuator(int name, TimeDiscretisation* t): Actuator(name, t)
-{}
+#ifndef RELATIONTYPES_HPP
+#define RELATIONTYPES_HPP
 
-void ExampleActuator::initialize()
+/** List of possible DynamicalSystems types*/
+enum RELATIONTYPES
 {
-  // Call initialize of base class
-  Actuator::initialize();
-}
+  /** First Order */
+  FirstOrder,
+  /** Lagrangian */
+  Lagrangian
+};
 
-void ExampleActuator::actuate()
+/** List of possible Relations subtypes*/
+enum RELATIONSUBTYPES
 {
-  cout << "Actuator action ... " << endl;
-  DSIterator itDS;
-  SiconosVector * myZ = new SimpleVector(3);
-  (*myZ)(0) = 12;
-  (*myZ)(1) = 132;
-  (*myZ)(2) = 212;
-
-  for (itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
-    (*itDS)->setZPtr(myZ);
-
-}
-
-ExampleActuator* ExampleActuator::convert(Actuator* s)
-{
-  ExampleActuator* sp = dynamic_cast<ExampleActuator*>(s);
-  return sp;
-}
-
-AUTO_REGISTER_ACTUATOR(1, ExampleActuator);
-
-
+  /** non linear */
+  NonLinearR,
+  /** linear */
+  LinearR,
+  /** Linear and time invariant */
+  LinearTIR,
+  /** Scleronomous (lagrangian only) */
+  ScleronomousR,
+  /** Rheonomous (lagrangian only) */
+  RheonomousR,
+  /** Compliant (lagrangian only) */
+  CompliantR,
+  /** */
+  Type1R
+};
+#endif

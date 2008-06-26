@@ -41,7 +41,7 @@ void FirstOrderNonLinearDS::initPluginFlags(bool val)
 // ===== CONSTRUCTORS =====
 
 // Default constructor (protected)
-FirstOrderNonLinearDS::FirstOrderNonLinearDS(const string& type):
+FirstOrderNonLinearDS::FirstOrderNonLinearDS(DSTYPES type):
   DynamicalSystem(FONLDS), M(NULL), f(NULL), jacobianXF(NULL),
   computeFPtr(NULL), computeJacobianXFPtr(NULL), r(NULL), rMemory(NULL), invM(NULL)
 {
@@ -581,7 +581,7 @@ void FirstOrderNonLinearDS::saveSpecificDataToXML()
 
 void FirstOrderNonLinearDS::display() const
 {
-  cout << " =====> First Order Non Linear DS (number: " << number << ", id: " << id << ")." << endl;
+  cout << " =====> First Order Non Linear DS (number: " << number << ")." << endl;
   cout << "- n (size) : " << n << endl;
   cout << "- x " << endl;
   if (x[0] != NULL) x[0]->display();

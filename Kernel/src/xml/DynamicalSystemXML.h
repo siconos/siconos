@@ -26,6 +26,7 @@
 
 #include "SiconosDOMTreeTools.h"
 #include "SimpleVector.h"
+#include "DynamicalSystemTypes.hpp"
 
 
 class SimpleVector;
@@ -74,34 +75,24 @@ public:
   /** Return the type of the DynamicalSystem
    *   \return a string
    */
-  inline const std::string getType() const
+  inline const DSTYPES getType() const
   {
     std::string res((char*)rootNode->name);
-    return res;
-  }
-
-  /** Return the id of the DynamicalSystem
-   *   \return The string id of the DynamicalSystem
-   */
-  inline const std::string getId() const
-  {
-    return SiconosDOMTreeTools::getStringAttributeValue(rootNode, "Id");
-  }
-
-  /** return true if id is given
-   *  \return a bool
-   */
-  inline bool hasId() const
-  {
-    return (xmlHasProp(rootNode, (xmlChar*)"Id"));
-  }
-
-  /** to save the id of the DynamicalSystem
-   *   \param a string
-   */
-  inline void setId(const std::string& s)
-  {
-    SiconosDOMTreeTools::setStringAttributeValue(rootNode, "Id", s);
+    if (res == "NonLinearDS")
+      return FONLDS;
+    else if (res == "LinearDS")
+      return FOLDS;
+    else if (res == "LinearTIDS")
+      return FOLTIDS;
+    else if (res == "LagrangianDS")
+      return LNLDS;
+    else if (res == "LagrangianLinearTIDS")
+      return LLTIDS;
+    else
+    {
+      XMLException::selfThrow("DynamicalSystemXML - getType: unknown type of DS.");
+      return FONLDS;
+    }
   }
 
   /** Returns the z vector, discret state of the DynamicalSystem

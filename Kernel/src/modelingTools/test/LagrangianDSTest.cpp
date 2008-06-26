@@ -104,7 +104,6 @@ void LagrangianDSTest::testBuildLagrangianDS1()
   M.eye();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1A : ", ds->getType() == LNLDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1B : ", ds->getNumber() == 13, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1C : ", ds->getId() == "testLAGDS1", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1D : ", ds->getStepsInMemory() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1D : ", ds->getNdof() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1E : ", ds->getQ0() == *q0, true);
@@ -124,7 +123,6 @@ void LagrangianDSTest::testBuildLagrangianDS2()
   LagrangianDS * ds = new LagrangianDS(tmpxml2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2A : ", ds->getType() == LNLDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2B : ", ds->getNumber() == 8, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2C : ", ds->getId() == "testLAGDS2", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2D : ", ds->getNdof() == 3, true);
 
   double time = 1.5;
@@ -174,8 +172,8 @@ void LagrangianDSTest::testBuildLagrangianDS3()
   cout << "--> Test: constructor xml 3." << endl;
   LagrangianDS * ds = new LagrangianDS(tmpxml3);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2A : ", ds->getType() == LNLDS, true);
+
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2B : ", ds->getNumber() == 4, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2C : ", ds->getId() == "testLAGDS3", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2D : ", ds->getNdof() == 3, true);
   double time = 1.5;
   ds->initialize("TimeStepping", time);

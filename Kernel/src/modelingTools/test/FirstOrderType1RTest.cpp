@@ -49,8 +49,8 @@ void FirstOrderType1RTest::testBuildFirstOrderType1R1()
   FirstOrderType1R * R1 = new FirstOrderType1R("TestPlugin:hT1", "TestPlugin:gT1");
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1a : ", R1->getInteractionPtr() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1b : ", R1->getType() == "FirstOrder", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1c : ", R1->getSubType() == "Type1R", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1b : ", R1->getType() == FirstOrder, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1c : ", R1->getSubType() == Type1R, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1d : ", R1->getFunctionName("h") == "TestPlugin:hT1", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1e : ", R1->getFunctionName("g") == "TestPlugin:gT1", true);
   R1->setComputeJacobianHFunction("TestPlugin.so", "Jh0T1");
@@ -67,8 +67,8 @@ void FirstOrderType1RTest::testBuildFirstOrderType1R2()
   cout << "--> Test: constructor data (2)." << endl;
   FirstOrderType1R * R2 = new FirstOrderType1R("TestPlugin:hT1", "TestPlugin:gT1", "TestPlugin:Jh0T1", "TestPlugin:Jg0T1");
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2a : ", R2->getInteractionPtr() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2b : ", R2->getType() == "FirstOrder", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2c : ", R2->getSubType() == "Type1R", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2b : ", R2->getType() == FirstOrder, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2c : ", R2->getSubType() == Type1R, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2d : ", R2->getFunctionName("h") == "TestPlugin:hT1", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2e : ", R2->getFunctionName("g") == "TestPlugin:gT1", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2e : ", R2->getFunctionName("jacobianH0") == "TestPlugin:Jh0T1", true);
@@ -115,8 +115,8 @@ void FirstOrderType1RTest::testBuildFirstOrderType1R3()
   node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "FirstOrderRelation");
   tmpxml1 = new FirstOrderRXML(node1);
   FirstOrderType1R * R1 = new FirstOrderType1R(tmpxml1);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R3a : ", R1->getType() == "FirstOrder", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R3b : ", R1->getSubType() == "Type1R", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R3a : ", R1->getType() == FirstOrder, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R3b : ", R1->getSubType() == Type1R, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R3c : ", R1->getFunctionName("h") == "TestPlugin:hT1", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R3d : ", R1->getFunctionName("g") == "TestPlugin:gT1", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R3e : ", R1->getFunctionName("jacobianH0") == "TestPlugin:Jh0T1", true);

@@ -484,9 +484,9 @@ void PrimalFrictionContact::computeUnitaryDSBlock(UnitaryRelation* UR, Dynamical
 {
   unsigned int sizeDS = (DS)->getDim();
   unsigned int nslawSize = UR->getNonSmoothLawSize();
-  string relationType = UR->getRelationType();
+  RELATIONTYPES relationType = UR->getRelationType();
 
-  if (relationType == "Lagrangian")
+  if (relationType == Lagrangian)
   {
     unitaryDSBlocks[UR][DS] = new SimpleMatrix(nslawSize, sizeDS);
     UR->getLeftUnitaryBlockForDS(DS, unitaryDSBlocks[UR][DS]);
@@ -530,7 +530,8 @@ void PrimalFrictionContact::computeQBlock(DynamicalSystem* DS, unsigned int pos)
 void PrimalFrictionContact::computeTildeLocalVelocityBlock(UnitaryRelation* UR, unsigned int pos)
 {
   // Get relation and non smooth law types
-  string relationType = UR->getRelationType() + UR->getRelationSubType();
+  RELATIONTYPES relationType = UR->getRelationType();
+  RELATIONSUBTYPES relationSubType = UR->getRelationSubType();
   string nslawType = UR->getNonSmoothLawType();
 
   string simulationType = simulation->getType();
@@ -559,7 +560,7 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(UnitaryRelation* UR, 
     RuntimeException::selfThrow("PrimalFrictionContact::computeTildeLocalVelocityBlock not yet implemented for OSI of type " + osiType);
 
   // Add "non-smooth law effect" on q
-  if (UR->getRelationType() == "Lagrangian")
+  if (UR->getRelationType() == Lagrangian)
   {
     double e;
     if (nslawType == NEWTONIMPACTNSLAW)
@@ -589,7 +590,7 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(UnitaryRelation* UR, 
         subscal(e, *tildeLocalVelocity, *tildeLocalVelocity, subCoord, false); // tildeLocalVelocity = tildeLocalVelocity + e * tildeLocalVelocity
       }
       else
-        RuntimeException::selfThrow("FrictionContact::computetildeLocalVelocityBlock not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
+        RuntimeException::selfThrow("FrictionContact::computetildeLocalVelocityBlock not yet implemented for this type of relation and a non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
     }
     else if (nslawType == NEWTONIMPACTFRICTIONNSLAW)
     {
@@ -604,11 +605,11 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(UnitaryRelation* UR, 
       if (simulationType == "TimeStepping")
         (*tildeLocalVelocity)(pos) +=  e * (*UR->getYOldPtr(levelMin))(0);
 
-      else RuntimeException::selfThrow("FrictionContact::computetildeLocalVelocityBlock not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
+      else RuntimeException::selfThrow("FrictionContact::computetildeLocalVelocityBlock not yet implemented for this type of relation and a non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
 
     }
     else
-      RuntimeException::selfThrow("FrictionContact::computeTILDELOCALVELOCITYBlock not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType);
+      RuntimeException::selfThrow("FrictionContact::computeTILDELOCALVELOCITYBlock not yet implemented for this type of relation and a non smooth law of type " + nslawType);
   }
 
 

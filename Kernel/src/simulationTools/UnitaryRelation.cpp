@@ -110,12 +110,12 @@ const string UnitaryRelation::getNonSmoothLawType() const
   return mainInteraction->getNonSmoothLawPtr()->getType();
 }
 
-const string UnitaryRelation::getRelationType() const
+const RELATIONTYPES UnitaryRelation::getRelationType() const
 {
   return mainInteraction->getRelationPtr()->getType();
 }
 
-const string UnitaryRelation::getRelationSubType() const
+const RELATIONSUBTYPES UnitaryRelation::getRelationSubType() const
 {
   return mainInteraction->getRelationPtr()->getSubType();
 }
@@ -141,8 +141,8 @@ void UnitaryRelation::initialize(const std::string& simulationType)
   //     }
   if (simulationType == "EventDriven")
   {
-    string pbType = getRelationType();
-    if (pbType == "FirstOrder")
+    RELATIONTYPES pbType = getRelationType();
+    if (pbType == FirstOrder)
     {
       for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
         workX->insertPtr((*it)->getXPtr());
@@ -176,20 +176,24 @@ void UnitaryRelation::getLeftUnitaryBlockForDS(DynamicalSystem * ds, SiconosMatr
 
   SiconosMatrix * originalMatrix = NULL; // Complete matrix, Relation member.
 
-  string relationType = getRelationType() + getRelationSubType();
+  RELATIONTYPES relationType = getRelationType();
+  RELATIONSUBTYPES relationSubType = getRelationSubType();
 
-  if (relationType == "FirstOrderType1R" || relationType == "FirstOrderType2R" || relationType == "FirstOrderType3R")
-    originalMatrix = (static_cast<FirstOrderR*>(mainInteraction->getRelationPtr()))->getJacobianHPtr(0);
+  if (relationType == FirstOrder)
+  {
+    if (relationSubType == Type1R)//|| relationType =="FirstOrderType2R" || relationType =="FirstOrderType3R")
+      originalMatrix = (static_cast<FirstOrderR*>(mainInteraction->getRelationPtr()))->getJacobianHPtr(0);
 
-  else if (relationType == "FirstOrderLinearR" || relationType == "FirstOrderLinearTIR")
-    originalMatrix = (static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr()))->getCPtr();
-
-  else if (relationType == "LagrangianScleronomousR" || relationType == "LagrangianRheonomousR" || relationType == "LagrangianCompliantR")
-    originalMatrix = (static_cast<LagrangianR*>(mainInteraction->getRelationPtr()))->getGPtr(index);
-
-  else if (relationType == "LagrangianLinearR")
-    originalMatrix = (static_cast<LagrangianLinearR*>(mainInteraction->getRelationPtr()))->getHPtr();
-
+    else if (relationSubType == LinearR || relationSubType == LinearTIR)
+      originalMatrix = (static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr()))->getCPtr();
+  }
+  else if (relationType == Lagrangian)
+  {
+    if (relationSubType == ScleronomousR || relationSubType == RheonomousR || relationSubType == CompliantR)
+      originalMatrix = (static_cast<LagrangianR*>(mainInteraction->getRelationPtr()))->getGPtr(index);
+    else if (relationSubType == LinearR || relationSubType == LinearTIR)
+      originalMatrix = (static_cast<LagrangianLinearR*>(mainInteraction->getRelationPtr()))->getHPtr();
+  }
   else
     RuntimeException::selfThrow("UnitaryRelation::getLeftUnitaryBlockForDS, not yet implemented for relations of type " + relationType);
 
@@ -225,21 +229,26 @@ void UnitaryRelation::getRightUnitaryBlockForDS(DynamicalSystem * ds, SiconosMat
     RuntimeException::selfThrow("UnitaryRelation::getRightUnitaryBlockForDS(DS, UnitaryBlock, ...): inconsistent sizes between UnitaryBlock and DS");
 
   SiconosMatrix * originalMatrix = NULL; // Complete matrix, Relation member.
-  string relationType = getRelationType() + getRelationSubType();
+  RELATIONTYPES relationType = getRelationType();
+  RELATIONSUBTYPES relationSubType = getRelationSubType();
 
-  if (relationType == "FirstOrderType1R" || relationType == "FirstOrderType2R" || relationType == "FirstOrderType3R")
-    originalMatrix = (static_cast<FirstOrderR*>(mainInteraction->getRelationPtr()))->getJacobianGPtr(0);
+  if (relationType == FirstOrder)
+  {
+    if (relationSubType == Type1R)//|| relationType =="FirstOrderType2R" || relationType =="FirstOrderType3R")
+      originalMatrix = (static_cast<FirstOrderR*>(mainInteraction->getRelationPtr()))->getJacobianGPtr(0);
 
-  else if (relationType == "FirstOrderLinearR" || relationType == "FirstOrderLinearTIR")
-    originalMatrix = (static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr()))->getBPtr();
-
-  else if (relationType == "LagrangianScleronomousR" || relationType == "LagrangianRheonomousR" || relationType == "LagrangianCompliantR")
-    originalMatrix = (static_cast<LagrangianR*>(mainInteraction->getRelationPtr()))->getGPtr(index);
-
-  else if (relationType == "LagrangianLinearR")
-    originalMatrix = (static_cast<LagrangianLinearR*>(mainInteraction->getRelationPtr()))->getHPtr();
-
-  else RuntimeException::selfThrow("UnitaryRelation::getRightUnitaryBlockForDS, not yet implemented for relation of type " + relationType);
+    else if (relationSubType == LinearR || relationSubType == LinearTIR)
+      originalMatrix = (static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr()))->getBPtr();
+  }
+  else if (relationType == Lagrangian)
+  {
+    if (relationSubType == ScleronomousR || relationSubType == RheonomousR || relationSubType == CompliantR)
+      originalMatrix = (static_cast<LagrangianR*>(mainInteraction->getRelationPtr()))->getGPtr(index);
+    else if (relationSubType == LinearR || relationSubType == LinearTIR)
+      originalMatrix = (static_cast<LagrangianLinearR*>(mainInteraction->getRelationPtr()))->getHPtr();
+  }
+  else
+    RuntimeException::selfThrow("UnitaryRelation::getRightUnitaryBlockForDS, not yet implemented for relations of type " + relationType);
 
   if (originalMatrix == NULL)
     RuntimeException::selfThrow("UnitaryRelation::getRightUnitaryBlockForDS(DS, UnitaryBlock, ...): the right unitaryBlock is a NULL pointer (miss matrix B or H or gradients ...in relation ?)");
@@ -263,25 +272,33 @@ void UnitaryRelation::getExtraUnitaryBlock(SiconosMatrix* UnitaryBlock) const
   // !!! Warning: we suppose that D is unitaryBlock diagonal, ie that there is no coupling between UnitaryRelation through D !!!
   // Any coupling between relations through D must be taken into account thanks to the nslaw (by "increasing" its dimension).
 
-  string relationType = getRelationType() + getRelationSubType();
-
+  RELATIONTYPES relationType = getRelationType();
+  RELATIONSUBTYPES relationSubType = getRelationSubType();
   SiconosMatrix * D = NULL;
-  if (relationType == "FirstOrderType1R" || relationType == "LagrangianScleronomousR" || relationType == "LagrangianRheonomousR")
+
+  if (relationType == FirstOrder)
   {
-    // nothing, D = NULL
+    if (relationSubType == Type1R)//|| relationType =="FirstOrderType2R" || relationType =="FirstOrderType3R")
+    {
+      // nothing, D = NULL
+    }
+
+    else if (relationSubType == LinearR || relationSubType == LinearTIR)
+      D = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getDPtr();
   }
-  else if (relationType == "FirstOrderType2R" || relationType == "FirstOrderType3R")
-    D = static_cast<FirstOrderR*>(mainInteraction->getRelationPtr())->getJacobianHPtr(1);
-  else if (relationType == "FirstOrderLinearTIR")
-    D = static_cast<FirstOrderLinearTIR*>(mainInteraction->getRelationPtr())->getDPtr();
-  else if (relationType == "FirstOrderLinearR")
-    D = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getDPtr();
-  else if (relationType == "LagrangianCompliantR")
-    D = static_cast<LagrangianCompliantR*>(mainInteraction->getRelationPtr())->getGPtr(1);
-  else if (relationType == "LagrangianLinearR")
-    D = static_cast<LagrangianLinearR*>(mainInteraction->getRelationPtr())->getDPtr();
+  else if (relationType == Lagrangian)
+  {
+    if (relationSubType == ScleronomousR || relationSubType == RheonomousR)
+    {
+      // nothing, D = NULL
+    }
+    else if (relationSubType == CompliantR)
+      D = static_cast<LagrangianCompliantR*>(mainInteraction->getRelationPtr())->getGPtr(1);
+    else if (relationSubType == LinearR || relationSubType == LinearTIR)
+      D = static_cast<LagrangianLinearR*>(mainInteraction->getRelationPtr())->getDPtr();
+  }
   else
-    RuntimeException::selfThrow("UnitaryRelation::getExtraUnitaryBlock, not yet implemented for first order relations of subtype " + relationType);
+    RuntimeException::selfThrow("UnitaryRelation::getExtraUnitaryBlock, not yet implemented for relations of type " + relationType);
 
   if (D == NULL)
   {
