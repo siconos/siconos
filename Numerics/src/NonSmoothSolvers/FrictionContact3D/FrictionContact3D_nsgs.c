@@ -78,7 +78,8 @@ void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, C
   {
     *solve = &frictionContact3D_Newton_solve;
     *freeSolver = &frictionContact3D_Newton_free;
-    *computeError = &fake_compute_error;
+    *computeError = &FrictionContact3D_compute_error;
+    // *computeError = &fake_compute_error;
     frictionContact3D_Newton_initialize(n, M, q, mu, iparam);
   }
   /* Path solver (Glocker Formulation) */
@@ -86,7 +87,8 @@ void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, C
   {
     *solve = &frictionContact3D_Path_solve;
     *freeSolver = &frictionContact3D_Path_free;
-    *computeError = &fake_compute_error;
+    *computeError = &FrictionContact3D_compute_error;
+    // *computeError = &fake_compute_error;
     frictionContact3D_Path_initialize(n, M, q, mu, iparam);
   }
   /* Fixed Point solver (Glocker Formulation) */
