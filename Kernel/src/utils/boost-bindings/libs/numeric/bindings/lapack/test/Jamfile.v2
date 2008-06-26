@@ -1,0 +1,52 @@
+# Copyright Thomas Klimpel 2008.
+# Use, modification and distribution are subject to the
+# Boost Software License, Version 1.0. (See accompanying file
+# LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+
+project libs/numeric/bindings/lapack/test : requirements
+        <include>$(BOOST_ROOT)
+        <include>$(B_ROOT)
+        <library>/numeric-bindings//lapack_lib ;
+
+import testing ;
+
+alias bindings-lapack-tests :
+    [ run lapack.cpp ]
+
+    [ run ublas_gees.cpp ]
+    [ run ublas_geqrf.cpp ]
+    [ run ublas_hbev.cpp ]
+    [ run ublas_heev.cpp ]
+    [ run ublas_syev.cpp ]
+
+    [ run ublas_hbevx.cpp ]
+    [ run ublas_heevd.cpp ]
+    [ run ublas_heevx.cpp ]
+
+    [ run ublas_gesdd.cc ]
+    [ run ublas_gesdd2.cc ]
+    [ run ublas_gesdd3.cc ]
+    [ run ublas_gesdd4.cc ]
+    [ run ublas_gesv.cc ]
+    [ run ublas_gesv2.cc ]
+    [ run ublas_gesvd.cc ]
+    [ run ublas_gesvd2.cc ]
+    [ run ublas_gesvd3.cc ]
+    [ run ublas_gesvd4.cc ]
+
+    [ run ublas_hesv.cc ]
+    [ run ublas_hpsv.cc ]
+    [ run ublas_posv.cc ]
+    [ run ublas_ppsv.cc ]
+    [ link ublas_spsv.cc ]
+    [ link ublas_sysv.cc ]
+
+    [ link ublas_getrf_getrs.cc ]
+    [ run ublas_hetrf_hetrs.cc ]
+    [ run ublas_hptrf_hptrs.cc ]
+    [ run ublas_potrf_potrs.cc ]
+    [ run ublas_pptrf_pptrs.cc ]
+    [ link ublas_sptrf_sptrs.cc ]
+    [ link ublas_sytrf_sytrs.cc ]
+;
+

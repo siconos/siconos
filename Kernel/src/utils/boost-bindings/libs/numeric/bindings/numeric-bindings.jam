@@ -1,0 +1,38 @@
+# Copyright Thomas Klimpel 2008.
+# Use, modification and distribution are subject to the
+# Boost Software License, Version 1.0. (See accompanying file
+# LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+
+# Make this module a project
+import project ;
+project.initialize $(__name__) ;
+project numeric-bindings ;
+
+AMOS_PATH ?= /usr/lib ;
+AMOS_LIB ?= amos ;
+
+ATLAS_INCLUDE ?= /usr/local/lib/ATLAS/include ;
+ATLAS_PATH ?= /usr/lib ;
+ATLAS_LIB ?= atlas ;
+CBLAS_LIB ?= cblas ;
+LAPACK_ATLAS_LIB ?= lapack ;
+
+BLAS_PATH ?= /usr/lib ;
+BLAS_LIB  ?= blas ;
+
+LAPACK_PATH ?= /usr/lib ;
+LAPACK_LIB  ?= lapack ;
+
+lib fortran_lib : : <name>g2c ;
+
+lib amos_lib : fortran_lib : <name>$(AMOS_LIB) <search>$(AMOS_PATH) ;
+
+lib atlas_lib : : <name>$(ATLAS_LIB) <search>$(ATLAS_PATH)
+              : : <include>$(ATLAS_INCLUDE) ;
+lib cblas_lib : : <name>$(CBLAS_LIB) <search>$(ATLAS_PATH)
+              : : <include>$(ATLAS_INCLUDE) ;
+lib lapack_atlas_lib : fortran_lib : <name>$(LAPACK_ATLAS_LIB) <search>$(ATLAS_PATH)
+              : : <include>$(ATLAS_INCLUDE) ;
+
+lib blas_lib   : fortran_lib : <name>$(BLAS_LIB)   <search>$(BLAS_PATH) ;
+lib lapack_lib : fortran_lib : <name>$(LAPACK_LIB) <search>$(LAPACK_PATH) <use>blas_lib : : <library>blas_lib ;

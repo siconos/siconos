@@ -1,0 +1,15 @@
+To install properly boost-bindings from the sources distributed with siconos:
+
+./configure --prefix=INSTALLPATH
+
+usually INSTALLPATH = /usr/include or /usr/local/include
+or the place where you have installed boost
+
+Thus locate rep boost/numeric and set INSTALLPATH= the place where boost/numeric is.
+
+(bindings are installed in INSTALLPATH/boost/numeric/bindings)
+
+Else, to get directly a new version, see:
+
+http://mathema.tician.de/dl/software/boost-bindings
+
