@@ -12,7 +12,6 @@ BIPOBJS = Contact.o \
 	JacobianNLEffects.o \
 	JacobianVelocityNLEffects.o \
 	Tags.o 
-       
 
 OBJS=$(BIPOBJS) ScilabInterface.o
 

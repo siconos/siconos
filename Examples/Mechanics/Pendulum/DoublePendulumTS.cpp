@@ -73,10 +73,9 @@ int main(int argc, char* argv[])
     q0(0) = 1.5;
     q0(1) = 1.5;
 
-    LagrangianDS * doublependulum = new LagrangianDS(1, q0, v0);
+    LagrangianDS * doublependulum = new LagrangianDS(1, q0, v0, "DoublePendulumPlugin:mass");
 
     // external plug-in
-    doublependulum->setComputeMassFunction("DoublePendulumPlugin.so", "mass");
     doublependulum->setComputeNNLFunction("DoublePendulumPlugin.so", "NNL");
     doublependulum->setComputeJacobianNNLFunction(1, "DoublePendulumPlugin.so", "jacobianVNNL");
     doublependulum->setComputeJacobianNNLFunction(0, "DoublePendulumPlugin.so", "jacobianQNNL");

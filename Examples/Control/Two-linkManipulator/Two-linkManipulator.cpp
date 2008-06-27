@@ -97,10 +97,9 @@ int main(int argc, char* argv[])
     (*z)(22) = 0;
     (*z)(23) = 0;
 
-    LagrangianDS * arm = new LagrangianDS(1, q0, v0);
+    LagrangianDS * arm = new LagrangianDS(1, q0, v0, "Two-linkPlugin:mass");
 
     // external plug-in
-    arm->setComputeMassFunction("Two-linkPlugin.so", "mass");
     arm->setComputeNNLFunction("Two-linkPlugin.so", "NNL");
     arm->setComputeJacobianNNLFunction(1, "Two-linkPlugin.so", "jacobianVNNL");
     arm->setComputeJacobianNNLFunction(0, "Two-linkPlugin.so", "jacobianQNNL");
