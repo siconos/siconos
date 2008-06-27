@@ -245,16 +245,16 @@ protected:
    */
   LagrangianDS();
 
+public:
+
+  // === CONSTRUCTORS - DESTRUCTOR ===
+
   /** constructor from a minimum set of data
    *  \param int : the number for this DynamicalSystem
    *  \param SiconosVector : initial coordinates of this DynamicalSystem
    *  \param SiconosVector : initial velocity of this DynamicalSystem
    */
   LagrangianDS(int, const SiconosVector&, const SiconosVector&);
-
-public:
-
-  // === CONSTRUCTORS - DESTRUCTOR ===
 
   /** constructor from an xml file
    *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
