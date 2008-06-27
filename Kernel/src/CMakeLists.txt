@@ -23,6 +23,7 @@ SET(SiconosKernel_DIRS
   simulationTools
   controlTools
   utils
+  utils/boost-bindings
   utils/contract
   utils/SiconosAlgebra
   utils/SiconosException
@@ -54,6 +55,12 @@ SET(SiconosKernel_INSTALL_INCLUDE_DIR include/Siconos/Kernel)
 FILE(GLOB ATLAS_HDRS utils/AtlasLocal/atlas/*.h)
 INSTALL(FILES ${ATLAS_HDRS} 
   DESTINATION include/Siconos/Kernel/AtlasLocal/atlas)
+
+FOREACH(_D amos;atlas;blas;cblas;lapack;traits;traits/detail;umfpack)
+  FILE(GLOB BOOST_HDRS_${_D} utils/boost-bindings/boost/numeric/bindings/${_D}/*.hpp)
+  INSTALL(FILES ${BOOST_HDRS_${_D}} 
+    DESTINATION include/Siconos/Kernel/boost-bindings/boost/numeric/bindings/${_D})
+ENDFOREACH(_D amos;atlas;blas;cblas;lapack;traits;umfpack)
 
 # config.h
 INSTALL(FILES ${CMAKE_BINARY_DIR}/KernelConfig.h DESTINATION include/Siconos/Kernel)
