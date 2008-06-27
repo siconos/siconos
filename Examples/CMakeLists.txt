@@ -7,6 +7,9 @@ SET(EXAMPLES_DIRECTORIES
   Electronics
   Mechanics
   Mechanics/3DBeads
+  Robotics/HuMAns_pa10
+  Control/ObserverLCS
+  Control/Two-linkManipulator
 )
 
 SET(NO_TEST_FILES
