@@ -59,7 +59,7 @@ INSTALL(FILES ${ATLAS_HDRS}
 FOREACH(_D amos;atlas;blas;cblas;lapack;traits;traits/detail;umfpack)
   FILE(GLOB BOOST_HDRS_${_D} utils/boost-bindings/boost/numeric/bindings/${_D}/*.hpp)
   INSTALL(FILES ${BOOST_HDRS_${_D}} 
-    DESTINATION include/Siconos/Kernel/boost-bindings/boost/numeric/bindings/${_D})
+    DESTINATION include/Siconos/Kernel/boost/numeric/bindings/${_D})
 ENDFOREACH(_D amos;atlas;blas;cblas;lapack;traits;umfpack)
 
 # config.h

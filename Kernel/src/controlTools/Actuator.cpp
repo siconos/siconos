@@ -95,7 +95,7 @@ void Actuator::initialize()
   // Uses the events factory to insert the new event.
   EventFactory::Registry& regEvent(EventFactory::Registry::get());
   eActuator = regEvent.instantiate(timeDiscretisation->getCurrentTime(), 3);
-  static_cast<ActuatorEvent*>(eActuator)->setActuatorPtr(this);
+  static_cast<gActuatorEvent*>(eActuator)->setActuatorPtr(this);
 
   // Warning: no Sensors initialization. They are supposed to be up to date when added in the Actuator.
 }

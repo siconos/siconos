@@ -18,6 +18,7 @@
 #endif /* WithSmartPtr */
 
 DEFINE_SPTR(SiconosVector);
+DEFINE_SPTR(SiconosMatrix);
 DEFINE_SPTR(OSNSMatrix);
 DEFINE_SPTR(NonSmoothLaw);
 DEFINE_SPTR(MixedComplementarityConditionNSL);
