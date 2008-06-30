@@ -15,14 +15,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 /*!\file BouncingBallEDXml.cpp
-\brief \ref EMBouncingBall - C++/XML input file, Event-Driven version - V. Acary, F. Perignon.
+  \brief \ref EMBouncingBall - C++/XML input file, Event-Driven version - V. Acary, F. Perignon.
 
-A Ball bouncing on the ground.
-Description of the model with XML input.
-Simulation with an Event-Driven scheme.
+  A Ball bouncing on the ground.
+  Description of the model with XML input.
+  Simulation with an Event-Driven scheme.
 */
 
 #include "SiconosKernel.h"
@@ -68,19 +68,26 @@ int main(int argc, char* argv[])
     EventsManager * eventsManager = s->getEventsManagerPtr();
     unsigned int numberOfEvent = 0 ;
     int k = 0;
-    while (s->hasNextEvent())
+    double T = bouncingBall->getFinalT();
+    bool nonSmooth = false;
+
+    while (s->getNextTime() < T)
     {
       k++;
+
       s->advanceToEvent();
+      if (eventsManager->getNextEventPtr()->getType() == 2)
+        nonSmooth = true;
 
       s->processEvents();
-      // If the treated event is non smooth, we save pre-impact state.
-      if (eventsManager->getStartingEventPtr()->getType() == "NonSmoothEvent")
+      // If the treated event is non smooth, the pre-impact state has been solved in memory vectors during process.
+      if (nonSmooth)
       {
         dataPlot(k, 0) = s->getStartingTime();
         dataPlot(k, 1) = (*ball->getQMemoryPtr()->getSiconosVector(1))(0);
         dataPlot(k, 2) = (*ball->getVelocityMemoryPtr()->getSiconosVector(1))(0);
         k++;
+        nonSmooth = false;
       }
       dataPlot(k, 0) = s->getStartingTime();
       dataPlot(k, 1) = (*q)(0);
@@ -88,6 +95,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 3) = (*p)(0);
       numberOfEvent++;
     }
+
     // --- Output files ---
     cout << "===== End of Event Driven simulation. " << numberOfEvent << " events have been processed. ==== " << endl << endl;
     cout << "====> Output file writing ..." << endl;

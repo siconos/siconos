@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
     (*Int_C)(0, 0) =  1.0;
     (*Int_C)(2, 0) =  1.0;
 
-    SiconosMatrix* Int_D = new SimpleMatrix(4, 4);
+    SimpleMatrix* Int_D = new SimpleMatrix(4, 4);
 
     (*Int_D)(0, 1) = -1.0;
     (*Int_D)(1, 0) =  1.0;
@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
     Offset_lambda = -DiodeThreshold * Offset_lambda;
 
     SimpleVector* Int_z = new SimpleVector(5);
-    SiconosVector * tmp = new SimpleVector(4) ;
+    SimpleVector * tmp = new SimpleVector(4) ;
     prod(*Int_D, Offset_lambda, *tmp);
     *tmp -= Offset_y;
     Int_z->setBlock(0, *tmp);
