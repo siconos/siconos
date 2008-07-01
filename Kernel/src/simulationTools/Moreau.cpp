@@ -275,6 +275,13 @@ void Moreau::initialize()
     // Allocate memory for a work vector used in ds and in Newton process convergence evaluation.
     if ((*itDS)->getType() == LNLDS || (*itDS)->getType() == FONLDS)
       (*itDS)->allocateWorkVector("NewtonCvg", WMap[*itDS]->size(0));
+
+    if ((*itDS)->getType() == FOLDS)
+    {
+      FirstOrderLinearDS *d = static_cast<FirstOrderLinearDS*>(*itDS);
+      d->computeB(t0); // bi
+    }
+
   }
 }
 
@@ -578,7 +585,7 @@ double Moreau::computeResidu()
       if (b != NULL)
       {
         // xFree -= h(1-theta)*bi + h*theta*bi+1
-        d->computeB(told); // bi
+        //        d->computeB(told); // bi
         double coeff = -h * (1 - theta);
         scal(coeff, *d->getBPtr(), *xfree, false);
         coeff = -h * theta;
@@ -849,7 +856,7 @@ void Moreau::computeFreeState()
       if (b != NULL)
       {
         // xFree += h(1-theta)*bi + h*theta*bi+1
-        d->computeB(told); // bi
+        //        d->computeB(told); // bi
         scal(h * (1.0 - theta), *d->getBPtr(), *xfree, false);
         d->computeB(t); // bi+1
         scal(h * theta, *d->getBPtr(), *xfree, false);

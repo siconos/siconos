@@ -292,7 +292,8 @@ void MLCP::computeUnitaryBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
     SiconosMatrix* currentUnitaryBlock = unitaryBlocks[UR1][UR2];
     SiconosMatrix *leftUnitaryBlock = NULL, *rightUnitaryBlock = NULL;
     unsigned int sizeDS;
-    string relationType1, relationType2;
+    RELATIONTYPES relationType1, relationType2;
+
     double h = simulation->getTimeDiscretisationPtr()->getCurrentTimeStep();
     printf("h : %f \n", h);
 
@@ -322,7 +323,7 @@ void MLCP::computeUnitaryBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
 
       UR1->getLeftUnitaryBlockForDS(*itDS, leftUnitaryBlock);
       // Computing depends on relation type -> move this in UnitaryRelation method?
-      if (relationType1 == "FirstOrder" && relationType2 == "FirstOrder")
+      if (relationType1 == FirstOrder && relationType2 == FirstOrder)
       {
         rightUnitaryBlock = new SimpleMatrix(sizeDS, nslawSize2);
         UR2->getRightUnitaryBlockForDS(*itDS, rightUnitaryBlock);
