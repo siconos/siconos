@@ -185,7 +185,11 @@ void F_AC(int Fsize, double *reaction , double *F, int up2Date)
     double alpha = MLocal[Fsize + 1] + MLocal[2 * Fsize + 2];
     double det = MLocal[1 * Fsize + 1] * MLocal[2 * Fsize + 2] - MLocal[2 * Fsize + 1] * MLocal[1 * Fsize + 2];
     double beta = alpha * alpha - 4 * det;
-    at = 2 * (alpha - sqrt(beta)) / ((alpha + sqrt(beta)) * (alpha + sqrt(beta)));
+    if (beta > 0.)
+      beta = sqrt(beta);
+    else
+      beta = 0.;
+    at = 2 * (alpha - beta) / ((alpha + beta) * (alpha + beta));
 
     /* Projection on [0, +infty[ and on D(0, mu*reactionn) */
     projN = reaction[0] - an * velocityLocal[0];
@@ -250,9 +254,13 @@ void jacobianF_AC(int Fsize, double *reaction, double *jacobianFMatrix, int up2D
 
     an = 1. / MLocal[0];
     double alpha = MLocal[Fsize + 1] + MLocal[2 * Fsize + 2];
-    double det = MLocal[1 * Fsize + 1] * MLocal[2 * Fsize + 2] - MLocal[2 * Fsize + 1] * MLocal[1 * Fsize + 2];
+    double det = MLocal[1 * Fsize + 1] * MLocal[2 * Fsize + 2] - MLocal[2 * Fsize + 1] + MLocal[1 * Fsize + 2];
     double beta = alpha * alpha - 4 * det;
-    at = 2 * (alpha - sqrt(beta)) / ((alpha + sqrt(beta)) * (alpha + sqrt(beta)));
+    if (beta > 0.)
+      beta = sqrt(beta);
+    else
+      beta = 0.;
+    at = 2 * (alpha - beta) / ((alpha + beta) * (alpha + beta));
 
     /* Projection on [0, +infty[ and on D(0, mu*reactionn) */
     projN = reaction[0] - an * velocityLocal[0];

@@ -45,7 +45,7 @@ int FrictionContact3D_compute_error(FrictionContact_Problem* problem, double *z 
   {
     /* Compute the modified local velocity */
     normUT = sqrt(w[ic * 3 + 1] * w[ic * 3 + 1] + w[ic * 3 + 2] * w[ic * 3 + 2]);
-    worktmp[0] = z[ic * 3] - rho * (w[ic * 3] * mu[ic] * normUT);
+    worktmp[0] = z[ic * 3] - rho * (w[ic * 3] + mu[ic] * normUT);
     worktmp[1] = z[ic * 3 + 1] - rho * w[ic * 3 + 1] ;
     worktmp[2] = z[ic * 3 + 2] - rho * w[ic * 3 + 2] ;
     projectionOnCone(worktmp, mu[ic]);
