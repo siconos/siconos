@@ -21,6 +21,10 @@ To get them, please fill in this form : \subpage downloadForm. \n
 
 Then you can log in and select the requested packages or files.
 
+
+\b Warning: the available version for download may be quite old, but stable and properly tested. \n
+If you need the last version (maybe unstable ...) do not hesitate to contact us.
+
 \section binaries 2 - Binaries
 
 Binaries (rpm, deb ...) for different linux distributions are available on <a href="https://gforge.inria.fr/frs/?group_id=9">Siconos GForge</a> page.

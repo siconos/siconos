@@ -8,7 +8,7 @@ Three steps:
 
 Warnings: 
 - before that, make sure you have read the section \ref IG_prereq.
-- Packages must be installed in this order: 1-Numerics, 2-Kernel, 3-Front-End.
+- Packages must be installed in this order: 1-Numerics, 2-Kernel, (3-Front-End).
 
 \section IG_installsources Installing from Sources.
 
@@ -22,31 +22,41 @@ tar -zxvf siconos-XXXX.tgz
 
 XXXX being Numerics, Kernel or Front-End package name. \n
 
-For compilation of each package, run the following commands in Numerics/Kernel/FrontEnd directories:
+For each package:
+first create a directory where sources will be built (anywhere but in the sources)
+then change to this directory and run:
+\verbatim
+cmake <path of the source directory> [CMAKE OPTIONS]
+make
+make install
+\endverbatim
 
 <em> Warning: you may need to be connected as root for "make install", depending on the targeted location. </em>
 
-\verbatim
- ./configure 
-  make
-  make install
-\endverbatim
-
-Take care to the resulting messages after "configure" call; if some external libraries are missing or \n
+Take care to the resulting messages after cmake call; if some external libraries are missing or \n
 with a too old version it may fail. 
 
-Type <tt>./configure --help</tt> to see more information on the available options.
-
-The default installation path is /usr/local but you can choose a local one at configure:\n
+The default installation path is /usr/local but you can choose a local one:\n
 \verbatim
-./configure --prefix=/your/install/path 
+cmake -DCMAKE_INSTALL_PREFIX=/your/install/path <path of the source directory>
 \endverbatim
 
-\b Warning: if the "configure" file is not in the directory, you may need to run "./autogen.sh" first, to generate it.
-
-To run tests: 
+To compile in debug mode:
 \verbatim
-  make check
+cmake -DCMAKE_BUILD_TYPE=Debug <path of the source directory>
+\endverbatim
+
+To see cmake state:
+\verbatim
+cmake -DPRINT_ENV=1 <path of the source directory>
+\endverbatim
+
+Some make that may be usefull: \n
+        to see make command as executed : VERBOSE=1
+
+To run tests (works only if you have installed cppunit, see \ref prerequisite)
+\verbatim
+make test
 \endverbatim
 
 To generate Doxygen documentation:
@@ -54,9 +64,9 @@ To generate Doxygen documentation:
 make doc
 \endverbatim
 
-The resulting doc (html) is saved in ../GeneratedDocs/XXX, XXX being Kernel or Numerics.
+The resulting doc (html files) is saved in ../GeneratedDocs/XXX, XXX being Kernel or Numerics.
 
-\section IG_installsources Installing from Binaries
+\section IG_installBin Installing from Binaries
 
 \subsection install_fedora Fedora Core
 
