@@ -198,12 +198,6 @@ public:
    */
   Interaction(const std::string&, DynamicalSystemsSet&, int, int, NonSmoothLawSPtr, Relation*);
 
-#ifdef WithSmartPtr
-  /* backward compatibility*/
-  Interaction(DynamicalSystemsSet&, int, int, NonSmoothLaw *, Relation*);
-  Interaction(const std::string&, DynamicalSystemsSet&, int, int, NonSmoothLaw *, Relation*);
-#endif
-
   /** destructor
    */
   ~Interaction();

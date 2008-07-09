@@ -102,7 +102,12 @@ bool DiodeBridge()
     FirstOrderLinearTIR* LTIRDiodeBridge = new FirstOrderLinearTIR(*Int_C, *Int_B);
     LTIRDiodeBridge->setDPtr(Int_D);
 
+#ifndef WithSmartPtr
     NonSmoothLaw * nslaw = new ComplementarityConditionNSL(4);
+#else
+    NonSmoothLawSPtr nslaw;
+    nslaw.reset(new ComplementarityConditionNSL(4));
+#endif
 
     Interaction* InterDiodeBridge = new Interaction("InterDiodeBridge", Inter_DS, 1, 4, nslaw, LTIRDiodeBridge);
 

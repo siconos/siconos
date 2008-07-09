@@ -474,7 +474,11 @@ void LCP::computeQBlock(UnitaryRelation* UR, unsigned int pos)
         }
         SiconosVector * e = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getEPtr();
         if (e != NULL)
+#ifndef WithSmartPtr
           static_cast<SimpleVector*>(q)->addBlock(pos, *e);
+#else
+          static_cast<SimpleVector*>(q.get())->addBlock(pos, *e);
+#endif
 
         H = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getFPtr();
         if (H != NULL)
