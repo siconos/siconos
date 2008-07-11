@@ -1,4 +1,4 @@
-/* Siconos-sample version 3.0.0, Copyright INRIA 2005-2008.
+/* Siconos-sample version 2.1.1, Copyright INRIA 2005-2007.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
     double T = 30;                   // final computation time
     double h = 1e-4;                // time step
     double criterion = 1e-8;
-    unsigned int maxIter = 200000;
+    unsigned int maxIter = 20000;
     double e = 0.7;                  // nslaw
     double e2 = 0.0;
     double L = 0.0;
@@ -97,9 +97,10 @@ int main(int argc, char* argv[])
     (*z)(22) = 0;
     (*z)(23) = 0;
 
-    LagrangianDS * arm = new LagrangianDS(1, q0, v0, "Two-linkPlugin:mass");
+    LagrangianDS * arm = new LagrangianDS(1, q0, v0);
 
     // external plug-in
+    arm->setComputeMassFunction("Two-linkPlugin.so", "mass");
     arm->setComputeNNLFunction("Two-linkPlugin.so", "NNL");
     arm->setComputeJacobianNNLFunction(1, "Two-linkPlugin.so", "jacobianVNNL");
     arm->setComputeJacobianNNLFunction(0, "Two-linkPlugin.so", "jacobianQNNL");
@@ -182,16 +183,18 @@ int main(int argc, char* argv[])
 
     // -- OneStepNsProblem --
     IntParameters iparam(5);
-    iparam[0] = 200001; // Max number of iteration
+    iparam[0] = 20000; // Max number of iteration
     DoubleParameters dparam(5);
-    dparam[0] =  0.00001; // Tolerance
+    dparam[0] = 1e-5; // Tolerance
     string solverName = "Lemke" ;
     NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
+    // -- OneStepNsProblem --
     OneStepNSProblem * osnspb = new LCP(s, mySolver);
+    // OneStepNSProblem * osnspb = new LCP(s,"name","Lemke",200001, 0.00001);
 
     cout << "=== End of model loading === " << endl;
 
-    // =========================== End of model definition ===========================  dataPlot(k,7) = (inter->getY(0))(0);
+    // =========================== End of model definition ===========================
 
 
     // ================================= Computation
@@ -203,7 +206,7 @@ int main(int argc, char* argv[])
     cout << "End of simulation initialisation" << endl;
 
     int k = 0;
-    int N = (int)((T - t0) / h) + 1; // Number of time steps
+    int N = (int)((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -232,8 +235,8 @@ int main(int argc, char* argv[])
     dataPlot(k, 12) = (*z)(22);
     dataPlot(k, 13) = (*z)(23);
 
-
-    while (s->getNextTime() < T)
+    cout << "====> Start computation ... " << endl << endl;
+    while (k < N)
     {
       (*z)(0) = (*q)(0);
       (*z)(1) = (*q)(1);
@@ -307,7 +310,7 @@ int main(int argc, char* argv[])
         L = 0;
       }
 
-      // change of desired trajectory during free-motion phase
+      //  controller during free-motion phase
       if (((*z)(13) - 0.1 >= 0) && (test == 4))
       {
         arm->setComputeFIntFunction("Two-linkPlugin.so", "U");
@@ -315,7 +318,8 @@ int main(int argc, char* argv[])
         (*z)(13) = 0;
       }
     }
-
+    cout << endl << "End of computation - Number of iterations done: " << k << endl;
+    cout << "Computation Time " << time.elapsed()  << endl;
     // --- Output files ---
     ioMatrix out("result.dat", "ascii");
     out.write(dataPlot, "noDim");
@@ -347,5 +351,5 @@ int main(int argc, char* argv[])
   {
     cout << "Exception caught in TwolinkManipulator" << endl;
   }
-  cout << "Computation Time " << time.elapsed()  << endl;
+
 }
