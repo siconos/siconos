@@ -78,8 +78,6 @@ protected:
    */
   FPtr3 G0Ptr;
 
-private:
-
   /** default constructor
    */
   LagrangianScleronomousR();

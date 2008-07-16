@@ -26,6 +26,13 @@
 
 using namespace std;
 
+//default constructor
+LagrangianScleronomousR::LagrangianScleronomousR() : LagrangianR(ScleronomousR), hPtr(NULL), G0Ptr(NULL)
+{
+  G.resize(1, NULL);
+}
+
+
 // xml constructor
 LagrangianScleronomousR::LagrangianScleronomousR(RelationXML* relxml): LagrangianR(relxml, ScleronomousR), hPtr(NULL), G0Ptr(NULL)
 {

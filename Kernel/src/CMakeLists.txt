@@ -22,6 +22,7 @@ SET(SiconosKernel_DIRS
   modelingTools
   simulationTools
   controlTools
+  multiBodyTools/2D
   utils
   utils/boost-bindings
   utils/contract
