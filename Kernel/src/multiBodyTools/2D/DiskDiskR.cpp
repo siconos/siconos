@@ -65,14 +65,14 @@ void DiskDiskR::computeG(double, unsigned int)
   g[1] = -dysd;       // dh[1]/dq[0]
   g[2] = -dysd;       // dh[0]/dq[1]
   g[3] = dxsd;        // dh[1]/dq[1]
-  g[4] = 0.;          // ...
-  g[5] = r1;
-  g[6] = dxsd;
+  g[4] = 0.;          // dh[0]/dq[2]
+  g[5] = r2;          // dh[1]/dq[2]
+  g[6] = dxsd;        // ...
   g[7] = dysd;
   g[8] = dysd;
   g[9] = -dxsd;
   g[10] = 0.;
-  g[11] = r2;
+  g[11] = r1;
 
 }
 
