@@ -23,6 +23,13 @@
 dim(u)=mm
 dim(v)=nn
 
+*
+* mlcp_direct_addConfigFromWSolution consists in precomputing the linear system from the current solution.
+*
+* mlcp_direct, the next LCP instance is solved using the current linear system, two cases can happen:
+* 1) The complementarity constraints hold --> Success.
+* 2) The complementarity constraints don't hold --> Failed.
+*
 **************************************************************************/
 
 #include <stdio.h>
@@ -61,6 +68,7 @@ static int sM;
 static int sNpM;
 static int* spIntBuf;
 static int sVerbose = 0;
+static int sProblemChanged = 0;
 
 double * mydMalloc(int n)
 {
@@ -88,6 +96,7 @@ int mlcp_direct_getNbDWork(MixedLinearComplementarity_Problem* problem, Solver_O
  *options->dparam[5] : tol
  *options->iparam[6] : verbose
  *options->iparam[7] : number of failed
+ *options->iparam[8] : mlcp problem hab been changed since the previous execution.
  *options->iWork : double work memory of size (n + m)*(n0+1) + nO*m
  *options->dWork : double work memory of size n + m + n0*(n+m)*(n+m)
  *
@@ -103,6 +112,7 @@ void mlcp_direct_init(MixedLinearComplementarity_Problem* problem, Solver_Option
   sTolneg = options->dparam[5];
   sTolpos = options->dparam[6];
   options->iparam[7] = 0;
+  sProblemChanged = options->iparam[8];
   sN = problem->n;
   sM = problem->m;
   if (sVerbose) printf("n= %d  m= %d /n sTolneg= %lf sTolpos= %lf \n", sN, sM, sTolneg, sTolpos);
@@ -124,6 +134,27 @@ void mlcp_direct_reset()
     spFirstCC = spFirstCC->next;
     free(aux);
   }
+}
+int internalPrecompute(MixedLinearComplementarity_Problem* problem)
+{
+  int INFO;
+  mlcp_buildM(spFirstCC->zw, spFirstCC->M, problem->M->matrix0, sN, sM);
+  DGETRF(sNpM, sNpM, spFirstCC->M, sNpM, spFirstCC->IPV, INFO);
+  if (INFO)
+  {
+    printf("mlcp_direct, internalPrecompute  error, LU impossible\n");
+    return 0;
+  }
+#ifdef DIRECT_SOLVER_USE_DGETRI
+  DGETRI(sNpM, spFirstCC->M, sNpM, spFirstCC->IPV, INFO);
+  if (INFO)
+  {
+    printf("mlcp_direct error, internalPrecompute  DGETRI impossible\n");
+    return 0;
+  }
+#endif
+  return 1;
+
 }
 /*memory management about floatWorkingMem and intWorkingMem*/
 int internalAddConfig(MixedLinearComplementarity_Problem* problem, int * zw, int init)
@@ -149,22 +180,7 @@ int internalAddConfig(MixedLinearComplementarity_Problem* problem, int * zw, int
   {
     spFirstCC->zw[i] = zw[i];
   }
-  mlcp_buildM(zw, spFirstCC->M, problem->M->matrix0, sN, sM);
-  DGETRF(sNpM, sNpM, spFirstCC->M, sNpM, spFirstCC->IPV, INFO);
-  if (INFO)
-  {
-    printf("mlcp_direct error, LU impossible\n");
-    return 0;
-  }
-#ifdef DIRECT_SOLVER_USE_DGETRI
-  DGETRI(sNpM, spFirstCC->M, sNpM, spFirstCC->IPV, INFO);
-  if (INFO)
-  {
-    printf("mlcp_direct error, DGETRI impossible\n");
-    return 0;
-  }
-#endif
-  return 1;
+  return internalPrecompute(problem);
 }
 /*memory management about dataComplementarityConf*/
 void mlcp_direct_addConfig(MixedLinearComplementarity_Problem* problem, int * zw)
@@ -229,6 +245,8 @@ int solveWithCurConfig(MixedLinearComplementarity_Problem* problem)
   int INCX = 1;
   int INCY = 1;
   double * solTest = 0;
+  if (sProblemChanged)
+    internalPrecompute(problem);
 #ifdef DIRECT_SOLVER_USE_DGETRI
   DGEMV(LA_NOTRANS, sNpM, sNpM, ALPHA, spCurCC->M, sNpM, sQ, INCX, BETA, sVBuf, INCY);
   solTest = sVBuf;
