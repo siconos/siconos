@@ -1,4 +1,4 @@
-/* Siconos-sample version 3.0.0, Copyright INRIA 2005-2008.
+/* Siconos-sample version 2.1.1, Copyright INRIA 2005-2007.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -29,7 +29,7 @@ double m2 = 1; //mass of the second link
 double I1 = 1;// the moment of inertia of the first link about the axis that passes through the center of mass (parallel to the Z axis)
 double I2 = 1;// the moment of inertia of the second link about the axis that passes through the center of mass (parallel to the Z axis)
 double g = 9.8;//gravitational acceleration
-double gamma2 = 5;
+double gamma2 = 7;
 double gamma1 = 8;
 double Kf = 0.5;
 double P = 10;
@@ -71,9 +71,9 @@ extern "C" void jacobianVNNL(unsigned int sizeOfq, const double *q, const  doubl
   jacobv[3] =  0;
 }
 
+
 extern "C" void U(double time, unsigned int sizeOfq, const double *q, const  double *velocity, double *U, unsigned int sizeZ, double* z)
 {
-
   double m11 = m1 * (l1 * l1 / 4) + I1 + I2 + m2 * (l1 * l1 + (l2 * l2 / 4) + l1 * l2 * cos(q[1]));
   double m12 = (m2 * l2 * l2 / 4) + I2 + m2 * l1 * l2 * cos(q[1]) / 2;
   double m22 = (m2 * l2 * l2 / 4) + I2;
@@ -163,28 +163,35 @@ extern "C" void U10(double time, unsigned int sizeOfq, const double *q, const  d
   double m12 = (m2 * l2 * l2 / 4) + I2 + m2 * l1 * l2 * cos(q[1]) / 2;
   double m22 = (m2 * l2 * l2 / 4) + I2;
 
+  // generalized coordinates q=(x,y)^T
   double x = l1 * cos(q[0]) + l2 * cos(q[0] + q[1]);
   double y = l1 * sin(q[0]) + l2 * sin(q[0] + q[1]);
 
+  // time derivatives of x and y
   double x1 = -l1 * sin(q[0]) * velocity[0] - l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]);
   double y1 = l1 * cos(q[0]) * velocity[0] + l2 * cos(q[0] + q[1]) * (velocity[0] + velocity[1]);
 
+  // the gradient of the transformation \theta->q
   double grad11 = -y;
   double grad12 = -l2 * sin(q[0] + q[1]);
   double grad21 = x;
   double grad22 = l2 * cos(q[0] + q[1]);
   double det = grad11 * grad22 - grad12 * grad21;
 
+  // d=(grad)^{-1}
   double d11 = grad22 / det;
   double d12 = -grad12 / det;
   double d21 = -grad21 / det;
   double d22 = grad11 / det;
+
+  // time derivative of d
 
   double dd11 =  -(sin(q[0] + q[1]) * (velocity[0] + velocity[1]) * sin(q[1]) + cos(q[0] + q[1]) * cos(q[1]) * velocity[1]) / (l1 * sin(q[1]) * sin(q[1]));
   double dd12 = (cos(q[0] + q[1]) * (velocity[0] + velocity[1]) * sin(q[1]) - sin(q[0] + q[1]) * cos(q[1]) * velocity[1]) / (l1 * sin(q[1]) * sin(q[1]));
   double dd21 =  -dd11 + (sin(q[0]) * sin(q[1]) * velocity[0] + cos(q[0]) * cos(q[1]) * velocity[1]) / (l2 * sin(q[1]) * sin(q[1]));
   double dd22 =  -dd12 - (cos(q[0]) * sin(q[1]) * velocity[0] - sin(q[0]) * cos(q[1]) * velocity[1]) / (l2 * sin(q[1]) * sin(q[1]));
 
+  // M*d
   double mc11 = m11 * d11 + m12 * d21;
   double mc12 = m11 * d12 + m12 * d22;
   double mc21 = m12 * d11 + m22 * d21;
@@ -212,12 +219,6 @@ extern "C" void U10(double time, unsigned int sizeOfq, const double *q, const  d
     qd2 = 0.1 * sin(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P);
     qd12 = (2 * PI / P) * 0.1 * cos(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) / (delta * delta);
     qd22 = -(2 * PI / P) * (2 * PI / P) * 0.1 * sin(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * ((2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta))) / (delta * delta * delta * delta) + (2 * PI / P) * 0.1 * cos(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (2 * t2 + 4 * (t2 - delta)) / (delta * delta);
-    // qd1 = 0.65+0.1*cos(2*PI*(z[8]+tf*tf*tf*tf*t2/(delta*delta*delta*delta))/P);
-    //     qd11 = -(2*PI/P)*0.1*sin(2*PI*(z[8]+tf*tf*tf*tf*t2/(delta*delta*delta*delta))/P)*(4*tf*tf*tf*t2+tf*tf*tf*tf)/(delta*delta*delta*delta);
-    //     qd21 = -(2*PI/P)*(2*PI/P)*0.1*cos(2*PI*(z[8]+tf*tf*tf*tf*t2/(delta*delta*delta*delta))/P)*(4*tf*tf*tf*t2+tf*tf*tf*tf)*(4*tf*tf*tf*t2+tf*tf*tf*tf)/(delta*delta*delta*delta*delta*delta*delta*delta)+(2*PI/P)*0.1*sin(2*PI*(z[8]+tf*tf*tf*tf*t2/(delta*delta*delta*delta))/P)*(12*tf*tf*t2+4*tf*tf*tf)/(delta*delta*delta*delta);
-    //       qd2 = 0.1*sin(2*PI*(z[8]+tf*tf*tf*tf*t2/(delta*delta*delta*delta))/P);
-    //       qd12 = (2*PI/P)*0.1*cos(2*PI*(z[8]+tf*tf*tf*tf*t2/(delta*delta*delta*delta))/P)*(4*tf*tf*tf*t2+tf*tf*tf*tf)/(delta*delta*delta*delta);
-    //       qd22 = -(2*PI/P)*(2*PI/P)*0.1*sin(2*PI*(z[8]+tf*tf*tf*tf*t2/(delta*delta*delta*delta))/P)*(4*tf*tf*tf*t2+tf*tf*tf*tf)*(4*tf*tf*tf*t2+tf*tf*tf*tf)/(delta*delta*delta*delta*delta*delta*delta*delta)-(2*PI/P)*0.1*cos(2*PI*(z[8]+tf*tf*tf*tf*t2/(delta*delta*delta*delta))/P)*(12*tf*tf*t2+4*tf*tf*tf)/(delta*delta*delta*delta);
   }
   else
   {
@@ -288,28 +289,35 @@ extern "C" void U11(double time, unsigned int sizeOfq, const double *q, const  d
   double m12 = (m2 * l2 * l2 / 4) + I2 + m2 * l1 * l2 * cos(q[1]) / 2;
   double m22 = (m2 * l2 * l2 / 4) + I2;
 
+  // generalized coordinates q=(x,y)^T
   double x = l1 * cos(q[0]) + l2 * cos(q[0] + q[1]);
   double y = l1 * sin(q[0]) + l2 * sin(q[0] + q[1]);
 
+  // time derivatives of x and y
   double x1 = -l1 * sin(q[0]) * velocity[0] - l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]);
   double y1 = l1 * cos(q[0]) * velocity[0] + l2 * cos(q[0] + q[1]) * (velocity[0] + velocity[1]);
 
+  // the gradient of the transformation \theta->q
   double grad11 = -y;
   double grad12 = -l2 * sin(q[0] + q[1]);
   double grad21 = x;
   double grad22 = l2 * cos(q[0] + q[1]);
   double det = grad11 * grad22 - grad12 * grad21;
 
+  // d=(grad)^{-1}
   double d11 = grad22 / det;
   double d12 = -grad12 / det;
   double d21 = -grad21 / det;
   double d22 = grad11 / det;
+
+  // time derivative of d
 
   double dd11 =  -(sin(q[0] + q[1]) * (velocity[0] + velocity[1]) * sin(q[1]) + cos(q[0] + q[1]) * cos(q[1]) * velocity[1]) / (l1 * sin(q[1]) * sin(q[1]));
   double dd12 = (cos(q[0] + q[1]) * (velocity[0] + velocity[1]) * sin(q[1]) - sin(q[0] + q[1]) * cos(q[1]) * velocity[1]) / (l1 * sin(q[1]) * sin(q[1]));
   double dd21 =  -dd11 + (sin(q[0]) * sin(q[1]) * velocity[0] + cos(q[0]) * cos(q[1]) * velocity[1]) / (l2 * sin(q[1]) * sin(q[1]));
   double dd22 =  -dd12 - (cos(q[0]) * sin(q[1]) * velocity[0] - sin(q[0]) * cos(q[1]) * velocity[1]) / (l2 * sin(q[1]) * sin(q[1]));
 
+  // M*d
   double mc11 = m11 * d11 + m12 * d21;
   double mc12 = m11 * d12 + m12 * d22;
   double mc21 = m12 * d11 + m22 * d21;
@@ -365,28 +373,35 @@ extern "C" void U2(double time, unsigned int sizeOfq, const double *q, const  do
   double m12 = (m2 * l2 * l2 / 4) + I2 + m2 * l1 * l2 * cos(q[1]) / 2;
   double m22 = (m2 * l2 * l2 / 4) + I2;
 
+  // generalized coordinates q=(x,y)^T
   double x = l1 * cos(q[0]) + l2 * cos(q[0] + q[1]);
   double y = l1 * sin(q[0]) + l2 * sin(q[0] + q[1]);
 
+  // time derivatives of x and y
   double x1 = -l1 * sin(q[0]) * velocity[0] - l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]);
   double y1 = l1 * cos(q[0]) * velocity[0] + l2 * cos(q[0] + q[1]) * (velocity[0] + velocity[1]);
 
+  // the gradient of the transformation \theta->q
   double grad11 = -y;
   double grad12 = -l2 * sin(q[0] + q[1]);
   double grad21 = x;
   double grad22 = l2 * cos(q[0] + q[1]);
   double det = grad11 * grad22 - grad12 * grad21;
 
+  // d=(grad)^{-1}
   double d11 = grad22 / det;
   double d12 = -grad12 / det;
   double d21 = -grad21 / det;
   double d22 = grad11 / det;
+
+  // time derivative of d
 
   double dd11 =  -(sin(q[0] + q[1]) * (velocity[0] + velocity[1]) * sin(q[1]) + cos(q[0] + q[1]) * cos(q[1]) * velocity[1]) / (l1 * sin(q[1]) * sin(q[1]));
   double dd12 = (cos(q[0] + q[1]) * (velocity[0] + velocity[1]) * sin(q[1]) - sin(q[0] + q[1]) * cos(q[1]) * velocity[1]) / (l1 * sin(q[1]) * sin(q[1]));
   double dd21 =  -dd11 + (sin(q[0]) * sin(q[1]) * velocity[0] + cos(q[0]) * cos(q[1]) * velocity[1]) / (l2 * sin(q[1]) * sin(q[1]));
   double dd22 =  -dd12 - (cos(q[0]) * sin(q[1]) * velocity[0] - sin(q[0]) * cos(q[1]) * velocity[1]) / (l2 * sin(q[1]) * sin(q[1]));
 
+  // M*d
   double mc11 = m11 * d11 + m12 * d21;
   double mc12 = m11 * d12 + m12 * d22;
   double mc21 = m12 * d11 + m22 * d21;
@@ -474,11 +489,14 @@ extern "C" void U3(double time, unsigned int sizeOfq, const double *q, const  do
   double d21 = -grad21 / det;
   double d22 = grad11 / det;
 
+  // time derivative of d
+
   double dd11 =  -(sin(q[0] + q[1]) * (velocity[0] + velocity[1]) * sin(q[1]) + cos(q[0] + q[1]) * cos(q[1]) * velocity[1]) / (l1 * sin(q[1]) * sin(q[1]));
   double dd12 = (cos(q[0] + q[1]) * (velocity[0] + velocity[1]) * sin(q[1]) - sin(q[0] + q[1]) * cos(q[1]) * velocity[1]) / (l1 * sin(q[1]) * sin(q[1]));
   double dd21 =  -dd11 + (sin(q[0]) * sin(q[1]) * velocity[0] + cos(q[0]) * cos(q[1]) * velocity[1]) / (l2 * sin(q[1]) * sin(q[1]));
   double dd22 =  -dd12 - (cos(q[0]) * sin(q[1]) * velocity[0] - sin(q[0]) * cos(q[1]) * velocity[1]) / (l2 * sin(q[1]) * sin(q[1]));
 
+  // M*d
   double mc11 = m11 * d11 + m12 * d21;
   double mc12 = m11 * d12 + m12 * d22;
   double mc21 = m12 * d11 + m22 * d21;
@@ -542,24 +560,39 @@ extern "C" void jacobFintQ(double time, unsigned int sizeOfq, const double *q, c
   double m12 = (m2 * l2 * l2 / 4) + I2 + m2 * l1 * l2 * cos(q[1]) / 2;
   double m22 = (m2 * l2 * l2 / 4) + I2;
 
+  // generalized coordinates q=(x,y)^T
   double x = l1 * cos(q[0]) + l2 * cos(q[0] + q[1]);
   double y = l1 * sin(q[0]) + l2 * sin(q[0] + q[1]);
 
+  // time derivatives of x and y
+  double x1 = -l1 * sin(q[0]) * velocity[0] - l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]);
+  double y1 = l1 * cos(q[0]) * velocity[0] + l2 * cos(q[0] + q[1]) * (velocity[0] + velocity[1]);
+
+  // the gradient of the transformation \theta->q
   double grad11 = -y;
   double grad12 = -l2 * sin(q[0] + q[1]);
   double grad21 = x;
   double grad22 = l2 * cos(q[0] + q[1]);
   double det = grad11 * grad22 - grad12 * grad21;
 
+  // d=(grad)^{-1}
   double d11 = grad22 / det;
   double d12 = -grad12 / det;
   double d21 = -grad21 / det;
   double d22 = grad11 / det;
 
+  // time derivative of d
+
   double dd11 =  -(sin(q[0] + q[1]) * (velocity[0] + velocity[1]) * sin(q[1]) + cos(q[0] + q[1]) * cos(q[1]) * velocity[1]) / (l1 * sin(q[1]) * sin(q[1]));
   double dd12 = (cos(q[0] + q[1]) * (velocity[0] + velocity[1]) * sin(q[1]) - sin(q[0] + q[1]) * cos(q[1]) * velocity[1]) / (l1 * sin(q[1]) * sin(q[1]));
   double dd21 =  -dd11 + (sin(q[0]) * sin(q[1]) * velocity[0] + cos(q[0]) * cos(q[1]) * velocity[1]) / (l2 * sin(q[1]) * sin(q[1]));
   double dd22 =  -dd12 - (cos(q[0]) * sin(q[1]) * velocity[0] - sin(q[0]) * cos(q[1]) * velocity[1]) / (l2 * sin(q[1]) * sin(q[1]));
+
+  // M*d
+  double mc11 = m11 * d11 + m12 * d21;
+  double mc12 = m11 * d12 + m12 * d22;
+  double mc21 = m12 * d11 + m22 * d21;
+  double mc22 = m12 * d12 + m22 * d22;
 
   double qr11 = z[16];
   double qr12 = z[17];
@@ -599,20 +632,35 @@ extern "C" void jacobFintV(double time, unsigned int sizeOfq, const double *q, c
   double m12 = (m2 * l2 * l2 / 4) + I2 + m2 * l1 * l2 * cos(q[1]) / 2;
   double m22 = (m2 * l2 * l2 / 4) + I2;
 
+  // generalized coordinates q=(x,y)^T
   double x = l1 * cos(q[0]) + l2 * cos(q[0] + q[1]);
   double y = l1 * sin(q[0]) + l2 * sin(q[0] + q[1]);
 
+  // time derivatives of x and y
+  double x1 = -l1 * sin(q[0]) * velocity[0] - l2 * sin(q[0] + q[1]) * (velocity[0] + velocity[1]);
+  double y1 = l1 * cos(q[0]) * velocity[0] + l2 * cos(q[0] + q[1]) * (velocity[0] + velocity[1]);
+
+  // the gradient of the transformation \theta->q
   double grad11 = -y;
   double grad12 = -l2 * sin(q[0] + q[1]);
   double grad21 = x;
   double grad22 = l2 * cos(q[0] + q[1]);
   double det = grad11 * grad22 - grad12 * grad21;
 
+  // d=(grad)^{-1}
   double d11 = grad22 / det;
   double d12 = -grad12 / det;
   double d21 = -grad21 / det;
   double d22 = grad11 / det;
 
+  // time derivative of d
+
+  double dd11 =  -(sin(q[0] + q[1]) * (velocity[0] + velocity[1]) * sin(q[1]) + cos(q[0] + q[1]) * cos(q[1]) * velocity[1]) / (l1 * sin(q[1]) * sin(q[1]));
+  double dd12 = (cos(q[0] + q[1]) * (velocity[0] + velocity[1]) * sin(q[1]) - sin(q[0] + q[1]) * cos(q[1]) * velocity[1]) / (l1 * sin(q[1]) * sin(q[1]));
+  double dd21 =  -dd11 + (sin(q[0]) * sin(q[1]) * velocity[0] + cos(q[0]) * cos(q[1]) * velocity[1]) / (l2 * sin(q[1]) * sin(q[1]));
+  double dd22 =  -dd12 - (cos(q[0]) * sin(q[1]) * velocity[0] - sin(q[0]) * cos(q[1]) * velocity[1]) / (l2 * sin(q[1]) * sin(q[1]));
+
+  // M*d
   double mc11 = m11 * d11 + m12 * d21;
   double mc12 = m11 * d12 + m12 * d22;
   double mc21 = m12 * d11 + m22 * d21;

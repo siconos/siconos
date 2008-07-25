@@ -236,6 +236,7 @@ int main(int argc, char* argv[])
     dataPlot(k, 13) = (*z)(23);
 
     cout << "====> Start computation ... " << endl << endl;
+
     while (k < N)
     {
       (*z)(0) = (*q)(0);
