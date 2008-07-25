@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
     // == User-defined parameters ==
     unsigned int ndof = 4;  // number of degrees of freedom of your system
     double t0 = 0.0;
-    double T = 25;        // Total simulation time
+    double T = 30;        // Total simulation time
     double h = 1.0e-3;      // Time step
     double Vinit = 10.0;
     unsigned int noutput = 1;
@@ -25,11 +25,11 @@ int main(int argc, char* argv[])
     // == Creation of the NonSmoothDynamicalSystem ==
     // DynamicalSystem(s)
     SiconosMatrix * A = new SimpleMatrix(2, 2); // All components of A are automatically set to 0.
-    (*A)(0, 0) = 1.0;
-    (*A)(0, 1) = 1.0;
-    (*A)(1, 0) = 3.0;
-    (*A)(1, 1) = 1.0;
-    (*A) = 0.1 * (*A);
+    (*A)(0, 0) = -1.0;
+    (*A)(0, 1) = 0.0;
+    (*A)(1, 0) = 0.0;
+    (*A)(1, 1) = -1.0;
+    //(*A) = 0.1 * (*A);
     SiconosMatrix * TildeA = new SimpleMatrix(ndof, ndof); // All components of A are automatically set to 0.
     (*TildeA)(0, 0) = (*A)(0, 0);
     (*TildeA)(0, 1) = (*A)(0, 1);
@@ -37,9 +37,9 @@ int main(int argc, char* argv[])
     (*TildeA)(1, 1) = (*A)(1, 1) ;
 
     SiconosMatrix * L = new SimpleMatrix(2, noutput);
-    (*L)(0, 0) = 1.0;
-    (*L)(1, 0) = 1.0;
-    (*L) = 0.1 * (*L);
+    (*L)(0, 0) = 0.0;
+    (*L)(1, 0) = 0.0;
+    //(*L) = 0.1 * (*L);
     SiconosMatrix * G = new SimpleMatrix(noutput, 2);
     (*G)(0, 0) = 2.0;
     (*G)(0, 1) = 2.0;

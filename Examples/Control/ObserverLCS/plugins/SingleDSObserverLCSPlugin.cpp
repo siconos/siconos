@@ -59,6 +59,105 @@ extern "C"   double computeControl(double time)
   double alpha = 50.0;
   int oddoreven = 1 ;
   int njump;
+  int N = 100;
+  double a = 24 / 25.0;
+
+  double timeaccu = 1 / (1.0 - a);
+
+
+  if (time < 1) u = 0.0;
+
+  if (time >= 1 & time < timeaccu)
+  {
+    njump = (int)((log(1.0 - (1.0 - a) * time) / log(a)) - 1.0);
+    u =  alpha / (pow(2 * njump + 1, 1.0 / a));
+
+
+    if ((njump % 2) == 0) u = -u;
+
+    printf("njump = %i\n", njump);
+    //printf("time = %e\n",time);
+    //u =  -alpha*(1.0+pow(2,njump+1)*(3.0-1.0/(pow(2,njump-1))));
+    //printf("u = %e\n",u);
+  };
+  if (time >= timeaccu)
+  {
+    oddoreven = int(time - timeaccu);
+    printf("time = %e\n", time);
+    printf("oddorven = %i\n", oddoreven);
+    if ((oddoreven % 2) == 0) u = alpha / 10;
+    else u = -alpha / 10;
+    printf("u = %e\n", u);
+  }
+
+
+
+  return u;
+}
+extern "C"   double computeControlori2(double time)
+{
+
+
+  double u;
+  double alpha = 50.0;
+  int oddoreven = 1 ;
+  int njump;
+  int N = 100;
+  if (time < 1) u = -0.0;
+
+  if (time >= 1 & time < 2)
+  {
+    njump = 0;
+    u =  alpha * pow(2, njump + 1) * time - alpha * (1.0 + pow(2, njump + 1)
+         * (3.0 -
+            pow(2, -njump + 1)
+           )
+                                                    ) ;
+    //printf("njump = %i\n",njump);
+    //printf("time = %e\n",time);
+    //u =  -alpha*(1.0+pow(2,njump+1)*(3.0-1.0/(pow(2,njump-1))));
+    //printf("u = %e\n",u);
+  }
+
+  if (time >= 2 & time < 3 - pow(2, -N))
+  {
+    njump = (int)((log(1.0 / (3.0 - time)) / log(2.0)) + 1.0);
+    u =  alpha * pow(2, njump + 1) * time - alpha * (1.0 + pow(2, njump + 1)
+         * (3.0 -
+            pow(2, -njump + 1)
+           )
+                                                    ) ;
+    printf("njump = %i\n", njump);
+    //printf("time = %e\n",time);
+    //u =  -alpha*(1.0+pow(2,njump+1)*(3.0-1.0/(pow(2,njump-1))));
+    //printf("u = %e\n",u);
+  };
+  if (time >= 3 - pow(2, -N) & time < 3)
+  {
+    u = 0.0;
+  }
+  if (time >= 3)
+  {
+    oddoreven = int(time - 3);
+    printf("time = %e\n", time);
+    printf("oddorven = %i\n", oddoreven);
+    if ((oddoreven % 2) == 0) u = alpha;
+    else u = -alpha;
+    printf("u = %e\n", u);
+  }
+
+
+
+  return u;
+}
+extern "C"   double computeControlori(double time)
+{
+
+
+  double u;
+  double alpha = 50.0;
+  int oddoreven = 1 ;
+  int njump;
 
   if (time < 1) u = -0.0;
   if (time >= 3) u = 0.0;
@@ -70,10 +169,10 @@ extern "C"   double computeControl(double time)
             pow(2, -njump + 1)
            )
                                                     ) ;
-    printf("njump = %i\n", njump);
-    printf("time = %e\n", time);
+    //printf("njump = %i\n",njump);
+    //printf("time = %e\n",time);
     //u =  -alpha*(1.0+pow(2,njump+1)*(3.0-1.0/(pow(2,njump-1))));
-    printf("u = %e\n", u);
+    //printf("u = %e\n",u);
   }
 
   if (time >= 2 & time < 3)
@@ -84,15 +183,17 @@ extern "C"   double computeControl(double time)
             pow(2, -njump + 1)
            )
                                                     ) ;
-    printf("njump = %i\n", njump);
-    printf("time = %e\n", time);
+    //printf("njump = %i\n",njump);
+    //printf("time = %e\n",time);
     //u =  -alpha*(1.0+pow(2,njump+1)*(3.0-1.0/(pow(2,njump-1))));
-    printf("u = %e\n", u);
+    //printf("u = %e\n",u);
   };
 
 
   return u;
 }
+
+
 
 
 extern "C"   void computeU(double time, unsigned int sizeOfB, double* b, unsigned int sizeOfZ, double* z)
