@@ -40,8 +40,8 @@ int pfc_2D_driver(FrictionContact_Problem* problem, double *reaction , double *v
   int info = -1;
 
   int storageType = problem->M->storageType;
-  if (storageType == 1)
-    numericsError("pfc_2D_driver", "not yet implemented for Sparse Block Storage");
+  //  if(storageType == 1)
+  //  numericsError("pfc_2D_driver", "not yet implemented for Sparse Block Storage");
 
   /* If the options for solver have not been set, read default values in .opt file */
   int NoDefaultOptions = options->isSet; /* true(1) if the Solver_Options structure has been filled in else false(0) */
@@ -67,6 +67,9 @@ int pfc_2D_driver(FrictionContact_Problem* problem, double *reaction , double *v
   /****** NLGS algorithm ******/
   if (strcmp(name , "NLGS") == 0 || strcmp(name , "PGS") == 0)
     pfc_2D_nlgs(problem, reaction, velocity, &info, options);
+
+  else if (strcmp(name , "NSGS") == 0 || strcmp(name , "PGS2") == 0)
+    frictionContact2D_sparse_nsgs(problem, reaction, velocity, &info, options, 2);
 
   /****** CPG algorithm ******/
   else if (strcmp(name , "CPG") == 0)
