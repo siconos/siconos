@@ -199,14 +199,14 @@ void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, 
     }
 
 
-    /*FrictionContact2D_compute_error(problem, z, w, tolerance, &error);*/
+    FrictionContact2D_compute_error(problem, z, w, tolerance, &error);
 
-    int n = 2 * blmat->size;
+    /*int n = 2* blmat->size;
 
     DCOPY(n, problem->q, 1, y, 1);
     prod(n, n, 1.0, problem->M, z, 1.0, y);
     DAXPY(n, -1, w, 1, y, 1);
-    error = DNRM2(n, y, 1) / DNRM2(n, q, 1);
+    error = DNRM2( n, y, 1)/ DNRM2( n, q, 1); */
 
     hasNotConverged = error > tolerance  ;
 
@@ -214,7 +214,7 @@ void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, 
 
   }
 
-  printf("%d %g\n", iter, error);
+  // printf("%d %g\n", iter, error);
 
   //  *info = hasNotConverged;
 

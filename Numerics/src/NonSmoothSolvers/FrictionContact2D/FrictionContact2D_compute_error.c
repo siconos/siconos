@@ -22,25 +22,6 @@
 #include "FrictionContact_Problem.h"
 #include <math.h>
 
-void projectionOnCone2D(double* r, double  mu)
-{
-  double normT = fabs(r[1]);
-  double mu2 = mu * mu;
-  if (mu * normT <= -r[0])
-  {
-    r[0] = 0.;
-    r[1] = 0.;
-    return;
-  }
-  else if (normT <= mu * r[0])
-    return;
-  else
-  {
-    r[0] = (mu * normT + r[0]) / (mu2 + 1);
-    r[1] = mu * r[0] * r[1] / normT;
-    return;
-  }
-}
 
 int FrictionContact2D_compute_error(FrictionContact_Problem* problem, double *z , double *w, double tolerance, double * error)
 {
@@ -53,9 +34,9 @@ int FrictionContact2D_compute_error(FrictionContact_Problem* problem, double *z 
 
   double *mu = problem->mu;
 
-  double worktmp[3];
+  double tmp[3];
 
-  double normUT;
+  double normT;
 
   /* Checks inputs */
   if (! problem || ! z || ! w)
@@ -65,16 +46,33 @@ int FrictionContact2D_compute_error(FrictionContact_Problem* problem, double *z 
 
   *error = 0.;
 
+  /* Num. Methods For Nonsmooth Dynamics, A.13 P 528 */
+  /* k* -) x _|_ y  (- k  <=>  x = projk(x-rho.y) */
+
   for (ic = 0, iN = 0, iT = 1 ; ic < nc ; ++ic , ++iN, ++iN, ++iT, ++iT)
   {
     /* Compute the modified local velocity */
-    normUT = fabs(w[iT]);
-    worktmp[0] = z[iN] - (w[iN] + mu[ic] * normUT);
-    worktmp[1] = z[iT] -  w[iT] ;
-    projectionOnCone2D(worktmp, mu[ic]);
-    worktmp[0] = z[iN] -  worktmp[0];
-    worktmp[1] = z[iT] -  worktmp[1];
-    *error +=  worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1];
+    tmp[0] = z[iN] - (w[iN] + mu[ic] * fabs(w[iT]));  /* rho=1 */
+    tmp[1] = z[iT] - w[iT];                     /* rho=1 */
+
+    /* projection */
+    normT = fabs(tmp[1]);
+    if (mu[ic]*normT <= -tmp[0])
+    {
+      tmp[0] = 0.;
+      tmp[1] = 0.;
+    }
+    else if (normT > mu[ic]*tmp[0])
+    {
+      /* solve([sqrt((r1-mu*ra)^2+(r0-ra)^2)=abs(mu*r0-r1)/sqrt(mu*mu+1)],[ra]) */
+      tmp[0] = (mu[ic] * normT + tmp[0]) / (mu[ic] * mu[ic] + 1);
+      tmp[1] = mu[ic] * tmp[0];
+    }
+
+    tmp[0] = z[iN] -  tmp[0];
+    tmp[1] = z[iT] -  tmp[1];
+    *error += tmp[0] * tmp[0] + tmp[1] * tmp[1];
+
   }
   *error = sqrt(*error);
 
