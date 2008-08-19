@@ -1,6 +1,6 @@
-/* Siconos-sample version 3.0.0, Copyright INRIA 2005-2008.
+/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
  * Siconos is a program dedicated to modeling, simulation and control
- * of non smooth dynamical systems.	
+ * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -14,28 +14,34 @@
  * along with Siconos; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * Contact: Vincent ACARY vincent.acary@inrialpes.fr 
+ * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
+/*! \file DrawUtilities.h
+  \brief Functions used to draw spheres or planes using openGL
+  \author F. Perignon
+  \date August 2008
+*/
 
-Column of n falling beads.
+#ifdef WithQGLViewer
+#ifndef DrawUtilities_H
+#define DrawUtilities_H
 
-Input: direct c++ model description (TS for time stepping, ED for event driven)
+/** Toolbox for drawing  */
+class DrawUtilities
+{
+public:
 
--> BeadsColumnsTS.cpp
--> BeadsColumnED.cpp
--> ThreeBeadsColumn.cpp (3 beads, time-stepping and Xml input).
+  /** draw a sphere of radius R, centered at point of coordinate (x,y,z)
+      c is used to choose the color
+  */
+  static void drawSphere(double radius, double x, double y, double z, double c);
 
-Output: result.dat
+  /** draw the plane z = ground
+   */
+  static void drawHorizontalPlane(double ground);
 
-Post-treatment: gnuplot -persist result.gp or ThreeBeadsXML.gp
+};
+#endif
 
-
-
-main.cpp: general input file, using model described in src/BallsModel. 
-It corresponds to BeadsColumnTS.cpp but proposes a 3D-display using QGLViewer:
-run siconos -DWithQGLViewer main.cpp
-
-set number of spheres, radius ... in src/environment.h.
-
-
+#endif
