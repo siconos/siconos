@@ -27,9 +27,15 @@
 
 int frictionContact2D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options)
 {
+  if (options == NULL || global_options == NULL)
+    numericsError("FrictionContact2D_driver", "null input for solver and/or global options");
 
   /* Set global options */
   setNumericsOptions(global_options);
+
+  /* Checks inputs */
+  if (problem == NULL || reaction == NULL || velocity == NULL)
+    numericsError("FrictionContact2D_driver", "null input for FrictionContact_Problem and/or unknowns (reaction,velocity)");
 
   /* If the options for solver have not been set, read default values in .opt file */
   int NoDefaultOptions = options->isSet; /* true(1) if the Solver_Options structure has been filled in else false(0) */

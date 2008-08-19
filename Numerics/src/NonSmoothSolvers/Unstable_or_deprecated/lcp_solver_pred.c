@@ -77,11 +77,11 @@ is solved by a prediction on the non-zero z values and linear system solving or 
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"
 #endif
-int lcp_solver_pred(double *vec, double *q , int *n , method *pt , double *z , double *w ,
+int lcp_solver_pred(double *vec, double *q , int *n , method_lcp *pt , double *z , double *w ,
                     int firsttime, int *soltype , int *indic , int *indicop , double *submatlcp , double *submatlcpop ,
                     int *ipiv , int *sizesublcp , int *sizesublcpop ,
                     double *subq , double *bufz , double *newz , double *workspace)
-int lcp_solver_pred(n , method *pt , double *z , double *w ,
+int lcp_solver_pred(n , method_lcp *pt , double *z , double *w ,
                     int firsttime, int *soltype , int *indic , int *indicop , double *submatlcp , double *submatlcpop ,
                     int *ipiv , int *sizesublcp , int *sizesublcpop ,
                     double *subq , double *bufz , double *newz , double *workspace)

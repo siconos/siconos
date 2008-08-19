@@ -98,6 +98,17 @@ TD.navtab {
        font-size: 70%;
 }
 
+/** link to the main page **/
+DIV.navpath {
+      color: #2F6A44 !important;
+      display: block;
+      text-align: left;
+      margin: 2px;
+      margin-right: 50px;
+      padding: 2px;
+      font-size: 80%;
+}
+
 A.qindex {
        text-decoration: none;
        font-weight: bold;

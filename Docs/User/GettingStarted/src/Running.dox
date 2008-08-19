@@ -6,30 +6,22 @@ There are two different ways to run a simulation with Siconos: directly with a C
 First check that Siconos is well installed (see \ref siconosInstall "Siconos Installation Guide"). \n
 Create a directory for your example, where the following files must be present:
 - the main input cpp file 
-- all the xxxPlugin.cpp files necessary for your simulation (for details on plug-in see \ref doc_usingPlugin)
+- a plugin or plugins directory, whith all the xxxPlugin.cpp files necessary for your simulation (for details on plug-in see \ref doc_usingPlugin).
 - the xml input file if you use xml data description
+- a src directory, with all the external files you need to be compiled and linked with Siconos.
 
 Then just run: 
 \verbatim 
 siconos myInputFile.cpp
 \endverbatim
-The simulation will then start. Note that xxxPlugin.so and an executable, myInputFile.out are created in the current directory. 
 
-To clean up the directory: 
-\verbatim 
-siconos -c
+The simulation will then start. Note that an executable, myInputFile is created in the current directory. 
+
+For details on all the available options of siconos command just run
+\verbatim
+siconos
 \endverbatim
 
-For verbose mode when running, add "-v" option to siconos. 
-
-Note: if siconos is not installed in the default, search path, you may have to give a full path name, that is SICONOS_INSTALL_DIRECTORY_NAME/siconos. \n
-Or just change your PATH variable:
-\verbatim 
-setenv PATH $PATH:SICONOS_INSTALL_DIRECTORY_NAME
-or
-PATH=$PATH:SICONOS_INSTALL_DIRECTORY_NAME
-export PATH
-\endverbatim
  
 <b> With Front-End (Scilab or Python) </b>\n
 First check that Siconos and Siconos Front-End are well installed. \n

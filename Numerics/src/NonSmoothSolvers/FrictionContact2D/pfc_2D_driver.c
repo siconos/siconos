@@ -22,6 +22,7 @@
 #include <time.h>
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"
+
 #endif
 
 int pfc_2D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options)
@@ -69,7 +70,7 @@ int pfc_2D_driver(FrictionContact_Problem* problem, double *reaction , double *v
     pfc_2D_nlgs(problem, reaction, velocity, &info, options);
 
   else if (strcmp(name , "NSGS") == 0 || strcmp(name , "PGS2") == 0)
-    frictionContact2D_sparse_nsgs(problem, reaction, velocity, &info, options, 2);
+    frictionContact2D_sparse_nsgs(problem, reaction, velocity, &info, options);
 
   /****** CPG algorithm ******/
   else if (strcmp(name , "CPG") == 0)

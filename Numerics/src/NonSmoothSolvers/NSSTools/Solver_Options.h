@@ -113,7 +113,7 @@ Note that options[i+1] is used for row i of M, while i<nbSolvers-1 and options[n
 #include "Numerics_Options.h"
 
 /** Structure used to send options (name, parameters and so on) to a specific solver-driver (mainly from Kernel to Numerics).
-    \param isSet, int equal to false(0) if the parameters below have not been set (ie need to read default values) else true(1)
+    \param isSet int equal to false(0) if the parameters below have not been set (ie need to read default values) else true(1)
     \param solverName name of the solver
     \param iSize size of vectors iparam \n
     \param iparam a list of int parameters (depends on each solver, see solver doc.)
@@ -121,8 +121,8 @@ Note that options[i+1] is used for row i of M, while i<nbSolvers-1 and options[n
     \param dparam a list of double parameters (depends on each solver, see solver doc.)
     \param filterOn 1 to check solution validity after the driver call, else 0. Default = 1. (For example if \n
     filterOn = 1 for a LCP, lcp_compute_error() will be called at the end of the process)
-    \param dWork is a pointer on a working memory zone reseved for the solver .
-    \param iWork is a pointer on a working memory zone reseved for the solver .
+    \param dWork is a pointer on a working memory zone (for doubles) reserved for the solver .
+    \param iWork is a pointer on a working memory zone (for integers) reserved for the solver .
 */
 typedef struct
 {

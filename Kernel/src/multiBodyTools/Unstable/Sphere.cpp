@@ -19,7 +19,6 @@
  */
 
 #include "Sphere.h"
-#include "drawstuff.h"
 
 using namespace std;
 
@@ -37,8 +36,6 @@ Sphere::Sphere(double R, double m, const SiconosVector& q0, const SiconosVector&
 
   setFExt(weight);
   setMass(Mass);
-
-
 }
 
 Sphere::~Sphere()
@@ -46,33 +43,29 @@ Sphere::~Sphere()
 
 void Sphere::draw()
 {
-  float theta;//,phi,psi;
-  float pos[3];
-  float R[12];
-  // Translation
-  pos[0] = (*q[0])(0);
-  pos[1] = (*q[0])(1);
-  pos[2] = (*q[0])(2);
+  //   float theta;//,phi,psi;
+  //   float pos[3];
+  //   float R[12];
+  //   // Translation
+  //   pos[0]=(*q[0])(0);
+  //   pos[1]=(*q[0])(1);
+  //   pos[2]=(*q[0])(2);
 
-  // Rotation
-  theta = (*q[0])(3);
-  //   phi=getQ()(4);
-  //   psi=getQ()(5);
+  //   // Rotation
+  //   theta=(*q[0])(3);
+  // //   phi=getQ()(4);
+  // //   psi=getQ()(5);
 
-  R[0] = 1.0;
-  R[1] = 0.0;
-  R[2] = 0.0;
-  R[4] = 0.0;
-  R[5] = cos(theta);
-  R[6] = -sin(theta);
-  R[8] = 0.0;
-  R[9] = sin(theta);
-  R[10] = cos(theta);
-  R[3] = R[7] = R[11] = 0.0;
+  //   R[0] = 1.0; R[1] = 0.0; R[2] = 0.0;
+  //   R[4] = 0.0; R[5] = cos(theta); R[6] = -sin(theta);
+  //   R[8] = 0.0; R[9] = sin(theta); R[10] = cos(theta);
+  //   R[3]=R[7]=R[11]=0.0;
 
-  dsSetTexture(DS_WOOD);
-  dsSetColor(1, 0.8f, 0.6f);
+  //   dsSetTexture (DS_WOOD);
+  //   dsSetColor (1,0.8f,0.6f);
 
-  dsDrawSphere(pos, R, Radius);
+  //   dsDrawSphere (pos,R, Radius);
 
+  // static void drawSphere(GLdouble radius, double x, double y, double z)
+  // {
 }

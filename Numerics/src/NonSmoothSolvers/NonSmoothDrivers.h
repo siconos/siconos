@@ -20,13 +20,17 @@
 
 Numerics package proposes a set of non-smooth solvers dedicated to some specific formulations for a non-smooth problem.\n
 
-For each type of problem, a generic interface function (driver) is provided (see contents table below for description and the file NonSmoothDrivers.h for a complete list of all interfaces).\n
+For each type of problem, a generic interface function (driver) is provided. \n
 The main arguments of this driver are:
  - a structure of type XXX_Problem (XXX being the formulation type: LinearComplementarity_Problem, FrictionContact_Problem ...), which holds the vectors and matrices used to formalize the problem, \n
- - the unknowns
+ - the unknowns \n
  - a structure of type Solver_Options, used to defined the solver type and its parameters (see \ref NumericsSolver). \n
+ - a Numerics_Options structure, used to define global options (verbose mode ...)
 
 To get more details on each formulation, check for each type of problem in \ref NSSpackContents below.
+
+All the drivers interfaces are defined in the file NonSmoothDrivers.h .\n
+Each type of formulation is defined in a structure in the file XXX_Problem.h .
 
 \section NSSpackContents Contents
 \subpage LCProblem \n\n
@@ -49,6 +53,8 @@ Other functions and useful tools related to NonSmoothSolvers are listed in NSSTo
   Last Modifications : Mathieu Renouf , Pascal Denoyelle, Franck Perignon
   \todo solve_qp does not exist
 
+  Note: all pfc_3D functions, structures ... are out of date and will be soon removed.
+  Use FrictionContact3D tools.
 */
 #ifndef NonSmoothSolvers_H
 #define NonSmoothSolvers_H
@@ -64,6 +70,7 @@ Other functions and useful tools related to NonSmoothSolvers are listed in NSSTo
 
 
 /** Union of specific methods (one for each type of problem)
+    Deprecated.
 */
 typedef union
 {
@@ -89,29 +96,6 @@ extern "C" {
   */
   int lcp_driver(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options, int numberOfSolvers, Numerics_Options* global_options);
 
-  /** General interface to solvers for Linear Complementarity Problems
-      \param[in] problem the LinearComplementarity_Problem structure which handles the problem (M,q)
-      \param[in,out] z a n-vector of doubles which contains the solution of the problem.
-      \param[in,out] w a n-vector of doubles which contains the solution of the problem.
-      \param[in,out] options structure used to define the solver(s) and their parameters
-      \return info termination value
-      - 0 : successful\n
-      - >0 : otherwise see each solver for more information about the log info
-      \author Nineb Sheherazade, Mathieu Renouf, Franck Perignon
-  */
-  int lcp_driver_DenseMatrix(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options);
-
-  /** Solver with extract-predict mechanism */
-  int lcp_solver_pred(double *vec, double *q , int *n , method *pt , double *z , double *w ,
-                      int firsttime, int *soltype , int *indic , int *indicop , double *submatlcp , double *submatlcpop ,
-                      int *ipiv , int *sizesublcp , int *sizesublcpop ,
-                      double *subq , double *bufz , double *newz , double *workspace);
-
-  /** Solver with extract-predict mechanism */
-  int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat, SparseBlockStructuredMatrixPred *blmatpred, int nbmethod,
-                                int maxiterglob, double tolglob,
-                                double *q, method **pt , double *z , double *w , int *it_end , int *itt_end , double *res);
-
   /** General interface to solver for MLCP problems
       \param[in] problem the MixedLinearComplementarity_Problem structure which handles the problem (M,q)
       \param[in,out] z a m+n-vector of doubles which contains the solution of the problem.
@@ -125,73 +109,11 @@ extern "C" {
       \author Vincent Acary
   */
   int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *w, Solver_Options* options, Numerics_Options* global_options);
-  /** General interface to initialize a solver.\n
-      Must be call for the following solvers:\n
-      - mlcp_enum
-      - mlcp_path
-      - mlcp_simplex
-      - mlcp_direct_enum
-      - mlcp_direct_path
-      - mlcp_direct_simplex
 
-      \param[in] problem the MixedLinearComplementarity_Problem structure which handles the problem (M,q)
-      \param[in] options structure used to define the solver(s) and their parameters
-      \author Olivier Bonnefon
-  */
-  void mlcp_driver_init(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
-  /** General interface to reset a solver.\n
-      Must be call for the following solvers:\n
-      - mlcp_enum
-      - mlcp_path
-      - mlcp_simplex
-      - mlcp_direct_enum
-      - mlcp_direct_path
-      - mlcp_direct_simplex
-
-      \param[in] problem the MixedLinearComplementarity_Problem structure which handles the problem (M,q)
-      \param[in] options structure used to define the solver(s) and their parameters
-      \author Olivier Bonnefon
-  */
-  void mlcp_driver_reset(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
-
-  /** General interface to get the number of integers that must be allocated for the solver.\n
-      Must be use for the following solvers:\n
-      - mlcp_enum
-      - mlcp_path
-      - mlcp_simplex
-      - mlcp_direct_enum
-      - mlcp_direct_path
-      - mlcp_direct_simplex
-
-      \param[in] problem the MixedLinearComplementarity_Problem structure which handles the problem (M,q)
-      \param[in] options structure used to define the solver(s) and their parameters
-      \return the number of integers that must be allocated by the user.
-
-      \author Olivier Bonnefon
-  */
-  int mlcp_driver_get_iwork(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
-  /** General interface to get the number of doubles that must be allocated for the solver.\n
-      Must be use for the following solvers:\n
-      - mlcp_enum
-      - mlcp_path
-      - mlcp_simplex
-      - mlcp_direct_enum
-      - mlcp_direct_path
-      - mlcp_direct_simplex
-
-      \param[in] problem the MixedLinearComplementarity_Problem structure which handles the problem (M,q)
-      \param[in] options structure used to define the solver(s) and their parameters
-      \return the number of doubles that must be allocated by the user.
-
-      \author Olivier Bonnefon
-  */
-  int mlcp_driver_get_dwork(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
-
-
-  /** General interface to solver for pfc 3D problems */
+  /** General interface to solver for pfc 3D problems - Out of date (will be removed soon) */
   int pfc_3D_driver(int, double*, double*, method*, double*, double*, double*);
 
-  /** General interface to solvers for primal friction 3D problem, with a sparse block storage for M.
+  /** General interface to solvers for primal friction 3D problem, with a sparse block storage for M - Out of date (will be removed soon)
    *   \param n    Dimension of the system. Then, the number of contacts is n/3.
    *  \param M    components of the double matrix with a fortran allocation.
    *  \param q    the components of the second member of the system.
@@ -215,26 +137,32 @@ extern "C" {
   int pfc_3D_driver_block(int, SparseBlockStructuredMatrix*, double*, method*, double*, double*, double*);
 
   /** General interface to solvers for primal friction-contact 2D problem
-      \param[in] , number of contacts (dim of the problem n = 2*nc)
-      \param[in] , M global matrix (n*n)
-      \param[in] , q global vector (n)
-      \param[in] , method
+      \param[in] , the structure which handles the Friction-Contact problem
       \param[in-out] , reaction global vector (n)
       \param[in-out] , velocity global vector (n)
-      \param[in] , mu vector of the friction coefficients (size nc)
+      \param[in,out] options structure used to define the solver(s) and their parameters
+      \param[in] general options for Numerics (verbose mode ...)
       \return result (0 if successful otherwise 1).
-      * \author Nineb Sheherazade.
+      \author Nineb Sheherazade.
   */
   int pfc_2D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options);
 
-  /** General interface to solver for dual friction-contact problems
-      \param[in] , number of contacts (dim of the problem n = 2*nc)
-      \param[in] , M global matrix (n*n)
-      \param[in] , q global vector (n)
-      \param[in] , method
+  /** General interface to solvers for friction-contact 2D problem
+      \param[in] , the structure which handles the Friction-Contact problem
       \param[in-out] , reaction global vector (n)
       \param[in-out] , velocity global vector (n)
-      \param[in] , mu vector of the friction coefficients (size nc)
+      \param[in,out] options structure used to define the solver(s) and their parameters
+      \param[in] general options for Numerics (verbose mode ...)
+      \return result (0 if successful otherwise 1).
+  */
+  int frictionContact2D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options);
+
+  /** General interface to solver for dual friction-contact problems
+      \param[in] , the structure which handles the Friction-Contact problem
+      \param[in-out] , reaction global vector (n)
+      \param[in-out] , velocity global vector (n)
+      \param[in,out] options structure used to define the solver(s) and their parameters
+      \param[in] general options for Numerics (verbose mode ...)
       \param[in,out] iparamDFC vector of dfc specific parameters (int):
          - [0] ddl_n:    contact in normal direction dof (not prescribed) (on enter)
          - [1] ddl_tt:   contact in tangential direction dof (not prescribed) (on enter)
@@ -275,28 +203,14 @@ extern "C" {
   int pr_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* options, Numerics_Options* global_options);
 
   /** General interface to solvers for friction-contact 3D problem
-      \param[in] , number of contacts (dim of the problem n = 3*nc)
-      \param[in] , M global matrix (n*n)
-      \param[in] , q global vector (n)
-      \param[in] , method
+      \param[in] , the structure which handles the Friction-Contact problem
       \param[in-out] , reaction global vector (n)
       \param[in-out] , velocity global vector (n)
-      \param[in] , mu vector of the friction coefficients (size nc)
+      \param[in,out] options structure used to define the solver(s) and their parameters
+      \param[in] general options for Numerics (verbose mode ...)
       \return result (0 if successful otherwise 1).
   */
   int frictionContact3D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options);
-
-  /** General interface to solvers for friction-contact 3D problem with sparse-block storage for M
-      \param[in] , number of contacts (dim of the problem n = 3*nc)
-      \param[in] , M global matrix (n*n)
-      \param[in] , q global vector (n)
-      \param[in] , method
-      \param[in-out] , reaction global vector (n)
-      \param[in-out] , velocity global vector (n)
-      \param[in] , mu vector of the friction coefficients (size nc)
-      \return result (0 if successful otherwise 1).
-  */
-  int frictionContact3D_driver_SBS(int, SparseBlockStructuredMatrix*, double*, method*, double*, double*, double*);
 
 #ifdef __cplusplus
 }

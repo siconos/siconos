@@ -51,10 +51,12 @@ To see cmake state:
 cmake -DPRINT_ENV=1 <path of the source directory>
 \endverbatim
 
-Some make that may be usefull: \n
-        to see make command as executed : VERBOSE=1
+To see make commands as they are executed:
+\verbatim
+make VERBOSE=1
+\endverbatim
 
-To run tests (works only if you have installed cppunit, see \ref prerequisite)
+To run tests (works only if you have installed cppunit, see \ref IG_prereq)
 \verbatim
 make test
 \endverbatim

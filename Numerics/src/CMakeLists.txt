@@ -38,8 +38,6 @@ SET(SiconosNumerics_DIRS
 # Unstable sources
 #
 SET(SiconosNumerics_Unstable_SRCS
-  NonSmoothSolvers/LCP/lcp_solver_block_pred_vec.c
-  NonSmoothSolvers/LCP/lcp_solver_pred.c
 )
 
 #

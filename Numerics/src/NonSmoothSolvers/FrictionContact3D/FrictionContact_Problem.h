@@ -97,12 +97,12 @@
 
 #include "NumericsMatrix.h"
 
-/** The structure that defines a Friction-Contact (3D or 2D)problem
-    \param numberOfContacts, the number of contacts
+/** The structure that defines a Friction-Contact (3D or 2D) problem
+    \param numberOfContacts the number of contacts
     \param M matrix (n X n, with n = 2 or 3*numberOfContacts)
     \param q vector (n)
-    \param mu, vector of friction coefficients (size: numberOfContacts)
-    \param isComplete, equal to 0 if some information is missing or wrong for the problem (M or q = NULL, inconsistent sizes), else equal to 1.
+    \param mu vector of friction coefficients (size: numberOfContacts)
+    \param isComplete equal to 0 if some information is missing or wrong for the problem (M or q = NULL, inconsistent sizes), else equal to 1.
 */
 typedef struct
 {

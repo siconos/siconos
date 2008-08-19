@@ -474,6 +474,18 @@ extern "C" {
   /*    int *indic , int *indicop , double *submatlcp , double *submatlcpop , */
   /*     int *ipiv , int *sizesublcp , int *sizesublcpop , double *subq , double *bufz , double *newz); */
 
+  /** Interface to solvers for Linear Complementarity Problems, dedicated to dense matrix storage
+      \param[in] problem the LinearComplementarity_Problem structure which handles the problem (M,q)
+      \param[in,out] z a n-vector of doubles which contains the solution of the problem.
+      \param[in,out] w a n-vector of doubles which contains the solution of the problem.
+      \param[in,out] options structure used to define the solver(s) and their parameters
+      \return info termination value
+      - 0 : successful\n
+      - >0 : otherwise see each solver for more information about the log info
+      \author Nineb Sheherazade, Mathieu Renouf, Franck Perignon
+  */
+  int lcp_driver_DenseMatrix(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options);
+
 #ifdef __cplusplus
 }
 #endif

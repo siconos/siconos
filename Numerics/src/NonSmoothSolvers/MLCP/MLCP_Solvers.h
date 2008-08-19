@@ -194,6 +194,68 @@ extern "C" {
 #include "mlcp_direct_simplex.h"
 #include "mlcp_direct_path.h"
 
+  /** General interface to initialize a solver.\n
+      Must be call for the following solvers:\n
+      - mlcp_enum
+      - mlcp_path
+      - mlcp_simplex
+      - mlcp_direct_enum
+      - mlcp_direct_path
+      - mlcp_direct_simplex
+
+      \param[in] problem the MixedLinearComplementarity_Problem structure which handles the problem (M,q)
+      \param[in] options structure used to define the solver(s) and their parameters
+      \author Olivier Bonnefon
+  */
+  void mlcp_driver_init(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
+  /** General interface to reset a solver.\n
+      Must be call for the following solvers:\n
+      - mlcp_enum
+      - mlcp_path
+      - mlcp_simplex
+      - mlcp_direct_enum
+      - mlcp_direct_path
+      - mlcp_direct_simplex
+
+      \param[in] problem the MixedLinearComplementarity_Problem structure which handles the problem (M,q)
+      \param[in] options structure used to define the solver(s) and their parameters
+      \author Olivier Bonnefon
+  */
+  void mlcp_driver_reset(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
+
+  /** General interface to get the number of integers that must be allocated for the solver.\n
+      Must be use for the following solvers:\n
+      - mlcp_enum
+      - mlcp_path
+      - mlcp_simplex
+      - mlcp_direct_enum
+      - mlcp_direct_path
+      - mlcp_direct_simplex
+
+      \param[in] problem the MixedLinearComplementarity_Problem structure which handles the problem (M,q)
+      \param[in] options structure used to define the solver(s) and their parameters
+      \return the number of integers that must be allocated by the user.
+
+      \author Olivier Bonnefon
+  */
+  int mlcp_driver_get_iwork(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
+  /** General interface to get the number of doubles that must be allocated for the solver.\n
+      Must be use for the following solvers:\n
+      - mlcp_enum
+      - mlcp_path
+      - mlcp_simplex
+      - mlcp_direct_enum
+      - mlcp_direct_path
+      - mlcp_direct_simplex
+
+      \param[in] problem the MixedLinearComplementarity_Problem structure which handles the problem (M,q)
+      \param[in] options structure used to define the solver(s) and their parameters
+      \return the number of doubles that must be allocated by the user.
+
+      \author Olivier Bonnefon
+  */
+  int mlcp_driver_get_dwork(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
+
   /**  mlcp_pgs (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver for MLCP.
    * \param[in] problem structure that represents the MLCP (n,m,M, q...)
    * \param[in-out] z a m+n-vector of doubles which contains the initial solution and returns the solution of the problem.

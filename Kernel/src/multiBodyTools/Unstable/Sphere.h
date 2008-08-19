@@ -66,17 +66,27 @@ public:
    */
   ~Sphere();
 
-
+  /* returns q(pos) */
   inline double getQ(unsigned int pos)
   {
     return (*q[0])(pos);
   };
+
+  /* returns velocity(pos) */
   inline double getVelocity(unsigned int pos)
   {
     return (*q[1])(pos);
   };
 
+  /* returns the radius of the sphere */
+  inline double getRadius() const
+  {
+    return Radius;
+  };
+
+  /* draw the sphere: not yet implemented - See BeadsColumn example for a proper way of drawing spheres. */
   void draw();
+
 
 };
 

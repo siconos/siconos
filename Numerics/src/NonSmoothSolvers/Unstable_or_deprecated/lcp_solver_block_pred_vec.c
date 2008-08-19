@@ -110,7 +110,7 @@
 
 int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat, SparseBlockStructuredMatrixPred *blmatpred, int nbmethod,
                               int maxiterglob, double tolglob,
-                              double *q, method **ptvec , double *z , double *w , int *it_end , int *itt_end , double *res)
+                              double *q, method_lcp **ptvec , double *z , double *w , int *it_end , int *itt_end , double *res)
 {
 
   static int firsttime = 1;
@@ -131,7 +131,7 @@ int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat, SparseBlockStr
   /*  double *ww;*/
 
   int iterrow0;
-  method *pt;
+  method_lcp *pt;
   int numsolver;
   int *soltype;
   int *indic;

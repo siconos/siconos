@@ -222,6 +222,11 @@ extern "C" {
   /** */
   void projc(double*, int*, int*, double*, double*, double*, int*);
 
+  /** */
+  void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, double *w, int *info, Solver_Options* options) ;
+
+
+
 #ifdef __cplusplus
 }
 #endif
