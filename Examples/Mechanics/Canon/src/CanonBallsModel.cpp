@@ -34,7 +34,7 @@
 
    The visualization is done thanks to drawstuff tools. For more details see the README file.
 
-   16/05/2007- Authors: Houari Khenous, Roger Pissard, Franck Perignon
+   16/05/2007- \authors: Houari Khenous, Roger Pissard, Franck Perignon
 
    Last modification 29/05/2008, F. Perignon
 
@@ -135,7 +135,7 @@ void CanonBallsModel::initialize()
   unsigned int N = int((T - t0) / h);
   unsigned int outputSize = 1 + 3 * numberOfSpheres;
   // Output matrix
-  dataPlot = new SimpleMatrix(N + 1, outputSize);
+  dataPlot = new SimpleMatrix(N + 2, outputSize);
 
   (*dataPlot)(0, 0) = t0; // time
   unsigned int i = 0;

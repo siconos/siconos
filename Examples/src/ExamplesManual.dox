@@ -1,163 +1,145 @@
 /** \mainpage Siconos Examples Manual
 \anchor siconosExamplesManual
+
+\htmlonly
+<div class=horizontalline>  </div>
+\endhtmlonly
+
+-# \ref EMIntro \n
+-# \ref EMBasicsExamples \n
+-# \ref EMDetailedExamples \n
+-# \ref EMMoreExamples \n
+-# \ref EMHowToAdd 
+
+\htmlonly
+<div class=horizontalline>  </div>
+\endhtmlonly
+
 \section EMIntro Foreword
 
-This documents is a collection of description of all the available samples in Siconos platform. \n
-For each documented example, it provides a detailed description of the physical problem and gives some comments on the corresponding
-implementation. \n
+This document is a collection of the descriptions of some examples avalaible in the Siconos platform. \n
 
-Categories of examples are:
-- Electronics
-- Mechanics
+Some simple examples are presented in \ref EMBasicsExamples. They are usefull to get a short view of Siconos functionnalities and for understanding, cut and paste to write your own example.
 
-Each sample is also identified thanks to a list of keywords, given at the beginning of the example description. 
+The list of all examples is available here: \ref EMAllEx.
 
-Then, for each example, you get:
-- a page with a complete description of the problem, the way it is implemented and so on: see "Related pages" tab on top of page for a complete lists of all available samples. 
-- a link to the source code and a short reference file documentation, see the Files/file list tab on top of page.
+\section EMBasicsExamples Basic Examples
+
+<table border="2" width="80%" bgcolor="#CCCCFF">
+<tr valign="top">
+<td>
+\subpage EMBouncingBall
+\image html Mechanics/BouncingBall/BouncingBall.png "Bouncing ball"
+
+</td>
+<td align="right">
+\subpage EMCircuitRLC
+\image html Electronics/CircuitRLCD/SchemaCircuitRLCD.png "Electrical Oscillator"
+</td>
+</tr>
+</table>
+
+\section EMDetailedExamples Other detailed examples
+
+<table border="2" width="80%" bgcolor="#CCCCFF" cellpadding="20" cellspacing="29">
+<tr valign="top">
+<td>
+\subpage EMBouncingBall
+\image html Mechanics/BouncingBall/BouncingBall.png "Bouncing ball"
+
+</td>
+<td align="right">
+\subpage EMCircuitRLC
+\image html Electronics/CircuitRLCD/SchemaCircuitRLCD.png "Electrical Oscillator"
+</td>
+</tr>
+</table>
+
+\section EMMoreExamples More examples
+
+The examples are organised as follows:
+- \ref EMElectronics
+- \ref EMMechanics
+- \ref EMRobotics
+- \ref EMControl
+
+\subsection EMElectronics Electronics
+
+
+<table border="2" width="80%" bgcolor="#CCCCFF">
+<tr valign="top">
+<td>
+\image html Electronics/DiodeBridge/SchemaDiodeBridge.png "4 diodes bridge full-wave rectifier"
+</td>
+<td align="right">
+\image html Electronics/PowerConverter/PRC_fig2.png "Power Converter"
+</td>
+</tr>
+
+</table>
+
+\subsection EMControl Control
+
+<table border="2" width="80%" bgcolor="#CCCCFF">
+<tr valign="top">
+<td>
+\subpage EMTwo-linkManipulator
+\image html Control/Two-linkManipulator/two-linkManipulatorResults2.png 
+</td>
+<td align="right">
+Observer LCS </td>
+</tr>
+</table>
+
+\subsection EMMechanics Mechanics
+
+<table border="2" width="80%" bgcolor="#CCCCFF">
+<tr valign="top">
+<td>
+\subpage EMCamFollower
+</td>
+<td align="right">
+\subpage EMDryFriction
+</td>
+</tr>
+<tr valign="top">
+<td>
+\image html Mechanics/Canon/Canon2.png "Canon Balls stack"
+</td>
+<td align="right">
+\image html Mechanics/Billiard/Billiard.png "Billiard"
+</td>
+</tr>
+<tr valign="top">
+<td>
+Woodpecker toy
+</td>
+<td align="right">
+Beads column
+</td>
+</tr>
+</table>
+
+\subsection EMRobotics Robotics
+
 
 \section EMAbout About this documentation
-On top of this page, you get links to the Siconos Home Page and to some other documents. \n
-On the left, the summary with:
-- a list of all commented examples
-- a list of all the namespaces (if documented) used in Siconos Examples.
-- a list of all the documented files in Siconos Examples. It provides a short description of each sample and some links to the source code and to the detailed documentation page.
-- Directories: files hierarchy in Siconos Examples
 
-\section EMHowTo How to Write a new sample
+The examples are the results of several contributions, and depending on each author(s) the documentation may be  more or less detailed. 
 
-Each time a new example is developed and distributed with the Siconos platform, do:
+But usually, for each documented example you get: 
+- a page where a detailed description of the physical problem and some comments on the corresponding implementation are provided. In that case, each example is identified thanks to a list of keywords, given at the beginning of the example description.  \n
+- some links to the source code and a short reference file.
 
--# Create a new directory for your sample
--# In this directory write either a .cpp, a .py or a .sci input file, depending on the process type you choose (C++, Python or Scilab). For details on how to write an input file, see \ref gettingStarted "Getting Started with Siconos". 
--# Add the optional files ( plugin, xml ...)
--# Write a result.gp file, to automate plots of some results of the simulation with gnuplot (see example in Mechanics/BouncingBall/ location). 
--# Write a documentation file (.dox, see below)
+See also:
 
-\subsection EMWriteDoc Writing your own documentation file
+\subpage EMHowToAdd
 
-The Manual is generated thanks to Doxygen. This results in html pages and/or latex files to build a pdf version of the documentation. \n
+All the documentation is generated using doxygen utilities. Then any new example added into the release must be
+documented according to some specific rules. This section provides all details on how to add and write your own example.
 
-First of all, read <a href="http://siconos.gforge.inria.fr/homePageAboutDoc.html">About this Documentation</a> page to learn how to use Doxygen with Siconos. 
+\subpage EMGenDocExample
 
-Then the process is:
-
--# in the directory where your sample input files are located, create a myExample.dox file. It must looks like:
-\verbatim
-/** \page labelOfYourExample TitleOfYourExample
-
-\author author's name
-
-\b Keywords: a list of keywords. At least the dynamical systems, non-smooth law and 
-relations types, the simulation and the OneStepNSProblem types.
-
-\b Location: sample directory.
-
-\b Code: the cpp file(s) related to this sample.
-
-\date the date of creation ...
-
-\section labelSection1 section1Title
-A first section where you give a detailed description of the considered problem.
-
-\section labelSection2 section2Title
-A second section where you describe the implementation of your problem in Siconos
-
-\section labelSection3 section3Title
-The results of the simulation.
-*/
-\endverbatim
-See for example the dox file in Examples/Mechanics/CamFollower/ to have an overview of the main commands and \ref EMCamFollower to see the resulting page. \n
-For details on all the doxygen commands see http://www.stack.nl/~dimitri/doxygen/commands.html . 
--# Save the figures you need in Examples/figures, possibly with some subdirectories. \n
-For example, to include a figure myFigure, saved in Examples/figures/myExample: 
-\verbatim
-\image html myExample/myFigure.png "caption" width=5cm
-\image latex myExample/myFigure.eps "caption" widht=5cm
-\endverbatim
-which means that each figure must be saved in png and eps format. The two commands are required: one to include the picture in html pages and another for latex/pdf. \n
-For the figure directory, please keep the same files tree as in Examples (i.e. if your sample is in Examples/Mechanics/MyExample, save your figures in Examples/figures/Mechanics/MyExample).
--# Document .cpp input file with Doxygen. At least the GNU-license header and a brief description of the sample:
-\verbatim
-/* Siconos-Examples version 3.0.0, Copyright INRIA 2005-2008.
- * Siconos is a program dedicated to modeling, simulation and control
- * of non smooth dynamical systems.	
- * Siconos is a free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- * Siconos is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Siconos; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- *
- * Contact: Vincent ACARY vincent.acary@inrialpes.fr 
-*/
-/*! \file myExample.cpp 
-\brief \ref labelOfYourExample - Brief comments - Author(s).
-Some more comments if required.
-*/
-\endverbatim
-For example, the header in CamFollower.cpp is: 
-\verbatim
-/*!\file CamFollowerNoXML.cpp 
-\brief \ref EMCamFollower - C++ input file version - M. di Bernardo, G. Osorio, S. Santini.
-*/
-\endverbatim
-EMCamFollower being the label on top of CamFollower.dox file. 
-Then, in tab files/file list on top of page you will get:
-\image html filesList.png
-\image latex filesList.eps "" width=4cm
-From left to right:
-	- the name of the file, a link to the file.cpp file reference which provide the detailed (optional) description and a depency graph.
-	- [code] a link to the full source code 
-	- a link to the documentation (from .dox) named "Simulation of a Cam Follower System"
-	- comments and authors names.
--# Add an entry in the Contents section of ExampleManual.dox, relative to you sample. 
--# Generate the files as explained in the next section.
-
-\subsection EMGenDoc Generation of Examples Manual
-
-\b Warning: you need doxygen 1.5.1, doxywizard and maybe graphviz utilities to process with doxygen documentation.
-For details on doxygen and related tools download and install, see <a href="http://www.stack.nl/~dimitri/doxygen/install.html#install_bin_unix">Doxygen Installation Page</a>.\n
-
-First of all, if it does not exist, create the directory "Examples/../GeneratedDocs". 
-
-Then, to generate the documentation, from Examples directory, launch doxywizard, and follow the steps:
--# load config/SiconosExamples.cfg 
--# "start" generation. 
-
-Then you can open Examples/../GeneratedDocs/Examples/index.html with any web browser.
-
-To generate latex, from doxywizard:
--# load config/SiconosExamples.cfg, choose Expert and in "LaTex" tab, tick GENERATE_LATEX.
--# save in config/SiconosExamples.cfg
--# start
-
-A latex directory is then created in Examples/../GeneratedDocs/Examples. From this location, type "make" to obtain refman.pdf, the pdf version of the Manual.
-
-If you do not want to use doxywizard, just run from config directory:
-\verbatim
-doxygen SiconosExamples.cfg
-\endverbatim
-
-\section EMtreeview Examples sources organisation
-
-\image html samplesTreeview.png
-\image latex samplesTreeview.eps "" width=5cm
-
-\section EMcontents Contents
-
-\subpage EMBouncingBall
-
-\subpage EMCamFollower
-
-\subpage EMDryFriction
-
-\subpage EMTwo-linkManipulator
+Details on how to generate this documentation from the sources.
 
 */
