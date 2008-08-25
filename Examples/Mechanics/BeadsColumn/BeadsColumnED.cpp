@@ -18,7 +18,7 @@
 */
 
 /*!\file BeadsColumnED.cpp
-\brief \ref EMBeadsColumnED - C++ input file, Event-Driven version - F. Perignon.
+\brief \ref EMBeadsColumn - C++ input file, Event-Driven version - F. Perignon.
 
 A column of balls
 Direct description of the model without XML input.

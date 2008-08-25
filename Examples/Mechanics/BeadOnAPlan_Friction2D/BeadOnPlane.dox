@@ -1,0 +1,16 @@
+/** \page EMBeadOnPlane Friction of a bead on a plane
+\authors Franck Perignon
+
+\b Keywords: LagrangianLinearTIDS, LagrangianLinearTIR, NewtonImpactFrictionNSL, TimeStepping, Moreau, FrictionContact, XML
+
+\b Location: Mechanics/BeadOnAPlan_Friction2D
+
+\b Code: BeadPlan.cpp, BeadPlan.xml
+
+\date 2006.
+
+\section EMBeadOnPlaneDescr Description
+
+A simple example using 2D friction.
+
+*/

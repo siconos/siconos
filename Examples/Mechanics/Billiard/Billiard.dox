@@ -1,0 +1,18 @@
+/** \page EMBilliard Billiard
+\authors Houari Khenous, Franck Perignon
+
+\b Keywords: LagrangianLinearTIDS, Sphere, LagrangianScleronomousR, NewtonImpactFrictionNSL, TimeStepping, Moreau, FrictionContact, QGLViewer
+
+\b Location: Mechanics/Billiard
+
+\b Code: BilliardMain.cpp, BilliardModel.cpp, BilliardModel.h
+
+\date 2008.
+
+\section EMBilliardDescr Description
+
+Billiard table. 
+
+Visualisation with QGLViewer.
+
+*/

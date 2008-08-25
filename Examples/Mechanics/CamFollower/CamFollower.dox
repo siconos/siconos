@@ -39,8 +39,8 @@ acceleration \f$ \frac{d^2c}{dt^2}(t)\f$ . It is possible to visualize
 the follower displacement as a function of the cam position. It is
 also important to notice that different types of cams and
 followers profiles are used in practical applications.
-\image html CamFollower/cam.png "Figure 1" width=8cm
-\image latex CamFollower/cam.eps "Figure 1" width=8cm
+\image html Mechanics/CamFollower/cam.png "Figure 1" width=8cm
+\image latex Mechanics/CamFollower/cam.eps "Figure 1" width=8cm
 
 \section EMCamFollowerLagNSDS The cam-follower as a Lagrangian NSDS.
  It is possible to completely describe the cam-follower system as a driven impact oscillator into the framework of \e Lagrangian \e NSDS using a
@@ -127,13 +127,13 @@ size (\f$ h_{min}=1e^{-12}\f$ ). Fig. 2 and 3 show the
 time simulations for different values of the cam rotational speed
 and Fig. 4 shows the chaotic attractor
 at \f$ rpm=660\f$  for impact and stroboscopic Poincaré sections.
-\image html CamFollower/time_comparison.png "Figure 2: Time series using SICONOS platform. Time-stepping scheme (continuous line). Event-driven scheme (dashed line) \e (a) rpm=358. \e (b) rpm=660. \e (c) rpm=700."
-\image latex CamFollower/time_comparison.eps "Figure 2: Time series using SICONOS platform. Time-stepping scheme (continuous line). Event-driven scheme (dashed line) \e (a) rpm=358. \e (b) rpm=660. \e (c) rpm=700." width=10cm
+\image html Mechanics/CamFollower/time_comparison.png "Figure 2: Time series using SICONOS platform. Time-stepping scheme (continuous line). Event-driven scheme (dashed line) \e (a) rpm=358. \e (b) rpm=660. \e (c) rpm=700."
+\image latex Mechanics/CamFollower/time_comparison.eps "Figure 2: Time series using SICONOS platform. Time-stepping scheme (continuous line). Event-driven scheme (dashed line) \e (a) rpm=358. \e (b) rpm=660. \e (c) rpm=700." width=10cm
 
-\image html CamFollower/state_comparison.png "Figure 3: State space comparison using SICONOS platform. \e (a) rpm=358. Event Driven \e (b) rpm=358. Time Stepping (h=1e-4) \e (c) rpm=700. Event Driven \e (d) rpm=700. Time Stepping (h=1e-4)"
-\image latex CamFollower/state_comparison.eps "Figure 3: State space comparison using SICONOS platform. \e (a) rpm=358. Event Driven \e (b) rpm=358. Time Stepping (h=1e-4) \e (c) rpm=700. Event Driven \e (d) rpm=700. Time Stepping (h=1e-4)" width=10cm
+\image html Mechanics/CamFollower/state_comparison.png "Figure 3: State space comparison using SICONOS platform. \e (a) rpm=358. Event Driven \e (b) rpm=358. Time Stepping (h=1e-4) \e (c) rpm=700. Event Driven \e (d) rpm=700. Time Stepping (h=1e-4)"
+\image latex Mechanics/CamFollower/state_comparison.eps "Figure 3: State space comparison using SICONOS platform. \e (a) rpm=358. Event Driven \e (b) rpm=358. Time Stepping (h=1e-4) \e (c) rpm=700. Event Driven \e (d) rpm=700. Time Stepping (h=1e-4)" width=10cm
 
-\image html CamFollower/impact_map.png "Figure 4: Attractors comparison using SICONOS platform at rpm=660. \e (a)  Impact map. (Event Driven) \e (b) Impact Map. Time Stepping (h=1e-4)\e (a) Stroboscopic map. (Event Driven) \e (b) Stroboscopic Map. Time Stepping (h=1e-4)" 
-\image latex CamFollower/impact_map.eps "Figure 4: Attractors comparison using SICONOS platform at rpm=660. \e (a)  Impact map. (Event Driven) \e (b) Impact Map. Time Stepping (h=1e-4)\e (a) Stroboscopic map. (Event Driven) \e (b) Stroboscopic Map. Time Stepping (h=1e-4)" width=10cm
+\image html Mechanics/CamFollower/impact_map.png "Figure 4: Attractors comparison using SICONOS platform at rpm=660. \e (a)  Impact map. (Event Driven) \e (b) Impact Map. Time Stepping (h=1e-4)\e (a) Stroboscopic map. (Event Driven) \e (b) Stroboscopic Map. Time Stepping (h=1e-4)" 
+\image latex Mechanics/CamFollower/impact_map.eps "Figure 4: Attractors comparison using SICONOS platform at rpm=660. \e (a)  Impact map. (Event Driven) \e (b) Impact Map. Time Stepping (h=1e-4)\e (a) Stroboscopic map. (Event Driven) \e (b) Stroboscopic Map. Time Stepping (h=1e-4)" width=10cm
 
 */

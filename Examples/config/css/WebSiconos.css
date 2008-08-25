@@ -630,3 +630,30 @@ div.title_links { text-align: left }
 	text-decoration: none;
 }
 
+
+table.siconosExamples {
+        width: 100px;		      
+	border-width: 15px;
+	border-spacing: 50px;
+	border-style: none;
+	border-color: #2F6A44;
+	border-collapse: separate;
+	background-color: #F0FFF0;
+}
+table.siconosExamples th {
+	border-width: thick;
+	padding: 5px;
+	border-style: inset;
+	border-color: #2F6A44;
+	background-color: rgb(255, 245, 238);
+	-moz-border-radius: 12px;
+}
+table.siconosExamples td {
+        text-align: center;		      
+	border-width: 8px;
+	padding: 17px;
+	border-style: solid;
+	border-color: #2F6A44;
+	background-color: rgb(255, 245, 238);
+	-moz-border-radius:8px;
+}

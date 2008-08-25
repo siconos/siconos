@@ -11,7 +11,7 @@
 
 \section EMBouncingBallPhysicalPb Description of the physical problem : A bouncing ball on a plane
 
-Let us consider  a ball of  mass \f$ m\f$  and radius \f$ R\f$ , described by \f$ 3\f$  generalized coordinates \f$ q=(z,x,\theta)\f$ . The ball is subjected to the gravity \f$ g\f$  and a vertical external force \f$ f(t)\f$ . The system is also constituted by a rigid plane, defined by its position \f$ h\f$  with respect to the axis \f$ Oz\f$ . We assume that the position of the plane is fixed. The physical problem  is depicted on the Figure~\ref{Fig:2D-BouncingBall}. 
+Let us consider  a ball of  mass \f$ m\f$  and radius \f$ R\f$ , described by \f$ 3\f$  generalized coordinates \f$ q=(z,x,\theta)\f$ . The ball is subjected to the gravity \f$ g\f$  and a vertical external force \f$ f(t)\f$ . The system is also constituted by a rigid plane, defined by its position \f$ h\f$  with respect to the axis \f$ Oz\f$ . We assume that the position of the plane is fixed. The physical problem  is depicted on the Figure below:
 
 \image html Mechanics/BouncingBall/bouncingBall.png 
 \image latex Mechanics/BouncingBall/bouncingBall.eps "Two-dimensional Bouncing Ball on a rigid plane" 
@@ -111,7 +111,7 @@ We can also consider the linear case such as
       \dot y &=& H^{T}\dot q, \\
       r &=& H \lambda,
 \f}
-which can be stated by assumptions or derived by a linearization procedure of \eqref{eq:7}.
+which can be stated by assumptions or derived by a linearization procedure.
 
 In order to give more meaning to this choice, let us recall the definition of a constraint (or a joint) in a  mechanical system :
 \f{eqnarray}
@@ -194,7 +194,7 @@ The unilateral constraint requires that :
 \f{eqnarray}
   z-R -h \geq 0
 \f}
-so we identify the terms of the equation~(\ref{eq:8}) 
+so we identify the terms of the equation giving the constraints:
 \f{eqnarray}
   y&=&H^{T}q+b\\
   H^{T}&=& \left[
@@ -227,7 +227,7 @@ In the case of the bouncing ball, there is just one unilateral constraint such t
 
 \subsection EMBouncingBallTD Time discretization of the dynamical system
 
-We provide in this section a time discretization method of the Lagrange dynmical system (\ref{eq:1}), consistent with the non smooth character of the solution. Let us consider here only the linear time invariant case. The equation  may be reformulated equivalently in terms of an integral over a time step \f$ [t_i,t_{i+1}]\f$  of length \f$ h\f$  such that :
+We provide in this section a time discretization method of the Lagrange dynamical system consistent with the non smooth character of the solution. Let us consider here only the linear time invariant case. The equation  may be reformulated equivalently in terms of an integral over a time step \f$ [t_i,t_{i+1}]\f$  of length \f$ h\f$  such that :
 \f{eqnarray}
   \int_{[t_i,t_{i+1}]} M \ddot q + C \dot q + K q \,dt =  \int_{[t_i,t_{i+1}]} F_{ext}(t)\,dt +  \int_{[t_i,t_{i+1}]} r \,d\nu
 \f}
@@ -291,7 +291,7 @@ A natural way of discretizing the unilateral constraint  leads to the following 
   0 \leq y_{i+1} \perp  \lambda_{i+1}  \geq 0
 \f}
 
-In the Moreau's time--stepping, we use a reformulation of the unilateral constraints in terms of velocity \eqref{eq:26} :
+In the Moreau's time--stepping, we use a reformulation of the unilateral constraints in terms of velocity:
 \f[
    \ If \ y(t) =0, \ then \ 0 \leq \dot y \perp  \lambda  \geq 0
 \f]
@@ -330,7 +330,7 @@ This set of equations can be reduced to a ``condensed'' system in terms of \f$ \
 
 \subsection EMBouncingBallNumStrat Numerical Strategy
 
-The numerical stratgey is given by the pseudo-algorithm \ref{Algo:MTS}.
+The numerical stratgey is given by the pseudo-algorithm below.
 
     \b Require Classical form of the synamical equation : \f$  M, K, C, F_{ext}, q_0, \dot q_0\f$  \n
     \b Require  Classical form of the relations : \f$  H, b\f$  \n

@@ -19,7 +19,7 @@
 
 /*!\file
 
-\brief \ref EMBeadsColumnTS - C++ input file, Time-Stepping version - F. Perignon.
+\brief \ref EMBeadsColumn - C++ input file, Time-Stepping version - F. Perignon.
 
 A column of balls
 Direct description of the model without XML input.

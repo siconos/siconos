@@ -7,7 +7,6 @@
 
 -# \ref EMIntro \n
 -# \ref EMBasicsExamples \n
--# \ref EMDetailedExamples \n
 -# \ref EMMoreExamples \n
 -# \ref EMHowToAdd 
 
@@ -18,39 +17,30 @@
 \section EMIntro Foreword
 
 This document is a collection of the descriptions of some examples avalaible in the Siconos platform. \n
+The examples are the results of several contributions, and depending on each author(s) the documentation may be more or less detailed. 
 
-Some simple examples are presented in \ref EMBasicsExamples. They are usefull to get a short view of Siconos functionnalities and for understanding, cut and paste to write your own example.
+To each example is associated a page with the author(s), some keywords and the list of the main source files (with links).
+Sometimes, a detailed description of the physical problem and some comments on the corresponding implementation are provided. 
 
-The list of all examples is available here: \ref EMAllEx.
+In the page below, some simple examples are first presented in \ref EMBasicsExamples. They are usefull to get a short view of Siconos functionnalities and for understanding, cut and paste to write your own example. \n
+Then you get a list of all the other examples in \ref EMMoreExamples. \n
+
+The last part, \ref EMAbout is dedicated to people who whish to add their own example in the Siconos-release. 
+This section and the provided links give details on how you must write the documentation and how this pages are generated.
 
 \section EMBasicsExamples Basic Examples
 
-<table border="2" width="80%" bgcolor="#CCCCFF">
-<tr valign="top">
-<td>
+<table class="siconosExamples" >
+<tr >
+<td >
 \subpage EMBouncingBall
-\image html Mechanics/BouncingBall/BouncingBall.png "Bouncing ball"
 
+\image html Mechanics/BouncingBall/BouncingBall.png 
 </td>
-<td align="right">
-\subpage EMCircuitRLC
-\image html Electronics/CircuitRLCD/SchemaCircuitRLCD.png "Electrical Oscillator"
-</td>
-</tr>
-</table>
-
-\section EMDetailedExamples Other detailed examples
-
-<table border="2" width="80%" bgcolor="#CCCCFF" cellpadding="20" cellspacing="29">
-<tr valign="top">
 <td>
-\subpage EMBouncingBall
-\image html Mechanics/BouncingBall/BouncingBall.png "Bouncing ball"
+\subpage EMCircuitRLCD
 
-</td>
-<td align="right">
-\subpage EMCircuitRLC
-\image html Electronics/CircuitRLCD/SchemaCircuitRLCD.png "Electrical Oscillator"
+\image html Electronics/CircuitRLCD/SchemaCircuitRLCD.png
 </td>
 </tr>
 </table>
@@ -65,14 +55,17 @@ The examples are organised as follows:
 
 \subsection EMElectronics Electronics
 
-
-<table border="2" width="80%" bgcolor="#CCCCFF">
+<table class="siconosExamples" >
 <tr valign="top">
-<td>
-\image html Electronics/DiodeBridge/SchemaDiodeBridge.png "4 diodes bridge full-wave rectifier"
+<td align="center">
+\subpage EMDiodeBridge
+
+\image html Electronics/DiodeBridge/SchemaDiodeBridge.png
 </td>
-<td align="right">
-\image html Electronics/PowerConverter/PRC_fig2.png "Power Converter"
+<td align="center">
+\subpage EMPowerConverter
+
+\image html Electronics/PowerConverter/PRC_fig2.png
 </td>
 </tr>
 
@@ -80,58 +73,83 @@ The examples are organised as follows:
 
 \subsection EMControl Control
 
-<table border="2" width="80%" bgcolor="#CCCCFF">
+<table class="siconosExamples" >
 <tr valign="top">
-<td>
+<td align="center">
 \subpage EMTwo-linkManipulator
+
 \image html Control/Two-linkManipulator/two-linkManipulatorResults2.png 
 </td>
-<td align="right">
-Observer LCS </td>
+<td align="center">
+\subpage EMObserverLCS
+
+\image html Control/ObserverLCS/ObserverLCS.png 
+</td>
 </tr>
 </table>
 
 \subsection EMMechanics Mechanics
 
-<table border="2" width="80%" bgcolor="#CCCCFF">
+<table class="siconosExamples" >
 <tr valign="top">
-<td>
+<td align="center">
 \subpage EMCamFollower
+
 </td>
-<td align="right">
+<td align="center">
 \subpage EMDryFriction
 </td>
 </tr>
 <tr valign="top">
-<td>
-\image html Mechanics/Canon/Canon2.png "Canon Balls stack"
+<td align="center">
+\subpage EMCanon
+
+\image html Mechanics/Canon/Canon2.png 
 </td>
-<td align="right">
-\image html Mechanics/Billiard/Billiard.png "Billiard"
+<td align="center">
+\subpage EMBilliard
+
+\image html Mechanics/Billiard/Billiard.png
 </td>
 </tr>
 <tr valign="top">
-<td>
-Woodpecker toy
+<td align="center">
+\subpage EMBallBowl
+
 </td>
-<td align="right">
-Beads column
+<td align="center">
+\subpage EMBeadOnPlane
+</td>
+</tr>
+<tr valign="top">
+<td align="center">
+\subpage EMWoodPecker
+
+\image html Mechanics/Woodpecker/woodpeckerphoto.png
+</td>
+<td align="center">
+\subpage EMBeadsColumn
+
+\image html Mechanics/MultiBeads/BeadsColumn.png
 </td>
 </tr>
 </table>
 
 \subsection EMRobotics Robotics
 
+<table class="siconosExamples" >
+<tr valign="top">
+<td align="center">
+\subpage EMHRP2
+
+\image html Robotics/HRP2/HRP2.png
+</td>
+</tr>
+</table>
 
 \section EMAbout About this documentation
 
-The examples are the results of several contributions, and depending on each author(s) the documentation may be  more or less detailed. 
-
-But usually, for each documented example you get: 
-- a page where a detailed description of the physical problem and some comments on the corresponding implementation are provided. In that case, each example is identified thanks to a list of keywords, given at the beginning of the example description.  \n
-- some links to the source code and a short reference file.
-
-See also:
+See:
 
 \subpage EMHowToAdd
 

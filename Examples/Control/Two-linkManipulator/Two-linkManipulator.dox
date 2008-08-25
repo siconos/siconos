@@ -3,14 +3,14 @@
 
 \b Keywords: LagrangianLinearTIDS, LagrangianLinearR, NewtonImpactNSL, TimeStepping, Moreau, LCP
 
-\b Location: Mechanics/Two-linkManipulator.
+\b Location: Control/Two-linkManipulator, Control/Two-linkMultiConstraints/
 
-\b Code: Two-linkManipulator.cpp
+\b Code: Two-linkManipulator.cpp, Two-linkMulticonstrManip.cpp
 
 \date May 2007.
 
 \section EMTwo-linkManipulatorPbFormulation Two-link planar manipulator
-\subsectionEMTwo-linkManipulatorFramework General framework
+\subsection EMTwo-linkManipulatorFramework General framework
 
 The model belongs to the class of complementary Lagrangian systems subject to frictionless unilateral constraints whose dynamics may be expressed as: 
 \f{equation}\label{general dynamics} 
@@ -40,8 +40,8 @@ Let us introduce the following notations:
 - \f$ l_{i}\f$ - the length of link \f$ i\f$,
 - \f$ g\f$ - the gravitational acceleration.
 
-\image html Mechanics/Two-linkManipulator/planar_manipulator.png 
-\image latex Mechanics/Two-linkManipulator/planar_manipulator.eps 
+\image html Control/Two-linkManipulator/planar_manipulator.png 
+\image latex Control/Two-linkManipulator/planar_manipulator.eps 
 
 In order to simplify the presentation we assume that the center of mass of each link is right at the middle of the link. We will also assume that the gravitational force acts in the negative direction of the \f$Y\f$ axis.
 
@@ -90,8 +90,8 @@ We call a singular configurations for the system above as those for which the en
 
 Without entering into details, from the mathematical point of view, singular configurations can be characterized using the Jacobian matrix. In the case of the two-link manipulator the singular configurations are given by: \f$\det J_{q}(\theta)=0\Leftrightarrow l_{1}l_{2}\sin\theta_{2}=0\Leftrightarrow \theta_{2}=0^{\circ}\f$ or \f$\theta_{2}=180^{\circ}\f$ (see figure below\}, the configurations A and B do not allow a velocity in the direction of the origin (or the opposite) realized by finite joint velocities).
 
-\image html Mechanics/Two-linkManipulator/Singular.png 
-\image latex Mechanics/Two-linkManipulator/Singular.eps 
+\image html Control/Two-linkManipulator/Singular.png 
+\image latex Control/Two-linkManipulator/Singular.eps 
 
 We consider only one unilateral constraint for the system associated to the end point of the manipulator's second link. Therefore, we do not take into account the case when some other parts of the manipulator touch the ground. Let us consider that the system must accomplish a cyclic task consisting of tracking a circle that violates the constraint. In order to track the trajectory the manipulator must follow the ground line from the point where the circle leave the admissible domain to the point where the circle re-enter in it. Thus, there exists a free-motion phase and a constraint motion phase during which a contact force is imposed.
 
@@ -176,10 +176,10 @@ The Newton impact law at impact is given by :
 
 We present here just some basic results concerning the tracking of the trajectory. More precisely, we present the variation of \f$y\f$ in time and the path of the end point of the manipulator's second link in \f$(x,y)\f$-plane. The variation of other quantities may be also obtained by the user.
 
-\image html Mechanics/Two-linkManipulator/two-linkManipulatorResults1.png 
-\image latex Mechanics/Two-linkManipulator/two-linkManipulatorResults1.eps 
+\image html Control/Two-linkManipulator/two-linkManipulatorResults1.png 
+\image latex Control/Two-linkManipulator/two-linkManipulatorResults1.eps 
 
-\image html Mechanics/Two-linkManipulator/two-linkManipulatorResults2.png 
-\image latex Mechanics/Two-linkManipulator/two-linkManipulatorResults2.eps 
+\image html Control/Two-linkManipulator/two-linkManipulatorResults2.png 
+\image latex Control/Two-linkManipulator/two-linkManipulatorResults2.eps 
 
 */
