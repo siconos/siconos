@@ -11,6 +11,7 @@
               <div id="menu">
 		<ul>
 		  <li><a href="#aboutA"> About</a></li>
+		  <li><a href="#shortTour"> Short Tour</a></li>
 		  <li><a href="#downloadHP"> Download</a></li>
 		  <li><a href="https://gforge.inria.fr/projects/siconos/"> Siconos Forge</a></li>
 		  <li><a href="#contacts"> Contacts</a></li>
@@ -26,7 +27,7 @@
             <li><span class="title"><a href="http://www.springer.com/978-3-540-75391-9">New Book on Nonsmooth Dynamical Systems Simulation </a></span><span class="date">01.03.2008</span></li>
 	</ul>
           <ul>
-            <li><span class="title"><a href="https://gforge.inria.fr/frs/?group_id=9">Siconos Software v3.0.0 </a></span><span class="date">23.08.2007</span>Download the last release of the Siconos platform</li>
+            <li><span class="title"><a href="https://gforge.inria.fr/frs/?group_id=9">Siconos Software v3.0.0 </a></span><span class="date">20.08.2008</span>Download the last release of the Siconos platform</li>
           </ul>
         </div>
       </div>
@@ -75,10 +76,19 @@ This software is distributed under the
 \subsection publi Related publications
 You can find here some publications at the origin of this software on <a href="http://siconos.inrialpes.fr/"> Siconos European Project Home Page</a>.\n
 
+\anchor shortTour
+\section siconosShortTour Siconos Short Tour
 
-\htmlonly
-<div class=horizontalline>  </div>
-\endhtmlonly
+To begin with Siconos you can first <a href="#downloadHP"> download</a> the Siconos platform and then read the \ref installGuide "Siconos installation guide". 
+
+Then you can try some \ref EMBasicsExamples "Basic examples" before reading \ref gettingStarted "Getting Started With Siconos" where some tutorials are proposed. 
+
+For a comprehensive introduction to Siconos, we also refer to <a href="http://hal.inria.fr/action/open_file.php?url=http://hal.inria.fr/docs/00/16/36/84/PDF/RT-0340.pdf&amp;docid=163684">INRIA technical report RT 340</a> where you can get an overview of Siconos platform's philosophy.
+
+See also the \ref siconosExamplesManual "Siconos Examples Manual" for an overview of all the available examples. 
+
+The full list of all sort of documentation guides or tools is provided in \ref docList "Siconos Help and Documentation".
+
 \anchor downloadHP
 \section d Downloads
 
@@ -96,17 +106,11 @@ The available version is the last stable one ( version 3.0.0 at the time). \n
 Since Siconos is under constant development, some functionnalities you required may have been achieved in the last (unstable) version. \n
 Thus, do not hesitate to contact us to get it.
 
-\htmlonly
-<div class=horizontalline>  </div>
-\endhtmlonly
 \anchor contact
 \section contacts Contacts
 <a href="mailto:vincent.acary@ nospam inrialpes.fr"> Vincent Acary</a>\n
 <a href="mailto:franck.perignon@ nospam inrialpes.fr"> Franck Pérignon</a>\n
 
-\htmlonly
-<div class=horizontalline>  </div>
-\endhtmlonly
 \anchor relatedProjects
 \section projects Related Projects 
 <ul>
@@ -114,10 +118,6 @@ Thus, do not hesitate to contact us to get it.
 <li><a href="http://www.lmgc.univ-montp2.fr/~dubois/LMGC90/index.html"> LMGC90 </a></li>.This software is an open platform for modelling interaction problems between elements including multi-physics. It allows to model: granular material made of rigid or deformable bodies and with complex interactions (contact, friction, cohesion, wear, etc.), discrete media, masonry, fracture, wear.
 </ul>
 
-
-\htmlonly
-<div class=horizontalline>  </div>
-\endhtmlonly
 \anchor uLinks
 \section links Useful Links
 

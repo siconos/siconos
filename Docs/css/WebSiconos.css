@@ -25,7 +25,23 @@ h1 {
 	margin-right: 25%;
 	margin-bottom: 20px;
 }
-h2 {
+h2{
+  font-size: large ;
+  font-weight: bold;
+   color: #2F6A44;	
+ /* color:#F0FFF0 ;*/
+  border-width: medium;
+  border-style : solid;
+  border-color: #2F6A44
+  /* background-color: #2F6A44; */
+  text-align: left;
+  vertical-align: top;
+  margin-top: 20px;
+  margin-bottom:10px;
+  padding: 10px;	
+  -moz-border-radius:8px;
+}
+/*h2 {
   color: #2F6A44 ;
   font-size: large ;
   font-weight: bold;
@@ -34,7 +50,7 @@ h2 {
   margin-top: 20px;
   margin-bottom:10px;
   padding-bottom: 2px;
-}
+}*/
 h3 {
   color: #2F6A44;
   font-size: medium;
@@ -140,11 +156,14 @@ A.elRef { font-weight: bold }
 
 /** Links **/
 
-a {
+a[href] {
  color: #2F6A44;
  background-color: transparent;
  text-decoration: none;
 }
+
+a[name] { text-decoration: none !important;
+/* Aucun style particulier */ }
 
 a:link { 
   text-decoration : none;

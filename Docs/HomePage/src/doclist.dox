@@ -3,10 +3,10 @@
 
 \e Warning: all on-line documentations correspond to the last published version of Siconos. 
 
-\section gforgelists Mailing lists, Forum ...
+\section gforgelists Mailing lists
  On the Siconos Gforge, differents tools are available to get help, submit bugs and so on:
  - a "Siconos users" \b mailing \b list for any questions or comments on Siconos at <a href="https://gforge.inria.fr/mail/?group_id=9">Siconos Gforge mailing lists</a>.
- - a \b bug \b tracker, to report or check for any installation, use, documentation ... problems: <a href="https://gforge.inria.fr/tracker/?group_id=9"> Siconos Gforge bug-tracker.</a>
+ - a \b bug \b tracker, to report or check for any installation, use or documentation problems: <a href="https://gforge.inria.fr/tracker/?group_id=9"> Siconos Gforge bug-tracker.</a>
 
 \section manuals Available Manuals:
 
