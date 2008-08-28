@@ -133,6 +133,12 @@ The examples are organised as follows:
 \image html Mechanics/MultiBeads/BeadsColumn.png
 </td>
 </tr>
+<tr valign="top">
+<td align="center">
+\subpage EMPendulum
+
+</td>
+</tr>
 </table>
 
 \subsection EMRobotics Robotics
