@@ -22,6 +22,7 @@
 #include "FrictionContact_Problem.h"
 #include <math.h>
 
+#define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
 
 int FrictionContact2D_compute_error(FrictionContact_Problem* problem, double *z , double *w, double tolerance, double * error)
 {
@@ -34,7 +35,7 @@ int FrictionContact2D_compute_error(FrictionContact_Problem* problem, double *z 
 
   double *mu = problem->mu;
 
-  double tmp[3];
+  double tmp[2];
 
   double normT;
 
@@ -42,12 +43,14 @@ int FrictionContact2D_compute_error(FrictionContact_Problem* problem, double *z 
   if (! problem || ! z || ! w)
     numericsError("FrictionContact2D_compute_error", "null input for problem and/or z and/or w");
 
-  /* w = Mz + q computed in frictionContact2DLocalSolve */
+  DCOPY(n, problem->q, 1, w, 1); // w <-q
+  prod(n, n, 1.0, problem->M, z, 1.0, w);
 
   *error = 0.;
 
   /* Num. Methods For Nonsmooth Dynamics, A.13 P 528 */
-  /* k* -) x _|_ y  (- k  <=>  x = projk(x-rho.y) */
+  /* DesaxceFeng98 */
+  /* K* -) x _|_ y  (- K  <=>  x = projK(x-rho.y) for all rho>0 */
 
   for (ic = 0, iN = 0, iT = 1 ; ic < nc ; ++ic , ++iN, ++iN, ++iT, ++iT)
   {
@@ -66,7 +69,7 @@ int FrictionContact2D_compute_error(FrictionContact_Problem* problem, double *z 
     {
       /* solve([sqrt((r1-mu*ra)^2+(r0-ra)^2)=abs(mu*r0-r1)/sqrt(mu*mu+1)],[ra]) */
       tmp[0] = (mu[ic] * normT + tmp[0]) / (mu[ic] * mu[ic] + 1);
-      tmp[1] = mu[ic] * tmp[0];
+      tmp[1] = mu[ic] * tmp[0] * SGN(tmp[1]);
     }
 
     tmp[0] = z[iN] -  tmp[0];
@@ -74,9 +77,8 @@ int FrictionContact2D_compute_error(FrictionContact_Problem* problem, double *z 
     *error += tmp[0] * tmp[0] + tmp[1] * tmp[1];
 
   }
-  *error = sqrt(*error);
 
-  /* Computes error */
+  *error = sqrt(*error);
   *error /= DNRM2(n, problem->q, 1);
 
   if (*error > tolerance)

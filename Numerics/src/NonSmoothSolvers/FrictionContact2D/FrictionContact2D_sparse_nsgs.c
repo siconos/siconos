@@ -28,6 +28,8 @@
 #include "LA.h"
 #include "FrictionContact2D_compute_error.h"
 
+#define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
+
 /* in lcp_GaussSeidel_SBM.c */
 void buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat, LinearComplementarity_Problem* local_problem, double* q, double* z);
 
@@ -79,9 +81,6 @@ int frictionContact2DLocalSolve(double *W, double *q, double mu, double *P, doub
     }
   }
 
-  /* U = WP + q */
-  U[0] = Wnn * P[0] + Wnt * P[1] + q[0];
-  U[1] = Wtn * P[0] + Wtt * P[1] + q[1];
 
 #undef Wnn
 #undef Wnt
@@ -90,8 +89,6 @@ int frictionContact2DLocalSolve(double *W, double *q, double mu, double *P, doub
 
   return(0);
 }
-
-
 
 
 void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
@@ -201,17 +198,16 @@ void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, 
 
     FrictionContact2D_compute_error(problem, z, w, tolerance, &error);
 
-    /*int n = 2* blmat->size;
+    /* int n = 2* blmat->size;
 
     DCOPY(n, problem->q, 1, y, 1);
     prod(n, n, 1.0, problem->M, z, 1.0, y);
     DAXPY(n, -1, w, 1, y, 1);
-    error = DNRM2( n, y, 1)/ DNRM2( n, q, 1); */
+    printf("DELTA = %g\n", DNRM2( n, y, 1)/ DNRM2( n, q, 1)); */
 
     hasNotConverged = error > tolerance  ;
 
     if (verbose > 1) printf(" Numerics - FrictionContact2D error = %g > tolerance = %g.\n", error, tolerance);
-
   }
 
   // printf("%d %g\n", iter, error);
