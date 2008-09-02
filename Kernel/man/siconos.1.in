@@ -22,6 +22,10 @@ siconos \- The Siconos C++ Front-End.
 .B \-h | \-help
 ]
 [
+.B \-L  
+.I DIRECTORY
+]
+[
 .B \-l  
 .I LIBRARY
 ]
@@ -96,9 +100,13 @@ The following command-line options are recognized by
 .B \-help
  Print help.
 .TP
+.BI \-L
+.I DIRECTORY
+ Add a directory to the linker search list.
+.TP
 .BI \-l
 .I LIBRARY
- Link with a library
+ Link with a library.
 .TP
 .BI \-noexec
  Do not run executable after compilation.
@@ -141,5 +149,5 @@ commands as they are executed.
 .SH SEE ALSO
 .I The Siconos Software Documentation
 .TP
-in the directory @CMAKE_INSTALL_PREFIX@/share/doc/siconos-@PACKAGE_VERSION@/html
+http://siconos.gforge.inria.fr/SiconosDocList.html
 

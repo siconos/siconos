@@ -58,6 +58,8 @@ usage() {
     echo " ";
     echo "     -h | -help : to print this help.";
     echo " ";
+    echo "     -L<dir> : add directory <dir> to the list from with the linker search for libraries."
+    echo " ";
     echo "     -l<lib> : link with library <lib>."
     echo " ";
     echo "     -noexec : compile only.";
@@ -96,7 +98,7 @@ cartridge
 
 if `getopt -T >/dev/null 2>&1` ; [ $? = 4 ] ; then
     args=`getopt -n $myname -a \
- -o aghl:D:P:v \
+ -o aghl:L:D:P:v \
  -l clean,help,noexec,src_dir:,opt:,ldopt:,plugin_dir:,plugins_dir: \
  -- "$@"`
     if test $? -ne 0; then
@@ -108,6 +110,15 @@ else
     no_parsing=true
     true
 fi
+
+definitions=
+linker_libraries=
+linker_directories=
+exec_prefix=
+compiler_options=
+plugin_directories=
+plugins_directories=
+sources_directories=
 
 while [ $# -gt 0 ] ; do
     case "$1" in
@@ -121,6 +132,11 @@ while [ $# -gt 0 ] ; do
             case :$1,:$linker_libraries in
                 :*,:) linker_libraries=$1;;
                 :*,:*) linker_libraries="$linker_libraries;$1";;
+            esac;;
+        -L) with_arg $@; shift; 
+            case :$1,:$linker_directories in
+                :*,:) linker_directories=$1;;
+                :*,:*) linker_directories="$linker_directories;$1";;
             esac;;
         -P) with_arg $@; shift; exec_prefix=$1;;
         --opt) with_arg $@; shift;
@@ -212,6 +228,7 @@ if test ! "$make_args" = "clean"; then
         -DSOURCES_DIRECTORIES=$sources_directories \
         -DCOMPILER_OPTIONS=$compiler_options \
         -DLINKER_OPTIONS=$linker_options \
+        -DLINKER_DIRECTORIES=$linker_directories \
         -DLINKER_LIBRARIES=$linker_libraries \
         -DALL_EXTRA_DEFINITIONS=$all_extra_defs \
         $extra_defs; then
