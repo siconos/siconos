@@ -19,7 +19,7 @@
  */
 
 /**
-   Canon Balls example using QGLViewer for drawing.
+   Billiard table example using QGLViewer for drawing.
 
    Use:
    siconos -DWithQGLViewer main.cpp
@@ -31,7 +31,7 @@
 #include "DrawSiconos.h"
 #include <qapplication.h>
 #else
-#include "CanonBallsModel.h"
+#include "BilliardModel.h"
 #include "environment.h"
 #endif
 
@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
   try
   {
 
-    CanonBallsModel* column = new CanonBallsModel(NBFloors);
+    BilliardModel* column = new BilliardModel(NBFloors);
     column->initialize();
     // --- simulation solver ---
     while (!column->isSimulationFinished())

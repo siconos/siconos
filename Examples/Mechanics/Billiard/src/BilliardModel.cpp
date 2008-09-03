@@ -25,10 +25,10 @@
 #include "BilliardModel.h"
 #include "environment.h"
 /**
-   Pyramidal arrangement of Canon Balls simulation - 3D frictionl contact problem in presence of a rigid foundation
+   Billiard Table simulation - 3D frictionl contact problem in presence of a rigid foundation
 
    The Siconos Model is built and initialized thanks to initSiconos() function.
-   All related functions are in src/CanonModel.cpp
+   All related functions are in src/BilliardModel.cpp
 
    The Simulation is saved in global variable GLOB_SIM
 
