@@ -124,7 +124,7 @@ void Lsodar::setTol(integer newItol, doublereal* newRtol, doublereal* newAtol)
   if (atol != NULL) delete atol;
   atol = new doublereal[sizeTol] ;  // atol, absolute tolerance
   *rtol = *newRtol;
-  *atol = *newRtol;
+  *atol = *newAtol;
 }
 
 void Lsodar::updateData()
