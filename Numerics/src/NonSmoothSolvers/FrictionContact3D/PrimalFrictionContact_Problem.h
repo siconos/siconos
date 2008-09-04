@@ -20,7 +20,7 @@
 #define PRIMALFRICTIONCONTACTPROBLEM_H
 
 /*! \page primalFcProblem Primal-Friction-contact problems (2 or 3-dimensional)
-  \section fcIntro The problem
+  \section pfcIntro The problem
   Find \f$(reaction,velocity)\f$ such that:\n
 
   \f$
@@ -65,14 +65,14 @@
   \f$
 
 
-  \section fc3DSolversList Available solvers for Friction Contact 3D
+  \section pfc3DSolversList Available solvers for Friction Contact 3D
   Use the generic function frictionContact3D_driver() to call one the the specific solvers listed below:
 
   - frictionContact3D_nsgs() : non-smooth Gauss-Seidel solver
 
   (see the functions/solvers list in PrimalFrictionContact3D_Solvers.h)
 
-  \section fc3DParam Required and optional parameters
+  \section pfc3DParam Required and optional parameters
   PrimalFrictionContact3D problems needs some specific parameters, given to the PrimalFrictionContact3D_driver() function thanks to a Solver_Options structure. \n
   They are:\n
      - the name of the solver (ex: NSGS), used to switch to the right solver function

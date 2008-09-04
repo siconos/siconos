@@ -26,7 +26,7 @@
 */
 
 /*! \page MLCProblem Mixed Linear Complementarity problems (MLCP)
-  \section lcpIntro The problem
+  \section mlcpIntro The problem
   Find \f$(z,w)\f$ such that:\n
 
   \f$
@@ -102,7 +102,7 @@
 #include "NumericsMatrix.h"
 
 /** Mixed Linear Complementarity Problem elements
-    \param n dim of the linear constarints
+    \param n dim of the linear constraints
     \param m dim of the Complementarity constraints
     \param M matrix of the MLCP
     \param q vector

@@ -36,7 +36,7 @@ For each solver, the input argument are:
 - info, the termination value (0: convergence, >0 problem which depends on the solver)
 - a Solver_Options structure, which handles iparam and dparam
 
-\section fc3Dnsgs Non-Smooth Gauss Seidel Solver
+\section pfc3Dnsgs Non-Smooth Gauss Seidel Solver
 
 \bf function: frictionContact3D_nsgs()
 \bf parameters:

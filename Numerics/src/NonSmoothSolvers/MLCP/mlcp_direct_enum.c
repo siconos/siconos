@@ -107,7 +107,7 @@ void mlcp_direct_enum(MixedLinearComplementarity_Problem* problem, double *z, do
   if (!siWorkEnum)
   {
     *info = 1;
-    printf("MLCP_DIRECT_ENUM error, call a non inytialised method!!!!!!!!!!!!!!!!!!!!!\n");
+    printf("MLCP_DIRECT_ENUM error, call a non initialised method!!!!!!!!!!!!!!!!!!!!!\n");
     return;
   }
   /*First, try direct solver*/

@@ -254,7 +254,7 @@ void jacobianF_AC(int Fsize, double *reaction, double *jacobianFMatrix, int up2D
 
     an = 1. / MLocal[0];
     double alpha = MLocal[Fsize + 1] + MLocal[2 * Fsize + 2];
-    double det = MLocal[1 * Fsize + 1] * MLocal[2 * Fsize + 2] - MLocal[2 * Fsize + 1] + MLocal[1 * Fsize + 2];
+    double det = MLocal[1 * Fsize + 1] * MLocal[2 * Fsize + 2] - MLocal[2 * Fsize + 1] * MLocal[1 * Fsize + 2];
     double beta = alpha * alpha - 4 * det;
     if (beta > 0.)
       beta = sqrt(beta);

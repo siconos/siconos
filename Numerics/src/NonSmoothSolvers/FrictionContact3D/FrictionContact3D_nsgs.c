@@ -126,10 +126,6 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
   /* Check for trivial case */
   *info = checkTrivialCase(n, q, velocity, reaction, iparam, dparam);
 
-  int incx = 1;
-  double  qs = DNRM2(n , q , incx);
-  double den = 1. / qs;
-
   if (*info == 0)
     return;
 
@@ -145,21 +141,15 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
 
-
-  double * W    = (double*)malloc(n * sizeof(double));
-
   int incy = 1;
-  double num;
   int contact; /* Number of the current row of blocks in M */
 
-  int pos;
+  dparam[0] = dparam[2]; // set the tolerance for the local solver
   while ((iter < itermax) && (hasNotConverged > 0))
   {
-    DCOPY(n , velocity , incx , W , incy);
-    DCOPY(n , q , incx , velocity , incy);
     ++iter;
     /* Loop through the contact points */
-    dparam[0] = dparam[2]; // set the tolerance for the local solver
+    //DCOPY( n , q , incx , velocity , incy );
     for (contact = 0 ; contact < nc ; ++contact)
       (*local_solver)(contact, n, reaction, iparam, dparam);
 
@@ -167,12 +157,12 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
     (*computeError)(problem, reaction , velocity, tolerance, &error);
 
     if (verbose > 0)
-      printf("-----------------------------------Iteration %i Error = %14.7e\n", iter, error);
+      printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e\n", iter, error);
 
     if (error < tolerance) hasNotConverged = 0;
-    dparam[0] = tolerance;
     *info = hasNotConverged;
   }
+  dparam[0] = tolerance;
 
   /***** Free memory *****/
   (*freeSolver)();

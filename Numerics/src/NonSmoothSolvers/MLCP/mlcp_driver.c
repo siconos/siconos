@@ -161,7 +161,6 @@ int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *
     fprintf(stderr, "mlcp_driver error: unknown solver named: %s\n", name);
     exit(EXIT_FAILURE);
   }
-
   return info;
 }
 
