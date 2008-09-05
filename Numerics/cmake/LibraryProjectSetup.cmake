@@ -3,6 +3,7 @@
 #
 # input:
 #
+# <PROJECT_NAME>_SRCS : [optional] Project SRCS on per files basis
 # <PROJECT_NAME>_DIRS : sources directories
 # <PROJECT_NAME>_Unstable_SRCS : built only if -DUNSTABLE=ON
 # <PROJECT_NAME>_VERSION : version of the library
@@ -17,6 +18,8 @@ MACRO(LIBRARY_PROJECT_SETUP)
   MESSAGE(STATUS "")
   MESSAGE(STATUS "Setting up ${PROJECT_NAME} library build")
 
+  #+RPG add a reset of _ALL_EXTS
+  SET(_ALL_EXTS)
   SET(_ALL_DIRS ${${PROJECT_NAME}_DIRS})
   IF(NOT ${PROJECT_NAME}_SOURCE_FILE_EXTENSIONS)
     # all extensions we know (should be done only with the project languages)
@@ -32,24 +35,39 @@ MACRO(LIBRARY_PROJECT_SETUP)
   ENDIF(NOT ${PROJECT_NAME}_SOURCE_FILE_EXTENSIONS)
   
   SET(_ALL_FILES)
-  FOREACH(_DIR ${_ALL_DIRS})
-    SET(_DIR_FILES)
-    FOREACH(_EXT ${_ALL_EXTS})
-      FILE(GLOB _DIR_FILES_EXT ${_DIR}/${_EXT})
-      IF(_DIR_FILES_EXT)
-        LIST(APPEND _DIR_FILES ${_DIR_FILES_EXT})
-      ENDIF(_DIR_FILES_EXT)
-    ENDFOREACH(_EXT ${_ALL_EXTS})
-    IF(_DIR_FILES)
-      FOREACH(_F ${_DIR_FILES})
-        IF(NOT ${_F}_T)
-          SET(${_F}_T T)
-          LIST(APPEND _ALL_FILES ${_F})
-        ENDIF(NOT ${_F}_T)
-      ENDFOREACH(_F ${_DIR_FILES})
-    ENDIF(_DIR_FILES)
-  ENDFOREACH(_DIR ${_ALL_DIRS})
   
+  #+++RPG add the possiblity to add files with PROJECT_NAME_SRCS and not automatically
+  IF(${PROJECT_NAME}_SRCS) 
+    MESSAGE(STATUS "Sources files manually with var PROJECT_NAME_SRCS")
+    FOREACH(_FILE ${${PROJECT_NAME}_SRCS})
+      FILE(GLOB _GFILE ${_FILE})
+      IF(_GFILE)
+        LIST(APPEND _ALL_FILES ${_GFILE})
+      ELSE(_GFILE)
+        MESSAGE(STATUS "WARNING : file NOT FOUND : ${_FILE}")
+      ENDIF(_GFILE)
+    ENDFOREACH(_FILE ${${PROJECT_NAME}_SRCS})
+  ELSE(${PROJECT_NAME}_SRCS)
+    
+
+    FOREACH(_DIR ${_ALL_DIRS})
+      SET(_DIR_FILES)
+      FOREACH(_EXT ${_ALL_EXTS})
+        FILE(GLOB _DIR_FILES_EXT ${_DIR}/${_EXT})
+        IF(_DIR_FILES_EXT)
+          LIST(APPEND _DIR_FILES ${_DIR_FILES_EXT})
+        ENDIF(_DIR_FILES_EXT)
+      ENDFOREACH(_EXT ${_ALL_EXTS})
+      IF(_DIR_FILES)
+        FOREACH(_F ${_DIR_FILES})
+          IF(NOT ${_F}_T)
+            SET(${_F}_T T)
+            LIST(APPEND _ALL_FILES ${_F})
+          ENDIF(NOT ${_F}_T)
+        ENDFOREACH(_F ${_DIR_FILES})
+      ENDIF(_DIR_FILES)
+    ENDFOREACH(_DIR ${_ALL_DIRS})
+  ENDIF(${PROJECT_NAME}_SRCS)
   #
   # headers
   #
