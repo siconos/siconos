@@ -29,6 +29,7 @@ using namespace std;
 void NonSmoothSolver::fillSolverOptions()
 {
   numerics_solver_options = new Solver_Options;
+  numerics_solver_options->filterOn = 0;
   if (!isSet)
     numerics_solver_options->isSet = 0;
 
