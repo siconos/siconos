@@ -30,6 +30,11 @@ ENDIF(IMPORT_BUILD_SETTINGS)
 INCLUDE(LibraryDependencies)
 INCLUDE(Settings)
 
+# Build type : if not specified, same as Kernel 
+IF(NOT CMAKE_BUILD_TYPE)
+  SET(CMAKE_BUILD_TYPE ${COMPILE_TIME_BUILD_TYPE})
+ENDIF(NOT CMAKE_BUILD_TYPE)
+
 # Compiler options (given with --opt)
 FOREACH(_O ${COMPILER_OPTIONS})
   ADD_DEFINITIONS(${_O})
