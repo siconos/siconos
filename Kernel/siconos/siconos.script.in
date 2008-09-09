@@ -21,8 +21,8 @@ NUMERICS_PREFIX=${NUMERICSPATH:-@SiconosNumerics_LIBRARY_DIRS_DIR@}
 KERNEL_PREFIX=${SICONOSPATH:-@CMAKE_INSTALL_PREFIX@}
 
 exec=true
-pwd=`pwd`
 myname=`basename $0`
+call_pwd=`pwd`
 
 cartridge() {
     echo;
@@ -30,7 +30,7 @@ cartridge() {
 #   echo "|          Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.           |";
     echo "|          Siconos-Kernel version @VERSION@, Copyright INRIA 2005-2008.           |";
     echo "|                                                                             |";
-    echo "|     Free software under GNU General Public License.                         |";
+    echo "|                 Free software under GNU General Public License.             |";
     echo "|=============================================================================|"; 
     echo;
 }
@@ -48,7 +48,11 @@ usage() {
     echo " or use -plugins_dir option below. ";
     echo " ";
     echo "Options are: ";
-    echo "     -a : To find and compile all sources files in YourExample.cpp directory.";
+    echo "     -a : to find and compile all sources files in YourExample.cpp directory.";
+    echo " ";
+    echo "     -build_dir <dir> : build is done in <dir>. Under /tmp, a temp directory is created";
+    echo " ";
+    echo "     -clean_build : clean build directory.";
     echo " ";
     echo "     -c | -clean : to clean the current directory (deletes binary files, etc.).";
     echo " ";
@@ -69,15 +73,15 @@ usage() {
     echo "     -ldopt <opt> : add option <opt> to linker." 
     echo "     -P prefix_command : to add a prefix command (time, valgrind, gdb, etc.)."
     echo " ";
-    echo "     -plugin_dir <plugin_directory> (Default = plugin): "
+    echo "     -plugin_dir <plugin_directory> (default = plugin): "
     echo "         create <plugin_directory>.so "
     echo "         with plugin sources under <plugin_directory>." 
     echo " ";
-    echo "     -plugins_dir <plugins_directory> (Default = plugins): "
+    echo "     -plugins_dir <plugins_directory> (default = plugins): "
     echo "         for each source file <name_src>.[c|f|cpp] under <plugins_directory>"
     echo "        it creates a plugin <name_src>.so"
     echo " ";
-    echo "     -src_dir <source_directory> (Default = src):  all sources files under <source_directory> (Warning: absolute path!!)"
+    echo "     -src_dir <source_directory> (default = src):  all sources files under <source_directory> (Warning: absolute path!!)"
     echo " to the executable.";
     echo " ";
     echo "     -v : to print 'make' commands as they are executed.";
@@ -98,8 +102,8 @@ cartridge
 
 if `getopt -T >/dev/null 2>&1` ; [ $? = 4 ] ; then
     args=`getopt -n $myname -a \
- -o aghl:L:D:P:v \
- -l clean,help,noexec,src_dir:,opt:,ldopt:,plugin_dir:,plugins_dir: \
+ -o acghl:L:D:P:v \
+ -l build_dir:,clean_build,clean,help,noexec,src_dir:,opt:,ldopt:,plugin_dir:,plugins_dir: \
  -- "$@"`
     if test $? -ne 0; then
         usage
@@ -111,6 +115,7 @@ else
     true
 fi
 
+
 definitions=
 linker_libraries=
 linker_directories=
@@ -119,11 +124,20 @@ compiler_options=
 plugin_directories=
 plugins_directories=
 sources_directories=
+tmp_directory=false
+build_directory=.siconos
+clean_build=false
 
-while [ $# -gt 0 ] ; do
+while test $# -gt 0 ; do
     case "$1" in
         -a) all_srcs=true;;
-        --clean|-c) make_args=clean; exec=false;;
+        --build_dir) with_args $@; shift;
+            case :$1 in 
+                :/tmp) tmp_directory=true; build_directory=$1;;
+                :*) build_directory=$1;;
+            esac;;
+        --clean_build) clean_build=true;;
+        --clean|-c) make_args=clean; clean_build=true; exec=false;;
         -D) with_arg $@; shift; definitions="$definitions $1";;
         -g) definitions="$definitions CMAKE_BUILD_TYPE=Debug";;
         -h|-help) usage; exit 0;;
@@ -172,24 +186,40 @@ while [ $# -gt 0 ] ; do
     shift
 done
 
+# build directory setup : ./.siconos/build is the default
+if test $tmp_directory = true; then
+    build_directory=`mktemp -d -p $build_directory siconosXXXXX`
+fi
+
+SICONOS_BUILD_DIR=${SICONOS_BUILD_DIR:-$build_directory}
+
+if test ! -d ${SICONOS_BUILD_DIR}; then
+    mkdir -p ${SICONOS_BUILD_DIR} 
+fi
+
+cd ${SICONOS_BUILD_DIR} || { 
+    $myname: Cannot change directory to ${SICONOS_BUILD_DIR}
+    exit 1
+}
+
 if test ! "$make_args" = "clean"; then
 
     case :$1,:$sources_directories in
         :,:) usage; exit 1;;
         :/*,*) main_source=$1;;
-        :*,*) main_source=$pwd/$1;;
+        :*,*) main_source=$call_pwd/$1;;
     esac
 
     shift
 
     case :$plugin_directories in
         /*|:);;
-        *) plugin_directories=$pwd/$plugin_directories;;
+        *) plugin_directories=$call_pwd/$plugin_directories;;
     esac
 
     case :$plugins_directories in
         /*|:);;
-        *) plugins_directories=$pwd/$plugins_directories;;
+        *) plugins_directories=$call_pwd/$plugins_directories;;
     esac
 
     if test -z "$sources_directories"; then 
@@ -220,6 +250,7 @@ if test ! "$make_args" = "clean"; then
                 all_extra_defs="$all_extra_defs;$d";;
         esac
     done
+
     if ! cmake $KERNEL_PREFIX/share/siconos-kernel/ \
         -DMAIN_SOURCE=$main_source \
         -DPLUGINS_SOURCES=$plugins_sources \
@@ -242,6 +273,24 @@ if test -f ./Makefile; then
 else
     echo "$myname: nothing to clean" 
 fi
+
+if test -f ./$exe; then
+    mv ./$exe $call_pwd
+fi
+
+if test $clean_build = true; then
+    if test -f Makefile; then
+        make clean
+    fi
+    rm -f CMakeCache.txt
+    rm -rf CMakeFiles
+    rm -f Makefile
+    rm -f cmake_install.cmake
+    cd $call_pwd
+    rmdir $build_directory
+fi
+
 if test $exec = true; then
+    cd $call_pwd
     eval LD_LIBRARY_PATH=$NUMERICS_PREFIX/lib:$KERNEL_PREFIX/lib:$KERNEL_PREFIX/share/siconos-kernel:. $exec_prefix ./$exe $@
 fi

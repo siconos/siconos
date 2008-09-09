@@ -1,12 +1,19 @@
 .TH SICONOS 1
 
 .SH NAME
-siconos \- The Siconos C++ Front-End.
+siconos \- Siconos C++ Compilation.
 
 .SH SYNOPSIS
 .B siconos
 [
 .B \-a
+]
+[
+.B \-build_dir
+.I DIRECTORY
+]
+[
+.B \-clean_build
 ]
 [
 .B \-clean
@@ -84,6 +91,13 @@ The following command-line options are recognized by
  Find and compile all sources files in 
 .I sample.cpp
  directory.
+.TP
+.BI \-build_dir
+.I DIRECTORY
+ Compile inside specified directory. If /tmp, temp directories are created.
+.TP
+.BI \-clean_build
+ Clean build directory.
 .TP
 .BI \-clean
  Clean the current directory (deletes binary files, etc.).
