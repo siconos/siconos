@@ -18,35 +18,33 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 #include "NumericsMatrix.h"
 #include "LA.h"
 
 
 void prod(int sizeX, int sizeY, double alpha, const NumericsMatrix* const A, const double* const x, double beta, double* y)
 {
-  if (A == NULL)
-  {
-    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector prod(A,x,y) failed, A == NULL.\n");
-    exit(EXIT_FAILURE);
-  }
-  /* check dim */
-  if (A->size0 != sizeY || A->size1 != sizeX)
-  {
-    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector prod(A,x,y) failed, unconsistent sizes.\n");
-    exit(EXIT_FAILURE);
-  }
+
+
+  assert(A);
+  assert(x);
+  assert(y);
+  assert(A->size0 == sizeY);
+  assert(A->size1 == sizeX);
 
   int storage = A->storageType;
 
   /* double* storage */
   if (storage == 0)
   {
-    int incx = 1, incy = 1;
-    DGEMV(LA_NOTRANS, sizeY, sizeX, alpha, A->matrix0, sizeX, x, incx, beta, y, incy);
+    DGEMV(LA_NOTRANS, sizeY, sizeX, alpha, A->matrix0, sizeX, x, 1, beta, y, 1);
   }
   /* SparseBlock storage */
   else if (storage == 1)
+  {
     prodSBM(sizeY, alpha, A->matrix1, x, beta, y);
+  }
   else
   {
     fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector prod(A,x,y) failed, unknown storage type for A.\n");
@@ -56,17 +54,12 @@ void prod(int sizeX, int sizeY, double alpha, const NumericsMatrix* const A, con
 
 void subRowProd(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* A, const double* const x, double* y, int init)
 {
-  if (A == NULL)
-  {
-    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector subRowProd(A,x,y) failed, A == NULL.\n");
-    exit(EXIT_FAILURE);
-  }
-  /* check dim */
-  if (A->size1 != sizeX || sizeY > A->size0)
-  {
-    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector subRowProd(A,x,y) failed, unconsistent sizes.\n");
-    exit(EXIT_FAILURE);
-  }
+
+  assert(A);
+  assert(x);
+  assert(y);
+  assert(A->size0 >= sizeY);
+  assert(A->size1 == sizeX);
 
   int storage = A->storageType;
 
@@ -100,19 +93,12 @@ void subRowProd(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix
 
 void rowProdNoDiag(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* A, const double* const x, double* y, int init)
 {
-  /* Checks inputs */
-  if (A == NULL || x == NULL || y == NULL)
-  {
-    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector rowProdNoDiag(A,x,y) failed, A or x or y == NULL.\n");
-    exit(EXIT_FAILURE);
-  }
-  /* Check dim */
-  if (A->size1 != sizeX || sizeY > A->size0)
-  {
-    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - vector rowProdNoDiag(A,x,y) failed, unconsistent sizes.\n");
-    exit(EXIT_FAILURE);
-  }
 
+  assert(A);
+  assert(x);
+  assert(y);
+  assert(A->size0 >= sizeY);
+  assert(A->size1 == sizeX);
 
   /* Checks storage type */
   int storage = A->storageType;
@@ -153,7 +139,7 @@ void freeNumericsMatrix(NumericsMatrix* m)
 {
   if (m->storageType == 0)
   {
-    if (m->matrix0 != NULL)
+    if (m->matrix0)
       free(m->matrix0);
     m->matrix0 = NULL;
   }
@@ -164,7 +150,7 @@ void freeNumericsMatrix(NumericsMatrix* m)
 
 void display(const NumericsMatrix* const m)
 {
-  if (m == NULL)
+  if (! m)
   {
     fprintf(stderr, "Numerics, NumericsMatrix display failed, NULL input.\n");
     exit(EXIT_FAILURE);
@@ -188,7 +174,7 @@ void display(const NumericsMatrix* const m)
 }
 void displayRawbyRaw(const NumericsMatrix* const m)
 {
-  if (m == NULL)
+  if (! m)
   {
     fprintf(stderr, "Numerics, NumericsMatrix display failed, NULL input.\n");
     exit(EXIT_FAILURE);

@@ -45,6 +45,17 @@ typedef struct
   int *RowIndex;
   int *ColumnIndex;
   double* vec;
+
+  /* from boost compressed_matrix */
+  /* index1_data is of size filled1 = size */
+  /* index2_data is of size filled2   */
+  /* index1_data[lineNumber] -> first block of row */
+  /* index2_data[blockNumber] -> columnNumber */
+  unsigned int filled1;
+  unsigned int filled2;
+  unsigned int *index1_data;
+  unsigned int *index2_data;
+
 } SparseBlockStructuredMatrix;
 
 typedef struct

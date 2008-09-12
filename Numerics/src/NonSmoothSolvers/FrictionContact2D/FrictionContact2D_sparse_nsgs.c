@@ -22,16 +22,20 @@
 #include <time.h>
 #include <math.h>
 #include <float.h>
+#include <assert.h>
 #ifndef MEXFLAG
 #include "NonSmoothDrivers.h"
 #endif
 #include "LA.h"
 #include "FrictionContact2D_compute_error.h"
 
+
 #define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
 
 /* in lcp_GaussSeidel_SBM.c */
-void buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat, LinearComplementarity_Problem* local_problem, double* q, double* z);
+void buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat,
+                       LinearComplementarity_Problem* local_problem,
+                       double* q, double* z);
 
 int frictionContact2DLocalSolve(double *W, double *q, double mu, double *P, double *U)
 {
@@ -91,21 +95,23 @@ int frictionContact2DLocalSolve(double *W, double *q, double mu, double *P, doub
 }
 
 
-void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
+void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, double *w,
+                                   int *info, Solver_Options* options)
 {
   /* Notes:
-     - we suppose that the trivial solution case has been checked before, and that all inputs differs from NULL
-     since this function is supposed to be called from lcp_driver_global().
-     - Input matrix M of the problem is supposed to be sparse-block with no null row (ie no rows with all blocks equal to null)
+     - we suppose that the trivial solution case has been checked
+     before, and that all inputs differs from NULL since this function
+     is supposed to be called from lcp_driver_global().
+
+     - Input matrix M of the problem is supposed to be sparse-block
+     with no null row (ie no rows with all blocks equal to null)
   */
-  if (problem->M->matrix1 == NULL)
-  {
-    fprintf(stderr, "lcp_GS_SBS error: wrong storage type for input matrix M of the LCP.\n");
-    exit(EXIT_FAILURE);
-  }
+
+  assert(problem->M->matrix1);
 
   /*
-    The options for the global "block" solver are defined in options[0].\n
+    The options for the global "block" solver are defined in
+    options[0].
     options[i], for 0<i<numberOfSolvers-1 correspond to local solvers.
    */
 
@@ -119,11 +125,8 @@ void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, 
 
   /* Number of non-null blocks in blmat */
   int nbOfNonNullBlocks = blmat->nbblocks;
-  if (nbOfNonNullBlocks < 1)
-  {
-    fprintf(stderr, "Numerics::FrictionContact2D_nsgs error: empty M matrix (all blocks = NULL).\n");
-    exit(EXIT_FAILURE);
-  }
+
+  assert(nbOfNonNullBlocks >= 1);
 
   /* Local problem initialization */
 
@@ -133,9 +136,9 @@ void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, 
   local_problem->M->matrix0 = NULL;
   local_problem->M->matrix1 = NULL;
 
-  double y[3000];
+  /* Memory allocation for q. Size of q = blsizemax, size of the
+     largest square-block in blmat */
 
-  /* Memory allocation for q. Size of q = blsizemax, size of the largest square-block in blmat */
   int blsizemax = blmat->blocksize[0];
   int k;
   for (int i = 1 ; i < blmat->size ; i++)
@@ -156,24 +159,22 @@ void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, 
   /* Output from local solver */
   options[0].iparam[2] = 0;
   options[0].dparam[2] = 0.0;
-  /*Number of the local solver */
-  int localSolverNum = 1;
+
   int pos = 0;
+
   /* Output from local solver */
   int infoLocal = -1;
-  /*   double * wBackup = malloc(problem->size*sizeof(*wBackup)); */
-  /*   double num; */
-  /*   double den = 1.0/(DNRM2(problem->size,problem->q, 1)); */
 
   while ((iter < itermax) && hasNotConverged)
   {
     ++iter;
-    /* Loop over the rows of blocks in blmat */
 
+    /* Loop over the rows of blocks in blmat */
     for (pos = 0, rowNumber = 0; rowNumber < blmat->size; ++rowNumber, ++pos, ++pos)
     {
       /* Local problem formalization */
       buildLocalProblem(rowNumber, blmat, local_problem, q, z);
+
       /* Solve local problem */
       infoLocal = frictionContact2DLocalSolve(local_problem->M->matrix0,
                                               local_problem->q,
@@ -195,15 +196,7 @@ void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, 
 
     }
 
-
     FrictionContact2D_compute_error(problem, z, w, tolerance, &error);
-
-    /* int n = 2* blmat->size;
-
-    DCOPY(n, problem->q, 1, y, 1);
-    prod(n, n, 1.0, problem->M, z, 1.0, y);
-    DAXPY(n, -1, w, 1, y, 1);
-    printf("DELTA = %g\n", DNRM2( n, y, 1)/ DNRM2( n, q, 1)); */
 
     hasNotConverged = error > tolerance  ;
 
@@ -212,7 +205,7 @@ void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, 
 
   // printf("%d %g\n", iter, error);
 
-  //  *info = hasNotConverged;
+  // *info = hasNotConverged;
 
 
   /* -> convergence is what it is (should be an option) */
@@ -220,6 +213,7 @@ void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, 
 
   /* Number of GS iterations */
   options[0].iparam[1] = iter;
+
   /* Resulting error */
   options[0].dparam[1] = error;
 

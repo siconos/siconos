@@ -56,9 +56,13 @@ void buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const b
 void lcp_GaussSeidel_SBM(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options, int numberOfSolvers)
 {
   /* Notes:
-     - we suppose that the trivial solution case has been checked before, and that all inputs differs from NULL
-     since this function is supposed to be called from lcp_driver_global().
-     - Input matrix M of the problem is supposed to be sparse-block with no null row (ie no rows with all blocks equal to null)
+
+     - we suppose that the trivial solution case has been checked
+     before, and that all inputs differs from NULL since this function
+     is supposed to be called from lcp_driver_global().
+
+     - Input matrix M of the problem is supposed to be sparse-block
+       with no null row (ie no rows with all blocks equal to null)
   */
   if (problem->M->matrix1 == NULL)
   {
@@ -94,6 +98,7 @@ void lcp_GaussSeidel_SBM(LinearComplementarity_Problem* problem, double *z, doub
   local_problem->M->storageType = 0; // dense storage
   local_problem->M->matrix0 = NULL;
   local_problem->M->matrix1 = NULL;
+
   /* Memory allocation for q. Size of q = blsizemax, size of the largest square-block in blmat */
   int blsizemax = blmat->blocksize[0];
   int k;
@@ -120,9 +125,6 @@ void lcp_GaussSeidel_SBM(LinearComplementarity_Problem* problem, double *z, doub
   int pos = 0;
   /* Output from local solver */
   int infoLocal = -1;
-  /*   double * wBackup = malloc(problem->size*sizeof(*wBackup)); */
-  /*   double num; */
-  /*   double den = 1.0/(DNRM2(problem->size,problem->q, 1)); */
 
   while ((iter < itermax) && (hasNotConverged > 0))
   {

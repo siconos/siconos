@@ -24,7 +24,9 @@ MACRO(SICONOS_PROJECT
   SET(VERSION "${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}")  
   
   # try to get the SVN revision number
-  INCLUDE(SVNRevisionNumber)
+  IF(NOT WithoutSVN)
+    INCLUDE(SVNRevisionNumber)
+  ENDIF(NOT WithoutSVN)
 
   # Some macros needed to check compilers environment
   INCLUDE(CheckSymbolExists)

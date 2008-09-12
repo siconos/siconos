@@ -54,6 +54,7 @@ The compilation is done out of the source directory:
         - make install
 
 some CMAKE OPTIONS that may be usefull:
+	- to build an optimized library (-O3 -DNDEBUG) : -DCMAKE_BUILD_TYPE=Release
 	- to build a debug library (compilation with -g) : -DCMAKE_BUILD_TYPE=Debug
 	- to see cmake state : -DPRINT_ENV=1
 
