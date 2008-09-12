@@ -142,7 +142,7 @@ void SparseBlockMatrix::fill(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMat
   nr = indexSet->size();
 
   // (re)allocate memory for ublas matrix
-  //MSparseBlock->resize(nr,nr,false);
+  MSparseBlock->resize(nr, nr, false);
   diagSizes->resize(nr);
 
   size_t row = 0; // (block) row position
@@ -185,6 +185,7 @@ void SparseBlockMatrix::fill(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMat
 
             // Insert block into the list
             (blocksList)->push_back(blocks[*itRow][*itCol]->getArray());
+            (*MSparseBlock)(row, col) = blocks[*itRow][*itCol];
 
             // Insert block positions into rowPos and colPos
             (rowPos)->push_back(row);
@@ -222,6 +223,13 @@ void SparseBlockMatrix::convert()
   numericsMatSparse->RowIndex = &((*rowPos)[0]);
   numericsMatSparse->ColumnIndex = &((*colPos)[0]);
   numericsMatSparse->block =  &((*blocksList)[0]);
+
+  // boost
+  numericsMatSparse->filled1 = (*MSparseBlock).filled1();
+  numericsMatSparse->filled2 = (*MSparseBlock).filled2();
+  numericsMatSparse->index1_data = &((*MSparseBlock).index1_data()[0]);
+  numericsMatSparse->index2_data = &((*MSparseBlock).index2_data()[0]);
+
   //   // Loop through the non-null blocks
   //   for (SpMatIt1 i1 = MSparseBlock->begin1(); i1 != MSparseBlock->end1(); ++i1)
   //     {
