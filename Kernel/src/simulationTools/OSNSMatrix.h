@@ -23,6 +23,7 @@
 #ifndef OSNSM_H
 #define OSNSM_H
 
+#include <boost/shared_ptr.hpp>
 #include "SimpleMatrix.h"
 #include "SiconosNumerics.h"
 #include "SimulationTypeDef.h"
@@ -88,22 +89,22 @@ protected:
    * of the corresponding unitaryBlock matrix in the full matrix (M in LCP case) - Warning: it depends on the considered index set \n
    * (ie on which constraints are "active")
    */
-  UR_int* unitaryBlocksPositions;
+  boost::shared_ptr<UR_int> unitaryBlocksPositions;
 
   /** map that links each DynamicalSystem with an int that gives the position (in number of scalar elements, not DSBlocks) \n
    * of the corresponding DSBlock matrix in the full matrix (M in PrimalFrictionalCase case) - Warning: it depends on the considered index set \n
    * (ie on which constraints are "active")
    */
-  DS_int* DSBlocksPositions;
+  boost::shared_ptr<DS_int> DSBlocksPositions;
 
   /** Numerics structure to be filled  */
-  NumericsMatrix* numericsMat;
+  boost::shared_ptr<NumericsMatrix> numericsMat;
 
   /** Matrix used for default storage type (storageType = 0) */
-  SiconosMatrix * M1;
+  boost::shared_ptr<SiconosMatrix> M1;
 
   /** Matrix which corresponds to Numerics SparseBlockStructuredMatrix (storageType = 1) */
-  SparseBlockMatrix * M2;
+  boost::shared_ptr<SparseBlockMatrix> M2;
 
   /** Private copy constructor => no copy nor pass by value */
   OSNSMatrix(const OSNSMatrix&);
@@ -228,13 +229,13 @@ public:
   /** get the numerics-readable structure */
   inline NumericsMatrix* getNumericsMatrix()
   {
-    return numericsMat;
+    return &*numericsMat;
   };
 
   /** get the matrix used for default storage */
   inline SiconosMatrix* getDefaultMatrixPtr()
   {
-    return M1;
+    return &*M1;
   };
 
   /** fill the current class using an index set and a map of unitaryBlocks

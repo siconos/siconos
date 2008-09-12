@@ -22,34 +22,30 @@ using namespace std;
 
 // Default constructor: empty matrix
 SparseBlockMatrix::SparseBlockMatrix():
-  nr(0), nbNonNullBlocks(0), numericsMatSparse(NULL), MSparseBlock(NULL), blocksList(NULL), diagSizes(NULL), rowPos(NULL), colPos(NULL)
+  nr(0)
 {
-  MSparseBlock = new SparseMat2();
-  numericsMatSparse = new SparseBlockStructuredMatrix();
-  blocksList = new std::vector<double*>;
-  diagSizes = new IndexInt();
-  rowPos = new IndexInt();
-  colPos = new IndexInt();
+  MSparseBlock.reset(new CompressedRowMat());
+  numericsMatSparse.reset(new SparseBlockStructuredMatrix());
+  diagSizes.reset(new IndexInt());
+  rowPos.reset(new IndexInt());
+  colPos.reset(new IndexInt());
 }
 
 // Constructor with dimensions
 SparseBlockMatrix::SparseBlockMatrix(unsigned int nRow):
-  nr(nRow), nbNonNullBlocks(0), numericsMatSparse(NULL), MSparseBlock(NULL), blocksList(NULL), diagSizes(NULL), rowPos(NULL), colPos(NULL)
+  nr(nRow)
 {
   // Only square-blocks matrices for the moment (ie nRow = nr = nrol)
 
   // Allocate memory and fill in the matrix
-  nbNonNullBlocks = nr;
   // rowPos, rowCol ... are initialized with nr to reserve at first step the maximum possible (according to given nr) space in memory.
   // Thus a future resize will not require memory allocation or copy.
 
-  MSparseBlock = new SparseMat2(nr, nr);
-  numericsMatSparse = new SparseBlockStructuredMatrix;
-  blocksList = new std::vector<double*>();
-  diagSizes = new IndexInt();
-  rowPos = new IndexInt();
-  colPos = new IndexInt();
-  blocksList->reserve(nr);
+  MSparseBlock.reset(new CompressedRowMat(nr, nr));
+  numericsMatSparse.reset(new SparseBlockStructuredMatrix);
+  diagSizes.reset(new IndexInt());
+  rowPos.reset(new IndexInt());
+  colPos.reset(new IndexInt());
   diagSizes->reserve(nr);
   rowPos->reserve(nr);
   colPos->reserve(nr);
@@ -57,76 +53,56 @@ SparseBlockMatrix::SparseBlockMatrix(unsigned int nRow):
 
 // Basic constructor
 SparseBlockMatrix::SparseBlockMatrix(UnitaryRelationsSet* I, MapOfMapOfUnitaryMatrices& blocks):
-  nr(0), nbNonNullBlocks(0), numericsMatSparse(NULL), MSparseBlock(NULL), blocksList(NULL), diagSizes(NULL), rowPos(NULL), colPos(NULL)
+  nr(0)
 {
   // Allocate memory and fill in the matrix
   nr = I->size();
-  MSparseBlock = new SparseMat2(nr, nr);
-  numericsMatSparse = new SparseBlockStructuredMatrix();
-  blocksList = new std::vector<double*>;
-  blocksList->reserve(nr);
-  diagSizes = new IndexInt();
+  MSparseBlock.reset(new CompressedRowMat(nr, nr));
+  numericsMatSparse.reset(new SparseBlockStructuredMatrix());
+  diagSizes.reset(new IndexInt());
   diagSizes->reserve(nr);
-  rowPos = new IndexInt();
+  rowPos.reset(new IndexInt());
   rowPos->reserve(nr);
-  colPos = new IndexInt();
+  colPos.reset(new IndexInt());
   colPos->reserve(nr);
   fill(I, blocks);
 }
 SparseBlockMatrix::SparseBlockMatrix(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSblocks):
-  nr(0), nbNonNullBlocks(0), numericsMatSparse(NULL), MSparseBlock(NULL), blocksList(NULL), diagSizes(NULL), rowPos(NULL), colPos(NULL)
+  nr(0)
 {
   // Allocate memory and fill in the matrix
   nr = DSSet->size();
-  MSparseBlock = new SparseMat2(nr, nr);
-  numericsMatSparse = new SparseBlockStructuredMatrix();
-  blocksList = new std::vector<double*>;
-  blocksList->reserve(nr);
-  diagSizes = new IndexInt();
+  MSparseBlock.reset(new CompressedRowMat(nr, nr));
+  numericsMatSparse.reset(new SparseBlockStructuredMatrix());
+  diagSizes.reset(new IndexInt());
   diagSizes->reserve(nr);
-  rowPos = new IndexInt();
+  rowPos.reset(new IndexInt());
   rowPos->reserve(nr);
-  colPos = new IndexInt();
+  colPos.reset(new IndexInt());
   colPos->reserve(nr);
   fill(DSSet, DSblocks);
 }
 SparseBlockMatrix::SparseBlockMatrix(UnitaryRelationsSet* I, DynamicalSystemsSet* DSSet, MapOfUnitaryMapOfDSMatrices& unitaryDSblocks):
-  nr(0), nbNonNullBlocks(0), numericsMatSparse(NULL), MSparseBlock(NULL), blocksList(NULL), diagSizes(NULL), rowPos(NULL), colPos(NULL)
+  nr(0)
 {
   // Allocate memory and fill in the matrix
   nr = I->size();
   nc = DSSet->size();
-  MSparseBlock = new SparseMat2(nr, nc);
-  numericsMatSparse = new SparseBlockStructuredMatrix();
-  blocksList = new std::vector<double*>;
-  blocksList->reserve(nr);
-  diagSizes = new IndexInt();
+  MSparseBlock.reset(new CompressedRowMat(nr, nc));
+  numericsMatSparse.reset(new SparseBlockStructuredMatrix());
+  diagSizes.reset(new IndexInt());
   diagSizes->reserve(nr);
-  rowPos = new IndexInt();
+  rowPos.reset(new IndexInt());
   rowPos->reserve(nr);
-  colPos = new IndexInt();
+  colPos.reset(new IndexInt());
   colPos->reserve(nr);
   fill(I, DSSet, unitaryDSblocks);
 }
-// Destructor
+
+// Destructor -> see smart pointers
 SparseBlockMatrix::~SparseBlockMatrix()
 {
-  blocksList->resize(0);
-  delete blocksList;
-  diagSizes->resize(0);
-  delete diagSizes;
-  rowPos->resize(0);
-  delete rowPos;
-  colPos->resize(0);
-  delete colPos;
-  delete MSparseBlock;
-  delete numericsMatSparse;
-  blocksList = NULL;
-  diagSizes = NULL;
-  rowPos = NULL;
-  colPos = NULL;
-  MSparseBlock = NULL;
-  numericsMatSparse = NULL;
+
 }
 
 // Fill the SparseMat
@@ -135,8 +111,7 @@ void SparseBlockMatrix::fill(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMat
   // ======>  Aim: find UR1 and UR2 both in indexSets[level] and which have common DynamicalSystems.
   // Then get the corresponding matrix from map blocks.
 
-  if (indexSet == NULL)
-    RuntimeException::selfThrow("SparseBlockMatrix::fill(IndexInt* i, ...), i is a null pointer");
+  assert(indexSet.get() && "NULL pointer");
 
   // Number of blocks in a row = number of active constraints.
   nr = indexSet->size();
@@ -148,12 +123,9 @@ void SparseBlockMatrix::fill(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMat
   size_t row = 0; // (block) row position
   size_t col = 0; // (block) col. position
 
-  // number of non null blocks
-  nbNonNullBlocks = 0;
-  // reset rowPos, colPos and blocksList
+  // reset rowPos, colPos
   rowPos->resize(0);
   colPos->resize(0);
-  blocksList->resize(0);
   int sizeV = 0;
 
   // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
@@ -180,12 +152,8 @@ void SparseBlockMatrix::fill(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMat
             // UR2 = *itCol
             // corresponding matrix = blocks[*itRow][(*itCol).first]
 
-            // Increment the number of non-null blocks
-            nbNonNullBlocks++;
-
             // Insert block into the list
-            (blocksList)->push_back(blocks[*itRow][*itCol]->getArray());
-            (*MSparseBlock)(row, col) = blocks[*itRow][*itCol];
+            (*MSparseBlock)(row, col) = blocks[*itRow][*itCol]->getArray();
 
             // Insert block positions into rowPos and colPos
             (rowPos)->push_back(row);
@@ -217,18 +185,18 @@ void SparseBlockMatrix::fill(UnitaryRelationsSet* indexSet, DynamicalSystemsSet*
 void SparseBlockMatrix::convert()
 {
   numericsMatSparse->size = nr;
-  numericsMatSparse->nbblocks = nbNonNullBlocks;
+  numericsMatSparse->nbblocks = (*MSparseBlock).nnz();
   // Next copies: pointer links!!
   numericsMatSparse->blocksize =  &((*diagSizes)[0]);
   numericsMatSparse->RowIndex = &((*rowPos)[0]);
   numericsMatSparse->ColumnIndex = &((*colPos)[0]);
-  numericsMatSparse->block =  &((*blocksList)[0]);
 
   // boost
   numericsMatSparse->filled1 = (*MSparseBlock).filled1();
   numericsMatSparse->filled2 = (*MSparseBlock).filled2();
   numericsMatSparse->index1_data = &((*MSparseBlock).index1_data()[0]);
   numericsMatSparse->index2_data = &((*MSparseBlock).index2_data()[0]);
+  numericsMatSparse->block =  &((*MSparseBlock).value_data()[0]);
 
   //   // Loop through the non-null blocks
   //   for (SpMatIt1 i1 = MSparseBlock->begin1(); i1 != MSparseBlock->end1(); ++i1)
@@ -243,7 +211,7 @@ void SparseBlockMatrix::convert()
 // Display data
 void SparseBlockMatrix::display() const
 {
-  cout << "----- Sparse Block Matrix with " << nr << " blocks in a row/col and " << nbNonNullBlocks << " non-null blocks" << endl;
+  cout << "----- Sparse Block Matrix with " << nr << " blocks in a row/col and " << MSparseBlock->nnz() << " non-null blocks" << endl;
   cout << "Non null blocks positions are (row index and columns index):" << endl;
   print(rowPos->begin(), rowPos->end());
   print(colPos->begin(), colPos->end());

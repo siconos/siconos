@@ -23,10 +23,11 @@ Definition of a sparse block matrix of SiconosMatrix*
 #ifndef SBM_H
 #define SBM_H
 
+#include <boost/shared_ptr.hpp>
 #include "SiconosNumerics.h"
 #include "SimulationTypeDef.h"
 
-typedef  boost::numeric::ublas::compressed_matrix<SiconosMatrix*> SparseMat2;
+typedef  boost::numeric::ublas::compressed_matrix<double*> CompressedRowMat;
 
 /** Definition of a sparse block matrix of SiconosMatrix*, used in OneStepNSProblem to save matrix M.
  *
@@ -83,26 +84,20 @@ private:
   /** Number of blocks in  col*/
   unsigned int nc;
 
-  /** Total number of non-null blocks in the matrix */
-  unsigned int nbNonNullBlocks;
-
   /** Specific structure required when a (Numerics) solver block is used */
-  SparseBlockStructuredMatrix* numericsMatSparse;
+  boost::shared_ptr<SparseBlockStructuredMatrix> numericsMatSparse;
 
   /** Sparse-Block Boost Matrix. Each block is a SiconosMatrix**/
-  SparseMat2 * MSparseBlock;
-
-  /** vector of the addresses of the non-null blocks. */
-  std::vector<double*> * blocksList;
+  boost::shared_ptr<CompressedRowMat> MSparseBlock;
 
   /** Vector used to save the sum of dim of diagonal blocks of M: diagSizes[i] = diagSizes[i-1] + ni, ni being the size of the diagonal block at row(block) i */
-  IndexInt* diagSizes;
+  boost::shared_ptr<IndexInt> diagSizes;
 
   /** List of non null blocks positions (in row) */
-  IndexInt* rowPos;
+  boost::shared_ptr<IndexInt> rowPos;
 
   /** List of non null blocks positions (in col) */
-  IndexInt* colPos;
+  boost::shared_ptr<IndexInt> colPos;
 
   /** Private copy constructor => no copy nor pass by value */
   SparseBlockMatrix(const SparseBlockMatrix&);
@@ -153,25 +148,19 @@ public:
   /** get total number of non-null blocks */
   inline const unsigned int getNbNonNullBlocks() const
   {
-    return nbNonNullBlocks;
+    return MSparseBlock->nnz();
   };
 
   /** get the numerics-readable structure */
   inline SparseBlockStructuredMatrix* getNumericsMatSparse()
   {
-    return numericsMatSparse;
+    return &*numericsMatSparse;
   };
 
   /** get the ublas sparse mat*/
-  inline SparseMat2 * getMSparse()
+  inline CompressedRowMat * getMSparse()
   {
-    return MSparseBlock;
-  };
-
-  /** get the list of pointer to non null blocks */
-  inline std::vector<double*>* getBlocksList()
-  {
-    return blocksList;
+    return &*MSparseBlock;
   };
 
   /** get the dimension of the square-diagonal block number num
@@ -188,8 +177,8 @@ public:
   */
   inline IndexInt * getPositionsIndex(bool i)
   {
-    if (i) return rowPos;
-    else return colPos;
+    if (i) return &*rowPos;
+    else return &*colPos;
   };
 
   /** fill the current class using an index set and a map of blocks
