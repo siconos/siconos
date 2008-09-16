@@ -35,8 +35,11 @@ void relay_path(Relay_Problem* problem, double *z, double *w, int *info , Solver
   /* matrix M/vector q of the relay */
   double * M = problem->M->matrix0;
   double * q = problem->q;
-  double *a = problem->a;
-  double *b = problem->b;
+  double *a = problem->ub;
+  double *b = problem->lb;
+
+
+
 
   int nnz, i, j, dim;
 
