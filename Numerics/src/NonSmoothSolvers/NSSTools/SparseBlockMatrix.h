@@ -20,6 +20,8 @@
 #ifndef SparseBlockMatrix_H
 #define SparseBlockMatrix_H
 
+#include <stddef.h>
+
 /*!\file SparseBlockMatrix.h
   \brief Structure definition and functions related to SparseBlockStructuredMatrix
   \author Pascal Denoyelle and Franck Perignon
@@ -51,10 +53,10 @@ typedef struct
   /* index2_data is of size filled2   */
   /* index1_data[lineNumber] -> first block of row */
   /* index2_data[blockNumber] -> columnNumber */
-  unsigned int filled1;
-  unsigned int filled2;
-  unsigned int *index1_data;
-  unsigned int *index2_data;
+  size_t filled1;
+  size_t filled2;
+  size_t *index1_data;
+  size_t *index2_data;
 
 } SparseBlockStructuredMatrix;
 

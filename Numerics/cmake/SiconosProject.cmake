@@ -11,7 +11,15 @@ INCLUDE(OutOfSourcesBuild)
 MACRO(SICONOS_PROJECT 
     _PROJECT_NAME 
     MAJOR_VERSION MINOR_VERSION PATCH_VERSION)
-  
+
+  # Build options
+  # Static and shared libs : defaults
+  OPTION(BUILD_SHARED_LIBS "Building of shared libraries" ON)
+  OPTION(BUILD_STATIC_LIBS "Building of static libraries" ON)
+  OPTION(WITH_TESTS_COVERAGE "Code coverage setup" OFF)
+  OPTION(WITHOUT_SVN "Consider SVN is offline" OFF)
+
+  # Project version
   STRING(TOLOWER ${_PROJECT_NAME} _LPROJECT_NAME)
   
   SET(PROJECT_SHORT_NAME ${_PROJECT_NAME})
@@ -24,9 +32,9 @@ MACRO(SICONOS_PROJECT
   SET(VERSION "${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}")  
   
   # try to get the SVN revision number
-  IF(NOT WithoutSVN)
+  IF(NOT WITHOUT_SVN)
     INCLUDE(SVNRevisionNumber)
-  ENDIF(NOT WithoutSVN)
+  ENDIF(NOT WITHOUT_SVN)
 
   # Some macros needed to check compilers environment
   INCLUDE(CheckSymbolExists)
@@ -69,10 +77,6 @@ MACRO(SICONOS_PROJECT
   
   INCLUDE(DartConfig)
   INCLUDE(Dart)
-
-  # Static and shared libs : defaults
-  OPTION(BUILD_SHARED_LIBS "Building of shared libraries" ON)
-  OPTION(BUILD_STATIC_LIBS "Building of static libraries" ON)
 
   # Tests coverage (taken from ViSp)
 
@@ -378,3 +382,7 @@ MACRO(CHECK_INSTALL_INCLUDE_DIRECTORIES)
   ENDFOREACH(_D ${${PROJECT_NAME}_INCLUDE_DIRECTORIES})
 ENDMACRO(CHECK_INSTALL_INCLUDE_DIRECTORIES)
 
+# debug
+MACRO(PRINT_VAR V)
+  MESSAGE(STATUS "${V} = ${${V}}")
+ENDMACRO(PRINT_VAR V)

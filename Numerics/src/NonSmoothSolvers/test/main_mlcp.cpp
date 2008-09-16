@@ -109,7 +109,7 @@ static int itest;
 /*
  ******************************************************************************
  */
-void printSolution(char *name, int n, int m, double *z, double *w)
+void printSolution(const char *name, int n, int m, double *z, double *w)
 {
   int i;
 #ifdef BAVARD
