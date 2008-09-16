@@ -30,8 +30,11 @@ void pr_latin(Relay_Problem* problem, double *z, double *w, int *info, Solver_Op
   double* vec = problem->M->matrix0;
   double* qq = problem->q;
   int n = problem -> size;
-  double *a = problem->a;
-  double *b = problem->b;
+  double *a = problem->ub;
+  double *b = problem->lb;
+  //\todo Rewrite completely the algorithm with a projection.
+  int ib;
+  for (ib = 0; ib < n; ib++) b[ib] = -b[ib];
 
   double k_latin = options->dparam[2];
   int itt = options->iparam[0];

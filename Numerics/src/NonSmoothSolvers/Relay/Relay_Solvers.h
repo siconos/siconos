@@ -92,6 +92,19 @@ extern "C" {
   */
   void pr_nlgs(Relay_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
+
+  /** relay_path is a resolution of the Relay with its inherent MCP formulation and using path.\n
+   * \param[in] problem structure that represents the Relay (M, q...)
+   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
+   0 = convergence,\n
+   1 = no convergence,\n
+   2 = Nul diagonal term\n
+   \author V. acary
+  */
+  void relay_path(Relay_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+
   /** dr_latin is a specific latin (LArge Time INcrement)solver for dual relay problems.\n
    * \param[in] problem structure that represents the Relay (M, q...)
    * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.

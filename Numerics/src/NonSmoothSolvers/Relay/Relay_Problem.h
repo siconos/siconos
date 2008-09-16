@@ -30,8 +30,8 @@
   \f$
   \left\lbrace
   \begin{array}{l}
-  w - M z = q \\
-  -w \in \partial\psi_{[-b, a]}(z)\\
+  w = M z + q \\
+  -w \in N_{[lb, ub]}(z)\\
   \end{array}
   \right.
   \f$
@@ -42,8 +42,8 @@
   \f$
   \left\lbrace
   \begin{array}{l}
-  w - M z = q\\
-  -z \in \partial\psi_{[-b,a]}(w)\\
+  w = M z + q\\
+  -z \in N_{[lb,ub]}(w)\\
   \end{array}
   \right.
   \f$
@@ -91,8 +91,8 @@ typedef struct
   int size;
   NumericsMatrix* M;
   double * q;
-  double * a;
-  double * b;
+  double * lb;
+  double * ub;
 } Relay_Problem;
 
 #ifdef __cplusplus

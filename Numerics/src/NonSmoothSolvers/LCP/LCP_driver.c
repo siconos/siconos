@@ -240,7 +240,7 @@ int lcp_driver_DenseMatrix(LinearComplementarity_Problem* problem, double *z , d
   /*error */
   else
   {
-    fprintf(stderr, "lcp_driver_DenseMatrix error: unknown solver named: %s\n", name);
+    fprintf(stderr, "lcp_driver_DenseMatrix error: unknown solver name: %s\n", name);
     exit(EXIT_FAILURE);
   }
 
