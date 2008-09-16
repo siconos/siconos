@@ -61,8 +61,8 @@ void relay_path(Relay_Problem* problem, double *z, double *w, int *info , Solver
   FortranToPathSparse(n, M, 1.0e-18, m_i, m_j, m_ij);
   for (i = 0; i < n; i++)
   {
-    lb[i] = -;
-    ub[i] = 1.e20;
+    lb[i] = b[i];
+    ub[i] = a[i];
   }
   SimpleLCP(n, nnz, m_i, m_j, m_ij, q, lb, ub,
             &termination, z);
