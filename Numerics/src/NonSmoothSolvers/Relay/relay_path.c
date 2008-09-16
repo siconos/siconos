@@ -21,7 +21,7 @@
 #include <string.h>
 #include "LA.h"
 #include <math.h>
-#include "RELAY_Solvers.h"
+#include "Relay_Solvers.h"
 
 static int sVerbose = 0;
 #ifdef HAVE_PATHFERRIS
@@ -83,7 +83,7 @@ void relay_path(Relay_Problem* problem, double *z, double *w, int *info , Solver
     }
     *info = 0;
     /* **** Criterium convergence **** */
-    relay_compute_error(problem, z, w, tol, &err);
+    //relay_compute_error(problem,z,w,tol,&err);
 
     if (verbose > 0)
       printf("PATH : RELAY Solved, error %10.7f.\n", err);
