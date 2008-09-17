@@ -109,6 +109,8 @@ NEW_TEST(LCPtest main_lcp.c)
 SET(MLCPtest_PROPERTIES WILL_FAIL TRUE)
 NEW_TEST(MLCPtest main_mlcp.cpp)
 
+NEW_TEST(Relaytest main_relay.c)
+
 END_TEST()
 
 IF(PRINT_ENV)

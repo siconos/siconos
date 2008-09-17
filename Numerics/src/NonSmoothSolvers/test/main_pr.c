@@ -188,7 +188,7 @@ int test_mmc(void)
     fscanf(f4, "%d", &nll);
     fscanf(f4, "%s", vall);
     qi = atof(vall);
-    b[nll - 1] = qi;
+    b[nll - 1] = -qi;
   }
 
 
@@ -220,552 +220,606 @@ int test_mmc(void)
   }
 
 
+  /*           Initialization  of the Relay problem               */
+
+
+  Relay_Problem * problem = malloc(sizeof(*problem));
+  NumericsMatrix * MM = malloc(sizeof(*MM));
+  MM->matrix0 = vecM;
+  MM->size0 = n;
+  MM->size1 = n;
+  MM->storageType = 0;
+  problem->q = q;
+  problem->M = MM;
+  problem->ub = a;
+  problem->lb = b;
+
+  /*           Initialization  of the Options               */
+
+  Solver_Options * options ;
+  Solver_Options * local_options = NULL;
+  if (problem->M->storageType == 0)
+  {
+    printf("\n\n  ");
+    printf("The matrix of the LCP is dense (ie double* storage) ");
+    printf("\n\n  ");
+    numberOfSolvers = 1;
+    options = malloc(numberOfSolvers * sizeof(*options));
+    local_options = options;
+    /* Is M symmetric ? */
+    for (i = 0 ; i < n ; ++i)
+    {
+      for (j = 0 ; j < i ; ++j)
+      {
+        if (abs(problem->M->matrix0[i * n + j] - problem->M->matrix0[j * n + i]) > 1e-16)
+        {
+          nonsymmetric = 1;
+          break;
+        }
+      }
+    }
+
+    strcat(nameList, "    PGS     |");
+    strcpy(local_options->solverName, "PGS");
+    int iparam[2] = {maxIter, 0};
+    double dparam[2] = {tolerance, 0.0};
+    local_options->iSize = 2;
+    local_options->dSize = 2;
+    local_options->iparam = iparam;
+    local_options->dparam = dparam;
+    local_options->isSet = 1;
+    local_options->filterOn = 0;
+    int info1 = lcp_driver(problem, z[k] , w[k], options, numberOfSolvers, &global_options);
+    comp = DDOT(n , z[k] , incx , w[k] , incy);
+    DCOPY(n , w[k], incx, wBuffer , incy);
+    DAXPY(n , alpha , problem->q , incx , wBuffer , incy);
+    prod(n, n, beta, problem->M, z[k], alpha, wBuffer);
+    diff = DNRM2(n , wBuffer  , incx);
+
+    if (isSparse == 0)
+      printf("  PGS     (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |\n", info1, local_options->iparam[1], local_options->dparam[1], comp, diff);
+    else
+      printf("Gauss-Seidel/PGS     (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |\n", info1, options[0].iparam[1], options[0].dparam[1], comp, diff);
+
+    if (info1 != 0)
+      info = info1;
+    k++;
+
+
+    strcpy(meth_pr1.pr.name, "NLGS");
+    meth_pr1.pr.itermax  =  50000;
+    meth_pr1.pr.tol      =  0.000001;
+    meth_pr1.pr.chat     =  1;
+
+
+    strcpy(meth_pr2.pr.name, "Latin");
+    meth_pr2.pr.itermax  =  50000;
+    meth_pr2.pr.tol      =  0.0000001;
+    meth_pr2.pr.k_latin  =  0.003;//0.003;
+    meth_pr2.pr.chat     =  1;
+
+
+
+
+    meth_pr1.pr.a = (double*)malloc(n * sizeof(double));
+    meth_pr1.pr.b = (double*)malloc(n * sizeof(double));
+    meth_pr2.pr.a = (double*)malloc(n * sizeof(double));
+    meth_pr2.pr.b = (double*)malloc(n * sizeof(double));
+
+    for (i = 0; i <= n - 1; i++)
+    {
+
+      meth_pr1.pr.a[i] =  a[i];
+      meth_pr1.pr.b[i] = -b[i];
+      meth_pr2.pr.a[i] =  a[i];
+      meth_pr2.pr.b[i] = -b[i];
+
+
+    }
+
+
+
 
 #ifdef CHAT
-  if (nonsymmetric) printf("\n !! WARNING !!\n M is a non symmetric matrix \n \n");
-  else printf(" \n M is a symmetric matrix \n \n");
+    printf("**** NLGS TEST ****\n \n");
+#endif
+    info1 = pr_driver(vec, q, &n, &meth_pr1, z1, w1);
+
+#ifdef CHAT
+    printf("\n**** LATIN TEST ***\n \n");
 #endif
 
+    //  info2 = pr_driver (vec,q,&n,&meth_pr2,z2,w2);
+    info2 = 0;
 
-
-
-
-  /*           Initialization                 */
-
-  strcpy(meth_pr1.pr.name, "NLGS");
-  meth_pr1.pr.itermax  =  50000;
-  meth_pr1.pr.tol      =  0.000001;
-  meth_pr1.pr.chat     =  1;
-
-
-  strcpy(meth_pr2.pr.name, "Latin");
-  meth_pr2.pr.itermax  =  50000;
-  meth_pr2.pr.tol      =  0.0000001;
-  meth_pr2.pr.k_latin  =  0.003;//0.003;
-  meth_pr2.pr.chat     =  1;
-
-
-
-
-  meth_pr1.pr.a = (double*)malloc(n * sizeof(double));
-  meth_pr1.pr.b = (double*)malloc(n * sizeof(double));
-  meth_pr2.pr.a = (double*)malloc(n * sizeof(double));
-  meth_pr2.pr.b = (double*)malloc(n * sizeof(double));
-
-  for (i = 0; i <= n - 1; i++)
-  {
-
-    meth_pr1.pr.a[i] =  a[i];
-    meth_pr1.pr.b[i] = -b[i];
-    meth_pr2.pr.a[i] =  a[i];
-    meth_pr2.pr.b[i] = -b[i];
-
-
-  }
-
+    if (info1 >= info2)
+    {
+      return info1;
+    }
+    else return info2;
 
 
 
 #ifdef CHAT
-  printf("**** NLGS TEST ****\n \n");
-#endif
-  info1 = pr_driver(vec, q, &n, &meth_pr1, z1, w1);
+    printf(" *** ************************************** ***\n");
+    for (i = 0 ; i < n ; ++i)
+      printf(" NLGS RESULT : %10.4e  %10.4e| LATIN RESULT : % 10.4e  %10.4e \n" , z1[i], w1[i], z2[i], w2[i]);
 
-#ifdef CHAT
-  printf("\n**** LATIN TEST ***\n \n");
-#endif
-
-  //  info2 = pr_driver (vec,q,&n,&meth_pr2,z2,w2);
-  info2 = 0;
-
-  if (info1 >= info2)
-  {
-    return info1;
-  }
-  else return info2;
-
-
-
-#ifdef CHAT
-  printf(" *** ************************************** ***\n");
-  for (i = 0 ; i < n ; ++i)
-    printf(" NLGS RESULT : %10.4e  %10.4e| LATIN RESULT : % 10.4e  %10.4e \n" , z1[i], w1[i], z2[i], w2[i]);
-
-  printf(" -- SOLVEUR --- ITER --- ERR-------INT-------NUL-w-----POS-w-----NPOS-w-----\n");
+    printf(" -- SOLVEUR --- ITER --- ERR-------INT-------NUL-w-----POS-w-----NPOS-w-----\n");
 
 
 
 
-  /*  TEST of behavior laws */
+    /*  TEST of behavior laws */
 
 
 
-  for (i = 0; i < n ; i ++)
-  {
+    for (i = 0; i < n ; i ++)
+    {
 
-    c[i] = (meth_pr1.pr.a[i] - meth_pr1.pr.b[i]) / 2;
-    d[i] = (meth_pr1.pr.a[i] + meth_pr1.pr.b[i]) / 2;
+      c[i] = (meth_pr1.pr.a[i] - meth_pr1.pr.b[i]) / 2;
+      d[i] = (meth_pr1.pr.a[i] + meth_pr1.pr.b[i]) / 2;
 
-  }
-
-
-  DCOPY(n, z1, incx, zt1, incy);
-  DCOPY(n, z2, incx, zt2, incy);
-
-  alpha = -1.;
-  DAXPY(n , alpha , c , incx , zt1 , incy);
-
-  alpha = -1.;
-  DAXPY(n , alpha , c , incx , zt2 , incy);
-
-  alpha = 1.;
-  beta  = 0.;
-  DGEMV(LA_NOTRANS , n , n , beta , vec , n , q , incx , alpha , qt , incy);
+    }
 
 
+    DCOPY(n, z1, incx, zt1, incy);
+    DCOPY(n, z2, incx, zt2, incy);
 
-  /*                 Relay                */
+    alpha = -1.;
+    DAXPY(n , alpha , c , incx , zt1 , incy);
 
+    alpha = -1.;
+    DAXPY(n , alpha , c , incx , zt2 , incy);
 
-  /*      zt in interval [-d,d]       */
-
-  abs_part(zt1, abso1, n);
-
-  abs_part(d, abso2, n);
-
-  alpha = -1.0;
-  DAXPY(n , alpha , abso1 , incx , abso2 , incy);
-
-  min_part(abso2, &mini, n);
-
-  mini = - mini;
-
-  dim = 1;
-  pos_part(&mini, &mini, dim) ;
-
-
-  abs_part(zt1, abso2, n);
-
-  max_part(abso2 , &max11 , n);
-
-  max11 = mini / max11;
-
-
-  /*       Test of |w| = 0        */
+    alpha = 1.;
+    beta  = 0.;
+    DGEMV(LA_NOTRANS , n , n , beta , vec , n , q , incx , alpha , qt , incy);
 
 
 
-  abs_part(zt1, abso1, n);
-
-  abs_part(d, abso2, n);
-
-  alpha = -1.0;
-  DAXPY(n , alpha , abso1 , incx , abso2 , incy);
-
-  abs_part(abso2, abso1, n);
-
-  abs_part(w1, abso2, n);
-
-  comp11 = DDOT(n , abso1 , incx , abso2 , incy);
+    /*                 Relay                */
 
 
-  abs_part(zt1, abso2, n);
+    /*      zt in interval [-d,d]       */
 
-  max_part(abso2 , &max2 , n);
+    abs_part(zt1, abso1, n);
 
-  abs_part(w1, abso2, n);
+    abs_part(d, abso2, n);
 
-  max_part(abso2 , &max1 , n);
+    alpha = -1.0;
+    DAXPY(n , alpha , abso1 , incx , abso2 , incy);
+
+    min_part(abso2, &mini, n);
+
+    mini = - mini;
+
+    dim = 1;
+    pos_part(&mini, &mini, dim) ;
 
 
-  if (max1 > 1e-10)
-  {
+    abs_part(zt1, abso2, n);
 
-    comp11 = comp11 / (n * max1 * max2);
+    max_part(abso2 , &max11 , n);
 
-  }
-  else
-  {
+    max11 = mini / max11;
+
+
+    /*       Test of |w| = 0        */
+
+
+
+    abs_part(zt1, abso1, n);
+
+    abs_part(d, abso2, n);
+
+    alpha = -1.0;
+    DAXPY(n , alpha , abso1 , incx , abso2 , incy);
+
+    abs_part(abso2, abso1, n);
 
     abs_part(w1, abso2, n);
-    max_part(abso2, &maxi_1, n);
 
-    abs_part(q, abso1, n);
-    max_part(abso1, &maxi_2, n);
-
-    if (maxi_1 > maxi_2)
-      max1 = maxi_1;
-    else
-      max1 = maxi_2;
-
-    comp11 = comp11 / (n * max2 * max1);
-
-  }
+    comp11 = DDOT(n , abso1 , incx , abso2 , incy);
 
 
+    abs_part(zt1, abso2, n);
 
-  /*       Test of wt > 0       */
-
-
-  DCOPY(n, zt1, incx, abso1, incy);
-
-  alpha = 1.0;
-  DAXPY(n , alpha , d , incx , abso1 , incy);
-
-  abs_part(abso1, abso2, n);
-
-  pos_part(w1, abso1, n) ;
-
-  comp111 = DDOT(n , abso1 , incx , abso2 , incy);
-
-  abs_part(zt1, abso2, n);
-
-  max_part(abso2 , &max2 , n);
-
-  abs_part(w1, abso2, n);
-
-  max_part(abso2 , &max1 , n);
-
-
-
-  if (max1 > 1e-10)
-  {
-
-    comp111 = comp111 / (n * max1 * max2);
-
-  }
-  else
-  {
+    max_part(abso2 , &max2 , n);
 
     abs_part(w1, abso2, n);
-    max_part(abso2, &maxi_1, n);
 
-    abs_part(q, abso1, n);
-    max_part(abso1, &maxi_2, n);
+    max_part(abso2 , &max1 , n);
 
-    if (maxi_1 > maxi_2)
-      max1 = maxi_1;
+
+    if (max1 > 1e-10)
+    {
+
+      comp11 = comp11 / (n * max1 * max2);
+
+    }
     else
-      max1 = maxi_2;
+    {
 
-    comp111 = comp111 / (n * max2 * max1);
+      abs_part(w1, abso2, n);
+      max_part(abso2, &maxi_1, n);
 
-  }
+      abs_part(q, abso1, n);
+      max_part(abso1, &maxi_2, n);
 
+      if (maxi_1 > maxi_2)
+        max1 = maxi_1;
+      else
+        max1 = maxi_2;
 
+      comp11 = comp11 / (n * max2 * max1);
 
-
-
-
-  /*        Test of wt < 0         */
-
-
-  DCOPY(n, zt1, incx, abso1, incy);
-
-  alpha = -1.0;
-  DAXPY(n , alpha , d , incx , abso1 , incy);
-
-  abs_part(abso1, abso2, n);
-
-  DCOPY(n, w1, incx, abso1, incy);
-
-  alpha = -1.;
-  DSCAL(n , alpha , abso1 , incx);
-
-  pos_part(abso1, abso1, n) ;
-
-  comp1111 = DDOT(n , abso1 , incx , abso2 , incy);
-
-  abs_part(zt1, abso2, n);
-
-  max_part(abso2 , &max2 , n);
-
-  abs_part(w1, abso2, n);
-
-  max_part(abso2 , &max1 , n);
+    }
 
 
 
-  if (max1 > 1e-10)
-  {
+    /*       Test of wt > 0       */
 
-    comp1111 = comp1111 / (n * max1 * max2);
 
-  }
-  else
-  {
+    DCOPY(n, zt1, incx, abso1, incy);
+
+    alpha = 1.0;
+    DAXPY(n , alpha , d , incx , abso1 , incy);
+
+    abs_part(abso1, abso2, n);
+
+    pos_part(w1, abso1, n) ;
+
+    comp111 = DDOT(n , abso1 , incx , abso2 , incy);
+
+    abs_part(zt1, abso2, n);
+
+    max_part(abso2 , &max2 , n);
 
     abs_part(w1, abso2, n);
-    max_part(abso2, &maxi_1, n);
 
-    abs_part(q, abso1, n);
-    max_part(abso1, &maxi_2, n);
+    max_part(abso2 , &max1 , n);
 
-    if (maxi_1 > maxi_2)
-      max1 = maxi_1;
+
+
+    if (max1 > 1e-10)
+    {
+
+      comp111 = comp111 / (n * max1 * max2);
+
+    }
     else
-      max1 = maxi_2;
+    {
 
-    comp1111 = comp1111 / (n * max2 * max1);
+      abs_part(w1, abso2, n);
+      max_part(abso2, &maxi_1, n);
 
-  }
+      abs_part(q, abso1, n);
+      max_part(abso1, &maxi_2, n);
 
+      if (maxi_1 > maxi_2)
+        max1 = maxi_1;
+      else
+        max1 = maxi_2;
 
+      comp111 = comp111 / (n * max2 * max1);
 
-  /*                    Equilibrium                  */
-
-
-
-  alpha = -1;
-  DAXPY(n , alpha , q , incx , w1 , incy);
-
-  beta  = 1;
-  DGEMV(LA_NOTRANS , n , n , beta , vec , n , z1 , incx , alpha , w1 , incy);
-
-  num = DNRM2(n , w1 , incx);
-  den = DNRM2(n , q , incx);
-
-  diff1 = num / den ;
+    }
 
 
 
-  /*                 Relay        */
-
-
-  /*      zt in interval [-d,d]       */
-
-
-  abs_part(zt2, abso1, n);
-
-  abs_part(d, abso2, n);
-
-  alpha = -1.0;
-  DAXPY(n , alpha , abso1 , incx , abso2 , incy);
-
-  min_part(abso2, &mini, n);
-
-  mini = - mini;
-
-  dim = 1;
-  pos_part(&mini, &mini, dim) ;
-
-
-  abs_part(zt2, abso2, n);
-
-  max_part(abso2 , &max22 , n);
-
-  max22 = mini / max22;
-
-
-  /*        Test of |w| = 0        */
 
 
 
-  abs_part(zt2, abso1, n);
-
-  abs_part(d, abso2, n);
-
-  alpha = -1.0;
-  DAXPY(n , alpha , abso1 , incx , abso2 , incy);
-
-  abs_part(abso2, abso1, n);
-
-  abs_part(w2, abso2, n);
-
-  comp22 = DDOT(n , abso1 , incx , abso2 , incy);
+    /*        Test of wt < 0         */
 
 
-  abs_part(zt2, abso2, n);
+    DCOPY(n, zt1, incx, abso1, incy);
 
-  max_part(abso2 , &max2 , n);
+    alpha = -1.0;
+    DAXPY(n , alpha , d , incx , abso1 , incy);
 
-  abs_part(w2, abso2, n);
+    abs_part(abso1, abso2, n);
 
-  max_part(abso2 , &max1 , n);
+    DCOPY(n, w1, incx, abso1, incy);
+
+    alpha = -1.;
+    DSCAL(n , alpha , abso1 , incx);
+
+    pos_part(abso1, abso1, n) ;
+
+    comp1111 = DDOT(n , abso1 , incx , abso2 , incy);
+
+    abs_part(zt1, abso2, n);
+
+    max_part(abso2 , &max2 , n);
+
+    abs_part(w1, abso2, n);
+
+    max_part(abso2 , &max1 , n);
 
 
 
-  if (max1 > 1e-10)
-  {
+    if (max1 > 1e-10)
+    {
 
-    comp22 = comp22 / (n * max1 * max2);
+      comp1111 = comp1111 / (n * max1 * max2);
 
-  }
-  else
-  {
+    }
+    else
+    {
+
+      abs_part(w1, abso2, n);
+      max_part(abso2, &maxi_1, n);
+
+      abs_part(q, abso1, n);
+      max_part(abso1, &maxi_2, n);
+
+      if (maxi_1 > maxi_2)
+        max1 = maxi_1;
+      else
+        max1 = maxi_2;
+
+      comp1111 = comp1111 / (n * max2 * max1);
+
+    }
+
+
+
+    /*                    Equilibrium                  */
+
+
+
+    alpha = -1;
+    DAXPY(n , alpha , q , incx , w1 , incy);
+
+    beta  = 1;
+    DGEMV(LA_NOTRANS , n , n , beta , vec , n , z1 , incx , alpha , w1 , incy);
+
+    num = DNRM2(n , w1 , incx);
+    den = DNRM2(n , q , incx);
+
+    diff1 = num / den ;
+
+
+
+    /*                 Relay        */
+
+
+    /*      zt in interval [-d,d]       */
+
+
+    abs_part(zt2, abso1, n);
+
+    abs_part(d, abso2, n);
+
+    alpha = -1.0;
+    DAXPY(n , alpha , abso1 , incx , abso2 , incy);
+
+    min_part(abso2, &mini, n);
+
+    mini = - mini;
+
+    dim = 1;
+    pos_part(&mini, &mini, dim) ;
+
+
+    abs_part(zt2, abso2, n);
+
+    max_part(abso2 , &max22 , n);
+
+    max22 = mini / max22;
+
+
+    /*        Test of |w| = 0        */
+
+
+
+    abs_part(zt2, abso1, n);
+
+    abs_part(d, abso2, n);
+
+    alpha = -1.0;
+    DAXPY(n , alpha , abso1 , incx , abso2 , incy);
+
+    abs_part(abso2, abso1, n);
 
     abs_part(w2, abso2, n);
-    max_part(abso2, &maxi_1, n);
 
-    abs_part(q, abso1, n);
-    max_part(abso1, &maxi_2, n);
-
-    if (maxi_1 > maxi_2)
-      max1 = maxi_1;
-    else
-      max1 = maxi_2;
-
-    comp22 = comp22 / (n * max2 * max1);
-
-  }
+    comp22 = DDOT(n , abso1 , incx , abso2 , incy);
 
 
+    abs_part(zt2, abso2, n);
 
-  /*       Test of wt > 0       */
-
-
-
-  DCOPY(n, zt2, incx, abso1, incy);
-
-  alpha = 1.0;
-  DAXPY(n , alpha , d , incx , abso1 , incy);
-
-  abs_part(abso1, abso2, n);
-
-  pos_part(w2, abso1, n) ;
-
-  comp222 = DDOT(n , abso1 , incx , abso2 , incy);
-
-  abs_part(zt2, abso2, n);
-
-  max_part(abso2 , &max2 , n);
-
-  abs_part(w2, abso2, n);
-
-  max_part(abso2 , &max1 , n);
-
-
-
-  if (max1 > 1e-10)
-  {
-
-    comp222 = comp222 / (n * max1 * max2);
-
-  }
-  else
-  {
+    max_part(abso2 , &max2 , n);
 
     abs_part(w2, abso2, n);
-    max_part(abso2, &maxi_1, n);
 
-    abs_part(q, abso1, n);
-    max_part(abso1, &maxi_2, n);
+    max_part(abso2 , &max1 , n);
 
-    if (maxi_1 > maxi_2)
-      max1 = maxi_1;
+
+
+    if (max1 > 1e-10)
+    {
+
+      comp22 = comp22 / (n * max1 * max2);
+
+    }
     else
-      max1 = maxi_2;
+    {
 
-    comp222 = comp222 / (n * max2 * max1);
+      abs_part(w2, abso2, n);
+      max_part(abso2, &maxi_1, n);
 
-  }
+      abs_part(q, abso1, n);
+      max_part(abso1, &maxi_2, n);
 
-  /*        Test of wt < 0       */
+      if (maxi_1 > maxi_2)
+        max1 = maxi_1;
+      else
+        max1 = maxi_2;
 
+      comp22 = comp22 / (n * max2 * max1);
 
-  DCOPY(n, zt2, incx, abso1, incy);
-
-  alpha = -1.0;
-  DAXPY(n , alpha , d , incx , abso1 , incy);
-
-  abs_part(abso1, abso2, n);
-
-  DCOPY(n, w2, incx, abso1, incy);
-
-  alpha = -1.;
-  DSCAL(n , alpha , abso1 , incx);
-
-  pos_part(abso1, abso1, n) ;
-
-  comp2222 = DDOT(n , abso1 , incx , abso2 , incy);
-
-  abs_part(zt2, abso2, n);
-
-  max_part(abso2 , &max2 , n);
-
-  abs_part(w2, abso2, n);
-
-  max_part(abso2 , &max1 , n);
+    }
 
 
 
-  if (max1 > 1e-10)
-  {
+    /*       Test of wt > 0       */
 
-    comp2222 = comp2222 / (n * max1 * max2);
 
-  }
-  else
-  {
+
+    DCOPY(n, zt2, incx, abso1, incy);
+
+    alpha = 1.0;
+    DAXPY(n , alpha , d , incx , abso1 , incy);
+
+    abs_part(abso1, abso2, n);
+
+    pos_part(w2, abso1, n) ;
+
+    comp222 = DDOT(n , abso1 , incx , abso2 , incy);
+
+    abs_part(zt2, abso2, n);
+
+    max_part(abso2 , &max2 , n);
 
     abs_part(w2, abso2, n);
-    max_part(abso2, &maxi_1, n);
 
-    abs_part(q, abso1, n);
-    max_part(abso1, &maxi_2, n);
+    max_part(abso2 , &max1 , n);
 
-    if (maxi_1 > maxi_2)
-      max1 = maxi_1;
+
+
+    if (max1 > 1e-10)
+    {
+
+      comp222 = comp222 / (n * max1 * max2);
+
+    }
     else
-      max1 = maxi_2;
+    {
 
-    comp2222 = comp2222 / (n * max2 * max1);
+      abs_part(w2, abso2, n);
+      max_part(abso2, &maxi_1, n);
 
-  }
+      abs_part(q, abso1, n);
+      max_part(abso1, &maxi_2, n);
 
+      if (maxi_1 > maxi_2)
+        max1 = maxi_1;
+      else
+        max1 = maxi_2;
 
-  /*                    Equilibrium                  */
+      comp222 = comp222 / (n * max2 * max1);
 
-  alpha = -1;
-  DAXPY(n , alpha , q , incx , w2 , incy);
+    }
 
-  beta  = 1;
-  DGEMV(LA_NOTRANS , n , n , beta , vec , n , z2 , incx , alpha , w2 , incy);
-
-  num = DNRM2(n , w2 , incx);
-  den = DNRM2(n , q , incx);
-
-  diff2 = num / den ;
-
+    /*        Test of wt < 0       */
 
 
-  printf("\n  NLGS RESULT: %5d|%10.4e|%10.4e|%10.4e|%10.4e|%10.4e|\n" , meth_pr1.pr.iter ,  diff1, max11, comp11, comp111, comp1111);
-  printf(" LATIN RESULT: %5d|%10.4e|%10.4e|%10.4e|%10.4e|%10.4e|\n" , meth_pr2.pr.iter ,  diff2, max22, comp22, comp222, comp2222);
+    DCOPY(n, zt2, incx, abso1, incy);
+
+    alpha = -1.0;
+    DAXPY(n , alpha , d , incx , abso1 , incy);
+
+    abs_part(abso1, abso2, n);
+
+    DCOPY(n, w2, incx, abso1, incy);
+
+    alpha = -1.;
+    DSCAL(n , alpha , abso1 , incx);
+
+    pos_part(abso1, abso1, n) ;
+
+    comp2222 = DDOT(n , abso1 , incx , abso2 , incy);
+
+    abs_part(zt2, abso2, n);
+
+    max_part(abso2 , &max2 , n);
+
+    abs_part(w2, abso2, n);
+
+    max_part(abso2 , &max1 , n);
+
+
+
+    if (max1 > 1e-10)
+    {
+
+      comp2222 = comp2222 / (n * max1 * max2);
+
+    }
+    else
+    {
+
+      abs_part(w2, abso2, n);
+      max_part(abso2, &maxi_1, n);
+
+      abs_part(q, abso1, n);
+      max_part(abso1, &maxi_2, n);
+
+      if (maxi_1 > maxi_2)
+        max1 = maxi_1;
+      else
+        max1 = maxi_2;
+
+      comp2222 = comp2222 / (n * max2 * max1);
+
+    }
+
+
+    /*                    Equilibrium                  */
+
+    alpha = -1;
+    DAXPY(n , alpha , q , incx , w2 , incy);
+
+    beta  = 1;
+    DGEMV(LA_NOTRANS , n , n , beta , vec , n , z2 , incx , alpha , w2 , incy);
+
+    num = DNRM2(n , w2 , incx);
+    den = DNRM2(n , q , incx);
+
+    diff2 = num / den ;
+
+
+
+    printf("\n  NLGS RESULT: %5d|%10.4e|%10.4e|%10.4e|%10.4e|%10.4e|\n" , meth_pr1.pr.iter ,  diff1, max11, comp11, comp111, comp1111);
+    printf(" LATIN RESULT: %5d|%10.4e|%10.4e|%10.4e|%10.4e|%10.4e|\n" , meth_pr2.pr.iter ,  diff2, max22, comp22, comp222, comp2222);
 
 
 
 
 
-  printf(" *** ************************************** ***\n");
+    printf(" *** ************************************** ***\n");
 #endif
 
 
-  free(vec);
-  free(q);
-  free(qt);
-  free(z1);
-  free(w1);
-  free(z2);
-  free(w2);
-  free(a);
-  free(b);
-  free(zt1);
-  free(zt2);
-  free(abso1);
-  free(abso2);
-  free(d);
-  free(abso3);
-  free(c);
-  free(meth_pr1.pr.a);
-  free(meth_pr1.pr.b);
-  free(meth_pr2.pr.a);
-  free(meth_pr2.pr.b);
-}
+    free(vec);
+    free(q);
+    free(qt);
+    free(z1);
+    free(w1);
+    free(z2);
+    free(w2);
+    free(a);
+    free(b);
+    free(zt1);
+    free(zt2);
+    free(abso1);
+    free(abso2);
+    free(d);
+    free(abso3);
+    free(c);
+    free(meth_pr1.pr.a);
+    free(meth_pr1.pr.b);
+    free(meth_pr2.pr.a);
+    free(meth_pr2.pr.b);
+  }
 
 
-int main(void)
-{
-  return test_mmc();
-}
+  int main(void)
+  {
+    return test_mmc();
+  }
 
 

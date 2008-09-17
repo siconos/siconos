@@ -200,7 +200,7 @@ extern "C" {
       - >0 : otherwise see each solver for more information about the log info
    * \author Nineb Sheherazade.
    */
-  int Relay_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* options, Numerics_Options* global_options);
+  int relay_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* options, Numerics_Options* global_options);
 
   /** General interface to solvers for friction-contact 3D problem
       \param[in] , the structure which handles the Friction-Contact problem
