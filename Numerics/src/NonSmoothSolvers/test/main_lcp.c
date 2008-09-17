@@ -331,7 +331,7 @@ int test_lcp_series(LinearComplementarity_Problem * problem, int* solversList)
   }
 
   /* Path */
-#ifdef PATH_DRIVER
+#ifdef HAVE_PATHFERRIS
   if (solversList[6] == 1)
   {
     strcat(nameList, "    PATH     |");
@@ -851,7 +851,7 @@ int test_matrix(void)
   double criteria = 0.0;
   double *sol = NULL;
 
-  int NBTEST = 14;
+  int NBTEST = 15;
 
   /* === Building of the LCPs === */
 
@@ -1074,6 +1074,17 @@ int test_matrix(void)
         solversList = l1;
         solversList2 = l2;
         solversListSBM = l3;
+      }
+    case 14:
+      getProblem("MATRIX/relay.dat", problem);
+      hasSBM = 0;
+      hasDense = 1;
+      hasUnstable = 1;
+      {
+        int l1[12] = {0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0};
+        int l2[12] = {1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1};
+        solversList = l1;
+        solversList2 = l2;
       }
       break;
     }
