@@ -761,11 +761,41 @@ void getProblemSBM(char* name, LinearComplementarity_Problem *  problem)
   for (i = 0 ; i < blmat->size ; i++) fscanf(LCPfile , "%d" , &blmat->blocksize[i]);
   blmat->RowIndex = (int*)malloc(blmat->nbblocks * sizeof(int));
   blmat->ColumnIndex = (int*)malloc(blmat->nbblocks * sizeof(int));
+  blmat->index1_data = (size_t*) malloc((blmat->size + 1) * sizeof(size_t));
   for (i = 0 ; i < blmat->nbblocks ; i++)
   {
     fscanf(LCPfile , "%d" , &blmat->RowIndex[i]);
     fscanf(LCPfile , "%d" , &blmat->ColumnIndex[i]);
   }
+
+
+  /* Boost sparse compressed : index1_data construction */
+  /* see SparseBlockMatrix.h */
+  int current_block;
+  int current_row;
+  int k;
+
+  current_block = 0;
+  current_row = 0;
+  while (current_block < blmat->nbblocks)
+  {
+    for (k = current_block; blmat->RowIndex[current_block] == blmat->RowIndex[k] && k < blmat->nbblocks; ++k) ;
+    for (i = current_row; i < blmat->RowIndex[current_block] + 1; ++i)
+      blmat->index1_data[i] = current_block;
+
+    blmat->index1_data[i] = k;
+    current_row = blmat->RowIndex[current_block] + 1;
+    current_block = k;
+  };
+
+  int k1, k2;
+
+  for (i = 0, k1 = 0; k1 < blmat->nbblocks; k1 = k2, i++)
+  {
+    for (k2 = k1; blmat->RowIndex[k1] == blmat->RowIndex[k2] && k2 < blmat->nbblocks; k2++);
+    blmat->index1_data[i] = k1;
+    blmat->index1_data[i + 1] = k2;
+  };
 
   blmat->block = (double**)malloc(blmat->nbblocks * sizeof(double*));
   int pos, sizebl, numberOfRows, numberOfColumns;

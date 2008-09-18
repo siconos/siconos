@@ -69,14 +69,26 @@ void test_BuildNumericsMatrix(NumericsMatrix** MM1, NumericsMatrix** MM2)
   for (i = 0; i < SBM->nbblocks; i++)
     SBM->ColumnIndex[i] = i2[i];
 
-  int k1, k2;
 
-  for (i = 0, k1 = 0; k1 < SBM->nbblocks; k1 = k2, i++)
+  /* Boost sparse compressed : index1_data construction */
+  /* see SparseBlockMatrix.h */
+  int current_block;
+  int current_row;
+  int k;
+
+  current_block = 0;
+  current_row = 0;
+  while (current_block < SBM->nbblocks)
   {
-    for (k2 = k1; SBM->RowIndex[k1] == SBM->RowIndex[k2] && k2 < SBM->nbblocks; k2++);
-    SBM->index1_data[i] = k1;
-    SBM->index1_data[i + 1] = k2;
+    for (k = current_block; SBM->RowIndex[current_block] == SBM->RowIndex[k] && k < SBM->nbblocks; ++k) ;
+    for (i = current_row; i < SBM->RowIndex[current_block] + 1; ++i)
+      SBM->index1_data[i] = current_block;
+
+    SBM->index1_data[i] = k;
+    current_row = SBM->RowIndex[current_block] + 1;
+    current_block = k;
   };
+
   SBM->block = malloc(SBM->nbblocks * sizeof(* (SBM->block)));
   double block0[] = {1, 2 , 0 , 5 , 2 , 1 , 0 , 0 , 0 , 0 , 1 , -1, 4, 0 , -1, 6};
   double block1[] = {3, 4, 0, 0, -1, 1, 0, 6};

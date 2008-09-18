@@ -49,9 +49,10 @@ typedef struct
   double* vec;
 
   /* from boost compressed_matrix */
-  /* index1_data is of size filled1 = size */
+  /* index1_data is of size filled1 = number of non empty lines + 1 */
   /* index2_data is of size filled2   */
-  /* index1_data[lineNumber] -> first block of row */
+  /* a block with number blockNumber inside a row numbered rowNumber verify :
+  /* index1_data[rowNumber]<= block <index1_data[rowNumber+1]
   /* index2_data[blockNumber] -> columnNumber */
   size_t filled1;
   size_t filled2;
