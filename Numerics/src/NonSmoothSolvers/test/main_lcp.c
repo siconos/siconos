@@ -1193,7 +1193,7 @@ int main(void)
   int info2 = test_matrix();
   if (info2 != 0)
   {
-    // printf("Warning: test_mmc log output different from 0 for some solvers.\n");
+    // printf("Warning: test_matrix log output different from 0 for some solvers.\n");
     return info2;
   }
 

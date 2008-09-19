@@ -34,8 +34,7 @@ void pr_latin(Relay_Problem* problem, double *z, double *w, int *info, Solver_Op
   double *b = problem->lb;
   //\todo Rewrite completely the algorithm with a projection.
   int ib;
-  for (ib = 0; ib < n; ib++) b[ib] = -b[ib];
-
+  for (ib = 1 ; ib < n; ib++) b[ib] = -b[ib];
   double k_latin = options->dparam[2];
   int itt = options->iparam[0];
   double errmax = options->dparam[0];
@@ -286,7 +285,7 @@ void pr_latin(Relay_Problem* problem, double *z, double *w, int *info, Solver_Op
 
   }
 
-
+  *info = relay_compute_error(problem, z, w, errmax, &err1);
 
   if (err1 > errmax)
   {

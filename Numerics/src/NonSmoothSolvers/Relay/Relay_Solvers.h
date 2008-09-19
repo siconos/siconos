@@ -67,30 +67,18 @@ LArge Time INcrements solver
 extern "C" {
 #endif
 
-  /** pr_latin is a specific latin solver for primal relay problems.
-   * \param[in] problem structure that represents the Relay (M, q...)
-   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
-   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
-   * \param[out] info an integer which returns the termination value:\n
-   0 = convergence,\n
-   1 = no convergence,\n
-   2 = Cholesky factorization failed,\n
-   3 = Nul diagonal term\n
-   \author Nineb Sheherazade.
-  */
-  void pr_latin(Relay_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
-  /** pr_nlgs is a specific nlgs(non linear Gauss-Seidel) solver for primal relay problems.\n
+  /** relay_nlgs is a projected Gauss-Seidel solver for (primal) relay problems.\n
    * \param[in] problem structure that represents the Relay (M, q...)
    * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:\n
    0 = convergence,\n
    1 = no convergence,\n
-   2 = Nul diagonal term\n
-   \author Nineb Sheherazade.
+   2 = Null diagonal term\n
+   \author V. Acary
   */
-  void pr_nlgs(Relay_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+  void relay_pgs(Relay_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
 
   /** relay_path is a resolution of the Relay with its inherent MCP formulation and using path.\n
@@ -104,6 +92,21 @@ extern "C" {
    \author V. acary
   */
   void relay_path(Relay_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+
+
+  /** pr_latin is a specific latin solver for primal relay problems.
+   * \param[in] problem structure that represents the Relay (M, q...)
+   * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[in-out] w a n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
+   0 = convergence,\n
+   1 = no convergence,\n
+   2 = Cholesky factorization failed,\n
+   3 = Nul diagonal term\n
+   \author Nineb Sheherazade.
+  */
+  void pr_latin(Relay_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+
 
   /** dr_latin is a specific latin (LArge Time INcrement)solver for dual relay problems.\n
    * \param[in] problem structure that represents the Relay (M, q...)
@@ -141,6 +144,34 @@ extern "C" {
    \author Nineb Sheherazade.
   */
   void pr_gsnl(Relay_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+
+  /** This function computes the input vector \f$ w = Mz + q \f$ and checks the validity of the vector z as a solution \n
+     * of the LCP : \n
+     * \f$
+     *   -(Mz + q) \in  N_{[lb,ub]}(z)
+     * \f$
+     * The criterion is based on \f$ error = \|z- proj_{[lb,ub]}(z - \rho * (M*z+q)) \|, \rho >0\f$ \n
+     * This error is divided by \f$ \|q\| \f$ and then compared to tol.\n
+     * \param[in] problem structure that represents the Relay (M, q...)
+     * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
+     * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
+     * \param[in] tolerance
+     * \param[in,out] error
+     * \return status: 0 : convergence, 1: error > tolerance
+     * \author Vincent Acary
+     */
+  int relay_compute_error(Relay_Problem* problem, double *z , double *w, double tolerance, double* error);
+
+
+  /** This function computes the projection on the boxr \f$ [lb,ub]\f$ of the vector  \f$z\f$  \n
+     * \param[in,out] z a n-vector of doubles which returns the projection
+     * \param[in,out] ub a n-vector of doubles which contains the upper bounds
+     * \param[in,out] lb a n-vector of doubles which contains the lower bounds
+     * \return status: 0
+     * \author Vincent Acary
+     */
+  int projectiononbox(double *z , double *lb, double * ub, int n);
+
 
 #ifdef __cplusplus
 }

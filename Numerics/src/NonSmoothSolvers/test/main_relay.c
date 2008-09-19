@@ -36,6 +36,8 @@ const __int32_t *__ctype_tolower ;
 int test_relay_series(Relay_Problem * problem, int* solversList)
 {
   /*
+
+
      solversList[i] = 1 => the corresponding solver will be applied to the input problem
      solversList[i] = 0 => solver ignored.
 
@@ -86,7 +88,7 @@ int test_relay_series(Relay_Problem * problem, int* solversList)
   nonsymmetric = 0;
   int info = 0;
   double alpha = -1, beta  = 1;
-  int maxIter = 1001;
+  int maxIter = 100001;
   double tolerance = 1e-8;
 
   Solver_Options * options ;
@@ -143,7 +145,7 @@ int test_relay_series(Relay_Problem * problem, int* solversList)
   printf("\n\n  ");
   printf("The following solvers are called:");
   printf("\n\n  ");
-  printf("      SOLVER     | ITER/PIVOT |   ERROR    |     w.z     | ||w-Mz-q|| |");
+  printf("      SOLVER     | ITER/PIVOT |   ERROR  |  ||w-Mz-q|| |");
   printf("\n\n  ");
 
   /* Current solver number */
@@ -152,8 +154,8 @@ int test_relay_series(Relay_Problem * problem, int* solversList)
   /* NLGS */
   if (solversList[0] == 1)
   {
-    strcat(nameList, "    NLGS     |");
-    strcpy(local_options->solverName, "NLGS");
+    strcat(nameList, "    PGS     |");
+    strcpy(local_options->solverName, "PGS");
     int iparam[2] = {maxIter, 0};
     double dparam[2] = {tolerance, 0.0};
     local_options->iSize = 2;
@@ -169,7 +171,7 @@ int test_relay_series(Relay_Problem * problem, int* solversList)
     prod(n, n, beta, problem->M, z[k], alpha, wBuffer);
     diff = DNRM2(n , wBuffer  , incx);
 
-    printf("  NLGS     (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |\n", info1, local_options->iparam[1], local_options->dparam[1], comp, diff);
+    printf("  PGS     (LOG:%1d)|      %5d | %10.4g  | %10.4g |\n", info1, local_options->iparam[1], local_options->dparam[1], diff);
 
     /*       if(info1!=0) */
     /*  info = info1; */
@@ -194,14 +196,12 @@ int test_relay_series(Relay_Problem * problem, int* solversList)
     prod(n, n, beta, problem->M, z[k], alpha, wBuffer);
     diff = DNRM2(n , wBuffer , incx);
 
-    printf("    Latin    (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |\n", info1, local_options->iparam[1], local_options->dparam[1], comp, diff);
+    printf("    Latin   (LOG:%1d)|      %5d | %10.4g |  %10.4g |\n", info1, local_options->iparam[1], local_options->dparam[1], diff);
 
     if (info1 != 0)
       /*  info = info1; */
       k++;
   }
-
-  printf("\n\n");
 
   /* =========================== Ouput: comparison between the different methods =========================== */
 
@@ -248,7 +248,7 @@ int test_mmc(void)
   FILE *f1, *f2, *f3, *f4;
   int i, nl, nc;
   double qi, Mij;
-  char val[20], vall[20];
+  char val[20];
 
   /* Building of the RELAY */
   Relay_Problem * problem = malloc(sizeof(*problem));
@@ -363,7 +363,7 @@ int test_mmc(void)
     fscanf(f4, "%d", &nl);
     fscanf(f4, "%s", val);
     qi = atof(val);
-    b[nl - 1] = -qi;
+    b[nl - 1] = qi;
   }
 
 
@@ -409,7 +409,7 @@ int test_mmc(void)
   printf("Run working tests ...\n");
   /* Stable: */
   //  int solversList[11] ={1,1,1,1,0,0,0,1,1,0,0};
-  int solversList[2] = {1, 1};
+  int solversList[3] = {1, 1, 1};
   int info = test_relay_series(problem, solversList);
   printf(" ----------------------------------------------------------\n");
 
@@ -439,432 +439,324 @@ int test_mmc(void)
 
 }
 
-/* /\* To read in a file a LinearComplementarity_Problem with a "double*" storage for M *\/ */
-/* void getProblem(char* name, LinearComplementarity_Problem *  problem) */
-/* { */
+/* To read in a file a Relay_Problem with a "double*" storage for M */
+void getProblem(char* name, Relay_Problem *  problem)
+{
 
-/*   FILE * RELAYfile =  fopen( name,"r" ); */
-/*   if(RELAYfile==NULL) */
-/*     { */
-/*       fprintf(stderr,"fopen RELAYfile: %s\n",name); */
-/*       exit(1); */
-/*     } */
-/*   printf("\n\n******************************************************\n"); */
-/*   printf("Read Linear Complementarity Problem in file %s\n", name); */
-/*   printf("******************************************************\n"); */
+  FILE * Relayfile =  fopen(name, "r");
+  if (Relayfile == NULL)
+  {
+    fprintf(stderr, "fopen Relayfile: %s\n", name);
+    exit(1);
+  }
+  printf("\n\n******************************************************\n");
+  printf("Read Relay Complementarity Problem in file %s\n", name);
+  printf("******************************************************\n");
 
-/*   /\* Dim of the RELAY *\/ */
-/*   int dim; */
-/*   fscanf( RELAYfile , "%d" , &dim ); */
-/*   int dim2 = dim*dim; */
+  /* Dim of the Relay */
+  int dim;
+  fscanf(Relayfile , "%d" , &dim);
+  int dim2 = dim * dim;
 
-/*   problem->M->matrix0 = malloc( dim2*sizeof( double ) ); */
-/*   problem->q = (double*)malloc(  dim*sizeof( double ) ); */
+  problem->M->matrix0 = malloc(dim2 * sizeof(double));
+  problem->q = (double*)malloc(dim * sizeof(double));
+  problem->lb = (double*) malloc(dim * sizeof(double));
+  problem->ub = (double*) malloc(dim * sizeof(double));
+  double * vecM = problem->M->matrix0;
 
-/*   double * vecM = problem->M->matrix0; */
-/*   int i,j; */
-/*   char val[20]; */
-/*   /\* fill M *\/ */
-/*   for( i = 0 ; i < dim ; ++i ){ */
-/*     for( j = 0 ; j < dim ; ++j ){ */
-/*       fscanf(RELAYfile,"%s",val); */
-/*       vecM[ dim*j+i ] = atof(val);     */
-/*     } */
-/*   } */
+  int i, j;
+  char val[20];
+  /* fill M */
+  for (i = 0 ; i < dim ; ++i)
+  {
+    for (j = 0 ; j < dim ; ++j)
+    {
+      fscanf(Relayfile, "%s", val);
+      vecM[ dim * j + i ] = atof(val);
+    }
+  }
 
-/*   /\* fill q *\/ */
-/*   for( i = 0 ; i < dim ; ++i ){ */
-/*     fscanf( RELAYfile , "%s" , val ); */
-/*     problem->q[i] = atof( val ); */
-/*   } */
+  /* fill q */
+  for (i = 0 ; i < dim ; ++i)
+  {
+    fscanf(Relayfile , "%s" , val);
+    problem->q[i] = atof(val);
+  }
+  /* fill lb */
+  for (i = 0 ; i < dim ; ++i)
+  {
+    fscanf(Relayfile , "%s" , val);
+    problem->lb[i] = atof(val);
+  }
+  /* fill ub */
+  for (i = 0 ; i < dim ; ++i)
+  {
+    fscanf(Relayfile , "%s" , val);
+    problem->ub[i] = atof(val);
+  }
 
-/*   /\* fill sol *\/ */
-/*   double* sol = NULL; */
-/*   fscanf( RELAYfile , "%s" , val ); */
-/*   if( !feof( RELAYfile ) ) */
-/*     { */
-/*       sol  = (double*)malloc(  dim*sizeof( double ) ); */
-/*       sol[0] = atof( val ); */
-/*       for( i = 1 ; i < dim ; ++i ){ */
-/*  fscanf( RELAYfile , "%s" , val ); */
-/*  sol[i] = atof( val ); */
-/*       } */
-/*     } */
-/*   printf("\n exact solution : "); */
-/*   if(sol!=NULL) for( i = 0 ; i < problem->size ; ++i ) printf(" %10.4g " , sol[i] ); */
-/*   else printf(" unknown "); */
-/*   printf("\n"); */
+  /* fill sol */
+  double* sol = NULL;
+  fscanf(Relayfile , "%s" , val);
+  if (!feof(Relayfile))
+  {
+    sol  = (double*)malloc(dim * sizeof(double));
+    sol[0] = atof(val);
+    for (i = 1 ; i < dim ; ++i)
+    {
+      fscanf(Relayfile , "%s" , val);
+      sol[i] = atof(val);
+    }
+  }
+  printf("\n exact solution : ");
+  if (sol != NULL) for (i = 0 ; i < problem->size ; ++i) printf(" %10.4g " , sol[i]);
+  else printf(" unknown ");
+  printf("\n");
 
-/*   problem->size = dim; */
-/*   problem->M->size0 = dim; */
-/*   problem->M->size1 = dim; */
-/*   fclose(RELAYfile); */
-/*   if(sol!=NULL) */
-/*     free(sol); */
-/* } */
+  problem->size = dim;
+  problem->M->size0 = dim;
+  problem->M->size1 = dim;
 
-/* /\* To read in a file a LinearComplementarity_Problem with a "SparseBlockStructuredMatrix*" storage for M *\/ */
-/* void getProblemSBM(char* name, LinearComplementarity_Problem *  problem) */
-/* { */
+  fclose(Relayfile);
+  if (sol != NULL)
+    free(sol);
+}
 
-/*   FILE * RELAYfile =  fopen( name,"r" ); */
-/*   if(RELAYfile==NULL) */
-/*     { */
-/*       fprintf(stderr,"fopen RELAYfile: %s\n",name); */
-/*       exit(1); */
-/*     } */
-/*   printf("\n\n******************************************************\n"); */
-/*   printf("Read Linear Complementarity Problem in file %s\n", name); */
-/*   printf("******************************************************\n"); */
+/* To read in a file a LinearComplementarity_Problem with a "SparseBlockStructuredMatrix*" storage for M */
+void getProblemSBM(char* name, Relay_Problem *  problem)
+{
 
-/*   printf("\n The matrix M of the RELAY is a SparseBlockStructuredMatrix.\n"); */
+  /*   FILE * RELAYfile =  fopen( name,"r" ); */
+  /*   if(RELAYfile==NULL) */
+  /*     { */
+  /*       fprintf(stderr,"fopen RELAYfile: %s\n",name); */
+  /*       exit(1); */
+  /*     } */
+  /*   printf("\n\n******************************************************\n"); */
+  /*   printf("Read Linear Complementarity Problem in file %s\n", name); */
+  /*   printf("******************************************************\n"); */
 
-/*   SparseBlockStructuredMatrix * blmat =  problem->M->matrix1; */
+  /*   printf("\n The matrix M of the RELAY is a SparseBlockStructuredMatrix.\n"); */
 
-/*   int i,j; */
-/*   char val[20]; */
+  /*   SparseBlockStructuredMatrix * blmat =  problem->M->matrix1; */
 
-/*   /\***** M *****\/ */
-/*   fscanf( RELAYfile , "%d" , &blmat->nbblocks ); */
-/*   fscanf( RELAYfile , "%d" , &blmat->size ); */
-/*   blmat->blocksize = (int*)malloc( blmat->size * sizeof(int) ); */
-/*   for( i = 0 ; i < blmat->size ; i++) fscanf( RELAYfile , "%d" , &blmat->blocksize[i] ); */
-/*   blmat->RowIndex = (int*)malloc( blmat->nbblocks * sizeof(int) ); */
-/*   blmat->ColumnIndex = (int*)malloc( blmat->nbblocks * sizeof(int) ); */
-/*   for( i = 0 ; i < blmat->nbblocks ; i++ ) */
-/*     { */
-/*       fscanf( RELAYfile , "%d" , &blmat->RowIndex[i] ); */
-/*       fscanf( RELAYfile , "%d" , &blmat->ColumnIndex[i] ); */
-/*     } */
+  /*   int i,j; */
+  /*   char val[20]; */
 
-/*   blmat->block = (double**)malloc( blmat->nbblocks * sizeof(double*) ); */
-/*   int pos, sizebl, numberOfRows, numberOfColumns; */
-/*   for (i = 0 ; i < blmat->nbblocks ; i++)  */
-/*     { */
-/*       pos = blmat->RowIndex[i]; */
-/*       numberOfRows = blmat->blocksize[pos]; */
-/*       if(pos>0) */
-/*  numberOfRows -= blmat->blocksize[pos-1]; */
-/*       pos = blmat->ColumnIndex[i]; */
-/*       numberOfColumns = blmat->blocksize[pos]; */
-/*       if(pos>0) */
-/*  numberOfColumns -= blmat->blocksize[pos-1]; */
-/*       sizebl = numberOfRows * numberOfColumns; */
-/*       blmat->block[i] = (double*)malloc( sizebl * sizeof(double) ); */
-/*       for( j = 0 ; j < sizebl ; j++ ){ */
-/*  fscanf(RELAYfile,"%s",val); */
-/*  blmat->block[i][j] = atof(val); */
-/*       } */
-/*     } */
+  /*   /\***** M *****\/ */
+  /*   fscanf( RELAYfile , "%d" , &blmat->nbblocks ); */
+  /*   fscanf( RELAYfile , "%d" , &blmat->size ); */
+  /*   blmat->blocksize = (int*)malloc( blmat->size * sizeof(int) ); */
+  /*   for( i = 0 ; i < blmat->size ; i++) fscanf( RELAYfile , "%d" , &blmat->blocksize[i] ); */
+  /*   blmat->RowIndex = (int*)malloc( blmat->nbblocks * sizeof(int) ); */
+  /*   blmat->ColumnIndex = (int*)malloc( blmat->nbblocks * sizeof(int) ); */
+  /*   for( i = 0 ; i < blmat->nbblocks ; i++ ) */
+  /*     { */
+  /*       fscanf( RELAYfile , "%d" , &blmat->RowIndex[i] ); */
+  /*       fscanf( RELAYfile , "%d" , &blmat->ColumnIndex[i] ); */
+  /*     } */
 
-/*   int dim = blmat->blocksize[blmat->size-1]; */
-/*   /\**** q ****\/ */
-/*   problem->q = (double*)malloc( dim * sizeof(double) ); */
-/*   for( i = 0 ; i < dim ; i++ ){ */
-/*     fscanf( RELAYfile , "%s" , val ); */
-/*     problem->q[i] = atof( val ); */
-/*   } */
+  /*   blmat->block = (double**)malloc( blmat->nbblocks * sizeof(double*) ); */
+  /*   int pos, sizebl, numberOfRows, numberOfColumns; */
+  /*   for (i = 0 ; i < blmat->nbblocks ; i++)  */
+  /*     { */
+  /*       pos = blmat->RowIndex[i]; */
+  /*       numberOfRows = blmat->blocksize[pos]; */
+  /*       if(pos>0) */
+  /*  numberOfRows -= blmat->blocksize[pos-1]; */
+  /*       pos = blmat->ColumnIndex[i]; */
+  /*       numberOfColumns = blmat->blocksize[pos]; */
+  /*       if(pos>0) */
+  /*  numberOfColumns -= blmat->blocksize[pos-1]; */
+  /*       sizebl = numberOfRows * numberOfColumns; */
+  /*       blmat->block[i] = (double*)malloc( sizebl * sizeof(double) ); */
+  /*       for( j = 0 ; j < sizebl ; j++ ){ */
+  /*  fscanf(RELAYfile,"%s",val); */
+  /*  blmat->block[i][j] = atof(val); */
+  /*       } */
+  /*     } */
 
-/*   fscanf( RELAYfile , "%s" , val ); */
+  /*   int dim = blmat->blocksize[blmat->size-1]; */
+  /*   /\**** q ****\/ */
+  /*   problem->q = (double*)malloc( dim * sizeof(double) ); */
+  /*   for( i = 0 ; i < dim ; i++ ){ */
+  /*     fscanf( RELAYfile , "%s" , val ); */
+  /*     problem->q[i] = atof( val ); */
+  /*   } */
 
-/*   double* sol = NULL; */
-/*   if( !feof( RELAYfile ) ){ */
-/*     sol  = (double*)malloc(  dim*sizeof( double ) ); */
-/*     sol[0] = atof( val ); */
-/*     for( i = 1 ; i < dim ; i++ ){ */
-/*       fscanf( RELAYfile , "%s" , val ); */
-/*       sol[i] = atof( val ); */
-/*     } */
-/*   } */
-/*   printf("\n exact solution : "); */
-/*   if(sol!=NULL) for( i = 0 ; i < problem->size ; ++i ) printf(" %10.4g " , sol[i] ); */
-/*   else printf(" unknown "); */
-/*   printf("\n"); */
+  /*   fscanf( RELAYfile , "%s" , val ); */
 
-/*   problem->size = dim; */
-/*   problem->M->size0 = dim; */
-/*   problem->M->size1 = dim; */
-/*   fclose(RELAYfile); */
-/*   if(sol!=NULL) */
-/*     free(sol); */
-/* } */
+  /*   double* sol = NULL; */
+  /*   if( !feof( RELAYfile ) ){ */
+  /*     sol  = (double*)malloc(  dim*sizeof( double ) ); */
+  /*     sol[0] = atof( val ); */
+  /*     for( i = 1 ; i < dim ; i++ ){ */
+  /*       fscanf( RELAYfile , "%s" , val ); */
+  /*       sol[i] = atof( val ); */
+  /*     } */
+  /*   } */
+  /*   printf("\n exact solution : "); */
+  /*   if(sol!=NULL) for( i = 0 ; i < problem->size ; ++i ) printf(" %10.4g " , sol[i] ); */
+  /*   else printf(" unknown "); */
+  /*   printf("\n"); */
 
-/* int test_matrix( void ) */
-/* { */
-/*   /\* */
-/*     Two problems: one with dense (double*) storage for M, "problem", and the other  */
-/*     with SparseBlockStructuredMatrix storage, "problemSBM". */
+  /*   problem->size = dim; */
+  /*   problem->M->size0 = dim; */
+  /*   problem->M->size1 = dim; */
+  /*   fclose(RELAYfile); */
+  /*   if(sol!=NULL) */
+  /*     free(sol); */
+}
 
-/*     For each case, one or both problems are read in a dat file. \n */
-/*     The according to the value of the lists solversList and solversList2 (for problem) ,\n */
-/*     solversListSBM (for problemSBM). */
-/*     the problems are solved with different solvers. \n */
-/*     list[i] = 1 => solver is called, list[i] = 0, solver is ignored. */
-/*     Check on top of test_relay_series() function for the list of available solvers and their corresponding indices. */
+int test_matrix(void)
+{
+  /*
+    Two problems: one with dense (double*) storage for M, "problem", and the other
+    with SparseBlockStructuredMatrix storage, "problemSBM".
 
-/*     "stable" tests, that must succeed, are those defined in solversList, while "unstable", that may fail or */
-/*     return an unexpected termination value are those defined in solversList2. */
+    For each case, one or both problems are read in a dat file. \n
+    The according to the value of the lists solversList and solversList2 (for problem) ,\n
+    solversListSBM (for problemSBM).
+    the problems are solved with different solvers. \n
+    list[i] = 1 => solver is called, list[i] = 0, solver is ignored.
+    Check on top of test_relay_series() function for the list of available solvers and their corresponding indices.
 
-/*    *\/ */
+    "stable" tests, that must succeed, are those defined in solversList, while "unstable", that may fail or
+    return an unexpected termination value are those defined in solversList2.
 
-/*   printf("========================================================================================================== \n"); */
-/*   printf("                         RELAY Solvers tests (function: test_matrix)  \n"); */
-/*   printf("==========================================================================================================\n"); */
+   */
 
-/*   FILE *RELAYfile = NULL, *RELAYfileBlock = NULL; */
-/*   int i,j,itest; */
-/*   int iter = 0; */
-/*   double criteria = 0.0; */
-/*   double *sol = NULL; */
+  printf("========================================================================================================== \n");
+  printf("                         RELAY Solvers tests (function: test_matrix)  \n");
+  printf("==========================================================================================================\n");
 
-/*   int NBTEST = 14; */
+  FILE *RELAYfile = NULL, *RELAYfileBlock = NULL;
+  int i, j, itest;
+  int iter = 0;
+  double criteria = 0.0;
+  double *sol = NULL;
 
-/*   /\* === Building of the RELAYs === *\/ */
+  int NBTEST = 1;
 
-/*   /\* RELAY with dense storage *\/ */
-/*   LinearComplementarity_Problem * problem = malloc(sizeof(*problem)); */
-/*   problem->M = malloc(sizeof(*(problem->M))); */
-/*   problem->M->storageType = 0; */
-/*   problem->M->matrix1 = NULL; */
+  /* === Building of the RELAYs === */
 
-/*   /\* RELAY with sparse-block storage *\/ */
-/*   LinearComplementarity_Problem * problemSBM = malloc(sizeof(*problemSBM)); */
-/*   problemSBM->M = malloc(sizeof(*(problemSBM->M))); */
-/*   problemSBM->M->storageType = 1; */
-/*   problemSBM->M->matrix0 = NULL; */
-/*   problemSBM->M->matrix1 = malloc(sizeof(*( problemSBM->M->matrix1))); */
+  /* RELAY with dense storage */
+  Relay_Problem * problem = malloc(sizeof(*problem));
+  problem->M = malloc(sizeof(*(problem->M)));
+  problem->M->storageType = 0;
+  problem->M->matrix1 = NULL;
 
-/*   /\* List of working solvers *\/ */
-/*   int * solversList = NULL; /\* for dense *\/ */
-/*   int * solversListSBM = NULL; /\* for sparse *\/ */
+  /*   /\* RELAY with sparse-block storage *\/ */
+  /*   Relay_Problem * problemSBM = malloc(sizeof(*problemSBM)); */
+  /*   problemSBM->M = malloc(sizeof(*(problemSBM->M))); */
+  /*   problemSBM->M->storageType = 1; */
+  /*   problemSBM->M->matrix0 = NULL; */
+  /*   problemSBM->M->matrix1 = malloc(sizeof(*( problemSBM->M->matrix1))); */
 
-/*   /\* List of unstable solvers (failed or wrong termination value) *\/ */
-/*   int * solversList2 = NULL; */
-/*   int hasSBM = 0; /\* =1 if the read matrix exists also in sparse *\/ */
-/*   int hasDense = 0; */
-/*   int hasUnstable = 0; */
-/*   int info = -1; */
-/*   for( itest = 0 ; itest < NBTEST ; ++itest ) */
-/*     { */
-/*       hasSBM = 0; hasUnstable = 0; hasDense = 0; */
-/*       /\* Read the RELAY *\/ */
-/*       switch(itest){ */
-/*       case 0: */
-/*  getProblem("MATRIX/deudeu.dat", problem); */
-/*  getProblemSBM("MATRIX/deudeu_block.dat", problemSBM); */
-/*  hasSBM = 1; hasDense = 1; hasUnstable = 1; */
-/*  { */
-/*    int l1[12] = {1,1,0,1,1,1,0,1,1,1,1,0}; */
-/*    int l2[12] = {0,0,1,0,0,0,1,0,0,0,0,1}; */
-/*    //int l3[11] = {1,1,0,1,0,0,0,1,1,0,0}; */
-/*    int * l3 = l1; */
-/*    solversList = l1; */
-/*    solversList2 = l2; */
-/*    solversListSBM = l3; */
-/*  } */
-/*  break; */
-/*       case 1: */
-/*  getProblem("MATRIX/trivial.dat", problem); */
-/*  getProblemSBM("MATRIX/trivial_block.dat", problemSBM); */
-/*  hasSBM = 1; hasDense = 1; hasUnstable = 1; */
-/*  { */
-/*    int l1[12] = {1,1,1,1,1,1,0,1,1,1,1,0}; */
-/*    int l2[12] = {0,0,0,0,0,0,1,0,0,0,0,1}; */
-/*    int l3[12] = {1,1,0,1,1,1,0,1,1,1,0,0}; */
-/*    solversList = l1; */
-/*    solversList2 = l2; */
-/*    solversListSBM = l3; */
-/*  } */
-/*  break; */
-/*       case 2: */
-/*  getProblem("MATRIX/ortiz.dat", problem); */
-/*  getProblemSBM("MATRIX/ortiz_block.dat", problemSBM); */
-/*  hasSBM = 1; hasDense = 1; hasUnstable = 1; */
-/*  { */
-/*    int l1[12] = {1,1,0,1,0,0,0,1,1,1,1,0}; */
-/*    int l2[12] = {0,0,1,0,1,1,1,0,0,0,0,1}; */
-/*    int l3[12] = {1,1,0,1,0,0,0,0,1,1,0,0}; */
-/*    solversList = l1; */
-/*    solversList2 = l2; */
-/*    solversListSBM = l3; */
-/*  } */
-/*  break; */
-/*       case 3: /\* Ortiz again ... *\/ */
-/*  getProblemSBM("MATRIX/ortiz_monoblock.dat", problemSBM); */
-/*  hasSBM = 1; hasDense = 0; hasUnstable = 0; */
-/*  { */
-/*    int l3[12] = {1,1,0,1,0,0,0,0,1,1,0,0}; */
-/*    solversListSBM = l3; */
-/*  } */
-/*  break; */
-/*       case 4: /\* Ortiz again ... *\/ */
-/*  getProblemSBM("MATRIX/ortiz_block31.dat", problemSBM); */
-/*  hasSBM = 1; hasDense = 0; hasUnstable = 0; */
-/*  { */
-/*    int l3[12] = {1,1,0,1,0,0,0,1,1,1,0,0}; */
-/*    solversListSBM = l3; */
-/*  } */
-/*  break; */
-/*       case 5: */
-/*  getProblem("MATRIX/pang.dat", problem); */
-/*  hasSBM = 0; hasDense = 1; hasUnstable = 1; */
-/*  { */
-/*    int l1[12] = {0,0,1,0,0,0,0,1,1,0,0,0}; */
-/*    int l2[12] = {1,1,0,1,1,1,1,0,0,1,1,1}; */
-/*    solversList = l1; */
-/*    solversList2 = l2; */
-/*  } */
-/*  break; */
-/*       case 6: */
-/*  getProblem("MATRIX/diodes.dat", problem); */
-/*  hasSBM = 0; hasDense = 1; hasUnstable = 1; */
-/*  { */
-/*    int l1[12] = {0,1,1,1,0,0,0,1,1,0,1,0}; */
-/*    int l2[12] = {1,0,0,0,1,1,1,0,0,1,0,1}; */
-/*    solversList = l1; */
-/*    solversList2 = l2; */
-/*  } */
-/*  break; */
-/*       case 7: */
-/*  getProblem("MATRIX/murty1.dat", problem); */
-/*  hasSBM = 0; hasDense = 1; hasUnstable = 1; */
-/*  { */
-/*    int l1[12] = {0,1,0,1,0,0,0,1,1,0,1,0}; */
-/*    int l2[12] = {1,0,1,0,1,1,1,0,0,1,0,1}; */
-/*    solversList = l1; */
-/*    solversList2 = l2; */
-/*  } */
-/*  break; */
-/*       case 8: */
-/*  printf("\n\n APPROXIMATED FRICTION CONE RELAY "); */
-/*  getProblem("MATRIX/confeti.dat", problem); */
-/*  getProblemSBM("MATRIX/confeti_block.dat", problemSBM); */
-/*  hasSBM = 1; hasDense = 1; hasUnstable = 1; */
-/*  { */
-/*    int l1[12] = {0,0,0,1,0,0,0,0,0,0,1,0}; */
-/*    int l2[12] = {1,1,1,0,1,1,1,1,1,1,0,1}; */
-/*    int l3[12] = {0,0,0,1,0,0,0,0,0,0,0,0}; */
-/*    solversList = l1; */
-/*    solversList2 = l2; */
-/*    solversListSBM = l3; */
-/*  } */
-/*  break; */
-/*       case 9: */
-/*  getProblem("MATRIX/mathieu1.dat", problem); */
-/*  getProblemSBM("MATRIX/bloc22_mathieu1.dat", problemSBM); */
-/*  hasSBM = 1; hasDense = 1; hasUnstable = 1; */
-/*  { */
-/*    int l1[12] = {1,1,0,1,1,1,0,1,1,1,1,0}; */
-/*    int l2[12] = {0,0,1,0,0,0,1,0,0,0,0,1}; */
-/*    int l3[12] = {1,1,0,1,0,0,0,1,1,1,0,0}; */
-/*    solversList = l1; */
-/*    solversList2 = l2; */
-/*    solversListSBM = l3; */
-/*  } */
-/*  break; */
-/*       case 10: /\* Same as above with sparse storage (one block) *\/ */
-/*  getProblemSBM("MATRIX/monobloc_mathieu1.dat", problemSBM); */
-/*  hasSBM = 1; hasDense = 0; hasUnstable = 0; */
-/*  { */
-/*    int l1[12] = {1,1,0,1,1,1,0,0,1,1,0,0}; */
-/*    solversListSBM = l1; */
-/*  } */
-/*  break; */
+  /* List of working solvers */
+  int * solversList = NULL; /* for dense */
+  int * solversListSBM = NULL; /* for sparse */
 
-/*       case 11: */
-/*  getProblem("MATRIX/mathieu2.dat", problem); */
-/*  getProblemSBM("MATRIX/bloc3333_mathieu2.dat", problemSBM); */
-/*  hasSBM = 1; hasDense = 1; hasUnstable = 1; */
-/*  { */
-/*    int l1[12] = {0,0,0,0,0,0,0,0,0,0,0,0}; */
-/*    int l2[12] = {1,1,1,1,1,1,1,1,1,1,1,1}; */
-/*    int l3[12] = {0,0,0,0,0,0,0,0,0,0,0,0}; */
-/*    solversList = l1; */
-/*    solversList2 = l2; */
-/*    solversListSBM = l3; */
-/*  } */
-/*  break; */
+  /* List of unstable solvers (failed or wrong termination value) */
+  int * solversList2 = NULL;
+  int hasSBM = 0; /* =1 if the read matrix exists also in sparse */
+  int hasDense = 0;
+  int hasUnstable = 0;
+  int info = -1;
+  for (itest = 0 ; itest < NBTEST ; ++itest)
+  {
+    hasSBM = 0;
+    hasUnstable = 0;
+    hasDense = 0;
+    /* Read the RELAY */
+    switch (itest)
+    {
+    case 0:
+      getProblem("DATA/relay_deudeu.dat", problem);
+      hasSBM = 0;
+      hasDense = 1;
+      hasUnstable = 0;
+      {
+        int l1[3] = {1, 1, 1};
+        solversList = l1;
+      }
+      break;
+    case 1:
+      getProblem("MATRIX/trivial.dat", problem);
+      /*  getProblemSBM("MATRIX/trivial_block.dat", problemSBM); */
+      hasSBM = 1;
+      hasDense = 1;
+      hasUnstable = 1;
+      {
+        int l1[12] = {1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0};
+        int l2[12] = {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+        int l3[12] = {1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0};
+        solversList = l1;
+        solversList2 = l2;
+        solversListSBM = l3;
+      }
+      break;
 
-/*     case 12: */
-/*  getProblem("MATRIX/trivial3.dat", problem); */
-/*  getProblemSBM("MATRIX/trivial3_block.dat", problemSBM); */
-/*  hasSBM = 1; hasDense = 1; hasUnstable = 1; */
-/*  { */
-/*    int l1[12] = {1,1,1,1,1,1,0,1,1,1,1,1}; */
-/*    int l2[12] = {0,0,0,0,0,0,1,0,0,0,0,0}; */
-/*    int l3[12] = {1,1,1,1,1,1,0,1,1,1,0,1}; */
-/*    solversList = l1; */
-/*    solversList2 = l2; */
-/*    solversListSBM = l3; */
-/*  } */
-/*  break; */
-/*       case 13: */
-/*  getProblem("MATRIX/buckconverterregul2.dat", problem); */
-/*  getProblemSBM("MATRIX/buckconverterregul2_block.dat", problemSBM); */
-/*  hasSBM = 1; hasDense = 1; hasUnstable = 1; */
-/*  { */
-/*    int l1[12] = {0,1,0,1,0,0,0,0,0,0,1,0}; */
-/*    int l2[12] = {1,0,1,0,1,1,1,1,1,1,0,1}; */
-/*    int l3[12] = {0,0,0,0,0,0,0,0,0,0,0,0}; */
-/*    solversList = l1; */
-/*    solversList2 = l2; */
-/*    solversListSBM = l3; */
-/*  } */
-/*  break; */
-/*       } */
+    }
 
-/*       printf(" ----------------------------------------------------------\n"); */
-/*       printf("Run working tests ...\n"); */
-/*       /\* Stable: *\/ */
-/*       int infoTmp = -1; */
-/*       if(hasDense == 1) */
-/*  infoTmp = test_relay_series(problem, solversList); */
+    printf(" ----------------------------------------------------------\n");
+    printf("Run working tests ...\n");
+    /* Stable: */
+    int infoTmp = -1;
+    if (hasDense == 1)
+      infoTmp = test_relay_series(problem, solversList);
 
-/*       if(hasSBM == 1) */
-/*  { */
-/*    printf("Run working tests for sparse storage ...\n"); */
-/*    infoTmp = test_relay_series(problemSBM, solversListSBM); */
-/*  } */
+    /*       if(hasSBM == 1) */
+    /*  { */
+    /*    printf("Run working tests for sparse storage ...\n"); */
+    /*    infoTmp = test_relay_series(problemSBM, solversListSBM); */
+    /*  } */
 
-/*       printf(" ----------------------------------------------------------\n\n"); */
+    printf(" ----------------------------------------------------------\n\n");
 
-/*       if(hasUnstable == 1) */
-/*  { */
-/*    /\* Fail or unstable: *\/ */
-/*    printf("---------------------------------------------------------- \n"); */
-/*    printf("\n Run unstable tests (results may be wrong or log !=0)...\n"); */
-/*    int infoFail = test_relay_series(problem, solversList2); */
-/*    printf("--------- End of unstable tests --------------------------- \n\n"); */
-/*  } */
+    if (hasUnstable == 1)
+    {
+      /* Fail or unstable: */
+      printf("---------------------------------------------------------- \n");
+      printf("\n Run unstable tests (results may be wrong or log !=0)...\n");
+      int infoFail = test_relay_series(problem, solversList2);
+      printf("--------- End of unstable tests --------------------------- \n\n");
+    }
 
-/*       /\* Free Memory *\/ */
-/*       if(problem->M->matrix0!=NULL) */
-/*  free(problem->M->matrix0); */
-/*       problem->M->matrix0 = NULL; */
-/*       if(problem->q!=NULL) */
-/*  free(problem->q); */
-/*       problem->q = NULL; */
-/*       if(problemSBM->q!=NULL) */
-/*  free(problemSBM->q); */
-/*       problemSBM->q = NULL; */
-/*       info = infoTmp; */
-/*       if(hasSBM==1) */
-/*  freeSBM(problemSBM->M->matrix1); */
+    /* Free Memory */
+    if (problem->M->matrix0 != NULL)
+      free(problem->M->matrix0);
+    problem->M->matrix0 = NULL;
+    if (problem->q != NULL)
+      free(problem->q);
+    problem->q = NULL;
+    if (problem->lb != NULL)
+      free(problem->lb);
+    problem->lb = NULL;
+    if (problem->ub != NULL)
+      free(problem->ub);
+    problem->ub = NULL;
+    /*     if(problemSBM->q!=NULL) */
+    /*  free(problemSBM->q); */
+    /*       problemSBM->q = NULL; */
+    info = infoTmp;
+    /*      if(hasSBM==1) */
+    /*  freeSBM(problemSBM->M->matrix1); */
 
-/*       if(infoTmp!=0) */
-/*        break; */
-/*     } */
-/*   free(problemSBM->M->matrix1); */
-/*   free(problemSBM); */
-/*   free(problem->M); */
-/*   free(problem); */
-/*   printf("========================================================================================================== \n"); */
-/*   printf("                                  END OF TEST MATRIX   \n"); */
-/*   printf("========================================================================================================== \n"); */
+    if (infoTmp != 0)
+      break;
+  }
+  /*   free(problemSBM->M->matrix1); */
+  /*   free(problemSBM); */
+  free(problem->M);
+  free(problem);
+  printf("========================================================================================================== \n");
+  printf("                                  END OF TEST MATRIX   \n");
+  printf("========================================================================================================== \n");
 
-/*   return info; */
+  return info;
 
-/* } */
+}
 
 
 int main(void)
@@ -876,12 +768,18 @@ int main(void)
 
   */
 
-  int info1 = test_mmc();
+  int info1  = test_mmc();
 
   if (info1 != 0)
   {
     // printf("Warning: test_mmc log output different from 0 for some solvers.\n");
     return info1;
+  }
+  int info2 = test_matrix();
+  if (info2 != 0)
+  {
+    // printf("Warning: test_matrix log output different from 0 for some solvers.\n");
+    return info2;
   }
   return 0;
 }

@@ -63,8 +63,11 @@ int relay_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* 
     printf(" ========================== Call %s solver for Relayproblem ==========================\n", name);
 
   /****** NLGS algorithm ******/
-  if (strcmp(name , "NLGS") == 0)
-    pr_nlgs(problem, z , w , &info , options);
+  if (strcmp(name , "PGS") == 0)
+    relay_pgs(problem, z , w , &info , options);
+
+  else if (strcmp(name , "NLGS") == 0)
+    fprintf(stderr, "Relay_driver error: NLGS solver obsolete:\n");
 
   /****** Latin algorithm ******/
   else if (strcmp(name , "Latin") == 0)
@@ -79,6 +82,8 @@ int relay_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* 
     fprintf(stderr, "Relay_driver error: unknown solver name: %s\n", name);
     exit(EXIT_FAILURE);
   }
+  if (options[0].filterOn > 0)
+    info = relay_compute_error(problem, z, w, options[0].dparam[0], &(options[0].dparam[1]));
 
   return info;
 }
