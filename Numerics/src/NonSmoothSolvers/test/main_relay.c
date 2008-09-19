@@ -288,6 +288,9 @@ int test_mmc(void)
   for (i = 0 ; i < n * n ; ++i)
   {
     vecM[i] = 0.0;
+  }
+  for (i = 0 ; i < n ; ++i)
+  {
     q[i] = 0;
     a[i] = 0;
     b[i] = 0;
@@ -372,17 +375,6 @@ int test_mmc(void)
   fclose(f1);
   fclose(f3);
 
-  if ((f1 = fopen("DATA/M_rectangle1.dat", "r")) == NULL)
-  {
-    perror("fopen 1");
-    exit(1);
-  }
-
-  if ((f2 = fopen("DATA/q_rectangle1.dat", "r")) == NULL)
-  {
-    perror("fopen 2");
-    exit(2);
-  }
 
 
   NumericsMatrix * MM = malloc(sizeof(*MM));
@@ -392,10 +384,6 @@ int test_mmc(void)
   MM->storageType = 0;
 
 
-  fclose(f2);
-  fclose(f1);
-  fclose(f3);
-  fclose(f4);
 
   // Set M and q of the problem
   problem->q = q;
