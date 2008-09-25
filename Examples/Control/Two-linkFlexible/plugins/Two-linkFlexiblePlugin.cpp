@@ -1,0 +1,1347 @@
+/* Siconos-sample version 2.1.1, Copyright INRIA 2005-2007.
+ * Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ * Siconos is a free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * Siconos is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Siconos; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+*/
+
+#include <stdio.h>
+#include <math.h>
+
+#define PI 3.14159265
+
+double l1 = 0.5;//length of the first link
+double l2 = 0.5;//length of the second link
+double m1 = 1; //mass of the first link
+double m2 = 1; //mass of the second link
+double I1 = 1;// the moment of inertia of the first link about the axis that passes through the center of mass (parallel to the Z axis)
+double I2 = 1;// the moment of inertia of the second link about the axis that passes through the center of mass (parallel to the Z axis)
+double g = 9.8;//gravitational acceleration
+double gamma2 = 7;
+double gamma1 = 15;
+double Kf = 0.5;
+double P = 15;
+double ep = 0.25;
+double delta = 0.4;
+double Del = 1;
+double eps = 0.1;
+double alpha = 1;
+double K1 = 500;
+double K2 = 500;
+double J1 = 0.3;
+double J2 = 0.3;
+
+extern "C" void mass(unsigned int sizeOfq, const double *q, double *mass, unsigned int sizeZ, double* z)
+{
+  mass[0]  = m1 * (l1 * l1 / 4) + I1 + I2 + m2 * (l1 * l1 + (l2 * l2 / 4) + l1 * l2 * cos(q[1]));
+  mass[1]  = I2 + m2 * l2 * l2 / 4 + m2 * l1 * l2 * cos(q[1]) / 2;
+  mass[2]  = 0;
+  mass[3]  = 0;
+  mass[4]  = I2 + m2 * l2 * l2 / 4 + m2 * l1 * l2 * cos(q[1]) / 2;
+  mass[5]  = I2 + m2 * l2 * l2 / 4;
+  mass[6]  = 0;
+  mass[7]  = 0;
+  mass[8]  = 0;
+  mass[9]  = 0;
+  mass[10]  = J1;
+  mass[11]  = 0;
+  mass[12]  = 0;
+  mass[13]  = 0;
+  mass[14]  = 0;
+  mass[15]  = J2;
+}
+
+extern "C" void NNL(unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, unsigned int sizeZ, double* z)
+{
+  NNL[0] = -m2 * l1 * l2 * sin(q[1]) * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2) + K1 * (q[0] - q[2]);
+  NNL[1] = m2 * l1 * l2 * sin(q[1]) * velocity[0] * velocity[0] / 2 + K2 * (q[1] - q[3]);
+  NNL[2] = K1 * (q[2] - q[0]);
+  NNL[3] = K2 * (q[3] - q[1]);
+}
+
+extern "C" void jacobianQNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
+{
+  jacob[0] = K1;
+  jacob[1] = 0;
+  jacob[2] = -K1;
+  jacob[3] = 0;
+  jacob[4] = -m2 * l1 * l2 * cos(q[1]) * (velocity[0] * velocity[1] + velocity[1] * velocity[1] / 2);
+  jacob[5] = m2 * l1 * l2 * cos(q[1]) * velocity[0] * velocity[0] / 2 + K2;
+  jacob[6] = 0;
+  jacob[7] = -K2;
+  jacob[8] = -K1;
+  jacob[9] = 0;
+  jacob[10] = K1;
+  jacob[11] = 0;
+  jacob[12] = 0;
+  jacob[13] = -K2;
+  jacob[14] = 0;
+  jacob[15] = K2;
+}
+
+extern "C" void jacobianVNNL(unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
+{
+  jacob[0] = -m2 * l1 * l2 * sin(q[1]) * velocity[1];
+  jacob[1] = m2 * l1 * l2 * sin(q[1]) * velocity[0];
+  jacob[2] = 0;
+  jacob[3] = 0;
+  jacob[4] = -m2 * l1 * l2 * sin(q[1]) * (velocity[0] + velocity[1]);
+  jacob[5] = 0;
+  jacob[6] = 0;
+  jacob[7] = 0;
+  jacob[8] = 0;
+  jacob[9] = 0;
+  jacob[10] = 0;
+  jacob[11] = 0;
+  jacob[12] = 0;
+  jacob[13] = 0;
+  jacob[14] = 0;
+  jacob[15] = 0;
+}
+
+extern "C" void U(double time, unsigned int sizeOfq, double *U, unsigned int sizeZ, double* z)
+{
+  double m11 = m1 * (l1 * l1 / 4) + I1 + I2 + m2 * (l1 * l1 + (l2 * l2 / 4) + l1 * l2 * cos(z[1]));
+  double m12 = (m2 * l2 * l2 / 4) + I2 + m2 * l1 * l2 * cos(z[1]) / 2;
+  double m22 = (m2 * l2 * l2 / 4) + I2;
+  double detm = m11 * m22 - m12 * m12;
+  double ddetm = (m12 - m22) * m2 * l1 * l2 * sin(z[1]) * z[3];
+
+  double NNL0 = -m2 * l1 * l2 * sin(z[1]) * (z[2] * z[3] + z[3] * z[3] / 2) + K1 * (z[0] - z[14]);
+  double NNL1 = m2 * l1 * l2 * sin(z[1]) * z[2] * z[2] / 2 + K2 * (z[1] - z[15]);
+
+  // generalized coordinates q=(x,y)^T
+  double x = l1 * cos(z[0]) + l2 * cos(z[0] + z[1]);
+  double y = l1 * sin(z[0]) + l2 * sin(z[0] + z[1]);
+
+  // time derivatives of x and y
+  double x1 = -l1 * sin(z[0]) * z[2] - l2 * sin(z[0] + z[1]) * (z[2] + z[3]);
+  double y1 = l1 * cos(z[0]) * z[2] + l2 * cos(z[0] + z[1]) * (z[2] + z[3]);
+
+  // acceleration in z[0],z[1] coordinates
+  double dv0 = (m22 * NNL0 - m12 * NNL1) / detm;
+  double dv1 = (m11 * NNL1 - m12 * NNL0) / detm;
+
+  double ddv0 = ((m22 * (-m2 * l1 * l2 * cos(z[1]) * z[3] * (z[2] * z[3] + z[3] * z[3] / 2) - m2 * l1 * l2 * sin(z[1]) * (dv0 * z[3] + dv1 * z[2] + dv1 * z[3]) + K1 * (z[2] - z[16])) + m2 * l1 * l2 * sin(z[1]) * z[3] * NNL1 / 2 - m12 * (m2 * l1 * l2 * cos(z[1]) * z[2] * z[2] * z[3] / 2 + m2 * l1 * l2 * sin(z[1]) * z[2] * dv0 + K2 * (z[3] - z[17]))) * detm - (m22 * NNL0 - m12 * NNL1) * ddetm) / (detm * detm);
+  double ddv1 = ((m11 * (m2 * l1 * l2 * cos(z[1]) * z[2] * z[2] * z[3] / 2 + m2 * l1 * l2 * sin(z[1]) * z[2] * dv0 + K2 * (z[3] - z[17])) + m2 * l1 * l2 * sin(z[1]) * z[3] * NNL0 / 2 - m2 * l1 * l2 * sin(z[1]) * z[3] * NNL1 + m12 * (m2 * l1 * l2 * cos(z[1]) * z[3] * (z[2] * z[3] + z[3] * z[3] / 2) + m2 * l1 * l2 * sin(z[1]) * (dv0 * z[3] + dv1 * z[2] + dv1 * z[3]) - K1 * (z[2] - z[16]))) * detm - (m11 * NNL1 - m12 * NNL0) * ddetm) / (detm * detm);
+
+  // acceleration in x,y coordinates
+  double x2 =  -l1 * cos(z[0]) * z[2] * z[2] - l1 * sin(z[0]) * dv0 - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) - l2 * sin(z[0] + z[1]) * (dv0 + dv1);
+  double y2 =  l1 * cos(z[0]) * dv0 - l1 * sin(z[0]) * z[2] * z[2] + l2 * cos(z[0] + z[1]) * (dv0 + dv1) - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]);
+
+  double x3 =  l1 * sin(z[0]) * z[2] * z[2] * z[2] - 2 * l1 * cos(z[0]) * z[2] * dv0 - l1 * cos(z[0]) * z[2] * dv0 - l1 * sin(z[0]) * ddv0 + l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * (z[2] + z[3]) - 2 * l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (dv0 + dv1) - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (dv0 + dv1) - l2 * sin(z[0] + z[1]) * (ddv0 + ddv1);
+  double y3 = -l1 * sin(z[0]) * z[2] * dv0 + l1 * cos(z[0]) * ddv0 - l1 * cos(z[0]) * z[2] * z[2] * z[2] - 2 * l1 * sin(z[0]) * z[2] * dv0 - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * (dv0 + dv1) + l2 * cos(z[0] + z[1]) * (ddv0 + ddv1) + l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * (z[2] + z[3]) - 2 * l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (dv0 + dv1);
+
+  // the gradient of the transformation \theta->q
+  double grad11 = -y;
+  double grad12 = -l2 * sin(z[0] + z[1]);
+  double grad21 = x;
+  double grad22 = l2 * cos(z[0] + z[1]);
+  double det = grad11 * grad22 - grad12 * grad21;
+
+  // d=(grad)^{-1}
+  double d11 = grad22 / det;
+  double d12 = -grad12 / det;
+  double d21 = -grad21 / det;
+  double d22 = grad11 / det;
+
+  // time derivative of d
+
+  double dd11 =  -(sin(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]));
+  double dd12 = (cos(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]));
+  double dd21 =  -dd11 + (sin(z[0]) * sin(z[1]) * z[2] + cos(z[0]) * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]));
+  double dd22 =  -dd12 - (cos(z[0]) * sin(z[1]) * z[2] - sin(z[0]) * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]));
+
+  // time derivative of dd
+
+  double ddd11 = (-(sin(z[0] + z[1]) * (dv0 + dv1) * sin(z[1]) + cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * sin(z[1]) - cos(z[0] + z[1]) * sin(z[1]) * z[3] * z[3] + cos(z[0] + z[1]) * cos(z[1]) * dv1) * sin(z[1]) + (sin(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double ddd12 = ((-sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * (dv0 + dv1) * sin(z[1]) + sin(z[0] + z[1]) * sin(z[1]) * z[3] * z[3] - sin(z[0] + z[1]) * cos(z[1]) * dv1) * sin(z[1]) - (cos(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double ddd21 =  -ddd11 + ((cos(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3]) + sin(z[0]) * sin(z[1]) * dv0 + cos(z[0]) * cos(z[1]) * dv1) * sin(z[1]) - (sin(z[0]) * sin(z[1]) * z[2] + cos(z[0]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double ddd22 =  -ddd12 - ((cos(z[0]) * sin(z[1]) * dv0 - sin(z[0]) * cos(z[1]) * dv1 - sin(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3])) * sin(z[1]) - (cos(z[0]) * sin(z[1]) * z[2] - sin(z[0]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]) * sin(z[1]));
+
+  // time derivative of ddd
+
+  double dddd11 = ((-(sin(z[0] + z[1]) * (ddv0 + ddv1) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * ddv1 + 3 * cos(z[0] + z[1]) * sin(z[1]) * (z[2] + z[3]) * (dv0 + dv1) - 3 * cos(z[0] + z[1]) * sin(z[1]) * z[3] * dv1 + cos(z[0] + z[1]) * cos(z[1]) * ((z[2] + z[3]) * (z[2] + z[3]) * z[3] - z[3] * z[3] * z[3]) - sin(z[0] + z[1]) * sin(z[1]) * (z[2] + z[3]) * ((z[2] + z[3]) * (z[2] + z[3]) - z[3] * z[3]) + sin(z[0] + z[1]) * cos(z[1]) * ((dv0 + dv1) * z[3] - (z[2] + z[3]) * dv1)) * sin(z[1]) + (sin(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * (cos(z[1]) * dv1 - sin(z[1]) * z[3] * z[3])) * sin(z[1]) - (-(sin(z[0] + z[1]) * (dv0 + dv1) * sin(z[1]) + cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * sin(z[1]) - cos(z[0] + z[1]) * sin(z[1]) * z[3] * z[3] + cos(z[0] + z[1]) * cos(z[1]) * dv1) * sin(z[1]) + (sin(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) * 3 * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double dddd12 = (((cos(z[0] + z[1]) * (ddv0 + ddv1) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * ddv1 - 3 * sin(z[0] + z[1]) * sin(z[1]) * ((z[2] + z[3]) * (dv0 + dv1) - z[3] * dv1) + cos(z[0] + z[1]) * cos(z[1]) * ((dv0 + dv1) * z[3] - (z[2] + z[3]) * dv1) - (cos(z[0] + z[1]) * sin(z[1]) * (z[2] + z[3]) + sin(z[0] + z[1]) * cos(z[1]) * z[3]) * ((z[2] + z[3]) * (z[2] + z[3]) - z[3] * z[3])) * sin(z[1]) - (cos(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * (cos(z[1]) * dv1 - sin(z[1]) * z[3] * z[3])) * sin(z[1]) - ((-sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * (dv0 + dv1) * sin(z[1]) + sin(z[0] + z[1]) * sin(z[1]) * z[3] * z[3] - sin(z[0] + z[1]) * cos(z[1]) * dv1) * (sin(z[1]) * sin(z[1])) - (cos(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * sin(z[1]) * cos(z[1]) * z[3]) * 3 * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double dddd21 = -dddd11 + (((sin(z[0]) * sin(z[1]) * ddv0 + cos(z[0]) * cos(z[1]) * ddv1 + 3 * (z[2] * dv0 - z[3] * dv1) + sin(z[0]) * cos(z[1]) * (z[3] * dv0 - z[2] * dv1) + (cos(z[0]) * cos(z[1]) * z[3] - sin(z[0]) * sin(z[1]) * z[2]) * (z[2] * z[2] - z[3] * z[3])) * sin(z[1]) - (sin(z[0]) * sin(z[1]) * z[2] + cos(z[0]) * cos(z[1]) * z[3]) * 2 * (cos(z[1]) * dv1 - sin(z[1]) * z[3] * z[3])) * sin(z[1]) - ((cos(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3]) + sin(z[0]) * sin(z[1]) * dv0 + cos(z[0]) * cos(z[1]) * dv1) * sin(z[1]) - (sin(z[0]) * sin(z[1]) * z[2] + cos(z[0]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) * 3 * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double dddd22 = -dddd12 - (((-(sin(z[0]) * cos(z[1]) * z[3] + cos(z[0]) * sin(z[1]) * z[2]) * (z[2] * z[2] - z[3] * z[3]) + cos(z[0]) * sin(z[1]) * ddv0 - sin(z[0]) * cos(z[1]) * ddv1 + 3 * (z[3] * dv1 - z[2] * dv0) * sin(z[0]) * sin(z[1]) - cos(z[0]) * cos(z[1]) * (z[3] * dv0 - z[2] * dv1)) * sin(z[1]) - (cos(z[0]) * sin(z[1]) * z[2] - sin(z[0]) * cos(z[1]) * z[3]) * 2 * (cos(z[1]) * dv1 - sin(z[1]) * z[3] * z[3])) * sin(z[1]) - ((cos(z[0]) * sin(z[1]) * dv0 - sin(z[0]) * cos(z[1]) * dv1 - sin(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3])) * sin(z[1]) - ((cos(z[0]) * sin(z[1]) * dv0 - sin(z[0]) * cos(z[1]) * dv1 - sin(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3])) * sin(z[1]) - (cos(z[0]) * sin(z[1]) * z[2] - sin(z[0]) * cos(z[1]) * z[3])) * 2 * cos(z[1]) * z[3]) * 3 * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]) * sin(z[1]) * sin(z[1]));
+
+  // M*d
+  double mc11 = m11 * d11 + m12 * d21;
+  double mc12 = m11 * d12 + m12 * d22;
+  double mc21 = m12 * d11 + m22 * d21;
+  double mc22 = m12 * d12 + m22 * d22;
+
+  // M*dd
+  double a11 = m11 * dd11 + m12 * dd21;
+  double a12 = m11 * dd12 + m12 * dd22;
+  double a21 = m12 * dd11 + m22 * dd21;
+  double a22 = m12 * dd12 + m22 * dd22;
+
+  double da11 = -m2 * l1 * l2 * sin(z[1]) * z[3] * dd11 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd21 / 2 + m11 * ddd11 + m12 * ddd21;
+  double da12 = -m2 * l1 * l2 * sin(z[1]) * z[3] * (dd12 + dd22 / 2) + m11 * ddd12 + m12 * ddd22;
+  double da21 = -m2 * l1 * l2 * sin(z[1]) * z[3] * dd11 / 2 + m12 * ddd11 + m22 * ddd21;
+  double da22 = -m2 * l1 * l2 * sin(z[1]) * z[3] * dd12 / 2 + m12 * ddd12 + m22 * ddd22;
+
+  double dda11 = -m2 * l1 * l2 * ((cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * dd11 + sin(z[1]) * z[3] * ddd11 + (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * dd21 / 2 + sin(z[1]) * z[3] * ddd21 / 2 + sin(z[1]) * z[3] * (ddd11 + ddd21 / 2)) + m11 * dddd11 + m12 * dddd21;
+  double dda12 = -m2 * l1 * l2 * ((cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * (dd12 + dd22 / 2) + sin(z[1]) * z[3] * (ddd12 + ddd22 / 2) + sin(z[1]) * z[3] * (ddd12 + ddd22 / 2)) + m11 * dddd12 + m12 * dddd22;
+  double dda21 = -m2 * l1 * l2 * ((cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * dd11 / 2 + sin(z[1]) * z[3] * ddd11) + m12 * dddd11 + m22 * dddd21;
+  double dda22 = -m2 * l1 * l2 * ((cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * dd12 / 2 + sin(z[1]) * z[3] * ddd12) + m12 * dddd12 + m22 * dddd22;
+
+  double dmc11 = -m2 * l1 * l2 * sin(z[1]) * z[3] * (d11 + d21 / 2) + m11 * dd11 + m12 * dd21;
+  double dmc12 = -m2 * l1 * l2 * sin(z[1]) * z[3] * (d12 + d22 / 2) + m11 * dd12 + m12 * dd22;
+  double dmc21 = -m2 * l1 * l2 * sin(z[1]) * z[3] * d11 / 2 + m12 * dd11 + m22 * dd21;
+  double dmc22 = -m2 * l1 * l2 * sin(z[1]) * z[3] * d12 / 2 + m12 * dd12 + m22 * dd22;
+
+  double ddmc11 = -m2 * l1 * l2 * (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * (d11 + d21 / 2) - m2 * l1 * l2 * sin(z[1]) * z[3] * (dd11 + dd21 / 2) + m11 * ddd11 + m12 * ddd21 - m2 * l1 * l2 * sin(z[1]) * z[3] * (dd11 + dd21 / 2);
+  double ddmc12 = -m2 * l1 * l2 * (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * (d12 + d22 / 2) - m2 * l1 * l2 * sin(z[1]) * z[3] * (dd12 + dd22 / 2) + m11 * ddd12 + m12 * ddd22 - m2 * l1 * l2 * sin(z[1]) * z[3] * (dd12 + dd22 / 2);
+  double ddmc21 =  -m2 * l1 * l2 * (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * d11 / 2 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd11 / 2 + m12 * ddd11 + m22 * ddd21 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd11 / 2;
+  double ddmc22 =  -m2 * l1 * l2 * (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * d12 / 2 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd12 / 2 + m12 * ddd12 + m22 * ddd22 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd12 / 2;
+
+  double qd1 = 0.65 + 0.1 * cos(2 * PI * time / P);
+  double qd2 = 0.1 * sin(2 * PI * time / P);
+  double qd11 = -(2 * PI / P) * 0.1 * sin(2 * PI * time / P);
+  double qd12 = (2 * PI / P) * 0.1 * cos(2 * PI * time / P);
+  double qd21 = -(2 * PI / P) * (2 * PI / P) * 0.1 * cos(2 * PI * time / P);
+  double qd22 = -(2 * PI / P) * (2 * PI / P) * 0.1 * sin(2 * PI * time / P);
+  double qd31 = (2 * PI / P) * (2 * PI / P) * (2 * PI / P) * 0.1 * sin(2 * PI * time / P);
+  double qd32 = -(2 * PI / P) * (2 * PI / P) * (2 * PI / P) * 0.1 * cos(2 * PI * time / P);
+  double qd41 = (2 * PI / P) * (2 * PI / P) * (2 * PI / P) * (2 * PI / P) * 0.1 * cos(2 * PI * time / P);
+  double qd42 = (2 * PI / P) * (2 * PI / P) * (2 * PI / P) * (2 * PI / P) * 0.1 * sin(2 * PI * time / P);
+
+  double qr11 = qd11 - gamma2 * (x - qd1);
+  double qr12 = qd12 - gamma2 * (y - qd2);
+
+  double qr21 = qd21 - gamma2 * (x1 - qd11);
+  double qr22 = qd22 - gamma2 * (y1 - qd12);
+
+  double qr31 = qd31 - gamma2 * (x2 - qd21);
+  double qr32 = qd32 - gamma2 * (y2 - qd22);
+
+  double qr41 = qd41 - gamma2 * (x3 - qd31);
+  double qr42 = qd42 - gamma2 * (y3 - qd32);
+
+  double s1 = x1 - qr11;
+  double s2 = y1 - qr12;
+
+  double a1 = -m2 * l1 * l2 * sin(z[1]) * z[3] * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2);
+  double a2 = a11 * qr11 + a12 * qr12;
+  double a3 = m2 * l1 * l2 * sin(z[1]) * z[2] * (d11 * qr11 + d12 * qr12) / 2;
+  double a4 = a21 * qr11 + a22 * qr12;
+
+  double da1 = -m2 * l1 * l2 * cos(z[1]) * z[3] * z[3] * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2) - m2 * l1 * l2 * sin(z[1]) * dv1 * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2) - m2 * l1 * l2 * sin(z[1]) * z[3] * ((dd11 * qr11 + dd12 * qr12 + d11 * qr21 + d12 * qr22) + (dd21 * qr11 + dd22 * qr12 + d21 * qr21 + d22 * qr22) / 2);
+  double da2 = a11 * qr21 + a12 * qr22 + da11 * qr11 + da12 * qr12;
+  double da3 = m2 * l1 * l2 * cos(z[1]) * z[2] * z[3] * (d11 * qr11 + d12 * qr12) / 2 + m2 * l1 * l2 * sin(z[1]) * dv0 * (d11 * qr11 + d12 * qr12) / 2 + m2 * l1 * l2 * sin(z[1]) * z[2] * (dd11 * qr11 + dd12 * qr12 + d11 * qr21 + d12 * qr22) / 2;
+  double da4 = a21 * qr21 + a22 * qr22 + da21 * qr11 + da22 * qr12;
+
+  double dda1 = (m2 * l1 * l2 * sin(z[1]) * z[3] * z[3] * z[3] - 2 * m2 * l1 * l2 * cos(z[1]) * z[3] * dv1) * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2) - m2 * l1 * l2 * cos(z[1]) * z[3] * z[3] * ((dd11 * qr11 + d11 * qr21 + dd12 * qr12 + d12 * qr22) + (dd21 * qr11 + dd22 * qr12 + d21 * qr21 + d22 * qr22) / 2) - (m2 * l1 * l2 * cos(z[1]) * z[3] * dv1 + m2 * l1 * l2 * sin(z[1]) * ddv1) * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2) - m2 * l1 * l2 * sin(z[1]) * dv1 * ((dd11 * qr11 + d11 * qr21 + dd12 * qr12 + d12 * qr22) + (dd21 * qr11 + dd22 * qr12 + d21 * qr21 + d22 * qr22) / 2) - (m2 * l1 * l2 * cos(z[1]) * z[3] * z[3] + m2 * l1 * l2 * sin(z[1]) * dv1) * ((dd11 * qr11 + dd12 * qr12 + d11 * qr21 + d12 * qr22) + (dd21 * qr11 + dd22 * qr12 + d21 * qr21 + d22 * qr22) / 2) - m2 * l1 * l2 * sin(z[1]) * z[3] * ((ddd11 * qr11 + dd11 * qr21 + ddd12 * qr12 + dd12 * qr22 + dd11 * qr21 + d11 * qr31 + dd12 * qr22 + d12 * qr32) + (ddd21 * qr11 + dd21 * qr21 + ddd22 * qr12 + dd22 * qr22 + dd21 * qr21 + d21 * qr31 + dd22 * qr22 + d22 * qr32) / 2);
+  double dda2 = da11 * qr21 + a11 * qr31 + da12 * qr22 + a12 * qr32 + da11 * qr21 + dda11 * qr11 + da12 * qr22 + dda12 * qr12;
+  double dda3 = (m2 * l1 * l2 * sin(z[1]) * ddv0 + 2 * m2 * l1 * l2 * cos(z[1]) * dv0 * z[3] + m2 * l1 * l2 * cos(z[1]) * z[2] * dv1 - m2 * l1 * l2 * sin(z[1]) * z[2] * z[3] * z[3]) * (d11 * qr11 + d12 * qr12) / 2 + (m2 * l1 * l2 * cos(z[1]) * z[2] * z[3] + m2 * l1 * l2 * sin(z[1]) * dv0) * (dd11 * qr11 + dd12 * qr12 + d11 * qr21 + d12 * qr22) + m2 * l1 * l2 * sin(z[1]) * z[2] * (ddd11 * qr11 + ddd12 * qr12 + dd11 * qr21 + dd12 * qr22 + dd11 * qr21 + dd12 * qr22 + d11 * qr31 + d12 * qr32) / 2;
+  double dda4 = da21 * qr21 + a21 * qr31 + da22 * qr22 + a22 * qr32 + dda21 * qr11 + da21 * qr21 + dda22 * qr12 + da22 * qr22;
+
+  double T01 = mc11 * qr21 + mc12 * qr22;
+  double T02 = a1 + a2;
+  double T03 = grad11 * gamma1 * s1 + grad21 * gamma1 * s2;
+
+  double dT01 = dmc11 * qr21 + dmc12 * qr22 + mc11 * qr31 + mc12 * qr32;
+  double dT02 = da1 + da2;
+  double dT03 = -y1 * gamma1 * s1 + x1 * gamma1 * s2 + grad11 * gamma1 * (x2 - qr21) + grad21 * gamma1 * (y2 - qr22);
+
+  double ddT01 = ddmc11 * qr21 + ddmc12 * qr22 + 2 * dmc11 * qr31 + 2 * dmc12 * qr32 + mc11 * qr41 + mc12 * qr42;
+  double ddT02 = dda1 + dda2;
+  double ddT03 = -y2 * gamma1 * s1 + x2 * gamma1 * s2 - 2 * y1 * gamma1 * (x2 - qr21) + 2 * x1 * gamma1 * (y2 - qr22) + grad11 * gamma1 * (x3 - qr31) + grad21 * gamma1 * (y3 - qr32);
+
+  double T11 = mc21 * qr21 + mc22 * qr22;
+  double T12 = a3 + a4;
+  double T13 = grad12 * gamma1 * s1 + grad22 * gamma1 * s2;
+
+  double dT11 = dmc21 * qr21 + dmc22 * qr22 + mc21 * qr31 + mc22 * qr32;
+  double dT12 = da3 + da4;
+  double dT13 = -l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * s1 - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * s2 + grad12 * gamma1 * (x2 - qr21) + grad22 * gamma1 * (y2 - qr22);
+
+  double ddT11 = ddmc21 * qr21 + ddmc22 * qr22 + 2 * dmc21 * qr31 + 2 * dmc22 * qr32 + mc21 * qr41 + mc22 * qr42;
+  double ddT12 = dda3 + dda4;
+  double ddT13 = -l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * gamma1 * s1 - l2 * cos(z[0] + z[1]) * (dv0 + dv1) * gamma1 * s1 - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * (x2 - qr21) - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * gamma1 * s2 - l2 * sin(z[0] + z[1]) * (dv0 + dv1) * gamma1 * s2 - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * (y2 - qr22) + grad12 * gamma1 * (x3 - qr31) + grad22 * gamma1 * (y3 - qr32) - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * (x2 - qr21) - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * (y2 - qr22);
+
+  double ki1 = sqrt((qd1 * qd1 + qd2 * qd2 + l1 * l1 + l2 * l2) * (qd1 * qd1 + qd2 * qd2 + l1 * l1 + l2 * l2) - 2 * ((qd1 * qd1 + qd2 * qd2) * (qd1 * qd1 + qd2 * qd2) + l1 * l1 * l1 * l1 + l2 * l2 * l2 * l2));
+  double ki2 = qd1 * qd1 + qd2 * qd2 + l1 * l1 - l2 * l2;
+  double ki3 = qd1 * qd1 + qd2 * qd2 - l1 * l1 - l2 * l2;
+
+  double xd = atan2(qd2, qd1) + atan2(ki1, ki2);
+  double yd = -atan2(ki1, ki3);
+  double xd1 = ((qd1 * qd11 + qd2 * qd12) * (l1 * l1 - qd1 * qd1 - qd2 * qd2 - l2 * l2)) / (ki1 * (qd1 * qd1 + qd2 * qd2));
+  double yd1 = 2 * (qd1 * qd11 + qd2 * qd12) / ki1;
+  double xd2 = (((qd1 * qd21 + qd11 * qd11 + qd2 * qd22 + qd12 * qd12) * (l1 * l1 - qd1 * qd1 - qd2 * qd2 - l2 * l2) - 2 * (qd1 * qd11 + qd2 * qd12) * (qd1 * qd11 + qd2 * qd12)) * ki1 * (qd1 * qd1 + qd2 * qd2) - (qd1 * qd11 + qd2 * qd12) * (l1 * l1 - qd1 * qd1 - qd2 * qd2 - l2 * l2) * (ki1 * 2 * (qd1 * qd11 + qd2 * qd12) - (qd1 * qd1 + qd2 * qd2) * 2 * (qd1 * qd11 + qd2 * qd12) * ki3 / ki1)) / (ki1 * (qd1 * qd1 + qd2 * qd2));
+  double yd2 = 2 * ((qd1 * qd21 + qd11 * qd11 + qd2 * qd22 + qd12 * qd12) * ki1 * ki1 + (qd1 * qd11 + qd2 * qd12) * 2 * (qd1 * qd11 + qd2 * qd12) * ki3) / ki1 * ki1 * ki1;
+
+  double thetad1 = xd + (T01 + T02 - T03) / K1;
+  double thetad2 = yd + (T11 + T12 - T13) / K2;
+  double thetad11 = xd1 + (dT01 + dT02 - dT03) / K1;
+  double thetad12 = yd1 + (dT11 + dT12 - dT13) / K2;
+  double thetad21 = xd2 + (ddT01 + ddT02 - ddT03) / K1;
+  double thetad22 = yd2 + (ddT11 + ddT12 - ddT13) / K2;
+
+  double s12 = (z[16] - thetad11) + gamma2 * (z[14] - thetad1);
+  double s22 = (z[17] - thetad12) + gamma2 * (z[15] - thetad2);
+
+  double thetar21 = thetad21 - gamma2 * (z[16] - thetad11);
+  double thetar22 = thetad22 - gamma2 * (z[17] - thetad12);
+
+  // control law
+  U[0] = 0;
+  U[1] = 0;
+  U[2] = (J1 * thetar21 + K1 * (thetad1 - xd) - gamma1 * s12);
+  U[3] = (J2 * thetar22 + K2 * (thetad2 - yd) - gamma1 * s22);
+
+  double V1 = (s1 * s1 * (d11 * mc11 + d21 * mc21) + 2 * s1 * s2 * (d12 * mc11 + d22 * mc21) + s2 * s2 * (d12 * mc12 + d22 * mc22)) / 2 + (J1 * s12 * s12 + J2 * s22 * s22) / 2;
+  z[6] = V1 + gamma1 * gamma2 * ((x - qd1) * (x - qd1) + (y - qd2) * (y - qd2) + (z[14] - thetad1) * (z[14] - thetad1) + (z[15] - thetad2) * (z[15] - thetad2)) + (x - qd1 - z[14] + thetad1) * K1 * (x - qd1 - z[14] + thetad1) + (y - qd2 - z[15] + thetad2) * K2 * (y - qd2 - z[15] + thetad2);
+
+  z[9] = V1;
+  z[11] = P;
+
+}
+
+
+extern "C" void U10(double time, unsigned int sizeOfq, double *U, unsigned int sizeZ, double* z)
+{
+  double m11 = m1 * (l1 * l1 / 4) + I1 + I2 + m2 * (l1 * l1 + (l2 * l2 / 4) + l1 * l2 * cos(z[1]));
+  double m12 = (m2 * l2 * l2 / 4) + I2 + m2 * l1 * l2 * cos(z[1]) / 2;
+  double m22 = (m2 * l2 * l2 / 4) + I2;
+  double detm = m11 * m22 - m12 * m12;
+  double ddetm = (m12 - m22) * m2 * l1 * l2 * sin(z[1]) * z[3];
+
+  double NNL0 = -m2 * l1 * l2 * sin(z[1]) * (z[2] * z[3] + z[3] * z[3] / 2) + K1 * (z[0] - z[14]);
+  double NNL1 = m2 * l1 * l2 * sin(z[1]) * z[2] * z[2] / 2 + K2 * (z[1] - z[15]);
+
+  // generalized coordinates q=(x,y)^T
+  double x = l1 * cos(z[0]) + l2 * cos(z[0] + z[1]);
+  double y = l1 * sin(z[0]) + l2 * sin(z[0] + z[1]);
+
+  // time derivatives of x and y
+  double x1 = -l1 * sin(z[0]) * z[2] - l2 * sin(z[0] + z[1]) * (z[2] + z[3]);
+  double y1 = l1 * cos(z[0]) * z[3] + l2 * cos(z[0] + z[1]) * (z[2] + z[3]);
+
+  // acceleration in z[0],z[1] coordinates
+  double dv0 = (m22 * NNL0 - m12 * NNL1) / detm;
+  double dv1 = (m11 * NNL1 - m12 * NNL0) / detm;
+
+  double ddv0 = ((m22 * (-m2 * l1 * l2 * cos(z[1]) * z[3] * (z[2] * z[3] + z[3] * z[3] / 2) - m2 * l1 * l2 * sin(z[1]) * (dv0 * z[3] + dv1 * z[2] + dv1 * z[3]) + K1 * (z[2] - z[16])) + m2 * l1 * l2 * sin(z[1]) * z[3] * NNL1 / 2 - m12 * (m2 * l1 * l2 * cos(z[1]) * z[2] * z[2] * z[3] / 2 + m2 * l1 * l2 * sin(z[1]) * z[2] * dv0 + K2 * (z[3] - z[17]))) * detm - (m22 * NNL0 - m12 * NNL1) * ddetm) / (detm * detm); //double ddv0 = ((m2*l1*l2*sin(z[1])*z[3]*NNL1/2-m12*(m2*l1*l2*cos(z[1])*z[2]*z[2]*z[3]/2+ m2*l1*l2*sin(z[1])*z[2]*dv0+K2*(z[3]-z[17])))*detm-(m22*NNL0-m12*NNL1)*ddetm)/(detm*detm);
+  double ddv1 = ((m11 * (m2 * l1 * l2 * cos(z[1]) * z[2] * z[2] * z[3] / 2 + m2 * l1 * l2 * sin(z[1]) * z[2] * dv0 + K2 * (z[3] - z[17])) + m2 * l1 * l2 * sin(z[1]) * z[3] * NNL0 / 2 - m2 * l1 * l2 * sin(z[1]) * z[3] * NNL1 + m12 * (m2 * l1 * l2 * cos(z[1]) * z[3] * (z[2] * z[3] + z[3] * z[3] / 2) + m2 * l1 * l2 * sin(z[1]) * (dv0 * z[3] + dv1 * z[2] + dv1 * z[3]) - K1 * (z[2] - z[16]))) * detm - (m11 * NNL1 - m12 * NNL0) * ddetm) / (detm * detm);
+
+  // acceleration in x,y coordinates
+  double x2 =  -l1 * cos(z[0]) * z[2] * z[2] - l1 * sin(z[0]) * dv0 - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) - l2 * sin(z[0] + z[1]) * (dv0 + dv1);
+  double y2 =  l1 * cos(z[0]) * dv0 - l1 * sin(z[0]) * z[2] * z[2] + l2 * cos(z[0] + z[1]) * (dv0 + dv1) - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]);
+
+  double x3 =  l1 * sin(z[0]) * z[2] * z[2] * z[2] - 2 * l1 * cos(z[0]) * z[2] * dv0 - l1 * cos(z[0]) * z[2] * dv0 - l1 * sin(z[0]) * ddv0 + l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * (z[2] + z[3]) - 2 * l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (dv0 + dv1) - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (dv0 + dv1) - l2 * sin(z[0] + z[1]) * (ddv0 + ddv1);
+  double y3 = -l1 * sin(z[0]) * z[2] * dv0 + l1 * cos(z[0]) * ddv0 - l1 * cos(z[0]) * z[2] * z[2] * z[2] - 2 * l1 * sin(z[0]) * z[2] * dv0 - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * (dv0 + dv1) + l2 * cos(z[0] + z[1]) * (ddv0 + ddv1) + l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * (z[2] + z[3]) - 2 * l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (dv0 + dv1);
+
+  // the gradient of the transformation \theta->q
+  double grad11 = -y;
+  double grad12 = -l2 * sin(z[0] + z[1]);
+  double grad21 = x;
+  double grad22 = l2 * cos(z[0] + z[1]);
+  double det = grad11 * grad22 - grad12 * grad21;
+
+  // d=(grad)^{-1}
+  double d11 = grad22 / det;
+  double d12 = -grad12 / det;
+  double d21 = -grad21 / det;
+  double d22 = grad11 / det;
+
+  // time derivative of d
+
+  double dd11 =  -(sin(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]));
+  double dd12 = (cos(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]));
+  double dd21 =  -dd11 + (sin(z[0]) * sin(z[1]) * z[2] + cos(z[0]) * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]));
+  double dd22 =  -dd12 - (cos(z[0]) * sin(z[1]) * z[2] - sin(z[0]) * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]));
+
+  // time derivative of dd
+
+  double ddd11 = (-(sin(z[0] + z[1]) * (dv0 + dv1) * sin(z[1]) + cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * sin(z[1]) - cos(z[0] + z[1]) * sin(z[1]) * z[3] * z[3] + cos(z[0] + z[1]) * cos(z[1]) * dv1) * sin(z[1]) + (sin(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double ddd12 = ((-sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * (dv0 + dv1) * sin(z[1]) + sin(z[0] + z[1]) * sin(z[1]) * z[3] * z[3] - sin(z[0] + z[1]) * cos(z[1]) * dv1) * sin(z[1]) - (cos(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double ddd21 =  -ddd11 + ((cos(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3]) + sin(z[0]) * sin(z[1]) * dv0 + cos(z[0]) * cos(z[1]) * dv1) * sin(z[1]) - (sin(z[0]) * sin(z[1]) * z[2] + cos(z[0]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double ddd22 =  -ddd12 - ((cos(z[0]) * sin(z[1]) * dv0 - sin(z[0]) * cos(z[1]) * dv1 - sin(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3])) * sin(z[1]) - (cos(z[0]) * sin(z[1]) * z[2] - sin(z[0]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]) * sin(z[1]));
+
+  // time derivative of ddd
+
+  double dddd11 = ((-(sin(z[0] + z[1]) * (ddv0 + ddv1) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * ddv1 + 3 * cos(z[0] + z[1]) * sin(z[1]) * (z[2] + z[3]) * (dv0 + dv1) - 3 * cos(z[0] + z[1]) * sin(z[1]) * z[3] * dv1 + cos(z[0] + z[1]) * cos(z[1]) * ((z[2] + z[3]) * (z[2] + z[3]) * z[3] - z[3] * z[3] * z[3]) - sin(z[0] + z[1]) * sin(z[1]) * (z[2] + z[3]) * ((z[2] + z[3]) * (z[2] + z[3]) - z[3] * z[3]) + sin(z[0] + z[1]) * cos(z[1]) * ((dv0 + dv1) * z[3] - (z[2] + z[3]) * dv1)) * sin(z[1]) + (sin(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * (cos(z[1]) * dv1 - sin(z[1]) * z[3] * z[3])) * sin(z[1]) - (-(sin(z[0] + z[1]) * (dv0 + dv1) * sin(z[1]) + cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * sin(z[1]) - cos(z[0] + z[1]) * sin(z[1]) * z[3] * z[3] + cos(z[0] + z[1]) * cos(z[1]) * dv1) * sin(z[1]) + (sin(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) * 3 * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double dddd12 = (((cos(z[0] + z[1]) * (ddv0 + ddv1) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * ddv1 - 3 * sin(z[0] + z[1]) * sin(z[1]) * ((z[2] + z[3]) * (dv0 + dv1) - z[3] * dv1) + cos(z[0] + z[1]) * cos(z[1]) * ((dv0 + dv1) * z[3] - (z[2] + z[3]) * dv1) - (cos(z[0] + z[1]) * sin(z[1]) * (z[2] + z[3]) + sin(z[0] + z[1]) * cos(z[1]) * z[3]) * ((z[2] + z[3]) * (z[2] + z[3]) - z[3] * z[3])) * sin(z[1]) - (cos(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * (cos(z[1]) * dv1 - sin(z[1]) * z[3] * z[3])) * sin(z[1]) - ((-sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * (dv0 + dv1) * sin(z[1]) + sin(z[0] + z[1]) * sin(z[1]) * z[3] * z[3] - sin(z[0] + z[1]) * cos(z[1]) * dv1) * (sin(z[1]) * sin(z[1])) - (cos(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * sin(z[1]) * cos(z[1]) * z[3]) * 3 * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double dddd21 = -dddd11 + (((sin(z[0]) * sin(z[1]) * ddv0 + cos(z[0]) * cos(z[1]) * ddv1 + 3 * (z[2] * dv0 - z[3] * dv1) + sin(z[0]) * cos(z[1]) * (z[3] * dv0 - z[2] * dv1) + (cos(z[0]) * cos(z[1]) * z[3] - sin(z[0]) * sin(z[1]) * z[2]) * (z[2] * z[2] - z[3] * z[3])) * sin(z[1]) - (sin(z[0]) * sin(z[1]) * z[2] + cos(z[0]) * cos(z[1]) * z[3]) * 2 * (cos(z[1]) * dv1 - sin(z[1]) * z[3] * z[3])) * sin(z[1]) - ((cos(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3]) + sin(z[0]) * sin(z[1]) * dv0 + cos(z[0]) * cos(z[1]) * dv1) * sin(z[1]) - (sin(z[0]) * sin(z[1]) * z[2] + cos(z[0]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) * 3 * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double dddd22 = -dddd12 - (((-(sin(z[0]) * cos(z[1]) * z[3] + cos(z[0]) * sin(z[1]) * z[2]) * (z[2] * z[2] - z[3] * z[3]) + cos(z[0]) * sin(z[1]) * ddv0 - sin(z[0]) * cos(z[1]) * ddv1 + 3 * (z[3] * dv1 - z[2] * dv0) * sin(z[0]) * sin(z[1]) - cos(z[0]) * cos(z[1]) * (z[3] * dv0 - z[2] * dv1)) * sin(z[1]) - (cos(z[0]) * sin(z[1]) * z[2] - sin(z[0]) * cos(z[1]) * z[3]) * 2 * (cos(z[1]) * dv1 - sin(z[1]) * z[3] * z[3])) * sin(z[1]) - ((cos(z[0]) * sin(z[1]) * dv0 - sin(z[0]) * cos(z[1]) * dv1 - sin(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3])) * sin(z[1]) - ((cos(z[0]) * sin(z[1]) * dv0 - sin(z[0]) * cos(z[1]) * dv1 - sin(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3])) * sin(z[1]) - (cos(z[0]) * sin(z[1]) * z[2] - sin(z[0]) * cos(z[1]) * z[3])) * 2 * cos(z[1]) * z[3]) * 3 * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]) * sin(z[1]) * sin(z[1]));
+
+  // M*d
+  double mc11 = m11 * d11 + m12 * d21;
+  double mc12 = m11 * d12 + m12 * d22;
+  double mc21 = m12 * d11 + m22 * d21;
+  double mc22 = m12 * d12 + m22 * d22;
+
+  // M*dd
+  double a11 = m11 * dd11 + m12 * dd21;
+  double a12 = m11 * dd12 + m12 * dd22;
+  double a21 = m12 * dd11 + m22 * dd21;
+  double a22 = m12 * dd12 + m22 * dd22;
+
+  double da11 = -m2 * l1 * l2 * sin(z[1]) * z[3] * dd11 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd21 / 2 + m11 * ddd11 + m12 * ddd21;
+  double da12 = -m2 * l1 * l2 * sin(z[1]) * z[3] * (dd12 + dd22 / 2) + m11 * ddd12 + m12 * ddd22;
+  double da21 = -m2 * l1 * l2 * sin(z[1]) * z[3] * dd11 / 2 + m12 * ddd11 + m22 * ddd21;
+  double da22 = -m2 * l1 * l2 * sin(z[1]) * z[3] * dd12 / 2 + m12 * ddd12 + m22 * ddd22;
+
+  double dda11 = -m2 * l1 * l2 * ((cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * dd11 + sin(z[1]) * z[3] * ddd11 + (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * dd21 / 2 + sin(z[1]) * z[3] * ddd21 / 2 + sin(z[1]) * z[3] * (ddd11 + ddd21 / 2)) + m11 * dddd11 + m12 * dddd21;
+  double dda12 = -m2 * l1 * l2 * ((cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * (dd12 + dd22 / 2) + sin(z[1]) * z[3] * (ddd12 + ddd22 / 2) + sin(z[1]) * z[3] * (ddd12 + ddd22 / 2)) + m11 * dddd12 + m12 * dddd22;
+  double dda21 = -m2 * l1 * l2 * ((cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * dd11 / 2 + sin(z[1]) * z[3] * ddd11) + m12 * dddd11 + m22 * dddd21;
+  double dda22 = -m2 * l1 * l2 * ((cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * dd12 / 2 + sin(z[1]) * z[3] * ddd12) + m12 * dddd12 + m22 * dddd22;
+
+  double dmc11 = -m2 * l1 * l2 * sin(z[1]) * z[3] * (d11 + d21 / 2) + m11 * dd11 + m12 * dd21;
+  double dmc12 = -m2 * l1 * l2 * sin(z[1]) * z[3] * (d12 + d22 / 2) + m11 * dd12 + m12 * dd22;
+  double dmc21 = -m2 * l1 * l2 * sin(z[1]) * z[3] * d11 / 2 + m12 * dd11 + m22 * dd21;
+  double dmc22 = -m2 * l1 * l2 * sin(z[1]) * z[3] * d12 / 2 + m12 * dd12 + m22 * dd22;
+
+  double ddmc11 = -m2 * l1 * l2 * (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * (d11 + d21 / 2) - m2 * l1 * l2 * sin(z[1]) * z[3] * (dd11 + dd21 / 2) + m11 * ddd11 + m12 * ddd21 - m2 * l1 * l2 * sin(z[1]) * z[3] * (dd11 + dd21 / 2);
+  double ddmc12 = -m2 * l1 * l2 * (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * (d12 + d22 / 2) - m2 * l1 * l2 * sin(z[1]) * z[3] * (dd12 + dd22 / 2) + m11 * ddd12 + m12 * ddd22 - m2 * l1 * l2 * sin(z[1]) * z[3] * (dd12 + dd22 / 2);
+  double ddmc21 =  -m2 * l1 * l2 * (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * d11 / 2 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd11 / 2 + m12 * ddd11 + m22 * ddd21 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd11 / 2;
+  double ddmc22 =  -m2 * l1 * l2 * (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * d12 / 2 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd12 / 2 + m12 * ddd12 + m22 * ddd22 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd12 / 2;
+
+  double qd1 = 0;
+  double qd11 = 0;
+  double qd21 = 0;
+  double qd31 = 0;
+  double qd41 = 0;
+  double t2 = time - z[8];
+
+  double qd2 = 0;
+  double qd12 = 0;
+  double qd22 = 0;
+  double qd32 = 0;
+  double qd42 = 0;
+  double t3 = (time - z[8] - delta) / Del;
+
+  double b0 = 0.1 * sin(2 * PI * z[8] / P);
+  double b2 = -3 * b0 - 3 * sqrt(z[7]) * alpha;
+  double b3 = 2 * b0 + 2 * sqrt(z[7]) * alpha;
+
+  if (t2 < delta)
+  {
+    qd1 = 0.65 + 0.1 * cos(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P);
+    qd11 = -(2 * PI / P) * 0.1 * sin(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) / (delta * delta);
+    qd21 = -(2 * PI / P) * (2 * PI / P) * 0.1 * cos(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * ((2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta))) / (delta * delta * delta * delta) - (2 * PI / P) * 0.1 * sin(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (2 * t2 + 4 * (t2 - delta)) / (delta * delta);
+    qd31 = (2 * PI / P) * (2 * PI / P) * (2 * PI / P) * 0.1 * sin(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) / (delta * delta * delta * delta * delta * delta) - 2 * (2 * PI / P) * (2 * PI / P) * 0.1 * cos(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * 4 * (3 * t2 - delta) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) / (delta * delta * delta * delta) - (2 * PI / P) * 0.1 * sin(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * 6 / (delta * delta);
+    qd41 = (2 * PI / P) * (2 * PI / P) * (2 * PI / P) * (2 * PI / P) * 0.1 * cos(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * ((2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta))) / (delta * delta * delta * delta * delta * delta * delta * delta) + (2 * PI / P) * (2 * PI / P) * (2 * PI / P) * 0.1 * sin(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * 2 * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * (3 * t2 - delta) / (delta * delta * delta * delta * delta * delta) + 2 * (2 * PI / P) * (2 * PI / P) * 0.1 * sin(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * 2 * (3 * t2 - delta) * 2 * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) / (delta * delta * delta * delta * delta * delta) - 2 * (2 * PI / P) * (2 * PI / P) * 0.1 * cos(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (16 * (3 * t2 - delta) * (3 * t2 - delta) + 12 * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta))) / (delta * delta * delta * delta) - (2 * PI / P) * (2 * PI / P) * 0.1 * cos(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * 6 / (delta * delta * delta * delta);
+    qd2 = 0.1 * sin(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P);
+    qd12 = (2 * PI / P) * 0.1 * cos(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) / (delta * delta);
+    qd22 = -(2 * PI / P) * (2 * PI / P) * 0.1 * sin(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * ((2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta))) / (delta * delta * delta * delta) + (2 * PI / P) * 0.1 * cos(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (2 * t2 + 4 * (t2 - delta)) / (delta * delta);
+    qd32 = -(2 * PI / P) * (2 * PI / P) * (2 * PI / P) * 0.1 * cos(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * ((2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta))) / (delta * delta * delta * delta * delta * delta) - (2 * PI / P) * (2 * PI / P) * 0.1 * sin(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (2 * (3 * t2 - delta) * 2 * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta))) / (delta * delta * delta * delta) - (2 * PI / P) * 0.1 * sin(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (2 * t2 + 4 * (t2 - delta)) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) / (delta * delta * delta * delta) + (2 * PI / P) * 0.1 * cos(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * 6 / (delta * delta);
+    qd42 = (2 * PI / P) * (2 * PI / P) * (2 * PI / P) * (2 * PI / P) * 0.1 * sin(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * ((2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta))) / (delta * delta * delta * delta * delta * delta * delta * delta) - (2 * PI / P) * (2 * PI / P) * (2 * PI / P) * 0.1 * cos(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * 2 * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * (3 * t2 - delta) / (delta * delta * delta * delta * delta * delta) - 2 * (2 * PI / P) * (2 * PI / P) * 0.1 * cos(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * 2 * (3 * t2 - delta) * 2 * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) / (delta * delta * delta * delta * delta * delta) - 2 * (2 * PI / P) * (2 * PI / P) * 0.1 * sin(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (16 * (3 * t2 - delta) * (3 * t2 - delta) + 12 * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta))) / (delta * delta * delta * delta) - (2 * PI / P) * (2 * PI / P) * 0.1 * sin(2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) * 6 / (delta * delta * delta * delta);
+  }
+  else
+  {
+    qd1 = z[5];
+    qd11 = 0;
+    qd21 = 0;
+    qd31 = 0;
+    qd41 = 0;
+    qd2 = b3 * t3 * t3 * t3 + b2 * t3 * t3 + b0;
+    qd12 = (3 * b3 * t3 * t3 + 2 * b2 * t3) / Del;
+    qd22 = (6 * b3 * t3 + 2 * b2) / (Del * Del);
+    qd32 = 6 * b3 / (Del * Del * Del);
+    qd42 = 0;
+  }
+
+  double qd2c = (fabs(qd2) + qd2) / 2;
+
+  double qr11 = qd11 - gamma2 * (x - qd1);
+  double qr12 = qd12 - gamma2 * (y - qd2);
+
+  double qr21 = qd21 - gamma2 * (x1 - qd11);
+  double qr22 = qd22 - gamma2 * (y1 - qd12);
+
+  double qr31 = qd31 - gamma2 * (x2 - qd21);
+  double qr32 = qd32 - gamma2 * (y2 - qd22);
+
+  double qr41 = qd41 - gamma2 * (x3 - qd31);
+  double qr42 = qd42 - gamma2 * (y3 - qd32);
+
+  double s1 = x1 - qr11;
+  double s2 = y1 - qr12;
+
+  double s2ly = 0;
+  if (qd2 >= 0)
+    s2ly = y1 - qr12;
+  else
+    s2ly = y1 + gamma2 * y;
+
+  double a1 = -m2 * l1 * l2 * sin(z[1]) * z[3] * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2);
+  double a2 = a11 * qr11 + a12 * qr12;
+  double a3 = m2 * l1 * l2 * sin(z[1]) * z[2] * (d11 * qr11 + d12 * qr12) / 2;
+  double a4 = a21 * qr11 + a22 * qr12;
+
+  double da1 = -m2 * l1 * l2 * cos(z[1]) * z[3] * z[3] * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2) - m2 * l1 * l2 * sin(z[1]) * dv1 * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2) - m2 * l1 * l2 * sin(z[1]) * z[3] * ((dd11 * qr11 + dd12 * qr12 + d11 * qr21 + d12 * qr22) + (dd21 * qr11 + dd22 * qr12 + d21 * qr21 + d22 * qr22) / 2);
+  double da2 = a11 * qr21 + a12 * qr22 + da11 * qr11 + da12 * qr12;
+  double da3 = m2 * l1 * l2 * cos(z[1]) * z[2] * z[3] * (d11 * qr11 + d12 * qr12) / 2 + m2 * l1 * l2 * sin(z[1]) * dv0 * (d11 * qr11 + d12 * qr12) / 2 + m2 * l1 * l2 * sin(z[1]) * z[2] * (dd11 * qr11 + dd12 * qr12 + d11 * qr21 + d12 * qr22) / 2;
+  double da4 = a21 * qr21 + a22 * qr22 + da21 * qr11 + da22 * qr12;
+
+  double dda1 = (m2 * l1 * l2 * sin(z[1]) * z[3] * z[3] * z[3] - 2 * m2 * l1 * l2 * cos(z[1]) * z[3] * dv1) * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2) - m2 * l1 * l2 * cos(z[1]) * z[3] * z[3] * ((dd11 * qr11 + d11 * qr21 + dd12 * qr12 + d12 * qr22) + (dd21 * qr11 + dd22 * qr12 + d21 * qr21 + d22 * qr22) / 2) - (m2 * l1 * l2 * cos(z[1]) * z[3] * dv1 + m2 * l1 * l2 * sin(z[1]) * ddv1) * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2) - m2 * l1 * l2 * sin(z[1]) * dv1 * ((dd11 * qr11 + d11 * qr21 + dd12 * qr12 + d12 * qr22) + (dd21 * qr11 + dd22 * qr12 + d21 * qr21 + d22 * qr22) / 2) - (m2 * l1 * l2 * cos(z[1]) * z[3] * z[3] + m2 * l1 * l2 * sin(z[1]) * dv1) * ((dd11 * qr11 + dd12 * qr12 + d11 * qr21 + d12 * qr22) + (dd21 * qr11 + dd22 * qr12 + d21 * qr21 + d22 * qr22) / 2) - m2 * l1 * l2 * sin(z[1]) * z[3] * ((ddd11 * qr11 + dd11 * qr21 + ddd12 * qr12 + dd12 * qr22 + dd11 * qr21 + d11 * qr31 + dd12 * qr22 + d12 * qr32) + (ddd21 * qr11 + dd21 * qr21 + ddd22 * qr12 + dd22 * qr22 + dd21 * qr21 + d21 * qr31 + dd22 * qr22 + d22 * qr32) / 2);
+  double dda2 = da11 * qr21 + a11 * qr31 + da12 * qr22 + a12 * qr32 + da11 * qr21 + dda11 * qr11 + da12 * qr22 + dda12 * qr12;
+  double dda3 = (m2 * l1 * l2 * sin(z[1]) * ddv0 + 2 * m2 * l1 * l2 * cos(z[1]) * dv0 * z[3] + m2 * l1 * l2 * cos(z[1]) * z[2] * dv1 - m2 * l1 * l2 * sin(z[1]) * z[2] * z[3] * z[3]) * (d11 * qr11 + d12 * qr12) / 2 + (m2 * l1 * l2 * cos(z[1]) * z[2] * z[3] + m2 * l1 * l2 * sin(z[1]) * dv0) * (dd11 * qr11 + dd12 * qr12 + d11 * qr21 + d12 * qr22) + m2 * l1 * l2 * sin(z[1]) * z[2] * (ddd11 * qr11 + ddd12 * qr12 + dd11 * qr21 + dd12 * qr22 + dd11 * qr21 + dd12 * qr22 + d11 * qr31 + d12 * qr32) / 2;
+  double dda4 = da21 * qr21 + a21 * qr31 + da22 * qr22 + a22 * qr32 + dda21 * qr11 + da21 * qr21 + dda22 * qr12 + da22 * qr22;
+
+
+  double T01 = mc11 * qr21 + mc12 * qr22;
+  double T02 = a1 + a2;
+  double T03 = grad11 * gamma1 * s1 + grad21 * gamma1 * s2;
+
+  double dT01 = dmc11 * qr21 + dmc12 * qr22 + mc11 * qr31 + mc12 * qr32;
+  double dT02 = da1 + da2;
+  double dT03 = -y1 * gamma1 * s1 + x1 * gamma1 * s2 + grad11 * gamma1 * (x2 - qr21) + grad21 * gamma1 * (y2 - qr22);
+
+  double ddT01 = ddmc11 * qr21 + ddmc12 * qr22 + 2 * dmc11 * qr31 + 2 * dmc12 * qr32 + mc11 * qr41 + mc12 * qr42;
+  double ddT02 = dda1 + dda2;
+  double ddT03 = -y2 * gamma1 * s1 + x2 * gamma1 * s2 - 2 * y1 * gamma1 * (x2 - qr21) + 2 * x1 * gamma1 * (y2 - qr22) + grad11 * gamma1 * (x3 - qr31) + grad21 * gamma1 * (y3 - qr32);
+
+  double T11 = mc21 * qr21 + mc22 * qr22;
+  double T12 = a3 + a4;
+  double T13 = grad12 * gamma1 * s1 + grad22 * gamma1 * s2;
+
+  double dT11 = dmc21 * qr21 + dmc22 * qr22 + mc21 * qr31 + mc22 * qr32;
+  double dT12 = da3 + da4;
+  double dT13 = -l2 * cos(z[0] + z[1]) * (z[14] + z[15]) * gamma1 * s1 - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * s2 + grad12 * gamma1 * (x2 - qr21) + grad22 * gamma1 * (y2 - qr22);
+
+  double ddT11 = ddmc21 * qr21 + ddmc22 * qr22 + 2 * dmc21 * qr31 + 2 * dmc22 * qr32 + mc21 * qr41 + mc22 * qr42;
+  double ddT12 = dda3 + dda4;
+  double ddT13 = -l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * gamma1 * s1 - l2 * cos(z[0] + z[1]) * (dv0 + dv1) * gamma1 * s1 - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * (x2 - qr21) - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * gamma1 * s2 - l2 * sin(z[0] + z[1]) * (dv0 + dv1) * gamma1 * s2 - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * (y2 - qr22) + grad12 * gamma1 * (x3 - qr31) + grad22 * gamma1 * (y3 - qr32) - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * (x2 - qr21) - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * (y2 - qr22);
+
+  double ki1 = sqrt((qd1 * qd1 + qd2 * qd2 + l1 * l1 + l2 * l2) * (qd1 * qd1 + qd2 * qd2 + l1 * l1 + l2 * l2) - 2 * ((qd1 * qd1 + qd2 * qd2) * (qd1 * qd1 + qd2 * qd2) + l1 * l1 * l1 * l1 + l2 * l2 * l2 * l2));
+  double ki2 = qd1 * qd1 + qd2 * qd2 + l1 * l1 - l2 * l2;
+  double ki3 = qd1 * qd1 + qd2 * qd2 - l1 * l1 - l2 * l2;
+
+  double xd = atan2(qd2, qd1) + atan2(ki1, ki2);
+  double yd = -atan2(ki1, ki3);
+  double xd1 = ((qd1 * qd11 + qd2 * qd12) * (l1 * l1 - qd1 * qd1 - qd2 * qd2 - l2 * l2)) / (ki1 * (qd1 * qd1 + qd2 * qd2));
+  double yd1 = 2 * (qd1 * qd11 + qd2 * qd12) / ki1;
+  double xd2 = (((qd1 * qd21 + qd11 * qd11 + qd2 * qd22 + qd12 * qd12) * (l1 * l1 - qd1 * qd1 - qd2 * qd2 - l2 * l2) - 2 * (qd1 * qd11 + qd2 * qd12) * (qd1 * qd11 + qd2 * qd12)) * ki1 * (qd1 * qd1 + qd2 * qd2) - (qd1 * qd11 + qd2 * qd12) * (l1 * l1 - qd1 * qd1 - qd2 * qd2 - l2 * l2) * (ki1 * 2 * (qd1 * qd11 + qd2 * qd12) - (qd1 * qd1 + qd2 * qd2) * 2 * (qd1 * qd11 + qd2 * qd12) * ki3 / ki1)) / (ki1 * (qd1 * qd1 + qd2 * qd2));
+  double yd2 = 2 * ((qd1 * qd21 + qd11 * qd11 + qd2 * qd22 + qd12 * qd12) * ki1 * ki1 + (qd1 * qd11 + qd2 * qd12) * 2 * (qd1 * qd11 + qd2 * qd12) * ki3) / ki1 * ki1 * ki1;
+
+  double thetad1 = xd + (T01 + T02 - T03) / K1;
+  double thetad2 = yd + (T11 + T12 - T13) / K2;
+  double thetad11 = xd1 + (dT01 + dT02 - dT03) / K1;
+  double thetad12 = yd1 + (dT11 + dT12 - dT13) / K2;
+  double thetad21 = xd2 + (ddT01 + ddT02 - ddT03) / K1;
+  double thetad22 = yd2 + (ddT11 + ddT12 - ddT13) / K2;
+
+  double s12 = (z[16] - thetad11) + gamma2 * (z[14] - thetad1);
+  double s22 = (z[17] - thetad12) + gamma2 * (z[15] - thetad2);
+
+  double thetar21 = thetad21 - gamma2 * (z[16] - thetad11);
+  double thetar22 = thetad22 - gamma2 * (z[17] - thetad12);
+
+  U[0] = 0;
+  U[1] = 0;
+  U[2] = (J1 * thetar21 + K1 * (thetad1 - xd) - gamma1 * s12);
+  U[3] = (J2 * thetar22 + K2 * (thetad2 - yd) - gamma1 * s22);
+
+  double V1 = (s1 * s1 * (d11 * mc11 + d21 * mc21) + 2 * s1 * s2 * (d12 * mc11 + d22 * mc21) + s2 * s2 * (d12 * mc12 + d22 * mc22)) / 2 + J1 * s12 * s12 + J2 * s22 * s22;
+  z[6] = V1 + gamma1 * gamma2 * ((x - qd1) * (x - qd1) + (y - qd2) * (y - qd2) + (z[14] - thetad1) * (z[14] - thetad1) + (z[15] - thetad2) * (z[15] - thetad2)) + (x - qd1 - z[14] + thetad1) * K1 * (x - qd1 - z[14] + thetad1) + (y - qd2 - z[15] + thetad2) * K2 * (y - qd2 - z[15] + thetad2);
+
+  z[9] = V1;
+  z[11] = P;
+}
+
+extern "C" void U11(double time, unsigned int sizeOfq, double *U, unsigned int sizeZ, double* z)
+{
+  double m11 = m1 * (l1 * l1 / 4) + I1 + I2 + m2 * (l1 * l1 + (l2 * l2 / 4) + l1 * l2 * cos(z[1]));
+  double m12 = (m2 * l2 * l2 / 4) + I2 + m2 * l1 * l2 * cos(z[1]) / 2;
+  double m22 = (m2 * l2 * l2 / 4) + I2;
+  double detm = m11 * m22 - m12 * m12;
+  double ddetm = (m12 - m22) * m2 * l1 * l2 * sin(z[1]) * z[3];
+
+  double NNL0 = -m2 * l1 * l2 * sin(z[1]) * (z[2] * z[3] + z[3] * z[3] / 2) + K1 * (z[0] - z[14]);
+  double NNL1 = m2 * l1 * l2 * sin(z[1]) * z[2] * z[2] / 2 + K2 * (z[1] - z[15]);
+
+  // generalized coordinates q=(x,y)^T
+  double x = l1 * cos(z[0]) + l2 * cos(z[0] + z[1]);
+  double y = l1 * sin(z[0]) + l2 * sin(z[0] + z[1]);
+
+  // time derivatives of x and y
+  double x1 = -l1 * sin(z[0]) * z[2] - l2 * sin(z[0] + z[1]) * (z[2] + z[3]);
+  double y1 = l1 * cos(z[0]) * z[3] + l2 * cos(z[0] + z[1]) * (z[2] + z[3]);
+
+  // acceleration in z[0],z[1] coordinates
+  double dv0 = (m22 * NNL0 - m12 * NNL1) / detm;
+  double dv1 = (m11 * NNL1 - m12 * NNL0) / detm;
+
+  double ddv0 = ((m22 * (-m2 * l1 * l2 * cos(z[1]) * z[3] * (z[2] * z[3] + z[3] * z[3] / 2) - m2 * l1 * l2 * sin(z[1]) * (dv0 * z[3] + dv1 * z[2] + dv1 * z[3]) + K1 * (z[2] - z[16])) + m2 * l1 * l2 * sin(z[1]) * z[3] * NNL1 / 2 - m12 * (m2 * l1 * l2 * cos(z[1]) * z[2] * z[2] * z[3] / 2 + m2 * l1 * l2 * sin(z[1]) * z[2] * dv0 + K2 * (z[3] - z[17]))) * detm - (m22 * NNL0 - m12 * NNL1) * ddetm) / (detm * detm);
+  double ddv1 = ((m11 * (m2 * l1 * l2 * cos(z[1]) * z[2] * z[2] * z[3] / 2 + m2 * l1 * l2 * sin(z[1]) * z[2] * dv0 + K2 * (z[3] - z[17])) + m2 * l1 * l2 * sin(z[1]) * z[3] * NNL0 / 2 - m2 * l1 * l2 * sin(z[1]) * z[3] * NNL1 + m12 * (m2 * l1 * l2 * cos(z[1]) * z[3] * (z[2] * z[3] + z[3] * z[3] / 2) + m2 * l1 * l2 * sin(z[1]) * (dv0 * z[3] + dv1 * z[2] + dv1 * z[3]) - K1 * (z[2] - z[16]))) * detm - (m11 * NNL1 - m12 * NNL0) * ddetm) / (detm * detm);
+
+  // acceleration in x,y coordinates
+  double x2 =  -l1 * cos(z[0]) * z[2] * z[2] - l1 * sin(z[0]) * dv0 - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) - l2 * sin(z[0] + z[1]) * (dv0 + dv1);
+  double y2 =  l1 * cos(z[0]) * dv0 - l1 * sin(z[0]) * z[2] * z[2] + l2 * cos(z[0] + z[1]) * (dv0 + dv1) - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]);
+
+  double x3 =  l1 * sin(z[0]) * z[2] * z[2] * z[2] - 2 * l1 * cos(z[0]) * z[2] * dv0 - l1 * cos(z[0]) * z[2] * dv0 - l1 * sin(z[0]) * ddv0 + l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * (z[2] + z[3]) - 2 * l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (dv0 + dv1) - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (dv0 + dv1) - l2 * sin(z[0] + z[1]) * (ddv0 + ddv1);
+  double y3 = -l1 * sin(z[0]) * z[2] * dv0 + l1 * cos(z[0]) * ddv0 - l1 * cos(z[0]) * z[2] * z[2] * z[2] - 2 * l1 * sin(z[0]) * z[2] * dv0 - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * (dv0 + dv1) + l2 * cos(z[0] + z[1]) * (ddv0 + ddv1) + l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * (z[2] + z[3]) - 2 * l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (dv0 + dv1);
+
+  // the gradient of the transformation \theta->q
+  double grad11 = -y;
+  double grad12 = -l2 * sin(z[0] + z[1]);
+  double grad21 = x;
+  double grad22 = l2 * cos(z[0] + z[1]);
+  double det = grad11 * grad22 - grad12 * grad21;
+
+  // d=(grad)^{-1}
+  double d11 = grad22 / det;
+  double d12 = -grad12 / det;
+  double d21 = -grad21 / det;
+  double d22 = grad11 / det;
+
+  // time derivative of d
+
+  double dd11 =  -(sin(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]));
+  double dd12 = (cos(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]));
+  double dd21 =  -dd11 + (sin(z[0]) * sin(z[1]) * z[2] + cos(z[0]) * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]));
+  double dd22 =  -dd12 - (cos(z[0]) * sin(z[1]) * z[2] - sin(z[0]) * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]));
+
+  // time derivative of dd
+
+  double ddd11 = (-(sin(z[0] + z[1]) * (dv0 + dv1) * sin(z[1]) + cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * sin(z[1]) - cos(z[0] + z[1]) * sin(z[1]) * z[3] * z[3] + cos(z[0] + z[1]) * cos(z[1]) * dv1) * sin(z[1]) + (sin(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double ddd12 = ((-sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * (dv0 + dv1) * sin(z[1]) + sin(z[0] + z[1]) * sin(z[1]) * z[3] * z[3] - sin(z[0] + z[1]) * cos(z[1]) * dv1) * sin(z[1]) - (cos(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double ddd21 =  -ddd11 + ((cos(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3]) + sin(z[0]) * sin(z[1]) * dv0 + cos(z[0]) * cos(z[1]) * dv1) * sin(z[1]) - (sin(z[0]) * sin(z[1]) * z[2] + cos(z[0]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double ddd22 =  -ddd12 - ((cos(z[0]) * sin(z[1]) * dv0 - sin(z[0]) * cos(z[1]) * dv1 - sin(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3])) * sin(z[1]) - (cos(z[0]) * sin(z[1]) * z[2] - sin(z[0]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]) * sin(z[1]));
+
+  // time derivative of ddd
+
+  double dddd11 = ((-(sin(z[0] + z[1]) * (ddv0 + ddv1) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * ddv1 + 3 * cos(z[0] + z[1]) * sin(z[1]) * (z[2] + z[3]) * (dv0 + dv1) - 3 * cos(z[0] + z[1]) * sin(z[1]) * z[3] * dv1 + cos(z[0] + z[1]) * cos(z[1]) * ((z[2] + z[3]) * (z[2] + z[3]) * z[3] - z[3] * z[3] * z[3]) - sin(z[0] + z[1]) * sin(z[1]) * (z[2] + z[3]) * ((z[2] + z[3]) * (z[2] + z[3]) - z[3] * z[3]) + sin(z[0] + z[1]) * cos(z[1]) * ((dv0 + dv1) * z[3] - (z[2] + z[3]) * dv1)) * sin(z[1]) + (sin(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * (cos(z[1]) * dv1 - sin(z[1]) * z[3] * z[3])) * sin(z[1]) - (-(sin(z[0] + z[1]) * (dv0 + dv1) * sin(z[1]) + cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * sin(z[1]) - cos(z[0] + z[1]) * sin(z[1]) * z[3] * z[3] + cos(z[0] + z[1]) * cos(z[1]) * dv1) * sin(z[1]) + (sin(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) * 3 * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double dddd12 = (((cos(z[0] + z[1]) * (ddv0 + ddv1) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * ddv1 - 3 * sin(z[0] + z[1]) * sin(z[1]) * ((z[2] + z[3]) * (dv0 + dv1) - z[3] * dv1) + cos(z[0] + z[1]) * cos(z[1]) * ((dv0 + dv1) * z[3] - (z[2] + z[3]) * dv1) - (cos(z[0] + z[1]) * sin(z[1]) * (z[2] + z[3]) + sin(z[0] + z[1]) * cos(z[1]) * z[3]) * ((z[2] + z[3]) * (z[2] + z[3]) - z[3] * z[3])) * sin(z[1]) - (cos(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * (cos(z[1]) * dv1 - sin(z[1]) * z[3] * z[3])) * sin(z[1]) - ((-sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * (dv0 + dv1) * sin(z[1]) + sin(z[0] + z[1]) * sin(z[1]) * z[3] * z[3] - sin(z[0] + z[1]) * cos(z[1]) * dv1) * (sin(z[1]) * sin(z[1])) - (cos(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * sin(z[1]) * cos(z[1]) * z[3]) * 3 * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double dddd21 = -dddd11 + (((sin(z[0]) * sin(z[1]) * ddv0 + cos(z[0]) * cos(z[1]) * ddv1 + 3 * (z[2] * dv0 - z[3] * dv1) + sin(z[0]) * cos(z[1]) * (z[3] * dv0 - z[2] * dv1) + (cos(z[0]) * cos(z[1]) * z[3] - sin(z[0]) * sin(z[1]) * z[2]) * (z[2] * z[2] - z[3] * z[3])) * sin(z[1]) - (sin(z[0]) * sin(z[1]) * z[2] + cos(z[0]) * cos(z[1]) * z[3]) * 2 * (cos(z[1]) * dv1 - sin(z[1]) * z[3] * z[3])) * sin(z[1]) - ((cos(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3]) + sin(z[0]) * sin(z[1]) * dv0 + cos(z[0]) * cos(z[1]) * dv1) * sin(z[1]) - (sin(z[0]) * sin(z[1]) * z[2] + cos(z[0]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) * 3 * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double dddd22 = -dddd12 - (((-(sin(z[0]) * cos(z[1]) * z[3] + cos(z[0]) * sin(z[1]) * z[2]) * (z[2] * z[2] - z[3] * z[3]) + cos(z[0]) * sin(z[1]) * ddv0 - sin(z[0]) * cos(z[1]) * ddv1 + 3 * (z[3] * dv1 - z[2] * dv0) * sin(z[0]) * sin(z[1]) - cos(z[0]) * cos(z[1]) * (z[3] * dv0 - z[2] * dv1)) * sin(z[1]) - (cos(z[0]) * sin(z[1]) * z[2] - sin(z[0]) * cos(z[1]) * z[3]) * 2 * (cos(z[1]) * dv1 - sin(z[1]) * z[3] * z[3])) * sin(z[1]) - ((cos(z[0]) * sin(z[1]) * dv0 - sin(z[0]) * cos(z[1]) * dv1 - sin(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3])) * sin(z[1]) - ((cos(z[0]) * sin(z[1]) * dv0 - sin(z[0]) * cos(z[1]) * dv1 - sin(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3])) * sin(z[1]) - (cos(z[0]) * sin(z[1]) * z[2] - sin(z[0]) * cos(z[1]) * z[3])) * 2 * cos(z[1]) * z[3]) * 3 * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]) * sin(z[1]) * sin(z[1]));
+
+  // M*d
+  double mc11 = m11 * d11 + m12 * d21;
+  double mc12 = m11 * d12 + m12 * d22;
+  double mc21 = m12 * d11 + m22 * d21;
+  double mc22 = m12 * d12 + m22 * d22;
+
+  // M*dd
+  double a11 = m11 * dd11 + m12 * dd21;
+  double a12 = m11 * dd12 + m12 * dd22;
+  double a21 = m12 * dd11 + m22 * dd21;
+  double a22 = m12 * dd12 + m22 * dd22;
+
+  double da11 = -m2 * l1 * l2 * sin(z[1]) * z[3] * dd11 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd21 / 2 + m11 * ddd11 + m12 * ddd21;
+  double da12 = -m2 * l1 * l2 * sin(z[1]) * z[3] * (dd12 + dd22 / 2) + m11 * ddd12 + m12 * ddd22;
+  double da21 = -m2 * l1 * l2 * sin(z[1]) * z[3] * dd11 / 2 + m12 * ddd11 + m22 * ddd21;
+  double da22 = -m2 * l1 * l2 * sin(z[1]) * z[3] * dd12 / 2 + m12 * ddd12 + m22 * ddd22;
+
+  double dda11 = -m2 * l1 * l2 * ((cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * dd11 + sin(z[1]) * z[3] * ddd11 + (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * dd21 / 2 + sin(z[1]) * z[3] * ddd21 / 2 + sin(z[1]) * z[3] * (ddd11 + ddd21 / 2)) + m11 * dddd11 + m12 * dddd21;
+  double dda12 = -m2 * l1 * l2 * ((cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * (dd12 + dd22 / 2) + sin(z[1]) * z[3] * (ddd12 + ddd22 / 2) + sin(z[1]) * z[3] * (ddd12 + ddd22 / 2)) + m11 * dddd12 + m12 * dddd22;
+  double dda21 = -m2 * l1 * l2 * ((cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * dd11 / 2 + sin(z[1]) * z[3] * ddd11) + m12 * dddd11 + m22 * dddd21;
+  double dda22 = -m2 * l1 * l2 * ((cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * dd12 / 2 + sin(z[1]) * z[3] * ddd12) + m12 * dddd12 + m22 * dddd22;
+
+  double dmc11 = -m2 * l1 * l2 * sin(z[1]) * z[3] * (d11 + d21 / 2) + m11 * dd11 + m12 * dd21;
+  double dmc12 = -m2 * l1 * l2 * sin(z[1]) * z[3] * (d12 + d22 / 2) + m11 * dd12 + m12 * dd22;
+  double dmc21 = -m2 * l1 * l2 * sin(z[1]) * z[3] * d11 / 2 + m12 * dd11 + m22 * dd21;
+  double dmc22 = -m2 * l1 * l2 * sin(z[1]) * z[3] * d12 / 2 + m12 * dd12 + m22 * dd22;
+
+  double ddmc11 = -m2 * l1 * l2 * (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * (d11 + d21 / 2) - m2 * l1 * l2 * sin(z[1]) * z[3] * (dd11 + dd21 / 2) + m11 * ddd11 + m12 * ddd21 - m2 * l1 * l2 * sin(z[1]) * z[3] * (dd11 + dd21 / 2);
+  double ddmc12 = -m2 * l1 * l2 * (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * (d12 + d22 / 2) - m2 * l1 * l2 * sin(z[1]) * z[3] * (dd12 + dd22 / 2) + m11 * ddd12 + m12 * ddd22 - m2 * l1 * l2 * sin(z[1]) * z[3] * (dd12 + dd22 / 2);
+  double ddmc21 =  -m2 * l1 * l2 * (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * d11 / 2 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd11 / 2 + m12 * ddd11 + m22 * ddd21 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd11 / 2;
+  double ddmc22 =  -m2 * l1 * l2 * (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * d12 / 2 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd12 / 2 + m12 * ddd12 + m22 * ddd22 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd12 / 2;
+
+  double qr11 = -gamma2 * (x - z[5]);
+  double qr12 = -gamma2 * y;
+
+  double qr21 = -gamma2 * x1;
+  double qr22 = -gamma2 * y1;
+
+  double qr31 = -gamma2 * x2;
+  double qr32 = -gamma2 * y2;
+
+  double qr41 = -gamma2 * x3;
+  double qr42 = -gamma2 * y3;
+
+  double s1 = x1 - qr11;
+  double s2 = y1 - qr12;
+  // double s2ly = y1+gamma2*y;
+  double s2bar = y1 + gamma2 * (y + sqrt(z[7]) * alpha);
+
+  double a1 = -m2 * l1 * l2 * sin(z[1]) * z[3] * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2);
+  double a2 = a11 * qr11 + a12 * qr12;
+  double a3 = m2 * l1 * l2 * sin(z[1]) * z[2] * (d11 * qr11 + d12 * qr12) / 2;
+  double a4 = a21 * qr11 + a22 * qr12;
+
+  double da1 = -m2 * l1 * l2 * cos(z[1]) * z[3] * z[3] * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2) - m2 * l1 * l2 * sin(z[1]) * dv1 * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2) - m2 * l1 * l2 * sin(z[1]) * z[3] * ((dd11 * qr11 + dd12 * qr12 + d11 * qr21 + d12 * qr22) + (dd21 * qr11 + dd22 * qr12 + d21 * qr21 + d22 * qr22) / 2);
+  double da2 = a11 * qr21 + a12 * qr22 + da11 * qr11 + da12 * qr12;
+  double da3 = m2 * l1 * l2 * cos(z[1]) * z[2] * z[3] * (d11 * qr11 + d12 * qr12) / 2 + m2 * l1 * l2 * sin(z[1]) * dv0 * (d11 * qr11 + d12 * qr12) / 2 + m2 * l1 * l2 * sin(z[1]) * z[2] * (dd11 * qr11 + dd12 * qr12 + d11 * qr21 + d12 * qr22) / 2;
+  double da4 = a21 * qr21 + a22 * qr22 + da21 * qr11 + da22 * qr12;
+
+  double dda1 = (m2 * l1 * l2 * sin(z[1]) * z[3] * z[3] * z[3] - 2 * m2 * l1 * l2 * cos(z[1]) * z[3] * dv1) * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2) - m2 * l1 * l2 * cos(z[1]) * z[3] * z[3] * ((dd11 * qr11 + d11 * qr21 + dd12 * qr12 + d12 * qr22) + (dd21 * qr11 + dd22 * qr12 + d21 * qr21 + d22 * qr22) / 2) - (m2 * l1 * l2 * cos(z[1]) * z[3] * dv1 + m2 * l1 * l2 * sin(z[1]) * ddv1) * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2) - m2 * l1 * l2 * sin(z[1]) * dv1 * ((dd11 * qr11 + d11 * qr21 + dd12 * qr12 + d12 * qr22) + (dd21 * qr11 + dd22 * qr12 + d21 * qr21 + d22 * qr22) / 2) - (m2 * l1 * l2 * cos(z[1]) * z[3] * z[3] + m2 * l1 * l2 * sin(z[1]) * dv1) * ((dd11 * qr11 + dd12 * qr12 + d11 * qr21 + d12 * qr22) + (dd21 * qr11 + dd22 * qr12 + d21 * qr21 + d22 * qr22) / 2) - m2 * l1 * l2 * sin(z[1]) * z[3] * ((ddd11 * qr11 + dd11 * qr21 + ddd12 * qr12 + dd12 * qr22 + dd11 * qr21 + d11 * qr31 + dd12 * qr22 + d12 * qr32) + (ddd21 * qr11 + dd21 * qr21 + ddd22 * qr12 + dd22 * qr22 + dd21 * qr21 + d21 * qr31 + dd22 * qr22 + d22 * qr32) / 2);
+  double dda2 = da11 * qr21 + a11 * qr31 + da12 * qr22 + a12 * qr32 + da11 * qr21 + dda11 * qr11 + da12 * qr22 + dda12 * qr12;
+  double dda3 = (m2 * l1 * l2 * sin(z[1]) * ddv0 + 2 * m2 * l1 * l2 * cos(z[1]) * dv0 * z[3] + m2 * l1 * l2 * cos(z[1]) * z[2] * dv1 - m2 * l1 * l2 * sin(z[1]) * z[2] * z[3] * z[3]) * (d11 * qr11 + d12 * qr12) / 2 + (m2 * l1 * l2 * cos(z[1]) * z[2] * z[3] + m2 * l1 * l2 * sin(z[1]) * dv0) * (dd11 * qr11 + dd12 * qr12 + d11 * qr21 + d12 * qr22) + m2 * l1 * l2 * sin(z[1]) * z[2] * (ddd11 * qr11 + ddd12 * qr12 + dd11 * qr21 + dd12 * qr22 + dd11 * qr21 + dd12 * qr22 + d11 * qr31 + d12 * qr32) / 2;
+  double dda4 = da21 * qr21 + a21 * qr31 + da22 * qr22 + a22 * qr32 + dda21 * qr11 + da21 * qr21 + dda22 * qr12 + da22 * qr22;
+
+
+  double T01 = mc11 * qr21 + mc12 * qr22;
+  double T02 = a1 + a2;
+  double T03 = grad11 * gamma1 * s1 + grad21 * gamma1 * s2bar;
+
+  double dT01 = dmc11 * qr21 + dmc12 * qr22 + mc11 * qr31 + mc12 * qr32;
+  double dT02 = da1 + da2;
+  double dT03 = -y1 * gamma1 * s1 + x1 * gamma1 * s2bar + grad11 * gamma1 * (x2 - qr21) + grad21 * gamma1 * (y2 - qr22);
+
+  double ddT01 = ddmc11 * qr21 + ddmc12 * qr22 + 2 * dmc11 * qr31 + 2 * dmc12 * qr32 + mc11 * qr41 + mc12 * qr42;
+  double ddT02 = dda1 + dda2;
+  double ddT03 = -y2 * gamma1 * s1 + x2 * gamma1 * s2bar - 2 * y1 * gamma1 * (x2 - qr21) + 2 * x1 * gamma1 * (y2 - qr22) + grad11 * gamma1 * (x3 - qr31) + grad21 * gamma1 * (y3 - qr32);
+
+  double T11 = mc21 * qr21 + mc22 * qr22;
+  double T12 = a3 + a4;
+  double T13 = grad12 * gamma1 * s1 + grad22 * gamma1 * s2bar;
+
+  double dT11 = dmc21 * qr21 + dmc22 * qr22 + mc21 * qr31 + mc22 * qr32;
+  double dT12 = da3 + da4;
+  double dT13 = -l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * s1 - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * s2bar + grad12 * gamma1 * (x2 - qr21) + grad22 * gamma1 * (y2 + gamma2 * y1);
+
+  double ddT11 = ddmc21 * qr21 + ddmc22 * qr22 + 2 * dmc21 * qr31 + 2 * dmc22 * qr32 + mc21 * qr41 + mc22 * qr42;
+  double ddT12 = dda3 + dda4;
+  double ddT13 = -l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * gamma1 * s1 - l2 * cos(z[0] + z[1]) * (dv0 + dv1) * gamma1 * s1 - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * (x2 - qr21) - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * gamma1 * s2bar - l2 * sin(z[0] + z[1]) * (dv0 + dv1) * gamma1 * s2bar - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * (y2 + gamma2 * y1) + grad12 * gamma1 * (x3 - qr31) + grad22 * gamma1 * (y3 + gamma2 * y2) - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * (x2 - qr21) - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * (y2 + gamma2 * y1);
+
+  double qd1 = z[5];
+  double qd2 = 0;
+  double qd11 = 0;
+  double qd12 = 0;
+  double qd21 = 0;
+  double qd22 = 0;
+
+  double ki1 = sqrt((qd1 * qd1 + qd2 * qd2 + l1 * l1 + l2 * l2) * (qd1 * qd1 + qd2 * qd2 + l1 * l1 + l2 * l2) - 2 * ((qd1 * qd1 + qd2 * qd2) * (qd1 * qd1 + qd2 * qd2) + l1 * l1 * l1 * l1 + l2 * l2 * l2 * l2));
+  double ki2 = qd1 * qd1 + qd2 * qd2 + l1 * l1 - l2 * l2;
+  double ki3 = qd1 * qd1 + qd2 * qd2 - l1 * l1 - l2 * l2;
+
+  double xd = atan2(qd2, qd1) + atan2(ki1, ki2);
+  double yd = -atan2(ki1, ki3);
+  double xd1 = ((qd1 * qd11 + qd2 * qd12) * (l1 * l1 - qd1 * qd1 - qd2 * qd2 - l2 * l2)) / (ki1 * (qd1 * qd1 + qd2 * qd2));
+  double yd1 = 2 * (qd1 * qd11 + qd2 * qd12) / ki1;
+  double xd2 = (((qd1 * qd21 + qd11 * qd11 + qd2 * qd22 + qd12 * qd12) * (l1 * l1 - qd1 * qd1 - qd2 * qd2 - l2 * l2) - 2 * (qd1 * qd11 + qd2 * qd12) * (qd1 * qd11 + qd2 * qd12)) * ki1 * (qd1 * qd1 + qd2 * qd2) - (qd1 * qd11 + qd2 * qd12) * (l1 * l1 - qd1 * qd1 - qd2 * qd2 - l2 * l2) * (ki1 * 2 * (qd1 * qd11 + qd2 * qd12) - (qd1 * qd1 + qd2 * qd2) * 2 * (qd1 * qd11 + qd2 * qd12) * ki3 / ki1)) / (ki1 * (qd1 * qd1 + qd2 * qd2));
+  double yd2 = 2 * ((qd1 * qd21 + qd11 * qd11 + qd2 * qd22 + qd12 * qd12) * ki1 * ki1 + (qd1 * qd11 + qd2 * qd12) * 2 * (qd1 * qd11 + qd2 * qd12) * ki3) / ki1 * ki1 * ki1;
+
+  double thetad1 = xd + (T01 + T02 - T03) / K1;
+  double thetad2 = yd + (T11 + T12 - T13) / K2;
+  double thetad11 = xd1 + (dT01 + dT02 - dT03) / K1;
+  double thetad12 = z[3] + (dT11 + dT12 - dT13) / K2;
+  double thetad21 = xd2 + (ddT01 + ddT02 - ddT03) / K1;
+  double thetad22 = yd2 + (ddT11 + ddT12 - ddT13) / K2;
+
+  double s12 = (z[16] - thetad11) + gamma2 * (z[14] - thetad1);
+  double s22 = (z[17] - thetad12) + gamma2 * (z[15] - thetad2);
+
+  double thetar21 = thetad21 - gamma2 * (z[16] - thetad11);
+  double thetar22 = thetad22 - gamma2 * (z[17] - thetad12);
+
+  U[0] = 0;
+  U[1] = 0;
+  U[2] = (thetar21 + K1 * (thetad1 - xd) - gamma1 * s12);
+  U[3] = (thetar22 + K2 * (thetad2 - yd) - gamma1 * s22);
+
+  double V1 = (s1 * s1 * (d11 * mc11 + d21 * mc21) + 2 * s1 * s2 * (d12 * mc11 + d22 * mc21) + s2 * s2 * (d12 * mc12 + d22 * mc22)) / 2 + J1 * s12 * s12 + J2 * s22 * s22;
+  z[6] = V1 + gamma1 * gamma2 * ((x - qd1) * (x - qd1) + (y - qd2) * (y - qd2) + (z[14] - thetad1) * (z[14] - thetad1) + (z[15] - thetad2) * (z[15] - thetad2)) + (x - qd1 - z[14] + thetad1) * K1 * (x - qd1 - z[14] + thetad1) + (y - qd2 - z[15] + thetad2) * K2 * (y - qd2 - z[15] + thetad2);
+
+  z[9] = V1;
+  z[11] = P;
+}
+
+extern "C" void U2(double time, unsigned int sizeOfq, double *U, unsigned int sizeZ, double* z)
+{
+  double m11 = m1 * (l1 * l1 / 4) + I1 + I2 + m2 * (l1 * l1 + (l2 * l2 / 4) + l1 * l2 * cos(z[1]));
+  double m12 = (m2 * l2 * l2 / 4) + I2 + m2 * l1 * l2 * cos(z[1]) / 2;
+  double m22 = (m2 * l2 * l2 / 4) + I2;
+  double detm = m11 * m22 - m12 * m12;
+  double ddetm = (m12 - m22) * m2 * l1 * l2 * sin(z[1]) * z[3];
+
+  double NNL0 = -m2 * l1 * l2 * sin(z[1]) * (z[2] * z[3] + z[3] * z[3] / 2) + K1 * (z[0] - z[14]);
+  double NNL1 = m2 * l1 * l2 * sin(z[1]) * z[2] * z[2] / 2 + K2 * (z[1] - z[15]);
+
+  // generalized coordinates q=(x,y)^T
+  double x = l1 * cos(z[0]) + l2 * cos(z[0] + z[1]);
+  double y = l1 * sin(z[0]) + l2 * sin(z[0] + z[1]);
+
+  // time derivatives of x and y
+  double x1 = -l1 * sin(z[0]) * z[2] - l2 * sin(z[0] + z[1]) * (z[2] + z[3]);
+  double y1 = l1 * cos(z[0]) * z[3] + l2 * cos(z[0] + z[1]) * (z[2] + z[3]);
+
+  // acceleration in z[0],z[1] coordinates
+  double dv0 = (m22 * NNL0 - m12 * NNL1) / detm;
+  double dv1 = (m11 * NNL1 - m12 * NNL0) / detm;
+
+  double ddv0 = ((m22 * (-m2 * l1 * l2 * cos(z[1]) * z[3] * (z[2] * z[3] + z[3] * z[3] / 2) - m2 * l1 * l2 * sin(z[1]) * (dv0 * z[3] + dv1 * z[2] + dv1 * z[3]) + K1 * (z[2] - z[16])) + m2 * l1 * l2 * sin(z[1]) * z[3] * NNL1 / 2 - m12 * (m2 * l1 * l2 * cos(z[1]) * z[2] * z[2] * z[3] / 2 + m2 * l1 * l2 * sin(z[1]) * z[2] * dv0 + K2 * (z[3] - z[17]))) * detm - (m22 * NNL0 - m12 * NNL1) * ddetm) / (detm * detm); //double ddv0 = ((m2*l1*l2*sin(z[1])*z[3]*NNL1/2-m12*(m2*l1*l2*cos(z[1])*z[2]*z[2]*z[3]/2+ m2*l1*l2*sin(z[1])*z[2]*dv0+K2*(z[3]-z[17])))*detm-(m22*NNL0-m12*NNL1)*ddetm)/(detm*detm);
+  double ddv1 = ((m11 * (m2 * l1 * l2 * cos(z[1]) * z[2] * z[2] * z[3] / 2 + m2 * l1 * l2 * sin(z[1]) * z[2] * dv0 + K2 * (z[3] - z[17])) + m2 * l1 * l2 * sin(z[1]) * z[3] * NNL0 / 2 - m2 * l1 * l2 * sin(z[1]) * z[3] * NNL1 + m12 * (m2 * l1 * l2 * cos(z[1]) * z[3] * (z[2] * z[3] + z[3] * z[3] / 2) + m2 * l1 * l2 * sin(z[1]) * (dv0 * z[3] + dv1 * z[2] + dv1 * z[3]) - K1 * (z[2] - z[16]))) * detm - (m11 * NNL1 - m12 * NNL0) * ddetm) / (detm * detm);
+
+  // acceleration in x,y coordinates
+  double x2 =  -l1 * cos(z[0]) * z[2] * z[2] - l1 * sin(z[0]) * dv0 - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) - l2 * sin(z[0] + z[1]) * (dv0 + dv1);
+  double y2 =  l1 * cos(z[0]) * dv0 - l1 * sin(z[0]) * z[2] * z[2] + l2 * cos(z[0] + z[1]) * (dv0 + dv1) - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]);
+
+  double x3 =  l1 * sin(z[0]) * z[2] * z[2] * z[2] - 2 * l1 * cos(z[0]) * z[2] * dv0 - l1 * cos(z[0]) * z[2] * dv0 - l1 * sin(z[0]) * ddv0 + l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * (z[2] + z[3]) - 2 * l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (dv0 + dv1) - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (dv0 + dv1) - l2 * sin(z[0] + z[1]) * (ddv0 + ddv1);
+  double y3 = -l1 * sin(z[0]) * z[2] * dv0 + l1 * cos(z[0]) * ddv0 - l1 * cos(z[0]) * z[2] * z[2] * z[2] - 2 * l1 * sin(z[0]) * z[2] * dv0 - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * (dv0 + dv1) + l2 * cos(z[0] + z[1]) * (ddv0 + ddv1) + l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * (z[2] + z[3]) - 2 * l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (dv0 + dv1);
+
+  // the gradient of the transformation \theta->q
+  double grad11 = -y;
+  double grad12 = -l2 * sin(z[0] + z[1]);
+  double grad21 = x;
+  double grad22 = l2 * cos(z[0] + z[1]);
+  double det = grad11 * grad22 - grad12 * grad21;
+
+  // d=(grad)^{-1}
+  double d11 = grad22 / det;
+  double d12 = -grad12 / det;
+  double d21 = -grad21 / det;
+  double d22 = grad11 / det;
+
+  // time derivative of d
+
+  double dd11 =  -(sin(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]));
+  double dd12 = (cos(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]));
+  double dd21 =  -dd11 + (sin(z[0]) * sin(z[1]) * z[2] + cos(z[0]) * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]));
+  double dd22 =  -dd12 - (cos(z[0]) * sin(z[1]) * z[2] - sin(z[0]) * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]));
+
+  // time derivative of dd
+
+  double ddd11 = (-(sin(z[0] + z[1]) * (dv0 + dv1) * sin(z[1]) + cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * sin(z[1]) - cos(z[0] + z[1]) * sin(z[1]) * z[3] * z[3] + cos(z[0] + z[1]) * cos(z[1]) * dv1) * sin(z[1]) + (sin(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double ddd12 = ((-sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * (dv0 + dv1) * sin(z[1]) + sin(z[0] + z[1]) * sin(z[1]) * z[3] * z[3] - sin(z[0] + z[1]) * cos(z[1]) * dv1) * sin(z[1]) - (cos(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double ddd21 =  -ddd11 + ((cos(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3]) + sin(z[0]) * sin(z[1]) * dv0 + cos(z[0]) * cos(z[1]) * dv1) * sin(z[1]) - (sin(z[0]) * sin(z[1]) * z[2] + cos(z[0]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double ddd22 =  -ddd12 - ((cos(z[0]) * sin(z[1]) * dv0 - sin(z[0]) * cos(z[1]) * dv1 - sin(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3])) * sin(z[1]) - (cos(z[0]) * sin(z[1]) * z[2] - sin(z[0]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]) * sin(z[1]));
+
+  // time derivative of ddd
+
+  double dddd11 = ((-(sin(z[0] + z[1]) * (ddv0 + ddv1) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * ddv1 + 3 * cos(z[0] + z[1]) * sin(z[1]) * (z[2] + z[3]) * (dv0 + dv1) - 3 * cos(z[0] + z[1]) * sin(z[1]) * z[3] * dv1 + cos(z[0] + z[1]) * cos(z[1]) * ((z[2] + z[3]) * (z[2] + z[3]) * z[3] - z[3] * z[3] * z[3]) - sin(z[0] + z[1]) * sin(z[1]) * (z[2] + z[3]) * ((z[2] + z[3]) * (z[2] + z[3]) - z[3] * z[3]) + sin(z[0] + z[1]) * cos(z[1]) * ((dv0 + dv1) * z[3] - (z[2] + z[3]) * dv1)) * sin(z[1]) + (sin(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * (cos(z[1]) * dv1 - sin(z[1]) * z[3] * z[3])) * sin(z[1]) - (-(sin(z[0] + z[1]) * (dv0 + dv1) * sin(z[1]) + cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * sin(z[1]) - cos(z[0] + z[1]) * sin(z[1]) * z[3] * z[3] + cos(z[0] + z[1]) * cos(z[1]) * dv1) * sin(z[1]) + (sin(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) * 3 * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double dddd12 = (((cos(z[0] + z[1]) * (ddv0 + ddv1) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * ddv1 - 3 * sin(z[0] + z[1]) * sin(z[1]) * ((z[2] + z[3]) * (dv0 + dv1) - z[3] * dv1) + cos(z[0] + z[1]) * cos(z[1]) * ((dv0 + dv1) * z[3] - (z[2] + z[3]) * dv1) - (cos(z[0] + z[1]) * sin(z[1]) * (z[2] + z[3]) + sin(z[0] + z[1]) * cos(z[1]) * z[3]) * ((z[2] + z[3]) * (z[2] + z[3]) - z[3] * z[3])) * sin(z[1]) - (cos(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * (cos(z[1]) * dv1 - sin(z[1]) * z[3] * z[3])) * sin(z[1]) - ((-sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * (dv0 + dv1) * sin(z[1]) + sin(z[0] + z[1]) * sin(z[1]) * z[3] * z[3] - sin(z[0] + z[1]) * cos(z[1]) * dv1) * (sin(z[1]) * sin(z[1])) - (cos(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * sin(z[1]) * cos(z[1]) * z[3]) * 3 * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double dddd21 = -dddd11 + (((sin(z[0]) * sin(z[1]) * ddv0 + cos(z[0]) * cos(z[1]) * ddv1 + 3 * (z[2] * dv0 - z[3] * dv1) + sin(z[0]) * cos(z[1]) * (z[3] * dv0 - z[2] * dv1) + (cos(z[0]) * cos(z[1]) * z[3] - sin(z[0]) * sin(z[1]) * z[2]) * (z[2] * z[2] - z[3] * z[3])) * sin(z[1]) - (sin(z[0]) * sin(z[1]) * z[2] + cos(z[0]) * cos(z[1]) * z[3]) * 2 * (cos(z[1]) * dv1 - sin(z[1]) * z[3] * z[3])) * sin(z[1]) - ((cos(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3]) + sin(z[0]) * sin(z[1]) * dv0 + cos(z[0]) * cos(z[1]) * dv1) * sin(z[1]) - (sin(z[0]) * sin(z[1]) * z[2] + cos(z[0]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) * 3 * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double dddd22 = -dddd12 - (((-(sin(z[0]) * cos(z[1]) * z[3] + cos(z[0]) * sin(z[1]) * z[2]) * (z[2] * z[2] - z[3] * z[3]) + cos(z[0]) * sin(z[1]) * ddv0 - sin(z[0]) * cos(z[1]) * ddv1 + 3 * (z[3] * dv1 - z[2] * dv0) * sin(z[0]) * sin(z[1]) - cos(z[0]) * cos(z[1]) * (z[3] * dv0 - z[2] * dv1)) * sin(z[1]) - (cos(z[0]) * sin(z[1]) * z[2] - sin(z[0]) * cos(z[1]) * z[3]) * 2 * (cos(z[1]) * dv1 - sin(z[1]) * z[3] * z[3])) * sin(z[1]) - ((cos(z[0]) * sin(z[1]) * dv0 - sin(z[0]) * cos(z[1]) * dv1 - sin(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3])) * sin(z[1]) - ((cos(z[0]) * sin(z[1]) * dv0 - sin(z[0]) * cos(z[1]) * dv1 - sin(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3])) * sin(z[1]) - (cos(z[0]) * sin(z[1]) * z[2] - sin(z[0]) * cos(z[1]) * z[3])) * 2 * cos(z[1]) * z[3]) * 3 * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]) * sin(z[1]) * sin(z[1]));
+
+  // M*d
+  double mc11 = m11 * d11 + m12 * d21;
+  double mc12 = m11 * d12 + m12 * d22;
+  double mc21 = m12 * d11 + m22 * d21;
+  double mc22 = m12 * d12 + m22 * d22;
+
+  // M*dd
+  double a11 = m11 * dd11 + m12 * dd21;
+  double a12 = m11 * dd12 + m12 * dd22;
+  double a21 = m12 * dd11 + m22 * dd21;
+  double a22 = m12 * dd12 + m22 * dd22;
+
+  double da11 = -m2 * l1 * l2 * sin(z[1]) * z[3] * dd11 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd21 / 2 + m11 * ddd11 + m12 * ddd21;
+  double da12 = -m2 * l1 * l2 * sin(z[1]) * z[3] * (dd12 + dd22 / 2) + m11 * ddd12 + m12 * ddd22;
+  double da21 = -m2 * l1 * l2 * sin(z[1]) * z[3] * dd11 / 2 + m12 * ddd11 + m22 * ddd21;
+  double da22 = -m2 * l1 * l2 * sin(z[1]) * z[3] * dd12 / 2 + m12 * ddd12 + m22 * ddd22;
+
+  double dda11 = -m2 * l1 * l2 * ((cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * dd11 + sin(z[1]) * z[3] * ddd11 + (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * dd21 / 2 + sin(z[1]) * z[3] * ddd21 / 2 + sin(z[1]) * z[3] * (ddd11 + ddd21 / 2)) + m11 * dddd11 + m12 * dddd21;
+  double dda12 = -m2 * l1 * l2 * ((cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * (dd12 + dd22 / 2) + sin(z[1]) * z[3] * (ddd12 + ddd22 / 2) + sin(z[1]) * z[3] * (ddd12 + ddd22 / 2)) + m11 * dddd12 + m12 * dddd22;
+  double dda21 = -m2 * l1 * l2 * ((cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * dd11 / 2 + sin(z[1]) * z[3] * ddd11) + m12 * dddd11 + m22 * dddd21;
+  double dda22 = -m2 * l1 * l2 * ((cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * dd12 / 2 + sin(z[1]) * z[3] * ddd12) + m12 * dddd12 + m22 * dddd22;
+
+  double dmc11 = -m2 * l1 * l2 * sin(z[1]) * z[3] * (d11 + d21 / 2) + m11 * dd11 + m12 * dd21;
+  double dmc12 = -m2 * l1 * l2 * sin(z[1]) * z[3] * (d12 + d22 / 2) + m11 * dd12 + m12 * dd22;
+  double dmc21 = -m2 * l1 * l2 * sin(z[1]) * z[3] * d11 / 2 + m12 * dd11 + m22 * dd21;
+  double dmc22 = -m2 * l1 * l2 * sin(z[1]) * z[3] * d12 / 2 + m12 * dd12 + m22 * dd22;
+
+  double ddmc11 = -m2 * l1 * l2 * (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * (d11 + d21 / 2) - m2 * l1 * l2 * sin(z[1]) * z[3] * (dd11 + dd21 / 2) + m11 * ddd11 + m12 * ddd21 - m2 * l1 * l2 * sin(z[1]) * z[3] * (dd11 + dd21 / 2);
+  double ddmc12 = -m2 * l1 * l2 * (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * (d12 + d22 / 2) - m2 * l1 * l2 * sin(z[1]) * z[3] * (dd12 + dd22 / 2) + m11 * ddd12 + m12 * ddd22 - m2 * l1 * l2 * sin(z[1]) * z[3] * (dd12 + dd22 / 2);
+  double ddmc21 =  -m2 * l1 * l2 * (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * d11 / 2 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd11 / 2 + m12 * ddd11 + m22 * ddd21 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd11 / 2;
+  double ddmc22 =  -m2 * l1 * l2 * (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * d12 / 2 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd12 / 2 + m12 * ddd12 + m22 * ddd22 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd12 / 2;
+
+  double k = trunc(time / P) + 1;
+  double td = (time - z[8]) / (k * P - z[8]);
+  double c3 = 2 * (z[5] - 0.75);
+  double c2 = -3 * (z[5] - 0.75);
+
+  double qd1 = c3 * td * td * td + c2 * td * td + z[5];
+  double qd11 = (3 * c3 * td * td + 2 * c2 * td) / (k * P - z[8]);
+  double qd21 = (6 * c3 * td + 2 * c2) / ((k * P - z[8]) * (k * P - z[8]));
+  double qd31 = 6 * c3 / ((k * P - z[8]) * (k * P - z[8]) * (k * P - z[8]));
+  double qd41 = 0;
+  double qd2 = 0;
+  double qd12 = 0;
+  double qd22 = 0;
+
+
+  double qr11 = qd11 - gamma2 * (x - qd1);
+  double qr12 = -gamma2 * y;
+
+  double qr21 = qd21 - gamma2 * (x1 - qd11);
+  double qr22 = -gamma2 * y1;
+
+  double qr31 = qd31 - gamma2 * (x2 - qd21);
+  double qr32 = -gamma2 * y2;
+
+  double qr41 = qd41 - gamma2 * (x3 - qd31);
+  double qr42 = -gamma2 * y3;
+
+  double s1 = x1 - qr11;
+  double s2 = y1 - qr12;
+
+  double a1 = -m2 * l1 * l2 * sin(z[1]) * z[3] * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2);
+  double a2 = a11 * qr11 + a12 * qr12;
+  double a3 = m2 * l1 * l2 * sin(z[1]) * z[2] * (d11 * qr11 + d12 * qr12) / 2;
+  double a4 = a21 * qr11 + a22 * qr12;
+
+  double da1 = -m2 * l1 * l2 * cos(z[1]) * z[3] * z[3] * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2) - m2 * l1 * l2 * sin(z[1]) * dv1 * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2) - m2 * l1 * l2 * sin(z[1]) * z[3] * ((dd11 * qr11 + dd12 * qr12 + d11 * qr21 + d12 * qr22) + (dd21 * qr11 + dd22 * qr12 + d21 * qr21 + d22 * qr22) / 2);
+  double da2 = a11 * qr21 + a12 * qr22 + da11 * qr11 + da12 * qr12;
+  double da3 = m2 * l1 * l2 * cos(z[1]) * z[2] * z[3] * (d11 * qr11 + d12 * qr12) / 2 + m2 * l1 * l2 * sin(z[1]) * dv0 * (d11 * qr11 + d12 * qr12) / 2 + m2 * l1 * l2 * sin(z[1]) * z[2] * (dd11 * qr11 + dd12 * qr12 + d11 * qr21 + d12 * qr22) / 2;
+  double da4 = a21 * qr21 + a22 * qr22 + da21 * qr11 + da22 * qr12;
+
+  double dda1 = (m2 * l1 * l2 * sin(z[1]) * z[3] * z[3] * z[3] - 2 * m2 * l1 * l2 * cos(z[1]) * z[3] * dv1) * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2) - m2 * l1 * l2 * cos(z[1]) * z[3] * z[3] * ((dd11 * qr11 + d11 * qr21 + dd12 * qr12 + d12 * qr22) + (dd21 * qr11 + dd22 * qr12 + d21 * qr21 + d22 * qr22) / 2) - (m2 * l1 * l2 * cos(z[1]) * z[3] * dv1 + m2 * l1 * l2 * sin(z[1]) * ddv1) * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2) - m2 * l1 * l2 * sin(z[1]) * dv1 * ((dd11 * qr11 + d11 * qr21 + dd12 * qr12 + d12 * qr22) + (dd21 * qr11 + dd22 * qr12 + d21 * qr21 + d22 * qr22) / 2) - (m2 * l1 * l2 * cos(z[1]) * z[3] * z[3] + m2 * l1 * l2 * sin(z[1]) * dv1) * ((dd11 * qr11 + dd12 * qr12 + d11 * qr21 + d12 * qr22) + (dd21 * qr11 + dd22 * qr12 + d21 * qr21 + d22 * qr22) / 2) - m2 * l1 * l2 * sin(z[1]) * z[3] * ((ddd11 * qr11 + dd11 * qr21 + ddd12 * qr12 + dd12 * qr22 + dd11 * qr21 + d11 * qr31 + dd12 * qr22 + d12 * qr32) + (ddd21 * qr11 + dd21 * qr21 + ddd22 * qr12 + dd22 * qr22 + dd21 * qr21 + d21 * qr31 + dd22 * qr22 + d22 * qr32) / 2);
+  double dda2 = da11 * qr21 + a11 * qr31 + da12 * qr22 + a12 * qr32 + da11 * qr21 + dda11 * qr11 + da12 * qr22 + dda12 * qr12;
+  double dda3 = (m2 * l1 * l2 * sin(z[1]) * ddv0 + 2 * m2 * l1 * l2 * cos(z[1]) * dv0 * z[3] + m2 * l1 * l2 * cos(z[1]) * z[2] * dv1 - m2 * l1 * l2 * sin(z[1]) * z[2] * z[3] * z[3]) * (d11 * qr11 + d12 * qr12) / 2 + (m2 * l1 * l2 * cos(z[1]) * z[2] * z[3] + m2 * l1 * l2 * sin(z[1]) * dv0) * (dd11 * qr11 + dd12 * qr12 + d11 * qr21 + d12 * qr22) + m2 * l1 * l2 * sin(z[1]) * z[2] * (ddd11 * qr11 + ddd12 * qr12 + dd11 * qr21 + dd12 * qr22 + dd11 * qr21 + dd12 * qr22 + d11 * qr31 + d12 * qr32) / 2;
+  double dda4 = da21 * qr21 + a21 * qr31 + da22 * qr22 + a22 * qr32 + dda21 * qr11 + da21 * qr21 + dda22 * qr12 + da22 * qr22;
+
+
+  double ld = (m2 * l1 * l2 * sin(z[1]) * z[2] * (d12 - d22 / 2) - a21 - (mc21 / mc11) * (m2 * l1 * l2 * sin(z[1]) * z[2] * (d11 - d21 / 2) - a11)) * s1 - gamma1 * mc21 * s1 / mc11 + (k * P - time) * (1 + Kf);
+  z[12] = 0.5 + (-mc22 * ld + fabs(mc22 * ld)) / 2;
+
+  double T01 = mc11 * qr21 + mc12 * qr22;
+  double T02 = a1 + a2;
+  double T03 = grad11 * gamma1 * s1 + grad21 * gamma1 * s2;
+
+  double dT01 = dmc11 * qr21 + dmc12 * qr22 + mc11 * qr31 + mc12 * qr32;
+  double dT02 = da1 + da2;
+  double dT03 = -y1 * gamma1 * s1 + x1 * gamma1 * s2 + grad11 * gamma1 * (x2 - qr21) + grad21 * gamma1 * (y2 - qr22);
+
+  double ddT01 = ddmc11 * qr21 + ddmc12 * qr22 + 2 * dmc11 * qr31 + 2 * dmc12 * qr32 + mc11 * qr41 + mc12 * qr42;
+  double ddT02 = dda1 + dda2;
+  double ddT03 = -y2 * gamma1 * s1 + x2 * gamma1 * s2 - 2 * y1 * gamma1 * (x2 - qr21) + 2 * x1 * gamma1 * (y2 - qr22) + grad11 * gamma1 * (x3 - qr31) + grad21 * gamma1 * (y3 - qr32);
+
+  double T11 = mc21 * qr21 + mc22 * qr22;
+  double T12 = a3 + a4;
+  double T13 = grad12 * gamma1 * s1 + grad22 * gamma1 * s2;
+
+  double dT11 = dmc21 * qr21 + dmc22 * qr22 + mc21 * qr31 + mc22 * qr32;
+  double dT12 = da3 + da4;
+  double dT13 = -l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * s1 - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * s2 + grad12 * gamma1 * (x2 - qr21) + grad22 * gamma1 * (y2 - qr22);
+
+  double ddT11 = ddmc21 * qr21 + ddmc22 * qr22 + 2 * dmc21 * qr31 + 2 * dmc22 * qr32 + mc21 * qr41 + mc22 * qr42;
+  double ddT12 = dda3 + dda4;
+  double ddT13 = -l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * gamma1 * s1 - l2 * cos(z[0] + z[1]) * (dv0 + dv1) * gamma1 * s1 - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * (x2 - qr21) - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * gamma1 * s2 - l2 * sin(z[0] + z[1]) * (dv0 + dv1) * gamma1 * s2 - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * (y2 - qr22) + grad12 * gamma1 * (x3 - qr31) + grad22 * gamma1 * (y3 - qr32) - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * (x2 - qr21) - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * (y2 - qr22);
+
+  double ki1 = sqrt((qd1 * qd1 + qd2 * qd2 + l1 * l1 + l2 * l2) * (qd1 * qd1 + qd2 * qd2 + l1 * l1 + l2 * l2) - 2 * ((qd1 * qd1 + qd2 * qd2) * (qd1 * qd1 + qd2 * qd2) + l1 * l1 * l1 * l1 + l2 * l2 * l2 * l2));
+  double ki2 = qd1 * qd1 + qd2 * qd2 + l1 * l1 - l2 * l2;
+  double ki3 = qd1 * qd1 + qd2 * qd2 - l1 * l1 - l2 * l2;
+
+  double xd = atan2(qd2, qd1) + atan2(ki1, ki2);
+  double yd = -atan2(ki1, ki3);
+  double xd1 = ((qd1 * qd11 + qd2 * qd12) * (l1 * l1 - qd1 * qd1 - qd2 * qd2 - l2 * l2)) / (ki1 * (qd1 * qd1 + qd2 * qd2));
+  double yd1 = 2 * (qd1 * qd11 + qd2 * qd12) / ki1;
+  double xd2 = (((qd1 * qd21 + qd11 * qd11 + qd2 * qd22 + qd12 * qd12) * (l1 * l1 - qd1 * qd1 - qd2 * qd2 - l2 * l2) - 2 * (qd1 * qd11 + qd2 * qd12) * (qd1 * qd11 + qd2 * qd12)) * ki1 * (qd1 * qd1 + qd2 * qd2) - (qd1 * qd11 + qd2 * qd12) * (l1 * l1 - qd1 * qd1 - qd2 * qd2 - l2 * l2) * (ki1 * 2 * (qd1 * qd11 + qd2 * qd12) - (qd1 * qd1 + qd2 * qd2) * 2 * (qd1 * qd11 + qd2 * qd12) * ki3 / ki1)) / (ki1 * (qd1 * qd1 + qd2 * qd2));
+  double yd2 = 2 * ((qd1 * qd21 + qd11 * qd11 + qd2 * qd22 + qd12 * qd12) * ki1 * ki1 + (qd1 * qd11 + qd2 * qd12) * 2 * (qd1 * qd11 + qd2 * qd12) * ki3) / ki1 * ki1 * ki1;
+
+  double thetad1 = xd + (T01 + T02 - T03) / K1;
+  double thetad2 = yd + (T11 + T12 - T13) / K2;
+  double thetad11 = xd1 + (dT01 + dT02 - dT03) / K1;
+  double thetad12 = yd1 + (dT11 + dT12 - dT13) / K2;
+  double thetad21 = xd2 + (ddT01 + ddT02 - ddT03) / K1;
+  double thetad22 = yd2 + (ddT11 + ddT12 - ddT13) / K2;
+
+  double s12 = (z[16] - thetad11) + gamma2 * (z[14] - thetad1);
+  double s22 = (z[17] - thetad12) + gamma2 * (z[15] - thetad2);
+
+  double thetar21 = thetad21 - gamma2 * (z[16] - thetad11);
+  double thetar22 = thetad22 - gamma2 * (z[17] - thetad12);
+
+  // control law
+  U[0] = grad21 * (Kf * z[4] - ld);
+  U[1] = grad22 * (Kf * z[4] - ld);
+  U[2] = (J1 * thetar21 + K1 * (thetad1 - xd) - gamma1 * s12);
+  U[3] = (J2 * thetar22 + K2 * (thetad2 - yd) - gamma1 * s22);
+
+  double V1 = (s1 * s1 * (d11 * mc11 + d21 * mc21) + 2 * s1 * s2 * (d12 * mc11 + d22 * mc21) + s2 * s2 * (d12 * mc12 + d22 * mc22)) / 2 + s12 * s12 + s22 * s22;
+  z[6] = V1 + gamma1 * gamma2 * ((x - qd1) * (x - qd1) + (y - qd2) * (y - qd2) + (z[14] - thetad1) * (z[14] - thetad1) + (z[15] - thetad2) * (z[15] - thetad2)) + (x - qd1 - z[14] + thetad1) * K1 * (x - qd1 - z[14] + thetad1) + (y - qd2 - z[15] + thetad2) * K2 * (y - qd2 - z[15] + thetad2);
+
+  z[11] = P;
+  z[7] = 0;
+  //  z[14] = qr11;
+  //   z[15] = qr12;
+  //   z[18] = qr21;
+  //   z[19] = qr22;
+  //   z[22] = -U[2]+g*(l1*cos(z[0])*(m2+m1/2)+m2*l2*cos(z[0]+z[1])/2);
+  //   z[23] = -U[3]+g*m2*l2*cos(z[0]+z[1])/2;//(k*P-time)*(1+Kf);
+}
+
+extern "C" void U3(double time, unsigned int sizeOfq, double *U, unsigned int sizeZ, double* z)
+{
+  double m11 = m1 * (l1 * l1 / 4) + I1 + I2 + m2 * (l1 * l1 + (l2 * l2 / 4) + l1 * l2 * cos(z[1]));
+  double m12 = (m2 * l2 * l2 / 4) + I2 + m2 * l1 * l2 * cos(z[1]) / 2;
+  double m22 = (m2 * l2 * l2 / 4) + I2;
+  double detm = m11 * m22 - m12 * m12;
+  double ddetm = (m12 - m22) * m2 * l1 * l2 * sin(z[1]) * z[3];
+
+  double NNL0 = -m2 * l1 * l2 * sin(z[1]) * (z[2] * z[3] + z[3] * z[3] / 2) + K1 * (z[0] - z[14]);
+  double NNL1 = m2 * l1 * l2 * sin(z[1]) * z[2] * z[2] / 2 + K2 * (z[1] - z[15]);
+
+  // generalized coordinates q=(x,y)^T
+  double x = l1 * cos(z[0]) + l2 * cos(z[0] + z[1]);
+  double y = l1 * sin(z[0]) + l2 * sin(z[0] + z[1]);
+
+  // time derivatives of x and y
+  double x1 = -l1 * sin(z[0]) * z[2] - l2 * sin(z[0] + z[1]) * (z[2] + z[3]);
+  double y1 = l1 * cos(z[0]) * z[3] + l2 * cos(z[0] + z[1]) * (z[2] + z[3]);
+
+  // acceleration in z[0],z[1] coordinates
+  double dv0 = (m22 * NNL0 - m12 * NNL1) / detm;
+  double dv1 = (m11 * NNL1 - m12 * NNL0) / detm;
+
+  double ddv0 = ((m22 * (-m2 * l1 * l2 * cos(z[1]) * z[3] * (z[2] * z[3] + z[3] * z[3] / 2) - m2 * l1 * l2 * sin(z[1]) * (dv0 * z[3] + dv1 * z[2] + dv1 * z[3]) + K1 * (z[2] - z[16])) + m2 * l1 * l2 * sin(z[1]) * z[3] * NNL1 / 2 - m12 * (m2 * l1 * l2 * cos(z[1]) * z[2] * z[2] * z[3] / 2 + m2 * l1 * l2 * sin(z[1]) * z[2] * dv0 + K2 * (z[3] - z[17]))) * detm - (m22 * NNL0 - m12 * NNL1) * ddetm) / (detm * detm); //double ddv0 = ((m2*l1*l2*sin(z[1])*z[3]*NNL1/2-m12*(m2*l1*l2*cos(z[1])*z[2]*z[2]*z[3]/2+ m2*l1*l2*sin(z[1])*z[2]*dv0+K2*(z[3]-z[17])))*detm-(m22*NNL0-m12*NNL1)*ddetm)/(detm*detm);
+  double ddv1 = ((m11 * (m2 * l1 * l2 * cos(z[1]) * z[2] * z[2] * z[3] / 2 + m2 * l1 * l2 * sin(z[1]) * z[2] * dv0 + K2 * (z[3] - z[17])) + m2 * l1 * l2 * sin(z[1]) * z[3] * NNL0 / 2 - m2 * l1 * l2 * sin(z[1]) * z[3] * NNL1 + m12 * (m2 * l1 * l2 * cos(z[1]) * z[3] * (z[2] * z[3] + z[3] * z[3] / 2) + m2 * l1 * l2 * sin(z[1]) * (dv0 * z[3] + dv1 * z[2] + dv1 * z[3]) - K1 * (z[2] - z[16]))) * detm - (m11 * NNL1 - m12 * NNL0) * ddetm) / (detm * detm);
+
+  // acceleration in x,y coordinates
+  double x2 =  -l1 * cos(z[0]) * z[2] * z[2] - l1 * sin(z[0]) * dv0 - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) - l2 * sin(z[0] + z[1]) * (dv0 + dv1);
+  double y2 =  l1 * cos(z[0]) * dv0 - l1 * sin(z[0]) * z[2] * z[2] + l2 * cos(z[0] + z[1]) * (dv0 + dv1) - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]);
+
+  double x3 =  l1 * sin(z[0]) * z[2] * z[2] * z[2] - 2 * l1 * cos(z[0]) * z[2] * dv0 - l1 * cos(z[0]) * z[2] * dv0 - l1 * sin(z[0]) * ddv0 + l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * (z[2] + z[3]) - 2 * l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (dv0 + dv1) - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (dv0 + dv1) - l2 * sin(z[0] + z[1]) * (ddv0 + ddv1);
+  double y3 = -l1 * sin(z[0]) * z[2] * dv0 + l1 * cos(z[0]) * ddv0 - l1 * cos(z[0]) * z[2] * z[2] * z[2] - 2 * l1 * sin(z[0]) * z[2] * dv0 - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * (dv0 + dv1) + l2 * cos(z[0] + z[1]) * (ddv0 + ddv1) + l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * (z[2] + z[3]) - 2 * l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (dv0 + dv1);
+
+  // the gradient of the transformation \theta->q
+  double grad11 = -y;
+  double grad12 = -l2 * sin(z[0] + z[1]);
+  double grad21 = x;
+  double grad22 = l2 * cos(z[0] + z[1]);
+  double det = grad11 * grad22 - grad12 * grad21;
+
+  // d=(grad)^{-1}
+  double d11 = grad22 / det;
+  double d12 = -grad12 / det;
+  double d21 = -grad21 / det;
+  double d22 = grad11 / det;
+
+  // time derivative of d
+
+  double dd11 =  -(sin(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]));
+  double dd12 = (cos(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]));
+  double dd21 =  -dd11 + (sin(z[0]) * sin(z[1]) * z[2] + cos(z[0]) * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]));
+  double dd22 =  -dd12 - (cos(z[0]) * sin(z[1]) * z[2] - sin(z[0]) * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]));
+
+  // time derivative of dd
+
+  double ddd11 = (-(sin(z[0] + z[1]) * (dv0 + dv1) * sin(z[1]) + cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * sin(z[1]) - cos(z[0] + z[1]) * sin(z[1]) * z[3] * z[3] + cos(z[0] + z[1]) * cos(z[1]) * dv1) * sin(z[1]) + (sin(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double ddd12 = ((-sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * (dv0 + dv1) * sin(z[1]) + sin(z[0] + z[1]) * sin(z[1]) * z[3] * z[3] - sin(z[0] + z[1]) * cos(z[1]) * dv1) * sin(z[1]) - (cos(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double ddd21 =  -ddd11 + ((cos(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3]) + sin(z[0]) * sin(z[1]) * dv0 + cos(z[0]) * cos(z[1]) * dv1) * sin(z[1]) - (sin(z[0]) * sin(z[1]) * z[2] + cos(z[0]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double ddd22 =  -ddd12 - ((cos(z[0]) * sin(z[1]) * dv0 - sin(z[0]) * cos(z[1]) * dv1 - sin(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3])) * sin(z[1]) - (cos(z[0]) * sin(z[1]) * z[2] - sin(z[0]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]) * sin(z[1]));
+
+  // time derivative of ddd
+
+  double dddd11 = ((-(sin(z[0] + z[1]) * (ddv0 + ddv1) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * ddv1 + 3 * cos(z[0] + z[1]) * sin(z[1]) * (z[2] + z[3]) * (dv0 + dv1) - 3 * cos(z[0] + z[1]) * sin(z[1]) * z[3] * dv1 + cos(z[0] + z[1]) * cos(z[1]) * ((z[2] + z[3]) * (z[2] + z[3]) * z[3] - z[3] * z[3] * z[3]) - sin(z[0] + z[1]) * sin(z[1]) * (z[2] + z[3]) * ((z[2] + z[3]) * (z[2] + z[3]) - z[3] * z[3]) + sin(z[0] + z[1]) * cos(z[1]) * ((dv0 + dv1) * z[3] - (z[2] + z[3]) * dv1)) * sin(z[1]) + (sin(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * (cos(z[1]) * dv1 - sin(z[1]) * z[3] * z[3])) * sin(z[1]) - (-(sin(z[0] + z[1]) * (dv0 + dv1) * sin(z[1]) + cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * sin(z[1]) - cos(z[0] + z[1]) * sin(z[1]) * z[3] * z[3] + cos(z[0] + z[1]) * cos(z[1]) * dv1) * sin(z[1]) + (sin(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) * 3 * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double dddd12 = (((cos(z[0] + z[1]) * (ddv0 + ddv1) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * ddv1 - 3 * sin(z[0] + z[1]) * sin(z[1]) * ((z[2] + z[3]) * (dv0 + dv1) - z[3] * dv1) + cos(z[0] + z[1]) * cos(z[1]) * ((dv0 + dv1) * z[3] - (z[2] + z[3]) * dv1) - (cos(z[0] + z[1]) * sin(z[1]) * (z[2] + z[3]) + sin(z[0] + z[1]) * cos(z[1]) * z[3]) * ((z[2] + z[3]) * (z[2] + z[3]) - z[3] * z[3])) * sin(z[1]) - (cos(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * (cos(z[1]) * dv1 - sin(z[1]) * z[3] * z[3])) * sin(z[1]) - ((-sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * sin(z[1]) + cos(z[0] + z[1]) * (dv0 + dv1) * sin(z[1]) + sin(z[0] + z[1]) * sin(z[1]) * z[3] * z[3] - sin(z[0] + z[1]) * cos(z[1]) * dv1) * (sin(z[1]) * sin(z[1])) - (cos(z[0] + z[1]) * (z[2] + z[3]) * sin(z[1]) - sin(z[0] + z[1]) * cos(z[1]) * z[3]) * 2 * sin(z[1]) * cos(z[1]) * z[3]) * 3 * cos(z[1]) * z[3]) / (l1 * sin(z[1]) * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double dddd21 = -dddd11 + (((sin(z[0]) * sin(z[1]) * ddv0 + cos(z[0]) * cos(z[1]) * ddv1 + 3 * (z[2] * dv0 - z[3] * dv1) + sin(z[0]) * cos(z[1]) * (z[3] * dv0 - z[2] * dv1) + (cos(z[0]) * cos(z[1]) * z[3] - sin(z[0]) * sin(z[1]) * z[2]) * (z[2] * z[2] - z[3] * z[3])) * sin(z[1]) - (sin(z[0]) * sin(z[1]) * z[2] + cos(z[0]) * cos(z[1]) * z[3]) * 2 * (cos(z[1]) * dv1 - sin(z[1]) * z[3] * z[3])) * sin(z[1]) - ((cos(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3]) + sin(z[0]) * sin(z[1]) * dv0 + cos(z[0]) * cos(z[1]) * dv1) * sin(z[1]) - (sin(z[0]) * sin(z[1]) * z[2] + cos(z[0]) * cos(z[1]) * z[3]) * 2 * cos(z[1]) * z[3]) * 3 * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]) * sin(z[1]) * sin(z[1]));
+  double dddd22 = -dddd12 - (((-(sin(z[0]) * cos(z[1]) * z[3] + cos(z[0]) * sin(z[1]) * z[2]) * (z[2] * z[2] - z[3] * z[3]) + cos(z[0]) * sin(z[1]) * ddv0 - sin(z[0]) * cos(z[1]) * ddv1 + 3 * (z[3] * dv1 - z[2] * dv0) * sin(z[0]) * sin(z[1]) - cos(z[0]) * cos(z[1]) * (z[3] * dv0 - z[2] * dv1)) * sin(z[1]) - (cos(z[0]) * sin(z[1]) * z[2] - sin(z[0]) * cos(z[1]) * z[3]) * 2 * (cos(z[1]) * dv1 - sin(z[1]) * z[3] * z[3])) * sin(z[1]) - ((cos(z[0]) * sin(z[1]) * dv0 - sin(z[0]) * cos(z[1]) * dv1 - sin(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3])) * sin(z[1]) - ((cos(z[0]) * sin(z[1]) * dv0 - sin(z[0]) * cos(z[1]) * dv1 - sin(z[0]) * sin(z[1]) * (z[2] * z[2] - z[3] * z[3])) * sin(z[1]) - (cos(z[0]) * sin(z[1]) * z[2] - sin(z[0]) * cos(z[1]) * z[3])) * 2 * cos(z[1]) * z[3]) * 3 * cos(z[1]) * z[3]) / (l2 * sin(z[1]) * sin(z[1]) * sin(z[1]) * sin(z[1]));
+
+  // M*d
+  double mc11 = m11 * d11 + m12 * d21;
+  double mc12 = m11 * d12 + m12 * d22;
+  double mc21 = m12 * d11 + m22 * d21;
+  double mc22 = m12 * d12 + m22 * d22;
+
+  // M*dd
+  double a11 = m11 * dd11 + m12 * dd21;
+  double a12 = m11 * dd12 + m12 * dd22;
+  double a21 = m12 * dd11 + m22 * dd21;
+  double a22 = m12 * dd12 + m22 * dd22;
+
+  double da11 = -m2 * l1 * l2 * sin(z[1]) * z[3] * dd11 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd21 / 2 + m11 * ddd11 + m12 * ddd21;
+  double da12 = -m2 * l1 * l2 * sin(z[1]) * z[3] * (dd12 + dd22 / 2) + m11 * ddd12 + m12 * ddd22;
+  double da21 = -m2 * l1 * l2 * sin(z[1]) * z[3] * dd11 / 2 + m12 * ddd11 + m22 * ddd21;
+  double da22 = -m2 * l1 * l2 * sin(z[1]) * z[3] * dd12 / 2 + m12 * ddd12 + m22 * ddd22;
+
+  double dda11 = -m2 * l1 * l2 * ((cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * dd11 + sin(z[1]) * z[3] * ddd11 + (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * dd21 / 2 + sin(z[1]) * z[3] * ddd21 / 2 + sin(z[1]) * z[3] * (ddd11 + ddd21 / 2)) + m11 * dddd11 + m12 * dddd21;
+  double dda12 = -m2 * l1 * l2 * ((cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * (dd12 + dd22 / 2) + sin(z[1]) * z[3] * (ddd12 + ddd22 / 2) + sin(z[1]) * z[3] * (ddd12 + ddd22 / 2)) + m11 * dddd12 + m12 * dddd22;
+  double dda21 = -m2 * l1 * l2 * ((cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * dd11 / 2 + sin(z[1]) * z[3] * ddd11) + m12 * dddd11 + m22 * dddd21;
+  double dda22 = -m2 * l1 * l2 * ((cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * dd12 / 2 + sin(z[1]) * z[3] * ddd12) + m12 * dddd12 + m22 * dddd22;
+
+  double dmc11 = -m2 * l1 * l2 * sin(z[1]) * z[3] * (d11 + d21 / 2) + m11 * dd11 + m12 * dd21;
+  double dmc12 = -m2 * l1 * l2 * sin(z[1]) * z[3] * (d12 + d22 / 2) + m11 * dd12 + m12 * dd22;
+  double dmc21 = -m2 * l1 * l2 * sin(z[1]) * z[3] * d11 / 2 + m12 * dd11 + m22 * dd21;
+  double dmc22 = -m2 * l1 * l2 * sin(z[1]) * z[3] * d12 / 2 + m12 * dd12 + m22 * dd22;
+
+  double ddmc11 = -m2 * l1 * l2 * (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * (d11 + d21 / 2) - m2 * l1 * l2 * sin(z[1]) * z[3] * (dd11 + dd21 / 2) + m11 * ddd11 + m12 * ddd21 - m2 * l1 * l2 * sin(z[1]) * z[3] * (dd11 + dd21 / 2);
+  double ddmc12 = -m2 * l1 * l2 * (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * (d12 + d22 / 2) - m2 * l1 * l2 * sin(z[1]) * z[3] * (dd12 + dd22 / 2) + m11 * ddd12 + m12 * ddd22 - m2 * l1 * l2 * sin(z[1]) * z[3] * (dd12 + dd22 / 2);
+  double ddmc21 =  -m2 * l1 * l2 * (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * d11 / 2 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd11 / 2 + m12 * ddd11 + m22 * ddd21 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd11 / 2;
+  double ddmc22 =  -m2 * l1 * l2 * (cos(z[1]) * z[3] * z[3] + sin(z[1]) * dv1) * d12 / 2 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd12 / 2 + m12 * ddd12 + m22 * ddd22 - m2 * l1 * l2 * sin(z[1]) * z[3] * dd12 / 2;
+
+  double k = trunc(z[10] / P);
+  double td = (time - k * P) / ep;
+  double b = z[8] * ep * P / (4 * 0.1 * PI);
+  double ard = b / ep + 2 * (PI / 2 - b) * td / ep;
+  double argd = sin(b * td + (PI / 2 - b) * td * td) + (time - k * P) * cos(b * td + (PI / 2 - b) * td * td) * ard;
+
+  double qd1 = 0.65 + 0.1 * cos(2 * PI * time / P);
+  double qd2 = 0.1 * sin(2 * PI * (k * P + (time - k * P) * sin(b * td + (PI / 2 - b) * td * td)) / P);
+  double qd11 = -(2 * PI / P) * 0.1 * sin(2 * PI * time / P);
+  double qd12 = 0.1 * (2 * PI / P) * cos(2 * PI * (k * P + (time - k * P) * sin(b * td + (PI / 2 - b) * td * td)) / P) * argd;
+  double qd21 = -(2 * PI / P) * (2 * PI / P) * 0.1 * cos(2 * PI * time / P);
+  double qd22 = -0.1 * (2 * PI / P) * (2 * PI / P) * sin(2 * PI * (k * P + (time - k * P) * sin(b * td + (PI / 2 - b) * td * td)) / P) * argd + 0.1 * (2 * PI / P) * cos(2 * PI * (k * P + (time - k * P) * sin(b * td + (PI / 2 - b) * td * td)) / P) * (2 * cos(b * td + (PI / 2 - b) * td * td) * ard + (time - k * P) * (2 * cos(b * td + (PI / 2 - b) * td * td) * (PI / 2 - b) / (ep * ep) - sin(b * td + (PI / 2 - b) * td * td) * ard * ard));
+  double qd31 = (2 * PI / P) * (2 * PI / P) * (2 * PI / P) * 0.1 * sin(2 * PI * time / P);
+  double qd32 =  -0.1 * (2 * PI / P) * (2 * PI / P) * (2 * PI / P) * cos(2 * PI * (k * P + (time - k * P) * sin(b * td + (PI / 2 - b) * td * td)) / P) * argd * argd - 0.1 * (2 * PI / P) * (2 * PI / P) * sin(2 * PI * (k * P + (time - k * P) * sin(b * td + (PI / 2 - b) * td * td)) / P) * (2 * cos(b * td + (PI / 2 - b) * td * td) * ard + (time - k * P) * (2 * cos(b * td + (PI / 2 - b) * td * td) * (PI / 2 - b) / (ep * ep) - sin(b * td + (PI / 2 - b) * td * td) * ard * ard)) - 0.1 * (2 * PI / P) * (2 * PI / P) * sin(2 * PI * (k * P + (time - k * P) * sin(b * td + (PI / 2 - b) * td * td)) / P) * argd * (2 * cos(b * td + (PI / 2 - b) * td * td) * ard + (time - k * P) * (2 * cos(b * td + (PI / 2 - b) * td * td) * (PI / 2 - b) / (ep * ep) - sin(b * td + (PI / 2 - b) * td * td) * ard * ard)) + 0.1 * (2 * PI / P) * cos(2 * PI * (k * P + (time - k * P) * sin(b * td + (PI / 2 - b) * td * td)) / P) * (-2 * sin(b * td + (PI / 2 - b) * td * td) * ard * ard + 2 * cos(b * td + (PI / 2 - b) * td * td) * (PI / 2 - b) / (ep * ep) + (2 * cos(b * td + (PI / 2 - b) * td * td) * (PI / 2 - b) / (ep * ep) - sin(b * td + (PI / 2 - b) * td * td) * ard * ard) + (time - k * P) * (-4 * sin(b * td + (PI / 2 - b) * td * td) * ard * (PI / 2 - b) / (ep * ep) - cos(b * td + (PI / 2 - b) * td * td) * ard * ard * ard));
+  double qd41 = (2 * PI / P) * (2 * PI / P) * (2 * PI / P) * (2 * PI / P) * 0.1 * cos(2 * PI * time / P);
+  double qd42 = 0.1 * (2 * PI / P) * (2 * PI / P) * (2 * PI / P) * (2 * PI / P) * sin(2 * PI * (k * P + (time - k * P) * sin(b * td + (PI / 2 - b) * td * td)) / P) * argd * argd * argd - 0.2 * (2 * PI / P) * (2 * PI / P) * (2 * PI / P) * cos(2 * PI * (k * P + (time - k * P) * sin(b * td + (PI / 2 - b) * td * td)) / P) * argd * (2 * cos(b * td + (PI / 2 - b) * td * td) * ard + (time - k * P) * (2 * cos(b * td + (PI / 2 - b) * td * td) * (PI / 2 - b) / (ep * ep) - sin(b * td + (PI / 2 - b) * td * td) * ard * ard)) - 0.1 * (2 * PI / P) * (2 * PI / P) * (2 * PI / P) * cos(2 * PI * (k * P + (time - k * P) * sin(b * td + (PI / 2 - b) * td * td)) / P) * argd * (2 * cos(b * td + (PI / 2 - b) * td * td) * ard + (time - k * P) * (2 * cos(b * td + (PI / 2 - b) * td * td) * (PI / 2 - b) / (ep * ep) - sin(b * td + (PI / 2 - b) * td * td) * ard * ard)) - 0.1 * (2 * PI / P) * (2 * PI / P) * sin(2 * PI * (k * P + (time - k * P) * sin(b * td + (PI / 2 - b) * td * td)) / P) * (2 * cos(b * td + (PI / 2 - b) * td * td) * ard + (time - k * P) * (2 * cos(b * td + (PI / 2 - b) * td * td) * (PI / 2 - b) / (ep * ep) - sin(b * td + (PI / 2 - b) * td * td) * ard * ard)) - 0.1 * (2 * PI / P) * (2 * PI / P) * (2 * PI / P) * cos(2 * PI * (k * P + (time - k * P) * sin(b * td + (PI / 2 - b) * td * td)) / P) * argd * argd * (2 * cos(b * td + (PI / 2 - b) * td * td) * ard + (time - k * P) * (2 * cos(b * td + (PI / 2 - b) * td * td) * (PI / 2 - b) / (ep * ep) - sin(b * td + (PI / 2 - b) * td * td) * ard * ard)) - 0.1 * (2 * PI / P) * (2 * PI / P) * sin(2 * PI * (k * P + (time - k * P) * sin(b * td + (PI / 2 - b) * td * td)) / P) * (2 * argd * (2 * cos(b * td + (PI / 2 - b) * td * td) * ard + (time - k * P) * (2 * cos(b * td + (PI / 2 - b) * td * td) * (PI / 2 - b) / (ep * ep) - sin(b * td + (PI / 2 - b) * td * td) * ard * ard)) * (2 * cos(b * td + (PI / 2 - b) * td * td) * ard + (time - k * P) * (2 * cos(b * td + (PI / 2 - b) * td * td) * (PI / 2 - b) / (ep * ep) - sin(b * td + (PI / 2 - b) * td * td) * ard * ard)) + argd * argd * (-2 * sin(b * td + (PI / 2 - b) * td * td) * ard * ard + 2 * cos(b * td + (PI / 2 - b) * td * td) * (PI / 2 - b) / (ep * ep) + (2 * cos(b * td + (PI / 2 - b) * td * td) * (PI / 2 - b) / (ep * ep) - sin(b * td + (PI / 2 - b) * td * td) * ard * ard) + (time - k * P) * (-2 * sin(b * td + (PI / 2 - b) * td * td) * ard * (PI / 2 - b) / (ep * ep) - cos(b * td + (PI / 2 - b) * td * td) * ard * ard * ard - 2 * sin(b * td + (PI / 2 - b) * td * td) * ard * (PI / 2 - b) / (ep * ep)))) - 0.1 * (2 * PI / P) * (2 * PI / P) * sin(2 * PI * (k * P + (time - k * P) * sin(b * td + (PI / 2 - b) * td * td)) / P) * argd * (-2 * sin(b * td + (PI / 2 - b) * td * td) * ard * ard + 2 * cos(b * td + (PI / 2 - b) * td * td) * (PI / 2 - b) / (ep * ep) + (2 * cos(b * td + (PI / 2 - b) * td * td) * (PI / 2 - b) / (ep * ep) - sin(b * td + (PI / 2 - b) * td * td) * ard * ard) + (time - k * P) * (-2 * sin(b * td + (PI / 2 - b) * td * td) * ard * (PI / 2 - b) / (ep * ep) - cos(b * td + (PI / 2 - b) * td * td) * ard * ard * ard - 2 * sin(b * td + (PI / 2 - b) * td * td) * ard * (PI / 2 - b) / (ep * ep))) + 0.1 * (2 * PI / P) * cos(2 * PI * (k * P + (time - k * P) * sin(b * td + (PI / 2 - b) * td * td)) / P) * (-4 * cos(b * td + (PI / 2 - b) * td * td) * ard * ard * ard - 14 * sin(b * td + (PI / 2 - b) * td * td) * ard * (PI / 2 - b) / (ep * ep) + (time - k * P) * (-5 * cos(b * td + (PI / 2 - b) * td * td) * ard * ard * (PI / 2 - b) / (ep * ep) - 4 * sin(b * td + (PI / 2 - b) * td * td) * (PI / 2 - b) * (PI / 2 - b) / (ep * ep * ep * ep) + sin(b * td + (PI / 2 - b) * td * td) * ard * ard * ard * ard));
+
+  z[13] = td * ep;
+
+  double qr11 = qd11 - gamma2 * (x - qd1);
+  double qr12 = qd12 - gamma2 * (y - qd2);
+
+  double qr21 = qd21 - gamma2 * (x1 - qd11);
+  double qr22 = qd22 - gamma2 * (y1 - qd12);
+
+  double qr31 = qd31 - gamma2 * (x2 - qd21);
+  double qr32 = qd32 - gamma2 * (y2 - qd22);
+
+  double qr41 = qd41 - gamma2 * (x3 - qd31);
+  double qr42 = qd42 - gamma2 * (y3 - qd32);
+
+  double s1 = x1 - qr11;
+  double s2 = y1 - qr12;
+  double a1 = -m2 * l1 * l2 * sin(z[1]) * z[3] * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2);
+  double a2 = a11 * qr11 + a12 * qr12;
+  double a3 = m2 * l1 * l2 * sin(z[1]) * z[2] * (d11 * qr11 + d12 * qr12) / 2;
+  double a4 = a21 * qr11 + a22 * qr12;
+
+  double da1 = -m2 * l1 * l2 * cos(z[1]) * z[3] * z[3] * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2) - m2 * l1 * l2 * sin(z[1]) * dv1 * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2) - m2 * l1 * l2 * sin(z[1]) * z[3] * ((dd11 * qr11 + dd12 * qr12 + d11 * qr21 + d12 * qr22) + (dd21 * qr11 + dd22 * qr12 + d21 * qr21 + d22 * qr22) / 2);
+  double da2 = a11 * qr21 + a12 * qr22 + da11 * qr11 + da12 * qr12;
+  double da3 = m2 * l1 * l2 * cos(z[1]) * z[2] * z[3] * (d11 * qr11 + d12 * qr12) / 2 + m2 * l1 * l2 * sin(z[1]) * dv0 * (d11 * qr11 + d12 * qr12) / 2 + m2 * l1 * l2 * sin(z[1]) * z[2] * (dd11 * qr11 + dd12 * qr12 + d11 * qr21 + d12 * qr22) / 2;
+  double da4 = a21 * qr21 + a22 * qr22 + da21 * qr11 + da22 * qr12;
+
+  double dda1 = (m2 * l1 * l2 * sin(z[1]) * z[3] * z[3] * z[3] - 2 * m2 * l1 * l2 * cos(z[1]) * z[3] * dv1) * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2) - m2 * l1 * l2 * cos(z[1]) * z[3] * z[3] * ((dd11 * qr11 + d11 * qr21 + dd12 * qr12 + d12 * qr22) + (dd21 * qr11 + dd22 * qr12 + d21 * qr21 + d22 * qr22) / 2) - (m2 * l1 * l2 * cos(z[1]) * z[3] * dv1 + m2 * l1 * l2 * sin(z[1]) * ddv1) * ((d11 * qr11 + d12 * qr12) + (d21 * qr11 + d22 * qr12) / 2) - m2 * l1 * l2 * sin(z[1]) * dv1 * ((dd11 * qr11 + d11 * qr21 + dd12 * qr12 + d12 * qr22) + (dd21 * qr11 + dd22 * qr12 + d21 * qr21 + d22 * qr22) / 2) - (m2 * l1 * l2 * cos(z[1]) * z[3] * z[3] + m2 * l1 * l2 * sin(z[1]) * dv1) * ((dd11 * qr11 + dd12 * qr12 + d11 * qr21 + d12 * qr22) + (dd21 * qr11 + dd22 * qr12 + d21 * qr21 + d22 * qr22) / 2) - m2 * l1 * l2 * sin(z[1]) * z[3] * ((ddd11 * qr11 + dd11 * qr21 + ddd12 * qr12 + dd12 * qr22 + dd11 * qr21 + d11 * qr31 + dd12 * qr22 + d12 * qr32) + (ddd21 * qr11 + dd21 * qr21 + ddd22 * qr12 + dd22 * qr22 + dd21 * qr21 + d21 * qr31 + dd22 * qr22 + d22 * qr32) / 2);
+  double dda2 = da11 * qr21 + a11 * qr31 + da12 * qr22 + a12 * qr32 + da11 * qr21 + dda11 * qr11 + da12 * qr22 + dda12 * qr12;
+  double dda3 = (m2 * l1 * l2 * sin(z[1]) * ddv0 + 2 * m2 * l1 * l2 * cos(z[1]) * dv0 * z[3] + m2 * l1 * l2 * cos(z[1]) * z[2] * dv1 - m2 * l1 * l2 * sin(z[1]) * z[2] * z[3] * z[3]) * (d11 * qr11 + d12 * qr12) / 2 + (m2 * l1 * l2 * cos(z[1]) * z[2] * z[3] + m2 * l1 * l2 * sin(z[1]) * dv0) * (dd11 * qr11 + dd12 * qr12 + d11 * qr21 + d12 * qr22) + m2 * l1 * l2 * sin(z[1]) * z[2] * (ddd11 * qr11 + ddd12 * qr12 + dd11 * qr21 + dd12 * qr22 + dd11 * qr21 + dd12 * qr22 + d11 * qr31 + d12 * qr32) / 2;
+  double dda4 = da21 * qr21 + a21 * qr31 + da22 * qr22 + a22 * qr32 + dda21 * qr11 + da21 * qr21 + dda22 * qr12 + da22 * qr22;
+
+
+  double T01 = mc11 * qr21 + mc12 * qr22;
+  double T02 = a1 + a2;
+  double T03 = grad11 * gamma1 * s1 + grad21 * gamma1 * s2;
+
+  double dT01 = dmc11 * qr21 + dmc12 * qr22 + mc11 * qr31 + mc12 * qr32;
+  double dT02 = da1 + da2;
+  double dT03 = -y1 * gamma1 * s1 + x1 * gamma1 * s2 + grad11 * gamma1 * (x2 - qr21) + grad21 * gamma1 * (y2 - qr22);
+
+  double ddT01 = ddmc11 * qr21 + ddmc12 * qr22 + 2 * dmc11 * qr31 + 2 * dmc12 * qr32 + mc11 * qr41 + mc12 * qr42;
+  double ddT02 = dda1 + dda2;
+  double ddT03 = -y2 * gamma1 * s1 + x2 * gamma1 * s2 - 2 * y1 * gamma1 * (x2 - qr21) + 2 * x1 * gamma1 * (y2 - qr22) + grad11 * gamma1 * (x3 - qr31) + grad21 * gamma1 * (y3 - qr32);
+
+  double T11 = mc21 * qr21 + mc22 * qr22;
+  double T12 = a3 + a4;
+  double T13 = grad12 * gamma1 * s1 + grad22 * gamma1 * s2;
+
+  double dT11 = dmc21 * qr21 + dmc22 * qr22 + mc21 * qr31 + mc22 * qr32;
+  double dT12 = da3 + da4;
+  double dT13 = -l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * s1 - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * s2 + grad12 * gamma1 * (x2 - qr21) + grad22 * gamma1 * (y2 - qr22);
+
+  double ddT11 = ddmc21 * qr21 + ddmc22 * qr22 + 2 * dmc21 * qr31 + 2 * dmc22 * qr32 + mc21 * qr41 + mc22 * qr42;
+  double ddT12 = dda3 + dda4;
+  double ddT13 = -l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * gamma1 * s1 - l2 * cos(z[0] + z[1]) * (dv0 + dv1) * gamma1 * s1 - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * (x2 - qr21) - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * (z[2] + z[3]) * gamma1 * s2 - l2 * sin(z[0] + z[1]) * (dv0 + dv1) * gamma1 * s2 - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * (y2 - qr22) + grad12 * gamma1 * (x3 - qr31) + grad22 * gamma1 * (y3 - qr32) - l2 * cos(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * (x2 - qr21) - l2 * sin(z[0] + z[1]) * (z[2] + z[3]) * gamma1 * (y2 - qr22);
+
+  double ki1 = sqrt((qd1 * qd1 + qd2 * qd2 + l1 * l1 + l2 * l2) * (qd1 * qd1 + qd2 * qd2 + l1 * l1 + l2 * l2) - 2 * ((qd1 * qd1 + qd2 * qd2) * (qd1 * qd1 + qd2 * qd2) + l1 * l1 * l1 * l1 + l2 * l2 * l2 * l2));
+  double ki2 = qd1 * qd1 + qd2 * qd2 + l1 * l1 - l2 * l2;
+  double ki3 = qd1 * qd1 + qd2 * qd2 - l1 * l1 - l2 * l2;
+
+  double xd = atan2(qd2, qd1) + atan2(ki1, ki2);
+  double yd = -atan2(ki1, ki3);
+  double xd1 = ((qd1 * qd11 + qd2 * qd12) * (l1 * l1 - qd1 * qd1 - qd2 * qd2 - l2 * l2)) / (ki1 * (qd1 * qd1 + qd2 * qd2));
+  double yd1 = 2 * (qd1 * qd11 + qd2 * qd12) / ki1;
+  double xd2 = (((qd1 * qd21 + qd11 * qd11 + qd2 * qd22 + qd12 * qd12) * (l1 * l1 - qd1 * qd1 - qd2 * qd2 - l2 * l2) - 2 * (qd1 * qd11 + qd2 * qd12) * (qd1 * qd11 + qd2 * qd12)) * ki1 * (qd1 * qd1 + qd2 * qd2) - (qd1 * qd11 + qd2 * qd12) * (l1 * l1 - qd1 * qd1 - qd2 * qd2 - l2 * l2) * (ki1 * 2 * (qd1 * qd11 + qd2 * qd12) - (qd1 * qd1 + qd2 * qd2) * 2 * (qd1 * qd11 + qd2 * qd12) * ki3 / ki1)) / (ki1 * (qd1 * qd1 + qd2 * qd2));
+  double yd2 = 2 * ((qd1 * qd21 + qd11 * qd11 + qd2 * qd22 + qd12 * qd12) * ki1 * ki1 + (qd1 * qd11 + qd2 * qd12) * 2 * (qd1 * qd11 + qd2 * qd12) * ki3) / ki1 * ki1 * ki1;
+
+  double thetad1 = xd + (T01 + T02 - T03) / K1;
+  double thetad2 = yd + (T11 + T12 - T13) / K2;
+  double thetad11 = xd1 + (dT01 + dT02 - dT03) / K1;
+  double thetad12 = yd1 + (dT11 + dT12 - dT13) / K2;
+  double thetad21 = xd2 + (ddT01 + ddT02 - ddT03) / K1;
+  double thetad22 = yd2 + (ddT11 + ddT12 - ddT13) / K2;
+
+  double s12 = (z[16] - thetad11) + gamma2 * (z[14] - thetad1);
+  double s22 = (z[17] - thetad12) + gamma2 * (z[15] - thetad2);
+
+  double thetar21 = thetad21 - gamma2 * (z[16] - thetad11);
+  double thetar22 = thetad22 - gamma2 * (z[17] - thetad12);
+
+  U[0] = 0;
+  U[1] = 0;
+  U[2] = (J1 * thetar21 + K1 * (thetad1 - xd) - gamma1 * s12);
+  U[3] = (J2 * thetar22 + K2 * (thetad2 - yd) - gamma1 * s22);
+
+  double V1 = (s1 * s1 * (d11 * mc11 + d21 * mc21) + 2 * s1 * s2 * (d12 * mc11 + d22 * mc21) + s2 * s2 * (d12 * mc12 + d22 * mc22)) / 2 + s12 * s12 + s22 * s22;
+  z[6] = V1 + gamma1 * gamma2 * ((x - qd1) * (x - qd1) + (y - qd2) * (y - qd2) + (z[14] - thetad1) * (z[14] - thetad1) + (z[15] - thetad2) * (z[15] - thetad2)) + (x - qd1 - z[14] + thetad1) * K1 * (x - qd1 - z[14] + thetad1) + (y - qd2 - z[15] + thetad2) * K2 * (y - qd2 - z[15] + thetad2);
+
+  z[11] = P;
+  //  z[14] = qr11;
+  //   z[15] = qr12;
+  //   z[18] = qr21;
+  //   z[19] = qr22;
+  //   z[22] = -U[2]+g*(l1*cos(q[0])*(m2+m1/2)+m2*l2*cos(q[0]+q[1])/2);
+  //   z[23] = -U[3]+g*m2*l2*cos(q[0]+q[1])/2;
+}
+
+
+// extern "C" void jacobFintQ(double time, unsigned int sizeOfq, const double *q,const  double *velocity, double *jacobFintQ, unsigned int sizeOfZ, double* z)
+// {
+//   double m11 = m1*(l1*l1/4)+I1+I2+m2*(l1*l1+(l2*l2/4)+l1*l2*cos(q[1]));
+//   double m12 = (m2*l2*l2/4)+I2+m2*l1*l2*cos(q[1])/2;
+//   double m22 = (m2*l2*l2/4)+I2;
+
+//   // generalized coordinates q=(x,y)^T
+//   double x = l1*cos(q[0])+l2*cos(q[0]+q[1]);
+//   double y = l1*sin(q[0])+l2*sin(q[0]+q[1]);
+
+//   // time derivatives of x and y
+//   double x1 = -l1*sin(q[0])*velocity[0]-l2*sin(q[0]+q[1])*(velocity[0]+velocity[1]);
+//   double y1 = l1*cos(q[0])*velocity[0]+l2*cos(q[0]+q[1])*(velocity[0]+velocity[1]);
+
+//   // the gradient of the transformation \theta->q
+//   double grad11 = -y;
+//   double grad12 = -l2*sin(q[0]+q[1]);
+//   double grad21 = x;
+//   double grad22 = l2*cos(q[0]+q[1]);
+//   double det = grad11*grad22-grad12*grad21;
+
+//   // d=(grad)^{-1}
+//   double d11 = grad22/det;
+//   double d12 = -grad12/det;
+//   double d21 = -grad21/det;
+//   double d22 = grad11/det;
+
+//   // time derivative of d
+
+//   double dd11 =  -(sin(q[0]+q[1])*(velocity[0]+velocity[1])*sin(q[1])+cos(q[0]+q[1])*cos(q[1])*velocity[1])/(l1*sin(q[1])*sin(q[1]));
+//   double dd12 =  (cos(q[0]+q[1])*(velocity[0]+velocity[1])*sin(q[1])-sin(q[0]+q[1])*cos(q[1])*velocity[1])/(l1*sin(q[1])*sin(q[1]));
+//   double dd21 =  -dd11+(sin(q[0])*sin(q[1])*velocity[0]+cos(q[0])*cos(q[1])*velocity[1])/(l2*sin(q[1])*sin(q[1]));
+//   double dd22 =  -dd12-(cos(q[0])*sin(q[1])*velocity[0]-sin(q[0])*cos(q[1])*velocity[1])/(l2*sin(q[1])*sin(q[1]));
+
+//  // M*d
+//   double mc11 = m11*d11+m12*d21;
+//   double mc12 = m11*d12+m12*d22;
+//   double mc21 = m12*d11+m22*d21;
+//   double mc22 = m12*d12+m22*d22;
+
+//   double qr11 = z[16];
+//   double qr12 = z[17];
+//   double qr21 = z[20];
+//   double qr22 = z[21];
+
+//   double a11 = m11*dd11+m12*dd21;
+//   double a12 = m11*dd12+m12*dd22;
+//   double a21 = m12*dd11+m22*dd21;
+//   double a22 = m12*dd12+m22*dd22;
+
+//   double A1 = -m2*l1*l2*sin(q[1])*velocity[1]*((-sin(q[0]+q[1])*qr11+cos(q[0]+q[1])*qr12)/(2*l1*sin(q[1]))+(sin(q[0])*qr11-cos(q[0])*qr12)/(2*l2*sin(q[1])));
+//   double A2 = m2*l1*l2*sin(q[1])*velocity[0]*((-sin(q[0]+q[1])*qr11+cos(q[0]+q[1])*qr12)/(2*l1*sin(q[1])));
+//   double A3 = -m2*l1*l2*sin(q[1])*velocity[1]*((-cos(q[0])*qr11-sin(q[0])*qr12)/(2*l1*sin(q[1])*sin(q[1]))+(cos(q[0])*cos(q[1])*qr11+sin(q[0])*sin(q[1])*qr12)/(2*l2*sin(q[1])*sin(q[1])));
+//   double A4 = m2*l1*l2*sin(q[1])*velocity[0]*((-cos(q[0])*qr11-sin(q[0])*qr12)/(2*l1*sin(q[1])*sin(q[1])));
+
+//   double B1 = ((m11-m12)*sin(q[0]+q[1])/(l1*sin(q[1]))-m12*sin(q[0])/(l2*sin(q[1])))*qr21+((-m11+m12)*cos(q[0]+q[1])/(l1*sin(q[1]))+m12*cos(q[0])/(l2*sin(q[1])))*qr22;
+//   double B2 = ((m12-m22)*sin(q[0]+q[1])/(l1*sin(q[1]))+m22*sin(q[0])/(l2*sin(q[1])))*qr21+((-m12+m22)*cos(q[0]+q[1])/(l1*sin(q[1]))+m22*cos(q[0])/(l2*sin(q[1])))*qr22;
+//   double B3 = (m2*l1*l2*sin(q[1])*(d11+d21/2)+(m11-m12)*cos(q[0])/(l1*sin(q[1])*sin(q[1]))-m12*cos(q[0]-q[1])/(l2*sin(q[1])*sin(q[1])))*qr21+(m2*l1*l2*sin(q[1])*(d12+d22/2)+(m11-m12)*sin(q[0])/(l1*sin(q[1])*sin(q[1]))+m12*sin(q[0]-q[1])/(l2*sin(q[1])*sin(q[1])));
+//   double B4 = (m2*l1*l2*sin(q[1])*d11/2+(m12-m22)*cos(q[0])/(l1*sin(q[1])*sin(q[1]))-m22*cos(q[0]-q[1])/(l2*sin(q[1])*sin(q[1])))*qr21+(m2*l1*l2*sin(q[1])*(d12/2)+(m12-m22)*sin(q[0])/(l1*sin(q[1])*sin(q[1]))+m22*sin(q[0]-q[1])/(l2*sin(q[1])*sin(q[1])));
+
+//   double C1 = ((m11-m12)*(-(cos(q[0]+q[1])*(velocity[0]+velocity[1])*sin(q[1])-sin(q[0]+q[1])*cos(q[1])*velocity[1])/(l1*sin(q[1])*sin(q[1])*sin(q[1])))+m12*(cos(q[0])*sin(q[1])*velocity[0]-sin(q[0])*cos(q[1])*velocity[1])/(l2*sin(q[1])*sin(q[1])))*qr11+((m11-m12)*((-sin(q[0]+q[1])*(velocity[0]+velocity[1])*sin(q[1])-cos(q[0]+q[1])*cos(q[1])*velocity[1])/(l1*sin(q[1])*sin(q[1])))-m12*((-sin(q[0])*sin(q[1])*velocity[0]-cos(q[0])*cos(q[1])*velocity[1])/(l2*sin(q[1])*sin(q[1]))))*qr12;
+//   double C2 = ((m12-m22)*(-(cos(q[0]+q[1])*(velocity[0]+velocity[1])*sin(q[1])-sin(q[0]+q[1])*cos(q[1])*velocity[1])/(l1*sin(q[1])*sin(q[1])))+m22*(cos(q[0])*sin(q[1])*velocity[0]-sin(q[0])*cos(q[1])*velocity[1])/(l2*sin(q[1])*sin(q[1])))*qr11+((m12-m22)*((-sin(q[0]+q[1])*(velocity[0]+velocity[1])*sin(q[1])-cos(q[0]+q[1])*cos(q[1])*velocity[1])/(l1*sin(q[1])*sin(q[1])))-m22*((-sin(q[0])*sin(q[1])*velocity[0]-cos(q[0])*cos(q[1])*velocity[1])/(l2*sin(q[1])*sin(q[1]))))*qr12;
+//   double C3 = ((m11-m12)*(2*cos(q[0])*cos(q[1])*velocity[1]+sin(q[0])*sin(q[1])*velocity[0])/(l1*sin(q[1])*sin(q[1])*sin(q[1]))-m12*(sin(q[0])*cos(q[1])*sin(q[1])*velocity[0]+cos(q[0])*sin(q[1])*sin(q[1])*velocity[1]+2*cos(q[0])*cos(q[1])*cos(q[0])*velocity[1])/(l2*sin(q[1])*sin(q[1])*sin(q[1])))*qr11+((m11-m12)*(2*sin(q[0])*cos(q[1])*velocity[1]-cos(q[0])*sin(q[1])*velocity[0])/(l1*sin(q[1])*sin(q[1])*sin(q[1]))+m12*(cos(q[0])*cos(q[1])*sin(q[1])*velocity[0]-sin(q[0])*sin(q[1])*sin(q[1])*velocity[1]+2*sin(q[0])*cos(q[1])*cos(q[1])*velocity[1])/(l2*sin(q[1])*sin(q[1])*sin(q[1])))*qr12-m2*l1*l2*sin(q[1])*((dd11+dd21/2)*qr11+(dd12+dd22/2)*qr12);
+//   double C4 = ((m12-m22)*(2*cos(q[0])*cos(q[1])*velocity[1]+sin(q[0])*sin(q[1])*velocity[0])/(l1*sin(q[1])*sin(q[1])*sin(q[1]))-m22*(sin(q[0])*cos(q[1])*sin(q[1])*velocity[0]+cos(q[0])*sin(q[1])*sin(q[1])*velocity[1]+2*cos(q[0])*cos(q[1])*cos(q[0])*velocity[1])/(l2*sin(q[1])*sin(q[1])*sin(q[1])))*qr11+((m12-m22)*(2*sin(q[0])*cos(q[1])*velocity[1]-cos(q[0])*sin(q[1])*velocity[0])/(l1*sin(q[1])*sin(q[1])*sin(q[1]))+m22*(cos(q[0])*cos(q[1])*sin(q[1])*velocity[0]-sin(q[0])*sin(q[1])*sin(q[1])*velocity[1]+2*sin(q[0])*cos(q[1])*cos(q[1])*velocity[1])/(l2*sin(q[1])*sin(q[1])*sin(q[1])))*qr12-m2*l1*l2*sin(q[1])*(dd11*qr11+dd12*qr12)/2;
+
+//   jacobFintQ[0]= 0;
+//   jacobFintQ[1]= 0;
+//   jacobFintQ[2]=(1+gamma1*gamma2/K2)*(B1-A1-C1+gamma2*(m2*l1*l2*sin(q[1])*velocity[1]*((d11*y-d12*x)+(d21*y-d22*x)/2)-a11*y+a12*x-grad11*gamma1*y+grad22*gamma1*x));
+//   jacobFintQ[3]= B2-A2-C2+gamma2*(-m2*l1*l2*sin(q[1])*velocity[0]*(d11*y-d12*x)/2-a21*y+a22*x-grad12*gamma1*y+grad22*gamma1*x);
+//   jacobFintQ[4]= 0;
+//   jacobFintQ[5]= 0;
+//   jacobFintQ[6]= B3-A3-C3+gamma2*(-m2*l1*l2*cos(q[1])*velocity[1]*((d11*qr11+d12*qr12)+(d21*qr11+d22*qr12)/2)-m2*l1*l2*sin(q[1])*velocity[1]*((d11*grad12+d12*grad22)+(d21*grad12+d22*grad22)/2)+a11*grad12+a12*grad22+grad11*gamma1*grad12+grad22*gamma1*grad22);
+//   jacobFintQ[7]= (1+gamma1*gamma2/K1)*(B4-A4-C4+gamma2*(m2*l1*l2*cos(q[1])*velocity[0]*(d11*qr11+d12*qr12)/2+m2*l1*l2*sin(q[1])*velocity[0]*(d11*grad12+d12*grad22)/2+a21*grad12+a22*grad22+grad12*gamma1*grad12+grad22*gamma1*grad22));
+//   jacobFintQ[8]= 0;
+//   jacobFintQ[9]= 0;
+//   jacobFintQ[10]= -gamma1*gamma2;
+//   jacobFintQ[11]= 0;
+//   jacobFintQ[12]= 0;
+//   jacobFintQ[13]= 0;
+//   jacobFintQ[14]= 0;
+//   jacobFintQ[15]= -gamma1*gamma2;
+// }
+
+// extern "C" void jacobFintV(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacobFintV, unsigned int sizeOfZ, double* z)
+// {
+//   double m11 = m1*(l1*l1/4)+I1+I2+m2*(l1*l1+(l2*l2/4)+l1*l2*cos(q[1]));
+//   double m12 = (m2*l2*l2/4)+I2+m2*l1*l2*cos(q[1])/2;
+//   double m22 = (m2*l2*l2/4)+I2;
+
+//   // generalized coordinates q=(x,y)^T
+//   double x = l1*cos(q[0])+l2*cos(q[0]+q[1]);
+//   double y = l1*sin(q[0])+l2*sin(q[0]+q[1]);
+
+//   // time derivatives of x and y
+//   double x1 = -l1*sin(q[0])*velocity[0]-l2*sin(q[0]+q[1])*(velocity[0]+velocity[1]);
+//   double y1 = l1*cos(q[0])*velocity[0]+l2*cos(q[0]+q[1])*(velocity[0]+velocity[1]);
+
+//   // the gradient of the transformation \theta->q
+//   double grad11 = -y;
+//   double grad12 = -l2*sin(q[0]+q[1]);
+//   double grad21 = x;
+//   double grad22 = l2*cos(q[0]+q[1]);
+//   double det = grad11*grad22-grad12*grad21;
+
+//   // d=(grad)^{-1}
+//   double d11 = grad22/det;
+//   double d12 = -grad12/det;
+//   double d21 = -grad21/det;
+//   double d22 = grad11/det;
+
+//   // time derivative of d
+
+//   double dd11 =  -(sin(q[0]+q[1])*(velocity[0]+velocity[1])*sin(q[1])+cos(q[0]+q[1])*cos(q[1])*velocity[1])/(l1*sin(q[1])*sin(q[1]));
+//   double dd12 =  (cos(q[0]+q[1])*(velocity[0]+velocity[1])*sin(q[1])-sin(q[0]+q[1])*cos(q[1])*velocity[1])/(l1*sin(q[1])*sin(q[1]));
+//   double dd21 =  -dd11+(sin(q[0])*sin(q[1])*velocity[0]+cos(q[0])*cos(q[1])*velocity[1])/(l2*sin(q[1])*sin(q[1]));
+//   double dd22 =  -dd12-(cos(q[0])*sin(q[1])*velocity[0]-sin(q[0])*cos(q[1])*velocity[1])/(l2*sin(q[1])*sin(q[1]));
+
+//  // M*d
+//   double mc11 = m11*d11+m12*d21;
+//   double mc12 = m11*d12+m12*d22;
+//   double mc21 = m12*d11+m22*d21;
+//   double mc22 = m12*d12+m22*d22;
+
+//   double qr11 = z[16];
+//   double qr12 = z[17];
+
+//   jacobFintV[0]= 0;
+//   jacobFintV[1]= 0;
+//   jacobFintV[2]= gamma2*(-mc11*y+mc12*x)-grad11*gamma1*y+grad22*gamma1*x;
+//   jacobFintV[3]= gamma2*(-mc21*y+mc22*x)-grad12*gamma1*y+grad22*gamma1*x-m2*l1*l2*sin(q[1])*(d11*qr11+d12*qr12)/2;
+//   jacobFintV[4]= 0;
+//   jacobFintV[5]= 0;
+//   jacobFintV[6]= gamma2*(mc11*grad12+mc12*grad22)+grad11*gamma1*grad12+grad21*gamma1*grad22+m2*l1*l2*sin(q[1])*((d11*qr11+d12*qr12)+(d21*qr11+d22*qr12)/2);
+//   jacobFintV[7]= gamma2*(mc21*grad12+mc22*grad22)+grad12*gamma1*grad12+grad22*gamma1*grad22;
+//   jacobFintV[8]= 0;
+//   jacobFintV[9]= 0;
+//   jacobFintV[10]= 1-gamma1+gamma2;
+//   jacobFintV[11]= 0;
+//   jacobFintV[12]= 0;
+//   jacobFintV[13]= 0;
+//   jacobFintV[14]= 0;
+//   jacobFintV[15]= 1-gamma1+gamma2;
+// }
+
+extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* y, unsigned int sizeOfZ, double* z)
+{
+  y[0] = 2 + l1 * cos(q[0]) + l2 * cos(q[0] + q[1]);
+  y[1] = l1 * sin(q[0]) + l2 * sin(q[0] + q[1]);
+
+}
+
+extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, unsigned int sizeOfZ, double* z)
+{
+  G[0] = 0;
+  G[1] = l1 * cos(q[0]) + l2 * cos(q[0] + q[1]); //0;
+  G[2] = 0;
+  G[3] = l2 * cos(q[0] + q[1]);
+}
+
+
