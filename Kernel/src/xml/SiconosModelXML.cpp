@@ -161,7 +161,7 @@ SiconosModelXML::~SiconosModelXML()
   simulationXML = NULL;
 }
 
-void SiconosModelXML::saveSiconosModelInXMLFile(char * siconosModelXMLFilePath)
+void SiconosModelXML::saveSiconosModelInXMLFile(const char * siconosModelXMLFilePath)
 {
   xmlIndentTreeOutput = 1;//to have the indentation
 

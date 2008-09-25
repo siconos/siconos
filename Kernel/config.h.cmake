@@ -1,4 +1,5 @@
-
+#ifndef KERNELCONFIG_H
+#define KERNELCONFIG_H
 #define WITH_CMAKE
 #define XML_SCHEMA "@CMAKE_INSTALL_PREFIX@/share/@PROJECT_PACKAGE_NAME@/SiconosModelSchema-V1.2.xsd"
 
@@ -16,3 +17,5 @@
 #cmakedefine HAVE_CLAPACK_H
 #cmakedefine HAVE_CBLAS_H
 #cmakedefine HAVE_XERBLA
+
+#endif /*KERNELCONFIG_H*/

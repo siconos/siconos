@@ -358,7 +358,7 @@ public:
   /** Saves the Siconos Model creating a Siconos XML data file
   *   \param siconosModelXMLFilePath the path string of the Siconos XML data file to save
   */
-  void saveSiconosModelInXMLFile(char *siconosModelXMLFilePath);
+  void saveSiconosModelInXMLFile(const char *siconosModelXMLFilePath);
 
   /** checks the content of the DOM tree associated to the data of the SiconosModelXML
   * by using the XML schema of the platform
