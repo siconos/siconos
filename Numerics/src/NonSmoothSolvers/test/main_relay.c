@@ -49,7 +49,8 @@ int test_relay_series(Relay_Problem * problem, int* solversList)
 
   */
 
-  int totalNBSolver = 2;
+  int totalNBSolver = 3;
+
   int nbSolvers = 0; /* Real number of solvers called in the tests */
   int i, j;
   for (i = 0; i < totalNBSolver; ++i)
@@ -63,6 +64,7 @@ int test_relay_series(Relay_Problem * problem, int* solversList)
   double comp, diff;
 
   int n = problem->size;
+  /*   printf ("problem size = %i",n); */
   double **z = malloc(nbSolvers * sizeof(*z));
   double **w = malloc(nbSolvers * sizeof(*w));
 
@@ -177,6 +179,35 @@ int test_relay_series(Relay_Problem * problem, int* solversList)
     /*  info = info1; */
     k++;
   }
+
+#ifdef HAVE_PATHFERRIS
+  if (solversList[2] == 1)
+  {
+    strcat(nameList, "    PATH     |");
+    strcpy(local_options->solverName, "Path");
+    double dparam[2] = {tolerance, 0.0};
+    local_options->iSize = 0;
+    local_options->dSize = 2;
+    local_options->iparam = NULL;
+    local_options->dparam = dparam;
+    local_options->isSet = 1;
+    int info1 = relay_driver(problem, z[k] , w[k], options, &global_options);
+    comp = DDOT(n , z[k] , incx , w[k] , incy);
+    DCOPY(n , w[k], incx, wBuffer , incy);
+    DAXPY(n , alpha , problem->q , incx , wBuffer , incy);
+    prod(n, n, beta, problem->M, z[k], alpha, wBuffer);
+    diff = DNRM2(n , wBuffer , incx);
+
+    if (isSparse == 0)
+      printf("    Path    (LOG:%1d)|  not set   | %10.4g | %10.4g | %10.4g |\n", info1, local_options->dparam[1], comp, diff);
+    else
+      printf("    Gauss-Seidel/Path    (LOG:%1d)|  not set   | %10.4g | %10.4g | %10.4g |\n", info1, options[0].dparam[1], comp, diff);
+
+    if (info1 != 0)
+      info = info1;
+    k++;
+  }
+#endif
   /* RPGS */
   if (solversList[1] == 1)
   {
@@ -202,7 +233,6 @@ int test_relay_series(Relay_Problem * problem, int* solversList)
       /*  info = info1; */
       k++;
   }
-
   /* =========================== Ouput: comparison between the different methods =========================== */
 
   strcat(nameList, "\n");

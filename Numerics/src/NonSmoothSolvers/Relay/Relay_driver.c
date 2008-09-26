@@ -69,13 +69,11 @@ int relay_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* 
   else if (strcmp(name , "NLGS") == 0)
     fprintf(stderr, "Relay_driver error: NLGS solver obsolete:\n");
 
-  /****** Latin algorithm ******/
-  else if (strcmp(name , "Latin") == 0)
-    pr_latin(problem, z , w , &info , options);
 
-  else if (strcmp(name , "path") == 0)
+  else if (strcmp(name , "Path") == 0)
+  {
     relay_path(problem, z , w , &info , options);
-
+  }
   /*error */
   else
   {

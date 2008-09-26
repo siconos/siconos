@@ -35,14 +35,12 @@ void relay_path(Relay_Problem* problem, double *z, double *w, int *info , Solver
   /* matrix M/vector q of the relay */
   double * M = problem->M->matrix0;
   double * q = problem->q;
-  double *a = problem->ub;
-  double *b = problem->lb;
 
 
 
 
-  int nnz, i, j, dim;
 
+  int nnz, i, j;
   /* size of the RELAY */
   int n = problem->size;
 
@@ -61,11 +59,16 @@ void relay_path(Relay_Problem* problem, double *z, double *w, int *info , Solver
   FortranToPathSparse(n, M, 1.0e-18, m_i, m_j, m_ij);
   for (i = 0; i < n; i++)
   {
-    lb[i] = b[i];
-    ub[i] = a[i];
+    lb[i] = problem->lb[i];
+    ub[i] = problem->ub[i];
   }
+  /*   for (i=0;i<n;i++){ */
+  /*       printf(" problem->lb[%i] = %e",i, problem->lb[i]); */
+  /*       printf(" problem->ub[%i] = %e",i, problem->ub[i]); */
+  /*   } */
   SimpleLCP(n, nnz, m_i, m_j, m_ij, q, lb, ub,
             &termination, z);
+  /*   printLCP(n, nnz, m_i, m_j, m_ij, q, lb, ub); */
 
   if (termination == MCP_Error)
   {
