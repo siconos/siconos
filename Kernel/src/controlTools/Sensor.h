@@ -34,7 +34,7 @@ class Model;
 class Event;
 
 /** The object used to store data in the Sensor. To each Event corresponds a Data */
-typedef std::map<Event*, VectorMap>  DataSet;
+typedef std::map<SP::Event, VectorMap>  DataSet;
 
 /** Sensor Base Class
 
@@ -95,13 +95,13 @@ protected:
   DataSet data;
 
   /** The model linked to this sensor */
-  Model * model;
+  SP::Model model;
 
   /** A time discretisation scheme */
-  TimeDiscretisation *timeDiscretisation;
+  SP::TimeDiscretisation timeDiscretisation;
 
   /** The event which will linked this sensor to the eventsManager of the simulation */
-  Event * eSensor;
+  SP::Event eSensor;
 
   /** default constructor
    */
@@ -118,7 +118,7 @@ public:
    * \param int, the type of the Sensor, which corresponds to the class type
    * \param a TimeDiscretisation*, (linked to a model).
    */
-  Sensor(int, TimeDiscretisation*);
+  Sensor(int, SP::TimeDiscretisation);
 
   /** destructor
    */
@@ -151,7 +151,7 @@ public:
   /** get the Model linked to this Sensor
    *  \return a pointer to Model
    */
-  inline Model* getModelPtr() const
+  inline SP::Model getModelPtr() const
   {
     return model;
   };
@@ -159,7 +159,7 @@ public:
   /** get the TimeDiscretisation linked to this Sensor
   *  \return a pointer to TimeDiscretisation.
   */
-  inline TimeDiscretisation* getTimeDiscretisationPtr() const
+  inline SP::TimeDiscretisation getTimeDiscretisationPtr() const
   {
     return timeDiscretisation;
   };
@@ -167,7 +167,7 @@ public:
   /** get the Event associated with this sensor
    *  \return an Event*
    */
-  inline Event* getEventPtr() const
+  inline SP::Event getEventPtr() const
   {
     return eSensor;
   };

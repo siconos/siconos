@@ -56,32 +56,27 @@ class LagrangianLinearR : public LagrangianR
 private:
 
   /** H matrix such as y = Hq + ...*/
-  SiconosMatrix* H;
+  SiconosMatrixSPtr H;
 
   /** b vector such y = Hq + b + ...*/
-  SimpleVector* b;
+  SimpleVectorSPtr b;
 
   /** D matrix, coefficient of lambda in y */
-  SiconosMatrix * D;
+  SiconosMatrixSPtr D;
 
   /** F matrix, coefficient of z */
-  SiconosMatrix * F;
+  SiconosMatrixSPtr F;
 
   /** Default constructor
    */
   LagrangianLinearR();
-
-  /** set all allocation flags to input value.
-   *  \param bool
-   */
-  void initAllocationFlags(bool);
 
 public:
 
   /** constructor with XML object of the parent class Relation
    *  \param RelationXML* : the XML object corresponding
    */
-  LagrangianLinearR(RelationXML*);
+  LagrangianLinearR(RelationXMLSPtr);
 
   /** constructor with in parameters, the data needed to build this Relation
    *  \param a SiconosMatrix to set H
@@ -132,7 +127,7 @@ public:
   /** get H
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getHPtr() const
+  inline SiconosMatrixSPtr getHPtr() const
   {
     return H;
   }
@@ -143,9 +138,9 @@ public:
   void setH(const SiconosMatrix&);
 
   /** set H to pointer newPtr
-   *  \param SiconosMatrix * newPtr
+   *  \param SP::SiconosMatrix  newPtr
    */
-  void setHPtr(SiconosMatrix *);
+  void setHPtr(SiconosMatrixSPtr);
   // -- b --
 
   /** get the value of b
@@ -159,7 +154,7 @@ public:
   /** get b
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getBPtr() const
+  inline SimpleVectorSPtr getBPtr() const
   {
     return b;
   }
@@ -172,7 +167,7 @@ public:
   /** set B to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  void setBPtr(SimpleVector *);
+  void setBPtr(SimpleVectorSPtr);
 
   // -- D --
 
@@ -187,7 +182,7 @@ public:
   /** get D
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getDPtr() const
+  inline SiconosMatrixSPtr getDPtr() const
   {
     return D;
   }
@@ -198,9 +193,9 @@ public:
   void setD(const SiconosMatrix&);
 
   /** set D to pointer newPtr
-   *  \param SiconosMatrix * newPtr
+   *  \param SP::SiconosMatrix  newPtr
    */
-  void setDPtr(SiconosMatrix *);
+  void setDPtr(SiconosMatrixSPtr);
 
   // -- F --
 
@@ -215,7 +210,7 @@ public:
   /** get F
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getFPtr() const
+  inline SiconosMatrixSPtr getFPtr() const
   {
     return F;
   }
@@ -226,9 +221,9 @@ public:
   void setF(const SiconosMatrix&);
 
   /** set F to pointer newPtr
-   *  \param SiconosMatrix * newPtr
+   *  \param SP::SiconosMatrix  newPtr
    */
-  void setFPtr(SiconosMatrix *);
+  void setFPtr(SiconosMatrixSPtr);
 
   // --- OTHER FUNCTIONS ---
 

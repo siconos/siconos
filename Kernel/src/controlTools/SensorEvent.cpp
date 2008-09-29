@@ -23,7 +23,7 @@
 using namespace std;
 using namespace EventFactory;
 
-void SensorEvent::process(Simulation*)
+void SensorEvent::process(SP::Simulation)
 {
   sensor->capture();
 }

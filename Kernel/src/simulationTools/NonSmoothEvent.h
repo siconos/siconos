@@ -56,9 +56,9 @@ public:
   ~NonSmoothEvent();
 
   /** OSNS solving and IndexSets updating
-  *  \param Simulation*, the simulation that owns this Event (through the EventsManager)
+  *  \param SP::Simulation, the simulation that owns this Event (through the EventsManager)
   */
-  void process(Simulation*);
+  void process(SP::Simulation);
 };
 
 #endif // NonSmoothEvent_H

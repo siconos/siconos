@@ -16,11 +16,14 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
+
+#include <fstream>
+#include <iterator>
+
 #include "ioMatrix.h"
 #include "SimpleMatrix.h"
 #include "SiconosMatrixException.h"
-#include <fstream>
-#include <iterator>
+
 
 // Default (private)
 ioMatrix::ioMatrix(): ioObject() {}

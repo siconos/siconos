@@ -33,13 +33,11 @@ using namespace std;
 
 
 InteractionXML::InteractionXML():
-  rootNode(NULL), sizeNode(NULL), yNode(NULL), lambdaNode(NULL), DSConcernedNode(NULL),  relationNode(NULL), nsLawNode(NULL),
-  relationXML(NULL), nSLawXML(NULL), isRelationXMLAllocatedIn(false), isNsLawXMLAllocatedIn(false)
+  rootNode(NULL), sizeNode(NULL), yNode(NULL), lambdaNode(NULL), DSConcernedNode(NULL),  relationNode(NULL), nsLawNode(NULL)
 {}
 
 InteractionXML::InteractionXML(xmlNodePtr  interactionNode):
-  rootNode(interactionNode), sizeNode(NULL), yNode(NULL), lambdaNode(NULL), DSConcernedNode(NULL),  relationNode(NULL), nsLawNode(NULL),
-  relationXML(NULL), nSLawXML(NULL), isRelationXMLAllocatedIn(false), isNsLawXMLAllocatedIn(false)
+  rootNode(interactionNode), sizeNode(NULL), yNode(NULL), lambdaNode(NULL), DSConcernedNode(NULL),  relationNode(NULL), nsLawNode(NULL)
 {
   xmlNodePtr node, node2;
   string type;
@@ -76,20 +74,19 @@ InteractionXML::InteractionXML(xmlNodePtr  interactionNode):
       if (type == "FirstOrderRelation")
       {
         if (subType == "NonLinear" || subType == "Type1")
-          relationXML = new FirstOrderRXML(node2);
+          relationXML.reset(new FirstOrderRXML(node2));
         else if (subType == "Linear" || subType == "LinearTI")
-          relationXML = new FirstOrderLinearRXML(node2);
+          relationXML.reset(new FirstOrderLinearRXML(node2));
       }
       else if (type == "LagrangianRelation")
       {
         if (subType == "Linear" || subType == "LinearTI")
-          relationXML = new LagrangianLinearRXML(node2);
+          relationXML.reset(new LagrangianLinearRXML(node2));
         else
-          relationXML = new LagrangianRXML(node2);
+          relationXML.reset(new LagrangianRXML(node2));
       }
       else
         XMLException::selfThrow("InteractionXML : undefined Relation type : " + type);
-      isRelationXMLAllocatedIn = true;
     }
     else
       XMLException::selfThrow("InteractionXML - constructor: relation not found.");
@@ -101,16 +98,15 @@ InteractionXML::InteractionXML(xmlNodePtr  interactionNode):
       // Non smooth law type
       type = (char*)nsLawNode->name;
       if (type == COMPLEMENTARITY_CONDITION_NSLAW_TAG)
-        nSLawXML = new ComplementarityConditionNSLXML(nsLawNode);
+        nSLawXML.reset(new ComplementarityConditionNSLXML(nsLawNode));
       else if (type == RELAY_NSLAW_TAG)
-        nSLawXML = new RelayNSLXML(nsLawNode);
+        nSLawXML.reset(new RelayNSLXML(nsLawNode));
       else if (type == NEWTON_IMPACT_NSLAW_TAG)
-        nSLawXML = new NewtonImpactNSLXML(nsLawNode);
+        nSLawXML.reset(new NewtonImpactNSLXML(nsLawNode));
       else if (type == NEWTON_IMPACT_FRICTION_NSLAW_TAG)
-        nSLawXML = new NewtonImpactFrictionNSLXML(nsLawNode);
+        nSLawXML.reset(new NewtonImpactFrictionNSLXML(nsLawNode));
       else
         XMLException::selfThrow("InteractionXML, constructor(xml) undefined non smooth law type : " + type);
-      isNsLawXMLAllocatedIn = true;
     }
     else
       XMLException::selfThrow("InteractionXML - constructor error: NonSmoothLaw not found.");
@@ -119,10 +115,6 @@ InteractionXML::InteractionXML(xmlNodePtr  interactionNode):
 
 InteractionXML::~InteractionXML()
 {
-  if (isRelationXMLAllocatedIn) delete relationXML;
-  relationXML = NULL;
-  if (isNsLawXMLAllocatedIn) delete nSLawXML;
-  nSLawXML = NULL;
 }
 
 void InteractionXML::setSize(const unsigned int newSize)
@@ -155,14 +147,14 @@ void InteractionXML::getDSNumbers(vector<int>& dsNumbers)
 }
 
 
-void InteractionXML::updateInteractionXML(xmlNodePtr  node, Interaction* inter)
+void InteractionXML::updateInteractionXML(xmlNodePtr  node, SP::Interaction inter)
 {
   rootNode = node;
   loadInteraction(inter);
 }
 
 // warning: this function has not been reviewed for multiple DS loading !!
-void InteractionXML::loadInteraction(Interaction* inter)
+void InteractionXML::loadInteraction(SP::Interaction inter)
 {
   XMLException::selfThrow("InteractionXML::loadInteraction - not implemented.");
 
@@ -310,6 +302,6 @@ void InteractionXML::loadInteraction(Interaction* inter)
   //  }
   //       else RuntimeException::selfThrow("InteractionXML::loadInteraction - There's no NonSmoothLaw in this Interaction, the XML platform can't be built");
   //     }
-  //   else XMLException::selfThrow("InteractionXML - loadInteraction( Interaction* ) Error : no rootNode is defined.");
+  //   else XMLException::selfThrow("InteractionXML - loadInteraction( SP::Interaction ) Error : no rootNode is defined.");
 }
 

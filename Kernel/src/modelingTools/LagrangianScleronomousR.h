@@ -88,7 +88,7 @@ public:
    *  \param relationXML
    *  \exception RuntimeException
    */
-  LagrangianScleronomousR(RelationXML*);
+  LagrangianScleronomousR(RelationXMLSPtr);
 
   /** constructor from a set of data
    *  \param string : the type of relation (scleronomic ...)

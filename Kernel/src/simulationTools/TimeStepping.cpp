@@ -33,64 +33,68 @@
 
 using namespace std;
 
-/** Pointer to function, used to set the behavior of simulation when ns solver failed.
-    If equal to null, use DefaultCheckSolverOutput else (set with setCheckSolverFunction) call the pointer below).
-    Note FP: (temporary) bad method to set checkSolverOutput but it works ... It may be better to use plug-in?
+/** Pointer to function, used to set the behavior of simulation when
+    ns solver failed.  If equal to null, use DefaultCheckSolverOutput
+    else (set with setCheckSolverFunction) call the pointer below).
+    Note FP: (temporary) bad method to set checkSolverOutput but it
+    works ... It may be better to use plug-in?
  */
 static CheckSolverFPtr checkSolverOutput = NULL;
 
-TimeStepping::TimeStepping(TimeDiscretisation * td): Simulation(td, "TimeStepping")
+TimeStepping::TimeStepping(TimeDiscretisationSPtr td): Simulation(td, "TimeStepping")
 {}
 
 // --- XML constructor ---
-TimeStepping::TimeStepping(SimulationXML* strxml, Model *newModel): Simulation(strxml, newModel, "TimeStepping")
+TimeStepping::TimeStepping(SimulationXMLSPtr strxml, ModelSPtr newModel): Simulation(strxml, newModel, "TimeStepping")
 {
-  // === One Step NS Problem ===
-  // For time stepping, only one non smooth problem is built.
-  if (simulationxml->hasOneStepNSProblemXML())  // ie if OSNSList is not empty
+  // === One Step NS Problem === For time stepping, only one non
+  // smooth problem is built.
+  if (simulationxml->hasOneStepNSProblemXML())  // ie if OSNSList is
+    // not empty
   {
     SetOfOSNSPBXML OSNSList = simulationxml->getOneStepNSProblemsXML();
     if (OSNSList.size() != 1)
       RuntimeException::selfThrow("TimeStepping::xml constructor - Two many inputs for OSNS problems (only one problem is required).");
 
-    OneStepNSProblemXML* osnsXML = *(OSNSList.begin());
+    OneStepNSProblemXMLSPtr osnsXML = *(OSNSList.begin());
     // OneStepNSProblem - Memory allocation/construction
     string type = osnsXML->getNSProblemType();
     if (type == LCP_TAG)  // LCP
     {
-      (*allNSProblems)["timeStepping"] = new LCP(osnsXML, this);
-      isNSProblemAllocatedIn[(*allNSProblems)["timeStepping"] ] = true;
+      (*allNSProblems)["timeStepping"].reset(new LCP(osnsXML, shared_from_this()));
     }
     else if (type == FRICTIONCONTACT_TAG)
     {
-      (*allNSProblems)["timeStepping"] = new FrictionContact(osnsXML, this);
-      isNSProblemAllocatedIn[(*allNSProblems)["timeStepping"] ] = true;
+      (*allNSProblems)["timeStepping"].reset(new FrictionContact(osnsXML, shared_from_this()));
     }
     else RuntimeException::selfThrow("TimeStepping::xml constructor - wrong type of NSProblem: inexistant or not yet implemented");
 
     (*allNSProblems)["timeStepping"]->setId("timeStepping");
 
-    // Add QP and Relay cases when these classes will be fully implemented.
+    // Add QP and Relay cases when these classes will be fully
+    // implemented.
   }
 }
 
 // --- Destructor ---
 TimeStepping::~TimeStepping()
 {
-  checkSolverOutput = NULL;
 }
 
 void TimeStepping::updateIndexSet(unsigned int i)
 {
-  // To update IndexSet number i: add or remove UnitaryRelations from this set, depending on y values.
+  // To update IndexSet number i: add or remove UnitaryRelations from
+  // this set, depending on y values.
 
   if (i > indexSets.size())
     RuntimeException::selfThrow("TimeStepping::updateIndexSet(i), indexSets[i] does not exist.");
 
-  if (i == 0) // IndexSets[0] must not be updated in simulation, since it belongs to the Topology.
+  if (i == 0) // IndexSets[0] must not be updated in simulation, since it
+    // belongs to the Topology.
     RuntimeException::selfThrow("TimeStepping::updateIndexSet(i=0), indexSets[0] can not be updated.");
 
-  // for all Unitary Relations in indexSet[i-1], compute y[i-1] and update the indexSet[i]
+  // for all Unitary Relations in indexSet[i-1], compute y[i-1] and
+  // update the indexSet[i]
   UnitaryRelationsIterator it, itForFind;
 
   double y;
@@ -98,8 +102,9 @@ void TimeStepping::updateIndexSet(unsigned int i)
   // For all UR in Index[i-1] ...
   for (it = (indexSets[i - 1])->begin(); it != (indexSets[i - 1])->end(); ++it)
   {
-    // itForFind: indicator to check if current Unitary Relation (ie *it) is already in indexSets[1]
-    // (if not itForFind will be equal to indexSets.end())
+    // itForFind: indicator to check if current Unitary Relation (ie
+    // *it) is already in indexSets[1] (if not itForFind will be
+    // equal to indexSets.end())
     itForFind = (indexSets[i])->find(*it);
 
     // Get y values for the considered UnitaryRelation
@@ -111,8 +116,9 @@ void TimeStepping::updateIndexSet(unsigned int i)
       y += 0.5 * h * yDot; // y_"prediction" = y[0](0) + 0.5*h*y[1](0)
     }
 
-    // if y <=0, then the unitary relation is added in indexSets[1] (if it was not already there)
-    // else if y > 0 and if the unitary relation was in the set, it is removed.
+    // if y <=0, then the unitary relation is added in indexSets[1]
+    // (if it was not already there) else if y > 0 and if the
+    // unitary relation was in the set, it is removed.
     if (y <= 0 && itForFind == (indexSets[i])->end())
       (indexSets[i])->insert(*it);
 
@@ -124,22 +130,25 @@ void TimeStepping::updateIndexSet(unsigned int i)
   }
 }
 
-void TimeStepping::addOneStepNSProblemPtr(OneStepNSProblem* osns)
+void TimeStepping::addOneStepNSProblemPtr(SP::OneStepNSProblem osns)
 {
-  // A the time, a time stepping simulation can only have one non smooth problem.
+  // A the time, a time stepping simulation can only have one non
+  // smooth problem.
   if (!allNSProblems->empty())
     RuntimeException::selfThrow("TimeStepping, addOneStepNSProblemPtr - A non smooth problem already exist. You can not have more than one.");
-  //cout <<" WARNING : TimeStepping, addOneStepNSProblemPtr - A non smooth problem already exist. You have more than one non smooth problem  " << endl;
+  //cout <<" WARNING : TimeStepping, addOneStepNSProblemPtr - A non
+  //smooth problem already exist. You have more than one non smooth
+  //problem " << endl;
   string name = "timeStepping"; // osns->getId();
   osns->setId(name);
   (*allNSProblems)[name] = osns;
-  isNSProblemAllocatedIn[osns] = false;
 }
 
 void TimeStepping::initOSNS()
 {
-  // === creates links between workVector in OSI and work vector in Unitary Relations
-  OneStepIntegrator * osi;
+  // === creates links between workVector in OSI and work vector in
+  // Unitary Relations
+  SP::OneStepIntegrator  osi;
 
   ConstDSIterator itDS;
   UnitaryRelationsIterator it;
@@ -147,8 +156,11 @@ void TimeStepping::initOSNS()
   for (it = indexSets[0]->begin(); it != indexSets[0]->end(); ++it)
   {
     (*it)->initialize("TimeStepping");
-    // creates a POINTER link between workX[ds] (xfree) and the corresponding unitaryBlock in each UR for each ds of the current UR.
-    for (itDS = (*it)->dynamicalSystemsBegin(); itDS != (*it)->dynamicalSystemsEnd(); ++itDS)
+    // creates a POINTER link between workX[ds] (xfree) and the
+    // corresponding unitaryBlock in each UR for each ds of the
+    // current UR.
+    for (itDS = (*it)->dynamicalSystemsBegin();
+         itDS != (*it)->dynamicalSystemsEnd(); ++itDS)
     {
       osi = osiMap[*itDS];
       (*it)->insertInWorkX(osi->getWorkX(*itDS));
@@ -156,13 +168,16 @@ void TimeStepping::initOSNS()
   }
 
 
-  if (!allNSProblems->empty()) // ie if some Interactions have been declared and a Non smooth problem built.
+  if (!allNSProblems->empty()) // ie if some Interactions have been
+    // declared and a Non smooth problem
+    // built.
   {
     if (allNSProblems->size() > 1)
       RuntimeException::selfThrow("TimeStepping::initialize, at the time, a time stepping simulation can not have more than one non smooth problem.");
 
-    // At the time, we consider that for all systems, levelMin is equal to the minimum value of the relative degree - 1
-    // except for degree 0 case where we keep 0.
+    // At the time, we consider that for all systems, levelMin is
+    // equal to the minimum value of the relative degree - 1 except
+    // for degree 0 case where we keep 0.
 
     levelMin = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMinRelativeDegree();
 
@@ -185,10 +200,13 @@ void TimeStepping::initOSNS()
 void TimeStepping::initLevelMax()
 {
   levelMax = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMaxRelativeDegree();
-  // Interactions initialization (here, since level depends on the type of simulation)
-  // level corresponds to the number of Y and Lambda derivatives computed.
+  // Interactions initialization (here, since level depends on the
+  // type of simulation) level corresponds to the number of Y and
+  // Lambda derivatives computed.
 
-  if (levelMax != 0) // level max is equal to relative degree-1. But for relative degree 0 case, we keep 0 value for levelMax
+  if (levelMax != 0) // level max is equal to relative degree-1. But for
+    // relative degree 0 case, we keep 0 value for
+    // levelMax
     levelMax--;
 }
 
@@ -223,9 +241,9 @@ void TimeStepping::computeFreeState()
     (*it)->computeFreeState();
 }
 
-// compute simulation between current and next event.
-// Initial DS/interaction state is given by memory vectors
-// and final state is the one saved in DS/Interaction at the end of this function
+// compute simulation between current and next event.  Initial
+// DS/interaction state is given by memory vectors and final state is
+// the one saved in DS/Interaction at the end of this function
 void TimeStepping::computeOneStep()
 {
   advanceToEvent();

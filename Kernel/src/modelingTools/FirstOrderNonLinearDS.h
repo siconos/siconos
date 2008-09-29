@@ -83,13 +83,13 @@ class FirstOrderNonLinearDS : public DynamicalSystem
 protected:
 
   /** Matrix coefficient of \f$ \dot x \f$ */
-  SiconosMatrix *M;
+  SiconosMatrixSPtr M;
 
   /** f(x,t,z) */
-  SiconosVector *f;
+  SiconosVectorSPtr f;
 
   /** Gradient of \f$ f(x,t,z) \f$ with respect to \f$ x\f$*/
-  SiconosMatrix *jacobianXF;
+  SiconosMatrixSPtr jacobianXF;
 
   /** DynamicalSystem plug-in to compute f(x,t,z) - id="f".
    *  @param  : current time
@@ -112,19 +112,22 @@ protected:
   void (*computeJacobianXFPtr)(double, unsigned int, const double*, double*, unsigned int, double*);
 
   /** the  input vector due to the non-smooth law \f$  r \in R^{n}\f$ (multiplier, force, ...)*/
-  SiconosVector *r;
+  SiconosVectorSPtr r;
 
   /**  the previous r vectors */
-  SiconosMemory *rMemory;
+  SiconosMemorySPtr rMemory;
 
   /** Copy of M Matrix, used to solve systems like Mx = b with LU-factorization.
       (Warning: may not exist, used if we need to avoid factorization in place of M) */
-  SiconosMatrix *invM;
+  SiconosMatrixSPtr invM;
 
+
+#ifndef WithSmartPtr
   /** set all allocation flags (isAllocated map)
    *  \param bool
    */
   virtual void initAllocationFlags(bool);
+#endif
 
   /** set all plug-in flags (isPlugin map) to val
    *  \param a bool
@@ -142,10 +145,11 @@ public:
 
   /** xml constructor
    *  \param DynamicalSystemXML* : the XML object for this DynamicalSystem
-   *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
+   *  \param NonSmoothSP::DynamicalSystem (optional): the NSDS that owns this ds
    *  \exception RuntimeException
    */
-  FirstOrderNonLinearDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* = NULL);
+  FirstOrderNonLinearDS(DynamicalSystemXMLSPtr dsXML,
+                        SP::NonSmoothDynamicalSystem = SP::NonSmoothDynamicalSystem());
 
   /** constructor from a set of data
    *  \param int : reference number for this DynamicalSystem
@@ -181,7 +185,7 @@ public:
   /** get r
    *  \return pointer on a SiconosVector
    */
-  inline SiconosVector* getRPtr() const
+  inline SiconosVectorSPtr getRPtr() const
   {
     return r;
   }
@@ -192,9 +196,9 @@ public:
   void setR(const SiconosVector&);
 
   /** set R to pointer newPtr
-   *  \param SiconosVector * newPtr
+   *  \param SP::SiconosVector newPtr
    */
-  void setRPtr(SiconosVector *);
+  void setRPtr(SiconosVectorSPtr);
 
   // rMemory
 
@@ -209,7 +213,7 @@ public:
   /** get all the values of the state vector r stored in memory
    *  \return a memory
    */
-  inline SiconosMemory* getRMemoryPtr() const
+  inline SiconosMemorySPtr getRMemoryPtr() const
   {
     return rMemory;
   }
@@ -222,7 +226,7 @@ public:
   /** set rMemory to pointer newPtr
    *  \param a ref on a SiconosMemory
    */
-  void setRMemoryPtr(SiconosMemory *);
+  void setRMemoryPtr(SiconosMemorySPtr);
 
   // --- M ---
   /** get the value of M
@@ -244,7 +248,7 @@ public:
   /** get M
   *  \return pointer on a SiconosMatrix
   */
-  inline SiconosMatrix* getMPtr() const
+  inline SiconosMatrixSPtr getMPtr() const
   {
     return M;
   }
@@ -257,7 +261,7 @@ public:
   /** link M with a new pointer
    *  \param a pointer to SiconosMatrix
    */
-  void setMPtr(SiconosMatrix *);
+  void setMPtr(SiconosMatrixSPtr);
 
   // --- invM ---
   /** get the value of invM
@@ -279,7 +283,7 @@ public:
   /** get invM
   *  \return pointer on a SiconosMatrix
   */
-  inline SiconosMatrix* getInvMPtr() const
+  inline SiconosMatrixSPtr getInvMPtr() const
   {
     return invM;
   }
@@ -292,7 +296,7 @@ public:
   /** link invM with a new pointer
    *  \param a pointer to SiconosMatrix
    */
-  void setInvMPtr(SiconosMatrix *);
+  void setInvMPtr(SiconosMatrixSPtr);
 
   // ---  F ---
 
@@ -308,7 +312,7 @@ public:
   /** get f, the derivative of the state of the DynamicalSystem
    *  \return pointer on a SiconosVector
    */
-  inline SiconosVector* getFPtr() const
+  inline SiconosVectorSPtr getFPtr() const
   {
     return f;
   }
@@ -319,9 +323,9 @@ public:
   virtual void setF(const SiconosVector&);
 
   /** set f to pointer newPtr
-   *  \param SiconosVector * newPtr
+   *  \param SP::SiconosVector newPtr
    */
-  virtual void setFPtr(SiconosVector *);
+  virtual void setFPtr(SiconosVectorSPtr);
 
   // --- JacobianXF ---
 
@@ -336,7 +340,7 @@ public:
   /** get JacobianXF
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getJacobianXFPtr() const
+  inline SiconosMatrixSPtr getJacobianXFPtr() const
   {
     return jacobianXF;
   }
@@ -347,9 +351,9 @@ public:
   virtual void setJacobianXF(const SiconosMatrix&);
 
   /** set JacobianXF to pointer newPtr
-   *  \param SiconosMatrix * newPtr
+   *  \param SP::SiconosMatrix  newPtr
    */
-  virtual void setJacobianXFPtr(SiconosMatrix *newPtr);
+  virtual void setJacobianXFPtr(SiconosMatrixSPtr newPtr);
 
   /** Initialization function for the rhs and its jacobian.
    *  \param time of initialization
@@ -402,9 +406,9 @@ public:
 
   /** function to compute \f$ f: (x,t)\f$ with x different from current saved state.
    * \param double time : current time
-   * \param SiconosVector*
+   * \param SP::SiconosVector
    */
-  virtual void computeF(double, SiconosVector*);
+  virtual void computeF(double, SiconosVectorSPtr);
 
   /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
    *  \param double time : current time
@@ -415,9 +419,9 @@ public:
 
   /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$ with x different from current saved state.
    *  \param double time : current time
-   *  \param SiconosVector*
+   *  \param SP::SiconosVector
    */
-  virtual void computeJacobianXF(double, SiconosVector*);
+  virtual void computeJacobianXF(double, SP::SiconosVector);
 
   /** Default function to the right-hand side term
    *  \param double time : current time
@@ -455,7 +459,7 @@ public:
   virtual double dsConvergenceIndicator();
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param DynamicalSystem* : the system which must be converted
+   *  \param SP::DynamicalSystem : the system which must be converted
    * \return a pointer on the system if it is of the right type, NULL otherwise
    */
   static FirstOrderNonLinearDS* convert(DynamicalSystem* ds);

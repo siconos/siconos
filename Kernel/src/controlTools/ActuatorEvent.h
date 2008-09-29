@@ -74,9 +74,9 @@ public:
   };
 
   /**
-   *  \param Simulation*, the simulation that owns this Event (through the EventsManager)
+   *  \param SP::Simulation, the simulation that owns this Event (through the EventsManager)
    */
-  void process(Simulation*);
+  void process(SP::Simulation);
 
   /** Increment time of the present event according to
       the time discretisation of the linked Actuator

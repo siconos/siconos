@@ -62,8 +62,8 @@ class OneStepNSProblem;
  *  IndexSets from simulation are used to know which constraints (UnitaryRelation) are active or not. \n
  *
  * \b Construction:
- *   - XML reading (inputs = xml node with tag "OneStepNSProblem" and a Simulation*)
- *   - Constructor from data (inputs = Simulations*, id, NonSmoothSolver*) - The solver is optional.
+ *   - XML reading (inputs = xml node with tag "OneStepNSProblem" and a SP::Simulation)
+ *   - Constructor from data (inputs = Simulations*, id, SP::NonSmoothSolver) - The solver is optional.
  * Main functions:
  *
  * \b Main functions:
@@ -112,18 +112,18 @@ private:
 public:
 
   /** xml constructor
-  *  \param OneStepNSProblemXML* : the XML linked-object
-  *  \param Simulation *: the simulation that owns the problem
+  *  \param SP::OneStepNSProblemXML : the XML linked-object
+  *  \param SP::Simulation: the simulation that owns the problem
   */
-  LCP(OneStepNSProblemXML*, Simulation*);
+  LCP(SP::OneStepNSProblemXML, SP::Simulation);
 
   /** constructor from data
-  *  \param Simulation *: the simulation that owns this problem
+  *  \param SP::Simulation: the simulation that owns this problem
   *  \param Solver* pointer to object that contains solver algorithm and formulation \n
   *  (optional, default = NULL => read .opt file in Numerics)
   *  \param String: id of the problem (default = "unamed")
   */
-  LCP(Simulation*, NonSmoothSolver* = NULL, const std::string& = "unamed_lcp");
+  LCP(SimulationSPtr, NonSmoothSolverSPtr = NonSmoothSolverSPtr(), const std::string& = "unamed_lcp");
 
   /** destructor
   */
@@ -153,7 +153,7 @@ public:
   void setW(const SiconosVector&);
 
   /** set w to pointer newPtr
-  *  \param SiconosVector * newPtr
+  *  \param SP::SiconosVector  newPtr
   */
   void setWPtr(SiconosVectorSPtr);
 
@@ -181,7 +181,7 @@ public:
   void setZ(const SiconosVector&);
 
   /** set z to pointer newPtr
-  *  \param SiconosVector * newPtr
+  *  \param SP::SiconosVector  newPtr
   */
   void setZPtr(SiconosVectorSPtr) ;
 
@@ -229,7 +229,7 @@ public:
   void setQ(const SiconosVector&);
 
   /** set q to pointer newPtr
-  *  \param SiconosVector * newPtr
+  *  \param SP::SiconosVector  newPtr
   */
   void setQPtr(SiconosVectorSPtr);
 
@@ -255,13 +255,13 @@ public:
   *  \param a pointer to UnitaryRelation
   *  \param a pointer to UnitaryRelation
   */
-  void computeUnitaryBlock(UnitaryRelation*, UnitaryRelation*);
+  void computeUnitaryBlock(SP::UnitaryRelation, SP::UnitaryRelation);
 
   /** To compute a part of the "q" vector of the OSNS
-     \param UnitaryRelation*, the UR which corresponds to the considered block
+     \param SP::UnitaryRelation, the UR which corresponds to the considered block
       \param unsigned int, the position of the first element of yOut to be set
   */
-  void computeQBlock(UnitaryRelation*, unsigned int);
+  void computeQBlock(SP::UnitaryRelation, unsigned int);
 
   /** compute vector q
    *  \param double : current time

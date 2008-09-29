@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
+c/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -41,15 +41,15 @@ void SiconosMemoryTest::setUp()
   z[0] = 7;
   z[1] = 8;
   z[2] = 9;
-  q1 = new SimpleVector(v);
-  q2 = new SimpleVector(w);
-  q3 = new SimpleVector(z);
-  c1 = new BlockVector();
-  c2 = new BlockVector();
+  q1.reset(new SimpleVector(v));
+  q2.reset(new SimpleVector(w));
+  q3.reset(new SimpleVector(z));
+  c1.reset(new BlockVector());
+  c2.reset(new BlockVector());
 
-  (static_cast<BlockVector*>(c1))->insert(*q1);
-  (static_cast<BlockVector*>(c1))->insert(*q2);
-  (static_cast<BlockVector*>(c2))->insert(*q3);
+  (boost::static_pointer_cast<BlockVector>(c1))->insert(*q1);
+  (boost::static_pointer_cast<BlockVector>(c1))->insert(*q2);
+  (boost::static_pointer_cast<BlockVector>(c2))->insert(*q3);
 
   V1.push_back(q1);
   V1.push_back(q2);
@@ -62,11 +62,6 @@ void SiconosMemoryTest::setUp()
 
 void SiconosMemoryTest::tearDown()
 {
-  delete c1;
-  delete c2;
-  delete q3;
-  delete q2;
-  delete q1;
 }
 
 // Constructor: data=memorySize
@@ -154,7 +149,7 @@ void SiconosMemoryTest::testSetVectorMemory()
 void SiconosMemoryTest::testGetSiconosVector()
 {
   SiconosMemory * tmp1 = new SiconosMemory(V1);
-  SiconosVector * tmp = tmp1->getSiconosVector(0);
+  SP::SiconosVector tmp = tmp1->getSiconosVector(0);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSiconosVector : *v1 size OK", tmp->size() == V1[0]->size(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSiconosVector : v1 values OK", *tmp == *(V1[0]), true);
@@ -203,7 +198,7 @@ void SiconosMemoryTest::testOperatorEqual()
 
 void SiconosMemoryTest::testMemoryException()
 {
-  /** SiconosMemory::SiconosMemory(int memorySize, vector<SiconosVector*> V)
+  /** SiconosMemory::SiconosMemory(int memorySize, vector<SP::SiconosVector> V)
    * We test the case where memorySize < V.size
    */
 
@@ -213,13 +208,13 @@ void SiconosMemoryTest::testMemoryException()
 
 void SiconosMemoryTest::testMemoryException1()
 {
-  /** SiconosVector* SiconosMemory::getSiconosVector(int index)
+  /** SP::SiconosVector SiconosMemory::getSiconosVector(int index)
    * We test the case where index > memorySize
    */
 
   SiconosMemory * M =  new SiconosMemory(V1);
 
-  SiconosVector *v;
+  SP::SiconosVector v;
   v = M->getSiconosVector(V1.size() + 10);
   delete M;
 }

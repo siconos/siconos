@@ -56,8 +56,8 @@ typedef int (*PFC_Driver)(PrimalFrictionContact_Problem*, double*, double*, Solv
  * Numerics driver will be called according to this value.
  *
  * \b Construction:
- *   - XML reading (inputs = xml node with tag "OneStepNSProblem" and a Simulation*)
- *   - Constructor from data (inputs = Simulations*, id, NonSmoothSolver*) - The solver is optional.
+ *   - XML reading (inputs = xml node with tag "OneStepNSProblem" and a SP::Simulation)
+ *   - Constructor from data (inputs = Simulations*, id, SP::NonSmoothSolver) - The solver is optional.
  * Main functions:
  *
  * \b Main functions:
@@ -132,19 +132,19 @@ private:
 public:
 
   /** xml constructor
-   *  \param OneStepNSProblemXML* : the XML linked-object
-   *  \param Simulation * the simulation that owns the problem
+   *  \param SP::OneStepNSProblemXML : the XML linked-object
+   *  \param SP::Simulation the simulation that owns the problem
    */
-  PrimalFrictionContact(OneStepNSProblemXML*, Simulation*);
+  PrimalFrictionContact(SP::OneStepNSProblemXML, SP::Simulation);
 
   /** constructor from data
-   *  \param Simulation* the simulation that owns this problem
+   *  \param SP::Simulation the simulation that owns this problem
    *  \param int dim (2D or 3D) of the friction-contact problem
    *  \param Solver* pointer to object that contains solver algorithm and formulation \n
    *  (optional, default = NULL => read .opt file in Numerics)
    *  \param string id of the problem (optional)
    */
-  PrimalFrictionContact(Simulation *, int, NonSmoothSolver* = NULL, const std::string& = "unamed_friction_contact_problem");
+  PrimalFrictionContact(SP::Simulation, int, SP::NonSmoothSolver = SP::NonSmoothSolver(), const std::string& = "unamed_friction_contact_problem");
 
   /** destructor
    */
@@ -445,26 +445,26 @@ public:
    *  \param a pointer to UnitaryRelation
    *  \param a pointer to UnitaryRelation
    */
-  void computeUnitaryBlock(UnitaryRelation*, UnitaryRelation*);
+  void computeUnitaryBlock(SP::UnitaryRelation, SP::UnitaryRelation);
 
   /** computes DSBlock-matrix that corresponds to DS1
    *  Move this to Unitary Relation class?
    *  \param a pointer to DynamicalSystem DS1
    */
-  void computeDSBlock(DynamicalSystem*);
+  void computeDSBlock(SP::DynamicalSystem);
 
   /** computes  UnitaryDSBlock-matrix that corresponds to UR1 and DS2
    *  Move this to Unitary Relation class?
    *  \param a pointer to UnitaryRelation UR1
    *  \param a pointer to DynamicalSystems DS2
    */
-  void computeUnitaryDSBlock(UnitaryRelation*, DynamicalSystem*);
+  void computeUnitaryDSBlock(SP::UnitaryRelation, SP::DynamicalSystem);
 
   /** To compute a part of the "q" vector of the OSNS
-      \param UnitaryRelation*, the UR which corresponds to the considered block
+      \param SP::UnitaryRelation, the UR which corresponds to the considered block
        \param unsigned int, the position of the first element of yOut to be set
   */
-  void computeQBlock(DynamicalSystem*, unsigned int);
+  void computeQBlock(SP::DynamicalSystem, unsigned int);
 
   /** compute vector q
    *  \param double : current time
@@ -472,10 +472,10 @@ public:
   void computeQ(double time);
 
   /** To compute a part of the "tildeLovalVelocity" vector of the OSNS
-      \param UnitaryRelation*, the UR which corresponds to the considered block
+      \param SP::UnitaryRelation, the UR which corresponds to the considered block
        \param unsigned int, the position of the first element of yOut to be set
   */
-  void computeTildeLocalVelocityBlock(UnitaryRelation*, unsigned int);
+  void computeTildeLocalVelocityBlock(SP::UnitaryRelation, unsigned int);
 
   /** compute vector tildeLocalVelocity
    *  \param double : current time

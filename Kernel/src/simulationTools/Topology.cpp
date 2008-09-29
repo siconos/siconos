@@ -24,7 +24,7 @@
 
 using namespace std;
 
-const bool Topology::addInteractionInIndexSet(Interaction * inter)
+const bool Topology::addInteractionInIndexSet(InteractionSPtr inter)
 {
   // Private function
   //
@@ -41,7 +41,7 @@ const bool Topology::addInteractionInIndexSet(Interaction * inter)
   for (unsigned int i = 0; i < m; ++i)
   {
     // each UnitaryRelation is of size "nsLawSize", at position pos and of number i.
-    checkUR = indexSet0->insert(new UnitaryRelation(inter, pos, i));
+    checkUR = indexSet0->insert(SP::UnitaryRelation(new UnitaryRelation(inter, pos, i)));
     pos += nsLawSize;
     if (checkUR.second == false) res = false;
   }
@@ -84,29 +84,22 @@ void Topology::computeRelativeDegrees()
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
 // default
-Topology::Topology(): allInteractions(NULL), isTopologyUpToDate(false), isTopologyTimeInvariant(true), nsds(NULL), numberOfConstraints(0)
+Topology::Topology(): isTopologyUpToDate(false), isTopologyTimeInvariant(true), numberOfConstraints(0)
 {}
 
-// with NonSmoothDynamicalSystem
-Topology::Topology(NonSmoothDynamicalSystem* newNsds): allInteractions(NULL), isTopologyUpToDate(false), isTopologyTimeInvariant(true), nsds(newNsds), numberOfConstraints(0)
+// with InteractionSet
+Topology::Topology(SP::InteractionsSet newInteractionSet): isTopologyUpToDate(false), isTopologyTimeInvariant(true), numberOfConstraints(0)
 {
-  indexSet0 = new UnitaryRelationsSet();
+  allInteractions = newInteractionSet;
+  indexSet0.reset(new UnitaryRelationsSet());
 }
 
 // destructor
 Topology::~Topology()
 {
-  // Clears all Unitary Relations of IndexSets[0]
-  UnitaryRelationsIterator it;
-  for (it = indexSet0->begin(); it != indexSet0->end(); ++it)
-    delete *it;
-
-  delete indexSet0;
-  nsds = NULL;
-  allInteractions = NULL;
 }
 
-const bool Topology::hasInteraction(Interaction* inter) const
+const bool Topology::hasInteraction(InteractionSPtr inter) const
 {
   return allInteractions->isIn(inter);
 }
@@ -131,11 +124,9 @@ const unsigned int Topology::getMinRelativeDegree()
 
 void Topology::initialize()
 {
-  if (nsds == NULL)
-    RuntimeException::selfThrow("Topology::initialize, the topology is not linked to a non smooth dynamical system.");
 
-  //-- Get all interactions --
-  allInteractions = nsds->getInteractions() ;
+  assert(allInteractions && "Topology : allInteractions is NULL");
+
   // -- Creates Unitary Relations and put them in indexSet0 ---
   // loop through interactions list (from NSDS)
   indexSet0->clear();

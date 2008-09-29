@@ -22,9 +22,8 @@
 
 using namespace std;
 
-QP::QP(OneStepNSProblemXML* osnspbxml, Simulation* newStrat):
-  OneStepNSProblem("QP", osnspbxml, newStrat), Q(NULL), p(NULL),
-  isQAllocatedIn(true), isPAllocatedIn(true)
+QP::QP(SP::OneStepNSProblemXML osnspbxml, SP::Simulation newStrat):
+  OneStepNSProblem("QP", osnspbxml, newStrat)
 {}
 
 QP::~QP()

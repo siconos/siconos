@@ -27,6 +27,8 @@
 #include "SiconosConst.h"
 #include "Tools.h"
 
+#include "SiconosPointers.h"
+
 class NonSmoothDynamicalSystem;
 class Simulation;
 class SiconosModelXML;
@@ -39,7 +41,7 @@ class SiconosModelXML;
  *
  *
  */
-class Model
+class Model : public boost::enable_shared_from_this<Model>
 {
 private:
   /** current time of the simulation */
@@ -52,19 +54,16 @@ private:
   double T;
 
   /** The simulation to solve the NonSmoothDynamicalSystem */
-  Simulation *strat;
+  SimulationSPtr strat;
 
   /** The NonSmoothDynamicalSystem of the simulation */
-  NonSmoothDynamicalSystem * nsds;
+  SP::NonSmoothDynamicalSystem nsds;
 
   /** XML object linked to the Model */
-  SiconosModelXML *modelxml;
+  SiconosModelXMLSPtr modelxml;
 
   /** information concerning the Model */
   std::string title, author, description, date, xmlSchema;
-
-  /** Flags to check wheter pointers were allocated in class constructors or not */
-  BoolMap isAllocatedIn;
 
   /** default constructor
    */
@@ -155,7 +154,7 @@ public:
   /** get the Simulation of the Model
    *  \return a pointer on Simulation
    */
-  inline Simulation* getSimulationPtr() const
+  inline SimulationSPtr getSimulationPtr() const
   {
     return strat;
   }
@@ -163,12 +162,12 @@ public:
   /** set the Simulation of the Model
    *  \return a pointer on Simulation
    */
-  void setSimulationPtr(Simulation*);
+  void setSimulationPtr(SimulationSPtr);
 
   /** get the NonSmoothDynamicalSystem of the Model
    *  \return a pointer on NonSmoothDynamicalSystem
    */
-  inline NonSmoothDynamicalSystem* getNonSmoothDynamicalSystemPtr() const
+  inline SP::NonSmoothDynamicalSystem getNonSmoothDynamicalSystemPtr() const
   {
     return nsds;
   }
@@ -176,12 +175,12 @@ public:
   /** set the NonSmoothDynamicalSystem of the Model
    *  \param a pointer on NonSmoothDynamicalSystem
    */
-  void setNonSmoothDynamicalSystemPtr(NonSmoothDynamicalSystem *newPtr);
+  void setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newPtr);
 
   /** get the SiconosModelXML of the Model
    *  \return a pointer on SiconosModelXML
    */
-  inline SiconosModelXML* getSiconosModelXMLPtr() const
+  inline SiconosModelXMLSPtr getSiconosModelXMLPtr() const
   {
     return modelxml;
   }
@@ -189,7 +188,7 @@ public:
   /** set the SiconosModelXML of the Model
    *  \param a pointer on SiconosModelXML
    */
-  void setSiconosModelXMLPtr(SiconosModelXML *newPtr);
+  void setSiconosModelXMLPtr(SiconosModelXMLSPtr newPtr);
 
   /** get the title of the simulation
    *  \return string : the title

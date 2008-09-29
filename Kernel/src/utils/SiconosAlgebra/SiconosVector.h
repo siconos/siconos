@@ -171,9 +171,9 @@ public:
 
   /** get block starting at "pos" (first argument) and write it in v (second arg)
    *  \param pos an int, position of the first element of the required block
-   *  \param v a SiconosVector*, in-out parameter.
+   *  \param v a SP::SiconosVector, in-out parameter.
    */
-  //  virtual void getBlock(unsigned int, SiconosVector*) const = 0;
+  //  virtual void getBlock(unsigned int, SP::SiconosVector) const = 0;
 
   /** sets all the values of the vector to 0.0
    */
@@ -200,17 +200,21 @@ public:
    */
   virtual void display(void)const = 0;
 
-  /** if this is a block vector return SiconosVector* number i (arg), else return this.
+  /** if this is a block vector return SP::SiconosVector number i (arg), else return this.
    * \param i, unsigned int
    * \return a pointer to a SiconosVector
    */
-  virtual SiconosVector* getVectorPtr(unsigned int) = 0;
+  virtual SiconosVectorSPtr getVectorPtr(unsigned int) = 0;
 
-  /** if this is a block vector return SiconosVector* number i (arg), else return this.
+  /** if this is a block vector return SP::SiconosVector number i (arg), else return this.
    * \param i, unsigned int
    * \return a pointer to a SiconosVector
    */
-  virtual const SiconosVector* getVectorPtr(unsigned int) const = 0;
+#ifndef WithSmartPtr
+  virtual const SP::SiconosVector getVectorPtr(unsigned int) const = 0;
+#else
+  virtual SiconosVectorSPtrConst getVectorPtr(unsigned int) const = 0;
+#endif
 
   /** set SiconosVector number i (copy) with v (second arg) - Useful only for BlockVector (else equivalent to a single copy)
    * \param i, unsigned int, block number (0 for SimpleVector)
@@ -222,7 +226,7 @@ public:
    * \param i, unsigned int: block number (0 for SimpleVector)
    * \param v, a pointer to a SiconosVector
    */
-  virtual void setVectorPtr(unsigned int, SiconosVector*) = 0;
+  virtual void setVectorPtr(unsigned int, SiconosVectorSPtr) = 0;
 
   /** set all values of the vector component to input value.
    * \param a double
@@ -283,15 +287,19 @@ public:
 
   /** get the vector at position i(ie this for Simple and block i for BlockVector)
    *  \param an unsigned integer i
-   *  \return a SiconosVector*
+   *  \return a SP::SiconosVector
    */
-  virtual SiconosVector* operator [](unsigned int) = 0;
+  virtual SiconosVectorSPtr operator [](unsigned int) = 0;
 
   /** get the vector at position i(ie this for Simple and block i for BlockVector)
    *  \param an unsigned integer i
-   *  \return a SiconosVector*
+   *  \return a SP::SiconosVector
    */
-  virtual const SiconosVector* operator [](unsigned int) const = 0;
+#ifndef WithSmartPtr
+  virtual const SP::SiconosVector operator [](unsigned int) const = 0;
+#else
+  virtual SiconosVectorSPtrConst operator [](unsigned int) const = 0;
+#endif
 
   /** assignment
    *  \param SiconosVector : the vector to be copied
@@ -366,9 +374,9 @@ public:
   };
 
   /** reserved to BlockVector - Insert a pointer to a subvector in this vector: no reallocation nor copy.
-   *  \param a pointer to SiconosVector*
+   *  \param a pointer to SP::SiconosVector
    */
-  virtual inline void insertPtr(SiconosVector*)
+  virtual inline void insertPtr(SiconosVectorSPtr)
   {
     SiconosVectorException::selfThrow("SiconosVector::insertPtr() : not implemented for this type of vector (Simple?) reserved to BlockVectors.");
   };
@@ -376,8 +384,8 @@ public:
   /** Compare two (block) vectors: true if they have the same number of blocks and if
       blocks which are facing each other have the same size;
       always true if one of the two is a SimpleVector.
-      \param a SiconosVector*.
-      \param a SiconosVector*.
+      \param a SP::SiconosVector.
+      \param a SP::SiconosVector.
   */
   friend const bool isComparableTo(const SiconosVector *, const SiconosVector *);
 

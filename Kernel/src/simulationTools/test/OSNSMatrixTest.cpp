@@ -36,7 +36,7 @@ void OSNSMatrixTest::setUp()
   s->initialize();
   // Get a set of Unitary Relations
   indexSet = s->getIndexSetPtr(0);
-  OneStepNSProblem * osns = s->getOneStepNSProblems()->begin()->second;
+  SP::OneStepNSProblem osns = s->getOneStepNSProblems()->begin()->second;
   osns->computeAllBlocks();
   blocks = osns->getBlocks();
 }
@@ -196,7 +196,7 @@ void OSNSMatrixTest::testConvert()
   M->fill(indexSet, blocks);
 
   M->convert();
-  NumericsMatrix * NumMat = M->getNumericsMatrix();
+  SP::NumericsMatrix NumMat = M->getNumericsMatrix();
   unsigned int dim = 0;
   for (UnitaryRelationsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
     dim += (*it)->getNonSmoothLawSize();
@@ -304,7 +304,7 @@ void OSNSMatrixTest::testConvert2()
   M->fill(indexSet, blocks);
 
   M->convert();
-  NumericsMatrix * NumMat = M->getNumericsMatrix();
+  SP::NumericsMatrix NumMat = M->getNumericsMatrix();
   unsigned int dim = 0;
   for (UnitaryRelationsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
     dim += (*it)->getNonSmoothLawSize();

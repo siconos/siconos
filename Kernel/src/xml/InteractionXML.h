@@ -64,15 +64,12 @@ private:
   xmlNodePtr nsLawNode;
 
   /** Relation xml object */
-  RelationXML *relationXML;
+  RelationXMLSPtr relationXML;
 
   /** Non smooth law xml object*/
-  NonSmoothLawXML *nSLawXML;
+  NonSmoothLawXMLSPtr nSLawXML;
 
   /** Flags to know if pointers have been allocated inside constructors or not */
-
-  bool isRelationXMLAllocatedIn;
-  bool isNsLawXMLAllocatedIn;
 
 public:
 
@@ -289,7 +286,7 @@ public:
   /** Return the relationXML of the InteractionXML
   *   \return The relationXML of the InteractionXML
   */
-  inline RelationXML* getRelationXML()
+  inline RelationXMLSPtr getRelationXML()
   {
     return relationXML;
   }
@@ -297,21 +294,21 @@ public:
   /** Return the NonSmoothLawXML of the InteractionXML
   *   \return The NonSmoothLawXML of the InteractionXML
   */
-  inline NonSmoothLawXML* getNonSmoothLawXML()
+  inline NonSmoothLawXMLSPtr getNonSmoothLawXML()
   {
     return nSLawXML;
   }
 
   /** makes the operations to add an Interaction to the NSDS
   *   \param xmlNodePtr  : the root node of the InteractionXML
-  *   \param Interaction* : the Interaction of this InteractionXML
+  *   \param SP::Interaction : the Interaction of this InteractionXML
   */
-  void updateInteractionXML(xmlNodePtr  node, Interaction* inter);
+  void updateInteractionXML(xmlNodePtr  node, InteractionSPtr inter);
 
   /** loads the data of the Interaction into the InteractionXML (in the DOM tree)
   *   \param NSDS* : the Interaction of this InteractionXML
   */
-  void loadInteraction(Interaction*);
+  void loadInteraction(InteractionSPtr);
 };
 
 #endif

@@ -51,7 +51,7 @@ typedef std::vector<double> DoubleParameters;
  * A driver needs a Solver_Options structure as input argument. This structure is used to set the chosen algorithm and its input parameters.\n
  * The present class is used to fill in this structure.
  *
- * Each OneStepNSProblem has a NonSmoothSolver* object member, in which the Solver_Options structure is embedded. \n
+ * Each OneStepNSProblem has a SP::NonSmoothSolver object member, in which the Solver_Options structure is embedded. \n
  * The parameters of the NonSmoothSolver can be:
  *     - read in an XML file
  *     - set using a data constructor, with a list of values

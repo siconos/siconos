@@ -23,6 +23,7 @@
 #ifndef __OneStepNSProblemXML__
 #define __OneStepNSProblemXML__
 
+#include "SiconosPointers.h"
 #include "SiconosDOMTreeTools.h"
 
 class OneStepNSProblem;
@@ -184,9 +185,9 @@ public:
 
   /** makes the operations to create a OneStepNSProblemXML to the SimulationXML
    *   \param xmlNodePtr : the root node of the OneStepNSProblemXML
-   *   \param OneStepNSProblem* : the OneStepNSProblem of this OneStepNSProblemXML
+   *   \param SP::OneStepNSProblem : the OneStepNSProblem of this OneStepNSProblemXML
    */
-  void updateOneStepNSProblemXML(xmlNodePtr , OneStepNSProblem*);
+  void updateOneStepNSProblemXML(xmlNodePtr , SP::OneStepNSProblem);
 
   /** Return the id of the OneStepNSProblem (attribute of the root node)
    *   \return a string

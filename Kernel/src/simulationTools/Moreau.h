@@ -44,7 +44,7 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
  * STL maps:
  * - WMap, with WMap[ds] = a pointer to a SiconosMatrix
  * - thetaMap, thetaMap[ds] = a double
- * ds being a DynamicalSystem*
+ * ds being a SP::DynamicalSystem
  *
  * W matrices are initialized and computed in initW and computeW. Depending on the DS type, they
  * may depend on time and DS state (x).
@@ -77,30 +77,30 @@ public:
 
   /** constructor from xml file
    *  \param OneStepIntegratorXML* : the XML object corresponding
-   *  \param Simulation * : the simulation that owns the osi
+   *  \param SP::Simulation : the simulation that owns the osi
    */
-  Moreau(OneStepIntegratorXML*, Simulation*);
+  Moreau(OneStepIntegratorXMLSPtr, SimulationSPtr);
 
   /** constructor from a minimum set of data: one DS and its theta
-   *  \param DynamicalSystem* : the DynamicalSystem linked to the OneStepIntegrator
+   *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
    *  \param Theta value
-   *  \param Simulation * : the simulation that owns the osi
+   *  \param SP::Simulation : the simulation that owns the osi
    */
-  Moreau(DynamicalSystem*, double, Simulation*);
+  Moreau(SP::DynamicalSystem, double, SimulationSPtr);
 
   /** constructor from a minimum set of data
    *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
    *  \param theta value for all these DS.
-   *  \param Simulation * : the simulation that owns the osi
+   *  \param SP::Simulation : the simulation that owns the osi
    */
-  Moreau(DynamicalSystemsSet&, double, Simulation*);
+  Moreau(DynamicalSystemsSet&, double, SimulationSPtr);
 
   /** constructor from a minimum set of data
    *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
    *  \param Map of theta values for the DS.
-   *  \param Simulation * : the simulation that owns the osi
+   *  \param SP::Simulation : the simulation that owns the osi
    */
-  Moreau(DynamicalSystemsSet&, const MapOfDouble&, Simulation*);
+  Moreau(DynamicalSystemsSet&, const MapOfDouble&, SimulationSPtr);
 
   /** destructor
    */
@@ -134,25 +134,25 @@ public:
    * \param a pointer to DynamicalSystem, optional, default = NULL. get W[0] in that case
    *  \return SimpleMatrix
    */
-  const SimpleMatrix getW(DynamicalSystem* = NULL);
+  const SimpleMatrix getW(SP::DynamicalSystem = SP::DynamicalSystem());
 
   /** get W corresponding to DynamicalSystem ds
    * \param a pointer to DynamicalSystem, optional, default = NULL. get W[0] in that case
    * \return pointer to a SiconosMatrix
    */
-  SiconosMatrix* getWPtr(DynamicalSystem* ds);
+  SiconosMatrixSPtr getWPtr(SP::DynamicalSystem ds);
 
   /** set the value of W[ds] to newValue
    * \param SiconosMatrix newValue
    * \param a pointer to DynamicalSystem,
    */
-  void setW(const SiconosMatrix&, DynamicalSystem*);
+  void setW(const SiconosMatrix&, SP::DynamicalSystem);
 
   /** set W[ds] to pointer newPtr
-   * \param SiconosMatrix * newPtr
+   * \param SP::SiconosMatrix  newPtr
    * \param a pointer to DynamicalSystem
    */
-  void setWPtr(SiconosMatrix *newPtr, DynamicalSystem*);
+  void setWPtr(SiconosMatrixSPtr newPtr, SP::DynamicalSystem);
 
   // -- theta --
 
@@ -173,13 +173,13 @@ public:
    *  \param a DynamicalSystem
    *  \return a double
    */
-  const double getTheta(DynamicalSystem*);
+  const double getTheta(SP::DynamicalSystem);
 
   /** set the value of thetaMap[ds]
    *  \param a double
    *  \param a DynamicalSystem
    */
-  void setTheta(double, DynamicalSystem*);
+  void setTheta(double, SP::DynamicalSystem);
 
   // --- OTHER FUNCTIONS ---
 
@@ -191,13 +191,13 @@ public:
    *  \param the time (double)
    *  \param a pointer to DynamicalSystem
    */
-  void initW(double, DynamicalSystem*);
+  void initW(double, SP::DynamicalSystem);
 
   /** compute WMap[ds] Moreau matrix at time t
    *  \param the time (double)
    *  \param a pointer to DynamicalSystem
    */
-  void computeW(double, DynamicalSystem*);
+  void computeW(double, SP::DynamicalSystem);
 
   /** return the maximum of all norms for the "Moreau-discretized" residus of DS
       \return a double

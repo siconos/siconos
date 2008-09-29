@@ -173,5 +173,4 @@ namespace SA = SharedArray;
 namespace SPC = SharedPointerConst;
 #endif
 
-
 #endif /* SiconosPointers_h */

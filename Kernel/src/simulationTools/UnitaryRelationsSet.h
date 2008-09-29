@@ -25,13 +25,18 @@
 #include "SiconosSet.h"
 #include "UnitaryRelation.h"
 
+#include "SiconosPointers.h"
+
 /** A set of pointers to interactions, sorted in a growing order according to their address */
 typedef SiconosSet<UnitaryRelation, double*> UnitaryRelationsSet;
 /** Iterator through a set of UnitaryRelations */
-typedef std::set<UnitaryRelation*, Cmp<UnitaryRelation, double*> >::iterator UnitaryRelationsIterator;
+typedef std::set<SP::UnitaryRelation, Cmp<UnitaryRelation, double*> >::iterator UnitaryRelationsIterator;
 /** const Iterator through a set of UnitaryRelations */
-typedef std::set<UnitaryRelation*, Cmp<UnitaryRelation, double*> >::const_iterator ConstUnitaryRelationsIterator;
+typedef std::set<SP::UnitaryRelation, Cmp<UnitaryRelation, double*> >::const_iterator ConstUnitaryRelationsIterator;
 /** return type value for insert function - bool = false if insertion failed. */
 typedef std::pair<UnitaryRelationsIterator, bool> CheckInsertUnitaryRelation;
+
+
+TYPEDEF_SPTR(UnitaryRelationsSet);
 
 #endif

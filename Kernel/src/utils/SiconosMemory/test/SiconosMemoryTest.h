@@ -20,6 +20,7 @@
 #define __SiconosMemoryTest__
 
 #include <cppunit/extensions/HelperMacros.h>
+#include "SiconosPointers.h"
 #include "SiconosVector.h"
 #include "SiconosMemory.h"
 #include "SiconosMemoryException.h"
@@ -28,8 +29,6 @@
 
 #define SIZE 10
 #define M_SIZE 3
-
-using namespace std;
 
 class SiconosMemoryTest : public CppUnit::TestFixture
 {
@@ -69,14 +68,14 @@ private:
   void testMemoryException1();
   //void testFail();
 
-  deque<SiconosVector*> V1;
-  deque<SiconosVector*> V2;
-  deque<SiconosVector*> V3;
-  SiconosVector * q1;
-  SiconosVector * q2;
-  SiconosVector * q3;
-  SiconosVector *c1;
-  SiconosVector *c2;
+  deque<SP::SiconosVector> V1;
+  deque<SP::SiconosVector> V2;
+  deque<SP::SiconosVector> V3;
+  SP::SiconosVector q1;
+  SP::SiconosVector q2;
+  SP::SiconosVector q3;
+  SP::SiconosVector c1;
+  SP::SiconosVector c2;
   unsigned int sizeMem;
 public:
   void setUp();
@@ -85,4 +84,3 @@ public:
 };
 
 #endif
-

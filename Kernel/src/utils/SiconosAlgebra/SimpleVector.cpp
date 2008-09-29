@@ -17,12 +17,14 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-#include "SimpleVector.h"
-#include "SimpleMatrix.h"
-#include "ioVector.h"
 #include <boost/numeric/ublas/io.hpp>            // for >> 
 #include <boost/numeric/ublas/vector_proxy.hpp>  // for project
 #include <boost/numeric/bindings/atlas/cblas1.hpp>
+
+#include "SimpleVector.h"
+#include "SimpleMatrix.h"
+#include "ioVector.h"
+
 
 // =================================================
 //                CONSTRUCTORS
@@ -394,7 +396,11 @@ void SimpleVector::setBlock(unsigned int index, const SiconosVector& vIn)
   }
 }
 
+#ifndef WithSmartPtr
 void setBlock(const SiconosVector * vIn, SiconosVector * vOut, unsigned int sizeB, unsigned int startIn, unsigned int startOut)
+#else
+void setBlock(SiconosVectorSPtrConst vIn, SiconosVectorSPtr vOut, unsigned int sizeB, unsigned int startIn, unsigned int startOut)
+#endif
 {
   // To copy a subBlock of vIn (from position startIn to startIn+sizeB) into vOut (from pos. startOut to startOut+sizeB).
   if (vIn == vOut) // useless op. => nothing to be done
@@ -451,7 +457,7 @@ void setBlock(const SiconosVector * vIn, SiconosVector * vOut, unsigned int size
       {
 
         // The current considered block ...
-        SiconosVector * currentBlock = vOut->getVectorPtr(blockOutStart);
+        SiconosVectorSPtr currentBlock = vOut->getVectorPtr(blockOutStart);
 
         // Size of the subBlock of vOut to be set.
         unsigned int subSizeB = currentBlock->size() - posOut;
@@ -510,7 +516,7 @@ void setBlock(const SiconosVector * vIn, SiconosVector * vOut, unsigned int size
       {
 
         // The current considered block ...
-        const SiconosVector * currentBlock = vIn->getVectorPtr(blockInStart);
+        SiconosVectorSPtrConst currentBlock = vIn->getVectorPtr(blockInStart);
 
         // Size of the subBlock of vIn to be set.
         unsigned int subSizeB = currentBlock->size() - posIn;
@@ -1512,7 +1518,7 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
       // Number of the subvector of x that handles element at position coord[1]
       unsigned int lastBlockNum = x.getNumVectorAtPos(coord[1]);
       std::vector<unsigned int> subCoord = coord;
-      SiconosVector * tmp = y[firstBlockNum];
+      SiconosVectorSPtr tmp = y[firstBlockNum];
       unsigned int subSize =  x[firstBlockNum]->size(); // Size of the sub-vector
       const Index * xTab = x.getTabIndexPtr();
       if (firstBlockNum != 0)
@@ -1633,7 +1639,12 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
         // Number of the subvector of x that handles element at position coord[1]
         unsigned int lastBlockNum = x.getNumVectorAtPos(coord[1]);
         std::vector<unsigned int> subCoord = coord;
+
+#ifndef WithSmartPtr
         const SiconosVector * tmp = x[firstBlockNum];
+#else
+        SiconosVectorSPtrConst tmp = x[firstBlockNum];
+#endif
         unsigned int subSize =  x[firstBlockNum]->size(); // Size of the sub-vector
         const Index * xTab = x.getTabIndexPtr();
         if (firstBlockNum != 0)
@@ -1683,7 +1694,7 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
         // Number of the subvector of x that handles element at position coord[3]
         unsigned int lastBlockNum = y.getNumVectorAtPos(coord[3]);
         std::vector<unsigned int> subCoord = coord;
-        SiconosVector * tmp = y[firstBlockNum];
+        SiconosVectorSPtr tmp = y[firstBlockNum];
         unsigned int subSize =  y[firstBlockNum]->size(); // Size of the sub-vector
         const Index * yTab = y.getTabIndexPtr();
         if (firstBlockNum != 0)

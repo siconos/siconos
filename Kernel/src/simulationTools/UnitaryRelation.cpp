@@ -28,17 +28,14 @@ using namespace std;
 // --- CONSTRUCTORS ---
 
 // Data constructor
-UnitaryRelation::UnitaryRelation(Interaction* inter, unsigned int pos, unsigned int num): mainInteraction(inter), relativePosition(pos), number(num),
-  workX(NULL), workZ(NULL)
+UnitaryRelation::UnitaryRelation(InteractionSPtr inter, unsigned int pos, unsigned int num): mainInteraction(inter), relativePosition(pos), number(num)
 {}
 
 // --- DESTRUCTOR ---
 UnitaryRelation::~UnitaryRelation()
 {
-  mainInteraction = NULL;
-  delete workX;
-  delete workZ;
 }
+
 
 const VectorOfVectors UnitaryRelation::getY() const
 {
@@ -54,13 +51,13 @@ const VectorOfVectors UnitaryRelation::getY() const
   return tmp;
 }
 
-SiconosVector* UnitaryRelation::getYPtr(unsigned int i) const
+SiconosVectorSPtr UnitaryRelation::getYPtr(unsigned int i) const
 {
   // i is the derivative number.
   return ((mainInteraction->getYPtr(i))->getVectorPtr(number));
 }
 
-SiconosVector* UnitaryRelation::getYOldPtr(unsigned int i) const
+SiconosVectorSPtr UnitaryRelation::getYOldPtr(unsigned int i) const
 {
   // i is the derivative number.
   return ((mainInteraction->getYOldPtr(i))->getVectorPtr(number));
@@ -79,7 +76,7 @@ const VectorOfVectors UnitaryRelation::getLambda() const
   return tmp;
 }
 
-SiconosVector* UnitaryRelation::getLambdaPtr(unsigned int i) const
+SiconosVectorSPtr UnitaryRelation::getLambdaPtr(unsigned int i) const
 {
   // i is the derivative number.
   return ((mainInteraction->getLambdaPtr(i))->getVectorPtr(number));
@@ -120,18 +117,23 @@ const RELATIONSUBTYPES UnitaryRelation::getRelationSubType() const
   return mainInteraction->getRelationPtr()->getSubType();
 }
 
-DynamicalSystemsSet * UnitaryRelation::getDynamicalSystemsPtr()
+DynamicalSystemsSetSPtr UnitaryRelation::getDynamicalSystemsPtr()
 {
   return mainInteraction->getDynamicalSystemsPtr();
 }
 
 void UnitaryRelation::initialize(const std::string& simulationType)
 {
-  if (mainInteraction == NULL)
+  if (!mainInteraction)
     RuntimeException::selfThrow("UnitaryRelation::initialize() failed: the linked interaction is NULL.");
 
+#ifndef WithSmartPtr
   workX = new BlockVector();
   workZ = new BlockVector();
+#else
+  workX.reset(new BlockVector());
+  workZ.reset(new BlockVector());
+#endif
 
   for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
     workZ->insertPtr((*it)->getZPtr());
@@ -150,14 +152,14 @@ void UnitaryRelation::initialize(const std::string& simulationType)
     else // Lagrangian
     {
       for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
-        workX->insertPtr((static_cast<LagrangianDS*>(*it))->getVelocityPtr());
+        workX->insertPtr((boost::static_pointer_cast<LagrangianDS>(*it))->getVelocityPtr());
     }
   }
   //   else
   //     RuntimeException::selfThrow("UnitaryRelation::initialize(simulationType) failed: unknown simulation type.");
 }
 
-void UnitaryRelation::getLeftUnitaryBlockForDS(DynamicalSystem * ds, SiconosMatrix* UnitaryBlock, unsigned index) const
+void UnitaryRelation::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SiconosMatrixSPtr UnitaryBlock, unsigned index) const
 {
   unsigned int k = 0;
   DSIterator itDS;
@@ -174,7 +176,7 @@ void UnitaryRelation::getLeftUnitaryBlockForDS(DynamicalSystem * ds, SiconosMatr
   if ((*itDS)->getDim() != UnitaryBlock->size(1))
     RuntimeException::selfThrow("UnitaryRelation::getLeftUnitaryBlockForDS(DS, UnitaryBlock, ...): inconsistent sizes between UnitaryBlock and DS");
 
-  SiconosMatrix * originalMatrix = NULL; // Complete matrix, Relation member.
+  SiconosMatrixSPtr originalMatrix;
 
   RELATIONTYPES relationType = getRelationType();
   RELATIONSUBTYPES relationSubType = getRelationSubType();
@@ -182,17 +184,17 @@ void UnitaryRelation::getLeftUnitaryBlockForDS(DynamicalSystem * ds, SiconosMatr
   if (relationType == FirstOrder)
   {
     if (relationSubType == Type1R)//|| relationType =="FirstOrderType2R" || relationType =="FirstOrderType3R")
-      originalMatrix = (static_cast<FirstOrderR*>(mainInteraction->getRelationPtr()))->getJacobianHPtr(0);
+      originalMatrix = (boost::static_pointer_cast<FirstOrderR>(mainInteraction->getRelationPtr()))->getJacobianHPtr(0);
 
     else if (relationSubType == LinearR || relationSubType == LinearTIR)
-      originalMatrix = (static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr()))->getCPtr();
+      originalMatrix = (boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr()))->getCPtr();
   }
   else if (relationType == Lagrangian)
   {
     if (relationSubType == ScleronomousR || relationSubType == RheonomousR || relationSubType == CompliantR)
-      originalMatrix = (static_cast<LagrangianR*>(mainInteraction->getRelationPtr()))->getGPtr(index);
+      originalMatrix = (boost::static_pointer_cast<LagrangianR>(mainInteraction->getRelationPtr()))->getGPtr(index);
     else if (relationSubType == LinearR || relationSubType == LinearTIR)
-      originalMatrix = (static_cast<LagrangianLinearR*>(mainInteraction->getRelationPtr()))->getHPtr();
+      originalMatrix = (boost::static_pointer_cast<LagrangianLinearR>(mainInteraction->getRelationPtr()))->getHPtr();
   }
   else
     RuntimeException::selfThrow("UnitaryRelation::getLeftUnitaryBlockForDS, not yet implemented for relations of type " + relationType);
@@ -211,7 +213,7 @@ void UnitaryRelation::getLeftUnitaryBlockForDS(DynamicalSystem * ds, SiconosMatr
   setBlock(originalMatrix, UnitaryBlock, subDim, subPos);
 }
 
-void UnitaryRelation::getRightUnitaryBlockForDS(DynamicalSystem * ds, SiconosMatrix* UnitaryBlock, unsigned index) const
+void UnitaryRelation::getRightUnitaryBlockForDS(SP::DynamicalSystem ds, SiconosMatrixSPtr UnitaryBlock, unsigned index) const
 {
   unsigned int k = 0;
   DSIterator itDS;
@@ -228,29 +230,31 @@ void UnitaryRelation::getRightUnitaryBlockForDS(DynamicalSystem * ds, SiconosMat
   if ((*itDS)->getDim() != UnitaryBlock->size(0))
     RuntimeException::selfThrow("UnitaryRelation::getRightUnitaryBlockForDS(DS, UnitaryBlock, ...): inconsistent sizes between UnitaryBlock and DS");
 
-  SiconosMatrix * originalMatrix = NULL; // Complete matrix, Relation member.
+
+  SiconosMatrixSPtr originalMatrix; // Complete matrix, Relation member.
   RELATIONTYPES relationType = getRelationType();
   RELATIONSUBTYPES relationSubType = getRelationSubType();
 
   if (relationType == FirstOrder)
   {
     if (relationSubType == Type1R)//|| relationType =="FirstOrderType2R" || relationType =="FirstOrderType3R")
-      originalMatrix = (static_cast<FirstOrderR*>(mainInteraction->getRelationPtr()))->getJacobianGPtr(0);
+      originalMatrix =
+        (boost::static_pointer_cast<FirstOrderR>(mainInteraction->getRelationPtr()))->getJacobianGPtr(0);
 
     else if (relationSubType == LinearR || relationSubType == LinearTIR)
-      originalMatrix = (static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr()))->getBPtr();
+      originalMatrix = (boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr()))->getBPtr();
   }
   else if (relationType == Lagrangian)
   {
     if (relationSubType == ScleronomousR || relationSubType == RheonomousR || relationSubType == CompliantR)
-      originalMatrix = (static_cast<LagrangianR*>(mainInteraction->getRelationPtr()))->getGPtr(index);
+      originalMatrix = (boost::static_pointer_cast<LagrangianR>(mainInteraction->getRelationPtr()))->getGPtr(index);
     else if (relationSubType == LinearR || relationSubType == LinearTIR)
-      originalMatrix = (static_cast<LagrangianLinearR*>(mainInteraction->getRelationPtr()))->getHPtr();
+      originalMatrix = (boost::static_pointer_cast<LagrangianLinearR>(mainInteraction->getRelationPtr()))->getHPtr();
   }
   else
     RuntimeException::selfThrow("UnitaryRelation::getRightUnitaryBlockForDS, not yet implemented for relations of type " + relationType);
 
-  if (originalMatrix == NULL)
+  if (! originalMatrix)
     RuntimeException::selfThrow("UnitaryRelation::getRightUnitaryBlockForDS(DS, UnitaryBlock, ...): the right unitaryBlock is a NULL pointer (miss matrix B or H or gradients ...in relation ?)");
 
   // copy sub-unitaryBlock of originalMatrix into UnitaryBlock
@@ -267,14 +271,14 @@ void UnitaryRelation::getRightUnitaryBlockForDS(DynamicalSystem * ds, SiconosMat
   setBlock(originalMatrix, UnitaryBlock, subDim, subPos);
 }
 
-void UnitaryRelation::getExtraUnitaryBlock(SiconosMatrix* UnitaryBlock) const
+void UnitaryRelation::getExtraUnitaryBlock(SiconosMatrixSPtr UnitaryBlock) const
 {
   // !!! Warning: we suppose that D is unitaryBlock diagonal, ie that there is no coupling between UnitaryRelation through D !!!
   // Any coupling between relations through D must be taken into account thanks to the nslaw (by "increasing" its dimension).
 
   RELATIONTYPES relationType = getRelationType();
   RELATIONSUBTYPES relationSubType = getRelationSubType();
-  SiconosMatrix * D = NULL;
+  SiconosMatrixSPtr D;
 
   if (relationType == FirstOrder)
   {
@@ -284,7 +288,7 @@ void UnitaryRelation::getExtraUnitaryBlock(SiconosMatrix* UnitaryBlock) const
     }
 
     else if (relationSubType == LinearR || relationSubType == LinearTIR)
-      D = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getDPtr();
+      D = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getDPtr();
   }
   else if (relationType == Lagrangian)
   {
@@ -293,14 +297,14 @@ void UnitaryRelation::getExtraUnitaryBlock(SiconosMatrix* UnitaryBlock) const
       // nothing, D = NULL
     }
     else if (relationSubType == CompliantR)
-      D = static_cast<LagrangianCompliantR*>(mainInteraction->getRelationPtr())->getGPtr(1);
+      D = boost::static_pointer_cast<LagrangianCompliantR>(mainInteraction->getRelationPtr())->getGPtr(1);
     else if (relationSubType == LinearR || relationSubType == LinearTIR)
-      D = static_cast<LagrangianLinearR*>(mainInteraction->getRelationPtr())->getDPtr();
+      D = boost::static_pointer_cast<LagrangianLinearR>(mainInteraction->getRelationPtr())->getDPtr();
   }
   else
     RuntimeException::selfThrow("UnitaryRelation::getExtraUnitaryBlock, not yet implemented for relations of type " + relationType);
 
-  if (D == NULL)
+  if (! D)
   {
     UnitaryBlock->zero();
     return; //ie no extra unitaryBlock
@@ -319,6 +323,4 @@ void UnitaryRelation::getExtraUnitaryBlock(SiconosMatrix* UnitaryBlock) const
   subPos[3] = 0;
   setBlock(D, UnitaryBlock, subDim, subPos);
 }
-
-
 

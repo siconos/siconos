@@ -24,6 +24,7 @@
 #ifndef ExampleActuator_H
 #define ExampleActuator_H
 
+#include "SiconosPointers.h"
 #include "Actuator.h"
 
 class SiconosMatrix;
@@ -45,7 +46,7 @@ public:
    * \param an int, the type of the Actuator, which corresponds to the class type
    * \param a TimeDiscretisation*, (linked to a model).
    */
-  ExampleActuator(int, TimeDiscretisation*);
+  ExampleActuator(int, SP::TimeDiscretisation);
 
   /** Destructor
    */

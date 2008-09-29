@@ -52,8 +52,8 @@ typedef int (*Driver)(FrictionContact_Problem*, double*, double*, Solver_Options
  * Numerics driver will be called according to this value.
  *
  * \b Construction:
- *   - XML reading (inputs = xml node with tag "OneStepNSProblem" and a Simulation*)
- *   - Constructor from data (inputs = Simulations*, id, NonSmoothSolver*) - The solver is optional.
+ *   - XML reading (inputs = xml node with tag "OneStepNSProblem" and a SP::Simulation)
+ *   - Constructor from data (inputs = Simulations*, id, SP::NonSmoothSolver) - The solver is optional.
  * Main functions:
  *
  * \b Main functions:
@@ -74,25 +74,31 @@ protected:
   int contactProblemDim;
 
   /** contains the vector velocity of a FrictionContact system */
-  SimpleVector *velocity;
+  SimpleVectorSPtr velocity;
 
   /** contains the vector reaction of a FrictionContact system */
-  SimpleVector *reaction;
+  SimpleVectorSPtr reaction;
 
   /** contains the matrix M of a FrictionContact system */
-  OSNSMatrix *M;
+  OSNSMatrixSPtr M;
 
   /** contains the vector q of a FrictionContact system */
-  SimpleVector *q;
+  SimpleVectorSPtr q;
 
   /** contains the vector q of a FrictionContact system */
+#ifndef WithSmartPtr
   std::vector<double>* mu;
+#else
+  boost::shared_ptr< std::vector<double> > mu;
+#endif
 
+#ifndef WithSmartPtr
   /** Flags to check wheter pointers were allocated in class constructors or not */
   bool isVelocityAllocatedIn;
   bool isReactionAllocatedIn;
   bool isMAllocatedIn;
   bool isQAllocatedIn;
+#endif
 
   /** Storage type for M - 0: SiconosMatrix (dense), 1: Sparse Storage (embedded into OSNSMatrix) */
   int MStorageType;
@@ -109,19 +115,19 @@ private:
 public:
 
   /** xml constructor
-   *  \param OneStepNSProblemXML* : the XML linked-object
-   *  \param Simulation * the simulation that owns the problem
+   *  \param SP::OneStepNSProblemXML : the XML linked-object
+   *  \param SP::Simulation the simulation that owns the problem
    */
-  FrictionContact(OneStepNSProblemXML*, Simulation*);
+  FrictionContact(SP::OneStepNSProblemXML, SP::Simulation);
 
   /** constructor from data
-   *  \param Simulation* the simulation that owns this problem
+   *  \param SP::Simulation the simulation that owns this problem
    *  \param int dim (2D or 3D) of the friction-contact problem
    *  \param Solver* pointer to object that contains solver algorithm and formulation \n
    *  (optional, default = NULL => read .opt file in Numerics)
    *  \param string id of the problem (optional)
    */
-  FrictionContact(Simulation *, int, NonSmoothSolver* = NULL, const std::string& = "unamed_friction_contact_problem");
+  FrictionContact(SP::Simulation, int, SP::NonSmoothSolver = SP::NonSmoothSolver(), const std::string& = "unamed_friction_contact_problem");
 
   /** destructor
    */
@@ -150,7 +156,7 @@ public:
   /** get velocity, the initial state of the DynamicalSystem
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getVelocityPtr() const
+  inline SimpleVectorSPtr getVelocityPtr() const
   {
     return velocity;
   }
@@ -163,7 +169,7 @@ public:
   /** set velocity to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  void setVelocityPtr(SimpleVector*);
+  void setVelocityPtr(SimpleVectorSPtr);
 
   // --- Reaction ---
   /** get the value of reaction, the initial state of the DynamicalSystem
@@ -178,7 +184,7 @@ public:
   /** get reaction, the initial state of the DynamicalSystem
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getReactionPtr() const
+  inline SimpleVectorSPtr getReactionPtr() const
   {
     return reaction;
   }
@@ -191,14 +197,14 @@ public:
   /** set reaction to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  void setReactionPtr(SimpleVector*) ;
+  void setReactionPtr(SimpleVectorSPtr) ;
 
   // --- M ---
 
   /** get M
    *  \return pointer on a OSNSMatrix
    */
-  inline OSNSMatrix* getMPtr() const
+  inline OSNSMatrixSPtr getMPtr() const
   {
     return M;
   }
@@ -211,7 +217,7 @@ public:
   /** set M to pointer newPtr
    *  \param  OSNSMatrix* newPtr
    */
-  void setMPtr(OSNSMatrix*);
+  void setMPtr(OSNSMatrixSPtr);
 
   // --- Q ---
   /** get the value of q, the initial state of the DynamicalSystem
@@ -226,7 +232,7 @@ public:
   /** get q, the initial state of the DynamicalSystem
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getQPtr() const
+  inline SimpleVectorSPtr getQPtr() const
   {
     return q;
   }
@@ -239,7 +245,7 @@ public:
   /** set q to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  void setQPtr(SimpleVector*);
+  void setQPtr(SimpleVectorSPtr);
 
   // --- Mu ---
   /** get the vector mu, list of the friction coefficients
@@ -253,10 +259,19 @@ public:
   /** get a pointer to mu, the list of the friction coefficients
    *  \return pointer on a std::vector<double>
    */
-  inline std::vector<double>* getMuPtr() const
+
+#ifndef WithSmartPtr
+  std::vector<double>* getMuPtr() const
   {
     return mu;
   }
+#else
+  inline boost::shared_ptr< std::vector<double> > getMuPtr() const
+  {
+    return mu;
+  }
+#endif
+
 
   /** get the value of the component number i of mu, the vector of the friction coefficients
    *  \return SimpleVector
@@ -299,13 +314,13 @@ public:
    *  \param a pointer to UnitaryRelation
    *  \param a pointer to UnitaryRelation
    */
-  void computeUnitaryBlock(UnitaryRelation*, UnitaryRelation*);
+  void computeUnitaryBlock(SP::UnitaryRelation, SP::UnitaryRelation);
 
   /** To compute a part of the "q" vector of the OSNS
-      \param UnitaryRelation*, the UR which corresponds to the considered block
+      \param SP::UnitaryRelation, the UR which corresponds to the considered block
        \param unsigned int, the position of the first element of yOut to be set
   */
-  void computeQBlock(UnitaryRelation*, unsigned int);
+  void computeQBlock(SP::UnitaryRelation, unsigned int);
 
   /** compute vector q
    *  \param double : current time

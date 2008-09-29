@@ -68,8 +68,8 @@ protected:
   std::vector<xmlNodePtr> jacobianFIntNode;
   std::vector<xmlNodePtr> jacobianNNLNode;
 
-  SiconosMemoryXML * qMemoryXML;
-  SiconosMemoryXML * velocityMemoryXML;
+  SiconosMemoryXMLSPtr qMemoryXML;
+  SiconosMemoryXMLSPtr velocityMemoryXML;
 
   // === Constructors - Destructor ===
   LagrangianDSXML();
@@ -130,7 +130,7 @@ public:
   /** Returns the qMemoryXML* of the DSXML
    *   \return SiconosMemoryXML*
    */
-  inline SiconosMemoryXML* getQMemoryXML() const
+  inline SiconosMemoryXMLSPtr getQMemoryXML() const
   {
     return qMemoryXML;
   }
@@ -186,7 +186,7 @@ public:
   /** Returns the velocityMemoryXML* of the DSXML
    *   \return SiconosMemoryXML*
    */
-  inline SiconosMemoryXML* getVelocityMemoryXML() const
+  inline SiconosMemoryXMLSPtr getVelocityMemoryXML() const
   {
     return velocityMemoryXML;
   }

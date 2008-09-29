@@ -44,10 +44,10 @@ private:
 public:
 
   /** xml constructor
-   *  \param OneStepNSProblemXML* : the XML linked-object
-   *  \param Simulation *: the simulation that owns the problem (optional)
+   *  \param SP::OneStepNSProblemXML : the XML linked-object
+   *  \param SP::Simulation: the simulation that owns the problem (optional)
    */
-  Relay(OneStepNSProblemXML*, Simulation * = NULL);
+  Relay(SP::OneStepNSProblemXML, SP::Simulation = SP::Simulation());
 
   /** Destructor */
   ~Relay();

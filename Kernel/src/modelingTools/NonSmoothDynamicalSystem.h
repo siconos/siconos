@@ -24,8 +24,11 @@
 /** Available Dynamical Systems types*/
 enum dynamicalsystem {LAGRANGIANNLDS, LAGRANGIANTIDS, LINEARTIDS};
 
+#include "SiconosPointers.h"
 #include "InteractionsSet.h"
 #include "DynamicalSystemsSet.h"
+
+#include "SiconosPointers.h"
 
 class Interaction;
 class DynamicalSystem;
@@ -39,7 +42,7 @@ class NonSmoothDynamicalSystemXML;
  *  \date (Creation) Apr 23, 2004
  *
  */
-class NonSmoothDynamicalSystem
+class NonSmoothDynamicalSystem : public boost::enable_shared_from_this<NonSmoothDynamicalSystem>
 {
 private:
 
@@ -47,25 +50,16 @@ private:
   bool BVP;
 
   /** contains all the Dynamic Systems of the simulation */
-  DynamicalSystemsSet * allDS;
-
-  /** inside-class allocation flags*/
-  std::map<DynamicalSystem*, bool> isDSAllocatedIn;
+  DynamicalSystemsSetSPtr allDS;
 
   /** contains all the Interactions */
-  InteractionsSet * allInteractions;
-
-  /** inside-class allocation flags*/
-  std::map<Interaction*, bool> isInteractionAllocatedIn;
+  InteractionsSetSPtr allInteractions;
 
   /** the topology of the system */
-  Topology * topology;
+  TopologySPtr topology;
 
   /** the XML object linked to the NonSmoothDynamicalSystem to read XML data */
-  NonSmoothDynamicalSystemXML *nsdsxml;
-
-  /** Flags to check whether pointers were allocated in class constructors or not */
-  bool isTopologyAllocatedIn;
+  NonSmoothDynamicalSystemXMLSPtr nsdsxml;
 
   /** default constructor
    *  \param (optional) a bool which determines if the problem is BVP (true) or IVP (false)
@@ -81,14 +75,14 @@ public:
   /** xml constructor
    *  \param: the XML object corresponding to the NonSmoothDynamicalSystem
    */
-  NonSmoothDynamicalSystem(NonSmoothDynamicalSystemXML*);
+  NonSmoothDynamicalSystem(NonSmoothDynamicalSystemXMLSPtr);
 
   /** constructor from minimum data.
    *  \param: a pointer to DynamicalSystem
    *  \param: a pointer to Interaction
    *  \param: a bool
    */
-  NonSmoothDynamicalSystem(DynamicalSystem*, Interaction* = NULL, const bool& = false);
+  NonSmoothDynamicalSystem(SP::DynamicalSystem, InteractionSPtr = boost::shared_ptr<Interaction>(), const bool& = false);
 
   /** constructor from data - Warning: DS and Interactions are not copied, but links are created
    *  between pointers of the two sets.
@@ -148,7 +142,7 @@ public:
   /** get all the DynamicalSystem of the NonSmoothDynamicalSystem problem (saved in a set)
    *  \return a DynamicalSystemsSet *
    */
-  inline const DynamicalSystemsSet * getDynamicalSystems() const
+  inline const DynamicalSystemsSetSPtr getDynamicalSystems() const
   {
     return allDS;
   }
@@ -156,7 +150,7 @@ public:
   /** get all the DynamicalSystem of the NonSmoothDynamicalSystem problem (saved in a set)
    *  \return a DynamicalSystemsSet *
    */
-  inline DynamicalSystemsSet * getDynamicalSystems()
+  inline DynamicalSystemsSetSPtr getDynamicalSystems()
   {
     return allDS;
   }
@@ -197,13 +191,13 @@ public:
    *  \param an int
    *  \return a pointer on DynamicalSystem
    */
-  DynamicalSystem* getDynamicalSystemPtr(const int&) const ;
+  SP::DynamicalSystem getDynamicalSystemPtr(const int&) const ;
 
   /** get Dynamical system number I
    *  \param the identifier of the DynamicalSystem to get
    *  \return a pointer on DynamicalSystem
    */
-  DynamicalSystem* getDynamicalSystemPtrNumber(const int&) const ;
+  SP::DynamicalSystem getDynamicalSystemPtrNumber(const int&) const ;
 
   /** to set allDS
    *  \param a DynamicalSystemsSet
@@ -220,7 +214,7 @@ public:
    *  \param a pointer to DynamicalSystem
    *  \return a bool
    */
-  const bool hasDynamicalSystem(DynamicalSystem*) const;
+  const bool hasDynamicalSystem(SP::DynamicalSystem) const;
 
   // === Interactions management ===
 
@@ -235,7 +229,7 @@ public:
   /** get all the Interactions of the NonSmoothDynamicalSystem problem (saved in a set)
    *  \return an InteractionsSet *
    */
-  inline const InteractionsSet * getInteractions() const
+  inline const InteractionsSetSPtr getInteractions() const
   {
     return allInteractions;
   }
@@ -243,7 +237,7 @@ public:
   /** get all the Interactions of the NonSmoothDynamicalSystem problem (saved in a set)
    *  \return an InteractionsSet *
    */
-  inline InteractionsSet * getInteractions()
+  inline InteractionsSetSPtr getInteractions()
   {
     return allInteractions;
   }
@@ -284,13 +278,13 @@ public:
    *  \param an int
    *  \return a pointer on Interaction
    */
-  Interaction* getInteractionPtr(const int&) const ;
+  InteractionSPtr getInteractionPtr(const int&) const ;
 
   /** get Interaction number I
    *  \param the id-number of the Interaction to get
    *  \return a pointer on Interaction
    */
-  Interaction* getInteractionPtrNumber(const int&) const ;
+  InteractionSPtr getInteractionPtrNumber(const int&) const ;
 
   /** to set allInteractions
    *  \param an InteractionsSet
@@ -307,12 +301,12 @@ public:
    *  \param a pointer to Interaction
    *  \return a bool
    */
-  const bool hasInteraction(Interaction*) const;
+  const bool hasInteraction(InteractionSPtr) const;
 
   /** get the topology of the system
    *  \return a pointer on Topology
    */
-  inline Topology* getTopologyPtr() const
+  inline TopologySPtr getTopologyPtr() const
   {
     return topology;
   }
@@ -320,7 +314,7 @@ public:
   /** get the xml linked object
    *  \return a pointer on NonSmoothDynamicalSystemXML
    */
-  inline NonSmoothDynamicalSystemXML* getNonSmoothDynamicalSystemXMLPtr() const
+  inline NonSmoothDynamicalSystemXMLSPtr getNonSmoothDynamicalSystemXMLPtr() const
   {
     return nsdsxml;
   }
@@ -328,7 +322,7 @@ public:
   /** set the xml linked object
    *  \param NonSmoothDynamicalSystemXML* : a pointer on NonSmoothDynamicalSystemXML* to link
    */
-  inline void setNonSmoothDynamicalSystemXMLPtr(NonSmoothDynamicalSystemXML *newNsdsxml)
+  inline void setNonSmoothDynamicalSystemXMLPtr(NonSmoothDynamicalSystemXMLSPtr newNsdsxml)
   {
     nsdsxml = newNsdsxml;
   }
@@ -345,14 +339,14 @@ public:
   void display() const;
 
   /** add a DynamicalSystem into the NonSmoothDynamicalSystem (pointer link, no copy!)
-   *  \param DynamicalSystem* : the DynamicalSystem to add
+   *  \param SP::DynamicalSystem : the DynamicalSystem to add
    */
-  void addDynamicalSystemPtr(DynamicalSystem*);
+  void addDynamicalSystemPtr(SP::DynamicalSystem);
 
   /** add an Interaction into the NonSmoothDynamicalSystem (pointer link, no copy!)
    *  \param Interaction : the Interaction to add
    */
-  void addInteractionPtr(Interaction*);
+  void addInteractionPtr(InteractionSPtr);
 
   /** calculate an indicator that gives convergence information for the DSs
    *  \return a double

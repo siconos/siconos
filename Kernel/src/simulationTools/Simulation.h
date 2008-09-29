@@ -31,6 +31,8 @@
 #include "EventsManager.h"
 #include <fstream>
 
+#include "SiconosPointers.h"
+
 class Model;
 class DynamicalSystem;
 class EventsManager;
@@ -54,7 +56,7 @@ class SimulationXML;
   Rules:
   - A Model must be given to the constructor, else => exception.
 */
-class Simulation
+class Simulation : public boost::enable_shared_from_this<Simulation>
 {
 protected:
 
@@ -65,10 +67,10 @@ protected:
   std::string simulationType;
 
   /** the default time discretisation scheme */
-  TimeDiscretisation *timeDiscretisation;
+  TimeDiscretisationSPtr timeDiscretisation;
 
   /** tool to manage all events */
-  EventsManager* eventsManager;
+  EventsManagerSPtr eventsManager;
 
   /** current starting time for integration */
   double tinit;
@@ -82,32 +84,23 @@ protected:
   */
   double tout;
 
-  /** Inside-class allocation flags */
-  BoolMap isAllocatedIn;
-
   /** the dynamical systems integrators */
-  OSISet * allOSI;
+  OSISetSPtr allOSI;
 
   /** Map to link all DynamicalSystems and their OneStepIntegrator*/
   DSOSIMap osiMap;
-
-  /** inside-class allocation flags*/
-  std::map<OneStepIntegrator*, bool> isOSIAllocatedIn;
 
   /** index sets vector (indexSets[0] is the set where y[0]=0, indexSets[1] where y[0] = 0 and y[1]=0 and so on */
   VectorOfSetOfUnitaryRelations indexSets;
 
   /** the non smooth problems (each problem is identified thanks to its id) */
-  OneStepNSProblems * allNSProblems;
-
-  /** Inside-class allocation flag for Non Smooth Problem(s) */
-  std::map<OneStepNSProblem*, bool >  isNSProblemAllocatedIn;
+  SP::OneStepNSProblems allNSProblems;
 
   /** the XML object linked to the Simulation to read XML data */
-  SimulationXML *simulationxml;
+  SimulationXMLSPtr simulationxml;
 
   /** A link to the Model which contains the Simulation */
-  Model *model;
+  ModelSPtr model;
 
   /** int used to set the minimal derivative order used in the OSNS variables */
   unsigned int levelMin;
@@ -147,14 +140,14 @@ public:
    *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
    *  \param string: simulation type, default = undefined
    */
-  Simulation(TimeDiscretisation*, const std::string& = "undefined");
+  Simulation(TimeDiscretisationSPtr, const std::string& = "undefined");
 
   /** constructor with XML object of the Simulation
    *  \param SimulationXML* : the XML object corresponding
    *  \param the model which owns this simulation  (optional parameter)
    *  \param string: simulation type, default = undefined
    */
-  Simulation(SimulationXML*, Model*, const std::string& = "undefined");
+  Simulation(SimulationXMLSPtr, ModelSPtr, const std::string& = "undefined");
 
   /** destructor
    */
@@ -195,7 +188,7 @@ public:
   /** get the TimeDiscretisation of the Simulation
    *  \return the TimeDiscretisation
    */
-  inline TimeDiscretisation* getTimeDiscretisationPtr()
+  inline TimeDiscretisationSPtr getTimeDiscretisationPtr()
   {
     return timeDiscretisation;
   };
@@ -203,7 +196,7 @@ public:
   /** set the TimeDiscretisation of the Simulation
    *  \param the TimeDiscretisation
    */
-  void setTimeDiscretisationPtr(TimeDiscretisation*);
+  void setTimeDiscretisationPtr(TimeDiscretisationSPtr);
 
   /** get time instant k of the time discretisation
    *  \return a double.
@@ -225,7 +218,7 @@ public:
   /** get the EventsManager
    *  \return a pointer to EventsManager
    */
-  inline EventsManager* getEventsManagerPtr() const
+  inline EventsManagerSPtr getEventsManagerPtr() const
   {
     return eventsManager;
   };
@@ -265,7 +258,7 @@ public:
   /** get all the Integrators of the Simulation
    *  \return an OSISset
    */
-  inline const OSISet * getOneStepIntegrators() const
+  inline const OSISetSPtr getOneStepIntegrators() const
   {
     return allOSI;
   };
@@ -278,12 +271,12 @@ public:
   /** searchs the integrator of the DS number "numberDS"
    * \param an int ("numberDS")
    */
-  OneStepIntegrator* getIntegratorOfDSPtr(int) const ;
+  OneStepIntegratorSPtr getIntegratorOfDSPtr(int) const ;
 
   /** get the integrator of "ds"
    * \param a pointer to DynamicalSystem ("ds")
    */
-  OneStepIntegrator* getIntegratorOfDSPtr(DynamicalSystem *) const ;
+  OneStepIntegratorSPtr getIntegratorOfDSPtr(SP::DynamicalSystem) const ;
 
   /** get the number of OSIs in the Simulation (ie the size of allOSI)
    *  \return an unsigned int
@@ -296,23 +289,23 @@ public:
   /** add an Integrator into allOSI (pointer link, no copy!)
    *  \param a pointer to a OneStepIntegrator
    */
-  void addOneStepIntegratorPtr(OneStepIntegrator *);
+  void addOneStepIntegratorPtr(OneStepIntegratorSPtr);
 
   /** register a DS and its OSI into the osiMap.
       \param a pointer to a DynamicalSystem.
    *  \param a pointer to a OneStepIntegrator.
    */
-  void addInOSIMap(DynamicalSystem*, OneStepIntegrator *);
+  void addInOSIMap(SP::DynamicalSystem, OneStepIntegratorSPtr);
 
   /** get a pointer to indexSets[i]
    *  \return a UnitaryRelationsSet
    */
-  UnitaryRelationsSet * getIndexSetPtr(unsigned int) ;
+  UnitaryRelationsSetSPtr getIndexSetPtr(unsigned int) ;
 
   /** get allNSProblems
-   *  \return a pointer to OneStepNSProblems object (container of OneStepNSProblem*)
+   *  \return a pointer to OneStepNSProblems object (container of SP::OneStepNSProblem)
    */
-  inline const OneStepNSProblems* getOneStepNSProblems() const
+  inline const OneStepNSProblemsSPtr getOneStepNSProblems() const
   {
     return allNSProblems;
   };
@@ -329,10 +322,10 @@ public:
    *  \param a string, the name of the osns
    *  \return a pointer to OneStepNSProblem
    */
-  OneStepNSProblem* getOneStepNSProblemPtr(const std::string&);
+  SP::OneStepNSProblem getOneStepNSProblemPtr(const std::string&);
 
   /** set allNSProblems map - Warning: no copy between OneStepNSProblem of each map, pointers links!
-   *  \param a OneStepNSProblems object (map of OneStepNSProblem*)
+   *  \param a OneStepNSProblems object (map of SP::OneStepNSProblem)
    */
   void setOneStepNSProblems(const OneStepNSProblems&);
 
@@ -344,7 +337,7 @@ public:
    *  \param a pointer to OneStepNSProblem
    *  \return a bool
    */
-  const bool hasOneStepNSProblem(OneStepNSProblem*) const ;
+  const bool hasOneStepNSProblem(OneStepNSProblemSPtr) const ;
 
   /** check if a OneStepNSProblem named id is already in the map
    *  \param a string ("id")
@@ -355,12 +348,12 @@ public:
   /** add a OneStepNSProblem in the Simulation (if its not the first, it needs to have an id clearly defined)
    *  \param a pointer to OneStepNSProblem
    */
-  virtual void addOneStepNSProblemPtr(OneStepNSProblem*);
+  virtual void addOneStepNSProblemPtr(OneStepNSProblemSPtr);
 
   /** get the SimulationXML* of the Simulation
    *  \return a pointer on the SimulationXML of the Simulation
    */
-  inline SimulationXML* getSimulationXMLPtr() const
+  inline SimulationXMLSPtr getSimulationXMLPtr() const
   {
     return simulationxml;
   }
@@ -368,23 +361,23 @@ public:
   /** set the SimulationXML of the Simulation
    *  \param SimulationXML* : the pointer to set the SimulationXML
    */
-  inline void setSimulationXMLPtr(SimulationXML* strxml)
+  inline void setSimulationXMLPtr(SimulationXMLSPtr strxml)
   {
     simulationxml = strxml;
   }
 
   /** get the Model which contains the Simulation
-   *  \return Model* : the Model which the Simulation
+   *  \return SP::Model : the Model which the Simulation
    */
-  inline Model* getModelPtr() const
+  inline ModelSPtr getModelPtr() const
   {
     return model;
   }
 
   /** set the Model which contains the Simulation
-   *  \param Model* : the Model to set
+   *  \param SP::Model : the Model to set
    */
-  inline void setModelPtr(Model* m)
+  inline void setModelPtr(ModelSPtr m)
   {
     model = m;
   }

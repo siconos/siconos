@@ -22,7 +22,7 @@
 #include "Tools.h"
 
 using namespace std;
-void OSNSMatrix::updateSizeAndPositions(unsigned int * dim, UnitaryRelationsSet* indexSet)
+void OSNSMatrix::updateSizeAndPositions(unsigned int * dim, UnitaryRelationsSetSPtr indexSet)
 {
   // === Description ===
 
@@ -31,7 +31,7 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int * dim, UnitaryRelationsSet*
   // element in the full-matrix M. This position depends on the
   // previous unitaryBlocks sizes.
   //
-  // positions are saved in a map<UnitaryRelation*, unsigned int>,
+  // positions are saved in a map<SP::UnitaryRelation, unsigned int>,
   // named unitaryBlocksPositions.
   //
 
@@ -43,7 +43,7 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int * dim, UnitaryRelationsSet*
     *dim += (*it)->getNonSmoothLawSize();
   }
 }
-void OSNSMatrix::updateSizeAndPositions(unsigned int * dim, DynamicalSystemsSet* DSSet)
+void OSNSMatrix::updateSizeAndPositions(unsigned int * dim, DynamicalSystemsSetSPtr DSSet)
 {
   // === Description ===
 
@@ -52,7 +52,7 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int * dim, DynamicalSystemsSet*
   // in the full-matrix M. This position depends on the previous
   // DSBlocks sizes.
   //
-  // positions are saved in a map<DynamicalSystem*, unsigned int>,
+  // positions are saved in a map<SP::DynamicalSystem, unsigned int>,
   // named DSBlocksPositions.
   //
 
@@ -64,13 +64,13 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int * dim, DynamicalSystemsSet*
     *dim += (*it)->getDim();
   }
 }
-void OSNSMatrix::updateSizeAndPositions(unsigned int * dim, DynamicalSystemsSet* DSSet, UnitaryRelationsSet* indexSet)
+void OSNSMatrix::updateSizeAndPositions(unsigned int * dim, DynamicalSystemsSetSPtr DSSet, UnitaryRelationsSetSPtr indexSet)
 {
   // === Description ===
 
-  // positions are saved in a map<UnitaryRelation*, unsigned int>,
+  // positions are saved in a map<SP::UnitaryRelation, unsigned int>,
   // named unitaryBlocksPositions.  positions are saved in a
-  // map<DynamicalSystem*, unsigned int>, named DSBlocksPositions.
+  // map<SP::DynamicalSystem, unsigned int>, named DSBlocksPositions.
   //
 
   // Computes real size of the current matrix = sum of the dim. of all
@@ -145,7 +145,7 @@ OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
 }
 
 // Basic constructor
-OSNSMatrix::OSNSMatrix(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMatrices& unitaryBlocks, int stor):
+OSNSMatrix::OSNSMatrix(UnitaryRelationsSetSPtr indexSet, MapOfMapOfUnitaryMatrices& unitaryBlocks, int stor):
   dimRow(0), dimColumn(0), storageType(stor)
 {
   unitaryBlocksPositions.reset(new UR_int());
@@ -155,7 +155,7 @@ OSNSMatrix::OSNSMatrix(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMatrices&
   fill(indexSet, unitaryBlocks);
 }
 
-OSNSMatrix::OSNSMatrix(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSBlocks, int stor):
+OSNSMatrix::OSNSMatrix(DynamicalSystemsSetSPtr DSSet, MapOfDSMatrices& DSBlocks, int stor):
   dimRow(0), dimColumn(0), storageType(stor)
 {
   unitaryBlocksPositions.reset(new UR_int());
@@ -164,7 +164,7 @@ OSNSMatrix::OSNSMatrix(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSBlocks, in
 
   fill(DSSet, DSBlocks);
 }
-OSNSMatrix::OSNSMatrix(DynamicalSystemsSet* DSSet, UnitaryRelationsSet* indexSet, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks, int stor):
+OSNSMatrix::OSNSMatrix(DynamicalSystemsSetSPtr DSSet, UnitaryRelationsSetSPtr indexSet, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks, int stor):
   dimRow(0), dimColumn(0), storageType(stor)
 {
   unitaryBlocksPositions.reset(new UR_int());
@@ -174,7 +174,7 @@ OSNSMatrix::OSNSMatrix(DynamicalSystemsSet* DSSet, UnitaryRelationsSet* indexSet
   fill(DSSet, indexSet, DSUnitaryBlocks);
 }
 
-OSNSMatrix::OSNSMatrix(UnitaryRelationsSet* indexSet, DynamicalSystemsSet* DSSet,  MapOfUnitaryMapOfDSMatrices& unitaryDSBlocks, int stor):
+OSNSMatrix::OSNSMatrix(UnitaryRelationsSetSPtr indexSet, DynamicalSystemsSetSPtr DSSet,  MapOfUnitaryMapOfDSMatrices& unitaryDSBlocks, int stor):
   dimRow(0), dimColumn(0), storageType(stor)
 {
   unitaryBlocksPositions.reset(new UR_int());
@@ -184,7 +184,7 @@ OSNSMatrix::OSNSMatrix(UnitaryRelationsSet* indexSet, DynamicalSystemsSet* DSSet
   fill(indexSet, DSSet, unitaryDSBlocks);
 }
 
-OSNSMatrix::OSNSMatrix(UnitaryRelationsSet* indexSet, DynamicalSystemsSet* DSSet, MapOfMapOfUnitaryMatrices& unitaryBlocks,   MapOfDSMatrices& DSBlocks, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks, MapOfUnitaryMapOfDSMatrices& unitaryDSBlocks, int stor):
+OSNSMatrix::OSNSMatrix(UnitaryRelationsSetSPtr indexSet, DynamicalSystemsSetSPtr DSSet, MapOfMapOfUnitaryMatrices& unitaryBlocks,   MapOfDSMatrices& DSBlocks, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks, MapOfUnitaryMapOfDSMatrices& unitaryDSBlocks, int stor):
   dimRow(0), dimColumn(0), storageType(stor)
 {
   unitaryBlocksPositions.reset(new UR_int());
@@ -218,14 +218,14 @@ OSNSMatrix::~OSNSMatrix()
 {
 }
 
-unsigned int OSNSMatrix::getPositionOfUnitaryBlock(UnitaryRelation* UR) const
+unsigned int OSNSMatrix::getPositionOfUnitaryBlock(SP::UnitaryRelation UR) const
 {
   UR_int::const_iterator it = unitaryBlocksPositions->find(UR);
   if (it == unitaryBlocksPositions->end())
     RuntimeException::selfThrow("OSNSMatrix::getPositionOfUnitaryBlock(UnitaryRelation ur), ur does not belong to the index set used to built the OSNS matrix.");
   return it->second;
 }
-unsigned int OSNSMatrix::getPositionOfDSBlock(DynamicalSystem* DS) const
+unsigned int OSNSMatrix::getPositionOfDSBlock(SP::DynamicalSystem DS) const
 {
   DS_int::const_iterator it = DSBlocksPositions->find(DS);
   if (it == DSBlocksPositions->end())
@@ -234,7 +234,7 @@ unsigned int OSNSMatrix::getPositionOfDSBlock(DynamicalSystem* DS) const
 }
 
 // Fill the matrix
-void OSNSMatrix::fill(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMatrices& unitaryBlocks, bool update)
+void OSNSMatrix::fill(UnitaryRelationsSetSPtr indexSet, MapOfMapOfUnitaryMatrices& unitaryBlocks, bool update)
 {
 
   assert(indexSet && "NULL pointer");
@@ -249,7 +249,7 @@ void OSNSMatrix::fill(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMatrices& 
   if (storageType == 0)
   {
     // === Memory allocation, if required ===
-    // Mem. is allocate only if M==NULL or if its size has changed.
+    // Mem. is allocate only if !M or if its size has changed.
     if (update)
     {
       if (! M1)
@@ -304,7 +304,7 @@ void OSNSMatrix::fill(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMatrices& 
   if (update)
     convert();
 }
-void OSNSMatrix::fillDiagonal(UnitaryRelationsSet* URSet, MapOfMapOfUnitaryMatrices& unitaryBlocks, bool update)
+void OSNSMatrix::fillDiagonal(UnitaryRelationsSetSPtr URSet, MapOfMapOfUnitaryMatrices& unitaryBlocks, bool update)
 {
 
   assert(URSet && "NULL pointer");
@@ -319,7 +319,7 @@ void OSNSMatrix::fillDiagonal(UnitaryRelationsSet* URSet, MapOfMapOfUnitaryMatri
   if (storageType == 0)
   {
     // === Memory allocation, if required ===
-    // Mem. is allocate only if M==NULL or if its size has changed.
+    // Mem. is allocate only if !M or if its size has changed.
     if (update)
     {
       if (! M1)
@@ -358,7 +358,7 @@ void OSNSMatrix::fillDiagonal(UnitaryRelationsSet* URSet, MapOfMapOfUnitaryMatri
     convert();
 }
 
-void OSNSMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSBlocks, bool update)
+void OSNSMatrix::fill(DynamicalSystemsSetSPtr DSSet, MapOfDSMatrices& DSBlocks, bool update)
 {
 
   assert(DSSet && "NULL pointer");
@@ -372,7 +372,7 @@ void OSNSMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSBlocks, boo
   if (storageType == 0)
   {
     // === Memory allocation, if required ===
-    // Mem. is allocate only if M==NULL or if its size has changed.
+    // Mem. is allocate only if !M or if its size has changed.
     if (update)
     {
       if (! M1)
@@ -410,7 +410,7 @@ void OSNSMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSBlocks, boo
     convert();
 
 }
-void OSNSMatrix::fill(DynamicalSystemsSet* DSSet, UnitaryRelationsSet* URSet, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks, bool update)
+void OSNSMatrix::fill(DynamicalSystemsSetSPtr DSSet, UnitaryRelationsSetSPtr URSet, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks, bool update)
 {
 
   assert(URSet && "NULL pointer");
@@ -428,7 +428,7 @@ void OSNSMatrix::fill(DynamicalSystemsSet* DSSet, UnitaryRelationsSet* URSet, Ma
   if (storageType == 0)
   {
     // === Memory allocation, if required ===
-    // Mem. is allocate only if M==NULL or if its size has changed.
+    // Mem. is allocate only if !M or if its size has changed.
     if (update)
     {
       if (! M1)
@@ -479,7 +479,7 @@ void OSNSMatrix::fill(DynamicalSystemsSet* DSSet, UnitaryRelationsSet* URSet, Ma
     convert();
 
 }
-void OSNSMatrix::fill(UnitaryRelationsSet* indexSet, DynamicalSystemsSet* DSSet,  MapOfUnitaryMapOfDSMatrices& unitaryDSBlocks, bool update)
+void OSNSMatrix::fill(UnitaryRelationsSetSPtr indexSet, DynamicalSystemsSetSPtr DSSet,  MapOfUnitaryMapOfDSMatrices& unitaryDSBlocks, bool update)
 {
 
   assert(indexSet && "NULL pointer");
@@ -497,7 +497,7 @@ void OSNSMatrix::fill(UnitaryRelationsSet* indexSet, DynamicalSystemsSet* DSSet,
   if (storageType == 0)
   {
     // === Memory allocation, if required ===
-    // Mem. is allocate only if M==NULL or if its size has changed.
+    // Mem. is allocate only if !M or if its size has changed.
     if (update)
     {
       if (! M1)
@@ -548,7 +548,7 @@ void OSNSMatrix::fill(UnitaryRelationsSet* indexSet, DynamicalSystemsSet* DSSet,
   if (update)
     convert();
 }
-void OSNSMatrix::fill(UnitaryRelationsSet* URSet, DynamicalSystemsSet* DSSet,  MapOfMapOfUnitaryMatrices& unitaryBlocks,  MapOfDSMatrices& DSBlocks, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks ,  MapOfUnitaryMapOfDSMatrices& unitaryDSBlocks , bool update)
+void OSNSMatrix::fill(UnitaryRelationsSetSPtr URSet, DynamicalSystemsSetSPtr DSSet,  MapOfMapOfUnitaryMatrices& unitaryBlocks,  MapOfDSMatrices& DSBlocks, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks ,  MapOfUnitaryMapOfDSMatrices& unitaryDSBlocks , bool update)
 {
   updateSizeAndPositions(&dimRow, DSSet, URSet);
   dimColumn = dimRow;
@@ -590,7 +590,7 @@ void OSNSMatrix::convert()
   else
   {
     M2->convert();
-    numericsMat->matrix1 = M2->getNumericsMatSparse();
+    numericsMat->matrix1 = &*M2->getNumericsMatSparse();
   }
 }
 

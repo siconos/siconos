@@ -27,6 +27,8 @@
 #include "SiconosConst.h"
 #include "RuntimeException.h"
 
+#include "SiconosPointers.h"
+
 const std::string COMPLEMENTARITYCONDITIONNSLAW = "ComplementarityNSL";
 const std::string MIXEDCOMPLEMENTARITYCONDITIONNSLAW = "MixedComplementarityNSL";
 const std::string NEWTONIMPACTNSLAW = "NewtonImpactNSL";
@@ -56,7 +58,7 @@ protected:
   unsigned int size;
 
   /** the XML pbject linked to the NonSmoothLaw to read XML data */
-  NonSmoothLawXML *nslawxml;
+  NonSmoothLawXMLSPtr nslawxml;
 
   /** default constructor
    */
@@ -78,7 +80,7 @@ public:
   * \param string: type of the law
   *  \param NonSmoothLawXML* : the XML object corresponding
   */
-  NonSmoothLaw(const std::string& , NonSmoothLawXML*);
+  NonSmoothLaw(const std::string& , NonSmoothLawXMLSPtr);
 
   /** destructor
   */
@@ -92,7 +94,7 @@ public:
   /** get the NonSmoothLawXML of the NonSmoothLaw
   *  \return the pointer on the NonSmoothLawXML of the NonSmoothLaw
   */
-  inline NonSmoothLawXML* getNonSmoothLawXML()
+  inline NonSmoothLawXMLSPtr getNonSmoothLawXML()
   {
     return nslawxml;
   }
@@ -100,7 +102,7 @@ public:
   /** set the NonSmoothLawXML of the NonSmoothLaw
   *  \param NonSmoothLawXML* : the pointer to set nslawxml
   */
-  inline void setNonSmoothLawXML(NonSmoothLawXML* newNslawxml)
+  inline void setNonSmoothLawXML(NonSmoothLawXMLSPtr newNslawxml)
   {
     nslawxml = newNslawxml;
   }

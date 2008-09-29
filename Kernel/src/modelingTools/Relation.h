@@ -31,6 +31,8 @@
 #include "SiconosSharedLibrary.h"
 #include "RelationTypes.hpp"
 
+#include "SiconosPointers.h"
+
 class Interaction;
 class RelationXML;
 class SimpleVector;
@@ -75,38 +77,38 @@ protected:
   RELATIONSUBTYPES  subType;
 
   /** The Interaction linked to this Relation */
-  Interaction * interaction;
+  InteractionSPtr interaction;
 
-  /** A map of vectors, used to save links (pointers) to DS objects of the interaction */
+  /** A map of vectors, used to save links (pointers) to DS objects of
+      the interaction */
   VectorMap data;
 
   /** the object linked this Relation to read XML data */
-  RelationXML *relationxml;
+  RelationXMLSPtr relationxml;
 
   /** class for manage plugin (open, close librairy...) */
   SiconosSharedLibrary cShared;
 
   /* contains the name of the plugin used to compute g function */
-  /* contains the names of the various plug-in. Example: pluginNames["output"] is the function used to compute the output y.*/
+  /* contains the names of the various plug-in. Example:
+     pluginNames["output"] is the function used to compute the output
+     y.*/
   NamesList pluginNames;
 
   /** Flag to check if operators are plugged or not .*/
   BoolMap isPlugged;
 
-  /** Flags to know if pointers have been allocated inside constructors or not */
-  BoolMap isAllocatedIn;
-
   /** work vector for x */
-  SimpleVector * workX;
+  SimpleVectorSPtr workX;
 
   /** work vector for z */
-  SimpleVector * workZ;
+  SimpleVectorSPtr workZ;
 
   /** work vector for y */
-  SimpleVector * workY;
+  SimpleVectorSPtr workY;
 
   /** work vector for lambda */
-  SimpleVector * workL;
+  SimpleVectorSPtr workL;
 
   /** default constructor
    */
@@ -123,7 +125,7 @@ protected:
    *  \param a string that gives the type of the relation
    *  \param a string that gives the subtype of the relation
    */
-  Relation(RelationXML*, RELATIONTYPES, RELATIONSUBTYPES);
+  Relation(RelationXMLSPtr, RELATIONTYPES, RELATIONSUBTYPES);
 
 private:
 
@@ -144,7 +146,7 @@ public:
   /** To get the pointer to the Interaction linked to the present Relation
    *  \return a pointer to Interaction.
    */
-  inline Interaction * getInteractionPtr()
+  inline InteractionSPtr getInteractionPtr()
   {
     return interaction;
   }
@@ -152,7 +154,7 @@ public:
   /** To set the pointer to the Interaction linked to the present Relation
    *  \param a pointer to Interaction.
    */
-  inline void setInteractionPtr(Interaction * newInter)
+  inline void setInteractionPtr(InteractionSPtr newInter)
   {
     interaction = newInter;
   }
@@ -160,7 +162,7 @@ public:
   /** To get the RelationXML* of the Relation
    *  \return a pointer on the RelationXML of the Relation
    */
-  inline RelationXML* getRelationXML()
+  inline RelationXMLSPtr getRelationXML()
   {
     return relationxml;
   }
@@ -168,7 +170,7 @@ public:
   /** To set the RelationXML* of the Relation
    *  \param RelationXML* : the pointer to set
    */
-  inline void setRelationXML(RelationXML *rxml)
+  inline void setRelationXML(RelationXMLSPtr rxml)
   {
     relationxml = rxml;
   }

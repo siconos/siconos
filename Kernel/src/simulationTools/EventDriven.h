@@ -60,13 +60,13 @@ public:
   /** defaut constructor
    *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
    */
-  EventDriven(TimeDiscretisation* td): Simulation(td, "EventDriven"), istate(1) {};
+  EventDriven(TimeDiscretisationSPtr td): Simulation(td, "EventDriven"), istate(1) {};
 
   /** constructor with XML object of the EventDriven
    *  \param SimulationXML* : the XML object corresponding
-   *  \param Model* : the Model which contains the Simulation
+   *  \param SP::Model : the Model which contains the Simulation
    */
-  EventDriven(SimulationXML*, Model*);
+  EventDriven(SimulationXMLSPtr, ModelSPtr);
 
   /** destructor
    */
@@ -90,7 +90,7 @@ public:
    *  \param doublereal*, x:array of double
    *  \param doublereal*, derivative of x (in-out parameter)
    */
-  void computeF(OneStepIntegrator*, integer *, doublereal *, doublereal *, doublereal *);
+  void computeF(SP::OneStepIntegrator, integer*, doublereal*, doublereal*, doublereal*);
 
   /** compute jacobian of the right-hand side
    *  \param pointer to OneStepIntegrator.
@@ -99,7 +99,7 @@ public:
    *  \param doublereal*, x:array of double
    *  \param doublereal*, jacobian of f according to x (in-out parameter)
    */
-  void computeJacobianF(OneStepIntegrator*, integer *, doublereal *, doublereal *,  doublereal *);
+  void computeJacobianF(SP::OneStepIntegrator, integer*, doublereal*, doublereal*,  doublereal*);
 
   /** compute constraint function g(x,t,...) for osi.
    *  \param pointer to OneStepIntegrator.
@@ -109,7 +109,7 @@ public:
    *  \param integer*, size of vector g (ie number of constraints)
    *  \param doublereal*, g (in-out parameter)
    */
-  void computeG(OneStepIntegrator*, integer *, doublereal *, doublereal*, integer *, doublereal*);
+  void computeG(OneStepIntegratorSPtr, integer*, doublereal*, doublereal*, integer*, doublereal*);
 
   /** update input for impact case (ie compute p[1])
    */
@@ -125,7 +125,7 @@ public:
   void advanceToEvent();
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param Simulation* : the Simulation which must be converted
+   *  \param SP::Simulation : the Simulation which must be converted
    * \return a pointer on the Simulation if it is of the right type, NULL otherwise
    */
   static EventDriven* convert(Simulation* str);

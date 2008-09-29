@@ -55,6 +55,10 @@ class SimpleVector;
  *
  */
 class SimpleMatrix: public SiconosMatrix
+#ifdef WithSmartPtr
+  , public boost::enable_shared_from_this<SimpleMatrix>
+#endif
+
 {
 protected:
   /** Union of The Boost Matrices : DenseMat, TriangMat, SymMat ...
@@ -90,7 +94,7 @@ private:
        \param a pointer to a SiconosVector, x
        \param a DenseVect, res.
   */
-  friend void private_addprod(const SiconosMatrix *, unsigned int, unsigned int, const SiconosVector *, SiconosVector*);
+  friend void private_addprod(SPC::SiconosMatrix, unsigned int, unsigned int, SPC::SiconosVector, SP::SiconosVector);
 
   /**  computes res = a*subA*x +res, subA being a submatrix of A (rows from startRow to startRow+sizeY and columns between startCol and startCol+sizeX).
        If x is a block vector, it call the present function for all blocks.
@@ -101,7 +105,7 @@ private:
        \param a pointer to a SiconosVector, x
        \param a DenseVect, res.
   */
-  friend void private_addprod(double, const SiconosMatrix *, unsigned int, unsigned int, const SiconosVector *, SiconosVector*);
+  friend void private_addprod(double, SPC::SiconosMatrix, unsigned int, unsigned int, SiconosVectorSPtrConst, SiconosVectorSPtr);
 
   /**  computes res = subA*x +res, subA being a submatrix of trans(A) (rows from startRow to startRow+sizeY and columns between startCol and startCol+sizeX).
        If x is a block vector, it call the present function for all blocks.
@@ -111,7 +115,7 @@ private:
        \param an int, sub-block position (startCol)
        \param a DenseVect, res.
   */
-  friend void private_addprod(const SiconosVector *, const SiconosMatrix *, unsigned int, unsigned int, SiconosVector*);
+  friend void private_addprod(SiconosVectorSPtrConst, SPC::SiconosMatrix, unsigned int, unsigned int, SiconosVectorSPtr);
 
   /**  computes y = subA*x (init =true) or += subA * x (init = false), subA being a submatrix of A (all columns, and rows between start and start+sizeY).
        If x is a block vector, it call the present function for all blocks.
@@ -121,7 +125,7 @@ private:
        \param a pointer to a SiconosVector, y
        \param init, a bool
   */
-  friend void private_prod(const SiconosMatrix *, unsigned int, const SiconosVector *, SiconosVector *, bool);
+  friend void private_prod(SPC::SiconosMatrix, unsigned int, SiconosVectorSPtrConst , SiconosVectorSPtr, bool);
 
   /**  computes y = a*subA*x (init =true) or += a*subA * x (init = false), subA being a submatrix of A (all columns, and rows between start and start+sizeY).
        If x is a block vector, it call the present function for all blocks.
@@ -132,7 +136,7 @@ private:
        \param a pointer to a SiconosVector, y
        \param init, a bool
   */
-  friend void private_prod(double, const SiconosMatrix *, unsigned int, const SiconosVector *, SiconosVector *, bool);
+  friend void private_prod(double, SPC::SiconosMatrix, unsigned int, SiconosVectorSPtrConst, SiconosVectorSPtr, bool);
 
   /**  computes y = subA*x (init =true) or += subA * x (init = false), subA being a submatrix of trans(A) (all columns, and rows between start and start+sizeY).
        If x is a block vector, it call the present function for all blocks.
@@ -142,7 +146,7 @@ private:
        \param a pointer to a SiconosVector, y
        \param init, a bool
   */
-  friend void private_prod(const SiconosVector *, const SiconosMatrix *, unsigned int, SiconosVector *, bool);
+  friend void private_prod(SPC::SiconosVector, SPC::SiconosMatrix, unsigned int, SP::SiconosVector, bool);
 
 public:
 
@@ -420,25 +424,43 @@ public:
    * \param start, an Index, start[0], start[1]: position (row, column) of the first element of the sub-block in MIn
    *  start[2], start[3]: position (row, column) of the first element of the sub-block in MOut.
    */
-  friend void setBlock(const SiconosMatrix *, SiconosMatrix *, const Index&, const Index&);
+#ifndef WithSmartPtr
+  friend void setBlock(const SiconosMatrix* , SiconosMatrix* , const Index&, const Index&);
+#else
+  friend void setBlock(SPC::SiconosMatrix , SP::SiconosMatrix , const Index&, const Index&);
+#endif
 
   /** get block at position row-col, ie return this in SimpleMatrix case
    *  \param unsigned int row
    *  \param unsigned int col
    */
-  inline SiconosMatrix* getBlockPtr(unsigned int = 0, unsigned int = 0)
+#ifndef WithSmartPtr
+  inline SiconosMatrixSPtr getBlockPtr(unsigned int = 0, unsigned int = 0)
   {
     return this;
   };
+#else
+  inline SiconosMatrixSPtr getBlockPtr(unsigned int = 0, unsigned int = 0)
+  {
+    return shared_from_this();
+  };
+#endif
 
   /** get block at position row-col, ie return this in SimpleMatrix case
    *  \param unsigned int row
    *  \param unsigned int col
    */
-  inline const SiconosMatrix* getBlockPtr(unsigned int = 0, unsigned int = 0) const
+#ifndef WithSmartPtr
+  inline SiconosMatrixSPtrConst getBlockPtr(unsigned int = 0, unsigned int = 0) const
   {
     return this;
   };
+#else
+  inline SiconosMatrixSPtrConst getBlockPtr(unsigned int = 0, unsigned int = 0) const
+  {
+    return shared_from_this();
+  };
+#endif
 
   /** get row index of current matrix and save it into vOut
    *  \param unsigned int: index of required line
@@ -465,30 +487,30 @@ public:
   /** get column number index of current matrix, starting from element at position pos and save it into vOut
    *  \param index, unsigned int, index of required column
    *  \param pos, unsigned int, index of the first required element in the column
-   *  \param vOut, SiconosVector*
+   *  \param vOut, SP::SiconosVector
    */
-  void getSubCol(unsigned int, unsigned int, SiconosVector*) const;
+  void getSubCol(unsigned int, unsigned int, SiconosVectorSPtr) const;
 
   /** get row number index of current matrix, starting from element at position pos and save it into vOut
    *  \param index, unsigned int, index of required row
    *  \param pos, unsigned int, index of the first required element in the row
-   *  \param vOut, SiconosVector*
+   *  \param vOut, SP::SiconosVector
    */
-  void getSubRow(unsigned int, unsigned int, SiconosVector*) const;
+  void getSubRow(unsigned int, unsigned int, SiconosVectorSPtr) const;
 
   /** set column number index of current matrix, starting from element at position pos, with vIn
    *  \param index, unsigned int, index of required column
    *  \param pos, unsigned int, index of the first required element in the column
-   *  \param vIn, SiconosVector*
+   *  \param vIn, SP::SiconosVector
    */
-  void setSubCol(unsigned int, unsigned int, SiconosVector*);
+  void setSubCol(unsigned int, unsigned int, SiconosVectorSPtr);
 
   /** set row number index of current matrix, starting from element at position pos, with vIn
    *  \param index, unsigned int, index of required row
    *  \param pos, unsigned int, index of the first required element in the row
-   *  \param vIn, SiconosVector*
+   *  \param vIn, SP::SiconosVector
    */
-  void setSubRow(unsigned int, unsigned int, SiconosVector*);
+  void setSubRow(unsigned int, unsigned int, SiconosVectorSPtr);
 
   /** add the input matrix to the elements starting from position i (row) and j (col).
    *  \param an unsigned int i

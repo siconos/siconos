@@ -34,7 +34,7 @@
 using namespace std;
 
 // --- XML constructor ---
-EventDriven::EventDriven(SimulationXML* strxml, Model *newModel): Simulation(strxml, newModel, "EventDriven"), istate(1)
+EventDriven::EventDriven(SimulationXMLSPtr strxml, ModelSPtr newModel): Simulation(strxml, newModel, "EventDriven"), istate(1)
 {
   // === One Step NS Problem ===
   // We read data in the xml output (mainly Interactions concerned and solver) and assign them to
@@ -44,7 +44,7 @@ EventDriven::EventDriven(SimulationXML* strxml, Model *newModel): Simulation(str
   if (simulationxml->hasOneStepNSProblemXML()) // ie if OSNSList is not empty
   {
     SetOfOSNSPBXML OSNSList = simulationxml->getOneStepNSProblemsXML();
-    OneStepNSProblemXML* osnsXML = NULL;
+    OneStepNSProblemXMLSPtr osnsXML;
     string type;
     // For EventDriven, two OSNSPb are required, "acceleration" and "impact"
 
@@ -57,8 +57,7 @@ EventDriven::EventDriven(SimulationXML* strxml, Model *newModel): Simulation(str
       type = osnsXML->getNSProblemType();
       if (type == LCP_TAG)  // LCP
       {
-        (*allNSProblems)[id] = new LCP(osnsXML, this);
-        isNSProblemAllocatedIn[(*allNSProblems)[id] ] = true;
+        (*allNSProblems)[id].reset(new LCP(osnsXML, shared_from_this()));
       }
       else
         RuntimeException::selfThrow("EventDriven::xml constructor - wrong type of NSProblem: inexistant or not yet implemented");
@@ -89,8 +88,8 @@ void EventDriven::updateIndexSet(unsigned int i)
     // Warning! work only if there is only one osi in the simulation.
     if (allOSI->size() > 1)
       RuntimeException::selfThrow("EventDriven::updateIndexSet(i), not yet implemented for several OneStepIntegrators in the same Simulation process.");
-    Lsodar * lsodar = static_cast<Lsodar*>(*(allOSI->begin()));
-    integer * jroot = lsodar->getJroot();
+    SP::Lsodar lsodar = boost::static_pointer_cast<Lsodar>(*(allOSI->begin()));
+    SA::integer jroot = lsodar->getJroot();
     unsigned int nsLawSize; // size of each UR, which corresponds to the related nsLaw size
     unsigned int absolutePosition = 0; // global position of the UR in the vector of constraints, ie in jroot.
     bool out = true;
@@ -226,7 +225,7 @@ void EventDriven::initLevelMax()
     levelMax++;
 }
 
-void EventDriven::computeF(OneStepIntegrator* osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
+void EventDriven::computeF(SP::OneStepIntegrator osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
 {
 
   // computeF is supposed to fill xdot in, using the definition of the dynamical systems belonging to the osi
@@ -235,7 +234,7 @@ void EventDriven::computeF(OneStepIntegrator* osi, integer * sizeOfX, doublereal
   if (osi->getType() != "Lsodar")
     RuntimeException::selfThrow("EventDriven::computeF(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
 
-  Lsodar * lsodar = static_cast<Lsodar*>(osi);
+  SP::Lsodar lsodar = boost::static_pointer_cast<Lsodar>(osi);
 
   // fill in xWork vector (ie all the x of the ds of this osi) with x
   lsodar->fillXWork(sizeOfX, x);
@@ -261,7 +260,7 @@ void EventDriven::computeF(OneStepIntegrator* osi, integer * sizeOfX, doublereal
   // Update Index sets?
 
   // Get the required value, ie xdot for output.
-  SiconosVector * xtmp2; // The Right-Hand side
+  SiconosVectorSPtr xtmp2; // The Right-Hand side
   DSIterator it;
   unsigned int i = 0;
   for (it = lsodar->dynamicalSystemsBegin(); it != lsodar->dynamicalSystemsEnd(); ++it)
@@ -270,15 +269,18 @@ void EventDriven::computeF(OneStepIntegrator* osi, integer * sizeOfX, doublereal
     for (unsigned int j = 0 ; j < (*it)->getN() ; ++j) // Warning: getN, not getDim !!!!
       xdot[i++] = (*xtmp2)(j);
   }
+
+#ifndef WithSmartPtr
   xtmp2 = NULL;
+#endif
 }
 
-void EventDriven::computeJacobianF(OneStepIntegrator* osi, integer *sizeOfX, doublereal *time, doublereal *x,  doublereal *jacob)
+void EventDriven::computeJacobianF(SP::OneStepIntegrator osi, integer *sizeOfX, doublereal *time, doublereal *x,  doublereal *jacob)
 {
   if (osi->getType() != "Lsodar")
     RuntimeException::selfThrow("EventDriven::computeF(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
 
-  Lsodar * lsodar = static_cast<Lsodar*>(osi);
+  SP::Lsodar lsodar = boost::static_pointer_cast<Lsodar>(osi);
 
   //   // Remark A: according to DLSODAR doc, each call to jacobian is preceded by a call to f with the same
   //   // arguments NEQ, T, and Y.  Thus to gain some efficiency, intermediate quantities shared by both calculations may be
@@ -297,7 +299,7 @@ void EventDriven::computeJacobianF(OneStepIntegrator* osi, integer *sizeOfX, dou
   unsigned int i = 0;
   for (it = lsodar->dynamicalSystemsBegin(); it != lsodar->dynamicalSystemsEnd(); ++it)
   {
-    SiconosMatrix * jacotmp = (*it)->getJacobianXRhsPtr(); // Pointer link !
+    SiconosMatrixSPtr jacotmp = (*it)->getJacobianXRhsPtr(); // Pointer link !
     for (unsigned int j = 0 ; j < (*it)->getN() ; ++j)
     {
       for (unsigned k = 0 ; k < (*it)->getDim() ; ++k)
@@ -306,13 +308,14 @@ void EventDriven::computeJacobianF(OneStepIntegrator* osi, integer *sizeOfX, dou
   }
 }
 
-void EventDriven::computeG(OneStepIntegrator* osi, integer * sizeOfX, doublereal* time, doublereal* x, integer * ng, doublereal * gOut)
+void EventDriven::computeG(SP::OneStepIntegrator osi, integer * sizeOfX, doublereal* time, doublereal* x, integer * ng, doublereal * gOut)
 {
   UnitaryRelationsIterator itUR;
   unsigned int nsLawSize, k = 0 ;
-  SiconosVector * y = NULL, * lambda = NULL;
 
-  Lsodar * lsodar = static_cast<Lsodar*>(osi);
+  SP::SiconosVector y, lambda;
+
+  SP::Lsodar lsodar = boost::static_pointer_cast<Lsodar>(osi);
 
   // fill in xWork vector (ie all the x of the ds of this osi) with x
   lsodar->fillXWork(sizeOfX, x); // That may be not necessary? Check if computeF is called for each computeG.
@@ -417,9 +420,9 @@ void EventDriven::advanceToEvent()
     }
     if (printStat)
     {
-      Lsodar * lsodar = static_cast<Lsodar*>(*it);
+      SP::Lsodar lsodar = boost::static_pointer_cast<Lsodar>(*it);
       statOut << "Results at time " << tout << ":" << endl;
-      integer * iwork = lsodar->getIwork();
+      SA::integer iwork = lsodar->getIwork();
       statOut << "Number of steps: " << iwork[10] << ", number of f evaluations: " << iwork[11] << ", number of jacobianF eval.: " << iwork[12] << "." << endl;
 
     }

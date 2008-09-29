@@ -65,8 +65,8 @@
  *  IndexSets from simulation are used to know which constraints (UnitaryRelation) are active or not. \n
  *
  * \b Construction:
- *   - XML reading (inputs = xml node with tag "OneStepNSProblem" and a Simulation*)
- *   - Constructor from data (inputs = Simulations*, id, NonSmoothSolver*) - The solver is optional.
+ *   - XML reading (inputs = xml node with tag "OneStepNSProblem" and a SP::Simulation)
+ *   - Constructor from data (inputs = Simulations*, id, SP::NonSmoothSolver) - The solver is optional.
  * Main functions:
  *
  * \b Main functions:
@@ -88,12 +88,12 @@ private:
 public:
 
   /** constructor from data
-  *  \param Simulation *: the simulation that owns this problem
+  *  \param SP::Simulation: the simulation that owns this problem
   *  \param Solver* pointer to object that contains solver algorithm and formulation \n
   *  (optional, default = NULL => read .opt file in Numerics)
   *  \param String: id of the problem (default = "unamed")
   */
-  MLCP2(Simulation*, NonSmoothSolver* = NULL, const std::string& = "unamed_mlcp");
+  MLCP2(SP::Simulation, SP::NonSmoothSolver = SP::NonSmoothSolver(), const std::string& = "unamed_mlcp");
 
   /** destructor
   */
@@ -114,10 +114,10 @@ public:
   *  \return void
   */
   virtual void preCompute(double);
-  virtual void computeUnitaryBlock(UnitaryRelation*, UnitaryRelation*);
-  virtual void computeDSBlock(DynamicalSystem*);
-  virtual void computeUnitaryDSBlock(UnitaryRelation* , DynamicalSystem*);
-  virtual void computeDSUnitaryBlock(DynamicalSystem*, UnitaryRelation*);
+  virtual void computeUnitaryBlock(SP::UnitaryRelation, SP::UnitaryRelation);
+  virtual void computeDSBlock(SP::DynamicalSystem);
+  virtual void computeUnitaryDSBlock(SP::UnitaryRelation , SP::DynamicalSystem);
+  virtual void computeDSUnitaryBlock(SP::DynamicalSystem, SP::UnitaryRelation);
   virtual void updateM();
   /** Compute the unknown z and w and update the Interaction (y and lambda )
   *  \param double : current time

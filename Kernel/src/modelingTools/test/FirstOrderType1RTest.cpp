@@ -103,9 +103,8 @@ void FirstOrderType1RTest::testBuildFirstOrderType1R3()
 
   // look for NSDS, Interaction and relation node
   xmlNode* nodetmp = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
-  NonSmoothDynamicalSystemXML * nsdsxml = new NonSmoothDynamicalSystemXML(nodetmp);
-  nsds = new NonSmoothDynamicalSystem(nsdsxml);
-  delete nsdsxml;
+  SP::NonSmoothDynamicalSystemXML nsdsxml(new NonSmoothDynamicalSystemXML(nodetmp));
+  nsds.reset(new NonSmoothDynamicalSystem(nsdsxml));
 
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Definition");
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction");

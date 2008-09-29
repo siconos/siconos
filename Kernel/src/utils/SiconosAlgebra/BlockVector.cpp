@@ -17,66 +17,113 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-#include "BlockVector.h"
-#include "SimpleVector.h"
 #include <boost/numeric/ublas/vector_proxy.hpp>  // for project
 #include <vector>
+
+#include "BlockVector.h"
+#include "SimpleVector.h"
+
 
 // =================================================
 //                CONSTRUCTORS
 // =================================================
-BlockVector::BlockVector(): SiconosVector(0), tabIndex(NULL), isBlockAllocatedIn(NULL)
+BlockVector::BlockVector(): SiconosVector(0), tabIndex(NULL)
+#ifndef WithSmartPtr
+  , isBlockAllocatedIn(NULL)
+#endif
 {
   tabIndex = new Index();
+
+#ifndef WithSmartPtr
   isBlockAllocatedIn = new std::vector<bool> ();
+#endif
+
 }
 
-BlockVector::BlockVector(const std::string & file, bool ascii): SiconosVector(0), tabIndex(NULL), isBlockAllocatedIn(NULL)
+BlockVector::BlockVector(const std::string & file, bool ascii): SiconosVector(0), tabIndex(NULL)
+#ifndef WithSmartPtr
+  , isBlockAllocatedIn(NULL)
+#endif
 {
   SiconosVectorException::selfThrow(" BlockVector::constructor from a file : read BlockVector is not implemented");
 }
 
-BlockVector::BlockVector(const BlockVector &v): SiconosVector(0), tabIndex(NULL), isBlockAllocatedIn(NULL)
+BlockVector::BlockVector(const BlockVector &v): SiconosVector(0), tabIndex(NULL)
+#ifndef WithSmartPtr
+  , isBlockAllocatedIn(NULL)
+#endif
 {
   unsigned int nbBlocks = v.getNumberOfBlocks();
   tabIndex = new Index();
   tabIndex->reserve(nbBlocks);
 
+#ifndef WithSmartPtr
   isBlockAllocatedIn = new std::vector<bool> ();
   isBlockAllocatedIn->reserve(nbBlocks);
+#endif
 
   vect.reserve(nbBlocks);
   ConstBlockVectIterator it;
   for (it = v.begin(); it != v.end(); ++it)
   {
+
+#ifndef WithSmartPtr
     if (!(*it)->isBlock())  // Call copy-constructor of SimpleVector
       vect.push_back(new SimpleVector(**it)) ;
     else
       vect.push_back(new BlockVector(**it)) ;
     isBlockAllocatedIn->push_back(true);
+#else
+    if (!(*it)->isBlock())  // Call copy-constructor of SimpleVector
+      vect.push_back(boost::shared_ptr<SimpleVector>(new SimpleVector(**it))) ;
+    else
+      vect.push_back(boost::shared_ptr<BlockVector>(new BlockVector(**it))) ;
+#endif
+
     sizeV += (*it)->size();
     tabIndex->push_back(sizeV);
   }
 }
 
-BlockVector::BlockVector(const SiconosVector &v): SiconosVector(0), tabIndex(NULL), isBlockAllocatedIn(NULL)
+BlockVector::BlockVector(const SiconosVector &v): SiconosVector(0), tabIndex(NULL)
+#ifndef WithSmartPtr
+  , isBlockAllocatedIn(NULL)
+#endif
 {
   unsigned int nbBlocks = v.getNumberOfBlocks();
   tabIndex = new Index();
+
+#ifndef WithSmartPtr
   isBlockAllocatedIn = new std::vector<bool> ();
+#endif
+
   tabIndex->reserve(nbBlocks);
   vect.reserve(nbBlocks);
+
+#ifndef WithSmartPtr
   isBlockAllocatedIn->reserve(nbBlocks);
+#endif
+
   if (v.isBlock())
   {
     ConstBlockVectIterator it;
     for (it = v.begin(); it != v.end(); ++it)
     {
+
+#ifndef WithSmartPtr
       if (!(*it)->isBlock())  // Call copy-constructor of SimpleVector
         vect.push_back(new SimpleVector(**it)) ;
       else
         vect.push_back(new BlockVector(**it)) ;
+
       isBlockAllocatedIn->push_back(true);
+#else
+      if (!(*it)->isBlock())  // Call copy-constructor of SimpleVector
+        vect.push_back(boost::shared_ptr<SimpleVector>(new SimpleVector(**it))) ;
+      else
+        vect.push_back(boost::shared_ptr<BlockVector>(new BlockVector(**it))) ;
+#endif
+
       sizeV += (*it)->size();
       tabIndex->push_back(sizeV);
     }
@@ -84,83 +131,154 @@ BlockVector::BlockVector(const SiconosVector &v): SiconosVector(0), tabIndex(NUL
   else
   {
     // Call copy-constructor of SimpleVector
+#ifndef WithSmartPtr
     vect.push_back(new SimpleVector(v));
     isBlockAllocatedIn->push_back(true);
+#else
+    vect.push_back(boost::shared_ptr<SimpleVector>(new SimpleVector(v)));
+
+#endif
+
     sizeV = v.size();
     tabIndex->push_back(sizeV);
   }
 }
 
-BlockVector::BlockVector(SiconosVector* v1, SiconosVector* v2): SiconosVector(0), tabIndex(NULL), isBlockAllocatedIn(NULL)
+BlockVector::BlockVector(SiconosVectorSPtr v1, SiconosVectorSPtr v2): SiconosVector(0), tabIndex(NULL)
+#ifndef WithSmartPtr
+  , isBlockAllocatedIn(NULL)
+#endif
 {
   // Insert the two vectors in the container
   // NO COPY !!
-  if ((v1 == NULL) && (v2 == NULL))
+  if (! v1  && ! v2)
     SiconosVectorException::selfThrow("BlockVector:constructor(SimpleVector*,SimpleVector*), both vectors are NULL.");
 
   tabIndex = new Index();
+
+#ifndef WithSmartPtr
   isBlockAllocatedIn = new std::vector<bool> ();
+#endif
+
   tabIndex->reserve(2);
   vect.reserve(2);
-  isBlockAllocatedIn->reserve(2);
 
-  if (v1 != NULL)
+#ifndef WithSmartPtr
+  isBlockAllocatedIn->reserve(2);
+#endif
+
+  if (v1)
   {
     vect.push_back(v1);
     sizeV = v1->size();
     tabIndex->push_back(sizeV);
+
+#ifndef WithSmartPtr
     isBlockAllocatedIn->push_back(false);
+#endif
+
   }
   else
     // If first parameter is a NULL pointer, then set this(1) to a SimpleVector of the same size as v2, and equal to 0.
   {
     // This case is usefull to set xDot in LagrangianDS.
     sizeV = v2->size();
+
+#ifndef WithSmartPtr
     vect.push_back(new SimpleVector(sizeV));
+#else
+    vect.push_back(boost::shared_ptr<SimpleVector>(new SimpleVector(sizeV)));
+#endif
+
     tabIndex->push_back(sizeV);
+
+#ifndef WithSmartPtr
     isBlockAllocatedIn->push_back(true);
+#endif
+
   }
-  if (v2 != NULL)
+  if (v2)
   {
     vect.push_back(v2);
     sizeV += v2->size();
     tabIndex->push_back(sizeV);
+
+#ifndef WithSmartPtr
     isBlockAllocatedIn->push_back(false);
+#endif
+
   }
   else // If second parameter is a NULL pointer, then set this(2) to a SimpleVector of the same size as v1, and equal to 0.
   {
     // This case is usefull to set xDot in LagrangianDS.
+
+#ifndef WithSmartPtr
     vect.push_back(new SimpleVector(v1->size()));
+#else
+    vect.push_back(boost::shared_ptr<SimpleVector>(new SimpleVector(v1->size())));
+#endif
+
     sizeV += v1->size();
     tabIndex->push_back(sizeV);
+
+#ifndef WithSmartPtr
     isBlockAllocatedIn->push_back(true);
+#endif
+
   }
 }
 
-BlockVector::BlockVector(unsigned int numberOfBlocks, unsigned int dim): SiconosVector(0), tabIndex(NULL), isBlockAllocatedIn(NULL)
+BlockVector::BlockVector(unsigned int numberOfBlocks, unsigned int dim): SiconosVector(0), tabIndex(NULL)
+#ifndef WithSmartPtr
+  , isBlockAllocatedIn(NULL)
+#endif
 {
   tabIndex = new Index();
+
+#ifndef WithSmartPtr
   isBlockAllocatedIn = new std::vector<bool> ();
+#endif
+
   tabIndex->reserve(numberOfBlocks);
   vect.reserve(numberOfBlocks);
+
+#ifndef WithSmartPtr
   isBlockAllocatedIn->reserve(numberOfBlocks);
+#endif
+
   for (unsigned int i = 0; i < numberOfBlocks; ++i)
   {
+#ifndef WithSmartPtr
     vect.push_back(new SimpleVector(dim));
+#else
+    vect.push_back(boost::shared_ptr<SimpleVector>(new SimpleVector(dim)));
+#endif
+
     tabIndex->push_back(dim * (i + 1));
+
+#ifndef WithSmartPtr
     isBlockAllocatedIn->push_back(true);
+#endif
+
   }
   sizeV = dim * numberOfBlocks;
 }
 
 BlockVector::~BlockVector()
 {
+
+#ifndef WithSmartPtr
   purge(vect, *isBlockAllocatedIn);
+#endif
 
   tabIndex->clear();
   delete tabIndex;
+
+#ifndef WithSmartPtr
   isBlockAllocatedIn->clear();
   delete isBlockAllocatedIn;
+#endif
+
 }
 
 // =================================================
@@ -218,7 +336,7 @@ void BlockVector::fill(double value)
 {
   BlockVectIterator it;
   for (it = vect.begin(); it != vect.end(); ++it)
-    if ((*it) != NULL)(*it)->fill(value);
+    if ((*it))(*it)->fill(value);
 }
 
 //=======================
@@ -252,7 +370,7 @@ const double BlockVector::norm2() const
   ConstBlockVectIterator it;
   for (it = vect.begin(); it != vect.end(); ++it)
   {
-    if ((*it) != NULL)
+    if ((*it))
       d += pow((*it)->norm2(), 2);
 
     else
@@ -353,7 +471,7 @@ const double BlockVector::operator()(unsigned int pos) const
 SimpleVector BlockVector::getVector(unsigned int pos) const
 {
 
-  if (vect[pos] == NULL)
+  if (! vect[pos])
     SiconosVectorException::selfThrow("BlockVector::getVector(pos), vector[pos] == NULL pointer.");
 
   if (vect[pos]->isBlock())
@@ -364,7 +482,7 @@ SimpleVector BlockVector::getVector(unsigned int pos) const
 
 void BlockVector::setVector(unsigned int pos, const SiconosVector& newV)
 {
-  if (vect[pos] == NULL)
+  if (! vect[pos])
     SiconosVectorException::selfThrow("BlockVector::setVector(pos,v), this[pos] == NULL pointer.");
 
   if (newV.size() != (vect[pos])->size())
@@ -373,22 +491,29 @@ void BlockVector::setVector(unsigned int pos, const SiconosVector& newV)
   *vect[pos] = newV ;
 }
 
-void BlockVector::setVectorPtr(unsigned int pos, SiconosVector* newV)
+void BlockVector::setVectorPtr(unsigned int pos, SiconosVectorSPtr newV)
 {
   if (newV->size() != (vect[pos])->size())
     SiconosVectorException::selfThrow("BlockVector::setVectorPtr(pos,v), this[pos] and v have unconsistent sizes.");
 
+#ifndef WithSmartPtr
   if ((*isBlockAllocatedIn)[pos]) delete vect[pos];
-  vect[pos] = newV;
   (*isBlockAllocatedIn)[pos] = false;
+#endif
+
+  vect[pos] = newV;
 }
 
-SiconosVector* BlockVector::operator [](unsigned int pos)
+SiconosVectorSPtr BlockVector::operator [](unsigned int pos)
 {
   return  vect[pos];
 }
 
-const SiconosVector* BlockVector::operator [](unsigned int pos) const
+#ifndef WithSmartPtr
+const SiconosVector * BlockVector::operator [](unsigned int pos) const
+#else
+SiconosVectorSPtrConst BlockVector::operator [](unsigned int pos) const
+#endif
 {
   return  vect[pos];
 }
@@ -419,8 +544,11 @@ void BlockVector::addSimple(unsigned int& index, const SiconosVector& vIn)
   for (it = vect.begin(); it != vect.end(); ++it)
   {
     if ((*it)->isBlock())
+#ifndef WithSmartPtr
       (static_cast<BlockVector*>(*it))->addSimple(index, vIn);
-
+#else
+      (boost::static_pointer_cast<BlockVector>(*it))->addSimple(index, vIn);
+#endif
     else // the current block is a SimpleVector
     {
       currentSize = (*it)->size();
@@ -452,7 +580,11 @@ void BlockVector::subSimple(unsigned int& index, const SiconosVector& vIn)
   for (it = vect.begin(); it != vect.end(); ++it)
   {
     if ((*it)->isBlock())
+#ifndef WithSmartPtr
       (static_cast<BlockVector*>(*it))->subSimple(index, vIn);
+#else
+      (boost::static_pointer_cast<BlockVector>(*it))->subSimple(index, vIn);
+#endif
 
     else // the current block is a SimpleVector
     {
@@ -471,7 +603,6 @@ void BlockVector::subSimple(unsigned int& index, const SiconosVector& vIn)
 //===============
 //  Assignment
 //===============
-
 BlockVector& BlockVector::operator = (const SiconosVector& vIn)
 {
   if (&vIn == this) return *this;
@@ -507,7 +638,11 @@ BlockVector& BlockVector::operator = (const SiconosVector& vIn)
   }
   else // if vIn is a SimpleVector
   {
+#ifndef WithSmartPtr
     setBlock(&vIn, this, sizeV, 0, 0);
+#else
+    setBlock(boost::shared_ptr<const SiconosVector>(&vIn), shared_from_this(), sizeV, 0, 0);
+#endif
     //       unsigned int pos = 0;
     //       BlockVectIterator it1;
     //       for(it1=vect.begin(); it1!=vect.end();++it1)
@@ -657,22 +792,34 @@ void BlockVector::insert(const  SiconosVector& v)
 {
   sizeV += v.size();
 
+#ifndef WithSmartPtr
   if (!v.isBlock())
     vect.push_back(new SimpleVector(v)); // Copy
   else
     vect.push_back(new BlockVector(v)); // Copy
 
   isBlockAllocatedIn->push_back(true);
+#else
+  if (!v.isBlock())
+    vect.push_back(boost::shared_ptr<SiconosVector>(new SimpleVector(v))); // Copy
+  else
+    vect.push_back(boost::shared_ptr<BlockVector>(new BlockVector(v))); // Copy
+#endif
+
   tabIndex->push_back(sizeV);
 }
 
-void BlockVector::insertPtr(SiconosVector* v)
+void BlockVector::insertPtr(SiconosVectorSPtr v)
 {
-  if (v == NULL)
+  if (!v)
     SiconosVectorException::selfThrow("BlockVector:insertPtr(v), v is a NULL vector.");
 
   sizeV += v->size();
   vect.push_back(v);
+
+#ifndef WithSmartPtr
   isBlockAllocatedIn->push_back(false);
+#endif
+
   tabIndex->push_back(sizeV);
 }

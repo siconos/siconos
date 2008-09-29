@@ -29,19 +29,19 @@ NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(unsigned int newSize):
   NonSmoothLaw(NEWTONIMPACTFRICTIONNSLAW, newSize), en(0.0), et(0.0), mu(0.0)
 {}
 
-NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(NonSmoothLawXML* nslawxml):
+NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(NonSmoothLawXMLSPtr nslawxml):
   NonSmoothLaw(NEWTONIMPACTFRICTIONNSLAW, nslawxml), en(0.0), et(0.0), mu(0.0)
 {
-  if (!nslawxml->hasSize()) // size is a required input for Friction
-    RuntimeException::selfThrow("NewtonImpactFrictionNSL:: xml constructor, size is a required xml input.");
+  assert((nslawxml->hasSize()) && // size is a required input for Friction
+         "NewtonImpactFrictionNSL:: xml constructor, size is a required xml input.");
 
-  if (size != 2 && size != 3)
-    RuntimeException::selfThrow("NewtonImpactFrictionNSL:: xml constructor, wrong size value = " + size);
+  assert((size == 2 || size == 3) &&
+         "NewtonImpactFrictionNSL:: xml constructor, wrong size value = " + size);
 
-  en = (static_cast<NewtonImpactFrictionNSLXML*>(nslawxml))->getEn();
-  if ((static_cast<NewtonImpactFrictionNSLXML*>(nslawxml))->hasEt())
-    et = (static_cast<NewtonImpactFrictionNSLXML*>(nslawxml))->getEt();
-  mu = (static_cast<NewtonImpactFrictionNSLXML*>(nslawxml))->getMu();
+  en = (boost::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml))->getEn();
+  if ((boost::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml))->hasEt())
+    et = (boost::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml))->getEt();
+  mu = (boost::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml))->getMu();
 }
 
 NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(double newEn, double newEt, double newMu, unsigned int newSize):
@@ -70,9 +70,9 @@ void NewtonImpactFrictionNSL::display() const
 
 void NewtonImpactFrictionNSL::saveNonSmoothLawToXML()
 {
-  static_cast<NewtonImpactFrictionNSLXML*>(nslawxml)->setEn(en);
-  static_cast<NewtonImpactFrictionNSLXML*>(nslawxml)->setEt(et);
-  static_cast<NewtonImpactFrictionNSLXML*>(nslawxml)->setMu(mu);
+  boost::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml)->setEn(en);
+  boost::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml)->setEt(et);
+  boost::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml)->setMu(mu);
 }
 
 NewtonImpactFrictionNSL* NewtonImpactFrictionNSL::convert(NonSmoothLaw* nsl)

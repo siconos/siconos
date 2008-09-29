@@ -61,7 +61,7 @@ class LagrangianRheonomousR : public LagrangianR
 protected:
 
   /** derivative of h according to time */
-  SiconosVector * hDot;
+  SiconosVectorSPtr hDot;
 
   /** LagrangianRheonomousR plug-in to compute h(q,t,z)
    * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
@@ -106,7 +106,7 @@ public:
    *  \param relationXML
    *  \exception RuntimeException
    */
-  LagrangianRheonomousR(RelationXML*);
+  LagrangianRheonomousR(RelationXMLSPtr);
 
   /** constructor from a set of data
    *  \param string : the name of the plugin to compute h
@@ -134,7 +134,7 @@ public:
   /** get a pointer on vector hDot
    *  \return a pointer on a SiconosVector.
    */
-  inline SiconosVector* getHDotPtr() const
+  inline SiconosVectorSPtr getHDotPtr() const
   {
     return hDot;
   }
@@ -145,9 +145,9 @@ public:
   void setHDot(const SiconosVector&);
 
   /** set hDot to pointer newPtr (pointer link)
-   *  \param  SiconosVector* newPtr
+   *  \param  SP::SiconosVector newPtr
    */
-  void setHDotPtr(SiconosVector *newPtr);
+  void setHDotPtr(SiconosVectorSPtr newPtr);
 
   /** to set a specified function to compute function h(q,...)
    *  \param string : the complete path to the plugin

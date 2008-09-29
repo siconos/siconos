@@ -30,7 +30,7 @@ DiskDiskR::DiskDiskR(double r, double rr) : LagrangianScleronomousR()
 void DiskDiskR::computeH(double)
 {
 
-  SiconosVector *y = interaction->getYPtr(0);
+  SP::SiconosVector y = interaction->getYPtr(0);
 
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
   *workX = *data["q0"];

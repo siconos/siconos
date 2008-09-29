@@ -29,15 +29,17 @@
 #ifndef SiconosAlgebra
 #define SiconosAlgebra
 
-#include "SiconosConst.h"
-#include "Tools.h"
-#include <deque>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/numeric/ublas/triangular.hpp>
 #include <boost/numeric/ublas/symmetric.hpp>
 #include <boost/numeric/ublas/banded.hpp>
 #include <boost/numeric/bindings/atlas/cblas_enum.hpp>
+
+#include "SiconosPointers.h"
+#include "SiconosConst.h"
+#include "Tools.h"
+#include <deque>
 
 namespace ublas = boost::numeric::ublas;
 namespace atlas = boost::numeric::bindings::atlas;
@@ -114,7 +116,7 @@ enum UBLAS_TYPE {DENSE = 1, TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO, IDENTIT
 
 class SiconosMatrix;
 /** A collection of pointers to matrices ; blocksMat is a typedef of boost::ublas::numeric::mapped_matrix<SiconosMatrix* > */
-typedef ublas::compressed_matrix<SiconosMatrix*> BlocksMat;
+typedef ublas::compressed_matrix<SP::SiconosMatrix> BlocksMat;
 
 /**  iterator for BlocksMat*/
 typedef BlocksMat::iterator1 BlockIterator1;
@@ -127,20 +129,20 @@ typedef BlocksMat::const_iterator2 ConstBlockIterator2;
 
 class SiconosVector;
 /** A collection of pointers to vectors;  blocksVect is a typedef of boost::ublas::numeric::mapped_matrix<SiconosMatrix* > */
-typedef std::vector<SiconosVector*> BlocksVect;
+typedef std::vector<SiconosVectorSPtr> BlocksVect;
 /** iterators for BlocksVect*/
 typedef BlocksVect::iterator BlockVectIterator;
 /** Const iterators for BlocksVect*/
 typedef BlocksVect::const_iterator ConstBlockVectIterator;
 
 /** Some containers for vectors - Used for example to handle x and its derivatives in DynamicalSystem. */
-typedef std::vector<SiconosVector*> VectorOfVectors;
+typedef std::vector<SiconosVectorSPtr> VectorOfVectors;
 
 /** Iterator through vector of vectors */
 typedef VectorOfVectors::iterator VectorOfVectorsIterator;
 
 /** Some containers for matrices - Used for example to handle the various jacobian in LagrangianDS. */
-typedef std::vector<SiconosMatrix*> VectorOfMatrices;
+typedef std::vector<SiconosMatrixSPtr> VectorOfMatrices;
 
 /** Iterator through vector of matrices */
 typedef VectorOfMatrices::iterator VectorOfMatricesIterator;
@@ -149,12 +151,14 @@ typedef VectorOfMatrices::iterator VectorOfMatricesIterator;
 typedef VectorOfMatrices::const_iterator VectorOfMatricesConstIterator;
 
 /** A map that links a string to a pointer to SiconosVector. */
-typedef std::map<std::string, SiconosVector*> VectorMap;
+typedef std::map<std::string, SP::SiconosVector> VectorMap;
 
 /** An iterator through a map that links a string to a pointer to SiconosVector. */
 typedef VectorMap::iterator VectorMapIterator;
 
 /** A const iterator through a map that links a string to a pointer to SiconosVector. */
 typedef VectorMap::const_iterator VectorMapConstIterator;
+
+TYPEDEF_SPTR(BlocksMat);
 
 #endif

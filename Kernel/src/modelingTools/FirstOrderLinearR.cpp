@@ -22,15 +22,6 @@
 
 using namespace std;
 
-void FirstOrderLinearR::initAllocationFlags(bool in)
-{
-  isAllocatedIn["C"] = in;
-  isAllocatedIn["D"] = in;
-  isAllocatedIn["F"] = in;
-  isAllocatedIn["e"] = in;
-  isAllocatedIn["B"] = in;
-}
-
 void FirstOrderLinearR::initPluginFlags(bool in)
 {
   isPlugged["C"] = in;
@@ -41,22 +32,19 @@ void FirstOrderLinearR::initPluginFlags(bool in)
 }
 
 // Default (private) constructor
-FirstOrderLinearR::FirstOrderLinearR(): FirstOrderR(LinearR), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL),
-  CPtr(NULL), DPtr(NULL), FPtr(NULL), ePtr(NULL), BPtr(NULL)
+FirstOrderLinearR::FirstOrderLinearR(): FirstOrderR(LinearR)
 {
   initPluginFlags(false);
-  initAllocationFlags(false);
 }
 
+
 // xml constructor
-FirstOrderLinearR::FirstOrderLinearR(RelationXML* relxml):
-  FirstOrderR(relxml, LinearR), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL),
-  CPtr(NULL), DPtr(NULL), FPtr(NULL), ePtr(NULL), BPtr(NULL)
+FirstOrderLinearR::FirstOrderLinearR(RelationXMLSPtr relxml):
+  FirstOrderR(relxml, LinearR)
 {
-  FirstOrderLinearRXML * folrXML = static_cast<FirstOrderLinearRXML *>(relationxml);
+  FirstOrderLinearRXMLSPtr folrXML = boost::static_pointer_cast<FirstOrderLinearRXML>(relationxml);
   // get matrices values. All are optional.
 
-  initAllocationFlags(false);
   initPluginFlags(false);
 
   if (folrXML->hasH())
@@ -72,8 +60,14 @@ FirstOrderLinearR::FirstOrderLinearR(RelationXML* relxml):
     }
     else
     {
+
+#ifndef WithSmartPtr
       C = new SimpleMatrix(folrXML->getC());
       isAllocatedIn["C"] = true;
+#else
+      C.reset(new SimpleMatrix(folrXML->getC()));
+#endif
+
     }
   }
 
@@ -86,8 +80,13 @@ FirstOrderLinearR::FirstOrderLinearR(RelationXML* relxml):
     }
     else
     {
+
+#ifndef WithSmartPtr
       D = new SimpleMatrix(folrXML->getD());
       isAllocatedIn["D"] = true;
+#else
+      D.reset(new SimpleMatrix(folrXML->getD()));
+#endif
     }
   }
 
@@ -100,8 +99,14 @@ FirstOrderLinearR::FirstOrderLinearR(RelationXML* relxml):
     }
     else
     {
+
+#ifndef WithSmartPtr
       F = new SimpleMatrix(folrXML->getF());
       isAllocatedIn["F"] = true;
+#else
+      F.reset(new SimpleMatrix(folrXML->getF()));
+#endif
+
     }
   }
 
@@ -114,8 +119,14 @@ FirstOrderLinearR::FirstOrderLinearR(RelationXML* relxml):
     }
     else
     {
+
+#ifndef WithSmartPtr
       e = new SimpleVector(folrXML->getE());
       isAllocatedIn["e"] = true;
+#else
+      e.reset(new SimpleVector(folrXML->getE()));
+#endif
+
     }
   }
 
@@ -131,40 +142,42 @@ FirstOrderLinearR::FirstOrderLinearR(RelationXML* relxml):
     }
     else
     {
+
+#ifndef WithSmartPtr
       B = new SimpleMatrix(folrXML->getB());
       isAllocatedIn["B"] = true;
+#else
+      B.reset(new SimpleMatrix(folrXML->getB()));
+#endif
     }
   }
 }
 
 // Constructor with C and B plug-in names
 FirstOrderLinearR::FirstOrderLinearR(const string& CName, const string& BName):
-  FirstOrderR(LinearR), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL),
-  CPtr(NULL), DPtr(NULL), FPtr(NULL), ePtr(NULL), BPtr(NULL)
+  FirstOrderR(LinearR)
 {
   initPluginFlags(false);
-  initAllocationFlags(false);
+
   setComputeCFunction(cShared.getPluginName(CName), cShared.getPluginFunctionName(CName));
   setComputeBFunction(cShared.getPluginName(BName), cShared.getPluginFunctionName(BName));
 }
 
 // Constructor with e plug-in name
 FirstOrderLinearR::FirstOrderLinearR(const string& EName):
-  FirstOrderR(LinearR), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL),
-  CPtr(NULL), DPtr(NULL), FPtr(NULL), ePtr(NULL), BPtr(NULL)
+  FirstOrderR(LinearR)
 {
   initPluginFlags(false);
-  initAllocationFlags(false);
+
   setComputeEFunction(cShared.getPluginName(EName), cShared.getPluginFunctionName(EName));
 }
 
 // Constructor from a complete set of data (plugin)
 FirstOrderLinearR::FirstOrderLinearR(const string& CName, const string& DName, const string& FName, const string& EName, const string& BName):
-  FirstOrderR(LinearR), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL),
-  CPtr(NULL), DPtr(NULL), FPtr(NULL), ePtr(NULL), BPtr(NULL)
+  FirstOrderR(LinearR)
 {
   initPluginFlags(true);
-  initAllocationFlags(false);
+
   setComputeCFunction(cShared.getPluginName(CName), cShared.getPluginFunctionName(CName));
   setComputeDFunction(cShared.getPluginName(DName), cShared.getPluginFunctionName(DName));
   setComputeFFunction(cShared.getPluginName(FName), cShared.getPluginFunctionName(FName));
@@ -173,35 +186,31 @@ FirstOrderLinearR::FirstOrderLinearR(const string& CName, const string& DName, c
 }
 
 // Minimum data (C, B as pointers) constructor
-FirstOrderLinearR::FirstOrderLinearR(SiconosMatrix * newC, SiconosMatrix * newB):
-  FirstOrderR(LinearR), C(newC), D(NULL), F(NULL), e(NULL), B(newB),
-  CPtr(NULL), DPtr(NULL), FPtr(NULL), ePtr(NULL), BPtr(NULL)
+FirstOrderLinearR::FirstOrderLinearR(SiconosMatrixSPtr newC, SiconosMatrixSPtr newB):
+  FirstOrderR(LinearR)
 {
   initPluginFlags(false);
-  initAllocationFlags(false);
+
+  C = newC;
+
 }
 
 // Constructor from a complete set of data
-FirstOrderLinearR::FirstOrderLinearR(SiconosMatrix* newC, SiconosMatrix* newD, SiconosMatrix* newF, SiconosVector* newE, SiconosMatrix* newB):
-  FirstOrderR(LinearR), C(newC), D(newD), F(newF), e(newE), B(newB),
-  CPtr(NULL), DPtr(NULL), FPtr(NULL), ePtr(NULL), BPtr(NULL)
+FirstOrderLinearR::FirstOrderLinearR(SiconosMatrixSPtr newC, SiconosMatrixSPtr newD, SiconosMatrixSPtr newF, SiconosVectorSPtr newE, SiconosMatrixSPtr newB):
+  FirstOrderR(LinearR)
 {
   initPluginFlags(false);
-  initAllocationFlags(false);
+
+  C = newC;
+  D = newD;
+  F = newF;
+  e = newE;
+  B = newB;
 }
 
 FirstOrderLinearR::~FirstOrderLinearR()
 {
-  if (isAllocatedIn["C"]) delete C;
-  C = NULL;
-  if (isAllocatedIn["D"]) delete D;
-  D = NULL;
-  if (isAllocatedIn["F"]) delete F;
-  F = NULL;
-  if (isAllocatedIn["e"]) delete e;
-  e = NULL;
-  if (isAllocatedIn["B"]) delete B;
-  B = NULL;
+
   CPtr = NULL;
   DPtr = NULL;
   FPtr = NULL;
@@ -226,30 +235,31 @@ void FirstOrderLinearR::initialize()
   unsigned int sizeX = interaction->getSizeOfDS();
   unsigned int sizeZ = interaction->getSizeZ();
 
-  if (C != NULL)
+  if (C)
   {
     if (C->size(0) != sizeY || C->size(1) != sizeX)
       RuntimeException::selfThrow("FirstOrderLinearR::initialize , inconsistent size between C and Interaction.");
   }
-  if (B != NULL)
+  if (B)
   {
     if (B->size(0) != sizeX || B->size(1) != sizeY)
       RuntimeException::selfThrow("FirstOrderLinearR::initialize , inconsistent size between C and B.");
   }
 
-  if (D != NULL)
+  if (D)
   {
     if (D->size(0) != sizeY || D->size(1) != sizeY)
       RuntimeException::selfThrow("FirstOrderLinearR::initialize , inconsistent size between C and D.");
   }
 
-  if (F != NULL && (F->size(0) != sizeY))
+  if (F && (F->size(0) != sizeY))
     RuntimeException::selfThrow("FirstOrderLinearR::initialize , inconsistent size between C and F.");
 
-  if (e != NULL && e->size() != sizeY)
+  if (e  && e->size() != sizeY)
     RuntimeException::selfThrow("FirstOrderLinearR::initialize , inconsistent size between C and e.");
 
   // Memory allocation if required (ie if plugged and not allocated: must be done here since in constructors, interaction is not knonw).
+#ifndef WithSmartPtr
   if (C == NULL && isPlugged["C"])
   {
     C = new SimpleMatrix(sizeY, sizeX);
@@ -280,16 +290,48 @@ void FirstOrderLinearR::initialize()
     isAllocatedIn["B"] = true ;
   }
   workZ = new SimpleVector(sizeZ);
+#else
+  if (! C && isPlugged["C"])
+  {
+    C.reset(new SimpleMatrix(sizeY, sizeX));
+  }
+
+  if (! D && isPlugged["D"])
+  {
+    D.reset(new SimpleMatrix(sizeY, sizeY));
+  }
+
+  if (! F && isPlugged["F"])
+  {
+    F.reset(new SimpleMatrix(sizeY, sizeZ));
+  }
+
+  if (! e && isPlugged["e"])
+  {
+    e.reset(new SimpleVector(sizeY));
+  }
+
+  if (! B && isPlugged["B"])
+  {
+    B.reset(new SimpleMatrix(sizeX, sizeY));
+  }
+  workZ.reset(new SimpleVector(sizeZ));
+#endif
 }
 
 // setters
 
 void FirstOrderLinearR::setC(const SiconosMatrix& newValue)
 {
-  if (C == NULL)
+  if (! C)
   {
+#ifndef WithSmartPtr
     C = new SimpleMatrix(newValue);
     isAllocatedIn["C"] = true;
+#else
+    C.reset(new SimpleMatrix(newValue));
+#endif
+
   }
   else
   {
@@ -303,11 +345,15 @@ void FirstOrderLinearR::setC(const SiconosMatrix& newValue)
 
 }
 
-void FirstOrderLinearR::setCPtr(SiconosMatrix *newPtr)
+void FirstOrderLinearR::setCPtr(SiconosMatrixSPtr newPtr)
 {
+
+#ifndef WithSmartPtr
   if (isAllocatedIn["C"]) delete C;
-  C = newPtr;
   isAllocatedIn["C"] = false;
+#endif
+
+  C = newPtr;
   isPlugged["C"] = false;
 }
 
@@ -323,10 +369,16 @@ void FirstOrderLinearR::setComputeCFunction(const string& pluginPath, const stri
 
 void FirstOrderLinearR::setD(const SiconosMatrix& newValue)
 {
-  if (D == NULL)
+  if (! D)
   {
+
+#ifndef WithSmartPtr
     D = new SimpleMatrix(newValue);
     isAllocatedIn["D"] = true;
+#else
+    D.reset(new SimpleMatrix(newValue));
+#endif
+
   }
   else
   {
@@ -338,11 +390,15 @@ void FirstOrderLinearR::setD(const SiconosMatrix& newValue)
   isPlugged["D"] = false;
 }
 
-void FirstOrderLinearR::setDPtr(SiconosMatrix *newPtr)
+void FirstOrderLinearR::setDPtr(SiconosMatrixSPtr newPtr)
 {
+
+#ifndef WithSmartPtr
   if (isAllocatedIn["D"]) delete D;
-  D = newPtr;
   isAllocatedIn["D"] = false;
+#endif
+
+  D = newPtr;
   isPlugged["D"] = false;
 }
 
@@ -358,10 +414,16 @@ void FirstOrderLinearR::setComputeDFunction(const string& pluginPath, const stri
 
 void FirstOrderLinearR::setF(const SiconosMatrix& newValue)
 {
-  if (F == NULL)
+  if (! F)
   {
+
+#ifndef WithSmartPtr
     F = new SimpleMatrix(newValue);
     isAllocatedIn["F"] = true;
+#else
+    F.reset(new SimpleMatrix(newValue));
+#endif
+
   }
   else
   {
@@ -373,11 +435,15 @@ void FirstOrderLinearR::setF(const SiconosMatrix& newValue)
   isPlugged["F"] = false;
 }
 
-void FirstOrderLinearR::setFPtr(SiconosMatrix *newPtr)
+void FirstOrderLinearR::setFPtr(SiconosMatrixSPtr newPtr)
 {
+
+#ifndef WithSmartPtr
   if (isAllocatedIn["F"]) delete F;
-  F = newPtr;
   isAllocatedIn["F"] = false;
+#endif
+
+  F = newPtr;
   isPlugged["F"] = false;
 }
 
@@ -393,10 +459,16 @@ void FirstOrderLinearR::setComputeFFunction(const string& pluginPath, const stri
 
 void FirstOrderLinearR::setE(const SiconosVector& newValue)
 {
-  if (e == NULL)
+  if (! e)
   {
+
+#ifndef WithSmartPtr
     e = new SimpleVector(newValue);
     isAllocatedIn["e"] = true;
+#else
+    e.reset(new SimpleVector(newValue));
+#endif
+
   }
   else
   {
@@ -408,11 +480,15 @@ void FirstOrderLinearR::setE(const SiconosVector& newValue)
   isPlugged["e"] = false;
 }
 
-void FirstOrderLinearR::setEPtr(SiconosVector* newPtr)
+void FirstOrderLinearR::setEPtr(SiconosVectorSPtr newPtr)
 {
+
+#ifndef WithSmartPtr
   if (isAllocatedIn["e"]) delete e;
-  e = newPtr;
   isAllocatedIn["e"] = false;
+#endif
+
+  e = newPtr;
   isPlugged["e"] = false;
 }
 void FirstOrderLinearR::setComputeEFunction(FOVecPtr ptrFunct)
@@ -433,10 +509,16 @@ void FirstOrderLinearR::setComputeEFunction(const string& pluginPath, const stri
 
 void FirstOrderLinearR::setB(const SiconosMatrix& newValue)
 {
-  if (B == NULL)
+  if (! B)
   {
+
+#ifndef WithSmartPtr
     B = new SimpleMatrix(newValue);
     isAllocatedIn["B"] = true;
+#else
+    B.reset(new SimpleMatrix(newValue));
+#endif
+
   }
   else
   {
@@ -448,11 +530,15 @@ void FirstOrderLinearR::setB(const SiconosMatrix& newValue)
   isPlugged["B"] = false;
 }
 
-void FirstOrderLinearR::setBPtr(SiconosMatrix *newPtr)
+void FirstOrderLinearR::setBPtr(SiconosMatrixSPtr newPtr)
 {
+
+#ifndef WithSmartPtr
   if (isAllocatedIn["B"]) delete B;
-  B = newPtr;
   isAllocatedIn["B"] = false;
+#endif
+
+  B = newPtr;
   isPlugged["B"] = false;
 }
 
@@ -482,22 +568,22 @@ void FirstOrderLinearR::computeOutput(double time, unsigned int)
   // y[0]
 
   // We get y and lambda of the interaction (pointers)
-  SiconosVector *y = interaction->getYPtr(0);
-  SiconosVector *lambda = interaction->getLambdaPtr(0);
+  SiconosVectorSPtr y = interaction->getYPtr(0);
+  SiconosVectorSPtr lambda = interaction->getLambdaPtr(0);
 
   // compute y
-  if (C != NULL)
+  if (C)
     prod(*C, *data["x"], *y);
   else
     y->zero();
 
-  if (D != NULL)
+  if (D)
     prod(*D, *lambda, *y, false);
 
-  if (e != NULL)
+  if (e)
     *y += *e;
 
-  if (F != NULL)
+  if (F)
     prod(*F, *data["z"], *y, false);
 }
 
@@ -507,7 +593,7 @@ void FirstOrderLinearR::computeInput(double time, unsigned int level)
     computeB(time);
 
   // We get lambda of the interaction (pointers)
-  SiconosVector *lambda = interaction->getLambdaPtr(level);
+  SiconosVectorSPtr lambda = interaction->getLambdaPtr(level);
   prod(*B, *lambda, *data["r"], false);
 }
 
@@ -597,19 +683,19 @@ void FirstOrderLinearR::display() const
 {
   cout << " ===== Linear Time Invariant relation display ===== " << endl;
   cout << "| C " << endl;
-  if (C != NULL) C->display();
+  if (C) C->display();
   else cout << "->NULL" << endl;
   cout << "| D " << endl;
-  if (D != NULL) D->display();
+  if (D) D->display();
   else cout << "->NULL" << endl;
   cout << "| F " << endl;
-  if (F != NULL) F->display();
+  if (F) F->display();
   else cout << "->NULL" << endl;
   cout << "| e " << endl;
-  if (e != NULL) e->display();
+  if (e) e->display();
   else cout << "->NULL" << endl;
   cout << "| B " << endl;
-  if (B != NULL) B->display();
+  if (B) B->display();
   else cout << "->NULL" << endl;
   cout << " ================================================== " << endl;
 }
@@ -619,7 +705,7 @@ void FirstOrderLinearR::saveRelationToXML() const
   if (relationxml == NULL)
     RuntimeException::selfThrow("FirstOrderLinearR::saveRelationToXML, no xml object found.");
 
-  FirstOrderLinearRXML * folrXML = (static_cast<FirstOrderLinearRXML*>(relationxml));
+  FirstOrderLinearRXMLSPtr folrXML = (boost::static_pointer_cast<FirstOrderLinearRXML>(relationxml));
   folrXML->setC(*C);
   folrXML->setD(*D);
   folrXML->setF(*F);

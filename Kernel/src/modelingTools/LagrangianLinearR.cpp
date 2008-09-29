@@ -24,109 +24,71 @@
 
 using namespace std;
 
-void LagrangianLinearR::initAllocationFlags(bool in)
-{
-  isAllocatedIn["H"] = in;
-  isAllocatedIn["b"] = in;
-  isAllocatedIn["D"] = in;
-  isAllocatedIn["F"] = in;
-}
 
 // Xml constructor
-LagrangianLinearR::LagrangianLinearR(RelationXML* relxml):
-  LagrangianR(relxml, LinearR), H(NULL), b(NULL), D(NULL), F(NULL)
+LagrangianLinearR::LagrangianLinearR(RelationXMLSPtr relxml):
+  LagrangianR(relxml, LinearR)
 {
-  LagrangianLinearRXML* LLRxml = (static_cast<LagrangianLinearRXML*>(relationxml));
-
-  initAllocationFlags(false);
+  LagrangianLinearRXMLSPtr LLRxml = (boost::static_pointer_cast<LagrangianLinearRXML>(relationxml));
 
   // H is the minimal required input.
   if (!LLRxml->hasH())
     RuntimeException::selfThrow("LagrangianLinearR:: xml constructor failed: can not find input for H matrix.");
 
-  H = new SimpleMatrix(LLRxml->getH());
-  isAllocatedIn["H"] = true;
+  H.reset(new SimpleMatrix(LLRxml->getH()));
 
   if (LLRxml->hasB())
   {
-    b = new SimpleVector(LLRxml->getB());
-    isAllocatedIn["b"] = true;
+    b.reset(new SimpleVector(LLRxml->getB()));
   }
 
   if (LLRxml->hasD())
   {
-    D = new SimpleMatrix(LLRxml->getD());
-    isAllocatedIn["D"] = true;
+    D.reset(new SimpleMatrix(LLRxml->getD()));
   }
 
   if (LLRxml->hasF())
   {
-    F = new SimpleMatrix(LLRxml->getF());
-    isAllocatedIn["F"] = true;
+    F.reset(new SimpleMatrix(LLRxml->getF()));
   }
 }
 
 // Constructor from data: H, b.
 LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVector& newB):
-  LagrangianR(LinearR), H(NULL), b(NULL), D(NULL), F(NULL)
+  LagrangianR(LinearR)
 {
-  H = new SimpleMatrix(newH);
-  isAllocatedIn["H"] = true;
-
-  b = new SimpleVector(newB);
-  isAllocatedIn["b"] = true;
-  isAllocatedIn["D"] = false;
-  isAllocatedIn["F"] = false;
+  H.reset(new SimpleMatrix(newH));
+  b.reset(new SimpleVector(newB));
 }
 
 // Constructor from data: H.
 LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH):
-  LagrangianR(LinearR), H(NULL), b(NULL), D(NULL), F(NULL)
+  LagrangianR(LinearR)
 {
-  H = new SimpleMatrix(newH);
-  isAllocatedIn["H"] = true;
-  isAllocatedIn["b"] = false;
-  isAllocatedIn["D"] = false;
-  isAllocatedIn["F"] = false;
+  H.reset(new SimpleMatrix(newH));
 }
 
 // Constructor from data: H, b, and D.
 LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVector& newB, const SiconosMatrix& newD):
-  LagrangianR(LinearR), H(NULL), b(NULL), D(NULL)
+  LagrangianR(LinearR)
 {
-  H = new SimpleMatrix(newH);
-  isAllocatedIn["H"] = true;
-  D = new SimpleMatrix(newD);
-  isAllocatedIn["D"] = true;
-  b = new SimpleVector(newB);
-  isAllocatedIn["b"] = true;
-  isAllocatedIn["F"] = false;
+  H.reset(new SimpleMatrix(newH));
+  D.reset(new SimpleMatrix(newD));
+  b.reset(new SimpleVector(newB));
 }
 
 // Constructor from data: H, b, D and F.
 LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVector& newB, const SiconosMatrix& newD, const SiconosMatrix& newF):
-  LagrangianR(LinearR), H(NULL), b(NULL), D(NULL)
+  LagrangianR(LinearR)
 {
-  H = new SimpleMatrix(newH);
-  isAllocatedIn["H"] = true;
-  D = new SimpleMatrix(newD);
-  isAllocatedIn["D"] = true;
-  b = new SimpleVector(newB);
-  isAllocatedIn["b"] = true;
-  F = new SimpleMatrix(newF);
-  isAllocatedIn["F"] = true;
+  H.reset(new SimpleMatrix(newH));
+  D.reset(new SimpleMatrix(newD));
+  b.reset(new SimpleVector(newB));
+  F.reset(new SimpleMatrix(newF));
 }
 
 LagrangianLinearR::~LagrangianLinearR()
 {
-  if (isAllocatedIn["H"]) delete H;
-  H = NULL;
-  if (isAllocatedIn["b"]) delete b;
-  b = NULL;
-  if (isAllocatedIn["D"]) delete D;
-  D = NULL;
-  if (isAllocatedIn["F"]) delete F;
-  F = NULL;
 }
 
 void LagrangianLinearR::initComponents()
@@ -134,135 +96,124 @@ void LagrangianLinearR::initComponents()
   unsigned int sizeY = interaction->getSizeOfY();
   unsigned int sizeDS = interaction->getSizeOfDS();
 
-  if (H->size(1) != sizeDS || H->size(0) != sizeY)
-    RuntimeException::selfThrow("LagrangianLinearR::initComponents inconsistent sizes between H matrix and the interaction.");
+  assert((H->size(1) == sizeDS && H->size(0) == sizeY) &&
+         "LagrangianLinearR::initComponents inconsistent sizes between H matrix and the interaction.");
 
-  if (D != NULL)
-    if (D->size(0) != sizeY || D->size(1) != sizeY)
-      RuntimeException::selfThrow("LagrangianLinearR::initComponents inconsistent sizes between D matrix and the interaction.");
-  if (b != NULL)
-    if (b->size() != sizeY)
-      RuntimeException::selfThrow("LagrangianLinearR::initComponents inconsistent sizes between b vector and the dimension of the interaction.");
+  assert((if (D)
+          (D->size(0) == sizeY && D->size(1) != sizeY)) &&
+         "LagrangianLinearR::initComponents inconsistent sizes between D matrix and the interaction.");
+  assert((if (b)
+          (b->size() == sizeY)) &&
+         "LagrangianLinearR::initComponents inconsistent sizes between b vector and the dimension of the interaction.");
 
-  if (F != NULL)
-  {
-    unsigned int sizeZ = interaction->getSizeZ();
-    if (F->size(0) != sizeY || F->size(1) != sizeZ)
-      RuntimeException::selfThrow("LagrangianLinearR::initComponents inconsistent sizes between F matrix and the interaction.");
-  }
-  workL = new SimpleVector(sizeY);
+  assert((if (F)
+{
+  unsigned int sizeZ = interaction->getSizeZ();
+    (F->size(0) == sizeY && F->size(1) == sizeZ);
+  }) &&
+         "LagrangianLinearR::initComponents inconsistent sizes between F matrix and the interaction.");
+
+
+  workL.reset(new SimpleVector(sizeY));
+
 }
 
 // Setters
 
 void LagrangianLinearR::setH(const SiconosMatrix& newValue)
 {
-  if (H == NULL)
+  if (! H)
   {
-    H = new SimpleMatrix(newValue);
-    isAllocatedIn["H"] = true;
+    H.reset(new SimpleMatrix(newValue));
   }
   else
     *H = newValue;
 }
 
-void LagrangianLinearR::setHPtr(SiconosMatrix *newPtr)
+void LagrangianLinearR::setHPtr(SiconosMatrixSPtr newPtr)
 {
-  if (isAllocatedIn["H"]) delete H;
   H = newPtr;
-  isAllocatedIn["H"] = false;
 }
 
 void LagrangianLinearR::setB(const SimpleVector& newValue)
 {
-  if (b == NULL)
+  if (! b)
   {
-    b = new SimpleVector(newValue);
-    isAllocatedIn["b"] = true;
+    b.reset(new SimpleVector(newValue));
   }
   else
     *b = newValue;
 }
 
-void LagrangianLinearR::setBPtr(SimpleVector *newPtr)
+void LagrangianLinearR::setBPtr(SimpleVectorSPtr newPtr)
 {
-  if (isAllocatedIn["b"]) delete b;
   b = newPtr;
-  isAllocatedIn["b"] = false;
 }
 
 void LagrangianLinearR::setD(const SiconosMatrix& newValue)
 {
-  if (D == NULL)
-  {
-    D = new SimpleMatrix(newValue);
-    isAllocatedIn["D"] = true;
-  }
+  if (! D)
+    D.reset(new SimpleMatrix(newValue));
   else
     *D = newValue;
 }
 
-void LagrangianLinearR::setDPtr(SiconosMatrix *newPtr)
+void LagrangianLinearR::setDPtr(SiconosMatrixSPtr newPtr)
 {
-  if (isAllocatedIn["D"]) delete D;
   D = newPtr;
-  isAllocatedIn["D"] = false;
 }
 
 void LagrangianLinearR::setF(const SiconosMatrix& newValue)
 {
-  if (F == NULL)
+  if (! F)
   {
-    F = new SimpleMatrix(newValue);
-    isAllocatedIn["F"] = true;
+    F.reset(new SimpleMatrix(newValue));
   }
   else
     *F = newValue;
 }
 
-void LagrangianLinearR::setFPtr(SiconosMatrix *newPtr)
+void LagrangianLinearR::setFPtr(SiconosMatrixSPtr newPtr)
 {
-  if (isAllocatedIn["F"]) delete F;
   F = newPtr;
-  isAllocatedIn["F"] = false;
 }
 
 void LagrangianLinearR::computeOutput(double time, unsigned int derivativeNumber)
 {
   // get y and lambda of the interaction
-  SiconosVector *y = interaction->getYPtr(derivativeNumber);
-  SiconosVector *lambda = interaction->getLambdaPtr(derivativeNumber);
+  SiconosVectorSPtr y = interaction->getYPtr(derivativeNumber);
+  SiconosVectorSPtr lambda = interaction->getLambdaPtr(derivativeNumber);
 
   //string name = "q"+toString<unsigned int>(derivativeNumber);
 
   if (derivativeNumber == 0)
   {
     prod(*H, *data["q0"], *y);
-    if (b != NULL)
+    if (b)
       *y += *b;
-    if (D != NULL)
+    if (D)
       prod(*D, *lambda, *y, false) ;
 
-    if (F != NULL)
+    if (F)
       prod(*F, *data["z"], *y, false);
   }
 
   else if (derivativeNumber == 1)
   {
     prod(*H, *data["q1"], *y);
-    if (D != NULL)
+    if (D)
       prod(*D, *lambda, *y, false) ;
 
-    if (F != NULL)
+    if (F)
       prod(*F, *data["z"], *y, false);
   }
   else if (derivativeNumber == 2)
   {
     prod(*H, *data["q2"], *y);
-    if (D != NULL)
+    if (D)
       prod(*D, *lambda, *y, false) ;
 
-    if (F != NULL)
+    if (F)
       prod(*F, *data["z"], *y, false);
   }
 
@@ -292,13 +243,13 @@ void LagrangianLinearR::computeInput(double time, const unsigned int level)
 
 void LagrangianLinearR::saveRelationToXML() const
 {
-  if (relationxml == NULL)
-    RuntimeException::selfThrow("LagrangianLinearR::saveRelationToXML - object RelationXML does not exist");
+  assert(relationxml &&
+         "LagrangianLinearR::saveRelationToXML - object RelationXML does not exist");
 
-  (static_cast<LagrangianLinearRXML*>(relationxml))->setH(*H) ;
-  (static_cast<LagrangianLinearRXML*>(relationxml))->setB(*b) ;
-  (static_cast<LagrangianLinearRXML*>(relationxml))->setD(*D) ;
-  (static_cast<LagrangianLinearRXML*>(relationxml))->setF(*F) ;
+  (boost::static_pointer_cast<LagrangianLinearRXML>(relationxml))->setH(*H) ;
+  (boost::static_pointer_cast<LagrangianLinearRXML>(relationxml))->setB(*b) ;
+  (boost::static_pointer_cast<LagrangianLinearRXML>(relationxml))->setD(*D) ;
+  (boost::static_pointer_cast<LagrangianLinearRXML>(relationxml))->setF(*F) ;
 }
 
 LagrangianLinearR* LagrangianLinearR::convert(Relation *r)
@@ -311,22 +262,22 @@ void LagrangianLinearR::display() const
   LagrangianR::display();
   cout << "===== Lagrangian Linear Relation display ===== " << endl;
   cout << " H: " << endl;
-  if (H != NULL)
+  if (H)
     H->display();
   else
     cout << " -> NULL " << endl;
   cout << " b: " << endl;
-  if (b != NULL)
+  if (b)
     b->display();
   else
     cout << " -> NULL " << endl;
   cout << " D: " << endl;
-  if (D != NULL)
+  if (D)
     D->display();
   else
     cout << " -> NULL " << endl;
   cout << " F: " << endl;
-  if (F != NULL)
+  if (F)
     F->display();
   else
     cout << " -> NULL " << endl;

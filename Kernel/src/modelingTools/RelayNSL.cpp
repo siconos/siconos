@@ -29,13 +29,13 @@ RelayNSL::RelayNSL(unsigned int newSize):
   NonSmoothLaw(RELAYNSLAW, newSize), c(0.0), d(0.0)
 {}
 
-RelayNSL::RelayNSL(NonSmoothLawXML* nslawxml):
+RelayNSL::RelayNSL(NonSmoothLawXMLSPtr nslawxml):
   NonSmoothLaw(RELAYNSLAW, nslawxml), c(0.0), d(0.0)
 {
-  if (nslawxml != NULL)
+  if (nslawxml)
   {
-    c = (static_cast<RelayNSLXML*>(nslawxml))->getC();
-    d = (static_cast<RelayNSLXML*>(nslawxml))->getD();
+    c = (boost::static_pointer_cast<RelayNSLXML>(nslawxml))->getC();
+    d = (boost::static_pointer_cast<RelayNSLXML>(nslawxml))->getD();
   }
   else RuntimeException::selfThrow("RelayNSL::xml constructor, xml file=NULL");
 }
@@ -66,8 +66,8 @@ void RelayNSL::display() const
 
 void RelayNSL::saveNonSmoothLawToXML()
 {
-  static_cast<RelayNSLXML*>(nslawxml)->setC(c);
-  static_cast<RelayNSLXML*>(nslawxml)->setD(d);
+  boost::static_pointer_cast<RelayNSLXML>(nslawxml)->setC(c);
+  boost::static_pointer_cast<RelayNSLXML>(nslawxml)->setD(d);
 }
 
 RelayNSL* RelayNSL::convert(NonSmoothLaw* nsl)

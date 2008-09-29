@@ -75,7 +75,7 @@ const std::string DEFAULT_OSNS_NAME = "unamed";
  *  a row, UnitaryMatrixColumnIterator will be used to iterate through columns, ie through all the UnitaryRelations that are linked to URrow.
  *
  */
-class OneStepNSProblem
+class OneStepNSProblem : public boost::enable_shared_from_this<OneStepNSProblem>
 {
 
 protected:
@@ -99,45 +99,31 @@ protected:
   MapOfMapOfUnitaryBool isUnitaryBlockAllocatedIn;
 
   /** map that links each DynamicalSystem with the corresponding DSBlocks
-      map < DynamicalSystem* , SiconosMatrix * > */
+      map < SP::DynamicalSystem , SiconosMatrix * > */
   MapOfDSMatrices DSBlocks;
-  /** inside-class allocation flags. To each couple of Unitary Relations corresponds a bool, true if
-      the unitaryBlock has been allocated in OneStepNSProblem, else false. */
-  MapOfDSBool isDSBlockAllocatedIn;
 
   /** map that links each UnitaryRelation and DynamicalSystem with the corresponding unitaryDSBlocks
       map < UnitaryRelationA * , map < DynamicalSystemB * , unitaryDSBlockMatrixAB > >
       UnitaryRelation A and DynamicalSystem B are coupled through unitaryDSBlockMatrixAB.  */
   MapOfUnitaryMapOfDSMatrices unitaryDSBlocks;
 
-  /** inside-class allocation flags. To each couple of Unitary Relations corresponds a bool, true if
-      the unitaryDSBlock has been allocated in OneStepNSProblem, else false. */
-  MapOfUnitaryMapOfDSBool isUnitaryDSBlockAllocatedIn;
-
   /** map that links each DynamicalSystem and UnitaryRelation with the corresponding DSunitaryBlocks
       map < DynamicalSystemA * , map < UnitaryRelationB* , DSunitaryBlockMatrixAB > >
       Dynamical A and UnitaryRelation B are coupled through DSunitaryBlockMatrixAB.  */
   MapOfDSMapOfUnitaryMatrices DSUnitaryBlocks;
 
-  /** inside-class allocation flags. To each couple of Unitary Relations corresponds a bool, true if
-      the DSunitaryBlock has been allocated in OneStepNSProblem, else false. */
-  MapOfDSMapOfUnitaryBool isDSUnitaryBlockAllocatedIn;
-
   /** Solver for Non Smooth Problem*/
-  NonSmoothSolver* solver;
-
-  /** bool to check whether solver has been allocated inside the class or not */
-  bool isSolverAllocatedIn;
+  NonSmoothSolverSPtr solver;
 
   /** link to the simulation that owns the NSPb */
-  Simulation *simulation;
+  SimulationSPtr simulation;
 
   /** the XML object linked to the OneStepNSProblem to read XML data */
-  OneStepNSProblemXML* onestepnspbxml;
+  OneStepNSProblemXMLSPtr onestepnspbxml;
 
   /** set of Interactions: link to the Interactions of the Non Smooth Dynamical System
    * Note: no get or set functions for this object in the class -> used only in OneStepNSProblem methods. */
-  InteractionsSet * OSNSInteractions;
+  InteractionsSetSPtr OSNSInteractions;
 
   /** minimum index set number to be taken into account */
   unsigned int levelMin;
@@ -162,7 +148,7 @@ protected:
   unsigned int nbIter;
 
   /** Numerics (C) structure used to define global options for Numerics functions calls */
-  Numerics_Options * numerics_options;
+  Numerics_OptionsSPtr numerics_options;
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
 
@@ -180,18 +166,19 @@ public:
 
   /** xml constructor
    *  \param string: problem type
-   *  \param OneStepNSProblemXML* : the XML linked-object
-   *  \param Simulation *: the simulation that owns the problem
+   *  \param SP::OneStepNSProblemXML : the XML linked-object
+   *  \param SP::Simulation: the simulation that owns the problem
    */
-  OneStepNSProblem(const std::string&, OneStepNSProblemXML*, Simulation *);
+  OneStepNSProblem(const std::string&, OneStepNSProblemXMLSPtr, SimulationSPtr);
 
   /** constructor from data
    *  \param string: problem type
-   *  \param Simulation *: the simulation that owns this problem
+   *  \param SP::Simulation: the simulation that owns this problem
    *  \param string : id
    *  \param Solver *: pointer on object that contains solver algorithm definition (optional)
    */
-  OneStepNSProblem(const std::string&, Simulation *, const std::string&, NonSmoothSolver* = NULL);
+  OneStepNSProblem(const std::string&, SimulationSPtr, const std::string&,
+                   NonSmoothSolverSPtr = NonSmoothSolverSPtr());
 
   /** destructor
    */
@@ -260,7 +247,8 @@ public:
    *  \param a pointer to UnitaryRelation, optional, default value = NULL, in that case UR2 = UR1 (ie get "diagonal" unitaryBlock)
    *  \return a pointer to SiconosMatrix
    */
-  SiconosMatrix* getUnitaryBlockPtr(UnitaryRelation*, UnitaryRelation* = NULL) const ;
+  SiconosMatrixSPtr getUnitaryBlockPtr(SP::UnitaryRelation,
+                                       SP::UnitaryRelation = SP::UnitaryRelation()) const ;
 
   /** set the map of unitary matrices
    *  \param a MapOfMapOfUnitaryMatrices
@@ -283,7 +271,7 @@ public:
    *  \param a pointer to DynamicalSystem, DS1
    *  \return a pointer to SiconosMatrix
    */
-  SiconosMatrix* getDSBlockPtr(DynamicalSystem*) const ;
+  SiconosMatrixSPtr getDSBlockPtr(SP::DynamicalSystem) const ;
 
   /** set the map of DS matrices
    *  \param a MapOfDSMatrices
@@ -308,7 +296,7 @@ public:
    *  \param a pointer to DynamicalSystem DS2
    *  \return a pointer to SiconosMatrix
    */
-  SiconosMatrix* getUnitaryDSBlockPtr(UnitaryRelation*, DynamicalSystem*) const ;
+  SiconosMatrixSPtr getUnitaryDSBlockPtr(SP::UnitaryRelation, SP::DynamicalSystem) const ;
 
   /** set the map of unitaryDS matrices
    *  \param a MapOfUnitaryMapOfDSMatrices
@@ -332,7 +320,7 @@ public:
    *  \param a pointer to DynamicalSystem DS1
    *  \return a pointer to SiconosMatrix
    */
-  SiconosMatrix* getDSUnitaryBlockPtr(DynamicalSystem*, UnitaryRelation*) const ;
+  SiconosMatrixSPtr getDSUnitaryBlockPtr(SP::DynamicalSystem, SP::UnitaryRelation) const ;
 
   /** set the map of DSUnitary matrices
    *  \param a MapOfDSMapOfUnitaryMatrices
@@ -346,7 +334,7 @@ public:
   /** get the NonSmoothSolver
    *  \return a pointer on NonSmoothSolver
    */
-  inline NonSmoothSolver* getNonSmoothSolverPtr() const
+  inline NonSmoothSolverSPtr getNonSmoothSolverPtr() const
   {
     return solver;
   }
@@ -354,12 +342,12 @@ public:
   /** set the NonSmoothSolver of the OneStepNSProblem
    *  \param: a pointer on NonSmoothSolver
    */
-  void setNonSmoothSolverPtr(NonSmoothSolver*);
+  void setNonSmoothSolverPtr(NonSmoothSolverSPtr);
 
   /** get the Simulation
    *  \return a pointer on Simulation
    */
-  inline Simulation* getSimulationPtr() const
+  inline SimulationSPtr getSimulationPtr() const
   {
     return simulation;
   }
@@ -367,7 +355,7 @@ public:
   /** get the Interactions set
    *  \return an InteractionsSet
    */
-  inline InteractionsSet * getInteractions() const
+  inline InteractionsSetSPtr getInteractions() const
   {
     return OSNSInteractions;
   }
@@ -479,7 +467,7 @@ public:
    *  \param a pointer to UnitaryRelation
    *  \param a pointer to UnitaryRelation
    */
-  virtual void computeUnitaryBlock(UnitaryRelation*, UnitaryRelation*);
+  virtual void computeUnitaryBlock(SP::UnitaryRelation, SP::UnitaryRelation);
 
   /** compute DSBlocks if necessary (this depends on the type of OSNS, on the indexSets ...)
   */
@@ -493,7 +481,7 @@ public:
    *  Move this to Unitary Relation class?
    *  \param a pointer to DynamicalSystem DS1
    */
-  virtual void computeDSBlock(DynamicalSystem*);
+  virtual void computeDSBlock(SP::DynamicalSystem);
 
 
   /** compute UnitaryDSBlocks if necessary (this depends on the type of OSNS, on the indexSets ...)
@@ -509,7 +497,7 @@ public:
    *  \param a pointer to UnitaryRelation UR1
    *  \param a pointer to DynamicalSystems DS2
    */
-  virtual void computeUnitaryDSBlock(UnitaryRelation* , DynamicalSystem*);
+  virtual void computeUnitaryDSBlock(SP::UnitaryRelation , SP::DynamicalSystem);
 
 
   /** compute DSUnitaryBlocks if necessary (this depends on the type of OSNS, on the indexSets ...)
@@ -525,7 +513,7 @@ public:
    *  \param a pointer to UnitaryRelation UR1
    *  \param a pointer to DynamicalSystems DS2
    */
-  virtual void computeDSUnitaryBlock(DynamicalSystem*, UnitaryRelation*);
+  virtual void computeDSUnitaryBlock(SP::DynamicalSystem, SP::UnitaryRelation);
 
 
   /** initialize the problem(compute topology ...)
@@ -560,7 +548,7 @@ public:
    *  \param a MapOfDSMatrices(in-out parameter)
    *  \param a MapOfDouble(in-out parameter)
    */
-  virtual void getOSIMaps(UnitaryRelation*, MapOfDSMatrices&, MapOfDouble&);
+  virtual void getOSIMaps(SP::UnitaryRelation, MapOfDSMatrices&, MapOfDouble&);
 
 };
 

@@ -147,18 +147,17 @@ void SiconosDOMTreeToolsTest::testGetSiconosVectorValue()
   child = root->children;
   child = child->next;
 
-  /*SiconosVector*/
-  SimpleVector v;
+  /*SP::SiconosVector/SimpleVector v;
   v = SiconosDOMTreeTools::getSiconosVectorValue(child);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSiconosVectorValue : v", v(3) == 4, true);
 
-  cout << "SiconosDOMTreeToolsTest >>> testGetSiconosVectorValue ............... OK\n ";
-}
+  cout<<"SiconosDOMTreeToolsTest >>> testGetSiconosVectorValue ............... OK\n ";
+  }
 
 
-void SiconosDOMTreeToolsTest::testGetSiconosMatrixValue()
-{
+  void SiconosDOMTreeToolsTest::testGetSiconosMatrixValue()
+  {
   doc = xmlParseFile("matrix.xml");
   root = xmlDocGetRootElement(doc);
   child = root->children;
@@ -167,11 +166,11 @@ void SiconosDOMTreeToolsTest::testGetSiconosMatrixValue()
   SiconosMatrix m;
   m = SiconosDOMTreeTools::getSiconosMatrixValue(child);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSiconosMatrixValue : m", m(0, 2) == 3, true);
-  cout << "SiconosDOMTreeToolsTest >>> testGetSiconosMatrixValue ............... OK\n ";
-}
+  cout<<"SiconosDOMTreeToolsTest >>> testGetSiconosMatrixValue ............... OK\n ";
+  }
 
-void SiconosDOMTreeToolsTest::testGetSiconosMatrixValue2()
-{
+  void SiconosDOMTreeToolsTest::testGetSiconosMatrixValue2()
+  {
   doc = xmlParseFile("matrix2.xml");
   root = xmlDocGetRootElement(doc);
   child = root->children;
@@ -180,29 +179,29 @@ void SiconosDOMTreeToolsTest::testGetSiconosMatrixValue2()
   SiconosMatrix m;
   m = SiconosDOMTreeTools::getSiconosMatrixValue(child);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSiconosMatrixValue2 : m", m(0, 2) == 3, true);
-  cout << "SiconosDOMTreeToolsTest >>> testGetSiconosMatrixValue2 .............. OK\n ";
-}
+  cout<<"SiconosDOMTreeToolsTest >>> testGetSiconosMatrixValue2 .............. OK\n ";
+  }
 
-//void SiconosDOMTreeToolsTest::testGetVectorMemoryValue()
-//{
-//  doc = xmlParseFile("testMemory.xml");
-//  root = xmlDocGetRootElement(doc);
-//  child = root->children;
-//  child = child->next;
-//
-//  vector<SiconosVector*> vect;
-//  vect = SiconosDOMTreeTools::getVectorMemoryValue(child);
-//
-//  SiconosVector v("testVector.dat", true);
-//  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetVectorMemoryValue size", vect.size() == 2, true);
-//  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetVectorMemoryValue size", *(vect[0]) == v, true);
-//
-//  cout<<"SiconosDOMTreeToolsTest >>> testGetVectorMemoryValue ................ OK\n ";
-//}
+  //void SiconosDOMTreeToolsTest::testGetVectorMemoryValue()
+  //{
+  // doc = xmlParseFile("testMemory.xml");
+  // root = xmlDocGetRootElement(doc);
+  // child = root->children;
+  // child = child->next;
+  //
+  // vector<SP::SiconosVector> vect;
+  // vect = SiconosDOMTreeTools::getVectorMemoryValue(child);
+  //
+  // SiconosVector v("testVector.dat", true);
+  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetVectorMemoryValue size", vect.size() == 2, true);
+  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetVectorMemoryValue size", *(vect[0]) == v, true);
+  //
+  // cout<<"SiconosDOMTreeToolsTest >>> testGetVectorMemoryValue ................ OK\n ";
+  //}
 
 
-void SiconosDOMTreeToolsTest::testSetStringContentValue()
-{
+  void SiconosDOMTreeToolsTest::testSetStringContentValue()
+  {
   doc = xmlParseFile("string.xml");
   root = xmlDocGetRootElement(doc);
   child = root->children;
@@ -218,12 +217,12 @@ void SiconosDOMTreeToolsTest::testSetStringContentValue()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetStringContentValue : newstring", s1 == newstring, true);
 
 
-  cout << "SiconosDOMTreeToolsTest >>> testSetStringContentValue ............... OK\n ";
-}
+  cout<<"SiconosDOMTreeToolsTest >>> testSetStringContentValue ............... OK\n ";
+  }
 
 
-void SiconosDOMTreeToolsTest::testSetIntegerContentValue()
-{
+  void SiconosDOMTreeToolsTest::testSetIntegerContentValue()
+  {
   doc = xmlParseFile("int.xml");
   root = xmlDocGetRootElement(doc);
   child = root->children;
@@ -240,11 +239,11 @@ void SiconosDOMTreeToolsTest::testSetIntegerContentValue()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetIntegerContentValue : i", i == newint, true);
 
 
-  cout << "SiconosDOMTreeToolsTest >>> testGetIntegerContentValue .............. OK\n ";
-}
+  cout<<"SiconosDOMTreeToolsTest >>> testGetIntegerContentValue .............. OK\n ";
+  }
 
-void SiconosDOMTreeToolsTest::testSetDoubleContentValue()
-{
+  void SiconosDOMTreeToolsTest::testSetDoubleContentValue()
+  {
   doc = xmlParseFile("double.xml");
   root = xmlDocGetRootElement(doc);
   child = root->children;
@@ -261,12 +260,12 @@ void SiconosDOMTreeToolsTest::testSetDoubleContentValue()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetDoubleContentValue : d", d == newdouble, true);
 
 
-  cout << "SiconosDOMTreeToolsTest >>> testSetDoubleContentValue ............... OK\n ";
-}
+  cout<<"SiconosDOMTreeToolsTest >>> testSetDoubleContentValue ............... OK\n ";
+  }
 
 
-void SiconosDOMTreeToolsTest::testSetStringAttributeValue()
-{
+  void SiconosDOMTreeToolsTest::testSetStringAttributeValue()
+  {
   doc = xmlParseFile("string_attribute.xml");
   root = xmlDocGetRootElement(doc);
   child = root->children;
@@ -282,12 +281,12 @@ void SiconosDOMTreeToolsTest::testSetStringAttributeValue()
   s = SiconosDOMTreeTools::getStringAttributeValue(child, "toto");
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetStringAttributeValue : s", s == newstring, true);
 
-  cout << "SiconosDOMTreeToolsTest >>> testSetStringAttributeValue ............. OK\n ";
-}
+  cout<<"SiconosDOMTreeToolsTest >>> testSetStringAttributeValue ............. OK\n ";
+  }
 
 
-void SiconosDOMTreeToolsTest::testSetDoubleAttributeValue()
-{
+  void SiconosDOMTreeToolsTest::testSetDoubleAttributeValue()
+  {
   doc = xmlParseFile("double_attribute.xml");
   root = xmlDocGetRootElement(doc);
   child = root->children;
@@ -297,18 +296,18 @@ void SiconosDOMTreeToolsTest::testSetDoubleAttributeValue()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetDoubleAttributeValue : d", d == 0.054, true);
 
   double newdouble = 1E-3;
-  SiconosDOMTreeTools::setDoubleAttributeValue(child, "toto", newdouble);
+  SiconosDOMTreeTools::setDoubleAttributeValue(child,"toto", newdouble);
 
   d = SiconosDOMTreeTools::getDoubleAttributeValue(child, "toto");
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetDoubleContentValue : d", d == newdouble, true);
 
-  cout << "SiconosDOMTreeToolsTest >>> testSetDoubleAttributeValue ............. OK\n ";
-}
+  cout<<"SiconosDOMTreeToolsTest >>> testSetDoubleAttributeValue ............. OK\n ";
+  }
 
 
-void SiconosDOMTreeToolsTest::testSetIntegerAttributeValue()
-{
+  void SiconosDOMTreeToolsTest::testSetIntegerAttributeValue()
+  {
   doc = xmlParseFile("int_attribute.xml");
   root = xmlDocGetRootElement(doc);
   child = root->children;
@@ -324,12 +323,12 @@ void SiconosDOMTreeToolsTest::testSetIntegerAttributeValue()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetIntegerContentValue : i", i == newint, true);
 
 
-  cout << "SiconosDOMTreeToolsTest >>> testSetIntegerAttributeValue ............ OK\n ";
-}
+  cout<<"SiconosDOMTreeToolsTest >>> testSetIntegerAttributeValue ............ OK\n ";
+  }
 
 
-void SiconosDOMTreeToolsTest::testSetSiconosVectorValue()
-{
+  void SiconosDOMTreeToolsTest::testSetSiconosVectorValue()
+  {
   doc = xmlParseFile("./vector.xml");
   root = xmlDocGetRootElement(doc);
   child = root->children;

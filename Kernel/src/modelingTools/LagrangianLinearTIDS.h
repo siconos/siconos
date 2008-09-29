@@ -86,19 +86,20 @@ private:
   LagrangianLinearTIDS();
 
   /** specific matrix for a LagrangianLinearTIDS */
-  SiconosMatrix *K;
+  SiconosMatrixSPtr K;
 
   /** specific matrix for a LagrangianLinearTIDS */
-  SiconosMatrix *C;
+  SiconosMatrixSPtr C;
 
 public:
 
   /** constructor from an xml file
    *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
-   *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
+   *  \param SP::NonSmoothDynamicalSystem (optional): the NSDS that owns this ds
    *  \exception RuntimeException
    */
-  LagrangianLinearTIDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* = NULL);
+  LagrangianLinearTIDS(DynamicalSystemXMLSPtr dsXML,
+                       SP::NonSmoothDynamicalSystem = SP::NonSmoothDynamicalSystem());
 
   /** constructor from a set of data
    *  \param int : the number for this DynamicalSystem
@@ -154,7 +155,7 @@ public:
   /** get K
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getKPtr() const
+  inline SiconosMatrixSPtr getKPtr() const
   {
     return K;
   }
@@ -165,9 +166,9 @@ public:
   void setK(const SiconosMatrix&);
 
   /** set K to pointer newPtr
-   *  \param SiconosMatrix * newPtr
+   *  \param SP::SiconosMatrix  newPtr
    */
-  void setKPtr(SiconosMatrix *newPtr);
+  void setKPtr(SiconosMatrixSPtr newPtr);
 
   // -- C --
   /** get the value of C
@@ -181,7 +182,7 @@ public:
   /** get C
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getCPtr() const
+  inline SiconosMatrixSPtr getCPtr() const
   {
     return C;
   }
@@ -192,9 +193,9 @@ public:
   void setC(const SiconosMatrix&);
 
   /** set C to pointer newPtr
-   *  \param SiconosMatrix * newPtr
+   *  \param SP::SiconosMatrix  newPtr
    */
-  void setCPtr(SiconosMatrix *newPtr) ;
+  void setCPtr(SiconosMatrixSPtr newPtr) ;
 
   /** Default function to the right-hand side term
    *  \param double time : current time

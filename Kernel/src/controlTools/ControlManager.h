@@ -90,9 +90,9 @@ protected:
 public:
 
   /** Constructor with a Model, to which control will be applied.
-   * \param a Model*
+   * \param a SP::Model
    */
-  ControlManager(Model*);
+  ControlManager(SP::Model);
 
   /** destructor
    */
@@ -101,7 +101,7 @@ public:
   /** get the Model linked to this ControlManager
    *  \return a pointer to Model
    */
-  inline Model* getModelPtr() const
+  inline SP::Model getModelPtr() const
   {
     return model;
   };

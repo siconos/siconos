@@ -16,6 +16,8 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
+
+#include "SiconosPointers.h"
 #include "SimulationXML.h"
 
 #include "OneStepIntegratorXML.h"
@@ -32,7 +34,7 @@
 
 using namespace std;
 
-SimulationXML::SimulationXML(xmlNodePtr rootSimulationNode): rootNode(rootSimulationNode), timeDiscretisationXML(NULL)
+SimulationXML::SimulationXML(xmlNodePtr rootSimulationNode): rootNode(rootSimulationNode)
 {
   xmlNodePtr node;
 
@@ -40,7 +42,7 @@ SimulationXML::SimulationXML(xmlNodePtr rootSimulationNode): rootNode(rootSimula
   {
     // === TimeDiscretisation data loading ===
     if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, TIMEDISCRETISATION_TAG)) != NULL)
-      timeDiscretisationXML = new TimeDiscretisationXML(node);
+      timeDiscretisationXML.reset(new TimeDiscretisationXML(node));
     else
       XMLException::selfThrow("SimulationXML - simulation XML constructor  ERROR : tag " + TIMEDISCRETISATION_TAG + " not found.");
 
@@ -56,10 +58,10 @@ SimulationXML::SimulationXML(xmlNodePtr rootSimulationNode): rootNode(rootSimula
       {
         typeOSI = (char*)OSINode->name;
         if (typeOSI == MOREAU_TAG)
-          OSIXMLSet.insert(new MoreauXML(OSINode));
+          OSIXMLSet.insert(SP::MoreauXML(new MoreauXML(OSINode)));
 
         else if (typeOSI == LSODAR_TAG)
-          OSIXMLSet.insert(new LsodarXML(OSINode));
+          OSIXMLSet.insert(SP::LsodarXML(new LsodarXML(OSINode)));
 
         else
           XMLException::selfThrow("SimulationXML, Integrator loading : undefined OneStepIntegrator type: " + typeOSI);
@@ -83,13 +85,13 @@ SimulationXML::SimulationXML(xmlNodePtr rootSimulationNode): rootNode(rootSimula
     {
       typeOSNS = (char*)OSNSPBNode->name;
       if (typeOSNS == LCP_TAG)
-        OSNSPBXMLSet.insert(new LCPXML(OSNSPBNode));
+        OSNSPBXMLSet.insert(SP::LCPXML(new LCPXML(OSNSPBNode)));
 
       else if (typeOSNS == QP_TAG)
-        OSNSPBXMLSet.insert(new QPXML(OSNSPBNode));
+        OSNSPBXMLSet.insert(SP::QPXML(new QPXML(OSNSPBNode)));
 
       else if (typeOSNS == "FrictionContact")
-        OSNSPBXMLSet.insert(new FrictionContactXML(OSNSPBNode));
+        OSNSPBXMLSet.insert(SP::FrictionContactXML(new FrictionContactXML(OSNSPBNode)));
 
       else // if (typeOSNS == RELAY_TAG) //--Not implemented for the moment
         XMLException::selfThrow("SimulationXML constructor, undefined (or not yet implemented) OneStepNSProblem of type: " + typeOSNS);
@@ -103,23 +105,12 @@ SimulationXML::SimulationXML(xmlNodePtr rootSimulationNode): rootNode(rootSimula
 
 SimulationXML::~SimulationXML()
 {
-  if (timeDiscretisationXML != NULL)
-    delete timeDiscretisationXML;
-
-  // Delete OSIXML set ...
-  SetOfOSIXMLIt it;
-  for (it = OSIXMLSet.begin(); it != OSIXMLSet.end(); ++it)
-    if ((*it) != NULL) delete(*it);
   OSIXMLSet.clear();
-  // Delete OSNSPBXMLSet set ...
-  SetOfOSNSPBXMLIt it2;
-  for (it2 = OSNSPBXMLSet.begin(); it2 != OSNSPBXMLSet.end(); ++it2)
-    if ((*it2) != NULL) delete(*it2);
   OSNSPBXMLSet.clear();
 }
 
 // To be reviewed ...
-void SimulationXML::saveSimulation2XML(xmlNodePtr  node, Simulation* str)
+void SimulationXML::saveSimulation2XML(xmlNodePtr  node, SP::Simulation str)
 {
   XMLException::selfThrow("SimulationXML saveSimulation2XML, not yet implemented");
 
@@ -127,7 +118,7 @@ void SimulationXML::saveSimulation2XML(xmlNodePtr  node, Simulation* str)
   //   string type, tmp;
   //   xmlNodePtr integratorDefinitionNode;
   //   OneStepIntegratorXML* osixml;
-  //   OneStepNSProblemXML* osnspbxml;
+  //   SP::OneStepNSProblemXML  osnspbxml;
   //   TimeDiscretisationXML* tdxml;
   //   int i;
 

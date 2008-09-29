@@ -28,11 +28,11 @@
 using namespace std;
 
 // --- constructor from a minimum set of data ---
-Moreau2::Moreau2(DynamicalSystem* newDS, double newTheta, Simulation* newS): Moreau(newDS, newTheta, newS)
+Moreau2::Moreau2(SP::DynamicalSystem newDS, double newTheta, SP::Simulation newS): Moreau(newDS, newTheta, newS)
 {
   integratorType = "Moreau2";
 }
-Moreau2::Moreau2(DynamicalSystemsSet& newDS, double newTheta, Simulation* newS): Moreau(newDS, newTheta, newS)
+Moreau2::Moreau2(DynamicalSystemsSet& newDS, double newTheta, SP::Simulation newS): Moreau(newDS, newTheta, newS)
 {
   integratorType = "Moreau2";
 }
@@ -44,7 +44,7 @@ Moreau2::~Moreau2()
 {
 }
 
-SiconosVector * Moreau2::getWorkX(DynamicalSystem *d)
+SP::SiconosVector  Moreau2::getWorkX(DynamicalSystem *d)
 {
   return workX[d];
 }
@@ -68,9 +68,9 @@ void Moreau2::computeFreeState()
   //
   DSIterator it; // Iterator through the set of DS.
 
-  DynamicalSystem* ds; // Current Dynamical System.
-  SiconosMatrix * W; // W Moreau matrix of the current DS.
-  SiconosMatrix * M; // W Moreau matrix of the current DS.
+  SP::DynamicalSystem ds; // Current Dynamical System.
+  SP::SiconosMatrix  W; // W Moreau matrix of the current DS.
+  SP::SiconosMatrix  M; // W Moreau matrix of the current DS.
   DSTYPES dsType ; // Type of the current DS.
   double theta; // Theta parameter of the current ds.
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
@@ -90,20 +90,20 @@ void Moreau2::computeFreeState()
 
       FirstOrderLinearDS *d = static_cast<FirstOrderLinearDS*>(ds);
 
-      SiconosVector *ffree = workX[d];
+      SP::SiconosVector ffree = workX[d];
 
       // x value at told
-      //SiconosVector *xold = d->getXMemoryPtr()->getSiconosVector(0);
-      SiconosVector *xold = d->getXPtr();
+      //SP::SiconosVector xold = d->getXMemoryPtr()->getSiconosVector(0);
+      SP::SiconosVector xold = d->getXPtr();
 
       // If M not equal to identity matrix
-      SiconosMatrix * M = d->getMPtr();
+      SP::SiconosMatrix  M = d->getMPtr();
       if (M != NULL)
         prod(*M, *xold, *ffree); // fFree = M*xi
       else
         *ffree = *xold;
 
-      SiconosMatrix *A = d->getAPtr();
+      SP::SiconosMatrix A = d->getAPtr();
       if (A != NULL)
       {
         d->computeA(told);
@@ -111,7 +111,7 @@ void Moreau2::computeFreeState()
         prod(coeff, *A, *xold, *ffree, false);
         // fFree += h(1-theta)A_i*x_i
       }
-      SiconosVector *b = d->getBPtr();
+      SP::SiconosVector b = d->getBPtr();
       if (b != NULL)
       {
         // fFree += h(1-theta)*bi + h*theta*bi+1
@@ -135,16 +135,16 @@ void Moreau2::computeFreeState()
 
       FirstOrderLinearDS *d = static_cast<FirstOrderLinearTIDS*>(ds);
       M = d->getMPtr();
-      SiconosVector *ffree = workX[d];
+      SP::SiconosVector ffree = workX[d];
       // x value at told
-      SiconosVector *xold = d->getXMemoryPtr()->getSiconosVector(0);
+      SP::SiconosVector xold = d->getXMemoryPtr()->getSiconosVector(0);
 
-      SiconosMatrix *A = d->getAPtr();
+      SP::SiconosMatrix A = d->getAPtr();
       if (A != NULL)
         prod(h * (1 - theta), *A, *xold, *ffree, true); // ffree = h*(1-theta)*A*xi
       else
         ffree->zero();
-      SiconosVector *b = d->getBPtr();
+      SP::SiconosVector b = d->getBPtr();
       if (b != NULL)
         scal(h, *b, *ffree, false); // ffree += hb
       if (M != NULL)
@@ -168,19 +168,19 @@ void Moreau2::computeFreeState()
       LagrangianDS* d = static_cast<LagrangianDS*>(ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SiconosVector* qold = d->getQMemoryPtr()->getSiconosVector(0);
-      SiconosVector* vold = d->getVelocityMemoryPtr()->getSiconosVector(0); // vol =v_i
+      SP::SiconosVector qold = d->getQMemoryPtr()->getSiconosVector(0);
+      SP::SiconosVector vold = d->getVelocityMemoryPtr()->getSiconosVector(0); // vol =v_i
 
       // --- ResiduFree computation ---
       // vFree pointer is used to compute and save ResiduFree in this first step.
-      SiconosVector *ffree = workX[d];
+      SP::SiconosVector ffree = workX[d];
 
       // -- Update W --
       // Note: during computeW, mass and jacobians of fL will be computed/
       computeW(t, d);
 
-      SiconosMatrix *M = d->getMassPtr();
-      SiconosVector *v = d->getVelocityPtr(); // v = v_k,i+1
+      SP::SiconosMatrix M = d->getMassPtr();
+      SP::SiconosVector v = d->getVelocityPtr(); // v = v_k,i+1
       prod(*M, (*v - *vold), *ffree); // ffree = M(v - vold)
 
       *ffree *= -1.0;
@@ -199,7 +199,7 @@ void Moreau2::computeFreeState()
         scal(coef, *d->getFLPtr(), *ffree, false);
       }
 
-      SiconosVector * ftmp = new SimpleVector(*ffree);
+      SP::SiconosVector  ftmp = new SimpleVector(*ffree);
       prod(*W, (*v), *ftmp);
       *ffree += *ftmp;
       delete(ftmp);
@@ -220,25 +220,25 @@ void Moreau2::computeFreeState()
       LagrangianLinearTIDS* d = static_cast<LagrangianLinearTIDS*>(ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SiconosVector* qold = d->getQMemoryPtr()->getSiconosVector(0); // qi
-      SiconosVector* vold = d->getVelocityMemoryPtr()->getSiconosVector(0); //vi
+      SP::SiconosVector qold = d->getQMemoryPtr()->getSiconosVector(0); // qi
+      SP::SiconosVector vold = d->getVelocityMemoryPtr()->getSiconosVector(0); //vi
 
       // --- ResiduFree computation ---
       // Velocity free and residu. vFree = RESfree (pointer equality !!).
-      SiconosVector *ffree = workX[d];
+      SP::SiconosVector ffree = workX[d];
 
-      SiconosMatrix *M = d->getMassPtr();
-      SiconosVector *v = d->getVelocityPtr(); // v = v_k,i+1
+      SP::SiconosMatrix M = d->getMassPtr();
+      SP::SiconosVector v = d->getVelocityPtr(); // v = v_k,i+1
       prod(*W, (*v - *vold), *ffree); // ffree = W (vold)
 
       // vFree pointer is used to compute and save ResiduFree in this first step.
       double coeff;
 
-      SiconosMatrix * C = d->getCPtr();
+      SP::SiconosMatrix  C = d->getCPtr();
       if (C != NULL)
         prod(-h, *C, *vold, *ffree, false); // ffree += -h*C*vi
 
-      SiconosMatrix * K = d->getKPtr();
+      SP::SiconosMatrix  K = d->getKPtr();
       if (K != NULL)
       {
         coeff = -h * h * theta;
@@ -246,7 +246,7 @@ void Moreau2::computeFreeState()
         prod(-h, *K, *qold, *ffree, false); // ffree += -h*K*qi
       }
 
-      SiconosVector * Fext = d->getFExtPtr();
+      SP::SiconosVector  Fext = d->getFExtPtr();
       if (Fext != NULL)
       {
         // computes Fext(ti)

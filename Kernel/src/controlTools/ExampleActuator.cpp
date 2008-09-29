@@ -23,7 +23,7 @@
 using namespace std;
 using namespace ActuatorFactory;
 
-ExampleActuator::ExampleActuator(int name, TimeDiscretisation* t): Actuator(name, t)
+ExampleActuator::ExampleActuator(int name, SP::TimeDiscretisation t): Actuator(name, t)
 {}
 
 void ExampleActuator::initialize()
@@ -36,7 +36,13 @@ void ExampleActuator::actuate()
 {
   cout << "Actuator action ... " << endl;
   DSIterator itDS;
+
+#ifndef WithSmartPtr
   SiconosVector * myZ = new SimpleVector(3);
+#else
+  SiconosVectorSPtr myZ(new SimpleVector(3));
+#endif
+
   (*myZ)(0) = 12;
   (*myZ)(1) = 132;
   (*myZ)(2) = 212;

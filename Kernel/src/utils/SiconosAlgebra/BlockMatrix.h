@@ -47,7 +47,7 @@ private:
 
   /** A container of pointers to SiconosMatrix*
    */
-  BlocksMat * mat;
+  SP::BlocksMat mat;
 
   /** list of blocks dimension - tabRow[i] = tabRow[i-1] + ni, ni being the number of rows of block i.
    */
@@ -56,10 +56,6 @@ private:
   /** list of blocks dimension - tabCol[i] = tabCol[i-1] + ni, ni being the number of columns of block i.
    */
   Index * tabCol;
-
-  /** a list of bool, to check inside-class allocation for SiconosMatrix blocks.
-   */
-  std::vector<bool> * isBlockAllocatedIn;
 
   /** default constructor
    */
@@ -82,15 +78,15 @@ public:
    *  \param unsigned int: number of blocks in a row
    *  \param unsigned int: number of col in a row
    */
-  BlockMatrix(const std::vector<SiconosMatrix* >&, unsigned int, unsigned int);
+  BlockMatrix(const std::vector<SP::SiconosMatrix>&, unsigned int, unsigned int);
 
   /** contructor with a list of 4 pointer to SiconosMatrix (!links with pointer, no copy!)
-   *  \param SiconosMatrix * m1, block (0,0)
-   *  \param SiconosMatrix * m2, block (0,1)
-   *  \param SiconosMatrix * m3, block (1,0)
-   *  \param SiconosMatrix * m4, block (1,1)
+   *  \param SP::SiconosMatrix  m1, block (0,0)
+   *  \param SP::SiconosMatrix  m2, block (0,1)
+   *  \param SP::SiconosMatrix  m3, block (1,0)
+   *  \param SP::SiconosMatrix  m4, block (1,1)
    */
-  BlockMatrix(SiconosMatrix*, SiconosMatrix*, SiconosMatrix*, SiconosMatrix*);
+  BlockMatrix(SiconosMatrixSPtr, SiconosMatrixSPtr, SiconosMatrixSPtr, SiconosMatrixSPtr);
 
   /** destructor
    */
@@ -323,7 +319,7 @@ public:
    *  \param unsigned int row
    *  \param unsigned int col
    */
-  inline SiconosMatrix* getBlockPtr(unsigned int row = 0, unsigned int col = 0)
+  inline SiconosMatrixSPtr getBlockPtr(unsigned int row = 0, unsigned int col = 0)
   {
     return (*mat)(row, col);
   };
@@ -332,9 +328,9 @@ public:
    *  \param unsigned int row
    *  \param unsigned int col
    */
-  inline const SiconosMatrix* getBlockPtr(unsigned int row = 0, unsigned int col = 0) const
+  inline SiconosMatrixSPtrConst getBlockPtr(unsigned int row = 0, unsigned int col = 0) const
   {
-    return (*mat)(row, col);
+    return boost::shared_ptr<SiconosMatrix>((*mat)(row, col));
   };
 
   /** get row index of current matrix and save it unsigned into vOut

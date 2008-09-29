@@ -110,9 +110,9 @@ void SimpleMatrixTest::setUp()
   m6 = new SimpleMatrix(size2 - 2, 2, 2);
   m7 = new SimpleMatrix(2, size2 - 2, 3);
   m8 = new SimpleMatrix(2, 2, 4);
-  Ab = new BlockMatrix(m1, m2, m3, m4);
-  Bb = new BlockMatrix(3 * *Ab);
-  Cb = new BlockMatrix(m5, m6, m7, m8);
+  Ab.reset(new BlockMatrix(m1, m2, m3, m4));
+  Bb.reset(new BlockMatrix(3 * *Ab));
+  Cb.reset(new BlockMatrix(m5, m6, m7, m8));
 
 
 }

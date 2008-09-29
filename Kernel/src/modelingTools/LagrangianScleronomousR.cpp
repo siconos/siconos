@@ -29,14 +29,14 @@ using namespace std;
 //default constructor
 LagrangianScleronomousR::LagrangianScleronomousR() : LagrangianR(ScleronomousR), hPtr(NULL), G0Ptr(NULL)
 {
-  G.resize(1, NULL);
+  G.resize(1);
 }
 
 
 // xml constructor
-LagrangianScleronomousR::LagrangianScleronomousR(RelationXML* relxml): LagrangianR(relxml, ScleronomousR), hPtr(NULL), G0Ptr(NULL)
+LagrangianScleronomousR::LagrangianScleronomousR(RelationXMLSPtr relxml): LagrangianR(relxml, ScleronomousR)
 {
-  LagrangianRXML * LRxml = static_cast<LagrangianRXML *>(relationxml);
+  LagrangianRXMLSPtr LRxml = boost::static_pointer_cast<LagrangianRXML>(relationxml);
   // h plug-in
   if (LRxml->hasH())
   {
@@ -45,7 +45,13 @@ LagrangianScleronomousR::LagrangianScleronomousR(RelationXML* relxml): Lagrangia
   }
   if (!LRxml->hasG())
     RuntimeException::selfThrow("LagrangianScleronomousR:: xml constructor failed, can not find a definition for G0.");
+
+#ifndef WithSmartPtr
   G.resize(1, NULL);
+#else
+  G.resize(1);
+#endif
+
   // Read G matrix or plug-in names.
   readGInXML(LRxml, 0);
 }
@@ -57,11 +63,21 @@ LagrangianScleronomousR::LagrangianScleronomousR(const string& computeH, const s
   setComputeHFunction(cShared.getPluginName(computeH), cShared.getPluginFunctionName(computeH));
   // Note that in this case, G is not allocated since we do not have its dimensions.
   // That will be done during initialize, with Interaction input.
+
+#ifndef WithSmartPtr
   G.resize(1, NULL);
+#else
+  G.resize(1);
+#endif
+
   string name = "G0";
   pluginNames[name] = computeG;
   setComputeGFunction(cShared.getPluginName(pluginNames[name]), cShared.getPluginFunctionName(pluginNames[name]), 0);
+
+#ifndef WithSmartPtr
   isAllocatedIn[name] = false;
+#endif
+
 }
 
 LagrangianScleronomousR::~LagrangianScleronomousR()
@@ -93,7 +109,7 @@ void LagrangianScleronomousR::computeH(double)
   if (isPlugged["h"])
   {
     // get vector y of the current interaction
-    SiconosVector *y = interaction->getYPtr(0);
+    SiconosVectorSPtr y = interaction->getYPtr(0);
 
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
     *workX = *data["q0"];
@@ -147,7 +163,7 @@ void LagrangianScleronomousR::computeOutput(double time, unsigned int derivative
   else
   {
     computeG(time);
-    SiconosVector *y = interaction->getYPtr(derivativeNumber) ;
+    SiconosVectorSPtr y = interaction->getYPtr(derivativeNumber) ;
     if (derivativeNumber == 1)
       prod(*G[0], *data["q1"], *y);
     else if (derivativeNumber == 2)
@@ -162,11 +178,11 @@ void LagrangianScleronomousR::computeInput(double time, unsigned int level)
   computeG(time, 0);
   string name = "p" + toString<unsigned int>(level);
   // get lambda of the concerned interaction
-  SiconosVector *lambda = interaction->getLambdaPtr(level);
+  SiconosVectorSPtr lambda = interaction->getLambdaPtr(level);
   // data[name] += trans(G) * lambda
   prod(*lambda, *G[0], *data[name], false);
 
-  //   SiconosMatrix * GT = new SimpleMatrix(*G[0]);
+  //   SP::SiconosMatrix  GT = new SimpleMatrix(*G[0]);
   //   GT->trans();
   //   *data[name] += prod(*GT, *lambda);
   //   delete GT;

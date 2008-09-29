@@ -22,7 +22,7 @@ using namespace std;
 ComplementarityConditionNSL::ComplementarityConditionNSL(unsigned int newSize): NonSmoothLaw(COMPLEMENTARITYCONDITIONNSLAW, newSize)
 {}
 
-ComplementarityConditionNSL::ComplementarityConditionNSL(NonSmoothLawXML* nslawxml):
+ComplementarityConditionNSL::ComplementarityConditionNSL(NonSmoothLawXMLSPtr nslawxml):
   NonSmoothLaw(COMPLEMENTARITYCONDITIONNSLAW, nslawxml)
 {}
 

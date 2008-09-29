@@ -52,7 +52,7 @@ NonSmoothDynamicalSystemXML::NonSmoothDynamicalSystemXML(xmlNodePtr  rootNSDSNod
         // We look for all Interaction tag, and for each of them add an InteractionXML pointer in the interactionXMLSet
         while (interNode != NULL) // scan all the "Interaction" tags, and for each of them insert an InteractionXML object in the set
         {
-          interactionsXMLSet.insert(new InteractionXML(interNode));
+          interactionsXMLSet.insert(SP::InteractionXML(new InteractionXML(interNode)));
           interNode = SiconosDOMTreeTools::findFollowNode(interNode, INTERACTION_TAG);
         }
       }
@@ -64,15 +64,9 @@ NonSmoothDynamicalSystemXML::NonSmoothDynamicalSystemXML(xmlNodePtr  rootNSDSNod
 NonSmoothDynamicalSystemXML::~NonSmoothDynamicalSystemXML()
 {
   // Delete DSXML set ...
-  SetOfDSXMLIt it;
-  for (it = DSXMLSet.begin(); it != DSXMLSet.end(); ++it)
-    if ((*it) != NULL) delete(*it);
   DSXMLSet.clear();
 
   // Delete InteractionXML set ...
-  SetOfInteractionsXMLIt it2;
-  for (it2 = interactionsXMLSet.begin(); it2 != interactionsXMLSet.end(); ++it2)
-    if ((*it2) != NULL) delete(*it2);
   interactionsXMLSet.clear();
 }
 
@@ -93,13 +87,13 @@ void NonSmoothDynamicalSystemXML::loadDynamicalSystemXML(xmlNodePtr  rootDSNode)
   {
     type = (char*)node->name; // get the type of DS
     if (type == LAGRANGIAN_NON_LINEARDS_TAG)
-      DSXMLSet.insert(new LagrangianDSXML(node, isbvp));
+      DSXMLSet.insert(SP::LagrangianDSXML(new LagrangianDSXML(node, isbvp)));
     else if (type == LAGRANGIAN_TIDS_TAG)
-      DSXMLSet.insert(new LagrangianLinearTIDSXML(node, isbvp));
+      DSXMLSet.insert(SP::LagrangianLinearTIDSXML(new LagrangianLinearTIDSXML(node, isbvp)));
     else if (type == LINEAR_DS_TAG || type == LINEAR_TIDS_TAG)
-      DSXMLSet.insert(new FirstOrderLinearDSXML(node, isbvp));
+      DSXMLSet.insert(SP::FirstOrderLinearDSXML(new FirstOrderLinearDSXML(node, isbvp)));
     else if (type == NON_LINEAR_DS_TAG)
-      DSXMLSet.insert(new FirstOrderNonLinearDSXML(node, isbvp));
+      DSXMLSet.insert(SP::FirstOrderNonLinearDSXML(new FirstOrderNonLinearDSXML(node, isbvp)));
     else
       XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadDynamicalSystemXML error : undefined DS type: " + type);
     // go to next node ...
@@ -110,7 +104,7 @@ void NonSmoothDynamicalSystemXML::loadDynamicalSystemXML(xmlNodePtr  rootDSNode)
 // WARNING : FOLLOWING FUNCTIONS ARE OBSOLETE, USELESS OR AT LEAST TO BE REVIEWED WHEN DSIO AND EQUALITY CONSTRAINTS
 // WILL BE WELL IMPLEMENTED IN MODELING PACKAGE
 
-void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
+void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystem nsds)
 {
   XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadDynamicalSystemXML not implemented.");
   //   string type;
@@ -389,10 +383,10 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(NonSmoothDynamica
   //      }
   //  }
   //     }
-  //   else XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadNonSmoothDynamicalSystem( NonSmoothDynamicalSystem* nsds ) Error : no rootNode is defined.");
+  //   else XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadNonSmoothDynamicalSystem( SP::NonSmoothDynamicalSystem nsds ) Error : no rootNode is defined.");
 }
 
-void NonSmoothDynamicalSystemXML::updateNonSmoothDynamicalSystemXML(xmlNodePtr  node, NonSmoothDynamicalSystem* nsds)
+void NonSmoothDynamicalSystemXML::updateNonSmoothDynamicalSystemXML(xmlNodePtr  node, SP::NonSmoothDynamicalSystem nsds)
 {
   rootNode = node;
   loadNonSmoothDynamicalSystem(nsds);

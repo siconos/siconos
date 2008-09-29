@@ -30,16 +30,22 @@ using namespace std;
 LagrangianCompliantR::LagrangianCompliantR(): LagrangianR(CompliantR), hPtr(NULL), G0Ptr(NULL), G1Ptr(NULL)
 {
   isPlugged["G0"] = false ;
-  isAllocatedIn["G0"] = false;
   isPlugged["G1"] = false ;
+
+#ifndef WithSmartPtr
+  isAllocatedIn["G0"] = false;
   isAllocatedIn["G1"] = false;
   G.resize(2, NULL);
+#else
+  G.resize(2);
+#endif
+
 }
 
 // xml constructor
-LagrangianCompliantR::LagrangianCompliantR(RelationXML* relxml): LagrangianR(relxml, CompliantR), hPtr(NULL), G0Ptr(NULL), G1Ptr(NULL)
+LagrangianCompliantR::LagrangianCompliantR(RelationXMLSPtr relxml): LagrangianR(relxml, CompliantR), hPtr(NULL), G0Ptr(NULL), G1Ptr(NULL)
 {
-  LagrangianRXML * LRxml = static_cast<LagrangianRXML *>(relationxml);
+  LagrangianRXMLSPtr LRxml = boost::static_pointer_cast<LagrangianRXML>(relationxml);
   // h plug-in
   if (LRxml->hasH())
   {
@@ -49,7 +55,13 @@ LagrangianCompliantR::LagrangianCompliantR(RelationXML* relxml): LagrangianR(rel
 
   if (!LRxml->hasG())
     RuntimeException::selfThrow("LagrangianCompliantR:: xml constructor failed, can not find a definition for G0.");
+
+#ifndef WithSmartPtr
   G.resize(2, NULL);
+#else
+  G.resize(2);
+#endif
+
   // Read G matrices or plug-in names.
   readGInXML(LRxml, 0);
   readGInXML(LRxml, 1);
@@ -62,14 +74,22 @@ LagrangianCompliantR::LagrangianCompliantR(const string& computeH, const std::ve
   setComputeHFunction(cShared.getPluginName(computeH), cShared.getPluginFunctionName(computeH));
   // G
   unsigned int nG = 2;
+
+#ifndef WithSmartPtr
   G.resize(nG, NULL);
+#else
+  G.resize(nG);
+#endif
+
   string name;
   for (unsigned int i = 0; i < nG; ++i)
   {
     name = "G" + toString<unsigned int>(i);
     pluginNames[name] = computeG[i];
     setComputeGFunction(cShared.getPluginName(pluginNames[name]), cShared.getPluginFunctionName(pluginNames[name]), i);
+#ifndef WithSmartPtr
     isAllocatedIn[name] = false;
+#endif
   }
 }
 
@@ -85,12 +105,22 @@ void LagrangianCompliantR::initComponents()
   LagrangianR::initComponents();
   unsigned int sizeY = interaction->getSizeOfY();
 
+#ifndef WithSmartPtr
   workL = new SimpleVector(sizeY);
+#else
+  workL.reset(new SimpleVector(sizeY));
+#endif
 
-  if (G[1] == NULL)
+  if (! G[1])
   {
+
+#ifndef WithSmartPtr
     G[1] = new SimpleMatrix(sizeY, sizeY);
     isAllocatedIn["G1"] = true ;
+#else
+    G[1].reset(new SimpleMatrix(sizeY, sizeY));
+#endif
+
   }
   else if (sizeY != G[1]->size(0) || sizeY != G[1]->size(1))
     RuntimeException::selfThrow("LagrangianCompliantR:: initComponents failed. Inconsistent sizes between Interaction and Relation matrices.");
@@ -123,8 +153,8 @@ void LagrangianCompliantR::computeH(double time)
   if (isPlugged["h"])
   {
     // get vector y of the current interaction
-    SiconosVector *y = interaction->getYPtr(0);
-    SiconosVector *lambda = interaction->getLambdaPtr(0);
+    SiconosVectorSPtr y = interaction->getYPtr(0);
+    SiconosVectorSPtr lambda = interaction->getLambdaPtr(0);
 
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
     *workX = *data["q0"];
@@ -188,12 +218,12 @@ void LagrangianCompliantR::computeOutput(double time, unsigned int derivativeNum
     computeH(time);
   else
   {
-    SiconosVector *y = interaction->getYPtr(derivativeNumber);
+    SiconosVectorSPtr y = interaction->getYPtr(derivativeNumber);
     computeG(time, 0);
     computeG(time, 1);
     if (derivativeNumber == 1)
     {
-      SiconosVector *lambda = interaction->getLambdaPtr(derivativeNumber);
+      SiconosVectorSPtr lambda = interaction->getLambdaPtr(derivativeNumber);
       // y = G0 q1 + G1 lambda
       prod(*G[0], *data["q1"], *y);
       prod(*G[1], *lambda, *y, false);
@@ -210,12 +240,12 @@ void LagrangianCompliantR::computeInput(const double time, const unsigned int le
   computeG(time, 0);
   string name = "p" + toString<unsigned int>(level);
   // get lambda of the concerned interaction
-  SiconosVector *lambda = interaction->getLambdaPtr(level);
+  SiconosVectorSPtr lambda = interaction->getLambdaPtr(level);
 
   // data[name] += trans(G) * lambda
   prod(*lambda, *G[0], *data[name], false);
 
-  //   SiconosMatrix * GT = new SimpleMatrix(*G[0]);
+  //   SP::SiconosMatrix  GT = new SimpleMatrix(*G[0]);
   //   GT->trans();
   //   *data[name] += prod(*GT, *lambda);
   //   delete GT;

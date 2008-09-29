@@ -92,7 +92,7 @@ protected:
    *  \param FirstOrderRXML* : the XML object.
    *  \param the type of the relation
    */
-  FirstOrderR(RelationXML*, RELATIONSUBTYPES);
+  FirstOrderR(RelationXMLSPtr, RELATIONSUBTYPES);
 
   /** To initialize data member: links to DS variables.
    */
@@ -142,7 +142,7 @@ public:
   /** get a pointer on matrix jacobianH[index]
    *  \return a pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getJacobianHPtr(unsigned int index = 0) const
+  inline SiconosMatrixSPtr getJacobianHPtr(unsigned int index = 0) const
   {
     return jacobianH[index];
   }
@@ -154,10 +154,10 @@ public:
   void setJacobianH(const SiconosMatrix&, unsigned int = 0);
 
   /** set jacobianH[index] to pointer newPtr (pointer link)
-   *  \param SiconosMatrix * newPtr
+   *  \param SP::SiconosMatrix  newPtr
    *  \param unsigned int: index position in jacobianH vector
    */
-  void setJacobianHPtr(SiconosMatrix *newPtr, unsigned int = 0);
+  void setJacobianHPtr(SiconosMatrixSPtr newPtr, unsigned int = 0);
 
   // -- jacobianG --
 
@@ -185,7 +185,7 @@ public:
   /** get a pointer on matrix jacobianG[index]
    *  \return a pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getJacobianGPtr(unsigned int index = 0) const
+  inline SiconosMatrixSPtr getJacobianGPtr(unsigned int index = 0) const
   {
     return jacobianG[index];
   }
@@ -197,10 +197,10 @@ public:
   void setJacobianG(const SiconosMatrix&, unsigned int = 0);
 
   /** set jacobianG[index] to pointer newPtr (pointer link)
-   *  \param SiconosMatrix * newPtr
+   *  \param SP::SiconosMatrix  newPtr
    *  \param unsigned int: index position in jacobianG vector
    */
-  void setJacobianGPtr(SiconosMatrix *newPtr, unsigned int = 0);
+  void setJacobianGPtr(SiconosMatrixSPtr newPtr, unsigned int = 0);
 
   /** To set a plug-in function to compute output function h
    *  \param string : the complete path to the plugin

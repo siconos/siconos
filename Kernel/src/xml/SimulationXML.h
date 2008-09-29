@@ -32,16 +32,19 @@ class OneStepNSProblemXML;
 class TimeDiscretisationXML;
 
 /** set of OneStepIntegratorXML */
-typedef std::set<OneStepIntegratorXML*> SetOfOSIXML;
+typedef std::set<OneStepIntegratorXMLSPtr> SetOfOSIXML;
 
 /** iterator through set of OneStepIntegratorXML */
 typedef SetOfOSIXML::iterator SetOfOSIXMLIt;
 
 /** set of OneStepNSProblemXML */
-typedef std::set<OneStepNSProblemXML*> SetOfOSNSPBXML;
+typedef std::set<OneStepNSProblemXMLSPtr> SetOfOSNSPBXML;
 
 /** iterator through  set of OneStepNSProblemXML*/
 typedef SetOfOSNSPBXML::iterator SetOfOSNSPBXMLIt;
+
+TYPEDEF_SPTR(SetOfOSIXML);
+TYPEDEF_SPTR(SetOfOSNSPBXML);
 
 /** XML management for Simulation
  *
@@ -90,12 +93,12 @@ private:
   SetOfOSNSPBXML OSNSPBXMLSet;
 
   /* TimeDiscretisationXML */
-  TimeDiscretisationXML *timeDiscretisationXML;
+  TimeDiscretisationXMLSPtr timeDiscretisationXML;
 
 public:
 
   /** Default constructor */
-  inline SimulationXML(): rootNode(NULL), timeDiscretisationXML(NULL) {};
+  inline SimulationXML(): rootNode(NULL) {};
 
   /** Build a SimulationXML object from a DOM tree describing a Simulation
    *   \param the Simulation xml node
@@ -149,7 +152,7 @@ public:
   /** Return the TimeDiscretisationXML of the SimulationXML
    *   \return the TimeDiscretisationXML of the SimulationXML
    */
-  inline TimeDiscretisationXML* getTimeDiscretisationXMLPtr()
+  inline TimeDiscretisationXMLSPtr getTimeDiscretisationXMLPtr()
   {
     return timeDiscretisationXML;
   }
@@ -164,9 +167,9 @@ public:
 
   /** save data of str into the DOM tree
    *   \param xmlNodePtr  : the root node of the SimulationXML
-   *   \param Simulation* : the Simulation of this SimulationXML
+   *   \param SP::Simulation : the Simulation of this SimulationXML
    */
-  void saveSimulation2XML(xmlNodePtr  , Simulation*);
+  void saveSimulation2XML(xmlNodePtr  , SimulationSPtr);
 };
 
 

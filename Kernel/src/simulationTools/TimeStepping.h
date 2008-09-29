@@ -24,6 +24,8 @@
 
 #include "Simulation.h"
 
+#include "SiconosPointers.h"
+
 /** type of function used to post-treat output info from solver. */
 typedef void (*CheckSolverFPtr)(int, Simulation*);
 
@@ -54,13 +56,13 @@ public:
   /** Constructor with the time-discretisation.
   *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
   */
-  TimeStepping(TimeDiscretisation*);
+  TimeStepping(TimeDiscretisationSPtr);
 
   /** constructor with XML object for TimeStepping
   *  \param SimulationXML* : the XML object corresponding
-  *  \param Model* : the Model which contains the Simulation
+  *  \param SP::Model : the Model which contains the Simulation
   */
-  TimeStepping(SimulationXML*, Model*);
+  TimeStepping(SimulationXMLSPtr, ModelSPtr);
 
   /** Destructor.
    */
@@ -69,7 +71,7 @@ public:
   /** add a OneStepNSProblem of the Simulation (if its not the first, it needs to have an id clearly defined)
   *  \param a pointer to OneStepNSProblem
   */
-  void addOneStepNSProblemPtr(OneStepNSProblem*);
+  void addOneStepNSProblemPtr(OneStepNSProblemSPtr);
 
   /** update indexSets[i] of the topology, using current y and lambda values of Interactions.
   *  \param unsigned int: the number of the set to be updated
@@ -116,7 +118,7 @@ public:
   void run(const std::string& = "linear", double = 0.005, unsigned int = 500);
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param Simulation* : the Simulation which must be converted
+   *  \param SP::Simulation : the Simulation which must be converted
    * \return a pointer on the Simulation if it is of the right type, NULL otherwise
    */
   static TimeStepping* convert(Simulation* str);

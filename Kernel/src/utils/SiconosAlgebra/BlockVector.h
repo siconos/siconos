@@ -28,17 +28,20 @@
 
 class SimpleVector;
 
-/** Object to handle block-vectors (ie list of SiconosVector*)
+/** Object to handle block-vectors (ie list of SP::SiconosVector)
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
  *
  * A block vector is a stl vector that handles pointers to SiconosVector.
  *
- * Insertion of NULL SiconosVector* is not allowed.
+ * Insertion of NULL SP::SiconosVector is not allowed.
  *
  */
 class BlockVector : public SiconosVector
+#ifdef WithSmartPtr
+  , public boost::enable_shared_from_this<BlockVector>
+#endif
 {
 private:
 
@@ -48,8 +51,10 @@ private:
   /** tabindex[i] = tabindex[i-1] + ni, ni being the size of svref[i]. */
   Index * tabIndex;
 
+#ifndef WithSmartPtr
   /** Flags to check wheter pointers were allocated in class constructors or not */
   std::vector<bool> * isBlockAllocatedIn;
+#endif
 
 public:
 
@@ -74,10 +79,10 @@ public:
   BlockVector(const SiconosVector&);
 
   /** contructor with a 2 SiconosVectors
-   *  \param SiconosVector* v1
-   *  \param SiconosVector* v2
+   *  \param SP::SiconosVector v1
+   *  \param SP::SiconosVector v2
    */
-  BlockVector(SiconosVector*, SiconosVector*);
+  BlockVector(SiconosVectorSPtr, SiconosVectorSPtr);
 
   /** constructor with the number of Blocks and their dimension (ie all Blocks have the same dim AND are SimpleVectors)
    *  \param unsigned int : number of Blocks
@@ -235,7 +240,7 @@ public:
    * \param unsigned int: block number
    * \return a pointer to a SiconosVector
    */
-  inline SiconosVector* getVectorPtr(unsigned int pos)
+  inline SiconosVectorSPtr getVectorPtr(unsigned int pos)
   {
     return vect.at(pos);
   };
@@ -244,10 +249,17 @@ public:
    * \param unsigned int: block number
    * \return a pointer to a SiconosVector
    */
-  inline const SiconosVector* getVectorPtr(unsigned int pos) const
+#ifndef WithSmartPtr
+  inline const SP::SiconosVector getVectorPtr(unsigned int pos) const
   {
     return vect.at(pos);
   };
+#else
+  inline SiconosVectorSPtrConst getVectorPtr(unsigned int pos) const
+  {
+    return vect.at(pos);
+  };
+#endif
 
   /** set i-eme SiconosVector of vect (copy)
    * \param unsigned int: block number
@@ -259,19 +271,23 @@ public:
    * \param unsigned int: block number
    * \param a pointer to a SiconosVector
    */
-  void setVectorPtr(unsigned int, SiconosVector*);
+  void setVectorPtr(unsigned int, SiconosVectorSPtr);
 
   /** get the vector at position i(ie this for Simple and block i for BlockVector)
    *  \param an unsigned integer i
-   *  \return a SiconosVector*
+   *  \return a SP::SiconosVector
    */
-  SiconosVector* operator [](unsigned int) ;
+  SiconosVectorSPtr operator [](unsigned int) ;
 
   /** get the vector at position i(ie this for Simple and block i for BlockVector)
    *  \param an unsigned integer i
-   *  \return a SiconosVector*
+   *  \return a SP::SiconosVector
    */
-  const SiconosVector* operator [](unsigned int) const;
+#ifndef WithSmartPtr
+  const SiconosVector operator [](unsigned int) const;
+#else
+  SiconosVectorSPtrConst operator [](unsigned int) const;
+#endif
 
   /** get the index tab
    * \return a standard vector of int
@@ -375,9 +391,9 @@ public:
   void insert(const SiconosVector&) ;
 
   /** Insert a pointer to a subvector in this vector: no reallocation nor copy.
-   *  \param a pointer to SiconosVector*
+   *  \param a pointer to SP::SiconosVector
    */
-  void insertPtr(SiconosVector*) ;
+  void insertPtr(SiconosVectorSPtr) ;
 
 };
 

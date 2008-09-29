@@ -87,7 +87,7 @@ void OneStepNSProblemXML::setNonSmoothSolverXMLPtr(NonSmoothSolverXML * solv)
   isSolverXMLAllocatedIn = false;
 }
 
-void OneStepNSProblemXML::updateOneStepNSProblemXML(xmlNode* node, OneStepNSProblem* osnspb)
+void OneStepNSProblemXML::updateOneStepNSProblemXML(xmlNode* node, SP::OneStepNSProblem osnspb)
 {
   rootNode = node;
 }

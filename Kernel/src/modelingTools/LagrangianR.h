@@ -77,7 +77,7 @@ protected:
    *  \param relationXML
    *  \param string: relation subType
    */
-  LagrangianR(RelationXML*, RELATIONSUBTYPES);
+  LagrangianR(RelationXMLSPtr, RELATIONSUBTYPES);
 
 public:
 
@@ -89,7 +89,7 @@ public:
       \param LagrangianRXML, the xml pointer
       \param i, index of required G
   */
-  void readGInXML(LagrangianRXML *, unsigned int);
+  void readGInXML(LagrangianRXMLSPtr, unsigned int);
 
   /** initialize the relation (check sizes, memory allocation ...)
    */
@@ -133,7 +133,7 @@ public:
   /** get a pointer on matrix G[index]
    *  \return a pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getGPtr(unsigned int index = 0) const
+  inline SiconosMatrixSPtr getGPtr(unsigned int index = 0) const
   {
     return G[index];
   }
@@ -145,10 +145,10 @@ public:
   void setG(const SiconosMatrix&, unsigned int = 0);
 
   /** set G[index] to pointer newPtr (pointer link)
-   *  \param SiconosMatrix * newPtr
+   *  \param SP::SiconosMatrix  newPtr
    *  \param unsigned int: index position in G vector
    */
-  void setGPtr(SiconosMatrix *newPtr, unsigned int = 0);
+  void setGPtr(SiconosMatrixSPtr newPtr, unsigned int = 0);
 
   /** to set a specified function to compute function h(q,...)
    *  \param string : the complete path to the plugin

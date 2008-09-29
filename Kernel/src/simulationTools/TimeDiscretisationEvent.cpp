@@ -32,7 +32,7 @@ TimeDiscretisationEvent::TimeDiscretisationEvent(double time, int): Event(time, 
 TimeDiscretisationEvent::~TimeDiscretisationEvent()
 {}
 
-void TimeDiscretisationEvent::process(Simulation* simulation)
+void TimeDiscretisationEvent::process(SP::Simulation simulation)
 {
   // Update y[i] values in Interactions with new DS states.
   //simulation->updateOutput(0, 1);

@@ -30,7 +30,7 @@ DiskPlanR::DiskPlanR(double r, double A, double B, double C) :
 void DiskPlanR::computeH(double)
 {
 
-  SiconosVector *y = interaction->getYPtr(0);
+  SP::SiconosVector y = interaction->getYPtr(0);
 
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
   *workX = *data["q0"];

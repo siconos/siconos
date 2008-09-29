@@ -56,7 +56,7 @@ QPXML::QPXML(xmlNode * QPNode)
 
 QPXML::~QPXML() {}
 
-void QPXML::updateOneStepNSProblemXML(xmlNode* node, OneStepNSProblem* osnspb)
+void QPXML::updateOneStepNSProblemXML(xmlNode* node, SP::OneStepNSProblem osnspb)
 {
   rootNode = node;
 }

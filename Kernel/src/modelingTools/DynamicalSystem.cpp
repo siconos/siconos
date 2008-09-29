@@ -22,6 +22,7 @@
 
 using namespace std;
 
+#ifndef WithSmartPtr
 void DynamicalSystem::initAllocationFlags(bool in) // default in = true.
 {
   isAllocatedIn["xMemory"] = in;
@@ -34,6 +35,7 @@ void DynamicalSystem::initAllocationFlags(bool in) // default in = true.
   isAllocatedIn["jacobianG0"] = in;
   isAllocatedIn["jacobianG1"] = in;
 }
+#endif
 
 void DynamicalSystem::initPluginFlags(bool val)
 {
@@ -46,20 +48,17 @@ void DynamicalSystem::initPluginFlags(bool val)
 
 // Default constructor (protected)
 DynamicalSystem::DynamicalSystem(DSTYPES type):
-  DSType(type), number(0), nsds(NULL), n(0), x0(NULL), jacobianXRhs(NULL), z(NULL), g(NULL), computeGPtr(NULL),
-  xMemory(NULL), stepsInMemory(1), dsxml(NULL)
+  DSType(type), number(0), n(0), stepsInMemory(1)
 {
-  initAllocationFlags(false);
-  x.resize(2, NULL);
+  x.resize(2);
 }
 
 // From XML file (warning: newNsds is optional, default = NULL)
-DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds):
-  DSType(dsXML->getType()), number(dsXML->getNumber()), nsds(newNsds), n(0), x0(NULL), jacobianXRhs(NULL), z(NULL), g(NULL), computeGPtr(NULL),
-  xMemory(NULL), stepsInMemory(1), dsxml(dsXML)
+DynamicalSystem::DynamicalSystem(DynamicalSystemXMLSPtr dsXML, SP::NonSmoothDynamicalSystem newNsds):
+  DSType(dsXML->getType()), number(dsXML->getNumber()), nsds(newNsds), n(0), stepsInMemory(1), dsxml(dsXML)
 {
-  if (dsXML == NULL)  // Not really useful: if NULL, error in init. list of the present constructor ... It is also tested in NSDS xml constructor.
-    RuntimeException::selfThrow("DynamicalSystem::DynamicalSystem - DynamicalSystemXML paramater must not be NULL");
+  assert(dsXML &&
+         "DynamicalSystem::DynamicalSystem - DynamicalSystemXML paramater must not be NULL");
 
   // Only the following data are set in this general constructor:
   //  - DSTye
@@ -72,14 +71,12 @@ DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalS
   // === Initial conditions ===
   // Warning: n is set thanks to vector of initial conditions size. That will be set in derived classes constructor.
 
-  initAllocationFlags(false); // default values
-  x.resize(2, NULL);
+  x.resize(2);
 
   // z - Optional parameter.
   if (dsxml->hasZ())
   {
-    z = new SimpleVector(dsxml->getZ());
-    isAllocatedIn["z"] = true;
+    z.reset(new SimpleVector(dsxml->getZ()));
   }
 
   if (dsxml->hasStepsInMemory()) stepsInMemory = dsxml->getStepsInMemory();
@@ -87,40 +84,14 @@ DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalS
 
 // From a minimum set of data
 DynamicalSystem::DynamicalSystem(DSTYPES type, int newNumber, unsigned int newN):
-  DSType(type), number(newNumber), nsds(NULL), n(newN), x0(NULL), jacobianXRhs(NULL), z(NULL), g(NULL), computeGPtr(NULL),
-  xMemory(NULL), stepsInMemory(1), dsxml(NULL)
+  DSType(type), number(newNumber), n(newN), stepsInMemory(1)
 {
-  initAllocationFlags(false);
-  x.resize(2, NULL);
+  x.resize(2);
 }
 
 // --- Destructor ---
 DynamicalSystem::~DynamicalSystem()
 {
-  if (isAllocatedIn["x0"])delete x0;
-  x0 = NULL ;
-  if (isAllocatedIn["x"]) delete x[0];
-  x[0] = NULL;
-  if (isAllocatedIn["rhs"]) delete x[1];
-  x[1] = NULL;
-  if (isAllocatedIn["xMemory"]) delete xMemory;
-  xMemory = NULL;
-  if (isAllocatedIn["jacobianXRhs"]) delete jacobianXRhs;
-  jacobianXRhs = NULL;
-  if (isAllocatedIn["z"]) delete z;
-  z = NULL;
-  if (isAllocatedIn["g"]) delete g;
-  g = NULL;
-  if (isAllocatedIn["jacobianG0"]) delete jacobianG[0];
-  if (isAllocatedIn["jacobianG1"]) delete jacobianG[1];
-  jacobianG.clear();
-  computeGPtr = NULL;
-  // clean workMatrix map. Warning: if set/get functions are added for this object,
-  // add a isAlloc. deque to check in-class allocation.
-  map<string, SiconosMatrix*>::iterator it;
-  for (it = workMatrix.begin(); it != workMatrix.end(); ++it)
-    if (it->second != NULL)
-      delete it->second;
 }
 
 bool DynamicalSystem::checkDynamicalSystem()
@@ -133,7 +104,7 @@ bool DynamicalSystem::checkDynamicalSystem()
     output = false;
   }
   // x0 != NULL
-  if (x0 == NULL)
+  if (!x0)
   {
     RuntimeException::selfThrow("DynamicalSystem::checkDynamicalSystem - x0 not set.");
     output = false;
@@ -149,28 +120,32 @@ void DynamicalSystem::setX0(const SiconosVector& newValue)
   if (newValue.size() != n)
     RuntimeException::selfThrow("DynamicalSystem::setX0 - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
 
-  if (x0 != NULL)
+  if (x0)
     *x0 = newValue;
 
   else
   {
     if (newValue.isBlock())
-      x0 = new BlockVector(newValue);
+      x0.reset(new BlockVector(newValue));
     else
-      x0 = new SimpleVector(newValue);
-    isAllocatedIn["x0"] = true;
+      x0.reset(new SimpleVector(newValue));
   }
 }
 
-void DynamicalSystem::setX0Ptr(SiconosVector* newPtr)
+void DynamicalSystem::setX0Ptr(SiconosVectorSPtr newPtr)
 {
   // check dimensions ...
   if (newPtr->size() != n)
     RuntimeException::selfThrow("DynamicalSystem::setX0Ptr - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
 
+#ifndef WithSmartPtr
   if (isAllocatedIn["x0"]) delete x0;
   x0 = newPtr;
   isAllocatedIn["x0"] = false;
+#else
+  x0 = newPtr;
+#endif
+
 }
 
 void DynamicalSystem::setX(const SiconosVector& newValue)
@@ -182,16 +157,22 @@ void DynamicalSystem::setX(const SiconosVector& newValue)
   if (newValue.size() != n)
     RuntimeException::selfThrow("DynamicalSystem::setX - inconsistent sizes between x input and n - Maybe you forget to set n?");
 
-  if (x[0] == NULL)
+  if (! x[0])
   {
+
+#ifndef WithSmartPtr
     x[0] = new SimpleVector(newValue);
     isAllocatedIn["x"] = true;
+#else
+    x[0].reset(new SimpleVector(newValue));
+#endif
+
   }
   else
     *(x[0]) = newValue;
 }
 
-void DynamicalSystem::setXPtr(SiconosVector* newPtr)
+void DynamicalSystem::setXPtr(SiconosVectorSPtr newPtr)
 {
   // Warning: this only sets the pointer x[0]
 
@@ -199,11 +180,16 @@ void DynamicalSystem::setXPtr(SiconosVector* newPtr)
   if (newPtr->size() != n)
     RuntimeException::selfThrow("DynamicalSystem::setXPtr - inconsistent sizes between x input and n - Maybe you forget to set n?");
 
+#ifndef WithSmartPtr
   if (isAllocatedIn["x"])
     delete x[0];
 
   x[0] = newPtr;
   isAllocatedIn["x"] = false;
+#else
+  x[0] = newPtr;
+#endif
+
 }
 
 void DynamicalSystem::setRhs(const SiconosVector& newValue)
@@ -214,16 +200,22 @@ void DynamicalSystem::setRhs(const SiconosVector& newValue)
   if (newValue.size() != n)
     RuntimeException::selfThrow("DynamicalSystem::setRhs - inconsistent sizes between x input and n - Maybe you forget to set n?");
 
-  if (x[1] == NULL)
+  if (! x[1])
   {
+
+#ifndef WithSmartPtr
     x[1] = new SimpleVector(newValue);
     isAllocatedIn["rhs"] = true;
+#else
+    x[1].reset(new SimpleVector(newValue));
+#endif
+
   }
   else
     *(x[1]) = newValue;
 }
 
-void DynamicalSystem::setRhsPtr(SiconosVector* newPtr)
+void DynamicalSystem::setRhsPtr(SiconosVectorSPtr newPtr)
 {
   // Warning: this only sets the pointer (*x)[1]
 
@@ -231,11 +223,16 @@ void DynamicalSystem::setRhsPtr(SiconosVector* newPtr)
   if (newPtr->size() != n)
     RuntimeException::selfThrow("DynamicalSystem::setRhsPtr - inconsistent sizes between x input and n - Maybe you forget to set n?");
 
+#ifndef WithSmartPtr
   if (isAllocatedIn["rhs"])
     delete x[1];
 
   x[1] = newPtr;
   isAllocatedIn["rhs"] = false;
+#else
+  x[1] = newPtr;
+#endif
+
 }
 
 void DynamicalSystem::setJacobianXRhs(const SiconosMatrix& newValue)
@@ -244,32 +241,41 @@ void DynamicalSystem::setJacobianXRhs(const SiconosMatrix& newValue)
   if (newValue.size(0) != n || newValue.size(1) != n)
     RuntimeException::selfThrow("DynamicalSystem::setJacobianXRhs - inconsistent sizes between jacobianXRhs input and n - Maybe you forget to set n?");
 
-  if (jacobianXRhs != NULL)
+  if (jacobianXRhs)
     *jacobianXRhs = newValue;
 
   else
   {
+#ifndef WithSmartPtr
     jacobianXRhs = new SimpleMatrix(newValue);
     isAllocatedIn["jacobianXRhs"] = true;
+#else
+    jacobianXRhs.reset(new SimpleMatrix(newValue));
+#endif
   }
   isPlugin["jacobianXRhs"] = false;
 }
 
-void DynamicalSystem::setJacobianXRhsPtr(SiconosMatrix *newPtr)
+void DynamicalSystem::setJacobianXRhsPtr(SiconosMatrixSPtr newPtr)
 {
   // check dimensions ...
   if (newPtr->size(0) != n || newPtr->size(1) != n)
     RuntimeException::selfThrow("DynamicalSystem::setJacobianXRhsPtr - inconsistent sizes between jacobianXRhs input and n - Maybe you forget to set n?");
 
+#ifndef WithSmartPtr
   if (isAllocatedIn["jacobianXRhs"]) delete jacobianXRhs;
   jacobianXRhs = newPtr;
   isAllocatedIn["jacobianXRhs"] = false;
+#else
+  jacobianXRhs = newPtr;
+#endif
+
   isPlugin["jacobianXRhs"] = false;
 }
 
 void DynamicalSystem::setZ(const SiconosVector& newValue)
 {
-  if (z != NULL)
+  if (z)
   {
     if (newValue.size() != z->size())
       RuntimeException::selfThrow("DynamicalSystem::setZ - inconsistent sizes between input and existing z - To change z size use setZPtr.");
@@ -277,19 +283,36 @@ void DynamicalSystem::setZ(const SiconosVector& newValue)
   }
   else
   {
+
+#ifndef WithSmartPtr
     if (newValue.isBlock())
       z = new BlockVector(newValue);
     else
       z = new SimpleVector(newValue);
     isAllocatedIn["z"] = true;
+#else
+    if (newValue.isBlock())
+      z.reset(new BlockVector(newValue));
+    else
+      z.reset(new SimpleVector(newValue));
+#endif
+
   }
 }
 
-void DynamicalSystem::setZPtr(SiconosVector* newPtr)
+void DynamicalSystem::setZPtr(SiconosVectorSPtr newPtr)
 {
+
+#ifndef WithSmartPtr
   if (isAllocatedIn["z"]) delete z;
   z = newPtr;
   isAllocatedIn["z"] = false;
+#else
+  z = newPtr;
+#endif
+
+
+
 }
 
 void DynamicalSystem::setG(const SiconosVector& newValue)
@@ -298,26 +321,36 @@ void DynamicalSystem::setG(const SiconosVector& newValue)
   if (newValue.size() != n)
     RuntimeException::selfThrow("DynamicalSystem::setG - inconsistent sizes between g input and n - Maybe you forget to set n?");
 
-  if (g == NULL)
+  if (! g)
   {
+
+#ifndef WithSmartPtr
     g = new SimpleVector(newValue);
     isAllocatedIn["g"] = true;
+#else
+    g.reset(new SimpleVector(newValue));
+#endif
+
   }
   else
     *g = newValue;
 }
 
-void DynamicalSystem::setGPtr(SiconosVector* newPtr)
+void DynamicalSystem::setGPtr(SiconosVectorSPtr newPtr)
 {
   // check dimensions ...
   if (newPtr->size() != n)
     RuntimeException::selfThrow("DynamicalSystem::setGPtr - inconsistent sizes between g input and n - Maybe you forget to set n?");
 
+#ifndef WithSmartPtr
   if (isAllocatedIn["g"])
     delete g;
-
   g = newPtr;
   isAllocatedIn["g"] = false;
+#else
+  g = newPtr;
+#endif
+
 }
 
 void DynamicalSystem::setJacobianG(unsigned int i, const SiconosMatrix& newValue)
@@ -326,31 +359,44 @@ void DynamicalSystem::setJacobianG(unsigned int i, const SiconosMatrix& newValue
     RuntimeException::selfThrow("DynamicalSystem - setJacobianG: inconsistent dimensions with problem size for input matrix JacobianG");
 
   string name = "jacobianG" + toString<unsigned int>(i);
-  if (jacobianG[i] == NULL)
+  if (! jacobianG[i])
   {
+
+#ifndef WithSmartPtr
     jacobianG[i] = new SimpleMatrix(newValue);
     isAllocatedIn[name] = true;
+#else
+    jacobianG[i].reset(new SimpleMatrix(newValue));
+#endif
+
   }
   else
     *jacobianG[i] = newValue;
+
   isPlugin[name] = false;
 }
 
-void DynamicalSystem::setJacobianGPtr(unsigned int i, SiconosMatrix *newPtr)
+void DynamicalSystem::setJacobianGPtr(unsigned int i, SiconosMatrixSPtr newPtr)
 {
   if (newPtr->size(0) != n || newPtr->size(1) != n)
     RuntimeException::selfThrow("DynamicalSystem - setJacobianGPtr: inconsistent input matrix size ");
 
   string name = "jacobianG" + toString<unsigned int>(i);
+
+#ifndef WithSmartPtr
   if (isAllocatedIn[name]) delete jacobianG[i];
   jacobianG[i] = newPtr;
   isAllocatedIn[name] = false;
+#else
+  jacobianG[i] = newPtr;
+#endif
+
   isPlugin[name] = false;
 }
 
 void DynamicalSystem::setXMemory(const SiconosMemory& newValue)
 {
-  if (xMemory != NULL)
+  if (xMemory)
   {
     if (newValue.getMemorySize() != xMemory->getMemorySize())
       RuntimeException::selfThrow("DynamicalSystem::setXMemory - inconsistent sizes between xMemory input and existing memorySize");
@@ -359,16 +405,28 @@ void DynamicalSystem::setXMemory(const SiconosMemory& newValue)
   }
   else
   {
+
+#ifndef WithSmartPtr
     xMemory = new SiconosMemory(newValue);
     isAllocatedIn["xMemory"] = true;
+#else
+    xMemory.reset(new SiconosMemory(newValue));
+#endif
+
   }
 }
 
-void DynamicalSystem::setXMemoryPtr(SiconosMemory * newPtr)
+void DynamicalSystem::setXMemoryPtr(SiconosMemorySPtr newPtr)
 {
+
+#ifndef WithSmartPtr
   if (isAllocatedIn["xMemory"]) delete xMemory;
   xMemory = newPtr;
   isAllocatedIn["xMemory"] = false;
+#else
+  xMemory = newPtr;
+#endif
+
 }
 
 void DynamicalSystem::update(double time)
@@ -386,18 +444,30 @@ void DynamicalSystem::initMemory(unsigned int steps)
   else
   {
     stepsInMemory = steps;
+
+#ifndef WithSmartPtr
     if (isAllocatedIn["xMemory"]) delete xMemory;
     xMemory = new SiconosMemory(steps);
     isAllocatedIn["xMemory"] = true;
+#else
+    xMemory.reset(new SiconosMemory(steps));
+#endif
+
   }
 }
 
 void DynamicalSystem::setComputeGFunction(const string& pluginPath, const string& functionName)
 {
-  if (g == NULL)
+  if (! g)
   {
+
+#ifndef WithSmartPtr
     g = new SimpleVector(n);
     isAllocatedIn["g"] = true;
+#else
+    g.reset(new SimpleVector(n));
+#endif
+
   }
 
   cShared.setFunction(&computeGPtr, pluginPath, functionName);
@@ -412,10 +482,16 @@ void DynamicalSystem::setComputeJacobianGFunction(unsigned int i, const string& 
 {
   string name = "jacobianG" + toString<unsigned int>(i);
 
-  if (jacobianG[i] == NULL)
+  if (! jacobianG[i])
   {
+
+#ifndef WithSmartPtr
     jacobianG[i] = new SimpleMatrix(n, n);
     isAllocatedIn[name] = true;
+#else
+    jacobianG[i].reset(new SimpleMatrix(n, n));
+#endif
+
   }
 
   cShared.setFunction(&computeJacobianGPtr[i], pluginPath, functionName);
@@ -430,7 +506,7 @@ void DynamicalSystem::computeG(double time)
 {
   if (isPlugin["g"])
   {
-    if (computeGPtr == NULL)
+    if (!computeGPtr)
       RuntimeException::selfThrow("DynamicalSystem::computeG() is not linked to a plugin function");
 
     computeGPtr(time, n, &(*x[0])(0), &(*x[1])(0), &(*g)(0), z->size(), &(*z)(0));
@@ -444,7 +520,7 @@ void DynamicalSystem::computeJacobianG(unsigned int i, double time)
 
   if (isPlugin[name])
   {
-    if (computeJacobianGPtr[i] == NULL)
+    if (!computeJacobianGPtr[i])
       RuntimeException::selfThrow("computeJacobianG(i,time) is not linked to a plugin function. i=" + i);
 
     (computeJacobianGPtr[i])(time, n, &(*x[0])(0), &(*x[1])(0), &(*jacobianG[i])(0, 0), z->size(), &(*z)(0));
@@ -458,7 +534,7 @@ void DynamicalSystem::saveDSToXML()
 {
   RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - Not yet tested for DS: do not use it.");
 
-  if (dsxml == NULL)
+  if (!dsxml)
     RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - The DynamicalSystemXML object doesn't exists");
 
   // --- Specific (depending on derived class) DS data ---

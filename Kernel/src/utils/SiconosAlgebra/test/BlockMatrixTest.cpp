@@ -31,12 +31,12 @@ void BlockMatrixTest::setUp()
 {
   tol = 1e-12;
 
-  B = new SimpleMatrix(2, 2, 1);
-  C = new SimpleMatrix(2, 4, 2);
-  D = new SimpleMatrix(2, 1, 3);
-  E = new SimpleMatrix(3, 2, 4);
-  F = new SimpleMatrix(3, 4, 5);
-  G = new SimpleMatrix(3, 1, 6);
+  B.reset(new SimpleMatrix(2, 2, 1));
+  C.reset(new SimpleMatrix(2, 4, 2));
+  D.reset(new SimpleMatrix(2, 1, 3));
+  E.reset(new SimpleMatrix(3, 2, 4));
+  F.reset(new SimpleMatrix(3, 4, 5));
+  G.reset(new SimpleMatrix(3, 1, 6));
 
   m.resize(6);
   m[0] = B ;
@@ -54,7 +54,7 @@ void BlockMatrixTest::setUp()
   tCol[1] = 6;
   tCol[2] = 7;
 
-  mapRef = new BlocksMat(2, 1);
+  mapRef.reset(new BlocksMat(2, 1));
   (*mapRef)(0, 0) = B;
   (*mapRef)(1, 0) = E;
 
@@ -63,17 +63,11 @@ void BlockMatrixTest::setUp()
 void BlockMatrixTest::tearDown()
 {
   m.clear();
-  delete B;
-  delete C;
-  delete D;
-  delete E;
-  delete F;
-  delete G;
 }
 
 //______________________________________________________________________________
 
-void BlockMatrixTest::testConstructor0() // constructor with a vector of SiconosMatrix*
+void BlockMatrixTest::testConstructor0() // constructor with a vector of SP::SiconosMatrix
 {
   cout << "====================================" << endl;
   cout << "=== Block Matrix tests start ...=== " << endl;
@@ -164,7 +158,7 @@ void BlockMatrixTest::testConstructor3() // Copy constructor, from a SiconosMatr
   cout << "--> Constructor 3(copy) test ended with success." << endl;
 }
 
-void BlockMatrixTest::testConstructor4() // Constructor from 4 SiconosMatrix*
+void BlockMatrixTest::testConstructor4() // Constructor from 4 SP::SiconosMatrix
 {
   cout << "--> Test: constructor 4." << endl;
   SiconosMatrix * test = new BlockMatrix(B, C, E, F);
@@ -234,16 +228,16 @@ void BlockMatrixTest::testNormInf()
 void BlockMatrixTest::testZero()
 {
   cout << "--> Test: zero." << endl;
-  SiconosMatrix* A = new SimpleMatrix(2, 2);
+  SP::SiconosMatrix A(new SimpleMatrix(2, 2));
   A->eye();
-  SiconosMatrix* H = new SimpleMatrix(2, 4);
+  SP::SiconosMatrix H(new SimpleMatrix(2, 4));
   H->eye();
-  SiconosMatrix* I = new SimpleMatrix(5, 2);
+  SP::SiconosMatrix I(new SimpleMatrix(5, 2));
   I->eye();
-  SiconosMatrix* J = new SimpleMatrix(5, 4);
+  SP::SiconosMatrix J(new SimpleMatrix(5, 4));
   J->eye();
 
-  std::vector<SiconosMatrix*> v(4);
+  std::vector<SP::SiconosMatrix> v(4);
   v[0] = A ;
   v[1] = H ;
   v[2] = I ;
@@ -271,22 +265,19 @@ void BlockMatrixTest::testZero()
   }
 
   delete test;
-  delete A;
-  delete H;
-  delete I;
-  delete J;
+
   cout << "--> zero test ended with success." << endl;
 }
 
 void BlockMatrixTest::testEye()
 {
   cout << "--> Test: eye." << endl;
-  SiconosMatrix* A = new SimpleMatrix(2, 2);
-  SiconosMatrix* H = new SimpleMatrix(2, 4);
-  SiconosMatrix* I = new SimpleMatrix(5, 2);
-  SiconosMatrix* J = new SimpleMatrix(5, 4);
+  SP::SiconosMatrix A(new SimpleMatrix(2, 2));
+  SP::SiconosMatrix H(new SimpleMatrix(2, 4));
+  SP::SiconosMatrix I(new SimpleMatrix(5, 2));
+  SP::SiconosMatrix J(new SimpleMatrix(5, 4));
 
-  std::vector<SiconosMatrix*> v(4);
+  std::vector<SP::SiconosMatrix> v(4);
   v[0] = A ;
   v[1] = H ;
   v[2] = I ;
@@ -328,10 +319,7 @@ void BlockMatrixTest::testEye()
   }
 
   delete test;
-  delete A;
-  delete H;
-  delete I;
-  delete J;
+
   cout << "--> eye test ended with success." << endl;
 }
 // Add tests with getDense ...
@@ -343,11 +331,11 @@ void BlockMatrixTest::testGetSetRowCol()
   SimpleVector * tmp1 = new SimpleVector(6);
   (*tmp1)(0) = 1;
   (*tmp1)(2) = 2;
-  SiconosMatrix* A = new SimpleMatrix(2, 2);
-  SiconosMatrix* H = new SimpleMatrix(2, 4);
-  SiconosMatrix* I = new SimpleMatrix(5, 2);
-  SiconosMatrix* J = new SimpleMatrix(5, 4);
-  std::vector<SiconosMatrix*> v(4);
+  SP::SiconosMatrix A(new SimpleMatrix(2, 2));
+  SP::SiconosMatrix H(new SimpleMatrix(2, 4));
+  SP::SiconosMatrix I(new SimpleMatrix(5, 2));
+  SP::SiconosMatrix J(new SimpleMatrix(5, 4));
+  std::vector<SP::SiconosMatrix> v(4);
   v[0] = A ;
   v[1] = H ;
   v[2] = I ;
@@ -372,10 +360,6 @@ void BlockMatrixTest::testGetSetRowCol()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", (*I)(0, 1) == 2, true);
 
   delete test;
-  delete A;
-  delete H;
-  delete I;
-  delete J;
   delete tmp;
   delete tmp1;
   delete tmp2;
@@ -386,15 +370,15 @@ void BlockMatrixTest::testGetSetRowCol()
 void BlockMatrixTest::testAssignment()
 {
   cout << "--> Test: assignment." << endl;
-  SiconosMatrix * Btmp = new SimpleMatrix(2, 2);
-  SiconosMatrix * Ctmp = new SimpleMatrix(2, 5);
-  SiconosMatrix * Dtmp = new SimpleMatrix(3, 2);
-  SiconosMatrix * Etmp = new SimpleMatrix(3, 5);
+  SP::SiconosMatrix Btmp(new SimpleMatrix(2, 2));
+  SP::SiconosMatrix Ctmp(new SimpleMatrix(2, 5));
+  SP::SiconosMatrix Dtmp(new SimpleMatrix(3, 2));
+  SP::SiconosMatrix Etmp(new SimpleMatrix(3, 5));
 
-  SiconosMatrix * test = new BlockMatrix(Btmp, Ctmp, Dtmp, Etmp);
+  SP::SiconosMatrix test(new BlockMatrix(Btmp, Ctmp, Dtmp, Etmp));
   // Block = Siconos(Simple)
   unsigned int size0 = test->size(0), size1 = test->size(1);
-  SiconosMatrix * ref = new SimpleMatrix(size0, size1);
+  SP::SiconosMatrix ref(new SimpleMatrix(size0, size1));
   for (unsigned int i = 0; i < size0 ; ++i)
     for (unsigned int j = 0; j < size1; ++j)
       (*ref)(i, j) = i + j;
@@ -405,31 +389,20 @@ void BlockMatrixTest::testAssignment()
 
   // Block = Siconos(Block)
   test->zero();
-  delete ref;
 
-  ref = new BlockMatrix(m, 2, 3);
+  ref.reset(new BlockMatrix(m, 2, 3));
   *test = *ref;
   for (unsigned int i = 0; i < size0 ; ++i)
     for (unsigned int j = 0; j < size1; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment: ", fabs((*test)(i, j) - (*ref)(i, j)) < tol , true);
 
-  delete ref;
   // Block = Block
   test->zero();
-  BlockMatrix * ref2 = new BlockMatrix(m, 2, 3);
+  SP::BlockMatrix ref2(new BlockMatrix(m, 2, 3));
   *test = *ref2;
   for (unsigned int i = 0; i < size0 ; ++i)
     for (unsigned int j = 0; j < size1; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment: ", fabs((*test)(i, j) - (*ref2)(i, j)) < tol , true);
-
-
-  delete ref2;
-  delete test;
-  delete Btmp;
-  delete Ctmp;
-  delete Dtmp;
-  delete Etmp;
-
   cout << "-->  test assignment ended with success." << endl;
 }
 
@@ -437,9 +410,9 @@ void BlockMatrixTest::testOperators1()
 {
   cout << "--> Test: operators1." << endl;
   double tol = 1e-10;
-  SiconosMatrix * Ab = new BlockMatrix(m, 2, 3);
-  SiconosMatrix * Cb = new BlockMatrix(*Ab);
-  SiconosMatrix * A = new SimpleMatrix(5, 7);
+  SP::SiconosMatrix Ab(new BlockMatrix(m, 2, 3));
+  SP::SiconosMatrix Cb(new BlockMatrix(*Ab));
+  SP::SiconosMatrix A(new SimpleMatrix(5, 7));
 
   for (unsigned int i = 0; i < 5 ; ++i)
     for (unsigned int j = 0; j < 7; ++j)
@@ -492,9 +465,6 @@ void BlockMatrixTest::testOperators1()
     for (unsigned int j = 0 ; j < Cb->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators1: ", fabs((*Cb)(i, j) - (*Ab)(i, j)) < tol , true);
 
-  delete Ab;
-  delete Cb;
-  delete A;
   cout << "-->  test operators1 ended with success." << endl;
 }
 

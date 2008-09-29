@@ -34,45 +34,20 @@
 using namespace std;
 
 // xml constructor
-LCP::LCP(OneStepNSProblemXML* onestepnspbxml, Simulation* newSimu):
+LCP::LCP(SP::OneStepNSProblemXML onestepnspbxml, SP::Simulation newSimu):
   OneStepNSProblem("LCP", onestepnspbxml, newSimu),
-
-#ifndef WithSmartPtr
-  w(NULL), z(NULL), M(NULL), q(NULL),
-  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false),
-#endif
-
   MStorageType(0)
 {}
 
 // Constructor from a set of data
-LCP::LCP(Simulation* newSimu, NonSmoothSolver* newSolver, const string& newId):
+LCP::LCP(SP::Simulation newSimu, SP::NonSmoothSolver newSolver, const string& newId):
   OneStepNSProblem("LCP", newSimu, newId, newSolver),
-
-#ifndef WithSmartPtr
-  w(NULL), z(NULL), M(NULL), q(NULL),
-  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false),
-#endif
-
   MStorageType(0)
 {}
 
 // destructor
 LCP::~LCP()
 {
-
-#ifndef WithSmartPtr
-  if (isWAllocatedIn) delete w;
-  w = NULL;
-  if (isZAllocatedIn) delete z;
-  z = NULL;
-  if (isMAllocatedIn)
-    delete M;
-  M = NULL;
-  if (isQAllocatedIn) delete q;
-  q = NULL;
-#endif
-
 }
 
 // Setters
@@ -260,7 +235,7 @@ void LCP::initialize()
   }
 
   // get topology
-  Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  SP::Topology topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
   // Note that unitaryBlocks is up to date since updateUnitaryBlocks has been called during OneStepNSProblem::initialize()
 
@@ -268,7 +243,7 @@ void LCP::initialize()
   if (topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty())
   {
     // Get index set from Simulation
-    UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
+    SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
     if (! M)
     {
       // Creates and fills M using UR of indexSet
@@ -316,7 +291,7 @@ void LCP::initialize()
   }
 }
 
-void LCP::computeUnitaryBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
+void LCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
 {
 
   // Computes matrix unitaryBlocks[UR1][UR2] (and allocates memory if necessary) if UR1 and UR2 have commond DynamicalSystem.
@@ -329,24 +304,30 @@ void LCP::computeUnitaryBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
   if (!commonDS.isEmpty()) // Nothing to be done if there are no common DS between the two UR.
   {
     DSIterator itDS;
-    // Warning: we suppose that at this point, all non linear operators (G for lagrangian relation for example) have been computed through plug-in mechanism.
+    // Warning: we suppose that at this point, all non linear
+    // operators (G for lagrangian relation for example) have been
+    // computed through plug-in mechanism.
 
     // Get dimension of the NonSmoothLaw (ie dim of the unitaryBlock)
     unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
     unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
     // Check allocation
-    if (unitaryBlocks[UR1][UR2] == NULL)
-      unitaryBlocks[UR1][UR2] = new SimpleMatrix(nslawSize1, nslawSize2);
-
-    // Get the W and Theta maps of one of the Unitary Relation - Warning: in the current version, if OSI!=Moreau, this fails.
-    // If OSI = MOREAU, centralUnitaryBlocks = W
-    // if OSI = LSODAR, centralUnitaryBlocks = M (mass matrices)
+    if (! unitaryBlocks[UR1][UR2])
+    {
+      unitaryBlocks[UR1][UR2].reset(new SimpleMatrix(nslawSize1, nslawSize2));
+    }
+    // Get the W and Theta maps of one of the Unitary Relation -
+    // Warning: in the current version, if OSI!=Moreau, this fails.
+    // If OSI = MOREAU, centralUnitaryBlocks = W if OSI = LSODAR,
+    // centralUnitaryBlocks = M (mass matrices)
     MapOfDSMatrices centralUnitaryBlocks;
     MapOfDouble Theta; // If OSI = LSODAR, Theta remains empty
     getOSIMaps(UR1, centralUnitaryBlocks, Theta);
 
-    SiconosMatrix* currentUnitaryBlock = unitaryBlocks[UR1][UR2];
-    SiconosMatrix *leftUnitaryBlock = NULL, *rightUnitaryBlock = NULL;
+    SiconosMatrixSPtr currentUnitaryBlock = unitaryBlocks[UR1][UR2];
+
+    SiconosMatrixSPtr leftUnitaryBlock, rightUnitaryBlock;
+
     unsigned int sizeDS;
     RELATIONTYPES relationType1, relationType2;
     double h = simulation->getTimeDiscretisationPtr()->getCurrentTimeStep();
@@ -367,17 +348,27 @@ void LCP::computeUnitaryBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
     for (itDS = commonDS.begin(); itDS != commonDS.end(); itDS++)
     {
       sizeDS = (*itDS)->getDim();
+
       // get unitaryBlocks corresponding to the current DS
       // These unitaryBlocks depends on the relation type.
+#ifndef WithSmartPtr
       leftUnitaryBlock = new SimpleMatrix(nslawSize1, sizeDS);
+#else
+      leftUnitaryBlock.reset(new SimpleMatrix(nslawSize1, sizeDS));
+#endif
 
       UR1->getLeftUnitaryBlockForDS(*itDS, leftUnitaryBlock);
       // Computing depends on relation type -> move this in UnitaryRelation method?
       if (relationType1 == FirstOrder && relationType2 == FirstOrder)
       {
-        rightUnitaryBlock = new SimpleMatrix(sizeDS, nslawSize2);
-        UR2->getRightUnitaryBlockForDS(*itDS, rightUnitaryBlock);
 
+#ifndef WithSmartPtr
+        rightUnitaryBlock = new SimpleMatrix(sizeDS, nslawSize2);
+#else
+        rightUnitaryBlock.reset(new SimpleMatrix(sizeDS, nslawSize2));
+#endif
+
+        UR2->getRightUnitaryBlockForDS(*itDS, rightUnitaryBlock);
         // centralUnitaryBlock contains a lu-factorized matrix and we solve
         // centralUnitaryBlock * X = rightUnitaryBlock with PLU
         centralUnitaryBlocks[*itDS]->PLUForwardBackwardInPlace(*rightUnitaryBlock);
@@ -387,7 +378,9 @@ void LCP::computeUnitaryBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
         *leftUnitaryBlock *= h;
         prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
         //left = C, right = W.B
+#ifndef WithSmartPtr
         delete rightUnitaryBlock;
+#endif
       }
       else if (relationType1 == Lagrangian || relationType2 == Lagrangian)
       {
@@ -403,24 +396,36 @@ void LCP::computeUnitaryBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
         }
         else
         {
+#ifndef WithSmartPtr
           rightUnitaryBlock = new SimpleMatrix(nslawSize2, sizeDS);
+#else
+          rightUnitaryBlock.reset(new SimpleMatrix(nslawSize2, sizeDS));
+#endif
+
           UR2->getLeftUnitaryBlockForDS(*itDS, rightUnitaryBlock);
-          // Warning: we use getLeft for Right unitaryBlock because right = transpose(left) and because of size checking inside the getBlock function,
-          // a getRight call will fail.
+          // Warning: we use getLeft for Right unitaryBlock
+          // because right = transpose(left) and because of
+          // size checking inside the getBlock function, a
+          // getRight call will fail.
           rightUnitaryBlock->trans();
           centralUnitaryBlocks[*itDS]->PLUForwardBackwardInPlace(*rightUnitaryBlock);
           //*currentUnitaryBlock +=  *leftUnitaryBlock ** work;
           prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
+#ifndef WithSmartPtr
           delete rightUnitaryBlock;
+#endif
         }
       }
-      else RuntimeException::selfThrow("LCP::computeUnitaryBlock not yet implemented for relation of type " + relationType1);
+
+#ifndef WithSmartPtr
       delete leftUnitaryBlock;
+#endif
+      else RuntimeException::selfThrow("LCP::computeUnitaryBlock not yet implemented for relation of type " + relationType1);
     }
   }
 }
 
-void LCP::computeQBlock(UnitaryRelation* UR, unsigned int pos)
+void LCP::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
 {
 
   // Get relation and non smooth law types
@@ -430,14 +435,14 @@ void LCP::computeQBlock(UnitaryRelation* UR, unsigned int pos)
 
   string simulationType = simulation->getType();
 
-  DynamicalSystem* ds = *(UR->dynamicalSystemsBegin());
+  SP::DynamicalSystem ds = *(UR->dynamicalSystemsBegin());
   string osiType = simulation->getIntegratorOfDSPtr(ds)->getType();
 
   unsigned int sizeY = UR->getNonSmoothLawSize();
   std::vector<unsigned int> coord(8);
 
   unsigned int relativePosition = UR->getRelativePosition();
-  Interaction * mainInteraction = UR->getInteractionPtr();
+  SP::Interaction mainInteraction = UR->getInteractionPtr();
   coord[0] = relativePosition;
   coord[1] = relativePosition + sizeY;
   coord[2] = 0;
@@ -445,16 +450,16 @@ void LCP::computeQBlock(UnitaryRelation* UR, unsigned int pos)
   coord[6] = pos;
   coord[7] = pos + sizeY;
 
-  SiconosMatrix * H = NULL;
-  SiconosVector* workX = UR->getWorkXPtr();
+  SP::SiconosMatrix  H;
+  SP::SiconosVector workX = UR->getWorkXPtr();
   if (osiType == "Moreau" || osiType == "Lsodar")
   {
     if (relationType == FirstOrder)
     {
       if (relationSubType == Type1R)//|| relationType =="FirstOrderType2R" || relationType =="FirstOrderType3R")
       {
-        H = static_cast<FirstOrderR*>(mainInteraction->getRelationPtr())->getJacobianHPtr(0);
-        if (H != NULL)
+        H = boost::static_pointer_cast<FirstOrderR>(mainInteraction->getRelationPtr())->getJacobianHPtr(0);
+        if (H)
         {
           coord[3] = H->size(1);
           coord[5] = H->size(1);
@@ -465,25 +470,21 @@ void LCP::computeQBlock(UnitaryRelation* UR, unsigned int pos)
       else if (relationSubType == LinearTIR || relationSubType == LinearR)
       {
         // q = HXfree + e + Fz
-        H = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getCPtr();
-        if (H != NULL)
+        H = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getCPtr();
+        if (H)
         {
           coord[3] = H->size(1);
           coord[5] = H->size(1);
           subprod(*H, *workX, (*q), coord, true);
         }
-        SiconosVector * e = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getEPtr();
-        if (e != NULL)
-#ifndef WithSmartPtr
-          static_cast<SimpleVector*>(q)->addBlock(pos, *e);
-#else
+        SP::SiconosVector e = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getEPtr();
+        if (e)
           static_cast<SimpleVector*>(q.get())->addBlock(pos, *e);
-#endif
 
-        H = static_cast<FirstOrderLinearR*>(mainInteraction->getRelationPtr())->getFPtr();
-        if (H != NULL)
+        H = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getFPtr();
+        if (H)
         {
-          SiconosVector * workZ = UR->getWorkZPtr();
+          SP::SiconosVector  workZ = UR->getWorkZPtr();
           coord[3] = H->size(1);
           coord[5] = H->size(1);
           subprod(*H, *workZ, *q, coord, false);
@@ -495,8 +496,8 @@ void LCP::computeQBlock(UnitaryRelation* UR, unsigned int pos)
       if (relationSubType == CompliantR || relationSubType == ScleronomousR || relationSubType == RheonomousR)
       {
         // q = jacobian_q h().v_free
-        H = static_cast<LagrangianR*>(mainInteraction->getRelationPtr())->getGPtr(0);
-        if (H != NULL)
+        H = boost::static_pointer_cast<LagrangianR>(mainInteraction->getRelationPtr())->getGPtr(0);
+        if (H)
         {
           coord[3] = H->size(1);
           coord[5] = H->size(1);
@@ -507,8 +508,8 @@ void LCP::computeQBlock(UnitaryRelation* UR, unsigned int pos)
       else if (relationSubType == LinearR || relationSubType == LinearTIR)
       {
         // q = H.v_free
-        H = static_cast<LagrangianLinearR*>(mainInteraction->getRelationPtr())->getHPtr();
-        if (H != NULL)
+        H = boost::static_pointer_cast<LagrangianLinearR>(mainInteraction->getRelationPtr())->getHPtr();
+        if (H)
         {
           coord[3] = H->size(1);
           coord[5] = H->size(1);
@@ -534,7 +535,7 @@ void LCP::computeQBlock(UnitaryRelation* UR, unsigned int pos)
     {
 
 #ifndef WithSmartPtr
-      e = (static_cast<NewtonImpactNSL*>(mainInteraction->getNonSmoothLawPtr()))->getE();
+      e = (boost::static_pointer_cast<NewtonImpactNSL>(mainInteraction->getNonSmoothLawPtr()))->getE();
 #else
       e = (boost::static_pointer_cast<NewtonImpactNSL>(mainInteraction->getNonSmoothLawPtr()))->getE();
 #endif
@@ -563,7 +564,7 @@ void LCP::computeQBlock(UnitaryRelation* UR, unsigned int pos)
     {
 
 #ifndef WithSmartPtr
-      e = (static_cast<NewtonImpactFrictionNSL*>(mainInteraction->getNonSmoothLawPtr()))->getEn();
+      e = (boost::static_pointer_cast<NewtonImpactFrictionNSL>(mainInteraction->getNonSmoothLawPtr()))->getEn();
 #else
       e = (boost::static_pointer_cast<NewtonImpactFrictionNSL>(mainInteraction->getNonSmoothLawPtr()))->getEn();
 #endif
@@ -587,7 +588,7 @@ void LCP::computeQ(double time)
   q->zero();
 
   // === Get index set from Simulation ===
-  UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
+  SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
   // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
 
   unsigned int pos = 0;
@@ -595,11 +596,10 @@ void LCP::computeQ(double time)
   string simulationType = simulation->getType();
   for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
   {
-    // *itCurrent is a UnitaryRelation*.
+    // *itCurrent is a SP::UnitaryRelation.
 
     // Compute q, this depends on the type of non smooth problem, on the relation type and on the non smooth law
     pos = M->getPositionOfUnitaryBlock(*itCurrent);
-
     computeQBlock((*itCurrent), pos); // free output is saved in y
   }
 }
@@ -615,7 +615,7 @@ void LCP::preCompute(double time)
   // M, sizeOutput have been computed in initialize and are uptodate.
 
   // Get topology
-  Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  SP::Topology topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
   if (!topology->isTimeInvariant())
   {
@@ -623,7 +623,7 @@ void LCP::preCompute(double time)
     updateUnitaryBlocks();
 
     // Updates matrix M
-    UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
+    SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
     M->fill(indexSet, unitaryBlocks);
     sizeOutput = M->size();
 
@@ -663,12 +663,12 @@ int LCP::compute(double time)
   {
     // The LCP in Numerics format
     LinearComplementarity_Problem numerics_problem;
-    numerics_problem.M = M->getNumericsMatrix();
+    numerics_problem.M = &*M->getNumericsMatrix();
     numerics_problem.q = q->getArray();
     numerics_problem.size = sizeOutput;
     int nbSolvers = 1;
     // Call LCP Driver
-    info = lcp_driver(&numerics_problem, z->getArray() , w->getArray() , solver->getNumericsSolverOptionsPtr(), nbSolvers, numerics_options);
+    info = lcp_driver(&numerics_problem, &*z->getArray() , &*w->getArray() , &*solver->getNumericsSolverOptionsPtr(), nbSolvers, &*numerics_options);
 
     // --- Recovering of the desired variables from LCP output ---
     postCompute();
@@ -684,10 +684,11 @@ void LCP::postCompute()
   // Only UnitaryRelations (ie Interactions) of indexSet(leveMin) are concerned.
 
   // === Get index set from Topology ===
-  UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
+  SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
 
   // y and lambda vectors
-  SiconosVector *lambda, *y;
+  SiconosVectorSPtr lambda;
+  SiconosVectorSPtr y;
 
   // === Loop through "active" Unitary Relations (ie present in indexSets[1]) ===
 
@@ -706,14 +707,8 @@ void LCP::postCompute()
     lambda = (*itCurrent)->getLambdaPtr(levelMin);
     // Copy w/z values, starting from index pos into y/lambda.
 
-#ifndef WithSmartPtr
     setBlock(w, y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
     setBlock(z, lambda, lambda->size(), pos, 0);
-#else
-    setBlock(w.get(), y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
-    setBlock(z.get(), lambda, lambda->size(), pos, 0);
-#endif
-
   }
 }
 
@@ -734,8 +729,8 @@ void LCP::saveNSProblemToXML()
   OneStepNSProblem::saveNSProblemToXML();
   //   if(onestepnspbxml != NULL)
   //     {
-  // //       (static_cast<LCPXML*>(onestepnspbxml))->setM(*M);
-  //       (static_cast<LCPXML*>(onestepnspbxml))->setQ(*q);
+  // //       (boost::static_pointer_cast<LCPXML>(onestepnspbxml))->setM(*M);
+  //       (boost::static_pointer_cast<LCPXML>(onestepnspbxml))->setQ(*q);
   //     }
   //   else RuntimeException::selfThrow("LCP::saveNSProblemToXML - OneStepNSProblemXML object not exists");
   RuntimeException::selfThrow("LCP::saveNSProblemToXML - Not yet implemented.");

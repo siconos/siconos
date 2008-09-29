@@ -60,7 +60,7 @@ private:
 
   unsigned int n;
   double tol;
-  UnitaryRelationsSet * indexSet;
+  SP::UnitaryRelationsSet indexSet;
   MapOfMapOfUnitaryMatrices blocks;
   Model * temp ;
 public:

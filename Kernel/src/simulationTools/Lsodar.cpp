@@ -30,40 +30,39 @@ using namespace std;
 // ===== Out of class objects and functions =====
 
 // global object and wrapping functions -> required for function plug-in and call in fortran routine.
-
-Lsodar* global_object;
+SP::Lsodar global_object;
 
 // This first function must have the same signature as argument F (arg 1) in DLSODAR (see opkdmain.f in Numerics)
-extern "C" void Lsodar_f_wrapper(integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
+extern "C" void Lsodar_f_wrapper(integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xdot)
 {
   return global_object->f(sizeOfX, time, x, xdot);
 }
 
 // Function to wrap g: same signature as argument G (arg 18) in DLSODAR (see opkdmain.f in Numerics)
-extern "C" void Lsodar_g_wrapper(integer * nEq, doublereal * time, doublereal* x, integer* ng, doublereal * gOut)
+extern "C" void Lsodar_g_wrapper(integer* nEq, doublereal* time, doublereal* x, integer* ng, doublereal* gOut)
 {
   return global_object->g(nEq, time, x, ng, gOut);
 }
 
 // Function to wrap jacobianF: same signature as argument JAC (arg 16) in DLSODAR (see opkdmain.f in Numerics)
-extern "C" void Lsodar_jacobianF_wrapper(integer * sizeOfX, doublereal * time, doublereal * x, integer* ml, integer * mu,  doublereal * jacob, integer * nrowpd)
+extern "C" void Lsodar_jacobianF_wrapper(integer* sizeOfX, doublereal* time, doublereal* x, integer* ml, integer* mu,  doublereal* jacob, integer* nrowpd)
 {
   return global_object->jacobianF(sizeOfX, time, x, ml, mu, jacob, nrowpd);
 }
 
-Lsodar::Lsodar(OneStepIntegratorXML* osiXML, Simulation* newS):
-  OneStepIntegrator("Lsodar", osiXML, newS), rtol(NULL), atol(NULL), rwork(NULL), iwork(NULL), jroot(NULL)
+Lsodar::Lsodar(OneStepIntegratorXMLSPtr osiXML, SimulationSPtr newS):
+  OneStepIntegrator("Lsodar", osiXML, newS)
 {
   // local time discretisation is set by default to those of the simulation.
   intData.resize(9);
   sizeMem = 2;
 }
 
-Lsodar::Lsodar(DynamicalSystem* ds, Simulation* newS):
-  OneStepIntegrator("Lsodar", newS), rtol(NULL), atol(NULL), rwork(NULL), iwork(NULL), jroot(NULL)
+Lsodar::Lsodar(SP::DynamicalSystem ds, SimulationSPtr newS):
+  OneStepIntegrator("Lsodar", newS)
 {
-  if (simulationLink == NULL)
-    RuntimeException::selfThrow("Lsodar:: constructor(ds,simulation) - simulation == NULL");
+  assert(simulationLink &&
+         "Lsodar:: constructor(ds,simulation) - simulation == NULL");
 
   // add ds in the set
   OSIDynamicalSystems->insert(ds);
@@ -72,11 +71,11 @@ Lsodar::Lsodar(DynamicalSystem* ds, Simulation* newS):
   sizeMem = 2;
 }
 
-Lsodar::Lsodar(DynamicalSystemsSet& newDS, Simulation* newS):
-  OneStepIntegrator("Lsodar", newDS, newS), rtol(NULL), atol(NULL), rwork(NULL), iwork(NULL), jroot(NULL)
+Lsodar::Lsodar(DynamicalSystemsSet& newDS, SimulationSPtr newS):
+  OneStepIntegrator("Lsodar", newDS, newS)
 {
-  if (simulationLink == NULL)
-    RuntimeException::selfThrow("Lsodar:: constructor(DSSet,simulation) - simulation == NULL");
+  assert(simulationLink &&
+         "Lsodar:: constructor(DSSet,simulation) - simulation == NULL");
 
   intData.resize(9);
   sizeMem = 2;
@@ -84,20 +83,9 @@ Lsodar::Lsodar(DynamicalSystemsSet& newDS, Simulation* newS):
 
 Lsodar::~Lsodar()
 {
-  global_object = NULL;
-  if (rtol != NULL) delete rtol;
-  rtol = NULL;
-  if (atol != NULL) delete atol;
-  atol = NULL;
-  if (rwork != NULL) delete rwork;
-  rwork = NULL;
-
-  if (iwork != NULL) delete iwork;
-  iwork = NULL;
-  if (xWork != NULL) delete xWork;
 }
 
-void Lsodar::setTol(integer newItol, doublereal* newRtol, doublereal* newAtol)
+void Lsodar::setTol(integer newItol, doublerealSAPtr newRtol, doublerealSAPtr newAtol)
 {
   //            The input parameters ITOL, RTOL, and ATOL determine
   //         the error control performed by the solver.  The solver will
@@ -117,14 +105,8 @@ void Lsodar::setTol(integer newItol, doublereal* newRtol, doublereal* newAtol)
 
   intData[2] = newItol; // itol
 
-  unsigned int sizeTol = intData[0]; // neq
-  // Memory allocation ...
-  if (rtol != NULL) delete rtol;
-  rtol = new doublereal[sizeTol] ;    // rtol, relative tolerance
-  if (atol != NULL) delete atol;
-  atol = new doublereal[sizeTol] ;  // atol, absolute tolerance
-  *rtol = *newRtol;
-  *atol = *newAtol;
+  rtol = newRtol;
+  atol = newAtol;
 }
 
 void Lsodar::updateData()
@@ -136,23 +118,18 @@ void Lsodar::updateData()
   //  if(intData[0]==1) sizeTol = 1;
   //  else sizeTol = intData[0];
 
-  if (rtol != NULL) delete rtol;
-  rtol = new doublereal[sizeTol] ;    // rtol, relative tolerance
+  rtol.reset(new doublereal[sizeTol]) ;    // rtol, relative tolerance
 
-  if (atol != NULL) delete atol;
-  atol = new doublereal[sizeTol] ;  // atol, absolute tolerance
+  atol.reset(new doublereal[sizeTol]) ;  // atol, absolute tolerance
 
-  if (iwork != NULL) delete iwork; // iwork
-  iwork = new integer[intData[7]];
+  iwork.reset(new integer[intData[7]]);
 
-  if (rwork != NULL) delete rwork; // rwork
-  rwork  = new doublereal[intData[6]];
+  rwork.reset(new doublereal[intData[6]]);
 
-  if (jroot != NULL) delete jroot; // jroot
-  jroot = new integer[intData[1]];
+  jroot.reset(new integer[intData[1]]);
 }
 
-void Lsodar::fillXWork(integer* sizeOfX, doublereal * x)
+void Lsodar::fillXWork(integer* sizeOfX, doublereal* x)
 {
   unsigned int sizeX = (unsigned int)(*sizeOfX);
   for (unsigned int i = 0; i < sizeX ; ++i)
@@ -173,25 +150,25 @@ void Lsodar::computeJacobianRhs(double t)
     (*it)->computeJacobianXRhs(t);
 }
 
-void Lsodar::f(integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
+void Lsodar::f(integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xdot)
 {
-  static_cast<EventDriven*>(simulationLink)->computeF(this, sizeOfX, time, x, xdot);
+  boost::static_pointer_cast<EventDriven>(simulationLink)->computeF(shared_from_this(), sizeOfX, time, x, xdot);
 }
 
-void Lsodar::g(integer * nEq, doublereal * time, doublereal* x, integer * ng, doublereal * gOut)
+void Lsodar::g(integer* nEq, doublereal*  time, doublereal* x, integer* ng, doublereal* gOut)
 {
-  static_cast<EventDriven*>(simulationLink)->computeG(this, nEq, time, x, ng, gOut);
+  boost::static_pointer_cast<EventDriven>(simulationLink)->computeG(shared_from_this(), nEq, time, x, ng, gOut);
 }
 
-void Lsodar::jacobianF(integer *sizeOfX, doublereal *time, doublereal *x, integer* ml, integer *mu,  doublereal *jacob, integer *nrowpd)
+void Lsodar::jacobianF(integer* sizeOfX, doublereal* time, doublereal* x, integer* ml, integer* mu,  doublereal* jacob, integer* nrowpd)
 {
-  static_cast<EventDriven*>(simulationLink)->computeJacobianF(this, sizeOfX, time, x, jacob);
+  boost::static_pointer_cast<EventDriven>(simulationLink)->computeJacobianF(shared_from_this(), sizeOfX, time, x, jacob);
 }
 
 void Lsodar::initialize()
 {
   OneStepIntegrator::initialize();
-  xWork = new BlockVector();
+  xWork.reset(new BlockVector());
   DSIterator it;
   string type;
   // initialize xWork with x values of the dynamical systems present in the set.
@@ -272,7 +249,7 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
 
   // === Pointers to function ===
   //  --> definition and initialisation thanks to wrapper:
-  global_object = this; // Warning: global object must be initialized to current one before pointers to function initialisation.
+  global_object = boost::static_pointer_cast<Lsodar>(shared_from_this()); // Warning: global object must be initialized to current one before pointers to function initialisation.
 
   // function to compute the righ-hand side of xdot = f(x,t) + Tu
   fpointer pointerToF = Lsodar_f_wrapper;
@@ -293,7 +270,7 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
   }
 
   intData[4] = istate;
-  F77NAME(dlsodar)(pointerToF, &(intData[0]), &(*xtmp)(0), &tinit_DR, &tend_DR, &(intData[2]), rtol, atol, &(intData[3]), &(intData[4]), &(intData[5]), rwork, &(intData[6]), iwork, &(intData[7]), pointerToJacobianF, &(intData[8]), pointerToG, &(intData[1]), jroot);
+  F77NAME(dlsodar)(pointerToF, &(intData[0]), &(*xtmp)(0), &tinit_DR, &tend_DR, &(intData[2]), rtol.get(), atol.get(), &(intData[3]), &(intData[4]), &(intData[5]), rwork.get(), &(intData[6]), iwork.get(), &(intData[7]), pointerToJacobianF, &(intData[8]), pointerToG, &(intData[1]), jroot.get());
 
   // jroot: jroot[i] = 0 if g(i) has a root at t, else jroot[i] = 0.
 
@@ -330,7 +307,7 @@ void Lsodar::updateState(unsigned int level)
   {
     for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
     {
-      LagrangianDS* lds = static_cast<LagrangianDS*>(*it);
+      LagrangianDSSPtr lds = boost::static_pointer_cast<LagrangianDS>(*it);
       lds->computePostImpactVelocity();
     }
   }

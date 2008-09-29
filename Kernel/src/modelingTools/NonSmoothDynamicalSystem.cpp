@@ -29,46 +29,43 @@ using namespace std;
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
 // xml constuctor
-NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NonSmoothDynamicalSystemXML* newNsdsxml):
-  BVP(false), allDS(NULL), allInteractions(NULL), topology(NULL), nsdsxml(newNsdsxml), isTopologyAllocatedIn(false)
+NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NonSmoothDynamicalSystemXMLSPtr newNsdsxml):
+  BVP(false), nsdsxml(newNsdsxml)
 {
-  if (nsdsxml == NULL)
-    RuntimeException::selfThrow("NonSmoothDynamicalSystem:: xml constructor, xml file=NULL");
+  assert(nsdsxml && "NonSmoothDynamicalSystem:: xml constructor, xml file=NULL");
 
   // === DS Vector fill-in: we sweep the list of DSXML and for each of them, add a new DynamicalSystem in the set allDS. ===
   SetOfDSXML dsList = nsdsxml->getDynamicalSystemsXML();
   SetOfDSXMLIt it;
   CheckInsertDS checkDS;
   DSTYPES type;
-  allDS = new DynamicalSystemsSet();
+  allDS.reset(new DynamicalSystemsSet());
   for (it = dsList.begin(); it != dsList.end(); ++it)
   {
     type = (*it)->getType();
     if (type  == LNLDS)  // LagrangianDS
-      checkDS = allDS->insert(new LagrangianDS(*it , this));
+      checkDS = allDS->insert(boost::shared_ptr<LagrangianDS>(new LagrangianDS(*it , shared_from_this())));
     else if (type == LLTIDS)  // Lagrangian Linear Time Invariant
-      checkDS = allDS->insert(new LagrangianLinearTIDS(*it, this));
+      checkDS = allDS->insert(boost::shared_ptr<LagrangianLinearTIDS>(new LagrangianLinearTIDS(*it, shared_from_this())));
     else if (type == FOLDS)  // Linear DS
-      checkDS = allDS->insert(new FirstOrderLinearDS(*it, this));
+      checkDS = allDS->insert(boost::shared_ptr<FirstOrderLinearDS>(new FirstOrderLinearDS(*it, shared_from_this())));
     else if (type == FOLTIDS)  // Linear Time Invariant DS
-      checkDS = allDS->insert(new FirstOrderLinearTIDS(*it, this));
+      checkDS = allDS->insert(boost::shared_ptr<FirstOrderLinearTIDS>(new FirstOrderLinearTIDS(*it, shared_from_this())));
     else if (type == FONLDS)  // Non linear DS
-      checkDS = allDS->insert(new FirstOrderNonLinearDS(*it, this));
+      checkDS = allDS->insert(boost::shared_ptr<FirstOrderNonLinearDS>(new FirstOrderNonLinearDS(*it, shared_from_this())));
     else RuntimeException::selfThrow("NonSmoothDynamicalSystem::xml constructor, wrong Dynamical System type" + type);
     // checkDS.first is an iterator that points to the DS inserted into the set.
-    isDSAllocatedIn[*(checkDS.first)] = true ;
   }
 
   // ===  The same process is applied for Interactions ===
   SetOfInteractionsXML  interactionsList = nsdsxml->getInteractionsXML();
   SetOfInteractionsXMLIt it2;
   CheckInsertInteraction checkInter;
-  allInteractions = new InteractionsSet();
+  allInteractions.reset(new InteractionsSet());
   for (it2 = interactionsList.begin(); it2 != interactionsList.end(); ++it2)
   {
-    checkInter = allInteractions->insert(new Interaction(*it2, this));
+    checkInter = allInteractions->insert(boost::shared_ptr<Interaction>(new Interaction(*it2, shared_from_this())));
     // checkInter.first is an iterator that points to the Interaction inserted into the set.
-    isInteractionAllocatedIn[*(checkInter.first)] = true;
   }
 
   // === Checks that sets are not empty ===
@@ -79,38 +76,34 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NonSmoothDynamicalSystemXML* 
     cout << "Warning: NonSmoothDynamicalSystem:: constructor(xml, ...): the set of Interactions is empty." << endl;
 
   // === Builds topology ===
-  topology = new Topology(this);
-  isTopologyAllocatedIn = true;
+  topology.reset(new Topology(allInteractions));
 }
 
 // Constructor with one DS and one Interaction (optional, default = NULL).
-NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystem* newDS, Interaction* newInteraction, const bool& isBVP):
-  BVP(isBVP), allDS(NULL), allInteractions(NULL), topology(NULL), nsdsxml(NULL), isTopologyAllocatedIn(false)
+NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::DynamicalSystem newDS, InteractionSPtr newInteraction, const bool& isBVP):
+  BVP(isBVP)
 {
 
   // === Checks that sets are not empty ===
   if (newDS == NULL)
-    RuntimeException::selfThrow("NonSmoothDynamicalSystem:: constructor(DynamicalSystem* ds...): ds == NULL.");
+    RuntimeException::selfThrow("NonSmoothDynamicalSystem:: constructor(SP::DynamicalSystem ds...): ds == NULL.");
 
   // Note that Interaction == NULL is possible and has sense.
 
-  allDS = new DynamicalSystemsSet();
-  allInteractions = new InteractionsSet();
+  allDS.reset(new DynamicalSystemsSet());
+  allInteractions.reset(new InteractionsSet());
   allDS->insert(newDS);
-  isDSAllocatedIn[newDS] = false;
-  if (newInteraction != NULL)
+  if (newInteraction)
   {
     allInteractions->insert(newInteraction);
-    isInteractionAllocatedIn[newInteraction] = false;
   }
 
   // === build topology ===
-  topology = new Topology(this);
-  isTopologyAllocatedIn = true;
+  topology.reset(new Topology(allInteractions));
 }
 
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS, InteractionsSet& listOfInteractions, const bool& isBVP):
-  BVP(isBVP), allDS(NULL), allInteractions(NULL), topology(NULL), nsdsxml(NULL), isTopologyAllocatedIn(false)
+  BVP(isBVP)
 {
 
   // === Checks that sets are not empty ===
@@ -122,29 +115,26 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS
 
   // === "copy" listOfDS/listOfInteractions in allDS/allInteractions ===
   // Warning: DS/Interactions are not copied but pointers are inserted into the corresponding set.
-  allDS = new DynamicalSystemsSet();
-  allInteractions = new InteractionsSet();
+  allDS.reset(new DynamicalSystemsSet());
+  allInteractions.reset(new InteractionsSet());
   InteractionsIterator itInter;
   DSIterator itDS;
   for (itDS = listOfDS.begin(); itDS != listOfDS.end(); ++itDS)
   {
     allDS->insert(*itDS);
-    isDSAllocatedIn[*itDS] = false;
   }
 
   for (itInter = listOfInteractions.begin(); itInter != listOfInteractions.end(); ++itInter)
   {
     allInteractions->insert(*itInter);
-    isInteractionAllocatedIn[*itInter] = false;
   }
 
   // === build topology ===
-  topology = new Topology(this);
-  isTopologyAllocatedIn = true;
+  topology.reset(new Topology(allInteractions));
 }
 
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS, const bool& isBVP):
-  BVP(isBVP), allDS(NULL), allInteractions(NULL), topology(NULL), nsdsxml(NULL), isTopologyAllocatedIn(false)
+  BVP(isBVP)
 {
 
   // === Checks that sets are not empty ===
@@ -153,52 +143,25 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS
 
   // === "copy" listOfDS/listOfInteractions in allDS/allInteractions ===
   // Warning: DS/Interactions are not copied but pointers are inserted into the corresponding set.
-  allDS = new DynamicalSystemsSet();
-  allInteractions = new InteractionsSet();
+  allDS.reset(new DynamicalSystemsSet());
+  allInteractions.reset(new InteractionsSet());
   DSIterator itDS;
   for (itDS = listOfDS.begin(); itDS != listOfDS.end(); ++itDS)
   {
     allDS->insert(*itDS);
-    isDSAllocatedIn[*itDS] = false;
   }
 
   // === build topology ===
-  topology = new Topology(this);
-  isTopologyAllocatedIn = true;
+  topology.reset(new Topology(allInteractions));
 }
 
 NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem()
 {
-  // == delete Interactions ==
-  InteractionsIterator it2;
-  for (it2 = allInteractions->begin(); it2 != allInteractions->end(); ++it2)
-  {
-    if (isInteractionAllocatedIn[*it2]) delete *it2;
-  }
-
-  allInteractions->clear();
-  isInteractionAllocatedIn.clear();
-
-  // == delete DS ==
-  DSIterator it;
-  for (it = allDS->begin(); it != allDS->end(); ++it)
-  {
-    if (isDSAllocatedIn[*it]) delete *it;
-  }
-
-  allDS->clear();
-  isDSAllocatedIn.clear();
-
-  delete allDS;
-  delete allInteractions;
-
-  if (isTopologyAllocatedIn) delete topology;
-  topology = NULL;
 }
 
 // === DynamicalSystems management ===
 
-DynamicalSystem* NonSmoothDynamicalSystem::getDynamicalSystemPtr(const int& nb) const
+SP::DynamicalSystem NonSmoothDynamicalSystem::getDynamicalSystemPtr(const int& nb) const
 {
   // Mind that DS are sorted in a growing order according to their id number.
   DSIterator it = allDS->begin();
@@ -211,7 +174,7 @@ DynamicalSystem* NonSmoothDynamicalSystem::getDynamicalSystemPtr(const int& nb) 
   return *it;
 }
 
-DynamicalSystem* NonSmoothDynamicalSystem::getDynamicalSystemPtrNumber(const int& nb) const
+SP::DynamicalSystem NonSmoothDynamicalSystem::getDynamicalSystemPtrNumber(const int& nb) const
 {
   if (! allDS->isIn(nb)) // if ds number nb is not in the set ...
     RuntimeException::selfThrow("NonSmoothDynamicalSystem::getDynamicalSystemOnNumber(nb), DS number nb is not in the set.");
@@ -221,21 +184,14 @@ DynamicalSystem* NonSmoothDynamicalSystem::getDynamicalSystemPtrNumber(const int
 
 void NonSmoothDynamicalSystem::setDynamicalSystems(const DynamicalSystemsSet& newVect)
 {
-  // clear old set
-  DSIterator it;
-  for (it = allDS->begin(); it != allDS->end(); ++it)
-  {
-    if (isDSAllocatedIn[*it]) delete *it;
-  }
 
+  // clear old set
   allDS->clear();
-  isDSAllocatedIn.clear();
 
   // copy the new one
-  for (it = newVect.begin(); it != newVect.end(); ++it)
+  for (DSIterator it = newVect.begin(); it != newVect.end(); ++it)
   {
     allDS->insert(*it);
-    isDSAllocatedIn[*it] = false;
   }
 
   topology->setUpToDate(false);
@@ -246,14 +202,14 @@ const bool NonSmoothDynamicalSystem::hasDynamicalSystemNumber(const int& nb) con
   return allDS->isIn(nb);
 }
 
-const bool NonSmoothDynamicalSystem::hasDynamicalSystem(DynamicalSystem* ds) const
+const bool NonSmoothDynamicalSystem::hasDynamicalSystem(SP::DynamicalSystem ds) const
 {
   return allDS->isIn(ds);
 }
 
 // === Interactions management ===
 
-Interaction* NonSmoothDynamicalSystem::getInteractionPtr(const int& nb) const
+InteractionSPtr NonSmoothDynamicalSystem::getInteractionPtr(const int& nb) const
 {
   // Mind that Interactions are sorted in a growing order according to their id number.
   InteractionsIterator it = allInteractions->begin();
@@ -266,7 +222,7 @@ Interaction* NonSmoothDynamicalSystem::getInteractionPtr(const int& nb) const
   return *it;
 }
 
-Interaction* NonSmoothDynamicalSystem::getInteractionPtrNumber(const int& nb) const
+InteractionSPtr NonSmoothDynamicalSystem::getInteractionPtrNumber(const int& nb) const
 {
   if (! allInteractions->isIn(nb)) // if Interaction number nb is not in the set ...
     RuntimeException::selfThrow("NonSmoothDynamicalSystem::getInteractionOnNumber(nb), Interaction number nb is not in the set.");
@@ -277,20 +233,12 @@ Interaction* NonSmoothDynamicalSystem::getInteractionPtrNumber(const int& nb) co
 void NonSmoothDynamicalSystem::setInteractions(const InteractionsSet& newVect)
 {
   // clear old set
-  InteractionsIterator it;
-  for (it = allInteractions->begin(); it != allInteractions->end(); ++it)
-  {
-    if (isInteractionAllocatedIn[*it]) delete *it;
-  }
-
   allInteractions->clear();
-  isInteractionAllocatedIn.clear();
 
   // copy the new one
-  for (it = newVect.begin(); it != newVect.end(); ++it)
+  for (InteractionsIterator it = newVect.begin(); it != newVect.end(); ++it)
   {
     allInteractions->insert(*it);
-    isInteractionAllocatedIn[*it] = false;
   }
 
   topology->setUpToDate(false);
@@ -301,7 +249,7 @@ const bool NonSmoothDynamicalSystem::hasInteractionNumber(const int& nb) const
   return allInteractions->isIn(nb);
 }
 
-const bool NonSmoothDynamicalSystem::hasInteraction(Interaction* inter) const
+const bool NonSmoothDynamicalSystem::hasInteraction(InteractionSPtr inter) const
 {
   return allInteractions->isIn(inter);
 }
@@ -316,13 +264,13 @@ void NonSmoothDynamicalSystem::saveNSDSToXML()
     for (it = allDS->begin(); it != allDS->end(); ++it)
     {
       if ((*it)->getType() == LNLDS)
-        (static_cast<LagrangianDS*>((*it)))->saveDSToXML();
+        (boost::static_pointer_cast<LagrangianDS>((*it)))->saveDSToXML();
       else if ((*it)->getType() == LLTIDS)
-        (static_cast<LagrangianLinearTIDS*>((*it)))->saveDSToXML();
+        (boost::static_pointer_cast<LagrangianLinearTIDS>((*it)))->saveDSToXML();
       else if ((*it)->getType() == FOLDS)
-        (static_cast<FirstOrderLinearDS*>((*it)))->saveDSToXML();
+        (boost::static_pointer_cast<FirstOrderLinearDS>((*it)))->saveDSToXML();
       else if ((*it)->getType() == FOLTIDS)
-        (static_cast<FirstOrderLinearDS*>((*it)))->saveDSToXML();
+        (boost::static_pointer_cast<FirstOrderLinearDS>((*it)))->saveDSToXML();
       else if ((*it)->getType() == FONLDS)
         (*it)->saveDSToXML();
       else RuntimeException::selfThrow("NonSmoothDynamicalSystem::saveToXML - bad kind of DynamicalSystem");
@@ -344,19 +292,17 @@ void NonSmoothDynamicalSystem::display() const
   cout << "===================================================" << endl;
 }
 
-void NonSmoothDynamicalSystem::addDynamicalSystemPtr(DynamicalSystem *ds)
+void NonSmoothDynamicalSystem::addDynamicalSystemPtr(SP::DynamicalSystem ds)
 {
-  ds->setNonSmoothDynamicalSystemPtr(this);
+  ds->setNonSmoothDynamicalSystemPtr(shared_from_this());
   allDS->insert(ds);
-  isDSAllocatedIn[ds] = false;
   topology->setUpToDate(false);
 }
 
-void NonSmoothDynamicalSystem::addInteractionPtr(Interaction *inter)
+void NonSmoothDynamicalSystem::addInteractionPtr(InteractionSPtr inter)
 {
-  inter->setNonSmoothDynamicalSystemPtr(this);
+  inter->setNonSmoothDynamicalSystemPtr(shared_from_this());
   allInteractions->insert(inter);
-  isInteractionAllocatedIn[inter] = false;
   // the topology should be updated
   topology->setUpToDate(false);
 }

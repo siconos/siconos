@@ -42,7 +42,7 @@
  * STL maps:
  * - WMap, with WMap[ds] = a pointer to a SiconosMatrix
  * - thetaMap, thetaMap[ds] = a double
- * ds being a DynamicalSystem*
+ * ds being a SP::DynamicalSystem
  *
  * W matrices are initialized and computed in initW and computeW. Depending on the DS type, they
  * may depend on time and DS state (x).
@@ -64,22 +64,22 @@ private:
 public:
 
   /** constructor from a minimum set of data: one DS and its theta
-   *  \param DynamicalSystem* : the DynamicalSystem linked to the OneStepIntegrator
+   *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
    *  \param Theta value
-   *  \param Simulation * : the simulation that owns the osi
+   *  \param SP::Simulation : the simulation that owns the osi
    */
-  Moreau2(DynamicalSystem*, double, Simulation*);
+  Moreau2(SP::DynamicalSystem, double, SP::Simulation);
 
   /** constructor from a minimum set of data: one DS and its theta
    *  \param DynamicalSystemSet* : the DynamicalSystem set linked to the OneStepIntegrator
    *  \param Theta value
-   *  \param Simulation * : the simulation that owns the osi
+   *  \param SP::Simulation : the simulation that owns the osi
    */
-  Moreau2(DynamicalSystemsSet&, double, Simulation*);
+  Moreau2(DynamicalSystemsSet&, double, SP::Simulation);
 
   virtual ~Moreau2();
 
-  //  SiconosVector * getFfree(FirstOrderLinearDS *d);
+  //  SP::SiconosVector  getFfree(FirstOrderLinearDS *d);
 
   /** integrates the Dynamical System linked to this integrator without boring the constraints
    */
@@ -90,7 +90,7 @@ public:
    *  \param unsigned int: level of interest for the dynamics: not used at the time
    */
   virtual void updateState(unsigned int);
-  SiconosVector * getWorkX(DynamicalSystem *d);
+  SP::SiconosVector  getWorkX(DynamicalSystem *d);
 
   static Moreau2* convert(OneStepIntegrator* osi);
 

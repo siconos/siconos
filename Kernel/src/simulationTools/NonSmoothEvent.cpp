@@ -34,14 +34,14 @@ NonSmoothEvent::NonSmoothEvent(double time, int): Event(time, 2)
 NonSmoothEvent::~NonSmoothEvent()
 {}
 
-void NonSmoothEvent::process(Simulation* simulation)
+void NonSmoothEvent::process(SP::Simulation simulation)
 {
   if (simulation->getType() != "EventDriven")
     RuntimeException::selfThrow("NonSmoothEvent::process failed; Simulation is not of EventDriven type.");
 
   if (!(simulation->getOneStepNSProblems()->empty()))
   {
-    EventDriven * eventDriven = static_cast<EventDriven*>(simulation);
+    SP::EventDriven eventDriven = boost::static_pointer_cast<EventDriven>(simulation);
 
     // Compute y[0], y[1] and update index sets. => already done during advance to event ...
 
@@ -50,8 +50,8 @@ void NonSmoothEvent::process(Simulation* simulation)
     //       simulation->updateIndexSets();
 
     // Get the required index sets ...
-    UnitaryRelationsSet * indexSet1 = simulation->getIndexSetPtr(1);
-    UnitaryRelationsSet * indexSet2 = simulation->getIndexSetPtr(2);
+    UnitaryRelationsSetSPtr indexSet1 = simulation->getIndexSetPtr(1);
+    UnitaryRelationsSetSPtr indexSet2 = simulation->getIndexSetPtr(2);
     UnitaryRelationsSet commonSet ;
     difference(*indexSet1, *indexSet2, commonSet);
     // ---> solve impact LCP if IndexSet[1]\IndexSet[2] is not empty.

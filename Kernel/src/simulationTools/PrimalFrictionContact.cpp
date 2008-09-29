@@ -35,7 +35,7 @@
 using namespace std;
 
 // xml constructor
-PrimalFrictionContact::PrimalFrictionContact(OneStepNSProblemXML* osNsPbXml, Simulation* newSimu):
+PrimalFrictionContact::PrimalFrictionContact(SP::OneStepNSProblemXML osNsPbXml, SP::Simulation newSimu):
   OneStepNSProblem("PrimalFrictionContact", osNsPbXml, newSimu), contactProblemDim(3), velocity(NULL), reaction(NULL), localVelocity(NULL), localReaction(NULL), tildeLocalVelocity(NULL), M(NULL), H(NULL), q(NULL), mu(NULL),
   isVelocityAllocatedIn(false), isReactionAllocatedIn(false), isLocalVelocityAllocatedIn(false), isLocalReactionAllocatedIn(false), isTildeLocalVelocityAllocatedIn(false), isMAllocatedIn(false), isHAllocatedIn(false), isQAllocatedIn(false), MStorageType(0)
 {
@@ -56,7 +56,7 @@ PrimalFrictionContact::PrimalFrictionContact(OneStepNSProblemXML* osNsPbXml, Sim
 // Constructor from a set of data
 // Required input: simulation
 // Optional: NonSmoothSolver and id
-PrimalFrictionContact::PrimalFrictionContact(Simulation* newSimu, int dimPb, NonSmoothSolver*  newSolver, const string& newId):
+PrimalFrictionContact::PrimalFrictionContact(SP::Simulation newSimu, int dimPb, SP::NonSmoothSolver  newSolver, const string& newId):
   OneStepNSProblem("PrimalFrictionContact", newSimu, newId, newSolver), contactProblemDim(dimPb), velocity(NULL), reaction(NULL), localVelocity(NULL), localReaction(NULL), tildeLocalVelocity(NULL), M(NULL), H(NULL), q(NULL), mu(NULL),
   isVelocityAllocatedIn(false), isReactionAllocatedIn(false), isLocalVelocityAllocatedIn(false), isLocalReactionAllocatedIn(false), isTildeLocalVelocityAllocatedIn(false), isMAllocatedIn(false), isHAllocatedIn(false), isQAllocatedIn(false), MStorageType(0)
 {}
@@ -363,7 +363,7 @@ void PrimalFrictionContact::initialize()
   }
 
   // get topology
-  Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  SP::Topology topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
   // Note that unitaryBlocks is up to date since updateUnitaryBlocks has been called during OneStepNSProblem::initialize()
 
@@ -380,7 +380,7 @@ void PrimalFrictionContact::initialize()
   if (topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty())
   {
 
-    if (M == NULL)
+    if (!M)
     {
       // Creates and fills M using UR of indexSet
       M = new OSNSMatrix(allDS, DSBlocks, MStorageType);
@@ -392,7 +392,7 @@ void PrimalFrictionContact::initialize()
       M->fill(allDS, DSBlocks);
     }
     // Get index set from Simulation
-    UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
+    SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
     if (H == NULL)
     {
       // Creates and fills M using UR of indexSet
@@ -422,7 +422,7 @@ void PrimalFrictionContact::initialize()
   else // in that case, M and mu will be updated during preCompute
   {
     // Default size for M = maxSize
-    if (M == NULL)
+    if (!M)
     {
       if (MStorageType == 0)
         M = new OSNSMatrix(maxSize, 0);
@@ -443,19 +443,19 @@ void PrimalFrictionContact::initialize()
   }
 }
 
-void PrimalFrictionContact::computeUnitaryBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
+void PrimalFrictionContact::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
 {
   // Computes matrix unitaryBlocks[UR1][UR2] (and allocates memory if necessary) if UR1 and UR2 have commond DynamicalSystem.
   // How unitaryBlocks are computed depends explicitely on the type of Relation of each UR.
 
 }
 
-void PrimalFrictionContact::computeDSBlock(DynamicalSystem* DS)
+void PrimalFrictionContact::computeDSBlock(SP::DynamicalSystem DS)
 {
   // Computes matrix DSBlocks[DS1](and allocates memory if necessary)
 
   DSIterator itDS;
-  OneStepIntegrator * Osi;
+  SP::OneStepIntegrator  Osi;
   string osiType; // type of the current one step integrator
   string dsType; // type of the current Dynamical System;
 
@@ -464,7 +464,7 @@ void PrimalFrictionContact::computeDSBlock(DynamicalSystem* DS)
   if (osiType == "Moreau" || osiType == "Moreau2")
   {
     DSBlocks[DS] = (static_cast<Moreau*>(Osi))->getWPtr(DS);  // get its W matrix ( pointer link!)
-    //       cout << "PrimalFrictionContact::computeDSBlock(DynamicalSystem* DS) " << endl;
+    //       cout << "PrimalFrictionContact::computeDSBlock(SP::DynamicalSystem DS) " << endl;
     //       DSBlocks[DS]->display();
   }
   else if (osiType == "Lsodar") // Warning: LagrangianDS only at the time !!!
@@ -480,7 +480,7 @@ void PrimalFrictionContact::computeDSBlock(DynamicalSystem* DS)
  *  \param a pointer to UnitaryRelation UR1
  *  \param a pointer to DynamicalSystems DS2
  */
-void PrimalFrictionContact::computeUnitaryDSBlock(UnitaryRelation* UR, DynamicalSystem* DS)
+void PrimalFrictionContact::computeUnitaryDSBlock(SP::UnitaryRelation UR, SP::DynamicalSystem DS)
 {
   unsigned int sizeDS = (DS)->getDim();
   unsigned int nslawSize = UR->getNonSmoothLawSize();
@@ -512,9 +512,9 @@ void PrimalFrictionContact::computeQ(const double time)
   }
 }
 
-void PrimalFrictionContact::computeQBlock(DynamicalSystem* DS, unsigned int pos)
+void PrimalFrictionContact::computeQBlock(SP::DynamicalSystem DS, unsigned int pos)
 {
-  OneStepIntegrator * Osi = simulation->getIntegratorOfDSPtr(DS);
+  SP::OneStepIntegrator  Osi = simulation->getIntegratorOfDSPtr(DS);
   string osiType = Osi->getType();
   unsigned int sizeDS;
   if (osiType == "Moreau2")
@@ -527,7 +527,7 @@ void PrimalFrictionContact::computeQBlock(DynamicalSystem* DS, unsigned int pos)
     RuntimeException::selfThrow("PrimalFrictionContact::computeQ. Not yet implemented for Integrator type : " + osiType);
   }
 }
-void PrimalFrictionContact::computeTildeLocalVelocityBlock(UnitaryRelation* UR, unsigned int pos)
+void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::UnitaryRelation UR, unsigned int pos)
 {
   // Get relation and non smooth law types
   RELATIONTYPES relationType = UR->getRelationType();
@@ -536,14 +536,14 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(UnitaryRelation* UR, 
 
   string simulationType = simulation->getType();
 
-  DynamicalSystem* ds = *(UR->dynamicalSystemsBegin());
+  SP::DynamicalSystem ds = *(UR->dynamicalSystemsBegin());
   string osiType = simulation->getIntegratorOfDSPtr(ds)->getType();
 
   unsigned int sizeY = UR->getNonSmoothLawSize();
   std::vector<unsigned int> coord(8);
 
   unsigned int relativePosition = UR->getRelativePosition();
-  Interaction * mainInteraction = UR->getInteractionPtr();
+  SP::Interaction mainInteraction = UR->getInteractionPtr();
   coord[0] = relativePosition;
   coord[1] = relativePosition + sizeY;
   coord[2] = 0;
@@ -551,8 +551,8 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(UnitaryRelation* UR, 
   coord[6] = pos;
   coord[7] = pos + sizeY;
 
-  SiconosMatrix * H = NULL;
-  SiconosVector* workX = UR->getWorkXPtr();
+  SP::SiconosMatrix  H = NULL;
+  SP::SiconosVector workX = UR->getWorkXPtr();
   if (osiType == "Moreau2")
   {
   }
@@ -620,7 +620,7 @@ void PrimalFrictionContact::computeTildeLocalVelocity(const double time)
     tildeLocalVelocity->resize(sizeLocalOutput);
   tildeLocalVelocity->zero();
   // === Get index set from Simulation ===
-  UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
+  SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
   // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
 
   unsigned int pos = 0;
@@ -643,9 +643,9 @@ void PrimalFrictionContact::preCompute(const double time)
   // M, sizeOutput have been computed in initialize and are uptodate.
 
   // Get topology
-  Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  SP::Topology topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
   DynamicalSystemsSet *allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();;
-  UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
+  SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
 
 
   if (!topology->isTimeInvariant())
@@ -659,7 +659,7 @@ void PrimalFrictionContact::preCompute(const double time)
 
 
     // Updates matrix M
-    UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
+    SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
     M->fill(allDS, DSBlocks);
     H->fill(indexSet, allDS, unitaryDSBlocks);
     sizeOutput = M->size();
@@ -771,10 +771,10 @@ void PrimalFrictionContact::postCompute()
   // Only UnitaryRelations (ie Interactions) of indexSet(leveMin) are concerned.
 
   // === Get index set from Topology ===
-  UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
+  SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
 
   // y and lambda vectors
-  SiconosVector * y, *lambda;
+  SP::SiconosVector  y, *lambda;
 
   //   // === Loop through "active" Unitary Relations (ie present in indexSets[1]) ===
 
@@ -802,7 +802,7 @@ void PrimalFrictionContact::postCompute()
   DynamicalSystemsSet *allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();;
   DSIterator itDS;
   unsigned int sizeDS;
-  OneStepIntegrator * Osi;
+  SP::OneStepIntegrator  Osi;
   string osiType; // type of the current one step integrator
   string dsType; // type of the current Dynamical System
   //   for(itDS = allDS->begin(); itDS!=  allDS->end(); ++itDS)

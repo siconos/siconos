@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 /*! \file DynamicalSystemsSet.h
-Set of DynamicalSystem*
+Set of SP::DynamicalSystem
 */
 #ifndef DSSET_H
 #define DSSET_H
@@ -25,13 +25,17 @@ Set of DynamicalSystem*
 #include "DynamicalSystem.h"
 #include "SiconosSet.h"
 
+#include <boost/shared_ptr.hpp>
+
 /** A set of pointers to dynamical systems, sorted in a growing order according to their numbers */
 typedef SiconosSet<DynamicalSystem, int> DynamicalSystemsSet;
 /** Iterator through a set of DS */
-typedef std::set<DynamicalSystem*, Cmp<DynamicalSystem, int> >::iterator DSIterator;
+typedef std::set<SP::DynamicalSystem, Cmp<DynamicalSystem, int> >::iterator DSIterator;
 /** const Iterator through a set of DS */
-typedef std::set<DynamicalSystem*, Cmp<DynamicalSystem, int> >::const_iterator ConstDSIterator;
+typedef std::set<SP::DynamicalSystem, Cmp<DynamicalSystem, int> >::const_iterator ConstDSIterator;
 /** return type value for insert function - bool = false if insertion failed. */
 typedef std::pair<DSIterator, bool> CheckInsertDS;
+
+TYPEDEF_SPTR(DynamicalSystemsSet);
 
 #endif

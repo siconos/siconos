@@ -35,7 +35,7 @@ namespace ActuatorFactory
 {
 
 /** A pointer to function, returning a pointer to Actuator, built with its type (ie class name) and a pointer to Model.*/
-typedef Actuator* (*object_creator)(int, TimeDiscretisation*) ;
+typedef SP::Actuator(*object_creator)(int, SP::TimeDiscretisation) ;
 
 /** The type of the factory map */
 typedef std::map<int, object_creator> MapFactory;
@@ -44,7 +44,7 @@ typedef std::map<int, object_creator> MapFactory;
 typedef MapFactory::iterator MapFactoryIt;
 
 /** Template function to return a new object of type SubType*/
-template<class SubType> Actuator* factory(int name, TimeDiscretisation* t)
+template<class SubType> SP::Actuator factory(int name, SP::TimeDiscretisation t)
 {
   return new SubType(name, t);
 }
@@ -85,7 +85,7 @@ public :
    * \param an int, the name of the object added (type name!)
    * \param a pointer to a TimeDiscretisation.
    */
-  Actuator* instantiate(int, TimeDiscretisation*);
+  SP::Actuator instantiate(int, SP::TimeDiscretisation);
 } ;
 
 /** Registration Class for sensors.

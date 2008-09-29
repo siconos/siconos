@@ -61,7 +61,7 @@ protected:
   NonSmoothDynamicalSystem *_NSDS;
   Model *_Model;
   TimesSet *_TimesSet;
-  Simulation * _Simulation;
+  SP::Simulation _Simulation;
   EventsManager  *_EventsManager;
 
 public:
@@ -88,8 +88,8 @@ public:
   Model *getModelPtr();
   void  setModelPtr(Model *ptrModel);
 
-  Simulation * getSimulationPtr();
-  void setSimulationPtr(Simulation * ptrSimulation);
+  SP::Simulation getSimulationPtr();
+  void setSimulationPtr(SP::Simulation ptrSimulation);
 
   NonSmoothDynamicalSystem * getNonSmoothDynamicalSystemPtr();
   void setNonSmoothDynamicalSystemPtr(NonSmoothDynamicalSystem * ptr);

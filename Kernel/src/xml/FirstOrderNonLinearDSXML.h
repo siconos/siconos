@@ -64,7 +64,7 @@ protected:
   xmlNodePtr fNode;/**< f(x,t) */
   xmlNodePtr jacobianXFNode;/**< jacobian of f according to x */
   xmlNodePtr xMemoryNode;/**<  memory vector for x*/
-  SiconosMemoryXML * xMemoryXML;/** <xml object for xMemory*/
+  SiconosMemoryXMLSPtr xMemoryXML;/** <xml object for xMemory*/
 
   /** Default constructor */
   FirstOrderNonLinearDSXML();
@@ -194,7 +194,7 @@ public:
   /** Returns the xMemoryXML* of the DynamicalSystemXML
    *   \return SiconosMemoryXML*
    */
-  inline SiconosMemoryXML* getXMemoryXML() const
+  inline SiconosMemoryXMLSPtr getXMemoryXML() const
   {
     return xMemoryXML;
   }

@@ -101,7 +101,7 @@ public:
   /** constructor from xml file
    *  \param relationXML
    */
-  LagrangianCompliantR(RelationXML*);
+  LagrangianCompliantR(RelationXMLSPtr);
 
   /** constructor from a set of data
    *  \param string : the name of the plugin to computeH

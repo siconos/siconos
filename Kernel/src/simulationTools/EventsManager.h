@@ -117,7 +117,7 @@ protected:
   Event * ENonSmooth;
 
   /* link to the simulation that owns this manager*/
-  Simulation * simulation;
+  SP::Simulation simulation;
 
   /** bool to check if some NonSmooth events has already been inserted */
   bool hasNS;
@@ -145,7 +145,7 @@ public:
   /**  constructor with Simulation
    *  \param the simulation that owns this manager
    */
-  EventsManager(Simulation*);
+  EventsManager(SP::Simulation);
 
   /** destructor
    */
@@ -205,7 +205,7 @@ public:
   /** get the Simulation
    *  \return a pointer to Simulation
    */
-  inline Simulation* getSimulationPtr() const
+  inline SP::Simulation getSimulationPtr() const
   {
     return simulation;
   }
@@ -213,7 +213,7 @@ public:
   /** set the Simulation of the OneStepNSProblem
    *  \param: a pointer on Simulation
    */
-  inline void setSimulationPtr(Simulation* str)
+  inline void setSimulationPtr(SP::Simulation str)
   {
     simulation = str;
   }

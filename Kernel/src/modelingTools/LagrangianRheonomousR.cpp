@@ -30,16 +30,22 @@ using namespace std;
 LagrangianRheonomousR::LagrangianRheonomousR(): LagrangianR(RheonomousR), hPtr(NULL), hDotPtr(NULL), G0Ptr(NULL)
 {
   isPlugged["G0"] = false ;
-  isAllocatedIn["G0"] = false;
   isPlugged["hDot"] = false ;
+
+#ifndef WithSmartPtr
+  isAllocatedIn["G0"] = false;
   isAllocatedIn["hDot"] = false;
   G.resize(1, NULL);
+#else
+  G.resize(1);
+#endif
+
 }
 
 // xml constructor
-LagrangianRheonomousR::LagrangianRheonomousR(RelationXML* relxml): LagrangianR(relxml, RheonomousR), hPtr(NULL), hDotPtr(NULL), G0Ptr(NULL)
+LagrangianRheonomousR::LagrangianRheonomousR(RelationXMLSPtr relxml): LagrangianR(relxml, RheonomousR)
 {
-  LagrangianRXML * LRxml = static_cast<LagrangianRXML *>(relationxml);
+  LagrangianRXMLSPtr LRxml = boost::static_pointer_cast<LagrangianRXML>(relationxml);
   // h plug-in
   if (LRxml->hasH())
   {
@@ -54,18 +60,26 @@ LagrangianRheonomousR::LagrangianRheonomousR(RelationXML* relxml): LagrangianR(r
   {
     pluginNames["hDot"] = LRxml->getHDotPlugin();
     setComputeHDotFunction(cShared.getPluginName(pluginNames["hDot"]), cShared.getPluginFunctionName(pluginNames["hDot"]));
-    isAllocatedIn["hDot"] = false;
+
   }
   else
   {
-    hDot = new SimpleVector(LRxml->getHDotVector());
-    isAllocatedIn["hDot"] = true   ;
+
+    hDot.reset(new SimpleVector(LRxml->getHDotVector()));
+
+
     isPlugged["hDot"] = false;
   }
 
   if (!LRxml->hasG())
     RuntimeException::selfThrow("LagrangianRheonomousR:: xml constructor failed, can not find a definition for G0.");
+
+#ifndef WithSmartPtr
   G.resize(1, NULL);
+#else
+  G.resize(1);
+#endif
+
   // Read G matrices or plug-in names.
   readGInXML(LRxml, 0);
 }
@@ -78,13 +92,24 @@ LagrangianRheonomousR::LagrangianRheonomousR(const string& computeH, const strin
   setComputeHFunction(cShared.getPluginName(computeH), cShared.getPluginFunctionName(computeH));
   // hDot
   setComputeHDotFunction(cShared.getPluginName(computeHDot), cShared.getPluginFunctionName(computeHDot));
+
+#ifndef WithSmartPtr
   isAllocatedIn["hDot"] = false;
   // G[0]
+
   G.resize(1, NULL);
+#else
+  G.resize(1);
+#endif
+
   string name = "G0";
   pluginNames[name] = computeG;
   setComputeGFunction(cShared.getPluginName(pluginNames[name]), cShared.getPluginFunctionName(pluginNames[name]), 0);
+
+#ifndef WithSmartPtr
   isAllocatedIn[name] = false;
+#endif
+
 }
 
 LagrangianRheonomousR::~LagrangianRheonomousR()
@@ -102,8 +127,14 @@ void LagrangianRheonomousR::initComponents()
   // hDot
   if (hDot == NULL)
   {
+
+#ifndef WithSmartPtr
     hDot = new SimpleVector(sizeY);
     isAllocatedIn["hDot"] = true;
+#else
+    hDot.reset(new SimpleVector(sizeY));
+#endif
+
   }
   else if (sizeY != hDot->size())
     RuntimeException::selfThrow("LagrangianRheonomousR:: initComponents failed. Inconsistent sizes between Interaction and Relation matrices.");
@@ -114,8 +145,13 @@ void LagrangianRheonomousR::setHDot(const SiconosVector& newValue)
 {
   if (hDot == NULL)
   {
+#ifndef WithSmartPtr
     hDot =  new SimpleVector(newValue);
     isAllocatedIn["hDot"] = true;
+#else
+    hDot.reset(new SimpleVector(newValue));
+#endif
+
   }
   else
     *(hDot) = newValue;
@@ -123,11 +159,16 @@ void LagrangianRheonomousR::setHDot(const SiconosVector& newValue)
   isPlugged["hDot"] = false;
 }
 
-void LagrangianRheonomousR::setHDotPtr(SiconosVector *newPtr)
+void LagrangianRheonomousR::setHDotPtr(SiconosVectorSPtr newPtr)
 {
+
+#ifndef WithSmartPtr
   if (isAllocatedIn["hDot"]) delete hDot;
-  hDot = newPtr;
   isAllocatedIn["hDot"] = false;
+#endif
+
+  hDot = newPtr;
+
   isPlugged["hDot"] = false;
 }
 
@@ -164,7 +205,7 @@ void LagrangianRheonomousR::computeH(double time)
   if (isPlugged["h"])
   {
     // get vector y of the current interaction
-    SiconosVector *y = interaction->getYPtr(0);
+    SiconosVectorSPtr y = interaction->getYPtr(0);
 
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
     *workX = *data["q0"];
@@ -235,7 +276,7 @@ void LagrangianRheonomousR::computeOutput(double time, unsigned int derivativeNu
     computeH(time);
   else
   {
-    SiconosVector *y = interaction->getYPtr(derivativeNumber);
+    SiconosVectorSPtr y = interaction->getYPtr(derivativeNumber);
     computeG(time);
     if (derivativeNumber == 1)
     {
@@ -255,10 +296,10 @@ void LagrangianRheonomousR::computeInput(double time, unsigned int level)
   computeG(time, 0);
   string name = "p" + toString<unsigned int>(level);
   // get lambda of the concerned interaction
-  SiconosVector *lambda = interaction->getLambdaPtr(level);
+  SiconosVectorSPtr lambda = interaction->getLambdaPtr(level);
   // data[name] += trans(G) * lambda
   prod(*lambda, *G[0], *data[name], false);
-  //   SiconosMatrix * GT = new SimpleMatrix(*G[0]);
+  //   SP::SiconosMatrix  GT = new SimpleMatrix(*G[0]);
   //   GT->trans();
   //   *data[name] += prod(*GT, *lambda);
   //   delete GT;

@@ -42,25 +42,21 @@ class QP : public OneStepNSProblem
 private:
 
   /** contains the Q matrix of a QP problem */
-  SiconosMatrix* Q;
+  SP::SiconosMatrix Q;
 
   /** contains the p vector of a QP problem */
-  SimpleVector* p;
+  SP::SimpleVector p;
 
   //  /** contains the data of the QP, according to siconos/numerics */
   //  QPStructure QPMethod;
 
-  /** Flags to check wheter pointers were allocated in class constructors or not */
-  bool isQAllocatedIn;
-  bool isPAllocatedIn;
-
 public:
 
   /** xml constructor
-   *  \param OneStepNSProblemXML* : the XML linked-object
-   *  \param Simulation *: the simulation that owns the problem (optional)
+   *  \param SP::OneStepNSProblemXML : the XML linked-object
+   *  \param SP::Simulation: the simulation that owns the problem (optional)
    */
-  QP(OneStepNSProblemXML*, Simulation * = NULL);
+  QP(SP::OneStepNSProblemXML, SP::Simulation = SP::Simulation());
 
   /** Destructor */
   ~QP();
@@ -79,7 +75,7 @@ public:
   /** get Q
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getQPtr() const
+  inline SP::SiconosMatrix getQPtr() const
   {
     return Q;
   }
@@ -93,13 +89,11 @@ public:
   }
 
   /** set Q to pointer newPtr
-   *  \param SiconosMatrix * newPtr
+   *  \param SP::SiconosMatrix  newPtr
    */
-  inline void setQPtr(SiconosMatrix *newPtr)
+  inline void setQPtr(SP::SiconosMatrix newPtr)
   {
-    if (isQAllocatedIn) delete Q;
     Q = newPtr;
-    isQAllocatedIn = false;
   }
 
   // --- P ---
@@ -115,7 +109,7 @@ public:
   /** get p, the initial state of the DynamicalSystem
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getPPtr() const
+  inline SP::SimpleVector getPPtr() const
   {
     return p;
   }
@@ -131,11 +125,9 @@ public:
   /** set p to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  inline void setPPtr(SimpleVector* newPtr)
+  inline void setPPtr(SP::SimpleVector newPtr)
   {
-    if (isPAllocatedIn) delete p;
     p = newPtr;
-    isPAllocatedIn = false;
   }
 
   // --- OTHER FUNCTIONS ---

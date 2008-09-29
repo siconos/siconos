@@ -16,12 +16,14 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
+#include <boost/numeric/ublas/matrix_proxy.hpp>
+#include <boost/numeric/ublas/vector_proxy.hpp>
+
 #include "BlockMatrix.h"
 #include "SimpleMatrix.h"
 #include "SimpleVector.h"
 #include "SiconosMatrixException.h"
-#include <boost/numeric/ublas/matrix_proxy.hpp>
-#include <boost/numeric/ublas/vector_proxy.hpp>
+
 
 using std::cout;
 using std::endl;
@@ -31,10 +33,10 @@ using std::endl;
 // =================================================
 
 // Default (private)
-BlockMatrix::BlockMatrix(): SiconosMatrix(0), mat(NULL), tabRow(NULL), tabCol(NULL), isBlockAllocatedIn(NULL)
+BlockMatrix::BlockMatrix(): SiconosMatrix(0), tabRow(NULL), tabCol(NULL)
 {}
 
-BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), mat(NULL), tabRow(NULL), tabCol(NULL), isBlockAllocatedIn(NULL)
+BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), tabRow(NULL), tabCol(NULL)
 {
   tabRow = new Index();
   tabCol = new Index();
@@ -46,9 +48,7 @@ BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), mat(NULL), t
     tabCol->reserve(nbCols);
 
     // mat construction
-    mat = new BlocksMat(nbRows, nbCols, nbRows * nbCols);
-    isBlockAllocatedIn = new std::vector<bool>();
-    isBlockAllocatedIn->reserve(nbRows * nbCols);
+    mat.reset(new BlocksMat(nbRows, nbCols, nbRows * nbCols));
 
     unsigned int i, j;
     ConstBlockIterator1 it1;
@@ -64,10 +64,9 @@ BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), mat(NULL), t
         i = it2.index1();
         j = it2.index2();
         if ((*it2)->isBlock())  // if the current matrix is a blockMatrix
-          mat->insert_element(i, j, new BlockMatrix(**it2));
+          mat->insert_element(i, j, boost::shared_ptr<SiconosMatrix>(new BlockMatrix(**it2)));
         else
-          mat->insert_element(i, j, new SimpleMatrix(**it2));
-        isBlockAllocatedIn->push_back(true);
+          mat->insert_element(i, j, boost::shared_ptr<SiconosMatrix>(new SimpleMatrix(**it2)));
         // dimCol must be incremented only at first "column-loop"
         if (firstLoop)
         {
@@ -83,11 +82,9 @@ BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), mat(NULL), t
     tabRow->reserve(1);
     tabCol->reserve(1);
     // mat construction
-    mat = new BlocksMat(1, 1, 1);
-    isBlockAllocatedIn = new std::vector<bool>();
-    isBlockAllocatedIn->reserve(1);
-    mat->insert_element(0, 0, new SimpleMatrix(m));
-    isBlockAllocatedIn->push_back(true);
+    mat.reset(new BlocksMat(1, 1, 1));
+    mat->insert_element(0, 0, boost::shared_ptr<SiconosMatrix>(new SimpleMatrix(m)));
+
     dimRow = m.size(0);
     dimCol = m.size(1);
     tabRow->push_back(dimRow);
@@ -95,7 +92,7 @@ BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), mat(NULL), t
   }
 }
 
-BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0), mat(NULL), tabRow(NULL), tabCol(NULL), isBlockAllocatedIn(NULL)
+BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0), tabRow(NULL), tabCol(NULL)
 {
   unsigned int nbRows = m.getNumberOfBlocks(0);
   unsigned int nbCols = m.getNumberOfBlocks(1);
@@ -105,9 +102,7 @@ BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0), mat(NULL), tab
   tabCol->reserve(nbCols);
 
   // mat construction
-  mat = new BlocksMat(nbRows, nbCols, nbRows * nbCols);
-  isBlockAllocatedIn = new std::vector<bool>();
-  isBlockAllocatedIn->reserve(nbRows * nbCols);
+  mat.reset(new BlocksMat(nbRows, nbCols, nbRows * nbCols));
 
   unsigned int i, j;
   // We scan all the blocks of m ...
@@ -124,10 +119,10 @@ BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0), mat(NULL), tab
       i = it2.index1();
       j = it2.index2();
       if ((*it2)->isBlock())  // if the current matrix is a blockMatrix
-        mat->insert_element(i, j, new BlockMatrix(**it2));
+        mat->insert_element(i, j, boost::shared_ptr<SiconosMatrix>(new BlockMatrix(**it2)));
       else
-        mat->insert_element(i, j, new SimpleMatrix(**it2));
-      isBlockAllocatedIn->push_back(true);
+        mat->insert_element(i, j, boost::shared_ptr<SiconosMatrix>(new SimpleMatrix(**it2)));
+
       // dimCol must be incremented only at first "column-loop"
       if (firstLoop)
       {
@@ -139,8 +134,8 @@ BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0), mat(NULL), tab
   }
 }
 
-BlockMatrix::BlockMatrix(const std::vector<SiconosMatrix* >& m, unsigned int row, unsigned int col):
-  SiconosMatrix(0), mat(NULL), tabRow(NULL), tabCol(NULL), isBlockAllocatedIn(NULL)
+BlockMatrix::BlockMatrix(const std::vector<SP::SiconosMatrix >& m, unsigned int row, unsigned int col):
+  SiconosMatrix(0), tabRow(NULL), tabCol(NULL)
 {
   if (m.size() != (row * col))
     SiconosMatrixException::selfThrow("BlockMatrix constructor from a vector<SiconosMatrix*>, number of blocks inconsistent with provided dimensions.");
@@ -151,9 +146,7 @@ BlockMatrix::BlockMatrix(const std::vector<SiconosMatrix* >& m, unsigned int row
   tabCol->reserve(col);
 
   // mat construction
-  mat = new BlocksMat(row, col, row * col);
-  isBlockAllocatedIn = new std::vector<bool>();
-  isBlockAllocatedIn->reserve(row * col);
+  mat.reset(new BlocksMat(row, col, row * col));
 
   BlockIterator1 it1;
   BlockIterator2 it2;
@@ -167,7 +160,7 @@ BlockMatrix::BlockMatrix(const std::vector<SiconosMatrix* >& m, unsigned int row
     for (unsigned int j = 0; j < col; ++j)
     {
       (*mat)(i, j) = m[k++];
-      isBlockAllocatedIn->push_back(false);
+
       // dimCol must be incremented only at first "column-loop"
       if (firstColLoop)
       {
@@ -186,8 +179,8 @@ BlockMatrix::BlockMatrix(const std::vector<SiconosMatrix* >& m, unsigned int row
   }
 }
 
-BlockMatrix::BlockMatrix(SiconosMatrix* A, SiconosMatrix* B, SiconosMatrix* C, SiconosMatrix* D):
-  SiconosMatrix(0), mat(NULL), tabRow(NULL), tabCol(NULL), isBlockAllocatedIn(NULL)
+BlockMatrix::BlockMatrix(SiconosMatrixSPtr A, SiconosMatrixSPtr B, SiconosMatrixSPtr C, SiconosMatrixSPtr D):
+  SiconosMatrix(0), tabRow(NULL), tabCol(NULL)
 {
   if (A->size(0) != B->size(0) || C->size(0) != D->size(0) ||  A->size(1) != C->size(1) ||  B->size(1) != D->size(1))
     SiconosMatrixException::selfThrow("BlockMatrix constructor(A,B,C,D), inconsistent sizes between A, B, C or D SiconosMatrices.");
@@ -196,9 +189,8 @@ BlockMatrix::BlockMatrix(SiconosMatrix* A, SiconosMatrix* B, SiconosMatrix* C, S
   //       [ C D ]
 
   // mat construction
-  mat = new BlocksMat(2, 2, 4);
-  isBlockAllocatedIn = new std::vector<bool>();
-  isBlockAllocatedIn->reserve(4);
+  mat.reset(new BlocksMat(2, 2, 4));
+
   tabRow = new Index();
   tabCol = new Index();
   tabRow->reserve(2);
@@ -216,40 +208,20 @@ BlockMatrix::BlockMatrix(SiconosMatrix* A, SiconosMatrix* B, SiconosMatrix* C, S
   tabCol->push_back(dimCol);
   dimCol += B->size(1);
   tabCol->push_back(dimCol);
-  isBlockAllocatedIn->push_back(false);
-  isBlockAllocatedIn->push_back(false);
-  isBlockAllocatedIn->push_back(false);
-  isBlockAllocatedIn->push_back(false);
+
 }
 
 BlockMatrix::~BlockMatrix()
 {
-  std::vector<bool>::iterator it = isBlockAllocatedIn->begin();
-  BlockIterator1 it1;
-  BlockIterator2 it2;
-
-  for (it1 = mat->begin1(); it1 != mat->end1(); ++it1)
-  {
-    for (it2 = it1.begin(); it2 != it1.end(); ++it2)
-    {
-      if (*it++) delete(*it2);
-      *it2 = NULL;
-    }
-  }
 
   mat->clear();
-  delete mat;
-  mat = NULL;
+
   tabRow->clear();
   tabCol->clear();
   delete tabRow;
   tabRow = NULL;
   delete tabCol;
   tabCol = NULL;
-  isBlockAllocatedIn->clear();
-  delete isBlockAllocatedIn;
-  isBlockAllocatedIn = NULL;
-
 }
 
 // =================================================
@@ -295,136 +267,153 @@ ConstBlockIterator1 BlockMatrix::end() const
 // return the boost dense matrix of the block (i, j)
 const DenseMat  BlockMatrix::getDense(unsigned int row, unsigned int col) const
 {
-  (*(*mat)(row, col)).display();
 
-  if ((*(*mat)(row, col)).getNum() != 1)
+  SP::SiconosMatrix tmp;
+  tmp = (*mat)(row, col);
+
+  if (tmp->getNum() != 1)
     SiconosMatrixException::selfThrow("DenseMat BlockMatrix::getDense(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Dense matrix");
 
-  return ((*(*mat)(row, col)).getDense());
+  return (tmp->getDense());
 }
 
 // return the boost triangular matrix of the block (i, j)
 const TriangMat BlockMatrix::getTriang(unsigned int row, unsigned int col) const
 {
-  if ((*(*mat)(row, col)).getNum() != 2);
+  SP::SiconosMatrix tmp = (*mat)(row, col);
+  if (tmp->getNum() != 2);
   SiconosMatrixException::selfThrow("TriangMat BlockMatrix::getTriang(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Triangular matrix");
-  return ((*(*mat)(row, col)).getTriang());
+  return (tmp->getTriang());
 }
 
 // return the boost symmetric matrix of the block (i, j)
 const SymMat BlockMatrix::getSym(unsigned int row, unsigned int col) const
 {
 
-  if ((*(*mat)(row, col)).getNum() != 3);
+  SP::SiconosMatrix tmp = (*mat)(row, col);
+  if (tmp->getNum() != 3);
   SiconosMatrixException::selfThrow("SymMat BlockMatrix::getSym(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Symmmetric matrix");
-  return ((*(*mat)(row, col)).getSym());
+  return (tmp->getSym());
 }
 
 // return the boost sparse matrix of the block (i, j)
 const SparseMat  BlockMatrix::getSparse(unsigned int row, unsigned int col) const
 {
 
-  if ((*(*mat)(row, col)).getNum() != 4);
+  SP::SiconosMatrix tmp = (*mat)(row, col);
+  if (tmp->getNum() != 4);
   SiconosMatrixException::selfThrow("SparseMat BlockMatrix::getSparse(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Sparse matrix");
 
-  return ((*(*mat)(row, col)).getSparse());
+  return (tmp->getSparse());
 }
 
 // return the boost banded matrix of the block (i, j)
 const BandedMat  BlockMatrix::getBanded(unsigned int row, unsigned int col) const
 {
 
-  if ((*(*mat)(row, col)).getNum() != 5);
+  SP::SiconosMatrix tmp = (*mat)(row, col);
+  if (tmp->getNum() != 5);
   SiconosMatrixException::selfThrow("BandedMat BlockMatrix::getBanded(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Banded matrix");
 
-  return ((*(*mat)(row, col)).getBanded());
+  return (tmp->getBanded());
 }
 
 // return the boost zero matrix of the block (i, j)
 const ZeroMat  BlockMatrix::getZero(unsigned int row, unsigned int col) const
 {
 
-  if ((*(*mat)(row, col)).getNum() != 5);
+  SP::SiconosMatrix tmp = (*mat)(row, col);
+  if (tmp->getNum() != 5);
   SiconosMatrixException::selfThrow("ZeroMat BlockMatrix::getZero(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Zero matrix");
 
-  return ((*(*mat)(row, col)).getZero());
+  return (tmp->getZero());
 }
 
 // return the boost identity matrix of the block (i, j)
 const IdentityMat  BlockMatrix::getIdentity(unsigned int row, unsigned int col) const
 {
 
-  if ((*(*mat)(row, col)).getNum() != 5);
+  SP::SiconosMatrix tmp = (*mat)(row, col);
+  if (tmp->getNum() != 5);
   SiconosMatrixException::selfThrow("IdentityMat BlockMatrix::getIdentity(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Identity matrix");
 
-  return ((*(*mat)(row, col)).getIdentity());
+  return (tmp->getIdentity());
 }
 
 // The following functions return the corresponding pointers
 DenseMat*  BlockMatrix::getDensePtr(unsigned int row, unsigned int col) const
 {
 
-  if ((*(*mat)(row, col)).getNum() != 1);
+
+  SP::SiconosMatrix tmp = (*mat)(row, col);
+  if (tmp->getNum() != 1);
   SiconosMatrixException::selfThrow("DenseMat* BlockMatrix::getDensePtr(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Dense matrix");
 
-  return ((*(*mat)(row, col)).getDensePtr());
+  return (tmp->getDensePtr());
 }
 
 TriangMat* BlockMatrix::getTriangPtr(unsigned int row, unsigned int col) const
 {
 
-  if ((*(*mat)(row, col)).getNum() != 2);
+  SP::SiconosMatrix tmp = (*mat)(row, col);
+  if (tmp->getNum() != 2);
   SiconosMatrixException::selfThrow("TriangMat* BlockMatrix::getTriangPtr(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Triangular matrix");
 
-  return ((*(*mat)(row, col)).getTriangPtr());
+  return (tmp->getTriangPtr());
 }
 SymMat* BlockMatrix::getSymPtr(unsigned int row, unsigned int col) const
 {
 
-  if ((*(*mat)(row, col)).getNum() != 3);
+  SP::SiconosMatrix tmp = (*mat)(row, col);
+  if (tmp->getNum() != 3);
   SiconosMatrixException::selfThrow("SymMat* BlockMatrix::getSymPtr(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Symmmetric matrix");
-  return ((*(*mat)(row, col)).getSymPtr());
+  return (tmp->getSymPtr());
 }
 
 SparseMat*  BlockMatrix::getSparsePtr(unsigned int row, unsigned int col) const
 {
 
-  if ((*(*mat)(row, col)).getNum() != 4);
+  SP::SiconosMatrix tmp = (*mat)(row, col);
+  if (tmp->getNum() != 4);
   SiconosMatrixException::selfThrow("SparseMat* BlockMatrix::getSparsePtr(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Sparse matrix");
 
-  return ((*(*mat)(row, col)).getSparsePtr());
+  return (tmp->getSparsePtr());
 }
 
 BandedMat*  BlockMatrix::getBandedPtr(unsigned int row, unsigned int col) const
 {
 
-  if ((*(*mat)(row, col)).getNum() != 5);
+  SP::SiconosMatrix tmp = (*mat)(row, col);
+  if (tmp->getNum() != 5);
   SiconosMatrixException::selfThrow("BandedMat* BlockMatrix::getBandedPtr(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Banded matrix");
 
-  return ((*(*mat)(row, col)).getBandedPtr());
+  return (tmp->getBandedPtr());
 }
 
 ZeroMat*  BlockMatrix::getZeroPtr(unsigned int row, unsigned int col) const
 {
 
-  if ((*(*mat)(row, col)).getNum() != 5);
+  SP::SiconosMatrix tmp = (*mat)(row, col);
+  if (tmp->getNum() != 5);
   SiconosMatrixException::selfThrow("ZeroMat* BlockMatrix::getZeroPtr(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Zero matrix");
 
-  return ((*(*mat)(row, col)).getZeroPtr());
+  return (tmp->getZeroPtr());
 }
 
 IdentityMat*  BlockMatrix::getIdentityPtr(unsigned int row, unsigned int col) const
 {
 
-  if ((*(*mat)(row, col)).getNum() != 5);
+  SP::SiconosMatrix tmp = (*mat)(row, col);
+  if (tmp->getNum() != 5);
   SiconosMatrixException::selfThrow("IdentityMat* BlockMatrix::getIdentityPtr(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Identity matrix");
 
-  return ((*(*mat)(row, col)).getIdentityPtr());
+  return (tmp->getIdentityPtr());
 }
 
 double* BlockMatrix::getArray(unsigned int i, unsigned int j) const
 {
-  return (*(*mat)(i, j)).getArray();
+  SP::SiconosMatrix tmp = (*mat)(i, j);
+  return tmp->getArray();
 }
 
 // ===========================
@@ -531,7 +520,9 @@ double& BlockMatrix::operator()(unsigned int row, unsigned int col)
   if (nbCol != 0)
     posCol -= (*tabCol)[nbCol - 1];
 
-  return (*(*mat)(nbRow, nbCol))(posRow, posCol);
+
+  SP::SiconosMatrix tmp = (*mat)(nbRow, nbCol);
+  return (*tmp)(posRow, posCol);
 }
 
 const double BlockMatrix::operator()(unsigned int row, unsigned int col) const
@@ -554,7 +545,8 @@ const double BlockMatrix::operator()(unsigned int row, unsigned int col) const
   if (nbCol != 0)
     posCol -= (*tabCol)[nbCol - 1];
 
-  return (*(*mat)(nbRow, nbCol))(posRow, posCol);
+  SP::SiconosMatrix tmp = (*mat)(nbRow, nbCol);
+  return (*tmp)(posRow, posCol);
 }
 
 const double BlockMatrix::getValue(unsigned int row, unsigned int col) const
@@ -576,7 +568,9 @@ const double BlockMatrix::getValue(unsigned int row, unsigned int col) const
   if (nbCol != 0)
     posCol -= (*tabCol)[nbCol - 1];
 
-  return (*(*mat)(nbRow, nbCol))(posRow, posCol);
+
+  SP::SiconosMatrix tmp = (*mat)(nbRow, nbCol);
+  return (*tmp)(posRow, posCol);
 }
 
 void BlockMatrix::setValue(unsigned int row, unsigned int col, double value)
@@ -598,7 +592,8 @@ void BlockMatrix::setValue(unsigned int row, unsigned int col, double value)
   if (nbCol != 0)
     posCol -= (*tabCol)[nbCol - 1];
 
-  (*(*mat)(nbRow, nbCol))(posRow, posCol) = value;
+  SP::SiconosMatrix tmp = (*mat)(nbRow, nbCol);
+  (*tmp)(posRow, posCol) = value;
 }
 
 //============================================
@@ -625,7 +620,7 @@ void BlockMatrix::setValue(unsigned int row, unsigned int col, double value)
 //     SiconosMatrixException::selfThrow("BlockMatrix::setBlock(i,j,m), i or j is out of range.");
 
 //   // Check dim
-//   if( (*(*mat)(row,col)).size(0)!=m->size(0) || (*(*mat)(row,col)).size(1) != m->size(1) )
+//   if( tmp->size(0)!=m->size(0) || tmp->size(1) != m->size(1) )
 //     SiconosMatrixException::selfThrow("BlockMatrix::setBlock(x,y,m), block(x,y) of current matrix and m have inconsistent sizes.");
 //   *((*mat)(row,col)) = *m; // copy
 // }
@@ -652,8 +647,9 @@ void BlockMatrix::getRow(unsigned int r, SiconosVector &v) const
   for (unsigned int j = 0; j < tabCol->size(); j++)
   {
     start = stop;
-    stop += (*(*mat)(numRow, j)).size(1);
-    ublas::subrange(*(v.getDensePtr()), start, stop) = ublas::row(*((*(*mat)(numRow, j)).getDensePtr()), posRow);
+    SP::SiconosMatrix tmp = (*mat)(numRow, j);
+    stop += tmp->size(1);
+    ublas::subrange(*(v.getDensePtr()), start, stop) = ublas::row(*(tmp->getDensePtr()), posRow);
   }
 }
 
@@ -679,8 +675,9 @@ void BlockMatrix::getCol(unsigned int c, SiconosVector &v) const
   for (unsigned int i = 0; i < tabRow->size(); i++)
   {
     start = stop;
-    stop += (*(*mat)(i, numCol)).size(0);
-    ublas::subrange(*(v.getDensePtr()), start, stop) = ublas::column((*(*mat)(i, numCol)).getDense(), posCol);
+    SP::SiconosMatrix tmp = (*mat)(i, numCol);
+    stop += tmp->size(0);
+    ublas::subrange(*(v.getDensePtr()), start, stop) = ublas::column(tmp->getDense(), posCol);
   }
 }
 
@@ -701,8 +698,9 @@ void BlockMatrix::setRow(unsigned int r, const SiconosVector &v)
   for (unsigned int j = 0; j < tabCol->size(); j++)
   {
     start = stop;
-    stop += (* (*mat)(numRow, j)).size(1);
-    ublas::row(*((*(*mat)(numRow, j)).getDensePtr()), posRow) = ublas::subrange(*(v.getDensePtr()), start, stop);
+    SP::SiconosMatrix tmp = (*mat)(numRow, j);
+    stop += tmp->size(1);
+    ublas::row(*(tmp->getDensePtr()), posRow) = ublas::subrange(*(v.getDensePtr()), start, stop);
   }
 }
 
@@ -723,8 +721,9 @@ void BlockMatrix::setCol(unsigned int col, const SiconosVector &v)
   for (unsigned int i = 0; i < tabRow->size(); i++)
   {
     start = stop;
-    stop += (*(*mat)(i, numCol)).size(0);
-    ublas::column(*((*(*mat)(i, numCol)).getDensePtr()), posCol) = ublas::subrange(*(v.getDensePtr()), start, stop);
+    SP::SiconosMatrix tmp = (*mat)(i, numCol);
+    stop += tmp->size(0);
+    ublas::column(*(tmp->getDensePtr()), posCol) = ublas::subrange(*(v.getDensePtr()), start, stop);
   }
 }
 
@@ -752,7 +751,7 @@ void BlockMatrix::addSimple(unsigned int& indRow, unsigned int& indCol, const Si
     for (it2 = it1.begin(); it2 != it1.end(); ++it2)
     {
       if ((*it2)->isBlock())  // if the sub-block is also a BlockMatrix ...
-        (static_cast<BlockMatrix*>(*it2))->addSimple(indRow, indCol, m);
+        (boost::static_pointer_cast<BlockMatrix>(*it2))->addSimple(indRow, indCol, m);
 
       else
       {
@@ -805,7 +804,7 @@ void BlockMatrix::subSimple(unsigned int& indRow, unsigned int& indCol, const Si
     for (it2 = it1.begin(); it2 != it1.end(); ++it2)
     {
       if ((*it2)->isBlock())  // if the sub-block is also a BlockMatrix ...
-        (static_cast<BlockMatrix*>(*it2))->subSimple(indRow, indCol, m);
+        (boost::static_pointer_cast<BlockMatrix>(*it2))->subSimple(indRow, indCol, m);
 
       else
       {
@@ -901,7 +900,7 @@ BlockMatrix& BlockMatrix::operator = (const SiconosMatrix &m)
         subPos[1] = posCol;
         subPos[2] = 0;
         subPos[3] = 0;
-        setBlock(&m, *it2, subDim, subPos);
+        setBlock(createSiconosMatrixSPtrConst(m), *it2, subDim, subPos);
         posCol += subDim[1];
       }
       posRow += (*it)->size(0);

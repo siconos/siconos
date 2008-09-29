@@ -27,7 +27,7 @@ void Disk::MassSetup()
   MassDisk->zero();
   (*MassDisk)(0, 0) = (*MassDisk)(1, 1) = massDisk;
   (*MassDisk)(2, 2) = massDisk * radiusDisk * radiusDisk / 2.;
-  setMassPtr(MassDisk.get());
+  setMassPtr(MassDisk);
 }
 
 Disk::Disk(int number,
@@ -43,7 +43,7 @@ Disk::Disk(int number,
   setNdof(ndofDisk);
   setNumber(number);
 
-  q.resize(3, NULL);
+  q.resize(3);
 
   QDisk->zero();
   VDisk->zero();
@@ -51,7 +51,7 @@ Disk::Disk(int number,
 
   QDisk->setValue(0, x);
   QDisk->setValue(1, y);
-  setQPtr(QDisk.get());
+  setQPtr(QDisk);
   setVelocity(*VDisk);
 
   setQ0(*QDisk);
@@ -59,8 +59,7 @@ Disk::Disk(int number,
   setVelocity0(*VDisk);
 
   // Missing setAccelerationPtr()
-  q[2] = new SimpleVector(ndofDisk);
-  isAllocatedIn["acceleration"] = true;
+  q[2].reset(new SimpleVector(ndofDisk));
   *q[2] = *ADisk;
 
   MassSetup();

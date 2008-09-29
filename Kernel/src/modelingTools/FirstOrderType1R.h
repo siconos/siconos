@@ -99,11 +99,6 @@ protected:
   */
   void initPluginFlags(bool);
 
-  /** protected function used to initilized isAllocated map
-      \param : a bool, value for all flags.
-  */
-  void initAllocationFlags(bool);
-
 private:
 
   /** default constructor
@@ -115,7 +110,7 @@ public:
   /** xml constructor
    *  \param FirstOrderType1RXML* : the XML object.
    */
-  FirstOrderType1R(RelationXML*);
+  FirstOrderType1R(RelationXMLSPtr);
 
   /** data constructor
    *  \param a string with computeOutput function name.

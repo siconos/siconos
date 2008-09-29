@@ -34,79 +34,52 @@ void LagrangianDS::connectToDS()
   // One exception: zero and identity matrices, used to filled in M and jacobianXF.
 
   // Initial conditions
+
+#ifndef WithSmartPtr
   x0 = new BlockVector(q0, velocity0);
   isAllocatedIn["x0"] = true;
+#else
+  x0.reset(new BlockVector(q0, velocity0));
+#endif
 
   // Current State: \f$ x \f$ and rhs = \f$ \dot x \f$
+
+#ifndef WithSmartPtr
   x[0] = new BlockVector(q[0], q[1]);
   isAllocatedIn["x"] = true;
   x[1] = new BlockVector(q[1], q[2]);
   isAllocatedIn["rhs"] = true;
+#else
+  x[0].reset(new BlockVector(q[0], q[1]));
+  x[1].reset(new BlockVector(q[1], q[2]));
+#endif
 
   // Everything concerning rhs and its jacobian is handled in initRhs and computeXXX related functions.
 }
 
+
 LagrangianDS::LagrangianDS(int newNumber, const SiconosVector& newQ0, const SiconosVector& newVelocity0):
-  DynamicalSystem(LNLDS, newNumber, 2 * newQ0.size()), ndof(newQ0.size()), q0(NULL), velocity0(NULL), qMemory(NULL), velocityMemory(NULL), mass(NULL), fInt(NULL), fExt(NULL),
-  NNL(NULL), fL(NULL), computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL)
+  DynamicalSystem(LNLDS, newNumber, 2 * newQ0.size()), ndof(newQ0.size()),
+  computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL)
 {
   // -- Memory allocation for vector and matrix members --
   // Initial conditions
-  q0 = new SimpleVector(newQ0);
-  velocity0 = new SimpleVector(newVelocity0);
+  q0.reset(new SimpleVector(newQ0));
+  velocity0.reset(new SimpleVector(newVelocity0));
 
   // Current state
-  q.resize(3, NULL);
-  q[0] = new SimpleVector(*q0);
-  q[1] = new SimpleVector(*velocity0);
-  q[2] = new SimpleVector(ndof);
+  q.resize(3);
+  q[0].reset(new SimpleVector(*q0));
+  q[1].reset(new SimpleVector(*velocity0));
+  q[2].reset(new SimpleVector(ndof));
 
   // set allocation flags: true for required input, false for others
-  initAllocationFlags(); // Default
   initPluginFlags(false);
-  isAllocatedIn["mass"] = false;
-  jacobianFInt.resize(2, NULL);
-  jacobianNNL.resize(2, NULL);
-  p.resize(3, NULL);
-  computeJacobianFIntPtr.resize(2, NULL);
-  computeJacobianNNLPtr.resize(2, NULL);
-}
-
-void LagrangianDS::initAllocationFlags(bool in)
-{
-  isAllocatedIn["qMemory"] = false;
-  isAllocatedIn["velocityMemory"] = false;
-  isAllocatedIn["p0"] = false;
-  isAllocatedIn["p1"] = false;
-  isAllocatedIn["p2"] = false;
-  isAllocatedIn["fInt"] = false;
-  isAllocatedIn["fExt"] = false;
-  isAllocatedIn["NNL"] = false;
-  isAllocatedIn["jacobianFInt0"] = false;
-  isAllocatedIn["jacobianFInt1"] = false;
-  isAllocatedIn["jacobianNNL0"] = false;
-  isAllocatedIn["jacobianNNL1"] = false;
-  isAllocatedIn["jXb10"] = false;
-  isAllocatedIn["jXb11"] = false;
-
-  if (in) // initialize flag to true for required input data and to false for optional ones
-  {
-    isAllocatedIn["q0"] = true;
-    isAllocatedIn["q"] = true;
-    isAllocatedIn["velocity0"] = true;
-    isAllocatedIn["velocity"] = true;
-    isAllocatedIn["acceleration"] = true;
-    isAllocatedIn["mass"] = true;
-  }
-  else
-  {
-    isAllocatedIn["q0"] = false;
-    isAllocatedIn["q"] = false;
-    isAllocatedIn["velocity0"] = false;
-    isAllocatedIn["velocity"] = false;
-    isAllocatedIn["acceleration"] = false;
-    isAllocatedIn["mass"] = false;
-  }
+  jacobianFInt.resize(2);
+  jacobianNNL.resize(2);
+  p.resize(3);
+  computeJacobianFIntPtr.resize(2);
+  computeJacobianNNLPtr.resize(2);
 }
 
 void LagrangianDS::initPluginFlags(bool val)
@@ -122,41 +95,69 @@ void LagrangianDS::initPluginFlags(bool val)
 }
 // -- Default constructor --
 LagrangianDS::LagrangianDS():
-  DynamicalSystem(LNLDS), ndof(0), q0(NULL), velocity0(NULL), qMemory(NULL), velocityMemory(NULL), mass(NULL), fInt(NULL),
-  fExt(NULL), NNL(NULL), fL(NULL), computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL)
+  DynamicalSystem(LNLDS), ndof(0), computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL)
 {
   // Protected constructor - Only call from derived class(es).
-  initAllocationFlags(false);
+
   initPluginFlags(false);
+
+#ifndef WithSmartPtr
+  initAllocationFlags(false);
   q.resize(3, NULL);
   p.resize(3, NULL);
+#else
+  q.resize(3);
+  p.resize(3);
+#endif
+
+
   // !!! No plug-in connection !!!
 }
 
 // --- Constructor from an xml file ---
-LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds):
+#ifndef WithSmartPtr
+LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, SP::NonSmoothDynamicalSystem newNsds):
   DynamicalSystem(dsXML, newNsds), ndof(0), q0(NULL), velocity0(NULL), qMemory(NULL), velocityMemory(NULL), mass(NULL), fInt(NULL), fExt(NULL),
   NNL(NULL), fL(NULL), computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL)
+#else
+LagrangianDS::LagrangianDS(DynamicalSystemXMLSPtr dsXML, SP::NonSmoothDynamicalSystem newNsds):
+  DynamicalSystem(LNLDS), ndof(0), computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL)
+#endif
 {
   // -- Lagrangian  xml object --
-  LagrangianDSXML* lgptr = static_cast <LagrangianDSXML*>(dsxml);
+  LagrangianDSXMLSPtr lgptr = boost::static_pointer_cast <LagrangianDSXML>(dsxml);
 
   // === Initial conditions ===
   // Warning: ndof is given by q0.size() !!
   if (! lgptr->hasQ0())
     RuntimeException::selfThrow("LagrangianDS:: xml constructor, q0 is a required input");
+
+#ifndef WithSmartPtr
   q0 = new SimpleVector(lgptr->getQ0()); // required node in xml file
+#else
+  q0.reset(new SimpleVector(lgptr->getQ0())); // required node in xml file
+#endif
+
   ndof = q0->size();
 
   if (! lgptr->hasVelocity0())
     RuntimeException::selfThrow("LagrangianDS:: xml constructor, v0 is a required input");
+
+#ifndef WithSmartPtr
   velocity0 = new SimpleVector(lgptr->getVelocity0()); // required node in xml file
+#else
+  velocity0.reset(new SimpleVector(lgptr->getVelocity0())); // required node in xml file
+#endif
 
   if (velocity0->size() != ndof)
     RuntimeException::selfThrow("LagrangianDS::xml constructor - size of input velocity0 differs from ndof");
 
+
   // --- Current State (optional input) ---
+
+#ifndef WithSmartPtr
   q.resize(3, NULL);
+
   if (lgptr->hasQ())
     q[0] = new SimpleVector(lgptr->getQ()); // Means that first q is different from q0 ?? Strange case ...
   else
@@ -171,18 +172,46 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
   p.resize(3, NULL);
 
   initAllocationFlags(); // Default configuration
+#else
+  q.resize(3);
+
+  if (lgptr->hasQ())
+    q[0].reset(new SimpleVector(lgptr->getQ())); // Means that first q is different from q0 ?? Strange case ...
+  else
+    q[0].reset(new SimpleVector(*q0));           // initialize q with q0
+  if (lgptr->hasVelocity())
+    q[1].reset(new SimpleVector(lgptr->getVelocity0())); // same remark as for q
+  else
+    q[1].reset(new SimpleVector(*velocity0));
+
+  q[2].reset(new SimpleVector(ndof));
+
+  p.resize(3);
+#endif
 
   // Memories
   if (lgptr->hasQMemory())   // qMemory
   {
+
+#ifndef WithSmartPtr
     qMemory = new SiconosMemory(lgptr->getQMemoryXML());
     isAllocatedIn["qMemory"] = true;
+#else
+    qMemory.reset(new SiconosMemory(lgptr->getQMemoryXML()));
+#endif
   }
+
 
   if (lgptr->hasVelocityMemory())   // velocityMemory
   {
+
+#ifndef WithSmartPtr
     velocityMemory = new SiconosMemory(lgptr->getVelocityMemoryXML());
     isAllocatedIn["velocityMemory"] = true;
+#else
+    velocityMemory.reset(new SiconosMemory(lgptr->getVelocityMemoryXML()));
+#endif
+
   }
 
   initPluginFlags(false);
@@ -194,11 +223,21 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
     plugin = lgptr->getMassPlugin();
     setComputeMassFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
   }
+#ifndef WithSmartPtr
   else mass = new SimpleMatrix(lgptr->getMassMatrix());
+#else
+  else mass.reset(new SimpleMatrix(lgptr->getMassMatrix()));
+#endif
 
   // === Optional inputs ===
+
+#ifndef WithSmartPtr
   jacobianFInt.resize(2, NULL);
   jacobianNNL.resize(2, NULL);
+#else
+  jacobianFInt.resize(2);
+  jacobianNNL.resize(2);
+#endif
 
   // fInt
   if (lgptr->hasFInt())  // if fInt is given
@@ -210,10 +249,21 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
     }
     else
     {
+
+#ifndef WithSmartPtr
       fInt = new SimpleVector(lgptr->getFIntVector());
       isAllocatedIn["fInt"] = true;
+#else
+      fInt.reset(new SimpleVector(lgptr->getFIntVector()));
+#endif
+
     }
+#ifndef WithSmartPtr
     computeJacobianFIntPtr.resize(2, NULL);
+#else
+    computeJacobianFIntPtr.resize(2);
+#endif
+
   }
 
   // fExt
@@ -226,8 +276,14 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
     }
     else
     {
+
+#ifndef WithSmartPtr
       fExt = new SimpleVector(lgptr->getFExtVector());
       isAllocatedIn["fExt"] = true;
+#else
+      fExt.reset(new SimpleVector(lgptr->getFExtVector()));
+#endif
+
     }
   }
 
@@ -241,10 +297,22 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
     }
     else
     {
+
+#ifndef WithSmartPtr
       NNL = new SimpleVector(lgptr->getNNLVector());
       isAllocatedIn["NNL"] = true;
+#else
+      NNL.reset(new SimpleVector(lgptr->getNNLVector()));
+#endif
+
     }
+
+#ifndef WithSmartPtr
     computeJacobianNNLPtr.resize(2, NULL);
+#else
+    computeJacobianNNLPtr.resize(2);
+#endif
+
   }
 
   for (unsigned int i = 0; i < 2; ++i)
@@ -261,8 +329,13 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
       }
       else
       {
+#ifndef WithSmartPtr
         jacobianFInt[i] = new SimpleMatrix(lgptr->getJacobianFIntMatrix(i));
         isAllocatedIn[name] = true;
+#else
+        jacobianFInt[i].reset(new SimpleMatrix(lgptr->getJacobianFIntMatrix(i)));
+#endif
+
       }
     }
 
@@ -278,8 +351,14 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
       }
       else
       {
+
+#ifndef WithSmartPtr
         jacobianNNL[i] = new SimpleMatrix(lgptr->getJacobianNNLMatrix(i));
         isAllocatedIn[name] = true;
+#else
+        jacobianNNL[i].reset(new SimpleMatrix(lgptr->getJacobianNNLMatrix(i)));
+#endif
+
       }
     }
   }
@@ -288,12 +367,13 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
 // From a set of data; Mass filled-in directly from a siconosMatrix -
 // This constructor leads to the minimum Lagrangian System form: \f$ M\ddot q = p \f$
 LagrangianDS::LagrangianDS(int newNumber, const SiconosVector& newQ0, const SiconosVector& newVelocity0, const SiconosMatrix& newMass):
-  DynamicalSystem(LNLDS, newNumber, 2 * newQ0.size()), ndof(newQ0.size()), q0(NULL), velocity0(NULL), qMemory(NULL), velocityMemory(NULL), mass(NULL), fInt(NULL), fExt(NULL),
-  NNL(NULL), fL(NULL), computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL)
+  DynamicalSystem(LNLDS, newNumber, 2 * newQ0.size()), ndof(newQ0.size()),
+  computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL)
 {
   // --- LAGRANGIAN INHERITED CLASS MEMBERS ---
   // -- Memory allocation for vector and matrix members --
 
+#ifndef WithSmartPtr
   // Mass matrix
   mass = new SimpleMatrix(newMass);
 
@@ -316,14 +396,44 @@ LagrangianDS::LagrangianDS(int newNumber, const SiconosVector& newQ0, const Sico
   p.resize(3, NULL);
   computeJacobianFIntPtr.resize(2, NULL);
   computeJacobianNNLPtr.resize(2, NULL);
+#else
+  // Mass matrix
+  mass.reset(new SimpleMatrix(newMass));
+
+  // Initial conditions
+  q0.reset(new SimpleVector(newQ0));
+  velocity0.reset(new SimpleVector(newVelocity0));
+
+  // Current state
+  q.resize(3);
+  q[0].reset(new SimpleVector(*q0));
+  q[1].reset(new SimpleVector(*velocity0));
+  q[2].reset(new SimpleVector(ndof));
+
+  // set allocation flags: true for required input, false for others
+  initPluginFlags(false);
+
+  jacobianFInt.resize(2);
+  jacobianNNL.resize(2);
+  p.resize(3);
+  computeJacobianFIntPtr.resize(2);
+  computeJacobianNNLPtr.resize(2);
+#endif
+
 }
 
 // From a set of data - Mass loaded from a plugin
 // This constructor leads to the minimum Lagrangian System form: \f$ M(q)\ddot q = p \f$
+#ifndef WithSmartPtr
 LagrangianDS::LagrangianDS(int newNumber, const SiconosVector& newQ0, const SiconosVector& newVelocity0, const string& massName):
   DynamicalSystem(LNLDS, newNumber, 2 * newQ0.size()), ndof(newQ0.size()), q0(NULL), velocity0(NULL), qMemory(NULL), velocityMemory(NULL), mass(NULL),
   fInt(NULL), fExt(NULL), NNL(NULL), fL(NULL), computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL)
+#else
+LagrangianDS::LagrangianDS(int newNumber, const SiconosVector& newQ0, const SiconosVector& newVelocity0, const string& massName):
+  DynamicalSystem(LNLDS), ndof(0), computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL)
+#endif
 {
+#ifndef WithSmartPtr
   // Initial conditions
   q0 = new SimpleVector(newQ0);
   velocity0 = new SimpleVector(newVelocity0);
@@ -346,11 +456,34 @@ LagrangianDS::LagrangianDS(int newNumber, const SiconosVector& newQ0, const Sico
   p.resize(3, NULL);
   computeJacobianFIntPtr.resize(2, NULL);
   computeJacobianNNLPtr.resize(2, NULL);
+#else
+  // Initial conditions
+  q0.reset(new SimpleVector(newQ0));
+  velocity0.reset(new SimpleVector(newVelocity0));
+
+  // Current state
+  q.resize(3);
+  q[0].reset(new SimpleVector(*q0));
+  q[1].reset(new SimpleVector(*velocity0));
+  q[2].reset(new SimpleVector(ndof));
+
+  // Mass
+  initPluginFlags(false);
+  setComputeMassFunction(cShared.getPluginName(massName), cShared.getPluginFunctionName(massName));
+
+  jacobianFInt.resize(2);
+  jacobianNNL.resize(2);
+  p.resize(3);
+  computeJacobianFIntPtr.resize(2);
+  computeJacobianNNLPtr.resize(2);
+#endif
+
 }
 
 // Destructor
 LagrangianDS::~LagrangianDS()
 {
+#ifndef WithSmartPtr
   if (isAllocatedIn["q"]) delete q[0];
   q[0] = NULL;
   if (isAllocatedIn["q0"]) delete q0;
@@ -387,15 +520,19 @@ LagrangianDS::~LagrangianDS()
   if (isAllocatedIn["jacobianFInt1"]) delete jacobianFInt[1] ;
   if (isAllocatedIn["jacobianNNL0"]) delete jacobianNNL[0] ;
   if (isAllocatedIn["jacobianNNL1"]) delete jacobianNNL[1] ;
+#endif
 
   jacobianFL.clear();
   jacobianFInt.clear();
   jacobianNNL.clear();
 
+#ifndef WithSmartPtr
   if (isAllocatedIn["jXb10"]) delete workMatrix["jacobianXBloc10"];
   workMatrix["jacobianXBloc10"] = NULL;
   if (isAllocatedIn["jXb11"]) delete workMatrix["jacobianXBloc11"];
   workMatrix["jacobianXBloc11"] = NULL;
+#endif
+
 }
 
 bool LagrangianDS::checkDynamicalSystem()
@@ -409,21 +546,21 @@ bool LagrangianDS::checkDynamicalSystem()
   }
 
   // q0 and velocity0 != NULL
-  if (q0 == NULL || velocity0 == NULL)
+  if (! q0 || ! velocity0)
   {
     RuntimeException::selfThrow("LagrangianDS::checkDynamicalSystem - initial conditions are badly set.");
     output = false;
   }
 
   // Mass
-  if (mass == NULL)
+  if (! mass)
   {
     RuntimeException::selfThrow("LagrangianDS::checkDynamicalSystem - Mass not set.");
     output = false;
   }
 
   // fInt
-  if ((fInt != NULL  && isPlugin["fInt"]) && (jacobianFInt[0] == NULL || jacobianFInt[1] == NULL))
+  if ((fInt && isPlugin["fInt"]) && (! jacobianFInt[0] || ! jacobianFInt[1]))
     // ie if fInt is defined and not constant => its Jacobian must be defined (but not necessarily plugged)
   {
     RuntimeException::selfThrow("LagrangianDS::checkDynamicalSystem - You defined fInt but not its Jacobian (according to q and velocity).");
@@ -431,7 +568,7 @@ bool LagrangianDS::checkDynamicalSystem()
   }
 
   // NNL
-  if ((NNL != NULL  && isPlugin["NNL"]) && (jacobianNNL[0] == NULL || jacobianNNL[1] == NULL))
+  if ((NNL  && isPlugin["NNL"]) && (! jacobianNNL[0] || ! jacobianNNL[1]))
     // ie if NNL is defined and not constant => its Jacobian must be defined (but not necessarily plugged)
   {
     RuntimeException::selfThrow("LagrangianDS::checkDynamicalSystem - You defined NNL but not its Jacobian (according to q and velocity).");
@@ -451,17 +588,35 @@ void LagrangianDS::initP(const string& simulationType)
 {
   if (simulationType == "TimeStepping")
   {
+#ifndef WithSmartPtr
     p[1] = new SimpleVector(ndof);
     isAllocatedIn["p1"] = true;
+#else
+    p[1].reset(new SimpleVector(ndof));
+#endif
+
     p[2] = p[1];
+    p[0] = p[1];
+
+#ifndef WithSmartPtr
     isAllocatedIn["p2"] = false;
+#endif
+
   }
   else if (simulationType == "EventDriven")
   {
+#ifndef WithSmartPtr
     p[1] = new SimpleVector(ndof);
     isAllocatedIn["p1"] = true;
     p[2] = new SimpleVector(ndof);
     isAllocatedIn["p2"] = true;
+#else
+    p[1].reset(new SimpleVector(ndof));
+    p[2].reset(new SimpleVector(ndof));
+#endif
+
+
+
   }
 }
 
@@ -477,8 +632,14 @@ void LagrangianDS::initFL()
   // First case: fL is equal to a sum of members and needs memory allocation.
   //if (count > 1)
   //{ TEMP : find a way to avoid copy when count == 1. Pb: fL = - NNL or FInt
+
+#ifndef WithSmartPtr
   fL = new SimpleVector(ndof);
   isAllocatedIn["fL"] = true;
+#else
+  fL.reset(new SimpleVector(ndof));
+#endif
+
   //}
   //  else if (count == 1) // fL = fInt or fExt or NNL; no memory allocation, just a pointer link.
   //{
@@ -492,7 +653,12 @@ void LagrangianDS::initFL()
   // else nothing! (count = 0 and fL need not to be allocated).
 
   // === Now the jacobians ===
+#ifndef WithSmartPtr
   jacobianFL.resize(2, NULL);
+#else
+  jacobianFL.resize(2);
+#endif
+
   for (unsigned int i = 0; i < jacobianFInt.size(); ++i)
   {
     //       count = 0;
@@ -503,9 +669,14 @@ void LagrangianDS::initFL()
     //       // First case: jacobianFL is equal to a sum of members and needs memory allocation.
     //       if (count > 1)
     //  {
+#ifndef WithSmartPtr
     string name = "jacobianFL" + toString<unsigned int>(i);
     jacobianFL[i] = new SimpleMatrix(ndof, ndof);
     isAllocatedIn[name] = true;
+#else
+    jacobianFL[i].reset(new SimpleMatrix(ndof, ndof));
+#endif
+
     //     }
     //       else if (count == 1)
     //  {
@@ -524,37 +695,56 @@ void LagrangianDS::initRhs(double time)
   // Solve Mq[2]=fL+p.
   *q[2] = *(p[2]); // Warning: r/p update is done in Interactions/Relations
 
-  if (fL != NULL)
+  if (fL)
   {
     computeFL(time);
     *q[2] += *fL;
   }
   computeMass();
   // Copy of Mass into workMatrix for LU-factorization.
+
+#ifndef WithSmartPtr
   workMatrix["invMass"] = new SimpleMatrix(*mass);
+#else
+  workMatrix["invMass"].reset(new SimpleMatrix(*mass));
+#endif
+
   workMatrix["invMass"]->PLUForwardBackwardInPlace(*q[2]);
 
   bool flag1 = false, flag2 = false;
-  if (jacobianFL[0] != NULL)
+  if (jacobianFL[0])
   {
     // Solve MjacobianX(1,0) = jacobianFL[0]
     computeJacobianFL(0, time);
+
+#ifndef WithSmartPtr
     workMatrix["jacobianXBloc10"] = new SimpleMatrix(*jacobianFL[0]);
     isAllocatedIn["jXb10"] = true;
+#else
+    workMatrix["jacobianXBloc10"].reset(new SimpleMatrix(*jacobianFL[0]));
+#endif
+
     workMatrix["invMass"]->PLUForwardBackwardInPlace(*workMatrix["jacobianXBloc10"]);
     flag1 = true;
   }
 
-  if (jacobianFL[1] != NULL)
+  if (jacobianFL[1])
   {
     // Solve MjacobianX(1,1) = jacobianFL[1]
     computeJacobianFL(1, time);
+
+#ifndef WithSmartPtr
     workMatrix["jacobianXBloc11"] = new SimpleMatrix(*jacobianFL[1]);
     isAllocatedIn["jXb11"] = true;
+#else
+    workMatrix["jacobianXBloc11"].reset(new SimpleMatrix(*jacobianFL[1]));
+#endif
+
     workMatrix["invMass"]->PLUForwardBackwardInPlace(*workMatrix["jacobianXBloc11"]);
     flag2 = true;
   }
 
+#ifndef WithSmartPtr
   workMatrix["zero-matrix"] = new SimpleMatrix(ndof, ndof, ZERO);
   workMatrix["Id-matrix"] = new SimpleMatrix(ndof, ndof, IDENTITY);
 
@@ -567,6 +757,19 @@ void LagrangianDS::initRhs(double time)
   else
     jacobianXRhs = new BlockMatrix(workMatrix["zero-matrix"], workMatrix["Id-matrix"], workMatrix["zero-matrix"], workMatrix["zero-matrix"]);
   isAllocatedIn["jacobianXRhs"] = true;
+#else
+  workMatrix["zero-matrix"].reset(new SimpleMatrix(ndof, ndof, ZERO));
+  workMatrix["Id-matrix"].reset(new SimpleMatrix(ndof, ndof, IDENTITY));
+
+  if (flag1 && flag2)
+    jacobianXRhs.reset(new BlockMatrix(workMatrix["zero-matrix"], workMatrix["Id-matrix"], workMatrix["jacobianXBloc10"], workMatrix["jacobianXBloc11"]));
+  else if (flag1) // flag2 = false
+    jacobianXRhs.reset(new BlockMatrix(workMatrix["zero-matrix"], workMatrix["Id-matrix"], workMatrix["jacobianXBloc10"], workMatrix["zero-matrix"]));
+  else if (flag2) // flag1 = false
+    jacobianXRhs.reset(new BlockMatrix(workMatrix["zero-matrix"], workMatrix["Id-matrix"], workMatrix["zero-matrix"], workMatrix["jacobianXBloc11"]));
+  else
+    jacobianXRhs.reset(new BlockMatrix(workMatrix["zero-matrix"], workMatrix["Id-matrix"], workMatrix["zero-matrix"], workMatrix["zero-matrix"]));
+#endif
 
 }
 
@@ -580,10 +783,16 @@ void LagrangianDS::initialize(const string& simulationType, double time, unsigne
   *q[1] = *velocity0;
 
   // If z is NULL (ie has not been set), we initialize it with a null vector of size 1, since z is required in plug-in functions call.
-  if (z == NULL)
+  if (! z)
   {
+
+#ifndef WithSmartPtr
     z = new SimpleVector(1);
     isAllocatedIn["z"] = true;
+#else
+    z.reset(new SimpleVector(1));
+#endif
+
   }
 
   // Memory allocation for fL and its jacobians.
@@ -610,23 +819,34 @@ void LagrangianDS::setQ(const SiconosVector& newValue)
   if (newValue.size() != ndof)
     RuntimeException::selfThrow("LagrangianDS - setQ: inconsistent input vector size ");
 
-  if (q[0] == NULL)
+  if (! q[0])
   {
+
+#ifndef WithSmartPtr
     q[0] = new SimpleVector(newValue);
     isAllocatedIn["q"] = true;
+#else
+    q[0].reset(new SimpleVector(newValue));
+#endif
+
   }
   else
     *q[0] = newValue;
 }
 
-void LagrangianDS::setQPtr(SiconosVector *newPtr)
+void LagrangianDS::setQPtr(SiconosVectorSPtr newPtr)
 {
   if (newPtr->size() != ndof)
     RuntimeException::selfThrow("LagrangianDS - setQPtr: inconsistent input vector size ");
 
+
+#ifndef WithSmartPtr
   if (isAllocatedIn["q"]) delete q[0];
-  q[0] = newPtr;
   isAllocatedIn["q"] = false;
+#endif
+
+  q[0] = newPtr;
+
 }
 
 void LagrangianDS::setQ0(const SiconosVector& newValue)
@@ -634,41 +854,61 @@ void LagrangianDS::setQ0(const SiconosVector& newValue)
   if (newValue.size() != ndof)
     RuntimeException::selfThrow("LagrangianDS - setQ0: inconsistent input vector size ");
 
-  if (q0 == NULL)
+  if (! q0)
   {
+
+#ifndef WithSmartPtr
     q0 = new SimpleVector(newValue);
     isAllocatedIn["q0"] = true;
+#else
+    q0.reset(new SimpleVector(newValue));
+#endif
+
   }
   else
     *q0 = newValue;
 }
 
-void LagrangianDS::setQ0Ptr(SiconosVector *newPtr)
+void LagrangianDS::setQ0Ptr(SiconosVectorSPtr newPtr)
 {
   if (newPtr->size() != ndof)
     RuntimeException::selfThrow("LagrangianDS - setQ0Ptr: inconsistent input vector size ");
 
+#ifndef WithSmartPtr
   if (isAllocatedIn["q0"]) delete q0;
-  q0 = newPtr;
   isAllocatedIn["q0"] = false;
+#endif
+
+  q0 = newPtr;
+
 }
 
 void LagrangianDS::setQMemory(const SiconosMemory& newValue)
 {
-  if (qMemory == NULL)
+  if (! qMemory)
   {
+
+#ifndef WithSmartPtr
     qMemory = new SiconosMemory(newValue);
     isAllocatedIn["qMemory"] = true;
+#else
+    qMemory.reset(new SiconosMemory(newValue));
+#endif
+
   }
   else
     *qMemory = newValue;
 }
 
-void LagrangianDS::setQMemoryPtr(SiconosMemory * newPtr)
+void LagrangianDS::setQMemoryPtr(SiconosMemorySPtr newPtr)
 {
+#ifndef WithSmartPtr
   if (isAllocatedIn["qMemory"]) delete qMemory;
-  qMemory = newPtr;
   isAllocatedIn["qMemory"] = false;
+#endif
+
+  qMemory = newPtr;
+
 }
 
 void LagrangianDS::setVelocity(const SiconosVector& newValue)
@@ -676,23 +916,34 @@ void LagrangianDS::setVelocity(const SiconosVector& newValue)
   if (newValue.size() != ndof)
     RuntimeException::selfThrow("LagrangianDS - setVelocity: inconsistent input vector size ");
 
-  if (q[1] == NULL)
+  if (! q[1])
   {
+
+#ifndef WithSmartPtr
     q[1] = new SimpleVector(newValue);
     isAllocatedIn["velocity"] = true;
+#else
+    q[1].reset(new SimpleVector(newValue));
+#endif
+
   }
   else
     *q[1] = newValue;
 }
 
-void LagrangianDS::setVelocityPtr(SiconosVector *newPtr)
+void LagrangianDS::setVelocityPtr(SiconosVectorSPtr newPtr)
 {
   if (newPtr->size() != ndof)
     RuntimeException::selfThrow("LagrangianDS - setVelocityPtr: inconsistent input vector size ");
 
+#ifndef WithSmartPtr
   if (isAllocatedIn["velocity"]) delete q[1];
-  q[1] = newPtr;
   isAllocatedIn["velocity"] = false;
+#endif
+
+  q[1] = newPtr;
+
+
 }
 
 void LagrangianDS::setVelocity0(const SiconosVector& newValue)
@@ -700,46 +951,66 @@ void LagrangianDS::setVelocity0(const SiconosVector& newValue)
   if (newValue.size() != ndof)
     RuntimeException::selfThrow("LagrangianDS - setVelocity0: inconsistent input vector size ");
 
-  if (velocity0 == NULL)
+  if (! velocity0)
   {
+
+#ifndef WithSmartPtr
     velocity0 = new SimpleVector(newValue);
     isAllocatedIn["velocity0"] = true;
+#else
+    velocity0.reset(new SimpleVector(newValue));
+#endif
+
   }
   else
     *velocity0 = newValue;
 }
 
-void LagrangianDS::setVelocity0Ptr(SiconosVector *newPtr)
+void LagrangianDS::setVelocity0Ptr(SiconosVectorSPtr newPtr)
 {
   if (newPtr->size() != ndof)
     RuntimeException::selfThrow("LagrangianDS - setVelocity0Ptr: inconsistent input vector size ");
 
+#ifndef WithSmartPtr
   if (isAllocatedIn["velocity0"]) delete velocity0;
-  velocity0 = newPtr;
   isAllocatedIn["velocity0"] = false;
+#endif
+
+  velocity0 = newPtr;
+
 }
 
-SiconosVector* LagrangianDS::getAccelerationPtr() const
+SiconosVectorSPtr LagrangianDS::getAccelerationPtr() const
 {
   return q[2];
 }
 
 void LagrangianDS::setVelocityMemory(const SiconosMemory& newValue)
 {
-  if (velocityMemory == NULL)
+  if (! velocityMemory)
   {
+
+#ifndef WithSmartPtr
     velocityMemory = new SiconosMemory(newValue);
     isAllocatedIn["velocityMemory"] = true;
+#else
+    velocityMemory.reset(new SiconosMemory(newValue));
+#endif
+
   }
   else
     *velocityMemory = newValue;
 }
 
-void LagrangianDS::setVelocityMemoryPtr(SiconosMemory * newPtr)
+void LagrangianDS::setVelocityMemoryPtr(SiconosMemorySPtr newPtr)
 {
+
+#ifndef WithSmartPtr
   if (isAllocatedIn["velocityMemory"]) delete velocityMemory;
-  velocityMemory = newPtr;
   isAllocatedIn["velocityMemory"] = false;
+#endif
+  velocityMemory = newPtr;
+
 }
 
 void LagrangianDS::setP(const SiconosVector& newValue, unsigned int level)
@@ -747,8 +1018,10 @@ void LagrangianDS::setP(const SiconosVector& newValue, unsigned int level)
   if (newValue.size() != ndof)
     RuntimeException::selfThrow("LagrangianDS - setP: inconsistent input vector size ");
 
-  if (p[level] == NULL)
+  if (! p[level])
   {
+
+#ifndef WithSmartPtr
     p[level] = new SimpleVector(newValue);
     string stringValue;
     stringstream sstr;
@@ -756,17 +1029,22 @@ void LagrangianDS::setP(const SiconosVector& newValue, unsigned int level)
     sstr >> stringValue;
     stringValue = "p" + stringValue;
     isAllocatedIn[stringValue] = true;
+#else
+    p[level].reset(new SimpleVector(newValue));
+#endif
+
   }
   else
     *(p[level]) = newValue;
 }
 
-void LagrangianDS::setPPtr(SiconosVector *newPtr, unsigned int level)
+void LagrangianDS::setPPtr(SiconosVectorSPtr newPtr, unsigned int level)
 {
 
   if (newPtr->size() != ndof)
     RuntimeException::selfThrow("LagrangianDS - setPPtr: inconsistent input vector size ");
 
+#ifndef WithSmartPtr
   string stringValue;
   stringstream sstr;
   sstr << level;
@@ -776,6 +1054,10 @@ void LagrangianDS::setPPtr(SiconosVector *newPtr, unsigned int level)
   if (isAllocatedIn[stringValue]) delete p[level];
   p[level] = newPtr;
   isAllocatedIn[stringValue] = false;
+#else
+  p[level] = newPtr;
+#endif
+
 }
 
 void LagrangianDS::setMass(const SiconosMatrix& newValue)
@@ -783,24 +1065,34 @@ void LagrangianDS::setMass(const SiconosMatrix& newValue)
   if (newValue.size(0) != ndof || newValue.size(1) != ndof)
     RuntimeException::selfThrow("LagrangianDS - setMass: inconsistent input matrix size ");
 
-  if (mass == NULL)
+  if (! mass)
   {
+
+#ifndef WithSmartPtr
     mass = new SimpleMatrix(newValue);
     isAllocatedIn["mass"] = true;
+#else
+    mass.reset(new SimpleMatrix(newValue));
+#endif
+
   }
   else
     *mass = newValue;
   isPlugin["mass"] = false;
 }
 
-void LagrangianDS::setMassPtr(SiconosMatrix *newPtr)
+void LagrangianDS::setMassPtr(SiconosMatrixSPtr newPtr)
 {
   if (newPtr->size(0) != ndof || newPtr->size(1) != ndof)
     RuntimeException::selfThrow("LagrangianDS - setMassPtr: inconsistent input matrix size ");
 
+#ifndef WithSmartPtr
   if (isAllocatedIn["mass"]) delete mass;
-  mass = newPtr;
   isAllocatedIn["mass"] = false;
+#endif
+
+  mass = newPtr;
+
   isPlugin["mass"] = false;
 }
 
@@ -809,24 +1101,35 @@ void LagrangianDS::setFInt(const SiconosVector& newValue)
   if (newValue.size() != ndof)
     RuntimeException::selfThrow("LagrangianDS - setFInt: inconsistent dimensions with problem size for input vector FInt");
 
-  if (fInt == NULL)
+  if (! fInt)
   {
+
+#ifndef WithSmartPtr
     fInt = new SimpleVector(newValue);
     isAllocatedIn["fInt"] = true;
+#else
+    fInt.reset(new SimpleVector(newValue));
+#endif
+
   }
   else
     *fInt = newValue;
   isPlugin["fInt"] = false;
 }
 
-void LagrangianDS::setFIntPtr(SiconosVector *newPtr)
+void LagrangianDS::setFIntPtr(SiconosVectorSPtr newPtr)
 {
   if (newPtr->size() != ndof)
     RuntimeException::selfThrow("LagrangianDS - setFIntPtr: inconsistent input matrix size ");
 
+
+#ifndef WithSmartPtr
   if (isAllocatedIn["fInt"]) delete fInt;
-  fInt = newPtr;
   isAllocatedIn["fInt"] = false;
+#endif
+
+  fInt = newPtr;
+
   isPlugin["fInt"] = false;
 }
 
@@ -835,23 +1138,33 @@ void LagrangianDS::setFExt(const SiconosVector& newValue)
   if (newValue.size() != ndof)
     RuntimeException::selfThrow("LagrangianDS - setFExt: inconsistent dimensions with problem size for input vector FExt");
 
-  if (fExt == NULL)
+  if (! fExt)
   {
+
+#ifndef WithSmartPtr
     fExt = new SimpleVector(newValue);
     isAllocatedIn["fExt"] = true;
+#else
+    fExt.reset(new SimpleVector(newValue));
+#endif
+
   }
   else
     *fExt = newValue;
   isPlugin["fExt"] = false;
 }
 
-void LagrangianDS::setFExtPtr(SiconosVector *newPtr)
+void LagrangianDS::setFExtPtr(SiconosVectorSPtr newPtr)
 {
   if (newPtr->size() != ndof)
     RuntimeException::selfThrow("LagrangianDS - setFIntPtr: inconsistent input matrix size ");
+
+#ifndef WithSmartPtr
   if (isAllocatedIn["fExt"]) delete fExt;
-  fExt = newPtr;
   isAllocatedIn["fExt"] = false;
+#endif
+
+  fExt = newPtr;
   isPlugin["fExt"] = false;
 }
 
@@ -860,24 +1173,33 @@ void LagrangianDS::setNNL(const SiconosVector& newValue)
   if (newValue.size() != ndof)
     RuntimeException::selfThrow("LagrangianDS - setNNL: inconsistent dimensions with problem size for input vector NNL");
 
-  if (NNL == NULL)
+  if (! NNL)
   {
+
+#ifndef WithSmartPtr
     NNL = new SimpleVector(ndof);
     isAllocatedIn["NNL"] = true;
+#else
+    NNL.reset(new SimpleVector(ndof));
+#endif
+
   }
   else
     *NNL = newValue;
   isPlugin["NNL"] = false;
 }
 
-void LagrangianDS::setNNLPtr(SiconosVector *newPtr)
+void LagrangianDS::setNNLPtr(SiconosVectorSPtr newPtr)
 {
   if (newPtr->size() != ndof)
     RuntimeException::selfThrow("LagrangianDS - setNNLPtr: inconsistent input matrix size ");
 
+#ifndef WithSmartPtr
   if (isAllocatedIn["NNL"]) delete NNL;
-  NNL = newPtr;
   isAllocatedIn["NNL"] = false;
+#endif
+
+  NNL = newPtr;
   isPlugin["NNL"] = false;
 }
 
@@ -887,25 +1209,35 @@ void LagrangianDS::setJacobianFInt(unsigned int i, const SiconosMatrix& newValue
     RuntimeException::selfThrow("LagrangianDS - setJacobianFInt: inconsistent dimensions with problem size for input matrix JacobianQFInt");
 
   string name = "jacobianFInt" + toString<unsigned int>(i);
-  if (jacobianFInt[i] == NULL)
+  if (! jacobianFInt[i])
   {
+
+#ifndef WithSmartPtr
     jacobianFInt[i] = new SimpleMatrix(newValue);
     isAllocatedIn[name] = true;
+#else
+    jacobianFInt[i].reset(new SimpleMatrix(newValue));
+#endif
+
   }
   else
     *jacobianFInt[i] = newValue;
   isPlugin[name] = false;
 }
 
-void LagrangianDS::setJacobianFIntPtr(unsigned int i, SiconosMatrix *newPtr)
+void LagrangianDS::setJacobianFIntPtr(unsigned int i, SiconosMatrixSPtr newPtr)
 {
   if (newPtr->size(0) != ndof || newPtr->size(1) != ndof)
     RuntimeException::selfThrow("LagrangianDS - setJacobianFIntPtr: inconsistent input matrix size ");
 
   string name = "jacobianFInt" + toString<unsigned int>(i);
+
+#ifndef WithSmartPtr
   if (isAllocatedIn[name]) delete jacobianFInt[i];
-  jacobianFInt[i] = newPtr;
   isAllocatedIn[name] = false;
+#endif
+
+  jacobianFInt[i] = newPtr;
   isPlugin[name] = false;
 }
 
@@ -915,35 +1247,50 @@ void LagrangianDS::setJacobianNNL(unsigned int i, const SiconosMatrix& newValue)
     RuntimeException::selfThrow("LagrangianDS - setJacobianNNL: inconsistent dimensions with problem size for input matrix JacobianQNNL");
 
   string name = "jacobianNNL" + toString<unsigned int>(i);
-  if (jacobianNNL[i] == NULL)
+  if (! jacobianNNL[i])
   {
+
+#ifndef WithSmartPtr
     jacobianNNL[i] = new SimpleMatrix(newValue);
     isAllocatedIn[name] = true;
+#else
+    jacobianNNL[i].reset(new SimpleMatrix(newValue));
+#endif
   }
   else
     *jacobianNNL[i] = newValue;
   isPlugin[name] = false;
 }
 
-void LagrangianDS::setJacobianNNLPtr(unsigned int i, SiconosMatrix *newPtr)
+void LagrangianDS::setJacobianNNLPtr(unsigned int i, SiconosMatrixSPtr newPtr)
 {
   if (newPtr->size(0) != ndof || newPtr->size(1) != ndof)
     RuntimeException::selfThrow("LagrangianDS - setJacobianNNLPtr: inconsistent input matrix size ");
 
   string name = "jacobianNNL" + toString<unsigned int>(i);
+
+#ifndef WithSmartPtr
   if (isAllocatedIn[name]) delete jacobianNNL[i];
-  jacobianNNL[i] = newPtr;
   isAllocatedIn[name] = false;
+#endif
+
+  jacobianNNL[i] = newPtr;
   isPlugin[name] = false;
 }
 
 // --- Plugins related functions ---
 void LagrangianDS::setComputeMassFunction(const string& pluginPath, const string& functionName)
 {
-  if (mass == NULL)
+  if (! mass)
   {
+
+#ifndef WithSmartPtr
     mass = new SimpleMatrix(ndof, ndof);
     isAllocatedIn["mass"] = true;
+#else
+    mass.reset(new SimpleMatrix(ndof, ndof));
+#endif
+
   }
 
   cShared.setFunction(&computeMassPtr, pluginPath, functionName);
@@ -956,10 +1303,16 @@ void LagrangianDS::setComputeMassFunction(const string& pluginPath, const string
 
 void LagrangianDS::setComputeFIntFunction(const string& pluginPath, const string& functionName)
 {
-  if (fInt == NULL)
+  if (! fInt)
   {
+
+#ifndef WithSmartPtr
     fInt = new SimpleVector(ndof);
     isAllocatedIn["fInt"] = true;
+#else
+    fInt.reset(new SimpleVector(ndof));
+#endif
+
   }
 
   cShared.setFunction(&computeFIntPtr, pluginPath, functionName);
@@ -972,10 +1325,16 @@ void LagrangianDS::setComputeFIntFunction(const string& pluginPath, const string
 
 void LagrangianDS::setComputeFExtFunction(const string& pluginPath, const string& functionName)
 {
-  if (fExt == NULL)
+  if (! fExt)
   {
+
+#ifndef WithSmartPtr
     fExt = new SimpleVector(ndof);
     isAllocatedIn["fExt"] = true;
+#else
+    fExt.reset(new SimpleVector(ndof));
+#endif
+
   }
 
   cShared.setFunction(&computeFExtPtr, pluginPath, functionName);
@@ -988,10 +1347,16 @@ void LagrangianDS::setComputeFExtFunction(const string& pluginPath, const string
 
 void LagrangianDS::setComputeNNLFunction(const string& pluginPath, const string& functionName)
 {
-  if (NNL == NULL)
+  if (! NNL)
   {
+
+#ifndef WithSmartPtr
     NNL = new SimpleVector(ndof);
     isAllocatedIn["NNL"] = true;
+#else
+    NNL.reset(new SimpleVector(ndof));
+#endif
+
   }
 
   cShared.setFunction(&computeNNLPtr, pluginPath, functionName);
@@ -1006,10 +1371,16 @@ void LagrangianDS::setComputeJacobianFIntFunction(unsigned int i, const string& 
 {
   string name = "jacobianFInt" + toString<unsigned int>(i);
 
-  if (jacobianFInt[i] == NULL)
+  if (! jacobianFInt[i])
   {
+
+#ifndef WithSmartPtr
     jacobianFInt[i] = new SimpleMatrix(ndof, ndof);
     isAllocatedIn[name] = true;
+#else
+    jacobianFInt[i].reset(new SimpleMatrix(ndof, ndof));
+#endif
+
   }
 
   cShared.setFunction(&computeJacobianFIntPtr[i], pluginPath, functionName);
@@ -1023,10 +1394,16 @@ void LagrangianDS::setComputeJacobianFIntFunction(unsigned int i, const string& 
 void LagrangianDS::setComputeJacobianNNLFunction(unsigned int i, const string& pluginPath, const string& functionName)
 {
   string name = "jacobianNNL" + toString<unsigned int>(i);
-  if (jacobianNNL[i] == NULL)
+  if (! jacobianNNL[i])
   {
+
+#ifndef WithSmartPtr
     jacobianNNL[i] = new SimpleMatrix(ndof, ndof);
     isAllocatedIn[name] = true;
+#else
+    jacobianNNL[i].reset(new SimpleMatrix(ndof, ndof));
+#endif
+
   }
 
   cShared.setFunction(& (computeJacobianNNLPtr[i]), pluginPath, functionName);
@@ -1052,7 +1429,7 @@ void LagrangianDS::computeMass()
   }
 }
 
-void LagrangianDS::computeMass(SiconosVector *q2)
+void LagrangianDS::computeMass(SiconosVectorSPtr q2)
 {
   if (isPlugin["mass"])
   {
@@ -1073,7 +1450,7 @@ void LagrangianDS::computeFInt(double time)
     computeFIntPtr(time, ndof, &(*q[0])(0), &(*q[1])(0), &(*fInt)(0), z->size(), &(*z)(0));
   }
 }
-void LagrangianDS::computeFInt(double time, SiconosVector *q2, SiconosVector *velocity2)
+void LagrangianDS::computeFInt(double time, SiconosVectorSPtr q2, SiconosVectorSPtr velocity2)
 {
   if (isPlugin["fInt"])
   {
@@ -1105,7 +1482,7 @@ void LagrangianDS::computeNNL()
   }
 }
 
-void LagrangianDS::computeNNL(SiconosVector *q2, SiconosVector *velocity2)
+void LagrangianDS::computeNNL(SiconosVectorSPtr q2, SiconosVectorSPtr velocity2)
 {
   if (isPlugin["NNL"])
   {
@@ -1129,7 +1506,7 @@ void LagrangianDS::computeJacobianFInt(unsigned int i, double time)
   }
 }
 
-void LagrangianDS::computeJacobianFInt(unsigned int i, double time, SiconosVector *q2, SiconosVector *velocity2)
+void LagrangianDS::computeJacobianFInt(unsigned int i, double time, SP::SiconosVector q2, SP::SiconosVector velocity2)
 {
   string name = "jacobianFInt" + toString<unsigned int>(i);
   if (isPlugin[name])
@@ -1153,7 +1530,7 @@ void LagrangianDS::computeJacobianNNL(unsigned int i)
   }
 }
 
-void LagrangianDS::computeJacobianNNL(unsigned int i, SiconosVector *q2, SiconosVector *velocity2)
+void LagrangianDS::computeJacobianNNL(unsigned int i, SP::SiconosVector q2, SP::SiconosVector velocity2)
 {
   string name = "jacobianNNL" + toString<unsigned int>(i);
   if (isPlugin[name])
@@ -1171,7 +1548,7 @@ void LagrangianDS::computeRhs(double time, bool isDSup)
 
   *q[2] = *(p[2]); // Warning: r/p update is done in Interactions/Relations
 
-  if (fL != NULL)
+  if (fL)
   {
     computeFL(time);
     *q[2] += *fL;
@@ -1203,17 +1580,17 @@ void LagrangianDS::computeJacobianXRhs(double time, bool isDSup)
   if (isPlugin["mass"])
     *workMatrix["invMass"] = *mass;
 
-  if (jacobianFL[0] != NULL)
+  if (jacobianFL[0])
   {
-    SiconosMatrix * bloc10 = jacobianXRhs->getBlockPtr(1, 0);
+    SiconosMatrixSPtr bloc10 = jacobianXRhs->getBlockPtr(1, 0);
     computeJacobianFL(0, time);
     *bloc10 = *jacobianFL[0];
     workMatrix["invMass"]->PLUForwardBackwardInPlace(*bloc10);
   }
 
-  if (jacobianFL[1] != NULL)
+  if (jacobianFL[1])
   {
-    SiconosMatrix * bloc11 = jacobianXRhs->getBlockPtr(1, 1);
+    SiconosMatrixSPtr bloc11 = jacobianXRhs->getBlockPtr(1, 1);
     computeJacobianFL(1, time);
     *bloc11 = *jacobianFL[1];
     workMatrix["invMass"]->PLUForwardBackwardInPlace(*bloc11);
@@ -1223,7 +1600,7 @@ void LagrangianDS::computeJacobianXRhs(double time, bool isDSup)
 void LagrangianDS::computeFL(double time)
 {
   // Warning: an operator (fInt ...) may be set (ie allocated and not NULL) but not plugged, that's why two steps are required here.
-  if (fL != NULL)
+  if (fL)
   {
     // 1 - Computes the required functions
     if (isPlugin["fInt"])
@@ -1236,29 +1613,36 @@ void LagrangianDS::computeFL(double time)
       computeNNL();
 
     // 2 - set fL = fExt - fInt - NNL
-    if (isAllocatedIn["fL"])
+
+    if (
+#ifndef WithSmartPtr
+      isAllocatedIn["fL"]
+#else
+      fL.use_count() == 1
+#endif
+    )
     {
       //if not that means that fL is already (pointer-)connected with
       // either fInt, NNL OR fExt.
       fL->zero();
 
-      if (fInt != NULL)
+      if (fInt)
         *fL -= *fInt;
 
-      if (fExt != NULL)
+      if (fExt)
         *fL += *fExt;
 
-      if (NNL != NULL)
+      if (NNL)
         *fL -= *NNL;
     }
   }
   // else nothing.
 }
 
-void LagrangianDS::computeFL(double time, SiconosVector *q2, SiconosVector *v2)
+void LagrangianDS::computeFL(double time, SiconosVectorSPtr q2, SiconosVectorSPtr v2)
 {
   // Warning: an operator (fInt ...) may be set (ie allocated and not NULL) but not plugged, that's why two steps are required here.
-  if (fL != NULL)
+  if (fL)
   {
     // 1 - Computes the required functions
     if (isPlugin["fInt"])
@@ -1271,19 +1655,25 @@ void LagrangianDS::computeFL(double time, SiconosVector *q2, SiconosVector *v2)
       computeNNL(q2, v2);
 
     // 2 - set fL = fExt - fInt - NNL
-    if (isAllocatedIn["fL"])
+    if (
+#ifndef WithSmartPtr
+      isAllocatedIn["fL"]
+#else
+      fL.use_count() == 1
+#endif
+    )
     {
       //if not that means that fL is already (pointer-)connected with
       // either fInt, NNL OR fExt.
       fL->zero();
 
-      if (fInt != NULL)
+      if (fInt)
         *fL -= *fInt;
 
-      if (fExt != NULL)
+      if (fExt)
         *fL += *fExt;
 
-      if (NNL != NULL)
+      if (NNL)
         *fL -= *NNL;
     }
   }
@@ -1292,7 +1682,7 @@ void LagrangianDS::computeFL(double time, SiconosVector *q2, SiconosVector *v2)
 
 void LagrangianDS::computeJacobianFL(unsigned int i, double time)
 {
-  if (jacobianFL[i] != NULL)
+  if (jacobianFL[i])
   {
     string name = "jacobianFInt" + toString<unsigned int>(i);
     if (isPlugin[name])
@@ -1300,14 +1690,20 @@ void LagrangianDS::computeJacobianFL(unsigned int i, double time)
     name = "jacobianNNL" + toString<unsigned int>(i);
     if (isPlugin[name])
       computeJacobianNNL(i);
-    if (isAllocatedIn[name])
+    if (
+#ifndef WithSmartPtr
+      isAllocatedIn[name]
+#else
+      jacobianFL[i].use_count() == 1
+#endif
+    )
     {
       //if not that means that jacobianFL[i] is already (pointer-)connected with
       // either jacobianFInt or jacobianNNL
       jacobianFL[i]->zero();
-      if (jacobianFInt[i] != NULL)
+      if (jacobianFInt[i])
         *jacobianFL[i] -= *jacobianFInt[i];
-      if (jacobianNNL[i] != NULL)
+      if (jacobianNNL[i])
         *jacobianFL[i] -= *jacobianNNL[i];
     }
   }
@@ -1320,7 +1716,7 @@ void LagrangianDS::saveSpecificDataToXML()
   if (dsxml == NULL)
     RuntimeException::selfThrow("LagrangianDS::saveDSToXML - object DynamicalSystemXML does not exist");
 
-  LagrangianDSXML* lgptr = static_cast <LagrangianDSXML*>(dsxml);
+  LagrangianDSXMLSPtr lgptr = boost::static_pointer_cast <LagrangianDSXML>(dsxml);
   lgptr->setMassPlugin(pluginNames["mass"]);
   lgptr->setQ(*q[0]);
   lgptr->setQ0(*q0);
@@ -1390,18 +1786,18 @@ void LagrangianDS::display() const
   cout << "=====> Lagrangian System display (number: " << number << ")." << endl;
   cout << "- ndof : " << ndof << endl;
   cout << "- q " << endl;
-  if (q[0] != NULL) q[0]->display();
+  if (q[0]) q[0]->display();
   else cout << "-> NULL" << endl;
   cout << "- q0 " << endl;
-  if (q0 != NULL) q0->display();
+  if (q0) q0->display();
   cout << "- v " << endl;
-  if (q[1] != NULL) q[1]->display();
+  if (q[1]) q[1]->display();
   else cout << "-> NULL" << endl;
   cout << "- v0 " << endl;
-  if (velocity0 != NULL) velocity0->display();
+  if (velocity0) velocity0->display();
   else cout << "-> NULL" << endl;
   cout << "- p " << endl;
-  if (p[2] != NULL) p[2]->display();
+  if (p[2]) p[2]->display();
   else cout << "-> NULL" << endl;
   cout << "===================================== " << endl;
 }
@@ -1415,12 +1811,18 @@ void LagrangianDS::initMemory(unsigned int steps)
     cout << "Warning : FirstOrderNonLinearDS::initMemory with size equal to zero" << endl;
   else
   {
+#ifndef WithSmartPtr
     if (isAllocatedIn["qMemory"]) delete qMemory;
     qMemory = new SiconosMemory(steps);
     isAllocatedIn["qMemory"] = true;
     if (isAllocatedIn["velocityMemory"]) delete velocityMemory;
     velocityMemory = new SiconosMemory(steps);
     isAllocatedIn["velocityMemory"] = true;
+#else
+    qMemory.reset(new SiconosMemory(steps));
+    velocityMemory.reset(new SiconosMemory(steps));
+#endif
+
     swapInMemory();
   }
 }
@@ -1433,7 +1835,11 @@ void LagrangianDS::swapInMemory()
   velocityMemory->swap(q[1]);
   // initialization of the reaction force due to the non smooth law
   p[1]->zero();
+
+#ifndef WithSmartPtr
   if (isAllocatedIn["p2"]) p[2]->zero();
+#endif
+
 }
 
 LagrangianDS* LagrangianDS::convert(DynamicalSystem* ds)
@@ -1447,7 +1853,7 @@ double LagrangianDS::dsConvergenceIndicator()
   double dsCvgIndic;
   SimpleVector diff(q[0]->size());
   // Compute difference between present and previous Newton steps
-  SiconosVector * valRef = workVector["NewtonCvg"];
+  SiconosVectorSPtr valRef = workVector["NewtonCvg"];
   sub(*(q[0]), *valRef, diff);
   if (valRef->norm2() != 0)
     dsCvgIndic = diff.norm2() / (valRef->norm2());
@@ -1456,7 +1862,7 @@ double LagrangianDS::dsConvergenceIndicator()
   return (dsCvgIndic);
 }
 
-void LagrangianDS::computeQFree(double time, unsigned int level, SiconosVector* qFreeOut)
+void LagrangianDS::computeQFree(double time, unsigned int level, SP::SiconosVector qFreeOut)
 {
   // to compute qFree, derivative number level. Mainly used in EventDriven to compute second derivative
   // of q for Output y computation.
@@ -1471,11 +1877,11 @@ void LagrangianDS::computeQFree(double time, unsigned int level, SiconosVector* 
   // Warning: we suppose that all other operators are up to date (FInt, FExt ...)
 
   qFreeOut->zero();
-  if (fInt != NULL)
+  if (fInt)
     *qFreeOut -= *fInt;
-  if (fExt != NULL)
+  if (fExt)
     *qFreeOut += *fExt;
-  if (NNL != NULL)
+  if (NNL)
     *qFreeOut -= *NNL;
 
   workMatrix["invMass"]->PLUForwardBackwardInPlace(*qFreeOut);
@@ -1484,7 +1890,11 @@ void LagrangianDS::computeQFree(double time, unsigned int level, SiconosVector* 
 void LagrangianDS::resetNonSmoothPart()
 {
   p[1]->zero();
+
+#ifndef WithSmartPtr
   if (isAllocatedIn["p2"]) p[2]->zero();
+#endif
+
 }
 
 void LagrangianDS::computePostImpactVelocity()

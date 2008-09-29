@@ -72,10 +72,10 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS
 protected:
 
   /** matrix specific to the FirstOrderLinearDS \f$ A \in R^{n \times n}  \f$*/
-  SiconosMatrix *A;
+  SiconosMatrixSPtr A;
 
   /** strength vector */
-  SimpleVector *b;
+  SimpleVectorSPtr b;
 
   /** FirstOrderLinearDS plug-in to compute A(t,z), id = "A"
    * @param time : current time
@@ -95,10 +95,13 @@ protected:
    */
   void (*bPtr)(double, unsigned int, double*, unsigned int, double*);
 
+#ifndef WithSmartPtr
   /** set all allocation flags (isAllocated map)
    *  \param bool: = if true (default) set default configuration, else set all to false
    */
   void initAllocationFlags(bool  = true);
+#endif
+
 
   /** set all plug-in flags (isPlugin map) to val
    *  \param a bool
@@ -115,9 +118,10 @@ public:
 
   /** xml constructor
    *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
-   *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
+   *  \param NonSmoothSP::DynamicalSystem (optional): the NSDS that owns this ds
    */
-  FirstOrderLinearDS(DynamicalSystemXML *, NonSmoothDynamicalSystem* = NULL);
+  FirstOrderLinearDS(DynamicalSystemXMLSPtr ,
+                     SP::NonSmoothDynamicalSystem = SP::NonSmoothDynamicalSystem());
 
   /** constructor from a set of data
    *  \param int : reference number of this DynamicalSystem
@@ -169,7 +173,7 @@ public:
   /** get A
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getAPtr() const
+  inline SiconosMatrixSPtr getAPtr() const
   {
     return A;
   }
@@ -180,9 +184,9 @@ public:
   void setA(const SiconosMatrix& newValue);
 
   /** set A to pointer newPtr
-   *  \param SiconosMatrix * newPtr
+   *  \param SP::SiconosMatrix  newPtr
    */
-  void setAPtr(SiconosMatrix *);
+  void setAPtr(SiconosMatrixSPtr);
 
   // --- b ---
 
@@ -197,7 +201,7 @@ public:
   /** get b
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getBPtr() const
+  inline SimpleVectorSPtr getBPtr() const
   {
     return b;
   }
@@ -210,7 +214,7 @@ public:
   /** set b to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  void setBPtr(SimpleVector *);
+  void setBPtr(SimpleVectorSPtr);
 
   // --- plugins related functions
 
@@ -249,9 +253,9 @@ public:
   };
 
   /** set f to pointer newPtr
-   *  \param SiconosVector * newPtr
+   *  \param SP::SiconosVector newPtr
    */
-  inline void setFPtr(SiconosVector *)
+  inline void setFPtr(SiconosVectorSPtr)
   {
     RuntimeException::selfThrow("FirstOrderLinearDS - setFPtr: f is not available for FirstOrderLinearDS.");
   };
@@ -265,9 +269,9 @@ public:
   };
 
   /** set JacobianXF to pointer newPtr: exception for LinearDS since f is not available.
-   *  \param SiconosMatrix * newPtr
+   *  \param SP::SiconosMatrix  newPtr
    */
-  inline void setJacobianXFPtr(SiconosMatrix *newPtr)
+  inline void setJacobianXFPtr(SiconosMatrixSPtr newPtr)
   {
     RuntimeException::selfThrow("FirstOrderLinearDS - setJacobianXFPtr: f is not available for FirstOrderLinearDS.");
   };

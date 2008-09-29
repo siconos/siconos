@@ -117,18 +117,18 @@ protected:
   /** To update dim and unitaryBlocksPositions for a new set of UnitaryRelation
       \param UnitaryRelationsSet* the index set of the active constraints
   */
-  void updateSizeAndPositions(unsigned int *, UnitaryRelationsSet*);
+  void updateSizeAndPositions(unsigned int *, UnitaryRelationsSetSPtr);
 
   /** To update dim and DSBlocksPositions for a new set of DynamicalSystem
       \param DynamicalSystemsSet* the DyncamicalSystemsSet
   */
-  void updateSizeAndPositions(unsigned int *, DynamicalSystemsSet*);
+  void updateSizeAndPositions(unsigned int *, DynamicalSystemsSetSPtr);
 
   /** To update dim, DSBlocksPositions and unitaryBlocksPositions for a new set of DynamicalSystem and  a new set of UnitaryRelation
       \param DynamicalSystemsSet* the DynamicalSystemsSet
       \param UnitaryRelationsSet* the index set of the active constraints
   */
-  void updateSizeAndPositions(unsigned int *, DynamicalSystemsSet*, UnitaryRelationsSet*);
+  void updateSizeAndPositions(unsigned int *, DynamicalSystemsSetSPtr, UnitaryRelationsSetSPtr);
 
 public:
 
@@ -153,35 +153,35 @@ public:
       \param MapOfMapOfUnitaryMatrices the list of matrices linked to a couple of UR*
       \param storage type
   */
-  OSNSMatrix(UnitaryRelationsSet*, MapOfMapOfUnitaryMatrices&, int);
+  OSNSMatrix(UnitaryRelationsSetSPtr, MapOfMapOfUnitaryMatrices&, int);
 
   /** Constructor from DynamicalSystemsSet and map
       \param UnitaryRelationsSet* the index set of the active constraints
       \param MapOfMapOfUnitaryMatrices the list of matrices linked to a couple of UR*
       \param storage type
   */
-  OSNSMatrix(DynamicalSystemsSet*, MapOfDSMatrices&, int);
+  OSNSMatrix(DynamicalSystemsSetSPtr, MapOfDSMatrices&, int);
 
   /** Constructor from DynamicalSystemsSet and indexSet and map
       \param UnitaryRelationsSet* the index set of the active constraints
       \param MapOfMapOfUnitaryMatrices the list of matrices linked to a couple of UR*
       \param storage type
   */
-  OSNSMatrix(DynamicalSystemsSet*, UnitaryRelationsSet*, MapOfDSMapOfUnitaryMatrices&, int);
+  OSNSMatrix(DynamicalSystemsSetSPtr, UnitaryRelationsSetSPtr, MapOfDSMapOfUnitaryMatrices&, int);
 
   /** Constructor from DynamicalSystemsSet and indexSet and map
       \param UnitaryRelationsSet* the index set of the active constraints
       \param MapOfMapOfUnitaryMatrices the list of matrices linked to a couple of UR*
       \param storage type
   */
-  OSNSMatrix(UnitaryRelationsSet*, DynamicalSystemsSet* , MapOfUnitaryMapOfDSMatrices&, int);
+  OSNSMatrix(UnitaryRelationsSetSPtr, DynamicalSystemsSetSPtr , MapOfUnitaryMapOfDSMatrices&, int);
 
   /** Constructor from DynamicalSystemsSet and indexSet and maps of Blocks
       \param UnitaryRelationsSet* the index set of the active constraints
       \param MapOfMapOfUnitaryMatrices the list of matrices linked to a couple of UR*
       \param storage type
   */
-  OSNSMatrix(UnitaryRelationsSet*, DynamicalSystemsSet*, MapOfMapOfUnitaryMatrices&,  MapOfDSMatrices&, MapOfDSMapOfUnitaryMatrices&,  MapOfUnitaryMapOfDSMatrices&, int);
+  OSNSMatrix(UnitaryRelationsSetSPtr, DynamicalSystemsSetSPtr, MapOfMapOfUnitaryMatrices&,  MapOfDSMatrices&, MapOfDSMapOfUnitaryMatrices&,  MapOfUnitaryMapOfDSMatrices&, int);
 
   /** Constructor with copy of a SiconosMatrix => storageType = 0
       \param MSource matrix to be copied
@@ -219,63 +219,63 @@ public:
   /** get the position (real, not unitaryBlock) of the first element of the unitaryBlock which corresponds to UR
       \param UR UnitaryRelation from which position is required
   */
-  unsigned int getPositionOfDSBlock(DynamicalSystem*) const;
+  unsigned int getPositionOfDSBlock(SP::DynamicalSystem) const;
 
   /** get the position (real, not DSBlock) of the first element of the DSBlock which corresponds to DS
       \param DS DynamicalSystem  from which position is required
   */
-  unsigned int getPositionOfUnitaryBlock(UnitaryRelation*) const;
+  unsigned int getPositionOfUnitaryBlock(SP::UnitaryRelation) const;
 
   /** get the numerics-readable structure */
-  inline NumericsMatrix* getNumericsMatrix()
+  inline NumericsMatrixSPtr getNumericsMatrix()
   {
-    return &*numericsMat;
+    return numericsMat;
   };
 
   /** get the matrix used for default storage */
-  inline SiconosMatrix* getDefaultMatrixPtr()
+  inline SiconosMatrixSPtr getDefaultMatrixPtr()
   {
-    return &*M1;
+    return M1;
   };
 
   /** fill the current class using an index set and a map of unitaryBlocks
       \param UnitaryRelationsSet*, the index set of the active constraints
       \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
   */
-  void fill(UnitaryRelationsSet*, MapOfMapOfUnitaryMatrices&, bool updateSize = true);
+  void fill(UnitaryRelationsSetSPtr, MapOfMapOfUnitaryMatrices&, bool updateSize = true);
 
   /** fill diagonal of thecurrent class using an index set and a map of unitaryBlocks
       \param UnitaryRelationsSet*, the index set of the active constraints
       \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
   */
-  void fillDiagonal(UnitaryRelationsSet* , MapOfMapOfUnitaryMatrices& , bool updateSize = true);
+  void fillDiagonal(UnitaryRelationsSetSPtr , MapOfMapOfUnitaryMatrices& , bool updateSize = true);
 
   /** fill the current class using an DynamicalSystemsSet and a map of DSBlocks
       \param DynamicalSystemsSet*, the Dynamical set
       \param MapOfDSMatrices, the list of matrices linked to a DynamicalSystems
   */
-  void fill(DynamicalSystemsSet*, MapOfDSMatrices&, bool updateSize = true);
+  void fill(DynamicalSystemsSetSPtr, MapOfDSMatrices&, bool updateSize = true);
 
   /** fill the current class using an index set , a DynamicalSystemsSet and a map of unitaryBlocks
       \param UnitaryRelationsSet*, the index set of the active constraints
       \param DynamicalSystemsSet*, the Dynamical set
       \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
   */
-  void fill(DynamicalSystemsSet*, UnitaryRelationsSet*, MapOfDSMapOfUnitaryMatrices&, bool updateSize = true);
+  void fill(DynamicalSystemsSetSPtr, UnitaryRelationsSetSPtr, MapOfDSMapOfUnitaryMatrices&, bool updateSize = true);
 
   /** fill the current class using an index set and a map of unitaryBlocks
       \param UnitaryRelationsSet*, the index set of the active constraints
       \param DynamicalSystemsSet*, the Dynamical set
       \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
   */
-  void fill(UnitaryRelationsSet*, DynamicalSystemsSet*, MapOfUnitaryMapOfDSMatrices&, bool updateSize = true);
+  void fill(UnitaryRelationsSetSPtr, DynamicalSystemsSetSPtr, MapOfUnitaryMapOfDSMatrices&, bool updateSize = true);
 
   /** fill the current class using an index set and  maps of Blocks
       \param UnitaryRelationsSet*, the index set of the active constraints
       \param DynamicalSystemsSet*, the Dynamical set
       \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
   */
-  void fill(UnitaryRelationsSet*, DynamicalSystemsSet*, MapOfMapOfUnitaryMatrices&,  MapOfDSMatrices&, MapOfDSMapOfUnitaryMatrices&,  MapOfUnitaryMapOfDSMatrices&, bool updateSize = true);
+  void fill(UnitaryRelationsSetSPtr, DynamicalSystemsSetSPtr, MapOfMapOfUnitaryMatrices&,  MapOfDSMatrices&, MapOfDSMapOfUnitaryMatrices&,  MapOfUnitaryMapOfDSMatrices&, bool updateSize = true);
 
   /** fill the numerics structure numericsMatSparse using MSparseBlock */
   void convert();

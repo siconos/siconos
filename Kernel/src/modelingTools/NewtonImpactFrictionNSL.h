@@ -59,7 +59,7 @@ public:
   /** constructor with XML object of the NewtonImpactFrictionNSL
    *  \param NonSmoothLawXML* : the XML object corresponding
    */
-  NewtonImpactFrictionNSL(NonSmoothLawXML*);
+  NewtonImpactFrictionNSL(NonSmoothLawXMLSPtr);
 
   /** constructor with the value of the NewtonImpactFrictionNSL attributes
    *  \param double : normal e coefficient

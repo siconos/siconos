@@ -53,7 +53,7 @@ public:
   /** xml constructor
    *  \param RelationXML* : the XML object corresponding
    */
-  FirstOrderLinearTIR(RelationXML*);
+  FirstOrderLinearTIR(RelationXMLSPtr);
 
   /** create the Relation from a set of data
    *  \param SiconosMatrix : the matrix C
@@ -79,7 +79,7 @@ public:
    *  \param pointer to SiconosMatrix : the matrix B
    *  \exception RuntimeException
    */
-  FirstOrderLinearTIR(SiconosMatrix* , SiconosMatrix*);
+  FirstOrderLinearTIR(SiconosMatrixSPtr , SiconosMatrixSPtr);
 
   /** create the Relation from a set of data
    *  \param pointer to SiconosMatrix : C
@@ -89,9 +89,9 @@ public:
    *  \param pointer to SiconosMatrix : B
    *  \exception RuntimeException
    */
-  FirstOrderLinearTIR(SiconosMatrix* , SiconosMatrix* ,
-                      SiconosMatrix* , SimpleVector* ,
-                      SiconosMatrix*);
+  FirstOrderLinearTIR(SiconosMatrixSPtr , SiconosMatrixSPtr ,
+                      SiconosMatrixSPtr , SimpleVectorSPtr ,
+                      SiconosMatrixSPtr);
 
   /** destructor
    */

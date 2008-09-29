@@ -22,6 +22,7 @@
 #ifndef SICONOSMEMORYXML_H
 #define SICONOSMEMORYXML_H
 
+#include "SiconosPointers.h"
 #include "SiconosDOMTreeTools.h"
 #include<deque>
 
@@ -49,7 +50,7 @@ public:
   /** allows to get the deque of SiconosVector from a SiconosMemory in the XML
   *  \return deque<SiconosVector*>
   */
-  inline std::deque<SiconosVector*> getSiconosMemoryVector()
+  inline std::deque<SP::SiconosVector> getSiconosMemoryVector()
   {
     return getVectorMemoryValue();
   }
@@ -63,9 +64,9 @@ public:
   }
 
   /** allows to set the vector of SiconosVector of a SiconosMemory in the XML
-  *  \param deque<SiconosVector*> to set
+  *  \param deque<SP::SiconosVector> to set
   */
-  inline void setSiconosMemoryVector(const std::deque<SiconosVector*>& v)
+  inline void setSiconosMemoryVector(const std::deque<SP::SiconosVector>& v)
   {
     setVectorMemoryValue(v);
   }
@@ -107,14 +108,14 @@ private:
   *   \param memoryNode : the memory node you want to get in a vector of SiconosVector type
   *   \return A  deque of SiconosVector
   */
-  std::deque<SiconosVector*> getVectorMemoryValue();
+  std::deque<SP::SiconosVector> getVectorMemoryValue();
 
   /** Change values of a memoryNode from a deque<SiconosVector>
   *   \param memoryNode : the memory node you want to set
   *   \param memory : the memory you want to copy the value in the memoryNode
   *   \exception XMLException
   */
-  void setVectorMemoryValue(const std::deque<SiconosVector*>& memory);
+  void setVectorMemoryValue(const std::deque<SP::SiconosVector>& memory);
 
   xmlNode * memoryNode;
   xmlNode * parentNode;

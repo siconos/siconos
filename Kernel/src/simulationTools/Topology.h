@@ -33,8 +33,8 @@ class SiconosMatrix;
 class UnitaryRelation;
 
 
-/** map that links a UnitaryRelation* to an int - Used for Relative degrees */
-typedef std::map< UnitaryRelation*, unsigned int > UnitaryRelationsIntMap;
+/** map that links a SP::UnitaryRelation to an int - Used for Relative degrees */
+typedef std::map< SP::UnitaryRelation, unsigned int > UnitaryRelationsIntMap;
 
 /** iterator through UnitaryRelationsIntMap */
 typedef UnitaryRelationsIntMap::iterator IteratorForRelativeDegrees;
@@ -60,7 +60,7 @@ typedef UnitaryRelationsIntMap::const_iterator ConstIteratorForRelativeDegrees;
  *    - insertion of the relations of all the Interaction into indexSet0
  *    - computation of all relative degrees
  *
- * Insertion of an Interaction into the set indexSet0: addInteractionInIndexSet(Interaction * inter)
+ * Insertion of an Interaction into the set indexSet0: addInteractionInIndexSet(SP::Interaction inter)
  *   for each relation of the interaction, it creates a new UnitaryRelation and inserts it into indexSet0
  *   It also counts the total number of "constraints" in the system.
  *
@@ -79,10 +79,10 @@ private:
   // --- MEMBERS ---
 
   /** the set of all the interactions of the system */
-  InteractionsSet * allInteractions;
+  InteractionsSetSPtr allInteractions;
 
   /** index set I0, ie a set of all the Unitary Relations - This corresponds to indexSets[0] of the Simulation */
-  UnitaryRelationsSet * indexSet0;
+  UnitaryRelationsSetSPtr indexSet0;
 
   /** map that links UnitaryRelations with their relative degrees */
   UnitaryRelationsIntMap relativeDegrees;
@@ -93,9 +93,6 @@ private:
   /** check if topology is static (all relative degrees = 0 or 1) or not */
   bool isTopologyTimeInvariant;
 
-  /** the NonSmoothDynamicalSystem that owns this topology */
-  NonSmoothDynamicalSystem * nsds;
-
   /** Total number of (scalar) constraints in the problem, ie sum of all nslaw sizes of Unitary Relations of IndexSet0.*/
   unsigned int numberOfConstraints;
 
@@ -104,7 +101,7 @@ private:
   /** schedules the relations of Interaction inter into IndexSet0 (ie creates the corresponding UnitaryRelations)
   * \param: a pointer to Interaction
   */
-  const bool addInteractionInIndexSet(Interaction*);
+  const bool addInteractionInIndexSet(InteractionSPtr);
 
   /** compute the  RelativeDegrees Map
   */
@@ -118,10 +115,10 @@ public:
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
 
-  /** constructor from nsds that owns that topology
-  * \param: a NonSmoothDynamicalSystem*
+  /** constructor from InteractionSet
+  * \param: a SP::InteractionSet
   */
-  Topology(NonSmoothDynamicalSystem*) ;
+  Topology(SP::InteractionsSet) ;
 
   /** destructor */
   ~Topology();
@@ -163,7 +160,7 @@ public:
   /** get all the Interactions of the Topology problem (saved in a set)
   *  \return an InteractionsSet
   */
-  inline const InteractionsSet * getInteractions() const
+  inline const InteractionsSetSPtr getInteractions() const
   {
     return allInteractions;
   }
@@ -172,12 +169,12 @@ public:
   *  \param a pointer to Interaction
   *  \return a bool
   */
-  const bool hasInteraction(Interaction*) const;
+  const bool hasInteraction(InteractionSPtr) const;
 
   /** get a pointer to the index set of all Unitary Relations.
    *  \return a UnitaryRelationsSet*
    */
-  inline UnitaryRelationsSet* getIndexSet0Ptr()
+  inline UnitaryRelationsSetSPtr getIndexSet0Ptr()
   {
     return indexSet0;
   }
@@ -196,7 +193,7 @@ public:
   *  \param a pointer to UnitaryRelation
   *  \return an unsigned int
   */
-  inline const unsigned int getRelativeDegree(UnitaryRelation* UR)
+  inline const unsigned int getRelativeDegree(SP::UnitaryRelation UR)
   {
     return relativeDegrees[UR];
   }

@@ -28,8 +28,7 @@ using namespace std;
 SiconosModelXML::SiconosModelXML():
   rootNode(NULL), timeNode(NULL), doc(NULL), xmlSchemaFile(XML_SCHEMA),
   titleNode(NULL), authorNode(NULL), descriptionNode(NULL), dateNode(NULL), xmlSchemaNode(NULL),
-  tNode(NULL), t0Node(NULL), TNode(NULL),
-  nsdsXML(NULL), simulationXML(NULL)
+  tNode(NULL), t0Node(NULL), TNode(NULL)
 {
   doc = xmlNewDoc((xmlChar*)"1.0");
   if (doc == NULL)
@@ -50,8 +49,7 @@ SiconosModelXML::SiconosModelXML():
 SiconosModelXML::SiconosModelXML(char * siconosModelXMLFilePath):
   rootNode(NULL), timeNode(NULL), doc(NULL), xmlSchemaFile(XML_SCHEMA),
   titleNode(NULL), authorNode(NULL), descriptionNode(NULL), dateNode(NULL), xmlSchemaNode(NULL),
-  tNode(NULL), t0Node(NULL), TNode(NULL),
-  nsdsXML(NULL), simulationXML(NULL)
+  tNode(NULL), t0Node(NULL), TNode(NULL)
 {
   if (siconosModelXMLFilePath != NULL)
   {
@@ -155,10 +153,6 @@ SiconosModelXML::~SiconosModelXML()
    */
   xmlCleanupParser();
 
-  delete nsdsXML;
-  nsdsXML = NULL;
-  delete simulationXML;
-  simulationXML = NULL;
 }
 
 void SiconosModelXML::saveSiconosModelInXMLFile(const char * siconosModelXMLFilePath)
@@ -197,7 +191,7 @@ void SiconosModelXML::loadModel(xmlNode *rootNode)
 
   // Non smooth dynamical system tag (required)
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, NSDS_TAG)) != NULL)
-    nsdsXML = new NonSmoothDynamicalSystemXML(node);
+    nsdsXML.reset(new NonSmoothDynamicalSystemXML(node));
   else
     XMLException::selfThrow("SiconosModelXML - loadModel error : tag " + NSDS_TAG + " not found.");
   // Time interval (required)
@@ -210,18 +204,18 @@ void SiconosModelXML::loadModel(xmlNode *rootNode)
 
   // Simulation tag (optional)
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, SIMULATION_TAG)) != NULL)
-    simulationXML = new SimulationXML(node);
+    simulationXML.reset(new SimulationXML(node));
   else
   {
     cout << " /!\\ Warning: SiconosModelXML - loadModel: no tag " << SIMULATION_TAG << " found. This may not be a problem since this tag is optional ./!\\" << endl;
     timeNode = node;
-    simulationXML = NULL;
+    simulationXML.reset();
   }
 }
 
-void SiconosModelXML::loadModel(Model * model)
+void SiconosModelXML::loadModel(SP::Model model)
 {
-  if (model != NULL)
+  if (model)
   {
     xmlNode* node;
     /*
@@ -243,7 +237,7 @@ void SiconosModelXML::loadModel(Model * model)
     if (model->getNonSmoothDynamicalSystemPtr() != NULL)
     {
       //nsdsXML = new NonSmoothDynamicalSystemXML( xmlNewChild(rootNode, NULL, (xmlChar*)SM_SIMULATION.c_str(), NULL) );
-      nsdsXML = new NonSmoothDynamicalSystemXML();
+      nsdsXML.reset(new NonSmoothDynamicalSystemXML());
 
       // linkage between the NSDS and his NonSmoothDynamicalSystemXML
       model->getNonSmoothDynamicalSystemPtr()->setNonSmoothDynamicalSystemXMLPtr(nsdsXML);
@@ -252,14 +246,14 @@ void SiconosModelXML::loadModel(Model * model)
       node = xmlNewChild(rootNode, NULL, (xmlChar*)NSDS_TAG.c_str(), NULL);
       nsdsXML->updateNonSmoothDynamicalSystemXML(node, model->getNonSmoothDynamicalSystemPtr());
     }
-    else nsdsXML = NULL;
+    else nsdsXML.reset();
 
     /*
      * creation of the Simulation node
      */
     if (model->getSimulationPtr() != NULL)
     {
-      simulationXML = new SimulationXML();
+      simulationXML.reset(new SimulationXML());
       // linkage between the Simulation and his SimulationXML
       model->getSimulationPtr()->setSimulationXMLPtr(simulationXML);
 

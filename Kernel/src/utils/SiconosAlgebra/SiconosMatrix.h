@@ -343,13 +343,13 @@ public:
    *  \param unsigned int row
    *  \param unsigned int col
    */
-  virtual SiconosMatrix* getBlockPtr(unsigned int = 0, unsigned int = 0) = 0;
+  virtual SiconosMatrixSPtr getBlockPtr(unsigned int = 0, unsigned int = 0) = 0;
 
   /** get block at position row-col if BlockMatrix, else if SimpleMatrix return this
    *  \param unsigned int row
    *  \param unsigned int col
    */
-  virtual const SiconosMatrix* getBlockPtr(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual SiconosMatrixSPtrConst getBlockPtr(unsigned int = 0, unsigned int = 0) const = 0;
 
   /** get row index of current matrix and save it into vOut
    *  \param unsigned int: index of required line
@@ -429,7 +429,7 @@ public:
       *getBandedPtr() *= s;
     else if (num == 6) {} // nothing!
     else //if(num == 7)
-      SiconosMatrixException::selfThrow(" SiconosMatrix *= (double) : invalid type of matrix");
+      SiconosMatrixException::selfThrow(" SP::SiconosMatrix = (double) : invalid type of matrix");
 
     return *this;
   }

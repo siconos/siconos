@@ -26,9 +26,12 @@
 #ifndef SICONOSMEMORY_H
 #define SICONOSMEMORY_H
 
+#include "SiconosPointers.h"
 #include "SiconosMemoryXML.h"
 #include "SiconosMemoryException.h"
 #include <deque>
+
+#include "SiconosPointers.h"
 
 /** This class is used to save vectors for several steps
  *
@@ -55,22 +58,22 @@ public:
    * \param SiconosMemoryXML * : the XML object which contains the data of the memory
    * \param unsigned int : the size of the memory (OPTIONAL)
    */
-  SiconosMemory(SiconosMemoryXML *, const unsigned int = 1);
+  SiconosMemory(SiconosMemoryXMLSPtr, const unsigned int = 1);
 
   /**
    * constructor with deque parameter.
-   * \param deque<SiconosVector*> : the deque of siconosVector which must be stored
+   * \param deque<SP::SiconosVector> : the deque of siconosVector which must be stored
    * memorySize is set to the size of the deque given in parameters
    */
-  SiconosMemory(const std::deque<SiconosVector*>&);
+  SiconosMemory(const std::deque<SiconosVectorSPtr>&);
 
   /**
    * constructor with size and deque parameter.
    * \param int : the size of the memory
-   * \param deque<SiconosVector*> : the deque of siconosVector which must be stored
+   * \param deque<SP::SiconosVector> : the deque of siconosVector which must be stored
    * this constructor is useful if the deque given in parameters has a size lower than the normal size of the memory
    */
-  SiconosMemory(const unsigned int, const std::deque<SiconosVector*>&);
+  SiconosMemory(const unsigned int, const std::deque<SiconosVectorSPtr>&);
 
   /**
    * constructor by copy
@@ -87,17 +90,17 @@ public:
 
   /**
    * fill the memory with a vector of siconosVector
-   * \param deque<SiconosVector*>
+   * \param deque<SP::SiconosVector>
    * memorySize is set to the size of the deque given in parameters
    */
-  void setVectorMemory(const std::deque<SiconosVector*>&);
+  void setVectorMemory(const std::deque<SiconosVectorSPtr>&);
 
   /**
    * To get SiconosVector number i of the memory
    * \param int i: the position in the memory of the wanted SiconosVector
-   * \return a SiconosVector*
+   * \return a SP::SiconosVector
    */
-  SiconosVector* getSiconosVector(const unsigned int) const;
+  SiconosVectorSPtr getSiconosVector(const unsigned int) const;
 
   /**
    * gives the size of the memory
@@ -130,7 +133,7 @@ public:
    * gives the vector of SiconosVectors of the memory
    * \return stl deque od siconosVector
    */
-  inline std::deque<SiconosVector*> getVectorMemory() const
+  inline std::deque<SiconosVectorSPtr> getVectorMemory() const
   {
     return vectorMemory;
   };
@@ -138,16 +141,16 @@ public:
   /** Allows to get the SiconosMemoryXML of the SiconosMemory
    *  \return SiconosMemoryXML* : the object SiconosMemoryXML of the SiconosMemory
    */
-  inline SiconosMemoryXML* getSiconosMemoryXML()
+  inline SiconosMemoryXMLSPtr getSiconosMemoryXML()
   {
     return memoryXML;
   }
 
   /**
    * puts a SiconosVector into the memory
-   * \param SiconosVector* : the SiconosVector we want to put in memory
+   * \param SP::SiconosVector : the SiconosVector we want to put in memory
    */
-  void swap(SiconosVector *);
+  void swap(SiconosVectorSPtr);
 
   /**
    * displays the data of the memory object
@@ -159,7 +162,7 @@ public:
    */
   inline void saveMemorySizeToXML()
   {
-    if (memoryXML != NULL) memoryXML->setSiconosMemorySize(memorySize);
+    if (memoryXML) memoryXML->setSiconosMemorySize(memorySize);
     else SiconosMemoryException::selfThrow("SiconosMemory::saveMemorySizeToXML() - memoryXML object == NULL");
   }
 
@@ -180,13 +183,10 @@ private:
 
   /** the stl deque which contains the SiconosVectors kept in memory */
   /** we use deque rather than vector to access to push_front function */
-  std::deque<SiconosVector*> vectorMemory;
-
-  /** stl vector to provides info about memory allocation */
-  std::deque<bool> isVectorMemoryAllocated;
+  std::deque<SiconosVectorSPtr> vectorMemory;
 
   /** link to the XML for SiconosMemory objects */
-  SiconosMemoryXML * memoryXML;
+  SiconosMemoryXMLSPtr memoryXML;
 
 };
 

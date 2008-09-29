@@ -20,6 +20,7 @@
 #define __BlockMatrixTest__
 
 #include <cppunit/extensions/HelperMacros.h>
+#include "SiconosPointers.h"
 #include "BlockMatrix.h"
 
 using namespace std;
@@ -60,10 +61,10 @@ private:
   void testOperators1();
   void End();
 
-  SiconosMatrix *B, *C, *D, *E, *F, *G;
-  std::vector<SiconosMatrix*> m;
+  SP::SiconosMatrix B, C, D, E, F, G;
+  std::vector<SP::SiconosMatrix> m;
   std::vector<unsigned int> tRow, tCol;
-  BlocksMat * mapRef;
+  SP::BlocksMat  mapRef;
   double tol;
 
 public:

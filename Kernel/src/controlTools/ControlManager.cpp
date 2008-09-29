@@ -28,7 +28,7 @@
 
 using namespace std;
 
-ControlManager::ControlManager(Model* m): model(m)
+ControlManager::ControlManager(SP::Model m): model(m)
 {
   if (model == NULL)
     RuntimeException::selfThrow("ControlManager::constructor failed. The given Model is a NULL pointer.");

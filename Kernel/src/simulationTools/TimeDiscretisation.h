@@ -23,6 +23,7 @@
 #ifndef TIMEDISCRETISATION_H
 #define TIMEDISCRETISATION_H
 
+#include "SiconosPointers.h"
 #include "TimeDiscretisationXML.h"
 #include <vector>
 
@@ -81,10 +82,10 @@ private:
   TkVector tk;
 
   /** the XML object linked to the TimeDiscretisation to read XML data */
-  TimeDiscretisationXML* timeDiscretisationXML;
+  SP::TimeDiscretisationXML timeDiscretisationXML;
 
   /* the model linked to this discretisation (used to set t0 and possibly final T) */
-  Model* model;
+  SP::Model model;
 
   /** Flag to check if all data are up to date (ie if it is necessary to initialize or not) */
   bool isUpToDate;
@@ -108,30 +109,30 @@ private:
 public:
 
   /** constructor with XML
-   *  \param TimeDiscretisationXML* : the XML object corresponding
-   *  \param Model* : the model that owns this discretisation
+   *  \param SP::TimeDiscretisationXML : the XML object corresponding
+   *  \param SP::Model : the model that owns this discretisation
    */
-  TimeDiscretisation(TimeDiscretisationXML*, Model *);
+  TimeDiscretisation(SP::TimeDiscretisationXML, SP::Model);
 
   // --- Straightforward constructors ---
 
   /** constructor with tk and model as given data
    *  \param a TkVector that describes the discretisation
-   *  \param Model* : the model that owns this discretisation
+   *  \param SP::Model : the model that owns this discretisation
    */
-  TimeDiscretisation(const TkVector&, Model*);
+  TimeDiscretisation(const TkVector&, SP::Model);
 
   /** constructor with the number of time steps
    *  \param int (nb steps)
-   *  \param Model* : the model that owns this discretisation
+   *  \param SP::Model : the model that owns this discretisation
    */
-  TimeDiscretisation(unsigned int, Model*);
+  TimeDiscretisation(unsigned int, SP::Model);
 
   /** constructor with the size of the default time step
    *  \param double, the time step
-   *  \param Model* : the model that owns this discretisation
+   *  \param SP::Model : the model that owns this discretisation
    */
-  TimeDiscretisation(double, Model*);
+  TimeDiscretisation(double, SP::Model);
 
   /** constructor with the size of the default time step and t0
    *  \param double, initial time value
@@ -191,7 +192,7 @@ public:
   /** get the TimeDiscretisationXML of the TimeDiscretisation
    *  \return a pointer on the TimeDiscretisationXML of the TimeDiscretisation
    */
-  inline TimeDiscretisationXML* getTimeDiscretisationXMLPtr() const
+  inline SP::TimeDiscretisationXML getTimeDiscretisationXMLPtr() const
   {
     return timeDiscretisationXML;
   }
@@ -199,7 +200,7 @@ public:
   /** set the TimeDiscretisationXML of the TimeDiscretisation
    *  \param TimeDiscretisationXML* : the pointer to set the TimeDiscretisationXML
    */
-  inline void setTimeDiscretisationXMLPtr(TimeDiscretisationXML* timediscrxml)
+  inline void setTimeDiscretisationXMLPtr(SP::TimeDiscretisationXML timediscrxml)
   {
     timeDiscretisationXML = timediscrxml;
   }
@@ -207,7 +208,7 @@ public:
   /** get the Model
    *  \return a pointer to Model
    */
-  inline Model* getModelPtr() const
+  inline SP::Model getModelPtr() const
   {
     return model;
   };

@@ -24,6 +24,7 @@
 #ifndef DYNAMICALSYSTEM_H
 #define DYNAMICALSYSTEM_H
 
+#include "SiconosPointers.h"
 #include "SiconosSharedLibrary.h"
 #include "RuntimeException.h"
 #include "Tools.h"
@@ -42,10 +43,10 @@ class SiconosMemory;
 class SiconosSharedLibrary;
 
 /** A map to save temporary working vectors */
-typedef std::map<const std::string , SiconosVector*> WorkMap;
+typedef std::map<const std::string , SiconosVectorSPtr> WorkMap;
 
 /** A map to save temporary working matrices */
-typedef std::map<std::string , SiconosMatrix*> WorkMap2;
+typedef std::map<std::string , SiconosMatrixSPtr> WorkMap2;
 
 /** Pointer to function for plug-in. */
 typedef void (*FPtr6)(double, unsigned int, const double*, const double*, double*, unsigned int, double*);
@@ -124,25 +125,25 @@ protected:
   int number;
 
   /** NonSmoothDynamicalSystem owner of this DynamicalSystem */
-  NonSmoothDynamicalSystem* nsds;
+  SP::NonSmoothDynamicalSystem nsds;
 
   /** the dimension of the system (\e ie size of the state vector x) */
   unsigned int n;
 
   /** initial state of the system */
-  SiconosVector *x0;
+  SiconosVectorSPtr x0;
 
   /** state of the system, \f$  x \in R^{n}\f$ - With \f$ x[0]=\f$ x \f$ , x[1]= \f$ \dot x \f$ . */
   VectorOfVectors x;
 
   /** jacobian according to x of the right-hand side (\f$ \dot x = f(x,t) + r \f$) */
-  SiconosMatrix *jacobianXRhs;
+  SiconosMatrixSPtr jacobianXRhs;
 
   /** Arbitrary algebraic values vector, z, discret state of the system. */
-  SiconosVector * z;
+  SiconosVectorSPtr z;
 
   /** \f$ g(t,\dot x,x,z) \f$ */
-  SiconosVector *g;
+  SiconosVectorSPtr g;
 
   /** jacobianXG[0] = \f$ \nabla_x g(t,\dot x,x,z) \f$, jacobianXG[1] = \f$ \nabla_{\dot x} g(t,\dot x,x,z) \f$  */
   VectorOfMatrices jacobianG;
@@ -174,7 +175,7 @@ protected:
   std::vector<FPtr6> computeJacobianGPtr;
 
   /** the  previous state vectors stored in memory*/
-  SiconosMemory *xMemory;
+  SiconosMemorySPtr xMemory;
 
   /** number of previous states stored in memory */
   unsigned int stepsInMemory;
@@ -187,7 +188,7 @@ protected:
   WorkMap2 workMatrix;
 
   /** the XML object linked to the DynamicalSystem  */
-  DynamicalSystemXML *dsxml;
+  DynamicalSystemXMLSPtr dsxml;
 
   // --- plugins utilities---
 
@@ -199,6 +200,7 @@ protected:
    * then computeJacobianXF does not change its value. */
   BoolMap isPlugin;
 
+#ifndef WithSmartPtr
   /** Flags to know if pointers have been allocated inside constructors or not */
   BoolMap isAllocatedIn;
 
@@ -206,6 +208,8 @@ protected:
    *  \param a bool
    */
   virtual void initAllocationFlags(bool);
+#endif
+
 
   /** set all plug-in flags (isPlugin map) to val
    *  \param a bool
@@ -227,9 +231,10 @@ public:
 
   /** xml constructor
    *  \param DynamicalSystemXML* : the XML object for this DynamicalSystem
-   *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
+   *  \param NonSmoothSP::DynamicalSystem (optional): the NSDS that owns this ds
    */
-  DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* = NULL);
+  DynamicalSystem(DynamicalSystemXMLSPtr dsXML,
+                  SP::NonSmoothDynamicalSystem = SP::NonSmoothDynamicalSystem());
 
   /** constructor from a set of data
    *  \param type of the system
@@ -279,7 +284,7 @@ public:
     return number;
   }
 
-  /** function used to sort DynamicalSystem in SiconosSet<DynamicalSystem*>
+  /** function used to sort DynamicalSystem in SiconosSet<SP::DynamicalSystem>
    *  \return an int
    */
   inline const int getSort() const
@@ -298,17 +303,17 @@ public:
   // --- NonSmoothDynamicalSystem ---
 
   /** get the NonSmoothDynamicalSystem containing this DynamicalSystem
-   *  \return NonSmoothDynamicalSystem*
+   *  \return NonSmoothSP::DynamicalSystem
    */
-  inline NonSmoothDynamicalSystem* getNonSmoothDynamicalSystemPtr() const
+  inline SPC::NonSmoothDynamicalSystem getNonSmoothDynamicalSystemPtr()
   {
     return nsds;
   }
 
   /** set the NonSmoothDynamicalSystem containing the DynamicalSystem
-   *  \param NonSmoothDynamicalSystem*
+   *  \param NonSmoothSP::DynamicalSystem
    */
-  inline void setNonSmoothDynamicalSystemPtr(NonSmoothDynamicalSystem *newNsds)
+  inline void setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newNsds)
   {
     nsds = newNsds;
   }
@@ -353,7 +358,7 @@ public:
   /** get x0, the initial state of the DynamicalSystem
    *  \return pointer on a SiconosVector
    */
-  inline SiconosVector* getX0Ptr() const
+  inline SiconosVectorSPtr getX0Ptr() const
   {
     return x0;
   }
@@ -364,9 +369,9 @@ public:
   void setX0(const SiconosVector&);
 
   /** set x0 to pointer newPtr
-   *  \param SiconosVector * newPtr
+   *  \param SP::SiconosVector newPtr
    */
-  void setX0Ptr(SiconosVector*);
+  void setX0Ptr(SiconosVectorSPtr);
 
   // --- X ---
 
@@ -374,6 +379,7 @@ public:
    *  \return SimpleVector
    * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
    */
+
   inline const SimpleVector getX() const
   {
     return *(x[0]);
@@ -382,7 +388,7 @@ public:
   /** get \f$ x \f$ (pointer), the state of the DynamicalSystem.
    *  \return pointer on a SiconosVector
    */
-  inline SiconosVector* getXPtr() const
+  inline SiconosVectorSPtr getXPtr() const
   {
     return x[0];
   }
@@ -393,9 +399,9 @@ public:
   void setX(const SiconosVector&);
 
   /** set \f$ x \f$ (ie (*x)[0]) to pointer newPtr
-   *  \param SiconosVector * newPtr
+   *  \param SP::SiconosVector newPtr
    */
-  void setXPtr(SiconosVector *);
+  void setXPtr(SiconosVectorSPtr);
 
   // ---  Rhs ---
 
@@ -411,7 +417,7 @@ public:
   /** get the right-hand side, \f$ \dot x \f$, the derivative of the state of the DynamicalSystem.
    *  \return a pointer on a SiconosVector
    */
-  inline SiconosVector* getRhsPtr() const
+  inline SiconosVectorSPtr getRhsPtr() const
   {
     return x[1];
   }
@@ -422,9 +428,9 @@ public:
   void setRhs(const SiconosVector&);
 
   /** set right-hand side, \f$ \dot x \f$, to pointer newPtr
-   *  \param SiconosVector * newPtr
+   *  \param SP::SiconosVector newPtr
    */
-  void setRhsPtr(SiconosVector *);
+  void setRhsPtr(SiconosVectorSPtr);
 
   // --- JacobianXRhs ---
 
@@ -439,7 +445,7 @@ public:
   /** get gradient according to \f$ x \f$ of the right-hand side (pointer)
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getJacobianXRhsPtr() const
+  inline SiconosMatrixSPtr getJacobianXRhsPtr() const
   {
     return jacobianXRhs;
   }
@@ -450,9 +456,9 @@ public:
   void setJacobianXRhs(const SiconosMatrix&);
 
   /** set JacobianXRhs to pointer newPtr
-   *  \param SiconosMatrix * newPtr
+   *  \param SP::SiconosMatrix  newPtr
    */
-  void setJacobianXRhsPtr(SiconosMatrix *newPtr);
+  void setJacobianXRhsPtr(SiconosMatrixSPtr newPtr);
 
   // -- z --
 
@@ -468,7 +474,7 @@ public:
   /** get \f$ z \f$ (pointer), the vector of algebraic parameters.
    *  \return pointer on a SiconosVector
    */
-  inline SiconosVector* getZPtr() const
+  inline SiconosVectorSPtr getZPtr() const
   {
     return z;
   }
@@ -479,9 +485,9 @@ public:
   void setZ(const SiconosVector&);
 
   /** set \f$ z \f$ to pointer newPtr
-   *  \param SiconosVector * newPtr
+   *  \param SP::SiconosVector newPtr
    */
-  void setZPtr(SiconosVector *);
+  void setZPtr(SiconosVectorSPtr);
 
   // --- g ---
 
@@ -497,7 +503,7 @@ public:
   /** get \f$ g \f$ (pointer)
    *  \return pointer on a SiconosVector
    */
-  inline SiconosVector* getGPtr() const
+  inline SiconosVectorSPtr getGPtr() const
   {
     return g;
   }
@@ -508,9 +514,9 @@ public:
   void setG(const SiconosVector&);
 
   /** set \f$ g \f$ to pointer newPtr
-   *  \param SiconosVector * newPtr
+   *  \param SP::SiconosVector newPtr
    */
-  void setGPtr(SiconosVector *);
+  void setGPtr(SiconosVectorSPtr);
 
   // -- Jacobian g --
 
@@ -527,7 +533,7 @@ public:
    *  \param index (0: \f$ \nabla_x \f$, 1: \f$ \nabla_{\dot x} \f$ )
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getJacobianGPtr(unsigned int i) const
+  inline SiconosMatrixSPtr getJacobianGPtr(unsigned int i) const
   {
     return jacobianG[i];
   }
@@ -540,9 +546,9 @@ public:
 
   /** set JacobianG to pointer newPtr
    *  \param index (0: \f$ \nabla_x \f$, 1: \f$ \nabla_{\dot x} \f$ )
-   *  \param SiconosMatrix * newPtr
+   *  \param SP::SiconosMatrix  newPtr
    */
-  void setJacobianGPtr(unsigned int, SiconosMatrix *newPtr);
+  void setJacobianGPtr(unsigned int, SiconosMatrixSPtr newPtr);
 
   // X memory
 
@@ -557,7 +563,7 @@ public:
   /** get all the values of the state vector x stored in memory
    *  \return a memory
    */
-  inline SiconosMemory* getXMemoryPtr() const
+  inline SiconosMemorySPtr getXMemoryPtr() const
   {
     return xMemory;
   }
@@ -570,7 +576,7 @@ public:
   /** set xMemory to pointer newPtr
    *  \param a ref on a SiconosMemory
    */
-  void setXMemoryPtr(SiconosMemory *);
+  void setXMemoryPtr(SiconosMemorySPtr);
 
   // --- Steps in memory ---
 
@@ -603,7 +609,7 @@ public:
   /** get the object DynamicalSystemXML of the DynamicalSystem
    *  \return a pointer on the DynamicalSystemXML of the DynamicalSystem
    */
-  inline const DynamicalSystemXML* getDynamicalSystemXMLPtr() const
+  inline const DynamicalSystemXMLSPtr getDynamicalSystemXMLPtr() const
   {
     return dsxml;
   }
@@ -611,7 +617,7 @@ public:
   /** set the DynamicalSystemXML of the DynamicalSystem
    *  \param DynamicalSystemXML* dsxml : the address of theDynamicalSystemXML to set
    */
-  inline void setDynamicalSystemXMLPtr(DynamicalSystemXML *newDsxml)
+  inline void setDynamicalSystemXMLPtr(DynamicalSystemXMLSPtr newDsxml)
   {
     dsxml = newDsxml;
   }
@@ -629,7 +635,7 @@ public:
   /** get a temporary saved vector, ref by id
    *  \return a std vector
    */
-  inline SiconosVector* getWorkVector(const std::string&  id)
+  inline SiconosVectorSPtr getWorkVector(const std::string&  id)
   {
     return workVector[id];
   }
@@ -643,10 +649,10 @@ public:
   }
 
   /** to add a temporary vector
-   *  \param a SiconosVector*
+   *  \param a SP::SiconosVector
    *  \param a string id
    */
-  inline void addWorkVector(SiconosVector* newVal, const std::string& id)
+  inline void addWorkVector(SiconosVectorSPtr newVal, const std::string& id)
   {
     *workVector[id] = *newVal;
   }
@@ -656,17 +662,28 @@ public:
    *  \param an int to set the size
    */
   inline void allocateWorkVector(const std::string& id, int size)
+
+#ifndef WithSmartPtr
   {
     workVector[id] = new SimpleVector(size);
   }
+#else
+  {
+    workVector[id].reset(new SimpleVector(size));
+  }
+#endif
 
+
+#ifndef WithSmartPtr
   /** to free memory in the map
    *  \param the id of the SimpleVector to free
    */
+
   inline void freeWorkVector(const std::string& id)
   {
     delete workVector[id];
   }
+#endif
 
   // --- get plugin functions names ---
 

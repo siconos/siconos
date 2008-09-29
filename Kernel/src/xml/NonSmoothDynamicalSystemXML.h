@@ -27,19 +27,21 @@
 #include "SiconosDOMTreeTools.h"
 #include <set>
 
+#include "SiconosPointers.h"
+
 class NonSmoothDynamicalSystem;
 class InteractionXML;
 class DynamicalSystemXML;
 const std::string NSDS_BVP = "bvp";
 
 /** set of DSXML */
-typedef std::set<DynamicalSystemXML*> SetOfDSXML;
+typedef std::set<DynamicalSystemXMLSPtr> SetOfDSXML;
 
 /** iterator through setOfDSXML */
 typedef SetOfDSXML::iterator SetOfDSXMLIt;
 
 /** set of InteractionXML */
-typedef std::set<InteractionXML*> SetOfInteractionsXML;
+typedef std::set<InteractionXMLSPtr> SetOfInteractionsXML;
 
 /** iterator through SetOfInteractionXML */
 typedef SetOfInteractionsXML::iterator SetOfInteractionsXMLIt;
@@ -150,14 +152,14 @@ public:
 
   /** makes the operations to add a NonSmoothDynamicalSystem to the SiconosModelXML
   *   \param xmlNodePtr  : the root node for the NonSmoothDynamicalSystemXML
-  *   \param NonSmoothDynamicalSystem* : the NonSmoothDynamicalSystem of this NonSmoothDynamicalSystemXML
+  *   \param SP::NonSmoothDynamicalSystem : the NonSmoothDynamicalSystem of this NonSmoothDynamicalSystemXML
   */
-  void updateNonSmoothDynamicalSystemXML(xmlNodePtr , NonSmoothDynamicalSystem*);
+  void updateNonSmoothDynamicalSystemXML(xmlNodePtr , SP::NonSmoothDynamicalSystem);
 
   /** loads the data of the NonSmoothDynamicalSystem into the NonSmoothDynamicalSystemXML (in the DOM tree)
-  *   \param NonSmoothDynamicalSystem* : the NonSmoothDynamicalSystem of this NonSmoothDynamicalSystemXML
+  *   \param SP::NonSmoothDynamicalSystem : the NonSmoothDynamicalSystem of this NonSmoothDynamicalSystemXML
   */
-  void loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem*);
+  void loadNonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystem);
 
 
 };

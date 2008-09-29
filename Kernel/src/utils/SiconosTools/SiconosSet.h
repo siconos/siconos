@@ -55,7 +55,7 @@ template <class T, class U> class SiconosSet
 public:
 
   /** set of T */
-  typedef std::set<T*, Cmp<T, U> > TSet;
+  typedef std::set<boost::shared_ptr<T>, Cmp<T, U> > TSet;
 
   /** iterator through a set of T */
   typedef typename TSet::iterator TIterator;
@@ -72,12 +72,7 @@ protected:
   const U(T::*fpt)() const;
 
   /** a set of T, sorted thanks to their address */
-  TSet * setOfT;
-
-  /** a map of bool to check inside-class allocation.
-   *  isTAllocatedIn[ds] = true if ds has been allocated in a method of the present class.
-   */
-  std::map<T*, bool > isTAllocatedIn;
+  boost::shared_ptr<TSet> setOfT;
 
 private:
 
@@ -90,23 +85,10 @@ public:
 
   /** default constructor
    */
-  SiconosSet(): fpt(NULL), setOfT(NULL)
+  SiconosSet(): fpt(NULL)
   {
     fpt = &T::getSort;
-    setOfT = new TSet(fpt);
-  };
-
-  /** destructor */
-  ~SiconosSet()
-  {
-    TIterator it;
-    for (it = setOfT->begin(); it != setOfT->end(); ++it)
-    {
-      if (isTAllocatedIn[*it]) delete(*it);
-    }
-    setOfT->clear();
-    isTAllocatedIn.clear();
-    delete setOfT;
+    setOfT.reset(new TSet(fpt));
   };
 
   /** return the number of Ts in the set
@@ -160,7 +142,7 @@ public:
   /** return setOfT
    *  \return an InterSet
    */
-  const TSet * getSet() const
+  const boost::shared_ptr<TSet> getSet() const
   {
     return setOfT;
   }
@@ -168,7 +150,7 @@ public:
   /** get T number num, if it is present in the set (else, exception)
    *  \return a pointer to T
    */
-  T* getPtr(int num) const
+  boost::shared_ptr<T> getPtr(int num) const
   {
     ConstTIterator it;
     for (it = setOfT->begin(); it != setOfT->end(); ++it)
@@ -185,7 +167,7 @@ public:
    *  \param a pointer to T
    *  \return a bool
    */
-  const bool isIn(T* t) const
+  const bool isIn(boost::shared_ptr<T> t) const
   {
     TIterator it = setOfT->find(t);
     bool out = false;
@@ -217,7 +199,7 @@ public:
    *  \param a pointer to T
    *  \param a TIterator
    */
-  TIterator find(T* t)
+  TIterator find(boost::shared_ptr<T> t)
   {
     return setOfT->find(t);
   };
@@ -241,25 +223,20 @@ public:
    *  \param a pointer to T
    *  \return a CheckInsertT (boolean type information)
    */
-  CheckInsertT insert(T* t)
+  CheckInsertT insert(boost::shared_ptr<T> t)
   {
     return setOfT->insert(t);
-    isTAllocatedIn[t] = false;
   };
 
   /** remove a T* from the set
    *  \param a pointer to T
    */
-  void erase(T* t)
+  void erase(boost::shared_ptr<T> t)
   {
     TIterator it = setOfT->find(t);
     if (it == setOfT->end())
       RuntimeException::selfThrow("SiconosSet::erase(t): t is not in the set!");
 
-    // If ds has been allocated inside the class, it is first necessary to release memory.
-    if (isTAllocatedIn[t])
-      delete *it;
-    isTAllocatedIn.erase(t);
     setOfT->erase(*it);
   };
 
@@ -267,13 +244,7 @@ public:
    */
   void clear()
   {
-    TIterator it;
-    for (it = setOfT->begin(); it != setOfT->end(); ++it)
-    {
-      if (isTAllocatedIn[*it]) delete *it;
-    }
     setOfT->clear();
-    isTAllocatedIn.clear();
   };
 
   /** screen-display of the numbers of the Ts present in the set.

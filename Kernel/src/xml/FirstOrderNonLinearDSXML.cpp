@@ -21,12 +21,12 @@ using namespace std;
 
 FirstOrderNonLinearDSXML::FirstOrderNonLinearDSXML():
   DynamicalSystemXML(), x0Node(NULL), xNode(NULL), MNode(NULL),
-  fNode(NULL), jacobianXFNode(NULL), xMemoryNode(NULL), xMemoryXML(NULL)
+  fNode(NULL), jacobianXFNode(NULL), xMemoryNode(NULL)
 {}
 
 FirstOrderNonLinearDSXML::FirstOrderNonLinearDSXML(xmlNodePtr DSNode, bool isBVP):
   DynamicalSystemXML(DSNode, isBVP), x0Node(NULL), xNode(NULL), MNode(NULL),
-  fNode(NULL), jacobianXFNode(NULL), xMemoryNode(NULL), xMemoryXML(NULL)
+  fNode(NULL), jacobianXFNode(NULL), xMemoryNode(NULL)
 {
   xmlNodePtr node;
 
@@ -48,14 +48,12 @@ FirstOrderNonLinearDSXML::FirstOrderNonLinearDSXML(xmlNodePtr DSNode, bool isBVP
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DS_XMEMORY)) != NULL)
   {
     xMemoryNode = node;
-    xMemoryXML = new SiconosMemoryXML(xMemoryNode, rootNode, DS_XMEMORY);
+    xMemoryXML.reset(new SiconosMemoryXML(xMemoryNode, rootNode, DS_XMEMORY));
   }
 }
 
 FirstOrderNonLinearDSXML::~FirstOrderNonLinearDSXML()
 {
-  if (xMemoryXML != NULL) delete xMemoryXML;
-  xMemoryXML = NULL;
 }
 
 void FirstOrderNonLinearDSXML::setM(const SiconosMatrix& m)
@@ -102,7 +100,7 @@ void FirstOrderNonLinearDSXML::setXMemory(const SiconosMemory& smem)
 {
   if (!hasXMemory())
   {
-    xMemoryXML = new SiconosMemoryXML(NULL, rootNode, DS_XMEMORY);
+    xMemoryXML.reset(new SiconosMemoryXML(NULL, rootNode, DS_XMEMORY));
     xMemoryNode = xMemoryXML->getSiconosMemoryXMLNode();
     xMemoryXML->setSiconosMemorySize(smem.getMemorySize());
     xMemoryXML->setSiconosMemoryVector(smem.getVectorMemory());

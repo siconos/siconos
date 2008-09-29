@@ -27,7 +27,7 @@
 using namespace std;
 using namespace SensorFactory;
 
-SensorPosition::SensorPosition(int name, TimeDiscretisation* t): Sensor(name, t), nSteps(2000)
+SensorPosition::SensorPosition(int name, SP::TimeDiscretisation t): Sensor(name, t), nSteps(2000)
 {}
 
 SensorPosition::~SensorPosition()

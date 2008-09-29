@@ -27,6 +27,8 @@
 #include "Interaction.h"
 #include "RelationTypes.hpp"
 
+#include "SiconosPointers.h"
+
 /** Interface to single relations from Interactions
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -63,7 +65,7 @@ class UnitaryRelation
 private:
 
   /** link to Interaction that owns this relation **/
-  Interaction * mainInteraction;
+  InteractionSPtr mainInteraction;
 
   /** relative position of the present relation in the Interaction - For example if the present relation takes place from index 2 to 4 in y vector
    of mainInteraction, the relative position is equal to 2. */
@@ -76,10 +78,10 @@ private:
   unsigned int absolutePostion;
 
   /** work vector to save pointers to state-related data of the dynamical systems involved in the UR.*/
-  SiconosVector* workX;
+  SiconosVectorSPtr workX;
 
   /** work vector to save pointers to z data of the dynamical systems involved in the UR.*/
-  SiconosVector* workZ;
+  SiconosVectorSPtr workZ;
 
   /** default constructor
    */
@@ -92,11 +94,11 @@ private:
 public:
 
   /** constructor from a pointer to Interaction
-  *  \param Interaction * : Interaction object from which a list of relation will be "extracted"
+  *  \param SP::Interaction : Interaction object from which a list of relation will be "extracted"
   *  \param unsigned int: gives the relative position of the relation inside the y vector of the interaction
   *  \param unsigned int: gives the number of the unitaryBlock in y vector of the interaction that corresponds to the present unitary relation.
   */
-  UnitaryRelation(Interaction* , unsigned int, unsigned int);
+  UnitaryRelation(InteractionSPtr , unsigned int, unsigned int);
 
   /** destructor
   */
@@ -105,7 +107,7 @@ public:
   /** get main interaction of this unitary relation
   *  \return a pointer to Interaction
   */
-  inline Interaction* getInteractionPtr()
+  inline InteractionSPtr getInteractionPtr()
   {
     return mainInteraction;
   } ;
@@ -143,12 +145,12 @@ public:
   /** get y[i], derivative number i of output
   *  \return pointer on a SimpleVector
   */
-  SiconosVector* getYPtr(unsigned int) const;
+  SiconosVectorSPtr getYPtr(unsigned int) const;
 
   /** get yOld[i], derivative number i of output
   *  \return pointer on a SimpleVector
   */
-  SiconosVector* getYOldPtr(unsigned int) const;
+  SiconosVectorSPtr getYOldPtr(unsigned int) const;
 
   /** get vector of input derivatives
   *  \return a VectorOfVectors
@@ -158,7 +160,7 @@ public:
   /** get lambda[i], derivative number i of input
   *  \return pointer on a SimpleVector
   */
-  SiconosVector* getLambdaPtr(unsigned int) const;
+  SiconosVectorSPtr getLambdaPtr(unsigned int) const;
 
   /** get y[i], derivative number i of output, value used to compute indexSets
   *  \return a double
@@ -188,7 +190,7 @@ public:
    */
   const RELATIONSUBTYPES getRelationSubType() const;
 
-  /** function used to sort UnitaryRelation in SiconosSet<UnitaryRelation*>
+  /** function used to sort UnitaryRelation in SiconosSet<SP::UnitaryRelation>
    *  \return an int
    */
   inline double* const getSort() const
@@ -231,28 +233,28 @@ public:
   /** gets a pointer to the DynamicalSystemsSet
    *  \return a DynamicalSystemsSet*
    */
-  DynamicalSystemsSet * getDynamicalSystemsPtr() ;
+  DynamicalSystemsSetSPtr getDynamicalSystemsPtr() ;
 
   /** To initialize the UR: mainly to set work vectors.
    */
   void initialize(const std::string&);
 
   /* to set workX content.
-   \param a SiconosVector* to be inserted into workX
+   \param a SP::SiconosVector to be inserted into workX
   */
-  inline void insertInWorkX(SiconosVector * newX)
+  inline void insertInWorkX(SiconosVectorSPtr newX)
   {
     workX->insertPtr(newX);
   };
 
   /** Get a pointer to workX */
-  inline SiconosVector* getWorkXPtr()
+  inline SiconosVectorSPtr getWorkXPtr()
   {
     return workX;
   };
 
   /** Get a pointer to workX */
-  inline SiconosVector* getWorkZPtr()
+  inline SiconosVectorSPtr getWorkZPtr()
   {
     return workZ;
   };
@@ -263,7 +265,7 @@ public:
    *  \param a pointer to SiconosMatrix (in-out parameter): the resulting unitaryBlock matrix
    *  \param unsigned int (optional): gradient index (see relations for details)
    */
-  void getLeftUnitaryBlockForDS(DynamicalSystem *, SiconosMatrix*, unsigned int = 0) const;
+  void getLeftUnitaryBlockForDS(SP::DynamicalSystem, SiconosMatrixSPtr, unsigned int = 0) const;
 
   /** gets the matrix used in unitaryBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to ds.
@@ -271,12 +273,12 @@ public:
    *  \param a pointer to SiconosMatrix (in-out parameter): the resulting unitaryBlock matrix
    *  \param unsigned int (optional): gradient index (see relations for details)
    */
-  void getRightUnitaryBlockForDS(DynamicalSystem *, SiconosMatrix*, unsigned int = 0) const;
+  void getRightUnitaryBlockForDS(SP::DynamicalSystem, SiconosMatrixSPtr, unsigned int = 0) const;
 
   /** gets extra unitaryBlock corresponding to the present UR (see the top of this files for extra unitaryBlock meaning)
    *  \param a pointer to a SiconosMatrix (in-out parameter)
    */
-  void getExtraUnitaryBlock(SiconosMatrix *) const;
+  void getExtraUnitaryBlock(SiconosMatrixSPtr) const;
 
 };
 

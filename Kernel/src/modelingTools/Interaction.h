@@ -26,6 +26,7 @@
 #define INTERACTION_H
 
 // const
+#include <boost/shared_ptr.hpp>
 #include "BlockVector.h"
 #include "DynamicalSystemsSet.h"
 #include "Tools.h"
@@ -71,7 +72,7 @@ class BlockVector;
  *
  *
  */
-class Interaction
+class Interaction : public boost::enable_shared_from_this<Interaction>
 {
 
   // === PRIVATE MEMBERS ===
@@ -112,37 +113,19 @@ private:
   VectorOfVectors lambdaOld;
 
   /** the Dynamical Systems concerned by this interaction */
-  DynamicalSystemsSet * involvedDS;
+  DynamicalSystemsSetSPtr involvedDS;
 
   /** the Non-smooth Law of the interaction*/
   NonSmoothLawSPtr nslaw;
 
   /** the type of Relation of the interaction */
-  Relation *relation;
+  RelationSPtr relation;
 
   /** the NonSmoothDynamicalSystem that owns this Interaction */
-  NonSmoothDynamicalSystem * NSDS;
+  SP::NonSmoothDynamicalSystem NSDS;
 
   /** the XML object linked to the Interaction to read XML data */
-  InteractionXML *interactionxml;
-
-  /** Flags to know if pointers have been allocated inside constructors or not
-   *  isXXXAllocatedIn[i][j] = true means that the vector that corresponds to relation j in the derivative i of XXX
-   *  has been allocated inside the class.
-   */
-  AllocationFlags isYAllocatedIn;
-
-  /** Flags for yOld[i] inside class allocation */
-  AllocationFlags isYOldAllocatedIn;
-
-  /** Flags for lambda[i] inside class allocation */
-  AllocationFlags isLambdaAllocatedIn;
-
-  /** Flags for lambdaOld[i] inside class allocation */
-  AllocationFlags isLambdaOldAllocatedIn;
-
-  /** Flags for yOld[i] inside class allocation */
-  BoolMap isAllocatedIn;
+  InteractionXMLSPtr interactionxml;
 
   // === PRIVATE FUNCTIONS ===
 
@@ -159,25 +142,25 @@ public:
    *  \param InteractionXML* : the XML object corresponding
    *  \param NonSmoothDynamicalSystem (optional)
    */
-  Interaction(InteractionXML*, NonSmoothDynamicalSystem* = NULL);
+  Interaction(InteractionXMLSPtr, SP::NonSmoothDynamicalSystem = boost::shared_ptr<NonSmoothDynamicalSystem>());
 
   /** constructor with a set of data (only one DS in the Interaction) - Note: no id.
-   *  \param a DynamicalSystem*: the DS involved in the Interaction
+   *  \param a SP::DynamicalSystem: the DS involved in the Interaction
    *  \param int : the number of this Interaction
    *  \param int : the value of interactionSize
    *  \param NonSmoothLaw* : a pointer to the non smooth law
    *  \param Relation* : a pointer to the Relation
    */
-  Interaction(DynamicalSystem*, int, int, NonSmoothLawSPtr, Relation*);
+  Interaction(SP::DynamicalSystem, int, int, NonSmoothLawSPtr, RelationSPtr);
   /** constructor with a set of data (only one DS in the Interaction)
    *  \param string: the id of this Interaction
-   *  \param a DynamicalSystem*: the DS involved in the Interaction
+   *  \param a SP::DynamicalSystem: the DS involved in the Interaction
    *  \param int : the number of this Interaction
    *  \param int : the value of interactionSize
    *  \param NonSmoothLaw* : a pointer to the non smooth law
    *  \param Relation* : a pointer to the Relation
    */
-  Interaction(const std::string&, DynamicalSystem*, int, int, NonSmoothLawSPtr, Relation*);
+  Interaction(const std::string&, SP::DynamicalSystem, int, int, NonSmoothLawSPtr, RelationSPtr);
 
   /** constructor with a set of data - Note: no id.
    *  \param a DynamicalSystemsSet: the set of DS involved in the Interaction
@@ -186,7 +169,7 @@ public:
    *  \param NonSmoothLaw* : a pointer to the non smooth law
    *  \param Relation* : a pointer to the Relation
    */
-  Interaction(DynamicalSystemsSet&, int, int, NonSmoothLawSPtr, Relation*);
+  Interaction(DynamicalSystemsSet&, int, int, NonSmoothLawSPtr, RelationSPtr);
 
   /** constructor with a set of data
    *  \param string: the id of this Interaction
@@ -196,7 +179,7 @@ public:
    *  \param NonSmoothLaw* : a pointer to the non smooth law
    *  \param Relation* : a pointer to the Relation
    */
-  Interaction(const std::string&, DynamicalSystemsSet&, int, int, NonSmoothLawSPtr, Relation*);
+  Interaction(const std::string&, DynamicalSystemsSet&, int, int, NonSmoothLawSPtr, RelationSPtr);
 
   /** destructor
    */
@@ -309,7 +292,7 @@ public:
   /** get y[i], derivative number i of output
   *  \return pointer on a SiconosVector
   */
-  inline SiconosVector* getYPtr(const unsigned int i) const
+  inline SiconosVectorSPtr getYPtr(const unsigned int i) const
   {
     return y[i];
   }
@@ -330,9 +313,9 @@ public:
   void setY(const unsigned int , const BlockVector&);
 
   /** set y[i] to pointer newPtr
-  *  \param a SiconosVector * and an unsigned int
+  *  \param a SP::SiconosVector  and an unsigned int
   */
-  void setYPtr(const unsigned int , SiconosVector *newPtr);
+  void setYPtr(const unsigned int , SiconosVectorSPtr newPtr);
 
   // -- yOld --
 
@@ -355,7 +338,7 @@ public:
   /** get yOld[i], derivative number i of output
   *  \return pointer on a SiconosVector
   */
-  inline SiconosVector* getYOldPtr(const unsigned int i) const
+  inline SiconosVectorSPtr getYOldPtr(const unsigned int i) const
   {
     return yOld[i];
   }
@@ -376,9 +359,9 @@ public:
   void setYOld(const unsigned int , const BlockVector&);
 
   /** set yOld[i] to pointer newPtr
-  *  \param a SiconosVector * and an unsigned int
+  *  \param a SP::SiconosVector  and an unsigned int
   */
-  void setYOldPtr(const unsigned int , SiconosVector *newPtr);
+  void setYOldPtr(const unsigned int , SiconosVectorSPtr newPtr);
 
   // -- lambda --
 
@@ -401,7 +384,7 @@ public:
   /** get lambda[i], derivative number i of input
   *  \return pointer on a SiconosVector
   */
-  inline SiconosVector* getLambdaPtr(const unsigned int i) const
+  inline SiconosVectorSPtr getLambdaPtr(const unsigned int i) const
   {
     return lambda[i];
   }
@@ -422,9 +405,9 @@ public:
   void setLambda(const unsigned int , const BlockVector&);
 
   /** set lambda[i] to pointer newPtr
-  *  \param a SiconosVector * and an unsigned int
+  *  \param a SP::SiconosVector  and an unsigned int
   */
-  void setLambdaPtr(const unsigned int , SiconosVector *newPtr);
+  void setLambdaPtr(const unsigned int , SiconosVectorSPtr newPtr);
 
   // -- lambdaOld --
 
@@ -447,7 +430,7 @@ public:
   /** get lambdaOld[i], derivative number i of input
   *  \return pointer on a SiconosVector
   */
-  inline SiconosVector* getLambdaOldPtr(const unsigned int i) const
+  inline SiconosVectorSPtr getLambdaOldPtr(const unsigned int i) const
   {
     return lambdaOld[i];
   }
@@ -468,13 +451,14 @@ public:
   void setLambdaOld(const unsigned int , const BlockVector&);
 
   /** set lambdaOld[i] to pointer newPtr
-  *  \param a SiconosVector * and an unsigned int
+  *  \param a SP::SiconosVector  and an unsigned int
   */
-  void setLambdaOldPtr(const unsigned int , SiconosVector *newPtr);
+  void setLambdaOldPtr(const unsigned int , SiconosVectorSPtr newPtr);
 
   /** gets an iterator to the first element of the involvedDS set.
    *  \return a DSIterator.
    */
+
   inline DSIterator dynamicalSystemsBegin()
   {
     return involvedDS->begin();
@@ -507,7 +491,7 @@ public:
   /** get a pointer to the DynamicalSystems of this Interaction
    *  \return a DynamicalSystemsSet*
    */
-  inline DynamicalSystemsSet * getDynamicalSystemsPtr()
+  inline DynamicalSystemsSetSPtr getDynamicalSystemsPtr()
   {
     return involvedDS;
   }
@@ -521,7 +505,7 @@ public:
   *  \param the identification number of the wanted DynamicalSystem
   *  \return a pointer on Dynamical System
   */
-  DynamicalSystem* getDynamicalSystemPtr(int);
+  SP::DynamicalSystem getDynamicalSystemPtr(int);
 
   /** get a specific DynamicalSystem. Out of date function?
    *  \param the identification number of the wanted DynamicalSystem
@@ -532,7 +516,7 @@ public:
   /** get the Relation of this Interaction
   *  \return a pointer on this Relation
   */
-  inline Relation* getRelationPtr() const
+  inline RelationSPtr getRelationPtr() const
   {
     return relation;
   }
@@ -540,7 +524,7 @@ public:
   /** set the Relation of this Interaction
   *  \param the relation* to set
   */
-  void setRelationPtr(Relation* newRelation) ;
+  void setRelationPtr(RelationSPtr newRelation) ;
 
   /** get the NonSmoothLaw of this Interaction
   *  \return a pointer on this NonSmoothLaw
@@ -556,22 +540,22 @@ public:
   void setNonSmoothLawPtr(NonSmoothLawSPtr newNslaw) ;
 
   /** get the NonSmoothDynamicalSystem that contains the current Interaction
-  *  \return NonSmoothDynamicalSystem*
+  *  \return SP::NonSmoothDynamicalSystem
   */
-  inline NonSmoothDynamicalSystem* getNonSmoothDynamicalSystemPtr() const
+  inline SP::NonSmoothDynamicalSystem getNonSmoothDynamicalSystemPtr() const
   {
     return NSDS;
   }
 
   /** set the NonSmoothDynamicalSystem that contains the current Interaction
-  *  \param NonSmoothDynamicalSystem*
+  *  \param SP::NonSmoothDynamicalSystem
   */
-  inline void setNonSmoothDynamicalSystemPtr(NonSmoothDynamicalSystem *newNsds)
+  inline void setNonSmoothDynamicalSystemPtr(boost::shared_ptr<NonSmoothDynamicalSystem> newNsds)
   {
     NSDS = newNsds;
   }
 
-  /** function used to sort Interaction in SiconosSet<Interaction*>
+  /** function used to sort Interaction in SiconosSet<SP::Interaction>
    *  \return an int
    */
   inline double* const getSort() const
@@ -610,7 +594,7 @@ public:
   /** get the InteractionXML* of the Interaction
   *  \return InteractionXML* : the pointer on the InteractionXML
   */
-  inline InteractionXML* getInteractionXMLPtr() const
+  inline InteractionXMLSPtr getInteractionXMLPtr() const
   {
     return interactionxml;
   }
@@ -618,7 +602,7 @@ public:
   /** set the InteractionXML* of the Interaction
   *  \param InteractionXML* :  the pointer to set
   */
-  inline void setInteractionXMLPtr(InteractionXML* interxml)
+  inline void setInteractionXMLPtr(boost::shared_ptr<InteractionXML> interxml)
   {
     interactionxml = interxml;
   }

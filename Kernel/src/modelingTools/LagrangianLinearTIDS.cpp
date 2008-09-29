@@ -23,55 +23,54 @@
 using namespace std;
 
 // --- Default (private) constructor ---
-LagrangianLinearTIDS::LagrangianLinearTIDS(): LagrangianDS(), K(NULL), C(NULL)
+LagrangianLinearTIDS::LagrangianLinearTIDS(): LagrangianDS()
+#ifndef WithSmartPtr
+  , K(NULL), C(NULL)
+#endif
+
 {
+#ifndef WithSmartPtr
   isAllocatedIn["C"] = false;
   isAllocatedIn["K"] = false;
+#endif
   DSType = LLTIDS;
 }
 
 // --- Constructor from an xml file (newNsds is optional) ---
-LagrangianLinearTIDS::LagrangianLinearTIDS(DynamicalSystemXML * dsXML,  NonSmoothDynamicalSystem* newNsds):
-  LagrangianDS(dsXML, newNsds), K(NULL), C(NULL)
+LagrangianLinearTIDS::LagrangianLinearTIDS(DynamicalSystemXMLSPtr dsXML,  SP::NonSmoothDynamicalSystem newNsds):
+  LagrangianDS(dsXML, newNsds)
 {
-  LagrangianLinearTIDSXML* lltidsxml = static_cast <LagrangianLinearTIDSXML*>(dsxml);
+  LagrangianLinearTIDSXMLSPtr lltidsxml = boost::static_pointer_cast <LagrangianLinearTIDSXML>(dsxml);
 
   // If Fint or NNL is given: ignored.
   if (lltidsxml->hasFInt() ||  lltidsxml->hasNNL())
     cout << "!!!!! Warning : LagrangianLinearTIDS: xml constructor, Fint or NNL input will be ignored in xml file." << endl;
 
   // K and C
+
   if (lltidsxml->hasK())
   {
-    K = new SimpleMatrix(lltidsxml->getK());
-    isAllocatedIn["K"] = true;
+    K.reset(new SimpleMatrix(lltidsxml->getK()));
   }
-  else isAllocatedIn["K"] = false;
   if (lltidsxml->hasC())
   {
-    C = new SimpleMatrix(lltidsxml->getC());
-    isAllocatedIn["C"] = true;
+    C.reset(new SimpleMatrix(lltidsxml->getC()));
   }
-  else isAllocatedIn["C"] = false;
-
 }
 
 // --- Constructor from a set of data - Mass, K and C ---
 LagrangianLinearTIDS::LagrangianLinearTIDS(int newNumber, const SimpleVector& newQ0, const SimpleVector& newVelocity0,
     const SiconosMatrix& newMass, const SiconosMatrix& newK, const SiconosMatrix& newC):
-  LagrangianDS(newNumber, newQ0, newVelocity0, newMass), K(NULL), C(NULL)
+  LagrangianDS(newNumber, newQ0, newVelocity0, newMass)
 {
-  if (newK.size(0) != ndof || newK.size(1) != ndof)
-    RuntimeException::selfThrow("LagrangianLinearTIDS - constructor from data, inconsistent size between K and ndof");
+  assert((newK.size(0) == ndof && newK.size(1) == ndof) &&
+         "LagrangianLinearTIDS - constructor from data, inconsistent size between K and ndof");
 
-  if (newC.size(0) != ndof || newC.size(1) != ndof)
-    RuntimeException::selfThrow("LagrangianLinearTIDS - constructor from data, inconsistent size between C and ndof");
+  assert((newC.size(0) == ndof && newC.size(1) == ndof) &&
+         "LagrangianLinearTIDS - constructor from data, inconsistent size between C and ndof");
 
-  K = new SimpleMatrix(newK);
-  isAllocatedIn["K"] = true;
-
-  C = new SimpleMatrix(newC);
-  isAllocatedIn["C"] = true;
+  K.reset(new SimpleMatrix(newK));
+  C.reset(new SimpleMatrix(newC));
 
   DSType = LLTIDS;
 }
@@ -79,19 +78,14 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(int newNumber, const SimpleVector& ne
 // --- Constructor from a set of data - Mass, no K and no C ---
 LagrangianLinearTIDS::LagrangianLinearTIDS(int newNumber, const SimpleVector& newQ0, const SimpleVector& newVelocity0,
     const SiconosMatrix& newMass):
-  LagrangianDS(newNumber, newQ0, newVelocity0, newMass), K(NULL), C(NULL)
+  LagrangianDS(newNumber, newQ0, newVelocity0, newMass)
 {
   DSType = LLTIDS;
-  isAllocatedIn["K"] = false;
-  isAllocatedIn["C"] = false;
+
 }
 
 LagrangianLinearTIDS::~LagrangianLinearTIDS()
 {
-  if (isAllocatedIn["K"]) delete K;
-  K = NULL;
-  if (isAllocatedIn["C"]) delete C;
-  C = NULL;
 }
 
 
@@ -106,14 +100,14 @@ bool LagrangianLinearTIDS::checkDynamicalSystem()
   }
 
   // q0 and velocity0 != NULL
-  if (q0 == NULL || velocity0 == NULL)
+  if (! q0 || ! velocity0)
   {
     RuntimeException::selfThrow("LagrangianLinearTIDS::checkDynamicalSystem - initial conditions are badly set.");
     output = false;
   }
 
   // Mass
-  if (mass == NULL)
+  if (! mass)
   {
     RuntimeException::selfThrow("LagrangianLinearTIDS::checkDynamicalSystem - Mass is not set.");
     output = false;
@@ -145,35 +139,62 @@ bool LagrangianLinearTIDS::checkDynamicalSystem()
 void LagrangianLinearTIDS::initRhs(double time)
 {
   // Copy of Mass into workMatrix for LU-factorization.
+
+#ifndef WithSmartPtr
   workMatrix["invMass"] = new SimpleMatrix(*mass);
+#else
+  workMatrix["invMass"].reset(new SimpleMatrix(*mass));
+#endif
 
   // compute x[1] (and thus fExt if required)
   computeRhs(time);
 
+#ifndef WithSmartPtr
   workMatrix["zero-matrix"] = new SimpleMatrix(ndof, ndof, ZERO);
   workMatrix["Id-matrix"] = new SimpleMatrix(ndof, ndof, IDENTITY);
+#else
+  workMatrix["zero-matrix"].reset(new SimpleMatrix(ndof, ndof, ZERO));
+  workMatrix["Id-matrix"].reset(new SimpleMatrix(ndof, ndof, IDENTITY));
+#endif
+
   // jacobianXRhs
-  if (K != NULL)
+  if (K)
   {
     //  bloc10 of jacobianX is solution of Mass*Bloc10 = K
+
+#ifndef WithSmartPtr
     workMatrix["jacobianXBloc10"] = new SimpleMatrix(-1 * *K);
     isAllocatedIn["jXb10"] = true;
+#else
+    workMatrix["jacobianXBloc10"].reset(new SimpleMatrix(-1 * *K));
+#endif
+
     workMatrix["invMass"]->PLUForwardBackwardInPlace(*workMatrix["jacobianXBloc10"]);
   }
   else
     workMatrix["jacobianXBloc10"] = workMatrix["zero-matrix"] ;
-  if (C != NULL)
+  if (C)
   {
     //  bloc11 of jacobianX is solution of Mass*Bloc11 = C
+
+#ifndef WithSmartPtr
     workMatrix["jacobianXBloc11"] = new SimpleMatrix(-1 * *C);
     isAllocatedIn["jXb11"] = true;
+#else
+    workMatrix["jacobianXBloc11"].reset(new SimpleMatrix(-1 * *C));
+#endif
+
     workMatrix["invMass"]->PLUForwardBackwardInPlace(*workMatrix["jacobianXBloc11"]);
   }
   else
     workMatrix["jacobianXBloc11"] = workMatrix["zero-matrix"] ;
 
+#ifndef WithSmartPtr
   jacobianXRhs = new BlockMatrix(workMatrix["zero-matrix"], workMatrix["Id-matrix"], workMatrix["jacobianXBloc10"], workMatrix["jacobianXBloc11"]);
   isAllocatedIn["jacobianXRhs"] = true ;
+#else
+  jacobianXRhs.reset(new BlockMatrix(workMatrix["zero-matrix"], workMatrix["Id-matrix"], workMatrix["jacobianXBloc10"], workMatrix["jacobianXBloc11"]));
+#endif
 }
 
 void LagrangianLinearTIDS::initialize(const string& simulationType, double time, unsigned int sizeOfMemory)
@@ -186,10 +207,16 @@ void LagrangianLinearTIDS::initialize(const string& simulationType, double time,
   *q[1] = *velocity0;
 
   // If z is NULL (ie has not been set), we initialize it with a null vector of size 1, since z is required in plug-in functions call.
-  if (z == NULL)
+  if (! z)
   {
+
+#ifndef WithSmartPtr
     z = new SimpleVector(1);
     isAllocatedIn["z"] = true;
+#else
+    z.reset(new SimpleVector(1));
+#endif
+
   }
 
   // Set variables of top-class DynamicalSystem
@@ -210,23 +237,34 @@ void LagrangianLinearTIDS::setK(const SiconosMatrix& newValue)
   if (newValue.size(0) != ndof || newValue.size(1) != ndof)
     RuntimeException::selfThrow("LagrangianLinearTIDS - setK: inconsistent input matrix size ");
 
-  if (K == NULL)
+  if (!K)
   {
+
+#ifndef WithSmartPtr
     K = new SimpleMatrix(newValue);
     isAllocatedIn["K"] = true;
+#else
+    K.reset(new SimpleMatrix(newValue));
+#endif
+
   }
   else
     *K = newValue;
 }
 
-void LagrangianLinearTIDS::setKPtr(SiconosMatrix *newPtr)
+void LagrangianLinearTIDS::setKPtr(SiconosMatrixSPtr newPtr)
 {
   if (newPtr->size(0) != ndof || newPtr->size(1) != ndof)
     RuntimeException::selfThrow("LagrangianLinearTIDS - setKPtr: inconsistent input matrix size ");
 
+#ifndef WithSmartPtr
   if (isAllocatedIn["K"]) delete K;
   K = newPtr;
   isAllocatedIn["K"] = false;
+#else
+  K = newPtr;
+#endif
+
 }
 
 void LagrangianLinearTIDS::setC(const SiconosMatrix& newValue)
@@ -234,23 +272,34 @@ void LagrangianLinearTIDS::setC(const SiconosMatrix& newValue)
   if (newValue.size(0) != ndof || newValue.size(1) != ndof)
     RuntimeException::selfThrow("LagrangianLinearTIDS - setC: inconsistent input matrix size ");
 
-  if (C == NULL)
+  if (!C)
   {
+
+#ifndef WithSmartPtr
     C = new SimpleMatrix(newValue);
     isAllocatedIn["C"] = true;
+#else
+    C.reset(new SimpleMatrix(newValue));
+#endif
+
   }
   else
     *C = newValue;
 }
 
-void LagrangianLinearTIDS::setCPtr(SiconosMatrix *newPtr)
+void LagrangianLinearTIDS::setCPtr(SiconosMatrixSPtr newPtr)
 {
   if (newPtr->size(0) != ndof || newPtr->size(1) != ndof)
     RuntimeException::selfThrow("LagrangianLinearTIDS - setCPtr: inconsistent input matrix size ");
 
+#ifndef WithSmartPtr
   if (isAllocatedIn["C"]) delete C;
   C = newPtr;
   isAllocatedIn["C"] = false;
+#else
+  C = newPtr;
+#endif
+
 }
 
 void LagrangianLinearTIDS::display() const
@@ -258,10 +307,10 @@ void LagrangianLinearTIDS::display() const
   LagrangianDS::display();
   cout << "===== Lagrangian Linear Time Invariant System display ===== " << endl;
   cout << "- Stiffness Matrix K : " << endl;
-  if (K != NULL) K->display();
+  if (K) K->display();
   else cout << "-> NULL" << endl;
   cout << "- Viscosity Matrix C : " << endl;
-  if (C != NULL) C->display();
+  if (C) C->display();
   else cout << "-> NULL" << endl;
   cout << "=========================================================== " << endl;
 }
@@ -272,16 +321,16 @@ void LagrangianLinearTIDS::computeRhs(double time, bool)
 
   *q[2] = *p[2]; // Warning: p update is done in Interactions/Relations
 
-  if (fExt != NULL)
+  if (fExt)
   {
     computeFExt(time);
     *q[2] += *fExt; // This supposes that fExt is up to date!!
   }
 
-  if (K != NULL)
+  if (K)
     *q[2] -= prod(*K, *q[0]);
 
-  if (C != NULL)
+  if (C)
     *q[2] -= prod(*C, *q[1]);
 
   // Then we search for q[2], such as Mass*q[2] = fExt - Cq[1] - Kq[0] + p.
@@ -296,10 +345,10 @@ void LagrangianLinearTIDS::computeJacobianXRhs(double time, bool)
 
 void LagrangianLinearTIDS::saveSpecificDataToXML()
 {
-  if (dsxml == NULL)
-    RuntimeException::selfThrow("LagrangianLinearTIDS::saveDSToXML - object DynamicalSystemXML does not exist");
+  assert(dsxml &&
+         "LagrangianLinearTIDS::saveDSToXML - object DynamicalSystemXML does not exist");
 
-  LagrangianDSXML* lgptr = static_cast <LagrangianDSXML*>(dsxml);
+  LagrangianDSXMLSPtr lgptr = boost::static_pointer_cast <LagrangianDSXML>(dsxml);
   lgptr->setMassMatrix(*mass);
   lgptr->setQ(*q[0]);
   lgptr->setQ0(*q0);
@@ -320,8 +369,8 @@ void LagrangianLinearTIDS::saveSpecificDataToXML()
   {
     lgptr->setFExtPlugin(pluginNames["fExt"]);
   }
-  (static_cast <LagrangianLinearTIDSXML*>(dsxml))->setK(*K);
-  (static_cast <LagrangianLinearTIDSXML*>(dsxml))->setC(*C);
+  (boost::static_pointer_cast <LagrangianLinearTIDSXML>(dsxml))->setK(*K);
+  (boost::static_pointer_cast <LagrangianLinearTIDSXML>(dsxml))->setC(*C);
 }
 
 LagrangianLinearTIDS* LagrangianLinearTIDS::convert(DynamicalSystem* ds)

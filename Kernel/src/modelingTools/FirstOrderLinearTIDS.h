@@ -72,10 +72,11 @@ public:
 
   /** xml constructor
    *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
-   *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
+   *  \param NonSmoothSP::DynamicalSystem (optional): the NSDS that owns this ds
    *  \exception RuntimeException
    */
-  FirstOrderLinearTIDS(DynamicalSystemXML *, NonSmoothDynamicalSystem* = NULL);
+  FirstOrderLinearTIDS(DynamicalSystemXMLSPtr,
+                       SP::NonSmoothDynamicalSystem = SP::NonSmoothDynamicalSystem());
 
   /** constructor from a set of data
    *  \param int : reference number of this DynamicalSystem
@@ -121,7 +122,7 @@ public:
   void display() const;
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param DynamicalSystem* : the system which must be converted
+   *  \param SP::DynamicalSystem : the system which must be converted
    * \return a pointer on the dynamical system if it is of the right type, NULL otherwise
    */
   static FirstOrderLinearTIDS* convert(DynamicalSystem* ds);

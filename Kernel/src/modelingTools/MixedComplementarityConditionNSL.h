@@ -58,7 +58,7 @@ public:
   /** constructor with XML object of the parent class NonSmoothLaw
   *  \param NonSmoothLawXML* : the XML object corresponding
   */
-  MixedComplementarityConditionNSL(NonSmoothLawXML*);
+  MixedComplementarityConditionNSL(NonSmoothLawXMLSPtr);
 
   /** Destructor */
   ~MixedComplementarityConditionNSL();

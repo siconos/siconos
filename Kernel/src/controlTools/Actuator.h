@@ -24,6 +24,7 @@
 #ifndef Actuator_H
 #define Actuator_H
 
+#include "SiconosPointers.h"
 #include"DynamicalSystemsSet.h"
 #include"EventsManager.h"
 #include<string>
@@ -42,6 +43,8 @@ typedef Sensors::iterator SensorsIterator;
 
 /** Return-type for Actuators insertion. */
 typedef std::pair<SensorsIterator, bool> SensorsCheckInsert;
+
+TYPEDEF_SPTR(Sensors);
 
 /** Actuators Base Class
 
@@ -87,19 +90,19 @@ protected:
   std::string id;
 
   /** Sensors linked to this actuator */
-  Sensors * allSensors;
+  SP::Sensors  allSensors;
 
   /** Dynamical Systems list: all the systems on which this actuator may act. */
-  DynamicalSystemsSet * allDS;
+  SP::DynamicalSystemsSet allDS;
 
   /** The model linked to this actuator */
-  Model * model;
+  SP::Model  model;
 
   /** A time discretisation scheme */
-  TimeDiscretisation *timeDiscretisation;
+  SP::TimeDiscretisation timeDiscretisation;
 
   /** The event which will linked this actuator to the eventsManager of the simulation */
-  Event * eActuator;
+  SP::Event eActuator;
 
   /** default constructor
    */
@@ -116,14 +119,14 @@ public:
    * \param a string, the type of the Actuator, which corresponds to the class type
    * \param a TimeDiscretisation*, (linked to a model).
    */
-  Actuator(int, TimeDiscretisation*);
+  Actuator(int, SP::TimeDiscretisation);
 
   /** Constructor with a TimeDiscretisation.
    * \param a string, the type of the Actuator, which corresponds to the class type
    * \param a TimeDiscretisation*, (linked to a model).
    * \param a Sensor linked to this Actuator.
    */
-  Actuator(int, TimeDiscretisation*, const Sensors&);
+  Actuator(int, SP::TimeDiscretisation, const Sensors&);
 
   /** destructor
    */
@@ -156,7 +159,7 @@ public:
   /** get all the Sensors linked to this actuator.
    *  \return a Sensors object (list of Sensor)
    */
-  inline const Sensors* getSensors() const
+  inline const SP::Sensors getSensors() const
   {
     return allSensors;
   };
@@ -169,12 +172,12 @@ public:
   /** add a Sensor in the actuator.
    *  \param a pointer to Sensor
    */
-  void addSensorPtr(Sensor*);
+  void addSensorPtr(SP::Sensor);
 
   /** get all the Dynamical Systems linked to this actuator.
    *  \return a DynamicalSystemsSet.
    */
-  inline const DynamicalSystemsSet * getDynamicalSystems() const
+  inline const SP::DynamicalSystemsSet getDynamicalSystems() const
   {
     return allDS;
   };
@@ -187,12 +190,12 @@ public:
   /** add a DynamicalSystem into the actuator.
    *  \param a pointer to DynamicalSystem
    */
-  void addDynamicalSystemPtr(DynamicalSystem*);
+  void addDynamicalSystemPtr(SP::DynamicalSystem);
 
   /** get the Model linked to this Actuator
    *  \return a pointer to Model
    */
-  inline Model* getModelPtr() const
+  inline SP::Model getModelPtr() const
   {
     return model;
   };
@@ -200,7 +203,7 @@ public:
   /** get the TimeDiscretisation linked to this Actuator
   *  \return a pointer to TimeDiscretisation.
   */
-  inline TimeDiscretisation* getTimeDiscretisationPtr() const
+  inline SP::TimeDiscretisation getTimeDiscretisationPtr() const
   {
     return timeDiscretisation;
   };
@@ -208,7 +211,7 @@ public:
   /** get the Event associated with this actuator
    *  \return an Event*
    */
-  inline Event* getEventPtr() const
+  inline SP::Event getEventPtr() const
   {
     return eActuator;
   };

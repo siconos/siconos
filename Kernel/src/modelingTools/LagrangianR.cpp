@@ -36,34 +36,47 @@ LagrangianR::LagrangianR(RELATIONSUBTYPES lagType):
   Relation(Lagrangian, lagType), LagrangianRelationType(lagType)
 {}
 
-LagrangianR::LagrangianR(RelationXML* relxml, RELATIONSUBTYPES newSubType): Relation(relxml, Lagrangian, newSubType), LagrangianRelationType()
+LagrangianR::LagrangianR(RelationXMLSPtr relxml, RELATIONSUBTYPES newSubType): Relation(relxml, Lagrangian, newSubType), LagrangianRelationType()
 {}
 
-void LagrangianR::readGInXML(LagrangianRXML * LRxml, unsigned int i)
+void LagrangianR::readGInXML(LagrangianRXMLSPtr LRxml, unsigned int i)
 {
   string name = "G" + toString<unsigned int>(i);
   if (LRxml->isGPlugin(i))
   {
     pluginNames[name] = LRxml->getGPlugin(i);
     setComputeGFunction(cShared.getPluginName(pluginNames[name]), cShared.getPluginFunctionName(pluginNames[name]), i);
+
+#ifndef WithSmartPtr
     isAllocatedIn[name] = false;
+#endif
   }
   else
   {
+
+#ifndef WithSmartPtr
     G[i] = new SimpleMatrix(LRxml->getGMatrix(i));
     isAllocatedIn[name] = true   ;
+#else
+    G[i].reset(new SimpleMatrix(LRxml->getGMatrix(i)));
+#endif
+
     isPlugged[name] = false;
   }
 }
 
 LagrangianR::~LagrangianR()
 {
+
+#ifndef WithSmartPtr
   string name;
   for (unsigned int i = 0; i < G.size(); ++i)
   {
     name = "G" + toString<unsigned int>(i);
     if (isAllocatedIn[name]) delete G[i];
   }
+#endif
+
   G.clear();
 }
 
@@ -77,13 +90,14 @@ void LagrangianR::initialize()
   initComponents();
 
   DSIterator it;
-  data["q0"] = new BlockVector(); // displacement
-  data["q1"] = new BlockVector(); // velocity
-  data["q2"] = new BlockVector(); // acceleration
-  data["z"] = new BlockVector(); // z vector
-  data["p1"] = new BlockVector();
-  data["p2"] = new BlockVector();
-  LagrangianDS* lds;
+  data["q0"].reset(new BlockVector()); // displacement
+  data["q1"].reset(new BlockVector()); // velocity
+  data["q2"].reset(new BlockVector()); // acceleration
+  data["z"].reset(new BlockVector()); // z vector
+  data["p0"].reset(new BlockVector());
+  data["p1"].reset(new BlockVector());
+  data["p2"].reset(new BlockVector());
+  LagrangianDSSPtr lds;
   DSTYPES type;
   for (it = interaction->dynamicalSystemsBegin(); it != interaction->dynamicalSystemsEnd(); ++it)
   {
@@ -93,11 +107,12 @@ void LagrangianR::initialize()
       RuntimeException::selfThrow("LagrangianR1::initialize failed, not implemented for dynamical system of type: " + type);
 
     // convert vDS systems into LagrangianDS and put them in vLDS
-    lds = static_cast<LagrangianDS*>(*it);
+    lds = boost::static_pointer_cast<LagrangianDS> (*it);
     // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
     data["q0"]->insertPtr(lds->getQPtr());
     data["q1"]->insertPtr(lds->getVelocityPtr());
     data["q2"]->insertPtr(lds->getAccelerationPtr());
+    data["p0"]->insertPtr(lds->getPPtr(1));
     data["p1"]->insertPtr(lds->getPPtr(1));
     data["p2"]->insertPtr(lds->getPPtr(2));
     data["z"]->insertPtr(lds->getZPtr());
@@ -109,17 +124,30 @@ void LagrangianR::initComponents()
   unsigned int sizeY = interaction->getSizeOfY();
   unsigned int sizeQ = interaction->getSizeOfDS();
 
-  if (G[0] == NULL)
+  if (! G[0])
   {
+
+#ifndef WithSmartPtr
     G[0] = new SimpleMatrix(sizeY, sizeQ);
     isAllocatedIn["G0"] = true;
+#else
+    G[0].reset(new SimpleMatrix(sizeY, sizeQ));
+#endif
+
   }
   else // Check if dimension are consistents with interaction.
     if (sizeY != G[0]->size(0) || sizeQ != G[0]->size(1))
       RuntimeException::selfThrow("LagrangianR:: initComponents failed. Inconsistent sizes between Interaction and Relation matrices.");
+
+#ifndef WithSmartPtr
   workX = new SimpleVector(interaction->getSizeOfDS());
   workZ = new SimpleVector(interaction->getSizeZ());
   workY = new SimpleVector(sizeY);
+#else
+  workX.reset(new SimpleVector(interaction->getSizeOfDS()));
+  workZ.reset(new SimpleVector(interaction->getSizeZ()));
+  workY.reset(new SimpleVector(sizeY));
+#endif
 }
 
 void LagrangianR::setGVector(const VectorOfMatrices& newVector)
@@ -128,8 +156,11 @@ void LagrangianR::setGVector(const VectorOfMatrices& newVector)
   if (newVector.size() != nG)
     RuntimeException::selfThrow("LagrangianR::setGVector(newG) failed. Inconsistent sizes between newG and the problem type. You might have forget to call setLagrangianRelationType before?");
 
+
   // If G[i] has been allocated before => delete
   string name;
+
+#ifndef WithSmartPtr
   for (unsigned int i = 0; i < nG; i++)
   {
     name = "G" + toString<unsigned int>(i);
@@ -138,6 +169,7 @@ void LagrangianR::setGVector(const VectorOfMatrices& newVector)
     isAllocatedIn[name] = false;
     isPlugged[name] = false;
   }
+#endif
 
   G.clear();
 
@@ -145,7 +177,11 @@ void LagrangianR::setGVector(const VectorOfMatrices& newVector)
   {
     G[i] = newVector[i]; // Warning: links to pointers, no copy!!
     name = "G" + toString<unsigned int>(i);
+
+#ifndef WithSmartPtr
     isAllocatedIn[name] = false;
+#endif
+
     isPlugged[name] = false;
   }
 }
@@ -156,10 +192,16 @@ void LagrangianR::setG(const SiconosMatrix& newValue, unsigned int index)
     RuntimeException::selfThrow("LagrangianR:: setG(mat,index), index out of range. Maybe you do not call setLagrangianRelationType before?");
 
   string name = "G" + toString<unsigned int>(index);
-  if (G[index] == NULL)
+  if (! G[index])
   {
+
+#ifndef WithSmartPtr
     G[index] =  new SimpleMatrix(newValue);
     isAllocatedIn[name] = true;
+#else
+    G[index].reset(new SimpleMatrix(newValue));
+#endif
+
   }
   else
     *(G[index]) = newValue;
@@ -167,15 +209,20 @@ void LagrangianR::setG(const SiconosMatrix& newValue, unsigned int index)
   isPlugged[name] = false;
 }
 
-void LagrangianR::setGPtr(SiconosMatrix *newPtr, unsigned int  index)
+void LagrangianR::setGPtr(SiconosMatrixSPtr newPtr, unsigned int  index)
 {
   if (index >= G.size())
     RuntimeException::selfThrow("LagrangianR:: setG(mat,index), index out of range. Maybe you do not call setLagrangianRelationType before?");
 
   string name = "G" + toString<unsigned int>(index);
+
+#ifndef WithSmartPtr
   if (isAllocatedIn[name]) delete G[index];
-  G[index] = newPtr;
   isAllocatedIn[name] = false;
+#endif
+
+  G[index] = newPtr;
+
   isPlugged[name] = false;
 }
 

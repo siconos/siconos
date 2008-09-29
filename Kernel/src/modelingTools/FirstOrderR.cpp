@@ -31,24 +31,32 @@ FirstOrderR::FirstOrderR(RELATIONSUBTYPES newType): Relation(FirstOrder, newType
 {}
 
 // xml constructor
-FirstOrderR::FirstOrderR(RelationXML* relxml, RELATIONSUBTYPES newType):
+FirstOrderR::FirstOrderR(RelationXMLSPtr relxml, RELATIONSUBTYPES newType):
   Relation(relxml, FirstOrder, newType), firstOrderType(newType)
 {}
 
 FirstOrderR::~FirstOrderR()
 {
+#ifndef WithSmartPtr
   string name;
   for (unsigned int i = 0; i < jacobianH.size(); ++i)
   {
     name = "jacobianH" + toString<unsigned int>(i);
+
     if (isAllocatedIn[name]) delete jacobianH[i];
+
   }
+#endif
   jacobianH.clear();
+
+#ifndef WithSmartPtr
   for (unsigned int i = 0; i < jacobianG.size(); ++i)
   {
     name = "jacobianG" + toString<unsigned int>(i);
     if (isAllocatedIn[name]) delete jacobianG[i];
   }
+
+#endif
   jacobianG.clear();
 }
 
@@ -56,15 +64,15 @@ void FirstOrderR::initDSLinks()
 {
   // Get the DS concerned by the interaction of this relation
   DSIterator it;
-  data["x"] = new BlockVector(); // displacements
-  data["z"] = new BlockVector();
-  data["r"] = new BlockVector();
+  data["x"].reset(new BlockVector()); // displacements
+  data["z"].reset(new BlockVector());
+  data["r"].reset(new BlockVector());
 
-  FirstOrderNonLinearDS* ds;
+  FirstOrderNonLinearDSSPtr ds;
   for (it = interaction->dynamicalSystemsBegin(); it != interaction->dynamicalSystemsEnd(); ++it)
   {
     // Put x/r ... of each DS into a block. (Pointers links, no copy!!)
-    ds = static_cast<FirstOrderNonLinearDS*>(*it);
+    ds = boost::static_pointer_cast<FirstOrderNonLinearDS> (*it);
     data["x"]->insertPtr(ds->getXPtr());
     data["z"]->insertPtr(ds->getZPtr());
     data["r"]->insertPtr(ds->getRPtr());
@@ -83,9 +91,16 @@ void FirstOrderR::initialize()
   // Update data member (links to DS variables)
   initDSLinks();
   // Initialize work vectors
+
+#ifndef WithSmartPtr
   workX = new SimpleVector(sizeX);
   workZ = new SimpleVector(sizeZ);
   workY = new SimpleVector(sizeY);
+#else
+  workX.reset(new SimpleVector(sizeX));
+  workZ.reset(new SimpleVector(sizeZ));
+  workY.reset(new SimpleVector(sizeY));
+#endif
 }
 
 void FirstOrderR::setJacobianHVector(const VectorOfMatrices& newVector)
@@ -94,8 +109,10 @@ void FirstOrderR::setJacobianHVector(const VectorOfMatrices& newVector)
   if (newVector.size() != nJH)
     RuntimeException::selfThrow("FirstOrderR::setJacobianHVector(newH) failed. Inconsistent sizes between newH and the problem type.");
 
-  // If jacobianH[i] has been allocated before => delete
   string name;
+
+#ifndef WithSmartPtr
+  // If jacobianH[i] has been allocated before => delete
   for (unsigned int i = 0; i < nJH; i++)
   {
     name = "jacobianH" + toString<unsigned int>(i);
@@ -104,6 +121,7 @@ void FirstOrderR::setJacobianHVector(const VectorOfMatrices& newVector)
     isAllocatedIn[name] = false;
     isPlugged[name] = false;
   }
+#endif
 
   jacobianH.clear();
 
@@ -111,7 +129,11 @@ void FirstOrderR::setJacobianHVector(const VectorOfMatrices& newVector)
   {
     jacobianH[i] = newVector[i]; // Warning: links to pointers, no copy!!
     name = "jacobianH" + toString<unsigned int>(i);
+
+#ifndef WithSmartPtr
     isAllocatedIn[name] = false;
+#endif
+
     isPlugged[name] = false;
   }
 }
@@ -122,10 +144,16 @@ void FirstOrderR::setJacobianH(const SiconosMatrix& newValue, unsigned int index
     RuntimeException::selfThrow("FirstOrderR:: setJacobianH(mat,index), index out of range.");
 
   string name = "jacobianH" + toString<unsigned int>(index);
-  if (jacobianH[index] == NULL)
+  if (! jacobianH[index])
   {
+
+#ifndef WithSmartPtr
     jacobianH[index] =  new SimpleMatrix(newValue);
     isAllocatedIn[name] = true;
+#else
+    jacobianH[index].reset(new SimpleMatrix(newValue));
+#endif
+
   }
   else
     *(jacobianH[index]) = newValue;
@@ -133,15 +161,19 @@ void FirstOrderR::setJacobianH(const SiconosMatrix& newValue, unsigned int index
   isPlugged[name] = false;
 }
 
-void FirstOrderR::setJacobianHPtr(SiconosMatrix *newPtr, unsigned int  index)
+void FirstOrderR::setJacobianHPtr(SiconosMatrixSPtr newPtr, unsigned int  index)
 {
   if (index >= jacobianH.size())
     RuntimeException::selfThrow("FirstOrderR:: setJacobianH(mat,index), index out of range.");
 
   string name = "jacobianH" + toString<unsigned int>(index);
+
+#ifndef WithSmartPtr
   if (isAllocatedIn[name]) delete jacobianH[index];
-  jacobianH[index] = newPtr;
   isAllocatedIn[name] = false;
+#endif
+  jacobianH[index] = newPtr;
+
   isPlugged[name] = false;
 }
 
@@ -151,8 +183,10 @@ void FirstOrderR::setJacobianGVector(const VectorOfMatrices& newVector)
   if (newVector.size() != nJG)
     RuntimeException::selfThrow("FirstOrderR::setJacobianGVector(newG) failed. Inconsistent sizes between newG and the problem type.");
 
-  // If jacobianG[i] has been allocated before => delete
   string name;
+
+#ifndef WithSmartPtr
+  // If jacobianG[i] has been allocated before => delete
   for (unsigned int i = 0; i < nJG; i++)
   {
     name = "jacobianG" + toString<unsigned int>(i);
@@ -161,6 +195,7 @@ void FirstOrderR::setJacobianGVector(const VectorOfMatrices& newVector)
     isAllocatedIn[name] = false;
     isPlugged[name] = false;
   }
+#endif
 
   jacobianG.clear();
 
@@ -168,7 +203,11 @@ void FirstOrderR::setJacobianGVector(const VectorOfMatrices& newVector)
   {
     jacobianG[i] = newVector[i]; // Warning: links to pointers, no copy!!
     name = "jacobianG" + toString<unsigned int>(i);
+
+#ifndef WithSmartPtr
     isAllocatedIn[name] = false;
+#endif
+
     isPlugged[name] = false;
   }
 }
@@ -179,10 +218,16 @@ void FirstOrderR::setJacobianG(const SiconosMatrix& newValue, unsigned int index
     RuntimeException::selfThrow("FirstOrderR:: setJacobianG(mat,index), index out of range.");
 
   string name = "jacobianG" + toString<unsigned int>(index);
-  if (jacobianG[index] == NULL)
+  if (! jacobianG[index])
   {
+
+#ifndef WithSmartPtr
     jacobianG[index] =  new SimpleMatrix(newValue);
     isAllocatedIn[name] = true;
+#else
+    jacobianG[index].reset(new SimpleMatrix(newValue));
+#endif
+
   }
   else
     *(jacobianG[index]) = newValue;
@@ -190,15 +235,19 @@ void FirstOrderR::setJacobianG(const SiconosMatrix& newValue, unsigned int index
   isPlugged[name] = false;
 }
 
-void FirstOrderR::setJacobianGPtr(SiconosMatrix *newPtr, unsigned int  index)
+void FirstOrderR::setJacobianGPtr(SiconosMatrixSPtr newPtr, unsigned int  index)
 {
   if (index >= jacobianG.size())
     RuntimeException::selfThrow("FirstOrderR:: setJacobianG(mat,index), index out of range.");
 
   string name = "jacobianG" + toString<unsigned int>(index);
+
+#ifndef WithSmartPtr
   if (isAllocatedIn[name]) delete jacobianG[index];
-  jacobianG[index] = newPtr;
   isAllocatedIn[name] = false;
+#endif
+  jacobianG[index] = newPtr;
+
   isPlugged[name] = false;
 }
 

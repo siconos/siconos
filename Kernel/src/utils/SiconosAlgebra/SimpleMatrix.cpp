@@ -17,9 +17,6 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-#include "SimpleMatrix.h"
-#include "SimpleVector.h"
-#include "ioMatrix.h"
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
 #include <boost/numeric/bindings/atlas/cblas1.hpp>
@@ -39,6 +36,14 @@ namespace lapack = boost::numeric::bindings::lapack;
 #include <boost/numeric/ublas/operation.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
 #include <boost/numeric/ublas/operation_sparse.hpp>
+
+#include "SimpleMatrix.h"
+#include "SimpleVector.h"
+#include "ioMatrix.h"
+
+
+
+
 
 
 // =================================================
@@ -755,7 +760,7 @@ void SimpleMatrix::setBlock(unsigned int row_min, unsigned int col_min, const Si
   }
 }
 
-void setBlock(const SiconosMatrix *  MIn, SiconosMatrix * MOut, const Index& dim, const Index& start)
+void setBlock(SPC::SiconosMatrix  MIn, SP::SiconosMatrix MOut, const Index& dim, const Index& start)
 {
   // To copy a subBlock of MIn into a subBlock of MOut.
   // dim[0], dim[1]: number of rows and columns of the sub-block
@@ -865,7 +870,7 @@ void setBlock(const SiconosMatrix *  MIn, SiconosMatrix * MOut, const Index& dim
       // Same process for other rows ...
 
       // The current considered block
-      SiconosMatrix *  currentBlock = MOut->getBlockPtr(blockStart0, blockStart1);
+      SP::SiconosMatrix   currentBlock = MOut->getBlockPtr(blockStart0, blockStart1);
 
       // dim of the subBlock of currentBlock to be set.
       Index subSize(2);
@@ -986,7 +991,7 @@ void setBlock(const SiconosMatrix *  MIn, SiconosMatrix * MOut, const Index& dim
       // Same process for other rows ...
 
       // The current considered block
-      const SiconosMatrix *  currentBlock = MIn->getBlockPtr(blockStart0, blockStart1);
+      SPC::SiconosMatrix  currentBlock = MIn->getBlockPtr(blockStart0, blockStart1);
 
       // dim of the subBlock of currentBlock to be set.
       Index subSize(2);
@@ -1345,7 +1350,7 @@ void SimpleMatrix::setCol(unsigned int r, const SiconosVector &vIn)
   resetLU();
 }
 
-void SimpleMatrix::getSubRow(unsigned int r, unsigned int pos, SiconosVector *vOut) const
+void SimpleMatrix::getSubRow(unsigned int r, unsigned int pos, SP::SiconosVector vOut) const
 {
   // Get row number r of current matrix, starting from element at position pos, and copy it into vOut.
   if (r >= dimRow)
@@ -1419,7 +1424,7 @@ void SimpleMatrix::getSubRow(unsigned int r, unsigned int pos, SiconosVector *vO
 
 }
 
-void SimpleMatrix::setSubRow(unsigned int r, unsigned int pos, SiconosVector *vIn)
+void SimpleMatrix::setSubRow(unsigned int r, unsigned int pos, SP::SiconosVector vIn)
 {
   // Set row number r, starting from element at position pos, of current matrix with vIn.
   unsigned int numV = vIn->getNum();
@@ -1469,7 +1474,7 @@ void SimpleMatrix::setSubRow(unsigned int r, unsigned int pos, SiconosVector *vI
 
 }
 
-void SimpleMatrix::getSubCol(unsigned int r, unsigned int pos, SiconosVector *vOut) const
+void SimpleMatrix::getSubCol(unsigned int r, unsigned int pos, SP::SiconosVector vOut) const
 {
   // Get col number r of current matrix, starting from element at position pos, and copy it into vOut.
   if (r >= dimCol)
@@ -1544,7 +1549,7 @@ void SimpleMatrix::getSubCol(unsigned int r, unsigned int pos, SiconosVector *vO
 
 }
 
-void SimpleMatrix::setSubCol(unsigned int r, unsigned int pos, SiconosVector *vIn)
+void SimpleMatrix::setSubCol(unsigned int r, unsigned int pos, SP::SiconosVector vIn)
 {
   // Set column number r, starting from element at position pos, of current matrix with vIn.
   unsigned int numV = vIn->getNum();
@@ -4228,7 +4233,7 @@ const SimpleMatrix pow(const SimpleMatrix& m, unsigned int power)
 // It is required to deal with block vectors of blocks ( of blocks ...).
 // It computes res = subA*x +res, subA being a submatrix of A (rows from startRow to startRow+sizeY and columns between startCol and startCol+sizeX).
 // If x is a block vector, it call the present function for all blocks.
-void private_addprod(const SiconosMatrix *A, unsigned int startRow, unsigned int startCol, const SiconosVector *x, SiconosVector* y)
+void private_addprod(SPC::SiconosMatrix A, unsigned int startRow, unsigned int startCol, SPC::SiconosVector x, SP::SiconosVector y)
 {
   if (A->isBlock())
     SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for block matrix.");
@@ -4281,7 +4286,7 @@ void private_addprod(const SiconosMatrix *A, unsigned int startRow, unsigned int
 }
 
 // x and y blocks
-void private_prod(const SiconosMatrix *A, unsigned int startRow, const SiconosVector *x, SiconosVector * y, bool init)
+void private_prod(SPC::SiconosMatrix A, unsigned int startRow, SPC::SiconosVector x, SP::SiconosVector y, bool init)
 {
 
   // Computes y = subA *x (or += if init = false), subA being a sub-matrix of A, between el. of index (row) startRow and startRow + sizeY
@@ -4306,7 +4311,7 @@ void private_prod(const SiconosMatrix *A, unsigned int startRow, const SiconosVe
 
 
 // With trans(A) ...
-void private_addprod(const SiconosVector *x, const SiconosMatrix *A, unsigned int startRow, unsigned int startCol, SiconosVector* y)
+void private_addprod(SPC::SiconosVector x, SPC::SiconosMatrix A, unsigned int startRow, unsigned int startCol, SP::SiconosVector y)
 {
   if (A->isBlock())
     SiconosMatrixException::selfThrow("private_addprod(x,A,start,y) error: not yet implemented for block matrix.");
@@ -4358,7 +4363,7 @@ void private_addprod(const SiconosVector *x, const SiconosMatrix *A, unsigned in
   }
 }
 
-void private_prod(const SiconosVector *x, const SiconosMatrix *A, unsigned int startCol, SiconosVector * y, bool init)
+void private_prod(SPC::SiconosVector x, SPC::SiconosMatrix A, unsigned int startCol, SP::SiconosVector  y, bool init)
 {
 
   // Computes y = subA *x (or += if init = false), subA being a sub-matrix of trans(A), between el. of A of index (col) startCol and startCol + sizeY
@@ -4381,7 +4386,7 @@ void private_prod(const SiconosVector *x, const SiconosMatrix *A, unsigned int s
   }
 }
 
-void private_addprod(double a, const SiconosMatrix *A, unsigned int startRow, unsigned int startCol, const SiconosVector *x, SiconosVector* y)
+void private_addprod(double a, SPC::SiconosMatrix A, unsigned int startRow, unsigned int startCol, SPC::SiconosVector x, SP::SiconosVector y)
 {
   if (A->isBlock())
     SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for block matrix.");
@@ -4433,7 +4438,7 @@ void private_addprod(double a, const SiconosMatrix *A, unsigned int startRow, un
   }
 }
 
-void private_prod(double a, const SiconosMatrix *A, unsigned int startRow, const SiconosVector *x, SiconosVector * y, bool init)
+void private_prod(double a, SPC::SiconosMatrix A, unsigned int startRow, SPC::SiconosVector x, SP::SiconosVector  y, bool init)
 {
 
   // Computes y = subA *x (or += if init = false), subA being a sub-matrix of A, between el. of index (row) startRow and startRow + sizeY
@@ -4514,7 +4519,7 @@ const SimpleVector prod(const SiconosMatrix& A, const SiconosVector& x)
 
       for (it = x.begin(); it != x.end(); ++it)
       {
-        private_addprod(&A, 0, start, *it, &res);
+        private_addprod(createSiconosMatrixSPtrConst(A), 0, start, *it, createSiconosVectorSPtr(res));
         start += (*it)->size();
       }
       return res;
@@ -4577,7 +4582,7 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
         ConstBlockVectIterator it;
         for (it = x.begin(); it != x.end(); ++it)
         {
-          private_addprod(&A, startRow, startCol, *it, &y);
+          private_addprod(createSiconosMatrixSPtrConst(A), startRow, startCol, *it, createSiconosVectorSPtr(y));
           startCol += (*it)->size();
         }
       }
@@ -4737,7 +4742,7 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
       // private_prod takes into account the fact that x and y[i] may be block vectors.
       for (it = y.begin(); it != y.end(); ++it)
       {
-        private_prod(&A, startRow, &x, *it, init);
+        private_prod(createSiconosMatrixSPtrConst(A), startRow, createSiconosVectorSPtrConst(x), *it, init);
         startRow += (*it)->size();
       }
     }
@@ -4812,7 +4817,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
       // Number of the subvector of x that handles element at position coord[5]
       unsigned int lastBlockNum = x.getNumVectorAtPos(coord[5]);
       std::vector<unsigned int> subCoord = coord;
-      const SiconosVector * tmp = x[firstBlockNum];
+      SPC::SiconosVector  tmp = x[firstBlockNum];
       unsigned int subSize =  x[firstBlockNum]->size(); // Size of the sub-vector
       const Index * xTab = x.getTabIndexPtr();
       if (firstBlockNum != 0)
@@ -5238,7 +5243,7 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
         ConstBlockVectIterator it;
         for (it = x.begin(); it != x.end(); ++it)
         {
-          private_addprod(a, &A, startRow, startCol, *it, &y);
+          private_addprod(a, createSiconosMatrixSPtrConst(A), startRow, startCol, *it, createSiconosVectorSPtr(y));
           startCol += (*it)->size();
         }
       }
@@ -5398,7 +5403,7 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
       // private_prod takes into account the fact that x and y[i] may be block vectors.
       for (it = y.begin(); it != y.end(); ++it)
       {
-        private_prod(a, &A, startRow, &x, *it, init);
+        private_prod(a, createSiconosMatrixSPtrConst(A), startRow, createSiconosVectorSPtrConst(x), *it, init);
         startRow += (*it)->size();
       }
     }
@@ -5459,7 +5464,7 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
         ConstBlockVectIterator it;
         for (it = x.begin(); it != x.end(); ++it)
         {
-          private_addprod(*it, &A, startRow, startCol, &y);
+          private_addprod(*it, createSiconosMatrixSPtrConst(A), startRow, startCol, createSiconosVectorSPtr(y));
           startCol += (*it)->size();
         }
       }
@@ -5621,7 +5626,7 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
       // private_prod takes into account the fact that x and y[i] may be block vectors.
       for (it = y.begin(); it != y.end(); ++it)
       {
-        private_prod(&x, &A, startRow, *it, init);
+        private_prod(createSiconosVectorSPtrConst(x), createSiconosMatrixSPtrConst(A), startRow, *it, init);
         startRow += (*it)->size();
       }
     }
@@ -5678,7 +5683,7 @@ void axpy_prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y,
         ConstBlockVectIterator it;
         for (it = x.begin(); it != x.end(); ++it)
         {
-          private_addprod(&A, startRow, startCol, *it, &y);
+          private_addprod(createSiconosMatrixSPtrConst(A), startRow, startCol, *it, createSiconosVectorSPtr(y));
           startCol += (*it)->size();
         }
       }
@@ -5763,7 +5768,7 @@ void axpy_prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y,
       // private_prod takes into account the fact that x and y[i] may be block vectors.
       for (it = y.begin(); it != y.end(); ++it)
       {
-        private_prod(&A, startRow, &x, *it, init);
+        private_prod(createSiconosMatrixSPtrConst(A), startRow, createSiconosVectorSPtrConst(x), *it, init);
         startRow += (*it)->size();
       }
     }

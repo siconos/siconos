@@ -23,11 +23,14 @@
 
 using namespace std;
 
+#ifndef WithSmartPtr
 void FirstOrderType1R::initAllocationFlags(bool in)
 {
   isAllocatedIn["jacobianH0"] = in;
   isAllocatedIn["jacobianG0"] = in;
 }
+#endif
+
 
 void FirstOrderType1R::initPluginFlags(bool in)
 {
@@ -38,16 +41,26 @@ void FirstOrderType1R::initPluginFlags(bool in)
 }
 
 // xml constructor
-FirstOrderType1R::FirstOrderType1R(RelationXML* relxml):
-  FirstOrderR(relxml, Type1R), output(NULL), jXOutput(NULL), input(NULL), jLInput(NULL)
+FirstOrderType1R::FirstOrderType1R(RelationXMLSPtr relxml):
+  FirstOrderR(relxml, Type1R)
 {
-  FirstOrderRXML * FORxml = static_cast<FirstOrderRXML*>(relationxml);
+  FirstOrderRXMLSPtr FORxml = boost::static_pointer_cast<FirstOrderRXML>(relationxml);
 
+#ifndef WithSmartPtr
   initAllocationFlags(false);
+#endif
+
   initPluginFlags(false);
   // Gradients
+
+#ifndef WithSmartPtr
   jacobianH.resize(1, NULL);
   jacobianG.resize(1, NULL);
+#else
+  jacobianH.resize(1);
+  jacobianG.resize(1);
+#endif
+
   // input g
   if (FORxml->hasG())
   {
@@ -64,8 +77,14 @@ FirstOrderType1R::FirstOrderType1R(RelationXML* relxml):
     }
     else
     {
+
+#ifndef WithSmartPtr
       jacobianG[0] = new SimpleMatrix(FORxml->getJacobianGMatrix(0));
       isAllocatedIn["jacobianG0"] = true   ;
+#else
+      jacobianG[0].reset(new SimpleMatrix(FORxml->getJacobianGMatrix(0)));
+#endif
+
     }
   }
 
@@ -84,8 +103,14 @@ FirstOrderType1R::FirstOrderType1R(RelationXML* relxml):
     }
     else
     {
+
+#ifndef WithSmartPtr
       jacobianH[0] = new SimpleMatrix(FORxml->getJacobianHMatrix(0));
       isAllocatedIn["jacobianH0"] = true   ;
+#else
+      jacobianH[0].reset(new SimpleMatrix(FORxml->getJacobianHMatrix(0)));
+#endif
+
     }
   }
 }
@@ -93,26 +118,47 @@ FirstOrderType1R::FirstOrderType1R(RelationXML* relxml):
 FirstOrderType1R::FirstOrderType1R(const string& computeOut, const string& computeIn):
   FirstOrderR(Type1R), output(NULL), jXOutput(NULL), input(NULL), jLInput(NULL)
 {
+
+#ifndef WithSmartPtr
   initAllocationFlags(false);
+#endif
+
   initPluginFlags(false);
   // Size vector of pointers to functions.
   // Connect input and output to plug-in
   setComputeHFunction(cShared.getPluginName(computeOut), cShared.getPluginFunctionName(computeOut));
   setComputeGFunction(cShared.getPluginName(computeIn), cShared.getPluginFunctionName(computeIn));
 
+#ifndef WithSmartPtr
   jacobianH.resize(1, NULL);
   jacobianG.resize(1, NULL);
+#else
+  jacobianH.resize(1);
+  jacobianG.resize(1);
+#endif
+
   // The jacobians are not set, and thus considered as null matrices at this point.
 }
 
 FirstOrderType1R::FirstOrderType1R(const string& computeOut, const string& computeIn, const string& computeJX, const string& computeJL):
   FirstOrderR(Type1R), output(NULL), jXOutput(NULL), input(NULL), jLInput(NULL)
 {
+
+#ifndef WithSmartPtr
   initAllocationFlags(false);
+#endif
+
   initPluginFlags(false);
   // Size vector of pointers to functions.
+
+#ifndef WithSmartPtr
   jacobianH.resize(1, NULL);
   jacobianG.resize(1, NULL);
+#else
+  jacobianH.resize(1);
+  jacobianG.resize(1);
+#endif
+
   // Connect input and output to plug-in
   setComputeHFunction(cShared.getPluginName(computeOut), cShared.getPluginFunctionName(computeOut));
   setComputeGFunction(cShared.getPluginName(computeIn), cShared.getPluginFunctionName(computeIn));
@@ -133,17 +179,29 @@ void FirstOrderType1R::initialize()
   FirstOrderR::initialize();
 
   // if jacobianH0 is plugged and memory not allocated ...
-  if (isPlugged["jacobianH0"] && jacobianH[0] == NULL)
+  if (isPlugged["jacobianH0"] && ! jacobianH[0])
   {
+
+#ifndef WithSmartPtr
     jacobianH[0] = new SimpleMatrix(interaction->getSizeOfY(), interaction->getSizeOfDS());
     isAllocatedIn["jacobianH0"] = true;
+#else
+    jacobianH[0].reset(new SimpleMatrix(interaction->getSizeOfY(), interaction->getSizeOfDS()));
+#endif
+
   }
 
   // Same work for jacobianLambdaG
-  if (isPlugged["jacobianG0"] && jacobianG[0] == NULL)
+  if (isPlugged["jacobianG0"] && ! jacobianG[0])
   {
+
+#ifndef WithSmartPtr
     jacobianG[0] = new SimpleMatrix(interaction->getSizeOfDS(), interaction->getSizeOfY());
     isAllocatedIn["jacobianG0"] = true;
+#else
+    jacobianG[0].reset(new SimpleMatrix(interaction->getSizeOfDS(), interaction->getSizeOfY()));
+#endif
+
   }
 }
 
@@ -187,7 +245,7 @@ void FirstOrderType1R::computeOutput(double, unsigned int)
   if (output == NULL)
     RuntimeException::selfThrow("FirstOrderType1R::computeOutput() is not linked to a plugin function");
 
-  SiconosVector *y = interaction->getYPtr(0);
+  SiconosVectorSPtr y = interaction->getYPtr(0);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
 
   *workX = *data["x"];
@@ -210,7 +268,7 @@ void FirstOrderType1R::computeInput(double, unsigned int level)
   if (input == NULL)
     RuntimeException::selfThrow("FirstOrderType1R::computeInput() is not linked to a plugin function");
 
-  SiconosVector *lambda = interaction->getLambdaPtr(level);
+  SiconosVectorSPtr lambda = interaction->getLambdaPtr(level);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
 
   *workX = *data["r"];
@@ -251,7 +309,7 @@ void FirstOrderType1R::computeJacobianG(double, unsigned int)
   if (jLInput == NULL)
     RuntimeException::selfThrow("FirstOrderType1R::computeJacobianH() failed; not linked to a plug-in function.");
 
-  SiconosVector *lambda = interaction->getLambdaPtr(0);
+  SiconosVectorSPtr lambda = interaction->getLambdaPtr(0);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
   *workZ = *data["z"];
   *workY = *lambda;

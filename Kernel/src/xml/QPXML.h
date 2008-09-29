@@ -110,9 +110,9 @@ public:
 
   /** makes the operations to create a OneStepNSProblemXML to the SimulationXML
    *   \param xmlNode* : the root node of the OneStepNSProblemXML
-   *   \param OneStepNSProblem* : the OneStepNSProblem of this OneStepNSProblemXML
+   *   \param SP::OneStepNSProblem : the OneStepNSProblem of this OneStepNSProblemXML
    */
-  void updateOneStepNSProblemXML(xmlNode* node, OneStepNSProblem* osnspb);
+  void updateOneStepNSProblemXML(xmlNode* node, SP::OneStepNSProblem osnspb);
 
 
 private:

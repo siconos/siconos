@@ -52,7 +52,7 @@ SparseBlockMatrix::SparseBlockMatrix(unsigned int nRow):
 }
 
 // Basic constructor
-SparseBlockMatrix::SparseBlockMatrix(UnitaryRelationsSet* I, MapOfMapOfUnitaryMatrices& blocks):
+SparseBlockMatrix::SparseBlockMatrix(SP::UnitaryRelationsSet I, MapOfMapOfUnitaryMatrices& blocks):
   nr(0)
 {
   // Allocate memory and fill in the matrix
@@ -67,7 +67,7 @@ SparseBlockMatrix::SparseBlockMatrix(UnitaryRelationsSet* I, MapOfMapOfUnitaryMa
   colPos->reserve(nr);
   fill(I, blocks);
 }
-SparseBlockMatrix::SparseBlockMatrix(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSblocks):
+SparseBlockMatrix::SparseBlockMatrix(SP::DynamicalSystemsSet DSSet, MapOfDSMatrices& DSblocks):
   nr(0)
 {
   // Allocate memory and fill in the matrix
@@ -82,7 +82,7 @@ SparseBlockMatrix::SparseBlockMatrix(DynamicalSystemsSet* DSSet, MapOfDSMatrices
   colPos->reserve(nr);
   fill(DSSet, DSblocks);
 }
-SparseBlockMatrix::SparseBlockMatrix(UnitaryRelationsSet* I, DynamicalSystemsSet* DSSet, MapOfUnitaryMapOfDSMatrices& unitaryDSblocks):
+SparseBlockMatrix::SparseBlockMatrix(SP::UnitaryRelationsSet I, SP::DynamicalSystemsSet DSSet, MapOfUnitaryMapOfDSMatrices& unitaryDSblocks):
   nr(0)
 {
   // Allocate memory and fill in the matrix
@@ -106,7 +106,7 @@ SparseBlockMatrix::~SparseBlockMatrix()
 }
 
 // Fill the SparseMat
-void SparseBlockMatrix::fill(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMatrices& blocks)
+void SparseBlockMatrix::fill(SP::UnitaryRelationsSet indexSet, MapOfMapOfUnitaryMatrices& blocks)
 {
   // ======>  Aim: find UR1 and UR2 both in indexSets[level] and which have common DynamicalSystems.
   // Then get the corresponding matrix from map blocks.
@@ -170,12 +170,12 @@ void SparseBlockMatrix::fill(UnitaryRelationsSet* indexSet, MapOfMapOfUnitaryMat
 }
 
 // Fill the SparseMat
-void SparseBlockMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSblocks)
+void SparseBlockMatrix::fill(SP::DynamicalSystemsSet DSSet, MapOfDSMatrices& DSblocks)
 {
   RuntimeException::selfThrow(" SparseBlockMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSblocks), Not Yet Implemented");
 }
 // Fill the SparseMat
-void SparseBlockMatrix::fill(UnitaryRelationsSet* indexSet, DynamicalSystemsSet* DSSet, MapOfUnitaryMapOfDSMatrices& unitaryDSblocks)
+void SparseBlockMatrix::fill(SP::UnitaryRelationsSet indexSet, SP::DynamicalSystemsSet DSSet, MapOfUnitaryMapOfDSMatrices& unitaryDSblocks)
 {
   RuntimeException::selfThrow(" SparseBlockMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSblocks), Not Yet Implemented");
 }

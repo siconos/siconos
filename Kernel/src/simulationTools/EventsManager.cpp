@@ -34,11 +34,11 @@ const bool EventsManager::createAndInsertEvent(int type, double time)
   return ((allEvents.insert(regEvent.instantiate(time, type)))  != allEvents.end());
 }
 
-EventsManager::EventsManager(Simulation* newSimu):
+EventsManager::EventsManager(SP::Simulation newSimu):
   currentEvent(NULL), nextEvent(NULL), ETD(NULL), ENonSmooth(NULL), simulation(newSimu), hasNS(false), hasCM(false)
 {
   //  === Checks connection with a simulation ===
-  if (simulation == NULL)
+  if (!simulation)
     RuntimeException::selfThrow("EventsManager initialize, no simulation linked to the manager.");
 
   //  === Creates and inserts two events corresponding
@@ -143,34 +143,34 @@ Event* EventsManager::getFollowingEventPtr(const mpz_t& inputTime) const
 
 const bool EventsManager::hasEvent(Event* event) const
 {
-  if (event == NULL) return false;
+  if (!event) return false;
   EventsContainer::iterator it2 = allEvents.find(event);
   return ((it2 != allEvents.end()));
 }
 
 const bool EventsManager::hasNextEvent() const
 {
-  return (nextEvent != NULL);
+  return (nextEvent);
 }
 
 const double EventsManager::getTimeOfEvent(Event* event) const
 {
   //  if(!hasEvent(event))
-  if (event == NULL)
+  if (!event)
     RuntimeException::selfThrow("EventsManager getTimeOfEvent, Event == NULL (not present in the set?) ");
   return event->getDoubleTimeOfEvent();
 }
 
 const double EventsManager::getStartingTime() const
 {
-  if (currentEvent == NULL)
+  if (!currentEvent)
     RuntimeException::selfThrow("EventsManager getStartingTime, current event is NULL");
   return currentEvent->getDoubleTimeOfEvent();
 }
 
 const double EventsManager::getNextTime() const
 {
-  if (nextEvent == NULL)
+  if (!nextEvent)
     RuntimeException::selfThrow("EventsManager getNextTime, next event is NULL");
   return nextEvent->getDoubleTimeOfEvent();
 }
@@ -178,7 +178,7 @@ const double EventsManager::getNextTime() const
 void EventsManager::display() const
 {
   cout << "=== EventsManager data display ===" << endl;
-  if (simulation != NULL)
+  if (simulation)
     cout << "- This manager belongs to the simulation named \" " << simulation->getName() << "\", of type " << simulation->getType() << "." << endl;
   else
     cout << "- No simulation linked to this manager." << endl;
@@ -209,7 +209,7 @@ void EventsManager::update()
 // Useful during simulation when a new event is detected.
 void EventsManager::scheduleNonSmoothEvent(double time)
 {
-  if (ENonSmooth == NULL)
+  if (!ENonSmooth)
   {
     EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;
     ENonSmooth = regEvent.instantiate(time, 2);
@@ -264,7 +264,7 @@ void EventsManager::OptimizedProcessEvents()
   update();
 
   // Set Model current time
-  if (nextEvent != NULL)
+  if (nextEvent)
     simulation->getModelPtr()->setCurrentTime(getTimeOfEvent(nextEvent));
 
 }
@@ -317,7 +317,7 @@ void EventsManager::GeneralProcessEvents()
   update();
 
   // Set Model current time
-  if (nextEvent != NULL)
+  if (nextEvent)
     simulation->getModelPtr()->setCurrentTime(getTimeOfEvent(nextEvent));
 }
 

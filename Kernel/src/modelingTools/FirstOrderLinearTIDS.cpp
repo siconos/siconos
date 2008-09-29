@@ -31,14 +31,15 @@ FirstOrderLinearTIDS::FirstOrderLinearTIDS():
 }
 
 // From xml file (newNsds is optional)
-FirstOrderLinearTIDS::FirstOrderLinearTIDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds):
+FirstOrderLinearTIDS::FirstOrderLinearTIDS(DynamicalSystemXMLSPtr dsXML, SP::NonSmoothDynamicalSystem newNsds):
   FirstOrderLinearDS(dsXML, newNsds)
 {
   // Everything is done during the call to FirstOrderLinearDS constructor. In the present one, we just reject cases
   // where A or b are given as plug-in rather than as matrices.
 
   // pointer to xml
-  FirstOrderLinearDSXML * ldsxml = (static_cast <FirstOrderLinearDSXML*>(dsxml));
+
+  FirstOrderLinearDSXMLSPtr ldsxml = (boost::static_pointer_cast <FirstOrderLinearDSXML>(dsxml));
 
   // reject case where A or b is a plug-in
   if (ldsxml->isAPlugin())
@@ -76,25 +77,37 @@ FirstOrderLinearTIDS::~FirstOrderLinearTIDS()
 
 void FirstOrderLinearTIDS::initRhs(double time)
 {
-  if (M != NULL)
+  if (M)
   {
-    if (invM == NULL)
+    if (! invM)
     {
+
+#ifndef WithSmartPtr
       invM = new SimpleMatrix(*M);
       isAllocatedIn["invM"] = true;
+#else
+      invM.reset(new SimpleMatrix(*M));
+#endif
+
     }
   }
 
   computeRhs(time);
 
-  if (jacobianXRhs == NULL) // if not allocated with a set or anything else
+  if (! jacobianXRhs)  // if not allocated with a set or anything else
   {
-    if (A != NULL && M == NULL) // if M is not defined, then A = jacobianXRhs, no memory allocation for that one.
+    if (A && ! M)  // if M is not defined, then A = jacobianXRhs, no memory allocation for that one.
       jacobianXRhs = A;
-    else if (A != NULL && M != NULL)
+    else if (A && M)
     {
+
+#ifndef WithSmartPtr
       jacobianXRhs = new SimpleMatrix(*A); // Copy A into jacobianXRhs
       isAllocatedIn["jacobianXRhs"] = true;
+#else
+      jacobianXRhs.reset(new SimpleMatrix(*A)); // Copy A into jacobianXRhs
+#endif
+
       // Solve MjacobianXRhs = A
       invM->PLUForwardBackwardInPlace(*jacobianXRhs);
     }

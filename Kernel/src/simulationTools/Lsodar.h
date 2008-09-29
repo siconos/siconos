@@ -56,17 +56,17 @@ private:
    */
   std::vector<integer> intData;
   /** relative tolerance */
-  doublereal * rtol;
+  doublerealSAPtr rtol;
   /** absolute tolerance */
-  doublereal * atol;
+  doublerealSAPtr atol;
   /** real work array */
-  doublereal * rwork;
+  doublerealSAPtr rwork;
   /** integer work array */
-  integer * iwork;
+  integerSAPtr iwork;
   /** integer array used for output of root information */
-  integer * jroot;
+  integerSAPtr jroot;
   /** temporary vector to save x values */
-  BlockVector* xWork;
+  BlockVectorSPtr xWork;
 
   /** default constructor, private
    */
@@ -76,21 +76,21 @@ public:
 
   /** constructor from xml file
    *  \param OneStepIntegratorXML* : the XML object
-   *  \param Simulation * : the simulation that owns the osi
+   *  \param SP::Simulation : the simulation that owns the osi
    */
-  Lsodar(OneStepIntegratorXML*, Simulation*);
+  Lsodar(OneStepIntegratorXMLSPtr, SimulationSPtr);
 
   /** constructor from a minimum set of data
-   *  \param DynamicalSystem* : the DynamicalSystem linked to the OneStepIntegrator
-   *  \param Simulation * : the simulation that owns the osi
+   *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
+   *  \param SP::Simulation : the simulation that owns the osi
    */
-  Lsodar(DynamicalSystem* , Simulation*);
+  Lsodar(SP::DynamicalSystem , SimulationSPtr);
 
   /** constructor from a list of Dynamical Systems
    *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
-   *  \param Simulation * : the simulation that owns the osi
+   *  \param SP::Simulation : the simulation that owns the osi
    */
-  Lsodar(DynamicalSystemsSet&, Simulation*);
+  Lsodar(DynamicalSystemsSet&, SimulationSPtr);
 
   /** destructor
    */
@@ -115,7 +115,7 @@ public:
   /** get relative tolerance parameter for lsodar
    *  \return a doublereal*
    */
-  inline const doublereal* getRtol() const
+  inline const doublerealSAPtr getRtol() const
   {
     return rtol;
   }
@@ -123,7 +123,7 @@ public:
   /** get absolute tolerance parameter for lsodar
    *  \return a doublereal*
    */
-  inline const doublereal* getAtol() const
+  inline const doublerealSAPtr getAtol() const
   {
     return atol;
   }
@@ -131,7 +131,7 @@ public:
   /** get real work vector parameter for lsodar
    *  \return a doublereal*
    */
-  inline const doublereal* getRwork() const
+  inline const doublerealSAPtr getRwork() const
   {
     return rwork;
   }
@@ -139,7 +139,7 @@ public:
   /** get iwork
    *  \return a pointer to integer
    */
-  inline integer* getIwork() const
+  inline integerSAPtr getIwork() const
   {
     return iwork;
   }
@@ -147,7 +147,7 @@ public:
   /** get output of root information
    *  \return a pointer to integer
    */
-  inline integer* getJroot() const
+  inline integerSAPtr getJroot() const
   {
     return jroot;
   }
@@ -165,7 +165,7 @@ public:
    *  \param doublereal * (rtol)
    *  \param doublereal * (atol)
    */
-  void setTol(integer, doublereal *, doublereal*);
+  void setTol(integer, doublerealSAPtr, doublerealSAPtr);
 
   /** update doubleData and iwork memory size, when changes occur in intData.
    */
@@ -175,7 +175,7 @@ public:
    *  \param integer*, size of x array
    *  \param doublereal* x:array of double
    */
-  void fillXWork(integer*, doublereal *) ;
+  void fillXWork(integer*, doublereal*) ;
 
   /** compute rhs(t) for all dynamical systems in the set
    */
@@ -185,11 +185,11 @@ public:
    */
   void computeJacobianRhs(double) ;
 
-  void f(integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot);
+  void f(integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xdot);
 
-  void g(integer * nEq, doublereal * time, doublereal* x, integer * ng, doublereal * gOut);
+  void g(integer* nEq, doublereal* time, doublereal* x, integer* ng, doublereal* gOut);
 
-  void jacobianF(integer *, doublereal *, doublereal *, integer *, integer *,  doublereal *, integer *);
+  void jacobianF(integer*, doublereal*, doublereal*, integer*, integer*,  doublereal*, integer*);
 
   /** initialise the integrator
    */

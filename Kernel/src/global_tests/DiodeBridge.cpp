@@ -116,7 +116,7 @@ bool DiodeBridge()
 
     // --- Non Smooth Dynamical system creation ---
 
-    NonSmoothDynamicalSystem* NSDSDiodeBridge = new NonSmoothDynamicalSystem(LSDiodeBridge, InterDiodeBridge, false);
+    SP::NonSmoothDynamicalSystem NSDSDiodeBridge = new NonSmoothDynamicalSystem(LSDiodeBridge, InterDiodeBridge, false);
     DiodeBridge.setNonSmoothDynamicalSystemPtr(NSDSDiodeBridge);
 
     // --- Simulation specification---

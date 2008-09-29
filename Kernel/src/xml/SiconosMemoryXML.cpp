@@ -50,22 +50,22 @@ SiconosMemoryXML::SiconosMemoryXML(xmlNode* newMemoryNode, xmlNode* newParentNod
 SiconosMemoryXML::~SiconosMemoryXML()
 {}
 
-deque<SiconosVector*> SiconosMemoryXML::getVectorMemoryValue()
+deque<SP::SiconosVector> SiconosMemoryXML::getVectorMemoryValue()
 {
-  deque<SiconosVector*> v;
+  deque<SP::SiconosVector> v;
   xmlNode *node = SiconosDOMTreeTools::findNodeChild(memoryNode, SM_MEMORY);
 
   int cpt = 0;
   while (node != NULL)
   {
-    v.push_back(new SimpleVector(SiconosDOMTreeTools::getSiconosVectorValue(node)));
+    v.push_back(SP::SimpleVector(new SimpleVector(SiconosDOMTreeTools::getSiconosVectorValue(node))));
     node = SiconosDOMTreeTools::findFollowNode(node, SM_MEMORY);
     cpt ++;
   }
   return v;
 }
 
-void SiconosMemoryXML::setVectorMemoryValue(const deque<SiconosVector*>& memory)
+void SiconosMemoryXML::setVectorMemoryValue(const deque<SP::SiconosVector>& memory)
 {
   xmlNode *oldNode = SiconosDOMTreeTools::findNodeChild(memoryNode, SM_MEMORY);
   xmlNode *node; /* oldNode is the node before node */

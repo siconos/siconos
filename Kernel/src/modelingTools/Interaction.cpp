@@ -16,6 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
+#include <assert.h>
 #include "Interaction.h"
 #include "InteractionXML.h"
 #include "NonSmoothLawXML.h"
@@ -38,15 +39,11 @@ using namespace std;
 // --- CONSTRUCTORS ---
 
 // --- XML constructor ---
-Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * nsds):
-  id("undefined"), number(0), interactionSize(0), numberOfRelations(0), sizeOfDS(0), sizeZ(0), involvedDS(NULL),
-#ifndef WithSmartPtr
-  nslaw(NULL),
-#endif
-  relation(NULL), NSDS(nsds), interactionxml(interxml)
+Interaction::Interaction(InteractionXMLSPtr interxml, SP::NonSmoothDynamicalSystem nsds):
+  id("undefined"), number(0), interactionSize(0), numberOfRelations(0),
+  sizeOfDS(0), sizeZ(0), NSDS(nsds), interactionxml(interxml)
 {
-  if (interactionxml == NULL)
-    RuntimeException::selfThrow("Interaction::xml constructor, xmlfile = NULL");
+  assert(interactionxml && "NULL pointer");
 
   // id and number
   if (interactionxml->hasId()) id = interactionxml->getId();
@@ -60,62 +57,38 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
   // ComplementarityConditionNSL
   if (NslawType == COMPLEMENTARITY_CONDITION_NSLAW_TAG)
   {
-
-#ifndef WithSmartPtr
-    nslaw = new ComplementarityConditionNSL(interactionxml->getNonSmoothLawXML());
-#else
     nslaw.reset(new ComplementarityConditionNSL(interactionxml->getNonSmoothLawXML()));
-#endif
   }
 
   // RelayNSL
   else if (NslawType == RELAY_NSLAW_TAG)
   {
-
-#ifndef WithSmartPtr
-    nslaw = new RelayNSL(interactionxml->getNonSmoothLawXML());
-#else
     nslaw.reset(new RelayNSL(interactionxml->getNonSmoothLawXML()));
-#endif
   }
 
   // NewtonImpactNSL
   else if (NslawType == NEWTON_IMPACT_NSLAW_TAG)
   {
-
-#ifndef WithSmartPtr
-    nslaw = new NewtonImpactNSL(interactionxml->getNonSmoothLawXML());
-#else
     nslaw.reset(new NewtonImpactNSL(interactionxml->getNonSmoothLawXML()));
-#endif
   }
   // Newton impact friction law
   else if (NslawType == NEWTON_IMPACT_FRICTION_NSLAW_TAG)
   {
-
-#ifndef WithSmartPtr
-    nslaw = new NewtonImpactFrictionNSL(interactionxml->getNonSmoothLawXML());
-#else
     nslaw.reset(new NewtonImpactFrictionNSL(interactionxml->getNonSmoothLawXML()));
-#endif
   }
   else RuntimeException::selfThrow("Interaction::xml constructor, unknown NSLAW type :" + nslaw->getType());
 
-#ifndef WithSmartPtr
-  isAllocatedIn["nsLaw"] = true;
-#endif
-
   // --- Dynamical Systems ---
   unsigned int sizeDS ;
-  involvedDS = new DynamicalSystemsSet();
-  if (nsds != NULL)
+  involvedDS.reset(new DynamicalSystemsSet());
+  if (nsds)
   {
     // Get a list of DS concerned from xml
 
     if (interactionxml->hasAllDS())
     {
       DSIterator itDS;
-      DynamicalSystemsSet * nsdsSet = nsds->getDynamicalSystems();
+      DynamicalSystemsSetSPtr nsdsSet = nsds->getDynamicalSystems();
       for (itDS = nsdsSet->begin(); itDS != nsdsSet->end(); ++itDS)
         involvedDS->insert(*itDS); // Warning: insert pointers to DS!!
     }
@@ -141,13 +114,13 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
   {
     RELATIONSUBTYPES relationSubType = interactionxml->getRelationXML()->getSubType();
     if (relationSubType == Type1R)
-      relation = new FirstOrderType1R(interactionxml->getRelationXML());
+      relation.reset(new FirstOrderType1R(interactionxml->getRelationXML()));
     // Linear relation
     else if (relationSubType == LinearR)
-      relation = new FirstOrderLinearR(interactionxml->getRelationXML());
+      relation.reset(new FirstOrderLinearR(interactionxml->getRelationXML()));
     // Linear time-invariant coef. relation
     else if (relationSubType == LinearTIR)
-      relation = new FirstOrderLinearTIR(interactionxml->getRelationXML());
+      relation.reset(new FirstOrderLinearTIR(interactionxml->getRelationXML()));
   }
   // Lagrangian non-linear relation
   else if (relationType == Lagrangian)
@@ -155,17 +128,16 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
     RELATIONSUBTYPES relationSubType = interactionxml->getRelationXML()->getSubType();
     // \todo create a factory to avoid "if" list for Relation construction according to subType.
     if (relationSubType == ScleronomousR)
-      relation = new LagrangianScleronomousR(interactionxml->getRelationXML());
+      relation.reset(new LagrangianScleronomousR(interactionxml->getRelationXML()));
     else if (relationSubType == RheonomousR)
-      relation = new LagrangianRheonomousR(interactionxml->getRelationXML());
+      relation.reset(new LagrangianRheonomousR(interactionxml->getRelationXML()));
     else if (relationSubType == CompliantR)
-      relation = new LagrangianCompliantR(interactionxml->getRelationXML());
+      relation.reset(new LagrangianCompliantR(interactionxml->getRelationXML()));
     // Lagrangian linear relation
     else if (relationSubType == LinearR || relationSubType == LinearTIR)
-      relation = new LagrangianLinearR(interactionxml->getRelationXML());
+      relation.reset(new LagrangianLinearR(interactionxml->getRelationXML()));
   }
   else RuntimeException::selfThrow("Interaction::xml constructor, unknown relation type " + relation->getType());
-  isAllocatedIn["relation"] = true;
 
   // check coherence between interactionSize and nsLawSize
   if ((interactionSize % nslaw->getNsLawSize()) != 0)
@@ -179,105 +151,62 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
 
 // --- Constructors from a set of data ---
 
-Interaction::Interaction(DynamicalSystem* ds, int newNumber, int nInter, NonSmoothLawSPtr newNSL, Relation* newRel):
-  id("none"), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0), y(1), involvedDS(NULL),
-  nslaw(newNSL), relation(newRel), NSDS(NULL), interactionxml(NULL)
+Interaction::Interaction(boost::shared_ptr<DynamicalSystem> ds, int newNumber, int nInter,
+                         NonSmoothLawSPtr newNSL, boost::shared_ptr<Relation> newRel):
+  id("none"), number(newNumber), interactionSize(nInter), numberOfRelations(1),
+  sizeOfDS(0), sizeZ(0), y(1), nslaw(newNSL), relation(newRel)
 {
-  involvedDS = new DynamicalSystemsSet();
+  involvedDS.reset(new DynamicalSystemsSet());
   involvedDS->insert(ds); // Warning: insert pointer to DS!!
-  isAllocatedIn["relation"] = false;
 
-#ifndef WithSmartPtr
-  isAllocatedIn["nsLaw"] = false;
-#endif
 }
-Interaction::Interaction(const string& newId, DynamicalSystem* ds, int newNumber, int nInter, NonSmoothLawSPtr newNSL, Relation* newRel):
-  id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0), y(1), involvedDS(NULL),
-  nslaw(newNSL), relation(newRel), NSDS(NULL), interactionxml(NULL)
+Interaction::Interaction(const string& newId, boost::shared_ptr<DynamicalSystem> ds,
+                         int newNumber, int nInter, NonSmoothLawSPtr newNSL, boost::shared_ptr<Relation> newRel):
+  id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1),
+  sizeOfDS(0), sizeZ(0), y(1), nslaw(newNSL), relation(newRel)
 {
-  involvedDS = new DynamicalSystemsSet();
+  involvedDS.reset(new DynamicalSystemsSet());
   involvedDS->insert(ds); // Warning: insert pointer to DS!!
-  isAllocatedIn["relation"] = false;
 
-#ifndef WithSmartPtr
-  isAllocatedIn["nsLaw"] = false;
-#endif
 }
 
 
-Interaction::Interaction(DynamicalSystemsSet& dsConcerned, int newNumber, int nInter, NonSmoothLawSPtr newNSL, Relation* newRel):
-  id("none"), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0), y(1), involvedDS(NULL),
-  nslaw(newNSL), relation(newRel), NSDS(NULL), interactionxml(NULL)
+Interaction::Interaction(DynamicalSystemsSet& dsConcerned, int newNumber, int nInter,
+                         NonSmoothLawSPtr newNSL, boost::shared_ptr<Relation> newRel):
+  id("none"), number(newNumber), interactionSize(nInter), numberOfRelations(1),
+  sizeOfDS(0), sizeZ(0), y(1), nslaw(newNSL), relation(newRel)
 {
-  involvedDS = new DynamicalSystemsSet();
+  involvedDS.reset(new DynamicalSystemsSet());
   DSIterator itDS;
   for (itDS = dsConcerned.begin(); itDS != dsConcerned.end(); ++itDS)
     involvedDS->insert(*itDS); // Warning: insert pointers to DS!!
-  isAllocatedIn["relation"] = false;
-
-#ifndef WithSmartPtr
-  isAllocatedIn["nsLaw"] = false;
-#endif
 }
 
-Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, int newNumber, int nInter, NonSmoothLawSPtr newNSL, Relation* newRel):
-  id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0), y(1), involvedDS(NULL),
-  nslaw(newNSL), relation(newRel), NSDS(NULL), interactionxml(NULL)
+Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, int newNumber,
+                         int nInter, NonSmoothLawSPtr newNSL, RelationSPtr newRel):
+  id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0),
+  y(1), nslaw(newNSL), relation(newRel)
 {
-  involvedDS = new DynamicalSystemsSet();
+  involvedDS.reset(new DynamicalSystemsSet());
   DSIterator itDS;
   for (itDS = dsConcerned.begin(); itDS != dsConcerned.end(); ++itDS)
     involvedDS->insert(*itDS); // Warning: insert pointers to DS!!
-  isAllocatedIn["relation"] = false;
-
-#ifndef WithSmartPtr
-  isAllocatedIn["nsLaw"] = false;
-#endif
 }
 
 // --- DESTRUCTOR ---
 Interaction::~Interaction()
 {
-  for (unsigned int i = 0; i < y.size(); i++)
-  {
-    if (isYAllocatedIn[i]) delete y[i];
-    y[i] = NULL;
-    if (isYOldAllocatedIn[i]) delete yOld[i];
-    yOld[i] = NULL;
-    if (isLambdaAllocatedIn[i]) delete lambda[i];
-    lambda[i] = NULL;
-    if (isLambdaOldAllocatedIn[i]) delete lambdaOld[i];
-    lambdaOld[i] = NULL;
-  }
-  y.clear();
-  yOld.clear();
-  lambda.clear();
-  lambdaOld.clear();
-
-  if (isAllocatedIn["relation"]) delete relation;
-  relation = NULL;
-
-#ifndef WithSmartPtr
-  if (isAllocatedIn["nsLaw"]) delete nslaw;
-  nslaw = NULL;
-#endif
-
-
-  NSDS = NULL;
-  involvedDS->clear();
-  delete involvedDS;
 }
 
 void Interaction::initialize(double t0, unsigned int level)
 {
-  if (relation == NULL)
-    RuntimeException::selfThrow("Interaction::initialize failed, relation == NULL");
-  if (nslaw == NULL)
-    RuntimeException::selfThrow("Interaction::initialize failed, non smooth law == NULL");
+  assert(relation && "Interaction::initialize failed, relation == NULL");
+
+  assert(nslaw && "Interaction::initialize failed, non smooth law == NULL");
 
   computeSizeOfDS();
 
-  relation->setInteractionPtr(this);
+  relation->setInteractionPtr(shared_from_this());
   relation->initialize();
 
   // compute number of relations.
@@ -315,125 +244,93 @@ void Interaction::initializeMemory(unsigned int numberOfDerivatives)
   for (unsigned int i = 0; i < numberOfDerivatives ; i++)
   {
 
-    y[i] = new BlockVector();
-    yOld[i] = new BlockVector();
-    lambda[i] = new BlockVector();
-    lambdaOld[i] = new BlockVector();
+    y[i].reset(new BlockVector());
+    yOld[i].reset(new BlockVector());
+    lambda[i].reset(new BlockVector());
+    lambdaOld[i].reset(new BlockVector());
     for (unsigned int j = 0; j < numberOfRelations; ++j)
     {
-      y[i]->insertPtr(new SimpleVector(nslawSize));
-      yOld[i]->insertPtr(new SimpleVector(nslawSize));
-      lambda[i]->insertPtr(new SimpleVector(nslawSize));
-      lambdaOld[i]->insertPtr(new SimpleVector(nslawSize));
+      y[i]->insertPtr(SimpleVectorSPtr(new SimpleVector(nslawSize)));
+      yOld[i]->insertPtr(SimpleVectorSPtr(new SimpleVector(nslawSize)));
+      lambda[i]->insertPtr(SimpleVectorSPtr(new SimpleVector(nslawSize)));
+      lambdaOld[i]->insertPtr(SimpleVectorSPtr(new SimpleVector(nslawSize)));
     }
   }
 
-  isYAllocatedIn.resize(numberOfDerivatives, true);
-  isYOldAllocatedIn.resize(numberOfDerivatives, true);
-  isLambdaAllocatedIn.resize(numberOfDerivatives, true);
-  isLambdaOldAllocatedIn.resize(numberOfDerivatives, true);
 }
 
 // --- GETTERS/SETTERS ---
 
 void Interaction::setY(const VectorOfVectors& newVector)
 {
-  // clear y
-  for (unsigned int i = 0; i < y.size(); i++)
-  {
-    if (isYAllocatedIn[i]) delete y[i];
-    y[i] = NULL;
-  }
-  y.clear();
 
   unsigned int size = newVector.size();
-  y.resize(size, NULL);
+
+  y.clear();
+  y.resize(size);
 
   for (unsigned int i = 0; i < size; i++)
-    y[i] = new BlockVector(*(newVector[i])); // -> copy !
-  isYAllocatedIn.resize(size, true);
+    y[i].reset(new BlockVector(*(newVector[i]))); // -> copy !
 }
 
 void Interaction::setYPtr(const VectorOfVectors& newVector)
 {
-  // clear y
-  for (unsigned int i = 0; i < y.size(); i++)
-  {
-    if (isYAllocatedIn[i]) delete y[i];
-    y[i] = NULL;
-  }
   y.clear();
 
   // copy
-  y = newVector; // warning: pointer equality between y[i] and newVector[i]
-  isYAllocatedIn.resize(y.size(), false);
+  y = newVector; // smart ptr
 }
 
 void Interaction::setY(const unsigned int  index, const BlockVector& newY)
 {
-  if (y.size() <= index)
-    RuntimeException::selfThrow("Interaction::setY, index out of range ");
+  assert(y.size() > index &&
+         "Interaction::setY, index out of range ");
 
   // set y[index]
-  if (y[index] == NULL)
+  if (! y[index])
   {
-    y[index] = new BlockVector(newY);
-    isYAllocatedIn[index] = true ;
+    y[index].reset(new BlockVector(newY));
   }
   else
   {
-    if (y[index]->size() != newY.size())
-      RuntimeException::selfThrow("Interaction::setY(index,newY), inconsistent sizes between y(index) and newY ");
+    assert(y[index]->size() == newY.size() &&
+           "Interaction::setY(index,newY), inconsistent sizes between y(index) and newY ");
     *(y[index]) = newY;
   }
 }
 
-void Interaction::setYPtr(const unsigned int  index, SiconosVector* newY)
+void Interaction::setYPtr(const unsigned int  index, boost::shared_ptr<SiconosVector> newY)
 {
-  if (y.size() <= index)
-    RuntimeException::selfThrow("Interaction::setYPtr, index out of range ");
-  if (newY->size() != interactionSize)
-    RuntimeException::selfThrow("Interaction::setYPtr, interactionSize differs from newY vector size ");
-  if (!newY->isBlock())
-    RuntimeException::selfThrow("Interaction::setYPtr(newY), newY is not a block vector! ");
+  assert(y.size() > index &&
+         "Interaction::setYPtr, index out of range");
 
-  // set y[index]
-  if (isYAllocatedIn[index]) delete y[index];
+  assert(newY->size() == interactionSize &&
+         "Interaction::setYPtr, interactionSize differs from newY vector size");
 
-  y[index] = static_cast<BlockVector*>(newY);
-  isYAllocatedIn[index] = false ;
+  assert(newY->isBlock() &&
+         "Interaction::setYPtr(newY), newY is not a block vector!");
+
+  y[index] = boost::static_pointer_cast<BlockVector>(newY);
 }
 
 void Interaction::setYOld(const VectorOfVectors& newVector)
 {
-  // clear yOld
-  for (unsigned int i = 0; i < yOld.size(); i++)
-  {
-    if (isYOldAllocatedIn[i]) delete yOld[i];
-    yOld[i] = NULL;
-  }
-  yOld.clear();
   unsigned int size = newVector.size();
-  yOld.resize(size, NULL);
+  yOld.clear();
+  yOld.resize(size);
 
   for (unsigned int i = 0; i < size; i++)
-    yOld[i] = new BlockVector(*(newVector[i])); // -> copy !
-  isYOldAllocatedIn.resize(size, true);
+    yOld[i].reset(new BlockVector(*(newVector[i]))); // -> copy !
 }
 
 void Interaction::setYOldPtr(const VectorOfVectors& newVector)
 {
   // clear yOld
-  for (unsigned int i = 0; i < yOld.size(); i++)
-  {
-    if (isYOldAllocatedIn[i]) delete yOld[i];
-    yOld[i] = NULL;
-  }
+
   yOld.clear();
 
   // copy
-  yOld = newVector; // warning: pointer equalityOld between yOld[i] and newVector[i]
-  isYOldAllocatedIn.resize(yOld.size(), false);
+  yOld = newVector; // smart ptr
 }
 
 void Interaction::setYOld(const unsigned int  index, const BlockVector& newYOld)
@@ -442,142 +339,113 @@ void Interaction::setYOld(const unsigned int  index, const BlockVector& newYOld)
     RuntimeException::selfThrow("Interaction::setYOld, index out of range ");
 
   // set yOld[index]
-  if (yOld[index] == NULL)
+  if (! yOld[index])
   {
-    yOld[index] = new BlockVector(newYOld);
-    isYOldAllocatedIn[index] = true ;
+    yOld[index].reset(new BlockVector(newYOld));
   }
   else
   {
-    if (yOld[index]->size() != newYOld.size())
-      RuntimeException::selfThrow("Interaction::setYOld(index,newYOld), inconsistent sizes between yOld(index) and newYOld ");
+    assert(yOld[index]->size() == newYOld.size() &&
+           "Interaction::setYOld(index,newYOld), inconsistent sizes between yOld(index) and newYOld");
     *(yOld[index]) = newYOld;
   }
 }
 
-void Interaction::setYOldPtr(const unsigned int  index, SiconosVector* newYOld)
+void Interaction::setYOldPtr(const unsigned int  index, SiconosVectorSPtr newYOld)
 {
-  if (yOld.size() <= index)
-    RuntimeException::selfThrow("Interaction::setYOldPtr, index out of range ");
-  if (newYOld->size() != interactionSize)
-    RuntimeException::selfThrow("Interaction::setYOldPtr, interactionSize differs from newYOld vector size ");
-  if (!newYOld->isBlock())
-    RuntimeException::selfThrow("Interaction::setYOldPtr(newY), newY is not a block vector! ");
+  assert(yOld.size() > index &&
+         "Interaction::setYOldPtr, index out of range");
+
+  assert(newYOld->size() == interactionSize &&
+         "Interaction::setYOldPtr, interactionSize differs from newYOld vector size");
+
+  assert((! newYOld->isBlock()) &&
+         "Interaction::setYOldPtr(newY), newY is not a block vector!");
 
   // set yOld[index]
-  if (isYOldAllocatedIn[index]) delete yOld[index];
-  yOld[index] = static_cast<BlockVector*>(newYOld);
-  isYOldAllocatedIn[index] = false ;
+  yOld[index] = boost::static_pointer_cast<BlockVector>(newYOld);
 }
 
 void Interaction::setLambda(const VectorOfVectors& newVector)
 {
-  // clear lambda
-  for (unsigned int i = 0; i < lambda.size(); i++)
-  {
-    if (isLambdaAllocatedIn[i]) delete lambda[i];
-    lambda[i] = NULL;
-  }
-  lambda.clear();
   unsigned int size = newVector.size();
-  lambda.resize(size, NULL);
+  lambda.clear();
+  lambda.resize(size);
 
   for (unsigned int i = 0; i < size; i++)
-    lambda[i] = new BlockVector(*(newVector[i])); // -> copy !
-  isLambdaAllocatedIn.resize(size, true);
+    lambda[i].reset(new BlockVector(*(newVector[i]))); // -> copy !
 }
 
 void Interaction::setLambdaPtr(const VectorOfVectors& newVector)
 {
-  // clear lambda
-  for (unsigned int i = 0; i < lambda.size(); i++)
-  {
-    if (isLambdaAllocatedIn[i]) delete lambda[i];
-    lambda[i] = NULL;
-  }
   lambda.clear();
 
-  // copy
-  lambda = newVector; // warning: pointer equality between lambda[i] and newVector[i]
-  isLambdaAllocatedIn.resize(lambda.size(), false);
+  lambda = newVector; // smart ptr
 }
 
 void Interaction::setLambda(const unsigned int  index, const BlockVector& newLambda)
 {
-  if (lambda.size() <= index)
-    RuntimeException::selfThrow("Interaction::setLambda, index out of range ");
+  assert(lambda.size() <= index &&
+         "Interaction::setLambda, index out of range");
 
   // set lambda[index]
-  if (lambda[index] == NULL)
+  if (! lambda[index])
   {
-    lambda[index] = new BlockVector(newLambda);
-    isLambdaAllocatedIn[index] = true ;
+    lambda[index].reset(new BlockVector(newLambda));
   }
   else
   {
-    if (lambda[index]->size() != newLambda.size())
-      RuntimeException::selfThrow("Interaction::setLambda(index,newLambda), inconsistent sizes between lambda(index) and newLambda ");
+    assert(lambda[index]->size() == newLambda.size() &&
+           "Interaction::setLambda(index,newLambda), inconsistent sizes between lambda(index) and newLambda");
     *(lambda[index]) = newLambda;
   }
 }
 
-void Interaction::setLambdaPtr(const unsigned int  index, SiconosVector* newLambda)
+void Interaction::setLambdaPtr(const unsigned int  index, SiconosVectorSPtr newLambda)
 {
-  if (lambda.size() <= index)
-    RuntimeException::selfThrow("Interaction::setLambdaPtr, index out of range ");
-  if (newLambda->size() != interactionSize)
-    RuntimeException::selfThrow("Interaction::setLambdaPtr, interactionSize differs from newLambda vector size ");
-  if (!newLambda->isBlock())
-    RuntimeException::selfThrow("Interaction::setLambdaPtr(newLambda), newLambda is not a block vector! ");
+  assert(lambda.size() > index &&
+         "Interaction::setLambdaPtr, index out of range ");
+
+  assert(newLambda->size() == interactionSize &&
+         "Interaction::setLambdaPtr, interactionSize differs from newLambda vector size ");
+
+  assert(newLambda->isBlock() &&
+         "Interaction::setLambdaPtr(newLambda), newLambda is not a block vector! ");
 
   // set lambda[index]
-  if (isLambdaAllocatedIn[index]) delete lambda[index];
-  lambda[index] = static_cast<BlockVector*>(newLambda);
-  isLambdaAllocatedIn[index] = false ;
+  lambda[index] = boost::static_pointer_cast<BlockVector>(newLambda);
 }
 
 void Interaction::setLambdaOld(const VectorOfVectors& newVector)
 {
-  // clear lambdaOld
-  for (unsigned int i = 0; i < lambdaOld.size(); i++)
-  {
-    if (isLambdaOldAllocatedIn[i]) delete lambdaOld[i];
-    lambdaOld[i] = NULL;
-  }
-  lambdaOld.clear();
   unsigned int size = newVector.size();
-  lambdaOld.resize(size, NULL);
+
+  // clear lambdaOld
+  lambdaOld.clear();
+  lambdaOld.resize(size);
 
   for (unsigned int i = 0; i < size; i++)
-    lambdaOld[i] = new BlockVector(*(newVector[i])); // -> copy !
-  isLambdaOldAllocatedIn.resize(size, true);
+    lambdaOld[i].reset(new BlockVector(*(newVector[i]))); // -> copy !
 }
 
 void Interaction::setLambdaOldPtr(const VectorOfVectors& newVector)
 {
   // clear lambdaOld
-  for (unsigned int i = 0; i < lambdaOld.size(); i++)
-  {
-    if (isLambdaOldAllocatedIn[i]) delete lambdaOld[i];
-    lambdaOld[i] = NULL;
-  }
   lambdaOld.clear();
 
   // copy
-  lambdaOld = newVector; // warning: pointer equality between lambdaOld[i] and newVector[i]
-  isLambdaOldAllocatedIn.resize(lambdaOld.size(), false);
+  lambdaOld = newVector; // smart ptrs
 }
 
 void Interaction::setLambdaOld(const unsigned int  index, const BlockVector& newLambdaOld)
 {
-  if (lambdaOld.size() <= index)
-    RuntimeException::selfThrow("Interaction::setLambdaOld, index out of range ");
+  assert(lambdaOld.size() > index &&
+         "Interaction::setLambdaOld, index out of range ");
 
   // set lambdaOld[index]
-  if (lambdaOld[index] == NULL)
+  if (! lambdaOld[index])
   {
-    lambdaOld[index] = new BlockVector(newLambdaOld);
-    isLambdaOldAllocatedIn[index] = true ;
+    lambdaOld[index].reset(new BlockVector(newLambdaOld));
   }
   else
   {
@@ -587,9 +455,9 @@ void Interaction::setLambdaOld(const unsigned int  index, const BlockVector& new
   }
 }
 
-void Interaction::setLambdaOldPtr(const unsigned int  index, SiconosVector* newLambdaOld)
+void Interaction::setLambdaOldPtr(const unsigned int  index, SiconosVectorSPtr newLambdaOld)
 {
-  if (lambdaOld.size() <= index)
+  if (lambdaOld.size() > index)
     RuntimeException::selfThrow("Interaction::setLambdaOldPtr, index out of range ");
   if (newLambdaOld->size() != interactionSize)
     RuntimeException::selfThrow("Interaction::setLambdaOldPtr, interactionSize differs from newLambdaOld vector size ");
@@ -597,9 +465,7 @@ void Interaction::setLambdaOldPtr(const unsigned int  index, SiconosVector* newL
     RuntimeException::selfThrow("Interaction::setLambdaOldPtr(newLambda), newLambda is not a block vector! ");
 
   // set lambdaOld[index]
-  if (isLambdaOldAllocatedIn[index]) delete lambdaOld[index];
-  lambdaOld[index] = static_cast<BlockVector*>(newLambdaOld);
-  isLambdaOldAllocatedIn[index] = false ;
+  lambdaOld[index] = boost::static_pointer_cast<BlockVector>(newLambdaOld);
 }
 
 
@@ -607,15 +473,15 @@ void Interaction::setDynamicalSystems(const DynamicalSystemsSet& newSet)
 {
   DSIterator itDS;
   for (itDS = newSet.begin(); itDS != newSet.end(); ++itDS)
-    involvedDS->insert(*itDS); // Warning: insert pointers to DS!!
+    involvedDS->insert(*itDS); // smart ptrs
 
   computeSizeOfDS();
 }
 
-DynamicalSystem* Interaction::getDynamicalSystemPtr(int nb)
+SP::DynamicalSystem Interaction::getDynamicalSystemPtr(int nb)
 {
-  if (! involvedDS->isIn(nb)) // if ds number nb is not in the set ...
-    RuntimeException::selfThrow("Interaction::getDynamicalSystemPtr(nb), DS number nb is not in the set.");
+  assert(involvedDS->isIn(nb) &&  // if ds number nb is not in the set ...
+         "Interaction::getDynamicalSystemPtr(nb), DS number nb is not in the set.");
   return involvedDS->getPtr(number);
 }
 
@@ -623,27 +489,19 @@ void Interaction::getDynamicalSystem(int nb, DynamicalSystem& ds)
 {
   // This function is useless in C++ but maybe required in Python? To be checked.
   // DS is a parameter, since it can be returned, DynamicalSystem being an abstract class.
-  if (! involvedDS->isIn(nb)) // if ds number nb is not in the set ...
-    RuntimeException::selfThrow("Interaction::getDynamicalSystem(nb), DS number nb is not in the set.");
+  assert(involvedDS->isIn(nb) &&   // if ds number nb is not in the set ...
+         "Interaction::getDynamicalSystem(nb), DS number nb is not in the set.");
   ds = *(involvedDS->getPtr(nb));
 }
 
-void Interaction::setRelationPtr(Relation* newRelation)
+void Interaction::setRelationPtr(RelationSPtr newRelation)
 {
-  if (isAllocatedIn["relation"]) delete relation;
   relation = newRelation;
-  isAllocatedIn["relation"] = false;
 }
 
 void Interaction::setNonSmoothLawPtr(NonSmoothLawSPtr newNslaw)
 {
-#ifndef WithSmartPtr
-  if (isAllocatedIn["nsLaw"]) delete nslaw;
   nslaw = newNslaw;
-  isAllocatedIn["nsLaw"] = false;
-#else
-  nslaw = newNslaw;
-#endif
 }
 
 // --- OTHER FUNCTIONS ---
@@ -653,10 +511,12 @@ void Interaction::computeSizeOfDS()
   sizeOfDS = 0;
   sizeZ = 0;
   DSIterator it;
+  SP::SiconosVector ZP;
   for (it = involvedDS->begin(); it != involvedDS->end(); it++)
   {
     sizeOfDS += (*it)->getDim();
-    sizeZ += (*it)->getZPtr()->size();
+    ZP = (*it)->getZPtr();
+    if (ZP) sizeZ += ZP->size();
   }
 }
 
@@ -680,22 +540,22 @@ void Interaction::display() const
   cout << "| number : " << number << endl;
   involvedDS->display();
   cout << "| y : " << endl;
-  if (y[0] != NULL) y[0]->display();
+  if (y[0]) y[0]->display();
   else cout << "->NULL" << endl;
   cout << "| yDot : " << endl;
-  if (y[1] != NULL) y[1]->display();
+  if (y[1]) y[1]->display();
   else cout << "->NULL" << endl;
   cout << "| yOld : " << endl;
-  if (yOld[0] != NULL) yOld[0]->display();
+  if (yOld[0]) yOld[0]->display();
   else cout << "->NULL" << endl;
   cout << "| yDotOld : " << endl;
-  if (yOld[1] != NULL) yOld[1]->display();
+  if (yOld[1]) yOld[1]->display();
   else cout << "->NULL" << endl;
   cout << "| lambda : " << endl;
-  if (lambda[0] != NULL) lambda[0]->display();
+  if (lambda[0]) lambda[0]->display();
   else cout << "->NULL" << endl;
   cout << "| lambdaDot : " << endl;
-  if (lambda[1] != NULL) lambda[1]->display();
+  if (lambda[1]) lambda[1]->display();
   else cout << "->NULL" << endl;
   cout << "===================================" << endl;
 }
@@ -718,7 +578,7 @@ void Interaction::saveInteractionToXML()
    * save the data of the Interaction
    */
 
-  if (interactionxml != NULL)
+  if (interactionxml)
   {
     //  interactionxml->setDSConcerned( involvedDS );
     interactionxml->setId(id);
@@ -742,16 +602,16 @@ void Interaction::saveInteractionToXML()
     if (subType == NonLinearR)
       relation->saveRelationToXML();
     else if (subType == LinearR)
-      (static_cast<FirstOrderLinearR*>(relation))->saveRelationToXML();
+      (boost::static_pointer_cast<FirstOrderLinearR>(relation))->saveRelationToXML();
     else if (subType == LinearTIR)
-      (static_cast<FirstOrderLinearTIR*>(relation))->saveRelationToXML();
+      (boost::static_pointer_cast<FirstOrderLinearTIR>(relation))->saveRelationToXML();
     else
       RuntimeException::selfThrow("Interaction::saveInteractionToXML - Unknown relation subtype: " + subType);
   }
   else if (type == Lagrangian)
   {
     if (subType == LinearR)
-      (static_cast<LagrangianLinearR*>(relation))->saveRelationToXML();
+      (boost::static_pointer_cast<LagrangianLinearR>(relation))->saveRelationToXML();
     else
       RuntimeException::selfThrow("Interaction::saveInteractionToXML - Not yet implemented for relation subtype " + subType);
   }
@@ -764,40 +624,20 @@ void Interaction::saveInteractionToXML()
 
   if (nslaw->getType() == COMPLEMENTARITYCONDITIONNSLAW)
   {
-
-#ifndef WithSmartPtr
-    (static_cast<ComplementarityConditionNSL*>(nslaw))->saveNonSmoothLawToXML();
-#else
     (boost::static_pointer_cast<ComplementarityConditionNSL>(nslaw))->saveNonSmoothLawToXML();
-#endif
   }
   else if (nslaw->getType() == RELAYNSLAW)
   {
-
-#ifndef WithSmartPtr
-    (static_cast<RelayNSL*>(nslaw))->saveNonSmoothLawToXML();
-#else
     (boost::static_pointer_cast<RelayNSL>(nslaw))->saveNonSmoothLawToXML();
-#endif
   }
   else if (nslaw->getType() == NEWTONIMPACTNSLAW)
   {
-
-#ifndef WithSmartPtr
-    (static_cast<NewtonImpactNSL*>(nslaw))->saveNonSmoothLawToXML();
-#else
     (boost::static_pointer_cast<NewtonImpactNSL>(nslaw))->saveNonSmoothLawToXML();
-#endif
   }
 
   else if (nslaw->getType() == NEWTONIMPACTFRICTIONNSLAW)
   {
-
-#ifndef WithSmartPtr
-    (static_cast<NewtonImpactFrictionNSL*>(nslaw))->saveNonSmoothLawToXML();
-#else
     (boost::static_pointer_cast<NewtonImpactFrictionNSL>(nslaw))->saveNonSmoothLawToXML();
-#endif
   }
 
   else RuntimeException::selfThrow("Interaction::saveInteractionToXML - bad kind of NonSmoothLaw : " + nslaw->getType());

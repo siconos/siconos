@@ -22,6 +22,7 @@
 #ifndef __MODELXML__
 #define __MODELXML__
 
+#include "SiconosPointers.h"
 #include "SiconosDOMTreeTools.h"
 #include "KernelConfig.h"
 #include <libxml/parser.h>
@@ -92,9 +93,9 @@ private:
   /** Final time node. */
   xmlNodePtr TNode;
   /** Non smooth dynamical system node. */
-  NonSmoothDynamicalSystemXML *nsdsXML;
+  NonSmoothDynamicalSystemXMLSPtr nsdsXML;
   /** Simulation node. */
-  SimulationXML *simulationXML;
+  SimulationXMLSPtr simulationXML;
 
   const std::string  SICONOSPATH;
 
@@ -334,7 +335,7 @@ public:
   /** This function allows to get the NonSmoothDynamicalSystemXML
   *   \return The NonSmoothDynamicalSystemXML of the SiconosModelXML
   */
-  inline NonSmoothDynamicalSystemXML* getNonSmoothDynamicalSystemXML() const
+  inline NonSmoothDynamicalSystemXMLSPtr getNonSmoothDynamicalSystemXML() const
   {
     return nsdsXML;
   }
@@ -342,7 +343,7 @@ public:
   /** This function allows to get the SimulationXML
   *   \return The SimulationXML of the SiconosModelXML
   */
-  inline SimulationXML* getSimulationXML() const
+  inline SimulationXMLSPtr getSimulationXML() const
   {
     return simulationXML;
   }
@@ -375,9 +376,9 @@ public:
   bool checkSiconosDOMTreeCoherency();
 
   /** Loads the model with all the data required to construct it
-  *  \param Model* : the Model which contains all the data to build the SiconosModelXML
+  *  \param SP::Model : the Model which contains all the data to build the SiconosModelXML
   */
-  void loadModel(Model*);
+  void loadModel(ModelSPtr);
 
   /**
   *  \param string :

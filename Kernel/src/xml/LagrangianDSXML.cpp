@@ -23,13 +23,12 @@ using namespace std;
 
 LagrangianDSXML::LagrangianDSXML() :
   DynamicalSystemXML(), qNode(NULL), q0Node(NULL), qMemoryNode(NULL), velocityNode(NULL),
-  velocity0Node(NULL), velocityMemoryNode(NULL),  MassNode(NULL), NNLNode(NULL), FIntNode(NULL), FExtNode(NULL),
-  qMemoryXML(NULL), velocityMemoryXML(NULL)
+  velocity0Node(NULL), velocityMemoryNode(NULL),  MassNode(NULL), NNLNode(NULL), FIntNode(NULL), FExtNode(NULL)
 {}
 
 LagrangianDSXML::LagrangianDSXML(xmlNodePtr  DSNode, bool isBVP):
   DynamicalSystemXML(DSNode, isBVP), qNode(NULL), q0Node(NULL), qMemoryNode(NULL), velocityNode(NULL),
-  velocity0Node(NULL), velocityMemoryNode(NULL),  MassNode(NULL), NNLNode(NULL), FIntNode(NULL), FExtNode(NULL), qMemoryXML(NULL), velocityMemoryXML(NULL)
+  velocity0Node(NULL), velocityMemoryNode(NULL),  MassNode(NULL), NNLNode(NULL), FIntNode(NULL), FExtNode(NULL)
 {
   xmlNodePtr node;
 
@@ -44,7 +43,7 @@ LagrangianDSXML::LagrangianDSXML(xmlNodePtr  DSNode, bool isBVP):
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_QMEMORY)) != NULL)
   {
     qMemoryNode = node;
-    qMemoryXML = new SiconosMemoryXML(qMemoryNode);
+    qMemoryXML.reset(new SiconosMemoryXML(qMemoryNode));
   }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_VELOCITY)) != NULL)
@@ -58,7 +57,7 @@ LagrangianDSXML::LagrangianDSXML(xmlNodePtr  DSNode, bool isBVP):
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_VELOCITYMEMORY)) != NULL)
   {
     velocityMemoryNode = node;
-    velocityMemoryXML = new SiconosMemoryXML(velocityMemoryNode);
+    velocityMemoryXML.reset(new SiconosMemoryXML(velocityMemoryNode));
   }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_Mass)) != NULL)
@@ -99,17 +98,13 @@ LagrangianDSXML::LagrangianDSXML(xmlNodePtr  DSNode, bool isBVP):
 
 LagrangianDSXML::~LagrangianDSXML()
 {
-  if (velocityMemoryXML != NULL) delete velocityMemoryXML;
-  if (qMemoryXML != NULL) delete qMemoryXML;
-  qMemoryXML = NULL;
-  velocityMemoryXML = NULL;
 }
 
 void LagrangianDSXML::setQMemory(const SiconosMemory& smem)
 {
   if (!hasQMemory())
   {
-    qMemoryXML = new SiconosMemoryXML(NULL, rootNode, LNLDS_QMEMORY);
+    qMemoryXML.reset(new SiconosMemoryXML(NULL, rootNode, LNLDS_QMEMORY));
     qMemoryNode = qMemoryXML->getSiconosMemoryXMLNode();
     qMemoryXML->setSiconosMemorySize(smem.getMemorySize());
     qMemoryXML->setSiconosMemoryVector(smem.getVectorMemory());
@@ -124,7 +119,7 @@ void LagrangianDSXML::setVelocityMemory(const SiconosMemory& smem)
 {
   if (hasVelocityMemory() == false)
   {
-    velocityMemoryXML = new SiconosMemoryXML(NULL, rootNode, LNLDS_VELOCITYMEMORY);
+    velocityMemoryXML.reset(new SiconosMemoryXML(NULL, rootNode, LNLDS_VELOCITYMEMORY));
     velocityMemoryNode = velocityMemoryXML->getSiconosMemoryXMLNode();
 
     velocityMemoryXML->setSiconosMemorySize(smem.getMemorySize());
