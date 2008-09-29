@@ -29,6 +29,8 @@
 
 using namespace std;
 
+namespace Ptr = SharedPointer;
+
 int main(int argc, char* argv[])
 {
   try
@@ -54,21 +56,21 @@ int main(int argc, char* argv[])
 
     cout << "====> Model loading ..." << endl << endl;
     DynamicalSystemsSet allDS; // the list of DS
-    SiconosMatrix *Mass = new SimpleMatrix(nDof, nDof);
+    Ptr::SiconosMatrix Mass(new SimpleMatrix(nDof, nDof));
     (*Mass)(0, 0) = m;
     (*Mass)(1, 1) = m;
     (*Mass)(2, 2) = 3. / 5 * m * R * R;
 
     // -- Initial positions and velocities --
-    SiconosVector * q0 = new SimpleVector(nDof);
-    SiconosVector * v0 = new SimpleVector(nDof);
+    Ptr::SiconosVector q0(new SimpleVector(nDof));
+    Ptr::SiconosVector v0(new SimpleVector(nDof));
     (*q0)(0) = position_init;
     (*v0)(0) = velocity_init;
     // -- The dynamical system --
-    LagrangianLinearTIDS* ball = new LagrangianLinearTIDS(0, *q0, *v0, *Mass);
+    Ptr::LagrangianLinearTIDS ball(new LagrangianLinearTIDS(0, *q0, *v0, *Mass));
     allDS.insert(ball);
     // -- Set external forces (weight) --
-    SiconosVector * weight = new SimpleVector(nDof);
+    Ptr::SiconosVector weight(new SimpleVector(nDof));
     (*weight)(0) = -m * g;
     ball->setFExtPtr(weight);
 
@@ -83,23 +85,23 @@ int main(int argc, char* argv[])
 
     // Interaction ball-floor
     //
-    SiconosMatrix *H = new SimpleMatrix(1, nDof);
+    Ptr::SiconosMatrix H(new SimpleMatrix(1, nDof));
     (*H)(0, 0) = 1.0;
-    NonSmoothLaw * nslaw0 = new NewtonImpactNSL(e);
-    Relation * relation0 = new LagrangianLinearR(*H);
+    Ptr::NonSmoothLaw nslaw0(new NewtonImpactNSL(e));
+    Ptr::Relation relation0(new LagrangianLinearR(*H));
 
-    Interaction * inter = new Interaction("floor-ball", allDS, 0, 1, nslaw0, relation0);
+    Ptr::Interaction inter(new Interaction("floor-ball", allDS, 0, 1, nslaw0, relation0));
     allInteractions.insert(inter);
     // --------------------------------
     // --- NonSmoothDynamicalSystem ---
     // --------------------------------
-    NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(allDS, allInteractions);
+    Ptr::NonSmoothDynamicalSystem nsds(new NonSmoothDynamicalSystem(allDS, allInteractions));
 
     // -------------
     // --- Model ---
     // -------------
 
-    Model * bouncingBall = new Model(t0, T);
+    Ptr::Model bouncingBall(new Model(t0, T));
     bouncingBall->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
 
     // ------------------
@@ -107,21 +109,21 @@ int main(int argc, char* argv[])
     // ------------------
 
     // -- Time discretisation --
-    TimeDiscretisation * t = new TimeDiscretisation(h, bouncingBall);
+    Ptr::TimeDiscretisation t(new TimeDiscretisation(h, bouncingBall));
 
-    TimeStepping* s = new TimeStepping(t);
+    Ptr::TimeStepping s(new TimeStepping(t));
 
     // -- OneStepIntegrators --
-    Moreau * OSI = new Moreau(ball, theta, s);
+    Ptr::Moreau OSI(new Moreau(ball, theta, s));
 
     IntParameters iparam(5);
     iparam[0] = 1000; // Max number of iteration
     DoubleParameters dparam(5);
     dparam[0] = 1e-15; // Tolerance
     string solverName = "Lemke" ;
-    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
+    Ptr::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     // -- OneStepNsProblem --
-    OneStepNSProblem * osnspb = new LCP(s, mySolver);
+    Ptr::OneStepNSProblem osnspb(new LCP(s, mySolver));
 
     // =========================== End of model definition ===========================
 
@@ -130,6 +132,8 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
     cout << "====> Simulation initialisation ..." << endl << endl;
+    s->addOneStepIntegratorPtr(OSI);
+    s->addOneStepNSProblemPtr(osnspb);
     s->initialize();
     int N = (int)((T - t0) / h); // Number of time steps
 
@@ -138,10 +142,10 @@ int main(int argc, char* argv[])
     unsigned int outputSize = 5;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
-    SiconosVector * q = ball->getQPtr();
-    SiconosVector * v = ball->getVelocityPtr();
-    SiconosVector * p = ball->getPPtr(2);
-    SiconosVector * lambda = inter->getLambdaPtr(1);
+    Ptr::SiconosVector q = ball->getQPtr();
+    Ptr::SiconosVector v = ball->getVelocityPtr();
+    Ptr::SiconosVector p = ball->getPPtr(2);
+    Ptr::SiconosVector lambda = inter->getLambdaPtr(1);
 
     dataPlot(0, 0) = bouncingBall->getT0();
     dataPlot(0, 1) = (*q)(0);
