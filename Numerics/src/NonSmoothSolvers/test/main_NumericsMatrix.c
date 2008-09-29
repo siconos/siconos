@@ -116,10 +116,10 @@ void test_BuildNumericsMatrix(NumericsMatrix** MM1, NumericsMatrix** MM2)
     SBM->block[5][i] = block5[i];
 }
 
-int test_prod(NumericsMatrix* M1, NumericsMatrix* M2)
+int test_prodNumericsMatrix(NumericsMatrix* M1, NumericsMatrix* M2)
 {
 
-  printf("== Numerics tests: prod(NumericsMatrix,vector) == \n");
+  printf("== Numerics tests: prodNumericsMatrix(NumericsMatrix,vector) == \n");
   int i , n = M1->size1;
   double * x = malloc(n * sizeof(double));
   double alpha = 2.3, beta = 1.9;
@@ -135,7 +135,7 @@ int test_prod(NumericsMatrix* M1, NumericsMatrix* M2)
   int incx = 1, incy = 1;
   DGEMV(LA_NOTRANS, n, n, alpha, M1->matrix0, n, x, incx, beta, yref, incy);
 
-  prod(n, n, alpha, M1, x, beta, y);
+  prodNumericsMatrix(n, n, alpha, M1, x, beta, y);
   double tol = 1e-12;
   int info = 0;
   for (i = 0; i < n; i++)
@@ -153,7 +153,7 @@ int test_prod(NumericsMatrix* M1, NumericsMatrix* M2)
   {
     y[i] = 0.1 * i;
   }
-  prod(n, n, alpha, M2, x, beta, y);
+  prodNumericsMatrix(n, n, alpha, M2, x, beta, y);
   for (i = 0; i < n; i++)
   {
     if (fabs(y[i] - yref[i]) > tol) info = 1;
@@ -167,7 +167,7 @@ int test_prod(NumericsMatrix* M1, NumericsMatrix* M2)
 
   free(x);
   free(y);
-  printf("== End of test prod(NumericsMatrix,vector), result = %d\n", info);
+  printf("== End of test prodNumericsMatrix(NumericsMatrix,vector), result = %d\n", info);
 
   return info;
 }
@@ -371,8 +371,8 @@ int main(void)
 
   test_BuildNumericsMatrix(&M1, &M2);
   printf("Construction ok ...\n");
-  int info = test_prod(M1, M2);
-  printf("End of Prod ...\n");
+  int info = test_prodNumericsMatrix(M1, M2);
+  printf("End of ProdNumericsMatrix ...\n");
   info = test_subRowprod(M1, M2);
   printf("End of Sub-Prod ...\n");
   info = test_rowProdNoDiag(M1, M2);

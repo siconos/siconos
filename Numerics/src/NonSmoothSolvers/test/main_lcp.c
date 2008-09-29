@@ -175,7 +175,7 @@ int test_lcp_series(LinearComplementarity_Problem * problem, int* solversList)
     comp = DDOT(n , z[k] , incx , w[k] , incy);
     DCOPY(n , w[k], incx, wBuffer , incy);
     DAXPY(n , alpha , problem->q , incx , wBuffer , incy);
-    prod(n, n, beta, problem->M, z[k], alpha, wBuffer);
+    prodNumericsMatrix(n, n, beta, problem->M, z[k], alpha, wBuffer);
     diff = DNRM2(n , wBuffer  , incx);
 
     if (isSparse == 0)
@@ -203,7 +203,7 @@ int test_lcp_series(LinearComplementarity_Problem * problem, int* solversList)
     comp = DDOT(n , z[k] , incx , w[k] , incy);
     DCOPY(n , w[k], incx, wBuffer , incy);
     DAXPY(n , alpha , problem->q , incx , wBuffer  , incy);
-    prod(n, n, beta, problem->M, z[k], alpha, wBuffer);
+    prodNumericsMatrix(n, n, beta, problem->M, z[k], alpha, wBuffer);
     diff = DNRM2(n , wBuffer , incx);
 
     if (isSparse == 0)
@@ -231,7 +231,7 @@ int test_lcp_series(LinearComplementarity_Problem * problem, int* solversList)
     comp = DDOT(n , z[k] , incx , w[k] , incy);
     DCOPY(n , w[k], incx, wBuffer , incy);
     DAXPY(n , alpha , problem->q , incx , wBuffer  , incy);
-    prod(n, n, beta, problem->M, z[k], alpha, wBuffer);
+    prodNumericsMatrix(n, n, beta, problem->M, z[k], alpha, wBuffer);
     diff = DNRM2(n , wBuffer , incx);
 
     printf("    CPG     (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |\n", info1, local_options->iparam[1], local_options->dparam[1], comp, diff);
@@ -259,7 +259,7 @@ int test_lcp_series(LinearComplementarity_Problem * problem, int* solversList)
     comp = DDOT(n , z[k] , incx , w[k] , incy);
     DCOPY(n , w[k], incx, wBuffer , incy);
     DAXPY(n , alpha , problem->q , incx , wBuffer , incy);
-    prod(n, n, beta, problem->M, z[k], alpha, wBuffer);
+    prodNumericsMatrix(n, n, beta, problem->M, z[k], alpha, wBuffer);
     diff = DNRM2(n , wBuffer , incx);
 
     if (isSparse == 0)
@@ -289,7 +289,7 @@ int test_lcp_series(LinearComplementarity_Problem * problem, int* solversList)
     comp = DDOT(n , z[k] , incx , w[k] , incy);
     DCOPY(n , w[k], incx, wBuffer , incy);
     DAXPY(n , alpha , problem->q , incx , wBuffer , incy);
-    prod(n, n, beta, problem->M, z[k], alpha, wBuffer);
+    prodNumericsMatrix(n, n, beta, problem->M, z[k], alpha, wBuffer);
     diff = DNRM2(n , wBuffer , incx);
 
     if (isSparse == 0)
@@ -317,7 +317,7 @@ int test_lcp_series(LinearComplementarity_Problem * problem, int* solversList)
     comp = DDOT(n , z[k] , incx , w[k] , incy);
     DCOPY(n , w[k], incx, wBuffer , incy);
     DAXPY(n , alpha , problem->q , incx , wBuffer , incy);
-    prod(n, n, beta, problem->M, z[k], alpha, wBuffer);
+    prodNumericsMatrix(n, n, beta, problem->M, z[k], alpha, wBuffer);
     diff = DNRM2(n , wBuffer , incx);
 
     if (isSparse == 0)
@@ -346,7 +346,7 @@ int test_lcp_series(LinearComplementarity_Problem * problem, int* solversList)
     comp = DDOT(n , z[k] , incx , w[k] , incy);
     DCOPY(n , w[k], incx, wBuffer , incy);
     DAXPY(n , alpha , problem->q , incx , wBuffer , incy);
-    prod(n, n, beta, problem->M, z[k], alpha, wBuffer);
+    prodNumericsMatrix(n, n, beta, problem->M, z[k], alpha, wBuffer);
     diff = DNRM2(n , wBuffer , incx);
 
     if (isSparse == 0)
@@ -374,7 +374,7 @@ int test_lcp_series(LinearComplementarity_Problem * problem, int* solversList)
     comp = DDOT(n , z[k] , incx , w[k] , incy);
     DCOPY(n , w[k], incx, wBuffer , incy);
     DAXPY(n , alpha , problem->q , incx , wBuffer , incy);
-    prod(n, n, beta, problem->M, z[k], alpha, wBuffer);
+    prodNumericsMatrix(n, n, beta, problem->M, z[k], alpha, wBuffer);
     diff = DNRM2(n , wBuffer , incx);
 
     printf("    QP      (LOG:%1d)|  not set   |  not set   | %10.4g | %10.4g |\n", info1, comp, diff);
@@ -398,7 +398,7 @@ int test_lcp_series(LinearComplementarity_Problem * problem, int* solversList)
     comp = DDOT(n , z[k] , incx , w[k] , incy);
     DCOPY(n , w[k], incx, wBuffer , incy);
     DAXPY(n , alpha , problem->q , incx , wBuffer , incy);
-    prod(n, n, beta, problem->M, z[k], alpha, wBuffer);
+    prodNumericsMatrix(n, n, beta, problem->M, z[k], alpha, wBuffer);
     diff = DNRM2(n , wBuffer , incx);
 
     printf("    NSQP    (LOG:%1d)|  not set   |  not set   | %10.4g | %10.4g |\n", info1, comp, diff);
@@ -423,7 +423,7 @@ int test_lcp_series(LinearComplementarity_Problem * problem, int* solversList)
     comp = DDOT(n , z[k] , incx , w[k] , incy);
     DCOPY(n , w[k], incx, wBuffer , incy);
     DAXPY(n , alpha , problem->q , incx , wBuffer , incy);
-    prod(n, n, beta, problem->M, z[k], alpha, wBuffer);
+    prodNumericsMatrix(n, n, beta, problem->M, z[k], alpha, wBuffer);
     diff = DNRM2(n , wBuffer , incx);
 
     if (isSparse == 0)
@@ -458,7 +458,7 @@ int test_lcp_series(LinearComplementarity_Problem * problem, int* solversList)
       comp = DDOT(n , z[k] , incx , w[k] , incy);
       DCOPY(n , w[k], incx, wBuffer , incy);
       DAXPY(n , alpha , problem->q , incx , wBuffer , incy);
-      prod(n, n, beta, problem->M, z[k], alpha, wBuffer);
+      prodNumericsMatrix(n, n, beta, problem->M, z[k], alpha, wBuffer);
       diff = DNRM2(n , wBuffer , incx);
     }
     else
@@ -491,7 +491,7 @@ int test_lcp_series(LinearComplementarity_Problem * problem, int* solversList)
     comp = DDOT(n , z[k] , incx , w[k] , incy);
     DCOPY(n , w[k], incx, wBuffer , incy);
     DAXPY(n , alpha , problem->q , incx , wBuffer , incy);
-    prod(n, n, beta, problem->M, z[k], alpha, wBuffer);
+    prodNumericsMatrix(n, n, beta, problem->M, z[k], alpha, wBuffer);
     diff = DNRM2(n , wBuffer , incx);
 
     if (isSparse == 0)

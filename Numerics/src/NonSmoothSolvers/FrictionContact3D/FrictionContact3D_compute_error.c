@@ -36,7 +36,7 @@ int FrictionContact3D_compute_error(FrictionContact_Problem* problem, double *z 
   double *mu = problem->mu;
   double worktmp[3];
   DCOPY(n , problem->q , incx , w , incy); // w <-q
-  prod(n, n, 1.0, problem->M, z, 1.0, w);
+  prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
 
   *error = 0.;
   double normUT;

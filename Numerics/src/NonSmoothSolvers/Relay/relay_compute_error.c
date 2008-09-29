@@ -42,7 +42,7 @@ int relay_compute_error(Relay_Problem* problem, double *z , double *w, double to
   /* Computes w = Mz + q */
   int n = problem->size;
   DCOPY(n , problem->q , 1 , w , 1);  // w <-q
-  prod(n, n, 1.0, problem->M, z, 1.0, w);
+  prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
   double * ztmp = (double*)malloc(n * sizeof(double));
   DCOPY(n , z , 1 , ztmp, 1);  // ztmp <-z
 

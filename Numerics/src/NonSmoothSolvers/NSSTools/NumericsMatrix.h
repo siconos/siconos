@@ -130,7 +130,7 @@ extern "C" {
       \param[in] beta coefficient
       \param[in,out] y the resulting vector
   */
-  void prod(int sizeX, int sizeY, double alpha, const NumericsMatrix* const A, const double* const x, double beta, double* y);
+  void prodNumericsMatrix(int sizeX, int sizeY, double alpha, const NumericsMatrix* const A, const double* const x, double beta, double* y);
 
   /** Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (sizeY rows and sizeX columns)
       \param[in] sizeX dim of the vector x

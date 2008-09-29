@@ -50,7 +50,7 @@ int mlcp_compute_error(MixedLinearComplementarity_Problem* problem, double *z, d
 
     /* Computes w = Mz + q */
     DCOPY(size , problem->q , incx , w , incy);
-    prod(size, size, 1.0, problem->M, z, 1.0, w);
+    prodNumericsMatrix(size, size, 1.0, problem->M, z, 1.0, w);
 
   }
   /* Problem in the form ABCD */

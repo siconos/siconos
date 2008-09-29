@@ -31,7 +31,7 @@ int lcp_compute_error(LinearComplementarity_Problem* problem, double *z , double
   int incx = 1, incy = 1;
   int n = problem->size;
   DCOPY(n , problem->q , incx , w , incy);  // w <-q
-  prod(n, n, 1.0, problem->M, z, 1.0, w);
+  prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
 
   /* Checks complementarity */
   *error = 0.;

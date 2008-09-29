@@ -170,7 +170,7 @@ int test_relay_series(Relay_Problem * problem, int* solversList)
     comp = DDOT(n , z[k] , incx , w[k] , incy);
     DCOPY(n , w[k], incx, wBuffer , incy);
     DAXPY(n , alpha , problem->q , incx , wBuffer , incy);
-    prod(n, n, beta, problem->M, z[k], alpha, wBuffer);
+    prodNumericsMatrix(n, n, beta, problem->M, z[k], alpha, wBuffer);
     diff = DNRM2(n , wBuffer  , incx);
 
     printf("  PGS     (LOG:%1d)|      %5d | %10.4g  | %10.4g |\n", info1, local_options->iparam[1], local_options->dparam[1], diff);
@@ -195,7 +195,7 @@ int test_relay_series(Relay_Problem * problem, int* solversList)
     comp = DDOT(n , z[k] , incx , w[k] , incy);
     DCOPY(n , w[k], incx, wBuffer , incy);
     DAXPY(n , alpha , problem->q , incx , wBuffer , incy);
-    prod(n, n, beta, problem->M, z[k], alpha, wBuffer);
+    prodNumericsMatrix(n, n, beta, problem->M, z[k], alpha, wBuffer);
     diff = DNRM2(n , wBuffer , incx);
 
     if (isSparse == 0)
@@ -225,7 +225,7 @@ int test_relay_series(Relay_Problem * problem, int* solversList)
     comp = DDOT(n , z[k] , incx , w[k] , incy);
     DCOPY(n , w[k], incx, wBuffer , incy);
     DAXPY(n , alpha , problem->q , incx , wBuffer  , incy);
-    prod(n, n, beta, problem->M, z[k], alpha, wBuffer);
+    prodNumericsMatrix(n, n, beta, problem->M, z[k], alpha, wBuffer);
     diff = DNRM2(n , wBuffer , incx);
 
     printf("    Latin   (LOG:%1d)|      %5d | %10.4g |  %10.4g |\n", info1, local_options->iparam[1], local_options->dparam[1], diff);

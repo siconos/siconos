@@ -23,7 +23,7 @@
 #include "LA.h"
 
 
-void prod(int sizeX, int sizeY, double alpha, const NumericsMatrix* const A, const double* const x, double beta, double* y)
+void prodNumericsMatrix(int sizeX, int sizeY, double alpha, const NumericsMatrix* const A, const double* const x, double beta, double* y)
 {
 
 
