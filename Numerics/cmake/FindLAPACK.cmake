@@ -1,5 +1,5 @@
 # - Find LAPACK library
-# This module finds an installed fortran library that implements the LAPACK
+# This module finds an installed C library that implements the LAPACK
 # linear-algebra interface (see http://www.netlib.org/lapack/).
 #
 # The approach follows that taken for the autoconf macro file, acx_lapack.m4
@@ -14,13 +14,13 @@
 #    link against to use LAPACK
 #
 
-include(CheckFortranFunctionExists)
+include(CheckFunctionExists)
 set(LAPACK_FOUND FALSE)
 
 macro(Check_Lapack_Libraries LIBRARIES _prefix _name _flags _list _blas)
-# This macro checks for the existence of the combination of fortran libraries
+# This macro checks for the existence of the combination of C libraries
 # given by _list.  If the combination is found, this macro checks (using the 
-# Check_Fortran_Function_Exists macro) whether can link against that library
+# Check_Function_Exists macro) whether can link against that library
 # combination using the name of a routine given by _name using the linker
 # flags given by _flags.  If the combination of libraries is found and passes
 # the link test, LIBRARIES is set to the list of complete library paths that
@@ -60,7 +60,7 @@ if(_libraries_work)
   # Test this combination of libraries.
   set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}} ${_blas})
   #message("DEBUG: CMAKE_REQUIRED_LIBRARIES = ${CMAKE_REQUIRED_LIBRARIES}")
-  check_fortran_function_exists(${_name} ${_prefix}${_combined_name}_WORKS)
+  check_function_exists(${_name} ${_prefix}${_combined_name}_WORKS)
   set(CMAKE_REQUIRED_LIBRARIES)
   mark_as_advanced(${_prefix}${_combined_name}_WORKS)
   set(_libraries_work ${${_prefix}${_combined_name}_WORKS})
@@ -94,7 +94,7 @@ if(BLAS_FOUND)
     check_lapack_libraries(
       LAPACK_LIBRARIES
       LAPACK
-      ATL_dgetrf  # checked with fortran!
+      ATL_dgetrf  
       ""
       "lapack_atlas"
       "${BLAS_LIBRARIES}")
@@ -102,7 +102,7 @@ if(BLAS_FOUND)
       check_lapack_libraries(
         LAPACK_LIBRARIES
         LAPACK
-        ATL_dgetrf  # checked with fortran!
+        ATL_dgetrf 
         ""
         "lapack"
         "${BLAS_LIBRARIES}")
@@ -111,7 +111,7 @@ if(BLAS_FOUND)
     check_lapack_libraries(
       COMPLETE_LAPACK_LIBRARIES
       LAPACK
-      cgesvd  # checked with fortran!
+      gesvd 
       ""
       "lapack"
       "${BLAS_LIBRARIES}")

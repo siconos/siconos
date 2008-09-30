@@ -47,7 +47,7 @@ MACRO(SICONOS_PROJECT
   # Build options
   # Static and shared libs : defaults
   OPTION(BUILD_SHARED_LIBS "Building of shared libraries" ON)
-  OPTION(BUILD_STATIC_LIBS "Building of static libraries" ON)
+  OPTION(BUILD_STATIC_LIBS "Building of static libraries" OFF)
   OPTION(WITH_TESTS_COVERAGE "Code coverage setup" OFF)
   OPTION(WITHOUT_SVN "Consider SVN is offline" OFF)
 

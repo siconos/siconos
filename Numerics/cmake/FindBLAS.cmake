@@ -1,4 +1,4 @@
-# This module finds an installed fortran library that implements the BLAS 
+# This module finds an installed C library that implements the BLAS 
 # linear-algebra interface (see http://www.netlib.org/blas/).  
 # The list of libraries searched for is taken
 # from the autoconf macro file, acx_blas.m4 (distributed at
@@ -13,12 +13,12 @@
 #    link against to use BLAS
 #
 
-include(CheckFortranFunctionExists)
+include(CheckFunctionExists)
 
-macro(Check_Fortran_Libraries LIBRARIES _prefix _name _flags _list)
-# This macro checks for the existence of the combination of fortran libraries
+macro(Check_Libraries LIBRARIES _prefix _name _flags _list)
+# This macro checks for the existence of the combination of libraries
 # given by _list.  If the combination is found, this macro checks (using the 
-# Check_Fortran_Function_Exists macro) whether can link against that library
+# Check_Function_Exists macro) whether can link against that library
 # combination using the name of a routine given by _name using the linker
 # flags given by _flags.  If the combination of libraries is found and passes
 # the link test, LIBRARIES is set to the list of complete library paths that
@@ -58,7 +58,7 @@ if(_libraries_work)
   # Test this combination of libraries.
   set(CMAKE_REQUIRED_LIBRARIES ${_flags} ${${LIBRARIES}})
   #message("DEBUG: CMAKE_REQUIRED_LIBRARIES = ${CMAKE_REQUIRED_LIBRARIES}")
-  check_fortran_function_exists(${_name} ${_prefix}${_combined_name}_WORKS)
+  check_function_exists(${_name} ${_prefix}${_combined_name}_WORKS)
   set(CMAKE_REQUIRED_LIBRARIES)
   mark_as_advanced(${_prefix}${_combined_name}_WORKS)
   set(_libraries_work ${${_prefix}${_combined_name}_WORKS})
@@ -67,7 +67,7 @@ if(NOT _libraries_work)
   set(${LIBRARIES} FALSE)
 endif(NOT _libraries_work)
 #message("DEBUG: ${LIBRARIES} = ${${LIBRARIES}}")
-endmacro(Check_Fortran_Libraries)
+endmacro(Check_Libraries)
 
 set(BLAS_LINKER_FLAGS)
 set(BLAS_LIBRARIES)
@@ -76,12 +76,12 @@ set(BLAS_LIBRARIES)
 
 if(NOT BLAS_LIBRARIES)
   # BLAS in ATLAS library? (http://math-atlas.sourceforge.net/)
-  check_fortran_libraries(
+  check_libraries(
   BLAS_LIBRARIES
   BLAS
   cblas_dgemm
   ""
-  "cblas;f77blas;atlas"
+  "cblas;atlas"
   )
   if (BLAS_LIBRARIES)
     set (ATLAS_FOUND TRUE)
@@ -91,7 +91,7 @@ endif(NOT BLAS_LIBRARIES)
 
 # BLAS in PhiPACK libraries? (requires generic BLAS lib, too)
 if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
+  check_libraries(
   BLAS_LIBRARIES
   BLAS
   sgemm
@@ -102,7 +102,7 @@ endif(NOT BLAS_LIBRARIES)
 
 # BLAS in Alpha CXML library?
 if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
+  check_libraries(
   BLAS_LIBRARIES
   BLAS
   sgemm
@@ -113,7 +113,7 @@ endif(NOT BLAS_LIBRARIES)
 
 # BLAS in Alpha DXML library? (now called CXML, see above)
 if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
+  check_libraries(
   BLAS_LIBRARIES
   BLAS
   sgemm
@@ -124,7 +124,7 @@ endif(NOT BLAS_LIBRARIES)
 
 # BLAS in Sun Performance library?
 if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
+  check_libraries(
   BLAS_LIBRARIES
   BLAS
   sgemm
@@ -139,7 +139,7 @@ endif(NOT BLAS_LIBRARIES)
 
 # BLAS in SCSL library?  (SGI/Cray Scientific Library)
 if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
+  check_libraries(
   BLAS_LIBRARIES
   BLAS
   sgemm
@@ -150,7 +150,7 @@ endif(NOT BLAS_LIBRARIES)
 
 # BLAS in SGIMATH library?
 if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
+  check_libraries(
   BLAS_LIBRARIES
   BLAS
   sgemm
@@ -161,7 +161,7 @@ endif(NOT BLAS_LIBRARIES)
 
 # BLAS in IBM ESSL library? (requires generic BLAS lib, too)
 if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
+  check_libraries(
   BLAS_LIBRARIES
   BLAS
   sgemm
@@ -175,7 +175,7 @@ endif(NOT BLAS_LIBRARIES)
 
 # BLAS in intel mkl library? (shared)
 if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
+  check_libraries(
   BLAS_LIBRARIES
   BLAS
   sgemm
@@ -186,7 +186,7 @@ endif(NOT BLAS_LIBRARIES)
 
 #BLAS in intel mkl library? (static, 32bit)
 if(NOT BLAS_LIBRARIES)
-check_fortran_libraries(
+check_libraries(
 BLAS_LIBRARIES
 BLAS
 sgemm
@@ -197,7 +197,7 @@ endif(NOT BLAS_LIBRARIES)
 
 #BLAS in intel mkl library? (static, em64t 64bit)
 if(NOT BLAS_LIBRARIES)
-check_fortran_libraries(
+check_libraries(
 BLAS_LIBRARIES
 BLAS
 sgemm
@@ -209,7 +209,7 @@ endif(NOT BLAS_LIBRARIES)
 
 #BLAS in acml library? 
 if(NOT BLAS_LIBRARIES)
-check_fortran_libraries(
+check_libraries(
 BLAS_LIBRARIES
 BLAS
 sgemm
@@ -222,7 +222,7 @@ endif(NOT BLAS_LIBRARIES)
 
 # Apple BLAS library?
 if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
+  check_libraries(
   BLAS_LIBRARIES
   BLAS
   cblas_dgemm
@@ -233,7 +233,7 @@ if(NOT BLAS_LIBRARIES)
   endif(NOT BLAS_LIBRARIES)
   
   if ( NOT BLAS_LIBRARIES )
-    check_fortran_libraries(
+    check_libraries(
     BLAS_LIBRARIES
     BLAS
     cblas_dgemm
@@ -245,7 +245,7 @@ if(NOT BLAS_LIBRARIES)
 
 # Generic BLAS library?
 if(NOT BLAS_LIBRARIES)
-  check_fortran_libraries(
+  check_libraries(
   BLAS_LIBRARIES
   BLAS
   sgemm
