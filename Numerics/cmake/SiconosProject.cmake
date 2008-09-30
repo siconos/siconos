@@ -12,6 +12,38 @@ MACRO(SICONOS_PROJECT
     _PROJECT_NAME 
     MAJOR_VERSION MINOR_VERSION PATCH_VERSION)
 
+  # Set cmake policies (cmake >= 2.6)
+  IF(COMMAND CMAKE_POLICY)
+    CMAKE_POLICY(VERSION 2.6.0)
+
+    # minimum version required
+    CMAKE_POLICY(SET CMP0000 NEW) 
+
+    # CMAKE_BACKWARDS_COMPATIBILITY should no longer be used
+    CMAKE_POLICY(SET CMP0001 NEW) 
+    
+    # logical target names must be globally unique
+    CMAKE_POLICY(SET CMP0002 NEW) 
+    
+    # Libraries linked via full path no longer produce linker search
+    # paths
+    CMAKE_POLICY(SET CMP0003 NEW)
+
+    # Libraries linked may not have leading or trailing white space
+    CMAKE_POLICY(SET CMP0004 NEW) 
+                               
+    # Preprocessor definition values are now escaped automatically.
+    CMAKE_POLICY(SET CMP0005 NEW)
+
+    # Installing MACOSX_BUNDLE targets requires a BUNDLE DESTINATION.
+    CMAKE_POLICY(SET CMP0006 NEW)
+    
+    #list command no longer ignores empty elements.
+    CMAKE_POLICY(SET CMP0007 NEW)
+                        
+  ENDIF(COMMAND CMAKE_POLICY)
+
+
   # Build options
   # Static and shared libs : defaults
   OPTION(BUILD_SHARED_LIBS "Building of shared libraries" ON)

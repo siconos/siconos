@@ -99,6 +99,10 @@ WHILE(${iopt} LESS ${imax})
     # I
     FILE(WRITE ${_CMAKELISTS}
       "PROJECT(FortranTest C Fortran)\n"
+      "CMAKE_MINIMUM_REQUIRED(VERSION 2.4)\n"
+      "if(COMMAND cmake_policy)\n"
+      "  cmake_policy(SET CMP0003 NEW)\n"
+      "endif(COMMAND cmake_policy)\n"
       "SET(CMAKE_Fortran_FLAGS \"${TMP_Fortran_FLAGS}\")\n")
 
     # II
