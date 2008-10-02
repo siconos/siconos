@@ -115,7 +115,8 @@ void mlcp_direct_init(MixedLinearComplementarity_Problem* problem, Solver_Option
   sProblemChanged = options->iparam[8];
   sN = problem->n;
   sM = problem->m;
-  if (sVerbose) printf("n= %d  m= %d /n sTolneg= %lf sTolpos= %lf \n", sN, sM, sTolneg, sTolpos);
+  if (sVerbose)
+    printf("n= %d  m= %d /n sTolneg= %lf sTolpos= %lf \n", sN, sM, sTolneg, sTolpos);
 
   sNpM = sN + sM;
   spCurCC = 0;

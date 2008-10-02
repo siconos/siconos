@@ -137,6 +137,7 @@ The direct and enumeratif solver must be initialize: \n
 - iparam[0] (in): Verbose.
 - iparam[5] (in): Number of registered configurations.
 - iparam[6] (in): Verbose mode for the direct solver.
+- iparam[7] (out): Number of case the direct solved failed.
 - dparam[0] (in): A positive value, tolerane about the sign.
 - dparam[5] (in): A tolerance for the direct solver to consider that a var is negative(ex: 1e-12).
 - dparam[6] (in): A tolerance for the direct solver to consider that a var is positive(ex: 1e-12).
@@ -153,6 +154,7 @@ The path solver must be initialize: \n
 \bf parameters:
 - iparam[5] (in): Number of registered configurations.
 - iparam[6] (in): Verbose mode for the direct solver.
+- iparam[7] (out): Number of case the direct solved failed.
 - dparam[0] (in): Tolerance.
 - dparam[5] (in): A tolerance for the direct solver to consider that a var is negative(ex: 1e-12).
 - dparam[6] (in): A tolerance for the direct solver to consider that a var is positive(ex: 1e-12).
@@ -170,6 +172,7 @@ The direct and simplex solver must be initialize: \n
 - iparam[1] (in): Verbose.
 - iparam[5] (in): Number of registered configurations.
 - iparam[6] (in): Verbose mode for the direct solver.
+- iparam[7] (out): Number of case the direct solved failed.
 - dparam[0] (in): A positive value, tolerance to consider that a var is null(ex: 10e-12).
 - dparam[1] (in): A positive value, tolerance to consider that complementarity holds(ex: 10e-12).
 - dparam[2] (in): A positive value, tolerance to consider that a var is negative(ex: 10e-9).
@@ -193,6 +196,8 @@ extern "C" {
 #include "mlcp_direct_enum.h"
 #include "mlcp_direct_simplex.h"
 #include "mlcp_direct_path.h"
+#include "mlcp_direct_FB.h"
+#include "mlcp_FB.h"
 
   /** General interface to initialize a solver.\n
       Must be call for the following solvers:\n
@@ -393,6 +398,29 @@ extern "C" {
    \author Olivier Bonnefon
   */
   void mlcp_simplex(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+
+  /** Fischer Burmeister solver
+   * \param[in] problem structure that represents the MLCP (n,mM, q...)
+   * \param[out] z a m+n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[out] w a m+n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
+   0 : success,it found a solution\n
+   1 : echec,it did not find any solution\n
+   \param[in-out] options structure used to define the solver and its parameters.
+   \author Olivier Bonnefon
+  */
+  void mlcp_FB(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+  /** Direct Fischer Burmeister solver
+   * \param[in] problem structure that represents the MLCP (n,mM, q...)
+   * \param[out] z a m+n-vector of doubles which contains the initial solution and returns the solution of the problem.
+   * \param[out] w a m+n-vector of doubles which returns the solution of the problem.
+   * \param[out] info an integer which returns the termination value:\n
+   0 : success,it found a solution\n
+   1 : echec,it did not find any solution\n
+   \param[in-out] options structure used to define the solver and its parameters.
+   \author Olivier Bonnefon
+  */
+  void mlcp_direct_FB(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
   /**
     This function checks the validity of the vector z as a solution \n

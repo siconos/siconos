@@ -21,15 +21,19 @@
 
 
 #include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
 #include "MixedLinearComplementarity_Problem.h"
 
-void displayMat(double * M, int Nblin, int Nbcol)
+void displayMat(double * M, int Nblin, int Nbcol, int incCol)
 {
   int lin, col;
+  if (incCol == 0)
+    incCol = Nblin;
   for (lin = 0; lin < Nblin; lin++)
   {
     for (col = 0; col < Nbcol; col++)
-      printf(" %lf", M[lin + col * Nblin]);
+      printf(" %.32e", M[lin + col * incCol]);
     printf("\n");
   }
 
@@ -52,7 +56,7 @@ void displayMLCP(MixedLinearComplementarity_Problem* p)
   if (p->q)
   {
     printf("q matrix:\n");
-    displayMat(p->q, n + m, 1);
+    displayMat(p->q, n + m, 1, 0);
   }
   else
     printf("No b matrix:\n");
@@ -61,46 +65,72 @@ void displayMLCP(MixedLinearComplementarity_Problem* p)
   if (p->A)
   {
     printf("A matrix:\n");
-    displayMat(p->A, n, n);
+    displayMat(p->A, n, n, 0);
   }
   else
+  {
     printf("No A matrix:\n");
+    if (!p->M->storageType)
+    {
+      printf("A matrix from M:\n");
+      displayMat(p->M->matrix0, n, n, n + m);
+    }
+  }
 
   if (p->C)
   {
-    printf("B matrix:\n");
-    displayMat(p->C, n, m);
+    printf("C matrix:\n");
+    displayMat(p->C, n, m, 0);
   }
   else
-    printf("No B matrix:\n");
+  {
+    printf("No C matrix:\n");
+    if (!p->M->storageType)
+    {
+      printf("C matrix from M:\n");
+      displayMat(p->M->matrix0 + n * (n + m), n, m, n + m);
+    }
+  }
 
   if (p->D)
   {
     printf("D matrix:\n");
-    displayMat(p->D, m, n);
+    displayMat(p->D, m, n, 0);
   }
   else
+  {
     printf("No D matrix:\n");
-
+    if (!p->M->storageType)
+    {
+      printf("D matrix from M:\n");
+      displayMat(p->M->matrix0 + n, m, n, n + m);
+    }
+  }
   if (p->B)
   {
     printf("B matrix:\n");
-    displayMat(p->B, m, m);
+    displayMat(p->B, m, m, 0);
   }
   else
+  {
     printf("No B matrix:\n");
-
+    if (!p->M->storageType)
+    {
+      printf("B matrix from M:\n");
+      displayMat(p->M->matrix0 + n * (n + m) + n, m, m, n + m);
+    }
+  }
   if (p->a)
   {
     printf("a matrix:\n");
-    displayMat(p->a, n, 1);
+    displayMat(p->a, n, 1, 0);
   }
   else
     printf("No a matrix:\n");
   if (p->b)
   {
     printf("b matrix:\n");
-    displayMat(p->b, m, 1);
+    displayMat(p->b, m, 1, 0);
   }
   else
     printf("No b matrix:\n");

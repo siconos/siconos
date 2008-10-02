@@ -129,7 +129,7 @@ typedef struct
   int problemType;
 } MixedLinearComplementarity_Problem;
 
-void displayMat(double * M, int Nblin, int Nbcol);
+void displayMat(double * M, int Nblin, int Nbcol, int incLin);
 
 #ifdef __cplusplus
 extern "C" {

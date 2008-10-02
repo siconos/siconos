@@ -49,6 +49,7 @@ void mlcp_rpsor(MixedLinearComplementarity_Problem* problem, double *z, double *
   double err, vi, viprev, uiprev;
   double tol, omega, rho;
   double *diagA, *diagB;
+  verbose = 0;
   incx = 1;
   incy = 1;
   incxn = n;

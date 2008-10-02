@@ -48,7 +48,7 @@ void mlcp_rpgs(MixedLinearComplementarity_Problem* problem, double *z, double *w
   double err, vi, viprev, uiprev;
   double tol, rho;
   double *diagA, *diagB;
-
+  verbose = 0;
   incx = 1;
   incy = 1;
   incxn = n;

@@ -31,6 +31,7 @@ SET(SiconosNumerics_DIRS
   NonSmoothSolvers/FrictionContact2D
   NonSmoothSolvers/FrictionContact3D
   NonSmoothSolvers/NCP
+  NonSmoothSolvers/MCP
   NonSmoothSolvers/NSSTools
   utils)
 

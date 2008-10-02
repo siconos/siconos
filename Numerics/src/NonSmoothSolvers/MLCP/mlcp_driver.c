@@ -37,8 +37,12 @@ void mlcp_driver_init(MixedLinearComplementarity_Problem* problem, Solver_Option
     mlcp_direct_simplex_init(problem, options);
   else if (strcmp(name , "DIRECT_PATH") == 0)
     mlcp_direct_path_init(problem, options);
+  else if (strcmp(name , "DIRECT_FB") == 0)
+    mlcp_direct_FB_init(problem, options);
   else if (strcmp(name , "SIMPLEX") == 0)
     mlcp_simplex_init(problem, options);
+  else if (strcmp(name , "FB") == 0)
+    mlcp_FB_init(problem, options);
 }
 void mlcp_driver_reset(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
 {
@@ -49,6 +53,8 @@ void mlcp_driver_reset(MixedLinearComplementarity_Problem* problem, Solver_Optio
     mlcp_direct_simplex_reset();
   else if (strcmp(name , "DIRECT_PATH") == 0)
     mlcp_direct_path_reset();
+  else if (strcmp(name , "DIRECT_FB") == 0)
+    mlcp_direct_FB_reset();
   else if (strcmp(name , "SIMPLEX") == 0)
     mlcp_simplex_reset();
 }
@@ -63,6 +69,10 @@ int mlcp_driver_get_iwork(MixedLinearComplementarity_Problem* problem, Solver_Op
     return  mlcp_direct_simplex_getNbIWork(problem, options);
   else if (strcmp(name , "DIRECT_PATH") == 0)
     return  mlcp_direct_path_getNbIWork(problem, options);
+  else if (strcmp(name , "FB") == 0)
+    return  mlcp_FB_getNbIWork(problem, options);
+  else if (strcmp(name , "DIRECT_FB") == 0)
+    return  mlcp_direct_FB_getNbIWork(problem, options);
   return 0;
 }
 int mlcp_driver_get_dwork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
@@ -76,11 +86,18 @@ int mlcp_driver_get_dwork(MixedLinearComplementarity_Problem* problem, Solver_Op
     return  mlcp_direct_simplex_getNbDWork(problem, options);
   else if (strcmp(name , "DIRECT_PATH") == 0)
     return  mlcp_direct_path_getNbDWork(problem, options);
+  else if (strcmp(name , "FB") == 0)
+    return  mlcp_FB_getNbDWork(problem, options);
+  else if (strcmp(name , "DIRECT_FB") == 0)
+    return  mlcp_direct_FB_getNbDWork(problem, options);
   return 0;
 }
 
 int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *w, Solver_Options* options, Numerics_Options* global_options)
 {
+  int i;
+  int ii;
+
   if (options == NULL || global_options == NULL)
     numericsError("mlcp_driver", "null input for solver and/or global options");
 
@@ -90,10 +107,9 @@ int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
     numericsError("mlcp_driver", "null input for LinearComplementarity_Problem and/or unknowns (z,w)");
-
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
-
+  //  displayMLCP(problem);
   /* Switch to DenseMatrix or SparseBlockMatrix solver according to the type of storage for M */
   /* Storage type for the matrix M of the LCP */
   int storageType = problem->M->storageType;
@@ -112,9 +128,13 @@ int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *
   /* Solver name */
   char * name = options->solverName;
 
-  if (verbose == 1)
-    printf(" ========================== Call %s solver for Relayproblem ==========================\n", name);
+  /*  if(verbose==1){
+    printf(" ========================== Call %s solver ==========================\n", name);
+    printf("Initial z value:\n");
+    for (i=0;i<problem->n+problem->m;i++)
+      printf("z[%d]=%.32e\n",i,z[i]);
 
+      }*/
   /****** PGS algorithm ******/
   if (strcmp(name , "PGS") == 0)
     mlcp_pgs(problem, z , w , &info , options);
@@ -155,12 +175,20 @@ int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *
   else if (strcmp(name , "DIRECT_PATH") == 0)
     mlcp_direct_path(problem, z , w , &info , options);
 
+  /****** FB algorithm ******/
+  else if (strcmp(name , "FB") == 0)
+    mlcp_FB(problem, z , w , &info , options);
+  /****** DIRECT FB algorithm ******/
+  else if (strcmp(name , "DIRECT_FB") == 0)
+    mlcp_direct_FB(problem, z , w , &info , options);
+
   /*error */
   else
   {
     fprintf(stderr, "mlcp_driver error: unknown solver named: %s\n", name);
     exit(EXIT_FAILURE);
   }
+
   return info;
 }
 

@@ -53,7 +53,8 @@
 #include "LA.h"
 
 #define BAVARD
-#define NBTEST 10
+#define NBTEST 13
+//#define NBTEST 2
 
 #define ENUM_ID 0
 #define PGS_EX_ID 1
@@ -67,10 +68,13 @@
 #define PATH_ID 9
 #define SIMPLEX_ID 10
 #define DIRECT_ENUM_ID 11
-#define NBMETHODS 12
+#define FB_ID 12
+#define DIRECT_FB_ID 13
+#define NBMETHODS 14
 
 #define PATH_DRIVER
-#define MAX_DIM_ENUM 15
+#define MAX_DIM_ENUM 20
+
 /*#ifdef PATH_DRIVER
 const unsigned short int *__ctype_b;
 const __int32_t *__ctype_tolower ;
@@ -80,7 +84,7 @@ const __int32_t *__ctype_tolower ;
 typedef struct
 {
   char file[124];
-  char cv[5][NBMETHODS];
+  char cv[NBMETHODS][5];
   int nbSteps[NBMETHODS];
   long times[NBMETHODS];
 } dataSummary;
@@ -103,7 +107,7 @@ void stopTimer()
   gettimeofday(&aux, NULL);
   sDt.mCumul += (aux.tv_sec - sDt.mStart.tv_sec) * 1000000 + (aux.tv_usec - sDt.mStart.tv_usec) ;
 }
-static dataSummary summary[NBTEST];
+static dataSummary summary[NBTEST + 5];
 static int itest;
 
 /*
@@ -148,166 +152,259 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
   int m = problem->m;
   double ohmega = 0;
   int _ID = PSOR_05_ID - 1;
+  int ndW = 0;
+  int niW = 0;
+  int aux = 0;
+  long laux;
 
-
+  mlcpOptions.isSet = 0;
+  mlcpOptions.iSize = 0;
+  mlcpOptions.iparam = 0;
+  mlcpOptions.dSize = 0;
+  mlcpOptions.dparam = 0;
+  mlcpOptions.filterOn = 0;
+  mlcpOptions.dWork = 0;
+  mlcpOptions.iWork = 0;
   mlcpOptions.iparam = (int*)malloc(10 * sizeof(int));
   mlcpOptions.dparam = (double*)malloc(10 * sizeof(double));
 
+  global_options.verboseMode = 1;
+  setNumericsOptions(&global_options);
+
+  mlcpOptions.iparam[5] = 3; /*Number of registered configurations*/
+  mlcpOptions.iparam[6] = 0; /*VERBOSE*/
+  mlcpOptions.iparam[8] = 0; /*Prb nedd a update*/
+  mlcpOptions.dparam[5] = 1e-12;
+  mlcpOptions.dparam[6] = 1e-12;
+
+  /*iwork and dwork memory*/
+  strcpy(mlcpOptions.solverName, "DIRECT_ENUM");
+  niW = mlcp_driver_get_iwork(problem, &mlcpOptions);
+  ndW = mlcp_driver_get_dwork(problem, &mlcpOptions);
+
+  strcpy(mlcpOptions.solverName, "DIRECT_FB");
+  aux = mlcp_driver_get_iwork(problem, &mlcpOptions);
+  if (aux > niW)
+    niW = aux;
+  aux = mlcp_driver_get_dwork(problem, &mlcpOptions);
+  if (aux > ndW)
+    ndW = aux;
+
+
+  strcpy(mlcpOptions.solverName, "DIRECT_PATH");
+  aux = mlcp_driver_get_iwork(problem, &mlcpOptions);
+  if (aux > niW)
+    niW = aux;
+  aux = mlcp_driver_get_dwork(problem, &mlcpOptions);
+  if (aux > ndW)
+    ndW = aux;
+
+
+
+  mlcpOptions.dWork = (double*)malloc(ndW * sizeof(double));
+  mlcpOptions.iWork = (int*)malloc(niW * sizeof(int));
+  if (mlcpOptions.dWork == 0 || mlcpOptions.iWork == 0)
+  {
+    printf("test_mlcp_series allocate memory failed %d %d %d %d.\n", niW, ndW, problem->n, problem->m);
+    exit(1);
+  }
+
+
+
   /*SOLVER ENUM*/
-  //   solTozw(n,m,z,w,sol);
-  //   strcpy(mlcpOptions.solverName,"ENUM");
-  //   mlcpOptions.iSize=1;
-  //   mlcpOptions.iparam[0]=0;/*verbose 1*/
-  //   mlcpOptions.dSize=1;
-  //   mlcpOptions.dparam[0]=tol1;
+  solTozw(n, m, z, w, sol);
+  printf("TRY SOLVER %s\n", "ENUM");
+  strcpy(mlcpOptions.solverName, "ENUM");
+  mlcpOptions.iSize = 1;
+  mlcpOptions.iparam[0] = 0; /*verbose 1*/
+  mlcpOptions.dSize = 1;
+  mlcpOptions.dparam[0] = tol1;
 
-  //   mlcpOptions.dWork=(double*)malloc( mlcp_enum_getNbDWork(problem,0)*sizeof(double));
-  //   mlcpOptions.iWork=(int*)malloc(mlcp_enum_getNbIWork(problem,0)*sizeof(int));
-  //   startTimer();
-  //   info=1;
-  //   if ( n+m < MAX_DIM_ENUM)
-  //     info = mlcp_driver( problem,z,w, &mlcpOptions,&global_options);
-  //   stopTimer();
-  //   summary[itest].times[ENUM_ID]=sDt.mCumul;
-  //   strcpy(summary[itest].cv[ENUM_ID],"CV");
-  //   if (info>0) {
-  //     printf("Can't find a solution\n");
-  //     strcpy(summary[itest].cv[ENUM_ID],"NO");
-  //   }else{
-  //     mlcp_compute_error(problem, z, w, tol1,  &error);
-  //     printf("find a solution with error %lf \n",error);
-  //     printSolution("ENUM",n,m,z,w);
-  //   }
-  //   free(mlcpOptions.dWork);
-  //   free(mlcpOptions.iWork);
-  // /*SOLVER PGS*/
-  //   solTozw(n,m,z,w,sol);
-  //   strcpy(mlcpOptions.solverName,"PGS");
-  //   //"PGS"       , 101 , 1e-8 , 0.6 , 1.0 , 1 , 0 , 0.0 }; */
-  //   mlcpOptions.iSize=2;
-  //   mlcpOptions.iparam[0]=101;
-  //   mlcpOptions.iparam[2]=0;//implicit
-  //   mlcpOptions.dSize=2;
-  //   mlcpOptions.dparam[0]=tol2;
+  mlcp_driver_init(problem, &mlcpOptions);
+  startTimer();
+  info = 1;
+  if (n + m < MAX_DIM_ENUM)
+    info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+  stopTimer();
+  summary[itest].times[ENUM_ID] = sDt.mCumul;
+  strcpy(summary[itest].cv[ENUM_ID], "CV");
+  if (info > 0)
+  {
+    printf("Can't find a solution\n");
+    strcpy(summary[itest].cv[ENUM_ID], "NO");
+  }
+  else
+  {
+    mlcp_compute_error(problem, z, w, tol1,  &error);
+    printf("find a solution with error %lf \n", error);
+    printSolution("ENUM", n, m, z, w);
+  }
+  mlcp_driver_reset(problem, &mlcpOptions);
 
-  //   startTimer();
-  //   info = mlcp_driver( problem,z,w, &mlcpOptions,&global_options);
-  //   stopTimer();
-  //   summary[itest].times[PGS_IM_ID]=sDt.mCumul;
-  //   strcpy(summary[itest].cv[PGS_IM_ID],"CV");
-  //   if (info>0) {
-  //     printf("Can't find a solution\n");
-  //     strcpy(summary[itest].cv[PGS_IM_ID],"NO");
-  //   }else{
-  //     mlcp_compute_error(problem, z, w, tol1,  &error);
-  //     printf("find a solution with error %lf \n",error);
-  //     printSolution("PGS",n,m,z,w);
-  //   }
-  // /*SOLVER PGS*/
-  //   solTozw(n,m,z,w,sol);
-  //   strcpy(mlcpOptions.solverName,"PGS");
-  //   //"PGS"       , 101 , 1e-8 , 0.6 , 1.0 , 1 , 0 , 0.0 }; */
-  //   mlcpOptions.iSize=2;
-  //   mlcpOptions.iparam[0]=101;
-  //   mlcpOptions.iparam[2]=1;//explicit
-  //   mlcpOptions.dSize=2;
-  //   mlcpOptions.dparam[0]=tol2;
+  /*SOLVER PGS*/
+  printf("TRY SOLVER %s\n", "PGS");
+  solTozw(n, m, z, w, sol);
+  strcpy(mlcpOptions.solverName, "PGS");
+  //"PGS"       , 101 , 1e-8 , 0.6 , 1.0 , 1 , 0 , 0.0 }; */
+  mlcpOptions.iSize = 2;
+  mlcpOptions.iparam[0] = 101;
+  mlcpOptions.iparam[2] = 0; //implicit
+  mlcpOptions.dSize = 2;
+  mlcpOptions.dparam[0] = tol2;
+  mlcp_driver_init(problem, &mlcpOptions);
 
-  //   startTimer();
-  //   info = mlcp_driver( problem,z,w, &mlcpOptions,&global_options);
-  //   stopTimer();
-  //   summary[itest].times[PGS_EX_ID]=sDt.mCumul;
-  //   strcpy(summary[itest].cv[PGS_EX_ID],"CV");
-  //   if (info>0) {
-  //     printf("Can't find a solution\n");
-  //     strcpy(summary[itest].cv[PGS_EX_ID],"NO");
-  //   }else{
-  //     mlcp_compute_error(problem, z, w, tol1,  &error);
-  //     printf("find a solution with error %lf \n",error);
-  //     printSolution("PGS",n,m,z,w);
-  //   }
-  // /*SOLVER RPGS*/
-  //   solTozw(n,m,z,w,sol);
-  //   strcpy(mlcpOptions.solverName,"RPGS");
-  //   mlcpOptions.iSize=2;
-  //   mlcpOptions.iparam[0]=101;
-  //   mlcpOptions.dSize=3;
-  //   mlcpOptions.dparam[0]=tol2;
-  //   mlcpOptions.dparam[2]=0.5;/*rho*/
+  startTimer();
+  info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+  stopTimer();
+  summary[itest].times[PGS_IM_ID] = sDt.mCumul;
+  strcpy(summary[itest].cv[PGS_IM_ID], "CV");
+  if (info > 0)
+  {
+    printf("Can't find a solution\n");
+    strcpy(summary[itest].cv[PGS_IM_ID], "NO");
+  }
+  else
+  {
+    mlcp_compute_error(problem, z, w, tol1,  &error);
+    printf("find a solution with error %lf \n", error);
+    printSolution("PGS", n, m, z, w);
+  }
+  mlcp_driver_reset(problem, &mlcpOptions);
 
-  //   startTimer();
-  //   info = mlcp_driver( problem,z,w, &mlcpOptions,&global_options);
-  //   stopTimer();
-  //   summary[itest].times[RPGS_ID]=sDt.mCumul;
-  //   strcpy(summary[itest].cv[RPGS_ID],"CV");
-  //   if (info>0) {
-  //     printf("Can't find a solution\n");
-  //     strcpy(summary[itest].cv[RPGS_ID],"NO");
-  //   }else{
-  //     mlcp_compute_error(problem, z, w, tol1,  &error);
-  //     printf("find a solution with error %lf \n",error);
-  //     printSolution("RPGS",n,m,z,w);
-  //   }
+  /*SOLVER PGS*/
+  printf("TRY SOLVER %s\n", "EX PGS");
+  solTozw(n, m, z, w, sol);
+  strcpy(mlcpOptions.solverName, "PGS");
+  //"PGS"       , 101 , 1e-8 , 0.6 , 1.0 , 1 , 0 , 0.0 }; */
+  mlcpOptions.iSize = 2;
+  mlcpOptions.iparam[0] = 101;
+  mlcpOptions.iparam[2] = 1; //explicit
+  mlcpOptions.dSize = 2;
+  mlcpOptions.dparam[0] = tol2;
 
-  // /*SOLVER PSOR*/
-  //   ohmega=0;
-  //   _ID=PSOR_05_ID-1;
-  //   for(int cmp=0;cmp<4;cmp++){
-  //     _ID++;
-  //     ohmega+=0.5;
+  startTimer();
+  info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+  stopTimer();
+  summary[itest].times[PGS_EX_ID] = sDt.mCumul;
+  strcpy(summary[itest].cv[PGS_EX_ID], "CV");
+  if (info > 0)
+  {
+    printf("Can't find a solution\n");
+    strcpy(summary[itest].cv[PGS_EX_ID], "NO");
+  }
+  else
+  {
+    mlcp_compute_error(problem, z, w, tol1,  &error);
+    printf("find a solution with error %lf \n", error);
+    printSolution("PGS", n, m, z, w);
+  }
+  mlcp_driver_reset(problem, &mlcpOptions);
 
-  //     solTozw(n,m,z,w,sol);
-  //     strcpy(mlcpOptions.solverName,"PSOR");
-  //     mlcpOptions.iSize=2;
-  //     mlcpOptions.iparam[0]=101;
-  //     mlcpOptions.dSize=3;
-  //     mlcpOptions.dparam[0]=tol2;
-  //     mlcpOptions.dparam[2]=ohmega;
+  /*SOLVER RPGS*/
+  printf("TRY SOLVER %s\n", "RPGS");
+  solTozw(n, m, z, w, sol);
+  strcpy(mlcpOptions.solverName, "RPGS");
+  mlcpOptions.iSize = 2;
+  mlcpOptions.iparam[0] = 101;
+  mlcpOptions.dSize = 3;
+  mlcpOptions.dparam[0] = tol2;
+  mlcpOptions.dparam[2] = 0.5; /*rho*/
+  mlcp_driver_init(problem, &mlcpOptions);
 
-  //     startTimer();
-  //     info = mlcp_driver( problem,z,w, &mlcpOptions,&global_options);
-  //     stopTimer();
-  //     summary[itest].times[_ID]=sDt.mCumul;
-  //     strcpy(summary[itest].cv[_ID],"CV");
-  //     if (info>0) {
-  //       printf("Can't find a solution\n");
-  //       strcpy(summary[itest].cv[_ID],"NO");
-  //     }else{
-  //       mlcp_compute_error(problem, z, w, tol1,  &error);
-  //       printf("find a solution with error %lf \n",error);
-  //       printSolution("PSOR",n,m,z,w);
-  //     }
-  //   }
-  // /*SOLVER RPSOR*/
-  //   solTozw(n,m,z,w,sol);
-  //   strcpy(mlcpOptions.solverName,"RPSOR");
-  //   mlcpOptions.iSize=2;
-  //   mlcpOptions.iparam[0]=101;
-  //   mlcpOptions.dSize=4;
-  //   mlcpOptions.dparam[0]=tol2;
-  //   mlcpOptions.dparam[2]=0.5;/*rho*/
-  //   mlcpOptions.dparam[3]=2;/*ohmega*/
+  startTimer();
+  info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+  stopTimer();
+  summary[itest].times[RPGS_ID] = sDt.mCumul;
+  strcpy(summary[itest].cv[RPGS_ID], "CV");
+  if (info > 0)
+  {
+    printf("Can't find a solution\n");
+    strcpy(summary[itest].cv[RPGS_ID], "NO");
+  }
+  else
+  {
+    mlcp_compute_error(problem, z, w, tol1,  &error);
+    printf("find a solution with error %lf \n", error);
+    printSolution("RPGS", n, m, z, w);
+  }
+  mlcp_driver_reset(problem, &mlcpOptions);
 
-  //   startTimer();
-  //   info = mlcp_driver( problem,z,w, &mlcpOptions,&global_options);
-  //   stopTimer();
-  //   summary[itest].times[RPSOR_ID]=sDt.mCumul;
-  //   strcpy(summary[itest].cv[RPSOR_ID],"CV");
-  //   if (info>0) {
-  //     printf("Can't find a solution\n");
-  //     strcpy(summary[itest].cv[RPSOR_ID],"NO");
-  //   }else{
-  //     mlcp_compute_error(problem, z, w, tol1,  &error);
-  //     printf("find a solution with error %lf \n",error);
-  //     printSolution("RPSOR",n,m,z,w);
-  //   }
+  /*SOLVER PSOR*/
+  printf("TRY SOLVER %s\n", "PSOR");
+  ohmega = 0;
+  _ID = PSOR_05_ID - 1;
+  for (int cmp = 0; cmp < 4; cmp++)
+  {
+    _ID++;
+    ohmega += 0.5;
+
+    solTozw(n, m, z, w, sol);
+    strcpy(mlcpOptions.solverName, "PSOR");
+    mlcpOptions.iSize = 2;
+    mlcpOptions.iparam[0] = 101;
+    mlcpOptions.dSize = 3;
+    mlcpOptions.dparam[0] = tol2;
+    mlcpOptions.dparam[2] = ohmega;
+    mlcp_driver_init(problem, &mlcpOptions);
+
+    startTimer();
+    info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+    stopTimer();
+    summary[itest].times[_ID] = sDt.mCumul;
+    strcpy(summary[itest].cv[_ID], "CV");
+    if (info > 0)
+    {
+      printf("Can't find a solution\n");
+      strcpy(summary[itest].cv[_ID], "NO");
+    }
+    else
+    {
+      mlcp_compute_error(problem, z, w, tol1,  &error);
+      printf("find a solution with error %lf \n", error);
+      printSolution("PSOR", n, m, z, w);
+    }
+  }
+  mlcp_driver_reset(problem, &mlcpOptions);
+
+  /*SOLVER RPSOR*/
+  printf("TRY SOLVER %s\n", "RPSOR");
+  solTozw(n, m, z, w, sol);
+  strcpy(mlcpOptions.solverName, "RPSOR");
+  mlcpOptions.iSize = 2;
+  mlcpOptions.iparam[0] = 101;
+  mlcpOptions.dSize = 4;
+  mlcpOptions.dparam[0] = tol2;
+  mlcpOptions.dparam[2] = 0.5; /*rho*/
+  mlcpOptions.dparam[3] = 2; /*ohmega*/
+  mlcp_driver_init(problem, &mlcpOptions);
+
+  startTimer();
+  info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+  stopTimer();
+  summary[itest].times[RPSOR_ID] = sDt.mCumul;
+  strcpy(summary[itest].cv[RPSOR_ID], "CV");
+  if (info > 0)
+  {
+    printf("Can't find a solution\n");
+    strcpy(summary[itest].cv[RPSOR_ID], "NO");
+  }
+  else
+  {
+    mlcp_compute_error(problem, z, w, tol1,  &error);
+    printf("find a solution with error %lf \n", error);
+    printSolution("RPSOR", n, m, z, w);
+  }
+  mlcp_driver_reset(problem, &mlcpOptions);
+
   /*SOLVER PATH*/
+  printf("TRY SOLVER %s\n", "PATH");
   solTozw(n, m, z, w, sol);
   strcpy(mlcpOptions.solverName, "PATH");
   mlcpOptions.iSize = 1;
   mlcpOptions.iparam[0] = 101;
   mlcpOptions.dSize = 1;
   mlcpOptions.dparam[0] = tol2;
+  mlcp_driver_init(problem, &mlcpOptions);
 
   startTimer();
   info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
@@ -327,75 +424,169 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     printf("find a solution with error %lf \n", error);
     printSolution("PATH", n, m, z, w);
   }
+  mlcp_driver_reset(problem, &mlcpOptions);
+
   /*SOLVER SIMPLEX*/
-  //   solTozw(n,m,z,w,sol);
-  //   strcpy(mlcpOptions.solverName,"SIMPLEX");
-  //   mlcpOptions.iSize=2;
-  //   mlcpOptions.iparam[0]=1000000;
-  //   mlcpOptions.iparam[1]=1;/*VERBOSE*/
-  //   mlcpOptions.dSize=3;
-  //   mlcpOptions.dparam[0]=1e-12;
-  //   mlcpOptions.dparam[1]=1e-12;
-  //   mlcpOptions.dparam[2]=1e-9;
+  printf("TRY SOLVER %s\n", "SIMPLEX");
+  strcpy(summary[itest].cv[SIMPLEX_ID], "NO");
+  summary[itest].times[SIMPLEX_ID] = 0;
 
-  //   startTimer();
-  //   info = mlcp_driver( problem,z,w, &mlcpOptions,&global_options);
-  //   stopTimer();
-  //   summary[itest].times[SIMPLEX_ID]=sDt.mCumul;
-  //   strcpy(summary[itest].cv[SIMPLEX_ID],"CV");
-  //   if (info>0) {
-  //     printf("Can't find a solution\n");
-  //     strcpy(summary[itest].cv[SIMPLEX_ID],"NO");
-  //   }else{
-  //     mlcp_compute_error(problem, z, w, tol1,  &error);
-  //     if (error > 1e-9)
-  //       strcpy(summary[itest].cv[SIMPLEX_ID],"NO");
-  //     printf("find a solution with error %lf \n",error);
-  //     printSolution("SIMPLEX",n,m,z,w);
-  //   }
-  // /*SOLVER DIRECT ENUM*/
-  //   solTozw(n,m,z,w,sol);
-  //   strcpy(mlcpOptions.solverName,"DIRECT_ENUM");
-  //   mlcpOptions.iSize=6;
-  //   mlcpOptions.iparam[5]=3;/*Number of registered configurations*/
-  //   mlcpOptions.iparam[0]=0;/*VERBOSE*/
-  //   mlcpOptions.dSize=6;
-  //   mlcpOptions.dparam[0]=1e-12;
-  //   mlcpOptions.dparam[5]=1e-12;
-  //   mlcpOptions.dparam[6]=1e-12;
-  //  int aux = mlcp_direct_enum_getNbDWork(problem,&mlcpOptions);
-  //  double * daux = (double*)malloc( aux*sizeof(double));
-  //   mlcpOptions.dWork=daux;
-  //   aux = mlcp_direct_enum_getNbIWork(problem,&mlcpOptions);
-  //   int * iaux = (int*)malloc(aux*sizeof(int));
-  //   mlcpOptions.iWork=iaux;
 
-  //   mlcp_direct_enum_init(problem,&mlcpOptions);
-  //   printf("Solver direct, precompute solution.\n");
-  //   info = mlcp_driver( problem,z,w, &mlcpOptions,&global_options);
-  //   if (info==0) {
-  //     printf("Solver direct, solution computed. ");
-  //     printf("Now, run direct solver.\n");
-  //     startTimer();
-  //     info = mlcp_driver( problem,z,w, &mlcpOptions,&global_options);
-  //     stopTimer();
-  //     summary[itest].times[DIRECT_ENUM_ID]=sDt.mCumul;
-  //     strcpy(summary[itest].cv[DIRECT_ENUM_ID],"CV");
-  //   }
-  //   if (info>0) {
-  //     printf("Can't find a solution\n");
-  //     strcpy(summary[itest].cv[DIRECT_ENUM_ID],"NO");
-  //   }else{
-  //     mlcp_compute_error(problem, z, w, tol1,  &error);
-  //     if (error > 1e-9)
-  //       strcpy(summary[itest].cv[DIRECT_ENUM_ID],"NO");
-  //     printf("find a solution with error %lf \n",error);
-  //     printSolution("DIRECT_ENUM_ID",n,m,z,w);
-  //   }
+  solTozw(n, m, z, w, sol);
+  strcpy(mlcpOptions.solverName, "SIMPLEX");
+  mlcpOptions.iSize = 2;
+  mlcpOptions.iparam[0] = 1000000;
+  mlcpOptions.iparam[1] = 1;
+  mlcpOptions.dSize = 3;
+  mlcpOptions.dparam[0] = 1e-12;
+  mlcpOptions.dparam[1] = 1e-12;
+  mlcpOptions.dparam[2] = 1e-9;
+  mlcp_driver_init(problem, &mlcpOptions);
 
-  //  free( daux);
-  //  free( iaux);
-  mlcp_direct_enum_reset();
+  startTimer();
+  info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+  stopTimer();
+  summary[itest].times[SIMPLEX_ID] = sDt.mCumul;
+  strcpy(summary[itest].cv[SIMPLEX_ID], "CV");
+  if (info > 0)
+  {
+    printf("Can't find a solution\n");
+    strcpy(summary[itest].cv[SIMPLEX_ID], "NO");
+  }
+  else
+  {
+    mlcp_compute_error(problem, z, w, tol1,  &error);
+    if (error > 1e-9)
+      strcpy(summary[itest].cv[SIMPLEX_ID], "NO");
+    printf("find a solution with error %lf \n", error);
+    printSolution("SIMPLEX", n, m, z, w);
+  }
+  mlcp_driver_reset(problem, &mlcpOptions);
+
+  /*SOLVER DIRECT ENUM*/
+  printf("TRY SOLVER %s\n", "DIRECT_ENUM");
+  solTozw(n, m, z, w, sol);
+  strcpy(mlcpOptions.solverName, "DIRECT_ENUM");
+  mlcpOptions.iSize = 6;
+  mlcpOptions.iparam[0] = 0;
+  mlcpOptions.dSize = 6;
+  mlcpOptions.dparam[0] = 1e-12;
+  mlcp_driver_init(problem, &mlcpOptions);
+
+  printf("Solver direct, precompute solution.\n");
+  if (n + m < MAX_DIM_ENUM)
+    info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+  if (info == 0)
+  {
+    printf("Solver direct, solution computed. ");
+    printf("Now, run direct solver.\n");
+    startTimer();
+    if (n + m < MAX_DIM_ENUM)
+      info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+    stopTimer();
+    summary[itest].times[DIRECT_ENUM_ID] = sDt.mCumul;
+    strcpy(summary[itest].cv[DIRECT_ENUM_ID], "CV");
+  }
+  if (info > 0)
+  {
+    printf("Can't find a solution\n");
+    strcpy(summary[itest].cv[DIRECT_ENUM_ID], "NO");
+  }
+  else
+  {
+    mlcp_compute_error(problem, z, w, tol1,  &error);
+    if (error > 1e-9)
+      strcpy(summary[itest].cv[DIRECT_ENUM_ID], "NO");
+    printf("find a solution with error %lf \n", error);
+    printSolution("DIRECT_ENUM_ID", n, m, z, w);
+  }
+  mlcp_driver_reset(problem, &mlcpOptions);
+
+  /*SOLVER FB*/
+
+  printf("TRY SOLVER %s\n", "FB");
+  solTozw(n, m, z, w, sol);
+  strcpy(mlcpOptions.solverName, "FB");
+  mlcpOptions.iSize = 2;
+  mlcpOptions.iparam[0] = 1000;
+  mlcpOptions.iparam[1] = 0;
+  mlcpOptions.dSize = 3;
+  mlcpOptions.dparam[0] = 1e-9;
+  mlcpOptions.dparam[1] = 0;
+
+
+
+  mlcp_driver_init(problem, &mlcpOptions);
+  startTimer();
+  info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+  stopTimer();
+  summary[itest].times[FB_ID] = sDt.mCumul;
+  strcpy(summary[itest].cv[FB_ID], "CV");
+  if (info > 0)
+  {
+    printf("Can't find a solution\n");
+    strcpy(summary[itest].cv[FB_ID], "NO");
+    mlcp_compute_error(problem, z, w, tol1,  &error);
+    printf("current point with error %lf \n", error);
+    printSolution("FB", n, m, z, w);
+  }
+  else
+  {
+    mlcp_compute_error(problem, z, w, tol1,  &error);
+    //    if (error > 1e-9)
+    strcpy(summary[itest].cv[FB_ID], "CV");
+    printf("find a solution with error %lf \n", error);
+    printSolution("FB", n, m, z, w);
+  }
+  mlcp_driver_reset(problem, &mlcpOptions);
+  /*SOLVER DIRECT_FB*/
+
+  printf("TRY SOLVER %s\n", "DIRECT_FB");
+  solTozw(n, m, z, w, sol);
+  strcpy(mlcpOptions.solverName, "DIRECT_FB");
+  mlcpOptions.iSize = 8;
+  mlcpOptions.iparam[0] = 10000;
+  mlcpOptions.iparam[1] = 0;
+
+  mlcpOptions.dSize = 9;
+  mlcpOptions.dparam[0] = 1e-9;
+  mlcpOptions.dparam[1] = 0;
+  info = 1;
+
+
+
+  mlcp_driver_init(problem, &mlcpOptions);
+  info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+  startTimer();
+  info = mlcp_driver(problem, z, w, &mlcpOptions, &global_options);
+  stopTimer();
+  laux = sDt.mCumul;
+  summary[itest].times[DIRECT_FB_ID] = sDt.mCumul;
+
+  if (info > 0)
+  {
+    printf("Can't find a solution\n");
+    strcpy(summary[itest].cv[DIRECT_FB_ID], "NO");
+    mlcp_compute_error(problem, z, w, tol1,  &error);
+    printf("current point with error %lf \n", error);
+    printSolution("DIRECT_FB", n, m, z, w);
+  }
+  else
+  {
+    mlcp_compute_error(problem, z, w, tol1,  &error);
+    strcpy(summary[itest].cv[DIRECT_FB_ID], "CV");
+    printf("find a solution with error %lf \n", error);
+    printSolution("DIRECT_FB", n, m, z, w);
+  }
+  mlcp_driver_reset(problem, &mlcpOptions);
+
+
+
+  free(mlcpOptions.dWork);
+  free(mlcpOptions.iWork);
+  mlcpOptions.dWork = 0;
+  mlcpOptions.iWork = 0;
+
   deleteSolverOptions(&mlcpOptions);
 
 
@@ -418,11 +609,22 @@ void test_matrix(void)
   double *vecA, *vecB, *vecC, *vecD, *vecM, *vecQ;
   NumericsMatrix M;
 
-  char val[20];
+  char val[128];
 
   int iter;
   double criteria;
   MixedLinearComplementarity_Problem problem;
+  problem.n = 0;
+  problem.m = 0;
+  problem.q = 0;
+  problem.A = 0;
+  problem.B = 0;
+  problem.C = 0;
+  problem.D = 0;
+  problem.a = 0;
+  problem.b = 0;
+  problem.problemType = 0;
+
 
   printf("* *** ******************** *** * \n");
   printf("* *** STARTING TEST MATRIX *** * \n");
@@ -439,13 +641,13 @@ void test_matrix(void)
 #endif
   /****************************************************************/
 
-  for (itest = 0 ; itest < NBTEST ; ++itest)
+  for (itest = 0 ; itest < NBTEST ; itest++)
   {
 
     switch (itest)
     {
-    case 0:
-      printf("\n\n 2x2 MLCP ");
+    case 9:
+      printf("\n\n 2x2 MLCP **************************************************************************");
       strcpy(summary[itest].file, "2x2 MLCP");
       if ((MLCPfile = fopen("MATRIX/deudeu_mlcp.dat", "r")) == NULL)
       {
@@ -453,17 +655,9 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 9:
-      printf("\n\n Buck converter ");
-      strcpy(summary[itest].file, "BuckConverter_mlcp");
-      if ((MLCPfile = fopen("MATRIX/BuckConverter_mlcp.dat", "r")) == NULL)
-      {
-        perror("fopen MLCPfile: BuckConverter_mlcp.dat");
-        exit(1);
-      }
-      break;
-    case 1:
-      printf("\n\n PD ");
+    case 11:
+      printf("BEGIN A NEWTEST  **************************************************************************");
+      printf("\n\n PD **************************************************************************");
       strcpy(summary[itest].file, "PD");
       if ((MLCPfile = fopen("MATRIX/PD_mlcp.dat", "r")) == NULL)
       {
@@ -471,8 +665,9 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 2:
-      printf("\n\n m2n1_mlcp.dat ");
+    case 12:
+      printf("BEGIN A NEWTEST  **************************************************************************");
+      printf("\n\n m2n1_mlcp.dat **************************************************************************");
       strcpy(summary[itest].file, "m2n1_mlcp");
       if ((MLCPfile = fopen("MATRIX/m2n1_mlcp.dat", "r")) == NULL)
       {
@@ -481,7 +676,8 @@ void test_matrix(void)
       }
       break;
     case 3:
-      printf("\n\n m3n2_mlcp.dat ");
+      printf("BEGIN A NEWTEST  **************************************************************************");
+      printf("\n\n m3n2_mlcp.dat **************************************************************************");
       strcpy(summary[itest].file, "m3n2_mlcp");
       if ((MLCPfile = fopen("MATRIX/m3n2_mlcp.dat", "r")) == NULL)
       {
@@ -490,7 +686,8 @@ void test_matrix(void)
       }
       break;
     case 4:
-      printf("\n\n PDSym_mlcp.dat ");
+      printf("BEGIN A NEWTEST  **************************************************************************");
+      printf("\n\n PDSym_mlcp.dat **************************************************************************");
       strcpy(summary[itest].file, "PDSym_mlcp");
       if ((MLCPfile = fopen("MATRIX/PDSym_mlcp.dat", "r")) == NULL)
       {
@@ -499,7 +696,8 @@ void test_matrix(void)
       }
       break;
     case 5:
-      printf("\n\n diodeBridge MLCP ");
+      printf("BEGIN A NEWTEST  **************************************************************************");
+      printf("\n\n diodeBridge MLCP **************************************************************************");
       strcpy(summary[itest].file, "diodeBridge MLCP");
       if ((MLCPfile = fopen("MATRIX/diodeBridge_mlcp.dat", "r")) == NULL)
       {
@@ -507,8 +705,19 @@ void test_matrix(void)
         exit(1);
       }
       break;
+    case 6:
+      printf("BEGIN A NEWTEST  **************************************************************************");
+      printf("\n\n RCD **************************************************************************");
+      strcpy(summary[itest].file, "RCD");
+      if ((MLCPfile = fopen("MATRIX/RCD_mlcp.dat", "r")) == NULL)
+      {
+        perror("fopen MLCPfile: RCD_mlcp.dat");
+        exit(1);
+      }
+      break;
     case 7:
-      printf("\n\n diodeBridge 20 MLCP ");
+      printf("BEGIN A NEWTEST  **************************************************************************");
+      printf("\n\n diodeBridge 20 MLCP **************************************************************************");
       strcpy(summary[itest].file, "diodeBridge 20 MLCP");
       if ((MLCPfile = fopen("MATRIX/diodeBridge20_mlcp.dat", "r")) == NULL)
       {
@@ -517,7 +726,8 @@ void test_matrix(void)
       }
       break;
     case 8:
-      printf("\n\n diodeBridge 40 MLCP ");
+      printf("BEGIN A NEWTEST  **************************************************************************");
+      printf("\n\n diodeBridge 40 MLCP **************************************************************************");
       strcpy(summary[itest].file, "diodeBridge 40 MLCP");
       if ((MLCPfile = fopen("MATRIX/diodeBridge40_mlcp.dat", "r")) == NULL)
       {
@@ -525,15 +735,47 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 6:
-      printf("\n\n RCD ");
-      strcpy(summary[itest].file, "RCD");
-      if ((MLCPfile = fopen("MATRIX/RCD_mlcp.dat", "r")) == NULL)
+    case 2:
+      printf("BEGIN A NEWTEST  **************************************************************************");
+      printf("\n\n Buck converter **************************************************************************");
+      strcpy(summary[itest].file, "BuckConverter_mlcp");
+      if ((MLCPfile = fopen("MATRIX/BuckConverter_mlcp.dat", "r")) == NULL)
       {
-        perror("fopen MLCPfile: RCD_mlcp.dat");
+        perror("fopen MLCPfile: BuckConverter_mlcp.dat");
         exit(1);
       }
       break;
+    case 0:
+      printf("BEGIN A NEWTEST  **************************************************************************");
+      printf("\n\n Buck converter FB failed **************************************************************************");
+      strcpy(summary[itest].file, "Buck2");
+      if ((MLCPfile = fopen("MATRIX/Buck2_mlcp.dat", "r")) == NULL)
+      {
+        perror("fopen MLCPfile: Buck2_mlcp.dat");
+        exit(1);
+      }
+      break;
+    case 1:
+      printf("BEGIN A NEWTEST  **************************************************************************");
+      printf("\n\n Buck converter First step **************************************************************************");
+      strcpy(summary[itest].file, "BuckFirstStep");
+      if ((MLCPfile = fopen("MATRIX/BuckFirstStep_mlcp.dat", "r")) == NULL)
+      {
+        perror("fopen MLCPfile: BuckFirstStep_mlcp.dat");
+        exit(1);
+      }
+      break;
+    case 10:
+      printf("BEGIN A NEWTEST  **************************************************************************");
+      printf("\n\n Relay **************************************************************************");
+      strcpy(summary[itest].file, "relay_mlcp");
+      if ((MLCPfile = fopen("MATRIX/relay_mlcp.dat", "r")) == NULL)
+      {
+        perror("fopen MLCPfile: relay_mlcp.dat");
+        exit(1);
+      }
+      break;
+
     default :
       exit(1);
     }
@@ -659,12 +901,13 @@ void test_matrix(void)
 #endif
     if (withSol)
     {
-      //      test_mlcp_series( n,m , vecA,vecB,vecC ,vecD,a,b,sol);
+      test_mlcp_series(&problem, z, w, sol);
       printf("\n Without exact solution : ");
       printf("\n ---------------------- : \n");
     }
     for (i = 0; i < n + m + m; i++)
       sol[i] = 0;
+
     test_mlcp_series(&problem, z, w, sol);
 
     free(sol);
@@ -681,7 +924,7 @@ void test_matrix(void)
   printf("* *** SUMMARY             *** * \n");
   printf("* *** ******************** *** * \n");
 
-  for (itest = 0; itest < NBTEST ; ++itest)
+  for (itest = 0; itest < NBTEST ; itest++)
   {
     printf(" test %s  :\n", summary[itest].file);
     printf(" ===================================================  \n");
@@ -689,14 +932,16 @@ void test_matrix(void)
     printf(" PGS IM %s %d \t", summary[itest].cv[PGS_IM_ID], summary[itest].times[PGS_IM_ID]);
     printf(" PGS EX %s %d \t", summary[itest].cv[PGS_EX_ID], summary[itest].times[PGS_EX_ID]);
     printf(" RPGS %s %d \t", summary[itest].cv[RPGS_ID], summary[itest].times[RPGS_ID]);
-    /*printf(" PSOR 05 %s %d \t",summary[itest].cv[PSOR_05_ID],summary[itest].times[PSOR_05_ID]);
-    printf(" PSOR 1 %s %d \t",summary[itest].cv[PSOR_1_ID],summary[itest].times[PSOR_1_ID]);
-    printf(" PSOR 15 %s %d \t",summary[itest].cv[PSOR_15_ID],summary[itest].times[PSOR_15_ID]);
-    printf(" PSOR 2 %s %d \t",summary[itest].cv[PSOR_2_ID],summary[itest].times[PSOR_2_ID]);
-    printf(" RPSOR %s %d \t",summary[itest].cv[RPSOR_ID],summary[itest].times[RPSOR_ID]);*/
+    printf(" PSOR 05 %s %d \t", summary[itest].cv[PSOR_05_ID], summary[itest].times[PSOR_05_ID]);
+    printf(" PSOR 1 %s %d \t", summary[itest].cv[PSOR_1_ID], summary[itest].times[PSOR_1_ID]);
+    printf(" PSOR 15 %s %d \t", summary[itest].cv[PSOR_15_ID], summary[itest].times[PSOR_15_ID]);
+    printf(" PSOR 2 %s %d \t \n", summary[itest].cv[PSOR_2_ID], summary[itest].times[PSOR_2_ID]);
+    printf(" RPSOR %s %d \t", summary[itest].cv[RPSOR_ID], summary[itest].times[RPSOR_ID]);
     printf(" PATH %s %d \t", summary[itest].cv[PATH_ID], summary[itest].times[PATH_ID]);
     printf(" SIMPLEX %s %d \t", summary[itest].cv[SIMPLEX_ID], summary[itest].times[SIMPLEX_ID]);
-    printf(" DIR_ENUM %s %d \n", summary[itest].cv[DIRECT_ENUM_ID], summary[itest].times[DIRECT_ENUM_ID]);
+    printf(" DIR_ENUM %s %d ", summary[itest].cv[DIRECT_ENUM_ID], summary[itest].times[DIRECT_ENUM_ID]);
+    printf(" FB %s %d ", summary[itest].cv[FB_ID], summary[itest].times[FB_ID]);
+    printf(" DIR_FB %s %d \n", summary[itest].cv[DIRECT_FB_ID], summary[itest].times[DIRECT_FB_ID]);
   }
   printf("* *** ******************** *** * \n");
   printf("* *** END OF TEST MATRIX   *** * \n");

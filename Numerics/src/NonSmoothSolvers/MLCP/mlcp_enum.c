@@ -33,12 +33,13 @@ dim(v)=nn
 #include "mlcp_tool.h"
 #include <math.h>
 #include "mlcp_enum.h"
+#include "mlcp_enum_tool.h"
 
 
 
 #ifdef MLCP_DEBUG
 static int *sLastIWork;
-static double *sLastIWork;
+static double *sLastDWork;
 #endif
 
 static double * sQ = 0;
@@ -46,10 +47,6 @@ static double * sColNul = 0;
 static double * sM = 0;
 static double * sMref = 0;
 static double * sQref = 0;
-static unsigned long  int sCurrentEnum = 0;
-static unsigned long  int sCmpEnum = 0;
-static unsigned long  int sNbCase = 0;
-static double sProgress = 0;
 static int sVerbose = 0;
 static int sNn = 0;
 static int sMm = 0;
@@ -72,46 +69,40 @@ static double* sU;
  *else
  *  v[i] null and w2[i] not null
  */
-void affectW2V()
-{
-  unsigned long  int aux = sCurrentEnum;
-  for (unsigned int i = 0; i < sMm; i++)
-  {
-    sW2V[i] = aux & 1;
-    aux = aux >> 1;
-  }
+/* void affectW2V(){ */
+/*   unsigned long  int aux = sCurrentEnum; */
+/*   for (unsigned int i =0; i <sMm; i++){ */
+/*     sW2V[i]=aux & 1; */
+/*     aux = aux >> 1; */
+/*   } */
 
-}
-void initEnum()
-{
-  int cmp;
-  sCmpEnum = 0;
-  sNbCase = 1;
-  for (cmp = 0; cmp < sMm; cmp++)
-    sNbCase = sNbCase << 1;
-  sProgress = 0;
-}
-int nextEnum()
-{
-  if (sCmpEnum == sNbCase)
-    return 0;
-  if (sCurrentEnum >= sNbCase)
-  {
-    sCurrentEnum = 0;
-  }
-  if (sVerbose)
-    printf("try enum :%d\n", (int)sCurrentEnum);
-  affectW2V();
-  sCurrentEnum++;
-  sCmpEnum++;
-  if (sVerbose && sCmpEnum > sProgress * sNbCase)
-  {
-    sProgress += 0.001;
-    printf(" progress %f %d \n", sProgress, (int) sCurrentEnum);
-  }
+/* } */
+/* void initEnum(){ */
+/*   int cmp; */
+/*   sCmpEnum=0;   */
+/*   sNbCase = 1; */
+/*   for (cmp=0;cmp<sMm;cmp++) */
+/*     sNbCase = sNbCase << 1; */
+/*   sProgress=0; */
+/* } */
+/* int nextEnum(){ */
+/*   if (sCmpEnum == sNbCase) */
+/*     return 0; */
+/*   if (sCurrentEnum >= sNbCase){ */
+/*     sCurrentEnum=0; */
+/*   } */
+/*   if (sVerbose) */
+/*     printf("try enum :%d\n",(int)sCurrentEnum); */
+/*   affectW2V(); */
+/*   sCurrentEnum++; */
+/*   sCmpEnum++; */
+/*   if (sVerbose && sCmpEnum > sProgress*sNbCase){ */
+/*     sProgress+=0.001; */
+/*     printf(" progress %f %d \n",sProgress,(int) sCurrentEnum); */
+/*   } */
 
-  return 1;
-}
+/*   return 1; */
+/* } */
 
 
 void buildQ()
@@ -122,17 +113,17 @@ void printCurrentSystem()
 {
   int npm = sNn + sMm;
   printf("printCurrentSystemM:\n");
-  displayMat(sM, npm, npm);
+  displayMat(sM, npm, npm, 0);
   printf("printCurrentSystemQ:\n");
-  displayMat(sQ, sMm + sNn, 1);
+  displayMat(sQ, sMm + sNn, 1, 0);
 }
 void printRefSystem()
 {
   int npm = sNn + sMm;
   printf("ref M n %d  m %d :\n", sNn, sMm);
-  displayMat(sMref, npm, npm);
+  displayMat(sMref, npm, npm, 0);
   printf("ref Q:\n");
-  displayMat(sQref, sMm + sNn, 1);
+  displayMat(sQref, sMm + sNn, 1, 0);
 }
 int mlcp_enum_getNbIWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
 {
@@ -174,7 +165,6 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
   sW2 = w + problem->n;
   sU = z;
   sV = z + problem->n;
-  sCurrentEnum = 0;
   tol = options->dparam[0];
 
   sMref = problem->M->matrix0;
@@ -200,8 +190,8 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
   sW2V = workingInt;
   ipiv = sW2V + sMm;
   *info = 0;
-  initEnum();
-  while (nextEnum())
+  initEnum(problem->m);
+  while (nextEnum(sW2V))
   {
     mlcp_buildM(sW2V, sM, sMref, sNn, sMm);
     buildQ();
@@ -214,7 +204,7 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
       if (sVerbose)
       {
         printf("LU foctorization success, solution:\n");
-        displayMat(sQ, npm, 1);
+        displayMat(sQ, npm, 1, 0);
       }
 
       check = 1;
