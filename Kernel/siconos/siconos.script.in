@@ -271,7 +271,10 @@ fi
 
 if test -f ./Makefile; then
     make $make_args || exit 1
-    make install || exit 1
+    case $make_args in 
+        clean);;
+        *) make install || exit 1;;
+    esac
 else
     echo "$myname: nothing to clean" 
 fi
