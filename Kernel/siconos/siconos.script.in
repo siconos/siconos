@@ -252,6 +252,7 @@ if test ! "$make_args" = "clean"; then
     done
 
     if ! cmake $KERNEL_PREFIX/share/siconos-kernel/ \
+        -DCALL_PWD=$call_pwd \
         -DMAIN_SOURCE=$main_source \
         -DPLUGINS_SOURCES=$plugins_sources \
         -DPLUGINS_DIRECTORIES=$plugins_directories \
@@ -270,12 +271,9 @@ fi
 
 if test -f ./Makefile; then
     make $make_args || exit 1
+    make install || exit 1
 else
     echo "$myname: nothing to clean" 
-fi
-
-if test -f ./$exe; then
-    mv ./$exe $call_pwd
 fi
 
 if test $clean_build = true; then
@@ -286,6 +284,7 @@ if test $clean_build = true; then
     rm -rf CMakeFiles
     rm -f Makefile
     rm -f cmake_install.cmake
+    rm -f install_manifest.txt
     cd $call_pwd
     rmdir $build_directory
 fi
