@@ -276,7 +276,7 @@ int test_lcp_series(LinearComplementarity_Problem * problem, int* solversList)
   /* Latin */
   if (solversList[4] == 1)
   {
-    strcat(nameList, "   LATIN    |");
+    strcat(nameList, "   LATIN     |");
     strcpy(local_options->solverName, "Latin");
     int iparam[2] = {maxIter, 0};
     double dparam[3] = {tolerance, 0.0, 0.3};
@@ -439,7 +439,7 @@ int test_lcp_series(LinearComplementarity_Problem * problem, int* solversList)
   /*Enumeratif solver*/
   if (solversList[10] == 1)
   {
-    strcat(nameList, "   ENUM |");
+    strcat(nameList, "   ENUM      |");
     strcpy(local_options->solverName, "ENUM");
     int iparam[2] = {0, 0};
     double dparam[1] = {tolerance};
@@ -901,12 +901,14 @@ int test_matrix(void)
   /* List of working solvers */
   int * solversList = NULL; /* for dense */
   int * solversListSBM = NULL; /* for sparse */
+  int * solversListSBM2 = NULL; /* for sparse instable */
 
   /* List of unstable solvers (failed or wrong termination value) */
   int * solversList2 = NULL;
   int hasSBM = 0; /* =1 if the read matrix exists also in sparse */
   int hasDense = 0;
   int hasUnstable = 0;
+  int hasUnstableSBM = 0;
   int info = -1;
   for (itest = 0 ; itest < NBTEST ; ++itest)
   {
@@ -988,8 +990,8 @@ int test_matrix(void)
       hasDense = 1;
       hasUnstable = 1;
       {
-        int l1[12] = {0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0};
-        int l2[12] = {1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1};
+        int l1[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        int l2[12] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
         solversList = l1;
         solversList2 = l2;
       }
@@ -1053,10 +1055,13 @@ int test_matrix(void)
       getProblemSBM("MATRIX/monobloc_mathieu1.dat", problemSBM);
       hasSBM = 1;
       hasDense = 0;
-      hasUnstable = 0;
+      hasUnstable = -1;
+      hasUnstableSBM = 0;
       {
-        int l1[12] = {1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0};
+        int l1[12] = {1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0};
+        int l4[12] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0};
         solversListSBM = l1;
+        solversListSBM2 = l4;
       }
       break;
 
@@ -1142,6 +1147,14 @@ int test_matrix(void)
       int infoFail = test_lcp_series(problem, solversList2);
       printf("--------- End of unstable tests --------------------------- \n\n");
     }
+    if (hasUnstableSBM == 1)
+    {
+      /* Fail or unstable: */
+      printf("---------------------------------------------------------- \n");
+      printf("\n Run unstable tests for SBM (results may be wrong or log !=0)...\n");
+      int infoFail2 = test_lcp_series(problemSBM, solversListSBM2);
+      printf("--------- End of unstable tests --------------------------- \n\n");
+    }
 
     /* Free Memory */
     if (problem->M->matrix0 != NULL)
@@ -1186,14 +1199,14 @@ int main(void)
 
   if (info1 != 0)
   {
-    // printf("Warning: test_mmc log output different from 0 for some solvers.\n");
+    printf("Warning: test_mmc log output different from 0 for some solvers.\n");
     return info1;
   }
 
   int info2 = test_matrix();
   if (info2 != 0)
   {
-    // printf("Warning: test_matrix log output different from 0 for some solvers.\n");
+    printf("Warning: test_matrix log output different from 0 for some solvers.\n");
     return info2;
   }
 

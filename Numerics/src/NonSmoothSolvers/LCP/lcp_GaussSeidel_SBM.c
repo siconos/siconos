@@ -148,15 +148,15 @@ void lcp_GaussSeidel_SBM(LinearComplementarity_Problem* problem, double *z, doub
 
       if (infoLocal > 0)
       {
-        free(local_problem->q);
-        free(local_problem->M);
-        free(local_problem);
+        //free(local_problem->q);
+        //free(local_problem->M);
+        //free(local_problem);
         /* Number of GS iterations */
         options[0].iparam[1] = iter;
         fprintf(stderr, "lcp_GaussSeidel_SBM error: local LCP solver failed at global iteration %d.\n for block-row number %d. Output info equal to %d.\n", iter, rowNumber, infoLocal);
-        exit(EXIT_FAILURE);
-        /*        printf("lcp_GaussSeidel_SBM warning: local LCP solver failed at global iteration %d.\n for block-row number %d. Output info equal to %d.\n", iter,rowNumber, infoLocal); */
-        /*        break; */
+        //exit(EXIT_FAILURE);
+
+        break;
 
       }
 
