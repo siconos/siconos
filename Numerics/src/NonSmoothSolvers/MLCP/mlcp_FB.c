@@ -48,7 +48,6 @@ int mlcp_FB_getNbDWork(MixedLinearComplementarity_Problem* problem, Solver_Optio
 }
 
 
-
 void computeFz(double* z)
 {
   int incx = 1, incy = 1;
@@ -97,6 +96,7 @@ void mlcp_FB_init(MixedLinearComplementarity_Problem* problem, Solver_Options* o
 
 void mlcp_FB_reset()
 {
+  NSNN_reset();
   /*free(sFz) ;*/
 }
 
@@ -110,14 +110,21 @@ void mlcp_FB(MixedLinearComplementarity_Problem* problem, double *z, double *w, 
   double err;
   double tol = options->dparam[0];
   int i;
-
+  /*only for debug
+  double * zz = (double *)malloc((sN+sM)*sizeof(double));
+  memcpy(zz,z,(sN+sM)*sizeof(double));
+  */
 
   *info = nonSmoothNewtonNeigh(sN + sM, z, &F, &jacobianF, options->iparam, options->dparam);
   if (*info > 0)
   {
     fprintf(stderr, "Numerics, mlcp_FB failed, reached max. number of iterations without convergence. Error = %f\n", options->dparam[1]);
-    /*displayMLCP(problem);*/
+    /*    displayMLCP(problem);
+    printf("with z init;\n");
+    for (i=0;i<sN+sM;i++)
+    printf("%.32e \n",zz[i]);*/
   }
+  /*  free(zz);*/
   mlcp_compute_error(problem, z, w, tol, &err);
   for (i = 0; i < sM; i++)
   {

@@ -76,6 +76,20 @@ void displayMLCP(MixedLinearComplementarity_Problem* p)
       displayMat(p->M->matrix0, n, n, n + m);
     }
   }
+  if (p->B)
+  {
+    printf("B matrix:\n");
+    displayMat(p->B, m, m, 0);
+  }
+  else
+  {
+    printf("No B matrix:\n");
+    if (!p->M->storageType)
+    {
+      printf("B matrix from M:\n");
+      displayMat(p->M->matrix0 + n * (n + m) + n, m, m, n + m);
+    }
+  }
 
   if (p->C)
   {
@@ -104,20 +118,6 @@ void displayMLCP(MixedLinearComplementarity_Problem* p)
     {
       printf("D matrix from M:\n");
       displayMat(p->M->matrix0 + n, m, n, n + m);
-    }
-  }
-  if (p->B)
-  {
-    printf("B matrix:\n");
-    displayMat(p->B, m, m, 0);
-  }
-  else
-  {
-    printf("No B matrix:\n");
-    if (!p->M->storageType)
-    {
-      printf("B matrix from M:\n");
-      displayMat(p->M->matrix0 + n * (n + m) + n, m, m, n + m);
     }
   }
   if (p->a)
