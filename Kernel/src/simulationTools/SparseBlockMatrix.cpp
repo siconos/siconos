@@ -143,7 +143,7 @@ void SparseBlockMatrix::fill(SP::UnitaryRelationsSet indexSet, MapOfMapOfUnitary
 
       if ((blocks[*itRow]).find(*itCol) != (blocks[*itRow]).end())
       {
-        if (blocks[*itRow][*itCol] != NULL)
+        if (blocks[*itRow][*itCol])
         {
           // We keep connected UR only if they are also in indexSets[level] and if the block is not NULL
           //   if( (indexSet->find((*itCol).first))!= indexSet->end() && blocks[*itRow][(*itCol).first] != NULL)

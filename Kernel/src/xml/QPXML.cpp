@@ -34,7 +34,7 @@ QPXML::QPXML(xmlNode * QPNode)
       qpModelNode = SiconosDOMTreeTools::findFollowNode(qpModelNode);
   }
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(qpModelNode, QP_Q)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(qpModelNode, QP_Q)))
   {
     QNode = node;
   }
@@ -43,7 +43,7 @@ QPXML::QPXML(xmlNode * QPNode)
     XMLException::selfThrow("QPXML - constructor : tag " + QP_Q + " not found.");
   }
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(qpModelNode, QP_P)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(qpModelNode, QP_P)))
   {
     pNode = node;
   }

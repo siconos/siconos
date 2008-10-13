@@ -91,13 +91,13 @@ protected:
   /** m is the size of the complementarity conditions */
   int m;
   /** contains the matrix M of a MLCP system */
-  OSNSMatrixSPtr M;
+  SP::OSNSMatrix M;
   /** contains the vector q of a MLCP system */
-  SiconosVectorSPtr q;
+  SP::SiconosVector q;
   /** contains the vector z of a MLCP system */
-  SiconosVectorSPtr z;
+  SP::SiconosVector z;
   /** contains the vector w of a MLCP system */
-  SiconosVectorSPtr w;
+  SP::SiconosVector w;
   /** The MLCP instance */
   MixedLinearComplementarity_Problem numerics_problem;
 
@@ -113,21 +113,19 @@ public:
 
   /** xml constructor
   *  \param SP::OneStepNSProblemXML : the XML linked-object
-  *  \param SP::Simulation: the simulation that owns the problem
   */
-  MLCP(SP::OneStepNSProblemXML, SP::Simulation);
+  MLCP(SP::OneStepNSProblemXML);
 
   /** constructor from data
-  *  \param SP::Simulation: the simulation that owns this problem
   *  \param Solver* pointer to object that contains solver algorithm and formulation \n
   *  (optional, default = NULL => read .opt file in Numerics)
   *  \param String: id of the problem (default = "unamed")
   */
-  MLCP(SP::Simulation, SP::NonSmoothSolver = SP::NonSmoothSolver(), const std::string& = "unamed_mlcp");
+  MLCP(SP::NonSmoothSolver = SP::NonSmoothSolver(), const std::string& = "unamed_mlcp");
 
   /** destructor
   */
-  ~MLCP();
+  ~MLCP() {};
 
   // --- n ---
   /** get the value of n,
@@ -161,7 +159,7 @@ public:
   /** get w, the initial state of the DynamicalSystem
   *  \return pointer on a SimpleVector
   */
-  inline SiconosVectorSPtr getWPtr() const
+  inline SP::SiconosVector getWPtr() const
   {
     return w;
   }
@@ -174,7 +172,7 @@ public:
   /** set w to pointer newPtr
   *  \param SP::SiconosVector  newPtr
   */
-  void setWPtr(SiconosVectorSPtr);
+  void setWPtr(SP::SiconosVector);
 
   // --- Z ---
   /** get the value of z, the initial state of the DynamicalSystem
@@ -189,7 +187,7 @@ public:
   /** get z, the initial state of the DynamicalSystem
   *  \return pointer on a SiconosVector
   */
-  inline SiconosVectorSPtr getZPtr() const
+  inline SP::SiconosVector getZPtr() const
   {
     return z;
   }
@@ -202,14 +200,14 @@ public:
   /** set z to pointer newPtr
   *  \param SP::SiconosVector  newPtr
   */
-  void setZPtr(SiconosVectorSPtr) ;
+  void setZPtr(SP::SiconosVector) ;
 
   // --- M ---
 
   /** get M
   *  \return pointer on a SiconosMatrix
   */
-  inline OSNSMatrixSPtr getMPtr() const
+  inline SP::OSNSMatrix getMPtr() const
   {
     return M;
   }
@@ -222,7 +220,7 @@ public:
   /** set M to pointer newPtr
    *  \param newPtr SiconosMatrix*
    */
-  void setMPtr(OSNSMatrixSPtr);
+  void setMPtr(SP::OSNSMatrix);
 
   // --- Q ---
   /** get the value of q, the initial state of the DynamicalSystem
@@ -237,7 +235,7 @@ public:
   /** get q, the initial state of the DynamicalSystem
   *  \return pointer on a SiconosVector
   */
-  inline SiconosVectorSPtr getQPtr() const
+  inline SP::SiconosVector getQPtr() const
   {
     return q;
   }
@@ -250,7 +248,7 @@ public:
   /** set q to pointer newPtr
   *  \param SP::SiconosVector  newPtr
   */
-  void setQPtr(SiconosVectorSPtr);
+  void setQPtr(SP::SiconosVector);
 
   /** get the type of storage for M */
   inline const int getMStorageType() const
@@ -266,8 +264,10 @@ public:
   };
 
   /** To initialize the MLCP problem(computes topology ...)
+      \param the simulation, owner of this OSNSPB
    */
-  virtual void initialize();
+  void initialize(SP::Simulation);
+
   virtual void updateM();
 
   void reset();

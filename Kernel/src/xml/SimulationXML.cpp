@@ -38,23 +38,23 @@ SimulationXML::SimulationXML(xmlNodePtr rootSimulationNode): rootNode(rootSimula
 {
   xmlNodePtr node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LMGC90_SIMULATION_TAG)) == NULL)
+  if (!(node = SiconosDOMTreeTools::findNodeChild(rootNode, LMGC90_SIMULATION_TAG)))
   {
     // === TimeDiscretisation data loading ===
-    if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, TIMEDISCRETISATION_TAG)) != NULL)
+    if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, TIMEDISCRETISATION_TAG)))
       timeDiscretisationXML.reset(new TimeDiscretisationXML(node));
     else
       XMLException::selfThrow("SimulationXML - simulation XML constructor  ERROR : tag " + TIMEDISCRETISATION_TAG + " not found.");
 
     // === OneStepIntegrator data loading ===
-    if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, ONESTEPINTEGRATOR_DEFINITION_TAG)) != NULL)
+    if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, ONESTEPINTEGRATOR_DEFINITION_TAG)))
     {
       xmlNodePtr OSINode = SiconosDOMTreeTools::findNodeChild(node);
-      if (OSINode == NULL) // At least one OSI must be described in the xml file.
+      if (!OSINode)  // At least one OSI must be described in the xml file.
         XMLException::selfThrow("SimulationXML - ERROR : at least one " + ONESTEPINTEGRATOR_TAG + " must be declared.");
 
       string typeOSI; // OneStepIntegrator type
-      while (OSINode != NULL)
+      while (OSINode)
       {
         typeOSI = (char*)OSINode->name;
         if (typeOSI == MOREAU_TAG)
@@ -76,12 +76,12 @@ SimulationXML::SimulationXML(xmlNodePtr rootSimulationNode): rootNode(rootSimula
   else cout << "SimulationXML - Constructor : the Simulation is not defined -> the LMGC90 tag is used." << endl;
 
   // === OneStepNSProblem data loading ===
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, ONESTEPNSPROBLEM_TAG)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, ONESTEPNSPROBLEM_TAG)))
   {
     xmlNodePtr OSNSPBNode = SiconosDOMTreeTools::findNodeChild(node);
 
     string typeOSNS; // OneStepNSPb type
-    while (OSNSPBNode != NULL)
+    while (OSNSPBNode)
     {
       typeOSNS = (char*)OSNSPBNode->name;
       if (typeOSNS == LCP_TAG)

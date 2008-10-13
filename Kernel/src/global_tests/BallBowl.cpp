@@ -16,8 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "SiconosKernel.h"
-
+#include "SiconosKernel.hpp"
 using namespace std;
 
 bool BallBowl()
@@ -30,25 +29,26 @@ bool BallBowl()
     cout << " **************************************" << endl;
     cout << " ******** Start Ball in a Bowl *********" << endl << endl << endl;
     // --- Model loading from xml file ---
-    Model bouncingBall("./BallBowl.xml");
+    SP::Model bouncingBall(new Model("./BallBowl.xml"));
+    bouncingBall->initialize();
+
     // --- Get and initialize the simulation ---
-    TimeStepping* s = static_cast<TimeStepping*>(bouncingBall.getSimulationPtr());
-    s->initialize();
+    SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(bouncingBall->getSimulationPtr());
     // --- Get the time discretisation scheme ---
-    TimeDiscretisation* t = s->getTimeDiscretisationPtr();
+    SP::TimeDiscretisation t = s->getTimeDiscretisationPtr();
     int k = 0; // Current step
-    SiconosMatrix * dataRef = new SimpleMatrix("refBallBowl.dat", true);
+    SP::SiconosMatrix dataRef(new SimpleMatrix("refBallBowl.dat", true));
     int N = dataRef->size(0);
     SimpleMatrix dataPlot(N, 6);
 
     // For the initial time step:
     // time
-    dataPlot(k, 0) =  bouncingBall.getT0();
+    dataPlot(k, 0) =  bouncingBall->getT0();
     // state q for the first dynamical system (ball)
-    LagrangianDS* ball = static_cast<LagrangianDS*>(bouncingBall.getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
-    SiconosVector * q = ball->getQPtr();
-    SiconosVector * v = ball->getVelocityPtr();
-    SiconosVector * p = ball->getPPtr(2);
+    SP::LagrangianDS ball = boost::static_pointer_cast<LagrangianDS> (bouncingBall->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(1));
+    SP::SiconosVector q = ball->getQPtr();
+    SP::SiconosVector v = ball->getVelocityPtr();
+    SP::SiconosVector p = ball->getPPtr(2);
 
     dataPlot(k, 1) = (*q)(0);
     dataPlot(k, 2) = (*v)(0);
@@ -58,7 +58,7 @@ bool BallBowl()
 
     cout << "Computation ... " << endl;
     // --- Time loop  ---
-    while (s->getNextTime() < bouncingBall.getFinalT())
+    while (s->getNextTime() < bouncingBall->getFinalT())
     {
       // solve ...
       s->computeOneStep();
@@ -96,8 +96,6 @@ bool BallBowl()
     }
 
     cout << endl << endl;
-
-    delete dataRef;
   }
 
   // --- Exceptions handling ---

@@ -29,7 +29,7 @@ NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(unsigned int newSize):
   NonSmoothLaw(NEWTONIMPACTFRICTIONNSLAW, newSize), en(0.0), et(0.0), mu(0.0)
 {}
 
-NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(NonSmoothLawXMLSPtr nslawxml):
+NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(SP::NonSmoothLawXML nslawxml):
   NonSmoothLaw(NEWTONIMPACTFRICTIONNSLAW, nslawxml), en(0.0), et(0.0), mu(0.0)
 {
   assert((nslawxml->hasSize()) && // size is a required input for Friction

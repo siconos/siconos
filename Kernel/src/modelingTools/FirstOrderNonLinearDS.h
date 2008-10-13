@@ -18,17 +18,25 @@
  */
 
 /*! \file FirstOrderNonLinearDS.h
-First Order Non Linear Dynamical Systems
+  First Order Non Linear Dynamical Systems
 */
 
 #ifndef FIRSTORDERNONLINEARDS_H
 #define FIRSTORDERNONLINEARDS_H
 
 #include "DynamicalSystem.h"
+#include "PluggedObject.hpp"
 #include "BlockMatrix.h"
 
 class DynamicalSystem;
 class BlockMatrix;
+
+typedef void (*fPtrFunction)(double, unsigned int, const double*, double*, unsigned int, double*);
+typedef PluggedObject<fPtrFunction, SimpleVector> PVF;
+typedef PluggedObject<fPtrFunction, SimpleMatrix> PMJF;
+
+TYPEDEF_SPTR(PVF);
+TYPEDEF_SPTR(PMJF);
 
 /**  General First Order Non Linear Dynamical Systems
  *
@@ -83,61 +91,33 @@ class FirstOrderNonLinearDS : public DynamicalSystem
 protected:
 
   /** Matrix coefficient of \f$ \dot x \f$ */
-  SiconosMatrixSPtr M;
+  SP::PMJF M;
 
   /** f(x,t,z) */
-  SiconosVectorSPtr f;
+  SP::PVF f;
 
   /** Gradient of \f$ f(x,t,z) \f$ with respect to \f$ x\f$*/
-  SiconosMatrixSPtr jacobianXF;
-
-  /** DynamicalSystem plug-in to compute f(x,t,z) - id="f".
-   *  @param  : current time
-   *  @param  : the size of the vector x
-   *  @param  : the pointer to the first element of the vector x
-   *  @param  : the pointer to the first element of the vector f(x,t)
-   *  @param  : the size of the vector z
-   *  @param  : a vector of parameters, z
-   */
-  void (*computeFPtr)(double, unsigned int, const double*, double*, unsigned int, double*);
-
-  /** DynamicalSystem plug-in to compute the gradient of f(x,t,z) with respect to the state: \f$ \nabla_x f: (x,t,z) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
-   * @param time : current time
-   * @param sizeOfX : size of vector x
-   * @param x : pointer to the first element of x
-   * @param[in,out] jacob : pointer to the first element of jacobianXF matrix
-   * @param  : the size of the vector z
-   * @param[in,out] z: a vector of parameters, z
-   */
-  void (*computeJacobianXFPtr)(double, unsigned int, const double*, double*, unsigned int, double*);
+  SP::PMJF jacobianXF;
 
   /** the  input vector due to the non-smooth law \f$  r \in R^{n}\f$ (multiplier, force, ...)*/
-  SiconosVectorSPtr r;
+  SP::SiconosVector r;
 
   /**  the previous r vectors */
-  SiconosMemorySPtr rMemory;
+  SP::SiconosMemory rMemory;
 
   /** Copy of M Matrix, used to solve systems like Mx = b with LU-factorization.
       (Warning: may not exist, used if we need to avoid factorization in place of M) */
-  SiconosMatrixSPtr invM;
-
-
-#ifndef WithSmartPtr
-  /** set all allocation flags (isAllocated map)
-   *  \param bool
-   */
-  virtual void initAllocationFlags(bool);
-#endif
-
-  /** set all plug-in flags (isPlugin map) to val
-   *  \param a bool
-   */
-  virtual void initPluginFlags(bool);
+  SP::SiconosMatrix invM;
 
   /** default constructor
    * \param the type of the system
    */
-  FirstOrderNonLinearDS(DSTYPES);
+  FirstOrderNonLinearDS(DS::TYPES): DynamicalSystem(DS::FONLDS) {};
+
+  /** constructor from a set of data
+      \param SiconosVector : initial state of this DynamicalSystem
+  */
+  FirstOrderNonLinearDS(const SiconosVector&);
 
 public:
 
@@ -145,37 +125,33 @@ public:
 
   /** xml constructor
    *  \param DynamicalSystemXML* : the XML object for this DynamicalSystem
-   *  \param NonSmoothSP::DynamicalSystem (optional): the NSDS that owns this ds
-   *  \exception RuntimeException
    */
-  FirstOrderNonLinearDS(DynamicalSystemXMLSPtr dsXML,
-                        SP::NonSmoothDynamicalSystem = SP::NonSmoothDynamicalSystem());
+  FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML);
 
   /** constructor from a set of data
-   *  \param int : reference number for this DynamicalSystem
    *  \param SiconosVector : initial state of this DynamicalSystem
-   *  \param string : plugin name for f of this DynamicalSystem (optional)
-   *  \param string : plugin name for jacobianXF of this DynamicalSystem (optional)
+   *  \param string : plugin name for f of this DynamicalSystem
+   *  \param string : plugin name for jacobianXF of this DynamicalSystem
    *  \exception RuntimeException
    */
-  FirstOrderNonLinearDS(int, const SiconosVector&, const std::string& = "DefaultPlugin:computeF", const std::string& = "DefaultPlugin:computeJacobianXF");
+  FirstOrderNonLinearDS(const SiconosVector&, const std::string&, const std::string&);
 
   // ===== DESTRUCTOR =====
 
   /** destructor
    */
-  virtual ~FirstOrderNonLinearDS();
+  virtual ~FirstOrderNonLinearDS() {};
 
   /** check that the system is complete (ie all required data are well set)
    * \return a bool
    */
-  virtual bool checkDynamicalSystem();
+  bool checkDynamicalSystem();
 
   // --- R ---
 
   /** get the value of r
    * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
-   *  \return a SiconosVector
+   *  \return a vector
    */
   inline const SimpleVector getR() const
   {
@@ -185,7 +161,7 @@ public:
   /** get r
    *  \return pointer on a SiconosVector
    */
-  inline SiconosVectorSPtr getRPtr() const
+  inline SP::SiconosVector getRPtr() const
   {
     return r;
   }
@@ -198,7 +174,7 @@ public:
   /** set R to pointer newPtr
    *  \param SP::SiconosVector newPtr
    */
-  void setRPtr(SiconosVectorSPtr);
+  void setRPtr(SP::SiconosVector);
 
   // rMemory
 
@@ -213,7 +189,7 @@ public:
   /** get all the values of the state vector r stored in memory
    *  \return a memory
    */
-  inline SiconosMemorySPtr getRMemoryPtr() const
+  inline SP::SiconosMemory getRMemoryPtr() const
   {
     return rMemory;
   }
@@ -226,42 +202,37 @@ public:
   /** set rMemory to pointer newPtr
    *  \param a ref on a SiconosMemory
    */
-  void setRMemoryPtr(SiconosMemorySPtr);
+  void setRMemoryPtr(SP::SiconosMemory);
 
   // --- M ---
   /** get the value of M
-  *  \return SimpleMatrix
-  */
-  inline const SimpleMatrix getMSimple() const
-  {
-    return *M;
-  }
-
-  /** get the value of M
-  *  \return BlockMatrix
-  */
-  inline const BlockMatrix getMBlock() const
+   *  \return a plugged-matrix
+   */
+  inline const PMJF getM() const
   {
     return *M;
   }
 
   /** get M
-  *  \return pointer on a SiconosMatrix
-  */
-  inline SiconosMatrixSPtr getMPtr() const
+   *  \return pointer on a plugged-matrix
+   */
+  inline SP::PMJF getMPtr() const
   {
     return M;
   }
 
   /** set the value of M to newValue
-  *  \param SimpleMatrix newValue
-  */
-  void setM(const SiconosMatrix&);
-
-  /** link M with a new pointer
-   *  \param a pointer to SiconosMatrix
+   *  \param plugged-matrix newValue
    */
-  void setMPtr(SiconosMatrixSPtr);
+  void setM(const PMJF&);
+
+  /** set M to pointer newPtr
+   *  \param a plugged matrix SP
+   */
+  inline void setMPtr(SP::PMJF newPtr)
+  {
+    M = newPtr;
+  }
 
   // --- invM ---
   /** get the value of invM
@@ -273,92 +244,96 @@ public:
   }
 
   /** get the value of invM
-  *  \return BlockMatrix
-  */
+   *  \return BlockMatrix
+   */
   inline const BlockMatrix getInvMBlock() const
   {
     return *invM;
   }
 
   /** get invM
-  *  \return pointer on a SiconosMatrix
-  */
-  inline SiconosMatrixSPtr getInvMPtr() const
+   *  \return pointer on a SiconosMatrix
+   */
+  inline SP::SiconosMatrix getInvMPtr() const
   {
     return invM;
   }
 
   /** set the value of invM to newValue
-  *  \param SimpleMatrix newValue
-  */
+   *  \param SimpleMatrix newValue
+   */
   void setInvM(const SiconosMatrix&);
 
   /** link invM with a new pointer
    *  \param a pointer to SiconosMatrix
    */
-  void setInvMPtr(SiconosMatrixSPtr);
+  void setInvMPtr(SP::SiconosMatrix);
 
-  // ---  F ---
+  // --- f ---
 
-  /** get the value of f derivative of the state of the DynamicalSystem
-   *  \return SimpleVector
-   * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
+  /** get the value of f
+   *  \return plugged vector
    */
-  inline const SimpleVector getF() const
+  inline const PVF getF() const
   {
     return *f;
   }
 
-  /** get f, the derivative of the state of the DynamicalSystem
-   *  \return pointer on a SiconosVector
+  /** get f
+   *  \return pointer on a plugged vector
    */
-  inline SiconosVectorSPtr getFPtr() const
+  inline SP::PVF getFPtr() const
   {
     return f;
   }
 
   /** set the value of f to newValue
-   *  \param SiconosVector newValue
+   *  \param a plugged vector
    */
-  virtual void setF(const SiconosVector&);
+  void setF(const PVF&);
 
   /** set f to pointer newPtr
-   *  \param SP::SiconosVector newPtr
+   *  \param a SP to plugged vector
    */
-  virtual void setFPtr(SiconosVectorSPtr);
+  inline void setFPtr(SP::PVF newPtr)
+  {
+    f = newPtr;
+  }
 
-  // --- JacobianXF ---
-
-  /** get the value of JacobianXF
-   *  \return SimpleMatrix
+  // --- jacobianXF ---
+  /** get the value of jacobianXF
+   *  \return a plugged-matrix
    */
-  inline const SimpleMatrix getJacobianXF() const
+  inline const PMJF getJacobianXF() const
   {
     return *jacobianXF;
   }
 
-  /** get JacobianXF
-   *  \return pointer on a SiconosMatrix
+  /** get jacobianXF
+   *  \return pointer on a plugged-matrix
    */
-  inline SiconosMatrixSPtr getJacobianXFPtr() const
+  inline SP::PMJF getJacobianXFPtr() const
   {
     return jacobianXF;
   }
 
-  /** set the value of JacobianXF to newValue
-   *  \param SiconosMatrix newValue
+  /** set the value of jacobianXF to newValue
+   *  \param plugged-matrix newValue
    */
-  virtual void setJacobianXF(const SiconosMatrix&);
+  void setJacobianXF(const PMJF&);
 
-  /** set JacobianXF to pointer newPtr
-   *  \param SP::SiconosMatrix  newPtr
+  /** set jacobianXF to pointer newPtr
+   *  \param a plugged matrix SP
    */
-  virtual void setJacobianXFPtr(SiconosMatrixSPtr newPtr);
+  inline void setJacobianXFPtr(SP::PMJF newPtr)
+  {
+    jacobianXF = newPtr;
+  }
 
   /** Initialization function for the rhs and its jacobian.
    *  \param time of initialization
    */
-  virtual void initRhs(double) ;
+  void initRhs(double) ;
 
   /** dynamical system initialization function: mainly set memory and compute value for initial state values.
    *  \param string: simulation type
@@ -383,71 +358,104 @@ public:
 
   // --- setters for functions to compute plugins ---
 
+  /** to set a specified function to compute M
+   *  \param string pluginPath : the complete path to the plugin
+   *  \param the string functionName : function name to use in this library
+   *  \exception SiconosSharedLibraryException
+   */
+  void setComputeMFunction(const std::string&  pluginPath, const std::string&  functionName);
+
+  /** set a specified function to compute M
+   *  \param fPtrFunction : a pointer on the plugin function
+   */
+  void setComputeMFunction(fPtrFunction fct);
+
   /** to set a specified function to compute f(x,t)
    *  \param string pluginPath : the complete path to the plugin
    *  \param string functionName : the function name to use in this library
    *  \exception SiconosSharedLibraryException
    */
-  virtual void setComputeFFunction(const std::string&  pluginPath, const std::string& functionName);
+  void setComputeFFunction(const std::string&  pluginPath, const std::string& functionName);
+
+  /** set a specified function to compute the vector f
+   *  \param fPtrFunction : a pointer on the plugin function
+   */
+  void setComputeFFunction(fPtrFunction fct);
 
   /** to set a specified function to compute jacobianXF
    *  \param string pluginPath : the complete path to the plugin
    *  \param the string functionName : function name to use in this library
    *  \exception SiconosSharedLibraryException
    */
-  virtual void setComputeJacobianXFFunction(const std::string&  pluginPath, const std::string&  functionName);
+  void setComputeJacobianXFFunction(const std::string&  pluginPath, const std::string&  functionName);
+
+  /** set a specified function to compute jacobianXF
+   *  \param fPtrFunction : a pointer on the plugin function
+   */
+  void setComputeJacobianXFFunction(fPtrFunction fct);
 
   // --- compute plugin functions ---
+
+  /** Default function to compute \f$ M: (x,t)\f$
+   * \param double time : current time
+   */
+  void computeM(double);
+
+  /** function to compute \f$ M: (x,t)\f$ with x different from current saved state.
+   * \param double time : current time
+   * \param SP::SiconosVector
+   */
+  void computeM(double, SP::SiconosVector);
 
   /** Default function to compute \f$ f: (x,t)\f$
    * \param double time : current time
    */
-  virtual void computeF(double);
+  void computeF(double);
 
   /** function to compute \f$ f: (x,t)\f$ with x different from current saved state.
    * \param double time : current time
    * \param SP::SiconosVector
    */
-  virtual void computeF(double, SiconosVectorSPtr);
+  void computeF(double, SP::SiconosVector);
 
   /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
    *  \exception RuntimeException
    */
-  virtual void computeJacobianXF(double, bool  = false);
+  void computeJacobianXF(double, bool  = false);
 
   /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$ with x different from current saved state.
    *  \param double time : current time
    *  \param SP::SiconosVector
    */
-  virtual void computeJacobianXF(double, SP::SiconosVector);
+  void computeJacobianXF(double, SP::SiconosVector);
 
   /** Default function to the right-hand side term
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
    *  \exception RuntimeException
    */
-  virtual void computeRhs(double, bool  = false);
+  void computeRhs(double, bool  = false);
 
   /** Default function to jacobian of the right-hand side term according to x
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
    *  \exception RuntimeException
    */
-  virtual void computeJacobianXRhs(double, bool  = false);
+  void computeJacobianXRhs(double, bool  = false);
 
   // ===== XML MANAGEMENT FUNCTIONS =====
 
   /** copy the data common to each system in the XML tree
    */
-  virtual void saveSpecificDataToXML();
+  void saveSpecificDataToXML();
 
   // ===== MISCELLANEOUS ====
 
   /** print the data of the dynamical system on the standard output
    */
-  virtual void display() const;
+  void display() const;
 
   /** set R to zero
    */
@@ -456,7 +464,7 @@ public:
   /** To compute \f$\frac{|x_{i+1} - xi|}{|x_i|}\f$ where \f$x_{i+1}\f$ represents the present state and \f$x_i\f$ the previous one
    * \return a double
    */
-  virtual double dsConvergenceIndicator();
+  double dsConvergenceIndicator();
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param SP::DynamicalSystem : the system which must be converted

@@ -28,7 +28,7 @@ using namespace std;
 NonSmoothLaw::NonSmoothLaw(const string& newType, unsigned int newSize): nsLawType(newType), size(newSize)
 {}
 
-NonSmoothLaw::NonSmoothLaw(const string& newType, NonSmoothLawXMLSPtr newNsLawXml):
+NonSmoothLaw::NonSmoothLaw(const string& newType, SP::NonSmoothLawXML newNsLawXml):
   nsLawType(newType), size(1), nslawxml(newNsLawXml)
 {
   assert(nslawxml &&

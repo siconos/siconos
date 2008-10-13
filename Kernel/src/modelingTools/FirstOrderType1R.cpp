@@ -22,120 +22,75 @@
 #include "FirstOrderNonLinearDS.h"
 
 using namespace std;
-
-#ifndef WithSmartPtr
-void FirstOrderType1R::initAllocationFlags(bool in)
-{
-  isAllocatedIn["jacobianH0"] = in;
-  isAllocatedIn["jacobianG0"] = in;
-}
-#endif
-
+using namespace RELATION;
 
 void FirstOrderType1R::initPluginFlags(bool in)
 {
-  isPlugged["h"] = in;
-  isPlugged["jacobianH0"] = in;
-  isPlugged["g"] = in;
-  isPlugged["jacobianG0"] = in ;
+  isPlugged[RELATION::h] = in;
+  isPlugged[RELATION::jacobianH0] = in;
+  isPlugged[RELATION::g] = in;
+  isPlugged[RELATION::jacobianG0] = in ;
 }
 
 // xml constructor
-FirstOrderType1R::FirstOrderType1R(RelationXMLSPtr relxml):
+FirstOrderType1R::FirstOrderType1R(SP::RelationXML relxml):
   FirstOrderR(relxml, Type1R)
 {
-  FirstOrderRXMLSPtr FORxml = boost::static_pointer_cast<FirstOrderRXML>(relationxml);
-
-#ifndef WithSmartPtr
-  initAllocationFlags(false);
-#endif
+  SP::FirstOrderRXML FORxml = boost::static_pointer_cast<FirstOrderRXML>(relationxml);
 
   initPluginFlags(false);
   // Gradients
 
-#ifndef WithSmartPtr
-  jacobianH.resize(1, NULL);
-  jacobianG.resize(1, NULL);
-#else
   jacobianH.resize(1);
   jacobianG.resize(1);
-#endif
 
   // input g
   if (FORxml->hasG())
   {
-    pluginNames["g"] = FORxml->getGPlugin();
-    setComputeGFunction(cShared.getPluginName(pluginNames["g"]), cShared.getPluginFunctionName(pluginNames["g"]));
+    pluginNames[RELATION::g] = FORxml->getGPlugin();
+    setComputeGFunction(SSL::getPluginName(pluginNames[RELATION::g]), SSL::getPluginFunctionName(pluginNames[RELATION::g]));
     // Gradients
     if (!FORxml->hasJacobianG())
       RuntimeException::selfThrow("FirstOrderType1R xml constructor failed. No input for gradient(s) of g function.");
 
     if (FORxml->isJacobianGPlugin(0))
     {
-      pluginNames["jacobianG0"] = FORxml->getJacobianGPlugin(0);
-      setComputeJacobianGFunction(cShared.getPluginName(pluginNames["jacobianG0"]), cShared.getPluginFunctionName(pluginNames["jacobianG0"]));
+      pluginNames[RELATION::jacobianG0] = FORxml->getJacobianGPlugin(0);
+      setComputeJacobianGFunction(SSL::getPluginName(pluginNames[RELATION::jacobianG0]), SSL::getPluginFunctionName(pluginNames[RELATION::jacobianG0]));
     }
     else
-    {
-
-#ifndef WithSmartPtr
-      jacobianG[0] = new SimpleMatrix(FORxml->getJacobianGMatrix(0));
-      isAllocatedIn["jacobianG0"] = true   ;
-#else
       jacobianG[0].reset(new SimpleMatrix(FORxml->getJacobianGMatrix(0)));
-#endif
-
-    }
   }
 
   // output h
   if (FORxml->hasH())
   {
-    pluginNames["h"] = FORxml->getHPlugin();
-    setComputeHFunction(cShared.getPluginName(pluginNames["h"]), cShared.getPluginFunctionName(pluginNames["h"]));
+    pluginNames[RELATION::h] = FORxml->getHPlugin();
+    setComputeHFunction(SSL::getPluginName(pluginNames[RELATION::h]), SSL::getPluginFunctionName(pluginNames[RELATION::h]));
     // Gradients
     if (!FORxml->hasJacobianH())
       RuntimeException::selfThrow("FirstOrderType1R xml constructor failed. No input for gradients of h function.");
     if (FORxml->isJacobianHPlugin(0))
     {
-      pluginNames["jacobianH0"] = FORxml->getJacobianHPlugin(0);
-      setComputeJacobianHFunction(cShared.getPluginName(pluginNames["jacobianH0"]), cShared.getPluginFunctionName(pluginNames["jacobianH0"]));
+      pluginNames[RELATION::jacobianH0] = FORxml->getJacobianHPlugin(0);
+      setComputeJacobianHFunction(SSL::getPluginName(pluginNames[RELATION::jacobianH0]), SSL::getPluginFunctionName(pluginNames[RELATION::jacobianH0]));
     }
     else
-    {
-
-#ifndef WithSmartPtr
-      jacobianH[0] = new SimpleMatrix(FORxml->getJacobianHMatrix(0));
-      isAllocatedIn["jacobianH0"] = true   ;
-#else
       jacobianH[0].reset(new SimpleMatrix(FORxml->getJacobianHMatrix(0)));
-#endif
-
-    }
   }
 }
 
 FirstOrderType1R::FirstOrderType1R(const string& computeOut, const string& computeIn):
   FirstOrderR(Type1R), output(NULL), jXOutput(NULL), input(NULL), jLInput(NULL)
 {
-
-#ifndef WithSmartPtr
-  initAllocationFlags(false);
-#endif
-
   initPluginFlags(false);
   // Size vector of pointers to functions.
   // Connect input and output to plug-in
-  setComputeHFunction(cShared.getPluginName(computeOut), cShared.getPluginFunctionName(computeOut));
-  setComputeGFunction(cShared.getPluginName(computeIn), cShared.getPluginFunctionName(computeIn));
+  setComputeHFunction(SSL::getPluginName(computeOut), SSL::getPluginFunctionName(computeOut));
+  setComputeGFunction(SSL::getPluginName(computeIn), SSL::getPluginFunctionName(computeIn));
 
-#ifndef WithSmartPtr
-  jacobianH.resize(1, NULL);
-  jacobianG.resize(1, NULL);
-#else
   jacobianH.resize(1);
   jacobianG.resize(1);
-#endif
 
   // The jacobians are not set, and thus considered as null matrices at this point.
 }
@@ -143,109 +98,60 @@ FirstOrderType1R::FirstOrderType1R(const string& computeOut, const string& compu
 FirstOrderType1R::FirstOrderType1R(const string& computeOut, const string& computeIn, const string& computeJX, const string& computeJL):
   FirstOrderR(Type1R), output(NULL), jXOutput(NULL), input(NULL), jLInput(NULL)
 {
-
-#ifndef WithSmartPtr
-  initAllocationFlags(false);
-#endif
-
   initPluginFlags(false);
   // Size vector of pointers to functions.
 
-#ifndef WithSmartPtr
-  jacobianH.resize(1, NULL);
-  jacobianG.resize(1, NULL);
-#else
   jacobianH.resize(1);
   jacobianG.resize(1);
-#endif
 
   // Connect input and output to plug-in
-  setComputeHFunction(cShared.getPluginName(computeOut), cShared.getPluginFunctionName(computeOut));
-  setComputeGFunction(cShared.getPluginName(computeIn), cShared.getPluginFunctionName(computeIn));
-  setComputeJacobianHFunction(cShared.getPluginName(computeJX), cShared.getPluginFunctionName(computeJX));
-  setComputeJacobianGFunction(cShared.getPluginName(computeJL), cShared.getPluginFunctionName(computeJL));
+  setComputeHFunction(SSL::getPluginName(computeOut), SSL::getPluginFunctionName(computeOut));
+  setComputeGFunction(SSL::getPluginName(computeIn), SSL::getPluginFunctionName(computeIn));
+  setComputeJacobianHFunction(SSL::getPluginName(computeJX), SSL::getPluginFunctionName(computeJX));
+  setComputeJacobianGFunction(SSL::getPluginName(computeJL), SSL::getPluginFunctionName(computeJL));
 }
 
 FirstOrderType1R::~FirstOrderType1R()
-{
-  input = NULL;
-  output = NULL;
-  jLInput = NULL;
-  jXOutput = NULL;
-}
+{}
 
 void FirstOrderType1R::initialize()
 {
   FirstOrderR::initialize();
 
   // if jacobianH0 is plugged and memory not allocated ...
-  if (isPlugged["jacobianH0"] && ! jacobianH[0])
-  {
-
-#ifndef WithSmartPtr
-    jacobianH[0] = new SimpleMatrix(interaction->getSizeOfY(), interaction->getSizeOfDS());
-    isAllocatedIn["jacobianH0"] = true;
-#else
+  if (isPlugged[RELATION::jacobianH0] && ! jacobianH[0])
     jacobianH[0].reset(new SimpleMatrix(interaction->getSizeOfY(), interaction->getSizeOfDS()));
-#endif
-
-  }
-
   // Same work for jacobianLambdaG
-  if (isPlugged["jacobianG0"] && ! jacobianG[0])
-  {
-
-#ifndef WithSmartPtr
-    jacobianG[0] = new SimpleMatrix(interaction->getSizeOfDS(), interaction->getSizeOfY());
-    isAllocatedIn["jacobianG0"] = true;
-#else
+  if (isPlugged[RELATION::jacobianG0] && ! jacobianG[0])
     jacobianG[0].reset(new SimpleMatrix(interaction->getSizeOfDS(), interaction->getSizeOfY()));
-#endif
-
-  }
 }
 
 void FirstOrderType1R::setComputeHFunction(const string& pluginPath, const string& functionName)
 {
-  cShared.setFunction(&output, pluginPath, functionName);
-  string plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  pluginNames["h"] = plugin + ":" + functionName;
-  isPlugged["h"] = true;
+  isPlugged[RELATION::h] = Plugin::setFunction(&output, pluginPath, functionName, pluginNames[RELATION::h]);
 }
 
 void FirstOrderType1R::setComputeJacobianHFunction(const string& pluginPath, const string& functionName, unsigned int)
 {
-  string name = "jacobianH0";
-  // Warning: output[0] corresponds to h, thus use output[index+1]
-  cShared.setFunction(&jXOutput, pluginPath, functionName);
-  string plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  pluginNames[name] = plugin + ":" + functionName;
-  isPlugged[name] = true;
+  isPlugged[RELATION::jacobianH0] = Plugin::setFunction(&jXOutput, pluginPath, functionName, pluginNames[RELATION::jacobianH0]);
 }
 
 void FirstOrderType1R::setComputeGFunction(const string& pluginPath, const string& functionName)
 {
-  cShared.setFunction(&input, pluginPath, functionName);
-  string plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  pluginNames["g"] = plugin + ":" + functionName;
-  isPlugged["g"] = true;
+  isPlugged[RELATION::g] = Plugin::setFunction(&input, pluginPath, functionName, pluginNames[RELATION::g]);
 }
 
 void FirstOrderType1R::setComputeJacobianGFunction(const string& pluginPath, const string& functionName, unsigned int)
 {
-  string name = "jacobianG0";
-  cShared.setFunction(&jLInput, pluginPath, functionName);
-  string plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  pluginNames[name] = plugin + ":" + functionName;
-  isPlugged[name] = true;
+  isPlugged[RELATION::jacobianG0] = Plugin::setFunction(&jLInput, pluginPath, functionName, pluginNames[RELATION::jacobianG0]);
 }
 
 void FirstOrderType1R::computeOutput(double, unsigned int)
 {
-  if (output == NULL)
+  if (!output)
     RuntimeException::selfThrow("FirstOrderType1R::computeOutput() is not linked to a plugin function");
 
-  SiconosVectorSPtr y = interaction->getYPtr(0);
+  SP::SiconosVector y = interaction->getYPtr(0);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
 
   *workX = *data["x"];
@@ -265,10 +171,10 @@ void FirstOrderType1R::computeOutput(double, unsigned int)
 
 void FirstOrderType1R::computeInput(double, unsigned int level)
 {
-  if (input == NULL)
+  if (!input)
     RuntimeException::selfThrow("FirstOrderType1R::computeInput() is not linked to a plugin function");
 
-  SiconosVectorSPtr lambda = interaction->getLambdaPtr(level);
+  SP::SiconosVector lambda = interaction->getLambdaPtr(level);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
 
   *workX = *data["r"];
@@ -287,7 +193,7 @@ void FirstOrderType1R::computeInput(double, unsigned int level)
 
 void FirstOrderType1R::computeJacobianH(double, unsigned int)
 {
-  if (jXOutput == NULL)
+  if (!jXOutput)
     RuntimeException::selfThrow("FirstOrderType1R::computeJacobianH() failed; not linked to a plug-in function.");
 
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
@@ -306,10 +212,10 @@ void FirstOrderType1R::computeJacobianH(double, unsigned int)
 
 void FirstOrderType1R::computeJacobianG(double, unsigned int)
 {
-  if (jLInput == NULL)
+  if (!jLInput)
     RuntimeException::selfThrow("FirstOrderType1R::computeJacobianH() failed; not linked to a plug-in function.");
 
-  SiconosVectorSPtr lambda = interaction->getLambdaPtr(0);
+  SP::SiconosVector lambda = interaction->getLambdaPtr(0);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
   *workZ = *data["z"];
   *workY = *lambda;

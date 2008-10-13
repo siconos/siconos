@@ -38,8 +38,8 @@
 using namespace std;
 
 // Constructor from a set of data
-MLCP2::MLCP2(SP::Simulation newSimu, SP::NonSmoothSolver newSolver, const string& newId):
-  MLCP(newSimu, newSolver, newId)
+MLCP2::MLCP2(SP::NonSmoothSolver newSolver, const string& newId):
+  MLCP(newSolver, newId)
 {
   mFirstCall = true;
   m = 0;
@@ -47,11 +47,7 @@ MLCP2::MLCP2(SP::Simulation newSimu, SP::NonSmoothSolver newSolver, const string
 
 }
 
-// destructor
-MLCP2::~MLCP2()
-{
-}
-void MLCP2::initialize()
+void MLCP2::initialize(SP::Simulation sim)
 {
   DynamicalSystemsSet * DSSet = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
   if (DSSet->begin() == DSSet->end())
@@ -71,7 +67,7 @@ void MLCP2::initialize()
     printf("DSSet is empty\n");
   else
     printf("DSSet is not empty\n");
-  MLCP::initialize();
+  MLCP::initialize(sim);
   w->resize(n + m);
   z->resize(n + m);
 }
@@ -137,7 +133,7 @@ void MLCP2::updateM()
 // // fill BlocksDS : W from the DS
 void MLCP2::computeDSBlock(SP::DynamicalSystem DS)
 {
-  if (DSBlocks[DS] == NULL)
+  if (!DSBlocks[DS])
   {
     DSBlocks[DS] = new SimpleMatrix(DS->getDim(), DS->getDim());
     n += DS->getDim();
@@ -155,7 +151,7 @@ void MLCP2::computeDSBlock(SP::DynamicalSystem DS)
 // // fill unitaryBlocks : D
 void MLCP2::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
 {
-  if (unitaryBlocks[UR1][UR1] == NULL)
+  if (!unitaryBlocks[UR1][UR1])
   {
     unitaryBlocks[UR1][UR1] = new SimpleMatrix(UR1->getNonSmoothLawSize(), UR1->getNonSmoothLawSize());
     m += UR1->getNonSmoothLawSize();
@@ -178,7 +174,7 @@ void MLCP2::computeUnitaryDSBlock(SP::UnitaryRelation UR, SP::DynamicalSystem DS
 void MLCP2::computeDSUnitaryBlock(SP::DynamicalSystem DS, SP::UnitaryRelation UR)
 {
   double h = simulation->getTimeStep();
-  if (DSUnitaryBlocks[DS][UR] == NULL)
+  if (!DSUnitaryBlocks[DS][UR])
   {
     DSUnitaryBlocks[DS][UR] = new SimpleMatrix(DS->getDim(), UR->getNonSmoothLawSize());
   }
@@ -274,7 +270,7 @@ void MLCP2::preCompute(double time)
 }
 void displayNM_(const NumericsMatrix* const m)
 {
-  if (m == NULL)
+  if (!m)
   {
     fprintf(stderr, "Numerics, NumericsMatrix display failed, NULL input.\n");
     exit(EXIT_FAILURE);

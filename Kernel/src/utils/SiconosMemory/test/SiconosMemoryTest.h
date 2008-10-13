@@ -20,12 +20,8 @@
 #define __SiconosMemoryTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "SiconosPointers.h"
 #include "SiconosVector.h"
 #include "SiconosMemory.h"
-#include "SiconosMemoryException.h"
-#include <deque>
-
 
 #define SIZE 10
 #define M_SIZE 3
@@ -68,9 +64,9 @@ private:
   void testMemoryException1();
   //void testFail();
 
-  deque<SP::SiconosVector> V1;
-  deque<SP::SiconosVector> V2;
-  deque<SP::SiconosVector> V3;
+  std::deque<SP::SiconosVector> V1;
+  std::deque<SP::SiconosVector> V2;
+  std::deque<SP::SiconosVector> V3;
   SP::SiconosVector q1;
   SP::SiconosVector q2;
   SP::SiconosVector q3;

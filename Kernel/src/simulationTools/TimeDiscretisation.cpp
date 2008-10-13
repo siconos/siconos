@@ -18,14 +18,13 @@
  */
 #include "TimeDiscretisation.h"
 #include "RuntimeException.h"
-#include "Model.h"
 #include "Tools.h"
 #include <math.h>
 using namespace std;
 
 // IO Constructors -> XML
-TimeDiscretisation::TimeDiscretisation(SP::TimeDiscretisationXML tdXML, SP::Model m):
-  h(0.0), k(0), timeDiscretisationXML(tdXML), model(m), isUpToDate(false), tdCase(0), pos(0)
+TimeDiscretisation::TimeDiscretisation(SP::TimeDiscretisationXML tdXML, double t0, double T):
+  h(0.0), k(0), timeDiscretisationXML(tdXML), tdCase(0), pos(0)
 {
   if (! timeDiscretisationXML)
     RuntimeException::selfThrow("TimeDiscretisation: xml constructor - TimeDiscretisationXML = NULL");
@@ -44,36 +43,25 @@ TimeDiscretisation::TimeDiscretisation(SP::TimeDiscretisationXML tdXML, SP::Mode
     RuntimeException::selfThrow("TimeDiscretisation: xml constructor - Too many input data, some of them are useless.");
 
   // --- Read the data ---
-  if (hasH)
+  if (hasH) // T is useless
   {
     h = timeDiscretisationXML->getH();
-    if (!model)
-      RuntimeException::selfThrow("TimeDiscretisation xml constructor - Not linked to a valid Model (NULL pointer).");
-
-    double t0 = model->getT0();
-    double T = model->getFinalT();
     tk.reserve(2);
     tk.push_back(t0);
     tk.push_back(t0 + h);
-    isUpToDate = true;
     tdCase = 2;
   }
-  else if (hasNSteps)
+  else if (hasNSteps) // t0 and T are required
   {
     unsigned int nSteps = timeDiscretisationXML->getN();
-    if (!model)
-      RuntimeException::selfThrow("TimeDiscretisation xml constructor - Not linked to a valid Model (NULL pointer).");
-
-    double t0 = model->getT0();
-    double T = model->getFinalT();
+    assert(T > t0 && "TimeDiscretisation xml constructor error: final time is less or equal to initial time.");
     h = (T - t0) / nSteps;
     tk.reserve(2);
     tk.push_back(t0);
     tk.push_back(t0 + h);
-    isUpToDate = true;
     tdCase = 2;
   }
-  else if (hasTk)
+  else if (hasTk) // neither t0 nor T is required.
   {
     // Read tk
     timeDiscretisationXML->getTk(tk);
@@ -88,42 +76,23 @@ TimeDiscretisation::TimeDiscretisation(SP::TimeDiscretisationXML tdXML, SP::Mode
 
 // --- Straightforward constructors ---
 
-// INPUT = tk - Model is optional.
+// INPUT = tk
 // => tdCase = 1.
 // hk is deduced from tk.
 // In this case, the complete vector tk is saved in the class.
-TimeDiscretisation::TimeDiscretisation(const TkVector& newTk, SP::Model m):
-  h(0.0), k(0), model(m), isUpToDate(true), tdCase(1), pos(k)
+TimeDiscretisation::TimeDiscretisation(const TkVector& newTk):
+  h(0.0), k(0), tdCase(1), pos(k)
 {
   tk = newTk;
   h = tk[1] - tk[0];
 }
 
-// INPUTS: nSteps - Model is required (for t0 and T) -
+// INPUTS: nSteps, t0, T  -
 // => tdCase = 2. Only two values are saved for tk.
-TimeDiscretisation::TimeDiscretisation(unsigned int nSteps, SP::Model m):
-  h(0.0), k(0), model(m), isUpToDate(true), tdCase(2), pos(0)
+TimeDiscretisation::TimeDiscretisation(unsigned int nSteps, double t0, double T):
+  h(0.0), k(0), tdCase(2), pos(0)
 {
-  if (!model)
-    RuntimeException::selfThrow("TimeDiscretisation::initialize - Not linked to a valid Model (NULL pointer).");
-
-  double t0 = model->getT0();
-  double T = model->getFinalT();
   h = (T - t0) / nSteps;
-  tk.reserve(2);
-  tk.push_back(t0);
-  tk.push_back(t0 + h);
-}
-
-// INPUTS: h - Model is required (for t0 and T) -
-// => tdCase = 2. Only two values are saved for tk.
-TimeDiscretisation::TimeDiscretisation(double newH, SP::Model m):
-  h(newH), k(0), model(m), isUpToDate(true), tdCase(2), pos(0)
-{
-  if (!model)
-    RuntimeException::selfThrow("TimeDiscretisation constructor - Not linked to a valid Model (NULL pointer).");
-
-  double t0 = model->getT0();
   tk.reserve(2);
   tk.push_back(t0);
   tk.push_back(t0 + h);
@@ -132,7 +101,7 @@ TimeDiscretisation::TimeDiscretisation(double newH, SP::Model m):
 // INPUTS: t0 and h
 // => tdCase = 2. Only two values are saved for tk.
 TimeDiscretisation::TimeDiscretisation(double t0, double newH):
-  h(newH), k(0), isUpToDate(true), tdCase(2), pos(0)
+  h(newH), k(0), tdCase(2), pos(0)
 {
   tk.reserve(2);
   tk.push_back(t0);
@@ -157,7 +126,6 @@ void TimeDiscretisation::setCurrentTimeStep(double newH)
     tk.resize(2);
   }
   tk[pos + 1] = tk[pos] + h;
-  isUpToDate = true;
 }
 
 void TimeDiscretisation::setTk(const TkVector& newValue)
@@ -167,7 +135,6 @@ void TimeDiscretisation::setTk(const TkVector& newValue)
   tdCase = 1;
   pos = 0;
   k = 0;
-  isUpToDate = true;
   h = tk[1] - tk[0];
 }
 

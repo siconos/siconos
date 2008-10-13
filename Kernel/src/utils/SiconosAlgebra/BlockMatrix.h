@@ -86,7 +86,7 @@ public:
    *  \param SP::SiconosMatrix  m3, block (1,0)
    *  \param SP::SiconosMatrix  m4, block (1,1)
    */
-  BlockMatrix(SiconosMatrixSPtr, SiconosMatrixSPtr, SiconosMatrixSPtr, SiconosMatrixSPtr);
+  BlockMatrix(SP::SiconosMatrix, SP::SiconosMatrix, SP::SiconosMatrix, SP::SiconosMatrix);
 
   /** destructor
    */
@@ -319,7 +319,7 @@ public:
    *  \param unsigned int row
    *  \param unsigned int col
    */
-  inline SiconosMatrixSPtr getBlockPtr(unsigned int row = 0, unsigned int col = 0)
+  inline SP::SiconosMatrix getBlockPtr(unsigned int row = 0, unsigned int col = 0)
   {
     return (*mat)(row, col);
   };
@@ -328,7 +328,7 @@ public:
    *  \param unsigned int row
    *  \param unsigned int col
    */
-  inline SiconosMatrixSPtrConst getBlockPtr(unsigned int row = 0, unsigned int col = 0) const
+  inline SPC::SiconosMatrix getBlockPtr(unsigned int row = 0, unsigned int col = 0) const
   {
     return boost::shared_ptr<SiconosMatrix>((*mat)(row, col));
   };

@@ -18,21 +18,38 @@
  */
 #include "DynamicalSystemXML.h"
 using namespace std;
-
-DynamicalSystemXML::DynamicalSystemXML():
-  rootNode(NULL), stepsInMemoryNode(NULL), zNode(NULL)
-{}
+using namespace DS;
 
 DynamicalSystemXML::DynamicalSystemXML(xmlNodePtr DSNode, bool):
   rootNode(DSNode), stepsInMemoryNode(NULL), zNode(NULL)
 {
   xmlNodePtr node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "StepsInMemory")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "StepsInMemory")))
     stepsInMemoryNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "z")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "z")))
     zNode = node;
+}
+
+const DS::TYPES DynamicalSystemXML::getType() const
+{
+  std::string res((char*)rootNode->name);
+  if (res == "NonLinearDS")
+    return FONLDS;
+  else if (res == "LinearDS")
+    return FOLDS;
+  else if (res == "LinearTIDS")
+    return FOLTIDS;
+  else if (res == "LagrangianDS")
+    return LNLDS;
+  else if (res == "LagrangianLinearTIDS")
+    return LLTIDS;
+  else
+  {
+    XMLException::selfThrow("DynamicalSystemXML - getType: unknown type of DS.");
+    return FONLDS;
+  }
 }
 
 void DynamicalSystemXML::setStepsInMemory(const unsigned int& nb)

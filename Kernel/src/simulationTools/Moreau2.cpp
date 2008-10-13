@@ -26,19 +26,18 @@
 #include "FirstOrderLinearTIDS.h"
 
 using namespace std;
+using namespace RELATION;
+using namespace DS;
 
 // --- constructor from a minimum set of data ---
-Moreau2::Moreau2(SP::DynamicalSystem newDS, double newTheta, SP::Simulation newS): Moreau(newDS, newTheta, newS)
+Moreau2::Moreau2(SP::DynamicalSystem newDS, double newTheta): Moreau(newDS, newTheta)
 {
   integratorType = "Moreau2";
 }
-Moreau2::Moreau2(DynamicalSystemsSet& newDS, double newTheta, SP::Simulation newS): Moreau(newDS, newTheta, newS)
+Moreau2::Moreau2(DynamicalSystemsSet& newDS, double newTheta): Moreau(newDS, newTheta)
 {
   integratorType = "Moreau2";
 }
-
-
-
 
 Moreau2::~Moreau2()
 {
@@ -71,7 +70,7 @@ void Moreau2::computeFreeState()
   SP::DynamicalSystem ds; // Current Dynamical System.
   SP::SiconosMatrix  W; // W Moreau matrix of the current DS.
   SP::SiconosMatrix  M; // W Moreau matrix of the current DS.
-  DSTYPES dsType ; // Type of the current DS.
+  DS::TYPES dsType ; // Type of the current DS.
   double theta; // Theta parameter of the current ds.
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
@@ -98,13 +97,13 @@ void Moreau2::computeFreeState()
 
       // If M not equal to identity matrix
       SP::SiconosMatrix  M = d->getMPtr();
-      if (M != NULL)
+      if (M)
         prod(*M, *xold, *ffree); // fFree = M*xi
       else
         *ffree = *xold;
 
       SP::SiconosMatrix A = d->getAPtr();
-      if (A != NULL)
+      if (A)
       {
         d->computeA(told);
         double coeff = h * (1 - theta);
@@ -112,7 +111,7 @@ void Moreau2::computeFreeState()
         // fFree += h(1-theta)A_i*x_i
       }
       SP::SiconosVector b = d->getBPtr();
-      if (b != NULL)
+      if (b)
       {
         // fFree += h(1-theta)*bi + h*theta*bi+1
         //        d->computeB(told); // bi
@@ -140,14 +139,14 @@ void Moreau2::computeFreeState()
       SP::SiconosVector xold = d->getXMemoryPtr()->getSiconosVector(0);
 
       SP::SiconosMatrix A = d->getAPtr();
-      if (A != NULL)
+      if (A)
         prod(h * (1 - theta), *A, *xold, *ffree, true); // ffree = h*(1-theta)*A*xi
       else
         ffree->zero();
       SP::SiconosVector b = d->getBPtr();
-      if (b != NULL)
+      if (b)
         scal(h, *b, *ffree, false); // ffree += hb
-      if (M != NULL)
+      if (M)
         prod(*M, *xold, *ffree, false); // ffree += M*xi
     }
     // 3 - Lagrangian Non Linear Systems
@@ -184,7 +183,7 @@ void Moreau2::computeFreeState()
       prod(*M, (*v - *vold), *ffree); // ffree = M(v - vold)
 
       *ffree *= -1.0;
-      if (d->getFLPtr() != NULL) // if fL exists
+      if (d->getFLPtr()) // if fL exists
       {
         // computes fL(ti,vi,qi)
         d->computeFL(told, qold, vold);
@@ -235,11 +234,11 @@ void Moreau2::computeFreeState()
       double coeff;
 
       SP::SiconosMatrix  C = d->getCPtr();
-      if (C != NULL)
+      if (C)
         prod(-h, *C, *vold, *ffree, false); // ffree += -h*C*vi
 
       SP::SiconosMatrix  K = d->getKPtr();
-      if (K != NULL)
+      if (K)
       {
         coeff = -h * h * theta;
         prod(coeff, *K, *vold, *ffree, false); // ffree += -h^2*theta*K*vi
@@ -247,7 +246,7 @@ void Moreau2::computeFreeState()
       }
 
       SP::SiconosVector  Fext = d->getFExtPtr();
-      if (Fext != NULL)
+      if (Fext)
       {
         // computes Fext(ti)
         d->computeFExt(told);

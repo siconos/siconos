@@ -65,9 +65,6 @@ protected:
   /** Stl map that associates a theta parameter for the integration scheme to each DynamicalSystem of the OSI */
   MapOfDouble thetaMap;
 
-  /** Stl map that associates a bool to each DynamicalSystem of the OSI - If true, then W has been allocated inside the class.*/
-  MapOfDSBool isWAllocatedInMap;
-
 private:
   /** Default constructor
    */
@@ -77,34 +74,31 @@ public:
 
   /** constructor from xml file
    *  \param OneStepIntegratorXML* : the XML object corresponding
-   *  \param SP::Simulation : the simulation that owns the osi
+   *  \param DynamicalSystemsSet: set of all DS in the NSDS
    */
-  Moreau(OneStepIntegratorXMLSPtr, SimulationSPtr);
+  Moreau(SP::OneStepIntegratorXML, SP::DynamicalSystemsSet);
 
   /** constructor from a minimum set of data: one DS and its theta
    *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
    *  \param Theta value
-   *  \param SP::Simulation : the simulation that owns the osi
    */
-  Moreau(SP::DynamicalSystem, double, SimulationSPtr);
+  Moreau(SP::DynamicalSystem, double);
 
   /** constructor from a minimum set of data
    *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
    *  \param theta value for all these DS.
-   *  \param SP::Simulation : the simulation that owns the osi
    */
-  Moreau(DynamicalSystemsSet&, double, SimulationSPtr);
+  Moreau(DynamicalSystemsSet&, double);
 
   /** constructor from a minimum set of data
    *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
    *  \param Map of theta values for the DS.
-   *  \param SP::Simulation : the simulation that owns the osi
    */
-  Moreau(DynamicalSystemsSet&, const MapOfDouble&, SimulationSPtr);
+  Moreau(DynamicalSystemsSet&, const MapOfDouble&);
 
   /** destructor
    */
-  virtual ~Moreau();
+  virtual ~Moreau() {};
 
   // --- GETTERS/SETTERS ---
   // -- W --
@@ -115,14 +109,6 @@ public:
   inline MapOfDSMatrices getWMap() const
   {
     return WMap;
-  };
-
-  /** get isWAllocatedIn map
-   *  \return a MapOfDSBool
-   */
-  inline MapOfDSBool getIsWAllocatedInMap() const
-  {
-    return isWAllocatedInMap;
   };
 
   /** set W map to newMap
@@ -140,7 +126,7 @@ public:
    * \param a pointer to DynamicalSystem, optional, default = NULL. get W[0] in that case
    * \return pointer to a SiconosMatrix
    */
-  SiconosMatrixSPtr getWPtr(SP::DynamicalSystem ds);
+  SP::SiconosMatrix getWPtr(SP::DynamicalSystem ds);
 
   /** set the value of W[ds] to newValue
    * \param SiconosMatrix newValue
@@ -152,7 +138,7 @@ public:
    * \param SP::SiconosMatrix  newPtr
    * \param a pointer to DynamicalSystem
    */
-  void setWPtr(SiconosMatrixSPtr newPtr, SP::DynamicalSystem);
+  void setWPtr(SP::SiconosMatrix newPtr, SP::DynamicalSystem);
 
   // -- theta --
 
@@ -184,8 +170,9 @@ public:
   // --- OTHER FUNCTIONS ---
 
   /** initialization of the Moreau integrator; for linear time invariant systems, we compute time invariant operator (example : W)
+      \param the simulation, owner of this OSI
    */
-  void initialize();
+  void initialize(SP::Simulation);
 
   /** init WMap[ds] Moreau matrix at time t
    *  \param the time (double)

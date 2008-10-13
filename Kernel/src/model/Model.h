@@ -26,7 +26,6 @@
 
 #include "SiconosConst.h"
 #include "Tools.h"
-
 #include "SiconosPointers.h"
 
 class NonSmoothDynamicalSystem;
@@ -54,13 +53,13 @@ private:
   double T;
 
   /** The simulation to solve the NonSmoothDynamicalSystem */
-  SimulationSPtr strat;
+  SP::Simulation strat;
 
   /** The NonSmoothDynamicalSystem of the simulation */
   SP::NonSmoothDynamicalSystem nsds;
 
   /** XML object linked to the Model */
-  SiconosModelXMLSPtr modelxml;
+  SP::SiconosModelXML modelxml;
 
   /** information concerning the Model */
   std::string title, author, description, date, xmlSchema;
@@ -154,7 +153,7 @@ public:
   /** get the Simulation of the Model
    *  \return a pointer on Simulation
    */
-  inline SimulationSPtr getSimulationPtr() const
+  inline SP::Simulation getSimulationPtr() const
   {
     return strat;
   }
@@ -162,7 +161,7 @@ public:
   /** set the Simulation of the Model
    *  \return a pointer on Simulation
    */
-  void setSimulationPtr(SimulationSPtr);
+  void setSimulationPtr(SP::Simulation);
 
   /** get the NonSmoothDynamicalSystem of the Model
    *  \return a pointer on NonSmoothDynamicalSystem
@@ -180,7 +179,7 @@ public:
   /** get the SiconosModelXML of the Model
    *  \return a pointer on SiconosModelXML
    */
-  inline SiconosModelXMLSPtr getSiconosModelXMLPtr() const
+  inline SP::SiconosModelXML getSiconosModelXMLPtr() const
   {
     return modelxml;
   }
@@ -188,7 +187,7 @@ public:
   /** set the SiconosModelXML of the Model
    *  \param a pointer on SiconosModelXML
    */
-  void setSiconosModelXMLPtr(SiconosModelXMLSPtr newPtr);
+  void setSiconosModelXMLPtr(SP::SiconosModelXML newPtr);
 
   /** get the title of the simulation
    *  \return string : the title
@@ -269,6 +268,11 @@ public:
   {
     xmlSchema = s;
   }
+
+  /** Complete initialization of the model (NonSmoothDynamicalSystem, Simulation)
+      \param a smart pointer to simulation (option, default = empty)
+   */
+  void initialize(SP::Simulation = SP::Simulation());
 
   // --- XML related functions ---
 

@@ -31,9 +31,9 @@ SiconosMemoryXML::SiconosMemoryXML(xmlNode* newMemoryNode, xmlNode* newParentNod
    * if parent == NULL, the parent node is not defined because the memoryNode exists
    * otherwise, we must create the SiconosMemoryNode with the parentNode
    */
-  if (parentNode == NULL)
+  if (!parentNode)
   {
-    if (memoryNode == NULL)
+    if (!memoryNode)
       XMLException::selfThrow("SiconosMemoryXML - constructor : element '" + name + "' not found, memoryNode == NULL and parentNode == NULL.");
   }
   else if (name != "default")
@@ -56,7 +56,7 @@ deque<SP::SiconosVector> SiconosMemoryXML::getVectorMemoryValue()
   xmlNode *node = SiconosDOMTreeTools::findNodeChild(memoryNode, SM_MEMORY);
 
   int cpt = 0;
-  while (node != NULL)
+  while (node)
   {
     v.push_back(SP::SimpleVector(new SimpleVector(SiconosDOMTreeTools::getSiconosVectorValue(node))));
     node = SiconosDOMTreeTools::findFollowNode(node, SM_MEMORY);
@@ -79,9 +79,9 @@ void SiconosMemoryXML::setVectorMemoryValue(const deque<SP::SiconosVector>& memo
    * if oldNode == NULL now, that's because the memory is declared in the xml file with no vector
    * only the max size of the memory is given
    */
-  if (oldNode != NULL)
+  if (oldNode)
   {
-    while ((node != NULL) && (i < memory.size()))
+    while ((node) && (i < memory.size()))
     {
       SiconosDOMTreeTools::setSiconosVectorNodeValue(node, *(memory[i]));
       oldNode = node;
@@ -92,12 +92,12 @@ void SiconosMemoryXML::setVectorMemoryValue(const deque<SP::SiconosVector>& memo
 
   while ((i < memory.size()) && (memory[i]->size() > 0)) //not enought nodes in the DOM tree to save memory
   {
-    if (oldNode == NULL) node = xmlNewChild(memoryNode, NULL, BAD_CAST SM_MEMORY.c_str(), NULL);
+    if (! oldNode) node = xmlNewChild(memoryNode, NULL, BAD_CAST SM_MEMORY.c_str(), NULL);
     else node = xmlNewNode(NULL, BAD_CAST SM_MEMORY.c_str());
 
     stringValue = memory[i]->toString();
     xmlNodeSetContent(node, (const xmlChar *)stringValue.c_str());
-    if (oldNode != NULL) oldNode->next = node;
+    if (oldNode) oldNode->next = node;
     oldNode = node;
     i++;
   }
@@ -116,7 +116,7 @@ void SiconosMemoryXML::deleteUnusedMemoryNodes(const int& nbGoodNode)
   /*
    * now, these are the nodes to delete
    */
-  while (node != NULL)
+  while (node)
   {
     tmp = node->next;
     xmlUnlinkNode(node);

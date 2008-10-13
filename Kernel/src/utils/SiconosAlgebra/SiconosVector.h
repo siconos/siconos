@@ -120,24 +120,24 @@ public:
   };
 
   /** reserved to BlockVector
-      \return a BlocksVectIterator
+      \return a VectorOfVectors::iterator
   */
-  virtual BlockVectIterator begin();
+  virtual VectorOfVectors::iterator begin();
 
   /** reserved to BlockVector
-      \return a BlocksVectIterator
+      \return a VectorOfVectors::iterator
   */
-  virtual BlockVectIterator end();
+  virtual VectorOfVectors::iterator end();
 
   /** reserved to BlockVector
-      \return a ConstBlocksVectIterator
+      \return a VectorOfVectors::const_iterator
   */
-  virtual ConstBlockVectIterator begin() const;
+  virtual VectorOfVectors::const_iterator begin() const;
 
   /** reserved to BlockVector
-      \return a ConstBlocksVectIterator
+      \return a VectorOfVectors::const_iterator
   */
-  virtual ConstBlockVectIterator end() const;
+  virtual VectorOfVectors::const_iterator end() const;
 
   /** get the ublas embedded vector if it's type is Dense
    *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
@@ -204,17 +204,13 @@ public:
    * \param i, unsigned int
    * \return a pointer to a SiconosVector
    */
-  virtual SiconosVectorSPtr getVectorPtr(unsigned int) = 0;
+  virtual SP::SiconosVector getVectorPtr(unsigned int) = 0;
 
   /** if this is a block vector return SP::SiconosVector number i (arg), else return this.
    * \param i, unsigned int
    * \return a pointer to a SiconosVector
    */
-#ifndef WithSmartPtr
-  virtual const SP::SiconosVector getVectorPtr(unsigned int) const = 0;
-#else
-  virtual SiconosVectorSPtrConst getVectorPtr(unsigned int) const = 0;
-#endif
+  virtual SPC::SiconosVector getVectorPtr(unsigned int) const = 0;
 
   /** set SiconosVector number i (copy) with v (second arg) - Useful only for BlockVector (else equivalent to a single copy)
    * \param i, unsigned int, block number (0 for SimpleVector)
@@ -226,7 +222,7 @@ public:
    * \param i, unsigned int: block number (0 for SimpleVector)
    * \param v, a pointer to a SiconosVector
    */
-  virtual void setVectorPtr(unsigned int, SiconosVectorSPtr) = 0;
+  virtual void setVectorPtr(unsigned int, SP::SiconosVector) = 0;
 
   /** set all values of the vector component to input value.
    * \param a double
@@ -289,17 +285,13 @@ public:
    *  \param an unsigned integer i
    *  \return a SP::SiconosVector
    */
-  virtual SiconosVectorSPtr operator [](unsigned int) = 0;
+  virtual SP::SiconosVector operator [](unsigned int) = 0;
 
   /** get the vector at position i(ie this for Simple and block i for BlockVector)
    *  \param an unsigned integer i
    *  \return a SP::SiconosVector
    */
-#ifndef WithSmartPtr
-  virtual const SP::SiconosVector operator [](unsigned int) const = 0;
-#else
-  virtual SiconosVectorSPtrConst operator [](unsigned int) const = 0;
-#endif
+  virtual SPC::SiconosVector operator [](unsigned int) const = 0;
 
   /** assignment
    *  \param SiconosVector : the vector to be copied
@@ -334,7 +326,7 @@ public:
   {
     if (num == 0)
     {
-      BlockVectIterator it;
+      VectorOfVectors::iterator it;
       for (it = begin(); it != end(); ++it)
         (**it) *= s;
     }
@@ -353,7 +345,7 @@ public:
   {
     if (num == 0)
     {
-      BlockVectIterator it;
+      VectorOfVectors::iterator it;
       for (it = begin(); it != end(); ++it)
         (**it) /= s;
     }
@@ -376,7 +368,7 @@ public:
   /** reserved to BlockVector - Insert a pointer to a subvector in this vector: no reallocation nor copy.
    *  \param a pointer to SP::SiconosVector
    */
-  virtual inline void insertPtr(SiconosVectorSPtr)
+  virtual inline void insertPtr(SP::SiconosVector)
   {
     SiconosVectorException::selfThrow("SiconosVector::insertPtr() : not implemented for this type of vector (Simple?) reserved to BlockVectors.");
   };

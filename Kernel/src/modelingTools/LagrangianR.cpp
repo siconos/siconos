@@ -25,6 +25,7 @@
 #include "LagrangianDS.h"
 
 using namespace std;
+using namespace RELATION;
 
 // Default constructor
 LagrangianR::LagrangianR():
@@ -32,58 +33,45 @@ LagrangianR::LagrangianR():
 {}
 
 // Basic constructor
-LagrangianR::LagrangianR(RELATIONSUBTYPES lagType):
+LagrangianR::LagrangianR(RELATION::SUBTYPES lagType):
   Relation(Lagrangian, lagType), LagrangianRelationType(lagType)
 {}
 
-LagrangianR::LagrangianR(RelationXMLSPtr relxml, RELATIONSUBTYPES newSubType): Relation(relxml, Lagrangian, newSubType), LagrangianRelationType()
+LagrangianR::LagrangianR(SP::RelationXML relxml, RELATION::SUBTYPES newSubType): Relation(relxml, Lagrangian, newSubType), LagrangianRelationType()
 {}
 
-void LagrangianR::readGInXML(LagrangianRXMLSPtr LRxml, unsigned int i)
+void LagrangianR::readGInXML(SP::LagrangianRXML LRxml, unsigned int i)
 {
-  string name = "G" + toString<unsigned int>(i);
+  RELATION::PluginNames name;
+  if (i == 0) name = G0;
+  else if (i == 1)
+    name = G1;
+  else //if (i==2)
+    name = G2;
+
   if (LRxml->isGPlugin(i))
   {
     pluginNames[name] = LRxml->getGPlugin(i);
-    setComputeGFunction(cShared.getPluginName(pluginNames[name]), cShared.getPluginFunctionName(pluginNames[name]), i);
+    setComputeGFunction(SSL::getPluginName(pluginNames[name]), SSL::getPluginFunctionName(pluginNames[name]), i);
 
-#ifndef WithSmartPtr
-    isAllocatedIn[name] = false;
-#endif
   }
   else
   {
 
-#ifndef WithSmartPtr
-    G[i] = new SimpleMatrix(LRxml->getGMatrix(i));
-    isAllocatedIn[name] = true   ;
-#else
     G[i].reset(new SimpleMatrix(LRxml->getGMatrix(i)));
-#endif
-
     isPlugged[name] = false;
   }
 }
 
 LagrangianR::~LagrangianR()
 {
-
-#ifndef WithSmartPtr
-  string name;
-  for (unsigned int i = 0; i < G.size(); ++i)
-  {
-    name = "G" + toString<unsigned int>(i);
-    if (isAllocatedIn[name]) delete G[i];
-  }
-#endif
-
   G.clear();
 }
 
 void LagrangianR::initialize()
 {
   // Check if an Interaction is connected to the Relation.
-  if (interaction == NULL)
+  if (!interaction)
     RuntimeException::selfThrow("LagrangianR::initialize failed. No Interaction linked to the present relation.");
 
   // Memory allocation for G[i], if required (depends on the chosen constructor).
@@ -97,13 +85,13 @@ void LagrangianR::initialize()
   data["p0"].reset(new BlockVector());
   data["p1"].reset(new BlockVector());
   data["p2"].reset(new BlockVector());
-  LagrangianDSSPtr lds;
-  DSTYPES type;
+  SP::LagrangianDS lds;
+  DS::TYPES type;
   for (it = interaction->dynamicalSystemsBegin(); it != interaction->dynamicalSystemsEnd(); ++it)
   {
     type = (*it)->getType();
     // check dynamical system type
-    if (type != LLTIDS && type != LNLDS)
+    if (type != DS::LLTIDS && type != DS::LNLDS)
       RuntimeException::selfThrow("LagrangianR1::initialize failed, not implemented for dynamical system of type: " + type);
 
     // convert vDS systems into LagrangianDS and put them in vLDS
@@ -125,29 +113,14 @@ void LagrangianR::initComponents()
   unsigned int sizeQ = interaction->getSizeOfDS();
 
   if (! G[0])
-  {
-
-#ifndef WithSmartPtr
-    G[0] = new SimpleMatrix(sizeY, sizeQ);
-    isAllocatedIn["G0"] = true;
-#else
     G[0].reset(new SimpleMatrix(sizeY, sizeQ));
-#endif
 
-  }
   else // Check if dimension are consistents with interaction.
     if (sizeY != G[0]->size(0) || sizeQ != G[0]->size(1))
       RuntimeException::selfThrow("LagrangianR:: initComponents failed. Inconsistent sizes between Interaction and Relation matrices.");
-
-#ifndef WithSmartPtr
-  workX = new SimpleVector(interaction->getSizeOfDS());
-  workZ = new SimpleVector(interaction->getSizeZ());
-  workY = new SimpleVector(sizeY);
-#else
   workX.reset(new SimpleVector(interaction->getSizeOfDS()));
   workZ.reset(new SimpleVector(interaction->getSizeZ()));
   workY.reset(new SimpleVector(sizeY));
-#endif
 }
 
 void LagrangianR::setGVector(const VectorOfMatrices& newVector)
@@ -158,30 +131,18 @@ void LagrangianR::setGVector(const VectorOfMatrices& newVector)
 
 
   // If G[i] has been allocated before => delete
-  string name;
-
-#ifndef WithSmartPtr
-  for (unsigned int i = 0; i < nG; i++)
-  {
-    name = "G" + toString<unsigned int>(i);
-    if (isAllocatedIn[name]) delete G[i];
-    G[i] = NULL;
-    isAllocatedIn[name] = false;
-    isPlugged[name] = false;
-  }
-#endif
-
+  RELATION::PluginNames name;
   G.clear();
 
   for (unsigned int i = 0; i < nG; i++)
   {
+    if (i == 0)
+      name = G0;
+    else if (i == 1)
+      name = G1;
+    else
+      name = G2;
     G[i] = newVector[i]; // Warning: links to pointers, no copy!!
-    name = "G" + toString<unsigned int>(i);
-
-#ifndef WithSmartPtr
-    isAllocatedIn[name] = false;
-#endif
-
     isPlugged[name] = false;
   }
 }
@@ -191,38 +152,35 @@ void LagrangianR::setG(const SiconosMatrix& newValue, unsigned int index)
   if (index >= G.size())
     RuntimeException::selfThrow("LagrangianR:: setG(mat,index), index out of range. Maybe you do not call setLagrangianRelationType before?");
 
-  string name = "G" + toString<unsigned int>(index);
+  RELATION::PluginNames name;
+  if (index == 0)
+    name = G0;
+  else if (index == 1)
+    name = G1;
+  else
+    name = G2;
+
   if (! G[index])
-  {
-
-#ifndef WithSmartPtr
-    G[index] =  new SimpleMatrix(newValue);
-    isAllocatedIn[name] = true;
-#else
     G[index].reset(new SimpleMatrix(newValue));
-#endif
 
-  }
   else
     *(G[index]) = newValue;
 
   isPlugged[name] = false;
 }
 
-void LagrangianR::setGPtr(SiconosMatrixSPtr newPtr, unsigned int  index)
+void LagrangianR::setGPtr(SP::SiconosMatrix newPtr, unsigned int  index)
 {
   if (index >= G.size())
     RuntimeException::selfThrow("LagrangianR:: setG(mat,index), index out of range. Maybe you do not call setLagrangianRelationType before?");
-
-  string name = "G" + toString<unsigned int>(index);
-
-#ifndef WithSmartPtr
-  if (isAllocatedIn[name]) delete G[index];
-  isAllocatedIn[name] = false;
-#endif
-
+  RELATION::PluginNames name;
+  if (index == 0)
+    name = G0;
+  else if (index == 1)
+    name = G1;
+  else
+    name = G2;
   G[index] = newPtr;
-
   isPlugged[name] = false;
 }
 
@@ -254,9 +212,9 @@ void LagrangianR::saveRelationToXML() const
 void LagrangianR::display() const
 {
   cout << "=====> Lagrangian Relation of type "  << LagrangianRelationType << endl;
-  if (interaction != NULL) cout << "- Interaction id" << interaction->getId() << endl;
+  if (interaction) cout << "- Interaction id" << interaction->getId() << endl;
   else cout << "- Linked interaction -> NULL" << endl;
-  NamesConstIterator it;
+  RELATION::PluginList::const_iterator it;
   cout << "The following operators are linked to plug-in: " << endl;
   for (it = pluginNames.begin(); it != pluginNames.end(); ++it)
     cout << (*it).first << " plugged to:" << (*it).second << endl;

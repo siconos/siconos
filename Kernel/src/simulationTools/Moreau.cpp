@@ -25,10 +25,12 @@
 #include "FirstOrderLinearTIDS.h"
 
 using namespace std;
+using namespace DS;
+using namespace RELATION;
 
 // --- xml constructor ---
-Moreau::Moreau(OneStepIntegratorXMLSPtr osiXML, SimulationSPtr newS):
-  OneStepIntegrator("Moreau", newS)
+Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
+  OneStepIntegrator("Moreau")
 {
   // Note: we do not call xml constructor of OSI, but default one, since we need to download theta and DS at the same time.
 
@@ -36,7 +38,7 @@ Moreau::Moreau(OneStepIntegratorXMLSPtr osiXML, SimulationSPtr newS):
     RuntimeException::selfThrow("Moreau::xml constructor - OneStepIntegratorXML object == NULL.");
 
   integratorXml = osiXML;
-  MoreauXMLSPtr moreauXml = boost::static_pointer_cast<MoreauXML>(osiXML);
+  SP::MoreauXML moreauXml = boost::static_pointer_cast<MoreauXML>(osiXML);
 
   // Required inputs: a list of DS and one theta per DS.
   // No xml entries at the time for sizeMem and W.
@@ -55,13 +57,10 @@ Moreau::Moreau(OneStepIntegratorXMLSPtr osiXML, SimulationSPtr newS):
   else
     moreauXml->getTheta(thetaXml);
 
-  SP::NonSmoothDynamicalSystem nsds = simulationLink->getModelPtr()->getNonSmoothDynamicalSystemPtr();
-
   if (osiXML->hasAllDS()) // if flag all=true is present -> get all ds from the nsds
   {
-    DSIterator it;
     unsigned int i = 0;
-    for (it = nsds->dynamicalSystemsBegin(); it != nsds->dynamicalSystemsEnd(); ++it)
+    for (DSIterator it = dsList->begin(); it != dsList->end(); ++it)
     {
       OSIDynamicalSystems->insert(*it);
       // get corresponding theta. In xml they must be sorted in an order that corresponds to growing DS-numbers order.
@@ -79,52 +78,40 @@ Moreau::Moreau(OneStepIntegratorXMLSPtr osiXML, SimulationSPtr newS):
     unsigned int i = 0;
     // get corresponding ds and insert them into the set.
     vector<int>::iterator it;
+    SP::DynamicalSystem ds;
+    for_each(dsList->begin(), dsList->end(), boost::bind(&DynamicalSystem::getNumber, _1));
     for (it = dsNumbers.begin(); it != dsNumbers.end(); ++it)
     {
-      OSIDynamicalSystems->insert(nsds->getDynamicalSystemPtrNumber(*it));
+      ds = dsList->getPtr(*it);
+      OSIDynamicalSystems->insert(ds);
       if (moreauXml->hasAllTheta()) // if one single value for all theta
-        thetaMap[nsds->getDynamicalSystemPtrNumber(*it)] = thetaXml[0];
+        thetaMap[ds] = thetaXml[0];
       else
-        thetaMap[nsds->getDynamicalSystemPtrNumber(*it)] = thetaXml[i++];
+        thetaMap[ds] = thetaXml[i++];
     }
   }
-
   // W loading: not yet implemented
   if (moreauXml->hasWList())
     RuntimeException::selfThrow("Moreau::xml constructor - W matrix loading not yet implemented.");
 }
 
 // --- constructor from a minimum set of data ---
-Moreau::Moreau(SP::DynamicalSystem newDS, double newTheta, SimulationSPtr newS): OneStepIntegrator("Moreau", newS)
+Moreau::Moreau(SP::DynamicalSystem newDS, double newTheta): OneStepIntegrator("Moreau")
 {
-  assert(simulationLink &&
-         "Moreau:: constructor (ds,theta,simulation) - simulation == NULL");
-
   OSIDynamicalSystems->insert(newDS);
   thetaMap[newDS] = newTheta;
 }
 
 // --- constructor from a set of data ---
-Moreau::Moreau(DynamicalSystemsSet& newDS, double newTheta, SimulationSPtr newS): OneStepIntegrator("Moreau", newDS, newS)
+Moreau::Moreau(DynamicalSystemsSet& newDS, double newTheta): OneStepIntegrator("Moreau", newDS)
 {
-  assert(simulationLink &&
-         "Moreau:: constructor (setOfDS,theta,simulation) - simulation == NULL");
-
-  DSIterator itDS;
-  for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
+  for (DSIterator itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
     thetaMap[*itDS] = newTheta;
 }
 
-Moreau::Moreau(DynamicalSystemsSet& newDS, const MapOfDouble& newTheta, SimulationSPtr newS): OneStepIntegrator("Moreau", newDS, newS)
+Moreau::Moreau(DynamicalSystemsSet& newDS, const MapOfDouble& newTheta): OneStepIntegrator("Moreau", newDS)
 {
-  assert(simulationLink &&
-         "Moreau:: constructor (setOfDS,theta,simulation) - simulation == NULL");
-
   thetaMap = newTheta;
-}
-
-Moreau::~Moreau()
-{
 }
 
 void Moreau::setWMap(const MapOfDSMatrices& newMap)
@@ -154,10 +141,9 @@ const SimpleMatrix Moreau::getW(SP::DynamicalSystem ds)
   return *(WMap[ds]); // Copy !!
 }
 
-SiconosMatrixSPtr Moreau::getWPtr(SP::DynamicalSystem ds)
+SP::SiconosMatrix Moreau::getWPtr(SP::DynamicalSystem ds)
 {
-  assert(ds &&
-         "Moreau::getWPtr(ds): ds == NULL.");
+  assert(ds && "Moreau::getWPtr(ds): ds == NULL.");
   //  return WMap[0];
   //  if(WMap[ds]==NULL)
   //    RuntimeException::selfThrow("Moreau::getWPtr(ds): W[ds] == NULL.");
@@ -198,7 +184,7 @@ void Moreau::setW(const SiconosMatrix& newValue, SP::DynamicalSystem ds)
   }
 }
 
-void Moreau::setWPtr(SiconosMatrixSPtr newPtr, SP::DynamicalSystem ds)
+void Moreau::setWPtr(SP::SiconosMatrix newPtr, SP::DynamicalSystem ds)
 {
   unsigned int line = newPtr->size(0);
   unsigned int col  = newPtr->size(1);
@@ -234,9 +220,9 @@ void Moreau::setTheta(double newTheta, SP::DynamicalSystem ds)
   thetaMap[ds] = newTheta;
 }
 
-void Moreau::initialize()
+void Moreau::initialize(SP::Simulation sim)
 {
-  OneStepIntegrator::initialize();
+  OneStepIntegrator::initialize(sim);
   // Get initial time
   double t0 = simulationLink->getModelPtr()->getT0();
   // Compute W(t0) for all ds
@@ -244,11 +230,7 @@ void Moreau::initialize()
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
   {
     // Memory allocation for workX. workX[ds*] corresponds to xfree (or vfree in lagrangian case).
-#ifndef WithSmartPtr
-    workX[*itDS] = new SimpleVector((*itDS)->getDim());
-#else
     workX[*itDS].reset(new SimpleVector((*itDS)->getDim()));
-#endif
 
     // W initialization
     initW(t0, *itDS);
@@ -259,10 +241,10 @@ void Moreau::initialize()
 
     if ((*itDS)->getType() == FOLDS)
     {
-      FirstOrderLinearDSSPtr d = boost::static_pointer_cast<FirstOrderLinearDS>(*itDS);
-      d->computeB(t0); // bi
+      SP::FirstOrderLinearDS d = boost::static_pointer_cast<FirstOrderLinearDS>(*itDS);
+      if (d->getBPtr())
+        d->computeB(t0); // bi
     }
-
   }
 }
 
@@ -284,18 +266,17 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
   // Memory allocation for W
   unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
   WMap[ds].reset(new SimpleMatrix(sizeW, sizeW));
-  isWAllocatedInMap[ds] = true;
 
-  SiconosMatrixSPtr W = WMap[ds];
+  SP::SiconosMatrix W = WMap[ds];
   double h = simulationLink->getTimeStep();
   double theta = thetaMap[ds];
-  DSTYPES dsType = ds->getType();
+  DS::TYPES dsType = ds->getType();
 
   // 1 - First order non linear systems
   if (dsType == FONLDS)
   {
     // W =  M - h*theta* [jacobian_x f(t,x,z)]
-    FirstOrderNonLinearDSSPtr d = boost::static_pointer_cast<FirstOrderNonLinearDS> (ds);
+    SP::FirstOrderNonLinearDS d = boost::static_pointer_cast<FirstOrderNonLinearDS> (ds);
 
     // Copy M or I if M is Null into W
     if (d->getMPtr())
@@ -312,7 +293,7 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
   // 2 - First order linear systems
   else if (dsType == FOLDS || dsType == FOLTIDS)
   {
-    FirstOrderLinearDSSPtr d = boost::static_pointer_cast<FirstOrderLinearDS> (ds);
+    SP::FirstOrderLinearDS d = boost::static_pointer_cast<FirstOrderLinearDS> (ds);
     if (d->getMPtr())
       *W = *d->getMPtr();
     else
@@ -323,9 +304,9 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
   // 3 - Lagrangian non linear systems
   else if (dsType == LNLDS)
   {
-    LagrangianDSSPtr d = boost::static_pointer_cast<LagrangianDS> (ds);
-    SiconosMatrixSPtr K = d->getJacobianFLPtr(0); // jacobian according to q
-    SiconosMatrixSPtr C = d->getJacobianFLPtr(1); // jacobian according to velocity
+    SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
+    SP::SiconosMatrix K = d->getJacobianFLPtr(0); // jacobian according to q
+    SP::SiconosMatrix C = d->getJacobianFLPtr(1); // jacobian according to velocity
 
     *W = *d->getMassPtr();
 
@@ -338,9 +319,9 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
   // 4 - Lagrangian linear systems
   else if (dsType == LLTIDS)
   {
-    LagrangianLinearTIDSSPtr d = boost::static_pointer_cast<LagrangianLinearTIDS> (ds);
-    SiconosMatrixSPtr K = d->getKPtr();
-    SiconosMatrixSPtr C = d->getCPtr();
+    SP::LagrangianLinearTIDS d = boost::static_pointer_cast<LagrangianLinearTIDS> (ds);
+    SP::SiconosMatrix K = d->getKPtr();
+    SP::SiconosMatrix C = d->getCPtr();
 
     *W = *d->getMassPtr();
 
@@ -373,15 +354,15 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
 
   double h = simulationLink->getTimeStep();
   double theta = thetaMap[ds];
-  DSTYPES dsType = ds->getType();
+  DS::TYPES dsType = ds->getType();
 
-  SiconosMatrixSPtr W = WMap[ds];
+  SP::SiconosMatrix W = WMap[ds];
 
   // 1 - First order non linear systems
   if (dsType == FONLDS)
   {
     // W =  M - h*theta* [jacobian_x f(t,x,z)]
-    FirstOrderNonLinearDSSPtr d = boost::static_pointer_cast<FirstOrderNonLinearDS> (ds);
+    SP::FirstOrderNonLinearDS d = boost::static_pointer_cast<FirstOrderNonLinearDS> (ds);
 
     // Copy M or I if M is Null into W
     if (d->getMPtr())
@@ -396,7 +377,7 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
   // 2 - First order linear systems
   else if (dsType == FOLDS || dsType == FOLTIDS)
   {
-    FirstOrderLinearDSSPtr d = boost::static_pointer_cast<FirstOrderLinearDS> (ds);
+    SP::FirstOrderLinearDS d = boost::static_pointer_cast<FirstOrderLinearDS> (ds);
     if (dsType == FOLDS)
       d->computeA(t);
 
@@ -409,9 +390,9 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
   // 3 - Lagrangian non linear systems
   else if (dsType == LNLDS)
   {
-    LagrangianDSSPtr d = boost::static_pointer_cast<LagrangianDS> (ds);
-    SiconosMatrixSPtr K = d->getJacobianFLPtr(0); // jacobian according to q
-    SiconosMatrixSPtr C = d->getJacobianFLPtr(1); // jacobian according to velocity
+    SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
+    SP::SiconosMatrix K = d->getJacobianFLPtr(0); // jacobian according to q
+    SP::SiconosMatrix C = d->getJacobianFLPtr(1); // jacobian according to velocity
 
     d->computeMass();
     *W = *d->getMassPtr();
@@ -460,7 +441,7 @@ double Moreau::computeResidu()
   //
   DSIterator it;
   SP::DynamicalSystem ds; // Current Dynamical System.
-  DSTYPES dsType ; // Type of the current DS.
+  DS::TYPES dsType ; // Type of the current DS.
   double theta; // Theta parameter of the current ds.
 
   double maxResidu = 0;
@@ -481,16 +462,16 @@ double Moreau::computeResidu()
       // value, ie the one saved in the DynamicalSystem.
       // "i" values are saved in memory vectors.
 
-      FirstOrderNonLinearDSSPtr d = boost::static_pointer_cast<FirstOrderNonLinearDS>(ds);
+      SP::FirstOrderNonLinearDS d = boost::static_pointer_cast<FirstOrderNonLinearDS>(ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SiconosVectorSPtr xold = d->getXMemoryPtr()->getSiconosVector(0); // xi
+      SP::SiconosVector xold = d->getXMemoryPtr()->getSiconosVector(0); // xi
 
       // xFree pointer is used to compute and save Residu.
-      SiconosVectorSPtr xfree = workX[d];
+      SP::SiconosVector xfree = workX[d];
 
-      SiconosVectorSPtr x = d->getXPtr(); // last saved value for x
-      SiconosMatrixSPtr M = d->getMPtr();
+      SP::SiconosVector x = d->getXPtr(); // last saved value for x
+      SP::SiconosMatrix M = d->getMPtr();
       if (M)
       {
         prod(*M, *xold, *xfree, true);
@@ -527,15 +508,15 @@ double Moreau::computeResidu()
     {
       // Residu = M(x_i+1 - x_i) - h*theta*(A_i+1*x_i+1 + b_i+1)  - h*(1-theta)*(Ai*xi + bi) - h*r_i+1
 
-      FirstOrderLinearDSSPtr d = boost::static_pointer_cast<FirstOrderLinearDS>(ds);
+      SP::FirstOrderLinearDS d = boost::static_pointer_cast<FirstOrderLinearDS>(ds);
 
-      SiconosVectorSPtr xfree = workX[d];
+      SP::SiconosVector xfree = workX[d];
 
-      SiconosVectorSPtr x = d->getXPtr(); // last saved value for x
+      SP::SiconosVector x = d->getXPtr(); // last saved value for x
       // x value at told
-      SiconosVectorSPtr xold = d->getXMemoryPtr()->getSiconosVector(0);
+      SP::SiconosVector xold = d->getXMemoryPtr()->getSiconosVector(0);
 
-      SiconosMatrixSPtr  M = d->getMPtr();
+      SP::SiconosMatrix  M = d->getMPtr();
       // If M not equal to identity matrix
       if (M)
       {
@@ -549,7 +530,7 @@ double Moreau::computeResidu()
         *xfree -= *xold;
       }
 
-      SiconosMatrixSPtr A = d->getAPtr();
+      SP::SiconosMatrix A = d->getAPtr();
       if (A)
       {
         // xFree += -h(1-theta)A_i*x_i
@@ -562,7 +543,7 @@ double Moreau::computeResidu()
         prod(coeff, *A, *x, *xfree, false);
 
       }
-      SiconosVectorSPtr b = d->getBPtr();
+      SP::SiconosVector b = d->getBPtr();
       if (b)
       {
         // xFree -= h(1-theta)*bi + h*theta*bi+1
@@ -581,24 +562,24 @@ double Moreau::computeResidu()
     else if (dsType == FOLTIDS)
     {
       // Residu = W*(x_i+1 - xi) -hb -hA*xi- hr_i+1
-      FirstOrderLinearDSSPtr d = boost::static_pointer_cast<FirstOrderLinearTIDS>(ds);
+      SP::FirstOrderLinearDS d = boost::static_pointer_cast<FirstOrderLinearTIDS>(ds);
 
-      SiconosVectorSPtr xfree = workX[d];
-      SiconosVectorSPtr x = d->getXPtr(); // last saved value for x
+      SP::SiconosVector xfree = workX[d];
+      SP::SiconosVector x = d->getXPtr(); // last saved value for x
       // x value at told
-      SiconosVectorSPtr xold = d->getXMemoryPtr()->getSiconosVector(0);
+      SP::SiconosVector xold = d->getXMemoryPtr()->getSiconosVector(0);
 
       *xfree = *x;
       *xfree -= *xold;
       computeW(t, d); // W is recomputed since it has been LU-factorized during solving.
-      SiconosMatrixSPtr W = WMap[ds]; // Its W Moreau matrix of iteration.
+      SP::SiconosMatrix W = WMap[ds]; // Its W Moreau matrix of iteration.
       prod(*W, *xfree, *xfree, true);
 
-      SiconosMatrixSPtr A = d->getAPtr();
+      SP::SiconosMatrix A = d->getAPtr();
       if (A)
         prod(-h, *A, *xold, *xfree, false); // xfree -= h*A*xi
 
-      SiconosVectorSPtr b = d->getBPtr();
+      SP::SiconosVector b = d->getBPtr();
       if (b)
         scal(-h, *b, *xfree, false); // xfree -= hb
 
@@ -611,18 +592,18 @@ double Moreau::computeResidu()
       // residu = M(q*)(v_k,i+1 - v_i) - h*theta*fL(t,v_k,i+1, q_k,i+1) - h*(1-theta)*fL(ti,vi,qi) - pi+1
 
       // -- Convert the DS into a Lagrangian one.
-      LagrangianDSSPtr d = boost::static_pointer_cast<LagrangianDS> (ds);
+      SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SiconosVectorSPtr qold = d->getQMemoryPtr()->getSiconosVector(0);
-      SiconosVectorSPtr vold = d->getVelocityMemoryPtr()->getSiconosVector(0);
+      SP::SiconosVector qold = d->getQMemoryPtr()->getSiconosVector(0);
+      SP::SiconosVector vold = d->getVelocityMemoryPtr()->getSiconosVector(0);
 
       // vFree pointer is used to compute and save the residu.
-      SiconosVectorSPtr vfree = workX[d];
+      SP::SiconosVector vfree = workX[d];
 
       d->computeMass();
-      SiconosMatrixSPtr M = d->getMassPtr();
-      SiconosVectorSPtr v = d->getVelocityPtr(); // v = v_k,i+1
+      SP::SiconosMatrix M = d->getMassPtr();
+      SP::SiconosVector v = d->getVelocityPtr(); // v = v_k,i+1
       prod(*M, (*v - *vold), *vfree); // vfree = M(v - vold)
 
       if (d->getFLPtr())  // if fL exists
@@ -649,24 +630,24 @@ double Moreau::computeResidu()
       // Residu = M(vi+1 - v_i) - h*theta*( Fext_i+1 - Kqi+1 - Cvi+1) - h*(1-theta)*(Fext_i -Cvi -kqi) - pi+1
 
       // -- Convert the DS into a Lagrangian one.
-      LagrangianLinearTIDSSPtr d = boost::static_pointer_cast<LagrangianLinearTIDS> (ds);
+      SP::LagrangianLinearTIDS d = boost::static_pointer_cast<LagrangianLinearTIDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SiconosVectorSPtr qold = d->getQMemoryPtr()->getSiconosVector(0); // qi
-      SiconosVectorSPtr vold = d->getVelocityMemoryPtr()->getSiconosVector(0); //vi
+      SP::SiconosVector qold = d->getQMemoryPtr()->getSiconosVector(0); // qi
+      SP::SiconosVector vold = d->getVelocityMemoryPtr()->getSiconosVector(0); //vi
 
       // --- ResiduFree computation ---
 
       // vFree pointer is used to compute and save residu.
-      SiconosVectorSPtr vfree = workX[d];
+      SP::SiconosVector vfree = workX[d];
 
-      SiconosMatrixSPtr M = d->getMassPtr();
-      SiconosVectorSPtr v = d->getVelocityPtr(); // v = v_k,i+1
+      SP::SiconosMatrix M = d->getMassPtr();
+      SP::SiconosVector v = d->getVelocityPtr(); // v = v_k,i+1
       prod(*M, (*v - *vold), *vfree); // vfree = M(v - vold)
 
       double coeff;
 
-      SiconosMatrixSPtr C = d->getCPtr();
+      SP::SiconosMatrix C = d->getCPtr();
       if (C)
       {
         coeff = h * (1 - theta);
@@ -674,17 +655,17 @@ double Moreau::computeResidu()
         coeff = h * theta;
         prod(coeff, *C, *v, *vfree, false); // vfree += h*theta*C*vi+1
       }
-      SiconosMatrixSPtr K = d->getKPtr();
+      SP::SiconosMatrix K = d->getKPtr();
       if (K)
       {
-        SiconosVectorSPtr q = d->getQPtr();
+        SP::SiconosVector q = d->getQPtr();
         coeff = h * (1 - theta);
         prod(coeff, *K, *qold, *vfree, false); // vfree += h(1-theta)*K*qi
         coeff = h * theta;
         prod(coeff, *K, *q, *vfree, false); // vfree += h*theta*K*qi+1
       }
 
-      SiconosVectorSPtr Fext = d->getFExtPtr();
+      SP::SiconosVector Fext = d->getFExtPtr();
       if (Fext)
       {
         // computes Fext(ti)
@@ -729,8 +710,8 @@ void Moreau::computeFreeState()
   DSIterator it; // Iterator through the set of DS.
 
   SP::DynamicalSystem ds; // Current Dynamical System.
-  SiconosMatrixSPtr W; // W Moreau matrix of the current DS.
-  DSTYPES dsType ; // Type of the current DS.
+  SP::SiconosMatrix W; // W Moreau matrix of the current DS.
+  DS::TYPES dsType ; // Type of the current DS.
   double theta; // Theta parameter of the current ds.
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
@@ -753,20 +734,20 @@ void Moreau::computeFreeState()
       // IN to be updated at current time: W, f
       // IN at told: f
       // IN, not time dependant: M
-      FirstOrderNonLinearDSSPtr d = boost::static_pointer_cast<FirstOrderNonLinearDS>(ds);
+      SP::FirstOrderNonLinearDS d = boost::static_pointer_cast<FirstOrderNonLinearDS>(ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SiconosVectorSPtr xold = d->getXMemoryPtr()->getSiconosVector(0); // xi
+      SP::SiconosVector xold = d->getXMemoryPtr()->getSiconosVector(0); // xi
 
       // --- ResiduFree computation ---
       // ResiduFree = M(x-xold) - h*[theta*f(t) + (1-theta)*f(told)]
       //
       // xFree pointer is used to compute and save ResiduFree in this first step.
-      SiconosVectorSPtr xfree = workX[d];
+      SP::SiconosVector xfree = workX[d];
 
-      SiconosVectorSPtr x = d->getXPtr(); // last saved value for x
+      SP::SiconosVector x = d->getXPtr(); // last saved value for x
 
-      SiconosMatrixSPtr M = d->getMPtr();
+      SP::SiconosMatrix M = d->getMPtr();
       if (M)
         prod(*M, (*x - *xold), *xfree, true); // vfree = M(v - vold)
       else // if M == Identity
@@ -811,21 +792,21 @@ void Moreau::computeFreeState()
       // IN at told: A, b, x
       // IN, not time dependant: M
 
-      FirstOrderLinearDSSPtr d = boost::static_pointer_cast<FirstOrderLinearDS>(ds);
+      SP::FirstOrderLinearDS d = boost::static_pointer_cast<FirstOrderLinearDS>(ds);
 
-      SiconosVectorSPtr xfree = workX[d];
+      SP::SiconosVector xfree = workX[d];
 
       // x value at told
-      SiconosVectorSPtr xold = d->getXMemoryPtr()->getSiconosVector(0);
+      SP::SiconosVector xold = d->getXMemoryPtr()->getSiconosVector(0);
 
       // If M not equal to identity matrix
-      SiconosMatrixSPtr M = d->getMPtr();
+      SP::SiconosMatrix M = d->getMPtr();
       if (M)
         prod(*M, *xold, *xfree); // xFree = M*xi
       else
         *xfree = *xold;
 
-      SiconosMatrixSPtr A = d->getAPtr();
+      SP::SiconosMatrix A = d->getAPtr();
       if (A)
       {
         d->computeA(told);
@@ -833,7 +814,7 @@ void Moreau::computeFreeState()
         prod(coeff, *A, *xold, *xfree, false);
         // xFree += h(1-theta)A_i*x_i
       }
-      SiconosVectorSPtr b = d->getBPtr();
+      SP::SiconosVector b = d->getBPtr();
       if (b)
       {
         // xFree += h(1-theta)*bi + h*theta*bi+1
@@ -857,19 +838,19 @@ void Moreau::computeFreeState()
       // IN at told: x
       // IN, not time dependant: A,b,W
 
-      FirstOrderLinearDSSPtr d = boost::static_pointer_cast<FirstOrderLinearTIDS>(ds);
+      SP::FirstOrderLinearDS d = boost::static_pointer_cast<FirstOrderLinearTIDS>(ds);
 
-      SiconosVectorSPtr xfree = workX[d];
+      SP::SiconosVector xfree = workX[d];
       // x value at told
-      SiconosVectorSPtr xold = d->getXMemoryPtr()->getSiconosVector(0);
+      SP::SiconosVector xold = d->getXMemoryPtr()->getSiconosVector(0);
 
-      SiconosMatrixSPtr A = d->getAPtr();
+      SP::SiconosMatrix A = d->getAPtr();
       if (A)
         prod(h, *A, *xold, *xfree, true); // xfree = h*A*xi
       else
         xfree->zero();
 
-      SiconosVectorSPtr b = d->getBPtr();
+      SP::SiconosVector b = d->getBPtr();
       if (b)
         scal(h, *b, *xfree, false); // xfree += hb
 
@@ -893,24 +874,24 @@ void Moreau::computeFreeState()
       // ResiduFree = M(q_k,i+1)(v_k,i+1 - v_i) - h*theta*fL(t,v_k,i+1, q_k,i+1) - h*(1-theta)*fL(ti,vi,qi)
 
       // -- Convert the DS into a Lagrangian one.
-      LagrangianDSSPtr d = boost::static_pointer_cast<LagrangianDS> (ds);
+      SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SiconosVectorSPtr qold = d->getQMemoryPtr()->getSiconosVector(0);
-      SiconosVectorSPtr vold = d->getVelocityMemoryPtr()->getSiconosVector(0);
+      SP::SiconosVector qold = d->getQMemoryPtr()->getSiconosVector(0);
+      SP::SiconosVector vold = d->getVelocityMemoryPtr()->getSiconosVector(0);
 
       // --- ResiduFree computation ---
       // ResFree = M(v-vold) - h*[theta*fL(t) + (1-theta)*fL(told)]
       //
       // vFree pointer is used to compute and save ResiduFree in this first step.
-      SiconosVectorSPtr vfree = workX[d];
+      SP::SiconosVector vfree = workX[d];
 
       // -- Update W --
       // Note: during computeW, mass and jacobians of fL will be computed/
       computeW(t, d);
 
-      SiconosMatrixSPtr M = d->getMassPtr();
-      SiconosVectorSPtr v = d->getVelocityPtr(); // v = v_k,i+1
+      SP::SiconosMatrix M = d->getMassPtr();
+      SP::SiconosVector v = d->getVelocityPtr(); // v = v_k,i+1
       prod(*M, (*v - *vold), *vfree); // vfree = M(v - vold)
 
       if (d->getFLPtr())  // if fL exists
@@ -962,26 +943,26 @@ void Moreau::computeFreeState()
       // ResiduFree = (-h*C -h^2*theta*K)*vi - h*K*qi + h*theta * Fext_i+1 + h*(1-theta)*Fext_i
 
       // -- Convert the DS into a Lagrangian one.
-      LagrangianLinearTIDSSPtr d = boost::static_pointer_cast<LagrangianLinearTIDS> (ds);
+      SP::LagrangianLinearTIDS d = boost::static_pointer_cast<LagrangianLinearTIDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SiconosVectorSPtr qold = d->getQMemoryPtr()->getSiconosVector(0); // qi
-      SiconosVectorSPtr vold = d->getVelocityMemoryPtr()->getSiconosVector(0); //vi
+      SP::SiconosVector qold = d->getQMemoryPtr()->getSiconosVector(0); // qi
+      SP::SiconosVector vold = d->getVelocityMemoryPtr()->getSiconosVector(0); //vi
 
       // --- ResiduFree computation ---
 
       // vFree pointer is used to compute and save ResiduFree in this first step.
 
       // Velocity free and residu. vFree = RESfree (pointer equality !!).
-      SiconosVectorSPtr vfree = workX[d];
+      SP::SiconosVector vfree = workX[d];
       vfree->zero();
       double coeff;
       // -- No need to update W --
-      SiconosMatrixSPtr C = d->getCPtr();
+      SP::SiconosMatrix C = d->getCPtr();
       if (C)
         prod(-h, *C, *vold, *vfree, false); // vfree += -h*C*vi
 
-      SiconosMatrixSPtr K = d->getKPtr();
+      SP::SiconosMatrix K = d->getKPtr();
       if (K)
       {
         coeff = -h * h * theta;
@@ -989,7 +970,7 @@ void Moreau::computeFreeState()
         prod(-h, *K, *qold, *vfree, false); // vfree += -h*K*qi
       }
 
-      SiconosVectorSPtr Fext = d->getFExtPtr();
+      SP::SiconosVector Fext = d->getFExtPtr();
       if (Fext)
       {
         // computes Fext(ti)
@@ -1030,26 +1011,26 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
   tout = tend;
 
   DSIterator it;
-  SiconosMatrixSPtr W;
+  SP::SiconosMatrix W;
   double theta;
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     SP::DynamicalSystem ds = *it;
     W = WMap[ds];
     theta = thetaMap[ds];
-    DSTYPES dsType = ds->getType();
+    DS::TYPES dsType = ds->getType();
 
     if (dsType == LLTIDS)
     {
       // get the ds
-      LagrangianLinearTIDSSPtr d = boost::static_pointer_cast<LagrangianLinearTIDS> (ds);
+      SP::LagrangianLinearTIDS d = boost::static_pointer_cast<LagrangianLinearTIDS> (ds);
       // get velocity pointers for current time step
-      SiconosVectorSPtr v = d->getVelocityPtr();
+      SP::SiconosVector v = d->getVelocityPtr();
       // get q and velocity pointers for previous time step
-      SiconosVectorSPtr vold = d->getVelocityMemoryPtr()->getSiconosVector(0);
-      SiconosVectorSPtr qold = d->getQMemoryPtr()->getSiconosVector(0);
+      SP::SiconosVector vold = d->getVelocityMemoryPtr()->getSiconosVector(0);
+      SP::SiconosVector qold = d->getQMemoryPtr()->getSiconosVector(0);
       // get p pointer
-      SiconosVectorSPtr p = d->getPPtr(2);
+      SP::SiconosVector p = d->getPPtr(2);
 
       // velocity computation :
       //
@@ -1060,11 +1041,11 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
 
       double coeff;
       // -- No need to update W --
-      SiconosMatrixSPtr C = d->getCPtr();
+      SP::SiconosMatrix C = d->getCPtr();
       if (C)
         prod(-h, *C, *vold, *v, false); // v += -h*C*vi
 
-      SiconosMatrixSPtr K = d->getKPtr();
+      SP::SiconosMatrix K = d->getKPtr();
       if (K)
       {
         coeff = -h * h * theta;
@@ -1072,7 +1053,7 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
         prod(-h, *K, *qold, *v, false); // v += -h*K*qi
       }
 
-      SiconosVectorSPtr Fext = d->getFExtPtr();
+      SP::SiconosVector Fext = d->getFExtPtr();
       if (Fext)
       {
         // computes Fext(ti)
@@ -1097,7 +1078,7 @@ void Moreau::updateState(unsigned int level)
   double h = simulationLink->getTimeStep();
 
   DSIterator it;
-  SiconosMatrixSPtr W;
+  SP::SiconosMatrix W;
   double theta;
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
@@ -1106,13 +1087,13 @@ void Moreau::updateState(unsigned int level)
     theta = thetaMap[ds];
     // Get the DS type
 
-    DSTYPES dsType = ds->getType();
+    DS::TYPES dsType = ds->getType();
 
     // 1 - First Order Systems
     if (dsType == FONLDS || dsType == FOLDS || dsType == FOLTIDS)
     {
-      FirstOrderNonLinearDSSPtr fonlds = boost::static_pointer_cast<FirstOrderNonLinearDS>(ds);
-      SiconosVectorSPtr x = ds->getXPtr();
+      SP::FirstOrderNonLinearDS fonlds = boost::static_pointer_cast<FirstOrderNonLinearDS>(ds);
+      SP::SiconosVector x = ds->getXPtr();
       //    SP::SiconosVector xFree = fonlds->getXFreePtr();
 
       //          integration of r with theta method removed
@@ -1130,10 +1111,10 @@ void Moreau::updateState(unsigned int level)
     else if (dsType == LNLDS || dsType == LLTIDS)
     {
       // get dynamical system
-      LagrangianDSSPtr d = boost::static_pointer_cast<LagrangianDS> (ds);
+      SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
 
       //    SiconosVector *vfree = d->getVelocityFreePtr();
-      SiconosVectorSPtr v = d->getVelocityPtr();
+      SP::SiconosVector v = d->getVelocityPtr();
 
       // To compute v, we solve W(v - vfree) = p
       *v = *d->getPPtr(level); // v = p
@@ -1141,14 +1122,14 @@ void Moreau::updateState(unsigned int level)
       *v += *workX[ds];
 
       // Compute q
-      SiconosVectorSPtr q = d->getQPtr();
+      SP::SiconosVector q = d->getQPtr();
       // Save value of q in stateTmp for future convergence computation
       if (dsType == LNLDS)
         ds->addWorkVector(q, "NewtonCvg");
 
       //  -> get previous time step state
-      SiconosVectorSPtr vold = d->getVelocityMemoryPtr()->getSiconosVector(0);
-      SiconosVectorSPtr qold = d->getQMemoryPtr()->getSiconosVector(0);
+      SP::SiconosVector vold = d->getVelocityMemoryPtr()->getSiconosVector(0);
+      SP::SiconosVector qold = d->getQMemoryPtr()->getSiconosVector(0);
       // *q = *qold + h*(theta * *v +(1.0 - theta)* *vold)
       double coeff = h * theta;
       scal(coeff, *v, *q) ; // q = h*theta*v
@@ -1171,7 +1152,7 @@ void Moreau::display()
   {
     cout << "--------------------------------" << endl;
     cout << "--> W of dynamical system number " << (*it)->getNumber() << ": " << endl;
-    if (WMap[*it] != NULL) WMap[*it]->display();
+    if (WMap[*it]) WMap[*it]->display();
     else cout << "-> NULL" << endl;
     cout << "--> and corresponding theta is: " << thetaMap[*it] << endl;
   }

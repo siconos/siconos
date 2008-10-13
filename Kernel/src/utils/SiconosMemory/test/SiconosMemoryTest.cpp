@@ -68,27 +68,24 @@ void SiconosMemoryTest::tearDown()
 void SiconosMemoryTest::testBuildMemory1()
 {
 
-  SiconosMemory * tmp1 = new SiconosMemory(4);
+  SP::SiconosMemory tmp1(new SiconosMemory(4));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory1 : memorysize OK", tmp1->getMemorySize() == 4, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory1 : nbVectorsInMemory OK", tmp1->getNbVectorsInMemory() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory1 : size vector OK", tmp1->getVectorMemory().size() == 0, true);
-  delete tmp1;
   cout << "SiconosMemoryTest >>> testBuildMemory1 .............................. OK\n ";
 }
 // Constructor: copy of a std::vector of siconos vectors
 void SiconosMemoryTest::testBuildMemory2()
 {
-  SiconosMemory * tmp1 = new SiconosMemory(V1);
+  SP::SiconosMemory tmp1(new SiconosMemory(V1));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory2 : memorysize OK", tmp1->getMemorySize() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory2 : nbVectorsInMemory OK", tmp1->getNbVectorsInMemory() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory2 : size vector OK", tmp1->getVectorMemory().size() == 2, true);
 
-  SiconosMemory * tmp2 = new SiconosMemory(V2);
+  SP::SiconosMemory tmp2(new SiconosMemory(V2));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory2 : memorysize OK", tmp2->getMemorySize() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory2 : nbVectorsInMemory OK", tmp2->getNbVectorsInMemory() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory2 : size vector OK", tmp2->getVectorMemory().size() == 2, true);
-  delete tmp2;
-  delete tmp1;
   cout << "SiconosMemoryTest >>> testBuildMemory2 .............................. OK\n ";
 }
 
@@ -96,51 +93,43 @@ void SiconosMemoryTest::testBuildMemory2()
 
 void SiconosMemoryTest::testBuildMemory3()
 {
-  SiconosMemory * tmp1 = new SiconosMemory(V1);
+  SP::SiconosMemory tmp1(new SiconosMemory(V1));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory3 : memorysize OK", tmp1->getMemorySize() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory3 : nbVectorsInMemory OK", tmp1->getNbVectorsInMemory() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory3 : size vector OK", tmp1->getVectorMemory().size() == 2, true);
 
-  SiconosMemory * tmp2 = new SiconosMemory(V2);
+  SP::SiconosMemory tmp2(new SiconosMemory(V2));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory3 : memorysize OK", tmp2->getMemorySize() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory3 : nbVectorsInMemory OK", tmp2->getNbVectorsInMemory() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory3 : size vector OK", tmp2->getVectorMemory().size() == 2, true);
-  delete tmp2;
-  delete tmp1;
   cout << "SiconosMemoryTest >>> testBuildMemory3 .............................. OK\n ";
 }
 
 // Copy constructor
 void SiconosMemoryTest::testBuildMemory4()
 {
-  SiconosMemory * tmp1 = new SiconosMemory(V1);
+  SP::SiconosMemory tmp1(new SiconosMemory(V1));
 
-  SiconosMemory *tmp2 = new SiconosMemory(*tmp1);
+  SP::SiconosMemory tmp2(new SiconosMemory(*tmp1));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory4 : memorysize OK", tmp2->getMemorySize() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory4 : nbVectorsInMemory OK", tmp2->getNbVectorsInMemory() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory4 : size vector OK", tmp2->getVectorMemory().size() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory4 : size vector OK", *(tmp2->getVectorMemory())[0] == *(tmp1->getVectorMemory())[0] , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory4 : size vector OK", *(tmp2->getVectorMemory())[1] == *(tmp1->getVectorMemory())[1] , true);
-
-  delete tmp2;
-  delete tmp1;
-
   cout << "SiconosMemoryTest >>> testBuildMemory4 .............................. OK\n ";
 }
 
 // setVectorMemory
 void SiconosMemoryTest::testSetVectorMemory()
 {
-  SiconosMemory * tmp1 = new SiconosMemory(V1);
+  SP::SiconosMemory tmp1(new SiconosMemory(V1));
 
   tmp1->setVectorMemory(V2);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory1 : memorysize OK", tmp1->getMemorySize() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory1 : nbVectorsInMemory OK", tmp1->getNbVectorsInMemory() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMemory1 : size vector OK", tmp1->getVectorMemory().size() == 2, true);
-
-  delete tmp1;
   cout << "SiconosMemoryTest >>> testSetVectorMemory.............................. OK\n ";
 
 }
@@ -148,13 +137,11 @@ void SiconosMemoryTest::testSetVectorMemory()
 // getSiconosVector
 void SiconosMemoryTest::testGetSiconosVector()
 {
-  SiconosMemory * tmp1 = new SiconosMemory(V1);
+  SP::SiconosMemory tmp1(new SiconosMemory(V1));
   SP::SiconosVector tmp = tmp1->getSiconosVector(0);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSiconosVector : *v1 size OK", tmp->size() == V1[0]->size(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSiconosVector : v1 values OK", *tmp == *(V1[0]), true);
-  delete tmp1;
-
   cout << "SiconosMemoryTest >>> testGetSiconosVector .......................... OK\n ";
 }
 
@@ -162,7 +149,7 @@ void SiconosMemoryTest::testGetSiconosVector()
 
 void SiconosMemoryTest::testSwap()
 {
-  SiconosMemory * tmp1 = new SiconosMemory(2);
+  SP::SiconosMemory tmp1(new SiconosMemory(2));
   tmp1->swap((V1[0]));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : vector OK", *(tmp1->getSiconosVector(0)) == *(V1[0]), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : nbVectorsInMemory OK", tmp1->getNbVectorsInMemory() == 1, true);
@@ -174,16 +161,14 @@ void SiconosMemoryTest::testSwap()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : vector OK", *(tmp1->getSiconosVector(0)) == *(V1[0]), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : vector OK", *(tmp1->getSiconosVector(1)) == *(V1[1]), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : nbVectorsInMemory OK", tmp1->getNbVectorsInMemory() == 2, true);
-
-  delete tmp1;
   cout << "SiconosMemoryTest >>> testSwap ...................................... OK\n ";
 }
 
 
 void SiconosMemoryTest::testOperatorEqual()
 {
-  SiconosMemory * tmp1 = new SiconosMemory(V1);
-  SiconosMemory * tmp2 = new SiconosMemory(V3);
+  SP::SiconosMemory tmp1(new SiconosMemory(V1));
+  SP::SiconosMemory tmp2(new SiconosMemory(V3));
 
   *tmp2 = *tmp1;
 
@@ -191,8 +176,6 @@ void SiconosMemoryTest::testOperatorEqual()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : nbVectorsInMemory OK", tmp1->getNbVectorsInMemory() == tmp2->getNbVectorsInMemory(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : size vector OK", tmp1->getVectorMemory().size() == tmp2->getVectorMemory().size(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : size vector OK", tmp1->getVectorMemory() == tmp2->getVectorMemory(), true);
-  delete tmp1;
-  delete tmp2;
   cout << "SiconosMemoryTest >>> testOperatorEqual ...................................... OK\n ";
 }
 
@@ -212,10 +195,9 @@ void SiconosMemoryTest::testMemoryException1()
    * We test the case where index > memorySize
    */
 
-  SiconosMemory * M =  new SiconosMemory(V1);
+  SP::SiconosMemory M(new SiconosMemory(V1));
 
   SP::SiconosVector v;
   v = M->getSiconosVector(V1.size() + 10);
-  delete M;
 }
 

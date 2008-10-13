@@ -20,8 +20,8 @@
 #include "Relay.h"
 using namespace std;
 
-Relay::Relay(SP::OneStepNSProblemXML osnspbxml, SP::Simulation newStrat):
-  OneStepNSProblem("Relay", osnspbxml, newStrat)
+Relay::Relay(SP::OneStepNSProblemXML osnspbxml):
+  OneStepNSProblem("Relay", osnspbxml)
 {}
 
 Relay::~Relay()

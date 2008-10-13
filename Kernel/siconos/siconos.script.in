@@ -27,7 +27,6 @@ call_pwd=`pwd`
 cartridge() {
     echo;
     echo "|=============================================================================|";
-#   echo "|          Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.           |";
     echo "|          Siconos-Kernel version @VERSION@, Copyright INRIA 2005-2008.           |";
     echo "|                                                                             |";
     echo "|                 Free software under GNU General Public License.             |";
@@ -71,6 +70,7 @@ usage() {
     echo "     -opt <opt> : add option <opt> to compiler." 
     echo " ";
     echo "     -ldopt <opt> : add option <opt> to linker." 
+    echo " ";
     echo "     -P prefix_command : to add a prefix command (time, valgrind, gdb, etc.)."
     echo " ";
     echo "     -plugin_dir <plugin_directory> (default = plugin): "

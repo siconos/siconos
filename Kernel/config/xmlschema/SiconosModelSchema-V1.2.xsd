@@ -287,7 +287,6 @@
 						<xsd:element name="f" type="matrix" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="jacobianXF" type="matrix" minOccurs="1" maxOccurs="1"/>
 					</xsd:all>
-				<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
 				</xsd:complexType>
 			</xsd:element>
 						
@@ -301,7 +300,6 @@
 						<xsd:element name="A" type="matrix" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="b" type="vector" minOccurs="0" maxOccurs="1"/>
 					</xsd:all>
-				  	<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
 				</xsd:complexType>
 			</xsd:element>
 						
@@ -315,7 +313,6 @@
 						<xsd:element name="A" type="matrix" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="b" type="vector" minOccurs="0" maxOccurs="1"/>
 					</xsd:all>
-				  	<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
 				</xsd:complexType>
 			</xsd:element>
 
@@ -338,7 +335,6 @@
 						<xsd:element name="JacobianQNNL" type="matrix" minOccurs="0" maxOccurs="1"/>
 						<xsd:element name="JacobianVelocityNNL" type="matrix" minOccurs="0" maxOccurs="1"/>
 					</xsd:all>
-					<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
 				</xsd:complexType>
 			</xsd:element>
 			<xsd:element name="LagrangianLinearTIDS">
@@ -356,19 +352,16 @@
 						<xsd:element name="K" type="matrix" minOccurs="0" maxOccurs="1"/>
 						<xsd:element name="C" type="matrix" minOccurs="0" maxOccurs="1"/>
 					</xsd:all>
-					<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
 				</xsd:complexType>
 			</xsd:element>
-						
 		</xsd:choice>
-				</xsd:sequence> 
-			</xsd:complexType>
-
-			<xsd:unique name="DSKey">
-		        <xsd:selector xpath='.//LagrangianDS|.//LagrangianLinearTIDS|.//FirstOrderLinearTIDS|.//FirstOrderLinearDS|.//FirstOrderNonLinearDS'/>
-		        <xsd:field xpath='./@number'/>
-				<!--<xsd:field xpath='@number'/>-->
-		     </xsd:unique>
+		</xsd:sequence> 
+		</xsd:complexType>
+		<xsd:unique name="DSKey">
+		<xsd:selector xpath='.//LagrangianDS|.//LagrangianLinearTIDS|.//FirstOrderLinearTIDS|.//FirstOrderLinearDS|.//FirstOrderNonLinearDS'/>
+                <xsd:field xpath='./@number'/>
+                <!--<xsd:field xpath='@number'/>-->
+ 		</xsd:unique>
 		</xsd:element>
 	</xsd:choice>
 

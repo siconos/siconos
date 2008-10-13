@@ -58,8 +58,8 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver0()
   double * d1 = opt->dparam;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverE : ", opt->isSet == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverG : ", opt->nbParam == (int)NB_PARAM, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverH : ", i1 == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverI : ", d1 == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverH : ", !i1, false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverI : ", !d1, false);
 
   delete NSS;
   cout << "------- Default constructor NonSmoothSolver ok -------" << endl;
@@ -134,11 +134,11 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver3()
 
   // parse xml file:
   xmlDocPtr doc = xmlParseFile("NonSmoothSolverTest.xml");
-  if (doc == NULL)
+  if (!doc)
     XMLException::selfThrow("Document not parsed successfully");
 
   xmlNodePtr cur = xmlDocGetRootElement(doc);
-  if (cur == NULL)
+  if (!cur)
   {
     XMLException::selfThrow("empty document");
     xmlFreeDoc(doc);

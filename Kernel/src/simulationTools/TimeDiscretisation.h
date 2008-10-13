@@ -27,7 +27,6 @@
 #include "TimeDiscretisationXML.h"
 #include <vector>
 
-class Model;
 class TimeDiscretisationXML;
 
 /** A time discretisation scheme
@@ -47,8 +46,7 @@ class TimeDiscretisationXML;
     The time instant values are saved in a vector tk. Depending on the way of construction of the TimeDiscretisation,
     all or only current and next times are saved in tk. The difference is just a question of saving memory. \n
 
-    Note that the TimeDiscretisation is linked to a Model. This is useful to synchronise it with initial and final
-    times of the Model.
+    Note that the TimeDiscretisation is not linked to the Model. It's up to the user to check that the way he builds his time-discretisation fits with the t0 and T given in the model.
 
     \section tdMfunc Main functions:
     - setCurrentTimeStep(), to set current h. This value will be used for all future time steps, until next change.
@@ -59,10 +57,10 @@ class TimeDiscretisationXML;
 
     - input = the complete vector tk. This defines t0, T, number of time steps and time step size
     (which is not necessarily constant). In this case, the whole vector is saved in the memory.
-    - inputs = number of time steps and the Model. t0 and T are given by the input model, and the time step
+    - inputs = number of time steps, t0 and T.
     size h is computed with t0,T and nSteps. Only two values are saved: t[k] and t[k+1] = t[k] + h.
     h can be changed at any time.
-    - inputs = h and the Model. t0 is given by the input model. Only two values are saved: t[k] and t[k+1] = t[k] + h.
+    - inputs = h and t0. Only two values are saved: t[k] and t[k+1] = t[k] + h.
     h can be changed at any time.
     - inputs = t0 and h.  Only two values are saved: t[k] and t[k+1] = t[k] + h.
     h can be changed at any time.
@@ -84,12 +82,6 @@ private:
   /** the XML object linked to the TimeDiscretisation to read XML data */
   SP::TimeDiscretisationXML timeDiscretisationXML;
 
-  /* the model linked to this discretisation (used to set t0 and possibly final T) */
-  SP::Model model;
-
-  /** Flag to check if all data are up to date (ie if it is necessary to initialize or not) */
-  bool isUpToDate;
-
   /** Indic. flag which sets the way the time-discretisation is built.*/
   int tdCase;
 
@@ -109,30 +101,25 @@ private:
 public:
 
   /** constructor with XML
-   *  \param SP::TimeDiscretisationXML : the XML object corresponding
-   *  \param SP::Model : the model that owns this discretisation
-   */
-  TimeDiscretisation(SP::TimeDiscretisationXML, SP::Model);
+      \param SP::TimeDiscretisationXML : the XML object corresponding
+      \param initial time
+      \param final time
+  */
+  TimeDiscretisation(SP::TimeDiscretisationXML, double, double);
 
   // --- Straightforward constructors ---
 
-  /** constructor with tk and model as given data
+  /** constructor with tk vector of instant times values.
    *  \param a TkVector that describes the discretisation
-   *  \param SP::Model : the model that owns this discretisation
    */
-  TimeDiscretisation(const TkVector&, SP::Model);
+  TimeDiscretisation(const TkVector&);
 
   /** constructor with the number of time steps
    *  \param int (nb steps)
-   *  \param SP::Model : the model that owns this discretisation
+   *  \param t0, initial time
+   *  \param T, final time
    */
-  TimeDiscretisation(unsigned int, SP::Model);
-
-  /** constructor with the size of the default time step
-   *  \param double, the time step
-   *  \param SP::Model : the model that owns this discretisation
-   */
-  TimeDiscretisation(double, SP::Model);
+  TimeDiscretisation(unsigned int, double, double);
 
   /** constructor with the size of the default time step and t0
    *  \param double, initial time value
@@ -204,14 +191,6 @@ public:
   {
     timeDiscretisationXML = timediscrxml;
   }
-
-  /** get the Model
-   *  \return a pointer to Model
-   */
-  inline SP::Model getModelPtr() const
-  {
-    return model;
-  };
 
   /** Steps to next time step. */
   void increment();

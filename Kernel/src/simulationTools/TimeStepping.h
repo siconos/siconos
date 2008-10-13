@@ -56,13 +56,16 @@ public:
   /** Constructor with the time-discretisation.
   *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
   */
-  TimeStepping(TimeDiscretisationSPtr);
+  TimeStepping(SP::TimeDiscretisation);
 
   /** constructor with XML object for TimeStepping
-  *  \param SimulationXML* : the XML object corresponding
-  *  \param SP::Model : the Model which contains the Simulation
+      \param SimulationXML* : the XML object corresponding
+      \param initial time
+      \param final time
+      \param the set of all DS in the NSDS
+      \param the set of all interactions in the NSDS
   */
-  TimeStepping(SimulationXMLSPtr, ModelSPtr);
+  TimeStepping(SP::SimulationXML, double, double, SP::DynamicalSystemsSet , SP::InteractionsSet);
 
   /** Destructor.
    */
@@ -71,7 +74,7 @@ public:
   /** add a OneStepNSProblem of the Simulation (if its not the first, it needs to have an id clearly defined)
   *  \param a pointer to OneStepNSProblem
   */
-  void addOneStepNSProblemPtr(OneStepNSProblemSPtr);
+  void recordNonSmoothProblem(SP::OneStepNSProblem);
 
   /** update indexSets[i] of the topology, using current y and lambda values of Interactions.
   *  \param unsigned int: the number of the set to be updated

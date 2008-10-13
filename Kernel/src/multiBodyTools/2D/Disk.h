@@ -25,7 +25,7 @@
 #define Disk_H
 
 #include "LagrangianDS.h"
-#include <boost/shared_ptr.hpp>
+#include "SiconosPointers.h"
 
 class Disk : public LagrangianDS
 {
@@ -34,7 +34,6 @@ private:
   double massDisk;
   unsigned int ndofDisk;
 
-  boost::shared_ptr<SiconosMatrix> MassDisk;
   boost::shared_ptr<SiconosVector> QDisk;
   boost::shared_ptr<SiconosVector> VDisk;
   boost::shared_ptr<SiconosVector> ADisk;
@@ -46,14 +45,13 @@ private:
 public:
 
   /** Constructor
-      \param number
       \param radius
       \param mass
       \param x postion
       \param y position
   */
 
-  Disk(int, double, double, double, double);
+  Disk(double, double, double, double);
 
   /** Constructor
       \param number
@@ -63,7 +61,7 @@ public:
       \param velocity vector
   */
 
-  Disk(int, double, double, const SiconosVector&, const SiconosVector&);
+  Disk(double, double, const SiconosVector&, const SiconosVector&);
 
   /** destructor
    */

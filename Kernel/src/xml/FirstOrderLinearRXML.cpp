@@ -26,19 +26,19 @@ FirstOrderLinearRXML::FirstOrderLinearRXML(xmlNode * LTIRelationNode):
   FirstOrderRXML(LTIRelationNode), CNode(NULL), DNode(NULL), FNode(NULL), eNode(NULL), BNode(NULL)
 {
   xmlNodePtr node;
-  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, "C")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, "C")))
     CNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, "D")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, "D")))
     DNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, "F")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, "F")))
     FNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, "e")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, "e")))
     eNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, "B")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, "B")))
     BNode = node;
 }
 
@@ -47,42 +47,42 @@ FirstOrderLinearRXML::~FirstOrderLinearRXML()
 
 void FirstOrderLinearRXML::setC(const SiconosMatrix& matrix)
 {
-  if (CNode == NULL)
+  if (!CNode)
     CNode = SiconosDOMTreeTools::createMatrixNode(rootNode, "C", matrix);
   else SiconosDOMTreeTools::setSiconosMatrixNodeValue(CNode, matrix);
 }
 
 void FirstOrderLinearRXML::setD(const SiconosMatrix& matrix)
 {
-  if (DNode == NULL)
+  if (!DNode)
     DNode = SiconosDOMTreeTools::createMatrixNode(rootNode, "D", matrix);
   else SiconosDOMTreeTools::setSiconosMatrixNodeValue(DNode, matrix);
 }
 
 void FirstOrderLinearRXML::setF(const SiconosMatrix &matrix)
 {
-  if (FNode == NULL)
+  if (!FNode)
     FNode = SiconosDOMTreeTools::createMatrixNode(rootNode, "F", matrix);
   else SiconosDOMTreeTools::setSiconosMatrixNodeValue(FNode, matrix);
 }
 
 void FirstOrderLinearRXML::setE(const SiconosVector& vec)
 {
-  if (eNode == NULL)
+  if (!eNode)
     eNode = SiconosDOMTreeTools::createVectorNode(rootNode, "e", vec);
   else SiconosDOMTreeTools::setSiconosVectorNodeValue(eNode, vec);
 }
 
 void FirstOrderLinearRXML::setB(const SiconosMatrix &matrix)
 {
-  if (BNode == NULL)
+  if (! BNode)
     BNode = SiconosDOMTreeTools::createMatrixNode(rootNode, "B", matrix);
   else SiconosDOMTreeTools::setSiconosMatrixNodeValue(BNode, matrix);
 }
 
 void FirstOrderLinearRXML::setCPlugin(const std::string& plugin)
 {
-  if (CNode == NULL)
+  if (!CNode)
   {
     CNode = SiconosDOMTreeTools::createSingleNode(rootNode, "C");
     xmlNewProp(CNode, (xmlChar*)("matrixPlugin"), (xmlChar*)plugin.c_str());
@@ -93,7 +93,7 @@ void FirstOrderLinearRXML::setCPlugin(const std::string& plugin)
 
 void FirstOrderLinearRXML::setDPlugin(const std::string& plugin)
 {
-  if (DNode == NULL)
+  if (!DNode)
   {
     DNode = SiconosDOMTreeTools::createSingleNode(rootNode, "D");
     xmlNewProp(DNode, (xmlChar*)("matrixPlugin"), (xmlChar*)plugin.c_str());
@@ -104,7 +104,7 @@ void FirstOrderLinearRXML::setDPlugin(const std::string& plugin)
 
 void FirstOrderLinearRXML::setFPlugin(const std::string& plugin)
 {
-  if (FNode == NULL)
+  if (!FNode)
   {
     FNode = SiconosDOMTreeTools::createSingleNode(rootNode, "F");
     xmlNewProp(FNode, (xmlChar*)("matrixPlugin"), (xmlChar*)plugin.c_str());
@@ -115,7 +115,7 @@ void FirstOrderLinearRXML::setFPlugin(const std::string& plugin)
 
 void FirstOrderLinearRXML::setEPlugin(const std::string& plugin)
 {
-  if (eNode == NULL)
+  if (!eNode)
   {
     eNode = SiconosDOMTreeTools::createSingleNode(rootNode, "e");
     xmlNewProp(eNode, (xmlChar*)("vectorPlugin"), (xmlChar*)plugin.c_str());
@@ -126,7 +126,7 @@ void FirstOrderLinearRXML::setEPlugin(const std::string& plugin)
 
 void FirstOrderLinearRXML::setBPlugin(const std::string& plugin)
 {
-  if (BNode == NULL)
+  if (!BNode)
   {
     BNode = SiconosDOMTreeTools::createSingleNode(rootNode, "B");
     xmlNewProp(BNode, (xmlChar*)("matrixPlugin"), (xmlChar*)plugin.c_str());

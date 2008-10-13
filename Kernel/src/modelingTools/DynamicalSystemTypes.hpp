@@ -18,14 +18,19 @@
  */
 
 /*! \file DynamicalSystemTypes.hpp
-  \brief enum of the available types for dynamical systems
+  \brief enum of the available types for dynamical systems,
+  plugin names ...
 */
 
 #ifndef DYNAMICALSYSTEMTYPES_HPP
 #define DYNAMICALSYSTEMTYPES_HPP
 
+/** Namespace for user-defined types related to relations */
+namespace DS
+{
+
 /** List of possible DynamicalSystems types*/
-enum DSTYPES
+enum TYPES
 {
   /** First Order Non Linear DS */
   FONLDS,
@@ -39,4 +44,6 @@ enum DSTYPES
   LLTIDS
 };
 
+
+}
 #endif

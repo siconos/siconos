@@ -17,15 +17,19 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-/*! \file DynamicalSystemTypes.hpp
-  \brief enum of the available types and subtypes for relations
+/*! \file RelationTypes.hpp
+  \brief enum of the available types and subtypes for relations,
+  plugin names ...
 */
 
 #ifndef RELATIONTYPES_HPP
 #define RELATIONTYPES_HPP
+/** Namespace for user-defined types related to relations */
+namespace RELATION
+{
 
 /** List of possible DynamicalSystems types*/
-enum RELATIONTYPES
+enum TYPES
 {
   /** First Order */
   FirstOrder,
@@ -34,7 +38,7 @@ enum RELATIONTYPES
 };
 
 /** List of possible Relations subtypes*/
-enum RELATIONSUBTYPES
+enum SUBTYPES
 {
   /** non linear */
   NonLinearR,
@@ -51,4 +55,30 @@ enum RELATIONSUBTYPES
   /** */
   Type1R
 };
+
+/** The list of all possible plugin names */
+enum PluginNames
+{
+  g, h, G0,
+  /** FirstOrder non linear*/
+  jacobianH0, jacobianH1, jacobianH2,
+  jacobianG0, jacobianG1, jacobianG2,
+  /** FirstOrderLinear */
+  C, D, F, e, B,
+  /** LagrangianScleronomous */
+  /** LagrangianRheonomous */
+  hDot,
+  /** LagrangianCompliant */
+  G1, G2
+};
+
+/** Container used to check if plugin are plugged or not - PluginNames are used
+    to access to PluginBool content. */
+typedef std::map<PluginNames, bool> PluginBool;
+
+/** Container used to save the list of plug-in names - PluginNames are used
+    to access to PluginBool content. */
+typedef std::map<PluginNames, std::string> PluginList;
+
+}
 #endif

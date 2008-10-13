@@ -31,7 +31,7 @@ GlobalTest::~GlobalTest()
   out.close();
   set<FunctionTest*>::iterator it;
   for (it = testsList.begin(); it != testsList.end(); ++it)
-    if ((*it) != NULL) delete(*it);
+    if ((*it)) delete(*it);
   testsList.clear();
 }
 

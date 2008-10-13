@@ -64,10 +64,10 @@ private:
   xmlNodePtr nsLawNode;
 
   /** Relation xml object */
-  RelationXMLSPtr relationXML;
+  SP::RelationXML relationXML;
 
   /** Non smooth law xml object*/
-  NonSmoothLawXMLSPtr nSLawXML;
+  SP::NonSmoothLawXML nSLawXML;
 
   /** Flags to know if pointers have been allocated inside constructors or not */
 
@@ -151,7 +151,7 @@ public:
   */
   const bool hasSize() const
   {
-    return (sizeNode != NULL);
+    return (sizeNode);
   };
 
   /** Return the size of the InteractionXML
@@ -174,7 +174,7 @@ public:
   */
   inline const bool hasY() const
   {
-    return (yNode != NULL);
+    return (yNode);
   }
 
   /** Return y vector of the InteractionXML
@@ -197,7 +197,7 @@ public:
   */
   inline const bool hasLambda() const
   {
-    return (lambdaNode != NULL);
+    return (lambdaNode);
   };
 
   /** Return lambda[0] of the Interaction
@@ -220,7 +220,7 @@ public:
   */
   inline const bool hasDSList() const
   {
-    return !(DSConcernedNode == NULL);
+    return DSConcernedNode;
   }
 
   /** get the DSConcerned node
@@ -256,7 +256,7 @@ public:
   */
   inline const bool hasRelation() const
   {
-    return (relationNode != NULL);
+    return relationNode;
   };
 
   /** get the relation node
@@ -272,7 +272,7 @@ public:
   */
   inline const bool hasNonSmoothLaw() const
   {
-    return (nsLawNode != NULL);
+    return nsLawNode;
   };
 
   /** get the nsLawNode  node
@@ -286,7 +286,7 @@ public:
   /** Return the relationXML of the InteractionXML
   *   \return The relationXML of the InteractionXML
   */
-  inline RelationXMLSPtr getRelationXML()
+  inline SP::RelationXML getRelationXML()
   {
     return relationXML;
   }
@@ -294,7 +294,7 @@ public:
   /** Return the NonSmoothLawXML of the InteractionXML
   *   \return The NonSmoothLawXML of the InteractionXML
   */
-  inline NonSmoothLawXMLSPtr getNonSmoothLawXML()
+  inline SP::NonSmoothLawXML getNonSmoothLawXML()
   {
     return nSLawXML;
   }
@@ -303,12 +303,12 @@ public:
   *   \param xmlNodePtr  : the root node of the InteractionXML
   *   \param SP::Interaction : the Interaction of this InteractionXML
   */
-  void updateInteractionXML(xmlNodePtr  node, InteractionSPtr inter);
+  void updateInteractionXML(xmlNodePtr  node, SP::Interaction inter);
 
   /** loads the data of the Interaction into the InteractionXML (in the DOM tree)
   *   \param NSDS* : the Interaction of this InteractionXML
   */
-  void loadInteraction(InteractionSPtr);
+  void loadInteraction(SP::Interaction);
 };
 
 #endif

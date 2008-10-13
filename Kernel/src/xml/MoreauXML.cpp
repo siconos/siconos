@@ -26,9 +26,9 @@ MoreauXML::MoreauXML(xmlNodePtr MoreauNode):
   OneStepIntegratorXML(MoreauNode), thetaNode(NULL), WNode(NULL)
 {
   xmlNodePtr node;
-  if ((node = SiconosDOMTreeTools::findNodeChild(MoreauNode, "W")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(MoreauNode, "W")))
     WNode = node;
-  if ((node = SiconosDOMTreeTools::findNodeChild(MoreauNode, "Theta")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(MoreauNode, "Theta")))
     thetaNode = node;
 }
 

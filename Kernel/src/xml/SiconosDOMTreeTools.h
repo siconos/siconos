@@ -80,7 +80,7 @@ public:
   */
   template<class T> static void getVector(const xmlNodePtr vectorNode, std::vector<T>& outputVector)
   {
-    if (vectorNode == NULL)
+    if (!vectorNode)
       XMLException::selfThrow("SiconosDOMTreeTools - getVector, node == NULL ");
 
     // vector loading, 3 options:

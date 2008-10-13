@@ -24,7 +24,7 @@
 
 using namespace std;
 
-const bool Topology::addInteractionInIndexSet(InteractionSPtr inter)
+const bool Topology::addInteractionInIndexSet(SP::Interaction inter)
 {
   // Private function
   //
@@ -99,7 +99,7 @@ Topology::~Topology()
 {
 }
 
-const bool Topology::hasInteraction(InteractionSPtr inter) const
+const bool Topology::hasInteraction(SP::Interaction inter) const
 {
   return allInteractions->isIn(inter);
 }

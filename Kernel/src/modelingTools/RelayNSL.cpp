@@ -29,7 +29,7 @@ RelayNSL::RelayNSL(unsigned int newSize):
   NonSmoothLaw(RELAYNSLAW, newSize), c(0.0), d(0.0)
 {}
 
-RelayNSL::RelayNSL(NonSmoothLawXMLSPtr nslawxml):
+RelayNSL::RelayNSL(SP::NonSmoothLawXML nslawxml):
   NonSmoothLaw(RELAYNSLAW, nslawxml), c(0.0), d(0.0)
 {
   if (nslawxml)

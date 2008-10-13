@@ -50,8 +50,8 @@ void NonSmoothEvent::process(SP::Simulation simulation)
     //       simulation->updateIndexSets();
 
     // Get the required index sets ...
-    UnitaryRelationsSetSPtr indexSet1 = simulation->getIndexSetPtr(1);
-    UnitaryRelationsSetSPtr indexSet2 = simulation->getIndexSetPtr(2);
+    SP::UnitaryRelationsSet indexSet1 = simulation->getIndexSetPtr(1);
+    SP::UnitaryRelationsSet indexSet2 = simulation->getIndexSetPtr(2);
     UnitaryRelationsSet commonSet ;
     difference(*indexSet1, *indexSet2, commonSet);
     // ---> solve impact LCP if IndexSet[1]\IndexSet[2] is not empty.

@@ -40,10 +40,7 @@ class SimpleMatrix;
  * You can find an overview on how to build and use vectors and matrices in \ref GS_SicAlgebra .
  *
  */
-class SimpleVector: public SiconosVector
-#ifdef WithSmartPtr
-  , public boost::enable_shared_from_this<SimpleVector>
-#endif
+class SimpleVector: public SiconosVector , public boost::enable_shared_from_this<SimpleVector>
 {
 protected:
   /**
@@ -51,7 +48,6 @@ protected:
    */
   VECTOR_UBLAS_TYPE vect;
 
-private:
   /** Default constructor
    */
   SimpleVector() {};
@@ -173,32 +169,18 @@ public:
   /** return the current object. This function is really usefull only for block vector
    * \return a pointer to a SiconosVector
    */
-#ifndef WithSmartPtr
   inline SP::SiconosVector getVectorPtr(unsigned int)
-  {
-    return this;
-  };
-#else
-  inline SiconosVectorSPtr getVectorPtr(unsigned int)
   {
     return shared_from_this();
   };
-#endif
 
   /** return the current object. This function is really usefull only for block vector
    * \return a pointer to a SiconosVector
    */
-#ifndef WithSmartPtr
-  inline const SP::SiconosVector getVectorPtr(unsigned int) const
-  {
-    return this;
-  };
-#else
   inline SPC::SiconosVector getVectorPtr(unsigned int) const
   {
     return shared_from_this();
   };
-#endif
 
   /** set SiconosVector number i (copy) with v (second arg) - Useful only for BlockVector (else equivalent to a single copy)
    * \param unsigned int: block number (0 for SimpleVector)
@@ -210,7 +192,7 @@ public:
    * \param unsigned int: block number (0 for SimpleVector)
    * \param a pointer to a SiconosVector
    */
-  inline void setVectorPtr(unsigned int, SiconosVectorSPtr)
+  inline void setVectorPtr(unsigned int, SP::SiconosVector)
   {
     SiconosVectorException::selfThrow("SimpleVector::setVectorPtr(num,v), not allowed for SimpleVector.");
   };
@@ -254,33 +236,19 @@ public:
    *  \param an unsigned integer i
    *  \return a SP::SiconosVector
    */
-#ifndef WithSmartPtr
   inline SP::SiconosVector operator [](unsigned int)
-  {
-    return this;
-  };
-#else
-  inline SiconosVectorSPtr operator [](unsigned int)
   {
     return shared_from_this();
   };
-#endif
 
   /** get the vector at position i(ie this for Simple and block i for BlockVector)
    *  \param an unsigned integer i
    *  \return a SP::SiconosVector
    */
-#ifndef WithSmartPtr
-  inline const SP::SiconosVector operator [](unsigned int) const
-  {
-    return this;
-  };
-#else
-  inline SiconosVectorSPtrConst operator [](unsigned int) const
+  inline SPC::SiconosVector operator [](unsigned int) const
   {
     return shared_from_this();
   };
-#endif
 
   /** set the elements starting from position i with input vector
    *  \param an unsigned int i
@@ -338,11 +306,7 @@ public:
    * \param startIn, an unsigned int
    * \param startOut, an unsigned int
    */
-#ifndef WithSmartPtr
-  friend void setBlock(const SP::SiconosVector, SP::SiconosVector, unsigned int, unsigned int, unsigned int);
-#else
-  friend void setBlock(SiconosVectorSPtrConst, SiconosVectorSPtr, unsigned int, unsigned int, unsigned int);
-#endif
+  friend void setBlock(SPC::SiconosVector, SP::SiconosVector, unsigned int, unsigned int, unsigned int);
 
   /** A==B when (A-B).normInf()<tolerance
    * \param 2 SiconosVector

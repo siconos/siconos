@@ -85,7 +85,7 @@ public:
   inline bool hasMemory()
   {
     bool res = false;
-    if (SiconosDOMTreeTools::findNodeChild(memoryNode, SM_MEMORY) != NULL) res = true;
+    if (SiconosDOMTreeTools::findNodeChild(memoryNode, SM_MEMORY)) res = true;
     return res;
   }
 

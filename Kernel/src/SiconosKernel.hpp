@@ -20,17 +20,17 @@
 Include files related to Siconos Kernel
 */
 
-#ifndef SiconosKernel_h
-#define SiconosKernel_h
+#ifndef SiconosKernel_hpp
+#define SiconosKernel_hpp
 
 #include "Model.h"
 #include "Utils.h"
 #include "ModelingTools.h"
 #include "SimulationTools.h"
-#include "ControlTools.h"
+//#include "ControlTools.h"
 #include "XmlTools.h"
 #include <sys/time.h>
 #include <boost/timer.hpp>
 #include <boost/progress.hpp>
 
-#endif /*SiconosKernel_h*/
+#endif

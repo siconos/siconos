@@ -79,10 +79,10 @@ private:
   // --- MEMBERS ---
 
   /** the set of all the interactions of the system */
-  InteractionsSetSPtr allInteractions;
+  SP::InteractionsSet allInteractions;
 
   /** index set I0, ie a set of all the Unitary Relations - This corresponds to indexSets[0] of the Simulation */
-  UnitaryRelationsSetSPtr indexSet0;
+  SP::UnitaryRelationsSet indexSet0;
 
   /** map that links UnitaryRelations with their relative degrees */
   UnitaryRelationsIntMap relativeDegrees;
@@ -101,7 +101,7 @@ private:
   /** schedules the relations of Interaction inter into IndexSet0 (ie creates the corresponding UnitaryRelations)
   * \param: a pointer to Interaction
   */
-  const bool addInteractionInIndexSet(InteractionSPtr);
+  const bool addInteractionInIndexSet(SP::Interaction);
 
   /** compute the  RelativeDegrees Map
   */
@@ -160,7 +160,7 @@ public:
   /** get all the Interactions of the Topology problem (saved in a set)
   *  \return an InteractionsSet
   */
-  inline const InteractionsSetSPtr getInteractions() const
+  inline const SP::InteractionsSet getInteractions() const
   {
     return allInteractions;
   }
@@ -169,12 +169,12 @@ public:
   *  \param a pointer to Interaction
   *  \return a bool
   */
-  const bool hasInteraction(InteractionSPtr) const;
+  const bool hasInteraction(SP::Interaction) const;
 
   /** get a pointer to the index set of all Unitary Relations.
    *  \return a UnitaryRelationsSet*
    */
-  inline UnitaryRelationsSetSPtr getIndexSet0Ptr()
+  inline SP::UnitaryRelationsSet getIndexSet0Ptr()
   {
     return indexSet0;
   }

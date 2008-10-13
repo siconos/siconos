@@ -40,7 +40,7 @@ void ExampleActuator::actuate()
 #ifndef WithSmartPtr
   SiconosVector * myZ = new SimpleVector(3);
 #else
-  SiconosVectorSPtr myZ(new SimpleVector(3));
+  SP::SiconosVector myZ(new SimpleVector(3));
 #endif
 
   (*myZ)(0) = 12;

@@ -71,7 +71,7 @@ public:
   */
   inline void setC(double c)
   {
-    if (CNode == NULL)
+    if (!CNode)
     {
       CNode = SiconosDOMTreeTools::createDoubleNode(rootNode, RNSL_C, c);
     }
@@ -83,7 +83,7 @@ public:
   */
   inline void setD(double d)
   {
-    if (DNode == NULL)
+    if (!DNode)
     {
       DNode = SiconosDOMTreeTools::createDoubleNode(rootNode, RNSL_D, d);
     }

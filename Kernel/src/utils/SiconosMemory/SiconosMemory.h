@@ -26,12 +26,10 @@
 #ifndef SICONOSMEMORY_H
 #define SICONOSMEMORY_H
 
-#include "SiconosPointers.h"
 #include "SiconosMemoryXML.h"
 #include "SiconosMemoryException.h"
-#include <deque>
-
 #include "SiconosPointers.h"
+#include <deque>
 
 /** This class is used to save vectors for several steps
  *
@@ -46,64 +44,55 @@ class SiconosMemory
 
 public:
 
-  /**
-   * constructor with size parameter.
+  /** constructor with size parameter.
    * \param int : the size of the memory
    * memorySize is set with the parameter, and the memory is allocated for this number of SiconosVector
    */
   SiconosMemory(const unsigned int);
 
-  /**
-   * xml constructor + (optional) size of memory; if not set, size is read in xml file.
+  /** xml constructor + (optional) size of memory; if not set, size is read in xml file.
    * \param SiconosMemoryXML * : the XML object which contains the data of the memory
    * \param unsigned int : the size of the memory (OPTIONAL)
    */
-  SiconosMemory(SiconosMemoryXMLSPtr, const unsigned int = 1);
+  SiconosMemory(SP::SiconosMemoryXML, const unsigned int = 1);
 
-  /**
-   * constructor with deque parameter.
+  /** constructor with deque parameter.
    * \param deque<SP::SiconosVector> : the deque of siconosVector which must be stored
    * memorySize is set to the size of the deque given in parameters
    */
-  SiconosMemory(const std::deque<SiconosVectorSPtr>&);
+  SiconosMemory(const std::deque<SP::SiconosVector>&);
 
-  /**
-   * constructor with size and deque parameter.
+  /** constructor with size and deque parameter.
    * \param int : the size of the memory
    * \param deque<SP::SiconosVector> : the deque of siconosVector which must be stored
    * this constructor is useful if the deque given in parameters has a size lower than the normal size of the memory
    */
-  SiconosMemory(const unsigned int, const std::deque<SiconosVectorSPtr>&);
+  SiconosMemory(const unsigned int, const std::deque<SP::SiconosVector>&);
 
-  /**
-   * constructor by copy
+  /** constructor by copy
    */
   SiconosMemory(const SiconosMemory&);
 
-  /**
-   * destructor
+  /** destructor
    * delete the SiconosVectors allocated in vectorMemory if memorySize > 0
    */
   ~SiconosMemory();
 
   /*************************************************************************/
 
-  /**
-   * fill the memory with a vector of siconosVector
+  /** fill the memory with a vector of siconosVector
    * \param deque<SP::SiconosVector>
    * memorySize is set to the size of the deque given in parameters
    */
-  void setVectorMemory(const std::deque<SiconosVectorSPtr>&);
+  void setVectorMemory(const std::deque<SP::SiconosVector>&);
 
-  /**
-   * To get SiconosVector number i of the memory
+  /** To get SiconosVector number i of the memory
    * \param int i: the position in the memory of the wanted SiconosVector
    * \return a SP::SiconosVector
    */
-  SiconosVectorSPtr getSiconosVector(const unsigned int) const;
+  SP::SiconosVector getSiconosVector(const unsigned int) const;
 
-  /**
-   * gives the size of the memory
+  /** gives the size of the memory
    * \return int >= 0
    */
   inline const unsigned int getMemorySize() const
@@ -111,8 +100,7 @@ public:
     return memorySize;
   };
 
-  /**
-   * set the max size of the SiconosMemory
+  /** set the max size of the SiconosMemory
    * \param int : the max size for this SiconosMemory
    */
   inline void setSiconosMemorySize(const unsigned int max)
@@ -120,8 +108,7 @@ public:
     memorySize = max;
   };
 
-  /**
-   * gives the numbers of SiconosVectors currently stored in the memory
+  /** gives the numbers of SiconosVectors currently stored in the memory
    * \return int >= 0
    */
   inline const unsigned int getNbVectorsInMemory() const
@@ -129,11 +116,10 @@ public:
     return nbVectorsInMemory;
   };
 
-  /**
-   * gives the vector of SiconosVectors of the memory
+  /** gives the vector of SiconosVectors of the memory
    * \return stl deque od siconosVector
    */
-  inline std::deque<SiconosVectorSPtr> getVectorMemory() const
+  inline std::deque<SP::SiconosVector> getVectorMemory() const
   {
     return vectorMemory;
   };
@@ -141,19 +127,17 @@ public:
   /** Allows to get the SiconosMemoryXML of the SiconosMemory
    *  \return SiconosMemoryXML* : the object SiconosMemoryXML of the SiconosMemory
    */
-  inline SiconosMemoryXMLSPtr getSiconosMemoryXML()
+  inline SP::SiconosMemoryXML getSiconosMemoryXML()
   {
     return memoryXML;
   }
 
-  /**
-   * puts a SiconosVector into the memory
+  /** puts a SiconosVector into the memory
    * \param SP::SiconosVector : the SiconosVector we want to put in memory
    */
-  void swap(SiconosVectorSPtr);
+  void swap(SP::SiconosVector);
 
-  /**
-   * displays the data of the memory object
+  /** displays the data of the memory object
    */
   void display() const;
 
@@ -170,9 +154,10 @@ public:
 
 
 private:
+
   /**
-  * default constructor.
-  */
+   * default constructor.
+   */
   SiconosMemory();
 
   /** the maximum size of the memory (i.e the max numbers of SiconosVectors it can store) */
@@ -183,10 +168,10 @@ private:
 
   /** the stl deque which contains the SiconosVectors kept in memory */
   /** we use deque rather than vector to access to push_front function */
-  std::deque<SiconosVectorSPtr> vectorMemory;
+  std::deque<SP::SiconosVector> vectorMemory;
 
   /** link to the XML for SiconosMemory objects */
-  SiconosMemoryXMLSPtr memoryXML;
+  SP::SiconosMemoryXML memoryXML;
 
 };
 

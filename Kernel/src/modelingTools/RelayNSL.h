@@ -53,7 +53,7 @@ public:
   /** constructor with XML object of the RelayNSL
   *  \param NonSmoothLawXML* : the XML object corresponding
   */
-  RelayNSL(NonSmoothLawXMLSPtr);
+  RelayNSL(SP::NonSmoothLawXML);
 
   /** constructor with the value of the RelayNSL attributes
   *  \param a double value c

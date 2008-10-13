@@ -35,13 +35,10 @@ class DynamicalSystemXML;
 const std::string NSDS_BVP = "bvp";
 
 /** set of DSXML */
-typedef std::set<DynamicalSystemXMLSPtr> SetOfDSXML;
-
-/** iterator through setOfDSXML */
-typedef SetOfDSXML::iterator SetOfDSXMLIt;
+typedef std::set<SP::DynamicalSystemXML> SetOfDSXML;
 
 /** set of InteractionXML */
-typedef std::set<InteractionXMLSPtr> SetOfInteractionsXML;
+typedef std::set<SP::InteractionXML> SetOfInteractionsXML;
 
 /** iterator through SetOfInteractionXML */
 typedef SetOfInteractionsXML::iterator SetOfInteractionsXMLIt;

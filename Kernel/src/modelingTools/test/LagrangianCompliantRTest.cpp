@@ -32,10 +32,10 @@ void LagrangianCompliantRTest::setUp()
   xmlDocPtr doc;
   xmlNodePtr cur;
   doc = xmlParseFile("LagrangianCompliant_test.xml");
-  if (doc == NULL)
+  if (!doc)
     XMLException::selfThrow("Document not parsed successfully");
   cur = xmlDocGetRootElement(doc);
-  if (cur == NULL)
+  if (!cur)
   {
     XMLException::selfThrow("empty document");
     xmlFreeDoc(doc);

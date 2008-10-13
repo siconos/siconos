@@ -58,7 +58,7 @@ protected:
   unsigned int size;
 
   /** the XML pbject linked to the NonSmoothLaw to read XML data */
-  NonSmoothLawXMLSPtr nslawxml;
+  SP::NonSmoothLawXML nslawxml;
 
   /** default constructor
    */
@@ -80,7 +80,7 @@ public:
   * \param string: type of the law
   *  \param NonSmoothLawXML* : the XML object corresponding
   */
-  NonSmoothLaw(const std::string& , NonSmoothLawXMLSPtr);
+  NonSmoothLaw(const std::string& , SP::NonSmoothLawXML);
 
   /** destructor
   */
@@ -94,7 +94,7 @@ public:
   /** get the NonSmoothLawXML of the NonSmoothLaw
   *  \return the pointer on the NonSmoothLawXML of the NonSmoothLaw
   */
-  inline NonSmoothLawXMLSPtr getNonSmoothLawXML()
+  inline SP::NonSmoothLawXML getNonSmoothLawXML()
   {
     return nslawxml;
   }
@@ -102,7 +102,7 @@ public:
   /** set the NonSmoothLawXML of the NonSmoothLaw
   *  \param NonSmoothLawXML* : the pointer to set nslawxml
   */
-  inline void setNonSmoothLawXML(NonSmoothLawXMLSPtr newNslawxml)
+  inline void setNonSmoothLawXML(SP::NonSmoothLawXML newNslawxml)
   {
     nslawxml = newNslawxml;
   }

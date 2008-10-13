@@ -32,6 +32,7 @@
 #include "SimpleMatrix.h"
 #include "SiconosMemory.h"
 #include "DynamicalSystemTypes.hpp"
+#include "PluggedObject.hpp"
 
 class NonSmoothDynamicalSystem;
 class DynamicalSystemXML;
@@ -43,139 +44,128 @@ class SiconosMemory;
 class SiconosSharedLibrary;
 
 /** A map to save temporary working vectors */
-typedef std::map<const std::string , SiconosVectorSPtr> WorkMap;
+typedef std::map<const std::string , SP::SiconosVector> WorkMap;
 
 /** A map to save temporary working matrices */
-typedef std::map<std::string , SiconosMatrixSPtr> WorkMap2;
+typedef std::map<std::string , SP::SiconosMatrix> WorkMap2;
 
 /** Pointer to function for plug-in. */
 typedef void (*FPtr6)(double, unsigned int, const double*, const double*, double*, unsigned int, double*);
 
+typedef PluggedObject<FPtr6, SimpleVector> POV0;
+typedef PluggedObject<FPtr6, SimpleMatrix> POM0;
+TYPEDEF_SPTR(POV0);
+TYPEDEF_SPTR(POM0);
+
+/** */
+
 /**  Abstract class to handle Dynamical Systems => interface for derived classes (First Order or Lagrangian systems)
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) January 15, 2007
- *
- * This class is used to describe dynamical systems of the form :
- * \f[
- * g(\dot x, x, t, z) = 0
- * \f]
- * where
- *    - \f$ x \in R^{n} \f$ is the state.
- *    - \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic variables, some sort of discret state.
- *  For example, z may be used to set some perturbation parameters, or to control the system (z will be set by some actuators) or anything else.
- *
- *  with \f$ g : R^{n} \times R  \mapsto  R^{n}   \f$ .
- *
- * Operators and the functions used to compute them:
- *
- * - g: computeG(t)
- * - jacobianXG[0] = \f$ \nabla_x g(t,\dot x,x,z) \f$: computeJacobianG(0,...)
- * - jacobianXG[1] = \f$ \nabla_{\dot x} g(t,\dot x,x,z) \f$: computeJacobianG(1,...)
- *
- * By default, the DynamicalSystem is considered to be an Initial Value Problem (IVP)
- * and the initial conditions are given by
- *  \f[
- *  x(t_0)=x_0
- * \f]
- * To define a boundary Value Problem, a pointer on a BoundaryCondition must be set (not yet implemented).
- *
- * Under some specific conditions, the system can be written as:
- *
- * \f[
- * \dot x = rhs(x, t, z)
- * \f]
- *
- * In that case, \f$ \nabla_{\dot x} g \f$ must be invertible.
- * Right-hand side (\f$ \dot x \f$) of the equation is computed thanks to computeRhs(t).
- *
- * And its Jacobian according to x, named jacobianXRhs, with computeJacobianXRhs(t).
- *
- * <b> Those two functions (computeRhs and computeJacobianXRhs) are pure virtual and must be implemented in all the derived classes. </b>
- *
- * Dynamical System types (followed by derived classes names):
- *  - First Order Non Linear Dynamical Systems (FirstOrderNonLinearDS)
- *  - First Order Linear DS (FirstOrderLinearDS)
- *  - First Order Linear and Time Invariant Coefficient DS (FirstOrderLinearTIDS)
- *  - Lagrangian DS (LagrangianDS)
- *  - Lagrangian Linear and Time Invariant coefficients DS (LagrangianLinearTIDS)
- *
- * About members:
- *  - A DynamicalSystem is identified thanks to a number and an id.
- *  - It handles a pointer to the owner NonSmoothDynamicalSystem and a pointer to a DynamicalSystemXML object for data i/o.
- *  - A VectorOfVectors, x,  is used to saved the state: x[0]=\f$ x \f$ and x[1]=\f$ \dot x \f$ = right-hand side.
- *
- * Remarks:
- *  - the copy constructor is declared as a private function => copy and pass-by-value of DS is forbidden.
- *
- * Warning:
- *  - At the time, nothing is implemented in simulation to proceed with systems written as \f$ g(...) = 0 \f$. Then use only the form
- *    \f$ \dot x = rhs(...) \f$.
- *
+
+   \author SICONOS Development Team - copyright INRIA
+   \version 3.0.0.
+   \date (Creation) January 15, 2007
+
+  This class is used to describe dynamical systems of the form :
+  \f[
+  g(\dot x, x, t, z) = 0
+  \f]
+  where
+     - \f$ x \in R^{n} \f$ is the state.
+     - \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic variables, some sort of discret state.
+   For example, z may be used to set some perturbation parameters, or to control the system (z will be set by some actuators) or anything else.
+
+   with \f$ g : R^{n} \times R  \mapsto  R^{n}   \f$ .
+
+  Operators and the functions used to compute them:
+
+  - g: computeG(t)
+  - jacobianXG[0] = \f$ \nabla_x g(t,\dot x,x,z) \f$: computeJacobianG(0,...)
+  - jacobianXG[1] = \f$ \nabla_{\dot x} g(t,\dot x,x,z) \f$: computeJacobianG(1,...)
+
+  By default, the DynamicalSystem is considered to be an Initial Value Problem (IVP)
+  and the initial conditions are given by
+   \f[
+   x(t_0)=x_0
+  \f]
+  To define a boundary Value Problem, a pointer on a BoundaryCondition must be set (not yet implemented).
+
+  Under some specific conditions, the system can be written as:
+
+  \f[
+  \dot x = rhs(x, t, z)
+  \f]
+
+  In that case, \f$ \nabla_{\dot x} g \f$ must be invertible.
+  Right-hand side (\f$ \dot x \f$) of the equation is computed thanks to computeRhs(t)
+
+  and its Jacobian according to x, named jacobianXRhs, with computeJacobianXRhs(t).
+
+  <b> Those two functions (computeRhs and computeJacobianXRhs) are pure virtual and must be implemented in all the derived classes. </b>
+
+  Dynamical System types (followed by derived classes names):
+   - First Order Non Linear Dynamical Systems (FirstOrderNonLinearDS)
+   - First Order Linear DS (FirstOrderLinearDS)
+   - First Order Linear and Time Invariant Coefficient DS (FirstOrderLinearTIDS)
+   - Lagrangian DS (LagrangianDS)
+   - Lagrangian Linear and Time Invariant coefficients DS (LagrangianLinearTIDS)
+
+  About members:
+   - A DynamicalSystem is identified thanks to a number.
+   - A VectorOfVectors, x,  is used to saved the state: x[0]=\f$ x \f$ and x[1]=\f$ \dot x \f$ = right-hand side.
+   - number is set automatically using count static variable except in the case of XML loading, where number is
+   read in the xml file, because it's to be given explicitely by user to set the list of DS in the Interactions.
+
+   Warning:
+   - At the time, nothing is implemented in simulation to proceed with systems written as \f$ g(...) = 0 \f$. Then use only the form
+     \f$ \dot x = rhs(...) \f$.
+
  */
 class DynamicalSystem
 {
+
+private:
+  /** used to set ds number */
+  static unsigned int count;
+
+  /** Default constructor => private, no copy nor pass-by-value.
+   */
+  DynamicalSystem();
+
+  /** copy constructor => private, no copy nor pass-by-value.
+   */
+  DynamicalSystem(const DynamicalSystem &);
+
 protected:
 
   /** Dynamical System type - See possible types in the enum DSTypes above.*/
-  DSTYPES  DSType;
+  DS::TYPES DSType;
 
   /** An id number for the DynamicalSystem */
   int number;
-
-  /** NonSmoothDynamicalSystem owner of this DynamicalSystem */
-  SP::NonSmoothDynamicalSystem nsds;
 
   /** the dimension of the system (\e ie size of the state vector x) */
   unsigned int n;
 
   /** initial state of the system */
-  SiconosVectorSPtr x0;
+  SP::SiconosVector x0;
 
   /** state of the system, \f$  x \in R^{n}\f$ - With \f$ x[0]=\f$ x \f$ , x[1]= \f$ \dot x \f$ . */
   VectorOfVectors x;
 
   /** jacobian according to x of the right-hand side (\f$ \dot x = f(x,t) + r \f$) */
-  SiconosMatrixSPtr jacobianXRhs;
+  SP::SiconosMatrix jacobianXRhs;
 
   /** Arbitrary algebraic values vector, z, discret state of the system. */
-  SiconosVectorSPtr z;
+  SP::SiconosVector z;
 
   /** \f$ g(t,\dot x,x,z) \f$ */
-  SiconosVectorSPtr g;
+  SP::POV0 g;
 
   /** jacobianXG[0] = \f$ \nabla_x g(t,\dot x,x,z) \f$, jacobianXG[1] = \f$ \nabla_{\dot x} g(t,\dot x,x,z) \f$  */
-  VectorOfMatrices jacobianG;
-
-  /** contains the names of the various plug-in. Example: pluginNames["mass"] is the function used to compute the mass.
-     Id are the names of the member (mass, fInt ...) */
-  NamesList pluginNames;
-
-  /** DynamicalSystem plug-in to compute \f$ g(t,\dot x,x,z) \f$
-   *  @param   current time
-   *  @param   the size of the vector x
-   *  @param   the pointer to the first element of the vector x[0]=\f$ x \f$
-   *  @param   the pointer to the first element of the vector x[1]=\f$ \dot x \f$
-   *  @param   the pointer to the first element of the vector g(t, ...)
-   *  @param   the size of the vector z
-   *  @param   a vector of parameters, z
-   */
-  FPtr6 computeGPtr;
-
-  /** Plug-in to compute jacobianG (computeJacobianGPtr[i] for jacobianG[i]).
-   *  @param   current time
-   *  @param   the size of the vector x
-   *  @param   the pointer to the first element of the vector x[0]=\f$ x \f$
-   *  @param   the pointer to the first element of the vector x[1]=\f$ \dot x \f$
-   *  @param   the pointer to the first element of the vector g(t, ...)
-   *  @param   the size of the vector z
-   *  @param   a vector of parameters, z
-   */
-  std::vector<FPtr6> computeJacobianGPtr;
+  std::vector<SP::POM0> jacobianG;
 
   /** the  previous state vectors stored in memory*/
-  SiconosMemorySPtr xMemory;
+  SP::SiconosMemory xMemory;
 
   /** number of previous states stored in memory */
   unsigned int stepsInMemory;
@@ -188,80 +178,53 @@ protected:
   WorkMap2 workMatrix;
 
   /** the XML object linked to the DynamicalSystem  */
-  DynamicalSystemXMLSPtr dsxml;
-
-  // --- plugins utilities---
-
-  /** class for plugin managing (open, close librairy...) */
-  SiconosSharedLibrary cShared;
-
-  /** Flag to check if operators are plugged or not (and thus constant).
-   * For example isPlugin["jacobianXF"] = false, means that jacobianXF is constant, not plugged ,
-   * then computeJacobianXF does not change its value. */
-  BoolMap isPlugin;
-
-#ifndef WithSmartPtr
-  /** Flags to know if pointers have been allocated inside constructors or not */
-  BoolMap isAllocatedIn;
-
-  /** set all allocation flags (isAllocated map) to true or false
-   *  \param a bool
-   */
-  virtual void initAllocationFlags(bool);
-#endif
-
-
-  /** set all plug-in flags (isPlugin map) to val
-   *  \param a bool
-   */
-  virtual void initPluginFlags(bool);
+  SP::DynamicalSystemXML dsxml;
 
   // ===== CONSTRUCTORS =====
 
-  /** default constructor
-   * \param DSTYPES the type of the system, default=FONLDS, non-linear first order system.
+  /** default constructors/destructor
+   * \param DS::TYPES the type of the system, default=FONLDS, non-linear first order system.
    */
-  DynamicalSystem(DSTYPES = FONLDS);
-
-  /** copy constructor => private, no copy nor pass-by-value.
-   */
-  DynamicalSystem(const DynamicalSystem &);
+  DynamicalSystem(DS::TYPES = DS::FONLDS);
 
 public:
 
+  /*! @name Constructors */
+  //@{
+
   /** xml constructor
    *  \param DynamicalSystemXML* : the XML object for this DynamicalSystem
-   *  \param NonSmoothSP::DynamicalSystem (optional): the NSDS that owns this ds
    */
-  DynamicalSystem(DynamicalSystemXMLSPtr dsXML,
-                  SP::NonSmoothDynamicalSystem = SP::NonSmoothDynamicalSystem());
+  DynamicalSystem(SP::DynamicalSystemXML dsXML);
 
   /** constructor from a set of data
    *  \param type of the system
-   *  \param int : reference number for this DynamicalSystem
    *  \param int : size of the system (n)
    */
-  DynamicalSystem(DSTYPES, int, unsigned int newN);
+  DynamicalSystem(DS::TYPES, unsigned int newN);
 
   // ===== DESTRUCTOR =====
 
   /** destructor
    */
-  virtual ~DynamicalSystem();
+  virtual ~DynamicalSystem() {};
+
+  //@}
 
   /** check that the system is complete (ie all required data are well set)
    * \return a bool
    */
-  virtual bool checkDynamicalSystem();
+  virtual bool checkDynamicalSystem() = 0;
 
-  // ===== GETTERS/SETTERS =====
+  /*! @name Members access */
+  //@{
 
   // --- type of DS ---
 
   /** get the type of a DynamicalSystem
    *  \return the type of the DynamicalSystem
    */
-  inline const DSTYPES getType() const
+  inline const DS::TYPES getType() const
   {
     return DSType;
   }
@@ -269,7 +232,7 @@ public:
   /** set the type of a DynamicalSystem
    *  \param the type of the DynamicalSystem
    */
-  inline void setType(DSTYPES newType)
+  inline void setType(DS::TYPES newType)
   {
     DSType = newType;
   }
@@ -290,32 +253,6 @@ public:
   inline const int getSort() const
   {
     return number;
-  }
-
-  /** allows to set the value of number
-   *  \param an integer to set the value of number
-   */
-  inline void setNumber(int newNumber)
-  {
-    number = newNumber;
-  }
-
-  // --- NonSmoothDynamicalSystem ---
-
-  /** get the NonSmoothDynamicalSystem containing this DynamicalSystem
-   *  \return NonSmoothSP::DynamicalSystem
-   */
-  inline SPC::NonSmoothDynamicalSystem getNonSmoothDynamicalSystemPtr()
-  {
-    return nsds;
-  }
-
-  /** set the NonSmoothDynamicalSystem containing the DynamicalSystem
-   *  \param NonSmoothSP::DynamicalSystem
-   */
-  inline void setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newNsds)
-  {
-    nsds = newNsds;
   }
 
   // --- n ---
@@ -358,7 +295,7 @@ public:
   /** get x0, the initial state of the DynamicalSystem
    *  \return pointer on a SiconosVector
    */
-  inline SiconosVectorSPtr getX0Ptr() const
+  inline SP::SiconosVector getX0Ptr() const
   {
     return x0;
   }
@@ -371,7 +308,7 @@ public:
   /** set x0 to pointer newPtr
    *  \param SP::SiconosVector newPtr
    */
-  void setX0Ptr(SiconosVectorSPtr);
+  void setX0Ptr(SP::SiconosVector);
 
   // --- X ---
 
@@ -388,7 +325,7 @@ public:
   /** get \f$ x \f$ (pointer), the state of the DynamicalSystem.
    *  \return pointer on a SiconosVector
    */
-  inline SiconosVectorSPtr getXPtr() const
+  inline SP::SiconosVector getXPtr() const
   {
     return x[0];
   }
@@ -401,7 +338,7 @@ public:
   /** set \f$ x \f$ (ie (*x)[0]) to pointer newPtr
    *  \param SP::SiconosVector newPtr
    */
-  void setXPtr(SiconosVectorSPtr);
+  void setXPtr(SP::SiconosVector);
 
   // ---  Rhs ---
 
@@ -417,7 +354,7 @@ public:
   /** get the right-hand side, \f$ \dot x \f$, the derivative of the state of the DynamicalSystem.
    *  \return a pointer on a SiconosVector
    */
-  inline SiconosVectorSPtr getRhsPtr() const
+  inline SP::SiconosVector getRhsPtr() const
   {
     return x[1];
   }
@@ -430,7 +367,7 @@ public:
   /** set right-hand side, \f$ \dot x \f$, to pointer newPtr
    *  \param SP::SiconosVector newPtr
    */
-  void setRhsPtr(SiconosVectorSPtr);
+  void setRhsPtr(SP::SiconosVector);
 
   // --- JacobianXRhs ---
 
@@ -445,7 +382,7 @@ public:
   /** get gradient according to \f$ x \f$ of the right-hand side (pointer)
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrixSPtr getJacobianXRhsPtr() const
+  inline SP::SiconosMatrix getJacobianXRhsPtr() const
   {
     return jacobianXRhs;
   }
@@ -458,7 +395,7 @@ public:
   /** set JacobianXRhs to pointer newPtr
    *  \param SP::SiconosMatrix  newPtr
    */
-  void setJacobianXRhsPtr(SiconosMatrixSPtr newPtr);
+  void setJacobianXRhsPtr(SP::SiconosMatrix newPtr);
 
   // -- z --
 
@@ -474,7 +411,7 @@ public:
   /** get \f$ z \f$ (pointer), the vector of algebraic parameters.
    *  \return pointer on a SiconosVector
    */
-  inline SiconosVectorSPtr getZPtr() const
+  inline SP::SiconosVector getZPtr() const
   {
     return z;
   }
@@ -487,68 +424,71 @@ public:
   /** set \f$ z \f$ to pointer newPtr
    *  \param SP::SiconosVector newPtr
    */
-  void setZPtr(SiconosVectorSPtr);
+  void setZPtr(SP::SiconosVector);
 
   // --- g ---
-
-  /** get the value of \f$ g \f$
-   *  \return SimpleVector
-   * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
+  /** get the value of g
+   *  \return plugged vector
    */
-  inline const SimpleVector getG() const
+  inline const POV0 getG() const
   {
     return *g;
   }
 
-  /** get \f$ g \f$ (pointer)
-   *  \return pointer on a SiconosVector
+  /** get g
+   *  \return pointer on a plugged vector
    */
-  inline SiconosVectorSPtr getGPtr() const
+  inline SP::POV0 getGPtr() const
   {
     return g;
   }
 
-  /** set the value of \f$ g \f$ to newValue
-   *  \param SiconosVector newValue
+  /** set the value of g to newValue
+   *  \param a plugged vector
    */
-  void setG(const SiconosVector&);
+  void setG(const POV0&);
 
-  /** set \f$ g \f$ to pointer newPtr
-   *  \param SP::SiconosVector newPtr
+  /** set g to pointer newPtr
+   *  \param a SP to plugged vector
    */
-  void setGPtr(SiconosVectorSPtr);
-
-  // -- Jacobian g --
-
-  /** get the value of jacobianG
-   *  \param index (0: \f$ \nabla_x \f$, 1: \f$ \nabla_{\dot x} \f$ )
-   *  \return SimpleMatrix
-   */
-  inline const SimpleMatrix getJacobianG(unsigned int i) const
+  inline void setGPtr(SP::POV0 newPtr)
   {
-    return *jacobianG[i];
+    g = newPtr;
   }
 
-  /** get JacobianG
-   *  \param index (0: \f$ \nabla_x \f$, 1: \f$ \nabla_{\dot x} \f$ )
-   *  \return pointer on a SiconosMatrix
-   */
-  inline SiconosMatrixSPtr getJacobianGPtr(unsigned int i) const
+  // -- Jacobian g --
+  /** get the value of jacobianG
+    \param index of the desired jacobian
+    *  \return a plugged-matrix
+    */
+  inline const POM0 getJacobianG(unsigned int i) const
+  {
+    return *(jacobianG[i]);
+  }
+
+  /** get jacobianG
+      \param index of the desired jacobian
+      *  \return pointer on a plugged-matrix
+      */
+  inline SP::POM0 getJacobianGPtr(unsigned int i) const
   {
     return jacobianG[i];
   }
 
-  /** set the value of JacobianG to newValue
-   *  \param index (0: \f$ \nabla_x \f$, 1: \f$ \nabla_{\dot x} \f$ )
-   *  \param SiconosMatrix newValue
-   */
-  void setJacobianG(unsigned int, const SiconosMatrix&);
+  /** set the value of jacobianG to newValue
+      \param index of the desired jacobian
+      *  \param plugged-matrix newValue
+      */
+  void setJacobianG(unsigned int, const POM0&);
 
-  /** set JacobianG to pointer newPtr
-   *  \param index (0: \f$ \nabla_x \f$, 1: \f$ \nabla_{\dot x} \f$ )
-   *  \param SP::SiconosMatrix  newPtr
-   */
-  void setJacobianGPtr(unsigned int, SiconosMatrixSPtr newPtr);
+  /** set jacobianG to pointer newPtr
+      \param index of the desired jacobian
+      *  \param a plugged matrix SP
+      */
+  inline void setJacobianGPtr(unsigned int i, SP::POM0 newPtr)
+  {
+    jacobianG[i] = newPtr;
+  }
 
   // X memory
 
@@ -563,7 +503,7 @@ public:
   /** get all the values of the state vector x stored in memory
    *  \return a memory
    */
-  inline SiconosMemorySPtr getXMemoryPtr() const
+  inline SP::SiconosMemory getXMemoryPtr() const
   {
     return xMemory;
   }
@@ -576,7 +516,7 @@ public:
   /** set xMemory to pointer newPtr
    *  \param a ref on a SiconosMemory
    */
-  void setXMemoryPtr(SiconosMemorySPtr);
+  void setXMemoryPtr(SP::SiconosMemory);
 
   // --- Steps in memory ---
 
@@ -596,20 +536,12 @@ public:
     stepsInMemory = steps;
   }
 
-  /** get name of function that computes "name"
-   *  \return a string
-   */
-  inline const std::string getFunctionName(const std::string& name) const
-  {
-    return (pluginNames.find(name))->second;
-  }
-
   // --- dsxml ---
 
   /** get the object DynamicalSystemXML of the DynamicalSystem
    *  \return a pointer on the DynamicalSystemXML of the DynamicalSystem
    */
-  inline const DynamicalSystemXMLSPtr getDynamicalSystemXMLPtr() const
+  inline const SP::DynamicalSystemXML getDynamicalSystemXMLPtr() const
   {
     return dsxml;
   }
@@ -617,7 +549,7 @@ public:
   /** set the DynamicalSystemXML of the DynamicalSystem
    *  \param DynamicalSystemXML* dsxml : the address of theDynamicalSystemXML to set
    */
-  inline void setDynamicalSystemXMLPtr(DynamicalSystemXMLSPtr newDsxml)
+  inline void setDynamicalSystemXMLPtr(SP::DynamicalSystemXML newDsxml)
   {
     dsxml = newDsxml;
   }
@@ -635,7 +567,7 @@ public:
   /** get a temporary saved vector, ref by id
    *  \return a std vector
    */
-  inline SiconosVectorSPtr getWorkVector(const std::string&  id)
+  inline SP::SiconosVector getWorkVector(const std::string&  id)
   {
     return workVector[id];
   }
@@ -652,7 +584,7 @@ public:
    *  \param a SP::SiconosVector
    *  \param a string id
    */
-  inline void addWorkVector(SiconosVectorSPtr newVal, const std::string& id)
+  inline void addWorkVector(SP::SiconosVector newVal, const std::string& id)
   {
     *workVector[id] = *newVal;
   }
@@ -662,38 +594,12 @@ public:
    *  \param an int to set the size
    */
   inline void allocateWorkVector(const std::string& id, int size)
-
-#ifndef WithSmartPtr
-  {
-    workVector[id] = new SimpleVector(size);
-  }
-#else
   {
     workVector[id].reset(new SimpleVector(size));
   }
-#endif
 
+  //@}
 
-#ifndef WithSmartPtr
-  /** to free memory in the map
-   *  \param the id of the SimpleVector to free
-   */
-
-  inline void freeWorkVector(const std::string& id)
-  {
-    delete workVector[id];
-  }
-#endif
-
-  // --- get plugin functions names ---
-
-  /** get the list of plug-in names
-   *  \return a NamesList
-   */
-  inline NamesList getComputeFunctionNames() const
-  {
-    return pluginNames;
-  }
 
   /** Initialization function for the rhs and its jacobian (including memory allocation).
    *  \param time of initialization
@@ -712,18 +618,21 @@ public:
    */
   void update(double);
 
-  // ===== MEMORY MANAGEMENT FUNCTIONS =====
-
+  /*! @name Memory vectors management  */
+  //@{
   /** initialize the SiconosMemory objects: reserve memory for i vectors in memory and reset all to zero.
    *  \param the size of the SiconosMemory (i)
    */
-  virtual void initMemory(unsigned int) ;
+  virtual void initMemory(unsigned int);
 
   /** push the current values of x and r in memory (index 0 of memory is the last inserted vector)
    *  xMemory and rMemory,
    */
   virtual void swapInMemory() = 0;
 
+  //@}
+  /*! @name Plugins management  */
+  //@{
   /** to set a specified function to compute g
    *  \param index (0: \f$ \nabla_x \f$, 1: \f$ \nabla_{\dot x} \f$ )
    *  \param string pluginPath : the complete path to the plugin
@@ -731,11 +640,22 @@ public:
    */
   void setComputeGFunction(const std::string&  pluginPath, const std::string& functionName);
 
+  /** set a specified function to compute g
+   *  \param a pointer on the plugin function
+   */
+  void setComputeGFunction(FPtr6 fct);
+
   /** to set a specified function to compute jacobianG
    *  \param string pluginPath : the complete path to the plugin
    *  \param the string functionName : function name to use in this library
    */
   void setComputeJacobianGFunction(unsigned int, const std::string&  pluginPath, const std::string&  functionName);
+
+  /** set a specified function to compute jacobianG
+   *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
+   *  \param a pointer on the plugin function
+   */
+  void setComputeJacobianGFunction(unsigned int, FPtr6);
 
   /** Default function to compute g
    *  \param double, the current time
@@ -748,6 +668,11 @@ public:
    */
   void computeJacobianG(unsigned int, double);
 
+  //@}
+
+
+  /*! @name Right-hand side computation */
+  //@{
   /** Default function to the right-hand side term
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
@@ -760,26 +685,10 @@ public:
    */
   virtual void computeJacobianXRhs(double, bool  = false) = 0;
 
-  // --- isPlugin ---
+  //@}
 
-  /** get isPlugin, map of flags to check if operators are plugged or not
-   *  \return a map of bool
-   */
-  inline const BoolMap getIsPlugin() const
-  {
-    return isPlugin;
-  }
-
-  /** return true if "name" is plugged, else false (ie name is constant)
-   *  \return a map of bool
-   */
-  inline const bool isPlugged(const std::string& name)
-  {
-    return isPlugin[name];
-  }
-
-  // ===== XML MANAGEMENT FUNCTIONS =====
-
+  /*! @name XML */
+  //@{
   /** copy the data of the DS into the XML tree
    */
   virtual void saveDSToXML();
@@ -787,6 +696,7 @@ public:
   /** copy the data specific to each system into the XML tree
    */
   virtual void saveSpecificDataToXML() = 0;
+  //@}
 
   // ===== MISCELLANEOUS ====
 
@@ -797,7 +707,7 @@ public:
   /** Default function for computing an indicator of convergence
    *  \return a double when DS is a Lagrangian
    */
-  virtual double dsConvergenceIndicator();
+  virtual double dsConvergenceIndicator() = 0;
 
   /** set R to zero
    */

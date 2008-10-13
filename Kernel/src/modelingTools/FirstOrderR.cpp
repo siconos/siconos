@@ -22,41 +22,23 @@
 #include "FirstOrderNonLinearDS.h"
 
 using namespace std;
+using namespace RELATION;
 
 // Default constructor
 FirstOrderR::FirstOrderR(): Relation(FirstOrder, NonLinearR), firstOrderType(NonLinearR)
 {}
 // Basic constructor
-FirstOrderR::FirstOrderR(RELATIONSUBTYPES newType): Relation(FirstOrder, newType), firstOrderType(newType)
+FirstOrderR::FirstOrderR(RELATION::SUBTYPES newType): Relation(FirstOrder, newType), firstOrderType(newType)
 {}
 
 // xml constructor
-FirstOrderR::FirstOrderR(RelationXMLSPtr relxml, RELATIONSUBTYPES newType):
+FirstOrderR::FirstOrderR(SP::RelationXML relxml, RELATION::SUBTYPES newType):
   Relation(relxml, FirstOrder, newType), firstOrderType(newType)
 {}
 
 FirstOrderR::~FirstOrderR()
 {
-#ifndef WithSmartPtr
-  string name;
-  for (unsigned int i = 0; i < jacobianH.size(); ++i)
-  {
-    name = "jacobianH" + toString<unsigned int>(i);
-
-    if (isAllocatedIn[name]) delete jacobianH[i];
-
-  }
-#endif
   jacobianH.clear();
-
-#ifndef WithSmartPtr
-  for (unsigned int i = 0; i < jacobianG.size(); ++i)
-  {
-    name = "jacobianG" + toString<unsigned int>(i);
-    if (isAllocatedIn[name]) delete jacobianG[i];
-  }
-
-#endif
   jacobianG.clear();
 }
 
@@ -68,7 +50,7 @@ void FirstOrderR::initDSLinks()
   data["z"].reset(new BlockVector());
   data["r"].reset(new BlockVector());
 
-  FirstOrderNonLinearDSSPtr ds;
+  SP::FirstOrderNonLinearDS ds;
   for (it = interaction->dynamicalSystemsBegin(); it != interaction->dynamicalSystemsEnd(); ++it)
   {
     // Put x/r ... of each DS into a block. (Pointers links, no copy!!)
@@ -85,22 +67,16 @@ void FirstOrderR::initialize()
   unsigned int sizeY = interaction->getSizeOfY();
   unsigned int sizeX = interaction->getSizeOfDS();
   unsigned int sizeZ = interaction->getSizeZ();
-  if (interaction == NULL)
+  if (!interaction)
     RuntimeException::selfThrow("FirstOrderR::initialize failed. No Interaction linked to the present relation.");
 
   // Update data member (links to DS variables)
   initDSLinks();
   // Initialize work vectors
 
-#ifndef WithSmartPtr
-  workX = new SimpleVector(sizeX);
-  workZ = new SimpleVector(sizeZ);
-  workY = new SimpleVector(sizeY);
-#else
   workX.reset(new SimpleVector(sizeX));
   workZ.reset(new SimpleVector(sizeZ));
   workY.reset(new SimpleVector(sizeY));
-#endif
 }
 
 void FirstOrderR::setJacobianHVector(const VectorOfMatrices& newVector)
@@ -109,31 +85,19 @@ void FirstOrderR::setJacobianHVector(const VectorOfMatrices& newVector)
   if (newVector.size() != nJH)
     RuntimeException::selfThrow("FirstOrderR::setJacobianHVector(newH) failed. Inconsistent sizes between newH and the problem type.");
 
-  string name;
-
-#ifndef WithSmartPtr
-  // If jacobianH[i] has been allocated before => delete
-  for (unsigned int i = 0; i < nJH; i++)
-  {
-    name = "jacobianH" + toString<unsigned int>(i);
-    if (isAllocatedIn[name]) delete jacobianH[i];
-    jacobianH[i] = NULL;
-    isAllocatedIn[name] = false;
-    isPlugged[name] = false;
-  }
-#endif
+  RELATION::PluginNames name;
 
   jacobianH.clear();
 
   for (unsigned int i = 0; i < nJH; i++)
   {
+    if (i == 0)
+      name = RELATION::jacobianH0;
+    else if (i == 1)
+      name = RELATION::jacobianH1;
+    else
+      name = RELATION::jacobianH2;
     jacobianH[i] = newVector[i]; // Warning: links to pointers, no copy!!
-    name = "jacobianH" + toString<unsigned int>(i);
-
-#ifndef WithSmartPtr
-    isAllocatedIn[name] = false;
-#endif
-
     isPlugged[name] = false;
   }
 }
@@ -143,37 +107,35 @@ void FirstOrderR::setJacobianH(const SiconosMatrix& newValue, unsigned int index
   if (index >= jacobianH.size())
     RuntimeException::selfThrow("FirstOrderR:: setJacobianH(mat,index), index out of range.");
 
-  string name = "jacobianH" + toString<unsigned int>(index);
+  RELATION::PluginNames name;
+  if (index == 0)
+    name = RELATION::jacobianH0;
+  else if (index == 1)
+    name = RELATION::jacobianH1;
+  else
+    name = RELATION::jacobianH2;
   if (! jacobianH[index])
-  {
-
-#ifndef WithSmartPtr
-    jacobianH[index] =  new SimpleMatrix(newValue);
-    isAllocatedIn[name] = true;
-#else
     jacobianH[index].reset(new SimpleMatrix(newValue));
-#endif
 
-  }
   else
     *(jacobianH[index]) = newValue;
 
   isPlugged[name] = false;
 }
 
-void FirstOrderR::setJacobianHPtr(SiconosMatrixSPtr newPtr, unsigned int  index)
+void FirstOrderR::setJacobianHPtr(SP::SiconosMatrix newPtr, unsigned int  index)
 {
   if (index >= jacobianH.size())
     RuntimeException::selfThrow("FirstOrderR:: setJacobianH(mat,index), index out of range.");
 
-  string name = "jacobianH" + toString<unsigned int>(index);
-
-#ifndef WithSmartPtr
-  if (isAllocatedIn[name]) delete jacobianH[index];
-  isAllocatedIn[name] = false;
-#endif
+  RELATION::PluginNames name;
+  if (index == 0)
+    name = RELATION::jacobianH0;
+  else if (index == 1)
+    name = RELATION::jacobianH1;
+  else
+    name = RELATION::jacobianH2;
   jacobianH[index] = newPtr;
-
   isPlugged[name] = false;
 }
 
@@ -182,32 +144,18 @@ void FirstOrderR::setJacobianGVector(const VectorOfMatrices& newVector)
   unsigned int nJG = jacobianG.size();
   if (newVector.size() != nJG)
     RuntimeException::selfThrow("FirstOrderR::setJacobianGVector(newG) failed. Inconsistent sizes between newG and the problem type.");
-
-  string name;
-
-#ifndef WithSmartPtr
-  // If jacobianG[i] has been allocated before => delete
-  for (unsigned int i = 0; i < nJG; i++)
-  {
-    name = "jacobianG" + toString<unsigned int>(i);
-    if (isAllocatedIn[name]) delete jacobianG[i];
-    jacobianG[i] = NULL;
-    isAllocatedIn[name] = false;
-    isPlugged[name] = false;
-  }
-#endif
-
+  RELATION::PluginNames name;
   jacobianG.clear();
 
   for (unsigned int i = 0; i < nJG; i++)
   {
+    if (i == 0)
+      name = RELATION::jacobianG0;
+    else if (i == 1)
+      name = RELATION::jacobianG1;
+    else
+      name = RELATION::jacobianG2;
     jacobianG[i] = newVector[i]; // Warning: links to pointers, no copy!!
-    name = "jacobianG" + toString<unsigned int>(i);
-
-#ifndef WithSmartPtr
-    isAllocatedIn[name] = false;
-#endif
-
     isPlugged[name] = false;
   }
 }
@@ -217,37 +165,35 @@ void FirstOrderR::setJacobianG(const SiconosMatrix& newValue, unsigned int index
   if (index >= jacobianG.size())
     RuntimeException::selfThrow("FirstOrderR:: setJacobianG(mat,index), index out of range.");
 
-  string name = "jacobianG" + toString<unsigned int>(index);
+  RELATION::PluginNames name;
+  if (index == 0)
+    name = RELATION::jacobianG0;
+  else if (index == 1)
+    name = RELATION::jacobianG1;
+  else
+    name = RELATION::jacobianG2;
   if (! jacobianG[index])
-  {
-
-#ifndef WithSmartPtr
-    jacobianG[index] =  new SimpleMatrix(newValue);
-    isAllocatedIn[name] = true;
-#else
     jacobianG[index].reset(new SimpleMatrix(newValue));
-#endif
 
-  }
   else
     *(jacobianG[index]) = newValue;
 
   isPlugged[name] = false;
 }
 
-void FirstOrderR::setJacobianGPtr(SiconosMatrixSPtr newPtr, unsigned int  index)
+void FirstOrderR::setJacobianGPtr(SP::SiconosMatrix newPtr, unsigned int  index)
 {
   if (index >= jacobianG.size())
     RuntimeException::selfThrow("FirstOrderR:: setJacobianG(mat,index), index out of range.");
 
-  string name = "jacobianG" + toString<unsigned int>(index);
-
-#ifndef WithSmartPtr
-  if (isAllocatedIn[name]) delete jacobianG[index];
-  isAllocatedIn[name] = false;
-#endif
+  RELATION::PluginNames name;
+  if (index == 0)
+    name = RELATION::jacobianG0;
+  else if (index == 1)
+    name = RELATION::jacobianG1;
+  else
+    name = RELATION::jacobianG2;
   jacobianG[index] = newPtr;
-
   isPlugged[name] = false;
 }
 
@@ -261,7 +207,7 @@ void FirstOrderR::setComputeJacobianHFunction(const string& pluginPath, const st
   RuntimeException::selfThrow("FirstOrderR::setComputeJacobianHFunction, not (yet) implemented or forbidden for relations of type " + firstOrderType);
   //   string name = "jacobianH"+toString<unsigned int>(index);
   //   // Warning: output[0] corresponds to h, thus use output[index+1]
-  //   cShared.setFunction(&(output[index+1]), pluginPath, functionName);
+  //   SSL::setFunction(&(output[index+1]), pluginPath, functionName);
   //   string plugin = pluginPath.substr(0, pluginPath.length()-3);
   //   pluginNames[name] = plugin + ":" + functionName;
   //   isPlugged[name] = true;
@@ -276,7 +222,7 @@ void FirstOrderR::setComputeJacobianGFunction(const string& pluginPath, const st
 {
   RuntimeException::selfThrow("FirstOrderR::setComputeJacobianGFunction, not (yet) implemented or forbidden for relations of type " + firstOrderType);
   //   string name = "jacobianG"+toString<unsigned int>(index);
-  //   cShared.setFunction(&(input[index+1]), pluginPath, functionName);
+  //   SSL::setFunction(&(input[index+1]), pluginPath, functionName);
   //   string plugin = pluginPath.substr(0, pluginPath.length()-3);
   //   pluginNames[name] = plugin + ":" + functionName;
   //   isPlugged[name] = true;
@@ -295,9 +241,9 @@ void FirstOrderR::computeJacobianG(double, unsigned int)
 void FirstOrderR::display() const
 {
   cout << "=====> FirstOrderR of type " << firstOrderType << endl;
-  if (interaction != NULL) cout << "- Interaction id" << interaction->getId() << endl;
+  if (interaction) cout << "- Interaction id" << interaction->getId() << endl;
   else cout << "- Linked interaction -> NULL" << endl;
-  NamesConstIterator it;
+  PluginList::const_iterator it;
   cout << "The following operators are linked to plug-in: " << endl;
   for (it = pluginNames.begin(); it != pluginNames.end(); ++it)
     cout << (*it).first << " plugged to:" << (*it).second << endl;

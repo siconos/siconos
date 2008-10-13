@@ -64,7 +64,7 @@ protected:
   xmlNodePtr fNode;/**< f(x,t) */
   xmlNodePtr jacobianXFNode;/**< jacobian of f according to x */
   xmlNodePtr xMemoryNode;/**<  memory vector for x*/
-  SiconosMemoryXMLSPtr xMemoryXML;/** <xml object for xMemory*/
+  SP::SiconosMemoryXML xMemoryXML;/** <xml object for xMemory*/
 
   /** Default constructor */
   FirstOrderNonLinearDSXML();
@@ -124,10 +124,35 @@ public:
     return  SiconosDOMTreeTools::getSiconosMatrixValue(MNode);
   }
 
-  /** to save the optional M of the LinearDSXML
-   *   \param The M SiconosMatrix to save
+  /** Return the name of the M plug-in
+   *  \return a string
    */
-  void setM(const SiconosMatrix& m);
+  inline const std::string getMPlugin() const
+  {
+    if (!isMPlugin())
+      XMLException::selfThrow("FirstOrderNonLinearDSXML - getMPlugin : jacobianXF is not calculated from a plugin since a jacobianXF matrix is given.");
+    return  SiconosDOMTreeTools::getStringAttributeValue(MNode, "matrixPlugin");
+  }
+
+  /** return M matrix
+   *   \return SimpleMatrix
+   */
+  inline const SimpleMatrix getMMatrix() const
+  {
+    if (isMPlugin())
+      XMLException::selfThrow("FirstOrderNonLinearDSXML - getMMatrix : jacobianXF matrix is not given since M is calculated using a plug-in");
+    return  SiconosDOMTreeTools::getSiconosMatrixValue(MNode);
+  }
+
+  /** to save the M matrix
+   *   \param a SiconosMatrix
+   */
+  void setMMatrix(const SiconosMatrix&v);
+
+  /** to save the JacobianXF plugin of the LagrangianDSXML
+   *   \param a string (name of the plug-in)
+   */
+  void setMPlugin(const std::string& plugin);
 
   // === f ===
   /** Return the name of the f plug-in
@@ -194,7 +219,7 @@ public:
   /** Returns the xMemoryXML* of the DynamicalSystemXML
    *   \return SiconosMemoryXML*
    */
-  inline SiconosMemoryXMLSPtr getXMemoryXML() const
+  inline SP::SiconosMemoryXML getXMemoryXML() const
   {
     return xMemoryXML;
   }
@@ -209,7 +234,7 @@ public:
    */
   inline bool hasX0() const
   {
-    return (x0Node != NULL);
+    return (x0Node);
   }
 
   /** returns true if xNode is defined
@@ -217,7 +242,7 @@ public:
    */
   inline bool hasX() const
   {
-    return (xNode != NULL);
+    return (xNode);
   }
 
   /** returns true if xMemoryNode is defined
@@ -225,7 +250,7 @@ public:
    */
   inline bool hasXMemory()const
   {
-    return (xMemoryNode != NULL);
+    return (xMemoryNode);
   }
 
   /** returns true if MNode is defined
@@ -233,7 +258,7 @@ public:
    */
   inline bool hasM() const
   {
-    return (MNode != NULL);
+    return (MNode);
   }
 
   /** returns true if fNode is defined
@@ -241,7 +266,7 @@ public:
    */
   inline bool hasF() const
   {
-    return (fNode != NULL);
+    return (fNode);
   }
 
   /** returns true if jacobianXFNode is defined
@@ -249,7 +274,15 @@ public:
    */
   inline bool hasJacobianXF() const
   {
-    return (jacobianXFNode != NULL);
+    return (jacobianXFNode);
+  }
+
+  /** Return true if M is calculated from a plugin
+   *  \return a bool
+   */
+  inline bool isMPlugin() const
+  {
+    return xmlHasProp(MNode, (xmlChar *) MATRIXPLUGIN.c_str());
   }
 
   /** Return true if f is calculated from a plugin

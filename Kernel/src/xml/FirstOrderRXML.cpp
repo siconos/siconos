@@ -29,15 +29,15 @@ FirstOrderRXML::FirstOrderRXML(xmlNodePtr relationNode): RelationXML(relationNod
 {
   xmlNodePtr node;
   // g function
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "g")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "g")))
     gNode = node;
 
   // h function
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "h")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "h")))
     hNode = node;
 
   // Gradients ...
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "jacobianG")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "jacobianG")))
   {
     // get number of functions given
     unsigned int size = SiconosDOMTreeTools::getAttributeValue<unsigned int>(node, "number");
@@ -46,18 +46,18 @@ FirstOrderRXML::FirstOrderRXML(xmlNodePtr relationNode): RelationXML(relationNod
     jacobianGNode.resize(size, NULL);
     // get corresponding nodes
     jacobianGNode[0] = SiconosDOMTreeTools::findNodeChild(node, "matrix")  ;
-    if (jacobianGNode[0] == NULL)
+    if (!jacobianGNode[0])
       XMLException::selfThrow("FirstOrderRXML:: constructor, jacobianG0 is missing");
 
     for (unsigned int i = 1; i < size; i++)
     {
       jacobianGNode[i] =  SiconosDOMTreeTools::findFollowNode(jacobianGNode[i - 1]);
-      if (jacobianGNode[i] == NULL)
+      if (!jacobianGNode[i])
         XMLException::selfThrow("FirstOrderRXML:: constructor, another gradient of G is required");
     }
   }
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "jacobianH")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "jacobianH")))
   {
     // get number of functions given
     unsigned int size = SiconosDOMTreeTools::getAttributeValue<unsigned int>(node, "number");
@@ -66,13 +66,13 @@ FirstOrderRXML::FirstOrderRXML(xmlNodePtr relationNode): RelationXML(relationNod
     jacobianHNode.resize(size, NULL);
     // get corresponding nodes
     jacobianHNode[0] = SiconosDOMTreeTools::findNodeChild(node, "matrix")  ;
-    if (jacobianHNode[0] == NULL)
+    if (!jacobianHNode[0])
       XMLException::selfThrow("FirstOrderRXML:: constructor, jacobianH0 is missing");
 
     for (unsigned int i = 1; i < size; i++)
     {
       jacobianHNode[i] =  SiconosDOMTreeTools::findFollowNode(jacobianHNode[i - 1]);
-      if (jacobianHNode[i] == NULL)
+      if (!jacobianHNode[i])
         XMLException::selfThrow("FirstOrderRXML:: constructor, another gradient of H is required");
     }
 
@@ -86,7 +86,7 @@ FirstOrderRXML::~FirstOrderRXML()
 
 void FirstOrderRXML::setGPlugin(const string&  plugin)
 {
-  if (gNode == NULL)
+  if (!gNode)
   {
     gNode = SiconosDOMTreeTools::createSingleNode(rootNode, "computeG");
     xmlNewProp(gNode, (xmlChar*)"plugin", (xmlChar*)plugin.c_str());
@@ -105,7 +105,7 @@ string FirstOrderRXML::getGPlugin() const
 
 void FirstOrderRXML::setHPlugin(const string&  plugin)
 {
-  if (hNode == NULL)
+  if (!hNode)
   {
     hNode = SiconosDOMTreeTools::createSingleNode(rootNode, "computeH");
     xmlNewProp(hNode, (xmlChar*)"plugin", (xmlChar*)plugin.c_str());

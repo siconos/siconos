@@ -23,13 +23,13 @@
 #include "LagrangianDS.h"
 
 using namespace std;
-
+using namespace RELATION;
 
 // Xml constructor
-LagrangianLinearR::LagrangianLinearR(RelationXMLSPtr relxml):
+LagrangianLinearR::LagrangianLinearR(SP::RelationXML relxml):
   LagrangianR(relxml, LinearR)
 {
-  LagrangianLinearRXMLSPtr LLRxml = (boost::static_pointer_cast<LagrangianLinearRXML>(relationxml));
+  SP::LagrangianLinearRXML LLRxml = (boost::static_pointer_cast<LagrangianLinearRXML>(relationxml));
 
   // H is the minimal required input.
   if (!LLRxml->hasH())
@@ -130,7 +130,7 @@ void LagrangianLinearR::setH(const SiconosMatrix& newValue)
     *H = newValue;
 }
 
-void LagrangianLinearR::setHPtr(SiconosMatrixSPtr newPtr)
+void LagrangianLinearR::setHPtr(SP::SiconosMatrix newPtr)
 {
   H = newPtr;
 }
@@ -145,7 +145,7 @@ void LagrangianLinearR::setB(const SimpleVector& newValue)
     *b = newValue;
 }
 
-void LagrangianLinearR::setBPtr(SimpleVectorSPtr newPtr)
+void LagrangianLinearR::setBPtr(SP::SimpleVector newPtr)
 {
   b = newPtr;
 }
@@ -158,7 +158,7 @@ void LagrangianLinearR::setD(const SiconosMatrix& newValue)
     *D = newValue;
 }
 
-void LagrangianLinearR::setDPtr(SiconosMatrixSPtr newPtr)
+void LagrangianLinearR::setDPtr(SP::SiconosMatrix newPtr)
 {
   D = newPtr;
 }
@@ -173,7 +173,7 @@ void LagrangianLinearR::setF(const SiconosMatrix& newValue)
     *F = newValue;
 }
 
-void LagrangianLinearR::setFPtr(SiconosMatrixSPtr newPtr)
+void LagrangianLinearR::setFPtr(SP::SiconosMatrix newPtr)
 {
   F = newPtr;
 }
@@ -181,8 +181,8 @@ void LagrangianLinearR::setFPtr(SiconosMatrixSPtr newPtr)
 void LagrangianLinearR::computeOutput(double time, unsigned int derivativeNumber)
 {
   // get y and lambda of the interaction
-  SiconosVectorSPtr y = interaction->getYPtr(derivativeNumber);
-  SiconosVectorSPtr lambda = interaction->getLambdaPtr(derivativeNumber);
+  SP::SiconosVector y = interaction->getYPtr(derivativeNumber);
+  SP::SiconosVector lambda = interaction->getLambdaPtr(derivativeNumber);
 
   //string name = "q"+toString<unsigned int>(derivativeNumber);
 

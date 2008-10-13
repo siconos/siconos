@@ -34,7 +34,7 @@
 using namespace std;
 
 // --- XML constructor ---
-EventDriven::EventDriven(SimulationXMLSPtr strxml, ModelSPtr newModel): Simulation(strxml, newModel, "EventDriven"), istate(1)
+EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T, SP::DynamicalSystemsSet dsList, SP::InteractionsSet interList): Simulation(strxml, t0, T, dsList, interList, "EventDriven"), istate(1)
 {
   // === One Step NS Problem ===
   // We read data in the xml output (mainly Interactions concerned and solver) and assign them to
@@ -44,7 +44,7 @@ EventDriven::EventDriven(SimulationXMLSPtr strxml, ModelSPtr newModel): Simulati
   if (simulationxml->hasOneStepNSProblemXML()) // ie if OSNSList is not empty
   {
     SetOfOSNSPBXML OSNSList = simulationxml->getOneStepNSProblemsXML();
-    OneStepNSProblemXMLSPtr osnsXML;
+    SP::OneStepNSProblemXML osnsXML;
     string type;
     // For EventDriven, two OSNSPb are required, "acceleration" and "impact"
 
@@ -57,7 +57,7 @@ EventDriven::EventDriven(SimulationXMLSPtr strxml, ModelSPtr newModel): Simulati
       type = osnsXML->getNSProblemType();
       if (type == LCP_TAG)  // LCP
       {
-        (*allNSProblems)[id].reset(new LCP(osnsXML, shared_from_this()));
+        (*allNSProblems)[id].reset(new LCP(osnsXML));
       }
       else
         RuntimeException::selfThrow("EventDriven::xml constructor - wrong type of NSProblem: inexistant or not yet implemented");
@@ -210,9 +210,9 @@ void EventDriven::initOSNS()
 
     // WARNING: only for Lagrangian systems - To be reviewed for other ones.
     (*allNSProblems)["impact"]->setLevels(levelMin - 1, levelMax - 1);
-    (*allNSProblems)["impact"]->initialize();
+    (*allNSProblems)["impact"]->initialize(shared_from_this());
     (*allNSProblems)["acceleration"]->setLevels(levelMin, levelMax);
-    (*allNSProblems)["acceleration"]->initialize();
+    (*allNSProblems)["acceleration"]->initialize(shared_from_this());
   }
 }
 
@@ -260,7 +260,7 @@ void EventDriven::computeF(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   // Update Index sets?
 
   // Get the required value, ie xdot for output.
-  SiconosVectorSPtr xtmp2; // The Right-Hand side
+  SP::SiconosVector xtmp2; // The Right-Hand side
   DSIterator it;
   unsigned int i = 0;
   for (it = lsodar->dynamicalSystemsBegin(); it != lsodar->dynamicalSystemsEnd(); ++it)
@@ -269,10 +269,6 @@ void EventDriven::computeF(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
     for (unsigned int j = 0 ; j < (*it)->getN() ; ++j) // Warning: getN, not getDim !!!!
       xdot[i++] = (*xtmp2)(j);
   }
-
-#ifndef WithSmartPtr
-  xtmp2 = NULL;
-#endif
 }
 
 void EventDriven::computeJacobianF(SP::OneStepIntegrator osi, integer *sizeOfX, doublereal *time, doublereal *x,  doublereal *jacob)
@@ -299,7 +295,7 @@ void EventDriven::computeJacobianF(SP::OneStepIntegrator osi, integer *sizeOfX, 
   unsigned int i = 0;
   for (it = lsodar->dynamicalSystemsBegin(); it != lsodar->dynamicalSystemsEnd(); ++it)
   {
-    SiconosMatrixSPtr jacotmp = (*it)->getJacobianXRhsPtr(); // Pointer link !
+    SP::SiconosMatrix jacotmp = (*it)->getJacobianXRhsPtr(); // Pointer link !
     for (unsigned int j = 0 ; j < (*it)->getN() ; ++j)
     {
       for (unsigned k = 0 ; k < (*it)->getDim() ; ++k)

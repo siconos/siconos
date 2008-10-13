@@ -303,7 +303,7 @@ SimpleMatrix::~SimpleMatrix()
     delete(mat.Zero);
   else if (num == 7)
     delete(mat.Identity);
-  if (ipiv != NULL) delete ipiv;
+  if (ipiv) delete ipiv;
 }
 
 //======================================
@@ -1154,7 +1154,7 @@ void SimpleMatrix::getRow(unsigned int r, SiconosVector &vOut) const
     unsigned int pos = 0;
     if (numV == 0) // vOut is Block
     {
-      BlockVectIterator it;
+      VectorOfVectors::iterator it;
       for (it = vOut.begin(); it != vOut.end(); ++it)
       {
         getSubRow(r, pos, *it);
@@ -1210,7 +1210,7 @@ void SimpleMatrix::setRow(unsigned int r, const SiconosVector& vIn)
 
   if (numV == 0) // vIn Block
   {
-    ConstBlockVectIterator it;
+    VectorOfVectors::const_iterator it;
     unsigned int pos = 0;
 
     for (it = vIn.begin(); it != vIn.end(); ++it)
@@ -1263,7 +1263,7 @@ void SimpleMatrix::getCol(unsigned int r, SiconosVector &vOut)const
 
     if (numV == 0) // vOut is Block
     {
-      BlockVectIterator it;
+      VectorOfVectors::iterator it;
       unsigned int pos = 0;
       for (it = vOut.begin(); it != vOut.end(); ++it)
       {
@@ -1320,7 +1320,7 @@ void SimpleMatrix::setCol(unsigned int r, const SiconosVector &vIn)
 
   if (numV == 0) // vIn Block
   {
-    ConstBlockVectIterator it;
+    VectorOfVectors::const_iterator it;
     unsigned int pos = 0;
     for (it = vIn.begin(); it != vIn.end(); ++it)
     {
@@ -1374,7 +1374,7 @@ void SimpleMatrix::getSubRow(unsigned int r, unsigned int pos, SP::SiconosVector
     unsigned int nbEl = vOut->size();
     if (numV == 0) // vOut is Block
     {
-      BlockVectIterator it;
+      VectorOfVectors::iterator it;
       for (it = vOut->begin(); it != vOut->end(); ++it)
       {
         getSubRow(r, subPos, *it);
@@ -1439,7 +1439,7 @@ void SimpleMatrix::setSubRow(unsigned int r, unsigned int pos, SP::SiconosVector
 
   if (numV == 0) // vIn Block
   {
-    ConstBlockVectIterator it;
+    VectorOfVectors::const_iterator it;
     unsigned int subPos = pos;
     for (it = vIn->begin(); it != vIn->end(); ++it)
     {
@@ -1498,7 +1498,7 @@ void SimpleMatrix::getSubCol(unsigned int r, unsigned int pos, SP::SiconosVector
     unsigned int nbEl = vOut->size();
     if (numV == 0) // vOut is Block
     {
-      BlockVectIterator it;
+      VectorOfVectors::iterator it;
       for (it = vOut->begin(); it != vOut->end(); ++it)
       {
         getSubRow(r, subPos, *it);
@@ -1564,7 +1564,7 @@ void SimpleMatrix::setSubCol(unsigned int r, unsigned int pos, SP::SiconosVector
 
   if (numV == 0) // vIn Block
   {
-    ConstBlockVectIterator it;
+    VectorOfVectors::const_iterator it;
     unsigned int subPos = pos;
     for (it = vIn->begin(); it != vIn->end(); ++it)
     {
@@ -2419,7 +2419,7 @@ void SimpleMatrix::PLUFactorizationInPlace()
     std::cout << "SimpleMatrix::PLUFactorizationInPlace warning: this matrix is already PLUFactorized. " << std::endl;
     return;
   }
-  if (ipiv == NULL)
+  if (!ipiv)
     ipiv = new std::vector<int>(dimRow);
   else
     ipiv->resize(dimRow);
@@ -2458,7 +2458,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
   if (!isPLUFactorized) // call gesv => LU-factorize+solve
   {
     // solve system:
-    if (ipiv == NULL)
+    if (!ipiv)
       ipiv = new std::vector<int>(dimRow);
     else
       ipiv->resize(dimRow);
@@ -2483,7 +2483,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
   if (!isPLUFactorized) // call gesv => LU-factorize+solve
   {
     // solve system:
-    if (ipiv == NULL)
+    if (!ipiv)
       ipiv = new std::vector<int>(dimRow);
     else
       ipiv->resize(dimRow);
@@ -2501,7 +2501,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
 
 void SimpleMatrix::resetLU()
 {
-  if (ipiv != NULL) ipiv->clear();
+  if (ipiv) ipiv->clear();
   isPLUFactorized = false;
   isPLUInversed = false;
 }
@@ -4275,7 +4275,7 @@ void private_addprod(SPC::SiconosMatrix A, unsigned int startRow, unsigned int s
   }
   else // if block
   {
-    ConstBlockVectIterator it;
+    VectorOfVectors::const_iterator it;
     unsigned int startColBis = startCol;
     for (it = x->begin(); it != x->end(); ++it)
     {
@@ -4300,7 +4300,7 @@ void private_prod(SPC::SiconosMatrix A, unsigned int startRow, SPC::SiconosVecto
   else // if y is a block: call private_prod on each block and so on until the considered block is a simple vector.
   {
     unsigned int row = startRow;
-    ConstBlockVectIterator it;
+    VectorOfVectors::const_iterator it;
     for (it = y->begin(); it != y->end(); ++it)
     {
       private_prod(A, row, x, *it, init);
@@ -4353,7 +4353,7 @@ void private_addprod(SPC::SiconosVector x, SPC::SiconosMatrix A, unsigned int st
   }
   else // if block
   {
-    ConstBlockVectIterator it;
+    VectorOfVectors::const_iterator it;
     unsigned int startColBis = startCol;
     for (it = x->begin(); it != x->end(); ++it)
     {
@@ -4377,7 +4377,7 @@ void private_prod(SPC::SiconosVector x, SPC::SiconosMatrix A, unsigned int start
   else // if y is a block: call private_prod on each block and so on until the considered block is a simple vector.
   {
     unsigned int col = startCol;
-    ConstBlockVectIterator it;
+    VectorOfVectors::const_iterator it;
     for (it = y->begin(); it != y->end(); ++it)
     {
       private_prod(x, A, col, *it, init);
@@ -4428,7 +4428,7 @@ void private_addprod(double a, SPC::SiconosMatrix A, unsigned int startRow, unsi
   }
   else // if block
   {
-    ConstBlockVectIterator it;
+    VectorOfVectors::const_iterator it;
     unsigned int startColBis = startCol;
     for (it = x->begin(); it != x->end(); ++it)
     {
@@ -4452,7 +4452,7 @@ void private_prod(double a, SPC::SiconosMatrix A, unsigned int startRow, SPC::Si
   else // if y is a block: call private_prod on each block and so on until the considered block is a simple vector.
   {
     unsigned int row = startRow;
-    ConstBlockVectIterator it;
+    VectorOfVectors::const_iterator it;
     for (it = y->begin(); it != y->end(); ++it)
     {
       private_prod(a, A, row, x, *it, init);
@@ -4513,7 +4513,7 @@ const SimpleVector prod(const SiconosMatrix& A, const SiconosVector& x)
     }
     else // if (x.isBlock())
     {
-      ConstBlockVectIterator it;
+      VectorOfVectors::const_iterator it;
       SimpleVector res(A.size(0));
       unsigned int start = 0;
 
@@ -4579,7 +4579,7 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
         // In private_addprod, the sum of all blocks of x, x[i], is computed: y = Sum_i (subA x[i]), with subA a submatrix of A,
         // starting from position startRow in rows and startCol in columns.
         // private_prod takes also into account the fact that each block of x can also be a block.
-        ConstBlockVectIterator it;
+        VectorOfVectors::const_iterator it;
         for (it = x.begin(); it != x.end(); ++it)
         {
           private_addprod(createSiconosMatrixSPtrConst(A), startRow, startCol, *it, createSiconosVectorSPtr(y));
@@ -4737,7 +4737,7 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
     else // === Second case: y is a block vector ===
     {
       unsigned int startRow = 0;
-      ConstBlockVectIterator it;
+      VectorOfVectors::const_iterator it;
       // For Each subvector of y, y[i], private_prod computes y[i] = subA x, subA being a submatrix of A corresponding to y[i] position.
       // private_prod takes into account the fact that x and y[i] may be block vectors.
       for (it = y.begin(); it != y.end(); ++it)
@@ -4811,7 +4811,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
   {
     if (numX == 0) // ie if x is a block vector
     {
-      ConstBlockVectIterator it;
+      VectorOfVectors::const_iterator it;
       // Number of the subvector of x that handles element at position coord[4]
       unsigned int firstBlockNum = x.getNumVectorAtPos(coord[4]);
       // Number of the subvector of x that handles element at position coord[5]
@@ -5240,7 +5240,7 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
         // In private_addprod, the sum of all blocks of x, x[i], is computed: y = Sum_i (subA x[i]), with subA a submatrix of A,
         // starting from position startRow in rows and startCol in columns.
         // private_prod takes also into account the fact that each block of x can also be a block.
-        ConstBlockVectIterator it;
+        VectorOfVectors::const_iterator it;
         for (it = x.begin(); it != x.end(); ++it)
         {
           private_addprod(a, createSiconosMatrixSPtrConst(A), startRow, startCol, *it, createSiconosVectorSPtr(y));
@@ -5398,7 +5398,7 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
     else // === Second case: y is a block vector ===
     {
       unsigned int startRow = 0;
-      ConstBlockVectIterator it;
+      VectorOfVectors::const_iterator it;
       // For Each subvector of y, y[i], private_prod computes y[i] = subA x, subA being a submatrix of A corresponding to y[i] position.
       // private_prod takes into account the fact that x and y[i] may be block vectors.
       for (it = y.begin(); it != y.end(); ++it)
@@ -5461,7 +5461,7 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
         // In private_addprod, the sum of all blocks of x, x[i], is computed: y = Sum_i (subA x[i]), with subA a submatrix of A,
         // starting from position startRow in rows and startCol in columns.
         // private_prod takes also into account the fact that each block of x can also be a block.
-        ConstBlockVectIterator it;
+        VectorOfVectors::const_iterator it;
         for (it = x.begin(); it != x.end(); ++it)
         {
           private_addprod(*it, createSiconosMatrixSPtrConst(A), startRow, startCol, createSiconosVectorSPtr(y));
@@ -5621,7 +5621,7 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
     else // === Second case: y is a block vector ===
     {
       unsigned int startRow = 0;
-      ConstBlockVectIterator it;
+      VectorOfVectors::const_iterator it;
       // For Each subvector of y, y[i], private_prod computes y[i] = subA x, subA being a submatrix of A corresponding to y[i] position.
       // private_prod takes into account the fact that x and y[i] may be block vectors.
       for (it = y.begin(); it != y.end(); ++it)
@@ -5680,7 +5680,7 @@ void axpy_prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y,
         // In private_addprod, the sum of all blocks of x, x[i], is computed: y = Sum_i (subA x[i]), with subA a submatrix of A,
         // starting from position startRow in rows and startCol in columns.
         // private_prod takes also into account the fact that each block of x can also be a block.
-        ConstBlockVectIterator it;
+        VectorOfVectors::const_iterator it;
         for (it = x.begin(); it != x.end(); ++it)
         {
           private_addprod(createSiconosMatrixSPtrConst(A), startRow, startCol, *it, createSiconosVectorSPtr(y));
@@ -5763,7 +5763,7 @@ void axpy_prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y,
     else // === Second case: y is a block vector ===
     {
       unsigned int startRow = 0;
-      ConstBlockVectIterator it;
+      VectorOfVectors::const_iterator it;
       // For Each subvector of y, y[i], private_prod computes y[i] = subA x, subA being a submatrix of A corresponding to y[i] position.
       // private_prod takes into account the fact that x and y[i] may be block vectors.
       for (it = y.begin(); it != y.end(); ++it)

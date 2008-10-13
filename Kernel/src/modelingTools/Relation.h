@@ -28,9 +28,8 @@
 #include "SimpleMatrix.h"
 #include "RuntimeException.h"
 #include "Tools.h"
-#include "SiconosSharedLibrary.h"
+#include "Plugin.hpp"
 #include "RelationTypes.hpp"
-
 #include "SiconosPointers.h"
 
 class Interaction;
@@ -71,44 +70,40 @@ class Relation
 protected:
 
   /** type of the Relation: FirstOrder or Lagrangian */
-  RELATIONTYPES  relationType;
+  RELATION::TYPES  relationType;
 
   /** sub-type of the Relation (exple: LinearTIR or ScleronomousR ...) */
-  RELATIONSUBTYPES  subType;
+  RELATION::SUBTYPES  subType;
 
   /** The Interaction linked to this Relation */
-  InteractionSPtr interaction;
+  SP::Interaction interaction;
 
   /** A map of vectors, used to save links (pointers) to DS objects of
       the interaction */
   VectorMap data;
 
   /** the object linked this Relation to read XML data */
-  RelationXMLSPtr relationxml;
+  SP::RelationXML relationxml;
 
-  /** class for manage plugin (open, close librairy...) */
-  SiconosSharedLibrary cShared;
-
-  /* contains the name of the plugin used to compute g function */
   /* contains the names of the various plug-in. Example:
-     pluginNames["output"] is the function used to compute the output
+     pluginNames[output] is the function used to compute the output
      y.*/
-  NamesList pluginNames;
+  RELATION::PluginList pluginNames;
 
   /** Flag to check if operators are plugged or not .*/
-  BoolMap isPlugged;
+  RELATION::PluginBool isPlugged;
 
   /** work vector for x */
-  SimpleVectorSPtr workX;
+  SP::SimpleVector workX;
 
   /** work vector for z */
-  SimpleVectorSPtr workZ;
+  SP::SimpleVector workZ;
 
   /** work vector for y */
-  SimpleVectorSPtr workY;
+  SP::SimpleVector workY;
 
   /** work vector for lambda */
-  SimpleVectorSPtr workL;
+  SP::SimpleVector workL;
 
   /** default constructor
    */
@@ -118,14 +113,14 @@ protected:
    *  \param a string that gives the type of the relation
    *  \param a string that gives the subtype of the relation
    */
-  Relation(RELATIONTYPES, RELATIONSUBTYPES);
+  Relation(RELATION::TYPES, RELATION::SUBTYPES);
 
   /** xml constructor
    *  \param RelationXML* : the XML object corresponding
    *  \param a string that gives the type of the relation
    *  \param a string that gives the subtype of the relation
    */
-  Relation(RelationXMLSPtr, RELATIONTYPES, RELATIONSUBTYPES);
+  Relation(SP::RelationXML, RELATION::TYPES, RELATION::SUBTYPES);
 
 private:
 
@@ -146,7 +141,7 @@ public:
   /** To get the pointer to the Interaction linked to the present Relation
    *  \return a pointer to Interaction.
    */
-  inline InteractionSPtr getInteractionPtr()
+  inline SP::Interaction getInteractionPtr()
   {
     return interaction;
   }
@@ -154,7 +149,7 @@ public:
   /** To set the pointer to the Interaction linked to the present Relation
    *  \param a pointer to Interaction.
    */
-  inline void setInteractionPtr(InteractionSPtr newInter)
+  inline void setInteractionPtr(SP::Interaction newInter)
   {
     interaction = newInter;
   }
@@ -162,7 +157,7 @@ public:
   /** To get the RelationXML* of the Relation
    *  \return a pointer on the RelationXML of the Relation
    */
-  inline RelationXMLSPtr getRelationXML()
+  inline SP::RelationXML getRelationXML()
   {
     return relationxml;
   }
@@ -170,7 +165,7 @@ public:
   /** To set the RelationXML* of the Relation
    *  \param RelationXML* : the pointer to set
    */
-  inline void setRelationXML(RelationXMLSPtr rxml)
+  inline void setRelationXML(SP::RelationXML rxml)
   {
     relationxml = rxml;
   }
@@ -178,7 +173,7 @@ public:
   /** To get the type of the Relation (FirstOrder or Lagrangian)
    *  \return the type of the Relation
    */
-  inline const RELATIONTYPES  getType() const
+  inline const RELATION::TYPES  getType() const
   {
     return relationType;
   }
@@ -186,7 +181,7 @@ public:
   /** To get the subType of the Relation
    *  \return the sub-type of the Relation
    */
-  inline const RELATIONSUBTYPES  getSubType() const
+  inline const RELATION::SUBTYPES  getSubType() const
   {
     return subType;
   }
@@ -194,7 +189,7 @@ public:
   /** get the list of plug-in names
    *  \return a NamesList
    */
-  inline NamesList getFunctionNames() const
+  inline RELATION::PluginList getFunctionNames() const
   {
     return pluginNames;
   }
@@ -202,7 +197,7 @@ public:
   /** get name of function that computes "name"
    *  \return a string
    */
-  inline const std::string getFunctionName(const std::string& name) const
+  inline const std::string getFunctionName(const RELATION::PluginNames& name) const
   {
     return (pluginNames.find(name))->second;
   }

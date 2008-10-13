@@ -28,10 +28,10 @@ LagrangianLinearTIDSXML::LagrangianLinearTIDSXML(xmlNodePtr DSNode, bool isBVP):
 {
   xmlNodePtr node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LTIDS_K)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LTIDS_K)))
     KNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LTIDS_C)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LTIDS_C)))
     CNode = node;
 }
 

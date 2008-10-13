@@ -34,12 +34,18 @@ const bool EventsManager::createAndInsertEvent(int type, double time)
   return ((allEvents.insert(regEvent.instantiate(time, type)))  != allEvents.end());
 }
 
-EventsManager::EventsManager(SP::Simulation newSimu):
-  currentEvent(NULL), nextEvent(NULL), ETD(NULL), ENonSmooth(NULL), simulation(newSimu), hasNS(false), hasCM(false)
+EventsManager::EventsManager():
+  currentEvent(NULL), nextEvent(NULL), ETD(NULL), ENonSmooth(NULL), hasNS(false), hasCM(false)
+{}
+
+EventsManager::~EventsManager()
+{}
+
+void EventsManager::initialize(SP::Simulation sim)
 {
-  //  === Checks connection with a simulation ===
-  if (!simulation)
-    RuntimeException::selfThrow("EventsManager initialize, no simulation linked to the manager.");
+  // Connection with the simulation
+  assert(sim && "EventsManager::initialize(simu), input simulation object = null.");
+  simulation = sim;
 
   //  === Creates and inserts two events corresponding
   // to times tk and tk+1 of the simulation time-discretisation  ===
@@ -52,27 +58,7 @@ EventsManager::EventsManager(SP::Simulation newSimu):
   nextEvent = ETD;
 }
 
-EventsManager::~EventsManager()
-{
-  nextEvent = NULL;
-  allEvents.erase(currentEvent);
-  allEvents.erase(ETD);
-  allEvents.erase(ENonSmooth);
-  delete currentEvent;
-  currentEvent = NULL;
-  delete ETD;
-  ETD = NULL;
-  delete ENonSmooth;
-  ENonSmooth = NULL;
-  EventsContainer::iterator it;
-  for (it = allEvents.begin(); it != allEvents.end(); ++it)
-  {
-    if (*it != NULL) delete(*it);
-  }
-  allEvents.clear();
-}
-
-void EventsManager::initialize()
+void EventsManager::preUpdate()
 {
   pair<EventsContainerIterator, EventsContainerIterator> rangeNew = allEvents.equal_range(currentEvent);
   // Note: a backup is required for rangeNew since any erase/insert in loop over equal range
@@ -82,6 +68,7 @@ void EventsManager::initialize()
   EventsContainer bckUp(rangeNew.first, rangeNew.second);
 
   allEvents.erase(allEvents.lower_bound(currentEvent), allEvents.upper_bound(currentEvent));
+
   for (EventsContainerIterator it = bckUp.begin(); it != bckUp.end() ; ++it)
   {
     (*it)->process(simulation);

@@ -26,6 +26,7 @@
 #include "TimeDiscretisation.h"
 #include "TimeStepping.h"
 #include "EventDriven.h"
+#include "Topology.h"
 
 using namespace std;
 
@@ -65,9 +66,9 @@ Model::Model(char *xmlFile):
   if (modelxml->hasSimulation())
   {
     if (modelxml->getSimulationXML()->getSimulationXMLType() == TIMESTEPPING_TAG)
-      strat.reset(new TimeStepping(modelxml->getSimulationXML(), shared_from_this()));
+      strat.reset(new TimeStepping(modelxml->getSimulationXML(), t0, T, nsds->getDynamicalSystems(), nsds->getInteractions()));
     else if (modelxml->getSimulationXML()->getSimulationXMLType() == EVENTDRIVEN_TAG)
-      strat.reset(new EventDriven(modelxml->getSimulationXML(), shared_from_this()));
+      strat.reset(new EventDriven(modelxml->getSimulationXML(), t0, T, nsds->getDynamicalSystems(), nsds->getInteractions()));
     else RuntimeException::selfThrow("Model: xml constructor, wrong type of simulation" + (modelxml->getSimulationXML()->getSimulationXMLType()));
   }
 }
@@ -88,7 +89,7 @@ Model::~Model()
 {
 }
 
-void Model::setSimulationPtr(SimulationSPtr newPtr)
+void Model::setSimulationPtr(SP::Simulation newPtr)
 {
   // Warning: this function may be used carefully because of the links between Model and TimeDiscretisation
   // The model of the simulation input MUST be the current model.
@@ -100,10 +101,30 @@ void Model::setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newPtr)
   nsds = newPtr;
 }
 
-void Model::setSiconosModelXMLPtr(SiconosModelXMLSPtr newPtr)
+void Model::setSiconosModelXMLPtr(SP::SiconosModelXML newPtr)
 {
   modelxml = newPtr;
 }
+
+void Model::initialize(SP::Simulation simulation)
+{
+  // Connection to input simulation only if non null.
+  // Two cases:
+  // 1- simulation object has been created inside the model => no need to link => no input arg. for the present function
+  //  (input = default = empty) - Ex: after xml constructor.
+  // 2- simulation built outside of the model => input simulation required
+  if (simulation)
+    strat = simulation;
+
+  assert(strat && "Model::initialize() error - The simulation object of this model is null.");
+
+  // === topology init (computes UnitaryRelation sets, relative degrees ...) ===
+  nsds->getTopologyPtr()->initialize();
+
+  // === Simulation init ===
+  strat->initialize(shared_from_this());
+}
+
 
 // --- OTHER FUNCTIONS ---
 

@@ -86,40 +86,33 @@ private:
   LagrangianLinearTIDS();
 
   /** specific matrix for a LagrangianLinearTIDS */
-  SiconosMatrixSPtr K;
+  SP::SiconosMatrix K;
 
   /** specific matrix for a LagrangianLinearTIDS */
-  SiconosMatrixSPtr C;
+  SP::SiconosMatrix C;
 
 public:
 
   /** constructor from an xml file
    *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
-   *  \param SP::NonSmoothDynamicalSystem (optional): the NSDS that owns this ds
-   *  \exception RuntimeException
    */
-  LagrangianLinearTIDS(DynamicalSystemXMLSPtr dsXML,
-                       SP::NonSmoothDynamicalSystem = SP::NonSmoothDynamicalSystem());
+  LagrangianLinearTIDS(SP::DynamicalSystemXML);
 
   /** constructor from a set of data
-   *  \param int : the number for this DynamicalSystem
    *  \param SimpleVector: initial coordinates of this DynamicalSystem
    *  \param SimpleVector : initial velocity of this DynamicalSystem
-   *  \param SiconosMatrix : mass of this DynamicalSystem
+   *  \param SiconosMatrix : mass matrix of this DynamicalSystem
    *  \param SiconosMatrix : matrix K of this DynamicalSystem
    *  \param SiconosMatrix : matrix C of this DynamicalSystem
-   *  \exception RuntimeException
    */
-  LagrangianLinearTIDS(int, const SimpleVector&, const SimpleVector&, const SiconosMatrix&, const SiconosMatrix&, const SiconosMatrix&);
+  LagrangianLinearTIDS(const SimpleVector&, const SimpleVector&, const SiconosMatrix&, const SiconosMatrix&, const SiconosMatrix&);
 
   /** constructor from a set of data
-   *  \param int : the number for this DynamicalSystem
    *  \param SimpleVector: initial coordinates of this DynamicalSystem
    *  \param SimpleVector : initial velocity of this DynamicalSystem
-   *  \param SiconosMatrix : mass of this DynamicalSystem
-   *  \exception RuntimeException
+   *  \param SiconosMatrix : mass matrix of this DynamicalSystem
    */
-  LagrangianLinearTIDS(int, const SimpleVector&, const SimpleVector&, const SiconosMatrix&);
+  LagrangianLinearTIDS(const SimpleVector&, const SimpleVector&, const SiconosMatrix&);
 
   /** destructor */
   ~LagrangianLinearTIDS();
@@ -155,7 +148,7 @@ public:
   /** get K
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrixSPtr getKPtr() const
+  inline SP::SiconosMatrix getKPtr() const
   {
     return K;
   }
@@ -168,7 +161,7 @@ public:
   /** set K to pointer newPtr
    *  \param SP::SiconosMatrix  newPtr
    */
-  void setKPtr(SiconosMatrixSPtr newPtr);
+  void setKPtr(SP::SiconosMatrix newPtr);
 
   // -- C --
   /** get the value of C
@@ -182,7 +175,7 @@ public:
   /** get C
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrixSPtr getCPtr() const
+  inline SP::SiconosMatrix getCPtr() const
   {
     return C;
   }
@@ -195,7 +188,7 @@ public:
   /** set C to pointer newPtr
    *  \param SP::SiconosMatrix  newPtr
    */
-  void setCPtr(SiconosMatrixSPtr newPtr) ;
+  void setCPtr(SP::SiconosMatrix newPtr) ;
 
   /** Default function to the right-hand side term
    *  \param double time : current time

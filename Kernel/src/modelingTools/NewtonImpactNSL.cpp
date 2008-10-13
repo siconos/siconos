@@ -23,7 +23,7 @@ using namespace std;
 NewtonImpactNSL::NewtonImpactNSL(): NonSmoothLaw(NEWTONIMPACTNSLAW, 1), e(0.0)
 {}
 
-NewtonImpactNSL::NewtonImpactNSL(NonSmoothLawXMLSPtr nslawxml):
+NewtonImpactNSL::NewtonImpactNSL(SP::NonSmoothLawXML nslawxml):
   NonSmoothLaw(NEWTONIMPACTNSLAW, nslawxml), e(0.0)
 {
   if (nslawxml)

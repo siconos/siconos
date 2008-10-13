@@ -31,7 +31,7 @@ SiconosMemory::SiconosMemory(const unsigned int newValue):
 {}
 
 // from xml file + optional value of memorySize
-SiconosMemory::SiconosMemory(SiconosMemoryXMLSPtr memXML, const unsigned int newMemorySize):
+SiconosMemory::SiconosMemory(SP::SiconosMemoryXML memXML, const unsigned int newMemorySize):
   memorySize(newMemorySize), nbVectorsInMemory(0), memoryXML(memXML)
 {
   if (memoryXML)
@@ -42,7 +42,7 @@ SiconosMemory::SiconosMemory(SiconosMemoryXMLSPtr memXML, const unsigned int new
       memorySize = memoryXML->getSiconosMemorySize();
 
     // get memory from xml file
-    deque<SiconosVectorSPtr> V;
+    deque<SP::SiconosVector> V;
     if (memoryXML->hasMemory())
     {
       V =  memoryXML->getSiconosMemoryVector();
@@ -145,7 +145,7 @@ void SiconosMemory::setVectorMemory(const deque<SP::SiconosVector>& V)
   }
 }
 
-SiconosVectorSPtr SiconosMemory::getSiconosVector(const unsigned int index) const
+SP::SiconosVector SiconosMemory::getSiconosVector(const unsigned int index) const
 {
   assert(index < nbVectorsInMemory &&
          "getSiconosVector(index) : inconsistent index value");

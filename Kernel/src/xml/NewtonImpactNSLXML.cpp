@@ -29,7 +29,7 @@ NewtonImpactNSLXML::NewtonImpactNSLXML(xmlNode * NewtonImpactNSLNode)
 {
   xmlNode *node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(NewtonImpactNSLNode, NEWTON_E)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(NewtonImpactNSLNode, NEWTON_E)))
     ENode = node;
   else
     XMLException::selfThrow("NewtonImpactNSLXML - constructor error : tag " + NEWTON_E + " not found.");

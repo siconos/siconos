@@ -76,7 +76,7 @@ public:
   */
   inline bool hasE() const
   {
-    return (ENode != NULL);
+    return (ENode);
   }
 
 };

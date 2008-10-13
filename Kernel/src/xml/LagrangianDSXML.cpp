@@ -32,46 +32,46 @@ LagrangianDSXML::LagrangianDSXML(xmlNodePtr  DSNode, bool isBVP):
 {
   xmlNodePtr node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_Q)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_Q)))
     qNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_Q0)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_Q0)))
     q0Node = node;
   else
     XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_Q0 + " not found.");
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_QMEMORY)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_QMEMORY)))
   {
     qMemoryNode = node;
     qMemoryXML.reset(new SiconosMemoryXML(qMemoryNode));
   }
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_VELOCITY)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_VELOCITY)))
     velocityNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_VELOCITY0)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_VELOCITY0)))
     velocity0Node = node;
   else
     XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_VELOCITY0 + " not found.");
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_VELOCITYMEMORY)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_VELOCITYMEMORY)))
   {
     velocityMemoryNode = node;
     velocityMemoryXML.reset(new SiconosMemoryXML(velocityMemoryNode));
   }
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_Mass)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_Mass)))
     MassNode = node;
   else
     XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_Mass + " not found.");
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_QNLINERTIA)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_QNLINERTIA)))
     NNLNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_FINT)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_FINT)))
     FIntNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_FEXT)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_FEXT)))
     FExtNode = node;
 
   jacobianNNLNode.resize(2, NULL);
@@ -84,14 +84,14 @@ LagrangianDSXML::LagrangianDSXML(xmlNodePtr  DSNode, bool isBVP):
       name += "QFInt";
     else
       name += "VelocityFInt";
-    if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, name)) != NULL)
+    if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, name)))
       jacobianFIntNode[i] = node;
     name = "Jacobian";
     if (i)
       name += "QNNL";
     else
       name += "VelocityNNL";
-    if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, name)) != NULL)
+    if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, name)))
       jacobianNNLNode[i] = node;
   }
 }

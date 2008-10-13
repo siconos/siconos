@@ -22,7 +22,7 @@
 
 using namespace std;
 
-Sphere::Sphere(double R, double m, const SiconosVector& q0, const SiconosVector& v0, int number): LagrangianDS(number, q0, v0), Radius(R), mass(m), nDof(6)
+Sphere::Sphere(double R, double m, const SiconosVector& q0, const SiconosVector& v0): LagrangianDS(q0, v0), Radius(R), mass(m), nDof(6)
 {
   // Gravity
   double g = 9.81;

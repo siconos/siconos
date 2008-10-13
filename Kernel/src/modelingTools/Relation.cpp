@@ -24,26 +24,24 @@
 using namespace std;
 
 // Default constructor
-Relation::Relation(RELATIONTYPES newType, RELATIONSUBTYPES newSub):
+Relation::Relation(RELATION::TYPES newType, RELATION::SUBTYPES newSub):
   relationType(newType), subType(newSub)
 {}
 
 // xml constructor
-Relation::Relation(RelationXMLSPtr relxml, RELATIONTYPES newType, RELATIONSUBTYPES newSub):
+Relation::Relation(SP::RelationXML relxml, RELATION::TYPES newType, RELATION::SUBTYPES newSub):
   relationType(newType), subType(newSub), relationxml(relxml)
 {
   if (! relationxml)
     RuntimeException::selfThrow("Relation::fillRelationWithRelationXML - object RelationXML does not exist");
 }
 
-Relation::~Relation()
-{
-}
+Relation::~Relation() {}
 
 void Relation::display() const
 {
   cout << "=====> Relation of type " << relationType << " and subtype " << subType << endl;
-  NamesConstIterator it;
+  RELATION::PluginList::const_iterator it;
   cout << "The following operators are linked to plug-in: " << endl;
   for (it = pluginNames.begin(); it != pluginNames.end(); ++it)
     cout << (*it).first << " plugged to:" << (*it).second << endl;

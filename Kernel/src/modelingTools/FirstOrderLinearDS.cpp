@@ -21,54 +21,18 @@
 
 using namespace std;
 
-#ifndef WithSmartPtr
-void FirstOrderLinearDS::initAllocationFlags(bool in) // default in = true.
-{
-  isAllocatedIn["A"] = in;
-  isAllocatedIn["b"] = in;
-}
-#endif
-
-void FirstOrderLinearDS::initPluginFlags(bool val)
-{
-  isPlugin["A"] = val;
-  isPlugin["b"] = val;
-}
-
 // --- Constructors ---
 
-// Default constructor
-FirstOrderLinearDS::FirstOrderLinearDS():
-  FirstOrderNonLinearDS(FOLDS), APtr(NULL), bPtr(NULL)
-#ifndef WithSmartPtr
-  , A(NULL), b(NULL)
-#endif
-
-{
-
-#ifndef WithSmartPtr
-  initAllocationFlags(false);
-#endif
-
-  initPluginFlags(false);
-}
-
-// From xml file (newNsds is optional)
-FirstOrderLinearDS::FirstOrderLinearDS(DynamicalSystemXMLSPtr dsXML, SP::NonSmoothDynamicalSystem newNsds):
-  FirstOrderNonLinearDS(dsXML, newNsds)
+// From xml file
+FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML): FirstOrderNonLinearDS(dsXML)
 {
   // pointer to xml
-  FirstOrderLinearDSXMLSPtr foldsxml = (boost::static_pointer_cast <FirstOrderLinearDSXML>(dsxml));
+  SP::FirstOrderLinearDSXML foldsxml = (boost::static_pointer_cast <FirstOrderLinearDSXML>(dsxml));
 
   // Check if f is given as a plug-in in xml input file.
   if (foldsxml->hasF() || foldsxml->hasJacobianXF())
     RuntimeException::selfThrow("FirstOrderLinearDS - xml constructor, you give a f or its jacobian as a plug-in for a FirstOrderLinearDS -> set rather A and b plug-in.");
 
-#ifndef WithSmartPtr
-  initAllocationFlags(false);
-#endif
-
-  initPluginFlags(false);
   string plugin;
   // A
   if (foldsxml->hasA())
@@ -76,18 +40,10 @@ FirstOrderLinearDS::FirstOrderLinearDS(DynamicalSystemXMLSPtr dsXML, SP::NonSmoo
     if (foldsxml->isAPlugin())
     {
       plugin = foldsxml->getAPlugin();
-      setComputeAFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
+      setComputeAFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
     }
     else
-    {
-
-#ifndef WithSmartPtr
-      A = new SimpleMatrix(foldsxml->getA());
-      isAllocatedIn["A"] = true;
-#else
-      A.reset(new SimpleMatrix(foldsxml->getA()));
-#endif
-    }
+      A.reset(new PMA(foldsxml->getA()));
   }
 
   // b
@@ -96,129 +52,55 @@ FirstOrderLinearDS::FirstOrderLinearDS(DynamicalSystemXMLSPtr dsXML, SP::NonSmoo
     if (foldsxml->isBPlugin())
     {
       plugin = foldsxml->getBPlugin();
-      setComputeBFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
+      setComputeBFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
     }
     else
-    {
-
-#ifndef WithSmartPtr
-      b = new SimpleVector(foldsxml->getBVector());
-      isAllocatedIn["b"] = true;
-#else
-      b.reset(new SimpleVector(foldsxml->getBVector()));
-#endif
-    }
+      b.reset(new PVB(foldsxml->getBVector()));
   }
-  bool res = checkDynamicalSystem();
-  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
+
+  checkDynamicalSystem();
 }
 
 // From a minimum set of data, A and b connected to a plug-in
-FirstOrderLinearDS::FirstOrderLinearDS(int newNumber, const SiconosVector& newX0,
-                                       const string& APlugin, const string& bPlugin):
-  FirstOrderNonLinearDS(newNumber, newX0), APtr(NULL), bPtr(NULL)
-#ifndef WithSmartPtr
-  , A(NULL), b(NULL)
-#endif
-
+FirstOrderLinearDS::FirstOrderLinearDS(const SiconosVector& newX0, const string& APlugin, const string& bPlugin):
+  FirstOrderNonLinearDS(newX0)
 {
-  DSType = FOLDS;
+  DSType = DS::FOLDS;
+  setComputeAFunction(SSL::getPluginName(APlugin), SSL::getPluginFunctionName(APlugin));
+  setComputeBFunction(SSL::getPluginName(bPlugin), SSL::getPluginFunctionName(bPlugin));
 
-#ifndef WithSmartPtr
-  initAllocationFlags(false);
-#endif
-
-  initPluginFlags(false);
-  setComputeAFunction(cShared.getPluginName(APlugin), cShared.getPluginFunctionName(APlugin));
-  setComputeBFunction(cShared.getPluginName(bPlugin), cShared.getPluginFunctionName(bPlugin));
-  bool res = checkDynamicalSystem();
-  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
+  checkDynamicalSystem();
 }
 
 // From a minimum set of data, A from a given matrix
-FirstOrderLinearDS::FirstOrderLinearDS(int newNumber, const SiconosVector& newX0, const SiconosMatrix& newA):
-  FirstOrderNonLinearDS(newNumber, newX0), APtr(NULL), bPtr(NULL)
-#ifndef WithSmartPtr
-  , A(NULL), b(NULL)
-#endif
-
+FirstOrderLinearDS::FirstOrderLinearDS(const SiconosVector& newX0, const SiconosMatrix& newA):
+  FirstOrderNonLinearDS(newX0)
 {
-  DSType = FOLDS;
-  if (newA.size(0) != n || newA.size(1) != n)
-    RuntimeException::selfThrow("FirstOrderLinearDS - constructor(number,x0,A): inconsistent dimensions with problem size for input matrix A");
+  DSType = DS::FOLDS;
+  assert(((newA.size(0) == n) && ( && newA.size(1) == n)) && "FirstOrderLinearDS - constructor(number,x0,A): inconsistent dimensions with problem size for input matrix A");
 
-  initPluginFlags(false);
-
-#ifndef WithSmartPtr
-  initAllocationFlags(false);
-  A = new SimpleMatrix(newA);
-  isAllocatedIn["A"] = true;
-#else
-  A.reset(new SimpleMatrix(newA));
-#endif
-
-  bool res = checkDynamicalSystem();
-  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
+  A.reset(new PMA(newA));
+  checkDynamicalSystem();
 }
 
 // From a minimum set of data, A from a given matrix
-FirstOrderLinearDS::FirstOrderLinearDS(const int newNumber, const SiconosVector& newX0, const SiconosMatrix& newA, const SiconosVector& newB):
-  FirstOrderNonLinearDS(newNumber, newX0), APtr(NULL), bPtr(NULL)
-#ifndef WithSmartPtr
-  , A(NULL), b(NULL)
-#endif
+FirstOrderLinearDS::FirstOrderLinearDS(const SiconosVector& newX0, const SiconosMatrix& newA, const SiconosVector& newB):
+  FirstOrderNonLinearDS(newX0)
 {
-  DSType = FOLDS;
-  if (newA.size(0) != n || newA.size(1) != n)
-    RuntimeException::selfThrow("FirstOrderLinearDS - constructor(number,x0,A,b): inconsistent dimensions with problem size for input matrix A");
-  if (newB.size() != n)
-    RuntimeException::selfThrow("FirstOrderLinearDS - constructor(number,x0,A,b): inconsistent dimensions with problem size for input vector b.");
+  DSType = DS::FOLDS;
+  assert(((newA.size(0) == n) && ( && newA.size(1) == n)) && "FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with problem size for input matrix A");
+  assert(newB.size() == n && "FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with problem size for input vector b ");
 
-  initPluginFlags(false);
+  A.reset(new PMA(newA));
+  b.reset(new PVB(newB));
 
-#ifndef WithSmartPtr
-  initAllocationFlags(false);
-  A = new SimpleMatrix(newA);
-  isAllocatedIn["A"] = true;
-  b = new SimpleVector(newB);
-  isAllocatedIn["b"] = true;
-#else
-  A.reset(new SimpleMatrix(newA));
-  b.reset(new SimpleVector(newB));
-#endif
-
-  bool res = checkDynamicalSystem();
-  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
+  checkDynamicalSystem();
 }
 
-FirstOrderLinearDS::~FirstOrderLinearDS()
+bool FirstOrderLinearDS::checkDynamicalSystem() // useless ...?
 {
-
-#ifndef WithSmartPtr
-  if (isAllocatedIn["A"]) delete A;
-  A = NULL;
-  if (isAllocatedIn["b"]) delete b;
-  b = NULL;
-#endif
-
-}
-
-bool FirstOrderLinearDS::checkDynamicalSystem() // useless ...
-{
-  bool output = true;
-  // n
-  if (n == 0)
-  {
-    RuntimeException::selfThrow("FirstOrderLinearDS::checkDynamicalSystem - number of degrees of freedom is equal to 0.");
-    output = false;
-  }
-  // x0 != NULL
-  if (! x0)
-  {
-    RuntimeException::selfThrow("FirstOrderLinearDS::checkDynamicalSystem - x0 not set.");
-    output = false;
-  }
-
+  bool output = DynamicalSystem::checkDynamicalSystem();
+  if (!output) cout << "FirstOrderLinearDS Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
   return output;
 }
 
@@ -230,170 +112,79 @@ void FirstOrderLinearDS::initRhs(double time)
     if (A && ! M)  // if M is not defined, then A = jacobianXRhs, no memory allocation for that one.
       jacobianXRhs = A;
     else if (A && M)
-    {
-#ifndef WithSmartPtr
-      jacobianXRhs = new SimpleMatrix(n, n);
-      isAllocatedIn["jacobianXRhs"] = true;
-#else
       jacobianXRhs.reset(new SimpleMatrix(n, n));
-#endif
-
-    }
     // else no allocation, jacobian is equal to 0.
   }
   computeJacobianXRhs(time);
 }
 
-void FirstOrderLinearDS::setA(const SiconosMatrix& newValue)
+void FirstOrderLinearDS::setA(const PMA& newValue)
 {
-  if (newValue.size(0) != n || newValue.size(1) != n)
-    RuntimeException::selfThrow("FirstOrderLinearDS - setA: inconsistent dimensions with problem size for input matrix A");
+  assert(newValue.size(0) == n && "FirstOrderLinearDS - setA: inconsistent dimensions with problem size for input matrix A.");
+  assert(newValue.size(1) == n && "FirstOrderLinearDS - setA: inconsistent dimensions with problem size for input matrix A.");
 
   if (! A)
-  {
-
-#ifndef WithSmartPtr
-    A = new SimpleMatrix(newValue);
-    isAllocatedIn["A"] = true;
-#else
-    A.reset(new SimpleMatrix(newValue));
-#endif
-
-  }
+    A.reset(new PMA(newValue));
   else
     *A = newValue;
-  isPlugin["A"] = false;
 }
 
-void FirstOrderLinearDS::setAPtr(SiconosMatrixSPtr newPtr)
+void FirstOrderLinearDS::setB(const PVB& newValue)
 {
-
-#ifndef WithSmartPtr
-  if (isAllocatedIn["A"]) delete A;
-  A = newPtr;
-  isAllocatedIn["A"] = false;
-#else
-  A = newPtr;
-#endif
-
-  isPlugin["A"] = false;
-
-
-}
-
-void FirstOrderLinearDS::setB(const SimpleVector& newValue)
-{
-  if (newValue.size() != n)
-    RuntimeException::selfThrow("FirstOrderLinearDS - setB: inconsistent dimensions with problem size for input vector b");
+  assert(newValue.size() == n && "FirstOrderLinearDS - setB: inconsistent dimensions with problem size for input vector b");
 
   if (! b)
-  {
-
-#ifndef WithSmartPtr
-    b = new SimpleVector(newValue);
-    isAllocatedIn["b"] = true;
-#else
-    b.reset(new SimpleVector(newValue));
-#endif
-
-  }
+    b.reset(new PVB(newValue));
   else
     *b = newValue;
-  isPlugin["b"] = false;
-}
-
-void FirstOrderLinearDS::setBPtr(SimpleVectorSPtr newPtr)
-{
-
-#ifndef WithSmartPtr
-  if (isAllocatedIn["b"]) delete b;
-  b = newPtr;
-  isAllocatedIn["b"] = false;
-#else
-  b = newPtr;
-#endif
-
-  isPlugin["b"] = false;
 }
 
 void FirstOrderLinearDS::setComputeAFunction(const string& pluginPath, const string& functionName)
 {
-  if (! A)
-  {
-
-#ifndef WithSmartPtr
-    A = new SimpleMatrix(n, n);
-    isAllocatedIn["A"] = true ;
-#else
-    A.reset(new SimpleMatrix(n, n));
-#endif
-
-  }
-
-  APtr = NULL;
-  cShared.setFunction(&APtr, pluginPath, functionName);
-
-  string plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  pluginNames["A"] = plugin + ":" + functionName;
-  isPlugin["A"] = true;
+  if (!A)
+    A.reset(new PMA(n, n));
+  A->setComputeFunction(pluginPath, functionName);
 }
 
+void   FirstOrderLinearDS::setComputeAFunction(bPtrFunction fct)
+{
+  if (!A)
+    A.reset(new PMA(n, n));
+  A->setComputeFunction(fct);
+}
 void FirstOrderLinearDS::setComputeBFunction(const string& pluginPath, const string& functionName)
 {
   if (! b)
-  {
-
-#ifndef WithSmartPtr
-    b = new SimpleVector(n);
-    isAllocatedIn["b"] = true;
-#else
-    b.reset(new SimpleVector(n));
-#endif
-
-  }
-  cShared.setFunction(&bPtr, pluginPath, functionName);
-
-  string plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  pluginNames["b"] = plugin + ":" + functionName;
-  isPlugin["b"] = true;
+    b.reset(new PVB(n));
+  b->setComputeFunction(pluginPath, functionName);
 }
 
-void   FirstOrderLinearDS::setComputeBFunction(bPtrFunction fct)
+void FirstOrderLinearDS::setComputeBFunction(bPtrFunction fct)
 {
   if (! b)
-  {
-
-#ifndef WithSmartPtr
-    b = new SimpleVector(n);
-    isAllocatedIn["b"] = true;
-#else
-    b.reset(new SimpleVector(n));
-#endif
-
-  }
-  bPtr = fct;
-  isPlugin["b"] = true;
+    b.reset(new PVB(n));
+  b->setComputeFunction(fct);
 }
 
 
 void FirstOrderLinearDS::computeA(const double time)
 {
-  if (isPlugin["A"])
+  if (A->isPlugged())
   {
-    if (APtr == NULL)
+    if (!A->fPtr)
       RuntimeException::selfThrow("computeA() is not linked to a plugin function");
-    APtr(time, n, &(*A)(0, 0), z->size(), &(*z)(0));
+    (A->fPtr)(time, n, &(*A)(0, 0), z->size(), &(*z)(0));
   }
   // else nothing
 }
 
 void FirstOrderLinearDS::computeB(const double time)
 {
-  if (isPlugin["b"])
+  if (b->isPlugged())
   {
-    if (bPtr == NULL)
+    if (!b->fPtr)
       RuntimeException::selfThrow("computeB() is not linked to a plugin function");
-    bPtr(time, n, &(*b)(0), z->size(), &(*z)(0));
+    (b->fPtr)(time, n, &(*b)(0), z->size(), &(*z)(0));
   }
   // else nothing
 }
@@ -422,16 +213,7 @@ void FirstOrderLinearDS::computeRhs(const double time, const bool)
   {
     // allocate invM at the first call of the present function
     if (! invM)
-    {
-
-#ifndef WithSmartPtr
-      invM = new SimpleMatrix(*M);
-      isAllocatedIn["invM"] = true;
-#else
       invM.reset(new SimpleMatrix(*M));
-#endif
-
-    }
 
     invM->PLUForwardBackwardInPlace(*x[1]);
   }
@@ -439,24 +221,14 @@ void FirstOrderLinearDS::computeRhs(const double time, const bool)
 
 void FirstOrderLinearDS::computeJacobianXRhs(const double time, const bool)
 {
-  if (isPlugin["A"])
-    computeA(time);
+  computeA(time);
 
   if (M && A)
   {
     *jacobianXRhs = *A;
     // copy M into invM for LU-factorisation, at the first call of this function.
     if (! invM)
-    {
-
-#ifndef WithSmartPtr
-      invM = new SimpleMatrix(*M);
-      isAllocatedIn["invM"] = true;
-#else
       invM.reset(new SimpleMatrix(*M));
-#endif
-
-    }
     // solve MjacobianXRhs = A
     invM->PLUForwardBackwardInPlace(*jacobianXRhs);
   }
@@ -467,21 +239,17 @@ void FirstOrderLinearDS::computeJacobianXRhs(const double time, const bool)
 void FirstOrderLinearDS::display() const
 {
   cout << "=== Linear system display, " << number << endl;
-  NamesConstIterator it;
-  cout << "The following operators are linked to plug-in: " << endl;
-  for (it = pluginNames.begin(); it != pluginNames.end(); ++it)
-    cout << (*it).first << " plugged to:" << (*it).second << endl;
   cout << "=============================" << endl;
 }
 
 void FirstOrderLinearDS::saveSpecificDataToXML()
 {
-  if (dsxml == NULL)
+  if (!dsxml)
     RuntimeException::selfThrow("FirstOrderLinearDS::saveDSToXML - The DynamicalSystemXML object doesn't exists");
   boost::static_pointer_cast<FirstOrderLinearDSXML>(dsxml)->setA(*A);
 
   // b
-  if (b != NULL)
+  if (b)
   {
     if (!(boost::static_pointer_cast <FirstOrderLinearDSXML>(dsxml))->isBPlugin())
       boost::static_pointer_cast<FirstOrderLinearDSXML>(dsxml)->setB(*b);

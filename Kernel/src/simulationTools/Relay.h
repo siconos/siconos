@@ -45,9 +45,8 @@ public:
 
   /** xml constructor
    *  \param SP::OneStepNSProblemXML : the XML linked-object
-   *  \param SP::Simulation: the simulation that owns the problem (optional)
    */
-  Relay(SP::OneStepNSProblemXML, SP::Simulation = SP::Simulation());
+  Relay(SP::OneStepNSProblemXML);
 
   /** Destructor */
   ~Relay();

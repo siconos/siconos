@@ -38,21 +38,17 @@
 #include <stdlib.h>
 
 using namespace std;
+using namespace RELATION;
 
 // xml constructor
-MLCP::MLCP(SP::OneStepNSProblemXML onestepnspbxml, SP::Simulation newSimu):
-  OneStepNSProblem("MLCP", onestepnspbxml, newSimu), MStorageType(0)
+MLCP::MLCP(SP::OneStepNSProblemXML onestepnspbxml):
+  OneStepNSProblem("MLCP", onestepnspbxml), MStorageType(0)
 {}
 
 // Constructor from a set of data
-MLCP::MLCP(SP::Simulation newSimu, SP::NonSmoothSolver newSolver, const string& newId):
-  OneStepNSProblem("MLCP", newSimu, newId, newSolver), MStorageType(0)
+MLCP::MLCP(SP::NonSmoothSolver newSolver, const string& newId):
+  OneStepNSProblem("MLCP", newId, newSolver), MStorageType(0)
 {}
-
-// destructor
-MLCP::~MLCP()
-{
-}
 
 // Setters
 
@@ -62,31 +58,18 @@ void MLCP::setW(const SiconosVector& newValue)
     RuntimeException::selfThrow("MLCP: setW, inconsistent size between given w size and problem size. You should set sizeOutput before");
 
   if (! w)
-  {
-#ifndef WithSmartPtr
-    w = new SimpleVector(sizeOutput);
-    isWAllocatedIn = true;
-#else
     w.reset(new SimpleVector(sizeOutput));
-#endif
 
-  }
   else if (w->size() != sizeOutput)
     RuntimeException::selfThrow("MLCP: setW, w size differs from sizeOutput");
 
   *w = newValue;
 }
 
-void MLCP::setWPtr(SiconosVectorSPtr newPtr)
+void MLCP::setWPtr(SP::SiconosVector newPtr)
 {
   if (sizeOutput != newPtr->size())
     RuntimeException::selfThrow("MLCP: setWPtr, inconsistent size between given w size and problem size. You should set sizeOutput before");
-
-#ifndef WithSmartPtr
-  if (isWAllocatedIn) delete w;
-  isWAllocatedIn = false;
-#endif
-
   w = newPtr;
 
 }
@@ -110,7 +93,7 @@ void MLCP::setZ(const SiconosVector& newValue)
   *z = newValue;
 }
 
-void MLCP::setZPtr(SiconosVectorSPtr newPtr)
+void MLCP::setZPtr(SP::SiconosVector newPtr)
 {
   if (sizeOutput != newPtr->size())
     RuntimeException::selfThrow("MLCP: setZPtr, inconsistent size between given z size and problem size. You should set sizeOutput before");
@@ -130,7 +113,7 @@ void MLCP::setM(const OSNSMatrix& newValue)
   RuntimeException::selfThrow("MLCP: setM, forbidden operation. Try setMPtr().");
 }
 
-void MLCP::setMPtr(OSNSMatrixSPtr newPtr)
+void MLCP::setMPtr(SP::OSNSMatrix newPtr)
 {
 
   // Note we do not test if newPtr and M sizes are equal. Not necessary?
@@ -164,7 +147,7 @@ void MLCP::setQ(const SiconosVector& newValue)
   *q = newValue;
 }
 
-void MLCP::setQPtr(SiconosVectorSPtr newPtr)
+void MLCP::setQPtr(SP::SiconosVector newPtr)
 {
   if (sizeOutput != newPtr->size())
     RuntimeException::selfThrow("MLCP: setQPtr, inconsistent size between given q size and problem size. You should set sizeOutput before");
@@ -179,7 +162,7 @@ void MLCP::setQPtr(SiconosVectorSPtr newPtr)
 
 }
 
-void MLCP::initialize()
+void MLCP::initialize(SP::Simulation sim)
 {
   // - Checks memory allocation for main variables (M,q,w,z)
   // - Formalizes the problem if the topology is time-invariant
@@ -187,7 +170,7 @@ void MLCP::initialize()
   // This function performs all steps that are time-invariant
 
   // General initialize for OneStepNSProblem
-  OneStepNSProblem::initialize();
+  OneStepNSProblem::initialize(sim);
 
   // Memory allocation for w, M, z and q.
   // If one of them has already been allocated, nothing is done.
@@ -314,12 +297,12 @@ void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
     MapOfDouble Theta; // If OSI = LSODAR, Theta remains empty
     getOSIMaps(UR1, centralUnitaryBlocks, Theta);
 
-    SiconosMatrixSPtr currentUnitaryBlock = unitaryBlocks[UR1][UR2];
+    SP::SiconosMatrix currentUnitaryBlock = unitaryBlocks[UR1][UR2];
 
-    SiconosMatrixSPtr leftUnitaryBlock, rightUnitaryBlock;
+    SP::SiconosMatrix leftUnitaryBlock, rightUnitaryBlock;
 
     unsigned int sizeDS;
-    RELATIONTYPES relationType1, relationType2;
+    RELATION::TYPES relationType1, relationType2;
 
     double h = simulation->getTimeDiscretisationPtr()->getCurrentTimeStep();
     printf("h : %f \n", h);
@@ -396,8 +379,8 @@ void MLCP::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
 {
 
   // Get relation and non smooth law types
-  RELATIONTYPES relationType = UR->getRelationType();
-  RELATIONSUBTYPES relationSubType = UR->getRelationSubType();
+  RELATION::TYPES relationType = UR->getRelationType();
+  RELATION::SUBTYPES relationSubType = UR->getRelationSubType();
   string nslawType = UR->getNonSmoothLawType();
 
   string simulationType = simulation->getType();
@@ -680,8 +663,8 @@ void MLCP::postCompute()
   SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
 
   // y and lambda vectors
-  SiconosVectorSPtr lambda;
-  SiconosVectorSPtr y;
+  SP::SiconosVector lambda;
+  SP::SiconosVector y;
 
   // === Loop through "active" Unitary Relations (ie present in indexSets[1]) ===
 

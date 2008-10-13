@@ -343,13 +343,13 @@ public:
    *  \param unsigned int row
    *  \param unsigned int col
    */
-  virtual SiconosMatrixSPtr getBlockPtr(unsigned int = 0, unsigned int = 0) = 0;
+  virtual SP::SiconosMatrix getBlockPtr(unsigned int = 0, unsigned int = 0) = 0;
 
   /** get block at position row-col if BlockMatrix, else if SimpleMatrix return this
    *  \param unsigned int row
    *  \param unsigned int col
    */
-  virtual SiconosMatrixSPtrConst getBlockPtr(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual SPC::SiconosMatrix getBlockPtr(unsigned int = 0, unsigned int = 0) const = 0;
 
   /** get row index of current matrix and save it into vOut
    *  \param unsigned int: index of required line

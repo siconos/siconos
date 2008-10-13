@@ -100,7 +100,7 @@ public:
    */
   inline bool hasIparam() const
   {
-    return (iparamNode != NULL);
+    return (iparamNode);
   }
 
   /** returns true if dparamNode is defined
@@ -108,7 +108,7 @@ public:
    */
   inline bool hasDparam() const
   {
-    return (dparamNode != NULL);
+    return (dparamNode);
   }
 
   /** Gets iparam vector values

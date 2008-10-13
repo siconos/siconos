@@ -22,125 +22,89 @@
 
 using namespace std;
 
-void FirstOrderNonLinearDS::initPluginFlags(bool val)
-{
-  isPlugin["f"] = val;
-  isPlugin["jacobianXF"] = val;
-}
-
 // ===== CONSTRUCTORS =====
 
-// Default constructor (protected)
-FirstOrderNonLinearDS::FirstOrderNonLinearDS(DSTYPES type):
-  DynamicalSystem(FONLDS)
+// From a minimum set of data
+FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0): DynamicalSystem(DS::FONLDS, newX0.size())
 {
-  initPluginFlags(false);
+  // == Initial conditions ==
+  x0.reset(new SimpleVector(newX0));
+
+  // == Current state ==
+  // x is composed of two blocks of size n, x[0] = \f$ x \f$ and x[1]=\f$ \dot x \f$.
+  // x[0] initialized with x0.
+
+  x[0].reset(new SimpleVector(*x0));
+  x[1].reset(new SimpleVector(n));
+
+  // == r ==
+
+  r.reset(new SimpleVector(n));
+
+  checkDynamicalSystem();
 }
 
-// From XML file (warning: newNsds is optional, default = NULL)
-#ifndef WithSmartPtr
-FirstOrderNonLinearDS::FirstOrderNonLinearDS(DynamicalSystemXML * dsXML, NonSmoothSP::DynamicalSystem newNsds):
-  DynamicalSystem(dsXML, newNsds), M(NULL), f(NULL), jacobianXF(NULL),
-  computeFPtr(NULL), computeJacobianXFPtr(NULL), r(NULL), rMemory(NULL), invM(NULL)
-#else
-FirstOrderNonLinearDS::FirstOrderNonLinearDS(DynamicalSystemXMLSPtr dsXML, SP::NonSmoothDynamicalSystem newNsds):
-  DynamicalSystem(FONLDS), computeFPtr(NULL), computeJacobianXFPtr(NULL)
-#endif
-
+// From XML file
+FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML):
+  DynamicalSystem(dsXML)
 {
   // -- FONLDS xml object --
-  FirstOrderNonLinearDSXMLSPtr fonlds = boost::static_pointer_cast <FirstOrderNonLinearDSXML>(dsxml);
-
-#ifndef WithSmartPtr
-  initAllocationFlags(false);
-#endif
-
-  initPluginFlags(false);
+  SP::FirstOrderNonLinearDSXML fonlds = boost::static_pointer_cast <FirstOrderNonLinearDSXML>(dsxml);
 
   // === Initial conditions ===
   // Warning: n is set thanks to x0 size
   if (! fonlds->hasX0())
     RuntimeException::selfThrow("FirstOrderNonLinearDS:: xml constructor, x0 is a required input");
 
-#ifndef WithSmartPtr
-  x0 = new SimpleVector(fonlds->getX0());
-  isAllocatedIn["x0"] = true;
-#else
   x0.reset(new SimpleVector(fonlds->getX0()));
-#endif
 
   n = x0->size();
 
   // === Current state (optional input) ===
   // x is composed of two blocks of size n, (*x)[0] = \f$ x \f$ and (*x)[1]=\f$ \dot x \f$.
 
-#ifndef WithSmartPtr
-  if (fonlds->hasX())
-    x[0] = new SimpleVector(fonlds->getX());
-  else // (*x)[0] initialize with x0.
-    x[0] = new SimpleVector(*x0);
-  isAllocatedIn["x"] = true;
-#else
   if (fonlds->hasX())
     x[0].reset(new SimpleVector(fonlds->getX()));
   else // (*x)[0] initialize with x0.
     x[0].reset(new SimpleVector(*x0));
-#endif
-
   // build and initialize right-hand side
-
-#ifndef WithSmartPtr
-  x[1] = new SimpleVector(n);
-  isAllocatedIn["rhs"] = true;
-#else
   x[1].reset(new SimpleVector(n));
-#endif
-
   // r
 
-#ifndef WithSmartPtr
-  r = new SimpleVector(n);
-  isAllocatedIn["r"] = true;
-#else
   r.reset(new SimpleVector(n));
-#endif
 
   string plugin;
 
-  // M - Optional parameter supposed to be a SimpleMatrix with xml
-  if (fonlds->hasM())
-  {
-
-#ifndef WithSmartPtr
-    M = new SimpleMatrix(fonlds->getM());
-    isAllocatedIn["M"] = true;
-#else
-    M.reset(new SimpleMatrix(fonlds->getM()));
-#endif
-
-  }
-
   // f and jacobianXF are required for DynamicalSystem but not for derived class.
   // Then we can not set exception if they are not given.
+  if (fonlds->hasM())
+  {
+    if (fonlds->isMPlugin())
+    {
+      plugin = fonlds->getMPlugin();
+      setComputeMFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+    }
+    else // This means that M is constant
+    {
+      M.reset(new PMJF(fonlds->getMMatrix()));
+      if (M->size(0) != n || M->size(1) != n)
+        RuntimeException::selfThrow("FirstOrderNonLinearDS:: xml constructor, M size differs from n!");
+    }
+  }
+
   if (fonlds->hasF())
   {
     if (fonlds->isFPlugin())
     {
       plugin = fonlds->getFPlugin();
-      setComputeFFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));     // this set isPlugin["f"] to true.
+      setComputeFFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
     }
     else
     {
       if (fonlds->getFVector().size() != n)
         RuntimeException::selfThrow("FirstOrderNonLinearDS:: xml constructor, f size differs from n!");
 
-#ifndef WithSmartPtr
-      f = new SimpleVector(fonlds->getFVector());
-      isAllocatedIn["f"] = true;
-#else
-      f.reset(new SimpleVector(fonlds->getFVector()));
-#endif
-
+      f.reset(new PVF(fonlds->getFVector()));
     }
   }
 
@@ -149,138 +113,53 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(DynamicalSystemXMLSPtr dsXML, SP::N
     if (fonlds->isJacobianXFPlugin())
     {
       plugin = fonlds->getJacobianXFPlugin();
-      setComputeJacobianXFFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));     // this set isPlugin["jacobianXF"] to true
+      setComputeJacobianXFFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
     }
     else // This means that jacobianXF is constant
     {
-#ifndef WithSmartPtr
-      jacobianXF = new SimpleMatrix(fonlds->getJacobianXFMatrix());
-#else
-      jacobianXF.reset(new SimpleMatrix(fonlds->getJacobianXFMatrix()));
-#endif
-
+      jacobianXF.reset(new PMJF(fonlds->getJacobianXFMatrix()));
       if (jacobianXF->size(0) != n || jacobianXF->size(1) != n)
         RuntimeException::selfThrow("FirstOrderNonLinearDS:: xml constructor, jacobianXF size differs from n!");
-
-#ifndef WithSmartPtr
-      isAllocatedIn["jacobianXF"] = true;
-#endif
     }
   }
 
   // Memory
-
   if (fonlds->hasXMemory())
-  {
-
-#ifndef WithSmartPtr
-    xMemory = new SiconosMemory(fonlds->getXMemoryXML());
-    isAllocatedIn["xMemory"] = true;
-#else
     xMemory.reset(new SiconosMemory(fonlds->getXMemoryXML()));
-#endif
 
-  }
-
-  bool res = checkDynamicalSystem();
-  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
+  checkDynamicalSystem();
 }
 
 // From a minimum set of data
-#ifndef WithSmartPtr
-FirstOrderNonLinearDS::FirstOrderNonLinearDS(int newNumber, const SiconosVector& newX0, const string& fPlugin, const string& jacobianXFPlugin):
-  DynamicalSystem(FONLDS, newNumber, newX0.size()), M(NULL), f(NULL), jacobianXF(NULL),
-  computeFPtr(NULL), computeJacobianXFPtr(NULL), r(NULL), rMemory(NULL), invM(NULL)
-#else
-FirstOrderNonLinearDS::FirstOrderNonLinearDS(int newNumber, const SiconosVector& newX0, const string& fPlugin, const string& jacobianXFPlugin):
-  DynamicalSystem(FONLDS, newNumber, newX0.size()), computeFPtr(NULL), computeJacobianXFPtr(NULL)
-#endif
+FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0, const string& fPlugin, const string& jacobianXFPlugin):
+  DynamicalSystem(DS::FONLDS, newX0.size())
 {
-  // === The dimension of the problem is given newX0.size() ===
-
-#ifndef WithSmartPtr
-  initAllocationFlags(false);
-#endif
-  initPluginFlags(false);
-
   // == Initial conditions ==
-
-#ifndef WithSmartPtr
-  x0 = new SimpleVector(newX0);
-  isAllocatedIn["x0"] = true;
-#else
   x0.reset(new SimpleVector(newX0));
-#endif
 
   // == Current state ==
   // x is composed of two blocks of size n, x[0] = \f$ x \f$ and x[1]=\f$ \dot x \f$.
   // x[0] initialized with x0.
 
-#ifndef WithSmartPtr
-  x[0] = new SimpleVector(*x0);
-  // x[1]
-  x[1] = new SimpleVector(n);
-  isAllocatedIn["x"] = true;
-  isAllocatedIn["rhs"] = true;
-#else
   x[0].reset(new SimpleVector(*x0));
   x[1].reset(new SimpleVector(n));
-#endif
 
   // == r ==
 
-#ifndef WithSmartPtr
-  r = new SimpleVector(n);
-  isAllocatedIn["r"] = true;
-#else
   r.reset(new SimpleVector(n));
-#endif
 
   // == f and its jacobian ==
   // Allocation and link with the plug-in
-  setComputeFFunction(cShared.getPluginName(fPlugin), cShared.getPluginFunctionName(fPlugin));
-  setComputeJacobianXFFunction(cShared.getPluginName(jacobianXFPlugin), cShared.getPluginFunctionName(jacobianXFPlugin));
-  bool res = checkDynamicalSystem();
-  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
-}
-
-// --- Destructor ---
-FirstOrderNonLinearDS::~FirstOrderNonLinearDS()
-{
-
-#ifndef WithSmartPtr
-  if (isAllocatedIn["r"]) delete r;
-  r = NULL;
-  if (isAllocatedIn["rMemory"]) delete rMemory;
-  rMemory = NULL;
-  if (isAllocatedIn["M"]) delete M;
-  M = NULL;
-  if (isAllocatedIn["invM"]) delete invM;
-  invM = NULL;
-  if (isAllocatedIn["f"]) delete f;
-  f = NULL;
-  if (isAllocatedIn["jacobianXF"]) delete jacobianXF;
-  jacobianXF = NULL;
-#endif
-
+  setComputeFFunction(SSL::getPluginName(fPlugin), SSL::getPluginFunctionName(fPlugin));
+  setComputeJacobianXFFunction(SSL::getPluginName(jacobianXFPlugin), SSL::getPluginFunctionName(jacobianXFPlugin));
+  checkDynamicalSystem();
 }
 
 bool FirstOrderNonLinearDS::checkDynamicalSystem()
 {
-  bool output = true;
-  // n
-  if (n == 0)
-  {
-    RuntimeException::selfThrow("FirstOrderNonLinearDS::checkDynamicalSystem - number of degrees of freedom is equal to 0.");
-    output = false;
-  }
-  // x0 != NULL
-  if (! x0)
-  {
-    RuntimeException::selfThrow("FirstOrderNonLinearDS::checkDynamicalSystem - x0 not set.");
-    output = false;
-  }
-
+  DynamicalSystem::checkDynamicalSystem();
+  bool output = DynamicalSystem::checkDynamicalSystem();
+  if (!output) cout << "FirstOrderNonLinearDS Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
   return output;
 }
 
@@ -294,32 +173,16 @@ void FirstOrderNonLinearDS::setR(const SiconosVector& newValue)
     *r = newValue;
 
   else
-  {
-
-#ifndef WithSmartPtr
-    r = new SimpleVector(newValue);
-    isAllocatedIn["r"] = true;
-#else
     r.reset(new SimpleVector(newValue));
-#endif
-
-  }
 }
 
-void FirstOrderNonLinearDS::setRPtr(SiconosVectorSPtr newPtr)
+void FirstOrderNonLinearDS::setRPtr(SP::SiconosVector newPtr)
 {
   // check dimensions ...
   if (newPtr->size() != n)
     RuntimeException::selfThrow("FirstOrderNonLinearDS::setRPtr - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
 
-
-#ifndef WithSmartPtr
-  if (isAllocatedIn["r"]) delete r;
   r = newPtr;
-  isAllocatedIn["r"] = false;
-#else
-  r = newPtr;
-#endif
 
 }
 
@@ -333,58 +196,23 @@ void FirstOrderNonLinearDS::setRMemory(const SiconosMemory& newValue)
       *rMemory = newValue;
   }
   else
-  {
-
-#ifndef WithSmartPtr
-    rMemory = new SiconosMemory(newValue);
-    isAllocatedIn["rMemory"] = true;
-#else
     rMemory.reset(new SiconosMemory(newValue));
-#endif
-
-  }
 }
 
-void FirstOrderNonLinearDS::setRMemoryPtr(SiconosMemorySPtr newPtr)
+void FirstOrderNonLinearDS::setRMemoryPtr(SP::SiconosMemory newPtr)
 {
-
-#ifndef WithSmartPtr
-  if (isAllocatedIn["rMemory"]) delete rMemory;
-  isAllocatedIn["rMemory"] = false;
-#endif
   rMemory = newPtr;
-
-
 }
 
-void FirstOrderNonLinearDS::setM(const SiconosMatrix& newValue)
+void FirstOrderNonLinearDS::setM(const PMJF& newValue)
 {
-  if (newValue.size(0) != n || newValue.size(1) != n)
-    RuntimeException::selfThrow("FirstOrderNonLinearDS::setM: inconsistent dimensions with problem size for input matrix M.");
+  assert(newValue.size(0) == n && "FirstOrderNonLinearDS - setM: inconsistent dimensions with problem size for input matrix M.");
+  assert(newValue.size(1) == n && "FirstOrderNonLinearDS - setM: inconsistent dimensions with problem size for input matrix M.");
 
   if (! M)
-  {
-
-#ifndef WithSmartPtr
-    M = new SimpleMatrix(n, n);
-    isAllocatedIn["M"] = true;
-#else
-    M.reset(new SimpleMatrix(n, n));
-#endif
-
-  }
-  *M = newValue;
-}
-
-void FirstOrderNonLinearDS::setMPtr(SiconosMatrixSPtr newPtr)
-{
-
-#ifndef WithSmartPtr
-  if (isAllocatedIn["M"]) delete M;
-  isAllocatedIn["M"] = false;
-#endif
-  M = newPtr;
-
+    M.reset(new PMJF(newValue));
+  else
+    *M = newValue;
 }
 
 void FirstOrderNonLinearDS::setInvM(const SiconosMatrix& newValue)
@@ -393,133 +221,48 @@ void FirstOrderNonLinearDS::setInvM(const SiconosMatrix& newValue)
     RuntimeException::selfThrow("FirstOrderNonLinearDS::setInvM: inconsistent dimensions with problem size for input matrix.");
 
   if (! invM)
-  {
-
-#ifndef WithSmartPtr
-    invM = new SimpleMatrix(n, n);
-    isAllocatedIn["invM"] = true;
-#else
     invM.reset(new SimpleMatrix(n, n));
-#endif
-
-  }
   *invM = newValue;
 }
 
-void FirstOrderNonLinearDS::setInvMPtr(SiconosMatrixSPtr newPtr)
+void FirstOrderNonLinearDS::setInvMPtr(SP::SiconosMatrix newPtr)
 {
-
-#ifndef WithSmartPtr
-  if (isAllocatedIn["invM"]) delete invM;
-  isAllocatedIn["invM"] = false;
-#endif
-
   invM = newPtr;
-
 }
 
-void FirstOrderNonLinearDS::setF(const SiconosVector& newValue)
+void FirstOrderNonLinearDS::setF(const PVF& newValue)
 {
-  // check dimensions ...
-  if (newValue.size() != n)
-    RuntimeException::selfThrow("FirstOrderNonLinearDS::setF - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
+  assert(newValue.size() == n && "FirstOrderNonLinearDS - setF: inconsistent dimensions with problem size for input vector f");
 
-  if (f)
+  if (! f)
+    f.reset(new PVF(newValue));
+  else
     *f = newValue;
+}
 
+void FirstOrderNonLinearDS::setJacobianXF(const PMJF& newValue)
+{
+  assert(newValue.size(0) == n && "FirstOrderNonLinearDS - setJacobianXF: inconsistent dimensions with problem size for input matrix M.");
+  assert(newValue.size(1) == n && "FirstOrderNonLinearDS - setJacobianXF: inconsistent dimensions with problem size for input matrix M.");
+
+  if (! jacobianXF)
+    jacobianXF.reset(new PMJF(newValue));
   else
-  {
-
-#ifndef WithSmartPtr
-    if (newValue.isBlock())
-      f = new BlockVector(newValue);
-    else
-      f = new SimpleVector(newValue);
-    isAllocatedIn["f"] = true;
-#else
-    if (newValue.isBlock())
-      f.reset(new BlockVector(newValue));
-    else
-      f.reset(new SimpleVector(newValue));
-#endif
-
-  }
-}
-
-void FirstOrderNonLinearDS::setFPtr(SiconosVectorSPtr newPtr)
-{
-  // check dimensions ...
-  if (newPtr->size() != n)
-    RuntimeException::selfThrow("FirstOrderNonLinearDS::setFPtr - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
-
-
-#ifndef WithSmartPtr
-  if (isAllocatedIn["f"]) delete f;
-  isAllocatedIn["f"] = false;
-#endif
-
-  f = newPtr;
-
-}
-
-void FirstOrderNonLinearDS::setJacobianXF(const SiconosMatrix& newValue)
-{
-  // check dimensions ...
-  if (newValue.size(0) != n || newValue.size(1) != n)
-    RuntimeException::selfThrow("FirstOrderNonLinearDS::setJacobianXF - inconsistent sizes between jacobianXF input and n - Maybe you forget to set n?");
-
-  if (jacobianXF)
     *jacobianXF = newValue;
-
-  else
-  {
-
-#ifndef WithSmartPtr
-    jacobianXF = new SimpleMatrix(newValue);
-    isAllocatedIn["jacobianXF"] = true;
-#else
-    jacobianXF.reset(new SimpleMatrix(newValue));
-#endif
-
-  }
-  isPlugin["jacobianXF"] = false;
-}
-
-void FirstOrderNonLinearDS::setJacobianXFPtr(SiconosMatrixSPtr newPtr)
-{
-  // check dimensions ...
-  if (newPtr->size(0) != n || newPtr->size(1) != n)
-    RuntimeException::selfThrow("FirstOrderNonLinearDS::setJacobianXFPtr - inconsistent sizes between jacobianXF input and n - Maybe you forget to set n?");
-
-#ifndef WithSmartPtr
-  if (isAllocatedIn["jacobianXF"]) delete jacobianXF;
-  isAllocatedIn["jacobianXF"] = false;
-#endif
-  jacobianXF = newPtr;
-
-  isPlugin["jacobianXF"] = false;
 }
 
 void FirstOrderNonLinearDS::initRhs(double time)
 {
   // compute initial values for f and jacobianXF, initialize right-hand side.
-  computeRhs(time); // this will compute, if required, f.
+  computeRhs(time); // this will compute, if required, f and M.
 
   if (! jacobianXRhs)  // if not allocated with a set or anything else
   {
     if (jacobianXF && ! M)  // if M is not defined, then jacobianXF = jacobianXRhs, no memory allocation for that one.
       jacobianXRhs = jacobianXF;
     else if (jacobianXF && M)
-    {
+      jacobianXRhs.reset(new PMJF(n, n));
 
-#ifndef WithSmartPtr
-      jacobianXRhs = new SimpleMatrix(n, n);
-      isAllocatedIn["jacobianXRhs"] = true;
-#else
-      jacobianXRhs.reset(new SimpleMatrix(n, n));
-#endif
-
-    }
     // else no allocation, jacobian is equal to 0.
   }
   computeJacobianXRhs(time);
@@ -531,18 +274,9 @@ void FirstOrderNonLinearDS::initialize(const string& simulationType, double time
   r->zero();
   *(x[0]) = *x0;
 
-  // If z is NULL (ie has not been set), we initialize it with a null vector of size 1, since z is required in plug-in functions call.
+  // If z has not been set, we initialize it with a null vector of size 1, since z is required in plug-in functions call.
   if (! z)
-  {
-
-#ifndef WithSmartPtr
-    z = new SimpleVector(1);
-    isAllocatedIn["z"] = true;
-#else
     z.reset(new SimpleVector(1));
-#endif
-
-  }
 
   // Initialize memory vectors
   initMemory(sizeOfMemory);
@@ -562,17 +296,7 @@ void FirstOrderNonLinearDS::initMemory(unsigned int steps)
   if (steps == 0)
     cout << "Warning : FirstOrderNonLinearDS::initMemory with size equal to zero" << endl;
   else
-  {
-
-#ifndef WithSmartPtr
-    if (isAllocatedIn["rMemory"]) delete rMemory;
-    rMemory = new SiconosMemory(steps);
-    isAllocatedIn["rMemory"] = true;
-#else
     rMemory.reset(new SiconosMemory(steps));
-#endif
-
-  }
 }
 
 void FirstOrderNonLinearDS::swapInMemory()
@@ -583,72 +307,95 @@ void FirstOrderNonLinearDS::swapInMemory()
 
 // ===== COMPUTE PLUGINS FUNCTIONS =====
 
+void FirstOrderNonLinearDS::setComputeMFunction(const string& pluginPath, const string& functionName)
+{
+  if (!M)
+    M.reset(new PMJF(n, n));
+  M->setComputeFunction(pluginPath, functionName);
+}
+
+void FirstOrderNonLinearDS::setComputeMFunction(fPtrFunction fct)
+{
+  if (!M)
+    M.reset(new PMJF(n, n));
+  M->setComputeFunction(fct);
+}
+
 void FirstOrderNonLinearDS::setComputeFFunction(const string& pluginPath, const string& functionName)
 {
   if (! f)
-  {
+    f.reset(new PVF(n));
+  f->setComputeFunction(pluginPath, functionName);
+}
 
-#ifndef WithSmartPtr
-    f = new SimpleVector(n);
-    isAllocatedIn["f"] = true ;
-#else
-    f.reset(new SimpleVector(n));
-#endif
-
-  }
-
-  computeFPtr = NULL;
-  cShared.setFunction(&computeFPtr, pluginPath, functionName);
-  string plugin;
-  plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  pluginNames["f"] = plugin + ":" + functionName;
-  isPlugin["f"] = true;
+void FirstOrderNonLinearDS::setComputeFFunction(fPtrFunction fct)
+{
+  if (! f)
+    f.reset(new PVF(n));
+  f->setComputeFunction(fct);
 }
 
 void FirstOrderNonLinearDS::setComputeJacobianXFFunction(const string& pluginPath, const string& functionName)
 {
-  if (! jacobianXF)
-  {
-
-#ifndef WithSmartPtr
-    jacobianXF = new SimpleMatrix(n, n);
-    isAllocatedIn["jacobianXF"] = true ;
-#else
-    jacobianXF.reset(new SimpleMatrix(n, n));
-#endif
-
-  }
-
-  computeJacobianXFPtr = NULL;
-  cShared.setFunction(&computeJacobianXFPtr, pluginPath, functionName);
-
-  string plugin;
-  plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  pluginNames["jacobianXF"] = plugin + ":" + functionName;
-  isPlugin["jacobianXF"] = true;
+  if (!jacobianXF)
+    jacobianXF.reset(new PMJF(n, n));
+  jacobianXF->setComputeFunction(pluginPath, functionName);
 }
 
-void FirstOrderNonLinearDS::computeF(double time)
+void FirstOrderNonLinearDS::setComputeJacobianXFFunction(fPtrFunction fct)
 {
-  if (isPlugin["f"])
+  if (!jacobianXF)
+    jacobianXF.reset(new PMJF(n, n));
+  jacobianXF->setComputeFunction(fct);
+}
+
+void FirstOrderNonLinearDS::computeM(double time)
+{
+  // second argument is useless at the time - Used in derived classes
+  if (M->isPlugged())
   {
-    if (computeFPtr == NULL)
-      RuntimeException::selfThrow("FirstOrderNonLinearDS::computeVF() f is not linked to a plugin function");
-    computeFPtr(time, n, &((*(x[0]))(0)) , &(*f)(0), z->size(), &(*z)(0));
+    if (!M->fPtr)
+      RuntimeException::selfThrow("FirstOrderNonLinearDS::computeM() is not linked to a plugin function");
+    (M->fPtr)(time, n, &((*(x[0]))(0)), &(*M)(0, 0), z->size(), &(*z)(0));
   }
   // else nothing!
 }
 
-void FirstOrderNonLinearDS::computeF(double time, SiconosVectorSPtr x2)
+void FirstOrderNonLinearDS::computeM(double time, SP::SiconosVector x2)
 {
-  if (isPlugin["f"])
+  // second argument is useless at the time - Used in derived classes
+  if (M->isPlugged())
   {
-    if (computeFPtr == NULL)
-      RuntimeException::selfThrow("FirstOrderNonLinearDS::computeVF() f is not linked to a plugin function");
+    if (!M->fPtr)
+      RuntimeException::selfThrow("FirstOrderNonLinearDS::computeM() is not linked to a plugin function");
     if (x2->size() != n)
-      RuntimeException::selfThrow("FirstOrderNonLinearDS::computeJacobianXF(t,x) x size does not fit with the system size.");
+      RuntimeException::selfThrow("FirstOrderNonLinearDS::computeM(t,x) x size does not fit with the system size.");
 
-    computeFPtr(time, n, &((*x2)(0)) , &(*f)(0), z->size(), &(*z)(0));
+    (M->fPtr)(time, n, &((*x2)(0)), &(*M)(0, 0), z->size(), &(*z)(0));
+  }
+  // else nothing!
+}
+
+void FirstOrderNonLinearDS::computeF(double time)
+{
+  if (f->isPlugged())
+  {
+    if (!f->fPtr)
+      RuntimeException::selfThrow("FirstOrderNonLinearDS::computeF() f is not linked to a plugin function");
+    (f->fPtr)(time, n, &((*(x[0]))(0)) , &(*f)(0), z->size(), &(*z)(0));
+  }
+  // else nothing!
+}
+
+void FirstOrderNonLinearDS::computeF(double time, SP::SiconosVector x2)
+{
+  if (f->isPlugged())
+  {
+    if (!f->fPtr)
+      RuntimeException::selfThrow("FirstOrderNonLinearDS::computeF() f is not linked to a plugin function");
+    if (x2->size() != n)
+      RuntimeException::selfThrow("FirstOrderNonLinearDS::computeF(t,x) x size does not fit with the system size.");
+    (f->fPtr)(time, n, &((*x2)(0)) , &(*f)(0), z->size(), &(*z)(0));
   }
   // else nothing!
 }
@@ -656,11 +403,11 @@ void FirstOrderNonLinearDS::computeF(double time, SiconosVectorSPtr x2)
 void FirstOrderNonLinearDS::computeJacobianXF(double time, bool)
 {
   // second argument is useless at the time - Used in derived classes
-  if (isPlugin["jacobianXF"])
+  if (jacobianXF->isPlugged())
   {
-    if (computeJacobianXFPtr == NULL)
+    if (!jacobianXF->fPtr)
       RuntimeException::selfThrow("FirstOrderNonLinearDS::computeJacobianXF() is not linked to a plugin function");
-    computeJacobianXFPtr(time, n, &((*(x[0]))(0)), &(*jacobianXF)(0, 0), z->size(), &(*z)(0));
+    (jacobianXF->fPtr)(time, n, &((*(x[0]))(0)), &(*jacobianXF)(0, 0), z->size(), &(*z)(0));
   }
   // else nothing!
 }
@@ -668,14 +415,14 @@ void FirstOrderNonLinearDS::computeJacobianXF(double time, bool)
 void FirstOrderNonLinearDS::computeJacobianXF(double time, SP::SiconosVector x2)
 {
   // second argument is useless at the time - Used in derived classes
-  if (isPlugin["jacobianXF"])
+  if (jacobianXF->isPlugged())
   {
-    if (computeJacobianXFPtr == NULL)
+    if (!jacobianXF->fPtr)
       RuntimeException::selfThrow("FirstOrderNonLinearDS::computeJacobianXF() is not linked to a plugin function");
     if (x2->size() != n)
       RuntimeException::selfThrow("FirstOrderNonLinearDS::computeJacobianXF(t,x) x size does not fit with the system size.");
 
-    computeJacobianXFPtr(time, n, &((*x2)(0)), &(*jacobianXF)(0, 0), z->size(), &(*z)(0));
+    (jacobianXF->fPtr)(time, n, &((*x2)(0)), &(*jacobianXF)(0, 0), z->size(), &(*z)(0));
   }
   // else nothing!
 }
@@ -698,16 +445,7 @@ void FirstOrderNonLinearDS::computeRhs(double time, bool)
   {
     // allocate invM at the first call of the present function
     if (! invM)
-    {
-
-#ifndef WithSmartPtr
-      invM = new SimpleMatrix(*M);
-      isAllocatedIn["invM"] = true;
-#else
       invM.reset(new SimpleMatrix(*M));
-#endif
-    }
-
     invM->PLUForwardBackwardInPlace(*x[1]);
   }
 }
@@ -725,16 +463,7 @@ void FirstOrderNonLinearDS::computeJacobianXRhs(double time, bool)
     *jacobianXRhs = *jacobianXF;
     // copy M into invM for LU-factorisation, at the first call of this function.
     if (! invM)
-    {
-
-#ifndef WithSmartPtr
-      invM = new SimpleMatrix(*M);
-      isAllocatedIn["invM"] = true;
-#else
       invM.reset(new SimpleMatrix(*M));
-#endif
-
-    }
 
     invM->PLUForwardBackwardInPlace(*jacobianXRhs);
   }
@@ -747,15 +476,15 @@ void FirstOrderNonLinearDS::computeJacobianXRhs(double time, bool)
 void FirstOrderNonLinearDS::saveSpecificDataToXML()
 {
   // -- FirstOrderNonLinearDS  xml object --
-  FirstOrderNonLinearDSXMLSPtr fonlds = boost::static_pointer_cast <FirstOrderNonLinearDSXML>(dsxml);
+  SP::FirstOrderNonLinearDSXML fonlds = boost::static_pointer_cast <FirstOrderNonLinearDSXML>(dsxml);
   // --- other data ---
-  if (fonlds == NULL)
+  if (!fonlds)
     RuntimeException::selfThrow("FirstOrderNonLinearDS::saveSpecificDataToXML - The DynamicalSystemXML object doesn't exists");
 
-  if (isPlugin["f"])
-    fonlds->setFPlugin(pluginNames["f"]);
-  if (isPlugin["jacobianXF"])
-    fonlds->setJacobianXFPlugin(pluginNames["jacobianXF"]);
+  if (f->isPlugged())
+    fonlds->setFPlugin(f->getPluginName());
+  if (jacobianXF->isPlugged())
+    fonlds->setJacobianXFPlugin(jacobianXF->getPluginName());
 }
 
 // ===== MISCELLANEOUS ====
@@ -773,10 +502,6 @@ void FirstOrderNonLinearDS::display() const
   cout << "- M: " << endl;
   if (M) M->display();
   else cout << "-> NULL" << endl;
-  map<string, bool>::const_iterator it;
-  cout << "Plug-in state (0: unplugged, ie constant, 1: plugged):" << endl;
-  for (it = isPlugin.begin(); it != isPlugin.end(); ++it)
-    cout << "Object " << it->first << " " << it->second << endl;
   cout << " ============================================" << endl;
 }
 
@@ -791,7 +516,7 @@ double FirstOrderNonLinearDS::dsConvergenceIndicator()
   // Velocity is used to calculate the indicator.
   SP::SiconosVector diff(new SimpleVector(x[0]->size()));
   // Compute difference between present and previous Newton steps
-  SiconosVectorSPtr valRef = workVector["NewtonCvg"];
+  SP::SiconosVector valRef = workVector["NewtonCvg"];
   *diff =  *(x[0]) - *valRef;
   if (valRef->norm2() != 0)
     dsCvgIndic = diff->norm2() / (valRef->norm2());

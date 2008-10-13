@@ -85,7 +85,7 @@ public:
   */
   const bool hasSize() const
   {
-    return (sizeNode != NULL);
+    return (sizeNode);
   };
 
   /** Return the size of the InteractionXML

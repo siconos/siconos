@@ -35,8 +35,8 @@
 using namespace std;
 
 // xml constructor
-PrimalFrictionContact::PrimalFrictionContact(SP::OneStepNSProblemXML osNsPbXml, SP::Simulation newSimu):
-  OneStepNSProblem("PrimalFrictionContact", osNsPbXml, newSimu), contactProblemDim(3), velocity(NULL), reaction(NULL), localVelocity(NULL), localReaction(NULL), tildeLocalVelocity(NULL), M(NULL), H(NULL), q(NULL), mu(NULL),
+PrimalFrictionContact::PrimalFrictionContact(SP::OneStepNSProblemXML osNsPbXml):
+  OneStepNSProblem("PrimalFrictionContact", osNsPbXml), contactProblemDim(3), velocity(NULL), reaction(NULL), localVelocity(NULL), localReaction(NULL), tildeLocalVelocity(NULL), M(NULL), H(NULL), q(NULL), mu(NULL),
   isVelocityAllocatedIn(false), isReactionAllocatedIn(false), isLocalVelocityAllocatedIn(false), isLocalReactionAllocatedIn(false), isTildeLocalVelocityAllocatedIn(false), isMAllocatedIn(false), isHAllocatedIn(false), isQAllocatedIn(false), MStorageType(0)
 {
   PrimalFrictionContactXML * xmlFC = (static_cast<PrimalFrictionContactXML*>(osNsPbXml));
@@ -56,8 +56,8 @@ PrimalFrictionContact::PrimalFrictionContact(SP::OneStepNSProblemXML osNsPbXml, 
 // Constructor from a set of data
 // Required input: simulation
 // Optional: NonSmoothSolver and id
-PrimalFrictionContact::PrimalFrictionContact(SP::Simulation newSimu, int dimPb, SP::NonSmoothSolver  newSolver, const string& newId):
-  OneStepNSProblem("PrimalFrictionContact", newSimu, newId, newSolver), contactProblemDim(dimPb), velocity(NULL), reaction(NULL), localVelocity(NULL), localReaction(NULL), tildeLocalVelocity(NULL), M(NULL), H(NULL), q(NULL), mu(NULL),
+PrimalFrictionContact::PrimalFrictionContact(int dimPb, SP::NonSmoothSolver  newSolver, const string& newId):
+  OneStepNSProblem("PrimalFrictionContact", newId, newSolver), contactProblemDim(dimPb), velocity(NULL), reaction(NULL), localVelocity(NULL), localReaction(NULL), tildeLocalVelocity(NULL), M(NULL), H(NULL), q(NULL), mu(NULL),
   isVelocityAllocatedIn(false), isReactionAllocatedIn(false), isLocalVelocityAllocatedIn(false), isLocalReactionAllocatedIn(false), isTildeLocalVelocityAllocatedIn(false), isMAllocatedIn(false), isHAllocatedIn(false), isQAllocatedIn(false), MStorageType(0)
 {}
 
@@ -82,7 +82,7 @@ PrimalFrictionContact::~PrimalFrictionContact()
   H = NULL;
   if (isQAllocatedIn) delete q;
   q = NULL;
-  if (mu != NULL) delete mu;
+  if (mu) delete mu;
   mu = NULL;
 }
 
@@ -93,7 +93,7 @@ void PrimalFrictionContact::setVelocity(const SimpleVector& newValue)
   if (sizeOutput != newValue.size())
     RuntimeException::selfThrow("PrimalFrictionContact: setVelocity, inconsistent size between given velocity size and problem size. You should set sizeOutput before");
 
-  if (velocity == NULL)
+  if (!velocity)
   {
     velocity = new SimpleVector(sizeOutput);
     isVelocityAllocatedIn = true;
@@ -120,7 +120,7 @@ void PrimalFrictionContact::setReaction(const SimpleVector& newValue)
   if (sizeOutput != newValue.size())
     RuntimeException::selfThrow("PrimalFrictionContact: setReaction, inconsistent size between given reaction size and problem size. You should set sizeOutput before");
 
-  if (reaction == NULL)
+  if (!reaction)
   {
     reaction = new SimpleVector(sizeOutput);
     isReactionAllocatedIn = true;
@@ -144,7 +144,7 @@ void PrimalFrictionContact::setLocalVelocity(const SimpleVector& newValue)
   if (sizeLocalOutput != newValue.size())
     RuntimeException::selfThrow("PrimalFrictionContact: setLocalVelocity, inconsistent size between given velocity size and problem size. You should set sizeOutput before");
 
-  if (localVelocity == NULL)
+  if (!localVelocity)
   {
     localVelocity = new SimpleVector(sizeLocalOutput);
     isLocalVelocityAllocatedIn = true;
@@ -171,7 +171,7 @@ void PrimalFrictionContact::setLocalReaction(const SimpleVector& newValue)
   if (sizeLocalOutput != newValue.size())
     RuntimeException::selfThrow("PrimalFrictionContact: setLocalReaction, inconsistent size between given reaction size and problem size. You should set sizeLocalOutput before");
 
-  if (localReaction == NULL)
+  if (!localReaction)
   {
     localReaction = new SimpleVector(sizeLocalOutput);
     isLocalReactionAllocatedIn = true;
@@ -194,7 +194,7 @@ void PrimalFrictionContact::setTildeLocalVelocity(const SimpleVector& newValue)
   if (sizeLocalOutput != newValue.size())
     RuntimeException::selfThrow("PrimalFrictionContact: setTildeLocalVelocity, inconsistent size between given velocity size and problem size. You should set sizeLocalOutput before");
 
-  if (tildeLocalVelocity == NULL)
+  if (!tildeLocalVelocity)
   {
     tildeLocalVelocity = new SimpleVector(sizeLocalOutput);
     isTildeLocalVelocityAllocatedIn = true;
@@ -251,7 +251,7 @@ void PrimalFrictionContact::setQ(const SimpleVector& newValue)
   if (sizeOutput != newValue.size())
     RuntimeException::selfThrow("PrimalFrictionContact: setQ, inconsistent size between given q size and problem size. You should set sizeOutput before");
 
-  if (q == NULL)
+  if (!q)
   {
     q = new SimpleVector(sizeOutput);
     isQAllocatedIn = true;
@@ -270,7 +270,7 @@ void PrimalFrictionContact::setQPtr(SimpleVector* newPtr)
   isQAllocatedIn = false;
 }
 
-void PrimalFrictionContact::initialize()
+void PrimalFrictionContact::initialize(SP::Simulation sim)
 {
   // - Checks memory allocation for main variables (M,q,w,z)
   // - Formalizes the problem if the topology is time-invariant
@@ -278,7 +278,7 @@ void PrimalFrictionContact::initialize()
   // This function performs all steps that are time-invariant
 
   // General initialize for OneStepNSProblem
-  OneStepNSProblem::initialize();
+  OneStepNSProblem::initialize(sim);
 
   updateDSBlocks(); //blocks of M
   // updateUnitaryDSBlocks(); This computation is not made because, we that UnitaryDSBlocks =H^T
@@ -298,7 +298,7 @@ void PrimalFrictionContact::initialize()
   // Memory allocation for reaction, and velocity
   // If one of them has already been allocated, nothing is done.
   // We suppose that user has chosen a correct size.
-  if (velocity == NULL)
+  if (!velocity)
   {
     velocity = new SimpleVector(maxSize);
     isVelocityAllocatedIn = true;
@@ -309,7 +309,7 @@ void PrimalFrictionContact::initialize()
       velocity->resize(maxSize);
   }
 
-  if (reaction == NULL)
+  if (!reaction)
   {
     reaction = new SimpleVector(maxSize);
     isReactionAllocatedIn = true;
@@ -320,7 +320,7 @@ void PrimalFrictionContact::initialize()
       reaction->resize(maxSize);
   }
 
-  if (localVelocity == NULL)
+  if (!localVelocity)
   {
     localVelocity = new SimpleVector(maxSize);
     isLocalVelocityAllocatedIn = true;
@@ -331,7 +331,7 @@ void PrimalFrictionContact::initialize()
       localVelocity->resize(maxSize);
   }
 
-  if (localReaction == NULL)
+  if (!localReaction)
   {
     localReaction = new SimpleVector(maxSize);
     isLocalReactionAllocatedIn = true;
@@ -341,7 +341,7 @@ void PrimalFrictionContact::initialize()
     if (reaction->size() != maxSize)
       reaction->resize(maxSize);
   }
-  if (tildeLocalVelocity == NULL)
+  if (!tildeLocalVelocity)
   {
     tildeLocalVelocity = new SimpleVector(maxSize);
     isTildeLocalVelocityAllocatedIn = true;
@@ -351,7 +351,7 @@ void PrimalFrictionContact::initialize()
     if (tildeLocalVelocity->size() != maxSize)
       tildeLocalVelocity->resize(maxSize);
   }
-  if (q == NULL)
+  if (!q)
   {
     q = new SimpleVector(maxSize);
     isQAllocatedIn = true;
@@ -393,7 +393,7 @@ void PrimalFrictionContact::initialize()
     }
     // Get index set from Simulation
     SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
-    if (H == NULL)
+    if (!H)
     {
       // Creates and fills M using UR of indexSet
       H = new OSNSMatrix(indexSet, allDS, unitaryDSBlocks, MStorageType);
@@ -430,7 +430,7 @@ void PrimalFrictionContact::initialize()
         M = new OSNSMatrix(simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems()->size(), 1);
       isMAllocatedIn = true;
     }
-    if (H == NULL)
+    if (!H)
     {
       if (MStorageType == 0)
         H = new OSNSMatrix(maxSize, 0);
@@ -484,7 +484,7 @@ void PrimalFrictionContact::computeUnitaryDSBlock(SP::UnitaryRelation UR, SP::Dy
 {
   unsigned int sizeDS = (DS)->getDim();
   unsigned int nslawSize = UR->getNonSmoothLawSize();
-  RELATIONTYPES relationType = UR->getRelationType();
+  RELATION::TYPES relationType = UR->getRelationType();
 
   if (relationType == Lagrangian)
   {
@@ -530,8 +530,8 @@ void PrimalFrictionContact::computeQBlock(SP::DynamicalSystem DS, unsigned int p
 void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::UnitaryRelation UR, unsigned int pos)
 {
   // Get relation and non smooth law types
-  RELATIONTYPES relationType = UR->getRelationType();
-  RELATIONSUBTYPES relationSubType = UR->getRelationSubType();
+  RELATION::TYPES relationType = UR->getRelationType();
+  RELATION::SUBTYPES relationSubType = UR->getRelationSubType();
   string nslawType = UR->getNonSmoothLawType();
 
   string simulationType = simulation->getType();
@@ -551,7 +551,7 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::UnitaryRelation U
   coord[6] = pos;
   coord[7] = pos + sizeY;
 
-  SP::SiconosMatrix  H = NULL;
+  SP::SiconosMatrix  H;
   SP::SiconosVector workX = UR->getWorkXPtr();
   if (osiType == "Moreau2")
   {
@@ -827,19 +827,19 @@ void PrimalFrictionContact::display() const
   cout << "size (sizeOutput) " << sizeOutput << endl;
   cout << "and  size (sizeLocalOutput) " << sizeLocalOutput << "(ie " << sizeLocalOutput / contactProblemDim << " contacts)." << endl;
   cout << " - Matrix M  : " << endl;
-  if (M != NULL) M->display();
+  if (M) M->display();
   else cout << "-> NULL" << endl;
   cout << " - Matrix H : " << endl;
-  if (H != NULL) H->display();
+  if (H) H->display();
   else cout << "-> NULL" << endl;
   cout << " - Vector q : " << endl;
-  if (q != NULL) q->display();
+  if (q) q->display();
   else cout << "-> NULL" << endl;
   cout << " - Vector tildeLocalVelocity : " << endl;
-  if (tildeLocalVelocity != NULL) tildeLocalVelocity->display();
+  if (tildeLocalVelocity) tildeLocalVelocity->display();
   else cout << "-> NULL" << endl;
   cout << " Friction coefficients: " << endl;
-  if (mu != NULL) print(mu->begin(), mu->end());
+  if (mu) print(mu->begin(), mu->end());
   else cout << "-> NULL" << endl;
   cout << "============================================================" << endl;
 }

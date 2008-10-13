@@ -130,11 +130,6 @@ protected:
    */
   const bool createAndInsertEvent(int, double);
 
-  /** default constructor => private
-   *  \param the simulation that owns this manager
-   */
-  EventsManager();
-
   /** copy constructor => private: no copy nor pass-by-value.
    *  \param the eventsManager to be copied
    */
@@ -142,18 +137,24 @@ protected:
 
 public:
 
-  /**  constructor with Simulation
+  /**  default constructor
    *  \param the simulation that owns this manager
    */
-  EventsManager(SP::Simulation);
+  EventsManager();
 
   /** destructor
    */
   ~EventsManager();
 
-  /** Run process of all events simultaneous to currentEvent. manager initialization function
+  /** initialize current, next events and the events stack.
+      \param simulation, owner of the present eventsManager.
    */
-  void initialize();
+  void initialize(SP::Simulation);
+
+  /** Run process of all events simultaneous to currentEvent + synchr. with actuators/sensors
+      Must be run at the end of simulation->initialize()
+   */
+  void preUpdate();
 
   /** add a set of existing Events into allEvents list
    *  \param an EventsContainer

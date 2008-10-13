@@ -31,7 +31,7 @@ SiconosModelXML::SiconosModelXML():
   tNode(NULL), t0Node(NULL), TNode(NULL)
 {
   doc = xmlNewDoc((xmlChar*)"1.0");
-  if (doc == NULL)
+  if (!doc)
     XMLException::selfThrow("SiconosModelXML - Creation of the document aborted");
 
   //=====Create and set the root element node=====//
@@ -51,18 +51,18 @@ SiconosModelXML::SiconosModelXML(char * siconosModelXMLFilePath):
   titleNode(NULL), authorNode(NULL), descriptionNode(NULL), dateNode(NULL), xmlSchemaNode(NULL),
   tNode(NULL), t0Node(NULL), TNode(NULL)
 {
-  if (siconosModelXMLFilePath != NULL)
+  if (siconosModelXMLFilePath)
   {
     //===== XML input file loading =====
     doc = xmlParseFile(siconosModelXMLFilePath);
 
-    if (doc == NULL) // check if parsing is ok
+    if (!doc)  // check if parsing is ok
       XMLException::selfThrow("SiconosModelXML - Document " + (string)siconosModelXMLFilePath + " not parsed successfully.");
 
     //===== Retrieve the document's root element =====
     xmlNode *newRootNode = xmlDocGetRootElement(doc);
 
-    if (newRootNode == NULL)
+    if (!newRootNode)
     {
       xmlFreeDoc(doc);
       XMLException::selfThrow("SiconosModelXML - Empty xml document");
@@ -79,7 +79,7 @@ SiconosModelXML::SiconosModelXML(char * siconosModelXMLFilePath):
     //===== Load the XML schema =====//
     // get schema location and name from the corresponding node
     xmlNodePtr xmlSchemaGiven = SiconosDOMTreeTools::findNodeChild(rootNode, SM_XMLSCHEMA);
-    if (xmlSchemaGiven != NULL)
+    if (xmlSchemaGiven)
     {
       // First case: the full-path for xmlSchema is given by user in input file
       xmlSchemaFile = SiconosDOMTreeTools::getStringContentValue(xmlSchemaGiven);
@@ -97,7 +97,7 @@ SiconosModelXML::SiconosModelXML(char * siconosModelXMLFilePath):
 
     //=====Load Schema=====
     std::ifstream givenXMLSchema(schemaFile.c_str());
-    if (givenXMLSchema == NULL)
+    if (!givenXMLSchema)
       XMLException::selfThrow("SiconosModelXML constructor. File \"" + schemaFile + "\" does not exist.");
 
     xmlSchemaParserCtxtPtr ctxt = xmlSchemaNewParserCtxt(schemaFile.c_str());
@@ -107,7 +107,7 @@ SiconosModelXML::SiconosModelXML(char * siconosModelXMLFilePath):
     xmlSchemaPtr schema = xmlSchemaParse(ctxt);
     xmlSchemaFreeParserCtxt(ctxt);
 
-    if (schema == NULL)
+    if (!schema)
       XMLException::selfThrow("SiconosModelXML - Unvalid schema: " + schemaFile + ".");
 
     xmlSchemaValidCtxtPtr validctxt = xmlSchemaNewValidCtxt(schema);
@@ -134,7 +134,7 @@ SiconosModelXML::SiconosModelXML(char * siconosModelXMLFilePath):
   else // if siconosModelXMLFilePath == NULL
   {
     doc = xmlNewDoc((xmlChar*)"3.0.0");
-    if (doc == NULL)
+    if (!doc)
       XMLException::selfThrow("SiconosModelXML - Creation of the document aborted");
 
     //===== Create and set the root element node =====//
@@ -146,7 +146,7 @@ SiconosModelXML::SiconosModelXML(char * siconosModelXMLFilePath):
 SiconosModelXML::~SiconosModelXML()
 {
   /* Free up the resulting document */
-  if (doc != NULL) xmlFreeDoc(doc);
+  if (doc) xmlFreeDoc(doc);
 
   /* Free the global variables that may
    *  have been allocated by the parser.
@@ -169,33 +169,33 @@ void SiconosModelXML::loadModel(xmlNode *rootNode)
   xmlNode *node;
 
   // title, author, description and date tags (required)
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, SM_TITLE)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, SM_TITLE)))
     titleNode = node;
   else XMLException::selfThrow("SiconosModelXML - loadModel error : tag " + SM_TITLE + " not found.");
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, SM_AUTHOR)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, SM_AUTHOR)))
     authorNode = node;
   else XMLException::selfThrow("SiconosModelXML - loadModel error : tag " + SM_AUTHOR + " not found.");
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, SM_DESCRIPTION)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, SM_DESCRIPTION)))
     descriptionNode = node;
   else XMLException::selfThrow("SiconosModelXML - loadModel error : tag " + SM_DESCRIPTION + " not found.");
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, SM_DATE)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, SM_DATE)))
     dateNode = node;
   else XMLException::selfThrow("SiconosModelXML - loadModel error : tag " + SM_DATE + " not found.");
 
   // xml schema location and name tag (optional)
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, SM_XMLSCHEMA)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, SM_XMLSCHEMA)))
     xmlSchemaNode = node;
 
   // Non smooth dynamical system tag (required)
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, NSDS_TAG)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, NSDS_TAG)))
     nsdsXML.reset(new NonSmoothDynamicalSystemXML(node));
   else
     XMLException::selfThrow("SiconosModelXML - loadModel error : tag " + NSDS_TAG + " not found.");
   // Time interval (required)
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, SM_TIME)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, SM_TIME)))
   {
     loadTime(node);
     timeNode = node;
@@ -203,7 +203,7 @@ void SiconosModelXML::loadModel(xmlNode *rootNode)
   else XMLException::selfThrow("SiconosModelXML - loadModel error : tag " + SM_TIME + " not found.");
 
   // Simulation tag (optional)
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, SIMULATION_TAG)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, SIMULATION_TAG)))
     simulationXML.reset(new SimulationXML(node));
   else
   {
@@ -234,7 +234,7 @@ void SiconosModelXML::loadModel(SP::Model model)
     /*
      * creation of the NSDS node
      */
-    if (model->getNonSmoothDynamicalSystemPtr() != NULL)
+    if (model->getNonSmoothDynamicalSystemPtr())
     {
       //nsdsXML = new NonSmoothDynamicalSystemXML( xmlNewChild(rootNode, NULL, (xmlChar*)SM_SIMULATION.c_str(), NULL) );
       nsdsXML.reset(new NonSmoothDynamicalSystemXML());
@@ -251,7 +251,7 @@ void SiconosModelXML::loadModel(SP::Model model)
     /*
      * creation of the Simulation node
      */
-    if (model->getSimulationPtr() != NULL)
+    if (model->getSimulationPtr())
     {
       simulationXML.reset(new SimulationXML());
       // linkage between the Simulation and his SimulationXML
@@ -271,13 +271,13 @@ void SiconosModelXML::loadTime(xmlNode *timeNode)
 {
   xmlNode * node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(timeNode, SM_T0)) != NULL) t0Node = node;
+  if ((node = SiconosDOMTreeTools::findNodeChild(timeNode, SM_T0))) t0Node = node;
   else XMLException::selfThrow("SiconosModelXML - loadTime error : tag " + SM_T0 + " not found.");
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(timeNode, SM_T)) != NULL) TNode = node;
+  if ((node = SiconosDOMTreeTools::findNodeChild(timeNode, SM_T))) TNode = node;
   else TNode = NULL;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(timeNode, SM_T_CURRENT)) != NULL) tNode = node;
+  if ((node = SiconosDOMTreeTools::findNodeChild(timeNode, SM_T_CURRENT))) tNode = node;
   else tNode = NULL;
 }
 
@@ -286,7 +286,7 @@ bool SiconosModelXML::checkSiconosDOMTree()
   bool res = false;
   string schemaFile = getenv("SICONOSPATH") + xmlSchemaFile;
 
-  if (doc == NULL)
+  if (!doc)
     cout << "Warning: no DOM tree has been initialized yet." << endl;
   else
   {
@@ -298,7 +298,7 @@ bool SiconosModelXML::checkSiconosDOMTree()
     xmlSchemaPtr schema = xmlSchemaParse(ctxt);
     xmlSchemaFreeParserCtxt(ctxt);
 
-    if (schema == NULL)
+    if (!schema)
       XMLException::selfThrow("SiconosModelXML - please correct the xml schema : " + schemaFile + ".");
     xmlSchemaValidCtxtPtr validctxt = xmlSchemaNewValidCtxt(schema);
     xmlSchemaSetValidErrors(validctxt, (xmlSchemaValidityErrorFunc) fprintf, (xmlSchemaValidityWarningFunc) fprintf, stderr);
@@ -335,7 +335,7 @@ bool SiconosModelXML::checkSiconosDOMTreeCoherency()
   // checks if the NSDS is BVP or not
   // get the set of DSXML of the NonSmoothDynamicalSystemXML.
   SetOfDSXML dsSet = getNonSmoothDynamicalSystemXML()->getDynamicalSystemsXML();
-  SetOfDSXMLIt it;
+  SetOfDSXML::iterator it;
 
   // checks the Matrix and Vector type
   // \todo : verification of the type of all the matrices and vectors (from XML file, from external file, from a plugin)
@@ -361,7 +361,7 @@ int SiconosModelXML::validateXmlFile(const string& xmlFile, const string& xmlSch
   xmlSchemaPtr schema = xmlSchemaParse(ctxt);
   xmlSchemaFreeParserCtxt(ctxt);
 
-  if (schema == NULL)
+  if (!schema)
     XMLException::selfThrow("SiconosModelXML - please correct the xml schema : " + schemaXML + ".");
 
   xmlSchemaValidCtxtPtr validctxt = xmlSchemaNewValidCtxt(schema);
@@ -369,7 +369,7 @@ int SiconosModelXML::validateXmlFile(const string& xmlFile, const string& xmlSch
 
   //=====Loads the XML input file=====//
   xmlDoc *doc = xmlParseFile(xmlFile.c_str());
-  if (doc == NULL)
+  if (!doc)
     XMLException::selfThrow("SiconosModelXML - Could not find or error(s) in your model XML file : " + xmlFile + ".");
 
   //=====Verififys the XML file respects the schema=====//

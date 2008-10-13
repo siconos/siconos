@@ -32,10 +32,10 @@
 #include "NewtonImpactNSL.h"
 #include "OneStepIntegrator.h"
 using namespace std;
-
+using namespace RELATION;
 // xml constructor
-FrictionContact::FrictionContact(SP::OneStepNSProblemXML osNsPbXml, SP::Simulation newSimu):
-  OneStepNSProblem("FrictionContact", osNsPbXml, newSimu), contactProblemDim(3)
+FrictionContact::FrictionContact(SP::OneStepNSProblemXML osNsPbXml):
+  OneStepNSProblem("FrictionContact", osNsPbXml), contactProblemDim(3)
 {
   SP::FrictionContactXML  xmlFC = (boost::static_pointer_cast<FrictionContactXML>(osNsPbXml));
 
@@ -54,14 +54,9 @@ FrictionContact::FrictionContact(SP::OneStepNSProblemXML osNsPbXml, SP::Simulati
 // Constructor from a set of data
 // Required input: simulation
 // Optional: NonSmoothSolver and id
-FrictionContact::FrictionContact(SP::Simulation newSimu, int dimPb, SP::NonSmoothSolver  newSolver, const string& newId):
-  OneStepNSProblem("FrictionContact", newSimu, newId, newSolver), contactProblemDim(dimPb)
+FrictionContact::FrictionContact(int dimPb, SP::NonSmoothSolver  newSolver, const string& newId):
+  OneStepNSProblem("FrictionContact", newId, newSolver), contactProblemDim(dimPb)
 {}
-
-// destructor
-FrictionContact::~FrictionContact()
-{
-}
 
 // Setters
 
@@ -71,30 +66,17 @@ void FrictionContact::setVelocity(const SimpleVector& newValue)
     RuntimeException::selfThrow("FrictionContact: setVelocity, inconsistent size between given velocity size and problem size. You should set sizeOutput before");
 
   if (! velocity)
-  {
-#ifndef WithSmartPtr
-    velocity = new SimpleVector(sizeOutput);
-    isVelocityAllocatedIn = true;
-#else
     velocity.reset(new SimpleVector(sizeOutput));
-#endif
-
-  }
   else if (velocity->size() != sizeOutput)
     RuntimeException::selfThrow("FrictionContact: setVelocity, velocity size differs from sizeOutput");
 
   *velocity = newValue;
 }
 
-void FrictionContact::setVelocityPtr(SimpleVectorSPtr newPtr)
+void FrictionContact::setVelocityPtr(SP::SimpleVector newPtr)
 {
   if (sizeOutput != newPtr->size())
     RuntimeException::selfThrow("FrictionContact: setVelocityPtr, inconsistent size between given velocity size and problem size. You should set sizeOutput before");
-
-#ifndef WithSmartPtr
-  if (isVelocityAllocatedIn) delete velocity;
-  isVelocityAllocatedIn = false;
-#endif
 
   velocity = newPtr;
 
@@ -107,33 +89,16 @@ void FrictionContact::setReaction(const SimpleVector& newValue)
     RuntimeException::selfThrow("FrictionContact: setReaction, inconsistent size between given reaction size and problem size. You should set sizeOutput before");
 
   if (! reaction)
-  {
-#ifndef WithSmartPtr
-    reaction = new SimpleVector(sizeOutput);
-    isReactionAllocatedIn = true;
-#else
     reaction.reset(new SimpleVector(sizeOutput));
-#endif
-
-  }
 
   *reaction = newValue;
 }
 
-void FrictionContact::setReactionPtr(SimpleVectorSPtr newPtr)
+void FrictionContact::setReactionPtr(SP::SimpleVector newPtr)
 {
   if (sizeOutput != newPtr->size())
     RuntimeException::selfThrow("FrictionContact: setReactionPtr, inconsistent size between given reaction size and problem size. You should set sizeOutput before");
-
-
-#ifndef WithSmartPtr
-  if (isReactionAllocatedIn) delete reaction;
   reaction = newPtr;
-  isReactionAllocatedIn = false;
-#else
-  reaction = newPtr;
-#endif
-
 }
 
 void FrictionContact::setM(const OSNSMatrix& newValue)
@@ -142,15 +107,9 @@ void FrictionContact::setM(const OSNSMatrix& newValue)
   RuntimeException::selfThrow("FrictionContact::setM, forbidden operation. Try setMPtr().");
 }
 
-void FrictionContact::setMPtr(OSNSMatrixSPtr newPtr)
+void FrictionContact::setMPtr(SP::OSNSMatrix newPtr)
 {
-
   // Note we do not test if newPtr and M sizes are equal. Not necessary?
-#ifndef WithSmartPtr
-  if (isMAllocatedIn)
-    delete M;
-  isMAllocatedIn = false;
-#endif
   M = newPtr;
 }
 
@@ -160,35 +119,20 @@ void FrictionContact::setQ(const SimpleVector& newValue)
     RuntimeException::selfThrow("FrictionContact: setQ, inconsistent size between given q size and problem size. You should set sizeOutput before");
 
   if (! q)
-  {
-
-#ifndef WithSmartPtr
-    q = new SimpleVector(sizeOutput);
-    isQAllocatedIn = true;
-#else
     q.reset(new SimpleVector(sizeOutput));
-#endif
-
-  }
 
   *q = newValue;
 }
 
-void FrictionContact::setQPtr(SimpleVectorSPtr newPtr)
+void FrictionContact::setQPtr(SP::SimpleVector newPtr)
 {
   if (sizeOutput != newPtr->size())
     RuntimeException::selfThrow("FrictionContact: setQPtr, inconsistent size between given q size and problem size. You should set sizeOutput before");
-
-#ifndef WithSmartPtr
-  if (isQAllocatedIn) delete q;
-  isQAllocatedIn = false;
-#endif
-
   q = newPtr;
 
 }
 
-void FrictionContact::initialize()
+void FrictionContact::initialize(SP::Simulation sim)
 {
   // - Checks memory allocation for main variables (M,q,w,z)
   // - Formalizes the problem if the topology is time-invariant
@@ -196,7 +140,7 @@ void FrictionContact::initialize()
   // This function performs all steps that are time-invariant
 
   // General initialize for OneStepNSProblem
-  OneStepNSProblem::initialize();
+  OneStepNSProblem::initialize(sim);
 
 
   // Connect to the right function according to dim. of the problem
@@ -325,19 +269,13 @@ void FrictionContact::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRe
     MapOfDouble Theta;
     getOSIMaps(UR1, W, Theta);
 
-    SiconosMatrixSPtr currentUnitaryBlock = unitaryBlocks[UR1][UR2];
+    SP::SiconosMatrix currentUnitaryBlock = unitaryBlocks[UR1][UR2];
 
-    SimpleMatrix *work = NULL;
     currentUnitaryBlock->zero();
 
-#ifndef WithSmartPtr
-    SiconosMatrix *leftUnitaryBlock = NULL, *rightUnitaryBlock = NULL;
-#else
-    SiconosMatrixSPtr leftUnitaryBlock, rightUnitaryBlock;
-#endif
-
+    SP::SiconosMatrix leftUnitaryBlock, rightUnitaryBlock;
     unsigned int sizeDS;
-    RELATIONTYPES relationType1, relationType2;
+    RELATION::TYPES relationType1, relationType2;
     bool flagRightUnitaryBlock = false;
 
     // General form of the unitaryBlock is :   unitaryBlock = a*extraUnitaryBlock + b * leftUnitaryBlock * OP * rightUnitaryBlock
@@ -351,12 +289,7 @@ void FrictionContact::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRe
 
       // get unitaryBlocks corresponding to the current DS
       // These unitaryBlocks depends on the relation type.
-#ifndef WithSmartPtr
-      leftUnitaryBlock = new SimpleMatrix(nslawSize1, sizeDS);
-#else
       leftUnitaryBlock.reset(new SimpleMatrix(nslawSize1, sizeDS));
-#endif
-
       UR1->getLeftUnitaryBlockForDS(*itDS, leftUnitaryBlock);
 
       relationType1 = UR1->getRelationType();
@@ -369,18 +302,13 @@ void FrictionContact::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRe
         else
         {
 
-#ifndef WithSmartPtr
-          rightUnitaryBlock = new SimpleMatrix(nslawSize2, sizeDS);
-#else
           rightUnitaryBlock.reset(new SimpleMatrix(nslawSize2, sizeDS));
-#endif
-
           UR2->getLeftUnitaryBlockForDS(*itDS, rightUnitaryBlock);
           // Warning: we use getLeft for Right unitaryBlock because right = transpose(left) and because of size checking inside the getBlock function,
           // a getRight call will fail.
           flagRightUnitaryBlock = true;
         }
-        work = new SimpleMatrix(*rightUnitaryBlock);
+        SP::SimpleMatrix work(new SimpleMatrix(*rightUnitaryBlock));
         work->trans();
         // W contains a lu-factorized matrix and we solve
         // W * X = rightUnitaryBlock with PLU
@@ -388,18 +316,8 @@ void FrictionContact::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRe
         W[*itDS]->PLUForwardBackwardInPlace(*work);
         //*currentUnitaryBlock +=  *leftUnitaryBlock * *work; // left = right = G or H
         gemm(CblasNoTrans, CblasNoTrans, 1.0, *leftUnitaryBlock, *work, 1.0, *currentUnitaryBlock);
-
-        delete work;
-
-#ifndef WithSmartPtr
-        if (flagRightUnitaryBlock) delete rightUnitaryBlock;
-#endif
       }
       else RuntimeException::selfThrow("FrictionContact::computeUnitaryBlock not yet implemented for relation of type " + relationType1);
-
-#ifndef WithSmartPtr
-      delete leftUnitaryBlock;
-#endif
     }
   }
 }
@@ -408,8 +326,8 @@ void FrictionContact::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
 {
 
   // Get relation and non smooth law types
-  RELATIONTYPES relationType = UR->getRelationType();
-  RELATIONSUBTYPES relationSubType = UR->getRelationSubType();
+  RELATION::TYPES relationType = UR->getRelationType();
+  RELATION::SUBTYPES relationSubType = UR->getRelationSubType();
   string nslawType = UR->getNonSmoothLawType();
 
   string simulationType = simulation->getType();
@@ -511,12 +429,7 @@ void FrictionContact::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
     double e;
     if (nslawType == NEWTONIMPACTNSLAW)
     {
-
-#ifndef WithSmartPtr
       e = (boost::static_pointer_cast<NewtonImpactNSL>(mainInteraction->getNonSmoothLawPtr()))->getE();
-#else
-      e = (boost::static_pointer_cast<NewtonImpactNSL>(mainInteraction->getNonSmoothLawPtr()))->getE();
-#endif
 
       std::vector<unsigned int> subCoord(4);
       if (simulationType == "TimeStepping")
@@ -541,11 +454,7 @@ void FrictionContact::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
     else if (nslawType == NEWTONIMPACTFRICTIONNSLAW)
     {
 
-#ifndef WithSmartPtr
       e = (boost::static_pointer_cast<NewtonImpactFrictionNSL>(mainInteraction->getNonSmoothLawPtr()))->getEn();
-#else
-      e = (boost::static_pointer_cast<NewtonImpactFrictionNSL>(mainInteraction->getNonSmoothLawPtr()))->getEn();
-#endif
 
       // Only the normal part is multiplied by e
       if (simulationType == "TimeStepping")
@@ -628,11 +537,7 @@ void FrictionContact::preCompute(const double time)
     for (ConstUnitaryRelationsIterator itUR = indexSet->begin(); itUR != indexSet->end(); ++itUR)
     {
 
-#ifndef WithSmartPtr
       mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL>((*itUR)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
-#else
-      mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL>((*itUR)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
-#endif
     }
 
   }
@@ -684,8 +589,8 @@ void FrictionContact::postCompute()
   SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
 
   // y and lambda vectors
-  SiconosVectorSPtr y;
-  SiconosVectorSPtr lambda;
+  SP::SiconosVector y;
+  SP::SiconosVector lambda;
 
   //   // === Loop through "active" Unitary Relations (ie present in indexSets[1]) ===
 

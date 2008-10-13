@@ -75,7 +75,7 @@ public:
   */
   inline bool hasEn() const
   {
-    return (enNode != NULL);
+    return (enNode);
   }
 
   /** return the Et of the NSLaw
@@ -101,7 +101,7 @@ public:
   */
   inline bool hasEt() const
   {
-    return (etNode != NULL);
+    return (etNode);
   }
 
   /** return mu value
@@ -127,7 +127,7 @@ public:
   */
   inline bool hasMu() const
   {
-    return (muNode != NULL);
+    return (muNode);
   }
 
 };

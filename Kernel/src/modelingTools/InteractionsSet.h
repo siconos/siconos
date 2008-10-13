@@ -29,13 +29,11 @@ Set of SP::Interaction
 /** A set of pointers to interactions, sorted in a growing order according to their address */
 typedef SiconosSet<Interaction, double*> InteractionsSet;
 /** Iterator through a set of Interactions */
-typedef std::set<InteractionSPtr, Cmp<Interaction, double*> >::iterator InteractionsIterator;
+typedef std::set<SP::Interaction, Cmp<Interaction, double*> >::iterator InteractionsIterator;
 /** const Iterator through a set of Interactions */
-typedef std::set<InteractionSPtr, Cmp<Interaction, double*> >::const_iterator ConstInteractionsIterator;
+typedef std::set<SP::Interaction, Cmp<Interaction, double*> >::const_iterator ConstInteractionsIterator;
 /** return type value for insert function - bool = false if insertion failed. */
 typedef std::pair<InteractionsIterator, bool> CheckInsertInteraction;
-
-typedef boost::shared_ptr<InteractionsSet> InteractionsSetSPtr;
 
 TYPEDEF_SPTR(InteractionsSet);
 

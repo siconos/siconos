@@ -28,11 +28,11 @@ OneStepIntegratorXML::OneStepIntegratorXML(xmlNodePtr OneStepIntegratorNode):
 {
   xmlNodePtr node;
   // get dsConcerned
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DS_CONCERNED)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DS_CONCERNED)))
     DSConcernedNode = node;
 
   // get interactionsConcerned
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, INTERACTIONS_CONCERNED)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, INTERACTIONS_CONCERNED)))
     interactionsConcernedNode = node;
 }
 

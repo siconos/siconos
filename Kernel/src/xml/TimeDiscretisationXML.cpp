@@ -23,13 +23,13 @@ TimeDiscretisationXML::TimeDiscretisationXML(xmlNodePtr timeDiscretisationNode):
   rootNode(timeDiscretisationNode), hNode(NULL), NNode(NULL), tkNode(NULL)
 {
   xmlNodePtr node;
-  if ((node = SiconosDOMTreeTools::findNodeChild(timeDiscretisationNode, TD_H)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(timeDiscretisationNode, TD_H)))
     hNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(timeDiscretisationNode, TD_N)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(timeDiscretisationNode, TD_N)))
     NNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(timeDiscretisationNode, TD_TK)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(timeDiscretisationNode, TD_TK)))
     tkNode = node;
 
 }

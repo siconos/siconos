@@ -27,15 +27,15 @@ FirstOrderLinearDSXML::FirstOrderLinearDSXML(xmlNodePtr nodeDS, bool isBVP):
   FirstOrderNonLinearDSXML(nodeDS, isBVP), ANode(NULL), bNode(NULL)
 {
   xmlNodePtr node = SiconosDOMTreeTools::findNodeChild(rootNode, LDS_A);
-  if (node != NULL)
+  if (node)
     ANode = node;
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LDS_B)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LDS_B)))
     bNode = node;
 }
 
 void FirstOrderLinearDSXML::setA(const SiconosMatrix& m)
 {
-  if (ANode != NULL)
+  if (ANode)
     SiconosDOMTreeTools::setSiconosMatrixNodeValue(ANode, m);
   else
     ANode = SiconosDOMTreeTools::createMatrixNode(rootNode, LDS_A, m);
@@ -43,7 +43,7 @@ void FirstOrderLinearDSXML::setA(const SiconosMatrix& m)
 
 void FirstOrderLinearDSXML::setAPlugin(const std::string& plugin)
 {
-  if (ANode == NULL)
+  if (!ANode)
   {
     ANode = SiconosDOMTreeTools::createSingleNode(rootNode, "A");
     xmlNewProp(ANode, (xmlChar*)("matrixPlugin"), (xmlChar*)plugin.c_str());
@@ -54,14 +54,14 @@ void FirstOrderLinearDSXML::setAPlugin(const std::string& plugin)
 
 void FirstOrderLinearDSXML::setB(const SiconosVector& v)
 {
-  if (bNode != NULL)
+  if (bNode)
     SiconosDOMTreeTools::setSiconosVectorNodeValue(bNode, v);
   else bNode = SiconosDOMTreeTools::createVectorNode(rootNode, LDS_B, v);
 }
 
 void FirstOrderLinearDSXML::setBPlugin(const std::string& plugin)
 {
-  if (bNode == NULL)
+  if (!bNode)
   {
     bNode = SiconosDOMTreeTools::createSingleNode(rootNode, "b");
     xmlNewProp(bNode, (xmlChar*)("vectorPlugin"), (xmlChar*)plugin.c_str());

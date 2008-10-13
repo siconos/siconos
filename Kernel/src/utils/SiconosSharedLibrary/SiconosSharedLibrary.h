@@ -52,25 +52,25 @@ class SiconosSharedLibrary
 private:
 
   /* to manage plug-in object closing (for each call to dlopen one object is add into isPlugged)*/
-  std::vector<PluginHandle> isPlugged;
+  static std::vector<PluginHandle> isPlugged;
 
 public:
 
-  /**   Constructor
-   *    \param unsigned int n, the number of plug-in that will be "connected" through the current object (optional)
-   */
-  SiconosSharedLibrary(const unsigned int& = 0);
+  /*   /\**   Constructor */
+  /*    *    \param unsigned int n, the number of plug-in that will be "connected" through the current object (optional) */
+  /*    *\/ */
+  /*   SiconosSharedLibrary(const unsigned int& =0); */
 
-  /** Destructor
-   */
-  ~SiconosSharedLibrary();
+  /*   /\** Destructor */
+  /*    *\/ */
+  /*   ~SiconosSharedLibrary(); */
 
   /**   loads a plugin
    *  \param std::string pluginPath : full plugin path name
    *  \exception SiconosSharedLibraryException if plugin fail to open
    *  \return PluginHandle : plugin handle
    */
-  PluginHandle loadPlugin(const std::string& pluginPath) ;
+  static PluginHandle loadPlugin(const std::string& pluginPath) ;
 
   /**   Gets procedure address
    *  \param PluginHandle plugin : plugin handle
@@ -78,41 +78,44 @@ public:
    *  \exception SiconosSharedLibraryException if procedure not found
    *  \return pointer on procedure
    */
-  void* getProcAddress(PluginHandle plugin, const std::string& procedure);
+  static void* getProcAddress(PluginHandle plugin, const std::string& procedure);
 
   /**  Closes plugin
    *  \param PluginHandle plugin : plugin handle
    */
-  void closePlugin(PluginHandle plugin);
+  static void closePlugin(PluginHandle plugin);
 
   /**   Closes all plugin set using the current object
    */
-  void closeAllPlugins();
+  static void closeAllPlugins();
 
   /** Gets shared library extension
    *  \return library extension ("*.so" for UNIX or "*.dll" for WNT)
    */
-  const std::string getSharedLibraryExtension() const ;
+  static const std::string getSharedLibraryExtension();
 
   /** set a function pointer to a function in an external library. Don't use it directely
   *  \param functionPtr : pointer to the function (in-out)
   *  \param std::string : the complet path to the external plugin (in)
   *  \param std::string : the name of the function to reference (in)
   */
-  void setFunction(void* functionPtr, const std::string& pluginPath, const std::string& functionName);
+  static void setFunction(void* functionPtr, const std::string& pluginPath, const std::string& functionName);
 
   /** extract the plugin name from a std::string containing data to call a plugin function
   *  \param std::string : its form is : "pluginName:functionName"
   *  \return a std::string containing the plugin name
   */
-  const std::string getPluginName(const std::string&) const ;
+  static const std::string getPluginName(const std::string&);
 
   /** extract the function name from a std::string containing data to call a plugin function
   *  \param std::string : its form is : "pluginName:functionName"
   *  \return a std::string containing the function name
   */
-  const std::string getPluginFunctionName(const std::string&) const ;
+  static const std::string getPluginFunctionName(const std::string&);
 
 };
+
+/** Alias for SiconosSharedLibrary */
+typedef SiconosSharedLibrary SSL;
 
 #endif //SICONOSSHAREDLIBRARY_H

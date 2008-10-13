@@ -60,7 +60,7 @@ public:
       \param vector of initial positions
       \param vector of initial velocities
    */
-  Sphere(double, double, const SiconosVector&, const SiconosVector&, int);
+  Sphere(double, double, const SiconosVector&, const SiconosVector&);
 
   /** destructor
    */

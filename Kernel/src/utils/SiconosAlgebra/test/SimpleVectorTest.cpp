@@ -606,10 +606,6 @@ void SimpleVectorTest::testOperators4()
   //   z->zero();
   //   *z = (*x)/a1; //
   //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ",norm_2(z->getSparse()-x->getSparse()/a1)<tol, true);
-  delete z;
-  z = NULL;
-  delete x;
-  x = NULL;
 
   // simple = a * block
   z = new SimpleVector(size);
@@ -731,10 +727,6 @@ void SimpleVectorTest::testOperators4Bis()
   // Following tests failed. Sparse init pb. To be reviewed.
   scal(1.0 / a, *x, *z);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Bis : ", norm_2(z->getSparse() - x->getSparse() / a) < tol, true);
-  delete z;
-  z = NULL;
-  delete x;
-  x = NULL;
 
   // simple = a * block
   z = new SimpleVector(size);
@@ -794,10 +786,6 @@ void SimpleVectorTest::testOperators4Ter()
   scal(a, *x, *z, false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Ter : ", norm_2(z->getSparse() - 2 * a * x->getSparse()) < tol, true);
 
-  delete z;
-  z = NULL;
-  delete x;
-  x = NULL;
 
   // simple = a * block
   z = new SimpleVector(size);

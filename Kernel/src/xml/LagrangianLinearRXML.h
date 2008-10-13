@@ -71,7 +71,7 @@ public:
    */
   inline bool hasH() const
   {
-    return (!(HNode == NULL));
+    return HNode;
   }
 
   /** Return the H of the LLRelationXML
@@ -91,7 +91,7 @@ public:
    */
   inline bool hasB() const
   {
-    return (!(bNode == NULL));
+    return bNode;
   }
 
   /** Return b vector of the LLRelationXML
@@ -111,7 +111,7 @@ public:
    */
   inline bool hasD() const
   {
-    return (!(DNode == NULL));
+    return DNode;
   }
 
   /** Return the D of the LLRelationXML
@@ -131,7 +131,7 @@ public:
    */
   inline bool hasF() const
   {
-    return (!(FNode == NULL));
+    return FNode;
   }
 
   /** Return the F of the LLRelationXML

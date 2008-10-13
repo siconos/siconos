@@ -71,7 +71,7 @@ class FirstOrderR : public Relation
 protected:
 
   /** type of the FirstOrderR */
-  RELATIONSUBTYPES  firstOrderType;
+  RELATION::SUBTYPES  firstOrderType;
 
   /** matrices of gradients of h. (jacobianH[0]: gradient according to x, jacobianH[1]: gradient according to lambda) */
   VectorOfMatrices jacobianH;
@@ -86,13 +86,13 @@ protected:
   /** basic constructor
    *  \param the type of the relation
    */
-  FirstOrderR(RELATIONSUBTYPES);
+  FirstOrderR(RELATION::SUBTYPES);
 
   /** xml constructor
    *  \param FirstOrderRXML* : the XML object.
    *  \param the type of the relation
    */
-  FirstOrderR(RelationXMLSPtr, RELATIONSUBTYPES);
+  FirstOrderR(SP::RelationXML, RELATION::SUBTYPES);
 
   /** To initialize data member: links to DS variables.
    */
@@ -107,7 +107,7 @@ public:
   /** To get the type of the FirstOrderR
    *  \return the type of the FirstOrderR
    */
-  inline const RELATIONSUBTYPES getFirstOrderRelationType() const
+  inline const RELATION::SUBTYPES getFirstOrderRelationType() const
   {
     return firstOrderType;
   }
@@ -142,7 +142,7 @@ public:
   /** get a pointer on matrix jacobianH[index]
    *  \return a pointer on a SiconosMatrix
    */
-  inline SiconosMatrixSPtr getJacobianHPtr(unsigned int index = 0) const
+  inline SP::SiconosMatrix getJacobianHPtr(unsigned int index = 0) const
   {
     return jacobianH[index];
   }
@@ -157,7 +157,7 @@ public:
    *  \param SP::SiconosMatrix  newPtr
    *  \param unsigned int: index position in jacobianH vector
    */
-  void setJacobianHPtr(SiconosMatrixSPtr newPtr, unsigned int = 0);
+  void setJacobianHPtr(SP::SiconosMatrix newPtr, unsigned int = 0);
 
   // -- jacobianG --
 
@@ -185,7 +185,7 @@ public:
   /** get a pointer on matrix jacobianG[index]
    *  \return a pointer on a SiconosMatrix
    */
-  inline SiconosMatrixSPtr getJacobianGPtr(unsigned int index = 0) const
+  inline SP::SiconosMatrix getJacobianGPtr(unsigned int index = 0) const
   {
     return jacobianG[index];
   }
@@ -200,7 +200,7 @@ public:
    *  \param SP::SiconosMatrix  newPtr
    *  \param unsigned int: index position in jacobianG vector
    */
-  void setJacobianGPtr(SiconosMatrixSPtr newPtr, unsigned int = 0);
+  void setJacobianGPtr(SP::SiconosMatrix newPtr, unsigned int = 0);
 
   /** To set a plug-in function to compute output function h
    *  \param string : the complete path to the plugin

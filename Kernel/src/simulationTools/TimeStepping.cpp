@@ -41,11 +41,11 @@ using namespace std;
  */
 static CheckSolverFPtr checkSolverOutput = NULL;
 
-TimeStepping::TimeStepping(TimeDiscretisationSPtr td): Simulation(td, "TimeStepping")
+TimeStepping::TimeStepping(SP::TimeDiscretisation td): Simulation(td, "TimeStepping")
 {}
 
 // --- XML constructor ---
-TimeStepping::TimeStepping(SimulationXMLSPtr strxml, ModelSPtr newModel): Simulation(strxml, newModel, "TimeStepping")
+TimeStepping::TimeStepping(SP::SimulationXML strxml, double t0, double T, SP::DynamicalSystemsSet dsList, SP::InteractionsSet interList): Simulation(strxml, t0, T, dsList, interList, "TimeStepping")
 {
   // === One Step NS Problem === For time stepping, only one non
   // smooth problem is built.
@@ -55,17 +55,16 @@ TimeStepping::TimeStepping(SimulationXMLSPtr strxml, ModelSPtr newModel): Simula
     SetOfOSNSPBXML OSNSList = simulationxml->getOneStepNSProblemsXML();
     if (OSNSList.size() != 1)
       RuntimeException::selfThrow("TimeStepping::xml constructor - Two many inputs for OSNS problems (only one problem is required).");
-
-    OneStepNSProblemXMLSPtr osnsXML = *(OSNSList.begin());
+    SP::OneStepNSProblemXML osnsXML = *(OSNSList.begin());
     // OneStepNSProblem - Memory allocation/construction
     string type = osnsXML->getNSProblemType();
     if (type == LCP_TAG)  // LCP
     {
-      (*allNSProblems)["timeStepping"].reset(new LCP(osnsXML, shared_from_this()));
+      (*allNSProblems)["timeStepping"].reset(new LCP(osnsXML));
     }
     else if (type == FRICTIONCONTACT_TAG)
     {
-      (*allNSProblems)["timeStepping"].reset(new FrictionContact(osnsXML, shared_from_this()));
+      (*allNSProblems)["timeStepping"].reset(new FrictionContact(osnsXML));
     }
     else RuntimeException::selfThrow("TimeStepping::xml constructor - wrong type of NSProblem: inexistant or not yet implemented");
 
@@ -130,16 +129,13 @@ void TimeStepping::updateIndexSet(unsigned int i)
   }
 }
 
-void TimeStepping::addOneStepNSProblemPtr(SP::OneStepNSProblem osns)
+void TimeStepping::recordNonSmoothProblem(SP::OneStepNSProblem osns)
 {
   // A the time, a time stepping simulation can only have one non
   // smooth problem.
   if (!allNSProblems->empty())
-    RuntimeException::selfThrow("TimeStepping, addOneStepNSProblemPtr - A non smooth problem already exist. You can not have more than one.");
-  //cout <<" WARNING : TimeStepping, addOneStepNSProblemPtr - A non
-  //smooth problem already exist. You have more than one non smooth
-  //problem " << endl;
-  string name = "timeStepping"; // osns->getId();
+    RuntimeException::selfThrow("TimeStepping,  recordNonSmoothProblem - A non smooth problem already exist. You can not have more than one.");
+  string name = "timeStepping";
   osns->setId(name);
   (*allNSProblems)[name] = osns;
 }
@@ -188,11 +184,10 @@ void TimeStepping::initOSNS()
     updateIndexSets();
 
     // initialization of  OneStepNonSmoothProblem
-    OSNSIterator itOsns;
-    for (itOsns = allNSProblems->begin(); itOsns != allNSProblems->end(); ++itOsns)
+    for (OSNSIterator itOsns = allNSProblems->begin(); itOsns != allNSProblems->end(); ++itOsns)
     {
       (itOsns->second)->setLevels(levelMin, levelMax);
-      (itOsns->second)->initialize();
+      (itOsns->second)->initialize(shared_from_this());
     }
   }
 }
@@ -236,9 +231,7 @@ void TimeStepping::update(unsigned int levelInput)
 
 void TimeStepping::computeFreeState()
 {
-  OSIIterator it;
-  for (it = allOSI->begin(); it != allOSI->end() ; ++it)
-    (*it)->computeFreeState();
+  std::for_each(allOSI->begin(), allOSI->end(), boost::bind(&OneStepIntegrator::computeFreeState, _1));
 }
 
 // compute simulation between current and next event.  Initial
@@ -257,7 +250,7 @@ void TimeStepping::advanceToEvent()
   if (!allNSProblems->empty())
     info = computeOneStepNSProblem("timeStepping");
   // Check output from solver (convergence or not ...)
-  if (checkSolverOutput == NULL)
+  if (!checkSolverOutput)
     DefaultCheckSolverOutput(info);
   else
     checkSolverOutput(info, this);
@@ -278,7 +271,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     if (!allNSProblems->empty())
       info = computeOneStepNSProblem("timeStepping");
     // Check output from solver (convergence or not ...)
-    if (checkSolverOutput == NULL)
+    if (!checkSolverOutput)
       DefaultCheckSolverOutput(info);
     else
       checkSolverOutput(info, this);
@@ -353,7 +346,7 @@ void TimeStepping::DefaultCheckSolverOutput(int info)
     cout << "TimeStepping::check non smooth solver output warning: output message from solver is equal to " << info << endl;
     //       cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." << endl;
     //      cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." << endl;
-    RuntimeException::selfThrow(" Non smooth problem, solver convergence failed ");
+    //     RuntimeException::selfThrow(" Non smooth problem, solver convergence failed ");
     /*      if(info == 1)
     cout <<" reach max iterations number with solver " << solverName << endl;
     else if (info == 2)

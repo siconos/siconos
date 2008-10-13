@@ -68,7 +68,7 @@ void OSNSMatrixTest::testBuildOSNSMatrix1()
   OSNSMatrix * M = new OSNSMatrix(n);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->size() == n, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->getStorageType() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->getDefaultMatrixPtr() != NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->getDefaultMatrixPtr(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->getDefaultMatrixPtr()->size(0) == n, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->getDefaultMatrixPtr()->size(1) == n, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->getDefaultMatrixPtr()->normInf() < tol , true);
@@ -103,7 +103,7 @@ void OSNSMatrixTest::testBuildOSNSMatrix2()
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->size() == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->getStorageType() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->getDefaultMatrixPtr() != NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->getDefaultMatrixPtr(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->getDefaultMatrixPtr()->size(0) == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->getDefaultMatrixPtr()->size(1) == dim, true);
   unsigned int i = 0, pos = 0;
@@ -148,7 +148,7 @@ void OSNSMatrixTest::testFill()
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->size() == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getStorageType() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getDefaultMatrixPtr() != NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getDefaultMatrixPtr(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getDefaultMatrixPtr()->size(0) == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getDefaultMatrixPtr()->size(1) == dim, true);
   unsigned int i = 0, pos = 0;
@@ -169,7 +169,7 @@ void OSNSMatrixTest::testFill()
   M->fill(indexSet, blocks);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->size() == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getStorageType() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getDefaultMatrixPtr() != NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getDefaultMatrixPtr(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getDefaultMatrixPtr()->size(0) == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getDefaultMatrixPtr()->size(1) == dim, true);
   i = 0;
@@ -218,7 +218,7 @@ void OSNSMatrixTest::testConvert()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConvert : ", NumMat->storageType == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConvert : ", NumMat->size0 == (int)dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConvert : ", NumMat->size1 == (int)dim, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConvert : ", NumMat->matrix1 == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConvert : ", !NumMat->matrix1, false);
   double * m1 = NumMat->matrix0;
   double *mRef = MRef.getArray();
   for (unsigned int k = 0; k < dim * dim; k++)
@@ -256,7 +256,7 @@ void OSNSMatrixTest::testFill2()
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->size() == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getStorageType() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getDefaultMatrixPtr() != NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getDefaultMatrixPtr(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getDefaultMatrixPtr()->size(0) == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getDefaultMatrixPtr()->size(1) == dim, true);
   unsigned int i = 0, pos = 0;
@@ -277,7 +277,7 @@ void OSNSMatrixTest::testFill2()
   M->fill(indexSet, blocks);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->size() == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getStorageType() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getDefaultMatrixPtr() != NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getDefaultMatrixPtr(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getDefaultMatrixPtr()->size(0) == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getDefaultMatrixPtr()->size(1) == dim, true);
   i = 0;
@@ -326,7 +326,7 @@ void OSNSMatrixTest::testConvert2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConvert2 : ", NumMat->storageType == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConvert2 : ", NumMat->size0 == (int)dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConvert2 : ", NumMat->size1 == (int)dim, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConvert2 : ", NumMat->matrix1 == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConvert2 : ", !NumMat->matrix1, false);
   double * m1 = NumMat->matrix0;
   double *mRef = MRef.getArray();
   for (unsigned int k = 0; k < dim * dim; k++)

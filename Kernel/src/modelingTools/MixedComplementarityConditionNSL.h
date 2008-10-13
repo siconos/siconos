@@ -58,7 +58,7 @@ public:
   /** constructor with XML object of the parent class NonSmoothLaw
   *  \param NonSmoothLawXML* : the XML object corresponding
   */
-  MixedComplementarityConditionNSL(NonSmoothLawXMLSPtr);
+  MixedComplementarityConditionNSL(SP::NonSmoothLawXML);
 
   /** Destructor */
   ~MixedComplementarityConditionNSL();
@@ -90,7 +90,7 @@ public:
   * \return a pointer on the law if it is of the right type, NULL otherwise
   */
 
-  static MixedComplementarityConditionNSLSPtr convert(NonSmoothLawSPtr nsl);
+  static SP::MixedComplementarityConditionNSL convert(SP::NonSmoothLaw nsl);
 };
 
 #endif // MIXEDCOMPLEMENTARITYCONDITIONNSLAW_H

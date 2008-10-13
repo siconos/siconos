@@ -122,20 +122,20 @@ public:
       \param SP::UnitaryRelation, the index set of the active constraints
       \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
   */
-  SparseBlockMatrix(UnitaryRelationsSetSPtr, MapOfMapOfUnitaryMatrices&);
+  SparseBlockMatrix(SP::UnitaryRelationsSet, MapOfMapOfUnitaryMatrices&);
 
   /** Constructor from DynamicalSystemsSet and map
       \param DynamicalSystemsSet*, the index set of the active constraints
       \param MapOfDSMatrices, the list of matrices linked to a couple of UR*
   */
-  SparseBlockMatrix(DynamicalSystemsSetSPtr, MapOfDSMatrices&);
+  SparseBlockMatrix(SP::DynamicalSystemsSet, MapOfDSMatrices&);
 
   /** Constructor from DynamicalSystemsSet and map
     \param SP::UnitaryRelation, the index set of the active constraints
      \param DynamicalSystemsSet*, the index set of the active constraints
      \param MapOfDSMatrices, the list of matrices linked to a couple of UR*
   */
-  SparseBlockMatrix(UnitaryRelationsSetSPtr, DynamicalSystemsSetSPtr, MapOfUnitaryMapOfDSMatrices&);
+  SparseBlockMatrix(SP::UnitaryRelationsSet, SP::DynamicalSystemsSet, MapOfUnitaryMapOfDSMatrices&);
 
   /** destructor
    */
@@ -177,7 +177,7 @@ public:
   /** get the index of blocks position (i=0 -> rows, i=1 -> columns)
       \param unsigned int, 0 for rows, 1 for columns
   */
-  inline IndexIntSPtr getPositionsIndex(bool i)
+  inline SP::IndexInt getPositionsIndex(bool i)
   {
     if (i) return rowPos;
     else return colPos;
@@ -187,20 +187,20 @@ public:
       \param UnitaryRelationsSet*, the index set of the active constraints
       \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
   */
-  void fill(UnitaryRelationsSetSPtr, MapOfMapOfUnitaryMatrices&);
+  void fill(SP::UnitaryRelationsSet, MapOfMapOfUnitaryMatrices&);
 
   /** fill the current class using an index set and a map of DSblocks
        \param DynamicalSystemsSet*, the  set of DynamicalSystem
        \param MapOfDSMatrices, the list of matrices linked to a DynamicalSystem
    */
-  void fill(DynamicalSystemsSetSPtr, MapOfDSMatrices&);
+  void fill(SP::DynamicalSystemsSet, MapOfDSMatrices&);
 
   /** fill the current class using an index set and a map of DSblocks
        \param DynamicalSystemsSet*, the  set of DynamicalSystem
        \param UnitaryRelationsSet*, the index set of the active constraints
        \param MapOfUnitaryMapOfDSMatrices, the list of matrices linked to a DynamicalSystem
    */
-  void fill(UnitaryRelationsSetSPtr, DynamicalSystemsSetSPtr, MapOfUnitaryMapOfDSMatrices&);
+  void fill(SP::UnitaryRelationsSet, SP::DynamicalSystemsSet, MapOfUnitaryMapOfDSMatrices&);
 
   /** fill the numerics structure numericsMatSparse using MSparseBlock */
   void convert();

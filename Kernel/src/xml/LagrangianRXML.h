@@ -72,7 +72,7 @@ public:
    */
   inline bool hasH() const
   {
-    return (hNode != NULL);
+    return (hNode);
   };
 
   /** Return h plug-in name, if it exists
@@ -88,7 +88,7 @@ public:
    */
   inline void setHPlugin(const std::string& plugin)
   {
-    if (hNode == NULL)
+    if (!hNode)
     {
       hNode = SiconosDOMTreeTools::createSingleNode(rootNode, "h");
       xmlNewProp(hNode, (xmlChar*)"matrixPlugin", (xmlChar*)plugin.c_str());
@@ -102,7 +102,7 @@ public:
    */
   inline bool hasHDot() const
   {
-    return (hDotNode != NULL);
+    return (hDotNode);
   };
 
   /** Return true if hDot is calculated with a plugin.

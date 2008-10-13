@@ -51,44 +51,43 @@ protected:
   std::string integratorType;
 
   /** a set of DynamicalSystem to integrate */
-  DynamicalSystemsSetSPtr OSIDynamicalSystems;
+  SP::DynamicalSystemsSet OSIDynamicalSystems;
 
   /** a set of Interactions to define a list of *
    * dynamical systems to be integrated, with some *
    * constraints to be taken into account */
-  InteractionsSetSPtr OSIInteractions;
+  SP::InteractionsSet OSIInteractions;
 
   /** size of the memory for the integrator */
   unsigned int sizeMem;
 
   /** A link to the simulation that owns this OSI */
-  SimulationSPtr simulationLink;
+  SP::Simulation simulationLink;
 
   /** Work map to save state-related data for the dynamical systems of the osi - DSVector: map<DS * , SP::SiconosVector> */
   DSVectors workX;
 
   /** the corresponding XML object */
-  OneStepIntegratorXMLSPtr integratorXml;
+  SP::OneStepIntegratorXML integratorXml;
 
-  /** basic constructor with Id and simulation
+  /** basic constructor with Id
    *  \param string, integrator type/name
-   *  \param SP::Simulation : the simulation that owns the osi
    */
-  OneStepIntegrator(const std::string&, SimulationSPtr);
+  OneStepIntegrator(const std::string&);
 
   /** constructor from xml file
-   *  \param string, integrator type/name
-   *  \param OneStepIntegratorXML* : the corresponding XML object
-   *  \param SP::Simulation : the simulation that owns the osi
-   */
-  OneStepIntegrator(const std::string&, OneStepIntegratorXMLSPtr, SimulationSPtr);
+      \param string, integrator type/name
+      \param OneStepIntegratorXML* : the corresponding XML object
+      \param the set of all DS in the NSDS
+      \param the set of all interactions in the NSDS
+  */
+  OneStepIntegrator(const std::string&, SP::OneStepIntegratorXML, SP::DynamicalSystemsSet , SP::InteractionsSet);
 
   /** constructor from a minimum set of data
    *  \param string, integrator type/name
    *  \param DynamicalSystemsSet : a set of DynamicalSystem to be integrated
-   *  \param SP::Simulation : the simulation that owns the osi
    */
-  OneStepIntegrator(const std::string&, const DynamicalSystemsSet&, SimulationSPtr);
+  OneStepIntegrator(const std::string&, const DynamicalSystemsSet&);
 
 private:
 
@@ -103,7 +102,7 @@ public:
 
   /** destructor
    */
-  virtual ~OneStepIntegrator();
+  virtual ~OneStepIntegrator() {};
 
   // --- GETTERS/SETTERS ---
 
@@ -126,7 +125,7 @@ public:
   /** get the set of DynamicalSystem associated with the Integrator
    *  \return a DynamicalSystemsSet
    */
-  inline DynamicalSystemsSetSPtr getDynamicalSystems() const
+  inline SP::DynamicalSystemsSet getDynamicalSystems() const
   {
     return OSIDynamicalSystems;
   };
@@ -171,7 +170,7 @@ public:
   /** get the set of Interactions associated with the Integrator
    *  \return an InteractionsSet
    */
-  inline const InteractionsSetSPtr getInteractions() const
+  inline const SP::InteractionsSet getInteractions() const
   {
     return OSIInteractions;
   };
@@ -232,7 +231,7 @@ public:
   /** get the Simulation that owns the OneStepIntegrator
    *  \return a pointer to Simulation
    */
-  inline SimulationSPtr getSimulationPtr() const
+  inline SP::Simulation getSimulationPtr() const
   {
     return simulationLink;
   }
@@ -240,7 +239,7 @@ public:
   /** set the Simulation of the OneStepIntegrator
    *  \param a pointer to Simulation
    */
-  inline void setSimulationPtr(SimulationSPtr newS)
+  inline void setSimulationPtr(SP::Simulation newS)
   {
     simulationLink = newS;
   }
@@ -248,7 +247,7 @@ public:
   /** get the OneStepIntegratorXML of the OneStepIntegrator
    *  \return a pointer on the OneStepIntegratorXML of the OneStepIntegrator
    */
-  inline OneStepIntegratorXMLSPtr getOneStepIntegratorXMLPtr() const
+  inline SP::OneStepIntegratorXML getOneStepIntegratorXMLPtr() const
   {
     return integratorXml;
   }
@@ -256,7 +255,7 @@ public:
   /** set the OneStepIntegratorXML of the OneStepIntegrator
    *  \param OneStepIntegratorXML* : the pointer to set the OneStepIntegratorXML
    */
-  inline void setOneStepIntegratorXMLPtr(OneStepIntegratorXMLSPtr newIntegratorXml)
+  inline void setOneStepIntegratorXMLPtr(SP::OneStepIntegratorXML newIntegratorXml)
   {
     integratorXml = newIntegratorXml;
   }
@@ -265,13 +264,14 @@ public:
    \param a SP::DynamicalSystem
    \return a SP::SiconosVector
   */
-  SiconosVectorSPtr getWorkX(SP::DynamicalSystem);
+  SP::SiconosVector getWorkX(SP::DynamicalSystem);
 
   // --- OTHERS ... ---
 
   /** initialise the integrator
+      \param the simulation that owns this OSI
    */
-  virtual void initialize() = 0;
+  virtual void initialize(SP::Simulation) = 0;
 
   /** Save Dynamical Systems data into memory.
    */

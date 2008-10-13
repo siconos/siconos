@@ -24,7 +24,7 @@ MixedComplementarityConditionNSL::MixedComplementarityConditionNSL(unsigned int 
   EqualitySize = equalitySize;
 }
 
-MixedComplementarityConditionNSL::MixedComplementarityConditionNSL(NonSmoothLawXMLSPtr nslawxml):
+MixedComplementarityConditionNSL::MixedComplementarityConditionNSL(SP::NonSmoothLawXML nslawxml):
   NonSmoothLaw(COMPLEMENTARITYCONDITIONNSLAW, nslawxml)
 {}
 
@@ -39,15 +39,9 @@ bool MixedComplementarityConditionNSL::isVerified() const
   return res;
 }
 
-MixedComplementarityConditionNSLSPtr MixedComplementarityConditionNSL::convert(NonSmoothLawSPtr nsl)
+SP::MixedComplementarityConditionNSL MixedComplementarityConditionNSL::convert(SP::NonSmoothLaw nsl)
 {
-#ifndef WithSmartPtr
-  MixedComplementarityConditionNSL* mccnsl = dynamic_cast<MixedComplementarityConditionNSL*>(nsl);
-#else
-  MixedComplementarityConditionNSLSPtr mccnsl = boost::dynamic_pointer_cast<MixedComplementarityConditionNSL>(nsl);
-#endif
-
-  return mccnsl;
+  return boost::dynamic_pointer_cast<MixedComplementarityConditionNSL>(nsl);
 }
 
 

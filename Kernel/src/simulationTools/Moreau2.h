@@ -66,30 +66,28 @@ public:
   /** constructor from a minimum set of data: one DS and its theta
    *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
    *  \param Theta value
-   *  \param SP::Simulation : the simulation that owns the osi
    */
-  Moreau2(SP::DynamicalSystem, double, SP::Simulation);
+  Moreau2(SP::DynamicalSystem, double);
 
   /** constructor from a minimum set of data: one DS and its theta
    *  \param DynamicalSystemSet* : the DynamicalSystem set linked to the OneStepIntegrator
    *  \param Theta value
-   *  \param SP::Simulation : the simulation that owns the osi
    */
-  Moreau2(DynamicalSystemsSet&, double, SP::Simulation);
+  Moreau2(DynamicalSystemsSet&, double);
 
-  virtual ~Moreau2();
+  ~Moreau2();
 
   //  SP::SiconosVector  getFfree(FirstOrderLinearDS *d);
 
   /** integrates the Dynamical System linked to this integrator without boring the constraints
    */
-  virtual void computeFreeState();
+  void computeFreeState();
 
 
   /** updates the state of the Dynamical Systems
    *  \param unsigned int: level of interest for the dynamics: not used at the time
    */
-  virtual void updateState(unsigned int);
+  void updateState(unsigned int);
   SP::SiconosVector  getWorkX(DynamicalSystem *d);
 
   static Moreau2* convert(OneStepIntegrator* osi);

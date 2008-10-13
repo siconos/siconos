@@ -27,16 +27,16 @@ NewtonImpactFrictionNSLXML::NewtonImpactFrictionNSLXML(xmlNodePtr nslNode):
   NonSmoothLawXML(nslNode), enNode(NULL), etNode(NULL), muNode(NULL)
 {
   xmlNodePtr node;
-  if ((node = SiconosDOMTreeTools::findNodeChild(nslNode, "en")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(nslNode, "en")))
     enNode = node;
   else
     XMLException::selfThrow("NewtonImpactFrictionNSLXML - constructor error : tag en not found.");
 
   // et is not always required (friction2D)
-  if ((node = SiconosDOMTreeTools::findNodeChild(nslNode, "et")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(nslNode, "et")))
     etNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(nslNode, "mu")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(nslNode, "mu")))
     muNode = node;
   else
     XMLException::selfThrow("NewtonImpactFrictionNSLXML - constructor error : tag mu not found.");

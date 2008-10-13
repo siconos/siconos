@@ -71,10 +71,10 @@ private:
 
   // Members
 
-  SimpleVector * x0;
-  SiconosMatrix *J0, *M;
-  xmlNode * node1 , *node2;
-  FirstOrderNonLinearDSXML* tmpxml1, * tmpxml2;
+  SP::SimpleVector x0;
+  SP::SiconosMatrix J0, M;
+  xmlNodePtr node1, node2;
+  SP::FirstOrderNonLinearDSXML tmpxml1, tmpxml2;
 public:
   void setUp();
   void tearDown();

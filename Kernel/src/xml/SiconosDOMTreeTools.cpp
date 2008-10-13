@@ -27,7 +27,7 @@ using namespace std;
 
 SimpleVector SiconosDOMTreeTools::getSiconosVectorValue(const xmlNodePtr vectorNode)
 {
-  if (vectorNode == NULL)
+  if (!vectorNode)
     XMLException::selfThrow("SiconosDOMTreeTools - getSiconosVectorValue, node == NULL ");
 
   // 2 cases:
@@ -62,7 +62,7 @@ SimpleVector SiconosDOMTreeTools::getSiconosVectorValue(const xmlNodePtr vectorN
 
 SimpleMatrix SiconosDOMTreeTools::getSiconosMatrixValue(const xmlNodePtr siconosMatrixNode)
 {
-  if (siconosMatrixNode == NULL)
+  if (!siconosMatrixNode)
     XMLException::selfThrow("SiconosDOMTreeTools - getSiconosMatrixValue, node == NULL");
 
   if (xmlHasProp((xmlNodePtr)siconosMatrixNode, (xmlChar *)SDTT_MATRIXFILE.c_str())) //matrix is defined in a extern ascii file
@@ -82,7 +82,7 @@ SimpleMatrix SiconosDOMTreeTools::getSiconosMatrixValue(const xmlNodePtr siconos
     unsigned int i = 0;
     SimpleMatrix matrix(matrixRowSize, matrixColSize);
     SimpleVector *v = new SimpleVector(matrixColSize);
-    while ((node != NULL) && (i < matrixRowSize))
+    while ((node) && (i < matrixRowSize))
     {
       if (getSiconosRowMatrixValue(node, matrixColSize).size() != matrixColSize)
       {
@@ -184,7 +184,7 @@ void SiconosDOMTreeTools::setSiconosMatrixNodeValue(const xmlNodePtr siconosMatr
 
     unsigned int i = 0;
     SimpleVector * matRow = new SimpleVector(matrix.size(1));
-    while ((node != NULL) && (i < matrixRowSize))
+    while ((node) && (i < matrixRowSize))
     {
       matrix.getRow(i, *matRow);
       setSiconosRowMatrixValue(node, *matRow, matrixColSize);
@@ -500,7 +500,7 @@ xmlNodePtr  SiconosDOMTreeTools::findNodeChild(const xmlNodePtr  node)
 xmlNodePtr  SiconosDOMTreeTools::findFollowNode(const xmlNodePtr  node, const string& followNodeName)
 {
   xmlNodePtr  n = (xmlNodePtr)node->next;
-  while (n != NULL)
+  while (n)
   {
     if (n->type == XML_ELEMENT_NODE)
     {
@@ -517,7 +517,7 @@ xmlNodePtr  SiconosDOMTreeTools::findFollowNode(const xmlNodePtr  node, const st
 xmlNodePtr  SiconosDOMTreeTools::findFollowNode(const xmlNodePtr  node)
 {
   xmlNodePtr  n = (xmlNodePtr)node->next;
-  while (n != NULL)
+  while (n)
   {
     if (n->type == XML_ELEMENT_NODE)
     {
@@ -578,14 +578,14 @@ int SiconosDOMTreeTools::getNodeChildrenNumber(const xmlNodePtr node)
   int res = 0;
   xmlNodePtr n;
 
-  if ((node == NULL) && (node->type != XML_ELEMENT_NODE))
+  if (!(node) && (node->type != XML_ELEMENT_NODE))
     res = -1;
   else
   {
     n = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr) node);
     //if( n != NULL ) res++;
 
-    while (n != NULL)
+    while (n)
     {
       n = findFollowNode(n);
       res++;

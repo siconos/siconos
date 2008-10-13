@@ -28,12 +28,12 @@ RelayNSLXML::RelayNSLXML(xmlNode * relayNSLawNode)
 {
   xmlNode *node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(relayNSLawNode, RNSL_C)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(relayNSLawNode, RNSL_C)))
     CNode = node;
   else
     XMLException::selfThrow("RelayNSLawXML - constructor error : tag " + RNSL_C + " not found.");
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(relayNSLawNode, RNSL_D)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(relayNSLawNode, RNSL_D)))
     DNode = node;
   else
     XMLException::selfThrow("RelayNSLawXML - constructor error : tag " + RNSL_D + " not found.");

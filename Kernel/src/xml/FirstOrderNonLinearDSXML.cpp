@@ -30,22 +30,22 @@ FirstOrderNonLinearDSXML::FirstOrderNonLinearDSXML(xmlNodePtr DSNode, bool isBVP
 {
   xmlNodePtr node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DS_X0)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DS_X0)))
     x0Node = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DS_X)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DS_X)))
     xNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DS_M)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DS_M)))
     MNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DS_F)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DS_F)))
     fNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DS_JACOBIANXF)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DS_JACOBIANXF)))
     jacobianXFNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DS_XMEMORY)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DS_XMEMORY)))
   {
     xMemoryNode = node;
     xMemoryXML.reset(new SiconosMemoryXML(xMemoryNode, rootNode, DS_XMEMORY));
@@ -56,12 +56,20 @@ FirstOrderNonLinearDSXML::~FirstOrderNonLinearDSXML()
 {
 }
 
-void FirstOrderNonLinearDSXML::setM(const SiconosMatrix& m)
+void FirstOrderNonLinearDSXML::setMMatrix(const SiconosMatrix&m)
 {
-  if (MNode != NULL)
-    SiconosDOMTreeTools::setSiconosMatrixNodeValue(MNode, m);
+  SiconosDOMTreeTools::setSiconosMatrixNodeValue(MNode, m);
+}
+
+void FirstOrderNonLinearDSXML::setMPlugin(const std::string& plugin)
+{
+  if (!MNode)
+  {
+    MNode = SiconosDOMTreeTools::createSingleNode(rootNode, DS_M);
+    xmlNewProp(MNode, (xmlChar*)("matrixPlugin"), (xmlChar*)plugin.c_str());
+  }
   else
-    MNode = SiconosDOMTreeTools::createMatrixNode(rootNode, DS_M, m);
+    SiconosDOMTreeTools::setStringAttributeValue(MNode, "matrixPlugin", plugin);
 }
 
 void FirstOrderNonLinearDSXML::setFVector(const SiconosVector&v)
@@ -71,7 +79,7 @@ void FirstOrderNonLinearDSXML::setFVector(const SiconosVector&v)
 
 void FirstOrderNonLinearDSXML::setFPlugin(const std::string& plugin)
 {
-  if (fNode == NULL)
+  if (!fNode)
   {
     fNode = SiconosDOMTreeTools::createSingleNode(rootNode, DS_F);
     xmlNewProp(fNode, (xmlChar*)("vectorPlugin"), (xmlChar*)plugin.c_str());
@@ -87,7 +95,7 @@ void FirstOrderNonLinearDSXML::setJacobianXFMatrix(const SiconosMatrix&m)
 
 void FirstOrderNonLinearDSXML::setJacobianXFPlugin(const std::string& plugin)
 {
-  if (jacobianXFNode == NULL)
+  if (!jacobianXFNode)
   {
     jacobianXFNode = SiconosDOMTreeTools::createSingleNode(rootNode, DS_JACOBIANXF);
     xmlNewProp(jacobianXFNode, (xmlChar*)("matrixPlugin"), (xmlChar*)plugin.c_str());

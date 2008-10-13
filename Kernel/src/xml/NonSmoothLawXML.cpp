@@ -25,7 +25,7 @@ NonSmoothLawXML::NonSmoothLawXML(): rootNode(NULL), sizeNode(NULL)
 NonSmoothLawXML::NonSmoothLawXML(xmlNodePtr node): rootNode(node), sizeNode(NULL)
 {
   // size (optional)
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "size")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "size")))
     sizeNode = node;
 }
 

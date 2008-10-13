@@ -69,27 +69,27 @@ public:
   /** return true if CNode exists */
   inline bool hasC() const
   {
-    return (CNode != NULL);
+    return (CNode);
   }
   /** return true if DNode exists */
   inline bool hasD() const
   {
-    return (DNode != NULL);
+    return (DNode);
   }
   /** return true if FNode exists */
   inline bool hasF() const
   {
-    return (FNode != NULL);
+    return (FNode);
   }
   /** return true if eNode exists */
   inline bool hasE() const
   {
-    return (eNode != NULL);
+    return (eNode);
   }
   /** return true if BNode exists */
   inline bool hasB() const
   {
-    return (BNode != NULL);
+    return (BNode);
   }
 
   /** Return true if C is calculated from a plugin */

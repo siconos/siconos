@@ -20,6 +20,7 @@
 #include "Interaction.h"
 
 using namespace std;
+using namespace RELATION;
 
 // Default (private) constructor
 FirstOrderLinearTIR::FirstOrderLinearTIR(): FirstOrderLinearR()
@@ -28,7 +29,7 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(): FirstOrderLinearR()
 }
 
 // xml constructor
-FirstOrderLinearTIR::FirstOrderLinearTIR(RelationXMLSPtr relxml):
+FirstOrderLinearTIR::FirstOrderLinearTIR(SP::RelationXML relxml):
   FirstOrderLinearR(relxml)
 {
   subType = LinearTIR;
@@ -39,17 +40,8 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(const SiconosMatrix& newC, const Sicono
   FirstOrderLinearR()
 {
   subType = LinearTIR;
-
-#ifndef WithSmartPtr
-  C = new SimpleMatrix(newC);
-  isAllocatedIn["C"] = true;
-
-  B = new SimpleMatrix(newB);
-  isAllocatedIn["B"] = true;
-#else
   C.reset(new SimpleMatrix(newC));
   B.reset(new SimpleMatrix(newB));
-#endif
 }
 
 // Constructor from a complete set of data
@@ -58,41 +50,23 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(const SiconosMatrix& newC, const Sicono
 {
   subType = LinearTIR;
 
-#ifndef WithSmartPtr
-  C = new SimpleMatrix(newC);
-  isAllocatedIn["C"] = true;
-
-  D = new SimpleMatrix(newD);
-  isAllocatedIn["D"] = true;
-
-  F = new SimpleMatrix(newF);
-  isAllocatedIn["F"] = true;
-
-  e = new SimpleVector(newE);
-  isAllocatedIn["e"] = true;
-
-  B = new SimpleMatrix(newB);
-  isAllocatedIn["B"] = true;
-#else
   C.reset(new SimpleMatrix(newC));
   D.reset(new SimpleMatrix(newD));
   F.reset(new SimpleMatrix(newF));
   e.reset(new SimpleVector(newE));
   B.reset(new SimpleMatrix(newB));
-#endif
-
   initPluginFlags(false);
 }
 
 // Minimum data (C, B as pointers) constructor
-FirstOrderLinearTIR::FirstOrderLinearTIR(SiconosMatrixSPtr newC, SiconosMatrixSPtr newB):
+FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SiconosMatrix newC, SP::SiconosMatrix newB):
   FirstOrderLinearR(newC, newB)
 {
   subType = LinearTIR;
 }
 
 // Constructor from a complete set of data
-FirstOrderLinearTIR::FirstOrderLinearTIR(SiconosMatrixSPtr newC, SiconosMatrixSPtr newD, SiconosMatrixSPtr newF, SimpleVectorSPtr newE, SiconosMatrixSPtr newB):
+FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SiconosMatrix newC, SP::SiconosMatrix newD, SP::SiconosMatrix newF, SP::SimpleVector newE, SP::SiconosMatrix newB):
   FirstOrderLinearR(newC, newD, newF, newE, newB)
 {
   subType = LinearTIR;
@@ -107,8 +81,8 @@ void FirstOrderLinearTIR::computeOutput(double time, unsigned int)
   // y[0]
 
   // We get y and lambda of the interaction (pointers)
-  SiconosVectorSPtr y = interaction->getYPtr(0);
-  SiconosVectorSPtr lambda = interaction->getLambdaPtr(0);
+  SP::SiconosVector y = interaction->getYPtr(0);
+  SP::SiconosVector lambda = interaction->getLambdaPtr(0);
 
   // compute y
   if (C)
@@ -131,7 +105,7 @@ void FirstOrderLinearTIR::computeInput(double time, unsigned int level)
   if (B)
   {
     // We get lambda of the interaction (pointers)
-    SiconosVectorSPtr lambda = interaction->getLambdaPtr(level);
+    SP::SiconosVector lambda = interaction->getLambdaPtr(level);
     prod(*B, *lambda, *data["r"], false);
   }
 }

@@ -30,7 +30,7 @@ using namespace std;
 
 ControlManager::ControlManager(SP::Model m): model(m)
 {
-  if (model == NULL)
+  if (!model)
     RuntimeException::selfThrow("ControlManager::constructor failed. The given Model is a NULL pointer.");
 }
 
@@ -39,12 +39,12 @@ ControlManager::~ControlManager()
   // Delete Sensors
   SensorsIterator itS;
   for (itS = allSensors.begin(); itS != allSensors.end(); ++itS)
-    if ((*itS) != NULL) delete(*itS);
+    if ((*itS)) delete(*itS);
   allSensors.clear();
   // Delete Actuators
   ActuatorsIterator itA;
   for (itA = allActuators.begin(); itA != allActuators.end(); ++itA)
-    if ((*itA) != NULL) delete(*itA);
+    if ((*itA)) delete(*itA);
   allActuators.clear();
 }
 
@@ -101,7 +101,7 @@ Actuator* ControlManager::addAndRecordActuator(int type, TimeDiscretisation* t)
 void ControlManager::display() const
 {
   cout << "=========> ControlManager " ;
-  if (model != NULL)
+  if (model)
     cout << "linked to model named: " << model->getTitle() << "." << endl;
   else
     cout << "not linked to a model." << endl;

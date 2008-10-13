@@ -28,18 +28,18 @@ LagrangianLinearRXML::LagrangianLinearRXML(xmlNode * LLRelationNode)
 {
   xmlNode *node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(LLRelationNode, "H")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(LLRelationNode, "H")))
     HNode = node;
-  else if (hNode == NULL)
+  else if (!hNode)
     XMLException::selfThrow("LLRelationXML - constructor error : tag H not found.");
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(LLRelationNode, "b")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(LLRelationNode, "b")))
     bNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(LLRelationNode, "D")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(LLRelationNode, "D")))
     DNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(LLRelationNode, "F")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(LLRelationNode, "F")))
     FNode = node;
 }
 
@@ -48,7 +48,7 @@ LagrangianLinearRXML::~LagrangianLinearRXML()
 
 void LagrangianLinearRXML::setH(const SiconosMatrix& matrix)
 {
-  if (HNode == NULL)
+  if (!HNode)
   {
     HNode = SiconosDOMTreeTools::createMatrixNode(rootNode, "H", matrix);
   }
@@ -57,7 +57,7 @@ void LagrangianLinearRXML::setH(const SiconosMatrix& matrix)
 
 void LagrangianLinearRXML::setB(const SiconosVector &vec)
 {
-  if (bNode == NULL)
+  if (!bNode)
   {
     bNode = SiconosDOMTreeTools::createVectorNode(rootNode, "b", vec);
   }
@@ -66,7 +66,7 @@ void LagrangianLinearRXML::setB(const SiconosVector &vec)
 
 void LagrangianLinearRXML::setD(const SiconosMatrix& matrix)
 {
-  if (DNode == NULL)
+  if (!DNode)
   {
     DNode = SiconosDOMTreeTools::createMatrixNode(rootNode, "D", matrix);
   }
@@ -75,7 +75,7 @@ void LagrangianLinearRXML::setD(const SiconosMatrix& matrix)
 
 void LagrangianLinearRXML::setF(const SiconosMatrix& matrix)
 {
-  if (FNode == NULL)
+  if (!FNode)
   {
     FNode = SiconosDOMTreeTools::createMatrixNode(rootNode, "F", matrix);
   }

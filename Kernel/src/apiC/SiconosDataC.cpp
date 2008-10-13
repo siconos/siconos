@@ -54,7 +54,7 @@ void DataC::setStatus(int status)
 
 Model * DataC::getModelPtr()
 {
-  if (_Model == NULL)
+  if (!_Model)
     RuntimeException::selfThrow("ApiC::Model is NULL");
 
   return _Model;
@@ -67,7 +67,7 @@ void  DataC::setModelPtr(Model *ptrModel)
 
 Simulation * DataC::getSimulationPtr()
 {
-  if (_Simulation == NULL)
+  if (!_Simulation)
     RuntimeException::selfThrow("ApiC::Simulation is NULL");
 
   return _Simulation;
@@ -79,7 +79,7 @@ void DataC::setSimulationPtr(Simulation * ptrSimulation)
 
 NonSmoothDynamicalSystem * DataC::getNonSmoothDynamicalSystemPtr()
 {
-  if (_NSDS == NULL)
+  if (!_NSDS)
     RuntimeException::selfThrow("ApiC::NSDS is NULL");
 
   return _NSDS;
@@ -92,7 +92,7 @@ void DataC::setNonSmoothDynamicalSystemPtr(NonSmoothDynamicalSystem * ptr)
 
 TimesSet * DataC::getTimesSetPtr()
 {
-  if (_TimesSet == NULL)
+  if (!_TimesSet)
     RuntimeException::selfThrow("ApiC::TimesSet is NULL");
 
   return _TimesSet;
@@ -101,7 +101,7 @@ TimesSet * DataC::getTimesSetPtr()
 
 DynamicalSystemsSet * DataC::getDynamicalSystemsSetPtr()
 {
-  if (_DSSet == NULL)
+  if (!_DSSet)
     RuntimeException::selfThrow("ApiC::DSSet is NULL");
 
   return _DSSet;
@@ -109,7 +109,7 @@ DynamicalSystemsSet * DataC::getDynamicalSystemsSetPtr()
 
 InteractionsSet* DataC::getInteractionsSetPtr()
 {
-  if (_InteractionsSet == NULL)
+  if (!_InteractionsSet)
     RuntimeException::selfThrow("ApiC::InteractionsSet is NULL");
 
   return _InteractionsSet;
@@ -118,7 +118,7 @@ InteractionsSet* DataC::getInteractionsSetPtr()
 
 RelationsSet* DataC::getRelationsSetPtr()
 {
-  if (_RelationsSet == NULL)
+  if (!_RelationsSet)
     RuntimeException::selfThrow("ApiC::RelationsSet is NULL");
 
   return _RelationsSet;
@@ -127,7 +127,7 @@ RelationsSet* DataC::getRelationsSetPtr()
 
 NonSmoothLawSet* DataC::getNonSmoothLawSetPtr()
 {
-  if (_NSLawSet == NULL)
+  if (!_NSLawSet)
     RuntimeException::selfThrow("ApiC::NonSmoothLawSet is NULL");
 
   return _NSLawSet;
@@ -135,7 +135,7 @@ NonSmoothLawSet* DataC::getNonSmoothLawSetPtr()
 
 EventsManager* DataC::getEventsManagerPtr()
 {
-  if (_EventsManager == NULL)
+  if (!_EventsManager)
     RuntimeException::selfThrow("ApiC::EventsManager is NULL");
 
   return _EventsManager;

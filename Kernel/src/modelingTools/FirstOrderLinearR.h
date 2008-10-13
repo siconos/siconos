@@ -58,15 +58,15 @@ class FirstOrderLinearR : public FirstOrderR
 protected:
 
   /** C */
-  SiconosMatrixSPtr C;
+  SP::SiconosMatrix C;
   /** D*/
-  SiconosMatrixSPtr D;
+  SP::SiconosMatrix D;
   /** F*/
-  SiconosMatrixSPtr F;
+  SP::SiconosMatrix F;
   /** e*/
-  SiconosVectorSPtr e;
+  SP::SiconosVector e;
   /**  B*/
-  SiconosMatrixSPtr B;
+  SP::SiconosMatrix B;
 
   /** Plug-in list to compute C(t,z)
    * @param time: current time
@@ -129,7 +129,7 @@ public:
   /** xml constructor
    *  \param FirstOrderLinearRXML* : the XML object corresponding
    */
-  FirstOrderLinearR(RelationXMLSPtr);
+  FirstOrderLinearR(SP::RelationXML);
 
   /** Constructor with C and B plug-in names
       \param C plug-in name
@@ -155,7 +155,7 @@ public:
    *  \param pointer to SiconosMatrix : the matrix C
    *  \param pointer to SiconosMatrix : the matrix B
    */
-  FirstOrderLinearR(SiconosMatrixSPtr , SiconosMatrixSPtr);
+  FirstOrderLinearR(SP::SiconosMatrix , SP::SiconosMatrix);
 
   /** create the Relation from a set of data
    *  \param pointer to SiconosMatrix : C
@@ -164,9 +164,9 @@ public:
    *  \param pointer to SimpleVector  : e
    *  \param pointer to SiconosMatrix : B
    */
-  FirstOrderLinearR(SiconosMatrixSPtr , SiconosMatrixSPtr ,
-                    SiconosMatrixSPtr , SiconosVectorSPtr ,
-                    SiconosMatrixSPtr);
+  FirstOrderLinearR(SP::SiconosMatrix , SP::SiconosMatrix ,
+                    SP::SiconosMatrix , SP::SiconosVector ,
+                    SP::SiconosMatrix);
 
   /** destructor
    */
@@ -191,7 +191,7 @@ public:
   /** get C
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrixSPtr getCPtr() const
+  inline SP::SiconosMatrix getCPtr() const
   {
     return C;
   }
@@ -204,7 +204,7 @@ public:
   /** set C to pointer newPtr
    *  \param SP::SiconosMatrix  newPtr
    */
-  void setCPtr(SiconosMatrixSPtr);
+  void setCPtr(SP::SiconosMatrix);
 
   /** set a specified function to compute the matrix C
    *  \param string : the complete path to the plugin
@@ -225,7 +225,7 @@ public:
   /** get D
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrixSPtr getDPtr() const
+  inline SP::SiconosMatrix getDPtr() const
   {
     return D;
   }
@@ -238,7 +238,7 @@ public:
   /** set D to pointer newPtr
    *  \param SP::SiconosMatrix  newPtr
    */
-  void setDPtr(SiconosMatrixSPtr);
+  void setDPtr(SP::SiconosMatrix);
 
   /** set a specified function to compute the matrix D
    *  \param string : the complete path to the plugin
@@ -259,7 +259,7 @@ public:
   /** get F
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrixSPtr getFPtr() const
+  inline SP::SiconosMatrix getFPtr() const
   {
     return F;
   }
@@ -272,7 +272,7 @@ public:
   /** set F to pointer newPtr
    *  \param SP::SiconosMatrix  newPtr
    */
-  void setFPtr(SiconosMatrixSPtr) ;
+  void setFPtr(SP::SiconosMatrix) ;
 
   /** set a specified function to compute the matrix F
    *  \param string : the complete path to the plugin
@@ -293,7 +293,7 @@ public:
   /** get e
    *  \return pointer on a SimpleVector
    */
-  inline SiconosVectorSPtr getEPtr() const
+  inline SP::SiconosVector getEPtr() const
   {
     return e;
   }
@@ -306,7 +306,7 @@ public:
   /** set E to pointer newPtr
    *  \param  SP::SiconosVector newPtr
    */
-  void setEPtr(SiconosVectorSPtr);
+  void setEPtr(SP::SiconosVector);
 
   /** set a specified function to compute the vector e
    *  \param string : the complete path to the plugin
@@ -331,7 +331,7 @@ public:
   /** get B
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrixSPtr getBPtr() const
+  inline SP::SiconosMatrix getBPtr() const
   {
     return B;
   }
@@ -344,7 +344,7 @@ public:
   /** set B to pointer newPtr
    *  \param SP::SiconosMatrix  newPtr
    */
-  void setBPtr(SiconosMatrixSPtr) ;
+  void setBPtr(SP::SiconosMatrix) ;
 
   /** set a specified function to compute the matrix B
    *  \param string : the complete path to the plugin

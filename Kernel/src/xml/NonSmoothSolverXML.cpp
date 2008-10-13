@@ -24,9 +24,9 @@ NonSmoothSolverXML::NonSmoothSolverXML(xmlNodePtr solverNode):
 {
   // Connect dparam and iparam nodes.
   xmlNodePtr node = NULL;
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "iparam")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "iparam")))
     iparamNode = node;
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "dparam")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "dparam")))
     dparamNode = node;
 }
 
@@ -41,13 +41,13 @@ NonSmoothSolverXML::~NonSmoothSolverXML()
 void NonSmoothSolverXML::getIParam(std::vector<int>& iparam)
 {
   // No error output if the node is null. It is the role of the function that call getIparam to check that.
-  if (iparamNode != NULL)
+  if (iparamNode)
     SiconosDOMTreeTools::getVector(iparamNode, iparam);
 }
 
 void NonSmoothSolverXML::getDParam(std::vector<double>& dparam)
 {
   // No error output if the node is null. It is the role of the function that call getDparam to check that.
-  if (dparamNode != NULL)
+  if (dparamNode)
     SiconosDOMTreeTools::getVector(dparamNode, dparam);
 }

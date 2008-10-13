@@ -101,7 +101,7 @@ public:
    */
   inline bool hasDSList()
   {
-    return !(DSConcernedNode == NULL);
+    return DSConcernedNode ;
   }
 
   /** true if tag interactionsConcernedNode is present
@@ -109,7 +109,7 @@ public:
    */
   inline bool hasInteractionsList()
   {
-    return !(interactionsConcernedNode == NULL);
+    return interactionsConcernedNode;
   }
 
   /** attribute of the DSConcerned tag - True if all DS of the NSDS are concerned

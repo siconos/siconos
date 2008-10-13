@@ -74,7 +74,7 @@ public:
   */
   inline void setK(const SiconosMatrix& m)
   {
-    if (KNode == NULL)
+    if (!KNode)
     {
       KNode = SiconosDOMTreeTools::createMatrixNode(rootNode, LTIDS_K, m);
     }
@@ -94,7 +94,7 @@ public:
   */
   inline void setC(const SiconosMatrix& m)
   {
-    if (CNode == NULL)
+    if (!CNode)
     {
       CNode = SiconosDOMTreeTools::createMatrixNode(rootNode, LTIDS_C, m);
     }
@@ -106,7 +106,7 @@ public:
   */
   inline const bool hasK() const
   {
-    return (KNode != NULL);
+    return (KNode);
   }
 
   /** determines if C is defined in the DOM tree
@@ -114,7 +114,7 @@ public:
   */
   inline const bool hasC() const
   {
-    return (CNode != NULL);
+    return (CNode);
   }
 };
 

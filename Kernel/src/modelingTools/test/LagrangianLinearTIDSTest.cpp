@@ -50,10 +50,10 @@ void LagrangianLinearTIDSTest::setUp()
   xmlDocPtr doc;
   xmlNodePtr cur;
   doc = xmlParseFile("lagtids_test.xml");
-  if (doc == NULL)
+  if (!doc)
     XMLException::selfThrow("Document not parsed successfully");
   cur = xmlDocGetRootElement(doc);
-  if (cur == NULL)
+  if (!cur)
   {
     XMLException::selfThrow("empty document");
     xmlFreeDoc(doc);
@@ -156,8 +156,8 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2G : ", ds->getQ() == *q0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2H : ", ds->getVelocity() == *velocity0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2I : ", ds->getMass() == *mass, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2J : ", ds->getKPtr() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2K : ", ds->getCPtr() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2J : ", !ds->getKPtr(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2K : ", !ds->getCPtr(), false);
 
   ds->setComputeFExtFunction("TestPlugin.so", "computeFExt");
 

@@ -21,7 +21,7 @@ SET(SiconosKernel_DIRS
   model
   modelingTools
   simulationTools
-#  controlTools
+  #controlTools
   multiBodyTools
   multiBodyTools/2D
   utils
@@ -54,7 +54,8 @@ INSTALL(FILES ${ATLAS_HDRS}
   DESTINATION include/Siconos/Kernel/AtlasLocal/atlas)
 
 FOREACH(_D amos;atlas;blas;cblas;lapack;traits;traits/detail;umfpack)
-  FILE(GLOB BOOST_HDRS_${_D} utils/boost-bindings/boost/numeric/bindings/${_D}/*.hpp)
+  FILE(GLOB BOOST_HDRS_${_D} utils/boost-bindings/boost/numeric/bindings/${_D}/*.hpp 
+    utils/boost-bindings/boost/numeric/bindings/${_D}/*.h)
   INSTALL(FILES ${BOOST_HDRS_${_D}} 
     DESTINATION include/Siconos/Kernel/boost/numeric/bindings/${_D})
 ENDFOREACH(_D amos;atlas;blas;cblas;lapack;traits;umfpack)
@@ -89,17 +90,13 @@ IF(OPENGL_FOUND)
 ENDIF(OPENGL_FOUND)
 
 FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/plugin/test)
-ADD_LIBRARY(DefaultPlugin MODULE plugin/DefaultPlugin.cpp)
-SET_TARGET_PROPERTIES(DefaultPlugin 
-  PROPERTIES PREFIX ""
-  OUTPUT_NAME plugin/DefaultPlugin)
 
 ADD_LIBRARY(TestPlugin MODULE plugin/test/TestPlugin.cpp)
 SET_TARGET_PROPERTIES(TestPlugin 
   PROPERTIES PREFIX ""
   OUTPUT_NAME plugin/test/TestPlugin)
 
-INSTALL(TARGETS DefaultPlugin TestPlugin 
+INSTALL(TARGETS TestPlugin 
   LIBRARY DESTINATION share/${PROJECT_PACKAGE_NAME})
 
 SET(SiconosKernel_LINKER_LANGUAGE CXX)
@@ -109,65 +106,66 @@ LIBRARY_PROJECT_SETUP()
 #
 # tests with cppunit
 #
-#IF(CPPUNIT_FOUND)
-#  # used in ldwrap.c.in
-#  SET(LD_LIBRARY_PATH ".:${CMAKE_CURRENT_BINARY_DIR}/plugin:${CMAKE_CURRENT_BINARY_DIR}/plugin/test")
-#
-#  # Siconos Algebra
-#  BEGIN_TEST(utils/SiconosAlgebra/test)
-#
+IF(CPPUNIT_FOUND)
+  # used in ldwrap.c.in
+  SET(LD_LIBRARY_PATH ".:${CMAKE_CURRENT_BINARY_DIR}/plugin:${CMAKE_CURRENT_BINARY_DIR}/plugin/test")
+
+  # Siconos Algebra
+  #BEGIN_TEST(utils/SiconosAlgebra/test)
+
 #  NEW_TEST(testSiconosAlgebra
-#    BlockMatrixTest.cpp  SimpleMatrixTest.cpp BlockVectorTest.cpp  SimpleVectorTest.cpp TestMain.cpp)
-#  
-#  END_TEST()
-#  
-#  # Siconos Memory
-#  BEGIN_TEST(utils/SiconosMemory/test)
-#  
-#  NEW_TEST(testSiconosMemory
-#    SiconosMemoryTest.cpp TestMain.cpp)
-#  
-#  END_TEST()
-#  
-#  # model
-#  BEGIN_TEST(model/test)
-#  
-#  NEW_TEST(testModel ModelTest.cpp TestMain.cpp)
-#  
-#  END_TEST()
-#  # modeling tools 
-#  BEGIN_TEST(modelingTools/test)
-#  
+ #   BlockMatrixTest.cpp  SimpleMatrixTest.cpp BlockVectorTest.cpp  SimpleVectorTest.cpp TestMain.cpp)
+  
+  #END_TEST()
+  
+  # Siconos Memory
+ # BEGIN_TEST(utils/SiconosMemory/test)
+  
+  #NEW_TEST(testSiconosMemory
+   # SiconosMemoryTest.cpp TestMain.cpp)
+  
+  #END_TEST()
+  
+  # model
+  BEGIN_TEST(model/test)
+  
+  NEW_TEST(testModel ModelTest.cpp TestMain.cpp)
+  
+  END_TEST()
+  # modeling tools 
+  BEGIN_TEST(modelingTools/test)
+  
 #  NEW_TEST(testModelingTools
-#    FirstOrderType1RTest.cpp FirstOrderLinearRTest.cpp FirstOrderLinearTIRTest.cpp 
-#    LagrangianScleronomousRTest.cpp LagrangianRheonomousRTest.cpp LagrangianCompliantRTest.cpp 
-#    LagrangianLinearRTest.cpp FirstOrderNonLinearDSTest.cpp FirstOrderLinearDSTest.cpp 
-#    LagrangianDSTest.cpp LagrangianLinearTIDSTest.cpp TestMain.cpp)
-#  
-#  END_TEST()
-#  
-#  
-#  # xml
-#  BEGIN_TEST(xml/test)
-#  NEW_TEST(testXMLTools
-#    TestMain.cpp)
-#  
-#  END_TEST()
-#  
-#  # Global tests
-#  BEGIN_TEST(global_tests)
-#  
-#  ADD_LIBRARY(gTestPlugin MODULE global_tests/gTestPlugin.cpp)
-#  SET_TARGET_PROPERTIES(gTestPlugin 
-#    PROPERTIES PREFIX "" 
-#    OUTPUT_NAME global_tests/gTestPlugin)
-#  
-#  NEW_TEST(testGlobal
-#    BallBowl.cpp  BouncingBall.cpp  DiodeBridge.cpp  FunctionTest.cpp  GlobalTests.cpp  MainTest.cpp)
-#  
-#  END_TEST()
-#  
-#ENDIF(CPPUNIT_FOUND)
+    #FirstOrderType1RTest.cpp FirstOrderLinearRTest.cpp FirstOrderLinearTIRTest.cpp 
+    #LagrangianScleronomousRTest.cpp LagrangianRheonomousRTest.cpp LagrangianCompliantRTest.cpp 
+    #LagrangianLinearRTest.cpp 
+    #FirstOrderNonLinearDSTest.cpp FirstOrderLinearDSTest.cpp 
+    #LagrangianDSTest.cpp LagrangianLinearTIDSTest.cpp TestMain.cpp)
+  
+  END_TEST()
+  
+  
+  # xml
+  BEGIN_TEST(xml/test)
+  NEW_TEST(testXMLTools
+    TestMain.cpp)
+  
+  END_TEST()
+  
+  # Global tests
+  BEGIN_TEST(global_tests)
+  
+  ADD_LIBRARY(gTestPlugin MODULE global_tests/gTestPlugin.cpp)
+  SET_TARGET_PROPERTIES(gTestPlugin 
+    PROPERTIES PREFIX "" 
+    OUTPUT_NAME global_tests/gTestPlugin)
+  
+  NEW_TEST(testGlobal
+    BallBowl.cpp  BouncingBall.cpp  DiodeBridge.cpp  FunctionTest.cpp  GlobalTests.cpp  MainTest.cpp)
+  
+  END_TEST()
+  
+ENDIF(CPPUNIT_FOUND)
 
 #
 # Export

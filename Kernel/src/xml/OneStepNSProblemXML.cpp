@@ -29,15 +29,15 @@ OneStepNSProblemXML::OneStepNSProblemXML(xmlNodePtr oneStepNSProblemXMLNode):
   // rootNode == formalisation type (LCP ...)
 
   xmlNodePtr node;
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "size")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "size")))
     dimNode = node;
 
   // get interactionsConcerned
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "Interactions_Concerned")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "Interactions_Concerned")))
     interactionsConcernedNode = node;
 
   // Solver
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "NonSmoothSolver")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "NonSmoothSolver")))
   {
     solverNode = node;
     solverXML = new NonSmoothSolverXML(solverNode);

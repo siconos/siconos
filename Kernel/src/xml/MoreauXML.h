@@ -58,7 +58,7 @@ public:
   */
   inline bool hasWList()
   {
-    return (WNode != NULL);
+    return (WNode);
   };
 
   /** Return the w of the OneStepIntegratorXML
@@ -86,7 +86,7 @@ public:
   */
   inline bool hasThetaList() const
   {
-    return (thetaNode != NULL);
+    return (thetaNode);
   }
 
   /** fill a vector<double> with given theta values

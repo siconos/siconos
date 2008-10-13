@@ -228,6 +228,16 @@ public:
     return setOfT->insert(t);
   };
 
+  /** insert a range into the set
+     \param iterator to the first element to be inserted
+     \param iterator after the last element to be inserted
+  */
+  template <class InputIterator>
+  void insert(InputIterator begin, InputIterator end)
+  {
+    setOfT->insert(begin, end);
+  }
+
   /** remove a T* from the set
    *  \param a pointer to T
    */

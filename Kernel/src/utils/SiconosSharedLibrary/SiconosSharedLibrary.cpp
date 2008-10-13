@@ -15,30 +15,31 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 #include "SiconosSharedLibrary.h"
 #include "SiconosSharedLibraryException.h"
 using namespace std;
 
+std::vector<PluginHandle> SiconosSharedLibrary::isPlugged;
 //*************************************************************************
 //
 // Public methods
 //
 //*************************************************************************
 
-SiconosSharedLibrary::SiconosSharedLibrary(const unsigned int & n)
-{
-  if (n > 0)
-    isPlugged.reserve(n);
-}
+// SiconosSharedLibrary::SiconosSharedLibrary(unsigned int n)
+// {
+//   if(n>0)
+//     isPlugged.reserve(n);
+// }
 
-SiconosSharedLibrary::~SiconosSharedLibrary()
-{
-  vector<PluginHandle>::iterator iter;
-  for (iter = isPlugged.begin(); iter != isPlugged.end(); ++iter)
-    dlclose(*iter);
-  isPlugged.clear();
-}
+// SiconosSharedLibrary::~SiconosSharedLibrary()
+// {
+//   vector<PluginHandle>::iterator iter;
+//   for(iter=isPlugged.begin();iter!=isPlugged.end();++iter)
+//     dlclose(*iter);
+//   isPlugged.clear();
+// }
 
 ///////////////////////////////////////////////////////////////////////////
 //
@@ -47,14 +48,12 @@ SiconosSharedLibrary::~SiconosSharedLibrary()
 PluginHandle SiconosSharedLibrary::loadPlugin(const string& pluginPath)
 {
   PluginHandle HandleRes;
-  //  cout << "PluginPath   :  " << pluginPath << endl;
 #ifdef _SYS_WNT
   HandleRes = LoadLibrary(pluginPath.c_str());
 #endif
 #ifdef _SYS_UNX
   HandleRes = dlopen(pluginPath.c_str(), RTLD_LAZY);
-  //cout << "dlerror() :" <<dlerror()<< endl;
-  if (HandleRes == NULL)
+  if (!HandleRes)
   {
     cout << "dlerror() :" << dlerror() << endl;
     SiconosSharedLibraryException::selfThrow("SiconosSharedLibrary::loadPlugin, can not open or found " + pluginPath);
@@ -75,7 +74,7 @@ void* SiconosSharedLibrary::getProcAddress(PluginHandle plugin, const string& pr
 #endif
 #ifdef _SYS_UNX
   void* ptr = dlsym(plugin, procedure.c_str());
-  if (ptr == NULL)
+  if (!ptr)
     throw SiconosSharedLibraryException(dlerror());
   return ptr;
 #endif
@@ -92,7 +91,7 @@ void  SiconosSharedLibrary::closePlugin(PluginHandle plugin)
 #endif
 }
 
-void  SiconosSharedLibrary::closeAllPlugins()
+void SiconosSharedLibrary::closeAllPlugins()
 {
 #ifdef _SYS_UNX
   vector<PluginHandle>::iterator iter;
@@ -105,7 +104,7 @@ void  SiconosSharedLibrary::closeAllPlugins()
 //
 // getSharedLibraryExtension
 //
-const string SiconosSharedLibrary::getSharedLibraryExtension() const
+const string SiconosSharedLibrary::getSharedLibraryExtension()
 {
 #ifdef _SYS_WNT
   return ".dll";
@@ -131,7 +130,7 @@ void SiconosSharedLibrary::setFunction(void* fPtr, const string& pluginPath, con
 //
 // new functions for the plugins
 //
-const string SiconosSharedLibrary::getPluginName(const string& s) const
+const string SiconosSharedLibrary::getPluginName(const string& s)
 {
   string res;
 
@@ -155,7 +154,7 @@ const string SiconosSharedLibrary::getPluginName(const string& s) const
   }
 }
 
-const string SiconosSharedLibrary::getPluginFunctionName(const string& s) const
+const string SiconosSharedLibrary::getPluginFunctionName(const string& s)
 {
   string res;
 

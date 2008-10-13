@@ -145,7 +145,7 @@ public:
    */
   inline bool hasH() const
   {
-    return (hNode != NULL);
+    return (hNode);
   }
 
   /** returns true if NNode is defined
@@ -153,7 +153,7 @@ public:
    */
   inline bool hasN() const
   {
-    return (NNode != NULL);
+    return (NNode);
   }
 
   /** returns true if tkNode is defined
@@ -161,7 +161,7 @@ public:
    */
   inline bool hasTk() const
   {
-    return (tkNode != NULL);
+    return (tkNode);
   }
 
   /** makes the operations to create the TimeDiscretisation of the SimulationXML

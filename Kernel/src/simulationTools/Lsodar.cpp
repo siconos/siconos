@@ -50,20 +50,17 @@ extern "C" void Lsodar_jacobianF_wrapper(integer* sizeOfX, doublereal* time, dou
   return global_object->jacobianF(sizeOfX, time, x, ml, mu, jacob, nrowpd);
 }
 
-Lsodar::Lsodar(OneStepIntegratorXMLSPtr osiXML, SimulationSPtr newS):
-  OneStepIntegrator("Lsodar", osiXML, newS)
+Lsodar::Lsodar(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList, SP::InteractionsSet interactionsList):
+  OneStepIntegrator("Lsodar", osiXML, dsList, interactionsList)
 {
   // local time discretisation is set by default to those of the simulation.
   intData.resize(9);
   sizeMem = 2;
 }
 
-Lsodar::Lsodar(SP::DynamicalSystem ds, SimulationSPtr newS):
-  OneStepIntegrator("Lsodar", newS)
+Lsodar::Lsodar(SP::DynamicalSystem ds):
+  OneStepIntegrator("Lsodar")
 {
-  assert(simulationLink &&
-         "Lsodar:: constructor(ds,simulation) - simulation == NULL");
-
   // add ds in the set
   OSIDynamicalSystems->insert(ds);
 
@@ -71,18 +68,11 @@ Lsodar::Lsodar(SP::DynamicalSystem ds, SimulationSPtr newS):
   sizeMem = 2;
 }
 
-Lsodar::Lsodar(DynamicalSystemsSet& newDS, SimulationSPtr newS):
-  OneStepIntegrator("Lsodar", newDS, newS)
+Lsodar::Lsodar(DynamicalSystemsSet& newDS):
+  OneStepIntegrator("Lsodar", newDS)
 {
-  assert(simulationLink &&
-         "Lsodar:: constructor(DSSet,simulation) - simulation == NULL");
-
   intData.resize(9);
   sizeMem = 2;
-}
-
-Lsodar::~Lsodar()
-{
 }
 
 void Lsodar::setTol(integer newItol, doublerealSAPtr newRtol, doublerealSAPtr newAtol)
@@ -165,9 +155,9 @@ void Lsodar::jacobianF(integer* sizeOfX, doublereal* time, doublereal* x, intege
   boost::static_pointer_cast<EventDriven>(simulationLink)->computeJacobianF(shared_from_this(), sizeOfX, time, x, jacob);
 }
 
-void Lsodar::initialize()
+void Lsodar::initialize(SP::Simulation sim)
 {
-  OneStepIntegrator::initialize();
+  OneStepIntegrator::initialize(sim);
   xWork.reset(new BlockVector());
   DSIterator it;
   string type;
@@ -307,7 +297,7 @@ void Lsodar::updateState(unsigned int level)
   {
     for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
     {
-      LagrangianDSSPtr lds = boost::static_pointer_cast<LagrangianDS>(*it);
+      SP::LagrangianDS lds = boost::static_pointer_cast<LagrangianDS>(*it);
       lds->computePostImpactVelocity();
     }
   }

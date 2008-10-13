@@ -83,24 +83,16 @@ class LCP : public OneStepNSProblem
 private:
 
   /** contains the vector w of a LCP system */
-  SiconosVectorSPtr w;
+  SP::SiconosVector w;
 
   /** contains the vector z of a LCP system */
-  SiconosVectorSPtr z;
+  SP::SiconosVector z;
 
   /** contains the matrix M of a LCP system */
-  OSNSMatrixSPtr M;
+  SP::OSNSMatrix M;
 
   /** contains the vector q of a LCP system */
-  SiconosVectorSPtr q;
-
-#ifndef WithSmartPtr
-  /** Flags to check whether pointers were allocated in class constructors or not */
-  bool isWAllocatedIn;
-  bool isZAllocatedIn;
-  bool isMAllocatedIn;
-  bool isQAllocatedIn;
-#endif
+  SP::SiconosVector q;
 
   /** Storage type for M - 0: SiconosMatrix (dense), 1: Sparse Storage (embedded into OSNSMatrix) */
   int MStorageType;
@@ -113,21 +105,19 @@ public:
 
   /** xml constructor
   *  \param SP::OneStepNSProblemXML : the XML linked-object
-  *  \param SP::Simulation: the simulation that owns the problem
   */
-  LCP(SP::OneStepNSProblemXML, SP::Simulation);
+  LCP(SP::OneStepNSProblemXML);
 
   /** constructor from data
-  *  \param SP::Simulation: the simulation that owns this problem
   *  \param Solver* pointer to object that contains solver algorithm and formulation \n
   *  (optional, default = NULL => read .opt file in Numerics)
   *  \param String: id of the problem (default = "unamed")
   */
-  LCP(SimulationSPtr, NonSmoothSolverSPtr = NonSmoothSolverSPtr(), const std::string& = "unamed_lcp");
+  LCP(SP::NonSmoothSolver = SP::NonSmoothSolver(), const std::string& = "unamed_lcp");
 
   /** destructor
   */
-  ~LCP();
+  ~LCP() {};
 
   // --- W ---
   /** get the value of w, the initial state of the DynamicalSystem
@@ -142,7 +132,7 @@ public:
   /** get w, the initial state of the DynamicalSystem
   *  \return pointer on a SimpleVector
   */
-  inline SiconosVectorSPtr getWPtr() const
+  inline SP::SiconosVector getWPtr() const
   {
     return w;
   }
@@ -155,7 +145,7 @@ public:
   /** set w to pointer newPtr
   *  \param SP::SiconosVector  newPtr
   */
-  void setWPtr(SiconosVectorSPtr);
+  void setWPtr(SP::SiconosVector);
 
   // --- Z ---
   /** get the value of z, the initial state of the DynamicalSystem
@@ -170,7 +160,7 @@ public:
   /** get z, the initial state of the DynamicalSystem
   *  \return pointer on a SiconosVector
   */
-  inline SiconosVectorSPtr getZPtr() const
+  inline SP::SiconosVector getZPtr() const
   {
     return z;
   }
@@ -183,14 +173,14 @@ public:
   /** set z to pointer newPtr
   *  \param SP::SiconosVector  newPtr
   */
-  void setZPtr(SiconosVectorSPtr) ;
+  void setZPtr(SP::SiconosVector) ;
 
   // --- M ---
 
   /** get M
   *  \return pointer on a OSNSMatrix
   */
-  inline OSNSMatrixSPtr getMPtr() const
+  inline SP::OSNSMatrix getMPtr() const
   {
     return M;
   }
@@ -203,7 +193,7 @@ public:
   /** set M to pointer newPtr
    *  \param newPtr OSNSMatrix*
    */
-  void setMPtr(OSNSMatrixSPtr);
+  void setMPtr(SP::OSNSMatrix);
 
   // --- Q ---
   /** get the value of q, the initial state of the DynamicalSystem
@@ -218,7 +208,7 @@ public:
   /** get q, the initial state of the DynamicalSystem
   *  \return pointer on a SiconosVector
   */
-  inline SiconosVectorSPtr getQPtr() const
+  inline SP::SiconosVector getQPtr() const
   {
     return q;
   }
@@ -231,7 +221,7 @@ public:
   /** set q to pointer newPtr
   *  \param SP::SiconosVector  newPtr
   */
-  void setQPtr(SiconosVectorSPtr);
+  void setQPtr(SP::SiconosVector);
 
   /** get the type of storage for M */
   inline const int getMStorageType() const
@@ -247,8 +237,9 @@ public:
   };
 
   /** To initialize the LCP problem(computes topology ...)
-   */
-  void initialize();
+      \param the simulation, owner of this OSNSPB
+  */
+  void initialize(SP::Simulation);
 
   /** computes extra diagonal unitaryBlock-matrix that corresponds to UR1 and UR2
   *  Move this to Unitary Relation class?
@@ -300,5 +291,7 @@ public:
   static LCP* convert(OneStepNSProblem* osnsp);
 
 };
+
+TYPEDEF_SPTR(LCP);
 
 #endif // LCP_H

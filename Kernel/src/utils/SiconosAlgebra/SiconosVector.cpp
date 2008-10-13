@@ -43,31 +43,31 @@ const Index * SiconosVector::getTabIndexPtr() const
   return tmp;
 }
 
-BlockVectIterator SiconosVector::begin()
+VectorOfVectors::iterator SiconosVector::begin()
 {
   SiconosVectorException::selfThrow("SiconosVector::begin(): reserved to BlockVectors");
-  BlockVectIterator it;
+  VectorOfVectors::iterator it;
   return it;
 };
 
-BlockVectIterator SiconosVector::end()
+VectorOfVectors::iterator SiconosVector::end()
 {
   SiconosVectorException::selfThrow("SiconosVector::end(): reserved to BlockVectors");
-  BlockVectIterator it;
+  VectorOfVectors::iterator it;
   return it;
 };
 
-ConstBlockVectIterator SiconosVector::begin() const
+VectorOfVectors::const_iterator SiconosVector::begin() const
 {
   SiconosVectorException::selfThrow("SiconosVector::begin(): reserved to BlockVectors");
-  ConstBlockVectIterator it;
+  VectorOfVectors::const_iterator it;
   return it;
 };
 
-ConstBlockVectIterator SiconosVector::end() const
+VectorOfVectors::const_iterator SiconosVector::end() const
 {
   SiconosVectorException::selfThrow("SiconosVector::end(): reserved to BlockVectors");
-  ConstBlockVectIterator it;
+  VectorOfVectors::const_iterator it;
   return it;
 };
 

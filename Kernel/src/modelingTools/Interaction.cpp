@@ -31,17 +31,17 @@
 #include "RelayNSL.h"
 #include "NewtonImpactNSL.h"
 #include "NewtonImpactFrictionNSL.h"
-#include "NonSmoothDynamicalSystem.h"
 #include "DynamicalSystem.h"
 
 using namespace std;
+using namespace RELATION;
 
 // --- CONSTRUCTORS ---
 
 // --- XML constructor ---
-Interaction::Interaction(InteractionXMLSPtr interxml, SP::NonSmoothDynamicalSystem nsds):
+Interaction::Interaction(SP::InteractionXML interxml, SP::DynamicalSystemsSet nsdsSet):
   id("undefined"), number(0), interactionSize(0), numberOfRelations(0),
-  sizeOfDS(0), sizeZ(0), NSDS(nsds), interactionxml(interxml)
+  sizeOfDS(0), sizeZ(0), interactionxml(interxml)
 {
   assert(interactionxml && "NULL pointer");
 
@@ -81,38 +81,32 @@ Interaction::Interaction(InteractionXMLSPtr interxml, SP::NonSmoothDynamicalSyst
   // --- Dynamical Systems ---
   unsigned int sizeDS ;
   involvedDS.reset(new DynamicalSystemsSet());
-  if (nsds)
+  if (!nsdsSet->isEmpty())
   {
     // Get a list of DS concerned from xml
 
     if (interactionxml->hasAllDS())
-    {
-      DSIterator itDS;
-      DynamicalSystemsSetSPtr nsdsSet = nsds->getDynamicalSystems();
-      for (itDS = nsdsSet->begin(); itDS != nsdsSet->end(); ++itDS)
-        involvedDS->insert(*itDS); // Warning: insert pointers to DS!!
-    }
+      involvedDS->insert(nsdsSet->begin(), nsdsSet->end());
+
     else
     {
       // get numbers of DS involved in the interaction from the xml input file.
-      std::vector<int> listDS;
-      interactionxml->getDSNumbers(listDS);
-
+      std::vector<int> dsNumbers;
+      interactionxml->getDSNumbers(dsNumbers);
       // get corresponding DS and insert them into the involvedDS set.
-      sizeDS = listDS.size();
-      for (unsigned int i = 0; i < sizeDS; i++)
-        involvedDS->insert(nsds->getDynamicalSystemPtrNumber(listDS[i]));
+      for (vector<int>::iterator it = dsNumbers.begin(); it != dsNumbers.end(); ++it)
+        involvedDS->insert(nsdsSet->getPtr(*it));
     }
   }
   else cout << "Interaction constructor, warning: no dynamical systems linked to the interaction!" << endl;
 
   // --- Relation ---
-  RELATIONTYPES relationType = interactionxml->getRelationXML()->getType();
+  RELATION::TYPES relationType = interactionxml->getRelationXML()->getType();
 
   // First Order Non Linear Relation
   if (relationType == FirstOrder)
   {
-    RELATIONSUBTYPES relationSubType = interactionxml->getRelationXML()->getSubType();
+    RELATION::SUBTYPES relationSubType = interactionxml->getRelationXML()->getSubType();
     if (relationSubType == Type1R)
       relation.reset(new FirstOrderType1R(interactionxml->getRelationXML()));
     // Linear relation
@@ -125,7 +119,7 @@ Interaction::Interaction(InteractionXMLSPtr interxml, SP::NonSmoothDynamicalSyst
   // Lagrangian non-linear relation
   else if (relationType == Lagrangian)
   {
-    RELATIONSUBTYPES relationSubType = interactionxml->getRelationXML()->getSubType();
+    RELATION::SUBTYPES relationSubType = interactionxml->getRelationXML()->getSubType();
     // \todo create a factory to avoid "if" list for Relation construction according to subType.
     if (relationSubType == ScleronomousR)
       relation.reset(new LagrangianScleronomousR(interactionxml->getRelationXML()));
@@ -151,8 +145,8 @@ Interaction::Interaction(InteractionXMLSPtr interxml, SP::NonSmoothDynamicalSyst
 
 // --- Constructors from a set of data ---
 
-Interaction::Interaction(boost::shared_ptr<DynamicalSystem> ds, int newNumber, int nInter,
-                         NonSmoothLawSPtr newNSL, boost::shared_ptr<Relation> newRel):
+Interaction::Interaction(SP::DynamicalSystem ds, int newNumber, int nInter,
+                         SP::NonSmoothLaw newNSL, SP::Relation newRel):
   id("none"), number(newNumber), interactionSize(nInter), numberOfRelations(1),
   sizeOfDS(0), sizeZ(0), y(1), nslaw(newNSL), relation(newRel)
 {
@@ -160,8 +154,8 @@ Interaction::Interaction(boost::shared_ptr<DynamicalSystem> ds, int newNumber, i
   involvedDS->insert(ds); // Warning: insert pointer to DS!!
 
 }
-Interaction::Interaction(const string& newId, boost::shared_ptr<DynamicalSystem> ds,
-                         int newNumber, int nInter, NonSmoothLawSPtr newNSL, boost::shared_ptr<Relation> newRel):
+Interaction::Interaction(const string& newId, SP::DynamicalSystem ds,
+                         int newNumber, int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel):
   id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1),
   sizeOfDS(0), sizeZ(0), y(1), nslaw(newNSL), relation(newRel)
 {
@@ -172,7 +166,7 @@ Interaction::Interaction(const string& newId, boost::shared_ptr<DynamicalSystem>
 
 
 Interaction::Interaction(DynamicalSystemsSet& dsConcerned, int newNumber, int nInter,
-                         NonSmoothLawSPtr newNSL, boost::shared_ptr<Relation> newRel):
+                         SP::NonSmoothLaw newNSL, SP::Relation newRel):
   id("none"), number(newNumber), interactionSize(nInter), numberOfRelations(1),
   sizeOfDS(0), sizeZ(0), y(1), nslaw(newNSL), relation(newRel)
 {
@@ -183,7 +177,7 @@ Interaction::Interaction(DynamicalSystemsSet& dsConcerned, int newNumber, int nI
 }
 
 Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, int newNumber,
-                         int nInter, NonSmoothLawSPtr newNSL, RelationSPtr newRel):
+                         int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel):
   id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0),
   y(1), nslaw(newNSL), relation(newRel)
 {
@@ -250,10 +244,10 @@ void Interaction::initializeMemory(unsigned int numberOfDerivatives)
     lambdaOld[i].reset(new BlockVector());
     for (unsigned int j = 0; j < numberOfRelations; ++j)
     {
-      y[i]->insertPtr(SimpleVectorSPtr(new SimpleVector(nslawSize)));
-      yOld[i]->insertPtr(SimpleVectorSPtr(new SimpleVector(nslawSize)));
-      lambda[i]->insertPtr(SimpleVectorSPtr(new SimpleVector(nslawSize)));
-      lambdaOld[i]->insertPtr(SimpleVectorSPtr(new SimpleVector(nslawSize)));
+      y[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
+      yOld[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
+      lambda[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
+      lambdaOld[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
     }
   }
 
@@ -299,7 +293,7 @@ void Interaction::setY(const unsigned int  index, const BlockVector& newY)
   }
 }
 
-void Interaction::setYPtr(const unsigned int  index, boost::shared_ptr<SiconosVector> newY)
+void Interaction::setYPtr(const unsigned int  index, SP::SiconosVector newY)
 {
   assert(y.size() > index &&
          "Interaction::setYPtr, index out of range");
@@ -351,7 +345,7 @@ void Interaction::setYOld(const unsigned int  index, const BlockVector& newYOld)
   }
 }
 
-void Interaction::setYOldPtr(const unsigned int  index, SiconosVectorSPtr newYOld)
+void Interaction::setYOldPtr(const unsigned int  index, SP::SiconosVector newYOld)
 {
   assert(yOld.size() > index &&
          "Interaction::setYOldPtr, index out of range");
@@ -401,7 +395,7 @@ void Interaction::setLambda(const unsigned int  index, const BlockVector& newLam
   }
 }
 
-void Interaction::setLambdaPtr(const unsigned int  index, SiconosVectorSPtr newLambda)
+void Interaction::setLambdaPtr(const unsigned int  index, SP::SiconosVector newLambda)
 {
   assert(lambda.size() > index &&
          "Interaction::setLambdaPtr, index out of range ");
@@ -455,7 +449,7 @@ void Interaction::setLambdaOld(const unsigned int  index, const BlockVector& new
   }
 }
 
-void Interaction::setLambdaOldPtr(const unsigned int  index, SiconosVectorSPtr newLambdaOld)
+void Interaction::setLambdaOldPtr(const unsigned int  index, SP::SiconosVector newLambdaOld)
 {
   if (lambdaOld.size() > index)
     RuntimeException::selfThrow("Interaction::setLambdaOldPtr, index out of range ");
@@ -485,21 +479,12 @@ SP::DynamicalSystem Interaction::getDynamicalSystemPtr(int nb)
   return involvedDS->getPtr(number);
 }
 
-void Interaction::getDynamicalSystem(int nb, DynamicalSystem& ds)
-{
-  // This function is useless in C++ but maybe required in Python? To be checked.
-  // DS is a parameter, since it can be returned, DynamicalSystem being an abstract class.
-  assert(involvedDS->isIn(nb) &&   // if ds number nb is not in the set ...
-         "Interaction::getDynamicalSystem(nb), DS number nb is not in the set.");
-  ds = *(involvedDS->getPtr(nb));
-}
-
-void Interaction::setRelationPtr(RelationSPtr newRelation)
+void Interaction::setRelationPtr(SP::Relation newRelation)
 {
   relation = newRelation;
 }
 
-void Interaction::setNonSmoothLawPtr(NonSmoothLawSPtr newNslaw)
+void Interaction::setNonSmoothLawPtr(SP::NonSmoothLaw newNslaw)
 {
   nslaw = newNslaw;
 }
@@ -593,9 +578,9 @@ void Interaction::saveInteractionToXML()
    * save the data of the Relation
    */
   // Main type of the relation: FirstOrder or Lagrangian
-  RELATIONTYPES type = relation->getType();
+  RELATION::TYPES type = relation->getType();
   // Subtype of the relation
-  RELATIONSUBTYPES subType = relation->getSubType();
+  RELATION::SUBTYPES subType = relation->getSubType();
 
   if (type == FirstOrder)
   {

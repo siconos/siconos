@@ -88,21 +88,22 @@ private:
 public:
 
   /** constructor from data
-  *  \param SP::Simulation: the simulation that owns this problem
   *  \param Solver* pointer to object that contains solver algorithm and formulation \n
   *  (optional, default = NULL => read .opt file in Numerics)
   *  \param String: id of the problem (default = "unamed")
   */
-  MLCP2(SP::Simulation, SP::NonSmoothSolver = SP::NonSmoothSolver(), const std::string& = "unamed_mlcp");
+  MLCP2(SP::NonSmoothSolver = SP::NonSmoothSolver(), const std::string& = "unamed_mlcp");
 
   /** destructor
   */
-  virtual ~MLCP2();
+  ~MLCP2() {};
 
 
   /** To initialize the MLCP problem(computes topology ...)
+     \param the simulation, owner of this OSNSPB
    */
-  virtual void initialize();
+  void initialize(SP::Simulation);
+
   void reset();
   /** compute vector q
   *  \param double : current time

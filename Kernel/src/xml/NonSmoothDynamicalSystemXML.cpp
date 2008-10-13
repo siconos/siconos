@@ -34,23 +34,23 @@ NonSmoothDynamicalSystemXML::NonSmoothDynamicalSystemXML(): rootNode(NULL)
 
 NonSmoothDynamicalSystemXML::NonSmoothDynamicalSystemXML(xmlNodePtr  rootNSDSNode): rootNode(rootNSDSNode)
 {
-  if (rootNode != NULL)
+  if (rootNode)
   {
     xmlNodePtr node;
 
-    if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LMGC90_NSDS_TAG)) == NULL)
+    if (!(node = SiconosDOMTreeTools::findNodeChild(rootNode, LMGC90_NSDS_TAG)))
     {
-      if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DYNAMICAL_SYSTEM_DEFINITION_TAG)) != NULL)
+      if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DYNAMICAL_SYSTEM_DEFINITION_TAG)))
         loadDynamicalSystemXML(node);
       else
         XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadNonSmoothDynamicalSystem error : tag " + DYNAMICAL_SYSTEM_DEFINITION_TAG + " not found.");
 
       // === Interactions ===
-      if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, INTERACTION_DEFINITION_TAG)) != NULL)
+      if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, INTERACTION_DEFINITION_TAG)))
       {
         xmlNodePtr interNode = SiconosDOMTreeTools::findNodeChild(node, INTERACTION_TAG);
         // We look for all Interaction tag, and for each of them add an InteractionXML pointer in the interactionXMLSet
-        while (interNode != NULL) // scan all the "Interaction" tags, and for each of them insert an InteractionXML object in the set
+        while (interNode) // scan all the "Interaction" tags, and for each of them insert an InteractionXML object in the set
         {
           interactionsXMLSet.insert(SP::InteractionXML(new InteractionXML(interNode)));
           interNode = SiconosDOMTreeTools::findFollowNode(interNode, INTERACTION_TAG);
@@ -80,10 +80,10 @@ void NonSmoothDynamicalSystemXML::loadDynamicalSystemXML(xmlNodePtr  rootDSNode)
   // rootDSNode = "DS_Definition". We look for its children node (DynamicalSystem and derived classes) and for
   // each of them add a new DynamicalSystemXML in the set of DSXML.
   node = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr)rootDSNode);
-  if (node == NULL) // At least one DynamicalSystem must be described in the xml file.
+  if (!node)  // At least one DynamicalSystem must be described in the xml file.
     XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadDynamicalSystemXML error : at least one " + DYNAMICAL_SYSTEM_TAG + " must be declared.");
 
-  while (node != NULL)
+  while (node)
   {
     type = (char*)node->name; // get the type of DS
     if (type == LAGRANGIAN_NON_LINEARDS_TAG)
@@ -122,16 +122,16 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(SP::NonSmoothDyna
   //   map<int, InteractionXML*>::iterator itinter;
   //   map<int, EqualityConstraintXML*>::iterator itec;
 
-  //   if( rootNode != NULL )
+  //   if( rootNode )
   //     {
   //       setBVP( nsds->isBVP() );
 
   //       // at first, we check whether we the tag is LMGC90 tag
-  //       if( SiconosDOMTreeTools::findNodeChild((const xmlNodePtr )rootNode, LMGC90_NSDS_TAG) == NULL )
+  //       if(! SiconosDOMTreeTools::findNodeChild((const xmlNodePtr )rootNode, LMGC90_NSDS_TAG)  )
   //  {
   //    // creation of the DS_Definition node if necessary
   //    dsDefinitionNode = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr )rootNode, DYNAMICAL_SYSTEM_DEFINITION_TAG);
-  //    if( dsDefinitionNode == NULL )
+  //    if( !dsDefinitionNode )
   //      dsDefinitionNode = xmlNewChild(rootNode, NULL, (xmlChar*)DYNAMICAL_SYSTEM_DEFINITION_TAG.c_str(), NULL);
 
   //    /*
@@ -139,7 +139,7 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(SP::NonSmoothDyna
   //     */
   //    for(i=0; i<nsds->getNumberOfDS(); i++)
   //      {
-  //        if( nsds->getDynamicalSystemPtr(i)->getDynamicalSystemXMLPtr() == NULL )
+  //        if( !nsds->getDynamicalSystemPtr(i)->getDynamicalSystemXMLPtr() )
   //    {
   //      type = nsds->getDynamicalSystemPtr(i)->getType();
   //      number = nsds->getDynamicalSystemPtr(i)->getNumber();
@@ -236,12 +236,12 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(SP::NonSmoothDyna
   //       if( nsds->getEqualityConstraints().size() > 0 )
   //  {
   //    ecDefinitionNode = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr )rootNode, EQUALITYCONSTRAINT_DEFINITION_TAG);
-  //    if( ecDefinitionNode == NULL )
+  //    if( !ecDefinitionNode )
   //      ecDefinitionNode = xmlNewChild(rootNode, NULL, (xmlChar*)EQUALITYCONSTRAINT_DEFINITION_TAG.c_str(), NULL);
 
   //    for(i=0; i<nsds->getEqualityConstraints().size(); i++)
   //      {
-  //        if( nsds->getEqualityConstraintPtr(i)->getEqualityConstraintXML() == NULL )
+  //        if(! nsds->getEqualityConstraintPtr(i)->getEqualityConstraintXML() )
   //    {
   //      number = nsds->getEqualityConstraintPtr(i)->getNumber();
   //      sprintf(num, "%d", number);
@@ -347,12 +347,12 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(SP::NonSmoothDyna
   //       if( nsds->getInteractionVectorSize() > 0 )
   //  {
   //    interactionDefinitionNode = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr )rootNode, INTERACTION_DEFINITION_TAG);
-  //    if( interactionDefinitionNode == NULL )
+  //    if( !interactionDefinitionNode )
   //      interactionDefinitionNode = xmlNewChild(rootNode, NULL, (xmlChar*)INTERACTION_DEFINITION_TAG.c_str(), NULL);
 
   //    for(i=0; int(i)<nsds->getInteractionVectorSize(); i++)
   //      {
-  //        if( nsds->getInteractionPtr(i)->getInteractionXMLPtr() == NULL )
+  //        if( !nsds->getInteractionPtr(i)->getInteractionXMLPtr()  )
   //    {
   //      number = nsds->getInteractionPtr(i)->getNumber();
   //      sprintf(num, "%d", number);

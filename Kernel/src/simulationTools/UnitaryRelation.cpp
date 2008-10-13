@@ -24,11 +24,12 @@
 #include "RuntimeException.h"
 
 using namespace std;
+using namespace RELATION;
 
 // --- CONSTRUCTORS ---
 
 // Data constructor
-UnitaryRelation::UnitaryRelation(InteractionSPtr inter, unsigned int pos, unsigned int num): mainInteraction(inter), relativePosition(pos), number(num)
+UnitaryRelation::UnitaryRelation(SP::Interaction inter, unsigned int pos, unsigned int num): mainInteraction(inter), relativePosition(pos), number(num)
 {}
 
 // --- DESTRUCTOR ---
@@ -51,13 +52,13 @@ const VectorOfVectors UnitaryRelation::getY() const
   return tmp;
 }
 
-SiconosVectorSPtr UnitaryRelation::getYPtr(unsigned int i) const
+SP::SiconosVector UnitaryRelation::getYPtr(unsigned int i) const
 {
   // i is the derivative number.
   return ((mainInteraction->getYPtr(i))->getVectorPtr(number));
 }
 
-SiconosVectorSPtr UnitaryRelation::getYOldPtr(unsigned int i) const
+SP::SiconosVector UnitaryRelation::getYOldPtr(unsigned int i) const
 {
   // i is the derivative number.
   return ((mainInteraction->getYOldPtr(i))->getVectorPtr(number));
@@ -76,7 +77,7 @@ const VectorOfVectors UnitaryRelation::getLambda() const
   return tmp;
 }
 
-SiconosVectorSPtr UnitaryRelation::getLambdaPtr(unsigned int i) const
+SP::SiconosVector UnitaryRelation::getLambdaPtr(unsigned int i) const
 {
   // i is the derivative number.
   return ((mainInteraction->getLambdaPtr(i))->getVectorPtr(number));
@@ -107,17 +108,17 @@ const string UnitaryRelation::getNonSmoothLawType() const
   return mainInteraction->getNonSmoothLawPtr()->getType();
 }
 
-const RELATIONTYPES UnitaryRelation::getRelationType() const
+const RELATION::TYPES UnitaryRelation::getRelationType() const
 {
   return mainInteraction->getRelationPtr()->getType();
 }
 
-const RELATIONSUBTYPES UnitaryRelation::getRelationSubType() const
+const RELATION::SUBTYPES UnitaryRelation::getRelationSubType() const
 {
   return mainInteraction->getRelationPtr()->getSubType();
 }
 
-DynamicalSystemsSetSPtr UnitaryRelation::getDynamicalSystemsPtr()
+SP::DynamicalSystemsSet UnitaryRelation::getDynamicalSystemsPtr()
 {
   return mainInteraction->getDynamicalSystemsPtr();
 }
@@ -143,7 +144,7 @@ void UnitaryRelation::initialize(const std::string& simulationType)
   //     }
   if (simulationType == "EventDriven")
   {
-    RELATIONTYPES pbType = getRelationType();
+    RELATION::TYPES pbType = getRelationType();
     if (pbType == FirstOrder)
     {
       for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
@@ -159,7 +160,7 @@ void UnitaryRelation::initialize(const std::string& simulationType)
   //     RuntimeException::selfThrow("UnitaryRelation::initialize(simulationType) failed: unknown simulation type.");
 }
 
-void UnitaryRelation::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SiconosMatrixSPtr UnitaryBlock, unsigned index) const
+void UnitaryRelation::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SP::SiconosMatrix UnitaryBlock, unsigned index) const
 {
   unsigned int k = 0;
   DSIterator itDS;
@@ -176,10 +177,10 @@ void UnitaryRelation::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SiconosMa
   if ((*itDS)->getDim() != UnitaryBlock->size(1))
     RuntimeException::selfThrow("UnitaryRelation::getLeftUnitaryBlockForDS(DS, UnitaryBlock, ...): inconsistent sizes between UnitaryBlock and DS");
 
-  SiconosMatrixSPtr originalMatrix;
+  SP::SiconosMatrix originalMatrix;
 
-  RELATIONTYPES relationType = getRelationType();
-  RELATIONSUBTYPES relationSubType = getRelationSubType();
+  RELATION::TYPES relationType = getRelationType();
+  RELATION::SUBTYPES relationSubType = getRelationSubType();
 
   if (relationType == FirstOrder)
   {
@@ -213,7 +214,7 @@ void UnitaryRelation::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SiconosMa
   setBlock(originalMatrix, UnitaryBlock, subDim, subPos);
 }
 
-void UnitaryRelation::getRightUnitaryBlockForDS(SP::DynamicalSystem ds, SiconosMatrixSPtr UnitaryBlock, unsigned index) const
+void UnitaryRelation::getRightUnitaryBlockForDS(SP::DynamicalSystem ds, SP::SiconosMatrix UnitaryBlock, unsigned index) const
 {
   unsigned int k = 0;
   DSIterator itDS;
@@ -231,9 +232,9 @@ void UnitaryRelation::getRightUnitaryBlockForDS(SP::DynamicalSystem ds, SiconosM
     RuntimeException::selfThrow("UnitaryRelation::getRightUnitaryBlockForDS(DS, UnitaryBlock, ...): inconsistent sizes between UnitaryBlock and DS");
 
 
-  SiconosMatrixSPtr originalMatrix; // Complete matrix, Relation member.
-  RELATIONTYPES relationType = getRelationType();
-  RELATIONSUBTYPES relationSubType = getRelationSubType();
+  SP::SiconosMatrix originalMatrix; // Complete matrix, Relation member.
+  RELATION::TYPES relationType = getRelationType();
+  RELATION::SUBTYPES relationSubType = getRelationSubType();
 
   if (relationType == FirstOrder)
   {
@@ -271,14 +272,14 @@ void UnitaryRelation::getRightUnitaryBlockForDS(SP::DynamicalSystem ds, SiconosM
   setBlock(originalMatrix, UnitaryBlock, subDim, subPos);
 }
 
-void UnitaryRelation::getExtraUnitaryBlock(SiconosMatrixSPtr UnitaryBlock) const
+void UnitaryRelation::getExtraUnitaryBlock(SP::SiconosMatrix UnitaryBlock) const
 {
   // !!! Warning: we suppose that D is unitaryBlock diagonal, ie that there is no coupling between UnitaryRelation through D !!!
   // Any coupling between relations through D must be taken into account thanks to the nslaw (by "increasing" its dimension).
 
-  RELATIONTYPES relationType = getRelationType();
-  RELATIONSUBTYPES relationSubType = getRelationSubType();
-  SiconosMatrixSPtr D;
+  RELATION::TYPES relationType = getRelationType();
+  RELATION::SUBTYPES relationSubType = getRelationSubType();
+  SP::SiconosMatrix D;
 
   if (relationType == FirstOrder)
   {

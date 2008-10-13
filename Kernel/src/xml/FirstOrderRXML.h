@@ -90,7 +90,7 @@ public:
    */
   inline bool hasG() const
   {
-    return (gNode != NULL);
+    return (gNode);
   }
   // ================== h ==================
 
@@ -116,7 +116,7 @@ public:
    */
   inline bool hasH() const
   {
-    return (hNode != NULL);
+    return (hNode);
   }
 
   // ================== jacobianG ==================

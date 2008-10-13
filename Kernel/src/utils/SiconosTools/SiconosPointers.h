@@ -1,8 +1,6 @@
 #ifndef SiconosPointers_h
 #define SiconosPointers_h
 
-#ifdef WithSmartPtr
-
 /* *SPtr types are smart pointers */
 
 /* http://www.boost.org/doc/libs/release/libs/smart_ptr */
@@ -76,20 +74,6 @@ struct nullDeleter
   class X; \
   TYPEDEF_SAPTR(X)
 
-
-#else /* WithSmartPtr */
-
-/* *SPtr types are standard pointer */
-
-#define DEFINE_SPTR(X) \
-  class X; \
-  typedef X * X##SPtr; \
-  typedef const X * X##SPtrConst; \
-  inline X##SPtr create##X##SPtr(X &x) { return &x; }; \
-  inline X##SPtrConst create##X##SPtrConst(const X &x) { return &x; };
-
-#endif /* WithSmartPtr */
-
 /* *SPtr types definitions */
 
 DEFINE_SPTR(SiconosVector);
@@ -122,6 +106,7 @@ DEFINE_SPTR(EventsManager);
 DEFINE_SPTR(UnitaryRelation);
 DEFINE_SPTR(DynamicalSystemXML);
 DEFINE_SPTR(FirstOrderLinearDS);
+DEFINE_SPTR(FirstOrderLinearTIDS);
 DEFINE_SPTR(FirstOrderLinearDSXML);
 DEFINE_SPTR(LagrangianScleronomousR);
 DEFINE_SPTR(LagrangianRXML);
@@ -156,7 +141,6 @@ DEFINE_SPTR(LsodarXML);
 DEFINE_SPTR(QPXML);
 DEFINE_SPTR(LCPXML);
 
-#ifdef WithSmartPtr
 TYPEDEF_SPTR(MixedLinearComplementarity_Problem);
 TYPEDEF_SPTR(Numerics_Options);
 TYPEDEF_SPTR(NumericsMatrix);
@@ -171,6 +155,5 @@ TYPEDEF_SAPTR(doublereal);
 namespace SP = SharedPointer;
 namespace SA = SharedArray;
 namespace SPC = SharedPointerConst;
-#endif
 
 #endif /* SiconosPointers_h */

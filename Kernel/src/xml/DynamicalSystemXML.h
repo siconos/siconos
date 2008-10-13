@@ -19,7 +19,7 @@
 
 /*! \file DynamicalSystemXML.h
 
-*/
+ */
 
 #ifndef __DynamicalSystemXML__
 #define __DynamicalSystemXML__
@@ -51,7 +51,7 @@ protected:
   xmlNodePtr zNode; /**< z in \f$ M \dot x = f(x,t,z) \f$ */
 
   /** Default constructor */
-  DynamicalSystemXML();
+  DynamicalSystemXML(): rootNode(NULL), stepsInMemoryNode(NULL), zNode(NULL) {};
 
 public:
 
@@ -65,8 +65,8 @@ public:
   virtual inline ~DynamicalSystemXML() {};
 
   /** Return the number of the DynamicalSystem
-   *   \return an integer
-   */
+      \return an integer
+  */
   inline const int getNumber() const
   {
     return SiconosDOMTreeTools::getAttributeValue<int>(rootNode, NUMBER_ATTRIBUTE);
@@ -75,25 +75,7 @@ public:
   /** Return the type of the DynamicalSystem
    *   \return a string
    */
-  inline const DSTYPES getType() const
-  {
-    std::string res((char*)rootNode->name);
-    if (res == "NonLinearDS")
-      return FONLDS;
-    else if (res == "LinearDS")
-      return FOLDS;
-    else if (res == "LinearTIDS")
-      return FOLTIDS;
-    else if (res == "LagrangianDS")
-      return LNLDS;
-    else if (res == "LagrangianLinearTIDS")
-      return LLTIDS;
-    else
-    {
-      XMLException::selfThrow("DynamicalSystemXML - getType: unknown type of DS.");
-      return FONLDS;
-    }
-  }
+  const DS::TYPES getType() const;
 
   /** Returns the z vector, discret state of the DynamicalSystem
    *  \return SimpleVector
@@ -131,7 +113,7 @@ public:
    */
   inline bool hasStepsInMemory() const
   {
-    return (stepsInMemoryNode != NULL);
+    return (stepsInMemoryNode);
   }
 
   /** returns true if zNode is defined
@@ -139,7 +121,7 @@ public:
    */
   inline bool hasZ() const
   {
-    return (zNode != NULL);
+    return (zNode);
   }
 
 };

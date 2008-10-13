@@ -382,7 +382,7 @@ extern "C" int sicModelgetQ(double *value, int indexDS, int indexVector)
 
     LagrangianDS* system = static_cast<LagrangianDS*>(prtModel->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(indexDS));
 
-    if (system != NULL)
+    if (system)
     {
       size = (system->getQ()).size();
       if ((indexVector >= size) || (indexVector < 0))
@@ -529,7 +529,7 @@ extern "C" int sicSetComputeMassFunction(int nIdDs, char *libname, char *func)
       st = SIC_ERROR;
     }
 
-    if (SetDSPtr->getPtr(nIdDs) == NULL)
+    if (!SetDSPtr->getPtr(nIdDs))
     {
       RuntimeException::selfThrow("siconos/C:: sicSetComputeMassFunction failed");
       st = SIC_ERROR;
@@ -566,7 +566,7 @@ extern "C" int sicSetComputeNNLFunction(int nIdDs, char *libname, char *func)
       RuntimeException::selfThrow("siconos/C:: sicSetComputeNNLFunction failed");
       st = SIC_ERROR;
     }
-    if (SetDSPtr->getPtr(nIdDs) == NULL)
+    if (!SetDSPtr->getPtr(nIdDs))
     {
       RuntimeException::selfThrow("siconos/C:: sicSetComputeNNLFunction failed");
       st = SIC_ERROR;
@@ -603,7 +603,7 @@ extern "C" int sicSetComputeJacobianQNNLFunction(int nIdDs, char *libname, char 
       RuntimeException::selfThrow("siconos/C:: sicSetComputeJacobianQNNLFunction failed");
       st = SIC_ERROR;
     }
-    if (SetDSPtr->getPtr(nIdDs) == NULL)
+    if (!SetDSPtr->getPtr(nIdDs))
     {
       RuntimeException::selfThrow("siconos/C:: sicSetComputeJacobianQNNLFunction failed");
       st = SIC_ERROR;
@@ -640,7 +640,7 @@ extern "C" int  sicSetComputeJacobianVelocityNNLFunction(int nIdDs, char *libnam
       RuntimeException::selfThrow("siconos/C::  sicSetComputeJacobianVelocityNNLFunction");
       st = SIC_ERROR;
     }
-    if (SetDSPtr->getPtr(nIdDs) == NULL)
+    if (!SetDSPtr->getPtr(nIdDs))
     {
       RuntimeException::selfThrow("siconos/C::  sicSetComputeJacobianVelocityNNLFunction failed");
       st = SIC_ERROR;
@@ -677,7 +677,7 @@ extern "C" int sicSetComputeFIntFunction(int nIdDs, char *libname, char *func)
       RuntimeException::selfThrow("siconos/C:: sicSetComputeFIntFunction failed");
       st = SIC_ERROR;
     }
-    if (SetDSPtr->getPtr(nIdDs) == NULL)
+    if (!SetDSPtr->getPtr(nIdDs))
     {
       RuntimeException::selfThrow("siconos/C:: sicSetComputeFIntFunction failed");
       st = SIC_ERROR;
@@ -714,7 +714,7 @@ extern "C" int sicSetComputeJacobianQFIntFunction(int nIdDs, char *libname, char
       RuntimeException::selfThrow("siconos/C:: sicSetComputeJacobianQFIntFunction failed");
       st = SIC_ERROR;
     }
-    if (SetDSPtr->getPtr(nIdDs) == NULL)
+    if (!SetDSPtr->getPtr(nIdDs))
     {
       RuntimeException::selfThrow("siconos/C:: sicSetComputeJacobianQFIntFunction failed");
       st = SIC_ERROR;
@@ -751,7 +751,7 @@ extern "C" int sicSetComputeJacobianVelocityFIntFunction(int nIdDs, char *libnam
       RuntimeException::selfThrow("siconos/C:: sicSetComputeJacobianVelocityFIntFunction failed");
       st = SIC_ERROR;
     }
-    if (SetDSPtr->getPtr(nIdDs) == NULL)
+    if (!SetDSPtr->getPtr(nIdDs))
     {
       RuntimeException::selfThrow("siconos/C:: sicSetComputeJacobianVelocityFIntFunction failed");
       st = SIC_ERROR;
@@ -829,7 +829,7 @@ extern "C" int  sicSetComputeFExtFunction(int nIdDs, char *libname, char *func)
       RuntimeException::selfThrow("siconos/C::  setComputeFExtFunction failed");
       st = SIC_ERROR;
     }
-    if (SetDSPtr->getPtr(nIdDs) == NULL)
+    if (!SetDSPtr->getPtr(nIdDs))
     {
       RuntimeException::selfThrow("siconos/C::  setComputeFExtFunction failed");
       st = SIC_ERROR;
@@ -1067,7 +1067,7 @@ extern "C" int sicModel(double t0, double T)
 
     if (InteractionSetPtr->size() == 0)
       RuntimeException::selfThrow("siconos/C:: sicNSDSModel failed due to Interaction empty");
-    if (prtNSDS == NULL)
+    if (!prtNSDS)
       RuntimeException::selfThrow("siconos/C:: sicModel failed due to NSDS empty");
 
     //prtNSDS->setDynamicalSystems(*SetDSPtr);

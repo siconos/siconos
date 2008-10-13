@@ -97,7 +97,7 @@ public:
    */
   inline bool hasP()
   {
-    return (this->pNode != NULL);
+    return (this->pNode);
   }
 
   /** returns true if QNode is defined
@@ -105,7 +105,7 @@ public:
    */
   inline bool hasQ()
   {
-    return (this->QNode != NULL);
+    return (this->QNode);
   }
 
   /** makes the operations to create a OneStepNSProblemXML to the SimulationXML

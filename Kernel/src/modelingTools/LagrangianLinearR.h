@@ -56,16 +56,16 @@ class LagrangianLinearR : public LagrangianR
 private:
 
   /** H matrix such as y = Hq + ...*/
-  SiconosMatrixSPtr H;
+  SP::SiconosMatrix H;
 
   /** b vector such y = Hq + b + ...*/
-  SimpleVectorSPtr b;
+  SP::SimpleVector b;
 
   /** D matrix, coefficient of lambda in y */
-  SiconosMatrixSPtr D;
+  SP::SiconosMatrix D;
 
   /** F matrix, coefficient of z */
-  SiconosMatrixSPtr F;
+  SP::SiconosMatrix F;
 
   /** Default constructor
    */
@@ -76,7 +76,7 @@ public:
   /** constructor with XML object of the parent class Relation
    *  \param RelationXML* : the XML object corresponding
    */
-  LagrangianLinearR(RelationXMLSPtr);
+  LagrangianLinearR(SP::RelationXML);
 
   /** constructor with in parameters, the data needed to build this Relation
    *  \param a SiconosMatrix to set H
@@ -127,7 +127,7 @@ public:
   /** get H
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrixSPtr getHPtr() const
+  inline SP::SiconosMatrix getHPtr() const
   {
     return H;
   }
@@ -140,7 +140,7 @@ public:
   /** set H to pointer newPtr
    *  \param SP::SiconosMatrix  newPtr
    */
-  void setHPtr(SiconosMatrixSPtr);
+  void setHPtr(SP::SiconosMatrix);
   // -- b --
 
   /** get the value of b
@@ -154,7 +154,7 @@ public:
   /** get b
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVectorSPtr getBPtr() const
+  inline SP::SimpleVector getBPtr() const
   {
     return b;
   }
@@ -167,7 +167,7 @@ public:
   /** set B to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  void setBPtr(SimpleVectorSPtr);
+  void setBPtr(SP::SimpleVector);
 
   // -- D --
 
@@ -182,7 +182,7 @@ public:
   /** get D
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrixSPtr getDPtr() const
+  inline SP::SiconosMatrix getDPtr() const
   {
     return D;
   }
@@ -195,7 +195,7 @@ public:
   /** set D to pointer newPtr
    *  \param SP::SiconosMatrix  newPtr
    */
-  void setDPtr(SiconosMatrixSPtr);
+  void setDPtr(SP::SiconosMatrix);
 
   // -- F --
 
@@ -210,7 +210,7 @@ public:
   /** get F
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrixSPtr getFPtr() const
+  inline SP::SiconosMatrix getFPtr() const
   {
     return F;
   }
@@ -223,7 +223,7 @@ public:
   /** set F to pointer newPtr
    *  \param SP::SiconosMatrix  newPtr
    */
-  void setFPtr(SiconosMatrixSPtr);
+  void setFPtr(SP::SiconosMatrix);
 
   // --- OTHER FUNCTIONS ---
 

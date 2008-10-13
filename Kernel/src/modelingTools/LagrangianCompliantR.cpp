@@ -25,42 +25,30 @@
 #include "LagrangianDS.h"
 
 using namespace std;
+using namespace RELATION;
 
 // Default constructor
 LagrangianCompliantR::LagrangianCompliantR(): LagrangianR(CompliantR), hPtr(NULL), G0Ptr(NULL), G1Ptr(NULL)
 {
-  isPlugged["G0"] = false ;
-  isPlugged["G1"] = false ;
-
-#ifndef WithSmartPtr
-  isAllocatedIn["G0"] = false;
-  isAllocatedIn["G1"] = false;
-  G.resize(2, NULL);
-#else
+  isPlugged[RELATION::G0] = false ;
+  isPlugged[RELATION::G1] = false ;
   G.resize(2);
-#endif
-
 }
 
 // xml constructor
-LagrangianCompliantR::LagrangianCompliantR(RelationXMLSPtr relxml): LagrangianR(relxml, CompliantR), hPtr(NULL), G0Ptr(NULL), G1Ptr(NULL)
+LagrangianCompliantR::LagrangianCompliantR(SP::RelationXML relxml): LagrangianR(relxml, CompliantR), hPtr(NULL), G0Ptr(NULL), G1Ptr(NULL)
 {
-  LagrangianRXMLSPtr LRxml = boost::static_pointer_cast<LagrangianRXML>(relationxml);
+  SP::LagrangianRXML LRxml = boost::static_pointer_cast<LagrangianRXML>(relationxml);
   // h plug-in
   if (LRxml->hasH())
   {
-    pluginNames["h"] = LRxml->getHPlugin();
-    setComputeHFunction(cShared.getPluginName(pluginNames["h"]), cShared.getPluginFunctionName(pluginNames["h"]));
+    pluginNames[RELATION::h] = LRxml->getHPlugin();
+    setComputeHFunction(SSL::getPluginName(pluginNames[RELATION::h]), SSL::getPluginFunctionName(pluginNames[RELATION::h]));
   }
 
   if (!LRxml->hasG())
     RuntimeException::selfThrow("LagrangianCompliantR:: xml constructor failed, can not find a definition for G0.");
-
-#ifndef WithSmartPtr
-  G.resize(2, NULL);
-#else
   G.resize(2);
-#endif
 
   // Read G matrices or plug-in names.
   readGInXML(LRxml, 0);
@@ -71,90 +59,58 @@ LagrangianCompliantR::LagrangianCompliantR(RelationXMLSPtr relxml): LagrangianR(
 LagrangianCompliantR::LagrangianCompliantR(const string& computeH, const std::vector<string> & computeG): LagrangianR(CompliantR), hPtr(NULL), G0Ptr(NULL), G1Ptr(NULL)
 {
   // h
-  setComputeHFunction(cShared.getPluginName(computeH), cShared.getPluginFunctionName(computeH));
+  setComputeHFunction(SSL::getPluginName(computeH), SSL::getPluginFunctionName(computeH));
   // G
   unsigned int nG = 2;
 
-#ifndef WithSmartPtr
-  G.resize(nG, NULL);
-#else
   G.resize(nG);
-#endif
 
-  string name;
+  RELATION::PluginNames name;
   for (unsigned int i = 0; i < nG; ++i)
   {
-    name = "G" + toString<unsigned int>(i);
+    if (i == 0) name = G0;
+    else if (i == 1) name = G1;
+    else name = G2;
     pluginNames[name] = computeG[i];
-    setComputeGFunction(cShared.getPluginName(pluginNames[name]), cShared.getPluginFunctionName(pluginNames[name]), i);
-#ifndef WithSmartPtr
-    isAllocatedIn[name] = false;
-#endif
+    setComputeGFunction(SSL::getPluginName(pluginNames[name]), SSL::getPluginFunctionName(pluginNames[name]), i);
   }
 }
 
 LagrangianCompliantR::~LagrangianCompliantR()
-{
-  hPtr = NULL;
-  G0Ptr = NULL;
-  G1Ptr = NULL;
-}
+{}
 
 void LagrangianCompliantR::initComponents()
 {
   LagrangianR::initComponents();
   unsigned int sizeY = interaction->getSizeOfY();
-
-#ifndef WithSmartPtr
-  workL = new SimpleVector(sizeY);
-#else
   workL.reset(new SimpleVector(sizeY));
-#endif
 
   if (! G[1])
-  {
-
-#ifndef WithSmartPtr
-    G[1] = new SimpleMatrix(sizeY, sizeY);
-    isAllocatedIn["G1"] = true ;
-#else
     G[1].reset(new SimpleMatrix(sizeY, sizeY));
-#endif
-
-  }
   else if (sizeY != G[1]->size(0) || sizeY != G[1]->size(1))
     RuntimeException::selfThrow("LagrangianCompliantR:: initComponents failed. Inconsistent sizes between Interaction and Relation matrices.");
 }
 
 void LagrangianCompliantR::setComputeHFunction(const string& pluginPath, const string& functionName)
 {
-  cShared.setFunction(&hPtr, pluginPath, functionName);
-  string plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  pluginNames["h"] = plugin + ":" + functionName;
-  isPlugged["h"] = true;
+  isPlugged[RELATION::h] = Plugin::setFunction(&hPtr, pluginPath, functionName, pluginNames[RELATION::h]);
 }
 
 void LagrangianCompliantR::setComputeGFunction(const string& pluginPath, const string& functionName, unsigned int index)
 {
   if (index == 0)
-    cShared.setFunction(&G0Ptr, pluginPath, functionName);
-  else if (index == 1)
-    cShared.setFunction(&G1Ptr, pluginPath, functionName);
+    isPlugged[RELATION::G0] = Plugin::setFunction(&G0Ptr, pluginPath, functionName, pluginNames[RELATION::G0]);
   else
-    RuntimeException::selfThrow("LagrangianCompliantR:: setComputeGFunction, index out of range");
-  string plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  string name = "G" + toString<unsigned int>(index);
-  pluginNames[name] = plugin + ":" + functionName;
-  isPlugged[name] = true;
+    isPlugged[RELATION::G1] = Plugin::setFunction(&G1Ptr, pluginPath, functionName, pluginNames[RELATION::G1]);
 }
 
 void LagrangianCompliantR::computeH(double time)
 {
-  if (isPlugged["h"])
+  if (isPlugged[RELATION::h])
   {
     // get vector y of the current interaction
-    SiconosVectorSPtr y = interaction->getYPtr(0);
-    SiconosVectorSPtr lambda = interaction->getLambdaPtr(0);
+    SP::SiconosVector y = interaction->getYPtr(0);
+    SP::SiconosVector lambda = interaction->getLambdaPtr(0);
 
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
     *workX = *data["q0"];
@@ -166,7 +122,7 @@ void LagrangianCompliantR::computeH(double time)
     unsigned int sizeY = y->size();
     unsigned int sizeZ = workZ->size();
 
-    if (hPtr == NULL)
+    if (!hPtr)
       RuntimeException::selfThrow("LagrangianCompliantR:computeH() failed, h is not linked to a plugin function");
     hPtr(sizeQ, &(*workX)(0), sizeY, &(*workL)(0), &(*workY)(0), sizeZ, &(*workZ)(0));
 
@@ -181,7 +137,10 @@ void LagrangianCompliantR::computeG(double time, unsigned int  index)
   if (index >= G.size())
     RuntimeException::selfThrow("LagrangianCompliantR:: computeG(index), index out of range.");
 
-  string name = "G" + toString<unsigned int>(index);
+  RELATION::PluginNames name;
+  if (index == 0) name = G0;
+  else if (index == 1) name = G1;
+  else name = G2;
 
   if (isPlugged[name])
   {
@@ -197,13 +156,13 @@ void LagrangianCompliantR::computeG(double time, unsigned int  index)
     *workL = *interaction->getLambdaPtr(0);
     if (index == 0)
     {
-      if (G0Ptr == NULL)
+      if (!G0Ptr)
         RuntimeException::selfThrow("LagrangianCompliantR::computeG() is not linked to a plugin function");
       G0Ptr(sizeQ, &(*workX)(0), sizeY, &(*workL)(0), &(*G[0])(0, 0), sizeZ, &(*workZ)(0));
     }
     else if (index == 1)
     {
-      if (G1Ptr == NULL)
+      if (!G1Ptr)
         RuntimeException::selfThrow("LagrangianCompliantR::computeG() is not linked to a plugin function");
       G1Ptr(sizeQ, &(*workX)(0), sizeY, &(*workL)(0), &(*G[1])(0, 0), sizeZ, &(*workZ)(0));
     }
@@ -218,12 +177,12 @@ void LagrangianCompliantR::computeOutput(double time, unsigned int derivativeNum
     computeH(time);
   else
   {
-    SiconosVectorSPtr y = interaction->getYPtr(derivativeNumber);
+    SP::SiconosVector y = interaction->getYPtr(derivativeNumber);
     computeG(time, 0);
     computeG(time, 1);
     if (derivativeNumber == 1)
     {
-      SiconosVectorSPtr lambda = interaction->getLambdaPtr(derivativeNumber);
+      SP::SiconosVector lambda = interaction->getLambdaPtr(derivativeNumber);
       // y = G0 q1 + G1 lambda
       prod(*G[0], *data["q1"], *y);
       prod(*G[1], *lambda, *y, false);
@@ -240,7 +199,7 @@ void LagrangianCompliantR::computeInput(const double time, const unsigned int le
   computeG(time, 0);
   string name = "p" + toString<unsigned int>(level);
   // get lambda of the concerned interaction
-  SiconosVectorSPtr lambda = interaction->getLambdaPtr(level);
+  SP::SiconosVector lambda = interaction->getLambdaPtr(level);
 
   // data[name] += trans(G) * lambda
   prod(*lambda, *G[0], *data[name], false);

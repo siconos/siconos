@@ -36,72 +36,42 @@ class Relation;
  *   \date 04/13/2004
  *
  */
+
+using RELATION::TYPES;
+using RELATION::SUBTYPES;
+
 class RelationXML
 {
+private:
+  /** Copy => private: no copy nor pass-by value. */
+  RelationXML(const RelationXML&);
+
 protected:
 
   /** Relation node.*/
   xmlNodePtr rootNode;
 
-  /**Default construcor. */
-  RelationXML();
-
-  /** Copy => private: no copy nor pass-by value. */
-  RelationXML(const RelationXML&);
+  /**Default constructor. */
+  RelationXML(): rootNode(NULL) {};
 
   /**Basic construcor.
    \param a pointer to the relation xml node.
   */
-  RelationXML(xmlNodePtr);
+  RelationXML(xmlNodePtr node): rootNode(node) {};
 
 public:
 
   /** Destructor */
-  virtual ~RelationXML();
+  virtual ~RelationXML() {};
 
   /** Returns the type of the RelationXML
-   *  \return a string.
    */
-  inline const RELATIONTYPES getType() const
-  {
-    std::string type((char*)rootNode->name);
-    if (type == "LagrangianRelation")
-      return Lagrangian;
-    else if (type == "FirstOrderRelation")
-      return FirstOrder;
-    else
-    {
-      XMLException::selfThrow("RelationXML - getType: unknown type of Relation.");
-      return Lagrangian;
-    }
-  }
+  const RELATION::TYPES getType() const ;
 
   /** Returns the sub-type of the Relation
    *  \return a string.
    */
-  const RELATIONSUBTYPES getSubType() const
-  {
-    std::string res = SiconosDOMTreeTools::getStringAttributeValue(rootNode, "type");
-    if (res == "NonLinear")
-      return NonLinearR;
-    else if (res == "Linear")
-      return LinearR;
-    else if (res == "Type1")
-      return Type1R;
-    else if (res == "LinearTI")
-      return LinearTIR;
-    else if (res == "Scleronomous")
-      return ScleronomousR;
-    else if (res == "Rheonomous")
-      return RheonomousR;
-    else if (res == "Compliant")
-      return CompliantR;
-    else
-    {
-      XMLException::selfThrow("RelationXML - getType: unknown type of Relation.");
-      return NonLinearR;
-    }
-  }
+  const RELATION::SUBTYPES getSubType() const;
 
   /** Returns the node of the RelationXML
    *   \return an xmlNodePtr.
@@ -115,7 +85,11 @@ public:
    *   \param xmlNodePtr : the root node of the RelationXML
    *   \param Relation* : the Relation of this RelationXML
    */
-  void updateRelationXML(xmlNodePtr, Relation*);
+  inline void updateRelationXML(xmlNodePtr node, Relation*)
+  {
+    rootNode = node;
+  }
+
 };
 
 #endif

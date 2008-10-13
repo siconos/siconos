@@ -32,13 +32,13 @@ class OneStepNSProblemXML;
 class TimeDiscretisationXML;
 
 /** set of OneStepIntegratorXML */
-typedef std::set<OneStepIntegratorXMLSPtr> SetOfOSIXML;
+typedef std::set<SP::OneStepIntegratorXML> SetOfOSIXML;
 
 /** iterator through set of OneStepIntegratorXML */
 typedef SetOfOSIXML::iterator SetOfOSIXMLIt;
 
 /** set of OneStepNSProblemXML */
-typedef std::set<OneStepNSProblemXMLSPtr> SetOfOSNSPBXML;
+typedef std::set<SP::OneStepNSProblemXML> SetOfOSNSPBXML;
 
 /** iterator through  set of OneStepNSProblemXML*/
 typedef SetOfOSNSPBXML::iterator SetOfOSNSPBXMLIt;
@@ -93,7 +93,7 @@ private:
   SetOfOSNSPBXML OSNSPBXMLSet;
 
   /* TimeDiscretisationXML */
-  TimeDiscretisationXMLSPtr timeDiscretisationXML;
+  SP::TimeDiscretisationXML timeDiscretisationXML;
 
 public:
 
@@ -152,7 +152,7 @@ public:
   /** Return the TimeDiscretisationXML of the SimulationXML
    *   \return the TimeDiscretisationXML of the SimulationXML
    */
-  inline TimeDiscretisationXMLSPtr getTimeDiscretisationXMLPtr()
+  inline SP::TimeDiscretisationXML getTimeDiscretisationXMLPtr()
   {
     return timeDiscretisationXML;
   }
@@ -169,7 +169,7 @@ public:
    *   \param xmlNodePtr  : the root node of the SimulationXML
    *   \param SP::Simulation : the Simulation of this SimulationXML
    */
-  void saveSimulation2XML(xmlNodePtr  , SimulationSPtr);
+  void saveSimulation2XML(xmlNodePtr  , SP::Simulation);
 };
 
 

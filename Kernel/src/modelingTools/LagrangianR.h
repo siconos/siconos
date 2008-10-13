@@ -60,7 +60,7 @@ class LagrangianR : public Relation
 protected:
 
   /** To define the type of constraints (scleronomic ...), ie the variables on which depend h and G*/
-  RELATIONSUBTYPES LagrangianRelationType;
+  RELATION::SUBTYPES LagrangianRelationType;
 
   /** G matrices of gradients of h. */
   VectorOfMatrices G;
@@ -71,13 +71,13 @@ protected:
 
   /** basic constructor
    */
-  LagrangianR(RELATIONSUBTYPES);
+  LagrangianR(RELATION::SUBTYPES);
 
   /** constructor from xml file
    *  \param relationXML
    *  \param string: relation subType
    */
-  LagrangianR(RelationXMLSPtr, RELATIONSUBTYPES);
+  LagrangianR(SP::RelationXML, RELATION::SUBTYPES);
 
 public:
 
@@ -89,7 +89,7 @@ public:
       \param LagrangianRXML, the xml pointer
       \param i, index of required G
   */
-  void readGInXML(LagrangianRXMLSPtr, unsigned int);
+  void readGInXML(SP::LagrangianRXML, unsigned int);
 
   /** initialize the relation (check sizes, memory allocation ...)
    */
@@ -98,7 +98,7 @@ public:
   /** get the type of constraints of the relation (scleronomic ...)
    *  \return a string
    */
-  inline const RELATIONSUBTYPES getLagrangianRelationType() const
+  inline const RELATION::SUBTYPES getLagrangianRelationType() const
   {
     return LagrangianRelationType;
   }
@@ -133,7 +133,7 @@ public:
   /** get a pointer on matrix G[index]
    *  \return a pointer on a SiconosMatrix
    */
-  inline SiconosMatrixSPtr getGPtr(unsigned int index = 0) const
+  inline SP::SiconosMatrix getGPtr(unsigned int index = 0) const
   {
     return G[index];
   }
@@ -148,7 +148,7 @@ public:
    *  \param SP::SiconosMatrix  newPtr
    *  \param unsigned int: index position in G vector
    */
-  void setGPtr(SiconosMatrixSPtr newPtr, unsigned int = 0);
+  void setGPtr(SP::SiconosMatrix newPtr, unsigned int = 0);
 
   /** to set a specified function to compute function h(q,...)
    *  \param string : the complete path to the plugin

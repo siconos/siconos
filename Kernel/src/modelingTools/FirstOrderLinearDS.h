@@ -18,13 +18,21 @@
  */
 /*! \file FirstOrderLinearDS.h
 
-*/
+ */
 #ifndef FOLINEARDS_H
 #define FOLINEARDS_H
 
 #include "FirstOrderNonLinearDS.h"
 
 class FirstOrderNonLinearDS;
+
+typedef void (*bPtrFunction)(double, unsigned int, double*, unsigned int, double*);
+
+typedef PluggedObject<bPtrFunction, SimpleVector> PVB;
+typedef PluggedObject<bPtrFunction, SimpleMatrix> PMA;
+
+TYPEDEF_SPTR(PVB);
+TYPEDEF_SPTR(PMA);
 
 /** First order linear systems - Inherits from DynamicalSystems
  *
@@ -64,53 +72,19 @@ class FirstOrderNonLinearDS;
  *   => setComputeBFunction
  *
  **/
-typedef   void (*bPtrFunction)(double, unsigned int, double*, unsigned int, double*);
-
-
 class FirstOrderLinearDS : public FirstOrderNonLinearDS
 {
 protected:
 
   /** matrix specific to the FirstOrderLinearDS \f$ A \in R^{n \times n}  \f$*/
-  SiconosMatrixSPtr A;
+  SP::PMA A;
 
   /** strength vector */
-  SimpleVectorSPtr b;
-
-  /** FirstOrderLinearDS plug-in to compute A(t,z), id = "A"
-   * @param time : current time
-   * @param sizeOfA : size of square-matrix A
-   * @param[in,out] A : pointer to the first element of A
-   * @param size of vector z
-   * @param[in,out] z a vector of user-defined parameters
-   */
-  void (*APtr)(double, unsigned int, double*, unsigned int, double*);
-
-  /** FirstOrderLinearDS plug-in to compute b(t,z), id = "b"
-   * @param time : current time
-   * @param sizeOfB : size of vector b
-   * @param[in,out] b : pointer to the first element of b
-   * @param size of vector z
-   * @param[in,out] param  : a vector of user-defined parameters
-   */
-  void (*bPtr)(double, unsigned int, double*, unsigned int, double*);
-
-#ifndef WithSmartPtr
-  /** set all allocation flags (isAllocated map)
-   *  \param bool: = if true (default) set default configuration, else set all to false
-   */
-  void initAllocationFlags(bool  = true);
-#endif
-
-
-  /** set all plug-in flags (isPlugin map) to val
-   *  \param a bool
-   */
-  void initPluginFlags(bool);
+  SP::PVB b;
 
   /** default constructor
    */
-  FirstOrderLinearDS();
+  FirstOrderLinearDS(): FirstOrderNonLinearDS(DS::FOLDS) {};
 
 public:
 
@@ -118,36 +92,31 @@ public:
 
   /** xml constructor
    *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
-   *  \param NonSmoothSP::DynamicalSystem (optional): the NSDS that owns this ds
    */
-  FirstOrderLinearDS(DynamicalSystemXMLSPtr ,
-                     SP::NonSmoothDynamicalSystem = SP::NonSmoothDynamicalSystem());
+  FirstOrderLinearDS(SP::DynamicalSystemXML);
 
   /** constructor from a set of data
-   *  \param int : reference number of this DynamicalSystem
    *  \param SiconosVector : the initial state of this DynamicalSystem
    *  \param string: plugin for A
    *  \param string: plugin for b
    */
-  FirstOrderLinearDS(int, const SiconosVector&, const std::string&, const std::string&);
+  FirstOrderLinearDS(const SiconosVector&, const std::string&, const std::string&);
 
   /** constructor from a set of data
-   *  \param int : reference number of the DynamicalSystem
    *  \param SiconosVector : the initial state of this DynamicalSystem
    *  \param SiconosMatrix : matrix A
    */
-  FirstOrderLinearDS(int, const SiconosVector&, const SiconosMatrix&);
+  FirstOrderLinearDS(const SiconosVector&, const SiconosMatrix&);
 
   /** constructor from a set of data
-   *  \param int : reference number of the DynamicalSystem
    *  \param SiconosVector : the initial state of this DynamicalSystem
    *  \param SiconosMatrix : matrix A
    *  \param SiconosVector : b
    */
-  FirstOrderLinearDS(int, const SiconosVector&, const SiconosMatrix&, const SiconosVector&);
+  FirstOrderLinearDS(const SiconosVector&, const SiconosMatrix&, const SiconosVector&);
 
   /** destructor */
-  virtual ~FirstOrderLinearDS();
+  virtual ~FirstOrderLinearDS() {};
 
   /** check that the system is complete (ie all required data are well set)
    * \return a bool
@@ -157,64 +126,70 @@ public:
   /** Initialization function for the rhs and its jacobian.
    *  \param time of initialization.
    */
-  virtual void initRhs(double) ;
+  void initRhs(double) ;
 
   // --- getter and setter ---
 
   // --- A ---
   /** get the value of A
-   *  \return SimpleMatrix
+   *  \return a plugged-matrix
    */
-  inline const SimpleMatrix getA() const
+  inline const PMA getA() const
   {
     return *A;
   }
 
   /** get A
-   *  \return pointer on a SiconosMatrix
+   *  \return pointer on a plugged-matrix
    */
-  inline SiconosMatrixSPtr getAPtr() const
+  inline SP::PMA getAPtr() const
   {
     return A;
   }
 
   /** set the value of A to newValue
-   *  \param SiconosMatrix newValue
+   *  \param plugged-matrix newValue
    */
-  void setA(const SiconosMatrix& newValue);
+  void setA(const PMA&);
 
   /** set A to pointer newPtr
-   *  \param SP::SiconosMatrix  newPtr
+   *  \param a plugged matrix SP
    */
-  void setAPtr(SiconosMatrixSPtr);
+  inline void setAPtr(SP::PMA newPtr)
+  {
+    A = newPtr;
+  }
 
   // --- b ---
 
   /** get the value of b
-   *  \return SimpleVector
+   *  \return plugged vector
    */
-  inline const SimpleVector getB() const
+  inline const PVB getB() const
   {
     return *b;
   }
 
   /** get b
-   *  \return pointer on a SimpleVector
+   *  \return pointer on a plugged vector
    */
-  inline SimpleVectorSPtr getBPtr() const
+  inline SP::PVB getBPtr() const
   {
     return b;
   }
 
   /** set the value of b to newValue
-   *  \param SimpleVector newValue
+   *  \param a plugged vector
    */
-  void setB(const SimpleVector&);
+  void setB(const PVB&);
 
   /** set b to pointer newPtr
-   *  \param SimpleVector * newPtr
+   *  \param a SP to plugged vector
    */
-  void setBPtr(SimpleVectorSPtr);
+  inline void setBPtr(SP::PVB newPtr)
+  {
+    b = newPtr;
+  }
 
   // --- plugins related functions
 
@@ -225,12 +200,18 @@ public:
    */
   void setComputeAFunction(const std::string& , const std::string&);
 
+  /** set a specified function to compute the matrix A
+   *  \param bPtrFunction : a pointer on the plugin function
+   */
+  void setComputeAFunction(bPtrFunction fct);
+
   /** set a specified function to compute the vector b
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
   void setComputeBFunction(const std::string& , const std::string&);
+
   /** set a specified function to compute the vector b
    *  \param bPtrFunction : a pointer on the plugin function
    */
@@ -244,86 +225,17 @@ public:
    */
   void computeB(double);
 
-  /** set the value of f to newValue
-   *  \param SiconosVector newValue
-   */
-  inline void setF(const SiconosVector&)
-  {
-    RuntimeException::selfThrow("FirstOrderLinearDS - setF: f is not available for FirstOrderLinearDS.");
-  };
-
-  /** set f to pointer newPtr
-   *  \param SP::SiconosVector newPtr
-   */
-  inline void setFPtr(SiconosVectorSPtr)
-  {
-    RuntimeException::selfThrow("FirstOrderLinearDS - setFPtr: f is not available for FirstOrderLinearDS.");
-  };
-
-  /** set the value of JacobianXF to newValue: exception for LinearDS since f is not available.
-   *  \param SiconosMatrix newValue
-   */
-  inline void setJacobianXF(const SiconosMatrix&)
-  {
-    RuntimeException::selfThrow("FirstOrderLinearDS - setJacobianXF: f is not available for FirstOrderLinearDS.");
-  };
-
-  /** set JacobianXF to pointer newPtr: exception for LinearDS since f is not available.
-   *  \param SP::SiconosMatrix  newPtr
-   */
-  inline void setJacobianXFPtr(SiconosMatrixSPtr newPtr)
-  {
-    RuntimeException::selfThrow("FirstOrderLinearDS - setJacobianXFPtr: f is not available for FirstOrderLinearDS.");
-  };
-
-  /** to set a specified function to compute f(x,t): exception for LinearDS since f is not available.
-   *  \param string pluginPath : the complete path to the plugin
-   *  \param string functionName : the function name to use in this library
-   */
-  inline void setComputeFFunction(const std::string&  pluginPath, const std::string& functionName)
-  {
-    RuntimeException::selfThrow("FirstOrderLinearDS - setComputeFFunction: f is not available for FirstOrderLinearDS.");
-  };
-
-  /** to set a specified function to compute jacobianXF: exception for LinearDS since f is not available.
-   *  \param string pluginPath : the complete path to the plugin
-   *  \param the string functionName : function name to use in this library
-   */
-  inline void setComputeJacobianXFFunction(const std::string&  pluginPath, const std::string&  functionName)
-  {
-    RuntimeException::selfThrow("FirstOrderLinearDS - setComputeJacobianXFFunction: f is not available for FirstOrderLinearDS.");
-  };
-
-  // --- compute plugin functions ---
-
-  /** Default function to compute \f$ f: (x,t)\f$: exception for LinearDS since f is not available.
-   * \param double time : current time
-   */
-  inline void computeF(double)
-  {
-    RuntimeException::selfThrow("FirstOrderLinearDS - computeF: f is not available for FirstOrderLinearDS.");
-  };
-
-  /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$: exception for LinearDS since f is not available.
-   *  \param double time : current time
-   *  \param bool isDSup : flag to avoid recomputation of operators
-   */
-  inline void computeJacobianXF(double, bool  = false)
-  {
-    RuntimeException::selfThrow("FirstOrderLinearDS - computeJacobianXF: f is not available for FirstOrderLinearDS.");
-  };
-
   /** Default function to the right-hand side term
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
    */
-  virtual void computeRhs(double, bool  = false);
+  void computeRhs(double, bool  = false);
 
   /** Default function to jacobian of the right-hand side term according to x
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
    */
-  virtual void computeJacobianXRhs(double, bool  = false);
+  void computeJacobianXRhs(double, bool  = false);
 
   // --- xml related functions ---
 
@@ -333,7 +245,7 @@ public:
 
   /** data display on screen
    */
-  virtual void display() const;
+  void display() const;
 
   /** overload LagrangianDS corresponding function
    * \return a double, always zero.

@@ -93,9 +93,9 @@ private:
   /** Final time node. */
   xmlNodePtr TNode;
   /** Non smooth dynamical system node. */
-  NonSmoothDynamicalSystemXMLSPtr nsdsXML;
+  SP::NonSmoothDynamicalSystemXML nsdsXML;
   /** Simulation node. */
-  SimulationXMLSPtr simulationXML;
+  SP::SimulationXML simulationXML;
 
   const std::string  SICONOSPATH;
 
@@ -228,7 +228,7 @@ public:
   */
   inline const bool hasTitle() const
   {
-    return (titleNode != NULL);
+    return titleNode ;
   }
 
   /** determines if the author of the model is in the DOM tree
@@ -236,7 +236,7 @@ public:
   */
   inline const bool hasAuthor() const
   {
-    return (authorNode != NULL);
+    return authorNode;
   }
 
   /** determines if the description of the model is in the DOM tree
@@ -244,14 +244,14 @@ public:
   */
   inline const bool hasDescription() const
   {
-    return (descriptionNode != NULL);
+    return descriptionNode;
   }
   /** determines if the date of the model is in the DOM tree
   *   \return bool :  true if date of the model is in the DOM tree
   */
   inline const bool hasDate() const
   {
-    return (dateNode != NULL);
+    return dateNode;
   }
 
   /** determines if the xml schema of the model is in the DOM tree
@@ -259,7 +259,7 @@ public:
   */
   inline const bool hasXMLSchema() const
   {
-    return (xmlSchemaNode != NULL);
+    return xmlSchemaNode;
   }
 
   /** determines if the current time T is in the DOM tree
@@ -267,7 +267,7 @@ public:
   */
   inline const bool hasT() const
   {
-    return (TNode != NULL);
+    return (TNode);
   }
 
   /** determines if the current time t is in the DOM tree
@@ -275,7 +275,7 @@ public:
   */
   inline const bool hasTCurrent() const
   {
-    return (tNode != NULL);
+    return (tNode);
   }
 
   /** Gets the value of t
@@ -307,7 +307,7 @@ public:
   */
   inline void setT0(const double& t0)
   {
-    if (t0Node == NULL)
+    if (!t0Node)
       t0Node = SiconosDOMTreeTools::createDoubleNode(timeNode, SM_T0, t0);
     else SiconosDOMTreeTools::setDoubleContentValue(t0Node, t0);
   }
@@ -335,7 +335,7 @@ public:
   /** This function allows to get the NonSmoothDynamicalSystemXML
   *   \return The NonSmoothDynamicalSystemXML of the SiconosModelXML
   */
-  inline NonSmoothDynamicalSystemXMLSPtr getNonSmoothDynamicalSystemXML() const
+  inline SP::NonSmoothDynamicalSystemXML getNonSmoothDynamicalSystemXML() const
   {
     return nsdsXML;
   }
@@ -343,7 +343,7 @@ public:
   /** This function allows to get the SimulationXML
   *   \return The SimulationXML of the SiconosModelXML
   */
-  inline SimulationXMLSPtr getSimulationXML() const
+  inline SP::SimulationXML getSimulationXML() const
   {
     return simulationXML;
   }
@@ -353,7 +353,7 @@ public:
   */
   inline const bool hasSimulation() const
   {
-    return (simulationXML != NULL);
+    return simulationXML ;
   }
 
   /** Saves the Siconos Model creating a Siconos XML data file
@@ -378,7 +378,7 @@ public:
   /** Loads the model with all the data required to construct it
   *  \param SP::Model : the Model which contains all the data to build the SiconosModelXML
   */
-  void loadModel(ModelSPtr);
+  void loadModel(SP::Model);
 
   /**
   *  \param string :

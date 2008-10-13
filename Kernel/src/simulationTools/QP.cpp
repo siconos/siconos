@@ -22,8 +22,8 @@
 
 using namespace std;
 
-QP::QP(SP::OneStepNSProblemXML osnspbxml, SP::Simulation newStrat):
-  OneStepNSProblem("QP", osnspbxml, newStrat)
+QP::QP(SP::OneStepNSProblemXML osnspbxml):
+  OneStepNSProblem("QP", osnspbxml)
 {}
 
 QP::~QP()

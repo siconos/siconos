@@ -45,7 +45,6 @@ int main(int argc, char* argv[])
     (*v0)(0) = 4;
     (*v0)(1) = 5;
     (*v0)(2) = 6;
-    SiconosSharedLibrary cShared;
 
     // constructor from min set of data
     cout << "======== Test 1 ============= " << endl;
@@ -185,10 +184,10 @@ int main(int argc, char* argv[])
     xmlDocPtr doc;
     xmlNodePtr cur;
     doc = xmlParseFile("LagrangianDS_test.xml");
-    if (doc == NULL)
+    if (!doc)
       XMLException::selfThrow("Document not parsed successfully");
     cur = xmlDocGetRootElement(doc);
-    if (cur == NULL)
+    if (!cur)
     {
       XMLException::selfThrow("empty document");
       xmlFreeDoc(doc);

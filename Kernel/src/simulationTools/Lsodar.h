@@ -66,7 +66,7 @@ private:
   /** integer array used for output of root information */
   integerSAPtr jroot;
   /** temporary vector to save x values */
-  BlockVectorSPtr xWork;
+  SP::BlockVector xWork;
 
   /** default constructor, private
    */
@@ -75,26 +75,25 @@ private:
 public:
 
   /** constructor from xml file
-   *  \param OneStepIntegratorXML* : the XML object
-   *  \param SP::Simulation : the simulation that owns the osi
-   */
-  Lsodar(OneStepIntegratorXMLSPtr, SimulationSPtr);
+      \param OneStepIntegratorXML* : the XML object
+      \param the set of all DS in the NSDS
+      \param the set of all interactions in the NSDS
+  */
+  Lsodar(SP::OneStepIntegratorXML, SP::DynamicalSystemsSet , SP::InteractionsSet);
 
   /** constructor from a minimum set of data
    *  \param SP::DynamicalSystem : the DynamicalSystem linked to the OneStepIntegrator
-   *  \param SP::Simulation : the simulation that owns the osi
    */
-  Lsodar(SP::DynamicalSystem , SimulationSPtr);
+  Lsodar(SP::DynamicalSystem);
 
   /** constructor from a list of Dynamical Systems
    *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
-   *  \param SP::Simulation : the simulation that owns the osi
    */
-  Lsodar(DynamicalSystemsSet&, SimulationSPtr);
+  Lsodar(DynamicalSystemsSet&);
 
   /** destructor
    */
-  ~Lsodar();
+  ~Lsodar() {};
 
   /** get vector of integer parameters for lsodar
    *  \return a vector<integer>
@@ -191,9 +190,10 @@ public:
 
   void jacobianF(integer*, doublereal*, doublereal*, integer*, integer*,  doublereal*, integer*);
 
-  /** initialise the integrator
+  /** initialization of the integrator
+      \param the simulation, owner of this OSI
    */
-  void initialize();
+  void initialize(SP::Simulation);
 
   /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
    *  \param double: tinit, initial time

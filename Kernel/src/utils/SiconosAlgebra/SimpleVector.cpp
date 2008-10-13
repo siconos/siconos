@@ -108,7 +108,7 @@ SimpleVector::SimpleVector(const SiconosVector &v): SiconosVector(1, v.size()) /
     // num = 1; default value
     vect.Dense = new DenseVect(sizeV);
 
-    ConstBlockVectIterator it;
+    VectorOfVectors::const_iterator it;
     unsigned int pos = 0;
     for (it = v.begin(); it != v.end(); ++it)
     {
@@ -165,7 +165,6 @@ SimpleVector::~SimpleVector()
   if (num == 1)
   {
     delete(vect.Dense);
-    vect.Dense = NULL;
   }
 
   else if (num == 4)
@@ -377,7 +376,7 @@ void SimpleVector::setBlock(unsigned int index, const SiconosVector& vIn)
   unsigned int numVin = vIn.getNum();
   if (numVin == 0) // if vIn is a BlockVector
   {
-    ConstBlockVectIterator it;
+    VectorOfVectors::const_iterator it;
     unsigned int pos = index;
     for (it = vIn.begin(); it != vIn.end(); ++it)
     {
@@ -396,11 +395,7 @@ void SimpleVector::setBlock(unsigned int index, const SiconosVector& vIn)
   }
 }
 
-#ifndef WithSmartPtr
-void setBlock(const SiconosVector * vIn, SiconosVector * vOut, unsigned int sizeB, unsigned int startIn, unsigned int startOut)
-#else
-void setBlock(SiconosVectorSPtrConst vIn, SiconosVectorSPtr vOut, unsigned int sizeB, unsigned int startIn, unsigned int startOut)
-#endif
+void setBlock(SPC::SiconosVector vIn, SP::SiconosVector vOut, unsigned int sizeB, unsigned int startIn, unsigned int startOut)
 {
   // To copy a subBlock of vIn (from position startIn to startIn+sizeB) into vOut (from pos. startOut to startOut+sizeB).
   if (vIn == vOut) // useless op. => nothing to be done
@@ -457,7 +452,7 @@ void setBlock(SiconosVectorSPtrConst vIn, SiconosVectorSPtr vOut, unsigned int s
       {
 
         // The current considered block ...
-        SiconosVectorSPtr currentBlock = vOut->getVectorPtr(blockOutStart);
+        SP::SiconosVector currentBlock = vOut->getVectorPtr(blockOutStart);
 
         // Size of the subBlock of vOut to be set.
         unsigned int subSizeB = currentBlock->size() - posOut;
@@ -516,7 +511,7 @@ void setBlock(SiconosVectorSPtrConst vIn, SiconosVectorSPtr vOut, unsigned int s
       {
 
         // The current considered block ...
-        SiconosVectorSPtrConst currentBlock = vIn->getVectorPtr(blockInStart);
+        SPC::SiconosVector currentBlock = vIn->getVectorPtr(blockInStart);
 
         // Size of the subBlock of vIn to be set.
         unsigned int subSizeB = currentBlock->size() - posIn;
@@ -584,7 +579,7 @@ void SimpleVector::addBlock(unsigned int index, const SiconosVector& vIn)
   unsigned int numVin = vIn.getNum();
   if (numVin == 0) // if vIn is a BlockVector
   {
-    ConstBlockVectIterator it;
+    VectorOfVectors::const_iterator it;
     unsigned int pos = index;
     for (it = vIn.begin(); it != vIn.end(); ++it)
     {
@@ -616,7 +611,7 @@ void SimpleVector::subBlock(unsigned int index, const SiconosVector& vIn)
   unsigned int numVin = vIn.getNum();
   if (numVin == 0) // if vIn is a BlockVector
   {
-    ConstBlockVectIterator it;
+    VectorOfVectors::const_iterator it;
     unsigned int pos = index;
     for (it = vIn.begin(); it != vIn.end(); ++it)
     {
@@ -650,7 +645,7 @@ SimpleVector& SimpleVector::operator = (const SiconosVector& vIn)
 
   if (vInNum == 0) // if vIn is a BlockVector
   {
-    ConstBlockVectIterator it;
+    VectorOfVectors::const_iterator it;
     unsigned int pos = 0;
     for (it = vIn.begin(); it != vIn.end(); ++it)
     {
@@ -780,7 +775,7 @@ SimpleVector& SimpleVector::operator += (const SiconosVector& vIn)
     if (sizeV != vIn.size())
       SiconosVectorException::selfThrow("SimpleVector::operator += failed: inconsistent sizes.");
 
-    ConstBlockVectIterator it;
+    VectorOfVectors::const_iterator it;
     unsigned int pos = 0;
     for (it = vIn.begin(); it != vIn.end(); ++it)
     {
@@ -833,7 +828,7 @@ SimpleVector& SimpleVector::operator -= (const SiconosVector& vIn)
     if (sizeV != vIn.size())
       SiconosVectorException::selfThrow("SimpleVector::operator -= failed: inconsistent sizes.");
 
-    ConstBlockVectIterator it;
+    VectorOfVectors::const_iterator it;
     unsigned int pos = 0;
     for (it = vIn.begin(); it != vIn.end(); ++it)
     {
@@ -1220,8 +1215,8 @@ void axpby(double a, const SiconosVector& x, double b, SiconosVector& y)
     {
       if (isComparableTo(&x, &y))
       {
-        BlockVectIterator itY;
-        ConstBlockVectIterator itX = x.begin();
+        VectorOfVectors::iterator itY;
+        VectorOfVectors::const_iterator itX = x.begin();
         for (itY = y.begin(); itY != y.end(); ++itY)
           axpby(a, **itX++, b, **itY);
       }
@@ -1291,8 +1286,8 @@ void axpy(double a, const SiconosVector& x, SiconosVector& y)
     {
       if (isComparableTo(&x, &y))
       {
-        BlockVectIterator itY;
-        ConstBlockVectIterator itX = x.begin();
+        VectorOfVectors::iterator itY;
+        VectorOfVectors::const_iterator itX = x.begin();
         for (itY = y.begin(); itY != y.end(); ++itY)
           axpy(a, **itX++, **itY);
       }
@@ -1418,8 +1413,8 @@ void scal(double a, const SiconosVector & x, SiconosVector & y, bool init)
       {
         if (isComparableTo(&x, &y)) // if x and y are "block-consistent"
         {
-          ConstBlockVectIterator itX = x.begin();
-          BlockVectIterator itY ;
+          VectorOfVectors::const_iterator itX = x.begin();
+          VectorOfVectors::iterator itY ;
           for (itY = y.begin(); itY != y.end(); ++itY)
             scal(a, **itX++, **itY++, init);
         }
@@ -1512,13 +1507,13 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
       if (coord[0] != coord[2] || coord[1] != coord[3])
         SiconosVectorException::selfThrow("subscal(a,x,y,...) error: x=y=blockVector and try to affect different positions in x and y; not yet implemented!");
 
-      ConstBlockVectIterator it;
+      VectorOfVectors::const_iterator it;
       // Number of the subvector of x that handles element at position coord[0]
       unsigned int firstBlockNum = x.getNumVectorAtPos(coord[0]);
       // Number of the subvector of x that handles element at position coord[1]
       unsigned int lastBlockNum = x.getNumVectorAtPos(coord[1]);
       std::vector<unsigned int> subCoord = coord;
-      SiconosVectorSPtr tmp = y[firstBlockNum];
+      SP::SiconosVector tmp = y[firstBlockNum];
       unsigned int subSize =  x[firstBlockNum]->size(); // Size of the sub-vector
       const Index * xTab = x.getTabIndexPtr();
       if (firstBlockNum != 0)
@@ -1633,18 +1628,15 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
     {
       if (numX == 0) // x a block vector
       {
-        ConstBlockVectIterator it;
+        VectorOfVectors::const_iterator it;
         // Number of the subvector of x that handles element at position coord[0]
         unsigned int firstBlockNum = x.getNumVectorAtPos(coord[0]);
         // Number of the subvector of x that handles element at position coord[1]
         unsigned int lastBlockNum = x.getNumVectorAtPos(coord[1]);
         std::vector<unsigned int> subCoord = coord;
 
-#ifndef WithSmartPtr
-        const SiconosVector * tmp = x[firstBlockNum];
-#else
-        SiconosVectorSPtrConst tmp = x[firstBlockNum];
-#endif
+        SPC::SiconosVector tmp = x[firstBlockNum];
+
         unsigned int subSize =  x[firstBlockNum]->size(); // Size of the sub-vector
         const Index * xTab = x.getTabIndexPtr();
         if (firstBlockNum != 0)
@@ -1688,13 +1680,13 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
 
       else if (numY == 0) // y a block vector
       {
-        ConstBlockVectIterator it;
+        VectorOfVectors::const_iterator it;
         // Number of the subvector of y that handles element at position coord[2]
         unsigned int firstBlockNum = y.getNumVectorAtPos(coord[2]);
         // Number of the subvector of x that handles element at position coord[3]
         unsigned int lastBlockNum = y.getNumVectorAtPos(coord[3]);
         std::vector<unsigned int> subCoord = coord;
-        SiconosVectorSPtr tmp = y[firstBlockNum];
+        SP::SiconosVector tmp = y[firstBlockNum];
         unsigned int subSize =  y[firstBlockNum]->size(); // Size of the sub-vector
         const Index * yTab = y.getTabIndexPtr();
         if (firstBlockNum != 0)

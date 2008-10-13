@@ -110,7 +110,7 @@ public:
   /** xml constructor
    *  \param FirstOrderType1RXML* : the XML object.
    */
-  FirstOrderType1R(RelationXMLSPtr);
+  FirstOrderType1R(SP::RelationXML);
 
   /** data constructor
    *  \param a string with computeOutput function name.

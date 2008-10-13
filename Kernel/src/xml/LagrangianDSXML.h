@@ -68,8 +68,8 @@ protected:
   std::vector<xmlNodePtr> jacobianFIntNode;
   std::vector<xmlNodePtr> jacobianNNLNode;
 
-  SiconosMemoryXMLSPtr qMemoryXML;
-  SiconosMemoryXMLSPtr velocityMemoryXML;
+  SP::SiconosMemoryXML qMemoryXML;
+  SP::SiconosMemoryXML velocityMemoryXML;
 
   // === Constructors - Destructor ===
   LagrangianDSXML();
@@ -120,7 +120,7 @@ public:
    */
   inline void  setQ0(const SiconosVector&v)
   {
-    if (q0Node == NULL)
+    if (!q0Node)
       q0Node = SiconosDOMTreeTools::createVectorNode(rootNode, LNLDS_Q0, v);
     else
       SiconosDOMTreeTools::setSiconosVectorNodeValue(q0Node, v);
@@ -130,7 +130,7 @@ public:
   /** Returns the qMemoryXML* of the DSXML
    *   \return SiconosMemoryXML*
    */
-  inline SiconosMemoryXMLSPtr getQMemoryXML() const
+  inline SP::SiconosMemoryXML getQMemoryXML() const
   {
     return qMemoryXML;
   }
@@ -174,7 +174,7 @@ public:
    */
   inline void setVelocity0(const SiconosVector&v)
   {
-    if (velocity0Node == NULL)
+    if (!velocity0Node)
     {
       velocity0Node = SiconosDOMTreeTools::createVectorNode(rootNode, LNLDS_VELOCITY0, v);
     }
@@ -186,7 +186,7 @@ public:
   /** Returns the velocityMemoryXML* of the DSXML
    *   \return SiconosMemoryXML*
    */
-  inline SiconosMemoryXMLSPtr getVelocityMemoryXML() const
+  inline SP::SiconosMemoryXML getVelocityMemoryXML() const
   {
     return velocityMemoryXML;
   }
@@ -224,7 +224,7 @@ public:
    */
   inline void setNNLPlugin(const std::string& plugin)
   {
-    if (NNLNode == NULL)
+    if (!NNLNode)
     {
       NNLNode = SiconosDOMTreeTools::createSingleNode(rootNode, LNLDS_QNLINERTIA);
       xmlNewProp(NNLNode, (xmlChar*)(VECTORPLUGIN.c_str()), (xmlChar*)plugin.c_str());
@@ -237,7 +237,7 @@ public:
    */
   inline void setNNLVector(const SiconosVector&v)
   {
-    if (NNLNode == NULL)
+    if (!NNLNode)
     {
       NNLNode = SiconosDOMTreeTools::createVectorNode(rootNode, LNLDS_QNLINERTIA, v);
     }
@@ -285,7 +285,7 @@ public:
    */
   inline void setFIntPlugin(const std::string& plugin)
   {
-    if (FIntNode == NULL)
+    if (!FIntNode)
     {
       FIntNode = SiconosDOMTreeTools::createSingleNode(rootNode, LNLDS_FINT);
       xmlNewProp(FIntNode, (xmlChar*)(VECTORPLUGIN.c_str()), (xmlChar*)plugin.c_str());
@@ -330,7 +330,7 @@ public:
    */
   inline void setFExtPlugin(const std::string& plugin)
   {
-    if (FExtNode == NULL)
+    if (!FExtNode)
     {
       FExtNode = SiconosDOMTreeTools::createSingleNode(rootNode, LNLDS_FEXT);
       xmlNewProp(FExtNode, (xmlChar*)(VECTORPLUGIN.c_str()), (xmlChar*)plugin.c_str());
@@ -375,7 +375,7 @@ public:
       name += "QFInt";
     else
       name += "VelocityFInt";
-    if (jacobianFIntNode[i] == NULL)
+    if (!jacobianFIntNode[i])
     {
       jacobianFIntNode[i] = SiconosDOMTreeTools::createSingleNode(rootNode, name);
       xmlNewProp(jacobianFIntNode[i], (xmlChar*)(MATRIXPLUGIN.c_str()), (xmlChar*)plugin.c_str());
@@ -426,7 +426,7 @@ public:
       name += "QNNL";
     else
       name += "VelocityNNL";
-    if (jacobianNNLNode[i] == NULL)
+    if (!jacobianNNLNode[i])
     {
       jacobianNNLNode[i] = SiconosDOMTreeTools::createSingleNode(rootNode, name);
       xmlNewProp(jacobianNNLNode[i], (xmlChar*)(MATRIXPLUGIN.c_str()), (xmlChar*)plugin.c_str());
@@ -471,7 +471,7 @@ public:
    */
   inline void setMassPlugin(const std::string& plugin)
   {
-    if (MassNode == NULL)
+    if (!MassNode)
     {
       MassNode = SiconosDOMTreeTools::createSingleNode(rootNode, LNLDS_Mass);
       xmlNewProp(MassNode, (xmlChar*)(MATRIXPLUGIN.c_str()), (xmlChar*)plugin.c_str());
@@ -485,7 +485,7 @@ public:
    */
   inline void setMassMatrix(const SiconosMatrix& m)
   {
-    if (MassNode == NULL)
+    if (!MassNode)
     {
       MassNode = SiconosDOMTreeTools::createMatrixNode(rootNode, LNLDS_Mass, m);
     }
@@ -556,7 +556,7 @@ public:
    */
   inline const bool hasQ0() const
   {
-    return (q0Node != NULL);
+    return (q0Node);
   }
 
   /** determines if Mass is defined in the DOM tree
@@ -564,7 +564,7 @@ public:
    */
   inline const bool hasVelocity0() const
   {
-    return (velocity0Node != NULL);
+    return (velocity0Node);
   }
 
   /** determines if Mass is defined in the DOM tree
@@ -572,7 +572,7 @@ public:
    */
   inline const bool hasMass() const
   {
-    return (MassNode != NULL);
+    return (MassNode);
   }
 
   /** determines if FInt is defined in the DOM tree
@@ -580,7 +580,7 @@ public:
    */
   inline const bool hasFInt() const
   {
-    return (FIntNode != NULL);
+    return (FIntNode);
   }
 
   /** determines if FExt is defined in the DOM tree
@@ -588,7 +588,7 @@ public:
    */
   inline const bool hasFExt() const
   {
-    return (FExtNode != NULL);
+    return (FExtNode);
   }
 
   /** determines if jacobianFInt is defined in the DOM tree
@@ -597,7 +597,7 @@ public:
    */
   inline const bool hasJacobianFInt(unsigned int i) const
   {
-    return (jacobianFIntNode[i] != NULL);
+    return (jacobianFIntNode[i]);
   }
 
 
@@ -607,7 +607,7 @@ public:
    */
   inline const bool hasJacobianNNL(unsigned int i) const
   {
-    return (jacobianNNLNode[i] != NULL);
+    return (jacobianNNLNode[i]);
   }
 
   /** determines if NNL is defined in the DOM tree
@@ -615,7 +615,7 @@ public:
    */
   inline const bool hasNNL() const
   {
-    return (NNLNode != NULL);
+    return (NNLNode);
   }
 
   /** returns true if qMemoryNode is defined
@@ -623,7 +623,7 @@ public:
    */
   inline const bool hasQMemory() const
   {
-    return (qMemoryNode != NULL);
+    return (qMemoryNode);
   }
 
   /** returns true if velocityMemoryNode is defined
@@ -631,7 +631,7 @@ public:
    */
   inline const bool hasVelocityMemory() const
   {
-    return (velocityMemoryNode != NULL);
+    return (velocityMemoryNode);
   }
 
   /** returns true if qNode is defined
@@ -639,7 +639,7 @@ public:
    */
   inline const bool hasQ() const
   {
-    return (qNode != NULL);
+    return (qNode);
   }
 
   /** returns true if velocityNode is defined
@@ -647,7 +647,7 @@ public:
    */
   inline const bool hasVelocity() const
   {
-    return (velocityNode != NULL);
+    return (velocityNode);
   }
 };
 

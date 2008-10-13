@@ -146,7 +146,7 @@ public:
   */
   inline bool hasA() const
   {
-    return (ANode != NULL);
+    return (ANode);
   }
 
   /** returns true if bNode is defined
@@ -154,7 +154,7 @@ public:
   */
   inline bool hasB() const
   {
-    return (bNode != NULL);
+    return (bNode);
   }
 
 };

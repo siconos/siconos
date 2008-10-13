@@ -41,57 +41,54 @@ void ModelTest::testBuildModel0()
   cout << "=== Model tests start ...=== " << endl;
   cout << "=============================" << endl;
   cout << "--> Test: constructor 0." << endl;
-  Model * M = new Model(t0);
+  SP::Model M(new Model(t0));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->getT0() == t0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->getFinalT() == -1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->getCurrentTime() == t0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->getSimulationPtr() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->getNonSmoothDynamicalSystemPtr() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->getSiconosModelXMLPtr() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", !M->getSimulationPtr(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", !M->getNonSmoothDynamicalSystemPtr(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", !M->getSiconosModelXMLPtr(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->getTitle() == "none", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->getAuthor() == "nobody", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->getDescription() == "none", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->getDate() == "none", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->getXmlSchema() == "none", true);
-  delete M;
   cout << "--> Constructor 0 test ended with success." << endl;
 }
 
 void ModelTest::testBuildModel1()
 {
   cout << "--> Test: constructor 1." << endl;
-  Model * M = new Model(t0, T);
+  SP::Model M(new Model(t0, T));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getT0() == t0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getFinalT() == T, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getCurrentTime() == t0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getSimulationPtr() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getNonSmoothDynamicalSystemPtr() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getSiconosModelXMLPtr() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", !M->getSimulationPtr(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", !M->getNonSmoothDynamicalSystemPtr(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", !M->getSiconosModelXMLPtr(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getTitle() == "none", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getAuthor() == "nobody", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getDescription() == "none", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getDate() == "none", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getXmlSchema() == "none", true);
-  delete M;
   cout << "--> Constructor 1 test ended with success." << endl;
 }
 
 void ModelTest::testBuildModel2()
 {
   cout << "--> Test: constructor 2." << endl;
-  Model * M = new Model(t0, T, "myModel", "SiconosTeam", "Description", "Today", "XMLschema");
+  SP::Model M(new Model(t0, T, "myModel", "SiconosTeam", "Description", "Today", "XMLschema"));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getT0() == t0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getFinalT() == T, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getCurrentTime() == t0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getSimulationPtr() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getNonSmoothDynamicalSystemPtr() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getSiconosModelXMLPtr() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", !M->getSimulationPtr(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", !M->getNonSmoothDynamicalSystemPtr(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", !M->getSiconosModelXMLPtr(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getTitle() == "myModel", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getAuthor() == "SiconosTeam", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getDescription() == "Description", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getDate() == "Today", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getXmlSchema() == "XMLschema", true);
-  delete M;
   cout << "--> Constructor 2 test ended with success." << endl;
 }
 
@@ -101,19 +98,18 @@ void ModelTest::testBuildModel3()
   cout << "--> Test: constructor xml." << endl;
   char * xmlFile = "ModelXml_test.xml" ;
 
-  Model * M = new Model(xmlFile);
+  SP::Model M(new Model(xmlFile));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getT0() == t0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getFinalT() == T, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getCurrentTime() == t0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getSimulationPtr() != NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getNonSmoothDynamicalSystemPtr() != NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getSiconosModelXMLPtr() != NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", !M->getSimulationPtr(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", !M->getNonSmoothDynamicalSystemPtr(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", !M->getSiconosModelXMLPtr(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getTitle() == "tryMxml", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getAuthor() == "SiconosTeam", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getDescription() == "Description", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getDate() == "Today", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getXmlSchema() == "../../../config/xmlschema/SiconosModelSchema-V1.2.xsd", true);
-  delete M;
   cout << "--> Constructor xml test ended with success." << endl;
 }
 

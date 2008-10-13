@@ -60,13 +60,16 @@ public:
   /** defaut constructor
    *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
    */
-  EventDriven(TimeDiscretisationSPtr td): Simulation(td, "EventDriven"), istate(1) {};
+  EventDriven(SP::TimeDiscretisation td): Simulation(td, "EventDriven"), istate(1) {};
 
   /** constructor with XML object of the EventDriven
-   *  \param SimulationXML* : the XML object corresponding
-   *  \param SP::Model : the Model which contains the Simulation
-   */
-  EventDriven(SimulationXMLSPtr, ModelSPtr);
+       \param SimulationXML* : the XML object corresponding
+       \param initial time
+       \param final time
+       \param the set of all DS in the NSDS
+       \param the set of all interactions in the NSDS
+  */
+  EventDriven(SP::SimulationXML, double, double, SP::DynamicalSystemsSet , SP::InteractionsSet);
 
   /** destructor
    */
@@ -109,7 +112,7 @@ public:
    *  \param integer*, size of vector g (ie number of constraints)
    *  \param doublereal*, g (in-out parameter)
    */
-  void computeG(OneStepIntegratorSPtr, integer*, doublereal*, doublereal*, integer*, doublereal*);
+  void computeG(SP::OneStepIntegrator, integer*, doublereal*, doublereal*, integer*, doublereal*);
 
   /** update input for impact case (ie compute p[1])
    */

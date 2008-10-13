@@ -28,11 +28,11 @@ LagrangianRXML::LagrangianRXML(xmlNodePtr LNLRelationNode): RelationXML(LNLRelat
 {
   xmlNodePtr node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "h")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "h")))
     hNode = node;
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "hDot")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "hDot")))
     hDotNode = node;
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "G")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "G")))
   {
     // get number of G functions given
     unsigned int size = SiconosDOMTreeTools::getAttributeValue<unsigned int>(node, "number");
@@ -41,12 +41,12 @@ LagrangianRXML::LagrangianRXML(xmlNodePtr LNLRelationNode): RelationXML(LNLRelat
     GNode.resize(size, NULL);
     // get corresponding nodes
     GNode[0] = SiconosDOMTreeTools::findNodeChild(node, "matrix")  ;
-    if (GNode[0] == NULL)
+    if (!GNode[0])
       XMLException::selfThrow("LagrangianRXML:: constructor, G0 is missing");
     for (unsigned int i = 1; i < size; i++)
     {
       GNode[i] =  SiconosDOMTreeTools::findFollowNode(GNode[i - 1]);
-      if (GNode[i] == NULL)
+      if (!GNode[i])
         XMLException::selfThrow("LagrangianRXML:: constructor, another G is required");
     }
   }
@@ -58,7 +58,7 @@ LagrangianRXML::~LagrangianRXML()
 unsigned int LagrangianRXML::getNumberOfGradients() const
 {
   xmlNodePtr node = SiconosDOMTreeTools::findNodeChild(rootNode, "G");
-  if (node == NULL)
+  if (!node)
     return 0;
   else
     return SiconosDOMTreeTools::getAttributeValue<unsigned int>(node, "number");
@@ -74,7 +74,7 @@ void LagrangianRXML::setHDotVector(const SiconosVector&v)
 
 void LagrangianRXML::setHDotPlugin(const string& plugin)
 {
-  if (hDotNode == NULL)
+  if (! hDotNode)
   {
     hDotNode = SiconosDOMTreeTools::createSingleNode(rootNode, "hDot");
     xmlNewProp(hDotNode, (xmlChar*)"vectorPlugin", (xmlChar*)plugin.c_str());
@@ -95,7 +95,7 @@ bool LagrangianRXML::hasG(unsigned int index) const
 {
   if (index >= GNode.size())
     XMLException::selfThrow("LagrangianRXML - hasG(index), index out of range");
-  return (GNode[index] != NULL);
+  return (GNode[index]);
 }
 
 string LagrangianRXML::getGPlugin(unsigned int index) const

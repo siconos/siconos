@@ -44,7 +44,7 @@ class OneStepIntegrator;
 // ================== Objects to handle DS ==================
 
 /** Map of SiconosMatrix; key = the related DS*/
-typedef std::map<SP::DynamicalSystem, SiconosMatrixSPtr> MapOfDSMatrices;
+typedef std::map<SP::DynamicalSystem, SP::SiconosMatrix> MapOfDSMatrices;
 
 /** Iterator through a map of matrices */
 typedef MapOfDSMatrices::iterator MatIterator;
@@ -53,7 +53,7 @@ typedef MapOfDSMatrices::iterator MatIterator;
 typedef MapOfDSMatrices::const_iterator ConstMatIterator;
 
 /** Map of SiconosVector; key = the related DS*/
-typedef std::map<SP::DynamicalSystem, SiconosVectorSPtr> DSVectors;
+typedef std::map<SP::DynamicalSystem, SP::SiconosVector> DSVectors;
 
 /** Iterator through a map of matrices */
 typedef DSVectors::iterator DSVectorsIterator;
@@ -79,7 +79,7 @@ typedef std::map<SP::DynamicalSystem, bool> MapOfDSBool;
 // ================== Objects to handle UnitaryRelations ==================
 
 /** Map of SiconosMatrices with a UnitaryRelations as a key - Used for diagonal unitaryBlock-terms in assembled matrices of LCP etc ...*/
-typedef std::map< SP::UnitaryRelation, SiconosMatrixSPtr>  MapOfUnitaryMatrices;
+typedef std::map< SP::UnitaryRelation, SP::SiconosMatrix>  MapOfUnitaryMatrices;
 
 /** Iterator through a MapOfUnitaryMatrices */
 typedef MapOfUnitaryMatrices::iterator UnitaryMatrixColumnIterator ;
@@ -135,7 +135,7 @@ typedef std::map< SP::UnitaryRelation , MapOfDSBool >  MapOfUnitaryMapOfDSBool;
 typedef std::map< SP::DynamicalSystem , std::map<SP::UnitaryRelation, bool> >  MapOfDSMapOfUnitaryBool;
 
 /** Vector that contains a sequel of sets of UnitaryRelations*/
-typedef std::vector< UnitaryRelationsSetSPtr > VectorOfSetOfUnitaryRelations;
+typedef std::vector< SP::UnitaryRelationsSet > VectorOfSetOfUnitaryRelations;
 
 /** Map to link SP::UnitaryRelation with an int - Used for example in unitaryBlocksPositions for OSNSMatrix */
 typedef std::map< SP::UnitaryRelation , unsigned int > UR_int;
@@ -147,7 +147,7 @@ typedef std::vector<int> IndexInt;
 
 
 /** Vector of OneStepIntegrator */
-typedef std::set<OneStepIntegratorSPtr> OSISet;
+typedef std::set<SP::OneStepIntegrator> OSISet;
 
 /** Iterator through vector of OSI*/
 typedef OSISet::iterator OSIIterator;
@@ -159,7 +159,7 @@ typedef OSISet::const_iterator ConstOSIIterator;
 typedef std::pair<OSISet::iterator, bool> CheckInsertOSI;
 
 /** A map that links DynamicalSystems and their OneStepIntegrator. */
-typedef std::map<SP::DynamicalSystem, OneStepIntegratorSPtr> DSOSIMap;
+typedef std::map<SP::DynamicalSystem, SP::OneStepIntegrator> DSOSIMap;
 
 /** Iterator through a DSOSIMap. */
 typedef DSOSIMap::iterator DSOSIIterator;
@@ -172,7 +172,7 @@ typedef DSOSIMap::const_iterator DSOSIConstIterator;
 //#include "OneStepNSProblem.h"
 class OneStepNSProblem;
 /** Map of OSNS */
-typedef std::map<std::string, OneStepNSProblemSPtr > OneStepNSProblems;
+typedef std::map<std::string, SP::OneStepNSProblem > OneStepNSProblems;
 
 /** Iterator through OneStepNSProblems */
 typedef OneStepNSProblems::iterator OSNSIterator;

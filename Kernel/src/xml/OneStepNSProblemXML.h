@@ -131,7 +131,7 @@ public:
    */
   inline bool hasDim() const
   {
-    return (dimNode != NULL);
+    return (dimNode);
   }
 
   /** All is an attribute of the Interactions_Concerned tag
@@ -180,7 +180,7 @@ public:
    */
   inline bool hasNonSmoothSolver() const
   {
-    return (solverNode != NULL);
+    return solverNode;
   }
 
   /** makes the operations to create a OneStepNSProblemXML to the SimulationXML

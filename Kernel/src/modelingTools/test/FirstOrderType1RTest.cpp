@@ -48,7 +48,7 @@ void FirstOrderType1RTest::testBuildFirstOrderType1R1()
 
   FirstOrderType1R * R1 = new FirstOrderType1R("TestPlugin:hT1", "TestPlugin:gT1");
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1a : ", R1->getInteractionPtr() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1a : ", !R1->getInteractionPtr(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1b : ", R1->getType() == FirstOrder, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1c : ", R1->getSubType() == Type1R, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1d : ", R1->getFunctionName("h") == "TestPlugin:hT1", true);
@@ -66,7 +66,7 @@ void FirstOrderType1RTest::testBuildFirstOrderType1R2()
 {
   cout << "--> Test: constructor data (2)." << endl;
   FirstOrderType1R * R2 = new FirstOrderType1R("TestPlugin:hT1", "TestPlugin:gT1", "TestPlugin:Jh0T1", "TestPlugin:Jg0T1");
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2a : ", R2->getInteractionPtr() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2a : ", !R2->getInteractionPtr(), falsetrue);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2b : ", R2->getType() == FirstOrder, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2c : ", R2->getSubType() == Type1R, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2d : ", R2->getFunctionName("h") == "TestPlugin:hT1", true);
@@ -85,10 +85,10 @@ void FirstOrderType1RTest::testBuildFirstOrderType1R3()
   xmlDocPtr doc;
   xmlNodePtr cur;
   doc = xmlParseFile("FOT1R.xml");
-  if (doc == NULL)
+  if (!doc)
     XMLException::selfThrow("Document not parsed successfully");
   cur = xmlDocGetRootElement(doc);
-  if (cur == NULL)
+  if (!cur)
   {
     XMLException::selfThrow("empty document");
     xmlFreeDoc(doc);

@@ -133,18 +133,16 @@ public:
 
   /** xml constructor
    *  \param SP::OneStepNSProblemXML : the XML linked-object
-   *  \param SP::Simulation the simulation that owns the problem
    */
-  PrimalFrictionContact(SP::OneStepNSProblemXML, SP::Simulation);
+  PrimalFrictionContact(SP::OneStepNSProblemXML);
 
   /** constructor from data
-   *  \param SP::Simulation the simulation that owns this problem
    *  \param int dim (2D or 3D) of the friction-contact problem
    *  \param Solver* pointer to object that contains solver algorithm and formulation \n
    *  (optional, default = NULL => read .opt file in Numerics)
    *  \param string id of the problem (optional)
    */
-  PrimalFrictionContact(SP::Simulation, int, SP::NonSmoothSolver = SP::NonSmoothSolver(), const std::string& = "unamed_friction_contact_problem");
+  PrimalFrictionContact(int, SP::NonSmoothSolver = SP::NonSmoothSolver(), const std::string& = "unamed_friction_contact_problem");
 
   /** destructor
    */
@@ -437,8 +435,9 @@ public:
   // --- Others functions ---
 
   /** initialize the PrimalFrictionContact problem(compute topology ...)
-   */
-  void initialize();
+    \param the simulation, owner of this OSNSPB
+    */
+  void initialize(SP::Simulation);
 
   /** computes extra diagonal unitaryBlock-matrix that corresponds to UR1 and UR2
    *  Move this to Unitary Relation class?

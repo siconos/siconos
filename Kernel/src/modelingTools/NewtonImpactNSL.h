@@ -58,7 +58,7 @@ public:
   /** constructor with XML object of the NewtonImpactNSL
   *  \param NonSmoothLawXML* : the XML object corresponding
   */
-  NewtonImpactNSL(NonSmoothLawXMLSPtr);
+  NewtonImpactNSL(SP::NonSmoothLawXML);
 
   /** constructor with the value of the NewtonImpactNSL attributes
   *  \param a double value e

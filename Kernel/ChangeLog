@@ -22,8 +22,29 @@ of the file were added first, and each subsequent addition is placed on a line
 before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
+
+	
 --------------------------------------------------------------------------------
-  v3.0.0 - (current release)
+  vXXX - Current version
+--------------------------------------------------------------------------------	
+Notes:
+
+Main Changes:
+	
+2008 October Franck Perignon <franck.perignon@inrialpes.fr> 
+	* Add DynamicalSystem Factory
+	* Add M(x) in FirstOrder DS
+	* Add Relation Factory
+	* Remove DefaultPlugin lib/file
+	* Remove Model from TimeDiscretisation
+	 + review of building/initialization process (to avoid cycling)
+	
+2008 September Maurice Bremond <Maurice.Bremond@inrialpes.fr>, Franck Perignon <franck.perignon@inrialpes.fr>
+	* Use Smart pointers utilities for memory management
+	 => review all files
+
+--------------------------------------------------------------------------------
+  v3.0.0 - August 2008
 --------------------------------------------------------------------------------	
 Notes:
 

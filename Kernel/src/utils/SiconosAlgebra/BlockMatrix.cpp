@@ -179,7 +179,7 @@ BlockMatrix::BlockMatrix(const std::vector<SP::SiconosMatrix >& m, unsigned int 
   }
 }
 
-BlockMatrix::BlockMatrix(SiconosMatrixSPtr A, SiconosMatrixSPtr B, SiconosMatrixSPtr C, SiconosMatrixSPtr D):
+BlockMatrix::BlockMatrix(SP::SiconosMatrix A, SP::SiconosMatrix B, SP::SiconosMatrix C, SP::SiconosMatrix D):
   SiconosMatrix(0), tabRow(NULL), tabCol(NULL)
 {
   if (A->size(0) != B->size(0) || C->size(0) != D->size(0) ||  A->size(1) != C->size(1) ||  B->size(1) != D->size(1))

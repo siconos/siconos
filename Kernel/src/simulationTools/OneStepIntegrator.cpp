@@ -26,123 +26,92 @@
 
 using namespace std;
 
-OneStepIntegrator::OneStepIntegrator(const string& id, SimulationSPtr newS):
-  integratorType(id),
-  sizeMem(1), simulationLink(newS)
+OneStepIntegrator::OneStepIntegrator(const string& id):
+  integratorType(id), sizeMem(1)
 {
-  assert(simulationLink &&
-         "OneStepIntegrator:: constructor(Id,simulation) - simulation == NULL");
-
   OSIDynamicalSystems.reset(new DynamicalSystemsSet());
   OSIInteractions.reset(new InteractionsSet());
 }
 
 // --- Xml constructor ---
-OneStepIntegrator::OneStepIntegrator(const string& id, OneStepIntegratorXMLSPtr osixml, SimulationSPtr newS):
-  integratorType(id), sizeMem(1), simulationLink(newS), integratorXml(osixml)
+OneStepIntegrator::OneStepIntegrator(const string& id, SP::OneStepIntegratorXML osixml,
+                                     SP::DynamicalSystemsSet dsList, SP::InteractionsSet interactionsList):
+  integratorType(id), sizeMem(1), integratorXml(osixml)
 {
   if (!integratorXml)
     RuntimeException::selfThrow("OneStepIntegrator::xml constructor - OneStepIntegratorXML object == NULL");
 
-  if (!simulationLink)
-    RuntimeException::selfThrow("OneStepIntegrator::xml constructor - SimulationLink == NULL");
-
-  simulationLink->addOneStepIntegratorPtr(shared_from_this());
-
   OSIDynamicalSystems.reset(new DynamicalSystemsSet());
   OSIInteractions.reset(new InteractionsSet());
 
-  // get a link to the NonSmoothDynamicalSystem.
-  SP::NonSmoothDynamicalSystem nsds = simulationLink->getModelPtr()->getNonSmoothDynamicalSystemPtr();
   // load DS list if present
   if (osixml->hasDSList())
   {
+    assert(dsList && "OneStepIntegrator xml constructor: empty ds list from NSDS.");
     if (osixml->hasAllDS()) // if flag all=true is present -> get all ds from the nsds
-    {
-      DSIterator it;
-      for (it = nsds->dynamicalSystemsBegin(); it != nsds->dynamicalSystemsEnd(); ++it)
-        OSIDynamicalSystems->insert(*it);
-    }
+      OSIDynamicalSystems->insert(dsList->begin(), dsList->end());
+
     else
     {
       // get list of ds numbers implicate in the OSI
       vector<int> dsNumbers;
       osixml->getDSNumbers(dsNumbers);
       // get corresponding ds and insert them into the set.
-      vector<int>::iterator it;
-      for (it = dsNumbers.begin(); it != dsNumbers.end(); ++it)
-        OSIDynamicalSystems->insert(nsds->getDynamicalSystemPtrNumber(*it));
+      for (vector<int>::iterator it = dsNumbers.begin(); it != dsNumbers.end(); ++it)
+        OSIDynamicalSystems->insert(dsList->getPtr(*it));
     }
   }
 
   // load interactions list if present
   if (osixml->hasInteractionsList())
   {
-    if (osixml->hasAllInteractions()) // if flag all=true is present -> get all interactions from the nsds
-    {
-      InteractionsIterator it;
-      for (it = nsds->interactionsBegin(); it != nsds->interactionsEnd(); ++it)
-        OSIInteractions->insert(*it);
-    }
+    assert(interactionsList && "OneStepIntegrator xml constructor: empty interaction list from NSDS.");
+    if (osixml->hasAllInteractions()) // if flag all=true is present -> get all interactions
+      OSIInteractions->insert(interactionsList->begin(), interactionsList->end());
+
     else
     {
       // get list of interactions numbers implicate in the OSI
       vector<int> interactionsNumbers;
       osixml->getInteractionsNumbers(interactionsNumbers);
       // get corresponding interactions and insert them into the set.
-      vector<int>::iterator it;
-      for (it = interactionsNumbers.begin(); it != interactionsNumbers.end(); ++it)
-        OSIInteractions->insert(nsds->getInteractionPtrNumber(*it));
+      for (vector<int>::iterator it = interactionsNumbers.begin(); it != interactionsNumbers.end(); ++it)
+        OSIInteractions->insert(interactionsList->getPtr(*it));
     }
   }
 }
 
 // --- Constructors from a minimum set of data ---
-OneStepIntegrator::OneStepIntegrator(const string& id, const DynamicalSystemsSet& listOfDs, SimulationSPtr newS):
-  integratorType(id), sizeMem(1), simulationLink(newS)
+OneStepIntegrator::OneStepIntegrator(const string& id, const DynamicalSystemsSet& listOfDs):
+  integratorType(id), sizeMem(1)
 {
-  if (!simulationLink)
-    RuntimeException::selfThrow("OneStepIntegrator:: constructor(Id,listDS,simulation) - simulation == NULL");
-
   OSIDynamicalSystems.reset(new DynamicalSystemsSet());
   OSIInteractions.reset(new InteractionsSet());
   setDynamicalSystems(listOfDs);
-
 }
-
-// --- Destructor ---
-OneStepIntegrator::~OneStepIntegrator()
-{
-}
-
 
 void OneStepIntegrator::setDynamicalSystems(const DynamicalSystemsSet& newSet)
 {
-  // Warning: pointers links between ds of newSet and OSIDynamicalSystems.
-  DSIterator it;
-  for (it = newSet.begin(); it != newSet.end(); ++it)
-    OSIDynamicalSystems->insert(*it);
+  OSIDynamicalSystems->insert(newSet.begin(), newSet.end());
 }
 
 void OneStepIntegrator::setInteractions(const InteractionsSet& newSet)
 {
-  // Warning: pointers links between ds of newSet and OSIDynamicalSystems.
-  InteractionsIterator it;
-  for (it = newSet.begin(); it != newSet.end(); ++it)
-    OSIInteractions->insert(*it);
+  OSIInteractions->insert(newSet.begin(), newSet.end());
 }
 
-SiconosVectorSPtr OneStepIntegrator::getWorkX(SP::DynamicalSystem ds)
+SP::SiconosVector OneStepIntegrator::getWorkX(SP::DynamicalSystem ds)
 {
   if (workX.find(ds) == workX.end())
     RuntimeException::selfThrow("OneStepIntegrator::getWorkX(ds): this vector does not exists for ds.");
   return workX[ds];
 }
 
-void OneStepIntegrator::initialize()
+void OneStepIntegrator::initialize(SP::Simulation sim)
 {
-
-  simulationLink->addOneStepIntegratorPtr(shared_from_this());
+  // Connection to the simulation owner of this OSI
+  assert(sim && "OneStepIntegrator::initialize(sim) error: sim is null.");
+  simulationLink = sim;
 
   double t0 = simulationLink->getModelPtr()->getT0();
   DSIterator it;
@@ -158,9 +127,7 @@ void OneStepIntegrator::initialize()
 
 void OneStepIntegrator::saveInMemory()
 {
-  DSIterator it;
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
-    (*it)->swapInMemory();
+  for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), boost::bind(&DynamicalSystem::swapInMemory, _1));
 }
 
 double OneStepIntegrator::computeResidu()
@@ -176,9 +143,7 @@ void OneStepIntegrator::computeFreeState()
 
 void OneStepIntegrator::resetNonSmoothPart()
 {
-  DSIterator it;
-  for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
-    (*it)->resetNonSmoothPart();
+  for_each(OSIDynamicalSystems->begin(), OSIDynamicalSystems->end(), boost::bind(&DynamicalSystem::resetNonSmoothPart, _1));
 }
 
 void OneStepIntegrator::display()

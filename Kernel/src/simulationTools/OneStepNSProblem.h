@@ -113,17 +113,17 @@ protected:
   MapOfDSMapOfUnitaryMatrices DSUnitaryBlocks;
 
   /** Solver for Non Smooth Problem*/
-  NonSmoothSolverSPtr solver;
+  SP::NonSmoothSolver solver;
 
   /** link to the simulation that owns the NSPb */
-  SimulationSPtr simulation;
+  SP::Simulation simulation;
 
   /** the XML object linked to the OneStepNSProblem to read XML data */
-  OneStepNSProblemXMLSPtr onestepnspbxml;
+  SP::OneStepNSProblemXML onestepnspbxml;
 
   /** set of Interactions: link to the Interactions of the Non Smooth Dynamical System
    * Note: no get or set functions for this object in the class -> used only in OneStepNSProblem methods. */
-  InteractionsSetSPtr OSNSInteractions;
+  SP::InteractionsSet OSNSInteractions;
 
   /** minimum index set number to be taken into account */
   unsigned int levelMin;
@@ -167,22 +167,19 @@ public:
   /** xml constructor
    *  \param string: problem type
    *  \param SP::OneStepNSProblemXML : the XML linked-object
-   *  \param SP::Simulation: the simulation that owns the problem
    */
-  OneStepNSProblem(const std::string&, OneStepNSProblemXMLSPtr, SimulationSPtr);
+  OneStepNSProblem(const std::string&, SP::OneStepNSProblemXML);
 
   /** constructor from data
    *  \param string: problem type
-   *  \param SP::Simulation: the simulation that owns this problem
    *  \param string : id
    *  \param Solver *: pointer on object that contains solver algorithm definition (optional)
    */
-  OneStepNSProblem(const std::string&, SimulationSPtr, const std::string&,
-                   NonSmoothSolverSPtr = NonSmoothSolverSPtr());
+  OneStepNSProblem(const std::string&, const std::string&, SP::NonSmoothSolver = SP::NonSmoothSolver());
 
   /** destructor
    */
-  virtual ~OneStepNSProblem();
+  virtual ~OneStepNSProblem() {};
 
   // --- GETTERS/SETTERS ---
 
@@ -247,7 +244,7 @@ public:
    *  \param a pointer to UnitaryRelation, optional, default value = NULL, in that case UR2 = UR1 (ie get "diagonal" unitaryBlock)
    *  \return a pointer to SiconosMatrix
    */
-  SiconosMatrixSPtr getUnitaryBlockPtr(SP::UnitaryRelation,
+  SP::SiconosMatrix getUnitaryBlockPtr(SP::UnitaryRelation,
                                        SP::UnitaryRelation = SP::UnitaryRelation()) const ;
 
   /** set the map of unitary matrices
@@ -271,7 +268,7 @@ public:
    *  \param a pointer to DynamicalSystem, DS1
    *  \return a pointer to SiconosMatrix
    */
-  SiconosMatrixSPtr getDSBlockPtr(SP::DynamicalSystem) const ;
+  SP::SiconosMatrix getDSBlockPtr(SP::DynamicalSystem) const ;
 
   /** set the map of DS matrices
    *  \param a MapOfDSMatrices
@@ -296,7 +293,7 @@ public:
    *  \param a pointer to DynamicalSystem DS2
    *  \return a pointer to SiconosMatrix
    */
-  SiconosMatrixSPtr getUnitaryDSBlockPtr(SP::UnitaryRelation, SP::DynamicalSystem) const ;
+  SP::SiconosMatrix getUnitaryDSBlockPtr(SP::UnitaryRelation, SP::DynamicalSystem) const ;
 
   /** set the map of unitaryDS matrices
    *  \param a MapOfUnitaryMapOfDSMatrices
@@ -320,7 +317,7 @@ public:
    *  \param a pointer to DynamicalSystem DS1
    *  \return a pointer to SiconosMatrix
    */
-  SiconosMatrixSPtr getDSUnitaryBlockPtr(SP::DynamicalSystem, SP::UnitaryRelation) const ;
+  SP::SiconosMatrix getDSUnitaryBlockPtr(SP::DynamicalSystem, SP::UnitaryRelation) const ;
 
   /** set the map of DSUnitary matrices
    *  \param a MapOfDSMapOfUnitaryMatrices
@@ -334,7 +331,7 @@ public:
   /** get the NonSmoothSolver
    *  \return a pointer on NonSmoothSolver
    */
-  inline NonSmoothSolverSPtr getNonSmoothSolverPtr() const
+  inline SP::NonSmoothSolver getNonSmoothSolverPtr() const
   {
     return solver;
   }
@@ -342,20 +339,28 @@ public:
   /** set the NonSmoothSolver of the OneStepNSProblem
    *  \param: a pointer on NonSmoothSolver
    */
-  void setNonSmoothSolverPtr(NonSmoothSolverSPtr);
+  void setNonSmoothSolverPtr(SP::NonSmoothSolver);
 
   /** get the Simulation
    *  \return a pointer on Simulation
    */
-  inline SimulationSPtr getSimulationPtr() const
+  inline SP::Simulation getSimulationPtr() const
   {
     return simulation;
+  }
+
+  /** set the Simulation of the OneStepNSProblem
+   *  \param a pointer to Simulation
+   */
+  inline void setSimulationPtr(SP::Simulation newS)
+  {
+    simulation = newS;
   }
 
   /** get the Interactions set
    *  \return an InteractionsSet
    */
-  inline InteractionsSetSPtr getInteractions() const
+  inline SP::InteractionsSet getInteractions() const
   {
     return OSNSInteractions;
   }
@@ -517,8 +522,9 @@ public:
 
 
   /** initialize the problem(compute topology ...)
+      \param the simulation, owner of this OSNSPB
     */
-  virtual void initialize();
+  virtual void initialize(SP::Simulation);
 
   /** save Interactions states in Memory
    */

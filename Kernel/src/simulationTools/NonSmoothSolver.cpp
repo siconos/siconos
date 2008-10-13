@@ -87,7 +87,7 @@ NonSmoothSolver::NonSmoothSolver(const std::string& newName, IntParameters& ipar
 NonSmoothSolver::NonSmoothSolver(NonSmoothSolverXML* solvXML):
   name("undefined"), int_parameters(NULL), double_parameters(NULL), numerics_solver_options(NULL), isSet(true)
 {
-  if (solvXML == NULL)
+  if (! solvXML)
     RuntimeException::selfThrow("NonSmoothSolver, XML constructor, NULL input");
 
   // Read name

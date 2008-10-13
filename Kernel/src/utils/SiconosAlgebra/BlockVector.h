@@ -38,23 +38,15 @@ class SimpleVector;
  * Insertion of NULL SP::SiconosVector is not allowed.
  *
  */
-class BlockVector : public SiconosVector
-#ifdef WithSmartPtr
-  , public boost::enable_shared_from_this<BlockVector>
-#endif
+class BlockVector : public SiconosVector , public boost::enable_shared_from_this<BlockVector>
 {
 private:
 
   /** A container of pointers on SiconosVector. */
-  BlocksVect vect;
+  VectorOfVectors vect;
 
   /** tabindex[i] = tabindex[i-1] + ni, ni being the size of svref[i]. */
   Index * tabIndex;
-
-#ifndef WithSmartPtr
-  /** Flags to check wheter pointers were allocated in class constructors or not */
-  std::vector<bool> * isBlockAllocatedIn;
-#endif
 
 public:
 
@@ -82,7 +74,7 @@ public:
    *  \param SP::SiconosVector v1
    *  \param SP::SiconosVector v2
    */
-  BlockVector(SiconosVectorSPtr, SiconosVectorSPtr);
+  BlockVector(SP::SiconosVector, SP::SiconosVector);
 
   /** constructor with the number of Blocks and their dimension (ie all Blocks have the same dim AND are SimpleVectors)
    *  \param unsigned int : number of Blocks
@@ -95,41 +87,41 @@ public:
   ~BlockVector();
 
   /** iterator equal to vect.begin
-      \return a BlocksVectIterator
+      \return a VectorOfVectors::iterator
   */
-  inline BlockVectIterator begin()
+  inline VectorOfVectors::iterator begin()
   {
     return vect.begin();
   };
 
   /** iterator equal to vect.end
-      \return a BlocksVectIterator
+      \return a VectorOfVectors::iterator
   */
-  inline BlockVectIterator end()
+  inline VectorOfVectors::iterator end()
   {
     return vect.end();
   };
 
   /** const iterator equal to vect.begin
-      \param a BlocksVectIterator
+      \param a VectorOfVectors::iterator
   */
-  inline ConstBlockVectIterator begin() const
+  inline VectorOfVectors::const_iterator begin() const
   {
     return vect.begin();
   };
 
   /** const iterator equal to vect.end
-      \param a BlocksVectIterator
+      \param a VectorOfVectors::iterator
   */
-  inline ConstBlockVectIterator end() const
+  inline VectorOfVectors::const_iterator end() const
   {
     return vect.end();
   } ;
 
   /** get vect, ie all the vectors of the object
-   * \return a BlocksVect
+   * \return a VectorOfVectors
    */
-  inline BlocksVect getAllVect() const
+  inline VectorOfVectors getAllVect() const
   {
     return vect;
   }
@@ -240,7 +232,7 @@ public:
    * \param unsigned int: block number
    * \return a pointer to a SiconosVector
    */
-  inline SiconosVectorSPtr getVectorPtr(unsigned int pos)
+  inline SP::SiconosVector getVectorPtr(unsigned int pos)
   {
     return vect.at(pos);
   };
@@ -249,17 +241,10 @@ public:
    * \param unsigned int: block number
    * \return a pointer to a SiconosVector
    */
-#ifndef WithSmartPtr
-  inline const SP::SiconosVector getVectorPtr(unsigned int pos) const
+  inline SPC::SiconosVector getVectorPtr(unsigned int pos) const
   {
     return vect.at(pos);
   };
-#else
-  inline SiconosVectorSPtrConst getVectorPtr(unsigned int pos) const
-  {
-    return vect.at(pos);
-  };
-#endif
 
   /** set i-eme SiconosVector of vect (copy)
    * \param unsigned int: block number
@@ -271,23 +256,19 @@ public:
    * \param unsigned int: block number
    * \param a pointer to a SiconosVector
    */
-  void setVectorPtr(unsigned int, SiconosVectorSPtr);
+  void setVectorPtr(unsigned int, SP::SiconosVector);
 
   /** get the vector at position i(ie this for Simple and block i for BlockVector)
    *  \param an unsigned integer i
    *  \return a SP::SiconosVector
    */
-  SiconosVectorSPtr operator [](unsigned int) ;
+  SP::SiconosVector operator [](unsigned int) ;
 
   /** get the vector at position i(ie this for Simple and block i for BlockVector)
    *  \param an unsigned integer i
    *  \return a SP::SiconosVector
    */
-#ifndef WithSmartPtr
-  const SiconosVector operator [](unsigned int) const;
-#else
-  SiconosVectorSPtrConst operator [](unsigned int) const;
-#endif
+  SPC::SiconosVector operator [](unsigned int) const;
 
   /** get the index tab
    * \return a standard vector of int
@@ -393,7 +374,7 @@ public:
   /** Insert a pointer to a subvector in this vector: no reallocation nor copy.
    *  \param a pointer to SP::SiconosVector
    */
-  void insertPtr(SiconosVectorSPtr) ;
+  void insertPtr(SP::SiconosVector) ;
 
 };
 

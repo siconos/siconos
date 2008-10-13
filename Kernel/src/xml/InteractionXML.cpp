@@ -43,28 +43,28 @@ InteractionXML::InteractionXML(xmlNodePtr  interactionNode):
   string type;
   string subType;
   // size (required)
-  if ((node = SiconosDOMTreeTools::findNodeChild(interactionNode, "size")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(interactionNode, "size")))
     sizeNode = node;
   else
     XMLException::selfThrow("InteractionXML - xml constructor: tag size not found.");
 
   // y (optional)
-  if ((node = SiconosDOMTreeTools::findNodeChild(interactionNode, "y")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(interactionNode, "y")))
     yNode = node;
   // lambda (optional)
-  if ((node = SiconosDOMTreeTools::findNodeChild(interactionNode, "lambda")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(interactionNode, "lambda")))
     lambdaNode = node;
   // get DSConcerned node (required)
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DS_CONCERNED)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DS_CONCERNED)))
     DSConcernedNode = node;
   else
     XMLException::selfThrow("InteractionXML - xml constructor, tag " + DS_CONCERNED + " not found.");
 
   // Relation and Non Smooth Law (required)
-  if ((node = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr)interactionNode, INTERACTION_CONTENT_TAG)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr)interactionNode, INTERACTION_CONTENT_TAG)))
   {
     // the first child is the Relation
-    if ((node2 = SiconosDOMTreeTools::findNodeChild(node)) != NULL)
+    if ((node2 = SiconosDOMTreeTools::findNodeChild(node)))
     {
       relationNode = node2;
       // get Relation type
@@ -93,7 +93,7 @@ InteractionXML::InteractionXML(xmlNodePtr  interactionNode):
 
     // the second child is the NonSmoothLaw
     nsLawNode = SiconosDOMTreeTools::findFollowNode(node2);
-    if (nsLawNode != NULL)
+    if (nsLawNode)
     {
       // Non smooth law type
       type = (char*)nsLawNode->name;

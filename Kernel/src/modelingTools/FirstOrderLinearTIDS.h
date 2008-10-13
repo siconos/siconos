@@ -72,28 +72,21 @@ public:
 
   /** xml constructor
    *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
-   *  \param NonSmoothSP::DynamicalSystem (optional): the NSDS that owns this ds
-   *  \exception RuntimeException
    */
-  FirstOrderLinearTIDS(DynamicalSystemXMLSPtr,
-                       SP::NonSmoothDynamicalSystem = SP::NonSmoothDynamicalSystem());
+  FirstOrderLinearTIDS(SP::DynamicalSystemXML);
 
   /** constructor from a set of data
-   *  \param int : reference number of this DynamicalSystem
    *  \param SiconosVector : the initial state of this DynamicalSystem
    *  \param SiconosMatrix: A
-   *  \exception RuntimeException
    */
-  FirstOrderLinearTIDS(int, const SiconosVector&, const SiconosMatrix&);
+  FirstOrderLinearTIDS(const SiconosVector&, const SiconosMatrix&);
 
   /** constructor from a set of data
-   *  \param int : reference number of this DynamicalSystem
    *  \param SiconosVector : the initial state of this DynamicalSystem
    *  \param SiconosMatrix: A
    *  \param SiconosVector: b
-   *  \exception RuntimeException
    */
-  FirstOrderLinearTIDS(int, const SiconosVector&, const SiconosMatrix&, const SiconosVector&);
+  FirstOrderLinearTIDS(const SiconosVector&, const SiconosMatrix&, const SiconosVector&);
 
   /** destructor */
   ~FirstOrderLinearTIDS();

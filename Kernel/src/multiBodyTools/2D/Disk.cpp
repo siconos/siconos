@@ -22,16 +22,14 @@
 
 void Disk::MassSetup()
 {
-  MassDisk.reset(new SimpleMatrix(ndof, ndof));
-  MassDisk->resize(ndof, ndof);
-  MassDisk->zero();
-  (*MassDisk)(0, 0) = (*MassDisk)(1, 1) = massDisk;
-  (*MassDisk)(2, 2) = massDisk * radiusDisk * radiusDisk / 2.;
-  setMassPtr(MassDisk);
+  mass.reset(new PMMass(ndof, ndof));
+  mass->resize(ndof, ndof);
+  mass->zero();
+  (*mass)(0, 0) = (*mass)(1, 1) = massDisk;
+  (*mass)(2, 2) = massDisk * radiusDisk * radiusDisk / 2.;
 }
 
-Disk::Disk(int number,
-           double r, double m,
+Disk::Disk(double r, double m,
            double x, double y)
   : LagrangianDS(), radiusDisk(r), massDisk(m), ndofDisk(3)
 {
@@ -41,7 +39,6 @@ Disk::Disk(int number,
   ADisk.reset(new SimpleVector(ndofDisk));
 
   setNdof(ndofDisk);
-  setNumber(number);
 
   q.resize(3);
 
@@ -66,10 +63,10 @@ Disk::Disk(int number,
 }
 
 
-Disk::Disk(int number, double r, double m,
+Disk::Disk(double r, double m,
            const SiconosVector& qinit,
            const SiconosVector& vinit)
-  : LagrangianDS(number, qinit, vinit),
+  : LagrangianDS(qinit, vinit),
     radiusDisk(r), massDisk(m), ndofDisk(3)
 {
   MassSetup();

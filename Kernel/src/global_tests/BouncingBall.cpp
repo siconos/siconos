@@ -26,7 +26,7 @@
 // ======================================================================================================
 
 #include "GlobalTests.h"
-#include "SiconosKernel.h"
+#include "SiconosKernel.hpp"
 using namespace std;
 
 bool BouncingBall()
@@ -38,14 +38,14 @@ bool BouncingBall()
     cout << " **************************************" << endl;
     cout << " ******** Start Bouncing Ball *********" << endl << endl << endl;
     // --- Model loading from xml file ---
-    Model * bouncingBall = new Model("./Ball.xml");
+    SP::Model bouncingBall(new Model("./Ball.xml"));
     // --- Get and initialize the simulation ---
-    TimeStepping* s = static_cast<TimeStepping*>(bouncingBall->getSimulationPtr());
-    LagrangianDS* ball = static_cast<LagrangianDS*>(bouncingBall->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
-    s->initialize();
+    SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(bouncingBall->getSimulationPtr());
+    SP::LagrangianDS ball = boost::static_pointer_cast<LagrangianDS> (bouncingBall->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(1));
+    bouncingBall->initialize();
 
     // --- Get the time discretisation scheme ---
-    TimeDiscretisation* t = s->getTimeDiscretisationPtr();
+    SP::TimeDiscretisation t = s->getTimeDiscretisationPtr();
 
     int N = 2000; // Number of time steps
     // --- Get the values to be plotted ---
@@ -54,9 +54,9 @@ bool BouncingBall()
     // For the initial time step:
     // time
 
-    SiconosVector * q = ball->getQPtr();
-    SiconosVector * v = ball->getVelocityPtr();
-    SiconosVector * p = ball->getPPtr(2);
+    SP::SiconosVector q = ball->getQPtr();
+    SP::SiconosVector v = ball->getVelocityPtr();
+    SP::SiconosVector p = ball->getPPtr(2);
 
     dataPlot(0, 0) = bouncingBall->getT0();
     dataPlot(0, 1) = (*q)(0);
@@ -76,7 +76,7 @@ bool BouncingBall()
       k++;
     }
 
-    SiconosMatrix * dataRef = new SimpleMatrix("refBouncingBall.dat", true);
+    SP::SiconosMatrix dataRef(new SimpleMatrix("refBouncingBall.dat", true));
     double tol = 1e-9;
     double norm = (dataPlot - (*dataRef)).normInf() ;// diff->normInf();
     ioMatrix io("result.dat", "ascii");
@@ -94,8 +94,6 @@ bool BouncingBall()
     }
 
     cout << endl << endl;
-
-    delete dataRef;
   }
 
   // --- Exceptions handling ---

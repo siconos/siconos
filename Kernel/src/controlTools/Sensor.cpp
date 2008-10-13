@@ -54,7 +54,7 @@ void Sensor::recordInSimulation()
 void Sensor::display() const
 {
   cout << "=====> Sensor of type " << type << ", named " << id ;
-  if (model != NULL)
+  if (model)
     cout << " and linked to model named " << model->getTitle() << "." << endl;
   else
     cout << " and not linked to a model." << endl;
