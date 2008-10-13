@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-#include "SiconosKernel.h"
+#include "SiconosKernel.hpp"
 #include "WoodPeckerConsts.h"
 
 using namespace std;

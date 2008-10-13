@@ -27,7 +27,7 @@ Simulation with a Time-Stepping scheme.
 Keywords: LagrangianLinearDS, LagrangianLinear relation, Moreau TimeStepping, LCP.
 */
 
-#include "SiconosKernel.h"
+#include "SiconosKernel.hpp"
 
 using namespace std;
 

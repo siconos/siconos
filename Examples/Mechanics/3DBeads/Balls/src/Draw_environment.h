@@ -2,7 +2,7 @@
 #ifndef Env_H
 #define Env_H
 
-#include "SiconosKernel.h"
+#include "SiconosKernel.hpp"
 
 // Position of walls
 const double WALL = 1.0;

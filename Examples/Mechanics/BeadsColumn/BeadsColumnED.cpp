@@ -26,7 +26,7 @@ Simulation with an Event-Driven scheme.
 Keywords: LagrangianLinearDS, LagrangianLinear relation, Event Driven, Lsodar, LCP.
 */
 
-#include "SiconosKernel.h"
+#include "SiconosKernel.hpp"
 
 using namespace std;
 

@@ -26,7 +26,7 @@
 //
 // =============================================================================================
 
-#include "SiconosKernel.h"
+#include "SiconosKernel.hpp"
 #include <stdlib.h>
 using namespace std;
 

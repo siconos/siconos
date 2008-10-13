@@ -62,7 +62,7 @@ void CanonBallsModel::initialize()
   // initial computation time
   double t0 = 0.0;
   // final computation time
-  double T = 2.;
+  double T = 1.0;
   // Default time step
   double h = 0.005;
   // ================= Creation of the model =======================
@@ -179,11 +179,11 @@ void CanonBallsModel::draw()
 {
 #ifdef WithQGLViewer
 
-  DrawUtilities::drawHorizontalPlane(GROUND);
-  DrawUtilities::drawYVerticalPlane(WALL);
-  DrawUtilities::drawYVerticalPlane(-WALL);
-  DrawUtilities::drawXVerticalPlane(-WALL);
-  DrawUtilities::drawXVerticalPlane(WALL);
+  //  DrawUtilities::drawHorizontalPlane(GROUND);
+  //   DrawUtilities::drawYVerticalPlane(WALL);
+  //   DrawUtilities::drawYVerticalPlane(-WALL);
+  //   DrawUtilities::drawXVerticalPlane(-WALL);
+  //   DrawUtilities::drawXVerticalPlane(WALL);
 
   double x, y, z, r, color = 0.1;
 
@@ -290,8 +290,8 @@ void CanonBallsModel::buildInteractions(InteractionsSet* allInteractions)
   vector<Relation*> LLR3_(numberOfSpheres);
 
   double Radius = 0.1;
-  double e  = 0.9;
-  double mu = 0.1;
+  double e  = 0.1;
+  double mu = 0.4;
   NonSmoothLaw * nslaw1 = new NewtonImpactFrictionNSL(e, e, mu, 3);
 
   SimpleVector bground(3), bceil(3), bwallYp(3), bwallYm(3), bwallXp(3), bwallXm(3);

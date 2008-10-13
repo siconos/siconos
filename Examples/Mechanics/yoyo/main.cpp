@@ -1,4 +1,4 @@
-#include "SiconosKernel.h"
+#include "SiconosKernel.hpp"
 #include "donnee.h"
 
 using namespace std;

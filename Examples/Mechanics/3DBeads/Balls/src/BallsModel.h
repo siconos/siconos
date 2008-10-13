@@ -24,7 +24,7 @@
 #ifndef BallsModel_H
 #define BallsModel_H
 
-#include "SiconosKernel.h"
+#include "SiconosKernel.hpp"
 #include "Sphere.h"
 typedef std::vector<SimpleVector*> Vectors;
 typedef std::vector<Sphere*> DSLIST;

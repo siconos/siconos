@@ -13,8 +13,8 @@
 
 Let us consider  a ball of  mass \f$ m\f$  and radius \f$ R\f$ , described by \f$ 3\f$  generalized coordinates \f$ q=(z,x,\theta)\f$ . The ball is subjected to the gravity \f$ g\f$  and a vertical external force \f$ f(t)\f$ . The system is also constituted by a rigid plane, defined by its position \f$ h\f$  with respect to the axis \f$ Oz\f$ . We assume that the position of the plane is fixed. The physical problem  is depicted on the Figure below:
 
-\image html Mechanics/BouncingBall/bouncingBall.png 
-\image latex Mechanics/BouncingBall/bouncingBall.eps "Two-dimensional Bouncing Ball on a rigid plane" 
+\image html Mechanics/BouncingBall/BouncingBall2.png 
+\image latex Mechanics/BouncingBall/BouncingBall2.eps "Two-dimensional Bouncing Ball on a rigid plane" 
 
 The ball bounces on the rigid plane, introducing a constraint on the position of the ball. We consider also that the behavior of the system at impact is governed by a Newton impact law with a coefficient of restitution \f$ e\f$ .
 

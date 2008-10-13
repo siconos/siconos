@@ -26,7 +26,7 @@ Description of the model with XML input.
 Simulation with a Time-Stepping scheme.
 */
 
-#include "SiconosKernel.h"
+#include "SiconosKernel.hpp"
 
 using namespace std;
 
@@ -40,17 +40,18 @@ int main(int argc, char* argv[])
     // --- Model loading from xml file ---
     cout << "====> Model loading (XML) ..." << endl << endl;
 
-    Model * bouncingBall = new Model("./BallTS.xml");
+    SP::Model bouncingBall(new Model("./BallTS.xml"));
     cout << "\n *** BallTS.xml file loaded ***" << endl << endl;
 
-    // --- Get and initialize the simulation ---
-    TimeStepping* s = static_cast<TimeStepping*>(bouncingBall->getSimulationPtr());
-    LagrangianDS* ball = static_cast<LagrangianDS*>(bouncingBall->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
-    cout << "====> Simulation initialisation ..." << endl << endl;
-    s->initialize();
 
+    cout << "====> Initialisation ..." << endl << endl;
+    bouncingBall->initialize();
+
+    // --- Get the simulation ---
+    SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(bouncingBall->getSimulationPtr());
+    SP::LagrangianDS ball = boost::static_pointer_cast<LagrangianDS> (bouncingBall->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(1));
     // --- Get the time discretisation scheme ---
-    TimeDiscretisation* t = s->getTimeDiscretisationPtr();
+    SP::TimeDiscretisation t = s->getTimeDiscretisationPtr();
 
     int N = 2000; // Number of time steps
     // --- Get the values to be plotted ---
@@ -59,9 +60,9 @@ int main(int argc, char* argv[])
     unsigned int outputSize = 4;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
-    SiconosVector * q = ball->getQPtr();
-    SiconosVector * v = ball->getVelocityPtr();
-    SiconosVector * p = ball->getPPtr(2);
+    SP::SiconosVector q = ball->getQPtr();
+    SP::SiconosVector v = ball->getVelocityPtr();
+    SP::SiconosVector p = ball->getPPtr(2);
 
     dataPlot(0, 0) = bouncingBall->getT0();
     dataPlot(0, 1) = (*q)(0);
@@ -90,7 +91,6 @@ int main(int argc, char* argv[])
 
     // Xml output
     //  bouncingBall->saveToXMLFile("./BouncingBall_TIDS.xml.output");
-    delete bouncingBall;
   }
 
   // --- Exceptions handling ---

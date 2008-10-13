@@ -21,7 +21,7 @@
 \brief \ref EMCamFollower - C++ input file version - M. di Bernardo, G. Osorio, S. Santini.
 */
 
-#include "SiconosKernel.h"
+#include "SiconosKernel.hpp"
 #include "CamState.h"
 
 using namespace std;

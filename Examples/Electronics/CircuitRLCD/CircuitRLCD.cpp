@@ -44,7 +44,7 @@
 //
 //-----------------------------------------------------------------------
 
-#include "SiconosKernel.h"
+#include "SiconosKernel.hpp"
 
 using namespace std;
 

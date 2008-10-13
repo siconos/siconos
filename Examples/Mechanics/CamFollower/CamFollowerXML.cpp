@@ -28,7 +28,7 @@
 //
 // ======================================================================================================
 
-#include "SiconosKernel.h"
+#include "SiconosKernel.hpp"
 #include "CamState.h"
 
 using namespace std;

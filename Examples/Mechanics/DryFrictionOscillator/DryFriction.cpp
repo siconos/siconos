@@ -23,7 +23,7 @@
 Description of the model with XML input.
 Simulation with a Time-Stepping scheme.
 */
-#include "SiconosKernel.h"
+#include "SiconosKernel.hpp"
 
 using namespace std;
 int main(int argc, char* argv[])

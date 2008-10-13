@@ -25,7 +25,7 @@
   Simulation with an Event-Driven scheme.
 */
 
-#include "SiconosKernel.h"
+#include "SiconosKernel.hpp"
 
 using namespace std;
 

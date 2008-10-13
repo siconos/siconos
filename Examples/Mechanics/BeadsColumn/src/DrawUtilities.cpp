@@ -28,6 +28,7 @@ void DrawUtilities::drawSphere(double radius, double x, double y, double z, doub
 {
   glPushMatrix();
   glTranslatef(x, y, z);
+  glEnable(GL_LIGHTING);
   glBegin(GL_QUADS);
   GLUquadricObj *Sphere = gluNewQuadric();
   //  gluQuadricCallback(Sphere, which, errorFunc);
@@ -35,30 +36,31 @@ void DrawUtilities::drawSphere(double radius, double x, double y, double z, doub
   GLint slices = 100; // number of slices around z-axis
   GLint stacks = 100; // number of stacks along z-axis
 
-  glColor3f(c, 2 * c, 0.5 * c);
+  glColor3f(0, 1, 0);
   gluSphere(Sphere, radius, slices, stacks);
   glEnd();
+  glDisable(GL_LIGHTING);
 
   glPopMatrix();
 }
 
 void DrawUtilities::drawHorizontalPlane(double ground)
 {
-  glEnable(GL_BLEND);
-  double alpha = 0.3;
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glColor4f(0.5, 0.7, 0.9, alpha);
+  //   glEnable(GL_BLEND);
+  double alpha = 1;
+  //   glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+  glColor4f(0.2, 0.2, 0.2, alpha);
 
   glBegin(GL_QUADS);
   // Ground
-
+  double scale = 4;
   glNormal3f(0.0f, -1.0f, ground);// Normal Pointing Down
-  glVertex3f(-1.0, -1.0, ground);
-  glVertex3f(-1.0, 1.0, ground);
-  glVertex3f(1.0, 1.0, ground);
-  glVertex3f(1.0, -1.0, ground);
+  glVertex3f(-scale, -scale, ground);
+  glVertex3f(-scale, scale, ground);
+  glVertex3f(scale, scale, ground);
+  glVertex3f(scale, -scale, ground);
   glEnd();
-  glDisable(GL_BLEND);
+  //   glDisable(GL_BLEND);
 }
 #endif
 

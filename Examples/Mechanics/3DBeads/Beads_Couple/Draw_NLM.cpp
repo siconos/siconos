@@ -35,7 +35,7 @@
 //
 // ======================================================================================================
 
-#include "SiconosKernel.h"
+#include "SiconosKernel.hpp"
 #include <sys/time.h>
 #include <math.h>
 #include <iostream>

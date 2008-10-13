@@ -51,10 +51,6 @@ void BallsModel::initialize()
   double T = 3.;
   // Default time step
   double h = 0.005;
-  double increment_position = 1;   // initial position increment from one DS to the following
-  double increment_velocity = 0;   // initial velocity increment from one DS to the following
-  double position_init = 5.5;     // initial position for lowest bead.
-  double velocity_init = 0.0;      // initial velocity for lowest bead.
 
   // ================= Creation of the model =======================
 
@@ -102,9 +98,6 @@ void BallsModel::initialize()
   string solverName = "Lemke";      // solver algorithm used for non-smooth problem
   IntParameters iparam(5);
   iparam[0] = 1000; // Max number of iteration
-  // Solver/formulation
-  // 0: projection, 1: Newton/AlartCurnier, 2: Newton/Fischer-Burmeister, 3: Path/Glocker
-  iparam[4] = 1;
   DoubleParameters dparam(5);
   dparam[0] = 1e-6; // Tolerance
   //dparam[2] = 1e-8; // Local Tolerance
@@ -208,9 +201,9 @@ void BallsModel::buildDynamicalSystems()
   q0.resize(numberOfSpheres, NULL);
   v0.resize(numberOfSpheres, NULL);
 
-  double increment_position = 0.5;   // initial position increment from one DS to the following
+  double increment_position = 3;   // initial position increment from one DS to the following
   double increment_velocity = 0;   // initial velocity increment from one DS to the following
-  double position_init = 1.0;     // initial position for lowest bead.
+  double position_init = 4.0;     // initial position for lowest bead.
   double velocity_init = 0.0;      // initial velocity for lowest bead.
 
   for (i = 0; i < numberOfSpheres; i++)

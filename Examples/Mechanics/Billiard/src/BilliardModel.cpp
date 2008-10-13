@@ -62,7 +62,7 @@ void BilliardModel::initialize()
   // initial computation time
   double t0 = 0.0;
   // final computation time
-  double T = 0.2;
+  double T = 2;
   // Default time step
   double h = 0.05;
   // ================= Creation of the model =======================
@@ -248,8 +248,8 @@ void BilliardModel::computeInitialPositions(Vectors q0, Vectors v0)
   (*(q0[8]))(1) =  0.8;
   (*(q0[8]))(2) =  0.1;
 
-  (*(v0[8]))(0) = -1;
-  (*(v0[8]))(1) = -20.;
+  (*(v0[8]))(0) = -0.1;
+  (*(v0[8]))(1) = -2.;
 
   (*(q0[9]))(0) =  0.3;
   (*(q0[9]))(1) = -0.6;

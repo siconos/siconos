@@ -2,7 +2,7 @@
 #ifndef Env_H
 #define Env_H
 
-#include "SiconosKernel.h"
+#include "SiconosKernel.hpp"
 
 // Number of floors (min = 1)
 const int NBSpheres = 16;

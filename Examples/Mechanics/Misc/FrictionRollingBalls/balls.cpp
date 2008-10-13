@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "SiconosKernel.h"
+#include "SiconosKernel.hpp"
 
 using namespace std;
 int main(int argc, char* argv[])
