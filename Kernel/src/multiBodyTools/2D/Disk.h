@@ -34,12 +34,14 @@ private:
   double massDisk;
   unsigned int ndofDisk;
 
-  boost::shared_ptr<SiconosVector> QDisk;
-  boost::shared_ptr<SiconosVector> VDisk;
-  boost::shared_ptr<SiconosVector> ADisk;
+  SP::SiconosVector QDisk;
+  SP::SiconosVector VDisk;
+  SP::SiconosVector ADisk;
 
   void MassSetup();
 
+
+protected:
   Disk();
 
 public:
@@ -54,7 +56,6 @@ public:
   Disk(double, double, double, double);
 
   /** Constructor
-      \param number
       \param radius
       \param mass
       \param postion vector

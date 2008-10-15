@@ -18,6 +18,7 @@
  *
  */
 
+#include <math.h>
 #include "DiskDiskR.h"
 
 DiskDiskR::DiskDiskR(double r, double rr) : LagrangianScleronomousR()
@@ -32,14 +33,15 @@ void DiskDiskR::computeH(double)
 
   SP::SiconosVector y = interaction->getYPtr(0);
 
-  // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+  // Warning: temporary method to have contiguous values in memory,
+  // copy of block to simple.
   *workX = *data["q0"];
   double *q = &(*workX)(0);
 
   double dx = q[3] - q[0];
   double dy = q[4] - q[1];
 
-  double d =  sqrt(dx * dx + dy * dy);
+  double d =  hypot(dx, dy);
 
   y->setValue(0, d - r1pr2);
   y->setValue(1, 0.);
@@ -56,7 +58,9 @@ void DiskDiskR::computeG(double, unsigned int)
   double dx = q[3] - q[0];
   double dy = q[4] - q[1];
 
-  double d = sqrt(dx * dx + dy * dy);
+  double d = hypot(dx, dy);
+
+  double dmr1pr2 = d - r1 - r2;
 
   double dxsd = dx / d;
   double dysd = dy / d;

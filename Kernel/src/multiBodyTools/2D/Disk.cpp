@@ -49,15 +49,13 @@ Disk::Disk(double r, double m,
   QDisk->setValue(0, x);
   QDisk->setValue(1, y);
   setQPtr(QDisk);
-  setVelocity(*VDisk);
+  setVelocityPtr(VDisk);
 
   setQ0(*QDisk);
-
   setVelocity0(*VDisk);
 
   // Missing setAccelerationPtr()
-  q[2].reset(new SimpleVector(ndofDisk));
-  *q[2] = *ADisk;
+  q[2] = ADisk;
 
   MassSetup();
 }

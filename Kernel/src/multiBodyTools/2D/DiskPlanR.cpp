@@ -18,13 +18,14 @@
  *
  */
 
+#include <math.h>
 #include "DiskPlanR.h"
 
 DiskPlanR::DiskPlanR(double r, double A, double B, double C) :
   LagrangianScleronomousR(),
   r(r), A(A), B(B), C(C)
 {
-  sqrA2pB2 = sqrt(A * A + B * B);
+  sqrA2pB2 = hypot(A, B);
 }
 
 void DiskPlanR::computeH(double)
@@ -32,7 +33,8 @@ void DiskPlanR::computeH(double)
 
   SP::SiconosVector y = interaction->getYPtr(0);
 
-  // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+  // Warning: temporary method to have contiguous values in memory,
+  // copy of block to simple.
   *workX = *data["q0"];
   double *q = &(*workX)(0);
 

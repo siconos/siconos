@@ -23,6 +23,9 @@
   \brief disk - plan relation - Inherits from LagrangianScleronomousR
 */
 
+#ifndef DiskPlanR_h
+#define DiskPlanR_h
+
 #include "Interaction.h"
 #include "LagrangianScleronomousR.h"
 
@@ -50,3 +53,5 @@ public:
   void computeG(double, unsigned int);
 
 };
+
+#endif /* DiskPlanR */

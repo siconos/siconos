@@ -22,6 +22,9 @@
   \brief Two disks relation - Inherits from LagrangianScleronomousR
 */
 
+#ifndef Disk_h
+#define Disk_h
+
 #include "Interaction.h"
 #include "LagrangianScleronomousR.h"
 
@@ -46,3 +49,5 @@ public:
   void computeG(double, unsigned int);
 
 };
+
+#endif /* Disk_h */
