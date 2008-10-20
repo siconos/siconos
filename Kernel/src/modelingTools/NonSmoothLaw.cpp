@@ -35,7 +35,7 @@ NonSmoothLaw::NonSmoothLaw(const string& newType, SP::NonSmoothLawXML newNsLawXm
          "NonSmoothLaw:: xml constructor, xml file==NULL");
 
   // Read size of the non smooth law
-  assert(nslawxml->hasSize()
+  assert(nslawxml->hasSize() &&
          "NonSmoothLaw:: xml constructor, an input is required for the nslaw size.");
 
   size = nslawxml->getSize();

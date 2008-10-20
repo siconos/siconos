@@ -742,7 +742,7 @@ void LagrangianDS::computeMass(SP::SiconosVector q2)
 
 void LagrangianDS::computeFInt(double time)
 {
-  if (fInt->isPlugged())
+  if (fInt && fInt->isPlugged())
   {
     if (!(fInt->fPtr))
       RuntimeException::selfThrow("computeFInt() is not linked to a plugin function");
@@ -752,7 +752,7 @@ void LagrangianDS::computeFInt(double time)
 }
 void LagrangianDS::computeFInt(double time, SP::SiconosVector q2, SP::SiconosVector velocity2)
 {
-  if (fInt->isPlugged())
+  if (fInt && fInt->isPlugged())
   {
     if (!(fInt->fPtr))
       RuntimeException::selfThrow("computeFInt() is not linked to a plugin function");
@@ -763,7 +763,7 @@ void LagrangianDS::computeFInt(double time, SP::SiconosVector q2, SP::SiconosVec
 
 void LagrangianDS::computeFExt(double time)
 {
-  if (fExt->isPlugged())
+  if (fExt && fExt->isPlugged())
   {
     if (!(fExt->fPtr))
       RuntimeException::selfThrow("computeFExt() is not linked to a plugin function");
@@ -774,7 +774,7 @@ void LagrangianDS::computeFExt(double time)
 
 void LagrangianDS::computeNNL()
 {
-  if (NNL->isPlugged())
+  if (NNL && NNL->isPlugged())
   {
     if (!(NNL->fPtr))
       RuntimeException::selfThrow("computeQ() is not linked to a plugin function");
@@ -784,7 +784,7 @@ void LagrangianDS::computeNNL()
 
 void LagrangianDS::computeNNL(SP::SiconosVector q2, SP::SiconosVector velocity2)
 {
-  if (NNL->isPlugged())
+  if (NNL && NNL->isPlugged())
   {
     if (!(NNL->fPtr))
       RuntimeException::selfThrow("computeQ() is not linked to a plugin function");
@@ -795,7 +795,7 @@ void LagrangianDS::computeNNL(SP::SiconosVector q2, SP::SiconosVector velocity2)
 
 void LagrangianDS::computeJacobianFInt(unsigned int i, double time)
 {
-  if (jacobianFInt[i]->isPlugged())
+  if (jacobianFInt[i] && jacobianFInt[i]->isPlugged())
   {
     if (!(jacobianFInt[i]->fPtr))
       RuntimeException::selfThrow("computeJacobianFInt(i,time) is not linked to a plugin function. i=" + i);
@@ -806,7 +806,7 @@ void LagrangianDS::computeJacobianFInt(unsigned int i, double time)
 
 void LagrangianDS::computeJacobianFInt(unsigned int i, double time, SP::SiconosVector q2, SP::SiconosVector velocity2)
 {
-  if (jacobianFInt[i]->isPlugged())
+  if (jacobianFInt[i] && jacobianFInt[i]->isPlugged())
   {
     if (!(jacobianFInt[i]->fPtr))
       RuntimeException::selfThrow("computeJacobianFInt(i, ...) is not linked to a plugin function. i=" + i);
@@ -817,7 +817,7 @@ void LagrangianDS::computeJacobianFInt(unsigned int i, double time, SP::SiconosV
 
 void LagrangianDS::computeJacobianNNL(unsigned int i)
 {
-  if (jacobianNNL[i]->isPlugged())
+  if (jacobianNNL[i] && jacobianNNL[i]->isPlugged())
   {
     if (!(jacobianNNL[i]->fPtr))
       RuntimeException::selfThrow("computeJacobianNNL(i) is not linked to a plugin function. i=" + i);
@@ -828,7 +828,7 @@ void LagrangianDS::computeJacobianNNL(unsigned int i)
 
 void LagrangianDS::computeJacobianNNL(unsigned int i, SP::SiconosVector q2, SP::SiconosVector velocity2)
 {
-  if (jacobianNNL[i]->isPlugged())
+  if (jacobianNNL[i] && jacobianNNL[i]->isPlugged())
   {
     if (!(jacobianNNL[i]->fPtr))
       RuntimeException::selfThrow("computeJacobianNNL(i, ...) is not linked to a plugin function. i=" + i);

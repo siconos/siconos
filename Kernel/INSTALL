@@ -68,12 +68,13 @@ The compilation is done out of the source directory:
         - make test
         - make install
 
-some CMAKE OPTIONS that may be usefull:
-	- to build an optimized library (-O3 -DNDEBUG) : -DCMAKE_BUILD_TYPE=Release
+Some CMAKE OPTIONS that may be usefull:
 	- to build a debug library (compilation with -g) : -DCMAKE_BUILD_TYPE=Debug
+	- to build an optimized library (-O3 -DNDEBUG) (this is the default): -DCMAKE_BUILD_TYPE=Release
 	- to see cmake state : -DPRINT_ENV=1
+        - to print a cmake variable : -DPRINT_VAR=VAR_NAME
 
-some MAKE OPTIONS that may be usefull:
+Some MAKE OPTIONS that may be usefull:
         - to see make command as executed : VERBOSE=1
 
       

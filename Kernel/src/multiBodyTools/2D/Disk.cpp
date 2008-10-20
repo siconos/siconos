@@ -30,38 +30,6 @@ void Disk::MassSetup()
 }
 
 Disk::Disk(double r, double m,
-           double x, double y)
-  : LagrangianDS(), radiusDisk(r), massDisk(m), ndofDisk(3)
-{
-
-  QDisk.reset(new SimpleVector(ndofDisk));
-  VDisk.reset(new SimpleVector(ndofDisk));
-  ADisk.reset(new SimpleVector(ndofDisk));
-
-  setNdof(ndofDisk);
-
-  q.resize(3);
-
-  QDisk->zero();
-  VDisk->zero();
-  ADisk->zero();
-
-  QDisk->setValue(0, x);
-  QDisk->setValue(1, y);
-  setQPtr(QDisk);
-  setVelocityPtr(VDisk);
-
-  setQ0(*QDisk);
-  setVelocity0(*VDisk);
-
-  // Missing setAccelerationPtr()
-  q[2] = ADisk;
-
-  MassSetup();
-}
-
-
-Disk::Disk(double r, double m,
            const SiconosVector& qinit,
            const SiconosVector& vinit)
   : LagrangianDS(qinit, vinit),

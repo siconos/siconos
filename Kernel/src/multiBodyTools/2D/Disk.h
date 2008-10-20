@@ -49,15 +49,6 @@ public:
   /** Constructor
       \param radius
       \param mass
-      \param x postion
-      \param y position
-  */
-
-  Disk(double, double, double, double);
-
-  /** Constructor
-      \param radius
-      \param mass
       \param postion vector
       \param velocity vector
   */

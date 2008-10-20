@@ -60,7 +60,7 @@ void DiskDiskR::computeG(double, unsigned int)
 
   double d = hypot(dx, dy);
 
-  double dmr1pr2 = d - r1 - r2;
+  double dmr1pr2 = d - r1pr2;
 
   double dxsd = dx / d;
   double dysd = dy / d;

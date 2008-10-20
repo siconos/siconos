@@ -77,7 +77,8 @@ FirstOrderLinearDS::FirstOrderLinearDS(const SiconosVector& newX0, const Siconos
   FirstOrderNonLinearDS(newX0)
 {
   DSType = DS::FOLDS;
-  assert(((newA.size(0) == n) && ( && newA.size(1) == n)) && "FirstOrderLinearDS - constructor(number,x0,A): inconsistent dimensions with problem size for input matrix A");
+  assert(((newA.size(0) == n) && (newA.size(1) == n)) &&
+         "FirstOrderLinearDS - constructor(number,x0,A): inconsistent dimensions with problem size for input matrix A");
 
   A.reset(new PMA(newA));
   checkDynamicalSystem();
@@ -88,8 +89,10 @@ FirstOrderLinearDS::FirstOrderLinearDS(const SiconosVector& newX0, const Siconos
   FirstOrderNonLinearDS(newX0)
 {
   DSType = DS::FOLDS;
-  assert(((newA.size(0) == n) && ( && newA.size(1) == n)) && "FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with problem size for input matrix A");
-  assert(newB.size() == n && "FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with problem size for input vector b ");
+  assert(((newA.size(0) == n) && (newA.size(1) == n)) &&
+         "FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with problem size for input matrix A");
+  assert(newB.size() == n &&
+         "FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with problem size for input vector b ");
 
   A.reset(new PMA(newA));
   b.reset(new PVB(newB));

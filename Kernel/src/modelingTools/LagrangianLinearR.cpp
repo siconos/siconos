@@ -96,21 +96,16 @@ void LagrangianLinearR::initComponents()
   unsigned int sizeY = interaction->getSizeOfY();
   unsigned int sizeDS = interaction->getSizeOfDS();
 
-  assert((H->size(1) == sizeDS && H->size(0) == sizeY) &&
+  assert((H) ? (H->size(1) == sizeDS && H->size(0) == sizeY) : 1 &&
          "LagrangianLinearR::initComponents inconsistent sizes between H matrix and the interaction.");
 
-  assert((if (D)
-          (D->size(0) == sizeY && D->size(1) != sizeY)) &&
+  assert((D) ? (D->size(0) == sizeY && D->size(1) != sizeY) : 1 &&
          "LagrangianLinearR::initComponents inconsistent sizes between D matrix and the interaction.");
-  assert((if (b)
-          (b->size() == sizeY)) &&
+  assert((b) ? (b->size() == sizeY) : 1 &&
          "LagrangianLinearR::initComponents inconsistent sizes between b vector and the dimension of the interaction.");
 
-  assert((if (F)
-{
-  unsigned int sizeZ = interaction->getSizeZ();
-    (F->size(0) == sizeY && F->size(1) == sizeZ);
-  }) &&
+  assert((F) ?
+         (F->size(0) == interaction->getSizeZ() && F->size(1) == interaction->getSizeZ()) : 1 &&
          "LagrangianLinearR::initComponents inconsistent sizes between F matrix and the interaction.");
 
 

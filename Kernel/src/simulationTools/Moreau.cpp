@@ -349,7 +349,7 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
   assert(ds &&
          "Moreau::computeW(t,ds) - ds == NULL");
 
-  assert((WMap.find(ds) == WMap.end()) &&
+  assert((WMap.find(ds) != WMap.end()) &&
          "Moreau::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
 
   double h = simulationLink->getTimeStep();
