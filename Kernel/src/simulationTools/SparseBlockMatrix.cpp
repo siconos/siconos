@@ -195,8 +195,11 @@ void SparseBlockMatrix::convert()
   numericsMatSparse->filled1 = (*MSparseBlock).filled1();
   numericsMatSparse->filled2 = (*MSparseBlock).filled2();
   numericsMatSparse->index1_data = &((*MSparseBlock).index1_data()[0]);
-  numericsMatSparse->index2_data = &((*MSparseBlock).index2_data()[0]);
-  numericsMatSparse->block =  &((*MSparseBlock).value_data()[0]);
+  if (nr > 0)
+  {
+    numericsMatSparse->index2_data = &((*MSparseBlock).index2_data()[0]);
+    numericsMatSparse->block =  &((*MSparseBlock).value_data()[0]);
+  };
 
   //   // Loop through the non-null blocks
   //   for (SpMatIt1 i1 = MSparseBlock->begin1(); i1 != MSparseBlock->end1(); ++i1)
