@@ -49,7 +49,15 @@ MACRO(SICONOS_PROJECT
   OPTION(BUILD_SHARED_LIBS "Building of shared libraries" ON)
   OPTION(BUILD_STATIC_LIBS "Building of static libraries" OFF)
   OPTION(WITH_TESTS_COVERAGE "Code coverage setup" OFF)
-  OPTION(WITHOUT_SVN "Consider SVN is offline" OFF)
+  OPTION(WITH_SVN "Consider SVN is online" ON)
+  OPTION(WITH_DEFAULT_BUILD_TYPE "Use a default build type (Release)" ON)
+
+  # Build type
+  IF(WITH_DEFAULT_BUILD_TYPE)
+    IF(NOT CMAKE_BUILD_TYPE)
+      SET(CMAKE_BUILD_TYPE "Release")
+    ENDIF(NOT CMAKE_BUILD_TYPE)
+  ENDIF(WITH_DEFAULT_BUILD_TYPE)
 
   # Project version
   STRING(TOLOWER ${_PROJECT_NAME} _LPROJECT_NAME)
@@ -64,9 +72,9 @@ MACRO(SICONOS_PROJECT
   SET(VERSION "${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}")  
   
   # try to get the SVN revision number
-  IF(NOT WITHOUT_SVN)
+  IF(WITH_SVN)
     INCLUDE(SVNRevisionNumber)
-  ENDIF(NOT WITHOUT_SVN)
+  ENDIF(WITH_SVN)
 
   # Some macros needed to check compilers environment
   INCLUDE(CheckSymbolExists)
@@ -350,8 +358,10 @@ MACRO(COMPILE_WITH)
 
   # update NumericsConfig.h/KernelConfig.h
   IF(NOT CONFIG_H_${_NAME}_CONFIGURED)
-    SET(CONFIG_H_${_NAME}_CONFIGURED 1 CACHE BOOL "${PROJECT_SHORT_NAME}Config.h generation for package ${_NAME}")
-    CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/config.h.cmake ${CMAKE_BINARY_DIR}/${PROJECT_SHORT_NAME}Config.h)
+    SET(CONFIG_H_${_NAME}_CONFIGURED 1 CACHE BOOL 
+      "${PROJECT_SHORT_NAME}Config.h generation for package ${_NAME}")
+    CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/config.h.cmake 
+      ${CMAKE_BINARY_DIR}/${PROJECT_SHORT_NAME}Config.h)
   ENDIF(NOT CONFIG_H_${_NAME}_CONFIGURED)
   SET(_N)
   SET(_NAME) 
