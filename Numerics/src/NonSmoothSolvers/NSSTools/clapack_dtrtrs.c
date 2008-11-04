@@ -2,8 +2,10 @@
 
 #include "LA.h"
 
+#ifndef FRAMEWORK_BLAS
 #ifdef HAVE_CLAPACK_H
 #include <clapack.h>
+#endif
 
 #define max(a,b) (a > b ? a : b)
 

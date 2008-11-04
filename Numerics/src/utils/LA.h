@@ -6,6 +6,7 @@
 #define FCAST(T,X) (T *) (& X)
 #define FCASTP(T,X) (T *) X
 
+#ifndef FRAMEWORK_BLAS /* apple */
 #ifdef HAVE_CBLAS_H
 #include <cblas.h>
 #ifndef HAVE_CLAPACK_H
@@ -63,6 +64,7 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 #define LAPACK_4_W LAPACK_4
 #define LAPACK_5_W LAPACK_5
 
+#endif /* not framework blas (apple) */
 #else /* f2c or g2c + blaslapack.h */
 #include "blaslapack.h"
 #define BLAS_NAME(N) F77NAME(N)
