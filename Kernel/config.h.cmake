@@ -16,6 +16,7 @@
 #cmakedefine HAVE_ATLAS
 #cmakedefine HAVE_CLAPACK_H
 #cmakedefine HAVE_CBLAS_H
+#cmakedefine FRAMEWORK_BLAS
 #cmakedefine HAVE_XERBLA
 
 #endif /*KERNELCONFIG_H*/
