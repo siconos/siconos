@@ -35,6 +35,15 @@ IF(LAPACK_FOUND)
   SET(HAVE_LAPACK 1)
 ENDIF(LAPACK_FOUND)
 
+
+IF(APPLE)
+  # clapack.h and cblas.h in Apple framework are differents...
+  IF(LAPACK_LIBRARIES MATCHES framework)
+    SET(FRAMEWORK_BLAS 1)
+  ENDIF(LAPACK_LIBRARIES MATCHES framework)
+ENDIF(APPLE)
+
+
 # Try to find atlas/cblas.h and atlas/clapack.h
 # On some systems (Debian, Ubuntu) they are misconfigured
 # This can be a problem with some boost headers
@@ -53,12 +62,6 @@ IF(ATLAS_FOUND)
       MESSAGE(STATUS "Failing back to the Cinterface to Blas and Lapack")
       MESSAGE(STATUS "The ATLAS library may not be used correctly.")
     ELSE(NOT CBLAS_INCLUDE_PATH)
-      IF(APPLE)
-        # clapack.h and cblas.h in Apple framework are differents...
-        IF(CBLAS_INCLUDE_PATH MATCHES framework)
-          SET(FRAMEWORK_BLAS 1)
-        ENDIF(CBLAS_INCLUDE_PATH MATCHES framework)
-      ENDIF(APPLE)
 #      CHECK_SYMBOL_EXISTS(cblas_xerbla ${CBLAS_INCLUDE_PATH}/cblas.h HAVE_XERBLA)
 
       SET(HAVE_XERBLA 1)

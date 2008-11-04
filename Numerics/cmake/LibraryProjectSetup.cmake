@@ -111,6 +111,7 @@ MACRO(LIBRARY_PROJECT_SETUP)
     # 1 : do not use defaults system libraries (i.e not fortran lapack lib but atlas/lapack lib)
     SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} -Wl,-search_paths_first,-single_module")
     SET(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS} -Wl,-search_paths_first")
+    SET(CMAKE_SHARED_LINKER_FLAGS "-read_only_relocs suppress")
     IF(FORTRAN_COMPILER_LIB_DIRECTORIES)
       # 2 : the runtime libraries of the fortran compiler are needed
       REMEMBER_LINK_DIRECTORIES("${FORTRAN_COMPILER_LIB_DIRECTORIES}")
