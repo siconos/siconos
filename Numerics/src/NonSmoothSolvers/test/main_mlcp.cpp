@@ -55,8 +55,8 @@
 #include "NonSmoothNewtonNeighbour.h"
 
 #define BAVARD
-#define NBTEST 16
-//#define NBTEST 1
+//#define NBTEST 17
+#define NBTEST 1
 
 #define ENUM_ID 0
 #define PGS_EX_ID 1
@@ -172,7 +172,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
   mlcpOptions.iparam = (int*)malloc(10 * sizeof(int));
   mlcpOptions.dparam = (double*)malloc(10 * sizeof(double));
 
-  global_options.verboseMode = 0;
+  global_options.verboseMode = 1;
   setNumericsOptions(&global_options);
 
   mlcpOptions.iparam[5] = 3; /*Number of registered configurations*/
@@ -533,10 +533,10 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     solTozw(n, m, z, w, sol);
     strcpy(mlcpOptions.solverName, "FB");
     mlcpOptions.iSize = 2;
-    mlcpOptions.iparam[0] = 2000;
+    mlcpOptions.iparam[0] = 1000;
     mlcpOptions.iparam[1] = 0;
     mlcpOptions.dSize = 3;
-    mlcpOptions.dparam[0] = 1e-12;
+    mlcpOptions.dparam[0] = 1e-10;
     mlcpOptions.dparam[1] = 0;
 
 
@@ -573,11 +573,11 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     solTozw(n, m, z, w, sol);
     strcpy(mlcpOptions.solverName, "DIRECT_FB");
     mlcpOptions.iSize = 8;
-    mlcpOptions.iparam[0] = 2000;
+    mlcpOptions.iparam[0] = 500;
     mlcpOptions.iparam[1] = 0;
 
     mlcpOptions.dSize = 9;
-    mlcpOptions.dparam[0] = 1e-12;
+    mlcpOptions.dparam[0] = 1e-11;
     mlcpOptions.dparam[1] = 0;
     info = 1;
 
@@ -713,7 +713,17 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 14:
+    case 0:
+      printf("BEGIN A NEWTEST  **************************************************************************");
+      printf("\n\n deltasigma2_mlcp.dat **************************************************************************");
+      strcpy(summary[itest].file, "deltasigma2_mlcp");
+      if ((MLCPfile = fopen("MATRIX/deltasigma2_mlcp.dat", "r")) == NULL)
+      {
+        perror("fopen MLCPfile: deltasigma2_mlcp.dat");
+        exit(1);
+      }
+      break;
+    case 16:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n relay3_mlcp.dat **************************************************************************");
       strcpy(summary[itest].file, "relay3_mlcp");
@@ -723,7 +733,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 0:
+    case 14:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n deltasigma_mlcp.dat **************************************************************************");
       strcpy(summary[itest].file, "deltasigma_mlcp");
@@ -958,6 +968,7 @@ void test_matrix(void)
     printf("\n");
 #endif
     sIdWithSol = 1;
+    /*ONLY FOR DEBUG    NSNN_thisIsTheSolution(n+m,sol);*/
     if (withSol)
     {
       test_mlcp_series(&problem, z, w, sol);
@@ -965,7 +976,7 @@ void test_matrix(void)
       printf("\n ---------------------- : \n");
     }
 
-    /*    NSNN_thisIsTheSolution(n+m,sol);*/
+    /*ONLY FOR DEBUG        NSNN_thisIsTheSolution(n+m,sol);*/
     for (i = 0; i < n + m + m; i++)
       sol[i] = 0;
     sIdWithSol = 0;
@@ -1036,7 +1047,7 @@ int main(void)
   int i;
   for (i = 0; i < NBMETHODS; i++)
     sRunMethod[i] = 0;
-  sRunMethod[PATH_ID] = 1;
+  sRunMethod[PATH_ID] = 0;
   sRunMethod[FB_ID] = 1;
 
   test_matrix();
