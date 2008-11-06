@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
     SiconosMatrix *H = new SimpleMatrix(1, nDof);
     (*H)(0, 0) = 1.0;
     NonSmoothLaw * nslaw0 = new NewtonImpactNSL(e);
-    Relation * relation0 = new LagrangianLinearR(*H);
+    Relation * relation0 = new LagrangianLinearTIR(*H);
 
     Interaction * inter = new Interaction("floor-ball", allDS, 0, 1, nslaw0, relation0);
     allInteractions.insert(inter);

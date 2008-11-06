@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
     (*b1)(0) = l_M + l_G - l_S - r_O;
     (*b1)(1) = 0;
     NonSmoothLaw* nslaw1 = new NewtonImpactFrictionNSL(eps_N_1, eps_T_123, mu_123, 2);;
-    Relation* relation1 = new LagrangianLinearR(*H1, *b1);
+    Relation* relation1 = new LagrangianLinearTIR(*H1, *b1);
 
     SiconosMatrix *H23 = new SimpleMatrix(4, nDof);
     (*H23)(0, 0) = 0;
@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
     (*b23)(2) = r_M - r_O;
     (*b23)(3) = 0;
     NonSmoothLaw* nslaw23 = new NewtonImpactFrictionNSL(eps_N_23, eps_T_123, mu_123, 2);
-    Relation* relation23 = new LagrangianLinearR(*H23, *b23);
+    Relation* relation23 = new LagrangianLinearTIR(*H23, *b23);
 
     Interaction * I1 = new Interaction("contact1", allDS, 0, 2, nslaw1, relation1);
 

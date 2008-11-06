@@ -396,7 +396,7 @@ int main(int argc, char* argv[])
 
 
 // //     NonSmoothLaw * nslaw2 = new NewtonImpactNSL(e2);
-// //     Relation * relation1 = new LagrangianLinearR(H1,b1);
+// //     Relation * relation1 = new LagrangianLinearTIR(H1,b1);
 // //     Interaction * inter1 =  new Interaction("floor-arm2", allDS,1,2, nslaw2, relation1);
 
 // //     SimpleMatrix H2(2,4);
@@ -408,7 +408,7 @@ int main(int argc, char* argv[])
 // //     b2(0) = 0.0001;
 // //     b2(1) = PI-0.0001;
 
-// //     Relation * relation2 = new LagrangianLinearR(H2,b2);
+// //     Relation * relation2 = new LagrangianLinearTIR(H2,b2);
 // //     Interaction * inter2 =  new Interaction("singular-points", allDS,2,2, nslaw2, relation2);
 
 

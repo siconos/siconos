@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
     b(3) = lim1;
 
     NonSmoothLaw * nslaw2 = new NewtonImpactNSL(e2);
-    Relation * relation2 = new LagrangianLinearR(H, b);
+    Relation * relation2 = new LagrangianLinearTIR(H, b);
     Interaction * inter2 =  new Interaction("floor-arm2", allDS, 1, 4, nslaw2, relation2);
 
     allInteractions.insert(inter);

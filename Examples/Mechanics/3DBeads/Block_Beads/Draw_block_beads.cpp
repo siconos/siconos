@@ -496,7 +496,7 @@ void initSiconos()
         ostringstream ostr;
         ostr << i;
         id2[i] = ostr.str();
-        LLR1[i] = new LagrangianLinearR(*H1, *b1);
+        LLR1[i] = new LagrangianLinearTIR(*H1, *b1);
         checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 3, nslaw1, LLR1[i]));
         dsConcernedi.clear();
       }
@@ -517,7 +517,7 @@ void initSiconos()
     //  ostringstream ostr;
     //  ostr << i;
     //  id2[i]= ostr.str();
-    //  LLR1_[i] = new LagrangianLinearR(*H1_,*b1_);
+    //  LLR1_[i] = new LagrangianLinearTIR(*H1_,*b1_);
     //  checkInter = allInteractions.insert( new Interaction(id2[i], dsConcernedi,i, 3, nslaw1, LLR1_[i]));
     //  dsConcernedi.clear();
     //       }
@@ -543,7 +543,7 @@ void initSiconos()
         ostringstream ostr;
         ostr << i;
         id2[i] = ostr.str();
-        LLR2[i] = new LagrangianLinearR(*H2, *b2);
+        LLR2[i] = new LagrangianLinearTIR(*H2, *b2);
         checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 3, nslaw1, LLR2[i]));
         dsConcernedi.clear();
       }
@@ -568,7 +568,7 @@ void initSiconos()
         ostringstream ostr;
         ostr << i;
         id2[i] = ostr.str();
-        LLR2_[i] = new LagrangianLinearR(*H2_, *b2_);
+        LLR2_[i] = new LagrangianLinearTIR(*H2_, *b2_);
         checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 3, nslaw1, LLR2_[i]));
         dsConcernedi.clear();
       }
@@ -593,7 +593,7 @@ void initSiconos()
         ostringstream ostr;
         ostr << i;
         id2[i] = ostr.str();
-        LLR3[i] = new LagrangianLinearR(*H3, *b3);
+        LLR3[i] = new LagrangianLinearTIR(*H3, *b3);
         checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 3, nslaw1, LLR3[i]));
         dsConcernedi.clear();
       }
@@ -617,7 +617,7 @@ void initSiconos()
         ostringstream ostr;
         ostr << i;
         id2[i] = ostr.str();
-        LLR3_[i] = new LagrangianLinearR(*H3_, *b3_);
+        LLR3_[i] = new LagrangianLinearTIR(*H3_, *b3_);
         checkInter = allInteractions.insert(new Interaction(id2[i], dsConcernedi, i, 3, nslaw1, LLR3_[i]));
         dsConcernedi.clear();
       }

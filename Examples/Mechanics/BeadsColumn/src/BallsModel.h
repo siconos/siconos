@@ -26,8 +26,8 @@
 
 #include "SiconosKernel.hpp"
 #include "Sphere.h"
-typedef std::vector<SimpleVector*> Vectors;
-typedef std::vector<Sphere*> DSLIST;
+typedef std::vector<SP::SimpleVector> Vectors;
+typedef std::vector<SP::Sphere> DSLIST;
 
 /** CanonBallsModel
 
@@ -46,11 +46,11 @@ private:
   unsigned int numberOfSpheres;
 
   /** The Siconos Model */
-  Model* balls;
+  SP::Model balls;
 
   unsigned int nDof;
 
-  SimpleMatrix * dataPlot;
+  SP::SimpleMatrix dataPlot;
 
   unsigned int iter_k;
 
@@ -67,7 +67,7 @@ public:
    */
   ~BallsModel();
 
-  inline Model* getModelPtr()
+  inline SP::Model getModelPtr()
   {
     return balls;
   };
@@ -100,7 +100,7 @@ public:
    */
   void buildDynamicalSystems();
 
-  void buildInteractions(InteractionsSet* allInteractions);
+  void buildInteractions(InteractionsSet& allInteractions);
 
   void end();
 

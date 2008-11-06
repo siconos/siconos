@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
     NonSmoothLaw * nslaw0 = new NewtonImpactNSL(e);
     SiconosVector *b = new SimpleVector(interactionSize);
     (*b)(0) = -R;
-    Relation * relation0 = new LagrangianLinearR(*H, *b);
+    Relation * relation0 = new LagrangianLinearTIR(*H, *b);
     unsigned int num = 0 ; // an id number for the Interaction
     Interaction * inter0 = new Interaction("bead-floor", dsConcerned, num, interactionSize, nslaw0, relation0);
     allInteractions.insert(inter0);
@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
         id[i - 1] = ostr.str();
         // The relations
         // Since Ri=Rj and h=0, we do not need to set b.
-        LLR[i - 1] = new LagrangianLinearR(*H1, *b);
+        LLR[i - 1] = new LagrangianLinearTIR(*H1, *b);
         checkInter = allInteractions.insert(new Interaction(id[i - 1], dsConcerned, i, interactionSize, nslaw0, LLR[i - 1]));
       }
     }

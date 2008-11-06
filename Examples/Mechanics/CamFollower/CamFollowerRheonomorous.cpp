@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
     DynamicalSystemsSet dsConcerned;
     dsConcerned.insert(lds);
 
-    //    Relation * relation0 = new LagrangianLinearR(*H);
+    //    Relation * relation0 = new LagrangianLinearTIR(*H);
     vector<string> listofG2(1);
     listofG2[0] = "FollowerPlugin:FollowerComputeG0";
     Relation * relation0 = new LagrangianRheonomousR("FollowerPlugin:FollowerComputeH1", "FollowerPlugin:FollowerComputeG10", "FollowerPlugin:FollowerComputeG11");

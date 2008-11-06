@@ -94,7 +94,7 @@ extern "C" void essai_model_XML(char  xmlFile[])
 
     SimpleVector sv_;
     inter = nsds->addInteraction(11, 11, &vect, &dsVect);
-    inter->createLagrangianLinearR(&sm, &sv_);
+    inter->createLagrangianLinearTIR(&sm, &sv_);
     inter->createComplementarityConditionNSL();
 
     OneStepNSProblem *onspb = m.getStrategy()->getOneStepNSProblem();
@@ -213,7 +213,7 @@ extern "C" void essai_model_XML(char  xmlFile[])
 
     Interaction* inter;
     inter = nsds->addInteraction(1, 1, &vect, &dsVect);
-    inter->createLagrangianLinearR(&H, &b);
+    inter->createLagrangianLinearTIR(&H, &b);
     inter->createNewtonImpactLawNSL(0.9);
 
     Strategy* str;
@@ -473,7 +473,7 @@ extern "C" void essai_model_XML(char  xmlFile[])
 
     Interaction* inter;
     inter = nsds->addInteraction(1, 2, &vect, &dsVect);
-    inter->createLagrangianLinearR(&sm, &sv);
+    inter->createLagrangianLinearTIR(&sm, &sv);
     inter->createComplementarityConditionNSL();
 
     inter = nsds->addInteraction(2, 2, &vect, &dsVect);

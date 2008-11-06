@@ -26,20 +26,19 @@ int main(int argc, char* argv[])
   {
 
     // --- Model loading from xml file ---
-    Model bouncingBall("./BallTS.xml");
+    SP::Model bouncingBall(new Model("./BallTS.xml"));
     cout << "\n *** BallTS.xml file loaded ***" << endl;
 
-    // --- Get and initialize the simulation ---
-    TimeStepping* s = static_cast<TimeStepping*>(bouncingBall.getSimulationPtr());
-    cout << "simulation initialization" << endl;
-    s->initialize();
-    cout << "\n **** the simulation is ready ****" << endl;
+    cout << "====> Initialisation ..." << endl << endl;
+    bouncingBall->initialize();
 
+    // --- Get the simulation ---
+    SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(bouncingBall->getSimulationPtr());
     // --- Get the time discretisation scheme ---
-    TimeDiscretisation* t = s->getTimeDiscretisationPtr();
+    SP::TimeDiscretisation t = s->getTimeDiscretisationPtr();
     int k = 0;
-    double T = bouncingBall.getFinalT();
-    double t0 = bouncingBall.getT0();
+    double T = bouncingBall->getFinalT();
+    double t0 = bouncingBall->getT0();
     double h = s->getTimeStep();
     int N = (int)((T - t0) / h);
 
@@ -50,12 +49,12 @@ int main(int argc, char* argv[])
     cout << "Prepare data for plotting ... " << endl;
     // For the initial time step:
     // time
-    dataPlot(k, 0) =  bouncingBall.getT0();
+    dataPlot(k, 0) =  bouncingBall->getT0();
     // state q for the first dynamical system (ball)
-    LagrangianDS* ball = static_cast<LagrangianDS*>(bouncingBall.getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
-    SiconosVector * q = ball->getQPtr();
-    SiconosVector * v = ball->getVelocityPtr();
-    SiconosVector * p = ball->getPPtr(2);
+    SP::LagrangianDS ball = boost::static_pointer_cast<LagrangianDS> (bouncingBall->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(1));
+    SP::SiconosVector q = ball->getQPtr();
+    SP::SiconosVector v = ball->getVelocityPtr();
+    SP::SiconosVector p = ball->getPPtr(2);
 
     dataPlot(k, 1) = (*q)(0);
     dataPlot(k, 2) = (*v)(0);
@@ -66,7 +65,7 @@ int main(int argc, char* argv[])
     // --- Compute elapsed time ---
     cout << "Computation ... " << endl;
     // --- Time loop  ---
-    while (s->getNextTime() <= bouncingBall.getFinalT())
+    while (s->getNextTime() <= bouncingBall->getFinalT())
     {
       // solve ...
       s->computeOneStep();

@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
     boost::timer time;
     time.restart();
     // User-defined main parameters
-    unsigned int dsNumber = 50;      // the number of dynamical systems
+    unsigned int dsNumber = 100;      // the number of dynamical systems
     unsigned int nDof = 3;           // degrees of freedom for beads
     double increment_position = 1;   // initial position increment from one DS to the following
     double increment_velocity = 0;   // initial velocity increment from one DS to the following
@@ -62,19 +62,19 @@ int main(int argc, char* argv[])
     // A set of DS that will handle all the "balls"
     DynamicalSystemsSet allDS;
     // mass matrix, set to identity
-    SiconosMatrix *Mass = new SimpleMatrix(nDof, nDof);
+    SP::SiconosMatrix Mass(new SimpleMatrix(nDof, nDof));
     Mass->eye();
     (*Mass)(2, 2) = 3. / 5 * R * R; // m = 1
 
     // -- Initial positions and velocities --
     // q0[i] and v0[i] correspond to position and velocity of ball i.
-    vector<SimpleVector *> q0;
-    vector<SimpleVector *> v0;
-    q0.resize(dsNumber, NULL);
-    v0.resize(dsNumber, NULL);
+    vector<SP::SimpleVector> q0;
+    vector<SP::SimpleVector> v0;
+    q0.resize(dsNumber);
+    v0.resize(dsNumber);
 
     // External forces
-    SiconosVector * gravity = new SimpleVector(nDof);
+    SP::PVFext gravity(new PVFext(nDof));
     double m = 1;   // beads mass
     double g = 9.8; // gravity
     (*gravity)(0) = - m * g;
@@ -83,17 +83,18 @@ int main(int argc, char* argv[])
     for (i = 0; i < dsNumber; i++)
     {
       // Memory allocation for q0[i] and v0[i]
-      q0[i] = new SimpleVector(nDof);
-      v0[i] = new SimpleVector(nDof);
+      q0[i].reset(new SimpleVector(nDof));
+      v0[i].reset(new SimpleVector(nDof));
       // set values
       (*(q0[i]))(0) = position_init;
       (*(v0[i]))(0) = velocity_init;
       // Create and insert in allDS a new Lagrangian Linear Dynamical System ...
-      checkDS = allDS.insert(new LagrangianLinearTIDS(i, *(q0[i]), *(v0[i]), *Mass));
+      SP::LagrangianLinearTIDS ds(new LagrangianLinearTIDS(*(q0[i]), *(v0[i]), *Mass));
+      checkDS = allDS.insert(ds);
       // Note that we now use a CheckInsertDS object: checkDS.first is
       // an iterator that points to the DS inserted above.
       //(static_cast<LagrangianDS*>(*(checkDS.first)))->setComputeFExtFunction("BeadsPlugin.so", "gravity");
-      (static_cast<LagrangianDS*>(*(checkDS.first)))->setFExtPtr(gravity);
+      (boost::static_pointer_cast<LagrangianLinearTIDS>(*(checkDS.first)))->setFExtPtr(gravity);
       position_init += increment_position;
       velocity_init += increment_velocity;
     }
@@ -120,14 +121,14 @@ int main(int argc, char* argv[])
 
     // Lagrangian Relation
     unsigned int interactionSize = 1; // y vector size
-    SiconosMatrix *H = new SimpleMatrix(interactionSize, nDof);
+    SP::SiconosMatrix H(new SimpleMatrix(interactionSize, nDof));
     (*H)(0, 0) = 1.0;
-    NonSmoothLaw * nslaw0 = new NewtonImpactNSL(e);
-    SiconosVector *b = new SimpleVector(interactionSize);
+    SP::NonSmoothLaw nslaw0(new NewtonImpactNSL(e));
+    SP::SiconosVector b(new SimpleVector(interactionSize));
     (*b)(0) = -R;
-    Relation * relation0 = new LagrangianLinearR(*H, *b);
+    SP::Relation relation0(new LagrangianLinearTIR(*H, *b));
     unsigned int num = 0 ; // an id number for the Interaction
-    Interaction * inter0 = new Interaction("bead-floor", dsConcerned, num, interactionSize, nslaw0, relation0);
+    SP::Interaction inter0(new Interaction("bead-floor", dsConcerned, num, interactionSize, nslaw0, relation0));
     allInteractions.insert(inter0);
 
     // A list of names for the Interactions
@@ -137,8 +138,8 @@ int main(int argc, char* argv[])
     // Interactions ball-ball
     CheckInsertInteraction checkInter;
     // A vector that handles all the relations
-    vector<Relation*> LLR(interactionNumber - 1);
-    SiconosMatrix *H1 = new SimpleMatrix(1, 2 * nDof);
+    vector<SP::Relation> LLR(interactionNumber - 1);
+    SP::SiconosMatrix H1(new SimpleMatrix(1, 2 * nDof));
     (*b)(0) = -2 * R;
     if (dsNumber > 1)
     {
@@ -155,21 +156,22 @@ int main(int argc, char* argv[])
         id[i - 1] = ostr.str();
         // The relations
         // Since Ri=Rj and h=0, we do not need to set b.
-        LLR[i - 1] = new LagrangianLinearR(*H1, *b);
-        checkInter = allInteractions.insert(new Interaction(id[i - 1], dsConcerned, i, interactionSize, nslaw0, LLR[i - 1]));
+        LLR[i - 1].reset(new LagrangianLinearTIR(*H1, *b));
+        SP::Interaction inter(new Interaction(id[i - 1], dsConcerned, i, interactionSize, nslaw0, LLR[i - 1]));
+        checkInter = allInteractions.insert(inter);
       }
     }
 
     // --------------------------------
     // --- NonSmoothDynamicalSystem ---
     // --------------------------------
-    NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(allDS, allInteractions);
+    SP::NonSmoothDynamicalSystem nsds(new NonSmoothDynamicalSystem(allDS, allInteractions));
 
     // -------------
     // --- Model ---
     // -------------
 
-    Model * multiBeads = new Model(t0, T);
+    SP::Model multiBeads(new Model(t0, T));
     multiBeads->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
 
     // ----------------
@@ -177,13 +179,14 @@ int main(int argc, char* argv[])
     // ----------------
 
     // -- Time discretisation --
-    TimeDiscretisation * t = new TimeDiscretisation(h, multiBeads);
+    SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-    TimeStepping* s = new TimeStepping(t);
+    SP::TimeStepping s(new TimeStepping(t));
 
     // -- OneStepIntegrators --
     double theta = 0.5000001;
-    OneStepIntegrator * OSI = new Moreau(allDS , theta , s);
+    SP::OneStepIntegrator OSI(new Moreau(allDS , theta));
+    s->recordIntegrator(OSI);
     // That means that all systems in allDS have the same theta value.
 
     // -- OneStepNsProblem --
@@ -192,15 +195,17 @@ int main(int argc, char* argv[])
     DoubleParameters dparam(5);
     dparam[0] = 1e-5; // Tolerance
     string solverName = "Lemke" ;
-    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
-    LCP * osnspb = new LCP(s, mySolver);
+    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
+    SP::LCP osnspb(new LCP(mySolver));
+    s->recordNonSmoothProblem(osnspb);
+
     //    osnspb->getSolverPtr()->setSolverBlock(true);
 
     // =========================== End of model definition =================================
     // ================================= Computation =================================
     // --- Simulation initialization ---
-    cout << "====> Simulation initialisation ..." << endl << endl;
-    s->initialize();
+    cout << "====> Model initialisation ..." << endl << endl;
+    multiBeads->initialize(s);
 
     int k = 0;
     int N = (int)((T - t0) / h); // Number of time steps
@@ -215,8 +220,8 @@ int main(int argc, char* argv[])
     DSIterator it;
     for (it = allDS.begin(); it != allDS.end(); ++it)
     {
-      dataPlot(k, (int)i * 2 + 1) = static_cast<LagrangianLinearTIDS*>(*it)->getQ()(0);
-      dataPlot(k, (int)i * 2 + 2) = static_cast<LagrangianLinearTIDS*>(*it)->getVelocity()(0);
+      dataPlot(k, (int)i * 2 + 1) = boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->getQ()(0);
+      dataPlot(k, (int)i * 2 + 2) = boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->getVelocity()(0);
       i++;
       if ((*it)->getNumber() == 9)
         break;
@@ -250,8 +255,8 @@ int main(int argc, char* argv[])
       i = 0;
       for (it = allDS.begin(); it != allDS.end(); ++it)
       {
-        dataPlot(k, (int)i * 2 + 1) = static_cast<LagrangianLinearTIDS*>(*it)->getQ()(0);
-        dataPlot(k, (int)i * 2 + 2) = static_cast<LagrangianLinearTIDS*>(*it)->getVelocity()(0);
+        dataPlot(k, (int)i * 2 + 1) = boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->getQ()(0);
+        dataPlot(k, (int)i * 2 + 2) = boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->getVelocity()(0);
         i++;
         if ((*it)->getNumber() == 9)
           break;

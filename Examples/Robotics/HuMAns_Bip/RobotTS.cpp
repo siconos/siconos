@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
     b(29) = 0.21;
 
 
-    Relation * relation2 = new LagrangianLinearR(H, b);
+    Relation * relation2 = new LagrangianLinearTIR(H, b);
     Interaction * inter2 =  new Interaction("joint-limits", allDS, 1, 30, nslaw, relation2);
 
 

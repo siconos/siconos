@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
     b(9) = b(8);
     b(10) = PI * 270.0 / 180.0;
     b(11) = b(10);
-    Relation * relation = new LagrangianLinearR(H, b);
+    Relation * relation = new LagrangianLinearTIR(H, b);
     Interaction * inter = new Interaction("butée", allDS, 0, 12, nslaw, relation);
 
     allInteractions.insert(inter);

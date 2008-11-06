@@ -71,18 +71,18 @@ int main(int argc, char* argv[])
     LS_A(0, 1) = -1.0 / Cvalue;
     LS_A(1, 0) = 1.0 / Lvalue;
 
-    FirstOrderLinearDS* LSDiodeBridge = new FirstOrderLinearDS(1, init_state, LS_A);
+    SP::FirstOrderLinearDS LSDiodeBridge(new FirstOrderLinearDS(init_state, LS_A));
 
     // --- Interaction between linear system and non smooth system ---
 
     DynamicalSystemsSet Inter_DS;
     Inter_DS.insert(LSDiodeBridge);
 
-    SiconosMatrix* Int_C = new SimpleMatrix(4, 2);
+    SP::SiconosMatrix Int_C(new SimpleMatrix(4, 2));
     (*Int_C)(2, 0) = -1.0;
     (*Int_C)(3, 0) = 1.0;
 
-    SiconosMatrix* Int_D = new SimpleMatrix(4, 4);
+    SP::SiconosMatrix Int_D(new SimpleMatrix(4, 4));
     (*Int_D)(0, 0) = 1.0 / Rvalue;
     (*Int_D)(0, 1) = 1.0 / Rvalue;
     (*Int_D)(0, 2) = -1.0;
@@ -92,35 +92,36 @@ int main(int argc, char* argv[])
     (*Int_D)(2, 0) = 1.0;
     (*Int_D)(3, 1) = 1.0;
 
-    SiconosMatrix* Int_B = new SimpleMatrix(2, 4);
+    SP::SiconosMatrix Int_B(new SimpleMatrix(2, 4));
     (*Int_B)(0, 2) = -1.0 / Cvalue ;
     (*Int_B)(0, 3) = 1.0 / Cvalue;
 
-    FirstOrderLinearTIR* LTIRDiodeBridge = new FirstOrderLinearTIR(*Int_C, *Int_B);
-    LTIRDiodeBridge->setDPtr(Int_D);
+    SP::FirstOrderLinearTIR LTIRDiodeBridge(new FirstOrderLinearTIR(*Int_C, *Int_B));
+    LTIRDiodeBridge->setD(*Int_D);
 
-    NonSmoothLaw * nslaw = new ComplementarityConditionNSL(4);
+    SP::NonSmoothLaw nslaw(new ComplementarityConditionNSL(4));
 
-    Interaction* InterDiodeBridge = new Interaction("InterDiodeBridge", Inter_DS, 1, 4, nslaw, LTIRDiodeBridge);
+    SP::Interaction InterDiodeBridge(new Interaction("InterDiodeBridge", Inter_DS, 1, 4, nslaw, LTIRDiodeBridge));
 
     // --- Model creation ---
-    Model DiodeBridge(t0, T, Modeltitle);
+    SP::Model DiodeBridge(new Model(t0, T, Modeltitle));
 
     // --- Non Smooth Dynamical system creation ---
 
-    NonSmoothDynamicalSystem* NSDSDiodeBridge = new NonSmoothDynamicalSystem(LSDiodeBridge, InterDiodeBridge, false);
-    DiodeBridge.setNonSmoothDynamicalSystemPtr(NSDSDiodeBridge);
+    SP::NonSmoothDynamicalSystem NSDSDiodeBridge(new NonSmoothDynamicalSystem(LSDiodeBridge, InterDiodeBridge, false));
+    DiodeBridge->setNonSmoothDynamicalSystemPtr(NSDSDiodeBridge);
 
     // --- Simulation specification---
 
-    TimeDiscretisation* TiDiscRLCD = new TimeDiscretisation(h_step, &DiodeBridge);
+    SP::TimeDiscretisation TiDiscRLCD(new TimeDiscretisation(t0, h_step));
 
-    TimeStepping* StratDiodeBridge = new TimeStepping(TiDiscRLCD);
+    SP::TimeStepping StratDiodeBridge(new TimeStepping(TiDiscRLCD));
 
     double theta = 0.5;
 
     // One Step Integrator
-    Moreau* OSI_RLCD = new Moreau(LSDiodeBridge, theta, StratDiodeBridge);
+    SP::Moreau OSI_RLCD(new Moreau(LSDiodeBridge, theta));
+    StratDiodeBridge->recordIntegrator(OSI_RLCD);
 
     // One Step non smooth problem
     IntParameters iparam(5);
@@ -128,12 +129,13 @@ int main(int argc, char* argv[])
     DoubleParameters dparam(5);
     dparam[0] = 0.0001; // Tolerance
     string solverName = "Lemke" ;
-    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
-    LCP* LCP_RLCD = new LCP(StratDiodeBridge, mySolver, "LCP");
+    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
+    SP::LCP LCP_RLCD(new LCP(mySolver));
+    StratDiodeBridge->recordNonSmoothProblem(LCP_RLCD);
 
     // Initialization
-    StratDiodeBridge->initialize();
-    cout << " ---> End of simulation initialization." << endl;
+    DiodeBridge->initialize(StratDiodeBridge);
+    cout << " ---> End of initialization." << endl;
 
     int k = 0;
     double h = StratDiodeBridge->getTimeStep();
@@ -143,9 +145,9 @@ int main(int argc, char* argv[])
     // -> saved in a matrix dataPlot
     SimpleMatrix dataPlot(N, 7);
 
-    SiconosVector * x = LSDiodeBridge->getXPtr();
-    SiconosVector * y = InterDiodeBridge->getYPtr(0);
-    SiconosVector * lambda = InterDiodeBridge->getLambdaPtr(0);
+    SP::SiconosVector x = LSDiodeBridge->getXPtr();
+    SP::SiconosVector y = InterDiodeBridge->getYPtr(0);
+    SP::SiconosVector lambda = InterDiodeBridge->getLambdaPtr(0);
 
     // For the initial time step:
     // time
@@ -226,19 +228,6 @@ int main(int argc, char* argv[])
     // dataPlot (ascii) output
     ioMatrix io("DiodeBridge.dat", "ascii");
     io.write(dataPlot, "noDim");
-
-    delete LCP_RLCD;
-    delete OSI_RLCD;
-    delete TiDiscRLCD;
-    delete StratDiodeBridge;
-    delete LTIRDiodeBridge;
-    delete InterDiodeBridge;
-    delete Int_B ;
-    delete Int_D ;
-    delete Int_C;
-    delete LSDiodeBridge;
-    delete NSDSDiodeBridge;
-
   }
 
   // --- Exceptions handling ---

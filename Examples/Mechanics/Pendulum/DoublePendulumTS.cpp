@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
 
 
     //     NonSmoothLaw * nslaw = new NewtonImpactNSL(e);
-    //     Relation * relation = new LagrangianLinearR(H,b);
+    //     Relation * relation = new LagrangianLinearTIR(H,b);
     //     Interaction * inter =  new Interaction("floor-mass1", allDS,1,1, nslaw, relation);
 
 
@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
     //     b2(0) = 0.0;
 
     //     NonSmoothLaw * nslaw1 = new NewtonImpactNSL(e1);
-    //     Relation * relation1 = new LagrangianLinearR(H2,b2);
+    //     Relation * relation1 = new LagrangianLinearTIR(H2,b2);
     //     Interaction * inter1 =  new Interaction("floor-mass2", allDS,2,1, nslaw1, relation1);
 
 

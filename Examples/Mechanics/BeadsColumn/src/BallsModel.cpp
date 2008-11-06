@@ -31,17 +31,13 @@
 using namespace std;
 
 BallsModel::BallsModel(unsigned int n):
-  numberOfSpheres(n), balls(NULL), nDof(6), dataPlot(NULL), iter_k(1)
+  numberOfSpheres(n), nDof(6), iter_k(1)
 {
   allSpheres.resize(numberOfSpheres);
 }
 
 BallsModel::~BallsModel()
-{
-  if (balls != NULL)
-    delete balls;
-  balls = NULL;
-}
+{}
 
 void BallsModel::initialize()
 {
@@ -67,19 +63,19 @@ void BallsModel::initialize()
   // --- Interactions---
   // -------------------
   InteractionsSet allInteractions;
-  buildInteractions(&allInteractions);
+  buildInteractions(allInteractions);
 
   // --------------------------------
   // --- NonSmoothDynamicalSystem ---
   // --------------------------------
-  NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(allDS, allInteractions);
+  SP::NonSmoothDynamicalSystem nsds(new NonSmoothDynamicalSystem(allDS, allInteractions));
 
   // -------------
   // --- Model ---
   // -------------
 
   // initial computation time
-  balls = new Model(t0, T);
+  balls.reset(new Model(t0, T));
   balls->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
 
   // ----------------
@@ -87,12 +83,12 @@ void BallsModel::initialize()
   // ----------------
 
   // -- Time-discretisation and Simulation --
-  TimeDiscretisation * t = new TimeDiscretisation(h, balls);
-  TimeStepping *s = new TimeStepping(t);
+  SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
+  SP::TimeStepping s(new TimeStepping(t));
 
   // -- OneStepIntegrators --
-  OneStepIntegrator * OSI;
-  OSI = new Moreau(allDS , 0.5000001 , s);
+  SP::OneStepIntegrator OSI(new Moreau(allDS , 0.5000001));
+  s->recordIntegrator(OSI);
 
   // -- OneStepNsProblem --
   string solverName = "Lemke";      // solver algorithm used for non-smooth problem
@@ -101,8 +97,10 @@ void BallsModel::initialize()
   DoubleParameters dparam(5);
   dparam[0] = 1e-6; // Tolerance
   //dparam[2] = 1e-8; // Local Tolerance
-  NonSmoothSolver * Mysolver = new NonSmoothSolver(solverName, iparam, dparam);
-  LCP* osnspb = new LCP(s, Mysolver);
+  SP::NonSmoothSolver Mysolver(new NonSmoothSolver(solverName, iparam, dparam));
+  SP::LCP osnspb(new LCP(Mysolver));
+  s->recordNonSmoothProblem(osnspb);
+
   //osnspb->setNumericsVerboseMode(1);
   //  osnspb->setMStorageType(1);
   cout << "=== End of model loading === " << endl;
@@ -112,7 +110,7 @@ void BallsModel::initialize()
   // --- Simulation initialization ---
 
   cout << "..." << endl;
-  s->initialize();
+  balls->initialize(s);
   cout << "=== End of simulation initialisation ===" << endl;
 
   unsigned int N = int((T - t0) / h);
@@ -120,7 +118,7 @@ void BallsModel::initialize()
 
 #ifndef WithQGLViewer
   // Output matrix
-  dataPlot = new SimpleMatrix(N + 2, outputSize); // Output data matrix
+  dataPlot.reset(new SimpleMatrix(N + 2, outputSize)); // Output data matrix
   (*dataPlot)(0, 0) = t0; // time
   unsigned int i = 0;
   for (DSLIST::iterator it = allSpheres.begin(); it != allSpheres.end(); ++it)
@@ -198,8 +196,8 @@ void BallsModel::buildDynamicalSystems()
   // q0[i] and v0[i] correspond to position and velocity of ball i.
   Vectors q0, v0;
   numberOfSpheres = NB_Spheres;
-  q0.resize(numberOfSpheres, NULL);
-  v0.resize(numberOfSpheres, NULL);
+  q0.resize(numberOfSpheres);
+  v0.resize(numberOfSpheres);
 
   double increment_position = 3;   // initial position increment from one DS to the following
   double increment_velocity = 0;   // initial velocity increment from one DS to the following
@@ -209,19 +207,19 @@ void BallsModel::buildDynamicalSystems()
   for (i = 0; i < numberOfSpheres; i++)
   {
     // Memory allocation for q0[i] and v0[i]
-    q0[i] = new SimpleVector(nDof);
-    v0[i] = new SimpleVector(nDof);
+    q0[i].reset(new SimpleVector(nDof));
+    v0[i].reset(new SimpleVector(nDof));
     // set values
     (*(q0[i]))(2) = position_init;
     (*(v0[i]))(2) = velocity_init;
     // Create and insert in allDS a new Lagrangian Linear Dynamical System ...
-    allSpheres[i] = new Sphere(Radius, m, *(q0[i]), *(v0[i]), i);
+    allSpheres[i].reset(new Sphere(Radius, m, *(q0[i]), *(v0[i])));
     position_init += increment_position;
     velocity_init += increment_velocity;
   }
 }
 
-void BallsModel::buildInteractions(InteractionsSet* allInteractions)
+void BallsModel::buildInteractions(InteractionsSet& allInteractions)
 {
   // The total number of Interactions
   int interactionNumber = NB_Spheres;
@@ -238,22 +236,22 @@ void BallsModel::buildInteractions(InteractionsSet* allInteractions)
 
   // Lagrangian Relation
   unsigned int interactionSize = 1; // y vector size
-  SiconosMatrix *H = new SimpleMatrix(interactionSize, nDof);
+  SP::SiconosMatrix H(new SimpleMatrix(interactionSize, nDof));
   (*H)(0, 2) = 1.0;
-  NonSmoothLaw * nslaw0 = new NewtonImpactNSL(e);
-  SiconosVector *b = new SimpleVector(interactionSize);
+  SP::NonSmoothLaw nslaw0(new NewtonImpactNSL(e));
+  SP::SiconosVector b(new SimpleVector(interactionSize));
   double R = DEFAULT_radius;
   (*b)(0) = -R - Ground;
-  Relation * relation0 = new LagrangianLinearR(*H, *b);
+  SP::Relation relation0(new LagrangianLinearTIR(*H, *b));
   unsigned int num = 0 ; // an id number for the Interaction
-  Interaction * inter0 = new Interaction(dsConcerned, num, interactionSize, nslaw0, relation0);
-  allInteractions->insert(inter0);
+  SP::Interaction inter0(new Interaction(dsConcerned, num, interactionSize, nslaw0, relation0));
+  allInteractions.insert(inter0);
 
   // Interactions ball-ball
   CheckInsertInteraction checkInter;
   // A vector that handles all the relations
-  vector<Relation*> LLR(interactionNumber - 1);
-  SiconosMatrix *H1 = new SimpleMatrix(1, 2 * nDof);
+  vector<SP::Relation> LLR(interactionNumber - 1);
+  SP::SiconosMatrix H1(new SimpleMatrix(1, 2 * nDof));
   (*b)(0) = -2 * R;
   if (numberOfSpheres > 1)
   {
@@ -267,8 +265,9 @@ void BallsModel::buildInteractions(InteractionsSet* allInteractions)
       dsConcerned.insert(allSpheres[i]);
       // The relations
       // Since Ri=Rj and h=0, we do not need to set b.
-      LLR[i - 1] = new LagrangianLinearR(*H1, *b);
-      checkInter = allInteractions->insert(new Interaction(dsConcerned, i, interactionSize, nslaw0, LLR[i - 1]));
+      LLR[i - 1].reset(new LagrangianLinearTIR(*H1, *b));
+      SP::Interaction inter(new Interaction(dsConcerned, i, interactionSize, nslaw0, LLR[i - 1]));
+      checkInter = allInteractions.insert(inter);
     }
   }
 }
@@ -280,6 +279,5 @@ void BallsModel::end()
   // --- Output files ---
   ioMatrix io("result.dat", "ascii");
   io.write(*dataPlot, "noDim");
-  delete dataPlot;
 #endif
 }

@@ -361,37 +361,37 @@ void CanonBallsModel::buildInteractions(InteractionsSet* allInteractions)
   {
     if (hasGround)
     {
-      LLR1[i] = new LagrangianLinearR(Hground, bground);
+      LLR1[i] = new LagrangianLinearTIR(Hground, bground);
       allInteractions->insert(new Interaction(allSpheres[i], i, 3, nslaw1, LLR1[i]));
     }
     // Interaction beads and ceiling
     if (hasCeil)
     {
-      LLR1_[i] = new LagrangianLinearR(Hceil, bceil);
+      LLR1_[i] = new LagrangianLinearTIR(Hceil, bceil);
       allInteractions->insert(new Interaction(allSpheres[i], i, 3, nslaw1, LLR1_[i]));
     }
     // Interaction beads and plan2 (OXZ)
     if (obst_y_p)
     {
-      LLR2[i] = new LagrangianLinearR(HwallYp, bwallYp);
+      LLR2[i] = new LagrangianLinearTIR(HwallYp, bwallYp);
       allInteractions->insert(new Interaction(allSpheres[i], i, 3, nslaw1, LLR2[i]));
     }
     // Interaction beads and plan2 (-ZOX)
     if (obst_y_m)
     {
-      LLR2_[i] = new LagrangianLinearR(HwallYm, bwallYm);
+      LLR2_[i] = new LagrangianLinearTIR(HwallYm, bwallYm);
       allInteractions->insert(new Interaction(allSpheres[i], i, 3, nslaw1, LLR2_[i]));
     }
     // Interaction beads and plan3 (OYZ)
     if (obst_x_p)
     {
-      LLR3[i] = new LagrangianLinearR(HwallXp, bwallXp);
+      LLR3[i] = new LagrangianLinearTIR(HwallXp, bwallXp);
       allInteractions->insert(new Interaction(allSpheres[i], i, 3, nslaw1, LLR3[i]));
     }
     // Interaction beads and plan3 (-ZOY)
     if (obst_x_m)
     {
-      LLR3_[i] = new LagrangianLinearR(HwallXm, bwallXm);
+      LLR3_[i] = new LagrangianLinearTIR(HwallXm, bwallXm);
       allInteractions->insert(new Interaction(allSpheres[i], i, 3, nslaw1, LLR3_[i]));
     }
   }

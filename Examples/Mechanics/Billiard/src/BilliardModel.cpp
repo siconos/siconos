@@ -337,7 +337,7 @@ void BilliardModel::buildInteractions(InteractionsSet* allInteractions)
   for (int i = 0; i < NBSpheres; i++)
   {
     dsConcernedi.insert(allSpheres[i]);
-    LLR1[i] = new LagrangianLinearR(*H1, *b1);
+    LLR1[i] = new LagrangianLinearTIR(*H1, *b1);
     allInteractions->insert(new Interaction(dsConcernedi, i, 3, nslaw1, LLR1[i]));
     dsConcernedi.clear();
   }
@@ -356,7 +356,7 @@ void BilliardModel::buildInteractions(InteractionsSet* allInteractions)
   for (int i = 0; i < NBSpheres; i++)
   {
     dsConcernedi.insert(allSpheres[i]);
-    LLR1_[i] = new LagrangianLinearR(*H1_, *b1_);
+    LLR1_[i] = new LagrangianLinearTIR(*H1_, *b1_);
     allInteractions->insert(new Interaction(dsConcernedi, i, 3, nslaw1, LLR1_[i]));
     dsConcernedi.clear();
   }
@@ -375,7 +375,7 @@ void BilliardModel::buildInteractions(InteractionsSet* allInteractions)
   for (int i = 0; i < NBSpheres; i++)
   {
     dsConcernedi.insert(allSpheres[i]);
-    LLR2[i] = new LagrangianLinearR(*H2, *b2);
+    LLR2[i] = new LagrangianLinearTIR(*H2, *b2);
     allInteractions->insert(new Interaction(dsConcernedi, i, 3, nslaw1, LLR2[i]));
     dsConcernedi.clear();
   }
@@ -394,7 +394,7 @@ void BilliardModel::buildInteractions(InteractionsSet* allInteractions)
   for (int i = 0; i < NBSpheres; i++)
   {
     dsConcernedi.insert(allSpheres[i]);
-    LLR2_[i] = new LagrangianLinearR(*H2_, *b2_);
+    LLR2_[i] = new LagrangianLinearTIR(*H2_, *b2_);
     allInteractions->insert(new Interaction(dsConcernedi, i, 3, nslaw1, LLR2_[i]));
     dsConcernedi.clear();
   }
@@ -413,7 +413,7 @@ void BilliardModel::buildInteractions(InteractionsSet* allInteractions)
   for (int i = 0; i < NBSpheres; i++)
   {
     dsConcernedi.insert(allSpheres[i]);
-    LLR3[i] = new LagrangianLinearR(*H3, *b3);
+    LLR3[i] = new LagrangianLinearTIR(*H3, *b3);
     allInteractions->insert(new Interaction(dsConcernedi, i, 3, nslaw1, LLR3[i]));
     dsConcernedi.clear();
   }
@@ -432,7 +432,7 @@ void BilliardModel::buildInteractions(InteractionsSet* allInteractions)
   for (int i = 0; i < NBSpheres; i++)
   {
     dsConcernedi.insert(allSpheres[i]);
-    LLR3_[i] = new LagrangianLinearR(*H3_, *b3_);
+    LLR3_[i] = new LagrangianLinearTIR(*H3_, *b3_);
     allInteractions->insert(new Interaction(dsConcernedi, i, 3, nslaw1, LLR3_[i]));
     dsConcernedi.clear();
   }
