@@ -24,7 +24,7 @@
 #include "NonSmoothDynamicalSystem.h"
 #include "NonSmoothDynamicalSystemXML.h"
 #include "FirstOrderLinearTIR.h"
-#include "FirstOrderLinearRXML.h"
+#include "LinearRXML.h"
 
 class FirstOrderLinearTIRTest : public CppUnit::TestFixture
 {
@@ -40,6 +40,21 @@ private:
   CPPUNIT_TEST(testBuildFirstOrderLinearTIR0);
   CPPUNIT_TEST(testBuildFirstOrderLinearTIR1);
   CPPUNIT_TEST(testBuildFirstOrderLinearTIR2);
+  CPPUNIT_TEST(testBuildFirstOrderLinearTIR4);
+  CPPUNIT_TEST(testBuildFirstOrderLinearTIR5);
+  CPPUNIT_TEST(testSetC);
+  CPPUNIT_TEST(testSetCPtr);
+  CPPUNIT_TEST(testSetD);
+  CPPUNIT_TEST(testSetDPtr);
+  CPPUNIT_TEST(testSetF);
+  CPPUNIT_TEST(testSetFPtr);
+  CPPUNIT_TEST(testSetE);
+  CPPUNIT_TEST(testSetEPtr);
+  CPPUNIT_TEST(testSetB);
+  CPPUNIT_TEST(testSetBPtr);
+  CPPUNIT_TEST(testGetJac);
+  CPPUNIT_TEST(testGetJacPtr);
+
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
@@ -49,15 +64,29 @@ private:
   void testBuildFirstOrderLinearTIR0();
   void testBuildFirstOrderLinearTIR1();
   void testBuildFirstOrderLinearTIR2();
+  void testBuildFirstOrderLinearTIR4();
+  void testBuildFirstOrderLinearTIR5();
+  void testSetC();
+  void testSetCPtr();
+  void testSetD();
+  void testSetDPtr();
+  void testSetF();
+  void testSetFPtr();
+  void testSetE();
+  void testSetEPtr();
+  void testSetB();
+  void testSetBPtr();
+  void testGetJac();
+  void testGetJacPtr();
   void End();
 
   // Members
 
-  SiconosMatrix *C, *B, *F, *D;
-  SimpleVector *e;
-  xmlNode * node1;
-  RelationXML * tmpxml1;
-  NonSmoothDynamicalSystem * nsds;
+  SP::SiconosMatrix C, B, F, D;
+  SP::SiconosVector e;
+  xmlNodePtr node1;
+  SP::RelationXML tmpxml1;
+  SP::NonSmoothDynamicalSystem nsds;
 
 public:
   void setUp();

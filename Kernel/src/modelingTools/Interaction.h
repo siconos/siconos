@@ -30,10 +30,10 @@
 #include "DynamicalSystemsSet.h"
 #include "Tools.h"
 #include "SiconosPointers.h"
+#include "Relation.h"
 
 class NonSmoothLaw;
 class DynamicalSystem;
-class Relation;
 class InteractionXML;
 class BlockVector;
 
@@ -69,11 +69,8 @@ class BlockVector;
  *
  *
  */
-class Interaction : public boost::enable_shared_from_this<Interaction>
+class Interaction : public boost::enable_shared_from_this<Interaction >
 {
-
-  // === PRIVATE MEMBERS ===
-
 private:
 
   /** name of the Interaction */

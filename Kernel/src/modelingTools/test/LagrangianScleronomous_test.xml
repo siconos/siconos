@@ -50,9 +50,9 @@
 				<Interaction_Content>		
 					<LagrangianRelation type="Scleronomous">
                                              <h plugin="TestPlugin:hSclero"/>
-                                             <G number='1'>
+                                             <jacobianH number='1'>
                                               <matrix matrixPlugin="TestPlugin:G0Sclero"/>
-                                             </G>
+                                             </jacobianH>
 					</LagrangianRelation>			
 					<!-- NS Law of this interaction	-->
 					<NewtonImpactLaw>

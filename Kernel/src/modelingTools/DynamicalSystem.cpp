@@ -32,6 +32,7 @@ DynamicalSystem::DynamicalSystem(DS::TYPES type):
   DSType(type), number(count++), n(0), stepsInMemory(1)
 {
   x.resize(2);
+  workV.resize(sizeWorkV);
 }
 
 // From XML file
@@ -60,6 +61,7 @@ DynamicalSystem::DynamicalSystem(SP::DynamicalSystemXML dsXML):
     z.reset(new SimpleVector(dsxml->getZ()));
 
   if (dsxml->hasStepsInMemory()) stepsInMemory = dsxml->getStepsInMemory();
+  workV.resize(sizeWorkV);
 }
 
 // From a minimum set of data
@@ -67,6 +69,7 @@ DynamicalSystem::DynamicalSystem(DS::TYPES type, unsigned int newN):
   DSType(type), number(count++), n(newN), stepsInMemory(1)
 {
   x.resize(2);
+  workV.resize(sizeWorkV);
 }
 
 bool DynamicalSystem::checkDynamicalSystem()

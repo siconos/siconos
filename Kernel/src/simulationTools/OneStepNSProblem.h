@@ -148,7 +148,7 @@ protected:
   unsigned int nbIter;
 
   /** Numerics (C) structure used to define global options for Numerics functions calls */
-  Numerics_OptionsSPtr numerics_options;
+  SP::Numerics_Options numerics_options;
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
 

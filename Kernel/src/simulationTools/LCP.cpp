@@ -72,16 +72,7 @@ void LCP::setZ(const SiconosVector& newValue)
     RuntimeException::selfThrow("LCP: setZ, inconsistent size between given z size and problem size. You should set sizeOutput before");
 
   if (! z)
-  {
-
-#ifndef WithSmartPtr
-    z = new SimpleVector(sizeOutput);
-    isZAllocatedIn = true;
-#else
     z.reset(new SimpleVector(sizeOutput));
-#endif
-
-  }
 
   *z = newValue;
 }
@@ -90,12 +81,6 @@ void LCP::setZPtr(SP::SiconosVector newPtr)
 {
   if (sizeOutput != newPtr->size())
     RuntimeException::selfThrow("LCP: setZPtr, inconsistent size between given z size and problem size. You should set sizeOutput before");
-
-#ifndef WithSmartPtr
-  if (isZAllocatedIn) delete z;
-  isZAllocatedIn = false;
-#endif
-
   z = newPtr;
 
 }
@@ -109,13 +94,6 @@ void LCP::setM(const OSNSMatrix& newValue)
 void LCP::setMPtr(SP::OSNSMatrix newPtr)
 {
 
-#ifndef WithSmartPtr
-  // Note we do not test if newPtr and M sizes are equal. Not necessary?
-  if (isMAllocatedIn)
-    delete M;
-  isMAllocatedIn = false;
-#endif
-
   M = newPtr;
 
 }
@@ -126,16 +104,7 @@ void LCP::setQ(const SiconosVector& newValue)
     RuntimeException::selfThrow("LCP: setQ, inconsistent size between given q size and problem size. You should set sizeOutput before");
 
   if (! q)
-  {
-
-#ifndef WithSmartPtr
-    q = new SimpleVector(sizeOutput);
-    isQAllocatedIn = true;
-#else
     q.reset(new SimpleVector(sizeOutput));
-#endif
-
-  }
 
   *q = newValue;
 }
@@ -145,13 +114,7 @@ void LCP::setQPtr(SP::SiconosVector newPtr)
   if (sizeOutput != newPtr->size())
     RuntimeException::selfThrow("LCP: setQPtr, inconsistent size between given q size and problem size. You should set sizeOutput before");
 
-#ifndef WithSmartPtr
-  if (isQAllocatedIn) delete q;
-  isQAllocatedIn = false;
-#endif
-
   q = newPtr;
-
 
 }
 
@@ -282,22 +245,14 @@ void LCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
 
       // get unitaryBlocks corresponding to the current DS
       // These unitaryBlocks depends on the relation type.
-#ifndef WithSmartPtr
-      leftUnitaryBlock = new SimpleMatrix(nslawSize1, sizeDS);
-#else
       leftUnitaryBlock.reset(new SimpleMatrix(nslawSize1, sizeDS));
-#endif
 
       UR1->getLeftUnitaryBlockForDS(*itDS, leftUnitaryBlock);
       // Computing depends on relation type -> move this in UnitaryRelation method?
       if (relationType1 == FirstOrder && relationType2 == FirstOrder)
       {
 
-#ifndef WithSmartPtr
-        rightUnitaryBlock = new SimpleMatrix(sizeDS, nslawSize2);
-#else
         rightUnitaryBlock.reset(new SimpleMatrix(sizeDS, nslawSize2));
-#endif
 
         UR2->getRightUnitaryBlockForDS(*itDS, rightUnitaryBlock);
         // centralUnitaryBlock contains a lu-factorized matrix and we solve
@@ -309,9 +264,6 @@ void LCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
         *leftUnitaryBlock *= h;
         prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
         //left = C, right = W.B
-#ifndef WithSmartPtr
-        delete rightUnitaryBlock;
-#endif
       }
       else if (relationType1 == Lagrangian || relationType2 == Lagrangian)
       {
@@ -327,12 +279,7 @@ void LCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
         }
         else
         {
-#ifndef WithSmartPtr
-          rightUnitaryBlock = new SimpleMatrix(nslawSize2, sizeDS);
-#else
           rightUnitaryBlock.reset(new SimpleMatrix(nslawSize2, sizeDS));
-#endif
-
           UR2->getLeftUnitaryBlockForDS(*itDS, rightUnitaryBlock);
           // Warning: we use getLeft for Right unitaryBlock
           // because right = transpose(left) and because of
@@ -342,15 +289,9 @@ void LCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
           centralUnitaryBlocks[*itDS]->PLUForwardBackwardInPlace(*rightUnitaryBlock);
           //*currentUnitaryBlock +=  *leftUnitaryBlock ** work;
           prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
-#ifndef WithSmartPtr
-          delete rightUnitaryBlock;
-#endif
         }
       }
 
-#ifndef WithSmartPtr
-      delete leftUnitaryBlock;
-#endif
       else RuntimeException::selfThrow("LCP::computeUnitaryBlock not yet implemented for relation of type " + relationType1);
     }
   }
@@ -385,78 +326,47 @@ void LCP::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
   SP::SiconosVector workX = UR->getWorkXPtr();
   if (osiType == "Moreau" || osiType == "Lsodar")
   {
-    if (relationType == FirstOrder)
+    H = mainInteraction->getRelationPtr()->getJacHPtr(0);
+    if (H)
     {
-      if (relationSubType == Type1R)//|| relationType =="FirstOrderType2R" || relationType =="FirstOrderType3R")
+      coord[3] = H->size(1);
+      coord[5] = H->size(1);
+      subprod(*H, *workX, *q, coord, true);
+    }
+
+    if (relationType == FirstOrder && (relationSubType == LinearTIR || relationSubType == LinearR))
+    {
+      // q = HXfree + e + Fz
+      SP::SiconosVector e;
+      if (relationSubType == LinearTIR)
       {
-        H = boost::static_pointer_cast<FirstOrderR>(mainInteraction->getRelationPtr())->getJacobianHPtr(0);
-        if (H)
-        {
-          coord[3] = H->size(1);
-          coord[5] = H->size(1);
-          subprod(*H, *workX, *q, coord, true);
-        }
+        e = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->getRelationPtr())->getEPtr();
+        H = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->getRelationPtr())->getFPtr();
       }
-
-      else if (relationSubType == LinearTIR || relationSubType == LinearR)
+      else
       {
-        // q = HXfree + e + Fz
-        H = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getCPtr();
-        if (H)
-        {
-          coord[3] = H->size(1);
-          coord[5] = H->size(1);
-          subprod(*H, *workX, (*q), coord, true);
-        }
-        SP::SiconosVector e = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getEPtr();
-        if (e)
-          static_cast<SimpleVector*>(q.get())->addBlock(pos, *e);
-
+        e = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getEPtr();
         H = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getFPtr();
-        if (H)
-        {
-          SP::SiconosVector  workZ = UR->getWorkZPtr();
-          coord[3] = H->size(1);
-          coord[5] = H->size(1);
-          subprod(*H, *workZ, *q, coord, false);
-        }
-      }
-    }
-    else if (relationType == Lagrangian)
-    {
-      if (relationSubType == CompliantR || relationSubType == ScleronomousR || relationSubType == RheonomousR)
-      {
-        // q = jacobian_q h().v_free
-        H = boost::static_pointer_cast<LagrangianR>(mainInteraction->getRelationPtr())->getGPtr(0);
-        if (H)
-        {
-          coord[3] = H->size(1);
-          coord[5] = H->size(1);
-          subprod(*H, *workX, *q, coord, true);
-        }
       }
 
-      else if (relationSubType == LinearR || relationSubType == LinearTIR)
+      if (e)
+        boost::static_pointer_cast<SimpleVector>(q)->addBlock(pos, *e);
+
+      if (H)
       {
-        // q = H.v_free
-        H = boost::static_pointer_cast<LagrangianLinearR>(mainInteraction->getRelationPtr())->getHPtr();
-        if (H)
-        {
-          coord[3] = H->size(1);
-          coord[5] = H->size(1);
-          subprod(*H, *workX, *q, coord, true);
-        }
+        SP::SiconosVector  workZ = UR->getWorkZPtr();
+        coord[3] = H->size(1);
+        coord[5] = H->size(1);
+        subprod(*H, *workZ, *q, coord, false);
       }
     }
-    else
-      RuntimeException::selfThrow("LCP::computeQBlock, not yet implemented for first order relations of subtype " + relationSubType);
-
   }
+
   else if (osiType == "Moreau2")
   {
   }
   else
-    RuntimeException::selfThrow("FrictionContact::computeQBlock not yet implemented for OSI of type " + osiType);
+    RuntimeException::selfThrow("LCP::computeQBlock not yet implemented for OSI of type " + osiType);
 
   // Add "non-smooth law effect" on q
   if (UR->getRelationType() == Lagrangian)
@@ -465,12 +375,7 @@ void LCP::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
     if (nslawType == NEWTONIMPACTNSLAW)
     {
 
-#ifndef WithSmartPtr
       e = (boost::static_pointer_cast<NewtonImpactNSL>(mainInteraction->getNonSmoothLawPtr()))->getE();
-#else
-      e = (boost::static_pointer_cast<NewtonImpactNSL>(mainInteraction->getNonSmoothLawPtr()))->getE();
-#endif
-
       std::vector<unsigned int> subCoord(4);
       if (simulationType == "TimeStepping")
       {
@@ -494,12 +399,7 @@ void LCP::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
     else if (nslawType == NEWTONIMPACTFRICTIONNSLAW)
     {
 
-#ifndef WithSmartPtr
       e = (boost::static_pointer_cast<NewtonImpactFrictionNSL>(mainInteraction->getNonSmoothLawPtr()))->getEn();
-#else
-      e = (boost::static_pointer_cast<NewtonImpactFrictionNSL>(mainInteraction->getNonSmoothLawPtr()))->getEn();
-#endif
-
       // Only the normal part is multiplied by e
       if (simulationType == "TimeStepping")
         (*q)(pos) +=  e * (*UR->getYOldPtr(levelMin))(0);
@@ -638,8 +538,8 @@ void LCP::postCompute()
     lambda = (*itCurrent)->getLambdaPtr(levelMin);
     // Copy w/z values, starting from index pos into y/lambda.
 
-    setBlock(w, y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
-    setBlock(z, lambda, lambda->size(), pos, 0);
+    setBlock(*w, y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
+    setBlock(*z, lambda, lambda->size(), pos, 0);
   }
 }
 

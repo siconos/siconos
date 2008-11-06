@@ -17,167 +17,152 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "FirstOrderLinearR.h"
-#include "FirstOrderLinearRXML.h"
+#include "LinearRXML.h"
 #include "Interaction.h"
+#include "FirstOrderR.cpp"
 
 using namespace std;
 using namespace RELATION;
 
-void FirstOrderLinearR::initPluginFlags(bool in)
-{
-  isPlugged[RELATION::C] = in;
-  isPlugged[RELATION::D] = in;
-  isPlugged[RELATION::F] = in;
-  isPlugged[RELATION::e] = in;
-  isPlugged[RELATION::B] = in ;
-}
-
-// Default (private) constructor
-FirstOrderLinearR::FirstOrderLinearR(): FirstOrderR(LinearR)
-{
-  initPluginFlags(false);
-}
-
-
 // xml constructor
 FirstOrderLinearR::FirstOrderLinearR(SP::RelationXML relxml):
-  FirstOrderR(relxml, LinearR)
+  FirstOrderR<MatrixFunctionOfTime>(relxml, LinearR)
 {
-  SP::FirstOrderLinearRXML folrXML = boost::static_pointer_cast<FirstOrderLinearRXML>(relationxml);
+  SP::LinearRXML folrXML = boost::static_pointer_cast<LinearRXML>(relationxml);
   // get matrices values. All are optional.
 
-  initPluginFlags(false);
-
-  if (folrXML->hasH())
-    RuntimeException::selfThrow(" FirstOrderLinearR xml constructor failed. Too many inputs: you can not give h or its jacobian.");
-
+  JacH.reserve(2);
+  JacG.resize(1);
   string plugin;
   if (folrXML->hasC())
   {
+    JacH.resize(1);
     if (folrXML->isCPlugin())
-    {
-      plugin = folrXML->getCPlugin();
-      setComputeCFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
-    }
+      JacH[0].reset(new PluggedMatrix(folrXML->getCPlugin()));
     else
-      C.reset(new SimpleMatrix(folrXML->getC()));
+      JacH[0].reset(new PluggedMatrix(folrXML->getC()));
   }
+  else
+    RuntimeException::selfThrow("FirstOrderLinearR:: xml constructor failed, can not find a definition for C.");
 
   if (folrXML->hasD())
   {
+    JacH.resize(2);
     if (folrXML->isDPlugin())
-    {
-      plugin = folrXML->getDPlugin();
-      setComputeDFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
-    }
+      JacH[1].reset(new PluggedMatrix(folrXML->getDPlugin()));
     else
-      D.reset(new SimpleMatrix(folrXML->getD()));
+      JacH[1].reset(new PluggedMatrix(folrXML->getD()));
   }
 
   if (folrXML->hasF())
   {
     if (folrXML->isFPlugin())
-    {
-      plugin = folrXML->getFPlugin();
-      setComputeFFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
-    }
+      F.reset(new PluggedMatrix(folrXML->getFPlugin()));
     else
-      F.reset(new SimpleMatrix(folrXML->getF()));
+      F.reset(new PluggedMatrix(folrXML->getF()));
   }
 
   if (folrXML->hasE())
   {
     if (folrXML->isEPlugin())
-    {
-      plugin = folrXML->getEPlugin();
-      setComputeEFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
-    }
+      e.reset(new PVTime(folrXML->getEPlugin()));
     else
-      e.reset(new SimpleVector(folrXML->getE()));
+      e.reset(new PVTime(folrXML->getE()));
   }
 
   if (folrXML->hasB())
   {
-    if (folrXML->hasG())
-      RuntimeException::selfThrow(" FirstOrderLinearR xml constructor failed. Too many inputs: you can not give B and g or its jacobian.");
-
     if (folrXML->isBPlugin())
-    {
-      plugin = folrXML->getBPlugin();
-      setComputeBFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
-    }
+      JacG[0].reset(new PluggedMatrix(folrXML->getBPlugin()));
     else
-      B.reset(new SimpleMatrix(folrXML->getB()));
+      JacG[0].reset(new PluggedMatrix(folrXML->getB()));
   }
+  else
+    RuntimeException::selfThrow("FirstOrderLinearR:: xml constructor failed, can not find a definition for B.");
 }
 
 // Constructor with C and B plug-in names
 FirstOrderLinearR::FirstOrderLinearR(const string& CName, const string& BName):
-  FirstOrderR(LinearR)
+  FirstOrderR<MatrixFunctionOfTime>(LinearR)
 {
-  initPluginFlags(false);
-
-  setComputeCFunction(SSL::getPluginName(CName), SSL::getPluginFunctionName(CName));
-  setComputeBFunction(SSL::getPluginName(BName), SSL::getPluginFunctionName(BName));
-}
-
-// Constructor with e plug-in name
-FirstOrderLinearR::FirstOrderLinearR(const string& EName):
-  FirstOrderR(LinearR)
-{
-  initPluginFlags(false);
-  setComputeEFunction(SSL::getPluginName(EName), SSL::getPluginFunctionName(EName));
+  // Warning: we cannot allocate memory for C/D matrix since no interaction
+  // is connected to the relation. This will be done during initialize.
+  // We only set the name of the plugin-function and connect it to the user-defined function.
+  JacH.reserve(2);
+  JacG.resize(1);
+  JacH.resize(1);
+  JacH[0].reset(new PluggedMatrix(CName));
+  JacG[0].reset(new PluggedMatrix(BName));
 }
 
 // Constructor from a complete set of data (plugin)
-FirstOrderLinearR::FirstOrderLinearR(const string& CName, const string& DName, const string& FName, const string& EName, const string& BName):
-  FirstOrderR(LinearR)
+FirstOrderLinearR::FirstOrderLinearR(const string& CName, const string& DName, const string& FName, const string& EName, const string& BName): FirstOrderR<MatrixFunctionOfTime>(LinearR)
 {
-  initPluginFlags(true);
-
-  setComputeCFunction(SSL::getPluginName(CName), SSL::getPluginFunctionName(CName));
-  setComputeDFunction(SSL::getPluginName(DName), SSL::getPluginFunctionName(DName));
-  setComputeFFunction(SSL::getPluginName(FName), SSL::getPluginFunctionName(FName));
-  setComputeEFunction(SSL::getPluginName(EName), SSL::getPluginFunctionName(EName));
-  setComputeBFunction(SSL::getPluginName(BName), SSL::getPluginFunctionName(BName));
+  JacG.resize(1);
+  JacH.resize(2);
+  JacH[0].reset(new PluggedMatrix(CName));
+  JacH[1].reset(new PluggedMatrix(DName));
+  F.reset(new PluggedMatrix(FName));
+  e.reset(new PVTime(EName));
+  JacG[0].reset(new PluggedMatrix(BName));
 }
 
 // Minimum data (C, B as pointers) constructor
-FirstOrderLinearR::FirstOrderLinearR(SP::SiconosMatrix newC, SP::SiconosMatrix newB):
-  FirstOrderR(LinearR)
+FirstOrderLinearR::FirstOrderLinearR(SP_PluggedMatrix newC, SP_PluggedMatrix newB):
+  FirstOrderR<MatrixFunctionOfTime>(LinearR)
 {
-  initPluginFlags(false);
-
-  C = newC;
-
+  JacH.push_back(newC);
+  JacG.push_back(newB);
 }
 
 // Constructor from a complete set of data
-FirstOrderLinearR::FirstOrderLinearR(SP::SiconosMatrix newC, SP::SiconosMatrix newD, SP::SiconosMatrix newF, SP::SiconosVector newE, SP::SiconosMatrix newB):
-  FirstOrderR(LinearR)
+FirstOrderLinearR::FirstOrderLinearR(SP_PluggedMatrix newC, SP_PluggedMatrix newD, SP_PluggedMatrix newF, SP::PVTime newE, SP_PluggedMatrix newB):
+  FirstOrderR<MatrixFunctionOfTime>(LinearR)
 {
-  initPluginFlags(false);
-
-  C = newC;
-  D = newD;
+  JacH.push_back(newC);
+  JacG.push_back(newB);
+  JacH.push_back(newD);
   F = newF;
   e = newE;
-  B = newB;
 }
 
-FirstOrderLinearR::~FirstOrderLinearR()
-{}
-
-void FirstOrderLinearR::initialize()
+// Minimum data (C, B as matrices) constructor
+FirstOrderLinearR::FirstOrderLinearR(const SiconosMatrix& newC, const SiconosMatrix& newB):
+  FirstOrderR<MatrixFunctionOfTime>(LinearR)
 {
-  // Note: do not call FirstOrderR::initialize to avoid jacobianH and jacobianG allocation.
+  JacH.reserve(2);
+  JacG.resize(1);
+  JacH.resize(1);
+  JacH[0].reset(new PluggedMatrix(newC));
+  JacG[0].reset(new PluggedMatrix(newB));
+}
 
-  // Check if an Interaction is connected to the Relation.
-  if (!interaction)
-    RuntimeException::selfThrow("FirstOrderR::initialize failed. No Interaction linked to the present relation.");
+// Constructor from a complete set of data (matrices)
+FirstOrderLinearR::FirstOrderLinearR(const SiconosMatrix& newC, const SiconosMatrix& newD, const SiconosMatrix& newF, const SiconosVector& newE, const SiconosMatrix& newB):
+  FirstOrderR<MatrixFunctionOfTime>(LinearR)
+{
+  JacG.resize(1);
+  JacH.resize(2);
+  JacH[0].reset(new PluggedMatrix(newC));
+  JacH[1].reset(new PluggedMatrix(newD));
+  F.reset(new PluggedMatrix(newF));
+  e.reset(new PVTime(newE));
+  JacG[0].reset(new PluggedMatrix(newB));
+}
+
+void FirstOrderLinearR::initialize(SP::Interaction inter)
+{
+  assert(inter && "FirstOrderLinearR::initialize failed. No Interaction linked to the present relation.");
+  interaction = inter;
+
+  // Note: do not call FirstOrderR::initialize to avoid jacobianH and jacobianG allocation.
 
   // Update data member (links to DS variables)
   initDSLinks();
+  if (!JacH[0])
+    RuntimeException::selfThrow("FirstOrderLinearR::initialize() C is null and is a required input.");
+  if (!JacG[0])
+    RuntimeException::selfThrow("FirstOrderLinearR::initialize() B is null and is a required input.");
 
   // Check if various operators sizes are consistent.
   // Reference: interaction.
@@ -185,201 +170,216 @@ void FirstOrderLinearR::initialize()
   unsigned int sizeX = interaction->getSizeOfDS();
   unsigned int sizeZ = interaction->getSizeZ();
 
-  if (C)
-  {
-    if (C->size(0) != sizeY || C->size(1) != sizeX)
-      RuntimeException::selfThrow("FirstOrderLinearR::initialize , inconsistent size between C and Interaction.");
-  }
-  if (B)
-  {
-    if (B->size(0) != sizeX || B->size(1) != sizeY)
-      RuntimeException::selfThrow("FirstOrderLinearR::initialize , inconsistent size between C and B.");
-  }
+  // The initialization of each matrix/vector depends on the way the Relation was built ie if the matrix/vector
+  // was read from xml or not
+  if (JacH[0]->size(0) == 0)
+    JacH[0]->resize(sizeX, sizeY);
+  else
+    assert((JacH[0]->size(0) == sizeY && JacH[0]->size(1) == sizeX) && "FirstOrderLinearR::initialize , inconsistent size between C and Interaction.");
 
-  if (D)
+  if (JacG[0]->size(0) == 0)
+    JacG[0]->resize(sizeY, sizeX);
+  else
+    assert((JacG[0]->size(1) == sizeY && JacG[0]->size(0) == sizeX) && "FirstOrderLinearR::initialize , inconsistent size between B and interaction.");
+
+  // C and B are the minimum inputs. The others may remain null.
+
+  if (JacH[1])
   {
-    if (D->size(0) != sizeY || D->size(1) != sizeY)
-      RuntimeException::selfThrow("FirstOrderLinearR::initialize , inconsistent size between C and D.");
-  }
-
-  if (F && (F->size(0) != sizeY))
-    RuntimeException::selfThrow("FirstOrderLinearR::initialize , inconsistent size between C and F.");
-
-  if (e  && e->size() != sizeY)
-    RuntimeException::selfThrow("FirstOrderLinearR::initialize , inconsistent size between C and e.");
-
-  // Memory allocation if required (ie if plugged and not allocated: must be done here since in constructors, interaction is not knonw).
-  if (! C && isPlugged[RELATION::C])
-  {
-    C.reset(new SimpleMatrix(sizeY, sizeX));
+    if (JacH[1]->size(0) == 0)
+      JacH[1]->resize(sizeY, sizeY);
+    else
+      assert((JacH[1]->size(0) == sizeY || JacH[1]->size(1) == sizeY) && "FirstOrderLinearR::initialize , inconsistent size between C and D.");
   }
 
-  if (! D && isPlugged[RELATION::D])
+  if (F)
   {
-    D.reset(new SimpleMatrix(sizeY, sizeY));
+    if (F->size(0) == 0)
+      F->resize(sizeY, sizeZ);
+    else
+      assert(((F->size(0) != sizeY) && (F->size(1) != sizeZ)) && "FirstOrderLinearR::initialize , inconsistent size between C and F.");
   }
 
-  if (! F && isPlugged[RELATION::F])
+  if (e)
   {
-    F.reset(new SimpleMatrix(sizeY, sizeZ));
+    if (e->size() == 0)
+      e->resize(sizeY);
+    else
+      assert(e->size() == sizeY && "FirstOrderLinearR::initialize , inconsistent size between C and e.");
   }
 
-  if (! e && isPlugged[RELATION::e])
-  {
-    e.reset(new SimpleVector(sizeY));
-  }
-
-  if (! B && isPlugged[RELATION::B])
-  {
-    B.reset(new SimpleMatrix(sizeX, sizeY));
-  }
   workZ.reset(new SimpleVector(sizeZ));
 }
 
 // setters
 
-void FirstOrderLinearR::setC(const SiconosMatrix& newValue)
-{
-  if (! C)
-    C.reset(new SimpleMatrix(newValue));
-  else
-  {
-    if ((newValue.size(0) == C->size(0)) && (newValue.size(1) == C->size(1)))
-      *C = newValue;
-    else
-      RuntimeException::selfThrow("FirstOrderLinearR - setC: inconsistent dimensions with problem size for input matrix C.");
-  }
-
-  isPlugged[RELATION::C] = false;
-
-}
-
-void FirstOrderLinearR::setCPtr(SP::SiconosMatrix newPtr)
-{
-  C = newPtr;
-  isPlugged[RELATION::C] = false;
-}
-
 void FirstOrderLinearR::setComputeCFunction(const string& pluginPath, const string& functionName)
 {
-  isPlugged[RELATION::C] = Plugin::setFunction(&CPtr, pluginPath, functionName, pluginNames[RELATION::C]);
-}
-
-void FirstOrderLinearR::setD(const SiconosMatrix& newValue)
-{
-  if (! D)
-    D.reset(new SimpleMatrix(newValue));
-  else
-  {
-    if ((newValue.size(0) == D->size(0)) && (newValue.size(1) == D->size(1)))
-      *D = newValue;
-    else
-      RuntimeException::selfThrow("FirstOrderLinearR - setD: inconsistent dimensions with problem size for input matrix D.");
-  }
-  isPlugged[RELATION::D] = false;
-}
-
-void FirstOrderLinearR::setDPtr(SP::SiconosMatrix newPtr)
-{
-  D = newPtr;
-  isPlugged[RELATION::D] = false;
+  setComputeJacobianHFunction(pluginPath, functionName, 0);
 }
 
 void FirstOrderLinearR::setComputeDFunction(const string& pluginPath, const string& functionName)
 {
-  isPlugged[RELATION::D] = Plugin::setFunction(&DPtr, pluginPath, functionName, pluginNames[RELATION::D]);
-}
-
-void FirstOrderLinearR::setF(const SiconosMatrix& newValue)
-{
-  if (! F)
-    F.reset(new SimpleMatrix(newValue));
-  else
-  {
-    if ((newValue.size(0) == F->size(0)) && (newValue.size(1) == F->size(1)))
-      *F = newValue;
-    else
-      RuntimeException::selfThrow("FirstOrderLinearR - setF: inconsistent dimensions with problem size for input matrix F.");
-  }
-  isPlugged[RELATION::F] = false;
-}
-
-void FirstOrderLinearR::setFPtr(SP::SiconosMatrix newPtr)
-{
-  F = newPtr;
-  isPlugged[RELATION::F] = false;
+  if (JacH.size() < 2) JacH.resize(2);
+  if (!JacH[1])
+    JacH[1].reset(new PluggedMatrix()); // Required since D may not have been created by constructor
+  setComputeJacobianHFunction(pluginPath, functionName, 1);
 }
 
 void FirstOrderLinearR::setComputeFFunction(const string& pluginPath, const string& functionName)
 {
-  isPlugged[RELATION::F] = Plugin::setFunction(&FPtr, pluginPath, functionName, pluginNames[RELATION::F]);
+  if (!F)
+    F.reset(new PluggedMatrix()); // Required since F may not have been created by constructor
+  F->setComputeFunction(pluginPath, functionName);
 }
 
-void FirstOrderLinearR::setE(const SiconosVector& newValue)
+void FirstOrderLinearR::setComputeEFunction(VectorFunctionOfTime ptrFunct)
 {
-  if (! e)
-    e.reset(new SimpleVector(newValue));
-  else
-  {
-    if (newValue.size() == e->size())
-      *e = newValue;
-    else
-      RuntimeException::selfThrow("FirstOrderLinearR - setE: inconsistent dimensions with problem size for input vector e.");
-  }
-  isPlugged[RELATION::e] = false;
-}
-
-void FirstOrderLinearR::setEPtr(SP::SiconosVector newPtr)
-{
-  e = newPtr;
-  isPlugged[RELATION::e] = false;
-}
-void FirstOrderLinearR::setComputeEFunction(FOVecPtr ptrFunct)
-{
-  ePtr = ptrFunct;
-  isPlugged[RELATION::e] = true;
+  if (!e)
+    e.reset(new PVTime()); // Required since e may not have been created by constructor
+  e->setComputeFunction(ptrFunct);
 }
 
 void FirstOrderLinearR::setComputeEFunction(const string& pluginPath, const string& functionName)
 {
-  isPlugged[RELATION::e] = Plugin::setFunction(&ePtr, pluginPath, functionName, pluginNames[RELATION::e]);
-}
-
-void FirstOrderLinearR::setB(const SiconosMatrix& newValue)
-{
-  if (! B)
-    B.reset(new SimpleMatrix(newValue));
-  else
-  {
-    if ((newValue.size(0) == B->size(0)) && (newValue.size(1) == B->size(1)))
-      *B = newValue;
-    else
-      RuntimeException::selfThrow("FirstOrderLinearR - setB: inconsistent dimensions with problem size for input matrix B.");
-  }
-  isPlugged[RELATION::B] = false;
-}
-
-void FirstOrderLinearR::setBPtr(SP::SiconosMatrix newPtr)
-{
-  B = newPtr;
-  isPlugged[RELATION::B] = false;
+  if (!e)
+    e.reset(new PVTime()); // Required since e may not have been created by constructor
+  e->setComputeFunction(pluginPath, functionName);
 }
 
 void FirstOrderLinearR::setComputeBFunction(const string& pluginPath, const string& functionName)
 {
-  isPlugged[RELATION::B] = Plugin::setFunction(&BPtr, pluginPath, functionName, pluginNames[RELATION::B]);
+  setComputeJacobianGFunction(pluginPath, functionName, 0);
+}
+
+void FirstOrderLinearR::computeC(const double time)
+{
+  if (JacH[0])
+  {
+    if (JacH[0]->isPlugged())
+    {
+      if (!JacH[0]->fPtr)
+        RuntimeException::selfThrow("FirstOrderLinearR::computeC() is not linked to a plugin function");
+      unsigned int sizeY = interaction->getSizeOfY();
+      unsigned int sizeX = interaction->getSizeOfDS();
+      unsigned int sizeZ = interaction->getSizeZ();
+      *workZ = *data[z];
+      (JacH[0]->fPtr)(time, sizeY, sizeX, &(*JacH[0])(0, 0), sizeZ, &(*workZ)(0));
+      // Copy data that might have been changed in the plug-in call.
+      *data[z] = *workZ;
+    }
+    // else nothing
+  }
+}
+
+void FirstOrderLinearR::computeD(const double time)
+{
+  if (JacH[1])
+  {
+    if (JacH[1]->isPlugged())
+    {
+      if (!JacH[1]->fPtr)
+        RuntimeException::selfThrow("FirstOrderLinearR::computeD() is not linked to a plugin function");
+      unsigned int sizeY = interaction->getSizeOfY();
+      unsigned int sizeZ = interaction->getSizeZ();
+      *workZ = *data[z];
+      JacH[1]->fPtr(time, sizeY, sizeY, &(*JacH[1])(0, 0), sizeZ, &(*workZ)(0));
+      // Copy data that might have been changed in the plug-in call.
+      *data[z] = *workZ;
+    }
+    // else nothing
+  }
+}
+
+void FirstOrderLinearR::computeF(const double time)
+{
+  if (F)
+  {
+    if (F->isPlugged())
+    {
+      if (!F->fPtr)
+        RuntimeException::selfThrow("FirstOrderLinearR::computeF() is not linked to a plugin function");
+      unsigned int sizeY = interaction->getSizeOfY();
+      unsigned int sizeZ = interaction->getSizeZ();
+      *workZ = *data[z];
+      (F->fPtr)(time, sizeY, sizeZ, &(*F)(0, 0), sizeZ, &(*workZ)(0));
+      // Copy data that might have been changed in the plug-in call.
+      *data[z] = *workZ;
+    }
+    // else nothing
+  }
+}
+
+void FirstOrderLinearR::computeE(const double time)
+{
+  if (e)
+  {
+    if (e->isPlugged())
+    {
+      if (!e->fPtr)
+        RuntimeException::selfThrow("FirstOrderLinearR::computeE() is not linked to a plugin function");
+      unsigned int sizeY = interaction->getSizeOfY();
+      unsigned int sizeZ = interaction->getSizeZ();
+      *workZ = *data[z];
+      (e->fPtr)(time, sizeY, &(*e)(0), sizeZ, &(*workZ)(0));
+      // Copy data that might have been changed in the plug-in call.
+      *data[z] = *workZ;
+    }
+    // else nothing
+  }
+}
+
+void FirstOrderLinearR::computeB(const double time)
+{
+  if (JacG[0]->isPlugged())
+  {
+    if (!JacG[0]->fPtr)
+      RuntimeException::selfThrow("FirstOrderLinearR::computeB() is not linked to a plugin function");
+    unsigned int sizeY = interaction->getSizeOfY();
+    unsigned int sizeX = interaction->getSizeOfDS();
+    unsigned int sizeZ = interaction->getSizeZ();
+    *workZ = *data[z];
+    JacG[0]->fPtr(time, sizeX, sizeY, &(*JacG[0])(0, 0), sizeZ, &(*workZ)(0));
+    // Copy data that might have been changed in the plug-in call.
+    *data[z] = *workZ;
+  }
+  // else nothing
+}
+
+void FirstOrderLinearR::computeH(double time)
+{
+  computeOutput(time, 0);
+}
+
+void FirstOrderLinearR::computeG(double time)
+{
+  computeInput(time, 0);
+}
+
+void FirstOrderLinearR::computeJacH(double time, unsigned int index)
+{
+  if (index == 0)
+    computeC(time);
+  else if (index == 1)
+    computeD(time);
+  else
+    RuntimeException::selfThrow("FirstOrderLinearR::computeJacH(t,index), index is out of range.");
+}
+
+void FirstOrderLinearR::computeJacG(double time, unsigned int index)
+{
+  if (index == 0)
+    computeB(time);
+  else
+    RuntimeException::selfThrow("FirstOrderLinearR::computeJacG(t,index), index is out of range.");
 }
 
 void FirstOrderLinearR::computeOutput(double time, unsigned int)
 {
-  if (isPlugged[RELATION::C])
-    computeC(time);
-  if (isPlugged[RELATION::D])
-    computeD(time);
-  if (isPlugged[RELATION::F])
-    computeF(time);
-  if (isPlugged[RELATION::e])
-    computeE(time);
+  computeC(time);
+  computeD(time);
+  computeF(time);
+  computeE(time);
 
   // Note that the second argument remains unamed since it is not used: for first order systems, we always compute
   // y[0]
@@ -389,121 +389,38 @@ void FirstOrderLinearR::computeOutput(double time, unsigned int)
   SP::SiconosVector lambda = interaction->getLambdaPtr(0);
 
   // compute y
-  if (C)
-    prod(*C, *data["x"], *y);
+  if (JacH[0])
+    prod(*JacH[0], *data[x], *y);
   else
     y->zero();
 
-  if (D)
-    prod(*D, *lambda, *y, false);
+  if (JacH[1])
+    prod(*JacH[1], *lambda, *y, false);
 
   if (e)
     *y += *e;
 
   if (F)
-    prod(*F, *data["z"], *y, false);
+    prod(*F, *data[z], *y, false);
 }
 
 void FirstOrderLinearR::computeInput(double time, unsigned int level)
 {
-  if (isPlugged[RELATION::B])
-    computeB(time);
+  computeB(time);
 
   // We get lambda of the interaction (pointers)
   SP::SiconosVector lambda = interaction->getLambdaPtr(level);
-  prod(*B, *lambda, *data["r"], false);
-}
-
-void FirstOrderLinearR::computeC(const double time)
-{
-  if (isPlugged[RELATION::C])
-  {
-    if (!CPtr)
-      RuntimeException::selfThrow("computeC() is not linked to a plugin function");
-    unsigned int sizeY = interaction->getSizeOfY();
-    unsigned int sizeX = interaction->getSizeOfDS();
-    unsigned int sizeZ = interaction->getSizeZ();
-    *workZ = *data["z"];
-    CPtr(time, sizeY, sizeX, &(*C)(0, 0), sizeZ, &(*workZ)(0));
-    // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *workZ;
-  }
-  // else nothing
-}
-
-void FirstOrderLinearR::computeD(const double time)
-{
-  if (isPlugged[RELATION::D])
-  {
-    if (!DPtr)
-      RuntimeException::selfThrow("computeD() is not linked to a plugin function");
-    unsigned int sizeY = interaction->getSizeOfY();
-    unsigned int sizeZ = interaction->getSizeZ();
-    *workZ = *data["z"];
-    DPtr(time, sizeY, &(*D)(0, 0), sizeZ, &(*workZ)(0));
-    // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *workZ;
-  }
-  // else nothing
-}
-
-void FirstOrderLinearR::computeF(const double time)
-{
-  if (isPlugged[RELATION::F])
-  {
-    if (!FPtr)
-      RuntimeException::selfThrow("computeF() is not linked to a plugin function");
-    unsigned int sizeY = interaction->getSizeOfY();
-    unsigned int sizeZ = interaction->getSizeZ();
-    *workZ = *data["z"];
-    FPtr(time, sizeY, &(*F)(0, 0), sizeZ, &(*workZ)(0));
-    // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *workZ;
-  }
-  // else nothing
-}
-
-void FirstOrderLinearR::computeE(const double time)
-{
-  if (isPlugged[RELATION::e])
-  {
-    if (!ePtr)
-      RuntimeException::selfThrow("computeE() is not linked to a plugin function");
-    unsigned int sizeY = interaction->getSizeOfY();
-    unsigned int sizeZ = interaction->getSizeZ();
-    *workZ = *data["z"];
-    ePtr(time, sizeY, &(*e)(0), sizeZ, &(*workZ)(0));
-    // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *workZ;
-  }
-  // else nothing
-}
-
-void FirstOrderLinearR::computeB(const double time)
-{
-  if (isPlugged[RELATION::B])
-  {
-    if (!BPtr)
-      RuntimeException::selfThrow("computeB() is not linked to a plugin function");
-    unsigned int sizeY = interaction->getSizeOfY();
-    unsigned int sizeX = interaction->getSizeOfDS();
-    unsigned int sizeZ = interaction->getSizeZ();
-    *workZ = *data["z"];
-    BPtr(time, sizeX, sizeY, &(*B)(0, 0), sizeZ, &(*workZ)(0));
-    // Copy data that might have been changed in the plug-in call.
-    *data["z"] = *workZ;
-  }
-  // else nothing
+  prod(*JacG[0], *lambda, *data[r], false);
 }
 
 void FirstOrderLinearR::display() const
 {
   cout << " ===== Linear Time Invariant relation display ===== " << endl;
   cout << "| C " << endl;
-  if (C) C->display();
+  if (JacH[0]) JacH[0]->display();
   else cout << "->NULL" << endl;
   cout << "| D " << endl;
-  if (D) D->display();
+  if (JacH[1]) JacH[1]->display();
   else cout << "->NULL" << endl;
   cout << "| F " << endl;
   if (F) F->display();
@@ -512,22 +429,22 @@ void FirstOrderLinearR::display() const
   if (e) e->display();
   else cout << "->NULL" << endl;
   cout << "| B " << endl;
-  if (B) B->display();
+  if (JacG[0]) JacG[0]->display();
   else cout << "->NULL" << endl;
   cout << " ================================================== " << endl;
 }
 
 void FirstOrderLinearR::saveRelationToXML() const
 {
-  if (!relationxml)
-    RuntimeException::selfThrow("FirstOrderLinearR::saveRelationToXML, no xml object found.");
+  //   if(!relationxml)
+  RuntimeException::selfThrow("FirstOrderLinearR::saveRelationToXML, no yet implemented.");
 
-  SP::FirstOrderLinearRXML folrXML = (boost::static_pointer_cast<FirstOrderLinearRXML>(relationxml));
-  folrXML->setC(*C);
-  folrXML->setD(*D);
-  folrXML->setF(*F);
-  folrXML->setE(*e);
-  folrXML->setB(*B);
+  //   SP::LinearRXML folrXML = (boost::static_pointer_cast<LinearRXML>(relationxml));
+  //   folrXML->setC( *C );
+  //   folrXML->setD( *D );
+  //   folrXML->setF( *F );
+  //   folrXML->setE( *e );
+  //   folrXML->setB( *B );
 }
 
 FirstOrderLinearR* FirstOrderLinearR::convert(Relation *r)

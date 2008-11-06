@@ -314,7 +314,7 @@ void FirstOrderNonLinearDS::setComputeMFunction(const string& pluginPath, const 
   M->setComputeFunction(pluginPath, functionName);
 }
 
-void FirstOrderNonLinearDS::setComputeMFunction(fPtrFunction fct)
+void FirstOrderNonLinearDS::setComputeMFunction(FPtr1 fct)
 {
   if (!M)
     M.reset(new PMJF(n, n));
@@ -328,7 +328,7 @@ void FirstOrderNonLinearDS::setComputeFFunction(const string& pluginPath, const 
   f->setComputeFunction(pluginPath, functionName);
 }
 
-void FirstOrderNonLinearDS::setComputeFFunction(fPtrFunction fct)
+void FirstOrderNonLinearDS::setComputeFFunction(FPtr1 fct)
 {
   if (! f)
     f.reset(new PVF(n));
@@ -342,7 +342,7 @@ void FirstOrderNonLinearDS::setComputeJacobianXFFunction(const string& pluginPat
   jacobianXF->setComputeFunction(pluginPath, functionName);
 }
 
-void FirstOrderNonLinearDS::setComputeJacobianXFFunction(fPtrFunction fct)
+void FirstOrderNonLinearDS::setComputeJacobianXFFunction(FPtr1 fct)
 {
   if (!jacobianXF)
     jacobianXF.reset(new PMJF(n, n));
@@ -516,7 +516,7 @@ double FirstOrderNonLinearDS::dsConvergenceIndicator()
   // Velocity is used to calculate the indicator.
   SP::SiconosVector diff(new SimpleVector(x[0]->size()));
   // Compute difference between present and previous Newton steps
-  SP::SiconosVector valRef = workVector["NewtonCvg"];
+  SP::SiconosVector valRef = workV[NewtonSave];
   *diff =  *(x[0]) - *valRef;
   if (valRef->norm2() != 0)
     dsCvgIndic = diff->norm2() / (valRef->norm2());

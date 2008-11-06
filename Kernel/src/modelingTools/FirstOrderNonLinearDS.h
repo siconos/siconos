@@ -25,15 +25,13 @@
 #define FIRSTORDERNONLINEARDS_H
 
 #include "DynamicalSystem.h"
-#include "PluggedObject.hpp"
 #include "BlockMatrix.h"
 
 class DynamicalSystem;
 class BlockMatrix;
 
-typedef void (*fPtrFunction)(double, unsigned int, const double*, double*, unsigned int, double*);
-typedef PluggedObject<fPtrFunction, SimpleVector> PVF;
-typedef PluggedObject<fPtrFunction, SimpleMatrix> PMJF;
+typedef PluggedObject<FPtr1, SimpleVector> PVF;
+typedef PluggedObject<FPtr1, SimpleMatrix> PMJF;
 
 TYPEDEF_SPTR(PVF);
 TYPEDEF_SPTR(PMJF);
@@ -366,9 +364,9 @@ public:
   void setComputeMFunction(const std::string&  pluginPath, const std::string&  functionName);
 
   /** set a specified function to compute M
-   *  \param fPtrFunction : a pointer on the plugin function
+   *  \param FPtr1 : a pointer on the plugin function
    */
-  void setComputeMFunction(fPtrFunction fct);
+  void setComputeMFunction(FPtr1 fct);
 
   /** to set a specified function to compute f(x,t)
    *  \param string pluginPath : the complete path to the plugin
@@ -378,9 +376,9 @@ public:
   void setComputeFFunction(const std::string&  pluginPath, const std::string& functionName);
 
   /** set a specified function to compute the vector f
-   *  \param fPtrFunction : a pointer on the plugin function
+   *  \param FPtr1 : a pointer on the plugin function
    */
-  void setComputeFFunction(fPtrFunction fct);
+  void setComputeFFunction(FPtr1 fct);
 
   /** to set a specified function to compute jacobianXF
    *  \param string pluginPath : the complete path to the plugin
@@ -390,9 +388,9 @@ public:
   void setComputeJacobianXFFunction(const std::string&  pluginPath, const std::string&  functionName);
 
   /** set a specified function to compute jacobianXF
-   *  \param fPtrFunction : a pointer on the plugin function
+   *  \param FPtr1 : a pointer on the plugin function
    */
-  void setComputeJacobianXFFunction(fPtrFunction fct);
+  void setComputeJacobianXFFunction(FPtr1 fct);
 
   // --- compute plugin functions ---
 

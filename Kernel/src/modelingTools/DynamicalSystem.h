@@ -33,6 +33,7 @@
 #include "SiconosMemory.h"
 #include "DynamicalSystemTypes.hpp"
 #include "PluggedObject.hpp"
+#include "PluginTypes.hpp"
 
 class NonSmoothDynamicalSystem;
 class DynamicalSystemXML;
@@ -42,15 +43,6 @@ class SimpleMatrix;
 class SimpleVector;
 class SiconosMemory;
 class SiconosSharedLibrary;
-
-/** A map to save temporary working vectors */
-typedef std::map<const std::string , SP::SiconosVector> WorkMap;
-
-/** A map to save temporary working matrices */
-typedef std::map<std::string , SP::SiconosMatrix> WorkMap2;
-
-/** Pointer to function for plug-in. */
-typedef void (*FPtr6)(double, unsigned int, const double*, const double*, double*, unsigned int, double*);
 
 typedef PluggedObject<FPtr6, SimpleVector> POV0;
 typedef PluggedObject<FPtr6, SimpleMatrix> POM0;
@@ -123,6 +115,10 @@ TYPEDEF_SPTR(POM0);
 class DynamicalSystem
 {
 
+public:
+  /** List of indices used to save tmp work vectors (last value is the size of the present list)*/
+  typedef enum WorkNames {NewtonSave, sizeWorkV};
+
 private:
   /** used to set ds number */
   static unsigned int count;
@@ -171,11 +167,11 @@ protected:
   unsigned int stepsInMemory;
 
   /** A container of vectors to save temporary values (for Newton convergence computation for example)*/
-  WorkMap workVector;
+  VectorOfVectors workV;
 
-  /** A container of matrices to save temporary values (zero-matrix, Id-matrix, inverse of Mass or any tmp work matrix ...)
+  /** A container of matrices to save temporary values (zeroMatrix, idMatrix, inverse of Mass or any tmp work matrix ...)
    * No get-set functions at the time. Only used as a protected member.*/
-  WorkMap2 workMatrix;
+  VectorOfMatrices workMatrix;
 
   /** the XML object linked to the DynamicalSystem  */
   SP::DynamicalSystemXML dsxml;
@@ -557,45 +553,45 @@ public:
   // ===== WORK VECTOR =====
 
   /** get the vector of temporary saved vector
-   *  \return a WorkMap (map that links string to vectors)
+   *  \return a VectorOfVectors (map that links string to vectors)
    */
-  inline WorkMap getWorkVector()
+  inline VectorOfVectors getWorkVector()
   {
-    return workVector;
+    return workV;
   }
 
   /** get a temporary saved vector, ref by id
    *  \return a std vector
    */
-  inline SP::SiconosVector getWorkVector(const std::string&  id)
+  inline SP::SiconosVector getWorkVector(const WorkNames& id)
   {
-    return workVector[id];
+    return workV[id];
   }
 
   /** set WorkVector
-   *  \param a WorkMap
+   *  \param a VectorOfVectors
    */
-  inline void setWorkVector(const WorkMap& newVect)
+  inline void setWorkVector(const VectorOfVectors& newVect)
   {
-    workVector = newVect;
+    workV = newVect;
   }
 
   /** to add a temporary vector
    *  \param a SP::SiconosVector
    *  \param a string id
    */
-  inline void addWorkVector(SP::SiconosVector newVal, const std::string& id)
+  inline void addWorkVector(SP::SiconosVector newVal, const WorkNames& id)
   {
-    *workVector[id] = *newVal;
+    *workV[id] = *newVal;
   }
 
   /** to allocate memory for a new vector in tmp map
    *  \param the id of the SimpleVector
    *  \param an int to set the size
    */
-  inline void allocateWorkVector(const std::string& id, int size)
+  inline void allocateWorkVector(const WorkNames& id, int size)
   {
-    workVector[id].reset(new SimpleVector(size));
+    workV[id].reset(new SimpleVector(size));
   }
 
   //@}

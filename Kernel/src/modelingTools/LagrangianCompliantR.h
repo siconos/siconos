@@ -24,8 +24,6 @@
 
 #include "LagrangianR.h"
 
-class DynamicalSystem;
-
 /** Lagrangian (Non Linear) Compliant Relation: Scleronomous, Non-Holonomic (function of lambda).
  *
  * \author SICONOS Development Team - copyright INRIA
@@ -55,48 +53,26 @@ class DynamicalSystem;
  * h, G0 and G1 are connected to user-defined functions.
  *
  */
-class LagrangianCompliantR : public LagrangianR
+class LagrangianCompliantR : public LagrangianR<FPtr2>
 {
 
 protected:
-  /** LagrangianR plug-in to compute h(q,lambda,z)
-   * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
-   * @param q : pointer to the first element of q
-   * @param sizeY : size of vector y (ie of lambda and of the interaction)
-   * @param lambda : pointer to lambda of the interaction
-   * @param[in,out] y : pointer to the first element of y
-   * @param sizeZ : size of vector z.
-   * @param[in,out] z : a vector of user-defined parameters
-   */
-  FPtr2 hPtr;
 
-  /** LagrangianR plug-in to compute G0(q,lambda,z)
-   * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
-   * @param q : pointer to the first element of q
-   * @param sizeY : size of vector y (ie of lambda and of the interaction)
-   * @param lambda : pointer to lambda of the interaction
-   * @param[in,out] G0 : pointer to the first element of G0
-   * @param sizeZ : size of vector z.
-   * @param[in,out] z : a vector of user-defined parameters
-   */
-  FPtr2 G0Ptr;
-
-  /** LagrangianR plug-in to compute G1(q,lambda,z)
-   * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
-   * @param q : pointer to the first element of q
-   * @param sizeY : size of vector y (ie of lambda and of the interaction)
-   * @param lambda : pointer to lambda of the interaction
-   * @param[in,out] G1 : pointer to the first element of G1
-   * @param sizeZ : size of vector z.
-   * @param[in,out] z : a vector of user-defined parameters
-   */
-  FPtr2 G1Ptr;
-
-public:
+  typedef FPtr2 FunctionPtr;
+  typedef LagrangianR<FPtr2> BaseClass;
 
   /** default constructor
    */
-  LagrangianCompliantR();
+  LagrangianCompliantR() : BaseClass(RELATION::CompliantR)
+  {
+    JacH.resize(2);
+  };
+
+  /** initialize G matrices or components specific to derived classes.
+   */
+  void initComponents();
+
+public:
 
   /** constructor from xml file
    *  \param relationXML
@@ -105,43 +81,24 @@ public:
 
   /** constructor from a set of data
    *  \param string : the name of the plugin to computeH
-   *  \param vector<string> : a list of names for the plugin to computeG (depends on relation type)
+   *  \param vector<string> : a list of names for the plugin to compute the jacobians of h
    */
   LagrangianCompliantR(const std::string&, const std::vector<std::string>&);
 
   /** destructor
    */
-  ~LagrangianCompliantR();
-
-  /** initialize G matrices or components specific to derived classes.
-   */
-  void initComponents();
-
-  /** to set a specified function to compute function h(q,...)
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
-   *  \exception SiconosSharedLibraryException
-   */
-  void setComputeHFunction(const std::string& , const std::string&);
-
-  /** to set a specified function to compute G(q, ...)
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
-   *  \param unsigned int: the index of G that must be computed (see introduction of this class for details on indexes)
-   *  \exception SiconosSharedLibraryException
-   */
-  void setComputeGFunction(const std::string& , const std::string&  , unsigned int  = 0);
+  virtual ~LagrangianCompliantR() {};
 
   /** to compute y = h(q,v,t) using plug-in mechanism
    * \param: double, current time
    */
   void computeH(double);
 
-  /** to compute G using plug-in mechanism. Index shows which G is to be computed
+  /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
    * \param: double, current time
    * \param: unsigned int
    */
-  void computeG(double, unsigned int = 0);
+  void computeJacH(double, unsigned int);
 
   /** to compute output
    *  \param Interaction : the interaction that owns y
@@ -163,5 +120,7 @@ public:
    */
   static LagrangianCompliantR* convert(Relation *r);
 };
+
+TYPEDEF_SPTR(LagrangianCompliantR);
 
 #endif

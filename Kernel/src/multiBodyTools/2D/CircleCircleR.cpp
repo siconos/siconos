@@ -35,7 +35,7 @@ void CircleCircleR::computeH(double)
   SP::SiconosVector y = interaction->getYPtr(0);
 
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-  *workX = *data["q0"];
+  *workX = *data[q0];
   double *q = &(*workX)(0);
 
   double dx = q[3] - q[0];
@@ -48,12 +48,12 @@ void CircleCircleR::computeH(double)
 
 };
 
-void CircleCircleR::computeG(double, unsigned int)
+void CircleCircleR::computeJacH(double, unsigned int)
 {
 
-  *workX = *data["q0"];
+  *workX = *data[q0];
   double *q = &(*workX)(0);
-  double *g = &(*(G[0]))(0, 0);
+  double *g = &(*(JacH[0]))(0, 0);
 
   double dx = q[3] - q[0];
   double dy = q[4] - q[1];

@@ -51,9 +51,9 @@
 					<LagrangianRelation type="Rheonomous">
                                              <h plugin="TestPlugin:hRheo"/>
                                              <hDot plugin="TestPlugin:hDot"/>
-                                             <G number='1'>
+                                             <jacobianH number='1'>
                                               <matrix matrixPlugin="TestPlugin:G0Rheo"/>
-                                             </G>
+                                             </jacobianH>
 					</LagrangianRelation>			
 					<!-- NS Law of this interaction	-->
 					<NewtonImpactLaw>

@@ -177,12 +177,12 @@ extern "C" void C(double, unsigned int, unsigned int, double*, unsigned int, dou
   printf("Warning: call of the function 'C' of the test plugin.\n");
 }
 
-extern "C" void D(double, unsigned int, double*, unsigned int, double*)
+extern "C" void D(double, unsigned int, unsigned int, double*, unsigned int, double*)
 {
   printf("Warning: call of the function 'D' of the test plugin.\n");
 }
 
-extern "C" void F(double, unsigned int, double*, unsigned int, double*)
+extern "C" void F(double, unsigned int, unsigned int, double*, unsigned int, double*)
 {
   printf("Warning: call of the function 'F' of the test plugin.\n");
 }

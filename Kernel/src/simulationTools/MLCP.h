@@ -142,7 +142,7 @@ public:
   */
   inline SP::MixedLinearComplementarity_Problem getNumericsMLCP()
   {
-    return createMixedLinearComplementarity_ProblemSPtr(numerics_problem);
+    return createSPtrMixedLinearComplementarity_Problem(numerics_problem);
   }
 
 

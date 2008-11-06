@@ -351,72 +351,32 @@ void FrictionContact::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
   SP::SiconosVector workX = UR->getWorkXPtr();
   if (osiType == "Moreau" || osiType == "Lsodar")
   {
-    if (relationType == FirstOrder)
+    H = mainInteraction->getRelationPtr()->getJacHPtr(0);
+    if (H)
     {
-      if (relationSubType == Type1R)//|| relationType =="FirstOrderType2R" || relationType =="FirstOrderType3R")
-      {
-        H = boost::static_pointer_cast<FirstOrderR>(mainInteraction->getRelationPtr())->getJacobianHPtr(0);
-        if (H)
-        {
-          coord[3] = H->size(1);
-          coord[5] = H->size(1);
-          subprod(*H, *workX, *q, coord, true);
-        }
-      }
+      coord[3] = H->size(1);
+      coord[5] = H->size(1);
+      subprod(*H, *workX, *q, coord, true);
+    }
 
-      else if (relationSubType == LinearTIR || relationSubType == LinearR)
-      {
-        // q = HXfree + e + Fz
-        H = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getCPtr();
-        if (H)
-        {
-          coord[3] = H->size(1);
-          coord[5] = H->size(1);
-          subprod(*H, *workX, (*q), coord, true);
-        }
-        SP::SiconosVector  e = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getEPtr();
-        if (e)
-          boost::static_pointer_cast<SimpleVector>(q)->addBlock(pos, *e);
+    if (relationType == FirstOrder && (relationSubType == LinearTIR || relationSubType == LinearR))
+    {
+      // q = HXfree + e + Fz
+      SP::SiconosVector  e = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getEPtr();
+      if (e)
+        boost::static_pointer_cast<SimpleVector>(q)->addBlock(pos, *e);
 
-        H = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getFPtr();
-        if (H)
-        {
-          SP::SiconosVector  workZ = UR->getWorkZPtr();
-          coord[3] = H->size(1);
-          coord[5] = H->size(1);
-          subprod(*H, *workZ, *q, coord, false);
-        }
+      H = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getFPtr();
+      if (H)
+      {
+        SP::SiconosVector  workZ = UR->getWorkZPtr();
+        coord[3] = H->size(1);
+        coord[5] = H->size(1);
+        subprod(*H, *workZ, *q, coord, false);
       }
     }
-    else if (relationType == Lagrangian)
-    {
-      if (relationSubType == CompliantR || relationSubType == ScleronomousR || relationSubType == RheonomousR)
-      {
-        // q = jacobian_q h().v_free
-        H = boost::static_pointer_cast<LagrangianR>(mainInteraction->getRelationPtr())->getGPtr(0);
-        if (H)
-        {
-          coord[3] = H->size(1);
-          coord[5] = H->size(1);
-          subprod(*H, *workX, *q, coord, true);
-        }
-      }
-      else if (relationSubType == LinearR || relationSubType == LinearTIR)
-      {
-        // q = H.v_free
-        H = boost::static_pointer_cast<LagrangianLinearR>(mainInteraction->getRelationPtr())->getHPtr();
-        if (H)
-        {
-          coord[3] = H->size(1);
-          coord[5] = H->size(1);
-          subprod(*H, *workX, *q, coord, true);
-        }
-      }
-    }
-    else
-      RuntimeException::selfThrow("FrictionContact::computeQBlock, not yet implemented for first order relations of subtype " + relationType);
-
   }
+
   else if (osiType == "Moreau2")
   {
   }
@@ -610,8 +570,8 @@ void FrictionContact::postCompute()
 
     // Copy velocity/reaction values, starting from index pos into y/lambda.
 
-    setBlock(velocity, y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
-    setBlock(reaction, lambda, lambda->size(), pos, 0);
+    setBlock(*velocity, y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
+    setBlock(*reaction, lambda, lambda->size(), pos, 0);
 
   }
 }

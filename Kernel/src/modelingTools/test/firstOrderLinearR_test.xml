@@ -36,9 +36,6 @@
 		<Interaction_Definition>
 			<Interaction number='1' Id='test-of-rel'>
 				<size>2</size>
-				<!-- List of couple of DS concerned by this interaction -->
-                                	<!-- <DS_Concerned vectorSize='2'>3 4</DS_Concerned>-->
-				<!-- Relation of this interaction -->				
 					<DS_Concerned all='true'/>
 					<Interaction_Content>		
 					<FirstOrderRelation type="Linear">
@@ -48,7 +45,6 @@
 					<e vectorPlugin="TestPlugin:e"/>
 					<B matrixPlugin="TestPlugin:B"/>
                                        </FirstOrderRelation>			
-					<!-- NS Law of this interaction	-->
 					<NewtonImpactLaw>
 						<e>0.9</e>	
 						<size>1</size>			

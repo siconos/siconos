@@ -26,8 +26,6 @@
 
 #include "FirstOrderR.h"
 
-/** Pointer to function for plug-in for operators related to output and its gradients.*/
-typedef void (*Type1Ptr)(unsigned int, const double*, unsigned int, double*, unsigned int, double*);
 
 /** FirstOrder Non Linear Relation.
  *  \author SICONOS Development Team - copyright INRIA
@@ -49,66 +47,16 @@ typedef void (*Type1Ptr)(unsigned int, const double*, unsigned int, double*, uns
      - \f$ \nabla_\lambda g \f$: jacobianG[0] ( input[1] )
  *
  */
-class FirstOrderType1R : public FirstOrderR
+class FirstOrderType1R : public FirstOrderR<FPtr3>
 {
-
-protected:
-
-  /** Plug-in to compute h(x,t,lambda,z)
-   *  @param the size of the vector x.
-   *  @param x : the pointer to the first element of the vector x.
-   *  @param the size of the vectors y and lambda.
-   *  @param[in,out]  a pointer to the first element of the result y
-   *  @param the size of the vectors z.
-   *  @param[in,out] z : a vector of user-defined parameters.
-   */
-  Type1Ptr output;
-
-  /** Plug-in to compute \f$ \nabla_x h(x,t,lambda,z)\f$
-   *  @param the size of the vector x.
-   *  @param x : the pointer to the first element of the vector x.
-   *  @param the size of the vectors y and lambda.
-   *  @param[in,out]  a pointer to the first element of the result, the jacobian
-   *  @param the size of the vectors z.
-   *  @param[in,out] z : a vector of user-defined parameters.
-   */
-  Type1Ptr jXOutput;
-
-  /** Plug-in to compute g(lambda,t,z)
-   *  @param sizeY : the size of the vector y and lambda.
-   *  @param lambda : the pointer to the first element of the vector lambda.
-   *  @param the size of the vectors R
-   *  @param[in,out] : the pointer to the first element of g or its jacobian.
-   *  @param the size of the vectors z.
-   *  @param[in,out] : a vector of user-defined parameters.
-   */
-  Type1Ptr input;
-
-  /** Plug-in to compute \f$ \nabla_\lambda g(lambda,t,z)\f$
-   *  @param sizeY : the size of the vector y and lambda.
-   *  @param lambda : the pointer to the first element of the vector lambda.
-   *  @param the size of the vectors R
-   *  @param[in,out] : the pointer to the first element of the jacobian.
-   *  @param the size of the vectors z.
-   *  @param[in,out] : a vector of user-defined parameters.
-   */
-  Type1Ptr jLInput;
-
-  /** protected function used to initilized isPlugged map
-      \param : a bool, value for all flags.
-  */
-  void initPluginFlags(bool);
-
 private:
 
-  /** default constructor
-   */
-  FirstOrderType1R();
+  typedef FirstOrderR<FPtr3> BaseClass;
 
 public:
 
   /** xml constructor
-   *  \param FirstOrderType1RXML* : the XML object.
+   *  \param RelationXML smart pointer : the XML object.
    */
   FirstOrderType1R(SP::RelationXML);
 
@@ -128,37 +76,34 @@ public:
 
   /** destructor
    */
-  ~FirstOrderType1R();
+  ~FirstOrderType1R() {};
 
   /** initialize the relation (check sizes, memory allocation ...)
+      \param SP to Interaction: the interaction that owns this relation
    */
-  void initialize();
+  void initialize(SP::Interaction);
 
-  /** To set a plug-in function to compute output function h
-   *  \param string : the complete path to the plugin
-   *  \param string : the function name to use in this plugin
+  /** default function to compute h
+   *  \param double : current time
    */
-  void setComputeHFunction(const std::string&, const std::string&);
+  void computeH(double);
 
-  /** To set a plug-in function to compute jacobian of h according to x
-   *  \param string : the complete path to the plugin
-   *  \param string : the function name to use in this plugin
-   *  \param index: not used, set any value.
+  /** default function to compute g
+   *  \param double : current time
    */
-  void setComputeJacobianHFunction(const std::string&, const std::string&, unsigned int = 0);
+  void computeG(double);
 
-  /** To set a plug-in function to compute input function g
-   *  \param string : the complete path to the plugin
-   *  \param string : the function name to use in this plugin
+  /** default function to compute jacobianH
+   *  \param double : not used
+   *  \param not used
    */
-  void setComputeGFunction(const std::string&, const std::string&);
+  void computeJacH(double, unsigned int);
 
-  /** To set a plug-in function to compute the jacobian of g according to lambda
-   *  \param string : the complete path to the plugin
-   *  \param string : the function name to use in this plugin
-   *  \param index not used.
+  /** default function to compute jacobianG according to lambda
+   *  \param double : current time
+   *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
    */
-  void setComputeJacobianGFunction(const std::string&, const std::string&, unsigned int = 0);
+  void computeJacG(double, unsigned int);
 
   /** default function to compute y
    *  \param double: not used
@@ -172,23 +117,13 @@ public:
    */
   void computeInput(double, unsigned int = 0);
 
-  /** default function to compute jacobianH
-   *  \param double : not used
-   *  \param not used
-   */
-  void computeJacobianH(double, unsigned int);
-
-  /** default function to compute jacobianG according to lambda
-   *  \param double : current time
-   *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
-   */
-  void computeJacobianG(double, unsigned int);
-
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param Relation * : the relation which must be converted
    * \return a pointer on the relation if it is of the right type, NULL otherwise
    */
   static FirstOrderType1R* convert(Relation *r);
 };
+
+TYPEDEF_SPTR(FirstOrderType1R);
 
 #endif

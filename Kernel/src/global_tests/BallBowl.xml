@@ -77,9 +77,9 @@
 				<Interaction_Content>		
 					<LagrangianRelation type="Scleronomous">
 					<h plugin="gTestPlugin:h0"/>
- 					<G number="1">
+ 					<jacobianH number="1">
                                       	<matrix matrixPlugin="gTestPlugin:G0"/>
-                                        </G>
+                                        </jacobianH>
 					</LagrangianRelation>			
 					<!-- NS Law of this interaction	-->
 					<NewtonImpactLaw>

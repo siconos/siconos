@@ -142,7 +142,7 @@ void TimeStepping::recordNonSmoothProblem(SP::OneStepNSProblem osns)
 
 void TimeStepping::initOSNS()
 {
-  // === creates links between workVector in OSI and work vector in
+  // === creates links between work vector in OSI and work vector in
   // Unitary Relations
   SP::OneStepIntegrator  osi;
 

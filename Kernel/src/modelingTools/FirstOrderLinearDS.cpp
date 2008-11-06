@@ -149,7 +149,7 @@ void FirstOrderLinearDS::setComputeAFunction(const string& pluginPath, const str
   A->setComputeFunction(pluginPath, functionName);
 }
 
-void   FirstOrderLinearDS::setComputeAFunction(bPtrFunction fct)
+void   FirstOrderLinearDS::setComputeAFunction(VectorFunctionOfTime fct)
 {
   if (!A)
     A.reset(new PMA(n, n));
@@ -162,7 +162,7 @@ void FirstOrderLinearDS::setComputeBFunction(const string& pluginPath, const str
   b->setComputeFunction(pluginPath, functionName);
 }
 
-void FirstOrderLinearDS::setComputeBFunction(bPtrFunction fct)
+void FirstOrderLinearDS::setComputeBFunction(VectorFunctionOfTime fct)
 {
   if (! b)
     b.reset(new PVB(n));

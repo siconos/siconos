@@ -17,27 +17,42 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-/*! \file FirstOrderLinearRXML.h
-  \brief xml management for first order linear relations (FirstOrderLinearR).
+/*! \file LinearRXML.h
+  \brief xml management for first order linear relations (LinearR).
 */
 
-#ifndef FirstOrderLinearRXML_H
-#define FirstOrderLinearRXML_H
+#ifndef LinearRXML_H
+#define LinearRXML_H
 
-#include "FirstOrderRXML.h"
+#include "RelationXML.h"
 #include "SimpleMatrix.h"
 #include "SimpleVector.h"
 
-/** XML management for FirstOrderLinearR
- *
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
- *   \date 05/13/2004
- *
- *  xml keyword: FirstOrderLinearRelation
- *
- */
-class FirstOrderLinearRXML : public FirstOrderRXML
+/** XML management for Linear Relations (FirstOrder or Lagrangian)
+
+    \author SICONOS Development Team - copyright INRIA
+    \version 3.0.0.
+    \date 05/13/2004
+
+    For a First Order Linear Relation:
+    \code
+    <FirstOrderRelation type="LinearR">
+    <C matrixRowSize='1' matrixColSize='3'>
+    <row> 1.0  0.0  0.0</row>
+    </C>
+    </FirstOrderRelation>
+    \endcode
+    For a Lagrangian Linear Relation:
+    \code
+    <LagrangianRelation type="LinearR">
+    <C matrixRowSize='1' matrixColSize='3'>
+    <row> 1.0  0.0  0.0</row>
+    </C>
+    </LagrangianRelation>
+    \endcode
+    *
+    */
+class LinearRXML : public RelationXML
 {
 
 private:
@@ -54,17 +69,17 @@ private:
   xmlNodePtr BNode;
 
   /** Default constructor */
-  FirstOrderLinearRXML();
+  LinearRXML();
 
 public:
 
-  /** Build a FirstOrderLinearRXML object from a DOM tree describing a Relation with LTI type
+  /** Build a LinearRXML object from a DOM tree describing a Relation with LTI type
    *   \param xml pointer to relation data.
    */
-  FirstOrderLinearRXML(xmlNodePtr);
+  LinearRXML(xmlNodePtr);
 
   /** Destructor*/
-  ~FirstOrderLinearRXML();
+  ~LinearRXML();
 
   /** return true if CNode exists */
   inline bool hasC() const
@@ -124,7 +139,7 @@ public:
   inline SimpleMatrix getC()
   {
     if (isCPlugin())
-      XMLException::selfThrow("FirstOrderLinearRXML - getC : no matrix input, C is loaded from a plugin");
+      XMLException::selfThrow("LinearRXML - getC : no matrix input, C is loaded from a plugin");
     return SiconosDOMTreeTools::getSiconosMatrixValue(CNode);
   }
 
@@ -134,7 +149,7 @@ public:
   inline SimpleMatrix getD()
   {
     if (isDPlugin())
-      XMLException::selfThrow("FirstOrderLinearRXML - getD : no matrix input, D is loaded from a plugin");
+      XMLException::selfThrow("LinearRXML - getD : no matrix input, D is loaded from a plugin");
     return SiconosDOMTreeTools::getSiconosMatrixValue(DNode);
   }
 
@@ -144,7 +159,7 @@ public:
   inline SimpleMatrix getF()
   {
     if (isFPlugin())
-      XMLException::selfThrow("FirstOrderLinearRXML - getF : no matrix input, F is loaded from a plugin");
+      XMLException::selfThrow("LinearRXML - getF : no matrix input, F is loaded from a plugin");
     return SiconosDOMTreeTools::getSiconosMatrixValue(FNode);
   }
 
@@ -154,7 +169,7 @@ public:
   inline SimpleVector getE()
   {
     if (isEPlugin())
-      XMLException::selfThrow("FirstOrderLinearRXML - getE : no vector input, e is loaded from a plugin");
+      XMLException::selfThrow("LinearRXML - getE : no vector input, e is loaded from a plugin");
     return SiconosDOMTreeTools::getSiconosVectorValue(eNode);
   }
 
@@ -164,7 +179,7 @@ public:
   inline SimpleMatrix getB()
   {
     if (isBPlugin())
-      XMLException::selfThrow("FirstOrderLinearRXML - getB : no matrix input, B is loaded from a plugin");
+      XMLException::selfThrow("LinearRXML - getB : no matrix input, B is loaded from a plugin");
     return SiconosDOMTreeTools::getSiconosMatrixValue(BNode);
   }
 
@@ -199,7 +214,7 @@ public:
   inline const std::string getCPlugin() const
   {
     if (!isCPlugin())
-      XMLException::selfThrow("FirstOrderLinearRXML - getCPlugin : C is not loaded from a plugin");
+      XMLException::selfThrow("LinearRXML - getCPlugin : C is not loaded from a plugin");
     return  SiconosDOMTreeTools::getStringAttributeValue(CNode, "matrixPlugin");
   }
 
@@ -209,7 +224,7 @@ public:
   inline const std::string getDPlugin() const
   {
     if (!isDPlugin())
-      XMLException::selfThrow("FirstOrderLinearRXML - getDPlugin : D is not loaded from a plugin");
+      XMLException::selfThrow("LinearRXML - getDPlugin : D is not loaded from a plugin");
     return  SiconosDOMTreeTools::getStringAttributeValue(DNode, "matrixPlugin");
   }
 
@@ -219,7 +234,7 @@ public:
   inline const std::string getFPlugin() const
   {
     if (!isFPlugin())
-      XMLException::selfThrow("FirstOrderLinearRXML - getFPlugin : F is not loaded from a plugin");
+      XMLException::selfThrow("LinearRXML - getFPlugin : F is not loaded from a plugin");
     return  SiconosDOMTreeTools::getStringAttributeValue(FNode, "matrixPlugin");
   }
 
@@ -229,7 +244,7 @@ public:
   inline const std::string getEPlugin() const
   {
     if (!isEPlugin())
-      XMLException::selfThrow("FirstOrderLinearRXML - getEPlugin : e is not loaded from a plugin.");
+      XMLException::selfThrow("LinearRXML - getEPlugin : e is not loaded from a plugin.");
     return  SiconosDOMTreeTools::getStringAttributeValue(eNode, "vectorPlugin");
   }
 
@@ -239,7 +254,7 @@ public:
   inline const std::string getBPlugin() const
   {
     if (!isBPlugin())
-      XMLException::selfThrow("FirstOrderLinearRXML - getBPlugin : B is not loaded from a plugin");
+      XMLException::selfThrow("LinearRXML - getBPlugin : B is not loaded from a plugin");
     return  SiconosDOMTreeTools::getStringAttributeValue(BNode, "matrixPlugin");
   }
 
@@ -270,5 +285,6 @@ public:
 
 };
 
+TYPEDEF_SPTR(LinearRXML);
 
 #endif

@@ -26,12 +26,6 @@
 
 #include "Relation.h"
 
-/** Pointer to function for plug-in for operators related to output and its gradients.*/
-typedef void (*OutPtr)(unsigned int, const double*, double, unsigned int, const double*, double*, unsigned int, double*);
-
-/** Pointer to function for plug-in for operators related to input and its gradients.*/
-typedef void (*InPtr)(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*);
-
 /** FirstOrder Non Linear Relation.
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
@@ -65,34 +59,51 @@ typedef void (*InPtr)(unsigned int, const double*, double, unsigned int, double*
 
  *
  */
-class FirstOrderR : public Relation
+template <class T> class FirstOrderR : public Relation
 {
+public:
+
+  typedef PluggedObject<T, SimpleMatrix> PluggedMatrix;
+  typedef boost::shared_ptr<PluggedMatrix> SP_PluggedMatrix;
+  typedef T LocalFunc;
+  typedef enum DataNames {z, x, r, sizeDataNames};
 
 protected:
 
-  /** type of the FirstOrderR */
-  RELATION::SUBTYPES  firstOrderType;
-
-  /** matrices of gradients of h. (jacobianH[0]: gradient according to x, jacobianH[1]: gradient according to lambda) */
-  VectorOfMatrices jacobianH;
-
-  /** matrices of gradients of g. (jacobianG[0]: gradient according to x, jacobianG[1]: gradient according to lambda) */
-  VectorOfMatrices jacobianG;
-
-  /** default constructor
+  /** Plug-in to compute h(x,t,lambda,z)
+   *  @param the size of the vector x.
+   *  @param x : the pointer to the first element of the vector x.
+   *  @param the size of the vectors y and lambda.
+   *  @param[in,out]  a pointer to the first element of the result y
+   *  @param the size of the vectors z.
+   *  @param[in,out] z : a vector of user-defined parameters.
    */
-  FirstOrderR();
+  T output;
+
+  /** Plug-in to compute g(lambda,t,z)
+   *  @param sizeY : the size of the vector y and lambda.
+   *  @param lambda : the pointer to the first element of the vector lambda.
+   *  @param the size of the vectors R
+   *  @param[in,out] : the pointer to the first element of g or its jacobian.
+   *  @param the size of the vectors z.
+   *  @param[in,out] : a vector of user-defined parameters.
+   */
+  T input;
+
+  std::vector<SP_PluggedMatrix> JacH;
+
+  std::vector<SP_PluggedMatrix> JacG;
 
   /** basic constructor
    *  \param the type of the relation
    */
-  FirstOrderR(RELATION::SUBTYPES);
+  FirstOrderR(RELATION::SUBTYPES newType): Relation(RELATION::FirstOrder, newType), output(NULL), input(NULL) {}
 
   /** xml constructor
-   *  \param FirstOrderRXML* : the XML object.
+   *  \param SP::RelationXML : the XML object.
    *  \param the type of the relation
    */
-  FirstOrderR(SP::RelationXML, RELATION::SUBTYPES);
+  FirstOrderR(SP::RelationXML relxml, RELATION::SUBTYPES newType): Relation(relxml, RELATION::FirstOrder, newType), output(NULL), input(NULL) {}
 
   /** To initialize data member: links to DS variables.
    */
@@ -102,155 +113,198 @@ public:
 
   /** destructor
    */
-  virtual ~FirstOrderR();
+  virtual ~FirstOrderR() {};
 
-  /** To get the type of the FirstOrderR
-   *  \return the type of the FirstOrderR
-   */
-  inline const RELATION::SUBTYPES getFirstOrderRelationType() const
-  {
-    return firstOrderType;
-  }
+  // -- JacH --
 
-  /** initialize the relation (check sizes, memory allocation ...)
-   */
-  virtual void initialize();
-
-  // -- jacobianH --
-
-  /** get the vector of matrices jacobianH
-   *  \return vector<SiconosMatrix*>
-   */
-  inline VectorOfMatrices getJacobianHVector() const
-  {
-    return jacobianH;
-  }
-
-  /** set the values of jacobianH[i]: no copy but links with pointers!!
-   *  \param a VectorOfMatrices.
-   */
-  void setJacobianHVector(const VectorOfMatrices&);
-
-  /** get matrix jacobianH[index]
+  /** get matrix JacH[index]
    *  \return a SimpleMatrix
    */
-  inline const SimpleMatrix getJacobianH(unsigned int  index = 0) const
+  virtual inline const SimpleMatrix getJacH(unsigned int  index = 0) const
   {
-    return *(jacobianH[index]);
+    return *(JacH.at(index));
   }
 
-  /** get a pointer on matrix jacobianH[index]
+  /** get a pointer on matrix JacH[index]
    *  \return a pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix getJacobianHPtr(unsigned int index = 0) const
+  virtual inline SP::SiconosMatrix getJacHPtr(unsigned int index = 0) const
   {
-    return jacobianH[index];
+    return JacH.at(index);
   }
 
-  /** set the value of jacobianH[index] to newValue (copy)
+  /** set the value of JacH[index] to newValue (copy)
    *  \param SiconosMatrix newValue
-   *  \param unsigned int: index position in jacobianH vector
+   *  \param unsigned int: index position in JacH vector
    */
-  void setJacobianH(const SiconosMatrix&, unsigned int = 0);
-
-  /** set jacobianH[index] to pointer newPtr (pointer link)
-   *  \param SP::SiconosMatrix  newPtr
-   *  \param unsigned int: index position in jacobianH vector
-   */
-  void setJacobianHPtr(SP::SiconosMatrix newPtr, unsigned int = 0);
-
-  // -- jacobianG --
-
-  /** get the vector of matrices jacobianG
-   *  \return vector<SiconosMatrix*>
-   */
-  inline VectorOfMatrices getJacobianGVector() const
+  template <class U> void setJacH(const U& newValue, unsigned int index)
   {
-    return jacobianG;
+    assert(index < JacH.size() && "FirstOrderR:: setJacH(mat,index), index out of range. Maybe you do not set the sub-type of the relation?");
+    // resize the local matrix, else exception. Note FP: Set resize in SimpleMatrix::operator= ??
+    if (JacH[index])
+      JacH[index]->resize(newValue.size(0), newValue.size(1));
+    setObject<PluggedMatrix, SP_PluggedMatrix, U>(JacH[index], newValue);
   }
 
-  /** set the values of jacobianG[i]: no copy but links with pointers!!
-   *  \param a VectorOfMatrices.
+  /** set JacH[index] to pointer newPtr (pointer link)
+   *  \param SP::SiconosMatrix  newPtr
+   *  \param unsigned int: index position in JacH vector
    */
-  void setJacobianGVector(const VectorOfMatrices&);
+  inline void setJacHPtr(SP_PluggedMatrix newPtr, unsigned int index = 0)
+  {
+    JacH.at(index) = newPtr ;
+  }
 
-  /** get matrix jacobianG[index]
+  // -- JacG --
+
+  /** get matrix JacG[index]
    *  \return a SimpleMatrix
    */
-  inline const SimpleMatrix getJacobianG(unsigned int  index = 0) const
+  inline const SimpleMatrix getJacG(unsigned int  index = 0) const
   {
-    return *(jacobianG[index]);
+    return *(JacG.at(index));
   }
 
-  /** get a pointer on matrix jacobianG[index]
+  /** get a pointer on matrix JacG[index]
    *  \return a pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix getJacobianGPtr(unsigned int index = 0) const
+  virtual inline SP::SiconosMatrix getJacGPtr(unsigned int index = 0) const
   {
-    return jacobianG[index];
+    return JacG.at(index);
   }
 
-  /** set the value of jacobianG[index] to newValue (copy)
+  /** set the value of JacG[index] to newValue (copy)
    *  \param SiconosMatrix newValue
-   *  \param unsigned int: index position in jacobianG vector
+   *  \param unsigned int: index position in JacG vector
    */
-  void setJacobianG(const SiconosMatrix&, unsigned int = 0);
+  template <class U> void setJacG(const U& newValue, unsigned int index)
+  {
+    assert(index < JacG.size() && "FirstOrderR:: setJacG(mat,index), index out of range. Maybe you do not set the sub-type of the relation?");
+    if (JacG[index]) JacG[index]->resize(newValue.size(0), newValue.size(1));
+    setObject<PluggedMatrix, SP_PluggedMatrix, U>(JacG[index], newValue);
+  };
 
-  /** set jacobianG[index] to pointer newPtr (pointer link)
+  /** set JacG[index] to pointer newPtr (pointer link)
    *  \param SP::SiconosMatrix  newPtr
-   *  \param unsigned int: index position in jacobianG vector
+   *  \param unsigned int: index position in JacG vector
    */
-  void setJacobianGPtr(SP::SiconosMatrix newPtr, unsigned int = 0);
+  inline void setJacGPtr(SP_PluggedMatrix newPtr, unsigned int index = 0)
+  {
+    JacG.at(index) = newPtr ;
+  }
+
+  /** To get the name of JacH[i] plugin
+   *  \return a string
+   */
+  const std::string getJacHName(unsigned int i) const
+  {
+    return JacH[i]->getPluginName();
+  }
+
+  /** To get the name of JacG[i] plugin
+   *  \return a string
+   */
+  const std::string getJacGName(unsigned int i) const
+  {
+    return JacG[i]->getPluginName();
+  }
+
+  /** true if JacH[i] is plugged
+   *  \return a bool
+   */
+  const bool isJacHPlugged(unsigned int i) const
+  {
+    return JacH[i]->isPlugged();
+  }
+
+  /** true if JacG[i] is plugged
+   *  \return a bool
+   */
+  const bool isJacGPlugged(unsigned int i) const
+  {
+    return JacG[i]->isPlugged();
+  }
+
+  /** Gets the number of computed jacobians for h
+      \return an unsigned int.
+  */
+  inline unsigned int getNumberOfJacobiansForH() const
+  {
+    return JacH.size();
+  }
+
+  /** Gets the number of computed jacobian for g
+      \return an unsigned int.
+  */
+  inline unsigned int getNumberOfJacobiansForG() const
+  {
+    return JacG.size();
+  }
 
   /** To set a plug-in function to compute output function h
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    */
-  virtual void setComputeHFunction(const std::string&, const std::string&);
+  void setComputeHFunction(const std::string&, const std::string&);
 
   /** To set a plug-in function to compute jacobianH
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
    */
-  virtual void setComputeJacobianHFunction(const std::string&, const std::string&, unsigned int = 0);
+  void setComputeJacobianHFunction(const std::string&, const std::string&, unsigned int = 0);
 
   /** To set a plug-in function to compute input function g
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    */
-  virtual void setComputeGFunction(const std::string&, const std::string&);
+  void setComputeGFunction(const std::string&, const std::string&);
 
   /** To set a plug-in function to compute the jacobian according to x of the input
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
    */
-  virtual void setComputeJacobianGFunction(const std::string&, const std::string&, unsigned int = 0);
+  void setComputeJacobianGFunction(const std::string&, const std::string&, unsigned int = 0);
 
-  /** default function to compute y
-   *  \param double : current time
-   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
+  /** initialize the relation (check sizes, memory allocation ...)
+      \param SP to Interaction: the interaction that owns this relation
    */
-  virtual void computeOutput(double, unsigned int = 0) = 0;
+  void initialize(SP::Interaction);
 
-  /** default function to compute r
+  /** default function to compute h
    *  \param double : current time
-   *  \param unsigned int: "derivative" order of lambda used to compute input
    */
-  virtual void computeInput(double, unsigned int) = 0;
+  void computeH(double) = 0;
+
+  /** default function to compute g
+   *  \param double : current time
+   */
+  void computeG(double) = 0;
 
   /** default function to compute jacobianH
    *  \param double : current time
    *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
    */
-  virtual void computeJacobianH(double, unsigned int);
+  void computeJacH(double, unsigned int);
 
   /** default function to compute jacobianG according to lambda
    *  \param double : current time
    *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
    */
-  virtual void computeJacobianG(double, unsigned int = 0);
+  void computeJacG(double, unsigned int);
+
+  /** default function to compute y
+   *  \param double : current time
+   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
+   */
+  void computeOutput(double, unsigned int = 0) = 0;
+
+  /** default function to compute r
+   *  \param double : current time
+   *  \param unsigned int: "derivative" order of lambda used to compute input
+   */
+  void computeInput(double, unsigned int = 0) = 0;
 
   /** main relation members display
    */

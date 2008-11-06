@@ -100,7 +100,7 @@ bool DiodeBridge()
     (*Int_B)(0, 3) = 1.0 / Cvalue;
 
     SP::FirstOrderLinearTIR LTIRDiodeBridge(new FirstOrderLinearTIR(*Int_C, *Int_B));
-    LTIRDiodeBridge->setDPtr(Int_D);
+    LTIRDiodeBridge->setD(*Int_D);
 
     SP::NonSmoothLaw nslaw(new ComplementarityConditionNSL(4));
     SP::Interaction InterDiodeBridge(new Interaction("InterDiodeBridge", Inter_DS, 1, 4, nslaw, LTIRDiodeBridge));

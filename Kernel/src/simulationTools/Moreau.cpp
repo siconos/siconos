@@ -237,7 +237,7 @@ void Moreau::initialize(SP::Simulation sim)
 
     // Allocate memory for a work vector used in ds and in Newton process convergence evaluation.
     if ((*itDS)->getType() == LNLDS || (*itDS)->getType() == FONLDS)
-      (*itDS)->allocateWorkVector("NewtonCvg", WMap[*itDS]->size(0));
+      (*itDS)->allocateWorkVector(DynamicalSystem::NewtonSave, WMap[*itDS]->size(0));
 
     if ((*itDS)->getType() == FOLDS)
     {
@@ -1100,7 +1100,7 @@ void Moreau::updateState(unsigned int level)
       //      *x = h * theta * *fonlds->getRPtr();
       // Save value of q in stateTmp for future convergence computation
       if (dsType == FONLDS)
-        ds->addWorkVector(x, "NewtonCvg");
+        ds->addWorkVector(x, DynamicalSystem::NewtonSave);
 
       // Solve W(x-xfree) = hr
       scal(h, *fonlds->getRPtr(), *x); // x = h*r
@@ -1125,7 +1125,7 @@ void Moreau::updateState(unsigned int level)
       SP::SiconosVector q = d->getQPtr();
       // Save value of q in stateTmp for future convergence computation
       if (dsType == LNLDS)
-        ds->addWorkVector(q, "NewtonCvg");
+        ds->addWorkVector(q, DynamicalSystem::NewtonSave);
 
       //  -> get previous time step state
       SP::SiconosVector vold = d->getVelocityMemoryPtr()->getSiconosVector(0);

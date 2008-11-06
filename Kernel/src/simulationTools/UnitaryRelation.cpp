@@ -184,18 +184,11 @@ void UnitaryRelation::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SP::Sicon
 
   if (relationType == FirstOrder)
   {
-    if (relationSubType == Type1R)//|| relationType =="FirstOrderType2R" || relationType =="FirstOrderType3R")
-      originalMatrix = (boost::static_pointer_cast<FirstOrderR>(mainInteraction->getRelationPtr()))->getJacobianHPtr(0);
-
-    else if (relationSubType == LinearR || relationSubType == LinearTIR)
-      originalMatrix = (boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr()))->getCPtr();
+    originalMatrix = mainInteraction->getRelationPtr()->getJacHPtr(0);
   }
   else if (relationType == Lagrangian)
   {
-    if (relationSubType == ScleronomousR || relationSubType == RheonomousR || relationSubType == CompliantR)
-      originalMatrix = (boost::static_pointer_cast<LagrangianR>(mainInteraction->getRelationPtr()))->getGPtr(index);
-    else if (relationSubType == LinearR || relationSubType == LinearTIR)
-      originalMatrix = (boost::static_pointer_cast<LagrangianLinearR>(mainInteraction->getRelationPtr()))->getHPtr();
+    originalMatrix = mainInteraction->getRelationPtr()->getJacHPtr(index);
   }
   else
     RuntimeException::selfThrow("UnitaryRelation::getLeftUnitaryBlockForDS, not yet implemented for relations of type " + relationType);
@@ -238,19 +231,11 @@ void UnitaryRelation::getRightUnitaryBlockForDS(SP::DynamicalSystem ds, SP::Sico
 
   if (relationType == FirstOrder)
   {
-    if (relationSubType == Type1R)//|| relationType =="FirstOrderType2R" || relationType =="FirstOrderType3R")
-      originalMatrix =
-        (boost::static_pointer_cast<FirstOrderR>(mainInteraction->getRelationPtr()))->getJacobianGPtr(0);
-
-    else if (relationSubType == LinearR || relationSubType == LinearTIR)
-      originalMatrix = (boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr()))->getBPtr();
+    originalMatrix = mainInteraction->getRelationPtr()->getJacGPtr(0);
   }
-  else if (relationType == Lagrangian)
+  else if (relationType == Lagrangian) // Note: the transpose will be done in LCP or MLCP ...
   {
-    if (relationSubType == ScleronomousR || relationSubType == RheonomousR || relationSubType == CompliantR)
-      originalMatrix = (boost::static_pointer_cast<LagrangianR>(mainInteraction->getRelationPtr()))->getGPtr(index);
-    else if (relationSubType == LinearR || relationSubType == LinearTIR)
-      originalMatrix = (boost::static_pointer_cast<LagrangianLinearR>(mainInteraction->getRelationPtr()))->getHPtr();
+    originalMatrix = mainInteraction->getRelationPtr()->getJacHPtr(index);
   }
   else
     RuntimeException::selfThrow("UnitaryRelation::getRightUnitaryBlockForDS, not yet implemented for relations of type " + relationType);
@@ -279,31 +264,10 @@ void UnitaryRelation::getExtraUnitaryBlock(SP::SiconosMatrix UnitaryBlock) const
 
   RELATION::TYPES relationType = getRelationType();
   RELATION::SUBTYPES relationSubType = getRelationSubType();
+
   SP::SiconosMatrix D;
-
-  if (relationType == FirstOrder)
-  {
-    if (relationSubType == Type1R)//|| relationType =="FirstOrderType2R" || relationType =="FirstOrderType3R")
-    {
-      // nothing, D = NULL
-    }
-
-    else if (relationSubType == LinearR || relationSubType == LinearTIR)
-      D = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getDPtr();
-  }
-  else if (relationType == Lagrangian)
-  {
-    if (relationSubType == ScleronomousR || relationSubType == RheonomousR)
-    {
-      // nothing, D = NULL
-    }
-    else if (relationSubType == CompliantR)
-      D = boost::static_pointer_cast<LagrangianCompliantR>(mainInteraction->getRelationPtr())->getGPtr(1);
-    else if (relationSubType == LinearR || relationSubType == LinearTIR)
-      D = boost::static_pointer_cast<LagrangianLinearR>(mainInteraction->getRelationPtr())->getDPtr();
-  }
-  else
-    RuntimeException::selfThrow("UnitaryRelation::getExtraUnitaryBlock, not yet implemented for relations of type " + relationType);
+  if (mainInteraction->getRelationPtr()->getNumberOfJacobiansForH() > 1)
+    D = mainInteraction->getRelationPtr()->getJacHPtr(1);
 
   if (! D)
   {

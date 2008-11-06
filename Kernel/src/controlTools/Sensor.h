@@ -33,6 +33,15 @@ class TimeDiscretisation;
 class Model;
 class Event;
 
+/** A map that links a string to a pointer to SiconosVector. */
+typedef std::map<std::string, SP::SiconosVector> VectorMap;
+
+/** An iterator through a map that links a string to a pointer to SiconosVector. */
+typedef VectorMap::iterator VectorMapIterator;
+
+/** A const iterator through a map that links a string to a pointer to SiconosVector. */
+typedef VectorMap::const_iterator VectorMapConstIterator;
+
 /** The object used to store data in the Sensor. To each Event corresponds a Data */
 typedef std::map<SP::Event, VectorMap>  DataSet;
 

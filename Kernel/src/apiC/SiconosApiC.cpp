@@ -910,7 +910,7 @@ extern "C" int sicInteraction(char *name, int nbDS, int *DS, int idLaw, int idRe
 
 
 
-extern "C" int sicLagrangianLinearR(int nDof, int nRel, double *H, double *b)
+extern "C" int sicLagrangianLinearTIR(int nDof, int nRel, double *H, double *b)
 {
   int nId = 0;
 
@@ -918,7 +918,7 @@ extern "C" int sicLagrangianLinearR(int nDof, int nRel, double *H, double *b)
   {
     RelationsSet * RelationsSetPtr = GLOB_DATA.getRelationsSetPtr();
 
-    // Id of sicLagrangianLinearR
+    // Id of sicLagrangianLinearTIR
     nId = RelationsSetPtr->size();
 
     SimpleMatrix mH(nRel, nDof);
@@ -938,7 +938,7 @@ extern "C" int sicLagrangianLinearR(int nDof, int nRel, double *H, double *b)
       vB(i) = b[i];
     }
 
-    RelationsSetPtr->push_back(new LagrangianLinearR(mH, vB));
+    RelationsSetPtr->push_back(new LagrangianLinearTIR(mH, vB));
   }
   catch (SiconosException e)
   {
@@ -947,7 +947,7 @@ extern "C" int sicLagrangianLinearR(int nDof, int nRel, double *H, double *b)
   }
   catch (...)
   {
-    cout << "Exception caught in sicLagrangianLinearR" << endl;
+    cout << "Exception caught in sicLagrangianLinearTIR" << endl;
     nId = SIC_ERROR;
   }
 
@@ -983,7 +983,7 @@ extern "C" int sicLagrangianR(int nIdInteraction, char *relationType, char *func
   catch(SiconosException e)
     {cout << e.report() << endl;nId=SIC_ERROR;}
   catch(...)
-    {cout << "Exception caught in sicLagrangianLinearR" << endl;nId=SIC_ERROR;}
+    {cout << "Exception caught in sicLagrangianLinearTIR" << endl;nId=SIC_ERROR;}
 
   return nId;
 }

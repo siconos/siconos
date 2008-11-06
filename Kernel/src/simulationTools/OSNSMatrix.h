@@ -227,7 +227,7 @@ public:
   unsigned int getPositionOfUnitaryBlock(SP::UnitaryRelation) const;
 
   /** get the numerics-readable structure */
-  inline NumericsMatrixSPtr getNumericsMatrix()
+  inline SP::NumericsMatrix getNumericsMatrix()
   {
     return numericsMat;
   };

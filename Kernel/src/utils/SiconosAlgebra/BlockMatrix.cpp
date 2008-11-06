@@ -900,7 +900,7 @@ BlockMatrix& BlockMatrix::operator = (const SiconosMatrix &m)
         subPos[1] = posCol;
         subPos[2] = 0;
         subPos[3] = 0;
-        setBlock(createSiconosMatrixSPtrConst(m), *it2, subDim, subPos);
+        setBlock(createSPtrConstSiconosMatrix(m), *it2, subDim, subPos);
         posCol += subDim[1];
       }
       posRow += (*it)->size(0);

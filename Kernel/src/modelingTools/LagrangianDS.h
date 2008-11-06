@@ -27,16 +27,7 @@
 
 #include "DynamicalSystem.h"
 
-/** Pointer to function for plug-in. For NNL and its jacobian. */
-typedef void (*FPtr5)(unsigned int, const double*, const double*, double*, unsigned int, double*);
-/** Fext*/
-typedef void (*FPtr1)(double, unsigned int, double*, unsigned int, double*);
-/** Mass */
-typedef void (*FPtr7)(unsigned int, const double*, double*, unsigned int, double*);
-/** fInt, its jacobian, defined in DynamicalSystem.h*/
-//typedef void (*FPtr6)(double, unsigned int, const double*, const double*, double*, unsigned int, double*);
-
-typedef PluggedObject<FPtr1, SimpleVector> PVFext;
+typedef PluggedObject<VectorFunctionOfTime, SimpleVector> PVFext;
 typedef PluggedObject<FPtr7, SimpleMatrix> PMMass;
 typedef PluggedObject<FPtr5, SimpleVector> PVNNL;
 typedef PluggedObject<FPtr5, SimpleMatrix> PMNNL;
@@ -124,6 +115,11 @@ class DynamicalSystem;
  */
 class LagrangianDS : public DynamicalSystem
 {
+public:
+
+  /** List of indices used to save tmp work matrics (last one is the size of the present list) */
+  typedef enum WorkMatrixNames {invMass, jacobianXBloc10, jacobianXBloc11, zeroMatrix, idMatrix, sizeWorkMat};
+
 protected:
 
   // -- MEMBERS --
@@ -172,10 +168,6 @@ protected:
 
   /** jacobian/coordinates, jacobianFL[0], and velocity, jacobianFL[1], of fL */
   VectorOfMatrices jacobianFL;
-
-  /** Map that links operators names with a bool. If bool is true, the operator
-      is up to date, else not. Uselful to avoid re-computation of mass, fInt ... */
-  BoolMap isUp;
 
   /** set links with DS members
    */
@@ -512,7 +504,7 @@ public:
    */
   inline SP::SiconosMatrix getMassLUPtr() const
   {
-    return (workMatrix.find("invMass"))->second;
+    return (workMatrix[invMass]);
   }
 
   // --- fInt ---
@@ -747,7 +739,7 @@ public:
   /** set a specified function to compute fExt
    *  \param a pointer on the plugin function
    */
-  void setComputeFExtFunction(FPtr1 fct);
+  void setComputeFExtFunction(VectorFunctionOfTime fct);
 
   /** allow to set a specified function to compute the inertia
    *  \param string : the complete path to the plugin

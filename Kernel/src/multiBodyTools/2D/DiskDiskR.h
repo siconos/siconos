@@ -46,7 +46,7 @@ public:
 
   void computeH(double);
 
-  void computeG(double, unsigned int);
+  void computeJacH(double, unsigned int);
 
 };
 

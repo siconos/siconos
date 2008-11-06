@@ -21,6 +21,8 @@
 #include <math.h>
 #include "DiskDiskR.h"
 
+
+
 DiskDiskR::DiskDiskR(double r, double rr) : LagrangianScleronomousR()
 {
   r1 = r;
@@ -35,7 +37,7 @@ void DiskDiskR::computeH(double)
 
   // Warning: temporary method to have contiguous values in memory,
   // copy of block to simple.
-  *workX = *data["q0"];
+  *workX = *data[q0];
   double *q = &(*workX)(0);
 
   double dx = q[3] - q[0];
@@ -48,12 +50,12 @@ void DiskDiskR::computeH(double)
 
 };
 
-void DiskDiskR::computeG(double, unsigned int)
+void DiskDiskR::computeJacH(double, unsigned int)
 {
 
-  *workX = *data["q0"];
+  *workX = *data[q0];
   double *q = &(*workX)(0);
-  double *g = &(*(G[0]))(0, 0);
+  double *g = &(*(JacH[0]))(0, 0);
 
   double dx = q[3] - q[0];
   double dy = q[4] - q[1];

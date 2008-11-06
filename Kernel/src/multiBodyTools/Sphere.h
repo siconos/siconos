@@ -90,4 +90,6 @@ public:
 
 };
 
+TYPEDEF_SPTR(Sphere);
+
 #endif

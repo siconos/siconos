@@ -50,10 +50,10 @@
 				<Interaction_Content>		
 					<LagrangianRelation type="Compliant">
                                              <h plugin="TestPlugin:hCompl"/>
-                                             <G number='2'>
+                                             <jacobianH number='2'>
                                               <matrix matrixPlugin="TestPlugin:G0Compl"/>
                                               <matrix matrixPlugin="TestPlugin:G1Compl"/>
-                                             </G>
+                                             </jacobianH>
 					</LagrangianRelation>			
 					<!-- NS Law of this interaction	-->
 					<NewtonImpactLaw>

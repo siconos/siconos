@@ -87,7 +87,7 @@ void Moreau2::computeFreeState()
       // IN at told: A, b, x
       // IN, not time dependant: M
 
-      FirstOrderLinearDS *d = static_cast<FirstOrderLinearDS*>(ds);
+      SP::FirstOrderLinearDS d = boost::static_pointer_cast<FirstOrderLinearDS>(ds);
 
       SP::SiconosVector ffree = workX[d];
 
@@ -132,7 +132,7 @@ void Moreau2::computeFreeState()
       // IN at told: x
       // IN, not time dependant: A,b,W
 
-      FirstOrderLinearDS *d = static_cast<FirstOrderLinearTIDS*>(ds);
+      SP::FirstOrderLinearDS d = boost::static_pointer_cast<FirstOrderLinearTIDS>(ds);
       M = d->getMPtr();
       SP::SiconosVector ffree = workX[d];
       // x value at told
@@ -164,7 +164,7 @@ void Moreau2::computeFreeState()
       // fFree =  W v_k,i+1 -M(q_k,i+1)(v_k,i+1- v_i) - h*theta*fL(t,v_k,i+1, q_k,i+1) - h*(1-theta)*fL(ti,vi,qi)
 
       // -- Convert the DS into a Lagrangian one.
-      LagrangianDS* d = static_cast<LagrangianDS*>(ds);
+      SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       SP::SiconosVector qold = d->getQMemoryPtr()->getSiconosVector(0);
@@ -216,7 +216,7 @@ void Moreau2::computeFreeState()
       // fFree = +W v_i + (-h*C -h^2*theta*K)*vi - h*K*qi + h*theta * Fext_i+1 + h*(1-theta)*Fext_i
 
       // -- Convert the DS into a Lagrangian one.
-      LagrangianLinearTIDS* d = static_cast<LagrangianLinearTIDS*>(ds);
+      SP::LagrangianLinearTIDS d = boost::static_pointer_cast<LagrangianLinearTIDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       SP::SiconosVector qold = d->getQMemoryPtr()->getSiconosVector(0); // qi

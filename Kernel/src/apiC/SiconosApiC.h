@@ -66,9 +66,9 @@ EXTERN int sicSetFExt(int nIdDs, double *Fext);
 
 EXTERN int sicInteraction(char *name, int nbDS, int *DS, int idLaw, int idRelation, int nSize);
 
-//EXTERN int sicLagrangianLinearR(int nIdInteraction, double *H,double *b);
+//EXTERN int sicLagrangianLinearTIR(int nIdInteraction, double *H,double *b);
 
-EXTERN int sicLagrangianLinearR(int nDof, int nRel, double *H, double *b);
+EXTERN int sicLagrangianLinearTIR(int nDof, int nRel, double *H, double *b);
 
 // EXTERN int sicLagrangianR(int nIdInteraction, char *relationType, char *funcH, char *funcG);
 

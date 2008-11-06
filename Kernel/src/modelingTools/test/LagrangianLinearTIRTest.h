@@ -16,71 +16,72 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#ifndef __FirstOrderLinearRTest__
-#define __FirstOrderLinearRTest__
+#ifndef __LagrangianLinearTIRTest__
+#define __LagrangianLinearTIRTest__
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "RelationXML.h"
 #include "NonSmoothDynamicalSystem.h"
 #include "NonSmoothDynamicalSystemXML.h"
-#include "FirstOrderLinearR.h"
+#include "LagrangianLinearTIR.h"
 #include "LinearRXML.h"
 
-class FirstOrderLinearRTest : public CppUnit::TestFixture
+class LagrangianLinearTIRTest : public CppUnit::TestFixture
 {
 
 private:
 
   // Name of the tests suite
-  CPPUNIT_TEST_SUITE(FirstOrderLinearRTest);
+  CPPUNIT_TEST_SUITE(LagrangianLinearTIRTest);
 
   // tests to be done ...
 
-  CPPUNIT_TEST(testBuildFirstOrderLinearR0);
-  CPPUNIT_TEST(testBuildFirstOrderLinearR1);
-  CPPUNIT_TEST(testBuildFirstOrderLinearR3);
-  CPPUNIT_TEST(testBuildFirstOrderLinearR4);
-  CPPUNIT_TEST(testBuildFirstOrderLinearR5);
+  //CPPUNIT_TEST(testBuildLagrangianLinearTIR);
+  CPPUNIT_TEST(testBuildLagrangianLinearTIR0);
+  CPPUNIT_TEST(testBuildLagrangianLinearTIR1);
+  CPPUNIT_TEST(testBuildLagrangianLinearTIR2);
+  CPPUNIT_TEST(testBuildLagrangianLinearTIR3);
+  CPPUNIT_TEST(testBuildLagrangianLinearTIR4);
+  CPPUNIT_TEST(testBuildLagrangianLinearTIR5);
+  CPPUNIT_TEST(testBuildLagrangianLinearTIR6);
   CPPUNIT_TEST(testSetC);
   CPPUNIT_TEST(testSetCPtr);
-  CPPUNIT_TEST(testSetCPtr2);
   CPPUNIT_TEST(testSetD);
   CPPUNIT_TEST(testSetDPtr);
   CPPUNIT_TEST(testSetF);
   CPPUNIT_TEST(testSetFPtr);
   CPPUNIT_TEST(testSetE);
   CPPUNIT_TEST(testSetEPtr);
-  CPPUNIT_TEST(testSetB);
-  CPPUNIT_TEST(testSetBPtr);
+  CPPUNIT_TEST(testGetJac);
+  CPPUNIT_TEST(testGetJacPtr);
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
-  void testBuildFirstOrderLinearR0();
-  void testBuildFirstOrderLinearR1();
-  void testBuildFirstOrderLinearR3();
-  void testBuildFirstOrderLinearR4();
-  void testBuildFirstOrderLinearR5();
+  void testBuildLagrangianLinearTIR0();
+  void testBuildLagrangianLinearTIR1();
+  void testBuildLagrangianLinearTIR2();
+  void testBuildLagrangianLinearTIR3();
+  void testBuildLagrangianLinearTIR4();
+  void testBuildLagrangianLinearTIR5();
+  void testBuildLagrangianLinearTIR6();
   void testSetC();
   void testSetCPtr();
-  void testSetCPtr2();
   void testSetD();
   void testSetDPtr();
   void testSetF();
   void testSetFPtr();
   void testSetE();
   void testSetEPtr();
-  void testSetB();
-  void testSetBPtr();
+  void testGetJac();
+  void testGetJacPtr();
   void End();
 
   // Members
 
   SP::SiconosMatrix C, B, F, D;
-  FirstOrderLinearR::SP_PluggedMatrix Cp, Bp, Fp, Dp;
-  SP::PVTime ep;
   SP::SiconosVector e;
   xmlNodePtr node1;
   SP::RelationXML tmpxml1;

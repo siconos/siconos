@@ -58,6 +58,12 @@ namespace lapack = boost::numeric::bindings::lapack;
 using std::cout;
 using std::endl;
 
+// Default (protected, used only for derived classes)
+SimpleMatrix::SimpleMatrix(): SiconosMatrix(1, 0, 0), ipiv(NULL), isPLUFactorized(false), isPLUInversed(false)
+{
+  mat.Dense = new DenseMat(ublas::zero_matrix<double>());
+}
+
 // parameters: dimensions and type.
 SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, UBLAS_TYPE typ, unsigned int upper, unsigned int lower):
   SiconosMatrix(1, row, col), ipiv(NULL), isPLUFactorized(false), isPLUInversed(false)
@@ -4524,7 +4530,7 @@ const SimpleVector prod(const SiconosMatrix& A, const SiconosVector& x)
 
       for (it = x.begin(); it != x.end(); ++it)
       {
-        private_addprod(createSiconosMatrixSPtrConst(A), 0, start, *it, createSiconosVectorSPtr(res));
+        private_addprod(createSPtrConstSiconosMatrix(A), 0, start, *it, createSPtrSiconosVector(res));
         start += (*it)->size();
       }
       return res;
@@ -4587,7 +4593,7 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
         VectorOfVectors::const_iterator it;
         for (it = x.begin(); it != x.end(); ++it)
         {
-          private_addprod(createSiconosMatrixSPtrConst(A), startRow, startCol, *it, createSiconosVectorSPtr(y));
+          private_addprod(createSPtrConstSiconosMatrix(A), startRow, startCol, *it, createSPtrSiconosVector(y));
           startCol += (*it)->size();
         }
       }
@@ -4747,7 +4753,7 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
       // private_prod takes into account the fact that x and y[i] may be block vectors.
       for (it = y.begin(); it != y.end(); ++it)
       {
-        private_prod(createSiconosMatrixSPtrConst(A), startRow, createSiconosVectorSPtrConst(x), *it, init);
+        private_prod(createSPtrConstSiconosMatrix(A), startRow, createSPtrConstSiconosVector(x), *it, init);
         startRow += (*it)->size();
       }
     }
@@ -5248,7 +5254,7 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
         VectorOfVectors::const_iterator it;
         for (it = x.begin(); it != x.end(); ++it)
         {
-          private_addprod(a, createSiconosMatrixSPtrConst(A), startRow, startCol, *it, createSiconosVectorSPtr(y));
+          private_addprod(a, createSPtrConstSiconosMatrix(A), startRow, startCol, *it, createSPtrSiconosVector(y));
           startCol += (*it)->size();
         }
       }
@@ -5408,7 +5414,7 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
       // private_prod takes into account the fact that x and y[i] may be block vectors.
       for (it = y.begin(); it != y.end(); ++it)
       {
-        private_prod(a, createSiconosMatrixSPtrConst(A), startRow, createSiconosVectorSPtrConst(x), *it, init);
+        private_prod(a, createSPtrConstSiconosMatrix(A), startRow, createSPtrConstSiconosVector(x), *it, init);
         startRow += (*it)->size();
       }
     }
@@ -5469,7 +5475,7 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
         VectorOfVectors::const_iterator it;
         for (it = x.begin(); it != x.end(); ++it)
         {
-          private_addprod(*it, createSiconosMatrixSPtrConst(A), startRow, startCol, createSiconosVectorSPtr(y));
+          private_addprod(*it, createSPtrConstSiconosMatrix(A), startRow, startCol, createSPtrSiconosVector(y));
           startCol += (*it)->size();
         }
       }
@@ -5631,7 +5637,7 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
       // private_prod takes into account the fact that x and y[i] may be block vectors.
       for (it = y.begin(); it != y.end(); ++it)
       {
-        private_prod(createSiconosVectorSPtrConst(x), createSiconosMatrixSPtrConst(A), startRow, *it, init);
+        private_prod(createSPtrConstSiconosVector(x), createSPtrConstSiconosMatrix(A), startRow, *it, init);
         startRow += (*it)->size();
       }
     }
@@ -5688,7 +5694,7 @@ void axpy_prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y,
         VectorOfVectors::const_iterator it;
         for (it = x.begin(); it != x.end(); ++it)
         {
-          private_addprod(createSiconosMatrixSPtrConst(A), startRow, startCol, *it, createSiconosVectorSPtr(y));
+          private_addprod(createSPtrConstSiconosMatrix(A), startRow, startCol, *it, createSPtrSiconosVector(y));
           startCol += (*it)->size();
         }
       }
@@ -5773,7 +5779,7 @@ void axpy_prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y,
       // private_prod takes into account the fact that x and y[i] may be block vectors.
       for (it = y.begin(); it != y.end(); ++it)
       {
-        private_prod(createSiconosMatrixSPtrConst(A), startRow, createSiconosVectorSPtrConst(x), *it, init);
+        private_prod(createSPtrConstSiconosMatrix(A), startRow, createSPtrConstSiconosVector(x), *it, init);
         startRow += (*it)->size();
       }
     }

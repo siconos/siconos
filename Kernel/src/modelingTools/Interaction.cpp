@@ -21,12 +21,7 @@
 #include "InteractionXML.h"
 #include "NonSmoothLawXML.h"
 #include "RelationXML.h"
-#include "FirstOrderType1R.h"
-#include "FirstOrderLinearTIR.h"
-#include "LagrangianLinearR.h"
-#include "LagrangianScleronomousR.h"
-#include "LagrangianRheonomousR.h"
-#include "LagrangianCompliantR.h"
+#include "RelationTypes.h"
 #include "ComplementarityConditionNSL.h"
 #include "RelayNSL.h"
 #include "NewtonImpactNSL.h"
@@ -129,7 +124,7 @@ Interaction::Interaction(SP::InteractionXML interxml, SP::DynamicalSystemsSet ns
       relation.reset(new LagrangianCompliantR(interactionxml->getRelationXML()));
     // Lagrangian linear relation
     else if (relationSubType == LinearR || relationSubType == LinearTIR)
-      relation.reset(new LagrangianLinearR(interactionxml->getRelationXML()));
+      relation.reset(new LagrangianLinearTIR(interactionxml->getRelationXML()));
   }
   else RuntimeException::selfThrow("Interaction::xml constructor, unknown relation type " + relation->getType());
 
@@ -201,7 +196,7 @@ void Interaction::initialize(double t0, unsigned int level)
   computeSizeOfDS();
 
   relation->setInteractionPtr(shared_from_this());
-  relation->initialize();
+  relation->initialize(shared_from_this());
 
   // compute number of relations.
   numberOfRelations = interactionSize / nslaw->getNsLawSize();
@@ -595,8 +590,8 @@ void Interaction::saveInteractionToXML()
   }
   else if (type == Lagrangian)
   {
-    if (subType == LinearR)
-      (boost::static_pointer_cast<LagrangianLinearR>(relation))->saveRelationToXML();
+    if (subType == LinearTIR)
+      (boost::static_pointer_cast<LagrangianLinearTIR>(relation))->saveRelationToXML();
     else
       RuntimeException::selfThrow("Interaction::saveInteractionToXML - Not yet implemented for relation subtype " + subType);
   }

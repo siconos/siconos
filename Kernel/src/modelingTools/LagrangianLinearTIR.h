@@ -16,35 +16,43 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-/*! \file FirstOrderLinearTIR.h
+/*! \file LagrangianLinearTIR.h
 
 */
-#ifndef FirstOrderLinearTIR_H
-#define FirstOrderLinearTIR_H
+#ifndef LAGRANGIANLINEARRELATION_H
+#define LAGRANGIANLINEARRELATION_H
 
-#include "FirstOrderR.h"
+#include "LagrangianR.h"
 
-/** Linear Time Invariant Relation, derived from class FirstOrderR
+
+/**  Lagrangian Linear Relation.
 
   \author SICONOS Development Team - copyright INRIA
    \version 3.0.0.
-   \date Apr 15, 2007
+   \date (Creation) Apr 27, 2004
 
-   Linear Relation for First Order Dynamical Systems:
+  Lagrangian Relation with:
 
-  \f{eqnarray}
-  y &=& Cx(t) + Fz + D\lambda + e\\
+  \f[
+  y= Cq + e + D\lambda[0] + Fz
+  \f]
+  \f[
+  \dot y= C \dot q + D\lambda[1]
+  \f]
 
-  R &=& B\lambda
-  \f}
+  \f[
+  p= C^t \lambda[1]
+  \f]
+
+   C is the only required input to built a LagrangianLinearTIR.
 
 */
-class FirstOrderLinearTIR : public FirstOrderR<int*>
+class LagrangianLinearTIR : public LagrangianR<int*>
 {
 
 protected:
 
-  typedef FirstOrderR<int*> BaseClass;
+  typedef LagrangianR<int*> BaseClass;
 
   /** C*/
   SP::SiconosMatrix C;
@@ -58,68 +66,67 @@ protected:
   /** e*/
   SP::SiconosVector e;
 
-  /** B */
-  SP::SiconosMatrix B;
-
-  /** default constructor, protected
+  /** Default constructor
    */
-  FirstOrderLinearTIR(): BaseClass(RELATION::LinearTIR) {};
+  LagrangianLinearTIR(): BaseClass(RELATION::LinearTIR) {};
 
 public:
 
   /** constructor with XML object of the parent class Relation
    *  \param RelationXML* : the XML object corresponding
    */
-  FirstOrderLinearTIR(SP::RelationXML);
+  LagrangianLinearTIR(SP::RelationXML);
 
   /** create the Relation from a set of data
    *  \param SP::SiconosMatrix : the matrix C
-   *  \param SP::SiconosMatrix : the matrix B
    */
-  FirstOrderLinearTIR(SP::SiconosMatrix, SP::SiconosMatrix);
+  LagrangianLinearTIR(SP::SiconosMatrix);
 
   /** create the Relation from a set of data
    *  \param SP::SiconosMatrix : C
    *  \param SP::SiconosMatrix : D
    *  \param SP::SiconosMatrix : F
    *  \param SP::SiconosVector : e
-   *  \param SP::SiconosMatrix : B
    */
-  FirstOrderLinearTIR(SP::SiconosMatrix, SP::SiconosMatrix, SP::SiconosMatrix, SP::SiconosVector, SP::SiconosMatrix);
+  LagrangianLinearTIR(SP::SiconosMatrix, SP::SiconosMatrix, SP::SiconosMatrix, SP::SiconosVector);
+
+  /** create the Relation from a set of data
+   *  \param SP::SiconosMatrix : C
+   *  \param SP::SiconosVector : e
+   */
+  LagrangianLinearTIR(SP::SiconosMatrix, SP::SiconosVector);
 
   /** create the Relation from a set of data
    *  \param SiconosMatrix : the matrix C
-   *  \param SiconosMatrix : the matrix B
    */
-  FirstOrderLinearTIR(const SiconosMatrix&, const SiconosMatrix&);
+  LagrangianLinearTIR(const SiconosMatrix&);
 
   /** create the Relation from a set of data
    *  \param SiconosMatrix : C
    *  \param SiconosMatrix : D
    *  \param SiconosMatrix : F
    *  \param SiconosVector : e
-   *  \param SiconosMatrix : B
    */
-  FirstOrderLinearTIR(const SiconosMatrix&, const SiconosMatrix&, const SiconosMatrix&, const SiconosVector&, const SiconosMatrix&);
+  LagrangianLinearTIR(const SiconosMatrix&, const SiconosMatrix&, const SiconosMatrix&, const SiconosVector&);
+
+  /** create the Relation from a set of data
+   *  \param SiconosMatrix : C
+   *  \param SiconosVector : e
+   */
+  LagrangianLinearTIR(const SiconosMatrix&, const SiconosVector&);
 
   /** destructor
    */
-  virtual ~FirstOrderLinearTIR() {};
+  virtual ~LagrangianLinearTIR() {};
 
-  /** initialize the relation (check sizes, memory allocation ...)
-      \param SP to Interaction: the interaction that owns this relation
+  /** initialize LagrangianLinearTIR specific operators.
    */
-  void initialize(SP::Interaction);
+  void initComponents();
 
   /** default function to compute h
    *  \param double : current time
    */
   void computeH(double);
-
-  /** default function to compute g
-   *  \param double : current time
-   */
-  void computeG(double);
 
   /** default function to compute y
    *  \param double: not used
@@ -269,39 +276,6 @@ public:
     e = newPtr;
   }
 
-  // -- B --
-  /** get the value of B
-   *  \return plugged matrix
-   */
-  inline const SimpleMatrix getB() const
-  {
-    return *B;
-  }
-
-  /** get B
-   *  \return pointer on a plugged matrix
-   */
-  inline SP::SiconosMatrix getBPtr() const
-  {
-    return B;
-  }
-
-  /** set the value of B to newValue
-   *  \param a plugged matrix
-   */
-  void setB(const SiconosMatrix& newValue)
-  {
-    setObject<SimpleMatrix, SP::SiconosMatrix, SiconosMatrix>(B, newValue);
-  }
-
-  /** set B to pointer newPtr
-   *  \param a SP to plugged matrix
-   */
-  inline void setBPtr(SP::SiconosMatrix newPtr)
-  {
-    B = newPtr;
-  }
-
   /** get matrix JacH[index]
    *  \return a SimpleMatrix
    */
@@ -311,16 +285,6 @@ public:
    *  \return a pointer on a SiconosMatrix
    */
   SP::SiconosMatrix getJacHPtr(unsigned int index = 0) const ;
-
-  /** get matrix JacG[index]
-   *  \return a SimpleMatrix
-   */
-  const SimpleMatrix getJacG(unsigned int  index = 0) const;
-
-  /** get a pointer on matrix JacG[index]
-   *  \return a pointer on a SiconosMatrix
-   */
-  SP::SiconosMatrix getJacGPtr(unsigned int index = 0) const ;
 
   /** copy the data of the Relation to the XML tree
    */
@@ -334,9 +298,9 @@ public:
    *  \param Relation * : the relation which must be converted
    * \return a pointer on the relation if it is of the right type, NULL otherwise
    */
-  static FirstOrderLinearTIR* convert(Relation *r);
+  static LagrangianLinearTIR* convert(Relation *r);
 };
 
-TYPEDEF_SPTR(FirstOrderLinearTIR);
+TYPEDEF_SPTR(LagrangianLinearTIR);
 
 #endif

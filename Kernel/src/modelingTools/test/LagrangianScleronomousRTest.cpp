@@ -55,13 +55,11 @@ void LagrangianScleronomousRTest::setUp()
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Content");
   // get relation
   xmlNode * node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "LagrangianRelation");
-  tmpxml1 = new LagrangianRXML(node1);
+  tmpxml1.reset(new RelationXML(node1));
 }
 
 void LagrangianScleronomousRTest::tearDown()
-{
-  delete tmpxml1;
-}
+{}
 
 // xml constructor (scleronomic case)
 void LagrangianScleronomousRTest::testBuildLagrangianScleronomousR0()
@@ -69,34 +67,22 @@ void LagrangianScleronomousRTest::testBuildLagrangianScleronomousR0()
   cout << "==============================================" << endl;
   cout << "=== LagrangianScleronomousR tests start ...=== " << endl;
   cout << "==============================================" << endl;
-  LagrangianScleronomousR * R1 = new LagrangianScleronomousR(tmpxml1);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1a : ", R1->getType() == Lagrangian, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1b : ", R1->getSubType() == ScleronomousR, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1c : ", R1->getFunctionName("h") == "TestPlugin:hSclero", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1d : ", R1->getFunctionName("G0") == "TestPlugin:G0Sclero", true);
-  delete R1;
+  SP::LagrangianScleronomousR R1(new LagrangianScleronomousR(tmpxml1));
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1a : ", R1->getType() == RELATION::Lagrangian, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1b : ", R1->getSubType() == RELATION::ScleronomousR, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1c : ", R1->getHName() == "TestPlugin:hSclero", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1d : ", R1->getJacHName(0) == "TestPlugin:G0Sclero", true);
   cout << " xml Constructor (1) LagrangianScleronomousR ok" << endl;
 }
-
-// default constructor:
-// void LagrangianScleronomousRTest::testBuildLagrangianScleronomousR1()
-// {
-//   LagrangianScleronomousR * R1 = new LagrangianScleronomousR();
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR2a : ", R1->getType()==Lagrangian, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR2b : ", R1->getSubType()==ScleronomousR, true);
-//   delete R1;
-//   cout << " default Constructor LagrangianScleronomousR ok" << endl;
-// }
 
 // data constructor:
 void LagrangianScleronomousRTest::testBuildLagrangianScleronomousR2()
 {
-  LagrangianScleronomousR * R1 = new LagrangianScleronomousR("TestPlugin:hSclero", "TestPlugin:G0Sclero");
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3a : ", R1->getType() == Lagrangian, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3b : ", R1->getSubType() == ScleronomousR, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3c : ", R1->getFunctionName("h") == "TestPlugin:hSclero", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3d : ", R1->getFunctionName("G0") == "TestPlugin:G0Sclero", true);
-  delete R1;
+  SP::LagrangianScleronomousR R1(new LagrangianScleronomousR("TestPlugin:hSclero", "TestPlugin:G0Sclero"));
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3a : ", R1->getType() == RELATION::Lagrangian, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3b : ", R1->getSubType() == RELATION::ScleronomousR, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3c : ", R1->getHName() == "TestPlugin:hSclero", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3d : ", R1->getJacHName(0) == "TestPlugin:G0Sclero", true);
   cout << " data Constructor LagrangianScleronomousR ok" << endl;
 }
 

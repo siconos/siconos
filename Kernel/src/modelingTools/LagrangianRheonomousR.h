@@ -24,8 +24,6 @@
 
 #include "LagrangianR.h"
 
-class DynamicalSystem;
-
 /** Lagrangian (Non Linear) Relation, Rheonomous and Holonomic.
  *
  * \author SICONOS Development Team - copyright INRIA
@@ -55,76 +53,51 @@ class DynamicalSystem;
  * h, G0 and hdot=\f$ \frac{\partial h}{\partial t}(q,t,z) \f$ are connected to user-defined functions.
  *
  */
-class LagrangianRheonomousR : public LagrangianR
+class LagrangianRheonomousR : public LagrangianR<FPtr4>
 {
+  typedef PluggedObject<FPtr4, SimpleVector> PVT2;
+  typedef boost::shared_ptr<PVT2> SPPVT2;
 
 protected:
 
-  /** derivative of h according to time */
-  SP::SiconosVector hDot;
+  typedef LagrangianR<FPtr4> BaseClass ;
 
-  /** LagrangianRheonomousR plug-in to compute h(q,t,z)
-   * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
-   * @param q : pointer to the first element of q
-   * @param time : current time
-   * @param sizeY : size of vector y (ie of the intercation)
-   * @param[in,out] y : pointer to the first element of y
-   * @param sizeZ : size of vector z
-   * @param[in,out] z : a vector of user-defined parameters
+  /** plugged vector used to compute hDot */
+  SPPVT2 hDot;
+
+  /** initialize G matrices or components specific to derived classes.
    */
-  FPtr4 hPtr;
-
-  /** LagrangianRheonomousR plug-in to compute hDot(q,t,z)
-   * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
-   * @param q : pointer to the first element of q
-   * @param time : current time
-   * @param sizeY : size of vector hDot (ie of the intercation)
-   * @param[in,out] pointer to the first element of hDot
-   * @param sizeZ : size of vector z
-   * @param[in,out] z : a vector of user-defined parameters
-   */
-  FPtr4 hDotPtr;
-
-  /** LagrangianRheonomousR plug-in to compute G0(q,t,z), gradient of h accoring to q
-   * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
-   * @param q : pointer to the first element of q
-   * @param time : current time
-   * @param sizeY : size of vector y (ie of the intercation)
-   * @param[in,out] G0 : pointer to the first element of G0
-   * @param sizeZ : size of vector z
-   * @param[in,out] z : a vector of user-defined parameters
-   */
-  FPtr4 G0Ptr;
-
-public:
+  void initComponents();
 
   /** default constructor
    */
-  LagrangianRheonomousR();
+  LagrangianRheonomousR(): BaseClass(RELATION::RheonomousR)
+  {
+    JacH.resize(1);
+  };
+
+public:
 
   /** constructor from xml file
    *  \param relationXML
-   *  \exception RuntimeException
    */
   LagrangianRheonomousR(SP::RelationXML);
 
   /** constructor from a set of data
    *  \param string : the name of the plugin to compute h
    *  \param string : the name of the plugin to compute hDot
-   *  \param string : the name of the plugin to computeG0
+   *  \param string : the name of the plugin  to compute jacobian h according to q
    */
   LagrangianRheonomousR(const std::string&, const std::string&, const std::string&);
 
   /** destructor
    */
-  ~LagrangianRheonomousR();
+  virtual ~LagrangianRheonomousR() {};
 
-  /** initialize G matrices or components specific to derived classes.
-   */
-  void initComponents();
+  // -- hDot --
 
   /** get vector hDot
-   *  \return a SimpleVector.
+   *  \return a SimpleVector
    */
   inline const SimpleVector getHDot() const
   {
@@ -132,7 +105,7 @@ public:
   }
 
   /** get a pointer on vector hDot
-   *  \return a pointer on a SiconosVector.
+   *  \return a smart pointer on a SiconosVector
    */
   inline SP::SiconosVector getHDotPtr() const
   {
@@ -140,33 +113,42 @@ public:
   }
 
   /** set the value of hDot to newValue (copy)
-   *  \param a SiconosVector.
+   *  \param SiconosVector newValue
    */
-  void setHDot(const SiconosVector&);
+  template <class U> void setHDot(const U& newValue)
+  {
+    setObject<PVT2, SPPVT2, U>(hDot, newValue);
+  }
 
   /** set hDot to pointer newPtr (pointer link)
-   *  \param  SP::SiconosVector newPtr
+   *  \param SP::SiconosVector  newPtr
    */
-  void setHDotPtr(SP::SiconosVector newPtr);
+  inline void setHDot(SPPVT2 newPtr)
+  {
+    hDot = newPtr ;
+  }
 
-  /** to set a specified function to compute function h(q,...)
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
+  /** To get the name of hDot plugin
+   *  \return a string
    */
-  void setComputeHFunction(const std::string& , const std::string&);
+  inline const std::string getHDotName() const
+  {
+    return hDot->getPluginName();
+  }
+
+  /** true if hDot is plugged
+   *  \return a bool
+   */
+  inline const bool isHDotPlugged() const
+  {
+    return hDot->isPlugged();
+  }
 
   /** to set a specified function to compute function hDot
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    */
   void setComputeHDotFunction(const std::string& , const std::string&);
-
-  /** to set a specified function to compute G(q, ...)
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
-   *  \param unsigned int: the index of G that must be computed (see introduction of this class for details on indexes)
-   */
-  void setComputeGFunction(const std::string& , const std::string&  , unsigned int  = 0);
 
   /** to compute y = h(q,v,t) using plug-in mechanism
    * \param: double, current time
@@ -178,23 +160,23 @@ public:
    */
   void computeHDot(double);
 
-  /** to compute G using plug-in mechanism. Index shows which G is to be computed
+  /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
    * \param: double, current time
    * \param: unsigned int
    */
-  void computeG(double, unsigned int = 0);
+  void computeJacH(double, unsigned int);
 
   /** to compute output
    *  \param double : current time
    *  \param unsigned int: number of the derivative to compute, optional, default = 0.
    */
-  virtual void computeOutput(double, unsigned int = 0);
+  void computeOutput(double, unsigned int = 0);
 
   /** to compute p
    *  \param double : current time
    *  \param unsigned int: "derivative" order of lambda used to compute input
    */
-  void computeInput(double, unsigned int);
+  void computeInput(double, unsigned int = 0);
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param Relation* : the relation which must be converted
@@ -202,5 +184,7 @@ public:
    */
   static LagrangianRheonomousR* convert(Relation *r);
 };
+
+TYPEDEF_SPTR(LagrangianRheonomousR);
 
 #endif

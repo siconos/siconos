@@ -26,10 +26,10 @@
 
 class FirstOrderNonLinearDS;
 
-typedef void (*bPtrFunction)(double, unsigned int, double*, unsigned int, double*);
+typedef void (*VectorFunctionOfTime)(double, unsigned int, double*, unsigned int, double*);
 
-typedef PluggedObject<bPtrFunction, SimpleVector> PVB;
-typedef PluggedObject<bPtrFunction, SimpleMatrix> PMA;
+typedef PluggedObject<VectorFunctionOfTime, SimpleVector> PVB;
+typedef PluggedObject<VectorFunctionOfTime, SimpleMatrix> PMA;
 
 TYPEDEF_SPTR(PVB);
 TYPEDEF_SPTR(PMA);
@@ -201,9 +201,9 @@ public:
   void setComputeAFunction(const std::string& , const std::string&);
 
   /** set a specified function to compute the matrix A
-   *  \param bPtrFunction : a pointer on the plugin function
+   *  \param VectorFunctionOfTime : a pointer on the plugin function
    */
-  void setComputeAFunction(bPtrFunction fct);
+  void setComputeAFunction(VectorFunctionOfTime fct);
 
   /** set a specified function to compute the vector b
    *  \param string : the complete path to the plugin
@@ -213,9 +213,9 @@ public:
   void setComputeBFunction(const std::string& , const std::string&);
 
   /** set a specified function to compute the vector b
-   *  \param bPtrFunction : a pointer on the plugin function
+   *  \param VectorFunctionOfTime : a pointer on the plugin function
    */
-  void setComputeBFunction(bPtrFunction fct);
+  void setComputeBFunction(VectorFunctionOfTime fct);
 
   /** default function to compute matrix A => same action as computeJacobianXF
    */

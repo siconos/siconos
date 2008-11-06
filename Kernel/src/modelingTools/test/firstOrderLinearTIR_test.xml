@@ -1,6 +1,5 @@
 <SiconosModel>
 	<NSDS bvp='false'>
-		<!-- DSs defined in the problem -->
 		<DS_Definition>		
 			<LagrangianLinearTIDS number='3'>
 	 			<StepsInMemory>1</StepsInMemory>				
@@ -17,7 +16,7 @@
 					<row>0.0 0.0 1.0</row>
 				</Mass>			
 			</LagrangianLinearTIDS>
-			<LagrangianLinearTIDS number='4' Id="Ball2">
+			<LagrangianLinearTIDS number='4'>
 	 			<StepsInMemory>1</StepsInMemory>				
 				<q0 vectorSize='3'>
 					1.0 0.0 0.0
@@ -36,9 +35,6 @@
 		<Interaction_Definition>
 			<Interaction number='1' Id='test-of-rel'>
 				<size>2</size>
-				<!-- List of couple of DS concerned by this interaction -->
-                                	<!-- <DS_Concerned vectorSize='2'>3 4</DS_Concerned>-->
-				<!-- Relation of this interaction -->				
 					<DS_Concerned all='true'/>
 					<Interaction_Content>		
 					<FirstOrderRelation type ="LinearTI">
@@ -48,7 +44,6 @@
   	                                <F matrixFile="matF.dat"/>
                                         <e vectorSize = '2'>0.1 0.1</e>
                                        </FirstOrderRelation>			
-					<!-- NS Law of this interaction	-->
 					<NewtonImpactLaw>
 						<e>0.9</e>
 						<size>1</size>				

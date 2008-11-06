@@ -141,15 +141,6 @@ typedef VectorOfMatrices::iterator VectorOfMatricesIterator;
 /** const Iterator through vector of matrices */
 typedef VectorOfMatrices::const_iterator VectorOfMatricesConstIterator;
 
-/** A map that links a string to a pointer to SiconosVector. */
-typedef std::map<std::string, SP::SiconosVector> VectorMap;
-
-/** An iterator through a map that links a string to a pointer to SiconosVector. */
-typedef VectorMap::iterator VectorMapIterator;
-
-/** A const iterator through a map that links a string to a pointer to SiconosVector. */
-typedef VectorMap::const_iterator VectorMapConstIterator;
-
 TYPEDEF_SPTR(BlocksMat);
 
 #endif

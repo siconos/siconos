@@ -29,11 +29,11 @@ struct nullDeleter
 #define NAME_SPACE_SPTR(X) \
   namespace SharedPointer \
   { \
-    typedef X##SPtr X; \
+    typedef SPtr##X X; \
   }; \
   namespace SharedPointerConst \
   { \
-    typedef X##SPtrConst X;\
+    typedef SPtrConst##X X;\
   }
 
 #define NAME_SPACE_SAPTR(X)                     \
@@ -46,14 +46,14 @@ struct nullDeleter
 /* template typedef : no */
 
 #define TYPEDEF_SPTR(X) \
-  typedef boost::shared_ptr<X> X##SPtr; \
-  typedef boost::shared_ptr<const X> X##SPtrConst; \
-  inline X##SPtr create##X##SPtr(X &x) \
+  typedef boost::shared_ptr<X> SPtr##X; \
+  typedef boost::shared_ptr<const X> SPtrConst##X; \
+  inline SPtr##X create##SPtr##X(X &x) \
   { \
     boost::shared_ptr<X> px(&x, nullDeleter()); \
     return px; \
   }; \
-  inline X##SPtrConst create##X##SPtrConst(const X &x) \
+  inline SPtrConst##X create##SPtrConst##X(const X &x) \
   { \
     boost::shared_ptr<const X> px(&x, nullDeleter()); \
     return px; \
@@ -88,8 +88,6 @@ DEFINE_SPTR(MixedComplementarityConditionNSL);
 DEFINE_SPTR(NonSmoothDynamicalSystem);
 DEFINE_SPTR(SiconosMemory);
 DEFINE_SPTR(DynamicalSystem);
-DEFINE_SPTR(Relation);
-DEFINE_SPTR(Interaction);
 DEFINE_SPTR(InteractionXML);
 DEFINE_SPTR(RelationXML);
 DEFINE_SPTR(NonSmoothDynamicalSystemXML)
@@ -108,16 +106,11 @@ DEFINE_SPTR(DynamicalSystemXML);
 DEFINE_SPTR(FirstOrderLinearDS);
 DEFINE_SPTR(FirstOrderLinearTIDS);
 DEFINE_SPTR(FirstOrderLinearDSXML);
-DEFINE_SPTR(LagrangianScleronomousR);
-DEFINE_SPTR(LagrangianRXML);
-DEFINE_SPTR(FirstOrderLinearRXML);
 DEFINE_SPTR(NonSmoothLawXML);
-DEFINE_SPTR(LagrangianLinearRXML);
 DEFINE_SPTR(LagrangianLinearTIDS);
 DEFINE_SPTR(LagrangianLinearTIDSXML);
 DEFINE_SPTR(LagrangianDS);
 DEFINE_SPTR(LagrangianDSXML);
-DEFINE_SPTR(FirstOrderRXML);
 DEFINE_SPTR(FirstOrderNonLinearDS);
 DEFINE_SPTR(FirstOrderNonLinearDSXML);
 DEFINE_SPTR(NewtonImpactFrictionNSL);
@@ -140,6 +133,8 @@ DEFINE_SPTR(Event);
 DEFINE_SPTR(LsodarXML);
 DEFINE_SPTR(QPXML);
 DEFINE_SPTR(LCPXML);
+DEFINE_SPTR(Interaction);
+DEFINE_SPTR(Relation);
 
 TYPEDEF_SPTR(MixedLinearComplementarity_Problem);
 TYPEDEF_SPTR(Numerics_Options);

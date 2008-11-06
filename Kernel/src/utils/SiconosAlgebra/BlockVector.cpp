@@ -491,7 +491,7 @@ BlockVector& BlockVector::operator = (const SiconosVector& vIn)
   }
   else // if vIn is a SimpleVector
   {
-    setBlock(boost::shared_ptr<const SiconosVector>(&vIn), shared_from_this(), sizeV, 0, 0);
+    setBlock(vIn, shared_from_this(), sizeV, 0, 0);
 
     //       unsigned int pos = 0;
     //       VectorOfVectors::iterator it1;

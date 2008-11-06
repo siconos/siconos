@@ -154,13 +154,13 @@ public:
   };
 
   /** get the numerics-readable structure */
-  inline SparseBlockStructuredMatrixSPtr getNumericsMatSparse()
+  inline SP::SparseBlockStructuredMatrix getNumericsMatSparse()
   {
     return numericsMatSparse;
   };
 
   /** get the ublas sparse mat*/
-  inline CompressedRowMatSPtr getMSparse()
+  inline SP::CompressedRowMat getMSparse()
   {
     return MSparseBlock;
   };

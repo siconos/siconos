@@ -30,6 +30,12 @@
 //                CONSTRUCTORS
 // =================================================
 
+// Default
+SimpleVector::SimpleVector(): SiconosVector(1, 0)
+{
+  vect.Dense = new DenseVect(ublas::zero_vector<double>());
+}
+
 // parameters: dimension and type.
 SimpleVector::SimpleVector(unsigned int row, UBLAS_TYPE typ): SiconosVector(1, row)
 {
@@ -395,15 +401,15 @@ void SimpleVector::setBlock(unsigned int index, const SiconosVector& vIn)
   }
 }
 
-void setBlock(SPC::SiconosVector vIn, SP::SiconosVector vOut, unsigned int sizeB, unsigned int startIn, unsigned int startOut)
+void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int sizeB, unsigned int startIn, unsigned int startOut)
 {
   // To copy a subBlock of vIn (from position startIn to startIn+sizeB) into vOut (from pos. startOut to startOut+sizeB).
-  if (vIn == vOut) // useless op. => nothing to be done
+  if (&vIn == vOut.get()) // useless op. => nothing to be done
   {}// SiconosVectorException::selfThrow("");
   else
   {
     // Check dim ...
-    unsigned int sizeIn = vIn->size();
+    unsigned int sizeIn = vIn.size();
     unsigned int sizeOut = vOut->size();
 
     if (startIn >= sizeIn)
@@ -420,7 +426,7 @@ void setBlock(SPC::SiconosVector vIn, SP::SiconosVector vOut, unsigned int sizeB
     if (endOut > sizeOut)
       SiconosVectorException::selfThrow("vector setBlock(v1,v2,...): end position in output vector is out of range.");
 
-    unsigned int numIn = vIn->getNum();
+    unsigned int numIn = vIn.getNum();
     unsigned int numOut = vOut->getNum();
 
     if (numIn == 0 && numOut == 0)
@@ -488,7 +494,7 @@ void setBlock(SPC::SiconosVector vIn, SP::SiconosVector vOut, unsigned int sizeB
 
       // We look for the block of vIn that include index startIn
       unsigned int blockInStart = 0;
-      const Index * tabIn = vIn->getTabIndexPtr();
+      const Index * tabIn = vIn.getTabIndexPtr();
       while (startIn >= (*tabIn)[blockInStart] && blockInStart < tabIn->size())
         blockInStart ++;
       // Relative position in the block blockInStart.
@@ -505,13 +511,13 @@ void setBlock(SPC::SiconosVector vIn, SP::SiconosVector vOut, unsigned int sizeB
 
       if (blockInEnd == blockInStart) //
       {
-        setBlock(vIn->getVectorPtr(blockInStart), vOut, sizeB, posIn, startOut);
+        setBlock(*vIn.getVectorPtr(blockInStart), vOut, sizeB, posIn, startOut);
       }
       else // More that one block of vIn are concerned
       {
 
         // The current considered block ...
-        SPC::SiconosVector currentBlock = vIn->getVectorPtr(blockInStart);
+        SPC::SiconosVector currentBlock = vIn.getVectorPtr(blockInStart);
 
         // Size of the subBlock of vIn to be set.
         unsigned int subSizeB = currentBlock->size() - posIn;
@@ -519,27 +525,27 @@ void setBlock(SPC::SiconosVector vIn, SP::SiconosVector vOut, unsigned int sizeB
 
         // Set vOut values, between index posOut and posOut+subSizeB,
         // with first sub-block (currentBlock) of vIn values from posIn to posIn+subSizeB.
-        setBlock(currentBlock, vOut, subSizeB, posIn, posOut);
+        setBlock(*currentBlock, vOut, subSizeB, posIn, posOut);
 
         // Other blocks, except number blockInEnd.
         unsigned int currentBlockNum = blockInStart + 1;
         while (currentBlockNum != blockInEnd)
         {
           posOut += subSizeB;
-          currentBlock =  vIn->getVectorPtr(currentBlockNum);
+          currentBlock =  vIn.getVectorPtr(currentBlockNum);
           subSizeB = currentBlock->size();
-          setBlock(currentBlock, vOut, subSizeB, 0, posOut);
+          setBlock(*currentBlock, vOut, subSizeB, 0, posOut);
           currentBlockNum++;
         }
         // set last subBlock ...
-        currentBlock =  vIn->getVectorPtr(blockInEnd);
+        currentBlock =  vIn.getVectorPtr(blockInEnd);
 
         posOut += subSizeB;
 
         // Relative position of index endIn in vIn[blockInEnd]
         subSizeB = endIn - (*tabIn)[blockInEnd - 1];
 
-        setBlock(currentBlock, vOut, subSizeB, 0, posOut);
+        setBlock(*currentBlock, vOut, subSizeB, 0, posOut);
       }
     }
     else // neither vIn nor vOut is a BlockVector
@@ -548,16 +554,16 @@ void setBlock(SPC::SiconosVector vIn, SP::SiconosVector vOut, unsigned int sizeB
       if (numIn == numOut)
       {
         if (numIn == 1) // vIn / vOut are Dense
-          noalias(ublas::subrange(*vOut->getDensePtr(), startOut, endOut)) = ublas::subrange(*vIn->getDensePtr(), startIn, startIn + sizeB);
+          noalias(ublas::subrange(*vOut->getDensePtr(), startOut, endOut)) = ublas::subrange(*vIn.getDensePtr(), startIn, startIn + sizeB);
         else // if(numIn == 4)// vIn / vOut are Sparse
-          noalias(ublas::subrange(*vOut->getSparsePtr(), startOut, endOut)) = ublas::subrange(*vIn->getSparsePtr(), startIn, startIn + sizeB);
+          noalias(ublas::subrange(*vOut->getSparsePtr(), startOut, endOut)) = ublas::subrange(*vIn.getSparsePtr(), startIn, startIn + sizeB);
       }
       else // vIn and vout of different types ...
       {
         if (numIn == 1) // vIn Dense
-          noalias(ublas::subrange(*vOut->getSparsePtr(), startOut, endOut)) = ublas::subrange(*vIn->getDensePtr(), startIn, startIn + sizeB);
+          noalias(ublas::subrange(*vOut->getSparsePtr(), startOut, endOut)) = ublas::subrange(*vIn.getDensePtr(), startIn, startIn + sizeB);
         else // if(numIn == 4)// vIn Sparse
-          noalias(ublas::subrange(*vOut->getDensePtr(), startOut, endOut)) = ublas::subrange(*vIn->getSparsePtr(), startIn, startIn + sizeB);
+          noalias(ublas::subrange(*vOut->getDensePtr(), startOut, endOut)) = ublas::subrange(*vIn.getSparsePtr(), startIn, startIn + sizeB);
       }
     }
   }

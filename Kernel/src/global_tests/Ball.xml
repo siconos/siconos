@@ -51,9 +51,9 @@
  <DS_Concerned all='true'></DS_Concerned>									
  <Interaction_Content>		
  <LagrangianRelation type="LinearTI">
-	<H matrixRowSize='1' matrixColSize='3'>
+	<C matrixRowSize='1' matrixColSize='3'>
           <row> 1.0  0.0  0.0</row>
-	</H>              
+	</C>              
  </LagrangianRelation>			
  <!-- NS Law of this interaction	-->
  <NewtonImpactLaw>

@@ -24,18 +24,10 @@
 
 #include "Relation.h"
 
-class Relation;
 class DynamicalSystem;
-class LagrangianRXML;
-
-/**Pointer to function - Plug-in utilities*/
-typedef void (*FPtr2)(unsigned int, const double*, unsigned int, const double*, double*, unsigned int, double*);
-
-/**Pointer to function - Plug-in utilities*/
-typedef void (*FPtr3)(unsigned int, const double*, unsigned int, double*, unsigned int, double*);
-
-/**Pointer to function - Plug-in utilities*/
-typedef void (*FPtr4)(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*);
+class RelationXML;
+class SimpleMatrix;
+class SimpleVector;
 
 /** Lagrangian (Non Linear) Relation (generic interface)
  *
@@ -54,137 +46,146 @@ typedef void (*FPtr4)(unsigned int, const double*, double, unsigned int, double*
  * In corresponding derived classes, h and Gi are connected to plug-in functions (user-defined).
  *
  */
-class LagrangianR : public Relation
+template <class T> class LagrangianR : public Relation
 {
+public:
+
+  typedef PluggedObject<T, SimpleMatrix> PluggedMatrix;
+  typedef boost::shared_ptr<PluggedMatrix> SP_PluggedMatrix;
+  typedef enum DataNames {z, q0, q1, q2, p0, p1, p2, sizeDataNames};
 
 protected:
 
-  /** To define the type of constraints (scleronomic ...), ie the variables on which depend h and G*/
-  RELATION::SUBTYPES LagrangianRelationType;
+  /** function used to compute h */
+  T hPtr;
 
-  /** G matrices of gradients of h. */
-  VectorOfMatrices G;
-
-  /** default constructor
-   */
-  LagrangianR();
+  /** Jacobian matrices of H */
+  std::vector<SP_PluggedMatrix> JacH;
 
   /** basic constructor
+      \param the sub-type of the relation
    */
-  LagrangianR(RELATION::SUBTYPES);
+  LagrangianR(RELATION::SUBTYPES lagType): Relation(RELATION::Lagrangian, lagType) {}
 
   /** constructor from xml file
    *  \param relationXML
    *  \param string: relation subType
    */
-  LagrangianR(SP::RelationXML, RELATION::SUBTYPES);
+  LagrangianR(SP::RelationXML relxml, RELATION::SUBTYPES newSubType): Relation(relxml, RELATION::Lagrangian, newSubType) {}
+
+  /** initialize components specific to derived classes.
+   */
+  virtual void initComponents();
 
 public:
 
   /** destructor
    */
-  virtual ~LagrangianR();
+  virtual ~LagrangianR() {};
 
-  /** xml utility: used to read G[i] in xml file
-      \param LagrangianRXML, the xml pointer
-      \param i, index of required G
-  */
-  void readGInXML(SP::LagrangianRXML, unsigned int);
+  // -- JacH --
 
-  /** initialize the relation (check sizes, memory allocation ...)
-   */
-  virtual void initialize();
-
-  /** get the type of constraints of the relation (scleronomic ...)
-   *  \return a string
-   */
-  inline const RELATION::SUBTYPES getLagrangianRelationType() const
-  {
-    return LagrangianRelationType;
-  }
-
-  /** initialize G matrices or components specific to derived classes.
-   */
-  virtual void initComponents();
-
-  // -- G --
-
-  /** get the vector of matrices G
-   *  \return vector<SiconosMatrix*>
-   */
-  inline VectorOfMatrices getGVector() const
-  {
-    return G;
-  }
-
-  /** set the values of G[i]: no copy but links with pointers!!
-   *  \param a VectorOfMatrices.
-   */
-  void setGVector(const VectorOfMatrices&);
-
-  /** get matrix G[index]
+  /** get matrix JacH[index]
    *  \return a SimpleMatrix
    */
-  inline const SimpleMatrix getG(unsigned int  index = 0) const
+  inline const SimpleMatrix getJacH(unsigned int  index = 0) const
   {
-    return *(G[index]);
+    return *(JacH.at(index));
   }
 
-  /** get a pointer on matrix G[index]
+  /** get a pointer on matrix JacH[index]
    *  \return a pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix getGPtr(unsigned int index = 0) const
+  inline SP::SiconosMatrix getJacHPtr(unsigned int index = 0) const
   {
-    return G[index];
+    return JacH.at(index);
   }
 
-  /** set the value of G[index] to newValue (copy)
+  /** set the value of JacH[index] to newValue (copy)
    *  \param SiconosMatrix newValue
-   *  \param unsigned int: index position in G vector
+   *  \param unsigned int: index position in JacH vector
    */
-  void setG(const SiconosMatrix&, unsigned int = 0);
+  template <class U> void setJacH(const U& newValue, unsigned int index = 0)
+  {
+    assert(index >= JacH.size() && "LagrangianR:: setJacH(mat,index), index out of range. Maybe you do not set the sub-type of the relation?");
 
-  /** set G[index] to pointer newPtr (pointer link)
+    if (JacH[index]) JacH[index]->resize(newValue.size(0), newValue.size(1));
+    setObject<PluggedMatrix, SP_PluggedMatrix, U>(JacH[index], newValue);
+  }
+
+  /** set JacH[index] to pointer newPtr (pointer link)
    *  \param SP::SiconosMatrix  newPtr
-   *  \param unsigned int: index position in G vector
+   *  \param unsigned int: index position in JacH vector
    */
-  void setGPtr(SP::SiconosMatrix newPtr, unsigned int = 0);
+  inline void setJacHPtr(SP_PluggedMatrix newPtr, unsigned int index = 0)
+  {
+    JacH.at(index) = newPtr ;
+  }
 
-  /** to set a specified function to compute function h(q,...)
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
+  /** To get the name of JacH[i] plugin
+   *  \return a string
    */
-  virtual void setComputeHFunction(const std::string& , const std::string&);
+  const std::string getJacHName(unsigned int i) const
+  {
+    return JacH[i]->getPluginName();
+  }
 
-  /** to set a specified function to compute G(q, ...)
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
-   *  \param unsigned int: the index of G that must be computed (see introduction of this class for details on indexes)
+  /** true if JacH[i] is plugged
+   *  \return a bool
    */
-  virtual void setComputeGFunction(const std::string& , const std::string&  , unsigned int  = 0);
+  const bool isJacHPlugged(unsigned int i) const
+  {
+    return JacH[i]->isPlugged();
+  }
+
+  /** Gets the number of computed jacobians for h
+      \return an unsigned int.
+  */
+  inline unsigned int getNumberOfJacobiansForH() const
+  {
+    return JacH.size();
+  }
+
+  /** To set a plug-in function to compute output function h
+   *  \param string : the complete path to the plugin
+   *  \param string : the function name to use in this plugin
+   */
+  void setComputeHFunction(const std::string&, const std::string&);
+
+  /** To set a plug-in function to compute jacobianH
+   *  \param string : the complete path to the plugin
+   *  \param string : the function name to use in this plugin
+   *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
+   */
+  void setComputeJacobianHFunction(const std::string&, const std::string&, unsigned int = 0);
+
+  /** initialize the relation (check sizes, memory allocation ...)
+      \param SP to Interaction: the interaction that owns this relation
+  */
+  void initialize(SP::Interaction);
 
   /** to compute y = h(q,v,t) using plug-in mechanism
    * \param: double, current time
    */
-  virtual void computeH(double);
+  void computeH(double);
 
-  /** to compute G using plug-in mechanism. Index shows which G is to be computed
-   * \param: double, current time
-   * \param: unsigned int
+  /** default function to compute jacobianH
+   *  \param double : current time
+   *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
    */
-  virtual void computeG(double, unsigned int = 0);
+  void computeJacH(double, unsigned int);
 
   /** to compute output
-   *  \param double : current time
-   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
-   */
-  virtual void computeOutput(double, unsigned int = 0) = 0;
+    *  \param double : current time
+    *  \param unsigned int: number of the derivative to compute, optional, default = 0.
+    */
+  void computeOutput(double, unsigned int = 0) = 0;
 
   /** to compute p
    *  \param double : current time
    *  \param unsigned int: "derivative" order of lambda used to compute input
    */
-  virtual void computeInput(double, unsigned int) = 0;
+  void computeInput(double, unsigned int = 0) = 0;
 
   /** copy the data of the Relation to the XML tree
    */
@@ -192,7 +193,7 @@ public:
 
   /** main relation members display
    */
-  virtual void display() const;
+  void display() const;
 
 };
 

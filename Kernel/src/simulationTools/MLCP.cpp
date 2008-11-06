@@ -23,7 +23,6 @@
 #include "Simulation.h"
 #include "Model.h"
 #include "NonSmoothDynamicalSystem.h"
-#include "Relation.h"
 #include "DynamicalSystem.h"
 #include "TimeDiscretisation.h"
 #include "MixedLinearComplementarity_Problem.h" // Numerics structure
@@ -81,14 +80,7 @@ void MLCP::setZ(const SiconosVector& newValue)
     RuntimeException::selfThrow("MLCP: setZ, inconsistent size between given z size and problem size. You should set sizeOutput before");
 
   if (! z)
-  {
-#ifndef WithSmartPtr
-    z = new SimpleVector(sizeOutput);
-    isZAllocatedIn = true;
-#else
     z.reset(new SimpleVector(sizeOutput));
-#endif
-  }
 
   *z = newValue;
 }
@@ -97,11 +89,6 @@ void MLCP::setZPtr(SP::SiconosVector newPtr)
 {
   if (sizeOutput != newPtr->size())
     RuntimeException::selfThrow("MLCP: setZPtr, inconsistent size between given z size and problem size. You should set sizeOutput before");
-
-#ifndef WithSmartPtr
-  if (isZAllocatedIn) delete z;
-  isZAllocatedIn = false;
-#endif
 
   z = newPtr;
 
@@ -117,12 +104,6 @@ void MLCP::setMPtr(SP::OSNSMatrix newPtr)
 {
 
   // Note we do not test if newPtr and M sizes are equal. Not necessary?
-#ifndef WithSmartPtr
-  if (isMAllocatedIn)
-    delete M;
-  isMAllocatedIn = false;
-#endif
-
   M = newPtr;
 
 }
@@ -133,16 +114,7 @@ void MLCP::setQ(const SiconosVector& newValue)
     RuntimeException::selfThrow("MLCP: setQ, inconsistent size between given q size and problem size. You should set sizeOutput before");
 
   if (! q)
-  {
-
-#ifndef WithSmartPtr
-    q = new SimpleVector(sizeOutput);
-    isQAllocatedIn = true;
-#else
     q.reset(new SimpleVector(sizeOutput));
-#endif
-
-  }
 
   *q = newValue;
 }
@@ -151,11 +123,6 @@ void MLCP::setQPtr(SP::SiconosVector newPtr)
 {
   if (sizeOutput != newPtr->size())
     RuntimeException::selfThrow("MLCP: setQPtr, inconsistent size between given q size and problem size. You should set sizeOutput before");
-
-#ifndef WithSmartPtr
-  if (isQAllocatedIn) delete q;
-  isQAllocatedIn = false;
-#endif
 
   q = newPtr;
 
@@ -283,11 +250,7 @@ void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
     // Check allocation
     if (! unitaryBlocks[UR1][UR2])
     {
-#ifndef WithSmartPtr
-      unitaryBlocks[UR1][UR2] = new SimpleMatrix(nslawSize1, nslawSize2);
-#else
       (unitaryBlocks[UR1][UR2]).reset(new SimpleMatrix(nslawSize1, nslawSize2));
-#endif
 
     }
     // Get the W and Theta maps of one of the Unitary Relation - Warning: in the current version, if OSI!=Moreau, this fails.
@@ -361,15 +324,9 @@ void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
         //        printf("finalbloc \n");
         //        currentBlock->display();
 
-#ifndef WithSmartPtr
-        delete rightUnitaryBlock;
-#endif
       }
       else RuntimeException::selfThrow("MLCP::computeBlock not yet implemented for relation of type " + relationType1);
 
-#ifndef WithSmartPtr
-      delete leftUnitaryBlock;
-#endif
     }
 
   }
@@ -404,71 +361,29 @@ void MLCP::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
   SP::SiconosVector workX = UR->getWorkXPtr();
   if (osiType == "Moreau" || osiType == "Lsodar")
   {
-    if (relationType == FirstOrder)
+    H = mainInteraction->getRelationPtr()->getJacHPtr(0);
+    if (H)
     {
-      if (relationSubType == Type1R) // || relationSubType =="FirstOrderType2R" || relationType =="FirstOrderType3R")
-      {
-        H = boost::static_pointer_cast<FirstOrderR>(mainInteraction->getRelationPtr())->getJacobianHPtr(0);
-        if (H)
-        {
-          coord[3] = H->size(1);
-          coord[5] = H->size(1);
-          subprod(*H, *workX, *q, coord, true);
-        }
-      }
-      else if (relationSubType == LinearTIR || relationSubType == LinearR)
-      {
-        // q = HXfree + e + Fz
-        H = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getCPtr();
-        if (H)
-        {
-          coord[3] = H->size(1);
-          coord[5] = H->size(1);
-          subprod(*H, *workX, (*q), coord, true);
-        }
-        SP::SiconosVector  e = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getEPtr();
-        if (e)
-          boost::static_pointer_cast<SimpleVector>(q)->addBlock(pos, *e);
+      coord[3] = H->size(1);
+      coord[5] = H->size(1);
+      subprod(*H, *workX, *q, coord, true);
+    }
 
-        H = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getFPtr();
-        if (H)
-        {
-          SP::SiconosVector  workZ = UR->getWorkZPtr();
-          coord[3] = H->size(1);
-          coord[5] = H->size(1);
-          subprod(*H, *workZ, *q, coord, false);
-        }
+    if (relationType == FirstOrder && (relationSubType == LinearTIR || relationSubType == LinearR))
+    {
+      // q = HXfree + e + Fz
+      SP::SiconosVector  e = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getEPtr();
+      if (e)
+        boost::static_pointer_cast<SimpleVector>(q)->addBlock(pos, *e);
+      H = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getFPtr();
+      if (H)
+      {
+        SP::SiconosVector  workZ = UR->getWorkZPtr();
+        coord[3] = H->size(1);
+        coord[5] = H->size(1);
+        subprod(*H, *workZ, *q, coord, false);
       }
     }
-    else if (relationType == Lagrangian)
-    {
-      if (relationSubType == CompliantR || relationSubType == ScleronomousR || relationSubType == RheonomousR)
-      {
-        // q = jacobian_q h().v_free
-        H = boost::static_pointer_cast<LagrangianR>(mainInteraction->getRelationPtr())->getGPtr(0);
-        if (H)
-        {
-          coord[3] = H->size(1);
-          coord[5] = H->size(1);
-          subprod(*H, *workX, *q, coord, true);
-        }
-      }
-
-      else if (relationSubType == LinearR || relationSubType == LinearTIR)
-      {
-        // q = H.v_free
-        H = boost::static_pointer_cast<LagrangianLinearR>(mainInteraction->getRelationPtr())->getHPtr();
-        if (H)
-        {
-          coord[3] = H->size(1);
-          coord[5] = H->size(1);
-          subprod(*H, *workX, *q, coord, true);
-        }
-      }
-    }
-    else
-      RuntimeException::selfThrow("MLCP::getExtraUnitaryBlock, not yet implemented for relations of subtype " + relationSubType);
-
   }
   else if (osiType == "Moreau2")
   {
@@ -483,12 +398,7 @@ void MLCP::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
     if (nslawType == NEWTONIMPACTNSLAW)
     {
 
-#ifndef WithSmartPtr
       e = (boost::static_pointer_cast<NewtonImpactNSL>(mainInteraction->getNonSmoothLawPtr()))->getE();
-#else
-      e = (boost::static_pointer_cast<NewtonImpactNSL>(mainInteraction->getNonSmoothLawPtr()))->getE();
-#endif
-
       std::vector<unsigned int> subCoord(4);
       if (simulationType == "TimeStepping")
       {
@@ -512,12 +422,7 @@ void MLCP::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
     else if (nslawType == NEWTONIMPACTFRICTIONNSLAW)
     {
 
-#ifndef WithSmartPtr
       e = (boost::static_pointer_cast<NewtonImpactFrictionNSL>(mainInteraction->getNonSmoothLawPtr()))->getEn();
-#else
-      e = (boost::static_pointer_cast<NewtonImpactFrictionNSL>(mainInteraction->getNonSmoothLawPtr()))->getEn();
-#endif
-
       // Only the normal part is multiplied by e
       if (simulationType == "TimeStepping")
         (*q)(pos) +=  e * (*UR->getYOldPtr(levelMin))(0);
@@ -682,8 +587,8 @@ void MLCP::postCompute()
     y = (*itCurrent)->getYPtr(levelMin);
     lambda = (*itCurrent)->getLambdaPtr(levelMin);
     // Copy w/z values, starting from index pos into y/lambda.
-    setBlock(w, y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
-    setBlock(z, lambda, lambda->size(), pos, 0);
+    setBlock(*w, y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
+    setBlock(*z, lambda, lambda->size(), pos, 0);
   }
 }
 

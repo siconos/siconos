@@ -369,6 +369,7 @@ void LagrangianDS::initFL()
 
 void LagrangianDS::initRhs(double time)
 {
+  workMatrix.resize(sizeWorkMat);
 
   // Solve Mq[2]=fL+p.
   *q[2] = *(p[2]); // Warning: r/p update is done in Interactions/Relations
@@ -381,8 +382,8 @@ void LagrangianDS::initRhs(double time)
   computeMass();
   // Copy of Mass into workMatrix for LU-factorization.
 
-  workMatrix["invMass"].reset(new SimpleMatrix(*mass));
-  workMatrix["invMass"]->PLUForwardBackwardInPlace(*q[2]);
+  workMatrix[invMass].reset(new SimpleMatrix(*mass));
+  workMatrix[invMass]->PLUForwardBackwardInPlace(*q[2]);
 
   bool flag1 = false, flag2 = false;
   if (jacobianFL[0])
@@ -390,8 +391,8 @@ void LagrangianDS::initRhs(double time)
     // Solve MjacobianX(1,0) = jacobianFL[0]
     computeJacobianFL(0, time);
 
-    workMatrix["jacobianXBloc10"].reset(new SimpleMatrix(*jacobianFL[0]));
-    workMatrix["invMass"]->PLUForwardBackwardInPlace(*workMatrix["jacobianXBloc10"]);
+    workMatrix[jacobianXBloc10].reset(new SimpleMatrix(*jacobianFL[0]));
+    workMatrix[invMass]->PLUForwardBackwardInPlace(*workMatrix[jacobianXBloc10]);
     flag1 = true;
   }
 
@@ -399,22 +400,22 @@ void LagrangianDS::initRhs(double time)
   {
     // Solve MjacobianX(1,1) = jacobianFL[1]
     computeJacobianFL(1, time);
-    workMatrix["jacobianXBloc11"].reset(new SimpleMatrix(*jacobianFL[1]));
-    workMatrix["invMass"]->PLUForwardBackwardInPlace(*workMatrix["jacobianXBloc11"]);
+    workMatrix[jacobianXBloc11].reset(new SimpleMatrix(*jacobianFL[1]));
+    workMatrix[invMass]->PLUForwardBackwardInPlace(*workMatrix[jacobianXBloc11]);
     flag2 = true;
   }
 
-  workMatrix["zero-matrix"].reset(new SimpleMatrix(ndof, ndof, ZERO));
-  workMatrix["Id-matrix"].reset(new SimpleMatrix(ndof, ndof, IDENTITY));
+  workMatrix[zeroMatrix].reset(new SimpleMatrix(ndof, ndof, ZERO));
+  workMatrix[idMatrix].reset(new SimpleMatrix(ndof, ndof, IDENTITY));
 
   if (flag1 && flag2)
-    jacobianXRhs.reset(new BlockMatrix(workMatrix["zero-matrix"], workMatrix["Id-matrix"], workMatrix["jacobianXBloc10"], workMatrix["jacobianXBloc11"]));
+    jacobianXRhs.reset(new BlockMatrix(workMatrix[zeroMatrix], workMatrix[idMatrix], workMatrix[jacobianXBloc10], workMatrix[jacobianXBloc11]));
   else if (flag1) // flag2 = false
-    jacobianXRhs.reset(new BlockMatrix(workMatrix["zero-matrix"], workMatrix["Id-matrix"], workMatrix["jacobianXBloc10"], workMatrix["zero-matrix"]));
+    jacobianXRhs.reset(new BlockMatrix(workMatrix[zeroMatrix], workMatrix[idMatrix], workMatrix[jacobianXBloc10], workMatrix[zeroMatrix]));
   else if (flag2) // flag1 = false
-    jacobianXRhs.reset(new BlockMatrix(workMatrix["zero-matrix"], workMatrix["Id-matrix"], workMatrix["zero-matrix"], workMatrix["jacobianXBloc11"]));
+    jacobianXRhs.reset(new BlockMatrix(workMatrix[zeroMatrix], workMatrix[idMatrix], workMatrix[zeroMatrix], workMatrix[jacobianXBloc11]));
   else
-    jacobianXRhs.reset(new BlockMatrix(workMatrix["zero-matrix"], workMatrix["Id-matrix"], workMatrix["zero-matrix"], workMatrix["zero-matrix"]));
+    jacobianXRhs.reset(new BlockMatrix(workMatrix[zeroMatrix], workMatrix[idMatrix], workMatrix[zeroMatrix], workMatrix[zeroMatrix]));
 }
 
 void LagrangianDS::initialize(const string& simulationType, double time, unsigned int sizeOfMemory)
@@ -584,7 +585,7 @@ void LagrangianDS::setMass(const PMMass& newValue)
 
 void LagrangianDS::setFInt(const POV0& newValue)
 {
-  assert(newValue.size() == n && "LagrangianDS - setFInt: inconsistent dimensions with problem size for input vector fInt");
+  assert(newValue.size() == ndof && "LagrangianDS - setFInt: inconsistent dimensions with problem size for input vector fInt");
 
   if (! fInt)
     fInt.reset(new POV0(newValue));
@@ -594,7 +595,7 @@ void LagrangianDS::setFInt(const POV0& newValue)
 
 void LagrangianDS::setFExt(const PVFext& newValue)
 {
-  assert(newValue.size() == n && "LagrangianDS - setFExt: inconsistent dimensions with problem size for input vector fExt");
+  assert(newValue.size() == ndof && "LagrangianDS - setFExt: inconsistent dimensions with problem size for input vector fExt");
 
   if (!fExt)
     fExt.reset(new PVFext(newValue));
@@ -604,7 +605,7 @@ void LagrangianDS::setFExt(const PVFext& newValue)
 
 void LagrangianDS::setNNL(const PVNNL& newValue)
 {
-  assert(newValue.size() == n && "LagrangianDS - setNNL: inconsistent dimensions with problem size for input vector NNL");
+  assert(newValue.size() == ndof && "LagrangianDS - setNNL: inconsistent dimensions with problem size for input vector NNL");
 
   if (!NNL)
     NNL.reset(new PVNNL(newValue));
@@ -614,8 +615,8 @@ void LagrangianDS::setNNL(const PVNNL& newValue)
 
 void LagrangianDS::setJacobianFInt(unsigned int i, const POM0& newValue)
 {
-  assert(newValue.size(0) == n && "LagrangianDS -setJacobianFInt : inconsistent dimensions with problem size for matrix JacobianFInt.");
-  assert(newValue.size(1) == n && "LagrangianDS -setJacobianFInt : inconsistent dimensions with problem size for matrix JacobianFInt.");
+  assert(newValue.size(0) == ndof && "LagrangianDS -setJacobianFInt : inconsistent dimensions with problem size for matrix JacobianFInt.");
+  assert(newValue.size(1) == ndof && "LagrangianDS -setJacobianFInt : inconsistent dimensions with problem size for matrix JacobianFInt.");
 
   if (! jacobianFInt[i])
     jacobianFInt[i].reset(new POM0(newValue));
@@ -625,8 +626,8 @@ void LagrangianDS::setJacobianFInt(unsigned int i, const POM0& newValue)
 
 void LagrangianDS::setJacobianNNL(unsigned int i, const PMNNL& newValue)
 {
-  assert(newValue.size(0) == n && "LagrangianDS - setJacobianNNL: inconsistent dimensions with problem size for matrix JacobianNNL.");
-  assert(newValue.size(1) == n && "LagrangianDS - setJacobianNNL: inconsistent dimensions with problem size for matrix JacobianNNL.");
+  assert(newValue.size(0) == ndof && "LagrangianDS - setJacobianNNL: inconsistent dimensions with problem size for matrix JacobianNNL.");
+  assert(newValue.size(1) == ndof && "LagrangianDS - setJacobianNNL: inconsistent dimensions with problem size for matrix JacobianNNL.");
 
   if (! jacobianNNL[i])
     jacobianNNL[i].reset(new PMNNL(newValue));
@@ -638,14 +639,14 @@ void LagrangianDS::setJacobianNNL(unsigned int i, const PMNNL& newValue)
 void LagrangianDS::setComputeMassFunction(const string& pluginPath, const string& functionName)
 {
   if (! mass)
-    mass.reset(new PMMass(n, n));
+    mass.reset(new PMMass(ndof, ndof));
   mass->setComputeFunction(pluginPath, functionName);
 }
 
 void LagrangianDS::setComputeMassFunction(FPtr7 fct)
 {
   if (! mass)
-    mass.reset(new PMMass(n, n));
+    mass.reset(new PMMass(ndof, ndof));
   mass->setComputeFunction(fct);
 }
 
@@ -670,7 +671,7 @@ void LagrangianDS::setComputeFExtFunction(const string& pluginPath, const string
   fExt->setComputeFunction(pluginPath, functionName);
 }
 
-void LagrangianDS::setComputeFExtFunction(FPtr1 fct)
+void LagrangianDS::setComputeFExtFunction(VectorFunctionOfTime fct)
 {
   if (! fExt)
     fExt.reset(new PVFext(ndof));
@@ -855,13 +856,13 @@ void LagrangianDS::computeRhs(double time, bool isDSup)
 
 
   // Computes q[2] = inv(mass)*(fL+p) by solving Mq[2]=fL+p.
-  // -- Case 1: if mass is constant, then a copy of imass is LU-factorized during initialization and saved into workMatrix["invMass"].
-  // -- Case 2: mass is not constant, we copy it into workMatrix["invMass"]
+  // -- Case 1: if mass is constant, then a copy of imass is LU-factorized during initialization and saved into workMatrix[invMass].
+  // -- Case 2: mass is not constant, we copy it into workMatrix[invMass]
   // Then we proceed with PLUForwardBackward.
   if (mass->isPlugged())
-    *workMatrix["invMass"] = *mass;
+    *workMatrix[invMass] = *mass;
 
-  workMatrix["invMass"]->PLUForwardBackwardInPlace(*q[2]);
+  workMatrix[invMass]->PLUForwardBackwardInPlace(*q[2]);
 
 }
 
@@ -873,14 +874,14 @@ void LagrangianDS::computeJacobianXRhs(double time, bool isDSup)
     computeMass();
 
   if (mass->isPlugged())
-    *workMatrix["invMass"] = *mass;
+    *workMatrix[invMass] = *mass;
 
   if (jacobianFL[0])
   {
     SP::SiconosMatrix bloc10 = jacobianXRhs->getBlockPtr(1, 0);
     computeJacobianFL(0, time);
     *bloc10 = *jacobianFL[0];
-    workMatrix["invMass"]->PLUForwardBackwardInPlace(*bloc10);
+    workMatrix[invMass]->PLUForwardBackwardInPlace(*bloc10);
   }
 
   if (jacobianFL[1])
@@ -888,7 +889,7 @@ void LagrangianDS::computeJacobianXRhs(double time, bool isDSup)
     SP::SiconosMatrix bloc11 = jacobianXRhs->getBlockPtr(1, 1);
     computeJacobianFL(1, time);
     *bloc11 = *jacobianFL[1];
-    workMatrix["invMass"]->PLUForwardBackwardInPlace(*bloc11);
+    workMatrix[invMass]->PLUForwardBackwardInPlace(*bloc11);
   }
 }
 
@@ -1095,7 +1096,7 @@ double LagrangianDS::dsConvergenceIndicator()
   double dsCvgIndic;
   SimpleVector diff(q[0]->size());
   // Compute difference between present and previous Newton steps
-  SP::SiconosVector valRef = workVector["NewtonCvg"];
+  SP::SiconosVector valRef = workV[NewtonSave];
   sub(*(q[0]), *valRef, diff);
   if (valRef->norm2() != 0)
     dsCvgIndic = diff.norm2() / (valRef->norm2());
@@ -1126,7 +1127,7 @@ void LagrangianDS::computeQFree(double time, unsigned int level, SP::SiconosVect
   if (NNL)
     *qFreeOut -= *NNL;
 
-  workMatrix["invMass"]->PLUForwardBackwardInPlace(*qFreeOut);
+  workMatrix[invMass]->PLUForwardBackwardInPlace(*qFreeOut);
 }
 
 void LagrangianDS::resetNonSmoothPart()
@@ -1138,6 +1139,6 @@ void LagrangianDS::computePostImpactVelocity()
 {
   // When this function is call, q[1] is supposed to be pre-impact velocity.
   // We solve M(v+ - v-) = p - The result is saved in(place of) p[1].
-  workMatrix["invMass"]->PLUForwardBackwardInPlace(*p[1]);
+  workMatrix[invMass]->PLUForwardBackwardInPlace(*p[1]);
   *q[1] += *p[1];  // v+ = v- + p
 }

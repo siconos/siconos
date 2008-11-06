@@ -35,18 +35,18 @@ void DiskPlanR::computeH(double)
 
   // Warning: temporary method to have contiguous values in memory,
   // copy of block to simple.
-  *workX = *data["q0"];
+  *workX = *data[q0];
   double *q = &(*workX)(0);
 
   y->setValue(0, fabs(A * q[0] + B * q[1] + C) / sqrA2pB2 - r);
 
 }
 
-void DiskPlanR::computeG(double, unsigned int)
+void DiskPlanR::computeJacH(double, unsigned int)
 {
-  *workX = *data["q0"];
+  *workX = *data[q0];
   double *q = &(*workX)(0);
-  double *g = &(*(G[0]))(0, 0);
+  double *g = &(*(JacH[0]))(0, 0);
 
   double x0 = q[0];
   double y0 = q[1];

@@ -21,7 +21,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "LagrangianScleronomousR.h"
-#include "LagrangianRXML.h"
+#include "RelationXML.h"
 #include "NonSmoothDynamicalSystem.h"
 #include "NonSmoothDynamicalSystemXML.h"
 
@@ -36,7 +36,6 @@ private:
   // tests to be done ...
 
   CPPUNIT_TEST(testBuildLagrangianScleronomousR0);
-  //  CPPUNIT_TEST(testBuildLagrangianScleronomousR1);
   CPPUNIT_TEST(testBuildLagrangianScleronomousR2);
   CPPUNIT_TEST(End);
 
@@ -45,14 +44,13 @@ private:
   // \todo exception test
 
   void testBuildLagrangianScleronomousR0();
-  //  void testBuildLagrangianScleronomousR1();
   void testBuildLagrangianScleronomousR2();
   void End();
 
   // Members
 
   xmlNode * node;
-  LagrangianRXML* tmpxml1;
+  SP::RelationXML tmpxml1;
 
 public:
   void setUp();

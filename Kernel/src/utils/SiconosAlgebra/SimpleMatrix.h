@@ -62,6 +62,10 @@ protected:
   */
   MATRIX_UBLAS_TYPE mat;
 
+  /** Default constructor
+   */
+  SimpleMatrix();
+
 private:
   /** std::vector<int> ipiv;
    * The pivot indices obtained from DGETRF (PLUFactorizationInPlace)
@@ -77,10 +81,6 @@ private:
    *  Boolean = true if the Matrix has been Inversed in Place
    */
   bool isPLUInversed;
-
-  /** Default constructor
-   */
-  SimpleMatrix() {};
 
   /**  computes res = subA*x +res, subA being a submatrix of A (rows from startRow to startRow+sizeY and columns between startCol and startCol+sizeX).
        If x is a block vector, it call the present function for all blocks.

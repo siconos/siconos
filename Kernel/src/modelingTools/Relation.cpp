@@ -17,35 +17,27 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "Relation.h"
-#include "RelationXML.h"
-#include "Interaction.h"
-#include "FirstOrderNonLinearDS.h"
 
 using namespace std;
 
 // Default constructor
 Relation::Relation(RELATION::TYPES newType, RELATION::SUBTYPES newSub):
-  relationType(newType), subType(newSub)
+  relationType(newType), subType(newSub), hPlugged(false), gPlugged(false), hName("unamed"), gName("unamed")
 {}
 
 // xml constructor
 Relation::Relation(SP::RelationXML relxml, RELATION::TYPES newType, RELATION::SUBTYPES newSub):
-  relationType(newType), subType(newSub), relationxml(relxml)
+  relationType(newType), subType(newSub), relationxml(relxml), hPlugged(false), gPlugged(false), hName("unamed"), gName("unamed")
 {
   if (! relationxml)
     RuntimeException::selfThrow("Relation::fillRelationWithRelationXML - object RelationXML does not exist");
 }
 
-Relation::~Relation() {}
-
 void Relation::display() const
 {
   cout << "=====> Relation of type " << relationType << " and subtype " << subType << endl;
-  RELATION::PluginList::const_iterator it;
-  cout << "The following operators are linked to plug-in: " << endl;
-  for (it = pluginNames.begin(); it != pluginNames.end(); ++it)
-    cout << (*it).first << " plugged to:" << (*it).second << endl;
-  cout << "===================================== " << endl;
+  if (interaction) cout << "- Interaction id" << interaction->getId() << endl;
+  else cout << "- Linked interaction -> NULL" << endl;
 }
 
 void Relation::saveRelationToXML() const

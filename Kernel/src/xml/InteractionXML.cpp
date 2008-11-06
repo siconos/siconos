@@ -20,8 +20,7 @@
 
 //---  Following includes to be suppressed thanks to factory (?) ---
 // Relations
-#include "FirstOrderLinearRXML.h"
-#include "LagrangianLinearRXML.h"
+#include "LinearRXML.h"
 // Nslaw
 #include "ComplementarityConditionNSLXML.h"
 #include "RelayNSLXML.h"
@@ -67,26 +66,15 @@ InteractionXML::InteractionXML(xmlNodePtr  interactionNode):
     if ((node2 = SiconosDOMTreeTools::findNodeChild(node)))
     {
       relationNode = node2;
-      // get Relation type
-      type = (char*)node2->name;
+      // get Relation sub-type
       subType = SiconosDOMTreeTools::getStringAttributeValue(node2, "type");
 
-      if (type == "FirstOrderRelation")
-      {
-        if (subType == "NonLinear" || subType == "Type1")
-          relationXML.reset(new FirstOrderRXML(node2));
-        else if (subType == "Linear" || subType == "LinearTI")
-          relationXML.reset(new FirstOrderLinearRXML(node2));
-      }
-      else if (type == "LagrangianRelation")
-      {
-        if (subType == "Linear" || subType == "LinearTI")
-          relationXML.reset(new LagrangianLinearRXML(node2));
-        else
-          relationXML.reset(new LagrangianRXML(node2));
-      }
+      // Linear case
+      if (subType == "Linear" || subType == "LinearTI")
+        relationXML.reset(new LinearRXML(node2));
+      // General non linear case
       else
-        XMLException::selfThrow("InteractionXML : undefined Relation type : " + type);
+        relationXML.reset(new RelationXML(node2));
     }
     else
       XMLException::selfThrow("InteractionXML - constructor: relation not found.");

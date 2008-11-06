@@ -20,7 +20,7 @@
 #define __FirstOrderType1RTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "FirstOrderRXML.h"
+#include "RelationXML.h"
 #include "NonSmoothDynamicalSystem.h"
 #include "NonSmoothDynamicalSystemXML.h"
 #include "FirstOrderType1R.h"
@@ -52,8 +52,8 @@ private:
   // Members
 
   xmlNodePtr node1;
-  FirstOrderRXML * tmpxml1;
-  NonSmoothDynamicalSystem * nsds;
+  SP::RelationXML tmpxml1;
+  SP::NonSmoothDynamicalSystem nsds;
 
 public:
   void setUp();

@@ -53,80 +53,47 @@
  * G0 and h are connected to plug-in functions.
  *
  */
-class LagrangianScleronomousR : public LagrangianR
+class LagrangianScleronomousR : public LagrangianR<FPtr3>
 {
 
 protected:
 
-  /** LagrangianScleronomousR plug-in to compute h(q,z)
-   * @param sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved in the interaction
-   * @param q : pointer to the first element of q
-   * @param sizeY : size of vector y (ie of the interaction)
-   * @param[in,out] y : pointer to the first element of y
-   * @param sizeZ : size of vector z
-   * @param[in,out] z: pointer to z vector(s) from DS.
-   */
-  FPtr3 hPtr;
-
-  /** LagrangianScleronomousR plug-in to compute G0(q,z), gradient of h according to q
-   * @param sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved in the interaction
-   * @param q : pointer to the first element of q
-   * @param sizeY : size of vector y (ie of the intercation)
-   * @param[in,out] G0 : pointer to the first element of G0 (sizeY X sizeDS matrix)
-   * @param sizeZ : size of vector z
-   * @param[in,out] z: pointer to z vector(s) from DS.
-   */
-  FPtr3 G0Ptr;
-
-  /** default constructor
-   */
-  LagrangianScleronomousR();
+  /** basic constructor
+      \param the sub-type of the relation
+  */
+  LagrangianScleronomousR(): LagrangianR<FPtr3>(RELATION::ScleronomousR)
+  {
+    JacH.resize(1);
+  }
 
 public:
 
   /** constructor from xml file
    *  \param relationXML
-   *  \exception RuntimeException
    */
   LagrangianScleronomousR(SP::RelationXML);
 
   /** constructor from a set of data
-   *  \param string : the type of relation (scleronomic ...)
-   *  \param string : the name of the plugin for computeH
-   *  \param vector<string> : a list of names for the plugin for computeG (depends on relation type)
+   *  \param string : the name of the plugin to compute h
+   *  \param string : the name of the plugin to compute jacobian h according to q
    *  \exception RuntimeException
    */
   LagrangianScleronomousR(const std::string&, const std::string&);
 
   /** destructor
    */
-  ~LagrangianScleronomousR();
-
-  /** to set a specified function to compute function h(q,...)
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
-   *  \exception SiconosSharedLibraryException
-   */
-  void setComputeHFunction(const std::string& , const std::string&);
-
-  /** to set a specified function to compute G(q, ...)
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
-   *  \param unsigned int: the index of G that must be computed (see introduction of this class for details on indexes)
-   *  \exception SiconosSharedLibraryException
-   */
-  void setComputeGFunction(const std::string& , const std::string&  , unsigned int  = 0);
+  virtual ~LagrangianScleronomousR() {};
 
   /** to compute y = h(q,v,t) using plug-in mechanism
    * \param: double, current time
    */
   void computeH(double);
 
-  /** to compute G using plug-in mechanism. Index shows which G is to be computed
+  /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
    * \param: double, current time
    * \param: unsigned int
    */
-  void computeG(double, unsigned int = 0);
+  void computeJacH(double, unsigned int);
 
   /** to compute output
    *  \param double : current time
@@ -138,7 +105,7 @@ public:
    *  \param double : current time
    *  \param unsigned int: "derivative" order of lambda used to compute input
    */
-  void computeInput(double, unsigned int);
+  void computeInput(double, unsigned int = 0);
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param Relation* : the relation which must be converted
@@ -146,5 +113,7 @@ public:
    */
   static LagrangianScleronomousR* convert(Relation *r);
 };
+
+TYPEDEF_SPTR(LagrangianScleronomousR);
 
 #endif // LAGRANGIANRELATION_H

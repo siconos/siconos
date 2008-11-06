@@ -17,67 +17,38 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-/*! \file RelationTypes.hpp
-  \brief enum of the available types and subtypes for relations,
-  plugin names ...
+/*! \file PluginTypes.hpp
+  \brief list of typedef for pointers to functions used in plugin mechanism.
 */
 
-#ifndef RELATIONTYPES_HPP
-#define RELATIONTYPES_HPP
-
-#include "PluggedObject.hpp"
-
-/** Namespace for user-defined types related to relations */
-namespace RELATION
-{
-/** List of possible Relations types*/
-enum TYPES
-{
-  /** First Order */
-  FirstOrder,
-  /** Lagrangian */
-  Lagrangian
-};
-
-/** List of possible Relations subtypes*/
-enum SUBTYPES
-{
-  /** non linear */
-  NonLinearR,
-  /** linear */
-  LinearR,
-  /** Linear and time invariant */
-  LinearTIR,
-  /** Scleronomous (lagrangian only) */
-  ScleronomousR,
-  /** Rheonomous (lagrangian only) */
-  RheonomousR,
-  /** Compliant (lagrangian only) */
-  CompliantR,
-  /** */
-  Type1R
-};
-}
-
-#include "SimpleMatrix.h"
-#include "SimpleVector.h"
+#ifndef PLUGINTYPES_HPP
+#define PLUGINTYPES_HPP
 
 /** Pointer to function used for plug-in for matrix-type operators that depends only on time */
 typedef void (*MatrixFunctionOfTime)(double, unsigned int, unsigned int, double*, unsigned int, double*);
 
-/** Matrix plugged to a MatrixFunctionOfTime */
-typedef PluggedObject<MatrixFunctionOfTime, SimpleMatrix> PMTime;
-
 /** Pointer to function used for plug-in for vector-type operators that depends only on time */
 typedef void (*VectorFunctionOfTime)(double, unsigned int, double*, unsigned int, double*);
 
-/** Vector plugged to a VectorFunctionOfTime */
-typedef PluggedObject<VectorFunctionOfTime, SimpleVector> PVTime;
+/** */
+typedef void (*FPtr1)(double, unsigned int, const double*, double*, unsigned int, double*);
 
-/** Smart pointer to a PMTime */
-TYPEDEF_SPTR(PMTime);
+/** */
+typedef void (*FPtr2)(unsigned int, const double*, unsigned int, const double*, double*, unsigned int, double*);
 
-/** Smart pointer to a PVTime */
-TYPEDEF_SPTR(PVTime);
+/** */
+typedef void (*FPtr3)(unsigned int, const double*, unsigned int, double*, unsigned int, double*);
+
+/** */
+typedef void (*FPtr4)(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*);
+
+/** */
+typedef void (*FPtr5)(unsigned int, const double*, const double*, double*, unsigned int, double*);
+
+/** */
+typedef void (*FPtr6)(double, unsigned int, const double*, const double*, double*, unsigned int, double*);
+
+/** */
+typedef void (*FPtr7)(unsigned int, const double*, double*, unsigned int, double*);
 
 #endif

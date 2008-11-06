@@ -68,7 +68,6 @@ const std::string LMGC90_SIMULATION_TAG = "OneStepIntegrator_LMGC90";
 const std::string RELATION_TAG = "Relation";
 const std::string LINEAR_TIME_INVARIANT_RELATION_TAG = "LinearTimeInvariantRelation";
 const std::string LAGRANGIAN_RELATION_TAG = "LagrangianRelation";
-const std::string LAGRANGIAN_LINEAR_RELATION_TAG = "LagrangianLinearRelation";
 // - Non-smooth laws -
 const std::string COMPLEMENTARITY_CONDITION_NSLAW_TAG = "ComplementarityCondition";
 const std::string RELAY_NSLAW_TAG = "Relay";

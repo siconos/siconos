@@ -16,71 +16,74 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "FirstOrderLinearRXML.h"
+#include "LinearRXML.h"
 using namespace std;
 
-FirstOrderLinearRXML::FirstOrderLinearRXML(): FirstOrderRXML(), CNode(NULL), DNode(NULL), FNode(NULL), eNode(NULL), BNode(NULL)
+LinearRXML::LinearRXML(): RelationXML(), CNode(NULL), DNode(NULL), FNode(NULL), eNode(NULL), BNode(NULL)
 {}
 
-FirstOrderLinearRXML::FirstOrderLinearRXML(xmlNode * LTIRelationNode):
-  FirstOrderRXML(LTIRelationNode), CNode(NULL), DNode(NULL), FNode(NULL), eNode(NULL), BNode(NULL)
+LinearRXML::LinearRXML(xmlNode * LRelationNode):
+  RelationXML(LRelationNode), CNode(NULL), DNode(NULL), FNode(NULL), eNode(NULL), BNode(NULL)
 {
   xmlNodePtr node;
-  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, "C")))
+  // Note Franck: We keep two different name for q coefficient according to the global type of the relation,
+  // this for backward compatibility.
+  // Todo: set one single name whatever the type is for all operators?
+
+  if ((node = SiconosDOMTreeTools::findNodeChild(LRelationNode, "C")))
     CNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, "D")))
+  if ((node = SiconosDOMTreeTools::findNodeChild(LRelationNode, "D")))
     DNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, "F")))
+  if ((node = SiconosDOMTreeTools::findNodeChild(LRelationNode, "F")))
     FNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, "e")))
+  if ((node = SiconosDOMTreeTools::findNodeChild(LRelationNode, "e")))
     eNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, "B")))
+  if ((node = SiconosDOMTreeTools::findNodeChild(LRelationNode, "B")))
     BNode = node;
 }
 
-FirstOrderLinearRXML::~FirstOrderLinearRXML()
-{}
+LinearRXML::~LinearRXML() {}
 
-void FirstOrderLinearRXML::setC(const SiconosMatrix& matrix)
+void LinearRXML::setC(const SiconosMatrix& matrix)
 {
   if (!CNode)
     CNode = SiconosDOMTreeTools::createMatrixNode(rootNode, "C", matrix);
   else SiconosDOMTreeTools::setSiconosMatrixNodeValue(CNode, matrix);
 }
 
-void FirstOrderLinearRXML::setD(const SiconosMatrix& matrix)
+void LinearRXML::setD(const SiconosMatrix& matrix)
 {
   if (!DNode)
     DNode = SiconosDOMTreeTools::createMatrixNode(rootNode, "D", matrix);
   else SiconosDOMTreeTools::setSiconosMatrixNodeValue(DNode, matrix);
 }
 
-void FirstOrderLinearRXML::setF(const SiconosMatrix &matrix)
+void LinearRXML::setF(const SiconosMatrix &matrix)
 {
   if (!FNode)
     FNode = SiconosDOMTreeTools::createMatrixNode(rootNode, "F", matrix);
   else SiconosDOMTreeTools::setSiconosMatrixNodeValue(FNode, matrix);
 }
 
-void FirstOrderLinearRXML::setE(const SiconosVector& vec)
+void LinearRXML::setE(const SiconosVector& vec)
 {
   if (!eNode)
     eNode = SiconosDOMTreeTools::createVectorNode(rootNode, "e", vec);
   else SiconosDOMTreeTools::setSiconosVectorNodeValue(eNode, vec);
 }
 
-void FirstOrderLinearRXML::setB(const SiconosMatrix &matrix)
+void LinearRXML::setB(const SiconosMatrix &matrix)
 {
   if (! BNode)
     BNode = SiconosDOMTreeTools::createMatrixNode(rootNode, "B", matrix);
   else SiconosDOMTreeTools::setSiconosMatrixNodeValue(BNode, matrix);
 }
 
-void FirstOrderLinearRXML::setCPlugin(const std::string& plugin)
+void LinearRXML::setCPlugin(const std::string& plugin)
 {
   if (!CNode)
   {
@@ -91,7 +94,7 @@ void FirstOrderLinearRXML::setCPlugin(const std::string& plugin)
     SiconosDOMTreeTools::setStringAttributeValue(CNode, "matrixPlugin", plugin);
 }
 
-void FirstOrderLinearRXML::setDPlugin(const std::string& plugin)
+void LinearRXML::setDPlugin(const std::string& plugin)
 {
   if (!DNode)
   {
@@ -102,7 +105,7 @@ void FirstOrderLinearRXML::setDPlugin(const std::string& plugin)
     SiconosDOMTreeTools::setStringAttributeValue(DNode, "matrixPlugin", plugin);
 }
 
-void FirstOrderLinearRXML::setFPlugin(const std::string& plugin)
+void LinearRXML::setFPlugin(const std::string& plugin)
 {
   if (!FNode)
   {
@@ -113,7 +116,7 @@ void FirstOrderLinearRXML::setFPlugin(const std::string& plugin)
     SiconosDOMTreeTools::setStringAttributeValue(FNode, "matrixPlugin", plugin);
 }
 
-void FirstOrderLinearRXML::setEPlugin(const std::string& plugin)
+void LinearRXML::setEPlugin(const std::string& plugin)
 {
   if (!eNode)
   {
@@ -124,7 +127,7 @@ void FirstOrderLinearRXML::setEPlugin(const std::string& plugin)
     SiconosDOMTreeTools::setStringAttributeValue(eNode, "vectorPlugin", plugin);
 }
 
-void FirstOrderLinearRXML::setBPlugin(const std::string& plugin)
+void LinearRXML::setBPlugin(const std::string& plugin)
 {
   if (!BNode)
   {

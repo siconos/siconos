@@ -50,7 +50,7 @@ protected:
 
   /** Default constructor
    */
-  SimpleVector() {};
+  SimpleVector();
 
 public:
   /***************************** CONSTRUCTORS ****************************/
@@ -306,7 +306,7 @@ public:
    * \param startIn, an unsigned int
    * \param startOut, an unsigned int
    */
-  friend void setBlock(SPC::SiconosVector, SP::SiconosVector, unsigned int, unsigned int, unsigned int);
+  friend void setBlock(const SiconosVector&, SP::SiconosVector, unsigned int, unsigned int, unsigned int);
 
   /** A==B when (A-B).normInf()<tolerance
    * \param 2 SiconosVector

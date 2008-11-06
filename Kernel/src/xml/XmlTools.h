@@ -36,8 +36,7 @@ Note that not all files from the current location are listed below, since some o
 #include "MoreauXML.h"
 #include "LsodarXML.h"
 
-#include "FirstOrderLinearRXML.h"
-#include "LagrangianLinearRXML.h"
+#include "LinearRXML.h"
 
 #include "SiconosModelXML.h"
 #include "SiconosMemoryXML.h"

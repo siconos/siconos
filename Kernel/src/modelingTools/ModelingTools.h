@@ -29,14 +29,7 @@ Note that not all files from the current location are listed below, since some o
 
 #include "Interaction.h"
 
-#include "FirstOrderType1R.h"
-#include "FirstOrderLinearR.h"
-#include "FirstOrderLinearTIR.h"
-
-#include "LagrangianLinearR.h"
-#include "LagrangianScleronomousR.h"
-#include "LagrangianCompliantR.h"
-#include "LagrangianRheonomousR.h"
+#include "RelationTypes.h"
 
 #include "LagrangianLinearTIDS.h"
 #include "FirstOrderLinearTIDS.h"

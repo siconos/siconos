@@ -20,203 +20,99 @@
 // \todo : create a work vector for all tmp vectors used in computeG, computeH ...
 
 #include "LagrangianR.h"
-#include "LagrangianRXML.h"
+#include "RelationXML.h"
 #include "Interaction.h"
 #include "LagrangianDS.h"
 
 using namespace std;
-using namespace RELATION;
 
-// Default constructor
-LagrangianR::LagrangianR():
-  Relation(Lagrangian, NonLinearR), LagrangianRelationType(NonLinearR)
-{}
-
-// Basic constructor
-LagrangianR::LagrangianR(RELATION::SUBTYPES lagType):
-  Relation(Lagrangian, lagType), LagrangianRelationType(lagType)
-{}
-
-LagrangianR::LagrangianR(SP::RelationXML relxml, RELATION::SUBTYPES newSubType): Relation(relxml, Lagrangian, newSubType), LagrangianRelationType()
-{}
-
-void LagrangianR::readGInXML(SP::LagrangianRXML LRxml, unsigned int i)
+template <class T> void LagrangianR<T>::initComponents()
 {
-  RELATION::PluginNames name;
-  if (i == 0) name = G0;
-  else if (i == 1)
-    name = G1;
-  else //if (i==2)
-    name = G2;
+  unsigned int sizeY = interaction->getSizeOfY();
+  unsigned int sizeDS = interaction->getSizeOfDS();
 
-  if (LRxml->isGPlugin(i))
-  {
-    pluginNames[name] = LRxml->getGPlugin(i);
-    setComputeGFunction(SSL::getPluginName(pluginNames[name]), SSL::getPluginFunctionName(pluginNames[name]), i);
-
-  }
+  // The initialization of JacH[0] depends on the way the Relation was built ie if the matrix
+  // was read from xml or not
+  if (! JacH[0])
+    JacH[0].reset(new PluggedMatrix(sizeY, sizeDS));
   else
   {
-
-    G[i].reset(new SimpleMatrix(LRxml->getGMatrix(i)));
-    isPlugged[name] = false;
+    if (JacH[0]->size(0) == 0) // if the matrix dim are null
+      JacH[0]->resize(sizeY, sizeDS);
+    else
+      assert((JacH[0]->size(1) == sizeDS && JacH[0]->size(0) == sizeY) &&
+             "LagrangianScleronomousR::initComponents inconsistent sizes between JacH[0] matrix and the interaction.");
   }
+
+  workX.reset(new SimpleVector(sizeDS));
+  workZ.reset(new SimpleVector(interaction->getSizeZ()));
+  workY.reset(new SimpleVector(sizeY));
 }
 
-LagrangianR::~LagrangianR()
+template <class T> void LagrangianR<T>::initialize(SP::Interaction inter)
 {
-  G.clear();
-}
-
-void LagrangianR::initialize()
-{
-  // Check if an Interaction is connected to the Relation.
-  if (!interaction)
-    RuntimeException::selfThrow("LagrangianR::initialize failed. No Interaction linked to the present relation.");
+  assert(inter && "FirstOrderR::initialize failed. No Interaction linked to the present relation.");
+  interaction = inter;
 
   // Memory allocation for G[i], if required (depends on the chosen constructor).
   initComponents();
+  data.resize(sizeDataNames);
 
   DSIterator it;
-  data["q0"].reset(new BlockVector()); // displacement
-  data["q1"].reset(new BlockVector()); // velocity
-  data["q2"].reset(new BlockVector()); // acceleration
-  data["z"].reset(new BlockVector()); // z vector
-  data["p0"].reset(new BlockVector());
-  data["p1"].reset(new BlockVector());
-  data["p2"].reset(new BlockVector());
+  data[q0].reset(new BlockVector()); // displacement
+  data[q1].reset(new BlockVector()); // velocity
+  data[q2].reset(new BlockVector()); // acceleration
+  data[z].reset(new BlockVector()); // z vector
+  data[p0].reset(new BlockVector());
+  data[p1].reset(new BlockVector());
+  data[p2].reset(new BlockVector());
   SP::LagrangianDS lds;
   DS::TYPES type;
   for (it = interaction->dynamicalSystemsBegin(); it != interaction->dynamicalSystemsEnd(); ++it)
   {
     type = (*it)->getType();
     // check dynamical system type
-    if (type != DS::LLTIDS && type != DS::LNLDS)
-      RuntimeException::selfThrow("LagrangianR1::initialize failed, not implemented for dynamical system of type: " + type);
+    assert((type == DS::LLTIDS || type == DS::LNLDS) && "LagrangianR::initialize failed, not implemented for dynamical system of type: " + type);
 
     // convert vDS systems into LagrangianDS and put them in vLDS
     lds = boost::static_pointer_cast<LagrangianDS> (*it);
     // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-    data["q0"]->insertPtr(lds->getQPtr());
-    data["q1"]->insertPtr(lds->getVelocityPtr());
-    data["q2"]->insertPtr(lds->getAccelerationPtr());
-    data["p0"]->insertPtr(lds->getPPtr(1));
-    data["p1"]->insertPtr(lds->getPPtr(1));
-    data["p2"]->insertPtr(lds->getPPtr(2));
-    data["z"]->insertPtr(lds->getZPtr());
+    data[q0]->insertPtr(lds->getQPtr());
+    data[q1]->insertPtr(lds->getVelocityPtr());
+    data[q2]->insertPtr(lds->getAccelerationPtr());
+    data[p0]->insertPtr(lds->getPPtr(1));
+    data[p1]->insertPtr(lds->getPPtr(1));
+    data[p2]->insertPtr(lds->getPPtr(2));
+    data[z]->insertPtr(lds->getZPtr());
   }
 }
 
-void LagrangianR::initComponents()
+template <class T> void LagrangianR<T>::setComputeHFunction(const string& pluginPath, const string& functionName)
 {
-  unsigned int sizeY = interaction->getSizeOfY();
-  unsigned int sizeQ = interaction->getSizeOfDS();
-
-  if (! G[0])
-    G[0].reset(new SimpleMatrix(sizeY, sizeQ));
-
-  else // Check if dimension are consistents with interaction.
-    if (sizeY != G[0]->size(0) || sizeQ != G[0]->size(1))
-      RuntimeException::selfThrow("LagrangianR:: initComponents failed. Inconsistent sizes between Interaction and Relation matrices.");
-  workX.reset(new SimpleVector(interaction->getSizeOfDS()));
-  workZ.reset(new SimpleVector(interaction->getSizeZ()));
-  workY.reset(new SimpleVector(sizeY));
+  hPlugged = Plugin::setFunction(&hPtr, pluginPath, functionName, hName);
 }
 
-void LagrangianR::setGVector(const VectorOfMatrices& newVector)
+template <class T> void LagrangianR<T>::setComputeJacobianHFunction(const string& pluginPath, const string& functionName, unsigned int index)
 {
-  unsigned int nG = G.size();
-  if (newVector.size() != nG)
-    RuntimeException::selfThrow("LagrangianR::setGVector(newG) failed. Inconsistent sizes between newG and the problem type. You might have forget to call setLagrangianRelationType before?");
-
-
-  // If G[i] has been allocated before => delete
-  RELATION::PluginNames name;
-  G.clear();
-
-  for (unsigned int i = 0; i < nG; i++)
-  {
-    if (i == 0)
-      name = G0;
-    else if (i == 1)
-      name = G1;
-    else
-      name = G2;
-    G[i] = newVector[i]; // Warning: links to pointers, no copy!!
-    isPlugged[name] = false;
-  }
+  JacH[index]->setComputeFunction(pluginPath, functionName);
 }
 
-void LagrangianR::setG(const SiconosMatrix& newValue, unsigned int index)
-{
-  if (index >= G.size())
-    RuntimeException::selfThrow("LagrangianR:: setG(mat,index), index out of range. Maybe you do not call setLagrangianRelationType before?");
-
-  RELATION::PluginNames name;
-  if (index == 0)
-    name = G0;
-  else if (index == 1)
-    name = G1;
-  else
-    name = G2;
-
-  if (! G[index])
-    G[index].reset(new SimpleMatrix(newValue));
-
-  else
-    *(G[index]) = newValue;
-
-  isPlugged[name] = false;
-}
-
-void LagrangianR::setGPtr(SP::SiconosMatrix newPtr, unsigned int  index)
-{
-  if (index >= G.size())
-    RuntimeException::selfThrow("LagrangianR:: setG(mat,index), index out of range. Maybe you do not call setLagrangianRelationType before?");
-  RELATION::PluginNames name;
-  if (index == 0)
-    name = G0;
-  else if (index == 1)
-    name = G1;
-  else
-    name = G2;
-  G[index] = newPtr;
-  isPlugged[name] = false;
-}
-
-void LagrangianR::setComputeHFunction(const string& , const string&)
-{
-  RuntimeException::selfThrow("LagrangianR::setComputeHFunction: not yet implemented (or useless) for Lagrangian relation of type " + subType);
-}
-
-void LagrangianR::setComputeGFunction(const string& , const string& , unsigned int)
-{
-  RuntimeException::selfThrow("LagrangianR::setComputeGFunction: not yet implemented (or useless) for Lagrangian relation of type " + subType);
-}
-
-void LagrangianR::computeH(double)
+template <class T> void LagrangianR<T>::computeH(double)
 {
   RuntimeException::selfThrow("LagrangianR::computeH: not yet implemented (or useless) for Lagrangian relation of type " + subType);
 }
 
-void LagrangianR::computeG(double, unsigned int)
+template <class T> void LagrangianR<T>::computeJacH(double, unsigned int)
 {
-  RuntimeException::selfThrow("LagrangianR::computeG: not yet implemented (or useless) for Lagrangian relation of type " + subType);
+  RuntimeException::selfThrow("FirstOrderR::computeJacobianH, not (yet) implemented or forbidden for relations of type " + subType);
 }
 
-void LagrangianR::saveRelationToXML() const
+template <class T> void LagrangianR<T>::saveRelationToXML() const
 {
   RuntimeException::selfThrow("LagrangianR1::saveRelationToXML - not yet implemented.");
 }
 
-void LagrangianR::display() const
+template <class T> void LagrangianR<T>::display() const
 {
-  cout << "=====> Lagrangian Relation of type "  << LagrangianRelationType << endl;
-  if (interaction) cout << "- Interaction id" << interaction->getId() << endl;
-  else cout << "- Linked interaction -> NULL" << endl;
-  RELATION::PluginList::const_iterator it;
-  cout << "The following operators are linked to plug-in: " << endl;
-  for (it = pluginNames.begin(); it != pluginNames.end(); ++it)
-    cout << (*it).first << " plugged to:" << (*it).second << endl;
-  cout << "===================================== " << endl;
+  Relation::display();
 }

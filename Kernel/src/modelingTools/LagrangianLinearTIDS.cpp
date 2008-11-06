@@ -109,33 +109,34 @@ bool LagrangianLinearTIDS::checkDynamicalSystem()
 
 void LagrangianLinearTIDS::initRhs(double time)
 {
+  workMatrix.resize(sizeWorkMat);
   // Copy of Mass into workMatrix for LU-factorization.
-  workMatrix["invMass"].reset(new SimpleMatrix(*mass));
+  workMatrix[invMass].reset(new SimpleMatrix(*mass));
   // compute x[1] (and thus fExt if required)
   computeRhs(time);
-  workMatrix["zero-matrix"].reset(new SimpleMatrix(ndof, ndof, ZERO));
-  workMatrix["Id-matrix"].reset(new SimpleMatrix(ndof, ndof, IDENTITY));
+  workMatrix[zeroMatrix].reset(new SimpleMatrix(ndof, ndof, ZERO));
+  workMatrix[idMatrix].reset(new SimpleMatrix(ndof, ndof, IDENTITY));
 
   // jacobianXRhs
   if (K)
   {
     //  bloc10 of jacobianX is solution of Mass*Bloc10 = K
-    workMatrix["jacobianXBloc10"].reset(new SimpleMatrix(-1 * *K));
-    workMatrix["invMass"]->PLUForwardBackwardInPlace(*workMatrix["jacobianXBloc10"]);
+    workMatrix[jacobianXBloc10].reset(new SimpleMatrix(-1 * *K));
+    workMatrix[invMass]->PLUForwardBackwardInPlace(*workMatrix[jacobianXBloc10]);
   }
   else
-    workMatrix["jacobianXBloc10"] = workMatrix["zero-matrix"] ;
+    workMatrix[jacobianXBloc10] = workMatrix[zeroMatrix] ;
 
   if (C)
   {
     //  bloc11 of jacobianX is solution of Mass*Bloc11 = C
-    workMatrix["jacobianXBloc11"].reset(new SimpleMatrix(-1 * *C));
-    workMatrix["invMass"]->PLUForwardBackwardInPlace(*workMatrix["jacobianXBloc11"]);
+    workMatrix[jacobianXBloc11].reset(new SimpleMatrix(-1 * *C));
+    workMatrix[invMass]->PLUForwardBackwardInPlace(*workMatrix[jacobianXBloc11]);
   }
   else
-    workMatrix["jacobianXBloc11"] = workMatrix["zero-matrix"] ;
+    workMatrix[jacobianXBloc11] = workMatrix[zeroMatrix] ;
 
-  jacobianXRhs.reset(new BlockMatrix(workMatrix["zero-matrix"], workMatrix["Id-matrix"], workMatrix["jacobianXBloc10"], workMatrix["jacobianXBloc11"]));
+  jacobianXRhs.reset(new BlockMatrix(workMatrix[zeroMatrix], workMatrix[idMatrix], workMatrix[jacobianXBloc10], workMatrix[jacobianXBloc11]));
 }
 
 void LagrangianLinearTIDS::initialize(const string& simulationType, double time, unsigned int sizeOfMemory)
@@ -232,7 +233,7 @@ void LagrangianLinearTIDS::computeRhs(double time, bool)
     *q[2] -= prod(*C, *q[1]);
 
   // Then we search for q[2], such as Mass*q[2] = fExt - Cq[1] - Kq[0] + p.
-  workMatrix["invMass"]->PLUForwardBackwardInPlace(*q[2]);
+  workMatrix[invMass]->PLUForwardBackwardInPlace(*q[2]);
 }
 
 void LagrangianLinearTIDS::computeJacobianXRhs(double time, bool)
