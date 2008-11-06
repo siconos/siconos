@@ -24,7 +24,7 @@
 #ifndef ExampleActuator_H
 #define ExampleActuator_H
 
-#include "SiconosPointers.h"
+#include "SiconosPointers.hpp"
 #include "Actuator.h"
 
 class SiconosMatrix;

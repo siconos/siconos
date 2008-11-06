@@ -15,28 +15,26 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
- */
-/*! \file UnitaryRelationsSet.h
- */
+*/
 
-#ifndef UnitaryRelationsSET_H
-#define UnitaryRelationsSET_H
+/*! \file InteractionsSet.hpp
+Set of SP::Interaction
+*/
+#ifndef InteractionsSET_H
+#define InteractionsSET_H
 
-#include "SiconosSet.h"
-#include "UnitaryRelation.h"
-
-#include "SiconosPointers.h"
+#include "SiconosSet.hpp"
+#include "Interaction.h"
 
 /** A set of pointers to interactions, sorted in a growing order according to their address */
-typedef SiconosSet<UnitaryRelation, double*> UnitaryRelationsSet;
-/** Iterator through a set of UnitaryRelations */
-typedef std::set<SP::UnitaryRelation, Cmp<UnitaryRelation, double*> >::iterator UnitaryRelationsIterator;
-/** const Iterator through a set of UnitaryRelations */
-typedef std::set<SP::UnitaryRelation, Cmp<UnitaryRelation, double*> >::const_iterator ConstUnitaryRelationsIterator;
+typedef SiconosSet<Interaction, double*> InteractionsSet;
+/** Iterator through a set of Interactions */
+typedef std::set<SP::Interaction, Cmp<Interaction, double*> >::iterator InteractionsIterator;
+/** const Iterator through a set of Interactions */
+typedef std::set<SP::Interaction, Cmp<Interaction, double*> >::const_iterator ConstInteractionsIterator;
 /** return type value for insert function - bool = false if insertion failed. */
-typedef std::pair<UnitaryRelationsIterator, bool> CheckInsertUnitaryRelation;
+typedef std::pair<InteractionsIterator, bool> CheckInsertInteraction;
 
-
-TYPEDEF_SPTR(UnitaryRelationsSet);
+TYPEDEF_SPTR(InteractionsSet);
 
 #endif

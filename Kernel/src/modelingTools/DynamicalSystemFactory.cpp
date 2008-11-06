@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
+/* Siconos-Kernel version 1.2.0, Copyright INRIA 2005-2008.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -16,26 +16,46 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-/*! \file DynamicalSystemsSet.h
-Set of SP::DynamicalSystem
-*/
-#ifndef DSSET_H
-#define DSSET_H
 
-#include "DynamicalSystem.h"
-#include "SiconosSet.h"
+#include "DynamicalSystemFactory.h"
+#include "RuntimeException.h"
 
-#include <boost/shared_ptr.hpp>
+namespace DynamicalSystemFactory
+{
 
-/** A set of pointers to dynamical systems, sorted in a growing order according to their numbers */
-typedef SiconosSet<DynamicalSystem, int> DynamicalSystemsSet;
-/** Iterator through a set of DS */
-typedef std::set<SP::DynamicalSystem, Cmp<DynamicalSystem, int> >::iterator DSIterator;
-/** const Iterator through a set of DS */
-typedef std::set<SP::DynamicalSystem, Cmp<DynamicalSystem, int> >::const_iterator ConstDSIterator;
-/** return type value for insert function - bool = false if insertion failed. */
-typedef std::pair<DSIterator, bool> CheckInsertDS;
+Registry& Registry::get()
+{
+  static Registry instance;
+  return instance;
+}
 
-TYPEDEF_SPTR(DynamicalSystemsSet);
+void Registry::add(int name, object_creator creator)
+{
+  factory_map[name] = creator;
+}
 
-#endif
+SP::DynamicalSystem Registry::instantiate(int name, const SiconosVector& x0)
+{
+  MapFactoryIt it = factory_map.find(name) ;
+
+  if (it == factory_map.end())
+    RuntimeException::selfThrow("Registry::instantiate (DynamicalSystemFactory) failed, no class named: " + name);
+
+  return (it->second)(name, x0) ; // run our factory
+}
+
+Registration::Registration(int name, object_creator creator)
+{
+  // Add creator into the factory of DynamicalSystems
+  Registry::get().add(name, creator) ;
+}
+
+}
+
+
+
+
+
+
+
+

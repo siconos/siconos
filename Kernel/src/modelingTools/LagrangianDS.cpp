@@ -143,7 +143,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
       setComputeFIntFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
     }
     else
-      fInt.reset(new POV0(lgptr->getFIntVector()));
+      fInt.reset(new PVFint(lgptr->getFIntVector()));
   }
 
   // fExt
@@ -155,7 +155,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
       setComputeFExtFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
     }
     else
-      fExt.reset(new PVFext(lgptr->getFExtVector()));
+      fExt.reset(new Plugged_Vector_FTime(lgptr->getFExtVector()));
   }
 
   // NNL
@@ -181,7 +181,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
         setComputeJacobianFIntFunction(i, SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
       }
       else
-        jacobianFInt[i].reset(new POM0(lgptr->getJacobianFIntMatrix(i)));
+        jacobianFInt[i].reset(new PMFint(lgptr->getJacobianFIntMatrix(i)));
     }
 
     // jacobian of NNL
@@ -583,22 +583,22 @@ void LagrangianDS::setMass(const PMMass& newValue)
     *mass = newValue;
 }
 
-void LagrangianDS::setFInt(const POV0& newValue)
+void LagrangianDS::setFInt(const PVFint& newValue)
 {
   assert(newValue.size() == ndof && "LagrangianDS - setFInt: inconsistent dimensions with problem size for input vector fInt");
 
   if (! fInt)
-    fInt.reset(new POV0(newValue));
+    fInt.reset(new PVFint(newValue));
   else
     *fInt = newValue;
 }
 
-void LagrangianDS::setFExt(const PVFext& newValue)
+void LagrangianDS::setFExt(const Plugged_Vector_FTime& newValue)
 {
   assert(newValue.size() == ndof && "LagrangianDS - setFExt: inconsistent dimensions with problem size for input vector fExt");
 
   if (!fExt)
-    fExt.reset(new PVFext(newValue));
+    fExt.reset(new Plugged_Vector_FTime(newValue));
   else
     *fExt = newValue;
 }
@@ -613,13 +613,13 @@ void LagrangianDS::setNNL(const PVNNL& newValue)
     *NNL = newValue;
 }
 
-void LagrangianDS::setJacobianFInt(unsigned int i, const POM0& newValue)
+void LagrangianDS::setJacobianFInt(unsigned int i, const PMFint& newValue)
 {
   assert(newValue.size(0) == ndof && "LagrangianDS -setJacobianFInt : inconsistent dimensions with problem size for matrix JacobianFInt.");
   assert(newValue.size(1) == ndof && "LagrangianDS -setJacobianFInt : inconsistent dimensions with problem size for matrix JacobianFInt.");
 
   if (! jacobianFInt[i])
-    jacobianFInt[i].reset(new POM0(newValue));
+    jacobianFInt[i].reset(new PMFint(newValue));
   else
     *jacobianFInt[i] = newValue;
 }
@@ -653,28 +653,28 @@ void LagrangianDS::setComputeMassFunction(FPtr7 fct)
 void LagrangianDS::setComputeFIntFunction(const string& pluginPath, const string& functionName)
 {
   if (! fInt)
-    fInt.reset(new POV0(ndof));
+    fInt.reset(new PVFint(ndof));
   fInt->setComputeFunction(pluginPath, functionName);
 }
 
 void LagrangianDS::setComputeFIntFunction(FPtr6 fct)
 {
   if (! fInt)
-    fInt.reset(new POV0(ndof));
+    fInt.reset(new PVFint(ndof));
   fInt->setComputeFunction(fct);
 }
 
 void LagrangianDS::setComputeFExtFunction(const string& pluginPath, const string& functionName)
 {
   if (! fExt)
-    fExt.reset(new PVFext(ndof));
+    fExt.reset(new Plugged_Vector_FTime(ndof));
   fExt->setComputeFunction(pluginPath, functionName);
 }
 
 void LagrangianDS::setComputeFExtFunction(VectorFunctionOfTime fct)
 {
   if (! fExt)
-    fExt.reset(new PVFext(ndof));
+    fExt.reset(new Plugged_Vector_FTime(ndof));
   fExt->setComputeFunction(fct);
 }
 
@@ -695,14 +695,14 @@ void LagrangianDS::setComputeNNLFunction(FPtr5 fct)
 void LagrangianDS::setComputeJacobianFIntFunction(unsigned int i, const string& pluginPath, const string& functionName)
 {
   if (! jacobianFInt[i])
-    jacobianFInt[i].reset(new POM0(ndof, ndof));
+    jacobianFInt[i].reset(new PMFint(ndof, ndof));
   jacobianFInt[i]->setComputeFunction(pluginPath, functionName);
 }
 
 void LagrangianDS::setComputeJacobianFIntFunction(unsigned int i, FPtr6 fct)
 {
   if (! jacobianFInt[i])
-    jacobianFInt[i].reset(new POM0(ndof, ndof));
+    jacobianFInt[i].reset(new PMFint(ndof, ndof));
   jacobianFInt[i]->setComputeFunction(fct);
 }
 

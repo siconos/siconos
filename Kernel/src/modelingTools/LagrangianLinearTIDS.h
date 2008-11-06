@@ -225,4 +225,6 @@ public:
   }
 };
 
+TYPEDEF_SPTR(LagrangianLinearTIDS);
+
 #endif // LAGRANGIANTIDS_H

@@ -22,12 +22,12 @@
 #ifndef UNITARYRELATION_H
 #define UNITARYRELATION_H
 
-#include "Tools.h"
-#include "SiconosAlgebra.h"
+#include "Tools.hpp"
+#include "SiconosAlgebra.hpp"
 #include "Interaction.h"
-#include "RelationTypes.hpp"
+#include "RelationNamespace.hpp"
 
-#include "SiconosPointers.h"
+#include "SiconosPointers.hpp"
 
 /** Interface to single relations from Interactions
  *

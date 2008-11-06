@@ -25,7 +25,7 @@
 #define __SICONOSDOMTREETOOLS__
 
 #include "SiconosConst.h"
-#include "XMLTagsName.h"
+#include "XMLTagsName.hpp"
 #include "XMLException.h"
 #include <libxml/tree.h>
 #include <vector>

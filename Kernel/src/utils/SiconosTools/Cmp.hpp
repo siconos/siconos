@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-/*! \file Cmp.h
+/*! \file Cmp.hpp
 Classes related to object ordering in SiconosSet.
 */
 
@@ -89,7 +89,7 @@ public:
 
 /** Cmp<T,U> objects are used to provide "strict weak ordering" relations,
  * used in SiconosSet to compare objects; See STL doc or
- * SiconosSet.h class for example of use.
+ * SiconosSet.hpp class for example of use.
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
  *  \date (Creation) April 25, 2006
@@ -105,7 +105,7 @@ public:
  * "a<b" is evaluated according to the returning value of the member \n
  * function pointed by fpt.
  *
- * Cmp objects are not supposed to be used directly but as arguments in SiconosSet.h.
+ * Cmp objects are not supposed to be used directly but as arguments in SiconosSet.hpp.
  * See that class for details.
  *
  *  Note: this is strongly inspired from http://www.josuttis.com/libbook/

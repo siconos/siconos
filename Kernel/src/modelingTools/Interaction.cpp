@@ -21,7 +21,7 @@
 #include "InteractionXML.h"
 #include "NonSmoothLawXML.h"
 #include "RelationXML.h"
-#include "RelationTypes.h"
+#include "RelationTypes.hpp"
 #include "ComplementarityConditionNSL.h"
 #include "RelayNSL.h"
 #include "NewtonImpactNSL.h"

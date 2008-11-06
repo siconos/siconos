@@ -15,45 +15,28 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
-#include "ExampleActuator.h"
-#include "DynamicalSystem.h"
-#include "ActuatorFactory.h"
-#include "ioMatrix.h"
-using namespace std;
-using namespace ActuatorFactory;
+ */
+/*! \file UnitaryRelationsSet.hpp
+ */
 
-ExampleActuator::ExampleActuator(int name, SP::TimeDiscretisation t): Actuator(name, t)
-{}
+#ifndef UnitaryRelationsSET_H
+#define UnitaryRelationsSET_H
 
-void ExampleActuator::initialize()
-{
-  // Call initialize of base class
-  Actuator::initialize();
-}
+#include "SiconosSet.hpp"
+#include "UnitaryRelation.h"
 
-void ExampleActuator::actuate()
-{
-  cout << "Actuator action ... " << endl;
-  DSIterator itDS;
+#include "SiconosPointers.hpp"
 
-  SP::SiconosVector myZ(new SimpleVector(3));
-
-  (*myZ)(0) = 12;
-  (*myZ)(1) = 132;
-  (*myZ)(2) = 212;
-
-  for (itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
-    (*itDS)->setZPtr(myZ);
-
-}
-
-ExampleActuator* ExampleActuator::convert(Actuator* s)
-{
-  ExampleActuator* sp = dynamic_cast<ExampleActuator*>(s);
-  return sp;
-}
-
-AUTO_REGISTER_ACTUATOR(1, ExampleActuator);
+/** A set of pointers to interactions, sorted in a growing order according to their address */
+typedef SiconosSet<UnitaryRelation, double*> UnitaryRelationsSet;
+/** Iterator through a set of UnitaryRelations */
+typedef std::set<SP::UnitaryRelation, Cmp<UnitaryRelation, double*> >::iterator UnitaryRelationsIterator;
+/** const Iterator through a set of UnitaryRelations */
+typedef std::set<SP::UnitaryRelation, Cmp<UnitaryRelation, double*> >::const_iterator ConstUnitaryRelationsIterator;
+/** return type value for insert function - bool = false if insertion failed. */
+typedef std::pair<UnitaryRelationsIterator, bool> CheckInsertUnitaryRelation;
 
 
+TYPEDEF_SPTR(UnitaryRelationsSet);
+
+#endif

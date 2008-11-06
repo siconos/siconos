@@ -18,7 +18,7 @@
  */
 #include "TimeDiscretisation.h"
 #include "RuntimeException.h"
-#include "Tools.h"
+#include "Tools.hpp"
 #include <math.h>
 using namespace std;
 

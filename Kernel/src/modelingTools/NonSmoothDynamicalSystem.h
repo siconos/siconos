@@ -24,9 +24,9 @@
 /** Available Dynamical Systems types*/
 enum dynamicalsystem {LAGRANGIANNLDS, LAGRANGIANTIDS, LINEARTIDS};
 
-#include "SiconosPointers.h"
-#include "InteractionsSet.h"
-#include "DynamicalSystemsSet.h"
+#include "SiconosPointers.hpp"
+#include "InteractionsSet.hpp"
+#include "DynamicalSystemsSet.hpp"
 
 class Interaction;
 class DynamicalSystem;

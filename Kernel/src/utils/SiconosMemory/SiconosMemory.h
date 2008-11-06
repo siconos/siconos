@@ -28,7 +28,7 @@
 
 #include "SiconosMemoryXML.h"
 #include "SiconosMemoryException.h"
-#include "SiconosPointers.h"
+#include "SiconosPointers.hpp"
 #include <deque>
 
 /** This class is used to save vectors for several steps

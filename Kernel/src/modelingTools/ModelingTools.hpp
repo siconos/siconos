@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
+/* Siconos-Kernel version 1.3.0, Copyright INRIA 2005-2008.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -16,25 +16,23 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-
-/*! \file InteractionsSet.h
-Set of SP::Interaction
+/*! \file SiconosKernel.h
+Include files related to modelingTools
+Note that not all files from the current location are listed below, since some of them are already included inside the ones below.
 */
-#ifndef InteractionsSET_H
-#define InteractionsSET_H
 
-#include "SiconosSet.h"
+#include "ComplementarityConditionNSL.h"
+#include "MixedComplementarityConditionNSL.h"
+#include "RelayNSL.h"
+#include "NewtonImpactNSL.h"
+#include "NewtonImpactFrictionNSL.h"
+
 #include "Interaction.h"
 
-/** A set of pointers to interactions, sorted in a growing order according to their address */
-typedef SiconosSet<Interaction, double*> InteractionsSet;
-/** Iterator through a set of Interactions */
-typedef std::set<SP::Interaction, Cmp<Interaction, double*> >::iterator InteractionsIterator;
-/** const Iterator through a set of Interactions */
-typedef std::set<SP::Interaction, Cmp<Interaction, double*> >::const_iterator ConstInteractionsIterator;
-/** return type value for insert function - bool = false if insertion failed. */
-typedef std::pair<InteractionsIterator, bool> CheckInsertInteraction;
+#include "RelationTypes.hpp"
 
-TYPEDEF_SPTR(InteractionsSet);
+#include "LagrangianLinearTIDS.h"
+#include "FirstOrderLinearTIDS.h"
 
-#endif
+#include "NonSmoothDynamicalSystem.h"
+

@@ -27,11 +27,10 @@
 
 // const
 #include "BlockVector.h"
-#include "DynamicalSystemsSet.h"
-#include "Tools.h"
-#include "SiconosPointers.h"
+#include "DynamicalSystemsSet.hpp"
+#include "Tools.hpp"
+#include "SiconosPointers.hpp"
 #include "Relation.h"
-
 class NonSmoothLaw;
 class DynamicalSystem;
 class InteractionXML;

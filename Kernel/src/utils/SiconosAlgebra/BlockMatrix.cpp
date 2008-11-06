@@ -853,7 +853,7 @@ BlockMatrix& BlockMatrix::operator = (const SiconosMatrix &m)
 
   if (m.isBlock())
   {
-    if (isComparableTo(this, &m))
+    if (isComparableTo(*this, m))
     {
       // iterators through this
       BlocksMat::iterator1 it1;
@@ -923,7 +923,7 @@ BlockMatrix& BlockMatrix::operator = (const BlockMatrix &m)
   // Thus, tabRow and tabCol remains unchanged.
   // If m and mat are not "block-consistent", we use the () operator for a componet-wise copy.
 
-  if (isComparableTo(this, &m))
+  if (isComparableTo(*this, m))
   {
     // iterators through this
     BlocksMat::iterator1 it1;
@@ -983,7 +983,7 @@ BlockMatrix& BlockMatrix::operator += (const SiconosMatrix &m)
 
   if (m.isBlock())
   {
-    if (isComparableTo(&m, this))
+    if (isComparableTo(m, *this))
     {
       // iterators through this
       BlocksMat::iterator1 it1;
@@ -1039,7 +1039,7 @@ BlockMatrix& BlockMatrix::operator -= (const SiconosMatrix &m)
 
   if (m.isBlock())
   {
-    if (isComparableTo(&m, this))
+    if (isComparableTo(m, *this))
     {
       // iterators through this
       BlocksMat::iterator1 it1;

@@ -26,7 +26,7 @@
 #include <boost/shared_ptr.hpp>
 #include "SimpleMatrix.h"
 #include "SiconosNumerics.h"
-#include "SimulationTypeDef.h"
+#include "SimulationTypeDef.hpp"
 
 class SparseBlockMatrix;
 

@@ -25,9 +25,9 @@ Basic class to handle with dynamical system integrators over a time step.
 #define ONESTEPINTEGRATOR_H
 
 #include "SiconosConst.h"
-#include "SimulationTypeDef.h"
-#include "DynamicalSystemsSet.h"
-#include "InteractionsSet.h"
+#include "SimulationTypeDef.hpp"
+#include "DynamicalSystemsSet.hpp"
+#include "InteractionsSet.hpp"
 
 class OneStepIntegratorXML;
 class Simulation;

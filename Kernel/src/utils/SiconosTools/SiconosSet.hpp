@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-/*! \file SiconosSet.h
+/*! \file SiconosSet.hpp
   Template class to define a set of Siconos object.
 
 */
@@ -27,7 +27,7 @@
 #include <set>
 #include <map>
 #include <iostream>
-#include "Cmp.h"
+#include "Cmp.hpp"
 #include "RuntimeException.h"
 
 /** Set (STL) of pointers to T -

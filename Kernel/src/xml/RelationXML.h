@@ -25,7 +25,8 @@
 #define RelationXML_H
 
 #include "SiconosDOMTreeTools.h"
-#include "RelationTypes.hpp"
+#include "RelationNamespace.hpp"
+#include "SimpleVector.h"
 
 class Relation;
 using RELATION::TYPES;

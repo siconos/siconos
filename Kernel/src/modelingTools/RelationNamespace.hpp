@@ -16,21 +16,44 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/*! \file SiconosKernel.hpp
-Include files related to Siconos Kernel
+/*! \file RelationNamespace.hpp
+  \brief Namespace related to relations
 */
 
-#ifndef SiconosKernel_hpp
-#define SiconosKernel_hpp
+#ifndef RELATIONNAMESPACE_HPP
+#define RELATIONNAMESPACE_HPP
+#include "PluggedObject.hpp"
 
-#include "Model.h"
-#include "Utils.hpp"
-#include "ModelingTools.hpp"
-#include "SimulationTools.hpp"
-//#include "ControlTools.hpp"
-#include "XmlTools.hpp"
-#include <sys/time.h>
-#include <boost/timer.hpp>
-#include <boost/progress.hpp>
+/** Namespace for types related to relations */
+namespace RELATION
+{
+/** List of possible Relations types*/
+enum TYPES
+{
+  /** First Order */
+  FirstOrder,
+  /** Lagrangian */
+  Lagrangian
+};
+
+/** List of possible Relations subtypes*/
+enum SUBTYPES
+{
+  /** non linear */
+  NonLinearR,
+  /** linear */
+  LinearR,
+  /** Linear and time invariant */
+  LinearTIR,
+  /** Scleronomous (lagrangian only) */
+  ScleronomousR,
+  /** Rheonomous (lagrangian only) */
+  RheonomousR,
+  /** Compliant (lagrangian only) */
+  CompliantR,
+  /** */
+  Type1R
+};
+}
 
 #endif

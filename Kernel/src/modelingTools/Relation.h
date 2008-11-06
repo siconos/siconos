@@ -27,12 +27,13 @@
 #include "SimpleVector.h"
 #include "SimpleMatrix.h"
 #include "RuntimeException.h"
-#include "Tools.h"
+#include "Tools.hpp"
 #include "Plugin.hpp"
-#include "RelationTypes.hpp"
-#include "SiconosPointers.h"
+#include "SiconosPointers.hpp"
 #include "Interaction.h"
 #include "PluginTypes.hpp"
+#include "RelationNamespace.hpp"
+
 class RelationXML;
 class SimpleVector;
 class SimpleMatrix;
@@ -58,7 +59,6 @@ class Interaction;
  *   - Lagrangian, for LagrangianDS and derived classes.
  *
  *  The specific type (Linear, Scleronomous ...) is then given by the "subType". \n
- The list of available types and subtypes is given in RelationTypes.hpp.
  *
  * The relation holds also:
  *  - a pointer to an xml object

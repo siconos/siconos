@@ -122,4 +122,6 @@ public:
 
 };
 
+TYPEDEF_SPTR(FirstOrderLinearTIDS);
+
 #endif // LINEARTIDS_H

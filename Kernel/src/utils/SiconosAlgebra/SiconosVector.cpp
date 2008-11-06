@@ -35,56 +35,51 @@ Index SiconosVector::getTabIndex() const
   return tmp;
 }
 
-const Index * SiconosVector::getTabIndexPtr() const
+const SP::Index SiconosVector::getTabIndexPtr() const
 {
   SiconosVectorException::selfThrow("SiconosVector::getTabIndexPtr() : not implemented for this type of vector (Simple?) reserved to BlockVectors.");
   // fake to avoid error on warning.
-  Index * tmp = NULL;
-  return tmp;
+  return SP::Index();
 }
 
 VectorOfVectors::iterator SiconosVector::begin()
 {
   SiconosVectorException::selfThrow("SiconosVector::begin(): reserved to BlockVectors");
-  VectorOfVectors::iterator it;
-  return it;
+  return VectorOfVectors::iterator() ;
 };
 
 VectorOfVectors::iterator SiconosVector::end()
 {
   SiconosVectorException::selfThrow("SiconosVector::end(): reserved to BlockVectors");
-  VectorOfVectors::iterator it;
-  return it;
+  return VectorOfVectors::iterator() ;
 };
 
 VectorOfVectors::const_iterator SiconosVector::begin() const
 {
   SiconosVectorException::selfThrow("SiconosVector::begin(): reserved to BlockVectors");
-  VectorOfVectors::const_iterator it;
-  return it;
+  return VectorOfVectors::const_iterator() ;
 };
 
 VectorOfVectors::const_iterator SiconosVector::end() const
 {
   SiconosVectorException::selfThrow("SiconosVector::end(): reserved to BlockVectors");
-  VectorOfVectors::const_iterator it;
-  return it;
+  return VectorOfVectors::const_iterator();
 };
 
 //=====================
 // vectors comparison
 //=====================
-const bool isComparableTo(const SiconosVector * v1, const SiconosVector * v2)
+const bool isComparableTo(const SiconosVector& v1, const SiconosVector& v2)
 {
   // return:
   // - true if one of the vectors is a Simple and if they have the same size
   // - true if both are block but with blocks which are facing each other of the same size.
   // - false in other cases
 
-  if ((!v1->isBlock() || !v2->isBlock()) && (v1->size() == v2->size())) return true;
+  if ((!v1.isBlock() || !v2.isBlock()) && (v1.size() == v2.size())) return true;
 
-  const Index * I1 = v1->getTabIndexPtr();
-  const Index * I2 = v2->getTabIndexPtr();
+  const SP::Index I1 = v1.getTabIndexPtr();
+  const SP::Index I2 = v2.getTabIndexPtr();
 
   return (*I1 == *I2);
 }

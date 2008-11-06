@@ -1,5 +1,5 @@
-#ifndef SiconosPointers_h
-#define SiconosPointers_h
+#ifndef SiconosPointers_hpp
+#define SiconosPointers_hpp
 
 /* *SPtr types are smart pointers */
 
@@ -87,7 +87,6 @@ DEFINE_SPTR(NonSmoothLaw);
 DEFINE_SPTR(MixedComplementarityConditionNSL);
 DEFINE_SPTR(NonSmoothDynamicalSystem);
 DEFINE_SPTR(SiconosMemory);
-DEFINE_SPTR(DynamicalSystem);
 DEFINE_SPTR(InteractionXML);
 DEFINE_SPTR(RelationXML);
 DEFINE_SPTR(NonSmoothDynamicalSystemXML)
@@ -103,15 +102,10 @@ DEFINE_SPTR(OneStepIntegrator);
 DEFINE_SPTR(EventsManager);
 DEFINE_SPTR(UnitaryRelation);
 DEFINE_SPTR(DynamicalSystemXML);
-DEFINE_SPTR(FirstOrderLinearDS);
-DEFINE_SPTR(FirstOrderLinearTIDS);
 DEFINE_SPTR(FirstOrderLinearDSXML);
 DEFINE_SPTR(NonSmoothLawXML);
-DEFINE_SPTR(LagrangianLinearTIDS);
 DEFINE_SPTR(LagrangianLinearTIDSXML);
-DEFINE_SPTR(LagrangianDS);
 DEFINE_SPTR(LagrangianDSXML);
-DEFINE_SPTR(FirstOrderNonLinearDS);
 DEFINE_SPTR(FirstOrderNonLinearDSXML);
 DEFINE_SPTR(NewtonImpactFrictionNSL);
 DEFINE_SPTR(NewtonImpactFrictionNSLXML);
@@ -119,6 +113,11 @@ DEFINE_SPTR(SparseBlockMatrix);
 DEFINE_SPTR(OneStepIntegratorXML);
 DEFINE_SPTR(Lsodar);
 DEFINE_SPTR(Moreau);
+DEFINE_SPTR(Relation);
+DEFINE_SPTR(Interaction);
+
+
+
 DEFINE_SPTR(MoreauXML);
 DEFINE_SPTR(SiconosMemoryXML);
 DEFINE_SPTR(OneStepNSProblemXML);
@@ -133,8 +132,6 @@ DEFINE_SPTR(Event);
 DEFINE_SPTR(LsodarXML);
 DEFINE_SPTR(QPXML);
 DEFINE_SPTR(LCPXML);
-DEFINE_SPTR(Interaction);
-DEFINE_SPTR(Relation);
 
 TYPEDEF_SPTR(MixedLinearComplementarity_Problem);
 TYPEDEF_SPTR(Numerics_Options);
@@ -151,4 +148,4 @@ namespace SP = SharedPointer;
 namespace SA = SharedArray;
 namespace SPC = SharedPointerConst;
 
-#endif /* SiconosPointers_h */
+#endif /* SiconosPointers_hpp */

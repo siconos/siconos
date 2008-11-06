@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 1.3.0, Copyright INRIA 2005-2008.
+/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -15,29 +15,27 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ */
+/*! \file DynamicalSystemsSet.hpp
+Set of SP::DynamicalSystem
 */
-/*! \file utils.h
-Include files related to utils directory
-*/
+#ifndef DSSET_H
+#define DSSET_H
 
-#include "BlockMatrix.h"
-#include "BlockVector.h"
-#include "SimpleMatrix.h"
-#include "SimpleVector.h"
-#include "ioMatrix.h"
-#include "ioVector.h"
+#include "DynamicalSystem.h"
+#include "SiconosSet.hpp"
 
-#include "RuntimeException.h"
-#include "SiconosMatrixException.h"
-#include "XMLException.h"
-#include "SiconosVectorException.h"
-#include "SiconosSharedLibraryException.h"
+#include <boost/shared_ptr.hpp>
 
-#include "SiconosMemory.h"
+/** A set of pointers to dynamical systems, sorted in a growing order according to their numbers */
+typedef SiconosSet<DynamicalSystem, int> DynamicalSystemsSet;
+/** Iterator through a set of DS */
+typedef std::set<SP::DynamicalSystem, Cmp<DynamicalSystem, int> >::iterator DSIterator;
+/** const Iterator through a set of DS */
+typedef std::set<SP::DynamicalSystem, Cmp<DynamicalSystem, int> >::const_iterator ConstDSIterator;
+/** return type value for insert function - bool = false if insertion failed. */
+typedef std::pair<DSIterator, bool> CheckInsertDS;
 
-#include "SiconosSharedLibrary.h"
+TYPEDEF_SPTR(DynamicalSystemsSet);
 
-#include "Tools.h"
-#include "Cmp.h"
-#include "SiconosSet.h"
-#include "check.h"
+#endif

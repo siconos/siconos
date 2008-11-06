@@ -29,7 +29,7 @@
 #include "SparseBlockMatrix.h"
 #include <sys/time.h>
 
-#include "SiconosPointers.h"
+#include "SiconosPointers.hpp"
 
 class OneStepNSProblem;
 

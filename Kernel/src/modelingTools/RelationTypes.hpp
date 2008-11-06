@@ -22,62 +22,20 @@
   plugin names ...
 */
 
-#ifndef RELATIONTYPES_HPP
-#define RELATIONTYPES_HPP
+/*! \file RelationTypes.hpp
+Include files related to the different types of relations
+*/
 
-#include "PluggedObject.hpp"
+#ifndef RelationTypes_hpp
+#define RelationTypes_hpp
 
-/** Namespace for user-defined types related to relations */
-namespace RELATION
-{
-/** List of possible Relations types*/
-enum TYPES
-{
-  /** First Order */
-  FirstOrder,
-  /** Lagrangian */
-  Lagrangian
-};
-
-/** List of possible Relations subtypes*/
-enum SUBTYPES
-{
-  /** non linear */
-  NonLinearR,
-  /** linear */
-  LinearR,
-  /** Linear and time invariant */
-  LinearTIR,
-  /** Scleronomous (lagrangian only) */
-  ScleronomousR,
-  /** Rheonomous (lagrangian only) */
-  RheonomousR,
-  /** Compliant (lagrangian only) */
-  CompliantR,
-  /** */
-  Type1R
-};
-}
-
-#include "SimpleMatrix.h"
-#include "SimpleVector.h"
-
-/** Pointer to function used for plug-in for matrix-type operators that depends only on time */
-typedef void (*MatrixFunctionOfTime)(double, unsigned int, unsigned int, double*, unsigned int, double*);
-
-/** Matrix plugged to a MatrixFunctionOfTime */
-typedef PluggedObject<MatrixFunctionOfTime, SimpleMatrix> PMTime;
-
-/** Pointer to function used for plug-in for vector-type operators that depends only on time */
-typedef void (*VectorFunctionOfTime)(double, unsigned int, double*, unsigned int, double*);
-
-/** Vector plugged to a VectorFunctionOfTime */
-typedef PluggedObject<VectorFunctionOfTime, SimpleVector> PVTime;
-
-/** Smart pointer to a PMTime */
-TYPEDEF_SPTR(PMTime);
-
-/** Smart pointer to a PVTime */
-TYPEDEF_SPTR(PVTime);
+#include "FirstOrderType1R.h"
+#include "FirstOrderLinearR.h"
+#include "FirstOrderLinearTIR.h"
+#include "LagrangianLinearTIR.h"
+#include "LagrangianScleronomousR.h"
+#include "LagrangianRheonomousR.h"
+#include "LagrangianCompliantR.h"
 
 #endif
+

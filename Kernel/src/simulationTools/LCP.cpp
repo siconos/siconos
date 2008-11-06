@@ -27,7 +27,7 @@
 #include "TimeDiscretisation.h"
 #include "OneStepIntegrator.h"
 #include "LinearComplementarity_Problem.h" // Numerics structure
-#include "RelationTypes.h"
+#include "RelationTypes.hpp"
 #include "NewtonImpactNSL.h"
 #include "NewtonImpactFrictionNSL.h"
 

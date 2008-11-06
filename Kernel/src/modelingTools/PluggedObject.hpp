@@ -1,7 +1,7 @@
 #ifndef PluggedObject_H
 #define PluggedObject_H
 
-#include "SiconosPointers.h"
+#include "SiconosPointers.hpp"
 #include "SiconosSharedLibrary.h"
 #include <string>
 

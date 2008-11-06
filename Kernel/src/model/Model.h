@@ -25,8 +25,8 @@
 #define MODEL_H
 
 #include "SiconosConst.h"
-#include "Tools.h"
-#include "SiconosPointers.h"
+#include "Tools.hpp"
+#include "SiconosPointers.hpp"
 
 class NonSmoothDynamicalSystem;
 class Simulation;

@@ -30,12 +30,6 @@
 class DynamicalSystem;
 class BlockMatrix;
 
-typedef PluggedObject<FPtr1, SimpleVector> PVF;
-typedef PluggedObject<FPtr1, SimpleMatrix> PMJF;
-
-TYPEDEF_SPTR(PVF);
-TYPEDEF_SPTR(PMJF);
-
 /**  General First Order Non Linear Dynamical Systems
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -471,6 +465,8 @@ public:
   static FirstOrderNonLinearDS* convert(DynamicalSystem* ds);
 
 };
+
+TYPEDEF_SPTR(FirstOrderNonLinearDS);
 
 #endif
 

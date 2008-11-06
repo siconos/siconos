@@ -51,7 +51,7 @@ protected:
   typedef FirstOrderR<MatrixFunctionOfTime> BaseClass;
 
   /** e*/
-  SP::PVTime e;
+  SP::Plugged_Vector_FTime e;
 
   /** F matrix, coefficient of z */
   SP_PluggedMatrix F;
@@ -95,7 +95,7 @@ public:
    *  \param Plugged Vector : e
    *  \param Plugged Matrix : B
    */
-  FirstOrderLinearR(SP_PluggedMatrix, SP_PluggedMatrix, SP_PluggedMatrix, SP::PVTime, SP_PluggedMatrix);
+  FirstOrderLinearR(SP_PluggedMatrix, SP_PluggedMatrix, SP_PluggedMatrix, SP::Plugged_Vector_FTime, SP_PluggedMatrix);
 
   /** create the Relation from a set of data
    *  \param  SiconosMatrix : the matrix C
@@ -243,7 +243,7 @@ public:
   /** get the value of e
    *  \return plugged vector
    */
-  inline const PVTime getE() const
+  inline const Plugged_Vector_FTime getE() const
   {
     return *e;
   }
@@ -251,7 +251,7 @@ public:
   /** get e
    *  \return pointer on a plugged vector
    */
-  inline SP::PVTime getEPtr() const
+  inline SP::Plugged_Vector_FTime getEPtr() const
   {
     return e;
   }
@@ -262,13 +262,13 @@ public:
   template <class U> void setE(const U& newValue)
   {
     if (e) e->resize(newValue.size());
-    setObject<PVTime, SP::PVTime, U>(e, newValue);
+    setObject<Plugged_Vector_FTime, SP::Plugged_Vector_FTime, U>(e, newValue);
   }
 
   /** set e to pointer newPtr
    *  \param a SP to plugged vector
    */
-  inline void setEPtr(SP::PVTime newPtr)
+  inline void setEPtr(SP::Plugged_Vector_FTime newPtr)
   {
     e = newPtr;
   }

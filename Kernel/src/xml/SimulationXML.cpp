@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-#include "SiconosPointers.h"
+#include "SiconosPointers.hpp"
 #include "SimulationXML.h"
 
 #include "OneStepIntegratorXML.h"

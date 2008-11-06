@@ -25,7 +25,7 @@
 #define Disk_H
 
 #include "LagrangianDS.h"
-#include "SiconosPointers.h"
+#include "SiconosPointers.hpp"
 
 class Disk : public LagrangianDS
 {

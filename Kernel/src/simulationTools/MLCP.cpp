@@ -27,7 +27,7 @@
 #include "TimeDiscretisation.h"
 #include "MixedLinearComplementarity_Problem.h" // Numerics structure
 #include "NumericsMatrix.h"
-#include "RelationTypes.h"
+#include "RelationTypes.hpp"
 #include "NewtonImpactNSL.h"
 #include "NewtonImpactFrictionNSL.h"
 

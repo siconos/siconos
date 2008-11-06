@@ -24,8 +24,8 @@
 #ifndef Sensor_H
 #define Sensor_H
 
-#include "Tools.h"
-#include "SiconosAlgebra.h"
+#include "Tools.hpp"
+#include "SiconosAlgebra.hpp"
 #include "EventsManager.h"
 
 class SiconosVector;

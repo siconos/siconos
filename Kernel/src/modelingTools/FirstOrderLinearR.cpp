@@ -65,9 +65,9 @@ FirstOrderLinearR::FirstOrderLinearR(SP::RelationXML relxml):
   if (folrXML->hasE())
   {
     if (folrXML->isEPlugin())
-      e.reset(new PVTime(folrXML->getEPlugin()));
+      e.reset(new Plugged_Vector_FTime(folrXML->getEPlugin()));
     else
-      e.reset(new PVTime(folrXML->getE()));
+      e.reset(new Plugged_Vector_FTime(folrXML->getE()));
   }
 
   if (folrXML->hasB())
@@ -103,7 +103,7 @@ FirstOrderLinearR::FirstOrderLinearR(const string& CName, const string& DName, c
   JacH[0].reset(new PluggedMatrix(CName));
   JacH[1].reset(new PluggedMatrix(DName));
   F.reset(new PluggedMatrix(FName));
-  e.reset(new PVTime(EName));
+  e.reset(new Plugged_Vector_FTime(EName));
   JacG[0].reset(new PluggedMatrix(BName));
 }
 
@@ -116,7 +116,7 @@ FirstOrderLinearR::FirstOrderLinearR(SP_PluggedMatrix newC, SP_PluggedMatrix new
 }
 
 // Constructor from a complete set of data
-FirstOrderLinearR::FirstOrderLinearR(SP_PluggedMatrix newC, SP_PluggedMatrix newD, SP_PluggedMatrix newF, SP::PVTime newE, SP_PluggedMatrix newB):
+FirstOrderLinearR::FirstOrderLinearR(SP_PluggedMatrix newC, SP_PluggedMatrix newD, SP_PluggedMatrix newF, SP::Plugged_Vector_FTime newE, SP_PluggedMatrix newB):
   FirstOrderR<MatrixFunctionOfTime>(LinearR)
 {
   JacH.push_back(newC);
@@ -146,7 +146,7 @@ FirstOrderLinearR::FirstOrderLinearR(const SiconosMatrix& newC, const SiconosMat
   JacH[0].reset(new PluggedMatrix(newC));
   JacH[1].reset(new PluggedMatrix(newD));
   F.reset(new PluggedMatrix(newF));
-  e.reset(new PVTime(newE));
+  e.reset(new Plugged_Vector_FTime(newE));
   JacG[0].reset(new PluggedMatrix(newB));
 }
 
@@ -236,14 +236,14 @@ void FirstOrderLinearR::setComputeFFunction(const string& pluginPath, const stri
 void FirstOrderLinearR::setComputeEFunction(VectorFunctionOfTime ptrFunct)
 {
   if (!e)
-    e.reset(new PVTime()); // Required since e may not have been created by constructor
+    e.reset(new Plugged_Vector_FTime()); // Required since e may not have been created by constructor
   e->setComputeFunction(ptrFunct);
 }
 
 void FirstOrderLinearR::setComputeEFunction(const string& pluginPath, const string& functionName)
 {
   if (!e)
-    e.reset(new PVTime()); // Required since e may not have been created by constructor
+    e.reset(new Plugged_Vector_FTime()); // Required since e may not have been created by constructor
   e->setComputeFunction(pluginPath, functionName);
 }
 

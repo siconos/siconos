@@ -26,14 +26,6 @@
 
 class FirstOrderNonLinearDS;
 
-typedef void (*VectorFunctionOfTime)(double, unsigned int, double*, unsigned int, double*);
-
-typedef PluggedObject<VectorFunctionOfTime, SimpleVector> PVB;
-typedef PluggedObject<VectorFunctionOfTime, SimpleMatrix> PMA;
-
-TYPEDEF_SPTR(PVB);
-TYPEDEF_SPTR(PMA);
-
 /** First order linear systems - Inherits from DynamicalSystems
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -77,10 +69,10 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS
 protected:
 
   /** matrix specific to the FirstOrderLinearDS \f$ A \in R^{n \times n}  \f$*/
-  SP::PMA A;
+  SP::Plugged_Matrix_FTime A;
 
   /** strength vector */
-  SP::PVB b;
+  SP::Plugged_Vector_FTime b;
 
   /** default constructor
    */
@@ -134,7 +126,7 @@ public:
   /** get the value of A
    *  \return a plugged-matrix
    */
-  inline const PMA getA() const
+  inline const Plugged_Matrix_FTime getA() const
   {
     return *A;
   }
@@ -142,7 +134,7 @@ public:
   /** get A
    *  \return pointer on a plugged-matrix
    */
-  inline SP::PMA getAPtr() const
+  inline SP::Plugged_Matrix_FTime getAPtr() const
   {
     return A;
   }
@@ -150,12 +142,12 @@ public:
   /** set the value of A to newValue
    *  \param plugged-matrix newValue
    */
-  void setA(const PMA&);
+  void setA(const Plugged_Matrix_FTime&);
 
   /** set A to pointer newPtr
    *  \param a plugged matrix SP
    */
-  inline void setAPtr(SP::PMA newPtr)
+  inline void setAPtr(SP::Plugged_Matrix_FTime newPtr)
   {
     A = newPtr;
   }
@@ -165,7 +157,7 @@ public:
   /** get the value of b
    *  \return plugged vector
    */
-  inline const PVB getB() const
+  inline const Plugged_Vector_FTime getB() const
   {
     return *b;
   }
@@ -173,7 +165,7 @@ public:
   /** get b
    *  \return pointer on a plugged vector
    */
-  inline SP::PVB getBPtr() const
+  inline SP::Plugged_Vector_FTime getBPtr() const
   {
     return b;
   }
@@ -181,12 +173,12 @@ public:
   /** set the value of b to newValue
    *  \param a plugged vector
    */
-  void setB(const PVB&);
+  void setB(const Plugged_Vector_FTime&);
 
   /** set b to pointer newPtr
    *  \param a SP to plugged vector
    */
-  inline void setBPtr(SP::PVB newPtr)
+  inline void setBPtr(SP::Plugged_Vector_FTime newPtr)
   {
     b = newPtr;
   }
@@ -203,7 +195,7 @@ public:
   /** set a specified function to compute the matrix A
    *  \param VectorFunctionOfTime : a pointer on the plugin function
    */
-  void setComputeAFunction(VectorFunctionOfTime fct);
+  void setComputeAFunction(MatrixFunctionOfTime fct);
 
   /** set a specified function to compute the vector b
    *  \param string : the complete path to the plugin
@@ -262,5 +254,7 @@ public:
   static FirstOrderLinearDS* convert(DynamicalSystem* ds);
 
 };
+
+TYPEDEF_SPTR(FirstOrderLinearDS);
 
 #endif // FOLINEARDS_H

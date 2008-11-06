@@ -27,7 +27,7 @@
 #include<gmp.h>
 #include<iostream>
 #include "SiconosConst.h"
-#include "SiconosPointers.h"
+#include "SiconosPointers.hpp"
 
 class Simulation;
 

@@ -24,8 +24,8 @@
 #ifndef Actuator_H
 #define Actuator_H
 
-#include "SiconosPointers.h"
-#include"DynamicalSystemsSet.h"
+#include "SiconosPointers.hpp"
+#include"DynamicalSystemsSet.hpp"
 #include"EventsManager.h"
 #include<string>
 

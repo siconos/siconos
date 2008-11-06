@@ -27,7 +27,7 @@
 #include "SiconosConst.h"
 #include "RuntimeException.h"
 
-#include "SiconosPointers.h"
+#include "SiconosPointers.hpp"
 
 const std::string COMPLEMENTARITYCONDITIONNSLAW = "ComplementarityNSL";
 const std::string MIXEDCOMPLEMENTARITYCONDITIONNSLAW = "MixedComplementarityNSL";

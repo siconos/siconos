@@ -26,7 +26,7 @@
 #ifndef __SiconosVector__
 #define __SiconosVector__
 
-#include "SiconosAlgebra.h"
+#include "SiconosAlgebra.hpp"
 #include "SiconosVectorException.h"
 
 /** Union of DenseVect and SparseVect pointers -
@@ -237,7 +237,7 @@ public:
   /** reserved to BlockVector - get the index tab
    * \return a pointer to a standard vector of int
    */
-  virtual const Index * getTabIndexPtr() const ;
+  virtual const SP::Index getTabIndexPtr() const ;
 
   /** get the number of the vector that handles element at position "pos"
       \param unsigned int, position of the element
@@ -379,7 +379,7 @@ public:
       \param a SP::SiconosVector.
       \param a SP::SiconosVector.
   */
-  friend const bool isComparableTo(const SiconosVector *, const SiconosVector *);
+  friend const bool isComparableTo(const SiconosVector&, const SiconosVector&);
 
   /** Swap x and y contents, using atlas swap.*/
   friend void swap(SiconosVector&, SiconosVector&);

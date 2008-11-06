@@ -37,7 +37,7 @@ void FirstOrderLinearRTest::setUp()
   Dp.reset(new FirstOrderLinearR::PluggedMatrix("TestPlugin:D"));
   Bp.reset(new FirstOrderLinearR::PluggedMatrix("TestPlugin:B"));
   Fp.reset(new FirstOrderLinearR::PluggedMatrix("TestPlugin:F"));
-  ep.reset(new PVTime("TestPlugin:e"));
+  ep.reset(new Plugged_Vector_FTime("TestPlugin:e"));
   (*e)(0) = 0.1;
   (*e)(1) = 0.1;
   // parse xml file:

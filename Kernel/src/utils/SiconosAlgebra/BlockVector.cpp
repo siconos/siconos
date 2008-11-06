@@ -27,20 +27,20 @@
 // =================================================
 //                CONSTRUCTORS
 // =================================================
-BlockVector::BlockVector(): SiconosVector(0), tabIndex(NULL)
+BlockVector::BlockVector(): SiconosVector(0)
 {
-  tabIndex = new Index();
+  tabIndex.reset(new Index());
 }
 
-BlockVector::BlockVector(const std::string & file, bool ascii): SiconosVector(0), tabIndex(NULL)
+BlockVector::BlockVector(const std::string & file, bool ascii): SiconosVector(0)
 {
   SiconosVectorException::selfThrow(" BlockVector::constructor from a file : read BlockVector is not implemented");
 }
 
-BlockVector::BlockVector(const BlockVector &v): SiconosVector(0), tabIndex(NULL)
+BlockVector::BlockVector(const BlockVector &v): SiconosVector(0)
 {
   unsigned int nbBlocks = v.getNumberOfBlocks();
-  tabIndex = new Index();
+  tabIndex.reset(new Index());
   tabIndex->reserve(nbBlocks);
   vect.reserve(nbBlocks);
   VectorOfVectors::const_iterator it;
@@ -55,10 +55,10 @@ BlockVector::BlockVector(const BlockVector &v): SiconosVector(0), tabIndex(NULL)
   }
 }
 
-BlockVector::BlockVector(const SiconosVector &v): SiconosVector(0), tabIndex(NULL)
+BlockVector::BlockVector(const SiconosVector &v): SiconosVector(0)
 {
   unsigned int nbBlocks = v.getNumberOfBlocks();
-  tabIndex = new Index();
+  tabIndex.reset(new Index());
 
   tabIndex->reserve(nbBlocks);
   vect.reserve(nbBlocks);
@@ -86,14 +86,14 @@ BlockVector::BlockVector(const SiconosVector &v): SiconosVector(0), tabIndex(NUL
   }
 }
 
-BlockVector::BlockVector(SP::SiconosVector v1, SP::SiconosVector v2): SiconosVector(0), tabIndex(NULL)
+BlockVector::BlockVector(SP::SiconosVector v1, SP::SiconosVector v2): SiconosVector(0)
 {
   // Insert the two vectors in the container
   // NO COPY !!
   if (! v1  && ! v2)
     SiconosVectorException::selfThrow("BlockVector:constructor(SimpleVector*,SimpleVector*), both vectors are NULL.");
 
-  tabIndex = new Index();
+  tabIndex.reset(new Index());
 
   tabIndex->reserve(2);
   vect.reserve(2);
@@ -132,9 +132,9 @@ BlockVector::BlockVector(SP::SiconosVector v1, SP::SiconosVector v2): SiconosVec
   }
 }
 
-BlockVector::BlockVector(unsigned int numberOfBlocks, unsigned int dim): SiconosVector(0), tabIndex(NULL)
+BlockVector::BlockVector(unsigned int numberOfBlocks, unsigned int dim): SiconosVector(0)
 {
-  tabIndex = new Index();
+  tabIndex.reset(new Index());
   tabIndex->reserve(numberOfBlocks);
   vect.reserve(numberOfBlocks);
   for (unsigned int i = 0; i < numberOfBlocks; ++i)
@@ -146,10 +146,7 @@ BlockVector::BlockVector(unsigned int numberOfBlocks, unsigned int dim): Siconos
 }
 
 BlockVector::~BlockVector()
-{
-  tabIndex->clear();
-  delete tabIndex;
-}
+{}
 
 // =================================================
 //        get Ublas component (dense or sparse)
@@ -465,7 +462,7 @@ BlockVector& BlockVector::operator = (const SiconosVector& vIn)
 
   if (vIn.isBlock())
   {
-    if (isComparableTo(this, &vIn)) // if vIn and this are "block-consistent"
+    if (isComparableTo(*this, vIn)) // if vIn and this are "block-consistent"
     {
       VectorOfVectors::iterator it1;
       VectorOfVectors::const_iterator it2 = vIn.begin();
@@ -512,7 +509,7 @@ BlockVector& BlockVector::operator = (const BlockVector& vIn)
   if (vIn.size() != sizeV)
     SiconosVectorException::selfThrow("BlockVector:operator = vIn, inconsistent size between this and vIn.");
 
-  if (isComparableTo(this, &vIn)) // if vIn and this are "block-consistent"
+  if (isComparableTo(*this, vIn)) // if vIn and this are "block-consistent"
   {
     VectorOfVectors::iterator it1;
     VectorOfVectors::const_iterator it2 = vIn.begin();
@@ -571,7 +568,7 @@ BlockVector& BlockVector::operator += (const SiconosVector& vIn)
 
   if (vIn.isBlock())
   {
-    if (isComparableTo(this, &vIn)) // if vIn and this are "block-consistent"
+    if (isComparableTo(*this, vIn)) // if vIn and this are "block-consistent"
     {
       VectorOfVectors::iterator it1;
       VectorOfVectors::const_iterator it2 = vIn.begin();
@@ -613,7 +610,7 @@ BlockVector& BlockVector::operator -= (const SiconosVector& vIn)
     SiconosVectorException::selfThrow("BlockVector:operator -= vIn, inconsistent size between this and vIn.");
   if (vIn.isBlock())
   {
-    if (isComparableTo(this, &vIn)) // if vIn and this are "block-consistent"
+    if (isComparableTo(*this, vIn)) // if vIn and this are "block-consistent"
     {
       unsigned int i = 0;
       VectorOfVectors::iterator it1;

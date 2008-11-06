@@ -84,12 +84,12 @@ public:
    */
   SimpleVector(const SiconosVector&);
 
-  /** constructor with a DenseVect vector (see SiconosAlgebra.h for details)
+  /** constructor with a DenseVect vector (see SiconosAlgebra.hpp for details)
    *  \param a DenseVect
    */
   SimpleVector(const DenseVect&);
 
-  /** constructor with a SparseVect vector (see SiconosAlgebra.h for details)
+  /** constructor with a SparseVect vector (see SiconosAlgebra.hpp for details)
    *  \param a SparseVect
    */
   SimpleVector(const SparseVect&);

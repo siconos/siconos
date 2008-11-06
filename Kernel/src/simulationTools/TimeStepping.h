@@ -24,7 +24,7 @@
 
 #include "Simulation.h"
 
-#include "SiconosPointers.h"
+#include "SiconosPointers.hpp"
 
 /** type of function used to post-treat output info from solver. */
 typedef void (*CheckSolverFPtr)(int, Simulation*);

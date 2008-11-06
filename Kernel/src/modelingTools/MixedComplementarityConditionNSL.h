@@ -28,7 +28,7 @@
 
 #include "NonSmoothLaw.h"
 
-#include "SiconosPointers.h"
+#include "SiconosPointers.hpp"
 
 class NonSmoothLaw;
 

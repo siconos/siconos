@@ -80,7 +80,7 @@ private:
 
   SP::SiconosMatrix C, B, F, D;
   FirstOrderLinearR::SP_PluggedMatrix Cp, Bp, Fp, Dp;
-  SP::PVTime ep;
+  SP::Plugged_Vector_FTime ep;
   SP::SiconosVector e;
   xmlNodePtr node1;
   SP::RelationXML tmpxml1;

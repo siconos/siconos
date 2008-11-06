@@ -73,20 +73,20 @@ const Index * SiconosMatrix::getTabColPtr() const
 //=====================
 // matrices comparison
 //=====================
-const bool isComparableTo(const  SiconosMatrix* m1, const  SiconosMatrix* m2)
+const bool isComparableTo(const  SiconosMatrix& m1, const  SiconosMatrix& m2)
 {
   // return:
   // - true if one of the matrices is a Simple and if they have the same dimensions.
   // - true if both are block but with blocks which are facing each other of the same size.
   // - false in other cases
 
-  if ((!m1->isBlock() || !m2->isBlock()) && (m1->size(0) == m2->size(0)) && (m1->size(1) == m2->size(1)))
+  if ((!m1.isBlock() || !m2.isBlock()) && (m1.size(0) == m2.size(0)) && (m1.size(1) == m2.size(1)))
     return true;
 
-  const Index * I1R = m1->getTabRowPtr();
-  const Index * I2R = m2->getTabRowPtr();
-  const Index * I1C = m1->getTabColPtr();
-  const Index * I2C = m2->getTabColPtr();
+  const Index * I1R = m1.getTabRowPtr();
+  const Index * I2R = m2.getTabRowPtr();
+  const Index * I1C = m1.getTabColPtr();
+  const Index * I2C = m2.getTabColPtr();
 
   return ((*I1R == *I2R) && (*I1C == *I2C));
 }

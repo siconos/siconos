@@ -71,9 +71,6 @@ IF(CXX_HAVE_FRIEND_INJECTION)
   APPEND_FLAGS(CMAKE_CXX_FLAGS "-ffriend-injection")
 ENDIF(CXX_HAVE_FRIEND_INJECTION)
 
-
-APPEND_FLAGS(CMAKE_CXX_FLAGS "-DWithSmartPtr")
-
 COMPILE_WITH(SiconosNumerics REQUIRED)
 COMPILE_WITH(Boost REQUIRED)
 COMPILE_WITH(LibXml2 REQUIRED)
@@ -114,9 +111,7 @@ IF(CPPUNIT_FOUND)
   # Siconos Memory
   #BEGIN_TEST(utils/SiconosMemory/test)
   
-  #NEW_TEST(testSiconosMemory
-   # SiconosMemoryTest.cpp TestMain.cpp)
-  
+  #NEW_TEST(testSiconosMemory SiconosMemoryTest.cpp TestMain.cpp)
   #END_TEST()
   
   # model

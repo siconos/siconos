@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-/*! \file Tools.h
+/*! \file Tools.hpp
   Various useful functions and typedef.
 */
 

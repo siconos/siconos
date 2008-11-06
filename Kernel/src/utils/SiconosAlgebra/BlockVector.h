@@ -46,7 +46,7 @@ private:
   VectorOfVectors vect;
 
   /** tabindex[i] = tabindex[i-1] + ni, ni being the size of svref[i]. */
-  Index * tabIndex;
+  SP::Index tabIndex;
 
 public:
 
@@ -279,9 +279,9 @@ public:
   }
 
   /** get a pointer to the index tab
-   * \return Index*
+   * \return SP::Index
    */
-  inline const Index* getTabIndexPtr() const
+  inline const SP::Index getTabIndexPtr() const
   {
     return tabIndex;
   }

@@ -24,14 +24,14 @@
 #define SIMULATION_H
 
 #include "SiconosConst.h"
-#include "Tools.h"
-#include "SimulationTypeDef.h"
+#include "Tools.hpp"
+#include "SimulationTypeDef.hpp"
 #include "TimeDiscretisation.h"
-#include "UnitaryRelationsSet.h"
+#include "UnitaryRelationsSet.hpp"
 #include "EventsManager.h"
-#include "SiconosPointers.h"
-#include "InteractionsSet.h"
-#include "DynamicalSystemsSet.h"
+#include "SiconosPointers.hpp"
+#include "InteractionsSet.hpp"
+#include "DynamicalSystemsSet.hpp"
 #include <fstream>
 #include <boost/bind.hpp>
 

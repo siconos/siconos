@@ -29,10 +29,10 @@ Typedef for simulation-related objects
 #include <map>
 #include <set>
 
-#include "UnitaryRelationsSet.h"
+#include "UnitaryRelationsSet.hpp"
 
 #include <boost/shared_container_iterator.hpp>
-#include "SiconosPointers.h"
+#include "SiconosPointers.hpp"
 
 /** double precision machine */
 const double MACHINE_PREC = 1e-14;//dlamch_("e");

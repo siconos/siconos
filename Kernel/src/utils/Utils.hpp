@@ -16,20 +16,28 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/*! \file RelationTypes.h
-Include files related to the different types of relations
+/*! \file utils.h
+Include files related to utils directory
 */
 
-#ifndef RelationTypes_h
-#define RelationTypes_h
+#include "BlockMatrix.h"
+#include "BlockVector.h"
+#include "SimpleMatrix.h"
+#include "SimpleVector.h"
+#include "ioMatrix.h"
+#include "ioVector.h"
 
-#include "FirstOrderType1R.h"
-#include "FirstOrderLinearR.h"
-#include "FirstOrderLinearTIR.h"
-#include "LagrangianLinearTIR.h"
-#include "LagrangianScleronomousR.h"
-#include "LagrangianRheonomousR.h"
-#include "LagrangianCompliantR.h"
+#include "RuntimeException.h"
+#include "SiconosMatrixException.h"
+#include "XMLException.h"
+#include "SiconosVectorException.h"
+#include "SiconosSharedLibraryException.h"
 
-#endif
+#include "SiconosMemory.h"
 
+#include "SiconosSharedLibrary.h"
+
+#include "Tools.hpp"
+#include "Cmp.hpp"
+#include "SiconosSet.hpp"
+#include "check.h"

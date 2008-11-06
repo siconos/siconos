@@ -212,23 +212,23 @@ void DynamicalSystem::setZPtr(SP::SiconosVector newPtr)
   z = newPtr;
 }
 
-void DynamicalSystem::setG(const POV0& newValue)
+void DynamicalSystem::setG(const PVFint& newValue)
 {
   assert(newValue.size() == n && "DynamicalSystem - setG: inconsistent dimensions with problem size for input vector g");
 
   if (!g)
-    g.reset(new POV0(newValue));
+    g.reset(new PVFint(newValue));
   else
     *g = newValue;
 }
 
-void DynamicalSystem::setJacobianG(unsigned int i, const POM0& newValue)
+void DynamicalSystem::setJacobianG(unsigned int i, const PMFint& newValue)
 {
   assert(newValue.size(0) == n && "DynamicalSystem - setJacobianG: inconsistent dimensions with problem size for matrix jacobianG.");
   assert(newValue.size(1) == n && "DynamicalSystem - setJacobianG: inconsistent dimensions with problem size for matrix jacobianG.");
 
   if (!jacobianG [i])
-    jacobianG[i].reset(new POM0(newValue));
+    jacobianG[i].reset(new PMFint(newValue));
   else
     *jacobianG[i] = newValue;
 }
@@ -275,28 +275,28 @@ void DynamicalSystem::initMemory(unsigned int steps)
 void DynamicalSystem::setComputeGFunction(const string& pluginPath, const string& functionName)
 {
   if (! g)
-    g.reset(new POV0(n));
+    g.reset(new PVFint(n));
   g->setComputeFunction(pluginPath, functionName);
 }
 
 void DynamicalSystem::setComputeGFunction(FPtr6 fct)
 {
   if (! g)
-    g.reset(new POV0(n));
+    g.reset(new PVFint(n));
   g->setComputeFunction(fct);
 }
 
 void DynamicalSystem::setComputeJacobianGFunction(unsigned int i, const string& pluginPath, const string& functionName)
 {
   if (! jacobianG[i])
-    jacobianG[i].reset(new POM0(n, n));
+    jacobianG[i].reset(new PMFint(n, n));
   jacobianG[i]->setComputeFunction(pluginPath, functionName);
 }
 
 void DynamicalSystem::setComputeJacobianGFunction(unsigned int i, FPtr6 fct)
 {
   if (! jacobianG[i])
-    jacobianG[i].reset(new POM0(n, n));
+    jacobianG[i].reset(new PMFint(n, n));
   jacobianG[i]->setComputeFunction(fct);
 }
 

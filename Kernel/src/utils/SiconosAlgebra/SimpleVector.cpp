@@ -435,7 +435,7 @@ void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int siz
     {
       // We look for the block of vOut that include index startOut
       unsigned int blockOutStart = 0;
-      const Index * tabOut = vOut->getTabIndexPtr();
+      const SP::Index tabOut = vOut->getTabIndexPtr();
       while (startOut >= (*tabOut)[blockOutStart] && blockOutStart < tabOut->size())
         blockOutStart ++;
       // Relative position in the block blockOutStart.
@@ -494,7 +494,7 @@ void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int siz
 
       // We look for the block of vIn that include index startIn
       unsigned int blockInStart = 0;
-      const Index * tabIn = vIn.getTabIndexPtr();
+      const SP::Index tabIn = vIn.getTabIndexPtr();
       while (startIn >= (*tabIn)[blockInStart] && blockInStart < tabIn->size())
         blockInStart ++;
       // Relative position in the block blockInStart.
@@ -1219,7 +1219,7 @@ void axpby(double a, const SiconosVector& x, double b, SiconosVector& y)
 
     else if (numX == 0) // ie if x and y are block
     {
-      if (isComparableTo(&x, &y))
+      if (isComparableTo(x, y))
       {
         VectorOfVectors::iterator itY;
         VectorOfVectors::const_iterator itX = x.begin();
@@ -1290,7 +1290,7 @@ void axpy(double a, const SiconosVector& x, SiconosVector& y)
 
     else if (numX == 0) // ie if x and y are block
     {
-      if (isComparableTo(&x, &y))
+      if (isComparableTo(x, y))
       {
         VectorOfVectors::iterator itY;
         VectorOfVectors::const_iterator itX = x.begin();
@@ -1417,7 +1417,7 @@ void scal(double a, const SiconosVector & x, SiconosVector & y, bool init)
     {
       if (numX == 0) // ie if both are block vectors
       {
-        if (isComparableTo(&x, &y)) // if x and y are "block-consistent"
+        if (isComparableTo(x, y)) // if x and y are "block-consistent"
         {
           VectorOfVectors::const_iterator itX = x.begin();
           VectorOfVectors::iterator itY ;
@@ -1521,7 +1521,7 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
       std::vector<unsigned int> subCoord = coord;
       SP::SiconosVector tmp = y[firstBlockNum];
       unsigned int subSize =  x[firstBlockNum]->size(); // Size of the sub-vector
-      const Index * xTab = x.getTabIndexPtr();
+      const SP::Index xTab = x.getTabIndexPtr();
       if (firstBlockNum != 0)
         subCoord[0] -= (*xTab)[firstBlockNum - 1];
       subCoord[1] =  std::min(coord[1] - (*xTab)[firstBlockNum - 1], subSize);
@@ -1644,7 +1644,7 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
         SPC::SiconosVector tmp = x[firstBlockNum];
 
         unsigned int subSize =  x[firstBlockNum]->size(); // Size of the sub-vector
-        const Index * xTab = x.getTabIndexPtr();
+        const SP::Index xTab = x.getTabIndexPtr();
         if (firstBlockNum != 0)
           subCoord[0] -= (*xTab)[firstBlockNum - 1];
         subCoord[1] =  std::min(coord[1] - (*xTab)[firstBlockNum - 1], subSize);
@@ -1694,7 +1694,7 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
         std::vector<unsigned int> subCoord = coord;
         SP::SiconosVector tmp = y[firstBlockNum];
         unsigned int subSize =  y[firstBlockNum]->size(); // Size of the sub-vector
-        const Index * yTab = y.getTabIndexPtr();
+        const SP::Index yTab = y.getTabIndexPtr();
         if (firstBlockNum != 0)
           subCoord[2] -= (*yTab)[firstBlockNum - 1];
         subCoord[3] =  std::min(coord[3] - (*yTab)[firstBlockNum - 1], subSize);

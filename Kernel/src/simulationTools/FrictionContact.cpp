@@ -28,7 +28,7 @@
 #include "Relation.h"
 #include "NewtonImpactFrictionNSL.h"
 #include "FrictionContact_Problem.h" // Numerics Header
-#include "RelationTypes.h"
+#include "RelationTypes.hpp"
 #include "NewtonImpactNSL.h"
 #include "OneStepIntegrator.h"
 using namespace std;
@@ -252,14 +252,7 @@ void FrictionContact::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRe
     unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
     // Check allocation
     if (! unitaryBlocks[UR1][UR2])
-    {
-
-#ifndef WithSmartPtr
-      unitaryBlocks[UR1][UR2] = new SimpleMatrix(nslawSize1, nslawSize2);
-#else
       unitaryBlocks[UR1][UR2].reset(new SimpleMatrix(nslawSize1, nslawSize2));
-#endif
-    }
 
     // Get DS common between UR1 and UR2
     DSIterator itDS;

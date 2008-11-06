@@ -23,8 +23,8 @@
 #ifndef ONESTEPNSPROBLEM_H
 #define ONESTEPNSPROBLEM_H
 
-#include "InteractionsSet.h"
-#include "SimulationTypeDef.h"
+#include "InteractionsSet.hpp"
+#include "SimulationTypeDef.hpp"
 #include "Numerics_Options.h"
 #include "NumericsMatrix.h"
 #include "NonSmoothSolver.h"

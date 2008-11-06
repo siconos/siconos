@@ -18,7 +18,7 @@
  */
 #include "LagrangianDS.h"
 #include "UnitaryRelation.h"
-#include "RelationTypes.h"
+#include "RelationTypes.hpp"
 #include "NewtonImpactNSL.h"
 #include "NewtonImpactFrictionNSL.h"
 #include "RuntimeException.h"
@@ -128,13 +128,8 @@ void UnitaryRelation::initialize(const std::string& simulationType)
   if (!mainInteraction)
     RuntimeException::selfThrow("UnitaryRelation::initialize() failed: the linked interaction is NULL.");
 
-#ifndef WithSmartPtr
-  workX = new BlockVector();
-  workZ = new BlockVector();
-#else
   workX.reset(new BlockVector());
   workZ.reset(new BlockVector());
-#endif
 
   for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
     workZ->insertPtr((*it)->getZPtr());

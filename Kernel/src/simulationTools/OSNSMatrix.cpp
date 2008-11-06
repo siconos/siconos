@@ -19,7 +19,7 @@
 #include <assert.h>
 #include "OSNSMatrix.h"
 #include "SparseBlockMatrix.h"
-#include "Tools.h"
+#include "Tools.hpp"
 
 using namespace std;
 void OSNSMatrix::updateSizeAndPositions(unsigned int * dim, SP::UnitaryRelationsSet indexSet)

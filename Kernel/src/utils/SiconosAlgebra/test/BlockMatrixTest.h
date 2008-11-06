@@ -20,7 +20,7 @@
 #define __BlockMatrixTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "SiconosPointers.h"
+#include "SiconosPointers.hpp"
 #include "BlockMatrix.h"
 
 using namespace std;

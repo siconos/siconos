@@ -23,7 +23,7 @@
 #ifndef __OneStepNSProblemXML__
 #define __OneStepNSProblemXML__
 
-#include "SiconosPointers.h"
+#include "SiconosPointers.hpp"
 #include "SiconosDOMTreeTools.h"
 
 class OneStepNSProblem;

@@ -24,10 +24,10 @@
 #ifndef DYNAMICALSYSTEM_H
 #define DYNAMICALSYSTEM_H
 
-#include "SiconosPointers.h"
+#include "SiconosPointers.hpp"
 #include "SiconosSharedLibrary.h"
 #include "RuntimeException.h"
-#include "Tools.h"
+#include "Tools.hpp"
 #include "SimpleVector.h"
 #include "SimpleMatrix.h"
 #include "SiconosMemory.h"
@@ -44,10 +44,6 @@ class SimpleVector;
 class SiconosMemory;
 class SiconosSharedLibrary;
 
-typedef PluggedObject<FPtr6, SimpleVector> POV0;
-typedef PluggedObject<FPtr6, SimpleMatrix> POM0;
-TYPEDEF_SPTR(POV0);
-TYPEDEF_SPTR(POM0);
 
 /** */
 
@@ -155,10 +151,10 @@ protected:
   SP::SiconosVector z;
 
   /** \f$ g(t,\dot x,x,z) \f$ */
-  SP::POV0 g;
+  SP::PVFint g;
 
   /** jacobianXG[0] = \f$ \nabla_x g(t,\dot x,x,z) \f$, jacobianXG[1] = \f$ \nabla_{\dot x} g(t,\dot x,x,z) \f$  */
-  std::vector<SP::POM0> jacobianG;
+  std::vector<SP::PMFint> jacobianG;
 
   /** the  previous state vectors stored in memory*/
   SP::SiconosMemory xMemory;
@@ -426,7 +422,7 @@ public:
   /** get the value of g
    *  \return plugged vector
    */
-  inline const POV0 getG() const
+  inline const PVFint getG() const
   {
     return *g;
   }
@@ -434,7 +430,7 @@ public:
   /** get g
    *  \return pointer on a plugged vector
    */
-  inline SP::POV0 getGPtr() const
+  inline SP::PVFint getGPtr() const
   {
     return g;
   }
@@ -442,12 +438,12 @@ public:
   /** set the value of g to newValue
    *  \param a plugged vector
    */
-  void setG(const POV0&);
+  void setG(const PVFint&);
 
   /** set g to pointer newPtr
    *  \param a SP to plugged vector
    */
-  inline void setGPtr(SP::POV0 newPtr)
+  inline void setGPtr(SP::PVFint newPtr)
   {
     g = newPtr;
   }
@@ -457,7 +453,7 @@ public:
     \param index of the desired jacobian
     *  \return a plugged-matrix
     */
-  inline const POM0 getJacobianG(unsigned int i) const
+  inline const PMFint getJacobianG(unsigned int i) const
   {
     return *(jacobianG[i]);
   }
@@ -466,7 +462,7 @@ public:
       \param index of the desired jacobian
       *  \return pointer on a plugged-matrix
       */
-  inline SP::POM0 getJacobianGPtr(unsigned int i) const
+  inline SP::PMFint getJacobianGPtr(unsigned int i) const
   {
     return jacobianG[i];
   }
@@ -475,13 +471,13 @@ public:
       \param index of the desired jacobian
       *  \param plugged-matrix newValue
       */
-  void setJacobianG(unsigned int, const POM0&);
+  void setJacobianG(unsigned int, const PMFint&);
 
   /** set jacobianG to pointer newPtr
       \param index of the desired jacobian
       *  \param a plugged matrix SP
       */
-  inline void setJacobianGPtr(unsigned int i, SP::POM0 newPtr)
+  inline void setJacobianGPtr(unsigned int i, SP::PMFint newPtr)
   {
     jacobianG[i] = newPtr;
   }
@@ -711,6 +707,8 @@ public:
 
 
 };
+
+TYPEDEF_SPTR(DynamicalSystem);
 
 #endif // DYNAMICALSYSTEM_H
 

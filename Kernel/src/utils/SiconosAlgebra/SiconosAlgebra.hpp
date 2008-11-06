@@ -18,7 +18,7 @@
  */
 
 
-/** ! \file SiconosAlgebra.h
+/** ! \file SiconosAlgebra.hpp
     \brief Header file for Siconos Algebra objects
 
     This file provides typedef for matrix and vector objects, const values and so on ...
@@ -36,9 +36,9 @@
 #include <boost/numeric/ublas/banded.hpp>
 #include <boost/numeric/bindings/atlas/cblas_enum.hpp>
 
-#include "SiconosPointers.h"
+#include "SiconosPointers.hpp"
 #include "SiconosConst.h"
-#include "Tools.h"
+#include "Tools.hpp"
 #include <deque>
 
 namespace ublas = boost::numeric::ublas;
@@ -48,28 +48,35 @@ namespace atlas = boost::numeric::bindings::atlas;
 
 /** type of object used to save indices */
 typedef std::vector<unsigned int> Index;
+TYPEDEF_SPTR(Index);
 
 /** Various matrix types available in Siconos **/
 
 /** DenseMat is a typedef of boost::ublas::numeric::matrix<double, column_major, std::vector<double> >
  */
 typedef ublas::matrix<double, ublas::column_major, std::vector<double> > DenseMat;
+TYPEDEF_SPTR(DenseMat);
+
 //typedef ublas::matrix<double, ublas::column_major, ublas::bounded_array<double, 10000> > DenseMat;
 /** TriangMat is a typedef of boost::ublas::numeric::triangular_matrix<double, upper, column_major, std::vector<double> >
  */
 typedef ublas::triangular_matrix<double, ublas::upper, ublas::column_major> TriangMat;
+TYPEDEF_SPTR(TriangMat);
 
 /** SymMat is a typedef of boost::ublas::numeric::symmetric_matrix<double, upper, column_major, std::vector<double> >
  */
 typedef ublas::symmetric_matrix<double, ublas::upper, ublas::column_major> SymMat;
+TYPEDEF_SPTR(SymMat);
 
 /** BandedMat is a typedef of boost::ublas::numeric::banded_matrix<double, column_major, std::vector<double> >
  */
 typedef ublas::banded_matrix<double, ublas::column_major > BandedMat;
+TYPEDEF_SPTR(BandedMat);
 
 /** SparseMat is a typedef of boost::ublas::numeric::mapped_matrix<double>
  */
 typedef ublas::compressed_matrix<double, ublas::column_major, 0, Index > SparseMat;
+TYPEDEF_SPTR(SparseMat);
 
 /** iterator (type1) through a sparse mat */
 typedef SparseMat::iterator1 SpMatIt1;
@@ -80,20 +87,24 @@ typedef SparseMat::iterator2 SpMatIt2;
 /** ZeroMat is a typedef of boost::ublas::numeric::zero_matrix, ie null matrix.
  */
 typedef ublas::zero_matrix<double> ZeroMat;
+TYPEDEF_SPTR(ZeroMat);
 
 /** IdentityMat is a typedef of boost::ublas::identity_matrix ie identity matrix.
  */
 typedef ublas::identity_matrix<double> IdentityMat;
+TYPEDEF_SPTR(IdentityMat);
 
 /** Various vector types available in Siconos **/
 
 /** DenseVect is a typedef of boost::ublas::numeric::vector<double, std::vector<double> >
  */
 typedef ublas::vector<double, std::vector<double> > DenseVect;
+TYPEDEF_SPTR(DenseVect);
 
 /** SparseVect is a typedef of boost::ublas::numeric::mapped<double>
  */
 typedef ublas::compressed_vector<double> SparseVect;
+TYPEDEF_SPTR(SparseVect);
 
 /** Const from old version of SiconosVector - To be reviewed */
 const char N_DOUBLE_PRECISION[] = "%1.52e "; // double mantisse precision /!\ DEPENDS ON MACHINE

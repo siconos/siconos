@@ -25,7 +25,7 @@ Definition of a sparse block matrix of SiconosMatrix*
 
 #include <boost/shared_ptr.hpp>
 #include "SiconosNumerics.h"
-#include "SimulationTypeDef.h"
+#include "SimulationTypeDef.hpp"
 
 typedef  boost::numeric::ublas::compressed_matrix<double*> CompressedRowMat;
 TYPEDEF_SPTR(CompressedRowMat);

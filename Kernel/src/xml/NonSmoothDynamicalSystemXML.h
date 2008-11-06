@@ -27,7 +27,7 @@
 #include "SiconosDOMTreeTools.h"
 #include <set>
 
-#include "SiconosPointers.h"
+#include "SiconosPointers.hpp"
 
 class NonSmoothDynamicalSystem;
 class InteractionXML;

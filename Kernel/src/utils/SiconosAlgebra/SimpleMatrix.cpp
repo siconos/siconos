@@ -3449,7 +3449,7 @@ void sub(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
 
 bool operator == (const SiconosMatrix &m, const SiconosMatrix &x)
 {
-  //  if( ! isComparableTo( &m, &x))
+  //  if( ! isComparableTo( m, x))
   //    return false;
   // Warning : two block matrices may be "equal" but have blocks of different sizes.
   double norm = (m - x).normInf();
@@ -4830,7 +4830,7 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
       std::vector<unsigned int> subCoord = coord;
       SPC::SiconosVector  tmp = x[firstBlockNum];
       unsigned int subSize =  x[firstBlockNum]->size(); // Size of the sub-vector
-      const Index * xTab = x.getTabIndexPtr();
+      const SP::Index xTab = x.getTabIndexPtr();
       if (firstBlockNum != 0)
       {
         subCoord[4] -= (*xTab)[firstBlockNum - 1];
@@ -5946,7 +5946,7 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
         {
 
         case 0: // A and B are block
-          if (isComparableTo(&A, &B))
+          if (isComparableTo(A, B))
           {
             BlockIterator1 itB1;
             BlockIterator2 itB2;

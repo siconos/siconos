@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 1.3.0, Copyright INRIA 2005-2008.
+/* Siconos-Kernel version 1.2.0, Copyright INRIA 2005-2008.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -15,24 +15,47 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
-/*! \file SiconosKernel.h
-Include files related to modelingTools
-Note that not all files from the current location are listed below, since some of them are already included inside the ones below.
-*/
+ */
 
-#include "ComplementarityConditionNSL.h"
-#include "MixedComplementarityConditionNSL.h"
-#include "RelayNSL.h"
-#include "NewtonImpactNSL.h"
-#include "NewtonImpactFrictionNSL.h"
+#include "RelationFactory.h"
+#include "RuntimeException.h"
 
-#include "Interaction.h"
+namespace RelationFactory
+{
 
-#include "RelationTypes.h"
+Registry& Registry::get()
+{
+  static Registry instance;
+  return instance;
+}
 
-#include "LagrangianLinearTIDS.h"
-#include "FirstOrderLinearTIDS.h"
+void Registry::add(int name, object_creator creator)
+{
+  factory_map[name] = creator;
+}
 
-#include "NonSmoothDynamicalSystem.h"
+SP::Relation Registry::instantiate(int name)
+{
+  MapFactoryIt it = factory_map.find(name) ;
+
+  if (it == factory_map.end())
+    RuntimeException::selfThrow("Registry::instantiate (RelationFactory) failed, no class named: " + name);
+
+  return (it->second)(name) ;  // run our factory
+}
+
+Registration::Registration(int name, object_creator creator)
+{
+  // Add creator into the factory of Relations
+  Registry::get().add(name, creator) ;
+}
+
+}
+
+
+
+
+
+
+
 

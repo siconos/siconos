@@ -23,7 +23,7 @@
 #ifndef TIMEDISCRETISATION_H
 #define TIMEDISCRETISATION_H
 
-#include "SiconosPointers.h"
+#include "SiconosPointers.hpp"
 #include "TimeDiscretisationXML.h"
 #include <vector>
 

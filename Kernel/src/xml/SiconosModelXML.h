@@ -22,7 +22,7 @@
 #ifndef __MODELXML__
 #define __MODELXML__
 
-#include "SiconosPointers.h"
+#include "SiconosPointers.hpp"
 #include "SiconosDOMTreeTools.h"
 #include "KernelConfig.h"
 #include <libxml/parser.h>

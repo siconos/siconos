@@ -25,7 +25,7 @@
 #ifndef __SiconosMatrix__
 #define __SiconosMatrix__
 
-#include "SiconosAlgebra.h"
+#include "SiconosAlgebra.hpp"
 #include "SiconosMatrixException.h"
 
 /** Union of DenseMat pointer, TriangMat pointer BandedMat, SparseMat, SymMat, Zero and Identity mat pointers.
@@ -499,10 +499,10 @@ public:
   /** Compares two (block) matrices: true if they have the same number of blocks and if
       blocks which are facing each other have the same size;
       always true if one of the two is a SimpleMatrix.
-      \param a SiconosMatrix*
-      \param a SiconosMatrix*
+      \param a SiconosMatrix
+      \param a SiconosMatrix
   */
-  friend const bool isComparableTo(const  SiconosMatrix*, const  SiconosMatrix*);
+  friend const bool isComparableTo(const SiconosMatrix&, const SiconosMatrix&);
 
 };
 

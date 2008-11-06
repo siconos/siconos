@@ -43,7 +43,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML): FirstOrder
       setComputeAFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
     }
     else
-      A.reset(new PMA(foldsxml->getA()));
+      A.reset(new Plugged_Matrix_FTime(foldsxml->getA()));
   }
 
   // b
@@ -55,7 +55,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML): FirstOrder
       setComputeBFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
     }
     else
-      b.reset(new PVB(foldsxml->getBVector()));
+      b.reset(new Plugged_Vector_FTime(foldsxml->getBVector()));
   }
 
   checkDynamicalSystem();
@@ -80,7 +80,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(const SiconosVector& newX0, const Siconos
   assert(((newA.size(0) == n) && (newA.size(1) == n)) &&
          "FirstOrderLinearDS - constructor(number,x0,A): inconsistent dimensions with problem size for input matrix A");
 
-  A.reset(new PMA(newA));
+  A.reset(new Plugged_Matrix_FTime(newA));
   checkDynamicalSystem();
 }
 
@@ -94,8 +94,8 @@ FirstOrderLinearDS::FirstOrderLinearDS(const SiconosVector& newX0, const Siconos
   assert(newB.size() == n &&
          "FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with problem size for input vector b ");
 
-  A.reset(new PMA(newA));
-  b.reset(new PVB(newB));
+  A.reset(new Plugged_Matrix_FTime(newA));
+  b.reset(new Plugged_Vector_FTime(newB));
 
   checkDynamicalSystem();
 }
@@ -121,23 +121,23 @@ void FirstOrderLinearDS::initRhs(double time)
   computeJacobianXRhs(time);
 }
 
-void FirstOrderLinearDS::setA(const PMA& newValue)
+void FirstOrderLinearDS::setA(const Plugged_Matrix_FTime& newValue)
 {
   assert(newValue.size(0) == n && "FirstOrderLinearDS - setA: inconsistent dimensions with problem size for input matrix A.");
   assert(newValue.size(1) == n && "FirstOrderLinearDS - setA: inconsistent dimensions with problem size for input matrix A.");
 
   if (! A)
-    A.reset(new PMA(newValue));
+    A.reset(new Plugged_Matrix_FTime(newValue));
   else
     *A = newValue;
 }
 
-void FirstOrderLinearDS::setB(const PVB& newValue)
+void FirstOrderLinearDS::setB(const Plugged_Vector_FTime& newValue)
 {
   assert(newValue.size() == n && "FirstOrderLinearDS - setB: inconsistent dimensions with problem size for input vector b");
 
   if (! b)
-    b.reset(new PVB(newValue));
+    b.reset(new Plugged_Vector_FTime(newValue));
   else
     *b = newValue;
 }
@@ -145,27 +145,27 @@ void FirstOrderLinearDS::setB(const PVB& newValue)
 void FirstOrderLinearDS::setComputeAFunction(const string& pluginPath, const string& functionName)
 {
   if (!A)
-    A.reset(new PMA(n, n));
+    A.reset(new Plugged_Matrix_FTime(n, n));
   A->setComputeFunction(pluginPath, functionName);
 }
 
-void   FirstOrderLinearDS::setComputeAFunction(VectorFunctionOfTime fct)
+void FirstOrderLinearDS::setComputeAFunction(MatrixFunctionOfTime fct)
 {
   if (!A)
-    A.reset(new PMA(n, n));
+    A.reset(new Plugged_Matrix_FTime(n, n));
   A->setComputeFunction(fct);
 }
 void FirstOrderLinearDS::setComputeBFunction(const string& pluginPath, const string& functionName)
 {
   if (! b)
-    b.reset(new PVB(n));
+    b.reset(new Plugged_Vector_FTime(n));
   b->setComputeFunction(pluginPath, functionName);
 }
 
 void FirstOrderLinearDS::setComputeBFunction(VectorFunctionOfTime fct)
 {
   if (! b)
-    b.reset(new PVB(n));
+    b.reset(new Plugged_Vector_FTime(n));
   b->setComputeFunction(fct);
 }
 
@@ -176,7 +176,7 @@ void FirstOrderLinearDS::computeA(const double time)
   {
     if (!A->fPtr)
       RuntimeException::selfThrow("computeA() is not linked to a plugin function");
-    (A->fPtr)(time, n, &(*A)(0, 0), z->size(), &(*z)(0));
+    (A->fPtr)(time, n, n, &(*A)(0, 0), z->size(), &(*z)(0));
   }
   // else nothing
 }

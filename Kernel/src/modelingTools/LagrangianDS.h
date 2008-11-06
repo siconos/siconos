@@ -27,15 +27,6 @@
 
 #include "DynamicalSystem.h"
 
-typedef PluggedObject<VectorFunctionOfTime, SimpleVector> PVFext;
-typedef PluggedObject<FPtr7, SimpleMatrix> PMMass;
-typedef PluggedObject<FPtr5, SimpleVector> PVNNL;
-typedef PluggedObject<FPtr5, SimpleMatrix> PMNNL;
-TYPEDEF_SPTR(PVFext);
-TYPEDEF_SPTR(PMMass);
-TYPEDEF_SPTR(PVNNL);
-TYPEDEF_SPTR(PMNNL);
-
 class DynamicalSystem;
 
 /** Lagrangian non linear dynamical systems - Derived from DynamicalSystem -
@@ -142,20 +133,20 @@ protected:
   /** memory of previous velocities of the system */
   SP::SiconosMemory velocityMemory;
 
-  /** "Reaction" due to the non smooth law - The index corresponds to the dynamic level. */
+  /** "Reaction" due to the non smooth law - The index corresponds to the dynamic levels. */
   std::vector<SP::SiconosVector> p;
 
   /** mass of the system */
   SP::PMMass mass;
 
   /** internal strength of the system */
-  SP::POV0 fInt;
+  SP::PVFint fInt;
 
   /** jacobian/coordinates, jacobianFInt[0] and velocity, jacobianFInt[1], of internal strength */
-  std::vector<SP::POM0> jacobianFInt;
+  std::vector<SP::PMFint> jacobianFInt;
 
   /** external strength of the system */
-  SP::PVFext fExt;
+  SP::Plugged_Vector_FTime fExt;
 
   /** non-linear inertia term of the system */
   SP::PVNNL NNL;
@@ -511,7 +502,7 @@ public:
   /** get the value of fInt
    *  \return plugged vector
    */
-  inline const POV0 getFInt() const
+  inline const PVFint getFInt() const
   {
     return *fInt;
   }
@@ -519,7 +510,7 @@ public:
   /** get fInt
    *  \return pointer on a plugged vector
    */
-  inline SP::POV0 getFIntPtr() const
+  inline SP::PVFint getFIntPtr() const
   {
     return fInt;
   }
@@ -527,12 +518,12 @@ public:
   /** set the value of fInt to newValue
    *  \param a plugged vector
    */
-  void setFInt(const POV0&);
+  void setFInt(const PVFint&);
 
   /** set fInt to pointer newPtr
    *  \param a SP to plugged vector
    */
-  inline void setFIntPtr(SP::POV0 newPtr)
+  inline void setFIntPtr(SP::PVFint newPtr)
   {
     fInt = newPtr;
   }
@@ -541,7 +532,7 @@ public:
   /** get the value of fExt
    *  \return plugged vector
    */
-  inline const PVFext getFExt() const
+  inline const Plugged_Vector_FTime getFExt() const
   {
     return *fExt;
   }
@@ -549,7 +540,7 @@ public:
   /** get fExt
    *  \return pointer on a plugged vector
    */
-  inline SP::PVFext getFExtPtr() const
+  inline SP::Plugged_Vector_FTime getFExtPtr() const
   {
     return fExt;
   }
@@ -557,12 +548,12 @@ public:
   /** set the value of fExt to newValue
    *  \param a plugged vector
    */
-  void setFExt(const PVFext&);
+  void setFExt(const Plugged_Vector_FTime&);
 
   /** set fExt to pointer newPtr
    *  \param a SP to plugged vector
    */
-  inline void setFExtPtr(SP::PVFext newPtr)
+  inline void setFExtPtr(SP::Plugged_Vector_FTime newPtr)
   {
     fExt = newPtr;
   }
@@ -604,7 +595,7 @@ public:
       \param index of the desired jacobian
       *  \return a plugged-matrix
       */
-  inline const POM0 getJacobianFInt(unsigned int i) const
+  inline const PMFint getJacobianFInt(unsigned int i) const
   {
     return *(jacobianFInt[i]);
   }
@@ -613,7 +604,7 @@ public:
       \param index of the desired jacobian
       *  \return pointer on a plugged-matrix
       */
-  inline SP::POM0 getJacobianFIntPtr(unsigned int i) const
+  inline SP::PMFint getJacobianFIntPtr(unsigned int i) const
   {
     return jacobianFInt[i];
   }
@@ -622,13 +613,13 @@ public:
       \param index of the desired jacobian
       *  \param plugged-matrix newValue
       */
-  void setJacobianFInt(unsigned int, const POM0&);
+  void setJacobianFInt(unsigned int, const PMFint&);
 
   /** set jacobianFInt to pointer newPtr
       \param index of the desired jacobian
       *  \param a plugged matrix SP
       */
-  inline void setJacobianFIntPtr(unsigned int i, SP::POM0 newPtr)
+  inline void setJacobianFIntPtr(unsigned int i, SP::PMFint newPtr)
   {
     jacobianFInt[i] = newPtr;
   }
@@ -915,5 +906,7 @@ public:
   void computePostImpactVelocity();
 
 };
+
+TYPEDEF_SPTR(LagrangianDS);
 
 #endif // LAGRANGIANNLDS_H

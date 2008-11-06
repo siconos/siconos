@@ -409,15 +409,8 @@ void PrimalFrictionContact::initialize(SP::Simulation sim)
 
 
     for (ConstUnitaryRelationsIterator itUR = indexSet->begin(); itUR != indexSet->end(); ++itUR)
-    {
-
-#ifndef WithSmartPtr
-      mu->push_back(static_cast<NewtonImpactFrictionNSL*>((*itUR)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
-#else
       mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL> ((*itUR)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
-#endif
 
-    }
   }
   else // in that case, M and mu will be updated during preCompute
   {
@@ -566,11 +559,7 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::UnitaryRelation U
     if (nslawType == NEWTONIMPACTNSLAW)
     {
 
-#ifndef WithSmartPtr
-      e = (static_cast<NewtonImpactNSL*>(mainInteraction->getNonSmoothLawPtr()))->getE();
-#else
       e = (boost::static_pointer_cast<NewtonImpactNSL>(mainInteraction->getNonSmoothLawPtr()))->getE();
-#endif
 
       std::vector<unsigned int> subCoord(4);
       if (simulationType == "TimeStepping")
@@ -595,11 +584,7 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::UnitaryRelation U
     else if (nslawType == NEWTONIMPACTFRICTIONNSLAW)
     {
 
-#ifndef WithSmartPtr
-      e = (static_cast<NewtonImpactFrictionNSL*>(mainInteraction->getNonSmoothLawPtr()))->getEn();
-#else
       e = (boost::static_pointer_cast<NewtonImpactFrictionNSL>(mainInteraction->getNonSmoothLawPtr()))->getEn();
-#endif
 
       // Only the normal part is multiplied by e
       if (simulationType == "TimeStepping")
@@ -693,15 +678,7 @@ void PrimalFrictionContact::preCompute(const double time)
     // Update mu
     mu->clear();
     for (ConstUnitaryRelationsIterator itUR = indexSet->begin(); itUR != indexSet->end(); ++itUR)
-    {
-
-#ifndef WithSmartPtr
-      mu->push_back(static_cast<NewtonImpactFrictionNSL*>((*itUR)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
-#else
       mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL>((*itUR)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
-#endif
-    }
-
   }
 
   // Computes q

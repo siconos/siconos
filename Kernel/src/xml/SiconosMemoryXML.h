@@ -22,7 +22,7 @@
 #ifndef SICONOSMEMORYXML_H
 #define SICONOSMEMORYXML_H
 
-#include "SiconosPointers.h"
+#include "SiconosPointers.hpp"
 #include "SiconosDOMTreeTools.h"
 #include<deque>
 
