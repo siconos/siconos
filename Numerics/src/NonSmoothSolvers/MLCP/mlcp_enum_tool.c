@@ -32,6 +32,12 @@ void affectW2V(int * W2V)
     W2V[i] = aux & 1;
     aux = aux >> 1;
   }
+  if (sVerbose)
+  {
+    for (unsigned int i = 0; i < sMm; i++)
+      printf("wv[%d]=%d \t", i, W2V[i]);
+    printf("\n");
+  }
 
 }
 

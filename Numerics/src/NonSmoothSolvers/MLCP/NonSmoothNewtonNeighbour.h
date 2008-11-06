@@ -55,6 +55,10 @@ extern "C" {
   double* nonSmoothNewtonNeighInitMemory(int n, double * dWork, int * iWork);
   int nonSmoothNewtonNeigh(int, double*, NewtonFunctionPtr*, NewtonFunctionPtr*, int*, double*);
 
+  int nonSmoothNewtonNeigh_getNbIWork(int n, int m);
+  int nonSmoothNewtonNeigh_getNbDWork(int n, int m);
+
+  /*only for debug*/
   void NSNN_thisIsTheSolution(int n, double * z);
   void  NSNN_reset();
 

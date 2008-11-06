@@ -30,11 +30,19 @@ void displayMat(double * M, int Nblin, int Nbcol, int incCol)
   int lin, col;
   if (incCol == 0)
     incCol = Nblin;
+  printf("M%d %d =[", Nblin, Nbcol);
   for (lin = 0; lin < Nblin; lin++)
   {
     for (col = 0; col < Nbcol; col++)
-      printf(" %.32e", M[lin + col * incCol]);
-    printf("\n");
+    {
+      printf(" %e", M[lin + col * incCol]);
+      if (col != Nbcol - 1)
+        printf(",");
+    }
+    if (lin != Nblin - 1)
+      printf(";\n");
+    else
+      printf("]\n");
   }
 
 }
@@ -49,6 +57,7 @@ void displayMLCP(MixedLinearComplementarity_Problem* p)
   if (p->M)
   {
     printf("M matrix:\n");
+    displayMat(p->M->matrix0, n + m, n + m, n + m);
     displayRawbyRaw(p->M);
   }
   else

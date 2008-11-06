@@ -114,7 +114,7 @@ void printCurrentSystem()
   int npm = sNn + sMm;
   printf("printCurrentSystemM:\n");
   displayMat(sM, npm, npm, 0);
-  printf("printCurrentSystemQ:\n");
+  printf("printCurrentSystemQ (ie -Q from mlcp beause of linear system MZ=Q):\n");
   displayMat(sQ, sMm + sNn, 1, 0);
 }
 void printRefSystem()
@@ -122,7 +122,7 @@ void printRefSystem()
   int npm = sNn + sMm;
   printf("ref M n %d  m %d :\n", sNn, sMm);
   displayMat(sMref, npm, npm, 0);
-  printf("ref Q:\n");
+  printf("ref Q (ie -Q from mlcp beause of linear system MZ=Q):\n");
   displayMat(sQref, sMm + sNn, 1, 0);
 }
 int mlcp_enum_getNbIWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
@@ -203,7 +203,7 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
     {
       if (sVerbose)
       {
-        printf("LU foctorization success, solution:\n");
+        printf("LU foctorization success, solution in cone?\n");
         displayMat(sQ, npm, 1, 0);
       }
 
@@ -220,11 +220,21 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
         continue;
       else
       {
-        if (sVerbose)
-          printf("mlcp_enum find a solution!\n");
         mlcp_fillSolution(sU, sV, sW1, sW2, sNn, sMm, sW2V, sQ);
+        if (sVerbose)
+        {
+          printf("mlcp_enum find a solution!\n");
+          mlcp_DisplaySolution(sU, sV, sW1, sW2, sNn, sMm);
+        }
         //  options->iparam[1]=sCurrentEnum-1;
         return;
+      }
+    }
+    else
+    {
+      if (sVerbose)
+      {
+        printf("LU foctorization failed:\n");
       }
     }
   }

@@ -39,12 +39,12 @@ The input structure MixedLinearComplementarity_Problem is supposed to fit with t
 */
 int mlcp_FB_getNbIWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
 {
-  return 2 * (problem->n + problem->m);
+  return nonSmoothNewtonNeigh_getNbIWork(problem->n, problem->m);
 
 }
 int mlcp_FB_getNbDWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
 {
-  return (12 + 2 * (problem->n + problem->m)) * (problem->n + problem->m) + 1;
+  return problem->n + problem->m + nonSmoothNewtonNeigh_getNbDWork(problem->n, problem->m);
 }
 
 
@@ -110,19 +110,21 @@ void mlcp_FB(MixedLinearComplementarity_Problem* problem, double *z, double *w, 
   double err;
   double tol = options->dparam[0];
   int i;
-  /*only for debug
-  double * zz = (double *)malloc((sN+sM)*sizeof(double));
-  memcpy(zz,z,(sN+sM)*sizeof(double));
-  */
+  /*only for debug */
+  double * zz = (double *)malloc((sN + sM) * sizeof(double));
+  memcpy(zz, z, (sN + sM)*sizeof(double));
+
 
   *info = nonSmoothNewtonNeigh(sN + sM, z, &F, &jacobianF, options->iparam, options->dparam);
   if (*info > 0)
   {
     fprintf(stderr, "Numerics, mlcp_FB failed, reached max. number of iterations without convergence. Error = %f\n", options->dparam[1]);
-    /*    displayMLCP(problem);
+    /*ONLY FOR DEBUG
+      displayMLCP(problem);
     printf("with z init;\n");
     for (i=0;i<sN+sM;i++)
-    printf("%.32e \n",zz[i]);*/
+    printf("%.32e \n",zz[i]);
+    exit(1);*/
   }
   /*  free(zz);*/
   mlcp_compute_error(problem, z, w, tol, &err);

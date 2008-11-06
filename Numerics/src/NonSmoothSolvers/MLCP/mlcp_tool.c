@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
 /*
  *if sW2V[i]==0
  *  v[i] not null w2[i] null
@@ -59,4 +60,20 @@ void   mlcp_fillSolution(double * z1, double * z2, double * w1, double * w2, int
       w2[lin] = Q[n + lin];
     }
   }
+}
+
+void   mlcp_DisplaySolution(double * z1, double * z2, double * w1, double * w2, int n, int m)
+{
+  int lin;
+  printf("z1:\n");
+  for (lin = 0; lin < n; lin++)
+    printf("z1[,%d]=%e\n", lin, z1[lin]);
+
+  printf("w1[0..%d]=0\n", lin);
+
+  printf("w2,z2:\n");
+  for (lin = 0; lin < m; lin++)
+    printf("z2[%d],w2[%d],=%e\t%e\n", lin, lin, z2[lin], w2[lin]);
+
+
 }

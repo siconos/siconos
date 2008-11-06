@@ -456,6 +456,9 @@ extern "C" {
   */
   int mlcp_compute_error(MixedLinearComplementarity_Problem* problem, double *z, double *w, double tolerance, double * error);
 
+
+
+
 #ifdef __cplusplus
 }
 #endif

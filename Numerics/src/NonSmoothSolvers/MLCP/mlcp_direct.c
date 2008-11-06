@@ -50,6 +50,7 @@ struct dataComplementarityConf
   double * M;
   struct dataComplementarityConf * next;
   struct dataComplementarityConf * prev;
+  int Usable;
   int used;
   int* IPV;
 };
@@ -140,9 +141,16 @@ int internalPrecompute(MixedLinearComplementarity_Problem* problem)
 {
   int INFO;
   mlcp_buildM(spFirstCC->zw, spFirstCC->M, problem->M->matrix0, sN, sM);
+  if (sVerbose)
+  {
+    printf("mlcp_direct, precomputed M :\n");
+    displayMat(spFirstCC->M, sNpM, sNpM, 0);
+  }
+  spFirstCC->Usable = 1;
   DGETRF(sNpM, sNpM, spFirstCC->M, sNpM, spFirstCC->IPV, INFO);
   if (INFO)
   {
+    spFirstCC->Usable = 0;
     printf("mlcp_direct, internalPrecompute  error, LU impossible\n");
     return 0;
   }
@@ -150,6 +158,7 @@ int internalPrecompute(MixedLinearComplementarity_Problem* problem)
   DGETRI(sNpM, spFirstCC->M, sNpM, spFirstCC->IPV, INFO);
   if (INFO)
   {
+    spFirstCC->Usable = 1;
     printf("mlcp_direct error, internalPrecompute  DGETRI impossible\n");
     return 0;
   }
@@ -248,6 +257,12 @@ int solveWithCurConfig(MixedLinearComplementarity_Problem* problem)
   double * solTest = 0;
   if (sProblemChanged)
     internalPrecompute(problem);
+  if (!spCurCC->Usable)
+  {
+    if (sVerbose)
+      printf("solveWithCurConfig not usable\n");
+    return 0;
+  }
 #ifdef DIRECT_SOLVER_USE_DGETRI
   DGEMV(LA_NOTRANS, sNpM, sNpM, ALPHA, spCurCC->M, sNpM, sQ, INCX, BETA, sVBuf, INCY);
   solTest = sVBuf;
@@ -275,8 +290,8 @@ int solveWithCurConfig(MixedLinearComplementarity_Problem* problem)
       }
     }
   }
-  if (sVerbose)
-    printf("solveWithCurConfig Success\n");
+  /*  if (sVerbose)
+      printf("solveWithCurConfig Success\n");*/
   return 1;
 }
 /*
