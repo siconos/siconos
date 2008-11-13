@@ -24,19 +24,11 @@
 #ifndef Circle_H
 #define Circle_H
 
-#include "LagrangianDS.h"
+#include "CircularDS.h"
 
-class Circle : public LagrangianDS
+class Circle : public CircularDS
 {
 private:
-  double radiusCircle;
-  double massCircle;
-  unsigned int ndofCircle;
-
-  SP::SiconosMatrix MassCircle;
-  SP::SiconosVector QCircle;
-  SP::SiconosVector VCircle;
-  SP::SiconosVector ACircle;
 
   void MassSetup();
 
@@ -60,24 +52,6 @@ public:
    */
   ~Circle();
 
-  inline double getQ(unsigned int pos)
-  {
-    return (*q[0])(pos);
-  };
-  inline double getVelocity(unsigned int pos)
-  {
-    return (*q[1])(pos);
-  };
-
-  inline double getRadius()
-  {
-    return radiusCircle;
-  };
-
-  inline double getMassValue()
-  {
-    return massCircle;
-  };
 
 };
 

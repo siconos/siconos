@@ -25,15 +25,14 @@ void Circle::MassSetup()
   mass.reset(new PMMass(ndof, ndof));
   mass->resize(ndof, ndof);
   mass->zero();
-  (*mass)(0, 0) = (*mass)(1, 1) = massCircle;
-  (*mass)(2, 2) = massCircle * radiusCircle * radiusCircle;
+  (*mass)(0, 0) = (*mass)(1, 1) = massValue;
+  (*mass)(2, 2) = massValue * radius * radius;
 }
 
 Circle::Circle(double r, double m,
                const SiconosVector& qinit,
                const SiconosVector& vinit)
-  : LagrangianDS(qinit, vinit),
-    radiusCircle(r), massCircle(m), ndofCircle(3)
+  : CircularDS(r, m, qinit, vinit)
 {
   MassSetup();
 }

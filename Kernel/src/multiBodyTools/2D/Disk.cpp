@@ -25,15 +25,14 @@ void Disk::MassSetup()
   mass.reset(new PMMass(ndof, ndof));
   mass->resize(ndof, ndof);
   mass->zero();
-  (*mass)(0, 0) = (*mass)(1, 1) = massDisk;
-  (*mass)(2, 2) = massDisk * radiusDisk * radiusDisk / 2.;
+  (*mass)(0, 0) = (*mass)(1, 1) = massValue;
+  (*mass)(2, 2) = massValue * radius * radius / 2.;
 }
 
 Disk::Disk(double r, double m,
            const SiconosVector& qinit,
            const SiconosVector& vinit)
-  : LagrangianDS(qinit, vinit),
-    radiusDisk(r), massDisk(m), ndofDisk(3)
+  : CircularDS(r, m, qinit, vinit)
 {
   MassSetup();
 }

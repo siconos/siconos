@@ -309,6 +309,15 @@ public:
    */
   void addInOSIMap(SP::DynamicalSystem, SP::OneStepIntegrator);
 
+
+  /** get indexSets
+      \return a VectorOfSetOfUnitaryRelations
+  */
+  VectorOfSetOfUnitaryRelations getIndexSets()
+  {
+    return indexSets;
+  };
+
   /** get a pointer to indexSets[i]
    *  \return a UnitaryRelationsSet
    */
@@ -328,6 +337,14 @@ public:
   inline const int getLevelMin() const
   {
     return levelMin;
+  };
+
+  /** get levelMax
+   *  \return the value of LevelMax
+   */
+  inline const int getLevelMax() const
+  {
+    return levelMax;
   };
 
   /** get allNSProblems[name], a specific OneStepNSProblem
@@ -436,8 +453,9 @@ public:
 
   /** Complete initialisation of the Simulation (OneStepIntegrators, OneStepNSProblem, TImediscretisation).
       \param the model, which will own the Simulation
+      \param optional flag for partial initialisation
   */
-  void initialize(SP::Model);
+  void initialize(SP::Model, bool = true);
 
   /** Set OSI (DS) non-smooth part to zero.
    */

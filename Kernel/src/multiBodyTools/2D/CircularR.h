@@ -22,17 +22,20 @@
   \brief Two disks relation - Inherits from LagrangianScleronomousR
 */
 
-#ifndef CircleCircleR_h
-#define CircleCircleR_h
+#ifndef CircularR_h
+#define CircularR_h
 
-#include "CircularR.h"
+#include "Interaction.h"
+#include "LagrangianScleronomousR.h"
 
-class CircleCircleR : public CircularR
+class CircularR : public LagrangianScleronomousR
 {
-private:
-  double ar1mr2;
+protected:
+  double r1, r2;
 
-  CircleCircleR();
+  CircularR();
+
+  ~CircularR();
 
 public:
 
@@ -41,16 +44,11 @@ public:
   \param disk1 radius
   \param disk2 radius
   */
-  CircleCircleR(double, double);
+  CircularR(double, double);
 
-  double distance(double, double, double, double, double, double);
-
-  void computeH(double);
-
-  void computeJacH(double, unsigned int);
+  virtual double distance(double, double, double, double, double, double);
 
 };
 
-TYPEDEF_SPTR(CircleCircleR);
-
-#endif /* CircleCircleR_h */
+TYPEDEF_SPTR(CircularR);
+#endif /* CircularR_h */

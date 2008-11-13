@@ -18,39 +18,12 @@
  *
  */
 
-/*! \file CircleCircleR.h
-  \brief Two disks relation - Inherits from LagrangianScleronomousR
-*/
-
-#ifndef CircleCircleR_h
-#define CircleCircleR_h
-
 #include "CircularR.h"
 
-class CircleCircleR : public CircularR
+CircularR::CircularR() : LagrangianScleronomousR() {};
+double CircularR::distance(double, double, double, double, double, double)
 {
-private:
-  double ar1mr2;
-
-  CircleCircleR();
-
-public:
-
-  /** Constructor
-
-  \param disk1 radius
-  \param disk2 radius
-  */
-  CircleCircleR(double, double);
-
-  double distance(double, double, double, double, double, double);
-
-  void computeH(double);
-
-  void computeJacH(double, unsigned int);
-
+  assert(0);
+  return(0);
 };
-
-TYPEDEF_SPTR(CircleCircleR);
-
-#endif /* CircleCircleR_h */
+CircularR::~CircularR() {};

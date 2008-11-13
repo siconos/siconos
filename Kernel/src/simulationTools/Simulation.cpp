@@ -150,7 +150,7 @@ void Simulation::recordIntegrator(SP::OneStepIntegrator osi)
 void Simulation::addInOSIMap(SP::DynamicalSystem ds, SP::OneStepIntegrator  osi)
 {
   if (osiMap.find(ds) != osiMap.end()) // ie if ds is already registered in the map with another integrator
-    RuntimeException::selfThrow("Simulation::addInOSIMap(ds,osi), ds is already associated with another one-step integrator");
+    ;/*RuntimeException::selfThrow("Simulation::addInOSIMap(ds,osi), ds is already associated with another one-step integrator");  */
   osiMap[ds] = osi;
 }
 
@@ -228,7 +228,7 @@ void Simulation::recordNonSmoothProblem(SP::OneStepNSProblem osns)
   (*allNSProblems)[name] = osns;
 }
 
-void Simulation::initialize(SP::Model m)
+void Simulation::initialize(SP::Model m, bool withOSI)
 {
   // === Connection with the model ===
   assert(m || !"Simulation::initialize(model) - model = NULL.");
@@ -238,8 +238,11 @@ void Simulation::initialize(SP::Model m)
   eventsManager->initialize(shared_from_this());
   tinit = eventsManager->getStartingTime();
 
-  // === OneStepIntegrators initialization ===
-  std::for_each(allOSI->begin(), allOSI->end(), boost::bind(&OneStepIntegrator::initialize, _1, shared_from_this()));
+  if (withOSI)
+  {
+    // === OneStepIntegrators initialization ===
+    std::for_each(allOSI->begin(), allOSI->end(), boost::bind(&OneStepIntegrator::initialize, _1, shared_from_this()));
+  };
 
   // === IndexSets building ===
   // The number of indexSets is given by the maximum value of relative degrees of the unitary relations.

@@ -18,39 +18,16 @@
  *
  */
 
-/*! \file CircleCircleR.h
-  \brief Two disks relation - Inherits from LagrangianScleronomousR
-*/
+#include "CircularDS.h"
 
-#ifndef CircleCircleR_h
-#define CircleCircleR_h
-
-#include "CircularR.h"
-
-class CircleCircleR : public CircularR
+CircularDS::CircularDS(double r, double m,
+                       const SiconosVector& qinit,
+                       const SiconosVector& vinit)
+  : LagrangianDS(qinit, vinit),
+    radius(r), massValue(m)
 {
-private:
-  double ar1mr2;
+  ndof = 3;
+}
 
-  CircleCircleR();
-
-public:
-
-  /** Constructor
-
-  \param disk1 radius
-  \param disk2 radius
-  */
-  CircleCircleR(double, double);
-
-  double distance(double, double, double, double, double, double);
-
-  void computeH(double);
-
-  void computeJacH(double, unsigned int);
-
-};
-
-TYPEDEF_SPTR(CircleCircleR);
-
-#endif /* CircleCircleR_h */
+CircularDS::~CircularDS()
+{}

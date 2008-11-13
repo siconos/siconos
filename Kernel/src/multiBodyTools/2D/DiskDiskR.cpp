@@ -21,31 +21,30 @@
 #include <math.h>
 #include "DiskDiskR.h"
 
-
-
-DiskDiskR::DiskDiskR(double r, double rr) : LagrangianScleronomousR()
+DiskDiskR::DiskDiskR(double r, double rr) : CircularR()
 {
   r1 = r;
   r2 = rr;
   r1pr2 = r1 + r2;
 }
 
+double DiskDiskR::distance(double x1, double y1, double r1, double x2, double y2, double r2)
+{
+  return (hypot(x1 - x2, y1 - y2) - r1 - r2);
+}
+
+
 void DiskDiskR::computeH(double)
 {
-
-  SP::SiconosVector y = interaction->getYPtr(0);
 
   // Warning: temporary method to have contiguous values in memory,
   // copy of block to simple.
   *workX = *data[q0];
   double *q = &(*workX)(0);
 
-  double dx = q[3] - q[0];
-  double dy = q[4] - q[1];
+  SP::SiconosVector y = interaction->getYPtr(0);
 
-  double d =  hypot(dx, dy);
-
-  y->setValue(0, d - r1pr2);
+  y->setValue(0, distance(q[0], q[1], r1, q[3], q[4], r2));
   y->setValue(1, 0.);
 
 };

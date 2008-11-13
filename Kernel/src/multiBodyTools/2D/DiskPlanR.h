@@ -29,7 +29,6 @@
 #include "Interaction.h"
 #include "LagrangianScleronomousR.h"
 
-
 class DiskPlanR : public LagrangianScleronomousR
 {
 private:
@@ -48,10 +47,15 @@ public:
   */
   DiskPlanR(double, double, double, double);
 
+  /* distance between disk and plan */
+  double distance(double x, double y, double r);
+
   void computeH(double);
 
   void computeJacH(double, unsigned int);
 
 };
+
+TYPEDEF_SPTR(DiskPlanR);
 
 #endif /* DiskPlanR */

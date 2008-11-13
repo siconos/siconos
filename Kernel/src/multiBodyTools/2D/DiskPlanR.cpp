@@ -20,6 +20,7 @@
 
 #include <math.h>
 #include "DiskPlanR.h"
+#include "Disk.h"
 
 DiskPlanR::DiskPlanR(double r, double A, double B, double C) :
   LagrangianScleronomousR(),
@@ -28,28 +29,34 @@ DiskPlanR::DiskPlanR(double r, double A, double B, double C) :
   sqrA2pB2 = hypot(A, B);
 }
 
-void DiskPlanR::computeH(double)
+double DiskPlanR::distance(double x, double y, double rad)
 {
 
+  return (fabs(A * x + B * y + C) / sqrA2pB2 - rad);
+}
+
+void DiskPlanR::computeH(double)
+{
   SP::SiconosVector y = interaction->getYPtr(0);
 
-  // Warning: temporary method to have contiguous values in memory,
-  // copy of block to simple.
-  *workX = *data[q0];
-  double *q = &(*workX)(0);
+  double q_0 = boost::static_pointer_cast<Disk>
+               (*interaction->dynamicalSystemsBegin())->getQ(0);
+  double q_1 = boost::static_pointer_cast<Disk>
+               (*(interaction->dynamicalSystemsBegin()))->getQ(1);
 
-  y->setValue(0, fabs(A * q[0] + B * q[1] + C) / sqrA2pB2 - r);
+  y->setValue(0, distance(q_0, q_1, r));
 
 }
 
 void DiskPlanR::computeJacH(double, unsigned int)
 {
-  *workX = *data[q0];
-  double *q = &(*workX)(0);
+
   double *g = &(*(JacH[0]))(0, 0);
 
-  double x0 = q[0];
-  double y0 = q[1];
+  double x0 = boost::static_pointer_cast<Disk>
+              (*interaction->dynamicalSystemsBegin())->getQ(0);
+  double y0 = boost::static_pointer_cast<Disk>
+              (*(interaction->dynamicalSystemsBegin()))->getQ(1);
   double D1 = A * x0 + B * y0 + C;
   double D2 = sqrA2pB2 * fabs(D1);
 

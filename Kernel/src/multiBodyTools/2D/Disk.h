@@ -24,22 +24,13 @@
 #ifndef Disk_H
 #define Disk_H
 
-#include "LagrangianDS.h"
-#include "SiconosPointers.hpp"
+#include "CircularDS.h"
 
-class Disk : public LagrangianDS
+class Disk : public CircularDS
 {
 private:
-  double radiusDisk;
-  double massDisk;
-  unsigned int ndofDisk;
-
-  SP::SiconosVector QDisk;
-  SP::SiconosVector VDisk;
-  SP::SiconosVector ADisk;
 
   void MassSetup();
-
 
 protected:
   Disk();
@@ -58,25 +49,6 @@ public:
   /** destructor
    */
   ~Disk();
-
-  inline double getQ(unsigned int pos)
-  {
-    return (*q[0])(pos);
-  };
-  inline double getVelocity(unsigned int pos)
-  {
-    return (*q[1])(pos);
-  };
-
-  inline double getRadius()
-  {
-    return radiusDisk;
-  };
-
-  inline double getMassValue()
-  {
-    return massDisk;
-  };
 
 };
 
