@@ -30,7 +30,7 @@ using namespace RELATION;
 
 // --- xml constructor ---
 Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
-  OneStepIntegrator("Moreau")
+  OneStepIntegrator(OSI::MOREAU)
 {
   // Note: we do not call xml constructor of OSI, but default one, since we need to download theta and DS at the same time.
 
@@ -96,20 +96,20 @@ Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
 }
 
 // --- constructor from a minimum set of data ---
-Moreau::Moreau(SP::DynamicalSystem newDS, double newTheta): OneStepIntegrator("Moreau")
+Moreau::Moreau(SP::DynamicalSystem newDS, double newTheta): OneStepIntegrator(OSI::MOREAU)
 {
   OSIDynamicalSystems->insert(newDS);
   thetaMap[newDS] = newTheta;
 }
 
 // --- constructor from a set of data ---
-Moreau::Moreau(DynamicalSystemsSet& newDS, double newTheta): OneStepIntegrator("Moreau", newDS)
+Moreau::Moreau(DynamicalSystemsSet& newDS, double newTheta): OneStepIntegrator(OSI::MOREAU, newDS)
 {
   for (DSIterator itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
     thetaMap[*itDS] = newTheta;
 }
 
-Moreau::Moreau(DynamicalSystemsSet& newDS, const MapOfDouble& newTheta): OneStepIntegrator("Moreau", newDS)
+Moreau::Moreau(DynamicalSystemsSet& newDS, const MapOfDouble& newTheta): OneStepIntegrator(OSI::MOREAU, newDS)
 {
   thetaMap = newTheta;
 }

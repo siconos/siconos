@@ -22,11 +22,11 @@
 #ifndef PrimalFrictionContact_H
 #define PrimalFrictionContact_H
 
-#include "OneStepNSProblem.h"
+#include "LinearOSNS.h"
 #include "SimpleVector.h"
 #include "SimpleMatrix.h"
 
-// Pointer to function of the type used for drivers for PrimalFrictionContact problems in Numerics
+/** Pointer to function of the type used for drivers for PrimalFrictionContact problems in Numerics */
 typedef int (*PFC_Driver)(PrimalFrictionContact_Problem*, double*, double*, Solver_Options*, Numerics_Options*);
 
 /** Formalization and Resolution of a Friction-Contact Problem
@@ -70,7 +70,7 @@ typedef int (*PFC_Driver)(PrimalFrictionContact_Problem*, double*, double*, Solv
  *  ouput results from the solver (velocity,reaction); function postCompute().
  *
  */
-class PrimalFrictionContact : public OneStepNSProblem
+class PrimalFrictionContact : public LinearOSNS
 {
 protected:
 
@@ -80,54 +80,23 @@ protected:
   /** size of the local problem to solve */
   unsigned int sizeLocalOutput;
 
-  /** contains the vector velocity of a PrimalFrictionContact system */
-  SimpleVector *velocity;
-
-  /** contains the vector reaction of a PrimalFrictionContact system */
-  SimpleVector *reaction;
-
   /** contains the vector localVelocity of a PrimalFrictionContact system */
-  SimpleVector *localVelocity;
+  SP::SiconosVector localVelocity;
 
   /** contains the vector localReaction of a PrimalFrictionContact system */
-  SimpleVector *localReaction;
+  SP::SiconosVector localReaction;
 
   /** contains the vector localVelocity of a PrimalFrictionContact system */
-  SimpleVector *tildeLocalVelocity;
+  SP::SiconosVector tildeLocalVelocity;
 
   /** contains the matrix M of a PrimalFrictionContact system */
-  OSNSMatrix *M;
-
-  /** contains the matrix M of a PrimalFrictionContact system */
-  OSNSMatrix *H;
+  SP::OSNSMatrix H;
 
   /** contains the vector q of a PrimalFrictionContact system */
-  SimpleVector *q;
-
-  /** contains the vector q of a PrimalFrictionContact system */
-  std::vector<double>* mu;
-
-  /** Flags to check wheter pointers were allocated in class constructors or not */
-  bool isVelocityAllocatedIn;
-  bool isReactionAllocatedIn;
-  bool isLocalVelocityAllocatedIn;
-  bool isLocalReactionAllocatedIn;
-  bool isTildeLocalVelocityAllocatedIn;
-  bool isMAllocatedIn;
-  bool isHAllocatedIn;
-  bool isQAllocatedIn;
-
-  /** Storage type for M - 0: SiconosMatrix (dense), 1: Sparse Storage (embedded into OSNSMatrix) */
-  int MStorageType;
+  SP::MuStorage mu;
 
   /** Pointer to the function used to call the Numerics driver to solve the problem */
   PFC_Driver primalFrictionContact_driver;
-
-private:
-
-  /** default constructor (private)
-   */
-  PrimalFrictionContact(const std::string& pbType = "PrimalFrictionContact2D");
 
 public:
 
@@ -146,7 +115,7 @@ public:
 
   /** destructor
    */
-  ~PrimalFrictionContact();
+  ~PrimalFrictionContact() {};
 
   // GETTERS/SETTERS
 
@@ -174,63 +143,6 @@ public:
     sizeLocalOutput = newVal;
   }
 
-  // --- Velocity ---
-  /** get the value of velocity, the initial state of the DynamicalSystem
-   *  \return SimpleVector
-   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
-   */
-  inline const SimpleVector getVelocity() const
-  {
-    return *velocity;
-  }
-
-  /** get velocity, the initial state of the DynamicalSystem
-   *  \return pointer on a SimpleVector
-   */
-  inline SimpleVector* getVelocityPtr() const
-  {
-    return velocity;
-  }
-
-  /** set the value of velocity to newValue
-   *  \param SimpleVector newValue
-   */
-  void setVelocity(const SimpleVector&);
-
-  /** set velocity to pointer newPtr
-   *  \param SimpleVector * newPtr
-   */
-  void setVelocityPtr(SimpleVector*);
-
-  // --- Reaction ---
-  /** get the value of reaction, the initial state of the DynamicalSystem
-   *  \return SimpleVector
-   *  \warning: SimpleVector is an abstract class => can not be an lvalue => return SimpleVector
-   */
-  inline const SimpleVector getReaction() const
-  {
-    return *reaction;
-  }
-
-  /** get reaction, the initial state of the DynamicalSystem
-   *  \return pointer on a SimpleVector
-   */
-  inline SimpleVector* getReactionPtr() const
-  {
-    return reaction;
-  }
-
-  /** set the value of reaction to newValue
-   *  \param SimpleVector newValue
-   */
-  void setReaction(const SimpleVector&);
-
-  /** set reaction to pointer newPtr
-   *  \param SimpleVector * newPtr
-   */
-  void setReactionPtr(SimpleVector*) ;
-
-
   // --- LocalVelocity ---
   /** get the value of localVelocity, the initial state of the DynamicalSystem
    *  \return SimpleVector
@@ -244,7 +156,7 @@ public:
   /** get localVelocity
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getLocalVelocityPtr() const
+  inline SP::SiconosVector getLocalVelocityPtr() const
   {
     return localVelocity;
   }
@@ -252,12 +164,15 @@ public:
   /** set the value of localVelocity to newValue
    *  \param SimpleVector newValue
    */
-  void setLocalVelocity(const SimpleVector&);
+  void setLocalVelocity(const SiconosVector&);
 
   /** set localVelocity to pointer newPtr
-   *  \param SimpleVector * newPtr
+   *  \param SP::SiconosVector  newPtr
    */
-  void setLocalVelocityPtr(SimpleVector*);
+  inline void setLocalVelocityPtr(SP::SiconosVector newPtr)
+  {
+    localVelocity = newPtr;
+  }
 
   // --- Reaction ---
   /** get the value of reaction, the initial state of the DynamicalSystem
@@ -272,7 +187,7 @@ public:
   /** get localReaction, the initial state of the DynamicalSystem
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getLocalReactionPtr() const
+  inline SP::SiconosVector getLocalReactionPtr() const
   {
     return localReaction;
   }
@@ -280,12 +195,16 @@ public:
   /** set the value of localReaction to newValue
    *  \param SimpleVector newValue
    */
-  void setLocalReaction(const SimpleVector&);
+  void setLocalReaction(const SiconosVector&);
 
   /** set localReaction to pointer newPtr
-   *  \param SimpleVector * newPtr
+   *  \param SP::SiconosVector  newPtr
    */
-  void setLocalReactionPtr(SimpleVector*) ;
+  inline void setLocalReactionPtr(SP::SiconosVector newPtr)
+  {
+    localReaction = newPtr;
+  }
+
   // --- TildeLocalVelocity ---
 
   /** get the value of tildeLocalVelocity, the initial state of the DynamicalSystem
@@ -300,7 +219,7 @@ public:
   /** get tildeLocalVelocity
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getTildeLocalVelocityPtr() const
+  inline SP::SiconosVector getTildeLocalVelocityPtr() const
   {
     return tildeLocalVelocity;
   }
@@ -308,41 +227,22 @@ public:
   /** set the value of tildeLocalVelocity to newValue
    *  \param SimpleVector newValue
    */
-  void setTildeLocalVelocity(const SimpleVector&);
+  void setTildeLocalVelocity(const SiconosVector&);
 
   /** set tildeLocalVelocity to pointer newPtr
-   *  \param SimpleVector * newPtr
+   *  \param SP::SiconosVector  newPtr
    */
-  void setTildeLocalVelocityPtr(SimpleVector*);
-
-
-  // --- M ---
-
-  /** get M
-   *  \return pointer on a OSNSMatrix
-   */
-  inline OSNSMatrix* getMPtr() const
+  inline void setTildeLocalVelocityPtr(SP::SiconosVector newPtr)
   {
-    return M;
+    tildeLocalVelocity = newPtr;
   }
-
-  /** set the value of M to newValue
-   *  \param  newValue
-   */
-  void setM(const OSNSMatrix &);
-
-  /** set M to pointer newPtr
-   *  \param  OSNSMatrix* newPtr
-   */
-  void setMPtr(OSNSMatrix*);
-
 
   // --- H ---
 
   /** get H
    *  \return pointer on a OSNSMatrix
    */
-  inline OSNSMatrix* getHPtr() const
+  inline SP::OSNSMatrix getHPtr() const
   {
     return H;
   }
@@ -353,37 +253,12 @@ public:
   void setH(const OSNSMatrix &);
 
   /** set H to pointer newPtr
-   *  \param  OSNSMatrix* newPtr
+   *  \param  SP::OSNSMatrix newPtr
    */
-  void setHPtr(OSNSMatrix*);
-
-  // --- Q ---
-  /** get the value of q, the initial state of the DynamicalSystem
-   *  \return SimpleVector
-   *  \warning: SimpleVector is an abstract class => can not be an lvalue => return SimpleVector
-   */
-  inline const SimpleVector getQ() const
+  inline void setHPtr(SP::OSNSMatrix newPtr)
   {
-    return *q;
+    H = newPtr;
   }
-
-  /** get q, the initial state of the DynamicalSystem
-   *  \return pointer on a SimpleVector
-   */
-  inline SimpleVector* getQPtr() const
-  {
-    return q;
-  }
-
-  /** set the value of q to newValue
-   *  \param SimpleVector newValue
-   */
-  void setQ(const SimpleVector&);
-
-  /** set q to pointer newPtr
-   *  \param SimpleVector * newPtr
-   */
-  void setQPtr(SimpleVector*);
 
   // --- Mu ---
   /** get the vector mu, list of the friction coefficients
@@ -397,7 +272,7 @@ public:
   /** get a pointer to mu, the list of the friction coefficients
    *  \return pointer on a std::vector<double>
    */
-  inline std::vector<double>* getMuPtr() const
+  inline SP::MuStorage getMuPtr() const
   {
     return mu;
   }
@@ -410,19 +285,6 @@ public:
   {
     return (*mu)[i];
   }
-
-  /** get the type of storage for M */
-  inline const int getMStorageType() const
-  {
-    return MStorageType;
-  };
-
-  /** set which type of storage will be used for M - Note that this function does not
-      allocate any memory for M, it just sets an indicator for future use */
-  inline void setMStorageType(int i)
-  {
-    MStorageType = i;
-  };
 
   /** set the driver-function used to solve the problem
       \param a function of prototype Driver
@@ -496,9 +358,6 @@ public:
    *  set values of the unknowns of Interactions using (velocity,reaction)
    */
   void postCompute();
-
-  /** copy the data of the OneStepNSProblem to the XML tree */
-  void saveNSProblemToXML();
 
   /** print the data to the screen */
   void display() const;

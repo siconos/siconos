@@ -56,15 +56,15 @@ private:
    */
   std::vector<integer> intData;
   /** relative tolerance */
-  doublerealSAPtr rtol;
+  SA::doublereal rtol;
   /** absolute tolerance */
-  doublerealSAPtr atol;
+  SA::doublereal atol;
   /** real work array */
-  doublerealSAPtr rwork;
+  SA::doublereal rwork;
   /** integer work array */
-  integerSAPtr iwork;
+  SA::integer iwork;
   /** integer array used for output of root information */
-  integerSAPtr jroot;
+  SA::integer jroot;
   /** temporary vector to save x values */
   SP::BlockVector xWork;
 
@@ -114,7 +114,7 @@ public:
   /** get relative tolerance parameter for lsodar
    *  \return a doublereal*
    */
-  inline const doublerealSAPtr getRtol() const
+  inline const SA::doublereal getRtol() const
   {
     return rtol;
   }
@@ -122,7 +122,7 @@ public:
   /** get absolute tolerance parameter for lsodar
    *  \return a doublereal*
    */
-  inline const doublerealSAPtr getAtol() const
+  inline const SA::doublereal getAtol() const
   {
     return atol;
   }
@@ -130,7 +130,7 @@ public:
   /** get real work vector parameter for lsodar
    *  \return a doublereal*
    */
-  inline const doublerealSAPtr getRwork() const
+  inline const SA::doublereal getRwork() const
   {
     return rwork;
   }
@@ -138,7 +138,7 @@ public:
   /** get iwork
    *  \return a pointer to integer
    */
-  inline integerSAPtr getIwork() const
+  inline SA::integer getIwork() const
   {
     return iwork;
   }
@@ -146,7 +146,7 @@ public:
   /** get output of root information
    *  \return a pointer to integer
    */
-  inline integerSAPtr getJroot() const
+  inline SA::integer getJroot() const
   {
     return jroot;
   }
@@ -164,7 +164,7 @@ public:
    *  \param doublereal * (rtol)
    *  \param doublereal * (atol)
    */
-  void setTol(integer, doublerealSAPtr, doublerealSAPtr);
+  void setTol(integer, SA::doublereal, SA::doublereal);
 
   /** update doubleData and iwork memory size, when changes occur in intData.
    */

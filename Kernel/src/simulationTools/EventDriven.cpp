@@ -231,7 +231,7 @@ void EventDriven::computeF(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   // computeF is supposed to fill xdot in, using the definition of the dynamical systems belonging to the osi
 
   // Check osi type: only lsodar is allowed.
-  if (osi->getType() != "Lsodar")
+  if (osi->getType() != OSI::LSODAR)
     RuntimeException::selfThrow("EventDriven::computeF(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
 
   SP::Lsodar lsodar = boost::static_pointer_cast<Lsodar>(osi);
@@ -273,7 +273,7 @@ void EventDriven::computeF(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
 
 void EventDriven::computeJacobianF(SP::OneStepIntegrator osi, integer *sizeOfX, doublereal *time, doublereal *x,  doublereal *jacob)
 {
-  if (osi->getType() != "Lsodar")
+  if (osi->getType() != OSI::LSODAR)
     RuntimeException::selfThrow("EventDriven::computeF(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
 
   SP::Lsodar lsodar = boost::static_pointer_cast<Lsodar>(osi);

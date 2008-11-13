@@ -25,6 +25,7 @@
 
 #include "SiconosPointers.hpp"
 #include "SiconosDOMTreeTools.h"
+#include "NonSmoothSolverXML.h"
 
 class OneStepNSProblem;
 class NonSmoothSolverXML;
@@ -84,15 +85,13 @@ protected:
   /** node used to define solver (tag: NonSmoothSolver) - Child of rootNode */
   xmlNodePtr solverNode;
   /** solverXML object */
-  NonSmoothSolverXML* solverXML;
-  /** bool to check whether solverXML has been allocated inside the class or not*/
-  bool isSolverXMLAllocatedIn;
+  SP::NonSmoothSolverXML solverXML;
 
 public:
 
   /** Default constructor */
   inline OneStepNSProblemXML(): rootNode(NULL), dimNode(NULL), interactionsConcernedNode(NULL),
-    solverNode(NULL), solverXML(NULL), isSolverXMLAllocatedIn(false) {};
+    solverNode(NULL) {};
 
   /** Build a OneStepNSProblemXML object from a DOM tree describing a OneStepNSProblem
    *   \param OneStepNSProblemNode : the OneStepNSProblem DOM tree
@@ -102,7 +101,7 @@ public:
 
   /** Destructor
    */
-  virtual ~OneStepNSProblemXML();
+  virtual ~OneStepNSProblemXML() {};
 
   /** Return the type of the OneStepNSProblem
    *   \return a string
@@ -147,7 +146,7 @@ public:
   /** to xml object that handles solver
    *   \return a pointer to a NonSmoothSolverXML
    */
-  inline NonSmoothSolverXML* getNonSmoothSolverXMLPtr() const
+  inline SP::NonSmoothSolverXML getNonSmoothSolverXMLPtr() const
   {
     return solverXML;
   }
@@ -155,7 +154,10 @@ public:
   /** set xml object that handles solver
    *   \param a pointer to a NonSmoothSolverXML
    */
-  void setNonSmoothSolverXMLPtr(NonSmoothSolverXML *);
+  inline void setNonSmoothSolverXMLPtr(SP::NonSmoothSolverXML newPtr)
+  {
+    solverXML = newPtr;
+  }
 
   /** Checks if attribute "storageType" is given in formalization tag
    *  \return a bool

@@ -69,6 +69,7 @@ typedef MapOfDouble::iterator DoubleIterator;
 
 /** Map of double; key = the related DS */
 typedef std::map<SP::DynamicalSystem, unsigned  int> DS_int;
+TYPEDEF_SPTR(DS_int);
 
 /** Iterator through a map of double */
 typedef MapOfDouble::iterator DoubleIterator;
@@ -139,6 +140,7 @@ typedef std::vector< SP::UnitaryRelationsSet > VectorOfSetOfUnitaryRelations;
 
 /** Map to link SP::UnitaryRelation with an int - Used for example in unitaryBlocksPositions for OSNSMatrix */
 typedef std::map< SP::UnitaryRelation , unsigned int > UR_int;
+TYPEDEF_SPTR(UR_int);
 
 /** list of indices */
 typedef std::vector<int> IndexInt;

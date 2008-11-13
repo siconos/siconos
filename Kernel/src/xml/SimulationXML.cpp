@@ -28,9 +28,8 @@
 
 #include "LsodarXML.h"
 #include "MoreauXML.h"
-#include "LCPXML.h"
 #include "QPXML.h"
-#include "FrictionContactXML.h"
+#include "FrictionContactXML.hpp"
 
 using namespace std;
 
@@ -84,13 +83,13 @@ SimulationXML::SimulationXML(xmlNodePtr rootSimulationNode): rootNode(rootSimula
     while (OSNSPBNode)
     {
       typeOSNS = (char*)OSNSPBNode->name;
-      if (typeOSNS == LCP_TAG)
-        OSNSPBXMLSet.insert(SP::LCPXML(new LCPXML(OSNSPBNode)));
+      if (typeOSNS == LCP_TAG) // No need to specific LCPXML
+        OSNSPBXMLSet.insert(SP::OneStepNSProblemXML(new OneStepNSProblemXML(OSNSPBNode)));
 
       else if (typeOSNS == QP_TAG)
         OSNSPBXMLSet.insert(SP::QPXML(new QPXML(OSNSPBNode)));
 
-      else if (typeOSNS == "FrictionContact")
+      else if (typeOSNS == "FrictionContact" || typeOSNS == "PrimalFrictionContact")
         OSNSPBXMLSet.insert(SP::FrictionContactXML(new FrictionContactXML(OSNSPBNode)));
 
       else // if (typeOSNS == RELAY_TAG) //--Not implemented for the moment

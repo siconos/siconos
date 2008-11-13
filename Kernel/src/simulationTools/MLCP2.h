@@ -24,10 +24,6 @@
 #define MLCP2_H
 
 #include "MLCP.h"
-#include "SimpleVector.h"
-#include "SimpleMatrix.h"
-#include "SparseBlockMatrix.h"
-#include <sys/time.h>
 
 /** Formalization and Resolution of a Mixed Linear Complementarity Problem (MLCP)
  *

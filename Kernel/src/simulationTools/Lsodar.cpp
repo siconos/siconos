@@ -51,7 +51,7 @@ extern "C" void Lsodar_jacobianF_wrapper(integer* sizeOfX, doublereal* time, dou
 }
 
 Lsodar::Lsodar(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList, SP::InteractionsSet interactionsList):
-  OneStepIntegrator("Lsodar", osiXML, dsList, interactionsList)
+  OneStepIntegrator(OSI::LSODAR, osiXML, dsList, interactionsList)
 {
   // local time discretisation is set by default to those of the simulation.
   intData.resize(9);
@@ -59,7 +59,7 @@ Lsodar::Lsodar(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList, 
 }
 
 Lsodar::Lsodar(SP::DynamicalSystem ds):
-  OneStepIntegrator("Lsodar")
+  OneStepIntegrator(OSI::LSODAR)
 {
   // add ds in the set
   OSIDynamicalSystems->insert(ds);
@@ -69,13 +69,13 @@ Lsodar::Lsodar(SP::DynamicalSystem ds):
 }
 
 Lsodar::Lsodar(DynamicalSystemsSet& newDS):
-  OneStepIntegrator("Lsodar", newDS)
+  OneStepIntegrator(OSI::LSODAR, newDS)
 {
   intData.resize(9);
   sizeMem = 2;
 }
 
-void Lsodar::setTol(integer newItol, doublerealSAPtr newRtol, doublerealSAPtr newAtol)
+void Lsodar::setTol(integer newItol, SA::doublereal newRtol, SA::doublereal newAtol)
 {
   //            The input parameters ITOL, RTOL, and ATOL determine
   //         the error control performed by the solver.  The solver will
@@ -253,7 +253,7 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
 
   // === LSODAR CALL ===
 
-  SimpleVector * xtmp = new SimpleVector(*xWork); // A copy of xWork is required since at the time, there are no contiguous values in memory for BlockVectors.
+  SP::SimpleVector xtmp(new SimpleVector(*xWork)); // A copy of xWork is required since at the time, there are no contiguous values in memory for BlockVectors.
   if (istate == 3)
   {
     istate = 1; // restart TEMPORARY
@@ -279,7 +279,6 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
   }
 
   *xWork = *xtmp;
-  delete xtmp;
   istate = intData[4];
   tout  = tinit_DR; // real ouput time
   tend  = tend_DR; // necessary for next start of DLSODAR

@@ -89,22 +89,22 @@ protected:
    * of the corresponding unitaryBlock matrix in the full matrix (M in LCP case) - Warning: it depends on the considered index set \n
    * (ie on which constraints are "active")
    */
-  boost::shared_ptr<UR_int> unitaryBlocksPositions;
+  SP::UR_int unitaryBlocksPositions;
 
   /** map that links each DynamicalSystem with an int that gives the position (in number of scalar elements, not DSBlocks) \n
    * of the corresponding DSBlock matrix in the full matrix (M in PrimalFrictionalCase case) - Warning: it depends on the considered index set \n
    * (ie on which constraints are "active")
    */
-  boost::shared_ptr<DS_int> DSBlocksPositions;
+  SP::DS_int DSBlocksPositions;
 
   /** Numerics structure to be filled  */
-  boost::shared_ptr<NumericsMatrix> numericsMat;
+  SP::NumericsMatrix numericsMat;
 
   /** Matrix used for default storage type (storageType = 0) */
-  boost::shared_ptr<SiconosMatrix> M1;
+  SP::SiconosMatrix M1;
 
   /** Matrix which corresponds to Numerics SparseBlockStructuredMatrix (storageType = 1) */
-  boost::shared_ptr<SparseBlockMatrix> M2;
+  SP::SparseBlockMatrix M2;
 
   /** Private copy constructor => no copy nor pass by value */
   OSNSMatrix(const OSNSMatrix&);
@@ -112,23 +112,21 @@ protected:
   /** Private assignment -> forbidden */
   OSNSMatrix& operator=(const OSNSMatrix&);
 
-
-
   /** To update dim and unitaryBlocksPositions for a new set of UnitaryRelation
       \param UnitaryRelationsSet* the index set of the active constraints
   */
-  void updateSizeAndPositions(unsigned int *, SP::UnitaryRelationsSet);
+  void updateSizeAndPositions(unsigned int&, SP::UnitaryRelationsSet);
 
   /** To update dim and DSBlocksPositions for a new set of DynamicalSystem
       \param DynamicalSystemsSet* the DyncamicalSystemsSet
   */
-  void updateSizeAndPositions(unsigned int *, SP::DynamicalSystemsSet);
+  void updateSizeAndPositions(unsigned int&, SP::DynamicalSystemsSet);
 
   /** To update dim, DSBlocksPositions and unitaryBlocksPositions for a new set of DynamicalSystem and  a new set of UnitaryRelation
       \param DynamicalSystemsSet* the DynamicalSystemsSet
       \param UnitaryRelationsSet* the index set of the active constraints
   */
-  void updateSizeAndPositions(unsigned int *, SP::DynamicalSystemsSet, SP::UnitaryRelationsSet);
+  void updateSizeAndPositions(unsigned int&, SP::DynamicalSystemsSet, SP::UnitaryRelationsSet);
 
 public:
 

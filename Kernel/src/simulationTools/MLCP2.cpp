@@ -17,23 +17,6 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "MLCP2.h"
-#include "Topology.h"
-#include "UnitaryRelation.h"
-#include "MixedComplementarityConditionNSL.h"
-#include "Simulation.h"
-#include "Model.h"
-#include "NonSmoothDynamicalSystem.h"
-#include "Relation.h"
-#include "DynamicalSystem.h"
-#include "TimeDiscretisation.h"
-#include "MixedLinearComplementarity_Problem.h" // Numerics structure
-#include "NumericsMatrix.h"
-//#include "mlcpDefaultSolver.h"
-#include "OneStepIntegrator.h"
-#include "FirstOrderLinearR.h"
-#include "Moreau2.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 using namespace std;
 
@@ -68,8 +51,8 @@ void MLCP2::initialize(SP::Simulation sim)
   else
     printf("DSSet is not empty\n");
   MLCP::initialize(sim);
-  w->resize(n + m);
-  z->resize(n + m);
+  _w->resize(n + m);
+  _z->resize(n + m);
 }
 void MLCP2::updateM()
 {
@@ -78,8 +61,8 @@ void MLCP2::updateM()
   if (!M)
   {
     // Creates and fills M using UR of indexSet
-    M = new OSNSMatrix(URSet, DSSet, unitaryBlocks,  DSBlocks, DSUnitaryBlocks,  unitaryDSBlocks, MStorageType);
-    isMAllocatedIn = true;
+    M.reset(new OSNSMatrix(URSet, DSSet, unitaryBlocks,  DSBlocks, DSUnitaryBlocks,  unitaryDSBlocks, MStorageType));
+
     numerics_problem.M = M->getNumericsMatrix();
     numerics_problem.A = 0;
     numerics_problem.B = 0;
@@ -135,12 +118,12 @@ void MLCP2::computeDSBlock(SP::DynamicalSystem DS)
 {
   if (!DSBlocks[DS])
   {
-    DSBlocks[DS] = new SimpleMatrix(DS->getDim(), DS->getDim());
+    DSBlocks[DS].reset(new SimpleMatrix(DS->getDim(), DS->getDim()));
     n += DS->getDim();
   }
   OneStepIntegrator* Osi = simulation->getIntegratorOfDSPtr(DS); // get OneStepIntegrator of current dynamical system
   const std::string osiType = Osi->getType();
-  if (osiType == "Moreau2")
+  if (osiType == MOREAU2)
   {
     DSBlocks[DS] = (boost::static_pointer_cast<Moreau2> (Osi))->getWPtr(DS); // get its W matrix ( pointer link!)
     (*DSBlocks[DS]) *= -1.0;
@@ -153,7 +136,7 @@ void MLCP2::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2
 {
   if (!unitaryBlocks[UR1][UR1])
   {
-    unitaryBlocks[UR1][UR1] = new SimpleMatrix(UR1->getNonSmoothLawSize(), UR1->getNonSmoothLawSize());
+    unitaryBlocks[UR1][UR1].reset(new SimpleMatrix(UR1->getNonSmoothLawSize(), UR1->getNonSmoothLawSize()));
     m += UR1->getNonSmoothLawSize();
   }
   UR1->getExtraUnitaryBlock(unitaryBlocks[UR1][UR1]);
@@ -165,7 +148,7 @@ void MLCP2::computeUnitaryDSBlock(SP::UnitaryRelation UR, SP::DynamicalSystem DS
 {
   if (unitaryDSBlocks[UR][DS] == 0)
   {
-    unitaryDSBlocks[UR][DS] = new SimpleMatrix(UR->getNonSmoothLawSize(), DS->getDim());
+    unitaryDSBlocks[UR][DS].reset(new SimpleMatrix(UR->getNonSmoothLawSize(), DS->getDim()));
   }
   UR->getLeftUnitaryBlockForDS(DS, unitaryDSBlocks[UR][DS]);
 }
@@ -176,7 +159,7 @@ void MLCP2::computeDSUnitaryBlock(SP::DynamicalSystem DS, SP::UnitaryRelation UR
   double h = simulation->getTimeStep();
   if (!DSUnitaryBlocks[DS][UR])
   {
-    DSUnitaryBlocks[DS][UR] = new SimpleMatrix(DS->getDim(), UR->getNonSmoothLawSize());
+    DSUnitaryBlocks[DS][UR].reset(new SimpleMatrix(DS->getDim(), UR->getNonSmoothLawSize()));
   }
   UR->getRightUnitaryBlockForDS(DS, DSUnitaryBlocks[DS][UR]);
   *(DSUnitaryBlocks[DS][UR]) *= h;
@@ -214,7 +197,7 @@ void MLCP2::computeQ(double time)
 
     OneStepIntegrator* Osi = simulation->getIntegratorOfDSPtr(*itDS); // get OneStepIntegrator of current dynamical system
     const std::string osiType = Osi->getType();
-    if (osiType == "Moreau2")
+    if (osiType == MOREAU2)
     {
       //update with ffree
       DynamicalSystem * DSaux = *itDS;
@@ -251,16 +234,16 @@ void MLCP2::preCompute(double time)
     sizeOutput = M->size();
 
     // Checks z and w sizes and reset if necessary
-    if (z->size() != sizeOutput)
+    if (_z->size() != sizeOutput)
     {
-      z->resize(sizeOutput, false);
-      z->zero();
+      _z->resize(sizeOutput, false);
+      _z->zero();
     }
 
-    if (w->size() != sizeOutput)
+    if (_w->size() != sizeOutput)
     {
-      w->resize(sizeOutput);
-      w->zero();
+      _w->resize(sizeOutput);
+      _w->zero();
     }
   }
 
@@ -318,7 +301,7 @@ int MLCP2::compute(double time)
     //      exit(1);
     //mlcpDefaultSolver *pSolver = new mlcpDefaultSolver(m,n);
     //      displayMLCP2(&numerics_problem);
-    info = mlcp_driver(&numerics_problem, z->getArray(), w->getArray(), solver->getNumericsSolverOptionsPtr(), numerics_options);
+    info = mlcp_driver(&numerics_problem, _z->getArray(), _w->getArray(), (solver->getNumericsSolverOptionsPtr()).get(), numerics_options);
 
     // --- Recovering of the desired variables from MLCP2 output ---
     postCompute();
@@ -355,15 +338,15 @@ void MLCP2::postCompute()
     y = (*itCurrent)->getYPtr(levelMin);
     lambda = (*itCurrent)->getLambdaPtr(levelMin);
     // Copy w/z values, starting from index pos into y/lambda.
-    setBlock(w, y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
-    setBlock(z, lambda, lambda->size(), pos, 0);
+    setBlock(_w, y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
+    setBlock(_z, lambda, lambda->size(), pos, 0);
   }
   DynamicalSystemsSet * allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
   for (DSIterator itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
   {
     pos = M->getPositionOfDSBlock(*itDS);
     x = (*itDS)->getXPtr();
-    setBlock(z, x, x->size(), pos, 0);
+    setBlock(_z, x, x->size(), pos, 0);
   }
 
 }

@@ -35,7 +35,7 @@ class TimeDiscretisation;
 /** Structure used for Events sorting. The time of occurence (in mpz_t format!!!)  is used to compare two Events. */
 struct compareEvent
 {
-  bool operator()(const Event* e1, const Event* e2) const
+  bool operator()(const SP::Event e1, const SP::Event e2) const
   {
     const mpz_t *t1 = e1->getTimeOfEvent();
     const mpz_t *t2 = e2->getTimeOfEvent();
@@ -48,7 +48,7 @@ struct compareEvent
 /** set of events, with an ordering based on Event time value (mpz_t) to compare Events
  *  A stl container of type "multiset" is used at the time
  *  \Warning This may be not the best choice => review all possibi lities */
-typedef std::multiset<Event*, compareEvent > EventsContainer; // sort in a chronological way
+typedef std::multiset<SP::Event, compareEvent > EventsContainer; // sort in a chronological way
 
 /** Iterator through a set of Events */
 typedef EventsContainer::iterator EventsContainerIterator;
@@ -102,19 +102,19 @@ protected:
   /** Pointer to currentEvent, ie the simulation starting point.
    * It correponds to the first object in allEvents.
    */
-  Event * currentEvent;
+  SP::Event currentEvent;
 
   /** Pointer to nextEvent, ie the simulation ending point.
    * It correponds to the event following currentEvent and so
    * to the second object in allEvents.
    */
-  Event * nextEvent;
+  SP::Event nextEvent;
 
   /** Event which corresponds to time tk+h of the simulation time discretisation */
-  Event * ETD;
+  SP::Event ETD;
 
   /** Non Smooth Event: corresponds to the last non-smooth event detected*/
-  Event * ENonSmooth;
+  SP::Event ENonSmooth;
 
   /* link to the simulation that owns this manager*/
   SP::Simulation simulation;
@@ -144,7 +144,7 @@ public:
 
   /** destructor
    */
-  ~EventsManager();
+  ~EventsManager() {};
 
   /** initialize current, next events and the events stack.
       \param simulation, owner of the present eventsManager.
@@ -173,12 +173,12 @@ public:
    *  \param a mpz_t
    *  \return a pointer to Event
    */
-  Event* getEventPtr(const mpz_t& inputTime) const;
+  SP::Event getEventPtr(const mpz_t& inputTime) const;
 
   /** get the current event
    *  \return a pointer to Event
    */
-  inline Event* getStartingEventPtr() const
+  inline SP::Event getStartingEventPtr() const
   {
     return currentEvent;
   };
@@ -186,7 +186,7 @@ public:
   /** get the next event to be processed.
    *  \return a pointer to Event
    */
-  inline Event* getNextEventPtr() const
+  inline SP::Event getNextEventPtr() const
   {
     return nextEvent;
   };
@@ -195,13 +195,13 @@ public:
    *  \param a pointer to Event
    *  \return a pointer to Events
    */
-  Event* getFollowingEventPtr(Event*) const;
+  SP::Event getFollowingEventPtr(SP::Event) const;
 
   /** get the event that follows the event at time inputTime  ("following" defined with operator(s) comparison of events)
    *  \param a mpz_t
    *  \return a pointer to Event
    */
-  Event* getFollowingEventPtr(const mpz_t& inputTime) const;
+  SP::Event getFollowingEventPtr(const mpz_t& inputTime) const;
 
   /** get the Simulation
    *  \return a pointer to Simulation
@@ -222,7 +222,7 @@ public:
   /** check if event is present in allEvents list
    *  \return a bool
    */
-  const bool hasEvent(Event*) const ;
+  const bool hasEvent(SP::Event) const ;
 
   /** check if some events remain in allEvents list
    *  \return a bool
@@ -232,7 +232,7 @@ public:
   /** get the time (double format) of an event
    *  \return a double
    */
-  const double getTimeOfEvent(Event*) const;
+  const double getTimeOfEvent(SP::Event) const;
 
   /** get the time of current event, in double format
    *  \return a double
@@ -251,7 +251,7 @@ public:
   /** Insert an existing event into the set
       \param Event*, the event to be nserted
    */
-  void insertEvent(Event*);
+  void insertEvent(SP::Event);
 
   /** Update nextEvent (useful in case of a new insertion)
    */
@@ -264,7 +264,7 @@ public:
 
   /** remove an Event from the unProcessed events list
    */
-  void removeEvent(Event*);
+  void removeEvent(SP::Event);
 
   /** update current and next event positions and run process functions of current event
    */
@@ -281,7 +281,7 @@ public:
   /** used when event's time has changed to resort it properly in allEvents set
       \param the event to be sorted
    */
-  void SortEvent(Event*);
+  void SortEvent(SP::Event);
 };
 
 #endif // EventsManager_H

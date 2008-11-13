@@ -87,19 +87,19 @@ private:
   unsigned int nc;
 
   /** Specific structure required when a (Numerics) solver block is used */
-  boost::shared_ptr<SparseBlockStructuredMatrix> numericsMatSparse;
+  SP::SparseBlockStructuredMatrix numericsMatSparse;
 
   /** Sparse-Block Boost Matrix. Each block is a SiconosMatrix**/
-  boost::shared_ptr<CompressedRowMat> MSparseBlock;
+  SP::CompressedRowMat MSparseBlock;
 
   /** Vector used to save the sum of dim of diagonal blocks of M: diagSizes[i] = diagSizes[i-1] + ni, ni being the size of the diagonal block at row(block) i */
-  boost::shared_ptr<IndexInt> diagSizes;
+  SP::IndexInt diagSizes;
 
   /** List of non null blocks positions (in row) */
-  boost::shared_ptr<IndexInt> rowPos;
+  SP::IndexInt rowPos;
 
   /** List of non null blocks positions (in col) */
-  boost::shared_ptr<IndexInt> colPos;
+  SP::IndexInt colPos;
 
   /** Private copy constructor => no copy nor pass by value */
   SparseBlockMatrix(const SparseBlockMatrix&);

@@ -17,178 +17,19 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "MLCP.h"
-#include "Topology.h"
-#include "UnitaryRelation.h"
 #include "MixedComplementarityConditionNSL.h"
 #include "Simulation.h"
-#include "Model.h"
-#include "NonSmoothDynamicalSystem.h"
-#include "DynamicalSystem.h"
-#include "TimeDiscretisation.h"
-#include "MixedLinearComplementarity_Problem.h" // Numerics structure
-#include "NumericsMatrix.h"
-#include "RelationTypes.hpp"
-#include "NewtonImpactNSL.h"
-#include "NewtonImpactFrictionNSL.h"
-
-#include "OneStepIntegrator.h"
-//#include "mlcpDefaultSolver.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 using namespace std;
 using namespace RELATION;
 
 // xml constructor
 MLCP::MLCP(SP::OneStepNSProblemXML onestepnspbxml):
-  OneStepNSProblem("MLCP", onestepnspbxml), MStorageType(0)
-{}
+  LinearOSNS(onestepnspbxml, "MLCP") {}
 
 // Constructor from a set of data
 MLCP::MLCP(SP::NonSmoothSolver newSolver, const string& newId):
-  OneStepNSProblem("MLCP", newId, newSolver), MStorageType(0)
-{}
-
-// Setters
-
-void MLCP::setW(const SiconosVector& newValue)
-{
-  if (sizeOutput != newValue.size())
-    RuntimeException::selfThrow("MLCP: setW, inconsistent size between given w size and problem size. You should set sizeOutput before");
-
-  if (! w)
-    w.reset(new SimpleVector(sizeOutput));
-
-  else if (w->size() != sizeOutput)
-    RuntimeException::selfThrow("MLCP: setW, w size differs from sizeOutput");
-
-  *w = newValue;
-}
-
-void MLCP::setWPtr(SP::SiconosVector newPtr)
-{
-  if (sizeOutput != newPtr->size())
-    RuntimeException::selfThrow("MLCP: setWPtr, inconsistent size between given w size and problem size. You should set sizeOutput before");
-  w = newPtr;
-
-}
-
-
-void MLCP::setZ(const SiconosVector& newValue)
-{
-  if (sizeOutput != newValue.size())
-    RuntimeException::selfThrow("MLCP: setZ, inconsistent size between given z size and problem size. You should set sizeOutput before");
-
-  if (! z)
-    z.reset(new SimpleVector(sizeOutput));
-
-  *z = newValue;
-}
-
-void MLCP::setZPtr(SP::SiconosVector newPtr)
-{
-  if (sizeOutput != newPtr->size())
-    RuntimeException::selfThrow("MLCP: setZPtr, inconsistent size between given z size and problem size. You should set sizeOutput before");
-
-  z = newPtr;
-
-}
-
-void MLCP::setM(const OSNSMatrix& newValue)
-{
-  // Useless ?
-  RuntimeException::selfThrow("MLCP: setM, forbidden operation. Try setMPtr().");
-}
-
-void MLCP::setMPtr(SP::OSNSMatrix newPtr)
-{
-
-  // Note we do not test if newPtr and M sizes are equal. Not necessary?
-  M = newPtr;
-
-}
-
-void MLCP::setQ(const SiconosVector& newValue)
-{
-  if (sizeOutput != newValue.size())
-    RuntimeException::selfThrow("MLCP: setQ, inconsistent size between given q size and problem size. You should set sizeOutput before");
-
-  if (! q)
-    q.reset(new SimpleVector(sizeOutput));
-
-  *q = newValue;
-}
-
-void MLCP::setQPtr(SP::SiconosVector newPtr)
-{
-  if (sizeOutput != newPtr->size())
-    RuntimeException::selfThrow("MLCP: setQPtr, inconsistent size between given q size and problem size. You should set sizeOutput before");
-
-  q = newPtr;
-
-
-}
-
-void MLCP::initialize(SP::Simulation sim)
-{
-  // - Checks memory allocation for main variables (M,q,w,z)
-  // - Formalizes the problem if the topology is time-invariant
-
-  // This function performs all steps that are time-invariant
-
-  // General initialize for OneStepNSProblem
-  OneStepNSProblem::initialize(sim);
-
-  // Memory allocation for w, M, z and q.
-  // If one of them has already been allocated, nothing is done.
-  // We suppose that user has chosen a correct size.
-
-  if (!w)
-  {
-    w.reset(new SimpleVector(maxSize));
-  }
-  else
-  {
-    if (w->size() != maxSize)
-      w->resize(maxSize);
-  }
-  if (! z)
-  {
-    z.reset(new SimpleVector(maxSize));
-  }
-  else
-  {
-    if (z->size() != maxSize)
-      z->resize(maxSize);
-  }
-
-  if (! q)
-  {
-    q.reset(new SimpleVector(maxSize));
-  }
-
-  // get topology
-  SP::Topology topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
-
-  // Note that unitaryBlocks is up to date since updateUnitaryBlocks has been called during OneStepNSProblem::initialize()
-
-  // If the topology is TimeInvariant ie if M structure does not change during simulation:
-  if (topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty())
-  {
-    updateM();
-  }
-  else // in that case, M will be updated during preCompute
-  {
-    // Default size for M = maxSize
-    if (!M)
-    {
-      if (MStorageType == 0)
-        M.reset(new OSNSMatrix(maxSize, 0));
-      else // if(MStorageType == 1) size = number of unitaryBlocks = number of UR in the largest considered indexSet
-        M.reset(new OSNSMatrix(simulation->getIndexSetPtr(levelMin)->size(), 1));
-    }
-  }
-}
+  LinearOSNS("MLCP", newSolver, newId) {}
 
 void MLCP::updateM()
 {
@@ -218,9 +59,10 @@ void MLCP::updateM()
   }
   sizeOutput = M->size();
 }
+
 void  MLCP::reset()
 {
-  mlcp_driver_reset(&numerics_problem, solver->getNumericsSolverOptionsPtr());
+  mlcp_driver_reset(&numerics_problem, (solver->getNumericsSolverOptionsPtr()).get());
 }
 
 void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
@@ -332,174 +174,6 @@ void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
   }
 }
 
-void MLCP::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
-{
-
-  // Get relation and non smooth law types
-  RELATION::TYPES relationType = UR->getRelationType();
-  RELATION::SUBTYPES relationSubType = UR->getRelationSubType();
-  string nslawType = UR->getNonSmoothLawType();
-
-  string simulationType = simulation->getType();
-
-  SP::DynamicalSystem ds = *(UR->dynamicalSystemsBegin());
-  string osiType = simulation->getIntegratorOfDSPtr(ds)->getType();
-
-  unsigned int sizeY = UR->getNonSmoothLawSize();
-  std::vector<unsigned int> coord(8);
-
-  unsigned int relativePosition = UR->getRelativePosition();
-  SP::Interaction mainInteraction = UR->getInteractionPtr();
-  coord[0] = relativePosition;
-  coord[1] = relativePosition + sizeY;
-  coord[2] = 0;
-  coord[4] = 0;
-  coord[6] = pos;
-  coord[7] = pos + sizeY;
-
-  SP::SiconosMatrix H;
-  SP::SiconosVector workX = UR->getWorkXPtr();
-  if (osiType == "Moreau" || osiType == "Lsodar")
-  {
-    H = mainInteraction->getRelationPtr()->getJacHPtr(0);
-    if (H)
-    {
-      coord[3] = H->size(1);
-      coord[5] = H->size(1);
-      subprod(*H, *workX, *q, coord, true);
-    }
-
-    if (relationType == FirstOrder && (relationSubType == LinearTIR || relationSubType == LinearR))
-    {
-      // q = HXfree + e + Fz
-      SP::SiconosVector  e = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getEPtr();
-      if (e)
-        boost::static_pointer_cast<SimpleVector>(q)->addBlock(pos, *e);
-      H = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getFPtr();
-      if (H)
-      {
-        SP::SiconosVector  workZ = UR->getWorkZPtr();
-        coord[3] = H->size(1);
-        coord[5] = H->size(1);
-        subprod(*H, *workZ, *q, coord, false);
-      }
-    }
-  }
-  else if (osiType == "Moreau2")
-  {
-  }
-  else
-    RuntimeException::selfThrow("FrictionContact::computeQBlock not yet implemented for OSI of type " + osiType);
-
-  // Add "non-smooth law effect" on q
-  if (UR->getRelationType() == Lagrangian)
-  {
-    double e;
-    if (nslawType == NEWTONIMPACTNSLAW)
-    {
-
-      e = (boost::static_pointer_cast<NewtonImpactNSL>(mainInteraction->getNonSmoothLawPtr()))->getE();
-      std::vector<unsigned int> subCoord(4);
-      if (simulationType == "TimeStepping")
-      {
-        subCoord[0] = 0;
-        subCoord[1] = UR->getNonSmoothLawSize();
-        subCoord[2] = pos;
-        subCoord[3] = pos + subCoord[1];
-        subscal(e, *UR->getYOldPtr(levelMin), *q, subCoord, false);
-      }
-      else if (simulationType == "EventDriven")
-      {
-        subCoord[0] = pos;
-        subCoord[1] = pos + UR->getNonSmoothLawSize();
-        subCoord[2] = pos;
-        subCoord[3] = subCoord[1];
-        subscal(e, *q, *q, subCoord, false); // q = q + e * q
-      }
-      else
-        RuntimeException::selfThrow("MLCP::computeQBlock not yet implemented for this type of relation and a non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
-    }
-    else if (nslawType == NEWTONIMPACTFRICTIONNSLAW)
-    {
-
-      e = (boost::static_pointer_cast<NewtonImpactFrictionNSL>(mainInteraction->getNonSmoothLawPtr()))->getEn();
-      // Only the normal part is multiplied by e
-      if (simulationType == "TimeStepping")
-        (*q)(pos) +=  e * (*UR->getYOldPtr(levelMin))(0);
-
-      else RuntimeException::selfThrow("MLCP::computeQBlock not yet implemented for this type of relation and a non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
-
-    }
-    else
-      RuntimeException::selfThrow("MLCP::computeQBlock not yet implemented for this type of relation and a non smooth law of type " + nslawType);
-  }
-}
-
-void MLCP::computeQ(double time)
-{
-  if (q->size() != sizeOutput)
-    q->resize(sizeOutput);
-  q->zero();
-
-  // === Get index set from Simulation ===
-  SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
-  // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
-
-  unsigned int pos = 0;
-  UnitaryRelationsIterator itCurrent, itLinked;
-  string simulationType = simulation->getType();
-  for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
-  {
-    // *itCurrent is a SP::UnitaryRelation.
-
-    // Compute q, this depends on the type of non smooth problem, on the relation type and on the non smooth law
-    pos = M->getPositionOfUnitaryBlock(*itCurrent);
-    computeQBlock((*itCurrent), pos); // free output is saved in y
-
-  }
-}
-
-void MLCP::preCompute(double time)
-{
-  // This function is used to prepare data for the MixedLinearComplementarity_Problem
-  // - computation of M and q
-  // - set sizeOutput
-  // - check dim. for z,w
-
-  // If the topology is time-invariant, only q needs to be computed at each time step.
-  // M, sizeOutput have been computed in initialize and are uptodate.
-
-  // Get topology
-  SP::Topology topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
-
-  if (!topology->isTimeInvariant())
-  {
-    // Computes new unitaryBlocks if required
-    updateUnitaryBlocks();
-
-    // Updates matrix M
-    SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
-    M->fill(indexSet, unitaryBlocks);
-    sizeOutput = M->size();
-
-    // Checks z and w sizes and reset if necessary
-    if (z->size() != sizeOutput)
-    {
-      z->resize(sizeOutput, false);
-      z->zero();
-    }
-
-    if (w->size() != sizeOutput)
-    {
-      w->resize(sizeOutput);
-      w->zero();
-    }
-  }
-
-  // Computes q of MLCP
-  computeQ(time);
-
-}
 void displayNM(const NumericsMatrix* const m)
 {
   if (!m)
@@ -549,7 +223,7 @@ int MLCP::compute(double time)
     //      exit(1);
     //mlcpDefaultSolver *pSolver = new mlcpDefaultSolver(m,n);
     //      displayMLCP(&numerics_problem);
-    info = mlcp_driver(&numerics_problem, &*z->getArray(), &*w->getArray(), &*solver->getNumericsSolverOptionsPtr(), &*numerics_options);
+    info = mlcp_driver(&numerics_problem, _z->getArray(), _w->getArray(), (solver->getNumericsSolverOptionsPtr()).get(), &*numerics_options);
 
     // --- Recovering of the desired variables from MLCP output ---
     postCompute();
@@ -559,62 +233,11 @@ int MLCP::compute(double time)
   return info;
 }
 
-void MLCP::postCompute()
-{
-  // This function is used to set y/lambda values using output from lcp_driver (w,z).
-  // Only UnitaryRelations (ie Interactions) of indexSet(leveMin) are concerned.
-
-  // === Get index set from Topology ===
-  SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
-
-  // y and lambda vectors
-  SP::SiconosVector lambda;
-  SP::SiconosVector y;
-
-  // === Loop through "active" Unitary Relations (ie present in indexSets[1]) ===
-
-  unsigned int pos = 0;
-  unsigned int nsLawSize;
-
-  for (UnitaryRelationsIterator itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
-  {
-    // size of the unitaryBlock that corresponds to the current UnitaryRelation
-    nsLawSize = (*itCurrent)->getNonSmoothLawSize();
-    // Get the relative position of UR-unitaryBlock in the vector w or z
-    pos = M->getPositionOfUnitaryBlock(*itCurrent);
-
-    // Get Y and Lambda for the current Unitary Relation
-    y = (*itCurrent)->getYPtr(levelMin);
-    lambda = (*itCurrent)->getLambdaPtr(levelMin);
-    // Copy w/z values, starting from index pos into y/lambda.
-    setBlock(*w, y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
-    setBlock(*z, lambda, lambda->size(), pos, 0);
-  }
-}
-
 void MLCP::display() const
 {
   cout << "======= MLCP of size " << sizeOutput << " with: " << endl;
   cout << "======= m " << m << " n " << n << endl;
-  cout << "M  ";
-  if (M) M->display();
-  else cout << "-> NULL" << endl;
-  cout << endl << " q : " ;
-  if (q) q->display();
-  else cout << "-> NULL" << endl;
-  cout << "==========================" << endl;
-}
-
-void MLCP::saveNSProblemToXML()
-{
-  OneStepNSProblem::saveNSProblemToXML();
-  //   if(onestepnspbxml != NULL)
-  //     {
-  // //       (static_cast<MLCPXML>(onestepnspbxml))->setM(*M);
-  //       (static_cast<MLCPXML>(onestepnspbxml))->setQ(*q);
-  //     }
-  //   else RuntimeException::selfThrow("MLCP::saveNSProblemToXML - OneStepNSProblemXML object not exists");
-  RuntimeException::selfThrow("MLCP::saveNSProblemToXML - Not yet implemented.");
+  LinearOSNS::display();
 }
 
 MLCP* MLCP::convert(OneStepNSProblem* osnsp)

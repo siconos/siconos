@@ -45,7 +45,8 @@ typedef MapFactory::iterator MapFactoryIt;
 /** Template function to return a new object of type SubType*/
 template<class SubType> SP::Relation factory(int name)
 {
-  return new SubType(name);
+  SP::Relation res(new SubType(name));
+  return res;
 }
 
 /** Registry Class for sensors.

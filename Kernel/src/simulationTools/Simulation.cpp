@@ -38,12 +38,6 @@
 
 using namespace std;
 
-// Warning: neither OSI nor OSNS are given in the constructors.
-// The rule is that an object OSI/OSNS needs a Simulation to be constructed. Then, the right construction is:
-//   SP::Simulation s = new Simulation(...);
-//   OneStepNSProblem  * osns = new OneStepNSProblem(...,s,...);
-//   SP::OneStepIntegrator  osi = new OneStepIntegrator(...,s,...);
-
 // --- Constructor with a TimeDiscretisation (and thus a Model) and an id ---
 Simulation::Simulation(SP::TimeDiscretisation td, const string& id):
   name("unnamed"), simulationType(id), timeDiscretisation(td), tinit(0.0), tend(0.0), tout(0.0), levelMin(0), levelMax(0), tolerance(DEFAULT_TOLERANCE), printStat(false)
@@ -253,9 +247,6 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 
     std::for_each(allInteractions->begin(), allInteractions->end(),
                   boost::bind(&Interaction::initialize, _1, tinit, levelMax + 1));
-    //      InteractionsIterator it;
-    //       for(it=allInteractions->begin(); it!=allInteractions->end();++it)
-    //  (*it)->initialize(tinit, levelMax+1);
 
     indexSets.resize(levelMax + 1);
     // Link with index0 of the Topology.
@@ -338,32 +329,18 @@ void Simulation::saveSimulationToXML()
 {
   if (simulationxml)
   {
-    string typeOSI;
+    OSI::TYPES typeOSI;
     OSIIterator it;
     for (it = allOSI->begin(); it != allOSI->end() ; ++it)
     {
       typeOSI = (*it)->getType();
-      if (typeOSI == "Moreau")
+      if (typeOSI == OSI::MOREAU)
         (boost::static_pointer_cast<Moreau>(*it))->saveIntegratorToXML();
-      else if (typeOSI == "Lsodar")
+      else if (typeOSI == OSI::LSODAR)
         (boost::static_pointer_cast<Lsodar>(*it))->saveIntegratorToXML();
       else RuntimeException::selfThrow("Simulation::saveSimulationToXML - wrong type of OneStepIntegrator");
     }
 
-    //       if( getSimulationXMLPtr()->hasOneStepNSProblemXML() )
-    //  {
-    //    string NSPType = nsProblem->getType();
-    //    if( NSPType == "LCP" )
-    //      (static_cast<LCP*>(nsProblem))->saveNSProblemToXML();
-    //    else if( NSPType == "FrictionContact")
-    //      (static_cast<FrictionContact*>(nsProblem))->saveNSProblemToXML();
-    //    else if( NSPType == "QP")
-    //      (static_cast<QP*>(nsProblem))->saveNSProblemToXML();
-    //    else if( NSPType == "Relay" )
-    //      (static_cast<Relay*>(nsProblem))->saveNSProblemToXML();
-    //    else
-    //      RuntimeException::selfThrow("Simulation::saveSimulationToXML - wrong type of OneStepNSProblem");
-    //  }
   }
   else RuntimeException::selfThrow("Simulation::saveSimulationToXML - SimulationXML = NULL");
 }

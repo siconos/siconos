@@ -34,7 +34,7 @@ namespace EventFactory
 {
 
 /** A pointer to function, returning a pointer to Event, built with its type (ie class name) and a pointer to Model.*/
-typedef Event* (*object_creator)(double, int);
+typedef SP::Event(*object_creator)(double, int);
 
 /** The type of the factory map */
 typedef std::map<int, object_creator> MapFactory;
@@ -43,9 +43,10 @@ typedef std::map<int, object_creator> MapFactory;
 typedef MapFactory::iterator MapFactoryIt;
 
 /** Template function to return a new object of type SubType*/
-template<class SubType> Event* factory(double time, int type)
+template<class SubType> SP::Event factory(double time, int type)
 {
-  return new SubType(time, type);
+  SP::Event e(new SubType(time, type));
+  return e;
 }
 
 /** Registry Class for Events.
@@ -78,7 +79,7 @@ public :
    *  \param a double, time of Event
    *  \param an int, type of Event
    */
-  Event* instantiate(double, int);
+  SP::Event instantiate(double, int);
 
 } ;
 

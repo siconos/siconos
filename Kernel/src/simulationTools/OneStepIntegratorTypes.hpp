@@ -16,44 +16,29 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-/*! \file LCPXML.h
-  \brief XML management for Linear Complementarity Problems
+
+/*! \file OneStepIntegratorTypes.hpp
+  \brief enum of the available types for one-step time integrators.
 */
 
-#ifndef __LCPXML__
-#define __LCPXML__
+#ifndef OSITYPES_HPP
+#define OSITYPES_HPP
 
-#include "OneStepNSProblemXML.h"
-#include "SimpleVector.h"
-#include "SimpleMatrix.h"
-
-/** XML management for LCP
- *
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
- *   \date 05/18/2004
- *
- *
- *
- * LCPXML XML data management for LCP NSProblem
- *
- */
-class LCPXML : public OneStepNSProblemXML
+/** Namespace for user-defined types related to relations */
+namespace OSI
 {
-public:
 
-  /** Default constructor */
-  LCPXML() : OneStepNSProblemXML() {}
-
-  /** Basic constructor, using xml node
-      \param LCP node, tag ="LCP"
-  */
-  LCPXML(xmlNodePtr LCPNOde) : OneStepNSProblemXML(LCPNOde) {}
-
-  /** Destructor */
-  ~LCPXML() {}
-
+/** List of possible DynamicalSystems types*/
+enum TYPES
+{
+  /** */
+  MOREAU,
+  /** */
+  LSODAR,
+  /** */
+  MOREAU2
 };
 
+}
 
 #endif

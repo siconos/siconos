@@ -22,7 +22,7 @@
 #include "Tools.hpp"
 
 using namespace std;
-void OSNSMatrix::updateSizeAndPositions(unsigned int * dim, SP::UnitaryRelationsSet indexSet)
+void OSNSMatrix::updateSizeAndPositions(unsigned int& dim, SP::UnitaryRelationsSet indexSet)
 {
   // === Description ===
 
@@ -36,14 +36,15 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int * dim, SP::UnitaryRelations
   //
 
   // Computes real size of the current matrix = sum of the dim. of all UR in indexSet
-  *dim = 0;
+  dim = 0;
   for (UnitaryRelationsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
   {
-    (*unitaryBlocksPositions)[*it] = *dim;
-    *dim += (*it)->getNonSmoothLawSize();
+    (*unitaryBlocksPositions)[*it] = dim;
+    dim += (*it)->getNonSmoothLawSize();
   }
 }
-void OSNSMatrix::updateSizeAndPositions(unsigned int * dim, SP::DynamicalSystemsSet DSSet)
+
+void OSNSMatrix::updateSizeAndPositions(unsigned int& dim, SP::DynamicalSystemsSet DSSet)
 {
   // === Description ===
 
@@ -57,14 +58,15 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int * dim, SP::DynamicalSystems
   //
 
   // Computes real size of the current matrix = sum of the dim. of all UR in indexSet
-  *dim = 0;
+  dim = 0;
   for (DSIterator it = DSSet->begin(); it != DSSet->end(); ++it)
   {
-    (*DSBlocksPositions)[*it] = *dim;
-    *dim += (*it)->getDim();
+    (*DSBlocksPositions)[*it] = dim;
+    dim += (*it)->getDim();
   }
 }
-void OSNSMatrix::updateSizeAndPositions(unsigned int * dim, SP::DynamicalSystemsSet DSSet, SP::UnitaryRelationsSet indexSet)
+
+void OSNSMatrix::updateSizeAndPositions(unsigned int& dim, SP::DynamicalSystemsSet DSSet, SP::UnitaryRelationsSet indexSet)
 {
   // === Description ===
 
@@ -75,18 +77,19 @@ void OSNSMatrix::updateSizeAndPositions(unsigned int * dim, SP::DynamicalSystems
 
   // Computes real size of the current matrix = sum of the dim. of all
   // UR in indexSet
-  *dim = 0;
+  dim = 0;
   for (DSIterator it = DSSet->begin(); it != DSSet->end(); ++it)
   {
-    (*DSBlocksPositions)[*it] = *dim;
-    *dim += (*it)->getDim();
+    (*DSBlocksPositions)[*it] = dim;
+    dim += (*it)->getDim();
   }
   for (UnitaryRelationsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
   {
-    (*unitaryBlocksPositions)[*it] = *dim;
-    *dim += (*it)->getNonSmoothLawSize();
+    (*unitaryBlocksPositions)[*it] = dim;
+    dim += (*it)->getNonSmoothLawSize();
   }
 }
+
 // Default constructor: empty matrix, default storage
 // No allocation for M1 or M2
 OSNSMatrix::OSNSMatrix():
@@ -242,8 +245,8 @@ void OSNSMatrix::fill(SP::UnitaryRelationsSet indexSet, MapOfMapOfUnitaryMatrice
   if (update)
   {
     // Computes dimRow and unitaryBlocksPositions according to indexSet
-    updateSizeAndPositions(&dimColumn, indexSet);
-    updateSizeAndPositions(&dimRow, indexSet);
+    updateSizeAndPositions(dimColumn, indexSet);
+    updateSizeAndPositions(dimRow, indexSet);
   }
 
   if (storageType == 0)
@@ -312,8 +315,8 @@ void OSNSMatrix::fillDiagonal(SP::UnitaryRelationsSet URSet, MapOfMapOfUnitaryMa
   if (update)
   {
     // Computes dimRow and unitaryBlocksPositions according to indexSet
-    updateSizeAndPositions(&dimColumn, URSet);
-    updateSizeAndPositions(&dimRow, URSet);
+    updateSizeAndPositions(dimColumn, URSet);
+    updateSizeAndPositions(dimRow, URSet);
   }
 
   if (storageType == 0)
@@ -366,8 +369,8 @@ void OSNSMatrix::fill(SP::DynamicalSystemsSet DSSet, MapOfDSMatrices& DSBlocks, 
   if (update)
   {
     // Computes dimRow and unitaryBlocksPositions according to indexSet
-    updateSizeAndPositions(&dimRow, DSSet);
-    updateSizeAndPositions(&dimColumn, DSSet);
+    updateSizeAndPositions(dimRow, DSSet);
+    updateSizeAndPositions(dimColumn, DSSet);
   }
   if (storageType == 0)
   {
@@ -419,10 +422,10 @@ void OSNSMatrix::fill(SP::DynamicalSystemsSet DSSet, SP::UnitaryRelationsSet URS
   if (update)
   {
     // Computes dimRow and unitaryBlocksPositions and  DSBlocksPositions according to indexSet
-    updateSizeAndPositions(&dimColumn, URSet);
+    updateSizeAndPositions(dimColumn, URSet);
 
 
-    updateSizeAndPositions(&dimRow, DSSet);
+    updateSizeAndPositions(dimRow, DSSet);
   }
 
   if (storageType == 0)
@@ -488,10 +491,10 @@ void OSNSMatrix::fill(SP::UnitaryRelationsSet indexSet, SP::DynamicalSystemsSet 
   if (update)
   {
     // Computes dimRow and unitaryBlocksPositions and  DSBlocksPositions according to indexSet
-    updateSizeAndPositions(&dimRow, indexSet);
+    updateSizeAndPositions(dimRow, indexSet);
 
 
-    updateSizeAndPositions(&dimColumn, DSSet);
+    updateSizeAndPositions(dimColumn, DSSet);
   }
 
   if (storageType == 0)
@@ -550,7 +553,7 @@ void OSNSMatrix::fill(SP::UnitaryRelationsSet indexSet, SP::DynamicalSystemsSet 
 }
 void OSNSMatrix::fill(SP::UnitaryRelationsSet URSet, SP::DynamicalSystemsSet DSSet,  MapOfMapOfUnitaryMatrices& unitaryBlocks,  MapOfDSMatrices& DSBlocks, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks ,  MapOfUnitaryMapOfDSMatrices& unitaryDSBlocks , bool update)
 {
-  updateSizeAndPositions(&dimRow, DSSet, URSet);
+  updateSizeAndPositions(dimRow, DSSet, URSet);
   dimColumn = dimRow;
   if (! M1)
     M1.reset(new SimpleMatrix(dimRow, dimColumn));

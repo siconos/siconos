@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-/*! \file FrictionContactXML.h
+/*! \file FrictionContactXML.hpp
   \brief XML management for FrictionContact problems
  */
 

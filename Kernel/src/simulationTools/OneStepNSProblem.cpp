@@ -507,19 +507,19 @@ void OneStepNSProblem::getOSIMaps(SP::UnitaryRelation UR, MapOfDSMatrices& centr
   // === OSI = LSODAR : gets M matrices of each DS concerned by the UnitaryRelation, Theta remains empty ===
 
   SP::OneStepIntegrator Osi;
-  string osiType; // type of the current one step integrator
+  OSI::TYPES osiType; // type of the current one step integrator
   DS::TYPES dsType; // type of the current Dynamical System
   DSIterator itDS = UR->dynamicalSystemsBegin();
   while (itDS != (UR->dynamicalSystemsEnd()))
   {
     Osi = simulation->getIntegratorOfDSPtr(*itDS); // get OneStepIntegrator of current dynamical system
     osiType = Osi->getType();
-    if (osiType == "Moreau")
+    if (osiType == OSI::MOREAU)
     {
       centralUnitaryBlocks[*itDS] = (boost::static_pointer_cast<Moreau> (Osi))->getWPtr(*itDS); // get its W matrix ( pointer link!)
       Theta[*itDS] = (boost::static_pointer_cast<Moreau> (Osi))->getTheta(*itDS);
     }
-    else if (osiType == "Lsodar") // Warning: LagrangianDS only at the time !!!
+    else if (osiType == OSI::LSODAR) // Warning: LagrangianDS only at the time !!!
     {
       dsType = (*itDS)->getType();
       if (dsType != LNLDS && dsType != LLTIDS)

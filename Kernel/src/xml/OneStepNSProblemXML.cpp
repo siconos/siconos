@@ -24,7 +24,7 @@ using namespace std;
 
 OneStepNSProblemXML::OneStepNSProblemXML(xmlNodePtr oneStepNSProblemXMLNode):
   rootNode(oneStepNSProblemXMLNode), dimNode(NULL), interactionsConcernedNode(NULL),
-  solverNode(NULL), solverXML(NULL), isSolverXMLAllocatedIn(false)
+  solverNode(NULL)
 {
   // rootNode == formalisation type (LCP ...)
 
@@ -40,16 +40,9 @@ OneStepNSProblemXML::OneStepNSProblemXML(xmlNodePtr oneStepNSProblemXMLNode):
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "NonSmoothSolver")))
   {
     solverNode = node;
-    solverXML = new NonSmoothSolverXML(solverNode);
-    isSolverXMLAllocatedIn = true;
+    solverXML.reset(new NonSmoothSolverXML(solverNode));
   }
   //  else -> nothing, it's up to OneStepNSProblem constructor to deal with the fact that no solver has been given
-}
-
-OneStepNSProblemXML::~OneStepNSProblemXML()
-{
-  if (isSolverXMLAllocatedIn) delete solverXML;
-  solverXML = NULL;
 }
 
 void OneStepNSProblemXML::setDimNSProblem(int n)
@@ -78,13 +71,6 @@ void OneStepNSProblemXML::setAllInteractions(const bool& all)
     if (all == false)
       xmlRemoveProp(xmlHasProp(interactionsConcernedNode, (xmlChar*)ALL_ATTRIBUTE.c_str()));
   }
-}
-
-void OneStepNSProblemXML::setNonSmoothSolverXMLPtr(NonSmoothSolverXML * solv)
-{
-  if (isSolverXMLAllocatedIn) delete solverXML;
-  solverXML = solv;
-  isSolverXMLAllocatedIn = false;
 }
 
 void OneStepNSProblemXML::updateOneStepNSProblemXML(xmlNode* node, SP::OneStepNSProblem osnspb)

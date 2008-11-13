@@ -26,7 +26,7 @@
 
 using namespace std;
 
-OneStepIntegrator::OneStepIntegrator(const string& id):
+OneStepIntegrator::OneStepIntegrator(const OSI::TYPES& id):
   integratorType(id), sizeMem(1)
 {
   OSIDynamicalSystems.reset(new DynamicalSystemsSet());
@@ -34,7 +34,7 @@ OneStepIntegrator::OneStepIntegrator(const string& id):
 }
 
 // --- Xml constructor ---
-OneStepIntegrator::OneStepIntegrator(const string& id, SP::OneStepIntegratorXML osixml,
+OneStepIntegrator::OneStepIntegrator(const OSI::TYPES& id, SP::OneStepIntegratorXML osixml,
                                      SP::DynamicalSystemsSet dsList, SP::InteractionsSet interactionsList):
   integratorType(id), sizeMem(1), integratorXml(osixml)
 {
@@ -82,7 +82,7 @@ OneStepIntegrator::OneStepIntegrator(const string& id, SP::OneStepIntegratorXML 
 }
 
 // --- Constructors from a minimum set of data ---
-OneStepIntegrator::OneStepIntegrator(const string& id, const DynamicalSystemsSet& listOfDs):
+OneStepIntegrator::OneStepIntegrator(const OSI::TYPES& id, const DynamicalSystemsSet& listOfDs):
   integratorType(id), sizeMem(1)
 {
   OSIDynamicalSystems.reset(new DynamicalSystemsSet());
@@ -102,8 +102,7 @@ void OneStepIntegrator::setInteractions(const InteractionsSet& newSet)
 
 SP::SiconosVector OneStepIntegrator::getWorkX(SP::DynamicalSystem ds)
 {
-  if (workX.find(ds) == workX.end())
-    RuntimeException::selfThrow("OneStepIntegrator::getWorkX(ds): this vector does not exists for ds.");
+  assert(workX.find(ds) != workX.end() && "OneStepIntegrator::getWorkX(ds): this vector does not exists for ds.");
   return workX[ds];
 }
 

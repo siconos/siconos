@@ -29,6 +29,8 @@
 #include <string>
 #include <map>
 
+class DynamicalSystem;
+
 /** Namespace for DynamicalSystem factory related objects. */
 namespace DynamicalSystemFactory
 {
@@ -43,9 +45,10 @@ typedef std::map<int, object_creator> MapFactory;
 typedef MapFactory::iterator MapFactoryIt;
 
 /** Template function to return a new object of type SubType*/
-template<class SubType> SP::DynamicalSystem factory(int name, SiconosVector& x0)
+template<class SubType> SP::DynamicalSystem factory(int name, const SiconosVector& x0)
 {
-  return new SubType(name, x0);
+  SP::DynamicalSystem res(new SubType(name, x0));
+  return res;
 }
 
 /** Registry Class for sensors.
@@ -106,7 +109,7 @@ public :
   Registration(int, object_creator) ;
 } ;
 
-#define AUTO_REGISTER_DYNAMICALSYSTEM(class_name,class_type) Registration _registration_## class_type(class_name,&factory<class_type>);
+#define AUTO_REGISTER_DS(class_name,class_type) Registration _registration_## class_type(class_name,&factory<class_type>);
 }
 // end of namespace DynamicalSystemFactory
 

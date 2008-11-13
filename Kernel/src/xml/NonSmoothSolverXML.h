@@ -24,6 +24,7 @@
 #define __NONSMOOTHSOLVERXML__
 
 #include "SiconosDOMTreeTools.h"
+#include "SiconosPointers.hpp"
 
 /** XML management for NonSmoothSolver
  *
@@ -122,5 +123,6 @@ public:
   void getDParam(std::vector<double>&);
 };
 
+TYPEDEF_SPTR(NonSmoothSolverXML);
 
 #endif

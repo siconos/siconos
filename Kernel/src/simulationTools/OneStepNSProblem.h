@@ -162,6 +162,9 @@ private:
    */
   OneStepNSProblem(const OneStepNSProblem&);
 
+  /** assignment (private => forbidden) */
+  OneStepNSProblem& operator=(const OneStepNSProblem&);
+
 public:
 
   /** xml constructor

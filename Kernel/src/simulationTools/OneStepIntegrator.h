@@ -28,6 +28,7 @@ Basic class to handle with dynamical system integrators over a time step.
 #include "SimulationTypeDef.hpp"
 #include "DynamicalSystemsSet.hpp"
 #include "InteractionsSet.hpp"
+#include "OneStepIntegratorTypes.hpp"
 
 class OneStepIntegratorXML;
 class Simulation;
@@ -48,7 +49,7 @@ class OneStepIntegrator : public boost::enable_shared_from_this<OneStepIntegrato
 protected:
 
   /** type/name of the Integrator */
-  std::string integratorType;
+  OSI::TYPES integratorType;
 
   /** a set of DynamicalSystem to integrate */
   SP::DynamicalSystemsSet OSIDynamicalSystems;
@@ -71,23 +72,23 @@ protected:
   SP::OneStepIntegratorXML integratorXml;
 
   /** basic constructor with Id
-   *  \param string, integrator type/name
+   *  \param integrator type/name
    */
-  OneStepIntegrator(const std::string&);
+  OneStepIntegrator(const OSI::TYPES&);
 
   /** constructor from xml file
-      \param string, integrator type/name
+      \param integrator type/name
       \param OneStepIntegratorXML* : the corresponding XML object
       \param the set of all DS in the NSDS
       \param the set of all interactions in the NSDS
   */
-  OneStepIntegrator(const std::string&, SP::OneStepIntegratorXML, SP::DynamicalSystemsSet , SP::InteractionsSet);
+  OneStepIntegrator(const OSI::TYPES&, SP::OneStepIntegratorXML, SP::DynamicalSystemsSet , SP::InteractionsSet);
 
   /** constructor from a minimum set of data
    *  \param string, integrator type/name
    *  \param DynamicalSystemsSet : a set of DynamicalSystem to be integrated
    */
-  OneStepIntegrator(const std::string&, const DynamicalSystemsSet&);
+  OneStepIntegrator(const OSI::TYPES&, const DynamicalSystemsSet&);
 
 private:
 
@@ -97,6 +98,9 @@ private:
 
   /** copy constructor, private, no copy nor pass-by value allowed */
   OneStepIntegrator(const OneStepIntegrator&);
+
+  /** assignment (private => forbidden) */
+  OneStepIntegrator& operator=(const OneStepIntegrator&);
 
 public:
 
@@ -109,7 +113,7 @@ public:
   /** get the type of the OneStepIntegrator
    *  \return string : the type of the OneStepIntegrator
    */
-  inline const std::string getType() const
+  inline const OSI::TYPES getType() const
   {
     return integratorType;
   }
@@ -117,7 +121,7 @@ public:
   /** set the type of the OneStepIntegrator
    *  \return string : the type of the OneStepIntegrator
    */
-  inline void setType(const std::string& newType)
+  inline void setType(const OSI::TYPES& newType)
   {
     integratorType = newType;
   }

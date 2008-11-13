@@ -34,11 +34,7 @@ const bool EventsManager::createAndInsertEvent(int type, double time)
   return ((allEvents.insert(regEvent.instantiate(time, type)))  != allEvents.end());
 }
 
-EventsManager::EventsManager():
-  currentEvent(NULL), nextEvent(NULL), ETD(NULL), ENonSmooth(NULL), hasNS(false), hasCM(false)
-{}
-
-EventsManager::~EventsManager()
+EventsManager::EventsManager(): hasNS(false), hasCM(false)
 {}
 
 void EventsManager::initialize(SP::Simulation sim)
@@ -86,10 +82,10 @@ void EventsManager::insertEvents(const EventsContainer& e)
   allEvents.insert(e.begin(), e.end());
 }
 
-Event* EventsManager::getEventPtr(const mpz_t& inputTime) const
+SP::Event EventsManager::getEventPtr(const mpz_t& inputTime) const
 {
   EventsContainer::iterator current;
-  Event * searchedEvent = NULL;
+  SP::Event searchedEvent;
   // look for the event following the one which time is inputTime
   for (current = allEvents.begin(); current != allEvents.end(); ++current)
   {
@@ -102,7 +98,7 @@ Event* EventsManager::getEventPtr(const mpz_t& inputTime) const
   return searchedEvent;
 }
 
-Event* EventsManager::getFollowingEventPtr(Event* inputEvent) const
+SP::Event EventsManager::getFollowingEventPtr(SP::Event inputEvent) const
 {
   // look for inputEvent in the unProcessed events list ...
   EventsContainer::iterator next, current = allEvents.find(inputEvent);
@@ -113,22 +109,22 @@ Event* EventsManager::getFollowingEventPtr(Event* inputEvent) const
     RuntimeException::selfThrow("EventsManager getFollowingEventPtr(inputEvent), Event input is not present in the set ");
 
   if (next == allEvents.end())
-    return NULL; //RuntimeException::selfThrow("EventsManager getFollowingEventPtr(inputEvent), no next event, input is the last one in the list.");
+    return SP::Event(); //RuntimeException::selfThrow("EventsManager getFollowingEventPtr(inputEvent), no next event, input is the last one in the list.");
   else
     return (*next);
 }
 
-Event* EventsManager::getFollowingEventPtr(const mpz_t& inputTime) const
+SP::Event EventsManager::getFollowingEventPtr(const mpz_t& inputTime) const
 {
   EventsContainer::iterator next = allEvents.upper_bound(getEventPtr(inputTime));
 
   if (next == allEvents.end())
-    return NULL; //RuntimeException::selfThrow("EventsManager getFollowingEventPtr(inputTime), no next event, the one corresponding to inputTime is the last one in the list.");
+    return SP::Event(); //RuntimeException::selfThrow("EventsManager getFollowingEventPtr(inputTime), no next event, the one corresponding to inputTime is the last one in the list.");
   else
     return (*next);
 }
 
-const bool EventsManager::hasEvent(Event* event) const
+const bool EventsManager::hasEvent(SP::Event event) const
 {
   if (!event) return false;
   EventsContainer::iterator it2 = allEvents.find(event);
@@ -140,7 +136,7 @@ const bool EventsManager::hasNextEvent() const
   return (nextEvent);
 }
 
-const double EventsManager::getTimeOfEvent(Event* event) const
+const double EventsManager::getTimeOfEvent(SP::Event event) const
 {
   //  if(!hasEvent(event))
   if (!event)
@@ -177,7 +173,7 @@ void EventsManager::display() const
 }
 
 // Insertion of a new EXISTING event.
-void EventsManager::insertEvent(Event* newE)
+void EventsManager::insertEvent(SP::Event newE)
 {
   if (newE->getDoubleTimeOfEvent() < currentEvent->getDoubleTimeOfEvent())
     RuntimeException::selfThrow("EventsManager insertEvent(), time is lower than current event time while it is forbidden to step back.");
@@ -213,7 +209,7 @@ void EventsManager::scheduleNonSmoothEvent(double time)
 }
 
 
-void EventsManager::removeEvent(Event* event)
+void EventsManager::removeEvent(SP::Event event)
 {
   if (event == currentEvent)
     RuntimeException::selfThrow("EventsManager removeEvent(input), input = currentEvent, you can not remove it!");
@@ -308,7 +304,7 @@ void EventsManager::GeneralProcessEvents()
     simulation->getModelPtr()->setCurrentTime(getTimeOfEvent(nextEvent));
 }
 
-void EventsManager::SortEvent(Event* e)
+void EventsManager::SortEvent(SP::Event e)
 {
   // Temporary function to deal with add/remove events with actuators and sensors.
   allEvents.erase(e);

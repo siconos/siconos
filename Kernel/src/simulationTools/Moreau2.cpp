@@ -32,11 +32,11 @@ using namespace DS;
 // --- constructor from a minimum set of data ---
 Moreau2::Moreau2(SP::DynamicalSystem newDS, double newTheta): Moreau(newDS, newTheta)
 {
-  integratorType = "Moreau2";
+  integratorType = MOREAU2;
 }
 Moreau2::Moreau2(DynamicalSystemsSet& newDS, double newTheta): Moreau(newDS, newTheta)
 {
-  integratorType = "Moreau2";
+  integratorType = MOREAU2;
 }
 
 Moreau2::~Moreau2()
@@ -198,10 +198,9 @@ void Moreau2::computeFreeState()
         scal(coef, *d->getFLPtr(), *ffree, false);
       }
 
-      SP::SiconosVector  ftmp = new SimpleVector(*ffree);
+      SP::SiconosVector  ftmp(new SimpleVector(*ffree));
       prod(*W, (*v), *ftmp);
       *ffree += *ftmp;
-      delete(ftmp);
     }
     // 4 - Lagrangian Linear Systems
     else if (dsType == LLTIDS)

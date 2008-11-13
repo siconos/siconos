@@ -27,6 +27,8 @@
 #include <vector>
 #include <string>
 
+TYPEDEF_SPTR(Solver_Options);
+
 /** Size of the vectors of parameters int_parameters and double_parameters. We set this size to NB_PARAM
     whatever the associated OneStepNSProblem is, to simplify the memory management for the Solver_Options structure fields.
 */
@@ -34,9 +36,11 @@ const unsigned int NB_PARAM = 4;
 
 /** Object used to send parameters of type int */
 typedef std::vector<int> IntParameters;
+TYPEDEF_SPTR(IntParameters);
 
 /** Object used to send parameters of type double */
 typedef std::vector<double> DoubleParameters;
+TYPEDEF_SPTR(DoubleParameters);
 
 /** Non Smooth Solver parameters definition for One Step Non Smooth Problem.
  *
@@ -79,13 +83,13 @@ private:
   std::string name;
 
   /** Vector of double parameters */
-  IntParameters * int_parameters;
+  SP::IntParameters int_parameters;
 
   /** Vector of int parameters */
-  DoubleParameters * double_parameters;
+  SP::DoubleParameters double_parameters;
 
   /** Numerics structure used to solve solver options */
-  Solver_Options * numerics_solver_options;
+  SP::Solver_Options numerics_solver_options;
 
   /** boolean, true if Solvers parameters have been set or read, else false
       (in that case, default options will be read during Numerics driver call)  */
@@ -125,7 +129,7 @@ public:
   /** Constructor from XML object
    *  \param a pointer to NonSmoothSolverXML
    */
-  NonSmoothSolver(NonSmoothSolverXML*);
+  NonSmoothSolver(SP::NonSmoothSolverXML);
 
   /** Constructor, by reading parameters in file (XML)
    *  \param name of the input file
@@ -152,9 +156,9 @@ public:
   };
 
   /** To get the list of int. parameters
-   *  \return an IntParameters*
+   *  \return a SP::IntParameters
    */
-  inline IntParameters* getIntParametersPtr() const
+  inline SP::IntParameters getIntParametersPtr() const
   {
     return int_parameters;
   };
@@ -166,9 +170,9 @@ public:
   void setIntParameter(unsigned int i, int val);
 
   /** To get the list of double parameters
-   *  \return a DoubleParameters*
+   *  \return a SP::DoubleParameters
    */
-  inline DoubleParameters* getDoubleParametersPtr() const
+  inline SP::DoubleParameters getDoubleParametersPtr() const
   {
     return double_parameters;
   };
@@ -182,7 +186,7 @@ public:
   /** To get the Solver_Options structure
    *  \return , the numerics structure used to save solver parameters
    */
-  inline Solver_Options* getNumericsSolverOptionsPtr() const
+  inline SP::Solver_Options getNumericsSolverOptionsPtr() const
   {
     return numerics_solver_options;
   };

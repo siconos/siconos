@@ -37,7 +37,7 @@ void Registry::add(int name, object_creator creator)
   factory_map[name] = creator;
 }
 
-Event* Registry::instantiate(double time, int name)
+SP::Event Registry::instantiate(double time, int name)
 {
   MapFactoryIt it = factory_map.find(name) ;
 

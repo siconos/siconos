@@ -29,8 +29,7 @@ Note that not all files from the current location are listed below, since some o
 #include "FirstOrderLinearDSXML.h"
 #include "LagrangianLinearTIDSXML.h"
 
-#include "FrictionContactXML.h"
-#include "LCPXML.h"
+#include "FrictionContactXML.hpp"
 #include "QPXML.h"
 
 #include "MoreauXML.h"

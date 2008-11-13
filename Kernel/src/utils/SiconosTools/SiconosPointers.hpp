@@ -15,10 +15,11 @@ namespace SharedPointer {};
 namespace SharedPointerConst {};
 namespace SharedArray {};
 
-/* Using a shared_ptr to hold a pointer to a statically allocated
-   object */
-/* use create<type>SPtr(<type> &x)
-/* cf http://www.boost.org/doc/ */
+/** Using a shared_ptr to hold a pointer to a statically allocated
+   object
+   use create<type>SPtr(<type> &x)
+   cf http://www.boost.org/doc/
+*/
 struct nullDeleter
 {
   void operator()(void const *) const {}
@@ -124,14 +125,12 @@ DEFINE_SPTR(OneStepNSProblemXML);
 DEFINE_SPTR(NonSmoothSolver);
 DEFINE_SPTR(TimeDiscretisationXML);
 DEFINE_SPTR(EventDriven);
-DEFINE_SPTR(FrictionContact);
 DEFINE_SPTR(FrictionContactXML);
 DEFINE_SPTR(Sensor)
 DEFINE_SPTR(Actuator)
 DEFINE_SPTR(Event);
 DEFINE_SPTR(LsodarXML);
 DEFINE_SPTR(QPXML);
-DEFINE_SPTR(LCPXML);
 
 TYPEDEF_SPTR(MixedLinearComplementarity_Problem);
 TYPEDEF_SPTR(Numerics_Options);
