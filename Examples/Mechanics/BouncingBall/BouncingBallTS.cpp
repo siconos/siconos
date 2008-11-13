@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
     SP::LagrangianLinearTIDS ball(new LagrangianLinearTIDS(*q0, *v0, *Mass));
     allDS.insert(ball);
     // -- Set external forces (weight) --
-    SP::PVFext weight(new PVFext(nDof));
+    SP::Plugged_Vector_FTime weight(new Plugged_Vector_FTime(nDof));
     (*weight)(0) = -m * g;
     ball->setFExtPtr(weight);
 
