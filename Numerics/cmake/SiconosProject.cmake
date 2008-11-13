@@ -43,7 +43,6 @@ MACRO(SICONOS_PROJECT
                         
   ENDIF(COMMAND CMAKE_POLICY)
 
-
   # Build options
   # Static and shared libs : defaults
   OPTION(BUILD_SHARED_LIBS "Building of shared libraries" ON)
