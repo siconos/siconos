@@ -15,15 +15,15 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 /*!\file BeadsColumnED.cpp
-\brief \ref EMBeadsColumn - C++ input file, Event-Driven version - F. Perignon.
+  \brief \ref EMBeadsColumn - C++ input file, Event-Driven version - F. Perignon.
 
-A column of balls
-Direct description of the model without XML input.
-Simulation with an Event-Driven scheme.
-Keywords: LagrangianLinearDS, LagrangianLinear relation, Event Driven, Lsodar, LCP.
+  A column of balls
+  Direct description of the model without XML input.
+  Simulation with an Event-Driven scheme.
+  Keywords: LagrangianLinearDS, LagrangianLinear relation, Event Driven, Lsodar, LCP.
 */
 
 #include "SiconosKernel.hpp"
@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
   {
 
     // User-defined main parameters
-    unsigned int dsNumber = 5;      // the number of dynamical systems
+    unsigned int dsNumber = 8;      // the number of dynamical systems
     unsigned int nDof = 3;           // degrees of freedom for beads
     double increment_position = 1;   // initial position increment from one DS to the following
     double increment_velocity = 0;   // initial velocity increment from one DS to the following
@@ -60,19 +60,19 @@ int main(int argc, char* argv[])
     // A set of DS that will handle all the "balls"
     DynamicalSystemsSet allDS;
     // mass matrix, set to identity
-    SiconosMatrix *Mass = new SimpleMatrix(nDof, nDof);
+    SP::SiconosMatrix Mass(new SimpleMatrix(nDof, nDof));
     Mass->eye();
     (*Mass)(2, 2) = 3. / 5 * R * R; // m = 1
 
     // -- Initial positions and velocities --
     // q0[i] and v0[i] correspond to position and velocity of ball i.
-    vector<SimpleVector *> q0;
-    vector<SimpleVector *> v0;
-    q0.resize(dsNumber, NULL);
-    v0.resize(dsNumber, NULL);
+    vector<SP::SimpleVector> q0;
+    vector<SP::SimpleVector> v0;
+    q0.resize(dsNumber);
+    v0.resize(dsNumber);
 
     // External forces
-    SiconosVector * gravity = new SimpleVector(nDof);
+    SP::Plugged_Vector_FTime gravity(new Plugged_Vector_FTime(nDof));
     double m = 1;   // beads mass
     double g = 9.8; // gravity
     (*gravity)(0) = - m * g;
@@ -81,17 +81,18 @@ int main(int argc, char* argv[])
     for (i = 0; i < dsNumber; i++)
     {
       // Memory allocation for q0[i] and v0[i]
-      q0[i] = new SimpleVector(nDof);
-      v0[i] = new SimpleVector(nDof);
+      q0[i].reset(new SimpleVector(nDof));
+      v0[i].reset(new SimpleVector(nDof));
       // set values
       (*(q0[i]))(0) = position_init;
       (*(v0[i]))(0) = velocity_init;
       // Create and insert in allDS a new Lagrangian Linear Dynamical System ...
-      checkDS = allDS.insert(new LagrangianLinearTIDS(i, *(q0[i]), *(v0[i]), *Mass));
+      SP::LagrangianLinearTIDS ds(new LagrangianLinearTIDS(*(q0[i]), *(v0[i]), *Mass));
+      checkDS = allDS.insert(ds);
       // Note that we now use a CheckInsertDS object: checkDS.first is
       // an iterator that points to the DS inserted above.
       //(static_cast<LagrangianDS*>(*(checkDS.first)))->setComputeFExtFunction("BeadsPlugin.so", "gravity");
-      (static_cast<LagrangianDS*>(*(checkDS.first)))->setFExtPtr(gravity);
+      (boost::static_pointer_cast<LagrangianLinearTIDS>(*(checkDS.first)))->setFExtPtr(gravity);
       position_init += increment_position;
       velocity_init += increment_velocity;
     }
@@ -118,14 +119,14 @@ int main(int argc, char* argv[])
 
     // Lagrangian Relation
     unsigned int interactionSize = 1; // y vector size
-    SiconosMatrix *H = new SimpleMatrix(interactionSize, nDof);
+    SP::SiconosMatrix H(new SimpleMatrix(interactionSize, nDof));
     (*H)(0, 0) = 1.0;
-    NonSmoothLaw * nslaw0 = new NewtonImpactNSL(e);
-    SiconosVector *b = new SimpleVector(interactionSize);
+    SP::NonSmoothLaw nslaw0(new NewtonImpactNSL(e));
+    SP::SiconosVector b(new SimpleVector(interactionSize));
     (*b)(0) = -R;
-    Relation * relation0 = new LagrangianLinearTIR(*H, *b);
+    SP::Relation relation0(new LagrangianLinearTIR(*H, *b));
     unsigned int num = 0 ; // an id number for the Interaction
-    Interaction * inter0 = new Interaction("bead-floor", dsConcerned, num, interactionSize, nslaw0, relation0);
+    SP::Interaction inter0(new Interaction("bead-floor", dsConcerned, num, interactionSize, nslaw0, relation0));
     allInteractions.insert(inter0);
 
     // A list of names for the Interactions
@@ -135,9 +136,9 @@ int main(int argc, char* argv[])
     // Interactions ball-ball
     CheckInsertInteraction checkInter;
     // A vector that handles all the relations
-    vector<Relation*> LLR(interactionNumber - 1);
-    SiconosMatrix *H1 = new SimpleMatrix(1, 2 * nDof);
-    (*b)(0) = -2.0 * R;
+    vector<SP::Relation> LLR(interactionNumber - 1);
+    SP::SiconosMatrix H1(new SimpleMatrix(1, 2 * nDof));
+    (*b)(0) = -2 * R;
     if (dsNumber > 1)
     {
       (*H1)(0, 0) = -1.0;
@@ -153,21 +154,22 @@ int main(int argc, char* argv[])
         id[i - 1] = ostr.str();
         // The relations
         // Since Ri=Rj and h=0, we do not need to set b.
-        LLR[i - 1] = new LagrangianLinearTIR(*H1, *b);
-        checkInter = allInteractions.insert(new Interaction(id[i - 1], dsConcerned, i, interactionSize, nslaw0, LLR[i - 1]));
+        LLR[i - 1].reset(new LagrangianLinearTIR(*H1, *b));
+        SP::Interaction inter(new Interaction(id[i - 1], dsConcerned, i, interactionSize, nslaw0, LLR[i - 1]));
+        checkInter = allInteractions.insert(inter);
       }
     }
 
     // --------------------------------
     // --- NonSmoothDynamicalSystem ---
     // --------------------------------
-    NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(allDS, allInteractions);
+    SP::NonSmoothDynamicalSystem nsds(new NonSmoothDynamicalSystem(allDS, allInteractions));
 
     // -------------
     // --- Model ---
     // -------------
 
-    Model * multiBeads = new Model(t0, T);
+    SP::Model multiBeads(new Model(t0, T));
     multiBeads->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
 
     // ----------------
@@ -175,11 +177,12 @@ int main(int argc, char* argv[])
     // ----------------
 
     // -- Time discretisation --
-    TimeDiscretisation * t = new TimeDiscretisation(h, multiBeads);
+    SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-    EventDriven* s = new EventDriven(t);
-
-    OneStepIntegrator * OSI = new Lsodar(allDS, s);
+    SP::EventDriven s(new EventDriven(t));
+    double theta = 0.5000001;
+    SP::OneStepIntegrator OSI(new Lsodar(allDS));
+    s->recordIntegrator(OSI);
 
     // -- OneStepNsProblem --
     IntParameters iparam(5);
@@ -187,15 +190,17 @@ int main(int argc, char* argv[])
     DoubleParameters dparam(5);
     dparam[0] = 1e-4; // Tolerance
     string solverName = "PGS" ;
-    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
-    OneStepNSProblem * impact = new LCP(s, mySolver, "impact");
-    OneStepNSProblem * acceleration = new LCP(s, mySolver, "acceleration");
+    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
+    SP::OneStepNSProblem impact(new LCP(mySolver, "impact"));
+    SP::OneStepNSProblem acceleration(new LCP(mySolver, "acceleration"));
+    s->recordNonSmoothProblem(impact);
+    s->recordNonSmoothProblem(acceleration);
 
     // =========================== End of model definition
     // ================================= Computation
     // --- Simulation initialization ---
     cout << "====> Simulation initialisation ..." << endl << endl;
-    s->initialize();
+    multiBeads->initialize(s);
 
     int N = 14692;// Number of Events
 
@@ -209,8 +214,8 @@ int main(int argc, char* argv[])
     DSIterator it;
     for (it = allDS.begin(); it != allDS.end(); ++it)
     {
-      dataPlot(0, (int)i * 2 + 1) = static_cast<LagrangianLinearTIDS*>(*it)->getQ()(0);
-      dataPlot(0, (int)i * 2 + 2) = static_cast<LagrangianLinearTIDS*>(*it)->getVelocity()(0);
+      dataPlot(0, (int)i * 2 + 1) = boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->getQ()(0);
+      dataPlot(0, (int)i * 2 + 2) = boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->getVelocity()(0);
       i++;
       if ((*it)->getNumber() == 9)
         break;
@@ -219,7 +224,7 @@ int main(int argc, char* argv[])
     // --- Time loop ---
     cout << "Start computation ... " << endl;
     bool nonSmooth = false;
-    EventsManager * eventsManager = s->getEventsManagerPtr();
+    SP::EventsManager eventsManager = s->getEventsManagerPtr();
     unsigned int numberOfEvent = 0 ;
     int k = 1;
     while (s->getNextTime() < multiBeads->getFinalT())
@@ -236,8 +241,8 @@ int main(int argc, char* argv[])
         dataPlot(k, 0) = s->getStartingTime();
         for (it = allDS.begin(); it != allDS.end(); ++it)
         {
-          dataPlot(k, (int)i * 2 + 1) = (*static_cast<LagrangianLinearTIDS*>(*it)->getQMemoryPtr()->getSiconosVector(1))(0);
-          dataPlot(k, (int)i * 2 + 2) = (*static_cast<LagrangianLinearTIDS*>(*it)->getVelocityMemoryPtr()->getSiconosVector(1))(0);
+          dataPlot(k, (int)i * 2 + 1) = (*(boost::static_pointer_cast<LagrangianLinearTIDS>(*it))->getQMemoryPtr()->getSiconosVector(1))(0);
+          dataPlot(k, (int)i * 2 + 2) = (*(boost::static_pointer_cast<LagrangianLinearTIDS>(*it))->getVelocityMemoryPtr()->getSiconosVector(1))(0);
           i++;
           if ((*it)->getNumber() == 9)
             break;
@@ -250,8 +255,8 @@ int main(int argc, char* argv[])
       dataPlot(k, 0) = s->getStartingTime();
       for (it = allDS.begin(); it != allDS.end(); ++it)
       {
-        dataPlot(k, (int)i * 2 + 1) = static_cast<LagrangianLinearTIDS*>(*it)->getQ()(0);
-        dataPlot(k, (int)i * 2 + 2) = static_cast<LagrangianLinearTIDS*>(*it)->getVelocity()(0);
+        dataPlot(k, (int)i * 2 + 1) = (boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->getQ())(0);
+        dataPlot(k, (int)i * 2 + 2) = (boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->getVelocity())(0);
         i++;
         if ((*it)->getNumber() == 9)
           break;
@@ -264,25 +269,6 @@ int main(int argc, char* argv[])
     // --- Output files ---
     ioMatrix io("result.dat", "ascii");
     io.write(dataPlot, "noDim");
-
-    // --- Free memory ---
-    delete impact;
-    delete acceleration;
-    delete OSI;
-    delete t;
-    delete s;
-    delete multiBeads;
-    delete nsds;
-
-    for (i = 0; i < LLR.size(); i++)
-      delete LLR[i];
-    delete H1;
-    delete inter0;
-    delete relation0;
-    delete nslaw0;
-    delete b;
-    delete H;
-    delete gravity;
   }
 
   catch (SiconosException e)

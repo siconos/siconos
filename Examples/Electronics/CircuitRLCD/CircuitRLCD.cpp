@@ -71,69 +71,69 @@ int main(int argc, char* argv[])
     LS_A(0 , 1) = -1.0 / Cvalue;
     LS_A(1 , 0) = 1.0 / Lvalue;
 
-    FirstOrderLinearTIDS* LSCircuitRLCD = new FirstOrderLinearTIDS(1, init_state, LS_A);
+    SP::FirstOrderLinearTIDS LSCircuitRLCD(new FirstOrderLinearTIDS(init_state, LS_A));
 
     // --- Interaction between linear system and non smooth system ---
 
     DynamicalSystemsSet Inter_DS;
     Inter_DS.insert(LSCircuitRLCD);
 
-    SiconosMatrix* Int_C = new SimpleMatrix(1, 2);
-    (*Int_C)(0 , 0) = -1.0;
+    SimpleMatrix Int_C(1, 2);
+    Int_C(0 , 0) = -1.0;
 
-    SiconosMatrix* Int_D = new SimpleMatrix(1, 1);
-    (*Int_D)(0 , 0) = Rvalue;
+    SimpleMatrix Int_D(1, 1);
+    Int_D(0 , 0) = Rvalue;
 
-    SiconosMatrix* Int_B = new SimpleMatrix(2, 1);
-    (*Int_B)(0 , 0) = -1.0 / Cvalue;
+    SimpleMatrix Int_B(2, 1);
+    Int_B(0 , 0) = -1.0 / Cvalue;
 
-    FirstOrderLinearTIR* LTIRCircuitRLCD = new FirstOrderLinearTIR(*Int_C, *Int_B);
-    NonSmoothLaw * NSLaw = new ComplementarityConditionNSL(1);
+    SP::FirstOrderLinearTIR LTIRCircuitRLCD(new FirstOrderLinearTIR(Int_C, Int_B));
+    SP::NonSmoothLaw NSLaw(new ComplementarityConditionNSL(1));
 
-    LTIRCircuitRLCD->setDPtr(Int_D);
-    //   LTIRCircuitRLCD->getCPtr()->display();
+    LTIRCircuitRLCD->setD(Int_D);
 
-    Interaction* InterCircuitRLCD = new Interaction("InterCircuitRLCD", Inter_DS, 1, 1, NSLaw, LTIRCircuitRLCD);
+    SP::Interaction InterCircuitRLCD(new Interaction("InterCircuitRLCD", Inter_DS, 1, 1, NSLaw, LTIRCircuitRLCD));
 
     // --- Model creation ---
-    Model * CircuitRLCD = new Model(t0, T, Modeltitle);
+    SP::Model CircuitRLCD(new Model(t0, T, Modeltitle));
 
     // --- Non Smooth Dynamical system creation ---
 
     InteractionsSet allInteractions;
     allInteractions.insert(InterCircuitRLCD);
 
-    NonSmoothDynamicalSystem* NSDSCircuitRLCD = new NonSmoothDynamicalSystem(Inter_DS, allInteractions, false);
+    SP::NonSmoothDynamicalSystem NSDSCircuitRLCD(new NonSmoothDynamicalSystem(Inter_DS, allInteractions, false));
     CircuitRLCD->setNonSmoothDynamicalSystemPtr(NSDSCircuitRLCD);
 
     // --- Simulation specification---
 
-    TimeDiscretisation* TiDiscRLCD = new TimeDiscretisation(h_step, CircuitRLCD);
+    SP::TimeDiscretisation TiDiscRLCD(new TimeDiscretisation(t0, h_step));
 
-    TimeStepping* StratCircuitRLCD = new TimeStepping(TiDiscRLCD);
+    SP::TimeStepping StratCircuitRLCD(new TimeStepping(TiDiscRLCD));
 
     double theta = 0.5000000000001;
 
-    Moreau* OSI_RLCD = new Moreau(LSCircuitRLCD, theta, StratCircuitRLCD);
-
+    SP::Moreau OSI_RLCD(new Moreau(LSCircuitRLCD, theta));
+    StratCircuitRLCD->recordIntegrator(OSI_RLCD);
 
     IntParameters iparam(5);
     iparam[0] = 101; // Max number of iteration
     DoubleParameters dparam(5);
     dparam[0] = 1e-8; // Tolerance
     string solverName = "Lemke" ;
-    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
+    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     // -- OneStepNsProblem --
 
-    LCP* LCP_RLCD = new LCP(StratCircuitRLCD, mySolver, "LCP");
+    SP::LCP LCP_RLCD(new LCP(mySolver));
+    StratCircuitRLCD->recordNonSmoothProblem(LCP_RLCD);
 
-    StratCircuitRLCD->initialize();
+    // Initialization
+    CircuitRLCD->initialize(StratCircuitRLCD);
     cout << " -----> End of initialization." << endl;
+
     double h = StratCircuitRLCD->getTimeStep();
     int N = (int)((T - t0) / h); // Number of time steps
     int k = 0;
-
-
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -196,20 +196,6 @@ int main(int argc, char* argv[])
     // dataPlot (ascii) output
     ioMatrix io("CircuitRLCD.dat", "ascii");
     io.write(dataPlot, "noDim");
-    delete LCP_RLCD;
-    delete OSI_RLCD;
-    delete TiDiscRLCD;
-    delete StratCircuitRLCD;
-    delete LTIRCircuitRLCD;
-    delete InterCircuitRLCD;
-    delete Int_C ;
-    delete Int_D ;
-    delete Int_B ;
-    delete LSCircuitRLCD;
-    delete NSDSCircuitRLCD;
-    delete CircuitRLCD;
-
-
   }
 
   // --- Exceptions handling ---

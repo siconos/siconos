@@ -171,15 +171,8 @@ int main(int argc, char* argv[])
     // diode F1 current
     dataPlot(k, 6) = (*lambda)(2);
 
-    // --- Compute elapsed time ---
-    double t1, t2, elapsed;
-    struct timeval tp;
-    int rtn;
-    clock_t start, end;
-    double elapsed2;
-    start = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t1 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
+    boost::timer t;
+    t.restart();
 
     // --- Time loop  ---
     for (k = 1 ; k < N ; ++k)

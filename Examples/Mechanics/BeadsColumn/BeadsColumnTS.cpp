@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
     boost::timer time;
     time.restart();
     // User-defined main parameters
-    unsigned int dsNumber = 100;      // the number of dynamical systems
+    unsigned int dsNumber = 10;      // the number of dynamical systems
     unsigned int nDof = 3;           // degrees of freedom for beads
     double increment_position = 1;   // initial position increment from one DS to the following
     double increment_velocity = 0;   // initial velocity increment from one DS to the following
@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
     v0.resize(dsNumber);
 
     // External forces
-    SP::PVFext gravity(new PVFext(nDof));
+    SP::Plugged_Vector_FTime gravity(new Plugged_Vector_FTime(nDof));
     double m = 1;   // beads mass
     double g = 9.8; // gravity
     (*gravity)(0) = - m * g;

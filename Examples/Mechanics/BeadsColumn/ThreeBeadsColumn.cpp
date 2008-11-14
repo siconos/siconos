@@ -26,18 +26,18 @@ int main(int argc, char* argv[])
   {
 
     // --- Model loading from xml file ---
-    Model * BeadsModel = new Model("./ThreeBeadsColumn.xml");
+    SP::Model BeadsModel(new Model("./ThreeBeadsColumn.xml"));
 
     cout << "\n *** ThreeBeadsColumn.xml loaded ***" << endl;
+    BeadsModel->initialize();
 
     // --- Get and initialize the simulation ---
-    TimeStepping * s = static_cast<TimeStepping*>(BeadsModel->getSimulationPtr());
-    s->initialize();
+    SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(BeadsModel->getSimulationPtr());
 
     cout << "\n **** the simulation is ready ****" << endl;
 
     // --- Get the time discretisation scheme ---
-    TimeDiscretisation* t = s->getTimeDiscretisationPtr();
+    SP::TimeDiscretisation t = s->getTimeDiscretisationPtr();
     int k = 0;
     double t0 = BeadsModel->getT0();
     double T = BeadsModel->getFinalT();
@@ -54,23 +54,23 @@ int main(int argc, char* argv[])
     dataPlot(k, 0) = BeadsModel->getT0();
 
     // state q and velocity for the first dynamical system
-    LagrangianLinearTIDS* bead = static_cast<LagrangianLinearTIDS*>(BeadsModel->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
-    SiconosVector * q1 = bead->getQPtr();
-    SiconosVector * v1 = bead->getVelocityPtr();
+    SP::LagrangianLinearTIDS bead = boost::static_pointer_cast<LagrangianLinearTIDS> (BeadsModel->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(1));
+    SP::SiconosVector q1 = bead->getQPtr();
+    SP::SiconosVector v1 = bead->getVelocityPtr();
     dataPlot(k, 1) = (*q1)(0);
     dataPlot(k, 2) = (*v1)(0);
 
     // state q and velocity for the second dynamical system
-    LagrangianLinearTIDS* bead2 = static_cast<LagrangianLinearTIDS*>(BeadsModel->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(1));
-    SiconosVector * q2 = bead2->getQPtr();
-    SiconosVector * v2 = bead2->getVelocityPtr();
+    SP::LagrangianLinearTIDS bead2 = boost::static_pointer_cast<LagrangianLinearTIDS> (BeadsModel->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(2));
+    SP::SiconosVector q2 = bead2->getQPtr();
+    SP::SiconosVector v2 = bead2->getVelocityPtr();
     dataPlot(k, 3) = (*q2)(0);
     dataPlot(k, 4) = (*v2)(0);
 
     // state q and velocity for the third dynamical system
-    LagrangianLinearTIDS* bead3 = static_cast<LagrangianLinearTIDS*>(BeadsModel->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(2));
-    SiconosVector * q3 = bead3->getQPtr();
-    SiconosVector * v3 = bead3->getVelocityPtr();
+    SP::LagrangianLinearTIDS bead3 = boost::static_pointer_cast<LagrangianLinearTIDS> (BeadsModel->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(3));
+    SP::SiconosVector q3 = bead3->getQPtr();
+    SP::SiconosVector v3 = bead3->getVelocityPtr();
     dataPlot(k, 5) = (*q3)(0);
     dataPlot(k, 6) = (*v3)(0);
 
