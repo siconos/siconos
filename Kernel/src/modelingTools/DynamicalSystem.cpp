@@ -233,25 +233,6 @@ void DynamicalSystem::setJacobianG(unsigned int i, const PMFint& newValue)
     *jacobianG[i] = newValue;
 }
 
-void DynamicalSystem::setXMemory(const SiconosMemory& newValue)
-{
-  if (xMemory)
-  {
-    if (newValue.getMemorySize() != xMemory->getMemorySize())
-      RuntimeException::selfThrow("DynamicalSystem::setXMemory - inconsistent sizes between xMemory input and existing memorySize");
-    else
-      *xMemory = newValue;
-  }
-  else
-    xMemory.reset(new SiconosMemory(newValue));
-
-}
-
-void DynamicalSystem::setXMemoryPtr(SP::SiconosMemory newPtr)
-{
-  xMemory = newPtr;
-}
-
 void DynamicalSystem::update(double time)
 {
   computeRhs(time);

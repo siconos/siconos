@@ -35,18 +35,7 @@ ControlManager::ControlManager(SP::Model m): model(m)
 }
 
 ControlManager::~ControlManager()
-{
-  // Delete Sensors
-  SensorsIterator itS;
-  for (itS = allSensors.begin(); itS != allSensors.end(); ++itS)
-    if ((*itS)) delete(*itS);
-  allSensors.clear();
-  // Delete Actuators
-  ActuatorsIterator itA;
-  for (itA = allActuators.begin(); itA != allActuators.end(); ++itA)
-    if ((*itA)) delete(*itA);
-  allActuators.clear();
-}
+{}
 
 void ControlManager::initialize()
 {
@@ -64,35 +53,35 @@ void ControlManager::initialize()
   }
 }
 
-Sensor* ControlManager::addSensor(int type, TimeDiscretisation* t)
+SP::Sensor ControlManager::addSensor(int type, SP::TimeDiscretisation t)
 {
   SensorFactory::Registry& regSensor(SensorFactory::Registry::get()) ;
   return (* (allSensors.insert(regSensor.instantiate(type, t))).first);
 }
 
-Sensor* ControlManager::addAndRecordSensor(int type, TimeDiscretisation* t)
+SP::Sensor ControlManager::addAndRecordSensor(int type, SP::TimeDiscretisation t)
 {
   double currentTime = model->getSimulationPtr()->getNextTime();
   while (t->getCurrentTime() < currentTime)
     t->increment();
   SensorFactory::Registry& regSensor(SensorFactory::Registry::get()) ;
-  Sensor* tmp = *(allSensors.insert(regSensor.instantiate(type, t))).first;
+  SP::Sensor tmp = *(allSensors.insert(regSensor.instantiate(type, t))).first;
   tmp->initialize();
   tmp->recordInSimulation();
 
   return tmp;
 }
 
-Actuator* ControlManager::addActuator(int type, TimeDiscretisation* t)
+SP::Actuator ControlManager::addActuator(int type, SP::TimeDiscretisation t)
 {
   ActuatorFactory::Registry& regActuator(ActuatorFactory::Registry::get()) ;
   return (* (allActuators.insert(regActuator.instantiate(type, t))).first);
 }
 
-Actuator* ControlManager::addAndRecordActuator(int type, TimeDiscretisation* t)
+SP::Actuator ControlManager::addAndRecordActuator(int type, SP::TimeDiscretisation t)
 {
   ActuatorFactory::Registry& regActuator(ActuatorFactory::Registry::get()) ;
-  Actuator* tmp = *(allActuators.insert(regActuator.instantiate(type, t))).first;
+  SP::Actuator tmp = *(allActuators.insert(regActuator.instantiate(type, t))).first;
   tmp->initialize();
   tmp->recordInSimulation();
   return tmp;

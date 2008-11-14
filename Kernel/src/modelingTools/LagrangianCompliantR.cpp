@@ -157,7 +157,6 @@ void LagrangianCompliantR::computeInput(const double time, const unsigned int le
   //   SP::SiconosMatrix  GT = new SimpleMatrix(*G[0]);
   //   GT->trans();
   //   *data[name] += prod(*GT, *lambda);
-  //   delete GT;
   //  gemv(CblasTrans, 1.0,*(G[0]), *lambda, 1.0, *data[name]); => not yet implemented for BlockVectors.
 }
 

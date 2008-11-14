@@ -24,7 +24,7 @@
 
 #include "SiconosPointers.hpp"
 #include "SiconosDOMTreeTools.h"
-#include<deque>
+#include "SiconosMemory.h"
 
 /** Maximum size for the memory */
 const std::string SM_MEMORYSIZE = "sizeMax";
@@ -41,16 +41,39 @@ const std::string SM_MEMORY = "Memory";
  */
 class SiconosMemoryXML
 {
+  xmlNodePtr memoryNode;
+  xmlNodePtr parentNode;
+
+private:
+
+  /** Return a vector of SiconosVector computed from a memory node
+  *   \param memoryNode : the memory node you want to get in a vector of SiconosVector type
+  *   \return A  deque of SiconosVector
+  */
+  SP::MemoryContainer getVectorMemoryValue();
+
+  /** Change values of a memoryNode from a deque<SiconosVector>
+  *   \param memoryNode : the memory node you want to set
+  *   \param memory : the memory you want to copy the value in the memoryNode
+  *   \exception XMLException
+  */
+  void setVectorMemoryValue(const MemoryContainer& memory);
+
+  /** Default constructor */
+  SiconosMemoryXML();
+
 public:
 
-  SiconosMemoryXML();
-  SiconosMemoryXML(xmlNode* memoryNode, xmlNode* parentNode = NULL, const std::string& name = "default");
-  ~SiconosMemoryXML();
+  /** Basic construcor */
+  SiconosMemoryXML(xmlNodePtr memoryNode, xmlNodePtr parentNode = NULL, const std::string& name = "default");
+
+  /** Destructor */
+  ~SiconosMemoryXML() {};
 
   /** allows to get the deque of SiconosVector from a SiconosMemory in the XML
   *  \return deque<SiconosVector*>
   */
-  inline std::deque<SP::SiconosVector> getSiconosMemoryVector()
+  inline SP::MemoryContainer getSiconosMemoryVector()
   {
     return getVectorMemoryValue();
   }
@@ -64,9 +87,9 @@ public:
   }
 
   /** allows to set the vector of SiconosVector of a SiconosMemory in the XML
-  *  \param deque<SP::SiconosVector> to set
+  *  \param MemoryContainer to set
   */
-  inline void setSiconosMemoryVector(const std::deque<SP::SiconosVector>& v)
+  inline void setSiconosMemoryVector(const MemoryContainer& v)
   {
     setVectorMemoryValue(v);
   }
@@ -84,15 +107,13 @@ public:
   */
   inline bool hasMemory()
   {
-    bool res = false;
-    if (SiconosDOMTreeTools::findNodeChild(memoryNode, SM_MEMORY)) res = true;
-    return res;
+    return SiconosDOMTreeTools::findNodeChild(memoryNode, SM_MEMORY);
   }
 
   /** returns the xmlNode of the SiconosMemoryXML
   *  \return xmlNode* : the value of the xmlNode of the SiconosMemoryXML
   */
-  inline xmlNode* getSiconosMemoryXMLNode()
+  inline xmlNodePtr getSiconosMemoryXMLNode()
   {
     return memoryNode;
   }
@@ -102,23 +123,6 @@ public:
   */
   void deleteUnusedMemoryNodes(const int&);
 
-private:
-
-  /** Return a vector of SiconosVector computed from a memory node
-  *   \param memoryNode : the memory node you want to get in a vector of SiconosVector type
-  *   \return A  deque of SiconosVector
-  */
-  std::deque<SP::SiconosVector> getVectorMemoryValue();
-
-  /** Change values of a memoryNode from a deque<SiconosVector>
-  *   \param memoryNode : the memory node you want to set
-  *   \param memory : the memory you want to copy the value in the memoryNode
-  *   \exception XMLException
-  */
-  void setVectorMemoryValue(const std::deque<SP::SiconosVector>& memory);
-
-  xmlNode * memoryNode;
-  xmlNode * parentNode;
 };
 
 #endif // SICONOSMEMORYXML_H

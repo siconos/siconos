@@ -299,36 +299,20 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
       subprod(*H, *workX, *q, coord, true);
     }
 
-    if (relationSubType == LinearTIR || relationSubType == LinearR)
+    if (relationType == FirstOrder && (relationSubType == LinearTIR || relationSubType == LinearR))
     {
-      // In the linear case it may be required to add e + FZ to q.
+      // In the first order linear case it may be required to add e + FZ to q.
       // q = HXfree + e + FZ
       SP::SiconosVector e;
-      if (relationType == FirstOrder)
+      if (relationSubType == LinearTIR)
       {
-        if (relationSubType == LinearTIR)
-        {
-          e = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->getRelationPtr())->getEPtr();
-          H = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->getRelationPtr())->getFPtr();
-        }
-        else
-        {
-          e = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getEPtr();
-          H = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getFPtr();
-        }
+        e = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->getRelationPtr())->getEPtr();
+        H = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->getRelationPtr())->getFPtr();
       }
-      else if (relationType == Lagrangian)
+      else
       {
-        if (relationSubType == LinearTIR)
-        {
-          e = boost::static_pointer_cast<LagrangianLinearTIR>(mainInteraction->getRelationPtr())->getEPtr();
-          H = boost::static_pointer_cast<LagrangianLinearTIR>(mainInteraction->getRelationPtr())->getFPtr();
-        }
-        //        else
-        //    {
-        //      e = boost::static_pointer_cast<LagrangianLinearR>(mainInteraction->getRelationPtr())->getEPtr();
-        //      H = boost::static_pointer_cast<LagrangianLinearR>(mainInteraction->getRelationPtr())->getFPtr();
-        //    }
+        e = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getEPtr();
+        H = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getFPtr();
       }
 
       if (e)

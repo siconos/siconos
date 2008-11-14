@@ -417,7 +417,6 @@ void SiconosDOMTreeToolsTest::testSetBooleanAttributeValue()
 ////
 ////  //cout<<"PRECISION : "<<DBL_MAX_EXP<<" "<<DBL_MANT_DIG<<" "<<FLT_MANT_DIG<<endl;
 ////  cout<<"testSetVectorMemoryValue vect.size = "<<vect.size()<<endl;
-////  delete vect[0];
 ////  vect[0] = v;
 ////  SiconosDOMTreeTools::setVectorMemoryValue(child, vect);
 ////  const vector<SiconosVector*> vect2 = SiconosDOMTreeTools::getVectorMemoryValue(child);
@@ -425,7 +424,6 @@ void SiconosDOMTreeToolsTest::testSetBooleanAttributeValue()
 //
 //  cout<<"SiconosDOMTreeToolsTest >>> testSetVectorMemoryValue ................ OK\n ";
 //  v->write("testVector.dat");
-//  delete v;
 //}
 
 void SiconosDOMTreeToolsTest::testCreateMatrixNode()

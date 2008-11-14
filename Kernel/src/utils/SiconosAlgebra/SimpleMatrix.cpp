@@ -59,14 +59,14 @@ using std::cout;
 using std::endl;
 
 // Default (protected, used only for derived classes)
-SimpleMatrix::SimpleMatrix(): SiconosMatrix(1, 0, 0), ipiv(NULL), isPLUFactorized(false), isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(): SiconosMatrix(1, 0, 0), isPLUFactorized(false), isPLUInversed(false)
 {
   mat.Dense = new DenseMat(ublas::zero_matrix<double>());
 }
 
 // parameters: dimensions and type.
 SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, UBLAS_TYPE typ, unsigned int upper, unsigned int lower):
-  SiconosMatrix(1, row, col), ipiv(NULL), isPLUFactorized(false), isPLUInversed(false)
+  SiconosMatrix(1, row, col), isPLUFactorized(false), isPLUInversed(false)
 {
   if (typ == DENSE)
   {
@@ -111,7 +111,7 @@ SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, UBLAS_TYPE typ, u
 
 // parameters: dimensions, input value and type
 SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, double inputValue, UBLAS_TYPE typ, unsigned int upper, unsigned int lower):
-  SiconosMatrix(1, row, col), ipiv(NULL), isPLUFactorized(false), isPLUInversed(false)
+  SiconosMatrix(1, row, col), isPLUFactorized(false), isPLUInversed(false)
 {
   // This constructor has sense only for dense matrices ...
   if (typ == DENSE)
@@ -125,7 +125,7 @@ SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, double inputValue
 
 // // parameters: a vector (stl) of double and the type.
 // SimpleMatrix::SimpleMatrix(const std::vector<double>& v, unsigned int row, unsigned int col, UBLAS_TYPE typ, unsigned int lower, unsigned int upper):
-//   SiconosMatrix(1, row, col), ipiv(NULL), isPLUFactorized(false), isPLUInversed(false)
+//   SiconosMatrix(1, row, col), isPLUFactorized(false), isPLUInversed(false)
 // {
 //   if( (  (v.size() != row*col) && (typ != SYMMETRIC && typ != BANDED) )
 //       || (v.size() != row*row && typ == SYMMETRIC)
@@ -166,7 +166,7 @@ SimpleMatrix::SimpleMatrix(unsigned int row, unsigned int col, double inputValue
 // }
 
 // Copy constructors
-SimpleMatrix::SimpleMatrix(const SimpleMatrix &smat): SiconosMatrix(smat.getNum(), smat.size(0), smat.size(1)), ipiv(NULL), isPLUFactorized(false), isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const SimpleMatrix &smat): SiconosMatrix(smat.getNum(), smat.size(0), smat.size(1)), isPLUFactorized(false), isPLUInversed(false)
 {
   if (num == 1)
   {
@@ -195,7 +195,7 @@ SimpleMatrix::SimpleMatrix(const SimpleMatrix &smat): SiconosMatrix(smat.getNum(
     mat.Identity = new IdentityMat(smat.size(0), smat.size(1));
 }
 
-SimpleMatrix::SimpleMatrix(const SiconosMatrix &m): SiconosMatrix(m.getNum(), m.size(0), m.size(1)), ipiv(NULL), isPLUFactorized(false), isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const SiconosMatrix &m): SiconosMatrix(m.getNum(), m.size(0), m.size(1)), isPLUFactorized(false), isPLUInversed(false)
 {
   // num is set in SiconosMatrix constructor with m.getNum() ... must be changed if m is Block
   unsigned int numM = m.getNum();
@@ -245,42 +245,42 @@ SimpleMatrix::SimpleMatrix(const SiconosMatrix &m): SiconosMatrix(m.getNum(), m.
     mat.Identity = new IdentityMat(m.size(0), m.size(1));
 }
 
-SimpleMatrix::SimpleMatrix(const DenseMat& m): SiconosMatrix(1, m.size1(), m.size2()), ipiv(NULL), isPLUFactorized(false), isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const DenseMat& m): SiconosMatrix(1, m.size1(), m.size2()), isPLUFactorized(false), isPLUInversed(false)
 {
   mat.Dense = new DenseMat(m);
 }
 
-SimpleMatrix::SimpleMatrix(const TriangMat& m): SiconosMatrix(2, m.size1(), m.size2()), ipiv(NULL), isPLUFactorized(false), isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const TriangMat& m): SiconosMatrix(2, m.size1(), m.size2()), isPLUFactorized(false), isPLUInversed(false)
 {
   mat.Triang = new TriangMat(m);
 }
 
-SimpleMatrix::SimpleMatrix(const SymMat& m): SiconosMatrix(3, m.size1(), m.size2()), ipiv(NULL), isPLUFactorized(false), isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const SymMat& m): SiconosMatrix(3, m.size1(), m.size2()), isPLUFactorized(false), isPLUInversed(false)
 {
   mat.Sym = new SymMat(m);
 }
 
-SimpleMatrix::SimpleMatrix(const SparseMat& m): SiconosMatrix(4, m.size1(), m.size2()), ipiv(NULL), isPLUFactorized(false), isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const SparseMat& m): SiconosMatrix(4, m.size1(), m.size2()), isPLUFactorized(false), isPLUInversed(false)
 {
   mat.Sparse = new SparseMat(m);
 }
 
-SimpleMatrix::SimpleMatrix(const BandedMat& m): SiconosMatrix(5, m.size1(), m.size2()), ipiv(NULL), isPLUFactorized(false), isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const BandedMat& m): SiconosMatrix(5, m.size1(), m.size2()), isPLUFactorized(false), isPLUInversed(false)
 {
   mat.Banded = new BandedMat(m);
 }
 
-SimpleMatrix::SimpleMatrix(const ZeroMat& m): SiconosMatrix(6, m.size1(), m.size2()), ipiv(NULL), isPLUFactorized(false), isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const ZeroMat& m): SiconosMatrix(6, m.size1(), m.size2()), isPLUFactorized(false), isPLUInversed(false)
 {
   mat.Zero = new ZeroMat(m);
 }
 
-SimpleMatrix::SimpleMatrix(const IdentityMat& m): SiconosMatrix(7, m.size1(), m.size2()), ipiv(NULL), isPLUFactorized(false), isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const IdentityMat& m): SiconosMatrix(7, m.size1(), m.size2()), isPLUFactorized(false), isPLUInversed(false)
 {
   mat.Identity = new IdentityMat(m);
 }
 
-SimpleMatrix::SimpleMatrix(const std::string &file, bool ascii): SiconosMatrix(1), ipiv(NULL), isPLUFactorized(false), isPLUInversed(false)
+SimpleMatrix::SimpleMatrix(const std::string &file, bool ascii): SiconosMatrix(1), isPLUFactorized(false), isPLUInversed(false)
 {
   mat.Dense = new DenseMat();
   if (ascii)
@@ -314,7 +314,6 @@ SimpleMatrix::~SimpleMatrix()
     delete(mat.Zero);
   else if (num == 7)
     delete(mat.Identity);
-  if (ipiv) delete ipiv;
 }
 
 //======================================
@@ -838,7 +837,7 @@ void setBlock(SPC::SiconosMatrix  MIn, SP::SiconosMatrix MOut, const Index& dim,
       // A - Block-Row position: we look for the block of MOut that include index start[2] and end[2].
       //
       unsigned int blockStart0 = 0;
-      const Index * tab = MOut->getTabRowPtr();
+      SPC::Index tab = MOut->getTabRowPtr();
       while (start[2] >= (*tab)[blockStart0] && blockStart0 < tab->size())
         blockStart0 ++;
       // Relative position in the block blockStart0 of the first element to be set.
@@ -959,7 +958,7 @@ void setBlock(SPC::SiconosMatrix  MIn, SP::SiconosMatrix MOut, const Index& dim,
       // Same process as for numOut == 0
 
       unsigned int blockStart0 = 0;
-      const Index * tab = MIn->getTabRowPtr();
+      SPC::Index tab = MIn->getTabRowPtr();
       while (start[0] >= (*tab)[blockStart0] && blockStart0 < tab->size())
         blockStart0 ++;
       // Relative position in the block blockStart0 of the first element to be set.
@@ -2431,7 +2430,7 @@ void SimpleMatrix::PLUFactorizationInPlace()
     return;
   }
   if (!ipiv)
-    ipiv = new std::vector<int>(dimRow);
+    ipiv.reset(new VInt(dimRow));
   else
     ipiv->resize(dimRow);
   int info = lapack::getrf(*mat.Dense, *ipiv);
@@ -2470,7 +2469,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
   {
     // solve system:
     if (!ipiv)
-      ipiv = new std::vector<int>(dimRow);
+      ipiv.reset(new VInt(dimRow));
     else
       ipiv->resize(dimRow);
     info = lapack::gesv(*mat.Dense, *ipiv, *(B.getDensePtr()));
@@ -2495,7 +2494,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
   {
     // solve system:
     if (!ipiv)
-      ipiv = new std::vector<int>(dimRow);
+      ipiv.reset(new VInt(dimRow));
     else
       ipiv->resize(dimRow);
     info = lapack::gesv(*mat.Dense, *ipiv, tmpB);

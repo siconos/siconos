@@ -44,7 +44,7 @@ class SensorPosition : public Sensor
 private:
 
   /** A matrix for output */
-  SiconosMatrix * dataPlot;
+  SP::SiconosMatrix dataPlot;
 
   /** counter */
   unsigned int k;
@@ -58,7 +58,7 @@ public:
    * \param an int, the type of the Sensor, which corresponds to the class type
    * \param a TimeDiscretisation*, (linked to a model).
    */
-  SensorPosition(int, TimeDiscretisation*);
+  SensorPosition(int, SP::TimeDiscretisation);
 
   /** Destructor
    */

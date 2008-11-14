@@ -151,12 +151,12 @@ public:
   /** reserved to BlockMatrix - get the index tab for rows
    * \return a pointer to a standard vector of int
    */
-  virtual const Index * getTabRowPtr() const ;
+  virtual const SP::Index getTabRowPtr() const ;
 
   /** reserved to BlockMatrix - get the index tab of columns
    * \return a pointer to a standard vector of int
    */
-  virtual const Index * getTabColPtr() const ;
+  virtual const SP::Index getTabColPtr() const ;
 
   /** get an iterator pointing at the beginning of the block matrix
   *  \return a BlockIterator1

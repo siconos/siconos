@@ -120,6 +120,11 @@ public:
    */
   void initRhs(double) ;
 
+  /** Call all plugged-function to initialize plugged-object values
+      \param time
+   */
+  virtual void updatePlugins(double);
+
   // --- getter and setter ---
 
   // --- A ---

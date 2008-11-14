@@ -36,7 +36,7 @@ class DynamicalSystem;
 class Sensor;
 
 /** A set of Sensors */
-typedef std::set<Sensor*> Sensors;
+typedef std::set<SP::Sensor> Sensors;
 
 /** An iterator through a set of Sensors */
 typedef Sensors::iterator SensorsIterator;

@@ -170,14 +170,6 @@ public:
 
   // rMemory
 
-  /** get the value of rMemory
-   *  \return a SiconosMemory
-   */
-  inline const SiconosMemory getRMemory() const
-  {
-    return *rMemory;
-  }
-
   /** get all the values of the state vector r stored in memory
    *  \return a memory
    */
@@ -185,16 +177,6 @@ public:
   {
     return rMemory;
   }
-
-  /** set the value of rMemory
-   *  \param a ref on a SiconosMemory
-   */
-  void setRMemory(const SiconosMemory&);
-
-  /** set rMemory to pointer newPtr
-   *  \param a ref on a SiconosMemory
-   */
-  void setRMemoryPtr(SP::SiconosMemory);
 
   // --- M ---
   /** get the value of M
@@ -326,6 +308,11 @@ public:
    *  \param time of initialization
    */
   void initRhs(double) ;
+
+  /** Call all plugged-function to initialize plugged-object values
+      \param time
+   */
+  virtual void updatePlugins(double);
 
   /** dynamical system initialization function: mainly set memory and compute value for initial state values.
    *  \param string: simulation type

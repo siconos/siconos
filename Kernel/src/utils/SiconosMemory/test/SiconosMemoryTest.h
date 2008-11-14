@@ -19,16 +19,12 @@
 #ifndef __SiconosMemoryTest__
 #define __SiconosMemoryTest__
 
-#include <cppunit/extensions/HelperMacros.h>
-#include "SiconosVector.h"
+/* /\* #include "SiconosVector.h" *\/ */
 #include "SiconosMemory.h"
-
-#define SIZE 10
-#define M_SIZE 3
+#include <cppunit/extensions/HelperMacros.h>
 
 class SiconosMemoryTest : public CppUnit::TestFixture
 {
-
 
 private:
 
@@ -38,40 +34,22 @@ private:
   CPPUNIT_TEST(testBuildMemory1);
   CPPUNIT_TEST(testBuildMemory2);
   CPPUNIT_TEST(testBuildMemory3);
-  CPPUNIT_TEST(testBuildMemory4);
   CPPUNIT_TEST(testSetVectorMemory);
   CPPUNIT_TEST(testGetSiconosVector);
   CPPUNIT_TEST(testSwap);
-  CPPUNIT_TEST(testOperatorEqual);
-
-  CPPUNIT_TEST_EXCEPTION(testMemoryException, SiconosMemoryException);
-  CPPUNIT_TEST_EXCEPTION(testMemoryException1, SiconosMemoryException);
-
-  //CPPUNIT_TEST_FAIL(testFail);
-
+  CPPUNIT_TEST(End);
   CPPUNIT_TEST_SUITE_END();
 
   void testBuildMemory1();
   void testBuildMemory2();
   void testBuildMemory3();
-  void testBuildMemory4();
   void testSetVectorMemory();
   void testGetSiconosVector();
   void testSwap();
-  void testOperatorEqual();
+  void End();
 
-  void testMemoryException();
-  void testMemoryException1();
-  //void testFail();
-
-  std::deque<SP::SiconosVector> V1;
-  std::deque<SP::SiconosVector> V2;
-  std::deque<SP::SiconosVector> V3;
-  SP::SiconosVector q1;
-  SP::SiconosVector q2;
-  SP::SiconosVector q3;
-  SP::SiconosVector c1;
-  SP::SiconosVector c2;
+  SP::MemoryContainer V1, V2, V3;
+  SP::SiconosVector q1, q2, q3, c1, c2;
   unsigned int sizeMem;
 public:
   void setUp();

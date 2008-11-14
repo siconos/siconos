@@ -28,20 +28,20 @@ CPPUNIT_TEST_SUITE_REGISTRATION(LagrangianDSTest);
 
 void LagrangianDSTest::setUp()
 {
-  q0 = new SimpleVector(3);
+  q0.reset(new SimpleVector(3));
   (*q0)(0) = 1;
   (*q0)(1) = 2;
   (*q0)(2) = 3;
-  velocity0 = new SimpleVector(3);
+  velocity0.reset(new SimpleVector(3));
   (*velocity0)(0) = 4;
   (*velocity0)(1) = 5;
   (*velocity0)(2) = 6;
 
-  u0 = new SimpleVector(2);
+  u0.reset(new SimpleVector(2));
   (*u0)(0) = 4;
   (*u0)(1) = 5;
 
-  mass = new SimpleMatrix(3, 3);
+  mass.reset(new SimpleMatrix(3, 3));
   (*mass)(0, 0) = 1;
   (*mass)(1, 1) = 2;
   (*mass)(2, 2) = 3;
@@ -68,29 +68,21 @@ void LagrangianDSTest::setUp()
   }
 
   // look for NSDS node
-  xmlNode* nodetmp = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
+  xmlNodePtr nodetmp = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "DS_Definition");
   // get first ds
   node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "LagrangianDS");
-  tmpxml1 = new LagrangianDSXML(node1, false);
+  tmpxml1.reset(new LagrangianDSXML(node1, false));
   // get second ds
   node2 = SiconosDOMTreeTools::findFollowNode(node1, "LagrangianDS");
-  tmpxml2 = new LagrangianDSXML(node2, false);
+  tmpxml2.reset(new LagrangianDSXML(node2, false));
   // get third ds
   node3 = SiconosDOMTreeTools::findFollowNode(node2, "LagrangianDS");
-  tmpxml3 = new LagrangianDSXML(node3, false);
+  tmpxml3.reset(new LagrangianDSXML(node3, false));
 }
 
 void LagrangianDSTest::tearDown()
-{
-  delete tmpxml1;
-  delete tmpxml2;
-  delete tmpxml3;
-  delete q0;
-  delete velocity0;
-  delete u0;
-  delete mass;
-}
+{}
 
 // xml constructor (1), without plugin
 void LagrangianDSTest::testBuildLagrangianDS1()
@@ -99,7 +91,7 @@ void LagrangianDSTest::testBuildLagrangianDS1()
   cout << "=== LagrangianDS tests start ...=== " << endl;
   cout << "===================================" << endl;
   cout << "--> Test: constructor xml." << endl;
-  LagrangianDS * ds = new LagrangianDS(tmpxml1);
+  SP::LagrangianDS ds(new LagrangianDS(tmpxml1));
   SimpleMatrix M(3, 3);
   M.eye();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1A : ", ds->getType() == LNLDS, true);
@@ -111,7 +103,6 @@ void LagrangianDSTest::testBuildLagrangianDS1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1E : ", ds->getQ() == *q0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1F : ", ds->getVelocity() == *velocity0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1F : ", ds->getMass() == M, true);
-  delete ds;
   cout << "--> Constructor xml test ended with success." << endl;
 }
 
@@ -120,7 +111,7 @@ void LagrangianDSTest::testBuildLagrangianDS1()
 void LagrangianDSTest::testBuildLagrangianDS2()
 {
   cout << "--> Test: constructor xml 2." << endl;
-  LagrangianDS * ds = new LagrangianDS(tmpxml2);
+  SP::LagrangianDS ds(new LagrangianDS(tmpxml2));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2A : ", ds->getType() == LNLDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2B : ", ds->getNumber() == 8, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2D : ", ds->getNdof() == 3, true);
@@ -128,11 +119,11 @@ void LagrangianDSTest::testBuildLagrangianDS2()
   double time = 1.5;
   ds->initialize("TimeStepping", time);
 
-  SimpleVector * x01 = new SimpleVector(3);
+  SimpleVector * x01(new SimpleVector(3));
   (*x01)(0) = 0;
   (*x01)(1) = 1;
   (*x01)(2) = 2;
-  SimpleVector * x02 = new SimpleVector(3);
+  SimpleVector * x02(new SimpleVector(3));
   (*x02)(0) = 0;
   (*x02)(1) = 1 * (*q0)(1);
   (*x02)(2) = 2 * (*q0)(2);
@@ -159,10 +150,6 @@ void LagrangianDSTest::testBuildLagrangianDS2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2N : ", ds->getJacobianFInt(1) == M, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2O : ", ds->getJacobianNNL(0) == M, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2P : ", ds->getJacobianNNL(1) == M, true);
-
-  delete x01;
-  delete x02;
-  delete ds;
   cout << "--> Constructor xml 2 test ended with success." << endl;
 }
 
@@ -170,7 +157,7 @@ void LagrangianDSTest::testBuildLagrangianDS2()
 void LagrangianDSTest::testBuildLagrangianDS3()
 {
   cout << "--> Test: constructor xml 3." << endl;
-  LagrangianDS * ds = new LagrangianDS(tmpxml3);
+  SP::LagrangianDS ds(new LagrangianDS(tmpxml3));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2A : ", ds->getType() == LNLDS, true);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2B : ", ds->getNumber() == 4, true);
@@ -203,7 +190,6 @@ void LagrangianDSTest::testBuildLagrangianDS3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS3T : ", isPl["jacobianQNNL"], false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS3T : ", isPl["jacobianVelocityNNL"], false);
 
-  delete ds;
   cout << "--> Constructor xml 3 test ended with success." << endl;
 }
 
@@ -212,7 +198,7 @@ void LagrangianDSTest::testBuildLagrangianDS4()
 {
   cout << "--> Test: constructor 4." << endl;
 
-  LagrangianDS * ds = new LagrangianDS(13, *q0, *velocity0, (*mass));
+  SP::LagrangianDS ds(new LagrangianDS(13, *q0, *velocity0, (*mass)));
   double time = 1.5;
   ds->initialize("TimeStepping", time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4A : ", ds->getType() == LNLDS, true);
@@ -229,9 +215,6 @@ void LagrangianDSTest::testBuildLagrangianDS4()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4T : ", isPl["jacobianVelocityFInt"], false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4T : ", isPl["jacobianQNNL"], false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4T : ", isPl["jacobianVelocityNNL"], false);
-
-
-  delete ds;
   cout << "--> Constructor 4 test ended with success." << endl;
 }
 
@@ -240,13 +223,13 @@ void LagrangianDSTest::testBuildLagrangianDS5()
 {
   cout << "--> Test: constructor 5." << endl;
   string plugin = "TestPlugin:computeMass";
-  DynamicalSystem * ds = new LagrangianDS(13, *q0, *velocity0, plugin);
+  SP::DynamicalSystem ds(new LagrangianDS(13, *q0, *velocity0, plugin));
   double time = 1.5;
   ds->initialize("TimeStepping", time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5A : ", ds->getType() == LNLDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5B : ", ds->getNumber() == 13, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5D : ", static_cast<LagrangianDS*>(ds)->getNdof() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5L : ", static_cast<LagrangianDS*>(ds)->getMass() == (*mass), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5D : ", boost::static_pointer_cast<LagrangianDS>(ds)->getNdof() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5L : ", boost::static_pointer_cast<LagrangianDS>(ds)->getMass() == (*mass), true);
 
   map<string, bool> isPl = ds->getIsPlugin();
 
@@ -258,17 +241,14 @@ void LagrangianDSTest::testBuildLagrangianDS5()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5T : ", isPl["jacobianVelocityFInt"], false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5T : ", isPl["jacobianQNNL"], false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5T : ", isPl["jacobianVelocityNNL"], false);
-
-
-  delete ds;
   cout << "--> Constructor 5 test ended with success." << endl;
 }
 
 void LagrangianDSTest::testcomputeDS()
 {
   cout << "-->Test: computeDS." << endl;
-  DynamicalSystem * ds = new LagrangianDS(tmpxml2);
-  LagrangianDS * copy = static_cast<LagrangianDS*>(ds);
+  DynamicalSystem * ds(new LagrangianDS(tmpxml2));
+  SP::LagrangianDS copy =  boost::static_pointer_cast<LagrangianDS>(ds);
   double time = 1.5;
   ds->initialize("EventDriven", time);
   ds->computeRhs(time);
@@ -279,16 +259,14 @@ void LagrangianDSTest::testcomputeDS()
   M(0, 0) = 1;
   M(1, 1) = 2;
   M(2, 2) = 3;
-  SiconosMatrix * jx = ds->getJacobianXRhsPtr();
-  SiconosVector * vf = ds->getRhsPtr();
+  SP::SiconosMatrix jx = ds->getJacobianXRhsPtr();
+  SP::SiconosVector vf = ds->getRhsPtr();
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSI : ", *(vf->getVectorPtr(0)) == *velocity0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSJ : ", prod(M, *(vf->getVectorPtr(1))) == (copy->getFExt() - copy->getFInt() - copy->getNNL()) , true);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(M, *(jx->getBlockPtr(1, 0))) == (copy->getJacobianFL(0)) , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(M, *(jx->getBlockPtr(1, 1))) == (copy->getJacobianFL(1)) , true);
-
-  delete ds;
   cout << "--> computeDS test ended with success." << endl;
 
 

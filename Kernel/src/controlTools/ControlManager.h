@@ -32,7 +32,7 @@ class Model;
 class TimeDiscretisation;
 
 /** A set of Actuators */
-typedef std::set<Actuator*> Actuators;
+typedef std::set<SP::Actuator> Actuators;
 
 /** An iterator through a set of Actuators */
 typedef Actuators::iterator ActuatorsIterator;
@@ -76,7 +76,7 @@ protected:
   Actuators allActuators;
 
   /** The model linked to this ControlManager */
-  Model * model;
+  SP::Model model;
 
   /** default constructor
    */
@@ -127,7 +127,7 @@ public:
    * \param the TimeDiscretisation of the Sensor
    * \return a pointer to the added Sensor
    */
-  Sensor* addSensor(int, TimeDiscretisation*);
+  SP::Sensor addSensor(int, SP::TimeDiscretisation);
 
   /** To build, add, initialize a new Sensor in the Manager and record it in the simulation
    * This function is only useful to add a new Sensor after the initialization of the manager
@@ -136,14 +136,14 @@ public:
    * \param the TimeDiscretisation of the Sensor
    * \return a pointer to the added Sensor
    */
-  Sensor* addAndRecordSensor(int, TimeDiscretisation*);
+  SP::Sensor addAndRecordSensor(int, SP::TimeDiscretisation);
 
   /** To build and add a new Actuator in the Manager
    * \param the type (int) of the Actuator
    * \param the TimeDiscretisation of the Actuator
    * \return a pointer to the added Actuator
    */
-  Actuator* addActuator(int, TimeDiscretisation*);
+  SP::Actuator addActuator(int, SP::TimeDiscretisation);
 
   /** To build, add, initialize a new Actuator in the Manager and record it in the simulation
    * This function is only useful to add a new Actuator after the initialization of the manager
@@ -152,7 +152,7 @@ public:
    * \param the TimeDiscretisation of the Actuator
    * \return a pointer to the added Actuator
    */
-  Actuator* addAndRecordActuator(int, TimeDiscretisation*);
+  SP::Actuator addAndRecordActuator(int, SP::TimeDiscretisation);
 
 
 

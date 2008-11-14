@@ -121,6 +121,12 @@ void FirstOrderLinearDS::initRhs(double time)
   computeJacobianXRhs(time);
 }
 
+void FirstOrderLinearDS::updatePlugins(double time)
+{
+  computeA(time);
+  computeB(time);
+}
+
 void FirstOrderLinearDS::setA(const Plugged_Matrix_FTime& newValue)
 {
   assert(newValue.size(0) == n && "FirstOrderLinearDS - setA: inconsistent dimensions with problem size for input matrix A.");

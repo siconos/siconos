@@ -34,7 +34,6 @@ SensorPosition::~SensorPosition()
 {
   ioMatrix io("resultSensor.dat", "ascii");
   io.write(*dataPlot, "noDim");
-  delete dataPlot;
 }
 
 void SensorPosition::initialize()
@@ -45,7 +44,7 @@ void SensorPosition::initialize()
   // --- Get the values to be plotted ---
   // -> saved in a matrix dataPlot
   unsigned int outputSize = 3;
-  dataPlot = new SimpleMatrix(nSteps, outputSize);
+  dataPlot.reset(new SimpleMatrix(nSteps, outputSize));
   k = 0;
 }
 

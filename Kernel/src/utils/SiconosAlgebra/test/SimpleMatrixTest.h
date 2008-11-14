@@ -151,18 +151,18 @@ private:
   void End();
 
   unsigned int size, size2;
-  SiconosMatrix *SicM, *m1, *m2, *m3, *m4, *m5, *m6, *m7, *m8, *C, *Cb, *Cb2;
-  const SiconosMatrix *A, *B, *Ab, *Bb;
-  SimpleMatrix *SimM;
+  SP::SiconosMatrix SicM, m1, m2, m3, m4, m5, m6, m7, m8, C, Cb, Cb2;
+  SPC::SiconosMatrix A, B, Ab, Bb;
+  SP::SimpleMatrix SimM;
   string fic1, fic2;
-  SimpleVector* vect1, *vect2, *vect3;
-  DenseMat * D;
-  TriangMat *T, *T2;
-  SymMat *S, *S2;
-  BandedMat *Band, *Band2;
-  SparseMat *SP;
-  ZeroMat * Z, *Z2;
-  IdentityMat* I, *I2;
+  SP::SimpleVector vect1, vect2, vect3;
+  SP::DenseMat  D;
+  SP::TriangMat T, T2;
+  SP::SymMat S, S2;
+  SP::BandedMat Band, Band2;
+  SP::SparseMat SP;
+  SP::ZeroMat  Z, Z2;
+  SP::IdentityMat I, I2;
   double tol;
 
 public:

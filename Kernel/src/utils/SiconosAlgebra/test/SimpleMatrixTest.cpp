@@ -19,8 +19,8 @@
 #include "SimpleMatrixTest.h"
 #include "SimpleVector.h"
 
-#define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
-            if ((alpha) == (omega)) CPPUNIT_FAIL(message);
+#define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
+  if ((alpha) == (omega)) CPPUNIT_FAIL(message);
 
 CPPUNIT_TEST_SUITE_REGISTRATION(SimpleMatrixTest);
 
@@ -32,8 +32,8 @@ void SimpleMatrixTest::setUp()
 
   fic1 = "mat1.dat"; // 2 X 2
   fic2 = "mat2.dat"; // 2 X 3
-  SicM = new SimpleMatrix(fic1, 1);
-  SimM = new SimpleMatrix(fic2, 1);
+  SicM.reset(new SimpleMatrix(fic1, 1));
+  SimM.reset(new SimpleMatrix(fic2, 1));
 
   std::vector<double> v3(2, 0);
   std::vector<double> v4(2, 0);
@@ -44,72 +44,72 @@ void SimpleMatrixTest::setUp()
   v5[1] = 9;
   v5[2] = 10;
 
-  vect1 = new SimpleVector(v3);
-  vect2 = new SimpleVector(v4); // vect2 != vect1, but vect2 == SimM second column
-  vect3 = new SimpleVector(v5); // vect3 != vect1, but vect3 == SimM second row
+  vect1.reset(new SimpleVector(v3));
+  vect2.reset(new SimpleVector(v4)); // vect2 != vect1, but vect2 == SimM second column
+  vect3.reset(new SimpleVector(v5)); // vect3 != vect1, but vect3 == SimM second row
 
   // Dense
-  D = new DenseMat(2, 2);
+  D.reset(new DenseMat(2, 2));
   for (unsigned i = 0; i < D->size1(); ++ i)
     for (unsigned j = 0; j < D->size2(); ++ j)
       (*D)(i, j) = 3 * i + j;
   // Triang
-  T = new TriangMat(3, 3);
+  T.reset(new TriangMat(3, 3));
   for (unsigned i = 0; i < T->size1(); ++ i)
     for (unsigned j = i; j < T->size2(); ++ j)
       (*T)(i, j) = 3 * i + j;
-  T2 = new TriangMat(4, 4);
+  T2.reset(new TriangMat(4, 4));
   for (unsigned i = 0; i < T2->size1(); ++ i)
     for (unsigned j = i; j < T2->size2(); ++ j)
       (*T2)(i, j) = 3 * i + j;
   // Sym
-  S = new SymMat(3, 3);
+  S.reset(new SymMat(3, 3));
   for (unsigned i = 0; i < S->size1(); ++ i)
     for (unsigned j = i; j < S->size2(); ++ j)
       (*S)(i, j) = 3 * i + j;
-  S2 = new SymMat(4, 4);
+  S2.reset(new SymMat(4, 4));
   for (unsigned i = 0; i < S2->size1(); ++ i)
     for (unsigned j = i; j < S2->size2(); ++ j)
       (*S2)(i, j) = 3 * i + j;
   // Sparse
-  SP = new SparseMat(4, 4);
+  SP.reset(new SparseMat(4, 4));
   for (unsigned i = 0; i < SP->size1(); ++ i)
     for (unsigned j = 0; j < SP->size2(); ++ j)
       (*SP)(i, j) = 3 * i + j;
 
   // Banded
-  Band = new BandedMat(4, 4, 1, 1);
+  Band.reset(new BandedMat(4, 4, 1, 1));
   for (signed i = 0; i < signed(Band->size1()); ++ i)
     for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(Band->size2())); ++ j)
       (*Band)(i, j) = 3 * i + j;
-  Band2 = new BandedMat(4, 3, 1, 1);
+  Band2.reset(new BandedMat(4, 3, 1, 1));
   for (signed i = 0; i < signed(Band2->size1()); ++ i)
     for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(Band2->size2())); ++ j)
       (*Band2)(i, j) = 3 * i + j;
 
   // Zero
-  Z = new ZeroMat(3, 3);
-  Z2 = new ZeroMat(4, 4);
+  Z.reset(new ZeroMat(3, 3));
+  Z2.reset(new ZeroMat(4, 4));
   // Identity
-  I = new IdentityMat(3, 3);
-  I2 = new IdentityMat(4, 4);
+  I.reset(new IdentityMat(3, 3));
+  I2.reset(new IdentityMat(4, 4));
 
   // BlockMat
   size = 10;
   size2 = 10;
 
-  C = new SimpleMatrix(size, size);
-  A = new SimpleMatrix("A.dat");
-  B = new SimpleMatrix("B.dat");
+  C.reset(new SimpleMatrix(size, size));
+  A.reset(new SimpleMatrix("A.dat"));
+  B.reset(new SimpleMatrix("B.dat"));
 
-  m1 = new SimpleMatrix(size - 2, size - 2, 1);
-  m2 = new SimpleMatrix(size - 2, 2, 2);
-  m3 = new SimpleMatrix(2, size - 2, 3);
-  m4 = new SimpleMatrix(2, 2, 4);
-  m5 = new SimpleMatrix(size2 - 2, size2 - 2, 1);
-  m6 = new SimpleMatrix(size2 - 2, 2, 2);
-  m7 = new SimpleMatrix(2, size2 - 2, 3);
-  m8 = new SimpleMatrix(2, 2, 4);
+  m1.reset(new SimpleMatrix(size - 2, size - 2, 1));
+  m2.reset(new SimpleMatrix(size - 2, 2, 2));
+  m3.reset(new SimpleMatrix(2, size - 2, 3));
+  m4.reset(new SimpleMatrix(2, 2, 4));
+  m5.reset(new SimpleMatrix(size2 - 2, size2 - 2, 1));
+  m6.reset(new SimpleMatrix(size2 - 2, 2, 2));
+  m7.reset(new SimpleMatrix(2, size2 - 2, 3));
+  m8.reset(new SimpleMatrix(2, 2, 4));
   Ab.reset(new BlockMatrix(m1, m2, m3, m4));
   Bb.reset(new BlockMatrix(3 * *Ab));
   Cb.reset(new BlockMatrix(m5, m6, m7, m8));
@@ -118,39 +118,7 @@ void SimpleMatrixTest::setUp()
 }
 
 void SimpleMatrixTest::tearDown()
-{
-
-  delete Ab;
-  delete Bb;
-  delete Cb;
-  delete Cb2;
-  delete m1;
-  delete m2;
-  delete m3;
-  delete m4;
-  delete A;
-  delete B;
-  delete C;
-  delete I;
-  delete Z;
-  delete I2;
-  delete Z2;
-  delete vect1;
-  delete vect2;
-  delete vect3;
-  delete SicM;
-  delete SimM;
-  delete T;
-  delete T2;
-  delete SP;
-  delete Band;
-  delete Band2;
-
-  delete D;
-  delete S;
-  delete S2;
-
-}
+{}
 
 //______________________________________________________________________________
 
@@ -160,89 +128,80 @@ void SimpleMatrixTest::testConstructor0() // constructor with TYP and dim
   cout << "=== Simple Matrix tests start ...=== " << endl;
   cout << "====================================" << endl;
   cout << "--> Test: constructor 0." << endl;
-  SimpleMatrix * test = new SimpleMatrix(2, 3);
+  SP::SimpleMatrix test(new SimpleMatrix(2, 3));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->getNum() == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->size(0) == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->size(1) == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->normInf() < tol, true);
-  delete test;
   cout << "--> Constructor 0 test ended with success." << endl;
 }
 
 void SimpleMatrixTest::testConstructor1() // Copy constructor, from a SimpleMatrix
 {
   cout << "--> Test: constructor 1." << endl;
-  SimpleMatrix * test = new SimpleMatrix(*SimM);
+  SP::SimpleMatrix test(new SimpleMatrix(*SimM));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *test == *SimM, true);
-  delete test;
   cout << "--> Constructor 1 (copy) test ended with success." << endl;
 }
 
 void SimpleMatrixTest::testConstructor2() // Copy constructor, from a SiconosMatrix
 {
   cout << "--> Test: constructor 2." << endl;
-  SimpleMatrix *  test = new SimpleMatrix(*SicM);
+  SP::SimpleMatrix  test(new SimpleMatrix(*SicM));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *test == *SicM, true);
-  delete test;
   cout << "--> Constructor 2 (copy) test ended with success." << endl;
 }
 
 void SimpleMatrixTest::testConstructor3() // Copy constructor, from a BlockMatrix
 {
   cout << "--> Test: constructor 3." << endl;
-  SimpleMatrix *  test = new SimpleMatrix(*Ab);
+  SP::SimpleMatrix test(new SimpleMatrix(*Ab));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", *test == *Ab, true);
-  delete test;
   cout << "--> Constructor 3 (copy) test ended with success." << endl;
 }
 
 // void SimpleMatrixTest::testConstructor3()
 // {
 //   cout << "--> Test: constructor 3." << endl;
-//   SimpleMatrix * test = new SimpleMatrix(SPARSE);
+//   SP::SimpleMatrix test(new SimpleMatrix(SPARSE);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ",test->getNum() == 4, true);
-//   delete test;
 //   cout << "--> Constructor 3 test ended with success." << endl;
 // }
 
 void SimpleMatrixTest::testConstructor4()
 {
   cout << "--> Test: constructor 4." << endl;
-  SiconosMatrix * test = new SimpleMatrix(*D);
+  SP::SiconosMatrix test(new SimpleMatrix(*D));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->getNum() == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", norm_inf(test->getDense() - *D) == 0, true);
-  delete test;
   cout << "--> Constructor 4 test ended with success." << endl;
 }
 
 void SimpleMatrixTest::testConstructor5()
 {
   cout << "--> Test: constructor 5." << endl;
-  SiconosMatrix * test = new SimpleMatrix(*T);
+  SP::SiconosMatrix test(new SimpleMatrix(*T));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", test->getNum() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", norm_inf(test->getTriang() - *T) == 0, true);
-  delete test;
   cout << "--> Constructor 5 test ended with success." << endl;
 }
 
 void SimpleMatrixTest::testConstructor6()
 {
   cout << "--> Test: constructor 6." << endl;
-  SiconosMatrix * test = new SimpleMatrix(*S);
+  SP::SiconosMatrix test(new SimpleMatrix(*S));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", test->getNum() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", norm_inf(test->getSym() - *S) == 0, true);
-  delete test;
   cout << "--> Constructor 6 test ended with success." << endl;
 }
 
 void SimpleMatrixTest::testConstructor7()
 {
   cout << "--> Test: constructor 7." << endl;
-  SiconosMatrix * test = new SimpleMatrix(*SP);
+  SP::SiconosMatrix test(new SimpleMatrix(*SP));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor7 : ", test->getNum() == 4, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor7 : ", norm_inf(test->getSparse() - *SP) == 0, true);
-  delete test;
   cout << "--> Constructor 7 test ended with success." << endl;
 }
 
@@ -250,16 +209,15 @@ void SimpleMatrixTest::testConstructor8()
 {
   cout << "--> Test: constructor 8." << endl;
   cout << "--> Constructor 8 test ended with success." << endl;
-  SiconosMatrix * test = new SimpleMatrix(*Band);
+  SP::SiconosMatrix test(new SimpleMatrix(*Band));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor8 : ", test->getNum() == 5, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor8 : ", norm_inf(test->getBanded() - *Band) == 0, true);
-  delete test;
 }
 
 void SimpleMatrixTest::testConstructor9() // constructor with TYP and dim and input value
 {
   cout << "--> Test: constructor 9." << endl;
-  SimpleMatrix * test = new SimpleMatrix(2, 3, 4.5);
+  SP::SimpleMatrix test(new SimpleMatrix(2, 3, 4.5));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor9 : ", test->getNum() == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor9 : ", test->size(0) == 2, true);
@@ -269,16 +227,14 @@ void SimpleMatrixTest::testConstructor9() // constructor with TYP and dim and in
     {
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor9 : ", (*test)(i, j) == 4.5, true);
     }
-  delete test;
   cout << "--> Constructor 9 test ended with success." << endl;
 }
 
 void SimpleMatrixTest::testConstructor10()
 {
   cout << "--> Test: constructor 10." << endl;
-  SiconosMatrix * test = new SimpleMatrix(fic1);
+  SP::SiconosMatrix test(new SimpleMatrix(fic1));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor10 : ", *test == *SicM, true);
-  delete test;
   cout << "--> Constructor 10 test ended with success." << endl;
 }
 
@@ -286,20 +242,18 @@ void SimpleMatrixTest::testConstructor11()
 {
   cout << "--> Test: constructor 11." << endl;
   cout << "--> Constructor 11 test ended with success." << endl;
-  SiconosMatrix * test = new SimpleMatrix(*Z);
+  SP::SiconosMatrix test(new SimpleMatrix(*Z));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor11 : ", test->getNum() == 6, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor11 : ", test->normInf() == 0, true);
-  delete test;
 }
 
 void SimpleMatrixTest::testConstructor12()
 {
   cout << "--> Test: constructor 12." << endl;
   cout << "--> Constructor 12 test ended with success." << endl;
-  SiconosMatrix * test = new SimpleMatrix(*I);
+  SP::SiconosMatrix test(new SimpleMatrix(*I));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor12 : ", test->getNum() == 7, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor12 : ", test->normInf() == 1, true);
-  delete test;
 }
 
 // Add tests with getDense ...
@@ -307,21 +261,20 @@ void SimpleMatrixTest::testConstructor12()
 void SimpleMatrixTest::testZero()
 {
   cout << "--> Test: zero." << endl;
-  SiconosMatrix * tmp = new SimpleMatrix(*SimM);
+  SP::SiconosMatrix tmp(new SimpleMatrix(*SimM));
   tmp->zero();
   unsigned int n1 = tmp->size(0);
   unsigned int n2 = tmp->size(1);
   for (unsigned int i = 0; i < n1; ++i)
     for (unsigned int j = 0; j < n2; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testZero : ", (*tmp)(i, j) == 0, true);
-  delete tmp;
   cout << "--> zero test ended with success." << endl;
 }
 
 void SimpleMatrixTest::testEye()
 {
   cout << "--> Test: eye." << endl;
-  SiconosMatrix * tmp = new SimpleMatrix(*SimM);
+  SP::SiconosMatrix tmp(new SimpleMatrix(*SimM));
   tmp->eye();
   unsigned int n1 = tmp->size(0);
   unsigned int n2 = tmp->size(1);
@@ -331,14 +284,13 @@ void SimpleMatrixTest::testEye()
         CPPUNIT_ASSERT_EQUAL_MESSAGE("testEye : ", (*tmp)(i, j) == 0, true);
       else
         CPPUNIT_ASSERT_EQUAL_MESSAGE("testEye : ", (*tmp)(i, j) == 1, true);
-  delete tmp;
   cout << "--> eye test ended with success." << endl;
 }
 
 void SimpleMatrixTest::testResize()
 {
   cout << "--> Test: resize." << endl;
-  SiconosMatrix * tmp = new SimpleMatrix(*SicM);
+  SP::SiconosMatrix tmp(new SimpleMatrix(*SicM));
   tmp->resize(3, 4);
   unsigned int n1 = SicM->size(0);
   unsigned int n2 = SicM->size(1);
@@ -370,7 +322,6 @@ void SimpleMatrixTest::testResize()
   //   for(unsigned int i = 0; i<1; ++i)
   //     for(unsigned int j=0;j<2;++j)
   //       CPPUNIT_ASSERT_EQUAL_MESSAGE("testResize : ", (*tmp)(i,j) == 0 , true);
-  delete tmp;
   cout << "--> resize test ended with success." << endl;
 }
 
@@ -387,12 +338,12 @@ void SimpleMatrixTest::testSetBlock()
   cout << "--> Test: testSetBlock." << endl;
 
   // Copy of a sub-block of a Simple into a Simple
-  SiconosMatrix * MIn = new SimpleMatrix(10, 10);
+  SP::SiconosMatrix MIn(new SimpleMatrix(10, 10));
   for (unsigned int i = 0; i < 10; ++i)
     for (unsigned int j = 0 ; j < 10; ++j)
       (*MIn)(i, j) = i + j;
 
-  SiconosMatrix * MOut = new SimpleMatrix(5, 5);
+  SP::SiconosMatrix MOut(new SimpleMatrix(5, 5));
 
   Index subDim(2);
   Index subPos(4);
@@ -409,8 +360,6 @@ void SimpleMatrixTest::testSetBlock()
     for (unsigned int j = subPos[3] ; j < subPos[3] + subDim[1]; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetBlock: ", fabs((*MOut)(i, j) - (*MIn)(i, j)) < tol , true);
 
-  delete MOut;
-
   // Copy of a sub-block of a Simple into a Block
   Cb->zero();
   setBlock(MIn, Cb, subDim, subPos);
@@ -418,18 +367,16 @@ void SimpleMatrixTest::testSetBlock()
   for (unsigned int i = subPos[2]; i < subPos[2] + subDim[0]; ++i)
     for (unsigned int j = subPos[3] ; j < subPos[3] + subDim[1]; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetBlock: ", fabs((*Cb)(i, j) - (*MIn)(i, j)) < tol , true);
-  delete MIn;
 
   // Copy of a sub-block of a Block into a Simple
 
-  MOut = new SimpleMatrix(5, 5);
+  MOut.reset(new SimpleMatrix(5, 5));
   setBlock(Ab, MOut, subDim, subPos);
 
   for (unsigned int i = subPos[2]; i < subPos[2] + subDim[0]; ++i)
     for (unsigned int j = subPos[3] ; j < subPos[3] + subDim[1]; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetBlock: ", fabs((*MOut)(i, j) - (*Ab)(i, j)) < tol , true);
 
-  delete MOut;
   cout << "-->  setBlock test ended with success." << endl;
 }
 
@@ -437,9 +384,9 @@ void SimpleMatrixTest::testSetBlock2()
 {
   cout << "--> Test: testSetBlock2." << endl;
   // Copy of a Simple into a sub-block of Simple
-  SimpleMatrix * MOut = new SimpleMatrix(10, 10);
+  SP::SimpleMatrix MOut(new SimpleMatrix(10, 10));
 
-  SiconosMatrix * MIn = new SimpleMatrix(5, 5);
+  SP::SiconosMatrix MIn(new SimpleMatrix(5, 5));
   for (unsigned int i = 0; i < 5; ++i)
     for (unsigned int j = 0 ; j < 5; ++j)
       (*MIn)(i, j) = i + j;
@@ -450,19 +397,15 @@ void SimpleMatrixTest::testSetBlock2()
     for (unsigned int j = 3 ; j < 8; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetBlock2: ", fabs((*MOut)(i, j) - (*MIn)(i - 2, j - 3)) < tol , true);
 
-  delete MIn;
-
   // Copy of a Block into a sub-block of Simple
 
-  MIn = new BlockMatrix(m4, m4, m4, m4);
+  MIn.reset(new BlockMatrix(m4, m4, m4, m4));
   MOut->setBlock(2, 3, *MIn);
 
   for (unsigned int i = 2; i < 6; ++i)
     for (unsigned int j = 3 ; j < 7; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetBlock2: ", fabs((*MOut)(i, j) - (*MIn)(i - 2, j - 3)) < tol , true);
 
-  delete MIn;
-  delete MOut;
   cout << "-->  setBlock2 test ended with success." << endl;
 }
 
@@ -471,11 +414,11 @@ void SimpleMatrixTest::testGetSetRowCol()
 {
   cout << "--> Test: get, set Row and Col." << endl;
 
-  SiconosVector * vIn = new SimpleVector(10, 1.2);
-  SiconosVector * vBIn = new BlockVector();
-  SiconosVector * v1 = new SimpleVector(3, 2);
-  SiconosVector * v2 = new SimpleVector(5, 3);
-  SiconosVector * v3 = new SimpleVector(2, 4);
+  SP::SiconosVector vIn(new SimpleVector(10, 1.2));
+  SP::SiconosVector vBIn(new BlockVector());
+  SP::SiconosVector v1(new SimpleVector(3, 2));
+  SP::SiconosVector v2(new SimpleVector(5, 3));
+  SP::SiconosVector v3(new SimpleVector(2, 4));
   vBIn->insertPtr(v1);
   vBIn->insertPtr(v2);
   vBIn->insertPtr(v3);
@@ -523,13 +466,6 @@ void SimpleMatrixTest::testGetSetRowCol()
   C->getCol(4, *vBIn);
   for (unsigned int i = 0; i < C->size(0); ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", fabs((*C)(i, 4) - (*vBIn)(i)) < tol, true);
-
-  delete vBIn;
-  delete vIn;
-  delete v1;
-  delete v2;
-  delete v3;
-
   cout << "--> get, set Row and Col tests ended with success." << endl;
 }
 
@@ -538,8 +474,8 @@ void SimpleMatrixTest::testTrans()
   cout << "--> Test: trans." << endl;
 
   // Transpose in place ...
-  SimpleMatrix * ref = new SimpleMatrix(*D);
-  SimpleMatrix * tRef = new SimpleMatrix(*ref);
+  SP::SimpleMatrix ref(new SimpleMatrix(*D));
+  SP::SimpleMatrix tRef(new SimpleMatrix(*ref));
 
   tRef->trans();
   for (unsigned int i = 0; i < ref->size(0); ++i)
@@ -561,18 +497,14 @@ void SimpleMatrixTest::testTrans()
       else
         CPPUNIT_ASSERT_EQUAL_MESSAGE("testTrans: ", (*tRef)(i, j) == (*ref)(j, i) , true);
 
-  delete tRef;
-  delete ref;
   // Sym
-  ref = new SimpleMatrix(*S);
-  tRef = new SimpleMatrix(*ref);
+  ref.reset(new SimpleMatrix(*S));
+  tRef.reset(new SimpleMatrix(*ref));
   tRef->trans(*ref);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testTrans: ", (*tRef) == (*ref) , true);
-  delete tRef;
-  delete ref;
   // Sparse
-  ref = new SimpleMatrix(*SP);
-  tRef = new SimpleMatrix(*ref);
+  ref.reset(new SimpleMatrix(*SP));
+  tRef.reset(new SimpleMatrix(*ref));
   tRef->trans(*ref);
   //   for(unsigned int i = 0; i<ref->size(0); ++i)
   //     {
@@ -582,11 +514,9 @@ void SimpleMatrixTest::testTrans()
   //  else
   //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testTrans: ", (*tRef)(i,j) == (*ref)(j,i) , true);
   //     }
-  delete tRef;
-  delete ref;
   // Banded
-  //   ref = new SimpleMatrix(*Band);
-  //   tRef = new SimpleMatrix(*ref);
+  //   ref.reset(new SimpleMatrix(*Band);
+  //   tRef.reset(new SimpleMatrix(*ref);
   //   *tRef = trans(*ref);
   //   for(unsigned int i = 0; i<ref->size(0); ++i)
   //     for(unsigned int j = 0 ; j< ref->size(1); ++j)
@@ -594,8 +524,6 @@ void SimpleMatrixTest::testTrans()
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testTrans: ", (*tRef)(i,j) == (*ref)(i,j) , true);
   //       else
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testTrans: ", (*tRef)(i,j) == (*ref)(j,i) , true);
-  //   delete tRef;
-  //   delete ref;
   cout << "-->  test trans ended with success." << endl;
 }
 
@@ -606,114 +534,85 @@ void SimpleMatrixTest::testAssignment0()
 
   // Simple = Simple
 
-  SimpleMatrix * ref = new SimpleMatrix(*D);
-  SiconosMatrix * tRef = new SimpleMatrix(*SicM);
+  SP::SimpleMatrix ref(new SimpleMatrix(*D));
+  SP::SiconosMatrix tRef(new SimpleMatrix(*SicM));
   // Dense = any type:
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref) , true);
-  delete ref;
-
-  ref = new SimpleMatrix(*T);
-  SiconosMatrix * tRef3 = new SimpleMatrix(3, 3);
+  ref.reset(new SimpleMatrix(*T));
+  SP::SiconosMatrix tRef3(new SimpleMatrix(3, 3));
   *tRef3 = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef3) == (*ref) , true);
-  delete ref;
 
-  ref = new SimpleMatrix(*S);
+  ref.reset(new SimpleMatrix(*S));
   *tRef3 = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef3) == (*ref) , true);
-  delete ref;
 
-  SiconosMatrix * tRef4 = new SimpleMatrix(4, 4);
-  ref = new SimpleMatrix(*SP);
+  SP::SiconosMatrix tRef4(new SimpleMatrix(4, 4));
+  ref.reset(new SimpleMatrix(*SP));
   *tRef4 = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef4) == (*ref) , true);
-  delete ref;
 
-  ref = new SimpleMatrix(*Band);
+
+  ref.reset(new SimpleMatrix(*Band));
   *tRef4 = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef4) == (*ref) , true);
-  delete ref;
-
-  ref = new SimpleMatrix(*Z);
+  ref.reset(new SimpleMatrix(*Z));
   *tRef3 = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef3) == (*ref) , true);
-  delete ref;
 
-  ref = new SimpleMatrix(*I);
+  ref.reset(new SimpleMatrix(*I));
   *tRef3 = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef3) == (*ref) , true);
-  delete ref;
 
-  delete tRef;
   // Triang = Triang, Zero or Identity
-  ref = new SimpleMatrix(*T);
-  tRef = new SimpleMatrix(*T);
+  ref.reset(new SimpleMatrix(*T));
+  tRef.reset(new SimpleMatrix(*T));
   tRef->zero();
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref) , true);
-  delete ref;
 
-  ref = new SimpleMatrix(*Z);
+  ref.reset(new SimpleMatrix(*Z));
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref) , true);
-  delete ref;
 
-  ref = new SimpleMatrix(*I);
+  ref.reset(new SimpleMatrix(*I));
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref) , true);
-  delete ref;
-
-  delete tRef;
   // Sym = Sym, Zero or Id
-  ref = new SimpleMatrix(*S);
-  tRef = new SimpleMatrix(*S);
+  ref.reset(new SimpleMatrix(*S));
+  tRef.reset(new SimpleMatrix(*S));
   tRef->zero();
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref) , true);
-  delete ref;
-  ref = new SimpleMatrix(*Z);
+  ref.reset(new SimpleMatrix(*Z));
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref) , true);
-  delete ref;
-  ref = new SimpleMatrix(*I);
+  ref.reset(new SimpleMatrix(*I));
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref) , true);
-  delete ref;
-  delete tRef;
   // Sparse = Sparse or Zero
-  ref = new SimpleMatrix(*SP);
-  tRef = new SimpleMatrix(*SP);
+  ref.reset(new SimpleMatrix(*SP));
+  tRef.reset(new SimpleMatrix(*SP));
   tRef->zero();
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref) , true);
 
-  delete ref;
-  ref = new SimpleMatrix(*Z2);
+  ref.reset(new SimpleMatrix(*Z2));
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref) , true);
-  delete ref;
-  delete tRef;
   // Banded = Banded, Id or Zero
-  ref = new SimpleMatrix(*Band);
-  tRef = new SimpleMatrix(*Band);
+  ref.reset(new SimpleMatrix(*Band));
+  tRef.reset(new SimpleMatrix(*Band));
   tRef->zero();
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref) , true);
-
-  delete ref;
-  ref = new SimpleMatrix(*Z2);
+  ref.reset(new SimpleMatrix(*Z2));
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref) , true);
-  delete ref;
-  ref = new SimpleMatrix(*I2);
+  ref.reset(new SimpleMatrix(*I2));
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref) , true);
-  delete ref;
-
-  delete tRef;
-  delete tRef3;
-  delete tRef4;
 
   cout << "-->  test assignment0 ended with success." << endl;
 }
@@ -735,114 +634,86 @@ void SimpleMatrixTest::testAssignment2()
 
   // Simple = Siconos(Simple)
 
-  SiconosMatrix * ref = new SimpleMatrix(*D);
-  SiconosMatrix * tRef = new SimpleMatrix(*SicM);
+  SP::SiconosMatrix ref(new SimpleMatrix(*D));
+  SP::SiconosMatrix tRef(new SimpleMatrix(*SicM));
   // Dense = any type:
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref) , true);
-  delete ref;
 
-  ref = new SimpleMatrix(*T);
-  SiconosMatrix * tRef3 = new SimpleMatrix(3, 3);
+  ref.reset(new SimpleMatrix(*T));
+  SP::SiconosMatrix tRef3(new SimpleMatrix(3, 3));
   *tRef3 = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef3) == (*ref) , true);
-  delete ref;
 
-  ref = new SimpleMatrix(*S);
+  ref.reset(new SimpleMatrix(*S));
   *tRef3 = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef3) == (*ref) , true);
-  delete ref;
 
-  SiconosMatrix * tRef4 = new SimpleMatrix(4, 4);
-  ref = new SimpleMatrix(*SP);
+  SP::SiconosMatrix tRef4(new SimpleMatrix(4, 4));
+  ref.reset(new SimpleMatrix(*SP));
   *tRef4 = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef4) == (*ref) , true);
-  delete ref;
 
-  ref = new SimpleMatrix(*Band);
+  ref.reset(new SimpleMatrix(*Band));
   *tRef4 = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef4) == (*ref) , true);
-  delete ref;
-
-  ref = new SimpleMatrix(*Z);
+  ref.reset(new SimpleMatrix(*Z));
   *tRef3 = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef3) == (*ref) , true);
-  delete ref;
 
-  ref = new SimpleMatrix(*I);
+  ref.reset(new SimpleMatrix(*I));
   *tRef3 = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef3) == (*ref) , true);
-  delete ref;
-
-  delete tRef;
   // Triang = Triang, Zero or Identity
-  ref = new SimpleMatrix(*T);
-  tRef = new SimpleMatrix(*T);
+  ref.reset(new SimpleMatrix(*T));
+  tRef.reset(new SimpleMatrix(*T));
   tRef->zero();
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref) , true);
-  delete ref;
 
-  ref = new SimpleMatrix(*Z);
+  ref.reset(new SimpleMatrix(*Z));
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref) , true);
-  delete ref;
 
-  ref = new SimpleMatrix(*I);
+  ref.reset(new SimpleMatrix(*I));
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref) , true);
-  delete ref;
-
-  delete tRef;
   // Sym = Sym, Zero or Id
-  ref = new SimpleMatrix(*S);
-  tRef = new SimpleMatrix(*S);
+  ref.reset(new SimpleMatrix(*S));
+  tRef.reset(new SimpleMatrix(*S));
   tRef->zero();
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref) , true);
-  delete ref;
-  ref = new SimpleMatrix(*Z);
+  ref.reset(new SimpleMatrix(*Z));
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref) , true);
-  delete ref;
-  ref = new SimpleMatrix(*I);
+
+  ref.reset(new SimpleMatrix(*I));
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref) , true);
-  delete ref;
-  delete tRef;
   // Sparse = Sparse or Zero
-  ref = new SimpleMatrix(*SP);
-  tRef = new SimpleMatrix(*SP);
+  ref.reset(new SimpleMatrix(*SP));
+  tRef.reset(new SimpleMatrix(*SP));
   tRef->zero();
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref) , true);
 
-  delete ref;
-  ref = new SimpleMatrix(*Z2);
+  ref.reset(new SimpleMatrix(*Z2));
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref) , true);
-  delete ref;
-  delete tRef;
   // Banded = Banded, Id or Zero
-  ref = new SimpleMatrix(*Band);
-  tRef = new SimpleMatrix(*Band);
+  ref.reset(new SimpleMatrix(*Band));
+  tRef.reset(new SimpleMatrix(*Band));
   tRef->zero();
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref) , true);
 
-  delete ref;
-  ref = new SimpleMatrix(*Z2);
+  ref.reset(new SimpleMatrix(*Z2));
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref) , true);
-  delete ref;
-  ref = new SimpleMatrix(*I2);
+  ref.reset(new SimpleMatrix(*I2));
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref) , true);
-  delete ref;
-
-  delete tRef;
-  delete tRef3;
-  delete tRef4;
   cout << "-->  test assignment2 ended with success." << endl;
 }
 
@@ -851,7 +722,7 @@ void SimpleMatrixTest::testOperators1()
   cout << "--> Test: operators1." << endl;
   //+=, -=, *=, /=
 
-  SiconosMatrix * tmp = new SimpleMatrix(*D);
+  SP::SiconosMatrix tmp(new SimpleMatrix(*D));
   // Dense *=, /=
   double a = 2.2;
   int a1 = 2;
@@ -887,8 +758,6 @@ void SimpleMatrixTest::testOperators1()
     for (unsigned int j = 0 ; j < tmp->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", fabs((*tmp)(i, j) - (*D)(i, j)) < tol , true);
 
-  delete tmp;
-
   // Dense +=, -= Block
   C->zero();
   *C += *Ab;
@@ -908,8 +777,8 @@ void SimpleMatrixTest::testOperators2()
 {
   cout << "--> Test: operators2." << endl;
   // +=, -=, *=, /= triangular
-  SiconosMatrix * tmp = new SimpleMatrix(*T);
-  SiconosMatrix * tmp2 = new SimpleMatrix(*T);
+  SP::SiconosMatrix tmp(new SimpleMatrix(*T));
+  SP::SiconosMatrix tmp2(new SimpleMatrix(*T));
   *tmp += *tmp2;
   for (unsigned int i = 0; i < tmp->size(0); ++i)
     for (unsigned int j = i ; j < tmp->size(1); ++j)
@@ -941,8 +810,6 @@ void SimpleMatrixTest::testOperators2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(tmp->getTriang() - *T) == 0 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", tmp->getNum() == 2 , true);
 
-  delete tmp;
-  delete tmp2;
   cout << "-->  test operators2 ended with success." << endl;
 }
 
@@ -950,8 +817,8 @@ void SimpleMatrixTest::testOperators3()
 {
   cout << "--> Test: operators3." << endl;
   // +=, -=, *=, /= Symmetric
-  SiconosMatrix * tmp = new SimpleMatrix(*S);
-  SiconosMatrix * tmp2 = new SimpleMatrix(*S);
+  SP::SiconosMatrix tmp(new SimpleMatrix(*S));
+  SP::SiconosMatrix tmp2(new SimpleMatrix(*S));
   *tmp += *tmp2;
   for (unsigned int i = 0; i < tmp->size(0); ++i)
     for (unsigned int j = i ; j < tmp->size(1); ++j)
@@ -983,8 +850,6 @@ void SimpleMatrixTest::testOperators3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(tmp->getSym() - *S) == 0 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", tmp->getNum() == 3 , true);
 
-  delete tmp;
-  delete tmp2;
   cout << "-->  test operators3 ended with success." << endl;
 }
 
@@ -992,12 +857,12 @@ void SimpleMatrixTest::testOperators4()
 {
   cout << "--> Test: operators4." << endl;
   // +=, -=, *=, /= sparse
-  SiconosMatrix * tmp = new SimpleMatrix(*SP);
-  SiconosMatrix * tmp2 = new SimpleMatrix(*SP);
-  SiconosMatrix * tmp3 = new SimpleMatrix(*T2);
+  SP::SiconosMatrix tmp(new SimpleMatrix(*SP));
+  SP::SiconosMatrix tmp2(new SimpleMatrix(*SP));
+  SP::SiconosMatrix tmp3(new SimpleMatrix(*T2));
 
-  SiconosMatrix * tmp4 = new SimpleMatrix(*Band);
-  SiconosMatrix * tmp5 = new SimpleMatrix(*S2);
+  SP::SiconosMatrix tmp4(new SimpleMatrix(*Band));
+  SP::SiconosMatrix tmp5(new SimpleMatrix(*S2));
 
   *tmp += *tmp2;
   for (unsigned int i = 0; i < tmp->size(0); ++i)
@@ -1073,11 +938,6 @@ void SimpleMatrixTest::testOperators4()
     for (unsigned int j = 0; j < tmp->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - (*SP)(i, j)) < tol , true);
 
-  delete tmp;
-  delete tmp2;
-  delete tmp3;
-  delete tmp4;
-  delete tmp5;
   cout << "-->  test operators4 ended with success." << endl;
 }
 
@@ -1085,8 +945,8 @@ void SimpleMatrixTest::testOperators5()
 {
   cout << "--> Test: operators5." << endl;
   // +=, -=, *=, /= banded
-  SiconosMatrix * tmp = new SimpleMatrix(*Band);
-  SiconosMatrix * tmp2 = new SimpleMatrix(*Band);
+  SP::SiconosMatrix tmp(new SimpleMatrix(*Band));
+  SP::SiconosMatrix tmp2(new SimpleMatrix(*Band));
   *tmp += *tmp2;
   for (signed i = 0; i < signed(Band->size1()); ++ i)
     for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(Band->size2())); ++ j)
@@ -1118,8 +978,6 @@ void SimpleMatrixTest::testOperators5()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(tmp->getBanded() - *Band) == 0 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", tmp->getNum() == 5 , true);
 
-  delete tmp;
-  delete tmp2;
   cout << "-->  test operators5 ended with success." << endl;
 }
 
@@ -1410,9 +1268,9 @@ void SimpleMatrixTest::testOperators6Ter()
   // +, - , prod for non-dense matrices.
 
   // Triang +,-,* Triang
-  SiconosMatrix * tmp = new SimpleMatrix(*T);
-  SiconosMatrix * tmp2 = new SimpleMatrix(*T);
-  SiconosMatrix * res = new SimpleMatrix(3, 3, TRIANGULAR);
+  SP::SiconosMatrix tmp(new SimpleMatrix(*T));
+  SP::SiconosMatrix tmp2(new SimpleMatrix(*T));
+  SP::SiconosMatrix res(new SimpleMatrix(3, 3, TRIANGULAR));
   *res = *tmp + *tmp2;
   for (unsigned int i = 0; i < res->size(0); ++i)
     for (unsigned int j = i ; j < res->size(1); ++j)
@@ -1426,14 +1284,11 @@ void SimpleMatrixTest::testOperators6Ter()
   *res = prod(*tmp, *tmp2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", norm_inf(res->getTriang() - prod(*T, *T)) == 0, true);
 
-  delete tmp;
-  delete tmp2;
-  delete res;
 
   // Sym +,-,* Sym
-  tmp = new SimpleMatrix(*S);
-  tmp2 = new SimpleMatrix(*S);
-  res = new SimpleMatrix(3, 3, SYMMETRIC);
+  tmp.reset(new SimpleMatrix(*S));
+  tmp2.reset(new SimpleMatrix(*S));
+  res.reset(new SimpleMatrix(3, 3, SYMMETRIC));
   *res = *tmp + *tmp2;
   for (unsigned int i = 0; i < res->size(0); ++i)
     for (unsigned int j = i ; j < res->size(1); ++j)
@@ -1447,14 +1302,11 @@ void SimpleMatrixTest::testOperators6Ter()
   *res = prod(*tmp , *tmp2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", norm_inf(res->getSym() - prod(*S, *S)) == 0, true);
 
-  delete tmp;
-  delete tmp2;
-  delete res;
 
   // Sparse +,-,* Sparse
-  tmp = new SimpleMatrix(*SP);
-  tmp2 = new SimpleMatrix(*SP);
-  res = new SimpleMatrix(4, 4, SPARSE);
+  tmp.reset(new SimpleMatrix(*SP));
+  tmp2.reset(new SimpleMatrix(*SP));
+  res.reset(new SimpleMatrix(4, 4, SPARSE));
   *res = *tmp + *tmp2;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", (*res) == (2.0 * (*tmp)), true);
 
@@ -1465,14 +1317,11 @@ void SimpleMatrixTest::testOperators6Ter()
   tmp->zero();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", (*res) == *tmp , true);
 
-  delete tmp;
-  delete tmp2;
-  delete res;
 
   // Banded +,- Banded
-  tmp = new SimpleMatrix(*Band);
-  tmp2 = new SimpleMatrix(*Band);
-  res = new SimpleMatrix(4, 4, BANDED);
+  tmp.reset(new SimpleMatrix(*Band));
+  tmp2.reset(new SimpleMatrix(*Band));
+  res.reset(new SimpleMatrix(4, 4, BANDED));
   *res = *tmp + *tmp2;
   for (signed i = 0; i < signed(Band->size1()); ++ i)
     for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(Band->size2())); ++ j)
@@ -1482,26 +1331,22 @@ void SimpleMatrixTest::testOperators6Ter()
     for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(Band->size2())); ++ j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", (*res)(i, j) == 0, true);
 
-  delete tmp;
-  delete tmp2;
-  delete res;
-
   cout << "-->  test operators6Ter6 ended with success." << endl;
 }
 
 void SimpleMatrixTest::testOperators7()
 {
   cout << "--> Test: operator7." << endl;
-  SiconosMatrix * tmp1 = new SimpleMatrix(*D);
+  SP::SiconosMatrix tmp1(new SimpleMatrix(*D));
   tmp1->resize(4, 4);
-  SiconosMatrix * tmp2 = new SimpleMatrix(*T2);
-  SiconosMatrix * tmp3 = new SimpleMatrix(*S2);
-  SiconosMatrix * tmp4 = new SimpleMatrix(*SP);
-  SiconosMatrix * tmp5 = new SimpleMatrix(*Band);
-  SiconosMatrix * tmp6 = new SimpleMatrix(*Z2);
-  SiconosMatrix * tmp7 = new SimpleMatrix(*I2);
+  SP::SiconosMatrix tmp2(new SimpleMatrix(*T2));
+  SP::SiconosMatrix tmp3(new SimpleMatrix(*S2));
+  SP::SiconosMatrix tmp4(new SimpleMatrix(*SP));
+  SP::SiconosMatrix tmp5(new SimpleMatrix(*Band));
+  SP::SiconosMatrix tmp6(new SimpleMatrix(*Z2));
+  SP::SiconosMatrix tmp7(new SimpleMatrix(*I2));
 
-  SiconosMatrix * res = new SimpleMatrix(4, 4);
+  SP::SiconosMatrix res(new SimpleMatrix(4, 4));
 
   // dense + ...
   // ... triang
@@ -2016,15 +1861,6 @@ void SimpleMatrixTest::testOperators7()
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", fabs((*res)(i, j) + (*tmp7)(i, j)) < tol, true);
   }
 
-  delete tmp1;
-  delete tmp2;
-  delete tmp3;
-  delete tmp4;
-  delete tmp5;
-  delete tmp6;
-  delete tmp7;
-  delete res;
-
   cout << "-->  test operators7 ended with success." << endl;
 }
 
@@ -2041,20 +1877,20 @@ void SimpleMatrixTest::testOperators8()
   // Block = Simple * Simple
   *Cb = prod(*A, *B);
   DenseMat Dtmp = prod(*A->getDensePtr(), *B->getDensePtr());
-  SimpleMatrix * tmp = new SimpleMatrix(Dtmp);
+  SP::SimpleMatrix tmp(new SimpleMatrix(Dtmp));
   for (unsigned int i = 0; i < C->size(0); ++i)
     for (unsigned int j = i ; j < C->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", fabs((*Cb)(i, j) - (*tmp)(i, j)) < tol, true);
 
   // Others ...
 
-  SiconosMatrix * tmp1 = new SimpleMatrix(4, 4, 2.3);
-  SiconosMatrix * tmp2 = new SimpleMatrix(*T2);
-  SiconosMatrix * tmp3 = new SimpleMatrix(*S2);
-  SiconosMatrix * tmp4 = new SimpleMatrix(*SP);
-  SiconosMatrix * tmp5 = new SimpleMatrix(*Band);
+  SP::SiconosMatrix tmp1(new SimpleMatrix(4, 4, 2.3));
+  SP::SiconosMatrix tmp2(new SimpleMatrix(*T2));
+  SP::SiconosMatrix tmp3(new SimpleMatrix(*S2));
+  SP::SiconosMatrix tmp4(new SimpleMatrix(*SP));
+  SP::SiconosMatrix tmp5(new SimpleMatrix(*Band));
 
-  SiconosMatrix * res = new SimpleMatrix(4, 4);
+  SP::SiconosMatrix res(new SimpleMatrix(4, 4));
 
   // Dense * ...
   // triang
@@ -2122,12 +1958,6 @@ void SimpleMatrixTest::testOperators8()
   *res = prod(*tmp5, *tmp3);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp5->getBanded(), tmp3->getSym())) < tol, true);
 
-  delete tmp1;
-  delete tmp2;
-  delete tmp3;
-  delete tmp4;
-  delete tmp5;
-  delete res;
   cout << "-->  test operators8 ended with success." << endl;
 }
 
@@ -2141,7 +1971,7 @@ void SimpleMatrixTest::testOperators8Bis()
   // Block = Simple * Simple
   prod(*A, *B, *Cb);
   DenseMat Dtmp = prod(*A->getDensePtr(), *B->getDensePtr());
-  SimpleMatrix * tmp = new SimpleMatrix(Dtmp);
+  SP::SimpleMatrix tmp(new SimpleMatrix(Dtmp));
   for (unsigned int i = 0; i < Cb->size(0); ++i)
     for (unsigned int j = i ; j < Cb->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", fabs((*Cb)(i, j) - (*tmp)(i, j)) < tol, true);
@@ -2149,13 +1979,13 @@ void SimpleMatrixTest::testOperators8Bis()
   // Others ...
 
   // Others ...
-  SiconosMatrix * tmp1 = new SimpleMatrix(4, 4, 2.4);
-  SiconosMatrix * tmp2 = new SimpleMatrix(*T2);
-  SiconosMatrix * tmp3 = new SimpleMatrix(*S2);
-  SiconosMatrix * tmp4 = new SimpleMatrix(*SP);
-  SiconosMatrix * tmp5 = new SimpleMatrix(*Band);
+  SP::SiconosMatrix tmp1(new SimpleMatrix(4, 4, 2.4));
+  SP::SiconosMatrix tmp2(new SimpleMatrix(*T2));
+  SP::SiconosMatrix tmp3(new SimpleMatrix(*S2));
+  SP::SiconosMatrix tmp4(new SimpleMatrix(*SP));
+  SP::SiconosMatrix tmp5(new SimpleMatrix(*Band));
 
-  SiconosMatrix * res = new SimpleMatrix(4, 4);
+  SP::SiconosMatrix res(new SimpleMatrix(4, 4));
 
   // Dense * ...
   // triang
@@ -2223,12 +2053,6 @@ void SimpleMatrixTest::testOperators8Bis()
   prod(*tmp5, *tmp3, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8Bis: ", norm_inf(res->getDense() - prod(tmp5->getBanded(), tmp3->getSym())) < tol, true);
 
-  delete tmp1;
-  delete tmp2;
-  delete tmp3;
-  delete tmp4;
-  delete tmp5;
-  delete res;
   cout << "-->  test operators8Bis ended with success." << endl;
 }
 
@@ -2240,7 +2064,7 @@ void SimpleMatrixTest::testOperators8Ter()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8Ter: ", norm_inf(*C->getDensePtr() - prod(*A->getDensePtr(), *B->getDensePtr())) < tol, true);
 
   // Simple += Simple * Simple
-  SiconosMatrix * backUp = new SimpleMatrix(*C);
+  SP::SiconosMatrix backUp(new SimpleMatrix(*C));
 
   axpy_prod(*A, *B, *C, false);
 
@@ -2248,7 +2072,7 @@ void SimpleMatrixTest::testOperators8Ter()
   // Block = Simple * Simple
   axpy_prod(*A, *B, *Cb, true);
   DenseMat Dtmp = prod(*A->getDensePtr(), *B->getDensePtr());
-  SimpleMatrix * tmp = new SimpleMatrix(Dtmp);
+  SP::SimpleMatrix tmp(new SimpleMatrix(Dtmp));
   for (unsigned int i = 0; i < Cb->size(0); ++i)
     for (unsigned int j = i ; j < Cb->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", fabs((*Cb)(i, j) - (*tmp)(i, j)) < tol, true);
@@ -2262,7 +2086,6 @@ void SimpleMatrixTest::testOperators8Ter()
     for (unsigned int j = i ; j < Cb->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", fabs((*Cb)(i, j) - (*tmp)(i, j) - (*backUp)(i, j)) < tol, true);
 
-  delete backUp;
   cout << "-->  test operators8Ter ended with success." << endl;
 }
 
@@ -2280,7 +2103,7 @@ void SimpleMatrixTest::testOperators8_4() // C += A*B
   prod(*A, *B, *Cb, false);
   prod(*A, *B, *Cb, false);
   DenseMat Dtmp = prod(*A->getDensePtr(), *B->getDensePtr());
-  SimpleMatrix * tmp = new SimpleMatrix(Dtmp);
+  SP::SimpleMatrix tmp(new SimpleMatrix(Dtmp));
   for (unsigned int i = 0; i < Cb->size(0); ++i)
     for (unsigned int j = i ; j < Cb->size(1); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", fabs((*Cb)(i, j) - 2 * (*tmp)(i, j)) < tol, true);
@@ -2293,12 +2116,12 @@ void SimpleMatrixTest::testOperators8_5()
 
   cout << "--> Test: operator8_5." << endl;
   std::vector<unsigned int> coord(8);
-  SiconosVector * x1 = new SimpleVector(2);
-  SiconosVector * x2 = new SimpleVector(3);
-  SiconosVector * x3 = new SimpleVector(5);
-  SiconosVector * y = new SimpleVector(size);
-  SiconosVector * x = new BlockVector();
-  SiconosVector * v = new SimpleVector(size);
+  SP::SiconosVector x1(new SimpleVector(2));
+  SP::SiconosVector x2(new SimpleVector(3));
+  SP::SiconosVector x3(new SimpleVector(5));
+  SP::SiconosVector y(new SimpleVector(size));
+  SP::SiconosVector x(new BlockVector());
+  SP::SiconosVector v(new SimpleVector(size));
   x->insertPtr(x1);
   x->insertPtr(x2);
   x->insertPtr(x3);
@@ -2363,7 +2186,7 @@ void SimpleMatrixTest::testOperators8_5()
   //   // Others ...
   // Triang
 
-  SiconosMatrix * A2 = new SimpleMatrix(10, 10, TRIANGULAR);
+  SP::SiconosMatrix A2(new SimpleMatrix(10, 10, TRIANGULAR));
   for (unsigned i = 0; i < A2->size(0); ++ i)
     for (unsigned j = i; j < A2->size(1); ++ j)
       (*A2)(i, j) = 3 * i + j;
@@ -2379,8 +2202,7 @@ void SimpleMatrixTest::testOperators8_5()
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs((*y)(i)) < tol, true);
   }
   // Sym
-  delete A2;
-  A2 = new SimpleMatrix(10, 10, SYMMETRIC);
+  A2.reset(new SimpleMatrix(10, 10, SYMMETRIC));
   for (unsigned i = 0; i < A2->size(0); ++ i)
     for (unsigned j = i; j < A2->size(1); ++ j)
       (*A2)(i, j) = 3 * i + j;
@@ -2397,8 +2219,7 @@ void SimpleMatrixTest::testOperators8_5()
   }
 
   // Sparse
-  delete A2;
-  A2 = new SimpleMatrix(10, 10, SPARSE);
+  A2.reset(new SimpleMatrix(10, 10, SPARSE));
   for (unsigned i = 0; i < A2->size(0); ++ i)
     for (unsigned j = i; j < A2->size(1); ++ j)
       A2->setValue(i, j, 3 * i + j);
@@ -2415,7 +2236,7 @@ void SimpleMatrixTest::testOperators8_5()
   }
 
   // Banded
-  A2 = new SimpleMatrix(10, 10, BANDED);
+  A2.reset(new SimpleMatrix(10, 10, BANDED));
   for (signed i = 0; i < signed(A2->size(0)); ++ i)
     for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(A2->size(1))); ++ j)
       (*A2)(i, j) = 3 * i + j;
@@ -2430,13 +2251,6 @@ void SimpleMatrixTest::testOperators8_5()
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs((*y)(i)) < tol, true);
   }
 
-  delete A2;
-  delete x1;
-  delete x2;
-  delete x3;
-  delete y;
-  delete v;
-  delete x;
   cout << "-->  test operators8_5 ended with success." << endl;
 }
 
@@ -2446,12 +2260,12 @@ void SimpleMatrixTest::testOperators8_6()
 
   cout << "--> Test: operator8_6." << endl;
   std::vector<unsigned int> coord(8);
-  SiconosVector * x1 = new SimpleVector(2);
-  SiconosVector * x2 = new SimpleVector(3);
-  SiconosVector * x3 = new SimpleVector(5);
-  SiconosVector * y = new SimpleVector(size);
-  SiconosVector * x = new BlockVector();
-  SiconosVector * v = new SimpleVector(size);
+  SP::SiconosVector x1(new SimpleVector(2));
+  SP::SiconosVector x2(new SimpleVector(3));
+  SP::SiconosVector x3(new SimpleVector(5));
+  SP::SiconosVector y(new SimpleVector(size));
+  SP::SiconosVector x(new BlockVector());
+  SP::SiconosVector v(new SimpleVector(size));
   x->insertPtr(x1);
   x->insertPtr(x2);
   x->insertPtr(x3);
@@ -2521,7 +2335,7 @@ void SimpleMatrixTest::testOperators8_6()
   //   // Others ...
   // Triang
 
-  SiconosMatrix * A2 = new SimpleMatrix(10, 10, TRIANGULAR);
+  SP::SiconosMatrix A2(new SimpleMatrix(10, 10, TRIANGULAR));
   for (unsigned i = 0; i < A2->size(0); ++ i)
     for (unsigned j = i; j < A2->size(1); ++ j)
       (*A2)(i, j) = 3 * i + j;
@@ -2539,8 +2353,7 @@ void SimpleMatrixTest::testOperators8_6()
   }
 
   // Sym
-  delete A2;
-  A2 = new SimpleMatrix(10, 10, SYMMETRIC);
+  A2.reset(new SimpleMatrix(10, 10, SYMMETRIC));
   for (unsigned i = 0; i < A2->size(0); ++ i)
     for (unsigned j = i; j < A2->size(1); ++ j)
       (*A2)(i, j) = 3 * i + j;
@@ -2558,8 +2371,7 @@ void SimpleMatrixTest::testOperators8_6()
   }
 
   // Sparse
-  delete A2;
-  A2 = new SimpleMatrix(10, 10, SPARSE);
+  A2.reset(new SimpleMatrix(10, 10, SPARSE));
   for (unsigned i = 0; i < A2->size(0); ++ i)
     for (unsigned j = i; j < A2->size(1); ++ j)
       A2->setValue(i, j, 3 * i + j);
@@ -2577,7 +2389,7 @@ void SimpleMatrixTest::testOperators8_6()
   }
 
   // Banded
-  A2 = new SimpleMatrix(10, 10, BANDED);
+  A2.reset(new SimpleMatrix(10, 10, BANDED));
   for (signed i = 0; i < signed(A2->size(0)); ++ i)
     for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(A2->size(1))); ++ j)
       (*A2)(i, j) = 3 * i + j;
@@ -2593,13 +2405,6 @@ void SimpleMatrixTest::testOperators8_6()
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs((*y)(i) - (*v)(i)) < tol, true);
   }
 
-  delete A2;
-  delete x1;
-  delete x2;
-  delete x3;
-  delete y;
-  delete v;
-  delete x;
   cout << "-->  test operators8_6 ended with success." << endl;
 }
 
@@ -2824,8 +2629,8 @@ void SimpleMatrixTest::testOperators10()
   cout << "--> Test: operator10." << endl;
   double m = 2.2;
   int i = 3;
-  SiconosMatrix * tmp1 = new SimpleMatrix(*T);
-  SiconosMatrix * res = new SimpleMatrix(3, 3, TRIANGULAR);
+  SP::SiconosMatrix tmp1(new SimpleMatrix(*T));
+  SP::SiconosMatrix res(new SimpleMatrix(3, 3, TRIANGULAR));
   *res = m ** tmp1;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getTriang() - tmp1->getTriang()*m) < tol, true);
   *res = i ** tmp1;
@@ -2838,8 +2643,6 @@ void SimpleMatrixTest::testOperators10()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getTriang() - tmp1->getTriang() / m) < tol, true);
   *res = *tmp1 / i;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getTriang() - tmp1->getTriang() / i) < tol, true);
-  delete tmp1;
-  delete res;
   cout << "-->  test operators10 ended with success." << endl;
 }
 
@@ -2848,8 +2651,8 @@ void SimpleMatrixTest::testOperators11()
   cout << "--> Test: operator11." << endl;
   double m = 2.2;
   int i = 3;
-  SiconosMatrix * tmp1 = new SimpleMatrix(*S);
-  SiconosMatrix * res = new SimpleMatrix(3, 3, SYMMETRIC);
+  SP::SiconosMatrix tmp1(new SimpleMatrix(*S));
+  SP::SiconosMatrix res(new SimpleMatrix(3, 3, SYMMETRIC));
   *res = m ** tmp1;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getSym() - tmp1->getSym()*m) < tol, true);
   *res = i ** tmp1;
@@ -2862,8 +2665,6 @@ void SimpleMatrixTest::testOperators11()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getSym() - tmp1->getSym() / m) < tol, true);
   *res = *tmp1 / i;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getSym() - tmp1->getSym() / i) < tol, true);
-  delete tmp1;
-  delete res;
   cout << "-->  test operator11 ended with success." << endl;
 }
 
@@ -2872,8 +2673,8 @@ void SimpleMatrixTest::testOperators12()
   cout << "--> Test: operator12." << endl;
   double m = 2.2;
   int i = 3;
-  SiconosMatrix * tmp1 = new SimpleMatrix(*SP);
-  SiconosMatrix * res = new SimpleMatrix(4, 4, SPARSE);
+  SP::SiconosMatrix tmp1(new SimpleMatrix(*SP));
+  SP::SiconosMatrix res(new SimpleMatrix(4, 4, SPARSE));
   *res = m ** tmp1;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getSparse() - tmp1->getSparse()*m) < tol, true);
   *res = i ** tmp1;
@@ -2886,8 +2687,6 @@ void SimpleMatrixTest::testOperators12()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getSparse() - tmp1->getSparse() / m) < tol, true);
   *res = *tmp1 / i;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getSparse() - tmp1->getSparse() / i) < tol, true);
-  delete tmp1;
-  delete res;
   cout << "-->  test operators12 ended with success." << endl;
 }
 
@@ -2896,8 +2695,8 @@ void SimpleMatrixTest::testOperators13()
   cout << "--> Test: operator13." << endl;
   //   double m = 2.2;
   //   int i = 3;
-  //   SiconosMatrix * tmp1 = new SimpleMatrix(*Band);
-  //   SiconosMatrix * res = new SimpleMatrix(*Band);//4,4,BANDED,1,1);
+  //   SP::SiconosMatrix tmp1(new SimpleMatrix(*Band);
+  //   SP::SiconosMatrix res(new SimpleMatrix(*Band);//4,4,BANDED,1,1);
   //   *res = m * *tmp1;
   //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getBanded()- tmp1->getBanded()*m)<tol, true);
   //   *res = i ** tmp1;
@@ -2910,8 +2709,6 @@ void SimpleMatrixTest::testOperators13()
   //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getBanded()- tmp1->getBanded()/m)<tol, true);
   //   *res = *tmp1 / i;
   //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getBanded()- tmp1->getBanded()/i)<tol, true);
-  //   delete tmp1;
-  //   delete res;
   cout << "-->  test operators13 ended with success." << endl;
 }
 
@@ -2919,40 +2716,30 @@ void SimpleMatrixTest::testPow()
 {
   cout << "--> Test: pow." << endl;
   // Dense
-  SiconosMatrix * tmp1 = new SimpleMatrix(*D);
-  SiconosMatrix * res = new SimpleMatrix(2, 2);
+  SP::SiconosMatrix tmp1(new SimpleMatrix(*D));
+  SP::SiconosMatrix res(new SimpleMatrix(2, 2));
   *res = pow(*tmp1, 3);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", *res == prod(*tmp1, prod(*tmp1, *tmp1)), true);
-  delete res;
   // Triang
-  SiconosMatrix * tmp2 = new SimpleMatrix(*T);
-  res = new SimpleMatrix(3, 3, TRIANGULAR);
+  SP::SiconosMatrix tmp2(new SimpleMatrix(*T));
+  res.reset(new SimpleMatrix(3, 3, TRIANGULAR));
   *res = pow(*tmp2, 3);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", *res == prod(*tmp2, prod(*tmp2, *tmp2)), true);
-  delete res;
   // Sym
-  SiconosMatrix * tmp3 = new SimpleMatrix(*S);
-  res = new SimpleMatrix(3, 3, SYMMETRIC);
+  SP::SiconosMatrix tmp3(new SimpleMatrix(*S));
+  res.reset(new SimpleMatrix(3, 3, SYMMETRIC));
   *res = pow(*tmp3, 3);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", *res == prod(*tmp3, prod(*tmp3, *tmp3)), true);
-  delete res;
   // Sparse
-  SiconosMatrix * tmp4 = new SimpleMatrix(*SP);
-  res = new SimpleMatrix(4, 4, SPARSE);
+  SP::SiconosMatrix tmp4(new SimpleMatrix(*SP));
+  res.reset(new SimpleMatrix(4, 4, SPARSE));
   *res = pow(*tmp4, 3);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", *res == prod(*tmp4, prod(*tmp4, *tmp4)), true);
-  delete res;
   // Banded
-  SiconosMatrix * tmp5 = new SimpleMatrix(*Band);
-  res = new SimpleMatrix(4, 4);
+  SP::SiconosMatrix tmp5(new SimpleMatrix(*Band));
+  res.reset(new SimpleMatrix(4, 4));
   *res = pow(*tmp5, 3);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", *res == prod(*tmp5, prod(*tmp5, *tmp5)), true);
-  delete res;
-  delete tmp1;
-  delete tmp2;
-  delete tmp3;
-  delete tmp4;
-  delete tmp5;
   cout << "-->  test pow ended with success." << endl;
 }
 
@@ -2960,13 +2747,13 @@ void SimpleMatrixTest::testProd() // y = A*x
 {
   cout << "--> Test: prod. mat-vect" << endl;
 
-  SiconosVector * y = new SimpleVector(size);
-  SiconosVector * x = new SimpleVector(size, 4.3);
-  SiconosVector * x1 = new SimpleVector(size - 2, 2.3);
-  SiconosVector * x2 = new SimpleVector(2, 3.1);
+  SP::SiconosVector y(new SimpleVector(size));
+  SP::SiconosVector x(new SimpleVector(size, 4.3));
+  SP::SiconosVector x1(new SimpleVector(size - 2, 2.3));
+  SP::SiconosVector x2(new SimpleVector(2, 3.1));
 
-  SiconosVector * xB = new BlockVector(x1, x2);
-  SiconosVector * yB = new BlockVector(*xB);
+  SP::SiconosVector xB(new BlockVector(x1, x2));
+  SP::SiconosVector yB(new BlockVector(*xB));
   yB->zero();
 
   // Matrix - vector product
@@ -3012,39 +2799,32 @@ void SimpleMatrixTest::testProd() // y = A*x
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", fabs((*yB)(i) - sum) < tol, true);
   }
 
-  delete x;
-  delete y;
-  delete xB;
-  delete yB;
-  delete x1;
-  delete x2;
-
   // Others or old stuff ...
 
-  SiconosMatrix * tmp2 = new SimpleMatrix(*T);
-  SiconosMatrix * tmp3 = new SimpleMatrix(*S);
-  SiconosMatrix * tmp4 = new SimpleMatrix(*SP);
-  SiconosMatrix * tmp5 = new SimpleMatrix(*Band2);
-  SiconosVector * v = new SimpleVector(3);
+  SP::SiconosMatrix tmp2(new SimpleMatrix(*T));
+  SP::SiconosMatrix tmp3(new SimpleMatrix(*S));
+  SP::SiconosMatrix tmp4(new SimpleMatrix(*SP));
+  SP::SiconosMatrix tmp5(new SimpleMatrix(*Band2));
+  SP::SiconosVector v(new SimpleVector(3));
   (*v)(0) = 1;
   (*v)(1) = 2;
   (*v)(2) = 3;
-  SiconosVector * vv = new SimpleVector(4);
+  SP::SiconosVector vv(new SimpleVector(4));
   (*vv)(0) = 1;
   (*vv)(1) = 2;
   (*vv)(2) = 3;
-  SparseVect * sv = new SparseVect(3);
+  SparseVect * sv(new SparseVect(3));
   (*sv)(0) = 4;
   (*sv)(1) = 5;
   (*sv)(2) = 6;
-  SparseVect * sv2 = new SparseVect(4);
+  SparseVect * sv2(new SparseVect(4));
   (*sv2)(0) = 4;
   (*sv2)(1) = 5;
   (*sv2)(2) = 6;
-  SiconosVector * w = new SimpleVector(*sv);
-  SiconosVector * ww = new SimpleVector(*sv2);
-  SiconosVector * res = new SimpleVector(4);
-  SiconosVector * res2 = new SimpleVector(3);
+  SP::SiconosVector w(new SimpleVector(*sv));
+  SP::SiconosVector ww(new SimpleVector(*sv2));
+  SP::SiconosVector res(new SimpleVector(4));
+  SP::SiconosVector res2(new SimpleVector(3));
 
   // Triang * ...
   *res2 = prod(*tmp2, *v);
@@ -3066,17 +2846,6 @@ void SimpleMatrixTest::testProd() // y = A*x
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", norm_2(res->getDense() - prod(tmp5->getBanded(), v->getDense())) < tol, true);
   *res = prod(*tmp5, *w);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", norm_2(res->getDense() - prod(tmp5->getBanded(), w->getSparse())) < tol, true);
-  delete tmp2;
-  delete tmp3;
-  delete tmp4;
-  delete tmp5;
-  delete sv;
-  delete v;
-  delete w;
-  delete vv;
-  delete ww;
-  delete res;
-  delete res2;
   cout << "-->  test prod ended with success." << endl;
 }
 
@@ -3084,13 +2853,13 @@ void SimpleMatrixTest::testProdBis()
 {
   cout << "--> Test: prod. mat-vect (bis)" << endl;
 
-  SiconosVector * y = new SimpleVector(size);
-  SiconosVector * x = new SimpleVector(size, 4.3);
-  SiconosVector * x1 = new SimpleVector(size - 2, 2.3);
-  SiconosVector * x2 = new SimpleVector(2, 3.1);
+  SP::SiconosVector y(new SimpleVector(size));
+  SP::SiconosVector x(new SimpleVector(size, 4.3));
+  SP::SiconosVector x1(new SimpleVector(size - 2, 2.3));
+  SP::SiconosVector x2(new SimpleVector(2, 3.1));
 
-  SiconosVector * xB = new BlockVector(x1, x2);
-  SiconosVector * yB = new BlockVector(*xB);
+  SP::SiconosVector xB(new BlockVector(x1, x2));
+  SP::SiconosVector yB(new BlockVector(*xB));
   yB->zero();
 
   // Matrix - vector product
@@ -3135,39 +2904,32 @@ void SimpleMatrixTest::testProdBis()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", fabs((*yB)(i) - sum) < tol, true);
   }
 
-  delete x;
-  delete y;
-  delete xB;
-  delete yB;
-  delete x1;
-  delete x2;
-
   // Others or old stuff ...
 
-  SiconosMatrix * tmp2 = new SimpleMatrix(*T);
-  SiconosMatrix * tmp3 = new SimpleMatrix(*S);
-  SiconosMatrix * tmp4 = new SimpleMatrix(*SP);
-  SiconosMatrix * tmp5 = new SimpleMatrix(*Band2);
-  SiconosVector * v = new SimpleVector(3);
+  SP::SiconosMatrix tmp2(new SimpleMatrix(*T));
+  SP::SiconosMatrix tmp3(new SimpleMatrix(*S));
+  SP::SiconosMatrix tmp4(new SimpleMatrix(*SP));
+  SP::SiconosMatrix tmp5(new SimpleMatrix(*Band2));
+  SP::SiconosVector v(new SimpleVector(3));
   (*v)(0) = 1;
   (*v)(1) = 2;
   (*v)(2) = 3;
-  SiconosVector * vv = new SimpleVector(4);
+  SP::SiconosVector vv(new SimpleVector(4));
   (*vv)(0) = 1;
   (*vv)(1) = 2;
   (*vv)(2) = 3;
-  SparseVect * sv = new SparseVect(3);
+  SP::SparseVect sv(new SparseVect(3));
   (*sv)(0) = 4;
   (*sv)(1) = 5;
   (*sv)(2) = 6;
-  SparseVect * sv2 = new SparseVect(4);
+  SP::SparseVect sv2(new SparseVect(4));
   (*sv2)(0) = 4;
   (*sv2)(1) = 5;
   (*sv2)(2) = 6;
-  SiconosVector * w = new SimpleVector(*sv);
-  SiconosVector * ww = new SimpleVector(*sv2);
-  SiconosVector * res = new SimpleVector(4);
-  SiconosVector * res2 = new SimpleVector(3);
+  SP::SiconosVector w(new SimpleVector(*sv));
+  SP::SiconosVector ww(new SimpleVector(*sv2));
+  SP::SiconosVector res(new SimpleVector(4));
+  SP::SiconosVector res2(new SimpleVector(3));
 
   // Triang * ...
   prod(*tmp2, *v, *res2);
@@ -3189,17 +2951,6 @@ void SimpleMatrixTest::testProdBis()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", norm_2(res->getDense() - prod(tmp5->getBanded(), v->getDense())) < tol, true);
   prod(*tmp5, *w, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", norm_2(res->getDense() - prod(tmp5->getBanded(), w->getSparse())) < tol, true);
-  delete tmp2;
-  delete tmp3;
-  delete tmp4;
-  delete tmp5;
-  delete sv;
-  delete v;
-  delete w;
-  delete vv;
-  delete ww;
-  delete res;
-  delete res2;
   cout << "-->  test prodBis ended with success." << endl;
 }
 
@@ -3207,13 +2958,13 @@ void SimpleMatrixTest::testProdTer()
 {
   cout << "--> Test: prod. mat-vect (ter)" << endl;
 
-  SiconosVector * y = new SimpleVector(size);
-  SiconosVector * x = new SimpleVector(size, 4.3);
-  SiconosVector * x1 = new SimpleVector(size - 2, 2.3);
-  SiconosVector * x2 = new SimpleVector(2, 3.1);
+  SP::SiconosVector y(new SimpleVector(size));
+  SP::SiconosVector x(new SimpleVector(size, 4.3));
+  SP::SiconosVector x1(new SimpleVector(size - 2, 2.3));
+  SP::SiconosVector x2(new SimpleVector(2, 3.1));
 
-  SiconosVector * xB = new BlockVector(x1, x2);
-  SiconosVector * yB = new BlockVector(*xB);
+  SP::SiconosVector xB(new BlockVector(x1, x2));
+  SP::SiconosVector yB(new BlockVector(*xB));
   yB->zero();
 
   // Matrix - vector product
@@ -3229,7 +2980,7 @@ void SimpleMatrixTest::testProdTer()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", fabs((*y)(i) - sum) < tol, true);
   }
 
-  SiconosVector * backUp = new SimpleVector(*y);
+  SP::SiconosVector backUp(new SimpleVector(*y));
   // Simple += Simple * Simple
   axpy_prod(*A, *x, *y, false);
   for (unsigned int i = 0; i < size; ++i)
@@ -3302,41 +3053,32 @@ void SimpleMatrixTest::testProdTer()
       sum += (*A)(i, j) * (*xB)(j);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", fabs((*yB)(i) - sum - (*backUp)(i)) < tol, true);
   }
-
-  delete backUp;
-  delete x;
-  delete y;
-  delete xB;
-  delete yB;
-  delete x1;
-  delete x2;
-
   // Others or old stuff ...
 
-  SiconosMatrix * tmp2 = new SimpleMatrix(*T);
-  SiconosMatrix * tmp3 = new SimpleMatrix(*S);
-  SiconosMatrix * tmp4 = new SimpleMatrix(*SP);
-  SiconosMatrix * tmp5 = new SimpleMatrix(*Band2);
-  SiconosVector * v = new SimpleVector(3);
+  SP::SiconosMatrix tmp2(new SimpleMatrix(*T));
+  SP::SiconosMatrix tmp3(new SimpleMatrix(*S));
+  SP::SiconosMatrix tmp4(new SimpleMatrix(*SP));
+  SP::SiconosMatrix tmp5(new SimpleMatrix(*Band2));
+  SP::SiconosVector v(new SimpleVector(3));
   (*v)(0) = 1;
   (*v)(1) = 2;
   (*v)(2) = 3;
-  SiconosVector * vv = new SimpleVector(4);
+  SP::SiconosVector vv(new SimpleVector(4));
   (*vv)(0) = 1;
   (*vv)(1) = 2;
   (*vv)(2) = 3;
-  SparseVect * sv = new SparseVect(3);
+  SP::SparseVect sv(new SparseVect(3));
   (*sv)(0) = 4;
   (*sv)(1) = 5;
   (*sv)(2) = 6;
-  SparseVect * sv2 = new SparseVect(4);
+  SP::SparseVect sv2(new SparseVect(4));
   (*sv2)(0) = 4;
   (*sv2)(1) = 5;
   (*sv2)(2) = 6;
-  SiconosVector * w = new SimpleVector(*sv);
-  SiconosVector * ww = new SimpleVector(*sv2);
-  SiconosVector * res = new SimpleVector(4);
-  SiconosVector * res2 = new SimpleVector(3);
+  SP::SiconosVector w(new SimpleVector(*sv));
+  SP::SiconosVector ww(new SimpleVector(*sv2));
+  SP::SiconosVector res(new SimpleVector(4));
+  SP::SiconosVector res2(new SimpleVector(3));
 
   // Triang * ...
   prod(*tmp2, *v, *res2);
@@ -3358,17 +3100,6 @@ void SimpleMatrixTest::testProdTer()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", norm_2(res->getDense() - prod(tmp5->getBanded(), v->getDense())) < tol, true);
   prod(*tmp5, *w, *res);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdTer: ", norm_2(res->getDense() - prod(tmp5->getBanded(), w->getSparse())) < tol, true);
-  delete tmp2;
-  delete tmp3;
-  delete tmp4;
-  delete tmp5;
-  delete sv;
-  delete v;
-  delete w;
-  delete vv;
-  delete ww;
-  delete res;
-  delete res2;
   cout << "-->  test prodTer ended with success." << endl;
 }
 
@@ -3376,13 +3107,13 @@ void SimpleMatrixTest::testProd4() // y += A*x
 {
   cout << "--> Test: prod. mat-vect (4)" << endl;
 
-  SiconosVector * y = new SimpleVector(size);
-  SiconosVector * x = new SimpleVector(size, 4.3);
-  SiconosVector * x1 = new SimpleVector(size - 2, 2.3);
-  SiconosVector * x2 = new SimpleVector(2, 3.1);
+  SP::SiconosVector y(new SimpleVector(size));
+  SP::SiconosVector x(new SimpleVector(size, 4.3));
+  SP::SiconosVector x1(new SimpleVector(size - 2, 2.3));
+  SP::SiconosVector x2(new SimpleVector(2, 3.1));
 
-  SiconosVector * xB = new BlockVector(x1, x2);
-  SiconosVector * yB = new BlockVector(*xB);
+  SP::SiconosVector xB(new BlockVector(x1, x2));
+  SP::SiconosVector yB(new BlockVector(*xB));
   yB->zero();
 
   // Matrix - vector product
@@ -3434,13 +3165,6 @@ void SimpleMatrixTest::testProd4() // y += A*x
       sum += 2 * (*A)(i, j) * (*xB)(j);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd4: ", fabs((*yB)(i) - sum) < tol, true);
   }
-
-  delete x;
-  delete y;
-  delete xB;
-  delete yB;
-  delete x1;
-  delete x2;
   cout << "-->  test prod4 ended with success." << endl;
 }
 
@@ -3448,13 +3172,13 @@ void SimpleMatrixTest::testProd5() // y += a*A*x
 {
   cout << "--> Test: prod. mat-vect (5)" << endl;
 
-  SiconosVector * y = new SimpleVector(size);
-  SiconosVector * x = new SimpleVector(size, 4.3);
-  SiconosVector * x1 = new SimpleVector(size - 2, 2.3);
-  SiconosVector * x2 = new SimpleVector(2, 3.1);
+  SP::SiconosVector y(new SimpleVector(size));
+  SP::SiconosVector x(new SimpleVector(size, 4.3));
+  SP::SiconosVector x1(new SimpleVector(size - 2, 2.3));
+  SP::SiconosVector x2(new SimpleVector(2, 3.1));
 
-  SiconosVector * xB = new BlockVector(x1, x2);
-  SiconosVector * yB = new BlockVector(*xB);
+  SP::SiconosVector xB(new BlockVector(x1, x2));
+  SP::SiconosVector yB(new BlockVector(*xB));
   yB->zero();
 
   // Matrix - vector product
@@ -3506,13 +3230,6 @@ void SimpleMatrixTest::testProd5() // y += a*A*x
       sum += a * 2 * (*A)(i, j) * (*xB)(j);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd5: ", fabs((*yB)(i) - sum) < tol, true);
   }
-
-  delete x;
-  delete y;
-  delete xB;
-  delete yB;
-  delete x1;
-  delete x2;
   cout << "-->  test prod5 ended with success." << endl;
 }
 
@@ -3520,16 +3237,16 @@ void SimpleMatrixTest::testProd6() // y += trans(A)*x
 {
   cout << "--> Test: prod. mat-vect (6)" << endl;
 
-  SiconosVector * y = new SimpleVector(size);
-  SiconosVector * x = new SimpleVector(size, 4.3);
-  SiconosVector * x1 = new SimpleVector(size - 2, 2.3);
-  SiconosVector * x2 = new SimpleVector(2, 3.1);
+  SP::SiconosVector y(new SimpleVector(size));
+  SP::SiconosVector x(new SimpleVector(size, 4.3));
+  SP::SiconosVector x1(new SimpleVector(size - 2, 2.3));
+  SP::SiconosVector x2(new SimpleVector(2, 3.1));
 
-  SiconosVector * xB = new BlockVector(x1, x2);
-  SiconosVector * yB = new BlockVector(*xB);
+  SP::SiconosVector xB(new BlockVector(x1, x2));
+  SP::SiconosVector yB(new BlockVector(*xB));
   yB->zero();
 
-  SiconosMatrix * tmp = new SimpleMatrix(*A);
+  SP::SiconosMatrix tmp(new SimpleMatrix(*A));
   tmp->trans();
   // Matrix - vector product
 
@@ -3581,14 +3298,6 @@ void SimpleMatrixTest::testProd6() // y += trans(A)*x
       sum += 2 * (*tmp)(i, j) * (*xB)(j);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd6: ", fabs((*yB)(i) - sum) < tol, true);
   }
-
-  delete tmp;
-  delete x;
-  delete y;
-  delete xB;
-  delete yB;
-  delete x1;
-  delete x2;
   cout << "-->  test prod6 ended with success." << endl;
 }
 
@@ -3596,10 +3305,10 @@ void SimpleMatrixTest::testGemv()
 {
   cout << "--> Test: gemv" << endl;
 
-  SiconosVector * y = new SimpleVector(size, 1.0);
-  SiconosVector * x = new SimpleVector(size, 4.3);
+  SP::SiconosVector y(new SimpleVector(size, 1.0));
+  SP::SiconosVector x(new SimpleVector(size, 4.3));
 
-  SiconosVector * backUp = new SimpleVector(*y);
+  SP::SiconosVector backUp(new SimpleVector(*y));
 
   gemv(*A, *x, *y);
   double sum;
@@ -3642,12 +3351,6 @@ void SimpleMatrixTest::testGemv()
       sum += a * (*A)(j, i) * (*x)(j);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testgemv: ", fabs((*y)(i) - sum) < tol, true);
   }
-
-
-  delete x;
-  delete y;
-  delete backUp;
-
   cout << "-->  test gemv ended with success." << endl;
 }
 
@@ -3658,7 +3361,7 @@ void SimpleMatrixTest::testGemm()
   double a = 2.3;
   double b = 1.5;
   *C = *A;
-  SiconosMatrix * backUp = new SimpleMatrix(*C);
+  SP::SiconosMatrix backUp(new SimpleMatrix(*C));
 
   gemm(*A, *B, *C);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm: ", norm_inf(*C->getDensePtr() - prod(*A->getDensePtr(), *B->getDensePtr())) < tol, true);
@@ -3676,9 +3379,6 @@ void SimpleMatrixTest::testGemm()
   *C = *backUp;
   gemm(CblasTrans, CblasTrans, a, *A, *B, b, *C);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm: ", norm_inf(*C->getDensePtr() - a * prod(trans(*A->getDensePtr()), trans(*B->getDensePtr())) - b**backUp->getDensePtr()) < tol, true);
-
-
-  delete backUp;
   cout << "-->  test gemm ended with success." << endl;
 }
 

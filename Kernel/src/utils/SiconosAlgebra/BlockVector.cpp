@@ -478,7 +478,6 @@ BlockVector& BlockVector::operator = (const SiconosVector& vIn)
       //    std::cout << "WARNING: BlockVector::operator = BlockVector, v=w, with v and w having blocks of different sizes. This operation may be time-consuming and inappropriate." << std::endl;
       //    SiconosVector * tmp = new SimpleVector(vIn);
       //    *this = *tmp;
-      //    delete tmp;
 
       // component by component copy ...
       for (unsigned int i = 0; i < sizeV; ++i)
@@ -525,7 +524,6 @@ BlockVector& BlockVector::operator = (const BlockVector& vIn)
     //       std::cout << "WARNING: BlockVector::operator = BlockVector, v=w, with v and w having blocks of different sizes. This operation may be time-consuming and inappropriate." << std::endl;
     //       SiconosVector * tmp = new SimpleVector(vIn);
     //       *this = *tmp;
-    //       delete tmp;
 
     // component by component copy ...
     for (unsigned int i = 0; i < sizeV; ++i)
@@ -583,7 +581,6 @@ BlockVector& BlockVector::operator += (const SiconosVector& vIn)
     {
       //      SiconosVector * tmp = new SimpleVector(vIn);
       //      *this += *tmp;
-      //      delete tmp;
       for (unsigned int i = 0; i < sizeV; ++i)
         (*this)(i) += vIn(i);
     }
@@ -622,7 +619,6 @@ BlockVector& BlockVector::operator -= (const SiconosVector& vIn)
     {
       //    SiconosVector * tmp = new SimpleVector(vIn);
       //    *this -= *tmp;
-      //    delete tmp;
       for (unsigned int i = 0; i < sizeV; ++i)
         (*this)(i) -= vIn(i);
     }

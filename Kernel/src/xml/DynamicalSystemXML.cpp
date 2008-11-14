@@ -35,11 +35,11 @@ DynamicalSystemXML::DynamicalSystemXML(xmlNodePtr DSNode, bool):
 const DS::TYPES DynamicalSystemXML::getType() const
 {
   std::string res((char*)rootNode->name);
-  if (res == "NonLinearDS")
+  if (res == "FirstOrderNonLinearDS")
     return FONLDS;
-  else if (res == "LinearDS")
+  else if (res == "FirstOrderLinearDS")
     return FOLDS;
-  else if (res == "LinearTIDS")
+  else if (res == "FirstOrderLinearTIDS")
     return FOLTIDS;
   else if (res == "LagrangianDS")
     return LNLDS;

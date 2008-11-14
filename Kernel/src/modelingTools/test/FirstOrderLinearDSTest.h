@@ -59,10 +59,12 @@ private:
 
   // Members
 
-  SimpleVector * x0, *b0;
-  SiconosMatrix *A0, *J0;
-  xmlNode * node1 , *node2;
-  FirstOrderLinearDSXML* tmpxml1, * tmpxml2;
+  SP::SiconosVector x0;
+  SP::Plugged_Vector_FTime b0;
+  SP::SiconosMatrix A0;
+  SP::Plugged_Matrix_FTime A0p;
+  xmlNodePtr node1, node2;
+  SP::FirstOrderLinearDSXML tmpxml1, tmpxml2;
 public:
   void setUp();
   void tearDown();

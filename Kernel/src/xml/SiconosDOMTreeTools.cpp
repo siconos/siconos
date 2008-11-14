@@ -81,7 +81,7 @@ SimpleMatrix SiconosDOMTreeTools::getSiconosMatrixValue(const xmlNodePtr siconos
     xmlNodePtr node = SiconosDOMTreeTools::findNodeChild(siconosMatrixNode, SDTT_ROW);
     unsigned int i = 0;
     SimpleMatrix matrix(matrixRowSize, matrixColSize);
-    SimpleVector *v = new SimpleVector(matrixColSize);
+    SP::SimpleVector v(new SimpleVector(matrixColSize));
     while ((node) && (i < matrixRowSize))
     {
       if (getSiconosRowMatrixValue(node, matrixColSize).size() != matrixColSize)
@@ -94,7 +94,6 @@ SimpleMatrix SiconosDOMTreeTools::getSiconosMatrixValue(const xmlNodePtr siconos
       node = SiconosDOMTreeTools::findFollowNode(node, SDTT_ROW);
       i++;
     }
-    delete v;
     return matrix;
   }
 }
@@ -183,7 +182,7 @@ void SiconosDOMTreeTools::setSiconosMatrixNodeValue(const xmlNodePtr siconosMatr
     xmlNodePtr node = SiconosDOMTreeTools::findNodeChild(siconosMatrixNode, SDTT_ROW);
 
     unsigned int i = 0;
-    SimpleVector * matRow = new SimpleVector(matrix.size(1));
+    SP::SimpleVector matRow(new SimpleVector(matrix.size(1)));
     while ((node) && (i < matrixRowSize))
     {
       matrix.getRow(i, *matRow);
@@ -191,7 +190,6 @@ void SiconosDOMTreeTools::setSiconosMatrixNodeValue(const xmlNodePtr siconosMatr
       node = SiconosDOMTreeTools::findFollowNode(node, SDTT_ROW);
       i++;
     }
-    delete matRow;
   }
 }
 
@@ -318,7 +316,7 @@ xmlNodePtr SiconosDOMTreeTools::createMatrixNode(xmlNodePtr rootNode, const stri
 
   xmlNewProp(node, (xmlChar*)(SDTT_MATRIXCOLSIZE.c_str()), (xmlChar*)col.c_str());
   xmlNewProp(node, (xmlChar*)(SDTT_MATRIXROWSIZE.c_str()), (xmlChar*)row.c_str());
-  SimpleVector * matRow = new SimpleVector(matrix.size(1));
+  SP::SimpleVector matRow(new SimpleVector(matrix.size(1)));
   for (unsigned int i = 0; i < matrix.size(0); i++)
   {
     rowNode = new xmlNode();
@@ -328,7 +326,6 @@ xmlNodePtr SiconosDOMTreeTools::createMatrixNode(xmlNodePtr rootNode, const stri
     xmlAddChildList(node, rowNode);
     delete rowNode;
   }
-  delete matRow;
   xmlAddChildList(rootNode, node);
 
   return node;

@@ -37,41 +37,38 @@ int main(int argc, char* argv[])
     // problem size
     unsigned int size = 3;
     // initial state
-    SimpleVector * q0 = new SimpleVector(3);
+    SP::SimpleVector q0(new SimpleVector(3));
     (*q0)(0) = 1;
     (*q0)(1) = 2;
     (*q0)(2) = 3;
-    SimpleVector * v0 = new SimpleVector(3);
+    SP::SimpleVector v0(new SimpleVector(3));
     (*v0)(0) = 4;
     (*v0)(1) = 5;
     (*v0)(2) = 6;
 
     // constructor from min set of data
     cout << "======== Test 1 ============= " << endl;
-    LagrangianDS * lds1 = new LagrangianDS(1, size, *q0, *v0);
+    SP::LagrangianDS lds1(new LagrangianDS(1, size, *q0, *v0));
     lds1->display();
-    delete lds1;
 
     cout << "======== Test 2 ============= " << endl;
     // constructor from a set of data, M from a plugin.
-    lds1 = new LagrangianDS(1, size, *q0, *v0, "LagPlugin:computeMass");
+    lds1.reset(new LagrangianDS(1, size, *q0, *v0, "LagPlugin:computeMass"));
     lds1->computeMass(2);
     lds1->getMassPtr()->display();
     lds1->computeMass(2, v0);
     lds1->getMassPtr()->display();
-    delete lds1;
 
     cout << "======== Test 3 ============= " << endl;
     // constructor from a set of data, Mass a given matrix.
-    SiconosMatrix * A = new SiconosMatrix("mat.dat", true);
-    lds1 = new LagrangianDS(1, size, *q0, *v0, *A);
+    SP::SiconosMatrix A(new SiconosMatrix("mat.dat", true));
+    lds1.reset(new LagrangianDS(1, size, *q0, *v0, *A));
     lds1->getMassPtr()->display();
-    delete lds1;
 
     cout << "======== Test 4 ============= " << endl;
     // getter/setter
     // by "value" :
-    lds1 = new LagrangianDS(1, size, *q0, *v0);
+    lds1.reset(new LagrangianDS(1, size, *q0, *v0));
     lds1->setMass(*A);
     lds1->getMass().display();
     lds1->setFInt(*q0);
@@ -92,7 +89,7 @@ int main(int argc, char* argv[])
     cout << "======== Test 5 ============= " << endl;
     // getter/setter
     // by pointer :
-    SiconosMatrix * B = new SiconosMatrix("matB.dat", true);
+    SP::SiconosMatrix B(new SiconosMatrix("matB.dat", true));
     lds1->setMassPtr(B);
     lds1->getMassPtr()->display();
     lds1->setFIntPtr(v0);
@@ -122,8 +119,7 @@ int main(int argc, char* argv[])
 
     cout << "======== Test 6 ============= " << endl;
     // Plugin
-    delete lds1;
-    lds1 = new LagrangianDS(1, size, *q0, *v0);
+    lds1.reset(new LagrangianDS(1, size, *q0, *v0));
     lds1->setComputeMassFunction("LagPlugin.so", "computeMass");
     lds1->computeMass(2);
     lds1->getMassPtr()->display();
@@ -161,22 +157,18 @@ int main(int argc, char* argv[])
     lds1->computeJacobianVelocityQNLInertia(v0, q0);
     lds1->getJacobianVelocityQNLInertiaPtr()->display();
 
-    delete lds1;
-
     // set f, u, B
-    SimpleVector *u = new SimpleVector(2);
+    SP::SimpleVector u(new SimpleVector(2));
     (*u)(0) = 1.8;
     (*u)(1) = 1.4;
-    SimpleVector *f = new SimpleVector(size);
+    SP::SimpleVector f(new SimpleVector(size));
     (*f)(0) = 2.5;
     (*f)(1) = 4;
     (*f)(2) = 9;
 
 
-    SimpleVector *u2 = new SimpleVector(1);
+    SP::SimpleVector u2(new SimpleVector(1));
     (*u2)(0) = 34;
-    delete u2;
-
 
     cout << "======== Test 6 ============= " << endl;
     // xml constructor
@@ -211,9 +203,9 @@ int main(int argc, char* argv[])
     cout << node->name << endl;
 
     // xml constructor
-    LagrangianDSXML * tmpxml = new LagrangianDSXML(node, false);
+    SP::LagrangianDSXML tmpxml(new LagrangianDSXML(node, false));
 
-    lds1 = new LagrangianDS(tmpxml);
+    lds1.reset(new LagrangianDS(tmpxml));
     lds1->computeMass(2);
     lds1->getMassPtr()->display();
     lds1->computeFInt(2);
@@ -242,17 +234,6 @@ int main(int argc, char* argv[])
     lds1->getJacobianVelocityQNLInertiaPtr()->display();
     lds1->computeJacobianVelocityQNLInertia(v0, q0);
     lds1->getJacobianVelocityQNLInertiaPtr()->display();
-
-    delete tmpxml;
-
-    delete f;
-    delete u;
-    delete B;
-    delete A;
-    delete lds1;
-    delete q0;
-    delete v0;
-
   }
 
   // --- Exceptions handling ---

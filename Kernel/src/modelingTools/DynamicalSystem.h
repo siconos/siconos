@@ -484,14 +484,6 @@ public:
 
   // X memory
 
-  /** get the value of xMemory
-   *  \return a SiconosMemory
-   */
-  inline const SiconosMemory getXMemory() const
-  {
-    return *xMemory;
-  }
-
   /** get all the values of the state vector x stored in memory
    *  \return a memory
    */
@@ -499,16 +491,6 @@ public:
   {
     return xMemory;
   }
-
-  /** set the value of xMemory
-   *  \param a ref on a SiconosMemory
-   */
-  void setXMemory(const SiconosMemory&);
-
-  /** set xMemory to pointer newPtr
-   *  \param a ref on a SiconosMemory
-   */
-  void setXMemoryPtr(SP::SiconosMemory);
 
   // --- Steps in memory ---
 

@@ -71,10 +71,10 @@ private:
   void End();
   // Members
 
-  SiconosVector * ref;
+  SP::SiconosVector ref;
   std::vector<double> vq;
-  DenseVect * dv;
-  SparseVect * sv;
+  SP::DenseVect dv;
+  SP::SparseVect sv;
   double tol;
 
 public:

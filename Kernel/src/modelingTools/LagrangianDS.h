@@ -310,14 +310,6 @@ public:
 
   // Q memory
 
-  /** get the value of qMemory
-   *  \return a SiconosMemory
-   */
-  inline const SiconosMemory getQMemory() const
-  {
-    return *qMemory;
-  }
-
   /** get all the values of the state vector q stored in memory
    *  \return a memory
    */
@@ -325,16 +317,6 @@ public:
   {
     return qMemory;
   }
-
-  /** set the value of qMemory
-   *  \param a ref on a SiconosMemory
-   */
-  void setQMemory(const SiconosMemory&);
-
-  /** set qMemory to pointer newPtr
-   *  \param a ref on a SiconosMemory
-   */
-  void setQMemoryPtr(SP::SiconosMemory);
 
   // -- velocity --
 
@@ -401,14 +383,6 @@ public:
 
   // Velocity memory
 
-  /** get the value of velocityMemory
-   *  \return a SiconosMemory
-   */
-  inline const SiconosMemory getVelocityMemory() const
-  {
-    return *velocityMemory;
-  }
-
   /** get all the values of the state vector velocity stored in memory
    *  \return a memory
    */
@@ -416,16 +390,6 @@ public:
   {
     return velocityMemory;
   }
-
-  /** set the value of velocityMemory
-   *  \param a ref on a SiconosMemory
-   */
-  void setVelocityMemory(const SiconosMemory&);
-
-  /** set velocityMemory to pointer newPtr
-   *  \param a ref on a SiconosMemory
-   */
-  void setVelocityMemoryPtr(SP::SiconosMemory);
 
   // -- p --
 

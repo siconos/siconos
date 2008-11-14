@@ -28,30 +28,28 @@
 #include <iostream>
 using namespace std;
 
-Actuator::Actuator(): type(0), id("none"), allSensors(NULL), allDS(NULL),  model(NULL), timeDiscretisation(NULL), eActuator(NULL)
+Actuator::Actuator(): type(0), id("none")
 {
-  allDS = new DynamicalSystemsSet();
-  allSensors = new Sensors();
+  allDS.reset(new DynamicalSystemsSet());
+  allSensors.reset(new Sensors());
 }
 
-Actuator::Actuator(int name, TimeDiscretisation* t): type(name), id("none"), allSensors(NULL), allDS(NULL), model(t->getModelPtr()), timeDiscretisation(t), eActuator(NULL)
+Actuator::Actuator(int name, SP::TimeDiscretisation t): type(name), id("none")
 {
-  allDS = new DynamicalSystemsSet();
-  allSensors = new Sensors();
+  allDS.reset(new DynamicalSystemsSet());
+  allSensors.reset(new Sensors());
 }
 
-Actuator::Actuator(int name, TimeDiscretisation* t, const Sensors& sensorList): type(name), id("none"), allSensors(NULL), allDS(NULL), model(t->getModelPtr()), timeDiscretisation(t), eActuator(NULL)
+Actuator::Actuator(int name, SP::TimeDiscretisation t, const Sensors& sensorList): type(name), id("none")
 {
-  allDS = new DynamicalSystemsSet();
-  allSensors = new Sensors();
+  allDS.reset(new DynamicalSystemsSet());
+  allSensors.reset(new Sensors());
 }
 
 Actuator::~Actuator()
 {
   allDS->clear();
   allSensors->clear();
-  delete allDS;
-  delete allSensors;
 }
 
 void Actuator::addSensors(const Sensors& newSensors)
@@ -59,14 +57,12 @@ void Actuator::addSensors(const Sensors& newSensors)
   // Add all the Sensor of newSensors into allSensors.
   // => allSensors is not cleared and so all existing Sensors remain.
   // => no copy of Sensors but copy of the pointers
-
-  SensorsIterator itS;
-  for (itS = newSensors.begin(); itS != newSensors.end(); ++itS)
+  for (SensorsIterator itS = newSensors.begin(); itS != newSensors.end(); ++itS)
     allSensors->insert(*itS);
 
 }
 
-void Actuator::addSensorPtr(Sensor * newSensor)
+void Actuator::addSensorPtr(SP::Sensor newSensor)
 {
   // Add a Sensor into allSensors set: no copy, pointer link.
   allSensors->insert(newSensor);
@@ -77,13 +73,11 @@ void Actuator::addDynamicalSystems(const DynamicalSystemsSet& newDSs)
   // Add all the DS of newDSs into allDS.
   // => allDS is not cleared and so all existing DSs remain.
   // => no copy of DS but copy of the pointers
-
-  DSIterator itDS;
-  for (itDS = newDSs.begin(); itDS != newDSs.end(); ++itDS)
+  for (DSIterator itDS = newDSs.begin(); itDS != newDSs.end(); ++itDS)
     allDS->insert(*itDS);
 }
 
-void Actuator::addDynamicalSystemPtr(DynamicalSystem * newDS)
+void Actuator::addDynamicalSystemPtr(DS::DynamicalSystem newDS)
 {
   // Add a DS into allDS set: no copy, pointer link.
   allDS->insert(newDS);

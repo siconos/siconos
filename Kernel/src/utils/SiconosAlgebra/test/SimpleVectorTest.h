@@ -109,12 +109,12 @@ private:
   void End();
   // Members
 
-  SiconosVector *ref, *z, *zB, *tmp1, *tmp2, *tmp3, *tmp4;
-  const SiconosVector *x, *y, *xB, *yB;
+  SP::SiconosVector ref, z, zB, tmp1, tmp2, tmp3, tmp4;
+  SPC::SiconosVector x, y, xB, yB;
   unsigned int size, size1, size2;
   std::vector<double> vq;
-  DenseVect * dv;
-  SparseVect * sv;
+  SP::DenseVect  dv;
+  SP::SparseVect  sv;
   double tol;
 
 public:

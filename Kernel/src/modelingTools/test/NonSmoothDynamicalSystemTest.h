@@ -51,8 +51,8 @@ private:
   void End();
   // Members
 
-  xmlNode * node;
-  NonSmoothDynamicalSystemXML* tmpxml;
+  xmlNodePtr node;
+  SP::NonSmoothDynamicalSystemXML tmpxml;
 public:
   void setUp();
   void tearDown();

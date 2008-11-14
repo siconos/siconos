@@ -234,7 +234,7 @@ public:
    */
   inline SP::SiconosVector getVectorPtr(unsigned int pos)
   {
-    return vect.at(pos);
+    return vect[pos];
   };
 
   /** return i-eme SiconosVector of vect
@@ -243,7 +243,7 @@ public:
    */
   inline SPC::SiconosVector getVectorPtr(unsigned int pos) const
   {
-    return vect.at(pos);
+    return vect[pos];
   };
 
   /** set i-eme SiconosVector of vect (copy)

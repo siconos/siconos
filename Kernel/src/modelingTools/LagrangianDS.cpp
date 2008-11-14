@@ -486,19 +486,6 @@ void LagrangianDS::setQ0Ptr(SP::SiconosVector newPtr)
   q0 = newPtr;
 }
 
-void LagrangianDS::setQMemory(const SiconosMemory& newValue)
-{
-  if (! qMemory)
-    qMemory.reset(new SiconosMemory(newValue));
-  else
-    *qMemory = newValue;
-}
-
-void LagrangianDS::setQMemoryPtr(SP::SiconosMemory newPtr)
-{
-  qMemory = newPtr;
-}
-
 void LagrangianDS::setVelocity(const SiconosVector& newValue)
 {
   if (newValue.size() != ndof)
@@ -538,19 +525,6 @@ void LagrangianDS::setVelocity0Ptr(SP::SiconosVector newPtr)
 SP::SiconosVector LagrangianDS::getAccelerationPtr() const
 {
   return q[2];
-}
-
-void LagrangianDS::setVelocityMemory(const SiconosMemory& newValue)
-{
-  if (! velocityMemory)
-    velocityMemory.reset(new SiconosMemory(newValue));
-  else
-    *velocityMemory = newValue;
-}
-
-void LagrangianDS::setVelocityMemoryPtr(SP::SiconosMemory newPtr)
-{
-  velocityMemory = newPtr;
 }
 
 void LagrangianDS::setP(const SiconosVector& newValue, unsigned int level)

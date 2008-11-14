@@ -51,11 +51,11 @@ private:
 
   /** list of blocks dimension - tabRow[i] = tabRow[i-1] + ni, ni being the number of rows of block i.
    */
-  Index * tabRow;
+  SP::Index tabRow;
 
   /** list of blocks dimension - tabCol[i] = tabCol[i-1] + ni, ni being the number of columns of block i.
    */
-  Index * tabCol;
+  SP::Index tabCol;
 
   /** default constructor
    */
@@ -302,7 +302,7 @@ public:
   /** get the vector tabRow
    *  \return a pointer to vector of int
    */
-  inline const Index * getTabRowPtr() const
+  inline const SP::Index getTabRowPtr() const
   {
     return tabRow;
   };
@@ -310,7 +310,7 @@ public:
   /** get the vector tabCol
    *  \return a pointer to vector of int
    */
-  inline const Index * getTabColPtr() const
+  inline const SP::Index getTabColPtr() const
   {
     return tabCol;
   };

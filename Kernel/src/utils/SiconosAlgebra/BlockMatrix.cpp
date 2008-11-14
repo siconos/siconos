@@ -32,14 +32,10 @@ using std::endl;
 //                CONSTRUCTORS
 // =================================================
 
-// Default (private)
-BlockMatrix::BlockMatrix(): SiconosMatrix(0), tabRow(NULL), tabCol(NULL)
-{}
-
-BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), tabRow(NULL), tabCol(NULL)
+BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0)
 {
-  tabRow = new Index();
-  tabCol = new Index();
+  tabRow.reset(new Index());
+  tabCol.reset(new Index());
   if (m.isBlock())
   {
     unsigned int nbRows = m.getNumberOfBlocks(0);
@@ -92,12 +88,12 @@ BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), tabRow(NULL)
   }
 }
 
-BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0), tabRow(NULL), tabCol(NULL)
+BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0)
 {
   unsigned int nbRows = m.getNumberOfBlocks(0);
   unsigned int nbCols = m.getNumberOfBlocks(1);
-  tabRow = new Index();
-  tabCol = new Index();
+  tabRow.reset(new Index());
+  tabCol.reset(new Index());
   tabRow->reserve(nbRows);
   tabCol->reserve(nbCols);
 
@@ -135,13 +131,13 @@ BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0), tabRow(NULL), 
 }
 
 BlockMatrix::BlockMatrix(const std::vector<SP::SiconosMatrix >& m, unsigned int row, unsigned int col):
-  SiconosMatrix(0), tabRow(NULL), tabCol(NULL)
+  SiconosMatrix(0)
 {
   if (m.size() != (row * col))
     SiconosMatrixException::selfThrow("BlockMatrix constructor from a vector<SiconosMatrix*>, number of blocks inconsistent with provided dimensions.");
 
-  tabRow = new Index();
-  tabCol = new Index();
+  tabRow.reset(new Index());
+  tabCol.reset(new Index());
   tabRow->reserve(row);
   tabCol->reserve(col);
 
@@ -180,7 +176,7 @@ BlockMatrix::BlockMatrix(const std::vector<SP::SiconosMatrix >& m, unsigned int 
 }
 
 BlockMatrix::BlockMatrix(SP::SiconosMatrix A, SP::SiconosMatrix B, SP::SiconosMatrix C, SP::SiconosMatrix D):
-  SiconosMatrix(0), tabRow(NULL), tabCol(NULL)
+  SiconosMatrix(0)
 {
   if (A->size(0) != B->size(0) || C->size(0) != D->size(0) ||  A->size(1) != C->size(1) ||  B->size(1) != D->size(1))
     SiconosMatrixException::selfThrow("BlockMatrix constructor(A,B,C,D), inconsistent sizes between A, B, C or D SiconosMatrices.");
@@ -191,8 +187,8 @@ BlockMatrix::BlockMatrix(SP::SiconosMatrix A, SP::SiconosMatrix B, SP::SiconosMa
   // mat construction
   mat.reset(new BlocksMat(2, 2, 4));
 
-  tabRow = new Index();
-  tabCol = new Index();
+  tabRow.reset(new Index());
+  tabCol.reset(new Index());
   tabRow->reserve(2);
   tabCol->reserve(2);
 
@@ -218,10 +214,6 @@ BlockMatrix::~BlockMatrix()
 
   tabRow->clear();
   tabCol->clear();
-  delete tabRow;
-  tabRow = NULL;
-  delete tabCol;
-  tabCol = NULL;
 }
 
 // =================================================

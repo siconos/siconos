@@ -28,22 +28,22 @@ CPPUNIT_TEST_SUITE_REGISTRATION(LagrangianLinearTIDSTest);
 
 void LagrangianLinearTIDSTest::setUp()
 {
-  q0 = new SimpleVector(3);
+  q0.reset(new SimpleVector(3));
   (*q0)(0) = 1;
   (*q0)(1) = 2;
   (*q0)(2) = 3;
-  velocity0 = new SimpleVector(3);
+  velocity0.reset(new SimpleVector(3));
   (*velocity0)(0) = 4;
   (*velocity0)(1) = 5;
   (*velocity0)(2) = 6;
 
-  mass = new SimpleMatrix(3, 3);
+  mass.reset(new SimpleMatrix(3, 3));
   (*mass)(0, 0) = 1;
   (*mass)(1, 1) = 2;
   (*mass)(2, 2) = 3;
 
-  K = new SimpleMatrix("K.dat", true);
-  C = new SimpleMatrix("C.dat", true);
+  K.reset(new SimpleMatrix("K.dat", true));
+  C.reset(new SimpleMatrix("C.dat", true));
 
 
   // parse xml file:
@@ -68,22 +68,15 @@ void LagrangianLinearTIDSTest::setUp()
   }
 
   // look for NSDS node
-  xmlNode* nodetmp = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
+  xmlNodePtr nodetmp = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "DS_Definition");
   // get first ds
   node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "LagrangianLinearTIDS");
-  tmpxml1 = new LagrangianLinearTIDSXML(node1, false);
+  tmpxml1(new LagrangianLinearTIDSXML(node1, false));
 }
 
 void LagrangianLinearTIDSTest::tearDown()
-{
-  delete tmpxml1;
-  delete q0;
-  delete velocity0;
-  delete mass;
-  delete K;
-  delete C;
-}
+{}
 
 // xml constructor (1), without plugin
 void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS1()
@@ -92,7 +85,7 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS1()
   cout << "=== LagrangianLinearTIDS tests start ...===" << endl;
   cout << "===========================================" << endl;
   cout << "--> Test: constructor xml." << endl;
-  LagrangianLinearTIDS * ds = new LagrangianLinearTIDS(tmpxml1);
+  SP::LagrangianLinearTIDS ds(new LagrangianLinearTIDS(tmpxml1))
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1A : ", ds->getType() == LLTIDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1B : ", ds->getNumber() == 13, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1D : ", ds->getStepsInMemory() == 2, true);
@@ -104,7 +97,6 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1I : ", ds->getMass() == *mass, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1J : ", ds->getK() == *K, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1K : ", ds->getC() == *C, true);
-  delete ds;
   cout << "--> Constructor xml test ended with success." << endl;
 }
 
@@ -113,7 +105,7 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS1()
 void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS2()
 {
   cout << "--> Test: constructor 2." << endl;
-  LagrangianLinearTIDS * ds = new LagrangianLinearTIDS(8, *q0, *velocity0, *mass, *K, *C);
+  SP::LagrangianLinearTIDS ds(new LagrangianLinearTIDS(8, *q0, *velocity0, *mass, *K, *C));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2A : ", ds->getType() == LLTIDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2B : ", ds->getNumber() == 8, true);
   cout << "--> Test: constructor 2." << endl;
@@ -132,13 +124,11 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS2()
   double time = 1.5;
   ds->initialize("TimeStepping", time);
 
-  SimpleVector * x01 = new SimpleVector(3);
+  SP::SimpleVector x01(new SimpleVector(3));
   (*x01)(0) = 0;
   (*x01)(1) = 1;
   (*x01)(2) = 2;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2I : ", ds->getFExt() == time* *x01, true);
-  delete x01;
-  delete ds;
   cout << "--> Constructor 2 test ended with success." << endl;
 }
 
@@ -146,7 +136,7 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS2()
 void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS3()
 {
   cout << "--> Test: constructor 3." << endl;
-  LagrangianLinearTIDS * ds = new LagrangianLinearTIDS(8, *q0, *velocity0, *mass);
+  SP::LagrangianLinearTIDS ds(new LagrangianLinearTIDS(8, *q0, *velocity0, *mass));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2A : ", ds->getType() == LLTIDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2B : ", ds->getNumber() == 8, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2D : ", ds->getStepsInMemory() == 1, true);
@@ -164,33 +154,29 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS3()
   double time = 1.5;
   ds->initialize("TimeStepping", time);
 
-  SimpleVector * x01 = new SimpleVector(3);
+  SP::SimpleVector x01(new SimpleVector(3));
   (*x01)(0) = 0;
   (*x01)(1) = 1;
   (*x01)(2) = 2;
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2I : ", ds->getFExt() == time* *x01, true);
-  delete x01;
-  delete ds;
   cout << "--> Constructor 3 test ended with success." << endl;
 }
 
 void LagrangianLinearTIDSTest::testcomputeDS()
 {
   cout << "-->Test: computeDS." << endl;
-  DynamicalSystem * ds = new LagrangianLinearTIDS(tmpxml1);
-  LagrangianLinearTIDS * copy = static_cast<LagrangianLinearTIDS*>(ds);
+  SP::DynamicalSystem ds(new LagrangianLinearTIDS(tmpxml1));
+  SP::LagrangianLinearTIDS copy = boost::static_pointer_cast<LagrangianLinearTIDS>(ds);
   double time = 1.5;
   ds->initialize("EventDriven", time);
-  SiconosMatrix * jx = ds->getJacobianXRhsPtr();
-  SiconosVector * vf = ds->getRhsPtr();
+  SP::SiconosMatrix jx = ds->getJacobianXRhsPtr();
+  SP::SiconosVector vf = ds->getRhsPtr();
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSI : ", *(vf->getVectorPtr(0)) == *velocity0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSJ : ", prod(*mass, *(vf->getVectorPtr(1))) == (copy->getFExt() - prod(*K, *(copy->getQPtr())) - prod(*C, *(copy->getVelocityPtr()))) , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(*mass, *(jx->getBlockPtr(1, 0))) == (-1.0 * *K) , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(*mass, *(jx->getBlockPtr(1, 1))) == (-1.0 * *C) , true);
-
-  delete ds;
   cout << "--> computeDS test ended with success." << endl;
 
 

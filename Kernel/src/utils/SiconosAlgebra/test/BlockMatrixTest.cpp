@@ -73,7 +73,7 @@ void BlockMatrixTest::testConstructor0() // constructor with a vector of SP::Sic
   cout << "=== Block Matrix tests start ...=== " << endl;
   cout << "====================================" << endl;
   cout << "--> Test: constructor 0." << endl;
-  SiconosMatrix * test = new BlockMatrix(m, 2, 3);
+  SP::SiconosMatrix test(new BlockMatrix(m, 2, 3));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->isBlock() == true, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->size(0) == 5 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->size(1) == 7, true);
@@ -85,15 +85,14 @@ void BlockMatrixTest::testConstructor0() // constructor with a vector of SP::Sic
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->getBlockPtr(1, 2) == G, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", *test->getTabRowPtr() == tRow, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", *test->getTabColPtr() == tCol, true);
-  delete test;
   cout << "--> Constructor 0 test ended with success." << endl;
 }
 
 void BlockMatrixTest::testConstructor1() // Copy constructor, from a BlockMatrix
 {
   cout << "--> Test: constructor 1." << endl;
-  BlockMatrix * ref = new BlockMatrix(m, 2, 3);
-  SiconosMatrix * test = new BlockMatrix(*ref);
+  SP::BlockMatrix ref(new BlockMatrix(m, 2, 3));
+  SP::SiconosMatrix test(new BlockMatrix(*ref));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", test->isBlock() == true, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", test->size(0) == 5 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", test->size(1) == 7, true);
@@ -105,16 +104,14 @@ void BlockMatrixTest::testConstructor1() // Copy constructor, from a BlockMatrix
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *(test->getBlockPtr(1, 2)) == *G, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *test->getTabRowPtr() == tRow, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *test->getTabColPtr() == tCol, true);
-  delete ref;
-  delete test;
   cout << "--> Constructor 1(copy) test ended with success." << endl;
 }
 
 void BlockMatrixTest::testConstructor2() // Copy constructor, from a SiconosMatrix(Block)
 {
   cout << "--> Test: constructor 2." << endl;
-  SiconosMatrix * ref = new BlockMatrix(m, 2, 3);
-  SiconosMatrix * test = new BlockMatrix(*ref);
+  SP::SiconosMatrix ref(new BlockMatrix(m, 2, 3));
+  SP::SiconosMatrix test(new BlockMatrix(*ref));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", test->isBlock() == true, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", test->size(0) == 5 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", test->size(1) == 7, true);
@@ -127,16 +124,13 @@ void BlockMatrixTest::testConstructor2() // Copy constructor, from a SiconosMatr
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *test->getTabRowPtr() == tRow, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *test->getTabColPtr() == tCol, true);
 
-  delete ref;
-  delete test;
-
   cout << "--> Constructor 2(copy) test ended with success." << endl;
 }
 void BlockMatrixTest::testConstructor3() // Copy constructor, from a SiconosMatrix(Simple)
 {
   cout << "--> Test: constructor 3." << endl;
-  SiconosMatrix * ref = new SimpleMatrix(5, 7, 2.3);
-  SiconosMatrix * test = new BlockMatrix(*ref);
+  SP::SiconosMatrix ref(new SimpleMatrix(5, 7, 2.3));
+  SP::SiconosMatrix test(new BlockMatrix(*ref));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", test->isBlock() == true, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", test->size(0) == 5 , true);
@@ -144,7 +138,7 @@ void BlockMatrixTest::testConstructor3() // Copy constructor, from a SiconosMatr
   for (unsigned int i = 0; i < 5; ++i)
     for (unsigned int j = 0; j < 7; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", fabs((*test)(i, j) - 2.3) < tol, true);
-  const Index * tab = test->getTabRowPtr();
+  SPC::Index tab = test->getTabRowPtr();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", tab->size() == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", (*tab)[0] == 5, true);
 
@@ -152,16 +146,13 @@ void BlockMatrixTest::testConstructor3() // Copy constructor, from a SiconosMatr
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", tab->size() == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", (*tab)[0] == 7, true);
 
-  delete ref;
-  delete test;
-
   cout << "--> Constructor 3(copy) test ended with success." << endl;
 }
 
 void BlockMatrixTest::testConstructor4() // Constructor from 4 SP::SiconosMatrix
 {
   cout << "--> Test: constructor 4." << endl;
-  SiconosMatrix * test = new BlockMatrix(B, C, E, F);
+  SP::SiconosMatrix test(new BlockMatrix(B, C, E, F));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->isBlock() == true, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->size(0) == 5 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->size(1) == 6, true);
@@ -169,7 +160,7 @@ void BlockMatrixTest::testConstructor4() // Constructor from 4 SP::SiconosMatrix
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->getBlockPtr(0, 1) == C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->getBlockPtr(1, 0) == E, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->getBlockPtr(1, 1) == F, true);
-  const Index * tab = test->getTabRowPtr();
+  SPC::Index tab = test->getTabRowPtr();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", tab->size() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", (*tab)[0] == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", (*tab)[1] == 5, true);
@@ -177,14 +168,13 @@ void BlockMatrixTest::testConstructor4() // Constructor from 4 SP::SiconosMatrix
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", tab->size() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", (*tab)[0] == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", (*tab)[1] == 6, true);
-  delete test;
   cout << "--> Constructor 4 test ended with success." << endl;
 }
 
 // void BlockMatrixTest::testResize()
 // {
 //   cout << "--> Test: resize." << endl;
-//   SiconosMatrix * test = new BlockMatrix(m,2,3);
+//   SP::SiconosMatrix test(new BlockMatrix(m,2,3);
 //   test->resize(3,4);
 //   (*test)(2,0) = B;
 //   (*test)(2,1) = C;
@@ -209,14 +199,13 @@ void BlockMatrixTest::testConstructor4() // Constructor from 4 SP::SiconosMatrix
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->getBlockPtr(2,2) == D, true);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->getBlockPtr(2,3) == C, true);
 
-//   delete test;
 //   cout << "--> resize test ended with success." << endl;
 // }
 
 void BlockMatrixTest::testNormInf()
 {
   cout << "--> Test: normInf." << endl;
-  SiconosMatrix * test = new BlockMatrix(m, 2, 3);
+  SP::SiconosMatrix test(new BlockMatrix(m, 2, 3));
   test->zero();
   double n = 12;
   (*test)(4, 3) = n;
@@ -242,7 +231,7 @@ void BlockMatrixTest::testZero()
   v[1] = H ;
   v[2] = I ;
   v[3] = J ;
-  SiconosMatrix * test = new BlockMatrix(v, 2, 2);
+  SP::SiconosMatrix test(new BlockMatrix(v, 2, 2));
   test->zero();
   unsigned int n1 = test->size(0);
   unsigned int n2 = test->size(1);
@@ -264,8 +253,6 @@ void BlockMatrixTest::testZero()
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testZero : ", (*J)(i, j) == 0, true);
   }
 
-  delete test;
-
   cout << "--> zero test ended with success." << endl;
 }
 
@@ -282,7 +269,7 @@ void BlockMatrixTest::testEye()
   v[1] = H ;
   v[2] = I ;
   v[3] = J ;
-  SiconosMatrix * test = new BlockMatrix(v, 2, 2);
+  SP::SiconosMatrix test(new BlockMatrix(v, 2, 2));
   test->eye();
   unsigned int n1 = test->size(0);
   unsigned int n2 = test->size(1);
@@ -318,8 +305,6 @@ void BlockMatrixTest::testEye()
     }
   }
 
-  delete test;
-
   cout << "--> eye test ended with success." << endl;
 }
 // Add tests with getDense ...
@@ -327,8 +312,8 @@ void BlockMatrixTest::testEye()
 void BlockMatrixTest::testGetSetRowCol()
 {
   cout << "--> Test: get, set Row and Col." << endl;
-  SimpleVector * tmp = new SimpleVector(6);
-  SimpleVector * tmp1 = new SimpleVector(6);
+  SP::SimpleVector tmp(new SimpleVector(6));
+  SP::SimpleVector tmp1(new SimpleVector(6));
   (*tmp1)(0) = 1;
   (*tmp1)(2) = 2;
   SP::SiconosMatrix A(new SimpleMatrix(2, 2));
@@ -340,7 +325,7 @@ void BlockMatrixTest::testGetSetRowCol()
   v[1] = H ;
   v[2] = I ;
   v[3] = J ;
-  SiconosMatrix * test = new BlockMatrix(v, 2, 2);
+  SP::SiconosMatrix test(new BlockMatrix(v, 2, 2));
 
   test->setRow(1, *tmp1);
   test->getRow(1, *tmp);
@@ -349,8 +334,8 @@ void BlockMatrixTest::testGetSetRowCol()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", (*A)(1, 0) == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", (*H)(1, 0) == 2, true);
 
-  SimpleVector * tmp2 = new SimpleVector(7);
-  SimpleVector * tmp3 = new SimpleVector(7);
+  SP::SimpleVector tmp2(new SimpleVector(7));
+  SP::SimpleVector tmp3(new SimpleVector(7));
   (*tmp3)(0) = 1;
   (*tmp3)(2) = 2;
   test->setCol(1, *tmp3);
@@ -359,11 +344,6 @@ void BlockMatrixTest::testGetSetRowCol()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", (*A)(0, 1) == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", (*I)(0, 1) == 2, true);
 
-  delete test;
-  delete tmp;
-  delete tmp1;
-  delete tmp2;
-  delete tmp3;
   cout << "--> get, set Row and Col tests ended with success." << endl;
 }
 

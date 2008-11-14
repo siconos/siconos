@@ -54,20 +54,18 @@ ConstBlockIterator1 SiconosMatrix::end() const
   return it;
 };
 
-const Index * SiconosMatrix::getTabRowPtr() const
+const SP::Index SiconosMatrix::getTabRowPtr() const
 {
   SiconosMatrixException::selfThrow("SiconosMatrix::getTabRowPtr() : not implemented for this type of matrix (Simple?) reserved to BlockMatrix.");
   // fake to avoid error on warning.
-  Index * tmp = NULL;
-  return tmp;
+  return SP::Index();
 }
 
-const Index * SiconosMatrix::getTabColPtr() const
+const SP::Index SiconosMatrix::getTabColPtr() const
 {
   SiconosMatrixException::selfThrow("SiconosMatrix::getTabColPtr() : not implemented for this type of matrix (Simple?) reserved to BlockMatrix.");
   // fake to avoid error on warning.
-  Index * tmp = NULL;
-  return tmp;
+  return SP::Index();
 }
 
 //=====================
@@ -83,10 +81,10 @@ const bool isComparableTo(const  SiconosMatrix& m1, const  SiconosMatrix& m2)
   if ((!m1.isBlock() || !m2.isBlock()) && (m1.size(0) == m2.size(0)) && (m1.size(1) == m2.size(1)))
     return true;
 
-  const Index * I1R = m1.getTabRowPtr();
-  const Index * I2R = m2.getTabRowPtr();
-  const Index * I1C = m1.getTabColPtr();
-  const Index * I2C = m2.getTabColPtr();
+  const SP::Index I1R = m1.getTabRowPtr();
+  const SP::Index I2R = m2.getTabRowPtr();
+  const SP::Index I1C = m1.getTabColPtr();
+  const SP::Index I2C = m2.getTabColPtr();
 
   return ((*I1R == *I2R) && (*I1C == *I2C));
 }

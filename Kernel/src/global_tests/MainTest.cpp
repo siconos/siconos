@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
     // Add tests
     GTest->addTest("BouncingBall", BouncingBall);
 
-    //GTest->addTest("DiodeBridge",DiodeBridge);
+    GTest->addTest("DiodeBridge", DiodeBridge);
 
     GTest->addTest("BallBowl", BallBowl);
     // Run tests

@@ -51,13 +51,11 @@ void NonSmoothDynamicalSystemTest::setUp()
 
   // look for NSDS node
   node = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
-  tmpxml = new NonSmoothDynamicalSystemXML(node);
+  tmpxml.reset(new NonSmoothDynamicalSystemXML(node));
 }
 
 void NonSmoothDynamicalSystemTest::tearDown()
-{
-  delete tmpxml;
-}
+{}
 
 // xml constructor
 void NonSmoothDynamicalSystemTest::testBuildNonSmoothDynamicalSystem1()
@@ -66,32 +64,27 @@ void NonSmoothDynamicalSystemTest::testBuildNonSmoothDynamicalSystem1()
   cout << " ===== NonSmoothDynamicalSystem tests start ...===== " << endl;
   cout << "====================================================" << endl;
   cout << "------- Xml Constructor test -------" << endl;
-  NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(tmpxml);
+  SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem(tmpxml));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemA : ", nsds->getDSVectorSize() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemB : ", nsds->getDynamicalSystemPtr(0)->getNumber() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemC : ", nsds->getDynamicalSystemPtr(1)->getNumber() == 8, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemD : ", nsds->getInteractionVectorSize() == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemE : ", nsds->getInteractionPtr(0)->getNumber() == 12, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemF : ", nsds->isBVP() == false, true);
-  delete nsds;
   cout << " ------- Constructor xml NonSmoothDynamicalSystem ok -------" << endl;
 }
 // copy constructor
 void NonSmoothDynamicalSystemTest::testBuildNonSmoothDynamicalSystem2()
 {
   cout << "------- Copy Constructor test -------" << endl;
-  NonSmoothDynamicalSystem * nsds1 = new NonSmoothDynamicalSystem(tmpxml);
-  cout << " okokok0 " << endl;
-  NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(*nsds1);
-  cout << " okokok " << endl;
+  SP::NonSmoothDynamicalSystem  nsds1(new NonSmoothDynamicalSystem(tmpxml));
+  SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem(*nsds1));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2A : ", nsds->getDSVectorSize() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2B : ", nsds->getDynamicalSystemPtr(0)->getNumber() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2C : ", nsds->getDynamicalSystemPtr(1)->getNumber() == 8, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2D : ", nsds->getInteractionVectorSize() == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2E : ", nsds->getInteractionPtr(0)->getNumber() == 12, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2F : ", nsds->isBVP() == false, true);
-  delete nsds;
-  delete nsds1;
   cout << "------- Constructor copy NonSmoothDynamicalSystem ok -------" << endl;
 }
 
@@ -99,12 +92,12 @@ void NonSmoothDynamicalSystemTest::testBuildNonSmoothDynamicalSystem2()
 // addDynamicalSystem
 void NonSmoothDynamicalSystemTest::testaddDynamicalSystem()
 {
-  NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(tmpxml);
+  SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem(tmpxml));
   xmlNode *node2 = SiconosDOMTreeTools::findNodeChild(node, "DS_Definition");
   xmlNode * node3 = SiconosDOMTreeTools::findNodeChild(node2, "LagrangianLinearTIDS");
-  DynamicalSystemXML * tmpdsxml = new LagrangianLinearTIDSXML(node3, false);
+  SP::DynamicalSystemXML tmpdsxml(new LagrangianLinearTIDSXML(node3, false));
 
-  DynamicalSystem * ltids = new LagrangianLinearTIDS(tmpdsxml);
+  SP::DynamicalSystem ltids(new LagrangianLinearTIDS(tmpdsxml));
   ltids ->setNumber(23);
 
   nsds->addDynamicalSystem(ltids);
@@ -112,30 +105,23 @@ void NonSmoothDynamicalSystemTest::testaddDynamicalSystem()
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testaddDynamicalSystemB: ", nsds->getDynamicalSystemPtr(0)->getNumber() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testaddDynamicalSystemC : ", nsds->getDynamicalSystemPtr(1)->getNumber() == 8, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testaddDynamicalSystemC : ", nsds->getDynamicalSystemPtr(2)->getNumber() == 23, true);
-  delete ltids;
-  delete nsds;
-  delete tmpdsxml;
-
   cout << "------- test addDynamicalSystem ok -------" << endl;
 }
 
 // addInteraction
 void NonSmoothDynamicalSystemTest::testaddInteraction()
 {
-  NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(tmpxml);
+  SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem(tmpxml));
   xmlNode *node2 = SiconosDOMTreeTools::findNodeChild(node, "Interaction_Definition");
   xmlNode *node3 = SiconosDOMTreeTools::findNodeChild(node2, "Interaction");
   vector<int> tmp;
   tmp.resize(2, 1);
-  InteractionXML* interxml = new InteractionXML(node3, tmp);
-  Interaction * inter = new Interaction(interxml);
+  SP::InteractionXML interxml(new InteractionXML(node3, tmp));
+  SP::Interaction inter(new Interaction(interxml));
   nsds->addInteraction(inter);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2D : ", nsds->getInteractionVectorSize() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2E : ", nsds->getInteractionPtr(0)->getNumber() == 12, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2E : ", nsds->getInteractionPtr(1)->getNumber() == 12, true);
-  delete nsds;
-  delete inter;
-  delete interxml;
   cout << " ------- test addInteractiontest ok -------" << endl;
 }
 

@@ -48,7 +48,7 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver0()
   cout << " ===== NonSmoothSolver tests start ...===== " << endl;
   cout << "===========================================" << endl;
   cout << "------- Default constructor test -------" << endl;
-  NonSmoothSolver * NSS = new NonSmoothSolver();
+  SP::NonSmoothSolver NSS(new NonSmoothSolver());
   std::vector<int> i0 = *NSS->getIntParametersPtr();
   std::vector<double> d0 = *NSS->getDoubleParametersPtr();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverA : ", NSS->isSolverSet(), false);
@@ -60,8 +60,6 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver0()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverG : ", opt->nbParam == (int)NB_PARAM, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverH : ", !i1, false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverI : ", !d1, false);
-
-  delete NSS;
   cout << "------- Default constructor NonSmoothSolver ok -------" << endl;
 }
 
@@ -69,7 +67,7 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver0()
 void NonSmoothSolverTest::testBuildNonSmoothSolver1()
 {
   cout << "------- Basic constructor test -------" << endl;
-  NonSmoothSolver * NSS = new NonSmoothSolver("NSGS", iparam, dparam);
+  SP::NonSmoothSolver NSS(new NonSmoothSolver("NSGS", iparam, dparam));
   std::vector<int> i0 = *NSS->getIntParametersPtr();
   std::vector<double> d0 = *NSS->getDoubleParametersPtr();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverA : ", NSS->isSolverSet(), true);
@@ -91,7 +89,6 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver1()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverH : ", i1[i] == iparam[i], true);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverI : ", d1[i] == dparam[i], true);
   }
-  delete NSS;
   cout << "------- Basic Constructor NonSmoothSolver ok -------" << endl;
 }
 
@@ -99,8 +96,8 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver1()
 void NonSmoothSolverTest::testBuildNonSmoothSolver2()
 {
   cout << "------- Copy constructor test -------" << endl;
-  NonSmoothSolver * NSS0 = new NonSmoothSolver("NSGS", iparam, dparam);
-  NonSmoothSolver * NSS = new NonSmoothSolver(*NSS0);
+  SP::NonSmoothSolver NSS0(new NonSmoothSolver("NSGS", iparam, dparam));
+  SP::NonSmoothSolver NSS(new NonSmoothSolver(*NSS0));
 
   std::vector<int> i0 = *NSS->getIntParametersPtr();
   std::vector<double> d0 = *NSS->getDoubleParametersPtr();
@@ -123,7 +120,6 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver2()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverH : ", i1[i] == iparam[i], true);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverI : ", d1[i] == dparam[i], true);
   }
-  delete NSS;
   cout << "------- Constructor copy NonSmoothSolver ok -------" << endl;
 }
 
@@ -153,8 +149,8 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver3()
 
   // look for NonSmoothSolver node
   xmlNodePtr node = SiconosDOMTreeTools::findNodeChild(cur, "NonSmoothSolver");
-  NonSmoothSolverXML * solvXML = new NonSmoothSolverXML(node);
-  NonSmoothSolver * NSS = new NonSmoothSolver(solvXML);
+  SP::NonSmoothSolverXML solvXML(new NonSmoothSolverXML(node));
+  SP::NonSmoothSolver NSS(new NonSmoothSolver(solvXML));
   std::vector<int> i0 = *NSS->getIntParametersPtr();
   std::vector<double> d0 = *NSS->getDoubleParametersPtr();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverA : ", NSS->isSolverSet(), true);
@@ -176,8 +172,6 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver3()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverH : ", i1[i] == iparam[i], true);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverI : ", d1[i] == dparam[i], true);
   }
-  delete NSS;
-  delete solvXML;
   cout << "------- XML Constructor NonSmoothSolver ok -------" << endl;
 }
 

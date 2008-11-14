@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 #include "SimpleVectorTest.h"
 
@@ -34,61 +34,47 @@ void SimpleVectorTest::setUp()
 
   // size = size1 + size2;
 
-  ref = new SimpleVector(size);
+  ref.reset(new SimpleVector(size));
   for (unsigned int i = 0; i < size; ++i)
     (*ref)(i) = i;
   vq.resize(size, 1);
   for (unsigned int i = 0; i < size; i++)
     vq[i] = i + 1;
 
-  dv = new DenseVect(3);
+  dv.reset(new DenseVect(3));
   (*dv)(0) = 1;
   (*dv)(1) = 2;
   (*dv)(2) = 3;
-  sv = new SparseVect(5);
+  sv.reset(new SparseVect(5));
   (*sv)(1) = 22;
 
 
   // const vectors used for operators test (ex: x and y in z = x + y)
   // "B" in name for BlockVectors
-  x = new SimpleVector(vq);
-  y = new SimpleVector(vq);
-  tmp1 = new SimpleVector(size1);
-  tmp2 = new SimpleVector(size2);
+  x.reset(new SimpleVector(vq));
+  y.reset(new SimpleVector(vq));
+  tmp1.reset(new SimpleVector(size1));
+  tmp2.reset(new SimpleVector(size2));
   for (unsigned int i = 0; i < size1; ++i)
     (*tmp1)(i) = i;
   for (unsigned int i = 0; i < size2; ++i)
     (*tmp2)(i) = 100 * i;
 
-  xB = new BlockVector(tmp1, tmp2);
-  yB = new BlockVector(tmp2, tmp1);
+  xB.reset(new BlockVector(tmp1, tmp2));
+  yB.reset(new BlockVector(tmp2, tmp1));
 
   // vectors used as results
-  z = new SimpleVector(size);
-  tmp3 = new SimpleVector(size2);
-  tmp4 = new SimpleVector(size1);
-  zB = new BlockVector();
+  z.reset(new SimpleVector(size));
+  tmp3.reset(new SimpleVector(size2));
+  tmp4.reset(new SimpleVector(size1));
+  zB.reset(new BlockVector());
   zB->insertPtr(tmp3);
   zB->insertPtr(tmp4);
 
 }
 
 void SimpleVectorTest::tearDown()
-{
-  delete ref;
-  delete zB;
-  delete xB;
-  delete yB;
-  delete tmp1;
-  delete tmp2;
-  delete tmp3;
-  delete tmp4;
-  delete x;
-  delete y;
-  delete z;
-  delete dv;
-  delete sv;
-}
+{}
 
 void SimpleVectorTest::testConstructor0()
 {
@@ -96,39 +82,35 @@ void SimpleVectorTest::testConstructor0()
   cout << "===  Simple Vector tests start ...=== " << endl;
   cout << "====================================" << endl;
   cout << "--> Test: constructor 0." << endl;
-  SimpleVector * v = new SimpleVector(3);
+  SP::SimpleVector v(new SimpleVector(3));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", v->size() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", v->getNum() == 1, true);
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", (*v)(i) == 0, true);
-  delete v;
-  v = new SimpleVector(3, SPARSE);
+  v.reset(new SimpleVector(3, SPARSE));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", v->size() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", v->getNum() == 4, true);
-  delete v;
   cout << "--> Constructor 0 test ended with success." << endl;
 }
 
 void SimpleVectorTest::testConstructor1()
 {
   cout << "--> Test: constructor 1." << endl;
-  SimpleVector * v = new SimpleVector(3, 2.4);
+  SP::SimpleVector v(new SimpleVector(3, 2.4));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->size() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->getNum() == 1, true);
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", (*v)(i) == 2.4, true);
-  delete v;
-  v = new SimpleVector(3, 2.4, SPARSE);
+  v.reset(new SimpleVector(3, 2.4, SPARSE));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->size() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->getNum() == 4, true);
 
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", (*v)(i) == 2.4, true);
-  delete v;
   cout << "--> Constructor 1 test ended with success." << endl;
 }
 
@@ -136,14 +118,13 @@ void SimpleVectorTest::testConstructor2()
 {
   cout << "--> Test: constructor 2." << endl;
   // Copy from a std::vector
-  SimpleVector *v = new SimpleVector(vq);
+  SP::SimpleVector v(new SimpleVector(vq));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", v->size() == vq.size(), true);
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", (*v)(i) == vq[i], true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->getNum() == 1, true);
-  delete v;
   cout << "--> Constructor 2 test ended with success." << endl;
 }
 
@@ -151,24 +132,20 @@ void SimpleVectorTest::testConstructor2()
 void SimpleVectorTest::testConstructor3()
 {
   cout << "--> Test: constructor 3." << endl;
-  SiconosVector * tmp = new SimpleVector(vq);
-  SimpleVector *v = new SimpleVector(*tmp);
+  SP::SiconosVector tmp(new SimpleVector(vq));
+  SP::SimpleVector v(new SimpleVector(*tmp));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", v->size() == vq.size(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", *v == *tmp, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", v->getNum() == 1, true);
-  delete v;
-  delete tmp;
-  tmp = new SimpleVector(3, SPARSE);
-  v = new SimpleVector(*tmp);
+  tmp.reset(new SimpleVector(3, SPARSE));
+  v.reset(new SimpleVector(*tmp));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", v->size() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", *v == *tmp, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", v->getNum() == 4, true);
-  delete v;
-  delete tmp;
   cout << "--> Constructor 3 test ended with success." << endl;
 }
 
@@ -176,7 +153,7 @@ void SimpleVectorTest::testConstructor3()
 void SimpleVectorTest::testConstructor3Bis()
 {
   cout << "--> Test: constructor 3Bis." << endl;
-  SiconosVector * v = new SimpleVector(*xB);
+  SP::SiconosVector v(new SimpleVector(*xB));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3Bis : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3Bis : ", v->size() == size, true);
@@ -186,7 +163,6 @@ void SimpleVectorTest::testConstructor3Bis()
   for (unsigned int i = size1; i < size2; ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3Bis : ", (*v)(i) == (*tmp2)(i - size1), true);
 
-  delete v;
   cout << "--> Constructor 3Bis test ended with success." << endl;
 }
 
@@ -194,24 +170,20 @@ void SimpleVectorTest::testConstructor3Bis()
 void SimpleVectorTest::testConstructor4()
 {
   cout << "--> Test: constructor 4." << endl;
-  SimpleVector * tmp = new SimpleVector(vq);
-  SimpleVector *v = new SimpleVector(*tmp);
+  SP::SimpleVector tmp(new SimpleVector(vq));
+  SP::SimpleVector v(new SimpleVector(*tmp));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", v->size() == vq.size(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", *v == *tmp, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", v->getNum() == 1, true);
-  delete v;
-  delete tmp;
-  tmp = new SimpleVector(4, SPARSE);
-  v = new SimpleVector(*tmp);
+  tmp.reset(new SimpleVector(4, SPARSE));
+  v.reset(new SimpleVector(*tmp));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", v->size() == 4, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", *v == *tmp, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", v->getNum() == 4, true);
-  delete v;
-  delete tmp;
   cout << "--> Constructor 4 test ended with success." << endl;
 }
 
@@ -219,12 +191,12 @@ void SimpleVectorTest::testConstructor4()
 void SimpleVectorTest::testConstructor5()
 {
   cout << "--> Test: constructor 5." << endl;
-  SiconosVector * v = new SimpleVector(*dv);
+  SP::SiconosVector v(new SimpleVector(*dv));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->size() == dv->size(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", norm_inf(v->getDense() - *dv) < tol, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->getNum() == 1, true);
-  delete v;
+
   cout << "--> Constructor 5 test ended with success." << endl;
 }
 
@@ -232,12 +204,11 @@ void SimpleVectorTest::testConstructor5()
 void SimpleVectorTest::testConstructor6()
 {
   cout << "--> Test: constructor 6." << endl;
-  SiconosVector * v = new SimpleVector(*sv);
+  SP::SiconosVector v(new SimpleVector(*sv));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", v->size() == sv->size(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", norm_inf(v->getSparse() - *sv) < tol, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", v->getNum() == 4, true);
-  delete v;
   cout << "--> Constructor 6 test ended with success." << endl;
 }
 
@@ -245,13 +216,12 @@ void SimpleVectorTest::testConstructor6()
 void SimpleVectorTest::testConstructor7()
 {
   cout << "--> Test: constructor 7." << endl;
-  SiconosVector * v = new SimpleVector("vect.dat", 1);
+  SP::SiconosVector v(new SimpleVector("vect.dat", 1));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor7 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor7 : ", v->size() == 4, true);
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor7 : ", (*v)(i) == i, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor7 : ", v->getNum() == 1, true);
-  delete v;
   cout << "--> Constructor 7 test ended with success." << endl;
 }
 
@@ -259,21 +229,19 @@ void SimpleVectorTest::testConstructor7()
 void SimpleVectorTest::testZero()
 {
   cout << "--> Test: zero." << endl;
-  SiconosVector *v = new SimpleVector(vq);
+  SP::SiconosVector v(new SimpleVector(vq));
   v->zero();
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testZero : ", (*v)(i) == 0, true);
-  delete v;
   cout << "--> zero test ended with success." << endl;
 }
 
 void SimpleVectorTest::testNorm()
 {
   cout << "--> Test: norm." << endl;
-  SiconosVector *v = new SimpleVector(*dv);
+  SP::SiconosVector v(new SimpleVector(*dv));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testNorm : ", v->normInf() == norm_inf(*dv), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testNorm : ", (v->norm2() - norm_2(*dv)) < tol, true);
-  delete v;
   cout << "--> norm test ended with success." << endl;
 }
 
@@ -282,10 +250,9 @@ void SimpleVectorTest::testFill()
 {
   cout << "--> Test: fill." << endl;
   double val = 4.5;
-  SiconosVector *v = new SimpleVector(5, val);
+  SP::SiconosVector v(new SimpleVector(5, val));
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", (*v)(i) == val, true);
-  delete v;
   cout << "--> fill test ended with success." << endl;
 }
 
@@ -293,7 +260,7 @@ void SimpleVectorTest::testFill()
 void SimpleVectorTest::testResize()
 {
   cout << "--> Test: resize." << endl;
-  SiconosVector *v = new SimpleVector(vq);
+  SP::SiconosVector v(new SimpleVector(vq));
   v->resize(6);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test resize : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test resize : ", v->size() == 6, true);
@@ -302,7 +269,6 @@ void SimpleVectorTest::testResize()
   for (unsigned int i = vq.size(); i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("test resize : ", (*v)(i) == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test resize : ", v->getNum() == 1, true);
-  delete v;
   cout << "-->  resize test ended with success." << endl;
 }
 
@@ -312,14 +278,13 @@ void SimpleVectorTest::testSetBlock()
 
   // Block copy from a Simple into a Simple
   unsigned int sizeB = 2;
-  SiconosVector * subBlock = new SimpleVector(6);
+  SP::SiconosVector subBlock(new SimpleVector(6));
   unsigned int posIn = 1;
   unsigned int posOut = 3;
-  setBlock(ref, subBlock, sizeB, posIn, posOut);
+  setBlock(*ref, subBlock, sizeB, posIn, posOut);
 
   for (unsigned int i = posOut; i < sizeB; ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("test setBlock : ", (*subBlock)(i) == (*ref)(i + posIn), true);
-  delete subBlock;
   cout << "--> setBlock test ended with success." << endl;
 }
 
@@ -328,26 +293,22 @@ void SimpleVectorTest::testSetBlock2()
   cout << "--> Test: setBlock2." << endl;
 
   // Block copy from a Block into a Simple.
-  SiconosVector * BSV = new BlockVector();
+  SP::SiconosVector BSV(new BlockVector());
   BSV->insertPtr(ref);
-  SiconosVector * ref2 = new SimpleVector(3);
+  SP::SiconosVector ref2(new SimpleVector(3));
   for (unsigned int i = 0; i < 3; ++i)
     (*ref2)(i) = i;
   BSV->insertPtr(ref2);
 
-  SiconosVector * vOut = new SimpleVector(14);
+  SP::SiconosVector vOut(new SimpleVector(14));
 
   unsigned int sizeB = 6;
   unsigned int posIn = 1;
   unsigned int posOut = 3;
 
-  setBlock(BSV, vOut, sizeB, posIn, posOut);
+  setBlock(*BSV, vOut, sizeB, posIn, posOut);
   for (unsigned int i = 0; i < sizeB; ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("test setBlock : ", (*vOut)(i + posOut) == (*BSV)(i + posIn), true);
-
-  delete vOut;
-  delete ref2;
-  delete BSV;
 
   cout << "--> setBlock2 test ended with success." << endl;
 }
@@ -357,32 +318,27 @@ void SimpleVectorTest::testSetBlock3()
   cout << "--> Test: setBlock3." << endl;
 
   // Block copy from a Simple into a Block.
-  SiconosVector * ref2 = new SimpleVector(3);
+  SP::SiconosVector ref2(new SimpleVector(3));
   for (unsigned int i = 0; i < 3; ++i)
     (*ref2)(i) = i;
-  SiconosVector * ref3 = new SimpleVector(6);
+  SP::SiconosVector ref3(new SimpleVector(6));
   for (unsigned int i = 0; i < 6; ++i)
     (*ref3)(i) = i;
-  SiconosVector * BSV = new BlockVector();
+  SP::SiconosVector BSV(new BlockVector());
   BSV->insertPtr(ref3);
   BSV->insertPtr(ref2);
 
-  SiconosVector * vIn = new SimpleVector(8);
+  SP::SiconosVector vIn(new SimpleVector(8));
 
   unsigned int sizeB = 6;
   unsigned int posIn = 1;
   unsigned int posOut = 2;
 
-  setBlock(vIn, BSV, sizeB, posIn, posOut);
+  setBlock(*vIn, BSV, sizeB, posIn, posOut);
   for (unsigned int i = 0; i < sizeB; ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("test setBlock : ", (*BSV)(i + posOut) == (*vIn)(i + posIn), true);
 
-  delete vIn;
-  delete BSV;
-  delete ref2;
-  delete ref3,
-
-         cout << "--> setBlock3 test ended with success." << endl;
+  cout << "--> setBlock3 test ended with success." << endl;
 }
 
 void SimpleVectorTest::testSetBlock4()
@@ -391,7 +347,7 @@ void SimpleVectorTest::testSetBlock4()
 
   // copy from a Simple into a simple
   unsigned int sizeB = 9;
-  SimpleVector * subBlock = new SimpleVector(sizeB);
+  SP::SimpleVector subBlock(new SimpleVector(sizeB));
   unsigned int pos = 1;
   subBlock->setBlock(pos, *ref);
 
@@ -399,13 +355,13 @@ void SimpleVectorTest::testSetBlock4()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("test setBlock : ", fabs((*subBlock)(i) - (*ref)(i - pos)) < tol, true);
 
   // copy from a Block into a simple
-  SiconosVector * ref2 = new SimpleVector(2);
+  SP::SiconosVector ref2(new SimpleVector(2));
   for (unsigned int i = 0; i < 2; ++i)
     (*ref2)(i) = i;
-  SiconosVector * ref3 = new SimpleVector(4);
+  SP::SiconosVector ref3(new SimpleVector(4));
   for (unsigned int i = 0; i < 2; ++i)
     (*ref3)(i) = i;
-  SiconosVector * BSV = new BlockVector();
+  SP::SiconosVector BSV(new BlockVector());
   BSV->insertPtr(ref3);
   BSV->insertPtr(ref2);
 
@@ -415,12 +371,7 @@ void SimpleVectorTest::testSetBlock4()
   for (unsigned int i = pos; i < pos + 6; ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("test setBlock : ", fabs((*BSV)(i - pos) - (*subBlock)(i)) < tol, true);
 
-  delete subBlock;
-  delete BSV;
-  delete ref2;
-  delete ref3,
-
-         cout << "--> setBlock4 test ended with success." << endl;
+  cout << "--> setBlock4 test ended with success." << endl;
 }
 
 // OPERATORS
@@ -430,16 +381,16 @@ void SimpleVectorTest::testAssignment()
 {
   cout << "--> Test: assignment." << endl;
 
-  SiconosVector *v = new SimpleVector(vq.size());
+  SP::SiconosVector v(new SimpleVector(vq.size()));
 
   // Simple = Simple
-  SimpleVector *w = new SimpleVector(vq);
+  SP::SimpleVector w(new SimpleVector(vq));
   *v = *w;
   for (unsigned int i = 0; i < vq.size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment : ", (*v)(i) == (*w)(i), true);
 
   // Simple = Siconos (Simple)
-  SiconosVector *w2 = new SimpleVector(vq);
+  SP::SiconosVector w2(new SimpleVector(vq));
   *v = *w2;
   for (unsigned int i = 0; i < vq.size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment : ", (*v)(i) == (*w2)(i), true);
@@ -501,7 +452,7 @@ void SimpleVectorTest::testOperators2()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", fabs((*z)(i) - (*x)(i)) < tol, true);
 
   // dense +=, -=, ... sparse
-  SiconosVector * w = new SimpleVector(*sv);
+  SP::SiconosVector w(new SimpleVector(*sv));
   z->zero();
   *z += *w;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(*z->getDensePtr() - *w->getSparsePtr()) < tol, true);
@@ -514,15 +465,13 @@ void SimpleVectorTest::testOperators2()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(*z->getDensePtr() - *w->getSparsePtr()) < tol, true);
 
   // sparse += -= sparse
-  SiconosVector *v = new SimpleVector(5, SPARSE);
+  SP::SiconosVector v(new SimpleVector(5, SPARSE));
   *v += *w;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(v->getSparse() - *sv) < tol, true);
   *v *= 3;
   *v -= *w;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(v->getSparse() - 2 * *sv) < tol, true);
-  delete w;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", v->getNum() == 4, true);
-  delete v;
   cout << "--> operators2 test ended with success." << endl;
 }
 
@@ -530,22 +479,19 @@ void SimpleVectorTest::testOperators2()
 void SimpleVectorTest::testOperators3()
 {
   cout << "--> Test: operators3." << endl;
-  SiconosVector *v = new SimpleVector(vq);
-  SiconosVector *w = new SimpleVector(vq);
+  SP::SiconosVector v(new SimpleVector(vq));
+  SP::SiconosVector w(new SimpleVector(vq));
   double res;
   // *
   res = inner_prod(*v, *w); // dense*dense
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators3 : ", res == 55, true);
-  delete w;
-  w = new SimpleVector(*sv);
+  w.reset(new SimpleVector(*sv));
   res = inner_prod(*v, *w); // dense*sparse
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators3 : ", res == 44, true);
-  delete v;
-  v = new SimpleVector(*sv);
+  v.reset(new SimpleVector(*sv));
   res = inner_prod(*v, *w); // sparse*sparse
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators3 : ", res == 484, true);
-  delete w;
-  w = new SimpleVector(vq);
+  w.reset(new SimpleVector(vq));
   res = inner_prod(*v, *w); // sparse*dense
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators3 : ", res == 44, true);
   cout << "--> operators3 test ended with success." << endl;
@@ -581,11 +527,9 @@ void SimpleVectorTest::testOperators4()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(z->getDense() - x->getDense() / a1) < tol, true);
   z->zero();
 
-  delete x;
   //  sparse = a*sparse or sparse/a
-  x = new SimpleVector(*sv);
-  delete z;
-  z = new SimpleVector(size, SPARSE);
+  x.reset(new SimpleVector(*sv));
+  z.reset(new SimpleVector(size, SPARSE));
   *z = a**x; //
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(z->getSparse() - a * x->getSparse()) < tol, true);
   z->zero();
@@ -608,7 +552,7 @@ void SimpleVectorTest::testOperators4()
   //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ",norm_2(z->getSparse()-x->getSparse()/a1)<tol, true);
 
   // simple = a * block
-  z = new SimpleVector(size);
+  z.reset(new SimpleVector(size));
   *z = a**xB; //
   for (unsigned int i = 0; i < size ; ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", fabs((*z)(i) - (a * (*xB)(i))) < tol, true);
@@ -665,7 +609,7 @@ void SimpleVectorTest::testOperators4()
   for (unsigned int i = 0; i < size ; ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", fabs((*zB)(i) - ((*xB)(i) / a1)) < tol, true);
 
-  x = new SimpleVector(vq);
+  x.reset(new SimpleVector(vq));
 
   // block = a *simple
   zB->zero();
@@ -715,12 +659,10 @@ void SimpleVectorTest::testOperators4Bis()
   scal(1.0 / a, *x, *z);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Bis : ", norm_2(z->getDense() - x->getDense() / a) < tol, true);
   z->zero();
-  delete x;
 
   //  sparse = a*sparse or sparse/a
-  x = new SimpleVector(*sv);
-  delete z;
-  z = new SimpleVector(size, SPARSE);
+  x.reset(new SimpleVector(*sv));
+  z.reset(new SimpleVector(size, SPARSE));
   scal(a, *x, *z);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Bis : ", norm_2(z->getSparse() - a * x->getSparse()) < tol, true);
   z->zero();
@@ -729,7 +671,7 @@ void SimpleVectorTest::testOperators4Bis()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Bis : ", norm_2(z->getSparse() - x->getSparse() / a) < tol, true);
 
   // simple = a * block
-  z = new SimpleVector(size);
+  z.reset(new SimpleVector(size));
   scal(a, *xB, *z); //
   for (unsigned int i = 0; i < size ; ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Bis : ", fabs((*z)(i) - (a * (*xB)(i))) < tol, true);
@@ -748,7 +690,7 @@ void SimpleVectorTest::testOperators4Bis()
   for (unsigned int i = 0; i < size ; ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Bis : ", fabs((*zB)(i) - ((*xB)(i) / a)) < tol, true);
 
-  x = new SimpleVector(vq);
+  x.reset(new SimpleVector(vq));
 
   // block = a *simple
   zB->zero();
@@ -778,9 +720,8 @@ void SimpleVectorTest::testOperators4Ter()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Ter : ", norm_2(z->getDense() - 2 * a * x->getDense()) < tol, true);
 
   //  sparse += a*sparse or sparse/a
-  x = new SimpleVector(*sv);
-  delete z;
-  z = new SimpleVector(size, SPARSE);
+  x.reset(new SimpleVector(*sv));
+  z.reset(new SimpleVector(size, SPARSE));
   z->zero();
   scal(a, *x, *z, false);
   scal(a, *x, *z, false);
@@ -788,7 +729,7 @@ void SimpleVectorTest::testOperators4Ter()
 
 
   // simple = a * block
-  z = new SimpleVector(size);
+  z.reset(new SimpleVector(size));
   scal(a, *xB, *z, false); //
   scal(a, *xB, *z, false); //
 
@@ -802,7 +743,7 @@ void SimpleVectorTest::testOperators4Ter()
   for (unsigned int i = 0; i < size ; ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4Ter : ", fabs((*zB)(i) - 2 * (a * (*xB)(i))) < tol, true);
 
-  x = new SimpleVector(vq);
+  x.reset(new SimpleVector(vq));
 
   // block = a *simple
   zB->zero();
@@ -1036,7 +977,7 @@ void SimpleVectorTest::testOperators7()
   double a = 2.2;
 
   // z Simple ,  x Simple
-  SiconosVector * tmp = new SimpleVector(*z); // copy of z for comparison.
+  SP::SiconosVector tmp(new SimpleVector(*z)); // copy of z for comparison.
   axpy(a, *x, *z);
 
   for (unsigned int i = 0; i < size; ++i)
@@ -1050,8 +991,7 @@ void SimpleVectorTest::testOperators7()
   z->zero();
   zB->zero();
   // z Block, x Simple
-  delete tmp;
-  tmp = new SimpleVector(*zB);
+  tmp.reset(new SimpleVector(*zB));
   axpy(a, *x, *zB);
   for (unsigned int i = 0; i < size; ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators7 : ", fabs((*zB)(i) - a * (*x)(i) + (*tmp)(i)) < tol , true);
@@ -1063,7 +1003,6 @@ void SimpleVectorTest::testOperators7()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators7 : ", fabs((*zB)(i) - a * (*xB)(i) + (*tmp)(i)) < tol , true);
 
   zB->zero();
-  delete tmp;
 
   // TO DO x and/or y sparse.
   cout << "--> operators7 test ended with success." << endl;
@@ -1074,7 +1013,7 @@ void SimpleVectorTest::testOperators8()
 {
   cout << "--> Test: operators8." << endl;
 
-  SiconosMatrix *res = new SimpleMatrix(size1, size);
+  SP::SiconosMatrix res(new SimpleMatrix(size1, size));
   *res = outer_prod(*tmp1, *x); // dense*dense
 
   for (unsigned int i = 0 ; i < size1; ++i)
@@ -1082,20 +1021,19 @@ void SimpleVectorTest::testOperators8()
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8 : ", ((*res)(i, j) - (*tmp1)(i) * (*x)(j)) < tol , true);
 
   res->zero();
-  SiconosVector * w = new SimpleVector(*sv);
+  SP::SiconosVector w(new SimpleVector(*sv));
   *res = outer_prod(*tmp1, *w); // dense*sparse
   for (unsigned int i = 0 ; i < size1; ++i)
     for (unsigned int j = 0; j < size; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8 : ", ((*res)(i, j) - (*tmp1)(i) * (w->getSparse())(j)) < tol , true);
 
   res->zero();
-  SiconosVector *v = new SimpleVector(*sv);
-  SiconosMatrix *res2 = new SimpleMatrix(size, size);
+  SP::SiconosVector v(new SimpleVector(*sv));
+  SP::SiconosMatrix res2(new SimpleMatrix(size, size));
   *res2 = outer_prod(*v, *w); // sparse*sparse
   for (unsigned int i = 0 ; i < size1; ++i)
     for (unsigned int j = 0; j < size; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8 : ", ((*res2)(i, j) - (v->getSparse())(i) * (w->getSparse())(j)) < tol , true);
-  delete w;
   res->zero();
 
   *res2 = outer_prod(*v, *x); // sparse*dense
@@ -1103,9 +1041,6 @@ void SimpleVectorTest::testOperators8()
     for (unsigned int j = 0; j < size; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8 : ", ((*res2)(i, j) - (v->getSparse())(i) * (*x)(j)) < tol , true);
 
-  delete v;
-  delete res;
-  delete res2;
   cout << "--> operators8 test ended with success." << endl;
 }
 
@@ -1113,17 +1048,17 @@ void SimpleVectorTest::testSubscal()
 {
   cout << "--> Test: testSubscal." << endl;
   unsigned int size = 12;
-  SiconosVector * xx = new SimpleVector(size, 1.0);
-  SiconosVector * ys = new SimpleVector(size, 2.0);
+  SP::SiconosVector xx(new SimpleVector(size, 1.0));
+  SP::SiconosVector ys(new SimpleVector(size, 2.0));
 
-  SiconosVector * yy = new BlockVector();
-  SiconosVector * y1 = new SimpleVector(2, 1.0);
-  SiconosVector * y2 = new SimpleVector(3, 2.0);
-  SiconosVector * y3 = new SimpleVector(7, 4.0);
+  SP::SiconosVector yy(new BlockVector());
+  SP::SiconosVector y1(new SimpleVector(2, 1.0));
+  SP::SiconosVector y2(new SimpleVector(3, 2.0));
+  SP::SiconosVector y3(new SimpleVector(7, 4.0));
   yy->insertPtr(y1);
   yy->insertPtr(y2);
   yy->insertPtr(y3);
-  SiconosVector * yref = new SimpleVector(*ys);
+  SP::SiconosVector yref(new SimpleVector(*ys));
 
   double a = 3;
   std::vector<unsigned int> coord(4) ;
@@ -1166,8 +1101,7 @@ void SimpleVectorTest::testSubscal()
   }
 
   // xx sparse, ys dense
-  delete xx;
-  xx = new SimpleVector(size, SPARSE);
+  xx.reset(new SimpleVector(size, SPARSE));
   xx->fill(2.0);
   *yref = *ys;
   subscal(a, *xx, *ys, coord, true);
@@ -1180,8 +1114,7 @@ void SimpleVectorTest::testSubscal()
   }
 
   // xx sparse, ys sparse
-  delete ys;
-  ys = new SimpleVector(size, SPARSE);
+  ys.reset(new SimpleVector(size, SPARSE));
   *yref = *ys;
   subscal(a, *xx, *ys, coord, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(4) - a * (*xx)(1)) < tol, true);
@@ -1191,12 +1124,6 @@ void SimpleVectorTest::testSubscal()
     if (i != 4 && i != 5)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys->getSparsePtr())(i) - (*yref->getDensePtr())(i)) < tol, true);
   }
-  delete ys;
-  delete yy;
-  delete xx;
-  delete y1;
-  delete y2;
-  delete y3;
   cout << "-->  subscal test ended with success." << endl;
 }
 

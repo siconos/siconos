@@ -64,7 +64,7 @@ private:
   SP::SiconosMatrix B, C, D, E, F, G;
   std::vector<SP::SiconosMatrix> m;
   std::vector<unsigned int> tRow, tCol;
-  SP::BlocksMat  mapRef;
+  SP::BlocksMat mapRef;
   double tol;
 
 public:

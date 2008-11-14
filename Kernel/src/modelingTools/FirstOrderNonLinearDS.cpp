@@ -186,24 +186,6 @@ void FirstOrderNonLinearDS::setRPtr(SP::SiconosVector newPtr)
 
 }
 
-void FirstOrderNonLinearDS::setRMemory(const SiconosMemory& newValue)
-{
-  if (rMemory)
-  {
-    if (newValue.getMemorySize() != rMemory->getMemorySize())
-      RuntimeException::selfThrow("FirstOrderNonLinearDS::setRMemory - inconsistent sizes between rMemory input and existing memorySize");
-    else
-      *rMemory = newValue;
-  }
-  else
-    rMemory.reset(new SiconosMemory(newValue));
-}
-
-void FirstOrderNonLinearDS::setRMemoryPtr(SP::SiconosMemory newPtr)
-{
-  rMemory = newPtr;
-}
-
 void FirstOrderNonLinearDS::setM(const PMJF& newValue)
 {
   assert(newValue.size(0) == n && "FirstOrderNonLinearDS - setM: inconsistent dimensions with problem size for input matrix M.");
@@ -268,6 +250,13 @@ void FirstOrderNonLinearDS::initRhs(double time)
   computeJacobianXRhs(time);
 }
 
+void FirstOrderNonLinearDS::updatePlugins(double time)
+{
+  computeM(time);
+  computeF(time);
+  computeJacobianXF(time);
+}
+
 void FirstOrderNonLinearDS::initialize(const string& simulationType, double time, unsigned int sizeOfMemory)
 {
   // reset x to x0 and r to zero.
@@ -280,6 +269,9 @@ void FirstOrderNonLinearDS::initialize(const string& simulationType, double time
 
   // Initialize memory vectors
   initMemory(sizeOfMemory);
+
+  updatePlugins(time);
+
   if (simulationType == "EventDriven")
   {
     // Rhs and its jacobian

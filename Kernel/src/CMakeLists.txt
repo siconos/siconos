@@ -102,17 +102,17 @@ IF(CPPUNIT_FOUND)
   SET(LD_LIBRARY_PATH ".:${CMAKE_CURRENT_BINARY_DIR}/plugin:${CMAKE_CURRENT_BINARY_DIR}/plugin/test")
 
   # Siconos Algebra
-#  BEGIN_TEST(utils/SiconosAlgebra/test)
+  BEGIN_TEST(utils/SiconosAlgebra/test)
 
- # NEW_TEST(testSiconosAlgebra
- #   BlockMatrixTest.cpp  SimpleMatrixTest.cpp BlockVectorTest.cpp  SimpleVectorTest.cpp TestMain.cpp)
- # END_TEST()
+  NEW_TEST(testSiconosAlgebra
+    BlockMatrixTest.cpp  SimpleMatrixTest.cpp BlockVectorTest.cpp  SimpleVectorTest.cpp TestMain.cpp)
+  END_TEST()
   
   # Siconos Memory
-  #BEGIN_TEST(utils/SiconosMemory/test)
+  BEGIN_TEST(utils/SiconosMemory/test)
   
-  #NEW_TEST(testSiconosMemory SiconosMemoryTest.cpp TestMain.cpp)
-  #END_TEST()
+  NEW_TEST(testSiconosMemory SiconosMemoryTest.cpp TestMain.cpp)
+  END_TEST()
   
   # model
   BEGIN_TEST(model/test)
@@ -123,12 +123,13 @@ IF(CPPUNIT_FOUND)
   # modeling tools 
   BEGIN_TEST(modelingTools/test)
   
-  NEW_TEST(testModelingTools FirstOrderLinearTIRTest.cpp FirstOrderLinearRTest.cpp FirstOrderType1RTest.cpp 
+  NEW_TEST(testModelingTools FirstOrderLinearDSTest.cpp FirstOrderLinearTIRTest.cpp FirstOrderLinearRTest.cpp 
+    FirstOrderType1RTest.cpp 
     LagrangianLinearTIRTest.cpp LagrangianScleronomousRTest.cpp LagrangianRheonomousRTest.cpp 
     LagrangianCompliantRTest.cpp TestMain.cpp)
   END_TEST()
-    #FirstOrderNonLinearDSTest.cpp FirstOrderLinearDSTest.cpp 
-    #LagrangianDSTest.cpp LagrangianLinearTIDSTest.cpp TestMain.cpp)
+  #FirstOrderNonLinearDSTest.cpp FirstOrderLinearDSTest.cpp 
+  #LagrangianDSTest.cpp LagrangianLinearTIDSTest.cpp TestMain.cpp)
     
     
   

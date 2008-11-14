@@ -53,10 +53,10 @@ private:
 
   // Members
 
-  SimpleVector * q0, *velocity0;
-  SiconosMatrix *mass, *K, *C;
-  xmlNode * node1;
-  LagrangianLinearTIDSXML* tmpxml1;
+  SP::SimpleVector q0, velocity0;
+  SP::SiconosMatrix mass, K, C;
+  xmlNodePtr node1;
+  SP::LagrangianLinearTIDSXML tmpxml1;
 
 public:
   void setUp();

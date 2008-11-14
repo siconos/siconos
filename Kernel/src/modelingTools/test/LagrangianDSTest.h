@@ -57,10 +57,10 @@ private:
 
   // Members
 
-  SimpleVector * q0, *velocity0,  *u0;
-  SiconosMatrix *mass;
-  xmlNode * node1 , *node2, *node3;
-  LagrangianDSXML* tmpxml1, * tmpxml2,  * tmpxml3;
+  SP::SimpleVector q0, velocity0, u0;
+  SP::SiconosMatrix mass;
+  xmlNodePtr node1 , *node2, *node3;
+  SP::LagrangianDSXML tmpxml1, tmpxml2, tmpxml3;
 
 public:
   void setUp();

@@ -31,8 +31,8 @@ void OSNSMatrixTest::setUp()
   n = 5;
   tol = 1e-12;
   // Download a Model from Template.xml file
-  temp = new Model("Template.xml");
-  TimeStepping * s = static_cast<TimeStepping*>(temp->getSimulationPtr());
+  temp.reset(new Model("Template.xml"));
+  SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(temp->getSimulationPtr());
   s->initialize();
   // Get a set of Unitary Relations
   indexSet = s->getIndexSetPtr(0);
@@ -42,9 +42,7 @@ void OSNSMatrixTest::setUp()
 }
 
 void OSNSMatrixTest::tearDown()
-{
-  delete temp;
-}
+{}
 
 // Default constructor
 void OSNSMatrixTest::testBuildOSNSMatrix0()
@@ -53,10 +51,9 @@ void OSNSMatrixTest::testBuildOSNSMatrix0()
   cout << " ===== OSNSMatrix tests start ...===== " << endl;
   cout << "===========================================" << endl;
   cout << "------- Default constructor test -------" << endl;
-  OSNSMatrix * M = new OSNSMatrix();
+  SP::OSNSMatrix  M = new OSNSMatrix();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix0 : ", M->size() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix0 : ", M->getStorageType() == 0, true);
-  delete M;
   cout << "------- Default constructor OSNSMatrix ok -------" << endl;
   cout << endl << endl;
 }
@@ -65,14 +62,13 @@ void OSNSMatrixTest::testBuildOSNSMatrix0()
 void OSNSMatrixTest::testBuildOSNSMatrix1()
 {
   cout << "------- Constructor with dim. test -------" << endl;
-  OSNSMatrix * M = new OSNSMatrix(n);
+  SP::OSNSMatrix  M(new OSNSMatrix(n));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->size() == n, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->getStorageType() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->getDefaultMatrixPtr(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->getDefaultMatrixPtr()->size(0) == n, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->getDefaultMatrixPtr()->size(1) == n, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->getDefaultMatrixPtr()->normInf() < tol , true);
-  delete M;
   cout << "------- Constructor(dim) ended with success -------" << endl;
   cout << endl << endl;
 }
@@ -81,7 +77,7 @@ void OSNSMatrixTest::testBuildOSNSMatrix2()
 {
   cout << "------- Constructor with index set and list of blocks -------" << endl;
 
-  OSNSMatrix * M = new OSNSMatrix(indexSet, blocks);
+  SP::OSNSMatrix  M(new OSNSMatrix(indexSet, blocks));
 
   unsigned int dim = 0;
   for (UnitaryRelationsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
@@ -116,7 +112,6 @@ void OSNSMatrixTest::testBuildOSNSMatrix2()
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", (*M->getDefaultMatrixPtr() - MRef).normInf() < tol, true);
 
-  delete M;
   cout << "------- Constructor(indexSet,blocks) ended with success -------" << endl;
   cout << endl << endl;
 }
@@ -125,7 +120,7 @@ void OSNSMatrixTest::testFill()
 {
   cout << "------- fill function test -------" << endl;
   // Start from empty matrix and fill it
-  OSNSMatrix * M = new OSNSMatrix();
+  SP::OSNSMatrix  M(new OSNSMatrix());
   M->fill(indexSet, blocks);
 
   unsigned int dim = 0;
@@ -160,12 +155,8 @@ void OSNSMatrixTest::testFill()
     pos += (*it)->getNonSmoothLawSize();
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", (*M->getDefaultMatrixPtr() - MRef).normInf() < tol, true);
-
-
-  delete M;
-
   // Start from matrix with maxSize = M and and fill it (with resize)
-  M = new OSNSMatrix(30);
+  M.reset(new OSNSMatrix(30));
   M->fill(indexSet, blocks);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->size() == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getStorageType() == 0, true);
@@ -182,8 +173,6 @@ void OSNSMatrixTest::testFill()
     pos += (*it)->getNonSmoothLawSize();
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", (*M->getDefaultMatrixPtr() - MRef).normInf() < tol, true);
-
-  delete M;
   cout << "------- fill function test ended with success -------" << endl;
   cout << endl << endl;
 }
@@ -192,7 +181,7 @@ void OSNSMatrixTest::testConvert()
 {
   cout << "------- convert function test -------" << endl;
   // Start from empty matrix and fill it
-  OSNSMatrix * M = new OSNSMatrix();
+  SP::OSNSMatrix  M(new OSNSMatrix());
   M->fill(indexSet, blocks);
 
   M->convert();
@@ -224,7 +213,6 @@ void OSNSMatrixTest::testConvert()
   for (unsigned int k = 0; k < dim * dim; k++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testConvert : ", fabs(mRef[k] - m1[k]) < tol, true);
 
-  delete M;
   cout << "------- convert function test ended with success -------" << endl;
   cout << endl << endl;
 }
@@ -233,7 +221,7 @@ void OSNSMatrixTest::testFill2()
 {
   cout << "------- fill2 function test (sparse storage) -------" << endl;
   // Start from empty matrix and fill it
-  OSNSMatrix * M = new OSNSMatrix();
+  SP::OSNSMatrix  M(new OSNSMatrix());
   M->fill(indexSet, blocks);
 
   unsigned int dim = 0;
@@ -269,11 +257,8 @@ void OSNSMatrixTest::testFill2()
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", (*M->getDefaultMatrixPtr() - MRef).normInf() < tol, true);
 
-
-  delete M;
-
   // Start from matrix with maxSize = M and and fill it (with resize)
-  M = new OSNSMatrix(30);
+  M.reset(new OSNSMatrix(30));
   M->fill(indexSet, blocks);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->size() == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getStorageType() == 0, true);
@@ -291,7 +276,6 @@ void OSNSMatrixTest::testFill2()
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", (*M->getDefaultMatrixPtr() - MRef).normInf() < tol, true);
 
-  delete M;
   cout << "------- fill2 function test ended with success -------" << endl;
   cout << endl << endl;
 }
@@ -300,7 +284,7 @@ void OSNSMatrixTest::testConvert2()
 {
   cout << "------- convert2 function test -------" << endl;
   // Start from empty matrix and fill it
-  OSNSMatrix * M = new OSNSMatrix();
+  SP::OSNSMatrix  M(new OSNSMatrix());
   M->fill(indexSet, blocks);
 
   M->convert();
@@ -332,7 +316,6 @@ void OSNSMatrixTest::testConvert2()
   for (unsigned int k = 0; k < dim * dim; k++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testConvert2 : ", fabs(mRef[k] - m1[k]) < tol, true);
 
-  delete M;
   cout << "------- convert2 function test ended with success -------" << endl;
   cout << endl << endl;
 }

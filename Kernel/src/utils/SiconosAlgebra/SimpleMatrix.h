@@ -28,6 +28,10 @@
 /**Input parameter for copy and transpose constructor.*/
 const std::string transpose = "transpose";
 
+/** A STL vector of int */
+typedef std::vector<int> VInt;
+TYPEDEF_SPTR(VInt);
+
 class SimpleVector;
 
 /**  Matrix (embedded various types of Boost matrices of double)
@@ -67,10 +71,10 @@ protected:
   SimpleMatrix();
 
 private:
-  /** std::vector<int> ipiv;
+  /** VInt ipiv;
    * The pivot indices obtained from DGETRF (PLUFactorizationInPlace)
    */
-  std::vector<int> * ipiv;
+  SP::VInt ipiv;
 
   /** bool isPLUFactorized;
    *  Boolean = true if the Matrix has been PLU Factorized in place.

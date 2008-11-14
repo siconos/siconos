@@ -17,6 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "FirstOrderNonLinearDSXML.h"
+#include "SiconosMemoryXML.h"
+
 using namespace std;
 
 FirstOrderNonLinearDSXML::FirstOrderNonLinearDSXML():
@@ -111,12 +113,12 @@ void FirstOrderNonLinearDSXML::setXMemory(const SiconosMemory& smem)
     xMemoryXML.reset(new SiconosMemoryXML(NULL, rootNode, DS_XMEMORY));
     xMemoryNode = xMemoryXML->getSiconosMemoryXMLNode();
     xMemoryXML->setSiconosMemorySize(smem.getMemorySize());
-    xMemoryXML->setSiconosMemoryVector(smem.getVectorMemory());
+    xMemoryXML->setSiconosMemoryVector(*smem.getVectorMemoryPtr());
   }
   else
   {
     xMemoryXML->setSiconosMemorySize(smem.getMemorySize());
-    xMemoryXML->setSiconosMemoryVector(smem.getVectorMemory());
+    xMemoryXML->setSiconosMemoryVector(*smem.getVectorMemoryPtr());
   }
 }
 
