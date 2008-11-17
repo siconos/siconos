@@ -132,8 +132,8 @@ void LinearOSNS::initialize(SP::Simulation sim)
       if (MStorageType == 0)
         M.reset(new OSNSMatrix(maxSize, 0));
 
-      else  // if(MStorageType == 1) size = number of unitaryBlocks = number of UR in the largest considered indexSet
-        M.reset(new OSNSMatrix(maxSize, 0));
+      else // if(MStorageType == 1) size = number of unitaryBlocks = number of UR in the largest considered indexSet
+        M.reset(new OSNSMatrix(simulation->getIndexSetPtr(levelMin)->size(), 1));
     }
   }
 }
