@@ -208,12 +208,7 @@ int main(int argc, char* argv[])
 
 
     // --- elapsed time computing ---
-    end = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t2 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-    elapsed = t2 - t1;
-    elapsed2 = (end - start) / (double)CLOCKS_PER_SEC;
-    cout << "time = " << elapsed << " --- cpu time " << elapsed2 << endl;
+    cout << "time = " << t.elapsed() << endl;
 
     // Number of time iterations
     cout << "Number of iterations done: " << k << endl;

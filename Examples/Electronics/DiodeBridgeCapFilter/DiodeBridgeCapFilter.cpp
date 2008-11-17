@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
 
     cout << " LS1 matrice A = " << endl;
     LS1_A.display();
-    FirstOrderLinearDS* LS1DiodeBridgeCapFilter = new FirstOrderLinearDS(1, init_stateLS1, LS1_A);
+    SP::FirstOrderLinearDS LS1DiodeBridgeCapFilter(new FirstOrderLinearDS(init_stateLS1, LS1_A));
 
     // --- Linear system 2 (load and filter) specification ---
     SimpleVector init_stateLS2(1);
@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
 
     cout << " LS2 matrice A = " << endl;
     LS2_A.display();
-    FirstOrderLinearDS* LS2DiodeBridgeCapFilter = new FirstOrderLinearDS(2, init_stateLS2, LS2_A);
+    SP::FirstOrderLinearDS LS2DiodeBridgeCapFilter(new FirstOrderLinearDS(init_stateLS2, LS2_A));
 
     // --- Interaction between linear systems and non smooth system ---
 
@@ -104,13 +104,13 @@ int main(int argc, char* argv[])
     Inter_DS.insert(LS1DiodeBridgeCapFilter);
     Inter_DS.insert(LS2DiodeBridgeCapFilter);
 
-    SiconosMatrix* Int_C = new SimpleMatrix(4, 3);
+    SP::SiconosMatrix Int_C(new SimpleMatrix(4, 3));
     (*Int_C)(0 , 2) = 1.0;
     (*Int_C)(2 , 0) = -1.0;
     (*Int_C)(2 , 2) = 1.0;
     (*Int_C)(3 , 0) = 1.0;
 
-    SiconosMatrix* Int_D = new SimpleMatrix(4, 4);
+    SP::SiconosMatrix Int_D(new SimpleMatrix(4, 4));
     (*Int_D)(0 , 1) = -1.0;
     (*Int_D)(1 , 0) = 1.0;
     (*Int_D)(1 , 2) = 1.0;
@@ -118,51 +118,49 @@ int main(int argc, char* argv[])
     (*Int_D)(2 , 1) = -1.0;
     (*Int_D)(3 , 1) = 1.0;
 
-    SiconosMatrix* Int_B = new SimpleMatrix(3, 4);
+    SP::SiconosMatrix Int_B(new SimpleMatrix(3, 4));
     (*Int_B)(0 , 2) = -1.0 / Cvalue;
     (*Int_B)(0 , 3) = 1.0 / Cvalue;
     (*Int_B)(2 , 0) = 1.0 / Cfilt;
     (*Int_B)(2 , 2) = 1.0 / Cfilt;
 
-    FirstOrderLinearTIR* LTIRDiodeBridgeCapFilter = new FirstOrderLinearTIR(*Int_C, *Int_B);
+    SP::FirstOrderLinearTIR LTIRDiodeBridgeCapFilter(new FirstOrderLinearTIR(*Int_C, *Int_B));
     LTIRDiodeBridgeCapFilter->setDPtr(Int_D);
-    NonSmoothLaw * nslaw = new ComplementarityConditionNSL(4);
+    SP::NonSmoothLaw nslaw(new ComplementarityConditionNSL(4));
 
-    Interaction* InterDiodeBridgeCapFilter = new Interaction("InterDiodeBridgeCapFilter", Inter_DS, 2, 4, nslaw, LTIRDiodeBridgeCapFilter);
+    SP::Interaction InterDiodeBridgeCapFilter(new Interaction("InterDiodeBridgeCapFilter", Inter_DS, 2, 4, nslaw, LTIRDiodeBridgeCapFilter));
 
     // --- Model creation ---
-    Model DiodeBridgeCapFilter(t0, T, Modeltitle);
+    SP::Model DiodeBridgeCapFilter(new Model(t0, T, Modeltitle));
 
     // --- Dynamical system creation ---
     InteractionsSet allInteractions;
     allInteractions.insert(InterDiodeBridgeCapFilter);
-    NonSmoothDynamicalSystem* NSDSDiodeBridgeCapFilter = new NonSmoothDynamicalSystem(Inter_DS, allInteractions, false);
-    DiodeBridgeCapFilter.setNonSmoothDynamicalSystemPtr(NSDSDiodeBridgeCapFilter);
+    SP::NonSmoothDynamicalSystem NSDSDiodeBridgeCapFilter(new NonSmoothDynamicalSystem(Inter_DS, allInteractions, false));
+    DiodeBridgeCapFilter->setNonSmoothDynamicalSystemPtr(NSDSDiodeBridgeCapFilter);
 
     // --- Simulation specification---
 
-    TimeDiscretisation* TiDisc = new TimeDiscretisation(h_step, &DiodeBridgeCapFilter);
+    SP::TimeDiscretisation TiDisc(new TimeDiscretisation(t0, h_step));
 
-    TimeStepping* StratDiodeBridgeCapFilter = new TimeStepping(TiDisc);
+    SP::TimeStepping StratDiodeBridgeCapFilter(new TimeStepping(TiDisc));
 
     double theta = 1.0;
     //Moreau* OSI_LS1DiodeBridgeCapFilter = new Moreau(LS1DiodeBridgeCapFilter,theta,StratDiodeBridgeCapFilter);
     //Moreau* OSI_LS2DiodeBridgeCapFilter = new Moreau(LS2DiodeBridgeCapFilter,theta,StratDiodeBridgeCapFilter);
-    Moreau* OSI_LS1DiodeBridgeCapFilter = new Moreau(Inter_DS, theta, StratDiodeBridgeCapFilter);
+    SP::Moreau OSI_LS1DiodeBridgeCapFilter(new Moreau(Inter_DS, theta));
+    StratDiodeBridgeCapFilter->recordIntegrator(OSI_LS1DiodeBridgeCapFilter);
 
     IntParameters iparam(5);
     iparam[0] = 10000; // Max number of iteration
     DoubleParameters dparam(5);
     dparam[0] = 1e-7; // Tolerance
     string solverName = "Lemke" ;
-    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
-    LCP* LCP_DiodeBridgeCapFilter = new LCP(StratDiodeBridgeCapFilter, mySolver, "LCP");
+    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
+    SP::LCP LCP_DiodeBridgeCapFilter(new LCP(mySolver));
+    StratDiodeBridgeCapFilter->recordNonSmoothProblem(LCP_DiodeBridgeCapFilter);
 
-    cout << " -----  Model description ------" << endl;
-    DiodeBridgeCapFilter.display();
-
-
-    StratDiodeBridgeCapFilter->initialize();
+    DiodeBridgeCapFilter->initialize(StratDiodeBridgeCapFilter);
 
 
     int k = 0;
@@ -176,7 +174,7 @@ int main(int argc, char* argv[])
     // For the initial time step:
 
     // time
-    dataPlot(k, 0) = DiodeBridgeCapFilter.getT0();
+    dataPlot(k, 0) = DiodeBridgeCapFilter->getT0();
 
     // inductor voltage
     dataPlot(k, 1) = (LS1DiodeBridgeCapFilter->getX())(0);
@@ -197,15 +195,8 @@ int main(int argc, char* argv[])
     dataPlot(k, 6) = (InterDiodeBridgeCapFilter->getLambda(0))(2);
 
     // --- Compute elapsed time ---
-    double t1, t2, elapsed;
-    struct timeval tp;
-    int rtn;
-    clock_t start, end;
-    double elapsed2;
-    start = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t1 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-
+    boost::timer t;
+    t.restart();
     // --- Time loop  ---
     while (k < N - 1)
     {
@@ -243,12 +234,7 @@ int main(int argc, char* argv[])
 
 
     // --- elapsed time computing ---
-    end = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t2 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-    elapsed = t2 - t1;
-    elapsed2 = (end - start) / (double)CLOCKS_PER_SEC;
-    cout << "time = " << elapsed << " --- cpu time " << elapsed2 << endl;
+    cout << "time = " << t.elapsed() << endl;
 
     // Number of time iterations
     cout << "Number of iterations done: " << k << endl;
@@ -256,20 +242,6 @@ int main(int argc, char* argv[])
     // dataPlot (ascii) output
     ioMatrix io("DiodeBridgeCapFilter.dat", "ascii");
     io.write(dataPlot, "noDim");
-
-    delete LCP_DiodeBridgeCapFilter;
-    delete OSI_LS1DiodeBridgeCapFilter;
-    delete TiDisc;
-    delete StratDiodeBridgeCapFilter;
-    delete LTIRDiodeBridgeCapFilter;
-    delete InterDiodeBridgeCapFilter;
-    delete Int_B ;
-    delete Int_D ;
-    delete Int_C;
-    delete LS2DiodeBridgeCapFilter;
-    delete LS1DiodeBridgeCapFilter;
-    delete NSDSDiodeBridgeCapFilter;
-
   }
 
   // --- Exceptions handling ---

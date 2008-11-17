@@ -129,6 +129,7 @@ int main(int argc, char* argv[])
 
     // Initialization
     CircuitRLCD->initialize(StratCircuitRLCD);
+
     cout << " -----> End of initialization." << endl;
 
     double h = StratCircuitRLCD->getTimeStep();

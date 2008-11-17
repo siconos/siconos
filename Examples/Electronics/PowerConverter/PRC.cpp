@@ -61,10 +61,10 @@ int main(int argc, char* argv[])
     LS_A(3 , 2) = 1.0 / Cfvalue;
     LS_A(3 , 3) = -1.0 / (Rvalue * Cfvalue);
 
-    FirstOrderLinearDS * LSPRC =  new FirstOrderLinearDS(1, init_state, LS_A);
+    SP::FirstOrderLinearDS LSPRC(new FirstOrderLinearDS(init_state, LS_A));
 
     // Lrvalue is required in the plug-in, thus we set z[0] = 100.0/ Lrvalue.
-    SiconosVector * z = new SimpleVector(1);
+    SP::SiconosVector z(new SimpleVector(1));
 
     // z[0] is used as a parameter in the plug-in.
     (*z)(0) = 1.0 / Lrvalue;
@@ -77,47 +77,48 @@ int main(int argc, char* argv[])
     dsConcerned.insert(LSPRC);
 
     // -> Relation
-    SiconosMatrix* Int_C = new SimpleMatrix(4, 4);
+    SP::SiconosMatrix Int_C(new SimpleMatrix(4, 4));
     (*Int_C)(0 , 1) = -1.0;
     (*Int_C)(1 , 1) = 1.0;
     (*Int_C)(2 , 2) = 1.0;
     (*Int_C)(3 , 2) = 1.0;
 
-    SiconosMatrix* Int_D = new SimpleMatrix(4, 4);
+    SP::SiconosMatrix Int_D(new SimpleMatrix(4, 4));
     (*Int_D)(0 , 2) = 1.0;
     (*Int_D)(1 , 3) = 1.0;
     (*Int_D)(2 , 0) = -1.0;
     (*Int_D)(3 , 1) = -1.0;
 
-    SiconosMatrix* Int_B = new SimpleMatrix(4, 4);
+    SP::SiconosMatrix Int_B(new SimpleMatrix(4, 4));
     (*Int_B)(1 , 0) = -1.0 / Crvalue;
     (*Int_B)(1 , 1) = 1.0 / Crvalue;
     (*Int_B)(2 , 2) = 1.0 / Lfvalue;
     (*Int_B)(2 , 3) = 1.0 / Lfvalue;
-    FirstOrderLinearTIR* LTIRPRC = new FirstOrderLinearTIR(Int_C, Int_B);
+    SP::FirstOrderLinearTIR LTIRPRC(new FirstOrderLinearTIR(Int_C, Int_B));
     LTIRPRC->setDPtr(Int_D);
 
     // -> Non-smooth law
-    NonSmoothLaw * nslaw = new ComplementarityConditionNSL(4);
+    SP::NonSmoothLaw nslaw(new ComplementarityConditionNSL(4));
 
-    Interaction * InterPRC =  new Interaction("InterPRC", dsConcerned, 1, 4, nslaw, LTIRPRC);
+    SP::Interaction InterPRC(new Interaction("InterPRC", dsConcerned, 1, 4, nslaw, LTIRPRC));
 
     // --- Non Smooth Dynamical system  ---
-    NonSmoothDynamicalSystem * NSDSPRC = new NonSmoothDynamicalSystem(LSPRC, InterPRC);
+    SP::NonSmoothDynamicalSystem NSDSPRC(new NonSmoothDynamicalSystem(LSPRC, InterPRC));
 
     // --- Model creation ---
-    Model * PRC = new Model(t0, T, Modeltitle, Author, Description, Date);
+    SP::Model PRC(new Model(t0, T, Modeltitle, Author, Description, Date));
     PRC->setNonSmoothDynamicalSystemPtr(NSDSPRC); // set NonSmoothDynamicalSystem of this model
 
     // --- Simulation specification---
 
     // -- Time discretisation --
-    TimeDiscretisation* TiDiscRLCD = new TimeDiscretisation(h_step, PRC);
-    TimeStepping* StratPRC = new TimeStepping(TiDiscRLCD);
+    SP::TimeDiscretisation TiDiscRLCD(new TimeDiscretisation(t0, h_step));
+    SP::TimeStepping StratPRC(new TimeStepping(TiDiscRLCD));
 
     // -- OneStepIntegrators --
     double theta = 0.5000000000000001;
-    OneStepIntegrator* OSI_RLCD = new Moreau(LSPRC, theta, StratPRC);
+    SP::OneStepIntegrator OSI_RLCD(new Moreau(LSPRC, theta));
+    StratPRC->recordIntegrator(OSI_RLCD);
 
     // -- OneStepNsProblem --
     IntParameters iparam(5);
@@ -125,15 +126,16 @@ int main(int argc, char* argv[])
     DoubleParameters dparam(5);
     dparam[0] = 0.000001; // Tolerance
     string solverName = "Lemke" ;
-    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
-    OneStepNSProblem * LCP_RLCD = new LCP(StratPRC, mySolver, "LCP");
+    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
+    SP::OneStepNSProblem LCP_RLCD(new LCP(mySolver));
+    StratPRC->recordNonSmoothProblem(LCP_RLCD);
 
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
     cout << "====> Simulation initialisation ..." << endl << endl;
-    StratPRC->initialize();
+    PRC->initialize(StratPRC);
 
     double h = StratPRC->getTimeStep();
     int N = (int)((T - t0) / h); // Number of time steps
@@ -142,7 +144,7 @@ int main(int argc, char* argv[])
     // -> saved in a matrix dataPlot
     SimpleMatrix dataPlot(N, 5);
 
-    SiconosVector * x =  LSPRC->getXPtr();
+    SP::SiconosVector x =  LSPRC->getXPtr();
 
     // For the initial time step:
     int k = 0;
@@ -182,19 +184,6 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     ioMatrix io("PRC.dat", "ascii");
     io.write(dataPlot, "noDim");
-
-    delete LCP_RLCD;
-    delete TiDiscRLCD;
-    delete StratPRC;
-    delete NSDSPRC;
-    delete OSI_RLCD;
-    delete nslaw;
-    delete LTIRPRC;
-    delete Int_B ;
-    delete Int_D ;
-    delete Int_C;
-    delete InterPRC;
-    delete LSPRC;
   }
 
   // --- Exceptions handling ---

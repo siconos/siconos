@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
     SimpleMatrix LS_A(1, 1);
     LS_A(0, 0) = -1.0 / (Rvalue * Cfilt);
 
-    FirstOrderLinearDS* LSDiodeBridgePowSup = new FirstOrderLinearDS(1, init_stateLS, LS_A);
+    SP::FirstOrderLinearDS LSDiodeBridgePowSup(new FirstOrderLinearDS(init_stateLS, LS_A));
 
     // TODO: review this example with the new way to set the control.
 
@@ -69,18 +69,18 @@ int main(int argc, char* argv[])
 
     // --- Interaction between linear system and non smooth system ---
 
-    SiconosMatrix* Int_C = new SimpleMatrix(4, 1);
-    (*Int_C)(0, 0) =  1.0;
-    (*Int_C)(2, 0) =  1.0;
+    SimpleMatrix Int_C(4, 1);
+    Int_C(0, 0) =  1.0;
+    Int_C(2, 0) =  1.0;
 
-    SimpleMatrix* Int_D = new SimpleMatrix(4, 4);
+    SimpleMatrix Int_D(4, 4);
 
-    (*Int_D)(0, 1) = -1.0;
-    (*Int_D)(1, 0) =  1.0;
-    (*Int_D)(1, 2) =  1.0;
-    (*Int_D)(1, 3) = -1.0;
-    (*Int_D)(2, 1) = -1.0;
-    (*Int_D)(3, 1) =  1.0;
+    Int_D(0, 1) = -1.0;
+    Int_D(1, 0) =  1.0;
+    Int_D(1, 2) =  1.0;
+    Int_D(1, 3) = -1.0;
+    Int_D(2, 1) = -1.0;
+    Int_D(3, 1) =  1.0;
 
     SimpleVector Offset_y(4);
     Offset_y(0) = 1.0;
@@ -92,51 +92,52 @@ int main(int argc, char* argv[])
     Offset_lambda(1) = 1.0;
     Offset_lambda = -DiodeThreshold * Offset_lambda;
 
-    SimpleVector* Int_z = new SimpleVector(5);
-    SimpleVector * tmp = new SimpleVector(4) ;
-    prod(*Int_D, Offset_lambda, *tmp);
+    SP::SimpleVector Int_z(new SimpleVector(5));
+    SP::SimpleVector tmp(new SimpleVector(4)) ;
+    prod(Int_D, Offset_lambda, *tmp);
     *tmp -= Offset_y;
     Int_z->setBlock(0, *tmp);
-    delete tmp;
     LSDiodeBridgePowSup->setZPtr(Int_z);
 
-    SiconosMatrix* Int_B = new SimpleMatrix(1, 4);
-    (*Int_B)(0 , 0) = 1.0 / Cfilt;
-    (*Int_B)(0 , 2) = 1.0 / Cfilt;
+    SimpleMatrix Int_B(1, 4);
+    Int_B(0 , 0) = 1.0 / Cfilt;
+    Int_B(0 , 2) = 1.0 / Cfilt;
 
-    FirstOrderLinearR* LTIRDiodeBridgePowSup = new FirstOrderLinearR(Int_C, Int_B);
-    LTIRDiodeBridgePowSup->setDPtr(Int_D);
+    SP::FirstOrderLinearR LTIRDiodeBridgePowSup(new FirstOrderLinearR(Int_C, Int_B));
+    LTIRDiodeBridgePowSup->setD(Int_D);
     LTIRDiodeBridgePowSup->setComputeEFunction("./SinPoPlugin.so", "SinPo");
 
-    ComplementarityConditionNSL * nslaw = new ComplementarityConditionNSL(4);
+    SP::ComplementarityConditionNSL nslaw(new ComplementarityConditionNSL(4));
 
-    Interaction* InterDiodeBridgePowSup = new Interaction("InterDiodeBridgePowSup", allDS, 1, 4, nslaw, LTIRDiodeBridgePowSup);
+    SP::Interaction InterDiodeBridgePowSup(new Interaction("InterDiodeBridgePowSup", allDS, 1, 4, nslaw, LTIRDiodeBridgePowSup));
 
-    NonSmoothDynamicalSystem* NSDSDiodeBridgePowSup = new NonSmoothDynamicalSystem(LSDiodeBridgePowSup, InterDiodeBridgePowSup, false);
+    SP::NonSmoothDynamicalSystem NSDSDiodeBridgePowSup(new NonSmoothDynamicalSystem(LSDiodeBridgePowSup, InterDiodeBridgePowSup, false));
 
     // --- Model creation ---
-    Model DiodeBridgePowSup(t0, T, Modeltitle);
-    DiodeBridgePowSup.setNonSmoothDynamicalSystemPtr(NSDSDiodeBridgePowSup);
+    SP::Model DiodeBridgePowSup(new Model(t0, T, Modeltitle));
+    DiodeBridgePowSup->setNonSmoothDynamicalSystemPtr(NSDSDiodeBridgePowSup);
 
     // --- Simulation specification---
 
-    TimeDiscretisation* TiDisc = new TimeDiscretisation(h_step, &DiodeBridgePowSup);
+    SP::TimeDiscretisation TiDisc(new TimeDiscretisation(t0, h_step));
 
-    TimeStepping* StratDiodeBridgePowSup = new TimeStepping(TiDisc);
+    SP::TimeStepping StratDiodeBridgePowSup(new TimeStepping(TiDisc));
 
     double theta = 0.5;
 
-    Moreau* OSI_LSDiodeBridgePowSup = new Moreau(LSDiodeBridgePowSup, theta, StratDiodeBridgePowSup);
+    SP::Moreau OSI_LSDiodeBridgePowSup(new Moreau(LSDiodeBridgePowSup, theta));
+    StratDiodeBridgePowSup->recordIntegrator(OSI_LSDiodeBridgePowSup);
 
     IntParameters iparam(5);
     iparam[0] = 300; // Max number of iteration
     DoubleParameters dparam(5);
     dparam[0] = 1e-8; // Tolerance
     string solverName = "NSQP" ;
-    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
-    LCP* LCP_DiodeBridgePowSup = new LCP(StratDiodeBridgePowSup, mySolver, "LCP");
+    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
+    SP::LCP LCP_DiodeBridgePowSup(new LCP(mySolver));
+    StratDiodeBridgePowSup->recordNonSmoothProblem(LCP_DiodeBridgePowSup);
 
-    StratDiodeBridgePowSup->initialize();
+    DiodeBridgePowSup->initialize(StratDiodeBridgePowSup);
 
     k = 0;
     double h = StratDiodeBridgePowSup->getTimeStep();
@@ -165,7 +166,7 @@ int main(int argc, char* argv[])
     v_DR2 = -(InterDiodeBridgePowSup->getY(0))(3) + DiodeThreshold;
 
     // time
-    dataPlot(k, 0) = DiodeBridgePowSup.getT0();
+    dataPlot(k, 0) = DiodeBridgePowSup->getT0();
 
     // source voltage
     dataPlot(k, 1) = (LSDiodeBridgePowSup->getZ())(4);
@@ -193,15 +194,8 @@ int main(int argc, char* argv[])
 
 
     // --- Compute elapsed time ---
-    double t1, t2, elapsed;
-    struct timeval tp;
-    int rtn;
-    double elapsed2;
-    clock_t start, end;
-    start = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t1 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-
+    boost::timer t;
+    t.restart();
     // --- Time loop  ---
     while (k < N - 1)
     {
@@ -255,12 +249,7 @@ int main(int argc, char* argv[])
 
 
     // --- elapsed time computing ---
-    end = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t2 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-    elapsed = t2 - t1;
-    elapsed2 = (end - start) / (double)CLOCKS_PER_SEC;
-    cout << "time = " << elapsed << " --- cpu time " << elapsed2 << endl;
+    cout << "time = " << t.elapsed() << endl;
 
     // Number of time iterations
     cout << "Number of iterations done: " << k << endl;
@@ -283,20 +272,6 @@ int main(int argc, char* argv[])
       outFile << endl;
     }
     outFile.close();
-
-
-    delete LCP_DiodeBridgePowSup;
-    delete OSI_LSDiodeBridgePowSup;
-    delete TiDisc;
-    delete StratDiodeBridgePowSup;
-    delete LTIRDiodeBridgePowSup;
-    delete InterDiodeBridgePowSup;
-    delete Int_B ;
-    delete Int_z ;
-    delete Int_D ;
-    delete Int_C;
-    delete LSDiodeBridgePowSup;
-    delete NSDSDiodeBridgePowSup;
 
   }
 
