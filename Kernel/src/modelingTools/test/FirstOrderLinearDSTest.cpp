@@ -146,7 +146,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS3()
   ds->initialize("TimeStepping", time);
   //   ds->computeA(time);
   //   ds->computeB(time);
-  //   ds->computeRhs(time);
+  ds->computeRhs(time);
   SP::SimpleVector x01(new SimpleVector(3));
   (*x01)(0) = 0;
   (*x01)(1) = 1;
@@ -154,6 +154,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS3()
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3I : ", ds->getB() == time* *x01, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3J : ", ds->getA() == 2 * *A0, true);
+  //  ds->getRhsPtr()->display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3E : ", ds->getRhs() == (time* *x01 + 2 * prod(*A0, *x0)) , true);
 
   ds->computeRhs(time);

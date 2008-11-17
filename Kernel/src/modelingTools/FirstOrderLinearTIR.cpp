@@ -118,6 +118,7 @@ void FirstOrderLinearTIR::initialize(SP::Interaction inter)
   if (D)
     assert((D->size(0) == sizeY || D->size(1) == sizeY) && "FirstOrderLinearTIR::initialize , inconsistent size between C and D.");
 
+
   if (F)
     assert(((F->size(0) != sizeY) && (F->size(1) != sizeZ)) && "FirstOrderLinearTIR::initialize , inconsistent size between C and F.");
   if (e)

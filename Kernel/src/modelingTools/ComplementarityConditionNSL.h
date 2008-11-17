@@ -80,4 +80,6 @@ public:
   static ComplementarityConditionNSL* convert(NonSmoothLaw* nsl);
 };
 
+TYPEDEF_SPTR(ComplementarityConditionNSL);
+
 #endif // COMPLEMENTARITYCONDITIONNSLAW_H

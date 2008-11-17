@@ -126,7 +126,6 @@ void PrimalFrictionContact::initialize(SP::Simulation sim)
   mu.reset(new MuStorage());
   mu->reserve(I0->size());
 
-
   SP::DynamicalSystemsSet allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();;
 
   // If the topology is TimeInvariant ie if M structure does not change during simulation:

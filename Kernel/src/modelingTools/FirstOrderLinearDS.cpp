@@ -178,22 +178,28 @@ void FirstOrderLinearDS::setComputeBFunction(VectorFunctionOfTime fct)
 
 void FirstOrderLinearDS::computeA(const double time)
 {
-  if (A->isPlugged())
+  if (A)
   {
-    if (!A->fPtr)
-      RuntimeException::selfThrow("computeA() is not linked to a plugin function");
-    (A->fPtr)(time, n, n, &(*A)(0, 0), z->size(), &(*z)(0));
+    if (A->isPlugged())
+    {
+      if (!A->fPtr)
+        RuntimeException::selfThrow("computeA() is not linked to a plugin function");
+      (A->fPtr)(time, n, n, &(*A)(0, 0), z->size(), &(*z)(0));
+    }
   }
   // else nothing
 }
 
 void FirstOrderLinearDS::computeB(const double time)
 {
-  if (b->isPlugged())
+  if (b)
   {
-    if (!b->fPtr)
-      RuntimeException::selfThrow("computeB() is not linked to a plugin function");
-    (b->fPtr)(time, n, &(*b)(0), z->size(), &(*z)(0));
+    if (b->isPlugged())
+    {
+      if (!b->fPtr)
+        RuntimeException::selfThrow("computeB() is not linked to a plugin function");
+      (b->fPtr)(time, n, &(*b)(0), z->size(), &(*z)(0));
+    }
   }
   // else nothing
 }

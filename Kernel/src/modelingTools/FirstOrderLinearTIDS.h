@@ -89,7 +89,7 @@ public:
   FirstOrderLinearTIDS(const SiconosVector&, const SiconosMatrix&, const SiconosVector&);
 
   /** destructor */
-  ~FirstOrderLinearTIDS();
+  ~FirstOrderLinearTIDS() {};
 
   /** Initialization function for the rhs and its jacobian.
    *  \param time of initialization.

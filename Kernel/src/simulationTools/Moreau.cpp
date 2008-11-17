@@ -239,12 +239,6 @@ void Moreau::initialize(SP::Simulation sim)
     if ((*itDS)->getType() == LNLDS || (*itDS)->getType() == FONLDS)
       (*itDS)->allocateWorkVector(DynamicalSystem::NewtonSave, WMap[*itDS]->size(0));
 
-    if ((*itDS)->getType() == FOLDS)
-    {
-      SP::FirstOrderLinearDS d = boost::static_pointer_cast<FirstOrderLinearDS>(*itDS);
-      if (d->getBPtr())
-        d->computeB(t0); // bi
-    }
   }
 }
 

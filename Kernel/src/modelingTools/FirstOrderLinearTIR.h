@@ -111,6 +111,24 @@ public:
    */
   void initialize(SP::Interaction);
 
+  /** Gets the number of computed jacobians for h
+      \return an unsigned int.
+  */
+  inline unsigned int getNumberOfJacobiansForH() const
+  {
+    if (D) return 2;
+    else return 1;
+  }
+
+
+  /** Gets the number of computed jacobian for g
+      \return an unsigned int.
+  */
+  inline unsigned int getNumberOfJacobiansForG() const
+  {
+    return 1;
+  }
+
   /** default function to compute h
    *  \param double : current time
    */

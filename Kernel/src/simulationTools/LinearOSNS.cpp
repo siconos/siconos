@@ -230,6 +230,7 @@ void LinearOSNS::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelatio
         *leftUnitaryBlock *= h;
         prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
         //left = C, right = inv(W).B
+
       }
       else if (relationType1 == Lagrangian || relationType2 == Lagrangian)
       {
@@ -472,6 +473,7 @@ void LinearOSNS::postCompute()
     setBlock(*_w, y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
     setBlock(*_z, lambda, lambda->size(), pos, 0);
   }
+
 }
 
 void LinearOSNS::display() const

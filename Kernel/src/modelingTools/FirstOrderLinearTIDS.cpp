@@ -23,13 +23,6 @@ using namespace std;
 using namespace DS;
 // --- Constructors ---
 
-// Default constructor
-FirstOrderLinearTIDS::FirstOrderLinearTIDS():
-  FirstOrderLinearDS()
-{
-  DSType = FOLTIDS;
-}
-
 // From xml file
 FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::DynamicalSystemXML dsXML): FirstOrderLinearDS(dsXML)
 {
@@ -65,9 +58,6 @@ FirstOrderLinearTIDS::FirstOrderLinearTIDS(const SiconosVector& newX0,
   DSType = FOLTIDS;
   checkDynamicalSystem();
 }
-
-FirstOrderLinearTIDS::~FirstOrderLinearTIDS()
-{}
 
 void FirstOrderLinearTIDS::initRhs(double time)
 {

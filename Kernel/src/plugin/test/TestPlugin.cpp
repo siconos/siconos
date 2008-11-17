@@ -94,12 +94,12 @@ extern "C" void computeB(double time, unsigned int sizeOfB, double* b, unsigned 
     b[i] = time * i ;
 
 }
-extern "C" void computeA(double time, unsigned int  sizeOfA, double* A, unsigned int sizeOfZ, double *z)
+extern "C" void computeA(double time, unsigned int rowA, unsigned int colA, double* A, unsigned int sizeOfZ, double *z)
 {
-  for (unsigned int j = 0; j < sizeOfA; j++)
+  for (unsigned int j = 0; j < rowA; j++)
   {
-    for (unsigned int i = 0; i < sizeOfA; i++)
-      A[i + j * sizeOfA] = 4 * (i + 1);
+    for (unsigned int i = 0; i < rowA; i++)
+      A[i + j * rowA] = 4 * (i + 1);
   }
 }
 
