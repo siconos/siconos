@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
     v0.zero();
     q0(0) = 0.9;
     q0(1) = -1.6;
-    SiconosVector * z = new SimpleVector(nDof * 12);
+    SP::SiconosVector z(new SimpleVector(nDof * 12));
     (*z)(0) = q0(0);
     (*z)(1) = q0(1);
     (*z)(2) = v0(0);
@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
     (*z)(22) = 0;
     (*z)(23) = 0;
 
-    LagrangianDS * arm = new LagrangianDS(1, q0, v0);
+    SP::LagrangianDS  arm(new LagrangianDS(q0, v0));
 
     // external plug-in
     arm->setComputeMassFunction("Two-linkPlugin.so", "mass");
@@ -122,9 +122,9 @@ int main(int argc, char* argv[])
 
     // -- relations --
 
-    NonSmoothLaw * nslaw = new NewtonImpactNSL(e);
-    Relation * relation = new LagrangianScleronomousR("Two-linkPlugin:h0", "Two-linkPlugin:G0");
-    Interaction * inter = new Interaction("floor-arm", allDS, 0, 2, nslaw, relation);
+    SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
+    SP::Relation relation(new LagrangianScleronomousR("Two-linkPlugin:h0", "Two-linkPlugin:G0"));
+    SP::Interaction inter(new Interaction("floor-arm", allDS, 0, 2, nslaw, relation));
 
 
     SimpleMatrix H1(2, 2);
@@ -136,9 +136,9 @@ int main(int argc, char* argv[])
     b1(0) = PI;
     b1(1) = 0;
 
-    NonSmoothLaw * nslaw2 = new NewtonImpactNSL(e2);
-    Relation * relation1 = new LagrangianLinearTIR(H1, b1);
-    Interaction * inter1 =  new Interaction("floor-arm2", allDS, 1, 2, nslaw2, relation1);
+    SP::NonSmoothLaw nslaw2(new NewtonImpactNSL(e2));
+    SP::Relation relation1(new LagrangianLinearTIR(H1, b1));
+    SP::Interaction inter1(new Interaction("floor-arm2", allDS, 1, 2, nslaw2, relation1));
 
     SimpleMatrix H2(2, 2);
     SimpleVector b2(2);
@@ -150,8 +150,8 @@ int main(int argc, char* argv[])
     b2(1) = PI - 0.0001;
 
 
-    Relation * relation2 = new LagrangianLinearTIR(H2, b2);
-    Interaction * inter2 =  new Interaction("singular-points", allDS, 2, 2, nslaw2, relation2);
+    SP::Relation relation2(new LagrangianLinearTIR(H2, b2));
+    SP::Interaction inter2(new Interaction("singular-points", allDS, 2, 2, nslaw2, relation2));
 
     allInteractions.insert(inter);
     allInteractions.insert(inter1);
@@ -160,13 +160,13 @@ int main(int argc, char* argv[])
     // --- NonSmoothDynamicalSystem ---
     // -------------------------------
 
-    NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(allDS, allInteractions);
+    SP::NonSmoothDynamicalSystem nsds(new NonSmoothDynamicalSystem(allDS, allInteractions));
 
     // -------------
     // --- Model ---
     // -------------
 
-    Model * Manipulator = new Model(t0, T);
+    SP::Model Manipulator(new Model(t0, T));
     Manipulator->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
 
     // ----------------
@@ -174,12 +174,13 @@ int main(int argc, char* argv[])
     // ----------------
 
     // -- Time discretisation --
-    TimeDiscretisation * t = new TimeDiscretisation(h, Manipulator);
+    SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-    TimeStepping* s = new TimeStepping(t);
+    SP::TimeStepping s(new TimeStepping(t));
 
     // -- OneStepIntegrators --
-    OneStepIntegrator * OSI =  new Moreau(arm, 0.500001, s);
+    SP::OneStepIntegrator OSI(new Moreau(arm, 0.500001));
+    s->recordIntegrator(OSI);
 
     // -- OneStepNsProblem --
     IntParameters iparam(5);
@@ -187,10 +188,11 @@ int main(int argc, char* argv[])
     DoubleParameters dparam(5);
     dparam[0] = 1e-5; // Tolerance
     string solverName = "Lemke" ;
-    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
+    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     // -- OneStepNsProblem --
-    OneStepNSProblem * osnspb = new LCP(s, mySolver);
-    // OneStepNSProblem * osnspb = new LCP(s,"name","Lemke",200001, 0.00001);
+    SP::OneStepNSProblem osnspb(new LCP(mySolver));
+    s->recordNonSmoothProblem(osnspb);
+    // OneStepNSProblem  osnspb(new LCP(s,"name","Lemke",200001, 0.00001);
 
     cout << "=== End of model loading === " << endl;
 
@@ -198,12 +200,12 @@ int main(int argc, char* argv[])
 
 
     // ================================= Computation
-    // --- Simulation initialization ---
+    // --- Model initialization ---
 
 
 
-    s->initialize();
-    cout << "End of simulation initialisation" << endl;
+    Manipulator->initialize(s);
+    cout << "End of model initialisation" << endl;
 
     int k = 0;
     int N = (int)((T - t0) / h); // Number of time steps
@@ -215,9 +217,9 @@ int main(int argc, char* argv[])
     // For the initial time step:
     // time
 
-    SiconosVector * q = arm->getQPtr();
-    SiconosVector * v = arm->getVelocityPtr();
-    SiconosVector * p = arm->getPPtr(2);
+    SP::SiconosVector q = arm->getQPtr();
+    SP::SiconosVector v = arm->getVelocityPtr();
+    SP::SiconosVector p = arm->getPPtr(2);
     // EventsManager * eventsManager = s->getEventsManagerPtr();
 
     dataPlot(k, 0) =  Manipulator->getT0();
@@ -325,23 +327,6 @@ int main(int argc, char* argv[])
     ioMatrix out("result.dat", "ascii");
     out.write(dataPlot, "noDim");
 
-    //     // --- Free memory ---
-    delete osnspb;
-    delete t;
-    delete OSI;
-    delete s;
-    delete Manipulator;
-    delete nsds;
-    delete inter;
-    delete inter1;
-    delete inter2;
-    delete relation;
-    delete relation1;
-    delete relation2;
-    delete nslaw;
-    delete nslaw2;
-    delete z;
-    delete arm;
   }
 
   catch (SiconosException e)

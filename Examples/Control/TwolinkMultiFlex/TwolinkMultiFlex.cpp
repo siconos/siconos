@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
     q0(1) = -0.9;
     q0(2) = 1.5;
     q0(3) = -0.9;
-    SiconosVector * z = new SimpleVector(nDof * 6 + 1);
+    SP::SiconosVector z(new SimpleVector(nDof * 6 + 1));
     (*z)(0) = q0(0);
     (*z)(1) = q0(1);
     (*z)(2) = v0(0);
@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
     (*z)(24) = 0;
 
 
-    LagrangianDS * arm = new LagrangianDS(1, q0, v0);
+    SP::LagrangianDS  arm(new LagrangianDS(q0, v0));
 
     // external plug-in
     arm->setComputeMassFunction("TwolinkMultiFlexPlugin.so", "mass");
@@ -129,11 +129,11 @@ int main(int argc, char* argv[])
 
     // -- relations --
 
-    NonSmoothLaw * nslaw = new NewtonImpactNSL(e);
-    Relation * relation = new LagrangianScleronomousR("TwolinkMultiFlexPlugin:h0", "TwolinkMultiFlexPlugin:G0");
-    Interaction * inter = new Interaction("floor-arm", allDS, 0, 2, nslaw, relation);
-    Relation * relation0 = new LagrangianScleronomousR("TwolinkMultiFlexPlugin:h3", "TwolinkMultiFlexPlugin:G3");
-    Interaction * inter0 = new Interaction("wall-arm", allDS, 1, 2, nslaw, relation0);
+    SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
+    SP::Relation relation(new LagrangianScleronomousR("TwolinkMultiFlexPlugin:h0", "TwolinkMultiFlexPlugin:G0"));
+    SP::Interaction inter(new Interaction("floor-arm", allDS, 0, 2, nslaw, relation));
+    SP::Relation relation0(new LagrangianScleronomousR("TwolinkMultiFlexPlugin:h3", "TwolinkMultiFlexPlugin:G3"));
+    SP::Interaction inter0(new Interaction("wall-arm", allDS, 1, 2, nslaw, relation0));
 
 
     allInteractions.insert(inter);
@@ -143,13 +143,13 @@ int main(int argc, char* argv[])
     // --- NonSmoothDynamicalSystem ---
     // -------------------------------
 
-    NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(allDS, allInteractions);
+    SP::NonSmoothDynamicalSystem nsds(new NonSmoothDynamicalSystem(allDS, allInteractions));
 
     // -------------
     // --- Model ---
     // -------------
 
-    Model * Manipulator = new Model(t0, T);
+    SP::Model Manipulator(new Model(t0, T));
     Manipulator->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
 
     // ----------------
@@ -157,12 +157,13 @@ int main(int argc, char* argv[])
     // ----------------
 
     // -- Time discretisation --
-    TimeDiscretisation * t = new TimeDiscretisation(h, Manipulator);
+    SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-    TimeStepping* s = new TimeStepping(t);
+    SP::TimeStepping s(new TimeStepping(t));
 
     // -- OneStepIntegrators --
-    OneStepIntegrator * OSI =  new Moreau(arm, 0.500001, s);
+    SP::OneStepIntegrator OSI(new Moreau(arm, 0.500001));
+    s->recordIntegrator(OSI);
 
     // -- OneStepNsProblem --
     IntParameters iparam(5);
@@ -170,9 +171,11 @@ int main(int argc, char* argv[])
     DoubleParameters dparam(5);
     dparam[0] = 1e-8; // Tolerance
     string solverName = "Lemke" ;
-    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
+    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     // -- OneStepNsProblem --
-    OneStepNSProblem * osnspb = new LCP(s, mySolver);
+    SP::OneStepNSProblem osnspb(new LCP(mySolver));
+    s->recordNonSmoothProblem(osnspb);
+    // OneStepNSProblem  osnspb(new LCP(s,"name","Lemke",200001, 0.00001);
 
     cout << "=== End of model loading === " << endl;
 
@@ -184,8 +187,8 @@ int main(int argc, char* argv[])
 
 
 
-    s->initialize();
-    cout << "End of simulation initialisation" << endl;
+    Manipulator->initialize(s);
+    cout << "End of model initialisation" << endl;
 
     int k = 0;
     int N = (int)((T - t0) / h); // Number of time steps
@@ -197,9 +200,9 @@ int main(int argc, char* argv[])
     // For the initial time step:
     // time
 
-    SiconosVector * q = arm->getQPtr();
-    SiconosVector * v = arm->getVelocityPtr();
-    SiconosVector * p = arm->getPPtr(2);
+    SP::SiconosVector q = arm->getQPtr();
+    SP::SiconosVector v = arm->getVelocityPtr();
+    SP::SiconosVector p = arm->getPPtr(2);
     // EventsManager * eventsManager = s->getEventsManagerPtr();
 
     dataPlot(k, 0) =  Manipulator->getT0();
@@ -342,20 +345,6 @@ int main(int argc, char* argv[])
     ioMatrix out("result.dat", "ascii");
     out.write(dataPlot, "noDim");
 
-    //     // --- Free memory ---
-    delete osnspb;
-    delete t;
-    delete OSI;
-    delete s;
-    delete Manipulator;
-    delete nsds;
-    delete inter;
-    delete inter0;
-    delete relation;
-    delete relation0;
-    delete nslaw;
-    delete z;
-    delete arm;
   }
 
   catch (SiconosException e)

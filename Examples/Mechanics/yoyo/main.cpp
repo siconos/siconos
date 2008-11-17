@@ -21,28 +21,20 @@ int main(int argc, char* argv[])
     // déclarations
 
     DynamicalSystemsSet allDS;
-    SiconosMatrix *M = new SimpleMatrix(nDof, nDof);
-    SiconosVector * q0 = new SimpleVector(nDof);
-    SiconosVector* v0 = new SimpleVector(nDof);
-    LagrangianDS* yoyo;
+    SP::SiconosMatrix M(new SimpleMatrix(nDof, nDof));
+    SP::SiconosVector q0(new SimpleVector(nDof));
+    SP::SiconosVector v0(new SimpleVector(nDof));
     InteractionsSet allInteractions;
 
-    NonSmoothLaw * loi = new NewtonImpactNSL(e);
-    Relation * relation = new LagrangianRheonomousR("YoyoPlugin:h1", "YoyoPlugin:G11", "YoyoPlugin:G10");
-    Interaction * inter ;
-    NonSmoothDynamicalSystem * system;
-    TimeDiscretisation * t;
-    TimeStepping* s ;
-    Moreau * OSI ;
-    Model * jeu ;
-    OneStepNSProblem * osnspb;
+    SP::NonSmoothLaw loi(new NewtonImpactNSL(e));
+    SP::Relation relation(new LagrangianRheonomousR("YoyoPlugin:h1", "YoyoPlugin:G11", "YoyoPlugin:G10"));
 
-    SiconosMatrix *H = new SimpleMatrix(1, nDof);
+    SP::SiconosMatrix H(new SimpleMatrix(1, nDof));
     (*H)(0, 0) = 0;
     (*H)(0, 1) = 0;
     (*H)(0, 2) = 0;
-    NonSmoothLaw * loi0 = new NewtonImpactNSL(e);
-    Relation * relation0 = new LagrangianLinearTIR(*H);
+    SP::NonSmoothLaw loi0(new NewtonImpactNSL(e));
+    SP::Relation relation0(new LagrangianLinearTIR(*H));
 
 
     // pramètres du solveur siconos
@@ -52,17 +44,17 @@ int main(int argc, char* argv[])
     DoubleParameters dparam(5);
     dparam[0] = 1e-15; // Tolerance
     string solverName = "Lemke" ;
-    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
+    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
 
 
     unsigned int outputSize = 9;
     SimpleMatrix dataPlot(N, outputSize);
 
 
-    SiconosVector * q ;
-    SiconosVector * v ;
-    SiconosVector * p ;
-    SiconosVector * lambda;
+    SP::SiconosVector q ;
+    SP::SiconosVector v ;
+    SP::SiconosVector p ;
+    SP::SiconosVector lambda;
 
 
     boost::progress_display show_progress(N);
@@ -115,18 +107,10 @@ int main(int argc, char* argv[])
 
         allDS.clear();
         allInteractions.clear();
-        delete inter;
-        delete osnspb;
-        delete t;
-        delete s;
-        delete OSI;
-        delete jeu;
-        delete system;
-        delete yoyo;
       }
 
       // création et insertion  du système dynamique représentant la yoyo dans le récipient allDS
-      yoyo = new LagrangianDS(0, *q0, *v0, *M);
+      SP::LagrangianDS yoyo(new LagrangianDS(*q0, *v0, *M));
 
       yoyo->setComputeFExtFunction("YoyoPlugin.so", "force_ext");
       yoyo->setComputeFIntFunction("YoyoPlugin.so", "F_int");
@@ -138,28 +122,29 @@ int main(int argc, char* argv[])
 
       ////////////////  loi d'impact et relations /////////////////////////////////
 
-      inter = new Interaction("impact", allDS, 0, 1, loi0, relation0);
+      SP::Interaction inter(new Interaction("impact", allDS, 0, 1, loi0, relation0));
       allInteractions.insert(inter);
-      system = new NonSmoothDynamicalSystem(allDS, allInteractions);
+      SP::NonSmoothDynamicalSystem system(new NonSmoothDynamicalSystem(allDS, allInteractions));
 
 
       /////////////////////////  MODEL //////////////////////////////////////////////////
-
-      jeu = new Model(t0, T);
+      SP::Model jeu(new Model(t0, T));
       jeu->setNonSmoothDynamicalSystemPtr(system); // set NonSmoothDynamicalSystem of this model
 
       ///////////////////// SIMULATION /////////////////////////////////
 
 
       // déscrétisation du temps
-      t = new TimeDiscretisation(h, jeu);
-      s = new TimeStepping(t);
+      SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
+      SP::TimeStepping s(new TimeStepping(t));
       // -- OneStepIntegrators --
-      OSI = new Moreau(yoyo, theta, s);
+      SP::Moreau OSI(new Moreau(yoyo, theta));
+      s->recordIntegrator(OSI);
       // -- OneStepNsProblem --
-      osnspb = new LCP(s, mySolver);
-      // --- Simulation initialization ---
-      s->initialize();
+      SP::OneStepNSProblem osnspb(new LCP(mySolver));
+      s->recordNonSmoothProblem(osnspb);
+      // --- Model initialization ---
+      jeu->initialize(s);
 
 
       q = yoyo->getQPtr();
@@ -220,18 +205,8 @@ int main(int argc, char* argv[])
       // libération de mémoire
       allDS.clear();
       allInteractions.clear();
-      delete inter;
-      delete osnspb;
-      delete t;
-      delete s;
-      delete OSI;
-      delete jeu;
-      delete system;
-      delete yoyo;
 
-
-
-      yoyo = new LagrangianDS(0, *q0, *v0, *M);
+      yoyo.reset(new LagrangianDS(*q0, *v0, *M));
       yoyo->setComputeFExtFunction("YoyoPlugin.so", "force_extf");
       yoyo->setComputeFIntFunction("YoyoPlugin.so", "F_intf");
       yoyo->setComputeJacobianFIntFunction(1, "YoyoPlugin.so", "jacobianVFIntf");
@@ -239,20 +214,21 @@ int main(int argc, char* argv[])
 
       allDS.insert(yoyo);
 
-      inter = new Interaction("impact", allDS, 0, 1, loi, relation);
+      inter.reset(new Interaction("impact", allDS, 0, 1, loi, relation));
       allInteractions.insert(inter);
 
-      system = new NonSmoothDynamicalSystem(allDS, allInteractions);
-      jeu = new Model(t0, T);
+      system.reset(new NonSmoothDynamicalSystem(allDS, allInteractions));
+      jeu.reset(new Model(t0, T));
       jeu->setNonSmoothDynamicalSystemPtr(system);
 
 
-      t = new TimeDiscretisation(h, jeu);
-      s = new TimeStepping(t);
-      OSI = new Moreau(yoyo, theta, s);
-      osnspb = new LCP(s, mySolver);
-      s->initialize();
-
+      t.reset(new TimeDiscretisation(t0, h));
+      s.reset(new TimeStepping(t));
+      OSI.reset(new Moreau(yoyo, theta));
+      s->recordIntegrator(OSI);
+      osnspb.reset(new LCP(mySolver));
+      s->recordNonSmoothProblem(osnspb);
+      jeu->initialize(s);
 
       q = yoyo->getQPtr();
       v = yoyo->getVelocityPtr();
@@ -292,16 +268,6 @@ int main(int argc, char* argv[])
     io2.write(Controle, "noDim");
 
     // --- Libérer de la mémoire
-
-    delete mySolver;
-    delete relation;
-    delete relation0;
-    delete loi;
-    delete loi0;
-    delete q0;
-    delete v0;
-    delete M;
-    delete H;
   }
 
   catch (SiconosException e)

@@ -36,14 +36,14 @@ int main(int argc, char* argv[])
     // x(0) = x0
     // Note: r = Blambda, B defines in relation below.
 
-    SiconosMatrix * A = new SimpleMatrix(ndof, ndof);
+    SP::SiconosMatrix A(new SimpleMatrix(ndof, ndof));
     (*A)(0, 0) = 1.0;
     (*A)(0, 1) = 1.0;
     (*A)(1, 0) = 3.0;
     (*A)(1, 1) = 1.0;
-    SiconosVector * x0 = new SimpleVector(ndof);
+    SP::SiconosVector x0(new SimpleVector(ndof));
     (*x0)(0) = Vinit;
-    FirstOrderLinearDS * process  = new FirstOrderLinearDS(0, *x0, *A);
+    SP::FirstOrderLinearDS process(new FirstOrderLinearDS(*x0, *A));
     process->setComputeBFunction("ObserverLCSPlugin.so", "uProcess");
 
     // Second System, the observer:
@@ -53,24 +53,24 @@ int main(int argc, char* argv[])
     // u(t) + Ly  is computed with uObserver function
 
     unsigned int noutput = 1;
-    SiconosMatrix * L = new SimpleMatrix(ndof, noutput);
+    SP::SiconosMatrix L(new SimpleMatrix(ndof, noutput));
     (*L)(0, 0) = 1.0;
     (*L)(1, 0) = 1.0;
-    SiconosMatrix * G = new SimpleMatrix(noutput, ndof);
+    SP::SiconosMatrix G(new SimpleMatrix(noutput, ndof));
     (*G)(0, 0) = 2.0;
     (*G)(0, 1) = 2.0;
 
     // hatA is initialized with A
-    SimpleMatrix* hatA = new SimpleMatrix(ndof, ndof);
-    (*hatA)(0, 0) = -1.0;
-    (*hatA)(0, 1) = -1.0;
-    (*hatA)(1, 0) = 1.0;
-    (*hatA)(1, 1) = -1.0;
+    SimpleMatrix hatA(ndof, ndof);
+    hatA(0, 0) = -1.0;
+    hatA(0, 1) = -1.0;
+    hatA(1, 0) = 1.0;
+    hatA(1, 1) = -1.0;
 
-    SiconosVector * obsX0 = new SimpleVector(ndof);
-    FirstOrderLinearDS* observer = new FirstOrderLinearDS(1, *obsX0, *hatA);
+    SP::SiconosVector obsX0(new SimpleVector(ndof));
+    SP::FirstOrderLinearDS observer(new FirstOrderLinearDS(*obsX0, hatA));
     observer->setComputeBFunction("ObserverLCSPlugin.so", "uObserver");
-    //    SimpleVector * z = new SimpleVector(1);
+    //    SimpleVector z(new SimpleVector(1);
     observer->setZPtr(process->getXPtr());
     // The set of all DynamicalSystems
     DynamicalSystemsSet allDS;
@@ -86,41 +86,41 @@ int main(int argc, char* argv[])
     // First relation, related to the process
     // y = Cx + Dlambda
     // r = Blambda
-    SiconosMatrix * B = new SimpleMatrix(ndof, ninter);
-    (*B)(0, 0) = -1.0;
-    (*B)(1, 0) = 1.0;
-    SiconosMatrix * C = new SimpleMatrix(ninter, ndof);
-    (*C)(0, 0) = -1.0;
-    (*C)(0, 1) = 1.0;
-    FirstOrderLinearR * myProcessRelation = new FirstOrderLinearR(C, B);
-    SiconosMatrix* D = new SimpleMatrix(ninter, ninter);
-    (*D)(0, 0) = 1.0;
+    SimpleMatrix B(ndof, ninter);
+    B(0, 0) = -1.0;
+    B(1, 0) = 1.0;
+    SimpleMatrix C(ninter, ndof);
+    C(0, 0) = -1.0;
+    C(0, 1) = 1.0;
+    SP::FirstOrderLinearR myProcessRelation(new FirstOrderLinearR(C, B));
+    SimpleMatrix D(ninter, ninter);
+    D(0, 0) = 1.0;
 
-    myProcessRelation->setDPtr(D);
+    myProcessRelation->setD(D);
     myProcessRelation->setComputeEFunction("ObserverLCSPlugin.so", "computeE");
 
     // Second relation, related to the observer
     // haty = C hatX + D hatLambda + E
     // hatR = B hatLambda
-    FirstOrderLinearR * myObserverRelation = new FirstOrderLinearR(C, B);
-    myObserverRelation->setDPtr(D);
+    SP::FirstOrderLinearR myObserverRelation(new FirstOrderLinearR(C, B));
+    myObserverRelation->setD(D);
     myObserverRelation->setComputeEFunction("ObserverLCSPlugin.so", "computeE");
 
     // NonSmoothLaw
     unsigned int nslawSize = 1;
-    NonSmoothLaw * myNslaw = new ComplementarityConditionNSL(nslawSize);
+    SP::NonSmoothLaw myNslaw(new ComplementarityConditionNSL(nslawSize));
 
     // The Interaction which involves the first DS (the process)
     string nameInter = "processInteraction"; // Name
     unsigned int numInter = 1; // Dim of the interaction = dim of y and lambda vectors
 
-    Interaction* myProcessInteraction = new Interaction(nameInter, process, numInter, ninter, myNslaw, myProcessRelation);
+    SP::Interaction myProcessInteraction(new Interaction(nameInter, process, numInter, ninter, myNslaw, myProcessRelation));
 
     // The Interaction which involves the second DS (the observer)
     string nameInter2 = "observerInteraction"; // Name
     unsigned int numInter2 = 2;
 
-    Interaction* myObserverInteraction = new Interaction(nameInter2, observer, numInter2, ninter, myNslaw, myObserverRelation);
+    SP::Interaction myObserverInteraction(new Interaction(nameInter2, observer, numInter2, ninter, myNslaw, myObserverRelation));
 
     // The set of all Interactions
     InteractionsSet allInteractions;
@@ -130,24 +130,25 @@ int main(int argc, char* argv[])
     // --------------------------------
     // --- NonSmoothDynamicalSystem ---
     // --------------------------------
-    NonSmoothDynamicalSystem* myNSDS = new NonSmoothDynamicalSystem(allDS, allInteractions);
+    SP::NonSmoothDynamicalSystem myNSDS(new NonSmoothDynamicalSystem(allDS, allInteractions));
 
     // -------------
     // --- Model ---
     // -------------
-    Model * ObserverLCS = new Model(t0, T);
+    SP::Model ObserverLCS(new Model(t0, T));
     ObserverLCS->setNonSmoothDynamicalSystemPtr(myNSDS); // set NonSmoothDynamicalSystem of this model
 
     // ------------------
     // --- Simulation ---
     // ------------------
     // TimeDiscretisation
-    TimeDiscretisation * td = new TimeDiscretisation(h, ObserverLCS);
+    SP::TimeDiscretisation td(new TimeDiscretisation(t0, h));
     // == Creation of the Simulation ==
-    TimeStepping * s = new TimeStepping(td);
+    SP::TimeStepping s(new TimeStepping(td));
     // -- OneStepIntegrators --
     double theta = 0.5;
-    Moreau* myIntegrator = new Moreau(allDS, theta, s);
+    SP::Moreau myIntegrator(new Moreau(allDS, theta));
+    s->recordIntegrator(myIntegrator);
 
     // -- OneStepNsProblem --
     IntParameters iparam(5);
@@ -155,8 +156,9 @@ int main(int argc, char* argv[])
     DoubleParameters dparam(5);
     dparam[0] = 1e-6; // Tolerance
     string solverName = "Lemke" ;
-    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
-    LCP * osnspb = new LCP(s, mySolver);
+    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
+    SP::LCP osnspb(new LCP(mySolver));
+    s->recordNonSmoothProblem(osnspb);
 
     // =========================== End of model definition ===========================
 
@@ -166,7 +168,7 @@ int main(int argc, char* argv[])
 
     cout << "====> Simulation initialisation ..." << endl << endl;
 
-    s->initialize();
+    ObserverLCS->initialize(s);
 
     // --- Get the values to be plotted ---
     unsigned int outputSize = 10; // number of required data
@@ -174,13 +176,13 @@ int main(int argc, char* argv[])
 
     SimpleMatrix dataPlot(N, outputSize);
 
-    SiconosVector * xProc = process->getXPtr();
-    SiconosVector * xObs = observer->getXPtr();
-    SiconosVector * lambdaProc = myProcessInteraction->getLambdaPtr(0);
-    SiconosVector * lambdaObs = myObserverInteraction->getLambdaPtr(0);
-    SiconosVector * yProc = myProcessInteraction->getYPtr(0);
-    SiconosVector * yObs = myObserverInteraction->getYPtr(0);
-    SiconosVector * z = observer->getZPtr();
+    SP::SiconosVector xProc = process->getXPtr();
+    SP::SiconosVector xObs = observer->getXPtr();
+    SP::SiconosVector lambdaProc = myProcessInteraction->getLambdaPtr(0);
+    SP::SiconosVector lambdaObs = myObserverInteraction->getLambdaPtr(0);
+    SP::SiconosVector yProc = myProcessInteraction->getYPtr(0);
+    SP::SiconosVector yObs = myObserverInteraction->getYPtr(0);
+    SP::SiconosVector z = observer->getZPtr();
 
     // -> saved in a matrix dataPlot
     dataPlot(0, 0) = ObserverLCS->getT0(); // Initial time of the model
