@@ -32,7 +32,7 @@ template <class T> void FirstOrderR<T>::initDSLinks()
   data[r].reset(new BlockVector());
 
   SP::FirstOrderNonLinearDS ds;
-  for (DSIterator it = interaction->dynamicalSystemsBegin(); it != interaction->dynamicalSystemsEnd(); ++it)
+  for (DSIterator it = getInteractionPtr()->dynamicalSystemsBegin(); it != getInteractionPtr()->dynamicalSystemsEnd(); ++it)
   {
     // Put x/r ... of each DS into a block. (Pointers links, no copy!!)
     ds = boost::static_pointer_cast<FirstOrderNonLinearDS> (*it);
@@ -48,9 +48,9 @@ template <class T> void FirstOrderR<T>::initialize(SP::Interaction inter)
   interaction = inter;
 
   // Check if an Interaction is connected to the Relation.
-  unsigned int sizeY = interaction->getSizeOfY();
-  unsigned int sizeX = interaction->getSizeOfDS();
-  unsigned int sizeZ = interaction->getSizeZ();
+  unsigned int sizeY = getInteractionPtr()->getSizeOfY();
+  unsigned int sizeX = getInteractionPtr()->getSizeOfDS();
+  unsigned int sizeZ = getInteractionPtr()->getSizeZ();
 
   // Update data member (links to DS variables)
   initDSLinks();

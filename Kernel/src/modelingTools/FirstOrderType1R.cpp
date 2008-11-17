@@ -92,10 +92,10 @@ void FirstOrderType1R::initialize(SP::Interaction inter)
   BaseClass::initialize(inter);
 
   // Check if an Interaction is connected to the Relation.
-  unsigned int sizeY = interaction->getSizeOfY();
-  unsigned int sizeDS = interaction->getSizeOfDS();
-  unsigned int sizeZ = interaction->getSizeZ();
-  if (!interaction)
+  unsigned int sizeY = getInteractionPtr()->getSizeOfY();
+  unsigned int sizeDS = getInteractionPtr()->getSizeOfDS();
+  unsigned int sizeZ = getInteractionPtr()->getSizeZ();
+  if (!getInteractionPtr())
     RuntimeException::selfThrow("FirstOrderR::initialize failed. No Interaction linked to the present relation.");
 
   // Update data member (links to DS variables)
@@ -136,7 +136,7 @@ void FirstOrderType1R::computeOutput(double t, unsigned int)
 {
   assert(output && "FirstOrderType1R::computeOutput() is not linked to a plugin function");
 
-  SP::SiconosVector y = interaction->getYPtr(0);
+  SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
 
   *workX = *data[x];
@@ -158,7 +158,7 @@ void FirstOrderType1R::computeInput(double t, unsigned int level)
 {
   assert(input && "FirstOrderType1R::computeInput() is not linked to a plugin function");
 
-  SP::SiconosVector lambda = interaction->getLambdaPtr(level);
+  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(level);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
 
   *workX = *data[r];
@@ -185,7 +185,7 @@ void FirstOrderType1R::computeJacH(double, unsigned int index)
   *workX = *data[x];
   *workZ = *data[z];
 
-  unsigned int sizeY = interaction->getSizeOfY();
+  unsigned int sizeY = getInteractionPtr()->getSizeOfY();
   unsigned int sizeX = data[x]->size();
   unsigned int sizeZ = data[z]->size();
 
@@ -200,7 +200,7 @@ void FirstOrderType1R::computeJacG(double, unsigned int index)
   assert(index == 0 && "FirstOrderType1R::computeJacobianG(index): index is out of range");
   assert(JacG[0]->fPtr && "FirstOrderType1R::computeJacobianG() failed; not linked to a plug-in function.");
 
-  SP::SiconosVector lambda = interaction->getLambdaPtr(0);
+  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(0);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
   *workZ = *data[z];
   *workY = *lambda;

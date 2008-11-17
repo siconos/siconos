@@ -105,9 +105,9 @@ void FirstOrderLinearTIR::initialize(SP::Interaction inter)
 
   // Check if various operators sizes are consistent.
   // Reference: interaction.
-  unsigned int sizeY = interaction->getSizeOfY();
-  unsigned int sizeX = interaction->getSizeOfDS();
-  unsigned int sizeZ = interaction->getSizeZ();
+  unsigned int sizeY = getInteractionPtr()->getSizeOfY();
+  unsigned int sizeX = getInteractionPtr()->getSizeOfDS();
+  unsigned int sizeZ = getInteractionPtr()->getSizeZ();
 
   assert((C->size(0) == sizeY && C->size(1) == sizeX) && "FirstOrderLinearTIR::initialize , inconsistent size between C and Interaction.");
 
@@ -143,8 +143,8 @@ void FirstOrderLinearTIR::computeOutput(double time, unsigned int)
   // y[0]
 
   // We get y and lambda of the interaction (pointers)
-  SP::SiconosVector y = interaction->getYPtr(0);
-  SP::SiconosVector lambda = interaction->getLambdaPtr(0);
+  SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
+  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(0);
 
   // compute y
   if (C)
@@ -165,7 +165,7 @@ void FirstOrderLinearTIR::computeOutput(double time, unsigned int)
 void FirstOrderLinearTIR::computeInput(double time, unsigned int level)
 {
   // We get lambda of the interaction (pointers)
-  SP::SiconosVector lambda = interaction->getLambdaPtr(level);
+  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(level);
   prod(*B, *lambda, *data[r], false);
 }
 

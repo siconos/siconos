@@ -63,7 +63,7 @@ void LagrangianScleronomousR::computeH(double)
   if (hPlugged)
   {
     // get vector y of the current interaction
-    SP::SiconosVector y = interaction->getYPtr(0);
+    SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
 
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
     *workX = *data[q0];
@@ -119,7 +119,7 @@ void LagrangianScleronomousR::computeOutput(double time, unsigned int derivative
   else
   {
     computeJacH(time, 0);
-    SP::SiconosVector y = interaction->getYPtr(derivativeNumber) ;
+    SP::SiconosVector y = getInteractionPtr()->getYPtr(derivativeNumber) ;
     // Approx: y[i] = jacH[0] q[i] , other terms are neglected.
     prod(*JacH[0], *data[q0 + derivativeNumber], *y);
   }
@@ -129,7 +129,7 @@ void LagrangianScleronomousR::computeInput(double time, unsigned int level)
 {
   computeJacH(time, 0);
   // get lambda of the concerned interaction
-  SP::SiconosVector lambda = interaction->getLambdaPtr(level);
+  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(level);
   // data[name] += trans(G) * lambda
   prod(*lambda, *JacH[0], *data[p0 + level], false);
 

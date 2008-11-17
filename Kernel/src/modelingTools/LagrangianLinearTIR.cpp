@@ -100,8 +100,8 @@ LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC, const Sicono
 
 void LagrangianLinearTIR::initComponents()
 {
-  unsigned int sizeY = interaction->getSizeOfY();
-  unsigned int sizeDS = interaction->getSizeOfDS();
+  unsigned int sizeY = getInteractionPtr()->getSizeOfY();
+  unsigned int sizeDS = getInteractionPtr()->getSizeOfDS();
 
   assert((C) ? (C->size(1) == sizeDS && C->size(0) == sizeY) : 1 &&
          "LagrangianLinearTIR::initComponents inconsistent sizes between H matrix and the interaction.");
@@ -112,7 +112,7 @@ void LagrangianLinearTIR::initComponents()
          "LagrangianLinearTIR::initComponents inconsistent sizes between e vector and the dimension of the interaction.");
 
   assert((F) ?
-         (F->size(0) == interaction->getSizeZ() && F->size(1) == interaction->getSizeZ()) : 1 &&
+         (F->size(0) == getInteractionPtr()->getSizeZ() && F->size(1) == getInteractionPtr()->getSizeZ()) : 1 &&
          "LagrangianLinearTIR::initComponents inconsistent sizes between F matrix and the interaction.");
 
 
@@ -128,8 +128,8 @@ void LagrangianLinearTIR::computeH(double time)
 void LagrangianLinearTIR::computeOutput(double time, unsigned int derivativeNumber)
 {
   // get y and lambda of the interaction
-  SP::SiconosVector y = interaction->getYPtr(derivativeNumber);
-  SP::SiconosVector lambda = interaction->getLambdaPtr(derivativeNumber);
+  SP::SiconosVector y = getInteractionPtr()->getYPtr(derivativeNumber);
+  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(derivativeNumber);
 
   //string name = "q"+toString<unsigned int>(derivativeNumber);
   prod(*C, *data[q0 + derivativeNumber], *y);
@@ -153,7 +153,7 @@ void LagrangianLinearTIR::computeInput(double time, const unsigned int level)
   // get lambda of the concerned interaction
   //  string name = "p"+toString<unsigned int>(level);
 
-  *workL = *interaction->getLambdaPtr(level);
+  *workL = *getInteractionPtr()->getLambdaPtr(level);
   // computation of p = Ht lambda
   prod(*workL, *C, *data[p0 + level], false);
   //gemv(CblasTrans,1.0,*H,*lambda,1.0, *data[name]); => not yet implemented for BlockVectors.

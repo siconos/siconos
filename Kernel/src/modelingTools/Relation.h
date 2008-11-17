@@ -33,6 +33,7 @@
 #include "Interaction.h"
 #include "PluginTypes.hpp"
 #include "RelationNamespace.hpp"
+#include <boost/weak_ptr.hpp>
 
 class RelationXML;
 class SimpleVector;
@@ -77,7 +78,7 @@ protected:
   RELATION::SUBTYPES subType;
 
   /** The Interaction linked to this Relation */
-  SP::Interaction interaction;
+  boost::weak_ptr<Interaction> interaction;
 
   /** True if h is plugged to a user-defined function */
   bool hPlugged;
@@ -141,14 +142,15 @@ public:
 
   /** destructor
    */
-  virtual ~Relation() {};
+  virtual ~Relation();
 
   /** To get the pointer to the Interaction linked to the present Relation
    *  \return a pointer to Interaction.
    */
   inline SP::Interaction getInteractionPtr()
   {
-    return interaction;
+    assert(!interaction.expired());
+    return interaction.lock();
   }
 
   /** To set the pointer to the Interaction linked to the present Relation
@@ -156,7 +158,7 @@ public:
    */
   inline void setInteractionPtr(SP::Interaction newInter)
   {
-    interaction = newInter;
+    interaction = boost::weak_ptr<Interaction>(newInter);
   }
 
   /** To get the RelationXML* of the Relation

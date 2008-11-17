@@ -33,10 +33,14 @@ Relation::Relation(SP::RelationXML relxml, RELATION::TYPES newType, RELATION::SU
     RuntimeException::selfThrow("Relation::fillRelationWithRelationXML - object RelationXML does not exist");
 }
 
+Relation::~Relation()
+{
+}
+
 void Relation::display() const
 {
   cout << "=====> Relation of type " << relationType << " and subtype " << subType << endl;
-  if (interaction) cout << "- Interaction id" << interaction->getId() << endl;
+  if (interaction.lock()) cout << "- Interaction id" << interaction.lock()->getId() << endl;
   else cout << "- Linked interaction -> NULL" << endl;
 }
 

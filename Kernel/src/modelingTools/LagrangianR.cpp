@@ -28,8 +28,8 @@ using namespace std;
 
 template <class T> void LagrangianR<T>::initComponents()
 {
-  unsigned int sizeY = interaction->getSizeOfY();
-  unsigned int sizeDS = interaction->getSizeOfDS();
+  unsigned int sizeY = getInteractionPtr()->getSizeOfY();
+  unsigned int sizeDS = getInteractionPtr()->getSizeOfDS();
 
   // The initialization of JacH[0] depends on the way the Relation was built ie if the matrix
   // was read from xml or not
@@ -45,7 +45,7 @@ template <class T> void LagrangianR<T>::initComponents()
   }
 
   workX.reset(new SimpleVector(sizeDS));
-  workZ.reset(new SimpleVector(interaction->getSizeZ()));
+  workZ.reset(new SimpleVector(getInteractionPtr()->getSizeZ()));
   workY.reset(new SimpleVector(sizeY));
 }
 
@@ -68,7 +68,7 @@ template <class T> void LagrangianR<T>::initialize(SP::Interaction inter)
   data[p2].reset(new BlockVector());
   SP::LagrangianDS lds;
   DS::TYPES type;
-  for (it = interaction->dynamicalSystemsBegin(); it != interaction->dynamicalSystemsEnd(); ++it)
+  for (it = getInteractionPtr()->dynamicalSystemsBegin(); it != getInteractionPtr()->dynamicalSystemsEnd(); ++it)
   {
     type = (*it)->getType();
     // check dynamical system type

@@ -37,12 +37,12 @@ double DiskPlanR::distance(double x, double y, double rad)
 
 void DiskPlanR::computeH(double)
 {
-  SP::SiconosVector y = interaction->getYPtr(0);
+  SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
 
   double q_0 = boost::static_pointer_cast<Disk>
-               (*interaction->dynamicalSystemsBegin())->getQ(0);
+               (*getInteractionPtr()->dynamicalSystemsBegin())->getQ(0);
   double q_1 = boost::static_pointer_cast<Disk>
-               (*(interaction->dynamicalSystemsBegin()))->getQ(1);
+               (*(getInteractionPtr()->dynamicalSystemsBegin()))->getQ(1);
 
   y->setValue(0, distance(q_0, q_1, r));
 
@@ -54,9 +54,9 @@ void DiskPlanR::computeJacH(double, unsigned int)
   double *g = &(*(JacH[0]))(0, 0);
 
   double x0 = boost::static_pointer_cast<Disk>
-              (*interaction->dynamicalSystemsBegin())->getQ(0);
+              (*getInteractionPtr()->dynamicalSystemsBegin())->getQ(0);
   double y0 = boost::static_pointer_cast<Disk>
-              (*(interaction->dynamicalSystemsBegin()))->getQ(1);
+              (*(getInteractionPtr()->dynamicalSystemsBegin()))->getQ(1);
   double D1 = A * x0 + B * y0 + C;
   double D2 = sqrA2pB2 * fabs(D1);
 

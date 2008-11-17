@@ -42,7 +42,7 @@ void DiskDiskR::computeH(double)
   *workX = *data[q0];
   double *q = &(*workX)(0);
 
-  SP::SiconosVector y = interaction->getYPtr(0);
+  SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
 
   y->setValue(0, distance(q[0], q[1], r1, q[3], q[4], r2));
   y->setValue(1, 0.);

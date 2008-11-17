@@ -166,9 +166,9 @@ void FirstOrderLinearR::initialize(SP::Interaction inter)
 
   // Check if various operators sizes are consistent.
   // Reference: interaction.
-  unsigned int sizeY = interaction->getSizeOfY();
-  unsigned int sizeX = interaction->getSizeOfDS();
-  unsigned int sizeZ = interaction->getSizeZ();
+  unsigned int sizeY = getInteractionPtr()->getSizeOfY();
+  unsigned int sizeX = getInteractionPtr()->getSizeOfDS();
+  unsigned int sizeZ = getInteractionPtr()->getSizeZ();
 
   // The initialization of each matrix/vector depends on the way the Relation was built ie if the matrix/vector
   // was read from xml or not
@@ -260,9 +260,9 @@ void FirstOrderLinearR::computeC(const double time)
     {
       if (!JacH[0]->fPtr)
         RuntimeException::selfThrow("FirstOrderLinearR::computeC() is not linked to a plugin function");
-      unsigned int sizeY = interaction->getSizeOfY();
-      unsigned int sizeX = interaction->getSizeOfDS();
-      unsigned int sizeZ = interaction->getSizeZ();
+      unsigned int sizeY = getInteractionPtr()->getSizeOfY();
+      unsigned int sizeX = getInteractionPtr()->getSizeOfDS();
+      unsigned int sizeZ = getInteractionPtr()->getSizeZ();
       *workZ = *data[z];
       (JacH[0]->fPtr)(time, sizeY, sizeX, &(*JacH[0])(0, 0), sizeZ, &(*workZ)(0));
       // Copy data that might have been changed in the plug-in call.
@@ -280,8 +280,8 @@ void FirstOrderLinearR::computeD(const double time)
     {
       if (!JacH[1]->fPtr)
         RuntimeException::selfThrow("FirstOrderLinearR::computeD() is not linked to a plugin function");
-      unsigned int sizeY = interaction->getSizeOfY();
-      unsigned int sizeZ = interaction->getSizeZ();
+      unsigned int sizeY = getInteractionPtr()->getSizeOfY();
+      unsigned int sizeZ = getInteractionPtr()->getSizeZ();
       *workZ = *data[z];
       JacH[1]->fPtr(time, sizeY, sizeY, &(*JacH[1])(0, 0), sizeZ, &(*workZ)(0));
       // Copy data that might have been changed in the plug-in call.
@@ -299,8 +299,8 @@ void FirstOrderLinearR::computeF(const double time)
     {
       if (!F->fPtr)
         RuntimeException::selfThrow("FirstOrderLinearR::computeF() is not linked to a plugin function");
-      unsigned int sizeY = interaction->getSizeOfY();
-      unsigned int sizeZ = interaction->getSizeZ();
+      unsigned int sizeY = getInteractionPtr()->getSizeOfY();
+      unsigned int sizeZ = getInteractionPtr()->getSizeZ();
       *workZ = *data[z];
       (F->fPtr)(time, sizeY, sizeZ, &(*F)(0, 0), sizeZ, &(*workZ)(0));
       // Copy data that might have been changed in the plug-in call.
@@ -318,8 +318,8 @@ void FirstOrderLinearR::computeE(const double time)
     {
       if (!e->fPtr)
         RuntimeException::selfThrow("FirstOrderLinearR::computeE() is not linked to a plugin function");
-      unsigned int sizeY = interaction->getSizeOfY();
-      unsigned int sizeZ = interaction->getSizeZ();
+      unsigned int sizeY = getInteractionPtr()->getSizeOfY();
+      unsigned int sizeZ = getInteractionPtr()->getSizeZ();
       *workZ = *data[z];
       (e->fPtr)(time, sizeY, &(*e)(0), sizeZ, &(*workZ)(0));
       // Copy data that might have been changed in the plug-in call.
@@ -335,9 +335,9 @@ void FirstOrderLinearR::computeB(const double time)
   {
     if (!JacG[0]->fPtr)
       RuntimeException::selfThrow("FirstOrderLinearR::computeB() is not linked to a plugin function");
-    unsigned int sizeY = interaction->getSizeOfY();
-    unsigned int sizeX = interaction->getSizeOfDS();
-    unsigned int sizeZ = interaction->getSizeZ();
+    unsigned int sizeY = getInteractionPtr()->getSizeOfY();
+    unsigned int sizeX = getInteractionPtr()->getSizeOfDS();
+    unsigned int sizeZ = getInteractionPtr()->getSizeZ();
     *workZ = *data[z];
     JacG[0]->fPtr(time, sizeX, sizeY, &(*JacG[0])(0, 0), sizeZ, &(*workZ)(0));
     // Copy data that might have been changed in the plug-in call.
@@ -385,8 +385,8 @@ void FirstOrderLinearR::computeOutput(double time, unsigned int)
   // y[0]
 
   // We get y and lambda of the interaction (pointers)
-  SP::SiconosVector y = interaction->getYPtr(0);
-  SP::SiconosVector lambda = interaction->getLambdaPtr(0);
+  SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
+  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(0);
 
   // compute y
   if (JacH[0])
@@ -409,7 +409,7 @@ void FirstOrderLinearR::computeInput(double time, unsigned int level)
   computeB(time);
 
   // We get lambda of the interaction (pointers)
-  SP::SiconosVector lambda = interaction->getLambdaPtr(level);
+  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(level);
   prod(*JacG[0], *lambda, *data[r], false);
 }
 

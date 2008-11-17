@@ -69,7 +69,7 @@ void LagrangianRheonomousR::initComponents()
 {
   LagrangianR<FPtr4>::initComponents();
 
-  unsigned int sizeY = interaction->getSizeOfY();
+  unsigned int sizeY = getInteractionPtr()->getSizeOfY();
   // hDot
   if (!hDot)
     hDot.reset(new PVT2(sizeY));
@@ -87,7 +87,7 @@ void LagrangianRheonomousR::computeH(double time)
   if (hPlugged)
   {
     // get vector y of the current interaction
-    SP::SiconosVector y = interaction->getYPtr(0);
+    SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
 
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
     *workX = *data[q0];
@@ -159,7 +159,7 @@ void LagrangianRheonomousR::computeOutput(double time, unsigned int derivativeNu
     computeH(time);
   else
   {
-    SP::SiconosVector y = interaction->getYPtr(derivativeNumber);
+    SP::SiconosVector y = getInteractionPtr()->getYPtr(derivativeNumber);
     computeJacH(time, 0);
     if (derivativeNumber == 1)
     {
@@ -178,7 +178,7 @@ void LagrangianRheonomousR::computeInput(double time, unsigned int level)
 {
   computeJacH(time, 0);
   // get lambda of the concerned interaction
-  SP::SiconosVector lambda = interaction->getLambdaPtr(level);
+  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(level);
   // data[name] += trans(G) * lambda
   prod(*lambda, *JacH[0], *data[p0 + level], false);
   //   SP::SiconosMatrix  GT = new SimpleMatrix(*G[0]);
