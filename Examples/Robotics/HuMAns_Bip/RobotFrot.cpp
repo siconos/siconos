@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
     q0(6) = 0.2;
     q0(7) = -0.1;
 
-    LagrangianDS * bip = new LagrangianDS(1, q0, v0);
+    SP::LagrangianDS bip(new LagrangianDS(q0, v0));
 
     // external plug-in
     bip->setComputeMassFunction("RobotFrotPlugin.so", "mass");
@@ -70,13 +70,13 @@ int main(int argc, char* argv[])
 
     // -- relations --
 
-    NonSmoothLaw * nslaw = new NewtonImpactFrictionNSL(en, et, mu, 3);
+    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(en, et, mu, 3));
     string G = "RobotFrotPlugin:G0";
-    Relation * relation = new LagrangianScleronomousR("RobotFrotPlugin:h0", G);
-    Interaction * inter = new Interaction("floor-feet", allDS, 0, 69, nslaw, relation);
+    SP::Relation relation(new LagrangianScleronomousR("RobotFrotPlugin:h0", G));
+    SP::Interaction inter(new Interaction("floor-feet", allDS, 0, 69, nslaw, relation));
 
     //The linear contraint corresponding to joints limits (hq+b>0)
-    NonSmoothLaw * nslaw2 = new NewtonImpactFrictionNSL(en, et, 0, 3);
+    SP::NonSmoothLaw nslaw2(new NewtonImpactFrictionNSL(en, et, 0, 3));
     SimpleMatrix H(90, 21);
     SimpleVector b(90);
     H.zero();
@@ -137,43 +137,46 @@ int main(int argc, char* argv[])
     b(3 * i + 29) = 0.21;
 
 
-    Relation * relation2 = new LagrangianLinearTIR(H, b);
-    Interaction * inter2 =  new Interaction("joint-limits", allDS, 1, 90, nslaw2, relation2);
+    SP::Relation relation2(new LagrangianLinearTIR(H, b));
+    SP::Interaction inter2(new Interaction("joint-limits", allDS, 1, 90, nslaw2, relation2));
 
 
     allInteractions.insert(inter);
     allInteractions.insert(inter2);
 
-    // --------------------------------
-    // --- NonSmoothDynamicalSystem ---
-    // --------------------------------
-
-    bool isBVP = 0;
-    NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(allDS, allInteractions, isBVP);
-
     // -------------
     // --- Model ---
     // -------------
 
-    Model * Robot = new Model(t0, T);
-    Robot->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
+    SP::Model Robot(new Model(t0, T, allDS, allInteractions));
 
     // ----------------
     // --- Simulation ---
     // ----------------
 
     // -- Time discretisation --
-    TimeDiscretisation * t = new TimeDiscretisation(h, Robot);
+    SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-    TimeStepping* s = new TimeStepping(t);
-
+    SP::TimeStepping s(new TimeStepping(t));
 
     // -- OneStepIntegrators --
-    OneStepIntegrator * OSI =  new Moreau(bip, 0.500001, s);
+    SP::OneStepIntegrator OSI(new Moreau(bip, 0.500001));
+    s->recordIntegrator(OSI);
 
     // -- OneStepNsProblem --
-    OneStepNSProblem * osnspb = new FrictionContact3D(s, "name", "NLGS", 2000, 0.0005);
-
+    string solverName = "NSGS";      // solver algorithm used for non-smooth problem
+    IntParameters iparam(5);
+    iparam[0] = 10100; // Max number of iteration
+    // Solver/formulation
+    // 0: projection, 1: Newton/AlartCurnier, 2: Newton/Fischer-Burmeister, 3: Path/Glocker
+    iparam[4] = 4;
+    DoubleParameters dparam(5);
+    dparam[0] = 1e-6; // Tolerance
+    dparam[2] = 1e-8; // Local Tolerance
+    SP::NonSmoothSolver Mysolver(new NonSmoothSolver(solverName, iparam, dparam));
+    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
+    SP::FrictionContact osnspb(new FrictionContact(3, mySolver));
+    s->recordNonSmoothProblem(osnspb);
     cout << "=== End of model loading === " << endl;
 
     // =========================== End of model definition ===========================
@@ -182,11 +185,11 @@ int main(int argc, char* argv[])
     // ================================= Computation =================================
 
     // --- Simulation initialization ---
-    s->initialize();
-    cout << "End of simulation initialisation" << endl;
+    Robot->initialize(s);
+    cout << "End of model initialisation" << endl;
 
     int k = 0; // Current step
-    int N = t->getNSteps(); // Number of time steps
+    unsigned int N = (unsigned int)((T - t0) / h);
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -200,22 +203,12 @@ int main(int argc, char* argv[])
       dataPlot(k, i) = bip->getQ()(i - 1);
 
     // --- Compute elapsed time ---
-    double t1, t2, elapsed;
-    struct timeval tp;
-    int rtn;
-    clock_t start, end;
-    double elapsed2;
-    start = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t1 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-
-    EventsManager * eventsManager = s->getEventsManagerPtr();
-
-    //   em->display();
+    boost::timer tt;
+    tt.restart();
 
     // --- Time loop ---
     cout << "Start computation ... " << endl;
-    while (eventsManager->getNextEventPtr() != NULL)
+    while (s->getNextTime() < T)
     {
       // get current time step
       k++;
@@ -227,31 +220,13 @@ int main(int argc, char* argv[])
       for (unsigned int i = 1; i < 22; i++)
         dataPlot(k, i) = bip->getQ()(i - 1);
     }
-    end = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t2 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-    elapsed = t2 - t1;
-    elapsed2 = (end - start) / (double)CLOCKS_PER_SEC;
-    cout << "time = " << elapsed << " --- cpu time " << elapsed2 << endl;
+    cout << "time = " << tt.elapsed() << endl;
     cout << "End of computation - Number of iterations done: " << k << endl;
 
     // --- Output files ---
     ioMatrix out("result.dat", "ascii");
     out.write(dataPlot, "noDim");
 
-    // --- Free memory ---
-    delete osnspb;
-    delete t;
-    delete OSI;
-    delete s;
-    delete Robot;
-    delete nsds;
-    delete inter;
-    delete inter2;
-    delete relation;
-    delete nslaw;
-    delete relation2;
-    delete bip;
   }
 
   catch (SiconosException e)

@@ -58,33 +58,33 @@ void DelayedSampledActuator::actuate()
   int nDof = model->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0)->getDim();
   int ncont = 0;
   double t = model->getCurrentTime();
-  SimpleVector * myZ = new SimpleVector(nDof);
-  SimpleVector * state = new SimpleVector(2 * nDof);
+  SimpleVector * myZ(new SimpleVector(nDof);
+                     SimpleVector * state(new SimpleVector(2 * nDof);
 
-  // ici récupération de la valeur du Sensor
-  itS = allSensors->begin();
-  //  EventsContainer capteurEvents = (*itS)->getEvents();
-  //  DataSet data;
-  Event * event  = (*itS)->getEventPtr();
-  //  Event * event = *(capteurEvents.begin());
-  DataSet * data = new DataSet((*itS)->getData());
-  *state = *(((*data)[event])["StoredX"]);
-  //for(unsigned int i=0; i<nDof; i++)
-  //cout << (*state)(i) <<" ";
-  //cout << endl;
+                                          // ici récupération de la valeur du Sensor
+                                          itS = allSensors->begin();
+                                          //  EventsContainer capteurEvents = (*itS)->getEvents();
+                                          //  DataSet data;
+                                          Event * event  = (*itS)->getEventPtr();
+                                          //  Event * event = *(capteurEvents.begin());
+                                          DataSet * data(new DataSet((*itS)->getData());
+                                              *state = *(((*data)[event])["StoredX"]);
+                                              //for(unsigned int i=0; i<nDof; i++)
+                                              //cout << (*state)(i) <<" ";
+                                              //cout << endl;
 
-  // et là calcul des couples correspondant
-  controlLaw(&t, &((*state)(0)), &((*state)(0)) + nDof, &nDof, &ncont, &((*myZ)(0)));
+                                              // et là calcul des couples correspondant
+                                              controlLaw(&t, &((*state)(0)), &((*state)(0)) + nDof, &nDof, &ncont, &((*myZ)(0)));
 
-  //mises à jour de la variable gardant les couples pour le systeme dynamique: Z
-  itDS = allDS->begin();
-  (*itDS)->setZ(*myZ);
+                                              //mises à jour de la variable gardant les couples pour le systeme dynamique: Z
+                                              itDS = allDS->begin();
+                                              (*itDS)->setZ(*myZ);
 
-  delete myZ;
-  delete state;
+                                              delete myZ;
+                                              delete state;
 }
 
-DelayedSampledActuator* DelayedSampledActuator::convert(Actuator* s)
+                                            DelayedSampledActuator* DelayedSampledActuator::convert(Actuator* s)
 {
   DelayedSampledActuator* sp = dynamic_cast<DelayedSampledActuator*>(s);
   return sp;

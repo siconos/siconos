@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
     v0(3) = 0.59;
     v0(5) = -0.34;
 
-    LagrangianDS * arm = new LagrangianDS(1, q0, v0, "RX90Plugin:mass");
+    SP::LagrangianDS arm(new LagrangianDS(q0, v0, "RX90Plugin:mass"));
 
     // external plug-in
     arm->setComputeNNLFunction("RX90Plugin.so", "NNL");
@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
 
     // -- relations --
 
-    NonSmoothLaw * nslaw = new NewtonImpactNSL(e);
+    SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
 
     SimpleMatrix H(12, 6);
     SimpleVector b(12);
@@ -116,45 +116,38 @@ int main(int argc, char* argv[])
     b(9) = b(8);
     b(10) = PI * 270.0 / 180.0;
     b(11) = b(10);
-    Relation * relation = new LagrangianLinearTIR(H, b);
-    Interaction * inter = new Interaction("butée", allDS, 0, 12, nslaw, relation);
+    SP::Relation relation(new LagrangianLinearTIR(H, b));
+    SP::Interaction inter(new Interaction("butée", allDS, 0, 12, nslaw, relation));
 
     allInteractions.insert(inter);
-
-    // --------------------------------
-    // --- NonSmoothDynamicalSystem ---
-    // -------------------------------
-
-    NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(allDS, allInteractions);
 
     // -------------
     // --- Model ---
     // -------------
 
-    Model * RX90 = new Model(t0, T);
-    RX90->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
+    SP::Model RX90(new Model(t0, T, allDS, allInteractions));
 
     // ----------------
     // --- Simulation ---
     // ----------------
 
     // -- Time discretisation --
-    TimeDiscretisation * t = new TimeDiscretisation(h, RX90);
+    SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-    EventDriven * s = new EventDriven(t);
+    SP::EventDriven s(new EventDriven(t));
 
     // -- OneStepIntegrators --
-    OneStepIntegrator * OSI =  new Lsodar(arm, s);
+    SP::OneStepIntegrator OSI(new Lsodar(arm));
 
     IntParameters iparam(5);
     iparam[0] = 1000; // Max number of iteration
     DoubleParameters dparam(5);
     dparam[0] = 1e-15; // Tolerance
     string solverName = "Lemke" ;
-    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
+    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     // -- OneStepNsProblem --
-    OneStepNSProblem * impact = new LCP(s, mySolver, "impact");
-    OneStepNSProblem * acceleration = new LCP(s, mySolver, "acceleration");
+    SP::OneStepNSProblem impact(new LCP(mySolver, "impact"));
+    SP::OneStepNSProblem acceleration(new LCP(mySolver, "acceleration"));
 
     cout << "=== End of model loading === " << endl;
 
@@ -165,7 +158,7 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
 
-    s->initialize();
+    RX90->initialize(s);
     cout << "End of simulation initialisation" << endl;
 
     int k = 0;
@@ -177,9 +170,9 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlot(N + 1, outputSize);
     // For the initial time step:
 
-    SiconosVector * q = arm->getQPtr();
-    SiconosVector * v = arm->getVelocityPtr();
-    EventsManager * eventsManager = s->getEventsManagerPtr();
+    SP::SiconosVector q = arm->getQPtr();
+    SP::SiconosVector v = arm->getVelocityPtr();
+    SP::EventsManager eventsManager = s->getEventsManagerPtr();
 
     dataPlot(k, 0) =  RX90->getT0();
     dataPlot(k, 1) = (*q)(0);
@@ -223,19 +216,6 @@ int main(int argc, char* argv[])
     ioMatrix out("result.dat", "ascii");
     out.write(dataPlot, "noDim");
 
-    //     // --- Free memory ---
-    //    delete osnspb;
-    delete t;
-    delete OSI;
-    delete s;
-    delete RX90;
-    delete impact;
-    delete acceleration;
-    delete nsds;
-    delete inter;
-    delete relation;
-    delete nslaw;
-    delete arm;
   }
 
   catch (SiconosException e)

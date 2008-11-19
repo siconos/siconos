@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
     q0(0) = 0.05;
     q0(1) = 0.05;
 
-    LagrangianDS * arm = new LagrangianDS(1, q0, v0);
+    SP::LagrangianDS arm(new LagrangianDS(q0, v0));
 
     // external plug-in
     arm->setComputeMassFunction("RobotPlugin.so", "mass");
@@ -89,10 +89,10 @@ int main(int argc, char* argv[])
     // -- relations --
 
     // => arm-floor relation
-    NonSmoothLaw * nslaw = new NewtonImpactNSL(e);
+    SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     string G = "RobotPlugin:G2";
-    Relation * relation = new LagrangianScleronomousR("RobotPlugin:h2", G);
-    Interaction * inter = new Interaction("floor-arm", allDS, 0, 2, nslaw, relation);
+    SP::Relation relation(new LagrangianScleronomousR("RobotPlugin:h2", G));
+    SP::Interaction inter(new Interaction("floor-arm", allDS, 0, 2, nslaw, relation));
 
     // => angular stops
 
@@ -128,47 +128,42 @@ int main(int argc, char* argv[])
     b(2) = lim1;
     b(3) = lim1;
 
-    NonSmoothLaw * nslaw2 = new NewtonImpactNSL(e2);
-    Relation * relation2 = new LagrangianLinearTIR(H, b);
-    Interaction * inter2 =  new Interaction("floor-arm2", allDS, 1, 4, nslaw2, relation2);
+    SP::NonSmoothLaw nslaw2(new NewtonImpactNSL(e2));
+    SP::Relation relation2(new LagrangianLinearTIR(H, b));
+    SP::Interaction inter2(new Interaction("floor-arm2", allDS, 1, 4, nslaw2, relation2));
 
     allInteractions.insert(inter);
     allInteractions.insert(inter2);
-
-    // --------------------------------
-    // --- NonSmoothDynamicalSystem ---
-    // --------------------------------
-
-    bool isBVP = 0;
-    NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(allDS, allInteractions, isBVP);
 
     // -------------
     // --- Model ---
     // -------------
 
-    Model * Robot = new Model(t0, T);
-    Robot->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
+    SP::Model Robot(new Model(t0, T, allDS, allInteractions));
 
     // ----------------
     // --- Simulation ---
     // ----------------
 
     // -- Time discretisation --
-    TimeDiscretisation * t = new TimeDiscretisation(h, Robot);
+    SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-    EventDriven* s = new EventDriven(t);
+    SP::EventDriven s(new EventDriven(t));
 
     // -- OneStepIntegrators --
-    Lsodar * OSI =  new Lsodar(arm, s);
+    SP::Lsodar OSI(new Lsodar(arm));
+    s->recordIntegrator(OSI);
     // -- OneStepNsProblem --
     IntParameters iparam(5);
     iparam[0] = 20001; // Max number of iteration
     DoubleParameters dparam(5);
     dparam[0] =  0.005; // Tolerance
     string solverName = "PGS" ;
-    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
-    OneStepNSProblem * impact = new LCP(s, mySolver, "impact");
-    OneStepNSProblem * acceleration = new LCP(s, mySolver, "acceleration");
+    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
+    SP::OneStepNSProblem impact(new LCP(mySolver, "impact"));
+    SP::OneStepNSProblem acceleration(new LCP(mySolver, "acceleration"));
+    s->recordNonSmoothProblem(impact);
+    s->recordNonSmoothProblem(acceleration);
 
     cout << "=== End of model loading === " << endl;
 
@@ -178,9 +173,8 @@ int main(int argc, char* argv[])
     // ================================= Computation =================================
 
     // --- Simulation initialization ---
-    s->setPrintStat(true);
-    s->initialize();
-    cout << "End of simulation initialisation" << endl;
+    Robot->initialize(s);
+    cout << "End of model initialisation" << endl;
 
     int k = 0;
     int N = 10630;
@@ -192,15 +186,15 @@ int main(int argc, char* argv[])
     // For the initial time step:
     // time
 
-    SiconosVector * q = arm->getQPtr();
-    SiconosVector * vel = arm->getVelocityPtr();
-    SiconosVector * y = inter->getYPtr(0);
-    SiconosVector * yDot = inter->getYPtr(1);
+    SP::SiconosVector q = arm->getQPtr();
+    SP::SiconosVector vel = arm->getVelocityPtr();
+    SP::SiconosVector y = inter->getYPtr(0);
+    SP::SiconosVector yDot = inter->getYPtr(1);
     // When a non-smooth event occurs, pre-impact values are saved in memory vectors at pos. 1:
-    SiconosVector * qMem = arm->getQMemoryPtr()->getSiconosVector(1);
-    SiconosVector * velMem = arm->getVelocityMemoryPtr()->getSiconosVector(1);
-    SiconosVector * yMem = inter->getYOldPtr(0);
-    SiconosVector * yDotMem = inter->getYOldPtr(1);
+    SP::SiconosVector qMem = arm->getQMemoryPtr()->getSiconosVector(1);
+    SP::SiconosVector velMem = arm->getVelocityMemoryPtr()->getSiconosVector(1);
+    SP::SiconosVector yMem = inter->getYOldPtr(0);
+    SP::SiconosVector yDotMem = inter->getYOldPtr(1);
 
     dataPlot(k, 0) =  Robot->getT0();
     dataPlot(k, 1) = (*q)(0);
@@ -220,7 +214,7 @@ int main(int argc, char* argv[])
     boostTimer.restart();
 
     unsigned int numberOfEvent = 0 ;
-    EventsManager * eventsManager = s->getEventsManagerPtr();
+    SP::EventsManager eventsManager = s->getEventsManagerPtr();
     bool nonSmooth = false;
     while (s->getNextTime() < T)
     {
@@ -272,22 +266,6 @@ int main(int argc, char* argv[])
     // --- Output files ---
     ioMatrix out("result.dat", "ascii");
     out.write(dataPlot, "noDim");
-
-    // --- Free memory ---
-    delete impact;
-    delete acceleration;
-    delete t;
-    delete OSI;
-    delete s;
-    delete Robot;
-    delete nsds;
-    delete inter;
-    delete inter2;
-    delete relation;
-    delete nslaw;
-    delete relation2;
-    delete nslaw2;
-    delete arm;
   }
 
   catch (SiconosException e)

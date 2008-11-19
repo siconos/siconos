@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
     q0(0) = 0.05;
     q0(1) = 0.05;
 
-    LagrangianDS * arm = new LagrangianDS(1, q0, v0);
+    SP::LagrangianDS arm(new LagrangianDS(q0, v0));
 
     // external plug-in
     arm->setComputeMassFunction("RobotPlugin.so", "mass");
@@ -91,10 +91,10 @@ int main(int argc, char* argv[])
     // -- relations --
 
     // => arm-floor relation
-    NonSmoothLaw * nslaw = new NewtonImpactNSL(e);
+    SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
     string G = "RobotPlugin:G2";
-    Relation * relation = new LagrangianScleronomousR("RobotPlugin:h2", G);
-    Interaction * inter = new Interaction("floor-arm", allDS, 0, 2, nslaw, relation);
+    SP::Relation relation(new LagrangianScleronomousR("RobotPlugin:h2", G));
+    SP::Interaction inter(new Interaction("floor-arm", allDS, 0, 2, nslaw, relation));
 
     // => angular stops
 
@@ -130,38 +130,31 @@ int main(int argc, char* argv[])
     b(2) = lim1;
     b(3) = lim1;
 
-    NonSmoothLaw * nslaw2 = new NewtonImpactNSL(e2);
-    Relation * relation2 = new LagrangianLinearTIR(H, b);
-    Interaction * inter2 =  new Interaction("floor-arm2", allDS, 1, 4, nslaw2, relation2);
+    SP::NonSmoothLaw nslaw2(new NewtonImpactNSL(e2));
+    SP::Relation relation2(new LagrangianLinearTIR(H, b));
+    SP::Interaction inter2(new Interaction("floor-arm2", allDS, 1, 4, nslaw2, relation2));
 
     allInteractions.insert(inter);
     allInteractions.insert(inter2);
-
-    // --------------------------------
-    // --- NonSmoothDynamicalSystem ---
-    // --------------------------------
-
-    bool isBVP = 0;
-    NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(allDS, allInteractions, isBVP);
 
     // -------------
     // --- Model ---
     // -------------
 
-    Model * Robot = new Model(t0, T);
-    Robot->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
+    SP::Model Robot(new Model(t0, T, allDS, allInteractions));
 
     // ----------------
     // --- Simulation ---
     // ----------------
 
     // -- Time discretisation --
-    TimeDiscretisation * t = new TimeDiscretisation(h, Robot);
+    SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-    TimeStepping* s = new TimeStepping(t);
+    SP::TimeStepping s(new TimeStepping(t));
 
     // -- OneStepIntegrators --
-    OneStepIntegrator * OSI =  new Moreau(arm, 0.500001, s);
+    SP::OneStepIntegrator OSI(new Moreau(arm, 0.500001));
+    s->recordIntegrator(OSI);
 
     // -- OneStepNsProblem --
     IntParameters iparam(5);
@@ -169,8 +162,9 @@ int main(int argc, char* argv[])
     DoubleParameters dparam(5);
     dparam[0] = 0.005; // Tolerance
     string solverName = "PGS" ;
-    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
-    OneStepNSProblem * osnspb = new LCP(s, mySolver);
+    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
+    SP::OneStepNSProblem osnspb(new LCP(mySolver));
+    s->recordNonSmoothProblem(osnspb);
 
     cout << "=== End of model loading === " << endl;
 
@@ -180,8 +174,8 @@ int main(int argc, char* argv[])
     // ================================= Computation =================================
 
     // --- Simulation initialization ---
-    s->initialize();
-    cout << "End of simulation initialisation" << endl;
+    Robot->initialize(s);
+    cout << "End of model initialisation" << endl;
 
     int k = 0;
     int N = (int)((T - t0) / h) + 1;
@@ -193,9 +187,9 @@ int main(int argc, char* argv[])
     // For the initial time step:
     // time
 
-    SiconosVector * q = arm->getQPtr();
-    SiconosVector * vel = arm->getVelocityPtr();
-    SiconosVector * y = inter->getYPtr(0);
+    SP::SiconosVector q = arm->getQPtr();
+    SP::SiconosVector vel = arm->getVelocityPtr();
+    SP::SiconosVector y = inter->getYPtr(0);
 
     dataPlot(k, 0) =  Robot->getT0();
     dataPlot(k, 1) = (*q)(0);
@@ -236,21 +230,6 @@ int main(int argc, char* argv[])
     // --- Output files ---
     ioMatrix out("result.dat", "ascii");
     out.write(dataPlot, "noDim");
-
-    // --- Free memory ---
-    delete osnspb;
-    delete t;
-    delete OSI;
-    delete s;
-    delete Robot;
-    delete nsds;
-    delete inter;
-    delete inter2;
-    delete relation;
-    delete nslaw;
-    delete relation2;
-    delete nslaw2;
-    delete arm;
   }
 
   catch (SiconosException e)

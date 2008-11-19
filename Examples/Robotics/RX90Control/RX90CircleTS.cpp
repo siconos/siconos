@@ -73,7 +73,8 @@ int main(int argc, char* argv[])
     v0(3) = 0.59;
     v0(5) = -0.34;
 
-    LagrangianDS * arm = new LagrangianDS(1, q0, v0, "RX90Plugin:mass");
+
+    SP::LagrangianDS arm(new LagrangianDS(q0, v0, "RX90Plugin:mass"));
 
     // external plug-in
     //    arm->setComputeMassFunction("RX90Plugin.so","mass");
@@ -85,7 +86,7 @@ int main(int argc, char* argv[])
     arm->setComputeJacobianFIntFunction(0, "RX90Plugin.so", "jacobFintQ");
 
     // creating Z parameter computed in Actuators and used in FInt
-    SimpleVector * torques = new SimpleVector(nDof);
+    SP::SimpleVector torques(new SimpleVector(nDof));
     torques->zero();
     arm->setZPtr(torques);
 
@@ -102,7 +103,7 @@ int main(int argc, char* argv[])
 
     // -- relations --
 
-    NonSmoothLaw * nslaw = new NewtonImpactNSL(e);
+    SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
 
     SimpleMatrix H(12, 6);
     SimpleVector b(12);
@@ -124,65 +125,60 @@ int main(int argc, char* argv[])
     b(9) = b(8);
     b(10) = PI * 270.0 / 180.0;
     b(11) = b(10);
-    Relation * relation = new LagrangianLinearTIR(H, b);
-    Interaction * inter = new Interaction("butée", allDS, 0, 12, nslaw, relation);
+    SP::Relation relation(new LagrangianLinearTIR(H, b));
+    SP::Interaction inter(new Interaction("butée", allDS, 0, 12, nslaw, relation));
 
     allInteractions.insert(inter);
-
-    // --------------------------------
-    // --- NonSmoothDynamicalSystem ---
-    // -------------------------------
-
-    NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(allDS, allInteractions);
 
     // -------------
     // --- Model ---
     // -------------
 
-    Model * RX90 = new Model(t0, T);
-    RX90->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
+    SP::Model RX90(new Model(t0, T, allDS, allInteractions));
 
     // ----------------
     // --- Simulation ---
     // ----------------
 
     // -- Time discretisation --
-    TimeDiscretisation * t = new TimeDiscretisation(h, RX90);
+    SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
     // -- Actuation (ici?) --
     //le premier evenement doit etre un evenement doit etre un evenement
     //de calcul, et pas de Actuators, ni sensors, c'est pourquoi le pas
     //de temps de la simu (h = 5e-3) est plus petit que le retard (6e-3)
-    TimeDiscretisation * sampling = new TimeDiscretisation(2 * h, RX90);
+    SP::TimeDiscretisation Sampling(new TimeDiscretisation(t0, 2 * h));
 
     unsigned int N = (unsigned int)((T - t0) / h + 1);
-    vector<double> * tmp = new vector<double>(N);
+    SP::vector<double>tmp(new vector<double>(N));
     (*tmp)[0] = t0;
     for (unsigned int i = 1; i < tmp->size() - 1; i++)
       (*tmp)[i] = t0 + (i - 1) * 2 * h + 6e-3;
     (*tmp)[tmp->size() - 1] = T;
 
-    TimeDiscretisation * delay = new TimeDiscretisation(*tmp, RX90);
+    SP::TimeDiscretisation delay(new TimeDiscretisation(*tmp, RX90));
 
     //Creation du control et ajout du Sensor et Actuator
-    ControlManager * control = new ControlManager(RX90);
+    SP::ControlManager control(new ControlManager(RX90));
     control->addSensor(2, sampling);
     control->addActuator(2, delay);
     (*(control->getActuators().begin()))->addSensorPtr(*((control->getSensors()).begin()));
 
-    TimeStepping * s = new TimeStepping(t);
+    SP::TimeStepping s(new TimeStepping(t));
 
     // -- OneStepIntegrators --
-    OneStepIntegrator * OSI =  new Moreau(arm, 0.5, s);
+    SP::OneStepIntegrator OSI(new Moreau(arm, 0.5));
+    s->recordIntegrator(OSI);
 
     IntParameters iparam(5);
     iparam[0] = 1000; // Max number of iteration
     DoubleParameters dparam(5);
     dparam[0] = 1e-15; // Tolerance
     string solverName = "Lemke" ;
-    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
+    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     // -- OneStepNsProblem --
-    OneStepNSProblem * osnsp = new LCP(s, mySolver);
+    SP::OneStepNSProblem osnsp(new LCP(mySolver));
+    s->recordNonSmoothProblem(osnsp);
 
     cout << "=== End of model loading === " << endl;
 
@@ -193,9 +189,7 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
 
 
-    control->initialize();
-    s->initialize();
-
+    RX90->initialize(s);
     cout << "End of simulation initialisation" << endl;
 
     int k = 0;
@@ -206,11 +200,9 @@ int main(int argc, char* argv[])
     unsigned int outputSize = 13;
     SimpleMatrix dataPlot(N + 1, outputSize);
     // For the initial time step:
-    // time
-
-    SiconosVector * q = arm->getQPtr();
-    SiconosVector * v = arm->getVelocityPtr();
-    EventsManager * eventsManager = s->getEventsManagerPtr();
+    SP::SiconosVector q = arm->getQPtr();
+    SP::SiconosVector v = arm->getVelocityPtr();
+    SP::EventsManager eventsManager = s->getEventsManagerPtr();
 
     dataPlot(k, 0) =  RX90->getT0();
     dataPlot(k, 1) = (*q)(0);
