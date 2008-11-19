@@ -39,26 +39,20 @@ int main(int argc, char* argv[])
   {
     // --- Model loading from xml file ---
     //Model bouncingBall("./BouncingBall_TIDS.xml");
-    Model CamFollower("./CamFollower_TIDS.xml");
+    SP::Model CamFollower(new Model("./CamFollower_TIDS.xml"));
 
     cout << "\n *** CamFollower_TIDS.xml file loaded ***" << endl;
+    CamFollower->initialize();
 
     // --- Get and initialize the simulation ---
-    //Simulation* s = bouncingBall.getSimulationPtr();
-    TimeStepping* S = static_cast<TimeStepping*>(CamFollower.getSimulationPtr());
-    cout << "Simulation initialization ..." << endl;
-    S->initialize();
-    cout << "\n **** the simulation is ready ****" << endl;
-
+    SP::TimeStepping S = boost::static_pointer_cast<TimeStepping>(CamFollower->getSimulationPtr());
     // --- Get the time discretisation scheme ---
-    TimeDiscretisation* t = S->getTimeDiscretisationPtr();
+    SP::TimeDiscretisation t = S->getTimeDiscretisationPtr();
     int k = 0;
-    double T = CamFollower.getFinalT();
-    double t0 = CamFollower.getT0();
+    double T = CamFollower->getFinalT();
+    double t0 = CamFollower->getT0();
     double h = S->getTimeStep();
     int N = (int)((T - t0) / h);
-
-    //t->display();
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -69,22 +63,14 @@ int main(int argc, char* argv[])
     // time
     DataPlot(k, 0) = t0;
 
-    // state q for the ball
-    //  LagrangianDS* ball = static_cast<LagrangianDS*> (bouncingBall.getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
-    //     dataPlot(k, 1) = (ball->getQ())(0);
-    //     // velocity for the ball
-    //     dataPlot(k, 2) = (ball->getVelocity())(0);
-    //     // Reaction
-    //     dataPlot(k, 3) = (bouncingBall.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
-
     // state q for the Follower
-    LagrangianDS* Follower = static_cast<LagrangianDS*>(CamFollower.getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
+    SP::LagrangianDS Follower = boost::static_pointer_cast<LagrangianDS> (CamFollower->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(1));
     // Position of the Follower
     DataPlot(k, 1) = (Follower->getQ())(0);
     // Velocity for the Follower
     DataPlot(k, 2) = (Follower->getVelocity())(0);
     // Reaction
-    DataPlot(k, 3) = (CamFollower.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
+    DataPlot(k, 3) = (CamFollower->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
     // External Forcing
     DataPlot(k, 4) = (Follower->getFExt())(0);
 
@@ -102,15 +88,8 @@ int main(int argc, char* argv[])
 
 
     // --- Compute elapsed time ---
-    double t1, t2, elapsed;
-    struct timeval tp;
-    int rtn;
-    clock_t start, end;
-    double elapsed2;
-    start = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t1 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-
+    boost::timer tt;
+    tt.restart();
     cout << "Computation ... " << endl;
     // --- Time loop  ---
 
@@ -128,7 +107,7 @@ int main(int argc, char* argv[])
       //  DataPlot(k, 3) = (bouncingBall.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
       DataPlot(k, 1) = (Follower->getQ())(0);
       DataPlot(k, 2) = (Follower->getVelocity())(0);
-      DataPlot(k, 3) = (CamFollower.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
+      DataPlot(k, 3) = (CamFollower->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
       DataPlot(k, 4) = (Follower->getFExt())(0);
 
       CamEqForce = CamState(S->getNextTime(), rpm, CamPosition, CamVelocity, CamAcceleration);
@@ -142,12 +121,7 @@ int main(int argc, char* argv[])
     }
 
     // --- elapsed time computing ---
-    end = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t2 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-    elapsed = t2 - t1;
-    elapsed2 = (end - start) / (double)CLOCKS_PER_SEC;
-    cout << "time = " << elapsed << " --- cpu time " << elapsed2 << endl;
+    cout << "time = " << tt.elapsed() << endl;
 
     // Number of time iterations
     cout << "Number of iterations done: " << k << endl;

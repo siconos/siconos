@@ -39,16 +39,6 @@ int main(int argc, char* argv[])
   try
   {
 
-    // --- Compute elapsed time ---
-    double t1, t2, elapsed;
-    struct timeval tp;
-    int rtn;
-    clock_t start, end;
-    double elapsed2;
-    start = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t1 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-
     // ================= Creation of the model =======================
 
     // User-defined main parameters
@@ -64,36 +54,34 @@ int main(int argc, char* argv[])
     // --- Dynamical systems ---
     // -------------------------
 
-    SiconosMatrix *Mass, *K, *C;        // mass/rigidity/viscosity
-    Mass = new SimpleMatrix(nDof, nDof);
-    //    for(i=0;i<nDof;i++)
-    (*Mass)(0, 0) = 1.221;
-    K = new SimpleMatrix(nDof, nDof);
-    (*K)(0, 0) = 1430.8;
-    C = new SimpleMatrix(nDof, nDof);
-    (*C)(0, 0) = 0;
+    SimpleMatrix Mass(nDof, nDof), K(nDof, nDof), C(nDof, nDof);     // mass/rigidity/viscosity
+    Mass(0, 0) = 1.221;
+    K(0, 0) = 1430.8;
 
     // -- Initial positions and velocities --
-    vector<SimpleVector *> q0;
-    vector<SimpleVector *> velocity0;
-    q0.resize(dsNumber, NULL);
-    velocity0.resize(dsNumber, NULL);
-    q0[0] = new SimpleVector(nDof);
-    velocity0[0] = new SimpleVector(nDof);
+    vector<SP::SiconosVector> q0;
+    vector<SP::SiconosVector> velocity0;
+    q0.resize(dsNumber);
+    velocity0.resize(dsNumber);
+    q0[0].reset(new SimpleVector(nDof));
+    velocity0[0].reset(new SimpleVector(nDof));
     (*(q0[0]))(0) = position_init;
     (*(velocity0[0]))(0) = velocity_init;
-    LagrangianLinearTIDS * lds = new LagrangianLinearTIDS(0, *(q0[0]), *(velocity0[0]), *Mass, *K, *C);
+    SP::LagrangianLinearTIDS lds(new LagrangianLinearTIDS(*(q0[0]), *(velocity0[0]), Mass, K, C));
     lds->setComputeFExtFunction("FollowerPlugin.so", "FollowerFExtR");
 
     // Example to set a list of parameters in FExt function.
     // 1 - Create a simple vector that contains the required parameters.
-    SimpleVector * param = new SimpleVector(1); // Here we only set one parameter, the DS number.
+    SP::SiconosVector param(new SimpleVector(1)); // Here we only set one parameter, the DS number.
     //    (*param)(0) = vectorDS[0]->getNumber();
     (*param)(0) = rpm;
     // 2 - Assign this param to the function FExt
     lds->setZPtr(param);
     // 2 corresponds to the position of FExt in the stl vector of possible parameters. 0 is mass, 1 FInt and so on.
     // Now the DS number will be available in FExt plugin.
+
+    DynamicalSystemsSet allDS;
+    allDS.insert(lds);
 
     // --------------------
     // --- Interactions ---
@@ -104,54 +92,42 @@ int main(int argc, char* argv[])
 
     // Interaction Follower-floor
     //
-    SiconosMatrix *H = new SimpleMatrix(1, nDof);
-    (*H)(0, 0) = 1.0;
-    NonSmoothLaw * nslaw0 = new NewtonImpactNSL(e);
-
+    SimpleMatrix H(1, nDof);
+    H(0, 0) = 1.0;
+    SP::NonSmoothLaw nslaw0(new NewtonImpactNSL(e));
     DynamicalSystemsSet dsConcerned;
     dsConcerned.insert(lds);
 
-    //    Relation * relation0 = new LagrangianLinearTIR(*H);
     vector<string> listofG2(1);
     listofG2[0] = "FollowerPlugin:FollowerComputeG0";
-    Relation * relation0 = new LagrangianRheonomousR("FollowerPlugin:FollowerComputeH1", "FollowerPlugin:FollowerComputeG10", "FollowerPlugin:FollowerComputeG11");
-    //Relation * relation0 = new LagrangianScleronomousR("FollowerPlugin:FollowerComputeH0",listofG2);
+    SP::Relation relation0(new LagrangianRheonomousR("FollowerPlugin:FollowerComputeH1", "FollowerPlugin:FollowerComputeG10", "FollowerPlugin:FollowerComputeG11"));
 
-    //    relation0->computeOutput(0);
-    SimpleVector * param2 = new SimpleVector(1); // Here we only set one parameter, the DS number.
-    //    (*param)(0) = vectorDS[0]->getNumber();
+    SP::SimpleVector param2(new SimpleVector(1)); // Here we only set one parameter, the DS number.
     (*param2)(0) = rpm;
 
-
-    //    static_cast<LagrangianR*>(relation0)->setZPtr(param2,"h");
-    //    static_cast<LagrangianR*>(relation0)->setZPtr(param2,"G10");
-
-    Interaction * inter =  new Interaction("Follower-Ground", dsConcerned, 0, 1, nslaw0, relation0);
-
-    // --------------------------------
-    // --- NonSmoothDynamicalSystem ---
-    // --------------------------------
-    bool isBVP = 0;
-    NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(lds, inter, isBVP);
+    SP::Interaction inter(new Interaction("Follower-Ground", dsConcerned, 0, 1, nslaw0, relation0));
+    InteractionsSet allInteractions;
+    allInteractions.insert(inter);
 
     // -------------
     // --- Model ---
     // -------------
 
-    Model * Follower = new Model(t0, T);
-    Follower->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
+    SP::Model Follower(new Model(t0, T, allDS, allInteractions));
 
     // ----------------
     // --- Simulation ---
     // ----------------
 
     // -- Time discretisation --
-    TimeDiscretisation * t = new TimeDiscretisation(h, Follower);
+    SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-    TimeStepping* S = new TimeStepping(t);
+    SP::TimeStepping S(new TimeStepping(t));
+
 
     // -- OneStepIntegrator --
-    OneStepIntegrator * OSI = new Moreau(lds, theta, S);
+    SP::OneStepIntegrator OSI(new Moreau(lds, theta));
+    S->recordIntegrator(OSI);
 
     // -- OneStepNsProblem --
     IntParameters iparam(5);
@@ -159,9 +135,9 @@ int main(int argc, char* argv[])
     DoubleParameters dparam(5);
     dparam[0] = 1e-6; // Tolerance
     string solverName = "QP" ;
-    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
-    // -- OneStepNsProblem --
-    OneStepNSProblem * osnspb = new LCP(S, mySolver);
+    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
+    SP::OneStepNSProblem osnspb(new LCP(mySolver));
+    S->recordNonSmoothProblem(osnspb);
 
     cout << "=== End of model loading === " << endl;
     // =========================== End of model definition ===========================
@@ -169,8 +145,8 @@ int main(int argc, char* argv[])
     // ================================= Computation =================================
 
     // --- Simulation initialization ---
-    S->initialize();
-    cout << "End of simulation initialisation" << endl;
+    Follower->initialize(S);
+    cout << "End of model initialisation" << endl;
 
 
     int k = 0;
@@ -199,7 +175,8 @@ int main(int argc, char* argv[])
     DataPlot(k, 6) = CamVelocity;
     // Acceleration of the Cam
     DataPlot(k, 7) = CamPosition + lds->getQ()(0);
-
+    boost::timer tt;
+    tt.restart();
     // --- Time loop ---
     cout << "Start computation ... " << endl;
     while (k < N)
@@ -208,6 +185,7 @@ int main(int argc, char* argv[])
       k++;
       // solve ...
       S->computeOneStep();
+
       // --- Get values to be plotted ---
 
       DataPlot(k, 0) = S->getNextTime();
@@ -226,31 +204,7 @@ int main(int argc, char* argv[])
     // --- Output files ---
     ioMatrix io("result.dat", "ascii");
     io.write(DataPlot, "noDim");
-
-    // --- Free memory ---
-    delete osnspb;
-    delete t;
-    delete S;
-    delete Follower;
-    delete OSI;
-    delete nsds;
-    delete relation0;
-    delete nslaw0;
-    delete H;
-    delete inter;
-    delete lds;
-    delete q0[0];
-    delete velocity0[0];
-    delete C;
-    delete K;
-    delete Mass;
-
-    end = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t2 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-    elapsed = t2 - t1;
-    elapsed2 = (end - start) / (double)CLOCKS_PER_SEC;
-    cout << "time = " << elapsed << " --- cpu time " << elapsed2 << endl;
+    cout << "time = " << tt.elapsed() << endl;
     cout << "End of computation - Number of iterations done: " << k << endl;
   }
 

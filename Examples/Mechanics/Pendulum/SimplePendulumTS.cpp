@@ -72,11 +72,11 @@ int main(int argc, char* argv[])
     v0.zero();
     q0(0) = 1.5;
 
-    LagrangianDS * simplependulum = new LagrangianDS(1, q0, v0);
+    SP::LagrangianDS simplependulum(new LagrangianDS(q0, v0));
 
-    SiconosMatrix *Mass = new SimpleMatrix(nDof, nDof);
-    (*Mass)(0, 0) = m1 * l1;
-    simplependulum->setMassPtr(Mass);
+    SimpleMatrix Mass(nDof, nDof);
+    Mass(0, 0) = m1 * l1;
+    simplependulum->setMass(Mass);
 
 
     // external plug-in
@@ -108,59 +108,50 @@ int main(int argc, char* argv[])
     //     b(0) = 0.0;
 
 
-    //     NonSmoothLaw * nslaw = new NewtonImpactNSL(e);
-    //     Relation * relation = new LagrangianLinearTIR(H,b);
-    //     Interaction * inter =  new Interaction("floor-mass1", allDS,1,1, nslaw, relation);
+    //     NonSmoothLaw nslaw(new NewtonImpactNSL(e));
+    //     Relation relation(new LagrangianLinearTIR(H,b));
+    //     Interaction inter =  new Interaction("floor-mass1", allDS,1,1, nslaw, relation);)
 
 
     string G = "DoublePendulumPlugin:G0";
-    NonSmoothLaw * nslaw = new NewtonImpactNSL(e);
-    Relation * relation = new LagrangianScleronomousR("SimplePendulumPlugin:h0", G);
-    Interaction * inter = new Interaction("floor-mass1", allDS, 1, 1, nslaw, relation);
+    SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
+    SP::Relation relation(new LagrangianScleronomousR("SimplePendulumPlugin:h0", G));
+    SP::Interaction inter(new Interaction("floor-mass1", allDS, 1, 1, nslaw, relation));
 
 
     allInteractions.insert(inter);
-
-
-    // --------------------------------
-    // --- NonSmoothDynamicalSystem ---
-    // --------------------------------
-
-    bool isBVP = false;
-    NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(allDS, allInteractions, isBVP);
 
     // -------------
     // --- Model ---
     // -------------
 
-    Model * Pendulum = new Model(t0, T);
-    Pendulum->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
+    SP::Model Pendulum(new Model(t0, T, allDS, allInteractions));
 
     // ----------------
     // --- Simulation ---
     // ----------------
 
     // -- Time discretisation --
-    TimeDiscretisation * t = new TimeDiscretisation(h, Pendulum);
+    SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-    TimeStepping* s = new TimeStepping(t);
+    SP::TimeStepping s(new TimeStepping(t));
 
     // -- OneStepIntegrators --
 
     //double theta=0.500001;
     double theta = 0.500001;
 
-    OneStepIntegrator * OSI =  new Moreau(simplependulum, theta, s);
-
+    SP::OneStepIntegrator OSI(new Moreau(simplependulum, theta));
+    s->recordIntegrator(OSI);
     // -- OneStepNsProblem --
     IntParameters iparam(5);
     iparam[0] = 2001; // Max number of iteration
     DoubleParameters dparam(5);
     dparam[0] = 0.005; // Tolerance
     string solverName = "Lemke" ;
-    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
-    OneStepNSProblem * osnspb = new LCP(s, mySolver);
-
+    SP:: NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
+    SP::OneStepNSProblem osnspb(new LCP(mySolver));
+    s->recordNonSmoothProblem(osnspb);
     cout << "=== End of model loading === " << endl;
 
     // =========================== End of model definition ===========================  dataPlot(k,7) = (inter->getY(0))(0);
@@ -170,7 +161,7 @@ int main(int argc, char* argv[])
 
 
     // --- Simulation initialization ---
-    s->initialize();
+    Pendulum->initialize(s);
     cout << "End of simulation initialisation" << endl;
 
     int k = 0;
@@ -189,17 +180,9 @@ int main(int argc, char* argv[])
     dataPlot(k, 4) = -l1 * cos(simplependulum->getQ()(0));
     dataPlot(k, 5) =  l1 * cos(simplependulum->getQ()(0)) * (simplependulum->getVelocity()(0));
     // --- Compute elapsed time ---
-    double t1, t2, elapsed;
-    struct timeval tp;
-    int rtn;
-    clock_t start, end;
-    double elapsed2;
-    start = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t1 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-
-    //    EventsManager * eventsManager = s->getEventsManagerPtr();
-
+    boost::timer tt;
+    //    EventsManager eventsManager = s->getEventsManagerPtr();
+    tt.restart();
     // --- Time loop ---
     cout << "Start computation ... " << endl;
     cout << "Number of time step" << N << "\n";
@@ -220,29 +203,13 @@ int main(int argc, char* argv[])
       s->nextStep();
     }
 
-    end = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t2 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-    elapsed = t2 - t1;
-    elapsed2 = (end - start) / (double)CLOCKS_PER_SEC;
-    cout << "time = " << elapsed << " --- cpu time " << elapsed2 << endl;
+    cout << "time = " << tt.elapsed() << endl;
     cout << "End of computation - Number of iterations done: " << k << endl;
 
     // --- Output files ---
     ioMatrix out("SimplePendulumResult.dat", "ascii");
     out.write(dataPlot, "noDim");
 
-    // --- Free memory ---
-    delete osnspb;
-    delete t;
-    delete OSI;
-    delete s;
-    delete Pendulum;
-    delete nsds;
-    delete inter;
-    //    delete relation;
-    delete nslaw;
-    delete simplependulum;
   }
 
   catch (SiconosException e)

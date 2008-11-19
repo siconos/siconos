@@ -65,9 +65,9 @@
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>		
 					<LagrangianRelation type="LinearTI">
-						<H matrixRowSize='1' matrixColSize='1'>
+						<C matrixRowSize='1' matrixColSize='1'>
          	                                <row> 1.0</row>
-						</H>              
+						</C>              
 					</LagrangianRelation>			
 					<!-- NS Law of this interaction	-->
 					<NewtonImpactLaw>

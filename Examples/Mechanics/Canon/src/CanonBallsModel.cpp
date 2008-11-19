@@ -44,17 +44,13 @@
 using namespace std;
 
 CanonBallsModel::CanonBallsModel(unsigned int n):
-  numberOfFloors(n), numberOfSpheres(SUM(numberOfFloors)), canonballs(NULL), nDof(6), dataPlot(NULL), iter_k(1)
+  numberOfFloors(n), numberOfSpheres(SUM(numberOfFloors)), nDof(6), iter_k(1)
 {
   allSpheres.resize(numberOfSpheres);
 }
 
 CanonBallsModel::~CanonBallsModel()
-{
-  if (canonballs != NULL)
-    delete canonballs;
-  canonballs = NULL;
-}
+{}
 
 void CanonBallsModel::initialize()
 {
@@ -80,32 +76,26 @@ void CanonBallsModel::initialize()
   // --- Interactions---
   // -------------------
   InteractionsSet allInteractions;
-  buildInteractions(&allInteractions);
-
-  // --------------------------------
-  // --- NonSmoothDynamicalSystem ---
-  // --------------------------------
-  NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(allDS, allInteractions);
+  buildInteractions(allInteractions);
 
   // -------------
   // --- Model ---
   // -------------
 
   // initial computation time
-  canonballs = new Model(t0, T);
-  canonballs->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
+  canonballs.reset(new Model(t0, T, allDS, allInteractions));
 
   // ----------------
   // --- Simulation ---
   // ----------------
 
   // -- Time-discretisation and Simulation --
-  TimeDiscretisation * t = new TimeDiscretisation(h, canonballs);
-  TimeStepping *s = new TimeStepping(t);
+  SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
+  SP::TimeStepping s(new TimeStepping(t));
 
   // -- OneStepIntegrators --
-  OneStepIntegrator * OSI;
-  OSI = new Moreau(allDS , 0.5000001 , s);
+  SP::OneStepIntegrator OSI(new Moreau(allDS , 0.5000001));
+  s->recordIntegrator(OSI);
 
   // -- OneStepNsProblem --
   string solverName = "NSGS";      // solver algorithm used for non-smooth problem
@@ -113,12 +103,13 @@ void CanonBallsModel::initialize()
   iparam[0] = 10100; // Max number of iteration
   // Solver/formulation
   // 0: projection, 1: Newton/AlartCurnier, 2: Newton/Fischer-Burmeister, 3: Path/Glocker
-  iparam[4] = 1;
+  iparam[4] = 4;
   DoubleParameters dparam(5);
   dparam[0] = 1e-6; // Tolerance
   dparam[2] = 1e-8; // Local Tolerance
-  NonSmoothSolver * Mysolver = new NonSmoothSolver(solverName, iparam, dparam);
-  FrictionContact* osnspb = new FrictionContact(s, 3, Mysolver);
+  SP::NonSmoothSolver Mysolver(new NonSmoothSolver(solverName, iparam, dparam));
+  SP::FrictionContact osnspb(new FrictionContact(3, Mysolver));
+  s->recordNonSmoothProblem(osnspb);
   //osnspb->setNumericsVerboseMode(1);
   //  osnspb->setMStorageType(1);
   cout << "=== End of model loading === " << endl;
@@ -128,14 +119,14 @@ void CanonBallsModel::initialize()
   // --- Simulation initialization ---
 
   cout << "..." << endl;
-  s->initialize();
-  cout << "=== End of simulation initialisation ===" << endl;
+  canonballs->initialize(s);
+  cout << "=== End of model initialisation ===" << endl;
 
 #ifndef WithQGLViewer
   unsigned int N = int((T - t0) / h);
   unsigned int outputSize = 1 + 3 * numberOfSpheres;
   // Output matrix
-  dataPlot = new SimpleMatrix(N + 2, outputSize);
+  dataPlot.reset(new SimpleMatrix(N + 2, outputSize));
 
   (*dataPlot)(0, 0) = t0; // time
   unsigned int i = 0;
@@ -246,13 +237,13 @@ void CanonBallsModel::buildDynamicalSystems()
   // q0[i] and v0[i] correspond to position and velocity of ball i.
 
   Vectors q0, v0;
-  q0.resize(numberOfSpheres, NULL);
-  v0.resize(numberOfSpheres, NULL);
+  q0.resize(numberOfSpheres);
+  v0.resize(numberOfSpheres);
   // Memory allocation for q0[i] and v0[i]
   for (unsigned int i = 0; i < numberOfSpheres; i++)
   {
-    q0[i] = new SimpleVector(nDof);
-    v0[i] = new SimpleVector(nDof);
+    q0[i].reset(new SimpleVector(nDof));
+    v0[i].reset(new SimpleVector(nDof));
   }
 
   // Computation of the position of all beads of the pyramid
@@ -261,12 +252,11 @@ void CanonBallsModel::buildDynamicalSystems()
   // Build and insert the DS into allDS
 
   for (unsigned int i = 0; i < numberOfSpheres; i++)
-    allSpheres[i] = new Sphere(Radius, m, *(q0[i]), *(v0[i]), i);
-
+    allSpheres[i].reset(new Sphere(Radius, m, *(q0[i]), *(v0[i])));
 }
 
 
-void CanonBallsModel::buildInteractions(InteractionsSet* allInteractions)
+void CanonBallsModel::buildInteractions(InteractionsSet& allInteractions)
 {
   // Definition of some obstacles
 
@@ -281,18 +271,18 @@ void CanonBallsModel::buildInteractions(InteractionsSet* allInteractions)
   bool obst_x_m = true;                    //  for x --> -
 
   int Fact = (numberOfSpheres) * (numberOfSpheres - 1) / 2;
-  vector<Relation*> LLR(Fact);
-  vector<Relation*> LLR1(numberOfSpheres);
-  vector<Relation*> LLR1_(numberOfSpheres);
-  vector<Relation*> LLR2(numberOfSpheres);
-  vector<Relation*> LLR2_(numberOfSpheres);
-  vector<Relation*> LLR3(numberOfSpheres);
-  vector<Relation*> LLR3_(numberOfSpheres);
+  vector<SP::Relation> LLR(Fact);
+  vector<SP::Relation> LLR1(numberOfSpheres);
+  vector<SP::Relation> LLR1_(numberOfSpheres);
+  vector<SP::Relation> LLR2(numberOfSpheres);
+  vector<SP::Relation> LLR2_(numberOfSpheres);
+  vector<SP::Relation> LLR3(numberOfSpheres);
+  vector<SP::Relation> LLR3_(numberOfSpheres);
 
   double Radius = 0.1;
   double e  = 0.1;
   double mu = 0.4;
-  NonSmoothLaw * nslaw1 = new NewtonImpactFrictionNSL(e, e, mu, 3);
+  SP::NonSmoothLaw nslaw1(new NewtonImpactFrictionNSL(e, e, mu, 3));
 
   SimpleVector bground(3), bceil(3), bwallYp(3), bwallYm(3), bwallXp(3), bwallXm(3);
   SimpleMatrix Hground(3, nDof), Hceil(3, nDof), HwallYp(3, nDof), HwallYm(3, nDof), HwallXp(3, nDof), HwallXm(3, nDof) ;
@@ -357,42 +347,50 @@ void CanonBallsModel::buildInteractions(InteractionsSet* allInteractions)
   //  for (unsigned int i=0;i<numberOfSpheres;i++)
   //    {
   // Interaction beads and ground (z=0)
+  SP::Interaction inter;
   for (unsigned int i = 0; i < numberOfSpheres; i++)
   {
     if (hasGround)
     {
-      LLR1[i] = new LagrangianLinearTIR(Hground, bground);
-      allInteractions->insert(new Interaction(allSpheres[i], i, 3, nslaw1, LLR1[i]));
+      LLR1[i].reset(new LagrangianLinearTIR(Hground, bground));
+      inter.reset(new Interaction(allSpheres[i], i, 3, nslaw1, LLR1[i]));
+      allInteractions.insert(inter);
     }
     // Interaction beads and ceiling
     if (hasCeil)
     {
-      LLR1_[i] = new LagrangianLinearTIR(Hceil, bceil);
-      allInteractions->insert(new Interaction(allSpheres[i], i, 3, nslaw1, LLR1_[i]));
+      LLR1_[i].reset(new LagrangianLinearTIR(Hceil, bceil));
+      inter.reset(new Interaction(allSpheres[i], i, 3, nslaw1, LLR1_[i]));
+      allInteractions.insert(inter);
     }
     // Interaction beads and plan2 (OXZ)
     if (obst_y_p)
     {
-      LLR2[i] = new LagrangianLinearTIR(HwallYp, bwallYp);
-      allInteractions->insert(new Interaction(allSpheres[i], i, 3, nslaw1, LLR2[i]));
+      LLR2[i].reset(new LagrangianLinearTIR(HwallYp, bwallYp));
+      inter.reset(new Interaction(allSpheres[i], i, 3, nslaw1, LLR2[i]));
+      allInteractions.insert(inter);
+
     }
     // Interaction beads and plan2 (-ZOX)
     if (obst_y_m)
     {
-      LLR2_[i] = new LagrangianLinearTIR(HwallYm, bwallYm);
-      allInteractions->insert(new Interaction(allSpheres[i], i, 3, nslaw1, LLR2_[i]));
+      LLR2_[i].reset(new LagrangianLinearTIR(HwallYm, bwallYm));
+      inter.reset(new Interaction(allSpheres[i], i, 3, nslaw1, LLR2_[i]));
+      allInteractions.insert(inter);
     }
     // Interaction beads and plan3 (OYZ)
     if (obst_x_p)
     {
-      LLR3[i] = new LagrangianLinearTIR(HwallXp, bwallXp);
-      allInteractions->insert(new Interaction(allSpheres[i], i, 3, nslaw1, LLR3[i]));
+      LLR3[i].reset(new LagrangianLinearTIR(HwallXp, bwallXp));
+      inter.reset(new Interaction(allSpheres[i], i, 3, nslaw1, LLR3[i]));
+      allInteractions.insert(inter);
     }
     // Interaction beads and plan3 (-ZOY)
     if (obst_x_m)
     {
-      LLR3_[i] = new LagrangianLinearTIR(HwallXm, bwallXm);
-      allInteractions->insert(new Interaction(allSpheres[i], i, 3, nslaw1, LLR3_[i]));
+      LLR3_[i].reset(new LagrangianLinearTIR(HwallXm, bwallXm));
+      inter.reset(new Interaction(allSpheres[i], i, 3, nslaw1, LLR3_[i]));
+      allInteractions.insert(inter);
     }
   }
 
@@ -400,7 +398,7 @@ void CanonBallsModel::buildInteractions(InteractionsSet* allInteractions)
 
   // frictional contact condition between beads
   double e2 = 0.9;
-  NonSmoothLaw * nslaw2 = new NewtonImpactFrictionNSL(e2, e2, mu, 3);
+  SP::NonSmoothLaw nslaw2(new NewtonImpactFrictionNSL(e2, e2, mu, 3));
   unsigned int l = 0;
   DynamicalSystemsSet dsConcerned;
   for (unsigned int i = 0; i < numberOfSpheres; i++)
@@ -411,8 +409,9 @@ void CanonBallsModel::buildInteractions(InteractionsSet* allInteractions)
       if (j > i)
       {
         dsConcerned.insert(allSpheres[j]);
-        LLR[l] = new LagrangianScleronomousR("CanonPlugin:h0", "CanonPlugin:G0");
-        allInteractions->insert(new Interaction(dsConcerned, l, 3, nslaw2, LLR[l]));
+        LLR[l].reset(new LagrangianScleronomousR("CanonPlugin:h0", "CanonPlugin:G0"));
+        inter.reset(new Interaction(dsConcerned, l, 3, nslaw2, LLR[l]));
+        allInteractions.insert(inter);
         dsConcerned.erase(allSpheres[j]);
         l++;
       }
@@ -429,6 +428,5 @@ void CanonBallsModel::end()
   // --- Output files ---
   ioMatrix io("result.dat", "ascii");
   io.write(*dataPlot, "noDim");
-  delete dataPlot;
 #endif
 }

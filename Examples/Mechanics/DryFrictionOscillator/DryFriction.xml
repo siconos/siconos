@@ -51,10 +51,6 @@
 					<row>1.0 0.0</row>
 					<row>0.0 0.0</row>
 				</K>
-				<C matrixRowSize='2' matrixColSize='2'>
-					<row>0.0 0.0</row>
-					<row>0.0 0.0</row>
-				</C>
 			</LagrangianLinearTIDS>
 		</DS_Definition>
 		<!-- Interactions defined in the problem -->		
@@ -66,11 +62,11 @@
                                 </DS_Concerned>									
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>		
-				 <LagrangianRelation type="Linear">
-				  <H matrixRowSize='2' matrixColSize='2'>
+				 <LagrangianRelation type="LinearTI">
+				  <C matrixRowSize='2' matrixColSize='2'>
   	                            <row> 0.0 1.0 </row>
   	                            <row> 1.0 0.0 </row>
-                                  </H>
+                                  </C>
   				 </LagrangianRelation>			
 				<!-- NS Law of this interaction	-->
 				<NewtonImpactFrictionLaw>
@@ -91,13 +87,13 @@
 		<OneStepIntegrator_Definition>
 			<Moreau>
 				<DS_Concerned vectorSize='1'>1</DS_Concerned>		
-				<Theta vectorSize='1'> 0.5</Theta>
+				<Theta vectorSize='1'>0.5</Theta>
 			</Moreau>					
 		</OneStepIntegrator_Definition>
 		<!-- One Step NS Problem of th Simulation-->
 		<OneStepNSProblems_List>
 		 	<FrictionContact Type="2">
-			   <NonSmoothSolver Name="NLGS">
+			   <NonSmoothSolver Name="PGS">
 			      <iparam  vectorSize='5'>101 0 0 0 0</iparam>
 			      <dparam  vectorSize='5'>1e-5 0 0 0 0</dparam>
 			   </NonSmoothSolver>

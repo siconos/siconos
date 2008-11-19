@@ -25,20 +25,18 @@ int main(int argc, char* argv[])
   {
 
     // --- Model loading from xml file ---
-    Model oscillator("./BeadPlan.xml");
+    SP::Model oscillator(new Model("./BeadPlan.xml"));
     cout << "\n *** BeadPlan.xml file loaded ***" << endl;
+    oscillator->initialize();
 
     // --- Get and initialize the simulation ---
-    TimeStepping* s = static_cast<TimeStepping*>(oscillator.getSimulationPtr());
-    cout << "simulation initialization" << endl;
-    s->initialize();
-    cout << "\n **** the simulation is ready ****" << endl;
+    SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(oscillator->getSimulationPtr());
 
     // --- Get the time discretisation scheme ---
-    TimeDiscretisation* t = s->getTimeDiscretisationPtr();
+    SP::TimeDiscretisation t = s->getTimeDiscretisationPtr();
     int k = 0;
-    double t0 = oscillator.getT0();
-    double T = oscillator.getFinalT();
+    double t0 = oscillator->getT0();
+    double T = oscillator->getFinalT();
     double h = s->getTimeStep();
     int N = (int)((T - t0) / h); // Number of time steps
 
@@ -48,10 +46,10 @@ int main(int argc, char* argv[])
 
     cout << "Prepare data for plotting ... " << endl;
     // For the initial time step:
-    LagrangianDS* oscillo = static_cast<LagrangianDS*>(oscillator.getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
-    SiconosVector * q = oscillo->getQPtr();
-    SiconosVector * v = oscillo->getVelocityPtr();
-    SiconosVector * p = oscillo->getPPtr(2);
+    SP::LagrangianDS oscillo = boost::static_pointer_cast<LagrangianDS> (oscillator->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(1));
+    SP::SiconosVector q = oscillo->getQPtr();
+    SP::SiconosVector v = oscillo->getVelocityPtr();
+    SP::SiconosVector p = oscillo->getPPtr(2);
 
     dataPlot(k, 0) = t0;
     dataPlot(0, 1) = (*q)(0);
@@ -60,7 +58,7 @@ int main(int argc, char* argv[])
 
     cout << "Computation ... " << endl;
     // --- Time loop  ---
-    while (s->getNextTime() <= oscillator.getFinalT())
+    while (s->getNextTime() <= oscillator->getFinalT())
     {
       // solve ...
       s->computeOneStep();

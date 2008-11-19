@@ -70,10 +70,10 @@
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>		
 				 <LagrangianRelation type="LinearTI">
-				  <H matrixRowSize='2' matrixColSize='3'>
+				  <C matrixRowSize='2' matrixColSize='3'>
   	                            <row> 0.0 1.0 0.0 </row>
   	                            <row> 1.0 0.0 0.0</row>
-                                  </H>
+                                  </C>
   				 </LagrangianRelation>			
 				<!-- NS Law of this interaction	-->
 				<NewtonImpactFrictionLaw>

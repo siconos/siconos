@@ -44,17 +44,13 @@
 using namespace std;
 
 BilliardModel::BilliardModel(unsigned int n):
-  numberOfFloors(n), numberOfSpheres(SUM(numberOfFloors)), billiard(NULL), nDof(6), dataPlot(NULL), iter_k(1)
+  numberOfFloors(n), numberOfSpheres(SUM(numberOfFloors)), nDof(6), iter_k(1)
 {
   allSpheres.resize(numberOfSpheres);
 }
 
 BilliardModel::~BilliardModel()
-{
-  if (billiard != NULL)
-    delete billiard;
-  billiard = NULL;
-}
+{}
 
 void BilliardModel::initialize()
 {
@@ -80,32 +76,26 @@ void BilliardModel::initialize()
   // --- Interactions---
   // -------------------
   InteractionsSet allInteractions;
-  buildInteractions(&allInteractions);
-
-  // --------------------------------
-  // --- NonSmoothDynamicalSystem ---
-  // --------------------------------
-  NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(allDS, allInteractions);
+  buildInteractions(allInteractions);
 
   // -------------
   // --- Model ---
   // -------------
 
   // initial computation time
-  billiard = new Model(t0, T);
-  billiard->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
+  billiard.reset(new Model(t0, T, allDS, allInteractions));
 
   // ----------------
   // --- Simulation ---
   // ----------------
 
   // -- Time-discretisation and Simulation --
-  TimeDiscretisation * t = new TimeDiscretisation(h, billiard);
-  TimeStepping *s = new TimeStepping(t);
+  SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
+  SP::TimeStepping s(new TimeStepping(t));
 
   // -- OneStepIntegrators --
-  OneStepIntegrator * OSI;
-  OSI = new Moreau(allDS , 0.5000001 , s);
+  SP::OneStepIntegrator OSI(new Moreau(allDS , 0.5000001));
+  s->recordIntegrator(OSI);
 
   // -- OneStepNsProblem --
   string solverName = "NSGS";      // solver algorithm used for non-smooth problem
@@ -117,8 +107,9 @@ void BilliardModel::initialize()
   DoubleParameters dparam(5);
   dparam[0] = 1e-6; // Tolerance
   dparam[2] = 1e-8; // Local Tolerance
-  NonSmoothSolver * Mysolver = new NonSmoothSolver(solverName, iparam, dparam);
-  FrictionContact* osnspb = new FrictionContact(s, 3, Mysolver);
+  SP::NonSmoothSolver Mysolver(new NonSmoothSolver(solverName, iparam, dparam));
+  SP::FrictionContact osnspb(new FrictionContact(3, Mysolver));
+  s->recordNonSmoothProblem(osnspb);
   //osnspb->setNumericsVerboseMode(1);
   //  osnspb->setMStorageType(1);
   cout << "=== End of model loading === " << endl;
@@ -128,14 +119,14 @@ void BilliardModel::initialize()
   // --- Simulation initialization ---
 
   cout << "..." << endl;
-  s->initialize();
+  billiard->initialize(s);
   cout << "=== End of simulation initialisation ===" << endl;
 
 #ifndef WithQGLViewer
   unsigned int N = int((T - t0) / h);
   unsigned int outputSize = 1 + 3 * numberOfSpheres;
   // Output matrix
-  dataPlot = new SimpleMatrix(N + 1, outputSize);
+  dataPlot.reset(new SimpleMatrix(N + 1, outputSize));
 
   (*dataPlot)(0, 0) = t0; // time
   unsigned int i = 0;
@@ -284,13 +275,13 @@ void BilliardModel::buildDynamicalSystems()
   // q0[i] and v0[i] correspond to position and velocity of ball i.
 
   Vectors q0, v0;
-  q0.resize(numberOfSpheres, NULL);
-  v0.resize(numberOfSpheres, NULL);
+  q0.resize(numberOfSpheres);
+  v0.resize(numberOfSpheres);
   // Memory allocation for q0[i] and v0[i]
   for (unsigned int i = 0; i < numberOfSpheres; i++)
   {
-    q0[i] = new SimpleVector(nDof);
-    v0[i] = new SimpleVector(nDof);
+    q0[i].reset(new SimpleVector(nDof));
+    v0[i].reset(new SimpleVector(nDof));
   }
 
   // Computation of the position of all beads of the pyramid
@@ -299,147 +290,155 @@ void BilliardModel::buildDynamicalSystems()
   // Build and insert the DS into allDS
 
   for (unsigned int i = 0; i < numberOfSpheres; i++)
-    allSpheres[i] = new Sphere(Radius, m, *(q0[i]), *(v0[i]), i);
+    allSpheres[i].reset(new Sphere(Radius, m, *(q0[i]), *(v0[i])));
 
 }
 
 
-void BilliardModel::buildInteractions(InteractionsSet* allInteractions)
+void BilliardModel::buildInteractions(InteractionsSet& allInteractions)
 {
   unsigned int Fact = NBSpheres * (NBSpheres - 1) / 2;
   double e = 0.9;                  // nslaw
   double e2 = 0.9;                  // nslaw2
   double mu = 0.;
   DynamicalSystemsSet dsConcernedi, dsConcerned2 ;
-  vector<Relation*> LLR(Fact);
-  vector<Relation*> LLR1(NBSpheres);
-  vector<Relation*> LLR1_(NBSpheres);
-  vector<Relation*> LLR2(NBSpheres);
-  vector<Relation*> LLR2_(NBSpheres);
-  vector<Relation*> LLR3(NBSpheres);
-  vector<Relation*> LLR3_(NBSpheres);
+  vector<SP::Relation> LLR(Fact);
+  vector<SP::Relation> LLR1(NBSpheres);
+  vector<SP::Relation> LLR1_(NBSpheres);
+  vector<SP::Relation> LLR2(NBSpheres);
+  vector<SP::Relation> LLR2_(NBSpheres);
+  vector<SP::Relation> LLR3(NBSpheres);
+  vector<SP::Relation> LLR3_(NBSpheres);
 
-  NonSmoothLaw * nslaw1 = new NewtonImpactFrictionNSL(e, e, mu, 3);
+  SP::NonSmoothLaw nslaw1(new NewtonImpactFrictionNSL(e, e, mu, 3));
 
   // Interaction beads and plan1 (OXY)
 
   double R = DEFAULT_radius;
 
-  SiconosVector *b1 = new SimpleVector(3);
-  (*b1)(0) = Ground - R;
-  SiconosMatrix *H1 = new SimpleMatrix(3, nDof);
-  (*H1)(0, 2) = 1.0;
-  (*H1)(1, 0) = 1.0;
-  (*H1)(1, 4) = -R;
-  (*H1)(2, 1) = 1.0;
-  (*H1)(2, 3) =  R;
+  SimpleVector b1(3);
+  b1(0) = Ground - R;
+  SimpleMatrix H1(3, nDof);
+  H1(0, 2) = 1.0;
+  H1(1, 0) = 1.0;
+  H1(1, 4) = -R;
+  H1(2, 1) = 1.0;
+  H1(2, 3) =  R;
+
+  SP::Interaction inter;
 
   for (int i = 0; i < NBSpheres; i++)
   {
     dsConcernedi.insert(allSpheres[i]);
-    LLR1[i] = new LagrangianLinearTIR(*H1, *b1);
-    allInteractions->insert(new Interaction(dsConcernedi, i, 3, nslaw1, LLR1[i]));
+    LLR1[i].reset(new LagrangianLinearTIR(H1, b1));
+    inter.reset(new Interaction(dsConcernedi, i, 3, nslaw1, LLR1[i]));
+    allInteractions.insert(inter);
     dsConcernedi.clear();
   }
 
   // Interaction beads and plan1 (-YOX)
 
-  SiconosVector *b1_ = new SimpleVector(3);
-  (*b1_)(0) = Top - R;
-  SiconosMatrix *H1_ = new SimpleMatrix(3, nDof);
-  (*H1_)(0, 2) = -1.0;
-  (*H1_)(1, 0) = 1.0;
-  (*H1_)(1, 4) = -R;
-  (*H1_)(2, 1) = 1.0;
-  (*H1_)(2, 3) =  R;
+  SimpleVector b1_(3);
+  b1_(0) = Top - R;
+  SimpleMatrix H1_(3, nDof);
+  H1_(0, 2) = -1.0;
+  H1_(1, 0) = 1.0;
+  H1_(1, 4) = -R;
+  H1_(2, 1) = 1.0;
+  H1_(2, 3) =  R;
 
   for (int i = 0; i < NBSpheres; i++)
   {
     dsConcernedi.insert(allSpheres[i]);
-    LLR1_[i] = new LagrangianLinearTIR(*H1_, *b1_);
-    allInteractions->insert(new Interaction(dsConcernedi, i, 3, nslaw1, LLR1_[i]));
+    LLR1_[i].reset(new LagrangianLinearTIR(H1_, b1_));
+    inter.reset(new Interaction(dsConcernedi, i, 3, nslaw1, LLR1_[i]));
+    allInteractions.insert(inter);
     dsConcernedi.clear();
   }
 
   // Interaction beads and plan2 (OXZ)
 
-  SiconosVector *b2 = new SimpleVector(3);
-  (*b2)(0) = Wall - R;
-  SiconosMatrix *H2 = new SimpleMatrix(3, nDof);
-  (*H2)(0, 1) = 1.0;
-  (*H2)(1, 0) = 1.0;
-  (*H2)(1, 5) = -R;
-  (*H2)(2, 2) = 1.0;
-  (*H2)(2, 3) =  R;
+  SimpleVector b2(3);
+  b2(0) = Wall - R;
+  SimpleMatrix H2(3, nDof);
+  H2(0, 1) = 1.0;
+  H2(1, 0) = 1.0;
+  H2(1, 5) = -R;
+  H2(2, 2) = 1.0;
+  H2(2, 3) =  R;
 
   for (int i = 0; i < NBSpheres; i++)
   {
     dsConcernedi.insert(allSpheres[i]);
-    LLR2[i] = new LagrangianLinearTIR(*H2, *b2);
-    allInteractions->insert(new Interaction(dsConcernedi, i, 3, nslaw1, LLR2[i]));
+    LLR2[i].reset(new LagrangianLinearTIR(H2, b2));
+    inter.reset(new Interaction(dsConcernedi, i, 3, nslaw1, LLR2[i]));
+    allInteractions.insert(inter);
     dsConcernedi.clear();
   }
 
   // Interaction beads and plan2 (-ZOX)
 
-  SiconosVector *b2_ = new SimpleVector(3);
-  (*b2_)(0) = Wall - R;
-  SiconosMatrix *H2_ = new SimpleMatrix(3, nDof);
-  (*H2_)(0, 1) = -1.0;
-  (*H2_)(1, 0) = 1.0;
-  (*H2_)(1, 5) = -R;
-  (*H2_)(2, 2) = 1.0;
-  (*H2_)(2, 3) =  R;
+  SimpleVector b2_(3);
+  b2_(0) = Wall - R;
+  SimpleMatrix H2_(3, nDof);
+  H2_(0, 1) = -1.0;
+  H2_(1, 0) = 1.0;
+  H2_(1, 5) = -R;
+  H2_(2, 2) = 1.0;
+  H2_(2, 3) =  R;
 
   for (int i = 0; i < NBSpheres; i++)
   {
     dsConcernedi.insert(allSpheres[i]);
-    LLR2_[i] = new LagrangianLinearTIR(*H2_, *b2_);
-    allInteractions->insert(new Interaction(dsConcernedi, i, 3, nslaw1, LLR2_[i]));
+    LLR2_[i].reset(new LagrangianLinearTIR(H2_, b2_));
+    inter.reset(new Interaction(dsConcernedi, i, 3, nslaw1, LLR2_[i]));
+    allInteractions.insert(inter);
     dsConcernedi.clear();
   }
 
   // Interaction beads and plan3 (OYZ)
 
-  SiconosVector *b3 = new SimpleVector(3);
-  (*b3)(0) = Wall - R;
-  SiconosMatrix *H3 = new SimpleMatrix(3, nDof);
-  (*H3)(0, 0) = 1.0;
-  (*H3)(1, 1) = 1.0;
-  (*H3)(1, 5) = -R;
-  (*H3)(2, 2) = 1.0;
-  (*H3)(2, 4) =  R;
+  SimpleVector b3(3);
+  b3(0) = Wall - R;
+  SimpleMatrix H3(3, nDof);
+  H3(0, 0) = 1.0;
+  H3(1, 1) = 1.0;
+  H3(1, 5) = -R;
+  H3(2, 2) = 1.0;
+  H3(2, 4) =  R;
 
   for (int i = 0; i < NBSpheres; i++)
   {
     dsConcernedi.insert(allSpheres[i]);
-    LLR3[i] = new LagrangianLinearTIR(*H3, *b3);
-    allInteractions->insert(new Interaction(dsConcernedi, i, 3, nslaw1, LLR3[i]));
+    LLR3[i].reset(new LagrangianLinearTIR(H3, b3));
+    inter.reset(new Interaction(dsConcernedi, i, 3, nslaw1, LLR3[i]));
+    allInteractions.insert(inter);
     dsConcernedi.clear();
   }
 
   // Interaction beads and plan3 (-ZOY)
 
-  SiconosVector *b3_ = new SimpleVector(3);
-  (*b3_)(0) = Wall - R;
-  SiconosMatrix *H3_ = new SimpleMatrix(3, nDof);
-  (*H3_)(0, 0) = -1.0;
-  (*H3_)(1, 1) = 1.0;
-  (*H3_)(1, 5) = -R;
-  (*H3_)(2, 2) = 1.0;
-  (*H3_)(2, 4) =  R;
+  SimpleVector b3_(3);
+  b3_(0) = Wall - R;
+  SimpleMatrix H3_(3, nDof);
+  H3_(0, 0) = -1.0;
+  H3_(1, 1) = 1.0;
+  H3_(1, 5) = -R;
+  H3_(2, 2) = 1.0;
+  H3_(2, 4) =  R;
 
   for (int i = 0; i < NBSpheres; i++)
   {
     dsConcernedi.insert(allSpheres[i]);
-    LLR3_[i] = new LagrangianLinearTIR(*H3_, *b3_);
-    allInteractions->insert(new Interaction(dsConcernedi, i, 3, nslaw1, LLR3_[i]));
+    LLR3_[i].reset(new LagrangianLinearTIR(H3_, b3_));
+    inter.reset(new Interaction(dsConcernedi, i, 3, nslaw1, LLR3_[i]));
+    allInteractions.insert(inter);
     dsConcernedi.clear();
   }
 
   // Interaction between beads
 
-  NonSmoothLaw * nslaw2 = new NewtonImpactFrictionNSL(e2, e2, mu, 3);
+  SP::NonSmoothLaw nslaw2(new NewtonImpactFrictionNSL(e2, e2, mu, 3));
 
   int l = 0;
   for (int i = 0; i < NBSpheres; i++)
@@ -450,8 +449,9 @@ void BilliardModel::buildInteractions(InteractionsSet* allInteractions)
       if (j > i)
       {
         dsConcerned2.insert(allSpheres[j]);
-        LLR[l] = new LagrangianScleronomousR("3DDrawPlugin:h0", "3DDrawPlugin:G0");
-        allInteractions->insert(new Interaction(dsConcerned2, l, 3, nslaw2, LLR[l]));
+        LLR[l].reset(new LagrangianScleronomousR("3DDrawPlugin:h0", "3DDrawPlugin:G0"));
+        inter.reset(new Interaction(dsConcerned2, l, 3, nslaw2, LLR[l]));
+        allInteractions.insert(inter);
         dsConcerned2.erase(allSpheres[j]);
         l = l + 1;
       }
@@ -468,6 +468,5 @@ void BilliardModel::end()
   // --- Output files ---
   ioMatrix io("result.dat", "ascii");
   io.write(*dataPlot, "noDim");
-  delete dataPlot;
 #endif
 }

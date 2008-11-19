@@ -32,25 +32,19 @@ int main(int argc, char* argv[])
   {
 
     // --- Model loading from xml file ---
-    Model oscillator("./DryFriction.xml");
+    SP::Model oscillator(new Model("./DryFriction.xml"));
     cout << "\n *** DryFriction.xml file loaded ***" << endl;
+    oscillator->initialize();
 
-    // --- Get and initialize the simulation ---
-    TimeStepping* s = static_cast<TimeStepping*>(oscillator.getSimulationPtr());
-    cout << "simulation initialization" << endl;
-    s->initialize();
-    cout << "\n **** the simulation is ready ****" << endl;
-
+    // --- Get the simulation ---
+    SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(oscillator->getSimulationPtr());
     // --- Get the time discretisation scheme ---
-    TimeDiscretisation* t = s->getTimeDiscretisationPtr();
+    SP::TimeDiscretisation t = s->getTimeDiscretisationPtr();
     int k = 0;
-    double T = oscillator.getFinalT();
-    double t0 = oscillator.getT0();
+    double T = oscillator->getFinalT();
+    double t0 = oscillator->getT0();
     double h = s->getTimeStep();
     int N = (int)((T - t0) / h);
-
-    //t->display();
-
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
     SimpleMatrix dataPlot(N + 1, 5);
@@ -60,23 +54,16 @@ int main(int argc, char* argv[])
     // time
     dataPlot(k, 0) = t0;
     // state q for the first dynamical system (ball)
-    LagrangianDS* oscillo = static_cast<LagrangianDS*>(oscillator.getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
+    SP::LagrangianDS oscillo = boost::static_pointer_cast<LagrangianDS> (oscillator->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(1));
     dataPlot(k, 1) = (oscillo->getQ())(0);
     // velocity for the oscillo
     dataPlot(k, 2) = (oscillo->getVelocity())(0);
-    dataPlot(k, 3) = (oscillator.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
-    dataPlot(k, 4) = (oscillator.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(1);
+    dataPlot(k, 3) = (oscillator->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
+    dataPlot(k, 4) = (oscillator->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(1);
 
     // --- Compute elapsed time ---
-    double t1, t2, elapsed;
-    struct timeval tp;
-    int rtn;
-    clock_t start, end;
-    double elapsed2;
-    start = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t1 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-
+    boost::timer tt;
+    tt.restart();
     cout << "Computation ... " << endl;
     // --- Time loop  ---
     while (k < N)
@@ -93,19 +80,14 @@ int main(int argc, char* argv[])
       dataPlot(k, 1) = (oscillo->getQ())(0);
       // Oscillo: velocity
       dataPlot(k, 2) = (oscillo->getVelocity())(0);
-      dataPlot(k, 3) = (oscillator.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
-      dataPlot(k, 4) = (oscillator.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(1);
+      dataPlot(k, 3) = (oscillator->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
+      dataPlot(k, 4) = (oscillator->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(1);
       // transfer of state i+1 into state i and time incrementation
       s->nextStep();
     }
 
     // --- elapsed time computing ---
-    end = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t2 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-    elapsed = t2 - t1;
-    elapsed2 = (end - start) / (double)CLOCKS_PER_SEC;
-    cout << "time = " << elapsed << " --- cpu time " << elapsed2 << endl;
+    cout << "time = " << tt.elapsed() << endl;
 
     // Number of time iterations
     cout << "Number of iterations done: " << k << endl;
@@ -115,7 +97,7 @@ int main(int argc, char* argv[])
     io.write(dataPlot, "noDim");
 
     // Xml output
-    //  oscillator.saveToXMLFile("./BouncingOscillo_TIDS.xml.output");
+    //  oscillator->saveToXMLFile("./BouncingOscillo_TIDS.xml.output");
   }
 
   // --- Exceptions handling ---

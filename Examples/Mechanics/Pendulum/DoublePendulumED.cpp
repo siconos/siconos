@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
     q0(0) = 1.5;
     q0(1) = 1.5;
 
-    LagrangianDS * doublependulum = new LagrangianDS(1, q0, v0, "DoublePendulumPlugin:mass");
+    SP::LagrangianDS doublependulum(new LagrangianDS(q0, v0, "DoublePendulumPlugin:mass"));
 
     // external plug-in
     doublependulum->setComputeNNLFunction("DoublePendulumPlugin.so", "NNL");
@@ -90,89 +90,49 @@ int main(int argc, char* argv[])
     InteractionsSet allInteractions;
 
     // -- relations --
-
-
-    //     SimpleMatrix H(1,2);
-    //     SimpleVector b(1);
-    //     H.zero();
-    //     H(0,0) =1.0;
-    //     H(0,1) =0.0;
-
-    //     b(0) = 0.0;
-
-
-    //     NonSmoothLaw * nslaw = new NewtonImpactNSL(e);
-    //     Relation * relation = new LagrangianLinearTIR(H,b);
-    //     Interaction * inter =  new Interaction("floor-mass1", allDS,1,1, nslaw, relation);
-
-
-
-    //     SimpleMatrix H2(1,2);
-    //     SimpleVector b2(1);
-    //     H2.zero();
-    //     H2(0,0) =0.0;
-    //     H2(0,1) =1;
-
-    //     b2(0) = 0.0;
-
-    //     NonSmoothLaw * nslaw1 = new NewtonImpactNSL(e1);
-    //     Relation * relation1 = new LagrangianLinearTIR(H2,b2);
-    //     Interaction * inter1 =  new Interaction("floor-mass2", allDS,2,1, nslaw1, relation1);
-
     string G = "DoublePendulumPlugin:G0";
-    NonSmoothLaw * nslaw = new NewtonImpactNSL(e);
-    Relation * relation = new LagrangianScleronomousR("DoublePendulumPlugin:h0", G);
-    Interaction * inter = new Interaction("floor-mass1", allDS, 1, 1, nslaw, relation);
+    SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
+    SP::Relation relation(new LagrangianScleronomousR("DoublePendulumPlugin:h0", G));
+    SP::Interaction inter(new Interaction("floor-mass1", allDS, 1, 1, nslaw, relation));
 
     string G1 = "DoublePendulumPlugin:G1";
-    NonSmoothLaw * nslaw1 = new NewtonImpactNSL(e1);
-    Relation * relation1 = new LagrangianScleronomousR("DoublePendulumPlugin:h1", G1);
-    Interaction * inter1 = new Interaction("floor-mass2", allDS, 2, 1, nslaw1, relation1);
+    SP::NonSmoothLaw nslaw1(new NewtonImpactNSL(e1));
+    SP::Relation relation1(new LagrangianScleronomousR("DoublePendulumPlugin:h1", G1));
+    SP::Interaction inter1(new Interaction("floor-mass2", allDS, 2, 1, nslaw1, relation1));
 
     allInteractions.insert(inter);
     allInteractions.insert(inter1);
-
-    // --------------------------------
-    // --- NonSmoothDynamicalSystem ---
-    // --------------------------------
-
-    bool isBVP = false;
-    NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(allDS, allInteractions, isBVP);
 
     // -------------
     // --- Model ---
     // -------------
 
-    Model * Pendulum = new Model(t0, T);
-    Pendulum->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
+    SP::Model Pendulum(new Model(t0, T, allDS, allInteractions));
 
     // ----------------
     // --- Simulation ---
     // ----------------
 
     // -- Time discretisation --
-    TimeDiscretisation * t = new TimeDiscretisation(h, Pendulum);
+    SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-
-    EventDriven* s = new EventDriven(t);
-
+    SP::EventDriven s(new EventDriven(t));
 
     // -- OneStepIntegrators --
-
-    OneStepIntegrator * OSI = new Lsodar(doublependulum, s);
-
+    SP::Lsodar OSI(new Lsodar(doublependulum));
+    s->recordIntegrator(OSI);
 
     // -- OneStepNsProblem --
-    //OneStepNSProblem * osnspb = new LCP(s,"name","Lemke",2001, 0.005);
     IntParameters iparam(5);
     iparam[0] = 1010; // Max number of iteration
     DoubleParameters dparam(5);
     dparam[0] = 0.0001; // Tolerance
     string solverName = "Lemke" ;
-    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
-    OneStepNSProblem * impact = new LCP(s, mySolver, "impact");
-    OneStepNSProblem * acceleration = new LCP(s, mySolver, "acceleration");
-
+    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
+    SP::OneStepNSProblem impact(new LCP(mySolver, "impact"));
+    SP::OneStepNSProblem acceleration(new LCP(mySolver, "acceleration"));
+    s->recordNonSmoothProblem(impact);
+    s->recordNonSmoothProblem(acceleration);
 
     cout << "=== End of model loading === " << endl;
 
@@ -182,7 +142,7 @@ int main(int argc, char* argv[])
     // ================================= Computation =================================
 
     // --- Simulation initialization ---
-    s->initialize();
+    Pendulum->initialize(s);
     cout << "End of simulation initialisation" << endl;
 
     int k = 0;
@@ -195,10 +155,10 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlot(N, outputSize);
     // For the initial time step:
     // time
-    SiconosVector * q = doublependulum->getQPtr();
-    SiconosVector * v = doublependulum->getVelocityPtr();
+    SP::SiconosVector q = doublependulum->getQPtr();
+    SP::SiconosVector v = doublependulum->getVelocityPtr();
 
-    dataPlot(k, 0) =  Pendulum->getT0();
+    dataPlot(k, 0) =  t0;
     dataPlot(k, 1) = (*q)(0);
     dataPlot(k, 2) = (*v)(0);
     dataPlot(k, 3) = (*q)(1);
@@ -216,7 +176,7 @@ int main(int argc, char* argv[])
     cout << "Start computation ... " << endl;
     bool nonSmooth = false;
 
-    EventsManager * eventsManager = s->getEventsManagerPtr();
+    SP::EventsManager eventsManager = s->getEventsManagerPtr();
     while (s->getNextTime() < T)
     {
       k++;
@@ -263,22 +223,6 @@ int main(int argc, char* argv[])
     // --- Output files ---
     ioMatrix out("DoublePendulumResult.dat", "ascii");
     out.write(dataPlot, "noDim");
-
-    // --- Free memory ---
-    delete impact;
-    delete acceleration;
-    delete t;
-    delete OSI;
-    delete s;
-    delete Pendulum;
-    delete nsds;
-    delete inter;
-    delete inter1;
-    delete relation;
-    delete nslaw;
-    delete relation1;
-    delete nslaw1;
-    delete doublependulum;
   }
 
   catch (SiconosException e)

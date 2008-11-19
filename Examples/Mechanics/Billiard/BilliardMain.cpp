@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
   try
   {
 
-    BilliardModel* column = new BilliardModel(NBFloors);
+    SP::BilliardModel column(new BilliardModel(4));
     column->initialize();
     // --- simulation solver ---
     while (!column->isSimulationFinished())

@@ -25,7 +25,7 @@ using namespace std;
 using namespace qglviewer;
 
 // The siconos model
-CanonBallsModel* model;
+SP::CanonBallsModel model;
 
 void Viewer::init()
 {
@@ -42,7 +42,7 @@ void Viewer::init()
   camera()->showEntireScene();
 
   // Model construction and initialisation
-  model = new CanonBallsModel(NBFloors);
+  model.reset(new CanonBallsModel(NBFloors));
   model->initialize();
 
   glPointSize(1.0);

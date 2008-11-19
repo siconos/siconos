@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
   try
   {
 
-    CanonBallsModel* column = new CanonBallsModel(NBFloors);
+    SP::CanonBallsModel column(new CanonBallsModel(NBFloors));
     column->initialize();
     // --- simulation solver ---
     while (!column->isSimulationFinished())
