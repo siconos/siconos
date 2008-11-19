@@ -65,6 +65,7 @@ WHILE(${iopt} LESS ${imax})
     /usr/local/*/lib/gcc/*/*
     /usr/lib/gcc/*/*
     /usr/local/lib/gcc/*/*
+    /usr/local/lib/gcc-lib/*/*
     /usr/* /usr/lib/*)
   
   FOREACH(_F ${_LIBDIRS_MAYBE})

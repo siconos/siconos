@@ -97,6 +97,17 @@ MACRO(SICONOS_PROJECT
 
   # Tests+Dashboard configuration
   ENABLE_TESTING()
+  IF(IS_DIRECTORY ${CMAKE_BINARY_DIR}/Testing)
+    # a note file for the dashboard
+    FILE(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/Testing/Notes)
+    FILE(WRITE ${CMAKE_BINARY_DIR}/Testing/Notes/Build "svn revision : ${SVN_REVISION}\n")
+    # the default buildname
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "System name : ${CMAKE_SYSTEM_NAME}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Processor   : ${CMAKE_SYSTEM_PROCESSOR}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "C compiler : ${CMAKE_C_COMPILER}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "CXX compiler : ${CMAKE_CXX_COMPILER}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Fortran compiler : ${CMAKE_Fortran_COMPILER}\n")
+  ENDIF(IS_DIRECTORY ${CMAKE_BINARY_DIR}/Testing)
   INCLUDE(Pipol)
 
   IF(BUILDNAME_OPTIONS)
