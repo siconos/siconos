@@ -85,8 +85,12 @@ Model::Model(double newT0, double newT, const string& newTitle, const string& ne
   // else no T in the model!
 }
 
-Model::~Model()
+Model::Model(double newT0, double newT, DynamicalSystemsSet& allDS, InteractionsSet& allInteractions):
+  t(newT0), t0(newT0), T(newT), title("none"), author("nobody"), description("none"), date("none"), xmlSchema("none")
 {
+  if (newT > 0 && newT <= t0)
+    RuntimeException::selfThrow("Model::constructor from data: Warning, final T lower than t0");
+  nsds.reset(new NonSmoothDynamicalSystem(allDS, allInteractions));
 }
 
 void Model::setSimulationPtr(SP::Simulation newPtr)

@@ -227,7 +227,7 @@ LagrangianDS::LagrangianDS(const SiconosVector& newQ0, const SiconosVector& newV
 // From a set of data - Mass loaded from a plugin
 // This constructor leads to the minimum Lagrangian System form: \f$ M(q)\ddot q = p \f$
 LagrangianDS::LagrangianDS(const SiconosVector& newQ0, const SiconosVector& newVelocity0, const string& massName):
-  DynamicalSystem(DS::LNLDS), ndof(0)
+  DynamicalSystem(DS::LNLDS), ndof(newQ0.size())
 {
   // Initial conditions
   q0.reset(new SimpleVector(newQ0));
@@ -548,8 +548,8 @@ void LagrangianDS::setPPtr(SP::SiconosVector newPtr, unsigned int level)
 
 void LagrangianDS::setMass(const PMMass& newValue)
 {
-  assert(newValue.size(0) == n && "LagrangianDS - setMass: inconsistent dimensions with problem size for matrix mass.");
-  assert(newValue.size(1) == n && "LagrangianDS - setMass: inconsistent dimensions with problem size for matrix mass.");
+  assert(newValue.size(0) == ndof && "LagrangianDS - setMass: inconsistent dimensions with problem size for matrix mass.");
+  assert(newValue.size(1) == ndof && "LagrangianDS - setMass: inconsistent dimensions with problem size for matrix mass.");
 
   if (!mass)
     mass.reset(new PMMass(newValue));

@@ -27,6 +27,7 @@
 #include "SiconosConst.h"
 #include "Tools.hpp"
 #include "SiconosPointers.hpp"
+#include "InteractionsSet.hpp"
 
 class NonSmoothDynamicalSystem;
 class Simulation;
@@ -96,9 +97,17 @@ public:
   Model(double, double = -1, const std::string& = "none", const std::string& = "nobody",
         const std::string& = "none", const std::string& = "none", const std::string& = "none");
 
+  /** build the model from init/final times and a list of DS and Interactions
+      \param double : the value for t0
+      \param double : the value for T; if you do not want to set the final time, set T = -1.
+      \param a list of DynamicalSystems
+      \param a list of Interactions
+   */
+  Model(double, double, DynamicalSystemsSet&, InteractionsSet&);
+
   /** destructor
    */
-  ~Model();
+  ~Model() {};
 
   // --- GETTERS/SETTERS
 
