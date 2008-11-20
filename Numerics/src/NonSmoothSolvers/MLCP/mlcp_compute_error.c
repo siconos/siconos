@@ -35,10 +35,10 @@ int mlcp_compute_error(MixedLinearComplementarity_Problem* problem, double *z, d
     numericsError("mlcp_compute_error", "null input for problem and/or z and/or w");
 
   int param = 1;
+  int NbLines = problem->M->size0; /* Equalities */
   int n = problem->n; /* Equalities */
   int m = problem->m; /* Inequalities */
   int incx = 1, incy = 1;
-  int size = n + m;
 
   /* Computation of w: depends on the way the problem is written */
 
@@ -49,8 +49,8 @@ int mlcp_compute_error(MixedLinearComplementarity_Problem* problem, double *z, d
       numericsError("mlcp_compute_error", "null input for M");
 
     /* Computes w = Mz + q */
-    DCOPY(size , problem->q , incx , w , incy);
-    prodNumericsMatrix(size, size, 1.0, problem->M, z, 1.0, w);
+    DCOPY(NbLines , problem->q , incx , w , incy);
+    prodNumericsMatrix(problem->M->size1, problem->M->size0, 1.0, problem->M, z, 1.0, w);
 
   }
   /* Problem in the form ABCD */
@@ -63,19 +63,19 @@ int mlcp_compute_error(MixedLinearComplementarity_Problem* problem, double *z, d
 
     /* Links to problem data */
     double *a = &problem->q[0];
-    double *b = &problem->q[n];
+    double *b = &problem->q[NbLines - m];
     double *A = problem->A;
     double *B = problem->B;
     double *C = problem->C;
     double *D = problem->D;
 
     /* Compute "equalities" part, we = Au + Cv + a - Must be equal to 0 */
-    DCOPY(n , a , incx , w , incy);  //  we = w[0..n-1] <-- a
-    DGEMV(LA_NOTRANS , n, n , 1.0 , A , n , &z[0] , incx , 1.0 , w , incy);   // we <-- A*u + we
-    DGEMV(LA_NOTRANS , n, m , 1.0 , C , n , &z[n] , incx , 1.0 , w , incy);   // we <-- C*v + we
+    DCOPY(NbLines - m , a , incx , w , incy);//  we = w[0..n-1] <-- a
+    DGEMV(LA_NOTRANS , NbLines - m, n , 1.0 , A , NbLines - m , &z[0] , incx , 1.0 , w , incy); // we <-- A*u + we
+    DGEMV(LA_NOTRANS , NbLines - m, m , 1.0 , C , NbLines - m , &z[n] , incx , 1.0 , w , incy); // we <-- C*v + we
 
     /* Computes part which corresponds to complementarity */
-    double * pwi = w + n; // No copy!!
+    double * pwi = w + NbLines - m; // No copy!!
     DCOPY(m , b , incx , pwi , incy); //  wi = w[n..m] <-- b
     // following int param, we recompute the product wi = Du+BV +b and we = Au+CV +a
     // The test is then more severe if we compute w because it checks that the linear equation is satisfied
@@ -87,12 +87,12 @@ int mlcp_compute_error(MixedLinearComplementarity_Problem* problem, double *z, d
   }
 
   /* Error on equalities part */
-  double error_e = DNRM2(n , w , incx);;
+  double error_e = DNRM2(NbLines - m , w , incx);;
 
   /* Checks complementarity (only for rows number n to size) */
   double error_i = 0.;
   double zi, wi;
-  for (int i = n ; i < size ; i++)
+  for (int i = NbLines - m ; i < NbLines ; i++)
   {
     zi = z[i];
     wi = w[i];
@@ -107,8 +107,8 @@ int mlcp_compute_error(MixedLinearComplementarity_Problem* problem, double *z, d
 
   /* Computes error */
   double *q = problem->q;
-  double normb = DNRM2(m , &q[n] , incx);
-  double norma = DNRM2(n , &q[0] , incx);
+  double normb = DNRM2(m , q + NbLines - m , incx);
+  double norma = DNRM2(NbLines - m , q , incx);
 
   if (error_i / normb >= error_e / norma)
   {

@@ -53,6 +53,7 @@
 #include "LA.h"
 /*only for debug functions*/
 #include "NonSmoothNewtonNeighbour.h"
+#include "MixedLinearComplementarity_Problem.h"
 
 #define BAVARD
 //#define NBTEST 17
@@ -75,7 +76,7 @@
 #define NBMETHODS 14
 
 #define PATH_DRIVER
-#define MAX_DIM_ENUM 20
+#define MAX_DIM_ENUM 10
 
 /*#ifdef PATH_DRIVER
 const unsigned short int *__ctype_b;
@@ -631,6 +632,7 @@ void test_matrix(void)
   int isol;
   int n , n2;
   int m, m2;
+  int NbLines;
   int withSol = 0;
 
   double *a, *b, *sol, *z, *w;
@@ -683,7 +685,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 11:
+    case 7:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n PD **************************************************************************");
       strcpy(summary[itest].file, "PD");
@@ -713,7 +715,17 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 0:
+    case 88:
+      printf("BEGIN A NEWTEST  **************************************************************************");
+      printf("\n\n simple_mlcp.dat **************************************************************************");
+      strcpy(summary[itest].file, "simple_mlcp");
+      if ((MLCPfile = fopen("MATRIX/simple_mlcp.dat", "r")) == NULL)
+      {
+        perror("fopen MLCPfile: simple_mlcp.dat");
+        exit(1);
+      }
+      break;
+    case 99:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n deltasigma2_mlcp.dat **************************************************************************");
       strcpy(summary[itest].file, "deltasigma2_mlcp");
@@ -763,7 +775,17 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 5:
+    case 0:
+      printf("BEGIN A NEWTEST  **************************************************************************");
+      printf("\n\n Rectangular_mlcp MLCP **************************************************************************");
+      strcpy(summary[itest].file, "Rectangular_mlcp MLCP");
+      if ((MLCPfile = fopen("MATRIX/Rectangular_mlcp.dat", "r")) == NULL)
+      {
+        perror("fopen MLCPfile: Rectangular_mlcp.dat");
+        exit(1);
+      }
+      break;
+    case 19:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n diodeBridge MLCP **************************************************************************");
       strcpy(summary[itest].file, "diodeBridge MLCP");
@@ -783,7 +805,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 7:
+    case 1:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n diodeBridge 20 MLCP **************************************************************************");
       strcpy(summary[itest].file, "diodeBridge 20 MLCP");
@@ -823,7 +845,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 1:
+    case 11:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n Buck converter First step **************************************************************************");
       strcpy(summary[itest].file, "BuckFirstStep");
@@ -850,20 +872,21 @@ void test_matrix(void)
 
     fscanf(MLCPfile , "%d" , &n);
     fscanf(MLCPfile , "%d" , &m);
+    fscanf(MLCPfile , "%d" , &NbLines);
 
     n2 = n * n;
     m2 = m * m;
     isol = 1;
 
-    vecM = (double*)malloc((n + m) * (n + m) * sizeof(double));
-    vecQ = (double*)malloc((n + m) * sizeof(double));
+    vecM = (double*)malloc((n + m) * (NbLines) * sizeof(double));
+    vecQ = (double*)malloc((NbLines) * sizeof(double));
     z = (double*)malloc((n + m) * sizeof(double));
-    w = (double*)malloc((n + m) * sizeof(double));
-    vecA = (double*)malloc(n2 * sizeof(double));
+    w = (double*)malloc((NbLines) * sizeof(double));
+    vecA = (double*)malloc(n * (NbLines - m) * sizeof(double));
     vecB = (double*)malloc(m2 * sizeof(double));
-    vecC = (double*)malloc(n * m * sizeof(double));
+    vecC = (double*)malloc((NbLines - m) * m * sizeof(double));
     vecD = (double*)malloc(m * n * sizeof(double));
-    a    = (double*)malloc(n * sizeof(double));
+    a    = (double*)malloc((NbLines - m) * sizeof(double));
     b    = (double*)malloc(m * sizeof(double));
     sol  = (double*)malloc((n + m + m) * sizeof(double));
 
@@ -881,18 +904,18 @@ void test_matrix(void)
 
     problem.n = n;
     problem.m = m;
-    M.size0 = n + m;
+    M.size0 = NbLines;
     M.size1 = n + m;
 
 
 
-    for (i = 0 ; i < n ; ++i)
+    for (i = 0 ; i < NbLines - m ; ++i)
     {
       for (j = 0 ; j < n ; ++j)
       {
         fscanf(MLCPfile, "%s", val);
-        vecA[ n * j + i ] = atof(val);
-        vecM[(n + m)*j + i ] = atof(val);
+        vecA[(NbLines - m)*j + i ] = atof(val);
+        vecM[(NbLines)*j + i ] = atof(val);
       }
     }
     for (i = 0 ; i < m ; ++i)
@@ -901,18 +924,18 @@ void test_matrix(void)
       {
         fscanf(MLCPfile, "%s", val);
         vecB[ m * j + i ] = atof(val);
-        vecM[ n * (m + n) + (n + m)*j + n + i ] = atof(val);
-
+        /*  vecM[ n*(m+n)+(n+m)*j+n+i ] = atof(val);*/
+        vecM[ n * (NbLines) + (NbLines)*j + (NbLines - m) + i ] = atof(val);
 
       }
     }
-    for (i = 0 ; i < n ; ++i)
+    for (i = 0 ; i < NbLines - m ; ++i)
     {
       for (j = 0 ; j < m ; ++j)
       {
         fscanf(MLCPfile, "%s", val);
-        vecC[ n * j + i ] = atof(val);
-        vecM[(n + m) * (n + j) + i ] = atof(val);
+        vecC[(NbLines - m)*j + i ] = atof(val);
+        vecM[(NbLines) * (n + j) + i ] = atof(val);
       }
     }
     for (i = 0 ; i < m ; ++i)
@@ -921,11 +944,11 @@ void test_matrix(void)
       {
         fscanf(MLCPfile, "%s", val);
         vecD[ m * j + i ] = atof(val);
-        vecM[(n + m)*j + i + n ] = atof(val);
+        vecM[(NbLines)*j + i + (NbLines - m) ] = atof(val);
       }
     }
 
-    for (i = 0 ; i < n ; ++i)
+    for (i = 0 ; i < NbLines - m ; ++i)
     {
       fscanf(MLCPfile , "%s" , val);
       a[i] = atof(val);
@@ -935,7 +958,7 @@ void test_matrix(void)
     {
       fscanf(MLCPfile , "%s" , val);
       b[i] = atof(val);
-      vecQ[i + n] = atof(val);
+      vecQ[i + NbLines - m] = atof(val);
     }
 
     fscanf(MLCPfile , "%s" , val);
@@ -957,7 +980,13 @@ void test_matrix(void)
       isol = 0;
       for (i = 0 ; i < (n + m) ; ++i) sol[i] = 0.0;
     }
-
+    printf("\n");
+    for (i = 0; i < NbLines; i++)
+    {
+      for (j = 0; j < n + m; j++)
+        printf("%f ", vecM[NbLines * j + i]);
+      printf("\n");
+    }
     fclose(MLCPfile);
 
 #ifdef BAVARD
@@ -1048,7 +1077,8 @@ int main(void)
   for (i = 0; i < NBMETHODS; i++)
     sRunMethod[i] = 0;
   sRunMethod[PATH_ID] = 0;
-  sRunMethod[FB_ID] = 1;
+  sRunMethod[ENUM_ID] = 1;
+  sRunMethod[SIMPLEX_ID] = 0;
 
   test_matrix();
 

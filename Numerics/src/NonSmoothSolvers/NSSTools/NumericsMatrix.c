@@ -38,7 +38,7 @@ void prodNumericsMatrix(int sizeX, int sizeY, double alpha, const NumericsMatrix
   /* double* storage */
   if (storage == 0)
   {
-    DGEMV(LA_NOTRANS, sizeY, sizeX, alpha, A->matrix0, sizeX, x, 1, beta, y, 1);
+    DGEMV(LA_NOTRANS, sizeY, sizeX, alpha, A->matrix0, sizeY, x, 1, beta, y, 1);
   }
   /* SparseBlock storage */
   else if (storage == 1)

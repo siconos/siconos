@@ -62,6 +62,7 @@ void displayMLCP(MixedLinearComplementarity_Problem* p)
   }
   else
     printf("No M matrix:\n");
+  return;
   if (p->q)
   {
     printf("q matrix:\n");
@@ -69,7 +70,6 @@ void displayMLCP(MixedLinearComplementarity_Problem* p)
   }
   else
     printf("No b matrix:\n");
-
 
   if (p->A)
   {

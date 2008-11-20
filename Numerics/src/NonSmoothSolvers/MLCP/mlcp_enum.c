@@ -35,7 +35,7 @@ dim(v)=nn
 #include "mlcp_enum.h"
 #include "mlcp_enum_tool.h"
 
-
+#define ENUM_USE_DGELS
 
 #ifdef MLCP_DEBUG
 static int *sLastIWork;
@@ -47,9 +47,13 @@ static double * sColNul = 0;
 static double * sM = 0;
 static double * sMref = 0;
 static double * sQref = 0;
+/* double working memory for dgels*/
+static double * sDgelsWork = 0;
+
 static int sVerbose = 0;
 static int sNn = 0;
 static int sMm = 0;
+static int sMl = 0;
 static int* sW2V = 0;
 
 /*OUTPUT */
@@ -131,7 +135,7 @@ int mlcp_enum_getNbIWork(MixedLinearComplementarity_Problem* problem, Solver_Opt
 }
 int mlcp_enum_getNbDWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
 {
-  return 3 * (problem->n + problem->m) + (problem->n + problem->m) * (problem->n + problem->m);
+  return 3 * (problem->M->size0) + (problem->n + problem->m) * (problem->M->size0);
 }
 
 /*
@@ -158,7 +162,8 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
   int one = 1;
   int * ipiv;
   int check;
-  int DGESVinfo;
+  int LAinfo;
+  int LWORK;
 
   /*OUTPUT param*/
   sW1 = w;
@@ -168,20 +173,29 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
   tol = options->dparam[0];
 
   sMref = problem->M->matrix0;
+  sMl = problem->M->size0;
 
   sNn = problem->n;
   sMm = problem->m;
+  LWORK = sMl * npm; /*LWORK >= max( 1, MN + max( MN, NRHS ) )*/
+
   sVerbose = options->iparam[0];
-  if (sVerbose)
-    printf("mlcp_enum begin, n %d m %d tol %lf\n", sNn, sMm, tol);
+  if (sVerbose)sQref = sColNul +
+                         printf("mlcp_enum begin, n %d m %d tol %lf\n", sNn, sMm, tol);
 
   sM = workingFloat;
-  sQ = sM + npm2;
-  sColNul = sQ + sMm + sNn;
-  sQref = sColNul + sMm + sNn;
-  for (lin = 0; lin < sMm + sNn; lin++)
+  /*  sQ = sM + npm2;*/
+  sQ = sM + (sNn + sMm) * sMl;
+  /*  sColNul = sQ + sMm +sNn;*/
+  sColNul = sQ + sMl;
+  /*  sQref = sColNul + sMm +sNn;*/
+  sQref = sColNul + sMl;
+
+  sDgelsWork = sQref + sMl;
+
+  for (lin = 0; lin < sMl; lin++)
     sQref[lin] =  - problem->q[lin];
-  for (lin = 0; lin < npm; lin++)
+  for (lin = 0; lin < sMl; lin++)
     sColNul[lin] = 0;
   /*  printf("sColNul\n");
       displayMat(sColNul,npm,1);*/
@@ -197,13 +211,22 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
     buildQ();
     if (sVerbose)
       printCurrentSystem();
-    DGESV(npm, NRHS, sM, npm, ipiv, sQ, npm, DGESVinfo);
+#ifdef ENUM_USE_DGELS
 
-    if (!DGESVinfo)
+    /*     DGELS( sMl, npm, NRHS, sM, npm, sQ, npm, sDgelsWork, LWORK,
+     LAinfo );*/
+    DGELS(sMl, npm, NRHS, sM, sMl, sQ, sMl, sDgelsWork, LWORK,
+          LAinfo);
+
+#else
+
+    DGESV(npm, NRHS, sM, npm, ipiv, sQ, npm, LAinfo);
+#endif
+    if (!LAinfo)
     {
       if (sVerbose)
       {
-        printf("LU foctorization success, solution in cone?\n");
+        printf("Solving linear system success, solution in cone?\n");
         displayMat(sQ, npm, 1, 0);
       }
 
