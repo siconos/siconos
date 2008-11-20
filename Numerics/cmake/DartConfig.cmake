@@ -1,5 +1,5 @@
 SET(CTEST_PROJECT_NAME "Siconos")
-SET(NIGHTLY_START_TIME "20:00:00")
+SET(NIGHTLY_START_TIME "18:00:00")
 SET(DROP_METHOD "http")
 SET(DROP_SITE "cdash.inria.fr")
 SET(DROP_LOCATION "/CDash/submit.php?project=Siconos")
