@@ -111,7 +111,7 @@ if(BLAS_FOUND)
     check_lapack_libraries(
       COMPLETE_LAPACK_LIBRARIES
       LAPACK
-      gesvd 
+      dgels_ 
       ""
       "lapack"
       "${BLAS_LIBRARIES}")
