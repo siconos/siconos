@@ -57,7 +57,7 @@
 
 #define BAVARD
 //#define NBTEST 17
-#define NBTEST 1
+#define NBTEST 2
 
 #define ENUM_ID 0
 #define PGS_EX_ID 1
@@ -76,7 +76,7 @@
 #define NBMETHODS 14
 
 #define PATH_DRIVER
-#define MAX_DIM_ENUM 10
+#define MAX_DIM_ENUM 100
 
 /*#ifdef PATH_DRIVER
 const unsigned short int *__ctype_b;
@@ -118,7 +118,7 @@ static int itest;
 /*
  ******************************************************************************
  */
-void printSolution(const char *name, int n, int m, double *z, double *w)
+void printSolution(const char *name, int n, int m, int NbLines, double *z, double *w)
 {
   int i;
 #ifdef BAVARD
@@ -128,7 +128,7 @@ void printSolution(const char *name, int n, int m, double *z, double *w)
     printf("%s: %14.7e  \n", name, z[i]);
   printf(" ****** w = ********************************\n");
   for (i = 0 ; i < m ; i++)
-    printf("%s: %14.7e  \n", name, w[i + n]);
+    printf("%s: %14.7e  \n", name, w[i + (NbLines - m)]);
 #endif
 }
 /*
@@ -161,6 +161,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
   int niW = 0;
   int aux = 0;
   long laux;
+  int NbLines = problem->M->size0;
 
   mlcpOptions.isSet = 0;
   mlcpOptions.iSize = 0;
@@ -244,7 +245,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     {
       mlcp_compute_error(problem, z, w, tol1,  &error);
       printf("find a solution with error %lf \n", error);
-      printSolution("ENUM", n, m, z, w);
+      printSolution("ENUM", n, m, NbLines, z, w);
     }
     mlcp_driver_reset(problem, &mlcpOptions);
   }
@@ -277,7 +278,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     {
       mlcp_compute_error(problem, z, w, tol1,  &error);
       printf("find a solution with error %lf \n", error);
-      printSolution("PGS", n, m, z, w);
+      printSolution("PGS", n, m, NbLines, z, w);
     }
     mlcp_driver_reset(problem, &mlcpOptions);
   }
@@ -310,7 +311,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     {
       mlcp_compute_error(problem, z, w, tol1,  &error);
       printf("find a solution with error %lf \n", error);
-      printSolution("PGS", n, m, z, w);
+      printSolution("PGS", n, m, NbLines, z, w);
     }
     mlcp_driver_reset(problem, &mlcpOptions);
   }
@@ -341,7 +342,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     {
       mlcp_compute_error(problem, z, w, tol1,  &error);
       printf("find a solution with error %lf \n", error);
-      printSolution("RPGS", n, m, z, w);
+      printSolution("RPGS", n, m, NbLines, z, w);
     }
     mlcp_driver_reset(problem, &mlcpOptions);
   }
@@ -379,7 +380,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
       {
         mlcp_compute_error(problem, z, w, tol1,  &error);
         printf("find a solution with error %lf \n", error);
-        printSolution("PSOR", n, m, z, w);
+        printSolution("PSOR", n, m, NbLines, z, w);
       }
     }
     mlcp_driver_reset(problem, &mlcpOptions);
@@ -412,7 +413,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     {
       mlcp_compute_error(problem, z, w, tol1,  &error);
       printf("find a solution with error %lf \n", error);
-      printSolution("RPSOR", n, m, z, w);
+      printSolution("RPSOR", n, m, NbLines, z, w);
     }
     mlcp_driver_reset(problem, &mlcpOptions);
   }
@@ -444,7 +445,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
       if (error > tol2)
         strcpy(summary[itest].cv[PATH_ID][sIdWithSol], "NO");
       printf("find a solution with error %lf \n", error);
-      printSolution("PATH", n, m, z, w);
+      printSolution("PATH", n, m, NbLines, z, w);
     }
     mlcp_driver_reset(problem, &mlcpOptions);
   }
@@ -481,7 +482,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
       if (error > 1e-9)
         strcpy(summary[itest].cv[SIMPLEX_ID][sIdWithSol], "NO");
       printf("find a solution with error %lf \n", error);
-      printSolution("SIMPLEX", n, m, z, w);
+      printSolution("SIMPLEX", n, m, NbLines, z, w);
     }
     mlcp_driver_reset(problem, &mlcpOptions);
   }
@@ -522,7 +523,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
       if (error > 1e-9)
         strcpy(summary[itest].cv[DIRECT_ENUM_ID][sIdWithSol], "NO");
       printf("find a solution with error %lf \n", error);
-      printSolution("DIRECT_ENUM_ID", n, m, z, w);
+      printSolution("DIRECT_ENUM_ID", n, m, NbLines, z, w);
     }
     mlcp_driver_reset(problem, &mlcpOptions);
   }
@@ -554,7 +555,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
       strcpy(summary[itest].cv[FB_ID][sIdWithSol], "NO");
       mlcp_compute_error(problem, z, w, tol1,  &error);
       printf("current point with error %lf \n", error);
-      printSolution("FB", n, m, z, w);
+      printSolution("FB", n, m, NbLines, z, w);
     }
     else
     {
@@ -562,7 +563,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
       //    if (error > 1e-9)
       strcpy(summary[itest].cv[FB_ID][sIdWithSol], "CV");
       printf("find a solution with error %lf \n", error);
-      printSolution("FB", n, m, z, w);
+      printSolution("FB", n, m, NbLines, z, w);
     }
     mlcp_driver_reset(problem, &mlcpOptions);
   }
@@ -598,14 +599,14 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
       strcpy(summary[itest].cv[DIRECT_FB_ID][sIdWithSol], "NO");
       mlcp_compute_error(problem, z, w, tol1,  &error);
       printf("current point with error %lf \n", error);
-      printSolution("DIRECT_FB", n, m, z, w);
+      printSolution("DIRECT_FB", n, m, NbLines, z, w);
     }
     else
     {
       mlcp_compute_error(problem, z, w, tol1,  &error);
       strcpy(summary[itest].cv[DIRECT_FB_ID][sIdWithSol], "CV");
       printf("find a solution with error %lf \n", error);
-      printSolution("DIRECT_FB", n, m, z, w);
+      printSolution("DIRECT_FB", n, m, NbLines, z, w);
     }
     mlcp_driver_reset(problem, &mlcpOptions);
 
@@ -765,7 +766,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 4:
+    case 1:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n PDSym_mlcp.dat **************************************************************************");
       strcpy(summary[itest].file, "PDSym_mlcp");
@@ -805,7 +806,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 1:
+    case 4:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n diodeBridge 20 MLCP **************************************************************************");
       strcpy(summary[itest].file, "diodeBridge 20 MLCP");
@@ -880,8 +881,8 @@ void test_matrix(void)
 
     vecM = (double*)malloc((n + m) * (NbLines) * sizeof(double));
     vecQ = (double*)malloc((NbLines) * sizeof(double));
-    z = (double*)malloc((n + m) * sizeof(double));
-    w = (double*)malloc((NbLines) * sizeof(double));
+    z = (double*)calloc((n + m), sizeof(double));
+    w = (double*)calloc((NbLines), sizeof(double));
     vecA = (double*)malloc(n * (NbLines - m) * sizeof(double));
     vecB = (double*)malloc(m2 * sizeof(double));
     vecC = (double*)malloc((NbLines - m) * m * sizeof(double));
