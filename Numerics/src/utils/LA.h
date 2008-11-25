@@ -6,11 +6,7 @@
 #define FCAST(T,X) (T *) (& X)
 #define FCASTP(T,X) (T *) X
 
-#ifndef FRAMEWORK_BLAS
-#define OUTSIDE_FRAMEWORK_BLAS
-#endif
-
-#if defined(OUTSIDE_FRAMEWORK_BLAS) && defined(HAVE_CBLAS_H)
+#ifdef HAVE_CBLAS_H
 #include <cblas.h>
 #ifndef HAVE_CLAPACK_H
 #error "HAVE_CBLAS without HAVE_CLAPACK"
@@ -226,6 +222,24 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      int C_LDA = LDA; \
      int C_LDB = LDB; \
      LAPACK_7(LAPACK_NAME(dgesv), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), INTEGERP(IPIV), B, INTEGER(C_LDB), INTEGER(INFO)); \
+  })
+
+/* DGELS -
+ *  DGELS solves overdetermined or underdetermined real linear systems
+ *  involving an M-by-N matrix A, or its transpose, using a QR or LQ
+ *  factorization of A.  It is assumed that A has full rank.
+ */
+#include "blaslapack.h"
+
+#define DGELS( M, N, NRHS, A, LDA, B, LDB, WORK, LWORK, INFO  ) \
+   ({int C_M = M; \
+     int C_N = N; \
+     int C_LWORK = LWORK; \
+     double * C_WORK = WORK; \
+     int C_NRHS = NRHS; \
+     int C_LDA = LDA; \
+     int C_LDB = LDB; \
+     F77NAME(dgels)("N", FCAST(integer,C_M) , FCAST(integer,C_N), FCAST(integer,C_NRHS), FCASTP(double, A), FCAST(integer,C_LDA),FCASTP(double,B), FCAST(integer, C_LDB), FCASTP(double,C_WORK) ,FCAST(integer,LWORK), FCAST(integer,INFO)); \
   })
 
 /* DTRTRS - solve a triangular system of the form  A * X = B or A**T * X = B,
