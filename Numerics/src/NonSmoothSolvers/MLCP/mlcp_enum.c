@@ -111,7 +111,7 @@ static double* sU;
 
 void buildQ()
 {
-  memcpy(sQ, sQref, (sMm + sNn)*sizeof(double));
+  memcpy(sQ, sQref, sMl * sizeof(double));
 }
 void printCurrentSystem()
 {
@@ -127,7 +127,7 @@ void printRefSystem()
   printf("ref M n %d  m %d :\n", sNn, sMm);
   displayMat(sMref, npm, npm, 0);
   printf("ref Q (ie -Q from mlcp beause of linear system MZ=Q):\n");
-  displayMat(sQref, sMm + sNn, 1, 0);
+  displayMat(sQref, sMl, 1, 0);
 }
 int mlcp_enum_getNbIWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
 {
@@ -135,7 +135,7 @@ int mlcp_enum_getNbIWork(MixedLinearComplementarity_Problem* problem, Solver_Opt
 }
 int mlcp_enum_getNbDWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
 {
-  return 3 * (problem->M->size0) + (problem->n + problem->m) * (problem->M->size0);
+  return 3 * (problem->M->size0) + 3 * (problem->n + problem->m) * (problem->M->size0);
 }
 
 /*
@@ -165,19 +165,20 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
   int LAinfo;
   int LWORK;
 
+  sMl = problem->M->size0;
+  sNn = problem->n;
+  sMm = problem->m;
+
   /*OUTPUT param*/
   sW1 = w;
-  sW2 = w + problem->n;
+  sW2 = w + (sMl - problem->m); /*sW2 size :m */
   sU = z;
   sV = z + problem->n;
   tol = options->dparam[0];
 
   sMref = problem->M->matrix0;
-  sMl = problem->M->size0;
 
-  sNn = problem->n;
-  sMm = problem->m;
-  LWORK = sMl * npm; /*LWORK >= max( 1, MN + max( MN, NRHS ) )*/
+  LWORK = 2 * sMl * npm; /*LWORK >= max( 1, MN + max( MN, NRHS ) )*/
 
   sVerbose = options->iparam[0];
   if (sVerbose)sQref = sColNul +
@@ -207,7 +208,7 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
   initEnum(problem->m);
   while (nextEnum(sW2V))
   {
-    mlcp_buildM(sW2V, sM, sMref, sNn, sMm);
+    mlcp_buildM(sW2V, sM, sMref, sNn, sMm, sMl);
     buildQ();
     if (sVerbose)
       printCurrentSystem();
@@ -227,7 +228,7 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
       if (sVerbose)
       {
         printf("Solving linear system success, solution in cone?\n");
-        displayMat(sQ, npm, 1, 0);
+        displayMat(sQ, sMl, 1, 0);
       }
 
       check = 1;
@@ -243,11 +244,11 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
         continue;
       else
       {
-        mlcp_fillSolution(sU, sV, sW1, sW2, sNn, sMm, sW2V, sQ);
+        mlcp_fillSolution(sU, sV, sW1, sW2, sNn, sMm, sMl, sW2V, sQ);
         if (sVerbose)
         {
           printf("mlcp_enum find a solution!\n");
-          mlcp_DisplaySolution(sU, sV, sW1, sW2, sNn, sMm);
+          mlcp_DisplaySolution(sU, sV, sW1, sW2, sNn, sMm, sMl);
         }
         //  options->iparam[1]=sCurrentEnum-1;
         return;

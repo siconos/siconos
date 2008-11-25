@@ -66,6 +66,7 @@ static double sTolneg = 0;
 static double sTolpos = 0;
 static int sN;
 static int sM;
+static int sNbLines;
 static int sNpM;
 static int* spIntBuf;
 static int sVerbose = 0;
@@ -116,6 +117,13 @@ void mlcp_direct_init(MixedLinearComplementarity_Problem* problem, Solver_Option
   sProblemChanged = options->iparam[8];
   sN = problem->n;
   sM = problem->m;
+  sNbLines = problem->n + problem->m;
+  if (problem->M->size0 != sNbLines)
+  {
+    printf("mlcp_direct_init : M rectangular, not yet managed\n");
+    exit(1);
+  }
+
   if (sVerbose)
     printf("n= %d  m= %d /n sTolneg= %lf sTolpos= %lf \n", sN, sM, sTolneg, sTolpos);
 
@@ -140,7 +148,7 @@ void mlcp_direct_reset()
 int internalPrecompute(MixedLinearComplementarity_Problem* problem)
 {
   int INFO;
-  mlcp_buildM(spFirstCC->zw, spFirstCC->M, problem->M->matrix0, sN, sM);
+  mlcp_buildM(spFirstCC->zw, spFirstCC->M, problem->M->matrix0, sN, sM, sNbLines);
   if (sVerbose)
   {
     printf("mlcp_direct, precomputed M :\n");
@@ -327,9 +335,9 @@ void mlcp_direct(MixedLinearComplementarity_Problem* problem, double *z, double 
       if (find)
       {
 #ifdef DIRECT_SOLVER_USE_DGETRI
-        mlcp_fillSolution(z, z + sN, w, w + sN, sN, sM, spCurCC->zw, sVBuf);
+        mlcp_fillSolution(z, z + sN, w, w + sN, sN, sM, sNbLines, spCurCC->zw, sVBuf);
 #else
-        mlcp_fillSolution(z, z + sN, w, w + sN, sN, sM, spCurCC->zw, sQ);
+        mlcp_fillSolution(z, z + sN, w, w + sN, sN, sM, sNbLines, spCurCC->zw, sQ);
 #endif
         /*Current becomes forst for the next step.*/
         if (spCurCC != spFirstCC)
