@@ -49,6 +49,7 @@ static double * sMref = 0;
 static double * sQref = 0;
 /* double working memory for dgels*/
 static double * sDgelsWork = 0;
+static int LWORK = 0;
 
 static int sVerbose = 0;
 static int sNn = 0;
@@ -135,7 +136,18 @@ int mlcp_enum_getNbIWork(MixedLinearComplementarity_Problem* problem, Solver_Opt
 }
 int mlcp_enum_getNbDWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
 {
-  return 5 * (problem->M->size0) + (problem->n + problem->m) * (problem->M->size0);
+  LWORK = -1;
+  double dgelsSize = 0;
+  int info = 0;
+  double bidon = 0;
+#ifdef ENUM_USE_DGELS
+  DGELS(problem->M->size0, problem->n + problem->m, 1, 0, problem->M->size0, 0, problem->M->size0, &dgelsSize, LWORK, info);
+  LWORK = (int) dgelsSize;
+#else
+  LWORK = 0;
+#endif
+
+  return LWORK + 3 * (problem->M->size0) + (problem->n + problem->m) * (problem->M->size0);
 }
 
 /*
@@ -163,7 +175,6 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
   int * ipiv;
   int check;
   int LAinfo;
-  int LWORK;
 
   sMl = problem->M->size0;
   sNn = problem->n;
@@ -178,7 +189,7 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
 
   sMref = problem->M->matrix0;
 
-  LWORK = 2 * npm; /*LWORK >= max( 1, MN + max( MN, NRHS ) ) where MN = min(M,N)*/
+  /*  LWORK = 2*npm; LWORK >= max( 1, MN + max( MN, NRHS ) ) where MN = min(M,N)*/
 
   sVerbose = options->iparam[0];
   if (sVerbose)sQref = sColNul +
@@ -214,8 +225,6 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
       printCurrentSystem();
 #ifdef ENUM_USE_DGELS
 
-    /*     DGELS( sMl, npm, NRHS, sM, npm, sQ, npm, sDgelsWork, LWORK,
-     LAinfo );*/
     DGELS(sMl, npm, NRHS, sM, sMl, sQ, sMl, sDgelsWork, LWORK,
           LAinfo);
 
