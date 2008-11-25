@@ -23,7 +23,6 @@
 #include <math.h>
 #include "LCP_Solvers.h"
 
-static int sVerbose = 0;
 
 
 static unsigned long  int sCurrentEnum = 0;
@@ -112,12 +111,12 @@ int lcp_nextEnum()
   {
     sCurrentEnum = 0;
   }
-  if (sVerbose)
+  if (verbose)
     printf("try enum :%d\n", (int)sCurrentEnum);
   affectWZ();
   sCurrentEnum++;
   sCmpEnum++;
-  if (sVerbose && sCmpEnum > sProgress * sNbCase)
+  if (verbose && sCmpEnum > sProgress * sNbCase)
   {
     sProgress += 0.001;
     printf("lcp_enum progress %f %d \n", sProgress, (int) sCurrentEnum);
@@ -164,8 +163,7 @@ void lcp_enum(LinearComplementarity_Problem* problem, double *z, double *w, int 
 
   }
 
-  sVerbose = options->iparam[0];
-  if (sVerbose)
+  if (verbose)
     printf("lcp_enum begin, size %d tol %lf\n", sSize, tol);
 
   sM = workingFloat;
@@ -185,13 +183,13 @@ void lcp_enum(LinearComplementarity_Problem* problem, double *z, double *w, int 
   {
     lcp_buildM(sWZ, sM, sMref, sSize);
     lcp_buildQ();
-    /*     if (sVerbose) */
+    /*     if (verbose) */
     /*       printCurrentSystem(); */
     DGESV(sSize, NRHS, sM, sSize, ipiv, sQ, sSize, DGESVinfo);
 
     if (!DGESVinfo)
     {
-      if (sVerbose)
+      if (verbose)
       {
         printf("lcp_enum LU foctorization success:\n");
       }
@@ -209,7 +207,7 @@ void lcp_enum(LinearComplementarity_Problem* problem, double *z, double *w, int 
         continue;
       else
       {
-        if (sVerbose)
+        if (verbose)
           printf("lcp_enum find a solution!\n");
         lcp_fillSolution(z, w, sSize, sWZ, sQ);
         options->iparam[1] = sCurrentEnum - 1;
@@ -218,6 +216,6 @@ void lcp_enum(LinearComplementarity_Problem* problem, double *z, double *w, int 
     }
   }
   *info = 1;
-  if (sVerbose)
+  if (verbose)
     printf("lcp_enum failed!\n");
 }

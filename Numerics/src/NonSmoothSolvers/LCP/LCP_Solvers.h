@@ -139,7 +139,6 @@ a nonsmooth Newton method based based on the Fischer-Bursmeister convex function
 \bf function: lcp_enum() \n
 \bf parameters:
 - dparam[0] (in): tolerance
-- iparam[0] (in): verbose
 - iparam[1] (out) : key of the solution
 
 \section lcpLatin Latin Solver

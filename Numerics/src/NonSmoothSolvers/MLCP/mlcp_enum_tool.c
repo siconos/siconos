@@ -1,13 +1,12 @@
 #include "mlcp_enum_tool.h"
 #include <stdio.h>
-
+#include "Numerics_Options.h"
 
 static unsigned long long int sCurrentEnum = 0;
 static unsigned long long int sCmpEnum = 0;
 static unsigned long long int sNbCase = 0;
 static double sProgress = 0;
 static int sMm = 0;
-static int sVerbose = 0;
 
 
 void initEnum(int M)
@@ -32,7 +31,7 @@ void affectW2V(int * W2V)
     W2V[i] = aux & 1;
     aux = aux >> 1;
   }
-  if (sVerbose)
+  if (verbose)
   {
     for (unsigned int i = 0; i < sMm; i++)
       printf("wv[%d]=%d \t", i, W2V[i]);
@@ -49,12 +48,12 @@ int nextEnum(int * W2V)
   {
     sCurrentEnum = 0;
   }
-  if (sVerbose)
+  if (verbose)
     printf("try enum :%d\n", (int)sCurrentEnum);
   affectW2V(W2V);
   sCurrentEnum++;
   sCmpEnum++;
-  if (sVerbose && sCmpEnum > sProgress * sNbCase)
+  if (verbose && sCmpEnum > sProgress * sNbCase)
   {
     sProgress += 0.001;
     printf(" progress %f %d \n", sProgress, (int) sCurrentEnum);

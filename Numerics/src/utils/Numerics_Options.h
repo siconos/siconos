@@ -45,6 +45,11 @@ extern int verbose;
 extern "C" {
 #endif
 
+  /* Set verbose mode in numerics
+     \param newVerboseMode, 0 no verbose, 1 verbose.
+   */
+  void setNumericsVerbose(int newVerboseMode);
+
   /* Set global option for numerics
      \param opt, a Numerics_Options structure
    */

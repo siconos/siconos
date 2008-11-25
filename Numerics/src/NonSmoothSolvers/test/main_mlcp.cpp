@@ -178,7 +178,6 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
   setNumericsOptions(&global_options);
 
   mlcpOptions.iparam[5] = 3; /*Number of registered configurations*/
-  mlcpOptions.iparam[6] = 0; /*VERBOSE*/
   mlcpOptions.iparam[8] = 0; /*Prb nedd a update*/
   mlcpOptions.dparam[5] = 1e-12;
   mlcpOptions.dparam[6] = 1e-12;
@@ -224,7 +223,6 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     printf("TRY SOLVER %s\n", "ENUM");
     strcpy(mlcpOptions.solverName, "ENUM");
     mlcpOptions.iSize = 1;
-    mlcpOptions.iparam[0] = 0; /*verbose 1*/
     mlcpOptions.dSize = 1;
     mlcpOptions.dparam[0] = tol1;
 

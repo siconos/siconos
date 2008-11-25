@@ -23,7 +23,6 @@
 #include <math.h>
 #include "LCP_Solvers.h"
 
-static int sVerbose = 0;
 #ifdef HAVE_PATHFERRIS
 #include "InterfaceToPathFerris/SimpleLCP.h"
 #endif /*HAVE_PATHFERRIS*/

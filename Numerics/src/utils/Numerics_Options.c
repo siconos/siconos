@@ -22,6 +22,10 @@
 Warning: global variable
 */
 int verbose = 0;
+void setNumericsVerbose(int newVerboseMode)
+{
+  verbose = newVerboseMode;
+}
 
 void setNumericsOptions(Numerics_Options* opt)
 {

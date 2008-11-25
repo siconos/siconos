@@ -28,7 +28,6 @@
 
 #include "MCP/MCP_FischerBurmeister.h"
 
-static int sVerbose = 0;
 static int sN = 0;
 static int sM = 0;
 static MixedLinearComplementarity_Problem* sProblem;
@@ -134,7 +133,7 @@ void mlcp_FB(MixedLinearComplementarity_Problem* problem, double *z, double *w, 
       w[sN + i] = 0;
   }
 
-  if (sVerbose)
+  if (verbose)
     printf("FB : MLCP Solved, error %10.7f.\n", err);
 
   return;

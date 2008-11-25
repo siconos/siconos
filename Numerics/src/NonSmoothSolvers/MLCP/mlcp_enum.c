@@ -51,7 +51,6 @@ static double * sQref = 0;
 static double * sDgelsWork = 0;
 static int LWORK = 0;
 
-static int sVerbose = 0;
 static int sNn = 0;
 static int sMm = 0;
 static int sMl = 0;
@@ -96,12 +95,12 @@ static double* sU;
 /*   if (sCurrentEnum >= sNbCase){ */
 /*     sCurrentEnum=0; */
 /*   } */
-/*   if (sVerbose) */
+/*   if (verbose) */
 /*     printf("try enum :%d\n",(int)sCurrentEnum); */
 /*   affectW2V(); */
 /*   sCurrentEnum++; */
 /*   sCmpEnum++; */
-/*   if (sVerbose && sCmpEnum > sProgress*sNbCase){ */
+/*   if (verbose && sCmpEnum > sProgress*sNbCase){ */
 /*     sProgress+=0.001; */
 /*     printf(" progress %f %d \n",sProgress,(int) sCurrentEnum); */
 /*   } */
@@ -154,7 +153,6 @@ int mlcp_enum_getNbDWork(MixedLinearComplementarity_Problem* problem, Solver_Opt
  * The are no memory allocation in mlcp_enum, all necessary memory must be allocated by the user.
  *
  *options:
- * iparam[0] : (in) verbose.
  * dparam[0] : (in) a positive value, tolerane about the sign.
  * dWork : working float zone size : (nn+mm)*(nn+mm) + 3*(nn+mm). MUST BE ALLOCATED BY THE USER.
  * iWork : working int zone size : 2(nn+mm). MUST BE ALLOCATED BY THE USER.
@@ -191,9 +189,8 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
 
   /*  LWORK = 2*npm; LWORK >= max( 1, MN + max( MN, NRHS ) ) where MN = min(M,N)*/
 
-  sVerbose = options->iparam[0];
-  if (sVerbose)sQref = sColNul +
-                         printf("mlcp_enum begin, n %d m %d tol %lf\n", sNn, sMm, tol);
+  if (verbose)
+    printf("mlcp_enum begin, n %d m %d tol %lf\n", sNn, sMm, tol);
 
   sM = workingFloat;
   /*  sQ = sM + npm2;*/
@@ -211,7 +208,7 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
     sColNul[lin] = 0;
   /*  printf("sColNul\n");
       displayMat(sColNul,npm,1);*/
-  if (sVerbose)
+  if (verbose)
     printRefSystem();
   sW2V = workingInt;
   ipiv = sW2V + sMm;
@@ -221,7 +218,7 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
   {
     mlcp_buildM(sW2V, sM, sMref, sNn, sMm, sMl);
     buildQ();
-    if (sVerbose)
+    if (verbose)
       printCurrentSystem();
 #ifdef ENUM_USE_DGELS
 
@@ -234,7 +231,7 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
 #endif
     if (!LAinfo)
     {
-      if (sVerbose)
+      if (verbose)
       {
         printf("Solving linear system success, solution in cone?\n");
         displayMat(sQ, sMl, 1, 0);
@@ -254,7 +251,7 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
       else
       {
         mlcp_fillSolution(sU, sV, sW1, sW2, sNn, sMm, sMl, sW2V, sQ);
-        if (sVerbose)
+        if (verbose)
         {
           printf("mlcp_enum find a solution!\n");
           mlcp_DisplaySolution(sU, sV, sW1, sW2, sNn, sMm, sMl);
@@ -265,13 +262,13 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
     }
     else
     {
-      if (sVerbose)
+      if (verbose)
       {
         printf("LU foctorization failed:\n");
       }
     }
   }
   *info = 1;
-  if (sVerbose)
+  if (verbose)
     printf("mlcp_enum failed!\n");
 }

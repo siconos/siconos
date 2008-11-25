@@ -69,7 +69,6 @@ static int sM;
 static int sNbLines;
 static int sNpM;
 static int* spIntBuf;
-static int sVerbose = 0;
 static int sProblemChanged = 0;
 
 double * mydMalloc(int n)
@@ -96,7 +95,6 @@ int mlcp_direct_getNbDWork(MixedLinearComplementarity_Problem* problem, Solver_O
 /*
  *options->iparam[5] : n0 number of possible configuration
  *options->dparam[5] : tol
- *options->iparam[6] : verbose
  *options->iparam[7] : number of failed
  *options->iparam[8] : mlcp problem hab been changed since the previous execution.
  *options->iWork : double work memory of size (n + m)*(n0+1) + nO*m
@@ -110,7 +108,6 @@ void mlcp_direct_init(MixedLinearComplementarity_Problem* problem, Solver_Option
   spCurDouble = options->dWork;
   spCurInt = options->iWork;
   sMaxNumberOfCC = options->iparam[5];
-  sVerbose = options->iparam[6];
   sTolneg = options->dparam[5];
   sTolpos = options->dparam[6];
   options->iparam[7] = 0;
@@ -124,7 +121,7 @@ void mlcp_direct_init(MixedLinearComplementarity_Problem* problem, Solver_Option
     exit(1);
   }
 
-  if (sVerbose)
+  if (verbose)
     printf("n= %d  m= %d /n sTolneg= %lf sTolpos= %lf \n", sN, sM, sTolneg, sTolpos);
 
   sNpM = sN + sM;
@@ -149,7 +146,7 @@ int internalPrecompute(MixedLinearComplementarity_Problem* problem)
 {
   int INFO;
   mlcp_buildM(spFirstCC->zw, spFirstCC->M, problem->M->matrix0, sN, sM, sNbLines);
-  if (sVerbose)
+  if (verbose)
   {
     printf("mlcp_direct, precomputed M :\n");
     displayMat(spFirstCC->M, sNpM, sNpM, 0);
@@ -180,7 +177,7 @@ int internalAddConfig(MixedLinearComplementarity_Problem* problem, int * zw, int
   int i;
   int npm;
   int INFO;
-  if (sVerbose)
+  if (verbose)
   {
     printf("mlcp_direct internalAddConfig\n");
     printf("-----------------------------\n");
@@ -267,7 +264,7 @@ int solveWithCurConfig(MixedLinearComplementarity_Problem* problem)
     internalPrecompute(problem);
   if (!spCurCC->Usable)
   {
-    if (sVerbose)
+    if (verbose)
       printf("solveWithCurConfig not usable\n");
     return 0;
   }
@@ -282,7 +279,7 @@ int solveWithCurConfig(MixedLinearComplementarity_Problem* problem)
 #endif
   if (INFO)
   {
-    if (sVerbose)
+    if (verbose)
       printf("solveWithCurConfig DGETRS failed\n");
     return 0;
   }
@@ -292,13 +289,13 @@ int solveWithCurConfig(MixedLinearComplementarity_Problem* problem)
     {
       if (solTest[sN + lin] < - sTolneg)
       {
-        if (sVerbose)
+        if (verbose)
           printf("solveWithCurConfig Sol not in the positive cone\n");
         return 0;
       }
     }
   }
-  /*  if (sVerbose)
+  /*  if (verbose)
       printf("solveWithCurConfig Success\n");*/
   return 1;
 }

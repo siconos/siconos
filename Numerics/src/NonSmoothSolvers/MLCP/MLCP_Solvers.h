@@ -100,7 +100,6 @@ The enumeratif solver must be initialize: \n
 2) Use a lot with \bf mlcp_driver() \bf.\n
 3) Reset the solver with \bf mlcp_driver_reset() \bf.\n
 \bf parameters:
-- iparam[0] (in): Verbose.
 - dparam[0] (in): a positive value, tolerane about the sign.
 - dWork : working float zone size : The number of doubles is retruned by the function \bf mlcp_driver_get_dwork() \bf. MUST BE ALLOCATED BY THE USER.
 - iWork : working int zone size : . The number of double is retruned by the function \bf mlcp_driver_get_iwork() \bf. MUST BE ALLOCATED BY THE USER.
@@ -119,7 +118,6 @@ The simplex solver must be initialize: \n
 
 \bf parameters:
 - iparam[0] (in): Max number of iteration (example: 1000000).
-- iparam[1] (in): Verbose.
 - dparam[0] (in): A positive value, tolerance to consider that a var is null(ex: 10e-12).
 - dparam[1] (in): A positive value, tolerance to consider that complementarity holds(ex: 10e-12).
 - dparam[2] (in): A positive value, tolerance to consider that a var is negative(ex: 10e-9).
@@ -134,9 +132,7 @@ The direct and enumeratif solver must be initialize: \n
 
 \bf function: mlcp_direct_enum() \n
 \bf parameters:
-- iparam[0] (in): Verbose.
 - iparam[5] (in): Number of registered configurations.
-- iparam[6] (in): Verbose mode for the direct solver.
 - iparam[7] (out): Number of case the direct solved failed.
 - dparam[0] (in): A positive value, tolerane about the sign.
 - dparam[5] (in): A tolerance for the direct solver to consider that a var is negative(ex: 1e-12).
@@ -153,7 +149,6 @@ The path solver must be initialize: \n
 \bf function: mlcp_direct_path() \n
 \bf parameters:
 - iparam[5] (in): Number of registered configurations.
-- iparam[6] (in): Verbose mode for the direct solver.
 - iparam[7] (out): Number of case the direct solved failed.
 - dparam[0] (in): Tolerance.
 - dparam[5] (in): A tolerance for the direct solver to consider that a var is negative(ex: 1e-12).
@@ -169,9 +164,7 @@ The direct and simplex solver must be initialize: \n
 \bf function: mlcp_direct_simplex() \n
 \bf parameters:
 - iparam[0] (in): Max number of iteration (example: 1000000).
-- iparam[1] (in): Verbose.
 - iparam[5] (in): Number of registered configurations.
-- iparam[6] (in): Verbose mode for the direct solver.
 - iparam[7] (out): Number of case the direct solved failed.
 - dparam[0] (in): A positive value, tolerance to consider that a var is null(ex: 10e-12).
 - dparam[1] (in): A positive value, tolerance to consider that complementarity holds(ex: 10e-12).
