@@ -135,7 +135,7 @@ int mlcp_enum_getNbIWork(MixedLinearComplementarity_Problem* problem, Solver_Opt
 }
 int mlcp_enum_getNbDWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
 {
-  return 3 * (problem->M->size0) + 3 * (problem->n + problem->m) * (problem->M->size0);
+  return 5 * (problem->M->size0) + (problem->n + problem->m) * (problem->M->size0);
 }
 
 /*
@@ -178,7 +178,7 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
 
   sMref = problem->M->matrix0;
 
-  LWORK = 2 * sMl * npm; /*LWORK >= max( 1, MN + max( MN, NRHS ) )*/
+  LWORK = 2 * npm; /*LWORK >= max( 1, MN + max( MN, NRHS ) ) where MN = min(M,N)*/
 
   sVerbose = options->iparam[0];
   if (sVerbose)sQref = sColNul +
