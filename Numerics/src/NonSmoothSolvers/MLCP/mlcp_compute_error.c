@@ -92,10 +92,10 @@ int mlcp_compute_error(MixedLinearComplementarity_Problem* problem, double *z, d
   /* Checks complementarity (only for rows number n to size) */
   double error_i = 0.;
   double zi, wi;
-  for (int i = NbLines - m ; i < NbLines ; i++)
+  for (int i = 0 ; i < m ; i++)
   {
-    zi = z[i];
-    wi = w[i];
+    zi = z[n + i];
+    wi = w[(NbLines - m) + i];
     if (zi < 0.0)
     {
       error_i += -zi;
@@ -121,12 +121,14 @@ int mlcp_compute_error(MixedLinearComplementarity_Problem* problem, double *z, d
 
   if (*error > tolerance)
   {
-    if (verbose > 0) printf(" Numerics - mlcp_compute_error failed: error = %g > tolerance = %g.\n", *error, tolerance);
+    /*if (verbose > 0) printf(" Numerics - mlcp_compute_error failed: error = %g > tolerance = %g.\n",*error, tolerance);*/
+    printf(" Numerics - mlcp_compute_error failed: error = %g > tolerance = %g.\n", *error, tolerance);
     return 1;
   }
   else
   {
-    if (verbose > 0) printf("Siconos/Numerics: mlcp_compute_error: Error evaluation = %g \n", *error);
+    /*if (verbose > 0) printf("Siconos/Numerics: mlcp_compute_error: Error evaluation = %g \n",*error);*/
+    printf("Siconos/Numerics: mlcp_compute_error: Error evaluation = %g \n", *error);
     return 0;
   }
 }
