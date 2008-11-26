@@ -56,8 +56,8 @@
 #include "MixedLinearComplementarity_Problem.h"
 
 #define BAVARD
-//#define NBTEST 17
-#define NBTEST 2
+//#define NBTEST 18
+#define NBTEST 3
 
 #define ENUM_ID 0
 #define PGS_EX_ID 1
@@ -150,7 +150,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
   int info;
   Solver_Options mlcpOptions;
   Numerics_Options global_options;
-  double tol1 = 1e-16;
+  double tol1 = 1e-15;
   double tol2 = 1e-6;
   double error = 0;
   int n = problem->n;
@@ -776,6 +776,16 @@ void test_matrix(void)
       break;
     case 0:
       printf("BEGIN A NEWTEST  **************************************************************************");
+      printf("\n\n Rectangular_1_n0_m4_mlcp MLCP **************************************************************************");
+      strcpy(summary[itest].file, "Rectangular_1_n0_m4_mlcp MLCP");
+      if ((MLCPfile = fopen("MATRIX/Rectangular_1_n0_m4_mlcp.dat", "r")) == NULL)
+      {
+        perror("fopen MLCPfile: Rectangular_1_n0_m4_mlcp.dat");
+        exit(1);
+      }
+      break;
+    case 2:
+      printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n Rectangular_mlcp MLCP **************************************************************************");
       strcpy(summary[itest].file, "Rectangular_mlcp MLCP");
       if ((MLCPfile = fopen("MATRIX/Rectangular_mlcp.dat", "r")) == NULL)
@@ -824,7 +834,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 2:
+    case 102:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n Buck converter **************************************************************************");
       strcpy(summary[itest].file, "BuckConverter_mlcp");

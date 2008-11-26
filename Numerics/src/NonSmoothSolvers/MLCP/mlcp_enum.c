@@ -117,15 +117,15 @@ void printCurrentSystem()
 {
   int npm = sNn + sMm;
   printf("printCurrentSystemM:\n");
-  displayMat(sM, npm, npm, 0);
+  displayMat(sM, sMl, npm, 0);
   printf("printCurrentSystemQ (ie -Q from mlcp beause of linear system MZ=Q):\n");
-  displayMat(sQ, sMm + sNn, 1, 0);
+  displayMat(sQ, sMl, 1, 0);
 }
 void printRefSystem()
 {
   int npm = sNn + sMm;
-  printf("ref M n %d  m %d :\n", sNn, sMm);
-  displayMat(sMref, npm, npm, 0);
+  printf("ref M NbLines %d n %d  m %d :\n", sMl, sNn, sMm);
+  displayMat(sMref, sMl, npm, 0);
   printf("ref Q (ie -Q from mlcp beause of linear system MZ=Q):\n");
   displayMat(sQref, sMl, 1, 0);
 }
@@ -164,6 +164,7 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
 {
   double tol ;
   double * workingFloat = options->dWork;
+  double rest = 0;
   int * workingInt = options->iWork;
   int lin;
   int npm = (problem->n) + (problem->m);
@@ -224,13 +225,33 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
 
     DGELS(sMl, npm, NRHS, sM, sMl, sQ, sMl, sDgelsWork, LWORK,
           LAinfo);
-
+    if (verbose)
+    {
+      printf("Solution of dgels\n");
+      displayMat(sQ, sMl, 1, 0);
+    }
 #else
 
     DGESV(npm, NRHS, sM, npm, ipiv, sQ, npm, LAinfo);
 #endif
     if (!LAinfo)
     {
+#ifdef ENUM_USE_DGELS
+      if (sMl > npm)
+      {
+        rest = DNRM2(sMl - npm, sQ + npm, 1);
+        if (rest > tol || isnan(rest) || isinf(rest))
+        {
+          if (verbose)
+            printf("DGELS, optimal point doesn't satisfy AX=b, rest = %e\n", rest);
+          continue;
+        }
+        if (verbose)
+          printf("DGELS, optimal point rest = %e\n", rest);
+      }
+
+
+#endif
       if (verbose)
       {
         printf("Solving linear system success, solution in cone?\n");
