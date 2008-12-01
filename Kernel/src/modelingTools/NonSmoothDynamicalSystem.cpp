@@ -117,19 +117,22 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS
   // === "copy" listOfDS/listOfInteractions in allDS/allInteractions ===
   // Warning: DS/Interactions are not copied but pointers are inserted into the corresponding set.
 
-  allDS.reset(new DynamicalSystemsSet());
-  allInteractions.reset(new InteractionsSet());
-  InteractionsIterator itInter;
+  //allDS.reset(new DynamicalSystemsSet());
+  //allInteractions.reset(new InteractionsSet());
+  /*InteractionsIterator itInter;
   DSIterator itDS;
-  for (itDS = listOfDS.begin(); itDS != listOfDS.end(); ++itDS)
-  {
-    allDS->insert(*itDS);
-  }
+  for(itDS=listOfDS.begin(); itDS!=listOfDS.end();++itDS)
+    {
+      allDS->insert(*itDS);
+    }
 
-  for (itInter = listOfInteractions.begin(); itInter != listOfInteractions.end(); ++itInter)
-  {
-    allInteractions->insert(*itInter);
-  }
+  for(itInter=listOfInteractions.begin(); itInter!=listOfInteractions.end();++itInter)
+    {
+      allInteractions->insert(*itInter);
+      }*/
+
+  allDS = createSPtrDynamicalSystemsSet(listOfDS);
+  allInteractions = createSPtrInteractionsSet(listOfInteractions);
 
   // === build topology ===
   topology.reset(new Topology(allInteractions));
@@ -303,3 +306,13 @@ double NonSmoothDynamicalSystem::nsdsConvergenceIndicator()
   return(convergenceIndicator);
 }
 
+void NonSmoothDynamicalSystem::clear()
+{
+  allInteractions->clear();
+  topology->clear();
+};
+
+NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem()
+{
+  clear();
+};

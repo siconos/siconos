@@ -40,11 +40,12 @@ UnitaryRelation::~UnitaryRelation()
 
 const VectorOfVectors UnitaryRelation::getY() const
 {
-  // A new object of type VectorOfVectors is created but it handles pointers to BlockVectors,
-  // thus there is no copy of the "basic" SimpleVectors.
+  // A new object of type VectorOfVectors is created but it handles
+  // pointers to BlockVectors, thus there is no copy of the "basic"
+  // SimpleVectors.
 
   VectorOfVectors tmp;
-  VectorOfVectors interactionUnitaryBlocks = mainInteraction->getY();
+  VectorOfVectors interactionUnitaryBlocks = mainInteraction.lock()->getY();
 
   for (unsigned int i = 0; i < interactionUnitaryBlocks.size(); ++i)
     tmp[i] = interactionUnitaryBlocks[i]->getVectorPtr(number);
@@ -55,21 +56,22 @@ const VectorOfVectors UnitaryRelation::getY() const
 SP::SiconosVector UnitaryRelation::getYPtr(unsigned int i) const
 {
   // i is the derivative number.
-  return ((mainInteraction->getYPtr(i))->getVectorPtr(number));
+  return ((mainInteraction.lock()->getYPtr(i))->getVectorPtr(number));
 }
 
 SP::SiconosVector UnitaryRelation::getYOldPtr(unsigned int i) const
 {
   // i is the derivative number.
-  return ((mainInteraction->getYOldPtr(i))->getVectorPtr(number));
+  return ((mainInteraction.lock()->getYOldPtr(i))->getVectorPtr(number));
 }
 
 const VectorOfVectors UnitaryRelation::getLambda() const
 {
-  // A new object of type VectorOfVectors is created but it handles pointers to BlockVectors,
-  // thus there is no copy of the "basic" SimpleVectors.
+  // A new object of type VectorOfVectors is created but it handles
+  // pointers to BlockVectors, thus there is no copy of the "basic"
+  // SimpleVectors.
   VectorOfVectors tmp;
-  VectorOfVectors interactionUnitaryBlocks = mainInteraction->getLambda();
+  VectorOfVectors interactionUnitaryBlocks = mainInteraction.lock()->getLambda();
 
   for (unsigned int i = 0; i < interactionUnitaryBlocks.size(); ++i)
     tmp[i] = interactionUnitaryBlocks[i]->getVectorPtr(number);
@@ -80,15 +82,17 @@ const VectorOfVectors UnitaryRelation::getLambda() const
 SP::SiconosVector UnitaryRelation::getLambdaPtr(unsigned int i) const
 {
   // i is the derivative number.
-  return ((mainInteraction->getLambdaPtr(i))->getVectorPtr(number));
+  return ((mainInteraction.lock()->getLambdaPtr(i))->getVectorPtr(number));
 }
 
 const double UnitaryRelation::getYRef(unsigned int i) const
 {
-  // get the single value used to build indexSets
-  // Warning: the relativePosition depends on NsLawSize and/or type.
-  // This means that at the time, for the unitaryBlock of y that corresponds to the present relation, the first scalar value is used.
-  // For example, for friction, normal part is in first position, followed by the tangential parts.
+  // get the single value used to build indexSets Warning: the
+  // relativePosition depends on NsLawSize and/or type.  This means
+  // that at the time, for the unitaryBlock of y that corresponds to
+  // the present relation, the first scalar value is used.  For
+  // example, for friction, normal part is in first position, followed
+  // by the tangential parts.
   return (*getYPtr(i))(0);
 }
 
@@ -100,32 +104,32 @@ const double UnitaryRelation::getLambdaRef(unsigned int i) const
 
 const unsigned int UnitaryRelation::getNonSmoothLawSize() const
 {
-  return mainInteraction->getNonSmoothLawPtr()->getNsLawSize();
+  return mainInteraction.lock()->getNonSmoothLawPtr()->getNsLawSize();
 }
 
 const string UnitaryRelation::getNonSmoothLawType() const
 {
-  return mainInteraction->getNonSmoothLawPtr()->getType();
+  return mainInteraction.lock()->getNonSmoothLawPtr()->getType();
 }
 
 const RELATION::TYPES UnitaryRelation::getRelationType() const
 {
-  return mainInteraction->getRelationPtr()->getType();
+  return mainInteraction.lock()->getRelationPtr()->getType();
 }
 
 const RELATION::SUBTYPES UnitaryRelation::getRelationSubType() const
 {
-  return mainInteraction->getRelationPtr()->getSubType();
+  return mainInteraction.lock()->getRelationPtr()->getSubType();
 }
 
 SP::DynamicalSystemsSet UnitaryRelation::getDynamicalSystemsPtr()
 {
-  return mainInteraction->getDynamicalSystemsPtr();
+  return mainInteraction.lock()->getDynamicalSystemsPtr();
 }
 
 void UnitaryRelation::initialize(const std::string& simulationType)
 {
-  if (!mainInteraction)
+  if (!mainInteraction.lock())
     RuntimeException::selfThrow("UnitaryRelation::initialize() failed: the linked interaction is NULL.");
 
   workX.reset(new BlockVector());
@@ -159,10 +163,10 @@ void UnitaryRelation::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SP::Sicon
 {
   unsigned int k = 0;
   DSIterator itDS;
-  itDS = mainInteraction->dynamicalSystemsBegin();
+  itDS = mainInteraction.lock()->dynamicalSystemsBegin();
 
   // look for ds and its position in G
-  while (*itDS != ds && itDS != mainInteraction->dynamicalSystemsEnd())
+  while (*itDS != ds && itDS != mainInteraction.lock()->dynamicalSystemsEnd())
   {
     k += (*itDS)->getDim();
     itDS++;
@@ -179,11 +183,11 @@ void UnitaryRelation::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SP::Sicon
 
   if (relationType == FirstOrder)
   {
-    originalMatrix = mainInteraction->getRelationPtr()->getJacHPtr(0);
+    originalMatrix = mainInteraction.lock()->getRelationPtr()->getJacHPtr(0);
   }
   else if (relationType == Lagrangian)
   {
-    originalMatrix = mainInteraction->getRelationPtr()->getJacHPtr(index);
+    originalMatrix = mainInteraction.lock()->getRelationPtr()->getJacHPtr(index);
   }
   else
     RuntimeException::selfThrow("UnitaryRelation::getLeftUnitaryBlockForDS, not yet implemented for relations of type " + relationType);
@@ -206,10 +210,10 @@ void UnitaryRelation::getRightUnitaryBlockForDS(SP::DynamicalSystem ds, SP::Sico
 {
   unsigned int k = 0;
   DSIterator itDS;
-  itDS = mainInteraction->dynamicalSystemsBegin();
+  itDS = mainInteraction.lock()->dynamicalSystemsBegin();
 
   // look for ds and its position in G
-  while (*itDS != ds && itDS != mainInteraction->dynamicalSystemsEnd())
+  while (*itDS != ds && itDS != mainInteraction.lock()->dynamicalSystemsEnd())
   {
     k += (*itDS)->getDim();
     itDS++;
@@ -226,11 +230,11 @@ void UnitaryRelation::getRightUnitaryBlockForDS(SP::DynamicalSystem ds, SP::Sico
 
   if (relationType == FirstOrder)
   {
-    originalMatrix = mainInteraction->getRelationPtr()->getJacGPtr(0);
+    originalMatrix = mainInteraction.lock()->getRelationPtr()->getJacGPtr(0);
   }
   else if (relationType == Lagrangian) // Note: the transpose will be done in LCP or MLCP ...
   {
-    originalMatrix = mainInteraction->getRelationPtr()->getJacHPtr(index);
+    originalMatrix = mainInteraction.lock()->getRelationPtr()->getJacHPtr(index);
   }
   else
     RuntimeException::selfThrow("UnitaryRelation::getRightUnitaryBlockForDS, not yet implemented for relations of type " + relationType);
@@ -254,15 +258,17 @@ void UnitaryRelation::getRightUnitaryBlockForDS(SP::DynamicalSystem ds, SP::Sico
 
 void UnitaryRelation::getExtraUnitaryBlock(SP::SiconosMatrix UnitaryBlock) const
 {
-  // !!! Warning: we suppose that D is unitaryBlock diagonal, ie that there is no coupling between UnitaryRelation through D !!!
-  // Any coupling between relations through D must be taken into account thanks to the nslaw (by "increasing" its dimension).
+  // !!! Warning: we suppose that D is unitaryBlock diagonal, ie that
+  // there is no coupling between UnitaryRelation through D !!!  Any
+  // coupling between relations through D must be taken into account
+  // thanks to the nslaw (by "increasing" its dimension).
 
   RELATION::TYPES relationType = getRelationType();
   RELATION::SUBTYPES relationSubType = getRelationSubType();
 
   SP::SiconosMatrix D;
-  if (mainInteraction->getRelationPtr()->getNumberOfJacobiansForH() > 1)
-    D = mainInteraction->getRelationPtr()->getJacHPtr(1);
+  if (mainInteraction.lock()->getRelationPtr()->getNumberOfJacobiansForH() > 1)
+    D = mainInteraction.lock()->getRelationPtr()->getJacHPtr(1);
 
   if (! D)
   {

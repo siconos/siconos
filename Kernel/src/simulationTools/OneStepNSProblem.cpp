@@ -145,7 +145,7 @@ SP::SiconosMatrix OneStepNSProblem::getDSUnitaryBlockPtr(SP::DynamicalSystem DS1
   ConstDSUnitaryMatrixRowIterator itRow = DSUnitaryBlocks.find(DS1);
   ConstUnitaryMatrixColumnIterator itCol = (itRow->second).find(UR2);
   if (itCol == (itRow->second).end()) // if DS1 and UR2 are not connected
-    RuntimeException::selfThrow("OneStepNSProblem - getDSUnitaryBlockPtr(DS1,UR2) : no DSUnitaryBlock corresonds to DS1 and UR2, ie the Unitary Relation and the DynamicalSystem are not connected.");
+    RuntimeException::selfThrow("OneStepNSProblem - getDSUnitaryBlockPtr(DS1,UR2) : no DSUnitaryBlock corresponds to DS1 and UR2, ie the Unitary Relation and the DynamicalSystem are not connected.");
 
   return itCol->second;
 
@@ -542,3 +542,34 @@ void OneStepNSProblem::printStat()
   cout << " Number of iterations done: " << nbIter << endl;
 }
 
+void OneStepNSProblem::clear()
+{
+  for (UnitaryMatrixRowIterator itRow = unitaryBlocks.begin(); itRow != unitaryBlocks.end() ; ++itRow)
+  {
+    (itRow->second).clear();
+  };
+
+  unitaryBlocks.clear();
+
+
+  DSBlocks.clear();
+
+  for (UnitaryDSMatrixRowIterator itRow = unitaryDSBlocks.begin(); itRow != unitaryDSBlocks.end() ; ++itRow)
+  {
+    (itRow->second).clear();
+  };
+  unitaryDSBlocks.clear();
+
+  for (DSUnitaryMatrixRowIterator itRow = DSUnitaryBlocks.begin(); itRow != DSUnitaryBlocks.end() ; ++itRow)
+  {
+    (itRow->second).clear();
+  };
+  DSUnitaryBlocks.clear();
+  if (OSNSInteractions)
+    OSNSInteractions->clear();
+}
+
+OneStepNSProblem::~OneStepNSProblem()
+{
+  clear();
+};

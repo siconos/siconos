@@ -91,6 +91,11 @@ public:
     setOfT.reset(new TSet(fpt));
   };
 
+  ~SiconosSet()
+  {
+    clear();
+  };
+
   /** return the number of Ts in the set
    *  \return an unsigned int
    */

@@ -45,25 +45,31 @@ class Interaction;
  *  \version 3.0.0.
  *  \date (Creation) Apr 27, 2004
  *
- *  A relation is a link between global variables of the Dynamical Systems and
- * some local ones, named y and lambda; belonging to one and only one Interaction.
+ *  A relation is a link between global variables of the Dynamical
+ * Systems and some local ones, named y and lambda; belonging to one
+ * and only one Interaction.
  *
- * The present class is an interface to all relations and provides tools to define and describe them.
+ * The present class is an interface to all relations and provides
+ * tools to define and describe them.
  *
  * Each relation must have the two following functions:
  *
  *  - computeOutput(...) to compute y using DS global variables.
- *  - computeInput(...) to compute non-smooth DS part (r or p) using lambda.
+ * - computeInput(...) to compute non-smooth DS part (r or p) using
+ *   lambda.
  *
- * Depending on the DS class and the link type, various relations (ie derived classes) are available:
+ * Depending on the DS class and the link type, various relations (ie
+ * derived classes) are available:
  *   - FirstOrder, for FirstOrderDS and derived classes.
  *   - Lagrangian, for LagrangianDS and derived classes.
  *
- *  The specific type (Linear, Scleronomous ...) is then given by the "subType". \n
+ *  The specific type (Linear, Scleronomous ...) is then given by the
+ *  "subType". \n
  *
  * The relation holds also:
  *  - a pointer to an xml object
- *  - a VectorMap to handle links to DS variables (no copy!!!). Filled in during initialize.
+ *  - a VectorMap to handle links to DS variables (no copy!!!). Filled
+ *    in during initialize.
  *
  */
 class Relation
@@ -144,7 +150,8 @@ public:
    */
   virtual ~Relation();
 
-  /** To get the pointer to the Interaction linked to the present Relation
+  /** To get the pointer to the Interaction linked to the present
+   *  Relation
    *  \return a pointer to Interaction.
    */
   inline SP::Interaction getInteractionPtr()
@@ -153,7 +160,8 @@ public:
     return interaction.lock();
   }
 
-  /** To set the pointer to the Interaction linked to the present Relation
+  /** To set the pointer to the Interaction linked to the present
+   *  Relation
    *  \param a pointer to Interaction.
    */
   inline void setInteractionPtr(SP::Interaction newInter)
@@ -310,7 +318,8 @@ public:
   /** To set a plug-in function to compute jacobianH
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
-   *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
+   *  \param index for jacobian (0: jacobian according to x, 1
+   *  according to lambda)
    */
   virtual void setComputeJacobianHFunction(const std::string&, const std::string&, unsigned int = 0) = 0;
 
@@ -359,7 +368,8 @@ public:
 
   /** default function to compute jacobianG according to lambda
    *  \param double : current time
-   *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
+   *  \param index for jacobian: at the time only one possible
+   *  jacobian => i = 0 is the default value .
    */
   virtual void computeJacG(double, unsigned int)
   {
@@ -367,13 +377,15 @@ public:
   }
   /** default function to compute y
    *  \param double : current time
-   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
+   *  \param unsigned int: number of the derivative to compute,
+   *  optional, default = 0.
    */
   virtual void computeOutput(double, unsigned int = 0) = 0;
 
   /** default function to compute r
    *  \param double : current time
-   *  \param unsigned int: "derivative" order of lambda used to compute input
+   *  \param unsigned int: "derivative" order of lambda used to
+   *  compute input
    */
   virtual void computeInput(double, unsigned int = 0) = 0;
 

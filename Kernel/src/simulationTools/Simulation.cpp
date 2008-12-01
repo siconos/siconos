@@ -98,6 +98,10 @@ Simulation::Simulation(SP::SimulationXML strxml, double t0, double T, SP::Dynami
 Simulation::~Simulation()
 {
   allNSProblems->clear();
+  allOSI->clear();
+  osiMap.clear();
+  indexSets.clear();
+  allNSProblems->clear();
   // -> see shared ressources for this
   if (statOut.is_open()) statOut.close();
 }
@@ -222,6 +226,32 @@ void Simulation::recordNonSmoothProblem(SP::OneStepNSProblem osns)
   (*allNSProblems)[name] = osns;
 }
 
+void Simulation::updateInteractions()
+{
+  SP::InteractionsSet allInteractions = model->getNonSmoothDynamicalSystemPtr()->getInteractions();
+  if (!allInteractions->isEmpty()) // ie if some Interactions have been declared
+  {
+    initLevelMax();
+
+    std::for_each(allInteractions->begin(), allInteractions->end(),
+                  boost::bind(&Interaction::initialize, _1, tinit, levelMax + 1));
+
+    for (unsigned int i = 1; i < indexSets.size(); ++i)
+      indexSets[i]->clear();
+    if (indexSets.size() > 0) indexSets[0]->clear();
+    indexSets.clear();
+    indexSets.resize(levelMax + 1);
+    // Link with index0 of the Topology.
+    indexSets[0] = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getIndexSet0Ptr();
+
+    for (unsigned int i = 1; i < indexSets.size(); ++i)
+    {
+      indexSets[i].reset(new UnitaryRelationsSet());
+    }
+  };
+  initOSNS();
+}
+
 void Simulation::initialize(SP::Model m, bool withOSI)
 {
   // === Connection with the model ===
@@ -248,9 +278,14 @@ void Simulation::initialize(SP::Model m, bool withOSI)
     std::for_each(allInteractions->begin(), allInteractions->end(),
                   boost::bind(&Interaction::initialize, _1, tinit, levelMax + 1));
 
+    for (unsigned int i = 1; i < indexSets.size(); ++i)
+      indexSets[i]->clear();
+    if (indexSets.size() > 0) indexSets[0]->clear();
+    indexSets.clear();
     indexSets.resize(levelMax + 1);
     // Link with index0 of the Topology.
     indexSets[0] = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getIndexSet0Ptr();
+
     for (unsigned int i = 1; i < indexSets.size(); ++i)
       indexSets[i].reset(new UnitaryRelationsSet());
   }
@@ -400,4 +435,12 @@ void Simulation::run(const std::string&, double, unsigned int)
 void Simulation::processEvents()
 {
   eventsManager->processEvents();
+}
+
+void Simulation::clear()
+{
+  for (unsigned int i = 1; i < indexSets.size(); ++i)
+    indexSets[i]->clear();
+  if (indexSets.size() > 0) indexSets[0]->clear();
+  indexSets.clear();
 }

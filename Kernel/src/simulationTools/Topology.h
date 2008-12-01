@@ -165,10 +165,22 @@ public:
     return allInteractions;
   }
 
+  /** set the Interactions of the Topology problem (saved in a set)
+   */
+  inline void setInteractionsPtr(SP::InteractionsSet newInteractions)
+  {
+    allInteractions->clear() ;
+    allInteractions = newInteractions;
+  }
+
+
   /** check if Interaction inter is in the set
   *  \param a pointer to Interaction
   *  \return a bool
   */
+
+
+
   const bool hasInteraction(SP::Interaction) const;
 
   /** get a pointer to the index set of all Unitary Relations.
@@ -255,6 +267,8 @@ public:
   /** initializes the topology (called in Simulation->initialize)
   */
   void initialize();
+
+  void clear();
 };
 
 #endif // TOPOLOGY_H

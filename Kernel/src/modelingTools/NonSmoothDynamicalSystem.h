@@ -98,7 +98,7 @@ public:
 
   /** destructor
    */
-  ~NonSmoothDynamicalSystem() {};
+  ~NonSmoothDynamicalSystem();
 
   // --- GETTERS/SETTERS ---
 
@@ -343,6 +343,9 @@ public:
    *  \return a double
    */
   double nsdsConvergenceIndicator() ;
+
+  void clear();
+
 };
 
 #endif

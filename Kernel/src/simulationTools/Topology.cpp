@@ -28,22 +28,27 @@ const bool Topology::addInteractionInIndexSet(SP::Interaction inter)
 {
   // Private function
   //
-  // Creates UnitaryRelations corresponding to inter and add them into indexSet0
+  // Creates UnitaryRelations corresponding to inter and add them into
+  // indexSet0
 
-  // First, we get the number of relations in the interaction.
-  // This corresponds to inter->getNumberOfRelations but since Interaction has not
-  // been initialized yet, this value is not set and we need to get interaction size and nsLaw size.
+  // First, we get the number of relations in the interaction.  This
+  // corresponds to inter->getNumberOfRelations but since Interaction
+  // has not been initialized yet, this value is not set and we need
+  // to get interaction size and nsLaw size.
   unsigned int nsLawSize = inter->getNonSmoothLawPtr()->getNsLawSize();
   unsigned int m = inter->getSizeOfY() / nsLawSize;
-  unsigned int pos = 0; // relative position of the relation in the y vector of the Interaction
+  unsigned int pos = 0; // relative position of the relation in the y
+  // vector of the Interaction
   CheckInsertUnitaryRelation checkUR;
-  bool res = true; // output value. False if insertion of one of the relations fails.
+  bool res = true; // output value. False if insertion of one of the
+  // relations fails.
   for (unsigned int i = 0; i < m; ++i)
   {
-    // each UnitaryRelation is of size "nsLawSize", at position pos and of number i.
+    // each UnitaryRelation is of size "nsLawSize", at position pos
+    // and of number i.
     checkUR = indexSet0->insert(SP::UnitaryRelation(new UnitaryRelation(inter, pos, i)));
     pos += nsLawSize;
-    if (checkUR.second == false) res = false;
+    res &= checkUR.second;
   }
 
   numberOfConstraints += m * nsLawSize;
@@ -53,7 +58,8 @@ const bool Topology::addInteractionInIndexSet(SP::Interaction inter)
 // Compute relative degrees map
 void Topology::computeRelativeDegrees()
 {
-  // for each Unitary Relation relative degree vector depends on NonSmooth Law and relations
+  // for each Unitary Relation relative degree vector depends on
+  // NonSmooth Law and relations
 
   relativeDegrees.clear();
   string nslawType;
@@ -63,7 +69,8 @@ void Topology::computeRelativeDegrees()
   for (it = indexSet0->begin(); it != indexSet0->end(); it++)
   {
     nslawType = (*it)->getNonSmoothLawType();
-    if (nslawType == COMPLEMENTARITYCONDITIONNSLAW || nslawType == MIXEDCOMPLEMENTARITYCONDITIONNSLAW)
+    if (nslawType == COMPLEMENTARITYCONDITIONNSLAW ||
+        nslawType == MIXEDCOMPLEMENTARITYCONDITIONNSLAW)
       relativeDegrees[*it] = 0;
 
     else if (nslawType == NEWTONIMPACTNSLAW)
@@ -79,6 +86,8 @@ void Topology::computeRelativeDegrees()
     else
       RuntimeException::selfThrow("Topology::computeRelativeDegree(...), not yet implemented for non smooth law of type" + nslawType);
   }
+
+  assert(!relativeDegrees.empty());
 }
 
 // --- CONSTRUCTORS/DESTRUCTOR ---
@@ -97,6 +106,7 @@ Topology::Topology(SP::InteractionsSet newInteractionSet): isTopologyUpToDate(fa
 // destructor
 Topology::~Topology()
 {
+  clear();
 }
 
 const bool Topology::hasInteraction(SP::Interaction inter) const
@@ -126,9 +136,10 @@ void Topology::initialize()
 {
 
   assert(allInteractions && "Topology : allInteractions is NULL");
+  assert(!allInteractions->isEmpty());
 
-  // -- Creates Unitary Relations and put them in indexSet0 ---
-  // loop through interactions list (from NSDS)
+  // -- Creates Unitary Relations and put them in indexSet0 --- loop
+  // through interactions list (from NSDS)
   indexSet0->clear();
   InteractionsIterator it;
   for (it = allInteractions->begin()  ; it != allInteractions->end() ; ++it)
@@ -140,3 +151,12 @@ void Topology::initialize()
   isTopologyUpToDate = true;
 }
 
+void Topology::clear()
+{
+  allInteractions->clear();
+
+  indexSet0->clear();
+  relativeDegrees.clear();
+
+  isTopologyUpToDate = false;
+}

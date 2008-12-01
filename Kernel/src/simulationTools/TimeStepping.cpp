@@ -85,12 +85,12 @@ void TimeStepping::updateIndexSet(unsigned int i)
   // To update IndexSet number i: add or remove UnitaryRelations from
   // this set, depending on y values.
 
-  if (i > indexSets.size())
-    RuntimeException::selfThrow("TimeStepping::updateIndexSet(i), indexSets[i] does not exist.");
+  assert(i <= indexSets.size() &&
+         "TimeStepping::updateIndexSet(i), indexSets[i] does not exist.");
 
-  if (i == 0) // IndexSets[0] must not be updated in simulation, since it
-    // belongs to the Topology.
-    RuntimeException::selfThrow("TimeStepping::updateIndexSet(i=0), indexSets[0] can not be updated.");
+  assert(i != 0 // IndexSets[0] must not be updated in simulation,
+         // since it belongs to the Topology.
+         && "TimeStepping::updateIndexSet(i=0), indexSets[0] can not be updated.");
 
   // for all Unitary Relations in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i]
@@ -175,6 +175,8 @@ void TimeStepping::initOSNS()
     // equal to the minimum value of the relative degree - 1 except
     // for degree 0 case where we keep 0.
 
+    assert(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->isUpToDate());
+    assert(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMinRelativeDegree() >= 0);
     levelMin = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMinRelativeDegree();
 
     if (levelMin != 0)

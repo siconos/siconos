@@ -94,10 +94,6 @@ protected:
       UnitaryRelations A and B are coupled through unitaryBlockMatrixAB.  */
   MapOfMapOfUnitaryMatrices unitaryBlocks;
 
-  /** inside-class allocation flags. To each couple of Unitary Relations corresponds a bool, true if
-      the unitaryBlock has been allocated in OneStepNSProblem, else false. */
-  MapOfMapOfUnitaryBool isUnitaryBlockAllocatedIn;
-
   /** map that links each DynamicalSystem with the corresponding DSBlocks
       map < SP::DynamicalSystem , SiconosMatrix * > */
   MapOfDSMatrices DSBlocks;
@@ -182,7 +178,7 @@ public:
 
   /** destructor
    */
-  virtual ~OneStepNSProblem() {};
+  virtual ~OneStepNSProblem();
 
   // --- GETTERS/SETTERS ---
 
@@ -558,6 +554,10 @@ public:
    *  \param a MapOfDouble(in-out parameter)
    */
   virtual void getOSIMaps(SP::UnitaryRelation, MapOfDSMatrices&, MapOfDouble&);
+
+
+  /** clear associated maps */
+  void clear();
 
 };
 

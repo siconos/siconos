@@ -65,7 +65,7 @@ class UnitaryRelation
 private:
 
   /** link to Interaction that owns this relation **/
-  SP::Interaction mainInteraction;
+  boost::weak_ptr<Interaction> mainInteraction;
 
   /** relative position of the present relation in the Interaction - For example if the present relation takes place from index 2 to 4 in y vector
    of mainInteraction, the relative position is equal to 2. */
@@ -109,8 +109,9 @@ public:
   */
   inline SP::Interaction getInteractionPtr()
   {
-    return mainInteraction;
-  } ;
+    assert(!mainInteraction.expired());
+    return mainInteraction.lock();
+  }
 
   /** get relative position of the Unitary Relation
   *  \return an unsigned int
@@ -125,7 +126,7 @@ public:
    */
   inline const std::string getId() const
   {
-    return mainInteraction->getId();
+    return mainInteraction.lock()->getId();
   };
 
   /** get number of the Unitary Relation
@@ -203,7 +204,7 @@ public:
    */
   inline DSIterator dynamicalSystemsBegin()
   {
-    return mainInteraction->dynamicalSystemsBegin();
+    return mainInteraction.lock()->dynamicalSystemsBegin();
   };
 
   /** gets an iterator equal to DynamicalSystems.end().
@@ -211,7 +212,7 @@ public:
    */
   inline DSIterator dynamicalSystemsEnd()
   {
-    return mainInteraction->dynamicalSystemsEnd();
+    return mainInteraction.lock()->dynamicalSystemsEnd();
   };
 
   /** gets a const iterator to the first element of the  DynamicalSystems set.
@@ -219,7 +220,7 @@ public:
    */
   inline ConstDSIterator dynamicalSystemsBegin() const
   {
-    return mainInteraction->dynamicalSystemsBegin();
+    return mainInteraction.lock()->dynamicalSystemsBegin();
   };
 
   /** gets a const iterator equal to DynamicalSystems.end().
@@ -227,7 +228,7 @@ public:
    */
   inline ConstDSIterator dynamicalSystemsEnd() const
   {
-    return mainInteraction->dynamicalSystemsEnd();
+    return mainInteraction.lock()->dynamicalSystemsEnd();
   };
 
   /** gets a pointer to the DynamicalSystemsSet
