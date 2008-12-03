@@ -160,4 +160,6 @@ public:
 
 };
 
+TYPEDEF_SPTR(MLCP);
+
 #endif // MLCP_H

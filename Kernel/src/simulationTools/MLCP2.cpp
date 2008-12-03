@@ -17,6 +17,13 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "MLCP2.h"
+#include "Moreau2.h"
+#include "Simulation.h"
+#include "Model.h"
+#include "NonSmoothDynamicalSystem.h"
+#include "OneStepIntegrator.h"
+#include "FirstOrderLinearR.h"
+#include "Topology.h"
 
 using namespace std;
 
@@ -30,9 +37,9 @@ MLCP2::MLCP2(SP::NonSmoothSolver newSolver, const string& newId):
 
 }
 
-void MLCP2::initialize(SP::Simulation sim)
+void MLCP2::initialize(SP::Simulation simulation)
 {
-  DynamicalSystemsSet * DSSet = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  SP::DynamicalSystemsSet  DSSet = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
   if (DSSet->begin() == DSSet->end())
     printf("DSSet is empty\n");
   else
@@ -50,20 +57,20 @@ void MLCP2::initialize(SP::Simulation sim)
     printf("DSSet is empty\n");
   else
     printf("DSSet is not empty\n");
-  MLCP::initialize(sim);
+  MLCP::initialize(simulation);
   _w->resize(n + m);
   _z->resize(n + m);
 }
 void MLCP2::updateM()
 {
   SP::UnitaryRelationsSet URSet = simulation->getIndexSetPtr(levelMin);
-  DynamicalSystemsSet * DSSet = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  SP::DynamicalSystemsSet  DSSet = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
   if (!M)
   {
     // Creates and fills M using UR of indexSet
     M.reset(new OSNSMatrix(URSet, DSSet, unitaryBlocks,  DSBlocks, DSUnitaryBlocks,  unitaryDSBlocks, MStorageType));
 
-    numerics_problem.M = M->getNumericsMatrix();
+    numerics_problem.M = M->getNumericsMatrix().get();
     numerics_problem.A = 0;
     numerics_problem.B = 0;
     numerics_problem.C = 0;
@@ -121,9 +128,9 @@ void MLCP2::computeDSBlock(SP::DynamicalSystem DS)
     DSBlocks[DS].reset(new SimpleMatrix(DS->getDim(), DS->getDim()));
     n += DS->getDim();
   }
-  OneStepIntegrator* Osi = simulation->getIntegratorOfDSPtr(DS); // get OneStepIntegrator of current dynamical system
-  const std::string osiType = Osi->getType();
-  if (osiType == MOREAU2)
+  SP::OneStepIntegrator Osi = simulation->getIntegratorOfDSPtr(DS); // get OneStepIntegrator of current dynamical system
+  const OSI::TYPES  osiType = Osi->getType();
+  if (osiType == OSI::MOREAU2)
   {
     DSBlocks[DS] = (boost::static_pointer_cast<Moreau2> (Osi))->getWPtr(DS); // get its W matrix ( pointer link!)
     (*DSBlocks[DS]) *= -1.0;
@@ -189,19 +196,19 @@ void MLCP2::computeQ(double time)
     SP::SiconosVector  e = boost::static_pointer_cast<FirstOrderLinearR>((*itCurrent)->getInteractionPtr()->getRelationPtr())->getEPtr();
     boost::static_pointer_cast<SimpleVector>(q)->addBlock(pos, *e);
   }
-  DynamicalSystemsSet * allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  SP::DynamicalSystemsSet  allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
   for (DSIterator itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
   {
     pos = M->getPositionOfDSBlock(*itDS);
 
 
-    OneStepIntegrator* Osi = simulation->getIntegratorOfDSPtr(*itDS); // get OneStepIntegrator of current dynamical system
-    const std::string osiType = Osi->getType();
-    if (osiType == MOREAU2)
+    SP::OneStepIntegrator Osi = simulation->getIntegratorOfDSPtr(*itDS); // get OneStepIntegrator of current dynamical system
+    const OSI::TYPES osiType = Osi->getType();
+    if (osiType == OSI::MOREAU2)
     {
       //update with ffree
-      DynamicalSystem * DSaux = *itDS;
-      SP::SiconosVector  Vaux = (boost::static_pointer_cast<Moreau2> (Osi))->getWorkX(DSaux);
+      SP::DynamicalSystem  DSaux = *itDS;
+      SP::SiconosVector  Vaux = Osi->getWorkX(DSaux);
       boost::static_pointer_cast<SimpleVector>(q)->addBlock(pos, *Vaux);
     }
 
@@ -228,7 +235,7 @@ void MLCP2::preCompute(double time)
 
     // Updates matrix M
     SP::UnitaryRelationsSet URSet = simulation->getIndexSetPtr(levelMin);
-    DynamicalSystemsSet * DSSet = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+    SP::DynamicalSystemsSet DSSet = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
     //fill M block
     M->fill(URSet, DSSet, unitaryBlocks, DSBlocks, DSUnitaryBlocks, unitaryDSBlocks);
     sizeOutput = M->size();
@@ -301,7 +308,7 @@ int MLCP2::compute(double time)
     //      exit(1);
     //mlcpDefaultSolver *pSolver = new mlcpDefaultSolver(m,n);
     //      displayMLCP2(&numerics_problem);
-    info = mlcp_driver(&numerics_problem, _z->getArray(), _w->getArray(), (solver->getNumericsSolverOptionsPtr()).get(), numerics_options);
+    info = mlcp_driver(&numerics_problem, _z->getArray(), _w->getArray(), (solver->getNumericsSolverOptionsPtr()).get(), numerics_options.get());
 
     // --- Recovering of the desired variables from MLCP2 output ---
     postCompute();
@@ -320,7 +327,7 @@ void MLCP2::postCompute()
   SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
 
   // y and lambda vectors
-  SP::SiconosVector lambda, *y, *x;
+  SP::SiconosVector lambda, y, x;
 
   // === Loop through "active" Unitary Relations (ie present in indexSets[1]) ===
 
@@ -338,15 +345,15 @@ void MLCP2::postCompute()
     y = (*itCurrent)->getYPtr(levelMin);
     lambda = (*itCurrent)->getLambdaPtr(levelMin);
     // Copy w/z values, starting from index pos into y/lambda.
-    setBlock(_w, y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
-    setBlock(_z, lambda, lambda->size(), pos, 0);
+    setBlock(*(_w.get()), y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
+    setBlock(*(_z.get()), lambda, lambda->size(), pos, 0);
   }
-  DynamicalSystemsSet * allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  SP::DynamicalSystemsSet allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
   for (DSIterator itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
   {
     pos = M->getPositionOfDSBlock(*itDS);
     x = (*itDS)->getXPtr();
-    setBlock(_z, x, x->size(), pos, 0);
+    setBlock(*(_z.get()), x, x->size(), pos, 0);
   }
 
 }

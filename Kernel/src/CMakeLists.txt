@@ -39,9 +39,7 @@ SET(SiconosKernel_DIRS
 # Unstable sources
 #
 SET(SiconosKernel_Unstable_SRCS 
-  simulationTools/PrimalFrictionContact.cpp 
-  simulationTools/MLCP2.cpp 
-  simulationTools/Moreau2.cpp)
+  simulationTools/PrimalFrictionContact.cpp)
 
 
 #

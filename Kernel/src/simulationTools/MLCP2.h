@@ -100,7 +100,6 @@ public:
    */
   void initialize(SP::Simulation);
 
-  void reset();
   /** compute vector q
   *  \param double : current time
   */

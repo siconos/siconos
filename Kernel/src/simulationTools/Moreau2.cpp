@@ -32,18 +32,18 @@ using namespace DS;
 // --- constructor from a minimum set of data ---
 Moreau2::Moreau2(SP::DynamicalSystem newDS, double newTheta): Moreau(newDS, newTheta)
 {
-  integratorType = MOREAU2;
+  integratorType = OSI::MOREAU2;
 }
 Moreau2::Moreau2(DynamicalSystemsSet& newDS, double newTheta): Moreau(newDS, newTheta)
 {
-  integratorType = MOREAU2;
+  integratorType = OSI::MOREAU2;
 }
 
 Moreau2::~Moreau2()
 {
 }
 
-SP::SiconosVector  Moreau2::getWorkX(DynamicalSystem *d)
+SP::SiconosVector  Moreau2::getWorkX(SP::DynamicalSystem d)
 {
   return workX[d];
 }

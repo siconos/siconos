@@ -268,7 +268,7 @@ public:
    \param a SP::DynamicalSystem
    \return a SP::SiconosVector
   */
-  SP::SiconosVector getWorkX(SP::DynamicalSystem);
+  virtual SP::SiconosVector getWorkX(SP::DynamicalSystem);
 
   // --- OTHERS ... ---
 
