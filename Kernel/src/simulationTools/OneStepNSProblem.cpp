@@ -447,8 +447,13 @@ void OneStepNSProblem::computeDSUnitaryBlock(SP::DynamicalSystem, SP::UnitaryRel
 void OneStepNSProblem::initialize(SP::Simulation sim)
 {
   // Link with the simulation that owns this osnsp
+
   assert(sim && "OneStepNSProblem::initialize(sim), sim is null.");
+
   simulation = sim;
+
+  bool isTimeInvariant = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->isTimeInvariant();
+
   // === Link to the Interactions of the Non Smooth Dynamical System (through the Simulation) ===
   // Warning: this means that all Interactions of the NSProblem are included in the OSNS !!
   OSNSInteractions = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
@@ -468,7 +473,7 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
   if (OSNSInteractions->isEmpty())
     //RuntimeException::selfThrow("OneStepNSProblem::initialize - The set of Interactions of this problem is empty.");
     cout << "Warning, OneStepNSProblem::initialize, the set of Interactions of this problem is empty." << endl;
-  else
+  else if (isTimeInvariant) // if time variant it is done in precompute
     updateUnitaryBlocks();
 
   // The maximum size of the problem (for example, the dim. of M in LCP or Friction problems).

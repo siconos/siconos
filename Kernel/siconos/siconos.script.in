@@ -35,58 +35,73 @@ cartridge() {
 }
 
 usage() { 
-    echo " ";
-    echo "The siconos command compiles, links and runs a Siconos program.";
-    echo " ";
-    echo "Usage: $myname [options] [YourExample.cpp|location/YourExample.cpp] [Arguments]";
-    echo " ";
-    echo " --> To use other source files (*.c, *.cpp, *.f), put them in ./src or see option -src_dir below ";
-    echo " --> To create a library and link it with the siconos program, create a ./plugin directory ";
-    echo " or use -plugin_dir option below. ";
-    echo " --> To create some libraries and link them with the siconos program, create a ./plugins directory ";
-    echo " or use -plugins_dir option below. ";
-    echo " ";
-    echo "Options are: ";
-    echo "     -a : to find and compile all sources files in YourExample.cpp directory.";
-    echo " ";
-    echo "     -build_dir <dir> : build is done in <dir>. Under /tmp, a temp directory is created";
-    echo " ";
-    echo "     -clean_build : clean build directory.";
-    echo " ";
-    echo "     -c | -clean : to clean the current directory (deletes binary files, etc.).";
-    echo " ";
-    echo "     -D key | -D key=value : to define a 'cmake' and a 'cpp' variable.";
-    echo " ";
-    echo "     -g : to compile with debug informations."
-    echo " ";
-    echo "     -h | -help : to print this help.";
-    echo " ";
-    echo "     -L<dir> : add directory <dir> to the list from with the linker search for libraries."
-    echo " ";
-    echo "     -l<lib> : link with library <lib>."
-    echo " ";
-    echo "     -noexec : compile only.";
-    echo " ";
-    echo "     -opt <opt> : add option <opt> to compiler." 
-    echo " ";
-    echo "     -ldopt <opt> : add option <opt> to linker." 
-    echo " ";
-    echo "     -P prefix_command : to add a prefix command (time, valgrind, gdb, etc.)."
-    echo " ";
-    echo "     -plugin_dir <plugin_directory> (default = plugin): "
-    echo "         create <plugin_directory>.so "
-    echo "         with plugin sources under <plugin_directory>." 
-    echo " ";
-    echo "     -plugins_dir <plugins_directory> (default = plugins): "
-    echo "         for each source file <name_src>.[c|f|cpp] under <plugins_directory>"
-    echo "        it creates a plugin <name_src>.so"
-    echo " ";
-    echo "     -src_dir <source_directory> (default = src):  all sources files under <source_directory> (Warning: absolute path!!)"
-    echo " to the executable.";
-    echo " ";
-    echo "     -v : to print 'make' commands as they are executed.";
-    echo " ";
+cat<<EOF
 
+The siconos command compiles, links and runs a Siconos program.
+
+Usage: $myname [options] [YourExample.cpp|location/YourExample.cpp] [Arguments]
+ 
+
+ --> To use other source files (*.c, *.cpp, *.f), put themin ./src or
+     -see option src_dir below
+
+ --> To create a library and link it with the siconos program, create
+    a ./plugin directory or use -plugin_dir option below.
+
+ --> To create some libraries and link them with the siconos program,
+     create a ./plugins directory or use -plugins_dir option below.
+
+Options are: 
+
+ -a : to find and compile all sources files in YourExample.cpp
+      directory.
+
+ -build_dir <dir> : build is done in <dir>. Under /tmp, a temp
+                    directory is created
+
+ 
+ -clean_build : clean build directory.
+
+ -c | -clean : to clean the current directory (deletes binary files,
+               etc.).
+
+ -D key | -D key=value : to define a 'cmake' and a 'cpp' variable.
+ 
+ -g : to compile with debug informations.
+ 
+ -h | -help : to print this help.
+ 
+ -L<dir> : add directory <dir> to the list from with the linker search
+           for libraries.
+ 
+ -l<lib> : link with library <lib>.
+ 
+ -noexec : compile only.
+ 
+ -opt <opt> : add option <opt> to compiler. 
+ 
+ -ldopt <opt> : add option <opt> to linker. 
+ 
+ -P prefix_command : to add a prefix command (time, valgrind, gdb,
+                     etc.).
+
+
+ -plugin_dir <plugin_directory> (default = plugin): create
+    <plugin_directory>.so with plugin sources under
+    <plugin_directory>.
+
+ 
+ -plugins_dir <plugins_directory> (default = plugins): for each source
+    file <name_src>.[c|f|cpp] under <plugins_directory> it creates a
+    plugin <name_src>.so
+
+
+ -src_dir <source_directory> (default = src): all sources files under
+    <source_directory> (Warning: absolute path!!)  to the executable.
+
+ -v : to print 'make' commands as they are executed.
+     
+EOF
 }
 
 with_arg() { 
@@ -111,6 +126,7 @@ if `getopt -T >/dev/null 2>&1` ; [ $? = 4 ] ; then
     fi
     eval set -- "$args"
 else
+    echo "Warning getopt failed and argument parsing is limited. Please consider installing GNU getopt." >&2
     no_parsing=true
     true
 fi
