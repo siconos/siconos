@@ -34,6 +34,7 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <algorithm>
 
 const std::string FILE_STORAGE = "ascii";
 const std::string SDTT_VECTOR = "Vector";
