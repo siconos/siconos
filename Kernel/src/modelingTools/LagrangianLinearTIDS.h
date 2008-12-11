@@ -79,10 +79,9 @@ class LagrangianDS;
  */
 class LagrangianLinearTIDS : public LagrangianDS
 {
-private:
+protected:
 
-  /** default constructor
-   */
+  /** default constructor */
   LagrangianLinearTIDS();
 
   /** specific matrix for a LagrangianLinearTIDS */

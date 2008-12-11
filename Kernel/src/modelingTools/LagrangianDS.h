@@ -735,7 +735,7 @@ public:
 
   /** default function to compute the mass
    */
-  void computeMass();
+  virtual void computeMass();
 
   /** function to compute the mass
    *  \param double time : the current time, SP::SiconosVector: pointer on the state vector q

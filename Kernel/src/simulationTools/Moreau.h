@@ -65,7 +65,6 @@ protected:
   /** Stl map that associates a theta parameter for the integration scheme to each DynamicalSystem of the OSI */
   MapOfDouble thetaMap;
 
-private:
   /** Default constructor
    */
   Moreau();
