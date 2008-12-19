@@ -216,7 +216,8 @@ void TimeStepping::nextStep()
 void TimeStepping::update(unsigned int levelInput)
 {
   // 1 - compute input (lambda -> r)
-  updateInput(levelInput);
+  if (!allNSProblems->empty())
+    updateInput(levelInput);
 
   // 2 - compute state for each dynamical system
 

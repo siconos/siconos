@@ -111,8 +111,8 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS
   if (listOfDS.isEmpty())
     RuntimeException::selfThrow("NonSmoothDynamicalSystem:: constructor(DynamicalSystemsSet, ...): the set of DS is empty.");
 
-  if (listOfInteractions.isEmpty())
-    RuntimeException::selfThrow("NonSmoothDynamicalSystem:: constructor(...,InteractionsSet, ...): the set of Interactions is empty.");
+  //   if( listOfInteractions.isEmpty())
+  //     RuntimeException::selfThrow("NonSmoothDynamicalSystem:: constructor(...,InteractionsSet, ...): the set of Interactions is empty.");
 
   // === "copy" listOfDS/listOfInteractions in allDS/allInteractions ===
   // Warning: DS/Interactions are not copied but pointers are inserted into the corresponding set.

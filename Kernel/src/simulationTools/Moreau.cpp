@@ -981,6 +981,7 @@ void Moreau::computeFreeState()
       // At this point vfree = residuFree
       // -> Solve WX = vfree and set vfree = X
       W->PLUForwardBackwardInPlace(*vfree);
+
       *vfree += *vold;
       // -- Computes *qfree = (*qold) + h * (theta * (*vfree) + (1.0 - theta) * (*vold))  --
       // May be useless?

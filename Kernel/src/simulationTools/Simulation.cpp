@@ -248,8 +248,8 @@ void Simulation::updateInteractions()
     {
       indexSets[i].reset(new UnitaryRelationsSet());
     }
+    initOSNS();
   };
-  initOSNS();
 }
 
 void Simulation::initialize(SP::Model m, bool withOSI)
@@ -288,10 +288,11 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 
     for (unsigned int i = 1; i < indexSets.size(); ++i)
       indexSets[i].reset(new UnitaryRelationsSet());
+
+    // Initialize OneStepNSProblem: in derived classes specific functions.
+    initOSNS();
   }
 
-  // Initialize OneStepNSProblem: in derived classes specific functions.
-  initOSNS();
 
   // Process events at time tinit. Useful to save values in memories for example.
   // Warning: can not be called during eventsManager->initialize, because it needs

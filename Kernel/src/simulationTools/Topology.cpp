@@ -87,7 +87,7 @@ void Topology::computeRelativeDegrees()
       RuntimeException::selfThrow("Topology::computeRelativeDegree(...), not yet implemented for non smooth law of type" + nslawType);
   }
 
-  assert(!relativeDegrees.empty());
+  // assert(!relativeDegrees.empty());
 }
 
 // --- CONSTRUCTORS/DESTRUCTOR ---
@@ -136,7 +136,7 @@ void Topology::initialize()
 {
 
   assert(allInteractions && "Topology : allInteractions is NULL");
-  assert(!allInteractions->isEmpty());
+  //  assert(!allInteractions->isEmpty());
 
   // -- Creates Unitary Relations and put them in indexSet0 --- loop
   // through interactions list (from NSDS)
