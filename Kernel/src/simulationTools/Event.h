@@ -24,8 +24,8 @@
 #define EVENT_H
 
 #include<math.h>
+#include<iostream> // Warning (FP): iostream must be included before gmp
 #include<gmp.h>
-#include<iostream>
 #include "SiconosConst.h"
 #include "SiconosPointers.hpp"
 

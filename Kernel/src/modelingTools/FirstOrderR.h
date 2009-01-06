@@ -66,7 +66,7 @@ public:
   typedef PluggedObject<T, SimpleMatrix> PluggedMatrix;
   typedef boost::shared_ptr<PluggedMatrix> SP_PluggedMatrix;
   typedef T LocalFunc;
-  typedef enum DataNames {z, x, r, sizeDataNames};
+  enum DataNames {z, x, r, sizeDataNames};
 
 protected:
 

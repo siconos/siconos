@@ -113,7 +113,7 @@ class DynamicalSystem
 
 public:
   /** List of indices used to save tmp work vectors (last value is the size of the present list)*/
-  typedef enum WorkNames {NewtonSave, sizeWorkV};
+  enum WorkNames {NewtonSave, sizeWorkV};
 
 private:
   /** used to set ds number */
