@@ -23,9 +23,10 @@
 
 #include "LA.h"
 #include <math.h>
+#include <float.h>
 #include "LCP_Solvers.h"
 
-#define EPSDIAG 1e-16
+#define EPSDIAG DBL_EPSILON
 void lcp_rpgs(LinearComplementarity_Problem* problem, double *z, double *w, int *info , Solver_Options* options)
 {
   /* matrix M/vector q of the lcp */

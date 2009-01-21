@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <float.h>
 #include "LA.h"
 #include "FrictionContact2D_Solvers.h"
 
@@ -156,7 +157,7 @@ void pfc_2D_latin(FrictionContact_Problem* problem , double *reaction , double *
   for (i = 0; i < n; i++)
   {
 
-    if (fabs(vec[i * n + i]) < 1e-16)
+    if (fabs(vec[i * n + i]) < DBL_EPSILON)
     {
 
       if (verbose > 0)

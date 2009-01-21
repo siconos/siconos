@@ -22,7 +22,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#define EPSDIAG 1e-16
+#include <float.h>
+#define EPSDIAG DBL_EPSILON
 /*
  *
  * double *z : size n+m

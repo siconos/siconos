@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <float.h>
 #include "LA.h"
 #include "Relay_Solvers.h"
 
@@ -43,7 +44,7 @@ void relay_pgs(Relay_Problem* problem, double *z, double *w, int *info, Solver_O
 
   for (i = 0 ; i < n ; ++i)
   {
-    if (fabs(M[i * n + i]) < 1e-16)
+    if (fabs(M[i * n + i]) < DBL_EPSILON)
     {
       if (verbose > 0)
       {

@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <float.h>
 #include "LA.h"
 #include "LCP_Solvers.h"
 
@@ -61,7 +62,7 @@ void lcp_psor(LinearComplementarity_Problem* problem, double *z, double *w, int 
 
   if (verbose > 0) printf("\n ||q||= %g \n", qs);
 
-  if (qs > 1e-16) den = 1.0 / qs;
+  if (qs > DBL_EPSILON) den = 1.0 / qs;
   else
   {
     for (i = 0 ; i < n ; ++i)
@@ -94,7 +95,7 @@ void lcp_psor(LinearComplementarity_Problem* problem, double *z, double *w, int 
 
   for (i = 0 ; i < n ; ++i)
   {
-    if (fabs(M[i * n + i]) < 1e-16)
+    if (fabs(M[i * n + i]) < DBL_EPSILON)
     {
 
       if (verbose > 0)

@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <float.h>
 
 /* Static variables */
 
@@ -165,7 +166,7 @@ void frictionContact3D_projectionWithDiagonalization_solve(int contact, int dimR
   }
   else
   {
-    if (MLocal[0] < 1e-16 || MLocal[nLocal + 1] < 1e-16 || MLocal[2 * nLocal + 2] < 1e-16)
+    if (MLocal[0] < DBL_EPSILON || MLocal[nLocal + 1] < DBL_EPSILON || MLocal[2 * nLocal + 2] < DBL_EPSILON)
     {
       fprintf(stderr, "FrictionContact3D_projection error: null term on MLocal diagonal.\n");
       exit(EXIT_FAILURE);

@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <float.h>
 #include "LA.h"
 #include "Relay_Solvers.h"
 
@@ -99,7 +100,7 @@ void dr_latin(Relay_Problem* problem, double *z, double *w, int *info, Solver_Op
   {
     k[i + n * i] = k_latin * vec[i * n + i];
 
-    if (fabs(k[i + n * i]) < 1e-16)
+    if (fabs(k[i + n * i]) < DBL_EPSILON)
     {
 
       if (verbose > 0)

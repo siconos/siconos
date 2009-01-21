@@ -23,6 +23,7 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
+#include <float.h>
 
 void pfc_3D_nlgs(int nc , double *vec , double *q , double *z , double *w , double* mu, int *info,
                  int *iparamLCP , double *dparamLCP)
@@ -72,7 +73,7 @@ void pfc_3D_nlgs(int nc , double *vec , double *q , double *z , double *w , doub
 
   if (ispeak > 0) printf("\n ||q||= %g \n" , qs);
 
-  if (qs > 1e-16) den = 1.0 / qs;
+  if (qs > DBL_EPSILON) den = 1.0 / qs;
   else
   {
     for (i = 0 ; i < n ; ++i)
@@ -99,7 +100,7 @@ void pfc_3D_nlgs(int nc , double *vec , double *q , double *z , double *w , doub
   for (i = 0 ; i < nc ; ++i)
   {
     in = 3 * i;
-    if (fabs(vec[in * n + in]) < 1e-16)
+    if (fabs(vec[in * n + in]) < DBL_EPSILON)
     {
 
       if (ispeak > 0)

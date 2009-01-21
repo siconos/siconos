@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <float.h>
 #include "LA.h"
 #include "pfc_3D_Solvers.h"
 
@@ -65,7 +66,7 @@ void pfc_3D_cpg(int nc , double *vec , double *q , double *z , double *w , doubl
 
   if (ispeak > 0) printf("\n ||q||= %g \n" , qs);
 
-  if (qs > 1e-16) den = 1.0 / qs;
+  if (qs > DBL_EPSILON) den = 1.0 / qs;
   else
   {
     for (i = 0 ; i < n ; ++i)
@@ -145,7 +146,7 @@ void pfc_3D_cpg(int nc , double *vec , double *q , double *z , double *w , doubl
 
     pMp = DDOT(n , pp , incx , w  , incy);
     //printf( " pWp = %10.4g  \n", pMp );
-    if (fabs(pMp) < 1e-16)
+    if (fabs(pMp) < DBL_EPSILON)
     {
 
       if (ispeak > 0)

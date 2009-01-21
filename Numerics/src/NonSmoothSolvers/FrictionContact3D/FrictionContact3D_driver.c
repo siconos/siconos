@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <float.h>
 #include "LA.h"
 #include "Numerics_Options.h"
 #include "FrictionContact3D_Solvers.h"
@@ -64,9 +65,9 @@ int checkTrivialCase(int n, double* q, double* velocity, double* reaction, int* 
   double qs = DNRM2(n , q , 1);
   int i;
   int info = -1;
-  if (qs <= 1e-16)
+  if (qs <= DBL_EPSILON)
   {
-    // q norm equal to zero (less than 1e-16)
+    // q norm equal to zero (less than DBL_EPSILON)
     // -> trivial solution: reaction = 0 and velocity = q
     for (i = 0 ; i < n ; ++i)
     {

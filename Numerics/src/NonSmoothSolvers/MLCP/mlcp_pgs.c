@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <float.h>
 /*
  *
  * double *z : size n+m
@@ -82,7 +83,7 @@ void mlcp_pgs(MixedLinearComplementarity_Problem* problem, double *z, double *w,
 
   for (i = 0 ; i < n ; ++i)
   {
-    if ((fabs(A[i * n + i]) < 1e-16))
+    if ((fabs(A[i * n + i]) < DBL_EPSILON))
     {
 
       if (verbose > 0)
@@ -105,7 +106,7 @@ void mlcp_pgs(MixedLinearComplementarity_Problem* problem, double *z, double *w,
   }
   for (i = 0 ; i < m ; ++i)
   {
-    if ((fabs(B[i * m + i]) < 1e-16))
+    if ((fabs(B[i * m + i]) < DBL_EPSILON))
     {
 
       if (verbose > 0)

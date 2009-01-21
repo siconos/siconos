@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <float.h>
 #include "LA.h"
 #include "LCP_Solvers.h"
 
@@ -128,7 +129,7 @@ void lcp_cpg(LinearComplementarity_Problem* problem, double *z, double *w, int *
 
     pMp = DDOT(n, pp, incx, w, incy);
 
-    if (fabs(pMp) < 1e-16)
+    if (fabs(pMp) < DBL_EPSILON)
     {
 
       if (verbose > 0)

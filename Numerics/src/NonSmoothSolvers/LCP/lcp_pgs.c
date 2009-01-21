@@ -20,8 +20,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "LA.h"
 #include <math.h>
+#include <float.h>
+#include "LA.h"
 #include "LCP_Solvers.h"
 
 void lcp_pgs(LinearComplementarity_Problem* problem, double *z, double *w, int *info , Solver_Options* options)
@@ -55,7 +56,7 @@ void lcp_pgs(LinearComplementarity_Problem* problem, double *z, double *w, int *
   double * diag = (double*)malloc(n * sizeof(double));
   for (i = 0 ; i < n ; ++i)
   {
-    if (fabs(M[i * n + i]) < 1e-16)
+    if (fabs(M[i * n + i]) < DBL_EPSILON)
     {
       if (verbose > 0)
       {

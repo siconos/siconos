@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <float.h>
 #include "LA.h"
 #include <math.h>
 /*
@@ -78,7 +79,7 @@ void mlcp_psor(MixedLinearComplementarity_Problem* problem, double *z, double *w
 
   for (i = 0 ; i < n ; ++i)
   {
-    if ((fabs(A[i * n + i]) < 1e-16))
+    if ((fabs(A[i * n + i]) < DBL_EPSILON))
     {
 
       if (verbose > 0)
@@ -101,7 +102,7 @@ void mlcp_psor(MixedLinearComplementarity_Problem* problem, double *z, double *w
   }
   for (i = 0 ; i < m ; ++i)
   {
-    if ((fabs(B[i * m + i]) < 1e-16))
+    if ((fabs(B[i * m + i]) < DBL_EPSILON))
     {
 
       if (verbose > 0)

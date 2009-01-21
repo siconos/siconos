@@ -23,6 +23,7 @@
 #include <math.h>
 #include "LA.h"
 #include <time.h>
+#include <float.h>
 #include "blaslapack.h"
 #include "pfc_3D_Alart_Curnier.h"
 
@@ -188,7 +189,7 @@ void G_f(int m, double *G, double *x , double *y , double *C, double *b , double
   mrn = zt * zt + zs * zs;
 
   // if the radius is negative or the vector is null projection on the disk = 0
-  if (mrn <= 1e-16 || x[0] <= 1e-16)
+  if (mrn <= DBL_EPSILON || x[0] <= DBL_EPSILON)
   {
     G[1] = x[1] / rt;
     G[2] = x[2] / rt;
@@ -244,7 +245,7 @@ void JacG_f(int m, double *JacG, double *A, double *B , double *x , double *y , 
   mrn = zt * zt + zs * zs;
 
   // if the radius is negative or the vector is null projection on the disk = 0
-  if (mrn <= 1e-16 || x[0] <= 1e-16)
+  if (mrn <= DBL_EPSILON || x[0] <= DBL_EPSILON)
     B[1 * m + 1] = B[2 * m + 2] = 1. / rt;
   // if the radius is positive and the vector is non null, we compute projection on the disk
   else
@@ -346,7 +347,7 @@ void pfc_3D_nlgsnewton(int nc , double *vec , double *q , double *z , double *w 
 
   if (ispeak > 0) printf("\n ||q||= %g \n" , qs);
 
-  if (qs > 1e-16) den = 1.0 / qs;
+  if (qs > DBL_EPSILON) den = 1.0 / qs;
   else
   {
     for (i = 0 ; i < n ; ++i)
@@ -398,7 +399,7 @@ void pfc_3D_nlgsnewton(int nc , double *vec , double *q , double *z , double *w 
   for (i = 0 ; i < nc ; ++i)
   {
     in = 3 * i;
-    if (fabs(vec[in * n + in]) < 1e-16)
+    if (fabs(vec[in * n + in]) < DBL_EPSILON)
     {
 
       if (ispeak > 0)

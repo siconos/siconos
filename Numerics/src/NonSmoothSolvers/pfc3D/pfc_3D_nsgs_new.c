@@ -23,6 +23,7 @@
 #include <math.h>
 #include "LA.h"
 #include <time.h>
+#include <float.h>
 #include "pfc_3D_Solvers.h"
 #include "NCP_Solvers.h"
 
@@ -81,9 +82,9 @@ void pfc_3D_nsgs_new(int nc , double *M , double *q , double *z , double *w, dou
     printf("\n ||q||= %g \n" , qs);
   }
 
-  if (qs <= 1e-16)
+  if (qs <= DBL_EPSILON)
   {
-    // q norm equal to zero (less than 1e-16)
+    // q norm equal to zero (less than DBL_EPSILON)
     // -> trivial solution: z = 0 and w = q
     for (i = 0 ; i < n ; ++i)
     {

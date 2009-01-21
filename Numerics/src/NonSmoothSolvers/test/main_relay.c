@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <float.h>
 #include "NonSmoothDrivers.h"
 #include "LA.h"
 #include "blaslapack.h" /* for dlamch */
@@ -111,7 +112,7 @@ int test_relay_series(Relay_Problem * problem, int* solversList)
     {
       for (j = 0 ; j < i ; ++j)
       {
-        if (abs(problem->M->matrix0[i * n + j] - problem->M->matrix0[j * n + i]) > 1e-16)
+        if (abs(problem->M->matrix0[i * n + j] - problem->M->matrix0[j * n + i]) > DBL_EPSILON)
         {
           nonsymmetric = 1;
           break;

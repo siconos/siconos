@@ -23,6 +23,7 @@
 #include <math.h>
 #include "LA.h"
 #include <time.h>
+#include <float.h>
 #include "pfc_3D_Solvers.h"
 #include "NCP_Solvers.h"
 
@@ -138,7 +139,7 @@ void pfc_3D_nsgs(int nc , double *vec , double *q , double *z , double *w , doub
 
   if (ispeak > 0) printf("\n ||q||= %g \n" , qs);
 
-  if (qs > 1e-16) den = 1.0 / qs;
+  if (qs > DBL_EPSILON) den = 1.0 / qs;
   else
   {
     for (i = 0 ; i < n ; ++i)

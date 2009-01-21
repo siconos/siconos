@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <float.h>
 #include "LA.h"
 #include "LCP_Solvers.h"
 
@@ -133,7 +134,7 @@ void lcp_latin(LinearComplementarity_Problem* problem, double *z, double *w, int
 
     k[i * n + i] =  k_latin * M[i * n + i];
 
-    if (fabs(k[i * n + i]) < 1e-16)
+    if (fabs(k[i * n + i]) < DBL_EPSILON)
     {
 
       if (verbose > 0)

@@ -107,7 +107,7 @@ int lcp_solver_pred(n , method_lcp *pt , double *z , double *w ,
   for (i = 0 ; i < 5 ; ++i) dparamLCP[i] = 0.0;
 
   *soltype = 0;
-  /*  limqpos = -1e-16 / sqrt((double) *n); */
+  /*  limqpos = -DBL_EPSILON / sqrt((double) *n); */
   if (firsttime == 0)
   {
     i = 0;
@@ -261,7 +261,7 @@ int extractLCP(NumericsMatrix* MGlobal, double *z , int *indic, int *indicop, do
     numericsError("extractLCP", "Null input for one arg (problem, z, ...)");
 
   int info;
-  /*  double epsdiag = 1e-16;*/
+  /*  double epsdiag = DBL_EPSILON;*/
 
   /* Extract data from problem */
   if (MGlobal->storageType == 1)

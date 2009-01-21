@@ -211,7 +211,7 @@ int test_mmc(void)
   {
     for (j = 0 ; j < i ; ++j)
     {
-      if (abs(vec[i * n + j] - vec[j * n + i]) > 1e-16)
+      if (abs(vec[i * n + j] - vec[j * n + i]) > DBL_EPSILON)
       {
         nonsymmetric = 1;
         break;
@@ -251,7 +251,7 @@ int test_mmc(void)
     {
       for (j = 0 ; j < i ; ++j)
       {
-        if (abs(problem->M->matrix0[i * n + j] - problem->M->matrix0[j * n + i]) > 1e-16)
+        if (abs(problem->M->matrix0[i * n + j] - problem->M->matrix0[j * n + i]) > DBL_EPSILON)
         {
           nonsymmetric = 1;
           break;
