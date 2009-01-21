@@ -112,7 +112,7 @@ const unsigned int M_MAXSIZEFORDISPLAY = 10;
 const std::string DEFAULT_FORMAT = "ascii";
 
 /** value used to compare matrices. Matrices A and B are equal when (A-B).normInf()<tolerance. */
-const double tolerance = 1e-14;
+const double tolerance = std::numeric_limits<double>::epsilon();
 
 /** UBLAS_TYPE  is an enumerated type of DENSE, TRIANGULAR, SYMMETRIC, SPARSE, BANDED. It is used to describe the type of matrix or vector we want to construct.
  */

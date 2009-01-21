@@ -35,7 +35,10 @@ Typedef for simulation-related objects
 #include "SiconosPointers.hpp"
 
 /** double precision machine */
-const double MACHINE_PREC = 1e-14;//dlamch_("e");
+/*  eq dlmach('e'),  DBL_EPSILON,  fabs(a-b) <  */
+const double MACHINE_PREC = std::numeric_limits<double>::epsilon();
+
+
 //#include "OneStepIntegrator.h"
 class OneStepIntegrator;
 
@@ -73,9 +76,6 @@ TYPEDEF_SPTR(DS_int);
 
 /** Iterator through a map of double */
 typedef MapOfDouble::iterator DoubleIterator;
-
-/** Map of bool; key = the related DS */
-typedef std::map<SP::DynamicalSystem, bool> MapOfDSBool;
 
 // ================== Objects to handle UnitaryRelations ==================
 
@@ -123,17 +123,6 @@ typedef MapOfUnitaryMapOfDSMatrices::iterator UnitaryDSMatrixRowIterator ;
 
 /** Const iterator through a MapOfUnitaryMapOfDSMatrices */
 typedef MapOfUnitaryMapOfDSMatrices::const_iterator ConstUnitaryDSMatrixRowIterator ;
-
-
-
-/** Map of map of bools, with UnitaryRelations as keys */
-typedef std::map< SP::UnitaryRelation , std::map<SP::UnitaryRelation, bool> >  MapOfMapOfUnitaryBool;
-
-/** Map of map of bools, with UnitaryRelations as keys */
-typedef std::map< SP::UnitaryRelation , MapOfDSBool >  MapOfUnitaryMapOfDSBool;
-
-/** Map of map of bools, with UnitaryRelations as keys */
-typedef std::map< SP::DynamicalSystem , std::map<SP::UnitaryRelation, bool> >  MapOfDSMapOfUnitaryBool;
 
 /** Vector that contains a sequel of sets of UnitaryRelations*/
 typedef std::vector< SP::UnitaryRelationsSet > VectorOfSetOfUnitaryRelations;
