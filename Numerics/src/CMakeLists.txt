@@ -85,7 +85,8 @@ CONFIGURE_FILE(SiconosNumerics.h  unit.mod.proxy COPYONLY)
 
 # The library tests
 
-
+# wrapper are not needed
+SET(TEST_WRAP)
 
 BEGIN_TEST(netlib/odepack/test)
  
