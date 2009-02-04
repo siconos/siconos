@@ -92,6 +92,9 @@ SET(SiconosKernel_LINKER_LANGUAGE CXX)
 
 LIBRARY_PROJECT_SETUP()
 
+# wrappers for tests are needed
+SET(TEST_WRAP TRUE)
+
 #
 # tests with cppunit
 #
