@@ -39,42 +39,93 @@
 
    * Download the source packages on the Gforge   
 
----++ INSTALL 
-
-- with cmake
+---++ INSTALL with cmake
 
 The command `cmake' is needed (http://www.cmake.org/).
 The compilation is done out of the source directory:
 
-	- create a build directory <build>
-	- cd <build>
-	- cmake <path of the source directory> [CMAKE OPTIONS]
-        - make [MAKE OPTIONS]
-        - make test
-        - make install
+   * create a build directory <build>
+   * cd <build>
+   * cmake <path of the source directory> [CMAKE OPTIONS]
+   * make [MAKE OPTIONS]
+   * make test
+   * make install
 
-some CMAKE OPTIONS that may be usefull:
-	- to build an optimized library (-O3 -DNDEBUG) : -DCMAKE_BUILD_TYPE=Release
-	- to build a debug library (compilation with -g) : -DCMAKE_BUILD_TYPE=Debug
-	- to see cmake state : -DPRINT_ENV=1
+Some CMAKE OPTIONS that may be usefull:
 
-some MAKE OPTIONS that may be usefull:
-        - to see make command as executed : VERBOSE=1
+   * to find some libraries in specific directories :
+    -DCMAKE_LIBRARY_PATH=<DIR>
+
+   * to build a debug library (compilation with -g) :
+    -DCMAKE_BUILD_TYPE=Debug
+
+   * to build an optimized library (-O3 -DNDEBUG) (this is the
+    default): -DCMAKE_BUILD_TYPE=Release
+
+   * to see cmake state : -DPRINT_ENV=1
+
+   * to print a cmake variable : -DPRINT_VAR=VAR_NAME
+
+        
+
+Some MAKE OPTIONS that may be usefull:
+   * to see make command as executed : VERBOSE=1
+
+      
+---+++ Is the installation of the Kernel OK ?
+
+   * You can try to run : 
+
+   cd /path/to/your/source/code/sample/Mechanics/BouncingBall ; siconos BouncingBall.cpp
+
+---+++ Is the installation of the Front-End OK ?
+   * You can try to run : 
+
+   cd /path/to/your/source/code/sample/Mechanics/BouncingBall ; pySiconos BouncingBall.py
+
+
+
+
+
+---- old notes on mac & libtool
 
 INSTALLATION ON MACOSX
 
-One Mach-O feature that hits many people by surprise is the strict distinction between shared libraries and dynamically loadable modules. On ELF systems both are the same; any piece of shared code can be used as a library and for dynamic loading. Use otool -hv some_file to see the filetype of some_file.
+One Mach-O feature that hits many people by surprise is the strict
+distinction between shared libraries and dynamically loadable
+modules. On ELF systems both are the same; any piece of shared code
+can be used as a library and for dynamic loading. Use otool -hv
+some_file to see the filetype of some_file.
 
-Mach-O shared libraries have the file type MH_DYLIB and carry the extension .dylib. They can be linked against with the usual static linker flags, e.g. -lfoo for libfoo.dylib. However, they can not be loaded as a module. (Side note: Shared libraries can be loaded dynamically through an API. However, that API is different from the API for bundles and the semantics make it useless for an dlopen() emulation. Most notably, shared libraries can not be unloaded.)
+Mach-O shared libraries have the file type MH_DYLIB and carry the
+extension .dylib. They can be linked against with the usual static
+linker flags, e.g. -lfoo for libfoo.dylib. However, they can not be
+loaded as a module. (Side note: Shared libraries can be loaded
+dynamically through an API. However, that API is different from the
+API for bundles and the semantics make it useless for an dlopen()
+emulation. Most notably, shared libraries can not be unloaded.)
 
-Loadable modules are called "bundles" in Mach-O speak. They have the file type MH_BUNDLE. Since no component involved cares about it, they can carry any extension. The extension .bundle is recommended by Apple, but most ported software uses .so for the sake of compatibility. Bundles can be dynamically loaded and unloaded via dyld APIs, and there is a wrapper that emulates dlopen() on top of that API. It is not possible to link against bundles as if they were shared libraries. However, it is possible that a bundle is linked against real shared libraries; those will be loaded automatically when the bundle is loaded.
+Loadable modules are called "bundles" in Mach-O speak. They have the
+file type MH_BUNDLE. Since no component involved cares about it, they
+can carry any extension. The extension .bundle is recommended by
+Apple, but most ported software uses .so for the sake of
+compatibility. Bundles can be dynamically loaded and unloaded via dyld
+APIs, and there is a wrapper that emulates dlopen() on top of that
+API. It is not possible to link against bundles as if they were shared
+libraries. However, it is possible that a bundle is linked against
+real shared libraries; those will be loaded automatically when the
+bundle is loaded.
 
-Note : To obtain a module you have just to add -module option to linker flag for libtool. For Siconos Numerics :
+Note : To obtain a module you have just to add -module option to
+linker flag for libtool. For Siconos Numerics :
 
 libSiconosNumerics_la_LDFLAGS= -version-info $(SICONOSNUMERICS_SO_CURRENT):$(SICONOSNUMERICS_SO_REVISION):$(SICONOSNUMERICS_SO_AGE) -module
 
 
-For the Siconos Numerics, we have chosen to build a shared library (.dylib) and not a module, because you can not link a module. A way to link with a module is to create a dummy .cpp file wich load the module !!!
+For the Siconos Numerics, we have chosen to build a shared library
+(.dylib) and not a module, because you can not link a module. A way to
+link with a module is to create a dummy .cpp file wich load the
+module!!!
 
 To obtain a shared libray,  you have just to add -dynamiclib option to linker flag for libtool. For Siconos Numerics :
 
