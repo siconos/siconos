@@ -35,7 +35,9 @@ dim(v)=nn
 #include "mlcp_enum.h"
 #include "mlcp_enum_tool.h"
 
+#ifdef HAVE_DGELS
 #define ENUM_USE_DGELS
+#endif
 
 #ifdef MLCP_DEBUG
 static int *sLastIWork;

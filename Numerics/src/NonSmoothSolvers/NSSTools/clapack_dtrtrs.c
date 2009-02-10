@@ -135,7 +135,9 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
   if (info != 0)
   {
     i__1 = -(info);
+#ifdef HAVE_XERBLA
     cblas_xerbla(i__1, "DTRTRS", "ERROR");
+#endif
     return info;
   }
 

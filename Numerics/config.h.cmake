@@ -13,5 +13,6 @@
 #cmakedefine HAVE_CBLAS_H
 #cmakedefine FRAMEWORK_BLAS
 #cmakedefine HAVE_XERBLA
+#cmakedefine HAVE_DGELS
 #cmakedefine HAVE_PATHFERRIS
 #cmakedefine HAVE_MLCPSIMPLEX
