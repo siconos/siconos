@@ -330,7 +330,7 @@ int getDiagonalBlockPos(const SparseBlockStructuredMatrix* const M, int num)
   int firstBlockOfRow = M->index1_data[num];
 
   /* Look at the diagonal block */
-  for (pos = firstBlockOfRow; M->ColumnIndex[pos] != M->RowIndex[firstBlockOfRow]; ++pos);
+  for (pos = firstBlockOfRow; M->index2_data[pos] != num; ++pos);
 
   return pos;
 }
