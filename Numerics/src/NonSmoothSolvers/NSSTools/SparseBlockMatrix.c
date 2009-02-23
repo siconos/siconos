@@ -15,12 +15,10 @@ void prodSBM(int size, double alpha, const SparseBlockStructuredMatrix* const A,
   /* Checks sizes */
   assert(size == A->blocksize[A->size - 1]);
 
-  /* Number of non-null blocks in the matrix */
-  int nbblocks = A->nbblocks;
   /* Row (block) position of the current block */
-  int currentRowNumber = 0;
+  int currentRowNumber ;
   /* Column (block) position of the current block*/
-  int colNumber = 0;
+  int colNumber;
   /* Number of rows/columns of the current block */
   int nbRows, nbColumns;
   /* Position of the sub-block of x multiplied by the sub-block of A */
@@ -33,32 +31,44 @@ void prodSBM(int size, double alpha, const SparseBlockStructuredMatrix* const A,
   */
   DSCAL(size, beta, y, 1);
 
-  for (int blockNum = 0; blockNum < nbblocks; ++blockNum)
+  for (currentRowNumber = 0 ; currentRowNumber < A->filled1 - 1; ++currentRowNumber)
   {
-    /* Get row/column position of the current block */
-    currentRowNumber = A->RowIndex[blockNum];
-    colNumber = A->ColumnIndex[blockNum];
-    /* Get dim. of the current block */
-    nbRows = A->blocksize[currentRowNumber];
-    if (currentRowNumber != 0)
-      nbRows -= A->blocksize[currentRowNumber - 1];
+    for (unsigned int blockNum = A->index1_data[currentRowNumber];
+         blockNum < A->index1_data[currentRowNumber + 1]; ++blockNum)
+    {
+      assert(blockNum < A->filled2);
 
-    nbColumns = A->blocksize[colNumber];
-    if (colNumber != 0)
-      nbColumns -= A->blocksize[colNumber - 1];
+      colNumber = A->index2_data[blockNum];
 
-    /* Get position in x of the sub-block multiplied by A sub-block */
-    posInX = 0;
-    if (colNumber != 0)
-      posInX += A->blocksize[colNumber - 1];
-    /* Get position in y for the ouput sub-block, result of the product */
-    posInY = 0;
-    if (currentRowNumber != 0)
-      posInY += A->blocksize[currentRowNumber - 1];
-    /* Computes y[] += currentBlock*x[] */
-    DGEMV(LA_NOTRANS, nbRows, nbColumns, alpha, A->block[blockNum], nbRows, &x[posInX], 1, 1.0, &y[posInY], 1);
+      assert(colNumber < size);
+
+      /* Get dim. of the current block */
+      nbRows = A->blocksize[currentRowNumber];
+
+
+      if (currentRowNumber != 0)
+        nbRows -= A->blocksize[currentRowNumber - 1];
+
+      assert(nbRows <= size);
+
+      nbColumns = A->blocksize[colNumber];
+      if (colNumber != 0)
+        nbColumns -= A->blocksize[colNumber - 1];
+
+      assert(nbColumns <= size);
+
+      /* Get position in x of the sub-block multiplied by A sub-block */
+      posInX = 0;
+      if (colNumber != 0)
+        posInX += A->blocksize[colNumber - 1];
+      /* Get position in y for the ouput sub-block, result of the product */
+      posInY = 0;
+      if (currentRowNumber != 0)
+        posInY += A->blocksize[currentRowNumber - 1];
+      /* Computes y[] += currentBlock*x[] */
+      DGEMV(LA_NOTRANS, nbRows, nbColumns, alpha, A->block[blockNum], nbRows, &x[posInX], 1, 1.0, &y[posInY], 1);
+    }
   }
-
 }
 
 void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init)
@@ -110,11 +120,12 @@ void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBlock
      But it requires a set to 0 of all y components
   */
 
-  int nextRowNumber = currentRowNumber;
-  while (nextRowNumber == currentRowNumber && blockNum < nbblocks)
+  for (unsigned int blockNum = A->index1_data[currentRowNumber];
+       blockNum < A->index1_data[currentRowNumber + 1];
+       ++blockNum)
   {
     /* Get row/column position of the current block */
-    colNumber = A->ColumnIndex[blockNum];
+    colNumber = A->index2_data[blockNum];
 
     /* Get dim(columns) of the current block */
     nbColumns = A->blocksize[colNumber];
@@ -128,9 +139,6 @@ void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBlock
     /* Computes y[] += currentBlock*x[] */
     DGEMV(LA_NOTRANS, nbRows, nbColumns, 1.0, A->block[blockNum], nbRows, &x[posInX], 1, 1.0, y, 1);
 
-    /* Step to next block*/
-    blockNum ++;
-    nextRowNumber = A->RowIndex[blockNum];
   }
 }
 
@@ -192,11 +200,12 @@ void rowProdNoDiagSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBl
      of the block is, in A->block, but it requires a set to 0 of all y
      components
   */
-  int nextRowNumber = currentRowNumber;
-  while (nextRowNumber == currentRowNumber && blockNum < nbblocks)
+  for (unsigned int blockNum = A->index1_data[currentRowNumber];
+       blockNum < A->index1_data[currentRowNumber + 1];
+       ++blockNum)
   {
     /* Get row/column position of the current block */
-    colNumber = A->ColumnIndex[blockNum];
+    colNumber = A->index2_data[blockNum];
 
     /* Computes product only for extra diagonal blocks */
     if (colNumber != currentRowNumber)
@@ -213,9 +222,6 @@ void rowProdNoDiagSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBl
       /* Computes y[] += currentBlock*x[] */
       DGEMV(LA_NOTRANS, nbRows, nbColumns, 1.0, A->block[blockNum], nbRows, &x[posInX], 1, 1.0, y, 1);
     }
-    /* Steps to next block*/
-    blockNum ++;
-    nextRowNumber = A->RowIndex[blockNum];
   }
 }
 
@@ -228,10 +234,6 @@ void freeSBM(SparseBlockStructuredMatrix *blmat)
    this function must not be called. See in Kernel/src/simulationsTools/SparseBlockMatrix.cpp for details on
    the way the structure is filled in.
   */
-  if (blmat->RowIndex)
-    free(blmat->RowIndex);
-  if (blmat->ColumnIndex)
-    free(blmat->ColumnIndex);
   if (blmat->blocksize)
     free(blmat->blocksize);
   for (int i = 0 ; i < blmat->nbblocks ; i++)
@@ -266,30 +268,6 @@ void printSBM(const SparseBlockStructuredMatrix* const m)
     printf("%d ", size);
   }
   printf("]\n");
-  printf("Indices of blocks row-positions = [");
-  for (int i = 0; i < m->nbblocks; i++)
-    printf("%d ", m->RowIndex[i]);
-  printf("]\n");
-  printf("Indices of blocks column-positions = [");
-  for (int i = 0; i < m->nbblocks; i++)
-    printf("%d ", m->ColumnIndex[i]);
-  printf("]\n");
-  int dimblock, row, col, posR, posC;
-  printf("Non null blocks (warning: column-major storage)\n");
-  for (int i = 0; i < m->nbblocks; i++)
-  {
-    posR = m->RowIndex[i];
-    posC = m->ColumnIndex[i];
-    row = m->blocksize[posR];
-    if (posR != 0) row -= m->blocksize[posR - 1];
-    col = m->blocksize[posC];
-    if (posC != 0) col -= m->blocksize[posC - 1];
-    dimblock = row * col;
-    printf("block %d,%d (dim:%dX%d)= [", posR, posC, row, col);
-    for (int j = 0; j < dimblock; ++j)
-      printf("%lf ", m->block[i][j]);
-    printf("]\n");
-  }
 }
 
 void freeSpBlMatPred(SparseBlockStructuredMatrixPred *blmatpred)
@@ -330,7 +308,7 @@ int getDiagonalBlockPos(const SparseBlockStructuredMatrix* const M, int num)
   int firstBlockOfRow = M->index1_data[num];
 
   /* Look at the diagonal block */
-  for (pos = firstBlockOfRow; M->index2_data[pos] != num; ++pos);
+  for (pos = firstBlockOfRow; M->index2_data[pos] != num; ++pos, assert(pos < M->filled2));
 
   return pos;
 }

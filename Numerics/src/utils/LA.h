@@ -18,9 +18,6 @@
 #include <clapack.h>
 
 /* missing */
-#ifndef HAVE_XERBLA
-void cblas_xerbla(int, char*, char*);
-#endif
 int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, const enum ATLAS_UPLO Uplo, const enum CBLAS_TRANSPOSE Trans, const enum CBLAS_DIAG Diag, const int n, const int nrhs, double *a, const int lda, double *b, const int ldb);
 
 /* LA_ORDER, LA_SIDE specific cblas/clapack */

@@ -24,9 +24,12 @@
 #include "NonSmoothDrivers.h"
 #endif
 #include "LA.h"
+#include <assert.h>
 
 void buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat, LinearComplementarity_Problem* local_problem, double* q, double* z)
 {
+
+  assert(blmat->blocksize[rowNumber] > 0);
 
   /* Position in vector blmat->block of the required diagonal block */
   int diagPos = getDiagonalBlockPos(blmat, rowNumber);
