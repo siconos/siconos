@@ -54,21 +54,21 @@ int main(int argc, char* argv[])
 
     cout << "====> Model loading ..." << endl << endl;
     DynamicalSystemsSet allDS; // the list of DS
-    SiconosMatrix *Mass = new SimpleMatrix(nDof, nDof);
+    SP::SiconosMatrix Mass(new SimpleMatrix(nDof, nDof));
     (*Mass)(0, 0) = m;
     (*Mass)(1, 1) = m;
     (*Mass)(2, 2) = 3. / 5 * m * R * R;
 
     // -- Initial positions and velocities --
-    SiconosVector * q0 = new SimpleVector(nDof);
-    SiconosVector * v0 = new SimpleVector(nDof);
+    SP::SiconosVector q0(new SimpleVector(nDof));
+    SP::SiconosVector v0(new SimpleVector(nDof));
     (*q0)(0) = position_init;
     (*v0)(0) = velocity_init;
     // -- The dynamical system --
-    LagrangianLinearTIDS* ball = new LagrangianLinearTIDS(0, *q0, *v0, *Mass);
+    SP::LagrangianLinearTIDS ball(new LagrangianLinearTIDS(*q0, *v0, *Mass));
     allDS.insert(ball);
     // -- Set external forces (weight) --
-    SiconosVector * weight = new SimpleVector(nDof);
+    SP::Plugged_Vector_FTime weight(new Plugged_Vector_FTime(nDof));
     (*weight)(0) = -m * g;
     ball->setFExtPtr(weight);
 
@@ -83,25 +83,25 @@ int main(int argc, char* argv[])
 
     // Interaction ball-floor
     //
-    SiconosMatrix *H = new SimpleMatrix(1, nDof);
+    SP::SiconosMatrix H(new SimpleMatrix(1, nDof));
     (*H)(0, 0) = 1.0;
-    NonSmoothLaw * nslaw0 = new NewtonImpactNSL(e);
-    Relation * relation0 = new LagrangianLinearTIR(*H);
+    SP::NonSmoothLaw  nslaw0(new NewtonImpactNSL(e));
+    SP::Relation relation0(new LagrangianLinearTIR(*H));
 
-    Interaction * inter = new Interaction("floor-ball", allDS, 0, 1, nslaw0, relation0);
+    SP::Interaction inter(new Interaction("floor-ball", allDS, 0, 1, nslaw0, relation0));
     allInteractions.insert(inter);
 
     // --------------------------------
     // --- NonSmoothDynamicalSystem ---
     // --------------------------------
     bool isBVP = 0;
-    NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(allDS, allInteractions, isBVP);
+    SP::NonSmoothDynamicalSystem nsds(new NonSmoothDynamicalSystem(allDS, allInteractions, isBVP));
 
     // -------------
     // --- Model ---
     // -------------
 
-    Model * bouncingBall = new Model(t0, T);
+    SP::Model bouncingBall(new Model(t0, T));
     bouncingBall->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
 
     // ----------------
@@ -109,21 +109,25 @@ int main(int argc, char* argv[])
     // ----------------
 
     // -- Time discretisation --
-    TimeDiscretisation * t = new TimeDiscretisation(h, bouncingBall);
+    SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-    EventDriven* s = new EventDriven(t);
+    SP::EventDriven s(new EventDriven(t));
 
     // -- OneStepIntegrators --
-    Lsodar * OSI = new Lsodar(ball, s);
+    SP::Lsodar OSI(new Lsodar(ball));
+    s->recordIntegrator(OSI);
+
     // -- OneStepNsProblem --
     IntParameters iparam(5);
     iparam[0] = 1000; // Max number of iteration
     DoubleParameters dparam(5);
     dparam[0] = 1e-15; // Tolerance
     string solverName = "Lemke" ;
-    NonSmoothSolver * mySolver = new NonSmoothSolver(solverName, iparam, dparam);
-    OneStepNSProblem * impact = new LCP(s, mySolver, "impact");
-    OneStepNSProblem * acceleration = new LCP(s, mySolver, "acceleration");
+    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
+    SP::OneStepNSProblem impact(new LCP(mySolver, "impact"));
+    SP::OneStepNSProblem acceleration(new LCP(mySolver, "acceleration"));
+    s->recordNonSmoothProblem(impact);
+    s->recordNonSmoothProblem(acceleration);
 
     // =========================== End of model definition ===========================
 
@@ -132,7 +136,7 @@ int main(int argc, char* argv[])
     // --- Simulation initialization ---
     cout << "====> Simulation initialisation ..." << endl << endl;
     s->setPrintStat(true);
-    s->initialize();
+    bouncingBall->initialize(s);
 
     int N = 1854; // Number of saved points: depends on the number of events ...
 
@@ -140,12 +144,12 @@ int main(int argc, char* argv[])
     // -> saved in a matrix dataPlot
     unsigned int outputSize = 4;
     SimpleMatrix dataPlot(N + 1, outputSize);
-    SiconosVector * q = ball->getQPtr();
-    SiconosVector * v = ball->getVelocityPtr();
-    SiconosVector * p = ball->getPPtr(1);
+    SP::SiconosVector q = ball->getQPtr();
+    SP::SiconosVector v = ball->getVelocityPtr();
+    SP::SiconosVector p = ball->getPPtr(1);
     //   SiconosVector * y = bouncingBall->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getYPtr(0);
 
-    EventsManager * eventsManager = s->getEventsManagerPtr();
+    SP::EventsManager eventsManager = s->getEventsManagerPtr();
 
     // For the initial time step:
     // time
@@ -161,10 +165,8 @@ int main(int argc, char* argv[])
     unsigned int numberOfEvent = 0 ;
     int k = 0;
     boost::progress_display show_progress(N);
-    while (s->getNextTime() < T)
+    while (s->getNextTime() < T && k < N)
     {
-      k++;
-
       s->advanceToEvent();
       if (eventsManager->getNextEventPtr()->getType() == 2)
         nonSmooth = true;
@@ -184,7 +186,8 @@ int main(int argc, char* argv[])
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*p)(0);
-      numberOfEvent++;
+      ++k;
+      ++numberOfEvent;
       ++show_progress;
     }
 
