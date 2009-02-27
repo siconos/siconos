@@ -36,35 +36,45 @@ class DynamicalSystem;
 class InteractionXML;
 class BlockVector;
 
-/**  An Interaction describes the non-smooth interactions between some Dynamical Systems.
+/**  An Interaction describes the non-smooth interactions between some
+ *  Dynamical Systems.
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
  *  \date (Creation) Apr 29, 2004
  *
- * An interaction represents the "link" between a set of Dynamical Systems (var: involvedDS) that interact through
- * some relations (between state variables (x,R) and local variables (y,lambda)) completed by a non-smooth law.
+ * An interaction represents the "link" between a set of Dynamical
+ * Systems (var: involvedDS) that interact through some relations
+ * (between state variables (x,R) and local variables (y,lambda))
+ * completed by a non-smooth law.
  *
  * Thus, the interaction main members are:
  *
- * - a set of Dynamical Systems (from 1 to ...) that interacts, named involvedDS.
+ * - a set of Dynamical Systems (from 1 to ...) that interacts, named
+     involvedDS.
  *
- * - relation: a pointer to a Relation object that determines the type of relation and so the way it is computed.\n
- *   Warning: there is only one Relation object (ie only one type of relation for an interaction) but there can be several "relations", in the sense
+ * - relation: a pointer to a Relation object that determines the type
+ *   of relation and so the way it is computed.\n Warning: there is
+ *   only one Relation object (ie only one type of relation for an
+ *   interaction) but there can be several "relations", in the sense
  *   of constraints equations between (y,lambda) and (x,r).
  *
  * - nslaw: the non smooth law
  *
  * - the local variables y and lambda (their size is interactionSize).
- *   STL vectors are used and y[i] (resp lambda[i]) represents the i-eme derivative of variable y (resp lambda).
+ *   STL vectors are used and y[i] (resp lambda[i]) represents the
+ *   i-eme derivative of variable y (resp lambda).
  *
- *   y is a container of BlockVector. Each block corresponds to a "unitary relation", a relation which size is the one of the non-smooth law. \n
- *    => ySize = interactionSize = numberOfRelations * nsLawSize .
- *   Same thing for lambda.
+ *   y is a container of BlockVector. Each block corresponds to a
+ *    "unitary relation", a relation which size is the one of the
+ *    non-smooth law. \n => ySize = interactionSize =
+ *    numberOfRelations * nsLawSize .  Same thing for lambda.
  *
  *  => all the relations of the interaction have the same non-smooth law. \n
- *  => the number of relations is equal to interactionSize/nsLawSize. Thus a relation is not necessarily represented
- *     by a single equation.
+ *
+ *  => the number of relations is equal to
+ *     interactionSize/nsLawSize. Thus a relation is not necessarily
+ *     represented by a single equation.
  *
  *
  */
@@ -182,8 +192,10 @@ public:
   void initialize(double, unsigned int);
 
   /** build Y and Lambda stl vectors.
-  *   \param unsigned int: dim of Y and Lambda vector of Interactions (ie number of derivatives that
-  *          are taken into account). This is an input argument since it depends on the simulation type.
+  *   \param unsigned int: dim of Y and Lambda vector of Interactions
+  *          (ie number of derivatives that are taken into
+  *          account). This is an input argument since it depends on
+  *          the simulation type.
   */
   void initializeMemory(const unsigned int);
 
@@ -287,7 +299,8 @@ public:
     return y[i];
   }
 
-  /** set the output vector y to newVector with copy of the y[i] (ie memory allocation)
+  /** set the output vector y to newVector with copy of the y[i] (ie
+      memory allocation)
   *  \param VectorOfVectors
   */
   void setY(const VectorOfVectors&);

@@ -63,10 +63,10 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemX
   SetOfInteractionsXML  interactionsList = nsdsxml->getInteractionsXML();
   SetOfInteractionsXMLIt it2;
   CheckInsertInteraction checkInter;
-  allInteractions.reset(new InteractionsSet());
+  allInteractionsLocal.reset(new InteractionsSet());
   for (it2 = interactionsList.begin(); it2 != interactionsList.end(); ++it2)
   {
-    checkInter = allInteractions->insert(SP::Interaction(new Interaction(*it2, allDS)));
+    checkInter = allInteractionsLocal->insert(SP::Interaction(new Interaction(*it2, allDS)));
     // checkInter.first is an iterator that points to the Interaction inserted into the set.
   }
 
@@ -74,11 +74,11 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemX
   if (allDS->isEmpty())
     RuntimeException::selfThrow("NonSmoothDynamicalSystem:: constructor(xml, ...): the set of DS is empty.");
 
-  if (allInteractions->isEmpty())  // Note: empty Interactions set is allowed.
+  if (allInteractionsLocal->isEmpty())  // Note: empty Interactions set is allowed.
     cout << "Warning: NonSmoothDynamicalSystem:: constructor(xml, ...): the set of Interactions is empty." << endl;
 
   // === Builds topology ===
-  topology.reset(new Topology(allInteractions));
+  topology.reset(new Topology(allInteractionsLocal));
 }
 
 // Constructor with one DS and one Interaction (optional)
@@ -92,15 +92,15 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::DynamicalSystem newDS, SP
   // Note that Interaction == NULL is possible and has sense.
 
   allDS.reset(new DynamicalSystemsSet());
-  allInteractions.reset(new InteractionsSet());
+  allInteractionsLocal.reset(new InteractionsSet());
   allDS->insert(newDS);
   if (newInteraction)
   {
-    allInteractions->insert(newInteraction);
+    allInteractionsLocal->insert(newInteraction);
   }
 
   // === build topology ===
-  topology.reset(new Topology(allInteractions));
+  topology.reset(new Topology(allInteractionsLocal));
 }
 
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS, InteractionsSet& listOfInteractions, const bool& isBVP):
@@ -132,10 +132,10 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS
       }*/
 
   allDS = createSPtrDynamicalSystemsSet(listOfDS);
-  allInteractions = createSPtrInteractionsSet(listOfInteractions);
+  allInteractionsLocal = createSPtrInteractionsSet(listOfInteractions);
 
   // === build topology ===
-  topology.reset(new Topology(allInteractions));
+  topology.reset(new Topology(allInteractionsLocal));
 }
 
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS, const bool& isBVP):
@@ -149,7 +149,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS
   // === "copy" listOfDS/listOfInteractions in allDS/allInteractions ===
   // Warning: DS/Interactions are not copied but pointers are inserted into the corresponding set.
   allDS.reset(new DynamicalSystemsSet());
-  allInteractions.reset(new InteractionsSet());
+  allInteractionsLocal.reset(new InteractionsSet());
   DSIterator itDS;
   for (itDS = listOfDS.begin(); itDS != listOfDS.end(); ++itDS)
   {
@@ -157,7 +157,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS
   }
 
   // === build topology ===
-  topology.reset(new Topology(allInteractions));
+  topology.reset(new Topology(allInteractionsLocal));
 }
 
 // === DynamicalSystems management ===
@@ -199,11 +199,11 @@ const bool NonSmoothDynamicalSystem::hasDynamicalSystem(SP::DynamicalSystem ds) 
 SP::Interaction NonSmoothDynamicalSystem::getInteractionPtr(const int& nb) const
 {
   // Mind that Interactions are sorted in a growing order according to their id number.
-  InteractionsIterator it = allInteractions->begin();
+  InteractionsIterator it = topology->getInteractionsPtr()->begin();
   for (int i = 0; i < nb; ++i)
     it++;
 
-  if (it == allInteractions->end())
+  if (it == topology->getInteractionsPtr()->end())
     RuntimeException::selfThrow("NonSmoothDynamicalSystem - getInteractionPtr(nb) : nb is out of range");
 
   return *it;
@@ -211,21 +211,21 @@ SP::Interaction NonSmoothDynamicalSystem::getInteractionPtr(const int& nb) const
 
 SP::Interaction NonSmoothDynamicalSystem::getInteractionPtrNumber(const int& nb) const
 {
-  if (! allInteractions->isIn(nb)) // if Interaction number nb is not in the set ...
+  if (! topology->getInteractionsPtr()->isIn(nb)) // if Interaction number nb is not in the set ...
     RuntimeException::selfThrow("NonSmoothDynamicalSystem::getInteractionOnNumber(nb), Interaction number nb is not in the set.");
 
-  return allInteractions->getPtr(nb);
+  return topology->getInteractionsPtr()->getPtr(nb);
 }
 
 void NonSmoothDynamicalSystem::setInteractions(const InteractionsSet& newVect)
 {
   // clear old set
-  allInteractions->clear();
+  topology->getInteractionsPtr()->clear();
 
   // copy the new one
   for (InteractionsIterator it = newVect.begin(); it != newVect.end(); ++it)
   {
-    allInteractions->insert(*it);
+    topology->addInteraction(*it);
   }
 
   topology->setUpToDate(false);
@@ -233,12 +233,12 @@ void NonSmoothDynamicalSystem::setInteractions(const InteractionsSet& newVect)
 
 const bool NonSmoothDynamicalSystem::hasInteractionNumber(const int& nb) const
 {
-  return allInteractions->isIn(nb);
+  return topology->getInteractionsPtr()->isIn(nb);
 }
 
 const bool NonSmoothDynamicalSystem::hasInteraction(SP::Interaction inter) const
 {
-  return allInteractions->isIn(inter);
+  return topology->getInteractionsPtr()->isIn(inter);
 }
 
 void NonSmoothDynamicalSystem::saveNSDSToXML()
@@ -264,7 +264,8 @@ void NonSmoothDynamicalSystem::saveNSDSToXML()
     }
 
     InteractionsIterator it2;
-    for (it2 = allInteractions->begin(); it2 != allInteractions->end(); ++it2)
+    for (it2 = topology->getInteractionsPtr()->begin();
+         it2 != getInteractionsPtr()->end(); ++it2)
       (*it2)->saveInteractionToXML();
   }
   else RuntimeException::selfThrow("NonSmoothDynamicalSystem::saveNSDSToXML - The NonSmoothDynamicalSystemXML object doesn't exists");
@@ -275,7 +276,7 @@ void NonSmoothDynamicalSystem::display() const
   cout << " ===== Non Smooth Dynamical System display ===== " << endl;
   cout << "---> isBVP = " << BVP << endl;
   allDS->display();
-  allInteractions->display();
+  topology->getInteractionsPtr()->display();
   cout << "===================================================" << endl;
 }
 
@@ -287,7 +288,7 @@ void NonSmoothDynamicalSystem::addDynamicalSystemPtr(SP::DynamicalSystem ds)
 
 void NonSmoothDynamicalSystem::addInteractionPtr(SP::Interaction inter)
 {
-  allInteractions->insert(inter);
+  topology->addInteraction(inter);
   // the topology should be updated
   topology->setUpToDate(false);
 }
@@ -308,7 +309,6 @@ double NonSmoothDynamicalSystem::nsdsConvergenceIndicator()
 
 void NonSmoothDynamicalSystem::clear()
 {
-  allInteractions->clear();
   topology->clear();
 };
 

@@ -80,53 +80,138 @@ TimeStepping::~TimeStepping()
 {
 }
 
+
+// i=1
 void TimeStepping::updateIndexSet(unsigned int i)
 {
   // To update IndexSet number i: add or remove UnitaryRelations from
   // this set, depending on y values.
 
-  assert(i <= indexSets.size() &&
+  assert(model);
+  assert(model->getNonSmoothDynamicalSystemPtr());
+  assert(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
+
+  SP::Topology topo = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+
+  assert(i < topo->indexSetsSize() &&
          "TimeStepping::updateIndexSet(i), indexSets[i] does not exist.");
 
-  assert(i != 0 // IndexSets[0] must not be updated in simulation,
+  assert(i != 0 &&   // IndexSets[0] must not be updated in simulation,
          // since it belongs to the Topology.
-         && "TimeStepping::updateIndexSet(i=0), indexSets[0] can not be updated.");
+         "TimeStepping::updateIndexSet(i=0), indexSets[0] can not be updated.");
+
+  assert(i == 1);  // yes
+
+  assert(topo->getIndexSetPtr(0));
+  assert(topo->getIndexSetPtr(1));
+
+  SP::UnitaryRelationsGraph indexSet0 = topo->getIndexSetPtr(0);
+  SP::UnitaryRelationsGraph indexSet1 = topo->getIndexSetPtr(1);
+
+
 
   // for all Unitary Relations in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i]
-  UnitaryRelationsIterator it, itForFind;
-
-  double y;
+  double y, yDot;
+  bool inserted;
 
   // For all UR in Index[i-1] ...
-  for (it = (indexSets[i - 1])->begin(); it != (indexSets[i - 1])->end(); ++it)
+  double h = getTimeStep();
+
+  // indexSet1 scan
+  UnitaryRelationsGraph::VIterator ui1, ui1end, v1next;
+  boost::tie(ui1, ui1end) = indexSet1->vertices();
+
+  for (v1next = ui1 ;
+       ui1 != ui1end; ui1 = v1next)
   {
-    // itForFind: indicator to check if current Unitary Relation (ie
-    // *it) is already in indexSets[1] (if not itForFind will be
-    // equal to indexSets.end())
-    itForFind = (indexSets[i])->find(*it);
+    ++v1next;
 
-    // Get y values for the considered UnitaryRelation
-    y = (*it)->getYRef(i - 1); // y[i-1](0)
-    if (i == 1)
+    SP::UnitaryRelation ur1 = indexSet1->bundle(*ui1);
+    if (indexSet0->is_vertex(ur1))
     {
-      double h = getTimeStep(); // Current time step
-      double yDot = (*it)->getYRef(1); // y[1](0)
-      y += 0.5 * h * yDot; // y_"prediction" = y[0](0) + 0.5*h*y[1](0)
+      UnitaryRelationsGraph::VDescriptor ur1_descr0 = indexSet0->descriptor(ur1);
+
+      assert((indexSet0->color(ur1_descr0)
+              == boost::white_color));
+
+      indexSet0->color(ur1_descr0) = boost::gray_color;
+
+      y = ur1->getYRef(i - 1);
+      yDot = ur1->getYRef(1);
+      y += 0.5 * h * yDot;
+      if (y > 0)
+      {
+        // Unitary relation is not active
+        // ui1 becomes invalid
+        indexSet0->color(ur1_descr0) = boost::black_color;
+        indexSet1->remove_vertex(ur1);
+        ur1->getLambdaPtr(1)->zero();
+      }
     }
-
-    // if y <=0, then the unitary relation is added in indexSets[1]
-    // (if it was not already there) else if y > 0 and if the
-    // unitary relation was in the set, it is removed.
-    if (y <= 0 && itForFind == (indexSets[i])->end())
-      (indexSets[i])->insert(*it);
-
-    else if (y > 0 && itForFind != (indexSets[i])->end())
+    else
     {
-      (indexSets[i])->erase(*it);
-      (*it)->getLambdaPtr(i)->zero();
+      // Unitary relation is not in indexSet0 anymore.
+      // ui1 becomes invalid
+      indexSet1->remove_vertex(ur1);
     }
   }
+
+  // indexSet0\indexSet1 scan
+  UnitaryRelationsGraph::VIterator ui0, ui0end;
+
+  for (boost::tie(ui0, ui0end) = indexSet0->vertices();
+       ui0 != ui0end; ++ui0)
+  {
+    if (indexSet0->color(*ui0) == boost::black_color)
+    {
+      // reset
+      indexSet0->color(*ui0) = boost::white_color ;
+    }
+    else
+    {
+      if (indexSet0->color(*ui0) == boost::gray_color)
+      {
+
+        // reset
+        indexSet0->color(*ui0) = boost::white_color ;
+
+        assert(indexSet1->is_vertex(indexSet0->bundle(*ui0)));
+        assert( { y = indexSet0->bundle(*ui0)->getYRef(i - 1);
+                  yDot = indexSet0->bundle(*ui0)->getYRef(1);
+                  y += 0.5 * h*yDot;
+                  y <= 0;
+                });
+      }
+
+      else
+      {
+        assert(indexSet0->color(*ui0) == boost::white_color);
+
+        SP::UnitaryRelation ur0 = indexSet0->bundle(*ui0);
+        assert(!indexSet1->is_vertex(ur0));
+
+
+        y = ur0->getYRef(i - 1);
+        yDot = ur0->getYRef(1);
+        y += 0.5 * h * yDot;
+        if (y <= 0)
+        {
+          assert(!indexSet1->is_vertex(ur0));
+
+          indexSet1->copy_vertex(ur0, *indexSet0);
+
+          assert(indexSet1->is_vertex(ur0));
+        }
+      }
+    }
+  }
+
+  indexSet1->update_vertices_indices();
+  indexSet1->update_edges_indices();
+
+  assert(indexSet1->size() <= indexSet0->size());
+
 }
 
 void TimeStepping::recordNonSmoothProblem(SP::OneStepNSProblem osns)
@@ -134,7 +219,8 @@ void TimeStepping::recordNonSmoothProblem(SP::OneStepNSProblem osns)
   // A the time, a time stepping simulation can only have one non
   // smooth problem.
   if (!allNSProblems->empty())
-    RuntimeException::selfThrow("TimeStepping,  recordNonSmoothProblem - A non smooth problem already exist. You can not have more than one.");
+    RuntimeException::selfThrow
+    ("TimeStepping,  recordNonSmoothProblem - A non smooth problem already exist. You can not have more than one.");
   string name = "timeStepping";
   osns->setId(name);
   (*allNSProblems)[name] = osns;
@@ -147,19 +233,26 @@ void TimeStepping::initOSNS()
   SP::OneStepIntegrator  osi;
 
   ConstDSIterator itDS;
-  UnitaryRelationsIterator it;
+
+  SP::Topology topo =  model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  SP::UnitaryRelationsGraph indexSet0 = topo->getIndexSetPtr(0);
+
+  UnitaryRelationsGraph::VIterator ui, uiend;
+
   // For each Unitary relation in I0 ...
-  for (it = indexSets[0]->begin(); it != indexSets[0]->end(); ++it)
+  for (boost::tie(ui, uiend) = indexSet0->vertices();
+       ui != uiend; ++ui)
   {
-    (*it)->initialize("TimeStepping");
+    SP::UnitaryRelation ur = indexSet0->bundle(*ui);
+    indexSet0->bundle(*ui)->initialize("TimeStepping");
     // creates a POINTER link between workX[ds] (xfree) and the
     // corresponding unitaryBlock in each UR for each ds of the
     // current UR.
-    for (itDS = (*it)->dynamicalSystemsBegin();
-         itDS != (*it)->dynamicalSystemsEnd(); ++itDS)
+    for (itDS = ur->dynamicalSystemsBegin();
+         itDS != ur->dynamicalSystemsEnd(); ++itDS)
     {
       osi = osiMap[*itDS];
-      (*it)->insertInWorkX(osi->getWorkX(*itDS));
+      ur->insertInWorkX(osi->getWorkX(*itDS));
     }
   }
 
@@ -177,6 +270,7 @@ void TimeStepping::initOSNS()
 
     assert(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->isUpToDate());
     assert(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMinRelativeDegree() >= 0);
+
     levelMin = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMinRelativeDegree();
 
     if (levelMin != 0)
@@ -315,7 +409,8 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
 void TimeStepping::run(const std::string& opt, double criterion, unsigned int maxIter)
 {
   unsigned int count = 0; // events counter.
-  // do simulation while events remains in the "future events" list of events manager.
+  // do simulation while events remains in the "future events" list of
+  // events manager.
   cout << " ==== Start of " << simulationType << " simulation - This may take a while ... ====" << endl;
   while (eventsManager->hasNextEvent())
   {

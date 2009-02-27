@@ -24,7 +24,6 @@
 #include "Interaction.h"
 #include "Relation.h"
 #include "OneStepIntegratorXML.h"
-#include "Model.h"
 #include "EventsManager.h"
 
 // One Step Integrators
@@ -100,7 +99,7 @@ Simulation::~Simulation()
   allNSProblems->clear();
   allOSI->clear();
   osiMap.clear();
-  indexSets.clear();
+
   allNSProblems->clear();
   // -> see shared ressources for this
   if (statOut.is_open()) statOut.close();
@@ -141,23 +140,20 @@ SP::OneStepIntegrator Simulation::getIntegratorOfDSPtr(SP::DynamicalSystem ds) c
 void Simulation::recordIntegrator(SP::OneStepIntegrator osi)
 {
   allOSI->insert(osi);
-  // Note: each (ds,osi) pair will be registered into the osiMap during initialize() call (in osi->initialize).
-  // During this step, we will check that each ds belongs to one and only one osi.
+  // Note: each (ds,osi) pair will be registered into the osiMap
+  // during initialize() call (in osi->initialize).  During this step,
+  // we will check that each ds belongs to one and only one osi.
 }
 
 void Simulation::addInOSIMap(SP::DynamicalSystem ds, SP::OneStepIntegrator  osi)
 {
-  if (osiMap.find(ds) != osiMap.end()) // ie if ds is already registered in the map with another integrator
+  if (osiMap.find(ds) != osiMap.end()) // ie if ds is already registered
+    // in the map with another
+    // integrator
     ;/*RuntimeException::selfThrow("Simulation::addInOSIMap(ds,osi), ds is already associated with another one-step integrator");  */
   osiMap[ds] = osi;
 }
 
-SP::UnitaryRelationsSet Simulation::getIndexSetPtr(unsigned int i)
-{
-  if (i >= indexSets.size())
-    RuntimeException::selfThrow("Simulation - getIndexSetPtr(i) - index set(i) does not exist.");
-  return (indexSets[i]);
-}
 
 SP::OneStepNSProblem Simulation::getOneStepNSProblemPtr(const std::string& name)
 {
@@ -210,9 +206,12 @@ const bool Simulation::hasOneStepNSProblem(const string& name) const
 void Simulation::updateIndexSets()
 {
   // Warning, I0 is not updated and must remain unchanged !
-  if (indexSets.size() > 1)
+  unsigned int nindexsets = model->getNonSmoothDynamicalSystemPtr()
+                            ->getTopologyPtr()->indexSetsSize();
+
+  if (nindexsets > 1)
   {
-    for (unsigned int i = 1; i < indexSets.size() ; ++i)
+    for (unsigned int i = 1; i < nindexsets ; ++i)
       updateIndexSet(i);
   }
 }
@@ -228,26 +227,17 @@ void Simulation::recordNonSmoothProblem(SP::OneStepNSProblem osns)
 
 void Simulation::updateInteractions()
 {
-  SP::InteractionsSet allInteractions = model->getNonSmoothDynamicalSystemPtr()->getInteractions();
-  if (!allInteractions->isEmpty()) // ie if some Interactions have been declared
+
+  SP::InteractionsSet allInteractions =
+    model->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
+
+  //if(!allInteractions->isEmpty())  // ie if some Interactions have been declared
   {
     initLevelMax();
 
     std::for_each(allInteractions->begin(), allInteractions->end(),
                   boost::bind(&Interaction::initialize, _1, tinit, levelMax + 1));
 
-    for (unsigned int i = 1; i < indexSets.size(); ++i)
-      indexSets[i]->clear();
-    if (indexSets.size() > 0) indexSets[0]->clear();
-    indexSets.clear();
-    indexSets.resize(levelMax + 1);
-    // Link with index0 of the Topology.
-    indexSets[0] = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getIndexSet0Ptr();
-
-    for (unsigned int i = 1; i < indexSets.size(); ++i)
-    {
-      indexSets[i].reset(new UnitaryRelationsSet());
-    }
     initOSNS();
   };
 }
@@ -258,6 +248,8 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   assert(m || !"Simulation::initialize(model) - model = NULL.");
   model = m;
 
+  SP::Topology topo = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+
   // === Events manager initialization ===
   eventsManager->initialize(shared_from_this());
   tinit = eventsManager->getStartingTime();
@@ -265,38 +257,38 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   if (withOSI)
   {
     // === OneStepIntegrators initialization ===
-    std::for_each(allOSI->begin(), allOSI->end(), boost::bind(&OneStepIntegrator::initialize, _1, shared_from_this()));
+    std::for_each(allOSI->begin(), allOSI->end(),
+                  boost::bind(&OneStepIntegrator::initialize, _1, shared_from_this()));
   };
 
   // === IndexSets building ===
-  // The number of indexSets is given by the maximum value of relative degrees of the unitary relations.
-  SP::InteractionsSet allInteractions = model->getNonSmoothDynamicalSystemPtr()->getInteractions();
-  if (!allInteractions->isEmpty()) // ie if some Interactions have been declared
+
+  // The number of indexSets is given by the maximum value of relative
+  // degrees of the unitary relations.
+  SP::InteractionsSet allInteractions =
+    model->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
+  //  if( !allInteractions->isEmpty() ) // ie if some Interactions
+  //  have been declared
   {
     initLevelMax();
+    topo->indexSetsResize(levelMax + 1);
 
     std::for_each(allInteractions->begin(), allInteractions->end(),
                   boost::bind(&Interaction::initialize, _1, tinit, levelMax + 1));
 
-    for (unsigned int i = 1; i < indexSets.size(); ++i)
-      indexSets[i]->clear();
-    if (indexSets.size() > 0) indexSets[0]->clear();
-    indexSets.clear();
-    indexSets.resize(levelMax + 1);
-    // Link with index0 of the Topology.
-    indexSets[0] = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getIndexSet0Ptr();
+    for (unsigned int i = 1; i < topo->indexSetsSize(); ++i)
+      topo->resetIndexSetPtr(i);
 
-    for (unsigned int i = 1; i < indexSets.size(); ++i)
-      indexSets[i].reset(new UnitaryRelationsSet());
-
-    // Initialize OneStepNSProblem: in derived classes specific functions.
+    // Initialize OneStepNSProblem: in derived classes specific
+    // functions.
     initOSNS();
   }
 
 
-  // Process events at time tinit. Useful to save values in memories for example.
-  // Warning: can not be called during eventsManager->initialize, because it needs
-  // the initialization of OSI, OSNS ...
+  // Process events at time tinit. Useful to save values in memories
+  // for example.  Warning: can not be called during
+  // eventsManager->initialize, because it needs the initialization of
+  // OSI, OSNS ...
   eventsManager->preUpdate();
   tend =  eventsManager->getNextTime();
 
@@ -306,10 +298,13 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 
   // End of initialize:
 
-  //  - all OSI and OSNS (ie DS and Interactions) states are computed for time tinit and saved into memories.
+  //  - all OSI and OSNS (ie DS and Interactions) states are computed
+  //  - for time tinit and saved into memories.
   //  - Sensors or related objects are updated for t=tinit.
-  //  - current time of the model is equal to t1, time of the first event after tinit.
-  //  - currentEvent of the simu. corresponds to tinit and nextEvent to tend.
+  //  - current time of the model is equal to t1, time of the first
+  //  - event after tinit.
+  //  - currentEvent of the simu. corresponds to tinit and nextEvent
+  //  - to tend.
 
   // If printStat is true, open output file.
   if (printStat)
@@ -386,7 +381,9 @@ void Simulation::updateInput(int level)
   // To compute input(level) (ie with lambda[level]) for all Interactions.
 
   if (level == -1)
-    level = levelMin; // We use this since it is impossible to set levelMin as defaultValue in OneStepNSProblem.h
+    level = levelMin; // We use this since it is impossible to set
+  // levelMin as defaultValue in
+  // OneStepNSProblem.h
 
   //  double time = getNextTime();
   double time = model->getCurrentTime();
@@ -403,7 +400,8 @@ void Simulation::updateInput(int level)
 
 void Simulation::updateOutput(int level0, int level1)
 {
-  // To compute output() for all levels between level0 and level1 (included), for all Interactions.
+  // To compute output() for all levels between level0 and level1
+  // (included), for all Interactions.
   if (level1 == -1)
     level1 = levelMax;
 
@@ -420,7 +418,8 @@ void Simulation::updateOutput(int level0, int level1)
 
 void Simulation::run(const std::string&, double, unsigned int)
 {
-  // Note that input arg. are useless in general case. Only useful for timeStepping.
+  // Note that input arg. are useless in general case. Only useful for
+  // timeStepping.
 
   unsigned int count = 0; // events counter.
   cout << " ==== Start of " << simulationType << " simulation - This may take a while ... ====" << endl;
@@ -438,10 +437,3 @@ void Simulation::processEvents()
   eventsManager->processEvents();
 }
 
-void Simulation::clear()
-{
-  for (unsigned int i = 1; i < indexSets.size(); ++i)
-    indexSets[i]->clear();
-  if (indexSets.size() > 0) indexSets[0]->clear();
-  indexSets.clear();
-}

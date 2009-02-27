@@ -63,8 +63,8 @@ OneStepNSProblem::OneStepNSProblem(const string& pbType, const string& newId, SP
 {
   if (!newSolver)
   {
-    // If the user does not provide any Solver, an empty one is built.
-    // Data will be read from XXX.opt file in Numerics.
+    // If the user does not provide any Solver, an empty one is
+    // built.  Data will be read from XXX.opt file in Numerics.
     solver.reset(new NonSmoothSolver());
   }
 
@@ -80,11 +80,13 @@ SP::SiconosMatrix OneStepNSProblem::getUnitaryBlockPtr(SP::UnitaryRelation UR1, 
 
   ConstUnitaryMatrixRowIterator itRow = unitaryBlocks.find(UR1);
   // itRow: we get the map of unitaryBlocks that corresponds to UR1.
-  // Then, thanks to itCol, we iterate through this map to find UR2 and the unitaryBlock that corresonds to UR1 and UR2
+  // Then, thanks to itCol, we iterate through this map to find UR2
+  // and the unitaryBlock that corresonds to UR1 and UR2
   ConstUnitaryMatrixColumnIterator itCol = (itRow->second).find(UR2);
 
-  if (itCol == (itRow->second).end()) // if UR1 and UR2 are not connected
-    RuntimeException::selfThrow("OneStepNSProblem - getUnitaryBlockPtr(UR1,UR2) : no unitaryBlock corresonds to UR1 and UR2, ie the Unitary Relations are not connected.");
+  if (itCol == (itRow->second).end()) // if UR1 and UR2 are not
+    // connected
+    RuntimeException::selfThrow("OneStepNSProblem - getUnitaryBlockPtr(UR1,UR2) : no unitaryBlock corresponds to UR1 and UR2, ie the Unitary Relations are not connected.");
 
   return itCol->second;
 
@@ -163,23 +165,29 @@ void OneStepNSProblem::setNonSmoothSolverPtr(SP::NonSmoothSolver newSolv)
 
 void OneStepNSProblem::updateUnitaryBlocks()
 {
-  // The present functions checks various conditions and possibly compute unitaryBlocks matrices.
+  // The present functions checks various conditions and possibly
+  // compute unitaryBlocks matrices.
   //
   // Let URi and URj be two Unitary Relations.
   //
   // Things to be checked are:
   //  1 - is the topology time invariant?
-  //  2 - does unitaryBlocks[URi][URj] already exists (ie has been computed in a previous time step)?
-  //  3 - do we need to compute this unitaryBlock? A unitaryBlock is to be computed if URi and URj are in IndexSet1 AND if URi and URj have common DynamicalSystems.
+  //  2 - does unitaryBlocks[URi][URj] already exists (ie has been
+  //  computed in a previous time step)?
+  //  3 - do we need to compute this unitaryBlock? A unitaryBlock is
+  //  to be computed if URi and URj are in IndexSet1 AND if URi and
+  //  URj have common DynamicalSystems.
   //
   // The possible cases are:
   //
   //  - If 1 and 2 are true then it does nothing. 3 is not checked.
   //  - If 1 == true, 2 == false, 3 == false, it does nothing.
-  //  - If 1 == true, 2 == false, 3 == true, it computes the unitaryBlock.
-  //  - If 1==false, 2 is not checked, and the unitaryBlock is computed if 3==true.
+  //  - If 1 == true, 2 == false, 3 == true, it computes the
+  //    unitaryBlock.
+  //  - If 1==false, 2 is not checked, and the unitaryBlock is
+  //    computed if 3==true.
   //
-  SP::UnitaryRelationsSet indexSet;
+  SP::UnitaryRelationsGraph indexSet;
   bool isTimeInvariant;
   UnitaryRelationsIterator itUR1, itUR2;
   DynamicalSystemsSet commonDS;
@@ -188,22 +196,50 @@ void OneStepNSProblem::updateUnitaryBlocks()
   indexSet = simulation->getIndexSetPtr(levelMin);
 
 
-  isTimeInvariant = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->isTimeInvariant();
-  for (itUR1 = indexSet->begin(); itUR1 != indexSet->end(); ++itUR1)
-  {
+  isTimeInvariant = simulation->getModelPtr()->
+                    getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->isTimeInvariant();
 
-    for (itUR2 = indexSet->begin(); itUR2 != indexSet->end(); ++itUR2)
+  UnitaryRelationsGraph::VIterator ui1, ui1end;
+  for (boost::tie(ui1, ui1end) = indexSet->vertices();
+       ui1 != ui1end; ++ui1)
+  {
+    SP::UnitaryRelation ur1 = indexSet->bundle(*ui1);
+
+    if (!isTimeInvariant)
     {
-      if (!isTimeInvariant)
-        computeUnitaryBlock(*itUR1, *itUR2);
-      else // if(isTimeInvariant)
+      computeUnitaryBlock(ur1, ur1);
+    }
+    else
+    {
+      // if unitaryBlocks[UR1] exists
+      if ((unitaryBlocks.find(ur1)) != unitaryBlocks.end())
       {
-        if ((unitaryBlocks.find(*itUR1)) != unitaryBlocks.end())  // if unitaryBlocks[UR1] exists
+        // if unitaryBlocks[UR1][UR2] does not exist
+        if ((unitaryBlocks[ur1].find(ur1)) == (unitaryBlocks[ur1].end()))
+          computeUnitaryBlock(ur1, ur1);
+      }
+      else computeUnitaryBlock(ur1, ur1);
+    }
+
+    UnitaryRelationsGraph::AVIterator ui2, ui2end;
+    for (boost::tie(ui2, ui2end) = indexSet->adjacent_vertices(*ui1);
+         ui2 != ui2end; ++ui2)
+    {
+      SP::UnitaryRelation ur2 = indexSet->bundle(*ui2);
+      if (!isTimeInvariant)
+      {
+        computeUnitaryBlock(ur1, ur2);
+      }
+      else
+      {
+        // if unitaryBlocks[UR1] exists
+        if ((unitaryBlocks.find(ur1)) != unitaryBlocks.end())
         {
-          if ((unitaryBlocks[*itUR1].find(*itUR2)) == (unitaryBlocks[*itUR1].end()))   // if unitaryBlocks[UR1][UR2] does not exist
-            computeUnitaryBlock(*itUR1, *itUR2);
+          // if unitaryBlocks[UR1][UR2] does not exist
+          if ((unitaryBlocks[ur1].find(ur2)) == (unitaryBlocks[ur1].end()))
+            computeUnitaryBlock(ur1, ur2);
         }
-        else computeUnitaryBlock(*itUR1, *itUR2);
+        else computeUnitaryBlock(ur1, ur2);
       }
     }
   }
@@ -211,17 +247,28 @@ void OneStepNSProblem::updateUnitaryBlocks()
 
 void OneStepNSProblem::computeAllUnitaryBlocks()
 {
-  SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(0);
+  SP::UnitaryRelationsGraph indexSet = simulation->getIndexSetPtr(0);
 
   UnitaryRelationsIterator itUR1, itUR2;
   DynamicalSystemsSet commonDS;
 
-  for (itUR1 = indexSet->begin(); itUR1 != indexSet->end(); ++itUR1)
+  UnitaryRelationsGraph::VIterator ui1, ui1end;
+  for (boost::tie(ui1, ui1end) = indexSet->vertices();
+       ui1 != ui1end; ++ui1)
   {
-    for (itUR2 = indexSet->begin(); itUR2 != indexSet->end(); ++itUR2)
-      computeUnitaryBlock(*itUR1, *itUR2);
+    SP::UnitaryRelation ur1 = indexSet->bundle(*ui1);
+    computeUnitaryBlock(ur1, ur1);
+
+    UnitaryRelationsGraph::AVIterator ui2, ui2end;
+    for (boost::tie(ui2, ui2end) = indexSet->adjacent_vertices(*ui1);
+         ui2 != ui2end; ++ui2)
+    {
+      SP::UnitaryRelation ur2 = indexSet->bundle(*ui2);
+      computeUnitaryBlock(ur1, ur2);
+    }
   }
 }
+
 
 void OneStepNSProblem::computeUnitaryBlock(SP::UnitaryRelation, SP::UnitaryRelation)
 {
@@ -250,35 +297,35 @@ void OneStepNSProblem::updateDSBlocks()
   // \warning We decided to include all dynamical systems test 3 is not satisfied
 
 
-  bool isTimeInvariant = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()
-                         ->getTopologyPtr()->isTimeInvariant();
-  SP::DynamicalSystemsSet allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  //   bool isTimeInvariant= simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()
+  //     ->getTopologyPtr()->isTimeInvariant();
+  //   SP::DynamicalSystemsSet allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
 
-  DSIterator itDS;
-  for (itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
-  {
-    if (!isTimeInvariant)
-      computeDSBlock(*itDS);
-    else // if(isTimeInvariant)
-    {
-      if ((DSBlocks.find(*itDS)) != DSBlocks.end())  // if unitaryBlocks[UR1] exists
-      {
-        ; // do nothing
-      }
-      else computeDSBlock(*itDS);
-    }
-  }
+  //   DSIterator itDS;
+  //   for(itDS = allDS->begin(); itDS!=allDS->end();++itDS)
+  //     {
+  //       if(!isTimeInvariant)
+  //  computeDSBlock(*itDS);
+  //       else // if(isTimeInvariant)
+  //  {
+  //    if( (DSBlocks.find(*itDS)) != DSBlocks.end())  // if unitaryBlocks[UR1] exists
+  //      {
+  //        ; // do nothing
+  //      }
+  //    else computeDSBlock(*itDS);
+  //  }
+  //     }
 
 }
 
 void OneStepNSProblem::computeAllDSBlocks()
 {
-  SP::DynamicalSystemsSet allDS;
-  DSIterator itDS;
-  allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  //  SP::DynamicalSystemsSet allDS;
+  //   DSIterator itDS;
+  //   allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
 
-  for (itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
-    computeDSBlock(*itDS);
+  //   for(itDS = allDS->begin(); itDS!=allDS->end();++itDS)
+  //     computeDSBlock(*itDS);
 }
 
 void OneStepNSProblem::computeDSBlock(SP::DynamicalSystem)
@@ -315,58 +362,58 @@ void OneStepNSProblem::updateUnitaryDSBlocks()
 
   // Get index set from Simulation
 
-  indexSet = simulation->getIndexSetPtr(levelMin);
+  // indexSet = simulation->getIndexSetPtr(levelMin);
 
 
-  isTimeInvariant = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->isTimeInvariant();
+  //   isTimeInvariant = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->isTimeInvariant();
 
-  itUR = indexSet->begin();
+  //   itUR = indexSet->begin();
 
-  for (itUR = indexSet->begin(); itUR != indexSet->end(); ++itUR)
-  {
-    concernedDS = (*itUR)->getDynamicalSystemsPtr();
+  //   for(itUR = indexSet->begin(); itUR!=indexSet->end();++itUR)
+  //     {
+  //       concernedDS = (*itUR)->getDynamicalSystemsPtr();
 
-    for (itDS = concernedDS->begin(); itDS != concernedDS->end(); itDS++)
-    {
-      if (!isTimeInvariant)
-      {
+  //       for(itDS = concernedDS->begin(); itDS!=concernedDS->end();itDS++)
+  //  {
+  //    if(!isTimeInvariant)
+  //      {
 
-        computeUnitaryDSBlock(*itUR, *itDS);
-      }
-      else // if(isTimeInvariant)
-      {
-        if ((unitaryDSBlocks.find(*itUR)) != unitaryDSBlocks.end())  // if unitaryBlocks[UR] exists
-        {
-          if ((unitaryDSBlocks[*itUR].find(*itDS)) == (unitaryDSBlocks[*itUR].end()))   // if unitaryBlocks[UR][DS2] does not exist
-          {
+  //        computeUnitaryDSBlock(*itUR, *itDS);
+  //      }
+  //    else // if(isTimeInvariant)
+  //      {
+  //        if( (unitaryDSBlocks.find(*itUR)) != unitaryDSBlocks.end())  // if unitaryBlocks[UR] exists
+  //    {
+  //      if( (unitaryDSBlocks[*itUR].find(*itDS)) == (unitaryDSBlocks[*itUR].end() ) ) // if unitaryBlocks[UR][DS2] does not exist
+  //        {
 
-            computeUnitaryDSBlock(*itUR, *itDS);
-          }
-        }
-        else
-        {
-          computeUnitaryDSBlock(*itUR, *itDS);
+  //          computeUnitaryDSBlock(*itUR, *itDS);
+  //        }
+  //    }
+  //        else
+  //    {
+  //      computeUnitaryDSBlock(*itUR, *itDS);
 
-        }
-      }
-    }
-  }
+  //    }
+  //      }
+  //  }
+  //     }
 
 }
 
 void OneStepNSProblem::computeAllUnitaryDSBlocks()
 {
-  SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(0);
-  DSIterator itDS;
-  UnitaryRelationsIterator itUR;
-  DynamicalSystemsSet concernedDS;
+  // SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(0);
+  //   DSIterator itDS;
+  //   UnitaryRelationsIterator itUR;
+  //   DynamicalSystemsSet concernedDS;
 
-  for (itUR = indexSet->begin(); itUR != indexSet->end(); ++itUR)
-  {
-    concernedDS =  *((*itUR)->getDynamicalSystemsPtr());
-    for (itDS = concernedDS.begin(); itDS != concernedDS.end(); itDS++)
-      computeUnitaryDSBlock(*itUR, *itDS);
-  }
+  //   for(itUR = indexSet->begin(); itUR!=indexSet->end();++itUR)
+  //     {
+  //       concernedDS =  *((*itUR)->getDynamicalSystemsPtr());
+  //       for(itDS = concernedDS.begin(); itDS!=concernedDS.end();itDS++)
+  //  computeUnitaryDSBlock(*itUR, *itDS);
+  //     }
 }
 
 void OneStepNSProblem::computeUnitaryDSBlock(SP::UnitaryRelation, SP::DynamicalSystem)
@@ -402,42 +449,42 @@ void OneStepNSProblem::updateDSUnitaryBlocks()
 
   // Get index set from Simulation
 
-  indexSet = simulation->getIndexSetPtr(levelMin);
-  isTimeInvariant = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->isTimeInvariant();
+  //   indexSet = simulation->getIndexSetPtr(levelMin);
+  //   isTimeInvariant = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->isTimeInvariant();
 
-  for (itUR = indexSet->begin(); itUR != indexSet->end(); ++itUR)
-  {
-    concernedDS = (*itUR)->getDynamicalSystemsPtr();
-    for (itDS = concernedDS->begin(); itDS != concernedDS->end(); itDS++)
-    {
-      if (!isTimeInvariant)
-        computeDSUnitaryBlock(*itDS, *itUR);
-      else // if(isTimeInvariant)
-      {
-        if ((DSUnitaryBlocks.find(*itDS)) != DSUnitaryBlocks.end())  // if unitaryBlocks[UR] exists
-        {
-          if ((DSUnitaryBlocks[*itDS].find(*itUR)) == (DSUnitaryBlocks[*itDS].end()))   // if unitaryBlocks[UR][DS2] does not exist
-            computeDSUnitaryBlock(*itDS, *itUR);
-        }
-        else computeDSUnitaryBlock(*itDS, *itUR);
-      }
-    }
-  }
+  //   for(itUR = indexSet->begin(); itUR!=indexSet->end();++itUR)
+  //     {
+  //       concernedDS = (*itUR)->getDynamicalSystemsPtr();
+  //       for(itDS = concernedDS->begin(); itDS!=concernedDS->end();itDS++)
+  //  {
+  //    if(!isTimeInvariant)
+  //      computeDSUnitaryBlock(*itDS, *itUR);
+  //    else // if(isTimeInvariant)
+  //      {
+  //        if( (DSUnitaryBlocks.find(*itDS)) != DSUnitaryBlocks.end())  // if unitaryBlocks[UR] exists
+  //    {
+  //      if( (DSUnitaryBlocks[*itDS].find(*itUR)) == (DSUnitaryBlocks[*itDS].end() ) ) // if unitaryBlocks[UR][DS2] does not exist
+  //        computeDSUnitaryBlock(*itDS, *itUR);
+  //    }
+  //        else computeDSUnitaryBlock(*itDS, *itUR);
+  //      }
+  //  }
+  //     }
 }
 
 void OneStepNSProblem::computeAllDSUnitaryBlocks()
 {
-  SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(0);
-  DSIterator itDS;
-  UnitaryRelationsIterator itUR;
-  SP::DynamicalSystemsSet concernedDS;
+  //  SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(0);
+  //   DSIterator itDS;
+  //   UnitaryRelationsIterator itUR;
+  //   SP::DynamicalSystemsSet concernedDS;
 
-  for (itUR = indexSet->begin(); itUR != indexSet->end(); ++itUR)
-  {
-    concernedDS = (*itUR)->getDynamicalSystemsPtr();
-    for (itDS = concernedDS->begin(); itDS != concernedDS->end(); itDS++)
-      computeDSUnitaryBlock(*itDS, *itUR);
-  }
+  //   for(itUR = indexSet->begin(); itUR!=indexSet->end();++itUR)
+  //     {
+  //       concernedDS =  (*itUR)->getDynamicalSystemsPtr();
+  //       for(itDS = concernedDS->begin(); itDS!=concernedDS->end();itDS++)
+  //  computeDSUnitaryBlock(*itDS, *itUR);
+  //     }
 }
 
 void OneStepNSProblem::computeDSUnitaryBlock(SP::DynamicalSystem, SP::UnitaryRelation)
@@ -456,17 +503,13 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
 
   // === Link to the Interactions of the Non Smooth Dynamical System (through the Simulation) ===
   // Warning: this means that all Interactions of the NSProblem are included in the OSNS !!
-  OSNSInteractions = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
+  OSNSInteractions = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
 
   // === Adds this in the simulation set of OneStepNSProblem ===
   // First checks the id if required.
   // An id is required if there is more than one OneStepNSProblem in the simulation
   if (!(simulation->getOneStepNSProblems())->empty() && id == DEFAULT_OSNS_NAME)
     RuntimeException::selfThrow("OneStepNSProblem::constructor(...). Since the simulation has several one step non smooth problem, an id is required for each of them.");
-
-  // === Link to the Interactions of the Non Smooth Dynamical System (through the Simulation) ===
-  // Warning: this means that all Interactions of the NSProblem are included in the OSNS !!
-  OSNSInteractions = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
 
   // Checks that the set of Interactions is not empty -
   // Empty set is not forbidden, then we just display a warning message.
@@ -484,6 +527,7 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
 
 void OneStepNSProblem::saveInMemory()
 {
+  assert(OSNSInteractions);
   std::for_each(OSNSInteractions->begin(), OSNSInteractions->end(), boost::bind(&Interaction::swapInMemory, _1));
 }
 

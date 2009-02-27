@@ -1,4 +1,4 @@
-/* Siconos-Example version 3.0.0, Copyright INRIA 2005-2008.
+/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -12,53 +12,27 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Siconos; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth FLOOR, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
- *
- */
-
-/*! \file CircleCircleR.h
-  \brief Two disks relation - Inherits from LagrangianScleronomousR
 */
 
-#ifndef CircularR_h
-#define CircularR_h
+#include <cppunit/extensions/TestFactoryRegistry.h>
+#include <cppunit/ui/text/TestRunner.h>
+#include <iostream>
+using namespace std;
 
-#include "Interaction.h"
-#include "LagrangianScleronomousR.h"
-
-class CircularR : public LagrangianScleronomousR
+int main()
 {
-protected:
-  double r1, r2;
+  // The object to run tests
+  CppUnit::TextUi::TestRunner runner;
 
-  CircularR();
+  // Get test classes that have been registered
+  CppUnit::TestFactoryRegistry &registry = CppUnit::TestFactoryRegistry::getRegistry();
 
-  ~CircularR();
+  // Put tests into the runner
+  runner.addTest(registry.makeTest());
 
-public:
-
-  /** Constructor
-
-  \param disk1 radius
-  \param disk2 radius
-  */
-  CircularR(double, double);
-
-  double getRadius1()
-  {
-    return r1;
-  };
-
-  double getRadius2()
-  {
-    return r2;
-  };
-
-  virtual double distance(double, double, double, double, double, double);
-
-};
-
-TYPEDEF_SPTR(CircularR);
-#endif /* CircularR_h */
+  // Run tests
+  runner.run("", false, true, false);
+}

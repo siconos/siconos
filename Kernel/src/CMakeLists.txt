@@ -33,13 +33,15 @@ SET(SiconosKernel_DIRS
   utils/SiconosMemory
   utils/SiconosSharedLibrary
   utils/SiconosTools
-  xml)
+  xml
+)
 
 #
 # Unstable sources
 #
 SET(SiconosKernel_Unstable_SRCS 
-  simulationTools/PrimalFrictionContact.cpp)
+  simulationTools/PrimalFrictionContact.cpp
+  simulationTools/MLCP2.cpp)
 
 
 #
@@ -154,6 +156,12 @@ IF(CPPUNIT_FOUND)
   
   END_TEST()
   
+  BEGIN_TEST(utils/SiconosTools/test)
+
+  NEW_TEST(SiconosGraph SiconosGraphTest.cpp TestMain.cpp)
+
+  END_TEST()
+
 ENDIF(CPPUNIT_FOUND)
 
 #

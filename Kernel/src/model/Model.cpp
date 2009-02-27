@@ -66,9 +66,9 @@ Model::Model(char *xmlFile):
   if (modelxml->hasSimulation())
   {
     if (modelxml->getSimulationXML()->getSimulationXMLType() == TIMESTEPPING_TAG)
-      strat.reset(new TimeStepping(modelxml->getSimulationXML(), t0, T, nsds->getDynamicalSystems(), nsds->getInteractions()));
+      strat.reset(new TimeStepping(modelxml->getSimulationXML(), t0, T, nsds->getDynamicalSystems(), nsds->getInteractionsPtr()));
     else if (modelxml->getSimulationXML()->getSimulationXMLType() == EVENTDRIVEN_TAG)
-      strat.reset(new EventDriven(modelxml->getSimulationXML(), t0, T, nsds->getDynamicalSystems(), nsds->getInteractions()));
+      strat.reset(new EventDriven(modelxml->getSimulationXML(), t0, T, nsds->getDynamicalSystems(), nsds->getInteractionsPtr()));
     else RuntimeException::selfThrow("Model: xml constructor, wrong type of simulation" + (modelxml->getSimulationXML()->getSimulationXMLType()));
   }
 }

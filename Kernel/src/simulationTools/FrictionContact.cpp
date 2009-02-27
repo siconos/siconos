@@ -58,23 +58,30 @@ void FrictionContact::initialize(SP::Simulation sim)
     frictionContact_driver = &frictionContact3D_driver;
 
   // get topology
-  SP::Topology topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  SP::Topology topology =
+    simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
-  // Note that unitaryBlocks is up to date since updateUnitaryBlocks has been called during OneStepNSProblem::initialize()
+  // Note that unitaryBlocks is up to date since updateUnitaryBlocks
+  // has been called during OneStepNSProblem::initialize()
 
   // Fill vector of friction coefficients
-  int sizeMu = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getIndexSet0Ptr()->size();
+  int sizeMu = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()
+               ->getTopologyPtr()->getIndexSetPtr(0)->size();
   mu.reset(new MuStorage());
   mu->reserve(sizeMu);
 
-  // If the topology is TimeInvariant ie if M structure does not change during simulation:
+  // If the topology is TimeInvariant ie if M structure does not
+  // change during simulation:
   if (topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty())
   {
     // Get index set from Simulation
-    SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
-    for (ConstUnitaryRelationsIterator itUR = indexSet->begin(); itUR != indexSet->end(); ++itUR)
+    SP::UnitaryRelationsGraph indexSet =
+      simulation->getIndexSetPtr(levelMin);
+    UnitaryRelationsGraph::VIterator ui, uiend;
+    for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
     {
-      mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL> ((*itUR)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
+      mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL>
+                    (indexSet->bundle(*ui)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
     }
   }
 }
@@ -88,10 +95,12 @@ int FrictionContact::compute(double time)
   // Update mu
   mu->clear();
 
-  SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
-  for (ConstUnitaryRelationsIterator itUR = indexSet->begin(); itUR != indexSet->end(); ++itUR)
+  SP::UnitaryRelationsGraph indexSet = simulation->getIndexSetPtr(levelMin);
+  UnitaryRelationsGraph::VIterator ui, uiend;
+  for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
-    mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL>((*itUR)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
+    mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL>
+                  (indexSet->bundle(*ui)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
   }
   // --- Call Numerics driver ---
   // Inputs:

@@ -35,26 +35,39 @@
  *  \version 3.0.0.
  *  \date (Creation) June 06, 2006
  *
- * Remind that each Interaction is composed with one (pointer to) relation and a non smooth law (size nsLawSize). The number of relations
- * is sizeOfInteraction/nsLawSize. A UnitaryRelation is one of the relations of the Interaction. Actually, this class only provides an interface
- * to handle single relations, this for IndexSets used in Topology.
- * Each UnitaryRelation has a pointer to its "mother" Interaction  and methods to compute y, lambda and so on.
+ * Remind that each Interaction is composed with one (pointer to)
+ * relation and a non smooth law (size nsLawSize). The number of
+ * relations is sizeOfInteraction/nsLawSize. A UnitaryRelation is one
+ * of the relations of the Interaction. Actually, this class only
+ * provides an interface to handle single relations, this for
+ * IndexSets used in Topology.  Each UnitaryRelation has a pointer to
+ * its "mother" Interaction and methods to compute y, lambda and so
+ * on.
  *
- * - UnitaryBlocks computation: in OneStepNSProblem, some operators/matrices are required to compute the unitaryBlocks matrices (used for example for the assembly
- * of Mlcp matrix).
- * In the present class, three methods are available to get the required unitaryBlocks:
- *  getLeftUnitaryBlockForDS, getRightUnitaryBlockForDS and getExtraUnitaryBlock, with the general model for unitaryBlock computation:
+ * - UnitaryBlocks computation: in OneStepNSProblem, some
+ * operators/matrices are required to compute the unitaryBlocks
+ * matrices (used for example for the assembly of Mlcp matrix).  In
+ * the present class, three methods are available to get the required
+ * unitaryBlocks: getLeftUnitaryBlockForDS, getRightUnitaryBlockForDS
+ * and getExtraUnitaryBlock, with the general model for unitaryBlock
+ * computation:
  *
  * unitaryBlock = getExtraUnitaryBlock  +  getLeftUnitaryBlockForDS * W * getRightUnitaryBlockForDS
  *
  * Examples:
- *   => LinearTIR, unitaryBlock = D + h*theta*C*W*B  (D != NULL only for unitaryBlocks on the diagonal of the full-assembled matrix)
- *    and thus getExtraUnitaryBlock = D, getLeftUnitaryBlockForDS = C, getRightUnitaryBlockForDS = B.
  *
- *   => Lagrangian, unitaryBlock = G* W* transpose(G)  (G=H for lagrangian linear)
- *     ie getExtraUnitaryBlock = NULL, getLeftUnitaryBlockForDS = getRightUnitaryBlockForDS = G (transpose is done using matMultTranspose)
+ *   => LinearTIR, unitaryBlock = D + h*theta*C*W*B (D != NULL only
+ *      for unitaryBlocks on the diagonal of the full-assembled
+ *      matrix) and thus getExtraUnitaryBlock = D,
+ *      getLeftUnitaryBlockForDS = C, getRightUnitaryBlockForDS = B.
  *
- * Moreover, for, G, B, etc ... we only get the part corresponding to a specific DynamicalSystem (which belongs to the UnitaryRelation)
+ *   => Lagrangian, unitaryBlock = G* W* transpose(G) (G=H for
+ *      xslagrangian linear) ie getExtraUnitaryBlock = NULL,
+ *      getLeftUnitaryBlockForDS = getRightUnitaryBlockForDS = G
+ *      (transpose is done using matMultTranspose)
+ *
+ * Moreover, for, G, B, etc ... we only get the part corresponding to
+ * a specific DynamicalSystem (which belongs to the UnitaryRelation)
  *
  */
 class UnitaryRelation
@@ -65,22 +78,28 @@ class UnitaryRelation
 private:
 
   /** link to Interaction that owns this relation **/
-  boost::weak_ptr<Interaction> mainInteraction;
+  SP::Interaction mainInteraction;
 
-  /** relative position of the present relation in the Interaction - For example if the present relation takes place from index 2 to 4 in y vector
-   of mainInteraction, the relative position is equal to 2. */
+  /** relative position of the present relation in the Interaction -
+   For example if the present relation takes place from index 2 to 4
+   in y vector of mainInteraction, the relative position is equal to
+   2. */
   unsigned int relativePosition;
 
-  /** number of the relation, ie the number of the corresponding unitaryBlock vector in the main Interaction.*/
+  /** number of the relation, ie the number of the corresponding
+      unitaryBlock vector in the main Interaction.*/
   unsigned int number;
 
-  /** Absolute position in the "global" vector of constraints (for example, the one handled by lsodar) */
+  /** Absolute position in the "global" vector of constraints (for
+      example, the one handled by lsodar) */
   unsigned int absolutePostion;
 
-  /** work vector to save pointers to state-related data of the dynamical systems involved in the UR.*/
+  /** work vector to save pointers to state-related data of the
+      dynamical systems involved in the UR.*/
   SP::SiconosVector workX;
 
-  /** work vector to save pointers to z data of the dynamical systems involved in the UR.*/
+  /** work vector to save pointers to z data of the dynamical systems
+      involved in the UR.*/
   SP::SiconosVector workZ;
 
   /** default constructor
@@ -94,9 +113,13 @@ private:
 public:
 
   /** constructor from a pointer to Interaction
-  *  \param SP::Interaction : Interaction object from which a list of relation will be "extracted"
-  *  \param unsigned int: gives the relative position of the relation inside the y vector of the interaction
-  *  \param unsigned int: gives the number of the unitaryBlock in y vector of the interaction that corresponds to the present unitary relation.
+  *  \param SP::Interaction : Interaction object from which a list of
+  *  relation will be "extracted"
+  *  \param unsigned int: gives the relative position of the relation
+  *  inside the y vector of the interaction
+  *  \param unsigned int: gives the number of the unitaryBlock in y
+  *  vector of the interaction that corresponds to the present
+  *  unitary relation.
   */
   UnitaryRelation(SP::Interaction , unsigned int, unsigned int);
 
@@ -109,8 +132,8 @@ public:
   */
   inline SP::Interaction getInteractionPtr()
   {
-    assert(!mainInteraction.expired());
-    return mainInteraction.lock();
+    assert(mainInteraction);
+    return mainInteraction;
   }
 
   /** get relative position of the Unitary Relation
@@ -126,7 +149,7 @@ public:
    */
   inline const std::string getId() const
   {
-    return mainInteraction.lock()->getId();
+    return mainInteraction->getId();
   };
 
   /** get number of the Unitary Relation
@@ -204,7 +227,7 @@ public:
    */
   inline DSIterator dynamicalSystemsBegin()
   {
-    return mainInteraction.lock()->dynamicalSystemsBegin();
+    return mainInteraction->dynamicalSystemsBegin();
   };
 
   /** gets an iterator equal to DynamicalSystems.end().
@@ -212,7 +235,7 @@ public:
    */
   inline DSIterator dynamicalSystemsEnd()
   {
-    return mainInteraction.lock()->dynamicalSystemsEnd();
+    return mainInteraction->dynamicalSystemsEnd();
   };
 
   /** gets a const iterator to the first element of the  DynamicalSystems set.
@@ -220,7 +243,7 @@ public:
    */
   inline ConstDSIterator dynamicalSystemsBegin() const
   {
-    return mainInteraction.lock()->dynamicalSystemsBegin();
+    return mainInteraction->dynamicalSystemsBegin();
   };
 
   /** gets a const iterator equal to DynamicalSystems.end().
@@ -228,7 +251,7 @@ public:
    */
   inline ConstDSIterator dynamicalSystemsEnd() const
   {
-    return mainInteraction.lock()->dynamicalSystemsEnd();
+    return mainInteraction->dynamicalSystemsEnd();
   };
 
   /** gets a pointer to the DynamicalSystemsSet
@@ -245,6 +268,7 @@ public:
   */
   inline void insertInWorkX(SP::SiconosVector newX)
   {
+    assert(workX) ;
     workX->insertPtr(newX);
   };
 

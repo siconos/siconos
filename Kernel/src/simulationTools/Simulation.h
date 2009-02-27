@@ -34,8 +34,10 @@
 #include "DynamicalSystemsSet.hpp"
 #include <fstream>
 #include <boost/bind.hpp>
+#include "Model.h"
+#include "NonSmoothDynamicalSystem.h"
+#include "Topology.h"
 
-class Model;
 class DynamicalSystem;
 class EventsManager;
 class OneStepIntegrator;
@@ -92,8 +94,9 @@ protected:
   /** Map to link all DynamicalSystems and their OneStepIntegrator*/
   DSOSIMap osiMap;
 
-  /** index sets vector (indexSets[0] is the set where y[0]=0, indexSets[1] where y[0] = 0 and y[1]=0 and so on */
-  VectorOfSetOfUnitaryRelations indexSets;
+  /** index sets vector (indexSets[0] is the set where y[0]=0,
+      indexSets[1] where y[0] = 0 and y[1]=0 and so on */
+  //std::vector<UnitaryRelationsGraph> indexSets;
 
   /** the non smooth problems (each problem is identified thanks to its id) */
   SP::OneStepNSProblems allNSProblems;
@@ -110,10 +113,12 @@ protected:
   /** int used to set the maximal derivative order used in the OSNS variables */
   unsigned int levelMax;
 
-  /** tolerance value used to compute the index sets - Default: equal to machine double precision (from dlamch lapack routine).*/
+  /** tolerance value used to compute the index sets - Default: equal
+      to machine double precision (from dlamch lapack routine).*/
   double tolerance;
 
-  /** Flag for optional output. True if output display for solver stat required, else false.*/
+  /** Flag for optional output. True if output display for solver stat
+      required, else false.*/
   bool printStat;
 
   /**Output file for stats*/
@@ -143,7 +148,8 @@ private:
 public:
 
   /** default constructor
-   *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
+   *  \param a pointer to a timeDiscretisation (linked to the model
+   *  that owns this simulation)
    *  \param string: simulation type, default = undefined
    */
   Simulation(SP::TimeDiscretisation, const std::string& = "undefined");
@@ -218,8 +224,9 @@ public:
     return timeDiscretisation->getCurrentTime();
   };
 
-  /** get time instant k+1 of the time discretisation - Warning: this instant may be different
-      from getNextTime(), if for example some non-smooth events or some sensor events are present
+  /** get time instant k+1 of the time discretisation - Warning: this
+      instant may be different from getNextTime(), if for example some
+      non-smooth events or some sensor events are present
       \return a double.
   */
   inline const double getTkp1() const
@@ -235,7 +242,8 @@ public:
     return eventsManager;
   };
 
-  /** get "current time" (ie starting point for current integration, time of currentEvent of eventsManager.)
+  /** get "current time" (ie starting point for current integration,
+      time of currentEvent of eventsManager.)
    *  \return a double.
    */
   inline const double getStartingTime() const
@@ -243,7 +251,8 @@ public:
     return eventsManager->getStartingTime();
   };
 
-  /** get "next time" (ie ending point for current integration, time of nextEvent of eventsManager.)
+  /** get "next time" (ie ending point for current integration, time
+      of nextEvent of eventsManager.)
    *  \return a double.
    */
   inline const double getNextTime() const
@@ -259,7 +268,8 @@ public:
     return (getNextTime() - getStartingTime());
   };
 
-  /** check if a future event is to be treated or not (ie if some events remain in the eventsManager).
+  /** check if a future event is to be treated or not (ie if some
+      events remain in the eventsManager).
    *  \return a bool.
    */
   inline const bool hasNextEvent() const
@@ -298,7 +308,8 @@ public:
     return allOSI->size();
   }
 
-  /** add an Integrator into the simulation list of integrators (pointer link, no copy!)
+  /** add an Integrator into the simulation list of integrators
+      (pointer link, no copy!)
    *  \param a smart pointer to a OneStepIntegrator
    */
   void recordIntegrator(SP::OneStepIntegrator);
@@ -310,21 +321,18 @@ public:
   void addInOSIMap(SP::DynamicalSystem, SP::OneStepIntegrator);
 
 
-  /** get indexSets
-      \return a VectorOfSetOfUnitaryRelations
-  */
-  VectorOfSetOfUnitaryRelations getIndexSets()
-  {
-    return indexSets;
-  };
-
   /** get a pointer to indexSets[i]
    *  \return a UnitaryRelationsSet
    */
-  SP::UnitaryRelationsSet getIndexSetPtr(unsigned int) ;
+  SP::UnitaryRelationsGraph getIndexSetPtr(unsigned int i)
+  {
+    return (model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getIndexSetPtr(i)) ;
+  };
+
 
   /** get allNSProblems
-   *  \return a pointer to OneStepNSProblems object (container of SP::OneStepNSProblem)
+   *  \return a pointer to OneStepNSProblems object (container of
+   *  SP::OneStepNSProblem)
    */
   inline const SP::OneStepNSProblems getOneStepNSProblems() const
   {
@@ -353,7 +361,8 @@ public:
    */
   SP::OneStepNSProblem getOneStepNSProblemPtr(const std::string&);
 
-  /** set allNSProblems map - Warning: no copy between OneStepNSProblem of each map, pointers links!
+  /** set allNSProblems map - Warning: no copy between
+      OneStepNSProblem of each map, pointers links!
    *  \param a OneStepNSProblems object (map of SP::OneStepNSProblem)
    */
   void setOneStepNSProblems(const OneStepNSProblems&);
@@ -374,7 +383,8 @@ public:
    */
   const bool hasOneStepNSProblem(const std::string&) const ;
 
-  /** add a OneStepNSProblem in the Simulation (if its not the first, it needs to have an id clearly defined)
+  /** add a OneStepNSProblem in the Simulation (if its not the first,
+      it needs to have an id clearly defined)
    *  \param a smart pointer to OneStepNSProblem
    */
   virtual void recordNonSmoothProblem(SP::OneStepNSProblem);
@@ -419,7 +429,8 @@ public:
     return tolerance;
   };
 
-  /** set the value of offset for q dof vector in dynamical systems (to avoid events accumulation)
+  /** set the value of offset for q dof vector in dynamical systems
+      (to avoid events accumulation)
    *  \param a double;
    */
   void setTolerance(double inputVal)
@@ -442,16 +453,19 @@ public:
     return printStat;
   };
 
-  /** update all index sets of the topology, using current y and lambda values of Interactions.
+  /** update all index sets of the topology, using current y and
+      lambda values of Interactions.
    */
   void updateIndexSets();
 
-  /** update indexSets[i] of the topology, using current y and lambda values of Interactions.
+  /** update indexSets[i] of the topology, using current y and lambda
+      values of Interactions.
    *  \param unsigned int: the number of the set to be updated
    */
   virtual void updateIndexSet(unsigned int) = 0;
 
-  /** Complete initialisation of the Simulation (OneStepIntegrators, OneStepNSProblem, TImediscretisation).
+  /** Complete initialisation of the Simulation (OneStepIntegrators,
+      OneStepNSProblem, TImediscretisation).
       \param the model, which will own the Simulation
       \param optional flag for partial initialisation
   */
@@ -464,7 +478,8 @@ public:
    */
   void reset();
 
-  /** save DynamicalSystems and Interactions states in Memories (through OSI and OSNS).
+  /** save DynamicalSystems and Interactions states in Memories
+      (through OSI and OSNS).
    */
   void saveInMemory();
 
@@ -479,7 +494,8 @@ public:
    */
   virtual void update(unsigned int) = 0;
 
-  /** update input, state of each dynamical system and output for all levels between levelMin and levelMax
+  /** update input, state of each dynamical system and output for all
+      levels between levelMin and levelMax
    */
   virtual void update();
 

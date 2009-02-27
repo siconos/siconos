@@ -27,33 +27,46 @@
 #include "SimpleMatrix.h"
 #include "SiconosNumerics.h"
 #include "SimulationTypeDef.hpp"
+#include "Topology.h"
 
 class SparseBlockMatrix;
 
-/** Interface to some specific storage types for matrices used in OneStepNSProblem
+/** Interface to some specific storage types for matrices used in
+ * OneStepNSProblem
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
  *  \date (Creation) 05/02/2008
  *
- * This class is used to define an interface for various storage used for matrices in OneStepNSProblem. \n
- * Its aim is to fill the Numerics structure NumericsMatrix, required in many XXX_problem structures of Numerics \n
- * as input argument for drivers. \n
+ * This class is used to define an interface for various storage used
+ * for matrices in OneStepNSProblem. Its aim is to fill the
+ * Numerics structure NumericsMatrix, required in many XXX_problem
+ * structures of Numerics as input argument for drivers. \n
  *
- * The idea is to remove all matrix storage management problems from OSNS classes (LCP ...) and to leave it into this class. \n
+ * The idea is to remove all matrix storage management problems from
+ * OSNS classes (LCP ...) and to leave it into this class. \n
  *
  * Two main functions:
- * - fill(indexSet, unitaryBlocks): fill the matrix using a list of "active" UnitaryRelation, in indexSet, and a MapOfMapOfUnitaryMatrices, unitaryBlocks, \n
- *   which determines which UR are connected or not (ie have common DynamicalSystem).
- * - convert(): fill the NumericsMatrix structure (indeed only pointers links to the components of the present class)
+ * - fill(indexSet, unitaryBlocks): fill the matrix using a list of
+ *   "active" UnitaryRelation, in indexSet, and a
+ *   MapOfMapOfUnitaryMatrices, unitaryBlocks, which determines
+ *   which UR are connected or not (ie have common DynamicalSystem).
+ *   - convert(): fill the NumericsMatrix structure (indeed only
+ *   pointers links to the components of the present class)
  *
  * Note that OSNSMatrix are square.
  *
- *  For example, if in a LCP, constraints of interest are indexSet={UR2,UR3,UR8,UR12}, whith common DynamicalSystem between 2 and 3, 2 and 8 and 8 and 12. \n
- *  unitaryBlocks contains matrices for all (URi,URj) which have common DS, for (URi,URj) in I0, the set of all UnitaryRelation.\n
- *  (for details on how unitaryBlocks is computed see OneStepNSProblem.h). \n
- * We denote unitaryBlocks[URi][URj] = mij \n
- * Then, a call to fill(indexSet, unitaryBlock) results in a matrix which looks like:
+ *  For example, if in a LCP, constraints of interest are
+ *  indexSet={UR2,UR3,UR8,UR12}, whith common DynamicalSystem between
+ *  2 and 3, 2 and 8 and 8 and 12.
+
+ *  unitaryBlocks contains matrices for all (URi,URj) which have
+ *  common DS, for (URi,URj) in I0, the set of all UnitaryRelation.
+
+ *  (for details on how unitaryBlocks is computed see OneStepNSProblem.h).
+ *
+ * We denote unitaryBlocks[URi][URj] = mij \n Then, a call to
+ * fill(indexSet, unitaryBlock) results in a matrix which looks like:
  *
  * \f{eqnarray*}
  M=\left\lbrace\begin{array}{cccc}
@@ -66,10 +79,16 @@ class SparseBlockMatrix;
  *
  *
  * Note: at the time the available storage types are:
- *  - full matrix in a SiconosMatrix (storageType = 0). In this case, for each call to fill(), the SiconosMatrix M is resized according\n
- *  to the sizes of the UR present in indexSet and then all the required unitaryBlocks mij are COPIED into M.
- *  - Sparse Block Storage (storageType = 1): corresponds to SparseBlockStructuredMatrix structure of Numerics. Only non-null unitaryBlocks are saved in the matrix M \n
- *  and there is no copy of sub-unitaryBlocks, only links thanks to pointers.
+ *
+ *  - full matrix in a SiconosMatrix (storageType = 0). In this case,
+ *  for each call to fill(), the SiconosMatrix M is resized
+ *  according  to the sizes of the UR present in indexSet and then
+ *  all the required unitaryBlocks mij are COPIED into M.
+ *
+ *  - Sparse Block Storage (storageType = 1): corresponds to
+ *  SparseBlockStructuredMatrix structure of Numerics. Only non-null
+ *  unitaryBlocks are saved in the matrix M and there is no copy of
+ *  sub-unitaryBlocks, only links thanks to pointers.
  *
  */
 class OSNSMatrix
@@ -85,15 +104,19 @@ protected:
   /** Storage type used for the present matrix */
   int storageType;
 
-  /** map that links each UnitaryRelation with an int that gives the position (in number of scalar elements, not unitaryBlocks) \n
-   * of the corresponding unitaryBlock matrix in the full matrix (M in LCP case) - Warning: it depends on the considered index set \n
+  /** map that links each UnitaryRelation with an int that gives the
+   * position (in number of scalar elements, not unitaryBlocks) \n of
+   * the corresponding unitaryBlock matrix in the full matrix (M in
+   * LCP case) - Warning: it depends on the considered index set \n
    * (ie on which constraints are "active")
    */
   SP::UR_int unitaryBlocksPositions;
 
-  /** map that links each DynamicalSystem with an int that gives the position (in number of scalar elements, not DSBlocks) \n
-   * of the corresponding DSBlock matrix in the full matrix (M in PrimalFrictionalCase case) - Warning: it depends on the considered index set \n
-   * (ie on which constraints are "active")
+  /** map that links each DynamicalSystem with an int that gives the
+   * position (in number of scalar elements, not DSBlocks) of the
+   * corresponding DSBlock matrix in the full matrix (M in
+   * PrimalFrictionalCase case) - Warning: it depends on the
+   * considered index set (ie on which constraints are "active")
    */
   SP::DS_int DSBlocksPositions;
 
@@ -102,8 +125,10 @@ protected:
 
   /** Matrix used for default storage type (storageType = 0) */
   SP::SiconosMatrix M1;
+  SP::SiconosMatrix Mt;
 
-  /** Matrix which corresponds to Numerics SparseBlockStructuredMatrix (storageType = 1) */
+  /** Matrix which corresponds to Numerics SparseBlockStructuredMatrix
+      (storageType = 1) */
   SP::SparseBlockMatrix M2;
 
   /** Private copy constructor => no copy nor pass by value */
@@ -112,21 +137,26 @@ protected:
   /** Private assignment -> forbidden */
   OSNSMatrix& operator=(const OSNSMatrix&);
 
-  /** To update dim and unitaryBlocksPositions for a new set of UnitaryRelation
-      \param UnitaryRelationsSet* the index set of the active constraints
+  /** To update dim and unitaryBlocksPositions for a new set of
+      UnitaryRelation
+      \param UnitaryRelationsGraph* the index set of
+      the active constraints
   */
-  void updateSizeAndPositions(unsigned int&, SP::UnitaryRelationsSet);
+  void updateSizeAndPositions(unsigned int&, SP::UnitaryRelationsGraph);
 
   /** To update dim and DSBlocksPositions for a new set of DynamicalSystem
       \param DynamicalSystemsSet* the DyncamicalSystemsSet
   */
   void updateSizeAndPositions(unsigned int&, SP::DynamicalSystemsSet);
 
-  /** To update dim, DSBlocksPositions and unitaryBlocksPositions for a new set of DynamicalSystem and  a new set of UnitaryRelation
+  /** To update dim, DSBlocksPositions and unitaryBlocksPositions for
+      a new set of DynamicalSystem and a new set of UnitaryRelation
       \param DynamicalSystemsSet* the DynamicalSystemsSet
-      \param UnitaryRelationsSet* the index set of the active constraints
+      \param UnitaryRelationsGraph* the index set of the active constraints
   */
-  void updateSizeAndPositions(unsigned int&, SP::DynamicalSystemsSet, SP::UnitaryRelationsSet);
+  void updateSizeAndPositions(unsigned int&, SP::DynamicalSystemsSet, SP::UnitaryRelationsGraph);
+
+  DynamicalSystemsGraph lineGraph(SP::UnitaryRelationsGraph);
 
 public:
 
@@ -147,39 +177,39 @@ public:
   OSNSMatrix(unsigned int, unsigned int, int);
 
   /** Constructor from index set and map
-      \param UnitaryRelationsSet* the index set of the active constraints
+      \param UnitaryRelationsGraph* the index set of the active constraints
       \param MapOfMapOfUnitaryMatrices the list of matrices linked to a couple of UR*
       \param storage type
   */
-  OSNSMatrix(SP::UnitaryRelationsSet, MapOfMapOfUnitaryMatrices&, int);
+  OSNSMatrix(SP::UnitaryRelationsGraph, MapOfMapOfUnitaryMatrices&, int);
 
   /** Constructor from DynamicalSystemsSet and map
-      \param UnitaryRelationsSet* the index set of the active constraints
+      \param UnitaryRelationsGraph* the index set of the active constraints
       \param MapOfMapOfUnitaryMatrices the list of matrices linked to a couple of UR*
       \param storage type
   */
   OSNSMatrix(SP::DynamicalSystemsSet, MapOfDSMatrices&, int);
 
   /** Constructor from DynamicalSystemsSet and indexSet and map
-      \param UnitaryRelationsSet* the index set of the active constraints
+      \param UnitaryRelationsGraph* the index set of the active constraints
       \param MapOfMapOfUnitaryMatrices the list of matrices linked to a couple of UR*
       \param storage type
   */
-  OSNSMatrix(SP::DynamicalSystemsSet, SP::UnitaryRelationsSet, MapOfDSMapOfUnitaryMatrices&, int);
+  OSNSMatrix(SP::DynamicalSystemsSet, SP::UnitaryRelationsGraph, MapOfDSMapOfUnitaryMatrices&, int);
 
   /** Constructor from DynamicalSystemsSet and indexSet and map
-      \param UnitaryRelationsSet* the index set of the active constraints
+      \param UnitaryRelationsGraph* the index set of the active constraints
       \param MapOfMapOfUnitaryMatrices the list of matrices linked to a couple of UR*
       \param storage type
   */
-  OSNSMatrix(SP::UnitaryRelationsSet, SP::DynamicalSystemsSet , MapOfUnitaryMapOfDSMatrices&, int);
+  OSNSMatrix(SP::UnitaryRelationsGraph, SP::DynamicalSystemsSet , MapOfUnitaryMapOfDSMatrices&, int);
 
   /** Constructor from DynamicalSystemsSet and indexSet and maps of Blocks
-      \param UnitaryRelationsSet* the index set of the active constraints
+      \param UnitaryRelationsGraph* the index set of the active constraints
       \param MapOfMapOfUnitaryMatrices the list of matrices linked to a couple of UR*
       \param storage type
   */
-  OSNSMatrix(SP::UnitaryRelationsSet, SP::DynamicalSystemsSet, MapOfMapOfUnitaryMatrices&,  MapOfDSMatrices&, MapOfDSMapOfUnitaryMatrices&,  MapOfUnitaryMapOfDSMatrices&, int);
+  OSNSMatrix(SP::UnitaryRelationsGraph, SP::DynamicalSystemsSet, MapOfMapOfUnitaryMatrices&,  MapOfDSMatrices&, MapOfDSMapOfUnitaryMatrices&,  MapOfUnitaryMapOfDSMatrices&, int);
 
   /** Constructor with copy of a SiconosMatrix => storageType = 0
       \param MSource matrix to be copied
@@ -237,16 +267,16 @@ public:
   };
 
   /** fill the current class using an index set and a map of unitaryBlocks
-      \param UnitaryRelationsSet*, the index set of the active constraints
+      \param UnitaryRelationsGraph*, the index set of the active constraints
       \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
   */
-  void fill(SP::UnitaryRelationsSet, MapOfMapOfUnitaryMatrices&, bool updateSize = true);
+  void fill(SP::UnitaryRelationsGraph, MapOfMapOfUnitaryMatrices&, bool updateSize = true);
 
   /** fill diagonal of thecurrent class using an index set and a map of unitaryBlocks
-      \param UnitaryRelationsSet*, the index set of the active constraints
+      \param UnitaryRelationsGraph*, the index set of the active constraints
       \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
   */
-  void fillDiagonal(SP::UnitaryRelationsSet , MapOfMapOfUnitaryMatrices& , bool updateSize = true);
+  void fillDiagonal(SP::UnitaryRelationsGraph , MapOfMapOfUnitaryMatrices& , bool updateSize = true);
 
   /** fill the current class using an DynamicalSystemsSet and a map of DSBlocks
       \param DynamicalSystemsSet*, the Dynamical set
@@ -255,25 +285,25 @@ public:
   void fill(SP::DynamicalSystemsSet, MapOfDSMatrices&, bool updateSize = true);
 
   /** fill the current class using an index set , a DynamicalSystemsSet and a map of unitaryBlocks
-      \param UnitaryRelationsSet*, the index set of the active constraints
+      \param UnitaryRelationsGraph*, the index set of the active constraints
       \param DynamicalSystemsSet*, the Dynamical set
       \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
   */
-  void fill(SP::DynamicalSystemsSet, SP::UnitaryRelationsSet, MapOfDSMapOfUnitaryMatrices&, bool updateSize = true);
+  void fill(SP::DynamicalSystemsSet, SP::UnitaryRelationsGraph, MapOfDSMapOfUnitaryMatrices&, bool updateSize = true);
 
   /** fill the current class using an index set and a map of unitaryBlocks
-      \param UnitaryRelationsSet*, the index set of the active constraints
+      \param UnitaryRelationsGraph*, the index set of the active constraints
       \param DynamicalSystemsSet*, the Dynamical set
       \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
   */
-  void fill(SP::UnitaryRelationsSet, SP::DynamicalSystemsSet, MapOfUnitaryMapOfDSMatrices&, bool updateSize = true);
+  void fill(SP::UnitaryRelationsGraph, SP::DynamicalSystemsSet, MapOfUnitaryMapOfDSMatrices&, bool updateSize = true);
 
   /** fill the current class using an index set and  maps of Blocks
-      \param UnitaryRelationsSet*, the index set of the active constraints
+      \param UnitaryRelationsGraph*, the index set of the active constraints
       \param DynamicalSystemsSet*, the Dynamical set
       \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
   */
-  void fill(SP::UnitaryRelationsSet, SP::DynamicalSystemsSet, MapOfMapOfUnitaryMatrices&,  MapOfDSMatrices&, MapOfDSMapOfUnitaryMatrices&,  MapOfUnitaryMapOfDSMatrices&, bool updateSize = true);
+  void fill(SP::UnitaryRelationsGraph, SP::DynamicalSystemsSet, MapOfMapOfUnitaryMatrices&,  MapOfDSMatrices&, MapOfDSMapOfUnitaryMatrices&,  MapOfUnitaryMapOfDSMatrices&, bool updateSize = true);
 
   /** fill the numerics structure numericsMatSparse using MSparseBlock */
   void convert();

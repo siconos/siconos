@@ -1,4 +1,4 @@
-/* Siconos-Example version 3.0.0, Copyright INRIA 2005-2008.
+/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -12,53 +12,54 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Siconos; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth FLOOR, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
- *
- */
-
-/*! \file CircleCircleR.h
-  \brief Two disks relation - Inherits from LagrangianScleronomousR
 */
+#ifndef SiconosGraphTest_h
+#define SiconosGraphTest_h
 
-#ifndef CircularR_h
-#define CircularR_h
+#include <cppunit/extensions/HelperMacros.h>
+#include "../SiconosGraph.hpp"
 
-#include "Interaction.h"
-#include "LagrangianScleronomousR.h"
-
-class CircularR : public LagrangianScleronomousR
+class SiconosGraphTest : public CppUnit::TestFixture
 {
-protected:
-  double r1, r2;
 
-  CircularR();
+private:
 
-  ~CircularR();
+  // Name of the tests suite
+  CPPUNIT_TEST_SUITE(SiconosGraphTest);
+
+  // tests to be done ...
+  CPPUNIT_TEST(t1);
+
+  CPPUNIT_TEST(t2);
+
+  CPPUNIT_TEST(t3);
+
+  CPPUNIT_TEST(t4);
+
+  CPPUNIT_TEST(t5);
+
+  CPPUNIT_TEST(t6);
+
+  CPPUNIT_TEST(t7);
+
+  CPPUNIT_TEST_SUITE_END();
+
+  // Members
+  void t1();
+  void t2();
+  void t3();
+  void t4();
+  void t5();
+  void t6();
+  void t7();
 
 public:
-
-  /** Constructor
-
-  \param disk1 radius
-  \param disk2 radius
-  */
-  CircularR(double, double);
-
-  double getRadius1()
-  {
-    return r1;
-  };
-
-  double getRadius2()
-  {
-    return r2;
-  };
-
-  virtual double distance(double, double, double, double, double, double);
+  void setUp();
+  void tearDown();
 
 };
 
-TYPEDEF_SPTR(CircularR);
-#endif /* CircularR_h */
+#endif

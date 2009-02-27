@@ -37,9 +37,10 @@ SparseBlockMatrix::SparseBlockMatrix(unsigned int nRow):
 {
   // Only square-blocks matrices for the moment (ie nRow = nr = nrol)
 
-  // Allocate memory and fill in the matrix
-  // rowPos, rowCol ... are initialized with nr to reserve at first step the maximum possible (according to given nr) space in memory.
-  // Thus a future resize will not require memory allocation or copy.
+  // Allocate memory and fill in the matrix rowPos, rowCol ... are
+  // initialized with nr to reserve at first step the maximum possible
+  // (according to given nr) space in memory.  Thus a future resize
+  // will not require memory allocation or copy.
 
   MSparseBlock.reset(new CompressedRowMat(nr, nr));
   numericsMatSparse.reset(new SparseBlockStructuredMatrix);
@@ -52,11 +53,12 @@ SparseBlockMatrix::SparseBlockMatrix(unsigned int nRow):
 }
 
 // Basic constructor
-SparseBlockMatrix::SparseBlockMatrix(SP::UnitaryRelationsSet I, MapOfMapOfUnitaryMatrices& blocks):
+SparseBlockMatrix::SparseBlockMatrix(SP::UnitaryRelationsGraph indexSet,
+                                     MapOfMapOfUnitaryMatrices& blocks):
   nr(0)
 {
   // Allocate memory and fill in the matrix
-  nr = I->size();
+  nr = indexSet->size();
   MSparseBlock.reset(new CompressedRowMat(nr, nr));
   numericsMatSparse.reset(new SparseBlockStructuredMatrix());
   diagSizes.reset(new IndexInt());
@@ -65,9 +67,10 @@ SparseBlockMatrix::SparseBlockMatrix(SP::UnitaryRelationsSet I, MapOfMapOfUnitar
   rowPos->reserve(nr);
   colPos.reset(new IndexInt());
   colPos->reserve(nr);
-  fill(I, blocks);
+  fill(indexSet, blocks);
 }
-SparseBlockMatrix::SparseBlockMatrix(SP::DynamicalSystemsSet DSSet, MapOfDSMatrices& DSblocks):
+SparseBlockMatrix::SparseBlockMatrix(SP::DynamicalSystemsSet DSSet,
+                                     MapOfDSMatrices& DSblocks):
   nr(0)
 {
   // Allocate memory and fill in the matrix
@@ -82,11 +85,13 @@ SparseBlockMatrix::SparseBlockMatrix(SP::DynamicalSystemsSet DSSet, MapOfDSMatri
   colPos->reserve(nr);
   fill(DSSet, DSblocks);
 }
-SparseBlockMatrix::SparseBlockMatrix(SP::UnitaryRelationsSet I, SP::DynamicalSystemsSet DSSet, MapOfUnitaryMapOfDSMatrices& unitaryDSblocks):
+SparseBlockMatrix::SparseBlockMatrix(SP::UnitaryRelationsGraph indexSet,
+                                     SP::DynamicalSystemsSet DSSet,
+                                     MapOfUnitaryMapOfDSMatrices& unitaryDSblocks):
   nr(0)
 {
   // Allocate memory and fill in the matrix
-  nr = I->size();
+  nr = indexSet->size();
   nc = DSSet->size();
   MSparseBlock.reset(new CompressedRowMat(nr, nc));
   numericsMatSparse.reset(new SparseBlockStructuredMatrix());
@@ -96,7 +101,7 @@ SparseBlockMatrix::SparseBlockMatrix(SP::UnitaryRelationsSet I, SP::DynamicalSys
   rowPos->reserve(nr);
   colPos.reset(new IndexInt());
   colPos->reserve(nr);
-  fill(I, DSSet, unitaryDSblocks);
+  fill(indexSet, DSSet, unitaryDSblocks);
 }
 
 // Destructor -> see smart pointers
@@ -106,12 +111,14 @@ SparseBlockMatrix::~SparseBlockMatrix()
 }
 
 // Fill the SparseMat
-void SparseBlockMatrix::fill(SP::UnitaryRelationsSet indexSet, MapOfMapOfUnitaryMatrices& blocks)
+void SparseBlockMatrix::fill(SP::UnitaryRelationsGraph indexSet,
+                             MapOfMapOfUnitaryMatrices& blocks)
 {
-  // ======>  Aim: find UR1 and UR2 both in indexSets[level] and which have common DynamicalSystems.
-  // Then get the corresponding matrix from map blocks.
+  // ======> Aim: find UR1 and UR2 both in indexSets[level] and which
+  // have common DynamicalSystems.  Then get the corresponding matrix
+  // from map blocks.
 
-  assert(indexSet.get() && "NULL pointer");
+  assert(indexSet);
 
   // Number of blocks in a row = number of active constraints.
   nr = indexSet->size();
@@ -120,64 +127,69 @@ void SparseBlockMatrix::fill(SP::UnitaryRelationsSet indexSet, MapOfMapOfUnitary
   MSparseBlock->resize(nr, nr, false);
   diagSizes->resize(nr);
 
-  size_t row = 0; // (block) row position
-  size_t col = 0; // (block) col. position
-
-  // reset rowPos, colPos
-  rowPos->resize(0);
-  colPos->resize(0);
   int sizeV = 0;
 
-  // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
-  for (UnitaryRelationsIterator itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
+  // === Loop through "active" Unitary Relations (ie present in
+  // indexSets[level]) ===
+  UnitaryRelationsGraph::VIterator ui1, ui1end;
+  for (boost::tie(ui1, ui1end) = indexSet->vertices();
+       ui1 != ui1end; ++ui1)
   {
-    // Size of the current diagonal block is added into diagSizes
-    sizeV  += (*itRow)->getNonSmoothLawSize();
-    (*diagSizes)[row] = sizeV;
-    // Look for UR connected (ie with common DS) to the current one
-    // The connection is checked thanks to blocks map
-    for (UnitaryRelationsIterator itCol = indexSet->begin(); itCol != indexSet->end(); ++itCol)
+    SP::UnitaryRelation ur1 = indexSet->bundle(*ui1);
+    sizeV  += ur1->getNonSmoothLawSize();
+    (*diagSizes)[indexSet->index(*ui1)] = sizeV;
+
+    assert((*diagSizes)[indexSet->index(*ui1)] > 0);
+    assert(blocks[ur1][ur1]);
+    assert(blocks[ur1][ur1]->size(0) > 0 && blocks[ur1][ur1]->size(1) > 0);
+    assert(blocks[ur1][ur1]->size(0) == ur1->getNonSmoothLawSize());
+    assert(blocks[ur1][ur1]->size(1) == ur1->getNonSmoothLawSize());
+    assert(indexSet->index(*ui1) < nr);
+
+    (*MSparseBlock)(indexSet->index(*ui1), indexSet->index(*ui1)) =
+      blocks[ur1][ur1]->getArray();
+
+    UnitaryRelationsGraph::AVIterator ui2, ui2end;
+    for (boost::tie(ui2, ui2end) =
+           indexSet->adjacent_vertices(*ui1);
+         ui2 != ui2end; ++ui2)
     {
-      //for(UnitaryMatrixColumnIterator itCol = blocks[*itRow].begin(); itCol!=blocks[*itRow].end(); ++itCol)
-      //{
+      SP::UnitaryRelation ur2 = indexSet->bundle(*ui2);
 
-      if ((blocks[*itRow]).find(*itCol) != (blocks[*itRow]).end())
-      {
-        if (blocks[*itRow][*itCol])
-        {
-          // We keep connected UR only if they are also in indexSets[level] and if the block is not NULL
-          //   if( (indexSet->find((*itCol).first))!= indexSet->end() && blocks[*itRow][(*itCol).first] != NULL)
-          {
-            // UR1 = *itRow
-            // UR2 = *itCol
-            // corresponding matrix = blocks[*itRow][(*itCol).first]
+      assert(indexSet->is_vertex(ur2));
+      assert(ur2 != ur1);
+      assert(blocks[ur1][ur2]);
+      assert(blocks[ur1][ur2]->size(0) > 0 && blocks[ur1][ur2]->size(1) > 0);
+      assert(blocks[ur1][ur2]->size(0) == ur1->getNonSmoothLawSize());
+      assert(blocks[ur1][ur2]->size(1) == ur2->getNonSmoothLawSize());
 
-            // Insert block into the list
-            (*MSparseBlock)(row, col) = blocks[*itRow][*itCol]->getArray();
+      assert(indexSet->index(*ui1) < nr);
+      assert(indexSet->index(*ui2) < nr);
 
-            // Insert block positions into rowPos and colPos
-            (rowPos)->push_back(row);
-            (colPos)->push_back(col);
+      assert(*ui2 == indexSet->descriptor(ur2));
+      assert(indexSet->index(*ui2) == indexSet->index(indexSet->descriptor(ur2)));
 
-          }
-        }
-      }
-      col++;// increment col position
+      (*MSparseBlock)(indexSet->index(*ui1), indexSet->index(*ui2)) =
+        blocks[ur1][ur2]->getArray();
+
     }
-    col = 0;
-    row++;// increment row position
   }
 }
 
 // Fill the SparseMat
-void SparseBlockMatrix::fill(SP::DynamicalSystemsSet DSSet, MapOfDSMatrices& DSblocks)
+void SparseBlockMatrix::fill(SP::DynamicalSystemsSet DSSet,
+                             MapOfDSMatrices& DSblocks)
 {
-  RuntimeException::selfThrow(" SparseBlockMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSblocks), Not Yet Implemented");
+  RuntimeException::selfThrow
+  (" SparseBlockMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSblocks), Not Yet Implemented");
 }
 // Fill the SparseMat
-void SparseBlockMatrix::fill(SP::UnitaryRelationsSet indexSet, SP::DynamicalSystemsSet DSSet, MapOfUnitaryMapOfDSMatrices& unitaryDSblocks)
+void SparseBlockMatrix::fill(SP::UnitaryRelationsGraph indexSet,
+                             SP::DynamicalSystemsSet DSSet,
+                             MapOfUnitaryMapOfDSMatrices& unitaryDSblocks)
 {
-  RuntimeException::selfThrow(" SparseBlockMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSblocks), Not Yet Implemented");
+  RuntimeException::selfThrow
+  (" SparseBlockMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSblocks), Not Yet Implemented");
 }
 
 
@@ -214,12 +226,26 @@ void SparseBlockMatrix::convert()
 // Display data
 void SparseBlockMatrix::display() const
 {
-  cout << "----- Sparse Block Matrix with " << nr << " blocks in a row/col and " << MSparseBlock->nnz() << " non-null blocks" << endl;
-  cout << "Non null blocks positions are (row index and columns index):" << endl;
-  print(rowPos->begin(), rowPos->end());
-  print(colPos->begin(), colPos->end());
-  cout << "Sum of sizes of the diagonal blocks:" << endl;
+  cout << "----- Sparse Block Matrix with "
+       << nr << " blocks in a row/col and "
+       << MSparseBlock->nnz()
+       << " non-null blocks" << endl;
+  cout << "filled1:" << MSparseBlock->filled1() << endl;
+  cout << "filled2:" << MSparseBlock->filled2() << endl;
+  cout << "index1_data:\n";
+  print(MSparseBlock->index1_data().begin(), MSparseBlock->index1_data().end());
+  cout << endl;
+  cout << "index2_data:\n";
+  print(MSparseBlock->index2_data().begin(), MSparseBlock->index2_data().end());
+  cout << endl;
+  cout << "Sum of sizes of the diagonal blocks:"
+       << endl;
   print(diagSizes->begin(), diagSizes->end());
 }
+
+
+
+
+
 
 

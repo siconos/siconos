@@ -27,6 +27,7 @@ enum dynamicalsystem {LAGRANGIANNLDS, LAGRANGIANTIDS, LINEARTIDS};
 #include "SiconosPointers.hpp"
 #include "InteractionsSet.hpp"
 #include "DynamicalSystemsSet.hpp"
+#include "Topology.h"
 
 class Interaction;
 class DynamicalSystem;
@@ -50,8 +51,8 @@ private:
   /** contains all the Dynamic Systems of the simulation */
   SP::DynamicalSystemsSet allDS;
 
-  /** contains all the Interactions */
-  SP::InteractionsSet allInteractions;
+  /** to build the interactions set */
+  SP::InteractionsSet allInteractionsLocal;
 
   /** the topology of the system */
   SP::Topology topology;
@@ -214,23 +215,15 @@ public:
    */
   inline const unsigned int getNumberOfInteractions() const
   {
-    return allInteractions->size();
+    return topology->getInteractionsPtr()->size();
   };
 
   /** get all the Interactions of the NonSmoothDynamicalSystem problem (saved in a set)
    *  \return an InteractionsSet *
    */
-  inline const SP::InteractionsSet getInteractions() const
+  inline const SP::InteractionsSet getInteractionsPtr() const
   {
-    return allInteractions;
-  }
-
-  /** get all the Interactions of the NonSmoothDynamicalSystem problem (saved in a set)
-   *  \return an InteractionsSet *
-   */
-  inline SP::InteractionsSet getInteractions()
-  {
-    return allInteractions;
+    return topology->getInteractionsPtr();
   }
 
   /** iterator equal to the first element of the set of Interactions
@@ -238,7 +231,7 @@ public:
    */
   inline InteractionsIterator interactionsBegin()
   {
-    return allInteractions->begin();
+    return topology->getInteractionsPtr()->begin();
   };
 
   /** iterator equal to allInteractions->end()
@@ -246,7 +239,7 @@ public:
    */
   inline InteractionsIterator interactionsEnd()
   {
-    return allInteractions->end();
+    return topology->getInteractionsPtr()->end();
   }
 
   /** const iterator equal to the first element of allInteractions
@@ -254,7 +247,7 @@ public:
    */
   inline ConstInteractionsIterator interactionsBegin() const
   {
-    return allInteractions->begin();
+    return topology->getInteractionsPtr()->begin();
   };
 
   /** const iterator equal to allInteractions->end()
@@ -262,7 +255,7 @@ public:
    */
   inline ConstInteractionsIterator interactionsEnd() const
   {
-    return allInteractions->end();
+    return topology->getInteractionsPtr()->end();
   }
 
   /** get Interaction at indix position in the set

@@ -131,8 +131,10 @@ protected:
    */
   unsigned int levelMax;
 
-  /** maximum value for sizeOutput. Set to the number of declared constraints by default (topology->getNumberOfConstraints());
-      This value is used to allocate memory for M during initialize call. The best choice is to set maxSize to the estimated maximum
+  /** maximum value for sizeOutput. Set to the number of declared
+      constraints by default (topology->getNumberOfConstraints());
+      This value is used to allocate memory for M during initialize
+      call. The best choice is to set maxSize to the estimated maximum
       dimension of the problem. It must not exceed ...
   */
   unsigned int maxSize;

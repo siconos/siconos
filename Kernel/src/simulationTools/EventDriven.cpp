@@ -34,19 +34,23 @@
 using namespace std;
 
 // --- XML constructor ---
-EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T, SP::DynamicalSystemsSet dsList, SP::InteractionsSet interList): Simulation(strxml, t0, T, dsList, interList, "EventDriven"), istate(1)
+EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T,
+                         SP::DynamicalSystemsSet dsList,
+                         SP::InteractionsSet interList):
+  Simulation(strxml, t0, T, dsList, interList, "EventDriven"), istate(1)
 {
-  // === One Step NS Problem ===
-  // We read data in the xml output (mainly Interactions concerned and solver) and assign them to
-  // both one step ns problems ("acceleration" and "impact").
-  // At the time, only LCP is available for Event Driven.
+  // === One Step NS Problem === We read data in the xml output
+  // (mainly Interactions concerned and solver) and assign them to
+  // both one step ns problems ("acceleration" and "impact").  At the
+  // time, only LCP is available for Event Driven.
 
   if (simulationxml->hasOneStepNSProblemXML()) // ie if OSNSList is not empty
   {
     SetOfOSNSPBXML OSNSList = simulationxml->getOneStepNSProblemsXML();
     SP::OneStepNSProblemXML osnsXML;
     string type;
-    // For EventDriven, two OSNSPb are required, "acceleration" and "impact"
+    // For EventDriven, two OSNSPb are required, "acceleration" and
+    // "impact"
 
     if (OSNSList.size() != 2)
       RuntimeException::selfThrow("EventDriven::xml constructor - Wrong number of OSNS problems: 2 are required.");
@@ -71,61 +75,94 @@ EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T, SP::Dyna
 
 void EventDriven::updateIndexSet(unsigned int i)
 {
-  if (i > indexSets.size())
-    RuntimeException::selfThrow("EventDriven::updateIndexSet(i), indexSets[i] does not exist.");
+  assert(model);
+  assert(model->getNonSmoothDynamicalSystemPtr());
+  assert(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
 
-  if (i == 0) // IndexSets[0] must not be updated by this function.
-    RuntimeException::selfThrow("EventDriven::updateIndexSet(i=0), indexSets[0] can not be updated.");
+  SP::Topology topo = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
-  // for all Unitary Relations in indexSet[i-1], compute y[i-1] and update the indexSet[i]
-  UnitaryRelationsIterator it, itForFind;
+  assert(i < topo->indexSetsSize() &&
+         "EventDriven::updateIndexSet(i), indexSets[i] does not exist.");
+
+  // IndexSets[0] must not be updated by this function.
+  assert(i > 0  &&
+         "EventDriven::updateIndexSet(i=0), indexSets[0] can not be updated.");
+
+  assert(topo->getIndexSetPtr(i));
+  assert(topo->getIndexSetPtr(i - 1));
+
+  // for all Unitary Relations in indexSet[i-1], compute y[i-1] and
+  // update the indexSet[i]
+
+  SP::UnitaryRelationsGraph indexSeti = topo->getIndexSetPtr(i);
+  SP::UnitaryRelationsGraph indexSetip = topo->getIndexSetPtr(i - 1);
 
   double y;
 
   if (i == 1) // Action is different when first set is treated
   {
-    // We get jroot array, output of root information
-    // Warning! work only if there is only one osi in the simulation.
+    // We get jroot array, output of root information Warning! work
+    // only if there is only one osi in the simulation.
     if (allOSI->size() > 1)
-      RuntimeException::selfThrow("EventDriven::updateIndexSet(i), not yet implemented for several OneStepIntegrators in the same Simulation process.");
-    SP::Lsodar lsodar = boost::static_pointer_cast<Lsodar>(*(allOSI->begin()));
+      RuntimeException::selfThrow
+      ("EventDriven::updateIndexSet(i), not yet implemented for several OneStepIntegrators in the same Simulation process.");
+    SP::Lsodar lsodar =
+      boost::static_pointer_cast<Lsodar>(*(allOSI->begin()));
     SA::integer jroot = lsodar->getJroot();
-    unsigned int nsLawSize; // size of each UR, which corresponds to the related nsLaw size
-    unsigned int absolutePosition = 0; // global position of the UR in the vector of constraints, ie in jroot.
+    unsigned int nsLawSize; // size of each UR, which corresponds to
+    // the related nsLaw size
+    unsigned int absolutePosition = 0; // global position of the UR
+    // in the vector of
+    // constraints, ie in jroot.
+    UnitaryRelationsGraph::VIterator uip, uipend, vpnext;
     bool out = true;
-    for (it = indexSets[i - 1]->begin(); it != indexSets[i - 1]->end(); ++it)
+    boost::tie(uip, uipend) = indexSetip->vertices();
+    for (vpnext = uip;
+         uip != uipend; uip = vpnext)
     {
-      itForFind = indexSets[i]->find(*it);
-      nsLawSize = (*it)->getNonSmoothLawSize();
+      ++vpnext;
+
+      SP::UnitaryRelation urp = indexSetip->bundle(*uip);
+      nsLawSize = urp->getNonSmoothLawSize();
 
       // 1 - If the UR is not yet in the set
-      if (itForFind == indexSets[i]->end())
+
+      if (!indexSeti->is_vertex(urp))
       {
-        // Each UR may handle several constraints and thus corresponds to a set of position in jroot
-        for (unsigned int pos = absolutePosition; pos < (absolutePosition + nsLawSize); ++pos)
+        // Each UR may handle several constraints and thus
+        // corresponds to a set of position in jroot
+        for (unsigned int pos = absolutePosition;
+             pos < (absolutePosition + nsLawSize); ++pos)
         {
           if (jroot[pos] == 1)
           {
-            indexSets[i]->insert(*it);
-            break; // if one, at least, of the nsLawSize constraints is active, the UR is inserted into the set.
+
+            indexSeti->copy_vertex(urp, *indexSetip);
+            break; // if one, at least, of the nsLawSize
+            // constraints is active, the UR is
+            // inserted into the set.
+
           }
         }
       }
       else // if the UR was already in the set
       {
         out = true;
-        for (unsigned int pos = absolutePosition; pos < (absolutePosition + nsLawSize); ++pos)
+        for (unsigned int pos = absolutePosition;
+             pos < (absolutePosition + nsLawSize); ++pos)
         {
           if (jroot[pos] == 1)
           {
             out = false;
-            break; // if one, at least, of the nsLawSize constraints is active, the UR remains in the set.
+            break; // if one, at least, of the nsLawSize
+            // constraints is active, the UR remains
+            // in the set.
           }
         }
         if (out)
         {
-          indexSets[i]->erase(*it);
-          (*it)->getLambdaPtr(i)->zero();
+          indexSeti->remove_vertex(urp);
+          urp->getLambdaPtr(i)->zero();
         }
 
       }
@@ -134,29 +171,35 @@ void EventDriven::updateIndexSet(unsigned int i)
   }
   else
   {
-    for (it = indexSets[i - 1]->begin(); it != indexSets[i - 1]->end(); ++it)
+    UnitaryRelationsGraph::VIterator uip, uipend, vpnext;
+    boost::tie(uip, uipend) = indexSetip->vertices();
+    for (vpnext = uip; uip != uipend; uip = vpnext)
     {
-      // check if current Unitary Relation (ie *it) is in indexSets[i]
-      // (if not itForFind will be equal to indexSets.end())
-      itForFind = indexSets[i]->find(*it);
+      ++vpnext;
 
+      // check if current Unitary Relation (ie *it) is in
+      // indexSets[i]
+      SP::UnitaryRelation ur = indexSetip->bundle(*uip);
       // Get y[i-1] double value
-      y = (*it)->getYRef(i - 1);
+      y = ur->getYRef(i - 1);
 
 
-      // if y[i-1] <=0, then the unitary relation is added in indexSets[i] (if it was not already there)
-      // else if y[i-1] > 0 and if the unitary relation was in the set, it is removed.
-      if (itForFind == indexSets[i]->end()) // If the UR is not yet in the set ...
+      // if y[i-1] <=0, then the unitary relation is added in
+      // indexSets[i] (if it was not already there) else if y[i-1]
+      // > 0 and if the unitary relation was in the set, it is
+      // removed.
+      if (!indexSeti->is_vertex(ur)) // If the UR is not yet in
+        // the set ...
       {
-        if (fabs(y) < tolerance)
-          indexSets[i]->insert(*it);
+        if (fabs(y) <= tolerance)
+          indexSeti->copy_vertex(ur, *indexSetip);
       }
       else  // if the UR is already in the set
       {
         if (fabs(y) > tolerance)
         {
-          indexSets[i]->erase(*it);
-          (*it)->getLambdaPtr(i)->zero();
+          indexSeti->remove_vertex(ur);
+          ur->getLambdaPtr(i)->zero();
         }
       }
     }
@@ -166,49 +209,88 @@ void EventDriven::updateIndexSet(unsigned int i)
 void EventDriven::updateIndexSetsWithDoubleCondition()
 {
 
-  // for all Unitary Relations in indexSet[i-1], compute y[i-1] and update the indexSet[i]
-  UnitaryRelationsIterator it, itForFind;
+  assert(model);
+  assert(model->getNonSmoothDynamicalSystemPtr());
+  assert(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
 
-  for (it = indexSets[2]->begin(); it != indexSets[2]->end(); ++it)
+  // for all Unitary Relations in indexSet[i-1], compute y[i-1] and
+  // update the indexSet[i]
+
+  SP::Topology topo = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+
+  SP::UnitaryRelationsGraph indexSet2 = topo->getIndexSetPtr(2);
+
+  UnitaryRelationsGraph::VIterator ui, uiend, vnext;
+  boost::tie(ui, uiend) = indexSet2->vertices();
+
+  for (vnext = ui; ui != uiend; ui = vnext)
   {
-    double gamma = (*it)->getYRef(2);
-    double F     = (*it)->getLambdaRef(2);
+    ++vnext;
+
+    SP::UnitaryRelation ur = indexSet2->bundle(*ui);
+    double gamma = ur->getYRef(2);
+    double F     = ur->getLambdaRef(2);
 
     if (gamma > 0 && fabs(F) < tolerance)
-      indexSets[2]->erase(*it);
+      indexSet2->remove_vertex(ur);
     else if (fabs(gamma) < tolerance && fabs(F) < tolerance) // undetermined case
-      RuntimeException::selfThrow("EventDriven::updateIndexSetsWithDoubleCondition(), undetermined case.");
+      RuntimeException::selfThrow
+      ("EventDriven::updateIndexSetsWithDoubleCondition(), undetermined case.");
   }
 }
 
 void EventDriven::initOSNS()
 {
-  UnitaryRelationsIterator it;
+
+  assert(model);
+  assert(model->getNonSmoothDynamicalSystemPtr());
+  assert(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
+
+  // for all Unitary Relations in indexSet[i-1], compute y[i-1] and
+  // update the indexSet[i]
+  UnitaryRelationsGraph::VIterator ui, uiend;
+  SP::Topology topo = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+
+  SP::UnitaryRelationsGraph indexSet0 = topo->getIndexSetPtr(0);
+
   // For each Unitary relation in I0 ...
-  for (it = indexSets[0]->begin(); it != indexSets[0]->end(); ++it)
-    (*it)->initialize("EventDriven");
+  for (boost::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    indexSet0->bundle(*ui)->initialize("EventDriven");
 
-  if (!allNSProblems->empty()) // ie if some Interactions have been declared and a Non smooth problem built.
+  if (!allNSProblems->empty()) // ie if some Interactions have been
+    // declared and a Non smooth problem
+    // built.
   {
-    // === OneStepNSProblem initialization. ===
-    // First check that there are 2 osns: one "impact" and one "acceleration"
+    // === OneStepNSProblem initialization. === First check that
+    // there are 2 osns: one "impact" and one "acceleration"
     if (allNSProblems->size() != 2)
-      RuntimeException::selfThrow(" EventDriven::initialize, \n an EventDriven simulation must have two non smooth problem.\n Here, there are " + allNSProblems->size());
+      RuntimeException::selfThrow
+      (" EventDriven::initialize, \n an EventDriven simulation must have two non smooth problem.\n Here, there are "
+       + allNSProblems->size());
 
-    if (allNSProblems->find("impact") == allNSProblems->end()) // ie if the impact problem does not exist
-      RuntimeException::selfThrow("EventDriven::initialize, an EventDriven simulation must have an 'impact' non smooth problem.");
-    if (allNSProblems->find("acceleration") == allNSProblems->end()) // ie if the acceleration-level problem does not exist
-      RuntimeException::selfThrow("EventDriven::initialize, an EventDriven simulation must have an 'acceleration' non smooth problem.");
+    if (allNSProblems->find("impact") ==
+        allNSProblems->end())  // ie if the impact problem does not
+      // exist
+      RuntimeException::selfThrow
+      ("EventDriven::initialize, an EventDriven simulation must have an 'impact' non smooth problem.");
+    if (allNSProblems->find("acceleration") ==
+        allNSProblems->end()) // ie if the acceleration-level problem
+      // does not exist
+      RuntimeException::selfThrow
+      ("EventDriven::initialize, an EventDriven simulation must have an 'acceleration' non smooth problem.");
 
-    // At the time, we consider that for all systems, levelMin is equal to the minimum value of the relative degree
-    levelMin = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMinRelativeDegree();
+    // At the time, we consider that for all systems, levelMin is
+    // equal to the minimum value of the relative degree
+    levelMin = model->getNonSmoothDynamicalSystemPtr()
+               ->getTopologyPtr()->getMinRelativeDegree();
     if (levelMin == 0)
       levelMin++;
 
     // === update all index sets ===
     updateIndexSets();
 
-    // WARNING: only for Lagrangian systems - To be reviewed for other ones.
+    // WARNING: only for Lagrangian systems - To be reviewed for
+    // other ones.
     (*allNSProblems)["impact"]->setLevels(levelMin - 1, levelMax - 1);
     (*allNSProblems)["impact"]->initialize(shared_from_this());
     (*allNSProblems)["acceleration"]->setLevels(levelMin, levelMax);
@@ -218,9 +300,11 @@ void EventDriven::initOSNS()
 
 void EventDriven::initLevelMax()
 {
-  levelMax = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMaxRelativeDegree();
-  // Interactions initialization (here, since level depends on the type of simulation)
-  // level corresponds to the number of Y and Lambda derivatives computed.
+  levelMax = model->getNonSmoothDynamicalSystemPtr()->
+             getTopologyPtr()->getMaxRelativeDegree();
+  // Interactions initialization (here, since level depends on the
+  // type of simulation) level corresponds to the number of Y and
+  // Lambda derivatives computed.
   if (levelMax == 0)
     levelMax++;
 }
@@ -228,7 +312,8 @@ void EventDriven::initLevelMax()
 void EventDriven::computeF(SP::OneStepIntegrator osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
 {
 
-  // computeF is supposed to fill xdot in, using the definition of the dynamical systems belonging to the osi
+  // computeF is supposed to fill xdot in, using the definition of the
+  // dynamical systems belonging to the osi
 
   // Check osi type: only lsodar is allowed.
   if (osi->getType() != OSI::LSODAR)
@@ -250,12 +335,13 @@ void EventDriven::computeF(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
       (*allNSProblems)["acceleration"]->compute(t);
       updateInput(2); // Necessary to compute DS state below
     }
-    // Compute the right-hand side ( xdot = f + r in DS) for all the ds, with the new value of input.
-    //lsodar->computeRhs(t);
+    // Compute the right-hand side ( xdot = f + r in DS) for all the
+    //ds, with the new value of input.  lsodar->computeRhs(t);
   }
   // update the DS of the OSI.
   lsodar->computeRhs(t);
-  //  lsodar->updateState(2); // update based on the last saved values for the DS state, ie the ones computed by lsodar (x above)
+  //  lsodar->updateState(2); // update based on the last saved values
+  //  for the DS state, ie the ones computed by lsodar (x above)
 
   // Update Index sets?
 
@@ -271,25 +357,34 @@ void EventDriven::computeF(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   }
 }
 
-void EventDriven::computeJacobianF(SP::OneStepIntegrator osi, integer *sizeOfX, doublereal *time, doublereal *x,  doublereal *jacob)
+void EventDriven::computeJacobianF(SP::OneStepIntegrator osi,
+                                   integer *sizeOfX,
+                                   doublereal *time,
+                                   doublereal *x,
+                                   doublereal *jacob)
 {
   if (osi->getType() != OSI::LSODAR)
     RuntimeException::selfThrow("EventDriven::computeF(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
 
   SP::Lsodar lsodar = boost::static_pointer_cast<Lsodar>(osi);
 
-  //   // Remark A: according to DLSODAR doc, each call to jacobian is preceded by a call to f with the same
-  //   // arguments NEQ, T, and Y.  Thus to gain some efficiency, intermediate quantities shared by both calculations may be
-  //   // saved in class members?
-  // fill in xWork vector (ie all the x of the ds of this osi) with x
-  // fillXWork(x); // -> copy // Maybe this step is not necessary? because of remark A above
+  // Remark A: according to DLSODAR doc, each call to jacobian is
+  // preceded by a call to f with the same arguments NEQ, T, and Y.
+  // Thus to gain some efficiency, intermediate quantities shared by
+  // both calculations may be saved in class members?  fill in xWork
+  // vector (ie all the x of the ds of this osi) with x fillXWork(x);
+  // -> copy
+  // Maybe this step is not necessary?  because of
+  // remark A above
 
-  // Compute the jacobian of the vector field according to x for the current ds
+  // Compute the jacobian of the vector field according to x for the
+  // current ds
   double t = *time;
   model->setCurrentTime(t);
   lsodar->computeJacobianRhs(t);
 
-  //   // Save jacobianX values from dynamical system into current jacob (in-out parameter)
+  // Save jacobianX values from dynamical system into current jacob
+  // (in-out parameter)
 
   DSIterator it;
   unsigned int i = 0;
@@ -304,9 +399,20 @@ void EventDriven::computeJacobianF(SP::OneStepIntegrator osi, integer *sizeOfX, 
   }
 }
 
-void EventDriven::computeG(SP::OneStepIntegrator osi, integer * sizeOfX, doublereal* time, doublereal* x, integer * ng, doublereal * gOut)
+void EventDriven::computeG(SP::OneStepIntegrator osi,
+                           integer * sizeOfX, doublereal* time,
+                           doublereal* x, integer * ng,
+                           doublereal * gOut)
 {
-  UnitaryRelationsIterator itUR;
+
+  assert(model);
+  assert(model->getNonSmoothDynamicalSystemPtr());
+  assert(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
+  UnitaryRelationsGraph::VIterator ui, uiend;
+  SP::Topology topo = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  SP::UnitaryRelationsGraph indexSet0 = topo->getIndexSetPtr(0);
+  SP::UnitaryRelationsGraph indexSet2 = topo->getIndexSetPtr(2);
+
   unsigned int nsLawSize, k = 0 ;
 
   SP::SiconosVector y, lambda;
@@ -314,7 +420,9 @@ void EventDriven::computeG(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   SP::Lsodar lsodar = boost::static_pointer_cast<Lsodar>(osi);
 
   // fill in xWork vector (ie all the x of the ds of this osi) with x
-  lsodar->fillXWork(sizeOfX, x); // That may be not necessary? Check if computeF is called for each computeG.
+  lsodar->fillXWork(sizeOfX, x); // That may be not necessary? Check if
+  // computeF is called for each
+  // computeG.
 
   double t = *time;
   model->setCurrentTime(t);
@@ -326,19 +434,22 @@ void EventDriven::computeG(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
     updateOutput(0, 0);
 
   // If UR is in IndexSet2, g = lambda[2], else g = y[0]
-  for (itUR = indexSets[0]->begin(); itUR != indexSets[0]->end(); ++itUR)
+  for (boost::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
-    nsLawSize = (*itUR)->getNonSmoothLawSize();
-    if (indexSets[2]->find(*itUR) != indexSets[2]->end()) // ie if the current Unitary Relation is in indexSets[2]
+    SP::UnitaryRelation ur = indexSet0->bundle(*ui);
+    nsLawSize = ur->getNonSmoothLawSize();
+    if (indexSet2->is_vertex(ur)) // ie if the current Unitary
+      // Relation is in indexSets[2]
     {
-      // Get lambda at acc. level, solution of LCP acc, called during computeF().
-      lambda = (*itUR)->getLambdaPtr(2);
+      // Get lambda at acc. level, solution of LCP acc, called
+      // during computeF().
+      lambda = ur->getLambdaPtr(2);
       for (unsigned int i = 0; i < nsLawSize; i++)
         gOut[k++] = (*lambda)(i);
     }
     else
     {
-      y = (*itUR)->getYPtr(0);
+      y = ur->getYPtr(0);
       for (unsigned int i = 0; i < nsLawSize; i++)
         gOut[k++] = (*y)(i);
     }
@@ -376,14 +487,16 @@ void EventDriven::update(unsigned int levelInput)
 
 void EventDriven::advanceToEvent()
 {
-  // WARNING: this is supposed to work for only one OSI, including all the DS.
-  // To be reviewed for multiple OSI case (if it has sense?).
+  // WARNING: this is supposed to work for only one OSI, including all
+  // the DS.  To be reviewed for multiple OSI case (if it has sense?).
 
-  // ---> Step 1: integrate the smooth dynamics from current event to next event;
-  // Starting event = last accessed event.
-  // Next event = next time step or first root of the 'g' function found by integrator (Lsodar)
+  // ---> Step 1: integrate the smooth dynamics from current event to
+  // next event; Starting event = last accessed event.  Next event =
+  // next time step or first root of the 'g' function found by
+  // integrator (Lsodar)
 
-  // if istate == 1 => first call. It this case we suppose that tinit and tend have been initialized before.
+  // if istate == 1 => first call. It this case we suppose that tinit
+  // and tend have been initialized before.
 
   if (istate == 2 || istate == 3)
   {
@@ -392,13 +505,18 @@ void EventDriven::advanceToEvent()
   }
 
   tout = tend;
-  bool isNewEventOccur = false;  // set to true if a new event occur during integration
+  bool isNewEventOccur = false;  // set to true if a new event occur
+  // during integration
 
   // call integrate method for each OSI, between tinit and tend.
   OSIIterator it;
   for (it = allOSI->begin(); it != allOSI->end(); ++it)
   {
-    (*it)->integrate(tinit, tend, tout, istate); // integrate must return a flag (istate) telling if tend has been reached or not.
+    (*it)->integrate(tinit, tend, tout, istate); // integrate must
+    // return a flag
+    // (istate) telling if
+    // tend has been
+    // reached or not.
 
     if (printStat)
     {
@@ -406,7 +524,8 @@ void EventDriven::advanceToEvent()
       statOut << " Starting time: " << tinit << endl;
 
     }
-    if (istate == 3) // ie if tout is not equal to tend: one or more roots have been found.
+    if (istate == 3) // ie if tout is not equal to tend: one or more
+      // roots have been found.
     {
       isNewEventOccur = true;
       // Add an event into the events manager list

@@ -26,9 +26,11 @@
 #include "SiconosConst.h"
 #include "InteractionsSet.hpp"
 #include "UnitaryRelationsSet.hpp"
+#include "SimulationTypeDef.hpp"
 
 class NonSmoothDynamicalSystem;
 class Interaction;
+class DynamicalSystem;
 class SiconosMatrix;
 class UnitaryRelation;
 
@@ -41,15 +43,22 @@ typedef UnitaryRelationsIntMap::iterator IteratorForRelativeDegrees;
 /** const iterator through UnitaryRelationsIntMap */
 typedef UnitaryRelationsIntMap::const_iterator ConstIteratorForRelativeDegrees;
 
-/**  This class describes the topology of the non-smooth dynamical system. It holds all the "potential" Unitary Relations and their Relative Degrees.
+
+
+/**  This class describes the topology of the non-smooth dynamical
+ *  system. It holds all the "potential" Unitary Relations and their
+ *  Relative Degrees.
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
  *  \date (Creation) July 20, 2005
  *
- *  Topology is built in NSDS constructors but initialized in Simulation->initialize(), ie when all Interactions have been clearly defined.
+ *  Topology is built in NSDS constructors but initialized in
+ *  Simulation->initialize(), ie when all Interactions have been
+ *  clearly defined.
  *
- * Note that indexSet0 holds all the possible relations (declared by user) not only those which are "actives".
+ * Note that indexSet0 holds all the possible relations (declared by
+ * user) not only those which are "actives".
  *
  * Construction consists in:
  *    - link with the NSDS that owns the topology.
@@ -60,18 +69,19 @@ typedef UnitaryRelationsIntMap::const_iterator ConstIteratorForRelativeDegrees;
  *    - insertion of the relations of all the Interaction into indexSet0
  *    - computation of all relative degrees
  *
- * Insertion of an Interaction into the set indexSet0: addInteractionInIndexSet(SP::Interaction inter)
- *   for each relation of the interaction, it creates a new UnitaryRelation and inserts it into indexSet0
- *   It also counts the total number of "constraints" in the system.
+ * Insertion of an Interaction into the set indexSet0:
+ * addInteractionInIndexSet(SP::Interaction inter) for each relation
+ * of the interaction, it creates a new UnitaryRelation and inserts it
+ * into indexSet0 It also counts the total number of "constraints" in
+ * the system.
  *
- * Relative degrees computation: at the time, depends only on the non-smooth law type of each UnitaryRelation.
- * Degrees are saved in a map that links each UnitaryRelation to an int, its relative degree.
- *
- * Rule: no Unitary Relation can be created outside of the present class (ie the only calls to new UnitaryRelation(...) are part of Topology methods)
- * Thus, no flags for inside-class allocation - All UnitaryRelation pointers are cleared during Topology destructor call.
+ * Relative degrees computation: at the time, depends only on the
+ * non-smooth law type of each UnitaryRelation.  Degrees are saved in
+ * a map that links each UnitaryRelation to an int, its relative
+ * degree.
  *
  */
-class Topology
+class Topology : public boost::enable_shared_from_this<Topology>
 {
 
 private:
@@ -81,8 +91,11 @@ private:
   /** the set of all the interactions of the system */
   SP::InteractionsSet allInteractions;
 
-  /** index set I0, ie a set of all the Unitary Relations - This corresponds to indexSets[0] of the Simulation */
-  SP::UnitaryRelationsSet indexSet0;
+  /** dynamical systems graphs */
+  std::vector<SP::DynamicalSystemsGraph> DSG;
+
+  /** unitary relations graphs (URG[0]=L[DSG[0]], L is the line graph transformation) */
+  std::vector<SP::UnitaryRelationsGraph> URG;
 
   /** map that links UnitaryRelations with their relative degrees */
   UnitaryRelationsIntMap relativeDegrees;
@@ -93,19 +106,19 @@ private:
   /** check if topology is static (all relative degrees = 0 or 1) or not */
   bool isTopologyTimeInvariant;
 
-  /** Total number of (scalar) constraints in the problem, ie sum of all nslaw sizes of Unitary Relations of IndexSet0.*/
+  /** Total number of (scalar) constraints in the problem, ie sum of
+      all nslaw sizes of Unitary Relations of IndexSet0.*/
   unsigned int numberOfConstraints;
 
   // === PRIVATE FUNCTIONS ===
 
-  /** schedules the relations of Interaction inter into IndexSet0 (ie creates the corresponding UnitaryRelations)
+  /** schedules the relations of Interaction inter into IndexSet0 (ie
+  * creates the corresponding UnitaryRelations)
   * \param: a pointer to Interaction
   */
   const bool addInteractionInIndexSet(SP::Interaction);
 
-  /** compute the  RelativeDegrees Map
-  */
-  void computeRelativeDegrees();
+  const bool removeInteractionFromIndexSet(SP::Interaction);
 
   /** default constructor
   */
@@ -118,10 +131,16 @@ public:
   /** constructor from InteractionSet
   * \param: a SP::InteractionSet
   */
-  Topology(SP::InteractionsSet) ;
+  Topology(SP::InteractionsSet);
+
 
   /** destructor */
   ~Topology();
+
+
+  /** compute the  RelativeDegrees Map
+  */
+  void computeRelativeDegrees();
 
   // === GETTERS/SETTERS ===
 
@@ -160,7 +179,7 @@ public:
   /** get all the Interactions of the Topology problem (saved in a set)
   *  \return an InteractionsSet
   */
-  inline const SP::InteractionsSet getInteractions() const
+  inline const SP::InteractionsSet getInteractionsPtr() const
   {
     return allInteractions;
   }
@@ -178,18 +197,65 @@ public:
   *  \param a pointer to Interaction
   *  \return a bool
   */
-
-
-
   const bool hasInteraction(SP::Interaction) const;
 
-  /** get a pointer to the index set of all Unitary Relations.
-   *  \return a UnitaryRelationsSet*
+  /** add an Interaction in the topology. The interaction is both
+      added in Dynamical Systems graph and Unitary Relations Graph
    */
-  inline SP::UnitaryRelationsSet getIndexSet0Ptr()
+  void addInteraction(SP::Interaction);
+
+  /** remove an Interaction from the topology. The interaction is
+      removed from Dynamical Systems graph and Unitary Relations Graph.
+      The interaction is not removed from actives subgraphs : updateIndexSet
+   */
+  void removeInteraction(SP::Interaction);
+
+  /** get a pointer to the graph of all Unitary Relations.
+   *  \return a SP::UnitaryRelationsGraph
+   */
+  inline SP::UnitaryRelationsGraph getIndexSet0Ptr()
   {
-    return indexSet0;
+    return URG[0];
   }
+
+  /** get a pointer to the graph at level num of Unitary Relations
+   *  \return a SP::UnitaryRelationsGraph
+   */
+  inline SP::UnitaryRelationsGraph getIndexSetPtr(unsigned int num)
+  {
+    assert(num < URG.size()) ;
+    return URG[num];
+  };
+
+  /** reset graph at level num of Unitary Relations
+   *  \return a SP::UnitaryRelationsGraph
+   */
+  inline void resetIndexSetPtr(unsigned int num)
+  {
+    assert(num < URG.size()) ;
+    URG[num].reset(new UnitaryRelationsGraph());
+  };
+
+  /** get a pointer to the graph at level num of Dynamical System
+   *  \return a SP::DynamicalSystemsGraph
+   */
+  inline SP::DynamicalSystemsGraph getDSGPtr(unsigned int num)
+  {
+    assert(num < DSG.size()) ;
+    return DSG[num];
+  };
+
+  /** get the number of Unitary Relations Graphs */
+  inline unsigned int indexSetsSize()
+  {
+    return URG.size();
+  };
+
+  /** resize Unitary Relations Graphs */
+  inline void indexSetsResize(unsigned int i)
+  {
+    return URG.resize(i);
+  };
 
   // --- relativeDegreesMap ---
 

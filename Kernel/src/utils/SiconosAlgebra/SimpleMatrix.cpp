@@ -717,7 +717,7 @@ void SimpleMatrix::setBlock(unsigned int row_min, unsigned int col_min, const Si
     SiconosMatrixException::selfThrow("SimpleMatrix::setBlock(row,col): row is out of range");
 
   if (col_min >= dimCol)
-    SiconosMatrixException::selfThrow("SimpleMatrix::setBloc(row,col)k: col is out of range");
+    SiconosMatrixException::selfThrow("SimpleMatrix::setBlock(row,col): col is out of range");
 
   unsigned int row_max, col_max;
   row_max = m.size(0) + row_min;

@@ -260,6 +260,7 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
   }
 
   intData[4] = istate;
+
   F77NAME(dlsodar)(pointerToF, &(intData[0]), &(*xtmp)(0), &tinit_DR, &tend_DR, &(intData[2]), rtol.get(), atol.get(), &(intData[3]), &(intData[4]), &(intData[5]), rwork.get(), &(intData[6]), iwork.get(), &(intData[7]), pointerToJacobianF, &(intData[8]), pointerToG, &(intData[1]), jroot.get());
 
   // jroot: jroot[i] = 0 if g(i) has a root at t, else jroot[i] = 0.

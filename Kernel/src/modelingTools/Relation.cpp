@@ -21,13 +21,20 @@
 using namespace std;
 
 // Default constructor
-Relation::Relation(RELATION::TYPES newType, RELATION::SUBTYPES newSub):
-  relationType(newType), subType(newSub), hPlugged(false), gPlugged(false), hName("unamed"), gName("unamed")
+Relation::Relation(RELATION::TYPES newType,
+                   RELATION::SUBTYPES newSub):
+  relationType(newType),
+  subType(newSub), hPlugged(false), gPlugged(false),
+  hName("unamed"), gName("unamed")
 {}
 
 // xml constructor
-Relation::Relation(SP::RelationXML relxml, RELATION::TYPES newType, RELATION::SUBTYPES newSub):
-  relationType(newType), subType(newSub), relationxml(relxml), hPlugged(false), gPlugged(false), hName("unamed"), gName("unamed")
+Relation::Relation(SP::RelationXML relxml,
+                   RELATION::TYPES newType,
+                   RELATION::SUBTYPES newSub):
+  relationType(newType), subType(newSub),
+  relationxml(relxml), hPlugged(false),
+  gPlugged(false), hName("unamed"), gName("unamed")
 {
   if (! relationxml)
     RuntimeException::selfThrow("Relation::fillRelationWithRelationXML - object RelationXML does not exist");
@@ -39,8 +46,15 @@ Relation::~Relation()
 
 void Relation::display() const
 {
-  cout << "=====> Relation of type " << relationType << " and subtype " << subType << endl;
-  if (interaction.lock()) cout << "- Interaction id" << interaction.lock()->getId() << endl;
+  cout << "=====> Relation of type "
+       << relationType
+       << " and subtype "
+       << subType << endl;
+  if (interaction.lock())
+    cout
+        << "- Interaction id"
+        << interaction.lock()->getId()
+        << endl;
   else cout << "- Linked interaction -> NULL" << endl;
 }
 

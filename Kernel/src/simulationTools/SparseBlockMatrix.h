@@ -122,7 +122,7 @@ public:
       \param SP::UnitaryRelation, the index set of the active constraints
       \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
   */
-  SparseBlockMatrix(SP::UnitaryRelationsSet, MapOfMapOfUnitaryMatrices&);
+  SparseBlockMatrix(SP::UnitaryRelationsGraph, MapOfMapOfUnitaryMatrices&);
 
   /** Constructor from DynamicalSystemsSet and map
       \param DynamicalSystemsSet*, the index set of the active constraints
@@ -135,7 +135,7 @@ public:
      \param DynamicalSystemsSet*, the index set of the active constraints
      \param MapOfDSMatrices, the list of matrices linked to a couple of UR*
   */
-  SparseBlockMatrix(SP::UnitaryRelationsSet, SP::DynamicalSystemsSet, MapOfUnitaryMapOfDSMatrices&);
+  SparseBlockMatrix(SP::UnitaryRelationsGraph, SP::DynamicalSystemsSet, MapOfUnitaryMapOfDSMatrices&);
 
   /** destructor
    */
@@ -184,10 +184,10 @@ public:
   };
 
   /** fill the current class using an index set and a map of blocks
-      \param UnitaryRelationsSet*, the index set of the active constraints
+      \param UnitaryRelationsGraph*, the index set of the active constraints
       \param MapOfMapOfUnitaryMatrices, the list of matrices linked to a couple of UR*
   */
-  void fill(SP::UnitaryRelationsSet, MapOfMapOfUnitaryMatrices&);
+  void fill(SP::UnitaryRelationsGraph, MapOfMapOfUnitaryMatrices&);
 
   /** fill the current class using an index set and a map of DSblocks
        \param DynamicalSystemsSet*, the  set of DynamicalSystem
@@ -197,10 +197,10 @@ public:
 
   /** fill the current class using an index set and a map of DSblocks
        \param DynamicalSystemsSet*, the  set of DynamicalSystem
-       \param UnitaryRelationsSet*, the index set of the active constraints
+       \param UnitaryRelationsGraph*, the index set of the active constraints
        \param MapOfUnitaryMapOfDSMatrices, the list of matrices linked to a DynamicalSystem
    */
-  void fill(SP::UnitaryRelationsSet, SP::DynamicalSystemsSet, MapOfUnitaryMapOfDSMatrices&);
+  void fill(SP::UnitaryRelationsGraph, SP::DynamicalSystemsSet, MapOfUnitaryMapOfDSMatrices&);
 
   /** fill the numerics structure numericsMatSparse using MSparseBlock */
   void convert();

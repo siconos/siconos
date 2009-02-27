@@ -63,7 +63,7 @@ void MLCP2::initialize(SP::Simulation simulation)
 }
 void MLCP2::updateM()
 {
-  SP::UnitaryRelationsSet URSet = simulation->getIndexSetPtr(levelMin);
+  SP::UnitaryRelationsGraph URSet = simulation->getIndexSetPtr(levelMin);
   SP::DynamicalSystemsSet  DSSet = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
   if (!M)
   {
@@ -181,11 +181,11 @@ void MLCP2::computeQ(double time)
   q->zero();
 
   // === Get index set from Simulation ===
-  SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
+  SP::UnitaryRelationsGraph indexSet = simulation->getIndexSetPtr(levelMin);
   // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
 
   unsigned int pos = 0;
-  UnitaryRelationsIterator itCurrent, itLinked;
+  UnitaryRelationsGraph::VIterator ui, uiend;
   string simulationType = simulation->getType();
   for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
   {

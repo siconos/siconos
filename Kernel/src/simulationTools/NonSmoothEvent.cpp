@@ -43,24 +43,31 @@ void NonSmoothEvent::process(SP::Simulation simulation)
   {
     SP::EventDriven eventDriven = boost::static_pointer_cast<EventDriven>(simulation);
 
-    // Compute y[0], y[1] and update index sets. => already done during advance to event ...
+    // Compute y[0], y[1] and update index sets. => already done
+    // during advance to event ...
 
     //       simulation->updateOutput(0, 1);
 
     //       simulation->updateIndexSets();
 
     // Get the required index sets ...
-    SP::UnitaryRelationsSet indexSet1 = simulation->getIndexSetPtr(1);
-    SP::UnitaryRelationsSet indexSet2 = simulation->getIndexSetPtr(2);
-    UnitaryRelationsSet commonSet ;
-    difference(*indexSet1, *indexSet2, commonSet);
+    SP::UnitaryRelationsGraph indexSet1 = simulation->getIndexSetPtr(1);
+    SP::UnitaryRelationsGraph indexSet2 = simulation->getIndexSetPtr(2);
+    bool found = true;
+    UnitaryRelationsGraph::VIterator ui, uiend;
+    for (boost::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
+    {
+      found = indexSet2->is_vertex(indexSet2->bundle(*ui));
+      if (!found) break;
+    }
     // ---> solve impact LCP if IndexSet[1]\IndexSet[2] is not empty.
-    if (!(commonSet).isEmpty())
+    if (!found)
     {
 
-      // For Event-Driven algo., memories vectors are of size 2 (ie 2 unitaryBlocks).
-      // First unitaryBlock (pos 0, last in) for post-event values and last unitaryBlock (pos 1, first in) for
-      // pre-event values.
+      // For Event-Driven algo., memories vectors are of size 2
+      // (ie 2 unitaryBlocks).  First unitaryBlock (pos 0, last
+      // in) for post-event values and last unitaryBlock (pos 1,
+      // first in) for pre-event values.
 
       simulation->saveInMemory();  // To save pre-impact values
 
@@ -74,16 +81,17 @@ void NonSmoothEvent::process(SP::Simulation simulation)
     // Update the corresponding index set ...
     eventDriven->updateIndexSets();
 
-    // check that IndexSet[1]-IndexSet[2] is now empty
-    //    if( !((*indexSet1-*indexSet2).isEmpty()))
-    //      RuntimeException::selfThrow("NonSmoothEvent::process, error after impact-LCP solving.");
-    // ---> solve acceleration LCP if IndexSet[2] is not empty
-    if (!((indexSet2)->isEmpty()))
+    // check that IndexSet[1]-IndexSet[2] is now empty if(
+    //    !((*indexSet1-*indexSet2).isEmpty()))
+    //    RuntimeException::selfThrow("NonSmoothEvent::process,
+    //    error after impact-LCP solving."); ---> solve
+    //    acceleration LCP if IndexSet[2] is not empty
+    if (indexSet2->size() > 0)
     {
-      // Update the state of the DS
-      //    OSIIterator itOSI;
-      //    for(itOSI = simulation->getOneStepIntegrators().begin(); itOSI!=simulation->getOneStepIntegrators().end() ; ++itOSI)
-      //      (*itOSI)->updateState(2);
+      // Update the state of the DS OSIIterator itOSI; for(itOSI =
+      //    simulation->getOneStepIntegrators().begin();
+      //    itOSI!=simulation->getOneStepIntegrators().end() ;
+      //    ++itOSI) (*itOSI)->updateState(2);
 
       // solve LCP-acceleration
       eventDriven->computeOneStepNSProblem("acceleration"); //solveLCPAcceleration();

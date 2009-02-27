@@ -50,6 +50,26 @@ public:
   /* distance between disk and plan */
   double distance(double x, double y, double r);
 
+  double getRadius()
+  {
+    return r;
+  };
+
+  double getA()
+  {
+    return A;
+  };
+
+  double getB()
+  {
+    return B;
+  };
+
+  double getC()
+  {
+    return C;
+  };
+
   void computeH(double);
 
   void computeJacH(double, unsigned int);

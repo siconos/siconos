@@ -31,7 +31,7 @@ Typedef for simulation-related objects
 
 #include "UnitaryRelationsSet.hpp"
 
-#include <boost/shared_container_iterator.hpp>
+#include "SiconosGraph.hpp"
 #include "SiconosPointers.hpp"
 
 /** double precision machine */
@@ -88,9 +88,6 @@ typedef MapOfUnitaryMatrices::iterator UnitaryMatrixColumnIterator ;
 /** Const iterator through a MapOfUnitaryMatrices */
 typedef MapOfUnitaryMatrices::const_iterator ConstUnitaryMatrixColumnIterator;
 
-
-
-
 /** Map of MapOfUnitaryMatrices with a UnitaryRelation as a key - Used for extra-diagonal unitaryBlock-terms in assembled matrices of LCP etc ..*/
 typedef std::map< SP::UnitaryRelation , MapOfUnitaryMatrices >  MapOfMapOfUnitaryMatrices;
 
@@ -133,6 +130,16 @@ TYPEDEF_SPTR(UR_int);
 
 /** list of indices */
 typedef std::vector<int> IndexInt;
+
+
+typedef SiconosGraph<SP::DynamicalSystem, SP::UnitaryRelation> DynamicalSystemsGraph;
+typedef SiconosGraph<SP::UnitaryRelation, SP::DynamicalSystem> UnitaryRelationsGraph;
+
+typedef std::map<SP::UnitaryRelation, UnitaryRelationsGraph::VDescriptor > URGVMap;
+
+TYPEDEF_SPTR(DynamicalSystemsGraph);
+TYPEDEF_SPTR(UnitaryRelationsGraph);
+TYPEDEF_SPTR(URGVMap);
 
 // ================== Objects to handle OSI ==================
 

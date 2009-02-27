@@ -141,7 +141,7 @@ void LinearOSNS::initialize(SP::Simulation sim)
 void LinearOSNS::updateM()
 {
   // Get index set from Simulation
-  SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
+  SP::UnitaryRelationsGraph indexSet = simulation->getIndexSetPtr(levelMin);
   if (! M) // Creates and fills M using UR of indexSet
     M.reset(new OSNSMatrix(indexSet, unitaryBlocks, MStorageType));
 
@@ -162,104 +162,102 @@ void LinearOSNS::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelatio
   // Get DS common between UR1 and UR2
   DynamicalSystemsSet commonDS;
   intersection(*UR1->getDynamicalSystemsPtr(), *UR2->getDynamicalSystemsPtr(), commonDS);
+  assert(!commonDS.isEmpty()) ;
 
-  if (!commonDS.isEmpty()) // Nothing to be done if there are no common DS between the two UR.
+  // Warning: we suppose that at this point, all non linear
+  // operators (G for lagrangian relation for example) have been
+  // computed through plug-in mechanism.
+
+  // Get dimension of the NonSmoothLaw (ie dim of the unitaryBlock)
+  unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
+  unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
+  // Check allocation
+  if (! unitaryBlocks[UR1][UR2])
+    unitaryBlocks[UR1][UR2].reset(new SimpleMatrix(nslawSize1, nslawSize2));
+
+  // Get the W and Theta maps of one of the Unitary Relation -
+  // Warning: in the current version, if OSI!=Moreau, this fails.
+  // If OSI = MOREAU, centralUnitaryBlocks = W if OSI = LSODAR,
+  // centralUnitaryBlocks = M (mass matrices)
+  MapOfDSMatrices centralUnitaryBlocks;
+  MapOfDouble Theta; // If OSI = LSODAR, Theta remains empty
+  getOSIMaps(UR1, centralUnitaryBlocks, Theta);
+
+  SP::SiconosMatrix currentUnitaryBlock = unitaryBlocks[UR1][UR2];
+
+  SP::SiconosMatrix leftUnitaryBlock, rightUnitaryBlock;
+
+  unsigned int sizeDS;
+  RELATION::TYPES relationType1, relationType2;
+  double h = simulation->getTimeDiscretisationPtr()->getCurrentTimeStep();
+
+  // General form of the unitaryBlock is :   unitaryBlock = a*extraUnitaryBlock + b * leftUnitaryBlock * centralUnitaryBlocks * rightUnitaryBlock
+  // a and b are scalars, centralUnitaryBlocks a matrix depending on the integrator (and on the DS), the simulation type ...
+  // left, right and extra depend on the relation type and the non smooth law.
+  relationType1 = UR1->getRelationType();
+  relationType2 = UR2->getRelationType();
+  // ==== First Order Relations - Specific treatment for diagonal unitaryBlocks ===
+  if (UR1 == UR2)
+    UR1->getExtraUnitaryBlock(currentUnitaryBlock);
+  else
+    currentUnitaryBlock->zero();
+
+
+  // loop over the common DS
+  for (DSIterator itDS = commonDS.begin(); itDS != commonDS.end(); itDS++)
   {
-    // Warning: we suppose that at this point, all non linear
-    // operators (G for lagrangian relation for example) have been
-    // computed through plug-in mechanism.
+    sizeDS = (*itDS)->getDim();
 
-    // Get dimension of the NonSmoothLaw (ie dim of the unitaryBlock)
-    unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
-    unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
-    // Check allocation
-    if (! unitaryBlocks[UR1][UR2])
-      unitaryBlocks[UR1][UR2].reset(new SimpleMatrix(nslawSize1, nslawSize2));
+    // get unitaryBlocks corresponding to the current DS
+    // These unitaryBlocks depends on the relation type.
+    leftUnitaryBlock.reset(new SimpleMatrix(nslawSize1, sizeDS));
+    UR1->getLeftUnitaryBlockForDS(*itDS, leftUnitaryBlock);
 
-    // Get the W and Theta maps of one of the Unitary Relation -
-    // Warning: in the current version, if OSI!=Moreau, this fails.
-    // If OSI = MOREAU, centralUnitaryBlocks = W if OSI = LSODAR,
-    // centralUnitaryBlocks = M (mass matrices)
-    MapOfDSMatrices centralUnitaryBlocks;
-    MapOfDouble Theta; // If OSI = LSODAR, Theta remains empty
-    getOSIMaps(UR1, centralUnitaryBlocks, Theta);
-
-    SP::SiconosMatrix currentUnitaryBlock = unitaryBlocks[UR1][UR2];
-
-    SP::SiconosMatrix leftUnitaryBlock, rightUnitaryBlock;
-
-    unsigned int sizeDS;
-    RELATION::TYPES relationType1, relationType2;
-    double h = simulation->getTimeDiscretisationPtr()->getCurrentTimeStep();
-
-    // General form of the unitaryBlock is :   unitaryBlock = a*extraUnitaryBlock + b * leftUnitaryBlock * centralUnitaryBlocks * rightUnitaryBlock
-    // a and b are scalars, centralUnitaryBlocks a matrix depending on the integrator (and on the DS), the simulation type ...
-    // left, right and extra depend on the relation type and the non smooth law.
-    relationType1 = UR1->getRelationType();
-    relationType2 = UR2->getRelationType();
-    // ==== First Order Relations - Specific treatment for diagonal unitaryBlocks ===
-    if (UR1 == UR2)
-      UR1->getExtraUnitaryBlock(currentUnitaryBlock);
-    else
-      currentUnitaryBlock->zero();
-
-
-    // loop over the common DS
-    for (DSIterator itDS = commonDS.begin(); itDS != commonDS.end(); itDS++)
+    // Computing depends on relation type -> move this in UnitaryRelation method?
+    if (relationType1 == FirstOrder && relationType2 == FirstOrder)
     {
-      sizeDS = (*itDS)->getDim();
 
-      // get unitaryBlocks corresponding to the current DS
-      // These unitaryBlocks depends on the relation type.
-      leftUnitaryBlock.reset(new SimpleMatrix(nslawSize1, sizeDS));
-      UR1->getLeftUnitaryBlockForDS(*itDS, leftUnitaryBlock);
+      rightUnitaryBlock.reset(new SimpleMatrix(sizeDS, nslawSize2));
 
-      // Computing depends on relation type -> move this in UnitaryRelation method?
-      if (relationType1 == FirstOrder && relationType2 == FirstOrder)
-      {
+      UR2->getRightUnitaryBlockForDS(*itDS, rightUnitaryBlock);
+      // centralUnitaryBlock contains a lu-factorized matrix and we solve
+      // centralUnitaryBlock * X = rightUnitaryBlock with PLU
+      centralUnitaryBlocks[*itDS]->PLUForwardBackwardInPlace(*rightUnitaryBlock);
+      //      integration of r with theta method removed
+      //      *currentUnitaryBlock += h *Theta[*itDS]* *leftUnitaryBlock * (*rightUnitaryBlock); //left = C, right = W.B
+      //gemm(h,*leftUnitaryBlock,*rightUnitaryBlock,1.0,*currentUnitaryBlock);
+      *leftUnitaryBlock *= h;
+      prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
+      //left = C, right = inv(W).B
 
-        rightUnitaryBlock.reset(new SimpleMatrix(sizeDS, nslawSize2));
-
-        UR2->getRightUnitaryBlockForDS(*itDS, rightUnitaryBlock);
-        // centralUnitaryBlock contains a lu-factorized matrix and we solve
-        // centralUnitaryBlock * X = rightUnitaryBlock with PLU
-        centralUnitaryBlocks[*itDS]->PLUForwardBackwardInPlace(*rightUnitaryBlock);
-        //      integration of r with theta method removed
-        //      *currentUnitaryBlock += h *Theta[*itDS]* *leftUnitaryBlock * (*rightUnitaryBlock); //left = C, right = W.B
-        //gemm(h,*leftUnitaryBlock,*rightUnitaryBlock,1.0,*currentUnitaryBlock);
-        *leftUnitaryBlock *= h;
-        prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
-        //left = C, right = inv(W).B
-
-      }
-      else if (relationType1 == Lagrangian || relationType2 == Lagrangian)
-      {
-        if (UR1 == UR2)
-        {
-          SP::SiconosMatrix work(new SimpleMatrix(*leftUnitaryBlock));
-          work->trans();
-          centralUnitaryBlocks[*itDS]->PLUForwardBackwardInPlace(*work);
-          //*currentUnitaryBlock +=  *leftUnitaryBlock ** work;
-          prod(*leftUnitaryBlock, *work, *currentUnitaryBlock, false);
-          //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftUnitaryBlock,*work,1.0,*currentUnitaryBlock);
-        }
-        else
-        {
-          rightUnitaryBlock.reset(new SimpleMatrix(nslawSize2, sizeDS));
-          UR2->getLeftUnitaryBlockForDS(*itDS, rightUnitaryBlock);
-          // Warning: we use getLeft for Right unitaryBlock
-          // because right = transpose(left) and because of
-          // size checking inside the getBlock function, a
-          // getRight call will fail.
-          rightUnitaryBlock->trans();
-          centralUnitaryBlocks[*itDS]->PLUForwardBackwardInPlace(*rightUnitaryBlock);
-          //*currentUnitaryBlock +=  *leftUnitaryBlock ** work;
-          prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
-        }
-      }
-
-      else RuntimeException::selfThrow("LinearOSNS::computeUnitaryBlock not yet implemented for relation of type " + relationType1);
     }
+    else if (relationType1 == Lagrangian || relationType2 == Lagrangian)
+    {
+      if (UR1 == UR2)
+      {
+        SP::SiconosMatrix work(new SimpleMatrix(*leftUnitaryBlock));
+        work->trans();
+        centralUnitaryBlocks[*itDS]->PLUForwardBackwardInPlace(*work);
+        //*currentUnitaryBlock +=  *leftUnitaryBlock ** work;
+        prod(*leftUnitaryBlock, *work, *currentUnitaryBlock, false);
+        //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftUnitaryBlock,*work,1.0,*currentUnitaryBlock);
+      }
+      else
+      {
+        rightUnitaryBlock.reset(new SimpleMatrix(nslawSize2, sizeDS));
+        UR2->getLeftUnitaryBlockForDS(*itDS, rightUnitaryBlock);
+        // Warning: we use getLeft for Right unitaryBlock
+        // because right = transpose(left) and because of
+        // size checking inside the getBlock function, a
+        // getRight call will fail.
+        rightUnitaryBlock->trans();
+        centralUnitaryBlocks[*itDS]->PLUForwardBackwardInPlace(*rightUnitaryBlock);
+        //*currentUnitaryBlock +=  *leftUnitaryBlock ** work;
+        prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
+      }
+    }
+
+    else RuntimeException::selfThrow("LinearOSNS::computeUnitaryBlock not yet implemented for relation of type " + relationType1);
   }
 }
 
@@ -289,12 +287,19 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
   coord[7] = pos + sizeY;
 
   SP::SiconosMatrix  H;
-  SP::SiconosVector workX = UR->getWorkXPtr();
+  SP::SiconosVector workX;
+
+  workX = UR->getWorkXPtr();
+
   if (osiType == OSI::MOREAU || osiType == OSI::LSODAR)
   {
     H = mainInteraction->getRelationPtr()->getJacHPtr(0);
     if (H)
     {
+
+      assert(workX);
+      assert(q);
+
       coord[3] = H->size(1);
       coord[5] = H->size(1);
       subprod(*H, *workX, *q, coord, true);
@@ -385,29 +390,36 @@ void LinearOSNS::computeQ(double time)
   q->zero();
 
   // === Get index set from Simulation ===
-  SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
-  // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
+  SP::UnitaryRelationsGraph indexSet =
+    simulation->getIndexSetPtr(levelMin);
+  // === Loop through "active" Unitary Relations (ie present in
+  // indexSets[level]) ===
 
   unsigned int pos = 0;
-  for (UnitaryRelationsIterator itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
+  UnitaryRelationsGraph::VIterator ui, uiend;
+  for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
-    // *itCurrent is a SP::UnitaryRelation.
+    SP::UnitaryRelation ur = indexSet->bundle(*ui);
 
-    // Compute q, this depends on the type of non smooth problem, on the relation type and on the non smooth law
-    pos = M->getPositionOfUnitaryBlock(*itCurrent);
-    computeQBlock((*itCurrent), pos); // free output is saved in y
+    // Compute q, this depends on the type of non smooth problem, on
+    // the relation type and on the non smooth law
+    pos = M->getPositionOfUnitaryBlock(ur);
+    computeQBlock(ur, pos); // free output is saved in y
   }
 }
 
 void LinearOSNS::preCompute(double time)
 {
-  // This function is used to prepare data for the LinearComplementarity_Problem
+  // This function is used to prepare data for the
+  // LinearComplementarity_Problem
+
   // - computation of M and q
   // - set sizeOutput
   // - check dim. for _z,w
 
-  // If the topology is time-invariant, only q needs to be computed at each time step.
-  // M, sizeOutput have been computed in initialize and are uptodate.
+  // If the topology is time-invariant, only q needs to be computed at
+  // each time step.  M, sizeOutput have been computed in initialize
+  // and are uptodate.
 
   // Get topology
   SP::Topology topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
@@ -418,7 +430,7 @@ void LinearOSNS::preCompute(double time)
     updateUnitaryBlocks();
 
     // Updates matrix M
-    SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
+    SP::UnitaryRelationsGraph indexSet = simulation->getIndexSetPtr(levelMin);
     M->fill(indexSet, unitaryBlocks);
     sizeOutput = M->size();
 
@@ -443,34 +455,41 @@ void LinearOSNS::preCompute(double time)
 
 void LinearOSNS::postCompute()
 {
-  // This function is used to set y/lambda values using output from lcp_driver (w,z).
-  // Only UnitaryRelations (ie Interactions) of indexSet(leveMin) are concerned.
+  // This function is used to set y/lambda values using output from
+  // lcp_driver (w,z).  Only UnitaryRelations (ie Interactions) of
+  // indexSet(leveMin) are concerned.
 
   // === Get index set from Topology ===
-  SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
+  SP::UnitaryRelationsGraph indexSet = simulation->getIndexSetPtr(levelMin);
 
   // y and lambda vectors
   SP::SiconosVector lambda;
   SP::SiconosVector y;
 
-  // === Loop through "active" Unitary Relations (ie present in indexSets[1]) ===
+  // === Loop through "active" Unitary Relations (ie present in
+  // indexSets[1]) ===
 
   unsigned int pos = 0;
   unsigned int nsLawSize;
 
-  for (UnitaryRelationsIterator itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
+  UnitaryRelationsGraph::VIterator ui, uiend;
+  for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
-    // size of the unitaryBlock that corresponds to the current UnitaryRelation
-    nsLawSize = (*itCurrent)->getNonSmoothLawSize();
-    // Get the relative position of UR-unitaryBlock in the vector w or z
-    pos = M->getPositionOfUnitaryBlock(*itCurrent);
+    SP::UnitaryRelation ur = indexSet->bundle(*ui);
+    // size of the unitaryBlock that corresponds to the current
+    // UnitaryRelation
+    nsLawSize = ur->getNonSmoothLawSize();
+    // Get the relative position of UR-unitaryBlock in the vector w
+    // or z
+    pos = M->getPositionOfUnitaryBlock(ur);
 
     // Get Y and Lambda for the current Unitary Relation
-    y = (*itCurrent)->getYPtr(levelMin);
-    lambda = (*itCurrent)->getLambdaPtr(levelMin);
+    y = ur->getYPtr(levelMin);
+    lambda = ur->getLambdaPtr(levelMin);
     // Copy _w/_z values, starting from index pos into y/lambda.
 
-    setBlock(*_w, y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
+    setBlock(*_w, y, y->size(), pos, 0);// Warning: yEquivalent is
+    // saved in y !!
     setBlock(*_z, lambda, lambda->size(), pos, 0);
   }
 

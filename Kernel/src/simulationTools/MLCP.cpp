@@ -34,7 +34,7 @@ MLCP::MLCP(SP::NonSmoothSolver newSolver, const string& newId):
 void MLCP::updateM()
 {
   // Get index set from Simulation
-  SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
+  SP::UnitaryRelationsGraph indexSet = simulation->getIndexSetPtr(levelMin);
 
   if (!M)
   {
