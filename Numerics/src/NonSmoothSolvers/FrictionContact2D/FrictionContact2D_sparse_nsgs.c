@@ -200,16 +200,12 @@ void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, 
 
     hasNotConverged = error > tolerance  ;
 
-    if (verbose > 1) printf(" Numerics - FrictionContact2D error = %g > tolerance = %g.\n", error, tolerance);
   }
 
-  // printf("%d %g\n", iter, error);
+  if (verbose > 0)
+    printf("Siconos Numerics : problem size=%d, nb iterations=%d, error=%g\n", blmat->size, iter, error);
 
-  // *info = hasNotConverged;
-
-
-  /* -> convergence is what it is (should be an option) */
-  *info = 0;
+  *info = hasNotConverged;
 
   /* Number of GS iterations */
   options[0].iparam[1] = iter;
@@ -220,7 +216,6 @@ void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, 
   free(local_problem->q);
   free(local_problem->M);
   free(local_problem);
-  /*   free(wBackup); */
 }
 
 
