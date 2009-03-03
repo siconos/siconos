@@ -136,7 +136,7 @@ void EventDriven::updateIndexSet(unsigned int i)
         {
           if (jroot[pos] == 1)
           {
-
+            // vertex and edges insertions
             indexSeti->copy_vertex(urp, *indexSetip);
             break; // if one, at least, of the nsLawSize
             // constraints is active, the UR is
@@ -192,6 +192,7 @@ void EventDriven::updateIndexSet(unsigned int i)
         // the set ...
       {
         if (fabs(y) <= tolerance)
+          // vertex and edges insertion
           indexSeti->copy_vertex(ur, *indexSetip);
       }
       else  // if the UR is already in the set

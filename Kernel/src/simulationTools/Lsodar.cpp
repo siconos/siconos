@@ -284,6 +284,13 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
   tout  = tinit_DR; // real ouput time
   tend  = tend_DR; // necessary for next start of DLSODAR
 
+
+  if (istate == 3)
+  {
+    std:: cout << "ok\n";
+    assert(true);
+  }
+
   //  tinit = tinit_DR;
 }
 

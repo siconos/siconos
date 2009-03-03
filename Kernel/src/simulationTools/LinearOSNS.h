@@ -72,8 +72,14 @@ protected:
   /** contains the vector q of a LinearOSNS system */
   SP::SiconosVector q;
 
-  /** Storage type for M - 0: SiconosMatrix (dense), 1: Sparse Storage (embedded into OSNSMatrix) */
+  /** Storage type for M - 0: SiconosMatrix (dense), 1: Sparse Storage
+      (embedded into OSNSMatrix) */
   int MStorageType;
+
+  /** a boolean to decide if _w and _z vectors are initialized with
+      previous values of Y and Lambda when a change occurs in problem
+      size */
+  bool keepLambdaAndYState;
 
   /** default constructor (private)
    */
@@ -89,11 +95,14 @@ public:
 
   /** constructor from data
       \param string, ns problem type    \
-      \param Solver* pointer to object that contains solver algorithm and formulation \n
-      (optional, default = NULL => read .opt file in Numerics)
+      \param Solver* pointer to object that contains solver algorithm
+      and formulation \n (optional, default = NULL => read .opt file
+      in Numerics)
       \param String: id of the problem (default = "unamed")
   */
-  LinearOSNS(const std::string&, SP::NonSmoothSolver = SP::NonSmoothSolver(), const std::string& = "unamed_lcp");
+  LinearOSNS(const std::string&,
+             SP::NonSmoothSolver = SP::NonSmoothSolver(),
+             const std::string& = "unamed_lcp");
 
   /** destructor
    */
@@ -102,7 +111,8 @@ public:
   // --- W ---
   /** get the value of w, the initial state of the DynamicalSystem
    *  \return SimpleVector
-   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
+   *  \warning: SiconosVector is an abstract class => can not be an
+   *  lvalue => return SimpleVector
    */
   inline const SimpleVector getW() const
   {
@@ -133,7 +143,8 @@ public:
   // --- Z ---
   /** get the value of z, the initial state of the DynamicalSystem
    *  \return SimpleVector
-   *  \warning: SimpleVector is an abstract class => can not be an lvalue => return SimpleVector
+   *  \warning: SimpleVector is an abstract class => can not be an
+   *  lvalue => return SimpleVector
    */
   inline const SimpleVector getZ() const
   {
@@ -187,7 +198,8 @@ public:
   // --- Q ---
   /** get the value of q, the initial state of the DynamicalSystem
    *  \return SimpleVector
-   *  \warning: SimpleVector is an abstract class => can not be an lvalue => return SimpleVector
+   *  \warning: SimpleVector is an abstract class => can not be an
+   *  lvalue => return SimpleVector
    */
   inline const SimpleVector getQ() const
   {
@@ -281,6 +293,14 @@ public:
    *  \exception RuntimeException
    */
   void saveNSProblemToXML();
+
+  /** set if if _w and _z vectors are initialized with
+      previous values of Y and Lambda when a change occurs in problem
+      size */
+  void setKeepLambdaAndYState(bool val)
+  {
+    keepLambdaAndYState = val ;
+  }
 
 };
 

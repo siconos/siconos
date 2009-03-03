@@ -82,6 +82,9 @@ class Interaction : public boost::enable_shared_from_this<Interaction >
 {
 private:
 
+  /**initialization flag */
+  bool initialized;
+
   /** name of the Interaction */
   std::string  id;
 

@@ -118,7 +118,11 @@ int FrictionContact::compute(double time)
     numerics_problem.isComplete = 1;
     numerics_problem.mu = &((*mu)[0]);
     // Call Numerics Driver for FrictionContact
-    info = (*frictionContact_driver)(&numerics_problem, &*_z->getArray() , &*_w->getArray() , (solver->getNumericsSolverOptionsPtr()).get(), &*numerics_options);
+    info = (*frictionContact_driver)(&numerics_problem,
+                                     &*_z->getArray() ,
+                                     &*_w->getArray() ,
+                                     (solver->getNumericsSolverOptionsPtr()).get(),
+                                     &*numerics_options);
     postCompute();
 
   }

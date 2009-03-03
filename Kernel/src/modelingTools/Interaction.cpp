@@ -36,7 +36,7 @@ using namespace RELATION;
 // --- XML constructor ---
 Interaction::Interaction(SP::InteractionXML interxml, SP::DynamicalSystemsSet nsdsSet):
   id("undefined"), number(0), interactionSize(0), numberOfRelations(0),
-  sizeOfDS(0), sizeZ(0), interactionxml(interxml)
+  sizeOfDS(0), sizeZ(0), interactionxml(interxml), initialized(false)
 {
   assert(interactionxml && "NULL pointer");
 
@@ -143,7 +143,7 @@ Interaction::Interaction(SP::InteractionXML interxml, SP::DynamicalSystemsSet ns
 Interaction::Interaction(SP::DynamicalSystem ds, int newNumber, int nInter,
                          SP::NonSmoothLaw newNSL, SP::Relation newRel):
   id("none"), number(newNumber), interactionSize(nInter), numberOfRelations(1),
-  sizeOfDS(0), sizeZ(0), y(1), nslaw(newNSL), relation(newRel)
+  sizeOfDS(0), sizeZ(0), y(1), nslaw(newNSL), relation(newRel), initialized(false)
 {
   involvedDS.reset(new DynamicalSystemsSet());
   involvedDS->insert(ds); // Warning: insert pointer to DS!!
@@ -152,7 +152,7 @@ Interaction::Interaction(SP::DynamicalSystem ds, int newNumber, int nInter,
 Interaction::Interaction(const string& newId, SP::DynamicalSystem ds,
                          int newNumber, int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel):
   id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1),
-  sizeOfDS(0), sizeZ(0), y(1), nslaw(newNSL), relation(newRel)
+  sizeOfDS(0), sizeZ(0), y(1), nslaw(newNSL), relation(newRel), initialized(false)
 {
   involvedDS.reset(new DynamicalSystemsSet());
   involvedDS->insert(ds); // Warning: insert pointer to DS!!
@@ -163,7 +163,7 @@ Interaction::Interaction(const string& newId, SP::DynamicalSystem ds,
 Interaction::Interaction(DynamicalSystemsSet& dsConcerned, int newNumber, int nInter,
                          SP::NonSmoothLaw newNSL, SP::Relation newRel):
   id("none"), number(newNumber), interactionSize(nInter), numberOfRelations(1),
-  sizeOfDS(0), sizeZ(0), y(1), nslaw(newNSL), relation(newRel)
+  sizeOfDS(0), sizeZ(0), y(1), nslaw(newNSL), relation(newRel), initialized(false)
 {
   involvedDS.reset(new DynamicalSystemsSet());
   DSIterator itDS;
@@ -174,7 +174,7 @@ Interaction::Interaction(DynamicalSystemsSet& dsConcerned, int newNumber, int nI
 Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, int newNumber,
                          int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel):
   id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0),
-  y(1), nslaw(newNSL), relation(newRel)
+  y(1), nslaw(newNSL), relation(newRel), initialized(false)
 {
   involvedDS.reset(new DynamicalSystemsSet());
   DSIterator itDS;
@@ -189,26 +189,32 @@ Interaction::~Interaction()
 
 void Interaction::initialize(double t0, unsigned int level)
 {
-  assert(relation && "Interaction::initialize failed, relation == NULL");
 
-  assert(nslaw && "Interaction::initialize failed, non smooth law == NULL");
-
-  computeSizeOfDS();
-
-  relation->setInteractionPtr(shared_from_this());
-  relation->initialize(shared_from_this());
-
-  // compute number of relations.
-  numberOfRelations = interactionSize / nslaw->getNsLawSize();
-
-  initializeMemory(level);
-
-  // Compute y values for t0
-  for (unsigned int i = 0; i < level; ++i)
+  if (!initialized)
   {
-    computeOutput(t0, i);
-    //      computeInput(t0,i);
+    assert(relation && "Interaction::initialize failed, relation == NULL");
+
+    assert(nslaw && "Interaction::initialize failed, non smooth law == NULL");
+
+    computeSizeOfDS();
+
+    relation->setInteractionPtr(shared_from_this());
+    relation->initialize(shared_from_this());
+
+    // compute number of relations.
+    numberOfRelations = interactionSize / nslaw->getNsLawSize();
+
+    initializeMemory(level);
+
+    // Compute y values for t0
+    for (unsigned int i = 0; i < level; ++i)
+    {
+      computeOutput(t0, i);
+      //      computeInput(t0,i);
+    }
+    initialized = true;
   }
+
 }
 
 // Initialize and InitializeMemory are separated in two functions since we need to know the relative degree to know "numberOfDerivatives",

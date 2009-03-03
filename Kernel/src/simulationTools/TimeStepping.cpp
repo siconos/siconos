@@ -199,6 +199,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
         {
           assert(!indexSet1->is_vertex(ur0));
 
+          // vertex and edges insertion in indexSet1
           indexSet1->copy_vertex(ur0, *indexSet0);
 
           assert(indexSet1->is_vertex(ur0));

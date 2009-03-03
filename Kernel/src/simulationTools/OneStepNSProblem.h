@@ -66,13 +66,17 @@ const std::string DEFAULT_OSNS_NAME = "unamed";
  *  - one for general options in Numerics (verbose mode ...)
  *  - the other to set the solver options (name, tolerance, max. number of iterations ...)
  *
- *  The second one is a member of the NonSmoothSolver, and thus filled during its construction. \n
- *  The general options are set thanks to specific functions (only setNumericsVerboseMode() at the time).
+ *  The second one is a member of the NonSmoothSolver, and thus filled
+ *  during its construction. The general options are set thanks to
+ *  specific functions (only setNumericsVerboseMode() at the time).
  *
  *
- *
- * Remark: UnitaryMatrixRowIterator will be used to iterate through what corresponds to rows of unitaryBlocks (a row for a UnitaryRelation, named URrow) and for
- *  a row, UnitaryMatrixColumnIterator will be used to iterate through columns, ie through all the UnitaryRelations that are linked to URrow.
+ * Remark: UnitaryMatrixRowIterator will be used to iterate through
+ *  what corresponds to rows of unitaryBlocks (a row for a
+ *  UnitaryRelation, named URrow) and for a row,
+ *  UnitaryMatrixColumnIterator will be used to iterate through
+ *  columns, ie through all the UnitaryRelations that are linked to
+ *  URrow.
  *
  */
 class OneStepNSProblem : public boost::enable_shared_from_this<OneStepNSProblem>
@@ -117,17 +121,23 @@ protected:
   /** the XML object linked to the OneStepNSProblem to read XML data */
   SP::OneStepNSProblemXML onestepnspbxml;
 
-  /** set of Interactions: link to the Interactions of the Non Smooth Dynamical System
-   * Note: no get or set functions for this object in the class -> used only in OneStepNSProblem methods. */
+  /** set of Interactions: link to the Interactions of the Non Smooth
+   * Dynamical System Note: no get or set functions for this object in
+   * the class -> used only in OneStepNSProblem methods. */
   SP::InteractionsSet OSNSInteractions;
 
   /** minimum index set number to be taken into account */
   unsigned int levelMin;
 
-  /** minimum index set number to be taken into account - For example, if level_min = 1 and level_max = 2, first and second derivatives of y and lambda will be
-   * taken into account in the non-smooth problem. Usually, level_max depends only on the non-smooth law and is given by the relative degree, whereas level_min
-   * can also depends on the integrator. These values are computed by the Simulation and given as input arguments for the OneStepNSProblem.
-   * Classical values are (0,0) for electrical (degree 0) systems, (1,1) for mechanical ones (degree 2).
+  /** minimum index set number to be taken into account - For example,
+   * if level_min = 1 and level_max = 2, first and second derivatives
+   * of y and lambda will be taken into account in the non-smooth
+   * problem. Usually, level_max depends only on the non-smooth law
+   * and is given by the relative degree, whereas level_min can also
+   * depends on the integrator. These values are computed by the
+   * Simulation and given as input arguments for the OneStepNSProblem.
+   * Classical values are (0,0) for electrical (degree 0) systems,
+   * (1,1) for mechanical ones (degree 2).
    */
   unsigned int levelMax;
 
