@@ -66,15 +66,19 @@ void prodSBM(int size, double alpha, const SparseBlockStructuredMatrix* const A,
       if (currentRowNumber != 0)
         posInY += A->blocksize[currentRowNumber - 1];
       /* Computes y[] += currentBlock*x[] */
-      DGEMV(LA_NOTRANS, nbRows, nbColumns, alpha, A->block[blockNum], nbRows, &x[posInX], 1, 1.0, &y[posInY], 1);
+      DGEMV(LA_NOTRANS, nbRows, nbColumns, alpha, A->block[blockNum],
+            nbRows, &x[posInX], 1, 1.0, &y[posInY], 1);
     }
   }
 }
 
-void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init)
+void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber,
+                   const SparseBlockStructuredMatrix* const A,
+                   const double* const x, double* y, int init)
 {
   /*
-     Product (Row of blocks of a SparseMat) - vector, y = rowA*x (init = 1 = true) or y += rowA*x (init = 0 = false)
+     Product (Row of blocks of a SparseMat) - vector, y = rowA*x (init
+     = 1 = true) or y += rowA*x (init = 0 = false)
   */
 
 
@@ -145,14 +149,15 @@ void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBlock
 void rowProdNoDiagSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBlockStructuredMatrix* const A, const double* const x, double* y, int init)
 {
   /*
-     If: A is a SparseBlockStructuredMatrix matrix, Aij a block at row i and column j
-     (Warning: i and j are indices of block position, not scalar component positions)
+     If: A is a SparseBlockStructuredMatrix matrix, Aij a block at row
+     i and column j (Warning: i and j are indices of block position,
+     not scalar component positions)
 
-     Then rowProdNoDiagSBM computes
-     y = sum for i not equal to j of Aij.xj over a row of blocks
-     (or += if init = false)
+     Then rowProdNoDiagSBM computes y = sum for i not equal to j of
+     Aij.xj over a row of blocks (or += if init = false)
 
-     currentRowNumber represents the position (block number) of the required line of blocks in the matrix A.
+     currentRowNumber represents the position (block number) of the
+     required line of blocks in the matrix A.
 
   */
 
@@ -228,10 +233,11 @@ void rowProdNoDiagSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBl
 void freeSBM(SparseBlockStructuredMatrix *blmat)
 {
   /* Free memory for SparseBlockStructuredMatrix */
-  /* Warning: nothing is done to check if memory has really been allocated for each component
-   or if it was only pointer links.
-   Note that when used from the Kernel, memory is not directly allocated for such structures and
-   this function must not be called. See in Kernel/src/simulationsTools/SparseBlockMatrix.cpp for details on
+  /* Warning: nothing is done to check if memory has really been
+   allocated for each component or if it was only pointer links.  Note
+   that when used from the Kernel, memory is not directly allocated
+   for such structures and this function must not be called. See in
+   Kernel/src/simulationsTools/SparseBlockMatrix.cpp for details on
    the way the structure is filled in.
   */
   if (blmat->blocksize)

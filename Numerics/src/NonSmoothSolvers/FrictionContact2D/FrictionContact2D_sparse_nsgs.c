@@ -99,9 +99,9 @@ void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, 
                                    int *info, Solver_Options* options)
 {
   /* Notes:
-     - we suppose that the trivial solution case has been checked
-     before, and that all inputs differs from NULL since this function
-     is supposed to be called from lcp_driver_global().
+     - we suppose that the trivial solution case has been checked before,
+     and that all inputs differs from NULL since this function is
+     supposed to be called from lcp_driver_global().
 
      - Input matrix M of the problem is supposed to be sparse-block
      with no null row (ie no rows with all blocks equal to null)
@@ -112,12 +112,15 @@ void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, 
   /*
     The options for the global "block" solver are defined in
     options[0].
-    options[i], for 0<i<numberOfSolvers-1 correspond to local solvers.
    */
 
   /* Global Solver parameters*/
   int itermax = options[0].iparam[0];
   double tolerance = options[0].dparam[0];
+  int erritermax = options[0].iparam[1];
+
+  /* warning needed */
+  if (erritermax > itermax || erritermax < 1) erritermax = 0;
 
   /* Matrix M/vector q of the LCP */
   SparseBlockStructuredMatrix* blmat = problem->M->matrix1;
@@ -130,7 +133,8 @@ void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, 
 
   /* Local problem initialization */
 
-  LinearComplementarity_Problem * local_problem = malloc(sizeof(*local_problem));
+  LinearComplementarity_Problem * local_problem =
+    malloc(sizeof(*local_problem));
   local_problem->M = malloc(sizeof(*local_problem->M));
   local_problem->M->storageType = 0; // dense storage
   local_problem->M->matrix0 = NULL;
@@ -153,6 +157,7 @@ void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, 
 
   /*****  Gauss-Seidel iterations *****/
   int iter = 0; /* Current iteration number */
+  int erriter = 0; /* Current error iteration number */
   double error = INFINITY; /* Current error */
   int hasNotConverged = 1;
 
@@ -168,6 +173,7 @@ void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, 
   while ((iter < itermax) && hasNotConverged)
   {
     ++iter;
+    ++erriter;
 
     /* Loop over the rows of blocks in blmat */
     for (pos = 0, rowNumber = 0; rowNumber < blmat->size; ++rowNumber, ++pos, ++pos)
@@ -196,14 +202,19 @@ void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, 
 
     }
 
-    FrictionContact2D_compute_error(problem, z, w, tolerance, &error);
-
-    hasNotConverged = error > tolerance  ;
-
+    if (erriter >= erritermax)
+    {
+      erriter = 0;
+      FrictionContact2D_compute_error(problem, z, w, tolerance, &error);
+      hasNotConverged = error > tolerance  ;
+    }
   }
 
   if (verbose > 0)
-    printf("Siconos Numerics : problem size=%d, nb iterations=%d, error=%g\n", blmat->size, iter, error);
+    printf("Siconos Numerics : problem size=%d, nb iterations=%d, error=%g\n",
+           blmat->size,
+           iter,
+           error);
 
   *info = hasNotConverged;
 
