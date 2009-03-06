@@ -32,13 +32,17 @@
 class DiskPlanR : public LagrangianScleronomousR
 {
 private:
-  double r, A, B, C, sqrA2pB2;
+  double r, A, B, C, sqrA2pB2,
+         AC, B2, A2, AB, BC, xCenter, yCenter, width, halfWidth, x1, x2, y1, y2;
+  bool finite;
+
+  void init(double, double, double, double, double, double, double);
 
   DiskPlanR();
 
 public:
 
-  /** Constructor
+  /** Infinite Plan
 
   \param disk radius
   \param A
@@ -46,6 +50,22 @@ public:
   \param C
   */
   DiskPlanR(double, double, double, double);
+
+  /** Finite or infinite Plan (segment)
+
+    \param disk radius
+    \param A
+    \param B
+    \param C
+    \param xCenter
+    \param yCenter
+    \param width
+    */
+  DiskPlanR(double, double, double, double, double, double, double);
+
+  /** Finite Plan
+  */
+  DiskPlanR(double, double, double, double, double);
 
   /* distance between disk and plan */
   double distance(double x, double y, double r);
@@ -70,10 +90,40 @@ public:
     return C;
   };
 
+  double getHypotAB()
+  {
+    return sqrA2pB2;
+  };
+
+  double getXCenter()
+  {
+    return xCenter;
+  };
+
+  double getYCenter()
+  {
+    return yCenter;
+  };
+
+  double getWidth()
+  {
+    return width;
+  };
+
   void computeH(double);
 
   void computeJacH(double, unsigned int);
 
+  bool equal(double, double, double, double);
+
+  bool equal(double, double, double, double, double, double, double);
+
+  bool equal(DiskPlanR&);
+
+  bool isFinite()
+  {
+    return finite;
+  };
 };
 
 TYPEDEF_SPTR(DiskPlanR);

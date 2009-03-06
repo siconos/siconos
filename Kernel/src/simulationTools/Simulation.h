@@ -45,15 +45,18 @@ class OneStepNSProblem;
 class TimeDiscretisation;
 class SimulationXML;
 
-/** Description of the simulation process (integrators, time discretisation and so on) - Base class for TimeStepping or EventDriven.
+/** Description of the simulation process (integrators, time
+    discretisation and so on) - Base class for TimeStepping or
+    EventDriven.
 
-   \author SICONOS Development Team - copyright INRIA
-   \version 3.0.0.
-   \date (Creation) Apr 26, 2004
+    \author SICONOS Development Team - copyright INRIA
+    \version 3.0.0.
+    \date (Creation) Apr 26, 2004
 
-  !!! This is an abstract class !!!
+    !!! This is an abstract class !!!
 
-  The available simulations are TimeStepping and EventDriven. See derived classes for more details.
+    The available simulations are TimeStepping and EventDriven. See
+    derived classes for more details.
 
 
 
@@ -67,7 +70,8 @@ protected:
   /** name or id of the Simulation */
   std::string name;
 
-  /** the type of the Simulation, ie the derived class type (TimeStepping, EventDriven ...) */
+  /** the type of the Simulation, ie the derived class type
+      (TimeStepping, EventDriven ...) */
   std::string simulationType;
 
   /** the default time discretisation scheme */
@@ -82,9 +86,9 @@ protected:
   /** current ending time for integration */
   double tend;
 
-  /** real ending time for integration
-      (different from tend in case of stop during integrate, for example when a root is found
-      in Lsodar procedur)
+  /** real ending time for integration (different from tend in case of
+      stop during integrate, for example when a root is found in
+      Lsodar procedur)
   */
   double tout;
 
@@ -98,7 +102,8 @@ protected:
       indexSets[1] where y[0] = 0 and y[1]=0 and so on */
   //std::vector<UnitaryRelationsGraph> indexSets;
 
-  /** the non smooth problems (each problem is identified thanks to its id) */
+  /** the non smooth problems (each problem is identified thanks to
+      its id) */
   SP::OneStepNSProblems allNSProblems;
 
   /** the XML object linked to the Simulation to read XML data */
@@ -107,10 +112,12 @@ protected:
   /** A link to the Model which contains the Simulation */
   SP::Model model;
 
-  /** int used to set the minimal derivative order used in the OSNS variables */
+  /** int used to set the minimal derivative order used in the OSNS
+      variables */
   unsigned int levelMin;
 
-  /** int used to set the maximal derivative order used in the OSNS variables */
+  /** int used to set the maximal derivative order used in the OSNS
+      variables */
   unsigned int levelMax;
 
   /** tolerance value used to compute the index sets - Default: equal
@@ -162,7 +169,8 @@ public:
       \param the set of all interactions in the NSDS
       \param string: simulation type, default = undefined
   */
-  Simulation(SP::SimulationXML, double, double, SP::DynamicalSystemsSet , SP::InteractionsSet, const std::string& = "undefined");
+  Simulation(SP::SimulationXML, double, double, SP::DynamicalSystemsSet,
+             SP::InteractionsSet, const std::string& = "undefined");
 
   /** destructor
    */

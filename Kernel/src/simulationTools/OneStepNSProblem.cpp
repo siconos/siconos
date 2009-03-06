@@ -513,11 +513,9 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
 
   // Checks that the set of Interactions is not empty -
   // Empty set is not forbidden, then we just display a warning message.
-  if (OSNSInteractions->isEmpty())
-    //RuntimeException::selfThrow("OneStepNSProblem::initialize - The set of Interactions of this problem is empty.");
-    cout << "Warning, OneStepNSProblem::initialize, the set of Interactions of this problem is empty." << endl;
-  else if (isTimeInvariant) // if time variant it is done in precompute
-    updateUnitaryBlocks();
+  if (!OSNSInteractions->isEmpty())
+    if (isTimeInvariant) // if time variant it is done in precompute
+      updateUnitaryBlocks();
 
   // The maximum size of the problem (for example, the dim. of M in LCP or Friction problems).
   // Set to the number of possible scalar constraints declared in the topology.
