@@ -73,14 +73,25 @@ The compilation is done out of the source directory:
 
 Some CMAKE OPTIONS that may be usefull:
 
+   * to find include headers in specific directories :
+     -DCMAKE_INCLUDE_PATH=<DIR>
+
+     use a semicolon to separate directories (and not a colon!!):
+     -DCMAKE_INCLUDE_PATH="<DIR1>;<DIR2>;.."
+
+
    * to find libraries in specific directories :
-    -DCMAKE_LIBRARY_PATH=<DIR>
+     -DCMAKE_LIBRARY_PATH=<DIR> 
+
+     for several directories, see above.
+
 
    * to build a debug library (compilation with -g) :
-    -DCMAKE_BUILD_TYPE=Debug
+     -DCMAKE_BUILD_TYPE=Debug
 
    * to build an optimized library (-O3 -DNDEBUG) (this is the
-    default): -DCMAKE_BUILD_TYPE=Release
+     default) : 
+     -DCMAKE_BUILD_TYPE=Release
 
    * to see cmake state : -DPRINT_ENV=1
 
