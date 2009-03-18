@@ -78,6 +78,7 @@ MACRO(SICONOS_PROJECT
   # Some macros needed to check compilers environment
   INCLUDE(CheckSymbolExists)
   INCLUDE(CheckFunctionExists)
+  INCLUDE(CheckIncludeFileCXX)
 
   # Compilers environment
   IF(CMAKE_C_COMPILER)
