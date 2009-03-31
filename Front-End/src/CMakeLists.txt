@@ -1,7 +1,5 @@
 PROJECT(Siconos CXX)
 
-SET(Siconos_VERSION "${VERSION}")
-
 COMPILE_WITH(SiconosKernel REQUIRED)
 COMPILE_WITH(SiconosNumerics REQUIRED)
 COMPILE_WITH(BLAS REQUIRED)
@@ -12,7 +10,7 @@ COMPILE_WITH(PythonLibs REQUIRED)
 
 INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
 
-SET(Siconos_DIRS ${SiconosKernel_INCLUDE_DIRS})
+FILE(GLOB SICONOS_HEADERS ${SiconosKernel_INCLUDE_DIRS}/*.h ${SiconosKernel_INCLUDE_DIRS}/*.hpp)
 
 # boost 3.8
 # Determine extra libraries we need to link against to build Python
@@ -54,21 +52,64 @@ FOREACH(_lib ${PYTHON_LIBRARIES})
   ENDIF(NOT _FOUND)
 ENDFOREACH(_lib ${PYTHON_LIBRARIES})
 
-CONFIGURE_FILE(code-generator.py.in ${CMAKE_CURRENT_BINARY_DIR}/code-generator.py)
+CONFIGURE_FILE(doxygen.py ${CMAKE_CURRENT_BINARY_DIR}/doxygen.py COPYONLY)
 
-ADD_CUSTOM_TARGET(SiconosBindings.cpp ALL)
+# not so fast and huge memory needed!
+IF(GLOBAL_BINDINGS)
+  SET(PYH)
+  FOREACH(_H ${SICONOS_HEADERS})
+    IF(PYH)
+      SET(PYH "${PYH},'${_H}'")
+    ELSE(PYH)
+      SET(PYH '${_H}')
+    ENDIF(PYH)
+  ENDFOREACH(_H ${SICONOS_HEADERS})
 
-ADD_CUSTOM_COMMAND(TARGET SiconosBindings.cpp
-  COMMAND python ${CMAKE_CURRENT_BINARY_DIR}/code-generator.py
-  OUTPUTS ${CMAKE_CURRENT_BINARY_DIR}/SiconosBindings.cpp
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/code-generator.py)
+  CONFIGURE_FILE(global-generator.py.in ${CMAKE_CURRENT_BINARY_DIR}/SiconosGenerator.py)
+
+  ADD_CUSTOM_TARGET(SiconosBindings.cpp ALL)
+
+  ADD_CUSTOM_COMMAND(TARGET SiconosBindings.cpp
+    COMMAND python ${CMAKE_CURRENT_BINARY_DIR}/SiconosGenerator.py
+    OUTPUTS ${CMAKE_CURRENT_BINARY_DIR}/SiconosBindings.cpp
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/SiconosGenerator.py)
+  
+
+  SET(BINDINGS ${CMAKE_CURRENT_BINARY_DIR}/SiconosBindings.cpp)
+
+# else make bindings for each header 
+ELSE(GLOBAL_BINDINGS)
+
+  SET(BINDINGS)
+
+  FOREACH(_H ${SICONOS_HEADERS})
+    GET_FILENAME_COMPONENT(_HP ${_H} NAME)
+    GET_FILENAME_COMPONENT(_HN ${_H} NAME_WE)
+    CONFIGURE_FILE(code-generator.py.in ${CMAKE_CURRENT_BINARY_DIR}/${_HN}Generator.py)
+    
+    ADD_CUSTOM_TARGET(${_HN}Bindings.cpp ALL)
+    
+    ADD_CUSTOM_COMMAND(TARGET ${_HN}Bindings.cpp
+      COMMAND python ${CMAKE_CURRENT_BINARY_DIR}/${_HN}Generator.py
+      OUTPUTS ${_HN}Bindings.cpp
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+      DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${_HN}Generator.py)
+
+    LIST(APPEND BINDINGS ${CMAKE_CURRENT_BINARY_DIR}/${_HN}Bindings.cpp)
+
+  ENDFOREACH(_H ${SICONOS_HEADERS})
+ENDIF(GLOBAL_BINDINGS)
 
 
+ADD_LIBRARY(Siconos ${BINDINGS})
 
-ADD_LIBRARY(Siconos ${CMAKE_CURRENT_BINARY_DIR}/SiconosBindings.cpp)
+ADD_DEPENDENCIES(Siconos ${BINDINGS})
 
-ADD_DEPENDENCIES(Siconos SiconosBindings.cpp)
+SET_TARGET_PROPERTIES(Siconos 
+  PROPERTIES PREFIX "" 
+  LINKER_LANGUAGE CXX
+  VERSION ${VERSION})
+# installation path needed
 
-SET_TARGET_PROPERTIES(Siconos PROPERTIES PREFIX "" LINKER_LANGUAGE CXX)
 TARGET_LINK_LIBRARIES(Siconos ${PYTHON_LIBRARIES})

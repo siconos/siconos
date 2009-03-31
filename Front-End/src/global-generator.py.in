@@ -8,17 +8,13 @@ from doxygen import doxygen_doc_extractor
 
 #Creating an instance of class that will help you to expose your
 #declarations
-try: 
-    mb = module_builder.module_builder_t( [ '@_HP@' ]
-                                          , include_paths=['@SiconosKernel_INCLUDE_DIRS@', 
-                                                           '@SiconosNumerics_INCLUDE_DIRS@', 
-                                                           '@ATLAS_INCLUDE_DIR@', 
-                                                           '@LIBXML2_INCLUDE_DIR@' ]
-                                          , working_directory = r"."
-                                          , define_symbols=[] )
-except:
-    print( "???? Cannot parse @_HP@" )
-    exit(0)
+mb = module_builder.module_builder_t( [ @PYH@ ]
+                                      , include_paths=['@SiconosKernel_INCLUDE_DIRS@', 
+                                                       '@SiconosNumerics_INCLUDE_DIRS@', 
+                                                       '@ATLAS_INCLUDE_DIR@', 
+                                                       '@LIBXML2_INCLUDE_DIR@' ]
+                                      , working_directory = r"."
+                                      , define_symbols=[] )
 
 #Well, don't you want to see what is going on?
 #mb.print_declarations()
@@ -30,13 +26,13 @@ except:
 funs = mb.calldefs()
 
 funs.create_with_signature = True
-for fun in funs:
-    if fun.call_policies:
+for mem_fun in funs:
+    if mem_fun.call_policies:
         continue
     
     # References and pointers
-    if (not fun.call_policies) and (declarations.is_reference(fun.return_type)or (declarations.is_pointer (fun.return_type)) ):
-        fun.call_policies = call_policies.return_value_policy(call_policies.reference_existing_object )
+    if (not mem_fun.call_policies) and (declarations.is_reference(mem_fun.return_type)or (declarations.is_pointer (mem_fun.return_type)) ):
+        mem_fun.call_policies = call_policies.return_value_policy(call_policies.reference_existing_object )
         
         
 #Creating code creator. After this step you should not
