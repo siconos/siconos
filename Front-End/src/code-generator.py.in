@@ -1,0 +1,23 @@
+# -*- python -*-
+
+from pyplusplus import module_builder
+
+#Creating an instance of class that will help you to expose your
+#declarations
+mb = module_builder.module_builder_t( [r"Model.h"]
+                                      , include_paths=['@SiconosKernel_INCLUDE_DIRS@', 
+                                                       '@SiconosNumerics_INCLUDE_DIRS@', 
+                                                       '@ATLAS_INCLUDE_DIR@', 
+                                                       '@LIBXML2_INCLUDE_DIR@' ]
+                                      , define_symbols=[] )
+
+
+#Well, don't you want to see what is going on?
+#mb.print_declarations()
+
+#Creating code creator. After this step you should not
+#modify/customize declarations.
+mb.build_code_creator( module_name='pyplusplus' )
+
+#Writing code to file.
+mb.write_module( './SiconosBindings.cpp' )
