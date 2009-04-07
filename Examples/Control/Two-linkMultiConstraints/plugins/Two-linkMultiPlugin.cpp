@@ -34,7 +34,7 @@ double gamma1 = 15;
 double Kf = 0.5;
 double P = 10;
 double ep = 0.1;
-double delta = 0.1;
+double delta = 0.4;
 double Del = 1;
 double eps = 0.1;
 double alpha = 100;
@@ -204,7 +204,7 @@ extern "C" void U10(double time, unsigned int sizeOfq, const double *q, const  d
   double b2 = -3 * b0 - 3 * sqrt(z[7]) * alpha;
   double b3 = 2 * b0 + 2 * sqrt(z[7]) * alpha;
 
-  if (t2 <= delta)
+  if (t2 < delta)
   {
     qd1 = 0.7 + 0.5 * cos(PI / 2 + 2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P);
     qd11 = -(2 * PI / P) * 0.5 * sin(PI / 2 + 2 * PI * (z[8] + (t2 - delta) * (t2 - delta) * t2 / (delta * delta)) / P) * (2 * (t2 - delta) * t2 + (t2 - delta) * (t2 - delta)) / (delta * delta);

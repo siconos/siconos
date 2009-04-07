@@ -46,10 +46,10 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 2;           // degrees of freedom for robot arm
     double t0 = 0;                   // initial computation time
-    double T = 20;                   // final computation time
+    double T = 60;                   // final computation time
     double h = 1e-4;                // time step
     double criterion = 1e-8;
-    unsigned int maxIter = 20000;
+    unsigned int maxIter = 200000;
     double e = 0.7;                  // nslaw
     double e2 = 0.0;
     //double L = 0.0;
@@ -279,20 +279,19 @@ int main(int argc, char* argv[])
       s->nextStep();
 
       //    controller during impacts accumulation phase before the first impact
-      if ((dataPlot(k - 1, 3) <= 0.05) && (test == 0) && (dataPlot(k, 6) < 0.4))
+      if ((dataPlot(k, 3) <= 0.01) && (test == 0) && (dataPlot(k, 6) < 0.3))
       {
         (*z)(8) = dataPlot(k, 0);
-        (*z)(5) = dataPlot(k, 6);
-        (*z)(10) = dataPlot(k, 3);
+        (*z)(5) =  0.7 + 0.5 * cos(PI / 2 + 2 * PI * ((*z)(8)) / (*z)(11));
         (*z)(7) = (*z)(9);
         arm->setComputeFIntFunction("Two-linkMultiPlugin.so", "U10");
         test = 1;
       }
 
       //  controller during impacts accumulation phase after the first impact
-      if ((dataPlot(k - 1, 12) > 0) && (test == 1))
+      if ((dataPlot(k, 12) > 0) && (test == 1))
       {
-        //(*z)(8) = dataPlot(k-1,0);
+        (*z)(8) = dataPlot(k, 0);
         arm->setComputeFIntFunction("Two-linkMultiPlugin.so", "U11");
         test = 2;
       }
@@ -300,7 +299,7 @@ int main(int argc, char* argv[])
         nimpact = nimpact + 1;
 
       // controller during constraint-motion phase.
-      if ((dataPlot(k, 12) > 0) && (test == 2) && (dataPlot(k, 7) - dataPlot(k - 5, 7) == 5)) // && (dataPlot(k-1,7)-dataPlot(k-2,7)==1))//  && (fabs((inter0->getY(1))(0))<1e-6))
+      if ((dataPlot(k, 12) > 0) && (test == 2) && (dataPlot(k, 7) - dataPlot(k - 1, 7) == 1) && (fabs((inter->getY(1))(1)) < 1e-6))
       {
         // L= dataPlot(k,0)-(*z)(8);
         (*z)(8) = dataPlot(k, 0);
@@ -309,7 +308,7 @@ int main(int argc, char* argv[])
         nimpact = 0;
       }
       //  controller during impacts accumulation phase after the first impact
-      if ((dataPlot(k - 1, 10) > 0) && (test == 3))
+      if (((*z)(24) > 0) && (test == 3))
       {
         arm->setComputeFIntFunction("Two-linkMultiPlugin.so", "U21");
         test = 4;
