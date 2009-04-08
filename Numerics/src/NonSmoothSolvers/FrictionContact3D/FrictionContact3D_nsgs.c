@@ -44,21 +44,21 @@ void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, C
 {
   /** Connect to local solver */
   /* Projection */
-  if (iparam[4] == 0)
+  if (iparam[4] == 3)
   {
     *solve = &frictionContact3D_projectionWithDiagonalization_solve;
     *freeSolver = &frictionContact3D_projection_free;
     *computeError = &FrictionContact3D_compute_error;
     frictionContact3D_projection_initialize(n, M, q, mu);
   }
-  else if (iparam[4] == 4)
+  else if (iparam[4] == 0)
   {
     *solve = &frictionContact3D_projectionOnCone_solve;
     *freeSolver = &frictionContact3D_projection_free;
     *computeError = &FrictionContact3D_compute_error;
     frictionContact3D_projection_initialize(n, M, q, mu);
   }
-  else if (iparam[4] == 6)
+  else if (iparam[4] == 2)
   {
     *solve = &frictionContact3D_projectionOnConeWithLocalIteration_solve;
     *freeSolver = &frictionContact3D_projection_free;
@@ -74,7 +74,7 @@ void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, C
     frictionContact3D_Newton_initialize(n, M, q, mu, iparam);
   }
   /* Newton solver (Glocker-Fischer-Burmeister)*/
-  else if (iparam[4] == 2)
+  else if (iparam[4] == 6)
   {
     *solve = &frictionContact3D_Newton_solve;
     *freeSolver = &frictionContact3D_Newton_free;
@@ -83,7 +83,7 @@ void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, C
     frictionContact3D_Newton_initialize(n, M, q, mu, iparam);
   }
   /* Path solver (Glocker Formulation) */
-  else if (iparam[4] == 3)
+  else if (iparam[4] == 4)
   {
     *solve = &frictionContact3D_Path_solve;
     *freeSolver = &frictionContact3D_Path_free;

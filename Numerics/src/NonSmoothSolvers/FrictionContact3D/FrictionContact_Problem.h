@@ -28,12 +28,13 @@
   \begin{array}{l}
   M \ reaction + q = velocity \\
   0 \le reaction_n \perp velocity_n \ge 0 \\
-  -velocity_t \in \partial\psi_{[-\mu.reaction_n, \mu.reaction_n]}(reaction_t)\\
+  -velocity_t \in \partial\psi_{D_(\mu reaction_n)}(reaction_t)\\
+  D_(\mu reaction_n) = \{ reaction_t \mid  \|reaction_t\| \leq \mu reaction_n  \}
   \end{array}
   \right.
   \f$
 
-  \f$ reaction, velocity, q\f$ are vectors of size n and \f$ M \f$ is a nXn matrix, with \f$ n = 2 or 3*nc \f$, nc being the number of contacts. \n
+  \f$ reaction, velocity, q\f$ are vectors of size n and \f$ M \f$ is a nXn matrix, with \f$ n = 2*nc or 3*nc \f$, nc being the number of contacts. \n
   \f$ reaction_n\f$ represents the normal part of the reaction while \f$ reaction_t\f$ is its tangential part.
 
   \f$ \mu \f$ is the friction coefficient (it may be different for each contact).
