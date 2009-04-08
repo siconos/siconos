@@ -18,7 +18,40 @@
  */
 
 /*!\file FrictionalContact3D.cpp
-  A very simple example to chow how to use SiconosNumerics to solve the time--discretized FrictionalContact3D problem
+  A very simple example to chow how to use SiconosNumerics to solve the time--discretized FrictionalContact3D problem with a dense storage.
+  The problem: Find \f$(reaction,velocity)\f$ such that:\n
+
+  \f$
+  \left\lbrace
+  \begin{array}{l}
+  M \ reaction + q = velocity \\
+  0 \le reaction_n \perp velocity_n \ge 0 \\
+  -velocity_t \in \partial\psi_{D_(\mu reaction_n)}(reaction_t)\\
+  D_(\mu reaction_n) = \{ reaction_t \mid  \|reaction_t\| \leq \mu reaction_n  \}
+  \end{array}
+  \right.
+  \f$
+
+  \f$ reaction, velocity, q\f$ are vectors of size n and \f$ M \f$ is a nXn matrix, with \f$ n = 2*nc or 3*nc \f$, nc being the number of contacts. \n
+  \f$ reaction_n\f$ represents the normal part of the reaction while \f$ reaction_t\f$ is its tangential part.
+
+  \f$ \mu \f$ is the friction coefficient (it may be different for each contact).
+
+  Use the generic function frictionContact3D_driver() to call one the the specific solvers listed below:
+
+  - frictionContact3D_nsgs() : non-smooth Gauss-Seidel solver
+
+  (see the functions/solvers list in FrictionContact3D_Solvers.h)
+
+  FrictionContact3D problems needs some specific parameters, given to the FrictionContact3D_driver() function thanks to a Solver_Options structure. \n
+  They are:\n
+     - the name of the solver (ex: NSGS), used to switch to the right solver function
+     - iparam[0]: max. number of iterations allowed
+     - iparam[1]:
+     - dparam[0]: tolerance
+     - isStorageSparse: 1 if a SparseBlockStructuredMatrix is used for M, else 0 (double* storage)
+
+
   \brief
 */
 
@@ -30,26 +63,23 @@ int main(int argc, char* argv[])
 
   // Problem Definition
   int NC = 3;//Number of contacts
-  double W[9][9];// = { };
-  double q[9];  // = { };
-  double mu[3];   // = { };
+  double M[9][9] = {{1, 0, 0, 0, 0, 0, 0, 0, 0}, {0, 1, 0, 0, 0, 0, 0, 0, 0}, {0, 0, 1, 0, 0, 0, 0, 0, 0}, {0, 0, 0, 1, 0, 0, 0, 0, 0}, {0, 0, 0, 0, 1, 0, 0, 0, 0}, {0, 0, 0, 0, 0, 1, 0, 0, 0}, {0, 0, 0, 0, 0, 0, 1, 0, 0}, {0, 0, 0, 0, 0, 0, 0, 1, 0}, {0, 0, 0, 0, 0, 0, 0, 0, 1}};
+  double q[9] = { -1, 1, 3, -1, 1, 3, -1, 1, 3};
+  double mu[3] = {0.1, 0.1, 0.1};
 
   int i, j, k;
-  for (j = 0 ; j < 9; j++)
-  {
-    for (k = 0 ; k < 9; k++)
-      W[j][k] = 0.0;
-  }
-
-  for (i = 0 ; i < NC; i++)
-  {
-    mu[i] = 0.1;
-    for (j = 0 ; j < 3; j++)
-    {
-      q[3 * i + j] = -1.0 + j * 2.0;
-      W[3 * i + j][3 * i + j] = 1.0;
-    }
-  }
+  /*  for (j =0 ; j<9; j++){ */
+  /*  for (k =0 ; k<9; k++) */
+  /*      M[j][k]=0.0; */
+  /*     } */
+  /*     for (i =0 ; i<NC; i++) */
+  /*  { */
+  /*      mu[i]=0.1; */
+  /*      for (j =0 ; j<3; j++){ */
+  /*      q[3*i+j] =-1.0+j*2.0;  */
+  /*    M[3*i+j][3*i+j]=1.0;    */
+  /*      } */
+  /*  } */
 
 
   FrictionContact_Problem NumericsProblem;
@@ -60,7 +90,7 @@ int main(int argc, char* argv[])
 
   NumericsMatrix *MM = (NumericsMatrix*)malloc(sizeof(*MM));
   MM->storageType = 0;
-  MM->matrix0 = W;
+  MM->matrix0 = M;
   MM->size0 = 3 * NC;
   MM->size1 = 3 * NC;
 
@@ -89,10 +119,9 @@ int main(int argc, char* argv[])
   numerics_solver_options.dparam = (double*)malloc(numerics_solver_options.dSize * sizeof(double));
 
   int nmax = 10000; // Max number of iteration
-  int localsolver = 1; // 0: projection, 1: Newton/AlartCurnier, 2: Newton/Fischer-Burmeister, 3: Path/Glocker
-
-  double tolerance = 1e-6;
-  double localtolerance = 1e-8;
+  int localsolver = 0; // 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 2: projection on Disk  with diagonalization,
+  double tolerance = 1e-10;
+  double localtolerance = 1e-12;
 
 
   numerics_solver_options.iparam[0] = nmax ;
@@ -108,7 +137,9 @@ int main(int argc, char* argv[])
 
 
   // Solver output
+  printf("\n");
   for (k = 0 ; k < 3 * NC; k++) printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e \n ", k, velocity[k], k , reaction[k]);
+  printf("\n");
 
 
   free(reaction);
