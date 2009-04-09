@@ -211,6 +211,7 @@ extern "C" {
       \return result (0 if successful otherwise 1).
   */
   int frictionContact3D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options);
+  int primalFrictionContact3D_driver(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, Solver_Options* options, Numerics_Options* global_options);
 
 #ifdef __cplusplus
 }

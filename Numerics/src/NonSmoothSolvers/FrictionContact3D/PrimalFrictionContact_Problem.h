@@ -26,67 +26,38 @@
   \f$
   \left\lbrace
   \begin{array}{l}
-  M \ reaction + q = velocity \\
-  0 \le reaction_n \perp velocity_n \ge 0 \\
-  -velocity_t \in \partial\psi_{[-\mu.reaction_n, \mu.reaction_n]}(reaction_t)\\
-  \end{array}
-  \right.
-  \f$
-
-  \f$ reaction, velocity, q\f$ are vectors of size n and \f$ M \f$ is a nXn matrix, with \f$ n = 3*nc \f$, nc being the number of contacts. \n
+    M globalVelocity =  q +  H reaction \\
+    velocity = H^T globalVelocity + b\\         \
+    K \le reaction_n \perp velocity_n \in K^* \\      \
+    K = \{reaction, \|reaction_t\| \leq \mu reaction_n \} \text{Coulomb's Cone}
+    \end{array}
+    \right.
+    \f$
+ *
+ * With:
+ *    - \f$globalVelocity \in R^{n} \f$  the global unknown,
+ *    - \f$M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
+ *    - \f$velocity \in R^{m} \f$  and \f$reaction \in R^{m} \f$ the local unknowns,
+ *    - \f$b \in R^{m} \f$ is the modified local velocity (\f$ e U_{N,k}\f$)
+ *    - \f$M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
+ *    - \f$H \in R^{n \times m } \f$
   \f$ reaction_n\f$ represents the normal part of the reaction while \f$ reaction_t\f$ is its tangential part.
 
   \f$ \mu \f$ is the friction coefficient (it may be different for each contact).
 
 
-  \bf Note: for 2-dimensional friction-contact problems, two formulation are available:\n
-  <em>primal problem:</em>\n
-  \f$
-  \left\lbrace
-  \begin{array}{l}
-  velocity - M reaction = q \\
-  0 \le reaction_n \perp velocity_n \ge 0\\
-  -velocity_t \in \partial\psi_{[-\mu reaction_n, \mu reaction_n]}(reaction_t)\\
-  \end{array}
-  \right.
-  \f$
-
-  or \n
-
-  <em>dual problem:</em>\n
-  \f$
-  \left\lbrace
-  \begin{array}{l}
-  velocity - M reaction = q \\
-  0 \le reaction_n \perp velocity_n \ge 0 \\
-  -reaction_t \in \partial\psi_{[-\mu velocity_n, \mu velocity_n]}(velocity_t)\\
-  \end{array}
-  \right.
-  \f$
 
 
   \section pfc3DSolversList Available solvers for Friction Contact 3D
-  Use the generic function frictionContact3D_driver() to call one the the specific solvers listed below:
+  Use the generic function primalFrictionContact3D_driver() to call one the the specific solvers listed below:
 
-  - frictionContact3D_nsgs() : non-smooth Gauss-Seidel solver
+  - primalfrictionContact3D_nsgs() : non-smooth Gauss-Seidel solver
 
   (see the functions/solvers list in PrimalFrictionContact3D_Solvers.h)
 
   \section pfc3DParam Required and optional parameters
   PrimalFrictionContact3D problems needs some specific parameters, given to the PrimalFrictionContact3D_driver() function thanks to a Solver_Options structure. \n
-  They are:\n
-     - the name of the solver (ex: NSGS), used to switch to the right solver function
-     - iparam[0]: max. number of iterations allowed
-     - iparam[1]:
-     - dparam[0]: tolerance
-     - isStorageSparse: 1 if a SparseBlockStructuredMatrix is used for M, else 0 (double* storage)
 
-  \section fc2DSolversList Available solvers for Friction Contact 2D
-
-  - pfc_2D_latin(), latin solver
-  - pfc_2D_nlgs(), Non Linear Gauss Seidel solver
-  - pfc_2D_cpg(), conjugated projected gradient solver
-  - dfc_2D_latin(), latin solver
 
 */
 
@@ -100,7 +71,9 @@
 /** The structure that defines a Friction-Contact (3D or 2D)problem
     \param numberOfContacts, the number of contacts
     \param M matrix (n X n, with n = 2 or 3*numberOfContacts)
+    \param H matrix (n X m, with n = 2 or 3*numberOfContacts)
     \param q vector (n)
+    \param b vector (m)
     \param mu, vector of friction coefficients (size: numberOfContacts)
     \param isComplete, equal to 0 if some information is missing or wrong for the problem (M or q = NULL, inconsistent sizes), else equal to 1.
 */
@@ -108,7 +81,9 @@ typedef struct
 {
   int numberOfContacts;
   NumericsMatrix* M;
+  NumericsMatrix* H;
   double* q;
+  double* b;
   double* mu;
   int isComplete;
 } PrimalFrictionContact_Problem;

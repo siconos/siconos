@@ -52,6 +52,16 @@ For each solver, the input argument are:
 #ifdef __cplusplus
 extern "C" {
 #endif
+  /** Check for trivial solution in the friction-contact 3D problem
+       \param dim of the problem
+       \param q global vector (n)
+       \param velocity global vector (n), in-out parameter
+       \param reaction global vector (n), in-out parameters
+       \param int vector of parameters (max. iteration number ...)
+       \param double vector of parameters (tolerance ...)
+       \return int =0 if a trivial solution has been found, else = -1
+   */
+  int checkTrivialCasePrimal(int, double*, double*, double*, double*, int*, double*);
 
 #ifdef __cplusplus
 }
