@@ -93,10 +93,10 @@ int main(int argc, char* argv[])
   MBlockMatrix->size = 3;
   int blocksize[3] = {3, 6, 9} ;
   MBlockMatrix->blocksize = blocksize;
-  int RowIndex[3] = {1, 2, 3} ;
-  int ColumnIndex[3] = {1, 2, 3} ;
-  MBlockMatrix->RowIndex = RowIndex;
-  MBlockMatrix->ColumnIndex = ColumnIndex;
+  /*     int RowIndex[3] = {1, 2, 3} ; */
+  /*     int ColumnIndex[3] = {1, 2, 3} ; */
+  /*     MBlockMatrix->RowIndex = RowIndex; */
+  /*     MBlockMatrix->ColumnIndex = ColumnIndex; */
   MBlockMatrix->filled1 = 4;
   MBlockMatrix->filled2 = 3;
   size_t index1_data[4] = {0, 1, 2, 3} ;
