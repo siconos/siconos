@@ -33,7 +33,6 @@ void test_BuildNumericsMatrix(NumericsMatrix** MM1, NumericsMatrix** MM2)
 {
   /* Build two equal Numerics Matrices, one with double* storage (MM1), the other with sparse storage (MM2)*/
   NumericsMatrix * M1 = *MM1;
-  NumericsMatrix * M2 = *MM2;
   int n = 8;
   /* Double * storage (column-major) */
   double m0[] = {1, 2, 0, 5, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, -1, 0, 0, 2, 2, 4, 0, -1, 6, 0, 0, 1, 2, 3, 4, 0, 0, 1, 0, 0, 0, -1, 1, 0, 6, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, -1, 0, 0, 0, 0, 5, 2, 2, 2};
@@ -46,48 +45,43 @@ void test_BuildNumericsMatrix(NumericsMatrix** MM1, NumericsMatrix** MM2)
   for (i = 0; i < n * n; i++)
     M1->matrix0[i] = m0[i];
   M1->matrix1 = NULL;
+
+
+  NumericsMatrix * M2 = *MM2;
   /* Build a NumericsMatrix with sparse-block storage */
   M2->storageType = 1;
   M2->size0 = n;
   M2->size1 = n;
   M2->matrix0 = NULL;
-  M2->matrix1 = malloc(1 * sizeof(*(M2->matrix1)));
-  SparseBlockStructuredMatrix * SBM = M2->matrix1;
+  SparseBlockStructuredMatrix * SBM = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
+  M2->matrix1 = SBM;
   SBM->nbblocks = 6;
   SBM->size = 3;
-  int sizes[] = {4, 6, 8};
-  SBM->blocksize = malloc(SBM->size * sizeof(int));
-  for (i = 0; i < SBM->size; i++)
-    SBM->blocksize[i] = sizes[i];
-  int i1[] = {0, 0, 1, 1, 2, 2};
-  SBM->RowIndex = malloc(SBM->nbblocks * sizeof(int));
-  for (i = 0; i < SBM->nbblocks; i++)
-    SBM->RowIndex[i] = i1[i];
-  SBM->ColumnIndex = malloc(SBM->nbblocks * sizeof(int));
-  SBM->index1_data = malloc((n + 1) * sizeof(int));
-  int i2[] = {0, 1, 1, 2, 0, 2};
-  for (i = 0; i < SBM->nbblocks; i++)
-    SBM->ColumnIndex[i] = i2[i];
+  int sizes[3] = {4, 6, 8};
 
 
-  /* Boost sparse compressed : index1_data construction */
-  /* see SparseBlockMatrix.h */
-  int current_block;
-  int current_row;
-  int k;
+  SBM->blocksize = (int*)malloc(3 * sizeof(int));
+  SBM->blocksize[0] = 4;
+  SBM->blocksize[1] = 6;
+  SBM->blocksize[2] = 8;
 
-  current_block = 0;
-  current_row = 0;
-  while (current_block < SBM->nbblocks)
-  {
-    for (k = current_block; SBM->RowIndex[current_block] == SBM->RowIndex[k] && k < SBM->nbblocks; ++k) ;
-    for (i = current_row; i < SBM->RowIndex[current_block] + 1; ++i)
-      SBM->index1_data[i] = current_block;
 
-    SBM->index1_data[i] = k;
-    current_row = SBM->RowIndex[current_block] + 1;
-    current_block = k;
-  };
+
+  int i1[6] = {0, 0, 1, 1, 2, 2};
+  SBM->filled1 = (n + 1);
+  SBM->filled2 = SBM->nbblocks;
+
+  size_t i2[6] = {0, 1, 1, 2, 0, 2};
+  SBM->index2_data = i2;
+
+
+
+  size_t ii1[4] = {0, 2, 4, 7};
+  SBM->index1_data = ii1;
+
+
+
+
 
   SBM->block = malloc(SBM->nbblocks * sizeof(* (SBM->block)));
   double block0[] = {1, 2 , 0 , 5 , 2 , 1 , 0 , 0 , 0 , 0 , 1 , -1, 4, 0 , -1, 6};
