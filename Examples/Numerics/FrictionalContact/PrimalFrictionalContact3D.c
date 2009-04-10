@@ -62,44 +62,46 @@ int main(int argc, char* argv[])
 
 
   // Problem Definition
+  int info = -1;
   int NC = 3;//Number of contacts
   double M[81] = {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+  double H[81] = {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
   double q[9] = { -1, 1, 3, -1, 1, 3, -1, 1, 3};
+  double b[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
   double mu[3] = {0.1, 0.1, 0.1};
 
   int i, j, k;
-  /*  for (j =0 ; j<9; j++){ */
-  /*  for (k =0 ; k<9; k++) */
-  /*      M[j][k]=0.0; */
-  /*     } */
-  /*     for (i =0 ; i<NC; i++) */
-  /*  { */
-  /*      mu[i]=0.1; */
-  /*      for (j =0 ; j<3; j++){ */
-  /*      q[3*i+j] =-1.0+j*2.0;  */
-  /*    M[3*i+j][3*i+j]=1.0;    */
-  /*      } */
-  /*  } */
+  int m = 3 * NC;
+  int n = 3 * NC;
 
-
-  FrictionContact_Problem NumericsProblem;
+  PrimalFrictionContact_Problem NumericsProblem;
   NumericsProblem.numberOfContacts = NC;
   NumericsProblem.isComplete = 0;
   NumericsProblem.mu = mu;
   NumericsProblem.q = q;
+  NumericsProblem.b = b;
 
   NumericsMatrix *MM = (NumericsMatrix*)malloc(sizeof(*MM));
   MM->storageType = 0;
   MM->matrix0 = M;
-  MM->size0 = 3 * NC;
-  MM->size1 = 3 * NC;
+  MM->size0 = n;
+  MM->size1 = n;
 
   NumericsProblem.M = MM;
 
+  NumericsMatrix *HH = (NumericsMatrix*)malloc(sizeof(*H));
+  HH->storageType = 0;
+  HH->matrix0 = H;
+  HH->size0 = m;
+  HH->size1 = m;
+
+  NumericsProblem.H = HH;
+
   // Unknown Declaration
 
-  double *reaction = (double*)malloc(3 * NC * sizeof(double));
-  double *velocity = (double*)malloc(3 * NC * sizeof(double));
+  double *reaction = (double*)malloc(m * sizeof(double));
+  double *velocity = (double*)malloc(m * sizeof(double));
+  double *globalVelocity = (double*)malloc(n * sizeof(double));
 
   // Numerics and Solver Options
 
@@ -130,21 +132,32 @@ int main(int argc, char* argv[])
   numerics_solver_options.dparam[2] = localtolerance ;
 
   //Driver call
-  frictionContact3D_driver(&NumericsProblem,
-                           reaction , velocity,
-                           &numerics_solver_options, &numerics_options);
-
+  //i=0;
+  //while (0==0){
+  info = primalFrictionContact3D_driver(&NumericsProblem,
+                                        reaction , velocity, globalVelocity,
+                                        &numerics_solver_options, &numerics_options);
+  //i++;
+  //printf("i=%i\n", i);
+  //}
 
 
   // Solver output
   printf("\n");
-  for (k = 0 ; k < 3 * NC; k++) printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e \n ", k, velocity[k], k , reaction[k]);
+  for (k = 0 ; k < m; k++) printf("velocity[%i] = %12.8e \t \t reaction[%i] = %12.8e \n ", k, velocity[k], k , reaction[k]);
+  for (k = 0 ; k < n; k++) printf("globalVelocity[%i] = %12.8e \t \n ", k, globalVelocity[k]);
   printf("\n");
 
 
   free(reaction);
   free(velocity);
+  free(globalVelocity);
   free(MM);
+
+
+
+
+  return info;
 
 
 }
