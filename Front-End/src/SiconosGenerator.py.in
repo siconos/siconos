@@ -1,0 +1,132 @@
+# -*- python -*-
+
+import os
+import time
+from pyplusplus import module_builder
+from pyplusplus import messages
+from pyplusplus.module_builder import call_policies
+from pygccxml import declarations
+from doxygen import doxygen_doc_extractor
+
+import logging
+from pygccxml import utils
+logger = utils.loggers.cxx_parser
+logger.setLevel(logging.DEBUG)
+
+
+
+def generate_code():  
+    # py++ main class
+
+    print 'Generating boost python code ...'
+
+    mb = module_builder.module_builder_t( [ '@PYH' ]
+                                          , include_paths=['@SiconosKernel_INCLUDE_DIRS@', 
+                                                           '@SiconosNumerics_INCLUDE_DIRS@', 
+                                                           '@ATLAS_INCLUDE_DIR@', 
+                                                           '@LIBXML2_INCLUDE_DIR@' ]
+                                          , working_directory = r"." )
+
+
+    # Global settings
+    
+    #Set max number of arguments
+    mb.BOOST_PYTHON_MAX_ARITY = 25                       
+    
+    mb.classes().always_expose_using_scope = True
+    mb.constructors().allow_implicit_conversion = True         
+    
+    messages.disable( 
+        #           Warnings 1020 - 1031 are all about why Py++ generates wrapper for class X
+        messages.W1020
+        , messages.W1021
+        , messages.W1022
+        , messages.W1023
+        , messages.W1024
+        , messages.W1025
+        , messages.W1026
+        , messages.W1027
+        , messages.W1028
+        , messages.W1029
+        , messages.W1030
+        , messages.W1031
+        #         , messages.W1035
+        #         , messages.W1040 
+        #         , messages.W1038        
+        #         , messages.W1041
+        , messages.W1036 # pointer to Python immutable member
+        , messages.W1033 # unnamed variables
+        , messages.W1018 # expose unnamed classes
+        , messages.W1049 # returns reference to local variable
+        , messages.W1014 # unsupported '=' operator
+        )
+    
+
+
+    # Selective inclusion
+    mb.decls( recursive=True ).exclude()
+    
+    SiconosAlgebra = [ 'SimpleVector', 'SimpleMatrix', 'BlockVector', 
+                       'BlockMatrix', 'ioMatrix', 'ioVector' ]
+
+    Model = [ 'Model' ]
+
+    ModelingTools = [ 'LagrangianDS', 'LagrangianScleronomousR', 
+                      'NewtonImpactNSL', 'NonSmoothLaw' ]
+
+    for class_name in SiconosAlgebra + Model + ModelingTools:
+        mb.global_ns.class_(class_name).include()
+
+    # functions and operators exclusions
+    for cl in mb.global_ns.classes( recursive=True ):
+        cl.mem_funs('getArray', allow_empty=True).exclude()
+        cl.mem_funs('begin', allow_empty=True).exclude()
+        cl.mem_funs('end', allow_empty=True).exclude()
+        cl.operators('operator()', allow_empty=True).exclude()
+
+
+    # set default call policy for reference and pointer
+    funs = mb.calldefs()
+
+    funs.create_with_signature = True
+    for fun in funs:
+        if fun.call_policies:
+            continue
+        
+        # References and pointers
+        if (not fun.call_policies) and (declarations.is_reference(fun.return_type) or 
+                                             (declarations.is_pointer (fun.return_type)) ):
+            print 'Setting call policy for %s to reference' % fun.name 
+            fun.call_policies = call_policies.return_value_policy(call_policies.reference_existing_object )
+            
+            
+    #Creating code creator. After this step you should not
+    #modify/customize declarations.
+    mb.build_code_creator( module_name='Siconos', doc_extractor=doxygen_doc_extractor() )
+            
+    mb.code_creator.license = """/*
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+ """
+            
+#Writing code to files.
+    mb.split_module( os.path.join( os.path.abspath('.'), 'Siconos' ) )
+                
+                
+if __name__ == '__main__':
+    start_time = time.clock()
+    generate_code()
+    print 'Boost python generation done (%f seconds)' % (  ( time.clock() - start_time ) )
