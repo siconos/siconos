@@ -166,7 +166,7 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      int C_LDA = LDA; \
      int C_LDB = LDB; \
      double C_BETA = BETA; \
-     int C_LDC= LDC; \
+     int C_LDC = LDC; \
      BLAS_NAME(dgemm)WITH_ORDER(LA_ORDER, T_TRANS(TRANSA), T_TRANS(TRANSB), INTEGER(C_M), INTEGER(C_N), INTEGER(C_K), DOUBLE(C_ALPHA), A, INTEGER(C_LDA), B, INTEGER(C_LDB), DOUBLE(C_BETA), C, INTEGER(C_LDC)); \
   })
 

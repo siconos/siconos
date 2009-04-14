@@ -61,7 +61,8 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
     //Copy Htmp <- H
     DCOPY(nm,  H->matrix0 , 1, Htmp, 1);
     //Compute Htmp   <- M^-1 Htmp
-    DGESV(n, 1, M->matrix0, n, ipiv, Htmp, m, infoDGESV);
+    DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV);
+
 
 
     NumericsMatrix *Wnum = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
@@ -71,7 +72,9 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
     Wnum->matrix0 = (double*)malloc(m * m * sizeof(double));
     localproblem->M = Wnum;
     // Compute W <-  H^T M^1 H
-    DGEMM(LA_TRANS, LA_NOTRANS, m, m, n, 1.0, H->matrix0, n, Htmp, m, 0.0, Wnum->matrix0, m);
+
+    DGEMM(LA_TRANS, LA_NOTRANS, m, m, n, 1.0, H->matrix0, n, Htmp, n, 0.0, Wnum->matrix0, m);
+    /*     DGEMM(LA_TRANS,LA_NOTRANS,m,m,n,1.0,H->matrix0,n,Htmp,n,0.0,Wnum->matrix0,m); */
     // compute q = H^T q +b
 
     //Copy q<- b
@@ -116,12 +119,12 @@ int computeGlobalVelocity(PrimalFrictionContact_Problem* problem, double * react
     //Compute Htmp   <- M^-1 Htmp
     int infoDGESV;
     int* ipiv = (int *)malloc(n * sizeof(*ipiv));
-    DGESV(n, 1, problem->M->matrix0, n, ipiv, Htmp, m, infoDGESV);
+    DGESV(n, m, problem->M->matrix0, n, ipiv, Htmp, n, infoDGESV);
 
     DGEMV(LA_NOTRANS, n, m, 1.0, Htmp , n, reaction , 1, 0.0, globalVelocity, 1);
     double *vfree = (double*)malloc(n * sizeof(double));
     DCOPY(n,  problem->q, 1, vfree, 1);
-    DGESV(n, 1, problem->M->matrix0, n, ipiv, vfree, m, infoDGESV);
+    DGESV(n, 1, problem->M->matrix0, n, ipiv, vfree, n, infoDGESV);
 
     DAXPY(n, 1.0, vfree, 1, globalVelocity, 1);
 
