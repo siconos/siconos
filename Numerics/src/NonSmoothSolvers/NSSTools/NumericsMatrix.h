@@ -132,6 +132,17 @@ extern "C" {
   */
   void prodNumericsMatrix(int sizeX, int sizeY, double alpha, const NumericsMatrix* const A, const double* const x, double beta, double* y);
 
+  /** Matrix - Matrix product C = alpha*A*B + beta*B
+      \param[in] alpha coefficient
+      \param[in] A the matrix to be multiplied
+      \param[in] B the matrix to be multiplied
+      \param[in] beta coefficient
+      \param[in,out] C the resulting matrix
+  */
+  void prodNumericsMatrixNumericsMatrix(double alpha, const NumericsMatrix* const A, const NumericsMatrix* const B, double beta, NumericsMatrix* C);
+
+
+
   /** Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (sizeY rows and sizeX columns)
       \param[in] sizeX dim of the vector x
       \param[in] sizeY dim of the vector y

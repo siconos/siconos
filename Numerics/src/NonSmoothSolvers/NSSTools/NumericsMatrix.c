@@ -52,6 +52,11 @@ void prodNumericsMatrix(int sizeX, int sizeY, double alpha, const NumericsMatrix
   }
 }
 
+void prodNumericsMatrixNumericsMatrix(double alpha, const NumericsMatrix* const A, const NumericsMatrix* const B, double beta,  NumericsMatrix* C)
+{
+  fprintf(stderr, "Numerics, NumericsMatrix, product matrix - matrix prod(A,B,C) not yet implemented.\n");
+  exit(EXIT_FAILURE);
+}
 void subRowProd(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* A, const double* const x, double* y, int init)
 {
 

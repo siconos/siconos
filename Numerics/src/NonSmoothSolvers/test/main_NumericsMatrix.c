@@ -29,10 +29,10 @@
 #include "LA.h"
 #include <math.h>
 
-void test_BuildNumericsMatrix(NumericsMatrix** MM1, NumericsMatrix** MM2)
+int test_BuildNumericsMatrix(NumericsMatrix* M1, NumericsMatrix* M2)
 {
+  int info = 0;
   /* Build two equal Numerics Matrices, one with double* storage (MM1), the other with sparse storage (MM2)*/
-  NumericsMatrix * M1 = *MM1;
   int n = 8;
   /* Double * storage (column-major) */
   double m0[] = {1, 2, 0, 5, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, -1, 0, 0, 2, 2, 4, 0, -1, 6, 0, 0, 1, 2, 3, 4, 0, 0, 1, 0, 0, 0, -1, 1, 0, 6, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, -1, 0, 0, 0, 0, 5, 2, 2, 2};
@@ -46,50 +46,47 @@ void test_BuildNumericsMatrix(NumericsMatrix** MM1, NumericsMatrix** MM2)
     M1->matrix0[i] = m0[i];
   M1->matrix1 = NULL;
 
-
-  NumericsMatrix * M2 = *MM2;
   /* Build a NumericsMatrix with sparse-block storage */
   M2->storageType = 1;
   M2->size0 = n;
   M2->size1 = n;
   M2->matrix0 = NULL;
+
+
   SparseBlockStructuredMatrix * SBM = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
   M2->matrix1 = SBM;
   SBM->nbblocks = 6;
   SBM->size = 3;
-  int sizes[3] = {4, 6, 8};
-
 
   SBM->blocksize = (int*)malloc(3 * sizeof(int));
   SBM->blocksize[0] = 4;
   SBM->blocksize[1] = 6;
   SBM->blocksize[2] = 8;
 
-
-
-  int i1[6] = {0, 0, 1, 1, 2, 2};
-  SBM->filled1 = (n + 1);
+  SBM->filled1 = 4;
   SBM->filled2 = SBM->nbblocks;
 
-  size_t i2[6] = {0, 1, 1, 2, 0, 2};
-  SBM->index2_data = i2;
+  SBM->index1_data = (size_t*)malloc((SBM->filled1) * sizeof(size_t));
+  SBM->index1_data[0] = 0;
+  SBM->index1_data[1] = 2;
+  SBM->index1_data[2] = 4;
+  SBM->index1_data[3] = 6;
 
+  SBM->index2_data = (size_t*)malloc((SBM->filled2) * sizeof(size_t));
+  SBM->index2_data[0] =  0;
+  SBM->index2_data[1] =  1;
+  SBM->index2_data[2] =  1;
+  SBM->index2_data[3] =  2;
+  SBM->index2_data[4] =  0;
+  SBM->index2_data[5] =  2;
 
-
-  size_t ii1[4] = {0, 2, 4, 7};
-  SBM->index1_data = ii1;
-
-
-
-
-
-  SBM->block = malloc(SBM->nbblocks * sizeof(* (SBM->block)));
-  double block0[] = {1, 2 , 0 , 5 , 2 , 1 , 0 , 0 , 0 , 0 , 1 , -1, 4, 0 , -1, 6};
-  double block1[] = {3, 4, 0, 0, -1, 1, 0, 6};
-  double block2[] = {1, 0, 0, 2};
-  double block3[] = {0, 0, 5, 2};
-  double block4[] = {0, 0, 0, 0, 2, 2, 1, 2};
-  double block5[] = {2, -1, 2, 2};
+  SBM->block = malloc(SBM->nbblocks * sizeof(*(SBM->block)));
+  double block0[16] = {1, 2 , 0 , 5 , 2 , 1 , 0 , 0 , 0 , 0 , 1 , -1, 4, 0 , -1, 6};
+  double block1[8] = {3, 4, 0, 0, -1, 1, 0, 6};
+  double block2[4] = {1, 0, 0, 2};
+  double block3[4] = {0, 0, 5, 2};
+  double block4[8] = {0, 0, 0, 0, 2, 2, 1, 2};
+  double block5[4] = {2, -1, 2, 2};
   SBM->block[0] = malloc(16 * sizeof(double));
   SBM->block[1] = malloc(8 * sizeof(double));
   SBM->block[2] = malloc(4 * sizeof(double));
@@ -108,6 +105,8 @@ void test_BuildNumericsMatrix(NumericsMatrix** MM1, NumericsMatrix** MM2)
     SBM->block[4][i] = block4[i];
   for (i = 0; i < 4; i++)
     SBM->block[5][i] = block5[i];
+
+  return info;
 }
 
 int test_prodNumericsMatrix(NumericsMatrix* M1, NumericsMatrix* M2)
@@ -360,24 +359,24 @@ int main(void)
 {
 
   printf("========= Starts Numerics tests for NumericsMatrix ========= \n");
-  NumericsMatrix * M1 = malloc(sizeof(*M1));
-  NumericsMatrix * M2 = malloc(sizeof(*M2));
+  NumericsMatrix * NM1 = malloc(sizeof(NumericsMatrix));
+  NumericsMatrix * NM2 = malloc(sizeof(NumericsMatrix));
 
-  test_BuildNumericsMatrix(&M1, &M2);
+  test_BuildNumericsMatrix(NM1, NM2);
   printf("Construction ok ...\n");
-  int info = test_prodNumericsMatrix(M1, M2);
+  int info = test_prodNumericsMatrix(NM1, NM2);
   printf("End of ProdNumericsMatrix ...\n");
-  info = test_subRowprod(M1, M2);
+  info = test_subRowprod(NM1, NM2);
   printf("End of Sub-Prod ...\n");
-  info = test_rowProdNoDiag(M1, M2);
+  info = test_rowProdNoDiag(NM1, NM2);
   printf("End of Sub-Prod no diag ...\n");
 
   /* free memory */
-  M1->matrix0 = NULL;
-  free(M1->matrix0);
-  freeSBM(M2->matrix1);
-  free(M1);
-  free(M2);
+  NM1->matrix0 = NULL;
+  free(NM1->matrix0);
+  freeSBM(NM2->matrix1);
+  free(NM1);
+  free(NM2);
   printf("========= End Numerics tests for NumericsMatrix ========= \n");
   return info;
 }
