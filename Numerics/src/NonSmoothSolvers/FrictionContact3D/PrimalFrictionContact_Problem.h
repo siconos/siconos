@@ -20,30 +20,36 @@
 #define PRIMALFRICTIONCONTACTPROBLEM_H
 
 /*! \page primalFcProblem Primal-Friction-contact problems (2 or 3-dimensional)
-  \section pfcIntro The problem
-  Find \f$(reaction,velocity)\f$ such that:\n
-
+ * \section pfcIntro The problem
+ * Find \f$(reaction,velocity)\f$ such that:\n
+ * \f$
+ \left\lbrace
+  \begin{array}{l}
+  M globalVelocity =  q +  H reaction \\
+  velocity = H^T globalVelocity + b\\
+  K \ni reaction_n \perp velocity_n \in K^* \\
+  \end{array}
+  \right.
+  \f$\n
+  * where
   \f$
   \left\lbrace
   \begin{array}{l}
-    M globalVelocity =  q +  H reaction \\
-    velocity = H^T globalVelocity + b\\         \
-    K \le reaction_n \perp velocity_n \in K^* \\      \
-    K = \{reaction, \|reaction_t\| \leq \mu reaction_n \} \text{Coulomb's Cone}
-    \end{array}
-    \right.
-    \f$
- *
- * With:
- *    - \f$globalVelocity \in R^{n} \f$  the global unknown,
- *    - \f$M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
- *    - \f$velocity \in R^{m} \f$  and \f$reaction \in R^{m} \f$ the local unknowns,
- *    - \f$b \in R^{m} \f$ is the modified local velocity (\f$ e U_{N,k}\f$)
- *    - \f$M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
- *    - \f$H \in R^{n \times m } \f$
-  \f$ reaction_n\f$ represents the normal part of the reaction while \f$ reaction_t\f$ is its tangential part.
+  K = \{reaction, \|reaction_t\| \leq \mu reaction_n \}
+  \end{array}
+  \right.
+  \f$
+  is the Coulomb's Cone \n
+    * and with:
+    *    - \f$globalVelocity \in R^{n} \f$  the global unknown,
+    *    - \f$M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
+    *    - \f$velocity \in R^{m} \f$  and \f$reaction \in R^{m} \f$ the local unknowns,
+    *    - \f$b \in R^{m} \f$ is the modified local velocity (\f$ e U_{N,k}\f$)
+    *    - \f$M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
+    *    - \f$H \in R^{n \times m } \f$
+    \f$ reaction_n\f$ represents the normal part of the reaction while \f$ reaction_t\f$ is its tangential part.
 
-  \f$ \mu \f$ is the friction coefficient (it may be different for each contact).
+    \f$ \mu \f$ is the friction coefficient (it may be different for each contact).
 
 
 
