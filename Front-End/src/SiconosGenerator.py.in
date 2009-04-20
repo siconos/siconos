@@ -20,7 +20,7 @@ def generate_code():
 
     print 'Generating boost python code ...'
 
-    mb = module_builder.module_builder_t( [ '@PYH' ]
+    mb = module_builder.module_builder_t( [ @PYH@ ]
                                           , include_paths=['@SiconosKernel_INCLUDE_DIRS@', 
                                                            '@SiconosNumerics_INCLUDE_DIRS@', 
                                                            '@ATLAS_INCLUDE_DIR@', 
@@ -65,24 +65,82 @@ def generate_code():
 
     # Selective inclusion
     mb.decls( recursive=True ).exclude()
+
     
-    SiconosAlgebra = [ 'SimpleVector', 'SimpleMatrix', 'BlockVector', 
-                       'BlockMatrix', 'ioMatrix', 'ioVector' ]
+    Utils = [
+        # Siconos Algebra
+        'SimpleVector', 'SimpleMatrix', 'BlockVector', 
+        'BlockMatrix', 'ioMatrix', 'ioVector', 'ioObject', 
+
+        # Siconos Exception
+        'RuntimeException', 'SiconosException', 
+        'SiconosMatrixException', 'SiconosMemoryException', 
+        'SiconosSharedLibraryException', 
+        'SiconosVectorException', 'XMLException',
+
+        # Siconos Memory
+        'SiconosMemory',
+
+        # Siconos shared library
+        'SiconosSharedLibrary'
+        ]
+
 
     Model = [ 'Model' ]
 
-    ModelingTools = [ 'LagrangianDS', 'LagrangianScleronomousR', 
-                      'NewtonImpactNSL', 'NonSmoothLaw' ]
+    ModelingTools = [ 'ComplementarityConditionNSL', 'DynamicalSystem', 
+                      'FirstOrderLinearDS', 'FirstOrderLinearR', 
+                      'FirstOrderLinearTIDS', 'FirstOrderLinearTIR',
+                      'FirstOrderNonLinearDS', 
+                      'Interaction',
+                      'LagrangianCompliantR',
+                      'LagrangianDS', 
+                      'LagrangianLinearTIDS',
+                      'LagrangianLinearTIR',
+                      'LagrangianRheonomousR',
+                      'LagrangianScleronomousR',
+                      'MixedComplementarityConditionNSL',
+                      'NewtonImpactFrictionNSL',
+                      'NewtonImpactNSL',
+                      'NonSmoothDynamicalSystem', 
+                      'NonSmoothLaw',
+                      'Relation',
+                      'RelayNSL'
+                      
+                      ]
 
-    for class_name in SiconosAlgebra + Model + ModelingTools:
+    SimulationTools = [ 'Event', 'EventDriven', 'FrictionContact', 'LCP', 'LinearOSNS', 'Lsodar',
+                        'MLCP', 'Moreau', 'NonSmoothEvent', 'NonSmoothSolver', 'OSNSMatrix', 
+                        'OneStepIntegrator', 'OneStepNSProblem', 'PrimalFrictionContact', 'QP',
+                        'Relay' , 'Simulation', 'SparseBlockMatrix', 'TimeDiscretisation', 
+                        'TimeDiscretisation', 'TimeDiscretisationEvent', 'TimeStepping', 'Topology',
+                        'UnitaryRelation' ]
+                        
+
+
+
+    for class_name in Utils + Model + ModelingTools + SimulationTools:
         mb.global_ns.class_(class_name).include()
+
+
+    for enum_ in mb.enumerations():
+        enum_.include()
 
     # functions and operators exclusions
     for cl in mb.global_ns.classes( recursive=True ):
         cl.mem_funs('getArray', allow_empty=True).exclude()
         cl.mem_funs('begin', allow_empty=True).exclude()
         cl.mem_funs('end', allow_empty=True).exclude()
+        cl.mem_funs('dynamicalSystemsBegin', allow_empty=True).exclude()
+        cl.mem_funs('dynamicalSystemsEnd', allow_empty=True).exclude()
+        cl.mem_funs('getSort', allow_empty=True).exclude()
         cl.operators('operator()', allow_empty=True).exclude()
+
+    mb.decls( lambda decl: 
+              decl.name.startswith('BaseClass') or
+              decl.name.startswith('MapOfMapOfUnitaryMatrices') ).exclude()
+
+    
 
 
     # set default call policy for reference and pointer
