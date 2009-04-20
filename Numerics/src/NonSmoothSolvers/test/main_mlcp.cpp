@@ -55,9 +55,11 @@
 #include "NonSmoothNewtonNeighbour.h"
 #include "MixedLinearComplementarity_Problem.h"
 
-#define BAVARD
-//#define NBTEST 18
-#define NBTEST 3
+#define NAX_NBTESTS 20
+
+//#define BAVARD
+//#define NBTEST 19
+#define NBTEST 10
 
 #define ENUM_ID 0
 #define PGS_EX_ID 1
@@ -76,7 +78,7 @@
 #define NBMETHODS 14
 
 #define PATH_DRIVER
-#define MAX_DIM_ENUM 100
+#define MAX_DIM_ENUM 19
 
 /*#ifdef PATH_DRIVER
 const unsigned short int *__ctype_b;
@@ -84,6 +86,7 @@ const __int32_t *__ctype_tolower ;
 #endif
 */
 
+static int sNbNOCV = 0;
 static int sIdWithSol = 0;
 typedef struct
 {
@@ -114,6 +117,7 @@ void stopTimer()
 static dataSummary summary[NBTEST];
 static int sRunMethod[NBMETHODS];
 static int itest;
+
 
 /*
  ******************************************************************************
@@ -174,7 +178,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
   mlcpOptions.iparam = (int*)malloc(10 * sizeof(int));
   mlcpOptions.dparam = (double*)malloc(10 * sizeof(double));
 
-  global_options.verboseMode = 1;
+  //  global_options.verboseMode=1;
   setNumericsOptions(&global_options);
 
   mlcpOptions.iparam[5] = 3; /*Number of registered configurations*/
@@ -238,6 +242,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     {
       printf("Can't find a solution\n");
       strcpy(summary[itest].cv[ENUM_ID][sIdWithSol], "NO");
+      sNbNOCV++;
     }
     else
     {
@@ -271,6 +276,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     {
       printf("Can't find a solution\n");
       strcpy(summary[itest].cv[PGS_IM_ID][sIdWithSol], "NO");
+      sNbNOCV++;
     }
     else
     {
@@ -304,6 +310,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     {
       printf("Can't find a solution\n");
       strcpy(summary[itest].cv[PGS_EX_ID][sIdWithSol], "NO");
+      sNbNOCV++;
     }
     else
     {
@@ -335,6 +342,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     {
       printf("Can't find a solution\n");
       strcpy(summary[itest].cv[RPGS_ID][sIdWithSol], "NO");
+      sNbNOCV++;
     }
     else
     {
@@ -373,6 +381,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
       {
         printf("Can't find a solution\n");
         strcpy(summary[itest].cv[_ID][sIdWithSol], "NO");
+        sNbNOCV++;
       }
       else
       {
@@ -406,6 +415,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     {
       printf("Can't find a solution\n");
       strcpy(summary[itest].cv[RPSOR_ID][sIdWithSol], "NO");
+      sNbNOCV++;
     }
     else
     {
@@ -424,7 +434,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     mlcpOptions.iSize = 1;
     mlcpOptions.iparam[0] = 101;
     mlcpOptions.dSize = 1;
-    mlcpOptions.dparam[0] = tol2;
+    mlcpOptions.dparam[0] = tol1;
     mlcp_driver_init(problem, &mlcpOptions);
 
     startTimer();
@@ -436,12 +446,16 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     {
       printf("Can't find a solution\n");
       strcpy(summary[itest].cv[PATH_ID][sIdWithSol], "NO");
+      sNbNOCV++;
     }
     else
     {
       mlcp_compute_error(problem, z, w, tol1,  &error);
       if (error > tol2)
+      {
         strcpy(summary[itest].cv[PATH_ID][sIdWithSol], "NO");
+        sNbNOCV++;
+      }
       printf("find a solution with error %lf \n", error);
       printSolution("PATH", n, m, NbLines, z, w);
     }
@@ -473,12 +487,16 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     {
       printf("Can't find a solution\n");
       strcpy(summary[itest].cv[SIMPLEX_ID][sIdWithSol], "NO");
+      sNbNOCV++;
     }
     else
     {
       mlcp_compute_error(problem, z, w, tol1,  &error);
       if (error > 1e-9)
+      {
         strcpy(summary[itest].cv[SIMPLEX_ID][sIdWithSol], "NO");
+        sNbNOCV++;
+      }
       printf("find a solution with error %lf \n", error);
       printSolution("SIMPLEX", n, m, NbLines, z, w);
     }
@@ -514,12 +532,16 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     {
       printf("Can't find a solution\n");
       strcpy(summary[itest].cv[DIRECT_ENUM_ID][sIdWithSol], "NO");
+      sNbNOCV++;
     }
     else
     {
       mlcp_compute_error(problem, z, w, tol1,  &error);
       if (error > 1e-9)
+      {
         strcpy(summary[itest].cv[DIRECT_ENUM_ID][sIdWithSol], "NO");
+        sNbNOCV++;
+      }
       printf("find a solution with error %lf \n", error);
       printSolution("DIRECT_ENUM_ID", n, m, NbLines, z, w);
     }
@@ -551,6 +573,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     {
       printf("Can't find a solution\n");
       strcpy(summary[itest].cv[FB_ID][sIdWithSol], "NO");
+      sNbNOCV++;
       mlcp_compute_error(problem, z, w, tol1,  &error);
       printf("current point with error %lf \n", error);
       printSolution("FB", n, m, NbLines, z, w);
@@ -595,6 +618,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     {
       printf("Can't find a solution\n");
       strcpy(summary[itest].cv[DIRECT_FB_ID][sIdWithSol], "NO");
+      sNbNOCV++;
       mlcp_compute_error(problem, z, w, tol1,  &error);
       printf("current point with error %lf \n", error);
       printSolution("DIRECT_FB", n, m, NbLines, z, w);
@@ -675,7 +699,7 @@ void test_matrix(void)
 
     switch (itest)
     {
-    case 9:
+    case 0:
       printf("\n\n 2x2 MLCP **************************************************************************");
       strcpy(summary[itest].file, "2x2 MLCP");
       if ((MLCPfile = fopen("MATRIX/deudeu_mlcp.dat", "r")) == NULL)
@@ -684,7 +708,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 7:
+    case 1:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n PD **************************************************************************");
       strcpy(summary[itest].file, "PD");
@@ -694,7 +718,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 12:
+    case 2:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n m2n1_mlcp.dat **************************************************************************");
       strcpy(summary[itest].file, "m2n1_mlcp");
@@ -704,7 +728,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 13:
+    case 3:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n relay2_mlcp.dat **************************************************************************");
       strcpy(summary[itest].file, "relay2_mlcp");
@@ -714,17 +738,16 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 88:
-      printf("BEGIN A NEWTEST  **************************************************************************");
-      printf("\n\n simple_mlcp.dat **************************************************************************");
-      strcpy(summary[itest].file, "simple_mlcp");
-      if ((MLCPfile = fopen("MATRIX/simple_mlcp.dat", "r")) == NULL)
-      {
-        perror("fopen MLCPfile: simple_mlcp.dat");
-        exit(1);
-      }
-      break;
-    case 99:
+      //     case 4:
+      //       printf("BEGIN A NEWTEST  **************************************************************************");
+      //       printf("\n\n simple_mlcp.dat **************************************************************************");
+      //       strcpy(summary[itest].file,"simple_mlcp");
+      //       if( ( MLCPfile = fopen( "MATRIX/simple_mlcp.dat","r" ) ) == NULL ){
+      //  perror("fopen MLCPfile: simple_mlcp.dat");
+      //  exit(1);
+      //       }
+      //       break;
+    case 11:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n deltasigma2_mlcp.dat **************************************************************************");
       strcpy(summary[itest].file, "deltasigma2_mlcp");
@@ -734,7 +757,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 16:
+    case 12:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n relay3_mlcp.dat **************************************************************************");
       strcpy(summary[itest].file, "relay3_mlcp");
@@ -744,7 +767,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 14:
+    case 13:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n deltasigma_mlcp.dat **************************************************************************");
       strcpy(summary[itest].file, "deltasigma_mlcp");
@@ -754,7 +777,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 3:
+    case 14:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n m3n2_mlcp.dat **************************************************************************");
       strcpy(summary[itest].file, "m3n2_mlcp");
@@ -764,7 +787,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 1:
+    case 9:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n PDSym_mlcp.dat **************************************************************************");
       strcpy(summary[itest].file, "PDSym_mlcp");
@@ -774,7 +797,17 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 0:
+    case 4:
+      printf("BEGIN A NEWTEST  **************************************************************************");
+      printf("\n\n RLCD_mlcp MLCP **************************************************************************");
+      strcpy(summary[itest].file, "RLCD_mlcp MLCP");
+      if ((MLCPfile = fopen("MATRIX/RLCD_mlcp.dat", "r")) == NULL)
+      {
+        perror("fopen MLCPfile: RLCD_mlcp.dat");
+        exit(1);
+      }
+      break;
+    case 16:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n Rectangular_1_n0_m4_mlcp MLCP **************************************************************************");
       strcpy(summary[itest].file, "Rectangular_1_n0_m4_mlcp MLCP");
@@ -784,7 +817,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 2:
+    case 17:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n Rectangular_mlcp MLCP **************************************************************************");
       strcpy(summary[itest].file, "Rectangular_mlcp MLCP");
@@ -794,7 +827,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 19:
+    case 6:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n diodeBridge MLCP **************************************************************************");
       strcpy(summary[itest].file, "diodeBridge MLCP");
@@ -804,7 +837,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 6:
+    case 7:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n RCD **************************************************************************");
       strcpy(summary[itest].file, "RCD");
@@ -814,7 +847,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 4:
+    case 5:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n diodeBridge 20 MLCP **************************************************************************");
       strcpy(summary[itest].file, "diodeBridge 20 MLCP");
@@ -824,7 +857,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 8:
+    case 18:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n diodeBridge 40 MLCP **************************************************************************");
       strcpy(summary[itest].file, "diodeBridge 40 MLCP");
@@ -834,7 +867,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 102:
+    case 8:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n Buck converter **************************************************************************");
       strcpy(summary[itest].file, "BuckConverter_mlcp");
@@ -844,7 +877,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 15:
+    case 19:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n Buck converter FB failed **************************************************************************");
       strcpy(summary[itest].file, "Buck2");
@@ -854,7 +887,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 11:
+    case 20:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n Buck converter First step **************************************************************************");
       strcpy(summary[itest].file, "BuckFirstStep");
@@ -864,7 +897,7 @@ void test_matrix(void)
         exit(1);
       }
       break;
-    case 10:
+    case 15:
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n Relay **************************************************************************");
       strcpy(summary[itest].file, "relay_mlcp");
@@ -1084,13 +1117,16 @@ int main(void)
 {
   int i;
   for (i = 0; i < NBMETHODS; i++)
-    sRunMethod[i] = 0;
+    sRunMethod[i] = 1;
   sRunMethod[PATH_ID] = 0;
-  sRunMethod[ENUM_ID] = 1;
+  //  sRunMethod[ENUM_ID]=1;
   sRunMethod[SIMPLEX_ID] = 0;
 
   test_matrix();
-
-  return 1;
+  printf("nb no cv %d\n", sNbNOCV++);
+  if (sNbNOCV == 111)
+    return 0;
+  else
+    return 1;
 }
 
