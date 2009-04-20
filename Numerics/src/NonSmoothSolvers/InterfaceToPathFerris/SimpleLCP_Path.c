@@ -22,6 +22,8 @@
 #include "SimpleLCP.h"
 #include "NumericsConfig.h"
 
+#define PATHFERRIS_LOG_IN_FILE
+
 #ifdef HAVE_PATHFERRIS
 
 #include "include/MCP_Interface.h"
@@ -34,7 +36,7 @@
 #include "include/Memory.h"
 #include "include/Output.h"
 #include "include/Options.h"
-
+#include "include/Output_Interface.h"
 typedef struct
 {
   int variables;
@@ -420,7 +422,11 @@ void SimpleLCP(int variables,
   double *x;
   double dnnz;
   int i;
-
+#ifdef PATHFERRIS_LOG_IN_FILE
+  FILE *f;
+  f = fopen("path.log", "w");
+  Output_SetLog(f);
+#endif
   o = Options_Create();
   Path_AddOptions(o);
   Options_Default(o);
@@ -479,6 +485,9 @@ void SimpleLCP(int variables,
   destroy();
 
   Options_Destroy(o);
+#ifdef PATHFERRIS_LOG_IN_FILE
+  fclose(f);
+#endif
   return;
 }
 #else

@@ -1123,7 +1123,7 @@ int main(void)
   sRunMethod[SIMPLEX_ID] = 0;
 
   test_matrix();
-  printf("nb no cv %d\n", sNbNOCV++);
+  printf("nb no cv %d\n", sNbNOCV);
   if (sNbNOCV == 111)
     return 0;
   else

@@ -68,6 +68,10 @@ ENDIF(C_HAVE_C99)
 
 # CXX may be needed with MlcpSimplex
 SET(SiconosNumerics_LINKER_LANGUAGE C)
+IF(MlcpSimplex_FOUND) 
+SET(SiconosNumerics_LINKER_LANGUAGE CXX)
+ENDIF(MlcpSimplex_FOUND)
+
 
 LIBRARY_PROJECT_SETUP()
 
@@ -108,7 +112,7 @@ BEGIN_TEST(NonSmoothSolvers/test)
 NEW_TEST(NumericsMatrixTest main_NumericsMatrix.c)
 NEW_TEST(LCPtest main_lcp.c)
 
-SET(MLCPtest_PROPERTIES WILL_FAIL TRUE)
+##SET(MLCPtest_PROPERTIES WILL_FAIL TRUE)
 NEW_TEST(MLCPtest main_mlcp.cpp)
 
 NEW_TEST(Relaytest main_relay.c)
