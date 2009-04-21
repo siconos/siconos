@@ -29,13 +29,28 @@
 #include "LA.h"
 #include <math.h>
 
-int test_BuildNumericsMatrix(NumericsMatrix* M1, NumericsMatrix* M2)
+int test_BuildNumericsMatrix(NumericsMatrix** MM)
 {
+
+  NumericsMatrix * M1 = MM[0];
+  NumericsMatrix * M2 = MM[1];
+  NumericsMatrix * M3 = MM[2];
+  NumericsMatrix * M4 = MM[3];
+
+
   int info = 0;
   /* Build two equal Numerics Matrices, one with double* storage (MM1), the other with sparse storage (MM2)*/
   int n = 8;
   /* Double * storage (column-major) */
-  double m0[] = {1, 2, 0, 5, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, -1, 0, 0, 2, 2, 4, 0, -1, 6, 0, 0, 1, 2, 3, 4, 0, 0, 1, 0, 0, 0, -1, 1, 0, 6, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, -1, 0, 0, 0, 0, 5, 2, 2, 2};
+  double m0[64] = {1, 2, 0, 5, 0, 0, 0, 0,
+                   2, 1, 0, 0, 0, 0, 0, 0,
+                   0, 0, 1, -1, 0, 0, 2, 2,
+                   4, 0, -1, 6, 0, 0, 1, 2,
+                   3, 4, 0, 0, 1, 0, 0, 0,
+                   -1, 1, 0, 6, 0, 2, 0, 0,
+                   0, 0, 0, 0, 0, 0, 2, -1,
+                   0, 0, 0, 0, 5, 2, 2, 2
+                  };
   M1->storageType = 0;
   M1->size0 = n;
   M1->size1 = n;
@@ -45,6 +60,22 @@ int test_BuildNumericsMatrix(NumericsMatrix* M1, NumericsMatrix* M2)
   for (i = 0; i < n * n; i++)
     M1->matrix0[i] = m0[i];
   M1->matrix1 = NULL;
+
+  int nn = 2;
+  /* Double * storage (column-major) */
+  double m00[] = {1, 2, 0, 5, 0, 0, 0, 0,
+                  2, 1, 0, 0, 0, 0, 0, 0,
+                  0, 0, 1, -1, 0, 0, 2, 2,
+                  4, 0, -1, 6, 0, 0, 1, 2
+                 };
+  M3->storageType = 0;
+  M3->size0 = n;
+  M3->size1 = nn;
+  M3->matrix0 = malloc(nn * n * sizeof(double));
+  for (i = 0; i < n * n; i++)
+    M3->matrix0[i] = m00[i];
+  M3->matrix1 = NULL;
+
 
   /* Build a NumericsMatrix with sparse-block storage */
   M2->storageType = 1;
@@ -56,12 +87,12 @@ int test_BuildNumericsMatrix(NumericsMatrix* M1, NumericsMatrix* M2)
   SparseBlockStructuredMatrix * SBM = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
   M2->matrix1 = SBM;
   SBM->nbblocks = 6;
-  SBM->size = 3;
+  SBM->blocknumber0 = 3;
 
-  SBM->blocksize = (int*)malloc(3 * sizeof(int));
-  SBM->blocksize[0] = 4;
-  SBM->blocksize[1] = 6;
-  SBM->blocksize[2] = 8;
+  SBM->blocksize0 = (int*)malloc(3 * sizeof(int));
+  SBM->blocksize0[0] = 4;
+  SBM->blocksize0[1] = 6;
+  SBM->blocksize0[2] = 8;
 
   SBM->filled1 = 4;
   SBM->filled2 = SBM->nbblocks;
@@ -106,6 +137,50 @@ int test_BuildNumericsMatrix(NumericsMatrix* M1, NumericsMatrix* M2)
   for (i = 0; i < 4; i++)
     SBM->block[5][i] = block5[i];
 
+
+  /* Build a NumericsMatrix with sparse-block storage */
+  M4->storageType = 1;
+  M4->size0 = n;
+  M4->size1 = 4;
+  M4->matrix0 = NULL;
+
+
+  SparseBlockStructuredMatrix * SBM2 = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
+  M4->matrix1 = SBM2;
+  SBM2->nbblocks = 2;
+  SBM2->blocknumber0 = 3;
+
+  SBM2->blocksize0 = (int*)malloc(SBM2->blocknumber0 * sizeof(int));
+  SBM2->blocksize0[0] = 4;
+  SBM2->blocksize0[1] = 6;
+  SBM2->blocksize0[2] = 8;
+
+  SBM2->blocknumber1 = 1;
+  SBM2->blocksize1 = (int*)malloc(SBM2->blocknumber1 * sizeof(int));
+  SBM2->blocksize1[0] = 4;
+
+  SBM2->filled1 = 4;
+  SBM2->filled2 = SBM2->nbblocks;
+
+  SBM2->index1_data = (size_t*)malloc((SBM2->filled1) * sizeof(size_t));
+  SBM2->index1_data[0] = 0;
+  SBM2->index1_data[1] = 1;
+  SBM2->index1_data[2] = 1;
+  SBM2->index1_data[3] = 2;
+
+  SBM2->index2_data = (size_t*)malloc((SBM2->filled2) * sizeof(size_t));
+  SBM2->index2_data[0] =  0;
+  SBM2->index2_data[1] =  0;
+
+  SBM2->block = malloc(SBM2->nbblocks * sizeof(*(SBM2->block)));
+  double block00[16] = {1, 2 , 0 , 5 , 2 , 1 , 0 , 0 , 0 , 0 , 1 , -1, 4, 0 , -1, 6};
+  double block40[8] = {0, 0, 0, 0, 2, 2, 1, 2};
+  SBM2->block[0] = malloc(16 * sizeof(double));
+  SBM2->block[1] = malloc(8 * sizeof(double));
+  for (i = 0; i < 16; i++)
+    SBM2->block[0][i] = block00[i];
+  for (i = 0; i < 8; i++)
+    SBM2->block[1][i] = block40[i];
   return info;
 }
 
@@ -161,6 +236,121 @@ int test_prodNumericsMatrix(NumericsMatrix* M1, NumericsMatrix* M2)
   free(x);
   free(y);
   printf("== End of test prodNumericsMatrix(NumericsMatrix,vector), result = %d\n", info);
+
+  return info;
+}
+int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
+{
+
+
+  NumericsMatrix * M1 = MM[0];
+  NumericsMatrix * M2 = MM[0];
+  NumericsMatrix * M3 = MM[0];
+  NumericsMatrix * M4 = MM[0];
+
+
+  int info = -1;
+  printf("== Numerics tests: prodNumericsMatrixNumericsMatrix(NumericsMatrix,NumericsMatrix) == \n");
+  int i, j, k , n = M1->size1;
+  double alpha = 1.0, beta = 1.0;
+  double tol = 1e-12;
+
+
+  NumericsMatrix C;
+
+  C.storageType = 0;
+  C.size0 = M1->size0;
+  C.size1 = M1->size1;
+  C.matrix0 = (double *)malloc(C.size0 * C.size1 * sizeof(double));
+  C.matrix1 = NULL;
+  prodNumericsMatrixNumericsMatrix(alpha, M1, M1, beta,  &C);
+
+  double * Cref = (double *)malloc(C.size0 * C.size1 * sizeof(double));
+  double sum;
+  for (i = 0; i < C.size0; i++)
+  {
+    for (j = 0; j < C.size1; j++)
+    {
+      sum = 0.0;
+      for (k = 0; k < M1->size1; k++)
+      {
+        sum = sum + M1->matrix0[i + k * M1->size1] * M1->matrix0[k + j * M1->size1];
+      }
+      Cref[i + j * C.size1] = sum;
+
+    }
+  }
+  double err = 0.0;
+  for (i = 0; i < C.size0; i++)
+  {
+    for (j = 0; j < C.size1; j++)
+    {
+      err += (Cref[i + j * C.size1] - C.matrix0[i + j * C.size1]) * (Cref[i + j * C.size1] - C.matrix0[i + j * C.size1]);
+    }
+  }
+  if (err < tol)
+  {
+    info = 0;
+  }
+
+  if (info == 0)
+    printf("Step 0 ( C = alpha*A*B + beta*C, double* storage, square matrix ) ok ...\n");
+  else
+  {
+    printf("Step 0 ( C = alpha*A*B + beta*C, double* storage, square matrix) failed ...\n");
+    return info;
+  }
+
+
+  NumericsMatrix C2;
+
+  C2.storageType = 0;
+  C2.size0 = M1->size0;
+  C2.size1 = M3->size1;
+  C2.matrix0 = (double *)malloc(C2.size0 * C2.size1 * sizeof(double));
+  C2.matrix1 = NULL;
+  prodNumericsMatrixNumericsMatrix(alpha, M1, M3, beta,  &C2);
+
+  double * C2ref = (double *)malloc(C2.size0 * C2.size1 * sizeof(double));
+  for (i = 0; i < C2.size0; i++)
+  {
+    for (j = 0; j < C2.size1; j++)
+    {
+      sum = 0.0;
+      for (k = 0; k < M1->size1; k++)
+      {
+        sum = sum + M1->matrix0[i + k * M1->size1] * M3->matrix0[k + j * M3->size1];
+      }
+      C2ref[i + j * C2.size1] = sum;
+
+    }
+  }
+  err = 0.0;
+  for (i = 0; i < C2.size0; i++)
+  {
+    for (j = 0; j < C2.size1; j++)
+    {
+      err += (C2ref[i + j * C2.size1] - C2.matrix0[i + j * C2.size1]) * (C2ref[i + j * C2.size1] - C2.matrix0[i + j * C2.size1]);
+    }
+  }
+  if (err < tol)
+  {
+    info = 0;
+  }
+
+  if (info == 0)
+    printf("Step 1 ( C = alpha*A*B + beta*C, double* storage, non square) ok ...\n");
+  else
+  {
+    printf("Step 1 ( C = alpha*A*B + beta*C, double* storage, non square) failed ...\n");
+    return info;
+  }
+
+
+
+
+
+
 
   return info;
 }
@@ -359,24 +549,44 @@ int main(void)
 {
 
   printf("========= Starts Numerics tests for NumericsMatrix ========= \n");
-  NumericsMatrix * NM1 = malloc(sizeof(NumericsMatrix));
-  NumericsMatrix * NM2 = malloc(sizeof(NumericsMatrix));
 
-  test_BuildNumericsMatrix(NM1, NM2);
+  int i, nmm = 4 ;
+  NumericsMatrix ** NMM = malloc(nmm * sizeof(NumericsMatrix *)) ;
+
+
+  for (i = 0 ; i < nmm; i++)
+  {
+    NMM[i] = malloc(sizeof(NumericsMatrix));
+  }
+
+
+  test_BuildNumericsMatrix(NMM);
   printf("Construction ok ...\n");
-  int info = test_prodNumericsMatrix(NM1, NM2);
+  int info = test_prodNumericsMatrix(NMM[0], NMM[1]);
   printf("End of ProdNumericsMatrix ...\n");
-  info = test_subRowprod(NM1, NM2);
+  info = test_prodNumericsMatrixNumericsMatrix(NMM);
+  printf("End of ProdNumericsMatrixNumericsMatrix ...\n");
+  info = test_subRowprod(NMM[0], NMM[1]);
   printf("End of Sub-Prod ...\n");
-  info = test_rowProdNoDiag(NM1, NM2);
+  info = test_rowProdNoDiag(NMM[0], NMM[1]);
   printf("End of Sub-Prod no diag ...\n");
 
   /* free memory */
-  NM1->matrix0 = NULL;
-  free(NM1->matrix0);
-  freeSBM(NM2->matrix1);
-  free(NM1);
-  free(NM2);
+
+  for (i = 0 ; i < nmm; i++)
+  {
+    free(NMM[i]->matrix0);
+    /*    free(NMM[i]->matrix1->blocksize0); */
+    /*    free(NMM[i]->matrix1->blocksize1); */
+    /*    free(NMM[i]->matrix1->index1_data); */
+    /*    free(NMM[i]->matrix1->index2_data); */
+    free(NMM[i]->matrix1);
+    free(NMM[i]);
+  }
+  free(NMM);
+
+
+
   printf("========= End Numerics tests for NumericsMatrix ========= \n");
   return info;
 }

@@ -54,8 +54,37 @@ void prodNumericsMatrix(int sizeX, int sizeY, double alpha, const NumericsMatrix
 
 void prodNumericsMatrixNumericsMatrix(double alpha, const NumericsMatrix* const A, const NumericsMatrix* const B, double beta,  NumericsMatrix* C)
 {
-  fprintf(stderr, "Numerics, NumericsMatrix, product matrix - matrix prod(A,B,C) not yet implemented.\n");
-  exit(EXIT_FAILURE);
+
+  int astorage = A->storageType;
+  int bstorage = B->storageType;
+  int cstorage = C->storageType;
+  assert(A);
+  assert(B);
+  assert(C);
+  assert(A->size1 == B->size0);
+  assert(C->size0 == A->size0);
+  assert(C->size1 == B->size1);
+
+
+  /* double* storage */
+  if ((astorage == 0) & (bstorage == 0) & (cstorage == 0))
+  {
+    /*      DGEMV(LA_NOTRANS, sizeY, sizeX, alpha, A->matrix0, sizeY, x, 1, beta, y, 1); */
+    DGEMM(LA_NOTRANS, LA_NOTRANS, A->size0, B->size1, A->size1, alpha, A->matrix0, A->size0, B->matrix0, B->size0, beta, C->matrix0, C->size0);
+  }
+  /* SparseBlock storage */
+  else if ((astorage == 1) & (bstorage == 1) & (cstorage == 1))
+  {
+    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - matrix prod(A,B,C) not yet implemented.\n");
+    exit(EXIT_FAILURE);
+    /* prodSBM(sizeY, alpha, A->matrix1, x,beta,y); */
+  }
+  else
+  {
+
+    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - matrix prod(A,B,C) not yet implemented.\n");
+    exit(EXIT_FAILURE);
+  }
 }
 void subRowProd(int sizeX, int sizeY, int currentRowNumber, const NumericsMatrix* A, const double* const x, double* y, int init)
 {

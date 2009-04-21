@@ -27,33 +27,67 @@
   \author Pascal Denoyelle and Franck Perignon
 */
 
-/** Structure to store sparse block matrices with square diagonal blocks
+/** Structure to store sparse block matrices with square diagonal
+    blocks
     \param nbblocks         : the total number of non null blocks
-    \param **block          : *block contains the double values of one block in Fortran storage (column by column)
-    **block is the list of non null blocks
-    \param size             : the number of blocks along a row (or column)
-    \param *blocksize       : the list of the sum of dim of diagonal blocks of M: blocksize[i] = blocksize[i-1] + ni,\n
-    ni being the size of the diagonal block at row(block) i
-    \param *RowIndex        : the list of *block row indices (first row = 0)
-    \param *ColumnIndex     : the list of *block column indices (first column = 0)
+    \param **block : *block contains the double values of one block in
+                      Fortran storage (column by column) **block is
+    the list of non null blocks
+
+    \param blocknumber0           : the first dimension of the block matrix (number of block rows)
+    \param blocknumber1           : the second dimension of the block matrix (number of block columns)
+    \param *blocksize0       : the list of sums of the number of rows of the first column of blocks of M: blocksize[i] = blocksize[i-1] + ni,\n
+    ni being the number of rows of the  block at  row i
+    *blocksize0       : the list of sums of the number of columns of the first row of blocks of M: blocksize[i] = blocksize[i-1] + ni,\n
+    ni being the number of columns of the block at  column i
+    \param filled1 : number of non empty lines + 1
+    \param filled2 : number of non null blocks
+    \param index1_data : index1_data is of size filled1 = number of non empty lines + 1. A block with number blockNumber inside a row numbered rowNumber verify : index1_data[rowNumber]<= blockNumber <index1_data[rowNumber+1]
+    \param index2_data : index2_data is of size filled2  index2_data[blockNumber] -> columnNumber.
+
+
     Related functions: prodSBM(), subRowProdSBM(), freeSBM(), printSBM, getDiagonalBlockPos()
+ * If we consider the matrix M and the right-hand-side q defined as
+ *
+ * \f$
+ * M=\left[\begin{array}{cccc|cc|cc}
+ *          1 & 2 & 0 & 4   & 3 &-1   & 0 & 0\\
+ *          2 & 1 & 0 & 0   & 4 & 1   & 0 & 0\\
+ *          0 & 0 & 1 &-1   & 0 & 0   & 0 & 0\\
+ *          5 & 0 &-1 & 6   & 0 & 6   & 0 & 0\\
+ *          \hline
+ *          0 & 0 & 0 & 0   & 1 & 0   & 0 & 5\\
+ *          0 & 0 & 0 & 0   & 0 & 2   & 0 & 2\\
+ *          \hline
+ *          0 & 0 & 2 & 1   & 0 & 0   & 2 & 2\\
+ *          0 & 0 & 2 & 2   & 0 & 0   & -1 & 2\\
+ *        \end{array}\right] \quad, q=\left[\begin{array}{c}-1\\-1\\0\\-1\\\hline 1\\0\\\hline -1\\2\end{array}\right].
+ * \f$
+ *
+ * then
+ * - the number of non null blocks is 6 (nbblocks=6)
+ * - the number of rows of blocks is 3 (blocknumber0 =3) and the number of columns of blocks is 3 (blocknumber1 =3)
+ * - the vector blocksize0  is equal to {4,6,8} and the vector blocksize1  is equal to {4,6,8}
+ * - the integer filled1 is equal to 4
+ * - the integer filled2 is equal to 6
+ * - the vector index1_data is equal to {0,2,4,6}
+ * - the vector index2_data is equal to {0,1,1,2,0,2}
+ * - the block contains all non null block matrices stored in Fortran order (column by column) as\n
+ *   block[0] = {1,2,0,5,2,1,0,0,0,0,1,-1,4,0,-1,6}\n
+ *   block[1] = {3,4,0,0,-1,1,0,6}\n
+ *   ...\n
+ *   block[5] = {2,-1,2,2}
 */
+
+
 typedef struct
 {
   int nbblocks;
   double **block;
-  int size;
-  int *blocksize;
-  int *RowIndex;
-  int *ColumnIndex;
-  double* vec;
-
-  /* from boost compressed_matrix */
-  /* index1_data is of size filled1 = number of non empty lines + 1 */
-  /* index2_data is of size filled2   */
-  /* a block with number blockNumber inside a row numbered rowNumber verify : */
-  /* index1_data[rowNumber]<= blockNumber <index1_data[rowNumber+1] */
-  /* index2_data[blockNumber] -> columnNumber */
+  int blocknumber0;
+  int blocknumber1;
+  int *blocksize0;
+  int *blocksize1;
   size_t filled1;
   size_t filled2;
   size_t *index1_data;

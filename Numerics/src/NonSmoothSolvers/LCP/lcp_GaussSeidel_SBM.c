@@ -29,18 +29,18 @@
 void buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat, LinearComplementarity_Problem* local_problem, double* q, double* z)
 {
 
-  assert(blmat->blocksize[rowNumber] > 0);
+  assert(blmat->blocksize0[rowNumber] > 0);
 
   /* Position in vector blmat->block of the required diagonal block */
   int diagPos = getDiagonalBlockPos(blmat, rowNumber);
   /* Gets diagonal block = MLocal  */
   local_problem->M->matrix0 = blmat->block[diagPos];
-  local_problem->size = blmat->blocksize[rowNumber];
+  local_problem->size = blmat->blocksize0[rowNumber];
   int pos = 0;
   if (rowNumber != 0)
   {
-    local_problem->size -= blmat->blocksize[rowNumber - 1];
-    pos =  blmat->blocksize[rowNumber - 1];
+    local_problem->size -= blmat->blocksize0[rowNumber - 1];
+    pos =  blmat->blocksize0[rowNumber - 1];
   }
 
   local_problem->M->size0 = local_problem->size;
@@ -52,7 +52,7 @@ void buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const b
      row of blocks of M
   */
   DCOPY(local_problem->size, &q[pos], 1, local_problem->q, 1);
-  rowProdNoDiagSBM(blmat->blocksize[blmat->size - 1], local_problem->size, rowNumber, blmat, z, local_problem->q, 0);
+  rowProdNoDiagSBM(blmat->blocksize0[blmat->blocknumber0 - 1], local_problem->size, rowNumber, blmat, z, local_problem->q, 0);
 
 }
 
@@ -103,11 +103,11 @@ void lcp_GaussSeidel_SBM(LinearComplementarity_Problem* problem, double *z, doub
   local_problem->M->matrix1 = NULL;
 
   /* Memory allocation for q. Size of q = blsizemax, size of the largest square-block in blmat */
-  int blsizemax = blmat->blocksize[0];
+  int blsizemax = blmat->blocksize0[0];
   int k;
-  for (int i = 1 ; i < blmat->size ; i++)
+  for (int i = 1 ; i < blmat->blocknumber0 ; i++)
   {
-    k = blmat->blocksize[i] - blmat->blocksize[i - 1];
+    k = blmat->blocksize0[i] - blmat->blocksize0[i - 1];
     if (k > blsizemax) blsizemax = k;
   }
   local_problem->q = (double*)malloc(blsizemax * sizeof(double));
@@ -136,7 +136,7 @@ void lcp_GaussSeidel_SBM(LinearComplementarity_Problem* problem, double *z, doub
     localSolverNum = 1;
     pos = 0;
     /*       DCOPY(problem->size,w,1,wBackup,1); */
-    for (rowNumber = 0; rowNumber < blmat->size; ++rowNumber)
+    for (rowNumber = 0; rowNumber < blmat->blocknumber0; ++rowNumber)
     {
       /* Local problem formalization */
       buildLocalProblem(rowNumber, blmat, local_problem, q, z);

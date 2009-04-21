@@ -13,7 +13,7 @@ void prodSBM(int size, double alpha, const SparseBlockStructuredMatrix* const A,
   assert(y);
 
   /* Checks sizes */
-  assert(size == A->blocksize[A->size - 1]);
+  assert(size == A->blocksize0[A->blocknumber0 - 1]);
 
   /* Row (block) position of the current block */
   int currentRowNumber ;
@@ -43,28 +43,28 @@ void prodSBM(int size, double alpha, const SparseBlockStructuredMatrix* const A,
       assert(colNumber < size);
 
       /* Get dim. of the current block */
-      nbRows = A->blocksize[currentRowNumber];
+      nbRows = A->blocksize0[currentRowNumber];
 
 
       if (currentRowNumber != 0)
-        nbRows -= A->blocksize[currentRowNumber - 1];
+        nbRows -= A->blocksize0[currentRowNumber - 1];
 
       assert(nbRows <= size);
 
-      nbColumns = A->blocksize[colNumber];
+      nbColumns = A->blocksize0[colNumber];
       if (colNumber != 0)
-        nbColumns -= A->blocksize[colNumber - 1];
+        nbColumns -= A->blocksize0[colNumber - 1];
 
       assert(nbColumns <= size);
 
       /* Get position in x of the sub-block multiplied by A sub-block */
       posInX = 0;
       if (colNumber != 0)
-        posInX += A->blocksize[colNumber - 1];
+        posInX += A->blocksize0[colNumber - 1];
       /* Get position in y for the ouput sub-block, result of the product */
       posInY = 0;
       if (currentRowNumber != 0)
-        posInY += A->blocksize[currentRowNumber - 1];
+        posInY += A->blocksize0[currentRowNumber - 1];
       /* Computes y[] += currentBlock*x[] */
       DGEMV(LA_NOTRANS, nbRows, nbColumns, alpha, A->block[blockNum],
             nbRows, &x[posInX], 1, 1.0, &y[posInY], 1);
@@ -87,7 +87,7 @@ void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber,
   assert(y);
 
   /* Checks sizes */
-  assert(sizeX == A->blocksize[A->size - 1]);
+  assert(sizeX == A->blocksize0[A->blocknumber0 - 1]);
 
   /* Number of non-null blocks in the matrix */
   int nbblocks = A->nbblocks;
@@ -99,7 +99,7 @@ void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber,
   int posInX = 0;
 
   /* Check if currentRowNumber fits with A dimensions */
-  assert(currentRowNumber <= A->size);
+  assert(currentRowNumber <= A->blocknumber0);
 
   /* Look for the first element of the wanted row */
   int blockNum = A->index1_data[currentRowNumber];
@@ -109,9 +109,9 @@ void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber,
 
   assert(
   {
-    nbRows = A->blocksize[currentRowNumber];
+    nbRows = A->blocksize0[currentRowNumber];
     if (currentRowNumber != 0)
-      nbRows -= A->blocksize[currentRowNumber - 1];
+      nbRows -= A->blocksize0[currentRowNumber - 1];
     nbRows == sizeY;
   });
 
@@ -132,14 +132,14 @@ void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber,
     colNumber = A->index2_data[blockNum];
 
     /* Get dim(columns) of the current block */
-    nbColumns = A->blocksize[colNumber];
+    nbColumns = A->blocksize0[colNumber];
     if (colNumber != 0)
-      nbColumns -= A->blocksize[colNumber - 1];
+      nbColumns -= A->blocksize0[colNumber - 1];
 
     /* Get position in x of the sub-block multiplied by A sub-block */
     posInX = 0;
     if (colNumber != 0)
-      posInX += A->blocksize[colNumber - 1];
+      posInX += A->blocksize0[colNumber - 1];
     /* Computes y[] += currentBlock*x[] */
     DGEMV(LA_NOTRANS, nbRows, nbColumns, 1.0, A->block[blockNum], nbRows, &x[posInX], 1, 1.0, y, 1);
 
@@ -180,8 +180,8 @@ void rowProdNoDiagSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBl
   assert(A);
   assert(x);
   assert(y);
-  assert(sizeX == A->blocksize[A->size - 1]);
-  assert(currentRowNumber <= A->size);
+  assert(sizeX == A->blocksize0[A->blocknumber0 - 1]);
+  assert(currentRowNumber <= A->blocknumber0);
 
   /* Get current block number */
   blockNum = A->index1_data[currentRowNumber];
@@ -191,9 +191,9 @@ void rowProdNoDiagSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBl
 
   assert(
   {
-    nbRows = A->blocksize[currentRowNumber];
+    nbRows = A->blocksize0[currentRowNumber];
     if (currentRowNumber != 0)
-      nbRows -= A->blocksize[currentRowNumber - 1];
+      nbRows -= A->blocksize0[currentRowNumber - 1];
     nbRows == sizeY ;
   });
 
@@ -216,14 +216,14 @@ void rowProdNoDiagSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBl
     if (colNumber != currentRowNumber)
     {
       /* Get dim(columns) of the current block */
-      nbColumns = A->blocksize[colNumber];
+      nbColumns = A->blocksize0[colNumber];
       if (colNumber != 0)
-        nbColumns -= A->blocksize[colNumber - 1];
+        nbColumns -= A->blocksize0[colNumber - 1];
 
       /* Get position in x of the sub-block multiplied by A sub-block */
       posInX = 0;
       if (colNumber != 0)
-        posInX += A->blocksize[colNumber - 1];
+        posInX += A->blocksize0[colNumber - 1];
       /* Computes y[] += currentBlock*x[] */
       DGEMV(LA_NOTRANS, nbRows, nbColumns, 1.0, A->block[blockNum], nbRows, &x[posInX], 1, 1.0, y, 1);
     }
@@ -240,8 +240,8 @@ void freeSBM(SparseBlockStructuredMatrix *blmat)
    Kernel/src/simulationsTools/SparseBlockMatrix.cpp for details on
    the way the structure is filled in.
   */
-  if (blmat->blocksize)
-    free(blmat->blocksize);
+  if (blmat->blocksize0)
+    free(blmat->blocksize0);
   for (int i = 0 ; i < blmat->nbblocks ; i++)
   {
     if (blmat->block[i])
@@ -258,19 +258,19 @@ void printSBM(const SparseBlockStructuredMatrix* const m)
     fprintf(stderr, "Numerics, SparseBlockStructuredMatrix display failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
-  if (m->size == 0)
+  if (m->blocknumber0 == 0)
   {
     printf("Numerics, SparseBlockStructuredMatrix display: matrix dim = 0.");
     return;
   }
-  int size = m->blocksize[m->size - 1];
-  printf("Sparse-Block structured matrix of size %dX%d, with %d blocks in a row(or column)\n", size, size, m->size);
+  int size = m->blocksize0[m->blocknumber0 - 1];
+  printf("Sparse-Block structured matrix of size %dX%d, with %d blocks in a row(or column)\n", size, size, m->blocknumber0);
   printf("and %d non null blocks\n", m->nbblocks);
   printf("Diagonal blocks sizes = [");
-  for (int i = 0; i < m->size; i++)
+  for (int i = 0; i < m->blocknumber0; i++)
   {
-    size = m->blocksize[i];
-    if (i != 0) size -= m->blocksize[i - 1];
+    size = m->blocksize0[i];
+    if (i != 0) size -= m->blocksize0[i - 1];
     printf("%d ", size);
   }
   printf("]\n");

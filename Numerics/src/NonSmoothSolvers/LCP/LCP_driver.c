@@ -37,7 +37,6 @@ int lcp_driver_SparseBlockMatrix(LinearComplementarity_Problem* problem, double 
    */
 
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
-  int sizeInfo = problem->M->matrix1->size + 1;
   int info = -1;
 
   /******************************************

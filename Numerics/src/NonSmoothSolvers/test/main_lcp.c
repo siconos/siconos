@@ -757,16 +757,17 @@ void getProblemSBM(char* name, LinearComplementarity_Problem *  problem)
 
   /***** M *****/
   fscanf(LCPfile , "%d" , &blmat->nbblocks);
-  fscanf(LCPfile , "%d" , &blmat->size);
-  blmat->blocksize = (int*)malloc(blmat->size * sizeof(int));
-  for (i = 0 ; i < blmat->size ; i++) fscanf(LCPfile , "%d" , &blmat->blocksize[i]);
-  blmat->RowIndex = (int*)malloc(blmat->nbblocks * sizeof(int));
-  blmat->ColumnIndex = (int*)malloc(blmat->nbblocks * sizeof(int));
-  blmat->index1_data = (size_t*) malloc((blmat->size + 1) * sizeof(size_t));
+  fscanf(LCPfile , "%d" , &blmat->blocknumber0);
+  blmat->blocksize0 = (int*)malloc(blmat->blocknumber0 * sizeof(int));
+  for (i = 0 ; i < blmat->blocknumber0 ; i++) fscanf(LCPfile , "%d" , &blmat->blocksize0[i]);
+  int * RowIndex = (int*)malloc(blmat->nbblocks * sizeof(int));
+  int * ColumnIndex = (int*)malloc(blmat->nbblocks * sizeof(int));
+  blmat->index1_data = (size_t*) malloc((blmat->blocknumber0 + 1) * sizeof(size_t));
+  blmat->index2_data = (size_t*) malloc(blmat->nbblocks  * sizeof(size_t));
   for (i = 0 ; i < blmat->nbblocks ; i++)
   {
-    fscanf(LCPfile , "%d" , &blmat->RowIndex[i]);
-    fscanf(LCPfile , "%d" , &blmat->ColumnIndex[i]);
+    fscanf(LCPfile , "%d" , RowIndex[i]);
+    fscanf(LCPfile , "%d" , ColumnIndex[i]);
   }
 
 
@@ -780,12 +781,12 @@ void getProblemSBM(char* name, LinearComplementarity_Problem *  problem)
   current_row = 0;
   while (current_block < blmat->nbblocks)
   {
-    for (k = current_block; blmat->RowIndex[current_block] == blmat->RowIndex[k] && k < blmat->nbblocks; ++k) ;
-    for (i = current_row; i < blmat->RowIndex[current_block] + 1; ++i)
+    for (k = current_block; RowIndex[current_block] == RowIndex[k] && k < blmat->nbblocks; ++k) ;
+    for (i = current_row; i < RowIndex[current_block] + 1; ++i)
       blmat->index1_data[i] = current_block;
 
     blmat->index1_data[i] = k;
-    current_row = blmat->RowIndex[current_block] + 1;
+    current_row = RowIndex[current_block] + 1;
     current_block = k;
   };
 
@@ -793,23 +794,30 @@ void getProblemSBM(char* name, LinearComplementarity_Problem *  problem)
 
   for (i = 0, k1 = 0; k1 < blmat->nbblocks; k1 = k2, i++)
   {
-    for (k2 = k1; blmat->RowIndex[k1] == blmat->RowIndex[k2] && k2 < blmat->nbblocks; k2++);
+    for (k2 = k1; RowIndex[k1] == RowIndex[k2] && k2 < blmat->nbblocks; k2++);
     blmat->index1_data[i] = k1;
     blmat->index1_data[i + 1] = k2;
   };
+  for (i = 0 ; i < blmat->nbblocks; i++)
+  {
+    blmat->index2_data[i] = ColumnIndex[i];
+  };
+
+
+
 
   blmat->block = (double**)malloc(blmat->nbblocks * sizeof(double*));
   int pos, sizebl, numberOfRows, numberOfColumns;
   for (i = 0 ; i < blmat->nbblocks ; i++)
   {
-    pos = blmat->RowIndex[i];
-    numberOfRows = blmat->blocksize[pos];
+    pos = RowIndex[i];
+    numberOfRows = blmat->blocksize0[pos];
     if (pos > 0)
-      numberOfRows -= blmat->blocksize[pos - 1];
-    pos = blmat->ColumnIndex[i];
-    numberOfColumns = blmat->blocksize[pos];
+      numberOfRows -= blmat->blocksize0[pos - 1];
+    pos = ColumnIndex[i];
+    numberOfColumns = blmat->blocksize0[pos];
     if (pos > 0)
-      numberOfColumns -= blmat->blocksize[pos - 1];
+      numberOfColumns -= blmat->blocksize0[pos - 1];
     sizebl = numberOfRows * numberOfColumns;
     blmat->block[i] = (double*)malloc(sizebl * sizeof(double));
     for (j = 0 ; j < sizebl ; j++)
@@ -819,7 +827,7 @@ void getProblemSBM(char* name, LinearComplementarity_Problem *  problem)
     }
   }
 
-  int dim = blmat->blocksize[blmat->size - 1];
+  int dim = blmat->blocksize0[blmat->blocknumber0 - 1];
   /**** q ****/
   problem->q = (double*)malloc(dim * sizeof(double));
   for (i = 0 ; i < dim ; i++)

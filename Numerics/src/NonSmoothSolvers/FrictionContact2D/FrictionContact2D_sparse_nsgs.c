@@ -143,11 +143,11 @@ void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, 
   /* Memory allocation for q. Size of q = blsizemax, size of the
      largest square-block in blmat */
 
-  int blsizemax = blmat->blocksize[0];
+  int blsizemax = blmat->blocksize0[0];
   int k;
-  for (int i = 1 ; i < blmat->size ; i++)
+  for (int i = 1 ; i < blmat->blocknumber0 ; i++)
   {
-    k = blmat->blocksize[i] - blmat->blocksize[i - 1];
+    k = blmat->blocksize0[i] - blmat->blocksize0[i - 1];
     if (k > blsizemax) blsizemax = k;
   }
   local_problem->q = (double*)malloc(blsizemax * sizeof(double));
@@ -176,7 +176,7 @@ void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, 
     ++erriter;
 
     /* Loop over the rows of blocks in blmat */
-    for (pos = 0, rowNumber = 0; rowNumber < blmat->size; ++rowNumber, ++pos, ++pos)
+    for (pos = 0, rowNumber = 0; rowNumber < blmat->blocknumber0; ++rowNumber, ++pos, ++pos)
     {
       /* Local problem formalization */
       buildLocalProblem(rowNumber, blmat, local_problem, q, z);
@@ -212,7 +212,7 @@ void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, 
 
   if (verbose > 0)
     printf("Siconos Numerics : problem size=%d, nb iterations=%d, error=%g\n",
-           blmat->size,
+           blmat->blocknumber0,
            iter,
            error);
 
