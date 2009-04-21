@@ -49,13 +49,13 @@ void prodSBM(int size, double alpha, const SparseBlockStructuredMatrix* const A,
       if (currentRowNumber != 0)
         nbRows -= A->blocksize0[currentRowNumber - 1];
 
-      assert(nbRows <= size);
+      assert(nbRows <= size & nbRows >= 0);
 
       nbColumns = A->blocksize0[colNumber];
       if (colNumber != 0)
         nbColumns -= A->blocksize0[colNumber - 1];
 
-      assert(nbColumns <= size);
+      assert(nbColumns <= size & nbColumns >= 0);
 
       /* Get position in x of the sub-block multiplied by A sub-block */
       posInX = 0;

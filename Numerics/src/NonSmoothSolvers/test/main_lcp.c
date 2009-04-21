@@ -762,13 +762,23 @@ void getProblemSBM(char* name, LinearComplementarity_Problem *  problem)
   for (i = 0 ; i < blmat->blocknumber0 ; i++) fscanf(LCPfile , "%d" , &blmat->blocksize0[i]);
   int * RowIndex = (int*)malloc(blmat->nbblocks * sizeof(int));
   int * ColumnIndex = (int*)malloc(blmat->nbblocks * sizeof(int));
-  blmat->index1_data = (size_t*) malloc((blmat->blocknumber0 + 1) * sizeof(size_t));
-  blmat->index2_data = (size_t*) malloc(blmat->nbblocks  * sizeof(size_t));
+
+  blmat->filled1 = blmat->blocknumber0 + 1;
+  blmat->filled2 = blmat->nbblocks;
+
+  blmat->index1_data = (size_t*) malloc(blmat->filled1 * sizeof(size_t));
+  blmat->index2_data = (size_t*) malloc(blmat->filled2  * sizeof(size_t));
   for (i = 0 ; i < blmat->nbblocks ; i++)
   {
-    fscanf(LCPfile , "%d" , RowIndex[i]);
-    fscanf(LCPfile , "%d" , ColumnIndex[i]);
+    fscanf(LCPfile , "%d" , &RowIndex[i]);
+    fscanf(LCPfile , "%d" , &ColumnIndex[i]);
   }
+  for (i = 0 ; i < blmat->nbblocks ; i++)
+  {
+    printf("RowIndex[%i]= %i\n", i, RowIndex[i]);
+    printf("ColumnIndex[%i]= %i\n", i, ColumnIndex[i]);
+  }
+
 
 
   /* Boost sparse compressed : index1_data construction */
@@ -798,9 +808,18 @@ void getProblemSBM(char* name, LinearComplementarity_Problem *  problem)
     blmat->index1_data[i] = k1;
     blmat->index1_data[i + 1] = k2;
   };
-  for (i = 0 ; i < blmat->nbblocks; i++)
+  /* \todo compute the right final index1_data*/
+
+  for (i = 0 ; i < blmat->filled1; i++)
+  {
+    printf("index1_data[%i]=%i\n", i, blmat->index1_data[i]);
+  };
+
+  blmat->filled2 = blmat->nbblocks;
+  for (i = 0 ; i < blmat->filled2; i++)
   {
     blmat->index2_data[i] = ColumnIndex[i];
+    printf("index2_data[%i]=%i\n", i, blmat->index2_data[i]);
   };
 
 
@@ -860,6 +879,10 @@ void getProblemSBM(char* name, LinearComplementarity_Problem *  problem)
   fclose(LCPfile);
   if (sol != NULL)
     free(sol);
+  free(RowIndex);
+  free(ColumnIndex);
+
+
 }
 
 int test_matrix(void)
