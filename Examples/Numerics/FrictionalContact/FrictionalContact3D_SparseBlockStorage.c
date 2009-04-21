@@ -90,9 +90,9 @@ int main(int argc, char* argv[])
   MBlockMatrix->nbblocks = 3;
   double * block[3] = {M11, M22, M33};
   MBlockMatrix->block = block;
-  MBlockMatrix->size = 3;
+  MBlockMatrix->blocknumber0 = 3;
   int blocksize[3] = {3, 6, 9} ;
-  MBlockMatrix->blocksize = blocksize;
+  MBlockMatrix->blocksize0 = blocksize;
   MBlockMatrix->filled1 = 4;
   MBlockMatrix->filled2 = 3;
   size_t index1_data[4] = {0, 1, 2, 3} ;
