@@ -412,6 +412,27 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
     return info;
   }
 
+  NumericsMatrix C3;
+
+  C3.storageType = 1;
+  C3.size0 = M2->size0;
+  C3.size1 = M2->size1;
+  SparseBlockStructuredMatrix * SBM3 = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
+  C3.matrix1 = SBM3;
+  /* allocateMemoryForProdSBMSBM(M2->matrix1, M2->matrix1, SBM3); */
+
+
+  /*  prodNumericsMatrixNumericsMatrix(alpha,M2, M2, beta,  &C3); */
+
+
+
+  if (info == 0)
+    printf("Step 2 ( C = alpha*A*B + beta*C, sparse storage) ok ...\n");
+  else
+  {
+    printf("Step 2 ( C = alpha*A*B + beta*C, sparse storage) failed ...\n");
+    return info;
+  }
 
 
 

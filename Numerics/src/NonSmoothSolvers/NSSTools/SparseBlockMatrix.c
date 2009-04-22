@@ -76,6 +76,18 @@ void prodSBM(int sizeX, int sizeY, double alpha, const SparseBlockStructuredMatr
     }
   }
 }
+void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B,  double beta, SparseBlockStructuredMatrix*  C)
+{
+  fprintf(stderr, "Numerics, SparseBlockStructuredMatrix, product matrix - matrix prodSBMSBM(alpha,A,B,beta,C) not yet implemented.\n");
+  exit(EXIT_FAILURE);
+
+}
+void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B, SparseBlockStructuredMatrix*  C)
+{
+  fprintf(stderr, "Numerics, allocate memory for SparseBlockStructuredMatrix, product matrix - matrix  AllocateMemoryForProdSBMSBM(alpha,A,B,beta,C) not yet implemented.\n");
+  exit(EXIT_FAILURE);
+
+}
 
 void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber,
                    const SparseBlockStructuredMatrix* const A,

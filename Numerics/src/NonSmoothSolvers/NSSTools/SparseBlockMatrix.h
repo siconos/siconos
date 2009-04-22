@@ -126,6 +126,22 @@ extern "C" {
   */
   void prodSBM(int sizeX, int sizeY, double alpha, const SparseBlockStructuredMatrix* const A, const double* const x, double beta, double* y);
 
+  /** SparseMatrix - SparseMatrix product C = alpha*A*B + beta*C
+     \param[in] alpha coefficient
+     \param[in] A, the matrix to be multiplied
+     \param[in] B, the matrix to be multiplied
+    \param[in] beta coefficient
+     \param[in-out] C, the resulting matrix
+  */
+  void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B,  double beta, SparseBlockStructuredMatrix*  C);
+
+  /** Allocating Memory and initialization for  SparseMatrix - SparseMatrix product C = alpha*A*B + beta*C
+    \param[in] A, the matrix to be multiplied
+    \param[in] B, the matrix to be multiplied
+    \param[in-out] C, the resulting matrix
+  */
+  void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B, SparseBlockStructuredMatrix*  C);
+
   /** Row of a SparseMatrix - vector product y = rowA*x or y += rowA*x, rowA being a row of blocks of A
       \param[in] sizeX, dim of the vector x
       \param[in] sizeY, dim of the vector y

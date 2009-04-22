@@ -75,9 +75,9 @@ void prodNumericsMatrixNumericsMatrix(double alpha, const NumericsMatrix* const 
   /* SparseBlock storage */
   else if ((astorage == 1) & (bstorage == 1) & (cstorage == 1))
   {
-    fprintf(stderr, "Numerics, NumericsMatrix, product matrix - matrix prod(A,B,C) not yet implemented.\n");
-    exit(EXIT_FAILURE);
-    /* prodSBM(sizeY, alpha, A->matrix1, x,beta,y); */
+    prodSBMSBM(alpha, A->matrix1, B->matrix1, beta, C->matrix1);
+
+
   }
   else
   {
