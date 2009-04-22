@@ -196,12 +196,12 @@ void SparseBlockMatrix::fill(SP::UnitaryRelationsGraph indexSet,
 // convert MSparseBlock to numerics structure
 void SparseBlockMatrix::convert()
 {
-  numericsMatSparse->size = nr;
+  numericsMatSparse->blocknumber0 = nr;
+  numericsMatSparse->blocknumber1 = nr;  // nc not always set
   numericsMatSparse->nbblocks = (*MSparseBlock).nnz();
   // Next copies: pointer links!!
-  numericsMatSparse->blocksize =  &((*diagSizes)[0]);
-  numericsMatSparse->RowIndex = &((*rowPos)[0]);
-  numericsMatSparse->ColumnIndex = &((*colPos)[0]);
+  numericsMatSparse->blocksize0 =  &((*diagSizes)[0]);
+  numericsMatSparse->blocksize1 =  &((*diagSizes)[0]);  // nr = nc
 
   // boost
   numericsMatSparse->filled1 = (*MSparseBlock).filled1();

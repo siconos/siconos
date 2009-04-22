@@ -54,8 +54,8 @@ class BlockVector;
      involvedDS.
  *
  * - relation: a pointer to a Relation object that determines the type
- *   of relation and so the way it is computed.\n Warning:g there is
- *   only one Relation object (ie only one type of relation for an
+ *   of relation and so the way it is computed. Warning: there is only
+ *   one Relation object (ie only one type of relation for an
  *   interaction) but there can be several "relations", in the sense
  *   of constraints equations between (y,lambda) and (x,r).
  *

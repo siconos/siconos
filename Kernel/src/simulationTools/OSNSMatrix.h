@@ -156,8 +156,6 @@ protected:
   */
   void updateSizeAndPositions(unsigned int&, SP::DynamicalSystemsSet, SP::UnitaryRelationsGraph);
 
-  DynamicalSystemsGraph lineGraph(SP::UnitaryRelationsGraph);
-
 public:
 
   /** Default constructor -> empty matrix

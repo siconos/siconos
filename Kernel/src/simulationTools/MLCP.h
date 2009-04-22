@@ -91,7 +91,7 @@ protected:
 
   /** default constructor (private)
    */
-  MLCP();
+  //  MLCP(); ambiguous
 
 public:
 

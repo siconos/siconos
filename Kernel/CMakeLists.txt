@@ -19,7 +19,7 @@ Siconos/Numerics which provides low-level algorithms to compute basic
 well-identified problems.")
 
 SET(DEBIAN_PACKAGE_DEPENDS 
-  "g++, gfortran, atlas3-base, atlas3-base-dev, atlas3-headers, libxml2-dev, doxygen, siconos-numerics")
+  "g++, gfortran, atlas3-base, atlas3-base-dev, atlas3-headers, libxml2-dev, doxygen, libboost-dev, libboost-graph-dev, libgfortran1-dev, libgmp3-dev, siconos-numerics")
 
 SICONOS_PROJECT(Kernel 3 0 0)
 
