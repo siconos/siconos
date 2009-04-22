@@ -43,7 +43,7 @@ void prodNumericsMatrix(int sizeX, int sizeY, double alpha, const NumericsMatrix
   /* SparseBlock storage */
   else if (storage == 1)
   {
-    prodSBM(sizeY, alpha, A->matrix1, x, beta, y);
+    prodSBM(sizeX, sizeY, alpha, A->matrix1, x, beta, y);
   }
   else
   {

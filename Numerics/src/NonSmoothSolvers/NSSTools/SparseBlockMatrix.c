@@ -3,17 +3,22 @@
 #include <assert.h>
 #include "SparseBlockMatrix.h"
 #include "LA.h"
-
-void prodSBM(int size, double alpha, const SparseBlockStructuredMatrix* const A, const double* const x, double beta, double* y)
+#include <math.h>
+void prodSBM(int sizeX, int sizeY, double alpha, const SparseBlockStructuredMatrix* const A, const double* const x, double beta, double* y)
 {
   /* Product SparseMat - vector, y = A*x (init = 1 = true) or y += A*x (init = 0 = false) */
 
   assert(A);
   assert(x);
   assert(y);
+  assert(A->blocksize0);
+  assert(A->blocksize1);
+  assert(A->index1_data);
+  assert(A->index2_data);
 
   /* Checks sizes */
-  assert(size == A->blocksize0[A->blocknumber0 - 1]);
+  assert(sizeX == A->blocksize1[A->blocknumber1 - 1]);
+  assert(sizeY == A->blocksize0[A->blocknumber0 - 1]);
 
   /* Row (block) position of the current block */
   int currentRowNumber ;
@@ -29,7 +34,7 @@ void prodSBM(int size, double alpha, const SparseBlockStructuredMatrix* const A,
   /* Loop over all non-null blocks
      Works whatever the ordering order of the block is, in A->block
   */
-  DSCAL(size, beta, y, 1);
+  DSCAL(sizeY, beta, y, 1);
 
   for (currentRowNumber = 0 ; currentRowNumber < A->filled1 - 1; ++currentRowNumber)
   {
@@ -40,7 +45,7 @@ void prodSBM(int size, double alpha, const SparseBlockStructuredMatrix* const A,
 
       colNumber = A->index2_data[blockNum];
 
-      assert(colNumber < size);
+      assert(colNumber < sizeX);
 
       /* Get dim. of the current block */
       nbRows = A->blocksize0[currentRowNumber];
@@ -49,18 +54,18 @@ void prodSBM(int size, double alpha, const SparseBlockStructuredMatrix* const A,
       if (currentRowNumber != 0)
         nbRows -= A->blocksize0[currentRowNumber - 1];
 
-      assert(nbRows <= size & nbRows >= 0);
+      assert(nbRows <= sizeY & nbRows >= 0);
 
-      nbColumns = A->blocksize0[colNumber];
+      nbColumns = A->blocksize1[colNumber];
       if (colNumber != 0)
-        nbColumns -= A->blocksize0[colNumber - 1];
+        nbColumns -= A->blocksize1[colNumber - 1];
 
-      assert(nbColumns <= size & nbColumns >= 0);
+      assert(nbColumns <= sizeX & nbColumns >= 0);
 
       /* Get position in x of the sub-block multiplied by A sub-block */
       posInX = 0;
       if (colNumber != 0)
-        posInX += A->blocksize0[colNumber - 1];
+        posInX += A->blocksize1[colNumber - 1];
       /* Get position in y for the ouput sub-block, result of the product */
       posInY = 0;
       if (currentRowNumber != 0)
@@ -87,7 +92,7 @@ void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber,
   assert(y);
 
   /* Checks sizes */
-  assert(sizeX == A->blocksize0[A->blocknumber0 - 1]);
+  assert(sizeX == A->blocksize1[A->blocknumber1 - 1]);
 
   /* Number of non-null blocks in the matrix */
   int nbblocks = A->nbblocks;
@@ -132,9 +137,9 @@ void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber,
     colNumber = A->index2_data[blockNum];
 
     /* Get dim(columns) of the current block */
-    nbColumns = A->blocksize0[colNumber];
+    nbColumns = A->blocksize1[colNumber];
     if (colNumber != 0)
-      nbColumns -= A->blocksize0[colNumber - 1];
+      nbColumns -= A->blocksize1[colNumber - 1];
 
     /* Get position in x of the sub-block multiplied by A sub-block */
     posInX = 0;
@@ -180,7 +185,7 @@ void rowProdNoDiagSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBl
   assert(A);
   assert(x);
   assert(y);
-  assert(sizeX == A->blocksize0[A->blocknumber0 - 1]);
+  assert(sizeX == A->blocksize1[A->blocknumber1 - 1]);
   assert(currentRowNumber <= A->blocknumber0);
 
   /* Get current block number */
@@ -216,9 +221,9 @@ void rowProdNoDiagSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBl
     if (colNumber != currentRowNumber)
     {
       /* Get dim(columns) of the current block */
-      nbColumns = A->blocksize0[colNumber];
+      nbColumns = A->blocksize1[colNumber];
       if (colNumber != 0)
-        nbColumns -= A->blocksize0[colNumber - 1];
+        nbColumns -= A->blocksize1[colNumber - 1];
 
       /* Get position in x of the sub-block multiplied by A sub-block */
       posInX = 0;
@@ -241,11 +246,24 @@ void freeSBM(SparseBlockStructuredMatrix *blmat)
    the way the structure is filled in.
   */
   if (blmat->blocksize0)
+  {
+
     free(blmat->blocksize0);
+    if (blmat->blocksize0 == blmat->blocksize1)
+    {
+      blmat->blocksize1 = NULL ;
+    }
+  }
+  if (blmat->blocksize1)
+  {
+    free(blmat->blocksize1);
+  }
   for (int i = 0 ; i < blmat->nbblocks ; i++)
   {
     if (blmat->block[i])
+    {
       free(blmat->block[i]);
+    }
   }
   if (blmat->block)
     free(blmat->block);
@@ -263,15 +281,22 @@ void printSBM(const SparseBlockStructuredMatrix* const m)
     printf("Numerics, SparseBlockStructuredMatrix display: matrix dim = 0.");
     return;
   }
-  int size = m->blocksize0[m->blocknumber0 - 1];
-  printf("Sparse-Block structured matrix of size %dX%d, with %d blocks in a row(or column)\n", size, size, m->blocknumber0);
+  assert(m->blocksize0);
+  assert(m->blocksize1);
+
+  int size0 = m->blocksize0[m->blocknumber0 - 1];
+  int size1 = m->blocksize1[m->blocknumber1 - 1];
+  printf("Sparse-Block structured matrix of size %dX%d elements, and  %dX%d blocks\n", size0, size1, m->blocknumber0, m->blocknumber1);
   printf("and %d non null blocks\n", m->nbblocks);
-  printf("Diagonal blocks sizes = [");
-  for (int i = 0; i < m->blocknumber0; i++)
+  printf("Diagonal blocks sizes = [ ");
+  int diagonalblocknumber  = m->blocknumber1 + ((m->blocknumber0 - m->blocknumber1) & -(m->blocknumber0 < m->blocknumber1)); // min(m->blocknumber0,m->blocknumber1);
+  for (int i = 0; i < diagonalblocknumber; i++)
   {
-    size = m->blocksize0[i];
-    if (i != 0) size -= m->blocksize0[i - 1];
-    printf("%d ", size);
+    size0 = m->blocksize0[i];
+    if (i != 0) size0 -= m->blocksize0[i - 1];
+    size1 = m->blocksize1[i];
+    if (i != 0) size1 -= m->blocksize1[i - 1];
+    printf("%dX%d ", size0, size1);
   }
   printf("]\n");
 }

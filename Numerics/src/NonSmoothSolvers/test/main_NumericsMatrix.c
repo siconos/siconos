@@ -61,7 +61,10 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
     M1->matrix0[i] = m0[i];
   M1->matrix1 = NULL;
 
-  int nn = 2;
+
+
+
+  int nn = 4;
   /* Double * storage (column-major) */
   double m00[] = {1, 2, 0, 5, 0, 0, 0, 0,
                   2, 1, 0, 0, 0, 0, 0, 0,
@@ -88,11 +91,14 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
   M2->matrix1 = SBM;
   SBM->nbblocks = 6;
   SBM->blocknumber0 = 3;
+  SBM->blocknumber1 = SBM->blocknumber0 ;
 
   SBM->blocksize0 = (int*)malloc(3 * sizeof(int));
   SBM->blocksize0[0] = 4;
   SBM->blocksize0[1] = 6;
   SBM->blocksize0[2] = 8;
+  SBM->blocksize1 = SBM->blocksize0;
+
 
   SBM->filled1 = 4;
   SBM->filled2 = SBM->nbblocks;
@@ -136,7 +142,7 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
     SBM->block[4][i] = block4[i];
   for (i = 0; i < 4; i++)
     SBM->block[5][i] = block5[i];
-
+  printSBM(SBM);
 
   /* Build a NumericsMatrix with sparse-block storage */
   M4->storageType = 1;
@@ -154,6 +160,7 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
   SBM2->blocksize0[0] = 4;
   SBM2->blocksize0[1] = 6;
   SBM2->blocksize0[2] = 8;
+  SBM2->blocksize1 = SBM2->blocksize0;
 
   SBM2->blocknumber1 = 1;
   SBM2->blocksize1 = (int*)malloc(SBM2->blocknumber1 * sizeof(int));
@@ -181,23 +188,39 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
     SBM2->block[0][i] = block00[i];
   for (i = 0; i < 8; i++)
     SBM2->block[1][i] = block40[i];
+
+
+  printSBM(SBM2);
   return info;
 }
 
-int test_prodNumericsMatrix(NumericsMatrix* M1, NumericsMatrix* M2)
+int test_prodNumericsMatrix(NumericsMatrix** MM)
 {
+  NumericsMatrix* M1 =  MM[0];
+  NumericsMatrix* M2 =  MM[1];
+  NumericsMatrix* M3 =  MM[2];
+  NumericsMatrix* M4 =  MM[3];
+
+
+
 
   printf("== Numerics tests: prodNumericsMatrix(NumericsMatrix,vector) == \n");
-  int i , n = M1->size1;
+  int i , n = M1->size1, m = 4;
+
   double * x = malloc(n * sizeof(double));
+  double * x2 = malloc(m * sizeof(double));
   double alpha = 2.3, beta = 1.9;
-  double yref[n];
+  double * yref = malloc(n * sizeof(double));
+  double * yref2 = malloc(n * sizeof(double));;
   double * y = malloc(n * sizeof(double));
+  double * y2 = malloc(n * sizeof(double));
   for (i = 0; i < n; i++)
   {
     x[i] = i + 1.0;
     yref[i] = 0.1 * i;
+    yref2[i] = 0.1 * i;
     y[i] = yref[i];
+    y2[i] = yref2[i];
   }
 
   int incx = 1, incy = 1;
@@ -216,21 +239,62 @@ int test_prodNumericsMatrix(NumericsMatrix* M1, NumericsMatrix* M2)
   else
     printf("Step 0 ( y = alpha*A*x + beta*y, double* storage) failed ...\n");
 
+
+  DGEMV(LA_NOTRANS, n, m, alpha, M3->matrix0, n, x2, incx, beta, yref2, incy);
+
+  prodNumericsMatrix(m, n, alpha, M3, x2, beta, y2);
+  for (i = 0; i < n; i++)
+  {
+    if (fabs(y2[i] - yref2[i]) > tol) info = 1;
+    /*           printf("%lf\n", fabs(y2[i]-yref2[i])); */
+    /*            printf("%lf\n",y2[i]); */
+    /*            printf("%lf\n",yref2[i]); */
+  }
+  if (info == 0)
+    printf("Step 1 ( y = alpha*A*x + beta*y, double* storage, non square) ok ...\n");
+  else
+    printf("Step 1 ( y = alpha*A*x + beta*y, double* storage, non square) failed ...\n");
+
+
+
+
+
+
   /* Sparse ... */
   for (i = 0; i < n; i++)
   {
     y[i] = 0.1 * i;
+    y2[i] = 0.1 * i;
   }
   prodNumericsMatrix(n, n, alpha, M2, x, beta, y);
   for (i = 0; i < n; i++)
   {
     if (fabs(y[i] - yref[i]) > tol) info = 1;
-    /*      printf("%lf\n", fabs(y[i]-yref[i])); */
+    /*       printf("%lf\n", fabs(y[i]-yref[i]));  */
+    /*       printf("%lf\n", y[i]);  */
   }
   if (info == 0)
     printf("Step 2 ( y = alpha*A*x + beta*y, sparse storage) ok ...\n");
   else
     printf("Step 2 ( y = alpha*A*x + beta*y,  sparsestorage) failed ...\n");
+
+
+
+  prodNumericsMatrix(m, n, alpha, M4, x2, beta, y2);
+  for (i = 0; i < n; i++)
+  {
+
+    if (fabs(y2[i] - yref2[i]) > tol) info = 1;
+    /*      printf("%lf\n", fabs(y2[i]-yref2[i]));  */
+    /*       printf("%lf\n",y2[i]); */
+    /*       printf("%lf\n",yref2[i]); */
+  }
+
+  if (info == 0)
+    printf("Step 3 ( y = alpha*A*x + beta*y, sparse storage, non square) ok ...\n");
+  else
+    printf("Step 3 ( y = alpha*A*x + beta*y,  sparsestorage, non square) failed ...\n");
+
 
 
   free(x);
@@ -239,6 +303,8 @@ int test_prodNumericsMatrix(NumericsMatrix* M1, NumericsMatrix* M2)
 
   return info;
 }
+
+
 int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
 {
 
@@ -383,7 +449,9 @@ int test_subRowprod(NumericsMatrix* M1, NumericsMatrix* M2)
   for (i = 0; i < sizeY; i++)
   {
     if (fabs(y[i] - yref[i]) > tol) info = 1;
-    /*       printf("%lf\n", fabs(y[i]-yref[i])); */
+    /*        printf("%lf\n", fabs(y[i]-yref[i]));  */
+    /*           printf("%lf\n", y[i]); */
+    /*           printf("%lf\n", yref[i]); */
   }
   if (info == 0)
     printf("Step 0 ( y = subA*x, double* storage) ok ...\n");
@@ -395,12 +463,18 @@ int test_subRowprod(NumericsMatrix* M1, NumericsMatrix* M2)
   for (i = 0; i < sizeY; i++)
   {
     if (fabs(y[i] - 2 * yref[i]) > tol) info = 1;
-    /*       printf("%lf\n", fabs(y[i]-2*yref[i]));  */
+    /*        printf("%lf\n", fabs(y[i]-2*yref[i]));  */
+    /*           printf("%lf\n", y[i]); */
+    /*           printf("%lf\n", 2*yref[i]); */
   }
   if (info == 0)
     printf("Step 1 ( y += subA*x, double* storage) ok ...\n");
   else
     printf("Step 1 ( y += subA*x, double* storage) failed ...\n");
+
+
+
+
 
   free(y);
   sizeY = 2;
@@ -449,6 +523,108 @@ int test_subRowprod(NumericsMatrix* M1, NumericsMatrix* M2)
 
   return info;
 }
+int test_subRowprodNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
+{
+
+  printf("== Numerics tests: subRowProdNonSquare(NumericsMatrix,vector) == \n");
+  int i , n = M3->size0, m = M3->size1;
+  double * x = malloc(m * sizeof(double));
+
+  for (i = 0; i < m; i++)
+  {
+    x[i] = i + 1;
+  }
+
+  int min = 1;
+  int max = 3;
+  int sizeY = max - min;
+  int sizeX = m;
+  /* Computes yRef = subA*x, subA = A limited to row min to max*/
+  double * y = malloc(sizeY * sizeof(double));
+  double yref[sizeY];
+  int incx = n, incy = 1;
+  for (i = 0; i < sizeY; i++)
+    yref[i] = DDOT(m, &(M3->matrix0[min + i]), incx, x, incy);
+
+  subRowProd(sizeX, sizeY, min, M3, x, y, 1);
+  double tol = 1e-12;
+  int info = 0;
+  for (i = 0; i < sizeY; i++)
+  {
+    if (fabs(y[i] - yref[i]) > tol) info = 1;
+    /*       printf("%lf\n", fabs(y[i]-yref[i]));  */
+    /*           printf("%lf\n", y[i]); */
+    /*           printf("%lf\n", yref[i]); */
+  }
+  if (info == 0)
+    printf("Step 0 ( y = subA*x, double* storage NonSquare) ok ...\n");
+  else
+    printf("Step 0 ( y = subA*x, double* storage NonSquare) failed ...\n");
+
+  /* += */
+  subRowProd(sizeX, sizeY, min, M3, x, y, 0);
+  for (i = 0; i < sizeY; i++)
+  {
+    if (fabs(y[i] - 2 * yref[i]) > tol) info = 1;
+    /*         printf("%lf\n", fabs(y[i]-2*yref[i]));  */
+    /*           printf("%lf\n", y[i]); */
+    /*           printf("%lf\n", 2*yref[i]); */
+  }
+  if (info == 0)
+    printf("Step 1 ( y += subA*x, double* storage NonSquare) ok ...\n");
+  else
+    printf("Step 1 ( y += subA*x, double* storage NonSquare) failed ...\n");
+
+
+  free(y);
+
+
+  sizeY = 2;
+  int pos = 1; // pos of the required row of blocks
+  y = malloc(sizeY * sizeof(double));
+  for (i = 0; i < sizeY; i++)
+    yref[i] = DDOT(m, &(M3->matrix0[4 + i]), incx, x, incy);
+  /* Sparse ... */
+  subRowProd(sizeX, sizeY, pos, M4, x, y, 1);
+  for (i = 0; i < sizeY; i++)
+  {
+    if (fabs(y[i] - yref[i]) > tol) info = 1;
+    //  printf("%lf\n", fabs(y[i]-yref[i]));
+  }
+  for (i = 0; i < sizeY; i++)
+    yref[i] = DDOT(m, &(M3->matrix0[6 + i]), incx, x, incy);
+  subRowProd(sizeX, sizeY, pos + 1, M4, x, y, 1);
+  for (i = 0; i < sizeY; i++)
+  {
+    if (fabs(y[i] - yref[i]) > tol) info = 1;
+    //  printf("%lf\n", fabs(y[i]-yref[i]));
+  }
+
+
+  if (info == 0)
+    printf("Step 2 ( y = subA*x, sparse storage NonSquare) ok ...\n");
+  else
+    printf("Step 2 ( y = subA*x,  sparse storage NonSquare) failed ...\n");
+
+  /* Sparse, += ... */
+  subRowProd(sizeX, sizeY, pos + 1, M4, x, y, 0);
+  for (i = 0; i < sizeY; i++)
+  {
+    if (fabs(y[i] - 2 * yref[i]) > tol) info = 1;
+    /*       printf("%lf\n", fabs(y[i]-yref[i])); */
+  }
+  if (info == 0)
+    printf("Step 3 ( y += subA*x, sparse storage) ok ...\n");
+  else
+    printf("Step 3 ( y += subA*x,  sparse storage) failed ...\n");
+
+
+  free(x);
+  free(y);
+  printf("== End of test subRowProd(NumericsMatrix,vector), result = %d\n", info);
+
+  return info;
+}
 
 int test_rowProdNoDiag(NumericsMatrix* M1, NumericsMatrix* M2)
 {
@@ -471,13 +647,16 @@ int test_rowProdNoDiag(NumericsMatrix* M1, NumericsMatrix* M2)
   //  int incx = n, incy =1;
   double tol = 1e-12;
   int info = 0;
+  /*   int incx=1,incy=1; */
+
   /*   for(i=0;i<sizeY;i++) */
   /*     yref[i]=DDOT(n, &(M1->matrix0[min+i]), incx, x, incy); */
 
   /*   rowProdNoDiag(n,sizeY,min,M1,x,y,1); */
+
   /*   for(i = 0; i< sizeY; i++) */
   /*     { */
-  /*       if( fabs(y[i]-yref[i])>tol) info = 1;  */
+  /*       if( fabs(y[i]-yref[i])>tol) info = 1; */
   /* /\*       printf("%lf\n", fabs(y[i]-yref[i])); *\/ */
   /*     } */
   /*   if(info ==0) */
@@ -489,7 +668,7 @@ int test_rowProdNoDiag(NumericsMatrix* M1, NumericsMatrix* M2)
   /*   rowProdNoDiag(n,sizeY,min,M1,x,y,0); */
   /*   for(i = 0; i< sizeY; i++) */
   /*     { */
-  /*       if( fabs(y[i]-2*yref[i])>tol) info = 1;  */
+  /*       if( fabs(y[i]-2*yref[i])>tol) info = 1; */
   /*       /\*       printf("%lf\n", fabs(y[i]-2*yref[i]));  *\/ */
   /*     } */
   /*   if(info ==0) */
@@ -517,7 +696,6 @@ int test_rowProdNoDiag(NumericsMatrix* M1, NumericsMatrix* M2)
   for (i = 0; i < sizeY; i++)
   {
     if (fabs(y[i] - yref[i]) > tol) info = 1;
-    //  printf("%lf\n", fabs(y[i]-yref[i]));
   }
 
   if (info == 0)
@@ -544,6 +722,111 @@ int test_rowProdNoDiag(NumericsMatrix* M1, NumericsMatrix* M2)
 
   return info;
 }
+int test_rowProdNoDiagNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
+{
+
+  printf("== Numerics tests: rowProdNoDiagNonSquare(NumericsMatrix,vector) == \n");
+  int i , n = M3->size0, m = M3->size1;
+  double * x = malloc(m * sizeof(double));
+
+  for (i = 0; i < m; i++)
+  {
+    x[i] = i + 1;
+  }
+
+  int min = 2;
+  int max = 6;
+  int sizeY = max - min;
+  int sizeX = m;
+  /* Computes yRef = subA*x, subA = A limited to row min to max*/
+  double * y = malloc(sizeY * sizeof(double));
+  double yref[sizeY];
+  //  int incx = n, incy =1;
+  double tol = 1e-12;
+  int info = 0;
+  /*   for(i=0;i<sizeY;i++) */
+  /*     yref[i]=DDOT(n, &(M3->matrix0[min+i]), incx, x, incy); */
+
+  /*   rowProdNoDiag(n,sizeY,min,M3,x,y,1); */
+  /*   for(i = 0; i< sizeY; i++) */
+  /*     { */
+  /*       if( fabs(y[i]-yref[i])>tol) info = 1;  */
+  /* /\*       printf("%lf\n", fabs(y[i]-yref[i])); *\/ */
+  /*     } */
+  /*   if(info ==0) */
+  /*     printf("Step 0 ( y = subA*x, double* storage) ok ...\n"); */
+  /*   else */
+  /*     printf("Step 0 ( y = subA*x, double* storage) failed ...\n"); */
+
+  /*   /\* += *\/ */
+  /*   rowProdNoDiag(n,sizeY,min,M3,x,y,0); */
+  /*   for(i = 0; i< sizeY; i++) */
+  /*     { */
+  /*       if( fabs(y[i]-2*yref[i])>tol) info = 1;  */
+  /*       /\*       printf("%lf\n", fabs(y[i]-2*yref[i]));  *\/ */
+  /*     } */
+  /*   if(info ==0) */
+  /*     printf("Step 1 ( y += subA*x, double* storage) ok ...\n"); */
+  /*   else */
+  /*     printf("Step 1 ( y += subA*x, double* storage) failed ...\n"); */
+
+  free(y);
+  sizeY = 2;
+  int pos = 1; // pos of the required row of blocks
+  y = malloc(sizeY * sizeof(double));
+  yref[0] = 0;
+  yref[1] = 0;
+
+  /* Sparse ... */
+  rowProdNoDiag(sizeX, sizeY, pos, M4, x, y, 1);
+  for (i = 0; i < sizeY; i++)
+  {
+    if (fabs(y[i] - yref[i]) > tol) info = 1;
+    /*       printf("%lf\n", fabs(y[i]-yref[i])); */
+    /*       printf("%lf\n", y[i]); */
+    /*       printf("%lf\n", yref[i]); */
+  }
+
+  printf("\n");
+  yref[0] = 10;
+  yref[1] = 14;
+
+  rowProdNoDiag(sizeX, sizeY, pos + 1, M4, x, y, 1);
+
+  for (i = 0; i < sizeY; i++)
+  {
+    if (fabs(y[i] - yref[i]) > tol) info = 1;
+    /*      printf("%lf\n", fabs(y[i]-yref[i])); */
+    /*             printf("%lf\n", y[i]); */
+    /*             printf("%lf\n", yref[i]); */
+  }
+
+  if (info == 0)
+    printf("Step 2 ( y = subA*x, sparse storage) ok ...\n");
+  else
+    printf("Step 2 ( y = subA*x,  sparse storage) failed ...\n");
+
+  /* Sparse, += ... */
+  rowProdNoDiag(sizeX, sizeY, pos + 1, M4, x, y, 0);
+  for (i = 0; i < sizeY; i++)
+  {
+    if (fabs(y[i] - 2 * yref[i]) > tol) info = 1;
+    /*           printf("%lf\n", fabs(y[i]-yref[i])); */
+    /*             printf("%lf\n", y[i]); */
+    /*             printf("%lf\n", yref[i]); */
+  }
+  if (info == 0)
+    printf("Step 3 ( y += subA*x, sparse storage) ok ...\n");
+  else
+    printf("Step 3 ( y += subA*x,  sparse storage) failed ...\n");
+
+
+  free(x);
+  free(y);
+  printf("== End of test rowProdNoDiagNonSquare(NumericsMatrix,vector), result = %d\n", info);
+
+  return info;
+}
 
 int main(void)
 {
@@ -562,27 +845,36 @@ int main(void)
 
   test_BuildNumericsMatrix(NMM);
   printf("Construction ok ...\n");
-  int info = test_prodNumericsMatrix(NMM[0], NMM[1]);
+  int info = test_prodNumericsMatrix(NMM);
   printf("End of ProdNumericsMatrix ...\n");
+  if (info != 0) return info;
   info = test_prodNumericsMatrixNumericsMatrix(NMM);
   printf("End of ProdNumericsMatrixNumericsMatrix ...\n");
+  if (info != 0) return info;
   info = test_subRowprod(NMM[0], NMM[1]);
   printf("End of Sub-Prod ...\n");
+  if (info != 0) return info;
+  info = test_subRowprodNonSquare(NMM[2], NMM[3]);
+  printf("End of Sub-Prod Non Square...\n");
+  if (info != 0) return info;
   info = test_rowProdNoDiag(NMM[0], NMM[1]);
   printf("End of Sub-Prod no diag ...\n");
+  if (info != 0) return info;
+  info = test_rowProdNoDiagNonSquare(NMM[2], NMM[3]);
+  printf("End of Sub-Prod no diag Non Square...\n");
+  if (info != 0) return info;
 
   /* free memory */
 
   for (i = 0 ; i < nmm; i++)
   {
-    free(NMM[i]->matrix0);
-    /*    free(NMM[i]->matrix1->blocksize0); */
-    /*    free(NMM[i]->matrix1->blocksize1); */
-    /*    free(NMM[i]->matrix1->index1_data); */
-    /*    free(NMM[i]->matrix1->index2_data); */
-    free(NMM[i]->matrix1);
+    if (NMM[i]->matrix0)
+      free(NMM[i]->matrix0);
+    if (NMM[i]->matrix1)
+      freeSBM(NMM[i]->matrix1);
     free(NMM[i]);
   }
+
   free(NMM);
 
 

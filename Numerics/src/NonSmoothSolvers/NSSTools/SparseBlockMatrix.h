@@ -116,14 +116,15 @@ extern "C" {
 #endif
 
   /** SparseMatrix - vector product y = alpha*A*x + beta*y
-      \param[in] size, dim of the vectors x and y
+      \param[in] sizeX, dim of the vectors x
+      \param[in] sizeY, dim of the vectors y
       \param[in] alpha coefficient
       \param[in] A, the matrix to be multiplied
       \param[in] x, the vector to be multiplied
       \param[in] beta coefficient
       \param[in-out] y, the resulting vector
   */
-  void prodSBM(int size, double alpha, const SparseBlockStructuredMatrix* const A, const double* const x, double beta, double* y);
+  void prodSBM(int sizeX, int sizeY, double alpha, const SparseBlockStructuredMatrix* const A, const double* const x, double beta, double* y);
 
   /** Row of a SparseMatrix - vector product y = rowA*x or y += rowA*x, rowA being a row of blocks of A
       \param[in] sizeX, dim of the vector x

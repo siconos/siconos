@@ -759,6 +759,8 @@ void getProblemSBM(char* name, LinearComplementarity_Problem *  problem)
   fscanf(LCPfile , "%d" , &blmat->nbblocks);
   fscanf(LCPfile , "%d" , &blmat->blocknumber0);
   blmat->blocksize0 = (int*)malloc(blmat->blocknumber0 * sizeof(int));
+  blmat->blocknumber1 = blmat->blocknumber0;
+  blmat->blocksize1 = blmat->blocksize0 ;     /* Only for square matrices with square diagonal blocks */
   for (i = 0 ; i < blmat->blocknumber0 ; i++) fscanf(LCPfile , "%d" , &blmat->blocksize0[i]);
   int * RowIndex = (int*)malloc(blmat->nbblocks * sizeof(int));
   int * ColumnIndex = (int*)malloc(blmat->nbblocks * sizeof(int));
