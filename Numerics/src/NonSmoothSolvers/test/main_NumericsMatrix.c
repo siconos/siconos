@@ -457,15 +457,35 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   SparseBlockStructuredMatrix * SBM3 = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
   C3.matrix1 = SBM3;
 
+
   allocateMemoryForProdSBMSBM(M2->matrix1, M2->matrix1, SBM3);
+  printf("End of allocation\n");
+  printf("\n");
+  printf("\n");
 
 
-  /*     prodNumericsMatrixNumericsMatrix(alpha,M2, M2, beta,  &C3); */
+  prodNumericsMatrixNumericsMatrix(alpha, M2, M2, beta,  &C3);
 
 
   /*     Check if it is correct */
 
+  /* C3 and CRef must have the same values.*/
 
+  for (i = 0; i < C3.size0; i++)
+  {
+    for (j = 0; j < C3.size1; j++)
+    {
+      if (fabs(Cref[i + j * C3.size0] - getValueSBM(C3.matrix1, i, j)) > tol) info = 1;
+
+      printf("%i\t%i\n", i, j);
+      printf("%lf\n", fabs(Cref[i + j * C3.size0] - getValueSBM(C3.matrix1, i, j)));
+      printf("%lf\n", Cref[i + j * C3.size0]);
+      printf("%lf\n", getValueSBM(C3.matrix1, i, j));
+
+      if (info == 1) break;
+    }
+    if (info == 1) break ;
+  }
 
 
   if (info == 0)

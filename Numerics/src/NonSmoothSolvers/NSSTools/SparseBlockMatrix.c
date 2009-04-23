@@ -148,6 +148,7 @@ void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, con
           assert(blockNumB < B->nbblocks);
           Bindex3_data[currentColNumberofB + 1]++;
           Bindex4_data[blockNumB] = currentRowNumberofB;
+
         }
 
 
@@ -155,6 +156,8 @@ void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, con
 
     }
   }
+
+
   printf("\n");
   for (i = 0 ; i < Bfilled3; i++) printf("Bindex3_data[%i]= %i\t", i, Bindex3_data[i]);
   printf("\n");
@@ -204,6 +207,8 @@ void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, con
               Cblocksize1 -= B->blocksize1[currentColNumberofB - 1];
             printf("of size %dX%d\n", Cblosksize0, Cblocksize1);
             Cblocktmp[C->nbblocks] = (double*)malloc(Cblosksize0 * Cblocksize1 * sizeof(double));
+            for (i = 0; i < Cblosksize0 * Cblocksize1; i++) Cblocktmp[C->nbblocks][i] = 0.0;
+
             C->index1_data[currentRowNumberofA + 1]++ ;
             Cindex2_datatmp[C->nbblocks] = currentColNumberofB ;
             break;
@@ -336,7 +341,7 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
 
   for (currentRowNumberofA = 0 ; currentRowNumberofA < A->filled1 - 1; ++currentRowNumberofA)
   {
-    C->index1_data[currentRowNumberofA + 1] = C->index1_data[currentRowNumberofA];
+
     for (currentColNumberofB = 0 ; currentColNumberofB < Bfilled3 - 1; ++currentColNumberofB)
     {
 
@@ -346,13 +351,13 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
       {
         assert(blockNumAA < A->filled2);
         colNumberAA = A->index2_data[blockNumAA];
-        printf("blockNumAA = %i \t,colNumberAA = %i \n ", blockNumAA, colNumberAA);
+        printf("blockNumAA = %i, colNumberAA = %i\n", blockNumAA, colNumberAA);
 
         for (unsigned int blockNumBB = Bindex3_data[currentColNumberofB];
              blockNumBB < Bindex3_data[currentColNumberofB + 1]; ++blockNumBB)
         {
           rowNumberBB = Bindex4_data[blockNumBB];
-          printf("blockNumBB = %i \t,rowNumberBB = %i \n ", blockNumBB, rowNumberBB);
+          printf("blockNumBB = %i, rowNumberBB = %i\n", blockNumBB, rowNumberBB);
 
           if (rowNumberBB == colNumberAA)
           {
@@ -361,7 +366,7 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
               Cnbblocks++; /* Find the right C block number*/
               CblockPassed = 0;
             }
-            assert(Cnbblocks <= C->nbblocks);
+            assert(Cnbblocks < C->nbblocks);
             printf("Compute C block number %i for %i %i ", Cnbblocks, currentRowNumberofA, currentColNumberofB);
 
             int Ablocksize0 = A->blocksize0[currentRowNumberofA];
@@ -383,9 +388,33 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
             printf("Contribution of the product of blocks matrices A(%i,%i) and B(%i,%i) of  sizes %dX%d by %dX%d\n", currentRowNumberofA, colNumberAA, rowNumberBB, currentColNumberofB,   Ablocksize0, Ablocksize1, Bblocksize0, Bblocksize1);
 
             assert(Ablocksize1 == Bblocksize0);
+            for (i = 0; i < Ablocksize0; i++)
+            {
+              for (j = 0; j < Ablocksize1; j++)
+              {
+                printf("A->block[%i](%i,%i) = %f\n", blockNumAA, i, j, A->block[blockNumAA][i + j * Ablocksize0]);
+              }
+            }
 
+            for (i = 0; i < Bblocksize0; i++)
+            {
+              for (j = 0; j < Bblocksize1; j++)
+              {
+                printf("B->block[%i](%i,%i) = %f\n", blockNumBB, i, j, B->block[blockNumBB][i + j * Bblocksize0]);
+              }
+            }
+
+            printf("DGEMM call\n");
             DGEMM(LA_NOTRANS, LA_NOTRANS, Ablocksize0, Bblocksize1, Ablocksize1, alpha, A->block[blockNumAA], Ablocksize0, B->block[blockNumBB], Bblocksize0, beta, C->block[Cnbblocks], Ablocksize0);
 
+
+            for (i = 0; i < Ablocksize0; i++)
+            {
+              for (j = 0; j < Bblocksize1; j++)
+              {
+                printf("C->block[%i](%i,%i) = %f\n", Cnbblocks, i, j, C->block[Cnbblocks][i + j * Ablocksize0]);
+              }
+            }
 
           };
           printf("\n");
@@ -398,6 +427,9 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
     }
   }
 
+  assert((Cnbblocks + 1) == C->nbblocks);
+
+
   printf("End of the Loop \n");
   free(Bindex3_data);
   free(Bindex4_data);
@@ -406,8 +438,8 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
 
 
 
-  fprintf(stderr, "Numerics, SparseBlockStructuredMatrix, product matrix - matrix prodSBMSBM(alpha,A,B,beta,C) not yet implemented.\n");
-  exit(EXIT_FAILURE);
+  /*   fprintf(stderr,"Numerics, SparseBlockStructuredMatrix, product matrix - matrix prodSBMSBM(alpha,A,B,beta,C) not yet implemented.\n"); */
+  /*   exit(EXIT_FAILURE); */
 
 }
 void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber,
@@ -616,6 +648,8 @@ void printSBM(const SparseBlockStructuredMatrix* const m)
   }
   assert(m->blocksize0);
   assert(m->blocksize1);
+  assert(m->index1_data);
+  assert(m->index2_data);
 
   int size0 = m->blocksize0[m->blocknumber0 - 1];
   int size1 = m->blocksize1[m->blocknumber1 - 1];
@@ -632,6 +666,51 @@ void printSBM(const SparseBlockStructuredMatrix* const m)
     printf("%dX%d ", size0, size1);
   }
   printf("]\n");
+  printf("index1_data = {");
+  for (int i = 0 ; i < m->filled1; i++) printf("%d,  ", m->index1_data[i]);
+  printf("}\n");
+  printf("index2_data = {\t");
+  for (int i = 0 ; i < m->filled2; i++) printf("%d,  ", m->index2_data[i]);
+  printf("}\n");
+  int sizemax = 10;
+  int currentRowNumber ;
+  int colNumber;
+  int nbRows, nbColumns;
+  for (currentRowNumber = 0 ; currentRowNumber < m->filled1 - 1; ++currentRowNumber)
+  {
+    for (unsigned int blockNum = m->index1_data[currentRowNumber];
+         blockNum < m->index1_data[currentRowNumber + 1]; ++blockNum)
+    {
+      assert(blockNum < m->filled2);
+      colNumber = m->index2_data[blockNum];
+      /* Get dim. of the current block */
+      nbRows = m->blocksize0[currentRowNumber];
+
+      if (currentRowNumber != 0)
+        nbRows -= m->blocksize0[currentRowNumber - 1];
+
+      nbColumns = m->blocksize1[colNumber];
+      if (colNumber != 0)
+        nbColumns -= m->blocksize1[colNumber - 1];
+      printf("block[%i] of size %dX%d\n", blockNum, nbRows, nbColumns);
+      if ((nbRows <= sizemax) & (nbColumns <= sizemax))
+      {
+        for (int i = 0; i < nbRows; i++)
+        {
+          for (int j = 0; j < nbColumns; j++)
+          {
+            printf("block[%i](%i,%i) = %f\n", blockNum, i, j, m->block[blockNum][i + j * nbRows]);
+          }
+        }
+      }
+      else
+      {
+        printf("Block[%i] is too lao=rge to be displayed\n");
+      }
+
+    }
+  }
+
 }
 
 void freeSpBlMatPred(SparseBlockStructuredMatrixPred *blmatpred)
