@@ -173,7 +173,7 @@ void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, con
 
   double **Cblocktmp = (double**)malloc(nbblocksmax * sizeof(double*));
   size_t *Cindex2_datatmp = (size_t*)malloc(nbblocksmax * sizeof(size_t*));
-  C->filled1 = C->blocknumber1 + 1;
+  C->filled1 = C->blocknumber0 + 1;
   C->index1_data = (size_t*)malloc(C->filled1 * sizeof(size_t));
   C->index1_data[0] = 0;
   for (currentRowNumberofA = 0 ; currentRowNumberofA < A->filled1 - 1; ++currentRowNumberofA)
@@ -668,12 +668,12 @@ void printSBM(const SparseBlockStructuredMatrix* const m)
     printf("%dX%d ", size0, size1);
   }
   printf("]\n");
-  printf("index1_data = {");
-  for (int i = 0 ; i < m->filled1; i++) printf("%d,  ", m->index1_data[i]);
-  printf("}\n");
-  printf("index2_data = {\t");
-  for (int i = 0 ; i < m->filled2; i++) printf("%d,  ", m->index2_data[i]);
-  printf("}\n");
+  printf("index1_data of size %i= {", m->filled1);
+  for (int i = 0 ; i < m->filled1 - 1; i++) printf("%d,  ", m->index1_data[i]);
+  printf("%d}\n", m->index1_data[m->filled1 - 1]);
+  printf("index2_data od size %i= {", m->filled2);
+  for (int i = 0 ; i < m->filled2 - 1; i++) printf("%d,  ", m->index2_data[i]);
+  printf("%d}\n", m->index1_data[m->filled2 - 1]);
   int sizemax = 10;
   int currentRowNumber ;
   int colNumber;
@@ -825,6 +825,196 @@ double getValueSBM(const SparseBlockStructuredMatrix* const M, int row, int col)
   assert(colpos < nbColumns);
 
   return M->block[blockNumber][rowpos + colpos * nbRows];
+
+
+
+}
+
+int copySBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMatrix*  B)
+{
+  assert(A);
+  B->nbblocks = A->nbblocks;
+  B->blocknumber0 = A->blocknumber0;
+  B->blocknumber1 = A->blocknumber1;
+  B->blocksize0 = (int*)malloc(B->blocknumber0 * sizeof(int));
+  for (int i = 0; i < B->blocknumber0; i++) B->blocksize0[i] = A->blocksize0[i];
+  B->blocksize1 = (int*)malloc(B->blocknumber1 * sizeof(int));
+  for (int i = 0; i < B->blocknumber1; i++) B->blocksize1[i] = A->blocksize1[i];
+  B->filled1 = A->filled1;
+  B->filled2 = A->filled2;
+  B->index1_data = (size_t*)malloc(B->filled1 * sizeof(size_t));
+  for (int i = 0; i < B->filled1; i++) B->index1_data[i] = A->index1_data[i];
+  B->index2_data = (size_t*)malloc(B->filled2 * sizeof(size_t));
+  for (int i = 0; i < B->filled2; i++) B->index2_data[i] = A->index2_data[i];
+  B->block = (double **)malloc(B->nbblocks * sizeof(double*));
+  int currentRowNumber ;
+  int colNumber;
+  int nbRows, nbColumns;
+  for (currentRowNumber = 0 ; currentRowNumber < B->filled1 - 1; ++currentRowNumber)
+  {
+    for (unsigned int blockNum = B->index1_data[currentRowNumber];
+         blockNum < B->index1_data[currentRowNumber + 1]; ++blockNum)
+    {
+      assert(blockNum < B->filled2);
+      colNumber = B->index2_data[blockNum];
+      /* Get dim. of the current block */
+      nbRows = B->blocksize0[currentRowNumber];
+      if (currentRowNumber != 0)
+        nbRows -= B->blocksize0[currentRowNumber - 1];
+      nbColumns = B->blocksize1[colNumber];
+      if (colNumber != 0)
+        nbColumns -= B->blocksize1[colNumber - 1];
+      B->block[blockNum] = (double*)malloc(nbRows * nbColumns * sizeof(double));
+      for (int i = 0; i < nbRows * nbColumns; i++)
+      {
+        B->block[blockNum] [i] = A->block[blockNum] [i] ;
+      }
+
+
+    }
+  }
+
+
+}
+
+int transposeSBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMatrix*  B)
+{
+  assert(A);
+  B->nbblocks = A->nbblocks;
+  B->blocknumber0 = A->blocknumber1;
+  B->blocknumber1 = A->blocknumber0;
+  B->blocksize0 = (int*)malloc(B->blocknumber0 * sizeof(int));
+  for (int i = 0; i < B->blocknumber0; i++) B->blocksize0[i] = A->blocksize1[i];
+  B->blocksize1 = (int*)malloc(B->blocknumber1 * sizeof(int));
+  for (int i = 0; i < B->blocknumber1; i++) B->blocksize1[i] = A->blocksize0[i];
+
+  B->filled1 = A->blocknumber1 + 1;;
+  B->filled2 = A->filled2;
+  B->index1_data = (size_t *)malloc(B->filled1 * sizeof(size_t));
+  B->index2_data = (size_t *)malloc(B->filled2 * sizeof(size_t));
+
+
+  int currentRowNumberofA;
+  int currentColNumberofA ;
+  int colNumberofA;
+
+  int * blockMap  = (int *)malloc(B->filled2 * sizeof(int));
+
+
+
+  int blockNumB = -1;
+  B->index1_data[0] = 0;
+  for (currentColNumberofA = 0 ; currentColNumberofA < A->filled2 - 1; ++currentColNumberofA)
+  {
+    B->index1_data[currentColNumberofA + 1] = B->index1_data[currentColNumberofA];
+    for (currentRowNumberofA = 0 ; currentRowNumberofA < A->filled1 - 1; ++currentRowNumberofA)
+    {
+      for (unsigned int blockNum = A->index1_data[currentRowNumberofA];
+           blockNum < A->index1_data[currentRowNumberofA + 1]; ++blockNum)
+      {
+        assert(blockNum < B->filled2);
+        colNumberofA = A->index2_data[blockNum];
+        if (colNumberofA == currentColNumberofA)
+        {
+          blockNumB++;
+          assert(blockNumB < B->nbblocks);
+          B->index1_data[currentColNumberofA + 1]++;
+          B->index2_data[blockNumB] = currentRowNumberofA;
+          blockMap[blockNum] = blockNumB;
+
+        }
+
+
+      }
+    }
+  }
+
+
+
+  B->block = (double **)malloc(B->nbblocks * sizeof(double*));
+  int currentRowNumber ;
+  int colNumber;
+  int nbRows, nbColumns;
+  for (currentRowNumber = 0 ; currentRowNumber < B->filled1 - 1; ++currentRowNumber)
+  {
+    for (unsigned int blockNum = B->index1_data[currentRowNumber];
+         blockNum < B->index1_data[currentRowNumber + 1]; ++blockNum)
+    {
+      assert(blockNum < B->filled2);
+      colNumber = B->index2_data[blockNum];
+      /* Get dim. of the current block */
+      nbRows = B->blocksize0[currentRowNumber];
+      if (currentRowNumber != 0)
+        nbRows -= B->blocksize0[currentRowNumber - 1];
+      nbColumns = B->blocksize1[colNumber];
+      if (colNumber != 0)
+        nbColumns -= B->blocksize1[colNumber - 1];
+      B->block[blockNum] = (double*)malloc(nbRows * nbColumns * sizeof(double));
+      for (int i = 0; i < nbRows; i++)
+      {
+        for (int j = 0; j < nbColumns; j++)
+        {
+          B->block[blockNum] [i + j * nbRows ] =  A->block[blockMap[blockNum]] [j + i * nbColumns] ;
+        }
+      }
+
+    }
+  }
+
+
+}
+int inverseDiagSBM(const SparseBlockStructuredMatrix*  M)
+{
+
+  for (int i = 0; i < M->filled1 - 1; i++)
+  {
+    int numberofblockperrow = M->index1_data[i + 1] - M->index1_data[i];
+    if (numberofblockperrow != 1)
+    {
+      fprintf(stderr, "SparseBlockMatrix : inverseDiagSBM: Not a diagonal blocks matrix\n");
+      exit(EXIT_FAILURE);
+    }
+  }
+  for (int i = 0; i < M->filled2; i++)
+  {
+    if (M->index2_data[i] != i)
+    {
+      fprintf(stderr, "SparseBlockMatrix : inverseDiagSBM: Not a diagonal blocks matrix\n");
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  int currentRowNumber ;
+  int colNumber;
+  int nbRows, nbColumns;
+  for (currentRowNumber = 0 ; currentRowNumber < M->filled1 - 1; ++currentRowNumber)
+  {
+    for (unsigned int blockNum = M->index1_data[currentRowNumber];
+         blockNum < M->index1_data[currentRowNumber + 1]; ++blockNum)
+    {
+      assert(blockNum < M->filled2);
+      colNumber = M->index2_data[blockNum];
+      /* Get dim. of the current block */
+      nbRows = M->blocksize0[currentRowNumber];
+      if (currentRowNumber != 0)
+        nbRows -= M->blocksize0[currentRowNumber - 1];
+      nbColumns = M->blocksize1[colNumber];
+      if (colNumber != 0)
+        nbColumns -= M->blocksize1[colNumber - 1];
+
+      assert(nbRows == nbColumns);
+
+      int infoDGETRF, infoDGETRI ;
+      int* ipiv = (int *)malloc(nbRows * sizeof(*ipiv));
+
+      DGETRF(nbRows, nbColumns, M->block[blockNum], nbRows, ipiv, infoDGETRF);
+      DGETRI(nbRows, M->block[blockNum], nbRows, ipiv, infoDGETRF);
+      free(ipiv);
+
+
+    }
+  }
+
 
 
 

@@ -21,6 +21,8 @@
 #include <string.h>
 #include <time.h>
 #include <float.h>
+#include <assert.h>
+
 #include "LA.h"
 #include "Numerics_Options.h"
 #include "PrimalFrictionContact3D_Solvers.h"
@@ -37,7 +39,8 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
   localproblem->isComplete = 0;
   localproblem->mu =  problem->mu;
 
-
+  assert(M);
+  assert(H);
 
   if (H->storageType != M->storageType)
   {
@@ -54,6 +57,8 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
     int m = H->size1;
     int nm = n * m;
     int infoDGESV;
+    int infoDGETRF;
+    int infoDGETRS;
     int* ipiv = (int *)malloc(n * sizeof(*ipiv));
     double *Htmp = (double*)malloc(nm * sizeof(double));
 
@@ -61,7 +66,12 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
     //Copy Htmp <- H
     DCOPY(nm,  H->matrix0 , 1, Htmp, 1);
     //Compute Htmp   <- M^-1 Htmp
-    DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV);
+
+    DGETRF(n, n, M->matrix0, n, ipiv, infoDGETRF);
+
+    DGETRS(LA_NOTRANS, n, m,  M->matrix0, n, ipiv, Htmp, n, infoDGETRS);
+
+    /*      DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
 
 
 
@@ -75,11 +85,16 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
 
     DGEMM(LA_TRANS, LA_NOTRANS, m, m, n, 1.0, H->matrix0, n, Htmp, n, 0.0, Wnum->matrix0, m);
     /*     DGEMM(LA_TRANS,LA_NOTRANS,m,m,n,1.0,H->matrix0,n,Htmp,n,0.0,Wnum->matrix0,m); */
-    // compute q = H^T q +b
+    // compute q = H^T M^(-1) q +b
 
     //Copy q<- b
     localproblem->q = (double*)malloc(m * sizeof(double));
-    DCOPY(m, problem->b  , 1, localproblem->q, 1);
+    DCOPY(m, problem->b , 1, localproblem->q, 1);
+
+    // compute H^T M^(-1) q+ b
+    DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, ipiv, problem->q , n, infoDGETRS);
+
+    /*      DGESV(n, m, M->matrix0, n, ipiv, problem->q , n, infoDGESV); */
 
     DGEMV(LA_TRANS, n, m, 1.0, H->matrix0 , n, problem->q , 1, 1.0, localproblem->q, 1);
 
@@ -97,6 +112,87 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
 
   else
   {
+    int n = M->size0;
+    int m = H->size1;
+    int nm = n * m;
+    int infoDGESV;
+    int* ipiv = (int *)malloc(n * sizeof(*ipiv));
+
+    // compute W = H^T M^-1 H
+    //Copy Htmp <- H
+    SparseBlockStructuredMatrix *HtmpSBM = (SparseBlockStructuredMatrix*)malloc(sizeof(*HtmpSBM));
+    /* copySBM(H->matrix1 , HtmpSBM); */
+    printSBM(H->matrix1);
+
+    //Compute Htmp   <- M^-1 HtmpSBM
+    /* DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
+
+    printf("Inverse ... \n");
+    inverseDiagSBM(M->matrix1);
+
+    printSBM(M->matrix1);
+
+    printf("Prod 1 ... \n");
+
+    allocateMemoryForProdSBMSBM(M->matrix1, H->matrix1, HtmpSBM);
+    double alpha = 1.0, beta = 1.0;
+    printSBM(HtmpSBM);
+
+    prodSBMSBM(alpha, M->matrix1, H->matrix1, beta, HtmpSBM);
+    printSBM(HtmpSBM);
+
+    printf("Transpose  ... \n");
+    SparseBlockStructuredMatrix *Htrans = (SparseBlockStructuredMatrix*)malloc(sizeof(*Htrans));
+
+    transposeSBM(H->matrix1, Htrans);
+    printSBM(Htrans);
+    printf("Prod 2 ... \n");
+
+    SparseBlockStructuredMatrix *W = (SparseBlockStructuredMatrix*)malloc(sizeof(*W));
+
+    allocateMemoryForProdSBMSBM(Htrans, HtmpSBM, W);
+    printSBM(W);
+    prodSBMSBM(alpha, Htrans, HtmpSBM, beta, W);
+    printSBM(W);
+    freeSBM(HtmpSBM);
+    /*    freeSBM(Htrans); */
+
+    NumericsMatrix *Wnum = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
+    Wnum->storageType = 1;
+    Wnum-> size0 = m;
+    Wnum-> size1 = m;
+    Wnum->matrix1 = W;
+    localproblem->M = Wnum;
+
+    printf("Compute localq 1  ... \n");
+
+    localproblem->q = (double*)malloc(m * sizeof(double));
+    //Copy q<- b
+    DCOPY(m, problem->b  , 1, localproblem->q, 1);
+    // compute H^T M^-1 q+ b
+    double* qtmp = (double*)malloc(n * sizeof(double));
+    double beta2 = 0.0;
+    prodSBM(n, n, alpha, M->matrix1, problem->q, beta2, qtmp);
+    printf("Compute localq 2  ... \n");
+
+
+
+
+    prodSBM(n, m, alpha, Htrans, qtmp, beta, localproblem->q);
+    printf("\n");
+    for (int i = 0; i < m; i++) printf("localproblem->q[%i]= %f\t", i, localproblem->q[i]);
+    printf("\n");
+
+    localproblem->mu = problem->mu;
+
+
+    localproblem->isComplete = 1;
+
+
+    /*   fprintf(stderr,"PrimalFrictionContact3D_driver reformulationIntoLocalProblem H->storageType = M->storageType=1 :This case is not yet implemented\n"); */
+    /*      exit(EXIT_FAILURE); */
+
+
   }
 
 

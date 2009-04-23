@@ -192,8 +192,23 @@ extern "C" {
      \return int col the column index
   */
   double getValueSBM(const SparseBlockStructuredMatrix* const M, int row, int col);
+  /** Copy of a SBM  A into B
+    \param[in] A the SparseBlockStructuredMatrix matrix to be copied
+    \param[out]  B the SparseBlockStructuredMatrix matrix copy of A
+  */
+  int copySBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMatrix*  B);
 
 
+  /** Transpose  by copy of a SBM  A into B
+    \param[in] A the SparseBlockStructuredMatrix matrix to be copied
+    \param[out]  B the SparseBlockStructuredMatrix matrix copy of transpose A
+  */
+  int transposeSBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMatrix*  B);
+
+  /** Inverse (in place) a square diagonal block matrix
+  \param[in-out] M the SparseBlockStructuredMatrix matrix to be inversed
+  */
+  int inverseDiagSBM(const SparseBlockStructuredMatrix*  M);
 #ifdef __cplusplus
 }
 #endif

@@ -463,6 +463,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   // while (i > 0)
 
   allocateMemoryForProdSBMSBM(M2->matrix1, M2->matrix1, SBM3);
+  /* printSBM(SBM3); */
 
 
   prodNumericsMatrixNumericsMatrix(alpha, M2, M2, beta,  &C3);
@@ -509,6 +510,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
 
 
   allocateMemoryForProdSBMSBM(M2->matrix1, M4->matrix1, SBM4);
+  /* printSBM(SBM4); */
 
   prodNumericsMatrixNumericsMatrix(alpha, M2, M4, beta,  &C4);
 
