@@ -142,7 +142,7 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
     SBM->block[4][i] = block4[i];
   for (i = 0; i < 4; i++)
     SBM->block[5][i] = block5[i];
-  printSBM(SBM);
+  /* printSBM(SBM); */
 
   /* M1 and M2 must have the same values.*/
   double tol = 1e-12;
@@ -210,7 +210,7 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
     SBM2->block[1][i] = block40[i];
 
 
-  printSBM(SBM2);
+  /*   printSBM(SBM2); */
   /* M3 and M4 must have the same values.*/
 
   for (i = 0; i < M3->size0; i++)
@@ -230,6 +230,7 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
   }
   return info;
 }
+/* ============================================================================================================================== */
 
 int test_prodNumericsMatrix(NumericsMatrix** MM)
 {
@@ -341,6 +342,7 @@ int test_prodNumericsMatrix(NumericsMatrix** MM)
   return info;
 }
 
+/* ============================================================================================================================== */
 
 int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
 {
@@ -377,7 +379,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
       sum = 0.0;
       for (k = 0; k < M1->size1; k++)
       {
-        sum = sum + M1->matrix0[i + k * M1->size1] * M1->matrix0[k + j * M1->size1];
+        sum = sum + M1->matrix0[i + k * M1->size0] * M1->matrix0[k + j * M1->size0];
       }
       Cref[i + j * C.size1] = sum;
 
@@ -388,7 +390,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   {
     for (j = 0; j < C.size1; j++)
     {
-      err += (Cref[i + j * C.size1] - C.matrix0[i + j * C.size1]) * (Cref[i + j * C.size1] - C.matrix0[i + j * C.size1]);
+      err += (Cref[i + j * C.size0] - C.matrix0[i + j * C.size0]) * (Cref[i + j * C.size0] - C.matrix0[i + j * C.size0]);
     }
   }
   if (err < tol)
@@ -422,10 +424,10 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
       sum = 0.0;
       for (k = 0; k < M1->size1; k++)
       {
-        sum = sum + M1->matrix0[i + k * M1->size1] * M3->matrix0[k + j * M3->size1];
+        sum = sum + M1->matrix0[i + k * M1->size0] * M3->matrix0[k + j * M3->size0];
       }
-      C2ref[i + j * C2.size1] = sum;
-
+      C2ref[i + j * C2.size0] = sum;
+      /*    printf("C2ref(%i,%i)=%f\n", i,j,C2ref[i+j*C2.size0] ); */
     }
   }
   err = 0.0;
@@ -433,7 +435,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   {
     for (j = 0; j < C2.size1; j++)
     {
-      err += (C2ref[i + j * C2.size1] - C2.matrix0[i + j * C2.size1]) * (C2ref[i + j * C2.size1] - C2.matrix0[i + j * C2.size1]);
+      err += (C2ref[i + j * C2.size0] - C2.matrix0[i + j * C2.size0]) * (C2ref[i + j * C2.size0] - C2.matrix0[i + j * C2.size0]);
     }
   }
   if (err < tol)
@@ -457,14 +459,15 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   SparseBlockStructuredMatrix * SBM3 = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
   C3.matrix1 = SBM3;
 
+  i = 1;
+  // while (i > 0)
 
   allocateMemoryForProdSBMSBM(M2->matrix1, M2->matrix1, SBM3);
-  printf("End of allocation\n");
-  printf("\n");
-  printf("\n");
 
 
   prodNumericsMatrixNumericsMatrix(alpha, M2, M2, beta,  &C3);
+  //freeSBM(SBM3);
+  printf("i= \n", i++);
 
 
   /*     Check if it is correct */
@@ -477,10 +480,10 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
     {
       if (fabs(Cref[i + j * C3.size0] - getValueSBM(C3.matrix1, i, j)) > tol) info = 1;
 
-      printf("%i\t%i\n", i, j);
-      printf("%lf\n", fabs(Cref[i + j * C3.size0] - getValueSBM(C3.matrix1, i, j)));
-      printf("%lf\n", Cref[i + j * C3.size0]);
-      printf("%lf\n", getValueSBM(C3.matrix1, i, j));
+      /*     printf("%i\t%i\n",i,j); */
+      /*     printf("%lf\n",fabs(Cref[i+j*C3.size0]-getValueSBM(C3.matrix1,i,j) )); */
+      /*       printf("%lf\n",Cref[i+j*C3.size0]);  */
+      /*       printf("%lf\n",getValueSBM(C3.matrix1,i,j));  */
 
       if (info == 1) break;
     }
@@ -493,6 +496,49 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   else
   {
     printf("Step 2 ( C = alpha*A*B + beta*C, sparse storage) failed ...\n");
+    return info;
+  }
+
+  NumericsMatrix C4;
+
+  C4.storageType = 1;
+  C4.size0 = M2->size0;
+  C4.size1 = M4->size1;
+  SparseBlockStructuredMatrix * SBM4 = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
+  C4.matrix1 = SBM4;
+
+
+  allocateMemoryForProdSBMSBM(M2->matrix1, M4->matrix1, SBM4);
+
+  prodNumericsMatrixNumericsMatrix(alpha, M2, M4, beta,  &C4);
+
+
+  /*     Check if it is correct */
+
+  /* C4 and C2Ref must have the same values.*/
+
+  for (i = 0; i < C4.size0; i++)
+  {
+    for (j = 0; j < C4.size1; j++)
+    {
+      if (fabs(C2ref[i + j * C4.size0] - getValueSBM(C4.matrix1, i, j)) > tol) info = 1;
+
+      /*     printf("%i\t%i\n",i,j); */
+      /*     printf("%lf\n",fabs(C2ref[i+j*C4.size0]-getValueSBM(C4.matrix1,i,j) )); */
+      /*       printf("%lf\n",C2ref[i+j*C4.size0]); */
+      /*       printf("%lf\n",getValueSBM(C4.matrix1,i,j)); */
+
+      if (info == 1) break;
+    }
+    if (info == 1) break ;
+  }
+
+
+  if (info == 0)
+    printf("Step 3 ( C = alpha*A*B + beta*C, sparse storage) ok ...\n");
+  else
+  {
+    printf("Step 3 ( C = alpha*A*B + beta*C, sparse storage) failed ...\n");
     return info;
   }
 
@@ -936,8 +982,12 @@ int main(void)
   info = test_prodNumericsMatrix(NMM);
   printf("End of ProdNumericsMatrix ...\n");
   if (info != 0) return info;
+  /*   i=1; */
+  /*   while (i > 0) */
+  /*       { */
   info = test_prodNumericsMatrixNumericsMatrix(NMM);
   printf("End of ProdNumericsMatrixNumericsMatrix ...\n");
+  /* i++;} */
   if (info != 0) return info;
   info = test_subRowprod(NMM[0], NMM[1]);
   printf("End of Sub-Prod ...\n");
