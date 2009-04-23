@@ -76,19 +76,340 @@ void prodSBM(int sizeX, int sizeY, double alpha, const SparseBlockStructuredMatr
     }
   }
 }
+
+void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B, SparseBlockStructuredMatrix*  C)
+{
+
+  assert(A);
+  assert(B);
+  assert(C);
+
+  int i, j, k;
+  /*     Check the compatibility of size of matrices */
+  assert(A->blocksize0);
+  assert(A->blocksize1);
+  assert(B->blocksize0);
+  assert(B->blocksize1);
+
+  assert(A->blocksize1[A->blocknumber1 - 1] == B->blocksize0[B->blocknumber0 - 1]);
+
+  /*     Check the compatibility of the number and the sizes of blocks */
+  int compat = 1;
+
+  if (A->blocknumber1 != B->blocknumber0) compat = 1; /* Compatibility of number of blocks */
+  for (i = 0; i < A->blocknumber1; i++)
+  {
+    if (A->blocksize1[i] != B->blocksize0[i]) compat = 0; /* Compatibility of sizes of blocks */
+  }
+  if (!compat)
+  {
+    fprintf(stderr, "Numerics, allocate memory for SparseBlockStructuredMatrix, product matrix - matrix  AllocateMemoryForProdSBMSBM(alpha,A,B,beta,C) not implemented for non compatible blosk sizes.\n");
+    exit(EXIT_FAILURE);
+  }
+  else
+  {
+    /*      compute blocknumber and block sizes of C */
+    C->blocknumber0 = A->blocknumber0;
+    C->blocknumber1 = B->blocknumber1;
+    C->blocksize0  = (int *)malloc(C->blocknumber0 * sizeof(int));
+    C->blocksize1  = (int *)malloc(C->blocknumber1 * sizeof(int));
+    for (i = 0; i < C->blocknumber0; i++) C->blocksize0[i] = A->blocksize0[i];
+    for (j = 0; j < C->blocknumber1; j++) C->blocksize1[j] = B->blocksize1[j];
+  }
+
+  int currentRowNumberofA, currentRowNumberofB;
+  int currentcolNumberofA, currentColNumberofB;
+  int colNumberofA, rowNumberofB;
+  int colNumberofB, rowNumberofA;
+
+  /* Search  the non null blocks of C */
+
+  /*     Creation of filled3,filled4 and index3_data,index4_data for B (indexation by column) */
+
+  int Bfilled3 = B->blocknumber0 + 1;
+  int * Bindex3_data = (int *)malloc(Bfilled3 * sizeof(int));
+  int Bfilled4 = B->nbblocks;
+  int * Bindex4_data = (int *)malloc(Bfilled4 * sizeof(int));
+  int blockNumB = -1;
+  Bindex3_data[0] = 0;
+  for (currentColNumberofB = 0 ; currentColNumberofB < Bfilled3 - 1; ++currentColNumberofB)
+  {
+    Bindex3_data[currentColNumberofB + 1] = Bindex3_data[currentColNumberofB];
+    for (currentRowNumberofB = 0 ; currentRowNumberofB < B->filled1 - 1; ++currentRowNumberofB)
+    {
+      for (unsigned int blockNum = B->index1_data[currentRowNumberofB];
+           blockNum < B->index1_data[currentRowNumberofB + 1]; ++blockNum)
+      {
+        assert(blockNum < B->filled2);
+        colNumberofB = B->index2_data[blockNum];
+        if (colNumberofB == currentColNumberofB)
+        {
+          blockNumB++;
+          assert(blockNumB < B->nbblocks);
+          Bindex3_data[currentColNumberofB + 1]++;
+          Bindex4_data[blockNumB] = currentRowNumberofB;
+        }
+
+
+      }
+
+    }
+  }
+  printf("\n");
+  for (i = 0 ; i < Bfilled3; i++) printf("Bindex3_data[%i]= %i\t", i, Bindex3_data[i]);
+  printf("\n");
+  for (i = 0 ; i < Bfilled4; i++) printf("Bindex4_data[%i]= %i\t", i, Bindex4_data[i]);
+  printf("\n");
+  printf("\n");
+  int colNumberAA, rowNumberBB;
+  C->nbblocks = -1;
+  C->filled2 = -1;
+  /*     \warning The implementation is chosen to optimize cpu effort rather than memory. Otherwise a two loops are needed */
+  int nbblocksmax = A->blocknumber0 * B->blocknumber1;
+
+  double **Cblocktmp = (double**)malloc(nbblocksmax * sizeof(double*));
+  size_t *Cindex2_datatmp = (size_t*)malloc(nbblocksmax * sizeof(size_t*));
+  C->filled1 = C->blocknumber1 + 1;
+  C->index1_data = (size_t*)malloc(C->filled1 * sizeof(size_t));
+  C->index1_data[0] = 0;
+  for (currentRowNumberofA = 0 ; currentRowNumberofA < A->filled1 - 1; ++currentRowNumberofA)
+  {
+    C->index1_data[currentRowNumberofA + 1] = C->index1_data[currentRowNumberofA];
+    for (currentColNumberofB = 0 ; currentColNumberofB < Bfilled3 - 1; ++currentColNumberofB)
+    {
+      int BlockCexists = 0;
+
+      for (unsigned int blockNumAA = A->index1_data[currentRowNumberofA];
+           blockNumAA < A->index1_data[currentRowNumberofA + 1]; ++blockNumAA)
+      {
+        assert(blockNumAA < A->filled2);
+        colNumberAA = A->index2_data[blockNumAA];
+
+        for (unsigned int blockNumBB = Bindex3_data[currentColNumberofB];
+             blockNumBB < Bindex3_data[currentColNumberofB + 1]; ++blockNumBB)
+        {
+          rowNumberBB = Bindex4_data[blockNumBB];
+          if (rowNumberBB == colNumberAA)
+          {
+            BlockCexists = 1;
+            C->nbblocks++;
+            printf("C block number %i exists for %i %i ", C->nbblocks, currentRowNumberofA, currentColNumberofB);
+
+            C->filled2++;
+            int Cblosksize0 = A->blocksize0[currentRowNumberofA];
+            if (currentRowNumberofA != 0)
+              Cblosksize0  -= A->blocksize0[currentRowNumberofA - 1];
+            int Cblocksize1 = B->blocksize1[currentColNumberofB];
+            if (currentColNumberofB != 0)
+              Cblocksize1 -= B->blocksize1[currentColNumberofB - 1];
+            printf("of size %dX%d\n", Cblosksize0, Cblocksize1);
+            Cblocktmp[C->nbblocks] = (double*)malloc(Cblosksize0 * Cblocksize1 * sizeof(double));
+            C->index1_data[currentRowNumberofA + 1]++ ;
+            Cindex2_datatmp[C->nbblocks] = currentColNumberofB ;
+            break;
+
+          };
+        }
+        if (BlockCexists) break;
+      }
+
+    }
+  }
+  C->nbblocks++;
+  C->filled2++;
+  assert(C->nbblocks ==  C->filled2);
+  C->block = (double**)malloc(C->nbblocks * sizeof(double*));
+  C->index2_data = (size_t*)malloc(C->nbblocks * sizeof(size_t*));
+
+  for (i = 0 ; i < C->nbblocks; i++)  C->block[i] = Cblocktmp[i];
+  for (i = 0 ; i < C->nbblocks; i++)  C->index2_data[i] = Cindex2_datatmp[i];
+  free(Cblocktmp);
+  free(Cindex2_datatmp);
+
+  free(Bindex3_data);
+  free(Bindex4_data);
+
+  printSBM(C);
+
+
+  /*   fprintf(stderr,"Numerics, allocate memory for SparseBlockStructuredMatrix, product matrix - matrix  AllocateMemoryForProdSBMSBM(alpha,A,B,beta,C) not yet implemented.\n"); */
+  /*   exit(EXIT_FAILURE); */
+
+}
 void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B,  double beta, SparseBlockStructuredMatrix*  C)
 {
+
+  assert(A);
+  assert(B);
+  assert(C);
+
+  int i, j, k;
+  /*     Check the compatibility of size of matrices */
+  assert(A->blocksize0);
+  assert(A->blocksize1);
+  assert(B->blocksize0);
+  assert(B->blocksize1);
+
+  assert(A->blocksize1[A->blocknumber1 - 1] == B->blocksize0[B->blocknumber0 - 1]);
+
+  /*     Check the compatibility of the number and the sizes of blocks */
+  int compat = 1;
+
+  if (A->blocknumber1 != B->blocknumber0) compat = 1; /* Compatibility of number of blocks */
+  for (i = 0; i < A->blocknumber1; i++)
+  {
+    if (A->blocksize1[i] != B->blocksize0[i]) compat = 0; /* Compatibility of sizes of blocks */
+  }
+  if (!compat)
+  {
+    fprintf(stderr, "Numerics, allocate memory for SparseBlockStructuredMatrix, product matrix - matrix  prodSBMSBM(alpha,A,B,beta,C) not implemented for non compatible blosk sizes.\n");
+    exit(EXIT_FAILURE);
+  }
+  else
+  {
+    assert(C->blocknumber0 == A->blocknumber0);
+    assert(C->blocknumber1 == B->blocknumber1);
+
+    assert( {int compat = 1;
+             for (i = 0; i < C->blocknumber0; i++)
+  {
+    if (C->blocksize0[i] != A->blocksize0[i]) compat = 0;
+    }
+    compat == 1;
+            });
+    assert( {int compat = 1;
+             for (j = 0; j < C->blocknumber1; j++)
+  {
+    if (C->blocksize1[j] != B->blocksize1[j]) compat = 0;
+    }
+    compat == 1;
+            });
+  }
+
+  int currentRowNumberofA, currentRowNumberofB;
+  int currentcolNumberofA, currentColNumberofB;
+  int colNumberofA, rowNumberofB;
+  int colNumberofB, rowNumberofA;
+
+  /* Search  the non null blocks of C */
+
+  /*     Creation of filled3,filled4 and index3_data,index4_data for B (indexation by column) */
+
+  int Bfilled3 = B->blocknumber0 + 1;
+  int * Bindex3_data = (int *)malloc(Bfilled3 * sizeof(int));
+  int Bfilled4 = B->nbblocks;
+  int * Bindex4_data = (int *)malloc(Bfilled4 * sizeof(int));
+  int blockNumB = -1;
+  Bindex3_data[0] = 0;
+  for (currentColNumberofB = 0 ; currentColNumberofB < Bfilled3 - 1; ++currentColNumberofB)
+  {
+    Bindex3_data[currentColNumberofB + 1] = Bindex3_data[currentColNumberofB];
+    for (currentRowNumberofB = 0 ; currentRowNumberofB < B->filled1 - 1; ++currentRowNumberofB)
+    {
+      for (unsigned int blockNum = B->index1_data[currentRowNumberofB];
+           blockNum < B->index1_data[currentRowNumberofB + 1]; ++blockNum)
+      {
+        assert(blockNum < B->filled2);
+        colNumberofB = B->index2_data[blockNum];
+        if (colNumberofB == currentColNumberofB)
+        {
+          blockNumB++;
+          assert(blockNumB < B->nbblocks);
+          Bindex3_data[currentColNumberofB + 1]++;
+          Bindex4_data[blockNumB] = currentRowNumberofB;
+        }
+
+
+      }
+
+    }
+  }
+  printf("\n");
+  for (i = 0 ; i < Bfilled3; i++) printf("Bindex3_data[%i]= %i\t", i, Bindex3_data[i]);
+  printf("\n");
+  for (i = 0 ; i < Bfilled4; i++) printf("Bindex4_data[%i]= %i\t", i, Bindex4_data[i]);
+  printf("\n");
+  printf("\n");
+  int colNumberAA, rowNumberBB;
+
+  int Cnbblocks = -1;
+
+  for (currentRowNumberofA = 0 ; currentRowNumberofA < A->filled1 - 1; ++currentRowNumberofA)
+  {
+    C->index1_data[currentRowNumberofA + 1] = C->index1_data[currentRowNumberofA];
+    for (currentColNumberofB = 0 ; currentColNumberofB < Bfilled3 - 1; ++currentColNumberofB)
+    {
+
+      int CblockPassed = 1;
+      for (unsigned int blockNumAA = A->index1_data[currentRowNumberofA];
+           blockNumAA < A->index1_data[currentRowNumberofA + 1]; ++blockNumAA)
+      {
+        assert(blockNumAA < A->filled2);
+        colNumberAA = A->index2_data[blockNumAA];
+        printf("blockNumAA = %i \t,colNumberAA = %i \n ", blockNumAA, colNumberAA);
+
+        for (unsigned int blockNumBB = Bindex3_data[currentColNumberofB];
+             blockNumBB < Bindex3_data[currentColNumberofB + 1]; ++blockNumBB)
+        {
+          rowNumberBB = Bindex4_data[blockNumBB];
+          printf("blockNumBB = %i \t,rowNumberBB = %i \n ", blockNumBB, rowNumberBB);
+
+          if (rowNumberBB == colNumberAA)
+          {
+            if (CblockPassed)
+            {
+              Cnbblocks++; /* Find the right C block number*/
+              CblockPassed = 0;
+            }
+            assert(Cnbblocks <= C->nbblocks);
+            printf("Compute C block number %i for %i %i ", Cnbblocks, currentRowNumberofA, currentColNumberofB);
+
+            int Ablocksize0 = A->blocksize0[currentRowNumberofA];
+            if (currentRowNumberofA != 0)
+              Ablocksize0  -= A->blocksize0[currentRowNumberofA - 1];
+
+            int Bblocksize1 = B->blocksize1[currentColNumberofB];
+            if (currentColNumberofB != 0)
+              Bblocksize1 -= B->blocksize1[currentColNumberofB - 1];
+            printf("of size %dX%d\n", Ablocksize0, Bblocksize1);
+
+            int Ablocksize1 = A->blocksize1[colNumberAA];
+            if (colNumberAA != 0)
+              Ablocksize1  -= A->blocksize1[colNumberAA - 1];
+
+            int Bblocksize0 = B->blocksize0[rowNumberBB];
+            if (rowNumberBB != 0)
+              Bblocksize0 -= B->blocksize1[rowNumberBB - 1];
+            printf("Contribution of the product of blocks matrices A(%i,%i) and B(%i,%i) of  sizes %dX%d by %dX%d\n", currentRowNumberofA, colNumberAA, rowNumberBB, currentColNumberofB,   Ablocksize0, Ablocksize1, Bblocksize0, Bblocksize1);
+
+            assert(Ablocksize1 == Bblocksize0);
+
+            DGEMM(LA_NOTRANS, LA_NOTRANS, Ablocksize0, Bblocksize1, Ablocksize1, alpha, A->block[blockNumAA], Ablocksize0, B->block[blockNumBB], Bblocksize0, beta, C->block[Cnbblocks], Ablocksize0);
+
+
+          };
+          printf("\n");
+
+        }
+        printf("\n");
+
+      }
+
+    }
+  }
+
+  printf("End of the Loop \n");
+  free(Bindex3_data);
+  free(Bindex4_data);
+
+  printSBM(C);
+
+
+
   fprintf(stderr, "Numerics, SparseBlockStructuredMatrix, product matrix - matrix prodSBMSBM(alpha,A,B,beta,C) not yet implemented.\n");
   exit(EXIT_FAILURE);
 
 }
-void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B, SparseBlockStructuredMatrix*  C)
-{
-  fprintf(stderr, "Numerics, allocate memory for SparseBlockStructuredMatrix, product matrix - matrix  AllocateMemoryForProdSBMSBM(alpha,A,B,beta,C) not yet implemented.\n");
-  exit(EXIT_FAILURE);
-
-}
-
 void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber,
                    const SparseBlockStructuredMatrix* const A,
                    const double* const x, double* y, int init)
@@ -354,4 +675,76 @@ int getDiagonalBlockPos(const SparseBlockStructuredMatrix* const M, int num)
   for (pos = firstBlockOfRow; M->index2_data[pos] != num; ++pos, assert(pos < M->filled2));
 
   return pos;
+}
+double getValueSBM(const SparseBlockStructuredMatrix* const M, int row, int col)
+{
+  /*      Search the row of blocks and the column of blocks */
+  int i, j;
+  int rowblocknumber = M->blocknumber0;
+  int colblocknumber = M->blocknumber1;
+  int rowpos = -1;
+  int colpos = -1;
+  int blockNumber = -1;
+  int colNumber;
+  assert(row < M->blocksize0[M->blocknumber0 - 1]);
+  assert(col < M->blocksize1[M->blocknumber1 - 1]);
+
+
+  for (i = 0; i < M->blocknumber0; i++)
+  {
+    if ((row < M->blocksize0[i]))
+    {
+      rowblocknumber = i;
+      assert(rowblocknumber < M->blocknumber0);
+      rowpos = row;
+      if (i != 0)
+        rowpos  -= M->blocksize0[i - 1];
+      break;
+    }
+
+  }
+  for (j = 0; j < M->blocknumber1; j++)
+  {
+    if ((col < M->blocksize1[j]))
+    {
+      colblocknumber = j;
+      assert(colblocknumber < M->blocknumber1);
+      colpos = col;
+      if (j != 0)
+        colpos -= M->blocksize1[j - 1];
+      blockNumber = -1;
+      for (unsigned int blockNum = M->index1_data[rowblocknumber];
+           blockNum < M->index1_data[rowblocknumber + 1]; ++blockNum)
+      {
+        assert(blockNum < M->filled2);
+
+        colNumber = M->index2_data[blockNum];
+        if (colblocknumber == colNumber)
+        {
+          blockNumber = blockNum;
+          break;
+        }
+
+      }
+      break;
+    }
+  }
+
+  if (blockNumber == -1) return 0.0;
+
+  /* Number of rows/columns of the current block */
+  int nbRows, nbColumns;
+  nbRows = M->blocksize0[rowblocknumber];
+  if (rowblocknumber != 0)
+    nbRows -= M->blocksize0[rowblocknumber - 1];
+  nbColumns = M->blocksize1[colblocknumber];
+  if (colblocknumber != 0)
+    nbColumns -= M->blocksize1[colblocknumber - 1];
+  assert(rowpos < nbRows);
+  assert(colpos < nbColumns);
+
+  return M->block[blockNumber][rowpos + colpos * nbRows];
+
+
+
 }

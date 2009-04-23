@@ -144,6 +144,26 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
     SBM->block[5][i] = block5[i];
   printSBM(SBM);
 
+  /* M1 and M2 must have the same values.*/
+  double tol = 1e-12;
+  int j;
+  for (i = 0; i < M1->size0; i++)
+  {
+    for (j = 0; j < M1->size1; j++)
+    {
+      if (fabs(M1->matrix0[i + j * M1->size0] - getValueSBM(M2->matrix1, i, j)) > tol) info = 1;
+
+      /*      printf("%i\t%i\n",i,j); */
+      /*     printf("%lf\n",M1->matrix0[i+j*M1->size0]-getValueSBM(M2->matrix1,i,j));  */
+      /*     printf("%lf\n",M1->matrix0[i+j*M1->size0]); */
+      /*     printf("%lf\n",getValueSBM(M2->matrix1,i,j));    */
+
+      if (info == 1) break;
+    }
+    if (info == 1) break ;
+  }
+
+
   /* Build a NumericsMatrix with sparse-block storage */
   M4->storageType = 1;
   M4->size0 = n;
@@ -191,6 +211,23 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
 
 
   printSBM(SBM2);
+  /* M3 and M4 must have the same values.*/
+
+  for (i = 0; i < M3->size0; i++)
+  {
+    for (j = 0; j < M3->size1; j++)
+    {
+      if (fabs(M3->matrix0[i + j * M3->size0] - getValueSBM(M4->matrix1, i, j)) > tol) info = 1;
+
+      /*     printf("%i\t%i\n",i,j); */
+      /*     printf("%lf\n",M3->matrix0[i+j*M3->size0]-getValueSBM(M4->matrix1,i,j)); */
+      /*     printf("%lf\n",M3->matrix0[i+j*M3->size0]); */
+      /*     printf("%lf\n",getValueSBM(M4->matrix1,i,j)); */
+
+      if (info == 1) break;
+    }
+    if (info == 1) break ;
+  }
   return info;
 }
 
@@ -310,9 +347,9 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
 
 
   NumericsMatrix * M1 = MM[0];
-  NumericsMatrix * M2 = MM[0];
-  NumericsMatrix * M3 = MM[0];
-  NumericsMatrix * M4 = MM[0];
+  NumericsMatrix * M2 = MM[1];
+  NumericsMatrix * M3 = MM[2];
+  NumericsMatrix * M4 = MM[3];
 
 
   int info = -1;
@@ -419,10 +456,15 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   C3.size1 = M2->size1;
   SparseBlockStructuredMatrix * SBM3 = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
   C3.matrix1 = SBM3;
-  /* allocateMemoryForProdSBMSBM(M2->matrix1, M2->matrix1, SBM3); */
+
+  allocateMemoryForProdSBMSBM(M2->matrix1, M2->matrix1, SBM3);
 
 
-  /*  prodNumericsMatrixNumericsMatrix(alpha,M2, M2, beta,  &C3); */
+  /*     prodNumericsMatrixNumericsMatrix(alpha,M2, M2, beta,  &C3); */
+
+
+  /*     Check if it is correct */
+
 
 
 
@@ -864,9 +906,14 @@ int main(void)
   }
 
 
-  test_BuildNumericsMatrix(NMM);
+  int info = test_BuildNumericsMatrix(NMM);
+  if (info != 0)
+  {
+    printf("Construction failed ...\n");
+    return info;
+  }
   printf("Construction ok ...\n");
-  int info = test_prodNumericsMatrix(NMM);
+  info = test_prodNumericsMatrix(NMM);
   printf("End of ProdNumericsMatrix ...\n");
   if (info != 0) return info;
   info = test_prodNumericsMatrixNumericsMatrix(NMM);

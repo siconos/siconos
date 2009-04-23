@@ -186,6 +186,13 @@ extern "C" {
   */
   int getDiagonalBlockPos(const SparseBlockStructuredMatrix* const M, int num);
 
+  /** get the element of row i and column j of the matrix M
+     \param M the SparseBlockStructuredMatrix matrix
+     \param int row the row index
+     \return int col the column index
+  */
+  double getValueSBM(const SparseBlockStructuredMatrix* const M, int row, int col);
+
 
 #ifdef __cplusplus
 }
