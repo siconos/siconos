@@ -174,6 +174,8 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
 
     freeSBM(HtmpSBM);
     freeSBM(Htrans);
+    free(HtmpSBM);
+    free(Htrans);
     free(qtmp);
   }
 
@@ -244,16 +246,19 @@ int freeLocalProblem(FrictionContact_Problem* localproblem)
 {
   int info = -1;
 
-  if (!localproblem->M->storageType)
+  /*    if (!localproblem->M->storageType) */
+  /*  { */
+  if (localproblem->M->matrix0)
+    free(localproblem->M->matrix0);
+  /*  } */
+  /*     else */
+  /*  { */
+  if (localproblem->M->matrix1)
   {
-    if (!localproblem->M->matrix0)
-      free(localproblem->M->matrix0);
+    freeSBM(localproblem->M->matrix1);
+    free(localproblem->M->matrix1);
   }
-  else
-  {
-    if (!localproblem->M->matrix1)
-      freeSBM(localproblem->M->matrix1);
-  }
+  /*  } */
   free(localproblem->M);
   free(localproblem->q);
   free(localproblem);

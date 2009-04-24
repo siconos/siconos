@@ -75,7 +75,7 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
   M3->size0 = n;
   M3->size1 = nn;
   M3->matrix0 = malloc(nn * n * sizeof(double));
-  for (i = 0; i < n * n; i++)
+  for (i = 0; i < nn * n; i++)
     M3->matrix0[i] = m00[i];
   M3->matrix1 = NULL;
 
@@ -170,9 +170,9 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
   M4->size1 = 4;
   M4->matrix0 = NULL;
 
+  M4->matrix1 = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
+  SparseBlockStructuredMatrix * SBM2 = M4->matrix1;
 
-  SparseBlockStructuredMatrix * SBM2 = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
-  M4->matrix1 = SBM2;
   SBM2->nbblocks = 2;
   SBM2->blocknumber0 = 3;
 
@@ -336,7 +336,12 @@ int test_prodNumericsMatrix(NumericsMatrix** MM)
 
 
   free(x);
+  free(x2);
   free(y);
+  free(y2);
+  free(yref);
+  free(yref2);
+
   printf("== End of test prodNumericsMatrix(NumericsMatrix,vector), result = %d\n", info);
 
   return info;
@@ -544,7 +549,12 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
     return info;
   }
 
-
+  free(C2.matrix0);
+  free(C2ref);
+  free(Cref);
+  free(C.matrix0);
+  freeSBM(SBM4);
+  freeSBM(SBM3);
 
 
 

@@ -608,6 +608,8 @@ void freeSBM(SparseBlockStructuredMatrix *blmat)
    Kernel/src/simulationsTools/SparseBlockMatrix.cpp for details on
    the way the structure is filled in.
   */
+  assert(blmat);
+
   if (blmat->blocksize0)
   {
 
@@ -621,6 +623,7 @@ void freeSBM(SparseBlockStructuredMatrix *blmat)
   {
     free(blmat->blocksize1);
   }
+
   for (int i = 0 ; i < blmat->nbblocks ; i++)
   {
     if (blmat->block[i])
@@ -630,6 +633,8 @@ void freeSBM(SparseBlockStructuredMatrix *blmat)
   }
   if (blmat->block)
     free(blmat->block);
+
+
   if (blmat->index1_data)
     free(blmat->index1_data);
   if (blmat->index2_data)
@@ -960,6 +965,7 @@ int transposeSBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructur
 
     }
   }
+  free(blockMap);
 
 
 }
