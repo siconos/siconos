@@ -67,8 +67,9 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
     int infoDGETRF;
     int infoDGETRS;
     Reformulation_ipiv = (int *)malloc(n * sizeof(int));
-    double *Htmp = (double*)malloc(nm * sizeof(double));
 
+
+    double *Htmp = (double*)malloc(nm * sizeof(double));
     // compute W = H^T M^-1 H
     //Copy Htmp <- H
     DCOPY(nm,  H->matrix0 , 1, Htmp, 1);
@@ -138,40 +139,25 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
 
     //Compute Htmp   <- M^-1 HtmpSBM
     /* DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
-
-
-    inverseDiagSBM(M->matrix1);
     Reformulation_MisInverse = 1;
-
-
-
     allocateMemoryForProdSBMSBM(M->matrix1, H->matrix1, HtmpSBM);
     double alpha = 1.0, beta = 1.0;
 
     prodSBMSBM(alpha, M->matrix1, H->matrix1, beta, HtmpSBM);
 
-
     SparseBlockStructuredMatrix *Htrans = (SparseBlockStructuredMatrix*)malloc(sizeof(*Htrans));
-
     transposeSBM(H->matrix1, Htrans);
 
-
-    SparseBlockStructuredMatrix *W = (SparseBlockStructuredMatrix*)malloc(sizeof(*W));
-
-    allocateMemoryForProdSBMSBM(Htrans, HtmpSBM, W);
-
-    prodSBMSBM(alpha, Htrans, HtmpSBM, beta, W);
-
-    freeSBM(HtmpSBM);
-    /*    freeSBM(Htrans); */
-
-    NumericsMatrix *Wnum = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
+    localproblem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));;
+    NumericsMatrix *Wnum = localproblem->M;
     Wnum->storageType = 1;
     Wnum-> size0 = m;
     Wnum-> size1 = m;
-    Wnum->matrix1 = W;
-    localproblem->M = Wnum;
+    Wnum->matrix1 = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
+    SparseBlockStructuredMatrix *W =  Wnum->matrix1;
 
+    allocateMemoryForProdSBMSBM(Htrans, HtmpSBM, W);
+    prodSBMSBM(alpha, Htrans, HtmpSBM, beta, W);
 
 
     localproblem->q = (double*)malloc(m * sizeof(double));
@@ -181,26 +167,14 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
     double* qtmp = (double*)malloc(n * sizeof(double));
     double beta2 = 0.0;
     prodSBM(n, n, alpha, M->matrix1, problem->q, beta2, qtmp);
-
-
-
-
-
     prodSBM(n, m, alpha, Htrans, qtmp, beta, localproblem->q);
 
-
-
-
     localproblem->mu = problem->mu;
-
-
     localproblem->isComplete = 1;
 
-
-    /*   fprintf(stderr,"PrimalFrictionContact3D_driver reformulationIntoLocalProblem H->storageType = M->storageType=1 :This case is not yet implemented\n"); */
-    /*      exit(EXIT_FAILURE); */
-
-
+    freeSBM(HtmpSBM);
+    freeSBM(Htrans);
+    free(qtmp);
   }
 
 
@@ -216,10 +190,7 @@ int computeGlobalVelocity(PrimalFrictionContact_Problem* problem, double * react
     int m = problem->H->size1;
     int nm = n * m;
 
-
     /* Compute globalVelocity   <- H reaction + q*/
-
-
     double alpha = 1.0;
     double beta = 1.0;
     /* globalVelocity <- problem->q */
@@ -261,11 +232,9 @@ int computeGlobalVelocity(PrimalFrictionContact_Problem* problem, double * react
     double beta2 = 0.0;
     prodSBM(n, n, alpha,  problem->M->matrix1, qtmp, beta2, globalVelocity);
 
-
-
-
-    /*  fprintf(stderr,"PrimalFrictionContact3D_driver computeGlobalVelocity H->storageType = M->storageType=1 :This case is not yet implemented\n"); */
-    /*      exit(EXIT_FAILURE); */
+    free(qtmp);
+    free(Reformulation_ipiv);
+    Reformulation_ipiv = NULL;
   }
 
   return info;
@@ -275,7 +244,16 @@ int freeLocalProblem(FrictionContact_Problem* localproblem)
 {
   int info = -1;
 
-  free(localproblem->M->matrix0);
+  if (!localproblem->M->storageType)
+  {
+    if (!localproblem->M->matrix0)
+      free(localproblem->M->matrix0);
+  }
+  else
+  {
+    if (!localproblem->M->matrix1)
+      freeSBM(localproblem->M->matrix1);
+  }
   free(localproblem->M);
   free(localproblem->q);
   free(localproblem);
