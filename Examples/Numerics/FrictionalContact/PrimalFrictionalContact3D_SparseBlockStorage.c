@@ -147,14 +147,16 @@ int main(int argc, char* argv[])
   NumericsProblem.q = q;
   NumericsProblem.b = b;
 
-  NumericsMatrix *MM = (NumericsMatrix*)malloc(sizeof(*MM));
+  NumericsProblem.M = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));
+  NumericsMatrix *MM =  NumericsProblem.M;
   MM->storageType = 1;
   MM->size0 = Ndof;
   MM->size1 = Ndof;
 
-  NumericsProblem.M = MM;
-  SparseBlockStructuredMatrix *MBlockMatrix = (SparseBlockStructuredMatrix*)malloc(sizeof(*MBlockMatrix));
-  MM->matrix1 = MBlockMatrix;
+
+  MM->matrix1 = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
+  MM->matrix0 = NULL;
+  SparseBlockStructuredMatrix *MBlockMatrix = MM->matrix1;
   MBlockMatrix->nbblocks = 3;
   double * block[3] = {M11, M22, M33};
   MBlockMatrix->block = block;
@@ -171,13 +173,15 @@ int main(int argc, char* argv[])
   MBlockMatrix->index2_data =  index2_data;
 
 
-  NumericsMatrix *HH = (NumericsMatrix*)malloc(sizeof(*HH));
+  NumericsProblem.H = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));
+  NumericsMatrix *HH =  NumericsProblem.H;
   HH->storageType = 1;
   HH->size0 = Ndof;
   HH->size1 = 3 * NC;
-  NumericsProblem.H = HH;
-  SparseBlockStructuredMatrix *HBlockMatrix = (SparseBlockStructuredMatrix*)malloc(sizeof(*HBlockMatrix));
-  HH->matrix1 = HBlockMatrix;
+
+  HH->matrix1 = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
+  HH->matrix0 = NULL;
+  SparseBlockStructuredMatrix *HBlockMatrix = HH->matrix1;
   HBlockMatrix->nbblocks = 2;
   double * hblock[3] = {H00, H20};
   HBlockMatrix->block = hblock;
@@ -225,6 +229,7 @@ int main(int argc, char* argv[])
   double localtolerance = 1e-12;
 
 
+
   numerics_solver_options.iparam[0] = nmax ;
   numerics_solver_options.iparam[4] = localsolver ;
   numerics_solver_options.dparam[0] = tolerance ;
@@ -251,7 +256,16 @@ int main(int argc, char* argv[])
   free(reaction);
   free(velocity);
   free(globalVelocity);
+
+  //     freeSBM(MM->matrix1);
+  //     freeSBM(HH->matrix1);
+  free(MM->matrix1);
+  free(HH->matrix1);
   free(MM);
+  free(HH);
+
+  free(numerics_solver_options.iparam);
+  free(numerics_solver_options.dparam);
 
 
 

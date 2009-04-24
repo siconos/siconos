@@ -68,6 +68,8 @@ int main(int argc, char* argv[])
 
   int NC = 1;//Number of contacts
   int Ndof = 9;//Number of DOF
+  int m = 3;
+  int n = 9;
   double M[81] = {1, 0, 0, 0, 0, 0, 0, 0, 0,
                   0, 1, 0, 0, 0, 0, 0, 0, 0,
                   0, 0, 1, 0, 0, 0, 0, 0, 0,
@@ -115,9 +117,7 @@ int main(int argc, char* argv[])
   /*     double mu[3] = {0.1,0.1,0.1};    */
 
 
-  int i, j, k;
-  int m = 3 * NC;
-  int n = Ndof;
+  int i = 0, j = 0, k = 0;
 
   PrimalFrictionContact_Problem NumericsProblem;
   NumericsProblem.numberOfContacts = NC;
@@ -126,21 +126,22 @@ int main(int argc, char* argv[])
   NumericsProblem.q = q;
   NumericsProblem.b = b;
 
-  NumericsMatrix *MM = (NumericsMatrix*)malloc(sizeof(*MM));
+
+  NumericsProblem.M = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));
+  NumericsMatrix *MM = NumericsProblem.M ;
   MM->storageType = 0;
   MM->matrix0 = M;
   MM->size0 = n;
   MM->size1 = n;
 
-  NumericsProblem.M = MM;
 
-  NumericsMatrix *HH = (NumericsMatrix*)malloc(sizeof(*H));
+  NumericsProblem.H  = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));
+  NumericsMatrix *HH = NumericsProblem.H;
   HH->storageType = 0;
   HH->matrix0 = H;
   HH->size0 = m;
   HH->size1 = m;
 
-  NumericsProblem.H = HH;
 
   // Unknown Declaration
 
@@ -170,6 +171,9 @@ int main(int argc, char* argv[])
   double tolerance = 1e-10;
   double localtolerance = 1e-12;
 
+  for (i = 0; i < numerics_solver_options.iSize ; i++) numerics_solver_options.iparam[i] = 0;
+  for (i = 0; i < numerics_solver_options.dSize ; i++) numerics_solver_options.dparam[i] = 0.0;
+
 
   numerics_solver_options.iparam[0] = nmax ;
   numerics_solver_options.iparam[4] = localsolver ;
@@ -197,9 +201,10 @@ int main(int argc, char* argv[])
   free(reaction);
   free(velocity);
   free(globalVelocity);
-  free(MM);
-
-
+  free(NumericsProblem.M);
+  free(NumericsProblem.H);
+  free(numerics_solver_options.iparam);
+  free(numerics_solver_options.dparam);
 
 
   return info;
