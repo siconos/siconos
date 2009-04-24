@@ -28,6 +28,13 @@
 #include "PrimalFrictionContact3D_Solvers.h"
 #include "NonSmoothDrivers.h"
 #include "FrictionContact3D_Solvers.h"
+
+
+/* Global Variable for the reformulation of the problem */
+int * Reformulation_ipiv = NULL;
+int  Reformulation_MisInverse;
+int  Reformulation_MisLU;
+
 int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, FrictionContact_Problem* localproblem)
 {
   int info = -1;
@@ -59,53 +66,58 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
     int infoDGESV;
     int infoDGETRF;
     int infoDGETRS;
-    int* ipiv = (int *)malloc(n * sizeof(*ipiv));
+    Reformulation_ipiv = (int *)malloc(n * sizeof(int));
     double *Htmp = (double*)malloc(nm * sizeof(double));
 
     // compute W = H^T M^-1 H
     //Copy Htmp <- H
     DCOPY(nm,  H->matrix0 , 1, Htmp, 1);
     //Compute Htmp   <- M^-1 Htmp
-
-    DGETRF(n, n, M->matrix0, n, ipiv, infoDGETRF);
-
-    DGETRS(LA_NOTRANS, n, m,  M->matrix0, n, ipiv, Htmp, n, infoDGETRS);
-
+    Reformulation_MisLU = 0; /*  Assume that M is not already LU */
+    DGETRF(n, n, M->matrix0, n, Reformulation_ipiv, infoDGETRF);
+    assert(!infoDGETRF);
+    Reformulation_MisLU = 1;
+    DGETRS(LA_NOTRANS, n, m,  M->matrix0, n, Reformulation_ipiv, Htmp, n, infoDGETRS);
+    assert(!infoDGETRS);
     /*      DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
 
-
-
-    NumericsMatrix *Wnum = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
+    localproblem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
+    NumericsMatrix *Wnum = localproblem->M;
     Wnum->storageType = 0;
     Wnum-> size0 = m;
     Wnum-> size1 = m;
     Wnum->matrix0 = (double*)malloc(m * m * sizeof(double));
-    localproblem->M = Wnum;
+
     // Compute W <-  H^T M^1 H
 
     DGEMM(LA_TRANS, LA_NOTRANS, m, m, n, 1.0, H->matrix0, n, Htmp, n, 0.0, Wnum->matrix0, m);
     /*     DGEMM(LA_TRANS,LA_NOTRANS,m,m,n,1.0,H->matrix0,n,Htmp,n,0.0,Wnum->matrix0,m); */
-    // compute q = H^T M^(-1) q +b
+    // compute localq = H^T M^(-1) q +b
 
-    //Copy q<- b
+    //Copy localq <- b
     localproblem->q = (double*)malloc(m * sizeof(double));
     DCOPY(m, problem->b , 1, localproblem->q, 1);
 
-    // compute H^T M^(-1) q+ b
-    DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, ipiv, problem->q , n, infoDGETRS);
+    double* qtmp = (double*)malloc(n * sizeof(double));
+    DCOPY(n,  problem->q, 1, qtmp, 1);
+
+    // compute H^T M^(-1) q + b
+
+    assert(Reformulation_MisLU);
+    DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Reformulation_ipiv, qtmp , n, infoDGETRS);
+
 
     /*      DGESV(n, m, M->matrix0, n, ipiv, problem->q , n, infoDGESV); */
 
-    DGEMV(LA_TRANS, n, m, 1.0, H->matrix0 , n, problem->q , 1, 1.0, localproblem->q, 1);
-
+    DGEMV(LA_TRANS, n, m, 1.0, H->matrix0 , n, qtmp, 1, 1.0, localproblem->q, 1);
     // Copy mu
     localproblem->mu = problem->mu;
 
 
     localproblem->isComplete = 1;
 
-    free(ipiv);
     free(Htmp);
+    free(qtmp);
 
 
   }
@@ -116,44 +128,40 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
     int m = H->size1;
     int nm = n * m;
     int infoDGESV;
-    int* ipiv = (int *)malloc(n * sizeof(*ipiv));
+    assert(!Reformulation_ipiv);
+    Reformulation_ipiv = (int *)malloc(n * sizeof(int));
 
     // compute W = H^T M^-1 H
     //Copy Htmp <- H
     SparseBlockStructuredMatrix *HtmpSBM = (SparseBlockStructuredMatrix*)malloc(sizeof(*HtmpSBM));
     /* copySBM(H->matrix1 , HtmpSBM); */
-    printSBM(H->matrix1);
 
     //Compute Htmp   <- M^-1 HtmpSBM
     /* DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
 
-    printf("Inverse ... \n");
+
     inverseDiagSBM(M->matrix1);
+    Reformulation_MisInverse = 1;
 
-    printSBM(M->matrix1);
 
-    printf("Prod 1 ... \n");
 
     allocateMemoryForProdSBMSBM(M->matrix1, H->matrix1, HtmpSBM);
     double alpha = 1.0, beta = 1.0;
-    printSBM(HtmpSBM);
 
     prodSBMSBM(alpha, M->matrix1, H->matrix1, beta, HtmpSBM);
-    printSBM(HtmpSBM);
 
-    printf("Transpose  ... \n");
+
     SparseBlockStructuredMatrix *Htrans = (SparseBlockStructuredMatrix*)malloc(sizeof(*Htrans));
 
     transposeSBM(H->matrix1, Htrans);
-    printSBM(Htrans);
-    printf("Prod 2 ... \n");
+
 
     SparseBlockStructuredMatrix *W = (SparseBlockStructuredMatrix*)malloc(sizeof(*W));
 
     allocateMemoryForProdSBMSBM(Htrans, HtmpSBM, W);
-    printSBM(W);
+
     prodSBMSBM(alpha, Htrans, HtmpSBM, beta, W);
-    printSBM(W);
+
     freeSBM(HtmpSBM);
     /*    freeSBM(Htrans); */
 
@@ -164,7 +172,7 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
     Wnum->matrix1 = W;
     localproblem->M = Wnum;
 
-    printf("Compute localq 1  ... \n");
+
 
     localproblem->q = (double*)malloc(m * sizeof(double));
     //Copy q<- b
@@ -173,15 +181,15 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
     double* qtmp = (double*)malloc(n * sizeof(double));
     double beta2 = 0.0;
     prodSBM(n, n, alpha, M->matrix1, problem->q, beta2, qtmp);
-    printf("Compute localq 2  ... \n");
+
 
 
 
 
     prodSBM(n, m, alpha, Htrans, qtmp, beta, localproblem->q);
-    printf("\n");
-    for (int i = 0; i < m; i++) printf("localproblem->q[%i]= %f\t", i, localproblem->q[i]);
-    printf("\n");
+
+
+
 
     localproblem->mu = problem->mu;
 
@@ -207,32 +215,57 @@ int computeGlobalVelocity(PrimalFrictionContact_Problem* problem, double * react
     int n = problem->M->size0;
     int m = problem->H->size1;
     int nm = n * m;
-    double *Htmp = (double*)malloc(nm * sizeof(double));
 
-    // compute W = H^T M^-1 H
-    //Copy Htmp <- H
-    DCOPY(nm,  problem->H->matrix0 , 1, Htmp, 1);
-    //Compute Htmp   <- M^-1 Htmp
-    int infoDGESV;
-    int* ipiv = (int *)malloc(n * sizeof(*ipiv));
-    DGESV(n, m, problem->M->matrix0, n, ipiv, Htmp, n, infoDGESV);
 
-    DGEMV(LA_NOTRANS, n, m, 1.0, Htmp , n, reaction , 1, 0.0, globalVelocity, 1);
-    double *vfree = (double*)malloc(n * sizeof(double));
-    DCOPY(n,  problem->q, 1, vfree, 1);
-    DGESV(n, 1, problem->M->matrix0, n, ipiv, vfree, n, infoDGESV);
+    /* Compute globalVelocity   <- H reaction + q*/
 
-    DAXPY(n, 1.0, vfree, 1, globalVelocity, 1);
 
-    free(vfree);
-    free(Htmp);
-    free(ipiv);
+    double alpha = 1.0;
+    double beta = 1.0;
+    /* globalVelocity <- problem->q */
+    DCOPY(n,  problem->q , 1, globalVelocity, 1);
+    /* globalVelocity <-  H*reaction + globalVelocity*/
+    DGEMV(LA_NOTRANS, n, m, 1.0, problem->H->matrix0 , n, reaction , 1, 1.0, globalVelocity, 1);
+    /* Compute globalVelocity <- M^(-1) globalVelocity*/
+    assert(Reformulation_ipiv);
+    assert(Reformulation_MisLU);
+    int infoDGETRS;
+    DGETRS(LA_NOTRANS, n, 1,   problem->M->matrix0, n, Reformulation_ipiv, globalVelocity , n, infoDGETRS);
+    assert(!infoDGETRS);
+
+    free(Reformulation_ipiv);
+    Reformulation_ipiv = NULL;
 
 
   }
   else
   {
+    int n = problem->M->size0;
+    int m = problem->H->size1;
+    int nm = n * m;
 
+    /* Compute qtmp   <- H reaction + q*/
+
+    double* qtmp = (double*)malloc(n * sizeof(double));
+    double alpha = 1.0;
+    double beta = 1.0;
+
+    DCOPY(n,  problem->q , 1, qtmp, 1);
+    prodSBM(m, n, alpha, problem->H->matrix1, reaction, beta, qtmp);
+    /* Compute global velocity = M^(-1) qtmp*/
+
+
+    /*      inverseDiagSBM(M->matrix1); We assume that M->matrix1 is already inverse*/
+    assert(Reformulation_MisInverse);
+
+    double beta2 = 0.0;
+    prodSBM(n, n, alpha,  problem->M->matrix1, qtmp, beta2, globalVelocity);
+
+
+
+
+    /*  fprintf(stderr,"PrimalFrictionContact3D_driver computeGlobalVelocity H->storageType = M->storageType=1 :This case is not yet implemented\n"); */
+    /*      exit(EXIT_FAILURE); */
   }
 
   return info;
@@ -274,6 +307,7 @@ int primalFrictionContact3D_driver(PrimalFrictionContact_Problem* problem, doubl
 
   // Reformulation
   FrictionContact_Problem* localproblem = (FrictionContact_Problem *) malloc(sizeof(FrictionContact_Problem));
+
   reformulationIntoLocalProblem(problem, localproblem);
 
 
