@@ -10,12 +10,25 @@
 #define OUTSIDE_FRAMEWORK_BLAS
 #endif
 
-#if defined(OUTSIDE_FRAMEWORK_BLAS) && defined(HAVE_CBLAS_H)
+#if defined(OUTSIDE_FRAMEWORK_BLAS) && defined(HAVE_CBLAS_H) && defined(HAVE_CLAPACK_H)
+
+
+#if defined(__cplusplus) && !defined (_NUMERICS_INTERNAL_CXX_)
+#if defined(HAVE_ATLAS)
+extern "C"
+{
+#include <atlas/cblas.h>
+#include <atlas/clapack.h>
+}
+#else /* HAVE_ATLAS */
 #include <cblas.h>
-#ifndef HAVE_CLAPACK_H
-#error "HAVE_CBLAS without HAVE_CLAPACK"
-#endif
 #include <clapack.h>
+#endif /* HAVE_ATLAS */
+
+#else /* __cplusplus */
+#include <cblas.h>
+#include <clapack.h>
+#endif /* __cplusplus */
 
 /* missing */
 int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, const enum ATLAS_UPLO Uplo, const enum CBLAS_TRANSPOSE Trans, const enum CBLAS_DIAG Diag, const int n, const int nrhs, double *a, const int lda, double *b, const int ldb);
