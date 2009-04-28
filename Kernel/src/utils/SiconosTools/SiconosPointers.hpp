@@ -75,67 +75,41 @@ struct nullDeleter
   class X; \
   TYPEDEF_SAPTR(X)
 
-/* *SPtr types definitions */
+/* *SPtr types definitions, outside class headers because of some race
+   conditions */
 
-DEFINE_SPTR(SiconosVector);
-DEFINE_SPTR(SimpleVector);
-DEFINE_SPTR(BlockVector);
-DEFINE_SPTR(SiconosMatrix);
-DEFINE_SPTR(SimpleMatrix);
-DEFINE_SPTR(BlockMatrix);
-DEFINE_SPTR(OSNSMatrix);
-DEFINE_SPTR(NonSmoothLaw);
-DEFINE_SPTR(MixedComplementarityConditionNSL);
-DEFINE_SPTR(NonSmoothDynamicalSystem);
-DEFINE_SPTR(SiconosMemory);
-DEFINE_SPTR(InteractionXML);
-DEFINE_SPTR(RelationXML);
-DEFINE_SPTR(NonSmoothDynamicalSystemXML)
-DEFINE_SPTR(Topology);
-DEFINE_SPTR(Simulation);
-DEFINE_SPTR(SiconosModelXML);
-DEFINE_SPTR(SimulationXML);
-DEFINE_SPTR(Model);
-DEFINE_SPTR(TimeDiscretisation);
-DEFINE_SPTR(OneStepNSProblem);
-DEFINE_SPTR(TimeStepping);
-DEFINE_SPTR(OneStepIntegrator);
-DEFINE_SPTR(EventsManager);
-DEFINE_SPTR(UnitaryRelation);
+DEFINE_SPTR(BlockCSRMatrix);
+
 DEFINE_SPTR(DynamicalSystemXML);
-DEFINE_SPTR(FirstOrderLinearDSXML);
-DEFINE_SPTR(NonSmoothLawXML);
-DEFINE_SPTR(LagrangianLinearTIDSXML);
-DEFINE_SPTR(LagrangianDSXML);
-DEFINE_SPTR(FirstOrderNonLinearDSXML);
-DEFINE_SPTR(NewtonImpactFrictionNSL);
-DEFINE_SPTR(NewtonImpactFrictionNSLXML);
-DEFINE_SPTR(SparseBlockMatrix);
-DEFINE_SPTR(OneStepIntegratorXML);
-DEFINE_SPTR(Lsodar);
-DEFINE_SPTR(Moreau);
-DEFINE_SPTR(Relation);
+
 DEFINE_SPTR(Interaction);
+DEFINE_SPTR(InteractionXML);
+
+DEFINE_SPTR(Model);
 
 
+DEFINE_SPTR(NonSmoothDynamicalSystemXML);
+DEFINE_SPTR(NonSmoothDynamicalSystem);
 
-DEFINE_SPTR(MoreauXML);
-DEFINE_SPTR(SiconosMemoryXML);
+DEFINE_SPTR(NonSmoothLawXML);
+
+DEFINE_SPTR(OneStepNSProblem);
 DEFINE_SPTR(OneStepNSProblemXML);
-DEFINE_SPTR(NonSmoothSolver);
-DEFINE_SPTR(TimeDiscretisationXML);
-DEFINE_SPTR(EventDriven);
-DEFINE_SPTR(FrictionContactXML);
-DEFINE_SPTR(Sensor)
-DEFINE_SPTR(Actuator)
-DEFINE_SPTR(Event);
-DEFINE_SPTR(LsodarXML);
-DEFINE_SPTR(QPXML);
 
+DEFINE_SPTR(OneStepIntegrator);
+DEFINE_SPTR(OneStepIntegratorXML);
+
+DEFINE_SPTR(Relation);
+DEFINE_SPTR(RelationXML);
+
+DEFINE_SPTR(Simulation);
+DEFINE_SPTR(SimulationXML);
+
+
+DEFINE_SPTR(MixedComplementarityConditionNSL);
 TYPEDEF_SPTR(MixedLinearComplementarity_Problem);
-TYPEDEF_SPTR(Numerics_Options);
-TYPEDEF_SPTR(NumericsMatrix);
-TYPEDEF_SPTR(SparseBlockStructuredMatrix);
+
+DEFINE_SPTR(TimeDiscretisationXML);
 
 TYPEDEF_SAPTR(integer);
 TYPEDEF_SPTR(integer);

@@ -143,53 +143,53 @@ public:
    *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    *  \return a DenseVect
    */
-  virtual const DenseVect getDense(unsigned int = 0) const = 0;
+  virtual const DenseVect getDense(unsigned int = 0) const PURE_DEF;
 
   /** get the ublas embedded vector if it's type is Sparse
    *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    *  \return a SparseVect
    */
-  virtual const SparseVect getSparse(unsigned int = 0) const = 0;
+  virtual const SparseVect getSparse(unsigned int = 0) const PURE_DEF;
 
   /** get a pointer to the ublas embedded vector if it's type is Dense
    *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    *  \return a DenseVect*
    */
-  virtual DenseVect* getDensePtr(unsigned int = 0) const = 0;
+  virtual DenseVect* getDensePtr(unsigned int = 0) const PURE_DEF;
 
   /** get a pointer to the ublas embedded vector if it's type is Sparse
    *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    *  \return a SparseVect*
    */
-  virtual SparseVect* getSparsePtr(unsigned int = 0) const = 0;
+  virtual SparseVect* getSparsePtr(unsigned int = 0) const PURE_DEF;
 
   /** return the array of double values of the vector
    *  \param unsigned int: vector position (only for block vector)
    *  \return double* : the pointer on the array
    */
-  virtual double* getArray(unsigned int = 0) const = 0;
+  virtual double* getArray(unsigned int = 0) const PURE_DEF;
 
   /** get block starting at "pos" (first argument) and write it in v (second arg)
    *  \param pos an int, position of the first element of the required block
    *  \param v a SP::SiconosVector, in-out parameter.
    */
-  //  virtual void getBlock(unsigned int, SP::SiconosVector) const = 0;
+  //  virtual void getBlock(unsigned int, SP::SiconosVector) const PURE_DEF;
 
   /** sets all the values of the vector to 0.0
    */
-  virtual void zero() = 0;
+  virtual void zero() PURE_DEF;
 
   /** resize the vector with nbcol columns. The existing elements of the vector are preseved when specified.
    *  \param: dim of the resized vector
    *  \param: a bool, true if old values are preserved else false. Default = true.
    *  \exception for Block Vector, resizing not allowed.
    */
-  virtual void resize(unsigned int, bool = true) = 0;
+  virtual void resize(unsigned int, bool = true) PURE_DEF;
 
   /** compute the infinite norm of the vector
    *  \return a double
    */
-  virtual const double normInf() const = 0;
+  virtual const double normInf() const PURE_DEF;
 
   /** return the Euclidian norm of the vector
    *  \return a double
@@ -198,36 +198,36 @@ public:
 
   /** display data on standard output
    */
-  virtual void display(void)const = 0;
+  virtual void display(void)const PURE_DEF;
 
   /** if this is a block vector return SP::SiconosVector number i (arg), else return this.
    * \param i, unsigned int
    * \return a pointer to a SiconosVector
    */
-  virtual SP::SiconosVector getVectorPtr(unsigned int) = 0;
+  virtual SP::SiconosVector getVectorPtr(unsigned int) PURE_DEF;
 
   /** if this is a block vector return SP::SiconosVector number i (arg), else return this.
    * \param i, unsigned int
    * \return a pointer to a SiconosVector
    */
-  virtual SPC::SiconosVector getVectorPtr(unsigned int) const = 0;
+  virtual SPC::SiconosVector getVectorPtr(unsigned int) const PURE_DEF;
 
   /** set SiconosVector number i (copy) with v (second arg) - Useful only for BlockVector (else equivalent to a single copy)
    * \param i, unsigned int, block number (0 for SimpleVector)
    * \param v, a SiconosVector
    */
-  virtual void setVector(unsigned int, const SiconosVector&) = 0;
+  virtual void setVector(unsigned int, const SiconosVector&) PURE_DEF;
 
   /** set SiconosVector number i (pointer link) with v (second arg) - Useful only for BlockVector
    * \param i, unsigned int: block number (0 for SimpleVector)
    * \param v, a pointer to a SiconosVector
    */
-  virtual void setVectorPtr(unsigned int, SP::SiconosVector) = 0;
+  virtual void setVectorPtr(unsigned int, SP::SiconosVector) PURE_DEF;
 
   /** set all values of the vector component to input value.
    * \param a double
    */
-  virtual void fill(double) = 0;
+  virtual void fill(double) PURE_DEF;
 
   /** reserved to BlockVector - get the index tab
    * \return a standard vector of int
@@ -250,7 +250,7 @@ public:
 
   /** put data of the vector into a string
    */
-  virtual const std::string toString() const = 0;
+  virtual const std::string toString() const PURE_DEF;
 
   /* Note: in the following functions, index is a general one;
    that means that for a SimpleVector v, v(i) is index i element but
@@ -261,7 +261,7 @@ public:
    *  \param an unsigned int i
    *  \return a double
    */
-  virtual const double getValue(unsigned int) const = 0;
+  virtual const double getValue(unsigned int) const PURE_DEF;
 
   /** set the element at position i in the vector.
    *  \param an unsigned int i
@@ -273,51 +273,51 @@ public:
    *  \param an integer i
    *  \return a double
    */
-  virtual double& operator()(unsigned int) = 0;
+  virtual double& operator()(unsigned int) PURE_DEF;
 
   /** get the element at position i in the vector
    *  \param an integer i
    *  \return a double
    */
-  virtual const double operator()(unsigned int) const = 0;
+  virtual const double operator()(unsigned int) const PURE_DEF;
 
   /** get the vector at position i(ie this for Simple and block i for BlockVector)
    *  \param an unsigned integer i
    *  \return a SP::SiconosVector
    */
-  virtual SP::SiconosVector operator [](unsigned int) = 0;
+  virtual SP::SiconosVector operator [](unsigned int) PURE_DEF;
 
   /** get the vector at position i(ie this for Simple and block i for BlockVector)
    *  \param an unsigned integer i
    *  \return a SP::SiconosVector
    */
-  virtual SPC::SiconosVector operator [](unsigned int) const = 0;
+  virtual SPC::SiconosVector operator [](unsigned int) const PURE_DEF;
 
   /** assignment
    *  \param SiconosVector : the vector to be copied
    */
-  virtual SiconosVector& operator = (const SiconosVector&) = 0;
+  virtual SiconosVector& operator = (const SiconosVector&) PURE_DEF;
 
   /** assignment
    *  \param a DenseVect : the vector to be copied
    */
-  virtual SiconosVector& operator = (const DenseVect&) = 0;
+  virtual SiconosVector& operator = (const DenseVect&) PURE_DEF;
 
   /** assignment
    *  \param a DenseVect : the vector to be copied
    */
-  virtual SiconosVector& operator = (const SparseVect&) = 0;
+  virtual SiconosVector& operator = (const SparseVect&) PURE_DEF;
 
   /** operator +=
    *  \param SiconosVector : a vector to add
    */
-  virtual SiconosVector& operator +=(const SiconosVector&) = 0;
+  virtual SiconosVector& operator +=(const SiconosVector&) PURE_DEF;
 
 
   /** operator -=
    *  \param SiconosVector : a vector to subtract
    */
-  virtual SiconosVector& operator -=(const SiconosVector&) = 0;
+  virtual SiconosVector& operator -=(const SiconosVector&) PURE_DEF;
 
   /** multiply the current vector with a scalar
    *  \param template, double, int ...

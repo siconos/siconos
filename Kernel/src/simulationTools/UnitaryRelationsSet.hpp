@@ -38,5 +38,4 @@ typedef std::pair<UnitaryRelationsIterator, bool> CheckInsertUnitaryRelation;
 
 
 TYPEDEF_SPTR(UnitaryRelationsSet);
-
 #endif

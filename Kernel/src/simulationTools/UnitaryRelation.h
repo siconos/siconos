@@ -104,7 +104,7 @@ private:
 
   /** default constructor
    */
-  UnitaryRelation();
+  UnitaryRelation() {};
 
   /** copy constructor: private, no copy cor pass-by value
    */
@@ -307,4 +307,5 @@ public:
 
 };
 
+TYPEDEF_SPTR(UnitaryRelation);
 #endif // UNITARYRELATION_H

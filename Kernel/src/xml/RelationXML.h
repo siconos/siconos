@@ -28,7 +28,6 @@
 #include "RelationNamespace.hpp"
 #include "SimpleVector.h"
 
-class Relation;
 using RELATION::TYPES;
 using RELATION::SUBTYPES;
 

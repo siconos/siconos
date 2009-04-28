@@ -29,9 +29,8 @@
 #include "SiconosPointers.hpp"
 #include "InteractionsSet.hpp"
 
-class NonSmoothDynamicalSystem;
 class Simulation;
-class SiconosModelXML;
+DEFINE_SPTR(SiconosModelXML);
 
 /** Model: object that links the NonSmoothDynamicalSystem with a Simulation.
  *

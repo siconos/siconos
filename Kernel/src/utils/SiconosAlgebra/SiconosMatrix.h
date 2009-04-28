@@ -70,7 +70,7 @@ protected:
   unsigned int num;
 
   /** default constructor */
-  SiconosMatrix();
+  SiconosMatrix() {};
 
   /** basic constructor
       \param unsigned int, type-number of the vector
@@ -190,122 +190,122 @@ public:
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a TriangMat
    */
-  virtual const TriangMat getTriang(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual const TriangMat getTriang(unsigned int = 0, unsigned int = 0) const PURE_DEF;
 
   /** get SymMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a SymMat
    */
-  virtual const SymMat getSym(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual const SymMat getSym(unsigned int = 0, unsigned int = 0) const PURE_DEF;
 
   /** get BandedMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a BandedMat
    */
-  virtual const BandedMat getBanded(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual const BandedMat getBanded(unsigned int = 0, unsigned int = 0) const PURE_DEF;
 
   /** get SparseMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a SparseMat
    */
-  virtual const SparseMat getSparse(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual const SparseMat getSparse(unsigned int = 0, unsigned int = 0) const PURE_DEF;
 
   /** get ZeroMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a ZeroMat
    */
-  virtual const ZeroMat getZero(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual const ZeroMat getZero(unsigned int = 0, unsigned int = 0) const PURE_DEF;
 
   /** get  getIdentity matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return an IdentityMat
    */
-  virtual const IdentityMat getIdentity(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual const IdentityMat getIdentity(unsigned int = 0, unsigned int = 0) const PURE_DEF;
 
   /** get a pointer on DenseMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a DenseMat*
    */
-  virtual  DenseMat* getDensePtr(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual  DenseMat* getDensePtr(unsigned int = 0, unsigned int = 0) const PURE_DEF;
 
   /** get a pointer on TriangMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a TriangMat*
    */
-  virtual TriangMat* getTriangPtr(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual TriangMat* getTriangPtr(unsigned int = 0, unsigned int = 0) const PURE_DEF;
 
   /** get a pointer on SymMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a SymMat*
    */
-  virtual SymMat* getSymPtr(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual SymMat* getSymPtr(unsigned int = 0, unsigned int = 0) const PURE_DEF;
 
   /** get a pointer on BandedMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a BandedMat*
    */
-  virtual BandedMat* getBandedPtr(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual BandedMat* getBandedPtr(unsigned int = 0, unsigned int = 0) const PURE_DEF;
 
   /** get a pointer on SparseMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a SparseMat*
    */
-  virtual SparseMat* getSparsePtr(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual SparseMat* getSparsePtr(unsigned int = 0, unsigned int = 0) const PURE_DEF;
 
   /** get a pointer on ZeroMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a ZeroMat*
    */
-  virtual ZeroMat* getZeroPtr(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual ZeroMat* getZeroPtr(unsigned int = 0, unsigned int = 0) const PURE_DEF;
 
   /** get a pointer on Identity matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return an IdentityMat*
    */
-  virtual IdentityMat* getIdentityPtr(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual IdentityMat* getIdentityPtr(unsigned int = 0, unsigned int = 0) const PURE_DEF;
 
   /** return the adress of the array of double values of the matrix ( for block(i,j) if this is a block matrix)
    *  \param: row position for the required block
    *  \param: col position for the required block
    *  \return double* : the pointer on the double array
    */
-  virtual double* getArray(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual double* getArray(unsigned int = 0, unsigned int = 0) const PURE_DEF;
 
   /** sets all the values of the matrix to 0.0
    */
-  virtual void zero() = 0;
+  virtual void zero() PURE_DEF;
 
   /** set an identity matrix
    */
-  virtual void eye() = 0;
+  virtual void eye() PURE_DEF;
 
   /** resize the matrix with nbrow rows and nbcol columns, upper and lower are only useful for BandedMatrix .
    *   The existing elements of the matrix are preseved when specified.
    *  \param 2 unsigned int: number of rows and columns
    *  \param 2 unsigned int: for banded matrices
    */
-  virtual void resize(unsigned int, unsigned int, unsigned int = 0, unsigned int = 0, bool = true) = 0;
+  virtual void resize(unsigned int, unsigned int, unsigned int = 0, unsigned int = 0, bool = true) PURE_DEF;
 
   /** compute the infinite norm of the matrix
    *  \return a double
    */
-  virtual const double normInf() const = 0;
+  virtual const double normInf() const PURE_DEF;
 
   /** display data on standard output
    */
-  virtual void display() const = 0;
+  virtual void display() const PURE_DEF;
 
   // Note: in the following functions, row and col are general;
   // that means that for a SimpleMatrix m, m(i,j) is index (i,j) element but
@@ -316,91 +316,91 @@ public:
    *  \param an unsigned int j
    *  \return the element matrix[i,j]
    */
-  virtual double& operator()(unsigned int , unsigned int) = 0;
+  virtual double& operator()(unsigned int , unsigned int) PURE_DEF;
 
   /** get or set the element matrix[i,j]
    *  \param an unsigned int i
    *  \param an unsigned int j
    *  \return the element matrix[i,j]
    */
-  virtual const double operator()(unsigned int , unsigned int) const = 0;
+  virtual const double operator()(unsigned int , unsigned int) const PURE_DEF;
 
   /** return the element matrix[i,j]
    *  \param an unsigned int i
    *  \param an unsigned int j
    *  \return a double
    */
-  virtual const double getValue(unsigned int, unsigned int) const = 0;
+  virtual const double getValue(unsigned int, unsigned int) const PURE_DEF;
 
   /** set the element matrix[i,j]
    *  \param an unsigned int i
    *  \param an unsigned int j
    *  \param the value
    */
-  virtual void setValue(unsigned int, unsigned int, double) = 0;
+  virtual void setValue(unsigned int, unsigned int, double) PURE_DEF;
 
   /** get block at position row-col if BlockMatrix, else if SimpleMatrix return this
    *  \param unsigned int row
    *  \param unsigned int col
    */
-  virtual SP::SiconosMatrix getBlockPtr(unsigned int = 0, unsigned int = 0) = 0;
+  virtual SP::SiconosMatrix getBlockPtr(unsigned int = 0, unsigned int = 0) PURE_DEF;
 
   /** get block at position row-col if BlockMatrix, else if SimpleMatrix return this
    *  \param unsigned int row
    *  \param unsigned int col
    */
-  virtual SPC::SiconosMatrix getBlockPtr(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual SPC::SiconosMatrix getBlockPtr(unsigned int = 0, unsigned int = 0) const PURE_DEF;
 
   /** get row index of current matrix and save it into vOut
    *  \param unsigned int: index of required line
    *  \param ref to SiconosVector: in-out parameter
    */
-  virtual void getRow(unsigned int, SiconosVector&) const = 0;
+  virtual void getRow(unsigned int, SiconosVector&) const PURE_DEF;
 
   /** get column index of current matrix and save it into vOut
    *  \param unsigned int: index of required column
    *  \param ref to SiconosVector: in-out parameter
    */
-  virtual void getCol(unsigned int, SiconosVector&) const = 0;
+  virtual void getCol(unsigned int, SiconosVector&) const PURE_DEF;
 
   /** set line row of the current matrix with vector v
    *  \param an unsigned int and a SiconosVector
    */
-  virtual void setRow(unsigned int, const SiconosVector&) = 0;
+  virtual void setRow(unsigned int, const SiconosVector&) PURE_DEF;
 
   /** set column col of the current matrix with vector v
    *  \param an unsigned int and a SiconosVector
    */
-  virtual void setCol(unsigned int, const SiconosVector&) = 0;
+  virtual void setCol(unsigned int, const SiconosVector&) PURE_DEF;
 
   /** transpose in place: x->trans() is x = transpose of x.
    */
-  virtual void trans() = 0;
+  virtual void trans() PURE_DEF;
 
   /** transpose a matrix: x->trans(m) is x = transpose of m.
    *  \param a SiconosMatrix: the matrix to be transposed.
    */
-  virtual void trans(const SiconosMatrix&) = 0;
+  virtual void trans(const SiconosMatrix&) PURE_DEF;
 
   /** operator =
    *  \param SiconosMatrix : the matrix to be copied
    */
-  virtual SiconosMatrix& operator  = (const SiconosMatrix&) = 0;
+  virtual SiconosMatrix& operator  = (const SiconosMatrix&) PURE_DEF;
 
   /** operator = to a DenseMat
    *  \param the ublas-matrix to be copied
    */
-  virtual SiconosMatrix& operator  = (const DenseMat&) = 0;
+  virtual SiconosMatrix& operator  = (const DenseMat&) PURE_DEF;
 
   /** operator +=
    *  \param SiconosMatrix : a matrix to add
    */
-  virtual SiconosMatrix& operator +=(const SiconosMatrix&) = 0;
+  virtual SiconosMatrix& operator +=(const SiconosMatrix&) PURE_DEF;
 
   /** operator -=
    *  \param SiconosMatrix : a matrix to subtract
    */
-  virtual SiconosMatrix& operator -=(const SiconosMatrix&) = 0;
+  virtual SiconosMatrix& operator -=(const SiconosMatrix&) PURE_DEF;
 
   /** multiply the current matrix with a scalar
    *  \param template, double, int ...
@@ -469,24 +469,24 @@ public:
   /** computes a LU factorization of a general M-by-N matrix using partial pivoting with row interchanges.
    *  The result is returned in this (InPlace). Based on Blas dgetrf function.
    */
-  virtual void PLUFactorizationInPlace() = 0;
+  virtual void PLUFactorizationInPlace() PURE_DEF;
 
   /**  compute inverse of this thanks to LU factorization with Partial pivoting. This method inverts U and then computes inv(A) by solving the system
    *  inv(A)*L = inv(U) for inv(A). The result is returned in this (InPlace). Based on Blas dgetri function.
    */
-  virtual void  PLUInverseInPlace() = 0;
+  virtual void  PLUInverseInPlace() PURE_DEF;
 
   /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
    *   by PLUFactorizationInPlace. Based on Blas dgetrs function.
    *  \param input: the RHS matrix b - output: the result x
    */
-  virtual void  PLUForwardBackwardInPlace(SiconosMatrix &B) = 0;
+  virtual void  PLUForwardBackwardInPlace(SiconosMatrix &B) PURE_DEF;
 
   /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
    *   by PLUFactorizationInPlace.  Based on Blas dgetrs function.
    *  \param input: the RHS matrix b - output: the result x
    */
-  virtual void   PLUForwardBackwardInPlace(SiconosVector &B) = 0;
+  virtual void   PLUForwardBackwardInPlace(SiconosVector &B) PURE_DEF;
 
   /** set to false all LU indicators. Useful in case of
       assignment for example.

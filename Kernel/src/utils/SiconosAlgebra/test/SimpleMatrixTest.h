@@ -20,6 +20,7 @@
 #define __SimpleMatrixTest__
 
 #include <cppunit/extensions/HelperMacros.h>
+#include "SimpleVector.h"
 #include "SimpleMatrix.h"
 #include "BlockMatrix.h"
 #include "BlockVector.h"

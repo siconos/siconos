@@ -121,5 +121,5 @@ private:
   xmlNode * pNode;
 
 };
-
+DEFINE_SPTR(QPXML);
 #endif

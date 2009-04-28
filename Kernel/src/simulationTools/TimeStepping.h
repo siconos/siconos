@@ -42,7 +42,7 @@ private:
 
   /** Default Constructor
    */
-  TimeStepping();
+  TimeStepping() {};
 
   /** initialisation specific to TimeStepping for OneStepNSProblem.
    */
@@ -135,6 +135,8 @@ public:
   void setCheckSolverFunction(CheckSolverFPtr);
 
 };
+
+DEFINE_SPTR(TimeStepping);
 
 #endif // TIMESTEPPING_H
 

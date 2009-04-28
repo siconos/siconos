@@ -276,8 +276,9 @@ public:
     return relativeDegrees[UR];
   }
 
-  /** for all relative degrees (one per Unitary Relation), find the maximum value.
-  *  \return an unsigned int
+  /** for all relative degrees (one per Unitary Relation), find the
+  *  maximum value.
+  \return an unsigned int
   */
   const unsigned int getMaxRelativeDegree();
 
@@ -336,5 +337,7 @@ public:
 
   void clear();
 };
+
+DEFINE_SPTR(Topology);
 
 #endif // TOPOLOGY_H

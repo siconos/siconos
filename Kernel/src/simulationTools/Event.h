@@ -85,7 +85,7 @@ protected:
 
   /** copy constructor ; private => no copy nor pass-by-value.
    */
-  Event(const Event&);
+  // Event(const Event&); pb python link
 
   /** assignment operator private => no assign allowed
    */
@@ -174,5 +174,5 @@ public:
   virtual void update();
 
 };
-
+DEFINE_SPTR(Event);
 #endif // Event_H

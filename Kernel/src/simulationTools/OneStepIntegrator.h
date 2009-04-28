@@ -30,9 +30,6 @@ Basic class to handle with dynamical system integrators over a time step.
 #include "InteractionsSet.hpp"
 #include "OneStepIntegratorTypes.hpp"
 
-class OneStepIntegratorXML;
-class Simulation;
-
 /**  Generic object to manage DynamicalSystem(s) time-integration
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -90,11 +87,12 @@ protected:
    */
   OneStepIntegrator(const OSI::TYPES&, const DynamicalSystemsSet&);
 
-private:
-
   /** default constructor
    */
-  OneStepIntegrator();
+  OneStepIntegrator() {};
+
+private:
+
 
   /** copy constructor, private, no copy nor pass-by value allowed */
   OneStepIntegrator(const OneStepIntegrator&);

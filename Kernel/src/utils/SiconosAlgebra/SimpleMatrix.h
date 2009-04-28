@@ -772,4 +772,7 @@ public:
   friend void scal(double, const SiconosMatrix&, SiconosMatrix&, bool = true);
 
 };
+
+DEFINE_SPTR(SimpleMatrix);
+
 #endif

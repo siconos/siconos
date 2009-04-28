@@ -18,7 +18,6 @@
  */
 #include <assert.h>
 #include "OSNSMatrix.h"
-#include "SparseBlockMatrix.h"
 #include "Tools.hpp"
 
 using namespace std;
@@ -129,7 +128,7 @@ OSNSMatrix::OSNSMatrix(unsigned int n, int stor):
     M1.reset(new SimpleMatrix(n, n));
   }
   else // if(storageType == 1)
-    M2.reset(new SparseBlockMatrix(n));
+    M2.reset(new BlockCSRMatrix(n));
   unitaryBlocksPositions.reset(new UR_int());
   DSBlocksPositions.reset(new DS_int());
   numericsMat.reset(new NumericsMatrix);
@@ -151,7 +150,7 @@ OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
     M1.reset(new SimpleMatrix(n, m));
   }
   else // if(storageType == 1)
-    M2.reset(new SparseBlockMatrix(n));
+    M2.reset(new BlockCSRMatrix(n));
 
   unitaryBlocksPositions.reset(new UR_int());
   DSBlocksPositions.reset(new DS_int());
@@ -319,7 +318,7 @@ void OSNSMatrix::fill(SP::UnitaryRelationsGraph indexSet, MapOfMapOfUnitaryMatri
   else // if storageType == 1
   {
     if (! M2)
-      M2.reset(new SparseBlockMatrix(indexSet, unitaryBlocks));
+      M2.reset(new BlockCSRMatrix(indexSet, unitaryBlocks));
     else
       M2->fill(indexSet, unitaryBlocks);
   }
@@ -376,7 +375,7 @@ void OSNSMatrix::fillDiagonal(SP::UnitaryRelationsGraph URSet, MapOfMapOfUnitary
   else // if storageType == 1
   {
     if (! M2)
-      M2.reset(new SparseBlockMatrix(URSet, unitaryBlocks));
+      M2.reset(new BlockCSRMatrix(URSet, unitaryBlocks));
     else
       M2->fill(URSet, unitaryBlocks);
   }
@@ -429,7 +428,7 @@ void OSNSMatrix::fill(SP::DynamicalSystemsSet DSSet, MapOfDSMatrices& DSBlocks, 
   else // if storageType == 1
   {
     if (! M2)
-      M2.reset(new SparseBlockMatrix(DSSet, DSBlocks));
+      M2.reset(new BlockCSRMatrix(DSSet, DSBlocks));
     else
       M2->fill(DSSet, DSBlocks);
   }
@@ -498,7 +497,7 @@ void OSNSMatrix::fill(SP::DynamicalSystemsSet DSSet, SP::UnitaryRelationsGraph U
     RuntimeException::selfThrow("Not yet Implemented case storageType == 1:OSNSMatrix::fill(DynamicalSystemsSet* DSSet, UnitaryRelationsGraph* URSet, MapOfDSMapOfUnitaryMatrices& DSUnitaryBlocks,bool update) ");
 
     //       if(M2==NULL)
-    //  M2 = new SparseBlockMatrix(DSSet,URSet,DSUnitaryBlocks);
+    //  M2 = new BlockCSRMatrix(DSSet,URSet,DSUnitaryBlocks);
     //       else
     //  M2->fill(DSSet,URSet,DSUnitaryBlocks);
   }
@@ -585,7 +584,7 @@ void OSNSMatrix::fill(SP::UnitaryRelationsGraph indexSet, SP::DynamicalSystemsSe
   else // if storageType == 1
     {
       if(! M2)
-  M2.reset(new SparseBlockMatrix(indexSet,DSSet,unitaryDSBlocks));
+  M2.reset(new BlockCSRMatrix(indexSet,DSSet,unitaryDSBlocks));
       else
   M2->fill(indexSet,DSSet,unitaryDSBlocks);
     }

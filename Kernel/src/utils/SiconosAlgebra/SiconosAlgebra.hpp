@@ -126,6 +126,8 @@ enum UBLAS_TYPE {DENSE = 1, TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO, IDENTIT
 /** Objects used to define block matrices and vectors:*/
 
 class SiconosMatrix;
+DEFINE_SPTR(SiconosMatrix);
+
 /** A collection of pointers to matrices ; blocksMat is a typedef of boost::ublas::numeric::mapped_matrix<SiconosMatrix* > */
 typedef ublas::compressed_matrix<SP::SiconosMatrix> BlocksMat;
 
@@ -139,6 +141,7 @@ typedef BlocksMat::const_iterator1 ConstBlockIterator1;
 typedef BlocksMat::const_iterator2 ConstBlockIterator2;
 
 class SiconosVector;
+DEFINE_SPTR(SiconosVector);
 
 /** Some containers for vectors - Used for example to handle x and its derivatives in DynamicalSystem. */
 typedef std::vector<SP::SiconosVector> VectorOfVectors;

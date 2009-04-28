@@ -88,5 +88,5 @@ public:
 
 };
 
-
+DEFINE_SPTR(FrictionContactXML);
 #endif

@@ -67,7 +67,7 @@ protected:
 
   /** Default constructor
    */
-  Moreau();
+  Moreau() {};
 
 public:
 

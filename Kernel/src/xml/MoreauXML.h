@@ -22,6 +22,7 @@
 #ifndef __MOREAUXML__
 #define __MOREAUXML__
 
+#include "SiconosPointers.hpp"
 #include "OneStepIntegratorXML.h"
 
 /** XML management for Moreau
@@ -113,4 +114,6 @@ public:
   }
 
 };
+
+DEFINE_SPTR(MoreauXML);
 #endif

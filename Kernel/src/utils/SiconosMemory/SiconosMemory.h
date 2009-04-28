@@ -28,9 +28,11 @@
 
 #include "SiconosMemoryException.h"
 #include "SiconosPointers.hpp"
+#include "SiconosVector.h"
 #include <vector>
 
-class SiconosMemoryXML;
+DEFINE_SPTR(SiconosMemoryXML);
+
 
 /** Container used to save vectors in SiconosMemory */
 typedef std::vector<SP::SiconosVector> MemoryContainer;
@@ -166,6 +168,8 @@ public:
   void saveMemorySizeToXML();
 
 };
+
+DEFINE_SPTR(SiconosMemory);
 
 #endif
 

@@ -206,5 +206,5 @@ public:
   void display() const;
 
 };
-
+DEFINE_SPTR(Sensor)
 #endif

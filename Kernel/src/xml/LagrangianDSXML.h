@@ -650,5 +650,5 @@ public:
     return (velocityNode);
   }
 };
-
+DEFINE_SPTR(LagrangianDSXML);
 #endif

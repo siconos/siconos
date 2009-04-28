@@ -126,6 +126,16 @@ static int TRM()
   malldelta = malloc_info2.uordblks - malloc_info1.uordblks;
   return(malldelta);
 }
+
+
+
+/* a modifiable pure virtual definition to solve problems with boost
+   python and pure virtual operators */
+#ifndef PURE_DEF
+#define PURE_DEF =0
+#endif
+
+
 #endif
 
 #endif

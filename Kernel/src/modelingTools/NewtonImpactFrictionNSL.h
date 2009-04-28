@@ -144,5 +144,5 @@ public:
   static NewtonImpactFrictionNSL* convert(NonSmoothLaw* nsl);
 
 };
-
+DEFINE_SPTR(NewtonImpactFrictionNSL);
 #endif // NewtonImpactFrictionNSL_H

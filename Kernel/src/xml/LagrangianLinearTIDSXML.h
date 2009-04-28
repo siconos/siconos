@@ -117,5 +117,5 @@ public:
     return (CNode);
   }
 };
-
+DEFINE_SPTR(LagrangianLinearTIDSXML);
 #endif

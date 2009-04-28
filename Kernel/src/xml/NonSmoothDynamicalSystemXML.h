@@ -30,8 +30,7 @@
 #include "SiconosPointers.hpp"
 
 class NonSmoothDynamicalSystem;
-class InteractionXML;
-class DynamicalSystemXML;
+
 const std::string NSDS_BVP = "bvp";
 
 /** set of DSXML */
@@ -160,7 +159,5 @@ public:
 
 
 };
-
-
 
 #endif

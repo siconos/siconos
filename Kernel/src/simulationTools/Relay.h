@@ -39,7 +39,7 @@ private:
 
   /** default constructor
    */
-  Relay();
+  Relay() {};
 
 public:
 

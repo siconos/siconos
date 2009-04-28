@@ -40,8 +40,6 @@ const double MACHINE_PREC = std::numeric_limits<double>::epsilon();
 
 
 //#include "OneStepIntegrator.h"
-class OneStepIntegrator;
-
 
 
 // ================== Objects to handle DS ==================
@@ -130,7 +128,7 @@ TYPEDEF_SPTR(UR_int);
 
 /** list of indices */
 typedef std::vector<int> IndexInt;
-
+TYPEDEF_SPTR(IndexInt);
 
 typedef SiconosGraph<SP::DynamicalSystem, SP::UnitaryRelation> DynamicalSystemsGraph;
 typedef SiconosGraph<SP::UnitaryRelation, SP::DynamicalSystem> UnitaryRelationsGraph;
@@ -167,8 +165,7 @@ typedef DSOSIMap::const_iterator DSOSIConstIterator;
 
 // ================== Objects to handle OSNS ==================
 
-//#include "OneStepNSProblem.h"
-class OneStepNSProblem;
+#include "OneStepNSProblem.h"
 /** Map of OSNS */
 typedef std::map<std::string, SP::OneStepNSProblem > OneStepNSProblems;
 
@@ -185,5 +182,5 @@ const double DEFAULT_TOLERANCE = 10 * MACHINE_PREC;
 
 TYPEDEF_SPTR(OSISet);
 TYPEDEF_SPTR(OneStepNSProblems);
-TYPEDEF_SPTR(IndexInt);
+
 #endif

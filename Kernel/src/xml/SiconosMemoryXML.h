@@ -124,5 +124,4 @@ public:
   void deleteUnusedMemoryNodes(const int&);
 
 };
-
 #endif // SICONOSMEMORYXML_H

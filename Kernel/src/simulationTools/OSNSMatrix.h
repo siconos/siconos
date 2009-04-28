@@ -28,8 +28,9 @@
 #include "SiconosNumerics.h"
 #include "SimulationTypeDef.hpp"
 #include "Topology.h"
+#include "BlockCSRMatrix.h"
 
-class SparseBlockMatrix;
+TYPEDEF_SPTR(NumericsMatrix);
 
 /** Interface to some specific storage types for matrices used in
  * OneStepNSProblem
@@ -129,7 +130,7 @@ protected:
 
   /** Matrix which corresponds to Numerics SparseBlockStructuredMatrix
       (storageType = 1) */
-  SP::SparseBlockMatrix M2;
+  SP::BlockCSRMatrix M2;
 
   /** Private copy constructor => no copy nor pass by value */
   OSNSMatrix(const OSNSMatrix&);
@@ -303,12 +304,14 @@ public:
   */
   void fill(SP::UnitaryRelationsGraph, SP::DynamicalSystemsSet, MapOfMapOfUnitaryMatrices&,  MapOfDSMatrices&, MapOfDSMapOfUnitaryMatrices&,  MapOfUnitaryMapOfDSMatrices&, bool updateSize = true);
 
-  /** fill the numerics structure numericsMatSparse using MSparseBlock */
+  /** fill the numerics structure numericsMatSparse using MBlockCSR */
   void convert();
 
   /** display the current matrix
    */
   void display() const;
 };
+
+DEFINE_SPTR(OSNSMatrix);
 
 #endif

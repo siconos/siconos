@@ -138,11 +138,11 @@ protected:
   /** compute LevelMax */
   virtual void initLevelMax() = 0;
 
-private:
-
-  /** default constructor. Private => no copy nor pass-by value.
+  /** default constructor.
    */
-  Simulation();
+  Simulation() {};
+
+private:
 
   /** copy constructor. Private => no copy nor pass-by value.
    */
@@ -540,7 +540,6 @@ public:
    */
   void processEvents();
 
-  void clear();
 };
 
 #endif // SIMULATION_H

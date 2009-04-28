@@ -109,5 +109,4 @@ public:
   */
   void updateNonSmoothLawXML(xmlNodePtr node, NonSmoothLaw* nsl);
 };
-
 #endif

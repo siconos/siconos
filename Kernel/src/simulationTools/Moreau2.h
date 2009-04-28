@@ -59,7 +59,7 @@ private:
 
   /** Default constructor
    */
-  Moreau2();
+  Moreau2() {};
 
 public:
 

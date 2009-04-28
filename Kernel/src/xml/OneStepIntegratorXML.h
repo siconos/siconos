@@ -143,5 +143,4 @@ public:
   void getInteractionsNumbers(std::vector<int>&);
 };
 
-
 #endif

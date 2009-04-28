@@ -23,6 +23,7 @@
 #ifndef __NewtonImpactFrictionNSLXML__
 #define __NewtonImpactFrictionNSLXML__
 
+#include "SiconosPointers.hpp"
 #include "NonSmoothLawXML.h"
 
 /** XML management for NewtonImpactFrictionNSL
@@ -131,5 +132,7 @@ public:
   }
 
 };
+
+TYPEDEF_SPTR(NewtonImpactFrictionNSLXML);
 
 #endif

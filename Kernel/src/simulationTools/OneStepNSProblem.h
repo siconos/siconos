@@ -34,7 +34,8 @@ class Simulation;
 class DynamicalSystem;
 class UnitaryRelation;
 class SiconosMatrix;
-class OneStepNSProblemXML;
+TYPEDEF_SPTR(Numerics_Options);
+
 
 /** default name for the OneStepNSProblem of the simulation */
 const std::string DEFAULT_OSNS_NAME = "unamed";
@@ -160,15 +161,15 @@ protected:
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
 
-private:
-
   /** default constructor
    */
-  OneStepNSProblem();
+  OneStepNSProblem() {};
+
+private:
 
   /** copy constructor (private => no copy nor pass-by value)
    */
-  OneStepNSProblem(const OneStepNSProblem&);
+  OneStepNSProblem(const OneStepNSProblem&) {};
 
   /** assignment (private => forbidden) */
   OneStepNSProblem& operator=(const OneStepNSProblem&);
@@ -263,10 +264,6 @@ public:
    */
   void setUnitaryBlocks(const MapOfMapOfUnitaryMatrices&);
 
-  /** clear the map of unitaryBlocks (ie release memory)
-   */
-  void clearUnitaryBlocks();
-
   /** get the DSBlocks matrices map
    *  \return a MapOfDSMatrices
    */
@@ -285,10 +282,6 @@ public:
    *  \param a MapOfDSMatrices
    */
   void setDSBlocks(const MapOfDSMatrices&);
-
-  /** clear the map of DSBlocks (ie release memory)
-   */
-  void clearDSBlocks();
 
 
   /** get the unitaryDSBlocks matrices map
@@ -311,10 +304,6 @@ public:
    */
   void setUnitaryDSBlocks(const MapOfUnitaryMapOfDSMatrices&);
 
-  /** clear the map of unitaryBlocks (ie release memory)
-   */
-  void clearUnitaryDSBlocks();
-
   /** get the DSunitaryBlocks matrices map
     *  \return a MapOfDSMapOfUnitaryMatrices
     */
@@ -334,10 +323,6 @@ public:
    *  \param a MapOfDSMapOfUnitaryMatrices
    */
   void setDSUnitaryBlocks(const MapOfDSMapOfUnitaryMatrices&);
-
-  /** clear the map of unitaryBlocks (ie release memory)
-   */
-  void clearDSUnitaryBlocks();
 
   /** get the NonSmoothSolver
    *  \return a pointer on NonSmoothSolver

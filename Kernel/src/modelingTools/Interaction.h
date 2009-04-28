@@ -31,9 +31,9 @@
 #include "Tools.hpp"
 #include "SiconosPointers.hpp"
 #include "Relation.h"
-class NonSmoothLaw;
+#include "NonSmoothLaw.h"
+
 class DynamicalSystem;
-class InteractionXML;
 class BlockVector;
 
 /**  An Interaction describes the non-smooth interactions between some

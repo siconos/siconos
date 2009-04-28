@@ -233,5 +233,5 @@ public:
   void display() const;
 
 };
-
+DEFINE_SPTR(Actuator)
 #endif

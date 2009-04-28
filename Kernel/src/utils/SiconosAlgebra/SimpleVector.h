@@ -411,4 +411,7 @@ public:
   friend void subscal(double, const SiconosVector&, SiconosVector&, const std::vector<unsigned int>&, bool = true);
 
 };
+
+DEFINE_SPTR(SimpleVector);
+
 #endif

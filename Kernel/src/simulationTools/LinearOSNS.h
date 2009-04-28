@@ -26,7 +26,7 @@
 #include "OneStepNSProblem.h"
 #include "SimpleVector.h"
 #include "SimpleMatrix.h"
-#include "SparseBlockMatrix.h"
+#include "BlockCSRMatrix.h"
 #include <sys/time.h>
 
 #include "SiconosPointers.hpp"
@@ -83,7 +83,7 @@ protected:
 
   /** default constructor (private)
    */
-  LinearOSNS();
+  LinearOSNS() {};
 
 public:
 

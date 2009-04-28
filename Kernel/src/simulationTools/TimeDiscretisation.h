@@ -27,8 +27,6 @@
 #include "TimeDiscretisationXML.h"
 #include <vector>
 
-class TimeDiscretisationXML;
-
 /** A time discretisation scheme
 
     \author SICONOS Development Team - copyright INRIA
@@ -93,7 +91,7 @@ private:
 
   /** default constructor (private => no copy nor pass-by value)
    */
-  TimeDiscretisation();
+  TimeDiscretisation() {};
 
   /** Assignment Operator (private => forbidden) */
   TimeDiscretisation& operator =(const TimeDiscretisation&);
@@ -207,5 +205,7 @@ public:
    */
   void saveTimeDiscretisationToXML();
 };
+
+DEFINE_SPTR(TimeDiscretisation);
 
 #endif // TIMEDISCRETISATION_H

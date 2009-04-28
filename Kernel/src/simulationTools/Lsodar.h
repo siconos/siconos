@@ -70,7 +70,7 @@ private:
 
   /** default constructor, private
    */
-  Lsodar();
+  Lsodar() {};
 
 public:
 

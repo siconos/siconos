@@ -26,19 +26,17 @@
 
 #include "SimpleVector.h"
 #include "SimpleMatrix.h"
+#include "Interaction.h"
 #include "RuntimeException.h"
 #include "Tools.hpp"
 #include "Plugin.hpp"
 #include "SiconosPointers.hpp"
-#include "Interaction.h"
 #include "PluginTypes.hpp"
 #include "RelationNamespace.hpp"
 #include <boost/weak_ptr.hpp>
 
-class RelationXML;
 class SimpleVector;
 class SimpleMatrix;
-class Interaction;
 
 /** General Non Linear Relation (Virtual Base class for Relations).
  *  \author SICONOS Development Team - copyright INRIA
@@ -398,5 +396,4 @@ public:
   virtual void saveRelationToXML() const;
 
 };
-
 #endif // RELATION_H

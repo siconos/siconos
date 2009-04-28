@@ -40,5 +40,6 @@ enum TYPES
 };
 
 }
-
+DEFINE_SPTR(Moreau);
+DEFINE_SPTR(Lsodar);
 #endif

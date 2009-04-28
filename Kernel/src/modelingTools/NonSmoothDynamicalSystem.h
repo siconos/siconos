@@ -32,7 +32,7 @@ enum dynamicalsystem {LAGRANGIANNLDS, LAGRANGIANTIDS, LINEARTIDS};
 class Interaction;
 class DynamicalSystem;
 class Topology;
-class NonSmoothDynamicalSystemXML;
+
 
 /** the Non Smooth Dynamical System composed with dynamical systems that interact alltogether.
  *

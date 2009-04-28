@@ -23,13 +23,11 @@
 #ifndef __SIMULATIONXML__
 #define __SIMULATIONXML__
 
+#include "SiconosPointers.hpp"
 #include "SiconosDOMTreeTools.h"
 #include <set>
 
 class Simulation;
-class OneStepIntegratorXML;
-class OneStepNSProblemXML;
-class TimeDiscretisationXML;
 
 /** set of OneStepIntegratorXML */
 typedef std::set<SP::OneStepIntegratorXML> SetOfOSIXML;
@@ -171,7 +169,5 @@ public:
    */
   void saveSimulation2XML(xmlNodePtr  , SP::Simulation);
 };
-
-
 
 #endif

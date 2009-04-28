@@ -28,10 +28,6 @@
 #include <libxml/parser.h>
 #include <libxml/xmlschemas.h>
 
-class Model;
-class NonSmoothDynamicalSystemXML;
-class SimulationXML;
-
 // warning: the xml_schema location must corresponds to the package name
 // provided in configure.ac (AC_INIT(package name ...)).
 // Here : siconos-kernel

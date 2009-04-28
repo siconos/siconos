@@ -36,7 +36,6 @@ const std::string RELAYNSLAW = "RelayNSL";
 const std::string NEWTONIMPACTFRICTIONNSLAW = "NewtonImpactFrictionNSL";
 
 class Interaction;
-class NonSmoothLawXML;
 
 /** Non Smooth Laws Base Class
  *
@@ -150,5 +149,7 @@ public:
   virtual void display() const = 0;
 
 };
+
+DEFINE_SPTR(NonSmoothLaw);
 
 #endif

@@ -158,5 +158,5 @@ public:
   }
 
 };
-
+DEFINE_SPTR(FirstOrderLinearDSXML);
 #endif

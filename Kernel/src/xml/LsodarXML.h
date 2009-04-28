@@ -22,6 +22,7 @@
 #ifndef __LsodarXML__
 #define __LsodarXML__
 
+#include "SiconosPointers.hpp"
 #include "OneStepIntegratorXML.h"
 
 /** XML management for Lsodar
@@ -48,5 +49,5 @@ public:
 private:
 };
 
-
+DEFINE_SPTR(LsodarXML);
 #endif

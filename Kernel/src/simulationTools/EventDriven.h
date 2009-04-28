@@ -44,10 +44,6 @@ private:
    */
   int istate;
 
-  /** defaut constructor (private)
-   */
-  EventDriven();
-
   /** initialisation specific to EventDriven for OneStepNSProblem.
    */
   void initOSNS();
@@ -70,6 +66,10 @@ public:
        \param the set of all interactions in the NSDS
   */
   EventDriven(SP::SimulationXML, double, double, SP::DynamicalSystemsSet , SP::InteractionsSet);
+
+  /** defaut constructor
+   */
+  // EventDriven() {};
 
   /** destructor
    */
@@ -134,5 +134,5 @@ public:
   static EventDriven* convert(Simulation* str);
 
 };
-
+DEFINE_SPTR(EventDriven);
 #endif // EVENTDRIVEN_H

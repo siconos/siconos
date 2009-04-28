@@ -24,6 +24,7 @@
 
 #include "Solver_Options.h" // Numerics header 
 #include "NonSmoothSolverXML.h"
+#include "RuntimeException.h"
 #include <vector>
 #include <string>
 
@@ -167,7 +168,10 @@ public:
    *  \param i, the index of the parameter to be set
    *  \param val, value of parameter[i]
    */
-  void setIntParameter(unsigned int i, int val);
+  void setIntParameter(unsigned int i, int val)
+  {
+    RuntimeException::selfThrow("NonSmoothSolver::setIntParameter not implemented") ;
+  };
 
   /** To get the list of double parameters
    *  \return a SP::DoubleParameters
@@ -181,7 +185,10 @@ public:
    *  \param i, the index of the parameter to be set
    *  \param val, value of parameter[i]
    */
-  void setDoubleParameter(unsigned int i, double val);
+  void setDoubleParameter(unsigned int i, double val)
+  {
+    RuntimeException::selfThrow("NonSmoothSolver::setDoubleParameter not implemented") ;
+  };
 
   /** To get the Solver_Options structure
    *  \return , the numerics structure used to save solver parameters
@@ -204,7 +211,10 @@ public:
    (warning: any previous input for parameters will be ignored!)\n
    else false (warning: it means that parameters must be properly set)
   */
-  void setSolverToDefault(bool input);
+  void setSolverToDefault(bool input)
+  {
+    RuntimeException::selfThrow("NonSmoothSolver::setSolverToDefault not implemented") ;
+  };
 
   /** To display solver data
    */
@@ -215,5 +225,5 @@ public:
   void saveNonSmoothSolverToXML();
 
 };
-
+DEFINE_SPTR(NonSmoothSolver);
 #endif // NonSmoothSolver_H

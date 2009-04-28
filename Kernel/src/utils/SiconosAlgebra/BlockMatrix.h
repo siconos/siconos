@@ -417,4 +417,6 @@ public:
   void PLUForwardBackwardInPlace(SiconosVector &B);
 };
 
+DEFINE_SPTR(BlockMatrix);
+
 #endif
