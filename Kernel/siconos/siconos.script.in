@@ -245,7 +245,7 @@ if test ! "$make_args" = "clean"; then
     fi
 
     if test ! -z "$main_source"; then
-        exe=`expr "\`basename $main_source\`" : "\(.*\).cpp"`
+        exe=`expr "\`basename $main_source\`" : "\(.*\)\..*"`
     else
         exe=`basename $sources_directory`
     fi
