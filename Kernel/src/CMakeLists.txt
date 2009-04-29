@@ -75,10 +75,12 @@ COMPILE_WITH(SiconosNumerics REQUIRED)
 COMPILE_WITH(Boost REQUIRED)
 # FIND_PACKAGE( ... COMPONENTS <component>) does not mention <component> in failure message!
 # a workaround 
-CHECK_INCLUDE_FILE_CXX(${Boost_INCLUDE_DIR}/boost/graph/adjacency_list.hpp BOOST_GRAPH_IS_HERE)
-IF(NOT BOOST_GRAPH_IS_HERE)
+
+FIND_PACKAGE(Boost COMPONENTS graph)
+
+IF(NOT Boost_GRAPH_FOUND)
   MESSAGE(FATAL_ERROR "boost graph library is needed.")
-ENDIF(NOT BOOST_GRAPH_IS_HERE)
+ENDIF(NOT Boost_GRAPH_FOUND)
 
 COMPILE_WITH(LibXml2 REQUIRED)
 COMPILE_WITH(LAPACK REQUIRED)

@@ -21,8 +21,8 @@
   Various useful functions and typedef.
 */
 
-#ifndef TOOLS
-#define TOOLS
+#ifndef TOOLS_H
+#define TOOLS_H
 
 #include<string>
 #include <sstream>
@@ -127,18 +127,16 @@ static int TRM()
   return(malldelta);
 }
 
-
-
 /* a modifiable pure virtual definition to solve problems with boost
    python and pure virtual operators */
+#endif /* TOOLS_H */
+
+
 #ifndef PURE_DEF
 #define PURE_DEF =0
 #endif
 
-
-#endif
-
-#endif
+#endif /* TOOLS_H */
 
 #ifndef PRINTSEQUENCE_H
 #define PRINTSEQUENCE_H
