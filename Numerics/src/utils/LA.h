@@ -78,9 +78,7 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 #define LAPACK_5_W LAPACK_5
 
 #else /* f2c or g2c + blaslapack.h */
-#ifndef FRAMEWORK_BLAS
 #include "blaslapack.h"
-#endif
 #define BLAS_NAME(N) F77NAME(N)
 #define LAPACK_NAME(N) F77NAME(N)
 #define LA_TRANS "T"
@@ -245,7 +243,6 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
  *  involving an M-by-N matrix A, or its transpose, using a QR or LQ
  *  factorization of A.  It is assumed that A has full rank.
  */
-#include "blaslapack.h"
 
 #define DGELS( M, N, NRHS, A, LDA, B, LDB, WORK, LWORK, INFO  ) \
    ({int C_M = M; \

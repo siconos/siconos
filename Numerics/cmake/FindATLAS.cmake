@@ -40,6 +40,7 @@ IF(APPLE)
   # clapack.h and cblas.h in Apple framework are differents...
   IF(LAPACK_LIBRARIES MATCHES framework)
     SET(FRAMEWORK_BLAS 1)
+    SET(ATLAS_FOUND 1)
   ENDIF(LAPACK_LIBRARIES MATCHES framework)
 ENDIF(APPLE)
 
