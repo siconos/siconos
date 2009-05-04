@@ -959,6 +959,9 @@ int transposeSBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructur
       {
         for (int j = 0; j < nbColumns; j++)
         {
+          assert(i + j * nbRows < nbRows * nbColumns);
+          assert(j + i * nbColumns < nbRows * nbColumns);
+
           B->block[blockNum] [i + j * nbRows ] =  A->block[blockMap[blockNum]] [j + i * nbColumns] ;
         }
       }
@@ -993,6 +996,8 @@ int inverseDiagSBM(const SparseBlockStructuredMatrix*  M)
   int currentRowNumber ;
   int colNumber;
   int nbRows, nbColumns;
+  int infoDGETRF, infoDGETRI ;
+  int info = 0;
   for (currentRowNumber = 0 ; currentRowNumber < M->filled1 - 1; ++currentRowNumber)
   {
     for (unsigned int blockNum = M->index1_data[currentRowNumber];
@@ -1010,18 +1015,21 @@ int inverseDiagSBM(const SparseBlockStructuredMatrix*  M)
 
       assert(nbRows == nbColumns);
 
-      int infoDGETRF, infoDGETRI ;
+
       int* ipiv = (int *)malloc(nbRows * sizeof(*ipiv));
 
       DGETRF(nbRows, nbColumns, M->block[blockNum], nbRows, ipiv, infoDGETRF);
-      DGETRI(nbRows, M->block[blockNum], nbRows, ipiv, infoDGETRF);
-      free(ipiv);
+      assert(!infoDGETRF);
 
+      DGETRI(nbRows, M->block[blockNum], nbRows, ipiv, infoDGETRI);
+      free(ipiv);
+      assert(!infoDGETRI);
 
     }
   }
+  if ((!infoDGETRF) || (!infoDGETRF)) info = 0;
 
-
+  return info;
 
 
 }

@@ -128,7 +128,7 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
     int n = M->size0;
     int m = H->size1;
     int nm = n * m;
-    int infoDGESV;
+    int infoInverseSBM = 0;
     assert(!Reformulation_ipiv);
     Reformulation_ipiv = (int *)malloc(n * sizeof(int));
 
@@ -139,7 +139,10 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
 
     //Compute Htmp   <- M^-1 HtmpSBM
     /* DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
+    infoInverseSBM = inverseDiagSBM(M->matrix1);
+    assert(!infoInverseSBM);
     Reformulation_MisInverse = 1;
+
     allocateMemoryForProdSBMSBM(M->matrix1, H->matrix1, HtmpSBM);
     double alpha = 1.0, beta = 1.0;
 
