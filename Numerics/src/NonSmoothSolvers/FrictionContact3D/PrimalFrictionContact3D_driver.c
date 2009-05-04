@@ -88,7 +88,7 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
     Wnum-> size0 = m;
     Wnum-> size1 = m;
     Wnum->matrix0 = (double*)malloc(m * m * sizeof(double));
-
+    Wnum->matrix0 = NULL;
     // Compute W <-  H^T M^1 H
 
     DGEMM(LA_TRANS, LA_NOTRANS, m, m, n, 1.0, H->matrix0, n, Htmp, n, 0.0, Wnum->matrix0, m);
@@ -157,6 +157,7 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
     Wnum-> size0 = m;
     Wnum-> size1 = m;
     Wnum->matrix1 = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
+    Wnum->matrix0 = NULL;
     SparseBlockStructuredMatrix *W =  Wnum->matrix1;
 
     allocateMemoryForProdSBMSBM(Htrans, HtmpSBM, W);
