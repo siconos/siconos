@@ -39,6 +39,7 @@ extern "C"
 #endif
 
 
+#ifndef BOOST_NUMERIC_BINDINGS_LAPACK_LAPACK_H
 
 #ifndef _BLAS1_H_
 
@@ -452,9 +453,13 @@ extern "C"
 
 #endif
 
+#endif // BOOST_NUMERIC_BINDINGS_LAPACK_LAPACK_H
+
 #ifdef __cplusplus
 }
 #endif
+
+
 
 #endif // BLASLAPACK_H
 
