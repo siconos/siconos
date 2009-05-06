@@ -678,7 +678,7 @@ void printSBM(const SparseBlockStructuredMatrix* const m)
   printf("%d}\n", m->index1_data[m->filled1 - 1]);
   printf("index2_data od size %i= {", m->filled2);
   for (int i = 0 ; i < m->filled2 - 1; i++) printf("%d,  ", m->index2_data[i]);
-  printf("%d}\n", m->index1_data[m->filled2 - 1]);
+  printf("%d}\n", m->index2_data[m->filled2 - 1]);
   int sizemax = 10;
   int currentRowNumber ;
   int colNumber;
@@ -1047,6 +1047,7 @@ int copySBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMat
 int transposeSBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMatrix*  B)
 {
   assert(A);
+  assert(B);
   B->nbblocks = A->nbblocks;
   B->blocknumber0 = A->blocknumber1;
   B->blocknumber1 = A->blocknumber0;
@@ -1071,10 +1072,11 @@ int transposeSBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructur
 
   int blockNumB = -1;
   B->index1_data[0] = 0;
-  for (currentColNumberofA = 0 ; currentColNumberofA < A->filled2 - 1; ++currentColNumberofA)
+  for (currentColNumberofA = 0 ; currentColNumberofA < A->blocknumber1; ++currentColNumberofA)
   {
+    assert(currentColNumberofA + 1 < B->filled1);
     B->index1_data[currentColNumberofA + 1] = B->index1_data[currentColNumberofA];
-    for (currentRowNumberofA = 0 ; currentRowNumberofA < A->filled1 - 1; ++currentRowNumberofA)
+    for (currentRowNumberofA = 0 ; currentRowNumberofA < A->blocknumber0; ++currentRowNumberofA)
     {
       for (unsigned int blockNum = A->index1_data[currentRowNumberofA];
            blockNum < A->index1_data[currentRowNumberofA + 1]; ++blockNum)
@@ -1116,7 +1118,8 @@ int transposeSBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructur
       nbColumns = B->blocksize1[colNumber];
       if (colNumber != 0)
         nbColumns -= B->blocksize1[colNumber - 1];
-      B->block[blockNum] = (double*)malloc(nbRows * nbColumns * sizeof(double));
+      int lengthblock = nbRows * nbColumns;
+      B->block[blockNum] = (double*)malloc(lengthblock * sizeof(double));
       for (int i = 0; i < nbRows; i++)
       {
         for (int j = 0; j < nbColumns; j++)

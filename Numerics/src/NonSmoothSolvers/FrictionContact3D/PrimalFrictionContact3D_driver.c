@@ -134,7 +134,7 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
 
     // compute W = H^T M^-1 H
     //Copy Htmp <- H
-    SparseBlockStructuredMatrix *HtmpSBM = (SparseBlockStructuredMatrix*)malloc(sizeof(*HtmpSBM));
+    SparseBlockStructuredMatrix *HtmpSBM = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
     /* copySBM(H->matrix1 , HtmpSBM); */
 
     //Compute Htmp   <- M^-1 HtmpSBM
@@ -148,7 +148,7 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
 
     prodSBMSBM(alpha, M->matrix1, H->matrix1, beta, HtmpSBM);
 
-    SparseBlockStructuredMatrix *Htrans = (SparseBlockStructuredMatrix*)malloc(sizeof(*Htrans));
+    SparseBlockStructuredMatrix *Htrans = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
     transposeSBM(H->matrix1, Htrans);
 
     localproblem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));;
