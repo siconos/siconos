@@ -821,21 +821,25 @@ void readInFileSBM(SparseBlockStructuredMatrix* const m, FILE *file)
     fscanf(file, "%d", &(m->blocksize1[i]));
   }
 
-
-  fscanf(file, "%d", &(m->filled1));
-  fscanf(file, "%d", &(m->filled2));
+  int filled1 = 0, filled2 = 0;
+  fscanf(file, "%d", &(filled1));
+  m->filled1 = filled1;
+  fscanf(file, "%d", &(filled2));
+  m->filled2 = filled2;
   m->index1_data = (size_t *)malloc(m->filled1 * sizeof(size_t));
   m->index2_data = (size_t *)malloc(m->filled2 * sizeof(size_t));
 
-
+  int index1_dataCurrent = 0;
   for (int i = 0; i < m->filled1; i++)
   {
-    fscanf(file, "%d", &(m->index1_data[i]));
+    fscanf(file, "%d", &(index1_dataCurrent));
+    m->index1_data[i] = index1_dataCurrent;
   }
-
+  int index2_dataCurrent = 0;
   for (int i = 0; i < m->filled2; i++)
   {
-    fscanf(file, "%d", &(m->index2_data[i]));
+    fscanf(file, "%d", &(index2_dataCurrent));
+    m->index2_data[i] = index2_dataCurrent;
   }
   m->block = (double**)malloc(m->nbblocks * sizeof(double*));
   int currentRowNumber ;
