@@ -236,6 +236,9 @@ void printInFile(const NumericsMatrix* const m, FILE* file)
   }
   int storageType = m->storageType;
   fprintf(file, "%d\n", m->storageType);
+  fprintf(file, "%d\n", m->size0);
+  fprintf(file, "%d\n", m->size1);
+
   if (storageType == 0)
   {
     fprintf(file, "%i\t%i\n", m->size0, m->size1);
@@ -265,6 +268,8 @@ void readInFile(NumericsMatrix* const m, FILE *file)
     exit(EXIT_FAILURE);
   }
   fscanf(file, "%d", &(m->storageType));
+  fscanf(file, "%d", &(m->size0));
+  fscanf(file, "%d", &(m->size1));
   int storageType = m->storageType;
   if (storageType == 0)
   {
