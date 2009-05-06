@@ -21,6 +21,7 @@
 #define SparseBlockMatrix_H
 
 #include <stddef.h>
+#include <stdio.h>
 
 /*!\file SparseBlockMatrix.h
   \brief Structure definition and functions related to SparseBlockStructuredMatrix
@@ -173,6 +174,27 @@ extern "C" {
       \param M the matrix to be displayed
    */
   void printSBM(const SparseBlockStructuredMatrix* const M);
+
+  /** print in file  of the matrix content
+  \param M the matrix to be displayed
+  \param file the corresponding  file
+  */
+  void printInFileSBM(const SparseBlockStructuredMatrix* const M, FILE* file);
+  /** read in file  of the matrix content
+  \param M the matrix to be displayed
+  \param filename the corresponding name of the file
+  */
+  void readInFileSBM(SparseBlockStructuredMatrix* const M, FILE *file);
+  /** print in file  of the matrix content
+  \param M the matrix to be displayed
+  \param file the corresponding file
+  */
+  void printInFileNameSBM(const SparseBlockStructuredMatrix* const M, const char *filename);
+  /** read in file  of the matrix content
+  \param M the matrix to be displayed
+  \param filename the corresponding name of the file
+  */
+  void readInFileNameSBM(SparseBlockStructuredMatrix* const M, const char *filename);
 
   /** Destructor for SparseBlockStructuredMatrixPred objects
       \param SparseBlockStructuredMatrix, the matrix to be destroyed.

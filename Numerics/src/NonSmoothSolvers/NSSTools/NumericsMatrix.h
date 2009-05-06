@@ -97,9 +97,8 @@ However, if required, a function freeNumericsMatrix() is available.
   \brief Structure definition and functions related to matrix storage in Numerics
   \author Franck Perignon
 */
-
+#include <stdio.h>
 #include "SparseBlockMatrix.h"
-
 /** Structure used to handle with matrix in Numerics (interface to double*, SparseBlockStructuredMatrix and so on) \n
     Warning: one and only one storage is allowed and thus only one of the pointers below can be different from NULL
     \param storageType, int that identifies the type of storage (0: double*, 1:SparseBlockStructuredMatrix)
@@ -117,6 +116,8 @@ typedef struct
   double* matrix0;
   SparseBlockStructuredMatrix* matrix1;
 } NumericsMatrix;
+
+#include "stdio.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -175,6 +176,30 @@ extern "C" {
       \param M the matrix to be displayed
    */
   void display(const NumericsMatrix* const M);
+
+  /** PrintInFile  of the matrix content
+     \param M the matrix to be printed
+     \param filename the corresponding name of the file
+  */
+  void printInFileName(const NumericsMatrix* const M, const char *filename);
+
+  /** Read in file  of the matrix content
+     \param M the matrix to be read
+     \param filename the corresponding name of the file
+  */
+  void readInFileName(NumericsMatrix* const M, const char *filename);
+  /** PrintInFile  of the matrix content
+     \param M the matrix to be printed
+     \param filename the corresponding file
+  */
+
+  void printInFile(const NumericsMatrix* const M, FILE* file);
+
+  /** Read in file  of the matrix content
+     \param M the matrix to be read
+     \param filename the corresponding  file
+  */
+  void readInFile(NumericsMatrix* const M, FILE *file);
 
   /** Screen display raw by raw of the matrix content
       \param M the matrix to be displayed

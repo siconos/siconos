@@ -227,3 +227,69 @@ void displayRawbyRaw(const NumericsMatrix* const m)
   else if (storageType == 1)
     printSBM(m->matrix1);
 }
+void printInFile(const NumericsMatrix* const m, FILE* file)
+{
+  if (! m)
+  {
+    fprintf(stderr, "Numerics, NumericsMatrix printInFile failed, NULL input.\n");
+    exit(EXIT_FAILURE);
+  }
+  int storageType = m->storageType;
+  fprintf(file, "%d\n", m->storageType);
+  if (storageType == 0)
+  {
+    fprintf(file, "%i\t%i\n", m->size0, m->size1);
+    fprintf(file, "[");
+    for (int i = 0; i < m->size1 * m->size0; i++)
+    {
+      fprintf(file, "%lf ", m->matrix0[i]);
+      if ((i + 1) % m->size1 == 0)
+        fprintf(file, "\n");
+    }
+    fprintf(file, "]");
+    fprintf(file, "\n (warning: column-major) \n");
+  }
+  else if (storageType == 1)
+    printInFileSBM(m->matrix1, file);
+}
+
+void printInFileName(const NumericsMatrix* const m, const char *filename)
+{
+}
+
+void readInFile(NumericsMatrix* const m, FILE *file)
+{
+  if (! m)
+  {
+    fprintf(stderr, "Numerics, NumericsMatrix printInFile failed, NULL input.\n");
+    exit(EXIT_FAILURE);
+  }
+  fscanf(file, "%d", &(m->storageType));
+  int storageType = m->storageType;
+  if (storageType == 0)
+  {
+    /* fprintf(file,"%i\t%i\n",m->size0,m->size1); */
+    /*  fprintf(file,"["); */
+    /*  for(int i = 0; i<m->size1*m->size0; i++){ */
+    /*      fprintf(file,"%lf ",m->matrix0[i]); */
+    /*      if ((i+1)%m->size1 == 0) */
+    /*    fprintf(file,"\n"); */
+    /*  } */
+    /*  fprintf(file,"]"); */
+    /*  fprintf(file,"\n (warning: column-major) \n"); */
+
+    fprintf(stderr, "Numerics, NumericsMatrix,readInFile for storageType %i not yet implemented.\n", storageType);
+    exit(EXIT_FAILURE);
+  }
+  else if (storageType == 1)
+  {
+    m->matrix0 = NULL;
+    m->matrix1 = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
+    readInFileSBM(m->matrix1, file);
+  }
+}
+
+void readInFileName(NumericsMatrix* const m, const char *filename)
+{
+}
+
