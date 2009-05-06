@@ -362,7 +362,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   int info = -1;
   printf("== Numerics tests: prodNumericsMatrixNumericsMatrix(NumericsMatrix,NumericsMatrix) == \n");
   int i, j, k , n = M1->size1;
-  double alpha = 1.0, beta = 1.0;
+  double alpha = 1.0, beta = 0.0;
   double tol = 1e-12;
 
 
@@ -386,7 +386,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
       {
         sum = sum + M1->matrix0[i + k * M1->size0] * M1->matrix0[k + j * M1->size0];
       }
-      Cref[i + j * C.size1] = sum;
+      Cref[i + j * C.size0] = sum;
 
     }
   }
@@ -395,7 +395,10 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   {
     for (j = 0; j < C.size1; j++)
     {
+      printf("Cref[%i+%i*%i]= %lf\t\t", i, j, C.size0, Cref[i + j * C.size0]);
+      printf("Cmatrix0[%i+%i*%i]= %lf\n", i, j, C.size0, C.matrix0[i + j * C.size0]);
       err += (Cref[i + j * C.size0] - C.matrix0[i + j * C.size0]) * (Cref[i + j * C.size0] - C.matrix0[i + j * C.size0]);
+      printf("err = %lf", err);
     }
   }
   if (err < tol)
@@ -463,7 +466,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   C3.size1 = M2->size1;
   SparseBlockStructuredMatrix * SBM3 = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
   C3.matrix1 = SBM3;
-
+  beta = 1.0;
   i = 1;
   // while (i > 0)
 
