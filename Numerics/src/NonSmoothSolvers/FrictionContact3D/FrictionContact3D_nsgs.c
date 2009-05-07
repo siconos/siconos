@@ -162,6 +162,7 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
+  printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e\n", iter, error);
   dparam[0] = tolerance;
 
   /***** Free memory *****/
