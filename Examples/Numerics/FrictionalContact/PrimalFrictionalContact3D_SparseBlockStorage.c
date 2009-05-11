@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
   double b[3] = {0, 0, 0};
   double mu[1] = {0.1};
 
-  DSCAL(9, -1.0, q, 1);
+  /*    DSCAL(9,-1.0,q,1); */
 
 
 
@@ -217,7 +217,8 @@ int main(int argc, char* argv[])
   numerics_solver_options.filterOn = 0;
   numerics_solver_options.isSet = 1;
 
-  strcpy(numerics_solver_options.solverName, "NSGS_WR");
+  /*     strcpy(numerics_solver_options.solverName,"NSGS_WR"); */
+  strcpy(numerics_solver_options.solverName, "NSGS");
 
   numerics_solver_options.iSize = 5;
   numerics_solver_options.iparam = (int*)malloc(numerics_solver_options.iSize * sizeof(int));

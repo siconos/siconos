@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
   NumericsMatrix *HH = NumericsProblem.H;
   HH->storageType = 0;
   HH->matrix0 = H;
-  HH->size0 = m;
+  HH->size0 = n;
   HH->size1 = m;
 
 
@@ -160,6 +160,7 @@ int main(int argc, char* argv[])
   numerics_solver_options.isSet = 1;
 
   strcpy(numerics_solver_options.solverName, "NSGS_WR");
+  strcpy(numerics_solver_options.solverName, "NSGS");
 
   numerics_solver_options.iSize = 5;
   numerics_solver_options.iparam = (int*)malloc(numerics_solver_options.iSize * sizeof(int));
