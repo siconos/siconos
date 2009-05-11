@@ -25,6 +25,10 @@
 
 #include "Numerics_Options.h"
 #include "PrimalFrictionContact3D_Solvers.h"
+int * Primal_ipiv = NULL;
+int  Primal_MisInverse = 0;
+int  Primal_MisLU = 0;
+
 
 int primalFrictionContact3D_driver(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity,  Solver_Options* options, Numerics_Options* global_options)
 {
@@ -55,13 +59,18 @@ int primalFrictionContact3D_driver(PrimalFrictionContact_Problem* problem, doubl
   {
     if (verbose == 1)
       printf(" ========================== Call NSGS solver with reformulation into Friction-Contact 3D problem ==========================\n");
-
+    Primal_ipiv = NULL;
+    Primal_MisInverse = 0;
+    Primal_MisLU = 0;
     primalFrictionContact3D_nsgs_wr(problem, reaction , velocity, globalVelocity, &info, options);
 
   }
   else if (strcmp(name, "NSGS") == 0)
   {
-    /*  primalFrictionContact3D_nsgs( problem, reaction , velocity, globalVelocity, &info , options); */
+    Primal_ipiv = NULL;
+    Primal_MisInverse = 0;
+    Primal_MisLU = 0;
+    primalFrictionContact3D_nsgs(problem, reaction , velocity, globalVelocity, &info , options);
 
   }
   else

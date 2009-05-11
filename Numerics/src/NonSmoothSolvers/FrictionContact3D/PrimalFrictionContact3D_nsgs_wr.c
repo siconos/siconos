@@ -29,11 +29,11 @@
 #include "NonSmoothDrivers.h"
 #include "FrictionContact3D_Solvers.h"
 
+extern int *Primal_ipiv;
+extern int  Primal_MisInverse;
+extern int  Primal_MisLU;
 
 /* Global Variable for the reformulation of the problem */
-int * Reformulation_ipiv = NULL;
-int  Reformulation_MisInverse;
-int  Reformulation_MisLU;
 
 int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, FrictionContact_Problem* localproblem)
 {
@@ -65,7 +65,7 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
     int nm = n * m;
     int infoDGETRF;
     int infoDGETRS;
-    Reformulation_ipiv = (int *)malloc(n * sizeof(int));
+    Primal_ipiv = (int *)malloc(n * sizeof(int));
 
 
     double *Htmp = (double*)malloc(nm * sizeof(double));
@@ -73,11 +73,11 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
     //Copy Htmp <- H
     DCOPY(nm,  H->matrix0 , 1, Htmp, 1);
     //Compute Htmp   <- M^-1 Htmp
-    Reformulation_MisLU = 0; /*  Assume that M is not already LU */
-    DGETRF(n, n, M->matrix0, n, Reformulation_ipiv, infoDGETRF);
+    Primal_MisLU = 0; /*  Assume that M is not already LU */
+    DGETRF(n, n, M->matrix0, n, Primal_ipiv, infoDGETRF);
     assert(!infoDGETRF);
-    Reformulation_MisLU = 1;
-    DGETRS(LA_NOTRANS, n, m,  M->matrix0, n, Reformulation_ipiv, Htmp, n, infoDGETRS);
+    Primal_MisLU = 1;
+    DGETRS(LA_NOTRANS, n, m,  M->matrix0, n, Primal_ipiv, Htmp, n, infoDGETRS);
     assert(!infoDGETRS);
     /*      DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
 
@@ -109,8 +109,8 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
 
     // compute H^T M^(-1) q + b
 
-    assert(Reformulation_MisLU);
-    DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Reformulation_ipiv, qtmp , n, infoDGETRS);
+    assert(Primal_MisLU);
+    DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Primal_ipiv, qtmp , n, infoDGETRS);
 
 
     /*      DGESV(n, m, M->matrix0, n, ipiv, problem->q , n, infoDGESV); */
@@ -134,8 +134,8 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
     int m = H->size1;
 
     int infoInverseSBM = 0;
-    assert(!Reformulation_ipiv);
-    Reformulation_ipiv = (int *)malloc(n * sizeof(int));
+    assert(!Primal_ipiv);
+    Primal_ipiv = (int *)malloc(n * sizeof(int));
 
     // compute W = H^T M^-1 H
     //Copy Htmp <- H
@@ -146,7 +146,7 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
     /* DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
     infoInverseSBM = inverseDiagSBM(M->matrix1);
     assert(!infoInverseSBM);
-    Reformulation_MisInverse = 1;
+    Primal_MisInverse = 1;
 
     allocateMemoryForProdSBMSBM(M->matrix1, H->matrix1, HtmpSBM);
     double alpha = 1.0, beta = 1.0;
@@ -208,14 +208,14 @@ int computeGlobalVelocity(PrimalFrictionContact_Problem* problem, double * react
     /* globalVelocity <-  H*reaction + globalVelocity*/
     DGEMV(LA_NOTRANS, n, m, 1.0, problem->H->matrix0 , n, reaction , 1, 1.0, globalVelocity, 1);
     /* Compute globalVelocity <- M^(-1) globalVelocity*/
-    assert(Reformulation_ipiv);
-    assert(Reformulation_MisLU);
+    assert(Primal_ipiv);
+    assert(Primal_MisLU);
     int infoDGETRS;
-    DGETRS(LA_NOTRANS, n, 1,   problem->M->matrix0, n, Reformulation_ipiv, globalVelocity , n, infoDGETRS);
+    DGETRS(LA_NOTRANS, n, 1,   problem->M->matrix0, n, Primal_ipiv, globalVelocity , n, infoDGETRS);
     assert(!infoDGETRS);
 
-    free(Reformulation_ipiv);
-    Reformulation_ipiv = NULL;
+    free(Primal_ipiv);
+    Primal_ipiv = NULL;
 
 
   }
@@ -236,14 +236,14 @@ int computeGlobalVelocity(PrimalFrictionContact_Problem* problem, double * react
 
 
     /*      inverseDiagSBM(M->matrix1); We assume that M->matrix1 is already inverse*/
-    assert(Reformulation_MisInverse);
+    assert(Primal_MisInverse);
 
     double beta2 = 0.0;
     prodSBM(n, n, alpha,  problem->M->matrix1, qtmp, beta2, globalVelocity);
 
     free(qtmp);
-    free(Reformulation_ipiv);
-    Reformulation_ipiv = NULL;
+    free(Primal_ipiv);
+    Primal_ipiv = NULL;
   }
 
   return info;

@@ -47,10 +47,14 @@ For each solver, the input argument are:
 #include "Numerics_Options.h"
 #include "Solver_Options.h"
 
+
 typedef void (*SolverPrimalPtr)(int, int, double*, int*, double*);
 typedef void (*PostSolverPrimalPtr)(int, double*);
 typedef void (*ComputeErrorPrimalPtr)(PrimalFrictionContact_Problem*, double*, double*, double *, double, double*);
-typedef void (*FreeSolverPrimalPtr)();
+typedef void (*FreeSolverPrimalPtr)(PrimalFrictionContact_Problem*);
+
+
+
 
 
 #ifdef __cplusplus
@@ -94,6 +98,9 @@ extern "C" {
        dparam[0] : tolerance
        dparam[2] : localtolerance
        dparam[1] : (out) error
+       \todo Implement ProdTransSBM
+       \todo Improve the splitting Algorithm with a smaller granularity
+       \todo Use a global projection perhaps
    */
   void primalFrictionContact3D_nsgs(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int* info, Solver_Options* options);
 

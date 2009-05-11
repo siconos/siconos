@@ -140,8 +140,6 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
   int iter = 0; /* Current iteration number */
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
-
-  int incy = 1;
   int contact; /* Number of the current row of blocks in M */
 
   dparam[0] = dparam[2]; // set the tolerance for the local solver
