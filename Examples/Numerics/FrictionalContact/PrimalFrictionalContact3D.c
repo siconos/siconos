@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
   numerics_solver_options.filterOn = 0;
   numerics_solver_options.isSet = 1;
 
-  strcpy(numerics_solver_options.solverName, "NSGS");
+  strcpy(numerics_solver_options.solverName, "NSGS_WR");
 
   numerics_solver_options.iSize = 5;
   numerics_solver_options.iparam = (int*)malloc(numerics_solver_options.iSize * sizeof(int));
@@ -181,14 +181,10 @@ int main(int argc, char* argv[])
   numerics_solver_options.dparam[2] = localtolerance ;
 
   //Driver call
-  //i=0;
-  //while (0==0){
+  i = 0;
   info = primalFrictionContact3D_driver(&NumericsProblem,
                                         reaction , velocity, globalVelocity,
                                         &numerics_solver_options, &numerics_options);
-  //i++;
-  //printf("i=%i\n", i);
-  //}
 
 
   // Solver output
