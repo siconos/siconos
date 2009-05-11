@@ -70,15 +70,13 @@ extern "C" {
 #endif
 
   /** Non-Smooth Gauss Seidel solver for friction-contact 3D problem
-      \param nc, number of contacts (dim of the problem n = 3*nc)
-      \param M global matrix (n*n)
-      \param q global vector (n)
-      \param reaction global vector (n), in-out parameter
+      \param problem, the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
-      \param mu, vector of the friction coefficients (size nc)
-      \param information about solver result
-      \param int vector of parameters (max. iteration number ...)
-      \param double vector of parameters (tolerance ...)
+      \param reaction global vector (n), in-out parameters
+      \param info return 0 if the solution is found
+      \param options the solver options :
+      iparam[0] : Maximum iteration number
+      iparam[4] : localsolver choice 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 2: projection on Disk  with diagonalization,
   */
   void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options);
 

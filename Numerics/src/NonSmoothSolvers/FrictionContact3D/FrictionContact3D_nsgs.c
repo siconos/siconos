@@ -164,6 +164,8 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
   }
   printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e\n", iter, error);
   dparam[0] = tolerance;
+  dparam[1] = error;
+
 
   /***** Free memory *****/
   (*freeSolver)();

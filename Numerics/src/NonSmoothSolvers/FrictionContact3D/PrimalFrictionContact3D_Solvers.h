@@ -47,6 +47,10 @@ For each solver, the input argument are:
 #include "Numerics_Options.h"
 #include "Solver_Options.h"
 
+typedef void (*SolverPrimalPtr)(int, int, double*, int*, double*);
+typedef void (*PostSolverPrimalPtr)(int, double*);
+typedef void (*ComputeErrorPrimalPtr)(PrimalFrictionContact_Problem*, double*, double*, double *, double, double*);
+typedef void (*FreeSolverPrimalPtr)();
 
 
 #ifdef __cplusplus
@@ -62,6 +66,38 @@ extern "C" {
        \return int =0 if a trivial solution has been found, else = -1
    */
   int checkTrivialCasePrimal(int, double*, double*, double*, double*, int*, double*);
+
+  /** Non-Smooth Gauss Seidel solver with reformulation for friction-contact 3D problem
+      \param problem, the friction-contact 3D problem to solve
+      \param velocity global vector (n), in-out parameter
+      \param reaction global vector (n), in-out parameters
+      \param globalVelocity global vector (m), in-out parameters
+      \param info return 0 if the solution is found
+      \param options the solver options :
+      iparam[0] : Maximum iteration number
+      iparam[4] : localsolver choice 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 2: projection on Disk  with diagonalization,
+      dparam[0] : tolerance
+      dparam[2] : localtolerance
+      dparam[1] : (out) error
+  */
+  void primalFrictionContact3D_nsgs_wr(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  Solver_Options* options);
+
+  /** Non-Smooth Gauss Seidel solver  for friction-contact 3D problem
+       \param problem, the friction-contact 3D problem to solve
+       \param velocity global vector (n), in-out parameter
+       \param reaction global vector (n), in-out parameters
+       \param globalVelocity global vector (m), in-out parameters
+       \param info return 0 if the solution is found
+       \param options the solver options :
+       iparam[0] : Maximum iteration number
+       iparam[4] ; local strategy
+       dparam[0] : tolerance
+       dparam[2] : localtolerance
+       dparam[1] : (out) error
+   */
+  void primalFrictionContact3D_nsgs(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int* info, Solver_Options* options);
+
+
 
 #ifdef __cplusplus
 }

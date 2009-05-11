@@ -27,7 +27,7 @@
   \begin{array}{l}
   M globalVelocity =  q +  H reaction \\
   velocity = H^T globalVelocity + b\\
-  K \ni reaction \perp velocity \in K^* \\
+  K \ni reaction \perp velocity + \mu \|velocity_T\| \in K^* \\
   \end{array}
   \right.
   \f$\n

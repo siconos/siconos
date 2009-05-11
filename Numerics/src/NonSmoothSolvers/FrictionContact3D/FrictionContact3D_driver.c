@@ -54,6 +54,12 @@ int frictionContact3D_driver(FrictionContact_Problem* problem, double *reaction 
       printf(" ========================== Call NSGS solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_nsgs(problem, reaction , velocity , &info , options);
   }
+  else
+  {
+    fprintf(stderr, "Numerics, FrictionContact3D_driver failed. Unknown solver.\n");
+    exit(EXIT_FAILURE);
+
+  }
 
   return info;
 
