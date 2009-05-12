@@ -75,6 +75,16 @@ extern "C" {
   */
   void frictionContact3D_projectionOnCone_solve(int, int, double*, int*, double*);
 
+  /** solve friction-contact 3D problem with projection on the Cone and regularization
+
+     \param number (position in global matrix) of the considered contact
+     \param dim. of the global problem
+     \param global reaction (only the block corresponding to the current contact will be modified,
+     \param vector of int parameters (max iteration numnber ...)
+     \param vector of double parameters (tolerance ...)
+  */
+  void frictionContact3D_projectionOnCone_with_regularization_solve(int, int, double*, int*, double*);
+
   /** solve friction-contact 3D problem with projection on the Cone with local
       iteration up to convergence of the local problem
       \param number (position in global matrix) of the considered contact

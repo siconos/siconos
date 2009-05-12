@@ -146,6 +146,89 @@ void frictionContact3D_projection_update(int contact, double* reaction)
   mu_i = mu[contact];
 }
 
+void projection_fillMLocal_with_regularization(int contact, double rho)
+{
+  // Dense storage
+  int storageType = MGlobal->storageType;
+  if (storageType == 0)
+  {
+    int in = 3 * contact, it = in + 1, is = it + 1;
+    int inc = n * in;
+    double * MM = MGlobal->matrix0;
+    /* The part of MM which corresponds to the current block is copied into MLocal */
+    MLocal[0] = MM[inc + in] - rho;
+    MLocal[1] = MM[inc + it];
+    MLocal[2] = MM[inc + is];
+    inc += n;
+    MLocal[3] = MM[inc + in] - rho;
+    MLocal[4] = MM[inc + it];
+    MLocal[5] = MM[inc + is];
+    inc += n;
+    MLocal[6] = MM[inc + in] - rho;
+    MLocal[7] = MM[inc + it];
+    MLocal[8] = MM[inc + is];
+  }
+  else if (storageType == 1)
+  {
+    int diagPos = getDiagonalBlockPos(MGlobal->matrix1, contact);
+    MLocal = MGlobal->matrix1->block[diagPos];
+  }
+  else
+    numericsError("FrictionContact3D_projection -", "unknown storage type for matrix M");
+}
+
+void frictionContact3D_projection_update_with_regularization(int contact, double* reaction, double rho)
+{
+  /* Build a local problem for a specific contact
+     reaction corresponds to the global vector (size n) of the global problem.
+  */
+
+  /* Call the update function which depends on the storage for MGlobal/MBGlobal */
+  /* Build a local problem for a specific contact
+   reaction corresponds to the global vector (size n) of the global problem.
+  */
+
+  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
+  projection_fillMLocal_with_regularization(contact, rho);
+
+  /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
+   excluding the block corresponding to the current contact. ****/
+
+  int in = 3 * contact, it = in + 1, is = it + 1;
+  /* reaction current block set to zero, to exclude current contact block */
+  double rin = reaction[in] ;
+  double rit = reaction[it] ;
+  double ris = reaction[is] ;
+  reaction[in] = 0.0;
+  reaction[it] = 0.0;
+  reaction[is] = 0.0;
+  /* qLocal computation*/
+  qLocal[0] = qGlobal[in] + rho * rin;
+  qLocal[1] = qGlobal[it] + rho * rit;
+  qLocal[2] = qGlobal[is] + rho * ris;
+
+  if (MGlobal->storageType == 0)
+  {
+    double * MM = MGlobal->matrix0;
+    int incx = n, incy = 1;
+    qLocal[0] += DDOT(n , &MM[in] , incx , reaction , incy);
+    qLocal[1] += DDOT(n , &MM[it] , incx , reaction , incy);
+    qLocal[2] += DDOT(n , &MM[is] , incx , reaction , incy);
+  }
+  else if (MGlobal->storageType == 1)
+  {
+    /* qLocal += rowMB * reaction
+    with rowMB the row of blocks of MGlobal which corresponds to the current contact
+    */
+    rowProdNoDiagSBM(n, 3, contact, MGlobal->matrix1, reaction, qLocal, 0);
+  }
+  reaction[in] = rin;
+  reaction[it] = rit;
+  reaction[is] = ris;
+
+  /* Friction coefficient for current block*/
+  mu_i = mu[contact];
+}
 void frictionContact3D_projectionWithDiagonalization_solve(int contact, int dimReaction, double* reaction, int* iparam, double* dparam)
 {
   /* Current block position */
@@ -196,7 +279,6 @@ void frictionContact3D_projectionOnConeWithLocalIteration_solve(int contact, int
   /* Builds local problem for the current contact */
   frictionContact3D_projection_update(contact, reaction);
 
-  double  mu2 = mu_i * mu_i;
 
   /*double an = 1./(MLocal[0]);*/
   /*   double alpha = MLocal[nLocal+1] + MLocal[2*nLocal+2]; */
@@ -305,7 +387,6 @@ void frictionContact3D_projectionOnCone_solve(int contact, int dimReaction, doub
   /* Builds local problem for the current contact */
   frictionContact3D_projection_update(contact, reaction);
 
-  double  mu2 = mu_i * mu_i;
 
   /*double an = 1./(MLocal[0]);*/
   /*   double alpha = MLocal[nLocal+1] + MLocal[2*nLocal+2]; */
@@ -328,7 +409,36 @@ void frictionContact3D_projectionOnCone_solve(int contact, int dimReaction, doub
   projectionOnCone(&reaction[pos], mu_i);
 
 }
+void frictionContact3D_projectionOnCone_with_regularization_solve(int contact, int dimReaction, double* reaction, int* iparam, double* dparam)
+{
+  /* Current block position */
+  int pos = contact * nLocal;
 
+  /* Builds local problem for the current contact */
+  double rho = dparam[3];
+  frictionContact3D_projection_update_with_regularization(contact, reaction, rho);
+
+  /*double an = 1./(MLocal[0]);*/
+  /*   double alpha = MLocal[nLocal+1] + MLocal[2*nLocal+2]; */
+  /*   double det = MLocal[1*nLocal+1]*MLocal[2*nLocal+2] - MLocal[2*nLocal+1] + MLocal[1*nLocal+2]; */
+  /*   double beta = alpha*alpha - 4*det; */
+  /*   double at = 2*(alpha - beta)/((alpha + beta)*(alpha + beta)); */
+
+  double an = 1. / (MLocal[0] + mu_i);
+
+  int incx = 1, incy = 1;
+  double worktmp[3];
+  double normUT;
+  DCOPY(nLocal , qLocal, incx , worktmp , incy);
+  DGEMV(LA_NOTRANS, nLocal, nLocal, 1.0, MLocal, 3, &reaction[pos], incx, 1.0, worktmp, incy);
+  normUT = sqrt(worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2]);
+  reaction[pos] -= an * (worktmp[0] + mu_i * normUT);
+  reaction[pos + 1] -= an * worktmp[1];
+  reaction[pos + 2] -= an * worktmp[2];
+
+  projectionOnCone(&reaction[pos], mu_i);
+
+}
 
 void frictionContact3D_projection_free()
 {
