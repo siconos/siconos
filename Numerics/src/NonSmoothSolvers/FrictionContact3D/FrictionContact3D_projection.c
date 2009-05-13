@@ -156,25 +156,41 @@ void projection_fillMLocal_with_regularization(int contact, double rho)
     int inc = n * in;
     double * MM = MGlobal->matrix0;
     /* The part of MM which corresponds to the current block is copied into MLocal */
-    MLocal[0] = MM[inc + in] - rho;
+    MLocal[0] = MM[inc + in] + rho;
     MLocal[1] = MM[inc + it];
     MLocal[2] = MM[inc + is];
     inc += n;
-    MLocal[3] = MM[inc + in] - rho;
+    MLocal[3] = MM[inc + in] + rho;
     MLocal[4] = MM[inc + it];
     MLocal[5] = MM[inc + is];
     inc += n;
-    MLocal[6] = MM[inc + in] - rho;
+    MLocal[6] = MM[+in] + rho;
     MLocal[7] = MM[inc + it];
     MLocal[8] = MM[inc + is];
   }
   else if (storageType == 1)
   {
     int diagPos = getDiagonalBlockPos(MGlobal->matrix1, contact);
-    MLocal = MGlobal->matrix1->block[diagPos];
+    for (int i = 0 ; i < 3 * 3 ; i++) MLocal[i] = MGlobal->matrix1->block[diagPos][i] ;
+    for (int i = 0 ; i < 3 ; i++) MLocal[i + 3 * i] += rho ;
   }
   else
     numericsError("FrictionContact3D_projection -", "unknown storage type for matrix M");
+}
+void frictionContact3D_projection_initialize_with_regularization(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0)
+{
+  /*
+    INPUT: the global problem operators: n0 (size), M0, q0 and mu0, vector of friction coefficients.
+    In initialize, these operators are "connected" to their corresponding static variables, that will be used to build local problem
+    for each considered contact.
+    Local problem is built during call to update (which depends on the storage type for M).
+  */
+  n = n0;
+  MGlobal = M0;
+  qGlobal = q0;
+  mu = mu0;
+  MLocal = (double*)malloc(nLocal * nLocal * sizeof(*MLocal));
+  isMAllocatedIn = 1;
 }
 
 void frictionContact3D_projection_update_with_regularization(int contact, double* reaction, double rho)
@@ -203,9 +219,9 @@ void frictionContact3D_projection_update_with_regularization(int contact, double
   reaction[it] = 0.0;
   reaction[is] = 0.0;
   /* qLocal computation*/
-  qLocal[0] = qGlobal[in] + rho * rin;
-  qLocal[1] = qGlobal[it] + rho * rit;
-  qLocal[2] = qGlobal[is] + rho * ris;
+  qLocal[0] = qGlobal[in] - rho * rin;
+  qLocal[1] = qGlobal[it] - rho * rit;
+  qLocal[2] = qGlobal[is] - rho * ris;
 
   if (MGlobal->storageType == 0)
   {
@@ -416,6 +432,9 @@ void frictionContact3D_projectionOnCone_with_regularization_solve(int contact, i
 
   /* Builds local problem for the current contact */
   double rho = dparam[3];
+
+
+
   frictionContact3D_projection_update_with_regularization(contact, reaction, rho);
 
   /*double an = 1./(MLocal[0]);*/

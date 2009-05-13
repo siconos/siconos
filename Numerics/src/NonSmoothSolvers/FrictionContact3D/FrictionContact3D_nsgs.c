@@ -104,11 +104,11 @@ void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, C
     *solve = &frictionContact3D_projectionOnCone_with_regularization_solve;
     *freeSolver = &frictionContact3D_projection_free;
     *computeError = &FrictionContact3D_compute_error;
-    frictionContact3D_projection_initialize(n, M, q, mu);
+    frictionContact3D_projection_initialize_with_regularization(n, M, q, mu);
   }
   else
   {
-    fprintf(stderr, "Numerics, FrictionContact3D_nsgs failed. Unknown solver.\n");
+    fprintf(stderr, "Numerics, FrictionContact3D_nsgs failed. Unknown solver number %i.\n", iparam[4]);
     exit(EXIT_FAILURE);
   }
 }

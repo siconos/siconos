@@ -25,7 +25,6 @@ void pfc_2D_cpg(FrictionContact_Problem* problem , double *reaction , double *ve
 {
   int nc = problem->numberOfContacts;
   double * vec = problem->M->matrix0;
-  double *q = problem->q;
   double * mu = problem->mu;
 
   int       n = 2 * nc, i, iter;

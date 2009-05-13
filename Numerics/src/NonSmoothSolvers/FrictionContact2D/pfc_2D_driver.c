@@ -40,7 +40,7 @@ int pfc_2D_driver(FrictionContact_Problem* problem, double *reaction , double *v
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
 
-  int storageType = problem->M->storageType;
+
   //  if(storageType == 1)
   //  numericsError("pfc_2D_driver", "not yet implemented for Sparse Block Storage");
 

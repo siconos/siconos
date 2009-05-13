@@ -92,7 +92,6 @@ void mlcp_direct_simplex_reset()
  */
 void mlcp_direct_simplex(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {
-  int i;
   /*First, try direct solver*/
   mlcp_direct(problem, z, w, info, options);
   if (*info)

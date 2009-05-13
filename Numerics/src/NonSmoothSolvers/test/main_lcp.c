@@ -649,6 +649,7 @@ int test_mmc(void)
   printf("\n Run unstable tests (results may be wrong or log !=0)...\n");
   int solversList2[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1};
   int infoFail = test_lcp_series(problem, solversList2);
+  printf("infoFail = %i\n", infoFail);
   printf("--------- End of unstable tests --------------------------- \n");
 
   // Release memory
@@ -814,14 +815,14 @@ void getProblemSBM(char* name, LinearComplementarity_Problem *  problem)
 
   for (i = 0 ; i < blmat->filled1; i++)
   {
-    printf("index1_data[%i]=%i\n", i, blmat->index1_data[i]);
+    printf("index1_data[%i]=%li\n", i, (long int)blmat->index1_data[i]);
   };
 
   blmat->filled2 = blmat->nbblocks;
   for (i = 0 ; i < blmat->filled2; i++)
   {
     blmat->index2_data[i] = ColumnIndex[i];
-    printf("index2_data[%i]=%i\n", i, blmat->index2_data[i]);
+    printf("index2_data[%i]=%li\n", i, (long int)blmat->index2_data[i]);
   };
 
 
@@ -909,12 +910,8 @@ int test_matrix(void)
   printf("                         LCP Solvers tests (function: test_matrix)  \n");
   printf("==========================================================================================================\n");
 
-  FILE *LCPfile = NULL, *LCPfileBlock = NULL;
-  int i, j, itest;
-  int iter = 0;
-  double criteria = 0.0;
-  double *sol = NULL;
 
+  int itest;
   int NBTEST = 15;
 
   /* === Building of the LCPs === */
@@ -1179,6 +1176,8 @@ int test_matrix(void)
       printf("---------------------------------------------------------- \n");
       printf("\n Run unstable tests (results may be wrong or log !=0)...\n");
       int infoFail = test_lcp_series(problem, solversList2);
+      printf("infoFail = %i\n", infoFail);
+
       printf("--------- End of unstable tests --------------------------- \n\n");
     }
     if (hasUnstableSBM == 1)
@@ -1187,6 +1186,7 @@ int test_matrix(void)
       printf("---------------------------------------------------------- \n");
       printf("\n Run unstable tests for SBM (results may be wrong or log !=0)...\n");
       int infoFail2 = test_lcp_series(problemSBM, solversListSBM2);
+      printf("infoFail2 = %i\n", infoFail2);
       printf("--------- End of unstable tests --------------------------- \n\n");
     }
 

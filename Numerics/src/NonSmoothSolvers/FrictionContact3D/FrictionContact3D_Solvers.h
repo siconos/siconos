@@ -78,7 +78,18 @@ extern "C" {
       iparam[0] : Maximum iteration number
       iparam[4] : localsolver choice 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 2: projection on Disk  with diagonalization,
   */
+
   void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options);
+  /** Proximal point solver for friction-contact 3D problem
+      \param problem, the friction-contact 3D problem to solve
+      \param velocity global vector (n), in-out parameter
+      \param reaction global vector (n), in-out parameters
+      \param info return 0 if the solution is found
+      \param options the solver options :
+      iparam[0] : Maximum iteration number
+      iparam[4] : localsolver choice 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 2: projection on Disk  with diagonalization,
+  */
+  void frictionContact3D_proximal(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options);
 
   /** Check for trivial solution in the friction-contact 3D problem
       \param dim of the problem

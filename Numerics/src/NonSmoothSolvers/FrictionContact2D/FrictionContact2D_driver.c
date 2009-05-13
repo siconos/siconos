@@ -75,8 +75,9 @@ int frictionContact2D_driver(FrictionContact_Problem* problem, double *reaction 
       /*frictionContact2D_nsgs(problem, reaction , velocity , &info , options);*/
     }
 
-    return info;
 
 
   }
+  return info;
+
 }

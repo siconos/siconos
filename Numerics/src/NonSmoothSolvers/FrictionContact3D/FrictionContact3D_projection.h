@@ -50,6 +50,14 @@ extern "C" {
   */
   void frictionContact3D_projection_initialize(int, const NumericsMatrix*const, const double*const, const double*const);
 
+  /** Initialize friction-contact 3D projection with regularization
+      \param dim. of the global problem
+      \param matrix M of the global problem
+      \param vector q of the global problem
+      \param vector of the friction coefficients
+  */
+  void frictionContact3D_projection_initialize_with_regularization(int, const NumericsMatrix*const, const double*const, const double*const);
+
   /** Update friction-contact 3D projection solver: formalize local problem for one contact.
       \param number (position in global matrix) of the considered contact
       \param global reaction (only the block corresponding to the current contact will be modified,

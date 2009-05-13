@@ -54,13 +54,13 @@ void prodSBM(int sizeX, int sizeY, double alpha, const SparseBlockStructuredMatr
       if (currentRowNumber != 0)
         nbRows -= A->blocksize0[currentRowNumber - 1];
 
-      assert(nbRows <= sizeY & nbRows >= 0);
+      assert((nbRows <= sizeY) & (nbRows >= 0));
 
       nbColumns = A->blocksize1[colNumber];
       if (colNumber != 0)
         nbColumns -= A->blocksize1[colNumber - 1];
 
-      assert(nbColumns <= sizeX & nbColumns >= 0);
+      assert((nbColumns <= sizeX) & (nbColumns >= 0));
 
       /* Get position in x of the sub-block multiplied by A sub-block */
       posInX = 0;
@@ -84,7 +84,7 @@ void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, con
   assert(B);
   assert(C);
 
-  int i, j, k;
+  int i, j;
   /*     Check the compatibility of size of matrices */
   assert(A->blocksize0);
   assert(A->blocksize1);
@@ -118,9 +118,8 @@ void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, con
   }
 
   int currentRowNumberofA, currentRowNumberofB;
-  int currentcolNumberofA, currentColNumberofB;
-  int colNumberofA, rowNumberofB;
-  int colNumberofB, rowNumberofA;
+  int currentColNumberofB;
+  int colNumberofB;
 
   /* Search  the non null blocks of C */
 
@@ -250,7 +249,7 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
   assert(B);
   assert(C);
 
-  int i, j, k;
+  int i, j;
   /*     Check the compatibility of size of matrices */
   assert(A->blocksize0);
   assert(A->blocksize1);
@@ -294,9 +293,8 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
   }
 
   int currentRowNumberofA, currentRowNumberofB;
-  int currentcolNumberofA, currentColNumberofB;
-  int colNumberofA, rowNumberofB;
-  int colNumberofB, rowNumberofA;
+  int currentColNumberofB;
+  int colNumberofB ;
 
   /* Search  the non null blocks of C */
 
@@ -457,8 +455,6 @@ void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber,
   /* Checks sizes */
   assert(sizeX == A->blocksize1[A->blocknumber1 - 1]);
 
-  /* Number of non-null blocks in the matrix */
-  int nbblocks = A->nbblocks;
   /* Column (block) position of the current block*/
   int colNumber = 0;
   /* Number of rows/columns of the current block */
@@ -468,9 +464,6 @@ void subRowProdSBM(int sizeX, int sizeY, int currentRowNumber,
 
   /* Check if currentRowNumber fits with A dimensions */
   assert(currentRowNumber <= A->blocknumber0);
-
-  /* Look for the first element of the wanted row */
-  int blockNum = A->index1_data[currentRowNumber];
 
   /* Get dim (rows) of the current block */
   nbRows = sizeY;
@@ -529,8 +522,6 @@ void rowProdNoDiagSBM(int sizeX, int sizeY, int currentRowNumber, const SparseBl
 
   */
 
-  /* Number of non-null blocks in the matrix */
-  int nbblocks = A->nbblocks;
 
   /* Column (block) position of the current block*/
   int colNumber = 0;
@@ -673,12 +664,12 @@ void printSBM(const SparseBlockStructuredMatrix* const m)
     printf("%dX%d ", size0, size1);
   }
   printf("]\n");
-  printf("index1_data of size %i= {", m->filled1);
-  for (int i = 0 ; i < m->filled1 - 1; i++) printf("%d,  ", m->index1_data[i]);
-  printf("%d}\n", m->index1_data[m->filled1 - 1]);
-  printf("index2_data od size %i= {", m->filled2);
-  for (int i = 0 ; i < m->filled2 - 1; i++) printf("%d,  ", m->index2_data[i]);
-  printf("%d}\n", m->index2_data[m->filled2 - 1]);
+  printf("index1_data of size %li= {", (long int)m->filled1);
+  for (int i = 0 ; i < m->filled1 - 1; i++) printf("%li,  ", (long int)m->index1_data[i]);
+  printf("%li}\n", (long int)m->index1_data[m->filled1 - 1]);
+  printf("index2_data od size %li= {", (long int)m->filled2);
+  for (int i = 0 ; i < m->filled2 - 1; i++) printf("%li,  ", (long int)m->index2_data[i]);
+  printf("%li}\n", (long int)m->index2_data[m->filled2 - 1]);
   int sizemax = 10;
   int currentRowNumber ;
   int colNumber;
@@ -712,7 +703,7 @@ void printSBM(const SparseBlockStructuredMatrix* const m)
       }
       else
       {
-        printf("Block[%i] is too large to be displayed\n");
+        printf("Block[%i] is too large to be displayed\n", blockNum);
       }
 
     }
@@ -747,16 +738,16 @@ void printInFileSBM(const SparseBlockStructuredMatrix* const m, FILE * file)
     fprintf(file, "%i\t", m->blocksize1[i]);
   }
   fprintf(file, "\n");
-  fprintf(file, "%i\n", m->filled1);
-  fprintf(file, "%i\n", m->filled2);
+  fprintf(file, "%li\n", (long int)m->filled1);
+  fprintf(file, "%li\n", (long int)m->filled2);
   for (int i = 0; i < m->filled1; i++)
   {
-    fprintf(file, "%i\t", m->index1_data[i]);
+    fprintf(file, "%li\t", (long int)m->index1_data[i]);
   }
   fprintf(file, "\n");
   for (int i = 0; i < m->filled2; i++)
   {
-    fprintf(file, "%i\t", m->index2_data[i]);
+    fprintf(file, "%li\t", (long int)m->index2_data[i]);
   }
   fprintf(file, "\n");
 
@@ -1041,7 +1032,7 @@ int copySBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMat
     }
   }
 
-
+  return 0;
 }
 
 int transposeSBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMatrix*  B)
@@ -1135,7 +1126,7 @@ int transposeSBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructur
   }
   free(blockMap);
 
-
+  return 0;
 }
 int inverseDiagSBM(const SparseBlockStructuredMatrix*  M)
 {

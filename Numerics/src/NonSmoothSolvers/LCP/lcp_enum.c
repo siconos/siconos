@@ -54,7 +54,7 @@ void affectWZ()
 }
 void lcp_buildM(int * zw, double * M, double * Mref, int size)
 {
-  int col, i;
+  int col;
   double * Aux;
   double * AuxRef;
   Aux = M;
@@ -147,7 +147,6 @@ void lcp_enum(LinearComplementarity_Problem* problem, double *z, double *w, int 
   int lin;
   sSize = (problem->size);
   int NRHS = 1;
-  int one = 1;
   int * ipiv;
   int check;
   int DGESVinfo;

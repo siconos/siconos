@@ -289,3 +289,19 @@ void  primalFrictionContact3D_nsgs_wr(PrimalFrictionContact_Problem* problem, do
 
 
 }
+
+void  primalFrictionContact3D_proximal_wr(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, Solver_Options* options)
+{
+
+  // Reformulation
+  FrictionContact_Problem* localproblem = (FrictionContact_Problem *) malloc(sizeof(FrictionContact_Problem));
+
+  reformulationIntoLocalProblem(problem, localproblem);
+
+  frictionContact3D_proximal(localproblem, reaction , velocity , info , options);
+
+  computeGlobalVelocity(problem, reaction, globalVelocity);
+  freeLocalProblem(localproblem);
+
+
+}

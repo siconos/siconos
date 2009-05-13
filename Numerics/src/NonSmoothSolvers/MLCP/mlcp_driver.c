@@ -95,8 +95,7 @@ int mlcp_driver_get_dwork(MixedLinearComplementarity_Problem* problem, Solver_Op
 
 int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *w, Solver_Options* options, Numerics_Options* global_options)
 {
-  int i;
-  int ii;
+
 
   if (options == NULL || global_options == NULL)
     numericsError("mlcp_driver", "null input for solver and/or global options");

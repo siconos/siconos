@@ -140,7 +140,6 @@ int mlcp_enum_getNbDWork(MixedLinearComplementarity_Problem* problem, Solver_Opt
   LWORK = -1;
   double dgelsSize = 0;
   int info = 0;
-  double bidon = 0;
 #ifdef ENUM_USE_DGELS
   DGELS(problem->M->size0, problem->n + problem->m, 1, 0, problem->M->size0, 0, problem->M->size0, &dgelsSize, LWORK, info);
   LWORK = (int) dgelsSize;

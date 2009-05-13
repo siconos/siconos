@@ -54,6 +54,13 @@ int frictionContact3D_driver(FrictionContact_Problem* problem, double *reaction 
       printf(" ========================== Call NSGS solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_nsgs(problem, reaction , velocity , &info , options);
   }
+  /* Proximal point algorithm */
+  else if (strcmp(name, "PROX") == 0)
+  {
+    if (verbose == 1)
+      printf(" ========================== Call PROX solver for Friction-Contact 3D problem ==========================\n");
+    frictionContact3D_proximal(problem, reaction , velocity , &info , options);
+  }
   else
   {
     fprintf(stderr, "Numerics, FrictionContact3D_driver failed. Unknown solver.\n");
@@ -85,7 +92,7 @@ int checkTrivialCase(int n, double* q, double* velocity, double* reaction, int* 
     dparam[1] = 0.0;
     dparam[3] = 0.0;
     info = 0;
-    if (iparam[1] > 0)
+    if (verbose == 1)
       printf("FrictionContact3D driver, norm(q) = 0, trivial solution reaction = 0, velocity = q.\n");
   }
   return info;

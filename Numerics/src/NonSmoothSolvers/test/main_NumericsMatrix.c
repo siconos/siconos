@@ -361,7 +361,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
 
   int info = -1;
   printf("== Numerics tests: prodNumericsMatrixNumericsMatrix(NumericsMatrix,NumericsMatrix) == \n");
-  int i, j, k , n = M1->size1;
+  int i, j, k;
   double alpha = 1.0, beta = 0.0;
   double tol = 1e-12;
 
@@ -476,7 +476,7 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
 
   prodNumericsMatrixNumericsMatrix(alpha, M2, M2, beta,  &C3);
   //freeSBM(SBM3);
-  printf("i= \n", i++);
+  printf("i= %i\n", i++);
 
 
   /*     Check if it is correct */
@@ -870,7 +870,7 @@ int test_rowProdNoDiagNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
 {
 
   printf("== Numerics tests: rowProdNoDiagNonSquare(NumericsMatrix,vector) == \n");
-  int i , n = M3->size0, m = M3->size1;
+  int i ,  m = M3->size1;
   double * x = malloc(m * sizeof(double));
 
   for (i = 0; i < m; i++)

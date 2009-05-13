@@ -110,7 +110,6 @@ void mlcp_direct_FB_reset()
  */
 void mlcp_direct_FB(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {
-  int i;
   /*First, try direct solver*/
   mlcp_direct(problem, z, w, info, options);
   if (*info)

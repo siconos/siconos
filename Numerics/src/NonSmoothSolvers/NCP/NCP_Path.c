@@ -37,7 +37,7 @@ int NCP_Path(int n, double* z, FuncEvalPtr F, JacEvalPtr jacobianF, int* iparam,
   int nnz = n * n;
   /* Termination status from PATH */
   int status;
-  int i, j;
+  int j;
 
   /* Connect F and its jacobian to input functions */
   setFuncEval(F);

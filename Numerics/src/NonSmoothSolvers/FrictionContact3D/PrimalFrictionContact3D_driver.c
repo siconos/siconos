@@ -58,11 +58,21 @@ int primalFrictionContact3D_driver(PrimalFrictionContact_Problem* problem, doubl
   if (strcmp(name, "NSGS_WR") == 0)
   {
     if (verbose == 1)
-      printf(" ========================== Call NSGS solver with reformulation into Friction-Contact 3D problem ==========================\n");
+      printf(" ========================== Call NSGS_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
     Primal_ipiv = NULL;
     Primal_MisInverse = 0;
     Primal_MisLU = 0;
     primalFrictionContact3D_nsgs_wr(problem, reaction , velocity, globalVelocity, &info, options);
+
+  }
+  else if (strcmp(name, "PROX_WR") == 0)
+  {
+    if (verbose == 1)
+      printf(" ========================== Call PROX_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
+    Primal_ipiv = NULL;
+    Primal_MisInverse = 0;
+    Primal_MisLU = 0;
+    primalFrictionContact3D_proximal_wr(problem, reaction , velocity, globalVelocity, &info, options);
 
   }
   else if (strcmp(name, "NSGS") == 0)

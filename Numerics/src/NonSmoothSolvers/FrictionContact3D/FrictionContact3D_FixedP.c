@@ -104,5 +104,5 @@ void frictionContact3D_FixedP_free()
 
 double frictionContact3D_FixedP_computeError(int contact, int dimReaction, double* reaction, double * error)
 {
-
+  return 0.0;
 }

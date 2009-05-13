@@ -651,12 +651,7 @@ int test_matrix(void)
   printf("                         RELAY Solvers tests (function: test_matrix)  \n");
   printf("==========================================================================================================\n");
 
-  FILE *RELAYfile = NULL, *RELAYfileBlock = NULL;
-  int i, j, itest;
-  int iter = 0;
-  double criteria = 0.0;
-  double *sol = NULL;
-
+  int itest;
   int NBTEST = 1;
 
   /* === Building of the RELAYs === */
@@ -741,6 +736,7 @@ int test_matrix(void)
       printf("---------------------------------------------------------- \n");
       printf("\n Run unstable tests (results may be wrong or log !=0)...\n");
       int infoFail = test_relay_series(problem, solversList2);
+      printf("infoFail = %i\n", infoFail);
       printf("--------- End of unstable tests --------------------------- \n\n");
     }
 

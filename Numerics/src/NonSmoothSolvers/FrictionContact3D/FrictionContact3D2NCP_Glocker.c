@@ -49,14 +49,14 @@ static const double* mu = NULL;
 /* Local FC3D problem */
 static double* MLocal;
 static int isMAllocatedIn = 0; /* True if a malloc is done for MLocal, else false */
-static double qLocal[3];
+/* static double qLocal[3]; */
 
 /* Local "Glocker" variables */
 static const int Gsize = 5;
 static double reactionGlocker[5];
 static double MGlocker[25];
-static double qGlocker[5];
-static double gGlocker[5];
+/* static double qGlocker[5]; */
+/* static double gGlocker[5]; */
 
 /* Output */
 static double jacobianFGlocker[25];
@@ -64,7 +64,8 @@ static double FGlocker[5];
 
 static double mu_i = 0.0;
 
-static double e1[3], e2[3], e3[2];
+/* static double e1[2],e2[2] ; */
+static double e3[2];
 static double IpInv[4];
 static double IpInvTranspose[4];
 static double I[4];
@@ -242,7 +243,6 @@ void NCPGlocker_update(int contact, double * reaction)
 
   // === computation of MGlocker = function(MLocal, mu_i, I, IpInvTranspose, IpInv, e3) ===/
   computeMGlocker();
-
   // === computation of qGlocker = function(qLocal, IpInv)
   // saved in FGlocker which is also initialized here ===
   //  - step 1: computes qLocal = qGlobal[in] + sum over a row of blocks in MGlobal of the products MLocal.reaction,

@@ -175,8 +175,6 @@ int internalPrecompute(MixedLinearComplementarity_Problem* problem)
 int internalAddConfig(MixedLinearComplementarity_Problem* problem, int * zw, int init)
 {
   int i;
-  int npm;
-  int INFO;
   if (verbose)
   {
     printf("mlcp_direct internalAddConfig\n");
@@ -252,7 +250,6 @@ void mlcp_direct_addConfigFromWSolution(MixedLinearComplementarity_Problem* prob
 
 int solveWithCurConfig(MixedLinearComplementarity_Problem* problem)
 {
-  int one = 1;
   int lin;
   int INFO = 0;
   double ALPHA = 1;

@@ -61,7 +61,7 @@ int FrictionContact3D_compute_error(FrictionContact_Problem* problem, double *z 
   *error = *error / normq;
   if (*error > tolerance)
   {
-    if (verbose > 0) printf(" Numerics - FrictionContact3D_compute_error failed: error = %g > tolerance = %g.\n", *error, tolerance);
+    /*      if (verbose > 0) printf(" Numerics - FrictionContact3D_compute_error failed: error = %g > tolerance = %g.\n",*error, tolerance); */
     return 1;
   }
   else
