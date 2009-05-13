@@ -82,6 +82,14 @@ void frictionContact3D_proximal(FrictionContact_Problem* problem, double *reacti
   DCOPY(n , reaction , 1 , reactionold , 1);
 
 
+  internalSolverPtr internalsolver;
+
+  if (iparam[2] == 0) internalsolver = &frictionContact3D_nsgs;
+  else if (iparam[2] == 1)internalsolver = &frictionContact3D_projectedgradient;
+  else  internalsolver = &frictionContact3D_nsgs;
+
+
+
 
   while ((iter < itermax) && (hasNotConverged > 0))
   {
@@ -104,7 +112,8 @@ void frictionContact3D_proximal(FrictionContact_Problem* problem, double *reacti
       }
     }
     // internal solver for the regularized problem
-    frictionContact3D_nsgs(problem, reaction , velocity , info , internalsolver_options);
+    /*       frictionContact3D_nsgs(problem, reaction , velocity , info , internalsolver_options); */
+    (*internalsolver)(problem, reaction , velocity , info , internalsolver_options);
 
 
     /* **** Criterium convergence **** */
@@ -132,7 +141,7 @@ void frictionContact3D_proximal(FrictionContact_Problem* problem, double *reacti
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
-  printf("----------------------------------- FC3D - PROXIMAL - Iteration %i Error = %14.7e\n", iter, error);
+  printf("----------------------------------- FC3D - PROXIMAL - # Iteration %i Final Error = %14.7e\n", iter, error);
   dparam[0] = tolerance;
   dparam[1] = error;
 

@@ -65,6 +65,9 @@ typedef void (*ComputeErrorPtr)(FrictionContact_Problem*, double*, double*, doub
 /** pointer to function used to free memory for objects used in solvers */
 typedef void (*FreeSolverPtr)();
 
+/** pointer to function used to call internal solver for proximal point solver */
+typedef void (*internalSolverPtr)(FrictionContact_Problem*, double*, double*, int *, Solver_Options *);
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -80,6 +83,7 @@ extern "C" {
   */
 
   void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options);
+
   /** Proximal point solver for friction-contact 3D problem
       \param problem, the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
@@ -90,6 +94,17 @@ extern "C" {
       iparam[4] : localsolver choice 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 2: projection on Disk  with diagonalization,
   */
   void frictionContact3D_proximal(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options);
+
+
+  /** Projected Gradient solver for friction-contact 3D problem
+      \param problem, the friction-contact 3D problem to solve
+      \param velocity global vector (n), in-out parameter
+      \param reaction global vector (n), in-out parameters
+      \param info return 0 if the solution is found
+      \param options the solver options :
+      iparam[0] : Maximum iteration number
+  */
+  void frictionContact3D_projectedgradient(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options);
 
   /** Check for trivial solution in the friction-contact 3D problem
       \param dim of the problem

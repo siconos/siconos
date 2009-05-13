@@ -61,6 +61,13 @@ int frictionContact3D_driver(FrictionContact_Problem* problem, double *reaction 
       printf(" ========================== Call PROX solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_proximal(problem, reaction , velocity , &info , options);
   }
+  /* Projected Gradient algorithm */
+  else if (strcmp(name, "PG") == 0)
+  {
+    if (verbose == 1)
+      printf(" ========================== Call Projected Gradinet (PG) solver for Friction-Contact 3D problem ==========================\n");
+    frictionContact3D_projectedgradient(problem, reaction , velocity , &info , options);
+  }
   else
   {
     fprintf(stderr, "Numerics, FrictionContact3D_driver failed. Unknown solver.\n");
