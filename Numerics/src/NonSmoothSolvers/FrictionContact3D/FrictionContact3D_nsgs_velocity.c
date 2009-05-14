@@ -82,8 +82,7 @@ void frictionContact3D_nsgs_velocity(FrictionContact_Problem* problem, double *r
     assert(!infoDGETRI);
     double* qtmp = (double*)malloc(n * sizeof(double));
     DCOPY(n,  q, 1, qtmp, 1);
-    DGEMV(LA_NOTRANS, n, n, 1.0, M->matrix0 , n, qtmp, 1, 0.0, q, 1);
-
+    DGEMV(LA_NOTRANS, n, n, -1.0, M->matrix0 , n, qtmp, 1, 0.0, q, 1);
     free(ipiv);
     free(qtmp);
 

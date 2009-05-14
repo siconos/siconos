@@ -45,10 +45,16 @@ double cond(double * A, double n, double m)
   if (WORK == NULL) - 1;
   else
   {
+#ifdef HAVE_DGESVD
     DGESVD(n, m, A, m, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD);
     LWORK = (int)(WORK[0]);
     WORK = realloc(WORK, LWORK * sizeof * WORK);
     DGESVD(n, m, A, m, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD);
+#endif
+#ifndef HAVE_DGEVSD
+    printf("Numerics, cond: Not able to find DGESVD\n");
+#endif
+
   }
 
   printf("SVD of A :\n ");

@@ -82,7 +82,7 @@ int FrictionContact3D_compute_error_velocity(FrictionContact_Problem* problem, d
   double *mu = problem->mu;
   double worktmp[3];
   double invmu = 0.0;
-  DCOPY(n , problem->q , incx , w , incy); // w <-q
+  DCOPY(n , problem->q , incx , z , incy); // z <-q
 
   // Compute the current reaction
   prodNumericsMatrix(n, n, 1.0, problem->M, w, 1.0, z);
