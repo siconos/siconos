@@ -21,7 +21,7 @@
 #include "Numerics_Options.h" // for global options
 #include "PrimalFrictionContact_Problem.h"
 #include "PrimalFrictionContact3D_Solvers.h"
-#include "FrictionContact3D_projection.h"
+#include "projectionOnCone.h"
 #include <math.h>
 #include <assert.h>
 

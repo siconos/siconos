@@ -227,6 +227,7 @@ void displayRawbyRaw(const NumericsMatrix* const m)
   else if (storageType == 1)
     printSBM(m->matrix1);
 }
+
 void printInFile(const NumericsMatrix* const m, FILE* file)
 {
   if (! m)
@@ -242,18 +243,50 @@ void printInFile(const NumericsMatrix* const m, FILE* file)
   if (storageType == 0)
   {
     fprintf(file, "%i\t%i\n", m->size0, m->size1);
-    fprintf(file, "[");
     for (int i = 0; i < m->size1 * m->size0; i++)
     {
       fprintf(file, "%lf ", m->matrix0[i]);
       if ((i + 1) % m->size1 == 0)
         fprintf(file, "\n");
     }
-    fprintf(file, "]");
     fprintf(file, "\n (warning: column-major) \n");
   }
   else if (storageType == 1)
     printInFileSBM(m->matrix1, file);
+}
+
+void printInFileForScilab(const NumericsMatrix* const m, FILE* file)
+{
+  if (! m)
+  {
+    fprintf(stderr, "Numerics, NumericsMatrix printInFile failed, NULL input.\n");
+    exit(EXIT_FAILURE);
+  }
+  int storageType = m->storageType;
+  fprintf(file, "%d\n", m->storageType);
+  fprintf(file, "%d\n", m->size0);
+  fprintf(file, "%d\n", m->size1);
+
+  if (storageType == 0)
+  {
+    fprintf(file, "data= [");
+    for (int i = 0; i < m->size0; i++)
+    {
+      fprintf(file, "[");
+      for (int j = 0; j < m->size1; j++)
+      {
+        fprintf(file, "%32.24e,\t ", m->matrix0[i + j * m->size0]);
+      }
+      fprintf(file, "];\n");
+    }
+    fprintf(file, "]");
+  }
+  else if (storageType == 1)
+  {
+    fprintf(stderr, "Numerics, NumericsMatrix printInFileForScilab. Not yet implemented fo storageType = %i.\n", storageType);
+    exit(EXIT_FAILURE);
+
+  }
 }
 
 void printInFileName(const NumericsMatrix* const m, const char *filename)

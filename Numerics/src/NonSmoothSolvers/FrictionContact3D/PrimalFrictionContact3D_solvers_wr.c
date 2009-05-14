@@ -28,6 +28,8 @@
 #include "PrimalFrictionContact3D_Solvers.h"
 #include "NonSmoothDrivers.h"
 #include "FrictionContact3D_Solvers.h"
+#include "cond.h"
+#define TEST_COND
 
 extern int *Primal_ipiv;
 extern int  Primal_MisInverse;
@@ -90,6 +92,8 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
     Wnum->matrix1 = NULL;
     // Compute W <-  H^T M^1 H
 
+
+
     assert(H->matrix0);
     assert(Htmp);
     assert(Wnum->matrix0);
@@ -98,6 +102,7 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
 
     DGEMM(LA_TRANS, LA_NOTRANS, m, m, n, 1.0, H->matrix0, n, Htmp, n, 0.0, Wnum->matrix0, m);
     /*     DGEMM(LA_TRANS,LA_NOTRANS,m,m,n,1.0,H->matrix0,n,Htmp,n,0.0,Wnum->matrix0,m); */
+
     // compute localq = H^T M^(-1) q +b
 
     //Copy localq <- b
@@ -167,7 +172,45 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
 
     allocateMemoryForProdSBMSBM(Htrans, HtmpSBM, W);
     prodSBMSBM(alpha, Htrans, HtmpSBM, beta, W);
+#ifdef TEST_COND
+    NumericsMatrix *WnumInverse = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));
+    WnumInverse->storageType = 0;
+    WnumInverse-> size0 = m;
+    WnumInverse-> size1 = m;
+    WnumInverse->matrix1 = NULL;
+    WnumInverse->matrix0 = (double*)malloc(m * m * sizeof(double));
+    double * WInverse = WnumInverse->matrix0;
+    SBMtoDense(W, WnumInverse->matrix0);
 
+    FILE * file1 = fopen("dataW.dat", "w");
+    printInFileForScilab(WnumInverse, file1);
+    fclose(file1);
+
+
+    double  condW = cond(WInverse, m, m);
+
+    int* ipiv = (int *)malloc(m * sizeof(*ipiv));
+    int infoDGETRF = 0;
+    DGETRF(m, m, WInverse, m, ipiv, infoDGETRF);
+    assert(!infoDGETRF);
+    int infoDGETRI;
+    DGETRI(m, WInverse, m, ipiv, infoDGETRI);
+    free(ipiv);
+    assert(!infoDGETRI);
+
+
+    double  condWInverse = cond(WInverse, m, m);
+
+    FILE * file2 = fopen("dataWInverse.dat", "w");
+    printInFileForScilab(WnumInverse, file2);
+    fclose(file2);
+
+
+
+
+    free(WInverse);
+    free(WnumInverse);
+#endif
 
     localproblem->q = (double*)malloc(m * sizeof(double));
     //Copy q<- b
@@ -289,6 +332,38 @@ void  primalFrictionContact3D_nsgs_wr(PrimalFrictionContact_Problem* problem, do
 
 
 }
+
+void  primalFrictionContact3D_nsgs_velocity_wr(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, Solver_Options* options)
+{
+  // Reformulation
+  FrictionContact_Problem* localproblem = (FrictionContact_Problem *) malloc(sizeof(FrictionContact_Problem));
+
+  reformulationIntoLocalProblem(problem, localproblem);
+
+  /* Change into dense if neccessary*/
+
+  int m = localproblem->M->size0;
+  int n = localproblem->M->size1;
+  assert(m == n);
+
+  if (localproblem->M->storageType == 1)
+  {
+
+    localproblem->M->matrix0 = (double*)malloc(m * m * sizeof(double));
+    SBMtoDense(localproblem->M->matrix1, localproblem->M->matrix0);
+    freeSBM(localproblem->M->matrix1);
+    free(localproblem->M->matrix1);
+    localproblem->M->storageType = 0;
+    localproblem->M->matrix1 = NULL;
+  }
+
+  frictionContact3D_nsgs_velocity(localproblem, reaction , velocity , info , options);
+
+  computeGlobalVelocity(problem, reaction, globalVelocity);
+  freeLocalProblem(localproblem);
+
+}
+
 void  primalFrictionContact3D_proximal_wr(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, Solver_Options* options)
 {
 

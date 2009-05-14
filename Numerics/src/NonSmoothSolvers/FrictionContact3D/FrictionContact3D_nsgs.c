@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void fake_compute_error(FrictionContact_Problem* problem, double *reaction, double *velocity, double tolerance, double* error)
+void fake_compute_error_nsgs(FrictionContact_Problem* problem, double *reaction, double *velocity, double tolerance, double* error)
 {
   int n = 3 * problem->numberOfContacts;
   *error = 0.;
@@ -40,7 +40,7 @@ void fake_compute_error(FrictionContact_Problem* problem, double *reaction, doub
   }
 }
 
-void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, int* iparam)
+void initializeLocalSolver_nsgs(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, int* iparam)
 {
   /** Connect to local solver */
   /* Projection */
@@ -96,7 +96,7 @@ void initializeLocalSolver(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, C
   {
     *solve = &frictionContact3D_FixedP_solve;
     *freeSolver = &frictionContact3D_FixedP_free;
-    *computeError = &fake_compute_error;
+    *computeError = &fake_compute_error_nsgs;
     frictionContact3D_FixedP_initialize(n, M, q, mu, iparam);
   }
   else if (iparam[4] == 7)
@@ -141,7 +141,7 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
   ComputeErrorPtr computeError = NULL;
 
   /* Connect local solver */
-  initializeLocalSolver(n, &local_solver, &freeSolver, &computeError, M, q, mu, iparam);
+  initializeLocalSolver_nsgs(n, &local_solver, &freeSolver, &computeError, M, q, mu, iparam);
 
   /*****  NSGS Iterations *****/
   int iter = 0; /* Current iteration number */

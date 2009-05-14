@@ -1189,3 +1189,21 @@ int inverseDiagSBM(const SparseBlockStructuredMatrix*  M)
 
 
 }
+
+void SBMtoDense(const SparseBlockStructuredMatrix* const A, double *denseMat)
+{
+  assert(A);
+  assert(A->blocksize0);
+  assert(A->blocksize1);
+  int n = A->blocksize0[A->blocknumber0 - 1];
+  int m = A->blocksize1[A->blocknumber1 - 1];
+
+  /*    denseMat = (double*)malloc(n*m*sizeof(double));  */
+  for (int i = 0; i < n ; i++)
+  {
+    for (int j = 0; j < m; j++)
+    {
+      denseMat[i + j * n] = getValueSBM(A, i, j);
+    }
+  }
+}

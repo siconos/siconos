@@ -113,6 +113,7 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
       C_LWORK = (int) (C_WORK[0]); \
       C_WORK = realloc(C_WORK, C_LWORK * sizeof *C_WORK); \
       F(A1,A2,A3,A4,C_WORK,INTEGER(C_LWORK),INFO); \
+      free(C_WORK); \
     } \
  })
 #define LAPACK_5_W(F,A1,A2,A3,A4,A5,INFO) \
@@ -124,6 +125,7 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
       C_LWORK = (int) (C_WORK[0]); \
       C_WORK = realloc(C_WORK, C_LWORK * sizeof *C_WORK); \
       F(A1,A2,A3,A4,A5,C_WORK,INTEGER(C_LWORK),INFO); \
+      free(C_WORK); \
     } \
  })
 
@@ -238,6 +240,8 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      LAPACK_7(LAPACK_NAME(dgesv), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), INTEGERP(IPIV), B, INTEGER(C_LDB), INTEGER(INFO)); \
   })
 
+//#ifndef HAVE_ATLAS
+
 /* DGELS -
  *  DGELS solves overdetermined or underdetermined real linear systems
  *  involving an M-by-N matrix A, or its transpose, using a QR or LQ
@@ -254,6 +258,29 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      int C_LDB = LDB; \
      F77NAME(dgels)("N", FCAST(integer,C_M) , FCAST(integer,C_N), FCAST(integer,C_NRHS), FCASTP(double, A), FCAST(integer,C_LDA),FCASTP(double,B), FCAST(integer, C_LDB), FCASTP(double,C_WORK) ,FCAST(integer,LWORK), FCAST(integer,INFO)); \
   })
+
+/* DGESVD -
+ * DGESVD  computes the singular value decomposition (SVD) of a real
+ *  M-by-N matrix A, optionally computing the left and/or right singular
+ *  vectors.
+ */
+
+#define DGESVD(M, N, A, LDA, S, U, LDU, VT, LDVT,WORK, LWORK, INFO ) \
+    ({int C_M = M; \
+     int C_N = N; \
+     int C_LDA = LDA; \
+     int C_LDU = LDU; \
+     int C_LDVT = LDVT;\
+     int C_LWORK = LWORK; \
+     double * C_WORK = WORK; \
+     F77NAME(dgesvd)("N", "N", FCAST(integer,C_M) , FCAST(integer,C_N),  FCASTP(double, A), FCAST(integer,C_LDA),FCASTP(double,S), \
+         FCASTP(double,U),FCAST(integer, C_LDU), FCASTP(double,VT),FCAST(integer, C_LDVT),\
+         FCASTP(double,C_WORK) ,  FCAST(integer,C_LWORK), FCAST(integer,INFO));\
+  })
+
+//#endif /*HAVE_ATLAS */
+
+
 
 /* DTRTRS - solve a triangular system of the form  A * X = B or A**T * X = B,
  */

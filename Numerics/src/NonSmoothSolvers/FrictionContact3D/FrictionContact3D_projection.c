@@ -19,6 +19,9 @@
 
 #include "LA.h"
 #include "FrictionContact3D_Solvers.h"
+#include "projectionOnCone.h"
+
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -469,28 +472,38 @@ void frictionContact3D_projection_free()
   MLocal = NULL;
 }
 
-void projectionOnCone(double* r, double  mu)
+void frictionContact3D_projectionOnCone_velocity_solve(int contact, int dimVelocity, double* velocity, int* iparam, double* dparam)
 {
-  double normT = sqrt(r[1] * r[1] + r[2] * r[2]);
-  double mu2 = mu * mu;
-  if (mu * normT <= - r[0])
-  {
-    r[0] = 0.0;
-    r[1] = 0.0;
-    r[2] = 0.0;
-    return ;
-  }
-  else if (normT <= mu * r[0])
-  {
-    return ;
-  }
-  else
-  {
-    r[0] = (mu * normT + r[0]) / (mu2 + 1.0);
-    r[1] = mu * r[0] * r[1] / normT;
-    r[2] = mu * r[0] * r[2] / normT;
-    return;
-  }
+  /* Current block position */
+  int pos = contact * nLocal;
+
+  /* Builds local problem for the current contact */
+  frictionContact3D_projection_update(contact, velocity);
+
+
+  /*double an = 1./(MLocal[0]);*/
+  /*   double alpha = MLocal[nLocal+1] + MLocal[2*nLocal+2]; */
+  /*   double det = MLocal[1*nLocal+1]*MLocal[2*nLocal+2] - MLocal[2*nLocal+1] + MLocal[1*nLocal+2]; */
+  /*   double beta = alpha*alpha - 4*det; */
+  /*   double at = 2*(alpha - beta)/((alpha + beta)*(alpha + beta)); */
+
+  double an = 1. / (MLocal[0] + mu_i);
+
+  int incx = 1, incy = 1;
+  double worktmp[3];
+  double normUT;
+
+  DCOPY(nLocal , qLocal, incx , worktmp , incy);
+  DGEMV(LA_NOTRANS, nLocal, nLocal, 1.0, MLocal, 3, &velocity[pos], incx, 1.0, worktmp, incy);
+  normUT = sqrt(velocity[pos + 1] * velocity[pos + 1] + velocity[pos + 2] * velocity[pos + 2]);
+  velocity[pos] -=  - mu_i * normUT + an * (worktmp[0]);
+  velocity[pos + 1] -= an * worktmp[1];
+  velocity[pos + 2] -= an * worktmp[2];
+  double invmui = 1.0 / mu_i;
+  projectionOnCone(&velocity[pos], invmui);
+
+  normUT = sqrt(velocity[1] * velocity[1] + velocity[2] * velocity[2]);
+  velocity[pos] -= mu_i * normUT;
 }
 
 

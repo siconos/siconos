@@ -36,6 +36,7 @@ int FrictionContact3D_compute_error(FrictionContact_Problem* problem, double *z 
   double *mu = problem->mu;
   double worktmp[3];
   DCOPY(n , problem->q , incx , w , incy); // w <-q
+  // Compute the current velocity
   prodNumericsMatrix(n, n, 1.0, problem->M, z, 1.0, w);
 
   *error = 0.;
@@ -62,6 +63,55 @@ int FrictionContact3D_compute_error(FrictionContact_Problem* problem, double *z 
   if (*error > tolerance)
   {
     /*      if (verbose > 0) printf(" Numerics - FrictionContact3D_compute_error failed: error = %g > tolerance = %g.\n",*error, tolerance); */
+    return 1;
+  }
+  else
+    return 0;
+}
+
+int FrictionContact3D_compute_error_velocity(FrictionContact_Problem* problem, double *z , double *w, double tolerance, double * error)
+{
+  /* Checks inputs */
+  if (problem == NULL || z == NULL || w == NULL)
+    numericsError("FrictionContact3D_compute_error", "null input for problem and/or z and/or w");
+
+  /* Computes w = Mz + q */
+  int incx = 1, incy = 1;
+  int nc = problem->numberOfContacts;
+  int n = nc * 3;
+  double *mu = problem->mu;
+  double worktmp[3];
+  double invmu = 0.0;
+  DCOPY(n , problem->q , incx , w , incy); // w <-q
+
+  // Compute the current reaction
+  prodNumericsMatrix(n, n, 1.0, problem->M, w, 1.0, z);
+
+  *error = 0.;
+  double normUT;
+  double rho = 1.0;
+  for (int ic = 0 ; ic < nc ; ic++)
+  {
+    /* Compute the modified local velocity */
+    normUT = sqrt(w[ic * 3 + 1] * w[ic * 3 + 1] + w[ic * 3 + 2] * w[ic * 3 + 2]);
+    worktmp[0] = w[ic * 3] + mu[ic] * normUT - rho * (z[ic * 3]);
+    worktmp[1] = w[ic * 3 + 1] - rho * z[ic * 3 + 1] ;
+    worktmp[2] = w[ic * 3 + 2] - rho * z[ic * 3 + 2] ;
+    invmu = 1.0 / mu[ic];
+    projectionOnCone(worktmp, invmu);
+    worktmp[0] = w[ic * 3] -  worktmp[0];
+    worktmp[1] = w[ic * 3 + 1] -  worktmp[1];
+    worktmp[2] = w[ic * 3 + 2] -  worktmp[2];
+    *error +=  worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
+  }
+  *error = sqrt(*error);
+
+  /* Computes error */
+  double normq = DNRM2(n , problem->q , incx);
+  *error = *error / normq;
+  if (*error > tolerance)
+  {
+    /*      if (verbose > 0) printf(" Numerics - FrictionContact3D_compute_error_velocity failed: error = %g > tolerance = %g.\n",*error, tolerance); */
     return 1;
   }
   else

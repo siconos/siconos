@@ -201,6 +201,19 @@ extern "C" {
   */
   void readInFile(NumericsMatrix* const M, FILE *file);
 
+  /** PrintInFileForScilab  of the matrix content
+   \param M the matrix to be printed
+   \param filename the corresponding file
+  */
+
+  void printInFileForScilab(const NumericsMatrix* const M, FILE* file);
+
+  /** Read in file for scilab  of the matrix content
+     \param M the matrix to be read
+     \param filename the corresponding  file
+  */
+  void readInFileForScilab(NumericsMatrix* const M, FILE *file);
+
   /** Screen display raw by raw of the matrix content
       \param M the matrix to be displayed
   */

@@ -103,17 +103,16 @@ extern "C" {
   */
   void frictionContact3D_projectionOnConeWithLocalIteration_solve(int, int, double*, int*, double*);
 
+  /** solve friction-contact 3D problem with projection on the Cone
+      \param number (position in global matrix) of the considered contact
+      \param dim. of the global problem
+      \param global reaction (only the block corresponding to the current contact will be modified,
+      \param vector of int parameters (max iteration numnber ...)
+      \param vector of double parameters (tolerance ...)
+  */
+  void frictionContact3D_projectionOnCone_velocity_solve(int, int, double*, int*, double*);
   /** free memory for friction contact 3D projection solver */
   void frictionContact3D_projection_free();
-
-
-  /** Implement the projection on the Coulomb cone
-      \param a pointrt to the 3D vector of Reaction
-      \param the coefficient of friction
-  */
-  void projectionOnCone(double* reaction, double  mu);
-
-
 
 #ifdef __cplusplus
 }

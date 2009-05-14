@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "FrictionContact3D_projection.h"
+#include "projectionOnCone.h"
 #include "FrictionContact3D_Solvers.h"
 #include "FrictionContact3D_compute_error.h"
 #include "NCP_Solvers.h"

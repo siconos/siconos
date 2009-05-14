@@ -231,6 +231,15 @@ extern "C" {
   \param[in-out] M the SparseBlockStructuredMatrix matrix to be inversed
   */
   int inverseDiagSBM(const SparseBlockStructuredMatrix*  M);
+
+  /** Copy a SBM into a Dense Matrix
+  \param[in] M the SparseBlockStructuredMatrix matrix to be inversed
+  \param[out] denseMat the returned dense Matrix
+  */
+
+  void SBMtoDense(const SparseBlockStructuredMatrix* const A, double *denseMat);
+
+
 #ifdef __cplusplus
 }
 #endif
