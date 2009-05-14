@@ -502,7 +502,7 @@ void frictionContact3D_projectionOnCone_velocity_solve(int contact, int dimVeloc
   double invmui = 1.0 / mu_i;
   projectionOnCone(&velocity[pos], invmui);
 
-  normUT = sqrt(velocity[1] * velocity[1] + velocity[2] * velocity[2]);
+  normUT = sqrt(velocity[pos + 1] * velocity[pos + 1] + velocity[pos + 2] * velocity[pos + 2]);
   velocity[pos] -= mu_i * normUT;
 }
 

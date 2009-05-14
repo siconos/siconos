@@ -114,7 +114,7 @@ int PrimalFrictionContact3D_compute_error(PrimalFrictionContact_Problem* problem
 
   if (*error > tolerance)
   {
-    if (verbose > 0) printf(" Numerics - PrimalFrictionContact3D_compute_error failed: error = %g > tolerance = %g.\n", *error, tolerance);
+    /*       if (verbose > 0) printf(" Numerics - PrimalFrictionContact3D_compute_error failed: error = %g > tolerance = %g.\n",*error, tolerance); */
     return 1;
   }
   else

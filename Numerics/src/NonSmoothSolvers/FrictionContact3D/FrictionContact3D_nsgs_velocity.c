@@ -61,7 +61,7 @@ void frictionContact3D_nsgs_velocity(FrictionContact_Problem* problem, double *r
   double tolerance = dparam[0];
 
   /* Check for trivial case */
-  *info = checkTrivialCase(n, q, velocity, reaction, iparam, dparam);
+  /*   *info = checkTrivialCase(n, q,velocity, reaction, iparam, dparam); */
 
   if (*info == 0)
     return;
@@ -79,11 +79,14 @@ void frictionContact3D_nsgs_velocity(FrictionContact_Problem* problem, double *r
     assert(!infoDGETRF);
     int infoDGETRI;
     DGETRI(n, M->matrix0, n, ipiv, infoDGETRI);
-    int infoDGETRS;
-    DGETRS(LA_NOTRANS, n, n, M->matrix0 , n, ipiv, q, n, infoDGETRS);
-    assert(!infoDGETRS);
-    free(ipiv);
     assert(!infoDGETRI);
+    double* qtmp = (double*)malloc(n * sizeof(double));
+    DCOPY(n,  q, 1, qtmp, 1);
+    DGEMV(LA_NOTRANS, n, n, 1.0, M->matrix0 , n, qtmp, 1, 0.0, q, 1);
+
+    free(ipiv);
+    free(qtmp);
+
   }
   else
   {
@@ -109,7 +112,16 @@ void frictionContact3D_nsgs_velocity(FrictionContact_Problem* problem, double *r
     /* Loop through the contact points */
     //DCOPY( n , q , incx , velocity , incy );
     for (contact = 0 ; contact < nc ; ++contact)
+    {
       (*local_solver)(contact, n, velocity, iparam, dparam);
+      for (int ncc = 0; ncc < 3; ncc ++)
+      {
+        printf("velocity[%i]=%14.7e\t", ncc, velocity[contact * 3 + ncc]);
+      }
+      printf("\n");
+    }
+
+
 
     /* **** Criterium convergence **** */
     (*computeError)(problem, reaction , velocity, tolerance, &error);
