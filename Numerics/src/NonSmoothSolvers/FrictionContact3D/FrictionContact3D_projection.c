@@ -488,7 +488,6 @@ void frictionContact3D_projectionOnCone_velocity_solve(int contact, int dimVeloc
   /*   double at = 2*(alpha - beta)/((alpha + beta)*(alpha + beta)); */
 
   double an = 1. / (MLocal[0] + mu_i);
-
   int incx = 1, incy = 1;
   double worktmp[3];
   double normUT;

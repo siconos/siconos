@@ -667,7 +667,7 @@ void printSBM(const SparseBlockStructuredMatrix* const m)
   printf("index1_data of size %li= {", (long int)m->filled1);
   for (int i = 0 ; i < m->filled1 - 1; i++) printf("%li,  ", (long int)m->index1_data[i]);
   printf("%li}\n", (long int)m->index1_data[m->filled1 - 1]);
-  printf("index2_data od size %li= {", (long int)m->filled2);
+  printf("index2_data of size %li= {", (long int)m->filled2);
   for (int i = 0 ; i < m->filled2 - 1; i++) printf("%li,  ", (long int)m->index2_data[i]);
   printf("%li}\n", (long int)m->index2_data[m->filled2 - 1]);
   int sizemax = 10;
@@ -681,15 +681,18 @@ void printSBM(const SparseBlockStructuredMatrix* const m)
     {
       assert(blockNum < m->filled2);
       colNumber = m->index2_data[blockNum];
+      assert(colNumber < m->blocknumber1);
       /* Get dim. of the current block */
       nbRows = m->blocksize0[currentRowNumber];
 
       if (currentRowNumber != 0)
         nbRows -= m->blocksize0[currentRowNumber - 1];
-
+      assert(nbRows);
       nbColumns = m->blocksize1[colNumber];
       if (colNumber != 0)
         nbColumns -= m->blocksize1[colNumber - 1];
+      assert(nbColumns);
+
       printf("block[%i] of size %dX%d\n", blockNum, nbRows, nbColumns);
       if ((nbRows <= sizemax) & (nbColumns <= sizemax))
       {

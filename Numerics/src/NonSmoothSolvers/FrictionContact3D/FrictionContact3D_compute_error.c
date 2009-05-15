@@ -80,7 +80,7 @@ int FrictionContact3D_compute_error_velocity(FrictionContact_Problem* problem, d
   int nc = problem->numberOfContacts;
   int n = nc * 3;
   double *mu = problem->mu;
-  double worktmp[3];
+  double worktmp[3] = {0.0, 0.0, 0.0};
   double invmu = 0.0;
   DCOPY(n , problem->q , incx , z , incy); // z <-q
 
@@ -88,7 +88,7 @@ int FrictionContact3D_compute_error_velocity(FrictionContact_Problem* problem, d
   prodNumericsMatrix(n, n, 1.0, problem->M, w, 1.0, z);
 
   *error = 0.;
-  double normUT;
+  double normUT = 0.0;
   double rho = 1.0;
   for (int ic = 0 ; ic < nc ; ic++)
   {
@@ -99,7 +99,8 @@ int FrictionContact3D_compute_error_velocity(FrictionContact_Problem* problem, d
     worktmp[2] = w[ic * 3 + 2] - rho * z[ic * 3 + 2] ;
     invmu = 1.0 / mu[ic];
     projectionOnCone(worktmp, invmu);
-    worktmp[0] = w[ic * 3] -  worktmp[0];
+    normUT = sqrt(worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2]);
+    worktmp[0] = w[ic * 3] - (worktmp[0] - mu[ic] * normUT);
     worktmp[1] = w[ic * 3 + 1] -  worktmp[1];
     worktmp[2] = w[ic * 3 + 2] -  worktmp[2];
     *error +=  worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
