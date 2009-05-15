@@ -76,12 +76,13 @@ int main(int argc, char* argv[])
 
 
 
-  int NC = 1;//Number of contacts
-  int Ndof = 9;//Number of DOF
+  int NC = 2;//Number of contacts
+  int Ndof = 12;//Number of DOF
   // Problem Definition
   double M11[9] = {1, 0, 0, 0, 1, 0, 0, 0, 1}; // Warning Fortran Storage
   double M22[9] = {1, 0, 0, 0, 1, 0, 0, 0, 1}; // Warning Fortran Storage
   double M33[9] = {1, 0, 0, 0, 1, 0, 0, 0, 1}; // Warning Fortran Storage
+  double M44[9] = {1, 0, 0, 0, 1, 0, 0, 0, 1}; // Warning Fortran Storage
   /*     double M[81] = {1, 0, 0, 0, 0, 0, 0, 0, 0,  */
   /*        0, 1, 0, 0, 0, 0, 0, 0, 0,  */
   /*        0, 0, 1, 0, 0, 0, 0, 0, 0,  */
@@ -95,15 +96,17 @@ int main(int argc, char* argv[])
 
   double H00[9] =  {1, 0, 0, 0, 1, 0, 0, 0, 1};
   double H20[9] =  { -1, 0, 0, 0, -1, 0, 0, 0, -1};
+  double H11[9] =  {1, 0, 0, 0, 1, 0, 0, 0, 1};
+  double H31[9] =  { -1, 0, 0, 0, -1, 0, 0, 0, -1};
 
   /*     double H[27] = {1, 0, 0, 0, 0, 0, -1, 0, 0, */
   /*        0, 1, 0, 0, 0, 0, 0, -1, 0, */
   /*        0, 0, 1, 0, 0, 0, 0, 0, -1}; */
 
 
-  double q[9] = { -3, -3, -3, -1, 1, 3, -1, 1, 3};
-  double b[3] = {0, 0, 0};
-  double mu[1] = {0.1};
+  double q[12] = { -3, -3, -3, -3, -3, -3, -1, 1, 3, -10, 1, 3};
+  double b[6] = {0, 0, 0, 0, 0, 0};
+  double mu[2] = {0.1, 0.1};
 
   /*    DSCAL(9,-1.0,q,1); */
 
@@ -158,18 +161,18 @@ int main(int argc, char* argv[])
   MM->matrix1 = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
   MM->matrix0 = NULL;
   SparseBlockStructuredMatrix *MBlockMatrix = MM->matrix1;
-  MBlockMatrix->nbblocks = 3;
-  double * block[3] = {M11, M22, M33};
+  MBlockMatrix->nbblocks = 4;
+  double * block[4] = {M11, M22, M33, M44};
   MBlockMatrix->block = block;
-  MBlockMatrix->blocknumber0 = 3;
-  MBlockMatrix->blocknumber1 = 3;
-  int blocksize[3] = {3, 6, 9} ;
+  MBlockMatrix->blocknumber0 = 4;
+  MBlockMatrix->blocknumber1 = 4;
+  int blocksize[4] = {3, 6, 9, 12} ;
   MBlockMatrix->blocksize0 = blocksize;
   MBlockMatrix->blocksize1 = blocksize;
-  MBlockMatrix->filled1 = 4;
-  MBlockMatrix->filled2 = 3;
-  size_t index1_data[4] = {0, 1, 2, 3} ;
-  size_t index2_data[3] = {0, 1, 2} ;
+  MBlockMatrix->filled1 = 5;
+  MBlockMatrix->filled2 = 4;
+  size_t index1_data[5] = {0, 1, 2, 3, 4} ;
+  size_t index2_data[4] = {0, 1, 2, 3} ;
   MBlockMatrix->index1_data =  index1_data;
   MBlockMatrix->index2_data =  index2_data;
 
@@ -183,22 +186,22 @@ int main(int argc, char* argv[])
   HH->matrix1 = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
   HH->matrix0 = NULL;
   SparseBlockStructuredMatrix *HBlockMatrix = HH->matrix1;
-  HBlockMatrix->nbblocks = 2;
-  double * hblock[3] = {H00, H20};
+  HBlockMatrix->nbblocks = 4;
+  double * hblock[4] = {H00, H11, H20, H31};
   HBlockMatrix->block = hblock;
-  HBlockMatrix->blocknumber0 = 3;
-  HBlockMatrix->blocknumber1 = 1;
-  int blocksize0[3] = {3, 6, 9} ;
-  int blocksize1[1] = {3} ;
+  HBlockMatrix->blocknumber0 = 4;
+  HBlockMatrix->blocknumber1 = 2;
+  int blocksize0[4] = {3, 6, 9, 12} ;
+  int blocksize1[2] = {3, 6, 9} ;
   HBlockMatrix->blocksize0 = blocksize0;
   HBlockMatrix->blocksize1 = blocksize1;
-  HBlockMatrix->filled1 = 4;
-  HBlockMatrix->filled2 = 2;
-  size_t hindex1_data[4] = {0, 1, 1, 2} ;
-  size_t hindex2_data[3] = {0, 0} ;
+  HBlockMatrix->filled1 = 5;
+  HBlockMatrix->filled2 = 4;
+  size_t hindex1_data[5] = {0, 1, 2, 3, 4} ;
+  size_t hindex2_data[4] = {0, 1, 0, 1} ;
   HBlockMatrix->index1_data =  hindex1_data;
   HBlockMatrix->index2_data =  hindex2_data;
-
+  printSBM(HBlockMatrix);
 
 
   // Unknown Declaration
