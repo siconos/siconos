@@ -17,18 +17,18 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-#ifndef Cond_H
-#define Cond_H
+#ifndef Pinv_H
+#define Pinv_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-  /** Compute the conditioning of dense matrix with column major storage
-  \param A the matrix to be read
+  /** Compute the pseudo-inverse of dense matrix with column major storage
+  \param A the matrix to be inversed
   \param n the number of rows of A
   \param m the number of columns of A
   */
-  double cond(double * A, int n, int m);
+  double pinv(double * A, int n, int m, double tolerance);
 
 
 #ifdef __cplusplus

@@ -265,7 +265,7 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
  *  vectors.
  */
 
-#define DGESVD(M, N, A, LDA, S, U, LDU, VT, LDVT,WORK, LWORK, INFO ) \
+#define DGESVD(JOBU,JOBVT,M, N, A, LDA, S, U, LDU, VT, LDVT,WORK, LWORK, INFO ) \
     ({int C_M = M; \
      int C_N = N; \
      int C_LDA = LDA; \
@@ -273,10 +273,16 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      int C_LDVT = LDVT;\
      int C_LWORK = LWORK; \
      double * C_WORK = WORK; \
-     F77NAME(dgesvd)("N", "N", FCAST(integer,C_M) , FCAST(integer,C_N),  FCASTP(double, A), FCAST(integer,C_LDA),FCASTP(double,S), \
+     F77NAME(dgesvd)(JOBU,JOBVT, FCAST(integer,C_M) , FCAST(integer,C_N),  FCASTP(double, A), FCAST(integer,C_LDA),FCASTP(double,S), \
          FCASTP(double,U),FCAST(integer, C_LDU), FCASTP(double,VT),FCAST(integer, C_LDVT),\
          FCASTP(double,C_WORK) ,  FCAST(integer,C_LWORK), FCAST(integer,INFO));\
   })
+/* DGESVD -
+ * DGESVD  computes the singular value decomposition (SVD) of a real
+ *  M-by-N matrix A, optionally computing the left and/or right singular
+ *  vectors.
+ */
+
 
 //#endif /*HAVE_ATLAS */
 

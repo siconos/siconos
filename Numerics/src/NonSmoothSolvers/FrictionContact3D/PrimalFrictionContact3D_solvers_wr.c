@@ -29,6 +29,8 @@
 #include "NonSmoothDrivers.h"
 #include "FrictionContact3D_Solvers.h"
 #include "cond.h"
+#include "pinv.h"
+#include <string.h>
 #define TEST_COND
 
 extern int *Primal_ipiv;
@@ -186,7 +188,8 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
     printInFileForScilab(WnumInverse, file1);
     fclose(file1);
 
-
+    double * WInversetmp = (double*)malloc(m * m * sizeof(double));
+    memcpy(WInversetmp, WInverse, m * m * sizeof(double));
     double  condW = cond(WInverse, m, m);
 
     int* ipiv = (int *)malloc(m * sizeof(*ipiv));
@@ -195,20 +198,37 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
     assert(!infoDGETRF);
     int infoDGETRI;
     DGETRI(m, WInverse, m, ipiv, infoDGETRI);
+
+
     free(ipiv);
     assert(!infoDGETRI);
 
 
     double  condWInverse = cond(WInverse, m, m);
 
+
+
+
     FILE * file2 = fopen("dataWInverse.dat", "w");
     printInFileForScilab(WnumInverse, file2);
     fclose(file2);
 
+    double tol = 1e-24;
+    pinv(WInversetmp, m, m, tol);
+    NumericsMatrix *WnumInversetmp = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));
+    WnumInversetmp->storageType = 0;
+    WnumInversetmp-> size0 = m;
+    WnumInversetmp-> size1 = m;
+    WnumInversetmp->matrix1 = NULL;
+    WnumInversetmp->matrix0 = WInversetmp ;
 
+    FILE * file3 = fopen("dataWPseudoInverse.dat", "w");
+    printInFileForScilab(WnumInversetmp, file3);
+    fclose(file3);
 
 
     free(WInverse);
+    free(WInversetmp);
     free(WnumInverse);
 #endif
 

@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "pinv.h"
 
 void initializeLocalSolver_nsgs_velocity(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, int* iparam)
 {
@@ -72,20 +73,21 @@ void frictionContact3D_nsgs_velocity(FrictionContact_Problem* problem, double *r
 
   if (M->storageType == 0)
   {
-    /* Inversion of the matrix M */
-    int* ipiv = (int *)malloc(n * sizeof(*ipiv));
-    int infoDGETRF = 0;
-    DGETRF(n, n, M->matrix0, n, ipiv, infoDGETRF);
-    assert(!infoDGETRF);
-    int infoDGETRI;
-    DGETRI(n, M->matrix0, n, ipiv, infoDGETRI);
-    assert(!infoDGETRI);
-    double* qtmp = (double*)malloc(n * sizeof(double));
-    DCOPY(n,  q, 1, qtmp, 1);
-    DGEMV(LA_NOTRANS, n, n, -1.0, M->matrix0 , n, qtmp, 1, 0.0, q, 1);
-    free(ipiv);
-    free(qtmp);
-
+    /*  /\* Inversion of the matrix M *\/ */
+    /*   int* ipiv = (int *)malloc(n*sizeof(*ipiv));  */
+    /*   int infoDGETRF=0; */
+    /*   DGETRF(n,n,M->matrix0,n, ipiv,infoDGETRF ); */
+    /*   assert(!infoDGETRF); */
+    /*   int infoDGETRI; */
+    /*   DGETRI(n,M->matrix0,n, ipiv,infoDGETRI ); */
+    /*   assert(!infoDGETRI); */
+    /*   double* qtmp = (double*)malloc(n*sizeof(double)); */
+    /*   DCOPY(n,  q, 1, qtmp, 1); */
+    /*   DGEMV(LA_NOTRANS, n, n, -1.0, M->matrix0 , n, qtmp,1,0.0,q, 1); */
+    /*   free(ipiv); */
+    /*   free(qtmp); */
+    double tolpinv = 1e-07;
+    pinv(M->matrix0, n, n, tolpinv);
   }
   else
   {

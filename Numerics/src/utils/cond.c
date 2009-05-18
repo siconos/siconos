@@ -23,9 +23,9 @@
 #include <string.h>
 #include "LA.h"
 
+#define HAVE_DGESVD
 
-
-double cond(double * A, double n, double m)
+double cond(double * A, int n, int m)
 {
   int LWORK = -1;
   double * WORK;
@@ -33,8 +33,11 @@ double cond(double * A, double n, double m)
   int dimS = n;
   if (m < n) dimS = m;
   double * S =  malloc(dimS * sizeof(*S));
+
+  char JOBU[1] = "N";
   int LDU = 1;
   double *U = NULL;
+  char JOBVT[1] = "N";
   int LDVT = 1;
   double *VT = NULL;
   int size = n * m * sizeof(double);
@@ -42,20 +45,17 @@ double cond(double * A, double n, double m)
   memcpy(Atmp, A, size);
 
   int InfoDGSVD = -1;
-  if (WORK == NULL) - 1;
-  else
-  {
 #ifdef HAVE_DGESVD
-    DGESVD(n, m, A, m, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD);
-    LWORK = (int)(WORK[0]);
-    WORK = realloc(WORK, LWORK * sizeof * WORK);
-    DGESVD(n, m, A, m, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD);
+  assert(WORK);
+  DGESVD(JOBU, JOBVT, n, m, A, m, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD);
+  LWORK = (int)(WORK[0]);
+  WORK = realloc(WORK, LWORK * sizeof * WORK);
+  DGESVD(JOBU, JOBVT, n, m, A, m, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD);
 #endif
 #ifndef HAVE_DGEVSD
-    printf("Numerics, cond: Not able to find DGESVD\n");
+  printf("Numerics, cond: Not able to find DGESVD\n");
 #endif
 
-  }
 
   printf("SVD of A :\n ");
   printf("[\t ");
@@ -65,10 +65,11 @@ double cond(double * A, double n, double m)
   }
   printf("]\n ");
   memcpy(A, Atmp, size);
-  return S[0] / S[dimS - 1];
+  double conditioning =  S[0] / S[dimS - 1];
 
   free(Atmp);
   free(WORK);
   free(S);
+  return conditioning;
 
 }

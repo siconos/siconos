@@ -125,6 +125,12 @@ NEW_TEST(Relaytest main_relay.c)
 
 END_TEST()
 
+BEGIN_TEST(utils/test)
+	
+NEW_TEST(pinvtest testpinv.c)
+
+
+END_TEST()
 IF(PRINT_ENV)
   INCLUDE(CMakeLog)
 ENDIF(PRINT_ENV)
