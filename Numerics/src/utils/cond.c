@@ -52,7 +52,7 @@ double cond(double * A, int n, int m)
   WORK = realloc(WORK, LWORK * sizeof * WORK);
   DGESVD(JOBU, JOBVT, n, m, A, m, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD);
 #endif
-#ifndef HAVE_DGEVSD
+#ifndef HAVE_DGESVD
   printf("Numerics, cond: Not able to find DGESVD\n");
 #endif
 
