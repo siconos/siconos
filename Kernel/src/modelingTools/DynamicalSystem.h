@@ -141,6 +141,12 @@ protected:
   /** initial state of the system */
   SP::SiconosVector x0;
 
+  /** ResiduFree  */
+  SP::SiconosVector mResiduFree;
+
+  /** used by the relative convergence criteron*/
+  double mNormRef;
+
   /** state of the system, \f$  x \in R^{n}\f$ - With \f$ x[0]=\f$ x \f$ , x[1]= \f$ \dot x \f$ . */
   VectorOfVectors x;
 
@@ -291,6 +297,24 @@ public:
   {
     return x0;
   }
+
+  inline const double& getNormRef()
+  {
+    return mNormRef;
+  };
+
+  // --- Residu ---
+
+
+  /** get Residu,
+   *  \return pointer on a SiconosVector
+   */
+  inline SP::SiconosVector getResiduFreePtr() const
+  {
+    return mResiduFree;
+  }
+
+
 
   /** set the value of x0 to newValue
    *  \param SiconosVector newValue
@@ -562,6 +586,14 @@ public:
   {
     *workV[id] = *newVal;
   }
+  /** sub a vector to a temporary one
+   *  \param a SP::SiconosVector
+   *  \param a string id
+   */
+  inline void subWorkVector(SP::SiconosVector newVal, const WorkNames& id)
+  {
+    *workV[id] -= *newVal;
+  }
 
   /** to allocate memory for a new vector in tmp map
    *  \param the id of the SimpleVector
@@ -681,7 +713,7 @@ public:
   /** Default function for computing an indicator of convergence
    *  \return a double when DS is a Lagrangian
    */
-  virtual double dsConvergenceIndicator() = 0;
+  virtual double dsConvergenceIndicator() ;
 
   /** set R to zero
    */

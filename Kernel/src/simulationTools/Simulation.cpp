@@ -43,6 +43,9 @@ Simulation::Simulation(SP::TimeDiscretisation td, const string& id):
 {
   if (!timeDiscretisation)
     RuntimeException::selfThrow("Simulation constructor - timeDiscretisation == NULL.");
+  mUseRelativeConvergenceCriterion = false;
+  mRelativeConvergenceCriterionHeld = false;
+  mRelativeConvergenceTol = 10e-3;
 
   // === indexSets will be updated during initialize() call ===
 
@@ -59,6 +62,10 @@ Simulation::Simulation(SP::SimulationXML strxml, double t0, double T, SP::Dynami
 {
   if (!simulationxml)
     RuntimeException::selfThrow("Simulation:: xml constructor - xml file = NULL");
+  mUseRelativeConvergenceCriterion = false;
+  mRelativeConvergenceCriterionHeld = false;
+  mRelativeConvergenceTol = 10e-3;
+
 
   // === Model ===
 

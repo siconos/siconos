@@ -31,6 +31,7 @@ unsigned int DynamicalSystem::count = 0;
 DynamicalSystem::DynamicalSystem(DS::TYPES type):
   DSType(type), number(count++), n(0), stepsInMemory(1)
 {
+  mNormRef = 1;
   x.resize(2);
   workV.resize(sizeWorkV);
 }
@@ -39,6 +40,7 @@ DynamicalSystem::DynamicalSystem(DS::TYPES type):
 DynamicalSystem::DynamicalSystem(SP::DynamicalSystemXML dsXML):
   DSType(dsXML->getType()), number(dsXML->getNumber()), n(0), stepsInMemory(1), dsxml(dsXML)
 {
+  mNormRef = 1;
   assert(dsXML && "DynamicalSystem::DynamicalSystem - DynamicalSystemXML paramater must not be NULL");
 
   // Update count: must be at least equal to number for future DS creation
@@ -68,8 +70,10 @@ DynamicalSystem::DynamicalSystem(SP::DynamicalSystemXML dsXML):
 DynamicalSystem::DynamicalSystem(DS::TYPES type, unsigned int newN):
   DSType(type), number(count++), n(newN), stepsInMemory(1)
 {
+  mNormRef = 1;
   x.resize(2);
   workV.resize(sizeWorkV);
+  mResiduFree.reset(new SimpleVector(getDim()));
 }
 
 bool DynamicalSystem::checkDynamicalSystem()
@@ -107,6 +111,7 @@ void DynamicalSystem::setX0(const SiconosVector& newValue)
     else
       x0.reset(new SimpleVector(newValue));
   }
+  mNormRef = x0->norm2() + 1;
 }
 
 void DynamicalSystem::setX0Ptr(SP::SiconosVector newPtr)
@@ -114,6 +119,7 @@ void DynamicalSystem::setX0Ptr(SP::SiconosVector newPtr)
   // check dimensions ...
   assert(newPtr->size() == n && "DynamicalSystem::setX0Ptr - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
   x0 = newPtr;
+  mNormRef = x0->norm2() + 1;
 }
 
 void DynamicalSystem::setX(const SiconosVector& newValue)
@@ -325,6 +331,6 @@ void DynamicalSystem::saveDSToXML()
 double DynamicalSystem::dsConvergenceIndicator()
 {
   RuntimeException::selfThrow("DynamicalSystem:dsConvergenceIndicator - not yet implemented for Dynamical system type :" + DSType);
-  return 0;
+  return 1.0;
 }
 

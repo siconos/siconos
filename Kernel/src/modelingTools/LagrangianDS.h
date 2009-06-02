@@ -247,7 +247,7 @@ public:
   /** return the dim. of the system (n for first order, ndof for Lagrangian). Usefull to avoid if(typeOfDS) when size is required.
    *  \return an unsigned int.
    */
-  inline const unsigned int getDim() const
+  virtual inline const unsigned int getDim() const
   {
     return ndof;
   }

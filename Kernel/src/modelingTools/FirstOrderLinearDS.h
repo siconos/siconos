@@ -249,7 +249,7 @@ public:
    */
   double dsConvergenceIndicator()
   {
-    return 0.0;
+    return 1.0;
   }
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.

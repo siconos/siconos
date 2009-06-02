@@ -131,6 +131,26 @@ protected:
   /**Output file for stats*/
   std::ofstream statOut;
 
+  /**
+   * bool, option specifying if a critere of relative convergence is used. Default value is false.
+   *
+   *
+   */
+  bool mUseRelativeConvergenceCriterion;
+  /**
+   * bool used to remind if the relative convergence held(useful for the newton-check-convergence). Modified only if mUseRelativeConvergenceCriterion is true.
+   *
+   *
+   */
+  bool mRelativeConvergenceCriterionHeld;
+  /**
+   *double, relative tolerence. Used only if mUseRelativeConvergenceCriterion is true.
+   *
+   *
+   */
+  double mRelativeConvergenceTol;
+
+
   /** initialisation for OneStepNSProblem.
    */
   virtual void initOSNS() = 0;
@@ -517,6 +537,60 @@ public:
   /** step from current event to next event of EventsManager
    */
   virtual void advanceToEvent() = 0;
+
+
+  /**
+   * set the option to specify if a relative convergence citeron must be used to stop the Newton iterations.
+   *
+   */
+  inline void setUseRelativeConvergenceCriteron(bool use)
+  {
+    mUseRelativeConvergenceCriterion = use;
+  };
+  /**
+   * return true iff the relative convergence criteron is activated.
+   *
+   */
+  inline bool getUseRelativeConvergenceCriteron()
+  {
+    return mUseRelativeConvergenceCriterion;
+  };
+
+  /**
+   * set the relative convergence tolerence
+   *
+   */
+  inline void setRelativeConvergenceTol(double v)
+  {
+    mRelativeConvergenceTol = v;
+  };
+
+  /**
+   * get the relative convergence tolerence.
+   *
+   */
+  inline const double & getRelativeConvergenceTol()
+  {
+    return mRelativeConvergenceTol;
+  };
+
+  /**
+   * To specify if the relative convergence criteron held.
+   *
+   */
+  inline void setRelativeConvergenceCriterionHeld(bool newVal)
+  {
+    mRelativeConvergenceCriterionHeld = newVal;
+  };
+  /**
+   * return true iff the relative convergence criteron held.
+   *
+   */
+  inline bool getRelativeConvergenceCriterionHeld()
+  {
+    return mRelativeConvergenceCriterionHeld;
+  };
+
 
   // --- XML RELATED FUNCTIONS ---
 

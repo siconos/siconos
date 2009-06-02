@@ -53,6 +53,7 @@ typedef void (*FPtr2)(unsigned int, const double*, unsigned int, const double*, 
 
 /** */
 typedef void (*FPtr3)(unsigned int, const double*, unsigned int, double*, unsigned int, double*);
+typedef void (*FPtr4bis)(unsigned int, const double*, unsigned int, double*, unsigned int, double*, unsigned int, double*);
 
 /** */
 typedef void (*FPtr4)(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*);

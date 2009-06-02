@@ -42,7 +42,8 @@ using namespace std;
 static CheckSolverFPtr checkSolverOutput = NULL;
 
 TimeStepping::TimeStepping(SP::TimeDiscretisation td): Simulation(td, "TimeStepping")
-{}
+{
+}
 
 // --- XML constructor ---
 TimeStepping::TimeStepping(SP::SimulationXML strxml, double t0, double T, SP::DynamicalSystemsSet dsList, SP::InteractionsSet interList): Simulation(strxml, t0, T, dsList, interList, "TimeStepping")
@@ -339,9 +340,16 @@ void TimeStepping::computeOneStep()
 {
   advanceToEvent();
 }
+void TimeStepping::computeInitialResidu()
+{
+  for (OSIIterator it = allOSI->begin(); it != allOSI->end() ; ++it)
+    (*it)->computeResidu();
+}
 
 void TimeStepping::advanceToEvent()
 {
+  computeInitialResidu();
+
   // solve ...
   computeFreeState();
   int info = 0;
@@ -362,6 +370,8 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
   unsigned int nbNewtonStep = 0; // number of Newton iterations
   //double residu = 0;
   int info = 0;
+  computeInitialResidu();
+
   while ((!isNewtonConverge) && (nbNewtonStep <= maxStep))
   {
     nbNewtonStep++;
@@ -377,29 +387,30 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     update(levelMin);
     isNewtonConverge = newtonCheckConvergence(criterion);
   }
-
   if (!isNewtonConverge)
     cout << "Newton process stopped: max. steps number reached." << endl ;
 }
 
 bool TimeStepping::newtonCheckConvergence(double criterion)
 {
-  bool checkConvergence = false;
-  // get the nsds indicator of convergence
-  double nsdsConverge = model-> getNonSmoothDynamicalSystemPtr()->nsdsConvergenceIndicator();
-  // We compute cvg = abs(xi+1 - xi)/xi and if cvg < criterion
-  if (nsdsConverge < criterion)
+  bool checkConvergence = true;
+  if (mRelativeConvergenceCriterionHeld)
   {
-    checkConvergence = true ;
+    return true;
+  }
+  // get the nsds indicator of convergence
+  // We compute cvg = abs(xi+1 - xi)/xi and if cvg < criterion
+  //  if (nsdsConverge < criterion )
+  {
     double residu = 0.0;
     for (OSIIterator it = allOSI->begin(); it != allOSI->end() ; ++it)
     {
+      double ds_relative_converge = model-> getNonSmoothDynamicalSystemPtr()->nsdsConvergenceIndicator();
       residu = (*it)->computeResidu();
-      //    cout << residu << endl;
       if (residu > criterion)
       {
         checkConvergence = false;
-        break;
+        //break;
       }
     }
   }

@@ -57,6 +57,7 @@ LagrangianDS::LagrangianDS(const SiconosVector& newQ0, const SiconosVector& newV
   q[0].reset(new SimpleVector(*q0));
   q[1].reset(new SimpleVector(*velocity0));
   q[2].reset(new SimpleVector(ndof));
+  mResiduFree.reset(new SimpleVector(getDim()));
 
   // set allocation flags: true for required input, false for others
   jacobianFInt.resize(2);
@@ -218,6 +219,8 @@ LagrangianDS::LagrangianDS(const SiconosVector& newQ0, const SiconosVector& newV
   q[0].reset(new SimpleVector(*q0));
   q[1].reset(new SimpleVector(*velocity0));
   q[2].reset(new SimpleVector(ndof));
+  mResiduFree.reset(new SimpleVector(getDim()));
+
 
   jacobianFInt.resize(2);
   jacobianNNL.resize(2);
@@ -238,6 +241,7 @@ LagrangianDS::LagrangianDS(const SiconosVector& newQ0, const SiconosVector& newV
   q[0].reset(new SimpleVector(*q0));
   q[1].reset(new SimpleVector(*velocity0));
   q[2].reset(new SimpleVector(ndof));
+  mResiduFree.reset(new SimpleVector(getDim()));
 
   // Mass
   setComputeMassFunction(SSL::getPluginName(massName), SSL::getPluginFunctionName(massName));
@@ -1068,14 +1072,12 @@ LagrangianDS* LagrangianDS::convert(DynamicalSystem* ds)
 double LagrangianDS::dsConvergenceIndicator()
 {
   double dsCvgIndic;
-  SimpleVector diff(q[0]->size());
+  //  SimpleVector diff(q[0]->size());
   // Compute difference between present and previous Newton steps
   SP::SiconosVector valRef = workV[NewtonSave];
-  sub(*(q[0]), *valRef, diff);
-  if (valRef->norm2() != 0)
-    dsCvgIndic = diff.norm2() / (valRef->norm2());
-  else
-    dsCvgIndic = diff.norm2();
+
+  sub(*(q[0]), *valRef, *valRef);
+  dsCvgIndic = valRef->norm2() / (valRef->norm2() + 1);
   return (dsCvgIndic);
 }
 

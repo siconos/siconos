@@ -51,7 +51,9 @@ private:
   /** compute LevelMax */
   void initLevelMax();
 
+
 public:
+
 
   /** Constructor with the time-discretisation.
   *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
@@ -107,6 +109,13 @@ public:
    * \param unsigned int: maximum number of Newton steps
    */
   void newtonSolve(double, unsigned int);
+  /** compute initial residu
+   * It computes the initial residu to start the newton algorithm.
+   *
+   */
+  void computeInitialResidu();
+
+
 
   /** check the convergence of Newton algorithm according to criterion
    * \param double, convergence criterion
