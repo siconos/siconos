@@ -23,8 +23,6 @@
 #include <string.h>
 #include "LA.h"
 
-#define HAVE_DGESVD
-
 double cond(double * A, int n, int m)
 {
   int LWORK = -1;

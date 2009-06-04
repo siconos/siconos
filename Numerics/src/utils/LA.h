@@ -240,7 +240,6 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      LAPACK_7(LAPACK_NAME(dgesv), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), INTEGERP(IPIV), B, INTEGER(C_LDB), INTEGER(INFO)); \
   })
 
-//#ifndef HAVE_ATLAS
 
 /* DGELS -
  *  DGELS solves overdetermined or underdetermined real linear systems
@@ -248,6 +247,8 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
  *  factorization of A.  It is assumed that A has full rank.
  */
 
+#ifdef COMPLETE_LAPACK_LIBRARIES
+#include "blaslapack.h"
 #define DGELS( M, N, NRHS, A, LDA, B, LDB, WORK, LWORK, INFO  ) \
    ({int C_M = M; \
      int C_N = N; \
@@ -258,13 +259,19 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      int C_LDB = LDB; \
      F77NAME(dgels)("N", FCAST(integer,C_M) , FCAST(integer,C_N), FCAST(integer,C_NRHS), FCASTP(double, A), FCAST(integer,C_LDA),FCASTP(double,B), FCAST(integer, C_LDB), FCASTP(double,C_WORK) ,FCAST(integer,LWORK), FCAST(integer,INFO)); \
   })
+#else
+#include <stdio.h>
+#define DGELS( M, N, NRHS, A, LDA, B, LDB, WORK, LWORK, INFO  ) \
+  ({ fprintf(stderr, "dgels not found\n"); })
+#endif
 
 /* DGESVD -
  * DGESVD  computes the singular value decomposition (SVD) of a real
  *  M-by-N matrix A, optionally computing the left and/or right singular
  *  vectors.
  */
-
+#ifdef COMPLETE_LAPACK_LIBRARIES
+#include "blaslapack.h"
 #define DGESVD(JOBU,JOBVT,M, N, A, LDA, S, U, LDU, VT, LDVT,WORK, LWORK, INFO ) \
     ({int C_M = M; \
      int C_N = N; \
@@ -282,10 +289,11 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
  *  M-by-N matrix A, optionally computing the left and/or right singular
  *  vectors.
  */
-
-
-//#endif /*HAVE_ATLAS */
-
+#else
+#include <stdio.h>
+#define DGESVD(JOBU,JOBVT,M, N, A, LDA, S, U, LDU, VT, LDVT,WORK, LWORK, INFO ) \
+  ({ fprintf(stderr, "dgesvd not found\n"); })
+#endif
 
 
 /* DTRTRS - solve a triangular system of the form  A * X = B or A**T * X = B,
