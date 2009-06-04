@@ -43,17 +43,12 @@ double cond(double * A, int n, int m)
   memcpy(Atmp, A, size);
 
   int InfoDGSVD = -1;
-#ifdef HAVE_DGESVD
+
   assert(WORK);
   DGESVD(JOBU, JOBVT, n, m, A, m, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD);
   LWORK = (int)(WORK[0]);
   WORK = realloc(WORK, LWORK * sizeof * WORK);
   DGESVD(JOBU, JOBVT, n, m, A, m, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD);
-#endif
-#ifndef HAVE_DGESVD
-  printf("Numerics, cond: Not able to find DGESVD\n");
-#endif
-
 
   printf("SVD of A :\n ");
   printf("[\t ");
