@@ -134,12 +134,15 @@ MACRO(BEGIN_TEST _D)
   SET(_CURRENT_TEST_DIRECTORY ${_D})
   FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${_D})
   
-  # find and copy data files : *.mat, *.dat and *.xml
+  # find and copy data files : *.mat, *.dat and *.xml, and etc.
   FILE(GLOB_RECURSE _DATA_FILES 
     RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${_D}
-    ${CMAKE_CURRENT_SOURCE_DIR}/${_D}/*.mat 
-    ${CMAKE_CURRENT_SOURCE_DIR}/${_D}/*.dat
-    ${CMAKE_CURRENT_SOURCE_DIR}/${_D}/*.xml)
+    *.mat 
+    *.dat
+    *.xml
+    *.DAT
+    *.INI)
+    
   FOREACH(_F ${_DATA_FILES})
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/${_D}/${_F} ${CMAKE_CURRENT_BINARY_DIR}/${_D}/${_F} COPYONLY)
   ENDFOREACH(_F ${_DATA_FILES})
