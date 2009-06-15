@@ -394,6 +394,8 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 bool TimeStepping::newtonCheckConvergence(double criterion)
 {
   bool checkConvergence = true;
+  //mRelativeConvergenceCriterionHeld is true means that the RCC is activated, and the relative criteron helds.
+  //In this case the newtonCheckConvergence has to return true. End of the Newton iterations
   if (mRelativeConvergenceCriterionHeld)
   {
     return true;

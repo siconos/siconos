@@ -1068,18 +1068,17 @@ LagrangianDS* LagrangianDS::convert(DynamicalSystem* ds)
   LagrangianDS* lnlds = dynamic_cast<LagrangianDS*>(ds);
   return lnlds;
 }
+/*must be remove, replace by the RelativeConvergenceCriteron of the simulation*/
 
-double LagrangianDS::dsConvergenceIndicator()
+/*double LagrangianDS::dsConvergenceIndicator()
 {
   double dsCvgIndic;
-  //  SimpleVector diff(q[0]->size());
-  // Compute difference between present and previous Newton steps
   SP::SiconosVector valRef = workV[NewtonSave];
 
-  sub(*(q[0]), *valRef, *valRef);
-  dsCvgIndic = valRef->norm2() / (valRef->norm2() + 1);
+  sub(*(q[0]),*valRef,*valRef);
+  dsCvgIndic= valRef->norm2()/(valRef->norm2()+1);
   return (dsCvgIndic);
-}
+  }*/
 
 void LagrangianDS::computeQFree(double time, unsigned int level, SP::SiconosVector qFreeOut)
 {

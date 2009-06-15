@@ -502,20 +502,21 @@ void FirstOrderNonLinearDS::resetNonSmoothPart()
   r->zero();
 }
 
-double FirstOrderNonLinearDS::dsConvergenceIndicator()
+/*must be remove, replace by the RelativeConvergenceCriteron of the simulation*/
+/*double FirstOrderNonLinearDS::dsConvergenceIndicator()
 {
-  double dsCvgIndic;
+    double dsCvgIndic;
   // Velocity is used to calculate the indicator.
   SP::SiconosVector diff(new SimpleVector(x[0]->size()));
   // Compute difference between present and previous Newton steps
   SP::SiconosVector valRef = workV[NewtonSave];
   *diff =  *(x[0]) - *valRef;
-  if (valRef->norm2() != 0)
-    dsCvgIndic = diff->norm2() / (valRef->norm2());
+  if (valRef->norm2()!=0)
+    dsCvgIndic= diff->norm2()/(valRef->norm2());
   else
-    dsCvgIndic = diff->norm2();
-  return (dsCvgIndic);
-}
+    dsCvgIndic= diff->norm2();
+    return (dsCvgIndic);
+    }*/
 
 FirstOrderNonLinearDS* FirstOrderNonLinearDS::convert(DynamicalSystem* ds)
 {

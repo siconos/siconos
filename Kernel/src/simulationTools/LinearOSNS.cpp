@@ -302,6 +302,7 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
   coord[7] = pos + sizeY;
 
   SP::SiconosMatrix  H;
+  SP::SiconosMatrix  F;
   SP::SiconosVector workX;
 
   workX = UR->getWorkXPtr();
@@ -328,23 +329,23 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
       if (relationSubType == LinearTIR)
       {
         e = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->getRelationPtr())->getEPtr();
-        H = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->getRelationPtr())->getFPtr();
+        F = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->getRelationPtr())->getFPtr();
       }
       else
       {
         e = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getEPtr();
-        H = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getFPtr();
+        F = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getFPtr();
       }
 
       if (e)
         boost::static_pointer_cast<SimpleVector>(q)->addBlock(pos, *e);
 
-      if (H)
+      if (F)
       {
         SP::SiconosVector  workZ = UR->getWorkZPtr();
-        coord[3] = H->size(1);
-        coord[5] = H->size(1);
-        subprod(*H, *workZ, *q, coord, false);
+        coord[3] = F->size(1);
+        coord[5] = F->size(1);
+        subprod(*F, *workZ, *q, coord, false);
       }
     }
   }

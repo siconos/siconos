@@ -851,7 +851,7 @@ public:
   /** To compute \f$\frac{|q_{i+1} - qi|}{|q_i|}\f$ where \f$ q_{i+1}\f$ represents the present state and \f$ q_i\f$ the previous one
    * \return a double
    */
-  double dsConvergenceIndicator();
+  /*  double dsConvergenceIndicator(); */
 
   /** function to compute derivative number level of qFree
    *  \param double: current time

@@ -97,6 +97,10 @@ protected:
   /**  the previous r vectors */
   SP::SiconosMemory rMemory;
 
+  /** Residu r*/
+  SP::SimpleVector mResidur;
+
+
   /** Copy of M Matrix, used to solve systems like Mx = b with LU-factorization.
       (Warning: may not exist, used if we need to avoid factorization in place of M) */
   SP::SiconosMatrix invM;
@@ -443,7 +447,7 @@ public:
   /** To compute \f$\frac{|x_{i+1} - xi|}{|x_i|}\f$ where \f$x_{i+1}\f$ represents the present state and \f$x_i\f$ the previous one
    * \return a double
    */
-  double dsConvergenceIndicator();
+  /*  double dsConvergenceIndicator(); */
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param SP::DynamicalSystem : the system which must be converted

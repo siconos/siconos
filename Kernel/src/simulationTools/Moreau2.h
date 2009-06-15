@@ -88,7 +88,7 @@ public:
    *  \param unsigned int: level of interest for the dynamics: not used at the time
    */
   void updateState(unsigned int);
-  virtual SP::SiconosVector  getWorkX(SP::DynamicalSystem d);
+  /*  virtual SP::SiconosVector  getWorkX(SP::DynamicalSystem d);*/
 
   static Moreau2* convert(OneStepIntegrator* osi);
 

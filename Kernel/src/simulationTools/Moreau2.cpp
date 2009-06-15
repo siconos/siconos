@@ -43,10 +43,9 @@ Moreau2::~Moreau2()
 {
 }
 
-SP::SiconosVector  Moreau2::getWorkX(SP::DynamicalSystem d)
-{
+/*SP::SiconosVector  Moreau2::getWorkX(SP::DynamicalSystem d){
   return workX[d];
-}
+  }*/
 
 void Moreau2::computeFreeState()
 {

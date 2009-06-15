@@ -237,7 +237,7 @@ void Moreau::initialize(SP::Simulation sim)
 
     // Allocate memory for a work vector used in ds and in Newton process convergence evaluation.
     if ((*itDS)->getType() == LNLDS || (*itDS)->getType() == FONLDS)
-      (*itDS)->allocateWorkVector(DynamicalSystem::NewtonSave, WMap[*itDS]->size(0));
+      (*itDS)->allocateWorkVector(DynamicalSystem::local_buffer, WMap[*itDS]->size(0));
 
   }
 }
@@ -553,26 +553,34 @@ double Moreau::computeResidu()
     // 2bis - First Order Linear Systems with Time Invariant coefficients
     else if (dsType == FOLTIDS)
     {
-      // Residu = W*(x_i+1 - xi) -hb -hA*xi- hr_i+1
-      SP::FirstOrderLinearDS d = boost::static_pointer_cast<FirstOrderLinearTIDS>(ds);
-
-      SP::SiconosVector x = d->getXPtr(); // last saved value for x
-      // x value at told
-      SP::SiconosVector xold = d->getXMemoryPtr()->getSiconosVector(0);
-
-      *residuFree = *x;
-      *residuFree -= *xold;
-      computeW(t, d); // W is recomputed since it has been LU-factorized during solving.
-      SP::SiconosMatrix W = WMap[ds]; // Its W Moreau matrix of iteration.
-      prod(*W, *residuFree, *residuFree, true);
-
-      SP::SiconosMatrix A = d->getAPtr();
-      if (A)
-        prod(-h, *A, *xold, *residuFree, false); // residuFree -= h*A*xi
-
+      SP::FirstOrderLinearTIDS d = boost::static_pointer_cast<FirstOrderLinearTIDS>(ds);
+      //Don't use W because it is LU factorized
+      //Residu : R_{free} = M(x^{\alpha}_{k+1} - x_{k}) -h( A (\theta x^{\alpha}_{k+1} + (1-\theta)  x_k) +b_{k+1})
       SP::SiconosVector b = d->getBPtr();
       if (b)
-        scal(-h, *b, *residuFree, false); // residuFree -= hb
+        *residuFree = *b;
+
+
+      SP::SiconosVector x_alpha = d->getXPtr(); // last saved value for x
+      // x value at told
+      SP::SiconosVector x_k = d->getXMemoryPtr()->getSiconosVector(0);
+
+      SP::SiconosVector xBuffer = d->getWorkVector(DynamicalSystem::local_buffer);
+      *xBuffer = theta * (*x_alpha);
+      *xBuffer += (1 - theta) * (*x_k);
+      *xBuffer *= -h;
+      SP::SiconosMatrix A = d->getAPtr();
+      if (A)
+        prod(*A, *xBuffer, *residuFree, false); // residuFree -= -h( A (\theta x^{\alpha}_{k+1} + (1-\theta)  x_k) +b_{k+1}
+
+      *xBuffer = (* x_alpha);
+      *xBuffer -= (*x_k);
+
+      SP::SiconosMatrix M = d->getMPtr();
+      if (M)
+        prod(*M, *xBuffer, *residuFree, false); // residuFree += M(x^{\alpha}_{k+1} - x_{k})
+      else
+        *residuFree += *xBuffer;
 
       (*workX[d]) = *residuFree;
       scal(-h, *d->getRPtr(), (*workX[d]), false); // residu = residu - h*r
@@ -718,7 +726,7 @@ void Moreau::computeFreeState()
       SP::FirstOrderNonLinearDS d = boost::static_pointer_cast<FirstOrderNonLinearDS>(ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SP::SiconosVector xold = d->getXMemoryPtr()->getSiconosVector(0); // xi
+      //    SP::SiconosVector xold = d->getXMemoryPtr()->getSiconosVector(0); // xi
 
       // --- ResiduFree computation ---
       // ResiduFree = M(x-xold) - h*[theta*f(t) + (1-theta)*f(told)]
@@ -726,6 +734,7 @@ void Moreau::computeFreeState()
       // xFree pointer is used to compute and save ResiduFree in this first step.
       SP::SiconosVector xfree = workX[d];
       *xfree = *(d->getResiduFreePtr());
+
 
       SP::SiconosVector x = d->getXPtr(); // last saved value for x
 
@@ -737,6 +746,8 @@ void Moreau::computeFreeState()
       computeW(t, d);
 
       W->PLUForwardBackwardInPlace(*xfree);
+
+
       // -> compute real xfree
       *xfree *= -1.0;
       *xfree += *x;
@@ -758,36 +769,40 @@ void Moreau::computeFreeState()
       // x value at told
       SP::SiconosVector xold = d->getXMemoryPtr()->getSiconosVector(0);
 
-      //*xfree=*(d->getResiduFreePtr());
-      // If M not equal to identity matrix
-      SP::SiconosMatrix M = d->getMPtr();
-      if (M)
-        prod(*M, *xold, *xfree); // xFree = M*xi
-      else
-        *xfree = *xold;
+      *xfree = *(d->getResiduFreePtr());
+      //    // If M not equal to identity matrix
+      //    SP::SiconosMatrix M = d->getMPtr();
+      //    if( M )
+      //      prod(*M,*xold,*xfree); // xFree = M*xi
+      //    else
+      //      *xfree = *xold;
 
-      SP::SiconosMatrix A = d->getAPtr();
-      if (A)
-      {
-        d->computeA(told);
-        double coeff = h * (1 - theta);
-        prod(coeff, *A, *xold, *xfree, false);
-        // xFree += h(1-theta)A_i*x_i
-      }
-      SP::SiconosVector b = d->getBPtr();
-      if (b)
-      {
-        // xFree += h(1-theta)*bi + h*theta*bi+1
-        //        d->computeB(told); // bi
-        scal(h * (1.0 - theta), *d->getBPtr(), *xfree, false);
-        d->computeB(t); // bi+1
-        scal(h * theta, *d->getBPtr(), *xfree, false);
-      }
+      //    SP::SiconosMatrix A = d->getAPtr();
+      //    if( A )
+      //      {
+      //        d->computeA(told);
+      //        double coeff = h*(1-theta);
+      //        prod(coeff,*A,*xold,*xfree,false);
+      //        // xFree += h(1-theta)A_i*x_i
+      //      }
+      //    SP::SiconosVector b = d->getBPtr();
+      //    if( b )
+      //      {
+      //        // xFree += h(1-theta)*bi + h*theta*bi+1
+      //        //        d->computeB(told); // bi
+      //        scal(h*(1.0-theta), *d->getBPtr(), *xfree, false);
+      //        d->computeB(t); // bi+1
+      //        scal(h*theta, *d->getBPtr(), *xfree, false);
+      //      }
 
       // -- Update W --
       computeW(t, d);
 
       W->PLUForwardBackwardInPlace(*xfree); // Solve WX = xfree and set xfree = X.
+      SP::SiconosVector x = d->getXPtr(); // last saved value for x
+      // -> compute real xfree
+      *xfree *= -1.0;
+      *xfree += *x;
     }
     // 2bis - First Order Linear Systems with Time Invariant coefficients
     else if (dsType == FOLTIDS)
@@ -804,13 +819,14 @@ void Moreau::computeFreeState()
       *xfree = *(d->getResiduFreePtr());
 
       //    // x value at told
-      SP::SiconosVector xold = d->getXMemoryPtr()->getSiconosVector(0);
+      //    SP::SiconosVector xold = d->getXMemoryPtr()->getSiconosVector(0);
 
 
 
       W->PLUForwardBackwardInPlace(*xfree); // Solve WX = xfree and set xfree = X.
-
-      *xfree += *xold; // xfree = xi + ...
+      SP::SiconosVector x = d->getXPtr(); // last saved value for x
+      *xfree *= -1.0;
+      *xfree += *x; // xfree = xi + ...
     }
     // 3 - Lagrangian Non Linear Systems
     else if (dsType == LNLDS)
@@ -998,7 +1014,7 @@ void Moreau::updateState(unsigned int level)
       //      *x = h * theta * *fonlds->getRPtr();
       // Save value of q in stateTmp for future convergence computation
       if (baux)
-        ds->addWorkVector(x, DynamicalSystem::NewtonSave);
+        ds->addWorkVector(x, DynamicalSystem::local_buffer);
 
 
       // Solve W(x-xfree) = hr
@@ -1007,8 +1023,8 @@ void Moreau::updateState(unsigned int level)
       *x += *workX[ds]; // x+=xfree
       if (baux)
       {
-        ds->subWorkVector(x, DynamicalSystem::NewtonSave);
-        double aux = ((ds->getWorkVector(DynamicalSystem::NewtonSave))->norm2()) / (ds->getNormRef());
+        ds->subWorkVector(x, DynamicalSystem::local_buffer);
+        double aux = ((ds->getWorkVector(DynamicalSystem::local_buffer))->norm2()) / (ds->getNormRef());
         if (aux > RelativeTol)
           simulationLink->setRelativeConvergenceCriterionHeld(false);
       }
@@ -1033,7 +1049,7 @@ void Moreau::updateState(unsigned int level)
       SP::SiconosVector q = d->getQPtr();
       // Save value of q in stateTmp for future convergence computation
       if (baux)
-        ds->addWorkVector(q, DynamicalSystem::NewtonSave);
+        ds->addWorkVector(q, DynamicalSystem::local_buffer);
 
       //  -> get previous time step state
       SP::SiconosVector vold = d->getVelocityMemoryPtr()->getSiconosVector(0);
@@ -1047,8 +1063,8 @@ void Moreau::updateState(unsigned int level)
 
       if (baux)
       {
-        ds->subWorkVector(q, DynamicalSystem::NewtonSave);
-        double aux = ((ds->getWorkVector(DynamicalSystem::NewtonSave))->norm2()) / (ds->getNormRef());
+        ds->subWorkVector(q, DynamicalSystem::local_buffer);
+        double aux = ((ds->getWorkVector(DynamicalSystem::local_buffer))->norm2()) / (ds->getNormRef());
         if (aux > RelativeTol)
           simulationLink->setRelativeConvergenceCriterionHeld(false);
       }
