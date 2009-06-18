@@ -26,7 +26,7 @@
 
 #include "CircularDS.h"
 
-class Disk : public CircularDS
+class Disk : public CircularDS, public boost::enable_shared_from_this<Disk>
 {
 private:
 
@@ -50,7 +50,14 @@ public:
    */
   ~Disk();
 
+  virtual void accept(Visitor& tourist)
+  {
+    tourist.visit(shared_from_this());
+  }
+
 };
+
+TYPEDEF_SPTR(Disk);
 
 #endif /* Disk_H */
 

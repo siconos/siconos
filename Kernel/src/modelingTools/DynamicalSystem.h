@@ -34,6 +34,7 @@
 #include "DynamicalSystemTypes.hpp"
 #include "PluggedObject.hpp"
 #include "PluginTypes.hpp"
+#include "SiconosVisitor.hpp"
 
 class NonSmoothDynamicalSystem;
 class DynamicalSystemXML;
@@ -44,6 +45,7 @@ class SimpleVector;
 class SiconosMemory;
 class SiconosSharedLibrary;
 
+using namespace Siconos;
 
 /** */
 
@@ -719,6 +721,12 @@ public:
    */
   virtual void resetNonSmoothPart() = 0;
 
+  /** visitor hook
+   */
+  virtual void accept(Visitor&)
+  {
+    RuntimeException::selfThrow("this class derived from DynamicalSystem cannot accept a visitor");
+  }
 
 };
 

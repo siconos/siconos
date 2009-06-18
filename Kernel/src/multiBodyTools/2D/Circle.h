@@ -26,7 +26,7 @@
 
 #include "CircularDS.h"
 
-class Circle : public CircularDS
+class Circle : public CircularDS, public boost::enable_shared_from_this<Circle>
 {
 private:
 
@@ -52,8 +52,14 @@ public:
    */
   ~Circle();
 
+  virtual void accept(Visitor& tourist)
+  {
+    tourist.visit(shared_from_this());
+  }
 
 };
+
+TYPEDEF_SPTR(Circle);
 
 #endif /* Circle_H */
 

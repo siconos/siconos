@@ -33,6 +33,7 @@ public:
   {
     return radius;
   };
+
 };
 
 TYPEDEF_SPTR(CircularDS);
