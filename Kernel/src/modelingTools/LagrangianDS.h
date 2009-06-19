@@ -510,16 +510,16 @@ public:
   }
 
   /** set the value of fExt to newValue
-   *  \param a plugged vector
+   *  \param a SimpleVector
    */
-  void setFExt(const Plugged_Vector_FTime&);
+  void setFExt(const SimpleVector&);
 
   /** set fExt to pointer newPtr
-   *  \param a SP to plugged vector
+   *  \param a SP to a Simple vector
    */
-  inline void setFExtPtr(SP::Plugged_Vector_FTime newPtr)
+  inline void setFExtPtr(SP::SimpleVector newPtr)
   {
-    fExt = newPtr;
+    fExt.reset(new Plugged_Vector_FTime(*newPtr));
   }
 
   // -- NNL --

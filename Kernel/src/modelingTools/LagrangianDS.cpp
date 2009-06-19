@@ -571,7 +571,7 @@ void LagrangianDS::setFInt(const PVFint& newValue)
     *fInt = newValue;
 }
 
-void LagrangianDS::setFExt(const Plugged_Vector_FTime& newValue)
+void LagrangianDS::setFExt(const SimpleVector& newValue)
 {
   assert(newValue.size() == ndof && "LagrangianDS - setFExt: inconsistent dimensions with problem size for input vector fExt");
 

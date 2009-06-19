@@ -287,7 +287,7 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
 
   if (istate == 3)
   {
-    std:: cout << "ok\n";
+    //      std:: cout << "ok\n";
     assert(true);
   }
 
