@@ -182,6 +182,15 @@ Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, 
     involvedDS->insert(*itDS); // Warning: insert pointers to DS!!
 }
 
+/* initialisation with empty set */
+Interaction::Interaction(int newNumber, int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel):
+  number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0),
+  y(1), nslaw(newNSL), relation(newRel), initialized(false)
+{
+  involvedDS.reset(new DynamicalSystemsSet());
+}
+
+
 // --- DESTRUCTOR ---
 Interaction::~Interaction()
 {

@@ -151,8 +151,8 @@ public:
    *  \param a SP::DynamicalSystem: the DS involved in the Interaction
    *  \param int : the number of this Interaction
    *  \param int : the value of interactionSize
-   *  \param NonSmoothLaw* : a pointer to the non smooth law
-   *  \param Relation* : a pointer to the Relation
+   *  \param SP::NonSmoothLaw : a pointer to the non smooth law
+   *  \param SP::Relation : a pointer to the Relation
    */
   Interaction(SP::DynamicalSystem, int, int, SP::NonSmoothLaw, SP::Relation);
   /** constructor with a set of data (only one DS in the Interaction)
@@ -160,8 +160,8 @@ public:
    *  \param a SP::DynamicalSystem: the DS involved in the Interaction
    *  \param int : the number of this Interaction
    *  \param int : the value of interactionSize
-   *  \param NonSmoothLaw* : a pointer to the non smooth law
-   *  \param Relation* : a pointer to the Relation
+   *  \param SP::NonSmoothLaw : a pointer to the non smooth law
+   *  \param SP::Relation : a pointer to the Relation
    */
   Interaction(const std::string&, SP::DynamicalSystem, int, int, SP::NonSmoothLaw, SP::Relation);
 
@@ -169,8 +169,8 @@ public:
    *  \param a DynamicalSystemsSet: the set of DS involved in the Interaction
    *  \param int : the number of this Interaction
    *  \param int : the value of interactionSize
-   *  \param NonSmoothLaw* : a pointer to the non smooth law
-   *  \param Relation* : a pointer to the Relation
+   *  \param SP::NonSmoothLaw : a pointer to the non smooth law
+   *  \param SP::Relation : a pointer to the Relation
    */
   Interaction(DynamicalSystemsSet&, int, int, SP::NonSmoothLaw, SP::Relation);
 
@@ -179,10 +179,18 @@ public:
    *  \param a DynamicalSystemsSet: the set of DS involved in the Interaction
    *  \param int : the number of this Interaction
    *  \param int : the value of interactionSize
-   *  \param NonSmoothLaw* : a pointer to the non smooth law
-   *  \param Relation* : a pointer to the Relation
+   *  \param SP::NonSmoothLaw : a pointer to the non smooth law
+   *  \param SP::Relation : a pointer to the Relation
    */
   Interaction(const std::string&, DynamicalSystemsSet&, int, int, SP::NonSmoothLaw, SP::Relation);
+
+  /** constructor with no data
+   *  \param int : the number of this Interaction
+   *  \param int : the value of interactionSize
+   *  \param SP::NonSmoothLaw : a pointer to the non smooth law
+   *  \param SP::Relation : a pointer to the Relation
+   */
+  Interaction(int, int, SP::NonSmoothLaw, SP::Relation);
 
   /** destructor
    */
@@ -461,10 +469,17 @@ public:
   */
   void setLambdaOldPtr(const unsigned int , SP::SiconosVector newPtr);
 
+  /** insert a Dynamical system
+   *  \param a SP::DynamicalSystem
+   */
+  void insert(SP::DynamicalSystem ds)
+  {
+    involvedDS->insert(ds);
+  };
+
   /** gets an iterator to the first element of the involvedDS set.
    *  \return a DSIterator.
    */
-
   inline DSIterator dynamicalSystemsBegin()
   {
     return involvedDS->begin();
@@ -522,7 +537,7 @@ public:
   }
 
   /** set the Relation of this Interaction
-  *  \param the relation* to set
+  *  \param the SP::relation to set
   */
   void setRelationPtr(SP::Relation newRelation) ;
 
@@ -535,7 +550,7 @@ public:
   }
 
   /** set the NonSmoothLaw of this Interaction
-  *  \param the NonSmoothLaw* to set
+  *  \param the SP::NonSmoothLaw to set
   */
   void setNonSmoothLawPtr(SP::NonSmoothLaw newNslaw) ;
 
