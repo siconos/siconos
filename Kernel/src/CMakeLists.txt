@@ -110,6 +110,8 @@ SET(TEST_WRAP TRUE)
 # tests with cppunit
 #
 IF(CPPUNIT_FOUND)
+
+  # the main test driver
   SET(TEST_MAIN model/test/TestMain.cpp)
 
   # used in ldwrap.c.in
