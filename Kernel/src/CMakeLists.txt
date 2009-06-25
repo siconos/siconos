@@ -110,6 +110,8 @@ SET(TEST_WRAP TRUE)
 # tests with cppunit
 #
 IF(CPPUNIT_FOUND)
+  SET(TEST_MAIN model/test/TestMain.cpp)
+
   # used in ldwrap.c.in
   SET(LD_LIBRARY_PATH ".:${CMAKE_CURRENT_BINARY_DIR}/plugin:${CMAKE_CURRENT_BINARY_DIR}/plugin/test")
 
@@ -117,19 +119,19 @@ IF(CPPUNIT_FOUND)
   BEGIN_TEST(utils/SiconosAlgebra/test)
 
   NEW_TEST(testSiconosAlgebra
-    BlockMatrixTest.cpp  SimpleMatrixTest.cpp BlockVectorTest.cpp  SimpleVectorTest.cpp TestMain.cpp)
+    BlockMatrixTest.cpp  SimpleMatrixTest.cpp BlockVectorTest.cpp  SimpleVectorTest.cpp)
   END_TEST()
   
   # Siconos Memory
   BEGIN_TEST(utils/SiconosMemory/test)
   
-  NEW_TEST(testSiconosMemory SiconosMemoryTest.cpp TestMain.cpp)
+  NEW_TEST(testSiconosMemory SiconosMemoryTest.cpp)
   END_TEST()
   
   # model
   BEGIN_TEST(model/test)
   
-  NEW_TEST(testModel ModelTest.cpp TestMain.cpp)
+  NEW_TEST(testModel ModelTest.cpp)
   
   END_TEST()
   # modeling tools 
@@ -138,7 +140,7 @@ IF(CPPUNIT_FOUND)
   NEW_TEST(testModelingTools FirstOrderLinearDSTest.cpp FirstOrderLinearTIRTest.cpp FirstOrderLinearRTest.cpp 
     FirstOrderType1RTest.cpp 
     LagrangianLinearTIRTest.cpp LagrangianScleronomousRTest.cpp LagrangianRheonomousRTest.cpp 
-    LagrangianCompliantRTest.cpp TestMain.cpp)
+    LagrangianCompliantRTest.cpp)
   END_TEST()
   #FirstOrderNonLinearDSTest.cpp FirstOrderLinearDSTest.cpp 
   #LagrangianDSTest.cpp LagrangianLinearTIDSTest.cpp TestMain.cpp)
@@ -147,8 +149,7 @@ IF(CPPUNIT_FOUND)
   
   # xml
   BEGIN_TEST(xml/test)
-  NEW_TEST(testXMLTools
-    TestMain.cpp)
+  NEW_TEST(testXMLTools)
   
   END_TEST()
   
@@ -161,13 +162,13 @@ IF(CPPUNIT_FOUND)
     OUTPUT_NAME global_tests/gTestPlugin)
   
   NEW_TEST(testGlobal
-    DiodeBridge.cpp BallBowl.cpp BouncingBall.cpp FunctionTest.cpp  GlobalTests.cpp  MainTest.cpp)
+    DiodeBridge.cpp BallBowl.cpp BouncingBall.cpp FunctionTest.cpp  GlobalTests.cpp)
   
   END_TEST()
   
   BEGIN_TEST(utils/SiconosTools/test)
 
-  NEW_TEST(SiconosGraph SiconosGraphTest.cpp TestMain.cpp)
+  NEW_TEST(SiconosGraph SiconosGraphTest.cpp)
 
   END_TEST()
 

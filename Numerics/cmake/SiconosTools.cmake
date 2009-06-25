@@ -164,6 +164,12 @@ MACRO(NEW_TEST)
   FOREACH(_F ${_SOURCES})
     LIST(APPEND ${_EXE}_FSOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${_CURRENT_TEST_DIRECTORY}/${_F})
   ENDFOREACH(_F ${_SOURCES})
+
+ 
+  IF(TEST_MAIN)
+    LIST(APPEND ${_EXE}_FSOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${TEST_MAIN})
+  ENDIF(TEST_MAIN)
+
   
   # pb env in ctest, see http://www.vtk.org/Bug/view.php?id=6391#bugnotes
   CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/ldwrap.c.in 

@@ -190,7 +190,6 @@ void OneStepNSProblem::updateUnitaryBlocks()
   SP::UnitaryRelationsGraph indexSet;
   bool isTimeInvariant;
   UnitaryRelationsIterator itUR1, itUR2;
-  DynamicalSystemsSet commonDS;
   // Get index set from Simulation
 
   indexSet = simulation->getIndexSetPtr(levelMin);
@@ -250,7 +249,6 @@ void OneStepNSProblem::computeAllUnitaryBlocks()
   SP::UnitaryRelationsGraph indexSet = simulation->getIndexSetPtr(0);
 
   UnitaryRelationsIterator itUR1, itUR2;
-  DynamicalSystemsSet commonDS;
 
   UnitaryRelationsGraph::VIterator ui1, ui1end;
   for (boost::tie(ui1, ui1end) = indexSet->vertices();
