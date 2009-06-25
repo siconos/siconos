@@ -45,8 +45,6 @@ class SimpleVector;
 class SiconosMemory;
 class SiconosSharedLibrary;
 
-using namespace Siconos;
-
 /** */
 
 /**  Abstract class to handle Dynamical Systems => interface for derived classes (First Order or Lagrangian systems)
@@ -721,9 +719,16 @@ public:
    */
   virtual void resetNonSmoothPart() = 0;
 
-  /** visitor hook
+  /** visitor hook for shared pointers
    */
-  virtual void accept(Visitor&)
+  virtual void accept(SP::SiconosVisitor)
+  {
+    RuntimeException::selfThrow("this class derived from DynamicalSystem does accept a visitor for shared pointers");
+  };
+
+  /** visitor hook for shared pointers
+   */
+  virtual void accept(SiconosVisitor&)
   {
     RuntimeException::selfThrow("this class derived from DynamicalSystem cannot accept a visitor");
   }

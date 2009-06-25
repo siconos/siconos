@@ -52,9 +52,13 @@ public:
    */
   ~Circle();
 
-  virtual void accept(Visitor& tourist)
+  virtual void accept(SiconosVisitor& tourist)
   {
-    tourist.visit(shared_from_this());
+    tourist.visit(*this);
+  }
+  virtual void accept(SP::SiconosVisitor tourist)
+  {
+    tourist->visit(shared_from_this());
   }
 
 };

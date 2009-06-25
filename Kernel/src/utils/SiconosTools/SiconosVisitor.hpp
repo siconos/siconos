@@ -51,21 +51,21 @@ class Circle;
 
 */
 
-namespace Siconos
-{
+//namespace Siconos
+//{
 
 #define QUOTE(M) #M
 
 #define FAIL(X) \
   { RuntimeException::selfThrow                                         \
-      (QUOTE(you must define a visit function for SP :: X in a derived class of Siconos::Visitor)); }
+      (QUOTE(you must define a visit function for SP :: X in a derived class of SiconosVisitor)); }
 
 
 #define VISIT(X)                                                    \
   virtual void visit(boost::shared_ptr<X>) FAIL(X);                 \
   virtual void visit(X&) FAIL(X);
 
-class Visitor
+class SiconosVisitor
 {
 public:
 
@@ -76,8 +76,10 @@ public:
   VISIT(Circle);
 
 };
-}
 
+//}
+
+TYPEDEF_SPTR(SiconosVisitor);
 
 
 #undef VISIT
