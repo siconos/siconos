@@ -38,7 +38,6 @@ private:
   CPPUNIT_TEST(testBuildModel1);
   CPPUNIT_TEST(testBuildModel2);
   CPPUNIT_TEST(testBuildModel3);
-  CPPUNIT_TEST(End);
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
@@ -47,7 +46,6 @@ private:
   void testBuildModel1();
   void testBuildModel2();
   void testBuildModel3();
-  void End();
   // Members
 
   double t0, T;

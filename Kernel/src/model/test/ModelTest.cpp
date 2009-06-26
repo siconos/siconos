@@ -113,9 +113,3 @@ void ModelTest::testBuildModel3()
   cout << "--> Constructor xml test ended with success." << endl;
 }
 
-void ModelTest::End()
-{
-  cout << "================================" << endl;
-  cout << " ===== End of Model Tests ===== " << endl;
-  cout << "================================" << endl;
-}

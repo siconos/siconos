@@ -151,7 +151,7 @@ IF(CPPUNIT_FOUND)
   
   # xml
   BEGIN_TEST(xml/test)
-  NEW_TEST(testXMLTools)
+  NEW_TEST(testXMLTools )
   
   END_TEST()
   

@@ -24,39 +24,65 @@
 #include <string.h>
 using namespace std;
 
+/* get a test pointer in the test suite */
 
-CppUnit::Test* GetTest(CppUnit::TestSuite *testSuite, const std::string& seekedname)
+CppUnit::Test* GetTest(CppUnit::Test* tests, const std::string& name)
 {
-  std::vector<CppUnit::Test*>::iterator testi;
-  std::vector<CppUnit::Test*> allTests = testSuite->getTests();
-  CppUnit::Test* returnTest;
 
-  for (testi = allTests.begin();
-       testi != allTests.end(); ++testi)
+  CppUnit::TestSuite* testSuite = dynamic_cast<CppUnit::TestSuite *>(tests);
+
+  CppUnit::Test* returnTest = NULL;
+
+  if (testSuite)
   {
-    if ((*testi)->getName() == seekedname)
+    if (testSuite->getName() == name)
     {
-      returnTest = *testi;
-      break;
+      return (testSuite);
+    }
+    else
+    {
+      std::vector<CppUnit::Test*> allTests = testSuite->getTests();
+      std::vector<CppUnit::Test*>::iterator testi;
+      for (testi = allTests.begin();
+           testi != allTests.end();
+           testi++)
+      {
+        returnTest = GetTest(*testi, name);
+        if (returnTest)
+          return (returnTest);
+      }
     }
   }
-  return(returnTest);
-
+  else
+  {
+    if (tests->getName() == name)
+    {
+      return (tests);
+    }
+  }
+  return NULL;
 };
 
-/*! Dump a test */
+/* Dump a unit test as a cmake test */
 int CdashDumpTest(CppUnit::Test *test, char* myname)
 {
-  std::cout << "ADD_TEST(" << test->getName() << " " << myname << " " << test->getName() << ")" << std::endl;
+
+  std::cout << "MESSAGE( STATUS Adding unit test : " << test->getName() << " ) "
+            << std::endl;
+
+  std::cout << "ADD_TEST(" << test->getName() << " "
+            << myname << ".ldwrap " << test->getName() << ")"
+            << std::endl;
 };
 
+/* Dump the test suite */
 int CdashDump(CppUnit::Test *tests, char* myname)
 {
 
   int count = 0;
-  // try to see if this is a TestSuite
+
   CppUnit::TestSuite* testSuite = dynamic_cast<CppUnit::TestSuite *>(tests);
-  // it's a suite, check all components
+
   if (testSuite != NULL)
   {
 
@@ -79,42 +105,21 @@ int CdashDump(CppUnit::Test *tests, char* myname)
 
 };
 
-int ListAllTestsInTestSuite(CppUnit::Test* tests)
-{
-  int count = 0;
-  // try to see if this is a TestSuite
-  CppUnit::TestSuite* testSuite = dynamic_cast<CppUnit::TestSuite *>(tests);
-  // it's a suite, check all components
-  if (testSuite != NULL)
-  {
-    std::vector<CppUnit::Test*> allTestsVector = testSuite->getTests();
-    std::vector<CppUnit::Test*>::iterator testIterator;
-    for (testIterator = allTestsVector.begin();
-         testIterator != allTestsVector.end();
-         testIterator++)
-    {
-      count += ListAllTestsInTestSuite(*testIterator);
-    }
-  }
-  else
-  {
-    // it's a test, get the name
-    count++;
-    std::cout << tests->getName() << std::endl;
-  }
-  return count;
-}
+
+/* <test executable> --cdash-prepare */
+/* <test executable> <unit test name> */
 
 int main(int argc, char** argv)
 {
 
+  // Registry and test suite
   CppUnit::TestFactoryRegistry &registry = CppUnit::TestFactoryRegistry::getRegistry();
   CppUnit::TestSuite *testSuite = static_cast<CppUnit::TestSuite*>(registry.makeTest());
 
   if (argc == 2)
   {
     std::string arg = argv[1];
-    if (strcmp(argv[1], "--cdash-prepare"))
+    if (strcmp(argv[1], "--cdash-prepare") == 0)
     {
       CdashDump(testSuite, argv[0]);
     }
@@ -127,13 +132,21 @@ int main(int argc, char** argv)
       // get the test
       CppUnit::Test * test = GetTest(testSuite, argv[1]);
 
-      runner.addTest(test);
+      if (test != NULL)
+      {
+        runner.addTest(test);
 
-      bool wasSucessful = false;
+        bool wasSucessful = false;
 
-      wasSucessful = runner.run("", false, true, false);
+        wasSucessful = runner.run("", false, true, false);
 
-      return wasSucessful ? 0 : 1;
+        return wasSucessful ? 0 : 1;
+      }
+      else
+      {
+        std::cerr << "Cannot find test : " << argv[1] << std::endl;
+        return 1;
+      }
 
     }
 

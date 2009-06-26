@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-int main() { 
+int main(int argc, char **argv) { 
 
   int rval; 
   setenv("LD_LIBRARY_PATH", "@LD_LIBRARY_PATH@",1);
-  rval=execlp("@CMAKE_CURRENT_BINARY_DIR@/@_CURRENT_TEST_DIRECTORY@/@_EXE@",NULL);
+  rval=execvp("@CMAKE_CURRENT_BINARY_DIR@/@_CURRENT_TEST_DIRECTORY@/@_EXE@",argv);
   return(rval);
 }
