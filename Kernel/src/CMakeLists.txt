@@ -76,11 +76,11 @@ COMPILE_WITH(Boost REQUIRED)
 # FIND_PACKAGE( ... COMPONENTS <component>) does not mention <component> in failure message!
 # a workaround 
 
-#FIND_PACKAGE(Boost COMPONENTS graph)
+FIND_PACKAGE(Boost COMPONENTS graph)
 
-#IF(NOT Boost_GRAPH_FOUND)
-#  MESSAGE(FATAL_ERROR "boost graph library is needed.")
-#ENDIF(NOT Boost_GRAPH_FOUND)
+IF(NOT Boost_GRAPH_FOUND)
+  MESSAGE(FATAL_ERROR "boost graph library is needed.")
+ENDIF(NOT Boost_GRAPH_FOUND)
 
 COMPILE_WITH(LibXml2 REQUIRED)
 COMPILE_WITH(LAPACK REQUIRED)
