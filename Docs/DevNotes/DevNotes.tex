@@ -82,6 +82,509 @@
     \hline
   \end{tabular}
 \end{table}
+\chapter{OneStepNSProblem formalisation for several interactions}
+
+\begin{table}[!ht]
+  \begin{tabular}{|l|l|}
+    \hline
+    author  & F. P\'erignon \\
+    \hline
+    date    & May 16, 2006 \\ 
+    \hline
+    version & ? \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+
+\section{LinearDS - Linear Time Invariant Relations}
+\subsection{General notations}
+We consider $n$ dynamical systems of the form:
+\begin{equation}
+\dot x_i = A_i x_i + R_i 
+\end{equation}
+Each system if of dimension $n_i$, and we denote $N = \displaystyle{\sum_{i=1}^{n} n_i}$. \\
+An interaction, $I_{\alpha}$ is composed with a non smooth law, $nslaw_{\alpha}$ and a relation:
+\begin{equation}
+y_{\alpha} = C_{\alpha}X_{\alpha} + D_{\alpha}\lambda_{\alpha}
+\end{equation}
+The ``dimension'' of the interaction, ie the size of vector $y_{\alpha}$, is denoted $m_{\alpha}$ and we set: 
+$$ M = \sum_{\alpha=1}^{m} m_{\alpha}$$
+$m$ being the number of interactions in the Non Smooth Dynamical System.  \\
+$X_{\alpha}$ is a vector that represents the DS concerned by the interaction. Its dimension is noted $N_{\alpha}$, this for $n_{\alpha}$ systems in the interaction. \\
+$C_{\alpha}$ is a $m_{\alpha} \times N_{\alpha}$ row-blocks matrix and $D_{\alpha}$ a $m_{\alpha} \times m_{\alpha}$ square matrix. \\
+\begin{equation}
+C_{\alpha}=\left[\begin{array}{ccc} 
+C_{\alpha}^i & C_{\alpha}^j & ...\end{array}\right]
+\end{equation}
+with $i,j,...\in \mathcal{DS}_{\alpha}$ which is the set of DS belonging to interaction $\alpha$.\\
+We also have the following relation: 
+\begin{equation}
+\left[\begin{array}{c} 
+R_{\alpha}^i \\
+R_{\alpha}^j \\
+...  
+\end{array}\right] = B_{\alpha}\lambda_{\alpha}
+=\left[\begin{array}{c} 
+B_{\alpha}^i \\
+B_{\alpha}^j \\
+...
+\end{array}\right]\lambda_{\alpha}
+\end{equation}
+$R_{\alpha}^i$ represents the contribution of interaction $\alpha$ on the reaction of the dynamical system $i$, and $B_{\alpha}^i$ is a $n_i \times m_{\alpha}$ block matrix. \\ 
+And so: 
+\begin{equation}
+R_i = \sum_{\beta\in\mathcal{I}_i}R_{\beta}^i=\sum_{\beta\in\mathcal{I}_i}B^i_{\beta} \lambda_{\beta}
+\end{equation}
+with $\mathcal{I}_i$ the set of interactions in which dynamical system number $i$ is involved. \\
+Introducing the time dicretisation, we get: 
+\begin{eqnarray}
+x_i^{k+1}-x_i^k = h A_i x_i^{k+1} + h R_i^{k+1}  \\
+\nonumber\\
+y_{\alpha}^{k+1} = C_{\alpha}X_{\alpha}^{k+1} + D_{\alpha}\lambda_{\alpha}^{k+1}\\
+\nonumber\\
+R_i^{k+1} = \sum_{\beta\in\mathcal{I}_i}B^i_{\beta} \lambda_{\beta}^{k+1}
+\end{eqnarray}
+ie, with $W_i = (I-h A_i)^{-1}$: 
+\begin{eqnarray}
+x_i^{k+1}&=& W_i x_i^{k} + hW_i R_i^{k+1}  \\
+\nonumber\\
+y_{\alpha}^{k+1} &=& C_{\alpha}W_{\alpha} X_{\alpha}^{k} + C_{\alpha}hW_{\alpha}\sum_{\beta\in\mathcal{I}_i}B^i_{\beta} \lambda_{\beta}^{k+1} + D_{\alpha}\lambda_{\alpha}^{k+1} \\
+&=& C_{\alpha}W_{\alpha} X_{\alpha}^{k} + (C_{\alpha}hW_{\alpha}B_{\alpha} + D_{\alpha}) \lambda_{\alpha}^{k+1} + \sum_{\beta\neq\alpha}(\sum_{i\in\mathcal{DS}_{\alpha}\cap\in\mathcal{DS}_{\beta}} hC_{\alpha}^iW_i B^i_{\beta} \lambda_{\beta}^{k+1})
+\end{eqnarray}
+with 
+\begin{equation}\label{Walpha}
+W_{\alpha}=\left[\begin{array}{ccc} 
+W_i &  0   & ... \\
+0   &  W_j & ...\\
+0  & ... & ... \\ 
+\end{array}\right]
+\end{equation}
+the block-diagonal matrix of all the $W$ for the dynamical systems involved in interaction $\alpha$.\\  
+The global-assembled $Y$ vector, of dimension M, composed by $m$ $y_{\alpha}$ subvectors, is given by:
+\begin{eqnarray}
+Y_{k+1} = q_{OSNSP} + M_{OSNSP}\Lambda_{k+1}
+\end{eqnarray}
+or,
+\begin{eqnarray}
+Y_{k+1} =\left[\begin{array}{c} 
+y_1 \\
+...  \\
+y_m
+\end{array}\right]_{k+1}
+&=&\left[\begin{array}{ccc} 
+C_1^1 & \ldots & C_1^n \\
+\vdots & \ldots & \vdots \\
+C_m^1 & \ldots & C_m^n 
+\end{array}\right]\left[\begin{array}{cccc} 
+W_1 & 0 & \ldots &0 \\
+0  & W_2 & \ddots & \vdots \\
+\vdots &\ddots  & \ddots & \vdots \\
+&&0& W_n
+\end{array}\right]
+\left[\begin{array}{c} 
+x_1  \\
+\vdots \\
+\vdots \\
+x_n 
+\end{array}\right]_k \\
+&+&\left[\begin{array}{cccc} 
+D_1+h\sum_{j\in \mathcal{DS}_1}C_1^jW_jB_1^j & h\displaystyle{\sum_{j\in \mathcal{DS}_1\cap\mathcal{DS}_2}C_1^jW_jB_2^j} & \ldots &\\
+\vdots&\ddots& &\\
+& h\displaystyle{\sum_{j\in \mathcal{DS}_m}C_m^jW_jB_{m-1}^j}  & D_m+h\displaystyle{\sum_{j\in \mathcal{DS}_m\cap\mathcal{DS}_{m-1}}C_m^jW_jB_m^j} \\
+\end{array}\right]\left[\begin{array}{c} 
+\lambda_1  \\
+\vdots \\
+\lambda_m 
+\end{array}\right]_{k+1} \nonumber
+\end{eqnarray}
+To sum it up, the block-diagonal term of matrix $M_{OSNSP}$, for block-row $\alpha$ is:
+\begin{equation}
+D_{\alpha}+h\sum_{j\in \mathcal{DS}_{\alpha}}C_{\alpha}^jW_jB_{\alpha}^j
+\end{equation}
+This is an $m_{\alpha}\times m_{\alpha}$ square matrix.
+The extra-diagonal block term, in position ($\alpha,\beta$) is: 
+\begin{equation}
+h\sum_{j\in \mathcal{DS}_{\alpha}\cap\mathcal{DS}_{\beta}}C_{\alpha}^jW_jB_{\beta}^j
+\end{equation}
+and is a $m_{\alpha}\times m_{\beta}$ matrix. This matrix differs from 0 when interactions $\alpha$ and $\beta$ are coupled, ie have common DS. \\
+
+Or, for the relation l of interaction $\alpha$, we get: 
+\begin{equation}
+D_{\alpha,l}+h\sum_{j\in \mathcal{DS}_{\alpha}}C_{\alpha,l}^jW_jB_{\alpha}^j
+\end{equation}
+for the diagonal, and 
+\begin{equation}
+h\sum_{j\in \mathcal{DS}_{\alpha}\cap\mathcal{DS}_{\beta}}C_{\alpha,l}^jW_jB_{\beta}^j
+\end{equation}
+for extra-diagonal terms. \\
+$D_{\alpha,l}$, row number $l$ of $D_{\alpha}$, the same for $C_{\alpha,l}$
+
+
+Finally, the linked-Interaction map provides, for each interaction (named ``current interaction''), the list of all the interactions (named ``linked interaction'') that have common dynamical system with the ``current interaction''.
+\subsection{A simple example}
+
+%We consider $n=5$ dynamical systems and $m=4$ interactions: 
+%\begin{eqnarray*}
+%I_{\mu}& \rightarrow& DS_1, DS_3, m_{\mu} = 3 \\
+%I_{\theta}&\rightarrow& DS_3, DS_4, m_{\theta} = 1  \\
+%I_{\gamma}&\rightarrow& DS_2,  m_{\gamma} = 1 \\
+%I_{\zeta}&\rightarrow& DS_1, DS_5,  m_{\zeta} = 2 
+%\end{eqnarray*}
+%The linked-interaction map is :
+%\begin{eqnarray*}
+%I_{\mu} &\rightarrow& I_{\theta}, commonDS = DS_3 \\
+%        &\rightarrow& I_{\zeta}, commonDS = DS_1 \\
+%I_{\theta} &\rightarrow&I_{\mu}, commonDS = DS_3 \\
+%I_{\zeta} &\rightarrow&I_{\mu}, commonDS = DS_1
+%\end{eqnarray*}
+%And:
+%\begin{eqnarray*}
+%M &=& 7, N = \displaystyle{\sum_{i=1}^{5} n_i} \\
+%\mathcal{I}_1 &=& \{I_{\mu}, I_{\zeta} \}\\
+%\mathcal{I}_2 &=& \{I_{\gamma}\} \\
+%\mathcal{I}_3 &=& \{I_{\mu}, I_{\theta}\} \\
+%\mathcal{I}_4 &=& \{I_{\theta} \} \\
+%\mathcal{I}_4 &=& \{I_{\zeta}\}
+%\end{eqnarray*}
+
+We consider $n=3$ dynamical systems and $m=2$ interactions: 
+\begin{eqnarray*}
+I_{\mu}& \rightarrow& \mathcal{DS}_{\mu} = \{DS_1, DS_3\}, m_{\mu} = 3 \\
+I_{\theta}&\rightarrow& \mathcal{DS}_{\theta} = \{DS_2, DS_3\}, m_{\theta} = 1  \\
+\end{eqnarray*}
+The linked-interaction map is :
+\begin{eqnarray*}
+I_{\mu} &\rightarrow& I_{\theta}, commonDS = DS_3 \\
+I_{\theta} &\rightarrow&I_{\mu}, commonDS = DS_3 \\
+\end{eqnarray*}
+And:
+\begin{eqnarray*}
+M &=& 4, N = \displaystyle{\sum_{i=1}^{3} n_i} \\
+\mathcal{I}_1 &=& \{I_{\mu} \}\\
+\mathcal{I}_2 &=& \{I_{\theta}\} \\
+\mathcal{I}_3 &=& \{I_{\mu}, I_{\theta}\} \\
+\end{eqnarray*}
+
+\begin{eqnarray}
+y_1 = \left[\begin{array}{ccc} 
+C_1^1 & C_1^3 \end{array}\right]
+\left[\begin{array}{c}
+x_1 \\
+x_3 
+\end{array}\right]
++ D_1\lambda_1 \\
+y_2 = \left[\begin{array}{ccc} 
+C_2^2 & C_2^3 \end{array}\right]
+\left[\begin{array}{c}
+x_2 \\
+x_3 
+\end{array}\right]
++ D_2\lambda_2 
+\end{eqnarray}
+%
+\begin{eqnarray}
+\left[\begin{array}{c}
+R_1 \\
+R_2 \\
+R_3 \end{array}\right]=
+\left[\begin{array}{c}
+B_1^1\lambda_1  \\
+B_2^2\lambda_2  \\
+B_1^3\lambda_1 + B_2^3\lambda_2
+\end{array}\right]
+\end{eqnarray}
+%
+\begin{eqnarray}
+M_{OSNSP} &=& \left[\begin{array}{cc} 
+D_1+hC_1^1W_1B_1^1+hC_1^3W_3B_1^3 & hC_1^3W_3B_2^3 \\
+hC_2^3W_3B_1^3 & D_2+hC_2^2W_2B_2^2+hC_2^3W_3B_2^3 
+\end{array}\right]\left[\begin{array}{c} 
+\lambda_1  \\
+\lambda_2
+\end{array}\right]_{k+1} 
+\end{eqnarray}
+
+\subsection{relative degree}
+Let us consider the global vector 
+\begin{eqnarray}
+Y =\left[\begin{array}{c} 
+y_1 \\
+...  \\
+y_M
+\end{array}\right] = CX + D\Lambda
+\end{eqnarray}
+We denot $r_j$ the relative degree of equation $j$, $j\in [1..M]$. 
+We have:
+\begin{eqnarray}
+y_j = \displaystyle{\sum_{i=1}^n C_j^i x_i +D_{j,j}\lambda_j + \sum_{i\neq j, i=1}^m D_{j,i} \lambda_i } 
+\end{eqnarray}
+$D_{j,i}$ a scalar and $C_j^i$ a $1 \times n_i$ line-vector. \\
+If $D_{jj} \neq 0$, then $r_j=0$. Else, we should consider the first derivative of $y_j$. \\
+Before that, recall that: 
+\begin{eqnarray}
+R_i = \displaystyle{\sum_{k=1}^M B_k^i \lambda_j}
+\end{eqnarray}
+Through many of the $B_j^i$ are equal to zero, we keep them all in the following lines. \\
+Then:
+
+\begin{eqnarray}
+\dot y_j &=& \displaystyle{\sum_{i=1}^n C_j^i (A_i x_i +  \sum_{k=1}^M B_k^i \lambda_k  ) + f(\lambda_k)_{k\neq j}} \\
+&=& \displaystyle{\sum_{i=1}^n C_j^i (A_i x_i + B_j^i \lambda_j + \sum_{k=1,k\neq j}^M B_k^i \lambda_k  ) + \ldots}
+\end{eqnarray}
+
+So, if $\displaystyle{\sum_{i=1}^n C_j^i B_j^i} \neq 0$ (note that this corresponds to the product between line $j$ of $C$ and column $j$ of $B$) 
+then $r_j=1$ else we consider the next derivative, and so on.  \\
+In derivative $r$, the coefficient of $\lambda_j$ will be:
+\begin{eqnarray}
+coeff_j&=& \displaystyle{\sum_{i=1}^n C_j^i (A_i)^{r-1} B_j^i }
+\end{eqnarray}
+if $coeff_j\neq 0$ then $r_j = r$. 
+
+%\subsection{Implementation}
+%\begin{itemize}
+%\item relative degree: function of $D,C,A$ off all interactions/relations, time invariant $\Rightarrow$ computed and saved in Topology.
+%\item linkedInteractionMap $\Rightarrow$ computed and saved in Topology
+%\item diagonal term: function of $D,C$ and $B$ of a specific interaction + function of $W$ of all DS concerned + time step. Time invariant.  \\
+%$\Rightarrow$ compute and save in OSNSP, during initialize. 
+%\item extra-diagonal terms: the same + depends of linkedInteractionMap $\Rightarrow$ compute and save in OSNSP, during initialize.  
+%
+% ============= LAGRANGIAN =====================
+%
+\section{LagrangianDS - Lagrangian Linear  Relations}
+\subsection{General notations}
+We consider $n$ dynamical systems, lagrangian and non linear, of the form: 
+\begin{equation}
+M_i(q_i) \ddot q_i + N_i(\dot q_i, q_i) = F_{Int,i}(\dot q_i , q_i , t)+F_{Ext,i}(t) + p_i
+\end{equation}
+Each system if of dimension $n_i$, and we denote $N = \displaystyle{\sum_{i=1}^{n} n_i}$. \\
+An interaction, $I_{\alpha}$ is composed with a non smooth law, $nslaw_{\alpha}$ and a relation:
+\begin{equation}
+y_{\alpha} = H_{\alpha}Q_{\alpha} + b_{\alpha}
+\end{equation}
+The ``dimension'' of the interaction, ie the size of vector $y_{\alpha}$, is denoted $m_{\alpha}$ and we set: 
+$$ M_y = \sum_{\alpha=1}^{m} m_{\alpha}$$
+$m$ being the number of interactions in the Non Smooth Dynamical System.  \\
+$Q_{\alpha}$ is a vector that represents the DS concerned by the interaction. Its dimension is noted $N_{\alpha}$, this for $n_{\alpha}$ systems in the interaction. \\
+$H_{\alpha}$ is a $m_{\alpha} \times N_{\alpha}$ row-blocks matrix and $b_{\alpha}$ a $m_{\alpha}$ vector. \\
+\begin{equation}
+H_{\alpha}=\left[\begin{array}{ccc} 
+H_{\alpha}^i & H_{\alpha}^j & ...\end{array}\right]
+\end{equation}
+with $i,j,...\in \mathcal{DS}_{\alpha}$ which is the set of DS belonging to interaction $\alpha$.\\
+We also have the following relation: 
+\begin{equation}
+\left[\begin{array}{c} 
+R_{\alpha}^i \\
+R_{\alpha}^j \\
+...  
+\end{array}\right] = {}^tH_{\alpha}\lambda_{\alpha}
+=\left[\begin{array}{c} 
+{}^tH_{\alpha}^i \\
+{}^tH_{\alpha}^j \\
+...
+\end{array}\right]\lambda_{\alpha}
+\end{equation}
+$R_{\alpha}^i$ represents the contribution of interaction $\alpha$ on the reaction of the dynamical system $i$, and ${}tH_{\alpha}^i$ is a $n_i \times m_{\alpha}$ block matrix. \\ 
+And so: 
+\begin{equation}
+R_i = \sum_{\beta\in\mathcal{I}_i}R_{\beta}^i=\sum_{\beta\in\mathcal{I}_i}{}H^i_{\beta} \lambda_{\beta}
+\end{equation}
+with $\mathcal{I}_i$ the set of interactions in which dynamical system number $i$ is involved. \\
+Introducing the time dicretisation, we get: 
+\begin{eqnarray}
+\dot q_i^{k+1} = \dot q_{free,i} + W_iR_i^{k+1}
+\nonumber\\
+\dot y_{\alpha}^{k+1} = H_{\alpha}\dot Q_{\alpha}^{k+1} \\
+\nonumber\\
+R_i^{k+1} = \sum_{\beta\in\mathcal{I}_i}H^i_{\beta} \lambda_{\beta}^{k+1}
+\end{eqnarray}
+ie, 
+\begin{eqnarray}
+  y_{\alpha}^{k+1} &=& H_{\alpha} Q_{\alpha}^{free} + H_{\alpha}W_{\alpha}{}^tH_{\alpha}\lambda_{\alpha}+\sum_{i\in \mathcal{DS}_{\alpha}}\sum_{\beta\in\mathcal{I}_i,\alpha\neq\beta}H_{\alpha}^iW_iH_{\beta}^j\lambda_{\beta}
+\end{eqnarray}
+with $W_{\alpha}$ given by \eqref{Walpha}. 
+
+The global-assembled $Y$ vector, of dimension M, composed by $m$ $y_{\alpha}$ subvectors, is given by:
+\begin{eqnarray}
+Y_{k+1} = q_{OSNSP} + M_{OSNSP}\Lambda_{k+1}
+\end{eqnarray}
+
+with:
+\begin{eqnarray}
+q_{OSNSP}^{\alpha} = H_{\alpha} Q_{\alpha}^{free}
+\end{eqnarray}
+and for $M_{OSNSP}$, the block-diagonal term for block-row $\alpha$ is
+\begin{equation}
+\sum_{j\in \mathcal{DS}_{\alpha}}H_{\alpha}^jW_j{}^tH_{\alpha}^j
+\end{equation}
+an $m_{\alpha}\times m_{\alpha}$ square matrix.
+The extra-diagonal block term, in position ($\alpha,\beta$) is: 
+\begin{equation}
+\sum_{j\in \mathcal{DS}_{\alpha}\cap\mathcal{DS}_{\beta}}H_{\alpha}^jW_j{}^tH_{\beta}^j
+\end{equation}
+and is a $m_{\alpha}\times m_{\beta}$ matrix. This matrix differs from 0 when interactions $\alpha$ and $\beta$ are coupled, ie have common DS. \\
+
+Or, for the relation l of interaction $\alpha$, we get: 
+\begin{equation}
+\sum_{j\in \mathcal{DS}_{\alpha}}H_{\alpha,l}^jW_j{}^tH_{\alpha}^j
+\end{equation}
+for the diagonal, and 
+\begin{equation}
+\sum_{j\in \mathcal{DS}_{\alpha}\cap\mathcal{DS}_{\beta}}H_{\alpha,l}^jW_j{}^tH_{\beta}^j
+\end{equation}
+for extra-diagonal terms. \\
+$H_{\alpha,l}$, row number $l$ of $H_{\alpha}$.
+
+
+WARNING: depending on linear and non linear case for the DS, there should be a factor h ahead W. See Bouncing Ball template. 
+
+\chapter{Dynamical Systems formulations in Siconos.}
+
+\begin{table}[!ht]
+  \begin{tabular}{|l|l|}
+    \hline
+    author  & F. P\'erignon \\
+    \hline
+    date    & March 22, 2006 \\ 
+    \hline
+    version & Kernel 1.1.4 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+
+\section{Class Diagram}
+There are four possible formulation for dynamical systems in Siconos,
+two for first order systems and two for second order Lagrangian systems. The main class is DynamicalSystem, all other derived from this one, as shown in the following diagram:
+\begin{figure}[htbp]
+  \centering
+ \includegraphics[width=0.3\textwidth]{./DSClassDiagram.eps}
+  \label{DSDiagram}
+\end{figure}
+% DYNAMICAL SYSTEMS
+\section{General non linear first order dynamical systems \\ $\rightarrow$ class \it{DynamicalSystem}}
+This is the top class for dynamical systems. All other systems classes derived from this one. \\
+
+A general dynamical systems is described by the following set of $n$ equations, completed with initial conditions:
+\begin{eqnarray}
+  \dot x &=& f(x,t) + T(x) u(x, \dot x, t) + r \\
+  x(t_0)&=&x_0 
+\end{eqnarray}
+
+\begin{itemize}
+\item $x$: state of the system - Vector of size $n$.
+\item $f(x,t)$: vector field - Vector of size $n$.
+\item $u(x, \dot x, t)$: control term - Vector of size $uSize$.
+\item $T(x)$: $n\times uSize$ matrix, related to control term.
+\item $r$: input due to non-smooth behavior - Vector of size $n$.
+\end{itemize}
+
+The Jacobian matrix, $\nabla_x f(x,t)$, of $f$ according to $x$, $n\times n$ square matrix, is also a member of the class. \\
+
+Initial conditions are given by the member $x_0$, vector of size $n$. This corresponds to x value when
+simulation is starting, ie after a call to strategy->initialize(). \\
+
+There are plug-in functions in this class for $f$ (vectorField), $jacobianX$, $u$ and $T$. All
+of them can handle a vector of user-defined parameters. 
+
+% LINEAR DS
+\section{First order linear dynamical systems $\rightarrow$ class \it{LinearDS}}
+
+Derived from DynamicalSystem, described by the set of $n$ equations and initial conditions: 
+\begin{eqnarray}
+  \dot x &=& A(t)x(t)+Tu(t)+b(t)+r \\
+  x(t_0)&=&x_0 
+\end{eqnarray}
+With:
+\begin{itemize}
+\item $A(t)$: $n\times n$ matrix, state independent but possibly time-dependent.
+\item $b(t)$: Vector of size $n$, possibly time-dependent.
+\end{itemize}
+Other variables are those of DynamicalSystem class. \\
+$A$ and $B$ have corresponding plug-in functions. \\
+
+Warning: time dependence for $A$ and $b$ is not available at the time in the simulation part for this kind of dynamical systems. \\
+
+Links with vectorField and its Jacobian are: 
+\begin{eqnarray}
+  f(x,t) &=& A(t)x(t)+b(t) \\
+  jacobianX&=&\nabla_x f(x,t) = A(t) 
+\end{eqnarray}
+
+% LAGRANGIANDS
+\section{Second order non linear Lagrangian dynamical systems \\  $\rightarrow$ class \it{LagrangianDS}}
+
+Lagrangian second order non linear systems are described by the following set of$nDof$ equations + initial conditions:
+\begin{eqnarray}
+ M(q) \ddot q + NNL(\dot q, q) + F_{Int}(\dot q , q , t) &=& F_{Ext}(t) + p \\
+ q(t_0) &=& q0 \\
+ \dot q(t_0) &=& velocity0 
+\end{eqnarray}
+With:
+\begin{itemize}
+\item $M(q)$: $nDof\times nDof$ matrix of inertia.
+\item $q$: state of the system - Vector of size $nDof$.
+\item $\dot q$ or $velocity$: derivative of the state according to time - Vector of size $nDof$.
+\item $NNL(\dot q, q)$:  non linear terms, time-independent - Vector of size $nDof$.
+\item $F_{Int}(\dot q , q , t)$: time-dependent linear terms - Vector of size $nDof$.
+\item $F_{Ext}(t)$: external forces, time-dependent BUT do not depend on state - Vector of size $nDof$.
+\item $p$: input due to non-smooth behavior - Vector of size $nDof$.
+\end{itemize}
+
+The following Jacobian are also member of this class:
+\begin{itemize}
+\item jacobianQFInt = $\nabla_q F_{Int}(t,q,\dot q)$ - $nDof\times nDof$ matrix.
+\item jacobianVelocityFInt = $\nabla_{\dot q} F_{Int}(t,q,\dot q)$ - $nDof\times nDof$ matrix.
+\item jacobianQNNL = $\nabla_q NNL(q,\dot q)$ - $nDof\times nDof$ matrix.
+\item jacobianVelocityNNL = $\nabla_{\dot q}NNL(q,\dot q)$ - $nDof\times nDof$ matrix.
+\end{itemize}
+
+
+There are plug-in functions in this class for $F_{int}$, $F_{Ext}$, $M$, $NNL$ and the four Jacobian matrices. All
+of them can handle a vector of user-defined parameters. \\
+
+Links with first order dynamical system are: 
+\begin{eqnarray}
+  n &= &2nDof \\
+  x &=&\left[\begin{array}{c}q \\ \dot q \end{array}\right] \\
+  f(x,t) &=&  \left[\begin{array}{c} \dot q \\ M^{-1}(F_{Ext}-F_{Int}-NNL) \end{array}\right] \\
+  \\
+  \nabla_x f(x,t) &=& 
+  \left[\begin{array}{cc} 
+      0_{nDof\times nDof} & I_{nDof\times nDof} \\
+      \nabla_q(M^{-1})(F_{Ext}-F_{Int}-NNL) -M^{-1}\nabla_q(F_{Int}+NNL) &  -M^{-1}\nabla_{\dot q}(F_{Int}+NNL) 
+    \end{array}\right] \\
+  r &=& \left[\begin{array}{c} 0_{nDof} \\ p \end{array}\right] \\
+  u(x,\dot x,t) &=& u_L(\dot q, q, t) \text{  (not yet implemented)} \\
+  T(x) &=& \left[\begin{array}{c} 0_{nDof} \\ T_L(q) \end{array}\right] \text{  (not yet implemented)} \\
+\end{eqnarray}
+With $0_{n}$ a vector of zero of size $n$, $0_{n\times m}$ a $n\times m$ zero matrix and
+$I_{n\times n}$, identity $n\times n$ matrix. \\
+
+Warning: control terms ($Tu$) are not fully implemented in Lagrangian systems. This will be part of future version.
+
+% LAGRANGIAN LINEAR TIME INVARIANT DS
+\section{Second order linear and time-invariant Lagrangian dynamical systems $\rightarrow$ class \it{LagrangianLinearTIDS}}
+
+\begin{eqnarray}
+M \ddot q + C \dot q + K q =  F_{Ext}(t) + p
+\end{eqnarray}
+
+With:
+\begin{itemize}
+\item $C$: constant viscosity $nDof\times nDof$ matrix 
+\item $K$: constant rigidity $nDof\times nDof$ matrix 
+\end{itemize}
+
+And: 
+\begin{eqnarray}
+F_{Int} &=& C \dot q + K q \\
+NNL &=& 0_{nDof} 
+\end{eqnarray}
+
+
 
 \chapter{Dynamical Systems implementation in Siconos.}
 
@@ -96,6 +599,9 @@
     \hline
   \end{tabular}
 \end{table}
+
+
+
 
 \section{Introduction}
 This document is only a sequel of notes and remarks on the way Dynamical Systems are implemented in Siconos.\\
