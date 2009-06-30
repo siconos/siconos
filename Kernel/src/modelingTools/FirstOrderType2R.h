@@ -17,12 +17,12 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-/*! \file FirstOrderType1.h
+/*! \file FirstOrderType2.h
 \brief non linear relations, with y depending on dynamical systems state and r on lambda.
  */
 
-#ifndef FirstOrderType1R_H
-#define FirstOrderType1R_H
+#ifndef FirstOrderType2R_H
+#define FirstOrderType2R_H
 
 #include "FirstOrderR.h"
 
@@ -36,7 +36,7 @@
  *
  *  Relation for First Order Dynamical Systems, with:
  * \f{eqnarray}
- * y &=& h(X,Z)\\
+ * y &=& h(X,\lambda,Z)\\
  * r &=& g(\lambda,Z)
  * \f}
  *
@@ -47,24 +47,25 @@
      - \f$ \nabla_\lambda g \f$: jacobianG[0] ( input[1] )
  *
  */
-class FirstOrderType1R : public FirstOrderR<FPtr3>
+class FirstOrderType2R : public FirstOrderR<FPtr4bis>
 {
 private:
 
-  typedef FirstOrderR<FPtr3> BaseClass;
+  typedef FirstOrderR<FPtr4bis> BaseClass;
 
 public:
 
   /** xml constructor
    *  \param RelationXML smart pointer : the XML object.
    */
-  FirstOrderType1R(SP::RelationXML);
+  FirstOrderType2R(SP::RelationXML);
 
+  FirstOrderType2R();
   /** data constructor
    *  \param a string with computeOutput function name.
    *  \param a string with computeInput function name.
    */
-  FirstOrderType1R(const std::string&, const std::string&);
+  FirstOrderType2R(const std::string&, const std::string&);
 
   /** data constructor
    *  \param a string with computeOutput function name.
@@ -72,11 +73,11 @@ public:
    *  \param a string: name of the function to compute the jacobian of h according to x
    *  \param a string: name of the function to compute the jacobian of g according to lambda
    */
-  FirstOrderType1R(const std::string&, const std::string&, const std::string&, const std::string&);
+  FirstOrderType2R(const std::string&, const std::string&, const std::string&, const std::string&);
 
   /** destructor
    */
-  ~FirstOrderType1R() {};
+  ~FirstOrderType2R() {};
 
   /** initialize the relation (check sizes, memory allocation ...)
       \param SP to Interaction: the interaction that owns this relation
@@ -86,41 +87,47 @@ public:
   /** default function to compute h
    *  \param double : current time
    */
-  void computeH(double);
+  virtual void computeH(double);
 
   /** default function to compute g
    *  \param double : current time
    */
-  void computeG(double);
+  virtual void computeG(double);
 
   /** default function to compute jacobianH
    *  \param double : not used
    *  \param not used
    */
-  void computeJacH(double, unsigned int);
+  virtual void computeJacH(double, unsigned int);
 
   /** default function to compute jacobianG according to lambda
    *  \param double : current time
    *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
    */
-  void computeJacG(double, unsigned int);
+  virtual void computeJacG(double, unsigned int);
 
   /** default function to compute y
    *  \param double: not used
    *  \param unsigned int: not used
    */
-  void computeOutput(double, unsigned int = 0);
+  virtual void computeOutput(double, unsigned int = 0);
 
   /** default function to compute r
    *  \param double : not used
    *  \param unsigned int: not used
    */
-  void computeInput(double, unsigned int = 0);
+  virtual void computeInput(double, unsigned int = 0);
 
-  /** encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param Relation * : the relation which must be converted
-   * \return a pointer on the relation if it is of the right type, NULL otherwise
-   */
+  inline SP_PluggedMatrix getB()
+  {
+    return JacG.at(1);
+  };
+  virtual SP::SiconosMatrix getBPtr()
+  {
+    return getJacGPtr(1);
+  }
+
+  virtual void preparNewtonIteration();
 
   /**
    * return true if the relation is linear.
@@ -131,9 +138,14 @@ public:
     return false;
   }
 
-  static FirstOrderType1R* convert(Relation *r);
+
+  /** encapsulates an operation of dynamic casting. Needed by Python interface.
+   *  \param Relation * : the relation which must be converted
+   * \return a pointer on the relation if it is of the right type, NULL otherwise
+   */
+  static FirstOrderType2R* convert(Relation *r);
 };
 
-TYPEDEF_SPTR(FirstOrderType1R);
+TYPEDEF_SPTR(FirstOrderType2R);
 
 #endif

@@ -30,6 +30,8 @@ template <class T> void FirstOrderR<T>::initDSLinks()
   data[x].reset(new BlockVector()); // displacements
   data[z].reset(new BlockVector());
   data[r].reset(new BlockVector());
+  data[ds_xp].reset(new BlockVector());
+  data[g_alpha].reset(new BlockVector());
 
   SP::FirstOrderNonLinearDS ds;
   for (DSIterator it = getInteractionPtr()->dynamicalSystemsBegin(); it != getInteractionPtr()->dynamicalSystemsEnd(); ++it)
@@ -39,6 +41,10 @@ template <class T> void FirstOrderR<T>::initDSLinks()
     data[x]->insertPtr(ds->getXPtr());
     data[z]->insertPtr(ds->getZPtr());
     data[r]->insertPtr(ds->getRPtr());
+    data[g_alpha]->insertPtr(ds->getGAlphaPtr());
+    data[ds_xp]->insertPtr(ds->getXpPtr());
+    //      data[Blambda]->insertPtr( ds->getBLambdaPtr());
+
   }
 }
 
@@ -56,6 +62,7 @@ template <class T> void FirstOrderR<T>::initialize(SP::Interaction inter)
   initDSLinks();
   // Initialize work vectors
 
+  workR.reset(new SimpleVector(sizeX));
   workX.reset(new SimpleVector(sizeX));
   workZ.reset(new SimpleVector(sizeZ));
   workY.reset(new SimpleVector(sizeY));

@@ -208,12 +208,12 @@ void Interaction::initialize(double t0, unsigned int level)
     computeSizeOfDS();
 
     relation->setInteractionPtr(shared_from_this());
-    relation->initialize(shared_from_this());
 
     // compute number of relations.
     numberOfRelations = interactionSize / nslaw->getNsLawSize();
 
     initializeMemory(level);
+    relation->initialize(shared_from_this());
 
     // Compute y values for t0
     for (unsigned int i = 0; i < level; ++i)
@@ -244,7 +244,7 @@ void Interaction::initializeMemory(unsigned int numberOfDerivatives)
 
   // get the dimension of the non smooth law, ie the size of a unitary blocks (one per relation)
   unsigned int nslawSize = nslaw->getNsLawSize();
-
+  getRelationPtr()->initializeMemory();
   for (unsigned int i = 0; i < numberOfDerivatives ; i++)
   {
 
@@ -564,6 +564,9 @@ void Interaction::computeInput(double time, unsigned int level)
 {
   relation->computeInput(time, level);
 }
+
+
+
 
 // --- XML RELATED FUNCTIONS ---
 

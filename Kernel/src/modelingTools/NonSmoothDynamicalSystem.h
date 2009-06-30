@@ -68,6 +68,11 @@ private:
    */
   NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem&);
 
+  /**
+   * False is one of the interaction is non-linear.
+   */
+  bool mIsLinear;
+
 public:
 
   /** xml constructor
@@ -336,6 +341,13 @@ public:
    *  \return a double
    */
   double nsdsConvergenceIndicator() ;
+
+  /**
+   * return false is one of the interations is not linear.
+   *        else return true.
+   *   \return a bool
+   */
+  bool isLinear();
 
   void clear();
 

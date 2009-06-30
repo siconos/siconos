@@ -110,7 +110,7 @@ void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
     RELATION::TYPES relationType1, relationType2;
 
     double h = simulation->getTimeDiscretisationPtr()->getCurrentTimeStep();
-    printf("h : %f \n", h);
+    //      printf("h : %f \n",h);
 
     // General form of the unitaryBlock is :   unitaryBlock = a*extraUnitaryBlock + b * leftUnitaryBlock * centralUnitaryBlocks * rightUnitaryBlock
     // a and b are scalars, centralUnitaryBlocks a matrix depending on the integrator (and on the DS), the simulation type ...

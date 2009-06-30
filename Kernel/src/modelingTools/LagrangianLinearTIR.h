@@ -127,6 +127,8 @@ public:
    *  \param double : current time
    */
   void computeH(double);
+  void computeG(double time);
+
 
   /** default function to compute y
    *  \param double: not used

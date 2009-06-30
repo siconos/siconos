@@ -37,6 +37,13 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0): Dynami
   x[0].reset(new SimpleVector(*x0));
   x[1].reset(new SimpleVector(n));
 
+  //mG
+  mG_alpha.reset(new SimpleVector(n));
+  mResidur.reset(new SimpleVector(n));
+  mXp.reset(new SimpleVector(getDim()));
+  mXq.reset(new SimpleVector(getDim()));
+  mXfree.reset(new SimpleVector(getDim()));
+
   // == r ==
 
   r.reset(new SimpleVector(n));
@@ -143,6 +150,13 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0, const s
 
   x[0].reset(new SimpleVector(*x0));
   x[1].reset(new SimpleVector(n));
+  //mG
+  mG_alpha.reset(new SimpleVector(n));
+  mResidur.reset(new SimpleVector(n));
+  mXp.reset(new SimpleVector(getDim()));
+  mXq.reset(new SimpleVector(getDim()));
+  mXfree.reset(new SimpleVector(getDim()));
+  r.reset(new SimpleVector(getDim()));
 
   // == r ==
 
@@ -154,7 +168,11 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0, const s
   setComputeJacobianXFFunction(SSL::getPluginName(jacobianXFPlugin), SSL::getPluginFunctionName(jacobianXFPlugin));
   checkDynamicalSystem();
 }
-
+void FirstOrderNonLinearDS::preparStep()
+{
+  mXp->zero();
+  r->zero();
+};
 bool FirstOrderNonLinearDS::checkDynamicalSystem()
 {
   DynamicalSystem::checkDynamicalSystem();
@@ -163,28 +181,6 @@ bool FirstOrderNonLinearDS::checkDynamicalSystem()
   return output;
 }
 
-void FirstOrderNonLinearDS::setR(const SiconosVector& newValue)
-{
-  // check dimensions ...
-  if (newValue.size() != n)
-    RuntimeException::selfThrow("FirstOrderNonLinearDS::setR - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
-
-  if (r)
-    *r = newValue;
-
-  else
-    r.reset(new SimpleVector(newValue));
-}
-
-void FirstOrderNonLinearDS::setRPtr(SP::SiconosVector newPtr)
-{
-  // check dimensions ...
-  if (newPtr->size() != n)
-    RuntimeException::selfThrow("FirstOrderNonLinearDS::setRPtr - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
-
-  r = newPtr;
-
-}
 
 void FirstOrderNonLinearDS::setM(const PMJF& newValue)
 {

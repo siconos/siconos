@@ -22,6 +22,7 @@
 #include "NewtonImpactNSL.h"
 #include "NewtonImpactFrictionNSL.h"
 #include "RuntimeException.h"
+#include "FirstOrderNonLinearDS.h"
 
 using namespace std;
 using namespace RELATION;
@@ -134,20 +135,37 @@ void UnitaryRelation::initialize(const std::string& simulationType)
 
   workX.reset(new BlockVector());
   workZ.reset(new BlockVector());
+  mWorkXq.reset(new BlockVector());
+  mXfree.reset(new BlockVector());
 
   for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
     workZ->insertPtr((*it)->getZPtr());
 
-  //   if(simulationType == "TimeStepping")
-  //     {
-  //     }
+  if (simulationType == "TimeStepping")
+  {
+    RELATION::TYPES pbType = getRelationType();
+    if (pbType == FirstOrder)
+    {
+      for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
+      {
+        SP::FirstOrderNonLinearDS fds = boost::static_pointer_cast<FirstOrderNonLinearDS>(*it);
+        workX->insertPtr(fds->getXPtr());
+        mXfree->insertPtr(fds->getXfreePtr());
+        mWorkXq->insertPtr(fds->getXqPtr());
+      }
+    }
+  }
+
   if (simulationType == "EventDriven")
   {
     RELATION::TYPES pbType = getRelationType();
     if (pbType == FirstOrder)
     {
       for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
+      {
         workX->insertPtr((*it)->getXPtr());
+        //      mWorkXq->insertPtr((*it)->getXqPtr());
+      }
     }
     else // Lagrangian
     {
@@ -231,7 +249,7 @@ void UnitaryRelation::getRightUnitaryBlockForDS(SP::DynamicalSystem ds, SP::Sico
 
   if (relationType == FirstOrder)
   {
-    originalMatrix = mainInteraction->getRelationPtr()->getJacGPtr(0);
+    originalMatrix = mainInteraction->getRelationPtr()->getBPtr();
   }
   else if (relationType == Lagrangian) // Note: the transpose will be done in LCP or MLCP ...
   {

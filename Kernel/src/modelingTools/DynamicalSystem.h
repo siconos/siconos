@@ -144,6 +144,11 @@ protected:
   /** ResiduFree  */
   SP::SiconosVector mResiduFree;
 
+  /** the  input vector due to the non-smooth law \f$  r \in R^{n}\f$ (multiplier, force, ...)*/
+  SP::SiconosVector r;
+
+
+
   /** used by the relative convergence criteron*/
   double mNormRef;
 
@@ -303,6 +308,34 @@ public:
     return mNormRef;
   };
 
+  // --- R ---
+
+  /** get the value of r
+   * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
+   *  \return a vector
+   */
+  inline const SimpleVector getR() const
+  {
+    return *r;
+  }
+
+  /** get r
+   *  \return pointer on a SiconosVector
+   */
+  inline SP::SiconosVector getRPtr() const
+  {
+    return r;
+  }
+
+  /** set the value of r to newValue
+   *  \param SiconosVector newValue
+   */
+  void setR(const SiconosVector&);
+
+  /** set R to pointer newPtr
+   *  \param SP::SiconosVector newPtr
+   */
+  void setRPtr(SP::SiconosVector);
   // --- Residu ---
 
 
@@ -718,6 +751,16 @@ public:
   /** set R to zero
    */
   virtual void resetNonSmoothPart() = 0;
+
+  /**
+   * overwrite this method to do the specific work that must be done at the beginning of a computation step.
+   * It could be reset some buffer vector.(like the function resetNonSmoothPart).
+   *
+   */
+  virtual void preparStep()
+  {
+    ;
+  };
 
   /** visitor hook for shared pointers
    */

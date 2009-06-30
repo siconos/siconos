@@ -88,6 +88,7 @@ public:
    * \param: double, current time
    */
   void computeH(double);
+  void computeG(double);
 
   /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
    * \param: double, current time

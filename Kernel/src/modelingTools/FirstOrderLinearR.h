@@ -120,36 +120,27 @@ public:
   // -- C --
   /** get the value of C
    *  \return plugged matrix
-   */
-  inline const PluggedMatrix getC() const
-  {
-    return *(JacH.at(0));
-  }
 
+  inline const PluggedMatrix getC() const { return *(JacH.at(0)); }
+  */
   /** get C
    *  \return pointer on a plugged matrix
    */
-  inline SP_PluggedMatrix getCPtr() const
-  {
-    return JacH.at(0);
-  }
+  //inline SP::SiconosMatrix getCPtr() const { return JacH.at(0); }
 
   /** set the value of C to newValue
    *  \param a plugged matrix
-   */
-  template <class U> void setC(const U& newValue)
-  {
-    setJacH(newValue, 0);
-  }
 
+  template <class U> void setC(const U& newValue)
+    {
+      setJacH(newValue,0);
+    }
+  */
   /** set C to pointer newPtr
    *  \param a SP to plugged matrix
-   */
-  inline void setCPtr(SP_PluggedMatrix newPtr)
-  {
-    JacH[0] = newPtr;
-  }
 
+  inline void setCPtr(SP_PluggedMatrix newPtr) {JacH[0] = newPtr;}
+  */
   /** set a specified function to compute the matrix C
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
@@ -161,18 +152,12 @@ public:
   /** get the value of D
    *  \return plugged matrix
    */
-  inline const PluggedMatrix getD() const
-  {
-    return *(JacH.at(1));
-  }
+  //inline const PluggedMatrix getD() const { return *(JacH.at(1)); }
 
   /** get D
    *  \return pointer on a plugged matrix
    */
-  inline SP_PluggedMatrix getDPtr() const
-  {
-    return JacH.at(1);
-  }
+  //inline SP::SiconosMatrix getDPtr() const { return JacH.at(1); }
 
   /** set the value of D to newValue
    *  \param a plugged matrix
@@ -288,18 +273,12 @@ public:
   /** get the value of B
    *  \return plugged matrix
    */
-  inline const PluggedMatrix getB() const
-  {
-    return *(JacG.at(0));
-  }
+  //inline const PluggedMatrix getB() const { return *(JacG.at(0)); }
 
   /** get B
    *  \return pointer on a plugged matrix
    */
-  inline SP_PluggedMatrix getBPtr() const
-  {
-    return JacG.at(0);
-  }
+  //inline SP_PluggedMatrix getBPtr() const { return JacG.at(0); }
 
   /** set the value of B to newValue
    *  \param a plugged matrix

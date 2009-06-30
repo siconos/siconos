@@ -66,7 +66,8 @@ public:
   typedef PluggedObject<T, SimpleMatrix> PluggedMatrix;
   typedef boost::shared_ptr<PluggedMatrix> SP_PluggedMatrix;
   typedef T LocalFunc;
-  enum DataNames {z, x, r, sizeDataNames};
+  //  enum DataNames {z,x,r,g_alpha,ds_xp,Blambda,sizeDataNames};
+  enum DataNames {z, x, r, g_alpha, ds_xp, sizeDataNames};
 
 protected:
 
@@ -270,7 +271,7 @@ public:
   /** initialize the relation (check sizes, memory allocation ...)
       \param SP to Interaction: the interaction that owns this relation
    */
-  void initialize(SP::Interaction);
+  virtual void initialize(SP::Interaction);
 
   /** default function to compute h
    *  \param double : current time

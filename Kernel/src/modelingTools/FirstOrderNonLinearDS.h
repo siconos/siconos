@@ -91,14 +91,21 @@ protected:
   /** Gradient of \f$ f(x,t,z) \f$ with respect to \f$ x\f$*/
   SP::PMJF jacobianXF;
 
-  /** the  input vector due to the non-smooth law \f$  r \in R^{n}\f$ (multiplier, force, ...)*/
-  SP::SiconosVector r;
 
   /**  the previous r vectors */
   SP::SiconosMemory rMemory;
 
   /** Residu r*/
   SP::SimpleVector mResidur;
+
+  /** g_alpha*/
+  SP::SimpleVector mG_alpha;
+  SP::SiconosVector mXfree;
+
+  SP::SiconosVector mXp;
+  SP::SiconosVector mXq;
+
+
 
 
   /** Copy of M Matrix, used to solve systems like Mx = b with LU-factorization.
@@ -143,34 +150,18 @@ public:
    */
   bool checkDynamicalSystem();
 
-  // --- R ---
-
-  /** get the value of r
-   * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
-   *  \return a vector
-   */
-  inline const SimpleVector getR() const
+  inline SP::SiconosVector getGAlphaPtr() const
   {
-    return *r;
+    return mG_alpha;
   }
 
-  /** get r
-   *  \return pointer on a SiconosVector
-   */
-  inline SP::SiconosVector getRPtr() const
+
+
+  inline SP::SiconosVector getResidurPtr() const
   {
-    return r;
+    return mResidur;
   }
 
-  /** set the value of r to newValue
-   *  \param SiconosVector newValue
-   */
-  void setR(const SiconosVector&);
-
-  /** set R to pointer newPtr
-   *  \param SP::SiconosVector newPtr
-   */
-  void setRPtr(SP::SiconosVector);
 
   // rMemory
 
@@ -442,7 +433,33 @@ public:
 
   /** set R to zero
    */
-  void resetNonSmoothPart();
+  virtual void resetNonSmoothPart();
+  /*
+   * reset work vectors.
+   */
+  virtual void preparStep();
+
+  /*
+   * get the Xp work vector.
+   */
+  inline SP::SiconosVector getXpPtr() const
+  {
+    return mXp;
+  };
+  /*
+   * get the Xq work vector.
+   */
+  inline SP::SiconosVector getXqPtr() const
+  {
+    return mXq;
+  };
+  /*
+   * get the Xfree work vector.
+   */
+  inline SP::SiconosVector getXfreePtr() const
+  {
+    return mXfree;
+  };
 
   /** To compute \f$\frac{|x_{i+1} - xi|}{|x_i|}\f$ where \f$x_{i+1}\f$ represents the present state and \f$x_i\f$ the previous one
    * \return a double

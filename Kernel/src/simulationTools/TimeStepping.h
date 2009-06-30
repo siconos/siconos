@@ -51,6 +51,8 @@ private:
   /** compute LevelMax */
   void initLevelMax();
 
+  bool mComputeResiduY;
+
 
 public:
 
@@ -116,12 +118,13 @@ public:
   void computeInitialResidu();
 
 
+  void   prepareNewtonIteration();
 
   /** check the convergence of Newton algorithm according to criterion
    * \param double, convergence criterion
    */
   bool newtonCheckConvergence(double);
-
+  void saveYandLambdaInMemory();
   /** run the simulation, from t0 to T
    * \param: simulation option. Default = "linear", else "Newton", used a Newton algorithm.
    * \param: convergence criterion for Newton. Default = 0.005.
@@ -142,6 +145,22 @@ public:
 
   /** Set CheckSolverOutput function */
   void setCheckSolverFunction(CheckSolverFPtr);
+
+  /**
+   *To specify if the interaction residu must be computed.
+   * \param: a bool
+   */
+  void setComputeResiduY(bool v)
+  {
+    mComputeResiduY = v;
+  };
+  /**
+   *To known if the interaction residu must be computed.
+   */
+  bool getComputeResiduY(bool v)
+  {
+    return mComputeResiduY;
+  };
 
 };
 

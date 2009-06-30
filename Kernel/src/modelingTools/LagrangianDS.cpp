@@ -58,6 +58,10 @@ LagrangianDS::LagrangianDS(const SiconosVector& newQ0, const SiconosVector& newV
   q[1].reset(new SimpleVector(*velocity0));
   q[2].reset(new SimpleVector(ndof));
   mResiduFree.reset(new SimpleVector(getDim()));
+  //   mXp.reset(new SimpleVector(getDim()));
+  //   mXq.reset(new SimpleVector(getDim()));
+  //   mXfree.reset(new SimpleVector(getDim()));
+  //   r.reset(new SimpleVector(getDim()));
 
   // set allocation flags: true for required input, false for others
   jacobianFInt.resize(2);

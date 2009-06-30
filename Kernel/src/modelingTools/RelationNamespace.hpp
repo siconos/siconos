@@ -52,7 +52,9 @@ enum SUBTYPES
   /** Compliant (lagrangian only) */
   CompliantR,
   /** */
-  Type1R
+  Type1R,
+  /** */
+  Type2R
 };
 }
 

@@ -104,6 +104,9 @@ protected:
   SP::RelationXML relationxml;
 
   /** work vector for x */
+  SP::SimpleVector workR;
+
+  /** work vector for x */
   SP::SimpleVector workX;
 
   /** work vector for z */
@@ -114,6 +117,11 @@ protected:
 
   /** work vector for lambda */
   SP::SimpleVector workL;
+
+  /** The residu y of the newton iterations*/
+  SP::SiconosVector mResiduy;
+  /*value of h at the current newton iteration*/
+  SP::SiconosVector mH_alpha;
 
   /** basic constructor
    *  \param a string that gives the type of the relation
@@ -143,6 +151,7 @@ private:
   Relation& operator=(const Relation&);
 
 public:
+
 
   /** destructor
    */
@@ -344,6 +353,7 @@ public:
       \param SP to Interaction: the interaction that owns this relation
   */
   virtual void initialize(SP::Interaction) = 0;
+  virtual void initializeMemory() ;
 
   /** default function to compute h
    *  \param double : current time
@@ -371,7 +381,7 @@ public:
    */
   virtual void computeJacG(double, unsigned int)
   {
-    RuntimeException::selfThrow("Relation::computeJacG() - not implemented for this type of relation (probably Lagrangian): " + getType());
+    ;//RuntimeException::selfThrow("Relation::computeJacG() - not implemented for this type of relation (probably Lagrangian): "+getType());
   }
   /** default function to compute y
    *  \param double : current time
@@ -386,6 +396,46 @@ public:
    *  compute input
    */
   virtual void computeInput(double, unsigned int = 0) = 0;
+
+
+  /**
+   * return a SP on the C matrix.
+   */
+  virtual SP::SiconosMatrix getCPtr();
+  /**
+   * return a SP on the D matrix.
+   */
+  virtual SP::SiconosMatrix getDPtr();
+  /**
+   * return a SP on the B matrix.
+   */
+  virtual SP::SiconosMatrix getBPtr();
+  // --- Residu y functions
+
+  inline const SP::SiconosVector getResiduY()
+  {
+    return mResiduy;
+  }
+  virtual void computeResiduY(double t);
+
+  virtual const SP::SiconosVector getHalphaPtr()
+  {
+    return mH_alpha;
+  };
+
+  virtual void preparNewtonIteration()
+  {
+    ;
+  };
+
+  /**
+   * return true if the relation is linear.
+   */
+
+  virtual bool isLinear()
+  {
+    return true;
+  }
 
   /** main relation members display
    */

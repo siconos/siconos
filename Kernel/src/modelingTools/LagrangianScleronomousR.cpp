@@ -91,7 +91,7 @@ void LagrangianScleronomousR::computeJacH(double, unsigned int index)
   // Last arg: index for G - Useless, always equal to 0 for this kind of relation.
 
   //
-  assert(index == 0 && "LagrangianScleronomousR::computeJacH(index): index is out of range");
+  //  assert(index==0&&"LagrangianScleronomousR::computeJacH(index): index is out of range");
   if (JacH[0]->isPlugged())
   {
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
@@ -123,6 +123,11 @@ void LagrangianScleronomousR::computeOutput(double time, unsigned int derivative
     // Approx: y[i] = jacH[0] q[i] , other terms are neglected.
     prod(*JacH[0], *data[q0 + derivativeNumber], *y);
   }
+}
+void LagrangianScleronomousR::computeG(double t)
+{
+
+  computeInput(t, 0);
 }
 
 void LagrangianScleronomousR::computeInput(double time, unsigned int level)

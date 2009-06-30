@@ -30,6 +30,7 @@
 #include "Interaction.h"
 #include "EventsManager.h"
 #include "FrictionContact.h"
+#include "Moreau.h"
 
 using namespace std;
 
@@ -43,11 +44,13 @@ static CheckSolverFPtr checkSolverOutput = NULL;
 
 TimeStepping::TimeStepping(SP::TimeDiscretisation td): Simulation(td, "TimeStepping")
 {
+  mComputeResiduY = false;
 }
 
 // --- XML constructor ---
 TimeStepping::TimeStepping(SP::SimulationXML strxml, double t0, double T, SP::DynamicalSystemsSet dsList, SP::InteractionsSet interList): Simulation(strxml, t0, T, dsList, interList, "TimeStepping")
 {
+  mComputeResiduY = false;
   // === One Step NS Problem === For time stepping, only one non
   // smooth problem is built.
   if (simulationxml->hasOneStepNSProblemXML())  // ie if OSNSList is
@@ -342,6 +345,16 @@ void TimeStepping::computeOneStep()
 }
 void TimeStepping::computeInitialResidu()
 {
+
+  SP::InteractionsSet allInteractions = model->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
+  for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+  {
+    (*it)->getRelationPtr()->computeG(getTkp1());
+    (*it)->getRelationPtr()->computeH(getTkp1());
+  }
+
+
+
   for (OSIIterator it = allOSI->begin(); it != allOSI->end() ; ++it)
     (*it)->computeResidu();
 }
@@ -364,17 +377,69 @@ void TimeStepping::advanceToEvent()
   update(levelMin);
 }
 
+/*update of the nabla */
+/*discretisation of the Interactions */
+void   TimeStepping::prepareNewtonIteration()
+{
+  //  cout << "update the operators" <<endl ;
+
+  DSOSIConstIterator it = osiMap.begin();
+  while (it != osiMap.end())
+  {
+    if ((it->second)->getType() == OSI::MOREAU)
+    {
+      Moreau::convert(&(*(it->second)))->computeW(getTkp1(), it->first);
+    }
+    ++it;
+  }
+
+  SP::InteractionsSet allInteractions = model->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
+  for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+  {
+    (*it)->getRelationPtr()->computeJacH(getTkp1(), 0);
+    (*it)->getRelationPtr()->computeJacH(getTkp1(), 1);
+    (*it)->getRelationPtr()->computeJacG(getTkp1(), 0);
+    (*it)->getRelationPtr()->computeJacG(getTkp1(), 1);
+  }
+
+
+  /*reset to zero the ds buffers*/
+  SP::DynamicalSystemsSet dsSet = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  for (DSIterator itds = dsSet->begin(); itds != dsSet->end(); itds++)
+  {
+    (*itds)->preparStep();
+    //     (*itds)->getXpPtr()->zero();
+    //     (*itds)->getRPtr()->zero();
+  }
+  /**/
+  for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+  {
+    (*it)->getRelationPtr()->preparNewtonIteration();
+  }
+
+}
+
+void TimeStepping::saveYandLambdaInMemory()
+{
+  // Save OSNS state (Interactions) in Memory.
+  OSNSIterator itOsns;
+  for (itOsns = allNSProblems->begin(); itOsns != allNSProblems->end(); ++itOsns)
+    (itOsns->second)->saveInMemory();
+
+}
 void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 {
   bool isNewtonConverge = false;
   unsigned int nbNewtonStep = 0; // number of Newton iterations
   //double residu = 0;
   int info = 0;
+  //  cout<<"||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||| BEGIN NEWTON IT"<<endl;
   computeInitialResidu();
 
   while ((!isNewtonConverge) && (nbNewtonStep <= maxStep))
   {
     nbNewtonStep++;
+    prepareNewtonIteration();
     computeFreeState();
     if (!allNSProblems->empty())
       info = computeOneStepNSProblem("timeStepping");
@@ -386,9 +451,14 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
     update(levelMin);
     isNewtonConverge = newtonCheckConvergence(criterion);
+    if (!isNewtonConverge)
+    {
+      saveYandLambdaInMemory();
+    }
   }
   if (!isNewtonConverge)
     cout << "Newton process stopped: max. steps number reached." << endl ;
+  //  cout<<"||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||  END NEWTON IT"<<endl;
 }
 
 bool TimeStepping::newtonCheckConvergence(double criterion)
@@ -403,20 +473,34 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
   // get the nsds indicator of convergence
   // We compute cvg = abs(xi+1 - xi)/xi and if cvg < criterion
   //  if (nsdsConverge < criterion )
+
+  double residu = 0.0;
+  for (OSIIterator it = allOSI->begin(); it != allOSI->end() ; ++it)
   {
-    double residu = 0.0;
-    for (OSIIterator it = allOSI->begin(); it != allOSI->end() ; ++it)
+    residu = (*it)->computeResidu();
+    if (residu > criterion)
     {
-      double ds_relative_converge = model-> getNonSmoothDynamicalSystemPtr()->nsdsConvergenceIndicator();
-      residu = (*it)->computeResidu();
-      if (residu > criterion)
-      {
-        checkConvergence = false;
-        //break;
-      }
+      checkConvergence = false;
+      //break;
     }
   }
+  if (!mComputeResiduY)
+    return(checkConvergence);
 
+
+  //check residuy.
+  SP::InteractionsSet allInteractions = model->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
+  for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+  {
+    (*it)->getRelationPtr()->computeResiduY(getTkp1());
+    residu = (*it)->getRelationPtr()->getResiduY()->norm2();
+    if (residu > criterion)
+    {
+      //      cout<<"residuY > criteron"<<residu<<">"<<criterion<<endl;
+      checkConvergence = false;
+      //break;
+    }
+  }
   return(checkConvergence);
 }
 

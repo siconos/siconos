@@ -40,6 +40,22 @@ Relation::Relation(SP::RelationXML relxml,
     RuntimeException::selfThrow("Relation::fillRelationWithRelationXML - object RelationXML does not exist");
 }
 
+
+void Relation::initializeMemory()
+{
+  mResiduy.reset(new BlockVector());
+  unsigned int nslawSize = getInteractionPtr()->getNonSmoothLawPtr()->getNsLawSize();
+  unsigned int numberOfRelations = getInteractionPtr()->getNumberOfRelations();
+  for (unsigned int j = 0; j < numberOfRelations ; ++j)
+    mResiduy->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
+
+  mH_alpha.reset(new BlockVector());
+  for (unsigned int j = 0; j < numberOfRelations; ++j)
+    mH_alpha->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
+
+}
+
+
 Relation::~Relation()
 {
 }
@@ -57,6 +73,39 @@ void Relation::display() const
         << endl;
   else cout << "- Linked interaction -> NULL" << endl;
 }
+
+// --- ResiduY functions
+void Relation::computeResiduY(double t)
+{
+  //Residu_y = y_alpha_k+1 - H_alpha;
+  *mResiduy = *mH_alpha;
+  scal(-1, *mResiduy, *mResiduy);
+
+  //  cout<<"Relation::computeResiduY mH_alpha"<<endl;
+  //  mH_alpha->display();
+  //  cout<<"Relation::computeResiduY Y"<<endl;
+  //  getInteractionPtr()->getYPtr(0)->display();
+
+  (*mResiduy) += *(getInteractionPtr()->getYPtr(0));
+
+  //  cout<<" Relation::computeResiduY residu Y"<<endl;
+  //  mResiduy->display();
+
+}
+
+SP::SiconosMatrix Relation::getCPtr()
+{
+  return getJacHPtr(0);
+}
+SP::SiconosMatrix Relation::getDPtr()
+{
+  return getJacHPtr(1);
+}
+SP::SiconosMatrix Relation::getBPtr()
+{
+  return getJacGPtr(0);
+}
+
 
 void Relation::saveRelationToXML() const
 {

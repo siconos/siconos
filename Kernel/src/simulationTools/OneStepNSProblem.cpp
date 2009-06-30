@@ -197,6 +197,8 @@ void OneStepNSProblem::updateUnitaryBlocks()
 
   isTimeInvariant = simulation->getModelPtr()->
                     getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->isTimeInvariant();
+  bool isLinear = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->isLinear();
+
 
   UnitaryRelationsGraph::VIterator ui1, ui1end;
   for (boost::tie(ui1, ui1end) = indexSet->vertices();
@@ -204,7 +206,7 @@ void OneStepNSProblem::updateUnitaryBlocks()
   {
     SP::UnitaryRelation ur1 = indexSet->bundle(*ui1);
 
-    if (!isTimeInvariant)
+    if (!isTimeInvariant || !isLinear)
     {
       computeUnitaryBlock(ur1, ur1);
     }
@@ -225,7 +227,7 @@ void OneStepNSProblem::updateUnitaryBlocks()
          ui2 != ui2end; ++ui2)
     {
       SP::UnitaryRelation ur2 = indexSet->bundle(*ui2);
-      if (!isTimeInvariant)
+      if (!isTimeInvariant || !isLinear)
       {
         computeUnitaryBlock(ur1, ur2);
       }
@@ -498,6 +500,7 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
   simulation = sim;
 
   bool isTimeInvariant = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->isTimeInvariant();
+  bool isLinear = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->isLinear();
 
   // === Link to the Interactions of the Non Smooth Dynamical System (through the Simulation) ===
   // Warning: this means that all Interactions of the NSProblem are included in the OSNS !!
@@ -512,7 +515,7 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
   // Checks that the set of Interactions is not empty -
   // Empty set is not forbidden, then we just display a warning message.
   if (!OSNSInteractions->isEmpty())
-    if (isTimeInvariant) // if time variant it is done in precompute
+    if (isTimeInvariant || !isLinear) // if time variant it is done in precompute
       updateUnitaryBlocks();
 
   // The maximum size of the problem (for example, the dim. of M in LCP or Friction problems).

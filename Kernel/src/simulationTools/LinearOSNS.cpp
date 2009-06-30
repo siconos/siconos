@@ -129,7 +129,9 @@ void LinearOSNS::initialize(SP::Simulation sim)
 
   // If the topology is TimeInvariant ie if M structure does not
   // change during simulation:
-  if (topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty())
+  bool b = topology->isTimeInvariant();
+  bool isLinear = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->isLinear();
+  if ((b || !isLinear) &&   !OSNSInteractions->isEmpty())
   {
     updateM();
   }
@@ -301,52 +303,97 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
   coord[6] = pos;
   coord[7] = pos + sizeY;
 
-  SP::SiconosMatrix  H;
+  SP::SiconosMatrix  C;
+  SP::SiconosMatrix  D;
   SP::SiconosMatrix  F;
-  SP::SiconosVector workX;
+  SP::SiconosVector Xq;
+  SP::SiconosVector lambda;
+  SP::SiconosVector H_alpha;
 
-  workX = UR->getWorkXPtr();
+  Xq = UR->getXqPtr();
+  lambda = UR->getInteractionPtr()->getLambdaPtr(0);
+  H_alpha = UR->getInteractionPtr()->getRelationPtr()->getHalphaPtr();
+  //  cout<<"LinearOSNS::computeQblock lambda "<< endl;
+  //  lambda->display();
+  //  cout<<"LinearOSNS::computeQblock H_alpha "<< endl;
+  //  H_alpha->display();
+
 
   if (osiType == OSI::MOREAU || osiType == OSI::LSODAR)
   {
-    H = mainInteraction->getRelationPtr()->getJacHPtr(0);
-    if (H)
+    SP::SiconosVector Xfree;
+    Xfree = UR->getXfreePtr();
+    //      cout<<"LinearOSNS::computeQblock xfree "<<endl;
+    //      Xfree->display();
+    if (relationType == FirstOrder && relationSubType == Type2R)
     {
+      C = mainInteraction->getRelationPtr()->getCPtr();
+      D = mainInteraction->getRelationPtr()->getDPtr();
+      if (D)
+      {
+        coord[3] = D->size(1);
+        coord[5] = D->size(1);
+        subprod(*D, *lambda, *q, coord, true);
+        for (int i = 0; i < sizeY; i++)
+          q->setValue(relativePosition + i, -1 * q->getValue(relativePosition + i));
 
-      assert(workX);
-      assert(q);
-
-      coord[3] = H->size(1);
-      coord[5] = H->size(1);
-      subprod(*H, *workX, *q, coord, true);
+      }
+      if (C)
+      {
+        coord[3] = C->size(1);
+        coord[5] = C->size(1);
+        subprod(*C, *Xq, *q, coord, false);
+        //    cout<<"Xq "<<endl;
+        //    Xq->display();
+      }
+      for (int i = 0; i < sizeY; i++)
+        q->setValue(relativePosition + i, q->getValue(relativePosition + i) + H_alpha->getValue(relativePosition + i));
     }
-
-    if (relationType == FirstOrder && (relationSubType == LinearTIR || relationSubType == LinearR))
+    else
     {
-      // In the first order linear case it may be required to add e + FZ to q.
-      // q = HXfree + e + FZ
-      SP::SiconosVector e;
-      if (relationSubType == LinearTIR)
+      C = mainInteraction->getRelationPtr()->getCPtr();
+      SP::SiconosVector WorkX = UR->getWorkXPtr();
+      if (C)
       {
-        e = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->getRelationPtr())->getEPtr();
-        F = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->getRelationPtr())->getFPtr();
-      }
-      else
-      {
-        e = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getEPtr();
-        F = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getFPtr();
+
+        assert(WorkX);
+        assert(q);
+
+        coord[3] = C->size(1);
+        coord[5] = C->size(1);
+        subprod(*C, *WorkX, *q, coord, true);
       }
 
-      if (e)
-        boost::static_pointer_cast<SimpleVector>(q)->addBlock(pos, *e);
-
-      if (F)
+      if (relationType == FirstOrder && (relationSubType == LinearTIR || relationSubType == LinearR))
       {
-        SP::SiconosVector  workZ = UR->getWorkZPtr();
-        coord[3] = F->size(1);
-        coord[5] = F->size(1);
-        subprod(*F, *workZ, *q, coord, false);
+        // In the first order linear case it may be required to add e + FZ to q.
+        // q = HXfree + e + FZ
+        SP::SiconosVector e;
+        if (relationSubType == LinearTIR)
+        {
+          e = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->getRelationPtr())->getEPtr();
+          F = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->getRelationPtr())->getFPtr();
+        }
+        else
+        {
+          e = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getEPtr();
+          F = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getFPtr();
+        }
+
+        if (e)
+          boost::static_pointer_cast<SimpleVector>(q)->addBlock(pos, *e);
+
+        if (F)
+        {
+          SP::SiconosVector  workZ = UR->getWorkZPtr();
+          coord[3] = F->size(1);
+          coord[5] = F->size(1);
+          subprod(*F, *workZ, *q, coord, false);
+        }
       }
+      //  cout<<"computeQblock q:"<<endl;
+      //  q->display();
+
     }
   }
 
@@ -440,8 +487,10 @@ void LinearOSNS::preCompute(double time)
   // Get topology
   SP::Topology topology = simulation->getModelPtr()
                           ->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  bool b = topology->isTimeInvariant();
+  bool isLinear = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->isLinear();
 
-  if (!topology->isTimeInvariant())
+  if (!b | !isLinear)
   {
     // Computes new unitaryBlocks if required
     updateUnitaryBlocks();

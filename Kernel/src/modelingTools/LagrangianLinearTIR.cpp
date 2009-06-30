@@ -124,6 +124,10 @@ void LagrangianLinearTIR::computeH(double time)
 {
   computeOutput(time, 0);
 }
+void LagrangianLinearTIR::computeG(double time)
+{
+  computeInput(time, 0);
+}
 
 void LagrangianLinearTIR::computeOutput(double time, unsigned int derivativeNumber)
 {

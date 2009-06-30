@@ -74,6 +74,7 @@ DynamicalSystem::DynamicalSystem(DS::TYPES type, unsigned int newN):
   x.resize(2);
   workV.resize(sizeWorkV);
   mResiduFree.reset(new SimpleVector(getDim()));
+  r.reset(new SimpleVector(getDim()));
 }
 
 bool DynamicalSystem::checkDynamicalSystem()
@@ -171,6 +172,28 @@ void DynamicalSystem::setRhsPtr(SP::SiconosVector newPtr)
     RuntimeException::selfThrow("DynamicalSystem::setRhsPtr - inconsistent sizes between x input and n - Maybe you forget to set n?");
 
   x[1] = newPtr;
+}
+void DynamicalSystem::setR(const SiconosVector& newValue)
+{
+  // check dimensions ...
+  if (newValue.size() != n)
+    RuntimeException::selfThrow("DynamicalSystem::setR - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
+
+  if (r)
+    *r = newValue;
+
+  else
+    r.reset(new SimpleVector(newValue));
+}
+
+void DynamicalSystem::setRPtr(SP::SiconosVector newPtr)
+{
+  // check dimensions ...
+  if (newPtr->size() != n)
+    RuntimeException::selfThrow("DynamicalSystem::setRPtr - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
+
+  r = newPtr;
+
 }
 
 void DynamicalSystem::setJacobianXRhs(const SiconosMatrix& newValue)
