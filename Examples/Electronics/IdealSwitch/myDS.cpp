@@ -1,0 +1,57 @@
+/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
+ * Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ * Siconos is a free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * Siconos is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Siconos; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ */
+#include "myDS.h"
+
+
+
+MyDS::MyDS(const SiconosVector& x0): FirstOrderNonLinearDS(x0)
+{
+  jacobianXF.reset(new PMJF(1, 1));
+  f.reset(new PVF(1));
+  M.reset(new PMJF(1, 1));
+  M->eye();
+}
+
+void MyDS::computeF(double t)
+{
+  f->setValue(0, 0);
+}
+void  MyDS::computeF(double, SP::SiconosVector)
+{
+  f->setValue(0, 0);
+}
+
+void MyDS::computeJacobianXF(double t, bool  b)
+{
+  jacobianXF->setValue(0, 0, 0);
+}
+
+void MyDS::computeJacobianXF(double t, SP::SiconosVector v)
+{
+  jacobianXF->setValue(0, 0, 0);
+
+}
+
+void MyDS::computeRhs(double t, bool  b)
+{
+  ;
+}
+void MyDS::resetNonSmoothPart()
+{
+}
