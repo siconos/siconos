@@ -120,6 +120,7 @@ int main(int argc, char* argv[])
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
     SP::TimeStepping s(new TimeStepping(t));
+    //        s->setUseRelativeConvergenceCriteron(true);
 
     // -- OneStepIntegrators --
 
@@ -182,7 +183,7 @@ int main(int argc, char* argv[])
 
     boost::progress_display show_progress(N);
 
-    while (s->getNextTime() <= Pendulum->getFinalT())
+    while (k < N)
     {
       k++;
       ++show_progress;
