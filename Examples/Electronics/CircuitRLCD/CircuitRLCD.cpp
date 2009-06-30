@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
 {
   double t0 = 0.0;
   double T = 5e-3;        // Total simulation time
-  double h_step = 10.0e-7;// Time step
+  double h_step = 10.0e-6;// Time step
   double Lvalue = 1e-2;   // inductance
   double Cvalue = 1e-6;   // capacitance
   double Rvalue = 1e3;    // resistance
@@ -61,7 +61,6 @@ int main(int argc, char* argv[])
 
   try
   {
-
     // --- Dynamical system specification ---
     SimpleVector init_state(2);
     init_state(0) = Vinit;
@@ -184,8 +183,9 @@ int main(int argc, char* argv[])
       // diode current
       dataPlot(k, 4) = (InterCircuitRLCD->getLambda(0))(0);
 
-      dataPlot(k, 5) = (LSCircuitRLCD->getR())(0);
-      dataPlot(k, 5) = OSI_RLCD->computeResidu();
+      //dataPlot(k,5) = (LSCircuitRLCD->getR())(0);
+      //    dataPlot(k,5) = OSI_RLCD->computeResidu();
+      dataPlot(k, 5) = 0;
       // transfer of state i+1 into state i and time incrementation
       StratCircuitRLCD->nextStep();
 
