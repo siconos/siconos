@@ -124,11 +124,6 @@ void LagrangianScleronomousR::computeOutput(double time, unsigned int derivative
     prod(*JacH[0], *data[q0 + derivativeNumber], *y);
   }
 }
-void LagrangianScleronomousR::computeG(double t)
-{
-
-  computeInput(t, 0);
-}
 
 void LagrangianScleronomousR::computeInput(double time, unsigned int level)
 {

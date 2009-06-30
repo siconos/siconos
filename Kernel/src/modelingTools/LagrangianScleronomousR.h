@@ -87,8 +87,7 @@ public:
   /** to compute y = h(q,v,t) using plug-in mechanism
    * \param: double, current time
    */
-  void computeH(double);
-  void computeG(double);
+  virtual void computeH(double);
 
   /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
    * \param: double, current time

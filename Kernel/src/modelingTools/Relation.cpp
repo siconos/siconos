@@ -92,6 +92,10 @@ void Relation::computeResiduY(double t)
   //  mResiduy->display();
 
 }
+void Relation::computeG(double t)
+{
+  computeInput(t, 0);
+}
 
 SP::SiconosMatrix Relation::getCPtr()
 {

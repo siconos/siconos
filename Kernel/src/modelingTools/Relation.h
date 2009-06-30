@@ -363,10 +363,7 @@ public:
   /** default function to compute g
    *  \param double : current time
    */
-  virtual void computeG(double)
-  {
-    RuntimeException::selfThrow("Relation::computeG() - not implemented for this type of relation (probably Lagrangian): " + getType());
-  }
+  virtual void computeG(double t);
 
   /** default function to compute jacobianH
    *  \param double : current time
@@ -400,14 +397,18 @@ public:
 
   /**
    * return a SP on the C matrix.
+   * The matrix C in the linear case, else it returns Jacobian of the output with respect to x.
+   *
    */
   virtual SP::SiconosMatrix getCPtr();
   /**
    * return a SP on the D matrix.
+   * The matrix D in the linear case, else it returns Jacobian of the output with respect to lambda.
    */
   virtual SP::SiconosMatrix getDPtr();
   /**
    * return a SP on the B matrix.
+   * The matrix B in the linear case, else it returns Jacobian of the input with respect to lambda.
    */
   virtual SP::SiconosMatrix getBPtr();
   // --- Residu y functions
@@ -416,13 +417,26 @@ public:
   {
     return mResiduy;
   }
+  /*
+   * Compute the residuY.
+   *
+   *
+   */
   virtual void computeResiduY(double t);
 
+  /*
+   * Return H_alpha
+   *
+   */
   virtual const SP::SiconosVector getHalphaPtr()
   {
     return mH_alpha;
   };
 
+  /*
+   * Do the computation needed by for a Iteration.
+   *
+   */
   virtual void preparNewtonIteration()
   {
     ;
