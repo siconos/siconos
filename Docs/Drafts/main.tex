@@ -1,0 +1,337 @@
+% Siconos-Doc version 3.0.0, Copyright INRIA 2005-2008.
+% Siconos is a program dedicated to modeling, simulation and control
+% of non smooth dynamical systems.	
+% Siconos is a free software; you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation; either version 2 of the License, or
+% (at your option) any later version.
+% Siconos is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Siconos; if not, write to the Free Software
+% Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+%
+% Contact: Vincent ACARY vincent.acary@inrialpes.fr 
+%/
+\documentclass[10pt]{report}
+\input{macro.tex}
+\usepackage{psfrag}
+\usepackage{fancyhdr}
+\usepackage{subfigure}
+%\renewcommand{\baselinestretch}{1.2}
+\textheight 23cm
+\textwidth 16cm
+\topmargin 0cm
+%\evensidemargin 0cm
+\oddsidemargin 0cm
+\evensidemargin 0cm
+\usepackage{layout}
+\usepackage{mathpple}
+\usepackage[T1]{fontenc}
+%\usepackage{array}
+\makeatletter
+\renewcommand\bibsection{\paragraph{References
+     \@mkboth{\MakeUppercase{\bibname}}{\MakeUppercase{\bibname}}}}
+\makeatother
+\usepackage{lastpage}
+
+%% style des entetes et des pieds de page
+\fancyhf{} % nettoie le entetes et les pieds
+\fancyhead[L]{\texttt{Siconos Development team -- Development Notes }}
+\fancyhead[C]{}
+\fancyhead[R]{\texttt{\thepage/\pageref{LastPage}}}
+\fancyfoot[L]{}
+\fancyfoot[C]{}
+\fancyfoot[R]{\texttt{file DevNotes.tex -- \isodayandtime}}
+
+
+\begingroup
+\count0=\time \divide\count0by60 % Hour
+\count2=\count0 \multiply\count2by-60 \advance\count2by\time
+% Min
+\def\2#1{\ifnum#1<10 0\fi\the#1}
+\xdef\isodayandtime{\the\year-\2\month-\2\day\space\2{\count0}:%
+\2{\count2}}
+\endgroup
+
+
+
+
+\begin{document}
+\thispagestyle{empty}
+\title{Developer's Notes}
+\author{Siconos Development Team}
+
+\date{\today}
+\maketitle
+
+\pagestyle{fancy}
+
+
+\chapter{Dynamical Systems implementation in Siconos.}
+
+\begin{table}[!ht]
+  \begin{tabular}{|l|l|}
+    \hline
+    author  & F.  P\'erignon \\
+    \hline
+    date    & November 7, 2006 \\ 
+    \hline
+    version & Kernel 1.3.0 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\section{Introduction}
+This document is only a sequel of notes and remarks on the way Dynamical Systems are implemented in Siconos.\\
+It has to be completed, reviewed, reorganized etc etc for a future Developpers'Guide. \\
+See also documentation in Doc/User/DynamicalSystemsInSiconos for a description of various dynamical systems types.
+
+\section{Class Diagram}
+There are four possible formulation for dynamical systems in Siconos,
+two for first order systems and two for second order Lagrangian systems. The main class is DynamicalSystem, all other derived from this one, as shown in the following diagram:
+\begin{figure}[htbp]
+  \centering
+ \includegraphics[width=0.3\textwidth]{./DSClassDiagram.eps}
+  \label{DSDiagram}
+\end{figure}
+% DYNAMICAL SYSTEMS
+
+\section{Construction}
+
+Each constructor must:
+\begin{itemize}
+\item initialize all the members of the class and of the top-class if it exists
+\item allocate memory and set value for all required inputs
+\item allocate memory and set value for optional input if they are given as argument (in xml for example)
+\item check that given data are coherent and that the system is complete (for example, in the LagrangianDS
+if the internal forces are given as a plug-in, their Jacobian are also required. If they are not given, this leads to an exception).
+\end{itemize}
+
+No memory allocation is made for unused members $\Rightarrow$ requires if statements in simulation.  (if!=NULL ...).\\
+
+\subsection{DynamicalSystem}
+
+\bf{Required data:}\\
+n, x0, f, jacobianXF \\
+\bf{Optional:}\\
+T,u \\
+
+\bf{Always allocated in constructor:} \\
+x, x0, xFree, r, rhs, jacobianXF
+
+Warning: default constructor is always private or protected and apart from the others and previous rules or remarks do not always apply to it. 
+This for DS class and any of the derived ones. 
+
+\subsection{LagrangianDS}
+
+\bf{Required data:}\\
+ndof, q0, velocity0, mass \\
+\bf{Optional:}\\
+fInt and its Jacobian, fExt, NNL and its Jacobian. \\
+
+\bf{Always allocated in constructor:} \\
+mass, q, q0, qFree, velocity, velocity0, velocityFree, p. \\
+All other pointers to vectors/matrices are set to NULL by default. \\
+Memory vectors are required but allocated during call to initMemory function. 
+
+Various rules:
+\begin{itemize}
+\item fInt (NNL) given as a plug-in $\Rightarrow$ check that JacobianQ/Velocity are present (matrices or plug-in)
+\item any of the four Jacobian present $\Rightarrow$ allocate memory for block-matrix jacobianX  (connectToDS function)
+\item 
+\end{itemize}
+
+check: end of constructor or in initialize? \\
+computeF and JacobianF + corresponding set functions: virtual or not? \\
+
+
+\section{Specific flags or members}
+
+\begin{itemize}
+\item isAllocatedIn: to check inside-class memory allocation
+\item isPlugin: to check if operators are computed with plug-in or just directly set as a matrix or vector
+\item workMatrix: used to save some specific matrices in order to avoid recomputation if possible (inverse of mass ...)
+\end{itemize}
+
+\section{plug-in management}
+DynamicalSystem class has a member named parameterList which is a $map<string, SimpleVector*>$, ie a list of
+pointers to SimpleVector*, with a string as a key to identified them. 
+For example, $parametersList["mass"]$ is a SimpleVector*, which corresponds to the last argument given in 
+mass plug-in function. \\
+By default, each parameters vectors must be initialized with a SimpleVector of size 1, as soon as the plug-in is
+declared. Moreover, to each vector corresponds a flag in isAllocatedIn map, to check if the corresponding vector has been 
+allocated inside the class or not. \\ 
+For example, in DynamicalSystem, if $isPlugin["vectorField"]==true$, then, during call to constructor or set function,
+it is necessary to defined the corresponding parameter: \\
+$parametersList["vectorField"] = new SimpleVector(1)$ \\
+and to complete the $isAllocatedIn$ flag: \\
+$isAllocatedIn["parameter_for_vectorField"] = true$. \\
+
+\chapter{Interactions}
+\begin{table}[!ht]
+  \begin{tabular}{|l|l|}
+    \hline
+    author  & F.  P\'erignon \\
+    \hline
+    date    & November 7, 2006 \\ 
+    \hline
+    version & Kernel 1.3.0 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\section{Introduction}
+This document is only a sequel of notes and remarks on the way Interactions are implemented in Siconos.\\
+It has to be completed, reviewed, reorganized etc etc for a future Developpers'Guide. \\
+See also documentation in Doc/User/Interaction.
+
+\section{Class Diagram}
+
+\section{Description}
+
+\begin{ndrfp} 
+review of interactions (for EventDriven implementation) 17th May 2006.
+\end{ndrfp}
+
+\bei
+\item variable \varcpp{nInter} renamed in \varcpp{interactionSize}: represents the size of \varcpp{y} and \varcpp{$\lambda$}. NOT the number of relations !! \\
+\item add a variable \varcpp{nsLawSize} that depends on the non-smooth law type.\\
+Examples:
+\bei
+\item NewtonImpact -> \varcpp{nsLawSize} = 1
+\item Friction 2D  -> \varcpp{nsLawSize} = 2
+\item Friction 3D  -> \varcpp{nsLawSize} = 3
+\item ... 
+\item \varcpp{nsLawSize} = n with n dim of matrix D in :
+$y=Cx+D\lambda$, D supposed to be a full-ranked matrix. \\
+Warning: this case is represented by only one relation of size n. 
+\ei
+\item \varcpp{numberOfRelations}: number of relations in the interaction, \varcpp{numberOfRelations} = $\Frac{\varcpp{interactionSize}}{\varcpp{nsLawSize}}$.
+\ei
+
+
+\chapter{Notes on the Non Smooth Dynamical System construction}
+\begin{table}[!ht]
+  \begin{tabular}{|l|l|}
+    \hline
+    author  & F.  P\'erignon \\
+    \hline
+    date    & November 7, 2006 \\ 
+    \hline
+    version & Kernel 1.3.0 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\section{Introduction}
+
+\section{Class Diagram}
+
+\section{Description}
+
+Objects must be constructed in the following order: 
+\bei
+\item DynamicalSystems
+\item NonSmoothLaw: depends on nothing
+\item Relation: no link with an interaction during construction, this will be done during initialization. 
+\item Interaction: default constructor is private and copy is forbidden. Two constructors: xml and from data. Required data are a DSSet, a NonSmoothLaw and
+a Relation (+ dim of the Interaction and a number). \\
+Interaction has an initialize function which allocates memory for y and lambda, links correctly the relation and initializes it .... This function is called at the 
+end of the constructor. That may be better to call it in simulation->initialize? Pb: xml constructor needs memory allocation for y and lambda if they are
+provided in the input xml file. 
+\item NonSmoothDynamicalSystem: default is private, copy fobidden. Two constructors: xml and from data. Required data are the DSSet and the InteractionsSet.
+The topology is declared and constructed (but empty) during constructor call of the nsds, but initialize in the Simulation, this because it can not be initialize until the nsds has been fully described (ie this to allow user to add DS, Inter ...) at any time in the model, but before simulation initialization). 
+
+\ei
+
+\section{misc}
+
+\bei 
+\item no need to keep a number for Interactions? Only used in xml for OSI, to know which Interactions it holds.
+\item pb: the number of saved derivatives for y and lambda in Interactions is set to 2. This must depends on the relative degree which is computes during
+Simulation initialize and thus too late. It is so not available when memory is allocated (Interaction construction). Problem-> to be reviewed.
+\ei 
+
+
+\chapter{OneStepIntegrator and derived classes.}
+\begin{table}[!ht]
+  \begin{tabular}{|l|l|}
+    \hline
+    author  & F.  P\'erignon \\
+    \hline
+    date    & November 7, 2006 \\ 
+    \hline
+    version & Kernel 1.3.0 \\
+    \hline
+  \end{tabular}
+\end{table}
+
+\section{Introduction}
+This document is only a sequel of notes and remarks on the way OneStepIntegrators are implemented in Siconos.\\
+It has to be completed, reviewed, reorganized etc etc for a future Developpers'Guide. \\
+See also documentation in Doc/User/OneStepIntegrator for a description of various OSI.
+
+\section{Class Diagram}
+
+\section{Misc}
+
+OSI review for consistency between Lsodar and Moreau:
+\begin{itemize}
+\item add set of DynamicalSystem*
+\item add set of Interaction* 
+\item add link to strategy that owns the OSI
+\item remove td object in OSI -> future: replace it by a set of td (one per ds)
+\item add strat in constructors arg list
+\end{itemize}
+
+
+osi -> strat -> Model -> nsds -> topology \\
+osi -> strat -> timeDiscretisation \\
+
+let a timeDiscretisation object in the OSI? set of td (one per ds)? \\
+create a class of object that corresponds to DS on the simulation side ? \\
+will contain the DS, its discretization, theta for Moreau ... ? \\ 
+Allow setStrategyPtr operation? Warning: need reinitialisation. \\
+
+
+Required input by user: \\
+\begin{itemize}
+\item list of DS or list of Interactions ? 
+\item pointer to strategy
+\item ...
+\end{itemize}
+
+\section{Construction}
+
+Each constructor must:
+
+\begin{itemize}
+\item
+\end{itemize}
+
+\subsection{Moreau}
+
+Two maps: one for W, and one for theta. To each DS corresponds a theta and a W. \\
+Strategy arg in each constructor.
+
+\bf{Required data:}\\
+
+\bf{Optional:}\\
+
+\bf{Always allocated in constructor:} \\
+
+Warning: default constructor is always private or protected and apart from the others and previous rules or remarks do not always apply to it. 
+
+\subsection{Lsodar}
+
+\bf{Required data:}\\
+
+\bf{Optional:}\\
+
+\bf{Always allocated in constructor:} \\
+
+\end{document}
