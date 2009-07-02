@@ -120,7 +120,7 @@ void elecRelation::computeH(double t)
   Heval->setValue(3, workL->getValue(2) + workL->getValue(1) * (workL->getValue(8) + sR1));
   Heval->setValue(4, workX->getValue(0) - workL->getValue(0) - workL->getValue(1));
   Heval->setValue(5, sR2 - workL->getValue(6) - sR1);
-  Heval->setValue(6, workL->getValue(4) - workL->getValue(3) + workL->getValue(5));
+  Heval->setValue(6, sAmpli * (workL->getValue(4) - workL->getValue(3)) + workL->getValue(5));
   Heval->setValue(7, sR2 - workL->getValue(8) - sR1);
   Heval->setValue(8, -workL->getValue(2) + workL->getValue(7));
 #else
@@ -246,8 +246,8 @@ void elecRelation::computeJacH(double t, unsigned int index)
     h[6] = 0;
     h[15] = 0;
     h[24] = 0;
-    h[33] = -1;
-    h[42] = 1;
+    h[33] = -sAmpli;
+    h[42] = sAmpli;
     h[51] = 1;
     h[60] = 0;
     h[69] = 0;

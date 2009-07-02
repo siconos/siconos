@@ -24,6 +24,7 @@ static double sTf = 10 * sT;
 static int sNSLawSize = 9;
 static int sN = 4;
 static int sM = 5;
+static double sAmpli = 100.0;
 
 #else
 /*    V1     /      V2
