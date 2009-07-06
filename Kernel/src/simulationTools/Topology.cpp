@@ -238,6 +238,9 @@ void Topology::computeRelativeDegrees()
 Topology::Topology(): isTopologyUpToDate(false), isTopologyTimeInvariant(true),
   numberOfConstraints(0)
 {
+  URG.resize(1);
+  DSG.resize(1);
+
   URG[0].reset(new UnitaryRelationsGraph());
   DSG[0].reset(new DynamicalSystemsGraph());
   allInteractions.reset(new InteractionsSet());
@@ -247,6 +250,9 @@ Topology::Topology(SP::InteractionsSet newInteractions) :
   isTopologyUpToDate(false), isTopologyTimeInvariant(true),
   numberOfConstraints(0)
 {
+
+  URG.resize(1);
+  DSG.resize(1);
 
   URG[0].reset(new UnitaryRelationsGraph());
   DSG[0].reset(new DynamicalSystemsGraph());

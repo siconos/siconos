@@ -50,6 +50,9 @@ public:
    */
   ~Disk();
 
+
+  /** visitors hook
+   */
   virtual void accept(SiconosVisitor& tourist)
   {
     tourist.visit(*this);

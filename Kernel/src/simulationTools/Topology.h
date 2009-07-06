@@ -88,6 +88,12 @@ private:
 
   // --- MEMBERS ---
 
+  /** minimum of the relative degrees */
+  unsigned int minRelativeDegrees;
+
+  /** maximum of the relative degrees */
+  unsigned int maxRelativeDegrees;
+
   /** the set of all the interactions of the system */
   SP::InteractionsSet allInteractions;
 
@@ -113,11 +119,14 @@ private:
   // === PRIVATE FUNCTIONS ===
 
   /** schedules the relations of Interaction inter into IndexSet0 (ie
-  * creates the corresponding UnitaryRelations)
+  * creates the corresponding UnitaryRelations and add them into DSG
+  * anr URG)
   * \param: a pointer to Interaction
   */
   const bool addInteractionInIndexSet(SP::Interaction);
 
+  /** remove the unitary relations of the interactions from URG and
+   *   DSG */
   const bool removeInteractionFromIndexSet(SP::Interaction);
 
   /** default constructor

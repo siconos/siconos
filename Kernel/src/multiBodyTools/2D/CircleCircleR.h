@@ -27,7 +27,7 @@
 
 #include "CircularR.h"
 
-class CircleCircleR : public CircularR
+class CircleCircleR : public CircularR, public boost::enable_shared_from_this<CircleCircleR>
 {
 private:
   double ar1mr2;
@@ -48,6 +48,17 @@ public:
   void computeH(double);
 
   void computeJacH(double, unsigned int);
+
+  /** visitors hook
+   */
+  virtual void accept(SiconosVisitor& tourist)
+  {
+    tourist.visit(*this);
+  }
+  virtual void accept(SP::SiconosVisitor tourist)
+  {
+    tourist->visit(shared_from_this());
+  }
 
 };
 

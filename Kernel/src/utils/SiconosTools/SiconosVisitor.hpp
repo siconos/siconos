@@ -32,7 +32,9 @@ class DynamicalSystem;
 class Sphere;
 class Disk;
 class Circle;
-
+class CircleCircleR;
+class DiskDiskR;
+class DiskPlanR;
 /** This define a visitor pattern
 
    \author SICONOS Development Team - copyright INRIA
@@ -74,6 +76,9 @@ public:
   VISIT(Sphere);
   VISIT(Disk);
   VISIT(Circle);
+  VISIT(DiskPlanR);
+  VISIT(CircleCircleR);
+  VISIT(DiskDiskR);
 
 };
 

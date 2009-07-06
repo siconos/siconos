@@ -29,7 +29,7 @@
 #include "Interaction.h"
 #include "LagrangianScleronomousR.h"
 
-class DiskPlanR : public LagrangianScleronomousR
+class DiskPlanR : public LagrangianScleronomousR, public boost::enable_shared_from_this<DiskPlanR>
 {
 private:
   double r, A, B, C, sqrA2pB2,
@@ -124,8 +124,21 @@ public:
   {
     return finite;
   };
+
+  /** visitor hooks
+   */
+  virtual void accept(SiconosVisitor& tourist)
+  {
+    tourist.visit(*this);
+  }
+  virtual void accept(SP::SiconosVisitor tourist)
+  {
+    tourist->visit(shared_from_this());
+  }
+
 };
 
 TYPEDEF_SPTR(DiskPlanR);
 
 #endif /* DiskPlanR */
+
