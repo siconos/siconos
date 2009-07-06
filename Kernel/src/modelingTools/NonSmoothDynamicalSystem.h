@@ -280,6 +280,24 @@ public:
    */
   void setInteractions(const InteractionsSet&) ;
 
+  /** add an interaction to the system
+   * \param a shared pointer to the interaction
+   */
+  void  addInteraction(SP::Interaction inter)
+  {
+    topology->addInteraction(inter);
+  };
+
+
+  /** remove an interaction to the system
+   * \param a shared pointer to the interaction
+   */
+  void  removeInteraction(SP::Interaction inter)
+  {
+    topology->removeInteraction(inter);
+  };
+
+
   /** check if Interaction number N exists
    *  \param the identifier of the Interaction to get
    *  \return bool

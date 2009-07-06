@@ -194,19 +194,21 @@ public:
 
 
   /** check if Interaction inter is in the set
-  *  \param a pointer to Interaction
-  *  \return a bool
-  */
+   *  \param a shared pointer to Interaction
+   *  \return a bool
+   */
   const bool hasInteraction(SP::Interaction) const;
 
   /** add an Interaction in the topology. The interaction is both
-      added in Dynamical Systems graph and Unitary Relations Graph
+   *  added in Dynamical Systems graph and Unitary Relations Graph
+   * \param a shared pointer to the interaction
    */
   void addInteraction(SP::Interaction);
 
   /** remove an Interaction from the topology. The interaction is
-      removed from Dynamical Systems graph and Unitary Relations Graph.
-      The interaction is not removed from actives subgraphs : updateIndexSet
+   *  removed from Dynamical Systems graph and Unitary Relations Graph.
+   *  The interaction is not removed from actives subgraphs : see updateIndexSet
+   *  \param a shared pointer to the interaction
    */
   void removeInteraction(SP::Interaction);
 

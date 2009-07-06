@@ -119,8 +119,9 @@ const bool Topology::addInteractionInIndexSet(SP::Interaction inter)
   return (res);
 };
 
-// an edge is removed if the corresponding vertex is removed in
-// adjoint graph
+/* an edge is removed from DSG graph if the corresponding vertex is
+   removed from the adjoint graph (URG)
+*/
 struct VertexIsRemoved
 {
   VertexIsRemoved(SP::Interaction I,
@@ -157,12 +158,10 @@ struct VertexIsRemoved
 };
 
 
+/* remove an interaction : remove edges (unitary relation) from DSG if
+   corresponding vertices are removed from URG */
 const bool Topology::removeInteractionFromIndexSet(SP::Interaction inter)
 {
-
-  /* remove unitary relation in ur graph */
-
-
 
   for (DSIterator ids = inter->getDynamicalSystemsPtr()->begin();
        ids != inter->getDynamicalSystemsPtr()->end();
@@ -177,6 +176,7 @@ const bool Topology::removeInteractionFromIndexSet(SP::Interaction inter)
 
 void Topology::addInteraction(SP::Interaction inter)
 {
+  assert(allInteractions);
   assert(DSG[0]->edges_number() == URG[0]->size());
 
   allInteractions->insert(inter);
@@ -188,6 +188,7 @@ void Topology::addInteraction(SP::Interaction inter)
 
 void Topology::removeInteraction(SP::Interaction inter)
 {
+  assert(allInteractions);
   assert(DSG[0]->edges_number() == URG[0]->size());
 
   allInteractions->erase(inter);
@@ -236,24 +237,27 @@ void Topology::computeRelativeDegrees()
 // default
 Topology::Topology(): isTopologyUpToDate(false), isTopologyTimeInvariant(true),
   numberOfConstraints(0)
-{}
+{
+  URG[0].reset(new UnitaryRelationsGraph());
+  DSG[0].reset(new DynamicalSystemsGraph());
+  allInteractions.reset(new InteractionsSet());
+}
 
 Topology::Topology(SP::InteractionsSet newInteractions) :
   isTopologyUpToDate(false), isTopologyTimeInvariant(true),
   numberOfConstraints(0)
 {
-  if (URG.size() == 0)
+
+  URG[0].reset(new UnitaryRelationsGraph());
+  DSG[0].reset(new DynamicalSystemsGraph());
+  allInteractions.reset(new InteractionsSet());
+
+  for (InteractionsIterator it = newInteractions->begin();
+       it != newInteractions->end(); ++it)
   {
-    URG.resize(1);
-    URG[0].reset(new UnitaryRelationsGraph());
-  }
-  if (DSG.size() == 0)
-  {
-    DSG.resize(1);
-    DSG[0].reset(new DynamicalSystemsGraph());
+    addInteraction(*it);
   }
 
-  allInteractions = newInteractions;
 
   isTopologyUpToDate = false;
 }
@@ -293,7 +297,6 @@ void Topology::initialize()
 {
 
   assert(allInteractions && "Topology : allInteractions is NULL");
-  //  assert(!allInteractions->isEmpty());
 
   // -- Creates Unitary Relations and put them in URG --- loop
   // through interactions list (from NSDS)
