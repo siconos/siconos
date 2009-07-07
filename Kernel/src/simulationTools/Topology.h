@@ -123,7 +123,7 @@ private:
   * anr URG)
   * \param: a pointer to Interaction
   */
-  const bool addInteractionInIndexSet(SP::Interaction);
+  void addInteractionInIndexSet(SP::Interaction);
 
   /** remove the unitary relations of the interactions from URG and
    *   DSG */

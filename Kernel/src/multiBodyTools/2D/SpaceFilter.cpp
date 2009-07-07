@@ -1,5 +1,8 @@
 #include "SpaceFilter.hpp"
 
+
+/* hash is done with encapsulation */
+
 class Hashed : public boost::enable_shared_from_this<Hashed>
 {
 public:
@@ -22,8 +25,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(HashedCircle);
-
 class HashedDisk : public Hashed
 {
 public:
@@ -32,61 +33,7 @@ public:
 
 };
 
-TYPEDEF_SPTR(HashedDisk);
-
-/* a visitor : some dynamical system may not be hashed ...*/
-class SpaceFilter::_BodyHash : public SiconosVisitor
-{
-public:
-  SP::SpaceFilter parent;
-  _BodyHash(SP::SpaceFilter p) : parent(p) {};
-
-  void visit(SP::Disk pds)
-  {
-    int i, j, imin, imax, jmin, jmax;
-
-    unsigned int _bboxsize = parent->bboxsize();
-    unsigned int _gridsize = parent->gridsize();
-
-    imin = (int) floor((pds->getQ(0) - _bboxsize * pds->getRadius()) / _gridsize);
-    imax = (int) floor((pds->getQ(0) + _bboxsize * pds->getRadius()) / _gridsize);
-
-    jmin = (int) floor((pds->getQ(1) - _bboxsize * pds->getRadius()) / _gridsize);
-    jmax = (int) floor((pds->getQ(1) + _bboxsize * pds->getRadius()) / _gridsize);
-
-    for (i = imin; i <= imax; ++i)
-    {
-      for (j = jmin; j <= jmax; ++j)
-      {
-        parent->insert(pds, i, j, 0);
-      }
-    }
-  };
-
-  void visit(SP::Circle pds)
-  {
-    int i, j, imin, imax, jmin, jmax;
-
-    unsigned int _bboxsize = parent->bboxsize();
-    unsigned int _gridsize = parent->gridsize();
-
-    imin = (int) floor((pds->getQ(0) - _bboxsize * pds->getRadius()) / _gridsize);
-    imax = (int) floor((pds->getQ(0) + _bboxsize * pds->getRadius()) / _gridsize);
-
-    jmin = (int) floor((pds->getQ(1) - _bboxsize * pds->getRadius()) / _gridsize);
-    jmax = (int) floor((pds->getQ(1) + _bboxsize * pds->getRadius()) / _gridsize);
-
-    for (i = imin; i <= imax; ++i)
-    {
-      for (j = jmin; j <= jmax; ++j)
-      {
-        parent->insert(pds, i, j, 0);
-      }
-    }
-  }
-
-};
-
+/* needed by boost hash */
 bool operator ==(SP::Hashed const& a, SP::Hashed const& b)
 {
   return (a->i == b->i &&
@@ -106,8 +53,68 @@ std::size_t hash_value(SP::Hashed const& h)
 };
 
 
+TYPEDEF_SPTR(HashedCircle);
+TYPEDEF_SPTR(HashedDisk);
+
+/* the hashing is done with a visitor */
+class SpaceFilter::_BodyHash : public SiconosVisitor
+{
+public:
+  SP::SpaceFilter parent;
+  _BodyHash(SP::SpaceFilter p) : parent(p) {};
+
+  void visit(SP::Disk pds)
+  {
+    int i, j, imin, imax, jmin, jmax;
+
+    unsigned int _bboxfactor = parent->bboxfactor();
+    unsigned int _cellsize = parent->cellsize();
+
+    imin = (int) floor((pds->getQ(0) - _bboxfactor * pds->getRadius()) / _cellsize);
+    imax = (int) floor((pds->getQ(0) + _bboxfactor * pds->getRadius()) / _cellsize);
+
+    jmin = (int) floor((pds->getQ(1) - _bboxfactor * pds->getRadius()) / _cellsize);
+    jmax = (int) floor((pds->getQ(1) + _bboxfactor * pds->getRadius()) / _cellsize);
+
+    for (i = imin; i <= imax; ++i)
+    {
+      for (j = jmin; j <= jmax; ++j)
+      {
+        parent->insert(pds, i, j, 0);
+      }
+    }
+  };
+
+  void visit(SP::Circle pds)
+  {
+    int i, j, imin, imax, jmin, jmax;
+
+    unsigned int _bboxfactor = parent->bboxfactor();
+    unsigned int _cellsize = parent->cellsize();
+
+    imin = (int) floor((pds->getQ(0) - _bboxfactor * pds->getRadius()) / _cellsize);
+    imax = (int) floor((pds->getQ(0) + _bboxfactor * pds->getRadius()) / _cellsize);
+
+    jmin = (int) floor((pds->getQ(1) - _bboxfactor * pds->getRadius()) / _cellsize);
+    jmax = (int) floor((pds->getQ(1) + _bboxfactor * pds->getRadius()) / _cellsize);
+
+    for (i = imin; i <= imax; ++i)
+    {
+      for (j = jmin; j <= jmax; ++j)
+      {
+        parent->insert(pds, i, j, 0);
+      }
+    }
+  }
+
+  /* ... visit other objects*/
+
+};
 
 
+
+
+/* proximity detection for circular object */
 void SpaceFilter::_CircularCircularFilter(SP::CircularDS ds1,
     SP::CircularDS ds2)
 {
@@ -194,7 +201,7 @@ void SpaceFilter::_CircularCircularFilter(SP::CircularDS ds1,
   }
 };
 
-
+/* disk plan relation comparison */
 struct SpaceFilter::_IsSameDiskPlanR : public SiconosVisitor
 {
   double A, B, C, r, xCenter, yCenter, width;
@@ -224,12 +231,13 @@ struct SpaceFilter::_IsSameDiskPlanR : public SiconosVisitor
 };
 
 
-
+/* proximity detection between circular object and plans */
 void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
                                       double xCenter, double yCenter, double width, SP::CircularDS ds)
 {
   double r = ds->getRadius();
 
+  /* tolerance */
   double tol = r;
 
   SP::DynamicalSystemsGraph DSG0 = _nsds->getTopologyPtr()->getDSGPtr(0);
@@ -294,13 +302,8 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
   }
 };
 
-typedef std::pair<int, int> interPair;
 
-bool operator ==(interPair const& a, interPair const& b)
-{
-  return ((a.first == b.first) && (a.second == b.second));
-};
-
+/* insertion */
 void SpaceFilter::insert(SP::Disk ds, int i, int j, int k)
 {
 
@@ -315,6 +318,17 @@ void SpaceFilter::insert(SP::Circle ds, int i, int j, int k)
   _hash_table.insert(hashed);
 };
 
+/* insert other objects */
+
+
+
+/* dynamical systems proximity detection */
+typedef std::pair<int, int> interPair;
+
+bool operator ==(interPair const& a, interPair const& b)
+{
+  return ((a.first == b.first) && (a.second == b.second));
+};
 
 struct SpaceFilter::_FindInteractions : public SiconosVisitor
 {
@@ -340,8 +354,8 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
 
     double x1 = Q1->getValue(0);
     double y1 = Q1->getValue(1);
-    SP::Hashed hds1(new Hashed(ds1, (int) floor(x1 / parent->_gridsize),
-                               (int) floor(y1 / parent->_gridsize)));
+    SP::Hashed hds1(new Hashed(ds1, (int) floor(x1 / parent->_cellsize),
+                               (int) floor(y1 / parent->_cellsize)));
     std::pair<space_hash::iterator, space_hash::iterator>
     neighbours = parent->_hash_table.equal_range(hds1);
 
@@ -386,6 +400,8 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
   };
 };
 
+
+/* general proximity detection */
 void SpaceFilter::buildInteractions()
 {
 

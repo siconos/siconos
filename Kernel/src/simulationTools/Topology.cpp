@@ -24,7 +24,7 @@
 
 #include <boost/bind.hpp>
 
-const bool Topology::addInteractionInIndexSet(SP::Interaction inter)
+void Topology::addInteractionInIndexSet(SP::Interaction inter)
 {
   // Private function
   //
@@ -45,34 +45,36 @@ const bool Topology::addInteractionInIndexSet(SP::Interaction inter)
 
   SP::DynamicalSystemsSet systems = inter->getDynamicalSystemsPtr();
 
-  bool inserted;
-
-  bool res = true; // output value. False if insertion of one of the
-  // relations fails.
-
-
-  std::vector<SP::UnitaryRelation> current_urs;
-
-  for (unsigned int i = 0, pos = 0; i < m; ++i, pos += nsLawSize)
-  {
-    SP::UnitaryRelation UR(new UnitaryRelation(inter, pos, i));
-    current_urs.push_back(UR);
-  };
-
   numberOfConstraints += m * nsLawSize;
 
-  // the hypergraph (set of DS, Interaction) is made of a clique in
-  // URG
+  // DSG is the hyper forest : (vertices : dynamical systems, edges :
+  // unitary relations)
+  //
+  // URG is the hyper graph : (vertices : unitary relations, edges :
+  // dynamical systems)
+
+  // URG = L(DSG),  L is the line graph transformation
+
+
+  // for all couples of ds in the interaction
   for (DSIterator i1ds = systems->begin(); i1ds != systems->end(); ++i1ds)
   {
     for (DSIterator i2ds = i1ds; i2ds != systems->end(); ++i2ds)
     {
-      // one DS is a special case : a self branch
+
+      // build the unitary relations
+      std::vector<SP::UnitaryRelation> current_urs;
+      for (unsigned int i = 0, pos = 0; i < m; ++i, pos += nsLawSize)
+      {
+        SP::UnitaryRelation UR(new UnitaryRelation(inter, pos, i));
+        current_urs.push_back(UR);
+      };
+
+      // one DS in the interaction is a special case : a self branch
       if ((i1ds == i2ds) && inter->getDynamicalSystemsPtr()->size() == 1)
       {
         DynamicalSystemsGraph::VDescriptor dsgv;
         dsgv = DSG[0]->add_vertex(*i1ds);
-        DSG[0]->color(dsgv) = boost::white_color;
 
         // this may be a multi edges graph
         for (std::vector<SP::UnitaryRelation>::iterator uri = current_urs.begin();
@@ -88,35 +90,32 @@ const bool Topology::addInteractionInIndexSet(SP::Interaction inter)
 
         }
       }
-      else if (i1ds != i2ds)
-      {
-        DynamicalSystemsGraph::VDescriptor dsgv1, dsgv2;
-
-        dsgv1 = DSG[0]->add_vertex(*i1ds);
-        dsgv2 = DSG[0]->add_vertex(*i2ds);
-
-        DSG[0]->color(dsgv1) = boost::white_color;
-        DSG[0]->color(dsgv2) = boost::white_color;
-
-
-        // this may be a multi edges graph
-        for (std::vector<SP::UnitaryRelation>::iterator uri = current_urs.begin();
-             uri != current_urs.end(); ++uri)
+      else
+        // multiples DS in the interaction : no self branch
+        if (i1ds != i2ds)
         {
+          DynamicalSystemsGraph::VDescriptor dsgv1, dsgv2;
 
-          assert(!DSG[0]->is_edge(dsgv1, dsgv2, *uri));
-          assert(!URG[0]->is_vertex(*uri));
+          dsgv1 = DSG[0]->add_vertex(*i1ds);
+          dsgv2 = DSG[0]->add_vertex(*i2ds);
+
+          // this may be a multi edges graph
+          for (std::vector<SP::UnitaryRelation>::iterator uri = current_urs.begin();
+               uri != current_urs.end(); ++uri)
+          {
+
+            assert(!DSG[0]->is_edge(dsgv1, dsgv2, *uri));
+            assert(!URG[0]->is_vertex(*uri));
 
 
-          DSG[0]->add_edge(dsgv1, dsgv2, *uri, *URG[0]);
+            DSG[0]->add_edge(dsgv1, dsgv2, *uri, *URG[0]);
 
-          assert(URG[0]->is_vertex(*uri));
-          assert(DSG[0]->is_edge(dsgv1, dsgv2, *uri));
+            assert(URG[0]->is_vertex(*uri));
+            assert(DSG[0]->is_edge(dsgv1, dsgv2, *uri));
+          }
         }
-      }
     }
   }
-  return (res);
 };
 
 /* an edge is removed from DSG graph if the corresponding vertex is

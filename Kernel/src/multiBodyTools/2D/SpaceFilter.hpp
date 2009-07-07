@@ -58,12 +58,12 @@ class SpaceFilter : public boost::enable_shared_from_this<SpaceFilter>
 
 private:
 
-  /** the bounding box size is multiplicated by the largest object
+  /** the bounding box factor is multiplicated by the largest object
       dimension */
-  unsigned int _bboxsize;
+  unsigned int _bboxfactor;
 
-  /** the grid size */
-  unsigned int _gridsize;
+  /** the cell size */
+  unsigned int _cellsize;
 
   /** interaction counter */
   unsigned int _interID;
@@ -104,9 +104,9 @@ private:
 
 public:
 
-  SpaceFilter(unsigned int bboxsize, unsigned int gridsize,
+  SpaceFilter(unsigned int bboxfactor, unsigned int cellsize,
               SP::NonSmoothDynamicalSystem nsds, SP::NonSmoothLaw nslaw, SP::SiconosMatrix plans) :
-    _bboxsize(bboxsize), _gridsize(gridsize), _interID(0),
+    _bboxfactor(bboxfactor), _cellsize(cellsize), _interID(0),
     _nsds(nsds), _nslaw(nslaw), _plans(plans)
   {};
 
@@ -122,13 +122,13 @@ public:
   /** get parameters
    */
 
-  inline unsigned int bboxsize()
+  inline unsigned int bboxfactor()
   {
-    return _bboxsize;
+    return _bboxfactor;
   };
-  inline unsigned int gridsize()
+  inline unsigned int cellsize()
   {
-    return _gridsize;
+    return _cellsize;
   };
 
 
