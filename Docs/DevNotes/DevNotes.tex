@@ -18,9 +18,11 @@
 %/
 \documentclass[10pt]{report}
 \input{macro.tex}
+
 \usepackage{psfrag}
 \usepackage{fancyhdr}
 \usepackage{subfigure}
+
 %\renewcommand{\baselinestretch}{1.2}
 \textheight 23cm
 \textwidth 16cm
@@ -56,7 +58,6 @@
 \xdef\isodayandtime{\the\year-\2\month-\2\day\space\2{\count0}:%
 \2{\count2}}
 \endgroup
-
 
 
 
@@ -852,9 +853,17 @@ Warning: default constructor is always private or protected and apart from the o
 
 \bf{Always allocated in constructor:} \\
 
+
+\chapter{Newton's linearization}
+Last update : 2009/07/07
+\input{MCP_linearized.tex}
+\input{MCP_linearized_2.tex}
+\input{MCP_linearized_linear.tex}
+
 \chapter{Simulation of a Cam Follower System}
 {\bf Main Contributors:} {\textit{Mario di Bernardo, Gustavo Osorio, Stefania Santini}}\\
 \textit{University of Naples Federico II, Italy.}\\
 
 \input{./CamFollower/Example_Manual_Cam_Follower}
+
 \end{document}
