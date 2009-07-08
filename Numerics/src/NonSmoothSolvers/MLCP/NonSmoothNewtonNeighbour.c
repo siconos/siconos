@@ -18,6 +18,8 @@
  */
 #include "NonSmoothNewton.h"
 #include "NonSmoothNewtonNeighbour.h"
+#include "MixedLinearComplementarity_Problem.h"
+
 #include "Numerics_Options.h"
 #include "LA.h"
 #include "math.h"
@@ -44,6 +46,8 @@ static  double *szzaux ;
 static  double *sz2 ;
 static  int* sipiv ;
 static  int* sW2V;
+
+static int scmp = 0;
 
 static int sPlotMerit = 1;
 static char fileName[64];
@@ -429,11 +433,13 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
 
 
   int itermax = iparam[0]; // maximum number of iterations allowed
+  int iterMaxWithSameZ = itermax / 4;
   int niter = 0; // current iteration number
   double tolerance = dparam[0];
   double coef;
   sFphi = phi;
   sFjacobianPhi = jacobianPhi;
+  //  verbose=1;
   if (verbose > 0)
   {
     printf(" ============= Starting of Newton process =============\n");
@@ -476,6 +482,7 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
   /** Iterations ... */
   while ((niter < itermax) && (terminationCriterion > tolerance))
   {
+    scmp++;
     ++niter;
     /** Computes phi and its jacobian */
     if (sZsol)
@@ -514,7 +521,7 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
     if (niter > 2)
     {
       /*  if(10*(itermax)*fabs(prev_psi_z-psi_z) < psi_z){*/
-      if (10 * norm_jacobian_psi_z < tolerance || !resls || NbLookingForANewZ > 100000)
+      if (10 * norm_jacobian_psi_z < tolerance || !resls || NbLookingForANewZ > iterMaxWithSameZ)
       {
         NbLookingForANewZ = 0;
         resls = 1;
@@ -559,7 +566,7 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
         /*find a gradiant going out of this cul-de-sac.*/
         norm = n / 2;
         findNewZ = 0;
-        for (j = 0; j < 10; j++)
+        for (j = 0; j < 20; j++)
         {
 
           for (i = 0; i < n; i++)
@@ -628,7 +635,14 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
           }
           if (findNewZ)
             break;
-          norm = -2 * norm;
+          if (j == 10)
+          {
+            norm = n / 2;
+          }
+          else if (j > 10)
+            norm = -2 * norm;
+          else
+            norm = -norm / 2.0;
         }
         if (! findNewZ)
         {
@@ -686,6 +700,11 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
 
     /* Criterion to be satisfied: error < -rho*norm(dk)^p */
     criterion = -rho * pow(criterion, p);
+    /*      printf("ddddddd %d\n",scmp);
+    if (scmp>100){
+    displayMat(sjacobianPhi_z,n,n,n);
+    exit(1);
+    }*/
 
     if ((infoDGESV != 0 || descentCondition > criterion) && 0)
     {
