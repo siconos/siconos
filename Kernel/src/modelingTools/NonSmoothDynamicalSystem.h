@@ -283,7 +283,7 @@ public:
   /** add an interaction to the system
    * \param a shared pointer to the interaction
    */
-  void  addInteraction(SP::Interaction inter)
+  void addInteraction(SP::Interaction inter)
   {
     topology->addInteraction(inter);
   };
@@ -292,9 +292,26 @@ public:
   /** remove an interaction to the system
    * \param a shared pointer to the interaction
    */
-  void  removeInteraction(SP::Interaction inter)
+  void removeInteraction(SP::Interaction inter)
   {
     topology->removeInteraction(inter);
+  };
+
+  /** add a dynamical system
+   * \param a shared pointer to a dynamical system
+   */
+  void addDynamicalSystem(SP::DynamicalSystem ds)
+  {
+    topology->addDynamicalSystem(ds);
+  };
+
+
+  /** remove a dynamical system
+   * \param a shared pointer to a dynamical system
+   */
+  void removeDynamicalSystem(SP::DynamicalSystem ds)
+  {
+    topology->removeDynamicalSystem(ds);
   };
 
 

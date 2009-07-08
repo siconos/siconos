@@ -100,16 +100,19 @@ private:
   /** dynamical systems graphs */
   std::vector<SP::DynamicalSystemsGraph> DSG;
 
-  /** unitary relations graphs (URG[0]=L[DSG[0]], L is the line graph transformation) */
+  /** unitary relations graphs (URG[0]=L[DSG[0]], L is the line graph
+      transformation) */
   std::vector<SP::UnitaryRelationsGraph> URG;
 
   /** map that links UnitaryRelations with their relative degrees */
   UnitaryRelationsIntMap relativeDegrees;
 
-  /** check if topology has been updated since nsds modifications occur */
+  /** check if topology has been updated since nsds modifications
+      occur */
   bool isTopologyUpToDate;
 
-  /** check if topology is static (all relative degrees = 0 or 1) or not */
+  /** check if topology is static (all relative degrees = 0 or 1) or
+      not */
   bool isTopologyTimeInvariant;
 
   /** Total number of (scalar) constraints in the problem, ie sum of
@@ -121,7 +124,7 @@ private:
   /** schedules the relations of Interaction inter into IndexSet0 (ie
   * creates the corresponding UnitaryRelations and add them into DSG
   * anr URG)
-  * \param: a pointer to Interaction
+  \param: a pointer to Interaction
   */
   void addInteractionInIndexSet(SP::Interaction);
 
@@ -141,6 +144,12 @@ public:
   * \param: a SP::InteractionSet
   */
   Topology(SP::InteractionsSet);
+
+  /** constructor from dynamical systems and interaction sets
+  * \param: a SP::DynamicalSystemsSet
+  * \param: a SP::InteractionsSet
+  */
+  Topology(SP::DynamicalSystemsSet, SP::InteractionsSet);
 
 
   /** destructor */
@@ -220,6 +229,19 @@ public:
    *  \param a shared pointer to the interaction
    */
   void removeInteraction(SP::Interaction);
+
+  /** add a dynamical system
+   * \param a shared pointer to a dynamical system
+   */
+  void addDynamicalSystem(SP::DynamicalSystem ds)
+  {
+    DSG[0]->add_vertex(ds);
+  };
+
+  /** remove a dynamical system
+   * \param a shared pointer to a dynamical system
+   */
+  void removeDynamicalSystem(SP::DynamicalSystem ds);
 
   /** get a pointer to the graph of all Unitary Relations.
    *  \return a SP::UnitaryRelationsGraph

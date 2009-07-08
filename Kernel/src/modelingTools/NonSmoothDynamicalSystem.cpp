@@ -78,11 +78,13 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemX
     cout << "Warning: NonSmoothDynamicalSystem:: constructor(xml, ...): the set of Interactions is empty." << endl;
 
   // === Builds topology ===
-  topology.reset(new Topology(allInteractionsLocal));
+  topology.reset(new Topology(allDS, allInteractionsLocal));
 }
 
 // Constructor with one DS and one Interaction (optional)
-NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::DynamicalSystem newDS, SP::Interaction newInteraction, const bool& isBVP):
+NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::DynamicalSystem newDS,
+    SP::Interaction newInteraction,
+    const bool& isBVP):
   BVP(isBVP)
 {
   // === Checks that sets are not empty ===
@@ -101,10 +103,12 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::DynamicalSystem newDS, SP
   mIsLinear = newInteraction->getRelationPtr()->isLinear();
 
   // === build topology ===
-  topology.reset(new Topology(allInteractionsLocal));
+  topology.reset(new Topology(allDS, allInteractionsLocal));
 }
 
-NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS, InteractionsSet& listOfInteractions, const bool& isBVP):
+NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS,
+    InteractionsSet& listOfInteractions,
+    const bool& isBVP):
   BVP(isBVP)
 {
 
@@ -136,7 +140,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS
   allInteractionsLocal = createSPtrInteractionsSet(listOfInteractions);
 
   // === build topology ===
-  topology.reset(new Topology(allInteractionsLocal));
+  topology.reset(new Topology(allDS, allInteractionsLocal));
 }
 
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS, const bool& isBVP):
@@ -158,7 +162,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS
   }
 
   // === build topology ===
-  topology.reset(new Topology(allInteractionsLocal));
+  topology.reset(new Topology(allDS, allInteractionsLocal));
 }
 
 // === DynamicalSystems management ===

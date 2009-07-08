@@ -24,6 +24,76 @@
 
 #include <boost/bind.hpp>
 
+// --- CONSTRUCTORS/DESTRUCTOR ---
+
+// default
+Topology::Topology(): isTopologyUpToDate(false), isTopologyTimeInvariant(true),
+  numberOfConstraints(0)
+{
+  URG.resize(1);
+  DSG.resize(1);
+
+  URG[0].reset(new UnitaryRelationsGraph());
+  DSG[0].reset(new DynamicalSystemsGraph());
+  allInteractions.reset(new InteractionsSet());
+}
+
+Topology::Topology(SP::InteractionsSet newInteractions) :
+  isTopologyUpToDate(false), isTopologyTimeInvariant(true),
+  numberOfConstraints(0)
+{
+
+  URG.resize(1);
+  DSG.resize(1);
+
+  URG[0].reset(new UnitaryRelationsGraph());
+  DSG[0].reset(new DynamicalSystemsGraph());
+  allInteractions.reset(new InteractionsSet());
+
+  for (InteractionsIterator it = newInteractions->begin();
+       it != newInteractions->end(); ++it)
+  {
+    addInteraction(*it);
+  }
+
+
+  isTopologyUpToDate = false;
+}
+
+
+// a constructor with a DS set : when some DS may not be in interactions
+Topology::Topology(SP::DynamicalSystemsSet newDSset, SP::InteractionsSet newInteractions) :
+  isTopologyUpToDate(false), isTopologyTimeInvariant(true),
+  numberOfConstraints(0)
+{
+
+  URG.resize(1);
+  DSG.resize(1);
+
+  URG[0].reset(new UnitaryRelationsGraph());
+  DSG[0].reset(new DynamicalSystemsGraph());
+  allInteractions.reset(new InteractionsSet());
+
+  for (InteractionsIterator it = newInteractions->begin();
+       it != newInteractions->end(); ++it)
+  {
+    addInteraction(*it);
+  }
+
+  for (DSIterator ids = newDSset->begin(); ids != newDSset->end() ; ++ids)
+  {
+    DSG[0]->add_vertex(*ids);
+  }
+
+  isTopologyUpToDate = false;
+}
+
+// destructor
+Topology::~Topology()
+{
+  clear();
+}
+
 void Topology::addInteractionInIndexSet(SP::Interaction inter)
 {
   // Private function
@@ -196,6 +266,10 @@ void Topology::removeInteraction(SP::Interaction inter)
   assert(DSG[0]->edges_number() == URG[0]->size());
 };
 
+void Topology::removeDynamicalSystem(SP::DynamicalSystem ds)
+{
+  RuntimeException::selfThrow("remove dynamical system not implemented");
+};
 
 // Compute relative degrees map
 void Topology::computeRelativeDegrees()
@@ -231,47 +305,7 @@ void Topology::computeRelativeDegrees()
   // assert(!relativeDegrees.empty());
 }
 
-// --- CONSTRUCTORS/DESTRUCTOR ---
 
-// default
-Topology::Topology(): isTopologyUpToDate(false), isTopologyTimeInvariant(true),
-  numberOfConstraints(0)
-{
-  URG.resize(1);
-  DSG.resize(1);
-
-  URG[0].reset(new UnitaryRelationsGraph());
-  DSG[0].reset(new DynamicalSystemsGraph());
-  allInteractions.reset(new InteractionsSet());
-}
-
-Topology::Topology(SP::InteractionsSet newInteractions) :
-  isTopologyUpToDate(false), isTopologyTimeInvariant(true),
-  numberOfConstraints(0)
-{
-
-  URG.resize(1);
-  DSG.resize(1);
-
-  URG[0].reset(new UnitaryRelationsGraph());
-  DSG[0].reset(new DynamicalSystemsGraph());
-  allInteractions.reset(new InteractionsSet());
-
-  for (InteractionsIterator it = newInteractions->begin();
-       it != newInteractions->end(); ++it)
-  {
-    addInteraction(*it);
-  }
-
-
-  isTopologyUpToDate = false;
-}
-
-// destructor
-Topology::~Topology()
-{
-  clear();
-}
 
 const bool Topology::hasInteraction(SP::Interaction inter) const
 {
