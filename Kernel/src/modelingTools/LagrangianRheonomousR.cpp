@@ -89,7 +89,8 @@ void LagrangianRheonomousR::computeH(double time)
     // get vector y of the current interaction
     SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
 
-    // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+    // Warning: temporary method to have contiguous values in
+    // memory, copy of block to simple.
     *workX = *data[q0];
     *workZ = *data[z];
     *workY = *y;
@@ -113,7 +114,8 @@ void LagrangianRheonomousR::computeHDot(double time)
 {
   if (hDot->isPlugged())
   {
-    // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+    // Warning: temporary method to have contiguous values in
+    // memory, copy of block to simple.
     *workX = *data[q0];
     *workZ = *data[z];
 
@@ -134,10 +136,10 @@ void LagrangianRheonomousR::computeHDot(double time)
 void LagrangianRheonomousR::computeJacH(double time, unsigned int)
 {
   // Note that second input arg is useless.
-  assert(index == 0 && "LagrangianRheonomousR::computeJacH(index): index is out of range");
   if (JacH[0]->isPlugged())
   {
-    // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+    // Warning: temporary method to have contiguous values in
+    // memory, copy of block to simple.
     *workX = *data[q0];
     *workZ = *data[z];
 
