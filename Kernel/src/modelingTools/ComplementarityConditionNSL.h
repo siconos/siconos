@@ -60,7 +60,7 @@ public:
   ~ComplementarityConditionNSL();
 
   /** checks the ns law to see if it is verified
-  *  \return a boolean value whioch determines if the NS Law is verified
+  *  \return a boolean value which determines if the NS Law is verified
   */
   bool isVerified(void) const;
 
@@ -78,6 +78,10 @@ public:
   * \return a pointer on the law if it is of the right type, NULL otherwise
   */
   static ComplementarityConditionNSL* convert(NonSmoothLaw* nsl);
+
+  /** Visitors hook
+   */
+  ACCEPT_STD_VISITORS();
 };
 
 TYPEDEF_SPTR(ComplementarityConditionNSL);

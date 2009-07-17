@@ -762,21 +762,9 @@ public:
     ;
   };
 
-  /** visitor hook for shared pointers
+  /** visitors hook
    */
-  virtual void accept(SP::SiconosVisitor)
-  {
-    RuntimeException::selfThrow
-    ("this class derived from DynamicalSystem does not accept a visitor for shared pointers");
-  };
-
-  /** visitor hook for standard pointers
-   */
-  virtual void accept(SiconosVisitor&)
-  {
-    RuntimeException::selfThrow
-    ("this class derived from DynamicalSystem does not accept a visitor");
-  }
+  VIRTUAL_ACCEPT_VISITORS(DynamicalSystem);
 
 };
 

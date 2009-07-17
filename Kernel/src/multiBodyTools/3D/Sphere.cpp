@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
+/* Siconos-Example version 3.0.0, Copyright INRIA 2005-2008.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -12,52 +12,31 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Siconos; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth FLOOR, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ *
+ */
 
-/*! \file Circle.h
-  \brief Definition of a 2D Circle - Inherits from CircularDS
-*/
+#include "Sphere.h"
 
-#ifndef Circle_H
-#define Circle_H
-
-#include "CircularDS.h"
-
-class Circle : public CircularDS, public boost::enable_shared_from_this<Circle>
+void Sphere::MassSetup()
 {
-private:
+  mass.reset(new PMMass(ndof, ndof));
+  mass->resize(ndof, ndof);
+  mass->zero();
+  (*mass)(0, 0) = (*mass)(1, 1) = (*mass)(2, 2) = massValue;    ;
+  (*mass)(3, 3) = (*mass)(4, 4) = (*mass)(5, 5) = 3. / 5 * massValue * radius * radius;
+}
 
-  void MassSetup();
+Sphere::Sphere(double r, double m,
+               const SiconosVector& qinit,
+               const SiconosVector& vinit)
+  : LagrangianDS(qinit, vinit), radius(r), massValue(m)
+{
+  ndof = 6;
+  MassSetup();
+}
 
-
-protected:
-
-  Circle();
-
-public:
-
-  /** Constructor
-      \param radius
-      \param mass
-      \param postion vector
-      \param velocity vector
-  */
-
-  Circle(double, double, const SiconosVector&, const SiconosVector&);
-
-  /** destructor
-   */
-  ~Circle();
-
-  /** visitors hook */
-  ACCEPT_VISITORS();
-
-};
-
-TYPEDEF_SPTR(Circle);
-
-#endif /* Circle_H */
-
+Sphere::~Sphere()
+{}

@@ -460,21 +460,8 @@ public:
   virtual void saveRelationToXML() const;
 
 
-  /** visitor hook for shared pointers
+  /** visitors hook
    */
-  virtual void accept(SP::SiconosVisitor)
-  {
-    RuntimeException::selfThrow
-    ("this class derived from Relation does not accept a visitor for shared pointers");
-  };
-
-  /** visitor hook for standard pointers
-   */
-  virtual void accept(SiconosVisitor&)
-  {
-    RuntimeException::selfThrow
-    ("this class derived from Relation does not accept a visitor");
-  }
-
+  VIRTUAL_ACCEPT_VISITORS(Relation)
 };
 #endif // RELATION_H

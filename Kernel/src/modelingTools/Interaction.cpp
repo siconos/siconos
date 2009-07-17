@@ -71,7 +71,7 @@ Interaction::Interaction(SP::InteractionXML interxml, SP::DynamicalSystemsSet ns
   {
     nslaw.reset(new NewtonImpactFrictionNSL(interactionxml->getNonSmoothLawXML()));
   }
-  else RuntimeException::selfThrow("Interaction::xml constructor, unknown NSLAW type :" + nslaw->getType());
+  else RuntimeException::selfThrow("Interaction::xml constructor, unknown NSLAW type");
 
   // --- Dynamical Systems ---
   unsigned int sizeDS ;
@@ -620,24 +620,7 @@ void Interaction::saveInteractionToXML()
    * save the data of the NonSmoothLaw
    */
 
-  if (nslaw->getType() == COMPLEMENTARITYCONDITIONNSLAW)
-  {
-    (boost::static_pointer_cast<ComplementarityConditionNSL>(nslaw))->saveNonSmoothLawToXML();
-  }
-  else if (nslaw->getType() == RELAYNSLAW)
-  {
-    (boost::static_pointer_cast<RelayNSL>(nslaw))->saveNonSmoothLawToXML();
-  }
-  else if (nslaw->getType() == NEWTONIMPACTNSLAW)
-  {
-    (boost::static_pointer_cast<NewtonImpactNSL>(nslaw))->saveNonSmoothLawToXML();
-  }
+  nslaw->saveNonSmoothLawToXML();
 
-  else if (nslaw->getType() == NEWTONIMPACTFRICTIONNSLAW)
-  {
-    (boost::static_pointer_cast<NewtonImpactFrictionNSL>(nslaw))->saveNonSmoothLawToXML();
-  }
-
-  else RuntimeException::selfThrow("Interaction::saveInteractionToXML - bad kind of NonSmoothLaw : " + nslaw->getType());
 }
 

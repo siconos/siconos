@@ -20,11 +20,11 @@
 #include "NewtonImpactNSLXML.h"
 using namespace std;
 
-NewtonImpactNSL::NewtonImpactNSL(): NonSmoothLaw(NEWTONIMPACTNSLAW, 1), e(0.0)
+NewtonImpactNSL::NewtonImpactNSL(): NonSmoothLaw(1), e(0.0)
 {}
 
 NewtonImpactNSL::NewtonImpactNSL(SP::NonSmoothLawXML nslawxml):
-  NonSmoothLaw(NEWTONIMPACTNSLAW, nslawxml), e(0.0)
+  NonSmoothLaw(nslawxml), e(0.0)
 {
   if (nslawxml)
     e = (boost::static_pointer_cast<NewtonImpactNSLXML>(nslawxml))->getE();
@@ -32,7 +32,7 @@ NewtonImpactNSL::NewtonImpactNSL(SP::NonSmoothLawXML nslawxml):
 }
 
 NewtonImpactNSL::NewtonImpactNSL(double newE):
-  NonSmoothLaw(NEWTONIMPACTNSLAW, 1), e(newE)
+  NonSmoothLaw(1), e(newE)
 {}
 
 NewtonImpactNSL::~NewtonImpactNSL()

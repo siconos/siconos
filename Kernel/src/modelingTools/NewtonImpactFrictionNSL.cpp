@@ -26,11 +26,11 @@ NewtonImpactFrictionNSL::NewtonImpactFrictionNSL():
 {}
 
 NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(unsigned int newSize):
-  NonSmoothLaw(NEWTONIMPACTFRICTIONNSLAW, newSize), en(0.0), et(0.0), mu(0.0)
+  NonSmoothLaw(newSize), en(0.0), et(0.0), mu(0.0)
 {}
 
 NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(SP::NonSmoothLawXML nslawxml):
-  NonSmoothLaw(NEWTONIMPACTFRICTIONNSLAW, nslawxml), en(0.0), et(0.0), mu(0.0)
+  NonSmoothLaw(nslawxml), en(0.0), et(0.0), mu(0.0)
 {
   assert((nslawxml->hasSize()) && // size is a required input for Friction
          "NewtonImpactFrictionNSL:: xml constructor, size is a required xml input.");
@@ -45,7 +45,7 @@ NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(SP::NonSmoothLawXML nslawxml):
 }
 
 NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(double newEn, double newEt, double newMu, unsigned int newSize):
-  NonSmoothLaw(NEWTONIMPACTFRICTIONNSLAW, newSize), en(newEn), et(newEt), mu(newMu)
+  NonSmoothLaw(newSize), en(newEn), et(newEt), mu(newMu)
 {}
 
 NewtonImpactFrictionNSL::~NewtonImpactFrictionNSL()

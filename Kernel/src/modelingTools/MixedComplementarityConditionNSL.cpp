@@ -19,13 +19,13 @@
 #include "MixedComplementarityConditionNSL.h"
 using namespace std;
 
-MixedComplementarityConditionNSL::MixedComplementarityConditionNSL(unsigned int newSize, unsigned int equalitySize): NonSmoothLaw(MIXEDCOMPLEMENTARITYCONDITIONNSLAW, newSize + equalitySize)
+MixedComplementarityConditionNSL::MixedComplementarityConditionNSL(unsigned int newSize, unsigned int equalitySize): NonSmoothLaw(newSize + equalitySize)
 {
   EqualitySize = equalitySize;
 }
 
 MixedComplementarityConditionNSL::MixedComplementarityConditionNSL(SP::NonSmoothLawXML nslawxml):
-  NonSmoothLaw(COMPLEMENTARITYCONDITIONNSLAW, nslawxml)
+  NonSmoothLaw(nslawxml)
 {}
 
 MixedComplementarityConditionNSL::~MixedComplementarityConditionNSL()

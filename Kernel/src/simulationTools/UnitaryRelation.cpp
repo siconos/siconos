@@ -103,6 +103,40 @@ const double UnitaryRelation::getLambdaRef(unsigned int i) const
   return (*getLambdaPtr(i))(0);
 }
 
+
+/* should be removed and moved in computeQ LinearOSNS.cpp */
+class ComplementarityConditionNSL;
+class MixedcomplementarityConditionNSL;
+class NewtonImpactFrictionNSL;
+class RelayNSL;
+class NewtonImpactFrictionNSL;
+
+struct UnitaryRelation::GetNSLType : public SiconosVisitor
+{
+  std::string type;
+
+  void visit(ComplementarityConditionNSL&)
+  {
+    type = "ComplementarityNSL" ;
+  };
+  void visit(MixedcomplementarityConditionNSL&)
+  {
+    type = "MixedComplementarityNSL" ;
+  };
+  void visit(NewtonImpactNSL&)
+  {
+    type = "NewtonImpactNSL";
+  };
+  void visit(RelayNSL&)
+  {
+    type = "RelayNSL";
+  };
+  void visit(NewtonImpactFrictionNSL&)
+  {
+    type = "NewtonImpactFrictionNSL";
+  };
+};
+
 const unsigned int UnitaryRelation::getNonSmoothLawSize() const
 {
   return mainInteraction->getNonSmoothLawPtr()->getNsLawSize();
@@ -110,7 +144,9 @@ const unsigned int UnitaryRelation::getNonSmoothLawSize() const
 
 const string UnitaryRelation::getNonSmoothLawType() const
 {
-  return mainInteraction->getNonSmoothLawPtr()->getType();
+  GetNSLType getNSLType;
+  mainInteraction->getNonSmoothLawPtr()->accept(getNSLType);
+  return getNSLType.type;
 }
 
 const RELATION::TYPES UnitaryRelation::getRelationType() const

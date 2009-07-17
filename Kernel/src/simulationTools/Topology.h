@@ -35,16 +35,6 @@ class SiconosMatrix;
 class UnitaryRelation;
 
 
-/** map that links a SP::UnitaryRelation to an int - Used for Relative degrees */
-typedef std::map< SP::UnitaryRelation, unsigned int > UnitaryRelationsIntMap;
-
-/** iterator through UnitaryRelationsIntMap */
-typedef UnitaryRelationsIntMap::iterator IteratorForRelativeDegrees;
-/** const iterator through UnitaryRelationsIntMap */
-typedef UnitaryRelationsIntMap::const_iterator ConstIteratorForRelativeDegrees;
-
-
-
 /**  This class describes the topology of the non-smooth dynamical
  *  system. It holds all the "potential" Unitary Relations and their
  *  Relative Degrees.
@@ -89,10 +79,10 @@ private:
   // --- MEMBERS ---
 
   /** minimum of the relative degrees */
-  unsigned int minRelativeDegrees;
+  unsigned int minRelativeDegree;
 
   /** maximum of the relative degrees */
-  unsigned int maxRelativeDegrees;
+  unsigned int maxRelativeDegree;
 
   /** the set of all the interactions of the system */
   SP::InteractionsSet allInteractions;
@@ -103,9 +93,6 @@ private:
   /** unitary relations graphs (URG[0]=L[DSG[0]], L is the line graph
       transformation) */
   std::vector<SP::UnitaryRelationsGraph> URG;
-
-  /** map that links UnitaryRelations with their relative degrees */
-  UnitaryRelationsIntMap relativeDegrees;
 
   /** check if topology has been updated since nsds modifications
       occur */
@@ -118,6 +105,12 @@ private:
   /** Total number of (scalar) constraints in the problem, ie sum of
       all nslaw sizes of Unitary Relations of IndexSet0.*/
   unsigned int numberOfConstraints;
+
+  /** initializations (relative degrees, time invariance) from non
+      smooth laws kind */
+  struct SetupFromNslaw;
+  friend class Topology::SetupFromNslaw;
+
 
   // === PRIVATE FUNCTIONS ===
 
@@ -291,23 +284,6 @@ public:
   };
 
   // --- relativeDegreesMap ---
-
-  /** get the relativeDegrees Map of this topology
-  *  \return a UnitaryRelationsIntMap
-  */
-  inline const UnitaryRelationsIntMap getRelativeDegrees() const
-  {
-    return relativeDegrees;
-  }
-
-  /** get the relativeDegree vector of a specific UnitaryRelation
-  *  \param a pointer to UnitaryRelation
-  *  \return an unsigned int
-  */
-  inline const unsigned int getRelativeDegree(SP::UnitaryRelation UR)
-  {
-    return relativeDegrees[UR];
-  }
 
   /** for all relative degrees (one per Unitary Relation), find the
   *  maximum value.

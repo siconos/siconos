@@ -89,8 +89,11 @@ public:
   *  \param NonSmoothLaw* : the law which must be converted
   * \return a pointer on the law if it is of the right type, NULL otherwise
   */
-
   static SP::MixedComplementarityConditionNSL convert(SP::NonSmoothLaw nsl);
+
+  /** Visitors hook
+   */
+  ACCEPT_STD_VISITORS();
 };
 
 #endif // MIXEDCOMPLEMENTARITYCONDITIONNSLAW_H

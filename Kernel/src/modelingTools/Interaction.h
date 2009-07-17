@@ -91,10 +91,14 @@ private:
   /** number specific to each Interaction */
   int number;
 
+  /** relative degree of this interaction */
+  unsigned int relativeDegree;
+
   /** size of the interaction, ie size of y[i] and lambda[i] */
   unsigned int interactionSize;
 
-  /** number of relations in the interaction ( equal to interactionSize / nsLawSize ) */
+  /** number of relations in the interaction ( equal to
+      interactionSize / nsLawSize ) */
   unsigned int numberOfRelations;
 
   /** sum of all DS sizes, for DS involved in the interaction */
@@ -147,7 +151,8 @@ public:
    */
   Interaction(SP::InteractionXML, SP::DynamicalSystemsSet);
 
-  /** constructor with a set of data (only one DS in the Interaction) - Note: no id.
+  /** constructor with a set of data (only one DS in the Interaction)
+      - Note: no id.
    *  \param a SP::DynamicalSystem: the DS involved in the Interaction
    *  \param int : the number of this Interaction
    *  \param int : the value of interactionSize
@@ -202,6 +207,14 @@ public:
    */
   void initialize(double, unsigned int);
 
+  /** check if Interaction is initialized
+   */
+  bool isInitialized() const
+  {
+    return initialized;
+  }
+
+
   /** build Y and Lambda stl vectors.
   *   \param unsigned int: dim of Y and Lambda vector of Interactions
   *          (ie number of derivatives that are taken into
@@ -243,6 +256,24 @@ public:
   {
     number = newNumber;
   }
+
+
+  /** get the relative degree
+   * \return an unsigned int
+   */
+  inline unsigned int getRelativeDegree() const
+  {
+    return relativeDegree;
+  };
+
+  /** set the relative degree
+   * \param an unsigned int
+   */
+  inline unsigned int setRelativeDegree(const unsigned int newVal)
+  {
+    relativeDegree = newVal;
+  };
+
 
   /** get the dimension of the interaction (y and lambda size)
   *  \return an unsigned int
@@ -316,8 +347,9 @@ public:
   */
   void setY(const VectorOfVectors&);
 
-  /** set the output vector y to newVector with direct pointer equality for the y[i]
-  *  \param VectorOfVectors
+  /** set the output vector y to newVector with direct pointer
+  *  equality for the y[i]
+  * \param VectorOfVectors
   */
   void setYPtr(const VectorOfVectors&);
 
@@ -362,8 +394,9 @@ public:
   */
   void setYOld(const VectorOfVectors&);
 
-  /** set vector yOld to newVector with direct pointer equality for the yOld[i]
-  *  \param VectorOfVectors
+  /** set vector yOld to newVector with direct pointer equality for
+  *  the yOld[i]
+  * \param VectorOfVectors
   */
   void setYOldPtr(const VectorOfVectors&);
 
@@ -578,11 +611,13 @@ public:
 
   /** Computes output y; depends on the relation type.
    *  \param double : current time
-   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
+   *  \param unsigned int: number of the derivative to compute,
+   *  optional, default = 0.
    */
   void computeOutput(double, unsigned int = 0);
 
-  /** Compute input r of all Dynamical Systems involved in the present Interaction.
+  /** Compute input r of all Dynamical Systems involved in the present
+   *   Interaction.
    *  \param double : current time
    *  \param unsigned int: order of lambda used to compute input.
    */

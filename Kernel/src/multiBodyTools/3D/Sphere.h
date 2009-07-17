@@ -17,79 +17,63 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-/*! \file Sphere.h
-  \brief Definition of a Sphere - Inherits from LagrangianDS
+/*! \file Sphere
+  \brief Definition of a 2D circular shape - Inherits from LagrangianDS
 */
 
-#ifndef Sphere_H
-#define Sphere_H
+
+#ifndef Sphere_h
+#define Sphere_h
 
 #include "LagrangianDS.h"
 
-class LagrangianDS;
-
-/** Sphere
-
-   \author F. Perignon
-   \version 3.0.0.
-   \date (Creation) May 2008
-
-
-
- */
-class Sphere : public LagrangianDS
+class Sphere : public LagrangianDS, public boost::enable_shared_from_this<Sphere>
 {
-private:
-
-  // radius
-  double Radius;
-
-  // mass
-  double mass;
-
-  // Number of degrees of freedom
-  unsigned int nDof;
-
-  Sphere();
+protected:
+  double radius;
+  double massValue;
+  void MassSetup();
 
 public:
 
-  /** Constructor
-      \param radius
-      \param mass
-      \param vector of initial positions
-      \param vector of initial velocities
-   */
   Sphere(double, double, const SiconosVector&, const SiconosVector&);
 
-  /** destructor
-   */
   ~Sphere();
 
-  /* returns q(pos) */
   inline double getQ(unsigned int pos)
   {
+    assert(pos < ndof);
     return (*q[0])(pos);
   };
-
-  /* returns velocity(pos) */
   inline double getVelocity(unsigned int pos)
   {
+    assert(pos < ndof);
     return (*q[1])(pos);
   };
 
-  /* returns the radius of the sphere */
-  inline double getRadius() const
+  inline double getMassValue()
   {
-    return Radius;
+    return massValue;
   };
 
-  /* draw the sphere: not yet implemented - See BeadsColumn example for a proper way of drawing spheres. */
-  void draw();
+  inline double getRadius()
+  {
+    return radius;
+  };
 
+  /** visitors hook
+   */
+  virtual void accept(SiconosVisitor& tourist)
+  {
+    tourist.visit(*this);
+  }
+  virtual void accept(SP::SiconosVisitor tourist)
+  {
+    tourist->visit(shared_from_this());
+  }
 
 };
 
 TYPEDEF_SPTR(Sphere);
 
-#endif
+#endif /* Sphere_h */

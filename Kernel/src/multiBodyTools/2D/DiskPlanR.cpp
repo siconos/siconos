@@ -133,11 +133,14 @@ void DiskPlanR::computeJacH(double, unsigned int)
               (*(getInteractionPtr()->dynamicalSystemsBegin()))->getQ(1);
   double D1 = A * x0 + B * y0 + C;
   double D2 = sqrA2pB2 * fabs(D1);
+  double D1oD2 = D1 / D2;
+  double AD1oD2 = A * D1oD2;
+  double BD1oD2 = B * D1oD2;
 
-  g[0] = A * D1 / D2;
-  g[1] = -B * D1 / D2;
-  g[2] = B * D1 / D2;
-  g[3] = A * D1 / D2;
+  g[0] = AD1oD2;
+  g[1] = -BD1oD2;
+  g[2] = BD1oD2;
+  g[3] = AD1oD2;
   g[4] = 0.;
   g[5] = -r;
 }

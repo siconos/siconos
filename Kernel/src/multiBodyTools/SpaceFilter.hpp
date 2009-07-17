@@ -24,7 +24,7 @@
 
 /** Very simple spatial filtering of interactions between 2D
  *  lagrangian systems => to see how may be plugged more elaborated
- *  collision detection software.
+ *  collision detection softwares.
  *
  *  algorithm description:
  *   Optimized Spatial Hashing for Collision Detection of Deformable Objects
@@ -44,6 +44,9 @@
 #include <DiskDiskR.h>
 #include <CircleCircleR.h>
 #include <DiskPlanR.h>
+#include <Sphere.h>
+#include <SphereSphereR.h>
+#include <SpherePlanR.h>
 
 #include <tr1/unordered_set>
 #include <boost/throw_exception.hpp>
@@ -80,14 +83,21 @@ private:
   /* the hash table */
   space_hash _hash_table;
 
-  void _CircularCircularFilter(SP::CircularDS ds1, SP::CircularDS ds2);
-
   void _PlanCircularFilter(double A, double B, double C,
                            double xCenter, double yCenter, double width,
                            SP::CircularDS ds);
 
+  void _PlanSphereFilter(double A, double B, double C, double D,
+                         SP::Sphere ds);
+
   /* visitors defined as Inner class */
   /* note : cf Thinking in C++, vol2, the inner class idiom. */
+
+  /* each kind of proximity detection */
+  struct _CircularFilter;
+  struct _SphereFilter;
+
+
 
   /* the body hasher */
   struct _BodyHash;
@@ -97,10 +107,14 @@ private:
 
   /* to compare relation */
   struct _IsSameDiskPlanR;
+  struct _IsSameSpherePlanR;
 
+  friend class SpaceFilter::_CircularFilter;
+  friend class SpaceFilter::_SphereFilter;
   friend class SpaceFilter::_BodyHash;
   friend class SpaceFilter::_FindInteractions;
   friend class SpaceFilter::_IsSameDiskPlanR;
+  friend class SpaceFilter::_IsSameSpherePlanR;
 
 public:
 
@@ -117,6 +131,8 @@ public:
   void insert(SP::Disk, int, int, int);
 
   void insert(SP::Circle, int, int, int);
+
+  void insert(SP::Sphere, int, int, int);
 
 
   /** get parameters

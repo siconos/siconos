@@ -25,6 +25,24 @@
 #ifndef SiconosVisitor_hpp
 #define SiconosVisitor_hpp
 
+/** A visitor pattern.
+
+   \author SICONOS Development Team - copyright INRIA
+   \version 3.0.0.
+   \date (Creation) June 14, 2009
+
+   User have to instantiate a derivation of SiconosVisitor class :
+
+   struct myvisitor : public SiconosVisitor
+
+   with some wanted visit() functions.
+
+   Then the visitor can be used as :
+
+   A_visitable_Siconos_Object->accept(Siconos::Visitor myvisitor)
+
+*/
+
 #include "RuntimeException.h"
 
 /* objects that may be visited (1) */
@@ -35,37 +53,49 @@ class Circle;
 class CircleCircleR;
 class DiskDiskR;
 class DiskPlanR;
-/** This define a visitor pattern
-
-   \author SICONOS Development Team - copyright INRIA
-   \version 3.0.0.
-   \date (Creation) June 14, 2009
-
-   User must define a derivation of Siconos::Visitor class "myvisitor"
-   with the correct visit() functions.
-
-   Then the visitor can be used as :
-
-   A_visitable_Siconos_Object->accept(Siconos::Visitor myvisitor)
-
-   The visitor itself may also be visited in order to compound visits on
-   several objects.
-
-*/
+class Sphere;
+class SphereSphereR;
+class SpherePlanR;
+class NonSmoothLaw;
+class MixedComplementarityConditionNSL;
+class ComplementarityConditionNSL;
+class NewtonImpactNSL;
+class NewtonImpactFrictionNSL;
 
 //namespace Siconos
 //{
 
-#define QUOTE(M) #M
+#define SICONOS_VISITOR_QUOTE(M) #M
 
-#define FAIL(X) \
+#define SICONOS_VISITOR_FAIL(X)                                                         \
   { RuntimeException::selfThrow                                         \
-      (QUOTE(you must define a visit function for SP :: X in a derived class of SiconosVisitor)); }
+      ( SICONOS_VISITOR_QUOTE(you must define a visit function for SP :: X in a derived class of SiconosVisitor)); }
+
+
+/** hook to be inserted in a virtual class definiton */
+#define VIRTUAL_ACCEPT_VISITORS(FROMCLASS)                              \
+  virtual void accept(SP::SiconosVisitor)                               \
+  { RuntimeException::selfThrow                                         \
+      ( SICONOS_VISITOR_QUOTE(this class derived from FROMCLASS does not accept a visitor for shared pointers)); }; \
+  virtual void accept(SiconosVisitor&)                                  \
+  { RuntimeException::selfThrow                                         \
+      ( SICONOS_VISITOR_QUOTE(this class derived from FROMCLASS does not accept a visitor)); }
+
+/** hooks to be inserted in class definition */
+#define ACCEPT_STD_VISITORS()                                           \
+  virtual void accept(SiconosVisitor& tourist) { tourist.visit(*this); } \
+ 
+#define ACCEPT_SP_VISITORS()                                            \
+  virtual void accept(SP::SiconosVisitor tourist) { tourist->visit(shared_from_this()); }
+
+#define ACCEPT_VISITORS() \
+  ACCEPT_SP_VISITORS();   \
+  ACCEPT_STD_VISITORS()
 
 
 #define VISIT(X)                                                    \
-  virtual void visit(boost::shared_ptr<X>) FAIL(X);                 \
-  virtual void visit(X&) FAIL(X);
+  virtual void visit(boost::shared_ptr<X>) SICONOS_VISITOR_FAIL(X);                 \
+  virtual void visit(X&) SICONOS_VISITOR_FAIL(X);
 
 class SiconosVisitor
 {
@@ -73,22 +103,26 @@ public:
 
   /* idem (1) */
   VISIT(DynamicalSystem);
-  VISIT(Sphere);
   VISIT(Disk);
   VISIT(Circle);
   VISIT(DiskPlanR);
   VISIT(CircleCircleR);
   VISIT(DiskDiskR);
-
+  VISIT(Sphere);
+  VISIT(SphereSphereR);
+  VISIT(SpherePlanR);
+  VISIT(NonSmoothLaw);
+  VISIT(MixedComplementarityConditionNSL);
+  VISIT(ComplementarityConditionNSL);
+  VISIT(NewtonImpactNSL);
+  VISIT(NewtonImpactFrictionNSL);
 };
 
 //}
 
+
 TYPEDEF_SPTR(SiconosVisitor);
 
-
 #undef VISIT
-#undef FAIL
-#undef QUOTE
 
 #endif /* SiconosVisitor_hpp */

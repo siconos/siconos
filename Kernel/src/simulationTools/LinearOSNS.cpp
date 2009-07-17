@@ -407,7 +407,7 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
   if (UR->getRelationType() == Lagrangian)
   {
     double e;
-    if (nslawType == NEWTONIMPACTNSLAW)
+    if (nslawType == "NewtonImpactNSL")
     {
 
       e = (boost::static_pointer_cast<NewtonImpactNSL>(mainInteraction->getNonSmoothLawPtr()))->getE();
@@ -431,7 +431,7 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
       else
         RuntimeException::selfThrow("LinearOSNS::computeQBlock not yet implemented for this type of relation and a non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
     }
-    else if (nslawType == NEWTONIMPACTFRICTIONNSLAW)
+    else if (nslawType == "NewtonImpactFrictionNSL")
     {
       e = (boost::static_pointer_cast<NewtonImpactFrictionNSL>(mainInteraction->getNonSmoothLawPtr()))->getEn();
       // Only the normal part is multiplied by e

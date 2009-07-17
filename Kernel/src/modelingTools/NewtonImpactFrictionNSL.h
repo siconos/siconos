@@ -143,6 +143,10 @@ public:
    */
   static NewtonImpactFrictionNSL* convert(NonSmoothLaw* nsl);
 
+  /** Visitors hook
+   */
+  ACCEPT_STD_VISITORS();
+
 };
 DEFINE_SPTR(NewtonImpactFrictionNSL);
 #endif // NewtonImpactFrictionNSL_H

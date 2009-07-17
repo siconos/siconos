@@ -205,6 +205,12 @@ public:
   */
   const unsigned int getNonSmoothLawSize() const;
 
+
+  /** temporary visitor to get type
+      must be removed */
+  struct GetNSLType;
+  friend class GetNSLType;
+
   /** returns the type of the embedded non smooth law
   *  \return a string
   */

@@ -23,6 +23,10 @@
 #include "UnitaryRelation.h"
 
 #include <boost/bind.hpp>
+#include <algorithm>
+#include <limits>
+
+#define MAX_RELATIVE_DEGREE 999
 
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
@@ -36,6 +40,8 @@ Topology::Topology(): isTopologyUpToDate(false), isTopologyTimeInvariant(true),
   URG[0].reset(new UnitaryRelationsGraph());
   DSG[0].reset(new DynamicalSystemsGraph());
   allInteractions.reset(new InteractionsSet());
+  maxRelativeDegree = 0;
+  minRelativeDegree = MAX_RELATIVE_DEGREE;
 }
 
 Topology::Topology(SP::InteractionsSet newInteractions) :
@@ -56,7 +62,8 @@ Topology::Topology(SP::InteractionsSet newInteractions) :
     addInteraction(*it);
   }
 
-
+  maxRelativeDegree = 0;
+  minRelativeDegree = MAX_RELATIVE_DEGREE;
   isTopologyUpToDate = false;
 }
 
@@ -84,7 +91,8 @@ Topology::Topology(SP::DynamicalSystemsSet newDSset, SP::InteractionsSet newInte
   {
     DSG[0]->add_vertex(*ids);
   }
-
+  maxRelativeDegree = 0;
+  minRelativeDegree = MAX_RELATIVE_DEGREE;
   isTopologyUpToDate = false;
 }
 
@@ -271,38 +279,85 @@ void Topology::removeDynamicalSystem(SP::DynamicalSystem ds)
   RuntimeException::selfThrow("remove dynamical system not implemented");
 };
 
-// Compute relative degrees map
+
+/* a visitor to set parameters depending on nslaw */
+
+class ComplementarityConditionnNSL;
+class MixedComplementarityConditionNSL;
+class NewtonImpactNSL;
+class NewtonImpactFrictionNSL;
+
+struct Topology::SetupFromNslaw : public SiconosVisitor
+{
+  SP::Topology parent;
+  SP::Interaction interaction;
+  SetupFromNslaw(SP::Topology p, SP::Interaction inter) :
+    parent(p), interaction(inter) {};
+
+  void visit(ComplementarityConditionnNSL&)
+  {
+    parent->minRelativeDegree = std::min<int>(0, parent->minRelativeDegree);
+    parent->maxRelativeDegree = std::max<int>(0, parent->maxRelativeDegree);
+    interaction->setRelativeDegree(0);
+  };
+
+  void visit(MixedComplementarityConditionNSL&)
+  {
+    parent->minRelativeDegree = std::min<int>(0, parent->minRelativeDegree);
+    parent->maxRelativeDegree = std::max<int>(0, parent->maxRelativeDegree);
+    interaction->setRelativeDegree(0);
+  };
+
+  void visit(NewtonImpactNSL&)
+  {
+    parent->minRelativeDegree = std::min<int>(2, parent->minRelativeDegree);
+    parent->maxRelativeDegree = std::max<int>(2, parent->maxRelativeDegree);
+    parent->isTopologyTimeInvariant = false;
+    interaction->setRelativeDegree(2);
+  };
+
+  void visit(NewtonImpactFrictionNSL&)
+  {
+    parent->minRelativeDegree = std::min<int>(2, parent->minRelativeDegree);
+    parent->maxRelativeDegree = std::max<int>(2, parent->maxRelativeDegree);
+    parent->isTopologyTimeInvariant = false;
+    interaction->setRelativeDegree(2);
+  };
+
+};
+
+
+// Compute min & max of relative degrees
 void Topology::computeRelativeDegrees()
 {
-  // for each Unitary Relation relative degree vector depends on
-  // NonSmooth Law and relations
-  relativeDegrees.clear();
-  std::string nslawType;
 
-  // loop through URG
+  boost::shared_ptr<SetupFromNslaw> setupFromNslaw;
   UnitaryRelationsGraph::VIterator uv, uend;
-  for (boost::tie(uv, uend) = URG[0]->vertices(); uv != uend; ++uv)
-  {
-    nslawType = URG[0]->bundle(*uv)->getNonSmoothLawType();
-    if (nslawType == COMPLEMENTARITYCONDITIONNSLAW ||
-        nslawType == MIXEDCOMPLEMENTARITYCONDITIONNSLAW)
-      relativeDegrees[URG[0]->bundle(*uv)] = 0;
 
-    else if (nslawType == NEWTONIMPACTNSLAW)
+
+  if (URG[0]->size() > 0)
+  {
+    minRelativeDegree = MAX_RELATIVE_DEGREE;
+    maxRelativeDegree = 0;
+
+
+    for (boost::tie(uv, uend) = URG[0]->vertices(); uv != uend; ++uv)
     {
-      relativeDegrees[URG[0]->bundle(*uv)] = 2;
-      isTopologyTimeInvariant = false;
+
+      setupFromNslaw.reset(new SetupFromNslaw(shared_from_this(),
+                                              URG[0]->bundle(*uv)->getInteractionPtr()));
+
+      URG[0]->bundle(*uv)->getInteractionPtr()->getNonSmoothLawPtr()->accept(*(setupFromNslaw.get()));
+
     }
-    else if (nslawType == NEWTONIMPACTFRICTIONNSLAW)
-    {
-      relativeDegrees[URG[0]->bundle(*uv)] = 2;
-      isTopologyTimeInvariant = false;
-    }
-    else
-      RuntimeException::selfThrow("Topology::computeRelativeDegree(...), not yet implemented for non smooth law of type" + nslawType);
+  }
+  else
+  {
+    // default values
+    minRelativeDegree = 2;
+    maxRelativeDegree = 2;
   }
 
-  // assert(!relativeDegrees.empty());
 }
 
 
@@ -314,38 +369,19 @@ const bool Topology::hasInteraction(SP::Interaction inter) const
 
 const unsigned int Topology::getMaxRelativeDegree()
 {
-  if (relativeDegrees.empty())
-    return 2;
-  //    RuntimeException::selfThrow("Topology::getMaxRelativeDegree, non-existent value, since the relative degrees map is empty.");
-
-  ConstIteratorForRelativeDegrees it = max_element(relativeDegrees.begin(), relativeDegrees.end());
-  return(it->second);
+  return maxRelativeDegree;
 }
 
 const unsigned int Topology::getMinRelativeDegree()
 {
-  if (relativeDegrees.empty())
-    return 2;
-  // RunimeException::selfThrow("Topology::getMinRelativeDegree, non-existent value, since the relative degrees map is empty.");
-
-  ConstIteratorForRelativeDegrees it = min_element(relativeDegrees.begin(), relativeDegrees.end());
-  return(it->second);
+  assert(minRelativeDegree != MAX_RELATIVE_DEGREE);
+  return minRelativeDegree;
 }
 
 void Topology::initialize()
 {
 
-  assert(allInteractions && "Topology : allInteractions is NULL");
-
-  // -- Creates Unitary Relations and put them in URG --- loop
-  // through interactions list (from NSDS)
-  for (InteractionsIterator it = allInteractions->begin();
-       it != allInteractions->end(); ++it)
-    addInteractionInIndexSet(*it);
-
-  //-- Fills RelativeDegreesMaps in --
   computeRelativeDegrees();
-
   isTopologyUpToDate = true;
 }
 
@@ -355,7 +391,6 @@ void Topology::clear()
 
   URG.clear();
   DSG.clear();
-  relativeDegrees.clear();
 
   isTopologyUpToDate = false;
 }

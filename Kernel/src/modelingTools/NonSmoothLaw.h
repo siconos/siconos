@@ -28,12 +28,7 @@
 #include "RuntimeException.h"
 
 #include "SiconosPointers.hpp"
-
-const std::string COMPLEMENTARITYCONDITIONNSLAW = "ComplementarityNSL";
-const std::string MIXEDCOMPLEMENTARITYCONDITIONNSLAW = "MixedComplementarityNSL";
-const std::string NEWTONIMPACTNSLAW = "NewtonImpactNSL";
-const std::string RELAYNSLAW = "RelayNSL";
-const std::string NEWTONIMPACTFRICTIONNSLAW = "NewtonImpactFrictionNSL";
+#include "SiconosVisitor.hpp"
 
 class Interaction;
 
@@ -70,16 +65,14 @@ protected:
 public:
 
   /** basic constructor
-  * \param string: type of the law (optional, default = none)
   * \param unsigned int, the non smooth law size
   */
-  NonSmoothLaw(const std::string&, unsigned int);
+  NonSmoothLaw(unsigned int);
 
   /** constructor with XML object of the NonSmoothLaw
-  * \param string: type of the law
   *  \param NonSmoothLawXML* : the XML object corresponding
   */
-  NonSmoothLaw(const std::string& , SP::NonSmoothLawXML);
+  NonSmoothLaw(SP::NonSmoothLawXML);
 
   /** destructor
   */
@@ -104,22 +97,6 @@ public:
   inline void setNonSmoothLawXML(SP::NonSmoothLawXML newNslawxml)
   {
     nslawxml = newNslawxml;
-  }
-
-  /** allows to get the type of the NonSmoothLaw
-  *  \return string : the type of the NonSmoothLaw
-  */
-  inline const std::string getType() const
-  {
-    return nsLawType;
-  }
-
-  /** set the type of the NonSmoothLaw
-  *  \param: string, the type of the NonSmoothLaw
-  */
-  inline void setType(const std::string& newType)
-  {
-    nsLawType = newType;
   }
 
   /** to get the size
@@ -147,6 +124,10 @@ public:
   *  \exception RuntimeException
   */
   virtual void display() const = 0;
+
+  /** visitors hook
+   */
+  VIRTUAL_ACCEPT_VISITORS(NonSmoothLaw);
 
 };
 

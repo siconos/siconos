@@ -25,6 +25,7 @@ SET(SiconosKernel_DIRS
   #controlTools
   multiBodyTools
   multiBodyTools/2D
+  multiBodyTools/3D
   utils
   utils/boost-bindings
   utils/contract

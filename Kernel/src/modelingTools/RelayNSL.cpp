@@ -26,11 +26,11 @@ RelayNSL::RelayNSL(): NonSmoothLaw(), c(0.0), d(0.0)
 {}
 
 RelayNSL::RelayNSL(unsigned int newSize):
-  NonSmoothLaw(RELAYNSLAW, newSize), c(0.0), d(0.0)
+  NonSmoothLaw(newSize), c(0.0), d(0.0)
 {}
 
 RelayNSL::RelayNSL(SP::NonSmoothLawXML nslawxml):
-  NonSmoothLaw(RELAYNSLAW, nslawxml), c(0.0), d(0.0)
+  NonSmoothLaw(nslawxml), c(0.0), d(0.0)
 {
   if (nslawxml)
   {
@@ -41,7 +41,7 @@ RelayNSL::RelayNSL(SP::NonSmoothLawXML nslawxml):
 }
 
 RelayNSL::RelayNSL(double newC, double newD, unsigned int newSize):
-  NonSmoothLaw(RELAYNSLAW, newSize), c(newC), d(newD)
+  NonSmoothLaw(newSize), c(newC), d(newD)
 {}
 
 RelayNSL::~RelayNSL()

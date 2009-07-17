@@ -103,6 +103,10 @@ public:
   * \return a pointer on the law if it is of the right type, NULL otherwise
   */
   static NewtonImpactNSL* convert(NonSmoothLaw* nsl);
+
+  /** Visitors hook
+   */
+  ACCEPT_STD_VISITORS();
 };
 
 #endif // NewtonImpactNSL_H

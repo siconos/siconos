@@ -116,6 +116,10 @@ public:
   */
   static RelayNSL* convert(NonSmoothLaw* nsl);
 
+  /** visitors hook
+   */
+  ACCEPT_STD_VISITORS();
+
 private:
   /** represent the value after the non smooth event */
   double c;
