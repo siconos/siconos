@@ -297,7 +297,8 @@ struct LinearOSNS::TimeSteppingNSLEffect : public SiconosVisitor
   unsigned int pos;
   SP::UnitaryRelation UR;
 
-  TimeSteppingNSLEffect(LinearOSNS *p, SP::UnitaryRelation UR, unsigned int pos) : parent(p), UR(UR), pos(pos) {};
+  TimeSteppingNSLEffect(LinearOSNS *p, SP::UnitaryRelation UR, unsigned int pos) :
+    parent(p), UR(UR), pos(pos) {};
 
   void visit(NewtonImpactNSL& nslaw)
   {
@@ -328,7 +329,8 @@ struct LinearOSNS::EventDrivenNSLEffect : public SiconosVisitor
   SP::UnitaryRelation UR;
   unsigned int pos;
 
-  EventDrivenNSLEffect(LinearOSNS *p, SP::UnitaryRelation UR, unsigned int pos) : parent(p), UR(UR), pos(pos) {};
+  EventDrivenNSLEffect(LinearOSNS *p, SP::UnitaryRelation UR, unsigned int pos) :
+    parent(p), UR(UR), pos(pos) {};
 
   void visit(NewtonImpactNSL& nslaw)
   {
@@ -358,18 +360,19 @@ struct LinearOSNS::NSLEffectOnSim : public SiconosVisitor
   SP::UnitaryRelation UR;
   unsigned int pos;
 
-  NSLEffectOnSim(LinearOSNS *p, SP::UnitaryRelation UR, unsigned int pos) : parent(p), UR(UR), pos(pos) {};
+  NSLEffectOnSim(LinearOSNS *p, SP::UnitaryRelation UR, unsigned int pos) :
+    parent(p), UR(UR), pos(pos) {};
 
   void visit(TimeStepping& sim)
   {
     SP::SiconosVisitor NSLEffect(new TimeSteppingNSLEffect(parent, UR, pos));
-    UR->getInteractionPtr()->getNonSmoothLawPtr()->accept(NSLEffect);
+    UR->getInteractionPtr()->getNonSmoothLawPtr()->accept(*NSLEffect);
   }
 
   void visit(EventDriven& sim)
   {
     SP::SiconosVisitor NSLEffect(new TimeSteppingNSLEffect(parent, UR, pos));
-    UR->getInteractionPtr()->getNonSmoothLawPtr()->accept(NSLEffect);
+    UR->getInteractionPtr()->getNonSmoothLawPtr()->accept(*NSLEffect);
   }
 
 };
