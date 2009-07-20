@@ -211,11 +211,6 @@ public:
   struct GetNSLType;
   friend class GetNSLType;
 
-  /** returns the type of the embedded non smooth law
-  *  \return a string
-  */
-  const std::string getNonSmoothLawType() const;
-
   /** returns the type of the embedded relation.
    */
   const RELATION::TYPES getRelationType() const;

@@ -62,6 +62,10 @@ class ComplementarityConditionNSL;
 class NewtonImpactNSL;
 class NewtonImpactFrictionNSL;
 
+class Simulation;
+class TimeStepping;
+class EventDriven;
+
 //namespace Siconos
 //{
 
@@ -116,6 +120,10 @@ public:
   VISIT(ComplementarityConditionNSL);
   VISIT(NewtonImpactNSL);
   VISIT(NewtonImpactFrictionNSL);
+
+  VISIT(Simulation);
+  VISIT(TimeStepping);
+  VISIT(EventDriven);
 };
 
 //}

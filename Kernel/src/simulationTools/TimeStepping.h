@@ -162,6 +162,10 @@ public:
     return mComputeResiduY;
   };
 
+  /** visitors hook
+   */
+  ACCEPT_STD_VISITORS();
+
 };
 
 DEFINE_SPTR(TimeStepping);

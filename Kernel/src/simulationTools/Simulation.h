@@ -614,6 +614,10 @@ public:
    */
   void processEvents();
 
+  /** visitors hook
+   */
+  VIRTUAL_ACCEPT_VISITORS(Simulation);
+
 };
 
 #endif // SIMULATION_H

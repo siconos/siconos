@@ -81,6 +81,15 @@ protected:
       size */
   bool keepLambdaAndYState;
 
+  /** nslaw effects : visitors experimentation
+   */
+  struct TimeSteppingNSLEffect;
+  struct EventDrivenNSLEffect;
+  struct NSLEffectOnSim;
+  friend class TimeSteppingNSLEffect;
+  friend class EventDrivenNSLEffect;
+  friend class NSLEffectOnSim;
+
   /** default constructor (private)
    */
   LinearOSNS() {};

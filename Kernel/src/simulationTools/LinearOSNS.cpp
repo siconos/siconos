@@ -278,13 +278,108 @@ void LinearOSNS::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelatio
   }
 }
 
+
+/* Cascading visitors experimentation.
+   the dispatch is done on simulationtype and then on nslawtype
+
+   1. Cumbersome. Is it better then if (simulationtype == ... ) { if
+   nslawType == ...) ?
+   2. Can simulation dispatch be done at top-level ?
+
+*/
+
+
+/* nslaw dispatch */
+
+struct LinearOSNS::TimeSteppingNSLEffect : public SiconosVisitor
+{
+  LinearOSNS *parent;
+  unsigned int pos;
+  SP::UnitaryRelation UR;
+
+  TimeSteppingNSLEffect(LinearOSNS *p, SP::UnitaryRelation UR, unsigned int pos) : parent(p), UR(UR), pos(pos) {};
+
+  void visit(NewtonImpactNSL& nslaw)
+  {
+    double e;
+    e = nslaw.getE();
+    std::vector<unsigned int> subCoord(4);
+    subCoord[0] = 0;
+    subCoord[1] = UR->getNonSmoothLawSize();
+    subCoord[2] = pos;
+    subCoord[3] = pos + subCoord[1];
+    subscal(e, *UR->getYOldPtr(parent->levelMin), *(parent->q), subCoord, false);
+  }
+
+  void visit(NewtonImpactFrictionNSL& nslaw)
+  {
+    double e;
+    e = nslaw.getEn();
+    // Only the normal part is multiplied by e
+    (*(parent->q))(pos) +=  e * (*UR->getYOldPtr(parent->levelMin))(0);
+
+  }
+
+};
+
+struct LinearOSNS::EventDrivenNSLEffect : public SiconosVisitor
+{
+  LinearOSNS *parent;
+  SP::UnitaryRelation UR;
+  unsigned int pos;
+
+  EventDrivenNSLEffect(LinearOSNS *p, SP::UnitaryRelation UR, unsigned int pos) : parent(p), UR(UR), pos(pos) {};
+
+  void visit(NewtonImpactNSL& nslaw)
+  {
+    double e;
+    e = nslaw.getE();
+    std::vector<unsigned int> subCoord(4);
+    subCoord[0] = pos;
+    subCoord[1] = pos + UR->getNonSmoothLawSize();
+    subCoord[2] = pos;
+    subCoord[3] = subCoord[1];
+    subscal(e, *(parent->q), *(parent->q), subCoord, false); // q = q + e * q
+  }
+
+  // note : no NewtonImpactFrictionNSL
+};
+
+
+
+/* Simulation dispatch */
+class TimeStepping;
+class EventDriven;
+
+struct LinearOSNS::NSLEffectOnSim : public SiconosVisitor
+{
+
+  LinearOSNS *parent;
+  SP::UnitaryRelation UR;
+  unsigned int pos;
+
+  NSLEffectOnSim(LinearOSNS *p, SP::UnitaryRelation UR, unsigned int pos) : parent(p), UR(UR), pos(pos) {};
+
+  void visit(TimeStepping& sim)
+  {
+    SP::SiconosVisitor NSLEffect(new TimeSteppingNSLEffect(parent, UR, pos));
+    UR->getInteractionPtr()->getNonSmoothLawPtr()->accept(NSLEffect);
+  }
+
+  void visit(EventDriven& sim)
+  {
+    SP::SiconosVisitor NSLEffect(new TimeSteppingNSLEffect(parent, UR, pos));
+    UR->getInteractionPtr()->getNonSmoothLawPtr()->accept(NSLEffect);
+  }
+
+};
+
 void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
 {
 
   // Get relation and non smooth law types
   RELATION::TYPES relationType = UR->getRelationType();
   RELATION::SUBTYPES relationSubType = UR->getRelationSubType();
-  string nslawType = UR->getNonSmoothLawType();
 
   string simulationType = simulation->getType();
 
@@ -406,44 +501,12 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
   // Add "non-smooth law effect" on q
   if (UR->getRelationType() == Lagrangian)
   {
-    double e;
-    if (nslawType == "NewtonImpactNSL")
-    {
-
-      e = (boost::static_pointer_cast<NewtonImpactNSL>(mainInteraction->getNonSmoothLawPtr()))->getE();
-      std::vector<unsigned int> subCoord(4);
-      if (simulationType == "TimeStepping")
-      {
-        subCoord[0] = 0;
-        subCoord[1] = UR->getNonSmoothLawSize();
-        subCoord[2] = pos;
-        subCoord[3] = pos + subCoord[1];
-        subscal(e, *UR->getYOldPtr(levelMin), *q, subCoord, false);
-      }
-      else if (simulationType == "EventDriven")
-      {
-        subCoord[0] = pos;
-        subCoord[1] = pos + UR->getNonSmoothLawSize();
-        subCoord[2] = pos;
-        subCoord[3] = subCoord[1];
-        subscal(e, *q, *q, subCoord, false); // q = q + e * q
-      }
-      else
-        RuntimeException::selfThrow("LinearOSNS::computeQBlock not yet implemented for this type of relation and a non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
-    }
-    else if (nslawType == "NewtonImpactFrictionNSL")
-    {
-      e = (boost::static_pointer_cast<NewtonImpactFrictionNSL>(mainInteraction->getNonSmoothLawPtr()))->getEn();
-      // Only the normal part is multiplied by e
-      if (simulationType == "TimeStepping")
-        (*q)(pos) +=  e * (*UR->getYOldPtr(levelMin))(0);
-
-      else RuntimeException::selfThrow("LinearOSNS::computeQBlock not yet implemented for this type of relation and a non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
-
-    }
-    else
-      RuntimeException::selfThrow("LinearOSNS::computeQBlock not yet implemented for this type of relation and a non smooth law of type " + nslawType);
+    SP::SiconosVisitor nslEffectOnSim(new NSLEffectOnSim(this, UR, pos));
+    simulation->accept(*nslEffectOnSim);
   }
+
+
+
 }
 
 void LinearOSNS::computeQ(double time)

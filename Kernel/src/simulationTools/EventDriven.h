@@ -133,6 +133,10 @@ public:
    */
   static EventDriven* convert(Simulation* str);
 
+  /** visitors hook
+   */
+  ACCEPT_STD_VISITORS();
+
 };
 DEFINE_SPTR(EventDriven);
 #endif // EVENTDRIVEN_H
