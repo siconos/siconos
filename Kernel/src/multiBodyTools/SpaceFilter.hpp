@@ -125,7 +125,7 @@ public:
   {};
 
 
-  /** 2D objects insertion
+  /** 2D/3D objects insertion
    *
    */
   void insert(SP::Disk, int, int, int);

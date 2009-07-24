@@ -46,6 +46,7 @@ void SpherePlanR::computeH(double)
 
   y->setValue(0, distance(q[0], q[1], q[2], r));
   y->setValue(1, 0.);
+  y->setValue(2, 0.);
 
 };
 
@@ -64,9 +65,18 @@ void SpherePlanR::computeJacH(double, unsigned int)
   double BD1oD2 = B * D1oD2;
   double CD1oD2 = C * D1oD2;
 
-  g[0] = AD1oD2;
-  g[3] = BD1oD2;
-  g[6] = CD1oD2;
+  g[0] = AD1oD2;     // dh[0]/dq[0]
+  g[1] = 0;          // dh[1]/dq[0]
+  g[2] = 0;          // dh[2]/dq[0]
+  g[3] = BD1oD2;     // dh[0]/dq[1]
+  g[4] = 0;
+  g[5] = 0;
+  g[6] = CD1oD2;     // dh[0]/dq[2]
+  g[7] = 0;
+  g[8] = 0;
+  g[9] = 0;          // dh[1]/dq[0]
+  g[10] = 0;         // dh[1]/dq[1]
+  g[11] = 0;
   g[11] = r;
 }
 

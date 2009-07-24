@@ -109,6 +109,7 @@ double DiskPlanR::distance(double x, double y, double rad)
 
 }
 
+/* called compute H, but only the gap function is needed! */
 void DiskPlanR::computeH(double)
 {
   SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
@@ -122,26 +123,89 @@ void DiskPlanR::computeH(double)
 
 }
 
+/* Note :
+
+   Only the first component (normal part) of H is meaningfull for siconos
+   see comment in UnitaryRelation.cpp/getYRef
+
+   The normal part (gap function) is used in updateIndexSet.
+
+   The second part is the same as the one of the linear mapping (i.e
+   what would be done with a LagrangianLinearTIR)
+
+    t
+   q  = [ x y theta ]
+        t
+   y = H  q + b
+            2     2
+   c = sqrt(A   + B  )
+
+    t
+   H =|  A/c    B/c     0|
+      | -B/c    A/c    -r|
+
+   b = C / c
+
+   y[0]  = A/c x + B/c y + C/c >= 0
+
+   Only one side.
+
+   Both side with g(q) = | A/c x + B/c y + C/c | as the gap function
+                                      t
+   Hnl(q) = |   g(q)          |    = H  q   +  |   g(q) - (A/c x + B/c y) |
+            | -B/c    A/c  -R |                |   0                      |
+
+
+  so:
+
+
+           [           |C + A*x + B*y|            ]
+           [           ---------------            ]
+           [                _________             ]
+           [               /  2    2              ]
+           [             \/  A  + B               ]
+   H(q) =  [                                      ]
+           [               A*y            B*x     ]
+           [-r*theta + ------------ - ------------]
+           [              _________      _________]
+           [             /  2    2      /  2    2 ]
+           [           \/  A  + B     \/  A  + B  ]
+
+
+           [A*sign(C + A*x + B*y)  B*sign(C + A*x + B*y)    ]
+           [---------------------  ---------------------  0 ]
+           [        _________              _________        ]
+           [       /  2    2              /  2    2         ]
+           [     \/  A  + B             \/  A  + B          ]
+JacH(q) =  [                                                ]
+           [         -B                     A               ]
+           [    ------------           ------------       -r]
+           [       _________              _________         ]
+           [      /  2    2              /  2    2          ]
+           [    \/  A  + B             \/  A  + B           ]
+
+
+*/
+
+
 void DiskPlanR::computeJacH(double, unsigned int)
 {
 
   double *g = &(*(JacH[0]))(0, 0);
 
-  double x0 = boost::static_pointer_cast<Disk>
-              (*getInteractionPtr()->dynamicalSystemsBegin())->getQ(0);
-  double y0 = boost::static_pointer_cast<Disk>
-              (*(getInteractionPtr()->dynamicalSystemsBegin()))->getQ(1);
-  double D1 = A * x0 + B * y0 + C;
-  double D2 = sqrA2pB2 * fabs(D1);
-  double D1oD2 = D1 / D2;
-  double AD1oD2 = A * D1oD2;
-  double BD1oD2 = B * D1oD2;
+  double x = boost::static_pointer_cast<Disk>
+             (*getInteractionPtr()->dynamicalSystemsBegin())->getQ(0);
+  double y = boost::static_pointer_cast<Disk>
+             (*(getInteractionPtr()->dynamicalSystemsBegin()))->getQ(1);
 
-  g[0] = AD1oD2;
-  g[1] = -BD1oD2;
-  g[2] = BD1oD2;
-  g[3] = AD1oD2;
-  g[4] = 0.;
+  double D1 = A * x + B * y + C;
+  double signD1 = copysign(1, D1);
+
+  g[0] = A * signD1 / sqrA2pB2;
+  g[1] = -B * signD1 / sqrA2pB2;
+  g[2] = B * signD1 / sqrA2pB2;
+  g[3] = A * signD1 / sqrA2pB2;
+  g[4] = 0;
   g[5] = -r;
 }
 
