@@ -707,6 +707,15 @@ public:
    */
   void computeJacobianG(unsigned int, double);
 
+  /**
+   *default function to update the plugins functions using a new time:
+   * \param double time : the current time
+   */
+  virtual void updatePlugins(double)
+  {
+    ;
+  }
+
   //@}
 
 

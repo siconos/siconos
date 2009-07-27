@@ -43,6 +43,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0): Dynami
   mXp.reset(new SimpleVector(getDim()));
   mXq.reset(new SimpleVector(getDim()));
   mXfree.reset(new SimpleVector(getDim()));
+  mfold.reset(new SimpleVector(getDim()));
 
   // == r ==
 
@@ -111,7 +112,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML):
       if (fonlds->getFVector().size() != n)
         RuntimeException::selfThrow("FirstOrderNonLinearDS:: xml constructor, f size differs from n!");
 
-      f.reset(new PVF(fonlds->getFVector()));
+      mf.reset(new PVF(fonlds->getFVector()));
     }
   }
 
@@ -157,6 +158,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0, const s
   mXq.reset(new SimpleVector(getDim()));
   mXfree.reset(new SimpleVector(getDim()));
   r.reset(new SimpleVector(getDim()));
+  mfold.reset(new SimpleVector(getDim()));
 
   // == r ==
 
@@ -212,10 +214,10 @@ void FirstOrderNonLinearDS::setF(const PVF& newValue)
 {
   assert(newValue.size() == n && "FirstOrderNonLinearDS - setF: inconsistent dimensions with problem size for input vector f");
 
-  if (! f)
-    f.reset(new PVF(newValue));
+  if (! mf)
+    mf.reset(new PVF(newValue));
   else
-    *f = newValue;
+    *mf = newValue;
 }
 
 void FirstOrderNonLinearDS::setJacobianXF(const PMJF& newValue)
@@ -267,6 +269,7 @@ void FirstOrderNonLinearDS::initialize(const string& simulationType, double time
   initMemory(sizeOfMemory);
 
   updatePlugins(time);
+  *mfold = *mf;
 
   if (simulationType == "EventDriven")
   {
@@ -291,6 +294,7 @@ void FirstOrderNonLinearDS::swapInMemory()
 {
   xMemory->swap(x[0]);
   rMemory->swap(r);
+  *mfold = *mf;
 }
 
 // ===== COMPUTE PLUGINS FUNCTIONS =====
@@ -311,16 +315,16 @@ void FirstOrderNonLinearDS::setComputeMFunction(FPtr1 fct)
 
 void FirstOrderNonLinearDS::setComputeFFunction(const string& pluginPath, const string& functionName)
 {
-  if (! f)
-    f.reset(new PVF(n));
-  f->setComputeFunction(pluginPath, functionName);
+  if (! mf)
+    mf.reset(new PVF(n));
+  mf->setComputeFunction(pluginPath, functionName);
 }
 
 void FirstOrderNonLinearDS::setComputeFFunction(FPtr1 fct)
 {
-  if (! f)
-    f.reset(new PVF(n));
-  f->setComputeFunction(fct);
+  if (! mf)
+    mf.reset(new PVF(n));
+  mf->setComputeFunction(fct);
 }
 
 void FirstOrderNonLinearDS::setComputeJacobianXFFunction(const string& pluginPath, const string& functionName)
@@ -366,24 +370,24 @@ void FirstOrderNonLinearDS::computeM(double time, SP::SiconosVector x2)
 
 void FirstOrderNonLinearDS::computeF(double time)
 {
-  if (f->isPlugged())
+  if (mf->isPlugged())
   {
-    if (!f->fPtr)
+    if (!mf->fPtr)
       RuntimeException::selfThrow("FirstOrderNonLinearDS::computeF() f is not linked to a plugin function");
-    (f->fPtr)(time, n, &((*(x[0]))(0)) , &(*f)(0), z->size(), &(*z)(0));
+    (mf->fPtr)(time, n, &((*(x[0]))(0)) , &(*mf)(0), z->size(), &(*z)(0));
   }
   // else nothing!
 }
 
 void FirstOrderNonLinearDS::computeF(double time, SP::SiconosVector x2)
 {
-  if (f->isPlugged())
+  if (mf->isPlugged())
   {
-    if (!f->fPtr)
+    if (!mf->fPtr)
       RuntimeException::selfThrow("FirstOrderNonLinearDS::computeF() f is not linked to a plugin function");
     if (x2->size() != n)
       RuntimeException::selfThrow("FirstOrderNonLinearDS::computeF(t,x) x size does not fit with the system size.");
-    (f->fPtr)(time, n, &((*x2)(0)) , &(*f)(0), z->size(), &(*z)(0));
+    (mf->fPtr)(time, n, &((*x2)(0)) , &(*mf)(0), z->size(), &(*z)(0));
   }
   // else nothing!
 }
@@ -423,10 +427,10 @@ void FirstOrderNonLinearDS::computeRhs(double time, bool)
 
   *x[1] = *r; // Warning: p update is done in Interactions/Relations
 
-  if (f)
+  if (mf)
   {
     computeF(time);
-    *(x[1]) += *f;
+    *(x[1]) += *mf;
   }
 
   if (M)
@@ -469,8 +473,8 @@ void FirstOrderNonLinearDS::saveSpecificDataToXML()
   if (!fonlds)
     RuntimeException::selfThrow("FirstOrderNonLinearDS::saveSpecificDataToXML - The DynamicalSystemXML object doesn't exists");
 
-  if (f->isPlugged())
-    fonlds->setFPlugin(f->getPluginName());
+  if (mf->isPlugged())
+    fonlds->setFPlugin(mf->getPluginName());
   if (jacobianXF->isPlugged())
     fonlds->setJacobianXFPlugin(jacobianXF->getPluginName());
 }

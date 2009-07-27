@@ -144,6 +144,22 @@ public:
     return A;
   }
 
+  virtual SP::SiconosMatrix getJacobianXFPtr() const
+  {
+    return A;
+  };
+  /**  function to compute \f$ f: (x,t)\f$
+   * \param double time : current time
+   */
+  virtual void computeF(double);
+
+  /** function to compute \f$ f: (x,t)\f$ with x different from current saved state.
+   * \param double time : current time
+   * \param SP::SiconosVector
+   */
+  virtual void computeF(double, SP::SiconosVector);
+
+
   /** set the value of A to newValue
    *  \param plugged-matrix newValue
    */

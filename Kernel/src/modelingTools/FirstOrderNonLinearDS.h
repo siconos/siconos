@@ -86,7 +86,10 @@ protected:
   SP::PMJF M;
 
   /** f(x,t,z) */
-  SP::PVF f;
+  SP::PVF mf;
+
+  /** to store f(x_k,t_k,z_k)*/
+  SP::SiconosVector mfold;
 
   /** Gradient of \f$ f(x,t,z) \f$ with respect to \f$ x\f$*/
   SP::PMJF jacobianXF;
@@ -245,7 +248,7 @@ public:
    */
   inline const PVF getF() const
   {
-    return *f;
+    return *mf;
   }
 
   /** get f
@@ -253,7 +256,11 @@ public:
    */
   inline SP::PVF getFPtr() const
   {
-    return f;
+    return mf;
+  }
+  inline SP::SiconosVector getFoldPtr() const
+  {
+    return mfold;
   }
 
   /** set the value of f to newValue
@@ -266,7 +273,7 @@ public:
    */
   inline void setFPtr(SP::PVF newPtr)
   {
-    f = newPtr;
+    mf = newPtr;
   }
 
   // --- jacobianXF ---
@@ -281,7 +288,7 @@ public:
   /** get jacobianXF
    *  \return pointer on a plugged-matrix
    */
-  inline SP::PMJF getJacobianXFPtr() const
+  virtual SP::SiconosMatrix getJacobianXFPtr() const
   {
     return jacobianXF;
   }
@@ -384,13 +391,13 @@ public:
   /** Default function to compute \f$ f: (x,t)\f$
    * \param double time : current time
    */
-  void computeF(double);
+  virtual void computeF(double);
 
   /** function to compute \f$ f: (x,t)\f$ with x different from current saved state.
    * \param double time : current time
    * \param SP::SiconosVector
    */
-  void computeF(double, SP::SiconosVector);
+  virtual void computeF(double, SP::SiconosVector);
 
   /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
    *  \param double time : current time

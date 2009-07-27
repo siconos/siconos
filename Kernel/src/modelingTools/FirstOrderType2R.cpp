@@ -158,8 +158,6 @@ void FirstOrderType2R::computeInput(double t, unsigned int level)
   //  cout<<"FirstOrderType2R::computeInput : result g_alpha - B*diffL"<<endl;
   //  workX->display();
   *data[r] += *workX;
-  //  cout<<"FirstOrderType2R::computeInput : r alpha+1"<<endl;
-  //  data[r]->display();
 
   /*compute the new g_alpha*/
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
@@ -237,18 +235,18 @@ void FirstOrderType2R::preparNewtonIteration()
   scal(-1.0, *workL, *workL);
   prod(*(getB()), *workL, *workX, true);
 
-  //  cout<<"FirstOrderType2R::preparNewtonIteration, -B*lambda: \n";
-  //  workX->display();
+  //     cout<<"FirstOrderType2R::preparNewtonIteration, -B*lambda: \n";
+  //     workX->display();
 
-  //  cout<<"FirstOrderType2R::preparNewtonIteration, g_alpha: \n";
-  //  data[g_alpha]->display();
+  //     cout<<"FirstOrderType2R::preparNewtonIteration, g_alpha: \n";
+  //     data[g_alpha]->display();
 
   *workX += *data[g_alpha];
 
 
   *data[ds_xp] += *workX;
-  //  cout<<"FirstOrderType2R::preparNewtonIteration, g_alpha -B*lambda : \n";
-  //  workX->display();
+  //    cout<<"FirstOrderType2R::preparNewtonIteration,xp= g_alpha -B*lambda : \n";
+  //    workX->display();
 }
 
 

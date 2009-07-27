@@ -68,6 +68,8 @@ FirstOrderLinearDS::FirstOrderLinearDS(const SiconosVector& newX0, const string&
   DSType = DS::FOLDS;
   setComputeAFunction(SSL::getPluginName(APlugin), SSL::getPluginFunctionName(APlugin));
   setComputeBFunction(SSL::getPluginName(bPlugin), SSL::getPluginFunctionName(bPlugin));
+  mf.reset(new PVF(getDim()));
+
 
   checkDynamicalSystem();
 }
@@ -77,6 +79,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(const SiconosVector& newX0, const Siconos
   FirstOrderNonLinearDS(newX0)
 {
   DSType = DS::FOLDS;
+  mf.reset(new PVF(getDim()));
   assert(((newA.size(0) == n) && (newA.size(1) == n)) &&
          "FirstOrderLinearDS - constructor(number,x0,A): inconsistent dimensions with problem size for input matrix A");
 
@@ -96,6 +99,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(const SiconosVector& newX0, const Siconos
 
   A.reset(new Plugged_Matrix_FTime(newA));
   b.reset(new Plugged_Vector_FTime(newB));
+  mf.reset(new PVF(getDim()));
 
   checkDynamicalSystem();
 }
@@ -203,7 +207,7 @@ void FirstOrderLinearDS::computeB(const double time)
   }
   // else nothing
 }
-
+/*This function is called only by Lsodar and eventDriven*/
 void FirstOrderLinearDS::computeRhs(const double time, const bool)
 {
   // second argument is useless at the time - Used in derived classes
@@ -277,4 +281,24 @@ FirstOrderLinearDS* FirstOrderLinearDS::convert(DynamicalSystem* ds)
 {
   FirstOrderLinearDS* lsds = dynamic_cast<FirstOrderLinearDS*>(ds);
   return lsds;
+}
+void FirstOrderLinearDS::computeF(double time)
+{
+  prod(*A, *x[0], *mf);
+  if (b)
+  {
+    //    computeB(time);
+    *mf += *b;
+  }
+}
+
+void FirstOrderLinearDS::computeF(double time, SP::SiconosVector x2)
+{
+  RuntimeException::selfThrow("FirstOrderLinearDS::computeF - Must not be used");
+  prod(*A, *x2, *mf);
+  if (b)
+  {
+    computeB(time);
+    *mf += *b;
+  }
 }

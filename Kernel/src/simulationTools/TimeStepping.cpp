@@ -346,17 +346,29 @@ void TimeStepping::computeOneStep()
 void TimeStepping::computeInitialResidu()
 {
 
+  double tkp1 = getTkp1();
   SP::InteractionsSet allInteractions = model->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
   for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
   {
-    (*it)->getRelationPtr()->computeG(getTkp1());
-    (*it)->getRelationPtr()->computeH(getTkp1());
+    (*it)->getRelationPtr()->computeG(tkp1);
+    (*it)->getRelationPtr()->computeH(tkp1);
   }
 
+  SP::DynamicalSystemsSet dsSet = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  for (DSIterator itds = dsSet->begin(); itds != dsSet->end(); itds++)
+  {
+    (*itds)->updatePlugins(tkp1);
+  }
 
 
   for (OSIIterator it = allOSI->begin(); it != allOSI->end() ; ++it)
     (*it)->computeResidu();
+  if (mComputeResiduY)
+    for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
+    {
+      (*it)->getRelationPtr()->computeResiduY(tkp1);
+    }
+
 }
 
 void TimeStepping::advanceToEvent()

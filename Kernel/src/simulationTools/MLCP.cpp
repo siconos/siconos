@@ -145,26 +145,26 @@ void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
         UR2->getRightUnitaryBlockForDS(*itDS, rightUnitaryBlock);
         // centralUnitaryBlock contains a lu-factorized matrix and we solve
         // centralUnitaryBlock * X = rightUnitaryBlock with PLU
-        //        printf("right bloc: ie B \n");
-        //        rightUnitaryBlock->display();
+        //          printf("right bloc: ie B \n");
+        //          rightUnitaryBlock->display();
         centralUnitaryBlocks[*itDS]->PLUForwardBackwardInPlace(*rightUnitaryBlock);
         //        printf("W \n");
         //        centralUnitaryBlocks[*itDS]->display();
-        //        printf("inv(W)B \n");
-        //        rightUnitaryBlock->display();
+        //          printf("inv(W)B \n");
+        //          rightUnitaryBlock->display();
         //      integration of r with theta method removed
         //      *currentUnitaryBlock += h *Theta[*itDS]* *leftUnitaryBlock * (*rightUnitaryBlock); //left = C, right = W.B
         //gemm(h,*leftUnitaryBlock,*rightUnitaryBlock,1.0,*currentUnitaryBlock);
         *leftUnitaryBlock *= h;
-        //        printf("currentbloc : ie D \n");
-        //        currentUnitaryBlock->display();
-        //        printf("leftUnitaryBlock : ie C \n");
-        //        leftUnitaryBlock->display();
+        //          printf("currentbloc : ie D \n");
+        //          currentUnitaryBlock->display();
+        //          printf("leftUnitaryBlock : ie C \n");
+        //          leftUnitaryBlock->display();
 
         prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
         //left = C, right = W.B
-        //        printf("finalbloc \n");
-        //        currentBlock->display();
+        //          printf("finalbloc \n");
+        //          currentUnitaryBlock->display();
 
       }
       else RuntimeException::selfThrow("MLCP::computeBlock not yet implemented for relation of type " + relationType1);
