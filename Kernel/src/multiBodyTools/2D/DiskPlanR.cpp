@@ -112,14 +112,11 @@ double DiskPlanR::distance(double x, double y, double rad)
 /* called compute H, but only the gap function is needed! */
 void DiskPlanR::computeH(double)
 {
-  SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
+  SiconosVector *y = getInteractionPtr()->getYPtr(0).get();
+  double q_0 = (*data[q0])(0);
+  double q_1 = (*data[q0])(1);
 
-  double q_0 = boost::static_pointer_cast<Disk>
-               (*getInteractionPtr()->dynamicalSystemsBegin())->getQ(0);
-  double q_1 = boost::static_pointer_cast<Disk>
-               (*(getInteractionPtr()->dynamicalSystemsBegin()))->getQ(1);
-
-  y->setValue(0, distance(q_0, q_1, r));
+  (*y)(0) = distance(q_0, q_1, r);
 
 }
 
@@ -191,22 +188,20 @@ JacH(q) =  [                                                ]
 void DiskPlanR::computeJacH(double, unsigned int)
 {
 
-  double *g = &(*(JacH[0]))(0, 0);
+  SimpleMatrix *g = JacH[0].get();
 
-  double x = boost::static_pointer_cast<Disk>
-             (*getInteractionPtr()->dynamicalSystemsBegin())->getQ(0);
-  double y = boost::static_pointer_cast<Disk>
-             (*(getInteractionPtr()->dynamicalSystemsBegin()))->getQ(1);
+  double x = (*data[q0])(0);
+  double y = (*data[q0])(1);
 
   double D1 = A * x + B * y + C;
   double signD1 = copysign(1, D1);
 
-  g[0] = A * signD1 / sqrA2pB2;
-  g[1] = -B * signD1 / sqrA2pB2;
-  g[2] = B * signD1 / sqrA2pB2;
-  g[3] = A * signD1 / sqrA2pB2;
-  g[4] = 0;
-  g[5] = -r;
+  (*g)(0, 0) = A * signD1 / sqrA2pB2;
+  (*g)(1, 0) = -B * signD1 / sqrA2pB2;
+  (*g)(0, 1) = B * signD1 / sqrA2pB2;
+  (*g)(1, 1) = A * signD1 / sqrA2pB2;
+  (*g)(0, 2) = 0;
+  (*g)(1, 2) = -r;
 }
 
 bool DiskPlanR::equal(double pA, double pB, double pC, double pr)

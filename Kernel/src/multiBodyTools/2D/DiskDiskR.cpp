@@ -30,54 +30,63 @@ DiskDiskR::DiskDiskR(double r, double rr) : CircularR()
 
 double DiskDiskR::distance(double x1, double y1, double r1, double x2, double y2, double r2)
 {
-  return (hypot(x1 - x2, y1 - y2) - r1 - r2);
+  return (hypot(x1 - x2, y1 - y2) - r1pr2);
 }
 
 
 void DiskDiskR::computeH(double)
 {
 
-  // Warning: temporary method to have contiguous values in memory,
-  // copy of block to simple.
-  *workX = *data[q0];
-  double *q = &(*workX)(0);
+  double q_0 = (*data[q0])(0);
+  double q_1 = (*data[q0])(1);
+  double q_3 = (*data[q0])(3);
+  double q_4 = (*data[q0])(4);
 
-  SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
-
-  y->setValue(0, distance(q[0], q[1], r1, q[3], q[4], r2));
-  y->setValue(1, 0.);
+  SiconosVector *y = getInteractionPtr()->getYPtr(0).get();
+  (*y)(0) = distance(q_0, q_1, r1, q_3, q_4, r2);
 
 };
 
 void DiskDiskR::computeJacH(double, unsigned int)
 {
 
-  *workX = *data[q0];
-  double *q = &(*workX)(0);
-  double *g = &(*(JacH[0]))(0, 0);
+  SimpleMatrix *g = JacH[0].get();
 
-  double dx = q[3] - q[0];
-  double dy = q[4] - q[1];
+  double x1 = (*data[q0])(0);
+  double y1 = (*data[q0])(1);
+  double x2 = (*data[q0])(3);
+  double y2 = (*data[q0])(4);
+
+  double dx = x2 - x1;
+  double dy = y2 - y1;
 
   double d = hypot(dx, dy);
-
-  double dmr1pr2 = d - r1pr2;
 
   double dxsd = dx / d;
   double dysd = dy / d;
 
-  g[0] = -dxsd;       // dh[0]/dq[0]
-  g[1] = -dysd;       // dh[1]/dq[0]
-  g[2] = -dysd;       // dh[0]/dq[1]
-  g[3] = dxsd;        // dh[1]/dq[1]
-  g[4] = 0.;          // dh[0]/dq[2]
-  g[5] = r2;          // dh[1]/dq[2]
-  g[6] = dxsd;        // ...
-  g[7] = dysd;
-  g[8] = dysd;
-  g[9] = -dxsd;
-  g[10] = 0.;
-  g[11] = r1;
+  /*
+  [-dx  -dy       dx   dy     ]
+  [---  ---   0   --   --   0 ]
+  [ d    d        d    d      ]
+  [                           ]
+  [dy   -dx       -dy  dx     ]
+  [--   ---  -r1  ---  --  -r2]
+  [d     d         d   d      ]
+  */
+
+  (*g)(0, 0) = -dxsd;
+  (*g)(1, 0) = dysd;
+  (*g)(0, 1) = -dysd;
+  (*g)(1, 1) = -dxsd;
+  (*g)(0, 2) = 0.;
+  (*g)(1, 2) = -r1;
+  (*g)(0, 3) = dxsd;
+  (*g)(1, 3) = -dysd;
+  (*g)(0, 4) = dysd;
+  (*g)(1, 4) = dxsd;
+  (*g)(0, 5) = 0.;
+  (*g)(1, 5) = -r2;
 
 }
 

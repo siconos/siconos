@@ -414,10 +414,6 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
   assert(DSG0->bundle(DSG0->descriptor(ds)) == ds);
   SP::DiskPlanR relp(new DiskPlanR(r, A, B, C, xCenter, yCenter, width));
 
-  std::cout << relp->distance(ds->getQ(0),
-                              ds->getQ(1),
-                              ds->getRadius()) << std::endl;
-
   if (relp->distance(ds->getQ(0),
                      ds->getQ(1),
                      ds->getRadius()) < tol)
