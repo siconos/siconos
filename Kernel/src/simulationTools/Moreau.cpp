@@ -491,20 +491,20 @@ double Moreau::computeResidu()
         // residuFree += coef * fL_k,i+1
         scal(coef, *d->getFPtr(), *residuFree, false);
       }
-      cout << "Moreau: residu free" << endl;
-      (*residuFree).display();
+      //    cout<<"Moreau: residu free"<<endl;
+      //    (*residuFree).display();
       (*workX[d]) = *residuFree;
       scal(-h, *d->getRPtr(), (*workX[d]), false); // residu = residu - h*r
       normResidu = (workX[d])->norm2();
-      cout << "Moreau: residu " << endl;
-      (workX[d])->display();
+      //    cout<<"Moreau: residu "<<endl;
+      //    (workX[d])->display();
       //    cout<<"Moreau: norm residu :"<<normResidu<<endl;
 
 
       (*d->getResidurPtr()) = (*d->getRPtr()) - (*d->getGAlphaPtr());
 
-      cout << "Moreau FONLDS: residu r" << endl;
-      (*d->getResidurPtr()).display();
+      //    cout<<"Moreau FONLDS: residu r"<<endl;
+      //    (*d->getResidurPtr()).display();
     }
 
     // 2 - First Order Linear Systems
@@ -781,19 +781,19 @@ void Moreau::computeFreeState()
       // -> compute real xfree
       *xfree *= -1.0;
       *xfree += *x;
-      cout << " moreau::computefreestate xfree" << endl;
-      xfree->display();
+      //    cout<<" moreau::computefreestate xfree"<<endl;
+      //    xfree->display();
 
       if (!simulationLink->getModelPtr()->getNonSmoothDynamicalSystemPtr()->isLinear())
       {
         SP::SiconosVector xp = d->getXpPtr();
-        cout << "before moreau::computefreestate xp" << endl;
-        xp->display();
+        //      cout<<"before moreau::computefreestate xp"<<endl;
+        //      xp->display();
         W->PLUForwardBackwardInPlace(*xp);
         scal(h, *xp, *xp);
         *xp += *xfree;
-        cout << "after moreau::computefreestate xp" << endl;
-        xp->display();
+        //      cout<<"after moreau::computefreestate xp"<<endl;
+        //      xp->display();
         SP::SiconosVector xq = d->getXqPtr();
         *xq = *xp;
         *xq -= *x;
