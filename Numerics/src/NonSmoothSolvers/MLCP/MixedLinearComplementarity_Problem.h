@@ -119,6 +119,7 @@ typedef struct
   int n;
   int m;
   NumericsMatrix* M;
+  NumericsMatrix* Bblock;
   double * q;
   double *A;
   double *B;

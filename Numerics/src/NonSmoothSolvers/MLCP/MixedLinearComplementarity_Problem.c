@@ -35,7 +35,7 @@ void displayMat(double * M, int Nblin, int Nbcol, int incCol)
   {
     for (col = 0; col < Nbcol; col++)
     {
-      printf(" %e", M[lin + col * incCol]);
+      printf(" %.15e", M[lin + col * incCol]);
       if (col != Nbcol - 1)
         printf(",");
     }
@@ -62,7 +62,7 @@ void displayMLCP(MixedLinearComplementarity_Problem* p)
   }
   else
     printf("No M matrix:\n");
-  return;
+
   if (p->q)
   {
     printf("q matrix:\n");

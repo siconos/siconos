@@ -123,12 +123,12 @@ int mlcp_compute_error(MixedLinearComplementarity_Problem* problem, double *z, d
   {
     /*if (verbose > 0) printf(" Numerics - mlcp_compute_error failed: error = %g > tolerance = %g.\n",*error, tolerance);*/
     printf(" Numerics - mlcp_compute_error failed: error = %g > tolerance = %g.\n", *error, tolerance);
+    /* displayMLCP(problem);*/
     return 1;
   }
   else
   {
-    /*if (verbose > 0) printf("Siconos/Numerics: mlcp_compute_error: Error evaluation = %g \n",*error);*/
-    printf("Siconos/Numerics: mlcp_compute_error: Error evaluation = %g \n", *error);
+    if (verbose > 0) printf("Siconos/Numerics: mlcp_compute_error: Error evaluation = %g \n", *error);
     return 0;
   }
 }

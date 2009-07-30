@@ -31,8 +31,11 @@
 void mlcp_driver_init(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
 {
   char * name = options->solverName;
+
   if (strcmp(name , "DIRECT_ENUM") == 0)
     mlcp_direct_enum_init(problem, options);
+  else if (strcmp(name , "PATH_ENUM") == 0)
+    mlcp_path_enum_init(problem, options);
   else if (strcmp(name , "DIRECT_SIMPLEX") == 0)
     mlcp_direct_simplex_init(problem, options);
   else if (strcmp(name , "DIRECT_PATH") == 0)
@@ -49,6 +52,8 @@ void mlcp_driver_reset(MixedLinearComplementarity_Problem* problem, Solver_Optio
   char * name = options->solverName;
   if (strcmp(name , "DIRECT_ENUM") == 0)
     mlcp_direct_enum_reset();
+  else if (strcmp(name , "PATH_ENUM") == 0)
+    mlcp_path_enum_reset();
   else if (strcmp(name , "DIRECT_SIMPLEX") == 0)
     mlcp_direct_simplex_reset();
   else if (strcmp(name , "DIRECT_PATH") == 0)
@@ -63,6 +68,8 @@ int mlcp_driver_get_iwork(MixedLinearComplementarity_Problem* problem, Solver_Op
   char * name = options->solverName;
   if (strcmp(name , "DIRECT_ENUM") == 0)
     return  mlcp_direct_enum_getNbIWork(problem, options);
+  else if (strcmp(name , "PATH_ENUM") == 0)
+    return  mlcp_path_enum_getNbIWork(problem, options);
   else if (strcmp(name , "ENUM") == 0)
     return  mlcp_enum_getNbIWork(problem, options);
   else if (strcmp(name , "DIRECT_SIMPLEX") == 0)
@@ -80,6 +87,8 @@ int mlcp_driver_get_dwork(MixedLinearComplementarity_Problem* problem, Solver_Op
   char * name = options->solverName;
   if (strcmp(name , "DIRECT_ENUM") == 0)
     return  mlcp_direct_enum_getNbDWork(problem, options);
+  else if (strcmp(name , "PATH_ENUM") == 0)
+    return  mlcp_path_enum_getNbDWork(problem, options);
   else if (strcmp(name , "ENUM") == 0)
     return  mlcp_enum_getNbDWork(problem, options);
   else if (strcmp(name , "DIRECT_SIMPLEX") == 0)
@@ -101,14 +110,15 @@ int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *
     numericsError("mlcp_driver", "null input for solver and/or global options");
 
   /* Set global options */
-  setNumericsOptions(global_options);
+  //  setNumericsOptions(global_options);
 
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
     numericsError("mlcp_driver", "null input for LinearComplementarity_Problem and/or unknowns (z,w)");
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
-  //  displayMLCP(problem);
+  if (verbose)
+    displayMLCP(problem);
   /* Switch to DenseMatrix or SparseBlockMatrix solver according to the type of storage for M */
   /* Storage type for the matrix M of the LCP */
   int storageType = problem->M->storageType;
@@ -165,6 +175,8 @@ int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *
   /****** DIRECT ENUM algorithm ******/
   else if (strcmp(name , "DIRECT_ENUM") == 0)
     mlcp_direct_enum(problem, z , w , &info , options);
+  else if (strcmp(name , "PATH_ENUM") == 0)
+    mlcp_path_enum(problem, z , w , &info , options);
 
   /****** DIRECT SIMPLEX algorithm ******/
   else if (strcmp(name , "DIRECT_SIMPLEX") == 0)
@@ -180,6 +192,8 @@ int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *
   /****** DIRECT FB algorithm ******/
   else if (strcmp(name , "DIRECT_FB") == 0)
     mlcp_direct_FB(problem, z , w , &info , options);
+  else if (strcmp(name , "MLCP_SBM") == 0)
+    mlcp_GaussSeidel_SBM(problem, z , w , &info , options, 1);
 
   /*error */
   else

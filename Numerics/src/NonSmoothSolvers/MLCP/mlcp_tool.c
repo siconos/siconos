@@ -69,14 +69,14 @@ void   mlcp_DisplaySolution(double * z1, double * z2, double * w1, double * w2, 
   int lin;
   printf("z1:\n");
   for (lin = 0; lin < n; lin++)
-    printf("z1[,%d]=%e\n", lin, z1[lin]);
+    printf("z1[,%d]=%.15e\n", lin, z1[lin]);
 
   for (lin = 0; lin < Nblines - m; lin++)
-    printf("w1[%d]=%e\n", lin, w1[lin]);
+    printf("w1[%d]=%.15e\n", lin, w1[lin]);
 
   printf("w2,z2:\n");
   for (lin = 0; lin < m; lin++)
-    printf("z2[%d],w2[%d],=%e\t%e\n", lin, lin, z2[lin], w2[lin]);
+    printf("z2[%d],w2[%d],=%.15e\t%.15e\n", lin, lin, z2[lin], w2[lin]);
 
 
 }

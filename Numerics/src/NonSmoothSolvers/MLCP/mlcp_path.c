@@ -36,6 +36,7 @@ void mlcp_path(MixedLinearComplementarity_Problem* problem, double *z, double *w
 {
   *info = 1;
 #ifdef HAVE_PATHFERRIS
+  *info = 0;
   MCP_Termination termination;
   double tol = options->dparam[0];
 
@@ -45,7 +46,15 @@ void mlcp_path(MixedLinearComplementarity_Problem* problem, double *z, double *w
   n = problem->n;
   m = problem->m;
   dim = m + n;
+  /*  if (verbose){
+    printf("initial values for z:\n");
+    for (int i=0;i<dim;i++)
+      printf("%.15e\n", z[i]);
+    printf("initial values for w:\n");
+    for (int i=0;i<dim;i++)
+      printf("%.15e\n", w[i]);
 
+      }*/
   nnz = nbNonNulElems(dim, M, 1.0e-18);
   int * m_i = (int *)calloc(nnz + 1, sizeof(int));
   int * m_j = (int *)calloc(nnz + 1, sizeof(int));
@@ -96,8 +105,11 @@ void mlcp_path(MixedLinearComplementarity_Problem* problem, double *z, double *w
       }
     }
 
-    *info = 0;
+
     mlcp_compute_error(problem, z, w, tol, &err);
+    /*1e-7 because it is the default tol of path.*/
+    if (err > 1e-7)
+      *info = 1;
     for (i = 0; i < m; i++)
     {
       if (z[n + i] > w[n + i])

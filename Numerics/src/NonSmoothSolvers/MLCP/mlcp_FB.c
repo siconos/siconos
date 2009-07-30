@@ -109,9 +109,9 @@ void mlcp_FB(MixedLinearComplementarity_Problem* problem, double *z, double *w, 
   double err;
   double tol = options->dparam[0];
   int i;
-  /*only for debug */
-  double * zz = (double *)malloc((sN + sM) * sizeof(double));
-  memcpy(zz, z, (sN + sM)*sizeof(double));
+  /*only for debug
+  double * zz = (double *)malloc((sN+sM)*sizeof(double));
+  memcpy(zz,z,(sN+sM)*sizeof(double));*/
 
 
   *info = nonSmoothNewtonNeigh(sN + sM, z, &F, &jacobianF, options->iparam, options->dparam);

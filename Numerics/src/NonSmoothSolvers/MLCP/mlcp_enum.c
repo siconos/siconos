@@ -36,7 +36,7 @@ dim(v)=nn
 #include "mlcp_enum_tool.h"
 
 #ifdef HAVE_DGELS
-#define ENUM_USE_DGELS
+//#define ENUM_USE_DGELS
 #endif
 
 #ifdef MLCP_DEBUG
@@ -175,6 +175,8 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
   int * ipiv;
   int check;
   int LAinfo;
+  int ii;
+  int cc;
 
   sMl = problem->M->size0;
   sNn = problem->n;
@@ -188,9 +190,8 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
   tol = options->dparam[0];
 
   sMref = problem->M->matrix0;
-
   /*  LWORK = 2*npm; LWORK >= max( 1, MN + max( MN, NRHS ) ) where MN = min(M,N)*/
-
+  //  verbose=1;
   if (verbose)
     printf("mlcp_enum begin, n %d m %d tol %lf\n", sNn, sMm, tol);
 
@@ -238,9 +239,23 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
     if (!LAinfo)
     {
 #ifdef ENUM_USE_DGELS
+      cc = 0;
+      for (ii = 0; ii < npm; ii++)
+      {
+        if (isnan(sQ[ii]) || isinf(sQ[ii]))
+        {
+          printf("DGELS FAILED\n");
+          cc = 1;
+          break;
+        }
+      }
+      if (cc)
+        continue;
+
       if (sMl > npm)
       {
         rest = DNRM2(sMl - npm, sQ + npm, 1);
+
         if (rest > tol || isnan(rest) || isinf(rest))
         {
           if (verbose)
@@ -272,6 +287,15 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
         continue;
       else
       {
+        double err;
+        mlcp_compute_error(problem, z, w, tol, &err);
+        /*because it happens the LU leads to an wrong solution witout raise any error.*/
+        if (err > 10 * tol)
+        {
+          if (verbose)
+            printf("mlcp_enum compute error out of tol: %e!\n", err);
+          continue;
+        }
         mlcp_fillSolution(sU, sV, sW1, sW2, sNn, sMm, sMl, sW2V, sQ);
         if (verbose)
         {

@@ -186,6 +186,7 @@ extern "C" {
 
 #include "mlcp_enum.h"
 #include "mlcp_simplex.h"
+#include "mlcp_path_enum.h"
 #include "mlcp_direct_enum.h"
 #include "mlcp_direct_simplex.h"
 #include "mlcp_direct_path.h"
@@ -414,6 +415,8 @@ extern "C" {
    \author Olivier Bonnefon
   */
   void mlcp_direct_FB(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+
+  void mlcp_GaussSeidel_SBM(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options, int numberOfSolvers);
 
   /**
     This function checks the validity of the vector z as a solution \n
