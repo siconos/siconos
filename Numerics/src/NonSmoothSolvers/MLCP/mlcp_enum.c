@@ -288,15 +288,15 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
       else
       {
         double err;
+        mlcp_fillSolution(sU, sV, sW1, sW2, sNn, sMm, sMl, sW2V, sQ);
         mlcp_compute_error(problem, z, w, tol, &err);
         /*because it happens the LU leads to an wrong solution witout raise any error.*/
         if (err > 10 * tol)
         {
-          if (verbose)
-            printf("mlcp_enum compute error out of tol: %e!\n", err);
+          if (verbose || 1)
+            printf("LU no-error, but mlcp_compute_error out of tol: %e!\n", err);
           continue;
         }
-        mlcp_fillSolution(sU, sV, sW1, sW2, sNn, sMm, sMl, sW2V, sQ);
         if (verbose)
         {
           printf("mlcp_enum find a solution!\n");
@@ -315,6 +315,6 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
     }
   }
   *info = 1;
-  if (verbose)
+  if (verbose || 1)
     printf("mlcp_enum failed!\n");
 }

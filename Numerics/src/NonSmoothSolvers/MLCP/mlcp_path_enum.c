@@ -120,6 +120,5 @@ void mlcp_path_enum(MixedLinearComplementarity_Problem* problem, double *z, doub
     options->iWork = siWorkEnum;
     /*solver direct failed, so run the enum solver.*/
     mlcp_enum(problem, z, w, info, options);
-    *info = 0;
   }
 }
