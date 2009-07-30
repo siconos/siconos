@@ -282,7 +282,7 @@ void Topology::removeDynamicalSystem(SP::DynamicalSystem ds)
 
 /* a visitor to set parameters depending on nslaw */
 
-class ComplementarityConditionnNSL;
+class ComplementarityConditionNSL;
 class MixedComplementarityConditionNSL;
 class NewtonImpactNSL;
 class NewtonImpactFrictionNSL;
@@ -294,7 +294,7 @@ struct Topology::SetupFromNslaw : public SiconosVisitor
   SetupFromNslaw(SP::Topology p, SP::Interaction inter) :
     parent(p), interaction(inter) {};
 
-  void visit(ComplementarityConditionnNSL&)
+  void visit(ComplementarityConditionNSL&)
   {
     parent->minRelativeDegree = std::min<int>(0, parent->minRelativeDegree);
     parent->maxRelativeDegree = std::max<int>(0, parent->maxRelativeDegree);

@@ -96,7 +96,7 @@ void ModelTest::testBuildModel2()
 void ModelTest::testBuildModel3()
 {
   cout << "--> Test: constructor xml." << endl;
-  char * xmlFile = "ModelXml_test.xml" ;
+  std::string xmlFile = "ModelXml_test.xml" ;
 
   SP::Model M(new Model(xmlFile));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->getT0() == t0, true);

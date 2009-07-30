@@ -38,14 +38,11 @@ Model::Model(): t(0.0), t0(0.0), T(0.0), title("none"), author("nobody"), descri
 {}
 
 // -> xml
-Model::Model(char *xmlFile):
+Model::Model(const std::string& xmlFile):
   t(0.0), t0(0.0), T(-1.0),
   title("none"), author("nobody"), description("none"),
   date("none"), xmlSchema(XML_SCHEMA)
 {
-  if (! xmlFile)
-    RuntimeException::selfThrow("Model: xml constructor, xmlfile = NULL");
-
   // Built DOMtree
   modelxml.reset(new SiconosModelXML(xmlFile));
 

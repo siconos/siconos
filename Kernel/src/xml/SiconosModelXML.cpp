@@ -46,15 +46,15 @@ SiconosModelXML::SiconosModelXML():
 }
 
 
-SiconosModelXML::SiconosModelXML(char * siconosModelXMLFilePath):
+SiconosModelXML::SiconosModelXML(const std::string& siconosModelXMLFilePath):
   rootNode(NULL), timeNode(NULL), doc(NULL), xmlSchemaFile(XML_SCHEMA),
   titleNode(NULL), authorNode(NULL), descriptionNode(NULL), dateNode(NULL), xmlSchemaNode(NULL),
   tNode(NULL), t0Node(NULL), TNode(NULL)
 {
-  if (siconosModelXMLFilePath)
+  if (siconosModelXMLFilePath != "")
   {
     //===== XML input file loading =====
-    doc = xmlParseFile(siconosModelXMLFilePath);
+    doc = xmlParseFile(siconosModelXMLFilePath.c_str());
 
     if (!doc)  // check if parsing is ok
       XMLException::selfThrow("SiconosModelXML - Document " + (string)siconosModelXMLFilePath + " not parsed successfully.");

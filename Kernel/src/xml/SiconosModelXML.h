@@ -114,7 +114,7 @@ public:
   *   \param siconosModelXMLFilePath : the path string of the Siconos XML data file
   *   \exception XMLException : exception may be the XML file does not exist ; XML schema has wrong syntax  or the XML file does not respect it ; etc.
   */
-  SiconosModelXML(char * siconosModelXMLFilePath);
+  SiconosModelXML(const std::string& siconosModelXMLFilePath);
 
   /** Destroy an SiconosModelXML object
   */

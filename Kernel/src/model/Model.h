@@ -82,7 +82,7 @@ public:
    *  \param char * : the input XML file (optional parameter)
    *  \exception RuntimeException
    */
-  Model(char *xmlFile);
+  Model(const std::string& xmlFile);
 
   /** create the Model from a set of data
    *  \param double : the value for t0
