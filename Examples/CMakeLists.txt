@@ -4,20 +4,13 @@ SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 INCLUDE(SiconosProject)
 
 SET(EXAMPLES_DIRECTORIES
+  Control
   Electronics
   Mechanics
-  Mechanics/3DBeads
   Robotics/HuMAns_pa10
-  Control/ObserverLCS
-  Control/Two-linkManipulator
 )
 
-SET(NO_TEST_FILES
-  Mechanics/3DBeads/Billard/draw_billard.cpp
-  Mechanics/3DBeads/Beads_Couple/Draw_NLM.cpp
-  Mechanics/3DBeads/Beads_Couple/Draw_NLM.cpp
-  Mechanics/3DBeads/Block_Beads/Draw_block_beads.cpp
-  Mechanics/3DBeads/Canon/main.cpp)
+SET(NO_TEST_FILES)
 
 SICONOS_PROJECT(Examples 3 0 0)
 
@@ -25,19 +18,16 @@ SICONOS_PROJECT(Examples 3 0 0)
 # Internals
 #
 
-SET(SICCOM "${CMAKE_INSTALL_PREFIX}/bin/siconos")
-
-SET(SICWRAP ${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/Siconos/wrap)
-
-FILE(WRITE ${SICWRAP}
-  "cd ${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/Siconos/; ${SICCOM} $@")
+SET(CMAKE_SICONOS_COMPILE_OBJECT "${CMAKE_INSTALL_PREFIX}/bin/siconos -noexec <SOURCE>")
+SET(CMAKE_SICONOS_LINK_EXECUTABLE "")
 
 ENABLE_TESTING()
 
 MACRO(ADD_EXAMPLE _N _EX)
   MESSAGE("Adding example ${_N} (${_EX})")
-  ADD_TEST(${_N} /bin/sh -x ${SICWRAP} ${_EX})
-ENDMACRO(ADD_EXAMPLE _EX _N)
+  ADD_TEST(${_N} ${_EX})
+  SET_TESTS_PROPERTIES(${_N} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Runtime Exception;SiconosException")
+ENDMACRO(ADD_EXAMPLE _N _EX)
 
 FOREACH(_D ${EXAMPLES_DIRECTORIES})
   FILE(GLOB EXAMPLES_P ${CMAKE_SOURCE_DIR}/${_D}/*/*.cpp )
@@ -59,7 +49,9 @@ FOREACH(EXAMPLE ${EXAMPLES})
     ENDFOREACH(_NT ${NO_TEST_FILES})
     IF(TEST_ME)
       GET_FILENAME_COMPONENT(EXAMPLE_NAME ${EXAMPLE} NAME_WE)
-      ADD_EXAMPLE(${EXAMPLE_NAME} ${EXAMPLE})
+      SET_SOURCE_FILES_PROPERTIES(${EXAMPLE} PROPERTIES LANGUAGE SICONOS)
+      ADD_EXECUTABLE(${EXAMPLE_NAME} ${EXAMPLE})
+      ADD_EXAMPLE(${EXAMPLE_NAME} ${EXAMPLE_NAME})
     ENDIF(TEST_ME)
   ENDIF(NOT EXAMPLE MATCHES Plugin)
 ENDFOREACH(EXAMPLE ${EXAMPLES})
