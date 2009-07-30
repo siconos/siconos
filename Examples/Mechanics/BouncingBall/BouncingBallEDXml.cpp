@@ -38,14 +38,15 @@ int main(int argc, char* argv[])
 
     // --- Model loading from xml file ---
     cout << "====> Model loading (XML) ..." << endl << endl;
-    Model * bouncingBall = new Model("./BallED.xml");
+    SP::Model bouncingBall(new Model("./BallED.xml"));
     cout << "\n *** BallED.xml file loaded ***" << endl << endl;
 
+    cout << "====> Initialisation ..." << endl << endl;
+    bouncingBall->initialize();
+
     // --- Get and initialize the simulation ---
-    EventDriven* s = static_cast<EventDriven*>(bouncingBall->getSimulationPtr());
-    LagrangianDS* ball = static_cast<LagrangianDS*>(bouncingBall->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
-    cout << "====> Simulation initialisation ..." << endl << endl;
-    s->initialize();
+    SP::EventDriven s = boost::static_pointer_cast<EventDriven>(bouncingBall->getSimulationPtr());
+    SP::LagrangianDS ball = boost::static_pointer_cast<LagrangianDS> (bouncingBall->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(0));
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -54,9 +55,9 @@ int main(int argc, char* argv[])
     unsigned int outputSize = 4;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
-    SiconosVector * q = ball->getQPtr();
-    SiconosVector * v = ball->getVelocityPtr();
-    SiconosVector * p = ball->getPPtr(2);
+    SP::SiconosVector q = ball->getQPtr();
+    SP::SiconosVector v = ball->getVelocityPtr();
+    SP::SiconosVector p = ball->getPPtr(2);
 
     dataPlot(0, 0) = bouncingBall->getT0();
     dataPlot(0, 1) = (*q)(0);
@@ -65,7 +66,7 @@ int main(int argc, char* argv[])
 
     cout << "====> Start computation ... " << endl << endl;
     // --- Time loop  ---
-    EventsManager * eventsManager = s->getEventsManagerPtr();
+    SP::EventsManager eventsManager = s->getEventsManagerPtr();
     unsigned int numberOfEvent = 0 ;
     int k = 0;
     double T = bouncingBall->getFinalT();
@@ -102,7 +103,6 @@ int main(int argc, char* argv[])
     ioMatrix io("result.dat", "ascii");
     io.write(dataPlot, "noDim");
 
-    delete ball;
   }
 
   catch (SiconosException e)
