@@ -53,6 +53,8 @@ private:
 
   bool mComputeResiduY;
 
+  unsigned int mNbNewtonSteps;
+
 
 public:
 
@@ -111,6 +113,16 @@ public:
    * \param unsigned int: maximum number of Newton steps
    */
   void newtonSolve(double, unsigned int);
+
+  /*
+   * To known the number of steps performed by the Newton algorithm.
+   *
+   */
+  unsigned int getNewtonNbSteps()
+  {
+    return mNbNewtonSteps;
+  }
+
   /** compute initial residu
    * It computes the initial residu to start the newton algorithm.
    *

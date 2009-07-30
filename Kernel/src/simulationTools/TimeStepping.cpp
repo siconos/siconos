@@ -345,7 +345,7 @@ void TimeStepping::computeOneStep()
 }
 void TimeStepping::computeInitialResidu()
 {
-
+  //  cout<<"BEGIN computeInitialResidu"<<endl;
   double tkp1 = getTkp1();
   SP::InteractionsSet allInteractions = model->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
   for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
@@ -369,6 +369,7 @@ void TimeStepping::computeInitialResidu()
       (*it)->getRelationPtr()->computeResiduY(tkp1);
     }
 
+  //  cout<<"END computeInitialResidu"<<endl;
 }
 
 void TimeStepping::advanceToEvent()
@@ -442,19 +443,23 @@ void TimeStepping::saveYandLambdaInMemory()
 void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 {
   bool isNewtonConverge = false;
-  unsigned int nbNewtonStep = 0; // number of Newton iterations
+  mNbNewtonSteps = 0; // number of Newton iterations
   //double residu = 0;
   int info = 0;
   //  cout<<"||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||| BEGIN NEWTON IT"<<endl;
   computeInitialResidu();
 
-  while ((!isNewtonConverge) && (nbNewtonStep <= maxStep))
+  while ((!isNewtonConverge || info) && (mNbNewtonSteps <= maxStep))
   {
-    nbNewtonStep++;
+    mNbNewtonSteps++;
     prepareNewtonIteration();
     computeFreeState();
+    if (info)
+      cout << "new loop because of info\n" << endl;
     if (!allNSProblems->empty())
       info = computeOneStepNSProblem("timeStepping");
+    if (info)
+      cout << "info!" << endl;
     // Check output from solver (convergence or not ...)
     if (!checkSolverOutput)
       DefaultCheckSolverOutput(info);
@@ -463,12 +468,12 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 
     update(levelMin);
     isNewtonConverge = newtonCheckConvergence(criterion);
-    if (!isNewtonConverge)
+    if (!isNewtonConverge && !info)
     {
       saveYandLambdaInMemory();
     }
   }
-  if (!isNewtonConverge)
+  if (!isNewtonConverge && !info)
     cout << "Newton process stopped: max. steps number reached." << endl ;
   //  cout<<"||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||  END NEWTON IT"<<endl;
 }
