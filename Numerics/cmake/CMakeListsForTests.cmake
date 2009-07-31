@@ -43,9 +43,9 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
     TARGET_LINK_LIBRARIES(${_EXE} ${FORTRAN_LIBRARIES})
   ENDIF(FORTRAN_LIBRARIES)
 
-  # a brutal way to handle ccpunit assertions failures
   IF(CPPUNIT_FOUND)
 
+    # each test in the test suite becomes a cmake test
     ADD_CUSTOM_COMMAND(TARGET ${_EXE}
       POST_BUILD
       COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${_EXE}

@@ -192,8 +192,9 @@ int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *
   /****** DIRECT FB algorithm ******/
   else if (strcmp(name , "DIRECT_FB") == 0)
     mlcp_direct_FB(problem, z , w , &info , options);
-  else if (strcmp(name , "MLCP_SBM") == 0)
-    mlcp_GaussSeidel_SBM(problem, z , w , &info , options, 1);
+  // need a svn add mlcp_GaussSeidel_SBM ...
+  //  else if( strcmp( name , "MLCP_SBM" ) == 0 )
+  //    mlcp_GaussSeidel_SBM( problem, z , w , &info , options,1);
 
   /*error */
   else
