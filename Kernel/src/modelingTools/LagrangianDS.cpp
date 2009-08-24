@@ -116,7 +116,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
     q[1].reset(new SimpleVector(*velocity0));
 
   q[2].reset(new SimpleVector(ndof));
-
+  mResiduFree.reset(new SimpleVector(getDim()));
   p.resize(3);
   // Memories
   if (lgptr->hasQMemory())   // qMemory

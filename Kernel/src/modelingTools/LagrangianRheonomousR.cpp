@@ -170,7 +170,8 @@ void LagrangianRheonomousR::computeOutput(double time, unsigned int derivativeNu
       *y += *hDot;
     }
     else if (derivativeNumber == 2)
-      prod(*JacH[0], *data[q2], *y); // Approx: y[2] = JacH[0]q[2], other terms are neglected ...
+      prod(*JacH[0], *data[q2], *y); // Approx:,  ...
+    // \warning :  the computation of y[2] (in event-driven simulation for instance) is approximated by  y[2] = JacH[0]q[2]. For the moment, other terms are neglected (especially, partial derivatives with respect to time).
     else
       RuntimeException::selfThrow("LagrangianRheonomousR::computeOutput(time,index), index out of range or not yet implemented.");
   }
