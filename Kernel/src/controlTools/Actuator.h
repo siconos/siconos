@@ -25,15 +25,16 @@
 #define Actuator_H
 
 #include "SiconosPointers.hpp"
-#include"DynamicalSystemsSet.hpp"
-#include"EventsManager.h"
-#include<string>
+#include "DynamicalSystemsSet.hpp"
+#include "EventsManager.h"
+#include "TimeDiscretisation.h"
+#include "Sensor.h"
+#include <string>
 
-class TimeDiscretisation;
 class Model;
 class Event;
 class DynamicalSystem;
-class Sensor;
+
 
 /** A set of Sensors */
 typedef std::set<SP::Sensor> Sensors;
@@ -54,16 +55,27 @@ TYPEDEF_SPTR(Sensors);
 
    Abstract class, interface to user-defined actuators.
 
-   An Actuator is dedicated to act on parameters of the Model (especially z param. in DynamicalSystem) according to some specific values recorded thanks to sensors. It gives an interface for User who can implement its own Actuator.
-   clearly define which data he needs to save.
+   An Actuator is dedicated to act on parameters of the Model
+   (especially z param. in DynamicalSystem) according to some specific
+   values recorded thanks to sensors. It gives an interface for User
+   who can implement its own Actuator.  clearly define which data he
+   needs to save.
 
-   An Actuator handles a TimeDiscretisation, which defines the set of all instants where the Actuator must operate \n
-   (i.e. each times where actuate() function will be called). An Event, inserted into the EventsManager of the Simulation, is linked to this TimeDiscretisation.
+   An Actuator handles a TimeDiscretisation, which defines the set of
+   all instants where the Actuator must operate \n (i.e. each times
+   where actuate() function will be called). An Event, inserted into
+   the EventsManager of the Simulation, is linked to this
+   TimeDiscretisation.
 
-   Moreover, an Actuator is identified thanks to an id and a type (a number associated to the derived class type indeed).
+   Moreover, an Actuator is identified thanks to an id and a type (a
+   number associated to the derived class type indeed).
 
    \section BActuator Construction
-   To build an Actuator it is necessary to use the factory. Inputs are a number which identify the derived class type and a TimeDiscretisation:
+
+   To build an Actuator it is necessary to use the factory. Inputs are
+   a number which identify the derived class type and a
+   TimeDiscretisation:
+
    \code
    // Get the registry
    ActuatorFactory::Registry& regActuator(ActuatorFactory::Registry::get()) ;
@@ -79,7 +91,7 @@ TYPEDEF_SPTR(Sensors);
    cm->addAndRecordActuator(myType,t)
    \endcode
 */
-class Actuator
+class Actuator : public boost::enable_shared_from_this<Actuator>
 {
 protected:
 

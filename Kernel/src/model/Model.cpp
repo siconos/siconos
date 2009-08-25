@@ -92,8 +92,9 @@ Model::Model(double newT0, double newT, DynamicalSystemsSet& allDS, Interactions
 
 void Model::setSimulationPtr(SP::Simulation newPtr)
 {
-  // Warning: this function may be used carefully because of the links between Model and TimeDiscretisation
-  // The model of the simulation input MUST be the current model.
+  // Warning: this function may be used carefully because of the links
+  // between Model and TimeDiscretisation The model of the simulation
+  // input MUST be the current model.
   strat = newPtr;
 }
 
@@ -111,9 +112,11 @@ void Model::initialize(SP::Simulation simulation)
 {
   // Connection to input simulation only if non null.
   // Two cases:
-  // 1- simulation object has been created inside the model => no need to link => no input arg. for the present function
-  //  (input = default = empty) - Ex: after xml constructor.
-  // 2- simulation built outside of the model => input simulation required
+  // 1- simulation object has been created inside the model => no need
+  //  to link => no input arg. for the present function (input =
+  //  default = empty) - Ex: after xml constructor.
+  // 2- simulation built outside of the model => input simulation
+  // required
   if (simulation)
     strat = simulation;
 
@@ -210,7 +213,8 @@ void Model::checkXMLPlatform()
     }
     else if (nsds)
     {
-      // creation of the NonSmoothDynamicalSystemXML and of all the DynamicalSystemXML and InteractionXML
+      // creation of the NonSmoothDynamicalSystemXML and of all
+      // the DynamicalSystemXML and InteractionXML
       modelxml->loadModel(shared_from_this());
       // \todo to be tested !!
     }
@@ -221,11 +225,15 @@ void Model::checkXMLPlatform()
       if (modelxml->getSimulationXML())
       {
         //
-        // no SimulationXML already exists, so no TimeDiscretisationXML, OneStepIntegratorXML and OneStepNSProblemXML are existing
-        // because these objects are required when a Simulation is defined in the XML input file
+        // no SimulationXML already exists, so no
+        // TimeDiscretisationXML, OneStepIntegratorXML and
+        // OneStepNSProblemXML are existing because these
+        // objects are required when a Simulation is defined in
+        // the XML input file
 
-        // we must update all the Model to do
-        // the creation of the SimulationXML and of all the OneStepIntegratorXML and OneStepNSProblemXML
+        // we must update all the Model to do the creation of
+        // the SimulationXML and of all the OneStepIntegratorXML
+        // and OneStepNSProblemXML
         //
         modelxml->loadModel(shared_from_this());
         // \todo to be tested !!
@@ -239,9 +247,11 @@ void Model::checkXMLPlatform()
   else
   {
     // in this case, we must create all the XML objects
-    // SiconosModelXML, NonSmoothDynamicalSystemXML, SimulationXML, ...
+    // SiconosModelXML, NonSmoothDynamicalSystemXML, SimulationXML,
+    // ...
 
-    // to build all the XML objects, we must fold all the objects of the platform
+    // to build all the XML objects, we must fold all the objects of
+    // the platform
 
     modelxml.reset(new SiconosModelXML());
     modelxml->loadModel(shared_from_this());
@@ -251,9 +261,9 @@ void Model::checkXMLPlatform()
 
 void Model::checkModelCoherency()
 {
-  // at first, checking the XML
-  // if matrix and vector are well defined by example
-  // if DynamicalSystems have BoundaryConditions when the NonSmoothDynamicalSystem is BVP for example
+  // at first, checking the XML if matrix and vector are well defined
+  // by example if DynamicalSystems have BoundaryConditions when the
+  // NonSmoothDynamicalSystem is BVP for example
 
   if (modelxml->checkSiconosDOMTreeCoherency() == true) cout << "Data of the XML DOM tree are coherent." << endl;
   else cout << "Warning : Data of the XML DOM tree are not coherent." << endl;

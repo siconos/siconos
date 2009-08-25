@@ -51,8 +51,8 @@ void SensorPosition::initialize()
 void SensorPosition::capture()
 {
   (*dataPlot)(k, 0) = timeDiscretisation->getCurrentTime();
-  (*dataPlot)(k, 1) = (*model->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0)->getXPtr())(0);
-  (*dataPlot)(k, 2) = (*model->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0)->getXPtr())(3);
+  (*dataPlot)(k, 1) = (*model->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(0)->getXPtr())(0);
+  (*dataPlot)(k, 2) = (*model->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(0)->getXPtr())(3);
   k++;
 }
 

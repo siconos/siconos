@@ -77,7 +77,7 @@ void Actuator::addDynamicalSystems(const DynamicalSystemsSet& newDSs)
     allDS->insert(*itDS);
 }
 
-void Actuator::addDynamicalSystemPtr(DS::DynamicalSystem newDS)
+void Actuator::addDynamicalSystemPtr(SP::DynamicalSystem newDS)
 {
   // Add a DS into allDS set: no copy, pointer link.
   allDS->insert(newDS);
@@ -89,7 +89,7 @@ void Actuator::initialize()
   // Uses the events factory to insert the new event.
   EventFactory::Registry& regEvent(EventFactory::Registry::get());
   eActuator = regEvent.instantiate(timeDiscretisation->getCurrentTime(), 3);
-  static_cast<ActuatorEvent*>(eActuator)->setActuatorPtr(this);
+  boost::static_pointer_cast<ActuatorEvent>(eActuator)->setActuatorPtr(shared_from_this());
 
   // Warning: no Sensors initialization. They are supposed to be up to date when added in the Actuator.
 }

@@ -26,15 +26,15 @@
 
 #include<map>
 
-class Sensor;
-class TimeDiscretisation;
+#include "Sensor.h"
+#include "TimeDiscretisation.h"
 
 /** Namespace for Sensor factory related objects. */
 namespace SensorFactory
 {
 
 /** A pointer to function, returning a pointer to Sensor, built with its type (ie class name) and a pointer to Model.*/
-typedef Sensor* (*object_creator)(int, TimeDiscretisation*) ;
+typedef SP::Sensor(*object_creator)(int, SP::TimeDiscretisation) ;
 
 /** The type of the factory map */
 typedef std::map<int, object_creator> MapFactory;
@@ -43,9 +43,9 @@ typedef std::map<int, object_creator> MapFactory;
 typedef MapFactory::iterator MapFactoryIt;
 
 /** Template function to return a new object of type SubType*/
-template<class SubType> Sensor* factory(int name, TimeDiscretisation* t)
+template<class SubType> SP::Sensor factory(int name, SP::TimeDiscretisation t)
 {
-  return new SubType(name, t);
+  return boost::shared_ptr<SubType>(new SubType(name, t));
 }
 
 /** Registry Class for sensors.
@@ -66,7 +66,8 @@ class Registry
 
 private :
 
-  /** map that links a string, the type of the class, to a pointer to function, used to build the object. */
+  /** map that links a string, the type of the class, to a pointer
+      to function, used to build the object. */
   MapFactory factory_map;
 
 public :
@@ -84,7 +85,7 @@ public :
    * \param a string, the name of the object added (type name!)
    * \param a pointer to a TimeDiscretisation.
    */
-  Sensor* instantiate(int, TimeDiscretisation*);
+  SP::Sensor instantiate(int, SP::TimeDiscretisation);
 
 } ;
 

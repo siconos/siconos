@@ -23,8 +23,7 @@
 #define ActuatorEvent_H
 
 #include "Event.h"
-
-class Actuator;
+#include "Actuator.h"
 
 /** Events when sensor data capture is done.
  *
@@ -40,7 +39,7 @@ class ActuatorEvent : public Event
 private:
 
   /** The actuator linked to the present event */
-  Actuator* actuator;
+  SP::Actuator actuator;
 
   /** Default constructor */
   ActuatorEvent(): Event(0.0, 3) {};
@@ -60,7 +59,7 @@ public:
   /** get the Actuator linked to this Event
    *  \return a pointer to Actuator
    */
-  inline Actuator* getActuatorPtr() const
+  inline SP::Actuator getActuatorPtr() const
   {
     return actuator;
   };
@@ -68,7 +67,7 @@ public:
   /** set the TimeDiscretisation linked to this Actuator
    *  \param a pointer to TimeDiscretisation.
    */
-  void setActuatorPtr(Actuator * newActuator)
+  void setActuatorPtr(SP::Actuator newActuator)
   {
     actuator = newActuator;
   };

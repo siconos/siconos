@@ -22,7 +22,7 @@ SET(SiconosKernel_DIRS
   plugin
   modelingTools
   simulationTools
-  #controlTools
+  controlTools
   multiBodyTools
   multiBodyTools/2D
   multiBodyTools/3D

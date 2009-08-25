@@ -282,7 +282,7 @@ void LinearOSNS::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelatio
 /* Cascading visitors experimentation.
    the dispatch is done on simulationtype and then on nslawtype
 
-   1. Cumbersome. Is it better then if (simulationtype == ... ) { if
+   1. Cumbersome. Is it better than if (simulationtype == ... ) { if
    nslawType == ...) ?
    2. Can simulation dispatch be done at top-level ?
 
@@ -371,7 +371,7 @@ struct LinearOSNS::NSLEffectOnSim : public SiconosVisitor
 
   void visit(EventDriven& sim)
   {
-    SP::SiconosVisitor NSLEffect(new TimeSteppingNSLEffect(parent, UR, pos));
+    SP::SiconosVisitor NSLEffect(new EventDrivenNSLEffect(parent, UR, pos));
     UR->getInteractionPtr()->getNonSmoothLawPtr()->accept(*NSLEffect);
   }
 

@@ -26,10 +26,10 @@
 #include <iostream>
 using namespace std;
 
-Sensor::Sensor(): type(0), id("none"), model(NULL), timeDiscretisation(NULL), eSensor(NULL)
+Sensor::Sensor(): type(0), id("none")
 {}
 
-Sensor::Sensor(int name, TimeDiscretisation* t): type(name), id("none"), model(t->getModelPtr()), timeDiscretisation(t), eSensor(NULL)
+Sensor::Sensor(int name, SP::TimeDiscretisation t): type(name), id("none"), timeDiscretisation(t)
 {}
 
 Sensor::~Sensor()
@@ -41,7 +41,7 @@ void Sensor::initialize()
   // Uses the events factory to insert the new event.
   EventFactory::Registry& regEvent(EventFactory::Registry::get());
   eSensor = regEvent.instantiate(timeDiscretisation->getCurrentTime(), 4);
-  static_cast<SensorEvent*>(eSensor)->setSensorPtr(this);
+  boost::static_pointer_cast<SensorEvent>(eSensor)->setSensorPtr(shared_from_this());
 }
 
 // Add the present sensor into the Simulation process

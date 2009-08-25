@@ -27,7 +27,7 @@ Include files related to Siconos Kernel
 #include "Utils.hpp"
 #include "ModelingTools.hpp"
 #include "SimulationTools.hpp"
-//#include "ControlTools.hpp"
+#include "ControlTools.hpp"
 #include "XmlTools.hpp"
 #include "PluginTypes.hpp"
 #include <sys/time.h>

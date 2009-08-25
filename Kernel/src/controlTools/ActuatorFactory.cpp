@@ -36,7 +36,7 @@ void Registry::add(int name, object_creator creator)
   factory_map[name] = creator;
 }
 
-Actuator* Registry::instantiate(int name, TimeDiscretisation* t)
+SP::Actuator Registry::instantiate(int name, SP::TimeDiscretisation t)
 {
   MapFactoryIt it = factory_map.find(name) ;
 

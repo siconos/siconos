@@ -117,7 +117,7 @@ cartridge
 
 if `getopt -T >/dev/null 2>&1` ; [ $? = 4 ] ; then
     args=`getopt -n $myname -a \
- -o acghl:L:D:P:v \
+ -o acghO:I:l:L:D:P:v \
  -l build_dir:,clean_build,clean,help,noexec,src_dir:,opt:,ldopt:,plugin_dir:,plugins_dir: \
  -- "$@"`
     if test $? -ne 0; then
@@ -132,6 +132,7 @@ else
 fi
 
 
+include_directories=
 definitions=
 linker_libraries=
 linker_directories=
@@ -158,6 +159,11 @@ while test $# -gt 0 ; do
         -g) definitions="$definitions CMAKE_BUILD_TYPE=Debug";;
         -h|-help) usage; exit 0;;
         --noexec) exec=false;;
+        -I) with_arg $@; shift; 
+            case :$1,:$include_directories in
+                :*,:) include_directories=$1;;
+                :*,:*) include_directories="$include_directories;$1";;
+            esac;;
         -l) with_arg $@; shift; 
             case :$1,:$linker_libraries in
                 :*,:) linker_libraries=$1;;
@@ -169,6 +175,11 @@ while test $# -gt 0 ; do
                 :*,:*) linker_directories="$linker_directories;$1";;
             esac;;
         -P) with_arg $@; shift; exec_prefix=$1;;
+        -O) with_arg $@; shift; 
+            case :$1,:$compiler_options in
+                :*,:) compiler_options=-O$1;;
+                :*,:*) compiler_options="$compiler_options;-O$1";;
+            esac;;
         --opt) with_arg $@; shift;
             case :$1,:$compiler_options in
                 :*,:) compiler_options=$1;;

@@ -23,8 +23,7 @@
 #define SensorEvent_H
 
 #include "Event.h"
-
-class Sensor;
+#include "Sensor.h"
 
 /** Events when sensor data capture is done.
  *
@@ -40,7 +39,7 @@ class SensorEvent : public Event
 private:
 
   /** The sensor linked to the present event */
-  Sensor* sensor;
+  SP::Sensor sensor;
 
   /** Default constructor */
   SensorEvent(): Event(0.0, 4) {};
@@ -60,7 +59,7 @@ public:
   /** get the Sensor linked to this Event
    *  \return a pointer to Sensor
    */
-  inline Sensor* getSensorPtr() const
+  inline SP::Sensor getSensorPtr() const
   {
     return sensor;
   };
@@ -68,7 +67,7 @@ public:
   /** set the TimeDiscretisation linked to this Sensor
    *  \param a pointer to TimeDiscretisation.
    */
-  void setSensorPtr(Sensor * newSensor)
+  void setSensorPtr(SP::Sensor newSensor)
   {
     sensor = newSensor;
   };
