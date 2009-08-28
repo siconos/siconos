@@ -12,7 +12,6 @@
 void mlcp_buildM(int * zw, double * M, double * Mref, int n, int m, int NbLines)
 {
   int col, i;
-  int npm = n + m;
   double * Aux;
   double * AuxRef;
   /*First, copy the n first collums.*/

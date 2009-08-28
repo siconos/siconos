@@ -18,5 +18,5 @@ int mlcp_path_enum_getNbDWork(MixedLinearComplementarity_Problem* problem, Solve
 
 void mlcp_path_enum_init(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
 void mlcp_path_enum_reset();
-
+void mlcp_path_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 #endif //MLCP_PATH_ENUM_H

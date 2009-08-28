@@ -20,6 +20,7 @@
 //#include "PrimalFrictionContact3D_projection.h"
 #include "PrimalFrictionContact3D_Solvers.h"
 #include "PrimalFrictionContact3D_compute_error.h"
+#include "projectionOnCone.h"
 #include "LA.h"
 #include "SparseBlockMatrix.h"
 #include <stdio.h>

@@ -137,10 +137,11 @@ int mlcp_enum_getNbIWork(MixedLinearComplementarity_Problem* problem, Solver_Opt
 }
 int mlcp_enum_getNbDWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
 {
-  LWORK = -1;
-  double dgelsSize = 0;
-  int info = 0;
+
 #ifdef ENUM_USE_DGELS
+  LWORK = -1;
+  int info = 0;
+  double dgelsSize = 0;
   DGELS(problem->M->size0, problem->n + problem->m, 1, 0, problem->M->size0, 0, problem->M->size0, &dgelsSize, LWORK, info);
   LWORK = (int) dgelsSize;
 #else
@@ -165,18 +166,13 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
 {
   double tol ;
   double * workingFloat = options->dWork;
-  double rest = 0;
   int * workingInt = options->iWork;
   int lin;
   int npm = (problem->n) + (problem->m);
-  int npm2 = npm * npm;
   int NRHS = 1;
-  int one = 1;
   int * ipiv;
   int check;
   int LAinfo;
-  int ii;
-  int cc;
 
   sMl = problem->M->size0;
   sNn = problem->n;
@@ -196,7 +192,7 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
     printf("mlcp_enum begin, n %d m %d tol %lf\n", sNn, sMm, tol);
 
   sM = workingFloat;
-  /*  sQ = sM + npm2;*/
+  /*  sQ = sM + npm*npm;*/
   sQ = sM + (sNn + sMm) * sMl;
   /*  sColNul = sQ + sMm +sNn;*/
   sColNul = sQ + sMl;
@@ -239,7 +235,9 @@ void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w
     if (!LAinfo)
     {
 #ifdef ENUM_USE_DGELS
-      cc = 0;
+      int cc = 0;
+      int ii;
+      double rest = 0;
       for (ii = 0; ii < npm; ii++)
       {
         if (isnan(sQ[ii]) || isinf(sQ[ii]))

@@ -51,7 +51,7 @@ static int scmp = 0;
 
 static int sPlotMerit = 1;
 static char fileName[64];
-static char fileId[16];
+/* static char fileId[16]; */
 
 static double* sZsol = 0;
 
@@ -75,7 +75,7 @@ void plotMerit(double *z, double psi_k, double descentCondition)
 {
   int incx = 1, incy = 1;
   double q_0, q_tk, qp_tk, merit_k;
-  double tmin = 1e-12;
+  /* double tmin = 1e-12; */
   double tk = 1, aux;
   double m1 = 1e-4;
   double Nstep = 0;
@@ -139,10 +139,12 @@ void plotMerit(double *z, double psi_k, double descentCondition)
 void plotMeritToZsol(double *z)
 {
   int incx = 1, incy = 1;
-  double q_0, q_tk, merit_k;
-  double tmin = 1e-12;
+  double q_0, q_tk;
+  /*   double merit_k;  */
+  /*  double tmin = 1e-12; */
   double tk = 1;
-  double m1 = 0.5, aux;
+  /*   double m1=0.5; */
+  double aux;
   int i = 0;
   int ii;
   if (!sPlotMerit || !sZsol)
@@ -288,7 +290,7 @@ int lineSearch_Wolfe(double *z, double qp_0)
   double tg, td;
   double m1 = 0.1;
   double m2 = 0.9;
-  int i = 0;
+
 
   (*sFphi)(sN, z, sphi_z, 0);
   q_0 =  DNRM2(sN, sphi_z , incx);
@@ -347,12 +349,13 @@ int lineSearch_Wolfe(double *z, double qp_0)
 int NonMonotomnelineSearch(double *z, double Rk)
 {
   int incx = 1, incy = 1;
-  double q_0, q_tk, merit_k;
+  double q_0, q_tk;
+  /*   double merit_k;  */
   double tmin = 1e-12;
   double tmax = 1000;
   double tk = 1;
-  double m1 = 0.5;
-  int i = 0;
+  /*   double m1=0.5; */
+
 
 
   (*sFphi)(sN, z, sphi_z, 0);
@@ -436,7 +439,7 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
   int iterMaxWithSameZ = itermax / 4;
   int niter = 0; // current iteration number
   double tolerance = dparam[0];
-  double coef;
+  /*   double coef; */
   sFphi = phi;
   sFjacobianPhi = jacobianPhi;
   //  verbose=1;
@@ -447,7 +450,7 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
   }
 
   int incx = 1;
-  int n2 = n * n;
+  /*   int n2 = n*n; */
   int infoDGESV;
 
   /** merit function and its jacobian */
@@ -467,13 +470,14 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
   double norm;
   int findNewZ, i, j, NbLookingForANewZ;
   int lastN = 0;
-  int naux = 0;
-  double aux = 0, aux1 = 0;
+  /*   int naux=0; */
+  double aux = 0;
+  /*   double aux1=0; */
   int ii;
   int useNewZ = 0;
   int resls = 1;
-  char c;
-  double * oldz;
+  /*   char c; */
+  /*  double * oldz; */
   /*  oldz=(double*)malloc(n*sizeof(double));*/
 
   prev_psi_z = 0;

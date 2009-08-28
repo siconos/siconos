@@ -113,8 +113,8 @@ void frictionContact3D_projectedgradient(FrictionContact_Problem* problem, doubl
       DAXPY(n, 1.0, reaction, 1, direction , 1) ;  // warning compyte -d and not d
       beta = 0.0;
       double alpha1 = DNRM2(n, direction, 1);
-      prodNumericsMatrix(n, n, alpha, M, direction, beta, work1tmp);
-      double alpha2 = DDOT(n, direction, 1, work1tmp, 1);
+      /*    prodNumericsMatrix(n,n, alpha, M, direction, beta,work1tmp ); */
+      /*    double alpha2=DDOT(n,direction,1,work1tmp,1); */
       prodNumericsMatrix(n, n, alpha, M, work2tmp, beta, work2tmp);
       double alpha3 = DDOT(n, direction, 1, work2tmp, 1);
 

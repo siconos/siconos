@@ -1181,8 +1181,9 @@ int inverseDiagSBM(const SparseBlockStructuredMatrix*  M)
       assert(!infoDGETRF);
 
       DGETRI(nbRows, M->block[blockNum], nbRows, ipiv, infoDGETRI);
-      free(ipiv);
       assert(!infoDGETRI);
+      free(ipiv);
+
 
     }
   }

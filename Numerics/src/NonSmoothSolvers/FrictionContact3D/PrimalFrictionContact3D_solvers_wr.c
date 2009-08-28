@@ -190,7 +190,8 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
 
     double * WInversetmp = (double*)malloc(m * m * sizeof(double));
     memcpy(WInversetmp, WInverse, m * m * sizeof(double));
-    double  condW = cond(WInverse, m, m);
+    double  condW;
+    condW = cond(WInverse, m, m);
 
     int* ipiv = (int *)malloc(m * sizeof(*ipiv));
     int infoDGETRF = 0;
@@ -204,7 +205,8 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
     assert(!infoDGETRI);
 
 
-    double  condWInverse = cond(WInverse, m, m);
+    double  condWInverse;
+    condWInverse = cond(WInverse, m, m);
 
 
 

@@ -21,6 +21,8 @@
 #include "Numerics_Options.h" // for global options
 #include "FrictionContact_Problem.h"
 #include "FrictionContact3D_projection.h"
+#include "projectionOnCone.h"
+
 #include <math.h>
 
 int FrictionContact3D_compute_error(FrictionContact_Problem* problem, double *z , double *w, double tolerance, double * error)

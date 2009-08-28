@@ -27,6 +27,7 @@
 
 double pinv(double * A, int n, int m, double tolerance)
 {
+#ifdef COMPLETE_LAPACK_LIBRARIES
   int LWORK = -1;
   double * WORK;
   WORK = malloc(sizeof(*WORK));
@@ -154,5 +155,9 @@ double pinv(double * A, int n, int m, double tolerance)
   free(Utranstmp);
   free(S);
   return conditioning;
-
+#else
+#include <stdio.h>
+  fprintf(stderr, "Numerics. cond.c dgesvd not found\n");
+  return 0.0;
+#endif
 }
