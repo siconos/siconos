@@ -157,7 +157,7 @@ double pinv(double * A, int n, int m, double tolerance)
   return conditioning;
 #else
 #include <stdio.h>
-  fprintf(stderr, "Numerics. cond.c dgesvd not found\n");
+  fprintf(stderr, "Numerics. pinv.c dgesvd not found\n");
   return 0.0;
 #endif
 }

@@ -59,15 +59,18 @@ double cond(double * A, int n, int m)
   }
   printf("]\n ");
   memcpy(A, Atmp, size);
-  double conditioning =  S[0] / S[dimS - 1];
+
+  double conditioning = S[0] / S[dimS - 1];
 
   free(Atmp);
   free(WORK);
   free(S);
+
   return conditioning;
 #else
 #include <stdio.h>
   fprintf(stderr, "Numerics. cond.c dgesvd not found\n");
   return 0.0;
 #endif
+
 }
