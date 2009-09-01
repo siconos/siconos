@@ -22,6 +22,7 @@ COMPILE_WITH(Boost REQUIRED)
 FIND_PACKAGE(Boost COMPONENTS python REQUIRED)
 
 INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}/..)
 
 # boost 3.8
 # Determine extra libraries we need to link against to build Python
@@ -67,6 +68,10 @@ ENDFOREACH(_lib ${PYTHON_LIBRARIES})
 FILE(GLOB BINDINGS *.h *.hpp *.cpp)
 
 ADD_LIBRARY(Siconos ${BINDINGS})
+
+# to avoid compilation failures with boost python and pure virtual
+# operators
+ADD_DEFINITIONS(-DPURE_DEF={})
 
 SET_TARGET_PROPERTIES(Siconos 
   PROPERTIES PREFIX "" 
