@@ -10,6 +10,16 @@
 #define OUTSIDE_FRAMEWORK_BLAS
 #endif
 
+#if defined(Py_COMPLEXOBJECT_H)
+#undef c_sum
+#undef c_diff
+#undef c_neg
+#undef c_prod
+#undef c_quot
+#undef c_pow
+#undef c_abs
+#endif
+
 #if defined(OUTSIDE_FRAMEWORK_BLAS) && defined(HAVE_CBLAS_H) && defined(HAVE_CLAPACK_H)
 
 

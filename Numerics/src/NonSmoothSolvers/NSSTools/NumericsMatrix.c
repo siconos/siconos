@@ -331,3 +331,4 @@ void readInFileName(NumericsMatrix* const m, const char *filename)
 {
 }
 
+void readInFileForScilab(NumericsMatrix* const M, FILE *file) {};

@@ -24,33 +24,40 @@
 #include <float.h>
 #include "LA.h"
 #include "LCP_Solvers.h"
+#include <assert.h>
 
 void lcp_pgs(LinearComplementarity_Problem* problem, double *z, double *w, int *info , Solver_Options* options)
 {
   /* matrix M/vector q of the lcp */
   double * M = problem->M->matrix0;
   double * q = problem->q;
+
+  assert(M);
+  assert(q);
+  assert(options->iSize > 1);
+  assert(options->dSize > 1);
+
   int n = problem->size;
 
-  int incx = 1, incy = 1;
   int i;
-  double qs, den, zi;
+  double qs, zi;
 
   /* Solver parameters */
   int itermax = options->iparam[0];
   double tol = options->dparam[0];
   /* Initialize output */
+
   options->iparam[1] = 0;
   options->dparam[1] = 0.0;
 
-  /* Check for non trivial case */
-  qs = DNRM2(n , q , incx);
   if (verbose > 0)
   {
+    qs = DNRM2(n , q , 1);
     printf("===== Starting of LCP solving with Projected Gauss Seidel algorithm.\n");
     printf("\n ||q||= %g \n", qs);
+    printf("itermax = %d \n", itermax);
+    printf("tolerance = %g \n", tol);
   }
-  den = 1.0 / qs;
 
   /* Preparation of the diagonal of the inverse matrix */
   double * diag = (double*)malloc(n * sizeof(double));
@@ -74,20 +81,19 @@ void lcp_pgs(LinearComplementarity_Problem* problem, double *z, double *w, int *
   /* Iterations*/
   int iter = 0;
   double err  = 1.;
+
   while ((iter < itermax) && (err > tol))
   {
 
     ++iter;
-    incx = 1;
-    incy = 1;
-    /* Initialization of w with q */
-    DCOPY(n , q , incx , w , incy);
 
-    incx = n;
+    /* Initialization of w with q */
+    DCOPY(n , q , 1 , w , 1);
+
     for (i = 0 ; i < n ; ++i)
     {
       z[i] = 0.0;
-      zi = -(q[i] + DDOT(n , &M[i] , incx , z , incy)) * diag[i];
+      zi = -(q[i] + DDOT(n , &M[i] , n , z , 1)) * diag[i];
       if (zi < 0) z[i] = 0.0;
       else z[i] = zi;
       /* z[i]=fmax(0.0,-( q[i] + ddot_( (integer *)&n , &M[i] , (integer *)&incxn , z , (integer *)&incy ))*diag[i]);*/
