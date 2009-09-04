@@ -32,8 +32,9 @@ class SpherePlanR : public LagrangianScleronomousR, public boost::enable_shared_
 private:
 
   /* Ax + By + Cz + D = 0 */
-  double r, A, B, C, D;
-  double sqrA2pB2pC2;
+  double r, A, B, C, D, nN, nU;
+  /* u ^ v  = n */
+  double u1, u2, u3, v1, v2, v3, n1, n2, n3, ru1, ru2, ru3, rv1, rv2, rv3;
 
   SpherePlanR();
 

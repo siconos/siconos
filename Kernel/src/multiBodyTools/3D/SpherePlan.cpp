@@ -24,59 +24,75 @@
 SpherePlanR::SpherePlanR(double r, double A, double B, double C, double D)
   : LagrangianScleronomousR(), r(r), A(A), B(B), C(C), D(D)
 {
-  sqrA2pB2pC2 = sqrt(A * A + B * B + C * C);
+  nN = sqrt(A * A + B * B + C * C);
+
+  n1 = A / nN;
+  n2 = B / nN;
+  n3 = C / nN;
+
+  nU = sqrt((A + B) * (A + B) + (B - C) * (B - C) + (A + C) * (A + C));
+  u1 = (B - C) / nU;
+  u2 = -(A + C) / nU;
+  u3 = (A + B) / nU;
+
+  // v = n /\ u
+
+  v1 = B * (A + B) / (nN * nU) - C * (-A - C) / (nN * nU);
+  v2 = C * (B - C) / (nN * nU) - A * (A + B) / (nN * nU);
+  v3 = A * (-A - C) / (nN * nU) - B * (B - C) / (nN * nU);
+
+  // r*u & r *v
+
+  ru1 = r * u1;
+  ru2 = r * u2;
+  ru3 = r * u3;
+
+  rv1 = r * v1;
+  rv2 = r * v2;
+  rv3 = r * v3;
 
 }
 
 double SpherePlanR::distance(double x, double y, double z, double rad)
 {
-  return (fabs(A * x + B * y + C * z + D) / sqrA2pB2pC2 - rad);
+
+  return (fabs(A * x + B * y + C * z + D) / nN - rad);
 }
 
 
 void SpherePlanR::computeH(double)
 {
 
-  // Warning: temporary method to have contiguous values in memory,
-  // copy of block to simple.
-  *workX = *data[q0];
-  double *q = &(*workX)(0);
+  double q_0 = (*data[q0])(0);
+  double q_1 = (*data[q0])(1);
+  double q_2 = (*data[q0])(2);
 
   SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
 
-  y->setValue(0, distance(q[0], q[1], q[2], r));
-  y->setValue(1, 0.);
-  y->setValue(2, 0.);
+  y->setValue(0, distance(q_0, q_1, q_2, r));
 
 };
-
 void SpherePlanR::computeJacH(double, unsigned int)
 {
+  SimpleMatrix *g = JacH[0].get();
 
-  *workX = *data[q0];
-  double *q = &(*workX)(0);
-  double *g = &(*(JacH[0]))(0, 0);
-
-  double D1 = A * q[0] + B * q[1] + C * q[2] + D;
-  double D2 = sqrA2pB2pC2 * fabs(D1);
-
-  double D1oD2 = D1 / D2;
-  double AD1oD2 = A * D1oD2;
-  double BD1oD2 = B * D1oD2;
-  double CD1oD2 = C * D1oD2;
-
-  g[0] = AD1oD2;     // dh[0]/dq[0]
-  g[1] = 0;          // dh[1]/dq[0]
-  g[2] = 0;          // dh[2]/dq[0]
-  g[3] = BD1oD2;     // dh[0]/dq[1]
-  g[4] = 0;
-  g[5] = 0;
-  g[6] = CD1oD2;     // dh[0]/dq[2]
-  g[7] = 0;
-  g[8] = 0;
-  g[9] = 0;          // dh[1]/dq[0]
-  g[10] = 0;         // dh[1]/dq[1]
-  g[11] = 0;
-  g[11] = r;
+  (*g)(0, 0) = n1;
+  (*g)(1, 0) = u1;
+  (*g)(2, 0) = v1;
+  (*g)(0, 1) = n2;
+  (*g)(1, 1) = u2;
+  (*g)(2, 1) = v2;
+  (*g)(0, 2) = n3;
+  (*g)(1, 2) = u3;
+  (*g)(2, 2) = v3;
+  (*g)(0, 3) = 0;          // -r n /\ n = 0
+  (*g)(1, 3) = -rv1;      // -r n /\ u = -r v
+  (*g)(2, 3) = ru1;       // -r n /\ v = r u
+  (*g)(0, 4) = 0;
+  (*g)(1, 4) = -rv2;
+  (*g)(2, 4) = ru2;
+  (*g)(0, 5) = 0;
+  (*g)(1, 5) = -rv3;
+  (*g)(2, 5) = ru3;
 }
 
