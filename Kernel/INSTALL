@@ -93,9 +93,21 @@ Some CMAKE OPTIONS that may be usefull:
      default) : 
      -DCMAKE_BUILD_TYPE=Release
 
+
+   * to build the documentation, if you are under svn 
+     -DWITH_DOCUMENTATION=TRUE -DWITH_SVN=TRUE
+     the documentation is generated under GeneratedDocs directory
+     (under your source directory!)
+
+   * to build the documentation, if you are not under svn
+     -DWITH_DOCUMENTATION=TRUE -DDOXYGEN_OUPUT=/some/where
+     (you may have to create the directory /some/where/Tags)
+
    * to see cmake state : -DPRINT_ENV=1
 
    * to print a cmake variable : -DPRINT_VAR=VAR_NAME
+
+
 
         
 
