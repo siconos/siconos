@@ -80,7 +80,7 @@ COMPILE_WITH(Boost REQUIRED)
 FIND_PACKAGE(Boost COMPONENTS graph)
 
 IF(NOT Boost_GRAPH_FOUND)
-  MESSAGE(FATAL_ERROR "boost graph library is needed.")
+  MESSAGE(STATUS "WARNING boost graph library not found.")
 ENDIF(NOT Boost_GRAPH_FOUND)
 
 COMPILE_WITH(LibXml2 REQUIRED)
