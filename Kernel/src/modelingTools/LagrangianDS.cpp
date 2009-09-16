@@ -841,8 +841,9 @@ void LagrangianDS::computeRhs(double time, bool isDSup)
   // -- Case 1: if mass is constant, then a copy of imass is LU-factorized during initialization and saved into workMatrix[invMass].
   // -- Case 2: mass is not constant, we copy it into workMatrix[invMass]
   // Then we proceed with PLUForwardBackward.
-  if (mass->isPlugged())
-    *workMatrix[invMass] = *mass;
+
+  //  if(mass->isPlugged()) : mass may be not plugged in LagrangianDS children
+  *workMatrix[invMass] = *mass;
 
   workMatrix[invMass]->PLUForwardBackwardInPlace(*q[2]);
 
@@ -855,8 +856,8 @@ void LagrangianDS::computeJacobianXRhs(double time, bool isDSup)
   if (!isDSup)
     computeMass();
 
-  if (mass->isPlugged())
-    *workMatrix[invMass] = *mass;
+  //  if(mass->isPlugged()) : mass may b not plugged in LagrangianDS children
+  *workMatrix[invMass] = *mass;
 
   if (jacobianFL[0])
   {

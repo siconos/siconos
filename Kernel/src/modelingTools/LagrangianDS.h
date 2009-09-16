@@ -760,13 +760,13 @@ public:
 
   /** default function to compute the inertia
    */
-  void computeNNL();
+  virtual void computeNNL();
 
   /** function to compute the inertia
    *  with some specific values for q and velocity (ie not those of the current state).
    *  \param SP::SiconosVector: pointers on the state vectors q and velocity
    */
-  void computeNNL(SP::SiconosVector q, SP::SiconosVector velocity);
+  virtual void computeNNL(SP::SiconosVector q, SP::SiconosVector velocity);
 
   /** default function to compute the gradient of the internal strengths compared to the state
    *  \param double time : the current time

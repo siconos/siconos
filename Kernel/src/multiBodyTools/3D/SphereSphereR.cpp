@@ -56,19 +56,40 @@ void SphereSphereR::computeH(double)
 void SphereSphereR::computeJacH(double, unsigned int)
 {
 
+  double r, A, B, C, D, nN, nU;
+  /* u ^ v  = n */
+  double u1, u2, u3, v1, v2, v3, n1, n2, n3, r1u1, r1u2, r1u3, r1v1, r1v2, r1v3, r2u1, r2u2, r2u3, r2v1, r2v2, r2v3;
+
   SimpleMatrix *g = JacH[0].get();
 
   double q_0 = (*data[q0])(0);
   double q_1 = (*data[q0])(1);
   double q_2 = (*data[q0])(2);
 
+  double theta1 = (*data[q0])(3);
+  double phi1 = (*data[q0])(4);
+  double psi1 = (*data[q0])(5);
+
   double q_6 = (*data[q0])(6);
   double q_7 = (*data[q0])(7);
   double q_8 = (*data[q0])(8);
 
-  double r, A, B, C, D, nN, nU;
-  /* u ^ v  = n */
-  double u1, u2, u3, v1, v2, v3, n1, n2, n3, r1u1, r1u2, r1u3, r1v1, r1v2, r1v3, r2u1, r2u2, r2u3, r2v1, r2v2, r2v3;
+
+  double theta2 = (*data[q0])(9);
+  double phi2 = (*data[q0])(10);
+  double psi2 = (*data[q0])(11);
+
+  double cthe1 = cos(theta1);
+  double sthe1 = sin(theta1);
+  double cphi1 = cos(phi1);
+  double sphi1 = sin(phi1);
+
+  double cthe2 = cos(theta2);
+  double sthe2 = sin(theta2);
+  double cphi2 = cos(phi2);
+  double sphi2 = sin(phi2);
+
+
 
   A = -(q_6 - q_0);
   B = -(q_7 - q_1);
@@ -99,9 +120,9 @@ void SphereSphereR::computeJacH(double, unsigned int)
   r1v2 = r1 * v2;
   r1v3 = r1 * v3;
 
-  r2u1 = r2 * u1;
-  r2u2 = r2 * u2;
-  r2u3 = r2 * u3;
+  r2u1 = -r2 * u1;
+  r2u2 = -r2 * u2;
+  r2u3 = -r2 * u3;
 
   r2v1 = r2 * v1;
   r2v2 = r2 * v2;
@@ -116,15 +137,15 @@ void SphereSphereR::computeJacH(double, unsigned int)
   (*g)(0, 2) = n3;
   (*g)(1, 2) = u3;
   (*g)(2, 2) = v3;
-  (*g)(0, 3) = 0;          // -r n /\ n = 0
-  (*g)(1, 3) = -r1v1;      // -r n /\ u = -r v
-  (*g)(2, 3) = r1u1;       // -r n /\ v = r u
+  (*g)(0, 3) = 0;
+  (*g)(1, 3) = -r1v1 * cphi1 - r1v2 * sphi1;
+  (*g)(2, 3) = r1u1 * cphi1 + r1u2 * sphi1;
   (*g)(0, 4) = 0;
-  (*g)(1, 4) = -r1v2;
-  (*g)(2, 4) = r1u2;
+  (*g)(1, 4) = -r1v3;
+  (*g)(2, 4) = r1u3;
   (*g)(0, 5) = 0;
-  (*g)(1, 5) = -r1v3;
-  (*g)(2, 5) = r1u3;
+  (*g)(1, 5) = -r1v3 * cthe1 + r1v2 * cphi1 * sthe1 - r1v1 * sphi1 * sthe1;
+  (*g)(2, 5) = r1u3 * cthe1 + r1u1 * sphi1 * sthe1 - r1u2 * cphi1 * sphi1;
 
   (*g)(0, 6) = -n1;
   (*g)(1, 6) = -u1;
@@ -135,15 +156,15 @@ void SphereSphereR::computeJacH(double, unsigned int)
   (*g)(0, 8) = -n3;
   (*g)(1, 8) = -u3;
   (*g)(2, 8) = v3;
-  (*g)(0, 9) = 0;          // -r n /\ n = 0
-  (*g)(1, 9) = r2v1;       // -r n /\ u = -r v
-  (*g)(2, 9) = -r2u1;      // -r n /\ v = r u
+  (*g)(0, 9) = 0;
+  (*g)(1, 9) = -r2v1 * cphi2 - r2v2 * sphi2;
+  (*g)(2, 9) = r2u1 * cphi2 + r2u2 * sphi2;
   (*g)(0, 10) = 0;
-  (*g)(1, 10) = r2v2;
-  (*g)(2, 10) = -r2u2;
+  (*g)(1, 10) = -r2v3;
+  (*g)(2, 10) = r2u3;
   (*g)(0, 11) = 0;
-  (*g)(1, 11) = r2v3;
-  (*g)(2, 11) = -r2u3;
+  (*g)(1, 11) = -r2v3 * cthe2 + r2v2 * cphi2 * sthe2 - r2v1 * sphi2 * sthe2;
+  (*g)(2, 11) = r2u3 * cthe2 + r2u1 * sphi2 * sthe2 - r2u2 * cphi2 * sphi2;
 
 }
 

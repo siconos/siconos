@@ -72,9 +72,21 @@ void SpherePlanR::computeH(double)
   y->setValue(0, distance(q_0, q_1, q_2, r));
 
 };
+
+void normalize(SP::SiconosVector, unsigned int);
+
 void SpherePlanR::computeJacH(double, unsigned int)
 {
   SimpleMatrix *g = JacH[0].get();
+
+  double theta = (*data[q0])(3);
+  double phi   = (*data[q0])(4);
+  double psi   = (*data[q0])(5);
+
+  double cthe = cos(theta);
+  double sthe = sin(theta);
+  double cphi = cos(phi);
+  double sphi = sin(phi);
 
   (*g)(0, 0) = n1;
   (*g)(1, 0) = u1;
@@ -85,14 +97,15 @@ void SpherePlanR::computeJacH(double, unsigned int)
   (*g)(0, 2) = n3;
   (*g)(1, 2) = u3;
   (*g)(2, 2) = v3;
-  (*g)(0, 3) = 0;          // -r n /\ n = 0
-  (*g)(1, 3) = -rv1;      // -r n /\ u = -r v
-  (*g)(2, 3) = ru1;       // -r n /\ v = r u
+  (*g)(0, 3) = 0;
+  (*g)(1, 3) = -rv1 * cphi - rv2 * sphi;
+  (*g)(2, 3) = ru1 * cphi + ru2 * sphi;
   (*g)(0, 4) = 0;
-  (*g)(1, 4) = -rv2;
-  (*g)(2, 4) = ru2;
+  (*g)(1, 4) = -rv3;
+  (*g)(2, 4) = ru3;
   (*g)(0, 5) = 0;
-  (*g)(1, 5) = -rv3;
-  (*g)(2, 5) = ru3;
+  (*g)(1, 5) = -rv3 * cthe + rv2 * cphi * sthe - rv1 * sphi * sthe;
+  (*g)(2, 5) = ru3 * cthe + ru1 * sphi * sthe - ru2 * cphi * sphi;
+
 }
 

@@ -644,6 +644,8 @@ double Moreau::computeResidu()
         scal(coef, *d->getFLPtr(), *residuFree, false);
 
         // computes fL(ti+1, v_k,i+1, q_k,i+1) = fL(t,v,q)
+
+        // d->computeFL(t,q,v) ?
         d->computeFL(t);
         coef = -h * theta;
         // residuFree += coef * fL_k,i+1

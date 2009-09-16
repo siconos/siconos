@@ -32,7 +32,7 @@ class Sphere : public LagrangianDS, public boost::enable_shared_from_this<Sphere
 protected:
   double radius;
   double massValue;
-  void MassSetup();
+  double I;
 
 public:
 
@@ -60,6 +60,12 @@ public:
   {
     return radius;
   };
+
+  void computeMass();
+
+  void computeNNL(SP::SiconosVector, SP::SiconosVector);
+
+  void computeNNL();
 
   /** visitors hook
    */
