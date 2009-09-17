@@ -94,6 +94,46 @@ void Sphere::computeNNL(SP::SiconosVector q, SP::SiconosVector v)
   (*NNL)(5) = -I * phidot * thetadot * sin(theta);
 }
 
+void Sphere::computeJacobianNNL(unsigned int i)
+{
+
+  Sphere::computeJacobianNNL(i, getQPtr(), getVelocityPtr());
+}
+
+void Sphere::computeJacobianNNL(unsigned int i, SP::SiconosVector q, SP::SiconosVector v)
+{
+  double theta    = q->getValue(3);
+  double phi      = q->getValue(4);
+  double psi      = q->getValue(5);
+
+  double thetadot = v->getValue(3);
+  double phidot   = v->getValue(4);
+  double psidot   = v->getValue(5);
+
+  jacobianNNL[0]->zero();
+  jacobianNNL[1]->zero();
+
+  (*jacobianNNL[0])(3, 4) = -I * psidot * phidot * cos(theta);
+  (*jacobianNNL[0])(4, 4) = I * psidot * phidot * cos(theta);
+  (*jacobianNNL[0])(5, 4) = I * psidot * phidot * cos(theta);
+
+  (*jacobianNNL[1])(3, 3) = I * psidot * sin(theta);
+  (*jacobianNNL[1])(3, 4) = 0;
+  (*jacobianNNL[1])(3, 5) = I * phidot * sin(theta);
+
+  (*jacobianNNL[1])(4, 3) = 0;
+  (*jacobianNNL[1])(4, 4) = -I * psidot * sin(theta);
+  (*jacobianNNL[1])(4, 5) = -I * thetadot * sin(theta);
+
+  (*jacobianNNL[1])(5, 3) =  -I * thetadot * sin(theta);
+  (*jacobianNNL[1])(5, 4) =  -I * phidot * sin(theta);
+  (*jacobianNNL[1])(5, 5) = 0;
+
+}
+
+
+
+
 Sphere::Sphere(double r, double m,
                const SiconosVector& qinit,
                const SiconosVector& vinit)
@@ -131,6 +171,10 @@ Sphere::Sphere(double r, double m,
 
   computeNNL();
 
+
+  jacobianNNL.resize(2);
+  jacobianNNL[0].reset(new PMNNL(ndof, ndof));
+  jacobianNNL[1].reset(new PMNNL(ndof, ndof));
 
 }
 

@@ -740,23 +740,23 @@ public:
   /** function to compute the mass
    *  \param double time : the current time, SP::SiconosVector: pointer on the state vector q
    */
-  void computeMass(SP::SiconosVector);
+  virtual void computeMass(SP::SiconosVector);
 
   /** default function to compute the internal strengths
    *  \param double time : the current time
    */
-  void computeFInt(double);
+  virtual void computeFInt(double);
 
   /** function to compute the internal strengths
    *  with some specific values for q and velocity (ie not those of the current state).
    *  \param double time : the current time, SP::SiconosVector: pointers on the state vectors q and velocity
    */
-  void computeFInt(double , SP::SiconosVector, SP::SiconosVector);
+  virtual void computeFInt(double , SP::SiconosVector, SP::SiconosVector);
 
   /** default function to compute the external strengths
    *  \param double time : the current time
    */
-  void computeFExt(double);
+  virtual void computeFExt(double);
 
   /** default function to compute the inertia
    */
@@ -772,36 +772,36 @@ public:
    *  \param double time : the current time
    *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    */
-  void computeJacobianFInt(unsigned int, double);
+  virtual void computeJacobianFInt(unsigned int, double);
 
   /** function to compute the gradient of the internal strengths compared to state q
    *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \param double time : the current time, SP::SiconosVector: pointers on the state vectors q and velocity
    */
-  void computeJacobianFInt(unsigned int, double , SP::SiconosVector q, SP::SiconosVector velocity);
+  virtual void computeJacobianFInt(unsigned int, double , SP::SiconosVector q, SP::SiconosVector velocity);
 
   /** function to compute the gradient of the inertia strengths compared to the state q
    *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    */
-  void computeJacobianNNL(unsigned int);
+  virtual void computeJacobianNNL(unsigned int);
 
   /** function to compute the gradient of the inertia strengths compared to the state q
    *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \param SP::SiconosVector: pointers on the state vectors q and velocity
    */
-  void computeJacobianNNL(unsigned int, SP::SiconosVector q, SP::SiconosVector velocity);
+  virtual void computeJacobianNNL(unsigned int, SP::SiconosVector q, SP::SiconosVector velocity);
 
   /** Default function to compute the right-hand side term
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
    */
-  void computeRhs(double, bool  = false);
+  virtual void computeRhs(double, bool  = false);
 
   /** Default function to compute jacobian of the right-hand side term according to x
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
    */
-  void computeJacobianXRhs(double, bool  = false);
+  virtual void computeJacobianXRhs(double, bool  = false);
 
   /** Default function to compute fL
    *  \param double, the current time

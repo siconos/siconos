@@ -67,6 +67,10 @@ public:
 
   void computeNNL();
 
+  void computeJacobianNNL(unsigned int);
+
+  void computeJacobianNNL(unsigned int, SP::SiconosVector, SP::SiconosVector);
+
   /** visitors hook
    */
   ACCEPT_VISITORS();
