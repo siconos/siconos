@@ -888,6 +888,7 @@ void LagrangianDS::computeFL(double time)
 
     // 2 - set fL = fExt - fInt - NNL
 
+    // seems ok.
     if (fL.use_count() == 1)
     {
       //if not that means that fL is already (pointer-)connected with
@@ -917,7 +918,7 @@ void LagrangianDS::computeFL(double time, SP::SiconosVector q2, SP::SiconosVecto
     computeFExt(time);
     computeNNL(q2, v2);
 
-    // 2 - set fL = fExt - fInt - NNL
+    // seems ok.
     if (fL.use_count() == 1)
     {
       //if not that means that fL is already (pointer-)connected with
@@ -943,7 +944,9 @@ void LagrangianDS::computeJacobianFL(unsigned int i, double time)
   {
     computeJacobianFInt(i, time);
     computeJacobianNNL(i);
-    if (jacobianFL[i].use_count() == 1)
+
+    // not true!
+    // if( jacobianFL[i].use_count() == 1 )
     {
       //if not that means that jacobianFL[i] is already (pointer-)connected with
       // either jacobianFInt or jacobianNNL
