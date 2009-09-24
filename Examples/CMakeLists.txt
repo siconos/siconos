@@ -18,6 +18,9 @@ SET(NO_TEST_FILES)
 
 SICONOS_PROJECT(Examples 3 0 0)
 
+COMPILE_WITH(SiconosNumerics REQUIRED)
+COMPILE_WITH(SiconosKernel REQUIRED)
+
 #
 # Internals
 #
