@@ -31,19 +31,6 @@ typedef void (*MatrixFunctionOfTime)(double, unsigned int, unsigned int, double*
 typedef void (*VectorFunctionOfTime)(double, unsigned int, double*, unsigned int, double*);
 
 #include "SimpleMatrix.h"
-#include "PluggedObject.hpp"
-
-/** Matrix plugged to a MatrixFunctionOfTime */
-typedef PluggedObject<MatrixFunctionOfTime, SimpleMatrix> Plugged_Matrix_FTime;
-
-/** Vector plugged to a VectorFunctionOfTime */
-typedef PluggedObject<VectorFunctionOfTime, SimpleVector> Plugged_Vector_FTime;
-
-/** Smart pointer to a Plugged_Matrix_FTime */
-TYPEDEF_SPTR(Plugged_Matrix_FTime);
-
-/** Smart pointer to a Plugged_Vector_FTime */
-TYPEDEF_SPTR(Plugged_Vector_FTime);
 
 /** */
 typedef void (*FPtr1)(double, unsigned int, const double*, double*, unsigned int, double*);
