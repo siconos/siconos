@@ -67,21 +67,22 @@ int main(int argc, char* argv[])
     // --- DS: Double Pendulum ---
 
     // Initial position (angles in radian)
-    SimpleVector q0(nDof), v0(nDof);
-    q0.zero();
-    v0.zero();
-    q0(0) = 1.5;
-    q0(1) = 1.5;
+    SP::SimpleVector q0(new SimpleVector(nDof));
+    SP::SimpleVector v0(new SimpleVector(nDof));
+    q0->zero();
+    v0->zero();
+    (*q0)(0) = 1.5;
+    (*q0)(1) = 1.5;
 
     SP::LagrangianDS doublependulum(new LagrangianDS(q0, v0, "DoublePendulumPlugin:mass"));
 
     // external plug-in
     doublependulum->setComputeNNLFunction("DoublePendulumPlugin.so", "NNL");
-    doublependulum->setComputeJacobianNNLFunction(1, "DoublePendulumPlugin.so", "jacobianVNNL");
-    doublependulum->setComputeJacobianNNLFunction(0, "DoublePendulumPlugin.so", "jacobianQNNL");
+    doublependulum->setComputeJacobianQDotNNLFunction("DoublePendulumPlugin.so", "jacobianVNNL");
+    doublependulum->setComputeJacobianQNNLFunction("DoublePendulumPlugin.so", "jacobianQNNL");
     doublependulum->setComputeFIntFunction("DoublePendulumPlugin.so", "FInt");
-    doublependulum->setComputeJacobianFIntFunction(1, "DoublePendulumPlugin.so", "jacobianVFInt");
-    doublependulum->setComputeJacobianFIntFunction(0, "DoublePendulumPlugin.so", "jacobianQFInt");
+    doublependulum->setComputeJacobianQDotFIntFunction("DoublePendulumPlugin.so", "jacobianVFInt");
+    doublependulum->setComputeJacobianQFIntFunction("DoublePendulumPlugin.so", "jacobianQFInt");
 
     allDS.insert(doublependulum);
 

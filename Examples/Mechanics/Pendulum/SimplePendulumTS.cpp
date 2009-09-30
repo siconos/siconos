@@ -67,16 +67,17 @@ int main(int argc, char* argv[])
     // --- DS: Double Pendulum ---
 
     // Initial position (angles in radian)
-    SimpleVector q0(nDof), v0(nDof);
-    q0.zero();
-    v0.zero();
-    q0(0) = 1.5;
+    SP::SimpleVector q0(new SimpleVector(nDof));
+    SP::SimpleVector v0(new SimpleVector(nDof));
+    (*q0).zero();
+    (*v0).zero();
+    (*q0)(0) = 1;
 
     SP::LagrangianDS simplependulum(new LagrangianDS(q0, v0));
 
-    SimpleMatrix Mass(nDof, nDof);
-    Mass(0, 0) = m1 * l1;
-    simplependulum->setMass(Mass);
+    SP::SimpleMatrix Mass(new SimpleMatrix(nDof, nDof));
+    (*Mass)(0, 0) = m1 * l1;
+    simplependulum->setMassPtr(Mass);
 
 
     // external plug-in
@@ -84,8 +85,8 @@ int main(int argc, char* argv[])
 
 
     simplependulum->setComputeFIntFunction("SimplePendulumPlugin.so", "FInt");
-    simplependulum->setComputeJacobianFIntFunction(1, "SimplePendulumPlugin.so", "jacobianVFInt");
-    simplependulum->setComputeJacobianFIntFunction(0, "SimplePendulumPlugin.so", "jacobianQFInt");
+    simplependulum->setComputeJacobianQDotFIntFunction("SimplePendulumPlugin.so", "jacobianVFInt");
+    simplependulum->setComputeJacobianQFIntFunction("SimplePendulumPlugin.so", "jacobianQFInt");
 
     allDS.insert(simplependulum);
 
@@ -135,6 +136,9 @@ int main(int argc, char* argv[])
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
     SP::TimeStepping s(new TimeStepping(t));
+    //    s->setUseRelativeConvergenceCriteron(true);
+    //  s->setRelativeConvergenceTol(0.5);
+
 
     // -- OneStepIntegrators --
 

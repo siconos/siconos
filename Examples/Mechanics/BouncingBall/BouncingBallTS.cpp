@@ -60,12 +60,12 @@ int main(int argc, char* argv[])
     (*Mass)(2, 2) = 3. / 5 * m * R * R;
 
     // -- Initial positions and velocities --
-    SP::SiconosVector q0(new SimpleVector(nDof));
-    SP::SiconosVector v0(new SimpleVector(nDof));
+    SP::SimpleVector q0(new SimpleVector(nDof));
+    SP::SimpleVector v0(new SimpleVector(nDof));
     (*q0)(0) = position_init;
     (*v0)(0) = velocity_init;
     // -- The dynamical system --
-    SP::LagrangianLinearTIDS ball(new LagrangianLinearTIDS(*q0, *v0, *Mass));
+    SP::LagrangianLinearTIDS ball(new LagrangianLinearTIDS(q0, v0, Mass));
     allDS.insert(ball);
     // -- Set external forces (weight) --
     SP::SimpleVector weight(new SimpleVector(nDof));
