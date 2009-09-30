@@ -47,7 +47,7 @@ public:
 
   void computeH(double);
 
-  void computeJacH(double, unsigned int);
+  void computeJacQH(double);
 
   /** visitors hook
    */

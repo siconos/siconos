@@ -36,7 +36,7 @@ protected:
 
 public:
 
-  Sphere(double, double, const SiconosVector&, const SiconosVector&);
+  Sphere(double, double, SP::SiconosVector, SP::SiconosVector);
 
   ~Sphere();
 
@@ -67,9 +67,12 @@ public:
 
   void computeNNL();
 
-  void computeJacobianNNL(unsigned int);
+  void computeJacobianQNNL();
+  void computeJacobianQDotNNL();
 
-  void computeJacobianNNL(unsigned int, SP::SiconosVector, SP::SiconosVector);
+  void computeJacobianQNNL(SP::SiconosVector, SP::SiconosVector);
+  void computeJacobianQDotNNL(SP::SiconosVector, SP::SiconosVector);
+
 
   /** visitors hook
    */

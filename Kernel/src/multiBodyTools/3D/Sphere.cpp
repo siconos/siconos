@@ -94,13 +94,20 @@ void Sphere::computeNNL(SP::SiconosVector q, SP::SiconosVector v)
   (*NNL)(5) = -I * phidot * thetadot * sin(theta);
 }
 
-void Sphere::computeJacobianNNL(unsigned int i)
+
+
+void Sphere::computeJacobianQNNL()
 {
 
-  Sphere::computeJacobianNNL(i, getQPtr(), getVelocityPtr());
+  Sphere::computeJacobianQNNL(getQPtr(), getVelocityPtr());
+}
+void Sphere::computeJacobianQDotNNL()
+{
+
+  Sphere::computeJacobianQDotNNL(getQPtr(), getVelocityPtr());
 }
 
-void Sphere::computeJacobianNNL(unsigned int i, SP::SiconosVector q, SP::SiconosVector v)
+void Sphere::computeJacobianQNNL(SP::SiconosVector q, SP::SiconosVector v)
 {
   double theta    = q->getValue(3);
   double phi      = q->getValue(4);
@@ -110,33 +117,45 @@ void Sphere::computeJacobianNNL(unsigned int i, SP::SiconosVector q, SP::Siconos
   double phidot   = v->getValue(4);
   double psidot   = v->getValue(5);
 
-  jacobianNNL[0]->zero();
-  jacobianNNL[1]->zero();
+  jacobianQNNL->zero();
 
-  (*jacobianNNL[0])(3, 4) = -I * psidot * phidot * cos(theta);
-  (*jacobianNNL[0])(4, 4) = I * psidot * phidot * cos(theta);
-  (*jacobianNNL[0])(5, 4) = I * psidot * phidot * cos(theta);
+  (*jacobianQNNL)(3, 4) = -I * psidot * phidot * cos(theta);
+  (*jacobianQNNL)(4, 4) = I * psidot * phidot * cos(theta);
+  (*jacobianQNNL)(5, 4) = I * psidot * phidot * cos(theta);
 
-  (*jacobianNNL[1])(3, 3) = I * psidot * sin(theta);
-  (*jacobianNNL[1])(3, 4) = 0;
-  (*jacobianNNL[1])(3, 5) = I * phidot * sin(theta);
 
-  (*jacobianNNL[1])(4, 3) = 0;
-  (*jacobianNNL[1])(4, 4) = -I * psidot * sin(theta);
-  (*jacobianNNL[1])(4, 5) = -I * thetadot * sin(theta);
+}
+void Sphere::computeJacobianQDotNNL(SP::SiconosVector q, SP::SiconosVector v)
+{
+  double theta    = q->getValue(3);
+  double phi      = q->getValue(4);
+  double psi      = q->getValue(5);
 
-  (*jacobianNNL[1])(5, 3) =  -I * thetadot * sin(theta);
-  (*jacobianNNL[1])(5, 4) =  -I * phidot * sin(theta);
-  (*jacobianNNL[1])(5, 5) = 0;
+  double thetadot = v->getValue(3);
+  double phidot   = v->getValue(4);
+  double psidot   = v->getValue(5);
+
+  jacobianQDotNNL->zero();
+
+
+  (*jacobianQDotNNL)(3, 3) = I * psidot * sin(theta);
+  (*jacobianQDotNNL)(3, 4) = 0;
+  (*jacobianQDotNNL)(3, 5) = I * phidot * sin(theta);
+
+  (*jacobianQDotNNL)(4, 3) = 0;
+  (*jacobianQDotNNL)(4, 4) = -I * psidot * sin(theta);
+  (*jacobianQDotNNL)(4, 5) = -I * thetadot * sin(theta);
+
+  (*jacobianQDotNNL)(5, 3) =  -I * thetadot * sin(theta);
+  (*jacobianQDotNNL)(5, 4) =  -I * phidot * sin(theta);
+  (*jacobianQDotNNL)(5, 5) = 0;
 
 }
 
 
-
-
 Sphere::Sphere(double r, double m,
-               const SiconosVector& qinit,
-               const SiconosVector& vinit)
+               SP::SiconosVector qinit,
+               SP::SiconosVector vinit)
   : LagrangianDS(qinit, vinit), radius(r), massValue(m)
 {
 
@@ -145,19 +164,19 @@ Sphere::Sphere(double r, double m,
   normalize(getQPtr(), 5);
   ndof = 6;
 
-  assert(qinit.size() == ndof);
-  assert(vinit.size() == ndof);
+  assert(qinit->size() == ndof);
+  assert(vinit->size() == ndof);
 
-  double theta    = qinit.getValue(3);
-  double phi      = qinit.getValue(4);
-  double psi      = qinit.getValue(5);
+  double theta    = qinit->getValue(3);
+  double phi      = qinit->getValue(4);
+  double psi      = qinit->getValue(5);
 
-  double thetadot = vinit.getValue(3);
-  double phidot   = vinit.getValue(4);
-  double psidot   = vinit.getValue(5);
+  double thetadot = vinit->getValue(3);
+  double phidot   = vinit->getValue(4);
+  double psidot   = vinit->getValue(5);
 
 
-  mass.reset(new PMMass(ndof, ndof));
+  mass.reset(new SimpleMatrix(ndof, ndof));
   mass->zero();
   I = massValue * radius * radius * 2. / 5.;
   (*mass)(0, 0) = (*mass)(1, 1) = (*mass)(2, 2) = massValue;    ;
@@ -166,15 +185,11 @@ Sphere::Sphere(double r, double m,
   computeMass();
 
 
-  NNL.reset(new PVNNL(ndof));
+  NNL.reset(new SimpleVector(ndof));
   NNL->zero();
 
   computeNNL();
 
-
-  jacobianNNL.resize(2);
-  jacobianNNL[0].reset(new PMNNL(ndof, ndof));
-  jacobianNNL[1].reset(new PMNNL(ndof, ndof));
 
 }
 

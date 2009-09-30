@@ -46,7 +46,7 @@ public:
       \param velocity vector
   */
 
-  Circle(double, double, const SiconosVector&, const SiconosVector&);
+  Circle(double, double, SP::SiconosVector, SP::SiconosVector);
 
   /** destructor
    */

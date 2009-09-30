@@ -21,8 +21,8 @@
 #include "CircularDS.h"
 
 CircularDS::CircularDS(double r, double m,
-                       const SiconosVector& qinit,
-                       const SiconosVector& vinit)
+                       SP::SiconosVector qinit,
+                       SP::SiconosVector vinit)
   : LagrangianDS(qinit, vinit),
     radius(r), massValue(m)
 {

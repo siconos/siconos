@@ -35,7 +35,7 @@ protected:
 
 public:
 
-  CircularDS(double, double, const SiconosVector&, const SiconosVector&);
+  CircularDS(double, double, SP::SiconosVector, SP::SiconosVector);
 
   ~CircularDS();
 

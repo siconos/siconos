@@ -44,7 +44,7 @@ public:
       \param velocity vector
   */
 
-  Disk(double, double, const SiconosVector&, const SiconosVector&);
+  Disk(double, double, SP::SiconosVector, SP::SiconosVector);
 
   /** destructor
    */

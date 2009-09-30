@@ -185,10 +185,10 @@ JacH(q) =  [                                                ]
 */
 
 
-void DiskPlanR::computeJacH(double, unsigned int)
+void DiskPlanR::computeJacQH(double)
 {
 
-  SimpleMatrix *g = JacH[0].get();
+  SimpleMatrix *g = (SimpleMatrix *) JacQH.get();
 
   double x = (*data[q0])(0);
   double y = (*data[q0])(1);

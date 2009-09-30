@@ -112,7 +112,7 @@ public:
 
   void computeH(double);
 
-  void computeJacH(double, unsigned int);
+  void computeJacQH(double);
 
   bool equal(double, double, double, double);
 

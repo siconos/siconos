@@ -22,16 +22,15 @@
 
 void Circle::MassSetup()
 {
-  mass.reset(new PMMass(ndof, ndof));
-  mass->resize(ndof, ndof);
+  mass.reset(new SimpleMatrix(ndof, ndof));
   mass->zero();
   (*mass)(0, 0) = (*mass)(1, 1) = massValue;
   (*mass)(2, 2) = massValue * radius * radius;
 }
 
 Circle::Circle(double r, double m,
-               const SiconosVector& qinit,
-               const SiconosVector& vinit)
+               SP::SiconosVector qinit,
+               SP::SiconosVector vinit)
   : CircularDS(r, m, qinit, vinit)
 {
   MassSetup();
