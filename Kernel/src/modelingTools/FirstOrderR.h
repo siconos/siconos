@@ -101,10 +101,6 @@ public:
   virtual ~FirstOrderR() {};
 
   // -- JacH --
-  virtual void setComputeJacXHFunction(const std::string& pluginPath, const std::string& functionName)
-  {
-    Plugin::setFunction(&jXOutput, pluginPath, functionName);
-  }
 
   /** get matrix JacH[index]
    *  \return a SimpleMatrix

@@ -125,7 +125,7 @@ void FirstOrderType1R::computeG(double t)
 
 void FirstOrderType1R::computeOutput(double t, unsigned int)
 {
-  assert(output && "FirstOrderType1R::computeOutput() is not linked to a plugin function");
+  assert(pluginH && "FirstOrderType1R::computeOutput() is not linked to a plugin function");
 
   SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
@@ -138,7 +138,7 @@ void FirstOrderType1R::computeOutput(double t, unsigned int)
   unsigned int sizeX = data[x]->size();
   unsigned int sizeZ = data[z]->size(); //
 
-  ((Type1Ptr)output)(sizeX, &(*workX)(0), sizeY, &(*workY)(0), sizeZ, &(*workZ)(0));
+  ((Type1Ptr)pluginH)(sizeX, &(*workX)(0), sizeY, &(*workY)(0), sizeZ, &(*workZ)(0));
 
   // Rebuilt y/z from Tmp
   *y = *workY;
@@ -147,7 +147,7 @@ void FirstOrderType1R::computeOutput(double t, unsigned int)
 
 void FirstOrderType1R::computeInput(double t, unsigned int level)
 {
-  assert(input && "FirstOrderType1R::computeInput() is not linked to a plugin function");
+  assert(pluginG && "FirstOrderType1R::computeInput() is not linked to a plugin function");
 
   SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(level);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
@@ -161,7 +161,7 @@ void FirstOrderType1R::computeInput(double t, unsigned int level)
   unsigned int sizeR = workX->size();
 
 
-  ((Type1Ptr)input)(sizeY, &(*workY)(0), sizeR, &(*workX)(0), sizeZ, &(*workZ)(0));
+  ((Type1Ptr)pluginG)(sizeY, &(*workY)(0), sizeR, &(*workX)(0), sizeZ, &(*workZ)(0));
 
   *data[r] = *workX;
   *data[z] = *workZ;
@@ -171,7 +171,7 @@ void FirstOrderType1R::computeJacXH(double)
 {
   //
   assert(index == 0 && "FirstOrderType1R::computeJacobianH(index): index is out of range");
-  assert(jXOutput && "FirstOrderType1R::computeJacobianH() failed; not linked to a plug-in function.");
+  assert(pluginjXH && "FirstOrderType1R::computeJacobianH() failed; not linked to a plug-in function.");
 
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
   *workX = *data[x];
@@ -181,7 +181,7 @@ void FirstOrderType1R::computeJacXH(double)
   unsigned int sizeX = data[x]->size();
   unsigned int sizeZ = data[z]->size();
 
-  ((Type1Ptr) jXOutput)(sizeX, &(*workX)(0), sizeY, &(*(JacXH))(0, 0), sizeZ, &(*workZ)(0));
+  ((Type1Ptr) pluginjXH)(sizeX, &(*workX)(0), sizeY, &(*(JacXH))(0, 0), sizeZ, &(*workZ)(0));
 
   // Rebuilt z from Tmp
   *data[z] = *workZ;
@@ -190,7 +190,7 @@ void FirstOrderType1R::computeJacXH(double)
 void FirstOrderType1R::computeJacLG(double)
 {
   assert(index == 0 && "FirstOrderType1R::computeJacobianG(index): index is out of range");
-  assert(jLInput && "FirstOrderType1R::computeJacobianG() failed; not linked to a plug-in function.");
+  assert(pluginjLG && "FirstOrderType1R::computeJacobianG() failed; not linked to a plug-in function.");
 
   SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(0);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
@@ -201,7 +201,7 @@ void FirstOrderType1R::computeJacLG(double)
   unsigned int sizeX = data[x]->size();
   unsigned int sizeZ = data[z]->size();
 
-  ((Type1Ptr)jLInput)(sizeY, &(*workY)(0), sizeX, &(*(JacLG))(0, 0), sizeZ, &(*workZ)(0));
+  ((Type1Ptr)pluginjLG)(sizeY, &(*workY)(0), sizeX, &(*(JacLG))(0, 0), sizeZ, &(*workZ)(0));
 
   // Rebuilt z from Tmp
   *data[z] = *workZ;

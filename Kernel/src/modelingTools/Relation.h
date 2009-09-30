@@ -76,31 +76,32 @@ class Relation
 protected:
   /** Plug-in to compute h(...)
   */
-  PluginHandle output;
-  std::string pluginNameOutput;
+  PluginHandle pluginH;
+  //std::string pluginNameOutput;
 
   /** Plug-in to compute \f$ \nabla_x h(..)\f$
    */
-  PluginHandle jXOutput;
-  std::string pluginNamejXOutput;
+  PluginHandle pluginjXH;
+  //  std::string pluginNamejXOutput;
   /** Plug-in to compute \f$ \nabla_{\lambda} h(..)\f$
    */
-  PluginHandle jLOutput;
-  std::string pluginNamejLOutput;
+  PluginHandle pluginjLH;
+  //  std::string pluginNamejLOutput;
 
   /** Plug-in to compute g(...)
    */
-  PluginHandle input;
-  std::string pluginNameInput;
+  PluginHandle pluginG;
+  //  std::string pluginNameInput;
 
   /** Plug-in to compute \f$ \nabla_\lambda g(lambda,t,z)\f$
    */
-  PluginHandle jLInput;
-  std::string pluginNamejLInput;
-  PluginHandle fplugin;
-  std::string pluginNamefplugin;
-  PluginHandle eplugin;
-  std::string pluginNameeplugin;
+  PluginHandle pluginjLG;
+  //  std::string pluginNamejLInput;
+  PluginHandle pluginf;
+  //  std::string pluginNamefplugin;
+  PluginHandle plugine;
+  //  std::string pluginNameeplugin;
+  void zeroPlugin();
 
 protected:
 
@@ -268,35 +269,23 @@ public:
 
   /** true if h is plugged
    *  \return a bool
-   */
-  inline const bool isHPlugged() const
-  {
-    return output;
-  }
 
+  inline const bool isHPlugged() const {return output;}
+  */
   /** true if g is plugged
    *  \return a bool
-   */
-  inline const bool isGPlugged() const
-  {
-    return input;
-  }
 
+  inline const bool isGPlugged() const {return input;}
+  */
   /** true if JacH[i] is plugged
    *  \return a bool
+  virtual const bool isJacHPlugged(unsigned int) const {return false;}
    */
-  virtual const bool isJacHPlugged(unsigned int) const
-  {
-    return false;
-  }
 
   /** true if JacG[i] is plugged
    *  \return a bool
+  virtual const bool isJacGPlugged(unsigned int) const {return false;}
    */
-  virtual const bool isJacGPlugged(unsigned int) const
-  {
-    return false;
-  }
 
 
   /**
@@ -361,6 +350,7 @@ public:
    *  according to lambda)
    */
   virtual void setComputeJacLHFunction(const std::string& pluginPath, const std::string& functionName);
+  virtual void setComputeJacXHFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** To set a plug-in function to compute input function g
    *  \param string : the complete path to the plugin
