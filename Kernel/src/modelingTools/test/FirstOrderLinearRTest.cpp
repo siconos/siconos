@@ -33,11 +33,11 @@ void FirstOrderLinearRTest::setUp()
   B.reset(new SimpleMatrix("matB.dat", true));
   F.reset(new SimpleMatrix("matF.dat", true));
   e.reset(new SimpleVector(2));
-  Cp.reset(new FirstOrderLinearR::PluggedMatrix("TestPlugin:C"));
-  Dp.reset(new FirstOrderLinearR::PluggedMatrix("TestPlugin:D"));
-  Bp.reset(new FirstOrderLinearR::PluggedMatrix("TestPlugin:B"));
-  Fp.reset(new FirstOrderLinearR::PluggedMatrix("TestPlugin:F"));
-  ep.reset(new Plugged_Vector_FTime("TestPlugin:e"));
+  //   Cp.reset(new FirstOrderLinearR::PluggedMatrix("TestPlugin:C"));
+  //   Dp.reset(new FirstOrderLinearR::PluggedMatrix("TestPlugin:D"));
+  //   Bp.reset(new FirstOrderLinearR::PluggedMatrix("TestPlugin:B"));
+  //   Fp.reset(new FirstOrderLinearR::PluggedMatrix("TestPlugin:F"));
+  //  ep.reset(new Plugged_Vector_FTime("TestPlugin:e"));
   (*e)(0) = 0.1;
   (*e)(1) = 0.1;
   // parse xml file:
@@ -125,9 +125,9 @@ void FirstOrderLinearRTest::testBuildFirstOrderLinearR3()
 void FirstOrderLinearRTest::testBuildFirstOrderLinearR4()
 {
   cout << "--> Test: constructor 4." << endl;
-  SP::FirstOrderLinearR folr(new FirstOrderLinearR(Cp, Bp));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR4a : ", folr->getCPtr() == Cp, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR4b : ", folr->getBPtr() == Bp, true);
+  SP::FirstOrderLinearR folr(new FirstOrderLinearR(C, B));
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR4a : ", folr->getCPtr() == C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR4b : ", folr->getBPtr() == B, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR4c : ", folr->getType() == RELATION::FirstOrder, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR4d : ", folr->getSubType() == RELATION::LinearR, true);
   cout << "--> Constructor 4 test ended with success." << endl;
@@ -137,33 +137,18 @@ void FirstOrderLinearRTest::testBuildFirstOrderLinearR4()
 void FirstOrderLinearRTest::testBuildFirstOrderLinearR5()
 {
   cout << "--> Test: constructor 5." << endl;
-  SP::FirstOrderLinearR folr(new FirstOrderLinearR(Cp, Dp, Fp, ep, Bp));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5a : ", folr->getCPtr() == Cp, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5b : ", folr->getDPtr() == Dp, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5c : ", folr->getFPtr() == Fp, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5d : ", folr->getEPtr() == ep, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5e : ", folr->getBPtr() == Bp, true);
+  SP::FirstOrderLinearR folr(new FirstOrderLinearR(C, D, F, e, B));
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5a : ", folr->getCPtr() == C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5b : ", folr->getDPtr() == D, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5c : ", folr->getFPtr() == F, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5d : ", folr->getEPtr() == e, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5e : ", folr->getBPtr() == B, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5f : ", folr->getType() == RELATION::FirstOrder, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5g : ", folr->getSubType() == RELATION::LinearR, true);
   cout << "--> Constructor 5 test ended with success." << endl;
 }
 
 // set C as a matrix and then plug it
-void FirstOrderLinearRTest::testSetC()
-{
-  //   cout << "--> Test: setC." << endl;
-  //   SP::SiconosMatrix tmp(new SimpleMatrix(*C));
-  //   tmp->zero();
-  //   SP::FirstOrderLinearR folr(new FirstOrderLinearR(*tmp,*B));
-  //   folr->setC(*C);
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetC : ", folr->getC()==*C, true);
-  //   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetC : ", folr->getCPtr()->isPlugged()==false, true);
-
-  //   folr->setComputeCFunction("TestPlugin.so","C");
-  // //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetC : ", folr->getCPtr()->isPlugged()==true, true);
-  // //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetC : ", folr->getCPtr()->getPluginName()=="TestPlugin:C", true);
-  //   cout << "--> setC test ended with success." << endl;
-}
 
 // setCPtr
 void FirstOrderLinearRTest::testSetCPtr()
@@ -196,14 +181,6 @@ void FirstOrderLinearRTest::testSetCPtr2()
 }
 
 // set D
-void FirstOrderLinearRTest::testSetD()
-{
-  //   cout << "--> Test: setD." << endl;
-  //   SP::FirstOrderLinearR folr(new FirstOrderLinearR(*C,*B));
-  //   folr->setD(*D);
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetD: ", folr->getD()==*D, true);
-  //   cout << "--> setD test ended with success." << endl;
-}
 
 // setDPtr
 void FirstOrderLinearRTest::testSetDPtr()
@@ -217,14 +194,6 @@ void FirstOrderLinearRTest::testSetDPtr()
 }
 
 // set F
-void FirstOrderLinearRTest::testSetF()
-{
-  //   cout << "--> Test: setF." << endl;
-  //   SP::FirstOrderLinearR folr(new FirstOrderLinearR(*C,*B));
-  //   folr->setF(*F);
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetF: ", folr->getF()==*F, true);
-  //   cout << "--> setF test ended with success." << endl;
-}
 
 // setFPtr
 void FirstOrderLinearRTest::testSetFPtr()
@@ -238,14 +207,7 @@ void FirstOrderLinearRTest::testSetFPtr()
 }
 
 // set E
-void FirstOrderLinearRTest::testSetE()
-{
-  cout << "--> Test: setE." << endl;
-  SP::FirstOrderLinearR folr(new FirstOrderLinearR(*C, *B));
-  folr->setE(*e);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetE: ", folr->getE() == *e, true);
-  cout << "--> setE test ended with success." << endl;
-}
+
 
 // setEPtr
 void FirstOrderLinearRTest::testSetEPtr()
@@ -259,16 +221,6 @@ void FirstOrderLinearRTest::testSetEPtr()
 }
 
 // set B
-void FirstOrderLinearRTest::testSetB()
-{
-  //   cout << "--> Test: setB." << endl;
-  //   SP::SiconosMatrix tmp(new SimpleMatrix(*B));
-  //   tmp->zero();
-  //   SP::FirstOrderLinearR folr(new FirstOrderLinearR(*C,*tmp));
-  //   folr->setB(*B);
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetB: ", folr->getB()==*B, true);
-  //   cout << "--> setB test ended with success." << endl;
-}
 
 // setBPtr
 void FirstOrderLinearRTest::testSetBPtr()

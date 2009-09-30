@@ -26,6 +26,9 @@
 
 #include "FirstOrderR.h"
 
+/** Pointer to function for plug-in for operators related to output and its gradients.*/
+typedef void (*Type1Ptr)(unsigned int, const double*, unsigned int, double*, unsigned int, double*);
+
 
 /** FirstOrder Non Linear Relation.
  *  \author SICONOS Development Team - copyright INRIA
@@ -47,11 +50,8 @@
      - \f$ \nabla_\lambda g \f$: jacobianG[0] ( input[1] )
  *
  */
-class FirstOrderType1R : public FirstOrderR<FPtr3>
+class FirstOrderType1R : public FirstOrderR
 {
-private:
-
-  typedef FirstOrderR<FPtr3> BaseClass;
 
 public:
 
@@ -97,13 +97,13 @@ public:
    *  \param double : not used
    *  \param not used
    */
-  void computeJacH(double, unsigned int);
+  void computeJacXH(double);
 
   /** default function to compute jacobianG according to lambda
    *  \param double : current time
    *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
    */
-  void computeJacG(double, unsigned int);
+  void computeJacLG(double);
 
   /** default function to compute y
    *  \param double: not used

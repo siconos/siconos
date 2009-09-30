@@ -47,18 +47,17 @@
    C is the only required input to built a LagrangianLinearTIR.
 
 */
-class LagrangianLinearTIR : public LagrangianR<int*>
+class LagrangianLinearTIR : public LagrangianR
 {
 
 protected:
 
-  typedef LagrangianR<int*> BaseClass;
 
   /** C*/
-  SP::SiconosMatrix C;
+  //SP::SiconosMatrix C;
 
   /** D matrix, coefficient of lambda in y */
-  SP::SiconosMatrix D;
+  //SP::SiconosMatrix D;
 
   /** F matrix, coefficient of z */
   SP::SiconosMatrix F;
@@ -68,7 +67,7 @@ protected:
 
   /** Default constructor
    */
-  LagrangianLinearTIR(): BaseClass(RELATION::LinearTIR) {};
+  LagrangianLinearTIR(): LagrangianR(RELATION::LinearTIR) {};
 
 public:
 
@@ -147,79 +146,74 @@ public:
   // -- C --
   /** get the value of C
    *  \return plugged matrix
-   */
-  inline const SimpleMatrix getC() const
-  {
-    return *C;
-  }
 
+  inline const SimpleMatrix getC() const { return *C; }
+  */
   /** get C
    *  \return pointer on a plugged matrix
    */
   inline SP::SiconosMatrix getCPtr() const
   {
-    return C;
+    return JacQH;
   }
 
   /** set the value of C to newValue
    *  \param a plugged matrix
-   */
+
   void setC(const SiconosMatrix& newValue)
-  {
-    setObject<SimpleMatrix, SP::SiconosMatrix, SiconosMatrix>(C, newValue);
-  }
+    {
+      setObject<SimpleMatrix,SP::SiconosMatrix,SiconosMatrix>(C,newValue);
+    }
+  */
 
   /** set C to pointer newPtr
    *  \param a SP to plugged matrix
    */
   inline void setCPtr(SP::SiconosMatrix newPtr)
   {
-    C = newPtr;
+    JacQH = newPtr;
   }
 
   // -- D --
 
   /** get the value of D
    *  \return plugged matrix
-   */
-  inline const SimpleMatrix getD() const
-  {
-    return *D;
-  }
+
+  inline const SimpleMatrix getD() const { return *D; }
+  */
 
   /** get D
    *  \return pointer on a plugged matrix
    */
   inline SP::SiconosMatrix getDPtr() const
   {
-    return D;
+    return JacLH;
   }
 
   /** set the value of D to newValue
    *  \param a plugged matrix
-   */
+
   void setD(const SiconosMatrix& newValue)
-  {
-    setObject<SimpleMatrix, SP::SiconosMatrix, SiconosMatrix>(D, newValue);
-  }
+    {
+      setObject<SimpleMatrix,SP::SiconosMatrix,SiconosMatrix>(D,newValue);
+    }
+  */
 
   /** set D to pointer newPtr
    *  \param a SP to plugged matrix
    */
   inline void setDPtr(SP::SiconosMatrix newPtr)
   {
-    D = newPtr;
+    JacLH = newPtr;
   }
 
   // -- F --
 
   /** get the value of F
    *  \return plugged matrix
-   */
-  inline const SimpleMatrix getF() const
-  {
-    return *F;
-  }
+
+  inline const SimpleMatrix getF() const { return *F; }
+  */
 
   /** get F
    *  \return pointer on a plugged matrix
@@ -231,11 +225,12 @@ public:
 
   /** set the value of F to newValue
    *  \param a plugged matrix
-   */
+
   void setF(const SiconosMatrix& newValue)
-  {
-    setObject<SimpleMatrix, SP::SiconosMatrix, SiconosMatrix>(F, newValue);
-  }
+    {
+      setObject<SimpleMatrix,SP::SiconosMatrix,SiconosMatrix>(F,newValue);
+    }
+  */
 
   /** set F to pointer newPtr
    *  \param a SP to plugged matrix
@@ -248,11 +243,9 @@ public:
   // -- e --
   /** get the value of e
    *  \return plugged vector
-   */
-  inline const SimpleVector getE() const
-  {
-    return *e;
-  }
+
+  inline const SimpleVector getE() const { return *e; }
+  */
 
   /** get e
    *  \return pointer on a plugged vector
@@ -264,11 +257,12 @@ public:
 
   /** set the value of e to newValue
    *  \param a plugged vector
-   */
+
   void setE(const SiconosVector& newValue)
-  {
-    setObject<SimpleVector, SP::SiconosVector, SiconosVector>(e, newValue);
-  }
+    {
+      setObject<SimpleVector, SP::SiconosVector,SiconosVector>(e,newValue);
+    }
+  */
 
   /** set e to pointer newPtr
    *  \param a SP to plugged vector
@@ -280,13 +274,13 @@ public:
 
   /** get matrix JacH[index]
    *  \return a SimpleMatrix
+  const SimpleMatrix getJacXH() const;
+  const SimpleMatrix getJacLH() const;
    */
-  const SimpleMatrix getJacH(unsigned int  index = 0) const;
 
   /** get a pointer on matrix JacH[index]
    *  \return a pointer on a SiconosMatrix
    */
-  SP::SiconosMatrix getJacHPtr(unsigned int index = 0) const ;
 
   /** copy the data of the Relation to the XML tree
    */

@@ -51,30 +51,34 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(SP::DynamicalSystemXML dsxml): Lagran
 }
 
 // --- Constructor from a set of data - Mass, K and C ---
-LagrangianLinearTIDS::LagrangianLinearTIDS(const SimpleVector& newQ0, const SimpleVector& newVelocity0,
-    const SiconosMatrix& newMass, const SiconosMatrix& newK, const SiconosMatrix& newC):
+LagrangianLinearTIDS::LagrangianLinearTIDS(SP::SimpleVector newQ0, SP::SimpleVector newVelocity0,
+    SP::SiconosMatrix newMass,  SP::SiconosMatrix newK, SP::SiconosMatrix newC):
   LagrangianDS(newQ0, newVelocity0, newMass)
 {
-  assert((newK.size(0) == ndof && newK.size(1) == ndof) &&
+  assert((newK->size(0) == ndof && newK->size(1) == ndof) &&
          "LagrangianLinearTIDS - constructor from data, inconsistent size between K and ndof");
 
-  assert((newC.size(0) == ndof && newC.size(1) == ndof) &&
+  assert((newC->size(0) == ndof && newC->size(1) == ndof) &&
          "LagrangianLinearTIDS - constructor from data, inconsistent size between C and ndof");
 
-  K.reset(new SimpleMatrix(newK));
-  C.reset(new SimpleMatrix(newC));
+  K = newK;
+  C = newC;
 
   DSType = LLTIDS;
 }
 
 // --- Constructor from a set of data - Mass, no K and no C ---
-LagrangianLinearTIDS::LagrangianLinearTIDS(const SimpleVector& newQ0, const SimpleVector& newVelocity0,
-    const SiconosMatrix& newMass):
+LagrangianLinearTIDS::LagrangianLinearTIDS(SP::SimpleVector newQ0, SP::SimpleVector newVelocity0,
+    SP::SiconosMatrix newMass):
   LagrangianDS(newQ0, newVelocity0, newMass)
 {
   DSType = LLTIDS;
 }
-
+LagrangianLinearTIDS::LagrangianLinearTIDS(const SimpleVector& newQ0, const SimpleVector& newVelocity0, const SiconosMatrix& newMass):
+  LagrangianDS(createSPtrSiconosVector((SimpleVector&)newQ0), createSPtrSiconosVector((SimpleVector&)newVelocity0), createSPtrSiconosMatrix((SimpleMatrix&)newMass))
+{
+  DSType = LLTIDS;
+}
 LagrangianLinearTIDS::~LagrangianLinearTIDS()
 {}
 
@@ -182,16 +186,6 @@ void LagrangianLinearTIDS::setKPtr(SP::SiconosMatrix newPtr)
   K = newPtr;
 }
 
-void LagrangianLinearTIDS::setC(const SiconosMatrix& newValue)
-{
-  if (newValue.size(0) != ndof || newValue.size(1) != ndof)
-    RuntimeException::selfThrow("LagrangianLinearTIDS - setC: inconsistent input matrix size ");
-
-  if (!C)
-    C.reset(new SimpleMatrix(newValue));
-  else
-    *C = newValue;
-}
 
 void LagrangianLinearTIDS::setCPtr(SP::SiconosMatrix newPtr)
 {
@@ -247,29 +241,29 @@ void LagrangianLinearTIDS::saveSpecificDataToXML()
   assert(dsxml &&
          "LagrangianLinearTIDS::saveDSToXML - object DynamicalSystemXML does not exist");
 
-  SP::LagrangianDSXML lgptr = boost::static_pointer_cast <LagrangianDSXML>(dsxml);
-  lgptr->setMassMatrix(*mass);
-  lgptr->setQ(*q[0]);
-  lgptr->setQ0(*q0);
-  lgptr->setQMemory(*qMemory);
-  lgptr->setVelocity(*q[1]);
-  lgptr->setVelocity0(*velocity0);
-  lgptr->setVelocityMemory(*velocityMemory);
+  /*  SP::LagrangianDSXML lgptr = boost::static_pointer_cast <LagrangianDSXML>(dsxml);
+  lgptr->setMassMatrix( *mass );
+  lgptr->setQ( *q[0] );
+  lgptr->setQ0( *q0 );
+  lgptr->setQMemory( *qMemory );
+  lgptr->setVelocity( *q[1] );
+  lgptr->setVelocity0( *velocity0 );
+  lgptr->setVelocityMemory( *velocityMemory );
 
   // FExt
-  if (lgptr->hasFExt())
-  {
-    if (!lgptr->isFExtPlugin())
+  if( lgptr->hasFExt() )
     {
-      lgptr->setFExtVector(*fExt);
-    }
-  }
-  else
+      if( !lgptr->isFExtPlugin())
   {
-    lgptr->setFExtPlugin(fExt->getPluginName());
+    lgptr->setFExtVector( *fExt );
   }
-  (boost::static_pointer_cast <LagrangianLinearTIDSXML>(dsxml))->setK(*K);
-  (boost::static_pointer_cast <LagrangianLinearTIDSXML>(dsxml))->setC(*C);
+    }
+  else
+    {
+      lgptr->setFExtPlugin(fExt->getPluginName());
+    }
+  (boost::static_pointer_cast <LagrangianLinearTIDSXML>(dsxml))->setK( *K );
+  (boost::static_pointer_cast <LagrangianLinearTIDSXML>(dsxml))->setC( *C );*/
 }
 
 LagrangianLinearTIDS* LagrangianLinearTIDS::convert(DynamicalSystem* ds)

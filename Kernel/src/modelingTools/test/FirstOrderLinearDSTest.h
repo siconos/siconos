@@ -38,9 +38,9 @@ private:
   CPPUNIT_TEST(testBuildFirstOrderLinearDS1);
   CPPUNIT_TEST(testBuildFirstOrderLinearDS2);
   CPPUNIT_TEST(testBuildFirstOrderLinearDS3);
-  CPPUNIT_TEST(testSetA);
+  //  CPPUNIT_TEST(testSetA);
   CPPUNIT_TEST(testSetAPtr);
-  CPPUNIT_TEST(testSetB);
+  //  CPPUNIT_TEST(testSetB);
   CPPUNIT_TEST(testSetBPtr);
   CPPUNIT_TEST(End);
 
@@ -51,18 +51,18 @@ private:
   void testBuildFirstOrderLinearDS1();
   void testBuildFirstOrderLinearDS2();
   void testBuildFirstOrderLinearDS3();
-  void testSetA();
+  //  void testSetA();
   void testSetAPtr();
-  void testSetB();
+  //  void testSetB();
   void testSetBPtr();
   void End();
 
   // Members
 
   SP::SiconosVector x0;
-  SP::Plugged_Vector_FTime b0;
+  SP::SiconosVector b0;
   SP::SiconosMatrix A0;
-  SP::Plugged_Matrix_FTime A0p;
+  SP::SiconosMatrix A0p;
   xmlNodePtr node1, node2;
   SP::FirstOrderLinearDSXML tmpxml1, tmpxml2;
 public:

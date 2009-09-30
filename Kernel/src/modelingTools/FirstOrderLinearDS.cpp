@@ -18,6 +18,7 @@
 */
 #include "FirstOrderLinearDS.h"
 #include "FirstOrderLinearDSXML.h"
+#include "Plugin.hpp"
 
 using namespace std;
 
@@ -25,7 +26,12 @@ using namespace std;
 
 // From xml file
 FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML): FirstOrderNonLinearDS(dsXML)
+  , pluginNameAPtr("unknown"), pluginNamebPtr("Unknown")
 {
+  APtr = NULL;
+  bPtr = NULL;
+
+  /*
   // pointer to xml
   SP::FirstOrderLinearDSXML foldsxml = (boost::static_pointer_cast <FirstOrderLinearDSXML>(dsxml));
 
@@ -35,71 +41,101 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML): FirstOrder
 
   string plugin;
   // A
-  if (foldsxml->hasA())
-  {
-    if (foldsxml->isAPlugin())
+  if(foldsxml->hasA())
     {
-      plugin = foldsxml->getAPlugin();
-      setComputeAFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
-    }
-    else
-      A.reset(new Plugged_Matrix_FTime(foldsxml->getA()));
+      if(foldsxml->isAPlugin())
+  {
+    plugin = foldsxml->getAPlugin();
+    setComputeAFunction(SSL::getPluginName( plugin ), SSL::getPluginFunctionName( plugin ));
   }
+      else
+  A.reset(new Plugged_Matrix_FTime(foldsxml->getA()));
+    }
 
   // b
-  if (foldsxml->hasB())
-  {
-    if (foldsxml->isBPlugin())
+  if(foldsxml->hasB())
     {
-      plugin = foldsxml->getBPlugin();
-      setComputeBFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
-    }
-    else
-      b.reset(new Plugged_Vector_FTime(foldsxml->getBVector()));
+      if(foldsxml->isBPlugin())
+  {
+    plugin = foldsxml->getBPlugin();
+    setComputeBFunction(SSL::getPluginName( plugin ), SSL::getPluginFunctionName( plugin ));
   }
+      else
+  b.reset(new Plugged_Vector_FTime(foldsxml->getBVector()));
+    }
 
   checkDynamicalSystem();
+  */
 }
 
 // From a minimum set of data, A and b connected to a plug-in
-FirstOrderLinearDS::FirstOrderLinearDS(const SiconosVector& newX0, const string& APlugin, const string& bPlugin):
-  FirstOrderNonLinearDS(newX0)
+FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, const string& APlugin, const string& bPlugin):
+  FirstOrderNonLinearDS(newX0), pluginNameAPtr("unknown"), pluginNamebPtr("Unknown")
 {
+  APtr = NULL;
+  bPtr = NULL;
+
   DSType = DS::FOLDS;
-  setComputeAFunction(SSL::getPluginName(APlugin), SSL::getPluginFunctionName(APlugin));
-  setComputeBFunction(SSL::getPluginName(bPlugin), SSL::getPluginFunctionName(bPlugin));
-  mf.reset(new PVF(getDim()));
+  Plugin::setFunction(&APtr, SSL::getPluginName(APlugin), SSL::getPluginFunctionName(APlugin));
+  Plugin::setFunction(&bPtr, SSL::getPluginName(bPlugin), SSL::getPluginFunctionName(bPlugin));
+  pluginNameAPtr = APlugin;
+  pluginNamebPtr = bPlugin;
+
+  mf.reset(new SimpleVector(getDim()));
 
 
   checkDynamicalSystem();
 }
+FirstOrderLinearDS::FirstOrderLinearDS(const SiconosVector& newX0, const std::string& APlugin, const std::string& bPlugin):
+  FirstOrderNonLinearDS(createSPtrSiconosVector((SiconosVector&) newX0)), pluginNameAPtr("unknown"), pluginNamebPtr("Unknown")
+{
+  //  SP::SiconosVector sp_aux = createSPtrSiconosVector ((SiconosVector&) newX0);
+  //  FirstOrderNonLinearDS::FirstOrderNonLinearDS();
+
+  DSType = DS::FOLDS;
+  Plugin::setFunction(&APtr, SSL::getPluginName(APlugin), SSL::getPluginFunctionName(APlugin));
+  Plugin::setFunction(&bPtr, SSL::getPluginName(bPlugin), SSL::getPluginFunctionName(bPlugin));
+  pluginNameAPtr = APlugin;
+  pluginNamebPtr = bPlugin;
+
+  mf.reset(new SimpleVector(getDim()));
+
+
+  checkDynamicalSystem();
+
+}
 
 // From a minimum set of data, A from a given matrix
-FirstOrderLinearDS::FirstOrderLinearDS(const SiconosVector& newX0, const SiconosMatrix& newA):
-  FirstOrderNonLinearDS(newX0)
+
+FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatrix newA):
+  FirstOrderNonLinearDS(newX0), pluginNameAPtr("unknown"), pluginNamebPtr("Unknown")
 {
+  APtr = NULL;
+  bPtr = NULL;
   DSType = DS::FOLDS;
-  mf.reset(new PVF(getDim()));
-  assert(((newA.size(0) == n) && (newA.size(1) == n)) &&
+  mf.reset(new SimpleVector(getDim()));
+  assert(((newA->size(0) == n) && (newA->size(1) == n)) &&
          "FirstOrderLinearDS - constructor(number,x0,A): inconsistent dimensions with problem size for input matrix A");
 
-  A.reset(new Plugged_Matrix_FTime(newA));
+  A = newA;
   checkDynamicalSystem();
 }
 
 // From a minimum set of data, A from a given matrix
-FirstOrderLinearDS::FirstOrderLinearDS(const SiconosVector& newX0, const SiconosMatrix& newA, const SiconosVector& newB):
-  FirstOrderNonLinearDS(newX0)
+FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatrix newA, SP::SiconosVector newB):
+  FirstOrderNonLinearDS(newX0), pluginNameAPtr("unknown"), pluginNamebPtr("Unknown")
 {
+  APtr = NULL;
+  bPtr = NULL;
   DSType = DS::FOLDS;
-  assert(((newA.size(0) == n) && (newA.size(1) == n)) &&
+  assert(((newA->size(0) == n) && (newA->size(1) == n)) &&
          "FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with problem size for input matrix A");
-  assert(newB.size() == n &&
+  assert(newB->size() == n &&
          "FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with problem size for input vector b ");
 
-  A.reset(new Plugged_Matrix_FTime(newA));
-  b.reset(new Plugged_Vector_FTime(newB));
-  mf.reset(new PVF(getDim()));
+  A = newA;
+  b = newB;
+  mf.reset(new SimpleVector(getDim()));
 
   checkDynamicalSystem();
 }
@@ -130,13 +166,13 @@ void FirstOrderLinearDS::updatePlugins(double time)
   computeA(time);
   computeB(time);
 }
-
+/*
 void FirstOrderLinearDS::setA(const Plugged_Matrix_FTime& newValue)
 {
-  assert(newValue.size(0) == n && "FirstOrderLinearDS - setA: inconsistent dimensions with problem size for input matrix A.");
-  assert(newValue.size(1) == n && "FirstOrderLinearDS - setA: inconsistent dimensions with problem size for input matrix A.");
+  assert(newValue.size(0)==n&&"FirstOrderLinearDS - setA: inconsistent dimensions with problem size for input matrix A.");
+  assert(newValue.size(1)==n&&"FirstOrderLinearDS - setA: inconsistent dimensions with problem size for input matrix A.");
 
-  if (! A)
+  if( ! A )
     A.reset(new Plugged_Matrix_FTime(newValue));
   else
     *A = newValue;
@@ -144,68 +180,48 @@ void FirstOrderLinearDS::setA(const Plugged_Matrix_FTime& newValue)
 
 void FirstOrderLinearDS::setB(const Plugged_Vector_FTime& newValue)
 {
-  assert(newValue.size() == n && "FirstOrderLinearDS - setB: inconsistent dimensions with problem size for input vector b");
+  assert(newValue.size()==n&&"FirstOrderLinearDS - setB: inconsistent dimensions with problem size for input vector b");
 
-  if (! b)
+  if( ! b )
     b.reset(new Plugged_Vector_FTime(newValue));
   else
     *b = newValue;
 }
-
+*/
 void FirstOrderLinearDS::setComputeAFunction(const string& pluginPath, const string& functionName)
 {
-  if (!A)
-    A.reset(new Plugged_Matrix_FTime(n, n));
-  A->setComputeFunction(pluginPath, functionName);
+  Plugin::setFunction(&APtr, pluginPath, functionName);
+  //   SSL::buildPluginName(pluginNameAPtr,pluginPath,functionName);
 }
 
-void FirstOrderLinearDS::setComputeAFunction(MatrixFunctionOfTime fct)
+void FirstOrderLinearDS::setComputeAFunction(LDSPtrFunction fct)
 {
-  if (!A)
-    A.reset(new Plugged_Matrix_FTime(n, n));
-  A->setComputeFunction(fct);
+  APtr = fct;
 }
 void FirstOrderLinearDS::setComputeBFunction(const string& pluginPath, const string& functionName)
 {
-  if (! b)
-    b.reset(new Plugged_Vector_FTime(n));
-  b->setComputeFunction(pluginPath, functionName);
+  Plugin::setFunction(&bPtr, pluginPath, functionName);
+  if (!b)
+    b.reset(new SimpleVector(getDim()));
+  //  SSL::buildPluginName(pluginNamebPtr,pluginPath,functionName);
 }
 
-void FirstOrderLinearDS::setComputeBFunction(VectorFunctionOfTime fct)
+void FirstOrderLinearDS::setComputeBFunction(LDSPtrFunction fct)
 {
-  if (! b)
-    b.reset(new Plugged_Vector_FTime(n));
-  b->setComputeFunction(fct);
+  bPtr = fct;
 }
 
 
 void FirstOrderLinearDS::computeA(const double time)
 {
-  if (A)
-  {
-    if (A->isPlugged())
-    {
-      if (!A->fPtr)
-        RuntimeException::selfThrow("computeA() is not linked to a plugin function");
-      (A->fPtr)(time, n, n, &(*A)(0, 0), z->size(), &(*z)(0));
-    }
-  }
-  // else nothing
+  if (A && APtr)
+    (APtr)(time, n, &(*A)(0, 0), z->size(), &(*z)(0));
 }
 
 void FirstOrderLinearDS::computeB(const double time)
 {
-  if (b)
-  {
-    if (b->isPlugged())
-    {
-      if (!b->fPtr)
-        RuntimeException::selfThrow("computeB() is not linked to a plugin function");
-      (b->fPtr)(time, n, &(*b)(0), z->size(), &(*z)(0));
-    }
-  }
-  // else nothing
+  if (b && bPtr)
+    bPtr(time, n, &(*b)(0), z->size(), &(*z)(0));
 }
 /*This function is called only by Lsodar and eventDriven*/
 void FirstOrderLinearDS::computeRhs(const double time, const bool)

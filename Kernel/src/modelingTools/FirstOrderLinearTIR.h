@@ -39,18 +39,13 @@
   \f}
 
 */
-class FirstOrderLinearTIR : public FirstOrderR<int*>
+class FirstOrderLinearTIR : public FirstOrderR
 {
 
 protected:
 
-  typedef FirstOrderR<int*> BaseClass;
 
-  /** C*/
-  SP::SiconosMatrix C;
 
-  /** D matrix, coefficient of lambda in y */
-  SP::SiconosMatrix D;
 
   /** F matrix, coefficient of z */
   SP::SiconosMatrix F;
@@ -58,12 +53,10 @@ protected:
   /** e*/
   SP::SiconosVector e;
 
-  /** B */
-  SP::SiconosMatrix B;
 
   /** default constructor, protected
    */
-  FirstOrderLinearTIR(): BaseClass(RELATION::LinearTIR) {};
+  FirstOrderLinearTIR(): FirstOrderR(RELATION::LinearTIR) {};
 
 public:
 
@@ -102,6 +95,8 @@ public:
    */
   FirstOrderLinearTIR(const SiconosMatrix&, const SiconosMatrix&, const SiconosMatrix&, const SiconosVector&, const SiconosMatrix&);
 
+
+
   /** destructor
    */
   virtual ~FirstOrderLinearTIR() {};
@@ -113,21 +108,18 @@ public:
 
   /** Gets the number of computed jacobians for h
       \return an unsigned int.
-  */
   inline unsigned int getNumberOfJacobiansForH() const
   {
-    if (D) return 2;
+    if(D) return 2;
     else return 1;
   }
+  */
 
 
   /** Gets the number of computed jacobian for g
       \return an unsigned int.
+  inline unsigned int getNumberOfJacobiansForG() const { return 1;}
   */
-  inline unsigned int getNumberOfJacobiansForG() const
-  {
-    return 1;
-  }
 
   /** default function to compute h
    *  \param double : current time
@@ -156,80 +148,69 @@ public:
   // -- C --
   /** get the value of C
    *  \return plugged matrix
-   */
-  inline const SimpleMatrix getC() const
-  {
-    return *C;
-  }
 
+  inline const SimpleMatrix getC() const { return *C; }
+  */
   /** get C
    *  \return pointer on a plugged matrix
    */
   inline SP::SiconosMatrix getCPtr() const
   {
-    return C;
+    return JacXH;
   }
 
   /** set the value of C to newValue
    *  \param a plugged matrix
-   */
-  void setC(const SiconosMatrix& newValue)
-  {
-    setObject<SimpleMatrix, SP::SiconosMatrix, SiconosMatrix>(C, newValue);
-  }
 
+  void setC(const SiconosMatrix& newValue){
+    setObject<SimpleMatrix,SP::SiconosMatrix,SiconosMatrix>(C,newValue);
+  }
+  */
   /** set C to pointer newPtr
    *  \param a SP to plugged matrix
    */
   inline void setCPtr(SP::SiconosMatrix newPtr)
   {
-    C = newPtr;
+    JacXH = newPtr;
   }
 
   // -- D --
 
   /** get the value of D
    *  \return plugged matrix
-   */
-  inline const SimpleMatrix getD() const
-  {
-    return *D;
-  }
 
+  inline const SimpleMatrix getD() const { return *D; }
+  */
   /** get D
    *  \return pointer on a plugged matrix
    */
   inline SP::SiconosMatrix getDPtr() const
   {
-    return D;
+    return JacLH;
   }
 
   /** set the value of D to newValue
    *  \param a plugged matrix
-   */
-  void setD(const SiconosMatrix& newValue)
-  {
-    setObject<SimpleMatrix, SP::SiconosMatrix, SiconosMatrix>(D, newValue);
-  }
 
+  void setD(const SiconosMatrix& newValue){
+    setObject<SimpleMatrix,SP::SiconosMatrix,SiconosMatrix>(D,newValue);
+  }
+  */
   /** set D to pointer newPtr
    *  \param a SP to plugged matrix
    */
   inline void setDPtr(SP::SiconosMatrix newPtr)
   {
-    D = newPtr;
+    JacLH = newPtr;
   }
 
   // -- F --
 
   /** get the value of F
    *  \return plugged matrix
-   */
-  inline const SimpleMatrix getF() const
-  {
-    return *F;
-  }
 
+  inline const SimpleMatrix getF() const { return *F; }
+  */
   /** get F
    *  \return pointer on a plugged matrix
    */
@@ -240,11 +221,12 @@ public:
 
   /** set the value of F to newValue
    *  \param a plugged matrix
-   */
+
   void setF(const SiconosMatrix& newValue)
-  {
-    setObject<SimpleMatrix, SP::SiconosMatrix, SiconosMatrix>(F, newValue);
-  }
+    {
+      setObject<SimpleMatrix,SP::SiconosMatrix,SiconosMatrix>(F,newValue);
+    }
+  */
 
   /** set F to pointer newPtr
    *  \param a SP to plugged matrix
@@ -257,12 +239,9 @@ public:
   // -- e --
   /** get the value of e
    *  \return plugged vector
-   */
-  inline const SimpleVector getE() const
-  {
-    return *e;
-  }
 
+  inline const SimpleVector getE() const { return *e; }
+  */
   /** get e
    *  \return pointer on a plugged vector
    */
@@ -273,11 +252,12 @@ public:
 
   /** set the value of e to newValue
    *  \param a plugged vector
-   */
+
   void setE(const SiconosVector& newValue)
-  {
-    setObject<SimpleVector, SP::SiconosVector, SiconosVector>(e, newValue);
-  }
+    {
+      setObject<SimpleVector, SP::SiconosVector,SiconosVector>(e,newValue);
+    }
+     */
 
   /** set e to pointer newPtr
    *  \param a SP to plugged vector
@@ -290,55 +270,51 @@ public:
   // -- B --
   /** get the value of B
    *  \return plugged matrix
-   */
-  inline const SimpleMatrix getB() const
-  {
-    return *B;
-  }
 
+  inline const SimpleMatrix getB() const { return *B; }
+  */
   /** get B
    *  \return pointer on a plugged matrix
    */
   inline SP::SiconosMatrix getBPtr() const
   {
-    return B;
+    return JacLG;
   }
 
   /** set the value of B to newValue
    *  \param a plugged matrix
-   */
+
   void setB(const SiconosMatrix& newValue)
-  {
-    setObject<SimpleMatrix, SP::SiconosMatrix, SiconosMatrix>(B, newValue);
-  }
+    {
+      setObject<SimpleMatrix,SP::SiconosMatrix,SiconosMatrix>(B,newValue);
+    }
+  */
 
   /** set B to pointer newPtr
    *  \param a SP to plugged matrix
    */
   inline void setBPtr(SP::SiconosMatrix newPtr)
   {
-    B = newPtr;
+    JacLG = newPtr;
   }
 
   /** get matrix JacH[index]
    *  \return a SimpleMatrix
+  const SimpleMatrix getJacXH() const;
    */
-  const SimpleMatrix getJacH(unsigned int  index = 0) const;
 
   /** get a pointer on matrix JacH[index]
    *  \return a pointer on a SiconosMatrix
    */
-  SP::SiconosMatrix getJacHPtr(unsigned int index = 0) const ;
 
   /** get matrix JacG[index]
    *  \return a SimpleMatrix
-   */
   const SimpleMatrix getJacG(unsigned int  index = 0) const;
+   */
 
   /** get a pointer on matrix JacG[index]
    *  \return a pointer on a SiconosMatrix
    */
-  SP::SiconosMatrix getJacGPtr(unsigned int index = 0) const ;
 
   /** copy the data of the Relation to the XML tree
    */

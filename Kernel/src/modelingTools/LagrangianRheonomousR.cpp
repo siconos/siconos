@@ -23,68 +23,73 @@
 #include "RelationXML.h"
 #include "Interaction.h"
 #include "LagrangianDS.h"
-#include "LagrangianR.cpp"
 
 using namespace std;
 using namespace RELATION;
 
 // xml constructor
-LagrangianRheonomousR::LagrangianRheonomousR(SP::RelationXML LRxml): BaseClass(LRxml, RheonomousR)
+LagrangianRheonomousR::LagrangianRheonomousR(SP::RelationXML LRxml): LagrangianR(LRxml, RheonomousR)
 {
-  // h plug-in
-  if (!LRxml->hasH())
+  /*  // h plug-in
+  if(!LRxml->hasH())
     RuntimeException::selfThrow("LagrangianRheonomousR:: xml constructor failed, can not find a definition for h.");
   hName = LRxml->getHPlugin();
-  setComputeHFunction(SSL::getPluginName(hName), SSL::getPluginFunctionName(hName));
+  setComputeHFunction(SSL::getPluginName( hName ),SSL::getPluginFunctionName( hName ));
 
   // Read hDot
-  if (!LRxml->hasHDot())
+  if(!LRxml->hasHDot())
     RuntimeException::selfThrow("LagrangianRheonomousR:: xml constructor failed, can not find a definition for hDot.");
-  if (LRxml->isHDotPlugin())
+  if(LRxml->isHDotPlugin())
     hDot.reset(new PVT2(LRxml->getHDotPlugin()));
   else
     hDot.reset(new PVT2(LRxml->getHDotVector()));
 
-  if (!LRxml->hasJacobianH())
+  if(!LRxml->hasJacobianH())
     RuntimeException::selfThrow("LagrangianRheonomousR:: xml constructor failed, can not find a definition for G0.");
   JacH.resize(1);
-  LRxml->readJacobianXML<PluggedMatrix, SP_PluggedMatrix>(JacH[0], LRxml, 0);
+  LRxml->readJacobianXML<PluggedMatrix, SP_PluggedMatrix>(JacH[0], LRxml, 0);*/
 }
 
 // constructor from a set of data
-LagrangianRheonomousR::LagrangianRheonomousR(const string& computeH, const string& computeHDot, const string& computeG):
-  BaseClass(RheonomousR)
+LagrangianRheonomousR::LagrangianRheonomousR(const string& computeH, const string& computeHDot, const string& strcomputeJacQH):
+  LagrangianR(RheonomousR)
 {
   // h
   setComputeHFunction(SSL::getPluginName(computeH), SSL::getPluginFunctionName(computeH));
 
   // hDot
-  hDot.reset(new PVT2(computeHDot));
+  setComputeHDotFunction(SSL::getPluginName(computeHDot), SSL::getPluginFunctionName(computeHDot));
+  Plugin::setFunction(&computeJacQHPtr, SSL::getPluginName(strcomputeJacQH), SSL::getPluginFunctionName(strcomputeJacQH));
 
-  JacH.resize(1);
-  JacH[0].reset(new PluggedMatrix(computeG));
+  unsigned int sizeY = getInteractionPtr()->getSizeOfY();
+  unsigned int sizeQ = workX->size();
+  JacQH.reset(new SimpleMatrix(sizeY, sizeQ));
 }
 
 void LagrangianRheonomousR::initComponents()
 {
-  LagrangianR<FPtr4>::initComponents();
+  LagrangianR::initComponents();
 
   unsigned int sizeY = getInteractionPtr()->getSizeOfY();
   // hDot
   if (!hDot)
-    hDot.reset(new PVT2(sizeY));
+    hDot.reset(new SimpleVector(sizeY));
   else
     hDot->resize(sizeY);
+}
+void LagrangianRheonomousR::setComputeHFunction(const string& pluginPath, const string& functionName)
+{
+  Plugin::setFunction(&hPtr, pluginPath, functionName);
 }
 
 void LagrangianRheonomousR::setComputeHDotFunction(const string& pluginPath, const string& functionName)
 {
-  hDot->setComputeFunction(pluginPath, functionName);
+  Plugin::setFunction(&hDotPtr, pluginPath, functionName);
 }
 
 void LagrangianRheonomousR::computeH(double time)
 {
-  if (hPlugged)
+  if (hPtr)
   {
     // get vector y of the current interaction
     SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
@@ -99,8 +104,6 @@ void LagrangianRheonomousR::computeH(double time)
     unsigned int sizeY = y->size();
     unsigned int sizeZ = workZ->size();
 
-    if (!hPtr)
-      RuntimeException::selfThrow("LagrangianRheonomousR:computeH() failed, h is not linked to a plugin function");
     hPtr(sizeQ, &(*workX)(0), time, sizeY,  &(*workY)(0), sizeZ, &(*workZ)(0));
 
     // Copy data that might have been changed in the plug-in call.
@@ -109,10 +112,14 @@ void LagrangianRheonomousR::computeH(double time)
   }
   // else nothing
 }
+void LagrangianRheonomousR::computeG(double time)
+{
+  assert(false && "LagrangianScleronomousR::computeG : G is computed in computeInput!\n");
+}
 
 void LagrangianRheonomousR::computeHDot(double time)
 {
-  if (hDot->isPlugged())
+  if (hDotPtr)
   {
     // Warning: temporary method to have contiguous values in
     // memory, copy of block to simple.
@@ -123,9 +130,7 @@ void LagrangianRheonomousR::computeHDot(double time)
     unsigned int sizeY = hDot->size();
     unsigned int sizeZ = workZ->size();
 
-    if (!(hDot->fPtr))
-      RuntimeException::selfThrow("LagrangianRheonomousR:computeHDot() failed, hDot is not linked to a plugin function");
-    (hDot->fPtr)(sizeQ, &(*workX)(0), time, sizeY,  &(*hDot)(0), sizeZ, &(*workZ)(0));
+    hDotPtr(sizeQ, &(*workX)(0), time, sizeY,  &(*hDot)(0), sizeZ, &(*workZ)(0));
 
     // Copy data that might have been changed in the plug-in call.
     *data[z] = *workZ;
@@ -133,22 +138,20 @@ void LagrangianRheonomousR::computeHDot(double time)
   // else nothing
 }
 
-void LagrangianRheonomousR::computeJacH(double time, unsigned int)
+void LagrangianRheonomousR::computeJacQH(double time)
 {
   // Note that second input arg is useless.
-  if (JacH[0]->isPlugged())
+  if (computeJacQHPtr)
   {
     // Warning: temporary method to have contiguous values in
     // memory, copy of block to simple.
     *workX = *data[q0];
     *workZ = *data[z];
 
-    unsigned int sizeY = JacH[0]->size(0);
+    unsigned int sizeY = JacQH->size(0);
     unsigned int sizeQ = workX->size();
     unsigned int sizeZ = workZ->size();
-    if (!(JacH[0]->fPtr))
-      RuntimeException::selfThrow("LagrangianRheonomousR::computeJacH(), JacH[0] is not linked to a plugin function");
-    (JacH[0]->fPtr)(sizeQ, &(*workX)(0), time, sizeY, &(*JacH[0])(0, 0), sizeZ, &(*workZ)(0));
+    ((FPtr4) computeJacQHPtr)(sizeQ, &(*workX)(0), time, sizeY, &(*JacQH)(0, 0), sizeZ, &(*workZ)(0));
     // Copy data that might have been changed in the plug-in call.
     *data[z] = *workZ;
   }
@@ -162,15 +165,15 @@ void LagrangianRheonomousR::computeOutput(double time, unsigned int derivativeNu
   else
   {
     SP::SiconosVector y = getInteractionPtr()->getYPtr(derivativeNumber);
-    computeJacH(time, 0);
+    computeJacQH(time);
     if (derivativeNumber == 1)
     {
       computeHDot(time); // \todo: save hDot directly into y[1] ?
-      prod(*JacH[0], *data[q1], *y);
+      prod(*JacQH, *data[q1], *y);
       *y += *hDot;
     }
     else if (derivativeNumber == 2)
-      prod(*JacH[0], *data[q2], *y); // Approx:,  ...
+      prod(*JacQH, *data[q2], *y); // Approx:,  ...
     // \warning :  the computation of y[2] (in event-driven simulation for instance) is approximated by  y[2] = JacH[0]q[2]. For the moment, other terms are neglected (especially, partial derivatives with respect to time).
     else
       RuntimeException::selfThrow("LagrangianRheonomousR::computeOutput(time,index), index out of range or not yet implemented.");
@@ -179,11 +182,12 @@ void LagrangianRheonomousR::computeOutput(double time, unsigned int derivativeNu
 
 void LagrangianRheonomousR::computeInput(double time, unsigned int level)
 {
-  computeJacH(time, 0);
+  computeJacQH(time);
   // get lambda of the concerned interaction
   SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(level);
   // data[name] += trans(G) * lambda
-  prod(*lambda, *JacH[0], *data[p0 + level], false);
+  prod(*lambda, *JacQH, *data[p0 + level], false);
+
   //   SP::SiconosMatrix  GT = new SimpleMatrix(*G[0]);
   //   GT->trans();
   //   *data[name] += prod(*GT, *lambda);

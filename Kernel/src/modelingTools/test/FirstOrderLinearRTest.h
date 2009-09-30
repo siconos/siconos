@@ -41,16 +41,16 @@ private:
   CPPUNIT_TEST(testBuildFirstOrderLinearR3);
   CPPUNIT_TEST(testBuildFirstOrderLinearR4);
   CPPUNIT_TEST(testBuildFirstOrderLinearR5);
-  CPPUNIT_TEST(testSetC);
+  //  CPPUNIT_TEST(testSetC);
   CPPUNIT_TEST(testSetCPtr);
   CPPUNIT_TEST(testSetCPtr2);
-  CPPUNIT_TEST(testSetD);
+  //  CPPUNIT_TEST(testSetD);
   CPPUNIT_TEST(testSetDPtr);
-  CPPUNIT_TEST(testSetF);
+  //  CPPUNIT_TEST(testSetF);
   CPPUNIT_TEST(testSetFPtr);
-  CPPUNIT_TEST(testSetE);
+  //  CPPUNIT_TEST(testSetE);
   CPPUNIT_TEST(testSetEPtr);
-  CPPUNIT_TEST(testSetB);
+  //  CPPUNIT_TEST(testSetB);
   CPPUNIT_TEST(testSetBPtr);
   CPPUNIT_TEST(End);
 
@@ -63,24 +63,22 @@ private:
   void testBuildFirstOrderLinearR3();
   void testBuildFirstOrderLinearR4();
   void testBuildFirstOrderLinearR5();
-  void testSetC();
+  //  void testSetC();
   void testSetCPtr();
   void testSetCPtr2();
-  void testSetD();
+  //  void testSetD();
   void testSetDPtr();
-  void testSetF();
+  //  void testSetF();
   void testSetFPtr();
-  void testSetE();
+  //  void testSetE();
   void testSetEPtr();
-  void testSetB();
+  //  void testSetB();
   void testSetBPtr();
   void End();
 
   // Members
 
   SP::SiconosMatrix C, B, F, D;
-  FirstOrderLinearR::SP_PluggedMatrix Cp, Bp, Fp, Dp;
-  SP::Plugged_Vector_FTime ep;
   SP::SiconosVector e;
   xmlNodePtr node1;
   SP::RelationXML tmpxml1;

@@ -38,6 +38,17 @@ public:
     return true;
   }
 
+  static bool setFunction(void* f,  const std::string& pluginPath, const std::string& functionName)
+  {
+    SSL::setFunction(f, pluginPath, functionName);
+    return true;
+  }
+  static bool setFunction(void* f,  const std::string& Name)
+  {
+    SSL::setFunction(f, SSL::getPluginName(Name), SSL::getPluginFunctionName(Name));
+    return true;
+  }
+
 
 };
 

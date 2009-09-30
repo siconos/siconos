@@ -25,6 +25,8 @@
 #include "FirstOrderNonLinearDS.h"
 
 class FirstOrderNonLinearDS;
+typedef   void (*LDSPtrFunction)(double, unsigned int, double*, unsigned int, double*);
+
 
 /** First order linear systems - Inherits from DynamicalSystems
  *
@@ -69,10 +71,30 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS
 protected:
 
   /** matrix specific to the FirstOrderLinearDS \f$ A \in R^{n \times n}  \f$*/
-  SP::Plugged_Matrix_FTime A;
+  SP::SiconosMatrix A;
 
   /** strength vector */
-  SP::Plugged_Vector_FTime b;
+  SP::SiconosVector b;
+
+  /** FirstOrderLinearDS plug-in to compute A(t,z), id = "A"
+  * @param time : current time
+  * @param sizeOfA : size of square-matrix A
+  * @param[in,out] A : pointer to the first element of A
+  * @param size of vector z
+  * @param[in,out] z a vector of user-defined parameters
+  */
+  LDSPtrFunction APtr;
+  std::string pluginNameAPtr;
+
+  /** FirstOrderLinearDS plug-in to compute b(t,z), id = "b"
+  * @param time : current time
+  * @param sizeOfB : size of vector b
+  * @param[in,out] b : pointer to the first element of b
+  * @param size of vector z
+  * @param[in,out] param  : a vector of user-defined parameters
+  */
+  LDSPtrFunction bPtr;
+  std::string pluginNamebPtr;
 
   /** default constructor
    */
@@ -92,20 +114,21 @@ public:
    *  \param string: plugin for A
    *  \param string: plugin for b
    */
+  FirstOrderLinearDS(SP::SiconosVector, const std::string&, const std::string&);
   FirstOrderLinearDS(const SiconosVector&, const std::string&, const std::string&);
 
   /** constructor from a set of data
    *  \param SiconosVector : the initial state of this DynamicalSystem
    *  \param SiconosMatrix : matrix A
    */
-  FirstOrderLinearDS(const SiconosVector&, const SiconosMatrix&);
+  FirstOrderLinearDS(SP::SiconosVector, SP::SiconosMatrix);
 
   /** constructor from a set of data
    *  \param SiconosVector : the initial state of this DynamicalSystem
    *  \param SiconosMatrix : matrix A
    *  \param SiconosVector : b
    */
-  FirstOrderLinearDS(const SiconosVector&, const SiconosMatrix&, const SiconosVector&);
+  FirstOrderLinearDS(SP::SiconosVector, SP::SiconosMatrix, SP::SiconosVector);
 
   /** destructor */
   virtual ~FirstOrderLinearDS() {};
@@ -130,16 +153,13 @@ public:
   // --- A ---
   /** get the value of A
    *  \return a plugged-matrix
-   */
-  inline const Plugged_Matrix_FTime getA() const
-  {
-    return *A;
-  }
 
+  inline const Plugged_Matrix_FTime getA() const { return *A; }
+  */
   /** get A
    *  \return pointer on a plugged-matrix
    */
-  inline SP::Plugged_Matrix_FTime getAPtr() const
+  inline SP::SiconosMatrix getAPtr() const
   {
     return A;
   }
@@ -162,13 +182,14 @@ public:
 
   /** set the value of A to newValue
    *  \param plugged-matrix newValue
-   */
+
   void setA(const Plugged_Matrix_FTime&);
+  */
 
   /** set A to pointer newPtr
    *  \param a plugged matrix SP
    */
-  inline void setAPtr(SP::Plugged_Matrix_FTime newPtr)
+  inline void setAPtr(SP::SiconosMatrix newPtr)
   {
     A = newPtr;
   }
@@ -177,29 +198,27 @@ public:
 
   /** get the value of b
    *  \return plugged vector
-   */
-  inline const Plugged_Vector_FTime getB() const
-  {
-    return *b;
-  }
 
+  inline const Plugged_Vector_FTime getB() const { return *b; }
+  */
   /** get b
    *  \return pointer on a plugged vector
    */
-  inline SP::Plugged_Vector_FTime getBPtr() const
+  inline SP::SiconosVector getBPtr() const
   {
     return b;
   }
 
   /** set the value of b to newValue
    *  \param a plugged vector
-   */
+
   void setB(const Plugged_Vector_FTime&);
+  */
 
   /** set b to pointer newPtr
    *  \param a SP to plugged vector
    */
-  inline void setBPtr(SP::Plugged_Vector_FTime newPtr)
+  inline void setBPtr(SP::SiconosVector newPtr)
   {
     b = newPtr;
   }
@@ -216,7 +235,7 @@ public:
   /** set a specified function to compute the matrix A
    *  \param VectorFunctionOfTime : a pointer on the plugin function
    */
-  void setComputeAFunction(MatrixFunctionOfTime fct);
+  void setComputeAFunction(LDSPtrFunction fct);
 
   /** set a specified function to compute the vector b
    *  \param string : the complete path to the plugin
@@ -228,7 +247,7 @@ public:
   /** set a specified function to compute the vector b
    *  \param VectorFunctionOfTime : a pointer on the plugin function
    */
-  void setComputeBFunction(VectorFunctionOfTime fct);
+  void setComputeBFunction(LDSPtrFunction fct);
 
   /** default function to compute matrix A => same action as computeJacobianXF
    */

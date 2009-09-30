@@ -104,13 +104,15 @@ public:
    *  \param SiconosMatrix : matrix K of this DynamicalSystem
    *  \param SiconosMatrix : matrix C of this DynamicalSystem
    */
-  LagrangianLinearTIDS(const SimpleVector&, const SimpleVector&, const SiconosMatrix&, const SiconosMatrix&, const SiconosMatrix&);
+  //  LagrangianLinearTIDS(const SimpleVector&, const SimpleVector&, const SiconosMatrix&, const SiconosMatrix&, const SiconosMatrix&);
+  LagrangianLinearTIDS(SP::SimpleVector, SP::SimpleVector, SP::SiconosMatrix, SP::SiconosMatrix, SP::SiconosMatrix);
 
   /** constructor from a set of data
    *  \param SimpleVector: initial coordinates of this DynamicalSystem
    *  \param SimpleVector : initial velocity of this DynamicalSystem
    *  \param SiconosMatrix : mass matrix of this DynamicalSystem
    */
+  LagrangianLinearTIDS(SP::SimpleVector, SP::SimpleVector, SP::SiconosMatrix);
   LagrangianLinearTIDS(const SimpleVector&, const SimpleVector&, const SiconosMatrix&);
 
   /** destructor */
@@ -165,12 +167,9 @@ public:
   // -- C --
   /** get the value of C
    *  \return SimpleMatrix
-   */
-  inline const SimpleMatrix getC() const
-  {
-    return *C;
-  }
 
+  inline const SimpleMatrix getC() const { return *C; }
+  */
   /** get C
    *  \return pointer on a SiconosMatrix
    */
@@ -181,8 +180,9 @@ public:
 
   /** set the value of C to newValue
    *  \param SiconosMatrix newValue
-   */
+
   void setC(const SiconosMatrix&);
+  */
 
   /** set C to pointer newPtr
    *  \param SP::SiconosMatrix  newPtr

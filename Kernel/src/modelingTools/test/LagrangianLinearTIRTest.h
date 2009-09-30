@@ -44,15 +44,10 @@ private:
   CPPUNIT_TEST(testBuildLagrangianLinearTIR4);
   CPPUNIT_TEST(testBuildLagrangianLinearTIR5);
   CPPUNIT_TEST(testBuildLagrangianLinearTIR6);
-  CPPUNIT_TEST(testSetC);
   CPPUNIT_TEST(testSetCPtr);
-  CPPUNIT_TEST(testSetD);
   CPPUNIT_TEST(testSetDPtr);
-  CPPUNIT_TEST(testSetF);
   CPPUNIT_TEST(testSetFPtr);
-  CPPUNIT_TEST(testSetE);
   CPPUNIT_TEST(testSetEPtr);
-  CPPUNIT_TEST(testGetJac);
   CPPUNIT_TEST(testGetJacPtr);
   CPPUNIT_TEST(End);
 
@@ -67,15 +62,10 @@ private:
   void testBuildLagrangianLinearTIR4();
   void testBuildLagrangianLinearTIR5();
   void testBuildLagrangianLinearTIR6();
-  void testSetC();
   void testSetCPtr();
-  void testSetD();
   void testSetDPtr();
-  void testSetF();
   void testSetFPtr();
-  void testSetE();
   void testSetEPtr();
-  void testGetJac();
   void testGetJacPtr();
   void End();
 

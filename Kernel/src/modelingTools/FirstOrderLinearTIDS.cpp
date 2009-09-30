@@ -43,7 +43,7 @@ FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::DynamicalSystemXML dsXML): FirstO
 }
 
 // From a minimum set of data: A
-FirstOrderLinearTIDS::FirstOrderLinearTIDS(const SiconosVector& newX0, const SiconosMatrix& newA):
+FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::SiconosVector newX0, SP::SiconosMatrix newA):
   FirstOrderLinearDS(newX0, newA)
 {
   DSType = FOLTIDS;
@@ -51,8 +51,7 @@ FirstOrderLinearTIDS::FirstOrderLinearTIDS(const SiconosVector& newX0, const Sic
 }
 
 // From a set of data: A and B
-FirstOrderLinearTIDS::FirstOrderLinearTIDS(const SiconosVector& newX0,
-    const SiconosMatrix& newA, const SiconosVector& newB):
+FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::SiconosVector newX0, SP::SiconosMatrix newA, SP::SiconosVector newB):
   FirstOrderLinearDS(newX0, newA, newB)
 {
   DSType = FOLTIDS;

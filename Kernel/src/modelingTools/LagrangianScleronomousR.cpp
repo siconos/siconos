@@ -23,44 +23,43 @@
 #include "RelationXML.h"
 #include "Interaction.h"
 #include "LagrangianDS.h"
-#include "LagrangianR.cpp"
 
 using namespace std;
 using namespace RELATION;
 
 // xml constructor
-LagrangianScleronomousR::LagrangianScleronomousR(SP::RelationXML LRxml): LagrangianR<FPtr3>(LRxml, ScleronomousR)
+LagrangianScleronomousR::LagrangianScleronomousR(SP::RelationXML LRxml): LagrangianR(LRxml, ScleronomousR)
 {
-  // h plug-in
-  if (!LRxml->hasH())
+  /* // h plug-in
+  if(!LRxml->hasH())
     RuntimeException::selfThrow("LagrangianScleronomousR:: xml constructor failed, can not find a definition for h.");
 
   hName = LRxml->getHPlugin();
-  setComputeHFunction(SSL::getPluginName(hName), SSL::getPluginFunctionName(hName));
+  setComputeHFunction(SSL::getPluginName( hName ),SSL::getPluginFunctionName( hName ));
 
-  if (!LRxml->hasJacobianH())
+  if(!LRxml->hasJacobianH())
     RuntimeException::selfThrow("LagrangianScleronomousR:: xml constructor failed, can not find a definition for JacH0.");
   JacH.resize(1);
-  LRxml->readJacobianXML<PluggedMatrix, SP_PluggedMatrix>(JacH[0], LRxml, 0);
+  LRxml->readJacobianXML<PluggedMatrix,SP_PluggedMatrix>(JacH[0], LRxml, 0);
+  */
 }
 
 // constructor from a set of data
-LagrangianScleronomousR::LagrangianScleronomousR(const string& computeH, const std::string& computeG):
-  LagrangianR<FPtr3>(ScleronomousR)
+LagrangianScleronomousR::LagrangianScleronomousR(const string& computeH, const std::string& strcomputeJacQH):
+  LagrangianR(ScleronomousR)
 {
-  setComputeHFunction(SSL::getPluginName(computeH), SSL::getPluginFunctionName(computeH));
+  Plugin::setFunction(&hPtr, SSL::getPluginName(computeH), SSL::getPluginFunctionName(computeH));
+  Plugin::setFunction(&computeJacQHPtr, SSL::getPluginName(strcomputeJacQH), SSL::getPluginFunctionName(strcomputeJacQH));
 
   // Warning: we cannot allocate memory for JacH[0] matrix since no interaction
   // is connected to the relation. This will be done during initialize.
   // We only set the name of the plugin-function and connect it to the user-defined function.
-  JacH.resize(1);
-  JacH[0].reset(new PluggedMatrix(computeG));
 }
 
 void LagrangianScleronomousR::computeH(double)
 {
   // arg= time. Unused in this function but required for interface.
-  if (hPlugged)
+  if (hPtr)
   {
     // get vector y of the current interaction
     SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
@@ -74,8 +73,6 @@ void LagrangianScleronomousR::computeH(double)
     unsigned int sizeY = y->size();
     unsigned int sizeZ = workZ->size();
 
-    if (!hPtr)
-      RuntimeException::selfThrow("LagrangianScleronomousR:computeH() failed, h is not linked to a plugin function");
     hPtr(sizeQ, &(*workX)(0) , sizeY, &(*workY)(0), sizeZ, &(*workZ)(0));
 
     // Copy data that might have been changed in the plug-in call.
@@ -84,27 +81,27 @@ void LagrangianScleronomousR::computeH(double)
   }
   // else nothing
 }
-
-void LagrangianScleronomousR::computeJacH(double, unsigned int index)
+void LagrangianScleronomousR::computeG(double, unsigned int)
+{
+  assert(false && "LagrangianScleronomousR::computeG : G is computed in computeInput!\n");
+}
+void LagrangianScleronomousR::computeJacQH(double)
 {
   // First arg: time. Useless.
   // Last arg: index for G - Useless, always equal to 0 for this kind of relation.
 
   //
-  //  assert(index==0&&"LagrangianScleronomousR::computeJacH(index): index is out of range");
-  if (JacH[0]->isPlugged())
+  if (computeJacQHPtr)
   {
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
     *workX = *data[q0];
     *workZ = *data[z];
 
-    unsigned int sizeY = JacH[0]->size(0);
+    unsigned int sizeY = JacQH->size(0);
     unsigned int sizeQ = workX->size();
     unsigned int sizeZ = workZ->size();
 
-    if (!(JacH[0]->fPtr))
-      RuntimeException::selfThrow("LagrangianScleronomousR::computeJacH(), JacH[0] is not linked to a plugin function");
-    (JacH[0]->fPtr)(sizeQ, &(*workX)(0), sizeY, &(*(JacH[0]))(0, 0), sizeZ, &(*workZ)(0));
+    (computeJacQHPtr)(sizeQ, &(*workX)(0), sizeY, &(*JacQH)(0, 0), sizeZ, &(*workZ)(0));
 
     // Copy data that might have been changed in the plug-in call.
     *data[z] = *workZ;
@@ -118,25 +115,25 @@ void LagrangianScleronomousR::computeOutput(double time, unsigned int derivative
     computeH(time);
   else
   {
-    computeJacH(time, 0);
+    computeJacQH(time);
     SP::SiconosVector y = getInteractionPtr()->getYPtr(derivativeNumber) ;
-    // Approx: y[i] = jacH[0] q[i] , other terms are neglected.
-    prod(*JacH[0], *data[q0 + derivativeNumber], *y);
+    if (derivativeNumber == 1)
+      prod(*JacQH, *data[q1], *y);
+    else if (derivativeNumber == 2)
+      prod(*JacQH, *data[q2], *y);
+    else
+      RuntimeException::selfThrow("LagrangianScleronomousR::computeOutput(t,index), index out of range");
   }
 }
 
 void LagrangianScleronomousR::computeInput(double time, unsigned int level)
 {
-  computeJacH(time, 0);
+  computeJacQH(time);
   // get lambda of the concerned interaction
   SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(level);
   // data[name] += trans(G) * lambda
-  prod(*lambda, *JacH[0], *data[p0 + level], false);
+  prod(*lambda, *JacQH, *data[p0 + level], false);
 
-  //   SP::SiconosMatrix  GT = new SimpleMatrix(*G[0]);
-  //   GT->trans();
-  //   *data[name] += prod(*GT, *lambda);
-  //gemv(CblasTrans, 1.0,*(G[0]), *lambda, 1.0, *data[name]); => not yet implemented for BlockVectors.
 }
 
 LagrangianScleronomousR* LagrangianScleronomousR::convert(Relation *r)

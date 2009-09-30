@@ -23,7 +23,7 @@
 
 using namespace std;
 
-template <class T> void FirstOrderR<T>::initDSLinks()
+void FirstOrderR::initDSLinks()
 {
   data.resize(sizeDataNames);
   // Get the DS concerned by the interaction of this relation
@@ -48,7 +48,7 @@ template <class T> void FirstOrderR<T>::initDSLinks()
   }
 }
 
-template <class T> void FirstOrderR<T>::initialize(SP::Interaction inter)
+void FirstOrderR::initialize(SP::Interaction inter)
 {
   assert(inter && "FirstOrderR::initialize failed. No Interaction linked to the present relation.");
   interaction = inter;
@@ -68,37 +68,21 @@ template <class T> void FirstOrderR<T>::initialize(SP::Interaction inter)
   workY.reset(new SimpleVector(sizeY));
 }
 
-template <class T> void FirstOrderR<T>::setComputeHFunction(const string& pluginPath, const string& functionName)
+void FirstOrderR::computeJacXH(double)
 {
-  hPlugged = Plugin::setFunction(&output, pluginPath, functionName, hName);
+  RuntimeException::selfThrow("FirstOrderR::computeJacXH, not (yet) implemented or forbidden for relations of type " + subType);
+}
+void FirstOrderR::computeJacLH(double)
+{
+  RuntimeException::selfThrow("FirstOrderR::computeJacLH, not (yet) implemented or forbidden for relations of type " + subType);
 }
 
-template <class T> void FirstOrderR<T>::setComputeJacobianHFunction(const string& pluginPath, const string& functionName, unsigned int index)
+void FirstOrderR::computeJacLG(double t)
 {
-  JacH[index]->setComputeFunction(pluginPath, functionName);
+  RuntimeException::selfThrow("FirstOrderR::computeJacLG, not (yet) implemented or forbidden for relations of type " + subType);
 }
 
-template <class T> void FirstOrderR<T>::setComputeGFunction(const string& pluginPath, const string& functionName)
-{
-  gPlugged = Plugin::setFunction(&input, pluginPath, functionName, gName);
-}
-
-template <class T> void FirstOrderR<T>::setComputeJacobianGFunction(const string& pluginPath, const string& functionName, unsigned int index)
-{
-  JacG[index]->setComputeFunction(pluginPath, functionName);
-}
-
-template <class T> void FirstOrderR<T>::computeJacH(double, unsigned int)
-{
-  RuntimeException::selfThrow("FirstOrderR::computeJacobianH, not (yet) implemented or forbidden for relations of type " + subType);
-}
-
-template <class T> void FirstOrderR<T>::computeJacG(double, unsigned int)
-{
-  RuntimeException::selfThrow("FirstOrderR::computeJacobianG, not (yet) implemented or forbidden for relations of type " + subType);
-}
-
-template <class T> void FirstOrderR<T>::display() const
+void FirstOrderR::display() const
 {
   Relation::display();
 }

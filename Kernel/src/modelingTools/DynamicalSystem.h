@@ -45,6 +45,12 @@ class SimpleVector;
 class SiconosMemory;
 class SiconosSharedLibrary;
 
+
+/** Pointer to function for plug-in. */
+typedef void (*FPtr6)(double, unsigned int, const double*, const double*, double*, unsigned int, double*);
+
+
+
 /** */
 
 /**  Abstract class to handle Dynamical Systems => interface for derived classes (First Order or Lagrangian systems)
@@ -158,14 +164,44 @@ protected:
   /** jacobian according to x of the right-hand side (\f$ \dot x = f(x,t) + r \f$) */
   SP::SiconosMatrix jacobianXRhs;
 
+  SP::SiconosMatrix jacobianXG;
+  SP::SiconosMatrix jacobianXDotG;
+  //  SP::SiconosMatrix jacobianZG;
+
   /** Arbitrary algebraic values vector, z, discret state of the system. */
   SP::SiconosVector z;
+  SP::SiconosVector g;
 
-  /** \f$ g(t,\dot x,x,z) \f$ */
-  SP::PVFint g;
 
-  /** jacobianXG[0] = \f$ \nabla_x g(t,\dot x,x,z) \f$, jacobianXG[1] = \f$ \nabla_{\dot x} g(t,\dot x,x,z) \f$  */
-  std::vector<SP::PMFint> jacobianG;
+
+
+
+  /** DynamicalSystem plug-in to compute \f$ g(t,\dot x,x,z) \f$
+   *  @param   current time
+   *  @param   the size of the vector x
+   *  @param   the pointer to the first element of the vector x[0]=\f$ x \f$
+   *  @param   the pointer to the first element of the vector x[1]=\f$ \dot x \f$
+   *  @param   the pointer to the first element of the vector g(t, ...)
+   *  @param   the size of the vector z
+   *  @param   a vector of parameters, z
+   */
+  FPtr6 computeGPtr;
+  std::string pluginNameComputeGPtr;
+
+  /** Plug-in to compute jacobianG (computeJacobianGPtr[i] for jacobianG[i]).
+   *  @param   current time
+   *  @param   the size of the vector x
+   *  @param   the pointer to the first element of the vector x[0]=\f$ x \f$
+   *  @param   the pointer to the first element of the vector x[1]=\f$ \dot x \f$
+   *  @param   the pointer to the first element of the vector g(t, ...)
+   *  @param   the size of the vector z
+   *  @param   a vector of parameters, z
+   */
+  FPtr6 computeJacobianXGPtr;
+  std::string pluginNameComputeJacobianXGPtr;
+  FPtr6 computeJacobianXDotGPtr;
+  std::string pluginNameComputeJacobianXDotGPtr;
+
 
   /** the  previous state vectors stored in memory*/
   SP::SiconosMemory xMemory;
@@ -189,6 +225,7 @@ protected:
    * \param DS::TYPES the type of the system, default=FONLDS, non-linear first order system.
    */
   DynamicalSystem(DS::TYPES = DS::FONLDS);
+  void zeroPlungin();
 
 public:
 
@@ -478,29 +515,27 @@ public:
   // --- g ---
   /** get the value of g
    *  \return plugged vector
+  inline const PVFint getG() const { return *g; }
    */
-  inline const PVFint getG() const
-  {
-    return *g;
-  }
 
   /** get g
    *  \return pointer on a plugged vector
    */
-  inline SP::PVFint getGPtr() const
+  inline SP::SiconosVector getGPtr() const
   {
     return g;
   }
 
   /** set the value of g to newValue
    *  \param a plugged vector
-   */
+
   void setG(const PVFint&);
+  */
 
   /** set g to pointer newPtr
    *  \param a SP to plugged vector
    */
-  inline void setGPtr(SP::PVFint newPtr)
+  inline void setGPtr(SP::SiconosVector newPtr)
   {
     g = newPtr;
   }
@@ -509,35 +544,43 @@ public:
   /** get the value of jacobianG
     \param index of the desired jacobian
     *  \return a plugged-matrix
-    */
-  inline const PMFint getJacobianG(unsigned int i) const
-  {
-    return *(jacobianG[i]);
-  }
+
+  inline const PMFint getJacobianG(unsigned int i) const { return *(jacobianG[i]); }
+  */
 
   /** get jacobianG
       \param index of the desired jacobian
       *  \return pointer on a plugged-matrix
       */
-  inline SP::PMFint getJacobianGPtr(unsigned int i) const
+  inline SP::SiconosMatrix getJacobianXGPtr() const
   {
-    return jacobianG[i];
+    return jacobianXG;
   }
+  inline SP::SiconosMatrix getJacobianXDotGPtr() const
+  {
+    return jacobianXDotG;
+  }
+  //  inline SP::SiconosMatrix getJacobianZGPtr() const { return jacobianZG; }
 
   /** set the value of jacobianG to newValue
       \param index of the desired jacobian
       *  \param plugged-matrix newValue
-      */
   void setJacobianG(unsigned int, const PMFint&);
+      */
 
   /** set jacobianG to pointer newPtr
       \param index of the desired jacobian
       *  \param a plugged matrix SP
       */
-  inline void setJacobianGPtr(unsigned int i, SP::PMFint newPtr)
+  inline void setJacobianXGPtr(SP::SiconosMatrix newPtr)
   {
-    jacobianG[i] = newPtr;
+    jacobianXG = newPtr;
   }
+  inline void setJacobianXDotGPtr(SP::SiconosMatrix newPtr)
+  {
+    jacobianXDotG = newPtr;
+  }
+  //  inline void setJacobianZGPtr( SP::SiconosMatrix newPtr) {jacobianZG = newPtr;}
 
   // X memory
 
@@ -688,13 +731,17 @@ public:
    *  \param string pluginPath : the complete path to the plugin
    *  \param the string functionName : function name to use in this library
    */
-  void setComputeJacobianGFunction(unsigned int, const std::string&  pluginPath, const std::string&  functionName);
+  void setComputeJacobianXGFunction(const std::string&  pluginPath, const std::string&  functionName);
+  void setComputeJacobianDotXGFunction(const std::string&  pluginPath, const std::string&  functionName);
+  //  void setComputeJacobianZGFunction( const std::string&  pluginPath, const std::string&  functionName);
 
   /** set a specified function to compute jacobianG
    *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \param a pointer on the plugin function
    */
-  void setComputeJacobianGFunction(unsigned int, FPtr6);
+  void setComputeJacobianXGFunction(FPtr6);
+  void setComputeJacobianDotXGFunction(FPtr6);
+  //  void setComputeJacobianZGFunction( FPtr6);
 
   /** Default function to compute g
    *  \param double, the current time
@@ -705,7 +752,8 @@ public:
    *  \param double time : the current time
    *  \param index (0: \f$ \nabla_x \f$, 1: \f$ \nabla_{\dot x} \f$ )
    */
-  void computeJacobianG(unsigned int, double);
+  void computeJacobianXG(double);
+  void computeJacobianDotXG(double);
 
   /**
    *default function to update the plugins functions using a new time:
@@ -780,5 +828,3 @@ public:
 TYPEDEF_SPTR(DynamicalSystem);
 
 #endif // DYNAMICALSYSTEM_H
-
-

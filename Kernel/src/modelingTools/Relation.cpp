@@ -24,8 +24,7 @@ using namespace std;
 Relation::Relation(RELATION::TYPES newType,
                    RELATION::SUBTYPES newSub):
   relationType(newType),
-  subType(newSub), hPlugged(false), gPlugged(false),
-  hName("unamed"), gName("unamed")
+  subType(newSub), hName("unamed"), gName("unamed"), output(NULL), jXOutput(NULL), jLOutput(NULL), input(NULL), jLInput(NULL)
 {}
 
 // xml constructor
@@ -33,8 +32,7 @@ Relation::Relation(SP::RelationXML relxml,
                    RELATION::TYPES newType,
                    RELATION::SUBTYPES newSub):
   relationType(newType), subType(newSub),
-  relationxml(relxml), hPlugged(false),
-  gPlugged(false), hName("unamed"), gName("unamed")
+  relationxml(relxml), output(NULL), jXOutput(NULL), jLOutput(NULL), input(NULL), jLInput(NULL), hName("unamed"), gName("unamed")
 {
   if (! relationxml)
     RuntimeException::selfThrow("Relation::fillRelationWithRelationXML - object RelationXML does not exist");
@@ -81,36 +79,64 @@ void Relation::computeResiduY(double t)
   *mResiduy = *mH_alpha;
   scal(-1, *mResiduy, *mResiduy);
 
-  //  cout<<"Relation::computeResiduY mH_alpha"<<endl;
-  //  mH_alpha->display();
-  //  cout<<"Relation::computeResiduY Y"<<endl;
-  //  getInteractionPtr()->getYPtr(0)->display();
+  //      cout<<"Relation::computeResiduY mH_alpha"<<endl;
+  //      mH_alpha->display();
+  //      cout<<"Relation::computeResiduY Y"<<endl;
+  //      getInteractionPtr()->getYPtr(0)->display();
 
   (*mResiduy) += *(getInteractionPtr()->getYPtr(0));
 
-  //  cout<<" Relation::computeResiduY residu Y"<<endl;
-  //  mResiduy->display();
+  //      cout<<" Relation::computeResiduY residuY"<<endl;
+  //      mResiduy->display();
 
 }
 void Relation::computeG(double t)
 {
-  computeInput(t, 0);
+  computeInput(t);
 }
 
-SP::SiconosMatrix Relation::getCPtr()
+void Relation::setComputeJacLHFunction(const std::string& pluginPath, const std::string& functionName)
 {
-  return getJacHPtr(0);
-}
-SP::SiconosMatrix Relation::getDPtr()
-{
-  return getJacHPtr(1);
-}
-SP::SiconosMatrix Relation::getBPtr()
-{
-  return getJacGPtr(0);
+  Plugin::setFunction(&jLOutput, pluginPath, functionName);
+  //    SSL::buildPluginName(pluginNamejLOutput,pluginPath,functionName);
 }
 
+/** To set a plug-in function to compute input function g
+ *  \param string : the complete path to the plugin
+ *  \param string : the function name to use in this plugin
+ */
+void Relation::setComputeGFunction(const std::string& pluginPath, const std::string& functionName)
+{
+  Plugin::setFunction(&input, pluginPath, functionName, gName);
+  //    SSL::buildPluginName(pluginNameInput,pluginPath,functionName);
+}
+void Relation::setComputeFFunction(const std::string& pluginPath, const std::string& functionName)
+{
+  Plugin::setFunction(&fplugin, pluginPath, functionName, gName);
+  //    SSL::buildPluginName(pluginNamefplugin,pluginPath,functionName);
+}
+void Relation::setComputeEFunction(const std::string& pluginPath, const std::string& functionName)
+{
+  Plugin::setFunction(&eplugin, pluginPath, functionName, gName);
+  //    SSL::buildPluginName(pluginNameeplugin,pluginPath,functionName);
+}
 
+/** To set a plug-in function to compute the jacobian according to x of the input
+ *  \param string : the complete path to the plugin
+ *  \param string : the function name to use in this plugin
+ *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
+ */
+void Relation::setComputeJacLGFunction(const std::string& pluginPath, const std::string& functionName)
+{
+  Plugin::setFunction(&jLOutput, pluginPath, functionName);
+  //    SSL::buildPluginName(pluginNamejLOutput,pluginPath,functionName);
+}
+
+void Relation::setComputeHFunction(const std::string& pluginPath, const std::string& functionName)
+{
+  Plugin::setFunction(&output, pluginPath, functionName, hName);
+  //    SSL::buildPluginName(pluginNameOutput,pluginPath,functionName);
+}
 void Relation::saveRelationToXML() const
 {
   RuntimeException::selfThrow("Relation - saveRelationToXML: not yet implemented for relation of type " + getType());

@@ -74,6 +74,35 @@ class Relation
 {
 
 protected:
+  /** Plug-in to compute h(...)
+  */
+  PluginHandle output;
+  std::string pluginNameOutput;
+
+  /** Plug-in to compute \f$ \nabla_x h(..)\f$
+   */
+  PluginHandle jXOutput;
+  std::string pluginNamejXOutput;
+  /** Plug-in to compute \f$ \nabla_{\lambda} h(..)\f$
+   */
+  PluginHandle jLOutput;
+  std::string pluginNamejLOutput;
+
+  /** Plug-in to compute g(...)
+   */
+  PluginHandle input;
+  std::string pluginNameInput;
+
+  /** Plug-in to compute \f$ \nabla_\lambda g(lambda,t,z)\f$
+   */
+  PluginHandle jLInput;
+  std::string pluginNamejLInput;
+  PluginHandle fplugin;
+  std::string pluginNamefplugin;
+  PluginHandle eplugin;
+  std::string pluginNameeplugin;
+
+protected:
 
   /** type of the Relation: FirstOrder or Lagrangian */
   RELATION::TYPES relationType;
@@ -83,12 +112,6 @@ protected:
 
   /** The Interaction linked to this Relation */
   boost::weak_ptr<Interaction> interaction;
-
-  /** True if h is plugged to a user-defined function */
-  bool hPlugged;
-
-  /** True if g is plugged to a user-defined function */
-  bool gPlugged;
 
   /** Name of the plugin function used to compute h*/
   std::string hName;
@@ -122,6 +145,9 @@ protected:
   SP::SiconosVector mResiduy;
   /*value of h at the current newton iteration*/
   SP::SiconosVector mH_alpha;
+
+  SP::SiconosMatrix JacLH;
+
 
   /** basic constructor
    *  \param a string that gives the type of the relation
@@ -245,7 +271,7 @@ public:
    */
   inline const bool isHPlugged() const
   {
-    return hPlugged;
+    return output;
   }
 
   /** true if g is plugged
@@ -253,7 +279,7 @@ public:
    */
   inline const bool isGPlugged() const
   {
-    return gPlugged;
+    return input;
   }
 
   /** true if JacH[i] is plugged
@@ -272,55 +298,61 @@ public:
     return false;
   }
 
+
+  /**
+  * return a SP on the C matrix.
+  * The matrix C in the linear case, else it returns Jacobian of the output with respect to x.
+  *
+  */
+  virtual SP::SiconosMatrix getCPtr() = 0;
+  /**
+   * return a SP on the D matrix.
+   * The matrix D in the linear case, else it returns Jacobian of the output with respect to lambda.
+   */
+  virtual SP::SiconosMatrix getDPtr() = 0;
+  /**
+   * return a SP on the B matrix.
+   * The matrix B in the linear case, else it returns Jacobian of the input with respect to lambda.
+   */
+  virtual SP::SiconosMatrix getBPtr() = 0;
+
+
+
   /** get matrix JacH[index]
    *  \return a SimpleMatrix
-   */
   virtual const SimpleMatrix getJacH(unsigned int  index = 0) const = 0;
+   */
 
   /** get a pointer on matrix JacH[index]
    *  \return a pointer on a SiconosMatrix
+  virtual SP::SiconosMatrix getJacXHPtr() const = 0;
+  virtual SP::SiconosMatrix getJacLHPtr() const = 0;
    */
-  virtual SP::SiconosMatrix getJacHPtr(unsigned int index = 0) const = 0;
 
   /** get matrix JacG[index]
    *  \return a SimpleMatrix
-   */
   virtual const SimpleMatrix getJacG(unsigned int  index = 0) const
   {
-    RuntimeException::selfThrow("Relation::getJacG() - not implemented for this type of relation (probably Lagrangian): " + getType());
-    return SimpleMatrix(0, 0);
+    RuntimeException::selfThrow("Relation::getJacG() - not implemented for this type of relation (probably Lagrangian): "+getType());
+    return SimpleMatrix(0,0);
   }
+   */
 
   /** get a pointer on matrix JacG[index]
    *  \return a pointer on a SiconosMatrix
    */
-  virtual SP::SiconosMatrix getJacGPtr(unsigned int index = 0) const
+  virtual SP::SiconosMatrix getJacLGPtr() const
   {
     RuntimeException::selfThrow("Relation::getJacGPtr() - not implemented for this type of relation (probably Lagrangian): " + getType());
     return SP::SiconosMatrix();
   }
 
-  /** Gets the number of computed jacobians for h
-      \return an unsigned int.
-  */
-  virtual unsigned int getNumberOfJacobiansForH() const
-  {
-    return 0;
-  }
-
-  /** Gets the number of computed jacobian for g
-      \return an unsigned int.
-  */
-  virtual unsigned int getNumberOfJacobiansForG() const
-  {
-    return 0;
-  }
 
   /** To set a plug-in function to compute output function h
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    */
-  virtual void setComputeHFunction(const std::string&, const std::string&) = 0;
+  virtual void setComputeHFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** To set a plug-in function to compute jacobianH
    *  \param string : the complete path to the plugin
@@ -328,26 +360,22 @@ public:
    *  \param index for jacobian (0: jacobian according to x, 1
    *  according to lambda)
    */
-  virtual void setComputeJacobianHFunction(const std::string&, const std::string&, unsigned int = 0) = 0;
+  virtual void setComputeJacLHFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** To set a plug-in function to compute input function g
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    */
-  virtual void setComputeGFunction(const std::string&, const std::string&)
-  {
-    RuntimeException::selfThrow("Relation::setComputeGFunction() - not implemented for this type of relation (probably Lagrangian): " + getType());
-  }
+  virtual void setComputeGFunction(const std::string& pluginPath, const std::string& functionName);
+  virtual void setComputeFFunction(const std::string& pluginPath, const std::string& functionName);
+  virtual void setComputeEFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** To set a plug-in function to compute the jacobian according to x of the input
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
    */
-  virtual void setComputeJacobianGFunction(const std::string&, const std::string&, unsigned int = 0)
-  {
-    RuntimeException::selfThrow("Relation::setComputeJacobianGFunction() - not implemented for this type of relation (probably Lagrangian): " + getType());
-  }
+  virtual void setComputeJacLGFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** initialize the relation (check sizes, memory allocation ...)
       \param SP to Interaction: the interaction that owns this relation
@@ -368,18 +396,26 @@ public:
   /** default function to compute jacobianH
    *  \param double : current time
    *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
-   */
-  virtual void computeJacH(double, unsigned int) = 0;
 
+  virtual void computeJacXH(double) = 0;
+  virtual void computeJacLH(double) = 0;
+  */
   /** default function to compute jacobianG according to lambda
    *  \param double : current time
    *  \param index for jacobian: at the time only one possible
    *  jacobian => i = 0 is the default value .
    */
-  virtual void computeJacG(double, unsigned int)
+  virtual void computeJacLG(double)
   {
     ;//RuntimeException::selfThrow("Relation::computeJacG() - not implemented for this type of relation (probably Lagrangian): "+getType());
   }
+
+  /* compute all the H Jacobian */
+  virtual void computeJacH(double) = 0;
+  /* compute all the G Jacobian */
+  virtual void computeJacG(double) = 0;
+
+
   /** default function to compute y
    *  \param double : current time
    *  \param unsigned int: number of the derivative to compute,
@@ -393,24 +429,13 @@ public:
    *  compute input
    */
   virtual void computeInput(double, unsigned int = 0) = 0;
+  virtual inline SP::SiconosMatrix getJacLHPtr() const
+  {
+    return JacLH;
+  }
 
 
-  /**
-   * return a SP on the C matrix.
-   * The matrix C in the linear case, else it returns Jacobian of the output with respect to x.
-   *
-   */
-  virtual SP::SiconosMatrix getCPtr();
-  /**
-   * return a SP on the D matrix.
-   * The matrix D in the linear case, else it returns Jacobian of the output with respect to lambda.
-   */
-  virtual SP::SiconosMatrix getDPtr();
-  /**
-   * return a SP on the B matrix.
-   * The matrix B in the linear case, else it returns Jacobian of the input with respect to lambda.
-   */
-  virtual SP::SiconosMatrix getBPtr();
+
   // --- Residu y functions
 
   inline const SP::SiconosVector getResiduY()
@@ -464,4 +489,5 @@ public:
    */
   VIRTUAL_ACCEPT_VISITORS(Relation)
 };
+
 #endif // RELATION_H

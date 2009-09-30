@@ -53,20 +53,30 @@
  * h, G0 and G1 are connected to user-defined functions.
  *
  */
-class LagrangianCompliantR : public LagrangianR<FPtr2>
+class LagrangianCompliantR : public LagrangianR
 {
 
 protected:
 
-  typedef FPtr2 FunctionPtr;
-  typedef LagrangianR<FPtr2> BaseClass;
+  /** LagrangianR plug-in to compute h(q,lambda,z)
+    * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
+    * @param q : pointer to the first element of q
+    * @param sizeY : size of vector y (ie of lambda and of the interaction)
+    * @param lambda : pointer to lambda of the interaction
+    * @param[in,out] y : pointer to the first element of y
+    * @param sizeZ : size of vector z.
+    * @param[in,out] z : a vector of user-defined parameters
+    */
+  FPtr2 hPtr;
+  std::string pluginNameHPtr;
+  FPtr2 JacQHPtr;
+  std::string pluginNameJacQHPtr;
+  FPtr2 JacLHPtr;
+  std::string pluginNameJacLHPtr;
 
   /** default constructor
    */
-  LagrangianCompliantR() : BaseClass(RELATION::CompliantR)
-  {
-    JacH.resize(2);
-  };
+  LagrangianCompliantR() : LagrangianR(RELATION::CompliantR) {  };
 
   /** initialize G matrices or components specific to derived classes.
    */
@@ -98,7 +108,8 @@ public:
    * \param: double, current time
    * \param: unsigned int
    */
-  void computeJacH(double, unsigned int);
+  void computeJacQH(double);
+  void computeJacLH(double);
 
   /** to compute output
    *  \param Interaction : the interaction that owns y

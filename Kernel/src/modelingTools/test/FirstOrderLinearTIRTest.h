@@ -42,17 +42,17 @@ private:
   CPPUNIT_TEST(testBuildFirstOrderLinearTIR2);
   CPPUNIT_TEST(testBuildFirstOrderLinearTIR4);
   CPPUNIT_TEST(testBuildFirstOrderLinearTIR5);
-  CPPUNIT_TEST(testSetC);
+  //  CPPUNIT_TEST(testSetC);
   CPPUNIT_TEST(testSetCPtr);
-  CPPUNIT_TEST(testSetD);
+  //  CPPUNIT_TEST(testSetD);
   CPPUNIT_TEST(testSetDPtr);
-  CPPUNIT_TEST(testSetF);
+  //  CPPUNIT_TEST(testSetF);
   CPPUNIT_TEST(testSetFPtr);
-  CPPUNIT_TEST(testSetE);
+  //  CPPUNIT_TEST(testSetE);
   CPPUNIT_TEST(testSetEPtr);
-  CPPUNIT_TEST(testSetB);
+  //  CPPUNIT_TEST(testSetB);
   CPPUNIT_TEST(testSetBPtr);
-  CPPUNIT_TEST(testGetJac);
+  //  CPPUNIT_TEST(testGetJac);
   CPPUNIT_TEST(testGetJacPtr);
 
   CPPUNIT_TEST(End);
@@ -66,17 +66,17 @@ private:
   void testBuildFirstOrderLinearTIR2();
   void testBuildFirstOrderLinearTIR4();
   void testBuildFirstOrderLinearTIR5();
-  void testSetC();
+  //  void testSetC();
   void testSetCPtr();
-  void testSetD();
+  //  void testSetD();
   void testSetDPtr();
-  void testSetF();
+  //  void testSetF();
   void testSetFPtr();
-  void testSetE();
+  //  void testSetE();
   void testSetEPtr();
-  void testSetB();
+  //  void testSetB();
   void testSetBPtr();
-  void testGetJac();
+  //  void testGetJac();
   void testGetJacPtr();
   void End();
 

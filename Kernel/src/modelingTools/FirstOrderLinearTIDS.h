@@ -79,14 +79,14 @@ public:
    *  \param SiconosVector : the initial state of this DynamicalSystem
    *  \param SiconosMatrix: A
    */
-  FirstOrderLinearTIDS(const SiconosVector&, const SiconosMatrix&);
+  FirstOrderLinearTIDS(SP::SiconosVector, SP::SiconosMatrix);
 
   /** constructor from a set of data
    *  \param SiconosVector : the initial state of this DynamicalSystem
    *  \param SiconosMatrix: A
    *  \param SiconosVector: b
    */
-  FirstOrderLinearTIDS(const SiconosVector&, const SiconosMatrix&, const SiconosVector&);
+  FirstOrderLinearTIDS(SP::SiconosVector, SP::SiconosMatrix, SP::SiconosVector);
 
   /** destructor */
   ~FirstOrderLinearTIDS() {};

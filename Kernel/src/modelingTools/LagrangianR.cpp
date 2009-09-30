@@ -26,21 +26,21 @@
 
 using namespace std;
 
-template <class T> void LagrangianR<T>::initComponents()
+void LagrangianR::initComponents()
 {
   unsigned int sizeY = getInteractionPtr()->getSizeOfY();
   unsigned int sizeDS = getInteractionPtr()->getSizeOfDS();
 
   // The initialization of JacH[0] depends on the way the Relation was built ie if the matrix
   // was read from xml or not
-  if (! JacH[0])
-    JacH[0].reset(new PluggedMatrix(sizeY, sizeDS));
+  if (! JacQH)
+    JacQH.reset(new SimpleMatrix(sizeY, sizeDS));
   else
   {
-    if (JacH[0]->size(0) == 0) // if the matrix dim are null
-      JacH[0]->resize(sizeY, sizeDS);
+    if (JacQH->size(0) == 0) // if the matrix dim are null
+      JacQH->resize(sizeY, sizeDS);
     else
-      assert((JacH[0]->size(1) == sizeDS && JacH[0]->size(0) == sizeY) &&
+      assert((JacQH->size(1) == sizeDS && JacQH->size(0) == sizeY) &&
              "LagrangianScleronomousR::initComponents inconsistent sizes between JacH[0] matrix and the interaction.");
   }
 
@@ -49,7 +49,7 @@ template <class T> void LagrangianR<T>::initComponents()
   workY.reset(new SimpleVector(sizeY));
 }
 
-template <class T> void LagrangianR<T>::initialize(SP::Interaction inter)
+void LagrangianR::initialize(SP::Interaction inter)
 {
   assert(inter && "FirstOrderR::initialize failed. No Interaction linked to the present relation.");
   interaction = inter;
@@ -87,32 +87,27 @@ template <class T> void LagrangianR<T>::initialize(SP::Interaction inter)
   }
 }
 
-template <class T> void LagrangianR<T>::setComputeHFunction(const string& pluginPath, const string& functionName)
-{
-  hPlugged = Plugin::setFunction(&hPtr, pluginPath, functionName, hName);
-}
 
-template <class T> void LagrangianR<T>::setComputeJacobianHFunction(const string& pluginPath, const string& functionName, unsigned int index)
-{
-  JacH[index]->setComputeFunction(pluginPath, functionName);
-}
-
-template <class T> void LagrangianR<T>::computeH(double)
+void LagrangianR::computeH(double)
 {
   RuntimeException::selfThrow("LagrangianR::computeH: not yet implemented (or useless) for Lagrangian relation of type " + subType);
 }
 
-template <class T> void LagrangianR<T>::computeJacH(double, unsigned int)
-{
-  RuntimeException::selfThrow("FirstOrderR::computeJacobianH, not (yet) implemented or forbidden for relations of type " + subType);
-}
+//  void LagrangianR::computeJacXH(double)
+// {
+//   RuntimeException::selfThrow("FirstOrderR::computeJacobianXH, not (yet) implemented or forbidden for relations of type "+subType);
+// }
+//  void LagrangianR::computeJacLH(double)
+// {
+//   RuntimeException::selfThrow("FirstOrderR::computeJacobianLH, not (yet) implemented or forbidden for relations of type "+subType);
+// }
 
-template <class T> void LagrangianR<T>::saveRelationToXML() const
+void LagrangianR::saveRelationToXML() const
 {
   RuntimeException::selfThrow("LagrangianR1::saveRelationToXML - not yet implemented.");
 }
 
-template <class T> void LagrangianR<T>::display() const
+void LagrangianR::display() const
 {
   Relation::display();
 }

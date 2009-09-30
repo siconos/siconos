@@ -53,17 +53,48 @@
  * h, G0 and hdot=\f$ \frac{\partial h}{\partial t}(q,t,z) \f$ are connected to user-defined functions.
  *
  */
-class LagrangianRheonomousR : public LagrangianR<FPtr4>
+class LagrangianRheonomousR : public LagrangianR
 {
-  typedef PluggedObject<FPtr4, SimpleVector> PVT2;
-  typedef boost::shared_ptr<PVT2> SPPVT2;
 
 protected:
+  SP::SiconosMatrix JacQH;
+  /** LagrangianRheonomousR plug-in to compute h(q,t,z)
+   * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
+   * @param q : pointer to the first element of q
+   * @param time : current time
+   * @param sizeY : size of vector y (ie of the intercation)
+   * @param[in,out] y : pointer to the first element of y
+   * @param sizeZ : size of vector z
+   * @param[in,out] z : a vector of user-defined parameters
+   */
+  FPtr4 hPtr;
 
-  typedef LagrangianR<FPtr4> BaseClass ;
+  /** LagrangianRheonomousR plug-in to compute hDot(q,t,z)
+   * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
+   * @param q : pointer to the first element of q
+   * @param time : current time
+   * @param sizeY : size of vector hDot (ie of the intercation)
+   * @param[in,out] pointer to the first element of hDot
+   * @param sizeZ : size of vector z
+   * @param[in,out] z : a vector of user-defined parameters
+   */
+  FPtr4 hDotPtr;
+
+  /** LagrangianRheonomousR plug-in to compute G0(q,t,z), gradient of h accoring to q
+   * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
+   * @param q : pointer to the first element of q
+   * @param time : current time
+   * @param sizeY : size of vector y (ie of the intercation)
+   * @param[in,out] G0 : pointer to the first element of G0
+   * @param sizeZ : size of vector z
+   * @param[in,out] z : a vector of user-defined parameters
+   */
+  FPtr4 computeJacQHPtr;
+
+
 
   /** plugged vector used to compute hDot */
-  SPPVT2 hDot;
+  SP::SiconosVector hDot;
 
   /** initialize G matrices or components specific to derived classes.
    */
@@ -71,10 +102,7 @@ protected:
 
   /** default constructor
    */
-  LagrangianRheonomousR(): BaseClass(RELATION::RheonomousR)
-  {
-    JacH.resize(1);
-  };
+  LagrangianRheonomousR(): LagrangianR(RELATION::RheonomousR) {  };
 
 public:
 
@@ -98,11 +126,9 @@ public:
 
   /** get vector hDot
    *  \return a SimpleVector
+
+  inline const SimpleVector getHDot() const { return *hDot; }
    */
-  inline const SimpleVector getHDot() const
-  {
-    return *hDot;
-  }
 
   /** get a pointer on vector hDot
    *  \return a smart pointer on a SiconosVector
@@ -114,42 +140,36 @@ public:
 
   /** set the value of hDot to newValue (copy)
    *  \param SiconosVector newValue
-   */
-  template <class U> void setHDot(const U& newValue)
-  {
-    setObject<PVT2, SPPVT2, U>(hDot, newValue);
-  }
+
+  void setHDot(const SiconosVector& newValue)
+    {
+      setObject<PVT2,SPPVT2,SiconosVector>(hDot,newValue);
+    }
+  */
 
   /** set hDot to pointer newPtr (pointer link)
    *  \param SP::SiconosVector  newPtr
-   */
-  inline void setHDot(SPPVT2 newPtr)
-  {
-    hDot = newPtr ;
-  }
 
+  inline void setHDot(SPPVT2 newPtr) {hDot = newPtr ;}
+  */
   /** To get the name of hDot plugin
    *  \return a string
    */
   inline const std::string getHDotName() const
   {
-    return hDot->getPluginName();
+    return "no name";
   }
 
   /** true if hDot is plugged
    *  \return a bool
    */
-  inline const bool isHDotPlugged() const
-  {
-    return hDot->isPlugged();
-  }
 
   /** to set a specified function to compute function hDot
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    */
   void setComputeHDotFunction(const std::string& , const std::string&);
-
+  virtual void setComputeHFunction(const std::string& pluginPath, const std::string& functionName);
   /** to compute y = h(q,v,t) using plug-in mechanism
    * \param: double, current time
    */
@@ -164,7 +184,7 @@ public:
    * \param: double, current time
    * \param: unsigned int
    */
-  void computeJacH(double, unsigned int);
+  void computeJacQH(double);
 
   /** to compute output
    *  \param double : current time
@@ -182,6 +202,7 @@ public:
    *  \param Relation* : the relation which must be converted
    * \return a pointer on the relation if it is of the right type, NULL otherwise
    */
+  virtual void computeG(double time);
   static LagrangianRheonomousR* convert(Relation *r);
 };
 

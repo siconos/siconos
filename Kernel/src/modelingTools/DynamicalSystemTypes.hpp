@@ -49,33 +49,5 @@ enum TYPES
 // Plugged objects used in Dynamical systems
 #include "PluginTypes.hpp"
 
-/** Vector plugged to a FPtr1 */
-typedef PluggedObject<FPtr1, SimpleVector> PVF;
-
-/** Matrix plugged to a FPtr1 */
-typedef PluggedObject<FPtr1, SimpleMatrix> PMJF;
-
-/** Vector plugged to a FPtr5 */
-typedef PluggedObject<FPtr5, SimpleVector> PVNNL;
-
-/** Matrix plugged to a FPtr5 */
-typedef PluggedObject<FPtr5, SimpleMatrix> PMNNL;
-
-/** Vector plugged to a FPtr6 */
-typedef PluggedObject<FPtr6, SimpleVector> PVFint;
-
-/** Matrix plugged to a FPtr6 */
-typedef PluggedObject<FPtr6, SimpleMatrix> PMFint;
-
-/** Matrix plugged to a FPtr7 */
-typedef PluggedObject<FPtr7, SimpleMatrix> PMMass;
-
-TYPEDEF_SPTR(PVF);
-TYPEDEF_SPTR(PMJF);
-TYPEDEF_SPTR(PMMass);
-TYPEDEF_SPTR(PVNNL);
-TYPEDEF_SPTR(PMNNL);
-TYPEDEF_SPTR(PVFint);
-TYPEDEF_SPTR(PMFint);
 
 #endif

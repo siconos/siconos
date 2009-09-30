@@ -23,6 +23,14 @@
 #define FirstOrderLinearR_H
 
 #include "FirstOrderR.h"
+/** Pointer to function used for plug-in for matrix-type operators (C,F etc) */
+typedef void (*FOMatPtr1)(double, unsigned int, unsigned int, double*, unsigned int, double*);
+
+/** Pointer to function used for plug-in for square matrix-type operators (D) */
+typedef void (*FOMatPtr2)(double, unsigned int, double*, unsigned int, double*);
+
+/** Pointer to function used for plug-in for vector-type operators (e) */
+typedef void (*FOVecPtr)(double, unsigned int, double*, unsigned int, double*);
 
 /** First Order Linear Relation
 
@@ -43,24 +51,23 @@
     Note: the connections (pointers equalities) between C, D, B and jacobianH and jacobianG of FirstOrderR class are done during initialize.
 
 */
-class FirstOrderLinearR : public FirstOrderR<MatrixFunctionOfTime>
+class FirstOrderLinearR : public FirstOrderR
 {
 
 protected:
 
-  typedef FirstOrderR<MatrixFunctionOfTime> BaseClass;
-
+  /** F*/
+  SP::SiconosMatrix F;
   /** e*/
-  SP::Plugged_Vector_FTime e;
+  SP::SiconosVector e;
 
-  /** F matrix, coefficient of z */
-  SP_PluggedMatrix F;
+
+
+public:
 
   /** default constructor, protected
    */
-  FirstOrderLinearR(): BaseClass(RELATION::LinearR) {};
-
-public:
+  FirstOrderLinearR();
 
   /** xml constructor
       \param SP::RelationXML : the XML object corresponding
@@ -86,7 +93,7 @@ public:
    *  \param Plugged Matrix : the matrix C
    *  \param Plugged Matrix : the matrix B
    */
-  FirstOrderLinearR(SP_PluggedMatrix, SP_PluggedMatrix);
+  FirstOrderLinearR(SP::SiconosMatrix, SP::SiconosMatrix);
 
   /** create the Relation from a set of data
    *  \param Plugged Matrix : C
@@ -95,25 +102,26 @@ public:
    *  \param Plugged Vector : e
    *  \param Plugged Matrix : B
    */
-  FirstOrderLinearR(SP_PluggedMatrix, SP_PluggedMatrix, SP_PluggedMatrix, SP::Plugged_Vector_FTime, SP_PluggedMatrix);
+  FirstOrderLinearR(SP::SiconosMatrix , SP::SiconosMatrix, SP::SiconosMatrix , SP::SiconosVector, SP::SiconosMatrix);
 
   /** create the Relation from a set of data
    *  \param  SiconosMatrix : the matrix C
    *  \param  SiconosMatrix : the matrix B
-   */
-  FirstOrderLinearR(const SiconosMatrix& , const SiconosMatrix&);
 
+  FirstOrderLinearR(const SiconosMatrix& , const SiconosMatrix&);
+  */
   /** create the Relation from a set of data
    *  \param  SiconosMatrix : C
    *  \param  SiconosMatrix : D
    *  \param  SiconosMatrix : F
    *  \param  SimpleVector  : e
    *  \param  SiconosMatrix : B
-   */
+
   FirstOrderLinearR(const SiconosMatrix& , const SiconosMatrix& , const SiconosMatrix&, const SiconosVector&, const SiconosMatrix&);
+  */
   /** destructor
    */
-  virtual ~FirstOrderLinearR() {};
+  ~FirstOrderLinearR() {};
 
   // GETTERS/SETTERS
 
@@ -145,7 +153,13 @@ public:
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    */
-  void setComputeCFunction(const std::string& , const std::string&);
+
+
+  void setComputeCFunction(const std::string& pluginPath, const std::string& functionName)
+  {
+    setComputeJacXHFunction(pluginPath,  functionName);
+  }
+
 
   // -- D --
 
@@ -161,59 +175,58 @@ public:
 
   /** set the value of D to newValue
    *  \param a plugged matrix
-   */
-  template <class U> void setD(const U& newValue)
-  {
-    if (JacH.size() < 2) JacH.resize(2);
-    setJacH(newValue, 1);
-  }
+
+  void setD(const U& newValue)
+    {
+      if(JacH.size()<2) JacH.resize(2);
+      setJacH(newValue,1);
+    }
+    */
 
   /** set D to pointer newPtr
    *  \param a SP to plugged matrix
    */
-  inline void setDPtr(SP_PluggedMatrix newPtr)
+  void setDPtr(SP::SiconosMatrix newPtr)
   {
-    if (JacH.size() < 2) JacH.resize(2);
-    JacH[1] = newPtr;
+    JacLH = newPtr;
   }
 
   /** set a specified function to compute the matrix D
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    */
-  void setComputeDFunction(const std::string& , const std::string&);
+  void setComputeDFunction(const std::string& pluginPath, const std::string& functionName)
+  {
+    setComputeJacLHFunction(pluginPath,  functionName);
+  }
+
 
   // -- F --
 
   /** get the value of F
    *  \return plugged matrix
-   */
-  inline const PluggedMatrix getF() const
-  {
-    return *F;
-  }
 
+  inline const PluggedMatrix getF() const { return *F; }
+  */
   /** get F
    *  \return pointer on a plugged matrix
    */
-  inline SP_PluggedMatrix getFPtr() const
+  inline SP::SiconosMatrix getFPtr() const
   {
     return F;
   }
 
   /** set the value of F to newValue
    *  \param a plugged matrix
-   */
-  template <class U> void setF(const U& newValue)
-  {
-    if (F) F->resize(newValue.size(0), newValue.size(1));
-    setObject<PluggedMatrix, SP_PluggedMatrix, U>(F, newValue);
-  }
 
+  void setF(const SiconosMatrix& newValue){
+    if(F) F->resize(newValue.size(0), newValue.size(1));
+  }
+  */
   /** set F to pointer newPtr
    *  \param a SP to plugged matrix
    */
-  inline void setFPtr(SP_PluggedMatrix newPtr)
+  inline void setFPtr(SP::SiconosMatrix newPtr)
   {
     F = newPtr;
   }
@@ -221,53 +234,45 @@ public:
   /** set a specified function to compute the matrix F
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
+    void setComputeFFunction(const std::string& , const std::string& );
    */
-  void setComputeFFunction(const std::string& , const std::string&);
 
   // -- e --
   /** get the value of e
    *  \return plugged vector
-   */
-  inline const Plugged_Vector_FTime getE() const
-  {
-    return *e;
-  }
 
+  inline const Plugged_Vector_FTime getE() const { return *e; }
+  */
   /** get e
    *  \return pointer on a plugged vector
    */
-  inline SP::Plugged_Vector_FTime getEPtr() const
+  inline SP::SiconosVector getEPtr() const
   {
     return e;
   }
 
   /** set the value of e to newValue
    *  \param a plugged vector
+  void setE(const SiconosVector& newValue)
+    {
+      if(e) e->resize(newValue.size());
+    }
    */
-  template <class U> void setE(const U& newValue)
-  {
-    if (e) e->resize(newValue.size());
-    setObject<Plugged_Vector_FTime, SP::Plugged_Vector_FTime, U>(e, newValue);
-  }
 
   /** set e to pointer newPtr
    *  \param a SP to plugged vector
    */
-  inline void setEPtr(SP::Plugged_Vector_FTime newPtr)
-  {
-    e = newPtr;
-  }
+  //  inline void setEPtr(SP::SiconosVector newPtr) {e = newPtr;}
 
   /** set a specified function to compute the vector e
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
-   */
-  void setComputeEFunction(const std::string& , const std::string&);
 
+    void setComputeEFunction(const std::string& , const std::string& );
+  */
   /** set a specified function to compute the vector e
    *  \param VectorFunctionOfTime : a pointer function
    */
-  void setComputeEFunction(VectorFunctionOfTime ptrFunct);
 
   // -- B --
   /** get the value of B
@@ -282,92 +287,94 @@ public:
 
   /** set the value of B to newValue
    *  \param a plugged matrix
-   */
-  template <class U> void setB(const U& newValue)
-  {
-    setJacG(newValue, 0);
-  }
 
+  void setB(const & newValue){
+    setJacG(newValue,0);
+  }
+  */
   /** set B to pointer newPtr
    *  \param a SP to plugged matrix
    */
-  inline void setBPtr(SP_PluggedMatrix newPtr)
+  //   inline void setBPtr(SP::SiconosMatrix newPtr) {JacLG = newPtr;}
+
+  //   /** set a specified function to compute the matrix B
+  //    *  \param string : the complete path to the plugin
+  //    *  \param string : the function name to use in this plugin
+  //    */
+  void setComputeBFunction(const std::string& pluginPath, const std::string& functionName)
   {
-    JacG.at(0) = newPtr;
+    setComputeJacLGFunction(pluginPath,  functionName);
   }
 
-  /** set a specified function to compute the matrix B
-   *  \param string : the complete path to the plugin
-   *  \param string : the function name to use in this plugin
-   */
-  void setComputeBFunction(const std::string& , const std::string&);
 
-  /** Function to compute matrix C
-   */
+  //   /** Function to compute matrix C
+  //    */
   void computeC(double);
 
-  /** Function to compute matrix F
-   */
+  //   /** Function to compute matrix F
+  //    */
   void computeF(double);
 
-  /** Function to compute matrix D
-   */
+  //   /** Function to compute matrix D
+  //    */
   void computeD(double);
 
-  /** Function to compute vector e
-   */
+  //   /** Function to compute vector e
+  //    */
   void computeE(double);
 
-  /** Function to compute matrix B
-   */
+  //   /** Function to compute matrix B
+  //    */
   void computeB(double);
 
-  /** initialize the relation (check sizes, memory allocation ...)
-      \param SP to Interaction: the interaction that owns this relation
-  */
+  //   /** initialize the relation (check sizes, memory allocation ...)
+  //       \param SP to Interaction: the interaction that owns this relation
+  //   */
   void initialize(SP::Interaction);
 
-  /** default function to compute h
-   *  \param double : current time
-   */
+  //   /** default function to compute h
+  //    *  \param double : current time
+  //    */
   void computeH(double);
 
-  /** default function to compute g
-   *  \param double : current time
-   */
+  //   /** default function to compute g
+  //    *  \param double : current time
+  //    */
   void computeG(double);
 
-  /** default function to compute jacobianH
-   *  \param double : not used
-   *  \param not used
-   */
-  void computeJacH(double, unsigned int);
+  //   /** default function to compute jacobianH
+  //    *  \param double : not used
+  //    *  \param not used
+  //    */
+  //   void computeJacXH(double);
+  //   void computeJacLH(double);
 
-  /** default function to compute jacobianG according to lambda
-   *  \param double : current time
-   *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
-   */
-  void computeJacG(double, unsigned int);
+  //   /** default function to compute jacobianG according to lambda
+  //    *  \param double : current time
+  //    *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
+  //    */
+  //   void computeJacLG(double);
 
-  /** default function to compute y
-   *  \param double: not used
-   *  \param unsigned int: not used
-   */
-  void computeOutput(double, unsigned int = 0);
+  //   /** default function to compute y
+  //    *  \param double: not used
+  //    *  \param unsigned int: not used
+  //    */
+  void computeOutput(double, unsigned int);
 
-  /** default function to compute r
-   *  \param double : not used
-   *  \param unsigned int: not used
-   */
-  void computeInput(double, unsigned int = 0);
+  //   /** default function to compute r
+  //    *  \param double : not used
+  //    *  \param unsigned int: not used
+  //    */
+  void computeInput(double, unsigned int);
 
-  /** copy the data of the Relation to the XML tree
-   */
+  //   /** copy the data of the Relation to the XML tree
+  //    */
   void saveRelationToXML() const;
 
-  /** print the data to the screen
-   */
+  //   /** print the data to the screen
+  //    */
   void display() const;
+  virtual void setComputeEFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param Relation * : the relation which must be converted

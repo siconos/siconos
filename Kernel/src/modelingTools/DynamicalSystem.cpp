@@ -19,6 +19,7 @@
 #include "DynamicalSystem.h"
 #include "DynamicalSystemXML.h"
 #include "BlockVector.h"
+#include "Plugin.hpp"
 
 using namespace std;
 using namespace DS;
@@ -31,6 +32,7 @@ unsigned int DynamicalSystem::count = 0;
 DynamicalSystem::DynamicalSystem(DS::TYPES type):
   DSType(type), number(count++), n(0), stepsInMemory(1)
 {
+  zeroPlungin();
   mNormRef = 1;
   x.resize(2);
   workV.resize(sizeWorkV);
@@ -45,7 +47,7 @@ DynamicalSystem::DynamicalSystem(SP::DynamicalSystemXML dsXML):
 
   // Update count: must be at least equal to number for future DS creation
   count = number;
-
+  zeroPlungin();
   // Only the following data are set in this general constructor:
   //  - DSTye
   //  - number
@@ -77,6 +79,7 @@ DynamicalSystem::DynamicalSystem(DS::TYPES type, unsigned int newN):
   r.reset(new SimpleVector(getDim()));
 }
 
+
 bool DynamicalSystem::checkDynamicalSystem()
 {
   bool output = true;
@@ -93,7 +96,12 @@ bool DynamicalSystem::checkDynamicalSystem()
   }
   return output;
 }
-
+void DynamicalSystem::zeroPlungin()
+{
+  computeJacobianXGPtr = NULL;
+  computeJacobianXDotGPtr = NULL;
+  computeGPtr = NULL;
+}
 // Setters
 
 void DynamicalSystem::setX0(const SiconosVector& newValue)
@@ -240,27 +248,29 @@ void DynamicalSystem::setZPtr(SP::SiconosVector newPtr)
 {
   z = newPtr;
 }
-
+/*
 void DynamicalSystem::setG(const PVFint& newValue)
 {
-  assert(newValue.size() == n && "DynamicalSystem - setG: inconsistent dimensions with problem size for input vector g");
+  assert(newValue.size()==n&&"DynamicalSystem - setG: inconsistent dimensions with problem size for input vector g");
 
-  if (!g)
+  if( !g  )
     g.reset(new PVFint(newValue));
   else
     *g = newValue;
 }
-
+*/
+/*
 void DynamicalSystem::setJacobianG(unsigned int i, const PMFint& newValue)
 {
-  assert(newValue.size(0) == n && "DynamicalSystem - setJacobianG: inconsistent dimensions with problem size for matrix jacobianG.");
-  assert(newValue.size(1) == n && "DynamicalSystem - setJacobianG: inconsistent dimensions with problem size for matrix jacobianG.");
+  assert(newValue.size(0)==n&&"DynamicalSystem - setJacobianG: inconsistent dimensions with problem size for matrix jacobianG.");
+  assert(newValue.size(1)==n&&"DynamicalSystem - setJacobianG: inconsistent dimensions with problem size for matrix jacobianG.");
 
-  if (!jacobianG [i])
+  if( !jacobianG [i] )
     jacobianG[i].reset(new PMFint(newValue));
   else
     *jacobianG[i] = newValue;
 }
+*/
 
 void DynamicalSystem::update(double time)
 {
@@ -284,55 +294,50 @@ void DynamicalSystem::initMemory(unsigned int steps)
 
 void DynamicalSystem::setComputeGFunction(const string& pluginPath, const string& functionName)
 {
-  if (! g)
-    g.reset(new PVFint(n));
-  g->setComputeFunction(pluginPath, functionName);
+  Plugin::setFunction(&computeGPtr, pluginPath, functionName);
+  SSL::buildPluginName(pluginNameComputeGPtr, pluginPath, functionName);
+
 }
 
 void DynamicalSystem::setComputeGFunction(FPtr6 fct)
 {
-  if (! g)
-    g.reset(new PVFint(n));
-  g->setComputeFunction(fct);
+  computeGPtr = fct;
 }
 
-void DynamicalSystem::setComputeJacobianGFunction(unsigned int i, const string& pluginPath, const string& functionName)
+void DynamicalSystem::setComputeJacobianXGFunction(const string& pluginPath, const string& functionName)
 {
-  if (! jacobianG[i])
-    jacobianG[i].reset(new PMFint(n, n));
-  jacobianG[i]->setComputeFunction(pluginPath, functionName);
+  Plugin::setFunction(&computeJacobianXGPtr, pluginPath, functionName);
+  SSL::buildPluginName(pluginNameComputeJacobianXGPtr, pluginPath, functionName);
 }
-
-void DynamicalSystem::setComputeJacobianGFunction(unsigned int i, FPtr6 fct)
+void DynamicalSystem::setComputeJacobianDotXGFunction(const string& pluginPath, const string& functionName)
 {
-  if (! jacobianG[i])
-    jacobianG[i].reset(new PMFint(n, n));
-  jacobianG[i]->setComputeFunction(fct);
+  Plugin::setFunction(&computeJacobianXDotGPtr, pluginPath, functionName);
+  SSL::buildPluginName(pluginNameComputeJacobianXDotGPtr, pluginPath, functionName);
 }
+// void DynamicalSystem::setComputeJacobianZGFunction( const string& pluginPath, const string& functionName){
+//   Plugin::setFunction(&pluginJacobianZGPtr, pluginPath,functionName);
+// }
 
 void DynamicalSystem::computeG(double time)
 {
-  if (g->isPlugged())
-  {
-    if (!(g->fPtr))
-      RuntimeException::selfThrow("DynamicalSystem::computeG() is not linked to a plugin function");
-
-    (g->fPtr)(time, n, &(*x[0])(0), &(*x[1])(0), &(*g)(0), z->size(), &(*z)(0));
-  }
-  else RuntimeException::selfThrow("DynamicalSystem::computeG - Not yet implemented for DS of type " + DSType);
+  if (computeGPtr)
+    (computeGPtr)(time, n, &(*x[0])(0), &(*x[1])(0), &(*g)(0), z->size(), &(*z)(0));
 }
 
-void DynamicalSystem::computeJacobianG(unsigned int i, double time)
+void DynamicalSystem::computeJacobianXG(double time)
 {
-  if (jacobianG[i]->isPlugged())
-  {
-    if (!(jacobianG[i]->fPtr))
-      RuntimeException::selfThrow("computeJacobianG(i,time) is not linked to a plugin function. i=" + i);
-
-    (jacobianG[i]->fPtr)(time, n, &(*x[0])(0), &(*x[1])(0), &(*jacobianG[i])(0, 0), z->size(), &(*z)(0));
-  }
-  else RuntimeException::selfThrow("DynamicalSystem::computeJacobianG - Not yet implemented for DS of type " + DSType);
+  if (computeJacobianXGPtr)
+    computeJacobianXGPtr(time, n, &(*x[0])(0), &(*x[1])(0), &(*jacobianXG)(0, 0), z->size(), &(*z)(0));
 }
+void DynamicalSystem::computeJacobianDotXG(double time)
+{
+  if (computeJacobianXDotGPtr)
+    computeJacobianXDotGPtr(time, n, &(*x[0])(0), &(*x[1])(0), &(*jacobianXDotG)(0, 0), z->size(), &(*z)(0));
+}
+// void DynamicalSystem::computeJacobianZG(double time){
+//   if (pluginJacobianXGPtr)
+//     pluginJacobianZGPtr(time, n, &(*x[0])(0), &(*x[1])(0), &(*jacobianG[i])(0,0), z->size(), &(*z)(0));
+// }
 
 // ===== XML MANAGEMENT FUNCTIONS =====
 

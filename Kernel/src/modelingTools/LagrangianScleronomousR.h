@@ -53,17 +53,35 @@
  * G0 and h are connected to plug-in functions.
  *
  */
-class LagrangianScleronomousR : public LagrangianR<FPtr3>
+class LagrangianScleronomousR : public LagrangianR
 {
 
 protected:
+  /** LagrangianScleronomousR plug-in to compute h(q,z)
+    * @param sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved in the interaction
+    * @param q : pointer to the first element of q
+    * @param sizeY : size of vector y (ie of the interaction)
+    * @param[in,out] y : pointer to the first element of y
+    * @param sizeZ : size of vector z
+    * @param[in,out] z: pointer to z vector(s) from DS.
+    */
+  FPtr3 hPtr;
 
+  /** LagrangianScleronomousR plug-in to compute G0(q,z), gradient of h according to q
+   * @param sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved in the interaction
+   * @param q : pointer to the first element of q
+   * @param sizeY : size of vector y (ie of the intercation)
+   * @param[in,out] G0 : pointer to the first element of G0 (sizeY X sizeDS matrix)
+   * @param sizeZ : size of vector z
+   * @param[in,out] z: pointer to z vector(s) from DS.
+   */
+  FPtr3 computeJacQHPtr;
   /** basic constructor
       \param the sub-type of the relation
   */
-  LagrangianScleronomousR(): LagrangianR<FPtr3>(RELATION::ScleronomousR)
+  LagrangianScleronomousR(): LagrangianR(RELATION::ScleronomousR)
   {
-    JacH.resize(1);
+    ;
   }
 
 public:
@@ -89,11 +107,16 @@ public:
    */
   virtual void computeH(double);
 
+  void computeJacQH(double);
+
+
   /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
    * \param: double, current time
    * \param: unsigned int
    */
-  void computeJacH(double, unsigned int);
+  //  void computeJacQH(double);
+  void computeG(double, unsigned int = 0);
+
 
   /** to compute output
    *  \param double : current time

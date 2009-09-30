@@ -30,6 +30,8 @@
 class DynamicalSystem;
 class BlockMatrix;
 
+typedef void (*FNLDSPtrfct)(double, unsigned int, const double*, double*, unsigned int, double*);
+
 /**  General First Order Non Linear Dynamical Systems
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -83,17 +85,42 @@ class FirstOrderNonLinearDS : public DynamicalSystem
 protected:
 
   /** Matrix coefficient of \f$ \dot x \f$ */
-  SP::PMJF M;
+  SP::SiconosMatrix M;
 
   /** f(x,t,z) */
-  SP::PVF mf;
+  SP::SiconosVector mf;
 
   /** to store f(x_k,t_k,z_k)*/
   SP::SiconosVector mfold;
 
   /** Gradient of \f$ f(x,t,z) \f$ with respect to \f$ x\f$*/
-  SP::PMJF jacobianXF;
+  SP::SiconosMatrix jacobianXF;
 
+  /** DynamicalSystem plug-in to compute f(x,t,z) - id="f".
+    *  @param  : current time
+    *  @param  : the size of the vector x
+    *  @param  : the pointer to the first element of the vector x
+    *  @param  : the pointer to the first element of the vector f(x,t)
+    *  @param  : the size of the vector z
+    *  @param  : a vector of parameters, z
+    */
+  FNLDSPtrfct computeFPtr;
+  std::string pluginNameComputeFPtr;
+
+
+  /** DynamicalSystem plug-in to compute the gradient of f(x,t,z) with respect to the state: \f$ \nabla_x f: (x,t,z) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
+   * @param time : current time
+   * @param sizeOfX : size of vector x
+   * @param x : pointer to the first element of x
+   * @param[in,out] jacob : pointer to the first element of jacobianXF matrix
+   * @param  : the size of the vector z
+   * @param[in,out] z: a vector of parameters, z
+   */
+  FNLDSPtrfct  computeJacobianXFPtr;
+  std::string pluginNameComputeJacobianXFPtr;
+
+  FNLDSPtrfct  pluginComputeM;
+  std::string pluginNamePluginComputeM;
 
   /**  the previous r vectors */
   SP::SiconosMemory rMemory;
@@ -123,7 +150,8 @@ protected:
   /** constructor from a set of data
       \param SiconosVector : initial state of this DynamicalSystem
   */
-  FirstOrderNonLinearDS(const SiconosVector&);
+  FirstOrderNonLinearDS(SP::SiconosVector);
+  FirstOrderNonLinearDS(const SiconosVector& SiconosVector);
 
 public:
 
@@ -179,29 +207,26 @@ public:
   // --- M ---
   /** get the value of M
    *  \return a plugged-matrix
-   */
-  inline const PMJF getM() const
-  {
-    return *M;
-  }
 
+  inline const PMJF getM() const { return *M; }
+  */
   /** get M
    *  \return pointer on a plugged-matrix
    */
-  inline SP::PMJF getMPtr() const
+  inline SP::SiconosMatrix getMPtr() const
   {
     return M;
   }
 
   /** set the value of M to newValue
    *  \param plugged-matrix newValue
-   */
-  void setM(const PMJF&);
 
+  void setM(const PMJF&);
+  */
   /** set M to pointer newPtr
    *  \param a plugged matrix SP
    */
-  inline void setMPtr(SP::PMJF newPtr)
+  inline void setMPtr(SP::SiconosMatrix newPtr)
   {
     M = newPtr;
   }
@@ -245,16 +270,14 @@ public:
 
   /** get the value of f
    *  \return plugged vector
-   */
-  inline const PVF getF() const
-  {
-    return *mf;
-  }
+
+  inline const PVF getF() const { return *mf; }
+  */
 
   /** get f
    *  \return pointer on a plugged vector
    */
-  inline SP::PVF getFPtr() const
+  inline SP::SiconosVector getFPtr() const
   {
     return mf;
   }
@@ -265,13 +288,13 @@ public:
 
   /** set the value of f to newValue
    *  \param a plugged vector
-   */
-  void setF(const PVF&);
 
+  void setF(const PVF&);
+  */
   /** set f to pointer newPtr
    *  \param a SP to plugged vector
    */
-  inline void setFPtr(SP::PVF newPtr)
+  inline void setFPtr(SP::SiconosVector newPtr)
   {
     mf = newPtr;
   }
@@ -279,12 +302,9 @@ public:
   // --- jacobianXF ---
   /** get the value of jacobianXF
    *  \return a plugged-matrix
-   */
-  inline const PMJF getJacobianXF() const
-  {
-    return *jacobianXF;
-  }
 
+  inline const PMJF getJacobianXF() const { return *jacobianXF; }
+  */
   /** get jacobianXF
    *  \return pointer on a plugged-matrix
    */
@@ -295,13 +315,13 @@ public:
 
   /** set the value of jacobianXF to newValue
    *  \param plugged-matrix newValue
-   */
-  void setJacobianXF(const PMJF&);
 
+  void setJacobianXF(const PMJF&);
+  */
   /** set jacobianXF to pointer newPtr
    *  \param a plugged matrix SP
    */
-  inline void setJacobianXFPtr(SP::PMJF newPtr)
+  inline void setJacobianXFPtr(SP::SiconosMatrix newPtr)
   {
     jacobianXF = newPtr;
   }

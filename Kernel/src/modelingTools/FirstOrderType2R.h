@@ -47,14 +47,13 @@
      - \f$ \nabla_\lambda g \f$: jacobianG[0] ( input[1] )
  *
  */
-class FirstOrderType2R : public FirstOrderR<FPtr4bis>
+class FirstOrderType2R : public FirstOrderR
 {
-private:
+protected:
+  SP::SimpleMatrix JacXG;
 
-  typedef FirstOrderR<FPtr4bis> BaseClass;
 
 public:
-
   /** xml constructor
    *  \param RelationXML smart pointer : the XML object.
    */
@@ -98,13 +97,17 @@ public:
    *  \param double : not used
    *  \param not used
    */
-  virtual void computeJacH(double, unsigned int);
+  virtual void computeJacXH(double);
+  virtual void computeJacLH(double);
 
   /** default function to compute jacobianG according to lambda
    *  \param double : current time
    *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
    */
-  virtual void computeJacG(double, unsigned int);
+  virtual void computeJacLG(double);
+  virtual void computeJacXG(double);
+
+  virtual void computeJacG(double t);
 
   /** default function to compute y
    *  \param double: not used
@@ -117,15 +120,9 @@ public:
    *  \param unsigned int: not used
    */
   virtual void computeInput(double, unsigned int = 0);
-
-  inline SP_PluggedMatrix getB()
-  {
-    return JacG.at(1);
-  };
-  virtual SP::SiconosMatrix getBPtr()
-  {
-    return getJacGPtr(1);
-  }
+  /*
+    inline SP_PluggedMatrix getB(){return JacG.at(1);};
+  */
 
   virtual void preparNewtonIteration();
 
@@ -137,8 +134,6 @@ public:
   {
     return false;
   }
-
-
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param Relation * : the relation which must be converted
    * \return a pointer on the relation if it is of the right type, NULL otherwise
