@@ -50,11 +50,11 @@ int main(int argc, char* argv[])
   {
     // --- Dynamical system creation ---
     // --- Linear system  (load and filter) specification ---
-    SimpleVector init_stateLS(1);
-    init_stateLS(0) = VinitLS;
+    SP::SimpleVector init_stateLS(new SimpleVector(1));
+    (*init_stateLS)(0) = VinitLS;
 
-    SimpleMatrix LS_A(1, 1);
-    LS_A(0, 0) = -1.0 / (Rvalue * Cfilt);
+    SP::SimpleMatrix LS_A(new SimpleMatrix(1, 1));
+    (*LS_A)(0, 0) = -1.0 / (Rvalue * Cfilt);
 
     SP::FirstOrderLinearDS LSDiodeBridgePowSup(new FirstOrderLinearDS(init_stateLS, LS_A));
 
@@ -69,42 +69,42 @@ int main(int argc, char* argv[])
 
     // --- Interaction between linear system and non smooth system ---
 
-    SimpleMatrix Int_C(4, 1);
-    Int_C(0, 0) =  1.0;
-    Int_C(2, 0) =  1.0;
+    SP::SimpleMatrix Int_C(new SimpleMatrix(4, 1));
+    (*Int_C)(0, 0) =  1.0;
+    (*Int_C)(2, 0) =  1.0;
 
-    SimpleMatrix Int_D(4, 4);
+    SP::SimpleMatrix Int_D(new SimpleMatrix(4, 4));
 
-    Int_D(0, 1) = -1.0;
-    Int_D(1, 0) =  1.0;
-    Int_D(1, 2) =  1.0;
-    Int_D(1, 3) = -1.0;
-    Int_D(2, 1) = -1.0;
-    Int_D(3, 1) =  1.0;
+    (*Int_D)(0, 1) = -1.0;
+    (*Int_D)(1, 0) =  1.0;
+    (*Int_D)(1, 2) =  1.0;
+    (*Int_D)(1, 3) = -1.0;
+    (*Int_D)(2, 1) = -1.0;
+    (*Int_D)(3, 1) =  1.0;
 
-    SimpleVector Offset_y(4);
-    Offset_y(0) = 1.0;
-    Offset_y(2) = 1.0;
-    Offset_y(3) = 1.0;
-    Offset_y = -DiodeThreshold * Offset_y;
+    SP::SimpleVector Offset_y(new SimpleVector(4));
+    (*Offset_y)(0) = 1.0;
+    (*Offset_y)(2) = 1.0;
+    (*Offset_y)(3) = 1.0;
+    *Offset_y = -DiodeThreshold * (*Offset_y);
 
-    SimpleVector Offset_lambda(4);
-    Offset_lambda(1) = 1.0;
-    Offset_lambda = -DiodeThreshold * Offset_lambda;
+    SP::SimpleVector Offset_lambda(new SimpleVector(4));
+    (*Offset_lambda)(1) = 1.0;
+    *Offset_lambda = -DiodeThreshold * (*Offset_lambda);
 
     SP::SimpleVector Int_z(new SimpleVector(5));
     SP::SimpleVector tmp(new SimpleVector(4)) ;
-    prod(Int_D, Offset_lambda, *tmp);
-    *tmp -= Offset_y;
+    prod(*Int_D, *Offset_lambda, *tmp);
+    *tmp -= *Offset_y;
     Int_z->setBlock(0, *tmp);
     LSDiodeBridgePowSup->setZPtr(Int_z);
 
-    SimpleMatrix Int_B(1, 4);
-    Int_B(0 , 0) = 1.0 / Cfilt;
-    Int_B(0 , 2) = 1.0 / Cfilt;
+    SP::SimpleMatrix Int_B(new SimpleMatrix(1, 4));
+    (*Int_B)(0 , 0) = 1.0 / Cfilt;
+    (*Int_B)(0 , 2) = 1.0 / Cfilt;
 
     SP::FirstOrderLinearR LTIRDiodeBridgePowSup(new FirstOrderLinearR(Int_C, Int_B));
-    LTIRDiodeBridgePowSup->setD(Int_D);
+    LTIRDiodeBridgePowSup->setDPtr(Int_D);
     LTIRDiodeBridgePowSup->setComputeEFunction("./SinPoPlugin.so", "SinPo");
 
     SP::ComplementarityConditionNSL nslaw(new ComplementarityConditionNSL(4));

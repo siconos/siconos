@@ -62,13 +62,13 @@ int main(int argc, char* argv[])
   try
   {
     // --- Dynamical system specification ---
-    SimpleVector init_state(2);
-    init_state(0) = Vinit;
-    init_state(1) = 0.0;
+    SP::SimpleVector init_state(new SimpleVector(2));
+    init_state->setValue(0, Vinit);
+    init_state->setValue(1, 0.0);
 
-    SimpleMatrix LS_A(2, 2);
-    LS_A(0 , 1) = -1.0 / Cvalue;
-    LS_A(1 , 0) = 1.0 / Lvalue;
+    SP::SimpleMatrix LS_A(new SimpleMatrix(2, 2));
+    LS_A->setValue(0 , 1, -1.0 / Cvalue);
+    LS_A->setValue(1 , 0, 1.0 / Lvalue);
 
     SP::FirstOrderLinearTIDS LSCircuitRLCD(new FirstOrderLinearTIDS(init_state, LS_A));
 
@@ -77,19 +77,19 @@ int main(int argc, char* argv[])
     DynamicalSystemsSet Inter_DS;
     Inter_DS.insert(LSCircuitRLCD);
 
-    SimpleMatrix Int_C(1, 2);
-    Int_C(0 , 0) = -1.0;
+    SP::SimpleMatrix Int_C(new SimpleMatrix(1, 2));
+    Int_C->setValue(0 , 0 , -1.0);
 
-    SimpleMatrix Int_D(1, 1);
-    Int_D(0 , 0) = Rvalue;
+    SP::SimpleMatrix Int_D(new SimpleMatrix(1, 1));
+    Int_D->setValue(0 , 0, Rvalue);
 
-    SimpleMatrix Int_B(2, 1);
-    Int_B(0 , 0) = -1.0 / Cvalue;
+    SP::SimpleMatrix Int_B(new SimpleMatrix(2, 1));
+    Int_B->setValue(0 , 0, -1.0 / Cvalue);
 
     SP::FirstOrderLinearTIR LTIRCircuitRLCD(new FirstOrderLinearTIR(Int_C, Int_B));
     SP::NonSmoothLaw NSLaw(new ComplementarityConditionNSL(1));
 
-    LTIRCircuitRLCD->setD(Int_D);
+    LTIRCircuitRLCD->setDPtr(Int_D);
 
     SP::Interaction InterCircuitRLCD(new Interaction("InterCircuitRLCD", Inter_DS, 1, 1, NSLaw, LTIRCircuitRLCD));
 

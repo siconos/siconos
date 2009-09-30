@@ -48,18 +48,18 @@ int main(int argc, char* argv[])
     // --- Dynamical system specification ---
 
     cout << "====> Model loading ..." << endl << endl;
-    SimpleVector init_state(4);
-    init_state(0) = 0.0;
-    init_state(1) = 0.0;
-    init_state(2) = 0.0;
-    init_state(3) = 0.0;
+    SP::SimpleVector init_state(new SimpleVector(4));
+    (*init_state)(0) = 0.0;
+    (*init_state)(1) = 0.0;
+    (*init_state)(2) = 0.0;
+    (*init_state)(3) = 0.0;
 
-    SimpleMatrix LS_A(4, 4);
-    LS_A(0 , 1) = -1.0 / Lrvalue;
-    LS_A(1 , 0) = 1.0 / Crvalue;
-    LS_A(2 , 3) = -1.0 / Lfvalue;
-    LS_A(3 , 2) = 1.0 / Cfvalue;
-    LS_A(3 , 3) = -1.0 / (Rvalue * Cfvalue);
+    SP::SimpleMatrix LS_A(new SimpleMatrix(4, 4));
+    (*LS_A)(0 , 1) = -1.0 / Lrvalue;
+    (*LS_A)(1 , 0) = 1.0 / Crvalue;
+    (*LS_A)(2 , 3) = -1.0 / Lfvalue;
+    (*LS_A)(3 , 2) = 1.0 / Cfvalue;
+    (*LS_A)(3 , 3) = -1.0 / (Rvalue * Cfvalue);
 
     SP::FirstOrderLinearDS LSPRC(new FirstOrderLinearDS(init_state, LS_A));
 

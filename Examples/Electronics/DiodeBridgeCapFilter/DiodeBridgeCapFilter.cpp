@@ -76,26 +76,26 @@ int main(int argc, char* argv[])
   {
 
     // --- Linear system 1 (LC oscillator) specification ---
-    SimpleVector init_stateLS1(2);
-    init_stateLS1(0) = VinitLS1;
+    SP::SimpleVector init_stateLS1(new SimpleVector(2));
+    (*init_stateLS1)(0) = VinitLS1;
 
-    SimpleMatrix LS1_A(2, 2);
-    LS1_A(0 , 1) = -1.0 / Cvalue;
-    LS1_A(1 , 0) = 1.0 / Lvalue;
+    SP::SimpleMatrix LS1_A(new SimpleMatrix(2, 2));
+    (*LS1_A)(0 , 1) = -1.0 / Cvalue;
+    (*LS1_A)(1 , 0) = 1.0 / Lvalue;
 
     cout << " LS1 matrice A = " << endl;
-    LS1_A.display();
+    LS1_A->display();
     SP::FirstOrderLinearDS LS1DiodeBridgeCapFilter(new FirstOrderLinearDS(init_stateLS1, LS1_A));
 
     // --- Linear system 2 (load and filter) specification ---
-    SimpleVector init_stateLS2(1);
-    init_stateLS2(0) = VinitLS2;
+    SP::SimpleVector init_stateLS2(new SimpleVector(1));
+    (*init_stateLS2)(0) = VinitLS2;
 
-    SimpleMatrix LS2_A(1, 1);
-    LS2_A(0 , 0) = -1.0 / (Rvalue * Cfilt);
+    SP::SimpleMatrix LS2_A(new SimpleMatrix(1, 1));
+    (*LS2_A)(0 , 0) = -1.0 / (Rvalue * Cfilt);
 
     cout << " LS2 matrice A = " << endl;
-    LS2_A.display();
+    LS2_A->display();
     SP::FirstOrderLinearDS LS2DiodeBridgeCapFilter(new FirstOrderLinearDS(init_stateLS2, LS2_A));
 
     // --- Interaction between linear systems and non smooth system ---

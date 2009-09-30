@@ -64,12 +64,12 @@ int main(int argc, char* argv[])
   try
   {
     // --- Dynamical system specification ---
-    SimpleVector init_state(2);
-    init_state(0) = Vinit;
+    SP::SimpleVector init_state(new SimpleVector(2));
+    init_state->setValue(0, Vinit);
 
-    SimpleMatrix LS_A(2, 2);
-    LS_A(0, 1) = -1.0 / Cvalue;
-    LS_A(1, 0) = 1.0 / Lvalue;
+    SP::SimpleMatrix LS_A(new SimpleMatrix(2, 2));
+    LS_A->setValue(0, 1, -1.0 / Cvalue);
+    LS_A->setValue(1, 0, 1.0 / Lvalue);
 
     SP::FirstOrderLinearDS LSDiodeBridge(new FirstOrderLinearDS(init_state, LS_A));
 
@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
     (*Int_B)(0, 3) = 1.0 / Cvalue;
 
     SP::FirstOrderLinearTIR LTIRDiodeBridge(new FirstOrderLinearTIR(*Int_C, *Int_B));
-    LTIRDiodeBridge->setD(*Int_D);
+    LTIRDiodeBridge->setDPtr(Int_D);
 
     SP::NonSmoothLaw nslaw(new ComplementarityConditionNSL(4));
 
