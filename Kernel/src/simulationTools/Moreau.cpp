@@ -298,8 +298,8 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
   else if (dsType == LNLDS)
   {
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
-    SP::SiconosMatrix K = d->getJacobianFLPtr(0); // jacobian according to q
-    SP::SiconosMatrix C = d->getJacobianFLPtr(1); // jacobian according to velocity
+    SP::SiconosMatrix K = d->getJacobianQFLPtr(); // jacobian according to q
+    SP::SiconosMatrix C = d->getJacobianQDotFLPtr(); // jacobian according to velocity
 
     *W = *d->getMassPtr();
 
@@ -384,21 +384,21 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
   else if (dsType == LNLDS)
   {
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
-    SP::SiconosMatrix K = d->getJacobianFLPtr(0); // jacobian according to q
-    SP::SiconosMatrix C = d->getJacobianFLPtr(1); // jacobian according to velocity
+    SP::SiconosMatrix K = d->getJacobianQFLPtr(); // jacobian according to q
+    SP::SiconosMatrix C = d->getJacobianQDotFLPtr(); // jacobian according to velocity
 
     d->computeMass();
     *W = *d->getMassPtr();
 
     if (C)
     {
-      d->computeJacobianFL(1, t);
+      d->computeJacobianQDotFL(t);
       scal(-h * theta, *C, *W, false); // W -= h*theta*C
     }
 
     if (K)
     {
-      d->computeJacobianFL(0, t);
+      d->computeJacobianQFL(t);
       scal(-h * h * theta * theta, *K, *W, false); //*W -= h*h*theta*theta**K;
     }
   }
@@ -503,8 +503,8 @@ double Moreau::computeResidu()
 
       (*d->getResidurPtr()) = (*d->getRPtr()) - (*d->getGAlphaPtr());
 
-      //    cout<<"Moreau FONLDS: residu r"<<endl;
-      //    (*d->getResidurPtr()).display();
+      //      cout<<"Moreau FONLDS: residu r"<<endl;
+      //      (*d->getResidurPtr()).display();
     }
 
     // 2 - First Order Linear Systems

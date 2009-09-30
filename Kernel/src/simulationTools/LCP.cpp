@@ -43,7 +43,6 @@ int LCP::compute(double time)
     numerics_problem.size = sizeOutput;
     int nbSolvers = 1;
     // Call LCP Driver
-
     info = lcp_driver(&numerics_problem, _z->getArray() , _w->getArray() , &*solver->getNumericsSolverOptionsPtr(), nbSolvers, &*numerics_options);
 
     // --- Recovering of the desired variables from LCP output ---

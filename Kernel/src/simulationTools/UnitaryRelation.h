@@ -304,7 +304,7 @@ public:
    *  \param a pointer to SiconosMatrix (in-out parameter): the resulting unitaryBlock matrix
    *  \param unsigned int (optional): gradient index (see relations for details)
    */
-  void getLeftUnitaryBlockForDS(SP::DynamicalSystem, SP::SiconosMatrix, unsigned int = 0) const;
+  void getLeftUnitaryBlockForDS(SP::DynamicalSystem, SP::SiconosMatrix) const;
 
   /** gets the matrix used in unitaryBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to ds.
@@ -312,7 +312,7 @@ public:
    *  \param a pointer to SiconosMatrix (in-out parameter): the resulting unitaryBlock matrix
    *  \param unsigned int (optional): gradient index (see relations for details)
    */
-  void getRightUnitaryBlockForDS(SP::DynamicalSystem, SP::SiconosMatrix, unsigned int = 0) const;
+  void getRightUnitaryBlockForDS(SP::DynamicalSystem, SP::SiconosMatrix) const;
 
   /** gets extra unitaryBlock corresponding to the present UR (see the top of this files for extra unitaryBlock meaning)
    *  \param a pointer to a SiconosMatrix (in-out parameter)

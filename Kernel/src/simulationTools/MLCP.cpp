@@ -145,8 +145,8 @@ void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
         UR2->getRightUnitaryBlockForDS(*itDS, rightUnitaryBlock);
         // centralUnitaryBlock contains a lu-factorized matrix and we solve
         // centralUnitaryBlock * X = rightUnitaryBlock with PLU
-        //          printf("right bloc: ie B \n");
-        //          rightUnitaryBlock->display();
+        printf("right bloc: ie B \n");
+        rightUnitaryBlock->display();
         centralUnitaryBlocks[*itDS]->PLUForwardBackwardInPlace(*rightUnitaryBlock);
         //        printf("W \n");
         //        centralUnitaryBlocks[*itDS]->display();
@@ -156,8 +156,8 @@ void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
         //      *currentUnitaryBlock += h *Theta[*itDS]* *leftUnitaryBlock * (*rightUnitaryBlock); //left = C, right = W.B
         //gemm(h,*leftUnitaryBlock,*rightUnitaryBlock,1.0,*currentUnitaryBlock);
         *leftUnitaryBlock *= h;
-        //          printf("currentbloc : ie D \n");
-        //          currentUnitaryBlock->display();
+        printf("currentbloc : ie D \n");
+        currentUnitaryBlock->display();
         //          printf("leftUnitaryBlock : ie C \n");
         //          leftUnitaryBlock->display();
 
@@ -223,7 +223,16 @@ int MLCP::compute(double time)
     //      exit(1);
     //mlcpDefaultSolver *pSolver = new mlcpDefaultSolver(m,n);
     //      displayMLCP(&numerics_problem);
-    info = mlcp_driver(&numerics_problem, _z->getArray(), _w->getArray(), (solver->getNumericsSolverOptionsPtr()).get(), &*numerics_options);
+    try
+    {
+      display();
+      info = mlcp_driver(&numerics_problem, _z->getArray(), _w->getArray(), (solver->getNumericsSolverOptionsPtr()).get(), &*numerics_options);
+    }
+    catch (...)
+    {
+      cout << "exception catched" << endl;
+      info = 1;
+    }
 
     // --- Recovering of the desired variables from MLCP output ---
     postCompute();

@@ -23,6 +23,7 @@
 #include "NewtonImpactFrictionNSL.h"
 #include "RuntimeException.h"
 #include "FirstOrderNonLinearDS.h"
+#include "FirstOrderR.h"
 
 using namespace std;
 using namespace RELATION;
@@ -172,7 +173,7 @@ void UnitaryRelation::initialize(const std::string& simulationType)
   //     RuntimeException::selfThrow("UnitaryRelation::initialize(simulationType) failed: unknown simulation type.");
 }
 
-void UnitaryRelation::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SP::SiconosMatrix UnitaryBlock, unsigned index) const
+void UnitaryRelation::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SP::SiconosMatrix UnitaryBlock) const
 {
   unsigned int k = 0;
   DSIterator itDS;
@@ -196,11 +197,13 @@ void UnitaryRelation::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SP::Sicon
 
   if (relationType == FirstOrder)
   {
-    originalMatrix = mainInteraction->getRelationPtr()->getJacHPtr(0);
+    SP::FirstOrderR r = boost::static_pointer_cast<FirstOrderR> (mainInteraction->getRelationPtr());
+    originalMatrix = r->getJacXHPtr();
   }
   else if (relationType == Lagrangian)
   {
-    originalMatrix = mainInteraction->getRelationPtr()->getJacHPtr(index);
+    SP::LagrangianR r = boost::static_pointer_cast<LagrangianR> (mainInteraction->getRelationPtr());
+    originalMatrix = r->getJacQHPtr();
   }
   else
     RuntimeException::selfThrow("UnitaryRelation::getLeftUnitaryBlockForDS, not yet implemented for relations of type " + relationType);
@@ -220,7 +223,7 @@ void UnitaryRelation::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SP::Sicon
   setBlock(originalMatrix, UnitaryBlock, subDim, subPos);
 }
 
-void UnitaryRelation::getRightUnitaryBlockForDS(SP::DynamicalSystem ds, SP::SiconosMatrix UnitaryBlock, unsigned index) const
+void UnitaryRelation::getRightUnitaryBlockForDS(SP::DynamicalSystem ds, SP::SiconosMatrix UnitaryBlock) const
 {
   unsigned int k = 0;
   DSIterator itDS;
@@ -244,11 +247,11 @@ void UnitaryRelation::getRightUnitaryBlockForDS(SP::DynamicalSystem ds, SP::Sico
 
   if (relationType == FirstOrder)
   {
-    originalMatrix = mainInteraction->getRelationPtr()->getBPtr();
+    originalMatrix = mainInteraction->getRelationPtr()->getJacLGPtr();
   }
   else if (relationType == Lagrangian) // Note: the transpose will be done in LCP or MLCP ...
   {
-    originalMatrix = mainInteraction->getRelationPtr()->getJacHPtr(index);
+    originalMatrix = mainInteraction->getRelationPtr()->getJacLHPtr();
   }
   else
     RuntimeException::selfThrow("UnitaryRelation::getRightUnitaryBlockForDS, not yet implemented for relations of type " + relationType);
@@ -282,8 +285,8 @@ void UnitaryRelation::getExtraUnitaryBlock(SP::SiconosMatrix UnitaryBlock) const
   RELATION::SUBTYPES relationSubType = getRelationSubType();
 
   SP::SiconosMatrix D;
-  if (mainInteraction->getRelationPtr()->getNumberOfJacobiansForH() > 1)
-    D = mainInteraction->getRelationPtr()->getJacHPtr(1);
+  //  if(mainInteraction->getRelationPtr()->getNumberOfJacobiansForH()>1)
+  D = mainInteraction->getRelationPtr()->getJacLHPtr();
 
   if (! D)
   {
