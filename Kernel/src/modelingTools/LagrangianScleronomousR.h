@@ -107,7 +107,7 @@ public:
    */
   virtual void computeH(double);
 
-  void computeJacQH(double);
+  virtual void computeJacQH(double);
 
 
   /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed

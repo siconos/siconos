@@ -73,7 +73,7 @@ class EventDriven;
 
 #define SICONOS_VISITOR_FAIL(X)                                                         \
   { RuntimeException::selfThrow                                         \
-      ( SICONOS_VISITOR_QUOTE(you must define a visit function for SP :: X in a derived class of SiconosVisitor)); }
+      ( SICONOS_VISITOR_QUOTE(you must define a visit function for X in a derived class of SiconosVisitor)); }
 
 
 /** hook to be inserted in a virtual class definiton */
@@ -98,7 +98,7 @@ class EventDriven;
 
 
 #define VISIT(X)                                                    \
-  virtual void visit(boost::shared_ptr<X>) SICONOS_VISITOR_FAIL(X);                 \
+  virtual void visit(boost::shared_ptr<X>) SICONOS_VISITOR_FAIL(SP :: X); \
   virtual void visit(X&) SICONOS_VISITOR_FAIL(X);
 
 class SiconosVisitor

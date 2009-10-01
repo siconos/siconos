@@ -127,14 +127,7 @@ public:
 
   /** visitor hooks
    */
-  virtual void accept(SiconosVisitor& tourist)
-  {
-    tourist.visit(*this);
-  }
-  virtual void accept(SP::SiconosVisitor tourist)
-  {
-    tourist->visit(shared_from_this());
-  }
+  ACCEPT_VISITORS();
 
 };
 
