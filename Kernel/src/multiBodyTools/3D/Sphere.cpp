@@ -184,6 +184,8 @@ Sphere::Sphere(double r, double m,
 
   computeMass();
 
+  jacobianQNNL.reset(new SimpleMatrix(ndof, ndof));
+  jacobianQDotNNL.reset(new SimpleMatrix(ndof, ndof));
 
   NNL.reset(new SimpleVector(ndof));
   NNL->zero();
