@@ -86,12 +86,13 @@ void Sphere::computeNNL(SP::SiconosVector q, SP::SiconosVector v)
   double phidot   = v->getValue(4);
   double psidot   = v->getValue(5);
 
+  double sintheta   = sin(theta);
 
   (*NNL)(0) = (*NNL)(1) = (*NNL)(2) = 0;
 
-  (*NNL)(3) = I * psidot * phidot * sin(theta);
-  (*NNL)(4) = -I * psidot * thetadot * sin(theta);
-  (*NNL)(5) = -I * phidot * thetadot * sin(theta);
+  (*NNL)(3) = I * psidot * phidot * sintheta;
+  (*NNL)(4) = -I * psidot * thetadot * sintheta;
+  (*NNL)(5) = -I * phidot * thetadot * sintheta;
 }
 
 
@@ -117,11 +118,13 @@ void Sphere::computeJacobianQNNL(SP::SiconosVector q, SP::SiconosVector v)
   double phidot   = v->getValue(4);
   double psidot   = v->getValue(5);
 
+  double costheta = cos(theta);
+
   jacobianQNNL->zero();
 
-  (*jacobianQNNL)(3, 4) = -I * psidot * phidot * cos(theta);
-  (*jacobianQNNL)(4, 4) = I * psidot * phidot * cos(theta);
-  (*jacobianQNNL)(5, 4) = I * psidot * phidot * cos(theta);
+  (*jacobianQNNL)(3, 3) = -I * psidot * phidot * costheta;
+  (*jacobianQNNL)(4, 3) = I * psidot * thetadot * costheta;
+  (*jacobianQNNL)(5, 3) = I * psidot * thetadot * costheta;
 
 
 }
@@ -135,19 +138,21 @@ void Sphere::computeJacobianQDotNNL(SP::SiconosVector q, SP::SiconosVector v)
   double phidot   = v->getValue(4);
   double psidot   = v->getValue(5);
 
+  double sintheta   = sin(theta);
+
   jacobianQDotNNL->zero();
 
 
-  (*jacobianQDotNNL)(3, 3) = I * psidot * sin(theta);
-  (*jacobianQDotNNL)(3, 4) = 0;
-  (*jacobianQDotNNL)(3, 5) = I * phidot * sin(theta);
+  (*jacobianQDotNNL)(3, 3) = 0;
+  (*jacobianQDotNNL)(3, 4) = I * psidot * sintheta;
+  (*jacobianQDotNNL)(3, 5) = I * phidot * sintheta;
 
-  (*jacobianQDotNNL)(4, 3) = 0;
-  (*jacobianQDotNNL)(4, 4) = -I * psidot * sin(theta);
-  (*jacobianQDotNNL)(4, 5) = -I * thetadot * sin(theta);
+  (*jacobianQDotNNL)(4, 3) = -I * psidot * sintheta;
+  (*jacobianQDotNNL)(4, 4) = 0;
+  (*jacobianQDotNNL)(4, 5) = -I * thetadot * sintheta;
 
-  (*jacobianQDotNNL)(5, 3) =  -I * thetadot * sin(theta);
-  (*jacobianQDotNNL)(5, 4) =  -I * phidot * sin(theta);
+  (*jacobianQDotNNL)(5, 3) =  -I * phidot * sintheta;
+  (*jacobianQDotNNL)(5, 4) =  -I * thetadot * sintheta;
   (*jacobianQDotNNL)(5, 5) = 0;
 
 }

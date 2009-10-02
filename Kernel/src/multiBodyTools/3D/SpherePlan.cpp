@@ -105,7 +105,7 @@ void SpherePlanR::computeJacQH(double)
   (*g)(2, 4) = ru3;
   (*g)(0, 5) = 0;
   (*g)(1, 5) = -rv3 * cthe + rv2 * cphi * sthe - rv1 * sphi * sthe;
-  (*g)(2, 5) = ru3 * cthe + ru1 * sphi * sthe - ru2 * cphi * sphi;
+  (*g)(2, 5) = ru3 * cthe + ru1 * sphi * sthe - ru2 * cphi * sthe;
 
 }
 
