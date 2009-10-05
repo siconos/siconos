@@ -111,8 +111,11 @@ void frictionContact3D_Newton_solve(int contact, int dimReaction, double* reacti
   int info = nonSmoothNewton(Fsize, reactionBlock, &F, &jacobianF, iparam, dparam);
   if (info > 0)
   {
-    fprintf(stderr, "Numerics, FrictionContact3D_Newton failed, reached max. number of iterations without convergence. Error = %f\n", dparam[1]);
-    exit(EXIT_FAILURE);
+    if (verbose > 0)
+    {
+      fprintf(stderr, "Numerics, FrictionContact3D_Newton failed, reached max. number of iterations without convergence. Error = %f\n", dparam[1]);
+      /* note : exit on failure should be done in DefaultCheckSolverOutput */
+    }
   }
 
   (*postSolver)(contact, reaction);

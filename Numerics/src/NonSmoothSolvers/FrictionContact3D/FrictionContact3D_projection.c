@@ -319,8 +319,12 @@ void frictionContact3D_projectionOnConeWithLocalIteration_solve(int contact, int
   while ((localerror > dparam[0]) && (localiter < iparam[0]))
   {
     localiter ++;
-    printf("----------------------\n");
-    printf("localiter = %i\n", localiter);
+
+    if (verbose > 1)
+    {
+      printf("----------------------\n");
+      printf("localiter = %i\n", localiter);
+    }
     /*    printf ("reaction[pos] = %14.7e\n",reaction[pos]); */
     /*    printf ("reaction[pos+1] = %14.7e\n",reaction[pos+1]); */
     /*    printf ("reaction[pos+2] = %14.7e\n",reaction[pos+2]); */
@@ -366,9 +370,12 @@ void frictionContact3D_projectionOnConeWithLocalIteration_solve(int contact, int
     /*    printf ("worktmp[0] = %14.7e\n",worktmp[0]); */
     /*    printf ("worktmp[1] = %14.7e\n",worktmp[1]); */
     /*    printf ("worktmp[2] = %14.7e\n",worktmp[2]); */
-    printf("reaction[pos] = %14.7e\n", reaction[pos]);
-    printf("reaction[pos+1] = %14.7e\n", reaction[pos + 1]);
-    printf("reaction[pos+2] = %14.7e\n", reaction[pos + 2]);
+    if (verbose > 1)
+    {
+      printf("reaction[pos] = %14.7e\n", reaction[pos]);
+      printf("reaction[pos+1] = %14.7e\n", reaction[pos + 1]);
+      printf("reaction[pos+2] = %14.7e\n", reaction[pos + 2]);
+    }
     /*    DCOPY( nLocal , qLocal, incx , worktmp , incy ); */
     /*    DGEMV(LA_NOTRANS, nLocal, nLocal, 1.0, MLocal, 3, &reaction[pos], incx, 1.0, worktmp, incy ); */
     /*    normUT = sqrt(worktmp[1]*worktmp[1]+worktmp[2]*worktmp[2]); */

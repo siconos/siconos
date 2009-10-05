@@ -65,7 +65,8 @@ void linesearch_Armijo(int n, double *z, double* dir, double psi_k, double desce
   }
   free(phiVector);
   if (tk <= tmin)
-    printf("NonSmoothNewton::linesearch_Armijo warning, resulting tk < tmin, linesearch stopped.\n");
+    if (verbose > 0)
+      printf("NonSmoothNewton::linesearch_Armijo warning, resulting tk < tmin, linesearch stopped.\n");
 
 }
 
