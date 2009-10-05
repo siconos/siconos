@@ -50,7 +50,36 @@
  * \f]
  *
  *
- * h, G0 and hdot=\f$ \frac{\partial h}{\partial t}(q,t,z) \f$ are connected to user-defined functions.
+ * h, G0 and hdot=\f$ \frac{\partial h}{\partial t}(q,t,z) \f$ are connected to user-defined functions.\n
+  * G0 and h are connected to plug-in functions.\n
+ * The plugin function to compute h(q,t,z) needs the following parameters:\n
+ * --> sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction\n
+ * --> q : pointer to the first element of q \n
+ * --> time : current time \n
+ * --> sizeY : size of vector y (ie of the interaction) \n
+ * --> [in,out] y : pointer to the first element of y \n
+ * --> sizeZ : size of vector z \n
+ * --> [in,out] z: pointer to z vector(s) from DS. \n
+ * Its signature must be "void userPluginH(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)"\n\n
+ * The plugin function to compute G0(q,t,z), gradient of h according to q, needs the following parameters: \n
+ *--> sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction  \n
+ *--> q : pointer to the first element of q  \n
+ *--> time : current time \n
+ *--> sizeY : size of vector y (ie of the intercation) \n
+ *--> [in,out] G0 : pointer to the first element of G0 (sizeY X sizeDS matrix)\n
+ * --> sizeZ : size of vector z \n
+ * -->[in,out] z: pointer to z vector(s) from DS.\n
+ * Its signature must be "void userPluginG0(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)"\n\n
+ * The plugin function to compute hdot(q,t,z), needs the following parameters: \n
+ *--> sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction  \n
+ *--> q : pointer to the first element of q  \n
+ *--> time : current time \n
+ *--> sizeY : size of vector y (ie of the intercation) \n
+ *--> [in,out] hDot : pointer to the first element of hDot.\n
+ * --> sizeZ : size of vector z \n
+ * -->[in,out] z: pointer to z vector(s) from DS.\n
+ * Its signature must be "void userPluginG0(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)"\n\n
+
  *
  */
 class LagrangianRheonomousR : public LagrangianR
@@ -116,9 +145,12 @@ public:
   LagrangianRheonomousR(SP::RelationXML);
 
   /** constructor from a set of data
-   *  \param string : the name of the plugin to compute h
-   *  \param string : the name of the plugin to compute hDot
-   *  \param string : the name of the plugin  to compute jacobian h according to q
+   *  \param string : the name of the plugin to compute h.\n
+   * Its signature must be "void userPluginH(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)"
+   *  \param string : the name of the plugin to compute hDot. \n
+   * Its signature must be "void userPluginHDot(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)
+   *  \param string : the name of the plugin  to compute jacobian h according to q.\n
+   * Its signature must be "void userPluginG0(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)"
    */
   LagrangianRheonomousR(const std::string&, const std::string&, const std::string&);
 

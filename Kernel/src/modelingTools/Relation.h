@@ -343,12 +343,12 @@ public:
    */
   virtual void setComputeHFunction(const std::string& pluginPath, const std::string& functionName);
 
-  /** To set a plug-in function to compute  \f$ \nabla_x h(..)\f
+  /** To set a plug-in function to compute  \f$ \nabla_x h(..)\f$
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    */
   virtual void setComputeJacXHFunction(const std::string& pluginPath, const std::string& functionName);
-  /** To set a plug-in function to compute  \f$ \nabla_{\lambda} h(..)\f
+  /** To set a plug-in function to compute  \f$ \nabla_{\lambda} h(..)\f$
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    */

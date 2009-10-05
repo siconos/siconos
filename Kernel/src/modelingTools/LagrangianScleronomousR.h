@@ -50,8 +50,25 @@
  G0(q,z) = \nabla_q h(q,z)
  \f]
 
- * G0 and h are connected to plug-in functions.
- *
+ * G0 and h are connected to plug-in functions.\n
+ * The plugin function to compute h(q,z) needs the following parameters:\n
+ * --> sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved in the interaction\n
+ * --> q : pointer to the first element of q \n
+ * --> sizeY : size of vector y (ie of the interaction) \n
+ * --> [in,out] y : pointer to the first element of y \n
+ * --> sizeZ : size of vector z \n
+ * --> [in,out] z: pointer to z vector(s) from DS. \n
+ * Its signature must be "void plugin(unsigned int, const double*, unsigned int, double*, unsigned int, double*)"\n\n
+ * The plugin function to compute G0(q,z), gradient of h according to q, needs the following parameters: \n
+ *--> sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved in the interaction  \n
+ *--> q : pointer to the first element of q  \n
+ *--> sizeY : size of vector y (ie of the intercation) \n
+ *--> [in,out] G0 : pointer to the first element of G0 (sizeY X sizeDS matrix)\n
+ * --> sizeZ : size of vector z \n
+ * -->[in,out] z: pointer to z vector(s) from DS.\n
+ * Its signature must be "void plugin(unsigned int, const double*, unsigned int, double*, unsigned int, double*)"\n
+
+*
  */
 class LagrangianScleronomousR : public LagrangianR
 {
@@ -75,7 +92,6 @@ protected:
    * @param sizeZ : size of vector z
    * @param[in,out] z: pointer to z vector(s) from DS.
    */
-  //  FPtr3 computeJacQHPtr;
   SP::PluggedObject pluginjQH;
   /** basic constructor
       \param the sub-type of the relation
@@ -93,8 +109,12 @@ public:
   LagrangianScleronomousR(SP::RelationXML);
 
   /** constructor from a set of data
-   *  \param string : the name of the plugin to compute h
-   *  \param string : the name of the plugin to compute jacobian h according to q
+   *  \param string : the name of the plugin to compute h(q,z).\n
+   * The signature  of the plugged function must be:
+   *  "void pluginH(unsigned int, const double*, unsigned int, double*, unsigned int, double*)"
+   *  \param string : the name of the plugin to compute jacobian h according to q.\n
+   * The signature  of the plugged function must be:
+   *  "void pluginG0(unsigned int, const double*, unsigned int, double*, unsigned int, double*)"
    *  \exception RuntimeException
    */
   LagrangianScleronomousR(const std::string&, const std::string&);
