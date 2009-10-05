@@ -58,6 +58,9 @@ class LagrangianRheonomousR : public LagrangianR
 
 protected:
   SP::SiconosMatrix JacQH;
+  /** plugged vector used to compute hDot */
+  SP::SiconosVector hDot;
+
   /** LagrangianRheonomousR plug-in to compute h(q,t,z)
    * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
    * @param q : pointer to the first element of q
@@ -67,7 +70,8 @@ protected:
    * @param sizeZ : size of vector z
    * @param[in,out] z : a vector of user-defined parameters
    */
-  FPtr4 hPtr;
+  //  SP::PluggedObject pluginjQH
+  //  FPtr4 hPtr;
 
   /** LagrangianRheonomousR plug-in to compute hDot(q,t,z)
    * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
@@ -78,7 +82,8 @@ protected:
    * @param sizeZ : size of vector z
    * @param[in,out] z : a vector of user-defined parameters
    */
-  FPtr4 hDotPtr;
+  SP::PluggedObject pluginhDotPtr;
+  //  FPtr4 hDotPtr;
 
   /** LagrangianRheonomousR plug-in to compute G0(q,t,z), gradient of h accoring to q
    * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
@@ -89,12 +94,11 @@ protected:
    * @param sizeZ : size of vector z
    * @param[in,out] z : a vector of user-defined parameters
    */
-  FPtr4 computeJacQHPtr;
+  SP::PluggedObject pluginjQH;
+  //  FPtr4 computeJacQHPtr;
 
 
 
-  /** plugged vector used to compute hDot */
-  SP::SiconosVector hDot;
 
   /** initialize G matrices or components specific to derived classes.
    */
@@ -169,7 +173,7 @@ public:
    *  \param string : the name of the function to use in this plugin
    */
   void setComputeHDotFunction(const std::string& , const std::string&);
-  virtual void setComputeHFunction(const std::string& pluginPath, const std::string& functionName);
+  //  virtual void setComputeHFunction(const std::string& pluginPath, const std::string& functionName);
   /** to compute y = h(q,v,t) using plug-in mechanism
    * \param: double, current time
    */

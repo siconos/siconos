@@ -33,6 +33,7 @@
 #include "SiconosPointers.hpp"
 #include "PluginTypes.hpp"
 #include "RelationNamespace.hpp"
+#include "PluggedObject.hpp"
 #include <boost/weak_ptr.hpp>
 
 class SimpleVector;
@@ -76,31 +77,30 @@ class Relation
 protected:
   /** Plug-in to compute h(...)
   */
-  PluginHandle pluginH;
-  //std::string pluginNameOutput;
+  SP::PluggedObject pluginH;
 
   /** Plug-in to compute \f$ \nabla_x h(..)\f$
    */
-  PluginHandle pluginjXH;
-  //  std::string pluginNamejXOutput;
+  SP::PluggedObject pluginjXH;
   /** Plug-in to compute \f$ \nabla_{\lambda} h(..)\f$
    */
-  PluginHandle pluginjLH;
-  //  std::string pluginNamejLOutput;
+  SP::PluggedObject pluginjLH;
 
   /** Plug-in to compute g(...)
    */
-  PluginHandle pluginG;
-  //  std::string pluginNameInput;
+  SP::PluggedObject pluginG;
 
   /** Plug-in to compute \f$ \nabla_\lambda g(lambda,t,z)\f$
    */
-  PluginHandle pluginjLG;
-  //  std::string pluginNamejLInput;
-  PluginHandle pluginf;
-  //  std::string pluginNamefplugin;
-  PluginHandle plugine;
-  //  std::string pluginNameeplugin;
+  SP::PluggedObject pluginjLG;
+  /** Plug-in to compute f.$
+   */
+  SP::PluggedObject pluginf;
+  /** Plug-in to compute e.$
+   */
+  SP::PluggedObject plugine;
+  /** To initialize all the plugin functions with NULL.
+   */
   void zeroPlugin();
 
 protected:
@@ -343,20 +343,26 @@ public:
    */
   virtual void setComputeHFunction(const std::string& pluginPath, const std::string& functionName);
 
-  /** To set a plug-in function to compute jacobianH
+  /** To set a plug-in function to compute  \f$ \nabla_x h(..)\f
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
-   *  \param index for jacobian (0: jacobian according to x, 1
-   *  according to lambda)
+   */
+  virtual void setComputeJacXHFunction(const std::string& pluginPath, const std::string& functionName);
+  /** To set a plug-in function to compute  \f$ \nabla_{\lambda} h(..)\f
+   *  \param string : the complete path to the plugin
+   *  \param string : the function name to use in this plugin
    */
   virtual void setComputeJacLHFunction(const std::string& pluginPath, const std::string& functionName);
-  virtual void setComputeJacXHFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** To set a plug-in function to compute input function g
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    */
   virtual void setComputeGFunction(const std::string& pluginPath, const std::string& functionName);
+  /** To set a plug-in function to compute input function F
+   *  \param string : the complete path to the plugin
+   *  \param string : the function name to use in this plugin
+   */
   virtual void setComputeFFunction(const std::string& pluginPath, const std::string& functionName);
   virtual void setComputeEFunction(const std::string& pluginPath, const std::string& functionName);
 

@@ -41,13 +41,13 @@ Relation::Relation(SP::RelationXML relxml,
 }
 void Relation::zeroPlugin()
 {
-  pluginH = NULL;
-  pluginjXH = NULL;
-  pluginjLH = NULL;
-  pluginG = NULL;
-  pluginjLG = NULL;
-  pluginf = NULL;
-  plugine = NULL;
+  pluginH.reset(new PluggedObject());
+  pluginjXH.reset(new PluggedObject());
+  pluginjLH.reset(new PluggedObject());
+  pluginG.reset(new PluggedObject());
+  pluginjLG.reset(new PluggedObject());
+  pluginf.reset(new PluggedObject());
+  plugine.reset(new PluggedObject());
 }
 
 void Relation::initializeMemory()
@@ -108,12 +108,14 @@ void Relation::computeG(double t)
 
 void Relation::setComputeJacLHFunction(const std::string& pluginPath, const std::string& functionName)
 {
-  Plugin::setFunction(&pluginjLH, pluginPath, functionName);
+  pluginjLH->setComputeFunction(pluginPath, functionName);
+  //  Plugin::setFunction(&pluginjLH, pluginPath, functionName);
   //    SSL::buildPluginName(pluginNamejLOutput,pluginPath,functionName);
 }
 void Relation::setComputeJacXHFunction(const std::string& pluginPath, const std::string& functionName)
 {
-  Plugin::setFunction(&pluginjXH, pluginPath, functionName);
+  pluginjXH->setComputeFunction(pluginPath, functionName);
+  //    Plugin::setFunction(&pluginjXH, pluginPath, functionName);
 }
 
 /** To set a plug-in function to compute input function g
@@ -122,17 +124,19 @@ void Relation::setComputeJacXHFunction(const std::string& pluginPath, const std:
  */
 void Relation::setComputeGFunction(const std::string& pluginPath, const std::string& functionName)
 {
-  Plugin::setFunction(&pluginG, pluginPath, functionName, gName);
+  pluginG->setComputeFunction(pluginPath, functionName);
   //    SSL::buildPluginName(pluginNameInput,pluginPath,functionName);
 }
 void Relation::setComputeFFunction(const std::string& pluginPath, const std::string& functionName)
 {
-  Plugin::setFunction(&pluginf, pluginPath, functionName, gName);
+  //  Plugin::setFunction(&pluginf, pluginPath, functionName,gName);
+  pluginf->setComputeFunction(pluginPath, functionName);
   //    SSL::buildPluginName(pluginNamefplugin,pluginPath,functionName);
 }
 void Relation::setComputeEFunction(const std::string& pluginPath, const std::string& functionName)
 {
-  Plugin::setFunction(&plugine, pluginPath, functionName, gName);
+  plugine->setComputeFunction(pluginPath, functionName);
+  //Plugin::setFunction(&plugine, pluginPath, functionName,gName);
   //    SSL::buildPluginName(pluginNameeplugin,pluginPath,functionName);
 }
 
@@ -143,13 +147,15 @@ void Relation::setComputeEFunction(const std::string& pluginPath, const std::str
  */
 void Relation::setComputeJacLGFunction(const std::string& pluginPath, const std::string& functionName)
 {
-  Plugin::setFunction(&pluginjLG, pluginPath, functionName);
+  pluginjLG->setComputeFunction(pluginPath, functionName);
+  //  Plugin::setFunction(&pluginjLG, pluginPath, functionName);
   //    SSL::buildPluginName(pluginNamejLOutput,pluginPath,functionName);
 }
 
 void Relation::setComputeHFunction(const std::string& pluginPath, const std::string& functionName)
 {
-  Plugin::setFunction(&pluginH, pluginPath, functionName, hName);
+  pluginH->setComputeFunction(pluginPath, functionName);
+  //  Plugin::setFunction(&pluginH, pluginPath, functionName,hName);
   //    SSL::buildPluginName(pluginNameOutput,pluginPath,functionName);
 }
 void Relation::saveRelationToXML() const

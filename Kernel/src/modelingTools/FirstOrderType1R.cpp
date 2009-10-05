@@ -27,34 +27,44 @@ using namespace std;
 FirstOrderType1R::FirstOrderType1R(SP::RelationXML FORxml):
   FirstOrderR(FORxml, RELATION::Type1R)
 {
-  /*  // input g
-  if( FORxml->hasG() )
-    {
-      gName = FORxml->getGPlugin();
-      setComputeGFunction(SSL::getPluginName( gName ),SSL::getPluginFunctionName( gName));
-      // Gradients
-      if(!FORxml->hasJacobianG())
-  RuntimeException::selfThrow("FirstOrderType1R xml constructor failed. No input for gradient(s) of g function.");
+  // input g
+  if (FORxml->hasG())
+  {
+    gName = FORxml->getGPlugin();
+    setComputeGFunction(SSL::getPluginName(gName), SSL::getPluginFunctionName(gName));
+    // Gradients
+    if (!FORxml->hasJacobianG())
+      RuntimeException::selfThrow("FirstOrderType1R xml constructor failed. No input for gradient(s) of g function.");
 
-      if(FORxml->isJacobianGPlugin(0))
-  JacG[0].reset(new PluggedMatrix(FORxml->getJacobianGPlugin(0)));
-      else
-  JacG[0].reset(new PluggedMatrix(FORxml->getJacobianGMatrix(0)));
+    if (FORxml->isJacobianGPlugin(0))
+    {
+      //  JacG[0].reset(new PluggedMatrix(FORxml->getJacobianGPlugin(0)));
+      setComputeJacLGFunction(SSL::getPluginName(gName), SSL::getPluginFunctionName(gName));
     }
+    else
+    {
+      JacLG.reset(new SimpleMatrix(FORxml->getJacobianGMatrix(0)));
+    }
+  }
 
   // output h
-  if( FORxml->hasH() )
+  if (FORxml->hasH())
+  {
+    hName = FORxml->getHPlugin();
+    setComputeHFunction(SSL::getPluginName(hName), SSL::getPluginFunctionName(hName));
+    // Gradients
+    if (!FORxml->hasJacobianH())
+      RuntimeException::selfThrow("FirstOrderType1R xml constructor failed. No input for gradients of h function.");
+    if (FORxml->isJacobianHPlugin(0))
     {
-      hName = FORxml->getHPlugin();
-      setComputeHFunction(SSL::getPluginName( hName ),SSL::getPluginFunctionName( hName ));
-      // Gradients
-      if(!FORxml->hasJacobianH())
-  RuntimeException::selfThrow("FirstOrderType1R xml constructor failed. No input for gradients of h function.");
-      if(FORxml->isJacobianHPlugin(0))
-  JacH[0].reset(new PluggedMatrix(FORxml->getJacobianHPlugin(0)));
-      else
-  JacH[0].reset(new PluggedMatrix(FORxml->getJacobianHMatrix(0)));
-  }*/
+      setComputeJacXHFunction(SSL::getPluginName(gName), SSL::getPluginFunctionName(gName));
+      //  JacH[0].reset(new PluggedMatrix(FORxml->getJacobianHPlugin(0)));
+    }
+    else
+    {
+      JacXH.reset(new SimpleMatrix(FORxml->getJacobianHMatrix(0)));
+    }
+  }
 }
 
 FirstOrderType1R::FirstOrderType1R(const string& computeOut, const string& computeIn):
@@ -138,7 +148,7 @@ void FirstOrderType1R::computeOutput(double t, unsigned int)
   unsigned int sizeX = data[x]->size();
   unsigned int sizeZ = data[z]->size(); //
 
-  ((Type1Ptr)pluginH)(sizeX, &(*workX)(0), sizeY, &(*workY)(0), sizeZ, &(*workZ)(0));
+  ((Type1Ptr)(pluginH->fPtr))(sizeX, &(*workX)(0), sizeY, &(*workY)(0), sizeZ, &(*workZ)(0));
 
   // Rebuilt y/z from Tmp
   *y = *workY;
@@ -161,7 +171,7 @@ void FirstOrderType1R::computeInput(double t, unsigned int level)
   unsigned int sizeR = workX->size();
 
 
-  ((Type1Ptr)pluginG)(sizeY, &(*workY)(0), sizeR, &(*workX)(0), sizeZ, &(*workZ)(0));
+  ((Type1Ptr)(pluginG->fPtr))(sizeY, &(*workY)(0), sizeR, &(*workX)(0), sizeZ, &(*workZ)(0));
 
   *data[r] = *workX;
   *data[z] = *workZ;
@@ -181,7 +191,7 @@ void FirstOrderType1R::computeJacXH(double)
   unsigned int sizeX = data[x]->size();
   unsigned int sizeZ = data[z]->size();
 
-  ((Type1Ptr) pluginjXH)(sizeX, &(*workX)(0), sizeY, &(*(JacXH))(0, 0), sizeZ, &(*workZ)(0));
+  ((Type1Ptr)(pluginjXH->fPtr))(sizeX, &(*workX)(0), sizeY, &(*(JacXH))(0, 0), sizeZ, &(*workZ)(0));
 
   // Rebuilt z from Tmp
   *data[z] = *workZ;
@@ -201,7 +211,7 @@ void FirstOrderType1R::computeJacLG(double)
   unsigned int sizeX = data[x]->size();
   unsigned int sizeZ = data[z]->size();
 
-  ((Type1Ptr)pluginjLG)(sizeY, &(*workY)(0), sizeX, &(*(JacLG))(0, 0), sizeZ, &(*workZ)(0));
+  ((Type1Ptr)(pluginjLG->fPtr))(sizeY, &(*workY)(0), sizeX, &(*(JacLG))(0, 0), sizeZ, &(*workZ)(0));
 
   // Rebuilt z from Tmp
   *data[z] = *workZ;

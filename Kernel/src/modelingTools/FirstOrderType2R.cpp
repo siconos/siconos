@@ -30,38 +30,7 @@ FirstOrderType2R::FirstOrderType2R():
 FirstOrderType2R::FirstOrderType2R(SP::RelationXML FORxml):
   FirstOrderR(FORxml, RELATION::Type2R)
 {
-  /*
-  JacH.resize(1);
-  JacG.resize(1);
-  // input g
-  if( FORxml->hasG() )
-    {
-      gName = FORxml->getGPlugin();
-      setComputeGFunction(SSL::getPluginName( gName ),SSL::getPluginFunctionName( gName));
-      // Gradients
-      if(!FORxml->hasJacobianG())
-  RuntimeException::selfThrow("FirstOrderType2R xml constructor failed. No input for gradient(s) of g function.");
-
-      if(FORxml->isJacobianGPlugin(0))
-  JacG[0].reset(new PluggedMatrix(FORxml->getJacobianGPlugin(0)));
-      else
-  JacG[0].reset(new PluggedMatrix(FORxml->getJacobianGMatrix(0)));
-    }
-
-  // output h
-  if( FORxml->hasH() )
-    {
-      hName = FORxml->getHPlugin();
-      setComputeHFunction(SSL::getPluginName( hName ),SSL::getPluginFunctionName( hName ));
-      // Gradients
-      if(!FORxml->hasJacobianH())
-  RuntimeException::selfThrow("FirstOrderType2R xml constructor failed. No input for gradients of h function.");
-      if(FORxml->isJacobianHPlugin(0))
-  JacH[0].reset(new PluggedMatrix(FORxml->getJacobianHPlugin(0)));
-      else
-  JacH[0].reset(new PluggedMatrix(FORxml->getJacobianHMatrix(0)));
-    }
-  */
+  RuntimeException::selfThrow("FirstOrderR::FirstOrderType2R xml constructor not implemented.");
 }
 
 FirstOrderType2R::FirstOrderType2R(const string& computeOut, const string& computeIn):
@@ -182,34 +151,20 @@ void FirstOrderType2R::computeInput(double t, unsigned int level)
 
 void FirstOrderType2R::computeJacLH(double)
 {
+  RuntimeException::selfThrow("FirstOrderType2R::computeJacLH must be overload.");
 }
 void FirstOrderType2R::computeJacXH(double)
 {
-  //
-  /*assert(index==0&&"FirstOrderType2R::computeJacobianH(index): index is out of range");
-  assert(JacH[0]->fPtr&&"FirstOrderType2R::computeJacobianH() failed; not linked to a plug-in function.");
-
-  // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-  *workX = *data[x];
-  *workZ = *data[z];
-
-  unsigned int sizeY = getInteractionPtr()->getSizeOfY();
-  unsigned int sizeX = data[x]->size();
-  unsigned int sizeZ = data[z]->size();
-
-  (JacH[0]->fPtr)(sizeX, &(*workX)(0), sizeY, &(*(JacH[0]))(0,0), sizeZ, &(*workZ)(0));
-
-  // Rebuilt z from Tmp
-  *data[z] = *workZ;*/
+  RuntimeException::selfThrow("FirstOrderType2R::computeJacXH must be overload.");
 }
 
 void FirstOrderType2R::computeJacLG(double)
 {
-  ;
+  RuntimeException::selfThrow("FirstOrderType2R::computeJacLG must be overload.");
 }
 void FirstOrderType2R::computeJacXG(double)
 {
-  ;
+  RuntimeException::selfThrow("FirstOrderType2R::computeJacXG must be overload.");
 }
 void FirstOrderType2R::computeJacG(double t)
 {

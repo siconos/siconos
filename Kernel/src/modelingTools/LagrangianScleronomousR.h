@@ -65,7 +65,7 @@ protected:
     * @param sizeZ : size of vector z
     * @param[in,out] z: pointer to z vector(s) from DS.
     */
-  FPtr3 hPtr;
+  //  FPtr3 hPtr;
 
   /** LagrangianScleronomousR plug-in to compute G0(q,z), gradient of h according to q
    * @param sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved in the interaction
@@ -75,7 +75,8 @@ protected:
    * @param sizeZ : size of vector z
    * @param[in,out] z: pointer to z vector(s) from DS.
    */
-  FPtr3 computeJacQHPtr;
+  //  FPtr3 computeJacQHPtr;
+  SP::PluggedObject pluginjQH;
   /** basic constructor
       \param the sub-type of the relation
   */

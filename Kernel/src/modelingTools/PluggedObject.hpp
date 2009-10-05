@@ -67,6 +67,11 @@ public:
     SSL::setFunction(&fPtr, pluginPath, functionName);
     pluginName = pluginPath.substr(0, pluginPath.length() - 3) + ":" + functionName;
   }
+  void setComputeFunction(const std::string& plugin)
+  {
+    SSL::setFunction(&fPtr, SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+    pluginName = plugin;
+  }
 
   /** Connect pluginName to fPtr => pluginName must have been set before !!
    */
@@ -101,5 +106,5 @@ public:
   }
 
 };
-
+TYPEDEF_SPTR(PluggedObject);
 #endif

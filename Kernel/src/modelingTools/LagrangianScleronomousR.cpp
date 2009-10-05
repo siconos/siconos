@@ -30,26 +30,35 @@ using namespace RELATION;
 // xml constructor
 LagrangianScleronomousR::LagrangianScleronomousR(SP::RelationXML LRxml): LagrangianR(LRxml, ScleronomousR)
 {
-  /* // h plug-in
-  if(!LRxml->hasH())
+  // h plug-in
+  if (!LRxml->hasH())
     RuntimeException::selfThrow("LagrangianScleronomousR:: xml constructor failed, can not find a definition for h.");
 
   hName = LRxml->getHPlugin();
-  setComputeHFunction(SSL::getPluginName( hName ),SSL::getPluginFunctionName( hName ));
+  setComputeHFunction(SSL::getPluginName(hName), SSL::getPluginFunctionName(hName));
 
-  if(!LRxml->hasJacobianH())
+  if (!LRxml->hasJacobianH())
     RuntimeException::selfThrow("LagrangianScleronomousR:: xml constructor failed, can not find a definition for JacH0.");
-  JacH.resize(1);
-  LRxml->readJacobianXML<PluggedMatrix,SP_PluggedMatrix>(JacH[0], LRxml, 0);
-  */
+  //  LRxml->readJacobianXML<PluggedMatrix,SP_PluggedMatrix>(JacH[0], LRxml, 0);
+  if (LRxml->isJacobianHPlugin(0))
+    pluginjQH->setComputeFunction(LRxml->getJacobianHPlugin(0));
+  else
+    JacQH.reset(new SimpleMatrix(LRxml->getJacobianHMatrix(0)));
+
 }
 
 // constructor from a set of data
 LagrangianScleronomousR::LagrangianScleronomousR(const string& computeH, const std::string& strcomputeJacQH):
   LagrangianR(ScleronomousR)
 {
-  Plugin::setFunction(&hPtr, SSL::getPluginName(computeH), SSL::getPluginFunctionName(computeH));
-  Plugin::setFunction(&computeJacQHPtr, SSL::getPluginName(strcomputeJacQH), SSL::getPluginFunctionName(strcomputeJacQH));
+  setComputeHFunction(SSL::getPluginName(computeH), SSL::getPluginFunctionName(computeH));
+
+  pluginjQH.reset(new PluggedObject());
+  pluginjQH->setComputeFunction(strcomputeJacQH);
+
+  //  unsigned int sizeY = getInteractionPtr()->getSizeOfY();
+  //  unsigned int sizeQ = workX->size();
+  //  JacQH.reset(new SimpleMatrix(sizeY,sizeQ));
 
   // Warning: we cannot allocate memory for JacH[0] matrix since no interaction
   // is connected to the relation. This will be done during initialize.
@@ -59,7 +68,7 @@ LagrangianScleronomousR::LagrangianScleronomousR(const string& computeH, const s
 void LagrangianScleronomousR::computeH(double)
 {
   // arg= time. Unused in this function but required for interface.
-  if (hPtr)
+  if (pluginH->fPtr)
   {
     // get vector y of the current interaction
     SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
@@ -73,7 +82,7 @@ void LagrangianScleronomousR::computeH(double)
     unsigned int sizeY = y->size();
     unsigned int sizeZ = workZ->size();
 
-    hPtr(sizeQ, &(*workX)(0) , sizeY, &(*workY)(0), sizeZ, &(*workZ)(0));
+    ((FPtr3)(pluginH->fPtr))(sizeQ, &(*workX)(0) , sizeY, &(*workY)(0), sizeZ, &(*workZ)(0));
 
     // Copy data that might have been changed in the plug-in call.
     *data[z] = *workZ;
@@ -91,7 +100,7 @@ void LagrangianScleronomousR::computeJacQH(double)
   // Last arg: index for G - Useless, always equal to 0 for this kind of relation.
 
   //
-  if (computeJacQHPtr)
+  if (pluginjQH->fPtr)
   {
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
     *workX = *data[q0];
@@ -101,7 +110,7 @@ void LagrangianScleronomousR::computeJacQH(double)
     unsigned int sizeQ = workX->size();
     unsigned int sizeZ = workZ->size();
 
-    (computeJacQHPtr)(sizeQ, &(*workX)(0), sizeY, &(*JacQH)(0, 0), sizeZ, &(*workZ)(0));
+    ((FPtr3)(pluginjQH->fPtr))(sizeQ, &(*workX)(0), sizeY, &(*JacQH)(0, 0), sizeZ, &(*workZ)(0));
 
     // Copy data that might have been changed in the plug-in call.
     *data[z] = *workZ;
