@@ -31,27 +31,28 @@ dim(v)=nn
 #include "LA.h"
 #include "MLCP_Solvers.h"
 #include <math.h>
+#include "mlcp_direct_path_enum.h"
+#include "mlcp_direct.h"
 #include "mlcp_path_enum.h"
-#include "mlcp_enum.h"
 #include "mlcp_tool.h"
 
 static int sN;
 static int sM;
 
-static int * siWorkEnum = 0;
-static int * siWorkPath = 0;
-static double * sdWorkEnum = 0;
-static double * sdWorkPath = 0;
+static int * siWorkPathEnum = 0;
+static int * siWorkDirect = 0;
+static double * sdWorkPathEnum = 0;
+static double * sdWorkDirect = 0;
 
 
 
-int mlcp_path_enum_getNbIWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
+int mlcp_direct_path_enum_getNbIWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
 {
-  return mlcp_enum_getNbIWork(problem, options);
+  return mlcp_direct_getNbIWork(problem, options) + mlcp_path_enum_getNbIWork(problem, options);
 }
-int mlcp_path_enum_getNbDWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
+int mlcp_direct_path_enum_getNbDWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
 {
-  return mlcp_enum_getNbDWork(problem, options);
+  return mlcp_direct_getNbDWork(problem, options) + mlcp_path_enum_getNbDWork(problem, options);
 }
 
 
@@ -65,26 +66,30 @@ int mlcp_path_enum_getNbDWork(MixedLinearComplementarity_Problem* problem, Solve
  *
  */
 
-void mlcp_path_enum_init(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
+void mlcp_direct_path_enum_init(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
 {
   sN = problem->n;
   sM = problem->m;
-  int iOffset = 0;/* mlcp_path_getNbIWork(problem,options);*/
-  int dOffset = 0;/*mlcp_path_getNbDWork(problem,options);*/
-  siWorkEnum = options->iWork + iOffset;
-  siWorkPath = options->iWork;
-  sdWorkEnum = options->dWork + dOffset;
-  sdWorkPath = options->dWork;
-  /*  mlcp_path_init(problem, options);*/
+  int iOffset = mlcp_direct_getNbIWork(problem, options);
+  int dOffset = mlcp_direct_getNbDWork(problem, options);
+  siWorkPathEnum = options->iWork + iOffset;
+  siWorkDirect = options->iWork;
+  sdWorkPathEnum = options->dWork + dOffset;
+  sdWorkDirect = options->dWork;
+  mlcp_direct_init(problem, options);
+  options->dWork = sdWorkPathEnum;
+  options->iWork = siWorkPathEnum;
+  mlcp_path_enum_init(problem, options);
 
 }
-void mlcp_path_enum_reset()
+void mlcp_direct_path_enum_reset()
 {
-  /*mlcp_path_reset();*/
-  siWorkEnum = 0;
-  siWorkPath = 0;
-  sdWorkEnum = 0;
-  sdWorkPath = 0;
+  mlcp_direct_reset();
+  mlcp_path_enum_reset();
+  siWorkPathEnum = 0;
+  siWorkDirect = 0;
+  sdWorkPathEnum = 0;
+  sdWorkDirect = 0;
 }
 
 /*
@@ -101,28 +106,27 @@ void mlcp_path_enum_reset()
  * double *w : size n+m
  * info : output. info == 0 if success
  */
-void mlcp_path_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
+void mlcp_direct_path_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {
-  if (!siWorkEnum)
+  if (!siWorkPathEnum)
   {
     *info = 1;
-    printf("MLCP_PATH_ENUM error, call a non initialised method!!!!!!!!!!!!!!!!!!!!!\n");
+    printf("MLCP_DIRECT_PATH_ENUM error, call a non initialised method!!!!!!!!!!!!!!!!!!!!!\n");
     return;
   }
   /*First, try direct solver*/
-  //  options->dWork = sdWorkDirect;
-  //  options->iWork = siWorkDirect;
-  if (options->iparam[8] == 761727)
-  {
-    displayMLCP(problem);
-  }
-  mlcp_path(problem, z, w, info, options);
+  options->dWork = sdWorkDirect;
+  options->iWork = siWorkDirect;
+  mlcp_direct(problem, z, w, info, options);
   if (*info)
   {
-    printf("MLCP_PATH_ENUM: path failed, call enum\n");
-    options->dWork = sdWorkEnum;
-    options->iWork = siWorkEnum;
+    options->dWork = sdWorkPathEnum;
+    options->iWork = siWorkPathEnum;
     /*solver direct failed, so run the enum solver.*/
-    mlcp_enum(problem, z, w, info, options);
+    mlcp_path_enum(problem, z, w, info, options);
+    if (!(*info))
+    {
+      mlcp_direct_addConfigFromWSolution(problem, w + sN);
+    }
   }
 }

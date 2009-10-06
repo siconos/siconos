@@ -187,6 +187,7 @@ extern "C" {
 #include "mlcp_enum.h"
 #include "mlcp_simplex.h"
 #include "mlcp_path_enum.h"
+#include "mlcp_direct_path_enum.h"
 #include "mlcp_direct_enum.h"
 #include "mlcp_direct_simplex.h"
 #include "mlcp_direct_path.h"

@@ -106,10 +106,13 @@ void mlcp_path(MixedLinearComplementarity_Problem* problem, double *z, double *w
     }
 
 
-    mlcp_compute_error(problem, z, w, tol, &err);
     /*1e-7 because it is the default tol of path.*/
+    mlcp_compute_error(problem, z, w, tol, &err);
     if (err > 1e-7)
-      *info = 1;
+    {
+      printf("PATH : MLCP Solved, error %10.7f.\n", err);
+      //*info = 1;
+    }
     for (i = 0; i < m; i++)
     {
       if (z[n + i] > w[n + i])

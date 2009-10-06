@@ -151,7 +151,8 @@ int internalPrecompute(MixedLinearComplementarity_Problem* problem)
     printf("mlcp_direct, precomputed M :\n");
     displayMat(spFirstCC->M, sNpM, sNpM, 0);
   }
-  spFirstCC->Usable = 1;
+  if (!(spFirstCC->Usable))
+    return 0;
   DGETRF(sNpM, sNpM, spFirstCC->M, sNpM, spFirstCC->IPV, INFO);
   if (INFO)
   {
@@ -204,6 +205,7 @@ void mlcp_direct_addConfig(MixedLinearComplementarity_Problem* problem, int * zw
     if (spFirstCC == 0) /*first add*/
     {
       spFirstCC = (struct dataComplementarityConf *) malloc(sizeof(struct dataComplementarityConf));
+      spFirstCC->Usable = 1;
       spCurCC = spFirstCC;
       spFirstCC->prev = 0;
       spFirstCC->next = 0;
@@ -211,6 +213,7 @@ void mlcp_direct_addConfig(MixedLinearComplementarity_Problem* problem, int * zw
     else
     {
       spFirstCC->prev = (struct dataComplementarityConf *) malloc(sizeof(struct dataComplementarityConf));
+      spFirstCC->prev->Usable = 1;
       spFirstCC->prev->next = spFirstCC;
       spFirstCC = spFirstCC->prev;
       spFirstCC->prev = 0;
@@ -228,6 +231,7 @@ void mlcp_direct_addConfig(MixedLinearComplementarity_Problem* problem, int * zw
       aux->prev = 0;
       aux->next = spFirstCC;
       spFirstCC = aux;
+      spFirstCC->Usable = 1;
     }
     internalAddConfig(problem, zw, 0);
   }
@@ -333,7 +337,7 @@ void mlcp_direct(MixedLinearComplementarity_Problem* problem, double *z, double 
 #else
         mlcp_fillSolution(z, z + sN, w, w + sN, sN, sM, sNbLines, spCurCC->zw, sQ);
 #endif
-        /*Current becomes forst for the next step.*/
+        /*Current becomes first for the next step.*/
         if (spCurCC != spFirstCC)
         {
           spCurCC->prev->next = spCurCC->next;
@@ -351,7 +355,9 @@ void mlcp_direct(MixedLinearComplementarity_Problem* problem, double *z, double 
     while (spCurCC && !find);
 
     if (find)
+    {
       *info = 0;
+    }
     else
     {
       options->iparam[7]++;

@@ -34,6 +34,8 @@ void mlcp_driver_init(MixedLinearComplementarity_Problem* problem, Solver_Option
 
   if (strcmp(name , "DIRECT_ENUM") == 0)
     mlcp_direct_enum_init(problem, options);
+  else if (strcmp(name , "DIRECT_PATH_ENUM") == 0)
+    mlcp_direct_path_enum_init(problem, options);
   else if (strcmp(name , "PATH_ENUM") == 0)
     mlcp_path_enum_init(problem, options);
   else if (strcmp(name , "DIRECT_SIMPLEX") == 0)
@@ -54,6 +56,8 @@ void mlcp_driver_reset(MixedLinearComplementarity_Problem* problem, Solver_Optio
     mlcp_direct_enum_reset();
   else if (strcmp(name , "PATH_ENUM") == 0)
     mlcp_path_enum_reset();
+  else if (strcmp(name , "DIRECT_PATH_ENUM") == 0)
+    mlcp_direct_path_enum_reset();
   else if (strcmp(name , "DIRECT_SIMPLEX") == 0)
     mlcp_direct_simplex_reset();
   else if (strcmp(name , "DIRECT_PATH") == 0)
@@ -70,6 +74,8 @@ int mlcp_driver_get_iwork(MixedLinearComplementarity_Problem* problem, Solver_Op
     return  mlcp_direct_enum_getNbIWork(problem, options);
   else if (strcmp(name , "PATH_ENUM") == 0)
     return  mlcp_path_enum_getNbIWork(problem, options);
+  else if (strcmp(name , "DIRECT_PATH_ENUM") == 0)
+    return  mlcp_direct_path_enum_getNbIWork(problem, options);
   else if (strcmp(name , "ENUM") == 0)
     return  mlcp_enum_getNbIWork(problem, options);
   else if (strcmp(name , "DIRECT_SIMPLEX") == 0)
@@ -89,6 +95,8 @@ int mlcp_driver_get_dwork(MixedLinearComplementarity_Problem* problem, Solver_Op
     return  mlcp_direct_enum_getNbDWork(problem, options);
   else if (strcmp(name , "PATH_ENUM") == 0)
     return  mlcp_path_enum_getNbDWork(problem, options);
+  else if (strcmp(name , "DIRECT_PATH_ENUM") == 0)
+    return  mlcp_direct_path_enum_getNbDWork(problem, options);
   else if (strcmp(name , "ENUM") == 0)
     return  mlcp_enum_getNbDWork(problem, options);
   else if (strcmp(name , "DIRECT_SIMPLEX") == 0)
@@ -185,6 +193,8 @@ int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *
   /****** DIRECT PATH algorithm ******/
   else if (strcmp(name , "DIRECT_PATH") == 0)
     mlcp_direct_path(problem, z , w , &info , options);
+  else if (strcmp(name , "DIRECT_PATH_ENUM") == 0)
+    mlcp_direct_path_enum(problem, z , w , &info , options);
 
   /****** FB algorithm ******/
   else if (strcmp(name , "FB") == 0)
