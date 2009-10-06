@@ -140,7 +140,7 @@ void LagrangianLinearTIDS::initRhs(double time)
   else
     workMatrix[jacobianXBloc11] = workMatrix[zeroMatrix] ;
 
-  jacobianXRhs.reset(new BlockMatrix(workMatrix[zeroMatrix], workMatrix[idMatrix], workMatrix[jacobianXBloc10], workMatrix[jacobianXBloc11]));
+  _jacXRhs.reset(new BlockMatrix(workMatrix[zeroMatrix], workMatrix[idMatrix], workMatrix[jacobianXBloc10], workMatrix[jacobianXBloc11]));
 }
 
 void LagrangianLinearTIDS::initialize(const string& simulationType, double time, unsigned int sizeOfMemory)

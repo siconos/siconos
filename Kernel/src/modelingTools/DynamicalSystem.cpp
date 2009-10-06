@@ -98,9 +98,9 @@ bool DynamicalSystem::checkDynamicalSystem()
 }
 void DynamicalSystem::zeroPlungin()
 {
-  computeJacobianXGPtr = NULL;
-  computeJacobianXDotGPtr = NULL;
-  computeGPtr = NULL;
+  _pluginJacXG.reset(new PluggedObject());
+  _pluginJacXDotG.reset(new PluggedObject());
+  _pluginG.reset(new PluggedObject());
 }
 // Setters
 
@@ -210,20 +210,20 @@ void DynamicalSystem::setJacobianXRhs(const SiconosMatrix& newValue)
   if (newValue.size(0) != n || newValue.size(1) != n)
     RuntimeException::selfThrow("DynamicalSystem::setJacobianXRhs - inconsistent sizes between jacobianXRhs input and n - Maybe you forget to set n?");
 
-  if (jacobianXRhs)
-    *jacobianXRhs = newValue;
+  if (_jacXRhs)
+    *_jacXRhs = newValue;
 
   else
-    jacobianXRhs.reset(new SimpleMatrix(newValue));
+    _jacXRhs.reset(new SimpleMatrix(newValue));
 }
 
 void DynamicalSystem::setJacobianXRhsPtr(SP::SiconosMatrix newPtr)
 {
   // check dimensions ...
   if (newPtr->size(0) != n || newPtr->size(1) != n)
-    RuntimeException::selfThrow("DynamicalSystem::setJacobianXRhsPtr - inconsistent sizes between jacobianXRhs input and n - Maybe you forget to set n?");
+    RuntimeException::selfThrow("DynamicalSystem::setJacobianXRhsPtr - inconsistent sizes between _jacXRhs input and n - Maybe you forget to set n?");
 
-  jacobianXRhs = newPtr;
+  _jacXRhs = newPtr;
 }
 
 void DynamicalSystem::setZ(const SiconosVector& newValue)
@@ -294,25 +294,21 @@ void DynamicalSystem::initMemory(unsigned int steps)
 
 void DynamicalSystem::setComputeGFunction(const string& pluginPath, const string& functionName)
 {
-  Plugin::setFunction(&computeGPtr, pluginPath, functionName);
-  SSL::buildPluginName(pluginNameComputeGPtr, pluginPath, functionName);
-
+  _pluginG->setComputeFunction(pluginPath, functionName);
 }
 
 void DynamicalSystem::setComputeGFunction(FPtr6 fct)
 {
-  computeGPtr = fct;
+  _pluginG->setComputeFunction((void *)fct);
 }
 
 void DynamicalSystem::setComputeJacobianXGFunction(const string& pluginPath, const string& functionName)
 {
-  Plugin::setFunction(&computeJacobianXGPtr, pluginPath, functionName);
-  SSL::buildPluginName(pluginNameComputeJacobianXGPtr, pluginPath, functionName);
+  _pluginJacXG->setComputeFunction(pluginPath, functionName);
 }
 void DynamicalSystem::setComputeJacobianDotXGFunction(const string& pluginPath, const string& functionName)
 {
-  Plugin::setFunction(&computeJacobianXDotGPtr, pluginPath, functionName);
-  SSL::buildPluginName(pluginNameComputeJacobianXDotGPtr, pluginPath, functionName);
+  _pluginJacXDotG->setComputeFunction(pluginPath, functionName);
 }
 // void DynamicalSystem::setComputeJacobianZGFunction( const string& pluginPath, const string& functionName){
 //   Plugin::setFunction(&pluginJacobianZGPtr, pluginPath,functionName);
@@ -320,19 +316,19 @@ void DynamicalSystem::setComputeJacobianDotXGFunction(const string& pluginPath, 
 
 void DynamicalSystem::computeG(double time)
 {
-  if (computeGPtr)
-    (computeGPtr)(time, n, &(*x[0])(0), &(*x[1])(0), &(*g)(0), z->size(), &(*z)(0));
+  if (_pluginG->fPtr)
+    ((FPtr6)(_pluginG->fPtr))(time, n, &(*x[0])(0), &(*x[1])(0), &(*g)(0), z->size(), &(*z)(0));
 }
 
 void DynamicalSystem::computeJacobianXG(double time)
 {
-  if (computeJacobianXGPtr)
-    computeJacobianXGPtr(time, n, &(*x[0])(0), &(*x[1])(0), &(*jacobianXG)(0, 0), z->size(), &(*z)(0));
+  if (_pluginJacXG->fPtr)
+    ((FPtr6) _pluginJacXG->fPtr)(time, n, &(*x[0])(0), &(*x[1])(0), &(*_jacXG)(0, 0), z->size(), &(*z)(0));
 }
 void DynamicalSystem::computeJacobianDotXG(double time)
 {
-  if (computeJacobianXDotGPtr)
-    computeJacobianXDotGPtr(time, n, &(*x[0])(0), &(*x[1])(0), &(*jacobianXDotG)(0, 0), z->size(), &(*z)(0));
+  if (_pluginJacXDotG->fPtr)
+    ((FPtr6)(_pluginJacXDotG->fPtr))(time, n, &(*x[0])(0), &(*x[1])(0), &(*_jacXDotG)(0, 0), z->size(), &(*z)(0));
 }
 // void DynamicalSystem::computeJacobianZG(double time){
 //   if (pluginJacobianXGPtr)

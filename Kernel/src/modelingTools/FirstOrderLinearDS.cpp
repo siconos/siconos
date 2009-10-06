@@ -150,12 +150,12 @@ bool FirstOrderLinearDS::checkDynamicalSystem() // useless ...?
 void FirstOrderLinearDS::initRhs(double time)
 {
   computeRhs(time); // If necessary, this will also compute A and b.
-  if (! jacobianXRhs)  // if not allocated with a set or anything else
+  if (! _jacXRhs)  // if not allocated with a set or anything else
   {
     if (A && ! M)  // if M is not defined, then A = jacobianXRhs, no memory allocation for that one.
-      jacobianXRhs = A;
+      _jacXRhs = A;
     else if (A && M)
-      jacobianXRhs.reset(new SimpleMatrix(n, n));
+      _jacXRhs.reset(new SimpleMatrix(n, n));
     // else no allocation, jacobian is equal to 0.
   }
   computeJacobianXRhs(time);
@@ -260,12 +260,12 @@ void FirstOrderLinearDS::computeJacobianXRhs(const double time, const bool)
 
   if (M && A)
   {
-    *jacobianXRhs = *A;
+    *_jacXRhs = *A;
     // copy M into invM for LU-factorisation, at the first call of this function.
     if (! invM)
       invM.reset(new SimpleMatrix(*M));
     // solve MjacobianXRhs = A
-    invM->PLUForwardBackwardInPlace(*jacobianXRhs);
+    invM->PLUForwardBackwardInPlace(*_jacXRhs);
   }
   // else jacobianXRhs = A, pointers equality.
 

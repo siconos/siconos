@@ -162,10 +162,10 @@ protected:
   VectorOfVectors x;
 
   /** jacobian according to x of the right-hand side (\f$ \dot x = f(x,t) + r \f$) */
-  SP::SiconosMatrix jacobianXRhs;
+  SP::SiconosMatrix _jacXRhs;
 
-  SP::SiconosMatrix jacobianXG;
-  SP::SiconosMatrix jacobianXDotG;
+  SP::SiconosMatrix _jacXG;
+  SP::SiconosMatrix _jacXDotG;
   //  SP::SiconosMatrix jacobianZG;
 
   /** Arbitrary algebraic values vector, z, discret state of the system. */
@@ -185,8 +185,7 @@ protected:
    *  @param   the size of the vector z
    *  @param   a vector of parameters, z
    */
-  FPtr6 computeGPtr;
-  std::string pluginNameComputeGPtr;
+  SP::PluggedObject _pluginG;
 
   /** Plug-in to compute jacobianG (computeJacobianGPtr[i] for jacobianG[i]).
    *  @param   current time
@@ -197,10 +196,8 @@ protected:
    *  @param   the size of the vector z
    *  @param   a vector of parameters, z
    */
-  FPtr6 computeJacobianXGPtr;
-  std::string pluginNameComputeJacobianXGPtr;
-  FPtr6 computeJacobianXDotGPtr;
-  std::string pluginNameComputeJacobianXDotGPtr;
+  SP::PluggedObject _pluginJacXG;
+  SP::PluggedObject _pluginJacXDotG;
 
 
   /** the  previous state vectors stored in memory*/
@@ -462,7 +459,7 @@ public:
    */
   inline const SimpleMatrix getJacobianXRhs() const
   {
-    return *jacobianXRhs;
+    return *_jacXRhs;
   }
 
   /** get gradient according to \f$ x \f$ of the right-hand side (pointer)
@@ -470,7 +467,7 @@ public:
    */
   inline SP::SiconosMatrix getJacobianXRhsPtr() const
   {
-    return jacobianXRhs;
+    return _jacXRhs;
   }
 
   /** set the value of JacobianXRhs to newValue
@@ -554,11 +551,11 @@ public:
       */
   inline SP::SiconosMatrix getJacobianXGPtr() const
   {
-    return jacobianXG;
+    return _jacXG;
   }
   inline SP::SiconosMatrix getJacobianXDotGPtr() const
   {
-    return jacobianXDotG;
+    return _jacXDotG;
   }
   //  inline SP::SiconosMatrix getJacobianZGPtr() const { return jacobianZG; }
 
@@ -574,11 +571,11 @@ public:
       */
   inline void setJacobianXGPtr(SP::SiconosMatrix newPtr)
   {
-    jacobianXG = newPtr;
+    _jacXG = newPtr;
   }
   inline void setJacobianXDotGPtr(SP::SiconosMatrix newPtr)
   {
-    jacobianXDotG = newPtr;
+    _jacXDotG = newPtr;
   }
   //  inline void setJacobianZGPtr( SP::SiconosMatrix newPtr) {jacobianZG = newPtr;}
 

@@ -382,13 +382,13 @@ void LagrangianDS::initRhs(double time)
   workMatrix[idMatrix].reset(new SimpleMatrix(ndof, ndof, IDENTITY));
 
   if (flag1 && flag2)
-    jacobianXRhs.reset(new BlockMatrix(workMatrix[zeroMatrix], workMatrix[idMatrix], workMatrix[jacobianXBloc10], workMatrix[jacobianXBloc11]));
+    _jacXRhs.reset(new BlockMatrix(workMatrix[zeroMatrix], workMatrix[idMatrix], workMatrix[jacobianXBloc10], workMatrix[jacobianXBloc11]));
   else if (flag1) // flag2 = false
-    jacobianXRhs.reset(new BlockMatrix(workMatrix[zeroMatrix], workMatrix[idMatrix], workMatrix[jacobianXBloc10], workMatrix[zeroMatrix]));
+    _jacXRhs.reset(new BlockMatrix(workMatrix[zeroMatrix], workMatrix[idMatrix], workMatrix[jacobianXBloc10], workMatrix[zeroMatrix]));
   else if (flag2) // flag1 = false
-    jacobianXRhs.reset(new BlockMatrix(workMatrix[zeroMatrix], workMatrix[idMatrix], workMatrix[zeroMatrix], workMatrix[jacobianXBloc11]));
+    _jacXRhs.reset(new BlockMatrix(workMatrix[zeroMatrix], workMatrix[idMatrix], workMatrix[zeroMatrix], workMatrix[jacobianXBloc11]));
   else
-    jacobianXRhs.reset(new BlockMatrix(workMatrix[zeroMatrix], workMatrix[idMatrix], workMatrix[zeroMatrix], workMatrix[zeroMatrix]));
+    _jacXRhs.reset(new BlockMatrix(workMatrix[zeroMatrix], workMatrix[idMatrix], workMatrix[zeroMatrix], workMatrix[zeroMatrix]));
 }
 
 void LagrangianDS::initialize(const string& simulationType, double time, unsigned int sizeOfMemory)
@@ -743,7 +743,7 @@ void LagrangianDS::computeJacobianXRhs(double time, bool isDSup)
 
   if (jacobianQFL)
   {
-    SP::SiconosMatrix bloc10 = jacobianXRhs->getBlockPtr(1, 0);
+    SP::SiconosMatrix bloc10 = _jacXRhs->getBlockPtr(1, 0);
     computeJacobianQFL(time);
     *bloc10 = *jacobianQFL;
     workMatrix[invMass]->PLUForwardBackwardInPlace(*bloc10);
@@ -751,7 +751,7 @@ void LagrangianDS::computeJacobianXRhs(double time, bool isDSup)
 
   if (jacobianQDotFL)
   {
-    SP::SiconosMatrix bloc11 = jacobianXRhs->getBlockPtr(1, 1);
+    SP::SiconosMatrix bloc11 = _jacXRhs->getBlockPtr(1, 1);
     computeJacobianQDotFL(time);
     *bloc11 = *jacobianQDotFL;
     workMatrix[invMass]->PLUForwardBackwardInPlace(*bloc11);

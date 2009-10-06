@@ -197,6 +197,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0, const s
   // Allocation and link with the plug-in
 
   Plugin::setFunction(&computeFPtr, SSL::getPluginName(fPlugin), SSL::getPluginFunctionName(fPlugin));
+  //  _pluginJacXF->setComputeFunction
   Plugin::setFunction(&computeJacobianXFPtr, SSL::getPluginName(jacobianXFPlugin), SSL::getPluginFunctionName(jacobianXFPlugin));
   pluginNameComputeFPtr = fPlugin;
   pluginNameComputeJacobianXFPtr = jacobianXFPlugin;
@@ -269,12 +270,12 @@ void FirstOrderNonLinearDS::initRhs(double time)
   // compute initial values for f and jacobianXF, initialize right-hand side.
   computeRhs(time); // this will compute, if required, f and M.
 
-  if (! jacobianXRhs)  // if not allocated with a set or anything else
+  if (! _jacXRhs)  // if not allocated with a set or anything else
   {
     if (jacobianXF && ! M)  // if M is not defined, then jacobianXF = jacobianXRhs, no memory allocation for that one.
-      jacobianXRhs = jacobianXF;
+      _jacXRhs = jacobianXF;
     else if (jacobianXF && M)
-      jacobianXRhs.reset(new SimpleMatrix(n, n));
+      _jacXRhs.reset(new SimpleMatrix(n, n));
 
     // else no allocation, jacobian is equal to 0.
   }
@@ -444,12 +445,12 @@ void FirstOrderNonLinearDS::computeJacobianXRhs(double time, bool)
   // solve M*jacobianXRhS = jacobianXF
   if (M && jacobianXF)
   {
-    *jacobianXRhs = *jacobianXF;
+    *_jacXRhs = *jacobianXF;
     // copy M into invM for LU-factorisation, at the first call of this function.
     if (! invM)
       invM.reset(new SimpleMatrix(*M));
 
-    invM->PLUForwardBackwardInPlace(*jacobianXRhs);
+    invM->PLUForwardBackwardInPlace(*_jacXRhs);
   }
   // else jacobianXRhs = jacobianXF, pointers equality set in initRhs
 
