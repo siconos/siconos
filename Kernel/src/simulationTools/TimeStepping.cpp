@@ -92,10 +92,10 @@ void TimeStepping::updateIndexSet(unsigned int i)
   // this set, depending on y values.
 
   assert(model);
-  assert(model->getNonSmoothDynamicalSystemPtr());
-  assert(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
+  assert(getModelPtr()->getNonSmoothDynamicalSystemPtr());
+  assert(getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
 
-  SP::Topology topo = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  SP::Topology topo = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
   assert(i < topo->indexSetsSize() &&
          "TimeStepping::updateIndexSet(i), indexSets[i] does not exist.");
@@ -239,7 +239,7 @@ void TimeStepping::initOSNS()
 
   ConstDSIterator itDS;
 
-  SP::Topology topo =  model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  SP::Topology topo =  getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
   SP::UnitaryRelationsGraph indexSet0 = topo->getIndexSetPtr(0);
 
   UnitaryRelationsGraph::VIterator ui, uiend;
@@ -273,10 +273,10 @@ void TimeStepping::initOSNS()
     // equal to the minimum value of the relative degree - 1 except
     // for degree 0 case where we keep 0.
 
-    assert(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->isUpToDate());
-    assert(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMinRelativeDegree() >= 0);
+    assert(getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->isUpToDate());
+    assert(getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMinRelativeDegree() >= 0);
 
-    levelMin = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMinRelativeDegree();
+    levelMin = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMinRelativeDegree();
 
     if (levelMin != 0)
       levelMin--;
@@ -295,7 +295,7 @@ void TimeStepping::initOSNS()
 
 void TimeStepping::initLevelMax()
 {
-  levelMax = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMaxRelativeDegree();
+  levelMax = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMaxRelativeDegree();
   // Interactions initialization (here, since level depends on the
   // type of simulation) level corresponds to the number of Y and
   // Lambda derivatives computed.
@@ -347,7 +347,7 @@ void TimeStepping::computeInitialResidu()
 {
   //  cout<<"BEGIN computeInitialResidu"<<endl;
   double tkp1 = getTkp1();
-  SP::InteractionsSet allInteractions = model->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
+  SP::InteractionsSet allInteractions = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
   for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
   {
     (*it)->getRelationPtr()->computeG(tkp1);
@@ -406,7 +406,7 @@ void   TimeStepping::prepareNewtonIteration()
     ++it;
   }
 
-  SP::InteractionsSet allInteractions = model->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
+  SP::InteractionsSet allInteractions = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
   for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
   {
     (*it)->getRelationPtr()->computeJacH(getTkp1());
@@ -504,7 +504,7 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
 
 
   //check residuy.
-  SP::InteractionsSet allInteractions = model->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
+  SP::InteractionsSet allInteractions = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
   for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
   {
     (*it)->getRelationPtr()->computeResiduY(getTkp1());

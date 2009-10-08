@@ -213,7 +213,7 @@ const bool Simulation::hasOneStepNSProblem(const string& name) const
 void Simulation::updateIndexSets()
 {
   // Warning, I0 is not updated and must remain unchanged !
-  unsigned int nindexsets = model->getNonSmoothDynamicalSystemPtr()
+  unsigned int nindexsets = getModelPtr()->getNonSmoothDynamicalSystemPtr()
                             ->getTopologyPtr()->indexSetsSize();
 
   if (nindexsets > 1)
@@ -236,7 +236,7 @@ void Simulation::updateInteractions()
 {
 
   SP::InteractionsSet allInteractions =
-    model->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
+    getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
 
   //if(!allInteractions->isEmpty())  // ie if some Interactions have been declared
   {
@@ -253,9 +253,9 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 {
   // === Connection with the model ===
   assert(m || !"Simulation::initialize(model) - model = NULL.");
-  model = m;
+  model = boost::weak_ptr<Model>(m);
 
-  SP::Topology topo = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  SP::Topology topo = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
   // === Events manager initialization ===
   eventsManager->initialize(shared_from_this());
@@ -273,7 +273,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   // The number of indexSets is given by the maximum value of relative
   // degrees of the unitary relations.
   SP::InteractionsSet allInteractions =
-    model->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
+    getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
   //  if( !allInteractions->isEmpty() ) // ie if some Interactions
   //  have been declared
   {
@@ -301,7 +301,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 
   // Set Model current time (warning: current time of the model
   // corresponds to the time of the next event to be treated).
-  model->setCurrentTime(getNextTime());
+  getModelPtr()->setCurrentTime(getNextTime());
 
   // End of initialize:
 
@@ -354,7 +354,7 @@ int Simulation::computeOneStepNSProblem(const std::string& name)
   if (!(*allNSProblems)[name])
     RuntimeException::selfThrow("Simulation - computeOneStepNSProblem, OneStepNSProblem == NULL, Id: " + name);
 
-  return (*allNSProblems)[name]->compute(model->getCurrentTime());
+  return (*allNSProblems)[name]->compute(getModelPtr()->getCurrentTime());
 }
 
 void Simulation::update()
@@ -393,8 +393,8 @@ void Simulation::updateInput(int level)
   // OneStepNSProblem.h
 
   //  double time = getNextTime();
-  double time = model->getCurrentTime();
-  SP::Topology topology = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  double time = getModelPtr()->getCurrentTime();
+  SP::Topology topology = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
   InteractionsIterator it;
 
   // Set dynamical systems non-smooth part to zero.
@@ -412,8 +412,8 @@ void Simulation::updateOutput(int level0, int level1)
   if (level1 == -1)
     level1 = levelMax;
 
-  double time = model->getCurrentTime();
-  SP::Topology topology = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  double time = getModelPtr()->getCurrentTime();
+  SP::Topology topology = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
   InteractionsIterator it;
 
   for (it = topology->interactionsBegin(); it != topology->interactionsEnd(); it++)
@@ -430,7 +430,7 @@ void Simulation::run(const std::string&, double, unsigned int)
 
   unsigned int count = 0; // events counter.
   cout << " ==== Start of " << simulationType << " simulation - This may take a while ... ====" << endl;
-  while (getNextTime() <= model->getFinalT())
+  while (getNextTime() <= getModelPtr()->getFinalT())
   {
     advanceToEvent();
     eventsManager->processEvents();

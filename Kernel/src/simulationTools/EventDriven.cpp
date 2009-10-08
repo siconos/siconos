@@ -76,10 +76,10 @@ EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T,
 void EventDriven::updateIndexSet(unsigned int i)
 {
   assert(model);
-  assert(model->getNonSmoothDynamicalSystemPtr());
-  assert(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
+  assert(getModelPtr()->getNonSmoothDynamicalSystemPtr());
+  assert(getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
 
-  SP::Topology topo = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  SP::Topology topo = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
   assert(i < topo->indexSetsSize() &&
          "EventDriven::updateIndexSet(i), indexSets[i] does not exist.");
@@ -211,13 +211,13 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
 {
 
   assert(model);
-  assert(model->getNonSmoothDynamicalSystemPtr());
-  assert(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
+  assert(getModelPtr()->getNonSmoothDynamicalSystemPtr());
+  assert(getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
 
   // for all Unitary Relations in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i]
 
-  SP::Topology topo = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  SP::Topology topo = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
   SP::UnitaryRelationsGraph indexSet2 = topo->getIndexSetPtr(2);
 
@@ -244,13 +244,13 @@ void EventDriven::initOSNS()
 {
 
   assert(model);
-  assert(model->getNonSmoothDynamicalSystemPtr());
-  assert(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
+  assert(getModelPtr()->getNonSmoothDynamicalSystemPtr());
+  assert(getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
 
   // for all Unitary Relations in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i]
   UnitaryRelationsGraph::VIterator ui, uiend;
-  SP::Topology topo = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  SP::Topology topo = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
   SP::UnitaryRelationsGraph indexSet0 = topo->getIndexSetPtr(0);
 
@@ -282,7 +282,7 @@ void EventDriven::initOSNS()
 
     // At the time, we consider that for all systems, levelMin is
     // equal to the minimum value of the relative degree
-    levelMin = model->getNonSmoothDynamicalSystemPtr()
+    levelMin = getModelPtr()->getNonSmoothDynamicalSystemPtr()
                ->getTopologyPtr()->getMinRelativeDegree();
     if (levelMin == 0)
       levelMin++;
@@ -301,7 +301,7 @@ void EventDriven::initOSNS()
 
 void EventDriven::initLevelMax()
 {
-  levelMax = model->getNonSmoothDynamicalSystemPtr()->
+  levelMax = getModelPtr()->getNonSmoothDynamicalSystemPtr()->
              getTopologyPtr()->getMaxRelativeDegree();
   // Interactions initialization (here, since level depends on the
   // type of simulation) level corresponds to the number of Y and
@@ -326,7 +326,7 @@ void EventDriven::computeF(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   lsodar->fillXWork(sizeOfX, x);
 
   double t = *time;
-  model->setCurrentTime(t);
+  getModelPtr()->setCurrentTime(t);
 
   // solve a LCP at "acceleration" level if required
   if (!allNSProblems->empty())
@@ -381,7 +381,7 @@ void EventDriven::computeJacobianF(SP::OneStepIntegrator osi,
   // Compute the jacobian of the vector field according to x for the
   // current ds
   double t = *time;
-  model->setCurrentTime(t);
+  getModelPtr()->setCurrentTime(t);
   lsodar->computeJacobianRhs(t);
 
   // Save jacobianX values from dynamical system into current jacob
@@ -407,10 +407,10 @@ void EventDriven::computeG(SP::OneStepIntegrator osi,
 {
 
   assert(model);
-  assert(model->getNonSmoothDynamicalSystemPtr());
-  assert(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
+  assert(getModelPtr()->getNonSmoothDynamicalSystemPtr());
+  assert(getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
   UnitaryRelationsGraph::VIterator ui, uiend;
-  SP::Topology topo = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  SP::Topology topo = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
   SP::UnitaryRelationsGraph indexSet0 = topo->getIndexSetPtr(0);
   SP::UnitaryRelationsGraph indexSet2 = topo->getIndexSetPtr(2);
 
@@ -426,7 +426,7 @@ void EventDriven::computeG(SP::OneStepIntegrator osi,
   // computeG.
 
   double t = *time;
-  model->setCurrentTime(t);
+  getModelPtr()->setCurrentTime(t);
 
   // IN: - lambda[2] obtained during LCP call in computeF()
   //     - y[0]: need to be updated.
@@ -546,7 +546,7 @@ void EventDriven::advanceToEvent()
 
 
   // Set model time to tout
-  model->setCurrentTime(tout);
+  getModelPtr()->setCurrentTime(tout);
   // Update all the index sets ...
   updateOutput(1, 1);
   updateIndexSets();

@@ -37,6 +37,7 @@
 #include "Model.h"
 #include "NonSmoothDynamicalSystem.h"
 #include "Topology.h"
+#include <boost/weak_ptr.hpp>
 
 class DynamicalSystem;
 class EventsManager;
@@ -110,7 +111,7 @@ protected:
   SP::SimulationXML simulationxml;
 
   /** A link to the Model which contains the Simulation */
-  SP::Model model;
+  boost::weak_ptr<Model> model;
 
   /** int used to set the minimal derivative order used in the OSNS
       variables */
@@ -354,7 +355,7 @@ public:
    */
   SP::UnitaryRelationsGraph getIndexSetPtr(unsigned int i)
   {
-    return (model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getIndexSetPtr(i)) ;
+    return (model.lock()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getIndexSetPtr(i)) ;
   };
 
 
@@ -438,7 +439,7 @@ public:
    */
   inline SP::Model getModelPtr() const
   {
-    return model;
+    return model.lock();
   }
 
   /** set the Model which contains the Simulation
@@ -446,7 +447,7 @@ public:
    */
   inline void setModelPtr(SP::Model m)
   {
-    model = m;
+    model = boost::weak_ptr<Model>(m);
   }
 
   /** get tolerance
