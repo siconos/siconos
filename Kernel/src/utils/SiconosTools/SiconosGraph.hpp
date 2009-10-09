@@ -281,6 +281,20 @@ public:
     return boost::vertices(g);
   };
 
+  inline VIterator begin()
+  {
+    VIterator vi, viend;
+    boost::tie(vi, viend) = vertices();
+    return vi;
+  }
+
+  inline VIterator end()
+  {
+    VIterator vi, viend;
+    boost::tie(vi, viend) = vertices();
+    return viend;
+  }
+
   inline std::pair<AVIterator, AVIterator> adjacent_vertices(const VDescriptor& vd)
   {
     return boost::adjacent_vertices(vd, g);

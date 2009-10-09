@@ -75,7 +75,7 @@ EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T,
 
 void EventDriven::updateIndexSet(unsigned int i)
 {
-  assert(model);
+  assert(!model.expired());
   assert(getModelPtr()->getNonSmoothDynamicalSystemPtr());
   assert(getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
 
@@ -210,7 +210,7 @@ void EventDriven::updateIndexSet(unsigned int i)
 void EventDriven::updateIndexSetsWithDoubleCondition()
 {
 
-  assert(model);
+  assert(!model.expired());
   assert(getModelPtr()->getNonSmoothDynamicalSystemPtr());
   assert(getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
 
@@ -243,7 +243,7 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
 void EventDriven::initOSNS()
 {
 
-  assert(model);
+  assert(!model.expired());
   assert(getModelPtr()->getNonSmoothDynamicalSystemPtr());
   assert(getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
 
@@ -406,7 +406,7 @@ void EventDriven::computeG(SP::OneStepIntegrator osi,
                            doublereal * gOut)
 {
 
-  assert(model);
+  assert(!model.expired());
   assert(getModelPtr()->getNonSmoothDynamicalSystemPtr());
   assert(getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
   UnitaryRelationsGraph::VIterator ui, uiend;

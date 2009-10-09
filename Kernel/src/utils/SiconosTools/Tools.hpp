@@ -126,15 +126,29 @@ static int TRM()
   malldelta = malloc_info2.uordblks - malloc_info1.uordblks;
   return(malldelta);
 }
+#endif /* __APPLE__ */
 
 /* a modifiable pure virtual definition to solve problems with boost
    python and pure virtual operators */
-#endif /* TOOLS_H */
-
-
 #ifndef PURE_DEF
 #define PURE_DEF =0
 #endif
+
+#include "SiconosPointers.hpp"
+/** Graph -> Set conversion */
+template <class S, class G>
+boost::shared_ptr<S> setOfGraph(boost::shared_ptr<G> g)
+{
+  boost::shared_ptr<S> r;
+  r.reset(new S());
+  for (typename G::VIterator vi = g->begin(); vi != g->end(); ++vi)
+  {
+    r->insert(g->bundle(*vi));
+  }
+  return(r);
+}
+
+// --- CONSTRUCTORS ---
 
 #endif /* TOOLS_H */
 

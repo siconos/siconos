@@ -44,6 +44,7 @@ private:
   CPPUNIT_TEST(t6);
 
   CPPUNIT_TEST(t7);
+  CPPUNIT_TEST(t8);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -55,6 +56,7 @@ private:
   void t5();
   void t6();
   void t7();
+  void t8();
 
 public:
   void setUp();

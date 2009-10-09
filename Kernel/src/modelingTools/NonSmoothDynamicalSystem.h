@@ -34,7 +34,8 @@ class DynamicalSystem;
 class Topology;
 
 
-/** the Non Smooth Dynamical System composed with dynamical systems that interact alltogether.
+/** the Non Smooth Dynamical System composed with dynamical systems
+ *  that interact alltogether.
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
@@ -47,12 +48,6 @@ private:
 
   /** TRUE if the NonSmoothDynamicalSystem is a boundary value problem*/
   bool BVP;
-
-  /** contains all the Dynamic Systems of the simulation */
-  SP::DynamicalSystemsSet allDS;
-
-  /** to build the interactions set */
-  SP::InteractionsSet allInteractionsLocal;
 
   /** the topology of the system */
   SP::Topology topology;
@@ -68,8 +63,7 @@ private:
    */
   NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem&);
 
-  /**
-   * False is one of the interaction is non-linear.
+  /** False is one of the interaction is non-linear.
    */
   bool mIsLinear;
 
@@ -134,72 +128,22 @@ public:
 
   // === DynamicalSystems management ===
 
-  /** get the number of Dynamical Systems present in the NSDS (ie in allDS set)
-   *  \return an unsigned int
+  /** get the number of Dynamical Systems present in the NSDS
+      \return an unsigned int
    */
   inline const unsigned int getNumberOfDS() const
   {
-    return allDS->size();
+    return getTopologyPtr()->getDSGPtr(0)->size();
   };
 
-  /** get all the DynamicalSystem of the NonSmoothDynamicalSystem problem (saved in a set)
-   *  \return a DynamicalSystemsSet *
+  /** get all the DynamicalSystem of the NonSmoothDynamicalSystem
+   *  problem
+   * \return a DynamicalSystemsSet *
    */
-  inline const SP::DynamicalSystemsSet getDynamicalSystems() const
+  inline const SP::DynamicalSystemsGraph getDynamicalSystems() const
   {
-    return allDS;
+    return getTopologyPtr()->getDSGPtr(0);
   }
-
-  /** get all the DynamicalSystem of the NonSmoothDynamicalSystem problem (saved in a set)
-   *  \return a DynamicalSystemsSet *
-   */
-  inline SP::DynamicalSystemsSet getDynamicalSystems()
-  {
-    return allDS;
-  }
-
-  /** iterator equal to the first element of setOfDS
-   *  \return a DSIterator
-   */
-  inline DSIterator dynamicalSystemsBegin()
-  {
-    return allDS->begin();
-  };
-
-  /** iterator equal to allDS->end()
-   *  \return a DSIterator
-   */
-  inline DSIterator dynamicalSystemsEnd()
-  {
-    return allDS->end();
-  }
-
-  /** const iterator equal to the first element of allDS
-   *  \return a ConstDSIterator
-   */
-  inline ConstDSIterator dynamicalSystemsBegin() const
-  {
-    return allDS->begin();
-  };
-
-  /** const iterator equal to allDS->end()
-   *  \return a ConstDSIterator
-   */
-  inline ConstDSIterator dynamicalSystemsEnd() const
-  {
-    return allDS->end();
-  }
-
-  /** get Dynamical system number I
-   *  \param the identifier of the DynamicalSystem to get
-   *  \return a pointer on DynamicalSystem
-   */
-  SP::DynamicalSystem getDynamicalSystemPtrNumber(int) const ;
-
-  /** to set allDS
-   *  \param a DynamicalSystemsSet
-   */
-  void setDynamicalSystems(const DynamicalSystemsSet&) ;
 
   /** check if DynamicalSystem number N exists
    *  \param the identifier of the DynamicalSystem to get
@@ -230,55 +174,6 @@ public:
   {
     return topology->getInteractionsPtr();
   }
-
-  /** iterator equal to the first element of the set of Interactions
-   *  \return an InteractionsIterator
-   */
-  inline InteractionsIterator interactionsBegin()
-  {
-    return topology->getInteractionsPtr()->begin();
-  };
-
-  /** iterator equal to allInteractions->end()
-   *  \return an InteractionsIterator
-   */
-  inline InteractionsIterator interactionsEnd()
-  {
-    return topology->getInteractionsPtr()->end();
-  }
-
-  /** const iterator equal to the first element of allInteractions
-   *  \return a ConstInteractionsIterator
-   */
-  inline ConstInteractionsIterator interactionsBegin() const
-  {
-    return topology->getInteractionsPtr()->begin();
-  };
-
-  /** const iterator equal to allInteractions->end()
-   *  \return a ConstInteractionsIterator
-   */
-  inline ConstInteractionsIterator interactionsEnd() const
-  {
-    return topology->getInteractionsPtr()->end();
-  }
-
-  /** get Interaction at indix position in the set
-   *  \param an int
-   *  \return a pointer on Interaction
-   */
-  SP::Interaction getInteractionPtr(const int&) const ;
-
-  /** get Interaction number I
-   *  \param the id-number of the Interaction to get
-   *  \return a pointer on Interaction
-   */
-  SP::Interaction getInteractionPtrNumber(const int&) const ;
-
-  /** to set allInteractions
-   *  \param an InteractionsSet
-   */
-  void setInteractions(const InteractionsSet&) ;
 
   /** add an interaction to the system
    * \param a shared pointer to the interaction
@@ -315,17 +210,12 @@ public:
   };
 
 
-  /** check if Interaction number N exists
-   *  \param the identifier of the Interaction to get
-   *  \return bool
-   */
-  const bool hasInteractionNumber(const int&) const;
+  /** get Dynamical system number I
+      -   *  \param the identifier of the DynamicalSystem to get
+      -   *  \return a pointer on DynamicalSystem
+  */
+  SP::DynamicalSystem getDynamicalSystemPtrNumber(int) const ;
 
-  /** check if Interaction inter is in the set
-   *  \param a pointer to Interaction
-   *  \return a bool
-   */
-  const bool hasInteraction(SP::Interaction) const;
 
   /** get the topology of the system
    *  \return a pointer on Topology
@@ -338,13 +228,15 @@ public:
   /** get the xml linked object
    *  \return a pointer on NonSmoothDynamicalSystemXML
    */
-  inline SP::NonSmoothDynamicalSystemXML getNonSmoothDynamicalSystemXMLPtr() const
+  inline SP::NonSmoothDynamicalSystemXML getNonSmoothDynamicalSystemXMLPtr()
+  const
   {
     return nsdsxml;
   }
 
   /** set the xml linked object
-   *  \param NonSmoothDynamicalSystemXML* : a pointer on NonSmoothDynamicalSystemXML* to link
+   *  \param NonSmoothDynamicalSystemXML* : a pointer on
+   *  NonSmoothDynamicalSystemXML* to link
    */
   inline void setNonSmoothDynamicalSystemXMLPtr(SP::NonSmoothDynamicalSystemXML newNsdsxml)
   {
@@ -362,25 +254,15 @@ public:
    */
   void display() const;
 
-  /** add a DynamicalSystem into the NonSmoothDynamicalSystem (pointer link, no copy!)
-   *  \param SP::DynamicalSystem : the DynamicalSystem to add
-   */
-  void addDynamicalSystemPtr(SP::DynamicalSystem);
-
-  /** add an Interaction into the NonSmoothDynamicalSystem (pointer link, no copy!)
-   *  \param Interaction : the Interaction to add
-   */
-  void addInteractionPtr(SP::Interaction);
-
-  /** calculate an indicator that gives convergence information for the DSs
+  /** calculate an indicator that gives convergence information for
+   *  the DSs
    *  \return a double
    */
   double nsdsConvergenceIndicator() ;
 
-  /**
-   * return false is one of the interations is not linear.
-   *        else return true.
-   *   \return a bool
+  /** return false is one of the interations is not linear.  else
+   *  return true.
+   *  \return a bool
    */
   bool isLinear();
 

@@ -322,6 +322,30 @@ void SiconosGraphTest::t7()
     tot += k * ag.bundle(*ui);
   }
 
-  CPPUNIT_ASSERT(tot = 300541);
+  CPPUNIT_ASSERT(tot == 300541);
 
+}
+
+void SiconosGraphTest::t8()
+{
+  typedef SiconosGraph<std::string, int> G;
+  G g;
+
+  G::VDescriptor vd1, vd2, vd3, vd4, vd5, vd6;
+
+  vd1 = g.add_vertex("hello");
+  vd2 = g.add_vertex("goodbye");
+  vd3 = g.add_vertex("bye");
+  vd4 = g.add_vertex("one");
+  vd5 = g.add_vertex("two");
+  vd6 = g.add_vertex("three");
+
+  std::ostringstream r;
+
+  for (G::VIterator vi = g.begin(); vi != g.end(); ++vi)
+  {
+    r << g.bundle(*vi);
+  }
+
+  CPPUNIT_ASSERT(r.str() == "hellogoodbyebyeonetwothree");
 }

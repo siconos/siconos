@@ -29,6 +29,7 @@
 #define OUTSIDE_FRAMEWORK_BLAS
 #endif
 
+#undef HAVE_ATLAS
 #if defined(HAVE_ATLAS) && defined(OUTSIDE_FRAMEWORK_BLAS)
 #include <boost/numeric/bindings/atlas/clapack.hpp>
 namespace lapack = boost::numeric::bindings::atlas;
@@ -2448,7 +2449,7 @@ void SimpleMatrix::PLUInverseInPlace()
   if (!isPLUFactorized)
     PLUFactorizationInPlace();
 
-#if defined(HAVE_ATLAS) && defined(OUTSIDE_FRAMEWORK_BLAS)
+#if defined(XHAVE_ATLAS) && defined(OUTSIDE_FRAMEWORK_BLAS)
   int info = lapack::getri(*mat.Dense, *ipiv);   // solve from factorization
 
   if (info != 0)
@@ -2474,6 +2475,15 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
       ipiv->resize(dimRow);
     info = lapack::gesv(*mat.Dense, *ipiv, *(B.getDensePtr()));
     isPLUFactorized = true;
+
+    /*
+    ublas::vector<double> S(std::max(size(0),size(1)));
+    ublas::matrix<double, ublas::column_major> U(size(0),size(1));
+    ublas::matrix<double, ublas::column_major> VT(size(0),size(1));
+
+    int ierr = lapack::gesdd(*mat.Dense, S, U, VT);
+    printf("info = %d, ierr = %d, emax = %f, emin = %f , cond = %f\n",info,ierr,S(0),S(2),S(0)/S(2));
+    */
     // B now contains solution:
   }
   else // call getrs: only solve using previous lu-factorization
@@ -2499,6 +2509,16 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
       ipiv->resize(dimRow);
     info = lapack::gesv(*mat.Dense, *ipiv, tmpB);
     isPLUFactorized = true;
+
+    /*
+    ublas::matrix<double> COPY(*mat.Dense);
+    ublas::vector<double> S(std::max(size(0),size(1)));
+    ublas::matrix<double, ublas::column_major> U(size(0),size(1));
+    ublas::matrix<double, ublas::column_major> VT(size(0),size(1));
+
+    int ierr = lapack::gesdd(COPY, S, U, VT);
+    printf("info = %d, ierr = %d, emax = %f, emin = %f , cond = %f\n",info,ierr,S(0),S(2),S(0)/S(2));
+    */
     // B now contains solution:
   }
   else // call getrs: only solve using previous lu-factorization

@@ -42,6 +42,7 @@ using namespace std;
  */
 static CheckSolverFPtr checkSolverOutput = NULL;
 
+
 TimeStepping::TimeStepping(SP::TimeDiscretisation td): Simulation(td, "TimeStepping")
 {
   mComputeResiduY = false;
@@ -91,7 +92,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
   // To update IndexSet number i: add or remove UnitaryRelations from
   // this set, depending on y values.
 
-  assert(model);
+  assert(!model.expired());
   assert(getModelPtr()->getNonSmoothDynamicalSystemPtr());
   assert(getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
 
@@ -354,10 +355,10 @@ void TimeStepping::computeInitialResidu()
     (*it)->getRelationPtr()->computeH(tkp1);
   }
 
-  SP::DynamicalSystemsSet dsSet = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
-  for (DSIterator itds = dsSet->begin(); itds != dsSet->end(); itds++)
+  SP::DynamicalSystemsGraph dsGraph = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
   {
-    (*itds)->updatePlugins(tkp1);
+    dsGraph->bundle(*vi)->updatePlugins(tkp1);
   }
 
 
@@ -415,10 +416,10 @@ void   TimeStepping::prepareNewtonIteration()
 
 
   /*reset to zero the ds buffers*/
-  SP::DynamicalSystemsSet dsSet = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
-  for (DSIterator itds = dsSet->begin(); itds != dsSet->end(); itds++)
+  SP::DynamicalSystemsGraph dsGraph = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
   {
-    (*itds)->preparStep();
+    dsGraph->bundle(*vi)->preparStep();
     //     (*itds)->getXpPtr()->zero();
     //     (*itds)->getRPtr()->zero();
   }

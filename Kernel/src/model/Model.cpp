@@ -30,6 +30,7 @@
 
 using namespace std;
 
+
 // --- CONSTRUCTORS ---
 
 // --- Default (private) constructor ---
@@ -63,9 +64,9 @@ Model::Model(const std::string& xmlFile):
   if (modelxml->hasSimulation())
   {
     if (modelxml->getSimulationXML()->getSimulationXMLType() == TIMESTEPPING_TAG)
-      strat.reset(new TimeStepping(modelxml->getSimulationXML(), t0, T, nsds->getDynamicalSystems(), nsds->getInteractionsPtr()));
+      strat.reset(new TimeStepping(modelxml->getSimulationXML(), t0, T, setOfGraph<DynamicalSystemsSet>(nsds->getDynamicalSystems()), nsds->getInteractionsPtr()));
     else if (modelxml->getSimulationXML()->getSimulationXMLType() == EVENTDRIVEN_TAG)
-      strat.reset(new EventDriven(modelxml->getSimulationXML(), t0, T, nsds->getDynamicalSystems(), nsds->getInteractionsPtr()));
+      strat.reset(new EventDriven(modelxml->getSimulationXML(), t0, T, setOfGraph<DynamicalSystemsSet>(nsds->getDynamicalSystems()), nsds->getInteractionsPtr()));
     else RuntimeException::selfThrow("Model: xml constructor, wrong type of simulation" + (modelxml->getSimulationXML()->getSimulationXMLType()));
   }
 }
