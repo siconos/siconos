@@ -109,12 +109,27 @@ ENDIF(MAIN_SOURCE)
 IF(_EXE)
 
   #
-  # include and lib directories, before target definition
+  # include user cmake commands in ${_EXE}.cmake
+  #  
+  IF(EXISTS ${_EXE}.cmake)
+    MESSAGE(STATUS "Including ${_EXE}.cmake")
+    INCLUDE(${_EXE}.cmake)
+  ENDIF(EXISTS ${_EXE}.cmake)
+  
+  IF(_MAIN_DIR)
+    IF(EXISTS ${_MAIN_DIR}/${_EXE}.cmake)
+      MESSAGE(STATUS "Including ${_MAIN_DIR}/${_EXE}.cmake")
+      INCLUDE(${_MAIN_DIR}/${_EXE}.cmake)
+    ENDIF(EXISTS ${_MAIN_DIR}/${_EXE}.cmake)
+  ENDIF(_MAIN_DIR)
+  
   #
+  # include and lib directories, before target definition
+  #  
   IF(_MAIN_DIR)
     INCLUDE_DIRECTORIES(${_MAIN_DIR})
   ENDIF(_MAIN_DIR)
-
+  
   IF(WithQGLViewer)
     FIND_PACKAGE(QGLViewer REQUIRED)
     INCLUDE_DIRECTORIES(${QGLVIEWER_INCLUDE_DIR})
@@ -197,7 +212,6 @@ IF(_EXE)
   ELSE(SOURCES_DIRECTORIES)
 
     ADD_EXECUTABLE(${_EXE} ${MAIN_SOURCE})  
-
   ENDIF(SOURCES_DIRECTORIES)
 
     

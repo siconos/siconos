@@ -77,6 +77,8 @@ Options are:
  -l<lib> : link with library <lib>.
  
  -noexec : compile only.
+
+ -O<n> : set compiler optimization.
  
  -opt <opt> : add option <opt> to compiler. 
  
