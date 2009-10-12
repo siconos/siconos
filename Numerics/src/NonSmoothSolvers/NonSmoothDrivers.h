@@ -62,6 +62,7 @@ Other functions and useful tools related to NonSmoothSolvers are listed in NSSTo
 #include "Relay_Solvers.h"
 #include "LCP_Solvers.h"
 #include "MLCP_Solvers.h"
+#include "LinearSystem_Problem.h"
 #include "FrictionContact2D_Solvers.h"
 #include "FrictionContact3D_Solvers.h"
 #include "PrimalFrictionContact3D_Solvers.h"
@@ -109,6 +110,18 @@ extern "C" {
       \author Vincent Acary
   */
   int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *w, Solver_Options* options, Numerics_Options* global_options);
+  /** General interface to solver for linear system
+      \param[in] problem the LinearSystem_Problem structure which handles the problem (M,q)
+      \param[in,out] z a n-vector of doubles solution of the problem.
+      \param[out] w a n-vector of doubles which contains zeros.
+      \param[in,out] options structure used to define the solver(s) and their parameters
+      \param[in] general options for Numerics (verbose mode ...)
+      \return info termination value
+      - 0 : successful\n
+      - >0 : otherwise see each solver for more information about the log info
+      \author Vincent Acary
+  */
+  int LinearSystem_driver(LinearSystem_Problem* problem, double *z , double *w, Solver_Options* options);
 
   /** General interface to solver for pfc 3D problems - Out of date (will be removed soon) */
   int pfc_3D_driver(int, double*, double*, method*, double*, double*, double*);

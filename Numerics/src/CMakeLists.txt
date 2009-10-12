@@ -24,6 +24,7 @@ SET(SiconosNumerics_DIRS
   NonSmoothSolvers
   NonSmoothSolvers/LCP
   NonSmoothSolvers/MLCP
+  NonSmoothSolvers/LinearSystem
   NonSmoothSolvers/InterfaceToPathFerris
   NonSmoothSolvers/pfc3D
   NonSmoothSolvers/QP
