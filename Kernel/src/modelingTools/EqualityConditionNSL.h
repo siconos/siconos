@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2007.
+/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -20,48 +20,44 @@
  * Size > 1 is usefull when D matrix in the relation is not null and not diagonal, to write the y = CX +Dlambda with only one
  * interaction and one unitary relation.
  */
-/*! \file MixedComplementarityConditionNSL.h
+/*! \file EqualityConditionNSL.h
 
 */
-#ifndef MIXEDCOMPLEMENTARITYCONDITIONNSLAW_H
-#define MIXEDCOMPLEMENTARITYCONDITIONNSLAW_H
+#ifndef EQUALITYCONDITIONNSLAW_H
+#define EQUALITYCONDITIONNSLAW_H
 
 #include "NonSmoothLaw.h"
 
-#include "SiconosPointers.hpp"
-
 class NonSmoothLaw;
 
-/** Complementarity NonSmoothLaw
+/** Equality NonSmoothLaw
  *
  * \author SICONOS Development Team - copyright INRIA
- *  \version 2.1.1.
+ *  \version 3.0.0.
  *  \date (Creation) Apr 27, 2004
  *
  *
  **/
-class MixedComplementarityConditionNSL : public NonSmoothLaw
+class EqualityConditionNSL : public NonSmoothLaw
 {
 private:
   /** default constructor
    */
-  MixedComplementarityConditionNSL() {};
-  unsigned int EqualitySize;
+  EqualityConditionNSL() {};
 
 public:
   /** basic constructor
   *  \param: size of the non smooth law
-  *  \param: size of the equality relation
   */
-  MixedComplementarityConditionNSL(unsigned int, unsigned int);
+  EqualityConditionNSL(unsigned int);
 
   /** constructor with XML object of the parent class NonSmoothLaw
   *  \param NonSmoothLawXML* : the XML object corresponding
   */
-  MixedComplementarityConditionNSL(SP::NonSmoothLawXML);
+  EqualityConditionNSL(SP::NonSmoothLawXML);
 
   /** Destructor */
-  ~MixedComplementarityConditionNSL();
+  ~EqualityConditionNSL();
 
 
   /** print the data to the screen
@@ -73,23 +69,17 @@ public:
   */
   inline void saveNonSmoothLawToXML() {};
 
-  /** get the number of equality present in the MLCP
-   *  \return an unsigned int
-   */
-  inline unsigned int getEqualitySize()
-  {
-    return EqualitySize;
-  };
-
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
   *  \param NonSmoothLaw* : the law which must be converted
   * \return a pointer on the law if it is of the right type, NULL otherwise
   */
-  static SP::MixedComplementarityConditionNSL convert(SP::NonSmoothLaw nsl);
+  static EqualityConditionNSL* convert(NonSmoothLaw* nsl);
 
   /** Visitors hook
    */
   ACCEPT_STD_VISITORS();
 };
 
-#endif // MIXEDCOMPLEMENTARITYCONDITIONNSLAW_H
+TYPEDEF_SPTR(EqualityConditionNSL);
+
+#endif // EQUALITYCONDITIONNSLAW_H

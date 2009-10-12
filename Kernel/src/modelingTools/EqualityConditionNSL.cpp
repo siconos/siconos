@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.1.1, Copyright INRIA 2005-2007.
+/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -16,25 +16,24 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "MixedComplementarityConditionNSL.h"
+#include "EqualityConditionNSL.h"
 using namespace std;
 
-MixedComplementarityConditionNSL::MixedComplementarityConditionNSL(unsigned int newSize, unsigned int equalitySize): NonSmoothLaw(newSize + equalitySize)
-{
-  EqualitySize = equalitySize;
-}
+EqualityConditionNSL::EqualityConditionNSL(unsigned int newSize): NonSmoothLaw(newSize)
+{}
 
-MixedComplementarityConditionNSL::MixedComplementarityConditionNSL(SP::NonSmoothLawXML nslawxml):
+EqualityConditionNSL::EqualityConditionNSL(SP::NonSmoothLawXML nslawxml):
   NonSmoothLaw(nslawxml)
 {}
 
-MixedComplementarityConditionNSL::~MixedComplementarityConditionNSL()
+EqualityConditionNSL::~EqualityConditionNSL()
 {}
 
 
-SP::MixedComplementarityConditionNSL MixedComplementarityConditionNSL::convert(SP::NonSmoothLaw nsl)
+EqualityConditionNSL* EqualityConditionNSL::convert(NonSmoothLaw* nsl)
 {
-  return boost::dynamic_pointer_cast<MixedComplementarityConditionNSL>(nsl);
+  EqualityConditionNSL* ccnsl = dynamic_cast<EqualityConditionNSL*>(nsl);
+  return ccnsl;
 }
 
 

@@ -81,7 +81,11 @@ public:
   /** check if the NS law is verified
   *  \return a boolean value whioch determines if the NS Law is verified
   */
-  virtual bool isVerified() const = 0;
+  virtual bool isVerified() const
+  {
+    RuntimeException::selfThrow("NonSmoothLaw:: isVerified, not yet implemented!");
+    return false;
+  }
 
   /** get the NonSmoothLawXML of the NonSmoothLaw
   *  \return the pointer on the NonSmoothLawXML of the NonSmoothLaw

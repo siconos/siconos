@@ -57,6 +57,7 @@ class Sphere;
 class SphereSphereR;
 class SpherePlanR;
 class NonSmoothLaw;
+class EqualityConditionNSL;
 class MixedComplementarityConditionNSL;
 class ComplementarityConditionNSL;
 class NewtonImpactNSL;
@@ -117,6 +118,7 @@ public:
   VISIT(SpherePlanR);
   VISIT(NonSmoothLaw);
   VISIT(MixedComplementarityConditionNSL);
+  VISIT(EqualityConditionNSL);
   VISIT(ComplementarityConditionNSL);
   VISIT(NewtonImpactNSL);
   VISIT(NewtonImpactFrictionNSL);

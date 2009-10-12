@@ -67,7 +67,7 @@ protected:
   SP::SiconosVector _z;
 
   /** contains the matrix M of a LinearOSNS system */
-  SP::OSNSMatrix M;
+  SP::OSNSMatrix _M;
 
   /** contains the vector q of a LinearOSNS system */
   SP::SiconosVector q;
@@ -188,7 +188,7 @@ public:
    */
   inline SP::OSNSMatrix getMPtr() const
   {
-    return M;
+    return _M;
   }
 
   /** set the value of M to newValue
@@ -201,7 +201,7 @@ public:
    */
   inline void setMPtr(SP::OSNSMatrix newPtr)
   {
-    M = newPtr;
+    _M = newPtr;
   }
 
   // --- Q ---

@@ -110,7 +110,7 @@ void LinearOSNS::initVectorsMemory()
 
 void LinearOSNS::initialize(SP::Simulation sim)
 {
-  // - Checks memory allocation for main variables (M,q,_w,z)
+  // - Checks memory allocation for main variables (_M,q,_w,z)
   // - Formalizes the problem if the topology is time-invariant
 
   // This function performs all steps that are time-invariant
@@ -138,14 +138,14 @@ void LinearOSNS::initialize(SP::Simulation sim)
   else // in that case, M will be updated during preCompute
   {
     // Default size for M = maxSize
-    if (! M)
+    if (! _M)
     {
       if (MStorageType == 0)
-        M.reset(new OSNSMatrix(maxSize, 0));
+        _M.reset(new OSNSMatrix(maxSize, 0));
 
       else // if(MStorageType == 1) size = number of unitaryBlocks
         // = number of UR in the largest considered indexSet
-        M.reset(new OSNSMatrix(simulation->getIndexSetPtr(levelMin)->size(), 1));
+        _M.reset(new OSNSMatrix(simulation->getIndexSetPtr(levelMin)->size(), 1));
     }
   }
 }
@@ -154,15 +154,15 @@ void LinearOSNS::updateM()
 {
   // Get index set from Simulation
   SP::UnitaryRelationsGraph indexSet = simulation->getIndexSetPtr(levelMin);
-  if (! M) // Creates and fills M using UR of indexSet
-    M.reset(new OSNSMatrix(indexSet, unitaryBlocks, MStorageType));
+  if (! _M) // Creates and fills M using UR of indexSet
+    _M.reset(new OSNSMatrix(indexSet, unitaryBlocks, MStorageType));
 
   else
   {
-    M->setStorageType(MStorageType);
-    M->fill(indexSet, unitaryBlocks);
+    _M->setStorageType(MStorageType);
+    _M->fill(indexSet, unitaryBlocks);
   }
-  sizeOutput = M->size();
+  sizeOutput = _M->size();
 }
 
 void LinearOSNS::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
@@ -240,12 +240,15 @@ void LinearOSNS::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelatio
       // centralUnitaryBlock contains a lu-factorized matrix and we solve
       // centralUnitaryBlock * X = rightUnitaryBlock with PLU
       centralUnitaryBlocks[*itDS]->PLUForwardBackwardInPlace(*rightUnitaryBlock);
+
       //      integration of r with theta method removed
       //      *currentUnitaryBlock += h *Theta[*itDS]* *leftUnitaryBlock * (*rightUnitaryBlock); //left = C, right = W.B
       //gemm(h,*leftUnitaryBlock,*rightUnitaryBlock,1.0,*currentUnitaryBlock);
       *leftUnitaryBlock *= h;
+
       prod(*leftUnitaryBlock, *rightUnitaryBlock, *currentUnitaryBlock, false);
       //left = C, right = inv(W).B
+
 
     }
     else if (relationType1 == Lagrangian || relationType2 == Lagrangian)
@@ -450,16 +453,19 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
     else
     {
       C = mainInteraction->getRelationPtr()->getCPtr();
-      SP::SiconosVector WorkX = UR->getWorkXPtr();
+      //  SP::SiconosVector WorkX = UR->getWorkXPtr();
+      SP::SiconosVector Xfree;
+      Xfree = UR->getXfreePtr();
+
       if (C)
       {
 
-        assert(WorkX);
+        assert(Xfree);
         assert(q);
 
         coord[3] = C->size(1);
         coord[5] = C->size(1);
-        subprod(*C, *WorkX, *q, coord, true);
+        subprod(*C, *Xfree, *q, coord, true);
       }
 
       if (relationType == FirstOrder && (relationSubType == LinearTIR || relationSubType == LinearR))
@@ -489,8 +495,6 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
           subprod(*F, *workZ, *q, coord, false);
         }
       }
-      //  cout<<"computeQblock q:"<<endl;
-      //  q->display();
 
     }
   }
@@ -532,7 +536,7 @@ void LinearOSNS::computeQ(double time)
 
     // Compute q, this depends on the type of non smooth problem, on
     // the relation type and on the non smooth law
-    pos = M->getPositionOfUnitaryBlock(ur);
+    pos = _M->getPositionOfUnitaryBlock(ur);
     computeQBlock(ur, pos); // free output is saved in y
   }
 }
@@ -563,8 +567,8 @@ void LinearOSNS::preCompute(double time)
 
     // Updates matrix M
     SP::UnitaryRelationsGraph indexSet = simulation->getIndexSetPtr(levelMin);
-    M->fill(indexSet, unitaryBlocks);
-    sizeOutput = M->size();
+    _M->fill(indexSet, unitaryBlocks);
+    sizeOutput = _M->size();
 
     // Checks z and _w sizes and reset if necessary
     if (_z->size() != sizeOutput)
@@ -589,7 +593,7 @@ void LinearOSNS::preCompute(double time)
         SP::UnitaryRelation ur = indexSet->bundle(*ui);
         // Get the relative position of UR-unitaryBlock in the vector w
         // or z
-        unsigned int pos = M->getPositionOfUnitaryBlock(ur);
+        unsigned int pos = _M->getPositionOfUnitaryBlock(ur);
 
         SPC::SiconosVector yOld = ur->getYOldPtr(levelMin);
         SPC::SiconosVector lambdaOld = ur->
@@ -630,7 +634,7 @@ void LinearOSNS::postCompute()
     SP::UnitaryRelation ur = indexSet->bundle(*ui);
     // Get the relative position of UR-unitaryBlock in the vector w
     // or z
-    pos = M->getPositionOfUnitaryBlock(ur);
+    pos = _M->getPositionOfUnitaryBlock(ur);
 
     // Get Y and Lambda for the current Unitary Relation
     y = ur->getYPtr(levelMin);
@@ -646,8 +650,8 @@ void LinearOSNS::postCompute()
 
 void LinearOSNS::display() const
 {
-  cout << "M  ";
-  if (M) M->display();
+  cout << "_M  ";
+  if (_M) _M->display();
   else cout << "-> NULL" << endl;
   cout << endl << " q : " ;
   if (q) q->display();
@@ -665,7 +669,7 @@ void LinearOSNS::saveNSProblemToXML()
 {
   //   if(onestepnspbxml != NULL)
   //     {
-  // //       (boost::static_pointer_cast<LinearOSNSXML>(onestepnspbxml))->setM(*M);
+  // //       (boost::static_pointer_cast<LinearOSNSXML>(onestepnspbxml))->setM(*_M);
   //       (boost::static_pointer_cast<LinearOSNSXML>(onestepnspbxml))->setQ(*q);
   //     }
   //   else RuntimeException::selfThrow("LinearOSNS::saveNSProblemToXML - OneStepNSProblemXML object not exists");

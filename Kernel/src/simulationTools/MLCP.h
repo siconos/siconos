@@ -81,10 +81,10 @@ class MLCP : public LinearOSNS
 protected:
 
   /** n is the number of equality */
-  int n;
+  int _n;
 
   /** m is the size of the complementarity conditions */
-  int m;
+  int _m;
 
   /** The MLCP instance */
   MixedLinearComplementarity_Problem numerics_problem;
@@ -117,7 +117,7 @@ public:
   */
   inline int getn() const
   {
-    return n;
+    return _n;
   }
 
   // --- numerics MLCP ---

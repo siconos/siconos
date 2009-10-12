@@ -21,6 +21,7 @@ Include files related to modelingTools
 Note that not all files from the current location are listed below, since some of them are already included inside the ones below.
 */
 
+#include "EqualityConditionNSL.h"
 #include "ComplementarityConditionNSL.h"
 #include "MixedComplementarityConditionNSL.h"
 #include "RelayNSL.h"

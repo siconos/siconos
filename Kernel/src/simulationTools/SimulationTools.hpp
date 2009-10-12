@@ -30,6 +30,7 @@ Note that not all files from the current location are listed below, since some o
 #include "PrimalFrictionContact.h"
 #include "TimeDiscretisation.h"
 #include "TimeStepping.h"
+#include "Equality.h"
 #include "LCP.h"
 #include "MLCP.h"
 #include "MLCP2.h"

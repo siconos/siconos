@@ -21,6 +21,7 @@
 #include "NonSmoothDynamicalSystem.h"
 #include "Interaction.h"
 #include "UnitaryRelation.h"
+#include "EqualityConditionNSL.h"
 
 #include <boost/bind.hpp>
 #include <algorithm>
@@ -295,6 +296,12 @@ struct Topology::SetupFromNslaw : public SiconosVisitor
     parent(p), interaction(inter) {};
 
   void visit(ComplementarityConditionNSL&)
+  {
+    parent->minRelativeDegree = std::min<int>(0, parent->minRelativeDegree);
+    parent->maxRelativeDegree = std::max<int>(0, parent->maxRelativeDegree);
+    interaction->setRelativeDegree(0);
+  };
+  void visit(EqualityConditionNSL&)
   {
     parent->minRelativeDegree = std::min<int>(0, parent->minRelativeDegree);
     parent->maxRelativeDegree = std::max<int>(0, parent->maxRelativeDegree);

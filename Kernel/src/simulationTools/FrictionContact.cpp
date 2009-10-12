@@ -112,7 +112,7 @@ int FrictionContact::compute(double time)
   {
     // The FrictionContact Problem in Numerics format
     FrictionContact_Problem numerics_problem;
-    numerics_problem.M = &*M->getNumericsMatrix();
+    numerics_problem.M = &*_M->getNumericsMatrix();
     numerics_problem.q = &*q->getArray();
     numerics_problem.numberOfContacts = sizeOutput / contactProblemDim;
     numerics_problem.isComplete = 1;

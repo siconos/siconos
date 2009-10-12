@@ -36,11 +36,11 @@ void MLCP::updateM()
   // Get index set from Simulation
   SP::UnitaryRelationsGraph indexSet = simulation->getIndexSetPtr(levelMin);
 
-  if (!M)
+  if (!_M)
   {
     // Creates and fills M using UR of indexSet
-    M.reset(new OSNSMatrix(indexSet, unitaryBlocks, MStorageType));
-    numerics_problem.M = &*M->getNumericsMatrix();
+    _M.reset(new OSNSMatrix(indexSet, unitaryBlocks, MStorageType));
+    numerics_problem.M = &*_M->getNumericsMatrix();
     numerics_problem.A = 0;
     numerics_problem.B = 0;
     numerics_problem.C = 0;
@@ -48,16 +48,16 @@ void MLCP::updateM()
     numerics_problem.a = 0;
     numerics_problem.b = 0;
     numerics_problem.problemType = 0;
-    numerics_problem.n = n;
-    numerics_problem.m = m;
+    numerics_problem.n = _n;
+    numerics_problem.m = _m;
   }
   else
   {
-    M->setStorageType(MStorageType);
-    M->fill(indexSet, unitaryBlocks);
+    _M->setStorageType(MStorageType);
+    _M->fill(indexSet, unitaryBlocks);
 
   }
-  sizeOutput = M->size();
+  sizeOutput = _M->size();
 }
 
 void  MLCP::reset()
@@ -74,8 +74,8 @@ void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
   // Get DS common between UR1 and UR2
   DynamicalSystemsSet commonDS;
   intersection(*UR1->getDynamicalSystemsPtr(), *UR2->getDynamicalSystemsPtr(), commonDS);
-  m = 0;
-  n = 0;
+  _m = 0;
+  _n = 0;
   if (!commonDS.isEmpty()) // Nothing to be done if there are no common DS between the two UR.
   {
     DSIterator itDS;
@@ -121,8 +121,8 @@ void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
     if (UR1 == UR2)
     {
       UR1->getExtraUnitaryBlock(currentUnitaryBlock);
-      m += nslawSize1 - equalitySize1;
-      n += equalitySize1;
+      _m += nslawSize1 - equalitySize1;
+      _n += equalitySize1;
     }
     else
       currentUnitaryBlock->zero();
@@ -145,8 +145,8 @@ void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
         UR2->getRightUnitaryBlockForDS(*itDS, rightUnitaryBlock);
         // centralUnitaryBlock contains a lu-factorized matrix and we solve
         // centralUnitaryBlock * X = rightUnitaryBlock with PLU
-        printf("right bloc: ie B \n");
-        rightUnitaryBlock->display();
+        //          printf("right bloc: ie B \n");
+        //          rightUnitaryBlock->display();
         centralUnitaryBlocks[*itDS]->PLUForwardBackwardInPlace(*rightUnitaryBlock);
         //        printf("W \n");
         //        centralUnitaryBlocks[*itDS]->display();
@@ -156,8 +156,8 @@ void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
         //      *currentUnitaryBlock += h *Theta[*itDS]* *leftUnitaryBlock * (*rightUnitaryBlock); //left = C, right = W.B
         //gemm(h,*leftUnitaryBlock,*rightUnitaryBlock,1.0,*currentUnitaryBlock);
         *leftUnitaryBlock *= h;
-        printf("currentbloc : ie D \n");
-        currentUnitaryBlock->display();
+        //          printf("currentbloc : ie D \n");
+        //          currentUnitaryBlock->display();
         //          printf("leftUnitaryBlock : ie C \n");
         //          leftUnitaryBlock->display();
 
@@ -225,7 +225,7 @@ int MLCP::compute(double time)
     //      displayMLCP(&numerics_problem);
     try
     {
-      display();
+      //  display();
       info = mlcp_driver(&numerics_problem, _z->getArray(), _w->getArray(), (solver->getNumericsSolverOptionsPtr()).get(), &*numerics_options);
     }
     catch (...)
@@ -245,7 +245,7 @@ int MLCP::compute(double time)
 void MLCP::display() const
 {
   cout << "======= MLCP of size " << sizeOutput << " with: " << endl;
-  cout << "======= m " << m << " n " << n << endl;
+  cout << "======= m " << _m << " _n " << _n << endl;
   LinearOSNS::display();
 }
 

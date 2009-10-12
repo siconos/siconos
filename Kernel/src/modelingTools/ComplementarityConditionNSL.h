@@ -59,10 +59,6 @@ public:
   /** Destructor */
   ~ComplementarityConditionNSL();
 
-  /** checks the ns law to see if it is verified
-  *  \return a boolean value which determines if the NS Law is verified
-  */
-  bool isVerified(void) const;
 
   /** print the data to the screen
   */

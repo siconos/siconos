@@ -16,14 +16,14 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "LCP.h"
-
+#include "Equality.h"
+#include "Simulation.h"
 using namespace std;
 using namespace RELATION;
 
-int LCP::compute(double time)
+int Equality::compute(double time)
 {
-  // --- Prepare data for LCP computing ---
+  // --- Prepare data for EQUALITY computing ---
   preCompute(time);
 
   int info = 0;
@@ -36,16 +36,13 @@ int LCP::compute(double time)
 
   if (sizeOutput != 0)
   {
-    // The LCP in Numerics format
-    LinearComplementarity_Problem numerics_problem;
-    numerics_problem.M = &*_M->getNumericsMatrix();
-    numerics_problem.q = q->getArray();
-    numerics_problem.size = sizeOutput;
-    int nbSolvers = 1;
-    // Call LCP Driver
-    info = lcp_driver(&numerics_problem, _z->getArray() , _w->getArray() , &*solver->getNumericsSolverOptionsPtr(), nbSolvers, &*numerics_options);
+    // The EQUALITY in Numerics format
+    // Call EQUALITY Driver
+    _numerics_problem.q = q->getArray();
+    _numerics_problem.size = sizeOutput;
+    info = LinearSystem_driver(&_numerics_problem, _z->getArray() , _w->getArray() , 0);
 
-    // --- Recovering of the desired variables from LCP output ---
+    // --- Recovering of the desired variables from EQUALITY output ---
     postCompute();
 
   }
@@ -53,16 +50,38 @@ int LCP::compute(double time)
   return info;
 }
 
-void LCP::display() const
+
+void Equality::updateM()
 {
-  cout << "======= LCP of size " << sizeOutput << " with: " << endl;
+  // Get index set from Simulation
+  SP::UnitaryRelationsGraph indexSet = simulation->getIndexSetPtr(levelMin);
+
+  if (!_M)
+  {
+    // Creates and fills M using UR of indexSet
+    _M.reset(new OSNSMatrix(indexSet, unitaryBlocks, MStorageType));
+    _numerics_problem.M = &*_M->getNumericsMatrix();
+  }
+  else
+  {
+    _M->setStorageType(MStorageType);
+    _M->fill(indexSet, unitaryBlocks);
+
+  }
+  sizeOutput = _M->size();
+}
+
+
+void Equality::display() const
+{
+  cout << "======= EQUALITY of size " << sizeOutput << " with: " << endl;
   LinearOSNS::display();
 }
 
-LCP* LCP::convert(OneStepNSProblem* osnsp)
+Equality* Equality::convert(OneStepNSProblem* osnsp)
 {
-  LCP* lcp = dynamic_cast<LCP*>(osnsp);
-  return lcp;
+  Equality* equality = dynamic_cast<Equality*>(osnsp);
+  return equality;
 }
 
 
