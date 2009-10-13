@@ -223,15 +223,7 @@ void Disks::init()
     playground_.reset(new SpaceFilter(3, 6, nsds_, nslaw, plans_));
     playground_->buildInteractions();
 
-
-    for (DSIterator ids = allDS_.begin(); ids != allDS_.end() ; ++ids)
-    {
-      nsds_->getTopologyPtr()->getDSGPtr(0)->add_vertex(*ids);
-    }
-
     nsds_->getTopologyPtr()->initialize();
-
-
 
     model_->initialize(simulation_);
 

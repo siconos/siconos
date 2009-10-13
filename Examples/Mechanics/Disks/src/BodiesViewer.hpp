@@ -18,14 +18,18 @@
  *
  */
 
-#ifndef DisksViewer_h
-#define DisksViewer_h
+#ifndef BodiesViewer_hpp
+#define BodiesViewer_hpp
+
+/* Siconos */
+#include <SiconosKernel.hpp>
+
+#include <SpaceFilter.hpp>
 #include "SiconosBodies.hpp"
 
-#include <SiconosKernel.hpp>
-#include <SpaceFilter.hpp>
 
-//QGLViewer
+
+/* QGLViewer */
 #include <QGLViewer/qglviewer.h>
 #include <qapplication.h>
 
@@ -45,11 +49,12 @@ public:
 #endif
 
 
-
+/* needed shared pointers */
 DEFINE_SPTR(Drawing);
 DEFINE_SPTR(BodyDraw);
 DEFINE_SPTR(SelectedBodyDraw);
 
+/* convenient macros */
 #define GETX(C) C->getQPtr()->getValue(0)
 #define GETY(C) C->getQPtr()->getValue(1)
 #define GETZ(C) C->getQPtr()->getValue(2)
@@ -71,11 +76,13 @@ DEFINE_SPTR(SelectedBodyDraw);
 #define GETALLDS(M) M->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getDSGPtr(0)
 #define GETNDS(M) GETALLDS(M)->size()
 
+/* a drawing of a Siconos Lagrangian DS */
 class Drawing
 {
 
 public:
 
+  /* construction from a LagrangianDS */
   Drawing(SP::LagrangianDS D)
   {
     DS_ = D;
@@ -86,15 +93,23 @@ public:
 
   ~Drawing() {};
 
+  /* pointer to DS */
   SP::LagrangianDS getDS()
   {
     return DS_;
   };
 
+  /* selection with mouse */
   bool selected()
   {
     return selected_ ;
   };
+  void nextSelection()
+  {
+    selected_ = !selected_ ;
+  };
+
+  /* identifiant */
   int getID()
   {
     return id_ ;
@@ -103,10 +118,9 @@ public:
   {
     id_ = i;
   };
-  void nextSelection()
-  {
-    selected_ = !selected_ ;
-  };
+
+
+  /* External force set from mouse and restore */
   void saveFExt()
   {
     *savedFExt_ = *(getDS()->getFExtPtr()) ;
@@ -116,6 +130,7 @@ public:
     *(getDS()->getFExtPtr()) = *savedFExt_;
   };
 
+  /* DS frame */
   qglviewer::ManipulatedFrame * getFrame()
   {
     return frame_.get();
@@ -130,6 +145,8 @@ protected:
 };
 
 
+
+/* QGLViewer main object */
 class BodiesViewer : public QGLViewer
 {
 
@@ -139,9 +156,6 @@ public:
   Viewer(QWidget *parent);
 #endif
   std::vector<SP::Drawing> drawings_;
-
-
-
 
 public:
   virtual void draw() = 0;
@@ -359,7 +373,9 @@ public:
     c[1] = .1;
     c[2] = .5;
     glLineWidth(3.);
-    viewer_->drawSphere(GETX(sphere), GETY(sphere), GETZ(sphere), GETA1(sphere), GETA2(sphere), GETA3(sphere), sphere->getRadius(), c);
+    viewer_->drawSphere(GETX(sphere), GETY(sphere), GETZ(sphere),
+                        GETA1(sphere), GETA2(sphere), GETA3(sphere),
+                        sphere->getRadius(), c);
     glColor3f(1., 0., 0.);
     dFe = hypot3d(GETXFE(sphere), GETYFE(sphere), GETZFE(sphere));
     Cal = log(dFe);
@@ -374,7 +390,8 @@ public:
 
 class LambdaSecond;
 
-class LambdaFirst : public SiconosVisitor, public boost::enable_shared_from_this<LambdaFirst>
+class LambdaFirst : public SiconosVisitor,
+  public boost::enable_shared_from_this<LambdaFirst>
 {
 
 

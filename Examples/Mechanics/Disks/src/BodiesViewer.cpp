@@ -309,7 +309,8 @@ void BodiesViewer::rotate(const float R[12])
   glMultMatrixf(matrix);
 }
 
-void BodiesViewer::drawSphere(float x, float y, float z, float theta, float phi, float psi, float r, float *c)
+void BodiesViewer::drawSphere(float x, float y, float z, float theta,
+                              float phi, float psi, float r, float *c)
 {
 
   float cl[3] = { 0, 0, 0 };
