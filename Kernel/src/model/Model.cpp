@@ -60,34 +60,49 @@ Model::Model(const std::string& xmlFile):
     xmlSchema = modelxml->getXMLSchema();
 
   // Memory allocation for nsds and simulation
-  nsds.reset(new NonSmoothDynamicalSystem(modelxml->getNonSmoothDynamicalSystemXML()));
+  nsds.reset(new NonSmoothDynamicalSystem
+             (modelxml->getNonSmoothDynamicalSystemXML()));
   if (modelxml->hasSimulation())
   {
-    if (modelxml->getSimulationXML()->getSimulationXMLType() == TIMESTEPPING_TAG)
-      strat.reset(new TimeStepping(modelxml->getSimulationXML(), t0, T, setOfGraph<DynamicalSystemsSet>(nsds->getDynamicalSystems()), nsds->getInteractionsPtr()));
+    if (modelxml->getSimulationXML()->
+        getSimulationXMLType() == TIMESTEPPING_TAG)
+      strat.reset(new TimeStepping
+                  (modelxml->getSimulationXML(), t0, T,
+                   setOfGraph<DynamicalSystemsSet>(nsds->getDynamicalSystems()),
+                   nsds->getInteractionsPtr()));
     else if (modelxml->getSimulationXML()->getSimulationXMLType() == EVENTDRIVEN_TAG)
-      strat.reset(new EventDriven(modelxml->getSimulationXML(), t0, T, setOfGraph<DynamicalSystemsSet>(nsds->getDynamicalSystems()), nsds->getInteractionsPtr()));
-    else RuntimeException::selfThrow("Model: xml constructor, wrong type of simulation" + (modelxml->getSimulationXML()->getSimulationXMLType()));
+      strat.reset(new EventDriven
+                  (modelxml->getSimulationXML(), t0, T,
+                   setOfGraph<DynamicalSystemsSet>(nsds->getDynamicalSystems()),
+                   nsds->getInteractionsPtr()));
+    else RuntimeException::selfThrow
+      ("Model: xml constructor, wrong type of simulation" +
+       (modelxml->getSimulationXML()->getSimulationXMLType()));
   }
 }
 
 // --- From a minimum set of data ---
-Model::Model(double newT0, double newT, const string& newTitle, const string& newAuthor,
-             const string& newDescription, const string& newDate, const string& newSchema):
+Model::Model(double newT0, double newT, const string& newTitle,
+             const string& newAuthor, const string& newDescription,
+             const string& newDate, const string& newSchema):
   t(newT0), t0(newT0), T(-1), title(newTitle),
   author(newAuthor), description(newDescription), date(newDate), xmlSchema(newSchema)
 {
   if (newT > t0) T = newT;
   else if (newT > 0 && newT <= t0)
-    RuntimeException::selfThrow("Model::constructor from min data: Warning, final T lower than t0");
+    RuntimeException::selfThrow
+    ("Model::constructor from min data: Warning, final T lower than t0");
   // else no T in the model!
 }
 
-Model::Model(double newT0, double newT, DynamicalSystemsSet& allDS, InteractionsSet& allInteractions):
-  t(newT0), t0(newT0), T(newT), title("none"), author("nobody"), description("none"), date("none"), xmlSchema("none")
+Model::Model(double newT0, double newT,
+             DynamicalSystemsSet& allDS, InteractionsSet& allInteractions):
+  t(newT0), t0(newT0), T(newT), title("none"), author("nobody"),
+  description("none"), date("none"), xmlSchema("none")
 {
   if (newT > 0 && newT <= t0)
-    RuntimeException::selfThrow("Model::constructor from data: Warning, final T lower than t0");
+    RuntimeException::selfThrow
+    ("Model::constructor from data: Warning, final T lower than t0");
   nsds.reset(new NonSmoothDynamicalSystem(allDS, allInteractions));
 }
 
@@ -210,7 +225,9 @@ void Model::checkXMLPlatform()
     if (modelxml->getNonSmoothDynamicalSystemXML())
     {
       // we must create/update the DynamicalSystemXMLs
-      nsds->getNonSmoothDynamicalSystemXMLPtr()->updateNonSmoothDynamicalSystemXML(modelxml->getNonSmoothDynamicalSystemXML()->getRootNode(), nsds);
+      nsds->getNonSmoothDynamicalSystemXMLPtr()->
+      updateNonSmoothDynamicalSystemXML
+      (modelxml->getNonSmoothDynamicalSystemXML()->getRootNode(), nsds);
     }
     else if (nsds)
     {
@@ -219,7 +236,8 @@ void Model::checkXMLPlatform()
       modelxml->loadModel(shared_from_this());
       // \todo to be tested !!
     }
-    else RuntimeException::selfThrow("Model::checkXMLPlatform - There's no NonSmoothDynamicalSystem in the Platform, the XML platform can't be built");
+    else RuntimeException::selfThrow
+      ("Model::checkXMLPlatform - There's no NonSmoothDynamicalSystem in the Platform, the XML platform can't be built");
 
     if ((strat))
     {
@@ -241,7 +259,9 @@ void Model::checkXMLPlatform()
       }
       else
       {
-        strat->getSimulationXMLPtr()->saveSimulation2XML(modelxml->getSimulationXML()->getRootNode(), strat);
+        strat->getSimulationXMLPtr()->
+        saveSimulation2XML
+        (modelxml->getSimulationXML()->getRootNode(), strat);
       }
     }
   }
@@ -266,8 +286,10 @@ void Model::checkModelCoherency()
   // by example if DynamicalSystems have BoundaryConditions when the
   // NonSmoothDynamicalSystem is BVP for example
 
-  if (modelxml->checkSiconosDOMTreeCoherency() == true) cout << "Data of the XML DOM tree are coherent." << endl;
-  else cout << "Warning : Data of the XML DOM tree are not coherent." << endl;
+  if (modelxml->checkSiconosDOMTreeCoherency() == true)
+    cout << "Data of the XML DOM tree are coherent." << endl;
+  else
+    cout << "Warning : Data of the XML DOM tree are not coherent." << endl;
 }
 
 int Model::xmlSchemaValidated(string xmlFile, string xmlSchema)

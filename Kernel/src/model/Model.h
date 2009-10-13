@@ -32,7 +32,8 @@
 class Simulation;
 DEFINE_SPTR(SiconosModelXML);
 
-/** Model: object that links the NonSmoothDynamicalSystem with a Simulation.
+/** Model: object that links the NonSmoothDynamicalSystem with a
+ * Simulation.
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
@@ -89,18 +90,22 @@ public:
    *  \param double : the value for T (optional parameter)
    *  \param string : the title of the Model (optional parameter)
    *  \param string : the author of the Model (optional parameter)
-   *  \param string : the description of the Model (optional parameter)
+   *  \param string : the description of the Model (optional
+   *                  parameter)
    *  \param string : the date of the Model (optional parameter)
    *  \param string : the xml schema of the Model (optional parameter)
    */
-  Model(double, double = -1, const std::string& = "none", const std::string& = "nobody",
-        const std::string& = "none", const std::string& = "none", const std::string& = "none");
+  Model(double, double = -1, const std::string& = "none",
+        const std::string& = "nobody", const std::string& = "none",
+        const std::string& = "none", const std::string& = "none");
 
-  /** build the model from init/final times and a list of DS and Interactions
-      \param double : the value for t0
-      \param double : the value for T; if you do not want to set the final time, set T = -1.
-      \param a list of DynamicalSystems
-      \param a list of Interactions
+  /** build the model from init/final times and a list of DS and
+   *   Interactions
+   *   \param double : the value for t0
+   *   \param double : the value for T; if you do not want to set the
+   *   final time, set T = -1.
+   *   \param a list of DynamicalSystems
+   *   \param a list of Interactions
    */
   Model(double, double, DynamicalSystemsSet&, InteractionsSet&);
 
@@ -277,7 +282,8 @@ public:
     xmlSchema = s;
   }
 
-  /** Complete initialization of the model (NonSmoothDynamicalSystem, Simulation)
+  /** Complete initialization of the model (NonSmoothDynamicalSystem,
+      Simulation)
       \param a smart pointer to simulation (option, default = empty)
    */
   void initialize(SP::Simulation = SP::Simulation());
@@ -309,7 +315,8 @@ public:
    */
   void checkXMLPlatform();
 
-  /** check if the Model is complete. That's to say if the objects of the platform are coherent and if data of the XML are coherent
+  /** check if the Model is complete. That's to say if the objects of
+      the platform are coherent and if data of the XML are coherent
    *  \exception RuntimeException
    */
   void checkModelCoherency();
