@@ -257,8 +257,8 @@ void TimeStepping::initOSNS()
     for (itDS = ur->dynamicalSystemsBegin();
          itDS != ur->dynamicalSystemsEnd(); ++itDS)
     {
-      osi = osiMap[*itDS];
-      ur->insertInWorkX(osi->getWorkX(*itDS));
+      //osi = osiMap[*itDS];
+      ur->insertInWorkFree((*itDS)->getWorkFreePtr()); // osi->getWorkX(*itDS));
     }
   }
 

@@ -224,6 +224,10 @@ protected:
   DynamicalSystem(DS::TYPES = DS::FONLDS);
   void zeroPlungin();
 
+protected:
+  /** a vector reserved to compute the freeState.*/
+  SP::SiconosVector _workFree;
+
 public:
 
   /*! @name Constructors */
@@ -676,6 +680,13 @@ public:
   {
     workV[id].reset(new SimpleVector(size));
   }
+
+  /** to get the free vector.
+   */
+  inline SP::SiconosVector getWorkFreePtr() const
+  {
+    return _workFree;
+  };
 
   //@}
 

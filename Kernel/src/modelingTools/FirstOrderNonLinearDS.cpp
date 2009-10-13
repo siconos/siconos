@@ -44,7 +44,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::SiconosVector newX0): Dynamical
   mResidur.reset(new SimpleVector(n));
   mXp.reset(new SimpleVector(getDim()));
   mXq.reset(new SimpleVector(getDim()));
-  mXfree.reset(new SimpleVector(getDim()));
+  _workFree.reset(new SimpleVector(getDim()));
   mfold.reset(new SimpleVector(getDim()));
 
   // == r ==
@@ -70,7 +70,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0): Dynami
   mResidur.reset(new SimpleVector(n));
   mXp.reset(new SimpleVector(getDim()));
   mXq.reset(new SimpleVector(getDim()));
-  mXfree.reset(new SimpleVector(getDim()));
+  _workFree.reset(new SimpleVector(getDim()));
   mfold.reset(new SimpleVector(getDim()));
 
   // == r ==
@@ -185,7 +185,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0, const s
   mResidur.reset(new SimpleVector(n));
   mXp.reset(new SimpleVector(getDim()));
   mXq.reset(new SimpleVector(getDim()));
-  mXfree.reset(new SimpleVector(getDim()));
+  _workFree.reset(new SimpleVector(getDim()));
   r.reset(new SimpleVector(getDim()));
   mfold.reset(new SimpleVector(getDim()));
 

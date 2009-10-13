@@ -100,11 +100,11 @@ void OneStepIntegrator::setInteractions(const InteractionsSet& newSet)
   OSIInteractions->insert(newSet.begin(), newSet.end());
 }
 
-SP::SiconosVector OneStepIntegrator::getWorkX(SP::DynamicalSystem ds)
-{
-  assert(workX.find(ds) != workX.end() && "OneStepIntegrator::getWorkX(ds): this vector does not exists for ds.");
-  return workX[ds];
-}
+// SP::SiconosVector OneStepIntegrator::getWorkX(SP::DynamicalSystem ds)
+// {
+//   assert(workX.find(ds)!=workX.end()&&"OneStepIntegrator::getWorkX(ds): this vector does not exists for ds.");
+//   return workX[ds];
+// }
 
 void OneStepIntegrator::initialize(SP::Simulation sim)
 {

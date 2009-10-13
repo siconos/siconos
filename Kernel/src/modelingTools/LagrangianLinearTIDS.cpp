@@ -151,6 +151,8 @@ void LagrangianLinearTIDS::initialize(const string& simulationType, double time,
   // set q and q[1] to q0 and velocity0, initialize acceleration.
   *q[0] = *q0;
   *q[1] = *velocity0;
+  if (!_workFree)
+    _workFree.reset(new SimpleVector(getDim()));
 
   // If z has not been set, we initialize it with a null vector of size 1, since z is required in plug-in functions call.
   if (! z)

@@ -421,7 +421,9 @@ void LagrangianDS::initialize(const string& simulationType, double time, unsigne
     jacobianQDotFInt.reset(new SimpleMatrix(ndof, ndof));
 
 
-
+  //
+  if (!_workFree)
+    _workFree.reset(new SimpleVector(getDim()));
   // Memory allocation for fL and its jacobians.
   initFL();
 

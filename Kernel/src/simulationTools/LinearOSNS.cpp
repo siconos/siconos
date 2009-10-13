@@ -423,7 +423,7 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
   if (osiType == OSI::MOREAU || osiType == OSI::LSODAR)
   {
     SP::SiconosVector Xfree;
-    Xfree = UR->getXfreePtr();
+    Xfree = UR->getWorkFreePtr();
     //      cout<<"LinearOSNS::computeQblock xfree "<<endl;
     //      Xfree->display();
     if (relationType == FirstOrder && relationSubType == Type2R)
@@ -455,7 +455,7 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
       C = mainInteraction->getRelationPtr()->getCPtr();
       //  SP::SiconosVector WorkX = UR->getWorkXPtr();
       SP::SiconosVector Xfree;
-      Xfree = UR->getXfreePtr();
+      Xfree = UR->getWorkFreePtr();
 
       if (C)
       {
@@ -465,6 +465,7 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
 
         coord[3] = C->size(1);
         coord[5] = C->size(1);
+
         subprod(*C, *Xfree, *q, coord, true);
       }
 

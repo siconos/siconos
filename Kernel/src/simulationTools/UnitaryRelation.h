@@ -98,7 +98,7 @@ private:
       dynamical systems involved in the UR.*/
   SP::SiconosVector workX;
   SP::SiconosVector mWorkXq;
-  SP::SiconosVector mXfree;
+  SP::SiconosVector _workFree;
 
   /** work vector to save pointers to z data of the dynamical systems
       involved in the UR.*/
@@ -276,6 +276,14 @@ public:
     assert(workX) ;
     workX->insertPtr(newX);
   };
+  /* to set _workFree content.
+   \param a SP::SiconosVector to be inserted into workFree
+  */
+  inline void insertInWorkFree(SP::SiconosVector newX)
+  {
+    assert(_workFree) ;
+    _workFree->insertPtr(newX);
+  };
 
   /** Get a pointer to workX */
   inline SP::SiconosVector getWorkXPtr()
@@ -286,9 +294,9 @@ public:
   {
     return mWorkXq;
   };
-  inline SP::SiconosVector getXfreePtr()
+  inline SP::SiconosVector getWorkFreePtr()
   {
-    return mXfree;
+    return _workFree;
   };
 
 

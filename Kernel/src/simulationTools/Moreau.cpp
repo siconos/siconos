@@ -230,7 +230,7 @@ void Moreau::initialize(SP::Simulation sim)
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
   {
     // Memory allocation for workX. workX[ds*] corresponds to xfree (or vfree in lagrangian case).
-    workX[*itDS].reset(new SimpleVector((*itDS)->getDim()));
+    // workX[*itDS].reset(new SimpleVector((*itDS)->getDim()));
 
     // W initialization
     initW(t0, *itDS);
@@ -493,9 +493,9 @@ double Moreau::computeResidu()
       }
       //    cout<<"Moreau: residu free"<<endl;
       //    (*residuFree).display();
-      (*workX[d]) = *residuFree;
-      scal(-h, *d->getRPtr(), (*workX[d]), false); // residu = residu - h*r
-      normResidu = (workX[d])->norm2();
+      (*(d->getWorkFreePtr())) = *residuFree;
+      scal(-h, *d->getRPtr(), (*d->getWorkFreePtr()), false); // residu = residu - h*r
+      normResidu = d->getWorkFreePtr()->norm2();
       //    cout<<"Moreau: residu "<<endl;
       //    (workX[d])->display();
       //    cout<<"Moreau: norm residu :"<<normResidu<<endl;
@@ -651,9 +651,9 @@ double Moreau::computeResidu()
         // residuFree += coef * fL_k,i+1
         scal(coef, *d->getFLPtr(), *residuFree, false);
       }
-      (*workX[d]) = *residuFree;
-      (*workX[d]) -= *d->getPPtr(2);
-      normResidu = (workX[d])->norm2();
+      *(d->getWorkFreePtr()) = *residuFree;
+      *(d->getWorkFreePtr()) -= *d->getPPtr(2);
+      normResidu = d->getWorkFreePtr()->norm2();
     }
     // 4 - Lagrangian Linear Systems
     else if (dsType == LLTIDS)
@@ -696,9 +696,9 @@ double Moreau::computeResidu()
         scal(coeff, *Fext, *residuFree, false); // vfree += h*theta * fext(ti+1)
       }
 
-      (*workX[d]) = *residuFree;
-      (*workX[d]) -= *d->getPPtr(2);
-      normResidu = (workX[d])->norm2();
+      (* d->getWorkFreePtr()) = *residuFree;
+      (* d->getWorkFreePtr()) -= *d->getPPtr(2);
+      normResidu = d->getWorkFreePtr()->norm2();
 
     }
     else
@@ -763,7 +763,7 @@ void Moreau::computeFreeState()
       // ResiduFree = M(x-xold) - h*[theta*f(t) + (1-theta)*f(told)]
       //
       // xFree pointer is used to compute and save ResiduFree in this first step.
-      SP::SiconosVector xfree = d->getXfreePtr();//workX[d];
+      SP::SiconosVector xfree = d->getWorkFreePtr();//workX[d];
       *xfree = *(d->getResiduFreePtr());
 
 
@@ -912,7 +912,7 @@ void Moreau::computeFreeState()
       // ResFree = M(v-vold) - h*[theta*fL(t) + (1-theta)*fL(told)]
       //
       // vFree pointer is used to compute and save ResiduFree in this first step.
-      SP::SiconosVector vfree = workX[d];
+      SP::SiconosVector vfree = d->getWorkFreePtr();//workX[d];
       (*vfree) = *(d->getResiduFreePtr());
 
       // -- Update W --
@@ -956,7 +956,7 @@ void Moreau::computeFreeState()
       // vFree pointer is used to compute and save ResiduFree in this first step.
 
       // Velocity free and residu. vFree = RESfree (pointer equality !!).
-      SP::SiconosVector vfree = workX[d];
+      SP::SiconosVector vfree = d->getWorkFreePtr();//workX[d];
       (*vfree) = *(d->getResiduFreePtr());
 
 
@@ -1077,7 +1077,7 @@ void Moreau::updateState(unsigned int level)
       // Solve W(x-xfree) = hr
       scal(h, *fonlds->getRPtr(), *x); // x = h*r
       W->PLUForwardBackwardInPlace(*x); // x =h* W^{-1} *r
-      *x += *(fonlds->getXfreePtr()); //*workX[ds]; // x+=xfree
+      *x += *(fonlds->getWorkFreePtr()); //*workX[ds]; // x+=xfree
       if (baux)
       {
         ds->subWorkVector(x, DynamicalSystem::local_buffer);
@@ -1112,7 +1112,7 @@ void Moreau::updateState(unsigned int level)
       // To compute v, we solve W(v - vfree) = p
       *v = *d->getPPtr(level); // v = p
       W->PLUForwardBackwardInPlace(*v);
-      *v += *workX[ds];
+      *v +=  * ds->getWorkFreePtr();
 
       // Compute q
       SP::SiconosVector q = d->getQPtr();

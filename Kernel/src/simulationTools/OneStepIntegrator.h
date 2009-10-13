@@ -63,7 +63,7 @@ protected:
   SP::Simulation simulationLink;
 
   /** Work map to save state-related data for the dynamical systems of the osi - DSVector: map<DS * , SP::SiconosVector> */
-  DSVectors workX;
+  //  DSVectors workX;
 
   /** the corresponding XML object */
   SP::OneStepIntegratorXML integratorXml;
@@ -266,7 +266,7 @@ public:
    \param a SP::DynamicalSystem
    \return a SP::SiconosVector
   */
-  SP::SiconosVector getWorkX(SP::DynamicalSystem);
+  //  SP::SiconosVector getWorkX(SP::DynamicalSystem);
 
   // --- OTHERS ... ---
 

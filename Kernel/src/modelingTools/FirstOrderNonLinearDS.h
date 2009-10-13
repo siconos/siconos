@@ -130,7 +130,7 @@ protected:
 
   /** g_alpha*/
   SP::SimpleVector mG_alpha;
-  SP::SiconosVector mXfree;
+  //  SP::SiconosVector mXfree;
 
   SP::SiconosVector mXp;
   SP::SiconosVector mXq;
@@ -483,10 +483,7 @@ public:
   /*
    * get the Xfree work vector.
    */
-  inline SP::SiconosVector getXfreePtr() const
-  {
-    return mXfree;
-  };
+  //  inline SP::SiconosVector getXfreePtr() const { return mXfree;};
 
   /** To compute \f$\frac{|x_{i+1} - xi|}{|x_i|}\f$ where \f$x_{i+1}\f$ represents the present state and \f$x_i\f$ the previous one
    * \return a double

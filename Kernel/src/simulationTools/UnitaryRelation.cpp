@@ -132,7 +132,7 @@ void UnitaryRelation::initialize(const std::string& simulationType)
   workX.reset(new BlockVector());
   workZ.reset(new BlockVector());
   mWorkXq.reset(new BlockVector());
-  mXfree.reset(new BlockVector());
+  _workFree.reset(new BlockVector());
 
   for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
     workZ->insertPtr((*it)->getZPtr());
@@ -146,7 +146,7 @@ void UnitaryRelation::initialize(const std::string& simulationType)
       {
         SP::FirstOrderNonLinearDS fds = boost::static_pointer_cast<FirstOrderNonLinearDS>(*it);
         workX->insertPtr(fds->getXPtr());
-        mXfree->insertPtr(fds->getXfreePtr());
+        _workFree->insertPtr(fds->getWorkFreePtr());
         mWorkXq->insertPtr(fds->getXqPtr());
       }
     }
