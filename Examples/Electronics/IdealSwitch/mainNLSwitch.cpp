@@ -25,7 +25,6 @@ using namespace std;
 /*main program*/
 
 
-
 int main()
 {
   string solverDirEnum = "DIRECT_ENUM" ;
