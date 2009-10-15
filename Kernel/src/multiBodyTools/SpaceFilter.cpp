@@ -144,7 +144,14 @@ public:
     }
 
   }
-  /* ... visit other objects*/
+
+  /* user interface */
+  void visit(SP::BodyLDS d)
+  {
+    d->selfHash(parent);
+  }
+
+  /* ... visit other objects */
 
 };
 
@@ -367,6 +374,12 @@ struct SpaceFilter::_IsSameDiskPlanR : public SiconosVisitor
     flag = false;
   };
 
+  void visit(SP::BodyLDSR)
+  {
+    flag = false;
+  };
+
+
   void visit(SP::DiskPlanR rel)
   {
     flag = rel->equal(A, B, C, r, xCenter, yCenter, width);
@@ -397,7 +410,8 @@ struct SpaceFilter::_IsSameSpherePlanR : public SiconosVisitor
 
 /* proximity detection between circular object and plans */
 void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
-                                      double xCenter, double yCenter, double width, SP::CircularDS ds)
+                                      double xCenter, double yCenter,
+                                      double width, SP::CircularDS ds)
 {
   double r = ds->getRadius();
 
@@ -407,7 +421,8 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
   SP::DynamicalSystemsGraph DSG0 = _nsds->getTopologyPtr()->getDSGPtr(0);
 
   boost::shared_ptr<_IsSameDiskPlanR>
-  isSameDiskPlanR(new _IsSameDiskPlanR(shared_from_this(), A, B, C, r, xCenter, yCenter, width));
+  isSameDiskPlanR(new _IsSameDiskPlanR(shared_from_this(), A, B, C, r,
+                                       xCenter, yCenter, width));
 
 
   // all DS must be in DS graph
@@ -578,7 +593,8 @@ bool operator ==(interPair const& a, interPair const& b)
 struct SpaceFilter::_FindInteractions : public SiconosVisitor
 {
 
-  typedef std::tr1::unordered_multiset<interPair, boost::hash<interPair> > interPairs;
+  typedef std::tr1::unordered_multiset < interPair,
+          boost::hash<interPair> > interPairs;
 
   SP::SpaceFilter parent;
   _FindInteractions(SP::SpaceFilter p) : parent(p) {};
@@ -590,8 +606,12 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
     // interactions with plans
     for (unsigned int i = 0; i < parent->_plans->size(0); ++i)
     {
-      parent->_PlanCircularFilter((*parent->_plans)(i, 0), (*parent->_plans)(i, 1), (*parent->_plans)(i, 2),
-                                  (*parent->_plans)(i, 3), (*parent->_plans)(i, 4), (*parent->_plans)(i, 5),
+      parent->_PlanCircularFilter((*parent->_plans)(i, 0),
+                                  (*parent->_plans)(i, 1),
+                                  (*parent->_plans)(i, 2),
+                                  (*parent->_plans)(i, 3),
+                                  (*parent->_plans)(i, 4),
+                                  (*parent->_plans)(i, 5),
                                   ds1);
     }
 
@@ -608,7 +628,8 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
 
     unsigned int j;
     interPairs declaredInteractions;
-    boost::shared_ptr<_CircularFilter> circularFilter(new _CircularFilter(parent, ds1));
+    boost::shared_ptr<_CircularFilter>
+    circularFilter(new _CircularFilter(parent, ds1));
 
 
     for (j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j)
@@ -653,7 +674,9 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
     // interactions with plans
     for (unsigned int i = 0; i < parent->_plans->size(0); ++i)
     {
-      parent->_PlanSphereFilter((*parent->_plans)(i, 0), (*parent->_plans)(i, 1), (*parent->_plans)(i, 2),
+      parent->_PlanSphereFilter((*parent->_plans)(i, 0),
+                                (*parent->_plans)(i, 1),
+                                (*parent->_plans)(i, 2),
                                 (*parent->_plans)(i, 3), ds1);
     }
 
@@ -700,6 +723,12 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
     }
   }
 
+  void visit(SP::BodyLDS d)
+  {
+    d->selfFindInteractions(parent);
+  }
+
+
 };
 
 
@@ -709,10 +738,13 @@ void SpaceFilter::buildInteractions()
 
   DSIterator it1;
 
-  SP::DynamicalSystemsGraph DSG0 = _nsds->getTopologyPtr()->getDSGPtr(0);
+  SP::DynamicalSystemsGraph
+  DSG0 = _nsds->getTopologyPtr()->getDSGPtr(0);
 
-  boost::shared_ptr<_BodyHash> hasher(new _BodyHash(shared_from_this()));
-  boost::shared_ptr<_FindInteractions> findInteractions(new _FindInteractions(shared_from_this()));
+  boost::shared_ptr<_BodyHash>
+  hasher(new _BodyHash(shared_from_this()));
+  boost::shared_ptr<_FindInteractions>
+  findInteractions(new _FindInteractions(shared_from_this()));
 
 
   _hash_table.clear();
@@ -730,9 +762,7 @@ void SpaceFilter::buildInteractions()
   for (boost::tie(vi, viend) = DSG0->vertices();
        vi != viend; ++vi)
   {
-
     DSG0->bundle(*vi)->accept(findInteractions);
-
   }
 
   // should be done on the fly. Linear time anyway.

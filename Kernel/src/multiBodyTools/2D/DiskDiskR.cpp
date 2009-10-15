@@ -28,7 +28,8 @@ DiskDiskR::DiskDiskR(double r, double rr) : CircularR()
   r1pr2 = r1 + r2;
 }
 
-double DiskDiskR::distance(double x1, double y1, double r1, double x2, double y2, double r2)
+double DiskDiskR::distance(double x1, double y1, double r1,
+                           double x2, double y2, double r2)
 {
   return (hypot(x1 - x2, y1 - y2) - r1pr2);
 }
