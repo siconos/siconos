@@ -1,0 +1,212 @@
+#!/bin/sh
+
+
+#PRE-PIPOL  src/nightly/siconos/trunk/Build/Pipol/pre-siconos
+
+#POST-PIPOL src/nightly/siconos/trunk/Build/Pipol/post-siconos
+
+#PIPOL fedora 02:00
+
+#PIPOL debian 02:00
+
+#PIPOL ubuntu 02:00
+
+#PIPOL mac 02:00
+
+#PIPOL windows 02:00 --root
+
+
+
+set -x
+mode=${1:-Nightly}
+
+export LC_ALL=C
+
+id -u
+date
+df -k
+
+head_revision=`cat $PIPOL_HOMEDIR/src/nightly/siconos/head_revision`
+local_revision=`cat $PIPOL_HOMEDIR/src/nightly/siconos/local_revision`
+
+echo HEAD : $head_revision
+echo LOCAL : $local_revision
+
+env
+
+case $PIPOL_IMAGE in 
+    *windows*) cp -r /home/admin/bremond/.ssh /home/root/.ssh;;
+esac
+
+# a local copy because make Nightly will update this sources.
+src_setup() {
+    for mod in Numerics Kernel Examples ; do 
+        [ -d $mod ] || svn co svn+ssh://bremond@scm.gforge.inria.fr/svn/siconos/trunk/$mod <&-
+        cd $mod; { 
+            svn update -r $local_revision
+        }; cd -
+    done
+}
+
+make_1() {
+    mod=$1
+    btype=$2
+    shift; shift
+    args="$@"
+    cd $PIPOL_WDIR/build/$mod/$btype ;{
+        make $args
+    }; cd -
+}
+
+make_2() {
+    mod=$1
+    btype=$2
+    shift; shift
+    args="$@"
+    cd $PIPOL_WDIR/build/$mod/$btype ;{
+        make -j 2 $args
+    }; cd -
+}
+
+
+configure_1() {
+    mod=$1
+    btype=$2
+    shift; shift
+    args="$@"
+    mkdir -p $PIPOL_WDIR/build/$mod/$btype
+    cd $PIPOL_WDIR/build/$mod/$btype; {
+        rm -f CMakeCache.txt
+        eval cmake $PIPOL_WDIR/$mod -DCMAKE_INSTALL_PREFIX=/usr -DWITH_SVN=TRUE -DCMAKE_BUILD_TYPE=$btype $args
+    }; cd -
+
+}
+
+pack_1() {
+    cd $PIPOL_WDIR/build/$1/$2 ;{
+        cmake $PIPOL_WDIR/$1 -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=$2
+        cpack -G $PIPOL_CPACK_G 
+    }; cd -
+    
+}
+
+gforge_upload() { 
+    cd $PIPOL_HOMEDIR/gforge ;{
+        export GFORGE_WSDL=https://gforge.inria.fr/soap/index.php?wsdl 
+        ./gforge.php -v login --username=sicupload --password='UPLOADplp!' --project=siconos
+        ./gforge.php frs addfile --package=1115 --release=2142 --file=$1 
+    }; cd -
+}
+
+save_packed_1() {
+    cd $PIPOL_WDIR/build/$1/$2; {
+        cp *.$PIPOL_PACK_EXT $PIPOL_HOMEDIR/packages
+    }; cd -
+}
+
+install_1() {
+    cd $PIPOL_WDIR/build/$1/$2 ;{
+        sudo make install
+        sudo chown $PIPOL_USER  install_manifest.txt
+        sudo chgrp $PIPOL_GROUP install_manifest.txt
+        sudo ldconfig
+    }; cd -
+}
+
+nightly_build() {
+    make_1 $1 $2 ${mode}Start
+    make_1 $1 $2 ${mode}Update
+    make_1 $1 $2 ${mode}Configure
+    make_1 $1 $2 ${mode}Build
+}
+
+silent_nightly_build() {
+    make_1 $1 $2 
+}
+
+
+nightly_test() { 
+    make_1 $1 $2 ${mode}Test
+}
+
+nightly_coverage() { 
+    make_1 $1 $2 ${mode}Test
+    make_1 $1 $2 ${mode}Coverage
+}
+
+nightly_memcheck() {
+    make_1 $1 $2 ${mode}MemCheck
+}
+
+nightly_submit() {
+    make_1 $1 $2 ${mode}Submit
+}
+
+#sudo rm -f /usr/local/bin/ctest
+
+# Releases
+src_setup
+configure_1 Numerics Release
+nightly_build Numerics Release
+nightly_test Numerics Release
+nightly_submit Numerics Release
+nightly_memcheck Numerics Release
+nightly_submit Numerics Release
+install_1 Numerics Release
+
+configure_1 Kernel Release
+nightly_build Kernel Release
+nightly_test Kernel Release
+nightly_submit Numerics Release
+nightly_memcheck Kernel Release
+nightly_submit Kernel Release
+install_1 Kernel Release
+
+# Examples
+configure_1 Examples Release
+nightly_build Examples Release
+nightly_test Examples Release
+nightly_memcheck Examples Release
+nightly_submit Examples Release
+
+# Release Packages
+pack_1 Numerics Release
+save_packed_1 Numerics Release
+
+pack_1 Kernel Release
+save_packed_1 Kernel Release
+
+pack_1 Examples Release
+save_packed_1 Examples Release
+
+# Coverage
+src_setup
+configure_1 Numerics Debug -DWITH_TESTS_COVERAGE=ON
+nightly_build Numerics Debug
+nightly_test Numerics Debug
+nightly_coverage Numerics Debug
+nightly_memcheck Numerics Debug
+nightly_submit Numerics Debug 
+
+src_setup
+configure_1 Kernel Debug -DWITH_TESTS_COVERAGE=ON
+nightly_build Kernel Debug
+nightly_test Kernel Debug
+nightly_coverage Kernel Debug
+nightly_memcheck Kernel Debug
+nightly_submit Kernel Debug
+
+# Debug packages
+#src_setup
+#configure_1 Numerics RelWithDebInfo
+#nightly_build Kernel RelWithDebInfo
+#nightly_test Kernel RelWithDebInfo
+#nightly_memcheck Kernel RelWithDebInfo
+#pack_1 Numerics RelWithDebInfo
+#save_packed_1 Numerics RelWithDebInfo
+#make_1 Numerics RelWithDebInfo clean
+
+
+# this is the end...
+date
+df -k

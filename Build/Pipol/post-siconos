@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cd $HOME/src/nightly/siconos
+svn update

@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# get local and head revision numbers
+cd src/nightly/siconos ;{ 
+    
+    local=`svn info | sed 's/Revision: \([0-9][0-9]*\)/\1/p;d'`
+    head=`svn info -r HEAD | sed 's/Revision: \([0-9][0-9]*\)/\1/p;d'`
+    
+    echo $local > local_revision
+    echo $head > head_revision
+
+}; cd $HOME
+
+
+# only update build scripts
+cd src/nightly/siconos/trunk/Build/Pipol ;{
+    svn update
+}; cd $HOME
+
+
+# do nothing if nothing change in svn
+if [ $local = $head ]; then
+    exit 1
+else
+    exit 0
+fi
