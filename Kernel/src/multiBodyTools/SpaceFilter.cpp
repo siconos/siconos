@@ -145,8 +145,7 @@ public:
 
   }
 
-  /* user interface */
-  void visit(SP::BodyLDS d)
+  void visit(SP::ExternalBody d)
   {
     d->selfHash(parent);
   }
@@ -374,7 +373,7 @@ struct SpaceFilter::_IsSameDiskPlanR : public SiconosVisitor
     flag = false;
   };
 
-  void visit(SP::BodyLDSR)
+  void visit(SP::ExternalBody)
   {
     flag = false;
   };
@@ -723,7 +722,7 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
     }
   }
 
-  void visit(SP::BodyLDS d)
+  void visit(SP::ExternalBody d)
   {
     d->selfFindInteractions(parent);
   }

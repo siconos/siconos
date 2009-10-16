@@ -56,6 +56,7 @@ class DiskPlanR;
 class Sphere;
 class SphereSphereR;
 class SpherePlanR;
+class ExternalBody;
 class NonSmoothLaw;
 class EqualityConditionNSL;
 class MixedComplementarityConditionNSL;
@@ -116,6 +117,7 @@ public:
   VISIT(Sphere);
   VISIT(SphereSphereR);
   VISIT(SpherePlanR);
+  VISIT(ExternalBody);
   VISIT(NonSmoothLaw);
   VISIT(MixedComplementarityConditionNSL);
   VISIT(EqualityConditionNSL);

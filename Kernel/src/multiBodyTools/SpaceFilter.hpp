@@ -38,15 +38,16 @@
 #ifndef SpaceFilter_hpp
 #define SpaceFilter_hpp
 
-#include <SiconosKernel.hpp>
-#include <Circle.h>
-#include <Disk.h>
-#include <DiskDiskR.h>
-#include <CircleCircleR.h>
-#include <DiskPlanR.h>
-#include <Sphere.h>
-#include <SphereSphereR.h>
-#include <SpherePlanR.h>
+#include "SiconosKernel.hpp"
+#include "Circle.h"
+#include "Disk.h"
+#include "DiskDiskR.h"
+#include "CircleCircleR.h"
+#include "DiskPlanR.h"
+#include "Sphere.h"
+#include "SphereSphereR.h"
+#include "SpherePlanR.h"
+#include "ExternalBody.hpp"
 
 #include <tr1/unordered_set>
 #include <boost/throw_exception.hpp>
@@ -151,12 +152,8 @@ public:
   /** search potential interactions
    *
    */
-  void buildInteractions();
+  virtual void buildInteractions();
 
 };
-
-TYPEDEF_SPTR(SpaceFilter);
-
-
 
 #endif /* SpaceFilter_hpp */

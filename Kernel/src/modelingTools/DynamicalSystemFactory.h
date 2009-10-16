@@ -35,7 +35,9 @@ class DynamicalSystem;
 namespace DynamicalSystemFactory
 {
 
-/** A pointer to function, returning a pointer to DynamicalSystem, built with its type (related to the class name) and a vector of initial conditions. */
+/** A pointer to function, returning a pointer to DynamicalSystem,
+    built with its type (related to the class name) and a vector of
+    initial conditions. */
 typedef SP::DynamicalSystem(*object_creator)(int, const SiconosVector&) ;
 
 /** The type of the factory map */
@@ -59,15 +61,20 @@ template<class SubType> SP::DynamicalSystem factory(int name, const SiconosVecto
  *
  * DynamicalSystem factory.
  * Use:
- *     DynamicalSystemFactory::Registry& regDynamicalSystem(DynamicalSystemFactory::Registry::get()) ;
- *     SP::DynamicalSystem yourDynamicalSystem = regDynamicalSystem.instantiate(type, x0);
+
+ *     DynamicalSystemFactory::Registry&
+ *        regDynamicalSystem(DynamicalSystemFactory::Registry::get()) ;
+ *
+ *     SP::DynamicalSystem yourDynamicalSystem =
+ *        regDynamicalSystem.instantiate(type, x0);
  */
 class Registry
 {
 
 private :
 
-  /** map that links a string, the type of the class, to a pointer to function, used to build the object. */
+  /** map that links a string, the type of the class, to a pointer
+      to function, used to build the object. */
   MapFactory factory_map;
 
 public :
@@ -99,7 +106,6 @@ public :
  */
 class Registration
 {
-
 public :
 
   /** To register some new object into the factory
@@ -114,16 +120,3 @@ public :
 // end of namespace DynamicalSystemFactory
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
