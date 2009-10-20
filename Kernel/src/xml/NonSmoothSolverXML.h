@@ -91,7 +91,7 @@ public:
   /** To get the name of the solver/algorithm (attribute of root node)
    *  \return a string
    */
-  inline std::string getName() const
+  inline std::string name() const
   {
     return SiconosDOMTreeTools::getStringAttributeValue(rootNode, "Name");
   };

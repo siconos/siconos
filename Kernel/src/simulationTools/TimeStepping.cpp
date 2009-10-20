@@ -49,15 +49,18 @@ TimeStepping::TimeStepping(SP::TimeDiscretisation td): Simulation(td, "TimeStepp
 }
 
 // --- XML constructor ---
-TimeStepping::TimeStepping(SP::SimulationXML strxml, double t0, double T, SP::DynamicalSystemsSet dsList, SP::InteractionsSet interList): Simulation(strxml, t0, T, dsList, interList, "TimeStepping")
+TimeStepping::TimeStepping(SP::SimulationXML strxml, double t0,
+                           double T, SP::DynamicalSystemsSet dsList,
+                           SP::InteractionsSet interList):
+  Simulation(strxml, t0, T, dsList, interList, "TimeStepping")
 {
   mComputeResiduY = false;
   // === One Step NS Problem === For time stepping, only one non
   // smooth problem is built.
-  if (simulationxml->hasOneStepNSProblemXML())  // ie if OSNSList is
+  if (_simulationxml->hasOneStepNSProblemXML())  // ie if OSNSList is
     // not empty
   {
-    SetOfOSNSPBXML OSNSList = simulationxml->getOneStepNSProblemsXML();
+    SetOfOSNSPBXML OSNSList = _simulationxml->getOneStepNSProblemsXML();
     if (OSNSList.size() != 1)
       RuntimeException::selfThrow("TimeStepping::xml constructor - Two many inputs for OSNS problems (only one problem is required).");
     SP::OneStepNSProblemXML osnsXML = *(OSNSList.begin());
@@ -65,15 +68,15 @@ TimeStepping::TimeStepping(SP::SimulationXML strxml, double t0, double T, SP::Dy
     string type = osnsXML->getNSProblemType();
     if (type == LCP_TAG)  // LCP
     {
-      (*allNSProblems)["timeStepping"].reset(new LCP(osnsXML));
+      (*_allNSProblems)["timeStepping"].reset(new LCP(osnsXML));
     }
     else if (type == FRICTIONCONTACT_TAG)
     {
-      (*allNSProblems)["timeStepping"].reset(new FrictionContact(osnsXML));
+      (*_allNSProblems)["timeStepping"].reset(new FrictionContact(osnsXML));
     }
     else RuntimeException::selfThrow("TimeStepping::xml constructor - wrong type of NSProblem: inexistant or not yet implemented");
 
-    (*allNSProblems)["timeStepping"]->setId("timeStepping");
+    (*_allNSProblems)["timeStepping"]->setId("timeStepping");
 
     // Add QP and Relay cases when these classes will be fully
     // implemented.
@@ -121,7 +124,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
   bool inserted;
 
   // For all UR in Index[i-1] ...
-  double h = getTimeStep();
+  double h = timeStep();
 
   // indexSet1 scan
   UnitaryRelationsGraph::VIterator ui1, ui1end, v1next;
@@ -224,12 +227,12 @@ void TimeStepping::recordNonSmoothProblem(SP::OneStepNSProblem osns)
 {
   // A the time, a time stepping simulation can only have one non
   // smooth problem.
-  if (!allNSProblems->empty())
+  if (!_allNSProblems->empty())
     RuntimeException::selfThrow
     ("TimeStepping,  recordNonSmoothProblem - A non smooth problem already exist. You can not have more than one.");
   string name = "timeStepping";
   osns->setId(name);
-  (*allNSProblems)[name] = osns;
+  (*_allNSProblems)[name] = osns;
 }
 
 void TimeStepping::initOSNS()
@@ -263,11 +266,11 @@ void TimeStepping::initOSNS()
   }
 
 
-  if (!allNSProblems->empty()) // ie if some Interactions have been
+  if (!_allNSProblems->empty()) // ie if some Interactions have been
     // declared and a Non smooth problem
     // built.
   {
-    if (allNSProblems->size() > 1)
+    if (_allNSProblems->size() > 1)
       RuntimeException::selfThrow("TimeStepping::initialize, at the time, a time stepping simulation can not have more than one non smooth problem.");
 
     // At the time, we consider that for all systems, levelMin is
@@ -277,18 +280,18 @@ void TimeStepping::initOSNS()
     assert(model()->nonSmoothDynamicalSystem()->topology()->isUpToDate());
     assert(model()->nonSmoothDynamicalSystem()->topology()->getMinRelativeDegree() >= 0);
 
-    levelMin = model()->nonSmoothDynamicalSystem()->topology()->getMinRelativeDegree();
+    _levelMin = model()->nonSmoothDynamicalSystem()->topology()->minRelativeDegree();
 
-    if (levelMin != 0)
-      levelMin--;
+    if (_levelMin != 0)
+      _levelMin--;
 
     // === update all index sets ===
     updateIndexSets();
 
     // initialization of  OneStepNonSmoothProblem
-    for (OSNSIterator itOsns = allNSProblems->begin(); itOsns != allNSProblems->end(); ++itOsns)
+    for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
     {
-      (itOsns->second)->setLevels(levelMin, levelMax);
+      (itOsns->second)->setLevels(_levelMin, _levelMax);
       (itOsns->second)->initialize(shared_from_this());
     }
   }
@@ -296,15 +299,15 @@ void TimeStepping::initOSNS()
 
 void TimeStepping::initLevelMax()
 {
-  levelMax = model()->nonSmoothDynamicalSystem()->topology()->getMaxRelativeDegree();
+  _levelMax = model()->nonSmoothDynamicalSystem()->topology()->maxRelativeDegree();
   // Interactions initialization (here, since level depends on the
   // type of simulation) level corresponds to the number of Y and
   // Lambda derivatives computed.
 
-  if (levelMax != 0) // level max is equal to relative degree-1. But for
+  if (_levelMax != 0) // level max is equal to relative degree-1. But for
     // relative degree 0 case, we keep 0 value for
-    // levelMax
-    levelMax--;
+    // _levelMax
+    _levelMax--;
 }
 
 void TimeStepping::nextStep()
@@ -316,25 +319,25 @@ void TimeStepping::nextStep()
 void TimeStepping::update(unsigned int levelInput)
 {
   // 1 - compute input (lambda -> r)
-  if (!allNSProblems->empty())
+  if (!_allNSProblems->empty())
     updateInput(levelInput);
 
   // 2 - compute state for each dynamical system
 
   OSIIterator itOSI;
-  for (itOSI = allOSI->begin(); itOSI != allOSI->end() ; ++itOSI)
+  for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     (*itOSI)->updateState(levelInput);
 
   // 3 - compute output ( x ... -> y)
-  if (!allNSProblems->empty())
+  if (!_allNSProblems->empty())
   {
-    updateOutput(0, levelMax);
+    updateOutput(0, _levelMax);
   }
 }
 
 void TimeStepping::computeFreeState()
 {
-  std::for_each(allOSI->begin(), allOSI->end(), boost::bind(&OneStepIntegrator::computeFreeState, _1));
+  std::for_each(_allOSI->begin(), _allOSI->end(), boost::bind(&OneStepIntegrator::computeFreeState, _1));
 }
 
 // compute simulation between current and next event.  Initial
@@ -362,7 +365,7 @@ void TimeStepping::computeInitialResidu()
   }
 
 
-  for (OSIIterator it = allOSI->begin(); it != allOSI->end() ; ++it)
+  for (OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
     (*it)->computeResidu();
   if (mComputeResiduY)
     for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
@@ -380,7 +383,7 @@ void TimeStepping::advanceToEvent()
   // solve ...
   computeFreeState();
   int info = 0;
-  if (!allNSProblems->empty())
+  if (!_allNSProblems->empty())
     info = computeOneStepNSProblem("timeStepping");
   // Check output from solver (convergence or not ...)
   if (!checkSolverOutput)
@@ -388,7 +391,7 @@ void TimeStepping::advanceToEvent()
   else
     checkSolverOutput(info, this);
   // Update
-  update(levelMin);
+  update(_levelMin);
 }
 
 /*update of the nabla */
@@ -397,8 +400,8 @@ void   TimeStepping::prepareNewtonIteration()
 {
   //  cout << "update the operators" <<endl ;
 
-  DSOSIConstIterator it = osiMap.begin();
-  while (it != osiMap.end())
+  DSOSIConstIterator it = _osiMap.begin();
+  while (it != _osiMap.end())
   {
     if ((it->second)->getType() == OSI::MOREAU)
     {
@@ -435,7 +438,7 @@ void TimeStepping::saveYandLambdaInMemory()
 {
   // Save OSNS state (Interactions) in Memory.
   OSNSIterator itOsns;
-  for (itOsns = allNSProblems->begin(); itOsns != allNSProblems->end(); ++itOsns)
+  for (itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
     (itOsns->second)->saveInMemory();
 
 }
@@ -455,7 +458,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     computeFreeState();
     if (info)
       cout << "new loop because of info\n" << endl;
-    if (!allNSProblems->empty())
+    if (!_allNSProblems->empty())
       info = computeOneStepNSProblem("timeStepping");
     if (info)
       cout << "info!" << endl;
@@ -465,7 +468,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     else
       checkSolverOutput(info, this);
 
-    update(levelMin);
+    update(_levelMin);
     isNewtonConverge = newtonCheckConvergence(criterion);
     if (!isNewtonConverge && !info)
     {
@@ -491,7 +494,7 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
   //  if (nsdsConverge < criterion )
 
   double residu = 0.0;
-  for (OSIIterator it = allOSI->begin(); it != allOSI->end() ; ++it)
+  for (OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
   {
     residu = (*it)->computeResidu();
     if (residu > criterion)
@@ -525,7 +528,7 @@ void TimeStepping::run(const std::string& opt, double criterion, unsigned int ma
   unsigned int count = 0; // events counter.
   // do simulation while events remains in the "future events" list of
   // events manager.
-  cout << " ==== Start of " << simulationType << " simulation - This may take a while ... ====" << endl;
+  cout << " ==== Start of " << _simulationType << " simulation - This may take a while ... ====" << endl;
   while (_eventsManager->hasNextEvent())
   {
     if (opt == "linear")
@@ -540,7 +543,7 @@ void TimeStepping::run(const std::string& opt, double criterion, unsigned int ma
     _eventsManager->processEvents();
     count++;
   }
-  cout << "===== End of " << simulationType << "simulation. " << count << " events have been processed. ==== " << endl;
+  cout << "===== End of " << _simulationType << "simulation. " << count << " events have been processed. ==== " << endl;
 }
 
 TimeStepping* TimeStepping::convert(Simulation *str)

@@ -81,7 +81,7 @@ class NonSmoothSolver
 private:
 
   /** Algorithm/solver name */
-  std::string name;
+  std::string _name;
 
   /** Vector of double parameters */
   SP::IntParameters int_parameters;
@@ -143,9 +143,9 @@ public:
   /** To get the solver algorithm name
    *  \return a string
    */
-  inline const std::string getName() const
+  inline const std::string name() const
   {
-    return name;
+    return _name;
   };
 
   /** To set the solver algorithm name
@@ -153,7 +153,7 @@ public:
    */
   inline void setName(const std::string& newVal)
   {
-    name = newVal;
+    _name = newVal;
   };
 
   /** To get the list of int. parameters

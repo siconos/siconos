@@ -78,7 +78,7 @@ public:
     return !isOk;
   } ;
 
-  /** \fn std::string getName() const {return name;} ;
+  /** \fn std::string name() const {return name;} ;
    * \brief return test name
    */
   inline std::string getName() const

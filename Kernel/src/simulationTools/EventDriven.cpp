@@ -44,9 +44,9 @@ EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T,
   // both one step ns problems ("acceleration" and "impact").  At the
   // time, only LCP is available for Event Driven.
 
-  if (simulationxml->hasOneStepNSProblemXML()) // ie if OSNSList is not empty
+  if (_simulationxml->hasOneStepNSProblemXML()) // ie if OSNSList is not empty
   {
-    SetOfOSNSPBXML OSNSList = simulationxml->getOneStepNSProblemsXML();
+    SetOfOSNSPBXML OSNSList = _simulationxml->getOneStepNSProblemsXML();
     SP::OneStepNSProblemXML osnsXML;
     string type;
     // For EventDriven, two OSNSPb are required, "acceleration" and
@@ -61,15 +61,15 @@ EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T,
       type = osnsXML->getNSProblemType();
       if (type == LCP_TAG)  // LCP
       {
-        (*allNSProblems)[id].reset(new LCP(osnsXML));
+        (*_allNSProblems)[id].reset(new LCP(osnsXML));
       }
       else
         RuntimeException::selfThrow("EventDriven::xml constructor - wrong type of NSProblem: inexistant or not yet implemented");
       id = "acceleration";
     }
 
-    (*allNSProblems)["acceleration"]->setId("acceleration");
-    (*allNSProblems)["impact"]->setId("impact");
+    (*_allNSProblems)["acceleration"]->setId("acceleration");
+    (*_allNSProblems)["impact"]->setId("impact");
   }
 }
 
@@ -103,11 +103,11 @@ void EventDriven::updateIndexSet(unsigned int i)
   {
     // We get jroot array, output of root information Warning! work
     // only if there is only one osi in the simulation.
-    if (allOSI->size() > 1)
+    if (_allOSI->size() > 1)
       RuntimeException::selfThrow
       ("EventDriven::updateIndexSet(i), not yet implemented for several OneStepIntegrators in the same Simulation process.");
     SP::Lsodar lsodar =
-      boost::static_pointer_cast<Lsodar>(*(allOSI->begin()));
+      boost::static_pointer_cast<Lsodar>(*(_allOSI->begin()));
     SA::integer jroot = lsodar->getJroot();
     unsigned int nsLawSize; // size of each UR, which corresponds to
     // the related nsLaw size
@@ -191,13 +191,13 @@ void EventDriven::updateIndexSet(unsigned int i)
       if (!indexSeti->is_vertex(ur)) // If the UR is not yet in
         // the set ...
       {
-        if (fabs(y) <= tolerance)
+        if (fabs(y) <= _tolerance)
           // vertex and edges insertion
           indexSeti->copy_vertex(ur, *indexSetip);
       }
       else  // if the UR is already in the set
       {
-        if (fabs(y) > tolerance)
+        if (fabs(y) > _tolerance)
         {
           indexSeti->remove_vertex(ur);
           ur->lambda(i)->zero();
@@ -232,9 +232,9 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
     double gamma = ur->getYRef(2);
     double F     = ur->getLambdaRef(2);
 
-    if (gamma > 0 && fabs(F) < tolerance)
+    if (gamma > 0 && fabs(F) < _tolerance)
       indexSet2->remove_vertex(ur);
-    else if (fabs(gamma) < tolerance && fabs(F) < tolerance) // undetermined case
+    else if (fabs(gamma) < _tolerance && fabs(F) < _tolerance) // undetermined case
       RuntimeException::selfThrow
       ("EventDriven::updateIndexSetsWithDoubleCondition(), undetermined case.");
   }
@@ -258,56 +258,56 @@ void EventDriven::initOSNS()
   for (boost::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     indexSet0->bundle(*ui)->initialize("EventDriven");
 
-  if (!allNSProblems->empty()) // ie if some Interactions have been
+  if (!_allNSProblems->empty()) // ie if some Interactions have been
     // declared and a Non smooth problem
     // built.
   {
     // === OneStepNSProblem initialization. === First check that
     // there are 2 osns: one "impact" and one "acceleration"
-    if (allNSProblems->size() != 2)
+    if (_allNSProblems->size() != 2)
       RuntimeException::selfThrow
       (" EventDriven::initialize, \n an EventDriven simulation must have two non smooth problem.\n Here, there are "
-       + allNSProblems->size());
+       + _allNSProblems->size());
 
-    if (allNSProblems->find("impact") ==
-        allNSProblems->end())  // ie if the impact problem does not
+    if (_allNSProblems->find("impact") ==
+        _allNSProblems->end())  // ie if the impact problem does not
       // exist
       RuntimeException::selfThrow
       ("EventDriven::initialize, an EventDriven simulation must have an 'impact' non smooth problem.");
-    if (allNSProblems->find("acceleration") ==
-        allNSProblems->end()) // ie if the acceleration-level problem
+    if (_allNSProblems->find("acceleration") ==
+        _allNSProblems->end()) // ie if the acceleration-level problem
       // does not exist
       RuntimeException::selfThrow
       ("EventDriven::initialize, an EventDriven simulation must have an 'acceleration' non smooth problem.");
 
     // At the time, we consider that for all systems, levelMin is
     // equal to the minimum value of the relative degree
-    levelMin = model()->nonSmoothDynamicalSystem()
-               ->topology()->getMinRelativeDegree();
-    if (levelMin == 0)
-      levelMin++;
+    _levelMin = model()->nonSmoothDynamicalSystem()
+                ->topology()->minRelativeDegree();
+    if (_levelMin == 0)
+      _levelMin++;
 
     // === update all index sets ===
     updateIndexSets();
 
     // WARNING: only for Lagrangian systems - To be reviewed for
     // other ones.
-    (*allNSProblems)["impact"]->setLevels(levelMin - 1, levelMax - 1);
-    (*allNSProblems)["impact"]->initialize(shared_from_this());
-    (*allNSProblems)["acceleration"]->setLevels(levelMin, levelMax);
-    (*allNSProblems)["acceleration"]->initialize(shared_from_this());
+    (*_allNSProblems)["impact"]->setLevels(_levelMin - 1, _levelMax - 1);
+    (*_allNSProblems)["impact"]->initialize(shared_from_this());
+    (*_allNSProblems)["acceleration"]->setLevels(_levelMin, _levelMax);
+    (*_allNSProblems)["acceleration"]->initialize(shared_from_this());
   }
 }
 
 void EventDriven::initLevelMax()
 {
-  levelMax = model()->nonSmoothDynamicalSystem()->
-             topology()->getMaxRelativeDegree();
+  _levelMax = model()->nonSmoothDynamicalSystem()->
+              topology()->maxRelativeDegree();
   // Interactions initialization (here, since level depends on the
   // type of simulation) level corresponds to the number of Y and
   // Lambda derivatives computed.
-  if (levelMax == 0)
-    levelMax++;
+  if (_levelMax == 0)
+    _levelMax++;
 }
 
 void EventDriven::computeF(SP::OneStepIntegrator osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
@@ -329,11 +329,11 @@ void EventDriven::computeF(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   model()->setCurrentTime(t);
 
   // solve a LCP at "acceleration" level if required
-  if (!allNSProblems->empty())
+  if (!_allNSProblems->empty())
   {
-    if (!((*allNSProblems)["acceleration"]->interactions())->isEmpty())
+    if (!((*_allNSProblems)["acceleration"]->interactions())->isEmpty())
     {
-      (*allNSProblems)["acceleration"]->compute(t);
+      (*_allNSProblems)["acceleration"]->compute(t);
       updateInput(2); // Necessary to compute DS state below
     }
     // Compute the right-hand side ( xdot = f + r in DS) for all the
@@ -431,7 +431,7 @@ void EventDriven::computeG(SP::OneStepIntegrator osi,
   // IN: - lambda[2] obtained during LCP call in computeF()
   //     - y[0]: need to be updated.
 
-  if (!allNSProblems->empty())
+  if (!_allNSProblems->empty())
     updateOutput(0, 0);
 
   // If UR is in IndexSet2, g = lambda[2], else g = y[0]
@@ -464,20 +464,20 @@ void EventDriven::updateImpactState()
   updateInput(1);
 
   // Compute post-impact velocity
-  for (itOSI = allOSI->begin(); itOSI != allOSI->end() ; ++itOSI)
+  for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     (*itOSI)->updateState(1);
 }
 
 void EventDriven::update(unsigned int levelInput)
 {
-  if (!allNSProblems->empty())
+  if (!_allNSProblems->empty())
   {
     // compute input (lambda -> r)
     updateInput(levelInput);
 
     // Update dynamical systems states
     OSIIterator itOSI;
-    for (itOSI = allOSI->begin(); itOSI != allOSI->end() ; ++itOSI)
+    for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
       (*itOSI)->updateState(levelInput);
 
     // Update output (y)
@@ -496,48 +496,48 @@ void EventDriven::advanceToEvent()
   // next time step or first root of the 'g' function found by
   // integrator (Lsodar)
 
-  // if istate == 1 => first call. It this case we suppose that tinit
-  // and tend have been initialized before.
+  // if istate == 1 => first call. It this case we suppose that _tinit
+  // and _tend have been initialized before.
 
   if (istate == 2 || istate == 3)
   {
-    tinit = _eventsManager->getStartingTime();
-    tend =  _eventsManager->getNextTime();
+    _tinit = _eventsManager->startingTime();
+    _tend =  _eventsManager->nextTime();
   }
 
-  tout = tend;
+  _tout = _tend;
   bool isNewEventOccur = false;  // set to true if a new event occur
   // during integration
 
-  // call integrate method for each OSI, between tinit and tend.
+  // call integrate method for each OSI, between _tinit and _tend.
   OSIIterator it;
-  for (it = allOSI->begin(); it != allOSI->end(); ++it)
+  for (it = _allOSI->begin(); it != _allOSI->end(); ++it)
   {
-    (*it)->integrate(tinit, tend, tout, istate); // integrate must
+    (*it)->integrate(_tinit, _tend, _tout, istate); // integrate must
     // return a flag
     // (istate) telling if
-    // tend has been
+    // _tend has been
     // reached or not.
 
-    if (printStat)
+    if (_printStat)
     {
       statOut << " =================> Results after advanceToEvent <================= " << endl;
-      statOut << " Starting time: " << tinit << endl;
+      statOut << " Starting time: " << _tinit << endl;
 
     }
-    if (istate == 3) // ie if tout is not equal to tend: one or more
+    if (istate == 3) // ie if _tout is not equal to _tend: one or more
       // roots have been found.
     {
       isNewEventOccur = true;
       // Add an event into the events manager list
-      _eventsManager->scheduleNonSmoothEvent(tout);
-      if (printStat)
-        statOut << " -----------> New non-smooth event at time " << tout << endl;
+      _eventsManager->scheduleNonSmoothEvent(_tout);
+      if (_printStat)
+        statOut << " -----------> New non-smooth event at time " << _tout << endl;
     }
-    if (printStat)
+    if (_printStat)
     {
       SP::Lsodar lsodar = boost::static_pointer_cast<Lsodar>(*it);
-      statOut << "Results at time " << tout << ":" << endl;
+      statOut << "Results at time " << _tout << ":" << endl;
       SA::integer iwork = lsodar->getIwork();
       statOut << "Number of steps: " << iwork[10] << ", number of f evaluations: " << iwork[11] << ", number of jacobianF eval.: " << iwork[12] << "." << endl;
 
@@ -545,8 +545,8 @@ void EventDriven::advanceToEvent()
   }
 
 
-  // Set model time to tout
-  model()->setCurrentTime(tout);
+  // Set model time to _tout
+  model()->setCurrentTime(_tout);
   // Update all the index sets ...
   updateOutput(1, 1);
   updateIndexSets();

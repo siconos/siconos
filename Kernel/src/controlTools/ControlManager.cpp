@@ -65,7 +65,7 @@ SP::Sensor ControlManager::addSensor(int type, SP::TimeDiscretisation t)
 
 SP::Sensor ControlManager::addAndRecordSensor(int type, SP::TimeDiscretisation t)
 {
-  double currentTime = model()->simulation()->getNextTime();
+  double currentTime = model()->simulation()->nextTime();
   while (t->currentTime() < currentTime)
     t->increment();
   SensorFactory::Registry& regSensor(SensorFactory::Registry::get()) ;
@@ -95,7 +95,7 @@ void ControlManager::display() const
 {
   cout << "=========> ControlManager " ;
   if (model())
-    cout << "linked to model named: " << model()->getTitle() << "." << endl;
+    cout << "linked to model named: " << model()->title() << "." << endl;
   else
     cout << "not linked to a model." << endl;
   cout << "It handles the following objects: " << endl;

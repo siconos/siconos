@@ -528,7 +528,7 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
   // === Adds this in the simulation set of OneStepNSProblem ===
   // First checks the id if required.
   // An id is required if there is more than one OneStepNSProblem in the simulation
-  if (!(simulation()->getOneStepNSProblems())->empty() && _id == DEFAULT_OSNS_NAME)
+  if (!(simulation()->oneStepNSProblems())->empty() && _id == DEFAULT_OSNS_NAME)
     RuntimeException::selfThrow("OneStepNSProblem::constructor(...). Since the simulation has several one step non smooth problem, an id is required for each of them.");
 
   // Checks that the set of Interactions is not empty -
@@ -540,7 +540,7 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
   // The maximum size of the problem (for example, the dim. of M in LCP or Friction problems).
   // Set to the number of possible scalar constraints declared in the topology.
   if (_maxSize == 0) // if maxSize not set explicitely by user before initialize
-    _maxSize = simulation()->model()->nonSmoothDynamicalSystem()->topology()->getNumberOfConstraints();
+    _maxSize = simulation()->model()->nonSmoothDynamicalSystem()->topology()->numberOfConstraints();
 }
 
 void OneStepNSProblem::saveInMemory()

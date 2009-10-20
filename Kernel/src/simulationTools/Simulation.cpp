@@ -40,7 +40,9 @@ using namespace std;
 // --- Constructor with a TimeDiscretisation (and thus a Model) and an
 // --- id ---
 Simulation::Simulation(SP::TimeDiscretisation td, const string& id):
-  name("unnamed"), simulationType(id), _timeDiscretisation(td), tinit(0.0), tend(0.0), tout(0.0), levelMin(0), levelMax(0), tolerance(DEFAULT_TOLERANCE), printStat(false)
+  _name("unnamed"), _simulationType(id), _timeDiscretisation(td),
+  _tinit(0.0), _tend(0.0), _tout(0.0), _levelMin(0), _levelMax(0),
+  _tolerance(DEFAULT_TOLERANCE), _printStat(false)
 {
   if (!_timeDiscretisation)
     RuntimeException::selfThrow("Simulation constructor - timeDiscretisation == NULL.");
@@ -50,18 +52,18 @@ Simulation::Simulation(SP::TimeDiscretisation td, const string& id):
 
   // === indexSets will be updated during initialize() call ===
 
-  allOSI.reset(new OSISet());
-  allNSProblems.reset(new OneStepNSProblems());
+  _allOSI.reset(new OSISet());
+  _allNSProblems.reset(new OneStepNSProblems());
   _eventsManager.reset(new EventsManager()); //
 }
 
 // --- xml constructor ---
 Simulation::Simulation(SP::SimulationXML strxml, double t0, double T, SP::DynamicalSystemsSet dsList,
                        SP::InteractionsSet interactionsList, const string& id):
-  name("unnamed"), simulationType(id), tinit(0.0), tend(0.0), tout(0.0),
-  simulationxml(strxml), levelMin(0), levelMax(0), tolerance(DEFAULT_TOLERANCE), printStat(false)
+  _name("unnamed"), _simulationType(id), _tinit(0.0), _tend(0.0), _tout(0.0),
+  _simulationxml(strxml), _levelMin(0), _levelMax(0), _tolerance(DEFAULT_TOLERANCE), _printStat(false)
 {
-  if (!simulationxml)
+  if (!_simulationxml)
     RuntimeException::selfThrow("Simulation:: xml constructor - xml file = NULL");
   mUseRelativeConvergenceCriterion = false;
   mRelativeConvergenceCriterionHeld = false;
@@ -71,22 +73,22 @@ Simulation::Simulation(SP::SimulationXML strxml, double t0, double T, SP::Dynami
   // === Model ===
 
   // === Time discretisation ===
-  _timeDiscretisation.reset(new TimeDiscretisation(simulationxml->timeDiscretisationXML(), t0, T));
+  _timeDiscretisation.reset(new TimeDiscretisation(_simulationxml->timeDiscretisationXML(), t0, T));
 
   // === OneStepIntegrators ===
-  SetOfOSIXML OSIXMLList = simulationxml->getOneStepIntegratorsXML();
+  SetOfOSIXML OSIXMLList = _simulationxml->getOneStepIntegratorsXML();
   SetOfOSIXMLIt it;
   string typeOfOSI;
-  allOSI.reset(new OSISet());
+  _allOSI.reset(new OSISet());
   for (it = OSIXMLList.begin(); it != OSIXMLList.end(); ++it)
   {
     typeOfOSI = (*it)->getType();
     // if OSI is a Moreau
     if (typeOfOSI == MOREAU_TAG)
-      allOSI->insert(SP::Moreau(new Moreau(*it, dsList)));
+      _allOSI->insert(SP::Moreau(new Moreau(*it, dsList)));
 
     else if (typeOfOSI == LSODAR_TAG) // if OSI is a Lsodar-type
-      allOSI->insert(SP::Lsodar(new Lsodar(*it, dsList, interactionsList)));
+      _allOSI->insert(SP::Lsodar(new Lsodar(*it, dsList, interactionsList)));
 
     else RuntimeException::selfThrow("Simulation::xml constructor - unknown one-step integrator type: " + typeOfOSI);
   }
@@ -98,17 +100,17 @@ Simulation::Simulation(SP::SimulationXML strxml, double t0, double T, SP::Dynami
 
   // === Events manager creation ===
   _eventsManager.reset(new EventsManager()); //
-  allNSProblems.reset(new OneStepNSProblems());
+  _allNSProblems.reset(new OneStepNSProblems());
 }
 
 // --- Destructor ---
 Simulation::~Simulation()
 {
-  allNSProblems->clear();
-  allOSI->clear();
-  osiMap.clear();
+  _allNSProblems->clear();
+  _allOSI->clear();
+  _osiMap.clear();
 
-  allNSProblems->clear();
+  _allNSProblems->clear();
   // -> see shared ressources for this
   if (statOut.is_open()) statOut.close();
 }
@@ -117,17 +119,17 @@ Simulation::~Simulation()
 
 void Simulation::setOneStepIntegrators(const OSISet& newSet)
 {
-  allOSI->clear();
-  allOSI->insert(newSet.begin(), newSet.end());
+  _allOSI->clear();
+  _allOSI->insert(newSet.begin(), newSet.end());
 }
 
 SP::OneStepIntegrator Simulation::integratorOfDS(int numberDS) const
 {
 
-  DSOSIConstIterator it = osiMap.begin();
+  DSOSIConstIterator it = _osiMap.begin();
   bool found = false;
 
-  while (!found || it != osiMap.end())
+  while (!found || it != _osiMap.end())
   {
     if ((it->first)->number() == numberDS)
       found = true;
@@ -139,27 +141,27 @@ SP::OneStepIntegrator Simulation::integratorOfDS(int numberDS) const
 
 SP::OneStepIntegrator Simulation::integratorOfDS(SP::DynamicalSystem ds) const
 {
-  DSOSIConstIterator it = osiMap.find(ds);
-  if (it == osiMap.end())
+  DSOSIConstIterator it = _osiMap.find(ds);
+  if (it == _osiMap.end())
     RuntimeException::selfThrow("Simulation::integratorOfDS(ds), ds not found in the integrator set.");
   return it->second;
 }
 
 void Simulation::recordIntegrator(SP::OneStepIntegrator osi)
 {
-  allOSI->insert(osi);
-  // Note: each (ds,osi) pair will be registered into the osiMap
+  _allOSI->insert(osi);
+  // Note: each (ds,osi) pair will be registered into the _osiMap
   // during initialize() call (in osi->initialize).  During this step,
   // we will check that each ds belongs to one and only one osi.
 }
 
 void Simulation::addInOSIMap(SP::DynamicalSystem ds, SP::OneStepIntegrator  osi)
 {
-  if (osiMap.find(ds) != osiMap.end()) // ie if ds is already registered
+  if (_osiMap.find(ds) != _osiMap.end()) // ie if ds is already registered
     // in the map with another
     // integrator
     ;/*RuntimeException::selfThrow("Simulation::addInOSIMap(ds,osi), ds is already associated with another one-step integrator");  */
-  osiMap[ds] = osi;
+  _osiMap[ds] = osi;
 }
 
 
@@ -168,7 +170,7 @@ SP::OneStepNSProblem Simulation::oneStepNSProblem(const std::string& name)
   if (!hasOneStepNSProblem(name))
     RuntimeException::selfThrow("Simulation - oneStepNSProblem(name) - The One Step NS Problem is not in the simulation.");
 
-  return (*allNSProblems)[name];
+  return (*_allNSProblems)[name];
 }
 
 void Simulation::setOneStepNSProblems(const OneStepNSProblems& mapOfOSNS)
@@ -176,15 +178,15 @@ void Simulation::setOneStepNSProblems(const OneStepNSProblems& mapOfOSNS)
   clearOneStepNSProblems();
 
   // Warning: pointers links between OneStepNSProblem of each map
-  allNSProblems.reset(new OneStepNSProblems());
+  _allNSProblems.reset(new OneStepNSProblems());
   for (ConstOSNSIterator itOSNS = mapOfOSNS.begin(); itOSNS != mapOfOSNS.end(); ++itOSNS)
-    (*allNSProblems)[itOSNS->first] = itOSNS->second;
+    (*_allNSProblems)[itOSNS->first] = itOSNS->second;
 }
 
 
 void Simulation::clearOneStepNSProblems()
 {
-  allNSProblems->clear();
+  _allNSProblems->clear();
 }
 
 const bool Simulation::hasOneStepNSProblem(SP::OneStepNSProblem osns) const
@@ -192,8 +194,8 @@ const bool Simulation::hasOneStepNSProblem(SP::OneStepNSProblem osns) const
 
   bool val = false; // true when osns found.
 
-  ConstOSNSIterator it = allNSProblems->find(osns->getId());
-  if (it != allNSProblems->end()) val = true;
+  ConstOSNSIterator it = _allNSProblems->find(osns->getId());
+  if (it != _allNSProblems->end()) val = true;
 
   return val;
 }
@@ -202,7 +204,7 @@ const bool Simulation::hasOneStepNSProblem(const string& name) const
 {
   bool val = false;
   ConstOSNSIterator it;
-  for (it = allNSProblems->begin(); it != allNSProblems->end(); ++it)
+  for (it = _allNSProblems->begin(); it != _allNSProblems->end(); ++it)
     if ((it->second)->getId() == name)
     {
       val = true;
@@ -230,7 +232,7 @@ void Simulation::recordNonSmoothProblem(SP::OneStepNSProblem osns)
     RuntimeException::selfThrow("Simulation - recordNonSmoothProblem(osns), the non smooth problem already exists in the Simulation. ");
 
   string name = osns->getId();
-  (*allNSProblems)[name] = osns;
+  (*_allNSProblems)[name] = osns;
 }
 
 void Simulation::updateInteractions()
@@ -244,7 +246,7 @@ void Simulation::updateInteractions()
     initLevelMax();
 
     std::for_each(allInteractions->begin(), allInteractions->end(),
-                  boost::bind(&Interaction::initialize, _1, tinit, levelMax + 1));
+                  boost::bind(&Interaction::initialize, _1, _tinit, _levelMax + 1));
 
     initOSNS();
   };
@@ -260,12 +262,12 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 
   // === Events manager initialization ===
   _eventsManager->initialize(shared_from_this());
-  tinit = _eventsManager->getStartingTime();
+  _tinit = _eventsManager->startingTime();
 
   if (withOSI)
   {
     // === OneStepIntegrators initialization ===
-    std::for_each(allOSI->begin(), allOSI->end(),
+    std::for_each(_allOSI->begin(), _allOSI->end(),
                   boost::bind(&OneStepIntegrator::initialize, _1, shared_from_this()));
   };
 
@@ -279,10 +281,10 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   //  have been declared
   {
     initLevelMax();
-    topo->indexSetsResize(levelMax + 1);
+    topo->indexSetsResize(_levelMax + 1);
 
     std::for_each(allInteractions->begin(), allInteractions->end(),
-                  boost::bind(&Interaction::initialize, _1, tinit, levelMax + 1));
+                  boost::bind(&Interaction::initialize, _1, _tinit, _levelMax + 1));
 
     for (unsigned int i = 1; i < topo->indexSetsSize(); ++i)
       topo->resetIndexSetPtr(i);
@@ -293,35 +295,35 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   }
 
 
-  // Process events at time tinit. Useful to save values in memories
+  // Process events at time _tinit. Useful to save values in memories
   // for example.  Warning: can not be called during
   // eventsManager->initialize, because it needs the initialization of
   // OSI, OSNS ...
   _eventsManager->preUpdate();
-  tend =  _eventsManager->getNextTime();
+  _tend =  _eventsManager->nextTime();
 
   // Set Model current time (warning: current time of the model
   // corresponds to the time of the next event to be treated).
-  model()->setCurrentTime(getNextTime());
+  model()->setCurrentTime(nextTime());
 
   // End of initialize:
 
   //  - all OSI and OSNS (ie DS and Interactions) states are computed
-  //  - for time tinit and saved into memories.
-  //  - Sensors or related objects are updated for t=tinit.
+  //  - for time _tinit and saved into memories.
+  //  - Sensors or related objects are updated for t=_tinit.
   //  - current time of the model is equal to t1, time of the first
-  //  - event after tinit.
-  //  - currentEvent of the simu. corresponds to tinit and nextEvent
-  //  - to tend.
+  //  - event after _tinit.
+  //  - currentEvent of the simu. corresponds to _tinit and nextEvent
+  //  - to _tend.
 
-  // If printStat is true, open output file.
-  if (printStat)
+  // If _printStat is true, open output file.
+  if (_printStat)
   {
     statOut.open("simulationStat.dat", std::ofstream::out);
     statOut << "============================================" << endl;
-    statOut << " Siconos Simulation of type " << simulationType << "." << endl;
+    statOut << " Siconos Simulation of type " << _simulationType << "." << endl;
     statOut << endl;
-    statOut << "The tolerance parameter is equal to: " << tolerance << endl;
+    statOut << "The tolerance parameter is equal to: " << _tolerance << endl;
     statOut << endl << endl;
   }
 }
@@ -330,7 +332,7 @@ void Simulation::reset()
 {
   // r (or p) is set to zero in all DynamicalSystems.
   OSIIterator itOSI;
-  for (itOSI = allOSI->begin(); itOSI != allOSI->end() ; ++itOSI)
+  for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     (*itOSI)->resetNonSmoothPart();
 }
 
@@ -339,12 +341,12 @@ void Simulation::saveInMemory()
 {
   // Save OSI state (DynamicalSystems) in Memory.
   OSIIterator it;
-  for (it = allOSI->begin(); it != allOSI->end() ; ++it)
+  for (it = _allOSI->begin(); it != _allOSI->end() ; ++it)
     (*it)->saveInMemory();
 
   // Save OSNS state (Interactions) in Memory.
   OSNSIterator itOsns;
-  for (itOsns = allNSProblems->begin(); itOsns != allNSProblems->end(); ++itOsns)
+  for (itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end(); ++itOsns)
     (itOsns->second)->saveInMemory();
 }
 
@@ -352,25 +354,25 @@ int Simulation::computeOneStepNSProblem(const std::string& name)
 {
   if (!hasOneStepNSProblem(name))
     RuntimeException::selfThrow("Simulation - computeOneStepNSProblem, OneStepNSProblem does not exist in the simulation. Id:" + name);
-  if (!(*allNSProblems)[name])
+  if (!(*_allNSProblems)[name])
     RuntimeException::selfThrow("Simulation - computeOneStepNSProblem, OneStepNSProblem == NULL, Id: " + name);
 
-  return (*allNSProblems)[name]->compute(model()->currentTime());
+  return (*_allNSProblems)[name]->compute(model()->currentTime());
 }
 
 void Simulation::update()
 {
-  for (unsigned int i = 1; i < levelMax; ++i)
+  for (unsigned int i = 1; i < _levelMax; ++i)
     update(i);
 }
 
 void Simulation::saveSimulationToXML()
 {
-  if (simulationxml)
+  if (_simulationxml)
   {
     OSI::TYPES typeOSI;
     OSIIterator it;
-    for (it = allOSI->begin(); it != allOSI->end() ; ++it)
+    for (it = _allOSI->begin(); it != _allOSI->end() ; ++it)
     {
       typeOSI = (*it)->getType();
       if (typeOSI == OSI::MOREAU)
@@ -389,11 +391,11 @@ void Simulation::updateInput(int level)
   // To compute input(level) (ie with lambda[level]) for all Interactions.
 
   if (level == -1)
-    level = levelMin; // We use this since it is impossible to set
-  // levelMin as defaultValue in
+    level = _levelMin; // We use this since it is impossible to set
+  // _levelMin as defaultValue in
   // OneStepNSProblem.h
 
-  //  double time = getNextTime();
+  //  double time = nextTime();
   double time = model()->currentTime();
   SP::Topology topology = model()->nonSmoothDynamicalSystem()->topology();
   InteractionsIterator it;
@@ -402,7 +404,8 @@ void Simulation::updateInput(int level)
   reset();
 
   // We compute input using lambda(level).
-  for (it = topology->interactionsBegin(); it != topology->interactionsEnd(); it++)
+  for (it = topology->interactions()->begin();
+       it != topology->interactions()->end(); it++)
     (*it)->computeInput(time, level);
 }
 
@@ -411,13 +414,14 @@ void Simulation::updateOutput(int level0, int level1)
   // To compute output() for all levels between level0 and level1
   // (included), for all Interactions.
   if (level1 == -1)
-    level1 = levelMax;
+    level1 = _levelMax;
 
   double time = model()->currentTime();
   SP::Topology topology = model()->nonSmoothDynamicalSystem()->topology();
   InteractionsIterator it;
 
-  for (it = topology->interactionsBegin(); it != topology->interactionsEnd(); it++)
+  for (it = topology->interactions()->begin();
+       it != topology->interactions()->end(); it++)
   {
     for (int i = level0; i <= level1; ++i)
       (*it)->computeOutput(time , i);
@@ -430,14 +434,14 @@ void Simulation::run(const std::string&, double, unsigned int)
   // timeStepping.
 
   unsigned int count = 0; // events counter.
-  cout << " ==== Start of " << simulationType << " simulation - This may take a while ... ====" << endl;
-  while (getNextTime() <= model()->getFinalT())
+  cout << " ==== Start of " << _simulationType << " simulation - This may take a while ... ====" << endl;
+  while (nextTime() <= model()->finalT())
   {
     advanceToEvent();
     _eventsManager->processEvents();
     count++;
   }
-  cout << "===== End of " << simulationType << "simulation. " << count << " events have been processed. ==== " << endl;
+  cout << "===== End of " << _simulationType << "simulation. " << count << " events have been processed. ==== " << endl;
 }
 
 void Simulation::processEvents()

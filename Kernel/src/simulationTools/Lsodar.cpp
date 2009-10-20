@@ -172,7 +172,7 @@ void Lsodar::initialize(SP::Simulation sim)
   intData[0] = xWork->size();
 
   // 2 - Ng, number of constraints:
-  intData[1] =  simulationLink->model()->nonSmoothDynamicalSystem()->topology()->getNumberOfConstraints();
+  intData[1] =  simulationLink->model()->nonSmoothDynamicalSystem()->topology()->numberOfConstraints();
 
   // 3 - Itol, itask, iopt
   intData[2] = 1; // itol, 1 if ATOL is a scalar, else 2 (ATOL array)

@@ -55,7 +55,7 @@ void Sensor::display() const
 {
   cout << "=====> Sensor of type " << _type << ", named " << _id ;
   if (_model)
-    cout << " and linked to model named " << model()->getTitle() << "." << endl;
+    cout << " and linked to model named " << model()->title() << "." << endl;
   else
     cout << " and not linked to a model." << endl;
   cout << "======" << endl ;

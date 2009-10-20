@@ -222,13 +222,13 @@ void SiconosModelXML::loadModel(SP::Model model)
      * creation of the time node
      */
     timeNode = xmlNewChild(rootNode, NULL, (xmlChar*)SM_TIME.c_str(), NULL);
-    setT0(model->getT0());
+    sett0(model->t0());
     setTCurrent(model->currentTime());
-    setT(model->getFinalT());
-    setTitle(model->getTitle());
-    setAuthor(model->getAuthor());
-    setDescription(model->getDescription());
-    setDate(model->getDate());
+    setT(model->finalT());
+    setTitle(model->title());
+    setAuthor(model->author());
+    setDescription(model->description());
+    setDate(model->date());
     setXMLSchema(model->getXmlSchema());
 
     /*

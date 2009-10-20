@@ -105,7 +105,7 @@ void Actuator::display() const
 {
   cout << "=====> Actuator of type " << _type << ", named " << _id ;
   if (model())
-    cout << " and linked to model named " << model()->getTitle() << "." << endl;
+    cout << " and linked to model named " << model()->title() << "." << endl;
   else
     cout << " and not linked to a model." << endl;
   cout << "The associated Sensors are: " << endl;

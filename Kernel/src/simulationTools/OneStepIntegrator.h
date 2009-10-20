@@ -172,41 +172,9 @@ public:
   /** get the set of Interactions associated with the Integrator
    *  \return an InteractionsSet
    */
-  inline const SP::InteractionsSet getInteractions() const
+  inline const SP::InteractionsSet interactions() const
   {
     return OSIInteractions;
-  };
-
-  /** gets an iterator to the first element of the OSIInteractions set.
-   *  \return a InteractionsIterator.
-   */
-  inline InteractionsIterator interactionsBegin()
-  {
-    return OSIInteractions->begin();
-  };
-
-  /** gets an iterator equal to OSIInteractions->end().
-   *  \return a InteractionsIterator.
-   */
-  inline InteractionsIterator interactionsEnd()
-  {
-    return OSIInteractions->end();
-  };
-
-  /** gets a const iterator to the first element of the OSIInteractions set.
-   *  \return a ConstInteractionsIterator.
-   */
-  inline ConstInteractionsIterator interactionsBegin() const
-  {
-    return OSIInteractions->begin();
-  };
-
-  /** gets a const iterator equal to OSIInteractions->end().
-   *  \return a ConstInteractionsIterator.
-   */
-  inline ConstInteractionsIterator interactionsEnd() const
-  {
-    return OSIInteractions->end();
   };
 
   /** set the Interaction list of this Integrator

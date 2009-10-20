@@ -224,7 +224,7 @@ void Moreau::initialize(SP::Simulation sim)
 {
   OneStepIntegrator::initialize(sim);
   // Get initial time
-  double t0 = simulationLink->model()->getT0();
+  double t0 = simulationLink->model()->t0();
   // Compute W(t0) for all ds
   ConstDSIterator itDS;
   for (itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
@@ -261,7 +261,7 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
   WMap[ds].reset(new SimpleMatrix(sizeW, sizeW));
 
   SP::SiconosMatrix W = WMap[ds];
-  double h = simulationLink->getTimeStep();
+  double h = simulationLink->timeStep();
   double theta = thetaMap[ds];
   DS::TYPES dsType = ds->getType();
 
@@ -345,7 +345,7 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
   assert((WMap.find(ds) != WMap.end()) &&
          "Moreau::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
 
-  double h = simulationLink->getTimeStep();
+  double h = simulationLink->timeStep();
   double theta = thetaMap[ds];
   DS::TYPES dsType = ds->getType();
 
@@ -429,8 +429,8 @@ double Moreau::computeResidu()
   //  $\mathcal R(x,r) = x - x_{k} -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) - h r$
   //  $\mathcal R_{free}(x,r) = x - x_{k} -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) $
 
-  double t = simulationLink->getNextTime(); // End of the time step
-  double told = simulationLink->getStartingTime(); // Beginning of the time step
+  double t = simulationLink->nextTime(); // End of the time step
+  double told = simulationLink->startingTime(); // Beginning of the time step
   double h = t - told; // time step length
 
   // Operators computed at told have index i, and (i+1) at t.
@@ -716,8 +716,8 @@ void Moreau::computeFreeState()
   // This function computes "free" states of the DS belonging to this Integrator.
   // "Free" means without taking non-smooth effects into account.
 
-  double t = simulationLink->getNextTime(); // End of the time step
-  double told = simulationLink->getStartingTime(); // Beginning of the time step
+  double t = simulationLink->nextTime(); // End of the time step
+  double told = simulationLink->startingTime(); // Beginning of the time step
   double h = t - told; // time step length
   //h=0.0100000;
   // Operators computed at told have index i, and (i+1) at t.
@@ -1042,7 +1042,7 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
 
 void Moreau::updateState(unsigned int level)
 {
-  double h = simulationLink->getTimeStep();
+  double h = simulationLink->timeStep();
 
   const double& RelativeTol = simulationLink->getRelativeConvergenceTol();
   bool useRCC = simulationLink->getUseRelativeConvergenceCriteron();

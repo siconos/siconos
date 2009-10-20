@@ -52,7 +52,7 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver0()
   std::vector<int> i0 = *NSS->intParameters();
   std::vector<double> d0 = *NSS->doubleParameters();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverA : ", NSS->isSolverSet(), false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverB : ", NSS->getName() == "undefined", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverB : ", NSS->name() == "undefined", true);
   SP::Solver_Options opt = NSS->numericsSolverOptions();
   int * i1 = opt->iparam;
   double * d1 = opt->dparam;
@@ -71,7 +71,7 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver1()
   std::vector<int> i0 = *NSS->intParameters();
   std::vector<double> d0 = *NSS->doubleParameters();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverA : ", NSS->isSolverSet(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverB : ", NSS->getName() == "NSGS", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverB : ", NSS->name() == "NSGS", true);
   for (unsigned int i = 0; i < NB_PARAM; ++i)
   {
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverC : ", i0[i] == iparam[i], true);
@@ -102,7 +102,7 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver2()
   std::vector<int> i0 = *NSS->intParameters();
   std::vector<double> d0 = *NSS->doubleParameters();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverA : ", NSS->isSolverSet(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverB : ", NSS->getName() == "NSGS", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverB : ", NSS->name() == "NSGS", true);
   for (unsigned int i = 0; i < NB_PARAM; ++i)
   {
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverC : ", i0[i] == iparam[i], true);
@@ -154,7 +154,7 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver3()
   std::vector<int> i0 = *NSS->intParameters();
   std::vector<double> d0 = *NSS->doubleParameters();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverA : ", NSS->isSolverSet(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverB : ", NSS->getName() == "NSGS", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverB : ", NSS->name() == "NSGS", true);
   for (unsigned int i = 0; i < NB_PARAM; ++i)
   {
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverC : ", i0[i] == iparam[i], true);

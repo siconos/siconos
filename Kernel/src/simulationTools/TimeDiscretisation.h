@@ -169,7 +169,7 @@ public:
   };
 
   /** Get time instant value at index k+1 ( tk[pos+1] ) */
-  double getNextTime() const
+  double nextTime() const
   {
     return tk[pos + 1];
   };

@@ -36,7 +36,7 @@ void NonSmoothSolver::fillSolverOptions()
   else
   {
     numerics_solver_options->isSet = 1;
-    strcpy(numerics_solver_options->solverName, name.c_str());
+    strcpy(numerics_solver_options->solverName, _name.c_str());
     // No memory allocation for iparam and dparam of numerics_solver_options, just pointer links
   }
   // Link is required for iparam and dparam even when isSet == 0, since we need to recover output parameters (error ...)
@@ -49,7 +49,7 @@ void NonSmoothSolver::fillSolverOptions()
 
 // Default constructor: build an empty Solver_Options structure
 // Parameters will be read in the default input parameters file during Numerics driver call.
-NonSmoothSolver::NonSmoothSolver(): name("undefined"), isSet(false)
+NonSmoothSolver::NonSmoothSolver(): _name("undefined"), isSet(false)
 {
   int_parameters.reset(new IntParameters(NB_PARAM));
   double_parameters.reset(new DoubleParameters(NB_PARAM));
@@ -58,7 +58,7 @@ NonSmoothSolver::NonSmoothSolver(): name("undefined"), isSet(false)
 
 // Copy constructor
 NonSmoothSolver::NonSmoothSolver(const NonSmoothSolver& newS):
-  name(newS.getName()), isSet(newS.isSolverSet())
+  _name(newS.name()), isSet(newS.isSolverSet())
 {
   int_parameters.reset(new IntParameters(*newS.intParameters()));
   double_parameters.reset(new DoubleParameters(*newS.doubleParameters()));
@@ -67,14 +67,14 @@ NonSmoothSolver::NonSmoothSolver(const NonSmoothSolver& newS):
 
 // Constructor from a set of data
 NonSmoothSolver::NonSmoothSolver(const std::string& newName, IntParameters& iparam, DoubleParameters& dparam):
-  name(newName), isSet(true)
+  _name(newName), isSet(true)
 {
   int_parameters.reset(new IntParameters(iparam));
   double_parameters.reset(new DoubleParameters(dparam));
   fillSolverOptions();
 }
 NonSmoothSolver::NonSmoothSolver(const std::string& newName, IntParameters& iparam, DoubleParameters& dparam, double * dWork, int * iWork):
-  name(newName), isSet(true)
+  _name(newName), isSet(true)
 {
   int_parameters.reset(new IntParameters(iparam));
   double_parameters.reset(new DoubleParameters(dparam));
@@ -85,13 +85,13 @@ NonSmoothSolver::NonSmoothSolver(const std::string& newName, IntParameters& ipar
 
 // Construction using XML object
 NonSmoothSolver::NonSmoothSolver(SP::NonSmoothSolverXML solvXML):
-  name("undefined"), isSet(true)
+  _name("undefined"), isSet(true)
 {
   if (! solvXML)
     RuntimeException::selfThrow("NonSmoothSolver, XML constructor, NULL input");
 
   // Read name
-  name = solvXML->getName();
+  _name = solvXML->name();
   // Built and read int_parameters and double_parameters
   int_parameters.reset(new IntParameters);
   double_parameters.reset(new DoubleParameters);
@@ -110,7 +110,7 @@ NonSmoothSolver::NonSmoothSolver(SP::NonSmoothSolverXML solvXML):
 
 // Construction by reading in a file (XML)
 NonSmoothSolver::NonSmoothSolver(const string& inputFile):
-  name("undefined"), isSet(false)
+  _name("undefined"), isSet(false)
 {}
 
 NonSmoothSolver::~NonSmoothSolver()
@@ -118,7 +118,7 @@ NonSmoothSolver::~NonSmoothSolver()
 
 void NonSmoothSolver::display() const
 {
-  cout << "=== Non Smooth Solver based on algorithm of type " << name << " with:" << endl;
+  cout << "=== Non Smooth Solver based on algorithm of type " << _name << " with:" << endl;
   if (isSet)
   {
     cout << "int parameters:  " ;

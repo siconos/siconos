@@ -39,7 +39,7 @@ void NonSmoothEvent::process(SP::Simulation simulation)
   if (simulation->getType() != "EventDriven")
     RuntimeException::selfThrow("NonSmoothEvent::process failed; Simulation is not of EventDriven type.");
 
-  if (!(simulation->getOneStepNSProblems()->empty()))
+  if (!(simulation->oneStepNSProblems()->empty()))
   {
     SP::EventDriven eventDriven = boost::static_pointer_cast<EventDriven>(simulation);
 

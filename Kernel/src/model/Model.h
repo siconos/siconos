@@ -45,25 +45,25 @@ class Model : public boost::enable_shared_from_this<Model>
 {
 private:
   /** current time of the simulation */
-  double t;
+  double _t;
 
   /** initial time of the simulation */
-  double t0;
+  double _t0;
 
   /** final time of the simulation */
-  double T;
+  double _T;
 
   /** The simulation to solve the NonSmoothDynamicalSystem */
-  SP::Simulation strat;
+  SP::Simulation _strat;
 
   /** The NonSmoothDynamicalSystem of the simulation */
-  SP::NonSmoothDynamicalSystem nsds;
+  SP::NonSmoothDynamicalSystem _nsds;
 
   /** XML object linked to the Model */
-  SP::SiconosModelXML modelxml;
+  SP::SiconosModelXML _modelxml;
 
   /** information concerning the Model */
-  std::string title, author, description, date, xmlSchema;
+  std::string _title, _author, _description, _date, _xmlSchema;
 
   /** default constructor
    */
@@ -120,7 +120,7 @@ public:
    */
   inline const double currentTime() const
   {
-    return t;
+    return _t;
   }
 
   /** set the current time
@@ -128,39 +128,39 @@ public:
    */
   inline void setCurrentTime(const double& newValue)
   {
-    t = newValue;
+    _t = newValue;
   }
 
   /** get initial time
    *  \return a double
    */
-  inline const double getT0() const
+  inline const double t0() const
   {
-    return t0;
+    return _t0;
   }
 
   /** set initial time of the time discretisation
    *  \param a double
    */
-  inline void setT0(const double& newT0)
+  inline void sett0(const double& newT0)
   {
-    t0 = newT0;
+    _t0 = newT0;
   };
 
   /** get final time
    *  \return a double
    */
-  inline const double getFinalT() const
+  inline const double finalT() const
   {
-    return T;
+    return _T;
   }
 
   /** set final time
    *  \param a double
    */
-  inline void setFinalT(const double& newValue)
+  inline void setT(const double& newValue)
   {
-    T = newValue;
+    _T = newValue;
   }
 
   /** get the Simulation of the Model
@@ -168,7 +168,7 @@ public:
    */
   inline SP::Simulation simulation() const
   {
-    return strat;
+    return _strat;
   }
 
   /** set the Simulation of the Model
@@ -181,7 +181,7 @@ public:
    */
   inline SP::NonSmoothDynamicalSystem nonSmoothDynamicalSystem() const
   {
-    return nsds;
+    return _nsds;
   }
 
   /** set the NonSmoothDynamicalSystem of the Model
@@ -194,7 +194,7 @@ public:
    */
   inline SP::SiconosModelXML siconosModelXML() const
   {
-    return modelxml;
+    return _modelxml;
   }
 
   /** set the SiconosModelXML of the Model
@@ -205,9 +205,9 @@ public:
   /** get the title of the simulation
    *  \return string : the title
    */
-  inline const std::string  getTitle() const
+  inline const std::string  title() const
   {
-    return title;
+    return _title;
   }
 
   /** set the title of the simulation
@@ -215,15 +215,15 @@ public:
    */
   inline void setTitle(const std::string & s)
   {
-    title = s;
+    _title = s;
   }
 
   /** get the author of the simulation
    *  \return string : the author
    */
-  inline const std::string  getAuthor() const
+  inline const std::string  author() const
   {
-    return author;
+    return _author;
   }
 
   /** set the author of the simulation
@@ -231,15 +231,15 @@ public:
    */
   inline void setAuthor(const std::string & s)
   {
-    author = s;
+    _author = s;
   }
 
   /** allows to get the description of the simulation
    *  \return string : the description
    */
-  inline const std::string  getDescription() const
+  inline const std::string  description() const
   {
-    return description;
+    return _description;
   }
 
   /** set the author of the simulation
@@ -247,15 +247,15 @@ public:
    */
   inline void setDescription(const std::string & s)
   {
-    description = s;
+    _description = s;
   }
 
   /** allows to get the date of the simulation
    *  \return string : the date
    */
-  inline const std::string  getDate() const
+  inline const std::string  date() const
   {
-    return date;
+    return _date;
   }
 
   /** set the author of the simulation
@@ -263,7 +263,7 @@ public:
    */
   inline void setDate(const std::string & s)
   {
-    date = s;
+    _date = s;
   }
 
   /** allows to get the xmlSchema of the simulation
@@ -271,7 +271,7 @@ public:
    */
   inline const std::string  getXmlSchema() const
   {
-    return xmlSchema;
+    return _xmlSchema;
   }
 
   /** set the author of the simulation
@@ -279,7 +279,7 @@ public:
    */
   inline void setXmlSchema(const std::string & s)
   {
-    xmlSchema = s;
+    _xmlSchema = s;
   }
 
   /** Complete initialization of the model (NonSmoothDynamicalSystem,

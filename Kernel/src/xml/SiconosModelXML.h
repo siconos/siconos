@@ -132,7 +132,7 @@ public:
   /** Gets the title of the model
   *   \return string
   */
-  inline const std::string  getTitle()
+  inline const std::string  title()
   {
     return  SiconosDOMTreeTools::getStringContentValue(titleNode);
   }
@@ -140,7 +140,7 @@ public:
   /** Gets the author of the model
   *   \return string
   */
-  inline const std::string  getAuthor()
+  inline const std::string  author()
   {
     return  SiconosDOMTreeTools::getStringContentValue(authorNode);
   }
@@ -148,7 +148,7 @@ public:
   /** Gets the Description of the model
   *   \return string
   */
-  inline const std::string  getDescription()
+  inline const std::string  description()
   {
     return  SiconosDOMTreeTools::getStringContentValue(descriptionNode);
   }
@@ -156,7 +156,7 @@ public:
   /** Gets the date of the model
   *   \return string
   */
-  inline const std::string  getDate()
+  inline const std::string  date()
   {
     return  SiconosDOMTreeTools::getStringContentValue(dateNode);
   }
@@ -285,7 +285,7 @@ public:
   /** Gets the value of t0
   *   \return t0 value
   */
-  inline const double getT0() const
+  inline const double t0() const
   {
     return  SiconosDOMTreeTools::getContentValue<double>(t0Node);
   }
@@ -301,7 +301,7 @@ public:
   /** Sets the value of t0
   *   \param The new t0 value
   */
-  inline void setT0(const double& t0)
+  inline void sett0(const double& t0)
   {
     if (!t0Node)
       t0Node = SiconosDOMTreeTools::createDoubleNode(timeNode, SM_T0, t0);

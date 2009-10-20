@@ -239,12 +239,12 @@ public:
   /** get the time of current event, in double format
    *  \return a double
    */
-  const double getStartingTime() const ;
+  const double startingTime() const ;
 
   /** get the time of next event, in double format
    *  \return a double
    */
-  const double getNextTime() const ;
+  const double nextTime() const ;
 
   /** display EventsManager data
    */

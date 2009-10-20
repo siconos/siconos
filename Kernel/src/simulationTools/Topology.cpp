@@ -32,30 +32,30 @@
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
 // default
-Topology::Topology(): isTopologyUpToDate(false), isTopologyTimeInvariant(true),
-  numberOfConstraints(0)
+Topology::Topology(): _isTopologyUpToDate(false), _isTopologyTimeInvariant(true),
+  _numberOfConstraints(0)
 {
-  URG.resize(1);
-  DSG.resize(1);
+  _URG.resize(1);
+  _DSG.resize(1);
 
-  URG[0].reset(new UnitaryRelationsGraph());
-  DSG[0].reset(new DynamicalSystemsGraph());
-  allInteractions.reset(new InteractionsSet());
-  maxRelativeDegree = 0;
-  minRelativeDegree = MAX_RELATIVE_DEGREE;
+  _URG[0].reset(new UnitaryRelationsGraph());
+  _DSG[0].reset(new DynamicalSystemsGraph());
+  _allInteractions.reset(new InteractionsSet());
+  _maxRelativeDegree = 0;
+  _minRelativeDegree = MAX_RELATIVE_DEGREE;
 }
 
 Topology::Topology(SP::InteractionsSet newInteractions) :
-  isTopologyUpToDate(false), isTopologyTimeInvariant(true),
-  numberOfConstraints(0)
+  _isTopologyUpToDate(false), _isTopologyTimeInvariant(true),
+  _numberOfConstraints(0)
 {
 
-  URG.resize(1);
-  DSG.resize(1);
+  _URG.resize(1);
+  _DSG.resize(1);
 
-  URG[0].reset(new UnitaryRelationsGraph());
-  DSG[0].reset(new DynamicalSystemsGraph());
-  allInteractions.reset(new InteractionsSet());
+  _URG[0].reset(new UnitaryRelationsGraph());
+  _DSG[0].reset(new DynamicalSystemsGraph());
+  _allInteractions.reset(new InteractionsSet());
 
   for (InteractionsIterator it = newInteractions->begin();
        it != newInteractions->end(); ++it)
@@ -63,24 +63,24 @@ Topology::Topology(SP::InteractionsSet newInteractions) :
     addInteraction(*it);
   }
 
-  maxRelativeDegree = 0;
-  minRelativeDegree = MAX_RELATIVE_DEGREE;
-  isTopologyUpToDate = false;
+  _maxRelativeDegree = 0;
+  _minRelativeDegree = MAX_RELATIVE_DEGREE;
+  _isTopologyUpToDate = false;
 }
 
 
 // a constructor with a DS set : when some DS may not be in interactions
 Topology::Topology(SP::DynamicalSystemsSet newDSset, SP::InteractionsSet newInteractions) :
-  isTopologyUpToDate(false), isTopologyTimeInvariant(true),
-  numberOfConstraints(0)
+  _isTopologyUpToDate(false), _isTopologyTimeInvariant(true),
+  _numberOfConstraints(0)
 {
 
-  URG.resize(1);
-  DSG.resize(1);
+  _URG.resize(1);
+  _DSG.resize(1);
 
-  URG[0].reset(new UnitaryRelationsGraph());
-  DSG[0].reset(new DynamicalSystemsGraph());
-  allInteractions.reset(new InteractionsSet());
+  _URG[0].reset(new UnitaryRelationsGraph());
+  _DSG[0].reset(new DynamicalSystemsGraph());
+  _allInteractions.reset(new InteractionsSet());
 
   for (InteractionsIterator it = newInteractions->begin();
        it != newInteractions->end(); ++it)
@@ -90,11 +90,11 @@ Topology::Topology(SP::DynamicalSystemsSet newDSset, SP::InteractionsSet newInte
 
   for (DSIterator ids = newDSset->begin(); ids != newDSset->end() ; ++ids)
   {
-    DSG[0]->add_vertex(*ids);
+    _DSG[0]->add_vertex(*ids);
   }
-  maxRelativeDegree = 0;
-  minRelativeDegree = MAX_RELATIVE_DEGREE;
-  isTopologyUpToDate = false;
+  _maxRelativeDegree = 0;
+  _minRelativeDegree = MAX_RELATIVE_DEGREE;
+  _isTopologyUpToDate = false;
 }
 
 // destructor
@@ -108,7 +108,7 @@ void Topology::addInteractionInIndexSet(SP::Interaction inter)
   // Private function
   //
   // Creates UnitaryRelations corresponding to inter and add them into
-  // URG
+  // _URG
 
   // First, we get the number of relations in the interaction.  This
   // corresponds to inter->getNumberOfRelations but since Interaction
@@ -124,15 +124,15 @@ void Topology::addInteractionInIndexSet(SP::Interaction inter)
 
   SP::DynamicalSystemsSet systems = inter->dynamicalSystems();
 
-  numberOfConstraints += m * nsLawSize;
+  _numberOfConstraints += m * nsLawSize;
 
-  // DSG is the hyper forest : (vertices : dynamical systems, edges :
+  // _DSG is the hyper forest : (vertices : dynamical systems, edges :
   // unitary relations)
   //
-  // URG is the hyper graph : (vertices : unitary relations, edges :
+  // _URG is the hyper graph : (vertices : unitary relations, edges :
   // dynamical systems)
 
-  // URG = L(DSG),  L is the line graph transformation
+  // _URG = L(_DSG),  L is the line graph transformation
 
 
   // for all couples of ds in the interaction
@@ -153,19 +153,19 @@ void Topology::addInteractionInIndexSet(SP::Interaction inter)
       if ((i1ds == i2ds) && inter->dynamicalSystems()->size() == 1)
       {
         DynamicalSystemsGraph::VDescriptor dsgv;
-        dsgv = DSG[0]->add_vertex(*i1ds);
+        dsgv = _DSG[0]->add_vertex(*i1ds);
 
         // this may be a multi edges graph
         for (std::vector<SP::UnitaryRelation>::iterator uri = current_urs.begin();
              uri != current_urs.end(); ++uri)
         {
-          assert(!DSG[0]->is_edge(dsgv, dsgv, *uri));
-          assert(!URG[0]->is_vertex(*uri));
+          assert(!_DSG[0]->is_edge(dsgv, dsgv, *uri));
+          assert(!_URG[0]->is_vertex(*uri));
 
-          DSG[0]->add_edge(dsgv, dsgv, *uri, *URG[0]);
+          _DSG[0]->add_edge(dsgv, dsgv, *uri, *_URG[0]);
 
-          assert(URG[0]->is_vertex(*uri));
-          assert(DSG[0]->is_edge(dsgv, dsgv, *uri));
+          assert(_URG[0]->is_vertex(*uri));
+          assert(_DSG[0]->is_edge(dsgv, dsgv, *uri));
 
         }
       }
@@ -175,48 +175,48 @@ void Topology::addInteractionInIndexSet(SP::Interaction inter)
         {
           DynamicalSystemsGraph::VDescriptor dsgv1, dsgv2;
 
-          dsgv1 = DSG[0]->add_vertex(*i1ds);
-          dsgv2 = DSG[0]->add_vertex(*i2ds);
+          dsgv1 = _DSG[0]->add_vertex(*i1ds);
+          dsgv2 = _DSG[0]->add_vertex(*i2ds);
 
           // this may be a multi edges graph
           for (std::vector<SP::UnitaryRelation>::iterator uri = current_urs.begin();
                uri != current_urs.end(); ++uri)
           {
 
-            assert(!DSG[0]->is_edge(dsgv1, dsgv2, *uri));
-            assert(!URG[0]->is_vertex(*uri));
+            assert(!_DSG[0]->is_edge(dsgv1, dsgv2, *uri));
+            assert(!_URG[0]->is_vertex(*uri));
 
 
-            DSG[0]->add_edge(dsgv1, dsgv2, *uri, *URG[0]);
+            _DSG[0]->add_edge(dsgv1, dsgv2, *uri, *_URG[0]);
 
-            assert(URG[0]->is_vertex(*uri));
-            assert(DSG[0]->is_edge(dsgv1, dsgv2, *uri));
+            assert(_URG[0]->is_vertex(*uri));
+            assert(_DSG[0]->is_edge(dsgv1, dsgv2, *uri));
           }
         }
     }
   }
 };
 
-/* an edge is removed from DSG graph if the corresponding vertex is
-   removed from the adjoint graph (URG)
+/* an edge is removed from _DSG graph if the corresponding vertex is
+   removed from the adjoint graph (_URG)
 */
 struct VertexIsRemoved
 {
   VertexIsRemoved(SP::Interaction I,
                   SP::DynamicalSystemsGraph sg, SP::UnitaryRelationsGraph asg) :
-    _I(I), _DSG(sg), _URG(asg) {};
+    _I(I), __DSG(sg), __URG(asg) {};
   bool operator()(DynamicalSystemsGraph::EDescriptor ed)
   {
 
-    if (_URG->is_vertex(_DSG->bundle(ed)))
+    if (__URG->is_vertex(__DSG->bundle(ed)))
     {
-      UnitaryRelationsGraph::VDescriptor uvd = _URG->descriptor(_DSG->bundle(ed));
+      UnitaryRelationsGraph::VDescriptor uvd = __URG->descriptor(__DSG->bundle(ed));
 
-      if (_URG->bundle(uvd)->interaction() == _I)
+      if (__URG->bundle(uvd)->interaction() == _I)
       {
-        _URG->remove_vertex(_DSG->bundle(ed));
+        __URG->remove_vertex(__DSG->bundle(ed));
 
-        assert(_URG->size() == _DSG->edges_number() - 1);
+        assert(__URG->size() == __DSG->edges_number() - 1);
 
         return true;
       }
@@ -231,13 +231,13 @@ struct VertexIsRemoved
     }
   }
   SP::Interaction _I;
-  SP::DynamicalSystemsGraph _DSG;
-  SP::UnitaryRelationsGraph _URG;
+  SP::DynamicalSystemsGraph __DSG;
+  SP::UnitaryRelationsGraph __URG;
 };
 
 
-/* remove an interaction : remove edges (unitary relation) from DSG if
-   corresponding vertices are removed from URG */
+/* remove an interaction : remove edges (unitary relation) from _DSG if
+   corresponding vertices are removed from _URG */
 const bool Topology::removeInteractionFromIndexSet(SP::Interaction inter)
 {
 
@@ -245,34 +245,34 @@ const bool Topology::removeInteractionFromIndexSet(SP::Interaction inter)
        ids != inter->dynamicalSystems()->end();
        ++ids)
   {
-    DSG[0]->remove_out_edge_if
-    (DSG[0]->descriptor(*ids),
-     VertexIsRemoved(inter, DSG[0], URG[0]));
+    _DSG[0]->remove_out_edge_if
+    (_DSG[0]->descriptor(*ids),
+     VertexIsRemoved(inter, _DSG[0], _URG[0]));
   };
 };
 
 
 void Topology::addInteraction(SP::Interaction inter)
 {
-  assert(allInteractions);
-  assert(DSG[0]->edges_number() == URG[0]->size());
+  assert(_allInteractions);
+  assert(_DSG[0]->edges_number() == _URG[0]->size());
 
-  allInteractions->insert(inter);
+  _allInteractions->insert(inter);
   addInteractionInIndexSet(inter);
 
-  assert(DSG[0]->edges_number() == URG[0]->size());
+  assert(_DSG[0]->edges_number() == _URG[0]->size());
 
 };
 
 void Topology::removeInteraction(SP::Interaction inter)
 {
-  assert(allInteractions);
-  assert(DSG[0]->edges_number() == URG[0]->size());
+  assert(_allInteractions);
+  assert(_DSG[0]->edges_number() == _URG[0]->size());
 
-  allInteractions->erase(inter);
+  _allInteractions->erase(inter);
   removeInteractionFromIndexSet(inter);
 
-  assert(DSG[0]->edges_number() == URG[0]->size());
+  assert(_DSG[0]->edges_number() == _URG[0]->size());
 };
 
 void Topology::removeDynamicalSystem(SP::DynamicalSystem ds)
@@ -297,37 +297,37 @@ struct Topology::SetupFromNslaw : public SiconosVisitor
 
   void visit(ComplementarityConditionNSL&)
   {
-    parent->minRelativeDegree = std::min<int>(0, parent->minRelativeDegree);
-    parent->maxRelativeDegree = std::max<int>(0, parent->maxRelativeDegree);
+    parent->_minRelativeDegree = std::min<int>(0, parent->_minRelativeDegree);
+    parent->_maxRelativeDegree = std::max<int>(0, parent->_maxRelativeDegree);
     interaction->setRelativeDegree(0);
   };
   void visit(EqualityConditionNSL&)
   {
-    parent->minRelativeDegree = std::min<int>(0, parent->minRelativeDegree);
-    parent->maxRelativeDegree = std::max<int>(0, parent->maxRelativeDegree);
+    parent->_minRelativeDegree = std::min<int>(0, parent->_minRelativeDegree);
+    parent->_maxRelativeDegree = std::max<int>(0, parent->_maxRelativeDegree);
     interaction->setRelativeDegree(0);
   };
 
   void visit(MixedComplementarityConditionNSL&)
   {
-    parent->minRelativeDegree = std::min<int>(0, parent->minRelativeDegree);
-    parent->maxRelativeDegree = std::max<int>(0, parent->maxRelativeDegree);
+    parent->_minRelativeDegree = std::min<int>(0, parent->_minRelativeDegree);
+    parent->_maxRelativeDegree = std::max<int>(0, parent->_maxRelativeDegree);
     interaction->setRelativeDegree(0);
   };
 
   void visit(NewtonImpactNSL&)
   {
-    parent->minRelativeDegree = std::min<int>(2, parent->minRelativeDegree);
-    parent->maxRelativeDegree = std::max<int>(2, parent->maxRelativeDegree);
-    parent->isTopologyTimeInvariant = false;
+    parent->_minRelativeDegree = std::min<int>(2, parent->_minRelativeDegree);
+    parent->_maxRelativeDegree = std::max<int>(2, parent->_maxRelativeDegree);
+    parent->_isTopologyTimeInvariant = false;
     interaction->setRelativeDegree(2);
   };
 
   void visit(NewtonImpactFrictionNSL&)
   {
-    parent->minRelativeDegree = std::min<int>(2, parent->minRelativeDegree);
-    parent->maxRelativeDegree = std::max<int>(2, parent->maxRelativeDegree);
-    parent->isTopologyTimeInvariant = false;
+    parent->_minRelativeDegree = std::min<int>(2, parent->_minRelativeDegree);
+    parent->_maxRelativeDegree = std::max<int>(2, parent->_maxRelativeDegree);
+    parent->_isTopologyTimeInvariant = false;
     interaction->setRelativeDegree(2);
   };
 
@@ -342,27 +342,27 @@ void Topology::computeRelativeDegrees()
   UnitaryRelationsGraph::VIterator uv, uend;
 
 
-  if (URG[0]->size() > 0)
+  if (_URG[0]->size() > 0)
   {
-    minRelativeDegree = MAX_RELATIVE_DEGREE;
-    maxRelativeDegree = 0;
+    _minRelativeDegree = MAX_RELATIVE_DEGREE;
+    _maxRelativeDegree = 0;
 
 
-    for (boost::tie(uv, uend) = URG[0]->vertices(); uv != uend; ++uv)
+    for (boost::tie(uv, uend) = _URG[0]->vertices(); uv != uend; ++uv)
     {
 
       setupFromNslaw.reset(new SetupFromNslaw(shared_from_this(),
-                                              URG[0]->bundle(*uv)->interaction()));
+                                              _URG[0]->bundle(*uv)->interaction()));
 
-      URG[0]->bundle(*uv)->interaction()->nonSmoothLaw()->accept(*(setupFromNslaw.get()));
+      _URG[0]->bundle(*uv)->interaction()->nonSmoothLaw()->accept(*(setupFromNslaw.get()));
 
     }
   }
   else
   {
     // default values
-    minRelativeDegree = 2;
-    maxRelativeDegree = 2;
+    _minRelativeDegree = 2;
+    _maxRelativeDegree = 2;
   }
 
 }
@@ -371,33 +371,33 @@ void Topology::computeRelativeDegrees()
 
 const bool Topology::hasInteraction(SP::Interaction inter) const
 {
-  return allInteractions->isIn(inter);
+  return _allInteractions->isIn(inter);
 }
 
-const unsigned int Topology::getMaxRelativeDegree()
+const unsigned int Topology::maxRelativeDegree()
 {
-  return maxRelativeDegree;
+  return _maxRelativeDegree;
 }
 
-const unsigned int Topology::getMinRelativeDegree()
+const unsigned int Topology::minRelativeDegree()
 {
-  assert(minRelativeDegree != MAX_RELATIVE_DEGREE);
-  return minRelativeDegree;
+  assert(_minRelativeDegree != MAX_RELATIVE_DEGREE);
+  return _minRelativeDegree;
 }
 
 void Topology::initialize()
 {
 
   computeRelativeDegrees();
-  isTopologyUpToDate = true;
+  _isTopologyUpToDate = true;
 }
 
 void Topology::clear()
 {
-  allInteractions->clear();
+  _allInteractions->clear();
 
-  URG.clear();
-  DSG.clear();
+  _URG.clear();
+  _DSG.clear();
 
-  isTopologyUpToDate = false;
+  _isTopologyUpToDate = false;
 }

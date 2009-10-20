@@ -43,7 +43,7 @@ bool BallBowl()
 
     // For the initial time step:
     // time
-    dataPlot(k, 0) =  bouncingBall->getT0();
+    dataPlot(k, 0) =  bouncingBall->t0();
     // state q for the first dynamical system (ball)
     SP::LagrangianDS ball = boost::static_pointer_cast<LagrangianDS> (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystemNumber(1));
     SP::SiconosVector q = ball->q();
@@ -58,14 +58,14 @@ bool BallBowl()
 
     cout << "Computation ... " << endl;
     // --- Time loop  ---
-    while (s->getNextTime() < bouncingBall->getFinalT())
+    while (s->nextTime() < bouncingBall->finalT())
     {
       // solve ...
       s->computeOneStep();
 
       // --- Get values to be plotted ---
       //time
-      dataPlot(k, 0) = s->getNextTime();;
+      dataPlot(k, 0) = s->nextTime();;
       // Ball: state q
       dataPlot(k, 1) = (*q)(0);
       // Ball: velocity

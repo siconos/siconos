@@ -144,17 +144,17 @@ const double EventsManager::getTimeOfEvent(SP::Event event) const
   return event->getDoubleTimeOfEvent();
 }
 
-const double EventsManager::getStartingTime() const
+const double EventsManager::startingTime() const
 {
   if (!_currentEvent)
-    RuntimeException::selfThrow("EventsManager getStartingTime, current event is NULL");
+    RuntimeException::selfThrow("EventsManager startingTime, current event is NULL");
   return _currentEvent->getDoubleTimeOfEvent();
 }
 
-const double EventsManager::getNextTime() const
+const double EventsManager::nextTime() const
 {
   if (!_nextEvent)
-    RuntimeException::selfThrow("EventsManager getNextTime, next event is NULL");
+    RuntimeException::selfThrow("EventsManager nextTime, next event is NULL");
   return _nextEvent->getDoubleTimeOfEvent();
 }
 
@@ -162,7 +162,7 @@ void EventsManager::display() const
 {
   cout << "=== EventsManager data display ===" << endl;
   if (simulation())
-    cout << "- This manager belongs to the simulation named \" " << simulation()->getName() << "\", of type " << simulation()->getType() << "." << endl;
+    cout << "- This manager belongs to the simulation named \" " << simulation()->name() << "\", of type " << simulation()->getType() << "." << endl;
   else
     cout << "- No simulation linked to this manager." << endl;
   EventsContainer::iterator it;

@@ -53,8 +53,8 @@ void Moreau2::computeFreeState()
   // This function computes "free" states of the DS belonging to this Integrator.
   // "Free" means without taking non-smooth effects into account.
 
-  double t = simulationLink->getNextTime(); // End of the time step
-  double told = simulationLink->getStartingTime(); // Beginning of the time step
+  double t = simulationLink->nextTime(); // End of the time step
+  double told = simulationLink->startingTime(); // Beginning of the time step
   double h = t - told; // time step length
   //h=0.0100000;
   // Operators computed at told have index i, and (i+1) at t.

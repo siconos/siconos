@@ -69,11 +69,11 @@ class Simulation : public boost::enable_shared_from_this<Simulation>
 protected:
 
   /** name or id of the Simulation */
-  std::string name;
+  std::string _name;
 
   /** the type of the Simulation, ie the derived class type
       (TimeStepping, EventDriven ...) */
-  std::string simulationType;
+  std::string _simulationType;
 
   /** the default time discretisation scheme */
   SP::TimeDiscretisation _timeDiscretisation;
@@ -82,22 +82,22 @@ protected:
   SP::EventsManager _eventsManager;
 
   /** current starting time for integration */
-  double tinit;
+  double _tinit;
 
   /** current ending time for integration */
-  double tend;
+  double _tend;
 
   /** real ending time for integration (different from tend in case of
       stop during integrate, for example when a root is found in
       Lsodar procedur)
   */
-  double tout;
+  double _tout;
 
   /** the dynamical systems integrators */
-  SP::OSISet allOSI;
+  SP::OSISet _allOSI;
 
   /** Map to link all DynamicalSystems and their OneStepIntegrator*/
-  DSOSIMap osiMap;
+  DSOSIMap _osiMap;
 
   /** index sets vector (indexSets[0] is the set where y[0]=0,
       indexSets[1] where y[0] = 0 and y[1]=0 and so on */
@@ -105,29 +105,29 @@ protected:
 
   /** the non smooth problems (each problem is identified thanks to
       its id) */
-  SP::OneStepNSProblems allNSProblems;
+  SP::OneStepNSProblems _allNSProblems;
 
   /** the XML object linked to the Simulation to read XML data */
-  SP::SimulationXML simulationxml;
+  SP::SimulationXML _simulationxml;
 
   /** A link to the Model which contains the Simulation */
   boost::weak_ptr<Model> _model;
 
   /** int used to set the minimal derivative order used in the OSNS
       variables */
-  unsigned int levelMin;
+  unsigned int _levelMin;
 
   /** int used to set the maximal derivative order used in the OSNS
       variables */
-  unsigned int levelMax;
+  unsigned int _levelMax;
 
   /** tolerance value used to compute the index sets - Default: equal
       to machine double precision (from dlamch lapack routine).*/
-  double tolerance;
+  double _tolerance;
 
   /** Flag for optional output. True if output display for solver stat
       required, else false.*/
-  bool printStat;
+  bool _printStat;
 
   /**Output file for stats*/
   std::ofstream statOut;
@@ -202,16 +202,16 @@ public:
   /** get the name of the Simulation
    *  \return string : the name of the Simulation
    */
-  inline const std::string getName() const
+  inline const std::string name() const
   {
-    return name;
+    return _name;
   }
 
   /** set the name of the Simulation
    */
   inline void setName(const std::string& newName)
   {
-    name = newName;
+    _name = newName;
   }
 
   /** get the type of the Simulation
@@ -219,14 +219,14 @@ public:
    */
   inline const std::string getType() const
   {
-    return simulationType;
+    return _simulationType;
   }
 
   /** set the type of the Simulation
    */
   inline void setType(const std::string& newType)
   {
-    simulationType = newType;
+    _simulationType = newType;
   }
 
   /** get the TimeDiscretisation of the Simulation
@@ -254,13 +254,13 @@ public:
   };
 
   /** get time instant k+1 of the time discretisation - Warning: this
-      instant may be different from getNextTime(), if for example some
+      instant may be different from nextTime(), if for example some
       non-smooth events or some sensor events are present
       \return a double.
   */
   inline const double getTkp1() const
   {
-    return _timeDiscretisation->getNextTime();
+    return _timeDiscretisation->nextTime();
   };
 
   /** get the EventsManager
@@ -275,26 +275,26 @@ public:
       time of currentEvent of eventsManager.)
    *  \return a double.
    */
-  inline const double getStartingTime() const
+  inline const double startingTime() const
   {
-    return _eventsManager->getStartingTime();
+    return _eventsManager->startingTime();
   };
 
   /** get "next time" (ie ending point for current integration, time
       of nextEvent of eventsManager.)
    *  \return a double.
    */
-  inline const double getNextTime() const
+  inline const double nextTime() const
   {
-    return _eventsManager->getNextTime();
+    return _eventsManager->nextTime();
   };
 
   /** get the current time step size ("next time"-"current time")
    *  \return a double.
    */
-  inline const double getTimeStep() const
+  inline const double timeStep() const
   {
-    return (getNextTime() - getStartingTime());
+    return (nextTime() - startingTime());
   };
 
   /** check if a future event is to be treated or not (ie if some
@@ -309,9 +309,9 @@ public:
   /** get all the Integrators of the Simulation
    *  \return an OSISset
    */
-  inline const SP::OSISet getOneStepIntegrators() const
+  inline const SP::OSISet oneStepIntegrators() const
   {
-    return allOSI;
+    return _allOSI;
   };
 
   /** set the Integrators of the Simulation
@@ -332,9 +332,9 @@ public:
   /** get the number of OSIs in the Simulation (ie the size of allOSI)
    *  \return an unsigned int
    */
-  inline const unsigned int getNumberOfOSI() const
+  inline const unsigned int numberOfOSI() const
   {
-    return allOSI->size();
+    return _allOSI->size();
   }
 
   /** add an Integrator into the simulation list of integrators
@@ -363,25 +363,25 @@ public:
    *  \return a pointer to OneStepNSProblems object (container of
    *  SP::OneStepNSProblem)
    */
-  inline const SP::OneStepNSProblems getOneStepNSProblems() const
+  inline const SP::OneStepNSProblems oneStepNSProblems() const
   {
-    return allNSProblems;
+    return _allNSProblems;
   };
 
   /** get levelMin
    *  \return the value of LevelMin
    */
-  inline const int getLevelMin() const
+  inline const int levelMin() const
   {
-    return levelMin;
+    return _levelMin;
   };
 
   /** get levelMax
    *  \return the value of LevelMax
    */
-  inline const int getLevelMax() const
+  inline const int levelMax() const
   {
-    return levelMax;
+    return _levelMax;
   };
 
   /** get allNSProblems[name], a specific OneStepNSProblem
@@ -423,7 +423,7 @@ public:
    */
   inline SP::SimulationXML simulationXML() const
   {
-    return simulationxml;
+    return _simulationxml;
   }
 
   /** set the SimulationXML of the Simulation
@@ -431,7 +431,7 @@ public:
    */
   inline void setSimulationXMLPtr(SP::SimulationXML strxml)
   {
-    simulationxml = strxml;
+    _simulationxml = strxml;
   }
 
   /** get the Model which contains the Simulation
@@ -453,9 +453,9 @@ public:
   /** get tolerance
    *  \return a double
    */
-  const double getTolerance() const
+  const double tolerance() const
   {
-    return tolerance;
+    return _tolerance;
   };
 
   /** set the value of offset for q dof vector in dynamical systems
@@ -464,7 +464,7 @@ public:
    */
   void setTolerance(double inputVal)
   {
-    tolerance = inputVal;
+    _tolerance = inputVal;
   };
 
   /** set printStat value: if true, print solver stats.
@@ -472,14 +472,14 @@ public:
    */
   inline void setPrintStat(const bool& newVal)
   {
-    printStat = newVal;
+    _printStat = newVal;
   };
 
   /** get printStat value
    */
   inline const bool getPrintStat() const
   {
-    return printStat;
+    return _printStat;
   };
 
   /** update all index sets of the topology, using current y and

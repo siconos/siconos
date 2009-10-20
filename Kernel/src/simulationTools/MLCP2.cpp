@@ -163,7 +163,7 @@ void MLCP2::computeUnitaryDSBlock(SP::UnitaryRelation UR, SP::DynamicalSystem DS
 //fill DSUnitaryBlocks with B
 void MLCP2::computeDSUnitaryBlock(SP::DynamicalSystem DS, SP::UnitaryRelation UR)
 {
-  double h = simulation->getTimeStep();
+  double h = simulation->timeStep();
   if (!DSUnitaryBlocks[DS][UR])
   {
     DSUnitaryBlocks[DS][UR].reset(new SimpleMatrix(DS->getDim(), UR->getNonSmoothLawSize()));

@@ -79,32 +79,32 @@ private:
   // --- MEMBERS ---
 
   /** minimum of the relative degrees */
-  unsigned int minRelativeDegree;
+  unsigned int _minRelativeDegree;
 
   /** maximum of the relative degrees */
-  unsigned int maxRelativeDegree;
+  unsigned int _maxRelativeDegree;
 
   /** the set of all the interactions of the system */
-  SP::InteractionsSet allInteractions;
+  SP::InteractionsSet _allInteractions;
 
   /** dynamical systems graphs */
-  std::vector<SP::DynamicalSystemsGraph> DSG;
+  std::vector<SP::DynamicalSystemsGraph> _DSG;
 
   /** unitary relations graphs (URG[0]=L[DSG[0]], L is the line graph
       transformation) */
-  std::vector<SP::UnitaryRelationsGraph> URG;
+  std::vector<SP::UnitaryRelationsGraph> _URG;
 
   /** check if topology has been updated since nsds modifications
       occur */
-  bool isTopologyUpToDate;
+  bool _isTopologyUpToDate;
 
   /** check if topology is static (all relative degrees = 0 or 1) or
       not */
-  bool isTopologyTimeInvariant;
+  bool _isTopologyTimeInvariant;
 
   /** Total number of (scalar) constraints in the problem, ie sum of
       all nslaw sizes of Unitary Relations of IndexSet0.*/
-  unsigned int numberOfConstraints;
+  unsigned int _numberOfConstraints;
 
   /** initializations (relative degrees, time invariance) from non
       smooth laws kind */
@@ -155,52 +155,20 @@ public:
 
   // === GETTERS/SETTERS ===
 
-  /** iterator equal to the first element of allInteractions
-  *  \return a InteractionsIterator
-  */
-  inline InteractionsIterator interactionsBegin()
-  {
-    return allInteractions->begin();
-  };
-
-  /** iterator equal to allInteractions->end()
-  *  \return a InteractionsIterator
-  */
-  inline InteractionsIterator interactionsEnd()
-  {
-    return allInteractions->end();
-  };
-
-  /** const iterator equal to the first element of allInteractions
-  *  \return a ConstInteractionsIterator
-  */
-  inline ConstInteractionsIterator interactionsBegin() const
-  {
-    return allInteractions->begin();
-  };
-
-  /** const iterator equal to allInteractions->end()
-  *  \return a ConstInteractionsIterator
-  */
-  inline ConstInteractionsIterator interactionsEnd() const
-  {
-    return allInteractions->end();
-  }
-
   /** get all the Interactions of the Topology problem (saved in a set)
   *  \return an InteractionsSet
   */
   inline const SP::InteractionsSet interactions() const
   {
-    return allInteractions;
+    return _allInteractions;
   }
 
   /** set the Interactions of the Topology problem (saved in a set)
    */
   inline void setInteractionsPtr(SP::InteractionsSet newInteractions)
   {
-    allInteractions->clear() ;
-    allInteractions = newInteractions;
+    _allInteractions->clear() ;
+    _allInteractions = newInteractions;
   }
 
 
@@ -228,7 +196,7 @@ public:
    */
   void addDynamicalSystem(SP::DynamicalSystem ds)
   {
-    DSG[0]->add_vertex(ds);
+    _DSG[0]->add_vertex(ds);
   };
 
   /** remove a dynamical system
@@ -241,7 +209,7 @@ public:
    */
   inline SP::UnitaryRelationsGraph indexSet0()
   {
-    return URG[0];
+    return _URG[0];
   }
 
   /** get a pointer to the graph at level num of Unitary Relations
@@ -249,8 +217,8 @@ public:
    */
   inline SP::UnitaryRelationsGraph indexSet(unsigned int num)
   {
-    assert(num < URG.size()) ;
-    return URG[num];
+    assert(num < _URG.size()) ;
+    return _URG[num];
   };
 
   /** reset graph at level num of Unitary Relations
@@ -258,8 +226,8 @@ public:
    */
   inline void resetIndexSetPtr(unsigned int num)
   {
-    assert(num < URG.size()) ;
-    URG[num].reset(new UnitaryRelationsGraph());
+    assert(num < _URG.size()) ;
+    _URG[num].reset(new UnitaryRelationsGraph());
   };
 
   /** get a pointer to the graph at level num of Dynamical System
@@ -267,20 +235,20 @@ public:
    */
   inline SP::DynamicalSystemsGraph dSG(unsigned int num)
   {
-    assert(num < DSG.size()) ;
-    return DSG[num];
+    assert(num < _DSG.size()) ;
+    return _DSG[num];
   };
 
   /** get the number of Unitary Relations Graphs */
   inline unsigned int indexSetsSize()
   {
-    return URG.size();
+    return _URG.size();
   };
 
   /** resize Unitary Relations Graphs */
   inline void indexSetsResize(unsigned int i)
   {
-    return URG.resize(i);
+    return _URG.resize(i);
   };
 
   // --- relativeDegreesMap ---
@@ -289,12 +257,12 @@ public:
   *  maximum value.
   \return an unsigned int
   */
-  const unsigned int getMaxRelativeDegree();
+  const unsigned int maxRelativeDegree();
 
   /** for all relative degrees (one per Unitary Relation), find the minimum value.
   *  \return an unsigned int
   */
-  const unsigned int getMinRelativeDegree();
+  const unsigned int minRelativeDegree();
 
   // --- isTopologyUpToDate ---
 
@@ -303,7 +271,7 @@ public:
   */
   inline void setUpToDate(const bool val)
   {
-    isTopologyUpToDate = val;
+    _isTopologyUpToDate = val;
   }
 
   /** check if topology has been updated since modifications occurs on nsds
@@ -311,7 +279,7 @@ public:
   */
   inline bool isUpToDate()
   {
-    return isTopologyUpToDate;
+    return _isTopologyUpToDate;
   }
 
   // --- isTopologyTimeInvariant ---
@@ -321,7 +289,7 @@ public:
   */
   inline void setTimeInvariant(const bool val)
   {
-    isTopologyTimeInvariant = val;
+    _isTopologyTimeInvariant = val;
   }
 
   /** check if all relative degrees are equal to 0 or 1
@@ -329,15 +297,15 @@ public:
   */
   inline bool isTimeInvariant()
   {
-    return isTopologyTimeInvariant;
+    return _isTopologyTimeInvariant;
   }
 
   /** get the total number of scalar constraints
   *  \return an unsigned int
   */
-  inline const unsigned int getNumberOfConstraints()
+  inline const unsigned int numberOfConstraints()
   {
-    return numberOfConstraints;
+    return _numberOfConstraints;
   };
 
   /** initializes the topology (called in Simulation->initialize)

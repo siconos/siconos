@@ -184,7 +184,7 @@ bool DiodeBridge()
 
       // --- Get values to be plotted ---
       // time
-      dataPlot(k, 0) = StratDiodeBridge->getNextTime();
+      dataPlot(k, 0) = StratDiodeBridge->nextTime();
 
       // inductor voltage
       dataPlot(k, 1) = (*x)(0);
