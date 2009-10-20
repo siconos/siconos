@@ -140,10 +140,10 @@ int main(int argc, char* argv[])
     unsigned int outputSize = 5;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
-    SP::SiconosVector q = ball->getQPtr();
-    SP::SiconosVector v = ball->getVelocityPtr();
-    SP::SiconosVector p = ball->getPPtr(2);
-    SP::SiconosVector lambda = inter->getLambdaPtr(1);
+    SP::SiconosVector q = ball->q();
+    SP::SiconosVector v = ball->velocity();
+    SP::SiconosVector p = ball->p(2);
+    SP::SiconosVector lambda = inter->lambda(1);
 
     dataPlot(0, 0) = bouncingBall->getT0();
     dataPlot(0, 1) = (*q)(0);

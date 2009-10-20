@@ -161,8 +161,8 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlot(N + 1, outputSize);
     // For the initial time step:
     // time
-    SP::SiconosVector q = doublependulum->getQPtr();
-    SP::SiconosVector v = doublependulum->getVelocityPtr();
+    SP::SiconosVector q = doublependulum->q();
+    SP::SiconosVector v = doublependulum->velocity();
 
     dataPlot(k, 0) =  t0;
     dataPlot(k, 1) = (*q)(0);

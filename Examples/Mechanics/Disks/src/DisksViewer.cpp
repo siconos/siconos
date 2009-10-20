@@ -93,7 +93,7 @@ void DisksViewer::draw()
 
   DSIterator itDS;
   SP::DynamicalSystemsSet involvedDS;
-  SP::UnitaryRelationsGraph I1 = Siconos_->getModelPtr()->getSimulationPtr()->getIndexSetPtr(1);
+  SP::UnitaryRelationsGraph I1 = Siconos_->model()->simulation()->indexSet(1);
   SP::Interaction interaction;
   SP::Relation relation;
 
@@ -102,20 +102,20 @@ void DisksViewer::draw()
   UnitaryRelationsGraph::VIterator ui, uiend;
   for (boost::tie(ui, uiend) = I1->vertices(); ui != uiend; ++ui)
   {
-    lbdmax = fmax(I1->bundle(*ui)->getInteractionPtr()->getLambdaOldPtr(1)->getValue(0), lbdmax);
+    lbdmax = fmax(I1->bundle(*ui)->interaction()->lambdaOld(1)->getValue(0), lbdmax);
   }
 
   for (boost::tie(ui, uiend) = I1->vertices(); ui != uiend; ++ui)
   {
-    interaction = I1->bundle(*ui)->getInteractionPtr();
-    relation = interaction->getRelationPtr();
+    interaction = I1->bundle(*ui)->interaction();
+    relation = interaction->relation();
 
-    lbd = interaction->getLambdaOldPtr(1)->getValue(0);
+    lbd = interaction->lambdaOld(1)->getValue(0);
 
     // screen width of interaction
     w = lbd / (2 * fmax(lbdmax, 1.)) + .03;
 
-    involvedDS = interaction->getDynamicalSystemsPtr();
+    involvedDS = interaction->dynamicalSystems();
 
     if (involvedDS->size() == 2)
     {
@@ -265,10 +265,10 @@ void DisksViewer::mouseMoveEvent(QMouseEvent *e)
 
     camera()->getUnprojectedCoordinatesOf(coor, coor, NULL);
 
-    drawings_[selectedName()]->getDS()->getFExtPtr()
-    ->setValue(0, ((float)coor[0] - drawings_[selectedName()]->getDS()->getQPtr()->getValue(0))*drawings_[selectedName()]->getDS()->getMassPtr()->getValue(0, 0) * 30);
-    drawings_[selectedName()]->getDS()->getFExtPtr()
-    ->setValue(1, ((float)coor[1] - drawings_[selectedName()]->getDS()->getQPtr()->getValue(1))*drawings_[selectedName()]->getDS()->getMassPtr()->getValue(0, 0) * 30);
+    drawings_[selectedName()]->getDS()->fExt()
+    ->setValue(0, ((float)coor[0] - drawings_[selectedName()]->getDS()->q()->getValue(0))*drawings_[selectedName()]->getDS()->mass()->getValue(0, 0) * 30);
+    drawings_[selectedName()]->getDS()->fExt()
+    ->setValue(1, ((float)coor[1] - drawings_[selectedName()]->getDS()->q()->getValue(1))*drawings_[selectedName()]->getDS()->mass()->getValue(0, 0) * 30);
   }
 
   QGLViewer::mouseMoveEvent(e);

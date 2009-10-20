@@ -187,7 +187,7 @@ void SpheresViewer::mouseMoveEvent(QMouseEvent *e)
 
     SP::Drawing selected_drawing = drawings_[selectedName()];
     SP::LagrangianDS DS = selected_drawing->getDS();
-    double mass = DS->getMassPtr()->getValue(0, 0);
+    double mass = DS->mass()->getValue(0, 0);
 
     QPoint pixel;
     qglviewer::Vec orig;
@@ -210,9 +210,9 @@ void SpheresViewer::mouseMoveEvent(QMouseEvent *e)
     coor[2] = m_coor[2];
 
     // toward camera
-    DS->getFExtPtr()->setValue(0, (coor[0] - DS->getQPtr()->getValue(0))*mass * 10);
-    DS->getFExtPtr()->setValue(1, (coor[1] - DS->getQPtr()->getValue(1))*mass * 10);
-    DS->getFExtPtr()->setValue(2, (coor[2] - DS->getQPtr()->getValue(2))*mass * 10);
+    DS->fExt()->setValue(0, (coor[0] - DS->q()->getValue(0))*mass * 10);
+    DS->fExt()->setValue(1, (coor[1] - DS->q()->getValue(1))*mass * 10);
+    DS->fExt()->setValue(2, (coor[2] - DS->q()->getValue(2))*mass * 10);
   }
 
   QGLViewer::mouseMoveEvent(e);

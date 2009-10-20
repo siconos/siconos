@@ -55,25 +55,25 @@ DEFINE_SPTR(BodyDraw);
 DEFINE_SPTR(SelectedBodyDraw);
 
 /* convenient macros */
-#define GETX(C) C->getQPtr()->getValue(0)
-#define GETY(C) C->getQPtr()->getValue(1)
-#define GETZ(C) C->getQPtr()->getValue(2)
-#define GETA1(C) C->getQPtr()->getValue(3)
-#define GETA2(C) C->getQPtr()->getValue(4)
-#define GETA3(C) C->getQPtr()->getValue(5)
-#define GETXFE(C) C->getFExtPtr()->getValue(0)
-#define GETYFE(C) C->getFExtPtr()->getValue(1)
-#define GETZFE(C) C->getFExtPtr()->getValue(2)
+#define GETX(C) C->q()->getValue(0)
+#define GETY(C) C->q()->getValue(1)
+#define GETZ(C) C->q()->getValue(2)
+#define GETA1(C) C->q()->getValue(3)
+#define GETA2(C) C->q()->getValue(4)
+#define GETA3(C) C->q()->getValue(5)
+#define GETXFE(C) C->fExt()->getValue(0)
+#define GETYFE(C) C->fExt()->getValue(1)
+#define GETZFE(C) C->fExt()->getValue(2)
 
-#define GETVX(C) C->getVelocityPtr()->getValue(0)
-#define GETVY(C) C->getVelocityPtr()->getValue(1)
-#define GETVZ(C) C->getVelocityPtr()->getValue(2)
+#define GETVX(C) C->velocity()->getValue(0)
+#define GETVY(C) C->velocity()->getValue(1)
+#define GETVZ(C) C->velocity()->getValue(2)
 
-#define GETVA1(C) C->getVelocityPtr()->getValue(3)
-#define GETVA2(C) C->getVelocityPtr()->getValue(4)
-#define GETVA3(C) C->getVelocityPtr()->getValue(5)
+#define GETVA1(C) C->velocity()->getValue(3)
+#define GETVA2(C) C->velocity()->getValue(4)
+#define GETVA3(C) C->velocity()->getValue(5)
 
-#define GETALLDS(M) M->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getDSGPtr(0)
+#define GETALLDS(M) M->model()->nonSmoothDynamicalSystem()->topology()->dSG(0)
 #define GETNDS(M) GETALLDS(M)->size()
 
 /* a drawing of a Siconos Lagrangian DS */
@@ -123,11 +123,11 @@ public:
   /* External force set from mouse and restore */
   void saveFExt()
   {
-    *savedFExt_ = *(getDS()->getFExtPtr()) ;
+    *savedFExt_ = *(getDS()->fExt()) ;
   };
   void restoreFExt()
   {
-    *(getDS()->getFExtPtr()) = *savedFExt_;
+    *(getDS()->fExt()) = *savedFExt_;
   };
 
   /* DS frame */

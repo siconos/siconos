@@ -178,11 +178,11 @@ int main(int argc, char* argv[])
     // For the initial time step:
     // time
     dataPlot(k, 0) =  Pendulum->getT0();
-    dataPlot(k, 1) = simplependulum->getQ()(0);
-    dataPlot(k, 2) = simplependulum->getVelocity()(0);
-    dataPlot(k, 3) =  l1 * sin(simplependulum->getQ()(0));
-    dataPlot(k, 4) = -l1 * cos(simplependulum->getQ()(0));
-    dataPlot(k, 5) =  l1 * cos(simplependulum->getQ()(0)) * (simplependulum->getVelocity()(0));
+    dataPlot(k, 1) = (*simplependulum->q())(0);
+    dataPlot(k, 2) = (*simplependulum->velocity())(0);
+    dataPlot(k, 3) =  l1 * sin((*simplependulum->q())(0));
+    dataPlot(k, 4) = -l1 * cos((*simplependulum->q())(0));
+    dataPlot(k, 5) =  l1 * cos((*simplependulum->q())(0)) * ((*simplependulum->velocity())(0));
     // --- Compute elapsed time ---
     boost::timer tt;
     //    EventsManager eventsManager = s->getEventsManagerPtr();
@@ -199,11 +199,11 @@ int main(int argc, char* argv[])
       s->newtonSolve(criterion, maxIter);
       // Data Output
       dataPlot(k, 0) =  s->getNextTime();
-      dataPlot(k, 1) = simplependulum->getQ()(0);
-      dataPlot(k, 2) = simplependulum->getVelocity()(0);
-      dataPlot(k, 3) =  l1 * sin(simplependulum->getQ()(0));
-      dataPlot(k, 4) = -l1 * cos(simplependulum->getQ()(0));
-      dataPlot(k, 5) =  l1 * cos(simplependulum->getQ()(0)) * (simplependulum->getVelocity()(0));
+      dataPlot(k, 1) = (*simplependulum->q())(0);
+      dataPlot(k, 2) = (*simplependulum->velocity())(0);
+      dataPlot(k, 3) =  l1 * sin((*simplependulum->q())(0));
+      dataPlot(k, 4) = -l1 * cos((*simplependulum->q())(0));
+      dataPlot(k, 5) =  l1 * cos((*simplependulum->q())(0)) * ((*simplependulum->velocity())(0));
       s->nextStep();
     }
 

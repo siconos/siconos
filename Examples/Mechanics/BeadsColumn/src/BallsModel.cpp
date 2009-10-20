@@ -125,7 +125,7 @@ void BallsModel::initialize()
   {
     (*dataPlot)(0, 1 + 2 * i) = (*it)->getQ(2);
     (*dataPlot)(0, 2 + 2 * i) = (*it)->getVelocity(2);
-    if ((*it)->getNumber() == 9)
+    if ((*it)->number() == 9)
       break;
     i++;
   }
@@ -134,27 +134,27 @@ void BallsModel::initialize()
 
 void BallsModel::compute()
 {
-  balls->getSimulationPtr()->advanceToEvent();
+  balls->simulation()->advanceToEvent();
   unsigned int i = 0;
 
 #ifndef WithQGLViewer
-  (*dataPlot)(iter_k, 0) =  balls->getSimulationPtr()->getNextTime(); // time
+  (*dataPlot)(iter_k, 0) =  balls->simulation()->getNextTime(); // time
   for (DSLIST::iterator it = allSpheres.begin(); it != allSpheres.end(); ++it)
   {
     (*dataPlot)(iter_k, 1 + 2 * i) = (*it)->getQ(2);
     (*dataPlot)(iter_k, 2 + 2 * i) = (*it)->getVelocity(2);
-    if ((*it)->getNumber() == 9)
+    if ((*it)->number() == 9)
       break;
     i++;
   }
 #endif
-  balls->getSimulationPtr()->processEvents();
+  balls->simulation()->processEvents();
   iter_k++;
 }
 
 bool BallsModel::isSimulationFinished()
 {
-  return !(balls->getSimulationPtr()->getNextTime() < balls->getFinalT());
+  return !(balls->simulation()->getNextTime() < balls->getFinalT());
 }
 
 

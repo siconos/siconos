@@ -223,7 +223,7 @@ void Disks::init()
     playground_.reset(new SpaceFilter(3, 6, nsds_, nslaw, plans_));
     playground_->buildInteractions();
 
-    nsds_->getTopologyPtr()->initialize();
+    nsds_->topology()->initialize();
 
     model_->initialize(simulation_);
 

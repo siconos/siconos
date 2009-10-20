@@ -30,10 +30,10 @@ int main(int argc, char* argv[])
     oscillator->initialize();
 
     // --- Get and initialize the simulation ---
-    SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(oscillator->getSimulationPtr());
+    SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(oscillator->simulation());
 
     // --- Get the time discretisation scheme ---
-    SP::TimeDiscretisation t = s->getTimeDiscretisationPtr();
+    SP::TimeDiscretisation t = s->timeDiscretisation();
     int k = 0;
     double t0 = oscillator->getT0();
     double T = oscillator->getFinalT();
@@ -47,9 +47,9 @@ int main(int argc, char* argv[])
     cout << "Prepare data for plotting ... " << endl;
     // For the initial time step:
     SP::LagrangianDS oscillo = boost::static_pointer_cast<LagrangianDS> (oscillator->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(1));
-    SP::SiconosVector q = oscillo->getQPtr();
-    SP::SiconosVector v = oscillo->getVelocityPtr();
-    SP::SiconosVector p = oscillo->getPPtr(2);
+    SP::SiconosVector q = oscillo->q();
+    SP::SiconosVector v = oscillo->velocity();
+    SP::SiconosVector p = oscillo->p(2);
 
     dataPlot(k, 0) = t0;
     dataPlot(0, 1) = (*q)(0);
@@ -64,8 +64,8 @@ int main(int argc, char* argv[])
       s->computeOneStep();
       // --- Get values to be plotted ---
       dataPlot(k, 0) = s->getNextTime();
-      dataPlot(k, 1) = (oscillo->getQ())(0);
-      dataPlot(k, 2) = (oscillo->getVelocity())(0);
+      dataPlot(k, 1) = (oscillo->q())(0);
+      dataPlot(k, 2) = (oscillo->velocity())(0);
       // transfer of state i+1 into state i and time incrementation
       s->nextStep();
       k++;
