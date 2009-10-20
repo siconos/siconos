@@ -406,7 +406,7 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
 
   Xq = UR->xq();
   lambda = UR->interaction()->lambda(0);
-  H_alpha = UR->interaction()->relation()->halpha();
+  H_alpha = UR->interaction()->relation()->Halpha();
   //  cout<<"LinearOSNS::computeQblock lambda "<< endl;
   //  lambda->display();
   //  cout<<"LinearOSNS::computeQblock H_alpha "<< endl;

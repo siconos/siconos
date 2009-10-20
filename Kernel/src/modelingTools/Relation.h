@@ -449,7 +449,7 @@ public:
    * Return H_alpha
    *
    */
-  virtual const SP::SiconosVector halpha()
+  virtual const SP::SiconosVector Halpha()
   {
     return mH_alpha;
   };

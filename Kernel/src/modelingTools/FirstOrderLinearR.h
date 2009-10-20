@@ -301,7 +301,7 @@ public:
   //    *  \param string : the complete path to the plugin
   //    *  \param string : the function name to use in this plugin
   //    */
-  void setComputeBFunction(const std::string& pluginPath, const std::string& functionName)
+  void setComputebFunction(const std::string& pluginPath, const std::string& functionName)
   {
     setComputeJacLGFunction(pluginPath,  functionName);
   }
