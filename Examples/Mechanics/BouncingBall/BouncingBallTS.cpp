@@ -90,17 +90,10 @@ int main(int argc, char* argv[])
 
     SP::Interaction inter(new Interaction("floor-ball", allDS, 0, 1, nslaw0, relation0));
     allInteractions.insert(inter);
-    // --------------------------------
-    // --- NonSmoothDynamicalSystem ---
-    // --------------------------------
-    SP::NonSmoothDynamicalSystem nsds(new NonSmoothDynamicalSystem(allDS, allInteractions));
-
     // -------------
     // --- Model ---
     // -------------
-
-    SP::Model bouncingBall(new Model(t0, T));
-    bouncingBall->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
+    SP::Model bouncingBall(new Model(t0, T, allDS, allInteractions));
 
     // ------------------
     // --- Simulation ---
@@ -145,7 +138,7 @@ int main(int argc, char* argv[])
     SP::SiconosVector p = ball->p(2);
     SP::SiconosVector lambda = inter->lambda(1);
 
-    dataPlot(0, 0) = bouncingBall->getT0();
+    dataPlot(0, 0) = bouncingBall->t0();
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
     dataPlot(0, 3) = (*p)(0);
@@ -159,12 +152,12 @@ int main(int argc, char* argv[])
     boost::timer time;
     time.restart();
 
-    while (s->getNextTime() < T)
+    while (s->nextTime() < T)
     {
       s->computeOneStep();
 
       // --- Get values to be plotted ---
-      dataPlot(k, 0) =  s->getNextTime();
+      dataPlot(k, 0) =  s->nextTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*p)(0);

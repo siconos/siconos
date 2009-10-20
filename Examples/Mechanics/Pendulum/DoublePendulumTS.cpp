@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
 
     cout << "=== End of model loading === " << endl;
 
-    // =========================== End of model definition ===========================  dataPlot(k,7) = (inter->getY(0))(0);
+    // =========================== End of model definition ===========================  dataPlot(k,7) = (*inter->y(0))(0);
 
 
     // ================================= Computation =================================
@@ -193,7 +193,7 @@ int main(int argc, char* argv[])
       // Solve problem
       s->newtonSolve(criterion, maxIter);
       // Data Output
-      dataPlot(k, 0) =  s->getNextTime();
+      dataPlot(k, 0) =  s->nextTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*q)(1);

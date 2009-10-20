@@ -200,11 +200,11 @@ int main(int argc, char* argv[])
     unsigned int outputSize = 13;
     SimpleMatrix dataPlot(N + 1, outputSize);
     // For the initial time step:
-    SP::SiconosVector q = arm->getQPtr();
-    SP::SiconosVector v = arm->getVelocityPtr();
-    SP::EventsManager eventsManager = s->getEventsManagerPtr();
+    SP::SiconosVector q = arm->q();
+    SP::SiconosVector v = arm->velocity();
+    SP::EventsManager eventsManager = s->eventsManager();
 
-    dataPlot(k, 0) =  RX90->getT0();
+    dataPlot(k, 0) =  RX90->t0();
     dataPlot(k, 1) = (*q)(0);
     dataPlot(k, 2) = (*q)(1);
     dataPlot(k, 3) = (*q)(2);
@@ -219,15 +219,15 @@ int main(int argc, char* argv[])
     dataPlot(k, 12) = (*v)(5);
 
 
-    while (s->getNextTime() <= T)
+    while (s->nextTime() <= T)
     {
       s->advanceToEvent();
       s->processEvents();
       // get current time step
-      if (abs(s->getStartingTime() - (k + 1)*h) < 1e-12)
+      if (abs(s->startingTime() - (k + 1)*h) < 1e-12)
       {
         k++;
-        dataPlot(k, 0) =  s->getStartingTime();
+        dataPlot(k, 0) =  s->startingTime();
         dataPlot(k, 1) = (*q)(0);
         dataPlot(k, 2) = (*q)(1);
         dataPlot(k, 3) = (*q)(2);

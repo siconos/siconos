@@ -45,13 +45,13 @@ int main(int argc, char* argv[])
     CamFollower->initialize();
 
     // --- Get and initialize the simulation ---
-    SP::TimeStepping S = boost::static_pointer_cast<TimeStepping>(CamFollower->getSimulationPtr());
+    SP::TimeStepping S = boost::static_pointer_cast<TimeStepping>(CamFollower->simulation());
     // --- Get the time discretisation scheme ---
-    SP::TimeDiscretisation t = S->getTimeDiscretisationPtr();
+    SP::TimeDiscretisation t = S->timeDiscretisation();
     int k = 0;
-    double T = CamFollower->getFinalT();
-    double t0 = CamFollower->getT0();
-    double h = S->getTimeStep();
+    double T = CamFollower->finalT();
+    double t0 = CamFollower->t0();
+    double h = S->timeStep();
     int N = (int)((T - t0) / h);
 
     // --- Get the values to be plotted ---
@@ -64,15 +64,15 @@ int main(int argc, char* argv[])
     DataPlot(k, 0) = t0;
 
     // state q for the Follower
-    SP::LagrangianDS Follower = boost::static_pointer_cast<LagrangianDS> (CamFollower->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(1));
+    SP::LagrangianDS Follower = boost::static_pointer_cast<LagrangianDS> (CamFollower->nonSmoothDynamicalSystem()->dynamicalSystemNumber(1));
     // Position of the Follower
-    DataPlot(k, 1) = (Follower->getQ())(0);
+    DataPlot(k, 1) = ((*Follower->q()))(0);
     // Velocity for the Follower
-    DataPlot(k, 2) = (Follower->getVelocity())(0);
+    DataPlot(k, 2) = ((*Follower->velocity()))(0);
     // Reaction
-    DataPlot(k, 3) = (CamFollower->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
+    DataPlot(k, 3) = (*CamFollower->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(0)->lambda(1))(0);
     // External Forcing
-    DataPlot(k, 4) = (Follower->getFExt())(0);
+    DataPlot(k, 4) = ((*Follower->fExt()))(0);
 
     // State of the Cam
     double rpm = 358;
@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
     // Velocity of the Cam
     DataPlot(k, 6) = CamVelocity;
     // Acceleration of the Cam
-    DataPlot(k, 7) = CamPosition + (Follower->getQ())(0);
+    DataPlot(k, 7) = CamPosition + ((*Follower->q()))(0);
 
 
     // --- Compute elapsed time ---
@@ -101,20 +101,20 @@ int main(int argc, char* argv[])
 
       S->computeOneStep();
       // --- Get values to be plotted ---
-      DataPlot(k, 0) = S->getNextTime();
-      //  DataPlot(k, 1) = (Follower->getQ())(0);
-      //  DataPlot(k, 2) = (ball->getVelocity())(0);
-      //  DataPlot(k, 3) = (bouncingBall.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
-      DataPlot(k, 1) = (Follower->getQ())(0);
-      DataPlot(k, 2) = (Follower->getVelocity())(0);
-      DataPlot(k, 3) = (CamFollower->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
-      DataPlot(k, 4) = (Follower->getFExt())(0);
+      DataPlot(k, 0) = S->nextTime();
+      //  DataPlot(k, 1) = ((*Follower->q()))(0);
+      //  DataPlot(k, 2) = ((*ball->velocity()))(0);
+      //  DataPlot(k, 3) = (bouncingBall.nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(0)->lambda(1))(0);
+      DataPlot(k, 1) = ((*Follower->q()))(0);
+      DataPlot(k, 2) = ((*Follower->velocity()))(0);
+      DataPlot(k, 3) = (*CamFollower->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(0)->lambda(1))(0);
+      DataPlot(k, 4) = ((*Follower->fExt()))(0);
 
-      CamEqForce = CamState(S->getNextTime(), rpm, CamPosition, CamVelocity, CamAcceleration);
+      CamEqForce = CamState(S->nextTime(), rpm, CamPosition, CamVelocity, CamAcceleration);
 
       DataPlot(k, 5) = CamPosition;
       DataPlot(k, 6) = CamVelocity;
-      DataPlot(k, 7) = CamPosition + (Follower->getQ())(0);
+      DataPlot(k, 7) = CamPosition + ((*Follower->q()))(0);
       // transfer of state i+1 into state i and time incrementation
 
       S->nextStep();

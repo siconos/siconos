@@ -33,13 +33,13 @@ int main(int argc, char* argv[])
     bouncingBall->initialize();
 
     // --- Get the simulation ---
-    SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(bouncingBall->getSimulationPtr());
+    SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(bouncingBall->simulation());
     // --- Get the time discretisation scheme ---
-    SP::TimeDiscretisation t = s->getTimeDiscretisationPtr();
+    SP::TimeDiscretisation t = s->timeDiscretisation();
     int k = 0;
-    double T = bouncingBall->getFinalT();
-    double t0 = bouncingBall->getT0();
-    double h = s->getTimeStep();
+    double T = bouncingBall->finalT();
+    double t0 = bouncingBall->t0();
+    double h = s->timeStep();
     int N = (int)((T - t0) / h);
 
     // --- Get the values to be plotted ---
@@ -49,12 +49,12 @@ int main(int argc, char* argv[])
     cout << "Prepare data for plotting ... " << endl;
     // For the initial time step:
     // time
-    dataPlot(k, 0) =  bouncingBall->getT0();
+    dataPlot(k, 0) =  bouncingBall->t0();
     // state q for the first dynamical system (ball)
-    SP::LagrangianDS ball = boost::static_pointer_cast<LagrangianDS> (bouncingBall->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(1));
-    SP::SiconosVector q = ball->getQPtr();
-    SP::SiconosVector v = ball->getVelocityPtr();
-    SP::SiconosVector p = ball->getPPtr(2);
+    SP::LagrangianDS ball = boost::static_pointer_cast<LagrangianDS> (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystemNumber(1));
+    SP::SiconosVector q = ball->q();
+    SP::SiconosVector v = ball->velocity();
+    SP::SiconosVector p = ball->p(2);
 
     dataPlot(k, 1) = (*q)(0);
     dataPlot(k, 2) = (*v)(0);
@@ -65,14 +65,14 @@ int main(int argc, char* argv[])
     // --- Compute elapsed time ---
     cout << "Computation ... " << endl;
     // --- Time loop  ---
-    while (s->getNextTime() <= bouncingBall->getFinalT())
+    while (s->nextTime() <= bouncingBall->finalT())
     {
       // solve ...
       s->computeOneStep();
 
       // --- Get values to be plotted ---
       //time
-      dataPlot(k, 0) = s->getNextTime();;
+      dataPlot(k, 0) = s->nextTime();;
       // Ball: state q
       dataPlot(k, 1) = (*q)(0);
       // Ball: velocity

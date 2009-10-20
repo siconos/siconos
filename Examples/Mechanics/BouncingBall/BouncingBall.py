@@ -26,16 +26,16 @@ gnuplot.title("Python BouncingBall sample");
 
 model = pySiconos.Model("./BallTS.xml");
 print "*** BallTS.xml loaded ***";
-s = pySiconos.TimeStepping.convert(model.getSimulationPtr());	
+s = pySiconos.TimeStepping.convert(model.simulationy());	
 print "simulation initialization ..."; 
 s.initialize();
 print " **** the simulation is ready ****"; 
-t = s.getTimeDiscretisationPtr();
+t = s.timeDiscretisation();
 k = 0;
 N = t.getNSteps();
 
 # DS
-ball = pySiconos.LagrangianLinearTIDS.convert(model.getNonSmoothDynamicalSystemPtr().getDynamicalSystemPtr(0));
+ball = pySiconos.LagrangianLinearTIDS.convert(model.nonSmoothDynamicalSystem().getDynamicalSystemPtr(0));
 
 m = pySiconos.SimpleMatrix(N+1, 4);
 m.zero()
@@ -43,13 +43,13 @@ m.zero()
 tmp = k * t.getH();
 m.setValue(k, 0, tmp);
 # position
-val = (ball.getQPtr()).getValue(0);
+val = (ball.q()).getValue(0);
 
 m.setValue(k, 1, val);
 # position
-val = (ball.getVelocityPtr()).getValue(0);
+val = (ball.velocity()).getValue(0);
 m.setValue(k, 2, val);
-val = (model.getNonSmoothDynamicalSystemPtr().getInteractionPtr(0).getLambdaPtr(1)).getValue(0);
+val = (model.nonSmoothDynamicalSystem().getInteractionPtr(0).lambda(1)).getValue(0);
 m.setValue(k, 3, val);
 # _________________________________________________
 
@@ -66,12 +66,12 @@ while k < N :
 	temps[k] = k*t.getH();
 	
 #	// position
-	m.setValue(k, 1, (ball.getQPtr()).getValue(0));
-	position[k] = (ball.getQPtr()).getValue(0);
+	m.setValue(k, 1, (ball.q()).getValue(0));
+	position[k] = (ball.q()).getValue(0);
 	
 #	// position
-	m.setValue(k, 2, (ball.getVelocityPtr()).getValue(0));						
-	m.setValue(k, 3, (model.getNonSmoothDynamicalSystemPtr().getInteractionPtr(0).getLambdaPtr(1)).getValue(0));    
+	m.setValue(k, 2, (ball.velocity()).getValue(0));						
+	m.setValue(k, 3, (model.nonSmoothDynamicalSystem().getInteractionPtr(0).lambda(1)).getValue(0));    
 	if plot == 1999 :
 		d1=Gnuplot.Data(temps, position, title="Ball position");
 		gnuplot.plot(d1);

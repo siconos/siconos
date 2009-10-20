@@ -104,16 +104,16 @@ int main(int argc, char* argv[])
     (*z)(24) = 0;
 
 
-    SP::LagrangianDS  arm(new LagrangianDS(q0, v0));
+    SP::LagrangianDS  arm(new LagrangianDS(createSPtrSimpleVector(q0), createSPtrSimpleVector(v0)));
 
     // external plug-in
     arm->setComputeMassFunction("TwolinkMultiFlexPlugin.so", "mass");
     arm->setComputeNNLFunction("TwolinkMultiFlexPlugin.so", "NNL");
-    arm->setComputeJacobianNNLFunction(1, "TwolinkMultiFlexPlugin.so", "jacobianVNNL");
-    arm->setComputeJacobianNNLFunction(0, "TwolinkMultiFlexPlugin.so", "jacobianQNNL");
+    arm->setComputeJacobianQDotNNLFunction("TwolinkMultiFlexPlugin.so", "jacobianVNNL");
+    arm->setComputeJacobianQNNLFunction("TwolinkMultiFlexPlugin.so", "jacobianQNNL");
     arm->setComputeFIntFunction("TwolinkMultiFlexPlugin.so", "U");
-    arm->setComputeJacobianFIntFunction(1, "TwolinkMultiFlexPlugin.so", "jacobFintV");
-    arm->setComputeJacobianFIntFunction(0, "TwolinkMultiFlexPlugin.so", "jacobFintQ");
+    arm->setComputeJacobianQDotFIntFunction("TwolinkMultiFlexPlugin.so", "jacobFintV");
+    arm->setComputeJacobianQFIntFunction("TwolinkMultiFlexPlugin.so", "jacobFintQ");
     arm->setZPtr(z);
 
     allDS.insert(arm);
@@ -200,19 +200,19 @@ int main(int argc, char* argv[])
     // For the initial time step:
     // time
 
-    SP::SiconosVector q = arm->getQPtr();
-    SP::SiconosVector v = arm->getVelocityPtr();
-    SP::SiconosVector p = arm->getPPtr(2);
-    // EventsManager * eventsManager = s->getEventsManagerPtr();
+    SP::SiconosVector q = arm->q();
+    SP::SiconosVector v = arm->velocity();
+    SP::SiconosVector p = arm->p(2);
+    // EventsManager * eventsManager = s->eventsManager();
 
-    dataPlot(k, 0) =  Manipulator->getT0();
+    dataPlot(k, 0) =  Manipulator->t0();
     dataPlot(k, 1) = (*q)(0);
     dataPlot(k, 2) = (*q)(1);
-    dataPlot(k, 3) = (inter->getY(0))(1);
+    dataPlot(k, 3) = (*inter->y(0))(1);
     dataPlot(k, 4) = (*v)(0);
     dataPlot(k, 5) = (*v)(1);
-    dataPlot(k, 6) = (inter->getY(0))(0) - 2;
-    dataPlot(k, 7) = nimpact; //(inter->getY(1))(1);
+    dataPlot(k, 6) = (*inter->y(0))(0) - 2;
+    dataPlot(k, 7) = nimpact; //(*inter->y(1))(1);
     dataPlot(k, 8) = (*z)(6);
     dataPlot(k, 9) = (*z)(4); //L
     dataPlot(k, 10) = (*z)(18);
@@ -239,18 +239,18 @@ int main(int argc, char* argv[])
       k++;
 
 
-      //      relation->computeOutput(s->getNextTime());
+      //      relation->computeOutput(s->nextTime());
       //  if(k==1106) stop = 1;
 
-      dataPlot(k, 0) =  s->getNextTime();
+      dataPlot(k, 0) =  s->nextTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*q)(1);
 
-      dataPlot(k, 3) = (inter->getY(0))(1);
+      dataPlot(k, 3) = (*inter->y(0))(1);
       dataPlot(k, 4) = (*v)(0);
       dataPlot(k, 5) = (*v)(1);
-      dataPlot(k, 6) = (inter->getY(0))(0) - 2;
-      dataPlot(k, 7) = nimpact; //(inter->getY(1))(1);
+      dataPlot(k, 6) = (*inter->y(0))(0) - 2;
+      dataPlot(k, 7) = nimpact; //(*inter->y(1))(1);
       dataPlot(k, 8) = (*z)(6);
       if (test == 3) dataPlot(k, 9) = (*z)(4) / h;
       else dataPlot(k, 9) = (*z)(4);
@@ -294,7 +294,7 @@ int main(int argc, char* argv[])
         nimpact = nimpact + 1;
 
       // controller during constraint-motion phase.
-      if (((*z)(4) > 0) && (test == 2) && (dataPlot(k, 7) - dataPlot(k - 3, 7) == 3)) //  && (fabs((inter0->getY(1))(1))<1e-6))
+      if (((*z)(4) > 0) && (test == 2) && (dataPlot(k, 7) - dataPlot(k - 3, 7) == 3)) //  && (fabs((*inter0->y(1))(1))<1e-6))
       {
         // L= dataPlot(k,0)-(*z)(8);
         (*z)(8) = dataPlot(k, 0);
@@ -312,7 +312,7 @@ int main(int argc, char* argv[])
       if (((*z)(18) > 0) && (test == 4))
         nimpact = nimpact + 1;
       // controller during constraint-motion phase.
-      if (((*z)(18) > 0) && (test == 4) && (dataPlot(k, 7) - dataPlot(k - 3, 7) == 3)) // && (fabs((inter0->getY(1))(0))<1e-6))
+      if (((*z)(18) > 0) && (test == 4) && (dataPlot(k, 7) - dataPlot(k - 3, 7) == 3)) // && (fabs((*inter0->y(1))(0))<1e-6))
       {
         (*z)(8) = dataPlot(k, 0);
         arm->setComputeFIntFunction("TwolinkMultiFlexPlugin.so", "U5");

@@ -60,17 +60,17 @@ int main(int argc, char* argv[])
     C.reset(new SimpleMatrix(nDof, nDof));
 
     // -- Initial positions and velocities --
-    SimpleVector q0(nDof);
-    q0(0) = y_0;
-    q0(1) = phi_M_0;
-    q0(2) = phi_S_0;
+    SP::SimpleVector q0(new SimpleVector(nDof));
+    (*q0)(0) = y_0;
+    (*q0)(1) = phi_M_0;
+    (*q0)(2) = phi_S_0;
 
-    SimpleVector velocity0(nDof);
-    velocity0(0) = v_0;
-    velocity0(1) = omega_M_0;
-    velocity0(2) = omega_S_0;
+    SP::SimpleVector velocity0(new SimpleVector(nDof));
+    (*velocity0)(0) = v_0;
+    (*velocity0)(1) = omega_M_0;
+    (*velocity0)(2) = omega_S_0;
 
-    SP::LagrangianDS dynamicalSystem(new LagrangianLinearTIDS(q0, velocity0, *Mass, *K, *C));
+    SP::LagrangianDS dynamicalSystem(new LagrangianLinearTIDS(q0, velocity0, Mass, K, C));
     dynamicalSystem->setComputeFExtFunction("WoodPeckerPlugin.so", "FExt");
 
     DynamicalSystemsSet allDS;
@@ -179,8 +179,8 @@ int main(int argc, char* argv[])
     dataPlot(k, 0) = t0;
     for (int i = 0; i < (int)nDof; i++)
     {
-      dataPlot(k, 2 * i + 1) = dynamicalSystem->getQ()(i);
-      dataPlot(k, 2 * i + 2) = dynamicalSystem->getVelocity()(i);
+      dataPlot(k, 2 * i + 1) = (*dynamicalSystem->q())(i);
+      dataPlot(k, 2 * i + 2) = (*dynamicalSystem->velocity())(i);
     }
 
     // --- Time loop ---
@@ -195,11 +195,11 @@ int main(int argc, char* argv[])
       s->computeOneStep();
 
       // get values
-      dataPlot(k, 0) = s->getNextTime();
+      dataPlot(k, 0) = s->nextTime();
       for (int i = 0; i < (int)nDof; i++)
       {
-        dataPlot(k, 2 * i + 1) = dynamicalSystem->getQ()(i);
-        dataPlot(k, 2 * i + 2) = dynamicalSystem->getVelocity()(i);
+        dataPlot(k, 2 * i + 1) = (*dynamicalSystem->q())(i);
+        dataPlot(k, 2 * i + 2) = (*dynamicalSystem->velocity())(i);
       }
 
       // transfer of state i+1 into state i and time incrementation

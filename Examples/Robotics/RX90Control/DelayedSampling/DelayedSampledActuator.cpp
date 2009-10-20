@@ -48,14 +48,14 @@ void DelayedSampledActuator::initialize()
   Actuator::initialize();
 
   //ajout du system dynamique dans les attributs de notre objet
-  this->addDynamicalSystemPtr(model->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
+  this->addDynamicalSystemPtr(model->nonSmoothDynamicalSystem()->getDynamicalSystemPtr(0));
 }
 
 void DelayedSampledActuator::actuate()
 {
   DSIterator itDS;
   SensorsIterator itS;
-  int nDof = model->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0)->getDim();
+  int nDof = model->nonSmoothDynamicalSystem()->getDynamicalSystemPtr(0)->getDim();
   int ncont = 0;
   double t = model->getCurrentTime();
   SimpleVector * myZ(new SimpleVector(nDof);

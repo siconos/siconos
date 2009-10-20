@@ -126,20 +126,20 @@ int main()
   aS->recordNonSmoothProblem(aMLCP);
   aM->initialize(aS);
   //  Alloc working mem for the solver
-  int aux = mlcp_driver_get_iwork(aMLCP->getNumericsMLCP().get(), mySolver->getNumericsSolverOptionsPtr().get());
+  int aux = mlcp_driver_get_iwork(aMLCP->getNumericsMLCP().get(), mySolver->numericsSolverOptions().get());
   intWorkingMem = (int*)malloc(aux * sizeof(int));
-  mySolver->getNumericsSolverOptionsPtr()->iWork = intWorkingMem;
-  aux = mlcp_driver_get_dwork(aMLCP->getNumericsMLCP().get(), mySolver->getNumericsSolverOptionsPtr().get());
+  mySolver->numericsSolverOptions()->iWork = intWorkingMem;
+  aux = mlcp_driver_get_dwork(aMLCP->getNumericsMLCP().get(), mySolver->numericsSolverOptions().get());
   floatWorkingMem = (double*)malloc(aux * sizeof(double));
-  mySolver->getNumericsSolverOptionsPtr()->dWork = floatWorkingMem;
+  mySolver->numericsSolverOptions()->dWork = floatWorkingMem;
 
-  mlcp_driver_init(aMLCP->getNumericsMLCP().get(), mySolver->getNumericsSolverOptionsPtr().get());
+  mlcp_driver_init(aMLCP->getNumericsMLCP().get(), mySolver->numericsSolverOptions().get());
   //      setNumericsVerbose(1);
 
 
-  SP::SiconosVector  x = aDS->getXPtr();
-  SP::SiconosVector  y = aI->getYPtr(0);
-  SP::SiconosVector  lambda = aI->getLambdaPtr(0);
+  SP::SiconosVector  x = aDS->x();
+  SP::SiconosVector  y = aI->y(0);
+  SP::SiconosVector  lambda = aI->lambda(0);
   ofstream * fout = new ofstream("simu.log");
 
   unsigned int count = 0; // events counter.
@@ -163,8 +163,8 @@ int main()
 
     aS-> newtonSolve(1e-4, 20);
     aS->nextStep();
-    x = aDS->getXPtr();
-    lambda = aI->getLambdaPtr(0);
+    x = aDS->x();
+    lambda = aI->lambda(0);
 #ifdef CLSC_CIRCUIT
 
     //    std::cout<<"x="<<x->getValue(0)<<" Is="<<lambda->getValue(0)<<" Id="<<lambda->getValue(1)<<" V3="<<lambda->getValue(2);

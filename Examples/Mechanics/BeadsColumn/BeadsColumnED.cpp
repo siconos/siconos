@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
     v0.resize(dsNumber);
 
     // External forces
-    SP::Plugged_Vector_FTime gravity(new Plugged_Vector_FTime(nDof));
+    SP::SimpleVector gravity(new SimpleVector(nDof));
     double m = 1;   // beads mass
     double g = 9.8; // gravity
     (*gravity)(0) = - m * g;
@@ -208,29 +208,29 @@ int main(int argc, char* argv[])
     unsigned int outputSize = dsNumber * 2 + 1;
     SimpleMatrix dataPlot(N + 1, outputSize);
     // time
-    dataPlot(0, 0) =   multiBeads->getT0();
+    dataPlot(0, 0) =   multiBeads->t0();
     // Positions and velocities
     i = 0; // Remember that DS are sorted in a growing order according to their number.
     DSIterator it;
     for (it = allDS.begin(); it != allDS.end(); ++it)
     {
-      dataPlot(0, (int)i * 2 + 1) = boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->getQ()(0);
-      dataPlot(0, (int)i * 2 + 2) = boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->getVelocity()(0);
+      dataPlot(0, (int)i * 2 + 1) = (*boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->q())(0);
+      dataPlot(0, (int)i * 2 + 2) = (*boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->velocity())(0);
       i++;
-      if ((*it)->getNumber() == 9)
+      if ((*it)->number() == 9)
         break;
     }
 
     // --- Time loop ---
     cout << "Start computation ... " << endl;
     bool nonSmooth = false;
-    SP::EventsManager eventsManager = s->getEventsManagerPtr();
+    SP::EventsManager eventsManager = s->eventsManager();
     unsigned int numberOfEvent = 0 ;
     int k = 1;
-    while (s->getNextTime() < multiBeads->getFinalT())
+    while (s->nextTime() < multiBeads->finalT())
     {
       s->advanceToEvent();
-      if (eventsManager->getNextEventPtr()->getType() == 2)
+      if (eventsManager->nextEvent()->getType() == 2)
         nonSmooth = true;
 
       s->processEvents();
@@ -238,13 +238,13 @@ int main(int argc, char* argv[])
       if (nonSmooth)
       {
         i = 0; // Remember that DS are sorted in a growing order according to their number.
-        dataPlot(k, 0) = s->getStartingTime();
+        dataPlot(k, 0) = s->startingTime();
         for (it = allDS.begin(); it != allDS.end(); ++it)
         {
-          dataPlot(k, (int)i * 2 + 1) = (*(boost::static_pointer_cast<LagrangianLinearTIDS>(*it))->getQMemoryPtr()->getSiconosVector(1))(0);
-          dataPlot(k, (int)i * 2 + 2) = (*(boost::static_pointer_cast<LagrangianLinearTIDS>(*it))->getVelocityMemoryPtr()->getSiconosVector(1))(0);
+          dataPlot(k, (int)i * 2 + 1) = (*(boost::static_pointer_cast<LagrangianLinearTIDS>(*it))->qMemory()->getSiconosVector(1))(0);
+          dataPlot(k, (int)i * 2 + 2) = (*(boost::static_pointer_cast<LagrangianLinearTIDS>(*it))->velocityMemory()->getSiconosVector(1))(0);
           i++;
-          if ((*it)->getNumber() == 9)
+          if ((*it)->number() == 9)
             break;
         }
         k++;
@@ -252,13 +252,13 @@ int main(int argc, char* argv[])
       // Positions and velocities
 
       i = 0; // Remember that DS are sorted in a growing order according to their number.
-      dataPlot(k, 0) = s->getStartingTime();
+      dataPlot(k, 0) = s->startingTime();
       for (it = allDS.begin(); it != allDS.end(); ++it)
       {
-        dataPlot(k, (int)i * 2 + 1) = (boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->getQ())(0);
-        dataPlot(k, (int)i * 2 + 2) = (boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->getVelocity())(0);
+        dataPlot(k, (int)i * 2 + 1) = (*boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->q())(0);
+        dataPlot(k, (int)i * 2 + 2) = (*boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->velocity())(0);
         i++;
-        if ((*it)->getNumber() == 9)
+        if ((*it)->number() == 9)
           break;
       }
       numberOfEvent++;

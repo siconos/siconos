@@ -43,8 +43,8 @@ int main(int argc, char* argv[])
     (*A)(1, 1) = 1.0;
     SP::SiconosVector x0(new SimpleVector(ndof));
     (*x0)(0) = Vinit;
-    SP::FirstOrderLinearDS process(new FirstOrderLinearDS(*x0, *A));
-    process->setComputeBFunction("ObserverLCSPlugin.so", "uProcess");
+    SP::FirstOrderLinearDS process(new FirstOrderLinearDS(x0, A));
+    process->setComputebFunction("ObserverLCSPlugin.so", "uProcess");
 
     // Second System, the observer:
     // dx/dt = A hatx + u(t) + L(y-haty)
@@ -61,17 +61,17 @@ int main(int argc, char* argv[])
     (*G)(0, 1) = 2.0;
 
     // hatA is initialized with A
-    SimpleMatrix hatA(ndof, ndof);
-    hatA(0, 0) = -1.0;
-    hatA(0, 1) = -1.0;
-    hatA(1, 0) = 1.0;
-    hatA(1, 1) = -1.0;
+    SP::SimpleMatrix hatA(new SimpleMatrix(ndof, ndof));
+    (*hatA)(0, 0) = -1.0;
+    (*hatA)(0, 1) = -1.0;
+    (*hatA)(1, 0) = 1.0;
+    (*hatA)(1, 1) = -1.0;
 
     SP::SiconosVector obsX0(new SimpleVector(ndof));
-    SP::FirstOrderLinearDS observer(new FirstOrderLinearDS(*obsX0, hatA));
-    observer->setComputeBFunction("ObserverLCSPlugin.so", "uObserver");
+    SP::FirstOrderLinearDS observer(new FirstOrderLinearDS(obsX0, hatA));
+    observer->setComputebFunction("ObserverLCSPlugin.so", "uObserver");
     //    SimpleVector z(new SimpleVector(1);
-    observer->setZPtr(process->getXPtr());
+    observer->setZPtr(process->x());
     // The set of all DynamicalSystems
     DynamicalSystemsSet allDS;
     allDS.insert(process);
@@ -86,24 +86,24 @@ int main(int argc, char* argv[])
     // First relation, related to the process
     // y = Cx + Dlambda
     // r = Blambda
-    SimpleMatrix B(ndof, ninter);
-    B(0, 0) = -1.0;
-    B(1, 0) = 1.0;
-    SimpleMatrix C(ninter, ndof);
-    C(0, 0) = -1.0;
-    C(0, 1) = 1.0;
+    SP::SimpleMatrix B(new SimpleMatrix(ndof, ninter));
+    (*B)(0, 0) = -1.0;
+    (*B)(1, 0) = 1.0;
+    SP::SimpleMatrix C(new SimpleMatrix(ninter, ndof));
+    (*C)(0, 0) = -1.0;
+    (*C)(0, 1) = 1.0;
     SP::FirstOrderLinearR myProcessRelation(new FirstOrderLinearR(C, B));
-    SimpleMatrix D(ninter, ninter);
-    D(0, 0) = 1.0;
+    SP::SimpleMatrix D(new SimpleMatrix(ninter, ninter));
+    (*D)(0, 0) = 1.0;
 
-    myProcessRelation->setD(D);
+    myProcessRelation->setDPtr(D);
     myProcessRelation->setComputeEFunction("ObserverLCSPlugin.so", "computeE");
 
     // Second relation, related to the observer
     // haty = C hatX + D hatLambda + E
     // hatR = B hatLambda
     SP::FirstOrderLinearR myObserverRelation(new FirstOrderLinearR(C, B));
-    myObserverRelation->setD(D);
+    myObserverRelation->setDPtr(D);
     myObserverRelation->setComputeEFunction("ObserverLCSPlugin.so", "computeE");
 
     // NonSmoothLaw
@@ -176,16 +176,16 @@ int main(int argc, char* argv[])
 
     SimpleMatrix dataPlot(N, outputSize);
 
-    SP::SiconosVector xProc = process->getXPtr();
-    SP::SiconosVector xObs = observer->getXPtr();
-    SP::SiconosVector lambdaProc = myProcessInteraction->getLambdaPtr(0);
-    SP::SiconosVector lambdaObs = myObserverInteraction->getLambdaPtr(0);
-    SP::SiconosVector yProc = myProcessInteraction->getYPtr(0);
-    SP::SiconosVector yObs = myObserverInteraction->getYPtr(0);
-    SP::SiconosVector z = observer->getZPtr();
+    SP::SiconosVector xProc = process->x();
+    SP::SiconosVector xObs = observer->x();
+    SP::SiconosVector lambdaProc = myProcessInteraction->lambda(0);
+    SP::SiconosVector lambdaObs = myObserverInteraction->lambda(0);
+    SP::SiconosVector yProc = myProcessInteraction->y(0);
+    SP::SiconosVector yObs = myObserverInteraction->y(0);
+    SP::SiconosVector z = observer->z();
 
     // -> saved in a matrix dataPlot
-    dataPlot(0, 0) = ObserverLCS->getT0(); // Initial time of the model
+    dataPlot(0, 0) = ObserverLCS->t0(); // Initial time of the model
     dataPlot(0, 1) = (*xProc)(0);
     dataPlot(0, 2) = (*xProc)(1);
     dataPlot(0, 3) = (*xObs)(0);
@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
     // ==== Simulation loop =====
     cout << "====> Start computation ... " << endl << endl;
 
-    // *z = *(myProcessInteraction->getYPtr(0)->getVectorPtr(0));
+    // *z = *(myProcessInteraction->y(0)->getVectorPtr(0));
     int k = 0; // Current step
 
     // Simulation loop
@@ -209,9 +209,9 @@ int main(int argc, char* argv[])
     while (k < N - 1)
     {
       k++;
-      //  *z = *(myProcessInteraction->getYPtr(0)->getVectorPtr(0));
+      //  *z = *(myProcessInteraction->y(0)->getVectorPtr(0));
       s->computeOneStep();
-      dataPlot(k, 0) = s->getNextTime();
+      dataPlot(k, 0) = s->nextTime();
       dataPlot(k, 1) = (*xProc)(0);
       dataPlot(k, 2) = (*xProc)(1);
       dataPlot(k, 3) = (*xObs)(0);

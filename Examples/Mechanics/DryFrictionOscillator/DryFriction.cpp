@@ -37,13 +37,13 @@ int main(int argc, char* argv[])
     oscillator->initialize();
 
     // --- Get the simulation ---
-    SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(oscillator->getSimulationPtr());
+    SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(oscillator->simulation());
     // --- Get the time discretisation scheme ---
-    SP::TimeDiscretisation t = s->getTimeDiscretisationPtr();
+    SP::TimeDiscretisation t = s->timeDiscretisation();
     int k = 0;
-    double T = oscillator->getFinalT();
-    double t0 = oscillator->getT0();
-    double h = s->getTimeStep();
+    double T = oscillator->finalT();
+    double t0 = oscillator->t0();
+    double h = s->timeStep();
     int N = (int)((T - t0) / h);
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -54,12 +54,12 @@ int main(int argc, char* argv[])
     // time
     dataPlot(k, 0) = t0;
     // state q for the first dynamical system (ball)
-    SP::LagrangianDS oscillo = boost::static_pointer_cast<LagrangianDS> (oscillator->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(1));
-    dataPlot(k, 1) = (oscillo->getQ())(0);
+    SP::LagrangianDS oscillo = boost::static_pointer_cast<LagrangianDS> (oscillator->nonSmoothDynamicalSystem()->dynamicalSystemNumber(1));
+    dataPlot(k, 1) = ((*oscillo->q()))(0);
     // velocity for the oscillo
-    dataPlot(k, 2) = (oscillo->getVelocity())(0);
-    dataPlot(k, 3) = (oscillator->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
-    dataPlot(k, 4) = (oscillator->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(1);
+    dataPlot(k, 2) = ((*oscillo->velocity()))(0);
+    dataPlot(k, 3) = (*oscillator->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(0)->lambda(1))(0);
+    dataPlot(k, 4) = (*oscillator->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(0)->lambda(1))(1);
 
     // --- Compute elapsed time ---
     boost::timer tt;
@@ -75,13 +75,13 @@ int main(int argc, char* argv[])
       s->computeOneStep();
       // --- Get values to be plotted ---
       //time
-      dataPlot(k, 0) = s->getNextTime();
+      dataPlot(k, 0) = s->nextTime();
       // Oscillo: state q
-      dataPlot(k, 1) = (oscillo->getQ())(0);
+      dataPlot(k, 1) = ((*oscillo->q()))(0);
       // Oscillo: velocity
-      dataPlot(k, 2) = (oscillo->getVelocity())(0);
-      dataPlot(k, 3) = (oscillator->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
-      dataPlot(k, 4) = (oscillator->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(1);
+      dataPlot(k, 2) = ((*oscillo->velocity()))(0);
+      dataPlot(k, 3) = (*oscillator->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(0)->lambda(1))(0);
+      dataPlot(k, 4) = (*oscillator->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(0)->lambda(1))(1);
       // transfer of state i+1 into state i and time incrementation
       s->nextStep();
     }

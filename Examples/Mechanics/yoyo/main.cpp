@@ -110,12 +110,12 @@ int main(int argc, char* argv[])
       }
 
       // création et insertion  du système dynamique représentant la yoyo dans le récipient allDS
-      SP::LagrangianDS yoyo(new LagrangianDS(*q0, *v0, *M));
+      SP::LagrangianDS yoyo(new LagrangianDS(q0, v0, M));
 
       yoyo->setComputeFExtFunction("YoyoPlugin.so", "force_ext");
       yoyo->setComputeFIntFunction("YoyoPlugin.so", "F_int");
-      yoyo->setComputeJacobianFIntFunction(1, "YoyoPlugin.so", "jacobianVFInt");
-      yoyo->setComputeJacobianFIntFunction(0, "YoyoPlugin.so", "jacobianQFInt");
+      yoyo->setComputeJacobianQDotFIntFunction("YoyoPlugin.so", "jacobianVFInt");
+      yoyo->setComputeJacobianQFIntFunction("YoyoPlugin.so", "jacobianQFInt");
 
       allDS.insert(yoyo);
 
@@ -147,15 +147,15 @@ int main(int argc, char* argv[])
       jeu->initialize(s);
 
 
-      q = yoyo->getQPtr();
-      v = yoyo->getVelocityPtr();
-      p = yoyo->getPPtr();
-      lambda = inter->getLambdaPtr(1);
+      q = yoyo->q();
+      v = yoyo->velocity();
+      p = yoyo->p();
+      lambda = inter->lambda(1);
 
 
       // --- sauver les valeurs dans une matrice dataPlot
 
-      dataPlot(k, 0) = jeu->getT0();
+      dataPlot(k, 0) = jeu->t0();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*p)(0);
@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
       {
         s->computeOneStep();
         // --- Get values to be plotted ---
-        dataPlot(k, 0) =  s->getNextTime();
+        dataPlot(k, 0) =  s->nextTime();
         dataPlot(k, 1) = (*q)(0);
         dataPlot(k, 2) = (*v)(0);
         dataPlot(k, 3) = (*p)(0);
@@ -206,11 +206,11 @@ int main(int argc, char* argv[])
       allDS.clear();
       allInteractions.clear();
 
-      yoyo.reset(new LagrangianDS(*q0, *v0, *M));
+      yoyo.reset(new LagrangianDS(q0, v0, M));
       yoyo->setComputeFExtFunction("YoyoPlugin.so", "force_extf");
       yoyo->setComputeFIntFunction("YoyoPlugin.so", "F_intf");
-      yoyo->setComputeJacobianFIntFunction(1, "YoyoPlugin.so", "jacobianVFIntf");
-      yoyo->setComputeJacobianFIntFunction(0, "YoyoPlugin.so", "jacobianQFIntf");
+      yoyo->setComputeJacobianQDotFIntFunction("YoyoPlugin.so", "jacobianVFIntf");
+      yoyo->setComputeJacobianQFIntFunction("YoyoPlugin.so", "jacobianQFIntf");
 
       allDS.insert(yoyo);
 
@@ -230,15 +230,15 @@ int main(int argc, char* argv[])
       s->recordNonSmoothProblem(osnspb);
       jeu->initialize(s);
 
-      q = yoyo->getQPtr();
-      v = yoyo->getVelocityPtr();
-      p = yoyo->getPPtr();
-      lambda = inter->getLambdaPtr(1);
+      q = yoyo->q();
+      v = yoyo->velocity();
+      p = yoyo->p();
+      lambda = inter->lambda(1);
 
       while (k < N)
       {
         s->computeOneStep();
-        dataPlot(k, 0) =  s->getNextTime();
+        dataPlot(k, 0) =  s->nextTime();
         dataPlot(k, 1) = (*q)(0);
         dataPlot(k, 2) = (*v)(0);
         dataPlot(k, 3) = (*p)(0);

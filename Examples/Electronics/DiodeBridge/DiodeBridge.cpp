@@ -138,16 +138,16 @@ int main(int argc, char* argv[])
     cout << " ---> End of initialization." << endl;
 
     int k = 0;
-    double h = StratDiodeBridge->getTimeStep();
+    double h = StratDiodeBridge->timeStep();
     int N = (int)((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
     SimpleMatrix dataPlot(N, 7);
 
-    SP::SiconosVector x = LSDiodeBridge->getXPtr();
-    SP::SiconosVector y = InterDiodeBridge->getYPtr(0);
-    SP::SiconosVector lambda = InterDiodeBridge->getLambdaPtr(0);
+    SP::SiconosVector x = LSDiodeBridge->x();
+    SP::SiconosVector y = InterDiodeBridge->y(0);
+    SP::SiconosVector lambda = InterDiodeBridge->lambda(0);
 
     // For the initial time step:
     // time
@@ -182,7 +182,7 @@ int main(int argc, char* argv[])
 
       // --- Get values to be plotted ---
       // time
-      dataPlot(k, 0) = StratDiodeBridge->getNextTime();
+      dataPlot(k, 0) = StratDiodeBridge->nextTime();
 
       // inductor voltage
       dataPlot(k, 1) = (*x)(0);

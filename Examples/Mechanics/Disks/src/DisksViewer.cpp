@@ -142,8 +142,8 @@ void DisksViewer::draw()
 
           itDS=involvedDS->begin();
 
-          x1 = AS(LagrangianDS )(*itDS)->getQPtr()->getValue(0);
-          y1 = AS(LagrangianDS )(*itDS)->getQPtr()->getValue(1);
+          x1 = AS(LagrangianDS )(*itDS)->q()->getValue(0);
+          y1 = AS(LagrangianDS )(*itDS)->q()->getValue(1);
           r =  AS(Disk )(*itDS)->getRadius();
 
           if ( relation->getSubType() == RELATION::ScleronomousR ) {

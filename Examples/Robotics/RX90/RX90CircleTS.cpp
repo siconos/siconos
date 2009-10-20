@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
 
     cout << "=== End of model loading === " << endl;
 
-    // =========================== End of model definition ===========================  dataPlot(k,7) = (inter->getY(0))(0);
+    // =========================== End of model definition ===========================  dataPlot(k,7) = (*inter->y(0))(0);
 
 
     // ================================= Computation
@@ -171,11 +171,11 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlot(N + 1, outputSize);
     // For the initial time step:
 
-    SP::SiconosVector q = arm->getQPtr();
-    SP::SiconosVector v = arm->getVelocityPtr();
-    SP::EventsManager eventsManager = s->getEventsManagerPtr();
+    SP::SiconosVector q = arm->q();
+    SP::SiconosVector v = arm->velocity();
+    SP::EventsManager eventsManager = s->eventsManager();
 
-    dataPlot(k, 0) =  RX90->getT0();
+    dataPlot(k, 0) =  RX90->t0();
     dataPlot(k, 1) = (*q)(0);
     dataPlot(k, 2) = (*q)(1);
     dataPlot(k, 3) = (*q)(2);
@@ -191,13 +191,13 @@ int main(int argc, char* argv[])
 
 
     time.restart();
-    while (s->getNextTime() <= T)
+    while (s->nextTime() <= T)
     {
       s->advanceToEvent();
       s->processEvents();
 
       k++;
-      dataPlot(k, 0) =  s->getStartingTime();
+      dataPlot(k, 0) =  s->startingTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*q)(1);
       dataPlot(k, 3) = (*q)(2);

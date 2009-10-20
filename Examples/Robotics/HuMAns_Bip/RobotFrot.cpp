@@ -197,10 +197,10 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlot(N + 1, outputSize);
     // For the initial time step:
     // time
-    dataPlot(k, 0) = Robot->getT0();
+    dataPlot(k, 0) = Robot->t0();
 
     for (unsigned int i = 1; i < 22; i++)
-      dataPlot(k, i) = bip->getQ()(i - 1);
+      dataPlot(k, i) = (*bip->q())(i - 1);
 
     // --- Compute elapsed time ---
     boost::timer tt;
@@ -208,17 +208,17 @@ int main(int argc, char* argv[])
 
     // --- Time loop ---
     cout << "Start computation ... " << endl;
-    while (s->getNextTime() < T)
+    while (s->nextTime() < T)
     {
       // get current time step
       k++;
       cout << k << endl;
       s->newtonSolve(criterion, maxIter);
       s->nextStep();
-      dataPlot(k, 0) = s->getStartingTime();
+      dataPlot(k, 0) = s->startingTime();
 
       for (unsigned int i = 1; i < 22; i++)
-        dataPlot(k, i) = bip->getQ()(i - 1);
+        dataPlot(k, i) = (*bip->q())(i - 1);
     }
     cout << "time = " << tt.elapsed() << endl;
     cout << "End of computation - Number of iterations done: " << k << endl;

@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
 
     cout << "=== End of model loading === " << endl;
 
-    // =========================== End of model definition ===========================  dataPlot(k,7) = (inter->getY(0))(0);
+    // =========================== End of model definition ===========================  dataPlot(k,7) = (*inter->y(0))(0);
 
 
     // ================================= Computation =================================
@@ -187,11 +187,11 @@ int main(int argc, char* argv[])
     // For the initial time step:
     // time
 
-    SP::SiconosVector q = arm->getQPtr();
-    SP::SiconosVector vel = arm->getVelocityPtr();
-    SP::SiconosVector y = inter->getYPtr(0);
+    SP::SiconosVector q = arm->q();
+    SP::SiconosVector vel = arm->velocity();
+    SP::SiconosVector y = inter->y(0);
 
-    dataPlot(k, 0) =  Robot->getT0();
+    dataPlot(k, 0) =  Robot->t0();
     dataPlot(k, 1) = (*q)(0);
     dataPlot(k, 2) = (*vel)(0);
     dataPlot(k, 3) = (*q)(1);
@@ -206,12 +206,12 @@ int main(int argc, char* argv[])
     boost::timer boostTimer;
     boostTimer.restart();
 
-    while (s->getNextTime() < T)
+    while (s->nextTime() < T)
     {
       // get current time step
       k++;
       s->newtonSolve(criterion, maxIter);
-      dataPlot(k, 0) =  s->getNextTime();
+      dataPlot(k, 0) =  s->nextTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*vel)(0);
       dataPlot(k, 3) = (*q)(1);

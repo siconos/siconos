@@ -14,14 +14,14 @@ elecRelation::elecRelation():
 void elecRelation::initialize(SP::Interaction inter)
 {
   FirstOrderType2R::initialize(inter);
-  unsigned int sizeY = getInteractionPtr()->getSizeOfY();
-  unsigned int sizeDS = getInteractionPtr()->getSizeOfDS();
-  SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
-  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(0);
+  unsigned int sizeY = interaction()->getSizeOfY();
+  unsigned int sizeDS = interaction()->getSizeOfDS();
+  SP::SiconosVector y = interaction()->y(0);
+  SP::SiconosVector lambda = interaction()->lambda(0);
 
   double t0 = 0;
 
-  workL.reset(new SimpleVector(getInteractionPtr()->getSizeOfY()));
+  workL.reset(new SimpleVector(interaction()->getSizeOfY()));
   JacXH->resize(sizeY, sizeDS);
   JacLH->resize(sizeY, sizeY);
 
@@ -98,13 +98,13 @@ void elecRelation::computeH(double t)
 {
 
   *workX = *data[x];
-  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(0);
+  SP::SiconosVector lambda = interaction()->lambda(0);
   *workL = *lambda;
 
-#ifdef SICONOS_DEBUG
+#ifdef SICONOS_DEBUGc
   std::cout << "********         computeH at " << t << std::endl;
 #endif
-  SP::SiconosVector Heval = getInteractionPtr()->getRelationPtr()->getHalphaPtr();
+  SP::SiconosVector Heval = interaction()->relation()->Halpha();
 #ifdef CLSC_CIRCUIT
   Heval->setValue(0, workL->getValue(4) - source(t));
   Heval->setValue(1, workX->getValue(0) - (workL->getValue(3)) / sR);
@@ -133,7 +133,7 @@ void elecRelation::computeH(double t)
 
 void elecRelation::computeG(double t)
 {
-  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(0);
+  SP::SiconosVector lambda = interaction()->lambda(0);
   *workL = *lambda;
 
 #ifdef SICONOS_DEBUG
@@ -159,7 +159,7 @@ void elecRelation::computeG(double t)
 void elecRelation::computeJacXH(double t)
 {
 
-  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(0);
+  SP::SiconosVector lambda = interaction()->lambda(0);
   *workL = *lambda;
   double *h = &(*JacXH)(0, 0);
 #ifdef SICONOS_DEBUG
@@ -187,7 +187,7 @@ void elecRelation::computeJacXH(double t)
 void elecRelation::computeJacLH(double t)
 {
 
-  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(0);
+  SP::SiconosVector lambda = interaction()->lambda(0);
   *workL = *lambda;
   double *h = &(*JacLH)(0, 0);
 #ifdef SICONOS_DEBUG

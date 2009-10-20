@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
 
 
     int k = 0;
-    double h = StratDiodeBridgeCapFilter->getTimeStep();
+    double h = StratDiodeBridgeCapFilter->timeStep();
     int N = (int)((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
@@ -174,19 +174,19 @@ int main(int argc, char* argv[])
     // For the initial time step:
 
     // time
-    dataPlot(k, 0) = DiodeBridgeCapFilter->getT0();
+    dataPlot(k, 0) = DiodeBridgeCapFilter->t0();
 
     // inductor voltage
-    dataPlot(k, 1) = (LS1DiodeBridgeCapFilter->getX())(0);
+    dataPlot(k, 1) = (*LS1DiodeBridgeCapFilter->x())(0);
 
     // inductor current
-    dataPlot(k, 2) = (LS1DiodeBridgeCapFilter->getX())(1);
+    dataPlot(k, 2) = (*LS1DiodeBridgeCapFilter->x())(1);
 
     // diode R1 current
     dataPlot(k, 3) = (InterDiodeBridgeCapFilter->getLambda(0))(0);
 
     // diode R1 voltage
-    dataPlot(k, 4) = -(InterDiodeBridgeCapFilter->getY(0))(0);
+    dataPlot(k, 4) = -(*InterDiodeBridgeCapFilter->y(0))(0);
 
     // diode F2 voltage
     dataPlot(k, 5) = -(InterDiodeBridgeCapFilter->getLambda(0))(1);
@@ -208,19 +208,19 @@ int main(int argc, char* argv[])
 
       // --- Get values to be plotted ---
       // time
-      dataPlot(k, 0) = StratDiodeBridgeCapFilter->getNextTime();
+      dataPlot(k, 0) = StratDiodeBridgeCapFilter->nextTime();
 
       // inductor voltage
-      dataPlot(k, 1) = (LS1DiodeBridgeCapFilter->getX())(0);
+      dataPlot(k, 1) = (*LS1DiodeBridgeCapFilter->x())(0);
 
       // inductor current
-      dataPlot(k, 2) = (LS1DiodeBridgeCapFilter->getX())(1);
+      dataPlot(k, 2) = (*LS1DiodeBridgeCapFilter->x())(1);
 
       // diode R1 current
       dataPlot(k, 3) = (InterDiodeBridgeCapFilter->getLambda(0))(0);
 
       // diode R1 voltage
-      dataPlot(k, 4) = -(InterDiodeBridgeCapFilter->getY(0))(0);
+      dataPlot(k, 4) = -(*InterDiodeBridgeCapFilter->y(0))(0);
 
       // diode F2 voltage
       dataPlot(k, 5) = -(InterDiodeBridgeCapFilter->getLambda(0))(1);

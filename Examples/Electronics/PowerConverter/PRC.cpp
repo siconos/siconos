@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
     // z[0] is used as a parameter in the plug-in.
     (*z)(0) = 1.0 / Lrvalue;
     LSPRC->setZPtr(z);
-    LSPRC->setComputeBFunction("PRCPlugin.so", "computeU");
+    LSPRC->setComputebFunction("PRCPlugin.so", "computeU");
 
     // --- Interaction between linear system and non smooth system ---
 
@@ -137,19 +137,19 @@ int main(int argc, char* argv[])
     cout << "====> Simulation initialisation ..." << endl << endl;
     PRC->initialize(StratPRC);
 
-    double h = StratPRC->getTimeStep();
+    double h = StratPRC->timeStep();
     int N = (int)((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
     SimpleMatrix dataPlot(N, 5);
 
-    SP::SiconosVector x =  LSPRC->getXPtr();
+    SP::SiconosVector x =  LSPRC->x();
 
     // For the initial time step:
     int k = 0;
     // time
-    dataPlot(k, 0) = PRC->getT0();
+    dataPlot(k, 0) = PRC->t0();
 
     // inductor voltage
     dataPlot(k, 1) = (*x)(0);
@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
     {
       StratPRC->computeOneStep();
       // --- Get values to be plotted ---
-      dataPlot(k, 0) = StratPRC->getNextTime();
+      dataPlot(k, 0) = StratPRC->nextTime();
       dataPlot(k, 1) = (*x)(0);
       dataPlot(k, 2) = (*x)(1);
       dataPlot(k, 3) = (*x)(2);

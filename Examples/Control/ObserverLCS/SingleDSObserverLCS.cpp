@@ -59,10 +59,10 @@ int main(int argc, char* argv[])
     TildeA(2, 1) = LG(0, 1);
     TildeA(3, 1) = LG(1, 1);
 
-    SimpleVector x0(ndof);
-    x0(0) = Vinit;
-    SP::FirstOrderLinearDS processObserver(new FirstOrderLinearDS(x0, TildeA));
-    processObserver->setComputeBFunction("SingleDSObserverLCSPlugin.so", "computeU");
+    SP::SimpleVector x0(new SimpleVector(ndof));
+    (*x0)(0) = Vinit;
+    SP::FirstOrderLinearDS processObserver(new FirstOrderLinearDS(x0, createSPtrSimpleMatrix(TildeA)));
+    processObserver->setComputebFunction("SingleDSObserverLCSPlugin.so", "computeU");
     DynamicalSystemsSet allDS;
     allDS.insert(processObserver);
 
@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
     C(1, 2) = -1.0;
     C(1, 3) = 1.0;
 
-    SP::FirstOrderLinearR myProcessRelation(new FirstOrderLinearR(C, B));
+    SP::FirstOrderLinearR myProcessRelation(new FirstOrderLinearR(createSPtrSimpleMatrix(C), createSPtrSimpleMatrix(B)));
 
     myProcessRelation->setComputeEFunction("SingleDSObserverLCSPlugin.so", "computeE");
 
@@ -150,21 +150,21 @@ int main(int argc, char* argv[])
     int N = (int)((T - t0) / h); // Number of time steps
     unsigned int outputSize = 10; // number of required data
     SimpleMatrix dataPlot(N, outputSize);
-    SP::SiconosVector processLambda = myProcessInteraction->getLambdaPtr(0);
+    SP::SiconosVector processLambda = myProcessInteraction->lambda(0);
 
 
     // We get values for the initial time step:
     // time
-    dataPlot(k, 0) = s->getNextTime();;
-    dataPlot(k, 1) = (processObserver->getX())(0); // Observer x(1)
-    dataPlot(k, 2) = (processObserver->getX())(1); //Observer x(2)
-    dataPlot(k, 3) = (processObserver->getX())(2);// Process x(1)
-    dataPlot(k, 4) = (processObserver->getX())(3);// Process x(2)
+    dataPlot(k, 0) = s->nextTime();;
+    dataPlot(k, 1) = (*processObserver->x())(0); // Observer x(1)
+    dataPlot(k, 2) = (*processObserver->x())(1); //Observer x(2)
+    dataPlot(k, 3) = (*processObserver->x())(2);// Process x(1)
+    dataPlot(k, 4) = (*processObserver->x())(3);// Process x(2)
     dataPlot(k, 5) = (*processLambda)(0);
     dataPlot(k, 6) = (*processLambda)(1);
-    dataPlot(k, 7) = (processObserver->getB())(0);
-    dataPlot(k, 8) = abs((processObserver->getX())(0) - (processObserver->getX())(2)) ;
-    dataPlot(k, 9) = abs((processObserver->getX())(1) - (processObserver->getX())(3))  ;
+    dataPlot(k, 7) = (*processObserver->b())(0);
+    dataPlot(k, 8) = abs((*processObserver->x())(0) - (*processObserver->x())(2)) ;
+    dataPlot(k, 9) = abs((*processObserver->x())(1) - (*processObserver->x())(3))  ;
     boost::progress_display show_progress(N);
 
     boost::timer time;
@@ -179,16 +179,16 @@ int main(int argc, char* argv[])
 
       s->computeOneStep();
 
-      dataPlot(k, 0) = s->getNextTime();;
-      dataPlot(k, 1) = (processObserver->getX())(0);
-      dataPlot(k, 2) = (processObserver->getX())(1);
-      dataPlot(k, 3) = (processObserver->getX())(2);
-      dataPlot(k, 4) = (processObserver->getX())(3);
+      dataPlot(k, 0) = s->nextTime();;
+      dataPlot(k, 1) = (*processObserver->x())(0);
+      dataPlot(k, 2) = (*processObserver->x())(1);
+      dataPlot(k, 3) = (*processObserver->x())(2);
+      dataPlot(k, 4) = (*processObserver->x())(3);
       dataPlot(k, 5) = (*processLambda)(0);
       dataPlot(k, 6) = (*processLambda)(1);
-      dataPlot(k, 7) = (processObserver->getB())(0);
-      dataPlot(k, 8) = abs((processObserver->getX())(0) - (processObserver->getX())(2)) ;
-      dataPlot(k, 9) = abs((processObserver->getX())(1) - (processObserver->getX())(3))  ;
+      dataPlot(k, 7) = (*processObserver->b())(0);
+      dataPlot(k, 8) = abs((*processObserver->x())(0) - (*processObserver->x())(2)) ;
+      dataPlot(k, 9) = abs((*processObserver->x())(1) - (*processObserver->x())(3))  ;
       ++show_progress;
 
     }

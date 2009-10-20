@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
 
     cout << " -----> End of initialization." << endl;
 
-    double h = StratCircuitRLCD->getTimeStep();
+    double h = StratCircuitRLCD->timeStep();
     int N = (int)((T - t0) / h); // Number of time steps
     int k = 0;
 
@@ -142,16 +142,16 @@ int main(int argc, char* argv[])
     // For the initial time step:
 
     // time
-    dataPlot(k, 0) = CircuitRLCD->getT0();
+    dataPlot(k, 0) = CircuitRLCD->t0();
 
     // inductor voltage
-    dataPlot(k, 1) = (LSCircuitRLCD->getX())(0);
+    dataPlot(k, 1) = (*LSCircuitRLCD->x())(0);
 
     // inductor current
-    dataPlot(k, 2) = (LSCircuitRLCD->getX())(1);
+    dataPlot(k, 2) = (*LSCircuitRLCD->x())(1);
 
     // diode voltage
-    dataPlot(k, 3) = - (InterCircuitRLCD->getY(0))(0);
+    dataPlot(k, 3) = - (*InterCircuitRLCD->y(0))(0);
 
     // diode current
     dataPlot(k, 4) = (InterCircuitRLCD->getLambda(0))(0);
@@ -169,16 +169,16 @@ int main(int argc, char* argv[])
 
       // --- Get values to be plotted ---
       // time
-      dataPlot(k, 0) = StratCircuitRLCD->getNextTime();
+      dataPlot(k, 0) = StratCircuitRLCD->nextTime();
 
       // inductor voltage
-      dataPlot(k, 1) = (LSCircuitRLCD->getX())(0);
+      dataPlot(k, 1) = (*LSCircuitRLCD->x())(0);
 
       // inductor current
-      dataPlot(k, 2) = (LSCircuitRLCD->getX())(1);
+      dataPlot(k, 2) = (*LSCircuitRLCD->x())(1);
 
       // diode voltage
-      dataPlot(k, 3) = - (InterCircuitRLCD->getY(0))(0);
+      dataPlot(k, 3) = - (*InterCircuitRLCD->y(0))(0);
 
       // diode current
       dataPlot(k, 4) = (InterCircuitRLCD->getLambda(0))(0);

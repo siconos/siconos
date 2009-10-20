@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
     v0.resize(dsNumber);
 
     // External forces
-    SP::Plugged_Vector_FTime gravity(new Plugged_Vector_FTime(nDof));
+    SP::SimpleVector gravity(new SimpleVector(nDof));
     double m = 1;   // beads mass
     double g = 9.8; // gravity
     (*gravity)(0) = - m * g;
@@ -214,16 +214,16 @@ int main(int argc, char* argv[])
     unsigned int outputSize = dsNumber * 2 + 1;
     SimpleMatrix dataPlot(N + 1, outputSize); // Output data matrix
     // time
-    dataPlot(k, 0) = multiBeads->getT0();
+    dataPlot(k, 0) = multiBeads->t0();
     // Positions and velocities
     i = 0; // Remember that DS are sorted in a growing order according to their number.
     DSIterator it;
     for (it = allDS.begin(); it != allDS.end(); ++it)
     {
-      dataPlot(k, (int)i * 2 + 1) = boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->getQ()(0);
-      dataPlot(k, (int)i * 2 + 2) = boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->getVelocity()(0);
+      dataPlot(k, (int)i * 2 + 1) = (*boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->q())(0);
+      dataPlot(k, (int)i * 2 + 2) = (*boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->velocity())(0);
       i++;
-      if ((*it)->getNumber() == 9)
+      if ((*it)->number() == 9)
         break;
     }
     double cpuTime = 0;
@@ -231,7 +231,7 @@ int main(int argc, char* argv[])
     cout << "====> Start computation ... " << endl << endl;
     boost::timer tt;
     tt.restart();
-    while (s->getNextTime() <= multiBeads->getFinalT())
+    while (s->nextTime() <= multiBeads->finalT())
     {
       // solve ...
       try
@@ -248,17 +248,17 @@ int main(int argc, char* argv[])
         ///        ioMatrix io("M.dat", "ascii");
         //       io.write(osnspb->getM(),"noDim");       cout << k << endl;
         //       ioVector io2("q.dat", "ascii");
-        //       io2.write(osnspb->getQ(),"noDim");      cout << k << endl;
+        //       io2.write((*osnspb->q()),"noDim");      cout << k << endl;
       }
       // --- Get values to be plotted ---
-      dataPlot(k, 0) = s->getNextTime();
+      dataPlot(k, 0) = s->nextTime();
       i = 0;
       for (it = allDS.begin(); it != allDS.end(); ++it)
       {
-        dataPlot(k, (int)i * 2 + 1) = boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->getQ()(0);
-        dataPlot(k, (int)i * 2 + 2) = boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->getVelocity()(0);
+        dataPlot(k, (int)i * 2 + 1) = (*boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->q())(0);
+        dataPlot(k, (int)i * 2 + 2) = (*boost::static_pointer_cast<LagrangianLinearTIDS>(*it)->velocity())(0);
         i++;
-        if ((*it)->getNumber() == 9)
+        if ((*it)->number() == 9)
           break;
       }
       // transfer of state i+1 into state i and time incrementation

@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
 
     cout << "=== End of model loading === " << endl;
 
-    // =========================== End of model definition ===========================  dataPlot(k,7) = (inter->getY(0))(0);
+    // =========================== End of model definition ===========================  dataPlot(k,7) = (*inter->y(0))(0);
 
 
     // ================================= Computation =================================
@@ -186,17 +186,17 @@ int main(int argc, char* argv[])
     // For the initial time step:
     // time
 
-    SP::SiconosVector q = arm->getQPtr();
-    SP::SiconosVector vel = arm->getVelocityPtr();
-    SP::SiconosVector y = inter->getYPtr(0);
-    SP::SiconosVector yDot = inter->getYPtr(1);
+    SP::SiconosVector q = arm->q();
+    SP::SiconosVector vel = arm->velocity();
+    SP::SiconosVector y = inter->y(0);
+    SP::SiconosVector yDot = inter->y(1);
     // When a non-smooth event occurs, pre-impact values are saved in memory vectors at pos. 1:
     SP::SiconosVector qMem = arm->getQMemoryPtr()->getSiconosVector(1);
     SP::SiconosVector velMem = arm->getVelocityMemoryPtr()->getSiconosVector(1);
     SP::SiconosVector yMem = inter->getYOldPtr(0);
     SP::SiconosVector yDotMem = inter->getYOldPtr(1);
 
-    dataPlot(k, 0) =  Robot->getT0();
+    dataPlot(k, 0) =  Robot->t0();
     dataPlot(k, 1) = (*q)(0);
     dataPlot(k, 2) = (*vel)(0);
     dataPlot(k, 3) = (*q)(1);
@@ -214,21 +214,21 @@ int main(int argc, char* argv[])
     boostTimer.restart();
 
     unsigned int numberOfEvent = 0 ;
-    SP::EventsManager eventsManager = s->getEventsManagerPtr();
+    SP::EventsManager eventsManager = s->eventsManager();
     bool nonSmooth = false;
-    while (s->getNextTime() < T)
+    while (s->nextTime() < T)
     {
       // get current time step
       k++;
       s->advanceToEvent();
-      if (eventsManager->getNextEventPtr()->getType() == 2)
+      if (eventsManager->nextEvent()->getType() == 2)
         nonSmooth = true;
 
       s->processEvents();
       // If the treated event is non smooth, we get the pre-impact state.
       if (nonSmooth)
       {
-        dataPlot(k, 0) =  s->getStartingTime();
+        dataPlot(k, 0) =  s->startingTime();
         dataPlot(k, 1) = (*qMem)(0);
         dataPlot(k, 2) = (*velMem)(0);
         dataPlot(k, 3) = (*qMem)(1);
@@ -243,7 +243,7 @@ int main(int argc, char* argv[])
 
         k++;
       }
-      dataPlot(k, 0) =  s->getStartingTime();
+      dataPlot(k, 0) =  s->startingTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*vel)(0);
       dataPlot(k, 3) = (*q)(1);

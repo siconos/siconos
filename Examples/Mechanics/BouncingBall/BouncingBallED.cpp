@@ -144,17 +144,17 @@ int main(int argc, char* argv[])
     // -> saved in a matrix dataPlot
     unsigned int outputSize = 4;
     SimpleMatrix dataPlot(N + 1, outputSize);
-    SP::SiconosVector q = ball->getQPtr();
-    SP::SiconosVector v = ball->getVelocityPtr();
-    SP::SiconosVector p = ball->getPPtr(1);
-    //   SiconosVector * y = bouncingBall->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getYPtr(0);
+    SP::SiconosVector q = ball->q();
+    SP::SiconosVector v = ball->velocity();
+    SP::SiconosVector p = ball->p(1);
+    //   SiconosVector * y = bouncingBall->nonSmoothDynamicalSystem()->interaction(0)->y(0);
 
-    SP::EventsManager eventsManager = s->getEventsManagerPtr();
+    SP::EventsManager eventsManager = s->eventsManager();
 
     // For the initial time step:
     // time
 
-    dataPlot(0, 0) = bouncingBall->getT0();
+    dataPlot(0, 0) = bouncingBall->t0();
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
     dataPlot(0, 3) = (*p)(0);
@@ -165,24 +165,24 @@ int main(int argc, char* argv[])
     unsigned int numberOfEvent = 0 ;
     int k = 0;
     boost::progress_display show_progress(N);
-    while (s->getNextTime() < T && k < N)
+    while (s->nextTime() < T && k < N)
     {
       s->advanceToEvent();
-      if (eventsManager->getNextEventPtr()->getType() == 2)
+      if (eventsManager->nextEvent()->getType() == 2)
         nonSmooth = true;
 
       s->processEvents();
       // If the treated event is non smooth, the pre-impact state has been solved in memory vectors during process.
       if (nonSmooth)
       {
-        dataPlot(k, 0) = s->getStartingTime();
-        dataPlot(k, 1) = (*ball->getQMemoryPtr()->getSiconosVector(1))(0);
-        dataPlot(k, 2) = (*ball->getVelocityMemoryPtr()->getSiconosVector(1))(0);
+        dataPlot(k, 0) = s->startingTime();
+        dataPlot(k, 1) = (*ball->qMemory()->getSiconosVector(1))(0);
+        dataPlot(k, 2) = (*ball->velocityMemory()->getSiconosVector(1))(0);
         k++;
         nonSmooth = false;
         ++show_progress;
       }
-      dataPlot(k, 0) = s->getStartingTime();
+      dataPlot(k, 0) = s->startingTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*p)(0);

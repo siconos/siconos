@@ -75,11 +75,11 @@ int main(int argc, char* argv[])
 
     // external plug-in
     doublependulum->setComputeNNLFunction("DoublePendulumPlugin.so", "NNL");
-    doublependulum->setComputeJacobianNNLFunction(1, "DoublePendulumPlugin.so", "jacobianVNNL");
-    doublependulum->setComputeJacobianNNLFunction(0, "DoublePendulumPlugin.so", "jacobianQNNL");
+    doublependulum->setComputeJacobianQDotNNLFunction("DoublePendulumPlugin.so", "jacobianVNNL");
+    doublependulum->setComputeJacobianQNNLFunction("DoublePendulumPlugin.so", "jacobianQNNL");
     doublependulum->setComputeFIntFunction("DoublePendulumPlugin.so", "FInt");
-    doublependulum->setComputeJacobianFIntFunction(1, "DoublePendulumPlugin.so", "jacobianVFInt");
-    doublependulum->setComputeJacobianFIntFunction(0, "DoublePendulumPlugin.so", "jacobianQFInt");
+    doublependulum->setComputeJacobianQDotFIntFunction("DoublePendulumPlugin.so", "jacobianVFInt");
+    doublependulum->setComputeJacobianQFIntFunction("DoublePendulumPlugin.so", "jacobianQFInt");
 
     allDS.insert(doublependulum);
 
@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
 
     cout << "=== End of model loading === " << endl;
 
-    // =========================== End of model definition ===========================  dataPlot(k,7) = (inter->getY(0))(0);
+    // =========================== End of model definition ===========================  dataPlot(k,7) = (*inter->y(0))(0);
 
 
     // ================================= Computation =================================
@@ -156,8 +156,8 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlot(N, outputSize);
     // For the initial time step:
     // time
-    SP::SiconosVector q = doublependulum->getQPtr();
-    SP::SiconosVector v = doublependulum->getVelocityPtr();
+    SP::SiconosVector q = doublependulum->q();
+    SP::SiconosVector v = doublependulum->velocity();
 
     dataPlot(k, 0) =  t0;
     dataPlot(k, 1) = (*q)(0);
@@ -177,20 +177,20 @@ int main(int argc, char* argv[])
     cout << "Start computation ... " << endl;
     bool nonSmooth = false;
 
-    SP::EventsManager eventsManager = s->getEventsManagerPtr();
-    while (s->getNextTime() < T)
+    SP::EventsManager eventsManager = s->eventsManager();
+    while (s->nextTime() < T)
     {
       k++;
       //  if (!(div(k,1000).rem))  cout <<"Step number "<< k << "\n";
 
       s->advanceToEvent();
-      if (eventsManager->getNextEventPtr()->getType() == 2)
+      if (eventsManager->nextEvent()->getType() == 2)
         nonSmooth = true;
       s->processEvents();
 
       if (nonSmooth)
       {
-        dataPlot(k, 0) =  s->getStartingTime();
+        dataPlot(k, 0) =  s->startingTime();
         dataPlot(k, 1) = (*q)(0);
         dataPlot(k, 2) = (*v)(0);
         dataPlot(k, 3) = (*q)(1);
@@ -204,7 +204,7 @@ int main(int argc, char* argv[])
         k++;
       }
 
-      dataPlot(k, 0) =  s->getStartingTime();
+      dataPlot(k, 0) =  s->startingTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*q)(1);
@@ -235,3 +235,4 @@ int main(int argc, char* argv[])
     cout << "Exception caught in \'sample/MultiBeadsColumn\'" << endl;
   }
 }
+

@@ -45,8 +45,10 @@ int main(int argc, char* argv[])
     bouncingBall->initialize();
 
     // --- Get and initialize the simulation ---
-    SP::EventDriven s = boost::static_pointer_cast<EventDriven>(bouncingBall->getSimulationPtr());
-    SP::LagrangianDS ball = boost::static_pointer_cast<LagrangianDS> (bouncingBall->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(0));
+    SP::EventDriven s = boost::static_pointer_cast<EventDriven>
+                        (bouncingBall->simulation());
+    SP::LagrangianDS ball = boost::static_pointer_cast<LagrangianDS>
+                            (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0));
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -55,42 +57,42 @@ int main(int argc, char* argv[])
     unsigned int outputSize = 4;
     SimpleMatrix dataPlot(N + 1, outputSize);
 
-    SP::SiconosVector q = ball->getQPtr();
-    SP::SiconosVector v = ball->getVelocityPtr();
-    SP::SiconosVector p = ball->getPPtr(2);
+    SP::SiconosVector q = ball->q();
+    SP::SiconosVector v = ball->velocity();
+    SP::SiconosVector p = ball->p(2);
 
-    dataPlot(0, 0) = bouncingBall->getT0();
+    dataPlot(0, 0) = bouncingBall->t0();
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
     dataPlot(0, 3) = (*p)(0);
 
     cout << "====> Start computation ... " << endl << endl;
     // --- Time loop  ---
-    SP::EventsManager eventsManager = s->getEventsManagerPtr();
+    SP::EventsManager eventsManager = s->eventsManager();
     unsigned int numberOfEvent = 0 ;
     int k = 0;
-    double T = bouncingBall->getFinalT();
+    double T = bouncingBall->finalT();
     bool nonSmooth = false;
 
-    while (s->getNextTime() < T)
+    while (s->nextTime() < T)
     {
       k++;
 
       s->advanceToEvent();
-      if (eventsManager->getNextEventPtr()->getType() == 2)
+      if (eventsManager->nextEvent()->getType() == 2)
         nonSmooth = true;
 
       s->processEvents();
       // If the treated event is non smooth, the pre-impact state has been solved in memory vectors during process.
       if (nonSmooth)
       {
-        dataPlot(k, 0) = s->getStartingTime();
-        dataPlot(k, 1) = (*ball->getQMemoryPtr()->getSiconosVector(1))(0);
-        dataPlot(k, 2) = (*ball->getVelocityMemoryPtr()->getSiconosVector(1))(0);
+        dataPlot(k, 0) = s->startingTime();
+        dataPlot(k, 1) = (*ball->qMemory()->getSiconosVector(1))(0);
+        dataPlot(k, 2) = (*ball->velocityMemory()->getSiconosVector(1))(0);
         k++;
         nonSmooth = false;
       }
-      dataPlot(k, 0) = s->getStartingTime();
+      dataPlot(k, 0) = s->startingTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*p)(0);

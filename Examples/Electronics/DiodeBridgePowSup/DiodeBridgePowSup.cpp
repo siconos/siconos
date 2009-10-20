@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
     DiodeBridgePowSup->initialize(StratDiodeBridgePowSup);
 
     k = 0;
-    double h = StratDiodeBridgePowSup->getTimeStep();
+    double h = StratDiodeBridgePowSup->timeStep();
     int N = (int)((T - t0) / h); // Number of time steps
     cout << "Number of time steps = " << N << endl;
     tinst = k * h_step;
@@ -157,16 +157,16 @@ int main(int argc, char* argv[])
 
     i_DF1 = (InterDiodeBridgePowSup->getLambda(0))(2);
     i_DR1 = (InterDiodeBridgePowSup->getLambda(0))(0);
-    i_DF2 = (InterDiodeBridgePowSup->getY(0))(1);
+    i_DF2 = (*InterDiodeBridgePowSup->y(0))(1);
     i_DR2 = (InterDiodeBridgePowSup->getLambda(0))(3);
 
-    v_DF1 = -(InterDiodeBridgePowSup->getY(0))(2) + DiodeThreshold;
-    v_DR1 = -(InterDiodeBridgePowSup->getY(0))(0) + DiodeThreshold;
+    v_DF1 = -(*InterDiodeBridgePowSup->y(0))(2) + DiodeThreshold;
+    v_DR1 = -(*InterDiodeBridgePowSup->y(0))(0) + DiodeThreshold;
     v_DF2 = -(InterDiodeBridgePowSup->getLambda(0))(1) + DiodeThreshold;
-    v_DR2 = -(InterDiodeBridgePowSup->getY(0))(3) + DiodeThreshold;
+    v_DR2 = -(*InterDiodeBridgePowSup->y(0))(3) + DiodeThreshold;
 
     // time
-    dataPlot(k, 0) = DiodeBridgePowSup->getT0();
+    dataPlot(k, 0) = DiodeBridgePowSup->t0();
 
     // source voltage
     dataPlot(k, 1) = (LSDiodeBridgePowSup->getZ())(4);
@@ -209,16 +209,16 @@ int main(int argc, char* argv[])
       // --- Get values to be plotted ---
       i_DF1 = (InterDiodeBridgePowSup->getLambda(0))(2);
       i_DR1 = (InterDiodeBridgePowSup->getLambda(0))(0);
-      i_DF2 = (InterDiodeBridgePowSup->getY(0))(1);
+      i_DF2 = (*InterDiodeBridgePowSup->y(0))(1);
       i_DR2 = (InterDiodeBridgePowSup->getLambda(0))(3);
 
-      v_DF1 = -(InterDiodeBridgePowSup->getY(0))(2) + DiodeThreshold;
-      v_DR1 = -(InterDiodeBridgePowSup->getY(0))(0) + DiodeThreshold;
+      v_DF1 = -(*InterDiodeBridgePowSup->y(0))(2) + DiodeThreshold;
+      v_DR1 = -(*InterDiodeBridgePowSup->y(0))(0) + DiodeThreshold;
       v_DF2 = -(InterDiodeBridgePowSup->getLambda(0))(1) + DiodeThreshold;
-      v_DR2 = -(InterDiodeBridgePowSup->getY(0))(3) + DiodeThreshold;
+      v_DR2 = -(*InterDiodeBridgePowSup->y(0))(3) + DiodeThreshold;
 
       // time
-      dataPlot(k, 0) = StratDiodeBridgePowSup->getNextTime();
+      dataPlot(k, 0) = StratDiodeBridgePowSup->nextTime();
 
       // source voltage
       dataPlot(k, 1) = (LSDiodeBridgePowSup->getZ())(4);

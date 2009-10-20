@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
     s->recordNonSmoothProblem(osnspb);
     cout << "=== End of model loading === " << endl;
 
-    // =========================== End of model definition ===========================  dataPlot(k,7) = (inter->getY(0))(0);
+    // =========================== End of model definition ===========================  dataPlot(k,7) = (*inter->y(0))(0);
 
 
     // ================================= Computation =================================
@@ -177,7 +177,7 @@ int main(int argc, char* argv[])
     SimpleMatrix dataPlot(N + 1, outputSize);
     // For the initial time step:
     // time
-    dataPlot(k, 0) =  Pendulum->getT0();
+    dataPlot(k, 0) =  Pendulum->t0();
     dataPlot(k, 1) = (*simplependulum->q())(0);
     dataPlot(k, 2) = (*simplependulum->velocity())(0);
     dataPlot(k, 3) =  l1 * sin((*simplependulum->q())(0));
@@ -185,12 +185,12 @@ int main(int argc, char* argv[])
     dataPlot(k, 5) =  l1 * cos((*simplependulum->q())(0)) * ((*simplependulum->velocity())(0));
     // --- Compute elapsed time ---
     boost::timer tt;
-    //    EventsManager eventsManager = s->getEventsManagerPtr();
+    //    EventsManager eventsManager = s->eventsManager();
     tt.restart();
     // --- Time loop ---
     cout << "Start computation ... " << endl;
     cout << "Number of time step" << N << "\n";
-    while (s->getNextTime() <= Pendulum->getFinalT())
+    while (s->nextTime() <= Pendulum->finalT())
     {
       k++;
       if (!(div(k, 1000).rem))  cout << "Step number " << k << "\n";
@@ -198,7 +198,7 @@ int main(int argc, char* argv[])
       // Solve problem
       s->newtonSolve(criterion, maxIter);
       // Data Output
-      dataPlot(k, 0) =  s->getNextTime();
+      dataPlot(k, 0) =  s->nextTime();
       dataPlot(k, 1) = (*simplependulum->q())(0);
       dataPlot(k, 2) = (*simplependulum->velocity())(0);
       dataPlot(k, 3) =  l1 * sin((*simplependulum->q())(0));

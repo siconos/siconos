@@ -54,20 +54,22 @@ int main(int argc, char* argv[])
     // --- Dynamical systems ---
     // -------------------------
 
-    SimpleMatrix Mass(nDof, nDof), K(nDof, nDof), C(nDof, nDof);     // mass/rigidity/viscosity
-    Mass(0, 0) = 1.221;
-    K(0, 0) = 1430.8;
+    SP::SimpleMatrix Mass(new SimpleMatrix(nDof, nDof));
+    SP::SimpleMatrix K(new SimpleMatrix(nDof, nDof));
+    SP::SimpleMatrix C(new SimpleMatrix(nDof, nDof));       // mass/rigidity/viscosity
+    (*Mass)(0, 0) = 1.221;
+    (*K)(0, 0) = 1430.8;
 
     // -- Initial positions and velocities --
-    vector<SP::SiconosVector> q0;
-    vector<SP::SiconosVector> velocity0;
+    vector<SP::SimpleVector> q0;
+    vector<SP::SimpleVector> velocity0;
     q0.resize(dsNumber);
     velocity0.resize(dsNumber);
     q0[0].reset(new SimpleVector(nDof));
     velocity0[0].reset(new SimpleVector(nDof));
     (*(q0[0]))(0) = position_init;
     (*(velocity0[0]))(0) = velocity_init;
-    SP::LagrangianLinearTIDS lds(new LagrangianLinearTIDS(*(q0[0]), *(velocity0[0]), Mass, K, C));
+    SP::LagrangianLinearTIDS lds(new LagrangianLinearTIDS(q0[0], velocity0[0], Mass, K, C));
     lds->setComputeFExtFunction("FollowerPlugin.so", "FollowerFExtR");
 
     // Example to set a list of parameters in FExt function.
@@ -159,10 +161,10 @@ int main(int argc, char* argv[])
     // For the initial time step:
     // time
     DataPlot(k, 0) = t0;
-    DataPlot(k, 1) = lds->getQ()(0);
-    DataPlot(k, 2) = lds->getVelocity()(0);
-    DataPlot(k, 3) = (Follower->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
-    DataPlot(k, 4) = lds->getFExt()(0);
+    DataPlot(k, 1) = (*lds->q())(0);
+    DataPlot(k, 2) = (*lds->velocity())(0);
+    DataPlot(k, 3) = (*Follower->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(0)->lambda(1))(0);
+    DataPlot(k, 4) = (*lds->fExt())(0);
 
     // State of the Cam
     //    double rpm=358;
@@ -174,7 +176,7 @@ int main(int argc, char* argv[])
     // Velocity of the Cam
     DataPlot(k, 6) = CamVelocity;
     // Acceleration of the Cam
-    DataPlot(k, 7) = CamPosition + lds->getQ()(0);
+    DataPlot(k, 7) = CamPosition + (*lds->q())(0);
     boost::timer tt;
     tt.restart();
     // --- Time loop ---
@@ -188,16 +190,16 @@ int main(int argc, char* argv[])
 
       // --- Get values to be plotted ---
 
-      DataPlot(k, 0) = S->getNextTime();
-      DataPlot(k, 1) = lds->getQ()(0);
-      DataPlot(k, 2) = lds->getVelocity()(0);
-      DataPlot(k, 3) = (Follower->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
-      DataPlot(k, 4) = lds->getFExt()(0);
+      DataPlot(k, 0) = S->nextTime();
+      DataPlot(k, 1) = (*lds->q())(0);
+      DataPlot(k, 2) = (*lds->velocity())(0);
+      DataPlot(k, 3) = (*Follower->nonSmoothDynamicalSystem()->topology()->interactions()->getPtr(0)->lambda(1))(0);
+      DataPlot(k, 4) = (*lds->fExt())(0);
 
-      CamEqForce = CamState(S->getNextTime(), rpm, CamPosition, CamVelocity, CamAcceleration);
+      CamEqForce = CamState(S->nextTime(), rpm, CamPosition, CamVelocity, CamAcceleration);
       DataPlot(k, 5) = CamPosition;
       DataPlot(k, 6) = CamVelocity;
-      DataPlot(k, 7) = CamPosition + lds->getQ()(0);
+      DataPlot(k, 7) = CamPosition + (*lds->q())(0);
       // transfer of state i+1 into state i and time incrementation
       S->nextStep();
     }

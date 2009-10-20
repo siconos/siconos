@@ -138,7 +138,7 @@ void BallsModel::compute()
   unsigned int i = 0;
 
 #ifndef WithQGLViewer
-  (*dataPlot)(iter_k, 0) =  balls->simulation()->getNextTime(); // time
+  (*dataPlot)(iter_k, 0) =  balls->simulation()->nextTime(); // time
   for (DSLIST::iterator it = allSpheres.begin(); it != allSpheres.end(); ++it)
   {
     (*dataPlot)(iter_k, 1 + 2 * i) = (*it)->getQ(2);
@@ -154,7 +154,7 @@ void BallsModel::compute()
 
 bool BallsModel::isSimulationFinished()
 {
-  return !(balls->simulation()->getNextTime() < balls->getFinalT());
+  return !(balls->simulation()->nextTime() < balls->finalT());
 }
 
 
@@ -213,7 +213,7 @@ void BallsModel::buildDynamicalSystems()
     (*(q0[i]))(2) = position_init;
     (*(v0[i]))(2) = velocity_init;
     // Create and insert in allDS a new Lagrangian Linear Dynamical System ...
-    allSpheres[i].reset(new Sphere(Radius, m, *(q0[i]), *(v0[i])));
+    allSpheres[i].reset(new Sphere(Radius, m, q0[i], v0[i]));
     position_init += increment_position;
     velocity_init += increment_velocity;
   }
