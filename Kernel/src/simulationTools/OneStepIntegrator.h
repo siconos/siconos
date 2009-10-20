@@ -127,7 +127,7 @@ public:
   /** get the set of DynamicalSystem associated with the Integrator
    *  \return a DynamicalSystemsSet
    */
-  inline SP::DynamicalSystemsSet getDynamicalSystems() const
+  inline SP::DynamicalSystemsSet dynamicalSystems() const
   {
     return OSIDynamicalSystems;
   };

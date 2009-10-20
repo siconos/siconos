@@ -39,20 +39,20 @@ MLCP2::MLCP2(SP::NonSmoothSolver newSolver, const string& newId):
 
 void MLCP2::initialize(SP::Simulation simulation)
 {
-  SP::DynamicalSystemsSet  DSSet = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
+  SP::DynamicalSystemsSet  DSSet = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   if (DSSet->begin() == DSSet->end())
     printf("DSSet is empty\n");
   else
     printf("DSSet is not empty\n");
   updateDSBlocks();
   updateDSUnitaryBlocks();
-  DSSet = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
+  DSSet = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   if (DSSet->begin() == DSSet->end())
     printf("DSSet is empty\n");
   else
     printf("DSSet is not empty\n");
   updateUnitaryDSBlocks();
-  DSSet = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
+  DSSet = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   if (DSSet->begin() == DSSet->end())
     printf("DSSet is empty\n");
   else
@@ -64,7 +64,7 @@ void MLCP2::initialize(SP::Simulation simulation)
 void MLCP2::updateM()
 {
   SP::UnitaryRelationsGraph URSet = simulation->indexSet(levelMin);
-  SP::DynamicalSystemsSet  DSSet = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
+  SP::DynamicalSystemsSet  DSSet = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   if (!M)
   {
     // Creates and fills M using UR of indexSet
@@ -106,7 +106,7 @@ void MLCP2::updateM()
 //     for(itUR1 = indexSet->begin(); itUR1!=indexSet->end();++itUR1){
 //       computeblock(&(*itUR1));
 //     }
-//     DynamicalSystemsSet * allDS = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
+//     DynamicalSystemsSet * allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
 //     for(itDS=allDS->begin(); itDS!= allDS->end(); ++itDS){
 //       computeblock(&(*itDS));
 //       for(itUR1 = indexSet->begin(); itUR1!=indexSet->end();++itUR1){
@@ -196,7 +196,7 @@ void MLCP2::computeQ(double time)
     SP::SiconosVector  e = boost::static_pointer_cast<FirstOrderLinearR>((*itCurrent)->interaction()->relation())->getEPtr();
     boost::static_pointer_cast<SimpleVector>(q)->addBlock(pos, *e);
   }
-  SP::DynamicalSystemsSet  allDS = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
+  SP::DynamicalSystemsSet  allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   for (DSIterator itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
   {
     pos = M->getPositionOfDSBlock(*itDS);
@@ -235,7 +235,7 @@ void MLCP2::preCompute(double time)
 
     // Updates matrix M
     SP::UnitaryRelationsSet URSet = simulation->indexSet(levelMin);
-    SP::DynamicalSystemsSet DSSet = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
+    SP::DynamicalSystemsSet DSSet = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
     //fill M block
     M->fill(URSet, DSSet, unitaryBlocks, DSBlocks, DSUnitaryBlocks, unitaryDSBlocks);
     sizeOutput = M->size();
@@ -348,7 +348,7 @@ void MLCP2::postCompute()
     setBlock(*(_w.get()), y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
     setBlock(*(_z.get()), lambda, lambda->size(), pos, 0);
   }
-  SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
+  SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   for (DSIterator itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
   {
     pos = M->getPositionOfDSBlock(*itDS);

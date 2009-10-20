@@ -309,7 +309,7 @@ void OneStepNSProblem::updateDSBlocks()
 
   //   bool isTimeInvariant= simulation()->model()->nonSmoothDynamicalSystem()
   //     ->topology()->isTimeInvariant();
-  //   SP::DynamicalSystemsSet allDS = simulation()->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
+  //   SP::DynamicalSystemsSet allDS = simulation()->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
   //   DSIterator itDS;
   //   for(itDS = allDS->begin(); itDS!=allDS->end();++itDS)
@@ -332,7 +332,7 @@ void OneStepNSProblem::computeAllDSBlocks()
 {
   //  SP::DynamicalSystemsSet allDS;
   //   DSIterator itDS;
-  //   allDS = simulation()->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
+  //   allDS = simulation()->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
   //   for(itDS = allDS->begin(); itDS!=allDS->end();++itDS)
   //     computeDSBlock(*itDS);

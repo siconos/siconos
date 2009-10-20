@@ -126,7 +126,7 @@ void PrimalFrictionContact::initialize(SP::Simulation sim)
   mu.reset(new MuStorage());
   mu->reserve(I0->size());
 
-  SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();;
+  SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();;
 
   // If the topology is TimeInvariant ie if M structure does not change during simulation:
   if (topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty())
@@ -164,7 +164,7 @@ void PrimalFrictionContact::initialize(SP::Simulation sim)
       if (MStorageType == 0)
         M.reset(new OSNSMatrix(maxSize, 0));
       else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered DynamicalSystemsSet
-        M.reset(new OSNSMatrix(simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems()->size(), 1));
+        M.reset(new OSNSMatrix(simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), 1));
     }
     if (!H)
     {
@@ -173,7 +173,7 @@ void PrimalFrictionContact::initialize(SP::Simulation sim)
       else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered DynamicalSystemsSet
 
 
-        H.reset(new OSNSMatrix(simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems()->size(), simulation->indexSet(levelMin)->size()   , 1));
+        H.reset(new OSNSMatrix(simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation->indexSet(levelMin)->size()   , 1));
     }
   }
 }
@@ -235,7 +235,7 @@ void PrimalFrictionContact::computeQ(const double time)
     q->resize(sizeOutput);
   q->zero();
 
-  SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();;
+  SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();;
   DSIterator itDS;
 
   // type of the current one step integrator
@@ -371,7 +371,7 @@ void PrimalFrictionContact::preCompute(const double time)
 
   // Get topology
   SP::Topology topology = simulation->model()->nonSmoothDynamicalSystem()->topology();
-  SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();;
+  SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();;
   SP::UnitaryRelationsSet indexSet = simulation->indexSet(levelMin);
 
   if (!topology->isTimeInvariant())
@@ -517,7 +517,7 @@ void PrimalFrictionContact::postCompute()
 
   //     }
 
-  SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();;
+  SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();;
   DSIterator itDS;
   unsigned int sizeDS;
   SP::OneStepIntegrator  Osi;

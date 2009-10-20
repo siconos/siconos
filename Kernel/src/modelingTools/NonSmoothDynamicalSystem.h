@@ -140,7 +140,7 @@ public:
    *  problem
    * \return a DynamicalSystemsSet *
    */
-  inline const SP::DynamicalSystemsGraph getDynamicalSystems() const
+  inline const SP::DynamicalSystemsGraph dynamicalSystems() const
   {
     return topology()->dSG(0);
   }

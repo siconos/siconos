@@ -189,7 +189,7 @@ public:
   /** get all the Dynamical Systems linked to this actuator.
    *  \return a DynamicalSystemsSet.
    */
-  inline const SP::DynamicalSystemsSet getDynamicalSystems() const
+  inline const SP::DynamicalSystemsSet dynamicalSystems() const
   {
     return _allDS;
   };

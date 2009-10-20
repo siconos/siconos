@@ -278,7 +278,7 @@ void TimeStepping::initOSNS()
     // for degree 0 case where we keep 0.
 
     assert(model()->nonSmoothDynamicalSystem()->topology()->isUpToDate());
-    assert(model()->nonSmoothDynamicalSystem()->topology()->getMinRelativeDegree() >= 0);
+    assert(model()->nonSmoothDynamicalSystem()->topology()->minRelativeDegree() >= 0);
 
     _levelMin = model()->nonSmoothDynamicalSystem()->topology()->minRelativeDegree();
 
@@ -358,7 +358,7 @@ void TimeStepping::computeInitialResidu()
     (*it)->relation()->computeH(tkp1);
   }
 
-  SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
+  SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
   {
     dsGraph->bundle(*vi)->updatePlugins(tkp1);
@@ -419,7 +419,7 @@ void   TimeStepping::prepareNewtonIteration()
 
 
   /*reset to zero the ds buffers*/
-  SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
+  SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
   for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
   {
     dsGraph->bundle(*vi)->preparStep();

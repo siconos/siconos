@@ -201,9 +201,9 @@ void NonSmoothDynamicalSystem::saveNSDSToXML()
     nsdsxml->setBVP(BVP);// no need to change the value of BVP, it mustn't change anyway
 
     DynamicalSystemsGraph::VIterator vi;
-    for (vi = getDynamicalSystems()->begin(); vi != getDynamicalSystems()->end(); ++vi)
+    for (vi = dynamicalSystems()->begin(); vi != dynamicalSystems()->end(); ++vi)
     {
-      SP::DynamicalSystem ds = getDynamicalSystems()->bundle(*vi);
+      SP::DynamicalSystem ds = dynamicalSystems()->bundle(*vi);
       if (ds->getType() == LNLDS)
         (boost::static_pointer_cast<LagrangianDS>(ds))->saveDSToXML();
       else if (ds->getType() == LLTIDS)
@@ -230,7 +230,7 @@ SP::DynamicalSystem NonSmoothDynamicalSystem::dynamicalSystemNumber(int nb) cons
 {
   SP::DynamicalSystemsSet allDSLocal;
 
-  allDSLocal = setOfGraph<DynamicalSystemsSet>(getDynamicalSystems());
+  allDSLocal = setOfGraph<DynamicalSystemsSet>(dynamicalSystems());
 
   // if ds number nb is not in the set ...
   assert(allDSLocal->isIn(nb) &&
@@ -243,7 +243,7 @@ void NonSmoothDynamicalSystem::display() const
 {
   cout << " ===== Non Smooth Dynamical System display ===== " << endl;
   cout << "---> isBVP = " << BVP << endl;
-  getDynamicalSystems()->begin();
+  dynamicalSystems()->begin();
   _topology->interactions()->display();
   cout << "===================================================" << endl;
 }
@@ -255,9 +255,9 @@ double NonSmoothDynamicalSystem::nsdsConvergenceIndicator()
   double convergenceIndicator = -std::numeric_limits<double>::infinity();
   double dsIndic ;
   DynamicalSystemsGraph::VIterator vi;
-  for (vi = getDynamicalSystems()->begin(); vi != getDynamicalSystems()->end(); ++vi)
+  for (vi = dynamicalSystems()->begin(); vi != dynamicalSystems()->end(); ++vi)
   {
-    dsIndic = getDynamicalSystems()->bundle(*vi)->dsConvergenceIndicator();
+    dsIndic = dynamicalSystems()->bundle(*vi)->dsConvergenceIndicator();
     if (dsIndic > convergenceIndicator) convergenceIndicator = dsIndic;
   }
   return(convergenceIndicator);
