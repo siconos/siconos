@@ -28,28 +28,28 @@
 #include <iostream>
 using namespace std;
 
-Actuator::Actuator(): type(0), id("none")
+Actuator::Actuator(): _type(0), _id("none")
 {
-  allDS.reset(new DynamicalSystemsSet());
-  allSensors.reset(new Sensors());
+  _allDS.reset(new DynamicalSystemsSet());
+  _allSensors.reset(new Sensors());
 }
 
-Actuator::Actuator(int name, SP::TimeDiscretisation t): type(name), id("none")
+Actuator::Actuator(int name, SP::TimeDiscretisation t): _type(name), _id("none")
 {
-  allDS.reset(new DynamicalSystemsSet());
-  allSensors.reset(new Sensors());
+  _allDS.reset(new DynamicalSystemsSet());
+  _allSensors.reset(new Sensors());
 }
 
-Actuator::Actuator(int name, SP::TimeDiscretisation t, const Sensors& sensorList): type(name), id("none")
+Actuator::Actuator(int name, SP::TimeDiscretisation t, const Sensors& sensorList): _type(name), _id("none")
 {
-  allDS.reset(new DynamicalSystemsSet());
-  allSensors.reset(new Sensors());
+  _allDS.reset(new DynamicalSystemsSet());
+  _allSensors.reset(new Sensors());
 }
 
 Actuator::~Actuator()
 {
-  allDS->clear();
-  allSensors->clear();
+  _allDS->clear();
+  _allSensors->clear();
 }
 
 void Actuator::addSensors(const Sensors& newSensors)
@@ -58,14 +58,14 @@ void Actuator::addSensors(const Sensors& newSensors)
   // => allSensors is not cleared and so all existing Sensors remain.
   // => no copy of Sensors but copy of the pointers
   for (SensorsIterator itS = newSensors.begin(); itS != newSensors.end(); ++itS)
-    allSensors->insert(*itS);
+    _allSensors->insert(*itS);
 
 }
 
 void Actuator::addSensorPtr(SP::Sensor newSensor)
 {
   // Add a Sensor into allSensors set: no copy, pointer link.
-  allSensors->insert(newSensor);
+  _allSensors->insert(newSensor);
 }
 
 void Actuator::addDynamicalSystems(const DynamicalSystemsSet& newDSs)
@@ -74,13 +74,13 @@ void Actuator::addDynamicalSystems(const DynamicalSystemsSet& newDSs)
   // => allDS is not cleared and so all existing DSs remain.
   // => no copy of DS but copy of the pointers
   for (DSIterator itDS = newDSs.begin(); itDS != newDSs.end(); ++itDS)
-    allDS->insert(*itDS);
+    _allDS->insert(*itDS);
 }
 
 void Actuator::addDynamicalSystemPtr(SP::DynamicalSystem newDS)
 {
   // Add a DS into allDS set: no copy, pointer link.
-  allDS->insert(newDS);
+  _allDS->insert(newDS);
 }
 
 void Actuator::initialize()
@@ -88,8 +88,8 @@ void Actuator::initialize()
   // == Create an event linked to the present Actuator. ==
   // Uses the events factory to insert the new event.
   EventFactory::Registry& regEvent(EventFactory::Registry::get());
-  eActuator = regEvent.instantiate(timeDiscretisation->getCurrentTime(), 3);
-  boost::static_pointer_cast<ActuatorEvent>(eActuator)->setActuatorPtr(shared_from_this());
+  _eActuator = regEvent.instantiate(_timeDiscretisation->currentTime(), 3);
+  boost::static_pointer_cast<ActuatorEvent>(_eActuator)->setActuatorPtr(shared_from_this());
 
   // Warning: no Sensors initialization. They are supposed to be up to date when added in the Actuator.
 }
@@ -98,23 +98,23 @@ void Actuator::initialize()
 // i.e. add eActuator into the EventsManager of the simulation
 void Actuator::recordInSimulation()
 {
-  model->getSimulationPtr()->getEventsManagerPtr()->insertEvent(eActuator);
+  model()->simulation()->eventsManager()->insertEvent(_eActuator);
 }
 
 void Actuator::display() const
 {
-  cout << "=====> Actuator of type " << type << ", named " << id ;
-  if (model)
-    cout << " and linked to model named " << model->getTitle() << "." << endl;
+  cout << "=====> Actuator of type " << _type << ", named " << _id ;
+  if (model())
+    cout << " and linked to model named " << model()->getTitle() << "." << endl;
   else
     cout << " and not linked to a model." << endl;
   cout << "The associated Sensors are: " << endl;
-  for (SensorsIterator itS = allSensors->begin(); itS != allSensors->end(); ++itS)
+  for (SensorsIterator itS = _allSensors->begin(); itS != _allSensors->end(); ++itS)
     (*itS)->display();
 
   cout << "The associated DynamicalSystems are: " << endl;
-  for (DSIterator itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
-    cout << " - Numbers : " << (*itDS)->getNumber()  << endl;
+  for (DSIterator itDS = _allDS->begin(); itDS != _allDS->end(); ++itDS)
+    cout << " - Numbers : " << (*itDS)->number()  << endl;
   cout << "======" << endl;
   cout << endl;
 }

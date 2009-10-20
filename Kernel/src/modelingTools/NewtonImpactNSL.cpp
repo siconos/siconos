@@ -20,19 +20,19 @@
 #include "NewtonImpactNSLXML.h"
 using namespace std;
 
-NewtonImpactNSL::NewtonImpactNSL(): NonSmoothLaw(1), e(0.0)
+NewtonImpactNSL::NewtonImpactNSL(): NonSmoothLaw(1), _e(0.0)
 {}
 
 NewtonImpactNSL::NewtonImpactNSL(SP::NonSmoothLawXML nslawxml):
-  NonSmoothLaw(nslawxml), e(0.0)
+  NonSmoothLaw(nslawxml), _e(0.0)
 {
   if (nslawxml)
-    e = (boost::static_pointer_cast<NewtonImpactNSLXML>(nslawxml))->getE();
+    _e = (boost::static_pointer_cast<NewtonImpactNSLXML>(nslawxml))->getE();
   else RuntimeException::selfThrow("NewtonImpactNSL:: xml constructor, xml file=NULL");
 }
 
 NewtonImpactNSL::NewtonImpactNSL(double newE):
-  NonSmoothLaw(1), e(newE)
+  NonSmoothLaw(1), _e(newE)
 {}
 
 NewtonImpactNSL::~NewtonImpactNSL()
@@ -49,13 +49,13 @@ bool NewtonImpactNSL::isVerified() const
 void NewtonImpactNSL::display() const
 {
   cout << "===============================================================================" << endl;
-  cout << "=== Newton impact (frictionless) non-smooth law coefficient of restitution: " << e << endl;
+  cout << "=== Newton impact (frictionless) non-smooth law coefficient of restitution: " << _e << endl;
   cout << "===============================================================================" << endl;
 }
 
 void NewtonImpactNSL::saveNonSmoothLawToXML()
 {
-  boost::static_pointer_cast<NewtonImpactNSLXML>(nslawxml)->setE(e);
+  boost::static_pointer_cast<NewtonImpactNSLXML>(_nslawxml)->setE(_e);
 }
 
 NewtonImpactNSL* NewtonImpactNSL::convert(NonSmoothLaw* nsl)

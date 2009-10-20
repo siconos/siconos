@@ -31,7 +31,7 @@ FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::DynamicalSystemXML dsXML): FirstO
 
   // pointer to xml
 
-  SP::FirstOrderLinearDSXML ldsxml = (boost::static_pointer_cast <FirstOrderLinearDSXML>(dsxml));
+  SP::FirstOrderLinearDSXML ldsxml = (boost::static_pointer_cast <FirstOrderLinearDSXML>(_dsxml));
 
   // reject case where A or b is a plug-in
   if (ldsxml->isAPlugin())
@@ -46,7 +46,7 @@ FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::DynamicalSystemXML dsXML): FirstO
 FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::SiconosVector newX0, SP::SiconosMatrix newA):
   FirstOrderLinearDS(newX0, newA)
 {
-  DSType = FOLTIDS;
+  _DSType = FOLTIDS;
   checkDynamicalSystem();
 }
 
@@ -54,26 +54,26 @@ FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::SiconosVector newX0, SP::SiconosM
 FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::SiconosVector newX0, SP::SiconosMatrix newA, SP::SiconosVector newB):
   FirstOrderLinearDS(newX0, newA, newB)
 {
-  DSType = FOLTIDS;
+  _DSType = FOLTIDS;
   checkDynamicalSystem();
 }
 
 void FirstOrderLinearTIDS::initRhs(double time)
 {
-  if (M && !invM)
-    invM.reset(new SimpleMatrix(*M));
+  if (_M && !_invM)
+    _invM.reset(new SimpleMatrix(*_M));
 
   computeRhs(time);
 
   if (! _jacXRhs)  // if not allocated with a set or anything else
   {
-    if (A && ! M)  // if M is not defined, then A = _jacXRhs, no memory allocation for that one.
-      _jacXRhs = A;
-    else if (A && M)
+    if (_A && ! _M)  // if M is not defined, then A = _jacXRhs, no memory allocation for that one.
+      _jacXRhs = _A;
+    else if (_A && _M)
     {
-      _jacXRhs.reset(new SimpleMatrix(*A)); // Copy A into _jacXRhs
+      _jacXRhs.reset(new SimpleMatrix(*_A)); // Copy A into _jacXRhs
       // Solve M_jacXRhs = A
-      invM->PLUForwardBackwardInPlace(*_jacXRhs);
+      _invM->PLUForwardBackwardInPlace(*_jacXRhs);
     }
     // else no allocation, jacobian is equal to 0.
   }
@@ -82,17 +82,17 @@ void FirstOrderLinearTIDS::initRhs(double time)
 void FirstOrderLinearTIDS::computeRhs(const double time, const bool)
 {
 
-  *x[1] = * r; // Warning: r update is done in Interactions/Relations
+  *_x[1] = * _r; // Warning: r update is done in Interactions/Relations
 
-  if (A)
-    prod(*A, *x[0], *x[1], false);
+  if (_A)
+    prod(*_A, *_x[0], *_x[1], false);
 
   // compute and add b if required
-  if (b)
-    *x[1] += *b;
+  if (_b)
+    *_x[1] += *_b;
 
-  if (M)
-    invM->PLUForwardBackwardInPlace(*x[1]);
+  if (_M)
+    _invM->PLUForwardBackwardInPlace(*_x[1]);
 }
 
 void FirstOrderLinearTIDS::computeJacobianXRhs(const double time, const bool)
@@ -102,16 +102,16 @@ void FirstOrderLinearTIDS::computeJacobianXRhs(const double time, const bool)
 
 void FirstOrderLinearTIDS::display() const
 {
-  cout << "===> Linear Time-invariant First Order System display, " << number << ")." << endl;
+  cout << "===> Linear Time-invariant First Order System display, " << _number << ")." << endl;
   cout << "- A " << endl;
-  if (A) A->display();
+  if (_A) _A->display();
   else cout << "-> NULL" << endl;
   cout << "- b " << endl;
-  if (b) b->display();
+  if (_b) _b->display();
   else cout << "-> NULL" << endl;
 
   cout << "- M: " << endl;
-  if (M) M->display();
+  if (_M) _M->display();
   else cout << "-> NULL" << endl;
 
   cout << "============================================" << endl;

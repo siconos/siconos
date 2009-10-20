@@ -22,30 +22,30 @@ using namespace std;
 
 // Default (private)
 NewtonImpactFrictionNSL::NewtonImpactFrictionNSL():
-  NonSmoothLaw(), en(0.0), et(0.0), mu(0.0)
+  NonSmoothLaw(), _en(0.0), _et(0.0), _mu(0.0)
 {}
 
 NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(unsigned int newSize):
-  NonSmoothLaw(newSize), en(0.0), et(0.0), mu(0.0)
+  NonSmoothLaw(newSize), _en(0.0), _et(0.0), _mu(0.0)
 {}
 
 NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(SP::NonSmoothLawXML nslawxml):
-  NonSmoothLaw(nslawxml), en(0.0), et(0.0), mu(0.0)
+  NonSmoothLaw(nslawxml), _en(0.0), _et(0.0), _mu(0.0)
 {
   assert((nslawxml->hasSize()) && // size is a required input for Friction
          "NewtonImpactFrictionNSL:: xml constructor, size is a required xml input.");
 
-  assert((size == 2 || size == 3) &&
-         "NewtonImpactFrictionNSL:: xml constructor, wrong size value = " + size);
+  assert((size() == 2 || size() == 3) &&
+         "NewtonImpactFrictionNSL:: xml constructor, wrong size value = " + size());
 
-  en = (boost::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml))->getEn();
+  _en = (boost::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml))->getEn();
   if ((boost::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml))->hasEt())
-    et = (boost::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml))->getEt();
-  mu = (boost::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml))->getMu();
+    _et = (boost::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml))->getEt();
+  _mu = (boost::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml))->getMu();
 }
 
 NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(double newEn, double newEt, double newMu, unsigned int newSize):
-  NonSmoothLaw(newSize), en(newEn), et(newEt), mu(newMu)
+  NonSmoothLaw(newSize), _en(newEn), _et(newEt), _mu(newMu)
 {}
 
 NewtonImpactFrictionNSL::~NewtonImpactFrictionNSL()
@@ -62,17 +62,17 @@ bool NewtonImpactFrictionNSL::isVerified() const
 void NewtonImpactFrictionNSL::display() const
 {
   cout << "=== Newton impact-friction non-smooth law data display ===" << endl;
-  cout << " Normal Newton coefficient of restitution: " << en << endl;
-  cout << " Tangential Newton coefficient of restitution: " << et << endl;
-  cout << "Friction coefficient: " << mu << endl;
+  cout << " Normal Newton coefficient of restitution: " << _en << endl;
+  cout << " Tangential Newton coefficient of restitution: " << _et << endl;
+  cout << "Friction coefficient: " << _mu << endl;
   cout << "==========================================================" << endl;
 }
 
 void NewtonImpactFrictionNSL::saveNonSmoothLawToXML()
 {
-  boost::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml)->setEn(en);
-  boost::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml)->setEt(et);
-  boost::static_pointer_cast<NewtonImpactFrictionNSLXML>(nslawxml)->setMu(mu);
+  boost::static_pointer_cast<NewtonImpactFrictionNSLXML>(_nslawxml)->setEn(_en);
+  boost::static_pointer_cast<NewtonImpactFrictionNSLXML>(_nslawxml)->setEt(_et);
+  boost::static_pointer_cast<NewtonImpactFrictionNSLXML>(_nslawxml)->setMu(_mu);
 }
 
 NewtonImpactFrictionNSL* NewtonImpactFrictionNSL::convert(NonSmoothLaw* nsl)

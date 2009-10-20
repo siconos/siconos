@@ -24,9 +24,9 @@ using namespace std;
 
 // IO Constructors -> XML
 TimeDiscretisation::TimeDiscretisation(SP::TimeDiscretisationXML tdXML, double t0, double T):
-  h(0.0), k(0), timeDiscretisationXML(tdXML), tdCase(0), pos(0)
+  h(0.0), k(0), _timeDiscretisationXML(tdXML), tdCase(0), pos(0)
 {
-  if (! timeDiscretisationXML)
+  if (! _timeDiscretisationXML)
     RuntimeException::selfThrow("TimeDiscretisation: xml constructor - TimeDiscretisationXML = NULL");
 
   // XML inputs: 3 possibilities
@@ -34,9 +34,9 @@ TimeDiscretisation::TimeDiscretisation(SP::TimeDiscretisationXML tdXML, double t
   //  - input for h
 
   // --- Check what are the given data ---
-  bool hasNSteps = timeDiscretisationXML->hasN();
-  bool hasH = timeDiscretisationXML->hasH();
-  bool hasTk = timeDiscretisationXML->hasTk();
+  bool hasNSteps = _timeDiscretisationXML->hasN();
+  bool hasH = _timeDiscretisationXML->hasH();
+  bool hasTk = _timeDiscretisationXML->hasTk();
 
   // Eliminate cases with too many inputs
   if ((hasTk && hasH) || (hasTk && hasNSteps) || (hasH && hasNSteps))
@@ -45,7 +45,7 @@ TimeDiscretisation::TimeDiscretisation(SP::TimeDiscretisationXML tdXML, double t
   // --- Read the data ---
   if (hasH) // T is useless
   {
-    h = timeDiscretisationXML->getH();
+    h = _timeDiscretisationXML->getH();
     tk.reserve(2);
     tk.push_back(t0);
     tk.push_back(t0 + h);
@@ -53,7 +53,7 @@ TimeDiscretisation::TimeDiscretisation(SP::TimeDiscretisationXML tdXML, double t
   }
   else if (hasNSteps) // t0 and T are required
   {
-    unsigned int nSteps = timeDiscretisationXML->getN();
+    unsigned int nSteps = _timeDiscretisationXML->getN();
     assert(T > t0 && "TimeDiscretisation xml constructor error: final time is less or equal to initial time.");
     h = (T - t0) / nSteps;
     tk.reserve(2);
@@ -64,7 +64,7 @@ TimeDiscretisation::TimeDiscretisation(SP::TimeDiscretisationXML tdXML, double t
   else if (hasTk) // neither t0 nor T is required.
   {
     // Read tk
-    timeDiscretisationXML->getTk(tk);
+    _timeDiscretisationXML->getTk(tk);
     h = tk[1] - tk[0];
     pos = k;
     tdCase = 1;
@@ -168,10 +168,10 @@ void TimeDiscretisation::saveTimeDiscretisationToXML()
   RuntimeException::selfThrow("TimeDiscretisation::saveTimeDiscretisationToXML -Not yet properly implemented");
 
 
-  if (timeDiscretisationXML)
+  if (_timeDiscretisationXML)
   {
-    timeDiscretisationXML->setH(h);
-    //timeDiscretisationXML->setTkNode(*tk);
+    _timeDiscretisationXML->setH(h);
+    //_timeDiscretisationXML->setTkNode(*tk);
   }
   else RuntimeException::selfThrow("TimeDiscretisation::saveTimeDiscretisationToXML - TimeDiscretisationXML object not exists");
 }

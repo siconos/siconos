@@ -28,8 +28,8 @@ using namespace std;
 
 void LagrangianR::initComponents()
 {
-  unsigned int sizeY = getInteractionPtr()->getSizeOfY();
-  unsigned int sizeDS = getInteractionPtr()->getSizeOfDS();
+  unsigned int sizeY = interaction()->getSizeOfY();
+  unsigned int sizeDS = interaction()->getSizeOfDS();
 
   // The initialization of JacH[0] depends on the way the Relation was built ie if the matrix
   // was read from xml or not
@@ -45,14 +45,14 @@ void LagrangianR::initComponents()
   }
 
   workX.reset(new SimpleVector(sizeDS));
-  workZ.reset(new SimpleVector(getInteractionPtr()->getSizeZ()));
+  workZ.reset(new SimpleVector(interaction()->getSizeZ()));
   workY.reset(new SimpleVector(sizeY));
 }
 
 void LagrangianR::initialize(SP::Interaction inter)
 {
   assert(inter && "FirstOrderR::initialize failed. No Interaction linked to the present relation.");
-  interaction = inter;
+  _interaction = inter;
 
   // Memory allocation for G[i], if required (depends on the chosen constructor).
   initComponents();
@@ -68,7 +68,7 @@ void LagrangianR::initialize(SP::Interaction inter)
   data[p2].reset(new BlockVector());
   SP::LagrangianDS lds;
   DS::TYPES type;
-  for (it = getInteractionPtr()->dynamicalSystemsBegin(); it != getInteractionPtr()->dynamicalSystemsEnd(); ++it)
+  for (it = interaction()->dynamicalSystemsBegin(); it != interaction()->dynamicalSystemsEnd(); ++it)
   {
     type = (*it)->getType();
     // check dynamical system type
@@ -77,13 +77,13 @@ void LagrangianR::initialize(SP::Interaction inter)
     // convert vDS systems into LagrangianDS and put them in vLDS
     lds = boost::static_pointer_cast<LagrangianDS> (*it);
     // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-    data[q0]->insertPtr(lds->getQPtr());
-    data[q1]->insertPtr(lds->getVelocityPtr());
-    data[q2]->insertPtr(lds->getAccelerationPtr());
-    data[p0]->insertPtr(lds->getPPtr(1));
-    data[p1]->insertPtr(lds->getPPtr(1));
-    data[p2]->insertPtr(lds->getPPtr(2));
-    data[z]->insertPtr(lds->getZPtr());
+    data[q0]->insertPtr(lds->q());
+    data[q1]->insertPtr(lds->velocity());
+    data[q2]->insertPtr(lds->acceleration());
+    data[p0]->insertPtr(lds->p(1));
+    data[p1]->insertPtr(lds->p(1));
+    data[p2]->insertPtr(lds->p(2));
+    data[z]->insertPtr(lds->z());
   }
 }
 

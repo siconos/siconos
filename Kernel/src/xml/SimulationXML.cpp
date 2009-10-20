@@ -41,7 +41,7 @@ SimulationXML::SimulationXML(xmlNodePtr rootSimulationNode): rootNode(rootSimula
   {
     // === TimeDiscretisation data loading ===
     if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, TIMEDISCRETISATION_TAG)))
-      timeDiscretisationXML.reset(new TimeDiscretisationXML(node));
+      _timeDiscretisationXML.reset(new TimeDiscretisationXML(node));
     else
       XMLException::selfThrow("SimulationXML - simulation XML constructor  ERROR : tag " + TIMEDISCRETISATION_TAG + " not found.");
 
@@ -124,19 +124,19 @@ void SimulationXML::saveSimulation2XML(xmlNodePtr  node, SP::Simulation str)
   //   if( rootNode != NULL )
   //     {
   //       // === TimeDiscretisation node ===
-  //       if( str->getTimeDiscretisationPtr()->getTimeDiscretisationXMLPtr() == NULL )
+  //       if( str->timeDiscretisation()->timeDiscretisationXML() == NULL )
   //  {
   //    node = xmlNewChild( rootNode, NULL, (xmlChar*)TIMEDISCRETISATION_TAG.c_str(), NULL );
-  //    if(str->getTimeDiscretisationPtr()->isConstant())
+  //    if(str->timeDiscretisation()->isConstant())
   //      xmlNewProp( node, (xmlChar*)TD_ISCONSTANT.c_str(), (xmlChar*)"true" );
 
   //    tdxml = new TimeDiscretisationXML();
 
   //    // linkage between the TimeDiscretisation and his TimeDiscretisationXML
-  //    str->getTimeDiscretisationPtr()->setTimeDiscretisationXMLPtr( tdxml );
+  //    str->timeDiscretisation()->setTimeDiscretisationXMLPtr( tdxml );
 
   //    // creation of the TimeDiscretisationXML
-  //    tdxml->updateTimeDiscretisationXML( node, str->getTimeDiscretisationPtr() );
+  //    tdxml->updateTimeDiscretisationXML( node, str->timeDiscretisation() );
 
   //    timeDiscretisationXML = tdxml;
   //  }
@@ -150,7 +150,7 @@ void SimulationXML::saveSimulation2XML(xmlNodePtr  node, SP::Simulation str)
   //    // creation of the OneStepIntegratorXML objects
   //    for(i=0; i < str->getOneStepIntegratorVectorSize(); i++)
   //      {
-  //        if( str->getOneStepIntegrator(i)->getOneStepIntegratorXMLPtr() == NULL )
+  //        if( str->getOneStepIntegrator(i)->oneStepIntegratorXML() == NULL )
   //    {
   //      type = str->getOneStepIntegrator(i)->getType();
   //      if (type == MOREAU_TAG)
@@ -188,24 +188,24 @@ void SimulationXML::saveSimulation2XML(xmlNodePtr  node, SP::Simulation str)
   //  XMLException::selfThrow("SimulationXML - saveSimulation2XML ERROR : LMGC90 simulation not yet implemented");
 
   //       // === OneStepNSProblemXML ===
-  //       if( str->getOneStepNSProblemPtr() != NULL )
+  //       if( str->oneStepNSProblem() != NULL )
   //  {
   //    if( !hasOneStepNSProblemXML() )
   //      node = xmlNewChild(rootNode, NULL, (xmlChar*)ONESTEPNSPROBLEM_TAG.c_str(), NULL );
 
-  //    if( str->getOneStepNSProblemPtr()->getOneStepNSProblemXML() == NULL )
+  //    if( str->oneStepNSProblem()->getOneStepNSProblemXML() == NULL )
   //      {
-  //        type = str->getOneStepNSProblemPtr()->getType();
+  //        type = str->oneStepNSProblem()->getType();
   //        if (type == LCP_TAG)
   //    {
   //      xmlNewChild( node, NULL, (xmlChar*)LCP_TAG.c_str(), NULL );
   //      osnspbxml = new LCPXML();
 
   //      // linkage between the OneStepNSProblem and his OneStepNSProblemXML
-  //      str->getOneStepNSProblemPtr()->setOneStepNSProblemXML( osnspbxml );
+  //      str->oneStepNSProblem()->setOneStepNSProblemXML( osnspbxml );
 
   //      // creation of the OneStepNSProblemXML
-  //      osnspbxml->updateOneStepNSProblemXML( node, str->getOneStepNSProblemPtr() );
+  //      osnspbxml->updateOneStepNSProblemXML( node, str->oneStepNSProblem() );
 
   //      oneStepNSProblemXML = osnspbxml;
   //    }
@@ -215,10 +215,10 @@ void SimulationXML::saveSimulation2XML(xmlNodePtr  node, SP::Simulation str)
   //      osnspbxml = new QPXML();
 
   //      // linkage between the OneStepNSProblem and his OneStepNSProblemXML
-  //      str->getOneStepNSProblemPtr()->setOneStepNSProblemXML( osnspbxml );
+  //      str->oneStepNSProblem()->setOneStepNSProblemXML( osnspbxml );
 
   //      // creation of the OneStepNSProblemXML
-  //      osnspbxml->updateOneStepNSProblemXML( node, str->getOneStepNSProblemPtr() );
+  //      osnspbxml->updateOneStepNSProblemXML( node, str->oneStepNSProblem() );
 
   //      oneStepNSProblemXML = osnspbxml;
   //    }

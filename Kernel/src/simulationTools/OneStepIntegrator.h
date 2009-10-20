@@ -233,7 +233,7 @@ public:
   /** get the Simulation that owns the OneStepIntegrator
    *  \return a pointer to Simulation
    */
-  inline SP::Simulation getSimulationPtr() const
+  inline SP::Simulation simulation() const
   {
     return simulationLink;
   }
@@ -249,7 +249,7 @@ public:
   /** get the OneStepIntegratorXML of the OneStepIntegrator
    *  \return a pointer on the OneStepIntegratorXML of the OneStepIntegrator
    */
-  inline SP::OneStepIntegratorXML getOneStepIntegratorXMLPtr() const
+  inline SP::OneStepIntegratorXML oneStepIntegratorXML() const
   {
     return integratorXml;
   }

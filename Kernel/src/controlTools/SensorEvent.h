@@ -39,7 +39,7 @@ class SensorEvent : public Event
 private:
 
   /** The sensor linked to the present event */
-  SP::Sensor sensor;
+  SP::Sensor _sensor;
 
   /** Default constructor */
   SensorEvent(): Event(0.0, 4) {};
@@ -59,9 +59,9 @@ public:
   /** get the Sensor linked to this Event
    *  \return a pointer to Sensor
    */
-  inline SP::Sensor getSensorPtr() const
+  inline SP::Sensor sensor() const
   {
-    return sensor;
+    return _sensor;
   };
 
   /** set the TimeDiscretisation linked to this Sensor
@@ -69,7 +69,7 @@ public:
    */
   void setSensorPtr(SP::Sensor newSensor)
   {
-    sensor = newSensor;
+    _sensor = newSensor;
   };
 
   /**

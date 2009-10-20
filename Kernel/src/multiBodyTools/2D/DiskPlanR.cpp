@@ -112,7 +112,7 @@ double DiskPlanR::distance(double x, double y, double rad)
 /* called compute H, but only the gap function is needed! */
 void DiskPlanR::computeH(double)
 {
-  SiconosVector *y = getInteractionPtr()->getYPtr(0).get();
+  SiconosVector *y = interaction()->y(0).get();
   double q_0 = (*data[q0])(0);
   double q_1 = (*data[q0])(1);
 

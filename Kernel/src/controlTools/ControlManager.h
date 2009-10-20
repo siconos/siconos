@@ -70,13 +70,13 @@ class ControlManager
 protected:
 
   /** A list of Sensors */
-  Sensors allSensors;
+  Sensors _allSensors;
 
   /** A list of Actuators */
-  Actuators allActuators;
+  Actuators _allActuators;
 
   /** The model linked to this ControlManager */
-  SP::Model model;
+  SP::Model _model;
 
   /** default constructor
    */
@@ -101,9 +101,9 @@ public:
   /** get the Model linked to this ControlManager
    *  \return a pointer to Model
    */
-  inline SP::Model getModelPtr() const
+  inline SP::Model model() const
   {
-    return model;
+    return _model;
   };
 
   /** get the list of Sensors associated to this manager.
@@ -111,7 +111,7 @@ public:
    */
   inline const Sensors getSensors() const
   {
-    return allSensors ;
+    return _allSensors ;
   };
 
   /** get the list of Actuators associated to this manager.
@@ -119,7 +119,7 @@ public:
    */
   inline const Actuators getActuators() const
   {
-    return allActuators ;
+    return _allActuators ;
   };
 
   /** To build and add a new Sensor in the Manager
@@ -129,9 +129,10 @@ public:
    */
   SP::Sensor addSensor(int, SP::TimeDiscretisation);
 
-  /** To build, add, initialize a new Sensor in the Manager and record it in the simulation
-   * This function is only useful to add a new Sensor after the initialization of the manager
-   * else call addSensor()
+  /** To build, add, initialize a new Sensor in the Manager and record
+   * it in the simulation This function is only useful to add a new
+   * Sensor after the initialization of the manager else call
+   * addSensor()
    * \param the type (int) of the Sensor
    * \param the TimeDiscretisation of the Sensor
    * \return a pointer to the added Sensor
@@ -145,9 +146,10 @@ public:
    */
   SP::Actuator addActuator(int, SP::TimeDiscretisation);
 
-  /** To build, add, initialize a new Actuator in the Manager and record it in the simulation
-   * This function is only useful to add a new Actuator after the initialization of the manager
-   * else call addActuator()
+  /** To build, add, initialize a new Actuator in the Manager and
+   * record it in the simulation This function is only useful to add a
+   * new Actuator after the initialization of the manager else call
+   * addActuator()
    * \param the type (int) of the Actuator
    * \param the TimeDiscretisation of the Actuator
    * \return a pointer to the added Actuator

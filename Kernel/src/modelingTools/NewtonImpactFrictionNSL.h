@@ -40,10 +40,10 @@ class NewtonImpactFrictionNSL : public NonSmoothLaw
 private:
   /*/** The Newton coefficient of restitution
    */
-  double en;
-  double et;
+  double _en;
+  double _et;
   /** friction coefficient */
-  double mu;
+  double _mu;
 
   /** default constructor
    */
@@ -82,9 +82,9 @@ public:
   /** getter of en
    *  \return the value of en
    */
-  inline const double getEn() const
+  inline const double en() const
   {
-    return en;
+    return _en;
   };
 
   /** setter of en
@@ -92,15 +92,15 @@ public:
    */
   inline void setEn(double newVal)
   {
-    en = newVal;
+    _en = newVal;
   };
 
   /** getter of et
    *  \return the value of et
    */
-  inline const double getEt() const
+  inline const double et() const
   {
-    return et;
+    return _et;
   };
 
   /** setter of et
@@ -108,15 +108,15 @@ public:
    */
   inline void setEt(double newVal)
   {
-    et = newVal;
+    _et = newVal;
   };
 
   /** getter of mu
    *  \return the value of mu
    */
-  inline const double getMu() const
+  inline const double mu() const
   {
-    return mu;
+    return _mu;
   };
 
   /** setter of mu
@@ -124,7 +124,7 @@ public:
    */
   inline void setMu(double newVal)
   {
-    mu = newVal;
+    _mu = newVal;
   };
 
   // OTHER FUNCTIONS

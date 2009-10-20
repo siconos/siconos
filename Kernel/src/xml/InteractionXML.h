@@ -130,10 +130,10 @@ public:
   /** Return the number of the Interaction (rootNode attribute)
   *   \return an int
   */
-  inline const int getNumber() const
+  inline const int number() const
   {
     if (!hasNumber())
-      XMLException::selfThrow("InteractionXML::getNumber(): number attribute is unset.");
+      XMLException::selfThrow("InteractionXML::number(): number attribute is unset.");
     return SiconosDOMTreeTools::getAttributeValue<int>(rootNode, NUMBER_ATTRIBUTE);
   }
 

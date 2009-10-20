@@ -92,7 +92,7 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(const SiconosMatrix& newC, const Sicono
 void FirstOrderLinearTIR::initialize(SP::Interaction inter)
 {
   assert(inter && "FirstOrderLinearTIR::initialize failed. No Interaction linked to the present relation.");
-  interaction = inter;
+  _interaction = inter;
 
   // Note: do not call FirstOrderR::initialize to avoid jacobianH and jacobianG allocation.
 
@@ -105,9 +105,9 @@ void FirstOrderLinearTIR::initialize(SP::Interaction inter)
 
   // Check if various operators sizes are consistent.
   // Reference: interaction.
-  unsigned int sizeY = getInteractionPtr()->getSizeOfY();
-  unsigned int sizeX = getInteractionPtr()->getSizeOfDS();
-  unsigned int sizeZ = getInteractionPtr()->getSizeZ();
+  unsigned int sizeY = interaction()->getSizeOfY();
+  unsigned int sizeX = interaction()->getSizeOfDS();
+  unsigned int sizeZ = interaction()->getSizeZ();
 
   assert((JacXH->size(0) == sizeY && JacXH->size(1) == sizeX) && "FirstOrderLinearTIR::initialize , inconsistent size between C and Interaction.");
 
@@ -143,8 +143,8 @@ void FirstOrderLinearTIR::computeOutput(double time, unsigned int)
   // y[0]
 
   // We get y and lambda of the interaction (pointers)
-  SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
-  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(0);
+  SP::SiconosVector y = interaction()->y(0);
+  SP::SiconosVector lambda = interaction()->lambda(0);
 
   // compute y
   if (JacXH)
@@ -165,7 +165,7 @@ void FirstOrderLinearTIR::computeOutput(double time, unsigned int)
 void FirstOrderLinearTIR::computeInput(double time, unsigned int level)
 {
   // We get lambda of the interaction (pointers)
-  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(level);
+  SP::SiconosVector lambda = interaction()->lambda(level);
   prod(*JacLG, *lambda, *data[r], false);
 }
 

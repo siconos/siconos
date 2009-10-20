@@ -38,7 +38,7 @@ extern "C" void computeA(unsigned int *sizeOfA, double* APtr, const double *time
 
 }
 
-extern "C" void computeB(unsigned int *sizeOfB, double* b, const double *time)
+extern "C" void computeb(unsigned int *sizeOfB, double* b, const double *time)
 {
   /* input parameter : time
    * output parameter : sizeOfB (size of the vector b); b (pointer to b vector)

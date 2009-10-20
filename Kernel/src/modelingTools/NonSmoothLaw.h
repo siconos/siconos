@@ -46,13 +46,13 @@ class NonSmoothLaw
 protected:
 
   /** type of the NonSmoothLaw */
-  std::string nsLawType;
+  std::string _nsLawType;
 
   /** "size" of the NonSmoothLaw */
-  unsigned int size;
+  unsigned int _size;
 
   /** the XML pbject linked to the NonSmoothLaw to read XML data */
-  SP::NonSmoothLawXML nslawxml;
+  SP::NonSmoothLawXML _nslawxml;
 
   /** default constructor
    */
@@ -90,9 +90,9 @@ public:
   /** get the NonSmoothLawXML of the NonSmoothLaw
   *  \return the pointer on the NonSmoothLawXML of the NonSmoothLaw
   */
-  inline SP::NonSmoothLawXML getNonSmoothLawXML()
+  inline SP::NonSmoothLawXML xml()
   {
-    return nslawxml;
+    return _nslawxml;
   }
 
   /** set the NonSmoothLawXML of the NonSmoothLaw
@@ -100,23 +100,23 @@ public:
   */
   inline void setNonSmoothLawXML(SP::NonSmoothLawXML newNslawxml)
   {
-    nslawxml = newNslawxml;
+    _nslawxml = newNslawxml;
   }
 
   /** to get the size
   *  \return an unsigned int
   */
-  inline const unsigned int getNsLawSize() const
+  inline const unsigned int size() const
   {
-    return size;
+    return _size;
   }
 
   /** set the size of the nsLaw
   *  \param an unsigned int
   */
-  inline void setNsLawSize(unsigned int newVal)
+  inline void setSize(unsigned int newVal)
   {
-    size = newVal;
+    _size = newVal;
   }
 
   /** copy the data of the NonSmoothLaw to the XML tree

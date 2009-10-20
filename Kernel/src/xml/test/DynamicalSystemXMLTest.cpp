@@ -68,7 +68,7 @@ void DynamicalSystemXMLTest::tearDown()
 
 void DynamicalSystemXMLTest::testGetNumber()
 {
-  CPPUNIT_ASSERT_MESSAGE("testGetNumber : ", ds.getNumber() == 120);
+  CPPUNIT_ASSERT_MESSAGE("testGetNumber : ", ds.number() == 120);
   cout << "DynamicalSystemXMLTest >>> testGetNumber ............................ OK\n ";
 }
 

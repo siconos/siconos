@@ -33,9 +33,9 @@ bool BallBowl()
     bouncingBall->initialize();
 
     // --- Get and initialize the simulation ---
-    SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(bouncingBall->getSimulationPtr());
+    SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(bouncingBall->simulation());
     // --- Get the time discretisation scheme ---
-    SP::TimeDiscretisation t = s->getTimeDiscretisationPtr();
+    SP::TimeDiscretisation t = s->timeDiscretisation();
     int k = 0; // Current step
     SP::SiconosMatrix dataRef(new SimpleMatrix("refBallBowl.dat", true));
     int N = dataRef->size(0);
@@ -45,10 +45,10 @@ bool BallBowl()
     // time
     dataPlot(k, 0) =  bouncingBall->getT0();
     // state q for the first dynamical system (ball)
-    SP::LagrangianDS ball = boost::static_pointer_cast<LagrangianDS> (bouncingBall->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(1));
-    SP::SiconosVector q = ball->getQPtr();
-    SP::SiconosVector v = ball->getVelocityPtr();
-    SP::SiconosVector p = ball->getPPtr(2);
+    SP::LagrangianDS ball = boost::static_pointer_cast<LagrangianDS> (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystemNumber(1));
+    SP::SiconosVector q = ball->q();
+    SP::SiconosVector v = ball->velocity();
+    SP::SiconosVector p = ball->p(2);
 
     dataPlot(k, 1) = (*q)(0);
     dataPlot(k, 2) = (*v)(0);

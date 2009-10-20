@@ -100,11 +100,11 @@ int main(int argc, char* argv[])
     lds1->display();
 
     // set with plugins
-    lds1->setComputeBFunction("LDSPlugin.so", "computeB");
+    lds1->setComputeBFunction("LDSPlugin.so", "computeb");
     lds1->setComputeUFunction("LDSPlugin.so", "computeU");
     lds1->setComputeEFunction("LDSPlugin.so", "computeE");
 
-    lds1->computeB(3);
+    lds1->computeb(3);
     lds1->computeU(2);
     lds1->computeE(2);
 
@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
 
     lds1.reset(new FirstOrderLinearDS(tmpxml));
     lds1->computeE(3);
-    lds1->computeB(2);
+    lds1->computeb(2);
 
     lds1->display();
 

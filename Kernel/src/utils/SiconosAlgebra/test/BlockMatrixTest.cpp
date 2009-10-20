@@ -77,14 +77,14 @@ void BlockMatrixTest::testConstructor0() // constructor with a vector of SP::Sic
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->isBlock() == true, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->size(0) == 5 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->size(1) == 7, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->getBlockPtr(0, 0) == B, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->getBlockPtr(0, 1) == C, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->getBlockPtr(0, 2) == D, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->getBlockPtr(1, 0) == E, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->getBlockPtr(1, 1) == F, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->getBlockPtr(1, 2) == G, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", *test->getTabRowPtr() == tRow, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", *test->getTabColPtr() == tCol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->block(0, 0) == B, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->block(0, 1) == C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->block(0, 2) == D, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->block(1, 0) == E, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->block(1, 1) == F, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->block(1, 2) == G, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", *test->tabRow() == tRow, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", *test->tabCol() == tCol, true);
   cout << "--> Constructor 0 test ended with success." << endl;
 }
 
@@ -96,14 +96,14 @@ void BlockMatrixTest::testConstructor1() // Copy constructor, from a BlockMatrix
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", test->isBlock() == true, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", test->size(0) == 5 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", test->size(1) == 7, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *(test->getBlockPtr(0, 0)) == *B, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *(test->getBlockPtr(0, 1)) == *C, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *(test->getBlockPtr(0, 2)) == *D, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *(test->getBlockPtr(1, 0)) == *E, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *(test->getBlockPtr(1, 1)) == *F, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *(test->getBlockPtr(1, 2)) == *G, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *test->getTabRowPtr() == tRow, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *test->getTabColPtr() == tCol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *(test->block(0, 0)) == *B, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *(test->block(0, 1)) == *C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *(test->block(0, 2)) == *D, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *(test->block(1, 0)) == *E, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *(test->block(1, 1)) == *F, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *(test->block(1, 2)) == *G, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *test->tabRow() == tRow, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *test->tabCol() == tCol, true);
   cout << "--> Constructor 1(copy) test ended with success." << endl;
 }
 
@@ -115,14 +115,14 @@ void BlockMatrixTest::testConstructor2() // Copy constructor, from a SiconosMatr
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", test->isBlock() == true, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", test->size(0) == 5 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", test->size(1) == 7, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *(test->getBlockPtr(0, 0)) == *B, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *(test->getBlockPtr(0, 1)) == *C, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *(test->getBlockPtr(0, 2)) == *D, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *(test->getBlockPtr(1, 0)) == *E, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *(test->getBlockPtr(1, 1)) == *F, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *(test->getBlockPtr(1, 2)) == *G, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *test->getTabRowPtr() == tRow, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *test->getTabColPtr() == tCol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *(test->block(0, 0)) == *B, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *(test->block(0, 1)) == *C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *(test->block(0, 2)) == *D, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *(test->block(1, 0)) == *E, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *(test->block(1, 1)) == *F, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *(test->block(1, 2)) == *G, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *test->tabRow() == tRow, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *test->tabCol() == tCol, true);
 
   cout << "--> Constructor 2(copy) test ended with success." << endl;
 }
@@ -138,11 +138,11 @@ void BlockMatrixTest::testConstructor3() // Copy constructor, from a SiconosMatr
   for (unsigned int i = 0; i < 5; ++i)
     for (unsigned int j = 0; j < 7; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", fabs((*test)(i, j) - 2.3) < tol, true);
-  SPC::Index tab = test->getTabRowPtr();
+  SPC::Index tab = test->tabRow();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", tab->size() == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", (*tab)[0] == 5, true);
 
-  tab = test->getTabColPtr();
+  tab = test->tabCol();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", tab->size() == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", (*tab)[0] == 7, true);
 
@@ -156,15 +156,15 @@ void BlockMatrixTest::testConstructor4() // Constructor from 4 SP::SiconosMatrix
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->isBlock() == true, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->size(0) == 5 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->size(1) == 6, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->getBlockPtr(0, 0) == B, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->getBlockPtr(0, 1) == C, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->getBlockPtr(1, 0) == E, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->getBlockPtr(1, 1) == F, true);
-  SPC::Index tab = test->getTabRowPtr();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->block(0, 0) == B, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->block(0, 1) == C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->block(1, 0) == E, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->block(1, 1) == F, true);
+  SPC::Index tab = test->tabRow();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", tab->size() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", (*tab)[0] == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", (*tab)[1] == 5, true);
-  tab = test->getTabColPtr();
+  tab = test->tabCol();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", tab->size() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", (*tab)[0] == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", (*tab)[1] == 6, true);
@@ -186,18 +186,18 @@ void BlockMatrixTest::testConstructor4() // Constructor from 4 SP::SiconosMatrix
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->isBlock() == true);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->size(0) == 7, true);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->size(1) == 11, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->getBlockPtr(0,0) == B, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->getBlockPtr(0,1) == C, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->getBlockPtr(0,2) == D, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->getBlockPtr(0,3) == C, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->getBlockPtr(1,0) == E, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->getBlockPtr(1,1) == F, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->getBlockPtr(1,2) == G, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->getBlockPtr(1,3) == F, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->getBlockPtr(2,0) == B, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->getBlockPtr(2,1) == C, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->getBlockPtr(2,2) == D, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->getBlockPtr(2,3) == C, true);
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->block(0,0) == B, true);
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->block(0,1) == C, true);
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->block(0,2) == D, true);
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->block(0,3) == C, true);
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->block(1,0) == E, true);
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->block(1,1) == F, true);
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->block(1,2) == G, true);
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->block(1,3) == F, true);
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->block(2,0) == B, true);
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->block(2,1) == C, true);
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->block(2,2) == D, true);
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->block(2,3) == C, true);
 
 //   cout << "--> resize test ended with success." << endl;
 // }

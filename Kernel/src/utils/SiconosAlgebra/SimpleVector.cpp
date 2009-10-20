@@ -91,14 +91,14 @@ SimpleVector::SimpleVector(const SimpleVector &svect): SiconosVector(svect.getNu
   if (num == 1) // dense
   {
     vect.Dense = new DenseVect(svect.size());
-    noalias(*vect.Dense) = (*svect.getDensePtr());
-    // std::copy((vect.Dense)->begin(), (vect.Dense)->end(), (svect.getDensePtr())->begin());
+    noalias(*vect.Dense) = (*svect.dense());
+    // std::copy((vect.Dense)->begin(), (vect.Dense)->end(), (svect.dense())->begin());
   }
   else //sparse
   {
     vect.Sparse = new SparseVect(svect.size());
-    noalias(*vect.Sparse) = (*svect.getSparsePtr());
-    //std::copy((vect.Sparse)->begin(), (vect.Sparse)->end(), (svect.getSparsePtr())->begin());
+    noalias(*vect.Sparse) = (*svect.sparse());
+    //std::copy((vect.Sparse)->begin(), (vect.Sparse)->end(), (svect.sparse())->begin());
   }
 
   // Note FP: using constructor + noalias = (or std::copy) is more efficient than a call to ublas::vector copy constructor,
@@ -126,14 +126,14 @@ SimpleVector::SimpleVector(const SiconosVector &v): SiconosVector(1, v.size()) /
   {
     // num = 1; default value
     vect.Dense = new DenseVect(v.size());
-    noalias(*vect.Dense) = (*v.getDensePtr());
-    //std::copy((v.getDensePtr())->begin(), (v.getDensePtr())->end(), (vect.Dense)->begin());
+    noalias(*vect.Dense) = (*v.dense());
+    //std::copy((v.dense())->begin(), (v.dense())->end(), (vect.Dense)->begin());
   }
   else // sparse
   {
     num = 4;
     vect.Sparse = new SparseVect(v.size());
-    std::copy((v.getSparsePtr())->begin(), (v.getSparsePtr())->end(), (vect.Sparse)->begin());
+    std::copy((v.sparse())->begin(), (v.sparse())->end(), (vect.Sparse)->begin());
   }
 }
 
@@ -198,11 +198,11 @@ const SparseVect SimpleVector::getSparse(unsigned int)const
   return *vect.Sparse;
 }
 
-SparseVect* SimpleVector::getSparsePtr(unsigned int)const
+SparseVect* SimpleVector::sparse(unsigned int)const
 {
 
   if (num != 4)
-    SiconosVectorException::selfThrow("SimpleVector::getSparsePtr(unsigned int row, unsigned int col) : the current vector is not a Sparse vector");
+    SiconosVectorException::selfThrow("SimpleVector::sparse(unsigned int row, unsigned int col) : the current vector is not a Sparse vector");
 
   return vect.Sparse;
 }
@@ -395,9 +395,9 @@ void SimpleVector::setBlock(unsigned int index, const SiconosVector& vIn)
     if (numVin != num) SiconosVectorException::selfThrow("SimpleVector::setBlock: inconsistent types.");
 
     if (num == 1)
-      noalias(ublas::subrange(*vect.Dense, index, end)) = *vIn.getDensePtr();
+      noalias(ublas::subrange(*vect.Dense, index, end)) = *vIn.dense();
     else
-      noalias(ublas::subrange(*vect.Sparse, index, end)) = *vIn.getSparsePtr();
+      noalias(ublas::subrange(*vect.Sparse, index, end)) = *vIn.sparse();
   }
 }
 
@@ -435,7 +435,7 @@ void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int siz
     {
       // We look for the block of vOut that include index startOut
       unsigned int blockOutStart = 0;
-      const SP::Index tabOut = vOut->getTabIndexPtr();
+      const SP::Index tabOut = vOut->tabIndex();
       while (startOut >= (*tabOut)[blockOutStart] && blockOutStart < tabOut->size())
         blockOutStart ++;
       // Relative position in the block blockOutStart.
@@ -452,13 +452,13 @@ void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int siz
 
       if (blockOutEnd == blockOutStart) //
       {
-        setBlock(vIn, vOut->getVectorPtr(blockOutStart), sizeB, startIn, posOut);
+        setBlock(vIn, vOut->vector(blockOutStart), sizeB, startIn, posOut);
       }
       else // More that one block of vOut are concerned
       {
 
         // The current considered block ...
-        SP::SiconosVector currentBlock = vOut->getVectorPtr(blockOutStart);
+        SP::SiconosVector currentBlock = vOut->vector(blockOutStart);
 
         // Size of the subBlock of vOut to be set.
         unsigned int subSizeB = currentBlock->size() - posOut;
@@ -473,13 +473,13 @@ void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int siz
         while (currentBlockNum != blockOutEnd)
         {
           posIn += subSizeB;
-          currentBlock =  vOut->getVectorPtr(currentBlockNum);
+          currentBlock =  vOut->vector(currentBlockNum);
           subSizeB = currentBlock->size();
           setBlock(vIn, currentBlock, subSizeB, posIn, 0);
           currentBlockNum++;
         }
         // set last subBlock ...
-        currentBlock =  vOut->getVectorPtr(blockOutEnd);
+        currentBlock =  vOut->vector(blockOutEnd);
 
         posIn += subSizeB;
 
@@ -494,7 +494,7 @@ void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int siz
 
       // We look for the block of vIn that include index startIn
       unsigned int blockInStart = 0;
-      const SP::Index tabIn = vIn.getTabIndexPtr();
+      const SP::Index tabIn = vIn.tabIndex();
       while (startIn >= (*tabIn)[blockInStart] && blockInStart < tabIn->size())
         blockInStart ++;
       // Relative position in the block blockInStart.
@@ -511,13 +511,13 @@ void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int siz
 
       if (blockInEnd == blockInStart) //
       {
-        setBlock(*vIn.getVectorPtr(blockInStart), vOut, sizeB, posIn, startOut);
+        setBlock(*vIn.vector(blockInStart), vOut, sizeB, posIn, startOut);
       }
       else // More that one block of vIn are concerned
       {
 
         // The current considered block ...
-        SPC::SiconosVector currentBlock = vIn.getVectorPtr(blockInStart);
+        SPC::SiconosVector currentBlock = vIn.vector(blockInStart);
 
         // Size of the subBlock of vIn to be set.
         unsigned int subSizeB = currentBlock->size() - posIn;
@@ -532,13 +532,13 @@ void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int siz
         while (currentBlockNum != blockInEnd)
         {
           posOut += subSizeB;
-          currentBlock =  vIn.getVectorPtr(currentBlockNum);
+          currentBlock =  vIn.vector(currentBlockNum);
           subSizeB = currentBlock->size();
           setBlock(*currentBlock, vOut, subSizeB, 0, posOut);
           currentBlockNum++;
         }
         // set last subBlock ...
-        currentBlock =  vIn.getVectorPtr(blockInEnd);
+        currentBlock =  vIn.vector(blockInEnd);
 
         posOut += subSizeB;
 
@@ -554,16 +554,16 @@ void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int siz
       if (numIn == numOut)
       {
         if (numIn == 1) // vIn / vOut are Dense
-          noalias(ublas::subrange(*vOut->getDensePtr(), startOut, endOut)) = ublas::subrange(*vIn.getDensePtr(), startIn, startIn + sizeB);
+          noalias(ublas::subrange(*vOut->dense(), startOut, endOut)) = ublas::subrange(*vIn.dense(), startIn, startIn + sizeB);
         else // if(numIn == 4)// vIn / vOut are Sparse
-          noalias(ublas::subrange(*vOut->getSparsePtr(), startOut, endOut)) = ublas::subrange(*vIn.getSparsePtr(), startIn, startIn + sizeB);
+          noalias(ublas::subrange(*vOut->sparse(), startOut, endOut)) = ublas::subrange(*vIn.sparse(), startIn, startIn + sizeB);
       }
       else // vIn and vout of different types ...
       {
         if (numIn == 1) // vIn Dense
-          noalias(ublas::subrange(*vOut->getSparsePtr(), startOut, endOut)) = ublas::subrange(*vIn.getDensePtr(), startIn, startIn + sizeB);
+          noalias(ublas::subrange(*vOut->sparse(), startOut, endOut)) = ublas::subrange(*vIn.dense(), startIn, startIn + sizeB);
         else // if(numIn == 4)// vIn Sparse
-          noalias(ublas::subrange(*vOut->getDensePtr(), startOut, endOut)) = ublas::subrange(*vIn.getSparsePtr(), startIn, startIn + sizeB);
+          noalias(ublas::subrange(*vOut->dense(), startOut, endOut)) = ublas::subrange(*vIn.sparse(), startIn, startIn + sizeB);
       }
     }
   }
@@ -598,9 +598,9 @@ void SimpleVector::addBlock(unsigned int index, const SiconosVector& vIn)
     if (numVin != num) SiconosVectorException::selfThrow("SimpleVector::addBlock : inconsistent types.");
 
     if (num == 1)
-      noalias(ublas::subrange(*vect.Dense, index, index + end)) += *vIn.getDensePtr();
+      noalias(ublas::subrange(*vect.Dense, index, index + end)) += *vIn.dense();
     else
-      noalias(ublas::subrange(*vect.Sparse, index, index + end)) += *vIn.getSparsePtr();
+      noalias(ublas::subrange(*vect.Sparse, index, index + end)) += *vIn.sparse();
   }
 }
 
@@ -630,9 +630,9 @@ void SimpleVector::subBlock(unsigned int index, const SiconosVector& vIn)
     if (numVin != num) SiconosVectorException::selfThrow("SimpleVector::subBlock : inconsistent types.");
 
     if (num == 1)
-      noalias(ublas::subrange(*vect.Dense, index, index + end)) -= *vIn.getDensePtr();
+      noalias(ublas::subrange(*vect.Dense, index, index + end)) -= *vIn.dense();
     else
-      noalias(ublas::subrange(*vect.Sparse, index, index + end)) -= *vIn.getSparsePtr();
+      noalias(ublas::subrange(*vect.Sparse, index, index + end)) -= *vIn.sparse();
   }
 }
 
@@ -667,11 +667,11 @@ SimpleVector& SimpleVector::operator = (const SiconosVector& vIn)
       switch (vInNum)
       {
       case 1:
-        //atlas::copy(*vIn.getDensePtr(),*vect.Dense);
-        noalias(*vect.Dense) = *vIn.getDensePtr();
+        //atlas::copy(*vIn.dense(),*vect.Dense);
+        noalias(*vect.Dense) = *vIn.dense();
         break;
       case 4:
-        noalias(*vect.Dense) = *vIn.getSparsePtr();
+        noalias(*vect.Dense) = *vIn.sparse();
         break;
       default:
         SiconosVectorException::selfThrow("SimpleVector::operator = : invalid type given");
@@ -680,7 +680,7 @@ SimpleVector& SimpleVector::operator = (const SiconosVector& vIn)
       break;
     case 4:
       if (vInNum == 4)
-        noalias(*vect.Sparse) = *vIn.getSparsePtr();
+        noalias(*vect.Sparse) = *vIn.sparse();
       else
         SiconosVectorException::selfThrow("SimpleVector::operator = : can not set sparse = dense.");
       break;
@@ -706,12 +706,12 @@ SimpleVector& SimpleVector::operator = (const SimpleVector& vIn)
     switch (vInNum)
     {
     case 1:
-      //atlas::copy(*vIn.getDensePtr(),*vect.Dense);
-      noalias(*vect.Dense) = *vIn.getDensePtr();
+      //atlas::copy(*vIn.dense(),*vect.Dense);
+      noalias(*vect.Dense) = *vIn.dense();
 
       break;
     case 4:
-      noalias(*vect.Dense) = *vIn.getSparsePtr();
+      noalias(*vect.Dense) = *vIn.sparse();
       break;
     default:
       SiconosVectorException::selfThrow("SimpleVector::operator = : invalid type given");
@@ -720,7 +720,7 @@ SimpleVector& SimpleVector::operator = (const SimpleVector& vIn)
     break;
   case 4:
     if (vInNum == 4)
-      noalias(*vect.Sparse) = *vIn.getSparsePtr();
+      noalias(*vect.Sparse) = *vIn.sparse();
     else
       SiconosVectorException::selfThrow("SimpleVector::operator = : can not set sparse = dense.");
     break;
@@ -797,10 +797,10 @@ SimpleVector& SimpleVector::operator += (const SiconosVector& vIn)
       switch (vInNum)
       {
       case 1:
-        noalias(*vect.Dense) += *vIn.getDensePtr();
+        noalias(*vect.Dense) += *vIn.dense();
         break;
       case 4:
-        noalias(*vect.Dense) += *vIn.getSparsePtr();
+        noalias(*vect.Dense) += *vIn.sparse();
         break;
       default:
         SiconosVectorException::selfThrow("SimpleVector::operator += : invalid type given");
@@ -809,7 +809,7 @@ SimpleVector& SimpleVector::operator += (const SiconosVector& vIn)
       break;
     case 4:
       if (vInNum == 4)
-        noalias(*vect.Sparse) += *vIn.getSparsePtr();
+        noalias(*vect.Sparse) += *vIn.sparse();
       else SiconosVectorException::selfThrow("SimpleVector::operator += : can not add a dense to a sparse.");
       break;
     default:
@@ -851,10 +851,10 @@ SimpleVector& SimpleVector::operator -= (const SiconosVector& vIn)
       switch (vInNum)
       {
       case 1:
-        noalias(*vect.Dense) -= *vIn.getDensePtr();
+        noalias(*vect.Dense) -= *vIn.dense();
         break;
       case 4:
-        noalias(*vect.Dense) -= *vIn.getSparsePtr();
+        noalias(*vect.Dense) -= *vIn.sparse();
         break;
       default:
         SiconosVectorException::selfThrow("SimpleVector::operator -= : invalid type given");
@@ -863,7 +863,7 @@ SimpleVector& SimpleVector::operator -= (const SiconosVector& vIn)
       break;
     case 4:
       if (vInNum == 4)
-        noalias(*vect.Sparse) -= *vIn.getSparsePtr();
+        noalias(*vect.Sparse) -= *vIn.sparse();
       else SiconosVectorException::selfThrow("SimpleVector::operator -= : can not sub a dense to a sparse.");
       break;
     default:
@@ -901,13 +901,13 @@ SimpleVector operator * (const  SiconosVector&m, double d)
   else if (numM == 1)
   {
     // Copy m into p and call atlas::scal(d,p), p = d*p.
-    DenseVect p = *m.getDensePtr();
+    DenseVect p = *m.dense();
     atlas::scal(d, p);
     return p;
   }
   else// if(numM==4)
   {
-    return (SparseVect)(*m.getSparsePtr() * d);
+    return (SparseVect)(*m.sparse() * d);
   }
 }
 
@@ -924,13 +924,13 @@ SimpleVector operator * (double d, const  SiconosVector&m)
   else if (numM == 1)
   {
     // Copy m into p and call atlas::scal(d,p), p = d*p.
-    DenseVect p = *m.getDensePtr();
+    DenseVect p = *m.dense();
     atlas::scal(d, p);
     return p;
   }
   else// if(numM==4)
   {
-    return (SparseVect)(*m.getSparsePtr() * d);
+    return (SparseVect)(*m.sparse() * d);
   }
 }
 
@@ -947,13 +947,13 @@ SimpleVector operator / (const SimpleVector &m, double d)
 
   else if (numM == 1)
   {
-    DenseVect p = *m.getDensePtr();
+    DenseVect p = *m.dense();
     atlas::scal((1.0 / d), p);
     return p;
   }
 
   else// if(numM==4){
-    return (SparseVect)(*m.getSparsePtr() / d);
+    return (SparseVect)(*m.sparse() / d);
 }
 
 //====================
@@ -972,20 +972,20 @@ SimpleVector operator + (const  SiconosVector& x, const  SiconosVector& y)
   {
     if (numX == 1)
     {
-      //    atlas::xpy(*x.getDensePtr(),p);
+      //    atlas::xpy(*x.dense(),p);
       //    return p;
-      return (DenseVect)(*x.getDensePtr() + *y.getDensePtr());
+      return (DenseVect)(*x.dense() + *y.dense());
     }
     else
-      return (SparseVect)(*x.getSparsePtr() + *y.getSparsePtr());
+      return (SparseVect)(*x.sparse() + *y.sparse());
   }
 
   else if (numX != 0 && numY != 0  && numX != numY) // x, y SimpleVector with y and x of different types
   {
     if (numX == 1)
-      return (DenseVect)(*x.getDensePtr() + *y.getSparsePtr());
+      return (DenseVect)(*x.dense() + *y.sparse());
     else
-      return (DenseVect)(*x.getSparsePtr() + *y.getDensePtr());
+      return (DenseVect)(*x.sparse() + *y.dense());
   }
 
   else if (numX == 0) // if x is block and y simple or block
@@ -1033,14 +1033,14 @@ void add(const SiconosVector& x, const SiconosVector& y, SiconosVector& z)
         {
           if (numZ != 1)
             SiconosVectorException::selfThrow("SiconosVector addition, add(x,y,z) failed - Addition of two dense vectors into a sparse.");
-          noalias(*z.getDensePtr()) = *x.getDensePtr() + *y.getDensePtr() ;
+          noalias(*z.dense()) = *x.dense() + *y.dense() ;
         }
         else
         {
           if (numZ == 1)
-            noalias(*z.getDensePtr()) = *x.getSparsePtr() + *y.getSparsePtr() ;
+            noalias(*z.dense()) = *x.sparse() + *y.sparse() ;
           else
-            noalias(*z.getSparsePtr()) = *x.getSparsePtr() + *y.getSparsePtr() ;
+            noalias(*z.sparse()) = *x.sparse() + *y.sparse() ;
         }
       }
       else if (numX != 0 && numY != 0) // x and y of different types => z must be dense.
@@ -1048,9 +1048,9 @@ void add(const SiconosVector& x, const SiconosVector& y, SiconosVector& z)
         if (numZ != 1)
           SiconosVectorException::selfThrow("SiconosVector addition, add(x,y,z) failed - z can not be sparse.");
         if (numX == 1)
-          noalias(*z.getDensePtr()) = *x.getDensePtr() + *y.getSparsePtr();
+          noalias(*z.dense()) = *x.dense() + *y.sparse();
         else
-          noalias(*z.getDensePtr()) = *x.getSparsePtr() + *y.getDensePtr() ;
+          noalias(*z.dense()) = *x.sparse() + *y.dense() ;
       }
       else if (numX == 0) // y simple or block
       {
@@ -1095,20 +1095,20 @@ SimpleVector operator - (const  SiconosVector& x, const  SiconosVector& y)
   {
     if (numX == 1)
     {
-      //    atlas::xpy(*x.getDensePtr(),p);
+      //    atlas::xpy(*x.dense(),p);
       //    return p;
-      return (DenseVect)(*x.getDensePtr() - *y.getDensePtr());
+      return (DenseVect)(*x.dense() - *y.dense());
     }
     else
-      return (SparseVect)(*x.getSparsePtr() - *y.getSparsePtr());
+      return (SparseVect)(*x.sparse() - *y.sparse());
   }
 
   else if (numX != 0 && numY != 0  && numX != numY) // x, y SimpleVector with y and x of different types
   {
     if (numX == 1)
-      return (DenseVect)(*x.getDensePtr() - *y.getSparsePtr());
+      return (DenseVect)(*x.dense() - *y.sparse());
     else
-      return (DenseVect)(*x.getSparsePtr() - *y.getDensePtr());
+      return (DenseVect)(*x.sparse() - *y.dense());
   }
 
   else // if y OR x is block
@@ -1147,14 +1147,14 @@ void sub(const SiconosVector& x, const SiconosVector& y, SiconosVector& z)
       {
         if (numZ != 1)
           SiconosVectorException::selfThrow("SiconosVector subtraction, sub(x,y,z) failed - Subtraction of two dense vectors into a sparse.");
-        *z.getDensePtr() = *x.getDensePtr() - *y.getDensePtr() ;
+        *z.dense() = *x.dense() - *y.dense() ;
       }
       else
       {
         if (numZ == 1)
-          *z.getDensePtr() = *x.getSparsePtr() - *y.getDensePtr() ;
+          *z.dense() = *x.sparse() - *y.dense() ;
         else
-          *z.getSparsePtr() = *x.getSparsePtr() - *y.getSparsePtr() ;
+          *z.sparse() = *x.sparse() - *y.sparse() ;
       }
     }
   }
@@ -1169,14 +1169,14 @@ void sub(const SiconosVector& x, const SiconosVector& y, SiconosVector& z)
         {
           if (numZ != 1)
             SiconosVectorException::selfThrow("SiconosVector addition, sub(x,y,z) failed - Addition of two dense vectors into a sparse.");
-          noalias(*z.getDensePtr()) = *x.getDensePtr() - *y.getDensePtr() ;
+          noalias(*z.dense()) = *x.dense() - *y.dense() ;
         }
         else
         {
           if (numZ == 1)
-            noalias(*z.getDensePtr()) = *x.getSparsePtr() - *y.getSparsePtr() ;
+            noalias(*z.dense()) = *x.sparse() - *y.sparse() ;
           else
-            noalias(*z.getSparsePtr()) = *x.getSparsePtr() - *y.getSparsePtr() ;
+            noalias(*z.sparse()) = *x.sparse() - *y.sparse() ;
         }
       }
       else if (numX != 0 && numY != 0) // x and y of different types => z must be dense.
@@ -1184,9 +1184,9 @@ void sub(const SiconosVector& x, const SiconosVector& y, SiconosVector& z)
         if (numZ != 1)
           SiconosVectorException::selfThrow("SiconosVector addition, sub(x,y,z) failed - z can not be sparse.");
         if (numX == 1)
-          noalias(*z.getDensePtr()) = *x.getDensePtr() - *y.getSparsePtr();
+          noalias(*z.dense()) = *x.dense() - *y.sparse();
         else
-          noalias(*z.getDensePtr()) = *x.getSparsePtr() - *y.getDensePtr() ;
+          noalias(*z.dense()) = *x.sparse() - *y.dense() ;
       }
       else // x simple, y block
       {
@@ -1215,7 +1215,7 @@ void axpby(double a, const SiconosVector& x, double b, SiconosVector& y)
   if (numX == numY) // x and y of the same type
   {
     if (numX == 1) // all dense
-      atlas::axpby(a, *x.getDensePtr(), b, *y.getDensePtr());
+      atlas::axpby(a, *x.dense(), b, *y.dense());
 
     else if (numX == 0) // ie if x and y are block
     {
@@ -1238,11 +1238,11 @@ void axpby(double a, const SiconosVector& x, double b, SiconosVector& y)
 
     else // all sparse
     {
-      *y.getSparsePtr() *= b;
+      *y.sparse() *= b;
       if (&y != &x)
-        noalias(*y.getSparsePtr()) += a**x.getSparsePtr();
+        noalias(*y.sparse()) += a**x.sparse();
       else
-        *y.getSparsePtr() += a**x.getSparsePtr();
+        *y.sparse() += a**x.sparse();
     }
   }
 
@@ -1259,16 +1259,16 @@ void axpby(double a, const SiconosVector& x, double b, SiconosVector& y)
     {
       SimpleVector tmp(x);
       if (numY == 1)
-        atlas::axpy(a, *tmp.getDensePtr(), *y.getDensePtr());
+        atlas::axpy(a, *tmp.dense(), *y.dense());
       else
         SiconosVectorException::selfThrow("axpby failed: try to add block to sparse vector.");
     }
     else // x and y simple but of different types
     {
       if (numX == 1)
-        *y.getSparsePtr() += a**x.getDensePtr();
+        *y.sparse() += a**x.dense();
       else
-        *y.getDensePtr() +=  a**x.getSparsePtr();
+        *y.dense() +=  a**x.sparse();
     }
   }
 }
@@ -1286,7 +1286,7 @@ void axpy(double a, const SiconosVector& x, SiconosVector& y)
   if (numX == numY) // x and y of the same type
   {
     if (numX == 1) // all dense
-      atlas::axpy(a, *x.getDensePtr(), *y.getDensePtr());
+      atlas::axpy(a, *x.dense(), *y.dense());
 
     else if (numX == 0) // ie if x and y are block
     {
@@ -1309,9 +1309,9 @@ void axpy(double a, const SiconosVector& x, SiconosVector& y)
     else // all sparse
     {
       if (&y != &x)
-        noalias(*y.getSparsePtr()) += a**x.getSparsePtr();
+        noalias(*y.sparse()) += a**x.sparse();
       else
-        *y.getSparsePtr() += a**x.getSparsePtr();
+        *y.sparse() += a**x.sparse();
     }
   }
 
@@ -1327,16 +1327,16 @@ void axpy(double a, const SiconosVector& x, SiconosVector& y)
     {
       SimpleVector tmp(x);
       if (numY == 1)
-        atlas::axpy(a, *tmp.getDensePtr(), *y.getDensePtr());
+        atlas::axpy(a, *tmp.dense(), *y.dense());
       else
         SiconosVectorException::selfThrow("axpby failed: try to add block to sparse vector.");
     }
     else // x and y simple but of different types
     {
       if (numX == 1)
-        *y.getSparsePtr() += a**x.getDensePtr();
+        *y.sparse() += a**x.dense();
       else
-        *y.getDensePtr() +=  a**x.getSparsePtr();
+        *y.dense() +=  a**x.sparse();
     }
   }
 }
@@ -1355,14 +1355,14 @@ const double inner_prod(const SiconosVector &x, const SiconosVector &m)
   if (numX == numM)
   {
     if (numM == 1)
-      return atlas::dot(*x.getDensePtr(), *m.getDensePtr());
+      return atlas::dot(*x.dense(), *m.dense());
     else
-      return inner_prod(*x.getSparsePtr(), *m.getSparsePtr());
+      return inner_prod(*x.sparse(), *m.sparse());
   }
   else if (numM == 1)
-    return inner_prod(*x.getSparsePtr(), *m.getDensePtr());
+    return inner_prod(*x.sparse(), *m.dense());
   else
-    return inner_prod(*x.getDensePtr(), *m.getSparsePtr());
+    return inner_prod(*x.dense(), *m.sparse());
 }
 
 // outer_prod(v,w) = trans(v)*w
@@ -1375,18 +1375,18 @@ SimpleMatrix outer_prod(const SiconosVector &x, const SiconosVector& m)
   if (numM == 1)
   {
     if (numX == 1)
-      return (DenseMat)(outer_prod(*x.getDensePtr(), *m.getDensePtr()));
+      return (DenseMat)(outer_prod(*x.dense(), *m.dense()));
 
     else// if(numX == 4)
-      return (DenseMat)(outer_prod(*x.getSparsePtr(), *m.getDensePtr()));
+      return (DenseMat)(outer_prod(*x.sparse(), *m.dense()));
   }
   else // if(numM == 4)
   {
     if (numX == 1)
-      return (DenseMat)(outer_prod(*x.getDensePtr(), *m.getSparsePtr()));
+      return (DenseMat)(outer_prod(*x.dense(), *m.sparse()));
 
     else //if(numX == 4)
-      return (DenseMat)(outer_prod(*x.getSparsePtr(), *m.getSparsePtr()));
+      return (DenseMat)(outer_prod(*x.sparse(), *m.sparse()));
   }
 }
 
@@ -1441,17 +1441,17 @@ void scal(double a, const SiconosVector & x, SiconosVector & y, bool init)
       else if (numX == 1) // ie if both are Dense
       {
         if (init)
-          //atlas::axpby(a,*x.getDensePtr(),0.0,*y.getDensePtr());
-          noalias(*y.getDensePtr()) = a * *x.getDensePtr();
+          //atlas::axpby(a,*x.dense(),0.0,*y.dense());
+          noalias(*y.dense()) = a * *x.dense();
         else
-          noalias(*y.getDensePtr()) += a * *x.getDensePtr();
+          noalias(*y.dense()) += a * *x.dense();
       }
       else  // if both are sparse
       {
         if (init)
-          noalias(*y.getSparsePtr()) = a**x.getSparsePtr();
+          noalias(*y.sparse()) = a**x.sparse();
         else
-          noalias(*y.getSparsePtr()) += a**x.getSparsePtr();
+          noalias(*y.sparse()) += a**x.sparse();
       }
     }
     else
@@ -1475,9 +1475,9 @@ void scal(double a, const SiconosVector & x, SiconosVector & y, bool init)
         if (numY == 1) // if y is dense
         {
           if (init)
-            noalias(*y.getDensePtr()) = a**x.getSparsePtr();
+            noalias(*y.dense()) = a**x.sparse();
           else
-            noalias(*y.getDensePtr()) += a**x.getSparsePtr();
+            noalias(*y.dense()) += a**x.sparse();
 
         }
         else
@@ -1521,7 +1521,7 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
       std::vector<unsigned int> subCoord = coord;
       SP::SiconosVector tmp = y[firstBlockNum];
       unsigned int subSize =  x[firstBlockNum]->size(); // Size of the sub-vector
-      const SP::Index xTab = x.getTabIndexPtr();
+      const SP::Index xTab = x.tabIndex();
       if (firstBlockNum != 0)
         subCoord[0] -= (*xTab)[firstBlockNum - 1];
       subCoord[1] =  std::min(coord[1] - (*xTab)[firstBlockNum - 1], subSize);
@@ -1564,7 +1564,7 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
 
     else if (numX == 1) // Dense
     {
-      ublas::vector_range<DenseVect> subY(*y.getDensePtr(), ublas::range(coord[2], coord[3]));
+      ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[2], coord[3]));
       if (coord[0] == coord[2])
       {
         if (init)
@@ -1574,7 +1574,7 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
       }
       else
       {
-        ublas::vector_range<DenseVect> subX(*x.getDensePtr(), ublas::range(coord[0], coord[1]));
+        ublas::vector_range<DenseVect> subX(*x.dense(), ublas::range(coord[0], coord[1]));
         if (init)
           subY = a * subX;
         else
@@ -1583,7 +1583,7 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
     }
     else //if (numX == 4) // Sparse
     {
-      ublas::vector_range<SparseVect> subY(*y.getSparsePtr(), ublas::range(coord[2], coord[3]));
+      ublas::vector_range<SparseVect> subY(*y.sparse(), ublas::range(coord[2], coord[3]));
       if (coord[0] == coord[2])
       {
         if (init)
@@ -1593,7 +1593,7 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
       }
       else
       {
-        ublas::vector_range<SparseVect> subX(*x.getSparsePtr(), ublas::range(coord[0], coord[1]));
+        ublas::vector_range<SparseVect> subX(*x.sparse(), ublas::range(coord[0], coord[1]));
         if (init)
           subY = a * subX;
         else
@@ -1611,8 +1611,8 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
       }
       else if (numX == 1) // ie if both are Dense
       {
-        ublas::vector_range<DenseVect> subX(*x.getDensePtr(), ublas::range(coord[0], coord[1]));
-        ublas::vector_range<DenseVect> subY(*y.getDensePtr(), ublas::range(coord[2], coord[3]));
+        ublas::vector_range<DenseVect> subX(*x.dense(), ublas::range(coord[0], coord[1]));
+        ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[2], coord[3]));
 
         if (init)
           noalias(subY) = a * subX;
@@ -1621,8 +1621,8 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
       }
       else  // if both are sparse
       {
-        ublas::vector_range<SparseVect> subX(*x.getSparsePtr(), ublas::range(coord[0], coord[1]));
-        ublas::vector_range<SparseVect> subY(*y.getSparsePtr(), ublas::range(coord[2], coord[3]));
+        ublas::vector_range<SparseVect> subX(*x.sparse(), ublas::range(coord[0], coord[1]));
+        ublas::vector_range<SparseVect> subY(*y.sparse(), ublas::range(coord[2], coord[3]));
 
         if (init)
           noalias(subY) = a * subX;
@@ -1644,7 +1644,7 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
         SPC::SiconosVector tmp = x[firstBlockNum];
 
         unsigned int subSize =  x[firstBlockNum]->size(); // Size of the sub-vector
-        const SP::Index xTab = x.getTabIndexPtr();
+        const SP::Index xTab = x.tabIndex();
         if (firstBlockNum != 0)
           subCoord[0] -= (*xTab)[firstBlockNum - 1];
         subCoord[1] =  std::min(coord[1] - (*xTab)[firstBlockNum - 1], subSize);
@@ -1694,7 +1694,7 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
         std::vector<unsigned int> subCoord = coord;
         SP::SiconosVector tmp = y[firstBlockNum];
         unsigned int subSize =  y[firstBlockNum]->size(); // Size of the sub-vector
-        const SP::Index yTab = y.getTabIndexPtr();
+        const SP::Index yTab = y.tabIndex();
         if (firstBlockNum != 0)
           subCoord[2] -= (*yTab)[firstBlockNum - 1];
         subCoord[3] =  std::min(coord[3] - (*yTab)[firstBlockNum - 1], subSize);
@@ -1735,8 +1735,8 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
       }
       else if (numY == 1) // y dense, x sparse
       {
-        ublas::vector_range<DenseVect> subY(*y.getDensePtr(), ublas::range(coord[2], coord[3]));
-        ublas::vector_range<SparseVect> subX(*x.getSparsePtr(), ublas::range(coord[0], coord[1]));
+        ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[2], coord[3]));
+        ublas::vector_range<SparseVect> subX(*x.sparse(), ublas::range(coord[0], coord[1]));
 
         if (init)
           noalias(subY) = a * subX;

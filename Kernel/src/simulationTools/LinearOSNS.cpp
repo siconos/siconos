@@ -36,31 +36,31 @@ using namespace RELATION;
 // xml constructor
 LinearOSNS::LinearOSNS(SP::OneStepNSProblemXML onestepnspbxml,
                        const string & name) :
-  OneStepNSProblem(name, onestepnspbxml), MStorageType(0), keepLambdaAndYState(false)
+  OneStepNSProblem(name, onestepnspbxml), _MStorageType(0), _keepLambdaAndYState(false)
 {
   // Read storage type if given (optional , default = dense)
   if (onestepnspbxml->hasStorageType())
-    MStorageType = onestepnspbxml->getStorageType();
+    _MStorageType = onestepnspbxml->getStorageType();
 }
 
 // Constructor from a set of data
 LinearOSNS::LinearOSNS(const string& name, SP::NonSmoothSolver newSolver,
                        const string& newId):
-  OneStepNSProblem(name, newId, newSolver), MStorageType(0), keepLambdaAndYState(false)
+  OneStepNSProblem(name, newId, newSolver), _MStorageType(0), _keepLambdaAndYState(false)
 {}
 
 // Setters
 
 void LinearOSNS::setW(const SiconosVector& newValue)
 {
-  assert(sizeOutput == newValue.size() &&
+  assert(_sizeOutput == newValue.size() &&
          "LinearOSNS: setW, inconsistent size between given velocity size and problem size. You should set sizeOutput before");
   setObject<SimpleVector, SP::SiconosVector, SiconosVector>(_w, newValue);
 }
 
 void LinearOSNS::setZ(const SiconosVector& newValue)
 {
-  assert(sizeOutput == newValue.size() &&
+  assert(_sizeOutput == newValue.size() &&
          "LinearOSNS: setZ, inconsistent size between given velocity size and problem size. You should set sizeOutput before");
   setObject<SimpleVector, SP::SiconosVector, SiconosVector>(_z, newValue);
 }
@@ -71,40 +71,33 @@ void LinearOSNS::setM(const OSNSMatrix& newValue)
   RuntimeException::selfThrow("LinearOSNS: setM, forbidden operation. Try setMPtr().");
 }
 
-void LinearOSNS::setQ(const SiconosVector& newValue)
-{
-  assert(sizeOutput == newValue.size() &&
-         "LinearOSNS: setQ, inconsistent size between given velocity size and problem size. You should set sizeOutput before");
-  setObject<SimpleVector, SP::SiconosVector, SiconosVector>(q, newValue);
-}
-
 void LinearOSNS::initVectorsMemory()
 {
   // Memory allocation for _w, M, z and q.
   // If one of them has already been allocated, nothing is done.
   // We suppose that user has chosen a correct size.
   if (! _w)
-    _w.reset(new SimpleVector(maxSize));
+    _w.reset(new SimpleVector(maxSize()));
   else
   {
-    if (_w->size() != maxSize)
-      _w->resize(maxSize);
+    if (_w->size() != maxSize())
+      _w->resize(maxSize());
   }
 
   if (! _z)
-    _z.reset(new SimpleVector(maxSize));
+    _z.reset(new SimpleVector(maxSize()));
   else
   {
-    if (_z->size() != maxSize)
-      _z->resize(maxSize);
+    if (_z->size() != maxSize())
+      _z->resize(maxSize());
   }
 
-  if (! q)
-    q.reset(new SimpleVector(maxSize));
+  if (! _q)
+    _q.reset(new SimpleVector(maxSize()));
   else
   {
-    if (q->size() != maxSize)
-      q->resize(maxSize);
+    if (_q->size() != maxSize())
+      _q->resize(maxSize());
   }
 }
 
@@ -121,31 +114,31 @@ void LinearOSNS::initialize(SP::Simulation sim)
   initVectorsMemory();
 
   // get topology
-  SP::Topology topology = simulation->getModelPtr()
-                          ->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  SP::Topology topology = simulation()->model()
+                          ->nonSmoothDynamicalSystem()->topology();
 
-  // Note that unitaryBlocks is up to date since updateUnitaryBlocks
+  // Note that _unitaryBlocks is up to date since updateUnitaryBlocks
   // has been called during OneStepNSProblem::initialize()
 
   // If the topology is TimeInvariant ie if M structure does not
   // change during simulation:
   bool b = topology->isTimeInvariant();
-  bool isLinear = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->isLinear();
-  if ((b || !isLinear) &&   !OSNSInteractions->isEmpty())
+  bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
+  if ((b || !isLinear) &&   !interactions()->isEmpty())
   {
     updateM();
   }
   else // in that case, M will be updated during preCompute
   {
-    // Default size for M = maxSize
+    // Default size for M = maxSize()
     if (! _M)
     {
-      if (MStorageType == 0)
-        _M.reset(new OSNSMatrix(maxSize, 0));
+      if (_MStorageType == 0)
+        _M.reset(new OSNSMatrix(maxSize(), 0));
 
-      else // if(MStorageType == 1) size = number of unitaryBlocks
+      else // if(_MStorageType == 1) size = number of _unitaryBlocks
         // = number of UR in the largest considered indexSet
-        _M.reset(new OSNSMatrix(simulation->getIndexSetPtr(levelMin)->size(), 1));
+        _M.reset(new OSNSMatrix(simulation()->indexSet(levelMin())->size(), 1));
     }
   }
 }
@@ -153,29 +146,29 @@ void LinearOSNS::initialize(SP::Simulation sim)
 void LinearOSNS::updateM()
 {
   // Get index set from Simulation
-  SP::UnitaryRelationsGraph indexSet = simulation->getIndexSetPtr(levelMin);
+  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
   if (! _M) // Creates and fills M using UR of indexSet
-    _M.reset(new OSNSMatrix(indexSet, unitaryBlocks, MStorageType));
+    _M.reset(new OSNSMatrix(indexSet, _unitaryBlocks, _MStorageType));
 
   else
   {
-    _M->setStorageType(MStorageType);
-    _M->fill(indexSet, unitaryBlocks);
+    _M->setStorageType(_MStorageType);
+    _M->fill(indexSet, _unitaryBlocks);
   }
-  sizeOutput = _M->size();
+  _sizeOutput = _M->size();
 }
 
 void LinearOSNS::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
 {
 
-  // Computes matrix unitaryBlocks[UR1][UR2] (and allocates memory if
+  // Computes matrix _unitaryBlocks[UR1][UR2] (and allocates memory if
   // necessary) if UR1 and UR2 have commond DynamicalSystem.  How
-  // unitaryBlocks are computed depends explicitely on the type of
+  // _unitaryBlocks are computed depends explicitely on the type of
   // Relation of each UR.
 
   // Get DS common between UR1 and UR2
   DynamicalSystemsSet commonDS;
-  intersection(*UR1->getDynamicalSystemsPtr(), *UR2->getDynamicalSystemsPtr(), commonDS);
+  intersection(*UR1->dynamicalSystems(), *UR2->dynamicalSystems(), commonDS);
   assert(!commonDS.isEmpty()) ;
 
   // Warning: we suppose that at this point, all non linear
@@ -186,8 +179,8 @@ void LinearOSNS::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelatio
   unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
   unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
   // Check allocation
-  if (! unitaryBlocks[UR1][UR2])
-    unitaryBlocks[UR1][UR2].reset(new SimpleMatrix(nslawSize1, nslawSize2));
+  if (! _unitaryBlocks[UR1][UR2])
+    _unitaryBlocks[UR1][UR2].reset(new SimpleMatrix(nslawSize1, nslawSize2));
 
   // Get the W and Theta maps of one of the Unitary Relation -
   // Warning: in the current version, if OSI!=Moreau, this fails.
@@ -197,13 +190,13 @@ void LinearOSNS::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelatio
   MapOfDouble Theta; // If OSI = LSODAR, Theta remains empty
   getOSIMaps(UR1, centralUnitaryBlocks, Theta);
 
-  SP::SiconosMatrix currentUnitaryBlock = unitaryBlocks[UR1][UR2];
+  SP::SiconosMatrix currentUnitaryBlock = _unitaryBlocks[UR1][UR2];
 
   SP::SiconosMatrix leftUnitaryBlock, rightUnitaryBlock;
 
   unsigned int sizeDS;
   RELATION::TYPES relationType1, relationType2;
-  double h = simulation->getTimeDiscretisationPtr()->getCurrentTimeStep();
+  double h = simulation()->timeDiscretisation()->currentTimeStep();
 
   // General form of the unitaryBlock is : unitaryBlock =
   // a*extraUnitaryBlock + b * leftUnitaryBlock * centralUnitaryBlocks
@@ -213,7 +206,7 @@ void LinearOSNS::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelatio
   // type and the non smooth law.
   relationType1 = UR1->getRelationType();
   relationType2 = UR2->getRelationType();
-  // ==== First Order Relations - Specific treatment for diagonal unitaryBlocks ===
+  // ==== First Order Relations - Specific treatment for diagonal _unitaryBlocks ===
   if (UR1 == UR2)
     UR1->getExtraUnitaryBlock(currentUnitaryBlock);
   else
@@ -225,8 +218,8 @@ void LinearOSNS::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelatio
   {
     sizeDS = (*itDS)->getDim();
 
-    // get unitaryBlocks corresponding to the current DS
-    // These unitaryBlocks depends on the relation type.
+    // get _unitaryBlocks corresponding to the current DS
+    // These _unitaryBlocks depends on the relation type.
     leftUnitaryBlock.reset(new SimpleMatrix(nslawSize1, sizeDS));
     UR1->getLeftUnitaryBlockForDS(*itDS, leftUnitaryBlock);
 
@@ -294,57 +287,57 @@ void LinearOSNS::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelatio
 
 /* nslaw dispatch */
 
-struct LinearOSNS::TimeSteppingNSLEffect : public SiconosVisitor
+struct LinearOSNS::_TimeSteppingNSLEffect : public SiconosVisitor
 {
   LinearOSNS *parent;
   unsigned int pos;
   SP::UnitaryRelation UR;
 
-  TimeSteppingNSLEffect(LinearOSNS *p, SP::UnitaryRelation UR, unsigned int pos) :
+  _TimeSteppingNSLEffect(LinearOSNS *p, SP::UnitaryRelation UR, unsigned int pos) :
     parent(p), UR(UR), pos(pos) {};
 
   void visit(NewtonImpactNSL& nslaw)
   {
     double e;
-    e = nslaw.getE();
+    e = nslaw.e();
     std::vector<unsigned int> subCoord(4);
     subCoord[0] = 0;
     subCoord[1] = UR->getNonSmoothLawSize();
     subCoord[2] = pos;
     subCoord[3] = pos + subCoord[1];
-    subscal(e, *UR->getYOldPtr(parent->levelMin), *(parent->q), subCoord, false);
+    subscal(e, *UR->yOld(parent->levelMin()), *(parent->_q), subCoord, false);
   }
 
   void visit(NewtonImpactFrictionNSL& nslaw)
   {
     double e;
-    e = nslaw.getEn();
+    e = nslaw.en();
     // Only the normal part is multiplied by e
-    (*(parent->q))(pos) +=  e * (*UR->getYOldPtr(parent->levelMin))(0);
+    (*(parent->_q))(pos) +=  e * (*UR->yOld(parent->levelMin()))(0);
 
   }
 
 };
 
-struct LinearOSNS::EventDrivenNSLEffect : public SiconosVisitor
+struct LinearOSNS::_EventDrivenNSLEffect : public SiconosVisitor
 {
   LinearOSNS *parent;
   SP::UnitaryRelation UR;
   unsigned int pos;
 
-  EventDrivenNSLEffect(LinearOSNS *p, SP::UnitaryRelation UR, unsigned int pos) :
+  _EventDrivenNSLEffect(LinearOSNS *p, SP::UnitaryRelation UR, unsigned int pos) :
     parent(p), UR(UR), pos(pos) {};
 
   void visit(NewtonImpactNSL& nslaw)
   {
     double e;
-    e = nslaw.getE();
+    e = nslaw.e();
     std::vector<unsigned int> subCoord(4);
     subCoord[0] = pos;
     subCoord[1] = pos + UR->getNonSmoothLawSize();
     subCoord[2] = pos;
     subCoord[3] = subCoord[1];
-    subscal(e, *(parent->q), *(parent->q), subCoord, false); // q = q + e * q
+    subscal(e, *(parent->_q), *(parent->_q), subCoord, false); // q = q + e * q
   }
 
   // note : no NewtonImpactFrictionNSL
@@ -356,26 +349,26 @@ struct LinearOSNS::EventDrivenNSLEffect : public SiconosVisitor
 class TimeStepping;
 class EventDriven;
 
-struct LinearOSNS::NSLEffectOnSim : public SiconosVisitor
+struct LinearOSNS::_NSLEffectOnSim : public SiconosVisitor
 {
 
   LinearOSNS *parent;
   SP::UnitaryRelation UR;
   unsigned int pos;
 
-  NSLEffectOnSim(LinearOSNS *p, SP::UnitaryRelation UR, unsigned int pos) :
+  _NSLEffectOnSim(LinearOSNS *p, SP::UnitaryRelation UR, unsigned int pos) :
     parent(p), UR(UR), pos(pos) {};
 
   void visit(TimeStepping& sim)
   {
-    SP::SiconosVisitor NSLEffect(new TimeSteppingNSLEffect(parent, UR, pos));
-    UR->getInteractionPtr()->getNonSmoothLawPtr()->accept(*NSLEffect);
+    SP::SiconosVisitor NSLEffect(new _TimeSteppingNSLEffect(parent, UR, pos));
+    UR->interaction()->nonSmoothLaw()->accept(*NSLEffect);
   }
 
   void visit(EventDriven& sim)
   {
-    SP::SiconosVisitor NSLEffect(new EventDrivenNSLEffect(parent, UR, pos));
-    UR->getInteractionPtr()->getNonSmoothLawPtr()->accept(*NSLEffect);
+    SP::SiconosVisitor NSLEffect(new _EventDrivenNSLEffect(parent, UR, pos));
+    UR->interaction()->nonSmoothLaw()->accept(*NSLEffect);
   }
 
 };
@@ -387,16 +380,16 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
   RELATION::TYPES relationType = UR->getRelationType();
   RELATION::SUBTYPES relationSubType = UR->getRelationSubType();
 
-  string simulationType = simulation->getType();
+  string simulationType = simulation()->getType();
 
   SP::DynamicalSystem ds = *(UR->dynamicalSystemsBegin());
-  OSI::TYPES osiType = simulation->getIntegratorOfDSPtr(ds)->getType();
+  OSI::TYPES osiType = simulation()->integratorOfDS(ds)->getType();
 
   unsigned int sizeY = UR->getNonSmoothLawSize();
   std::vector<unsigned int> coord(8);
 
   unsigned int relativePosition = UR->getRelativePosition();
-  SP::Interaction mainInteraction = UR->getInteractionPtr();
+  SP::Interaction mainInteraction = UR->interaction();
   coord[0] = relativePosition;
   coord[1] = relativePosition + sizeY;
   coord[2] = 0;
@@ -411,9 +404,9 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
   SP::SiconosVector lambda;
   SP::SiconosVector H_alpha;
 
-  Xq = UR->getXqPtr();
-  lambda = UR->getInteractionPtr()->getLambdaPtr(0);
-  H_alpha = UR->getInteractionPtr()->getRelationPtr()->getHalphaPtr();
+  Xq = UR->xq();
+  lambda = UR->interaction()->lambda(0);
+  H_alpha = UR->interaction()->relation()->halpha();
   //  cout<<"LinearOSNS::computeQblock lambda "<< endl;
   //  lambda->display();
   //  cout<<"LinearOSNS::computeQblock H_alpha "<< endl;
@@ -423,50 +416,50 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
   if (osiType == OSI::MOREAU || osiType == OSI::LSODAR)
   {
     SP::SiconosVector Xfree;
-    Xfree = UR->getWorkFreePtr();
+    Xfree = UR->workFree();
     //      cout<<"LinearOSNS::computeQblock xfree "<<endl;
     //      Xfree->display();
     if (relationType == FirstOrder && relationSubType == Type2R)
     {
-      C = mainInteraction->getRelationPtr()->getCPtr();
-      D = mainInteraction->getRelationPtr()->getDPtr();
+      C = mainInteraction->relation()->getCPtr();
+      D = mainInteraction->relation()->getDPtr();
       if (D)
       {
         coord[3] = D->size(1);
         coord[5] = D->size(1);
-        subprod(*D, *lambda, *q, coord, true);
+        subprod(*D, *lambda, *_q, coord, true);
         for (int i = 0; i < sizeY; i++)
-          q->setValue(relativePosition + i, -1 * q->getValue(relativePosition + i));
+          _q->setValue(relativePosition + i, -1 * _q->getValue(relativePosition + i));
 
       }
       if (C)
       {
         coord[3] = C->size(1);
         coord[5] = C->size(1);
-        subprod(*C, *Xq, *q, coord, false);
+        subprod(*C, *Xq, *_q, coord, false);
         //    cout<<"Xq "<<endl;
         //    Xq->display();
       }
       for (int i = 0; i < sizeY; i++)
-        q->setValue(relativePosition + i, q->getValue(relativePosition + i) + H_alpha->getValue(relativePosition + i));
+        _q->setValue(relativePosition + i, _q->getValue(relativePosition + i) + H_alpha->getValue(relativePosition + i));
     }
     else
     {
-      C = mainInteraction->getRelationPtr()->getCPtr();
-      //  SP::SiconosVector WorkX = UR->getWorkXPtr();
+      C = mainInteraction->relation()->getCPtr();
+      //  SP::SiconosVector WorkX = UR->workX();
       SP::SiconosVector Xfree;
-      Xfree = UR->getWorkFreePtr();
+      Xfree = UR->workFree();
 
       if (C)
       {
 
         assert(Xfree);
-        assert(q);
+        assert(_q);
 
         coord[3] = C->size(1);
         coord[5] = C->size(1);
 
-        subprod(*C, *Xfree, *q, coord, true);
+        subprod(*C, *Xfree, *_q, coord, true);
       }
 
       if (relationType == FirstOrder && (relationSubType == LinearTIR || relationSubType == LinearR))
@@ -476,24 +469,24 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
         SP::SiconosVector e;
         if (relationSubType == LinearTIR)
         {
-          e = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->getRelationPtr())->getEPtr();
-          F = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->getRelationPtr())->getFPtr();
+          e = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->relation())->getEPtr();
+          F = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->relation())->getFPtr();
         }
         else
         {
-          e = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getEPtr();
-          F = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->getRelationPtr())->getFPtr();
+          e = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->getEPtr();
+          F = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->getFPtr();
         }
 
         if (e)
-          boost::static_pointer_cast<SimpleVector>(q)->addBlock(pos, *e);
+          boost::static_pointer_cast<SimpleVector>(_q)->addBlock(pos, *e);
 
         if (F)
         {
-          SP::SiconosVector  workZ = UR->getWorkZPtr();
+          SP::SiconosVector  workZ = UR->workZ();
           coord[3] = F->size(1);
           coord[5] = F->size(1);
-          subprod(*F, *workZ, *q, coord, false);
+          subprod(*F, *workZ, *_q, coord, false);
         }
       }
 
@@ -509,8 +502,8 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
   // Add "non-smooth law effect" on q
   if (UR->getRelationType() == Lagrangian)
   {
-    SP::SiconosVisitor nslEffectOnSim(new NSLEffectOnSim(this, UR, pos));
-    simulation->accept(*nslEffectOnSim);
+    SP::SiconosVisitor nslEffectOnSim(new _NSLEffectOnSim(this, UR, pos));
+    simulation()->accept(*nslEffectOnSim);
   }
 
 
@@ -519,13 +512,13 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
 
 void LinearOSNS::computeQ(double time)
 {
-  if (q->size() != sizeOutput)
-    q->resize(sizeOutput);
-  q->zero();
+  if (_q->size() != _sizeOutput)
+    _q->resize(_sizeOutput);
+  _q->zero();
 
   // === Get index set from Simulation ===
   SP::UnitaryRelationsGraph indexSet =
-    simulation->getIndexSetPtr(levelMin);
+    simulation()->indexSet(levelMin());
   // === Loop through "active" Unitary Relations (ie present in
   // indexSets[level]) ===
 
@@ -548,45 +541,45 @@ void LinearOSNS::preCompute(double time)
   // LinearComplementarity_Problem
 
   // - computation of M and q
-  // - set sizeOutput
+  // - set _sizeOutput
   // - check dim. for _z,_w
 
   // If the topology is time-invariant, only q needs to be computed at
-  // each time step.  M, sizeOutput have been computed in initialize
+  // each time step.  M, _sizeOutput have been computed in initialize
   // and are uptodate.
 
   // Get topology
-  SP::Topology topology = simulation->getModelPtr()
-                          ->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  SP::Topology topology = simulation()->model()
+                          ->nonSmoothDynamicalSystem()->topology();
   bool b = topology->isTimeInvariant();
-  bool isLinear = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->isLinear();
+  bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
 
   if (!b | !isLinear)
   {
-    // Computes new unitaryBlocks if required
+    // Computes new _unitaryBlocks if required
     updateUnitaryBlocks();
 
     // Updates matrix M
-    SP::UnitaryRelationsGraph indexSet = simulation->getIndexSetPtr(levelMin);
-    _M->fill(indexSet, unitaryBlocks);
-    sizeOutput = _M->size();
+    SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
+    _M->fill(indexSet, _unitaryBlocks);
+    _sizeOutput = _M->size();
 
     // Checks z and _w sizes and reset if necessary
-    if (_z->size() != sizeOutput)
+    if (_z->size() != _sizeOutput)
     {
-      _z->resize(sizeOutput, false);
+      _z->resize(_sizeOutput, false);
       _z->zero();
     }
 
-    if (_w->size() != sizeOutput)
+    if (_w->size() != _sizeOutput)
     {
-      _w->resize(sizeOutput);
+      _w->resize(_sizeOutput);
       _w->zero();
     }
 
     // _w and _z <- old values. Note : sizeOuput can be unchanged,
     // but positions may have changed
-    if (keepLambdaAndYState)
+    if (_keepLambdaAndYState)
     {
       UnitaryRelationsGraph::VIterator ui, uiend;
       for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
@@ -596,9 +589,9 @@ void LinearOSNS::preCompute(double time)
         // or z
         unsigned int pos = _M->getPositionOfUnitaryBlock(ur);
 
-        SPC::SiconosVector yOld = ur->getYOldPtr(levelMin);
+        SPC::SiconosVector yOld = ur->yOld(levelMin());
         SPC::SiconosVector lambdaOld = ur->
-                                       getInteractionPtr()->getLambdaOldPtr(levelMin);
+                                       interaction()->lambdaOld(levelMin());
 
         setBlock(*yOld, _w, yOld->size(), 0, pos);
         setBlock(*lambdaOld, _z, lambdaOld->size(), 0, pos);
@@ -618,7 +611,7 @@ void LinearOSNS::postCompute()
   // indexSet(leveMin) are concerned.
 
   // === Get index set from Topology ===
-  SP::UnitaryRelationsGraph indexSet = simulation->getIndexSetPtr(levelMin);
+  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
 
   // y and lambda vectors
   SP::SiconosVector lambda;
@@ -638,8 +631,8 @@ void LinearOSNS::postCompute()
     pos = _M->getPositionOfUnitaryBlock(ur);
 
     // Get Y and Lambda for the current Unitary Relation
-    y = ur->getYPtr(levelMin);
-    lambda = ur->getLambdaPtr(levelMin);
+    y = ur->y(levelMin());
+    lambda = ur->lambda(levelMin());
     // Copy _w/_z values, starting from index pos into y/lambda.
 
     setBlock(*_w, y, y->size(), pos, 0);// Warning: yEquivalent is
@@ -655,7 +648,7 @@ void LinearOSNS::display() const
   if (_M) _M->display();
   else cout << "-> NULL" << endl;
   cout << endl << " q : " ;
-  if (q) q->display();
+  if (_q) _q->display();
   else cout << "-> NULL" << endl;
   cout << "w  ";
   if (_w) _w->display();

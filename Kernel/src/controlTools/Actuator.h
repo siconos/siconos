@@ -96,25 +96,25 @@ class Actuator : public boost::enable_shared_from_this<Actuator>
 protected:
 
   /** type of the Actuator */
-  int type;
+  int _type;
 
   /** id of the Actuator */
-  std::string id;
+  std::string _id;
 
   /** Sensors linked to this actuator */
-  SP::Sensors  allSensors;
+  SP::Sensors  _allSensors;
 
   /** Dynamical Systems list: all the systems on which this actuator may act. */
-  SP::DynamicalSystemsSet allDS;
+  SP::DynamicalSystemsSet _allDS;
 
   /** The model linked to this actuator */
-  SP::Model  model;
+  SP::Model  _model;
 
   /** A time discretisation scheme */
-  SP::TimeDiscretisation timeDiscretisation;
+  SP::TimeDiscretisation _timeDiscretisation;
 
   /** The event which will linked this actuator to the eventsManager of the simulation */
-  SP::Event eActuator;
+  SP::Event _eActuator;
 
   /** default constructor
    */
@@ -149,7 +149,7 @@ public:
    */
   inline void setId(const std::string& newId)
   {
-    id = newId;
+    _id = newId;
   };
 
   /** get id of the Actuator
@@ -157,7 +157,7 @@ public:
    */
   inline const std::string getId() const
   {
-    return id;
+    return _id;
   };
 
   /** get the type of the Actuator (ie class name)
@@ -165,7 +165,7 @@ public:
    */
   inline const int getType() const
   {
-    return type;
+    return _type;
   };
 
   /** get all the Sensors linked to this actuator.
@@ -173,7 +173,7 @@ public:
    */
   inline const SP::Sensors getSensors() const
   {
-    return allSensors;
+    return _allSensors;
   };
 
   /** Ass a set of Sensors into this actuator.
@@ -191,7 +191,7 @@ public:
    */
   inline const SP::DynamicalSystemsSet getDynamicalSystems() const
   {
-    return allDS;
+    return _allDS;
   };
 
   /** Add a set of DynamicalSystem into this actuator.
@@ -207,25 +207,25 @@ public:
   /** get the Model linked to this Actuator
    *  \return a pointer to Model
    */
-  inline SP::Model getModelPtr() const
+  inline SP::Model model() const
   {
-    return model;
+    return _model;
   };
 
   /** get the TimeDiscretisation linked to this Actuator
   *  \return a pointer to TimeDiscretisation.
   */
-  inline SP::TimeDiscretisation getTimeDiscretisationPtr() const
+  inline SP::TimeDiscretisation timeDiscretisation() const
   {
-    return timeDiscretisation;
+    return _timeDiscretisation;
   };
 
   /** get the Event associated with this actuator
    *  \return an Event*
    */
-  inline SP::Event getEventPtr() const
+  inline SP::Event event() const
   {
-    return eActuator;
+    return _eActuator;
   };
 
   /** initialize actuator data.

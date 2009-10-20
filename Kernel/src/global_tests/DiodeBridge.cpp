@@ -150,9 +150,9 @@ bool DiodeBridge()
     // -> saved in a matrix dataPlot
     SimpleMatrix dataPlot(N, 7);
 
-    SP::SiconosVector x = LSDiodeBridge->getXPtr();
-    SP::SiconosVector y = InterDiodeBridge->getYPtr(0);
-    SP::SiconosVector lambda = InterDiodeBridge->getLambdaPtr(0);
+    SP::SiconosVector x = LSDiodeBridge->x();
+    SP::SiconosVector y = InterDiodeBridge->y(0);
+    SP::SiconosVector lambda = InterDiodeBridge->lambda(0);
 
     // For the initial time step:
     // time

@@ -37,11 +37,12 @@
 
 using namespace std;
 
-// --- Constructor with a TimeDiscretisation (and thus a Model) and an id ---
+// --- Constructor with a TimeDiscretisation (and thus a Model) and an
+// --- id ---
 Simulation::Simulation(SP::TimeDiscretisation td, const string& id):
-  name("unnamed"), simulationType(id), timeDiscretisation(td), tinit(0.0), tend(0.0), tout(0.0), levelMin(0), levelMax(0), tolerance(DEFAULT_TOLERANCE), printStat(false)
+  name("unnamed"), simulationType(id), _timeDiscretisation(td), tinit(0.0), tend(0.0), tout(0.0), levelMin(0), levelMax(0), tolerance(DEFAULT_TOLERANCE), printStat(false)
 {
-  if (!timeDiscretisation)
+  if (!_timeDiscretisation)
     RuntimeException::selfThrow("Simulation constructor - timeDiscretisation == NULL.");
   mUseRelativeConvergenceCriterion = false;
   mRelativeConvergenceCriterionHeld = false;
@@ -51,7 +52,7 @@ Simulation::Simulation(SP::TimeDiscretisation td, const string& id):
 
   allOSI.reset(new OSISet());
   allNSProblems.reset(new OneStepNSProblems());
-  eventsManager.reset(new EventsManager()); //
+  _eventsManager.reset(new EventsManager()); //
 }
 
 // --- xml constructor ---
@@ -70,7 +71,7 @@ Simulation::Simulation(SP::SimulationXML strxml, double t0, double T, SP::Dynami
   // === Model ===
 
   // === Time discretisation ===
-  timeDiscretisation.reset(new TimeDiscretisation(simulationxml->getTimeDiscretisationXMLPtr(), t0, T));
+  _timeDiscretisation.reset(new TimeDiscretisation(simulationxml->timeDiscretisationXML(), t0, T));
 
   // === OneStepIntegrators ===
   SetOfOSIXML OSIXMLList = simulationxml->getOneStepIntegratorsXML();
@@ -96,7 +97,7 @@ Simulation::Simulation(SP::SimulationXML strxml, double t0, double T, SP::Dynami
   // This depends on the type of simulation --> in derived class constructor
 
   // === Events manager creation ===
-  eventsManager.reset(new EventsManager()); //
+  _eventsManager.reset(new EventsManager()); //
   allNSProblems.reset(new OneStepNSProblems());
 }
 
@@ -120,7 +121,7 @@ void Simulation::setOneStepIntegrators(const OSISet& newSet)
   allOSI->insert(newSet.begin(), newSet.end());
 }
 
-SP::OneStepIntegrator Simulation::getIntegratorOfDSPtr(int numberDS) const
+SP::OneStepIntegrator Simulation::integratorOfDS(int numberDS) const
 {
 
   DSOSIConstIterator it = osiMap.begin();
@@ -128,7 +129,7 @@ SP::OneStepIntegrator Simulation::getIntegratorOfDSPtr(int numberDS) const
 
   while (!found || it != osiMap.end())
   {
-    if ((it->first)->getNumber() == numberDS)
+    if ((it->first)->number() == numberDS)
       found = true;
     else ++it;
   }
@@ -136,11 +137,11 @@ SP::OneStepIntegrator Simulation::getIntegratorOfDSPtr(int numberDS) const
   return (it->second);
 }
 
-SP::OneStepIntegrator Simulation::getIntegratorOfDSPtr(SP::DynamicalSystem ds) const
+SP::OneStepIntegrator Simulation::integratorOfDS(SP::DynamicalSystem ds) const
 {
   DSOSIConstIterator it = osiMap.find(ds);
   if (it == osiMap.end())
-    RuntimeException::selfThrow("Simulation::getIntegratorOfDSPtr(ds), ds not found in the integrator set.");
+    RuntimeException::selfThrow("Simulation::integratorOfDS(ds), ds not found in the integrator set.");
   return it->second;
 }
 
@@ -162,10 +163,10 @@ void Simulation::addInOSIMap(SP::DynamicalSystem ds, SP::OneStepIntegrator  osi)
 }
 
 
-SP::OneStepNSProblem Simulation::getOneStepNSProblemPtr(const std::string& name)
+SP::OneStepNSProblem Simulation::oneStepNSProblem(const std::string& name)
 {
   if (!hasOneStepNSProblem(name))
-    RuntimeException::selfThrow("Simulation - getOneStepNSProblemPtr(name) - The One Step NS Problem is not in the simulation.");
+    RuntimeException::selfThrow("Simulation - oneStepNSProblem(name) - The One Step NS Problem is not in the simulation.");
 
   return (*allNSProblems)[name];
 }
@@ -213,8 +214,8 @@ const bool Simulation::hasOneStepNSProblem(const string& name) const
 void Simulation::updateIndexSets()
 {
   // Warning, I0 is not updated and must remain unchanged !
-  unsigned int nindexsets = getModelPtr()->getNonSmoothDynamicalSystemPtr()
-                            ->getTopologyPtr()->indexSetsSize();
+  unsigned int nindexsets = model()->nonSmoothDynamicalSystem()
+                            ->topology()->indexSetsSize();
 
   if (nindexsets > 1)
   {
@@ -236,7 +237,7 @@ void Simulation::updateInteractions()
 {
 
   SP::InteractionsSet allInteractions =
-    getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
+    model()->nonSmoothDynamicalSystem()->interactions();
 
   //if(!allInteractions->isEmpty())  // ie if some Interactions have been declared
   {
@@ -253,13 +254,13 @@ void Simulation::initialize(SP::Model m, bool withOSI)
 {
   // === Connection with the model ===
   assert(m || !"Simulation::initialize(model) - model = NULL.");
-  model = boost::weak_ptr<Model>(m);
+  _model = boost::weak_ptr<Model>(m);
 
-  SP::Topology topo = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
 
   // === Events manager initialization ===
-  eventsManager->initialize(shared_from_this());
-  tinit = eventsManager->getStartingTime();
+  _eventsManager->initialize(shared_from_this());
+  tinit = _eventsManager->getStartingTime();
 
   if (withOSI)
   {
@@ -273,7 +274,7 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   // The number of indexSets is given by the maximum value of relative
   // degrees of the unitary relations.
   SP::InteractionsSet allInteractions =
-    getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
+    model()->nonSmoothDynamicalSystem()->interactions();
   //  if( !allInteractions->isEmpty() ) // ie if some Interactions
   //  have been declared
   {
@@ -296,12 +297,12 @@ void Simulation::initialize(SP::Model m, bool withOSI)
   // for example.  Warning: can not be called during
   // eventsManager->initialize, because it needs the initialization of
   // OSI, OSNS ...
-  eventsManager->preUpdate();
-  tend =  eventsManager->getNextTime();
+  _eventsManager->preUpdate();
+  tend =  _eventsManager->getNextTime();
 
   // Set Model current time (warning: current time of the model
   // corresponds to the time of the next event to be treated).
-  getModelPtr()->setCurrentTime(getNextTime());
+  model()->setCurrentTime(getNextTime());
 
   // End of initialize:
 
@@ -354,7 +355,7 @@ int Simulation::computeOneStepNSProblem(const std::string& name)
   if (!(*allNSProblems)[name])
     RuntimeException::selfThrow("Simulation - computeOneStepNSProblem, OneStepNSProblem == NULL, Id: " + name);
 
-  return (*allNSProblems)[name]->compute(getModelPtr()->getCurrentTime());
+  return (*allNSProblems)[name]->compute(model()->currentTime());
 }
 
 void Simulation::update()
@@ -393,8 +394,8 @@ void Simulation::updateInput(int level)
   // OneStepNSProblem.h
 
   //  double time = getNextTime();
-  double time = getModelPtr()->getCurrentTime();
-  SP::Topology topology = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  double time = model()->currentTime();
+  SP::Topology topology = model()->nonSmoothDynamicalSystem()->topology();
   InteractionsIterator it;
 
   // Set dynamical systems non-smooth part to zero.
@@ -412,8 +413,8 @@ void Simulation::updateOutput(int level0, int level1)
   if (level1 == -1)
     level1 = levelMax;
 
-  double time = getModelPtr()->getCurrentTime();
-  SP::Topology topology = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  double time = model()->currentTime();
+  SP::Topology topology = model()->nonSmoothDynamicalSystem()->topology();
   InteractionsIterator it;
 
   for (it = topology->interactionsBegin(); it != topology->interactionsEnd(); it++)
@@ -430,10 +431,10 @@ void Simulation::run(const std::string&, double, unsigned int)
 
   unsigned int count = 0; // events counter.
   cout << " ==== Start of " << simulationType << " simulation - This may take a while ... ====" << endl;
-  while (getNextTime() <= getModelPtr()->getFinalT())
+  while (getNextTime() <= model()->getFinalT())
   {
     advanceToEvent();
-    eventsManager->processEvents();
+    _eventsManager->processEvents();
     count++;
   }
   cout << "===== End of " << simulationType << "simulation. " << count << " events have been processed. ==== " << endl;
@@ -441,6 +442,6 @@ void Simulation::run(const std::string&, double, unsigned int)
 
 void Simulation::processEvents()
 {
-  eventsManager->processEvents();
+  _eventsManager->processEvents();
 }
 

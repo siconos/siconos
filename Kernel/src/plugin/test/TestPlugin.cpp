@@ -88,7 +88,7 @@ extern "C" void computeJacobianVelocityNNL(unsigned int sizeOfq, const double *q
 
 //==================  FirstOrderLinearDS ==================
 
-extern "C" void computeB(double time, unsigned int sizeOfB, double* b, unsigned int sizeOfZ, double *z)
+extern "C" void computeb(double time, unsigned int sizeOfB, double* b, unsigned int sizeOfZ, double *z)
 {
   for (unsigned int i = 0; i < sizeOfB; i++)
     b[i] = time * i ;

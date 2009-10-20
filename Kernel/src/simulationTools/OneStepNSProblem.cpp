@@ -32,53 +32,60 @@ using namespace DS;
 
 // --- CONSTRUCTORS/DESTRUCTOR ---
 // xml constructor
-OneStepNSProblem::OneStepNSProblem(const string& pbType, SP::OneStepNSProblemXML osnspbxml):
-  nspbType(pbType), id(DEFAULT_OSNS_NAME), sizeOutput(0), onestepnspbxml(osnspbxml), levelMin(0), levelMax(0), maxSize(0), CPUtime(0), nbIter(0)
+OneStepNSProblem::OneStepNSProblem(const string& pbType,
+                                   SP::OneStepNSProblemXML osnspbxml):
+  _nspbType(pbType), _id(DEFAULT_OSNS_NAME), _sizeOutput(0),
+  _onestepnspbxml(osnspbxml), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0)
 {
-  if (!onestepnspbxml)
+  if (!_onestepnspbxml)
     RuntimeException::selfThrow("OneStepNSProblem::xml constructor, xml file == NULL");
 
   // === get dimension of the problem ===
-  if (onestepnspbxml->hasDim()) sizeOutput = onestepnspbxml->getDimNSProblem();
+  if (_onestepnspbxml->hasDim())
+    _sizeOutput = _onestepnspbxml->getDimNSProblem();
 
   // === get Id ===
 
-  if (onestepnspbxml->hasId()) id = onestepnspbxml->getId();
+  if (_onestepnspbxml->hasId())
+    _id = _onestepnspbxml->getId();
 
   // === read solver related data ===
-  if (onestepnspbxml->hasNonSmoothSolver())
-    solver.reset(new NonSmoothSolver(onestepnspbxml->getNonSmoothSolverXMLPtr()));
+  if (_onestepnspbxml->hasNonSmoothSolver())
+    _solver.reset(new NonSmoothSolver(_onestepnspbxml->nonSmoothSolverXML()));
   else // solver = default one
-    solver.reset(new NonSmoothSolver());
+    _solver.reset(new NonSmoothSolver());
 
   // Numerics general options
-  numerics_options.reset(new Numerics_Options());
-  numerics_options->verboseMode = 0; // turn verbose mode to off by default
+  _numerics_options.reset(new Numerics_Options());
+  _numerics_options->verboseMode = 0; // turn verbose mode to off by default
 }
 
 // Constructor with given simulation and a pointer on Solver (Warning, solver is an optional argument)
 OneStepNSProblem::OneStepNSProblem(const string& pbType, const string& newId, SP::NonSmoothSolver newSolver):
-  nspbType(pbType), id(newId), sizeOutput(0), solver(newSolver),
-  levelMin(0), levelMax(0), maxSize(0), CPUtime(0), nbIter(0)
+  _nspbType(pbType), _id(newId), _sizeOutput(0), _solver(newSolver),
+  _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0)
 {
   if (!newSolver)
   {
     // If the user does not provide any Solver, an empty one is
     // built.  Data will be read from XXX.opt file in Numerics.
-    solver.reset(new NonSmoothSolver());
+    _solver.reset(new NonSmoothSolver());
   }
 
   // Numerics general options
-  numerics_options.reset(new Numerics_Options());
-  numerics_options->verboseMode = 0; // turn verbose mode to off by default
+  _numerics_options.reset(new Numerics_Options());
+  _numerics_options->verboseMode = 0; // turn verbose mode to off by default
 }
 
-SP::SiconosMatrix OneStepNSProblem::getUnitaryBlockPtr(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2) const
+SP::SiconosMatrix OneStepNSProblem::unitaryBlock(SP::UnitaryRelation UR1,
+    SP::UnitaryRelation UR2) const
 {
-  // if UR2 is not given or NULL, UR2=UR1, ie we get the diagonal unitaryBlock.
-  if (!UR2) UR2 = UR1;
+  // if UR2 is not given or NULL, UR2=UR1, ie we get the diagonal
+  // unitaryBlock.
+  if (!UR2)
+    UR2 = UR1;
 
-  ConstUnitaryMatrixRowIterator itRow = unitaryBlocks.find(UR1);
+  ConstUnitaryMatrixRowIterator itRow = _unitaryBlocks.find(UR1);
   // itRow: we get the map of unitaryBlocks that corresponds to UR1.
   // Then, thanks to itCol, we iterate through this map to find UR2
   // and the unitaryBlock that corresonds to UR1 and UR2
@@ -86,7 +93,8 @@ SP::SiconosMatrix OneStepNSProblem::getUnitaryBlockPtr(SP::UnitaryRelation UR1, 
 
   if (itCol == (itRow->second).end()) // if UR1 and UR2 are not
     // connected
-    RuntimeException::selfThrow("OneStepNSProblem - getUnitaryBlockPtr(UR1,UR2) : no unitaryBlock corresponds to UR1 and UR2, ie the Unitary Relations are not connected.");
+    RuntimeException::selfThrow
+    ("OneStepNSProblem - unitaryBlock(UR1,UR2) : no unitaryBlock corresponds to UR1 and UR2, ie the Unitary Relations are not connected.");
 
   return itCol->second;
 
@@ -106,10 +114,10 @@ void OneStepNSProblem::setUnitaryBlocks(const MapOfMapOfUnitaryMatrices& newMap)
   RuntimeException::selfThrow("OneStepNSProblem::setUnitaryBlocks - Not implemented: forbidden operation.");
 }
 
-SP::SiconosMatrix OneStepNSProblem::getDSBlockPtr(SP::DynamicalSystem DS1) const
+SP::SiconosMatrix OneStepNSProblem::dSBlock(SP::DynamicalSystem DS1) const
 {
 
-  ConstMatIterator itDS = DSBlocks.find(DS1);
+  ConstMatIterator itDS = _DSBlocks.find(DS1);
   return itDS->second;
 
 }
@@ -120,16 +128,16 @@ void OneStepNSProblem::setDSBlocks(const MapOfDSMatrices& newMap)
   RuntimeException::selfThrow("OneStepNSProblem::setDSBlocks - Not implemented: forbidden operation.");
 }
 
-SP::SiconosMatrix OneStepNSProblem::getUnitaryDSBlockPtr(SP::UnitaryRelation UR1, SP::DynamicalSystem DS2) const
+SP::SiconosMatrix OneStepNSProblem::unitaryDSBlock(SP::UnitaryRelation UR1, SP::DynamicalSystem DS2) const
 {
-  ConstUnitaryDSMatrixRowIterator itRow = unitaryDSBlocks.find(UR1);
+  ConstUnitaryDSMatrixRowIterator itRow = _unitaryDSBlocks.find(UR1);
 
   // itRow: we get the map of DSBlocks that corresponds to UR1.
   // Then, thanks to itCol, we iterate through this map to find DS2 and the UnitaryDSBlock that corresonds to UR1 and DS2
   ConstMatIterator itCol = (itRow->second).find(DS2);
 
   if (itCol == (itRow->second).end()) // if UR1 and DS2 are not connected
-    RuntimeException::selfThrow("OneStepNSProblem - getUnitaryDSBlockPtr(UR1,DS2) : no unitaryDSBlock corresonds to UR1 and DS2, ie the Unitary Relation and the DynamicalSystem are not connected.");
+    RuntimeException::selfThrow("OneStepNSProblem - unitaryDSBlock(UR1,DS2) : no unitaryDSBlock corresonds to UR1 and DS2, ie the Unitary Relation and the DynamicalSystem are not connected.");
 
   return itCol->second;
 
@@ -142,12 +150,12 @@ void OneStepNSProblem::setUnitaryDSBlocks(const MapOfUnitaryMapOfDSMatrices& new
 
 
 
-SP::SiconosMatrix OneStepNSProblem::getDSUnitaryBlockPtr(SP::DynamicalSystem DS1, SP::UnitaryRelation UR2) const
+SP::SiconosMatrix OneStepNSProblem::dSUnitaryBlock(SP::DynamicalSystem DS1, SP::UnitaryRelation UR2) const
 {
-  ConstDSUnitaryMatrixRowIterator itRow = DSUnitaryBlocks.find(DS1);
+  ConstDSUnitaryMatrixRowIterator itRow = _DSUnitaryBlocks.find(DS1);
   ConstUnitaryMatrixColumnIterator itCol = (itRow->second).find(UR2);
   if (itCol == (itRow->second).end()) // if DS1 and UR2 are not connected
-    RuntimeException::selfThrow("OneStepNSProblem - getDSUnitaryBlockPtr(DS1,UR2) : no DSUnitaryBlock corresponds to DS1 and UR2, ie the Unitary Relation and the DynamicalSystem are not connected.");
+    RuntimeException::selfThrow("OneStepNSProblem - dSUnitaryBlock(DS1,UR2) : no DSUnitaryBlock corresponds to DS1 and UR2, ie the Unitary Relation and the DynamicalSystem are not connected.");
 
   return itCol->second;
 
@@ -160,7 +168,7 @@ void OneStepNSProblem::setDSUnitaryBlocks(const MapOfDSMapOfUnitaryMatrices& new
 
 void OneStepNSProblem::setNonSmoothSolverPtr(SP::NonSmoothSolver newSolv)
 {
-  solver = newSolv;
+  _solver = newSolv;
 }
 
 void OneStepNSProblem::updateUnitaryBlocks()
@@ -192,12 +200,12 @@ void OneStepNSProblem::updateUnitaryBlocks()
   UnitaryRelationsIterator itUR1, itUR2;
   // Get index set from Simulation
 
-  indexSet = simulation->getIndexSetPtr(levelMin);
+  indexSet = simulation()->indexSet(_levelMin);
 
 
-  isTimeInvariant = simulation->getModelPtr()->
-                    getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->isTimeInvariant();
-  bool isLinear = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->isLinear();
+  isTimeInvariant = simulation()->model()->
+                    nonSmoothDynamicalSystem()->topology()->isTimeInvariant();
+  bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
 
 
   UnitaryRelationsGraph::VIterator ui1, ui1end;
@@ -213,10 +221,10 @@ void OneStepNSProblem::updateUnitaryBlocks()
     else
     {
       // if unitaryBlocks[UR1] exists
-      if ((unitaryBlocks.find(ur1)) != unitaryBlocks.end())
+      if ((_unitaryBlocks.find(ur1)) != _unitaryBlocks.end())
       {
         // if unitaryBlocks[UR1][UR2] does not exist
-        if ((unitaryBlocks[ur1].find(ur1)) == (unitaryBlocks[ur1].end()))
+        if ((_unitaryBlocks[ur1].find(ur1)) == (_unitaryBlocks[ur1].end()))
           computeUnitaryBlock(ur1, ur1);
       }
       else computeUnitaryBlock(ur1, ur1);
@@ -234,10 +242,10 @@ void OneStepNSProblem::updateUnitaryBlocks()
       else
       {
         // if unitaryBlocks[UR1] exists
-        if ((unitaryBlocks.find(ur1)) != unitaryBlocks.end())
+        if ((_unitaryBlocks.find(ur1)) != _unitaryBlocks.end())
         {
           // if unitaryBlocks[UR1][UR2] does not exist
-          if ((unitaryBlocks[ur1].find(ur2)) == (unitaryBlocks[ur1].end()))
+          if ((_unitaryBlocks[ur1].find(ur2)) == (_unitaryBlocks[ur1].end()))
             computeUnitaryBlock(ur1, ur2);
         }
         else computeUnitaryBlock(ur1, ur2);
@@ -248,7 +256,7 @@ void OneStepNSProblem::updateUnitaryBlocks()
 
 void OneStepNSProblem::computeAllUnitaryBlocks()
 {
-  SP::UnitaryRelationsGraph indexSet = simulation->getIndexSetPtr(0);
+  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(0);
 
   UnitaryRelationsIterator itUR1, itUR2;
 
@@ -272,7 +280,9 @@ void OneStepNSProblem::computeAllUnitaryBlocks()
 
 void OneStepNSProblem::computeUnitaryBlock(SP::UnitaryRelation, SP::UnitaryRelation)
 {
-  RuntimeException::selfThrow("OneStepNSProblem::computeUnitaryBlock - not yet implemented for problem type =" + nspbType);
+  RuntimeException::selfThrow
+  ("OneStepNSProblem::computeUnitaryBlock - not yet implemented for problem type ="
+   + _nspbType);
 }
 
 void OneStepNSProblem::updateDSBlocks()
@@ -297,9 +307,9 @@ void OneStepNSProblem::updateDSBlocks()
   // \warning We decided to include all dynamical systems test 3 is not satisfied
 
 
-  //   bool isTimeInvariant= simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()
-  //     ->getTopologyPtr()->isTimeInvariant();
-  //   SP::DynamicalSystemsSet allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  //   bool isTimeInvariant= simulation()->model()->nonSmoothDynamicalSystem()
+  //     ->topology()->isTimeInvariant();
+  //   SP::DynamicalSystemsSet allDS = simulation()->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
 
   //   DSIterator itDS;
   //   for(itDS = allDS->begin(); itDS!=allDS->end();++itDS)
@@ -322,7 +332,7 @@ void OneStepNSProblem::computeAllDSBlocks()
 {
   //  SP::DynamicalSystemsSet allDS;
   //   DSIterator itDS;
-  //   allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  //   allDS = simulation()->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
 
   //   for(itDS = allDS->begin(); itDS!=allDS->end();++itDS)
   //     computeDSBlock(*itDS);
@@ -330,7 +340,9 @@ void OneStepNSProblem::computeAllDSBlocks()
 
 void OneStepNSProblem::computeDSBlock(SP::DynamicalSystem)
 {
-  RuntimeException::selfThrow("OneStepNSProblem::computeDSBlock - not yet implemented for problem type =" + nspbType);
+  RuntimeException::selfThrow
+  ("OneStepNSProblem::computeDSBlock - not yet implemented for problem type ="
+   + _nspbType);
 }
 
 
@@ -362,16 +374,16 @@ void OneStepNSProblem::updateUnitaryDSBlocks()
 
   // Get index set from Simulation
 
-  // indexSet = simulation->getIndexSetPtr(levelMin);
+  // indexSet = simulation()->indexSet(levelMin);
 
 
-  //   isTimeInvariant = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->isTimeInvariant();
+  //   isTimeInvariant = simulation()->model()->nonSmoothDynamicalSystem()->topology()->isTimeInvariant();
 
   //   itUR = indexSet->begin();
 
   //   for(itUR = indexSet->begin(); itUR!=indexSet->end();++itUR)
   //     {
-  //       concernedDS = (*itUR)->getDynamicalSystemsPtr();
+  //       concernedDS = (*itUR)->dynamicalSystems();
 
   //       for(itDS = concernedDS->begin(); itDS!=concernedDS->end();itDS++)
   //  {
@@ -403,14 +415,14 @@ void OneStepNSProblem::updateUnitaryDSBlocks()
 
 void OneStepNSProblem::computeAllUnitaryDSBlocks()
 {
-  // SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(0);
+  // SP::UnitaryRelationsSet indexSet = simulation()->indexSet(0);
   //   DSIterator itDS;
   //   UnitaryRelationsIterator itUR;
   //   DynamicalSystemsSet concernedDS;
 
   //   for(itUR = indexSet->begin(); itUR!=indexSet->end();++itUR)
   //     {
-  //       concernedDS =  *((*itUR)->getDynamicalSystemsPtr());
+  //       concernedDS =  *((*itUR)->dynamicalSystems());
   //       for(itDS = concernedDS.begin(); itDS!=concernedDS.end();itDS++)
   //  computeUnitaryDSBlock(*itUR, *itDS);
   //     }
@@ -418,7 +430,9 @@ void OneStepNSProblem::computeAllUnitaryDSBlocks()
 
 void OneStepNSProblem::computeUnitaryDSBlock(SP::UnitaryRelation, SP::DynamicalSystem)
 {
-  RuntimeException::selfThrow("OneStepNSProblem::computeUnitaryDSBlock - not yet implemented for problem type =" + nspbType);
+  RuntimeException::selfThrow
+  ("OneStepNSProblem::computeUnitaryDSBlock - not yet implemented for problem type ="
+   + _nspbType);
 }
 
 
@@ -449,12 +463,12 @@ void OneStepNSProblem::updateDSUnitaryBlocks()
 
   // Get index set from Simulation
 
-  //   indexSet = simulation->getIndexSetPtr(levelMin);
-  //   isTimeInvariant = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->isTimeInvariant();
+  //   indexSet = simulation()->indexSet(levelMin);
+  //   isTimeInvariant = simulation()->model()->nonSmoothDynamicalSystem()->topology()->isTimeInvariant();
 
   //   for(itUR = indexSet->begin(); itUR!=indexSet->end();++itUR)
   //     {
-  //       concernedDS = (*itUR)->getDynamicalSystemsPtr();
+  //       concernedDS = (*itUR)->dynamicalSystems();
   //       for(itDS = concernedDS->begin(); itDS!=concernedDS->end();itDS++)
   //  {
   //    if(!isTimeInvariant)
@@ -474,22 +488,27 @@ void OneStepNSProblem::updateDSUnitaryBlocks()
 
 void OneStepNSProblem::computeAllDSUnitaryBlocks()
 {
-  //  SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(0);
+  //  SP::UnitaryRelationsSet indexSet = simulation()->indexSet(0);
   //   DSIterator itDS;
   //   UnitaryRelationsIterator itUR;
   //   SP::DynamicalSystemsSet concernedDS;
 
   //   for(itUR = indexSet->begin(); itUR!=indexSet->end();++itUR)
   //     {
-  //       concernedDS =  (*itUR)->getDynamicalSystemsPtr();
+  //       concernedDS =  (*itUR)->dynamicalSystems();
   //       for(itDS = concernedDS->begin(); itDS!=concernedDS->end();itDS++)
   //  computeDSUnitaryBlock(*itDS, *itUR);
   //     }
+  RuntimeException::selfThrow
+  ("OneStepNSProblem::computeALLDSUnitaryBlocks - not yet implemented for problem type ="
+   + _nspbType);
 }
 
 void OneStepNSProblem::computeDSUnitaryBlock(SP::DynamicalSystem, SP::UnitaryRelation)
 {
-  RuntimeException::selfThrow("OneStepNSProblem::computeDSUnitaryBlock - not yet implemented for problem type =" + nspbType);
+  RuntimeException::selfThrow
+  ("OneStepNSProblem::computeDSUnitaryBlock - not yet implemented for problem type ="
+   + _nspbType);
 }
 void OneStepNSProblem::initialize(SP::Simulation sim)
 {
@@ -497,37 +516,38 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
 
   assert(sim && "OneStepNSProblem::initialize(sim), sim is null.");
 
-  simulation = sim;
+  _simulation = sim;
 
-  bool isTimeInvariant = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->isTimeInvariant();
-  bool isLinear = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->isLinear();
+  bool isTimeInvariant = simulation()->model()->nonSmoothDynamicalSystem()->topology()->isTimeInvariant();
+  bool isLinear = simulation()->model()->nonSmoothDynamicalSystem()->isLinear();
 
   // === Link to the Interactions of the Non Smooth Dynamical System (through the Simulation) ===
   // Warning: this means that all Interactions of the NSProblem are included in the OSNS !!
-  OSNSInteractions = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
+  _OSNSInteractions = simulation()->model()->nonSmoothDynamicalSystem()->interactions();
 
   // === Adds this in the simulation set of OneStepNSProblem ===
   // First checks the id if required.
   // An id is required if there is more than one OneStepNSProblem in the simulation
-  if (!(simulation->getOneStepNSProblems())->empty() && id == DEFAULT_OSNS_NAME)
+  if (!(simulation()->getOneStepNSProblems())->empty() && _id == DEFAULT_OSNS_NAME)
     RuntimeException::selfThrow("OneStepNSProblem::constructor(...). Since the simulation has several one step non smooth problem, an id is required for each of them.");
 
   // Checks that the set of Interactions is not empty -
   // Empty set is not forbidden, then we just display a warning message.
-  if (!OSNSInteractions->isEmpty())
+  if (!_OSNSInteractions->isEmpty())
     if (isTimeInvariant || !isLinear) // if time variant it is done in precompute
       updateUnitaryBlocks();
 
   // The maximum size of the problem (for example, the dim. of M in LCP or Friction problems).
   // Set to the number of possible scalar constraints declared in the topology.
-  if (maxSize == 0) // if maxSize not set explicitely by user before initialize
-    maxSize = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getNumberOfConstraints();
+  if (_maxSize == 0) // if maxSize not set explicitely by user before initialize
+    _maxSize = simulation()->model()->nonSmoothDynamicalSystem()->topology()->getNumberOfConstraints();
 }
 
 void OneStepNSProblem::saveInMemory()
 {
-  assert(OSNSInteractions);
-  std::for_each(OSNSInteractions->begin(), OSNSInteractions->end(), boost::bind(&Interaction::swapInMemory, _1));
+  assert(_OSNSInteractions);
+  std::for_each(_OSNSInteractions->begin(), _OSNSInteractions->end(),
+                boost::bind(&Interaction::swapInMemory, _1));
 }
 
 void OneStepNSProblem::saveNSProblemToXML()
@@ -540,7 +560,7 @@ void OneStepNSProblem::saveNSProblemToXML()
   //       vector<int> v;
   //       InteractionsIterator it;
   //       for(it=OSNSInteractions->begin(); it!=OSNSInteractions->end();++it)
-  //  v.push_back((*it)->getNumber());
+  //  v.push_back((*it)->number());
   //       //onestepnspbxml->setInteractionConcerned( v, allInteractionConcerned() );
 
   //       //onestepnspbxml->setSolver(solvingFormalisation, methodName, normType, tolerance, maxIter, searchDirection );
@@ -560,7 +580,7 @@ void OneStepNSProblem::getOSIMaps(SP::UnitaryRelation UR, MapOfDSMatrices& centr
   DSIterator itDS = UR->dynamicalSystemsBegin();
   while (itDS != (UR->dynamicalSystemsEnd()))
   {
-    Osi = simulation->getIntegratorOfDSPtr(*itDS); // get OneStepIntegrator of current dynamical system
+    Osi = simulation()->integratorOfDS(*itDS); // get OneStepIntegrator of current dynamical system
     osiType = Osi->getType();
     if (osiType == OSI::MOREAU)
     {
@@ -575,7 +595,7 @@ void OneStepNSProblem::getOSIMaps(SP::UnitaryRelation UR, MapOfDSMatrices& centr
 
       // get lu-factorized mass
       centralUnitaryBlocks[*itDS] =
-        (boost::static_pointer_cast<LagrangianDS>(*itDS))->getMassLUPtr();
+        (boost::static_pointer_cast<LagrangianDS>(*itDS))->massLU();
 
     }
     else
@@ -586,35 +606,38 @@ void OneStepNSProblem::getOSIMaps(SP::UnitaryRelation UR, MapOfDSMatrices& centr
 
 void OneStepNSProblem::printStat()
 {
-  cout << " CPU time for solving : " << CPUtime / (double)CLOCKS_PER_SEC << endl;
-  cout << " Number of iterations done: " << nbIter << endl;
+  cout << " CPU time for solving : " << _CPUtime / (double)CLOCKS_PER_SEC << endl;
+  cout << " Number of iterations done: " << _nbIter << endl;
 }
 
 void OneStepNSProblem::clear()
 {
-  for (UnitaryMatrixRowIterator itRow = unitaryBlocks.begin(); itRow != unitaryBlocks.end() ; ++itRow)
+  for (UnitaryMatrixRowIterator itRow = _unitaryBlocks.begin();
+       itRow != _unitaryBlocks.end() ; ++itRow)
   {
     (itRow->second).clear();
   };
 
-  unitaryBlocks.clear();
+  _unitaryBlocks.clear();
 
 
-  DSBlocks.clear();
+  _DSBlocks.clear();
 
-  for (UnitaryDSMatrixRowIterator itRow = unitaryDSBlocks.begin(); itRow != unitaryDSBlocks.end() ; ++itRow)
+  for (UnitaryDSMatrixRowIterator itRow = _unitaryDSBlocks.begin();
+       itRow != _unitaryDSBlocks.end() ; ++itRow)
   {
     (itRow->second).clear();
   };
-  unitaryDSBlocks.clear();
+  _unitaryDSBlocks.clear();
 
-  for (DSUnitaryMatrixRowIterator itRow = DSUnitaryBlocks.begin(); itRow != DSUnitaryBlocks.end() ; ++itRow)
+  for (DSUnitaryMatrixRowIterator itRow = _DSUnitaryBlocks.begin();
+       itRow != _DSUnitaryBlocks.end() ; ++itRow)
   {
     (itRow->second).clear();
   };
-  DSUnitaryBlocks.clear();
-  if (OSNSInteractions)
-    OSNSInteractions->clear();
+  _DSUnitaryBlocks.clear();
+  if (_OSNSInteractions)
+    _OSNSInteractions->clear();
 }
 
 OneStepNSProblem::~OneStepNSProblem()

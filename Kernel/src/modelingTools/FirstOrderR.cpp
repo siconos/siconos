@@ -34,16 +34,16 @@ void FirstOrderR::initDSLinks()
   data[g_alpha].reset(new BlockVector());
 
   SP::FirstOrderNonLinearDS ds;
-  for (DSIterator it = getInteractionPtr()->dynamicalSystemsBegin(); it != getInteractionPtr()->dynamicalSystemsEnd(); ++it)
+  for (DSIterator it = interaction()->dynamicalSystemsBegin(); it != interaction()->dynamicalSystemsEnd(); ++it)
   {
     // Put x/r ... of each DS into a block. (Pointers links, no copy!!)
     ds = boost::static_pointer_cast<FirstOrderNonLinearDS> (*it);
-    data[x]->insertPtr(ds->getXPtr());
-    data[z]->insertPtr(ds->getZPtr());
-    data[r]->insertPtr(ds->getRPtr());
-    data[g_alpha]->insertPtr(ds->getGAlphaPtr());
-    data[ds_xp]->insertPtr(ds->getXpPtr());
-    //      data[Blambda]->insertPtr( ds->getBLambdaPtr());
+    data[x]->insertPtr(ds->x());
+    data[z]->insertPtr(ds->z());
+    data[r]->insertPtr(ds->r());
+    data[g_alpha]->insertPtr(ds->gAlpha());
+    data[ds_xp]->insertPtr(ds->xp());
+    //      data[Blambda]->insertPtr( ds->bLambda());
 
   }
 }
@@ -51,12 +51,12 @@ void FirstOrderR::initDSLinks()
 void FirstOrderR::initialize(SP::Interaction inter)
 {
   assert(inter && "FirstOrderR::initialize failed. No Interaction linked to the present relation.");
-  interaction = inter;
+  _interaction = inter;
 
   // Check if an Interaction is connected to the Relation.
-  unsigned int sizeY = getInteractionPtr()->getSizeOfY();
-  unsigned int sizeX = getInteractionPtr()->getSizeOfDS();
-  unsigned int sizeZ = getInteractionPtr()->getSizeZ();
+  unsigned int sizeY = interaction()->getSizeOfY();
+  unsigned int sizeX = interaction()->getSizeOfDS();
+  unsigned int sizeZ = interaction()->getSizeZ();
 
   // Update data member (links to DS variables)
   initDSLinks();

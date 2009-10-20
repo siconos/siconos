@@ -62,7 +62,7 @@ LagrangianCompliantR::LagrangianCompliantR(const string& computeH, const std::ve
 void LagrangianCompliantR::initComponents()
 {
   LagrangianR::initComponents();
-  unsigned int sizeY = getInteractionPtr()->getSizeOfY();
+  unsigned int sizeY = interaction()->getSizeOfY();
   workL.reset(new SimpleVector(sizeY));
 
   if (! JacLH)
@@ -76,8 +76,8 @@ void LagrangianCompliantR::computeH(double time)
   if (hPtr)
   {
     // get vector y of the current interaction
-    SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
-    SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(0);
+    SP::SiconosVector y = interaction()->y(0);
+    SP::SiconosVector lambda = interaction()->lambda(0);
 
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
     *workX = *data[q0];
@@ -111,7 +111,7 @@ void LagrangianCompliantR::computeJacQH(double time)
     unsigned int sizeZ = workZ->size();
 
     // get vector lambda of the current interaction
-    *workL = *getInteractionPtr()->getLambdaPtr(0);
+    *workL = *interaction()->lambda(0);
     (JacQHPtr)(sizeQ, &(*workX)(0), sizeY, &(*workL)(0), &(*JacQH)(0, 0), sizeZ, &(*workZ)(0));
     // Copy data that might have been changed in the plug-in call.
     *data[z] = *workZ;
@@ -131,7 +131,7 @@ void LagrangianCompliantR::computeJacLH(double time)
     unsigned int sizeZ = workZ->size();
 
     // get vector lambda of the current interaction
-    *workL = *getInteractionPtr()->getLambdaPtr(0);
+    *workL = *interaction()->lambda(0);
     (JacLHPtr)(sizeQ, &(*workX)(0), sizeY, &(*workL)(0), &(*JacLH)(0, 0), sizeZ, &(*workZ)(0));
     // Copy data that might have been changed in the plug-in call.
     *data[z] = *workZ;
@@ -144,12 +144,12 @@ void LagrangianCompliantR::computeOutput(double time, unsigned int derivativeNum
     computeH(time);
   else
   {
-    SP::SiconosVector y = getInteractionPtr()->getYPtr(derivativeNumber);
+    SP::SiconosVector y = interaction()->y(derivativeNumber);
     computeJacQH(time);
     computeJacLH(time);
     if (derivativeNumber == 1)
     {
-      SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(derivativeNumber);
+      SP::SiconosVector lambda = interaction()->lambda(derivativeNumber);
       // y = JacH[0] q1 + JacH[1] lambda
       prod(*JacQH, *data[q1], *y);
       prod(*JacLH, *lambda, *y, false);
@@ -165,7 +165,7 @@ void LagrangianCompliantR::computeInput(const double time, const unsigned int le
 {
   computeJacQH(time);
   // get lambda of the concerned interaction
-  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(level);
+  SP::SiconosVector lambda = interaction()->lambda(level);
 
   // data[name] += trans(G) * lambda
   prod(*lambda, *JacQH, *data[p0 + level], false);

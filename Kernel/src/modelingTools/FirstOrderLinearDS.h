@@ -50,18 +50,22 @@ typedef   void (*LDSPtrFunction)(double, unsigned int, double*, unsigned int, do
  *
  * Specific members of this class are A and b.
  *
- * f is not set for such system and thus calls to computeF or other related functions are forbidden.
+ * f is not set for such system and thus calls to computeF or other
+ * related functions are forbidden.
  *
  *  Thus, the main steps for FirstOrderLinearDS handling consist in:
  *
- *  - Construction: A and b are optional, and can be given as a matrix/vector or a plug-in.
- *  - Initialization: compute values at time=t0 (rhs, jacobianXF, A ...), usually done when calling simulation->initialize.
- *  - Computation at time t, by calling "compute" functions
+ * - Construction: A and b are optional, and can be given as a
+ *   matrix/vector or a plug-in.
+ * - Initialization: compute values at time=t0 (rhs, jacobianXF, A
+ *    ...), usually done when calling simulation->initialize.
+ * - Computation at time t, by calling "compute" functions
  *      => computeA
- *      => computeB
+ *      => computeb
  *      => computeRhs, compute \f$ \dot x = M^{-1}(Ax + b + r) \f$
  *
- * Any call to a plug-in requires that it has been set correctly before simulation using one of the following:
+ * Any call to a plug-in requires that it has been set correctly
+ * before simulation using one of the following:
  *   => setComputeAFunction
  *   => setComputeBFunction
  *
@@ -71,10 +75,10 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS
 protected:
 
   /** matrix specific to the FirstOrderLinearDS \f$ A \in R^{n \times n}  \f$*/
-  SP::SiconosMatrix A;
+  SP::SiconosMatrix _A;
 
   /** strength vector */
-  SP::SiconosVector b;
+  SP::SiconosVector _b;
 
   /** FirstOrderLinearDS plug-in to compute A(t,z), id = "A"
   * @param time : current time
@@ -83,8 +87,8 @@ protected:
   * @param size of vector z
   * @param[in,out] z a vector of user-defined parameters
   */
-  LDSPtrFunction APtr;
-  std::string pluginNameAPtr;
+  LDSPtrFunction _APtr;
+  std::string _pluginNameAPtr;
 
   /** FirstOrderLinearDS plug-in to compute b(t,z), id = "b"
   * @param time : current time
@@ -93,8 +97,8 @@ protected:
   * @param size of vector z
   * @param[in,out] param  : a vector of user-defined parameters
   */
-  LDSPtrFunction bPtr;
-  std::string pluginNamebPtr;
+  LDSPtrFunction _bPtr;
+  std::string _pluginNamebPtr;
 
   /** default constructor
    */
@@ -159,21 +163,22 @@ public:
   /** get A
    *  \return pointer on a plugged-matrix
    */
-  inline SP::SiconosMatrix getAPtr() const
+  inline SP::SiconosMatrix A() const
   {
-    return A;
+    return _A;
   }
 
-  virtual SP::SiconosMatrix getJacobianXFPtr() const
+  virtual SP::SiconosMatrix jacobianXF() const
   {
-    return A;
+    return _A;
   };
   /**  function to compute \f$ f: (x,t)\f$
    * \param double time : current time
    */
   virtual void computeF(double);
 
-  /** function to compute \f$ f: (x,t)\f$ with x different from current saved state.
+  /** function to compute \f$ f: (x,t)\f$ with x different from
+      current saved state.
    * \param double time : current time
    * \param SP::SiconosVector
    */
@@ -191,7 +196,11 @@ public:
    */
   inline void setAPtr(SP::SiconosMatrix newPtr)
   {
-    A = newPtr;
+    _A = newPtr;
+  }
+  inline void setA(SP::SiconosMatrix newPtr)
+  {
+    _A = newPtr;
   }
 
   // --- b ---
@@ -204,9 +213,9 @@ public:
   /** get b
    *  \return pointer on a plugged vector
    */
-  inline SP::SiconosVector getBPtr() const
+  inline SP::SiconosVector b() const
   {
-    return b;
+    return _b;
   }
 
   /** set the value of b to newValue
@@ -218,9 +227,9 @@ public:
   /** set b to pointer newPtr
    *  \param a SP to plugged vector
    */
-  inline void setBPtr(SP::SiconosVector newPtr)
+  inline void setb(SP::SiconosVector newPtr)
   {
-    b = newPtr;
+    _b = newPtr;
   }
 
   // --- plugins related functions
@@ -242,20 +251,21 @@ public:
    *  \param string : the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeBFunction(const std::string& , const std::string&);
+  void setComputebFunction(const std::string& , const std::string&);
 
   /** set a specified function to compute the vector b
    *  \param VectorFunctionOfTime : a pointer on the plugin function
    */
-  void setComputeBFunction(LDSPtrFunction fct);
+  void setComputebFunction(LDSPtrFunction fct);
 
-  /** default function to compute matrix A => same action as computeJacobianXF
+  /** default function to compute matrix A => same action as
+      computeJacobianXF
    */
   void computeA(double);
 
   /** default function to compute vector b
    */
-  void computeB(double);
+  void computeb(double);
 
   /** Default function to the right-hand side term
    *  \param double time : current time
@@ -263,7 +273,9 @@ public:
    */
   void computeRhs(double, bool  = false);
 
-  /** Default function to jacobian of the right-hand side term according to x
+  /** Default function to jacobian of the right-hand side term
+      according to x
+
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
    */
@@ -287,9 +299,11 @@ public:
     return 1.0;
   }
 
-  /** encapsulates an operation of dynamic casting. Needed by Python interface.
+  /** encapsulates an operation of dynamic casting. Needed by Python
+      interface.
    *  \param DynamicalSystem* : the system which must be converted
-   * \return a pointer on the dynamical system if it is of the right type, NULL otherwise
+   * \return a pointer on the dynamical system if it is of the right
+   * type, NULL otherwise
    */
   static FirstOrderLinearDS* convert(DynamicalSystem* ds);
 

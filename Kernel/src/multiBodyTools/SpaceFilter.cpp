@@ -168,7 +168,7 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
   {
 
     SP::CircularR rel;
-    SP::DynamicalSystemsGraph DSG0 = parent->_nsds->getTopologyPtr()->getDSGPtr(0);
+    SP::DynamicalSystemsGraph DSG0 = parent->_nsds->topology()->dSG(0);
 
     assert(ds1 != ds2);
     assert(DSG0->bundle(DSG0->descriptor(ds1)) == ds1);
@@ -222,7 +222,7 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
                                               rel));
         inter->insert(ds1);
         inter->insert(ds2);
-        parent->_nsds->getTopologyPtr()->addInteraction(inter);
+        parent->_nsds->topology()->addInteraction(inter);
       }
     }
     else
@@ -242,8 +242,8 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
 
       if (found)
       {
-        parent->_nsds->getTopologyPtr()->
-        removeInteraction(DSG0->bundle(*oei)->getInteractionPtr());
+        parent->_nsds->topology()->
+        removeInteraction(DSG0->bundle(*oei)->interaction());
       }
 
     }
@@ -274,7 +274,7 @@ struct SpaceFilter::_SphereFilter : public SiconosVisitor
   void visit(SP::Sphere ds2)
   {
     SP::SphereSphereR rel;
-    SP::DynamicalSystemsGraph DSG0 = parent->_nsds->getTopologyPtr()->getDSGPtr(0);
+    SP::DynamicalSystemsGraph DSG0 = parent->_nsds->topology()->dSG(0);
 
     assert(ds1 != ds2);
     assert(DSG0->bundle(DSG0->descriptor(ds1)) == ds1);
@@ -323,7 +323,7 @@ struct SpaceFilter::_SphereFilter : public SiconosVisitor
                                               rel));
         inter->insert(ds1);
         inter->insert(ds2);
-        parent->_nsds->getTopologyPtr()->addInteraction(inter);
+        parent->_nsds->topology()->addInteraction(inter);
       }
     }
     else
@@ -343,8 +343,8 @@ struct SpaceFilter::_SphereFilter : public SiconosVisitor
 
       if (found)
       {
-        parent->_nsds->getTopologyPtr()->
-        removeInteraction(DSG0->bundle(*oei)->getInteractionPtr());
+        parent->_nsds->topology()->
+        removeInteraction(DSG0->bundle(*oei)->interaction());
       }
 
     }
@@ -417,7 +417,7 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
   /* tolerance */
   double tol = r;
 
-  SP::DynamicalSystemsGraph DSG0 = _nsds->getTopologyPtr()->getDSGPtr(0);
+  SP::DynamicalSystemsGraph DSG0 = _nsds->topology()->dSG(0);
 
   boost::shared_ptr<_IsSameDiskPlanR>
   isSameDiskPlanR(new _IsSameDiskPlanR(shared_from_this(), A, B, C, r,
@@ -439,8 +439,8 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
     for (boost::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
          oei != oeiend; ++oei)
     {
-      DSG0->bundle(*oei)->getInteractionPtr()
-      ->getRelationPtr()->accept(isSameDiskPlanR);
+      DSG0->bundle(*oei)->interaction()
+      ->relation()->accept(isSameDiskPlanR);
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameDiskPlanR->flag)
       {
@@ -457,7 +457,7 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
                                             relp));
       inter->insert(ds);
 
-      _nsds->getTopologyPtr()->addInteraction(inter);
+      _nsds->topology()->addInteraction(inter);
 
     }
   }
@@ -468,14 +468,14 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
     for (boost::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
          oei != oeiend; ++oei)
     {
-      DSG0->bundle(*oei)->getInteractionPtr()
-      ->getRelationPtr()->accept(isSameDiskPlanR);
+      DSG0->bundle(*oei)->interaction()
+      ->relation()->accept(isSameDiskPlanR);
 
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameDiskPlanR->flag)
       {
-        _nsds->getTopologyPtr()->
-        removeInteraction(DSG0->bundle(*oei)->getInteractionPtr());
+        _nsds->topology()->
+        removeInteraction(DSG0->bundle(*oei)->interaction());
         break;
       }
     }
@@ -490,7 +490,7 @@ void SpaceFilter::_PlanSphereFilter(double A, double B, double C, double D, SP::
   /* tolerance */
   double tol = r;
 
-  SP::DynamicalSystemsGraph DSG0 = _nsds->getTopologyPtr()->getDSGPtr(0);
+  SP::DynamicalSystemsGraph DSG0 = _nsds->topology()->dSG(0);
 
   boost::shared_ptr<_IsSameSpherePlanR>
   isSameSpherePlanR(new _IsSameSpherePlanR(shared_from_this(), A, B, C, D, r));
@@ -511,8 +511,8 @@ void SpaceFilter::_PlanSphereFilter(double A, double B, double C, double D, SP::
     for (boost::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
          oei != oeiend; ++oei)
     {
-      DSG0->bundle(*oei)->getInteractionPtr()
-      ->getRelationPtr()->accept(isSameSpherePlanR);
+      DSG0->bundle(*oei)->interaction()
+      ->relation()->accept(isSameSpherePlanR);
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameSpherePlanR->flag)
       {
@@ -529,7 +529,7 @@ void SpaceFilter::_PlanSphereFilter(double A, double B, double C, double D, SP::
                                             relp));
       inter->insert(ds);
 
-      _nsds->getTopologyPtr()->addInteraction(inter);
+      _nsds->topology()->addInteraction(inter);
 
     }
   }
@@ -540,14 +540,14 @@ void SpaceFilter::_PlanSphereFilter(double A, double B, double C, double D, SP::
     for (boost::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
          oei != oeiend; ++oei)
     {
-      DSG0->bundle(*oei)->getInteractionPtr()
-      ->getRelationPtr()->accept(isSameSpherePlanR);
+      DSG0->bundle(*oei)->interaction()
+      ->relation()->accept(isSameSpherePlanR);
 
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameSpherePlanR->flag)
       {
-        _nsds->getTopologyPtr()->
-        removeInteraction(DSG0->bundle(*oei)->getInteractionPtr());
+        _nsds->topology()->
+        removeInteraction(DSG0->bundle(*oei)->interaction());
         break;
       }
     }
@@ -614,7 +614,7 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
                                   ds1);
     }
 
-    SP::SiconosVector Q1 = ds1->getQPtr();
+    SP::SiconosVector Q1 = ds1->q();
 
     double x1 = Q1->getValue(0);
     double y1 = Q1->getValue(1);
@@ -634,8 +634,8 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
     for (j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j)
     {
       SP::LagrangianDS ds2 = (*neighbours.first)->body;
-      int ids1 = ds1->getNumber();
-      int ids2 = ds2->getNumber();
+      int ids1 = ds1->number();
+      int ids2 = ds2->number();
       int imax = (std::max)(ids1, ids2);
       int imin = (std::min)(ids1, ids2);
       if (ids1 != ids2)
@@ -679,7 +679,7 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
                                 (*parent->_plans)(i, 3), ds1);
     }
 
-    SP::SiconosVector Q1 = ds1->getQPtr();
+    SP::SiconosVector Q1 = ds1->q();
 
     double x1 = Q1->getValue(0);
     double y1 = Q1->getValue(1);
@@ -700,8 +700,8 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
     for (j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j)
     {
       SP::LagrangianDS ds2 = (*neighbours.first)->body;
-      int ids1 = ds1->getNumber();
-      int ids2 = ds2->getNumber();
+      int ids1 = ds1->number();
+      int ids2 = ds2->number();
       int imax = (std::max)(ids1, ids2);
       int imin = (std::min)(ids1, ids2);
       if (ids1 != ids2)
@@ -738,7 +738,7 @@ void SpaceFilter::buildInteractions()
   DSIterator it1;
 
   SP::DynamicalSystemsGraph
-  DSG0 = _nsds->getTopologyPtr()->getDSGPtr(0);
+  DSG0 = _nsds->topology()->dSG(0);
 
   boost::shared_ptr<_BodyHash>
   hasher(new _BodyHash(shared_from_this()));
@@ -765,6 +765,6 @@ void SpaceFilter::buildInteractions()
   }
 
   // should be done on the fly. Linear time anyway.
-  _nsds->getTopologyPtr()->computeRelativeDegrees();
+  _nsds->topology()->computeRelativeDegrees();
 
 }

@@ -22,10 +22,10 @@
 
 void Circle::MassSetup()
 {
-  mass.reset(new SimpleMatrix(ndof, ndof));
-  mass->zero();
-  (*mass)(0, 0) = (*mass)(1, 1) = massValue;
-  (*mass)(2, 2) = massValue * radius * radius;
+  _mass.reset(new SimpleMatrix(_ndof, _ndof));
+  _mass->zero();
+  (*_mass)(0, 0) = (*_mass)(1, 1) = massValue;
+  (*_mass)(2, 2) = massValue * radius * radius;
 }
 
 Circle::Circle(double r, double m,

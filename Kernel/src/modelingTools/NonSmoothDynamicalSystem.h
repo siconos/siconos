@@ -50,7 +50,7 @@ private:
   bool BVP;
 
   /** the topology of the system */
-  SP::Topology topology;
+  SP::Topology _topology;
 
   /** the XML object linked to the NonSmoothDynamicalSystem to read XML data */
   SP::NonSmoothDynamicalSystemXML nsdsxml;
@@ -133,7 +133,7 @@ public:
    */
   inline const unsigned int getNumberOfDS() const
   {
-    return getTopologyPtr()->getDSGPtr(0)->size();
+    return topology()->dSG(0)->size();
   };
 
   /** get all the DynamicalSystem of the NonSmoothDynamicalSystem
@@ -142,7 +142,7 @@ public:
    */
   inline const SP::DynamicalSystemsGraph getDynamicalSystems() const
   {
-    return getTopologyPtr()->getDSGPtr(0);
+    return topology()->dSG(0);
   }
 
   /** check if DynamicalSystem number N exists
@@ -164,15 +164,15 @@ public:
    */
   inline const unsigned int getNumberOfInteractions() const
   {
-    return topology->getInteractionsPtr()->size();
+    return _topology->interactions()->size();
   };
 
   /** get all the Interactions of the NonSmoothDynamicalSystem problem (saved in a set)
    *  \return an InteractionsSet *
    */
-  inline const SP::InteractionsSet getInteractionsPtr() const
+  inline const SP::InteractionsSet interactions() const
   {
-    return topology->getInteractionsPtr();
+    return _topology->interactions();
   }
 
   /** add an interaction to the system
@@ -180,7 +180,7 @@ public:
    */
   void addInteraction(SP::Interaction inter)
   {
-    topology->addInteraction(inter);
+    _topology->addInteraction(inter);
   };
 
 
@@ -189,7 +189,7 @@ public:
    */
   void removeInteraction(SP::Interaction inter)
   {
-    topology->removeInteraction(inter);
+    _topology->removeInteraction(inter);
   };
 
   /** add a dynamical system
@@ -197,7 +197,7 @@ public:
    */
   void addDynamicalSystem(SP::DynamicalSystem ds)
   {
-    topology->addDynamicalSystem(ds);
+    _topology->addDynamicalSystem(ds);
   };
 
 
@@ -206,7 +206,7 @@ public:
    */
   void removeDynamicalSystem(SP::DynamicalSystem ds)
   {
-    topology->removeDynamicalSystem(ds);
+    _topology->removeDynamicalSystem(ds);
   };
 
 
@@ -214,21 +214,21 @@ public:
       -   *  \param the identifier of the DynamicalSystem to get
       -   *  \return a pointer on DynamicalSystem
   */
-  SP::DynamicalSystem getDynamicalSystemPtrNumber(int) const ;
+  SP::DynamicalSystem dynamicalSystemNumber(int) const ;
 
 
   /** get the topology of the system
    *  \return a pointer on Topology
    */
-  inline SP::Topology getTopologyPtr() const
+  inline SP::Topology topology() const
   {
-    return topology;
+    return _topology;
   }
 
   /** get the xml linked object
    *  \return a pointer on NonSmoothDynamicalSystemXML
    */
-  inline SP::NonSmoothDynamicalSystemXML getNonSmoothDynamicalSystemXMLPtr()
+  inline SP::NonSmoothDynamicalSystemXML nonSmoothDynamicalSystemXML()
   const
   {
     return nsdsxml;

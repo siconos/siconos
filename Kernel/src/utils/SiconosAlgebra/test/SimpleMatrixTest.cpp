@@ -1311,7 +1311,7 @@ void SimpleMatrixTest::testOperators6Ter()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", (*res) == (2.0 * (*tmp)), true);
 
   *res = prod(*tmp , *tmp2);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", norm_inf(*res->getSparsePtr() - prod(*SP, *SP)) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", norm_inf(*res->sparse() - prod(*SP, *SP)) < tol, true);
 
   *res = *tmp - *tmp2;
   tmp->zero();
@@ -1872,11 +1872,11 @@ void SimpleMatrixTest::testOperators8()
 
   // Simple = Simple * Simple
   *C = prod(*A, *B);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8Bis: ", norm_inf(*C->getDensePtr() - prod(*A->getDensePtr(), *B->getDensePtr())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8Bis: ", norm_inf(*C->dense() - prod(*A->dense(), *B->dense())) < tol, true);
 
   // Block = Simple * Simple
   *Cb = prod(*A, *B);
-  DenseMat Dtmp = prod(*A->getDensePtr(), *B->getDensePtr());
+  DenseMat Dtmp = prod(*A->dense(), *B->dense());
   SP::SimpleMatrix tmp(new SimpleMatrix(Dtmp));
   for (unsigned int i = 0; i < C->size(0); ++i)
     for (unsigned int j = i ; j < C->size(1); ++j)
@@ -1966,11 +1966,11 @@ void SimpleMatrixTest::testOperators8Bis()
   cout << "--> Test: operator8Bis." << endl;
   // Simple = Simple * Simple
   prod(*A, *B, *C);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8Bis: ", norm_inf(*C->getDensePtr() - prod(*A->getDensePtr(), *B->getDensePtr())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8Bis: ", norm_inf(*C->dense() - prod(*A->dense(), *B->dense())) < tol, true);
 
   // Block = Simple * Simple
   prod(*A, *B, *Cb);
-  DenseMat Dtmp = prod(*A->getDensePtr(), *B->getDensePtr());
+  DenseMat Dtmp = prod(*A->dense(), *B->dense());
   SP::SimpleMatrix tmp(new SimpleMatrix(Dtmp));
   for (unsigned int i = 0; i < Cb->size(0); ++i)
     for (unsigned int j = i ; j < Cb->size(1); ++j)
@@ -2061,17 +2061,17 @@ void SimpleMatrixTest::testOperators8Ter()
   cout << "--> Test: operator8Ter." << endl;
   // Simple = Simple * Simple
   axpy_prod(*A, *B, *C, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8Ter: ", norm_inf(*C->getDensePtr() - prod(*A->getDensePtr(), *B->getDensePtr())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8Ter: ", norm_inf(*C->dense() - prod(*A->dense(), *B->dense())) < tol, true);
 
   // Simple += Simple * Simple
   SP::SiconosMatrix backUp(new SimpleMatrix(*C));
 
   axpy_prod(*A, *B, *C, false);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8Ter: ", norm_inf(*C->getDensePtr() - prod(*A->getDensePtr(), *B->getDensePtr()) - *backUp->getDensePtr()) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8Ter: ", norm_inf(*C->dense() - prod(*A->dense(), *B->dense()) - *backUp->dense()) < tol, true);
   // Block = Simple * Simple
   axpy_prod(*A, *B, *Cb, true);
-  DenseMat Dtmp = prod(*A->getDensePtr(), *B->getDensePtr());
+  DenseMat Dtmp = prod(*A->dense(), *B->dense());
   SP::SimpleMatrix tmp(new SimpleMatrix(Dtmp));
   for (unsigned int i = 0; i < Cb->size(0); ++i)
     for (unsigned int j = i ; j < Cb->size(1); ++j)
@@ -2080,7 +2080,7 @@ void SimpleMatrixTest::testOperators8Ter()
   *backUp = *Cb;
   // Block += Simple * Simple
   axpy_prod(*A, *B, *Cb, false);
-  Dtmp = prod(*A->getDensePtr(), *B->getDensePtr());
+  Dtmp = prod(*A->dense(), *B->dense());
   *tmp = Dtmp;
   for (unsigned int i = 0; i < Cb->size(0); ++i)
     for (unsigned int j = i ; j < Cb->size(1); ++j)
@@ -2096,13 +2096,13 @@ void SimpleMatrixTest::testOperators8_4() // C += A*B
   C->zero();
   prod(*A, *B, *C, false);
   prod(*A, *B, *C, false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_4: ", norm_inf(*C->getDensePtr() - 2 * prod(*A->getDensePtr(), *B->getDensePtr())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_4: ", norm_inf(*C->dense() - 2 * prod(*A->dense(), *B->dense())) < tol, true);
 
   // Block = Simple * Simple
   Cb->zero();
   prod(*A, *B, *Cb, false);
   prod(*A, *B, *Cb, false);
-  DenseMat Dtmp = prod(*A->getDensePtr(), *B->getDensePtr());
+  DenseMat Dtmp = prod(*A->dense(), *B->dense());
   SP::SimpleMatrix tmp(new SimpleMatrix(Dtmp));
   for (unsigned int i = 0; i < Cb->size(0); ++i)
     for (unsigned int j = i ; j < Cb->size(1); ++j)
@@ -2144,12 +2144,12 @@ void SimpleMatrixTest::testOperators8_5()
   coord[6] = 0;
   coord[7] = size;
   subprod(*A, *v, *y, coord, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", norm_inf(*y->getDensePtr() - prod(*A->getDensePtr(), *v->getDensePtr())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", norm_inf(*y->dense() - prod(*A->dense(), *v->dense())) < tol, true);
 
   // Simple = Simple * Block, all dense
   // subprod but with full matrix/vectors
   subprod(*A, *x, *y, coord, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", norm_inf(*y->getDensePtr() - prod(*A->getDensePtr(), *v->getDensePtr())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", norm_inf(*y->dense() - prod(*A->dense(), *v->dense())) < tol, true);
 
   coord[0] = 0;
   coord[1] = 2;
@@ -2290,13 +2290,13 @@ void SimpleMatrixTest::testOperators8_6()
   coord[6] = 0;
   coord[7] = size;
   subprod(*A, *v, *y, coord, false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", norm_inf(*y->getDensePtr() - prod(*A->getDensePtr(), *v->getDensePtr()) - *v->getDensePtr()) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", norm_inf(*y->dense() - prod(*A->dense(), *v->dense()) - *v->dense()) < tol, true);
 
   // Simple = Simple * Block, all dense
   // subprod but with full matrix/vectors
   *y = *v;
   subprod(*A, *x, *y, coord, false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", norm_inf(*y->getDensePtr() - prod(*A->getDensePtr(), *v->getDensePtr()) - *v->getDensePtr()) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", norm_inf(*y->dense() - prod(*A->dense(), *v->dense()) - *v->dense()) < tol, true);
 
   coord[0] = 0;
   coord[1] = 2;
@@ -3364,21 +3364,21 @@ void SimpleMatrixTest::testGemm()
   SP::SiconosMatrix backUp(new SimpleMatrix(*C));
 
   gemm(*A, *B, *C);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm: ", norm_inf(*C->getDensePtr() - prod(*A->getDensePtr(), *B->getDensePtr())) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm: ", norm_inf(*C->dense() - prod(*A->dense(), *B->dense())) < tol, true);
 
   *C = *backUp;
   gemm(a, *A, *B, b, *C);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm: ", norm_inf(*C->getDensePtr() - a * prod(*A->getDensePtr(), *B->getDensePtr()) - b**backUp->getDensePtr()) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm: ", norm_inf(*C->dense() - a * prod(*A->dense(), *B->dense()) - b**backUp->dense()) < tol, true);
 
 
   *C = *backUp;
   gemm(CblasNoTrans, CblasNoTrans, a, *A, *B, b, *C);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm: ", norm_inf(*C->getDensePtr() - a * prod(*A->getDensePtr(), *B->getDensePtr()) - b**backUp->getDensePtr()) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm: ", norm_inf(*C->dense() - a * prod(*A->dense(), *B->dense()) - b**backUp->dense()) < tol, true);
 
   *C = *backUp;
   gemm(CblasTrans, CblasTrans, a, *A, *B, b, *C);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm: ", norm_inf(*C->getDensePtr() - a * prod(trans(*A->getDensePtr()), trans(*B->getDensePtr())) - b**backUp->getDensePtr()) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm: ", norm_inf(*C->dense() - a * prod(trans(*A->dense()), trans(*B->dense())) - b**backUp->dense()) < tol, true);
   cout << "-->  test gemm ended with success." << endl;
 }
 

@@ -26,7 +26,7 @@ CircularDS::CircularDS(double r, double m,
   : LagrangianDS(qinit, vinit),
     radius(r), massValue(m)
 {
-  ndof = 3;
+  _ndof = 3;
 }
 
 CircularDS::~CircularDS()

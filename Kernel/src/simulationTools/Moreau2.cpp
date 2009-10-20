@@ -60,7 +60,7 @@ void Moreau2::computeFreeState()
   // Operators computed at told have index i, and (i+1) at t.
 
   //  Note: integration of r with a theta method has been removed
-  //  SimpleVector *rold = static_cast<SimpleVector*>(d->getRMemoryPtr()->getSiconosVector(0));
+  //  SimpleVector *rold = static_cast<SimpleVector*>(d->rMemory()->getSiconosVector(0));
 
   // Iteration through the set of Dynamical Systems.
   //
@@ -88,20 +88,20 @@ void Moreau2::computeFreeState()
 
       SP::FirstOrderLinearDS d = boost::static_pointer_cast<FirstOrderLinearDS>(ds);
 
-      SP::SiconosVector ffree = d->getWorkFreePtr();
+      SP::SiconosVector ffree = d->workFree();
 
       // x value at told
-      //SP::SiconosVector xold = d->getXMemoryPtr()->getSiconosVector(0);
-      SP::SiconosVector xold = d->getXPtr();
+      //SP::SiconosVector xold = d->xMemory()->getSiconosVector(0);
+      SP::SiconosVector xold = d->x();
 
       // If M not equal to identity matrix
-      SP::SiconosMatrix  M = d->getMPtr();
+      SP::SiconosMatrix  M = d->M();
       if (M)
         prod(*M, *xold, *ffree); // fFree = M*xi
       else
         *ffree = *xold;
 
-      SP::SiconosMatrix A = d->getAPtr();
+      SP::SiconosMatrix A = d->A();
       if (A)
       {
         d->computeA(told);
@@ -109,14 +109,14 @@ void Moreau2::computeFreeState()
         prod(coeff, *A, *xold, *ffree, false);
         // fFree += h(1-theta)A_i*x_i
       }
-      SP::SiconosVector b = d->getBPtr();
+      SP::SiconosVector b = d->b();
       if (b)
       {
         // fFree += h(1-theta)*bi + h*theta*bi+1
-        //        d->computeB(told); // bi
-        scal(h * (1.0 - theta), *d->getBPtr(), *ffree, false);
-        d->computeB(t); // bi+1
-        scal(h * theta, *d->getBPtr(), *ffree, false);
+        //        d->computeb(told); // bi
+        scal(h * (1.0 - theta), *d->b(), *ffree, false);
+        d->computeb(t); // bi+1
+        scal(h * theta, *d->b(), *ffree, false);
       }
 
       // -- Update W --
@@ -132,17 +132,17 @@ void Moreau2::computeFreeState()
       // IN, not time dependant: A,b,W
 
       SP::FirstOrderLinearDS d = boost::static_pointer_cast<FirstOrderLinearTIDS>(ds);
-      M = d->getMPtr();
-      SP::SiconosVector ffree = d->getWorkFreePtr();
+      M = d->M();
+      SP::SiconosVector ffree = d->workFree();
       // x value at told
-      SP::SiconosVector xold = d->getXMemoryPtr()->getSiconosVector(0);
+      SP::SiconosVector xold = d->xMemory()->getSiconosVector(0);
 
-      SP::SiconosMatrix A = d->getAPtr();
+      SP::SiconosMatrix A = d->A();
       if (A)
         prod(h * (1 - theta), *A, *xold, *ffree, true); // ffree = h*(1-theta)*A*xi
       else
         ffree->zero();
-      SP::SiconosVector b = d->getBPtr();
+      SP::SiconosVector b = d->b();
       if (b)
         scal(h, *b, *ffree, false); // ffree += hb
       if (M)
@@ -166,35 +166,35 @@ void Moreau2::computeFreeState()
       SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SP::SiconosVector qold = d->getQMemoryPtr()->getSiconosVector(0);
-      SP::SiconosVector vold = d->getVelocityMemoryPtr()->getSiconosVector(0); // vol =v_i
+      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
+      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); // vol =v_i
 
       // --- ResiduFree computation ---
       // vFree pointer is used to compute and save ResiduFree in this first step.
-      SP::SiconosVector ffree = d->getWorkFreePtr();
+      SP::SiconosVector ffree = d->workFree();
 
       // -- Update W --
       // Note: during computeW, mass and jacobians of fL will be computed/
       computeW(t, d);
 
-      SP::SiconosMatrix M = d->getMassPtr();
-      SP::SiconosVector v = d->getVelocityPtr(); // v = v_k,i+1
+      SP::SiconosMatrix M = d->mass();
+      SP::SiconosVector v = d->velocity(); // v = v_k,i+1
       prod(*M, (*v - *vold), *ffree); // ffree = M(v - vold)
 
       *ffree *= -1.0;
-      if (d->getFLPtr()) // if fL exists
+      if (d->fL()) // if fL exists
       {
         // computes fL(ti,vi,qi)
         d->computeFL(told, qold, vold);
         double coef = h * (1 - theta);
         // ffree += coef * fL_i
-        scal(coef, *d->getFLPtr(), *ffree, false);
+        scal(coef, *d->fL(), *ffree, false);
 
         // computes fL(ti+1, v_k,i+1, q_k,i+1) = fL(t,v,q)
         d->computeFL(t);
         coef = h * theta;
         // ffree += coef * fL_k,i+1
-        scal(coef, *d->getFLPtr(), *ffree, false);
+        scal(coef, *d->fL(), *ffree, false);
       }
 
       SP::SiconosVector  ftmp(new SimpleVector(*ffree));
@@ -217,15 +217,15 @@ void Moreau2::computeFreeState()
       SP::LagrangianLinearTIDS d = boost::static_pointer_cast<LagrangianLinearTIDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SP::SiconosVector qold = d->getQMemoryPtr()->getSiconosVector(0); // qi
-      SP::SiconosVector vold = d->getVelocityMemoryPtr()->getSiconosVector(0); //vi
+      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0); // qi
+      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); //vi
 
       // --- ResiduFree computation ---
       // Velocity free and residu. vFree = RESfree (pointer equality !!).
-      SP::SiconosVector ffree = d->getWorkFreePtr();
+      SP::SiconosVector ffree = d->workFree();
 
-      SP::SiconosMatrix M = d->getMassPtr();
-      SP::SiconosVector v = d->getVelocityPtr(); // v = v_k,i+1
+      SP::SiconosMatrix M = d->mass();
+      SP::SiconosVector v = d->velocity(); // v = v_k,i+1
       prod(*W, (*v - *vold), *ffree); // ffree = W (vold)
 
       // vFree pointer is used to compute and save ResiduFree in this first step.
@@ -243,7 +243,7 @@ void Moreau2::computeFreeState()
         prod(-h, *K, *qold, *ffree, false); // ffree += -h*K*qi
       }
 
-      SP::SiconosVector  Fext = d->getFExtPtr();
+      SP::SiconosVector  Fext = d->fExt();
       if (Fext)
       {
         // computes Fext(ti)

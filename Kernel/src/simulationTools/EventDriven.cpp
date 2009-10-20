@@ -75,11 +75,11 @@ EventDriven::EventDriven(SP::SimulationXML strxml, double t0, double T,
 
 void EventDriven::updateIndexSet(unsigned int i)
 {
-  assert(!model.expired());
-  assert(getModelPtr()->getNonSmoothDynamicalSystemPtr());
-  assert(getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
+  assert(!_model.expired());
+  assert(model()->nonSmoothDynamicalSystem());
+  assert(model()->nonSmoothDynamicalSystem()->topology());
 
-  SP::Topology topo = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
 
   assert(i < topo->indexSetsSize() &&
          "EventDriven::updateIndexSet(i), indexSets[i] does not exist.");
@@ -88,14 +88,14 @@ void EventDriven::updateIndexSet(unsigned int i)
   assert(i > 0  &&
          "EventDriven::updateIndexSet(i=0), indexSets[0] can not be updated.");
 
-  assert(topo->getIndexSetPtr(i));
-  assert(topo->getIndexSetPtr(i - 1));
+  assert(topo->indexSet(i));
+  assert(topo->indexSet(i - 1));
 
   // for all Unitary Relations in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i]
 
-  SP::UnitaryRelationsGraph indexSeti = topo->getIndexSetPtr(i);
-  SP::UnitaryRelationsGraph indexSetip = topo->getIndexSetPtr(i - 1);
+  SP::UnitaryRelationsGraph indexSeti = topo->indexSet(i);
+  SP::UnitaryRelationsGraph indexSetip = topo->indexSet(i - 1);
 
   double y;
 
@@ -162,7 +162,7 @@ void EventDriven::updateIndexSet(unsigned int i)
         if (out)
         {
           indexSeti->remove_vertex(urp);
-          urp->getLambdaPtr(i)->zero();
+          urp->lambda(i)->zero();
         }
 
       }
@@ -200,7 +200,7 @@ void EventDriven::updateIndexSet(unsigned int i)
         if (fabs(y) > tolerance)
         {
           indexSeti->remove_vertex(ur);
-          ur->getLambdaPtr(i)->zero();
+          ur->lambda(i)->zero();
         }
       }
     }
@@ -210,16 +210,16 @@ void EventDriven::updateIndexSet(unsigned int i)
 void EventDriven::updateIndexSetsWithDoubleCondition()
 {
 
-  assert(!model.expired());
-  assert(getModelPtr()->getNonSmoothDynamicalSystemPtr());
-  assert(getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
+  assert(!_model.expired());
+  assert(model()->nonSmoothDynamicalSystem());
+  assert(model()->nonSmoothDynamicalSystem()->topology());
 
   // for all Unitary Relations in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i]
 
-  SP::Topology topo = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
 
-  SP::UnitaryRelationsGraph indexSet2 = topo->getIndexSetPtr(2);
+  SP::UnitaryRelationsGraph indexSet2 = topo->indexSet(2);
 
   UnitaryRelationsGraph::VIterator ui, uiend, vnext;
   boost::tie(ui, uiend) = indexSet2->vertices();
@@ -243,16 +243,16 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
 void EventDriven::initOSNS()
 {
 
-  assert(!model.expired());
-  assert(getModelPtr()->getNonSmoothDynamicalSystemPtr());
-  assert(getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
+  assert(!_model.expired());
+  assert(model()->nonSmoothDynamicalSystem());
+  assert(model()->nonSmoothDynamicalSystem()->topology());
 
   // for all Unitary Relations in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i]
   UnitaryRelationsGraph::VIterator ui, uiend;
-  SP::Topology topo = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
 
-  SP::UnitaryRelationsGraph indexSet0 = topo->getIndexSetPtr(0);
+  SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0);
 
   // For each Unitary relation in I0 ...
   for (boost::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
@@ -282,8 +282,8 @@ void EventDriven::initOSNS()
 
     // At the time, we consider that for all systems, levelMin is
     // equal to the minimum value of the relative degree
-    levelMin = getModelPtr()->getNonSmoothDynamicalSystemPtr()
-               ->getTopologyPtr()->getMinRelativeDegree();
+    levelMin = model()->nonSmoothDynamicalSystem()
+               ->topology()->getMinRelativeDegree();
     if (levelMin == 0)
       levelMin++;
 
@@ -301,8 +301,8 @@ void EventDriven::initOSNS()
 
 void EventDriven::initLevelMax()
 {
-  levelMax = getModelPtr()->getNonSmoothDynamicalSystemPtr()->
-             getTopologyPtr()->getMaxRelativeDegree();
+  levelMax = model()->nonSmoothDynamicalSystem()->
+             topology()->getMaxRelativeDegree();
   // Interactions initialization (here, since level depends on the
   // type of simulation) level corresponds to the number of Y and
   // Lambda derivatives computed.
@@ -326,12 +326,12 @@ void EventDriven::computeF(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   lsodar->fillXWork(sizeOfX, x);
 
   double t = *time;
-  getModelPtr()->setCurrentTime(t);
+  model()->setCurrentTime(t);
 
   // solve a LCP at "acceleration" level if required
   if (!allNSProblems->empty())
   {
-    if (!((*allNSProblems)["acceleration"]->getInteractions())->isEmpty())
+    if (!((*allNSProblems)["acceleration"]->interactions())->isEmpty())
     {
       (*allNSProblems)["acceleration"]->compute(t);
       updateInput(2); // Necessary to compute DS state below
@@ -352,7 +352,7 @@ void EventDriven::computeF(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   unsigned int i = 0;
   for (it = lsodar->dynamicalSystemsBegin(); it != lsodar->dynamicalSystemsEnd(); ++it)
   {
-    xtmp2 = (*it)->getRhsPtr(); // Pointer link !
+    xtmp2 = (*it)->rhs(); // Pointer link !
     for (unsigned int j = 0 ; j < (*it)->getN() ; ++j) // Warning: getN, not getDim !!!!
       xdot[i++] = (*xtmp2)(j);
   }
@@ -381,7 +381,7 @@ void EventDriven::computeJacobianF(SP::OneStepIntegrator osi,
   // Compute the jacobian of the vector field according to x for the
   // current ds
   double t = *time;
-  getModelPtr()->setCurrentTime(t);
+  model()->setCurrentTime(t);
   lsodar->computeJacobianRhs(t);
 
   // Save jacobianX values from dynamical system into current jacob
@@ -391,7 +391,7 @@ void EventDriven::computeJacobianF(SP::OneStepIntegrator osi,
   unsigned int i = 0;
   for (it = lsodar->dynamicalSystemsBegin(); it != lsodar->dynamicalSystemsEnd(); ++it)
   {
-    SP::SiconosMatrix jacotmp = (*it)->getJacobianXRhsPtr(); // Pointer link !
+    SP::SiconosMatrix jacotmp = (*it)->jacobianXRhs(); // Pointer link !
     for (unsigned int j = 0 ; j < (*it)->getN() ; ++j)
     {
       for (unsigned k = 0 ; k < (*it)->getDim() ; ++k)
@@ -406,13 +406,13 @@ void EventDriven::computeG(SP::OneStepIntegrator osi,
                            doublereal * gOut)
 {
 
-  assert(!model.expired());
-  assert(getModelPtr()->getNonSmoothDynamicalSystemPtr());
-  assert(getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
+  assert(!_model.expired());
+  assert(model()->nonSmoothDynamicalSystem());
+  assert(model()->nonSmoothDynamicalSystem()->topology());
   UnitaryRelationsGraph::VIterator ui, uiend;
-  SP::Topology topo = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
-  SP::UnitaryRelationsGraph indexSet0 = topo->getIndexSetPtr(0);
-  SP::UnitaryRelationsGraph indexSet2 = topo->getIndexSetPtr(2);
+  SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
+  SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0);
+  SP::UnitaryRelationsGraph indexSet2 = topo->indexSet(2);
 
   unsigned int nsLawSize, k = 0 ;
 
@@ -426,7 +426,7 @@ void EventDriven::computeG(SP::OneStepIntegrator osi,
   // computeG.
 
   double t = *time;
-  getModelPtr()->setCurrentTime(t);
+  model()->setCurrentTime(t);
 
   // IN: - lambda[2] obtained during LCP call in computeF()
   //     - y[0]: need to be updated.
@@ -444,13 +444,13 @@ void EventDriven::computeG(SP::OneStepIntegrator osi,
     {
       // Get lambda at acc. level, solution of LCP acc, called
       // during computeF().
-      lambda = ur->getLambdaPtr(2);
+      lambda = ur->lambda(2);
       for (unsigned int i = 0; i < nsLawSize; i++)
         gOut[k++] = (*lambda)(i);
     }
     else
     {
-      y = ur->getYPtr(0);
+      y = ur->y(0);
       for (unsigned int i = 0; i < nsLawSize; i++)
         gOut[k++] = (*y)(i);
     }
@@ -501,8 +501,8 @@ void EventDriven::advanceToEvent()
 
   if (istate == 2 || istate == 3)
   {
-    tinit = eventsManager->getStartingTime();
-    tend =  eventsManager->getNextTime();
+    tinit = _eventsManager->getStartingTime();
+    tend =  _eventsManager->getNextTime();
   }
 
   tout = tend;
@@ -530,7 +530,7 @@ void EventDriven::advanceToEvent()
     {
       isNewEventOccur = true;
       // Add an event into the events manager list
-      eventsManager->scheduleNonSmoothEvent(tout);
+      _eventsManager->scheduleNonSmoothEvent(tout);
       if (printStat)
         statOut << " -----------> New non-smooth event at time " << tout << endl;
     }
@@ -546,7 +546,7 @@ void EventDriven::advanceToEvent()
 
 
   // Set model time to tout
-  getModelPtr()->setCurrentTime(tout);
+  model()->setCurrentTime(tout);
   // Update all the index sets ...
   updateOutput(1, 1);
   updateIndexSets();

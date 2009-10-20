@@ -58,7 +58,7 @@ private:
   unsigned int nbVectorsInMemory;
 
   /** the stl deque which contains the SiconosVectors kept in memory */
-  SP::MemoryContainer vectorMemory;
+  SP::MemoryContainer _vectorMemory;
 
   /** link to the XML for SiconosMemory objects */
   SP::SiconosMemoryXML memoryXML;
@@ -142,9 +142,9 @@ public:
   /** gives the vector of SiconosVectors of the memory
    * \return stl deque of  SiconosVector
    */
-  inline SP::MemoryContainer getVectorMemoryPtr() const
+  inline SP::MemoryContainer vectorMemory() const
   {
-    return vectorMemory;
+    return _vectorMemory;
   };
 
   /** Allows to get the SiconosMemoryXML of the SiconosMemory

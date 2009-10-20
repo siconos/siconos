@@ -35,106 +35,108 @@ using namespace RELATION;
 
 // --- XML constructor ---
 Interaction::Interaction(SP::InteractionXML interxml, SP::DynamicalSystemsSet nsdsSet):
-  id("undefined"), number(0), interactionSize(0), numberOfRelations(0),
-  sizeOfDS(0), sizeZ(0), interactionxml(interxml), initialized(false)
+  _id("undefined"), _number(0), _interactionSize(0), _numberOfRelations(0),
+  _sizeOfDS(0), _sizeZ(0), _interactionxml(interxml), _initialized(false)
 {
-  assert(interactionxml && "NULL pointer");
+  assert(_interactionxml && "NULL pointer");
 
   // id and number
-  if (interactionxml->hasId()) id = interactionxml->getId();
-  number = interactionxml->getNumber();
+  if (_interactionxml->hasId()) _id = _interactionxml->getId();
+  _number = _interactionxml->number();
 
   // interaction size
-  interactionSize = interactionxml->getSize();
+  _interactionSize = _interactionxml->getSize();
 
   // --- Non smooth law ---
-  string NslawType = interactionxml->getNonSmoothLawXML()->getType();
+  string NslawType = _interactionxml->getNonSmoothLawXML()->getType();
   // ComplementarityConditionNSL
   if (NslawType == COMPLEMENTARITY_CONDITION_NSLAW_TAG)
   {
-    nslaw.reset(new ComplementarityConditionNSL(interactionxml->getNonSmoothLawXML()));
+    _nslaw.reset(new ComplementarityConditionNSL(_interactionxml->getNonSmoothLawXML()));
   }
 
   // RelayNSL
   else if (NslawType == RELAY_NSLAW_TAG)
   {
-    nslaw.reset(new RelayNSL(interactionxml->getNonSmoothLawXML()));
+    _nslaw.reset(new RelayNSL(_interactionxml->getNonSmoothLawXML()));
   }
 
   // NewtonImpactNSL
   else if (NslawType == NEWTON_IMPACT_NSLAW_TAG)
   {
-    nslaw.reset(new NewtonImpactNSL(interactionxml->getNonSmoothLawXML()));
+    _nslaw.reset(new NewtonImpactNSL(_interactionxml->getNonSmoothLawXML()));
   }
   // Newton impact friction law
   else if (NslawType == NEWTON_IMPACT_FRICTION_NSLAW_TAG)
   {
-    nslaw.reset(new NewtonImpactFrictionNSL(interactionxml->getNonSmoothLawXML()));
+    _nslaw.reset(new NewtonImpactFrictionNSL(_interactionxml->getNonSmoothLawXML()));
   }
   else RuntimeException::selfThrow("Interaction::xml constructor, unknown NSLAW type");
 
   // --- Dynamical Systems ---
   unsigned int sizeDS ;
-  involvedDS.reset(new DynamicalSystemsSet());
+  _involvedDS.reset(new DynamicalSystemsSet());
   if (!nsdsSet->isEmpty())
   {
     // Get a list of DS concerned from xml
 
-    if (interactionxml->hasAllDS())
-      involvedDS->insert(nsdsSet->begin(), nsdsSet->end());
+    if (_interactionxml->hasAllDS())
+      _involvedDS->insert(nsdsSet->begin(), nsdsSet->end());
 
     else
     {
       // get numbers of DS involved in the interaction from the xml input file.
       std::vector<int> dsNumbers;
-      interactionxml->getDSNumbers(dsNumbers);
+      _interactionxml->getDSNumbers(dsNumbers);
       // get corresponding DS and insert them into the involvedDS set.
       for (vector<int>::iterator it = dsNumbers.begin(); it != dsNumbers.end(); ++it)
-        involvedDS->insert(nsdsSet->getPtr(*it));
+        _involvedDS->insert(nsdsSet->getPtr(*it));
     }
   }
   else cout << "Interaction constructor, warning: no dynamical systems linked to the interaction!" << endl;
 
   // --- Relation ---
-  RELATION::TYPES relationType = interactionxml->getRelationXML()->getType();
+  RELATION::TYPES relationType = _interactionxml->getRelationXML()->getType();
 
   // First Order Non Linear Relation
   if (relationType == FirstOrder)
   {
-    RELATION::SUBTYPES relationSubType = interactionxml->getRelationXML()->getSubType();
+    RELATION::SUBTYPES relationSubType = _interactionxml->getRelationXML()->getSubType();
     if (relationSubType == Type1R)
-      relation.reset(new FirstOrderType1R(interactionxml->getRelationXML()));
+      _relation.reset(new FirstOrderType1R(_interactionxml->getRelationXML()));
     // Linear relation
     else if (relationSubType == LinearR)
-      relation.reset(new FirstOrderLinearR(interactionxml->getRelationXML()));
+      _relation.reset(new FirstOrderLinearR(_interactionxml->getRelationXML()));
     // Linear time-invariant coef. relation
     else if (relationSubType == LinearTIR)
-      relation.reset(new FirstOrderLinearTIR(interactionxml->getRelationXML()));
+      _relation.reset(new FirstOrderLinearTIR(_interactionxml->getRelationXML()));
   }
   // Lagrangian non-linear relation
   else if (relationType == Lagrangian)
   {
-    RELATION::SUBTYPES relationSubType = interactionxml->getRelationXML()->getSubType();
-    // \todo create a factory to avoid "if" list for Relation construction according to subType.
+    RELATION::SUBTYPES relationSubType = _interactionxml->getRelationXML()->getSubType();
+    // \todo create a factory to avoid "if" list for Relation
+    // construction according to subType.
     if (relationSubType == ScleronomousR)
-      relation.reset(new LagrangianScleronomousR(interactionxml->getRelationXML()));
+      _relation.reset(new LagrangianScleronomousR(_interactionxml->getRelationXML()));
     else if (relationSubType == RheonomousR)
-      relation.reset(new LagrangianRheonomousR(interactionxml->getRelationXML()));
+      _relation.reset(new LagrangianRheonomousR(_interactionxml->getRelationXML()));
     else if (relationSubType == CompliantR)
-      relation.reset(new LagrangianCompliantR(interactionxml->getRelationXML()));
+      _relation.reset(new LagrangianCompliantR(_interactionxml->getRelationXML()));
     // Lagrangian linear relation
     else if (relationSubType == LinearR || relationSubType == LinearTIR)
-      relation.reset(new LagrangianLinearTIR(interactionxml->getRelationXML()));
+      _relation.reset(new LagrangianLinearTIR(_interactionxml->getRelationXML()));
   }
-  else RuntimeException::selfThrow("Interaction::xml constructor, unknown relation type " + relation->getType());
+  else RuntimeException::selfThrow("Interaction::xml constructor, unknown relation type " + _relation->getType());
 
   // check coherence between interactionSize and nsLawSize
-  if ((interactionSize % nslaw->getNsLawSize()) != 0)
+  if ((_interactionSize % _nslaw->size()) != 0)
     RuntimeException::selfThrow("Interaction::xml constructor, inconsistency between interaction size and non smooth law size.");
 
-  // download xml values for y[0] and lambda[0] forbidden since y and lambda are not allocated yet (this is
-  // done in initialize function, called by simulation !!)
-  if (interactionxml->hasY() ||  interactionxml->hasLambda())
+  // download xml values for y[0] and lambda[0] forbidden since y and
+  // lambda are not allocated yet (this is done in initialize
+  // function, called by simulation !!)
+  if (_interactionxml->hasY() ||  _interactionxml->hasLambda())
     RuntimeException::selfThrow("Interaction::xml constructor, y or lambda download is forbidden.");
 }
 
@@ -142,52 +144,51 @@ Interaction::Interaction(SP::InteractionXML interxml, SP::DynamicalSystemsSet ns
 
 Interaction::Interaction(SP::DynamicalSystem ds, int newNumber, int nInter,
                          SP::NonSmoothLaw newNSL, SP::Relation newRel):
-  id("none"), number(newNumber), interactionSize(nInter), numberOfRelations(1),
-  sizeOfDS(0), sizeZ(0), y(1), nslaw(newNSL), relation(newRel), initialized(false)
+  _id("none"), _number(newNumber), _interactionSize(nInter), _numberOfRelations(1),
+  _sizeOfDS(0), _sizeZ(0), _y(1), _nslaw(newNSL), _relation(newRel), _initialized(false)
 {
-  involvedDS.reset(new DynamicalSystemsSet());
-  involvedDS->insert(ds); // Warning: insert pointer to DS!!
+  _involvedDS.reset(new DynamicalSystemsSet());
+  _involvedDS->insert(ds); // Warning: insert pointer to DS!!
 
 }
 Interaction::Interaction(const string& newId, SP::DynamicalSystem ds,
                          int newNumber, int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel):
-  id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1),
-  sizeOfDS(0), sizeZ(0), y(1), nslaw(newNSL), relation(newRel), initialized(false)
+  _id(newId), _number(newNumber), _interactionSize(nInter), _numberOfRelations(1),
+  _sizeOfDS(0), _sizeZ(0), _y(1), _nslaw(newNSL), _relation(newRel), _initialized(false)
 {
-  involvedDS.reset(new DynamicalSystemsSet());
-  involvedDS->insert(ds); // Warning: insert pointer to DS!!
-
+  _involvedDS.reset(new DynamicalSystemsSet());
+  _involvedDS->insert(ds); // Warning: insert pointer to DS!!
 }
 
 
 Interaction::Interaction(DynamicalSystemsSet& dsConcerned, int newNumber, int nInter,
                          SP::NonSmoothLaw newNSL, SP::Relation newRel):
-  id("none"), number(newNumber), interactionSize(nInter), numberOfRelations(1),
-  sizeOfDS(0), sizeZ(0), y(1), nslaw(newNSL), relation(newRel), initialized(false)
+  _id("none"), _number(newNumber), _interactionSize(nInter), _numberOfRelations(1),
+  _sizeOfDS(0), _sizeZ(0), _y(1), _nslaw(newNSL), _relation(newRel), _initialized(false)
 {
-  involvedDS.reset(new DynamicalSystemsSet());
+  _involvedDS.reset(new DynamicalSystemsSet());
   DSIterator itDS;
   for (itDS = dsConcerned.begin(); itDS != dsConcerned.end(); ++itDS)
-    involvedDS->insert(*itDS); // Warning: insert pointers to DS!!
+    _involvedDS->insert(*itDS); // Warning: insert pointers to DS!!
 }
 
 Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, int newNumber,
                          int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel):
-  id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0),
-  y(1), nslaw(newNSL), relation(newRel), initialized(false)
+  _id(newId), _number(newNumber), _interactionSize(nInter), _numberOfRelations(1), _sizeOfDS(0), _sizeZ(0),
+  _y(1), _nslaw(newNSL), _relation(newRel), _initialized(false)
 {
-  involvedDS.reset(new DynamicalSystemsSet());
+  _involvedDS.reset(new DynamicalSystemsSet());
   DSIterator itDS;
   for (itDS = dsConcerned.begin(); itDS != dsConcerned.end(); ++itDS)
-    involvedDS->insert(*itDS); // Warning: insert pointers to DS!!
+    _involvedDS->insert(*itDS); // Warning: insert pointers to DS!!
 }
 
 /* initialisation with empty set */
 Interaction::Interaction(int newNumber, int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel):
-  number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0),
-  y(1), nslaw(newNSL), relation(newRel), initialized(false)
+  _number(newNumber), _interactionSize(nInter), _numberOfRelations(1), _sizeOfDS(0), _sizeZ(0),
+  _y(1), _nslaw(newNSL), _relation(newRel), _initialized(false)
 {
-  involvedDS.reset(new DynamicalSystemsSet());
+  _involvedDS.reset(new DynamicalSystemsSet());
 }
 
 
@@ -199,21 +200,21 @@ Interaction::~Interaction()
 void Interaction::initialize(double t0, unsigned int level)
 {
 
-  if (!initialized)
+  if (!_initialized)
   {
-    assert(relation && "Interaction::initialize failed, relation == NULL");
+    assert(relation() && "Interaction::initialize failed, relation() == NULL");
 
-    assert(nslaw && "Interaction::initialize failed, non smooth law == NULL");
+    assert(nslaw() && "Interaction::initialize failed, non smooth law == NULL");
 
     computeSizeOfDS();
 
-    relation->setInteractionPtr(shared_from_this());
+    relation()->setInteractionPtr(shared_from_this());
 
     // compute number of relations.
-    numberOfRelations = interactionSize / nslaw->getNsLawSize();
+    _numberOfRelations = _interactionSize / nslaw()->size();
 
     initializeMemory(level);
-    relation->initialize(shared_from_this());
+    relation()->initialize(shared_from_this());
 
     // Compute y values for t0
     for (unsigned int i = 0; i < level; ++i)
@@ -221,43 +222,47 @@ void Interaction::initialize(double t0, unsigned int level)
       computeOutput(t0, i);
       //      computeInput(t0,i);
     }
-    initialized = true;
+    _initialized = true;
   }
 
 }
 
-// Initialize and InitializeMemory are separated in two functions since we need to know the relative degree to know "numberOfDerivatives",
-// while numberOfRelations and the size of the non smooth law are required inputs to compute the relative degree.
+// Initialize and InitializeMemory are separated in two functions
+// since we need to know the relative degree to know
+// "numberOfDerivatives", while numberOfRelations and the size of the
+// non smooth law are required inputs to compute the relative degree.
 void Interaction::initializeMemory(unsigned int numberOfDerivatives)
 {
-  // Warning: this function is called from Simulation initialize, since we need to know the relative degree and
-  // the type of simulation to size Y and Lambda.
+  // Warning: this function is called from Simulation initialize,
+  // since we need to know the relative degree and the type of
+  // simulation to size Y and Lambda.
 
   // Memory allocation for y and lambda
 
-  // Note that numberOfDerivatives depends on the type of simulation and on the relative degree.
+  // Note that numberOfDerivatives depends on the type of simulation
+  // and on the relative degree.
 
-  y.resize(numberOfDerivatives) ;
-  yOld.resize(numberOfDerivatives);
-  lambda.resize(numberOfDerivatives);
-  lambdaOld.resize(numberOfDerivatives);
+  _y.resize(numberOfDerivatives) ;
+  _yOld.resize(numberOfDerivatives);
+  _lambda.resize(numberOfDerivatives);
+  _lambdaOld.resize(numberOfDerivatives);
 
   // get the dimension of the non smooth law, ie the size of a unitary blocks (one per relation)
-  unsigned int nslawSize = nslaw->getNsLawSize();
-  getRelationPtr()->initializeMemory();
+  unsigned int nslawSize = nslaw()->size();
+  relation()->initializeMemory();
   for (unsigned int i = 0; i < numberOfDerivatives ; i++)
   {
 
-    y[i].reset(new BlockVector());
-    yOld[i].reset(new BlockVector());
-    lambda[i].reset(new BlockVector());
-    lambdaOld[i].reset(new BlockVector());
-    for (unsigned int j = 0; j < numberOfRelations; ++j)
+    _y[i].reset(new BlockVector());
+    _yOld[i].reset(new BlockVector());
+    _lambda[i].reset(new BlockVector());
+    _lambdaOld[i].reset(new BlockVector());
+    for (unsigned int j = 0; j < _numberOfRelations; ++j)
     {
-      y[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
-      yOld[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
-      lambda[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
-      lambdaOld[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
+      _y[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
+      _yOld[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
+      _lambda[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
+      _lambdaOld[i]->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
     }
   }
 
@@ -270,154 +275,154 @@ void Interaction::setY(const VectorOfVectors& newVector)
 
   unsigned int size = newVector.size();
 
-  y.clear();
-  y.resize(size);
+  _y.clear();
+  _y.resize(size);
 
   for (unsigned int i = 0; i < size; i++)
-    y[i].reset(new BlockVector(*(newVector[i]))); // -> copy !
+    _y[i].reset(new BlockVector(*(newVector[i]))); // -> copy !
 }
 
 void Interaction::setYPtr(const VectorOfVectors& newVector)
 {
-  y.clear();
+  _y.clear();
 
   // copy
-  y = newVector; // smart ptr
+  _y = newVector; // smart ptr
 }
 
 void Interaction::setY(const unsigned int  index, const BlockVector& newY)
 {
-  assert(y.size() > index &&
+  assert(_y.size() > index &&
          "Interaction::setY, index out of range ");
 
   // set y[index]
-  if (! y[index])
+  if (! _y[index])
   {
-    y[index].reset(new BlockVector(newY));
+    _y[index].reset(new BlockVector(newY));
   }
   else
   {
-    assert(y[index]->size() == newY.size() &&
+    assert(_y[index]->size() == newY.size() &&
            "Interaction::setY(index,newY), inconsistent sizes between y(index) and newY ");
-    *(y[index]) = newY;
+    *(_y[index]) = newY;
   }
 }
 
 void Interaction::setYPtr(const unsigned int  index, SP::SiconosVector newY)
 {
-  assert(y.size() > index &&
+  assert(_y.size() > index &&
          "Interaction::setYPtr, index out of range");
 
-  assert(newY->size() == interactionSize &&
+  assert(newY->size() == _interactionSize &&
          "Interaction::setYPtr, interactionSize differs from newY vector size");
 
   assert(newY->isBlock() &&
          "Interaction::setYPtr(newY), newY is not a block vector!");
 
-  y[index] = boost::static_pointer_cast<BlockVector>(newY);
+  _y[index] = boost::static_pointer_cast<BlockVector>(newY);
 }
 
 void Interaction::setYOld(const VectorOfVectors& newVector)
 {
   unsigned int size = newVector.size();
-  yOld.clear();
-  yOld.resize(size);
+  _yOld.clear();
+  _yOld.resize(size);
 
   for (unsigned int i = 0; i < size; i++)
-    yOld[i].reset(new BlockVector(*(newVector[i]))); // -> copy !
+    _yOld[i].reset(new BlockVector(*(newVector[i]))); // -> copy !
 }
 
 void Interaction::setYOldPtr(const VectorOfVectors& newVector)
 {
-  // clear yOld
+  // clear _yOld
 
-  yOld.clear();
+  _yOld.clear();
 
   // copy
-  yOld = newVector; // smart ptr
+  _yOld = newVector; // smart ptr
 }
 
 void Interaction::setYOld(const unsigned int  index, const BlockVector& newYOld)
 {
-  if (yOld.size() <= index)
+  if (_yOld.size() <= index)
     RuntimeException::selfThrow("Interaction::setYOld, index out of range ");
 
-  // set yOld[index]
-  if (! yOld[index])
+  // set _yOld[index]
+  if (! _yOld[index])
   {
-    yOld[index].reset(new BlockVector(newYOld));
+    _yOld[index].reset(new BlockVector(newYOld));
   }
   else
   {
-    assert(yOld[index]->size() == newYOld.size() &&
+    assert(_yOld[index]->size() == newYOld.size() &&
            "Interaction::setYOld(index,newYOld), inconsistent sizes between yOld(index) and newYOld");
-    *(yOld[index]) = newYOld;
+    *(_yOld[index]) = newYOld;
   }
 }
 
 void Interaction::setYOldPtr(const unsigned int  index, SP::SiconosVector newYOld)
 {
-  assert(yOld.size() > index &&
+  assert(_yOld.size() > index &&
          "Interaction::setYOldPtr, index out of range");
 
-  assert(newYOld->size() == interactionSize &&
+  assert(newYOld->size() == _interactionSize &&
          "Interaction::setYOldPtr, interactionSize differs from newYOld vector size");
 
   assert((! newYOld->isBlock()) &&
          "Interaction::setYOldPtr(newY), newY is not a block vector!");
 
-  // set yOld[index]
-  yOld[index] = boost::static_pointer_cast<BlockVector>(newYOld);
+  // set _yOld[index]
+  _yOld[index] = boost::static_pointer_cast<BlockVector>(newYOld);
 }
 
 void Interaction::setLambda(const VectorOfVectors& newVector)
 {
   unsigned int size = newVector.size();
-  lambda.clear();
-  lambda.resize(size);
+  _lambda.clear();
+  _lambda.resize(size);
 
   for (unsigned int i = 0; i < size; i++)
-    lambda[i].reset(new BlockVector(*(newVector[i]))); // -> copy !
+    _lambda[i].reset(new BlockVector(*(newVector[i]))); // -> copy !
 }
 
 void Interaction::setLambdaPtr(const VectorOfVectors& newVector)
 {
-  lambda.clear();
+  _lambda.clear();
 
-  lambda = newVector; // smart ptr
+  _lambda = newVector; // smart ptr
 }
 
 void Interaction::setLambda(const unsigned int  index, const BlockVector& newLambda)
 {
-  assert(lambda.size() <= index &&
+  assert(_lambda.size() <= index &&
          "Interaction::setLambda, index out of range");
 
   // set lambda[index]
-  if (! lambda[index])
+  if (! _lambda[index])
   {
-    lambda[index].reset(new BlockVector(newLambda));
+    _lambda[index].reset(new BlockVector(newLambda));
   }
   else
   {
-    assert(lambda[index]->size() == newLambda.size() &&
+    assert(_lambda[index]->size() == newLambda.size() &&
            "Interaction::setLambda(index,newLambda), inconsistent sizes between lambda(index) and newLambda");
-    *(lambda[index]) = newLambda;
+    *(_lambda[index]) = newLambda;
   }
 }
 
 void Interaction::setLambdaPtr(const unsigned int  index, SP::SiconosVector newLambda)
 {
-  assert(lambda.size() > index &&
+  assert(_lambda.size() > index &&
          "Interaction::setLambdaPtr, index out of range ");
 
-  assert(newLambda->size() == interactionSize &&
+  assert(newLambda->size() == _interactionSize &&
          "Interaction::setLambdaPtr, interactionSize differs from newLambda vector size ");
 
   assert(newLambda->isBlock() &&
          "Interaction::setLambdaPtr(newLambda), newLambda is not a block vector! ");
 
   // set lambda[index]
-  lambda[index] = boost::static_pointer_cast<BlockVector>(newLambda);
+  _lambda[index] = boost::static_pointer_cast<BlockVector>(newLambda);
 }
 
 void Interaction::setLambdaOld(const VectorOfVectors& newVector)
@@ -425,51 +430,51 @@ void Interaction::setLambdaOld(const VectorOfVectors& newVector)
   unsigned int size = newVector.size();
 
   // clear lambdaOld
-  lambdaOld.clear();
-  lambdaOld.resize(size);
+  _lambdaOld.clear();
+  _lambdaOld.resize(size);
 
   for (unsigned int i = 0; i < size; i++)
-    lambdaOld[i].reset(new BlockVector(*(newVector[i]))); // -> copy !
+    _lambdaOld[i].reset(new BlockVector(*(newVector[i]))); // -> copy !
 }
 
 void Interaction::setLambdaOldPtr(const VectorOfVectors& newVector)
 {
   // clear lambdaOld
-  lambdaOld.clear();
+  _lambdaOld.clear();
 
   // copy
-  lambdaOld = newVector; // smart ptrs
+  _lambdaOld = newVector; // smart ptrs
 }
 
 void Interaction::setLambdaOld(const unsigned int  index, const BlockVector& newLambdaOld)
 {
-  assert(lambdaOld.size() > index &&
+  assert(_lambdaOld.size() > index &&
          "Interaction::setLambdaOld, index out of range ");
 
   // set lambdaOld[index]
-  if (! lambdaOld[index])
+  if (! _lambdaOld[index])
   {
-    lambdaOld[index].reset(new BlockVector(newLambdaOld));
+    _lambdaOld[index].reset(new BlockVector(newLambdaOld));
   }
   else
   {
-    if (lambdaOld[index]->size() != newLambdaOld.size())
+    if (_lambdaOld[index]->size() != newLambdaOld.size())
       RuntimeException::selfThrow("Interaction::setLambdaOld(index,newLambdaOld), inconsistent sizes between lambdaOld(index) and newLambdaOld ");
-    *(lambdaOld[index]) = newLambdaOld;
+    *(_lambdaOld[index]) = newLambdaOld;
   }
 }
 
 void Interaction::setLambdaOldPtr(const unsigned int  index, SP::SiconosVector newLambdaOld)
 {
-  if (lambdaOld.size() > index)
+  if (_lambdaOld.size() > index)
     RuntimeException::selfThrow("Interaction::setLambdaOldPtr, index out of range ");
-  if (newLambdaOld->size() != interactionSize)
+  if (newLambdaOld->size() != _interactionSize)
     RuntimeException::selfThrow("Interaction::setLambdaOldPtr, interactionSize differs from newLambdaOld vector size ");
   if (!newLambdaOld->isBlock())
     RuntimeException::selfThrow("Interaction::setLambdaOldPtr(newLambda), newLambda is not a block vector! ");
 
   // set lambdaOld[index]
-  lambdaOld[index] = boost::static_pointer_cast<BlockVector>(newLambdaOld);
+  _lambdaOld[index] = boost::static_pointer_cast<BlockVector>(newLambdaOld);
 }
 
 
@@ -477,53 +482,53 @@ void Interaction::setDynamicalSystems(const DynamicalSystemsSet& newSet)
 {
   DSIterator itDS;
   for (itDS = newSet.begin(); itDS != newSet.end(); ++itDS)
-    involvedDS->insert(*itDS); // smart ptrs
+    _involvedDS->insert(*itDS); // smart ptrs
 
   computeSizeOfDS();
 }
 
-SP::DynamicalSystem Interaction::getDynamicalSystemPtr(int nb)
+SP::DynamicalSystem Interaction::dynamicalSystem(int nb)
 {
-  assert(involvedDS->isIn(nb) &&  // if ds number nb is not in the set ...
-         "Interaction::getDynamicalSystemPtr(nb), DS number nb is not in the set.");
-  return involvedDS->getPtr(number);
+  assert(_involvedDS->isIn(nb) &&  // if ds number nb is not in the set ...
+         "Interaction::dynamicalSystem(nb), DS number nb is not in the set.");
+  return _involvedDS->getPtr(_number);
 }
 
 void Interaction::setRelationPtr(SP::Relation newRelation)
 {
-  relation = newRelation;
+  _relation = newRelation;
 }
 
 void Interaction::setNonSmoothLawPtr(SP::NonSmoothLaw newNslaw)
 {
-  nslaw = newNslaw;
+  _nslaw = newNslaw;
 }
 
 // --- OTHER FUNCTIONS ---
 
 void Interaction::computeSizeOfDS()
 {
-  sizeOfDS = 0;
-  sizeZ = 0;
+  _sizeOfDS = 0;
+  _sizeZ = 0;
   DSIterator it;
   SP::SiconosVector ZP;
-  for (it = involvedDS->begin(); it != involvedDS->end(); it++)
+  for (it = _involvedDS->begin(); it != _involvedDS->end(); it++)
   {
-    sizeOfDS += (*it)->getDim();
-    ZP = (*it)->getZPtr();
-    if (ZP) sizeZ += ZP->size();
+    _sizeOfDS += (*it)->getDim();
+    ZP = (*it)->z();
+    if (ZP) _sizeZ += ZP->size();
   }
 }
 
 void Interaction::swapInMemory()
 {
   // i corresponds to the derivative number and j the relation number.
-  for (unsigned int i = 0; i < y.size() ; i++)
+  for (unsigned int i = 0; i < _y.size() ; i++)
   {
-    for (unsigned int j = 0; j < numberOfRelations; ++j)
+    for (unsigned int j = 0; j < _numberOfRelations; ++j)
     {
-      *(yOld[i]->getVectorPtr(j)) = *(y[i]->getVectorPtr(j)) ;
-      *(lambdaOld[i]->getVectorPtr(j)) = *(lambda[i]->getVectorPtr(j));
+      *(_yOld[i]->vector(j)) = *(_y[i]->vector(j)) ;
+      *(_lambdaOld[i]->vector(j)) = *(_lambda[i]->vector(j));
     }
   }
 }
@@ -531,38 +536,38 @@ void Interaction::swapInMemory()
 void Interaction::display() const
 {
   cout << "======= Interaction display =======" << endl;
-  cout << "| id : " << id << endl;
-  cout << "| number : " << number << endl;
-  involvedDS->display();
+  cout << "| id : " << _id << endl;
+  cout << "| number : " << _number << endl;
+  _involvedDS->display();
   cout << "| y : " << endl;
-  if (y[0]) y[0]->display();
+  if (_y[0]) _y[0]->display();
   else cout << "->NULL" << endl;
   cout << "| yDot : " << endl;
-  if (y[1]) y[1]->display();
+  if (_y[1]) _y[1]->display();
   else cout << "->NULL" << endl;
-  cout << "| yOld : " << endl;
-  if (yOld[0]) yOld[0]->display();
+  cout << "| _yOld : " << endl;
+  if (_yOld[0]) _yOld[0]->display();
   else cout << "->NULL" << endl;
   cout << "| yDotOld : " << endl;
-  if (yOld[1]) yOld[1]->display();
+  if (_yOld[1]) _yOld[1]->display();
   else cout << "->NULL" << endl;
-  cout << "| lambda : " << endl;
-  if (lambda[0]) lambda[0]->display();
+  cout << "| _lambda : " << endl;
+  if (_lambda[0]) _lambda[0]->display();
   else cout << "->NULL" << endl;
-  cout << "| lambdaDot : " << endl;
-  if (lambda[1]) lambda[1]->display();
+  cout << "| _lambdaDot : " << endl;
+  if (_lambda[1]) _lambda[1]->display();
   else cout << "->NULL" << endl;
   cout << "===================================" << endl;
 }
 
 void Interaction::computeOutput(double time, unsigned int level)
 {
-  relation->computeOutput(time, level);
+  relation()->computeOutput(time, level);
 }
 
 void Interaction::computeInput(double time, unsigned int level)
 {
-  relation->computeInput(time, level);
+  relation()->computeInput(time, level);
 }
 
 
@@ -576,14 +581,14 @@ void Interaction::saveInteractionToXML()
    * save the data of the Interaction
    */
 
-  if (interactionxml)
+  if (_interactionxml)
   {
-    //  interactionxml->setDSConcerned( involvedDS );
-    interactionxml->setId(id);
-    interactionxml->setNumber(number);
-    interactionxml->setSize(interactionSize);
-    interactionxml->setY(*(y[0]));
-    interactionxml->setLambda(*(lambda[0]));
+    //  _interactionxml->setDSConcerned( involvedDS );
+    _interactionxml->setId(_id);
+    _interactionxml->setNumber(_number);
+    _interactionxml->setSize(_interactionSize);
+    _interactionxml->setY(*(_y[0]));
+    _interactionxml->setLambda(*(_lambda[0]));
   }
   else RuntimeException::selfThrow("Interaction::saveInteractionToXML - object InteractionXML does not exist");
 
@@ -591,25 +596,25 @@ void Interaction::saveInteractionToXML()
    * save the data of the Relation
    */
   // Main type of the relation: FirstOrder or Lagrangian
-  RELATION::TYPES type = relation->getType();
+  RELATION::TYPES type = relation()->getType();
   // Subtype of the relation
-  RELATION::SUBTYPES subType = relation->getSubType();
+  RELATION::SUBTYPES subType = relation()->getSubType();
 
   if (type == FirstOrder)
   {
     if (subType == NonLinearR)
-      relation->saveRelationToXML();
+      relation()->saveRelationToXML();
     else if (subType == LinearR)
-      (boost::static_pointer_cast<FirstOrderLinearR>(relation))->saveRelationToXML();
+      (boost::static_pointer_cast<FirstOrderLinearR>(relation()))->saveRelationToXML();
     else if (subType == LinearTIR)
-      (boost::static_pointer_cast<FirstOrderLinearTIR>(relation))->saveRelationToXML();
+      (boost::static_pointer_cast<FirstOrderLinearTIR>(relation()))->saveRelationToXML();
     else
       RuntimeException::selfThrow("Interaction::saveInteractionToXML - Unknown relation subtype: " + subType);
   }
   else if (type == Lagrangian)
   {
     if (subType == LinearTIR)
-      (boost::static_pointer_cast<LagrangianLinearTIR>(relation))->saveRelationToXML();
+      (boost::static_pointer_cast<LagrangianLinearTIR>(relation()))->saveRelationToXML();
     else
       RuntimeException::selfThrow("Interaction::saveInteractionToXML - Not yet implemented for relation subtype " + subType);
   }
@@ -620,7 +625,7 @@ void Interaction::saveInteractionToXML()
    * save the data of the NonSmoothLaw
    */
 
-  nslaw->saveNonSmoothLawToXML();
+  nslaw()->saveNonSmoothLawToXML();
 
 }
 

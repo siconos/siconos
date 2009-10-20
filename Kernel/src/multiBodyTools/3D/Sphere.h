@@ -42,13 +42,13 @@ public:
 
   inline double getQ(unsigned int pos)
   {
-    assert(pos < ndof);
-    return (*q[0])(pos);
+    assert(pos < _ndof);
+    return (*_q[0])(pos);
   };
   inline double getVelocity(unsigned int pos)
   {
-    assert(pos < ndof);
-    return (*q[1])(pos);
+    assert(pos < _ndof);
+    return (*_q[1])(pos);
   };
 
   inline double getMassValue()

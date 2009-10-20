@@ -34,12 +34,12 @@ int Equality::compute(double time)
   // - the options for the solver (name, max iteration number ...)
   // - the global options for Numerics (verbose mode ...)
 
-  if (sizeOutput != 0)
+  if (_sizeOutput != 0)
   {
     // The EQUALITY in Numerics format
     // Call EQUALITY Driver
-    _numerics_problem.q = q->getArray();
-    _numerics_problem.size = sizeOutput;
+    _numerics_problem.q = q()->getArray();
+    _numerics_problem.size = _sizeOutput;
     info = LinearSystem_driver(&_numerics_problem, _z->getArray() , _w->getArray() , 0);
 
     // --- Recovering of the desired variables from EQUALITY output ---
@@ -54,27 +54,27 @@ int Equality::compute(double time)
 void Equality::updateM()
 {
   // Get index set from Simulation
-  SP::UnitaryRelationsGraph indexSet = simulation->getIndexSetPtr(levelMin);
+  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
 
   if (!_M)
   {
     // Creates and fills M using UR of indexSet
-    _M.reset(new OSNSMatrix(indexSet, unitaryBlocks, MStorageType));
+    _M.reset(new OSNSMatrix(indexSet, _unitaryBlocks, _MStorageType));
     _numerics_problem.M = &*_M->getNumericsMatrix();
   }
   else
   {
-    _M->setStorageType(MStorageType);
-    _M->fill(indexSet, unitaryBlocks);
+    _M->setStorageType(_MStorageType);
+    _M->fill(indexSet, _unitaryBlocks);
 
   }
-  sizeOutput = _M->size();
+  _sizeOutput = _M->size();
 }
 
 
 void Equality::display() const
 {
-  cout << "======= EQUALITY of size " << sizeOutput << " with: " << endl;
+  cout << "======= EQUALITY of size " << _sizeOutput << " with: " << endl;
   LinearOSNS::display();
 }
 

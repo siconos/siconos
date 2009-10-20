@@ -98,7 +98,7 @@ typedef std::map<SP::Event, VectorMap>  DataSet;
    "myDS_X" as an id and yourDS->getXPtr() as the SiconosVector. For
    myEvent being an Event where you need to save data, you get:
    (data[myEvent])["myDS_X] =
-   model->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr()->getXPtr()
+   model->nonSmoothDynamicalSystem()->dynamicalSystem()->getXPtr()
 
    See \ref UMSiconosControl for details on how to define its own Sensor.
 
@@ -108,22 +108,22 @@ class Sensor : public boost::enable_shared_from_this<Sensor>
 protected:
 
   /** type of the Sensor */
-  int type;
+  int _type;
 
   /** id of the Sensor */
-  std::string id;
+  std::string _id;
 
   /** data list - Each vector of data is identified with a string. */
-  DataSet data;
+  DataSet _data;
 
   /** The model linked to this sensor */
-  SP::Model model;
+  SP::Model _model;
 
   /** A time discretisation scheme */
-  SP::TimeDiscretisation timeDiscretisation;
+  SP::TimeDiscretisation _timeDiscretisation;
 
   /** The event which will linked this sensor to the eventsManager of the simulation */
-  SP::Event eSensor;
+  SP::Event _eSensor;
 
   /** default constructor
    */
@@ -151,7 +151,7 @@ public:
    */
   inline void setId(const std::string& newId)
   {
-    id = newId;
+    _id = newId;
   };
 
   /** get id of the Sensor
@@ -159,7 +159,7 @@ public:
    */
   inline const std::string getId() const
   {
-    return id;
+    return _id;
   };
 
   /** get the type of the Sensor
@@ -167,31 +167,31 @@ public:
    */
   inline const int getType() const
   {
-    return type;
+    return _type;
   };
 
   /** get the Model linked to this Sensor
    *  \return a pointer to Model
    */
-  inline SP::Model getModelPtr() const
+  inline SP::Model model() const
   {
-    return model;
+    return _model;
   };
 
   /** get the TimeDiscretisation linked to this Sensor
   *  \return a pointer to TimeDiscretisation.
   */
-  inline SP::TimeDiscretisation getTimeDiscretisationPtr() const
+  inline SP::TimeDiscretisation timeDiscretisation() const
   {
-    return timeDiscretisation;
+    return _timeDiscretisation;
   };
 
   /** get the Event associated with this sensor
    *  \return an Event*
    */
-  inline SP::Event getEventPtr() const
+  inline SP::Event event() const
   {
-    return eSensor;
+    return _eSensor;
   };
 
   /** get all the data saved for this sensor
@@ -199,7 +199,7 @@ public:
    */
   inline const DataSet getData() const
   {
-    return data;
+    return _data;
   };
 
   /** initialize sensor data.

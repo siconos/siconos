@@ -85,7 +85,7 @@ class FirstOrderNonLinearDS : public DynamicalSystem
 protected:
 
   /** Matrix coefficient of \f$ \dot x \f$ */
-  SP::SiconosMatrix M;
+  SP::SiconosMatrix _M;
 
   /** f(x,t,z) */
   SP::SiconosVector mf;
@@ -94,7 +94,7 @@ protected:
   SP::SiconosVector mfold;
 
   /** Gradient of \f$ f(x,t,z) \f$ with respect to \f$ x\f$*/
-  SP::SiconosMatrix jacobianXF;
+  SP::SiconosMatrix _jacobianXF;
 
   /** DynamicalSystem plug-in to compute f(x,t,z) - id="f".
     *  @param  : current time
@@ -104,8 +104,8 @@ protected:
     *  @param  : the size of the vector z
     *  @param  : a vector of parameters, z
     */
-  FNLDSPtrfct computeFPtr;
-  std::string pluginNameComputeFPtr;
+  FNLDSPtrfct _computeFPtr;
+  std::string _pluginNameComputeFPtr;
 
 
   /** DynamicalSystem plug-in to compute the gradient of f(x,t,z) with respect to the state: \f$ \nabla_x f: (x,t,z) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
@@ -116,14 +116,14 @@ protected:
    * @param  : the size of the vector z
    * @param[in,out] z: a vector of parameters, z
    */
-  FNLDSPtrfct  computeJacobianXFPtr;
+  FNLDSPtrfct computeJacobianXFPtr;
   std::string pluginNameComputeJacobianXFPtr;
 
   FNLDSPtrfct  pluginComputeM;
   std::string pluginNamePluginComputeM;
 
   /**  the previous r vectors */
-  SP::SiconosMemory rMemory;
+  SP::SiconosMemory _rMemory;
 
   /** Residu r*/
   SP::SimpleVector mResidur;
@@ -140,7 +140,7 @@ protected:
 
   /** Copy of M Matrix, used to solve systems like Mx = b with LU-factorization.
       (Warning: may not exist, used if we need to avoid factorization in place of M) */
-  SP::SiconosMatrix invM;
+  SP::SiconosMatrix _invM;
 
   /** default constructor
    * \param the type of the system
@@ -181,14 +181,14 @@ public:
    */
   bool checkDynamicalSystem();
 
-  inline SP::SiconosVector getGAlphaPtr() const
+  inline SP::SiconosVector gAlpha() const
   {
     return mG_alpha;
   }
 
 
 
-  inline SP::SiconosVector getResidurPtr() const
+  inline SP::SiconosVector residur() const
   {
     return mResidur;
   }
@@ -199,9 +199,9 @@ public:
   /** get all the values of the state vector r stored in memory
    *  \return a memory
    */
-  inline SP::SiconosMemory getRMemoryPtr() const
+  inline SP::SiconosMemory rMemory() const
   {
-    return rMemory;
+    return _rMemory;
   }
 
   // --- M ---
@@ -213,9 +213,9 @@ public:
   /** get M
    *  \return pointer on a plugged-matrix
    */
-  inline SP::SiconosMatrix getMPtr() const
+  inline SP::SiconosMatrix M() const
   {
-    return M;
+    return _M;
   }
 
   /** set the value of M to newValue
@@ -228,7 +228,7 @@ public:
    */
   inline void setMPtr(SP::SiconosMatrix newPtr)
   {
-    M = newPtr;
+    _M = newPtr;
   }
 
   // --- invM ---
@@ -237,7 +237,7 @@ public:
    */
   inline const SimpleMatrix getInvMSimple() const
   {
-    return *invM;
+    return *_invM;
   }
 
   /** get the value of invM
@@ -245,15 +245,15 @@ public:
    */
   inline const BlockMatrix getInvMBlock() const
   {
-    return *invM;
+    return *_invM;
   }
 
   /** get invM
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix getInvMPtr() const
+  inline SP::SiconosMatrix invM() const
   {
-    return invM;
+    return _invM;
   }
 
   /** set the value of invM to newValue
@@ -277,11 +277,11 @@ public:
   /** get f
    *  \return pointer on a plugged vector
    */
-  inline SP::SiconosVector getFPtr() const
+  inline SP::SiconosVector f() const
   {
     return mf;
   }
-  inline SP::SiconosVector getFoldPtr() const
+  inline SP::SiconosVector fold() const
   {
     return mfold;
   }
@@ -308,9 +308,9 @@ public:
   /** get jacobianXF
    *  \return pointer on a plugged-matrix
    */
-  virtual SP::SiconosMatrix getJacobianXFPtr() const
+  virtual SP::SiconosMatrix jacobianXF() const
   {
-    return jacobianXF;
+    return _jacobianXF;
   }
 
   /** set the value of jacobianXF to newValue
@@ -323,7 +323,7 @@ public:
    */
   inline void setJacobianXFPtr(SP::SiconosMatrix newPtr)
   {
-    jacobianXF = newPtr;
+    _jacobianXF = newPtr;
   }
 
   /** Initialization function for the rhs and its jacobian.
@@ -336,7 +336,8 @@ public:
    */
   virtual void updatePlugins(double);
 
-  /** dynamical system initialization function: mainly set memory and compute value for initial state values.
+  /** dynamical system initialization function: mainly set memory and
+      compute value for initial state values.
    *  \param string: simulation type
    *  \param time of initialisation, default value = 0
    *  \param the size of the memory, default size = 1.
@@ -345,7 +346,8 @@ public:
 
   // ===== MEMORY MANAGEMENT FUNCTIONS =====
 
-  /** initialize the SiconosMemory objects: reserve memory for i vectors in memory and reset all to zero.
+  /** initialize the SiconosMemory objects: reserve memory for i
+      vectors in memory and reset all to zero.
    *  \param the size of the SiconosMemory (i)
    */
   void initMemory(unsigned int) ;
@@ -426,7 +428,9 @@ public:
    */
   void computeJacobianXF(double, bool  = false);
 
-  /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$ with x different from current saved state.
+  /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n}
+   *   \times R \mapsto R^{n \times n} \f$ with x different from
+   *   current saved state.
    *  \param double time : current time
    *  \param SP::SiconosVector
    */
@@ -469,23 +473,25 @@ public:
   /*
    * get the Xp work vector.
    */
-  inline SP::SiconosVector getXpPtr() const
+  inline SP::SiconosVector xp() const
   {
     return mXp;
   };
   /*
    * get the Xq work vector.
    */
-  inline SP::SiconosVector getXqPtr() const
+  inline SP::SiconosVector xq() const
   {
     return mXq;
   };
   /*
    * get the Xfree work vector.
    */
-  //  inline SP::SiconosVector getXfreePtr() const { return mXfree;};
+  //  inline SP::SiconosVector xfree() const { return mXfree;};
 
-  /** To compute \f$\frac{|x_{i+1} - xi|}{|x_i|}\f$ where \f$x_{i+1}\f$ represents the present state and \f$x_i\f$ the previous one
+  /** To compute \f$\frac{|x_{i+1} - xi|}{|x_i|}\f$ where
+      \f$x_{i+1}\f$ represents the present state and \f$x_i\f$ the
+      previous one
    * \return a double
    */
   /*  double dsConvergenceIndicator(); */

@@ -43,7 +43,7 @@ void CircleCircleR::computeH(double)
   double q_3 = (*data[q0])(3);
   double q_4 = (*data[q0])(4);
 
-  SiconosVector *y = getInteractionPtr()->getYPtr(0).get();
+  SiconosVector *y = interaction()->y(0).get();
   (*y)(0) = distance(q_0, q_1, r1, q_3, q_4, r2);
 
 };

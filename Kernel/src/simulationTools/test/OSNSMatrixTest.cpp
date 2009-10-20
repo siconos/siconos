@@ -32,10 +32,10 @@ void OSNSMatrixTest::setUp()
   tol = 1e-12;
   // Download a Model from Template.xml file
   temp.reset(new Model("Template.xml"));
-  SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(temp->getSimulationPtr());
+  SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(temp->simulation());
   s->initialize();
   // Get a set of Unitary Relations
-  indexSet = s->getIndexSetPtr(0);
+  indexSet = s->indexSet(0);
   SP::OneStepNSProblem osns = s->getOneStepNSProblems()->begin()->second;
   osns->computeAllBlocks();
   blocks = osns->getBlocks();
@@ -65,10 +65,10 @@ void OSNSMatrixTest::testBuildOSNSMatrix1()
   SP::OSNSMatrix  M(new OSNSMatrix(n));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->size() == n, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->getStorageType() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->getDefaultMatrixPtr(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->getDefaultMatrixPtr()->size(0) == n, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->getDefaultMatrixPtr()->size(1) == n, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->getDefaultMatrixPtr()->normInf() < tol , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->defaultMatrix(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->defaultMatrix()->size(0) == n, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->defaultMatrix()->size(1) == n, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->defaultMatrix()->normInf() < tol , true);
   cout << "------- Constructor(dim) ended with success -------" << endl;
   cout << endl << endl;
 }
@@ -99,9 +99,9 @@ void OSNSMatrixTest::testBuildOSNSMatrix2()
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->size() == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->getStorageType() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->getDefaultMatrixPtr(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->getDefaultMatrixPtr()->size(0) == dim, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->getDefaultMatrixPtr()->size(1) == dim, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->defaultMatrix(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->defaultMatrix()->size(0) == dim, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->defaultMatrix()->size(1) == dim, true);
   unsigned int i = 0, pos = 0;
   for (UnitaryRelationsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
   {
@@ -110,7 +110,7 @@ void OSNSMatrixTest::testBuildOSNSMatrix2()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->getSizeOfDiagonalBlock(i++) == (*it)->getNonSmoothLawSize(), true);
     pos += (*it)->getNonSmoothLawSize();
   }
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", (*M->getDefaultMatrixPtr() - MRef).normInf() < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", (*M->defaultMatrix() - MRef).normInf() < tol, true);
 
   cout << "------- Constructor(indexSet,blocks) ended with success -------" << endl;
   cout << endl << endl;
@@ -143,9 +143,9 @@ void OSNSMatrixTest::testFill()
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->size() == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getStorageType() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getDefaultMatrixPtr(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getDefaultMatrixPtr()->size(0) == dim, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getDefaultMatrixPtr()->size(1) == dim, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->defaultMatrix(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->defaultMatrix()->size(0) == dim, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->defaultMatrix()->size(1) == dim, true);
   unsigned int i = 0, pos = 0;
   for (UnitaryRelationsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
   {
@@ -154,15 +154,15 @@ void OSNSMatrixTest::testFill()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getSizeOfDiagonalBlock(i++) == (*it)->getNonSmoothLawSize(), true);
     pos += (*it)->getNonSmoothLawSize();
   }
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", (*M->getDefaultMatrixPtr() - MRef).normInf() < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", (*M->defaultMatrix() - MRef).normInf() < tol, true);
   // Start from matrix with maxSize = M and and fill it (with resize)
   M.reset(new OSNSMatrix(30));
   M->fill(indexSet, blocks);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->size() == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getStorageType() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getDefaultMatrixPtr(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getDefaultMatrixPtr()->size(0) == dim, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getDefaultMatrixPtr()->size(1) == dim, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->defaultMatrix(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->defaultMatrix()->size(0) == dim, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->defaultMatrix()->size(1) == dim, true);
   i = 0;
   pos = 0;
   for (UnitaryRelationsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
@@ -172,7 +172,7 @@ void OSNSMatrixTest::testFill()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getSizeOfDiagonalBlock(i++) == (*it)->getNonSmoothLawSize(), true);
     pos += (*it)->getNonSmoothLawSize();
   }
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", (*M->getDefaultMatrixPtr() - MRef).normInf() < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", (*M->defaultMatrix() - MRef).normInf() < tol, true);
   cout << "------- fill function test ended with success -------" << endl;
   cout << endl << endl;
 }
@@ -244,9 +244,9 @@ void OSNSMatrixTest::testFill2()
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->size() == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getStorageType() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getDefaultMatrixPtr(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getDefaultMatrixPtr()->size(0) == dim, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getDefaultMatrixPtr()->size(1) == dim, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->defaultMatrix(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->defaultMatrix()->size(0) == dim, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->defaultMatrix()->size(1) == dim, true);
   unsigned int i = 0, pos = 0;
   for (UnitaryRelationsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
   {
@@ -255,16 +255,16 @@ void OSNSMatrixTest::testFill2()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getSizeOfDiagonalBlock(i++) == (*it)->getNonSmoothLawSize(), true);
     pos += (*it)->getNonSmoothLawSize();
   }
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", (*M->getDefaultMatrixPtr() - MRef).normInf() < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", (*M->defaultMatrix() - MRef).normInf() < tol, true);
 
   // Start from matrix with maxSize = M and and fill it (with resize)
   M.reset(new OSNSMatrix(30));
   M->fill(indexSet, blocks);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->size() == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getStorageType() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getDefaultMatrixPtr(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getDefaultMatrixPtr()->size(0) == dim, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getDefaultMatrixPtr()->size(1) == dim, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->defaultMatrix(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->defaultMatrix()->size(0) == dim, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->defaultMatrix()->size(1) == dim, true);
   i = 0;
   pos = 0;
   for (UnitaryRelationsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
@@ -274,7 +274,7 @@ void OSNSMatrixTest::testFill2()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getSizeOfDiagonalBlock(i++) == (*it)->getNonSmoothLawSize(), true);
     pos += (*it)->getNonSmoothLawSize();
   }
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", (*M->getDefaultMatrixPtr() - MRef).normInf() < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", (*M->defaultMatrix() - MRef).normInf() < tol, true);
 
   cout << "------- fill2 function test ended with success -------" << endl;
   cout << endl << endl;

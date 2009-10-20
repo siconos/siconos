@@ -27,13 +27,13 @@
 using namespace std;
 using namespace SensorFactory;
 
-SensorPosition::SensorPosition(int name, SP::TimeDiscretisation t): Sensor(name, t), nSteps(2000)
+SensorPosition::SensorPosition(int name, SP::TimeDiscretisation t): Sensor(name, t), _nSteps(2000)
 {}
 
 SensorPosition::~SensorPosition()
 {
   ioMatrix io("resultSensor.dat", "ascii");
-  io.write(*dataPlot, "noDim");
+  io.write(*_dataPlot, "noDim");
 }
 
 void SensorPosition::initialize()
@@ -44,16 +44,16 @@ void SensorPosition::initialize()
   // --- Get the values to be plotted ---
   // -> saved in a matrix dataPlot
   unsigned int outputSize = 3;
-  dataPlot.reset(new SimpleMatrix(nSteps, outputSize));
-  k = 0;
+  _dataPlot.reset(new SimpleMatrix(_nSteps, outputSize));
+  _k = 0;
 }
 
 void SensorPosition::capture()
 {
-  (*dataPlot)(k, 0) = timeDiscretisation->getCurrentTime();
-  (*dataPlot)(k, 1) = (*model->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(0)->getXPtr())(0);
-  (*dataPlot)(k, 2) = (*model->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(0)->getXPtr())(3);
-  k++;
+  (*_dataPlot)(_k, 0) = _timeDiscretisation->currentTime();
+  (*_dataPlot)(_k, 1) = (*_model->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0)->x())(0);
+  (*_dataPlot)(_k, 2) = (*_model->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0)->x())(3);
+  _k++;
 }
 
 SensorPosition* SensorPosition::convert(Sensor* s)

@@ -45,7 +45,7 @@ private:
   SP::SiconosMatrix Q;
 
   /** contains the p vector of a QP problem */
-  SP::SimpleVector p;
+  SP::SimpleVector _p;
 
   //  /** contains the data of the QP, according to siconos/numerics */
   //  QPStructure QPMethod;
@@ -74,7 +74,7 @@ public:
   /** get Q
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix getQPtr() const
+  inline SP::SiconosMatrix q() const
   {
     return Q;
   }
@@ -102,15 +102,15 @@ public:
    */
   inline const SimpleVector getP() const
   {
-    return *p;
+    return *_p;
   }
 
   /** get p, the initial state of the DynamicalSystem
    *  \return pointer on a SimpleVector
    */
-  inline SP::SimpleVector getPPtr() const
+  inline SP::SimpleVector p() const
   {
-    return p;
+    return _p;
   }
 
   /** set the value of p to newValue
@@ -118,15 +118,15 @@ public:
    */
   inline void setP(const SimpleVector& newValue)
   {
-    *p = newValue;
+    *_p = newValue;
   }
 
   /** set p to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  inline void setPPtr(SP::SimpleVector newPtr)
+  inline void setp(SP::SimpleVector newPtr)
   {
-    p = newPtr;
+    _p = newPtr;
   }
 
   // --- OTHER FUNCTIONS ---

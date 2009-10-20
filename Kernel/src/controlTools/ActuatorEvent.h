@@ -39,7 +39,7 @@ class ActuatorEvent : public Event
 private:
 
   /** The actuator linked to the present event */
-  SP::Actuator actuator;
+  SP::Actuator _actuator;
 
   /** Default constructor */
   ActuatorEvent(): Event(0.0, 3) {};
@@ -59,9 +59,9 @@ public:
   /** get the Actuator linked to this Event
    *  \return a pointer to Actuator
    */
-  inline SP::Actuator getActuatorPtr() const
+  inline SP::Actuator actuator() const
   {
-    return actuator;
+    return _actuator;
   };
 
   /** set the TimeDiscretisation linked to this Actuator
@@ -69,7 +69,7 @@ public:
    */
   void setActuatorPtr(SP::Actuator newActuator)
   {
-    actuator = newActuator;
+    _actuator = newActuator;
   };
 
   /**

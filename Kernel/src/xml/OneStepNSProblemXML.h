@@ -146,7 +146,7 @@ public:
   /** to xml object that handles solver
    *   \return a pointer to a NonSmoothSolverXML
    */
-  inline SP::NonSmoothSolverXML getNonSmoothSolverXMLPtr() const
+  inline SP::NonSmoothSolverXML nonSmoothSolverXML() const
   {
     return solverXML;
   }

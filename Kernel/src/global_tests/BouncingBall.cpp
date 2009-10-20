@@ -40,12 +40,12 @@ bool BouncingBall()
     // --- Model loading from xml file ---
     SP::Model bouncingBall(new Model("./Ball.xml"));
     // --- Get and initialize the simulation ---
-    SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(bouncingBall->getSimulationPtr());
-    SP::LagrangianDS ball = boost::static_pointer_cast<LagrangianDS> (bouncingBall->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(1));
+    SP::TimeStepping s = boost::static_pointer_cast<TimeStepping>(bouncingBall->simulation());
+    SP::LagrangianDS ball = boost::static_pointer_cast<LagrangianDS> (bouncingBall->nonSmoothDynamicalSystem()->dynamicalSystemNumber(1));
     bouncingBall->initialize();
 
     // --- Get the time discretisation scheme ---
-    SP::TimeDiscretisation t = s->getTimeDiscretisationPtr();
+    SP::TimeDiscretisation t = s->timeDiscretisation();
 
     int N = 2000; // Number of time steps
     // --- Get the values to be plotted ---
@@ -54,9 +54,9 @@ bool BouncingBall()
     // For the initial time step:
     // time
 
-    SP::SiconosVector q = ball->getQPtr();
-    SP::SiconosVector v = ball->getVelocityPtr();
-    SP::SiconosVector p = ball->getPPtr(2);
+    SP::SiconosVector q = ball->q();
+    SP::SiconosVector v = ball->velocity();
+    SP::SiconosVector p = ball->p(2);
 
     dataPlot(0, 0) = bouncingBall->getT0();
     dataPlot(0, 1) = (*q)(0);

@@ -49,11 +49,11 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver0()
   cout << "===========================================" << endl;
   cout << "------- Default constructor test -------" << endl;
   SP::NonSmoothSolver NSS(new NonSmoothSolver());
-  std::vector<int> i0 = *NSS->getIntParametersPtr();
-  std::vector<double> d0 = *NSS->getDoubleParametersPtr();
+  std::vector<int> i0 = *NSS->intParameters();
+  std::vector<double> d0 = *NSS->doubleParameters();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverA : ", NSS->isSolverSet(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverB : ", NSS->getName() == "undefined", true);
-  SP::Solver_Options opt = NSS->getNumericsSolverOptionsPtr();
+  SP::Solver_Options opt = NSS->numericsSolverOptions();
   int * i1 = opt->iparam;
   double * d1 = opt->dparam;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverE : ", opt->isSet == 0, true);
@@ -68,8 +68,8 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver1()
 {
   cout << "------- Basic constructor test -------" << endl;
   SP::NonSmoothSolver NSS(new NonSmoothSolver("NSGS", iparam, dparam));
-  std::vector<int> i0 = *NSS->getIntParametersPtr();
-  std::vector<double> d0 = *NSS->getDoubleParametersPtr();
+  std::vector<int> i0 = *NSS->intParameters();
+  std::vector<double> d0 = *NSS->doubleParameters();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverA : ", NSS->isSolverSet(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverB : ", NSS->getName() == "NSGS", true);
   for (unsigned int i = 0; i < NB_PARAM; ++i)
@@ -77,7 +77,7 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver1()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverC : ", i0[i] == iparam[i], true);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverD : ", d0[i] == dparam[i], true);
   }
-  SP::Solver_Options opt = NSS->getNumericsSolverOptionsPtr();
+  SP::Solver_Options opt = NSS->numericsSolverOptions();
   int * i1 = opt->iparam;
   double * d1 = opt->dparam;
 
@@ -99,8 +99,8 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver2()
   SP::NonSmoothSolver NSS0(new NonSmoothSolver("NSGS", iparam, dparam));
   SP::NonSmoothSolver NSS(new NonSmoothSolver(*NSS0));
 
-  std::vector<int> i0 = *NSS->getIntParametersPtr();
-  std::vector<double> d0 = *NSS->getDoubleParametersPtr();
+  std::vector<int> i0 = *NSS->intParameters();
+  std::vector<double> d0 = *NSS->doubleParameters();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverA : ", NSS->isSolverSet(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverB : ", NSS->getName() == "NSGS", true);
   for (unsigned int i = 0; i < NB_PARAM; ++i)
@@ -108,7 +108,7 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver2()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverC : ", i0[i] == iparam[i], true);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverD : ", d0[i] == dparam[i], true);
   }
-  SP::Solver_Options opt = NSS->getNumericsSolverOptionsPtr();
+  SP::Solver_Options opt = NSS->numericsSolverOptions();
   int * i1 = opt->iparam;
   double * d1 = opt->dparam;
 
@@ -151,8 +151,8 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver3()
   xmlNodePtr node = SiconosDOMTreeTools::findNodeChild(cur, "NonSmoothSolver");
   SP::NonSmoothSolverXML solvXML(new NonSmoothSolverXML(node));
   SP::NonSmoothSolver NSS(new NonSmoothSolver(solvXML));
-  std::vector<int> i0 = *NSS->getIntParametersPtr();
-  std::vector<double> d0 = *NSS->getDoubleParametersPtr();
+  std::vector<int> i0 = *NSS->intParameters();
+  std::vector<double> d0 = *NSS->doubleParameters();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverA : ", NSS->isSolverSet(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverB : ", NSS->getName() == "NSGS", true);
   for (unsigned int i = 0; i < NB_PARAM; ++i)
@@ -160,7 +160,7 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver3()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverC : ", i0[i] == iparam[i], true);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverD : ", d0[i] == dparam[i], true);
   }
-  SP::Solver_Options opt = NSS->getNumericsSolverOptionsPtr();
+  SP::Solver_Options opt = NSS->numericsSolverOptions();
   int * i1 = opt->iparam;
   double * d1 = opt->dparam;
 

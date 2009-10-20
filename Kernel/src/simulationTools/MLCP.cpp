@@ -34,12 +34,12 @@ MLCP::MLCP(SP::NonSmoothSolver newSolver, const string& newId):
 void MLCP::updateM()
 {
   // Get index set from Simulation
-  SP::UnitaryRelationsGraph indexSet = simulation->getIndexSetPtr(levelMin);
+  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
 
   if (!_M)
   {
     // Creates and fills M using UR of indexSet
-    _M.reset(new OSNSMatrix(indexSet, unitaryBlocks, MStorageType));
+    _M.reset(new OSNSMatrix(indexSet, _unitaryBlocks, _MStorageType));
     numerics_problem.M = &*_M->getNumericsMatrix();
     numerics_problem.A = 0;
     numerics_problem.B = 0;
@@ -53,27 +53,27 @@ void MLCP::updateM()
   }
   else
   {
-    _M->setStorageType(MStorageType);
-    _M->fill(indexSet, unitaryBlocks);
+    _M->setStorageType(_MStorageType);
+    _M->fill(indexSet, _unitaryBlocks);
 
   }
-  sizeOutput = _M->size();
+  _sizeOutput = _M->size();
 }
 
 void  MLCP::reset()
 {
-  mlcp_driver_reset(&numerics_problem, (solver->getNumericsSolverOptionsPtr()).get());
+  mlcp_driver_reset(&numerics_problem, (solver()->numericsSolverOptions()).get());
 }
 
 void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
 {
 
-  // Computes matrix unitaryBlocks[UR1][UR2] (and allocates memory if necessary) if UR1 and UR2 have commond DynamicalSystem.
-  // How unitaryBlocks are computed depends explicitely on the type of Relation of each UR.
+  // Computes matrix _unitaryBlocks[UR1][UR2] (and allocates memory if necessary) if UR1 and UR2 have commond DynamicalSystem.
+  // How _unitaryBlocks are computed depends explicitely on the type of Relation of each UR.
 
   // Get DS common between UR1 and UR2
   DynamicalSystemsSet commonDS;
-  intersection(*UR1->getDynamicalSystemsPtr(), *UR2->getDynamicalSystemsPtr(), commonDS);
+  intersection(*UR1->dynamicalSystems(), *UR2->dynamicalSystems(), commonDS);
   _m = 0;
   _n = 0;
   if (!commonDS.isEmpty()) // Nothing to be done if there are no common DS between the two UR.
@@ -84,15 +84,15 @@ void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
     // Get dimension of the NonSmoothLaw (ie dim of the unitaryBlock)
     unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
     unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
-    unsigned int equalitySize1 =  MixedComplementarityConditionNSL::convert(UR1->getInteractionPtr()->getNonSmoothLawPtr())->getEqualitySize();
-    unsigned int equalitySize2 = MixedComplementarityConditionNSL::convert(UR1->getInteractionPtr()->getNonSmoothLawPtr())->getEqualitySize();
+    unsigned int equalitySize1 =  MixedComplementarityConditionNSL::convert(UR1->interaction()->nonSmoothLaw())->getEqualitySize();
+    unsigned int equalitySize2 = MixedComplementarityConditionNSL::convert(UR1->interaction()->nonSmoothLaw())->getEqualitySize();
 
 
 
     // Check allocation
-    if (! unitaryBlocks[UR1][UR2])
+    if (! _unitaryBlocks[UR1][UR2])
     {
-      (unitaryBlocks[UR1][UR2]).reset(new SimpleMatrix(nslawSize1, nslawSize2));
+      (_unitaryBlocks[UR1][UR2]).reset(new SimpleMatrix(nslawSize1, nslawSize2));
 
     }
     // Get the W and Theta maps of one of the Unitary Relation - Warning: in the current version, if OSI!=Moreau, this fails.
@@ -102,14 +102,14 @@ void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
     MapOfDouble Theta; // If OSI = LSODAR, Theta remains empty
     getOSIMaps(UR1, centralUnitaryBlocks, Theta);
 
-    SP::SiconosMatrix currentUnitaryBlock = unitaryBlocks[UR1][UR2];
+    SP::SiconosMatrix currentUnitaryBlock = _unitaryBlocks[UR1][UR2];
 
     SP::SiconosMatrix leftUnitaryBlock, rightUnitaryBlock;
 
     unsigned int sizeDS;
     RELATION::TYPES relationType1, relationType2;
 
-    double h = simulation->getTimeDiscretisationPtr()->getCurrentTimeStep();
+    double h = simulation()->timeDiscretisation()->currentTimeStep();
     //      printf("h : %f \n",h);
 
     // General form of the unitaryBlock is :   unitaryBlock = a*extraUnitaryBlock + b * leftUnitaryBlock * centralUnitaryBlocks * rightUnitaryBlock
@@ -117,7 +117,7 @@ void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
     // left, right and extra depend on the relation type and the non smooth law.
     relationType1 = UR1->getRelationType();
     relationType2 = UR2->getRelationType();
-    // ==== First Order Relations - Specific treatment for diagonal unitaryBlocks ===
+    // ==== First Order Relations - Specific treatment for diagonal _unitaryBlocks ===
     if (UR1 == UR2)
     {
       UR1->getExtraUnitaryBlock(currentUnitaryBlock);
@@ -212,9 +212,9 @@ int MLCP::compute(double time)
   // - the options for the solver (name, max iteration number ...)
   // - the global options for Numerics (verbose mode ...)
 
-  if (sizeOutput != 0)
+  if (_sizeOutput != 0)
   {
-    numerics_problem.q = q->getArray();
+    numerics_problem.q = _q->getArray();
     int nbSolvers = 1;
     // Call MLCP Driver
     //printf("MLCP display");
@@ -226,7 +226,8 @@ int MLCP::compute(double time)
     try
     {
       //  display();
-      info = mlcp_driver(&numerics_problem, _z->getArray(), _w->getArray(), (solver->getNumericsSolverOptionsPtr()).get(), &*numerics_options);
+      info = mlcp_driver(&numerics_problem, _z->getArray(), _w->getArray(),
+                         (solver()->numericsSolverOptions()).get(), &*_numerics_options);
     }
     catch (...)
     {
@@ -244,7 +245,7 @@ int MLCP::compute(double time)
 
 void MLCP::display() const
 {
-  cout << "======= MLCP of size " << sizeOutput << " with: " << endl;
+  cout << "======= MLCP of size " << _sizeOutput << " with: " << endl;
   cout << "======= m " << _m << " _n " << _n << endl;
   LinearOSNS::display();
 }

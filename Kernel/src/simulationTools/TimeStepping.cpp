@@ -92,11 +92,11 @@ void TimeStepping::updateIndexSet(unsigned int i)
   // To update IndexSet number i: add or remove UnitaryRelations from
   // this set, depending on y values.
 
-  assert(!model.expired());
-  assert(getModelPtr()->getNonSmoothDynamicalSystemPtr());
-  assert(getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr());
+  assert(!_model.expired());
+  assert(model()->nonSmoothDynamicalSystem());
+  assert(model()->nonSmoothDynamicalSystem()->topology());
 
-  SP::Topology topo = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  SP::Topology topo = model()->nonSmoothDynamicalSystem()->topology();
 
   assert(i < topo->indexSetsSize() &&
          "TimeStepping::updateIndexSet(i), indexSets[i] does not exist.");
@@ -107,11 +107,11 @@ void TimeStepping::updateIndexSet(unsigned int i)
 
   assert(i == 1);  // yes
 
-  assert(topo->getIndexSetPtr(0));
-  assert(topo->getIndexSetPtr(1));
+  assert(topo->indexSet(0));
+  assert(topo->indexSet(1));
 
-  SP::UnitaryRelationsGraph indexSet0 = topo->getIndexSetPtr(0);
-  SP::UnitaryRelationsGraph indexSet1 = topo->getIndexSetPtr(1);
+  SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0);
+  SP::UnitaryRelationsGraph indexSet1 = topo->indexSet(1);
 
 
 
@@ -151,7 +151,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
         // ui1 becomes invalid
         indexSet0->color(ur1_descr0) = boost::black_color;
         indexSet1->remove_vertex(ur1);
-        ur1->getLambdaPtr(1)->zero();
+        ur1->lambda(1)->zero();
       }
     }
     else
@@ -240,8 +240,8 @@ void TimeStepping::initOSNS()
 
   ConstDSIterator itDS;
 
-  SP::Topology topo =  getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
-  SP::UnitaryRelationsGraph indexSet0 = topo->getIndexSetPtr(0);
+  SP::Topology topo =  model()->nonSmoothDynamicalSystem()->topology();
+  SP::UnitaryRelationsGraph indexSet0 = topo->indexSet(0);
 
   UnitaryRelationsGraph::VIterator ui, uiend;
 
@@ -258,7 +258,7 @@ void TimeStepping::initOSNS()
          itDS != ur->dynamicalSystemsEnd(); ++itDS)
     {
       //osi = osiMap[*itDS];
-      ur->insertInWorkFree((*itDS)->getWorkFreePtr()); // osi->getWorkX(*itDS));
+      ur->insertInWorkFree((*itDS)->workFree()); // osi->getWorkX(*itDS));
     }
   }
 
@@ -274,10 +274,10 @@ void TimeStepping::initOSNS()
     // equal to the minimum value of the relative degree - 1 except
     // for degree 0 case where we keep 0.
 
-    assert(getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->isUpToDate());
-    assert(getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMinRelativeDegree() >= 0);
+    assert(model()->nonSmoothDynamicalSystem()->topology()->isUpToDate());
+    assert(model()->nonSmoothDynamicalSystem()->topology()->getMinRelativeDegree() >= 0);
 
-    levelMin = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMinRelativeDegree();
+    levelMin = model()->nonSmoothDynamicalSystem()->topology()->getMinRelativeDegree();
 
     if (levelMin != 0)
       levelMin--;
@@ -296,7 +296,7 @@ void TimeStepping::initOSNS()
 
 void TimeStepping::initLevelMax()
 {
-  levelMax = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMaxRelativeDegree();
+  levelMax = model()->nonSmoothDynamicalSystem()->topology()->getMaxRelativeDegree();
   // Interactions initialization (here, since level depends on the
   // type of simulation) level corresponds to the number of Y and
   // Lambda derivatives computed.
@@ -309,7 +309,7 @@ void TimeStepping::initLevelMax()
 
 void TimeStepping::nextStep()
 {
-  eventsManager->processEvents();
+  _eventsManager->processEvents();
 }
 
 
@@ -348,14 +348,14 @@ void TimeStepping::computeInitialResidu()
 {
   //  cout<<"BEGIN computeInitialResidu"<<endl;
   double tkp1 = getTkp1();
-  SP::InteractionsSet allInteractions = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
+  SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
   for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
   {
-    (*it)->getRelationPtr()->computeG(tkp1);
-    (*it)->getRelationPtr()->computeH(tkp1);
+    (*it)->relation()->computeG(tkp1);
+    (*it)->relation()->computeH(tkp1);
   }
 
-  SP::DynamicalSystemsGraph dsGraph = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
   for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
   {
     dsGraph->bundle(*vi)->updatePlugins(tkp1);
@@ -367,7 +367,7 @@ void TimeStepping::computeInitialResidu()
   if (mComputeResiduY)
     for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
     {
-      (*it)->getRelationPtr()->computeResiduY(tkp1);
+      (*it)->relation()->computeResiduY(tkp1);
     }
 
   //  cout<<"END computeInitialResidu"<<endl;
@@ -407,26 +407,26 @@ void   TimeStepping::prepareNewtonIteration()
     ++it;
   }
 
-  SP::InteractionsSet allInteractions = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
+  SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
   for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
   {
-    (*it)->getRelationPtr()->computeJacH(getTkp1());
-    (*it)->getRelationPtr()->computeJacG(getTkp1());
+    (*it)->relation()->computeJacH(getTkp1());
+    (*it)->relation()->computeJacG(getTkp1());
   }
 
 
   /*reset to zero the ds buffers*/
-  SP::DynamicalSystemsGraph dsGraph = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
   for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
   {
     dsGraph->bundle(*vi)->preparStep();
-    //     (*itds)->getXpPtr()->zero();
+    //     (*itds)->xp()->zero();
     //     (*itds)->getRPtr()->zero();
   }
   /**/
   for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
   {
-    (*it)->getRelationPtr()->preparNewtonIteration();
+    (*it)->relation()->preparNewtonIteration();
   }
 
 }
@@ -505,11 +505,11 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
 
 
   //check residuy.
-  SP::InteractionsSet allInteractions = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractionsPtr();
+  SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
   for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
   {
-    (*it)->getRelationPtr()->computeResiduY(getTkp1());
-    residu = (*it)->getRelationPtr()->getResiduY()->norm2();
+    (*it)->relation()->computeResiduY(getTkp1());
+    residu = (*it)->relation()->getResiduY()->norm2();
     if (residu > criterion)
     {
       //      cout<<"residuY > criteron"<<residu<<">"<<criterion<<endl;
@@ -526,7 +526,7 @@ void TimeStepping::run(const std::string& opt, double criterion, unsigned int ma
   // do simulation while events remains in the "future events" list of
   // events manager.
   cout << " ==== Start of " << simulationType << " simulation - This may take a while ... ====" << endl;
-  while (eventsManager->hasNextEvent())
+  while (_eventsManager->hasNextEvent())
   {
     if (opt == "linear")
       advanceToEvent();
@@ -537,7 +537,7 @@ void TimeStepping::run(const std::string& opt, double criterion, unsigned int ma
     else
       RuntimeException::selfThrow("TimeStepping::run(opt) failed. Unknow simulation option: " + opt);
 
-    eventsManager->processEvents();
+    _eventsManager->processEvents();
     count++;
   }
   cout << "===== End of " << simulationType << "simulation. " << count << " events have been processed. ==== " << endl;

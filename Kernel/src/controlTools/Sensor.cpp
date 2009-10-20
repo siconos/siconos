@@ -26,10 +26,10 @@
 #include <iostream>
 using namespace std;
 
-Sensor::Sensor(): type(0), id("none")
+Sensor::Sensor(): _type(0), _id("none")
 {}
 
-Sensor::Sensor(int name, SP::TimeDiscretisation t): type(name), id("none"), timeDiscretisation(t)
+Sensor::Sensor(int name, SP::TimeDiscretisation t): _type(name), _id("none"), _timeDiscretisation(t)
 {}
 
 Sensor::~Sensor()
@@ -40,22 +40,22 @@ void Sensor::initialize()
   // == Create an event linked to the present Actuator. ==
   // Uses the events factory to insert the new event.
   EventFactory::Registry& regEvent(EventFactory::Registry::get());
-  eSensor = regEvent.instantiate(timeDiscretisation->getCurrentTime(), 4);
-  boost::static_pointer_cast<SensorEvent>(eSensor)->setSensorPtr(shared_from_this());
+  _eSensor = regEvent.instantiate(_timeDiscretisation->currentTime(), 4);
+  boost::static_pointer_cast<SensorEvent>(_eSensor)->setSensorPtr(shared_from_this());
 }
 
 // Add the present sensor into the Simulation process
 // i.e. add eSensor into the EventsManager of the simulation
 void Sensor::recordInSimulation()
 {
-  model->getSimulationPtr()->getEventsManagerPtr()->insertEvent(eSensor);
+  model()->simulation()->eventsManager()->insertEvent(_eSensor);
 }
 
 void Sensor::display() const
 {
-  cout << "=====> Sensor of type " << type << ", named " << id ;
-  if (model)
-    cout << " and linked to model named " << model->getTitle() << "." << endl;
+  cout << "=====> Sensor of type " << _type << ", named " << _id ;
+  if (_model)
+    cout << " and linked to model named " << model()->getTitle() << "." << endl;
   else
     cout << " and not linked to a model." << endl;
   cout << "======" << endl ;

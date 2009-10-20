@@ -139,10 +139,10 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(SP::NonSmoothDyna
   //     */
   //    for(i=0; i<nsds->getNumberOfDS(); i++)
   //      {
-  //        if( !nsds->getDynamicalSystemPtr(i)->getDynamicalSystemXMLPtr() )
+  //        if( !nsds->dynamicalSystem(i)->dynamicalSystemXML() )
   //    {
-  //      type = nsds->getDynamicalSystemPtr(i)->getType();
-  //      number = nsds->getDynamicalSystemPtr(i)->getNumber();
+  //      type = nsds->dynamicalSystem(i)->getType();
+  //      number = nsds->dynamicalSystem(i)->getNumber();
   //      sprintf(num, "%d", number);
   //      definedDSNumbers.push_back( number );
 
@@ -159,10 +159,10 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(SP::NonSmoothDyna
   //        dsxml = new LagrangianDSXML();
 
   //        // linkage between the DynamicalSystem and his DynamicalSystemXML
-  //        nsds->getDynamicalSystemPtr(i)->setDynamicalSystemXMLPtr( dsxml );
+  //        nsds->dynamicalSystem(i)->setDynamicalSystemXMLPtr( dsxml );
 
   //        // creation of the DynamicalSystemXML
-  //        static_cast<LagrangianDSXML*>(dsxml)->updateDynamicalSystemXML( node, nsds->getDynamicalSystemPtr(i) );
+  //        static_cast<LagrangianDSXML*>(dsxml)->updateDynamicalSystemXML( node, nsds->dynamicalSystem(i) );
 
   //        DSXMLMap[number] = dsxml;
   //      }
@@ -173,10 +173,10 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(SP::NonSmoothDyna
   //        dsxml = new LagrangianLinearTIDSXML();
 
   //        // linkage between the DynamicalSystem and his DynamicalSystemXML
-  //        nsds->getDynamicalSystemPtr(i)->setDynamicalSystemXMLPtr( dsxml );
+  //        nsds->dynamicalSystem(i)->setDynamicalSystemXMLPtr( dsxml );
 
   //        // creation of the DynamicalSystemXML
-  //        static_cast<LagrangianLinearTIDSXML*>(dsxml)->updateDynamicalSystemXML( node, nsds->getDynamicalSystemPtr(i) );
+  //        static_cast<LagrangianLinearTIDSXML*>(dsxml)->updateDynamicalSystemXML( node, nsds->dynamicalSystem(i) );
 
   //        DSXMLMap[number] = dsxml;
   //      }
@@ -187,10 +187,10 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(SP::NonSmoothDyna
   //        dsxml = new LinearDSXML();
 
   //        // linkage between the DynamicalSystem and his DynamicalSystemXML
-  //        nsds->getDynamicalSystemPtr(i)->setDynamicalSystemXMLPtr( dsxml );
+  //        nsds->dynamicalSystem(i)->setDynamicalSystemXMLPtr( dsxml );
 
   //        // creation of the DynamicalSystemXML
-  //        static_cast<LinearDSXML*>(dsxml)->updateDynamicalSystemXML( node, nsds->getDynamicalSystemPtr(i) );
+  //        static_cast<LinearDSXML*>(dsxml)->updateDynamicalSystemXML( node, nsds->dynamicalSystem(i) );
 
   //        DSXMLMap[number] = dsxml;
 
@@ -202,10 +202,10 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(SP::NonSmoothDyna
   //        dsxml = new DynamicalSystemXML();
 
   //        // linkage between the DynamicalSystem and his DynamicalSystemXML
-  //        nsds->getDynamicalSystemPtr(i)->setDynamicalSystemXMLPtr( dsxml );
+  //        nsds->dynamicalSystem(i)->setDynamicalSystemXMLPtr( dsxml );
 
   //        // creation of the DynamicalSystemXML
-  //        dsxml->updateDynamicalSystemXML( node, nsds->getDynamicalSystemPtr(i) );
+  //        dsxml->updateDynamicalSystemXML( node, nsds->dynamicalSystem(i) );
 
   //        DSXMLMap[number] = dsxml;
   //      }
@@ -221,7 +221,7 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(SP::NonSmoothDyna
   //        }
   //    }
   //        else
-  //    cout<<"## /!\\ the DynamicalSystem : "<<nsds->getDynamicalSystemPtr(i)->getType()<<" number "<<nsds->getDynamicalSystemPtr(i)->getNumber()<<
+  //    cout<<"## /!\\ the DynamicalSystem : "<<nsds->dynamicalSystem(i)->getType()<<" number "<<nsds->dynamicalSystem(i)->getNumber()<<
   //      ", has already an XML object."<<endl;
   //      }
   //  }
@@ -241,9 +241,9 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(SP::NonSmoothDyna
 
   //    for(i=0; i<nsds->getEqualityConstraints().size(); i++)
   //      {
-  //        if(! nsds->getEqualityConstraintPtr(i)->getEqualityConstraintXML() )
+  //        if(! nsds->equalityConstraint(i)->getEqualityConstraintXML() )
   //    {
-  //      number = nsds->getEqualityConstraintPtr(i)->getNumber();
+  //      number = nsds->equalityConstraint(i)->getNumber();
   //      sprintf(num, "%d", number);
   //      definedEqualityConstraintNumbers.push_back( number );
 
@@ -251,84 +251,84 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(SP::NonSmoothDyna
   //      itec = equalityConstraintXMLMap.find(number);
   //      if (itec == equalityConstraintXMLMap.end())
   //        {
-  //          if( nsds->getEqualityConstraintPtr(i)->getType() == LINEAREC )
+  //          if( nsds->equalityConstraint(i)->getType() == LINEAREC )
   //      {
   //        node = xmlNewChild( ecDefinitionNode, NULL, (xmlChar*)LINEAR_EC_TAG.c_str(), NULL );
   //        xmlNewProp( node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num );
   //        ecXML = new LinearECXML();
 
   //        // linkage between the DynamicalSystem and his DynamicalSystemXML
-  //        nsds->getEqualityConstraintPtr(i)->setEqualityConstraintXML( ecXML );
+  //        nsds->equalityConstraint(i)->setEqualityConstraintXML( ecXML );
 
   //        // creation of the DynamicalSystemXML
-  //        static_cast<LinearECXML*>(ecXML)->updateEqualityConstraintXML( node, nsds->getEqualityConstraintPtr(i) );
+  //        static_cast<LinearECXML*>(ecXML)->updateEqualityConstraintXML( node, nsds->equalityConstraint(i) );
 
   //        equalityConstraintXMLMap[number] = ecXML;
   //      }
-  //          else if( nsds->getEqualityConstraintPtr(i)->getType() == LINEARTIEC )
+  //          else if( nsds->equalityConstraint(i)->getType() == LINEARTIEC )
   //      {
   //        node = xmlNewChild( ecDefinitionNode, NULL, (xmlChar*)LINEAR_TIME_INVARIANT_EC_TAG.c_str(), NULL );
   //        xmlNewProp( node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num );
   //        ecXML = new LinearTIECXML();
 
   //        // linkage between the DynamicalSystem and his DynamicalSystemXML
-  //        nsds->getEqualityConstraintPtr(i)->setEqualityConstraintXML( ecXML );
+  //        nsds->equalityConstraint(i)->setEqualityConstraintXML( ecXML );
 
   //        // creation of the DynamicalSystemXML
-  //        static_cast<LinearTIECXML*>(ecXML)->updateEqualityConstraintXML( node, nsds->getEqualityConstraintPtr(i) );
+  //        static_cast<LinearTIECXML*>(ecXML)->updateEqualityConstraintXML( node, nsds->equalityConstraint(i) );
 
   //        equalityConstraintXMLMap[number] = ecXML;
   //      }
-  //          else if( nsds->getEqualityConstraintPtr(i)->getType() == LAGRANGIANEC )
+  //          else if( nsds->equalityConstraint(i)->getType() == LAGRANGIANEC )
   //      {
   //        node = xmlNewChild( ecDefinitionNode, NULL, (xmlChar*)LAGRANGIAN_EC_TAG.c_str(), NULL );
   //        xmlNewProp( node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num );
   //        ecXML = new LagrangianECXML();
 
   //        // linkage between the DynamicalSystem and his DynamicalSystemXML
-  //        nsds->getEqualityConstraintPtr(i)->setEqualityConstraintXML( ecXML );
+  //        nsds->equalityConstraint(i)->setEqualityConstraintXML( ecXML );
 
   //        // creation of the DynamicalSystemXML
-  //        static_cast<LagrangianECXML*>(ecXML)->updateEqualityConstraintXML( node, nsds->getEqualityConstraintPtr(i) );
+  //        static_cast<LagrangianECXML*>(ecXML)->updateEqualityConstraintXML( node, nsds->equalityConstraint(i) );
 
   //        equalityConstraintXMLMap[number] = ecXML;
   //      }
-  //          else if( nsds->getEqualityConstraintPtr(i)->getType() == LAGRANGIANLINEAREC )
+  //          else if( nsds->equalityConstraint(i)->getType() == LAGRANGIANLINEAREC )
   //      {
   //        node = xmlNewChild( ecDefinitionNode, NULL, (xmlChar*)LAGRANGIAN_LINEAR_EC_TAG.c_str(), NULL );
   //        xmlNewProp( node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num );
   //        ecXML = new LagrangianECXML();
 
   //        // linkage between the DynamicalSystem and his DynamicalSystemXML
-  //        nsds->getEqualityConstraintPtr(i)->setEqualityConstraintXML( ecXML );
+  //        nsds->equalityConstraint(i)->setEqualityConstraintXML( ecXML );
 
   //        // creation of the DynamicalSystemXML
-  //        static_cast<LagrangianLinearECXML*>(ecXML)->updateEqualityConstraintXML( node, nsds->getEqualityConstraintPtr(i) );
+  //        static_cast<LagrangianLinearECXML*>(ecXML)->updateEqualityConstraintXML( node, nsds->equalityConstraint(i) );
 
   //        equalityConstraintXMLMap[number] = ecXML;
   //      }
-  //          else if( nsds->getEqualityConstraintPtr(i)->getType() == NLINEAREC )
+  //          else if( nsds->equalityConstraint(i)->getType() == NLINEAREC )
   //      {
   //        node = xmlNewChild( ecDefinitionNode, NULL, (xmlChar*)NON_LINEAR_EC_TAG.c_str(), NULL );
   //        xmlNewProp( node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num );
   //        ecXML = new EqualityConstraintXML();
 
   //        // linkage between the DynamicalSystem and his DynamicalSystemXML
-  //        nsds->getEqualityConstraintPtr(i)->setEqualityConstraintXML( ecXML );
+  //        nsds->equalityConstraint(i)->setEqualityConstraintXML( ecXML );
 
   //        // creation of the DynamicalSystemXML
-  //        ecXML->updateEqualityConstraintXML( node, nsds->getEqualityConstraintPtr(i) );
+  //        ecXML->updateEqualityConstraintXML( node, nsds->equalityConstraint(i) );
 
   //        equalityConstraintXMLMap[number] = ecXML;
   //      }
-  //          else XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadNonSmoothDynamicalSystem | Error : the EqualityConstraint type : " + nsds->getEqualityConstraintPtr(i)->getType() + " doesn't exist!");
+  //          else XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadNonSmoothDynamicalSystem | Error : the EqualityConstraint type : " + nsds->equalityConstraint(i)->getType() + " doesn't exist!");
 
   //          /*  end of the save : saving the DynamicalSystem linked to this DSInputOutput */
   //          ecDsioNode = xmlNewChild( node, NULL, (xmlChar*)DSIO_CONCERNED.c_str(), NULL );
-  //          for( unsigned int j=0; j<nsds->getEqualityConstraintPtr(i)->getDSInputOutputs().size(); j++)
+  //          for( unsigned int j=0; j<nsds->equalityConstraint(i)->getDSInputOutputs().size(); j++)
   //      {
   //        node = xmlNewChild( ecDsioNode, NULL, (xmlChar*)DSINPUTOUTPUT_TAG.c_str(), NULL );
-  //        number = nsds->getEqualityConstraintPtr(i)->getDSInputOutput(j)->getNumber();
+  //        number = nsds->equalityConstraint(i)->getDSInputOutput(j)->getNumber();
   //        sprintf(num, "%d", number);
   //        xmlNewProp( node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num );
   //      }
@@ -352,9 +352,9 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(SP::NonSmoothDyna
 
   //    for(i=0; int(i)<nsds->getInteractionVectorSize(); i++)
   //      {
-  //        if( !nsds->getInteractionPtr(i)->getInteractionXMLPtr()  )
+  //        if( !nsds->interaction(i)->interactionXML()  )
   //    {
-  //      number = nsds->getInteractionPtr(i)->getNumber();
+  //      number = nsds->interaction(i)->getNumber();
   //      sprintf(num, "%d", number);
   //      definedInteractionNumbers.push_back( number );
 
@@ -367,10 +367,10 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(SP::NonSmoothDyna
   //          interactionXML = new InteractionXML();
 
   //          // linkage between the DynamicalSystem and his DynamicalSystemXML
-  //          nsds->getInteractionPtr(i)->setInteractionXMLPtr( interactionXML );
+  //          nsds->interaction(i)->setInteractionXMLPtr( interactionXML );
 
   //          // creation of the DynamicalSystemXML
-  //          interactionXML->updateInteractionXML( node, nsds->getInteractionPtr(i) );
+  //          interactionXML->updateInteractionXML( node, nsds->interaction(i) );
 
   //          interactionXMLMap[number] = interactionXML;
   //        }

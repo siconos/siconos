@@ -112,7 +112,7 @@ protected:
   RELATION::SUBTYPES subType;
 
   /** The Interaction linked to this Relation */
-  boost::weak_ptr<Interaction> interaction;
+  boost::weak_ptr<Interaction> _interaction;
 
   /** Name of the plugin function used to compute h*/
   std::string hName;
@@ -188,10 +188,10 @@ public:
    *  Relation
    *  \return a pointer to Interaction.
    */
-  inline SP::Interaction getInteractionPtr()
+  inline SP::Interaction interaction()
   {
-    assert(!interaction.expired());
-    return interaction.lock();
+    assert(!_interaction.expired());
+    return _interaction.lock();
   }
 
   /** To set the pointer to the Interaction linked to the present
@@ -200,7 +200,7 @@ public:
    */
   inline void setInteractionPtr(SP::Interaction newInter)
   {
-    interaction = boost::weak_ptr<Interaction>(newInter);
+    _interaction = boost::weak_ptr<Interaction>(newInter);
   }
 
   /** To get the RelationXML* of the Relation
@@ -314,8 +314,8 @@ public:
 
   /** get a pointer on matrix JacH[index]
    *  \return a pointer on a SiconosMatrix
-  virtual SP::SiconosMatrix getJacXHPtr() const = 0;
-  virtual SP::SiconosMatrix getJacLHPtr() const = 0;
+  virtual SP::SiconosMatrix jacXH() const = 0;
+  virtual SP::SiconosMatrix jacLH() const = 0;
    */
 
   /** get matrix JacG[index]
@@ -330,9 +330,9 @@ public:
   /** get a pointer on matrix JacG[index]
    *  \return a pointer on a SiconosMatrix
    */
-  virtual SP::SiconosMatrix getJacLGPtr() const
+  virtual SP::SiconosMatrix jacLG() const
   {
-    RuntimeException::selfThrow("Relation::getJacGPtr() - not implemented for this type of relation (probably Lagrangian): " + getType());
+    RuntimeException::selfThrow("Relation::jacG() - not implemented for this type of relation (probably Lagrangian): " + getType());
     return SP::SiconosMatrix();
   }
 
@@ -425,7 +425,7 @@ public:
    *  compute input
    */
   virtual void computeInput(double, unsigned int = 0) = 0;
-  virtual inline SP::SiconosMatrix getJacLHPtr() const
+  virtual inline SP::SiconosMatrix jacLH() const
   {
     return JacLH;
   }
@@ -449,7 +449,7 @@ public:
    * Return H_alpha
    *
    */
-  virtual const SP::SiconosVector getHalphaPtr()
+  virtual const SP::SiconosVector halpha()
   {
     return mH_alpha;
   };

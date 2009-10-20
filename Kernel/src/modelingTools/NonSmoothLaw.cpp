@@ -25,20 +25,20 @@ using namespace std;
 // warning -> this is an abstract class, so constructors are usefull only for
 // calls in derived classes constructors
 
-NonSmoothLaw::NonSmoothLaw(unsigned int newSize): size(newSize)
+NonSmoothLaw::NonSmoothLaw(unsigned int newSize): _size(newSize)
 {}
 
 NonSmoothLaw::NonSmoothLaw(SP::NonSmoothLawXML newNsLawXml):
-  size(1), nslawxml(newNsLawXml)
+  _size(1), _nslawxml(newNsLawXml)
 {
-  assert(nslawxml &&
+  assert(_nslawxml &&
          "NonSmoothLaw:: xml constructor, xml file==NULL");
 
   // Read size of the non smooth law
-  assert(nslawxml->hasSize() &&
+  assert(_nslawxml->hasSize() &&
          "NonSmoothLaw:: xml constructor, an input is required for the nslaw size.");
 
-  size = nslawxml->getSize();
+  _size = _nslawxml->getSize();
 }
 
 

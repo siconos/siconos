@@ -67,7 +67,7 @@ void SpherePlanR::computeH(double)
   double q_1 = (*data[q0])(1);
   double q_2 = (*data[q0])(2);
 
-  SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
+  SP::SiconosVector y = interaction()->y(0);
 
   y->setValue(0, distance(q_0, q_1, q_2, r));
 

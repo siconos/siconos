@@ -91,7 +91,7 @@ private:
   SetOfOSNSPBXML OSNSPBXMLSet;
 
   /* TimeDiscretisationXML */
-  SP::TimeDiscretisationXML timeDiscretisationXML;
+  SP::TimeDiscretisationXML _timeDiscretisationXML;
 
 public:
 
@@ -150,9 +150,9 @@ public:
   /** Return the TimeDiscretisationXML of the SimulationXML
    *   \return the TimeDiscretisationXML of the SimulationXML
    */
-  inline SP::TimeDiscretisationXML getTimeDiscretisationXMLPtr()
+  inline SP::TimeDiscretisationXML timeDiscretisationXML()
   {
-    return timeDiscretisationXML;
+    return _timeDiscretisationXML;
   }
 
   /** Return the type of the Simulation

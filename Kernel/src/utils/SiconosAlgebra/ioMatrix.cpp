@@ -47,7 +47,7 @@ const bool ioMatrix::read(SiconosMatrix& m) const
     SiconosMatrixException::selfThrow("ioMatrix::read not yet implemented for block matrix.");
 
   infile.precision(15);
-  DenseMat * p = m.getDensePtr();
+  DenseMat * p = m.dense();
 
   // Dim of the matrix are given in the first line.
   // Just use to check that sizes are consistents.
@@ -73,7 +73,7 @@ const bool ioMatrix::read(SiconosMatrix& m) const
   }
 
   // Old version: result in Boost format for ouptut
-  //  DenseMat * p = m.getDensePtr();
+  //  DenseMat * p = m.dense();
   //  infile >> *p;
 
   infile.close();
@@ -106,7 +106,7 @@ const bool ioMatrix::write(const SiconosMatrix& m, const std::string& outputType
 
   if (m.getNum() == 1)
   {
-    DenseMat * p = m.getDensePtr();
+    DenseMat * p = m.dense();
     DenseMat::iterator1 row;
     for (row = p->begin1(); row != p->end1() ; ++row)
     {
@@ -116,7 +116,7 @@ const bool ioMatrix::write(const SiconosMatrix& m, const std::string& outputType
   }
   else if (m.getNum() == 2)
   {
-    TriangMat * p = m.getTriangPtr();
+    TriangMat * p = m.triang();
     TriangMat::iterator1 row;
     for (row = p->begin1(); row != p->end1() ; ++row)
     {
@@ -126,7 +126,7 @@ const bool ioMatrix::write(const SiconosMatrix& m, const std::string& outputType
   }
   else if (m.getNum() == 3)
   {
-    SymMat * p = m.getSymPtr();
+    SymMat * p = m.sym();
     SymMat::iterator1 row;
     for (row = p->begin1(); row != p->end1() ; ++row)
     {
@@ -136,7 +136,7 @@ const bool ioMatrix::write(const SiconosMatrix& m, const std::string& outputType
   }
   else if (m.getNum() == 4)
   {
-    SparseMat * p = m.getSparsePtr();
+    SparseMat * p = m.sparse();
     SparseMat::iterator1 row;
     for (row = p->begin1(); row != p->end1() ; ++row)
     {
@@ -146,7 +146,7 @@ const bool ioMatrix::write(const SiconosMatrix& m, const std::string& outputType
   }
   else
   {
-    BandedMat * p = m.getBandedPtr();
+    BandedMat * p = m.banded();
     BandedMat::iterator1 row;
     for (row = p->begin1(); row != p->end1() ; ++row)
     {

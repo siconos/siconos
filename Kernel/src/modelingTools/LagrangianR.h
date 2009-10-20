@@ -102,15 +102,15 @@ public:
   /** get a pointer on matrix JacH[index]
    *  \return a pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix getJacQHPtr() const
+  inline SP::SiconosMatrix jacQH() const
   {
     return JacQH;
   }
-  inline SP::SiconosMatrix getJacQDotHPtr() const
+  inline SP::SiconosMatrix jacQDotH() const
   {
     return JacQDotH;
   }
-  inline SP::SiconosMatrix getJacLHPtr() const
+  inline SP::SiconosMatrix jacLH() const
   {
     return JacLH;
   }
@@ -148,7 +148,7 @@ public:
 
   /** Gets the number of computed jacobians for h
       \return an unsigned int.
-  inline unsigned int getNumberOfJacobiansForH() const { return JacH.size();}
+  inline unsigned int numberOfJacobiansForH() const { return JacH.size();}
   */
 
 
@@ -233,7 +233,7 @@ public:
   */
   virtual SP::SiconosMatrix getCPtr()
   {
-    return getJacQHPtr();
+    return jacQH();
   }
   /**
    * return a SP on the D matrix.
@@ -241,7 +241,7 @@ public:
    */
   virtual SP::SiconosMatrix getDPtr()
   {
-    return getJacLHPtr();
+    return jacLH();
   }
   /**
    * return a SP on the B matrix.
@@ -249,7 +249,7 @@ public:
    */
   virtual SP::SiconosMatrix getBPtr()
   {
-    return getJacLGPtr();
+    return jacLG();
   }
 
   /** main relation members display

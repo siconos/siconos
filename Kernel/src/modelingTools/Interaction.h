@@ -83,56 +83,56 @@ class Interaction : public boost::enable_shared_from_this<Interaction >
 private:
 
   /**initialization flag */
-  bool initialized;
+  bool _initialized;
 
   /** name of the Interaction */
-  std::string  id;
+  std::string  _id;
 
   /** number specific to each Interaction */
-  int number;
+  int _number;
 
   /** relative degree of this interaction */
-  unsigned int relativeDegree;
+  unsigned int _relativeDegree;
 
   /** size of the interaction, ie size of y[i] and lambda[i] */
-  unsigned int interactionSize;
+  unsigned int _interactionSize;
 
   /** number of relations in the interaction ( equal to
       interactionSize / nsLawSize ) */
-  unsigned int numberOfRelations;
+  unsigned int _numberOfRelations;
 
   /** sum of all DS sizes, for DS involved in the interaction */
-  unsigned int sizeOfDS;
+  unsigned int _sizeOfDS;
 
   /** sum of all z sizes, for DS involved in the interaction */
-  unsigned int sizeZ;
+  unsigned int _sizeZ;
 
   /** relation between constrained variables and states variables
    * vector of output derivatives
    * y[0] is y, y[1] is yDot and so on
    */
-  VectorOfVectors y;
+  VectorOfVectors _y;
 
   /** previous step values for y */
-  VectorOfVectors yOld;
+  VectorOfVectors _yOld;
 
   /** result of the computeInput function */
-  VectorOfVectors lambda;
+  VectorOfVectors _lambda;
 
   /** previous step values for lambda */
-  VectorOfVectors lambdaOld;
+  VectorOfVectors _lambdaOld;
 
   /** the Dynamical Systems concerned by this interaction */
-  SP::DynamicalSystemsSet involvedDS;
+  SP::DynamicalSystemsSet _involvedDS;
 
   /** the Non-smooth Law of the interaction*/
-  SP::NonSmoothLaw nslaw;
+  SP::NonSmoothLaw _nslaw;
 
   /** the type of Relation of the interaction */
-  SP::Relation relation;
+  SP::Relation _relation;
 
   /** the XML object linked to the Interaction to read XML data */
-  SP::InteractionXML interactionxml;
+  SP::InteractionXML _interactionxml;
 
   // === PRIVATE FUNCTIONS ===
 
@@ -211,7 +211,7 @@ public:
    */
   bool isInitialized() const
   {
-    return initialized;
+    return _initialized;
   }
 
 
@@ -230,7 +230,7 @@ public:
   */
   inline const std::string  getId() const
   {
-    return id;
+    return _id;
   }
 
   /** set the id of this Interaction
@@ -238,15 +238,15 @@ public:
    */
   inline void setId(const int newId)
   {
-    id = newId;
+    _id = newId;
   }
 
   /** get the value of number
    *  \return the value of number
    */
-  inline const int getNumber() const
+  inline const int number() const
   {
-    return number;
+    return _number;
   }
 
   /** set number
@@ -254,7 +254,7 @@ public:
   */
   inline void setNumber(const int newNumber)
   {
-    number = newNumber;
+    _number = newNumber;
   }
 
 
@@ -263,7 +263,7 @@ public:
    */
   inline unsigned int getRelativeDegree() const
   {
-    return relativeDegree;
+    return _relativeDegree;
   };
 
   /** set the relative degree
@@ -271,7 +271,7 @@ public:
    */
   inline unsigned int setRelativeDegree(const unsigned int newVal)
   {
-    relativeDegree = newVal;
+    _relativeDegree = newVal;
   };
 
 
@@ -280,7 +280,7 @@ public:
   */
   inline const unsigned int getSizeOfY() const
   {
-    return interactionSize;
+    return _interactionSize;
   }
 
   /** set the dimension of the Interaction
@@ -288,15 +288,15 @@ public:
   */
   inline void setInteractionSize(const unsigned int newVal)
   {
-    interactionSize = newVal;
+    _interactionSize = newVal;
   }
 
   /** get the number of relations in the interaction
   *  \return an unsigned int
   */
-  inline const unsigned int getNumberOfRelations() const
+  inline const unsigned int numberOfRelations() const
   {
-    return numberOfRelations;
+    return _numberOfRelations;
   }
 
   /** get the sum of DS sizes, for DS involved in interaction
@@ -304,7 +304,7 @@ public:
    */
   inline const unsigned int getSizeOfDS() const
   {
-    return sizeOfDS;
+    return _sizeOfDS;
   }
 
   /** get the sum of z sizes, for DS involved in interaction
@@ -312,33 +312,43 @@ public:
    */
   inline const unsigned int getSizeZ() const
   {
-    return sizeZ;
+    return _sizeZ;
   }
 
   // -- y --
 
+  /** get y[i], derivative number i of output
+   *  \return BlockVector
+   */
+  inline const BlockVector getCopyOfy(const unsigned int i) const
+  {
+    return *(_y[i]);
+  }
+
+  /** get y[i], derivative number i of output
+   *  \return BlockVector
+   */
+  inline const BlockVector getCopyOfyOld(const unsigned int i) const
+  {
+    return *(_yOld[i]);
+  }
+
+
   /** get vector of output derivatives
   *  \return a VectorOfVectors
   */
-  inline const VectorOfVectors getY() const
+  inline const VectorOfVectors y() const
   {
-    return y;
+    return _y;
   }
 
-  /** get y[i], derivative number i of output
-  *  \return BlockVector
-  */
-  inline const BlockVector getY(const unsigned int i) const
-  {
-    return *(y[i]);
-  }
 
   /** get y[i], derivative number i of output
-  *  \return pointer on a SiconosVector
+  *  \return pointer on a SimpleVector
   */
-  inline SP::SiconosVector getYPtr(const unsigned int i) const
+  inline SP::SiconosVector y(const unsigned int i) const
   {
-    return y[i];
+    return _y[i];
   }
 
   /** set the output vector y to newVector with copy of the y[i] (ie
@@ -370,7 +380,7 @@ public:
   */
   inline const VectorOfVectors getYOld() const
   {
-    return yOld;
+    return _yOld;
   }
 
   /** get yOld[i], derivative number i of output
@@ -378,15 +388,15 @@ public:
   */
   inline const BlockVector getYOld(const unsigned int i) const
   {
-    return *(yOld[i]);
+    return *(_yOld[i]);
   }
 
   /** get yOld[i], derivative number i of output
   *  \return pointer on a SiconosVector
   */
-  inline SP::SiconosVector getYOldPtr(const unsigned int i) const
+  inline SP::SiconosVector yOld(const unsigned int i) const
   {
-    return yOld[i];
+    return _yOld[i];
   }
 
   /** set the output vector yOld to newVector
@@ -417,7 +427,7 @@ public:
   */
   inline const VectorOfVectors getLambda() const
   {
-    return lambda;
+    return _lambda;
   }
 
   /** get lambda[i], derivative number i of input
@@ -425,15 +435,15 @@ public:
   */
   inline const BlockVector getLambda(const unsigned int i) const
   {
-    return *(lambda[i]);
+    return *(_lambda[i]);
   }
 
   /** get lambda[i], derivative number i of input
   *  \return pointer on a SiconosVector
   */
-  inline SP::SiconosVector getLambdaPtr(const unsigned int i) const
+  inline SP::SiconosVector lambda(const unsigned int i) const
   {
-    return lambda[i];
+    return _lambda[i];
   }
 
   /** set the input vector lambda to newVector
@@ -463,7 +473,7 @@ public:
   */
   inline const VectorOfVectors getLambdaOld() const
   {
-    return lambdaOld;
+    return _lambdaOld;
   }
 
   /** get lambdaOld[i], derivative number i of input
@@ -471,15 +481,15 @@ public:
   */
   inline const BlockVector getLambdaOld(const unsigned int i) const
   {
-    return *(lambdaOld[i]);
+    return *(_lambdaOld[i]);
   }
 
   /** get lambdaOld[i], derivative number i of input
   *  \return pointer on a SiconosVector
   */
-  inline SP::SiconosVector getLambdaOldPtr(const unsigned int i) const
+  inline SP::SiconosVector lambdaOld(const unsigned int i) const
   {
-    return lambdaOld[i];
+    return _lambdaOld[i];
   }
 
   /** set the input vector lambdaOld to newVector
@@ -507,7 +517,7 @@ public:
    */
   void insert(SP::DynamicalSystem ds)
   {
-    involvedDS->insert(ds);
+    _involvedDS->insert(ds);
   };
 
   /** gets an iterator to the first element of the involvedDS set.
@@ -515,7 +525,7 @@ public:
    */
   inline DSIterator dynamicalSystemsBegin()
   {
-    return involvedDS->begin();
+    return _involvedDS->begin();
   };
 
   /** gets an iterator equal to involvedDS->end().
@@ -523,7 +533,7 @@ public:
    */
   inline DSIterator dynamicalSystemsEnd()
   {
-    return involvedDS->end();
+    return _involvedDS->end();
   };
 
   /** gets a const iterator to the first element of the involvedDS set.
@@ -531,26 +541,26 @@ public:
    */
   inline ConstDSIterator dynamicalSystemsBegin() const
   {
-    return involvedDS->begin();
+    return _involvedDS->begin();
   };
 
-  /** gets a const iterator equal to involvedDS->end().
+  /** gets a const iterator equal to _involvedDS->end().
    *  \return a ConstDSIterator.
    */
   inline ConstDSIterator dynamicalSystemsEnd() const
   {
-    return involvedDS->end();
+    return _involvedDS->end();
   };
 
   /** get a pointer to the DynamicalSystems of this Interaction
    *  \return a DynamicalSystemsSet*
    */
-  inline SP::DynamicalSystemsSet getDynamicalSystemsPtr()
+  inline SP::DynamicalSystemsSet dynamicalSystems()
   {
-    return involvedDS;
+    return _involvedDS;
   }
 
-  /** set the involvedDS
+  /** set the _involvedDS
   *  \param a DynamicalSystemsSet
   */
   void setDynamicalSystems(const DynamicalSystemsSet&) ;
@@ -559,14 +569,14 @@ public:
   *  \param the identification number of the wanted DynamicalSystem
   *  \return a pointer on Dynamical System
   */
-  SP::DynamicalSystem getDynamicalSystemPtr(int);
+  SP::DynamicalSystem dynamicalSystem(int);
 
   /** get the Relation of this Interaction
    *  \return a pointer on this Relation
    */
-  inline SP::Relation getRelationPtr() const
+  inline SP::Relation relation() const
   {
-    return relation;
+    return _relation;
   }
 
   /** set the Relation of this Interaction
@@ -577,9 +587,13 @@ public:
   /** get the NonSmoothLaw of this Interaction
   *  \return a pointer on this NonSmoothLaw
   */
-  inline SP::NonSmoothLaw getNonSmoothLawPtr() const
+  inline SP::NonSmoothLaw nonSmoothLaw() const
   {
-    return nslaw;
+    return _nslaw;
+  }
+  inline SP::NonSmoothLaw nslaw() const
+  {
+    return _nslaw;
   }
 
   /** set the NonSmoothLaw of this Interaction
@@ -628,9 +642,9 @@ public:
   /** get the InteractionXML* of the Interaction
   *  \return InteractionXML* : the pointer on the InteractionXML
   */
-  inline SP::InteractionXML getInteractionXMLPtr() const
+  inline SP::InteractionXML interactionXML() const
   {
-    return interactionxml;
+    return _interactionxml;
   }
 
   /** set the InteractionXML* of the Interaction
@@ -638,7 +652,7 @@ public:
   */
   inline void setInteractionXMLPtr(SP::InteractionXML interxml)
   {
-    interactionxml = interxml;
+    _interactionxml = interxml;
   }
 
   /** copy the data of the Interaction to the XML tree

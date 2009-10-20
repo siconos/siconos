@@ -190,7 +190,7 @@ public:
   /** get all the Interactions of the Topology problem (saved in a set)
   *  \return an InteractionsSet
   */
-  inline const SP::InteractionsSet getInteractionsPtr() const
+  inline const SP::InteractionsSet interactions() const
   {
     return allInteractions;
   }
@@ -239,7 +239,7 @@ public:
   /** get a pointer to the graph of all Unitary Relations.
    *  \return a SP::UnitaryRelationsGraph
    */
-  inline SP::UnitaryRelationsGraph getIndexSet0Ptr()
+  inline SP::UnitaryRelationsGraph indexSet0()
   {
     return URG[0];
   }
@@ -247,7 +247,7 @@ public:
   /** get a pointer to the graph at level num of Unitary Relations
    *  \return a SP::UnitaryRelationsGraph
    */
-  inline SP::UnitaryRelationsGraph getIndexSetPtr(unsigned int num)
+  inline SP::UnitaryRelationsGraph indexSet(unsigned int num)
   {
     assert(num < URG.size()) ;
     return URG[num];
@@ -265,7 +265,7 @@ public:
   /** get a pointer to the graph at level num of Dynamical System
    *  \return a SP::DynamicalSystemsGraph
    */
-  inline SP::DynamicalSystemsGraph getDSGPtr(unsigned int num)
+  inline SP::DynamicalSystemsGraph dSG(unsigned int num)
   {
     assert(num < DSG.size()) ;
     return DSG[num];

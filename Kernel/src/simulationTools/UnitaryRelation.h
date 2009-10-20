@@ -78,31 +78,31 @@ class UnitaryRelation
 private:
 
   /** link to Interaction that owns this relation **/
-  SP::Interaction mainInteraction;
+  SP::Interaction _mainInteraction;
 
   /** relative position of the present relation in the Interaction -
    For example if the present relation takes place from index 2 to 4
    in y vector of mainInteraction, the relative position is equal to
    2. */
-  unsigned int relativePosition;
+  unsigned int _relativePosition;
 
   /** number of the relation, ie the number of the corresponding
       unitaryBlock vector in the main Interaction.*/
-  unsigned int number;
+  unsigned int _number;
 
   /** Absolute position in the "global" vector of constraints (for
       example, the one handled by lsodar) */
-  unsigned int absolutePostion;
+  unsigned int _absolutePostion;
 
   /** work vector to save pointers to state-related data of the
       dynamical systems involved in the UR.*/
-  SP::SiconosVector workX;
+  SP::SiconosVector _workX;
   SP::SiconosVector mWorkXq;
   SP::SiconosVector _workFree;
 
   /** work vector to save pointers to z data of the dynamical systems
       involved in the UR.*/
-  SP::SiconosVector workZ;
+  SP::SiconosVector _workZ;
 
 
 
@@ -134,10 +134,10 @@ public:
   /** get main interaction of this unitary relation
   *  \return a pointer to Interaction
   */
-  inline SP::Interaction getInteractionPtr()
+  inline SP::Interaction interaction() const
   {
-    assert(mainInteraction);
-    return mainInteraction;
+    assert(_mainInteraction);
+    return _mainInteraction;
   }
 
   /** get relative position of the Unitary Relation
@@ -145,7 +145,7 @@ public:
   */
   inline const unsigned int getRelativePosition() const
   {
-    return relativePosition;
+    return _relativePosition;
   } ;
 
   /** get id of the parent interaction
@@ -153,32 +153,26 @@ public:
    */
   inline const std::string getId() const
   {
-    return mainInteraction->getId();
+    return _mainInteraction->getId();
   };
 
   /** get number of the Unitary Relation
    *  \return an unsigned int
    */
-  inline const unsigned int getNumber() const
+  inline const unsigned int number() const
   {
-    return number;
+    return _number;
   };
-
-  /** get vector of output derivatives
-  *  \return a VectorOfVectors
-  */
-  //  const std::vector< SimpleVector* > getY() const;
-  const VectorOfVectors getY() const;
 
   /** get y[i], derivative number i of output
   *  \return pointer on a SimpleVector
   */
-  SP::SiconosVector getYPtr(unsigned int) const;
+  SP::SiconosVector y(unsigned int) const;
 
   /** get yOld[i], derivative number i of output
   *  \return pointer on a SimpleVector
   */
-  SP::SiconosVector getYOldPtr(unsigned int) const;
+  SP::SiconosVector yOld(unsigned int) const;
 
   /** get vector of input derivatives
   *  \return a VectorOfVectors
@@ -188,7 +182,7 @@ public:
   /** get lambda[i], derivative number i of input
   *  \return pointer on a SimpleVector
   */
-  SP::SiconosVector getLambdaPtr(unsigned int) const;
+  SP::SiconosVector lambda(unsigned int) const;
 
   /** get y[i], derivative number i of output, value used to compute indexSets
   *  \return a double
@@ -232,7 +226,7 @@ public:
    */
   inline DSIterator dynamicalSystemsBegin()
   {
-    return mainInteraction->dynamicalSystemsBegin();
+    return _mainInteraction->dynamicalSystemsBegin();
   };
 
   /** gets an iterator equal to DynamicalSystems.end().
@@ -240,7 +234,7 @@ public:
    */
   inline DSIterator dynamicalSystemsEnd()
   {
-    return mainInteraction->dynamicalSystemsEnd();
+    return _mainInteraction->dynamicalSystemsEnd();
   };
 
   /** gets a const iterator to the first element of the  DynamicalSystems set.
@@ -248,7 +242,7 @@ public:
    */
   inline ConstDSIterator dynamicalSystemsBegin() const
   {
-    return mainInteraction->dynamicalSystemsBegin();
+    return _mainInteraction->dynamicalSystemsBegin();
   };
 
   /** gets a const iterator equal to DynamicalSystems.end().
@@ -256,13 +250,13 @@ public:
    */
   inline ConstDSIterator dynamicalSystemsEnd() const
   {
-    return mainInteraction->dynamicalSystemsEnd();
+    return _mainInteraction->dynamicalSystemsEnd();
   };
 
   /** gets a pointer to the DynamicalSystemsSet
    *  \return a DynamicalSystemsSet*
    */
-  SP::DynamicalSystemsSet getDynamicalSystemsPtr() ;
+  SP::DynamicalSystemsSet dynamicalSystems() ;
 
   /** To initialize the UR: mainly to set work vectors.
    */
@@ -273,8 +267,8 @@ public:
   */
   inline void insertInWorkX(SP::SiconosVector newX)
   {
-    assert(workX) ;
-    workX->insertPtr(newX);
+    assert(_workX) ;
+    _workX->insertPtr(newX);
   };
   /* to set _workFree content.
    \param a SP::SiconosVector to be inserted into workFree
@@ -286,24 +280,24 @@ public:
   };
 
   /** Get a pointer to workX */
-  inline SP::SiconosVector getWorkXPtr()
+  inline SP::SiconosVector workX()
   {
-    return workX;
+    return _workX;
   };
-  inline SP::SiconosVector getXqPtr()
+  inline SP::SiconosVector xq()
   {
     return mWorkXq;
   };
-  inline SP::SiconosVector getWorkFreePtr()
+  inline SP::SiconosVector workFree()
   {
     return _workFree;
   };
 
 
   /** Get a pointer to workX */
-  inline SP::SiconosVector getWorkZPtr()
+  inline SP::SiconosVector workZ()
   {
-    return workZ;
+    return _workZ;
   };
 
   /** gets the matrix used in unitaryBlock computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).

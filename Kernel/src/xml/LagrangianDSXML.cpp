@@ -107,12 +107,12 @@ void LagrangianDSXML::setQMemory(const SiconosMemory& smem)
     qMemoryXML.reset(new SiconosMemoryXML(NULL, rootNode, LNLDS_QMEMORY));
     qMemoryNode = qMemoryXML->getSiconosMemoryXMLNode();
     qMemoryXML->setSiconosMemorySize(smem.getMemorySize());
-    qMemoryXML->setSiconosMemoryVector(*smem.getVectorMemoryPtr());
+    qMemoryXML->setSiconosMemoryVector(*smem.vectorMemory());
   }
   else
   {
     qMemoryXML->setSiconosMemorySize(smem.getMemorySize());
-    qMemoryXML->setSiconosMemoryVector(*smem.getVectorMemoryPtr());
+    qMemoryXML->setSiconosMemoryVector(*smem.vectorMemory());
   }
 }
 void LagrangianDSXML::setVelocityMemory(const SiconosMemory& smem)
@@ -123,11 +123,11 @@ void LagrangianDSXML::setVelocityMemory(const SiconosMemory& smem)
     velocityMemoryNode = velocityMemoryXML->getSiconosMemoryXMLNode();
 
     velocityMemoryXML->setSiconosMemorySize(smem.getMemorySize());
-    velocityMemoryXML->setSiconosMemoryVector(*smem.getVectorMemoryPtr());
+    velocityMemoryXML->setSiconosMemoryVector(*smem.vectorMemory());
   }
   else
   {
     velocityMemoryXML->setSiconosMemorySize(smem.getMemorySize());
-    velocityMemoryXML->setSiconosMemoryVector(*smem.getVectorMemoryPtr());
+    velocityMemoryXML->setSiconosMemoryVector(*smem.vectorMemory());
   }
 }

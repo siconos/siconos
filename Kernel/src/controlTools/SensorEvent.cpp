@@ -25,15 +25,15 @@ using namespace EventFactory;
 
 void SensorEvent::process(SP::Simulation)
 {
-  sensor->capture();
+  sensor()->capture();
 }
 
 void SensorEvent::update()
 {
   // Increment sensor time discr. to next step
-  sensor->getTimeDiscretisationPtr()->increment();
+  sensor()->timeDiscretisation()->increment();
   // set sensor event time to new current time value
-  setTime(sensor->getTimeDiscretisationPtr()->getCurrentTime());
+  setTime(sensor()->timeDiscretisation()->currentTime());
 }
 
 AUTO_REGISTER_EVENT(4, SensorEvent);

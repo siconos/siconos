@@ -86,9 +86,9 @@ class LagrangianRheonomousR : public LagrangianR
 {
 
 protected:
-  SP::SiconosMatrix JacQH;
+  SP::SiconosMatrix _JacQH;
   /** plugged vector used to compute hDot */
-  SP::SiconosVector hDot;
+  SP::SiconosVector _hDot;
 
   /** LagrangianRheonomousR plug-in to compute h(q,t,z)
    * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
@@ -111,7 +111,7 @@ protected:
    * @param sizeZ : size of vector z
    * @param[in,out] z : a vector of user-defined parameters
    */
-  SP::PluggedObject pluginhDotPtr;
+  SP::PluggedObject _pluginhDotPtr;
   //  FPtr4 hDotPtr;
 
   /** LagrangianRheonomousR plug-in to compute G0(q,t,z), gradient of h accoring to q
@@ -123,7 +123,7 @@ protected:
    * @param sizeZ : size of vector z
    * @param[in,out] z : a vector of user-defined parameters
    */
-  SP::PluggedObject pluginjQH;
+  SP::PluggedObject _pluginjQH;
   //  FPtr4 computeJacQHPtr;
 
 
@@ -169,9 +169,9 @@ public:
   /** get a pointer on vector hDot
    *  \return a smart pointer on a SiconosVector
    */
-  inline SP::SiconosVector getHDotPtr() const
+  inline SP::SiconosVector hDot() const
   {
-    return hDot;
+    return _hDot;
   }
 
   /** set the value of hDot to newValue (copy)

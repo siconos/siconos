@@ -159,7 +159,7 @@ public:
   /** To get the list of int. parameters
    *  \return a SP::IntParameters
    */
-  inline SP::IntParameters getIntParametersPtr() const
+  inline SP::IntParameters intParameters() const
   {
     return int_parameters;
   };
@@ -176,7 +176,7 @@ public:
   /** To get the list of double parameters
    *  \return a SP::DoubleParameters
    */
-  inline SP::DoubleParameters getDoubleParametersPtr() const
+  inline SP::DoubleParameters doubleParameters() const
   {
     return double_parameters;
   };
@@ -193,7 +193,7 @@ public:
   /** To get the Solver_Options structure
    *  \return , the numerics structure used to save solver parameters
    */
-  inline SP::Solver_Options getNumericsSolverOptionsPtr() const
+  inline SP::Solver_Options numericsSolverOptions() const
   {
     return numerics_solver_options;
   };

@@ -85,26 +85,26 @@ public:
   int getStatus();
   void setStatus(int status);
 
-  Model *getModelPtr();
+  Model *model();
   void  setModelPtr(Model *ptrModel);
 
-  SP::Simulation getSimulationPtr();
+  SP::Simulation simulation();
   void setSimulationPtr(SP::Simulation ptrSimulation);
 
-  NonSmoothDynamicalSystem * getNonSmoothDynamicalSystemPtr();
+  NonSmoothDynamicalSystem * nonSmoothDynamicalSystem();
   void setNonSmoothDynamicalSystemPtr(NonSmoothDynamicalSystem * ptr);
 
-  DynamicalSystemsSet * getDynamicalSystemsSetPtr();
+  DynamicalSystemsSet * dynamicalSystemsSet();
 
-  InteractionsSet* getInteractionsSetPtr();
+  InteractionsSet* interactionsSet();
 
-  RelationsSet* getRelationsSetPtr();
+  RelationsSet* relationsSet();
 
-  TimesSet* getTimesSetPtr();
+  TimesSet* timesSet();
 
-  NonSmoothLawSet* getNonSmoothLawSetPtr();
+  NonSmoothLawSet* nonSmoothLawSet();
 
-  EventsManager* getEventsManagerPtr();
+  EventsManager* eventsManager();
   void setEventsManagerPtr(EventsManager* ptr);
 
 };

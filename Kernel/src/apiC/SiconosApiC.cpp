@@ -34,8 +34,8 @@ extern "C" int sicLoadModel(char ModelXmlFile[])
     Model *ptrModel = new Model(ModelXmlFile) ;
     GLOB_DATA.setModelPtr(ptrModel);
     // shortcut of object pointers
-    GLOB_DATA.setSimulationPtr(ptrModel->getSimulationPtr());
-    GLOB_DATA.setEventsManagerPtr(ptrModel->getSimulationPtr()->getEventsManagerPtr());
+    GLOB_DATA.setSimulationPtr(ptrModel->simulation());
+    GLOB_DATA.setEventsManagerPtr(ptrModel->simulation()->eventsManager());
 
     GLOB_DATA.setStatus(DATAC_MODEL);
   }
@@ -63,12 +63,12 @@ extern "C" int sicInitSimulation()
     if (GLOB_DATA.getStatus() != DATAC_MODEL)
       RuntimeException::selfThrow("ApiC:: MODEL must be constructed before sicInitSimulation");
 
-    // TimeStepping* s = static_cast<TimeStepping*>(GLOB_DATA.getSimulationPtr());
+    // TimeStepping* s = static_cast<TimeStepping*>(GLOB_DATA.simulation());
 
-    Simulation *s = GLOB_DATA.getSimulationPtr();
+    Simulation *s = GLOB_DATA.simulation();
 
-    cout << "-->" << GLOB_DATA.getSimulationPtr() << endl;
-    //GLOB_DATA.getSimulationPtr()->initialize();
+    cout << "-->" << GLOB_DATA.simulation() << endl;
+    //GLOB_DATA.simulation()->initialize();
     s->initialize();
     cout << "END" << endl;
 
@@ -95,8 +95,8 @@ extern "C" int sicTimeGetH(double *H)
 
   try
   {
-    Simulation * prtSimul = GLOB_DATA.getSimulationPtr();
-    *H = prtSimul->getTimeDiscretisationPtr()->getH();
+    Simulation * prtSimul = GLOB_DATA.simulation();
+    *H = prtSimul->timeDiscretisation()->getH();
   }
   catch (SiconosException e)
   {
@@ -118,8 +118,8 @@ extern "C" int  sicTimeGetN(int *N)
 
   try
   {
-    Simulation * prtSimul = GLOB_DATA.getSimulationPtr();
-    *N = prtSimul->getTimeDiscretisationPtr()->getNSteps();
+    Simulation * prtSimul = GLOB_DATA.simulation();
+    *N = prtSimul->timeDiscretisation()->getNSteps();
   }
   catch (SiconosException e)
   {
@@ -141,7 +141,7 @@ extern "C" int sicSTNextStep()
   try
   {
 
-    GLOB_DATA.getEventsManagerPtr()->processEvents();
+    GLOB_DATA.eventsManager()->processEvents();
 
   }
   catch (SiconosException e)
@@ -164,7 +164,7 @@ extern "C" int sicSTSaveInMemory()
   int ret = SIC_OK;
   try
   {
-    Simulation * prtSimul = GLOB_DATA.getSimulationPtr();
+    Simulation * prtSimul = GLOB_DATA.simulation();
     //RPG OUPS !!!
     prtSimul->saveInMemory();
   }
@@ -188,7 +188,7 @@ extern "C" int sicSTComputeOneStep()
 
   try
   {
-    GLOB_DATA.getSimulationPtr()->advanceToEvent();
+    GLOB_DATA.simulation()->advanceToEvent();
   }
   catch (SiconosException e)
   {
@@ -211,7 +211,7 @@ extern "C" int sicSTnewtonSolve(double criterion, int maxIter)
 
   try
   {
-    Simulation * prtSimul = GLOB_DATA.getSimulationPtr();
+    Simulation * prtSimul = GLOB_DATA.simulation();
     //RPG OUPS !!!
     ((TimeStepping*) prtSimul)->newtonSolve(criterion, maxIter);
   }
@@ -236,7 +236,7 @@ extern "C" int sicSTupdateState()
 
   try
   {
-    Simulation * prtSimul = GLOB_DATA.getSimulationPtr();
+    Simulation * prtSimul = GLOB_DATA.simulation();
     prtSimul->update(1); // WARNING FP: update needs an input, ie the derivative order used for lambda to compute R
   }
   catch (SiconosException e)
@@ -261,9 +261,9 @@ extern "C" int sicAdvanceToEvent()
   {
 
     cout << "sicAdvanceToEvent APIC" << endl;
-    cout << "TYPE " << ((EventDriven*)GLOB_DATA.getSimulationPtr())->getType() << endl;
+    cout << "TYPE " << ((EventDriven*)GLOB_DATA.simulation())->getType() << endl;
     cout << "OK" << endl;
-    ((EventDriven*) GLOB_DATA.getSimulationPtr())->advanceToEvent();
+    ((EventDriven*) GLOB_DATA.simulation())->advanceToEvent();
   }
   catch (SiconosException e)
   {
@@ -284,9 +284,9 @@ extern "C" int sicProcessEvents()
   int ret = SIC_OK;
   try
   {
-    // Simulation * prtSimul=GLOB_DATA.getSimulationPtr();
+    // Simulation * prtSimul=GLOB_DATA.simulation();
     //RPG OUPS !!!
-    GLOB_DATA.getEventsManagerPtr()->processEvents();
+    GLOB_DATA.eventsManager()->processEvents();
   }
   catch (SiconosException e)
   {
@@ -308,7 +308,7 @@ extern "C" int sicHasNextEvent(int *hasnextevent)
 
   try
   {
-    Simulation * prtSimul = GLOB_DATA.getSimulationPtr();
+    Simulation * prtSimul = GLOB_DATA.simulation();
 
     *hasnextevent = (int) prtSimul->hasNextEvent();
   }
@@ -333,8 +333,8 @@ extern "C" int sicGetTypeEvent(char *type)
 
   try
   {
-    EventsManager *prtEventsManager = GLOB_DATA.getEventsManagerPtr();
-    strcpy(type, prtEventsManager->getStartingEventPtr()->getType().c_str());
+    EventsManager *prtEventsManager = GLOB_DATA.eventsManager();
+    strcpy(type, prtEventsManager->startingEvent()->getType().c_str());
   }
   catch (SiconosException e)
   {
@@ -357,9 +357,9 @@ extern "C" void sicDebug(int *ret)
   // GLOB_SIMULATION->update();
   cout << "--- Debug" << endl;
 
-  // LagrangianDS* ball1 = static_cast<LagrangianDS*> (GLOB_MODEL->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
+  // LagrangianDS* ball1 = static_cast<LagrangianDS*> (GLOB_MODEL->nonSmoothDynamicalSystem()->dynamicalSystem(0));
 
-  //   vector<Interaction*> vIS= (GLOB_MODEL->getNonSmoothDynamicalSystemPtr()->getInteractions());
+  //   vector<Interaction*> vIS= (GLOB_MODEL->nonSmoothDynamicalSystem()->getInteractions());
 
   //   for (int index = 0; index < vIS.size(); index++)
   //     {
@@ -378,9 +378,9 @@ extern "C" int sicModelgetQ(double *value, int indexDS, int indexVector)
   try
   {
 
-    Model * prtModel = GLOB_DATA.getModelPtr();
+    Model * prtModel = GLOB_DATA.model();
 
-    LagrangianDS* system = static_cast<LagrangianDS*>(prtModel->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(indexDS));
+    LagrangianDS* system = static_cast<LagrangianDS*>(prtModel->nonSmoothDynamicalSystem()->dynamicalSystem(indexDS));
 
     if (system)
     {
@@ -420,7 +420,7 @@ extern "C" int sicLagrangianLinearTIDS(int nDof, double *Q0, double *Vel0, doubl
   try
   {
 
-    DynamicalSystemsSet* SetDSPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
+    DynamicalSystemsSet* SetDSPtr = GLOB_DATA.dynamicalSystemsSet();
 
     // Id of LagrangianLinearTIDS
     nId = SetDSPtr->size();
@@ -471,7 +471,7 @@ extern "C" int sicLagrangianDS(int nDof, double *Q0, double *Vel0)
 
   try
   {
-    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
+    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.dynamicalSystemsSet();
 
     // Id of LagrangianDS
     nId = SetDSPtr->size();
@@ -519,7 +519,7 @@ extern "C" int sicSetComputeMassFunction(int nIdDs, char *libname, char *func)
 
   try
   {
-    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
+    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.dynamicalSystemsSet();
 
     // DS verification
     int  nDSMax = SetDSPtr->size();
@@ -557,7 +557,7 @@ extern "C" int sicSetComputeNNLFunction(int nIdDs, char *libname, char *func)
 
   try
   {
-    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
+    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.dynamicalSystemsSet();
 
     // DS verification
     int  nDSMax = SetDSPtr->size();
@@ -594,7 +594,7 @@ extern "C" int sicSetComputeJacobianQNNLFunction(int nIdDs, char *libname, char 
 
   try
   {
-    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
+    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.dynamicalSystemsSet();
 
     // DS verification
     int  nDSMax = SetDSPtr->size();
@@ -631,7 +631,7 @@ extern "C" int  sicSetComputeJacobianVelocityNNLFunction(int nIdDs, char *libnam
 
   try
   {
-    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
+    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.dynamicalSystemsSet();
 
     // DS verification
     int  nDSMax = SetDSPtr->size();
@@ -668,7 +668,7 @@ extern "C" int sicSetComputeFIntFunction(int nIdDs, char *libname, char *func)
 
   try
   {
-    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
+    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.dynamicalSystemsSet();
 
     // DS verification
     int  nDSMax = SetDSPtr->size();
@@ -705,7 +705,7 @@ extern "C" int sicSetComputeJacobianQFIntFunction(int nIdDs, char *libname, char
 
   try
   {
-    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
+    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.dynamicalSystemsSet();
 
     // DS verification
     int  nDSMax = SetDSPtr->size();
@@ -742,7 +742,7 @@ extern "C" int sicSetComputeJacobianVelocityFIntFunction(int nIdDs, char *libnam
 
   try
   {
-    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
+    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.dynamicalSystemsSet();
 
     // DS verification
     int  nDSMax = SetDSPtr->size();
@@ -779,7 +779,7 @@ extern "C" int  sicSetFExt(int nIdDs, double *tFext)
 
   try
   {
-    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
+    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.dynamicalSystemsSet();
 
     // DS verification
     int  nDSMax = SetDSPtr->size();
@@ -820,7 +820,7 @@ extern "C" int  sicSetComputeFExtFunction(int nIdDs, char *libname, char *func)
 
   try
   {
-    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
+    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.dynamicalSystemsSet();
 
     // DS verification
     int  nDSMax = SetDSPtr->size();
@@ -857,10 +857,10 @@ extern "C" int sicInteraction(char *name, int nbDS, int *DS, int idLaw, int idRe
 
   try
   {
-    DynamicalSystemsSet * DSSetPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
-    NonSmoothLawSet * NSLawSetPtr = GLOB_DATA.getNonSmoothLawSetPtr();
-    RelationsSet *RelationsSetPtr = GLOB_DATA.getRelationsSetPtr();
-    InteractionsSet * InteractionsSetPtr = GLOB_DATA.getInteractionsSetPtr();
+    DynamicalSystemsSet * DSSetPtr = GLOB_DATA.dynamicalSystemsSet();
+    NonSmoothLawSet * NSLawSetPtr = GLOB_DATA.nonSmoothLawSet();
+    RelationsSet *RelationsSetPtr = GLOB_DATA.relationsSet();
+    InteractionsSet * InteractionsSetPtr = GLOB_DATA.interactionsSet();
 
     // Id of Interaction
     nId = InteractionsSetPtr->size();
@@ -916,7 +916,7 @@ extern "C" int sicLagrangianLinearTIR(int nDof, int nRel, double *H, double *b)
 
   try
   {
-    RelationsSet * RelationsSetPtr = GLOB_DATA.getRelationsSetPtr();
+    RelationsSet * RelationsSetPtr = GLOB_DATA.relationsSet();
 
     // Id of sicLagrangianLinearTIR
     nId = RelationsSetPtr->size();
@@ -960,7 +960,7 @@ extern "C" int sicLagrangianR(int nIdInteraction, char *relationType, char *func
   int nId=SIC_OK;
 
   try {
-    InteractionsSet * InteractionSetPtr=GLOB_DATA.getInteractionsSetPtr();
+    InteractionsSet * InteractionSetPtr=GLOB_DATA.interactionsSet();
 
     // Retrieve Interaction
     int nSize=InteractionSetPtr->size();
@@ -995,7 +995,7 @@ extern "C" int sicNewtonImpactNSL(double e)
 
   try
   {
-    NonSmoothLawSet * NSLawSetPtr = GLOB_DATA.getNonSmoothLawSetPtr();
+    NonSmoothLawSet * NSLawSetPtr = GLOB_DATA.nonSmoothLawSet();
 
     // Id of NewtonImpactNSL
     nId = NSLawSetPtr->size();
@@ -1023,8 +1023,8 @@ extern "C" int sicNonSmoothDynamicalSystem(int isBVP)
 
   try
   {
-    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
-    InteractionsSet * InteractionSetPtr = GLOB_DATA.getInteractionsSetPtr();
+    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.dynamicalSystemsSet();
+    InteractionsSet * InteractionSetPtr = GLOB_DATA.interactionsSet();
 
     if ((isBVP < 0) || (isBVP > 1))
       RuntimeException::selfThrow("siconos/C:: sicNSDSModel failed due to bad isBVP");
@@ -1052,9 +1052,9 @@ extern "C" int sicModel(double t0, double T)
 
   try
   {
-    NonSmoothDynamicalSystem *prtNSDS = GLOB_DATA.getNonSmoothDynamicalSystemPtr();
-    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
-    InteractionsSet * InteractionSetPtr = GLOB_DATA.getInteractionsSetPtr();
+    NonSmoothDynamicalSystem *prtNSDS = GLOB_DATA.nonSmoothDynamicalSystem();
+    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.dynamicalSystemsSet();
+    InteractionsSet * InteractionSetPtr = GLOB_DATA.interactionsSet();
 
 
     // Parameters verification
@@ -1075,7 +1075,7 @@ extern "C" int sicModel(double t0, double T)
 
     // Create the model connected with NSDS
     GLOB_DATA.setModelPtr(new Model(t0, T));
-    GLOB_DATA.getModelPtr()->setNonSmoothDynamicalSystemPtr(prtNSDS);
+    GLOB_DATA.model()->setNonSmoothDynamicalSystemPtr(prtNSDS);
   }
 
   catch (SiconosException e)
@@ -1098,9 +1098,9 @@ extern "C" int sicTimeDiscretisation(double h)
 
   try
   {
-    Model * prtModel = GLOB_DATA.getModelPtr();
+    Model * prtModel = GLOB_DATA.model();
 
-    TimesSet * TimesSetPtr = GLOB_DATA.getTimesSetPtr();
+    TimesSet * TimesSetPtr = GLOB_DATA.timesSet();
 
     // Id of  Time discretisation
     nId = TimesSetPtr->size();
@@ -1131,7 +1131,7 @@ extern "C" int sicSimulationTimeStepping(int idTime)
   try
   {
     // Time discretisation
-    TimesSet * timediscret = GLOB_DATA.getTimesSetPtr();
+    TimesSet * timediscret = GLOB_DATA.timesSet();
     nSize = timediscret->size();
     if ((idTime < 0) || (idTime > nSize))
       RuntimeException::selfThrow("siconos/C:: sicSimulationTimeStepping failed due to bad time index");
@@ -1161,8 +1161,8 @@ extern "C" int sicOneStepIntegratorMoreau(double *theta)
 
   try
   {
-    Simulation * prtSimul = GLOB_DATA.getSimulationPtr();
-    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
+    Simulation * prtSimul = GLOB_DATA.simulation();
+    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.dynamicalSystemsSet();
 
     int  dsNumber = SetDSPtr->size();
 
@@ -1205,8 +1205,8 @@ extern "C" int sicOneStepIntegratorLsodar()
 
   try
   {
-    Simulation * prtSimul = GLOB_DATA.getSimulationPtr();
-    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.getDynamicalSystemsSetPtr();
+    Simulation * prtSimul = GLOB_DATA.simulation();
+    DynamicalSystemsSet * SetDSPtr = GLOB_DATA.dynamicalSystemsSet();
 
     int  dsNumber = SetDSPtr->size();
 
@@ -1250,8 +1250,8 @@ extern "C" int sicOneStepNSProblemLCP(char *solverName, int maxiter, double tole
   {
     // One Step problem
 
-    // TimeStepping *s = (TimeStepping *)GLOB_DATA.getSimulationPtr();
-    // SP::OneStepNSProblem onsspb = new LCP(GLOB_DATA.getSimulationPtr(),"LCP",solverName,maxiter,tolerance,normetyp,searchdir,rho);
+    // TimeStepping *s = (TimeStepping *)GLOB_DATA.simulation();
+    // SP::OneStepNSProblem onsspb = new LCP(GLOB_DATA.simulation(),"LCP",solverName,maxiter,tolerance,normetyp,searchdir,rho);
     // PB
     // SP::OneStepNSProblem onsspb = new LCP(s,"LCP",solverName,maxiter,tolerance);
     // FP: unused variables => comment.
@@ -1270,7 +1270,7 @@ extern "C" int sicOneStepNSProblemLCP(char *solverName, int maxiter, double tole
   }
 
   // shortcut of object pointers
-  GLOB_DATA.setEventsManagerPtr(GLOB_DATA.getSimulationPtr()->getEventsManagerPtr());
+  GLOB_DATA.setEventsManagerPtr(GLOB_DATA.simulation()->eventsManager());
 
   GLOB_DATA.setStatus(DATAC_MODEL);
 

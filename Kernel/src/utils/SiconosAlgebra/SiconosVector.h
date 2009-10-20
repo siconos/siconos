@@ -155,13 +155,13 @@ public:
    *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    *  \return a DenseVect*
    */
-  virtual DenseVect* getDensePtr(unsigned int = 0) const PURE_DEF;
+  virtual DenseVect* dense(unsigned int = 0) const PURE_DEF;
 
   /** get a pointer to the ublas embedded vector if it's type is Sparse
    *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    *  \return a SparseVect*
    */
-  virtual SparseVect* getSparsePtr(unsigned int = 0) const PURE_DEF;
+  virtual SparseVect* sparse(unsigned int = 0) const PURE_DEF;
 
   /** return the array of double values of the vector
    *  \param unsigned int: vector position (only for block vector)
@@ -204,13 +204,13 @@ public:
    * \param i, unsigned int
    * \return a pointer to a SiconosVector
    */
-  virtual SP::SiconosVector getVectorPtr(unsigned int) PURE_DEF;
+  virtual SP::SiconosVector vector(unsigned int) PURE_DEF;
 
   /** if this is a block vector return SP::SiconosVector number i (arg), else return this.
    * \param i, unsigned int
    * \return a pointer to a SiconosVector
    */
-  virtual SPC::SiconosVector getVectorPtr(unsigned int) const PURE_DEF;
+  virtual SPC::SiconosVector vector(unsigned int) const PURE_DEF;
 
   /** set SiconosVector number i (copy) with v (second arg) - Useful only for BlockVector (else equivalent to a single copy)
    * \param i, unsigned int, block number (0 for SimpleVector)
@@ -237,7 +237,7 @@ public:
   /** reserved to BlockVector - get the index tab
    * \return a pointer to a standard vector of int
    */
-  virtual const SP::Index getTabIndexPtr() const ;
+  virtual const SP::Index tabIndex() const ;
 
   /** get the number of the vector that handles element at position "pos"
       \param unsigned int, position of the element
@@ -332,9 +332,9 @@ public:
     }
     else if (num == 1)
       //atlas::scal((double)m,*vect.Dense);
-      *getDensePtr() *= s;
+      *dense() *= s;
     else
-      *getSparsePtr() *= s;
+      *sparse() *= s;
     return *this;
   }
 
@@ -351,9 +351,9 @@ public:
     }
     else if (num == 1)
       //atlas::scal((double)m,*vect.Dense);
-      *getDensePtr() /= s;
+      *dense() /= s;
     else
-      *getSparsePtr() /= s;
+      *sparse() /= s;
     return *this;
   }
 

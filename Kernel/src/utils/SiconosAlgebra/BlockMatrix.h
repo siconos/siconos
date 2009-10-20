@@ -47,15 +47,15 @@ private:
 
   /** A container of pointers to SiconosMatrix*
    */
-  SP::BlocksMat mat;
+  SP::BlocksMat _mat;
 
   /** list of blocks dimension - tabRow[i] = tabRow[i-1] + ni, ni being the number of rows of block i.
    */
-  SP::Index tabRow;
+  SP::Index _tabRow;
 
   /** list of blocks dimension - tabCol[i] = tabCol[i-1] + ni, ni being the number of columns of block i.
    */
-  SP::Index tabCol;
+  SP::Index _tabCol;
 
   /** default constructor
    */
@@ -172,49 +172,49 @@ public:
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a DenseMat*
    */
-  DenseMat* getDensePtr(unsigned int = 0, unsigned int = 0)const;
+  DenseMat* dense(unsigned int = 0, unsigned int = 0)const;
 
   /** get a pointer on TriangMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a TriangMat*
    */
-  TriangMat* getTriangPtr(unsigned int = 0, unsigned int = 0)const;
+  TriangMat* triang(unsigned int = 0, unsigned int = 0)const;
 
   /** get a pointer on SymMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a SymMat*
    */
-  SymMat* getSymPtr(unsigned int = 0, unsigned int = 0)const;
+  SymMat* sym(unsigned int = 0, unsigned int = 0)const;
 
   /** get a pointer on BandedMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a BandedMat*
    */
-  BandedMat* getBandedPtr(unsigned int = 0, unsigned int = 0)const;
+  BandedMat* banded(unsigned int = 0, unsigned int = 0)const;
 
   /** get a pointer on SparseMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a SparseMat*
    */
-  SparseMat* getSparsePtr(unsigned int = 0, unsigned int = 0)const;
+  SparseMat* sparse(unsigned int = 0, unsigned int = 0)const;
 
   /** get a pointer on ZeroMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a ZeroMat*
    */
-  ZeroMat* getZeroPtr(unsigned int = 0, unsigned int = 0) const;
+  ZeroMat* zero(unsigned int = 0, unsigned int = 0) const;
 
   /** get a pointer on Identity matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return an IdentityMat*
    */
-  IdentityMat* getIdentityPtr(unsigned int = 0, unsigned int = 0) const;
+  IdentityMat* identity(unsigned int = 0, unsigned int = 0) const;
 
   /** return the adress of the array of double values of the matrix
    *  \param: row position for the required block ->useless for SimpleMatrix
@@ -288,7 +288,7 @@ public:
    */
   inline Index getTabRow() const
   {
-    return *tabRow;
+    return *_tabRow;
   };
 
   /** get the vector tabCol
@@ -296,41 +296,41 @@ public:
    */
   inline Index getTabCol() const
   {
-    return *tabCol;
+    return *_tabCol;
   };
 
   /** get the vector tabRow
    *  \return a pointer to vector of int
    */
-  inline const SP::Index getTabRowPtr() const
+  inline const SP::Index tabRow() const
   {
-    return tabRow;
+    return _tabRow;
   };
 
   /** get the vector tabCol
    *  \return a pointer to vector of int
    */
-  inline const SP::Index getTabColPtr() const
+  inline const SP::Index tabCol() const
   {
-    return tabCol;
+    return _tabCol;
   };
 
   /** get block at position row-col
    *  \param unsigned int row
    *  \param unsigned int col
    */
-  inline SP::SiconosMatrix getBlockPtr(unsigned int row = 0, unsigned int col = 0)
+  inline SP::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0)
   {
-    return (*mat)(row, col);
+    return (*_mat)(row, col);
   };
 
   /** get block at position row-col
    *  \param unsigned int row
    *  \param unsigned int col
    */
-  inline SPC::SiconosMatrix getBlockPtr(unsigned int row = 0, unsigned int col = 0) const
+  inline SPC::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0) const
   {
-    return boost::shared_ptr<SiconosMatrix>((*mat)(row, col));
+    return boost::shared_ptr<SiconosMatrix>((*_mat)(row, col));
   };
 
   /** get row index of current matrix and save it unsigned into vOut

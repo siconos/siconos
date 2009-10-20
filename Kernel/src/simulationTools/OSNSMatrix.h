@@ -260,7 +260,7 @@ public:
   };
 
   /** get the matrix used for default storage */
-  inline SP::SiconosMatrix getDefaultMatrixPtr()
+  inline SP::SiconosMatrix defaultMatrix()
   {
     return M1;
   };

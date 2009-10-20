@@ -87,7 +87,7 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS1()
   cout << "--> Test: constructor xml." << endl;
   SP::LagrangianLinearTIDS ds(new LagrangianLinearTIDS(tmpxml1))
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1A : ", ds->getType() == LLTIDS, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1B : ", ds->getNumber() == 13, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1B : ", ds->number() == 13, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1D : ", ds->getStepsInMemory() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1D : ", ds->getNdof() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1E : ", ds->getQ0() == *q0, true);
@@ -107,7 +107,7 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS2()
   cout << "--> Test: constructor 2." << endl;
   SP::LagrangianLinearTIDS ds(new LagrangianLinearTIDS(8, *q0, *velocity0, *mass, *K, *C));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2A : ", ds->getType() == LLTIDS, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2B : ", ds->getNumber() == 8, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2B : ", ds->number() == 8, true);
   cout << "--> Test: constructor 2." << endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2D : ", ds->getStepsInMemory() == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2D : ", ds->getNdof() == 3, true);
@@ -138,7 +138,7 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS3()
   cout << "--> Test: constructor 3." << endl;
   SP::LagrangianLinearTIDS ds(new LagrangianLinearTIDS(8, *q0, *velocity0, *mass));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2A : ", ds->getType() == LLTIDS, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2B : ", ds->getNumber() == 8, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2B : ", ds->number() == 8, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2D : ", ds->getStepsInMemory() == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2D : ", ds->getNdof() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2E : ", ds->getQ0() == *q0, true);
@@ -170,13 +170,13 @@ void LagrangianLinearTIDSTest::testcomputeDS()
   SP::LagrangianLinearTIDS copy = boost::static_pointer_cast<LagrangianLinearTIDS>(ds);
   double time = 1.5;
   ds->initialize("EventDriven", time);
-  SP::SiconosMatrix jx = ds->getJacobianXRhsPtr();
-  SP::SiconosVector vf = ds->getRhsPtr();
+  SP::SiconosMatrix jx = ds->jacobianXRhs();
+  SP::SiconosVector vf = ds->rhs();
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSI : ", *(vf->getVectorPtr(0)) == *velocity0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSJ : ", prod(*mass, *(vf->getVectorPtr(1))) == (copy->getFExt() - prod(*K, *(copy->getQPtr())) - prod(*C, *(copy->getVelocityPtr()))) , true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(*mass, *(jx->getBlockPtr(1, 0))) == (-1.0 * *K) , true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(*mass, *(jx->getBlockPtr(1, 1))) == (-1.0 * *C) , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSI : ", *(vf->vector(0)) == *velocity0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSJ : ", prod(*mass, *(vf->vectorPtr(1))) == (copy->getFExt() - prod(*K, *(copy->q())) - prod(*C, *(copy->getVelocity()))) , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(*mass, *(jx->block(1, 0))) == (-1.0 * *K) , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(*mass, *(jx->block(1, 1))) == (-1.0 * *C) , true);
   cout << "--> computeDS test ended with success." << endl;
 
 

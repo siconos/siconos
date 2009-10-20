@@ -70,25 +70,25 @@ protected:
   SP::OSNSMatrix _M;
 
   /** contains the vector q of a LinearOSNS system */
-  SP::SiconosVector q;
+  SP::SiconosVector _q;
 
   /** Storage type for M - 0: SiconosMatrix (dense), 1: Sparse Storage
       (embedded into OSNSMatrix) */
-  int MStorageType;
+  int _MStorageType;
 
   /** a boolean to decide if _w and _z vectors are initialized with
       previous values of Y and Lambda when a change occurs in problem
       size */
-  bool keepLambdaAndYState;
+  bool _keepLambdaAndYState;
 
   /** nslaw effects : visitors experimentation
    */
-  struct TimeSteppingNSLEffect;
-  struct EventDrivenNSLEffect;
-  struct NSLEffectOnSim;
-  friend class TimeSteppingNSLEffect;
-  friend class EventDrivenNSLEffect;
-  friend class NSLEffectOnSim;
+  struct _TimeSteppingNSLEffect;
+  struct _EventDrivenNSLEffect;
+  struct _NSLEffectOnSim;
+  friend class _TimeSteppingNSLEffect;
+  friend class _EventDrivenNSLEffect;
+  friend class _NSLEffectOnSim;
 
   /** default constructor (private)
    */
@@ -212,41 +212,37 @@ public:
    */
   inline const SimpleVector getQ() const
   {
-    return *q;
+    return *_q;
   }
 
   /** get q, the initial state of the DynamicalSystem
    *  \return pointer on a SiconosVector
    */
-  inline SP::SiconosVector getQPtr() const
+  inline SP::SiconosVector q() const
   {
-    return q;
+    return _q;
   }
-
-  /** set the value of q to newValue
-   *  \param SiconosVector newValue
-   */
-  void setQ(const SiconosVector&);
 
   /** set q to pointer newPtr
    *  \param SP::SiconosVector  newPtr
    */
-  inline void setQPtr(SP::SiconosVector newPtr)
+  inline void setq(SP::SiconosVector newPtr)
   {
-    q = newPtr;
+    _q = newPtr;
   }
 
   /** get the type of storage for M */
   inline const int getMStorageType() const
   {
-    return MStorageType;
+    return _MStorageType;
   };
 
-  /** set which type of storage will be used for M - Note that this function does not
-      allocate any memory for M, it just sets an indicator for future use */
+  /** set which type of storage will be used for M - Note that this
+      function does not allocate any memory for M, it just sets an
+      indicator for future use */
   inline void setMStorageType(int i)
   {
-    MStorageType = i;
+    _MStorageType = i;
   };
 
   /** Memory allocation or resizing for z,w,q */
@@ -308,7 +304,7 @@ public:
       size */
   void setKeepLambdaAndYState(bool val)
   {
-    keepLambdaAndYState = val ;
+    _keepLambdaAndYState = val ;
   }
 
 };

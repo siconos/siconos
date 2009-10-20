@@ -60,8 +60,8 @@ NonSmoothSolver::NonSmoothSolver(): name("undefined"), isSet(false)
 NonSmoothSolver::NonSmoothSolver(const NonSmoothSolver& newS):
   name(newS.getName()), isSet(newS.isSolverSet())
 {
-  int_parameters.reset(new IntParameters(*newS.getIntParametersPtr()));
-  double_parameters.reset(new DoubleParameters(*newS.getDoubleParametersPtr()));
+  int_parameters.reset(new IntParameters(*newS.intParameters()));
+  double_parameters.reset(new DoubleParameters(*newS.doubleParameters()));
   fillSolverOptions();
 }
 

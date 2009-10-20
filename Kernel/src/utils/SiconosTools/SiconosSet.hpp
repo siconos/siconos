@@ -160,7 +160,7 @@ public:
     ConstTIterator it;
     for (it = setOfT->begin(); it != setOfT->end(); ++it)
     {
-      if (((*it)->getNumber()) == num)
+      if (((*it)->number()) == num)
         break;
     }
     if (it == setOfT->end())
@@ -190,7 +190,7 @@ public:
     TIterator it;
     for (it = setOfT->begin(); it != setOfT->end(); ++it)
     {
-      if (((*it)->getNumber()) == num)
+      if (((*it)->number()) == num)
       {
         out = true;
         break;
@@ -218,7 +218,7 @@ public:
     TIterator it;
     for (it = setOfT->begin(); it != setOfT->end(); ++it)
     {
-      if (((*it)->getNumber()) == num)
+      if (((*it)->number()) == num)
         break;
     }
     return it; // == this.end() if not found.
@@ -269,7 +269,7 @@ public:
     std::cout << "====> Set display - The following objects are present in the set (number):" << std::endl;
     TIterator it;
     for (it = setOfT->begin(); it != setOfT->end(); ++it)
-      std::cout << "(" << (*it)->getNumber() << "), ";
+      std::cout << "(" << (*it)->number() << "), ";
     std::cout << std::endl;
     std::cout << "=============================================================================================" << std::endl;
   };

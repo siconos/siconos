@@ -25,15 +25,15 @@ using namespace EventFactory;
 
 void ActuatorEvent::process(SP::Simulation)
 {
-  actuator->actuate();
+  actuator()->actuate();
 }
 
 void ActuatorEvent::update()
 {
   // Increment actuator time discr. to next step
-  actuator->getTimeDiscretisationPtr()->increment();
+  actuator()->timeDiscretisation()->increment();
   // set actuator event time to new current time value
-  setTime(actuator->getTimeDiscretisationPtr()->getCurrentTime());
+  setTime(actuator()->timeDiscretisation()->currentTime());
 }
 
 AUTO_REGISTER_EVENT(3, ActuatorEvent);

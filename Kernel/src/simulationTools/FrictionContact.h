@@ -69,12 +69,12 @@ class FrictionContact : public LinearOSNS
 protected:
 
   /** Type (dimension) of the contact problem (2D or 3D) */
-  int contactProblemDim;
+  int _contactProblemDim;
 
-  SP::MuStorage mu;
+  SP::MuStorage _mu;
 
   /** Pointer to the function used to call the Numerics driver to solve the problem */
-  Driver frictionContact_driver;
+  Driver _frictionContact_driver;
 
 public:
 
@@ -91,7 +91,7 @@ public:
    */
   FrictionContact(int dimPb, SP::NonSmoothSolver newSolver = SP::NonSmoothSolver(),
                   const std::string& newId = "unamed_friction_contact_problem"):
-    LinearOSNS("FrictionContact", newSolver, newId), contactProblemDim(dimPb) {};
+    LinearOSNS("FrictionContact", newSolver, newId), _contactProblemDim(dimPb) {};
 
   /** destructor
    */
@@ -104,7 +104,7 @@ public:
    */
   inline int getFrictionContactDim() const
   {
-    return contactProblemDim;
+    return _contactProblemDim;
   }
 
   // --- Mu ---
@@ -113,16 +113,16 @@ public:
    */
   inline const MuStorage getMu() const
   {
-    return *mu;
+    return *_mu;
   }
 
   /** get a pointer to mu, the list of the friction coefficients
    *  \return pointer on a std::vector<double>
    */
 
-  inline SP::MuStorage getMuPtr() const
+  inline SP::MuStorage mu() const
   {
-    return mu;
+    return _mu;
   }
 
   /** get the value of the component number i of mu, the vector of the friction coefficients
@@ -130,7 +130,7 @@ public:
    */
   inline const double getMu(unsigned int i) const
   {
-    return (*mu)[i];
+    return (*_mu)[i];
   }
 
   /** set the driver-function used to solve the problem
@@ -138,7 +138,7 @@ public:
   */
   inline void setNumericsDriver(Driver newFunction)
   {
-    frictionContact_driver = newFunction;
+    _frictionContact_driver = newFunction;
   };
 
   // --- Others functions ---

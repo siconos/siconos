@@ -114,7 +114,7 @@ void Topology::addInteractionInIndexSet(SP::Interaction inter)
   // corresponds to inter->getNumberOfRelations but since Interaction
   // has not been initialized yet, this value is not set and we need
   // to get interaction size and nsLaw size.
-  unsigned int nsLawSize = inter->getNonSmoothLawPtr()->getNsLawSize();
+  unsigned int nsLawSize = inter->nonSmoothLaw()->size();
   unsigned int m = inter->getSizeOfY() / nsLawSize;
   unsigned int pos; // relative position of the relation in the y
   // vector of the Interaction
@@ -122,7 +122,7 @@ void Topology::addInteractionInIndexSet(SP::Interaction inter)
   UnitaryRelationsGraph::VDescriptor ui_current_vertex;
   UnitaryRelationsGraph::EDescriptor ds_current_edge;
 
-  SP::DynamicalSystemsSet systems = inter->getDynamicalSystemsPtr();
+  SP::DynamicalSystemsSet systems = inter->dynamicalSystems();
 
   numberOfConstraints += m * nsLawSize;
 
@@ -150,7 +150,7 @@ void Topology::addInteractionInIndexSet(SP::Interaction inter)
       };
 
       // one DS in the interaction is a special case : a self branch
-      if ((i1ds == i2ds) && inter->getDynamicalSystemsPtr()->size() == 1)
+      if ((i1ds == i2ds) && inter->dynamicalSystems()->size() == 1)
       {
         DynamicalSystemsGraph::VDescriptor dsgv;
         dsgv = DSG[0]->add_vertex(*i1ds);
@@ -212,7 +212,7 @@ struct VertexIsRemoved
     {
       UnitaryRelationsGraph::VDescriptor uvd = _URG->descriptor(_DSG->bundle(ed));
 
-      if (_URG->bundle(uvd)->getInteractionPtr() == _I)
+      if (_URG->bundle(uvd)->interaction() == _I)
       {
         _URG->remove_vertex(_DSG->bundle(ed));
 
@@ -241,8 +241,8 @@ struct VertexIsRemoved
 const bool Topology::removeInteractionFromIndexSet(SP::Interaction inter)
 {
 
-  for (DSIterator ids = inter->getDynamicalSystemsPtr()->begin();
-       ids != inter->getDynamicalSystemsPtr()->end();
+  for (DSIterator ids = inter->dynamicalSystems()->begin();
+       ids != inter->dynamicalSystems()->end();
        ++ids)
   {
     DSG[0]->remove_out_edge_if
@@ -352,9 +352,9 @@ void Topology::computeRelativeDegrees()
     {
 
       setupFromNslaw.reset(new SetupFromNslaw(shared_from_this(),
-                                              URG[0]->bundle(*uv)->getInteractionPtr()));
+                                              URG[0]->bundle(*uv)->interaction()));
 
-      URG[0]->bundle(*uv)->getInteractionPtr()->getNonSmoothLawPtr()->accept(*(setupFromNslaw.get()));
+      URG[0]->bundle(*uv)->interaction()->nonSmoothLaw()->accept(*(setupFromNslaw.get()));
 
     }
   }

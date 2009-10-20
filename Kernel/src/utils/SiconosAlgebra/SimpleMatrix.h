@@ -306,49 +306,49 @@ public:
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a DenseMat*
    */
-  DenseMat* getDensePtr(unsigned int = 0, unsigned int = 0) const;
+  DenseMat* dense(unsigned int = 0, unsigned int = 0) const;
 
   /** get a pointer on TriangMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a TriangMat*
    */
-  TriangMat* getTriangPtr(unsigned int = 0, unsigned int = 0) const;
+  TriangMat* triang(unsigned int = 0, unsigned int = 0) const;
 
   /** get a pointer on SymMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a SymMat*
    */
-  SymMat* getSymPtr(unsigned int = 0, unsigned int = 0) const;
+  SymMat* sym(unsigned int = 0, unsigned int = 0) const;
 
   /** get a pointer on BandedMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a BandedMat*
    */
-  BandedMat* getBandedPtr(unsigned int = 0, unsigned int = 0) const;
+  BandedMat* banded(unsigned int = 0, unsigned int = 0) const;
 
   /** get a pointer on SparseMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a SparseMat*
    */
-  SparseMat* getSparsePtr(unsigned int = 0, unsigned int = 0) const;
+  SparseMat* sparse(unsigned int = 0, unsigned int = 0) const;
 
   /** get a pointer on ZeroMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a ZeroMat*
    */
-  ZeroMat* getZeroPtr(unsigned int = 0, unsigned int = 0) const;
+  ZeroMat* zero(unsigned int = 0, unsigned int = 0) const;
 
   /** get a pointer on Identity matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return an IdentityMat*
    */
-  IdentityMat* getIdentityPtr(unsigned int = 0, unsigned int = 0) const;
+  IdentityMat* identity(unsigned int = 0, unsigned int = 0) const;
 
   /** return the adress of the array of double values of the matrix
    *  \param: row position for the required block ->useless for SimpleMatrix
@@ -430,7 +430,7 @@ public:
    *  \param unsigned int row
    *  \param unsigned int col
    */
-  inline SP::SiconosMatrix getBlockPtr(unsigned int = 0, unsigned int = 0)
+  inline SP::SiconosMatrix block(unsigned int = 0, unsigned int = 0)
   {
     return shared_from_this();
   };
@@ -439,7 +439,7 @@ public:
    *  \param unsigned int row
    *  \param unsigned int col
    */
-  inline SPC::SiconosMatrix getBlockPtr(unsigned int = 0, unsigned int = 0) const
+  inline SPC::SiconosMatrix block(unsigned int = 0, unsigned int = 0) const
   {
     return shared_from_this();
   };

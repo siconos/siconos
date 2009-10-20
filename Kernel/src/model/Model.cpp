@@ -69,12 +69,12 @@ Model::Model(const std::string& xmlFile):
       strat.reset(new TimeStepping
                   (modelxml->getSimulationXML(), t0, T,
                    setOfGraph<DynamicalSystemsSet>(nsds->getDynamicalSystems()),
-                   nsds->getInteractionsPtr()));
+                   nsds->interactions()));
     else if (modelxml->getSimulationXML()->getSimulationXMLType() == EVENTDRIVEN_TAG)
       strat.reset(new EventDriven
                   (modelxml->getSimulationXML(), t0, T,
                    setOfGraph<DynamicalSystemsSet>(nsds->getDynamicalSystems()),
-                   nsds->getInteractionsPtr()));
+                   nsds->interactions()));
     else RuntimeException::selfThrow
       ("Model: xml constructor, wrong type of simulation" +
        (modelxml->getSimulationXML()->getSimulationXMLType()));
@@ -139,7 +139,7 @@ void Model::initialize(SP::Simulation simulation)
   assert(strat && "Model::initialize() error - The simulation object of this model is null.");
 
   // === topology init (computes UnitaryRelation sets, relative degrees ...) ===
-  nsds->getTopologyPtr()->initialize();
+  nsds->topology()->initialize();
 
   // === Simulation init ===
   strat->initialize(shared_from_this());
@@ -195,7 +195,7 @@ void Model::savePlatformToXML()
 
   if (strat)
   {
-    strat->getTimeDiscretisationPtr()->saveTimeDiscretisationToXML();
+    strat->timeDiscretisation()->saveTimeDiscretisationToXML();
 
     if (strat->getType() == "TimeStepping")
       (boost::static_pointer_cast<TimeStepping>(strat))->saveSimulationToXML();
@@ -225,7 +225,7 @@ void Model::checkXMLPlatform()
     if (modelxml->getNonSmoothDynamicalSystemXML())
     {
       // we must create/update the DynamicalSystemXMLs
-      nsds->getNonSmoothDynamicalSystemXMLPtr()->
+      nsds->nonSmoothDynamicalSystemXML()->
       updateNonSmoothDynamicalSystemXML
       (modelxml->getNonSmoothDynamicalSystemXML()->getRootNode(), nsds);
     }
@@ -259,7 +259,7 @@ void Model::checkXMLPlatform()
       }
       else
       {
-        strat->getSimulationXMLPtr()->
+        strat->simulationXML()->
         saveSimulation2XML
         (modelxml->getSimulationXML()->getRootNode(), strat);
       }

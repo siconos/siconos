@@ -34,16 +34,17 @@ int LCP::compute(double time)
   // - the options for the solver (name, max iteration number ...)
   // - the global options for Numerics (verbose mode ...)
 
-  if (sizeOutput != 0)
+  if (_sizeOutput != 0)
   {
     // The LCP in Numerics format
     LinearComplementarity_Problem numerics_problem;
     numerics_problem.M = &*_M->getNumericsMatrix();
-    numerics_problem.q = q->getArray();
-    numerics_problem.size = sizeOutput;
+    numerics_problem.q = _q->getArray();
+    numerics_problem.size = _sizeOutput;
     int nbSolvers = 1;
     // Call LCP Driver
-    info = lcp_driver(&numerics_problem, _z->getArray() , _w->getArray() , &*solver->getNumericsSolverOptionsPtr(), nbSolvers, &*numerics_options);
+    info = lcp_driver(&numerics_problem, _z->getArray() , _w->getArray() ,
+                      &*_solver->numericsSolverOptions(), nbSolvers, &*_numerics_options);
 
     // --- Recovering of the desired variables from LCP output ---
     postCompute();
@@ -55,7 +56,7 @@ int LCP::compute(double time)
 
 void LCP::display() const
 {
-  cout << "======= LCP of size " << sizeOutput << " with: " << endl;
+  cout << "======= LCP of size " << _sizeOutput << " with: " << endl;
   LinearOSNS::display();
 }
 

@@ -48,7 +48,7 @@ const bool ioVector::read(SiconosVector& m) const
 
   infile.precision(15);
 
-  DenseVect *p = m.getDensePtr();
+  DenseVect *p = m.dense();
 
   // Read the dimension of the vector in the first line of the input file
   // Just use to check that sizes are consistents.
@@ -87,12 +87,12 @@ const bool ioVector::write(const SiconosVector& m, const std::string& outputType
 
   if (m.getNum() == 1)
   {
-    DenseVect*  p = m.getDensePtr();
+    DenseVect*  p = m.dense();
     std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));
   }
   else if (m.getNum() == 4)
   {
-    SparseVect* p = m.getSparsePtr();
+    SparseVect* p = m.sparse();
     std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));
   }
 

@@ -85,7 +85,7 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1E : ", ds->getX0() == *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1E : ", ds->getM() == *M, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1H : ", ds->getFPtr()->isPlugged(), false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1I : ", ds->getJacobianXFPtr()->isPlugged(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1I : ", ds->jacobianXF()->isPlugged(), false);
 
   cout << "--> Constructor xml test ended with success." << endl;
 }
@@ -100,7 +100,7 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2D : ", ds->getN() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2E : ", ds->getX0() == 2 * *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2F : ", ds->getFPtr()->isPlugged(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2G : ", ds->getJacobianXFPtr()->isPlugged(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2G : ", ds->jacobianXF()->isPlugged(), true);
   ds->initialize("TimeStepping", 0.5);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2H : ", ds->getF() == *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2I : ", ds->getJacobianXF() == *J0, true);
@@ -213,11 +213,11 @@ void FirstOrderNonLinearDSTest::testInitMemory()
   cout << "--> Test: initMemory." << endl;
   SP::FirstOrderNonLinearDS ds1(new FirstOrderNonLinearDS(tmpxml2));
   ds1->initMemory(2);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem1 : ", ds1->getXMemoryPtr()->getMemorySize() == 2, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem3 : ", ds1->getRMemoryPtr()->getMemorySize() == 2, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem1 : ", ds1->xMemory()->getMemorySize() == 2, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem3 : ", ds1->rMemory()->getMemorySize() == 2, true);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem4 : ", ds1->getXMemoryPtr()->getNbVectorsInMemory() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem6 : ", ds1->getRMemoryPtr()->getNbVectorsInMemory() == 0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem4 : ", ds1->xMemory()->getNbVectorsInMemory() == 0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem6 : ", ds1->rMemory()->getNbVectorsInMemory() == 0, true);
   cout << "--> initMemory test ended with success." << endl;
 }
 
@@ -231,8 +231,8 @@ void FirstOrderNonLinearDSTest::testSwap()
   ds1->setR(*x0);
   ds1->initMemory(1);
   ds1->swapInMemory();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap1 : ", *((ds1->getXMemoryPtr()->getVectorMemory())[0]) == *x0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap3 : ", *((ds1->getRMemoryPtr()->getVectorMemory())[0]) == *x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap1 : ", *((ds1->xMemory()->getVectorMemory())[0]) == *x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap3 : ", *((ds1->rMemory()->getVectorMemory())[0]) == *x0, true);
   cout << "--> swap test ended with success." << endl;
 }
 

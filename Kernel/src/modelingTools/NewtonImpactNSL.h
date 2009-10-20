@@ -47,7 +47,7 @@ class NewtonImpactNSL : public NonSmoothLaw
 
 private:
   /** The Newton normal coefficient of restitution  */
-  double e;
+  double _e;
 
 public:
 
@@ -77,9 +77,9 @@ public:
   /** getter of e
   *  \return the value of e
   */
-  inline const double getE() const
+  inline const double e() const
   {
-    return e;
+    return _e;
   };
 
   /** setter of e
@@ -87,7 +87,7 @@ public:
   */
   inline void setE(double newVal)
   {
-    e = newVal;
+    _e = newVal;
   };
 
   /** copy the data of the NonSmoothLaw in the XML tree

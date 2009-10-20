@@ -17,35 +17,60 @@
 # Contact: Vincent ACARY vincent.acary@inrialpes.fr 
 #	
 
-----------------------------------------------------------------------------------------------------------------------------------------------------------------
-          						README File for Siconos kernel
-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------
+                        README File for Siconos kernel
+------------------------------------------------------------------------
 
-This project belongs to the European project SICONOS, dedicated to the modeling, the control the analysis and the simulation of the so-called 
-``Non Smooth Dynamical system'' NSDS. More details on this European project can be found on the website of the Project http://siconos.inrialpes.fr.
+This project belongs to the European project SICONOS, dedicated to the
+modeling, the control the analysis and the simulation of the so-called
+``Non Smooth Dynamical system'' NSDS. More details on this European
+project can be found on the website of the Project
+http://siconos.inrialpes.fr.
 
-Besides the standard features which are required for a software of scientific computing, the objectives of this project are of the following :
+Besides the standard features which are required for a software of
+scientific computing, the objectives of this project are of the
+following :
 
-        * To provide a common framework (modeling and simulation tools) for non smooth problems present in various scientific fields :
-		 applied Mathematics, Mechanics, Robotics, Electrical networks, etc.
-        * To be able to rely on existing developments, as well for the modeling tools as for the simulation tools. 
-	  The platform will not re-implement the dedicated tools, which are already used for the modeling of specific systems in various fields,
-          but will provide a framework to their integration. In the same way, we want to re-use improved numerical low-level routines.
-        * To support exchanges and comparisons of methods between researchers.
-        * To disseminate the know-how to other fields of research and industry.
-        * To take into account the diversity of users (end users, experts, software developers, framework builders, industrial users, etc ... ).
+        * To provide a common framework (modeling and simulation
+          tools) for non smooth problems present in various scientific
+          fields : applied Mathematics, Mechanics, Robotics,
+          Electrical networks, etc.
+ 
+        * To be able to rely on existing developments, as well for the
+	  modeling tools as for the simulation tools.  The platform
+	  will not re-implement the dedicated tools, which are already
+	  used for the modeling of specific systems in various fields,
+	  but will provide a framework to their integration. In the
+	  same way, we want to re-use improved numerical low-level
+	  routines.
+
+        * To support exchanges and comparisons of methods between
+          researchers.
+
+        * To disseminate the know-how to other fields of research and
+          industry.
+
+        * To take into account the diversity of users (end users,
+          experts, software developers, framework builders, industrial
+          users, etc ... ).
+
         * To set up standards in terms of modeling of the NSDS.
-        * To ensure software quality by the use of modern software design methods.
 
-The present package, Siconos/Kernel, is dedicated to the modeling and the simulation of  NSDS, with high level description and numerical solving strategies.
-It relies on Siconos/Numerics which provides low-level algorithms to compute basic well-identified problems.
+        * To ensure software quality by the use of modern software
+          design methods.
 
-More details are available on software documentation pages, Doc/Devel directory of the current distribution, in "design" chapter,
-or on http://siconos.gforge.inria.fr/
+The present package, Siconos/Kernel, is dedicated to the modeling and
+the simulation of NSDS, with high level description and numerical
+solving strategies.  It relies on Siconos/Numerics which provides
+low-level algorithms to compute basic well-identified problems.
 
-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+More details are available on software documentation pages, Doc/Devel
+directory of the current distribution, in "design" chapter, or on
+http://siconos.gforge.inria.fr/
 
-Software install and loading: see INSTALL file. 
-Last changes/update: see ChangeLog file.
+------------------------------------------------------------------------
 
-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+Software install and loading: see INSTALL file.  Last changes/update:
+see ChangeLog file.
+
+------------------------------------------------------------------------

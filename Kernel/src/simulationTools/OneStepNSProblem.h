@@ -86,49 +86,49 @@ class OneStepNSProblem : public boost::enable_shared_from_this<OneStepNSProblem>
 protected:
 
   /** type of the OneStepNSProblem (LCP ...) */
-  std::string nspbType;
+  std::string _nspbType;
 
   /** id/name of the problem */
-  std::string id;
+  std::string _id;
 
   /** size of the problem to solve */
-  unsigned int sizeOutput;
+  unsigned int _sizeOutput;
 
   /** map that links each UnitaryRelation with the corresponding unitaryBlocks
       map < UnitaryRelationA * , map < UnitaryRelationB* , unitaryBlockMatrixAB > >
       UnitaryRelations A and B are coupled through unitaryBlockMatrixAB.  */
-  MapOfMapOfUnitaryMatrices unitaryBlocks;
+  MapOfMapOfUnitaryMatrices _unitaryBlocks;
 
   /** map that links each DynamicalSystem with the corresponding DSBlocks
       map < SP::DynamicalSystem , SiconosMatrix * > */
-  MapOfDSMatrices DSBlocks;
+  MapOfDSMatrices _DSBlocks;
 
   /** map that links each UnitaryRelation and DynamicalSystem with the corresponding unitaryDSBlocks
       map < UnitaryRelationA * , map < DynamicalSystemB * , unitaryDSBlockMatrixAB > >
       UnitaryRelation A and DynamicalSystem B are coupled through unitaryDSBlockMatrixAB.  */
-  MapOfUnitaryMapOfDSMatrices unitaryDSBlocks;
+  MapOfUnitaryMapOfDSMatrices _unitaryDSBlocks;
 
   /** map that links each DynamicalSystem and UnitaryRelation with the corresponding DSunitaryBlocks
       map < DynamicalSystemA * , map < UnitaryRelationB* , DSunitaryBlockMatrixAB > >
       Dynamical A and UnitaryRelation B are coupled through DSunitaryBlockMatrixAB.  */
-  MapOfDSMapOfUnitaryMatrices DSUnitaryBlocks;
+  MapOfDSMapOfUnitaryMatrices _DSUnitaryBlocks;
 
   /** Solver for Non Smooth Problem*/
-  SP::NonSmoothSolver solver;
+  SP::NonSmoothSolver _solver;
 
   /** link to the simulation that owns the NSPb */
-  SP::Simulation simulation;
+  SP::Simulation _simulation;
 
   /** the XML object linked to the OneStepNSProblem to read XML data */
-  SP::OneStepNSProblemXML onestepnspbxml;
+  SP::OneStepNSProblemXML _onestepnspbxml;
 
   /** set of Interactions: link to the Interactions of the Non Smooth
    * Dynamical System Note: no get or set functions for this object in
    * the class -> used only in OneStepNSProblem methods. */
-  SP::InteractionsSet OSNSInteractions;
+  SP::InteractionsSet _OSNSInteractions;
 
   /** minimum index set number to be taken into account */
-  unsigned int levelMin;
+  unsigned int _levelMin;
 
   /** minimum index set number to be taken into account - For example,
    * if level_min = 1 and level_max = 2, first and second derivatives
@@ -140,7 +140,7 @@ protected:
    * Classical values are (0,0) for electrical (degree 0) systems,
    * (1,1) for mechanical ones (degree 2).
    */
-  unsigned int levelMax;
+  unsigned int _levelMax;
 
   /** maximum value for sizeOutput. Set to the number of declared
       constraints by default (topology->getNumberOfConstraints());
@@ -148,16 +148,17 @@ protected:
       call. The best choice is to set maxSize to the estimated maximum
       dimension of the problem. It must not exceed ...
   */
-  unsigned int maxSize;
+  unsigned int _maxSize;
 
   /** Timer: cpu time spent in solver */
-  clock_t CPUtime;
+  clock_t _CPUtime;
 
   /** Number of calls to the solver */
-  unsigned int nbIter;
+  unsigned int _nbIter;
 
-  /** Numerics (C) structure used to define global options for Numerics functions calls */
-  SP::Numerics_Options numerics_options;
+  /** Numerics (C) structure used to define global options for
+      Numerics functions calls */
+  SP::Numerics_Options _numerics_options;
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
 
@@ -185,9 +186,11 @@ public:
   /** constructor from data
    *  \param string: problem type
    *  \param string : id
-   *  \param Solver *: pointer on object that contains solver algorithm definition (optional)
+   *  \param Solver *: pointer on object that contains solver
+   *  algorithm definition (optional)
    */
-  OneStepNSProblem(const std::string&, const std::string&, SP::NonSmoothSolver = SP::NonSmoothSolver());
+  OneStepNSProblem(const std::string&, const std::string&,
+                   SP::NonSmoothSolver = SP::NonSmoothSolver());
 
   /** destructor
    */
@@ -200,7 +203,7 @@ public:
    */
   inline std::string getType() const
   {
-    return nspbType;
+    return _nspbType;
   }
 
   /** set the type of the OneStepNSProblem
@@ -208,7 +211,7 @@ public:
    */
   inline void setType(const std::string&  newVal)
   {
-    nspbType = newVal;
+    _nspbType = newVal;
   }
 
   /** to get the id of the OneStepNSProblem
@@ -216,7 +219,7 @@ public:
    */
   inline std::string getId() const
   {
-    return id;
+    return _id;
   }
 
   /** set the id of the OneStepNSProblem
@@ -224,7 +227,7 @@ public:
    */
   inline void setId(const std::string& newVal)
   {
-    id = newVal;
+    _id = newVal;
   }
 
   /** get dimension of the problem
@@ -232,7 +235,7 @@ public:
    */
   inline const unsigned int getSizeOutput() const
   {
-    return sizeOutput;
+    return _sizeOutput;
   }
 
   /** set the value of sizeOutput
@@ -240,7 +243,7 @@ public:
    */
   inline void setSizeOutput(const unsigned int newVal)
   {
-    sizeOutput = newVal;
+    _sizeOutput = newVal;
   }
 
   /** get the unitaryBlocks matrices map
@@ -248,7 +251,7 @@ public:
    */
   inline const MapOfMapOfUnitaryMatrices getUnitaryBlocks() const
   {
-    return unitaryBlocks;
+    return _unitaryBlocks;
   };
 
   /** get the unitaryBlock orresponding to UR1 and UR2
@@ -256,8 +259,8 @@ public:
    *  \param a pointer to UnitaryRelation, optional, default value = NULL, in that case UR2 = UR1 (ie get "diagonal" unitaryBlock)
    *  \return a pointer to SiconosMatrix
    */
-  SP::SiconosMatrix getUnitaryBlockPtr(SP::UnitaryRelation,
-                                       SP::UnitaryRelation = SP::UnitaryRelation()) const ;
+  SP::SiconosMatrix unitaryBlock(SP::UnitaryRelation,
+                                 SP::UnitaryRelation = SP::UnitaryRelation()) const ;
 
   /** set the map of unitary matrices
    *  \param a MapOfMapOfUnitaryMatrices
@@ -269,14 +272,14 @@ public:
    */
   inline const MapOfDSMatrices getDSBlocks() const
   {
-    return DSBlocks;
+    return _DSBlocks;
   };
 
   /** get the DSBlock orresponding to DS1
    *  \param a pointer to DynamicalSystem, DS1
    *  \return a pointer to SiconosMatrix
    */
-  SP::SiconosMatrix getDSBlockPtr(SP::DynamicalSystem) const ;
+  SP::SiconosMatrix dSBlock(SP::DynamicalSystem) const ;
 
   /** set the map of DS matrices
    *  \param a MapOfDSMatrices
@@ -289,7 +292,7 @@ public:
    */
   inline const MapOfUnitaryMapOfDSMatrices getUnitaryDSBlocks() const
   {
-    return unitaryDSBlocks;
+    return _unitaryDSBlocks;
   };
 
   /** get the unitaryDSBlock corresponding to UR1 and DS2
@@ -297,7 +300,7 @@ public:
    *  \param a pointer to DynamicalSystem DS2
    *  \return a pointer to SiconosMatrix
    */
-  SP::SiconosMatrix getUnitaryDSBlockPtr(SP::UnitaryRelation, SP::DynamicalSystem) const ;
+  SP::SiconosMatrix unitaryDSBlock(SP::UnitaryRelation, SP::DynamicalSystem) const ;
 
   /** set the map of unitaryDS matrices
    *  \param a MapOfUnitaryMapOfDSMatrices
@@ -309,7 +312,7 @@ public:
     */
   inline const MapOfDSMapOfUnitaryMatrices getDSUnitaryBlocks() const
   {
-    return DSUnitaryBlocks;
+    return _DSUnitaryBlocks;
   };
 
   /** get the DSunitaryBlock corresponding to DS1 and UR2
@@ -317,7 +320,7 @@ public:
    *  \param a pointer to DynamicalSystem DS1
    *  \return a pointer to SiconosMatrix
    */
-  SP::SiconosMatrix getDSUnitaryBlockPtr(SP::DynamicalSystem, SP::UnitaryRelation) const ;
+  SP::SiconosMatrix dSUnitaryBlock(SP::DynamicalSystem, SP::UnitaryRelation) const ;
 
   /** set the map of DSUnitary matrices
    *  \param a MapOfDSMapOfUnitaryMatrices
@@ -327,9 +330,9 @@ public:
   /** get the NonSmoothSolver
    *  \return a pointer on NonSmoothSolver
    */
-  inline SP::NonSmoothSolver getNonSmoothSolverPtr() const
+  inline SP::NonSmoothSolver solver() const
   {
-    return solver;
+    return _solver;
   }
 
   /** set the NonSmoothSolver of the OneStepNSProblem
@@ -340,9 +343,9 @@ public:
   /** get the Simulation
    *  \return a pointer on Simulation
    */
-  inline SP::Simulation getSimulationPtr() const
+  inline SP::Simulation simulation() const
   {
-    return simulation;
+    return _simulation;
   }
 
   /** set the Simulation of the OneStepNSProblem
@@ -350,23 +353,23 @@ public:
    */
   inline void setSimulationPtr(SP::Simulation newS)
   {
-    simulation = newS;
+    _simulation = newS;
   }
 
   /** get the Interactions set
    *  \return an InteractionsSet
    */
-  inline SP::InteractionsSet getInteractions() const
+  inline SP::InteractionsSet interactions() const
   {
-    return OSNSInteractions;
+    return _OSNSInteractions;
   }
 
   /** get level min value
    *  \return an unsigned int
    */
-  inline const unsigned int getLevelMin() const
+  inline const unsigned int levelMin() const
   {
-    return levelMin;
+    return _levelMin;
   }
 
   /** set the value of level min
@@ -374,7 +377,7 @@ public:
    */
   inline void setLevelMin(unsigned int newVal)
   {
-    levelMin = newVal;
+    _levelMin = newVal;
   }
 
   /** get level max value
@@ -382,7 +385,7 @@ public:
    */
   inline const unsigned int getLevelMax() const
   {
-    return levelMax;
+    return _levelMax;
   }
 
   /** set the value of level  max
@@ -390,7 +393,7 @@ public:
    */
   inline void setLevelMax(unsigned int newVal)
   {
-    levelMax = newVal;
+    _levelMax = newVal;
   }
 
   /** set the values of level min and max
@@ -399,16 +402,16 @@ public:
    */
   inline void setLevels(unsigned int newMin, unsigned int newMax)
   {
-    levelMin = newMin;
-    levelMax = newMax;
+    _levelMin = newMin;
+    _levelMax = newMax;
   }
 
   /** get maximum value allowed for the dimension of the problem
    *  \return an unsigned int
    */
-  inline const unsigned int getMaxSize() const
+  inline const unsigned int maxSize() const
   {
-    return maxSize;
+    return _maxSize;
   }
 
   /** set the value of maxSize
@@ -416,7 +419,7 @@ public:
    */
   inline void setMaxSize(const unsigned int newVal)
   {
-    maxSize = newVal;
+    _maxSize = newVal;
   }
 
   /** get the total (CPU) time spent in the solver
@@ -424,7 +427,7 @@ public:
    */
   inline const double getCPUtime() const
   {
-    return CPUtime / (double)CLOCKS_PER_SEC;
+    return _CPUtime / (double)CLOCKS_PER_SEC;
   };
 
   /** get the number of call to ns solver
@@ -432,7 +435,7 @@ public:
    */
   inline const unsigned int getNumberOfIterations() const
   {
-    return nbIter;
+    return _nbIter;
   };
 
   /** set Numerics verbose mode
@@ -440,15 +443,15 @@ public:
    */
   inline void setNumericsVerboseMode(bool vMode)
   {
-    numerics_options->verboseMode = vMode;
+    _numerics_options->verboseMode = vMode;
   };
 
   /** reset stat (nbIter and CPUtime)
    */
   inline void resetStat()
   {
-    CPUtime = 0;
-    nbIter = 0;
+    _CPUtime = 0;
+    _nbIter = 0;
   };
 
   /** display stat. info (CPU time and nb of iterations achieved)
@@ -470,7 +473,8 @@ public:
    */
   virtual void computeUnitaryBlock(SP::UnitaryRelation, SP::UnitaryRelation);
 
-  /** compute DSBlocks if necessary (this depends on the type of OSNS, on the indexSets ...)
+  /** compute DSBlocks if necessary (this depends on the type of
+      OSNS, on the indexSets ...)
   */
   void updateDSBlocks();
 
@@ -485,7 +489,8 @@ public:
   virtual void computeDSBlock(SP::DynamicalSystem);
 
 
-  /** compute UnitaryDSBlocks if necessary (this depends on the type of OSNS, on the indexSets ...)
+  /** compute UnitaryDSBlocks if necessary (this depends on the type
+      of OSNS, on the indexSets ...)
   */
   void updateUnitaryDSBlocks();
 
@@ -501,7 +506,8 @@ public:
   virtual void computeUnitaryDSBlock(SP::UnitaryRelation , SP::DynamicalSystem);
 
 
-  /** compute DSUnitaryBlocks if necessary (this depends on the type of OSNS, on the indexSets ...)
+  /** compute DSUnitaryBlocks if necessary (this depends on the type
+      of OSNS, on the indexSets ...)
   */
   void updateDSUnitaryBlocks();
 

@@ -55,15 +55,15 @@ int main(int argc, char* argv[])
     // constructor from a set of data, M from a plugin.
     lds1.reset(new LagrangianDS(1, size, *q0, *v0, "LagPlugin:computeMass"));
     lds1->computeMass(2);
-    lds1->getMassPtr()->display();
+    lds1->mass()->display();
     lds1->computeMass(2, v0);
-    lds1->getMassPtr()->display();
+    lds1->mass()->display();
 
     cout << "======== Test 3 ============= " << endl;
     // constructor from a set of data, Mass a given matrix.
     SP::SiconosMatrix A(new SiconosMatrix("mat.dat", true));
     lds1.reset(new LagrangianDS(1, size, *q0, *v0, *A));
-    lds1->getMassPtr()->display();
+    lds1->mass()->display();
 
     cout << "======== Test 4 ============= " << endl;
     // getter/setter
@@ -91,71 +91,71 @@ int main(int argc, char* argv[])
     // by pointer :
     SP::SiconosMatrix B(new SiconosMatrix("matB.dat", true));
     lds1->setMassPtr(B);
-    lds1->getMassPtr()->display();
+    lds1->mass()->display();
     lds1->setFIntPtr(v0);
-    lds1->getFIntPtr()->display();
+    lds1->fInt()->display();
     lds1->setFExtPtr(q0);
-    lds1->getFExtPtr()->display();
+    lds1->fExt()->display();
     lds1->setQNLInertiaPtr(v0);
-    lds1->getQNLInertiaPtr()->display();
+    lds1->qNLInertia()->display();
     lds1->setJacobianQFIntPtr(B);
-    lds1->getJacobianQFIntPtr()->display();
+    lds1->jacobianQFInt()->display();
     lds1->setJacobianVelocityFIntPtr(B);
-    lds1->getJacobianVelocityFIntPtr()->display();
+    lds1->jacobianVelocityFInt()->display();
     lds1->setJacobianQQNLInertiaPtr(B);
-    lds1->getJacobianQQNLInertiaPtr()->display();
+    lds1->jacobianQQNLInertia()->display();
     lds1->setJacobianVelocityQNLInertiaPtr(B);
-    lds1->getJacobianVelocityQNLInertiaPtr()->display();
+    lds1->jacobianVelocityQNLInertia()->display();
 
     B->zero();
-    lds1->getMassPtr()->display();
-    lds1->getFIntPtr()->display();
-    lds1->getFExtPtr()->display();
-    lds1->getQNLInertiaPtr()->display();
-    lds1->getJacobianQFIntPtr()->display();
-    lds1->getJacobianVelocityFIntPtr()->display();
-    lds1->getJacobianQQNLInertiaPtr()->display();
-    lds1->getJacobianVelocityQNLInertiaPtr()->display();
+    lds1->mass()->display();
+    lds1->fInt()->display();
+    lds1->fExt()->display();
+    lds1->qNLInertia()->display();
+    lds1->jacobianQFInt()->display();
+    lds1->jacobianVelocityFInt()->display();
+    lds1->jacobianQQNLInertia()->display();
+    lds1->jacobianVelocityQNLInertia()->display();
 
     cout << "======== Test 6 ============= " << endl;
     // Plugin
     lds1.reset(new LagrangianDS(1, size, *q0, *v0));
     lds1->setComputeMassFunction("LagPlugin.so", "computeMass");
     lds1->computeMass(2);
-    lds1->getMassPtr()->display();
+    lds1->mass()->display();
     lds1->setComputeFIntFunction("LagPlugin.so", "computeFInt");
     lds1->computeFInt(2);
-    lds1->getFIntPtr()->display();
+    lds1->fInt()->display();
     lds1->computeFInt(3, v0, q0);
-    lds1->getFIntPtr()->display();
+    lds1->fInt()->display();
     lds1->setComputeFExtFunction("LagPlugin.so", "computeFExt");
     lds1->computeFExt(2);
-    lds1->getFExtPtr()->display();
+    lds1->fExt()->display();
     lds1->setComputeQNLInertiaFunction("LagPlugin.so", "computeQNLInertia");
     lds1->computeQNLInertia();
-    lds1->getQNLInertiaPtr()->display();
+    lds1->qNLInertia()->display();
     lds1->computeQNLInertia(v0, q0);
-    lds1->getQNLInertiaPtr()->display();
+    lds1->qNLInertia()->display();
     lds1->setComputeJacobianQFIntFunction("LagPlugin.so", "computeJacobianQFInt");
     lds1->computeJacobianQFInt(2);
-    lds1->getJacobianQFIntPtr()->display();
+    lds1->jacobianQFInt()->display();
     lds1->computeJacobianQFInt(2, v0, q0);
-    lds1->getJacobianQFIntPtr()->display();
+    lds1->jacobianQFInt()->display();
     lds1->setComputeJacobianVelocityFIntFunction("LagPlugin.so", "computeJacobianVelocityFInt");
     lds1->computeJacobianVelocityFInt(2);
-    lds1->getJacobianVelocityFIntPtr()->display();
+    lds1->jacobianVelocityFInt()->display();
     lds1->computeJacobianVelocityFInt(2, v0, q0);
-    lds1->getJacobianVelocityFIntPtr()->display();
+    lds1->jacobianVelocityFInt()->display();
     lds1->setComputeJacobianQQNLInertiaFunction("LagPlugin.so", "computeJacobianQQNLInertia");
     lds1->computeJacobianQQNLInertia();
-    lds1->getJacobianQQNLInertiaPtr()->display();
+    lds1->jacobianQQNLInertia()->display();
     lds1->computeJacobianQQNLInertia(v0, q0);
-    lds1->getJacobianQQNLInertiaPtr()->display();
+    lds1->jacobianQQNLInertia()->display();
     lds1->setComputeJacobianVelocityQNLInertiaFunction("LagPlugin.so", "computeJacobianVelocityQNLInertia");
     lds1->computeJacobianVelocityQNLInertia();
-    lds1->getJacobianVelocityQNLInertiaPtr()->display();
+    lds1->jacobianVelocityQNLInertia()->display();
     lds1->computeJacobianVelocityQNLInertia(v0, q0);
-    lds1->getJacobianVelocityQNLInertiaPtr()->display();
+    lds1->jacobianVelocityQNLInertia()->display();
 
     // set f, u, B
     SP::SimpleVector u(new SimpleVector(2));
@@ -207,33 +207,33 @@ int main(int argc, char* argv[])
 
     lds1.reset(new LagrangianDS(tmpxml));
     lds1->computeMass(2);
-    lds1->getMassPtr()->display();
+    lds1->mass()->display();
     lds1->computeFInt(2);
-    lds1->getFIntPtr()->display();
+    lds1->fInt()->display();
     lds1->computeFInt(3, v0, q0);
-    lds1->getFIntPtr()->display();
+    lds1->fInt()->display();
     lds1->computeFExt(2);
-    lds1->getFExtPtr()->display();
+    lds1->fExt()->display();
     lds1->computeQNLInertia();
-    lds1->getQNLInertiaPtr()->display();
+    lds1->qNLInertia()->display();
     lds1->computeQNLInertia(v0, q0);
-    lds1->getQNLInertiaPtr()->display();
+    lds1->qNLInertia()->display();
     lds1->computeJacobianQFInt(2);
-    lds1->getJacobianQFIntPtr()->display();
+    lds1->jacobianQFInt()->display();
     lds1->computeJacobianQFInt(2, v0, q0);
-    lds1->getJacobianQFIntPtr()->display();
+    lds1->jacobianQFInt()->display();
     lds1->computeJacobianVelocityFInt(2);
-    lds1->getJacobianVelocityFIntPtr()->display();
+    lds1->jacobianVelocityFInt()->display();
     lds1->computeJacobianVelocityFInt(2, v0, q0);
-    lds1->getJacobianVelocityFIntPtr()->display();
+    lds1->jacobianVelocityFInt()->display();
     lds1->computeJacobianQQNLInertia();
-    lds1->getJacobianQQNLInertiaPtr()->display();
+    lds1->jacobianQQNLInertia()->display();
     lds1->computeJacobianQQNLInertia(v0, q0);
-    lds1->getJacobianQQNLInertiaPtr()->display();
+    lds1->jacobianQQNLInertia()->display();
     lds1->computeJacobianVelocityQNLInertia();
-    lds1->getJacobianVelocityQNLInertiaPtr()->display();
+    lds1->jacobianVelocityQNLInertia()->display();
     lds1->computeJacobianVelocityQNLInertia(v0, q0);
-    lds1->getJacobianVelocityQNLInertiaPtr()->display();
+    lds1->jacobianVelocityQNLInertia()->display();
   }
 
   // --- Exceptions handling ---

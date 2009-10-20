@@ -118,7 +118,7 @@ public:
   /** get the current time
    *  \return a double
    */
-  inline const double getCurrentTime() const
+  inline const double currentTime() const
   {
     return t;
   }
@@ -166,7 +166,7 @@ public:
   /** get the Simulation of the Model
    *  \return a pointer on Simulation
    */
-  inline SP::Simulation getSimulationPtr() const
+  inline SP::Simulation simulation() const
   {
     return strat;
   }
@@ -179,7 +179,7 @@ public:
   /** get the NonSmoothDynamicalSystem of the Model
    *  \return a pointer on NonSmoothDynamicalSystem
    */
-  inline SP::NonSmoothDynamicalSystem getNonSmoothDynamicalSystemPtr() const
+  inline SP::NonSmoothDynamicalSystem nonSmoothDynamicalSystem() const
   {
     return nsds;
   }
@@ -192,7 +192,7 @@ public:
   /** get the SiconosModelXML of the Model
    *  \return a pointer on SiconosModelXML
    */
-  inline SP::SiconosModelXML getSiconosModelXMLPtr() const
+  inline SP::SiconosModelXML siconosModelXML() const
   {
     return modelxml;
   }

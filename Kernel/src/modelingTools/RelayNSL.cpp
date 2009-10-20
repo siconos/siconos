@@ -66,8 +66,8 @@ void RelayNSL::display() const
 
 void RelayNSL::saveNonSmoothLawToXML()
 {
-  boost::static_pointer_cast<RelayNSLXML>(nslawxml)->setC(c);
-  boost::static_pointer_cast<RelayNSLXML>(nslawxml)->setD(d);
+  boost::static_pointer_cast<RelayNSLXML>(_nslawxml)->setC(c);
+  boost::static_pointer_cast<RelayNSLXML>(_nslawxml)->setD(d);
 }
 
 RelayNSL* RelayNSL::convert(NonSmoothLaw* nsl)

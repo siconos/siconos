@@ -29,7 +29,7 @@
 // =================================================
 BlockVector::BlockVector(): SiconosVector(0)
 {
-  tabIndex.reset(new Index());
+  _tabIndex.reset(new Index());
 }
 
 BlockVector::BlockVector(const std::string & file, bool ascii): SiconosVector(0)
@@ -40,8 +40,8 @@ BlockVector::BlockVector(const std::string & file, bool ascii): SiconosVector(0)
 BlockVector::BlockVector(const BlockVector &v): SiconosVector(0)
 {
   unsigned int nbBlocks = v.getNumberOfBlocks();
-  tabIndex.reset(new Index());
-  tabIndex->reserve(nbBlocks);
+  _tabIndex.reset(new Index());
+  _tabIndex->reserve(nbBlocks);
   vect.reserve(nbBlocks);
   VectorOfVectors::const_iterator it;
   for (it = v.begin(); it != v.end(); ++it)
@@ -51,16 +51,16 @@ BlockVector::BlockVector(const BlockVector &v): SiconosVector(0)
     else
       vect.push_back(boost::shared_ptr<BlockVector>(new BlockVector(**it))) ;
     sizeV += (*it)->size();
-    tabIndex->push_back(sizeV);
+    _tabIndex->push_back(sizeV);
   }
 }
 
 BlockVector::BlockVector(const SiconosVector &v): SiconosVector(0)
 {
   unsigned int nbBlocks = v.getNumberOfBlocks();
-  tabIndex.reset(new Index());
+  _tabIndex.reset(new Index());
 
-  tabIndex->reserve(nbBlocks);
+  _tabIndex->reserve(nbBlocks);
   vect.reserve(nbBlocks);
 
   if (v.isBlock())
@@ -74,7 +74,7 @@ BlockVector::BlockVector(const SiconosVector &v): SiconosVector(0)
       else
         vect.push_back(boost::shared_ptr<BlockVector>(new BlockVector(**it))) ;
       sizeV += (*it)->size();
-      tabIndex->push_back(sizeV);
+      _tabIndex->push_back(sizeV);
     }
   }
   else
@@ -82,7 +82,7 @@ BlockVector::BlockVector(const SiconosVector &v): SiconosVector(0)
     // Call copy-constructor of SimpleVector
     vect.push_back(boost::shared_ptr<SimpleVector>(new SimpleVector(v)));
     sizeV = v.size();
-    tabIndex->push_back(sizeV);
+    _tabIndex->push_back(sizeV);
   }
 }
 
@@ -93,16 +93,16 @@ BlockVector::BlockVector(SP::SiconosVector v1, SP::SiconosVector v2): SiconosVec
   if (! v1  && ! v2)
     SiconosVectorException::selfThrow("BlockVector:constructor(SimpleVector*,SimpleVector*), both vectors are NULL.");
 
-  tabIndex.reset(new Index());
+  _tabIndex.reset(new Index());
 
-  tabIndex->reserve(2);
+  _tabIndex->reserve(2);
   vect.reserve(2);
 
   if (v1)
   {
     vect.push_back(v1);
     sizeV = v1->size();
-    tabIndex->push_back(sizeV);
+    _tabIndex->push_back(sizeV);
 
   }
   else
@@ -112,14 +112,14 @@ BlockVector::BlockVector(SP::SiconosVector v1, SP::SiconosVector v2): SiconosVec
     sizeV = v2->size();
 
     vect.push_back(boost::shared_ptr<SimpleVector>(new SimpleVector(sizeV)));
-    tabIndex->push_back(sizeV);
+    _tabIndex->push_back(sizeV);
 
   }
   if (v2)
   {
     vect.push_back(v2);
     sizeV += v2->size();
-    tabIndex->push_back(sizeV);
+    _tabIndex->push_back(sizeV);
 
   }
   else // If second parameter is a NULL pointer, then set this(2) to a SimpleVector of the same size as v1, and equal to 0.
@@ -128,19 +128,19 @@ BlockVector::BlockVector(SP::SiconosVector v1, SP::SiconosVector v2): SiconosVec
 
     vect.push_back(boost::shared_ptr<SimpleVector>(new SimpleVector(v1->size())));
     sizeV += v1->size();
-    tabIndex->push_back(sizeV);
+    _tabIndex->push_back(sizeV);
   }
 }
 
 BlockVector::BlockVector(unsigned int numberOfBlocks, unsigned int dim): SiconosVector(0)
 {
-  tabIndex.reset(new Index());
-  tabIndex->reserve(numberOfBlocks);
+  _tabIndex.reset(new Index());
+  _tabIndex->reserve(numberOfBlocks);
   vect.reserve(numberOfBlocks);
   for (unsigned int i = 0; i < numberOfBlocks; ++i)
   {
     vect.push_back(boost::shared_ptr<SimpleVector>(new SimpleVector(dim)));
-    tabIndex->push_back(dim * (i + 1));
+    _tabIndex->push_back(dim * (i + 1));
   }
   sizeV = dim * numberOfBlocks;
 }
@@ -167,18 +167,18 @@ const SparseVect BlockVector::getSparse(unsigned int i)const
   return (vect[i])->getSparse();
 }
 
-DenseVect* BlockVector::getDensePtr(unsigned int i) const
+DenseVect* BlockVector::dense(unsigned int i) const
 {
   if (vect[i]->getNum() != 1)
-    SiconosVectorException::selfThrow("BlockVector::getDensePtr(unsigned int num) : the vector[num] is not a Dense vector");
-  return (vect[i])->getDensePtr();
+    SiconosVectorException::selfThrow("BlockVector::dense(unsigned int num) : the vector[num] is not a Dense vector");
+  return (vect[i])->dense();
 }
 
-SparseVect* BlockVector::getSparsePtr(unsigned int i) const
+SparseVect* BlockVector::sparse(unsigned int i) const
 {
   if (vect[i]->getNum() != 4)
-    SiconosVectorException::selfThrow("BlockVector::getSparsePtr(unsigned int num) : the vector[num] is not a Sparse vector");
-  return (vect[i])->getSparsePtr();
+    SiconosVectorException::selfThrow("BlockVector::sparse(unsigned int num) : the vector[num] is not a Sparse vector");
+  return (vect[i])->sparse();
 }
 
 double* BlockVector::getArray(unsigned int i) const
@@ -253,7 +253,7 @@ const double BlockVector::norm2() const
 void BlockVector::display() const
 {
   VectorOfVectors::const_iterator it;
-  std::cout << "=======> Block Vector Display (" << tabIndex->size() << " block(s)): " << std::endl;
+  std::cout << "=======> Block Vector Display (" << _tabIndex->size() << " block(s)): " << std::endl;
   for (it = vect.begin(); it != vect.end(); ++it)
     (*it)->display();
 }
@@ -276,13 +276,13 @@ const double BlockVector::getValue(unsigned int pos) const
 {
   unsigned int blockNum = 0;
 
-  while (pos >= (*tabIndex)[blockNum] && blockNum < tabIndex->size())
+  while (pos >= (*_tabIndex)[blockNum] && blockNum < _tabIndex->size())
     blockNum ++;
 
   unsigned int relativePos = pos;
 
   if (blockNum != 0)
-    relativePos -= (*tabIndex)[blockNum - 1];
+    relativePos -= (*_tabIndex)[blockNum - 1];
 
   return (*vect[blockNum])(relativePos);
 }
@@ -291,13 +291,13 @@ void BlockVector::setValue(unsigned int pos, double value)
 {
   unsigned int blockNum = 0;
 
-  while (pos >= (*tabIndex)[blockNum] && blockNum < tabIndex->size())
+  while (pos >= (*_tabIndex)[blockNum] && blockNum < _tabIndex->size())
     blockNum ++;
 
   unsigned int relativePos = pos;
 
   if (blockNum != 0)
-    relativePos -= (*tabIndex)[blockNum - 1];
+    relativePos -= (*_tabIndex)[blockNum - 1];
 
   (*vect[blockNum])(relativePos) = value;
 }
@@ -306,13 +306,13 @@ double& BlockVector::operator()(unsigned int pos)
 {
   unsigned int blockNum = 0;
 
-  while (pos >= (*tabIndex)[blockNum] && blockNum < tabIndex->size())
+  while (pos >= (*_tabIndex)[blockNum] && blockNum < _tabIndex->size())
     blockNum ++;
 
   unsigned int relativePos = pos;
 
   if (blockNum != 0)
-    relativePos -= (*tabIndex)[blockNum - 1];
+    relativePos -= (*_tabIndex)[blockNum - 1];
 
   return (*vect[blockNum])(relativePos);
 }
@@ -321,12 +321,12 @@ const double BlockVector::operator()(unsigned int pos) const
 {
   unsigned int blockNum = 0;
 
-  while (pos >= (*tabIndex)[blockNum] && blockNum < tabIndex->size())
+  while (pos >= (*_tabIndex)[blockNum] && blockNum < _tabIndex->size())
     blockNum ++;
   unsigned int relativePos = pos;
 
   if (blockNum != 0)
-    relativePos -= (*tabIndex)[blockNum - 1];
+    relativePos -= (*_tabIndex)[blockNum - 1];
 
   return (*vect[blockNum])(relativePos);
 }
@@ -342,7 +342,7 @@ SimpleVector BlockVector::getVector(unsigned int pos) const
     SiconosVectorException::selfThrow("BlockVector::getVector(pos), vector[pos] == NULL pointer.");
 
   if (vect[pos]->isBlock())
-    SiconosVectorException::selfThrow("BlockVector::getVector(pos), vector[pos] is a Block. Use getVectorPtr()");
+    SiconosVectorException::selfThrow("BlockVector::getVector(pos), vector[pos] is a Block. Use vector()");
 
   return *(vect[pos]);
 }
@@ -380,7 +380,7 @@ unsigned int BlockVector::getNumVectorAtPos(unsigned int pos) const
 {
   unsigned int blockNum = 0;
 
-  while (pos >= (*tabIndex)[blockNum] && blockNum < tabIndex->size() - 1)
+  while (pos >= (*_tabIndex)[blockNum] && blockNum < _tabIndex->size() - 1)
     blockNum ++;
   return blockNum;
 }
@@ -409,9 +409,9 @@ void BlockVector::addSimple(unsigned int& index, const SiconosVector& vIn)
       currentNum = (*it)->getNum();
       if (numVIn != currentNum) SiconosVectorException::selfThrow("BlockVector::addSimple : inconsistent types.");
       if (numVIn == 1)
-        noalias(*(*it)->getDensePtr()) +=  ublas::subrange(*vIn.getDensePtr(), index, index + currentSize) ;
+        noalias(*(*it)->dense()) +=  ublas::subrange(*vIn.dense(), index, index + currentSize) ;
       else
-        noalias(*(*it)->getSparsePtr()) +=  ublas::subrange(*vIn.getSparsePtr(), index, index + currentSize) ;
+        noalias(*(*it)->sparse()) +=  ublas::subrange(*vIn.sparse(), index, index + currentSize) ;
       index += currentSize;
     }
   }
@@ -442,9 +442,9 @@ void BlockVector::subSimple(unsigned int& index, const SiconosVector& vIn)
       currentNum = (*it)->getNum();
       if (numVIn != currentNum) SiconosVectorException::selfThrow("BlockVector::addSimple : inconsistent types.");
       if (numVIn == 1)
-        noalias(*(*it)->getDensePtr()) -=  ublas::subrange(*vIn.getDensePtr(), index, index + currentSize) ;
+        noalias(*(*it)->dense()) -=  ublas::subrange(*vIn.dense(), index, index + currentSize) ;
       else
-        noalias(*(*it)->getSparsePtr()) -=  ublas::subrange(*vIn.getSparsePtr(), index, index + currentSize) ;
+        noalias(*(*it)->sparse()) -=  ublas::subrange(*vIn.sparse(), index, index + currentSize) ;
       index += currentSize;
     }
   }
@@ -640,7 +640,7 @@ void BlockVector::insert(const  SiconosVector& v)
   else
     vect.push_back(boost::shared_ptr<BlockVector>(new BlockVector(v))); // Copy
 
-  tabIndex->push_back(sizeV);
+  _tabIndex->push_back(sizeV);
 }
 
 void BlockVector::insertPtr(SP::SiconosVector v)
@@ -650,5 +650,5 @@ void BlockVector::insertPtr(SP::SiconosVector v)
 
   sizeV += v->size();
   vect.push_back(v);
-  tabIndex->push_back(sizeV);
+  _tabIndex->push_back(sizeV);
 }

@@ -28,9 +28,9 @@
 
 using namespace std;
 
-ControlManager::ControlManager(SP::Model m): model(m)
+ControlManager::ControlManager(SP::Model m): _model(m)
 {
-  if (!model)
+  if (!_model)
     RuntimeException::selfThrow("ControlManager::constructor failed. The given Model is a NULL pointer.");
 }
 
@@ -39,14 +39,18 @@ ControlManager::~ControlManager()
 
 void ControlManager::initialize()
 {
-  // Initialize all the Sensors and insert their events into the EventsManager of the Simulation.
-  for (SensorsIterator itS = allSensors.begin(); itS != allSensors.end(); ++itS)
+  // Initialize all the Sensors and insert their events into the
+  // EventsManager of the Simulation.
+  for (SensorsIterator itS = _allSensors.begin();
+       itS != _allSensors.end(); ++itS)
   {
     (*itS)->initialize();
     (*itS)->recordInSimulation();
   }
-  // Initialize all the Actuators and insert their events into the EventsManager of the Simulation.
-  for (ActuatorsIterator itA = allActuators.begin(); itA != allActuators.end(); ++itA)
+  // Initialize all the Actuators and insert their events into the
+  // EventsManager of the Simulation.
+  for (ActuatorsIterator itA = _allActuators.begin();
+       itA != _allActuators.end(); ++itA)
   {
     (*itA)->initialize();
     (*itA)->recordInSimulation();
@@ -56,16 +60,16 @@ void ControlManager::initialize()
 SP::Sensor ControlManager::addSensor(int type, SP::TimeDiscretisation t)
 {
   SensorFactory::Registry& regSensor(SensorFactory::Registry::get()) ;
-  return (* (allSensors.insert(regSensor.instantiate(type, t))).first);
+  return (* (_allSensors.insert(regSensor.instantiate(type, t))).first);
 }
 
 SP::Sensor ControlManager::addAndRecordSensor(int type, SP::TimeDiscretisation t)
 {
-  double currentTime = model->getSimulationPtr()->getNextTime();
-  while (t->getCurrentTime() < currentTime)
+  double currentTime = model()->simulation()->getNextTime();
+  while (t->currentTime() < currentTime)
     t->increment();
   SensorFactory::Registry& regSensor(SensorFactory::Registry::get()) ;
-  SP::Sensor tmp = *(allSensors.insert(regSensor.instantiate(type, t))).first;
+  SP::Sensor tmp = *(_allSensors.insert(regSensor.instantiate(type, t))).first;
   tmp->initialize();
   tmp->recordInSimulation();
 
@@ -75,13 +79,13 @@ SP::Sensor ControlManager::addAndRecordSensor(int type, SP::TimeDiscretisation t
 SP::Actuator ControlManager::addActuator(int type, SP::TimeDiscretisation t)
 {
   ActuatorFactory::Registry& regActuator(ActuatorFactory::Registry::get()) ;
-  return (* (allActuators.insert(regActuator.instantiate(type, t))).first);
+  return (* (_allActuators.insert(regActuator.instantiate(type, t))).first);
 }
 
 SP::Actuator ControlManager::addAndRecordActuator(int type, SP::TimeDiscretisation t)
 {
   ActuatorFactory::Registry& regActuator(ActuatorFactory::Registry::get()) ;
-  SP::Actuator tmp = *(allActuators.insert(regActuator.instantiate(type, t))).first;
+  SP::Actuator tmp = *(_allActuators.insert(regActuator.instantiate(type, t))).first;
   tmp->initialize();
   tmp->recordInSimulation();
   return tmp;
@@ -90,17 +94,17 @@ SP::Actuator ControlManager::addAndRecordActuator(int type, SP::TimeDiscretisati
 void ControlManager::display() const
 {
   cout << "=========> ControlManager " ;
-  if (model)
-    cout << "linked to model named: " << model->getTitle() << "." << endl;
+  if (model())
+    cout << "linked to model named: " << model()->getTitle() << "." << endl;
   else
     cout << "not linked to a model." << endl;
   cout << "It handles the following objects: " << endl;
   SensorsIterator itS;
-  for (itS = allSensors.begin(); itS != allSensors.end(); ++itS)
+  for (itS = _allSensors.begin(); itS != _allSensors.end(); ++itS)
     (*itS)->display();
   // Initialize all the Actuators.
   ActuatorsIterator itA;
-  for (itA = allActuators.begin(); itA != allActuators.end(); ++itA)
+  for (itA = _allActuators.begin(); itA != _allActuators.end(); ++itA)
     (*itA)->display();
   cout << "==========" << endl;
   cout << endl;

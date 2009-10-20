@@ -97,33 +97,33 @@ protected:
    *  The first event of this set is currentEvent, and the second is nextEvent.
    * ("first" and "second" defined according to event comparison operator)
    */
-  EventsContainer allEvents;
+  EventsContainer _allEvents;
 
   /** Pointer to currentEvent, ie the simulation starting point.
    * It correponds to the first object in allEvents.
    */
-  SP::Event currentEvent;
+  SP::Event _currentEvent;
 
   /** Pointer to nextEvent, ie the simulation ending point.
    * It correponds to the event following currentEvent and so
    * to the second object in allEvents.
    */
-  SP::Event nextEvent;
+  SP::Event _nextEvent;
 
   /** Event which corresponds to time tk+h of the simulation time discretisation */
-  SP::Event ETD;
+  SP::Event _ETD;
 
   /** Non Smooth Event: corresponds to the last non-smooth event detected*/
-  SP::Event ENonSmooth;
+  SP::Event _ENonSmooth;
 
   /* link to the simulation that owns this manager*/
-  SP::Simulation simulation;
+  SP::Simulation _simulation;
 
   /** bool to check if some NonSmooth events has already been inserted */
-  bool hasNS;
+  bool _hasNS;
 
   /** bool to check if a ControlManager is associated to the simulation */
-  bool hasCM;
+  bool _hasCM;
 
   /** Creates and adds a new Event in the allEvents list
    *  \return false if Event already exists
@@ -164,51 +164,53 @@ public:
   /** get the list of all Events in the set
    *  \return a set of Events*
    */
-  inline const EventsContainer getEvents() const
+  inline const EventsContainer events() const
   {
-    return allEvents ;
+    return _allEvents ;
   };
 
   /** get the event that occurs at time inputTime
    *  \param a mpz_t
    *  \return a pointer to Event
    */
-  SP::Event getEventPtr(const mpz_t& inputTime) const;
+  SP::Event event(const mpz_t& inputTime) const;
 
   /** get the current event
    *  \return a pointer to Event
    */
-  inline SP::Event getStartingEventPtr() const
+  inline SP::Event currentEvent() const
   {
-    return currentEvent;
+    return _currentEvent;
   };
 
   /** get the next event to be processed.
    *  \return a pointer to Event
    */
-  inline SP::Event getNextEventPtr() const
+  inline SP::Event nextEvent() const
   {
-    return nextEvent;
+    return _nextEvent;
   };
 
-  /** get the event following inputEvent  ("following" defined with operator(s) comparison of events)
+  /** get the event following inputEvent ("following" defined with
+   *   operator(s) comparison of events)
    *  \param a pointer to Event
    *  \return a pointer to Events
    */
-  SP::Event getFollowingEventPtr(SP::Event) const;
+  SP::Event followingEvent(SP::Event) const;
 
-  /** get the event that follows the event at time inputTime  ("following" defined with operator(s) comparison of events)
+  /** get the event that follows the event at time inputTime
+   *   ("following" defined with operator(s) comparison of events)
    *  \param a mpz_t
    *  \return a pointer to Event
    */
-  SP::Event getFollowingEventPtr(const mpz_t& inputTime) const;
+  SP::Event followingEvent(const mpz_t& inputTime) const;
 
   /** get the Simulation
    *  \return a pointer to Simulation
    */
-  inline SP::Simulation getSimulationPtr() const
+  inline SP::Simulation simulation() const
   {
-    return simulation;
+    return _simulation;
   }
 
   /** set the Simulation of the OneStepNSProblem
@@ -216,7 +218,7 @@ public:
    */
   inline void setSimulationPtr(SP::Simulation str)
   {
-    simulation = str;
+    _simulation = str;
   }
 
   /** check if event is present in allEvents list

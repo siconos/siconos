@@ -29,7 +29,7 @@ using namespace RELATION;
 
 // xml constructor
 FrictionContact::FrictionContact(SP::OneStepNSProblemXML osNsPbXml):
-  LinearOSNS(osNsPbXml, "FrictionContact"), contactProblemDim(3)
+  LinearOSNS(osNsPbXml, "FrictionContact"), _contactProblemDim(3)
 {
   SP::FrictionContactXML xmlFC = boost::static_pointer_cast<FrictionContactXML>(osNsPbXml);
 
@@ -37,7 +37,7 @@ FrictionContact::FrictionContact(SP::OneStepNSProblemXML osNsPbXml):
   if (!xmlFC->hasProblemDim())
     RuntimeException::selfThrow("FrictionContact: xml constructor failed, attribute for dimension of the problem (2D or 3D) is missing.");
 
-  contactProblemDim = xmlFC->getProblemDim();
+  _contactProblemDim = xmlFC->getProblemDim();
 
 }
 
@@ -52,36 +52,36 @@ void FrictionContact::initialize(SP::Simulation sim)
   LinearOSNS::initialize(sim);
 
   // Connect to the right function according to dim. of the problem
-  if (contactProblemDim == 2)
-    frictionContact_driver = &pfc_2D_driver;
-  else // if(contactProblemDim == 3)
-    frictionContact_driver = &frictionContact3D_driver;
+  if (_contactProblemDim == 2)
+    _frictionContact_driver = &pfc_2D_driver;
+  else // if(_contactProblemDim == 3)
+    _frictionContact_driver = &frictionContact3D_driver;
 
   // get topology
   SP::Topology topology =
-    simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+    simulation()->model()->nonSmoothDynamicalSystem()->topology();
 
   // Note that unitaryBlocks is up to date since updateUnitaryBlocks
   // has been called during OneStepNSProblem::initialize()
 
   // Fill vector of friction coefficients
-  int sizeMu = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()
-               ->getTopologyPtr()->getIndexSetPtr(0)->size();
-  mu.reset(new MuStorage());
-  mu->reserve(sizeMu);
+  int sizeMu = simulation()->model()->nonSmoothDynamicalSystem()
+               ->topology()->indexSet(0)->size();
+  _mu.reset(new MuStorage());
+  _mu->reserve(sizeMu);
 
   // If the topology is TimeInvariant ie if M structure does not
   // change during simulation:
-  if (topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty())
+  if (topology->isTimeInvariant() &&   !interactions()->isEmpty())
   {
     // Get index set from Simulation
     SP::UnitaryRelationsGraph indexSet =
-      simulation->getIndexSetPtr(levelMin);
+      simulation()->indexSet(levelMin());
     UnitaryRelationsGraph::VIterator ui, uiend;
     for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
     {
-      mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL>
-                    (indexSet->bundle(*ui)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
+      _mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL>
+                     (indexSet->bundle(*ui)->interaction()->nonSmoothLaw())->mu());
     }
   }
 }
@@ -93,14 +93,14 @@ int FrictionContact::compute(double time)
   preCompute(time);
 
   // Update mu
-  mu->clear();
+  _mu->clear();
 
-  SP::UnitaryRelationsGraph indexSet = simulation->getIndexSetPtr(levelMin);
+  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
   UnitaryRelationsGraph::VIterator ui, uiend;
   for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
-    mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL>
-                  (indexSet->bundle(*ui)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
+    _mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL>
+                   (indexSet->bundle(*ui)->interaction()->nonSmoothLaw())->mu());
   }
   // --- Call Numerics driver ---
   // Inputs:
@@ -108,21 +108,21 @@ int FrictionContact::compute(double time)
   // - the unknowns (z,w)
   // - the options for the solver (name, max iteration number ...)
   // - the global options for Numerics (verbose mode ...)
-  if (sizeOutput != 0)
+  if (_sizeOutput != 0)
   {
     // The FrictionContact Problem in Numerics format
     FrictionContact_Problem numerics_problem;
     numerics_problem.M = &*_M->getNumericsMatrix();
-    numerics_problem.q = &*q->getArray();
-    numerics_problem.numberOfContacts = sizeOutput / contactProblemDim;
+    numerics_problem.q = &*_q->getArray();
+    numerics_problem.numberOfContacts = _sizeOutput / _contactProblemDim;
     numerics_problem.isComplete = 1;
-    numerics_problem.mu = &((*mu)[0]);
+    numerics_problem.mu = &((*_mu)[0]);
     // Call Numerics Driver for FrictionContact
-    info = (*frictionContact_driver)(&numerics_problem,
-                                     &*_z->getArray() ,
-                                     &*_w->getArray() ,
-                                     (solver->getNumericsSolverOptionsPtr()).get(),
-                                     &*numerics_options);
+    info = (*_frictionContact_driver)(&numerics_problem,
+                                      &*_z->getArray() ,
+                                      &*_w->getArray() ,
+                                      (_solver->numericsSolverOptions()).get(),
+                                      &*_numerics_options);
     postCompute();
 
   }
@@ -132,8 +132,8 @@ int FrictionContact::compute(double time)
 
 void FrictionContact::display() const
 {
-  cout << "===== " << contactProblemDim << "D Friction Contact Problem " << endl;
-  cout << "of size " << sizeOutput << "(ie " << sizeOutput / contactProblemDim << " contacts)." << endl;
+  cout << "===== " << _contactProblemDim << "D Friction Contact Problem " << endl;
+  cout << "of size " << _sizeOutput << "(ie " << _sizeOutput / _contactProblemDim << " contacts)." << endl;
   LinearOSNS::display();
 }
 

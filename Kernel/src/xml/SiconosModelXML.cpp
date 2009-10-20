@@ -223,7 +223,7 @@ void SiconosModelXML::loadModel(SP::Model model)
      */
     timeNode = xmlNewChild(rootNode, NULL, (xmlChar*)SM_TIME.c_str(), NULL);
     setT0(model->getT0());
-    setTCurrent(model->getCurrentTime());
+    setTCurrent(model->currentTime());
     setT(model->getFinalT());
     setTitle(model->getTitle());
     setAuthor(model->getAuthor());
@@ -234,33 +234,33 @@ void SiconosModelXML::loadModel(SP::Model model)
     /*
      * creation of the NSDS node
      */
-    if (model->getNonSmoothDynamicalSystemPtr())
+    if (model->nonSmoothDynamicalSystem())
     {
       //nsdsXML = new NonSmoothDynamicalSystemXML( xmlNewChild(rootNode, NULL, (xmlChar*)SM_SIMULATION.c_str(), NULL) );
       nsdsXML.reset(new NonSmoothDynamicalSystemXML());
 
       // linkage between the NSDS and his NonSmoothDynamicalSystemXML
-      model->getNonSmoothDynamicalSystemPtr()->setNonSmoothDynamicalSystemXMLPtr(nsdsXML);
+      model->nonSmoothDynamicalSystem()->setNonSmoothDynamicalSystemXMLPtr(nsdsXML);
 
       // creation of the nodes of the NSDS with the right data
       node = xmlNewChild(rootNode, NULL, (xmlChar*)NSDS_TAG.c_str(), NULL);
-      nsdsXML->updateNonSmoothDynamicalSystemXML(node, model->getNonSmoothDynamicalSystemPtr());
+      nsdsXML->updateNonSmoothDynamicalSystemXML(node, model->nonSmoothDynamicalSystem());
     }
     else nsdsXML.reset();
 
     /*
      * creation of the Simulation node
      */
-    if (model->getSimulationPtr())
+    if (model->simulation())
     {
       simulationXML.reset(new SimulationXML());
       // linkage between the Simulation and his SimulationXML
-      model->getSimulationPtr()->setSimulationXMLPtr(simulationXML);
+      model->simulation()->setSimulationXMLPtr(simulationXML);
 
       // creation of the nodes of the Simulation with the right data
       node = xmlNewChild(rootNode, NULL, (xmlChar*)SIMULATION_TAG.c_str(), NULL);
-      xmlNewProp(node, (xmlChar*)TYPE_ATTRIBUTE.c_str(), (xmlChar*)model->getSimulationPtr()->getType().c_str());
-      simulationXML->saveSimulation2XML(node, model->getSimulationPtr());
+      xmlNewProp(node, (xmlChar*)TYPE_ATTRIBUTE.c_str(), (xmlChar*)model->simulation()->getType().c_str());
+      simulationXML->saveSimulation2XML(node, model->simulation());
     }
   }
   else XMLException::selfThrow("SiconosModelXML::loadModel(Model * model) : no Model has been given.");

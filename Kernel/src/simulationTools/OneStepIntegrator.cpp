@@ -112,7 +112,7 @@ void OneStepIntegrator::initialize(SP::Simulation sim)
   assert(sim && "OneStepIntegrator::initialize(sim) error: sim is null.");
   simulationLink = sim;
 
-  double t0 = simulationLink->getModelPtr()->getT0();
+  double t0 = simulationLink->model()->getT0();
   DSIterator it;
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {

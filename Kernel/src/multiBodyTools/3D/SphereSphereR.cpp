@@ -46,7 +46,7 @@ void SphereSphereR::computeH(double)
   *workX = *data[q0];
   double *q = &(*workX)(0);
 
-  SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
+  SP::SiconosVector y = interaction()->y(0);
 
   y->setValue(0, distance(q[0], q[1], q[2], r1, q[6], q[7], q[8], r2));
   y->setValue(1, 0.);

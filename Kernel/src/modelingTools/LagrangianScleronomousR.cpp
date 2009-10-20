@@ -56,7 +56,7 @@ LagrangianScleronomousR::LagrangianScleronomousR(const string& computeH, const s
   pluginjQH.reset(new PluggedObject());
   pluginjQH->setComputeFunction(strcomputeJacQH);
 
-  //  unsigned int sizeY = getInteractionPtr()->getSizeOfY();
+  //  unsigned int sizeY = interaction()->getSizeOfY();
   //  unsigned int sizeQ = workX->size();
   //  JacQH.reset(new SimpleMatrix(sizeY,sizeQ));
 
@@ -71,7 +71,7 @@ void LagrangianScleronomousR::computeH(double)
   if (pluginH->fPtr)
   {
     // get vector y of the current interaction
-    SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
+    SP::SiconosVector y = interaction()->y(0);
 
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
     *workX = *data[q0];
@@ -125,7 +125,7 @@ void LagrangianScleronomousR::computeOutput(double time, unsigned int derivative
   else
   {
     computeJacQH(time);
-    SP::SiconosVector y = getInteractionPtr()->getYPtr(derivativeNumber) ;
+    SP::SiconosVector y = interaction()->y(derivativeNumber) ;
     if (derivativeNumber == 1)
       prod(*JacQH, *data[q1], *y);
     else if (derivativeNumber == 2)
@@ -139,7 +139,7 @@ void LagrangianScleronomousR::computeInput(double time, unsigned int level)
 {
   computeJacQH(time);
   // get lambda of the concerned interaction
-  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(level);
+  SP::SiconosVector lambda = interaction()->lambda(level);
   // data[name] += trans(G) * lambda
   prod(*lambda, *JacQH, *data[p0 + level], false);
 

@@ -44,15 +44,15 @@ class SensorPosition : public Sensor
 private:
 
   /** A matrix for output */
-  SP::SiconosMatrix dataPlot;
+  SP::SiconosMatrix _dataPlot;
 
   /** counter */
-  unsigned int k;
+  unsigned int _k;
 
 public:
 
   /** Number of time steps*/
-  unsigned int nSteps;
+  unsigned int _nSteps;
 
   /** Constructor with a TimeDiscretisation.
    * \param an int, the type of the Sensor, which corresponds to the class type

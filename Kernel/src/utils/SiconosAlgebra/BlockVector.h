@@ -46,7 +46,7 @@ private:
   VectorOfVectors vect;
 
   /** tabindex[i] = tabindex[i-1] + ni, ni being the size of svref[i]. */
-  SP::Index tabIndex;
+  SP::Index _tabIndex;
 
 public:
 
@@ -142,20 +142,20 @@ public:
    *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    *  \return a DenseVect*
    */
-  DenseVect* getDensePtr(unsigned int = 0) const;
+  DenseVect* dense(unsigned int = 0) const;
 
   /** get a pointer on SparseVect
    *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    *  \return a SparseVect*
    */
-  SparseVect* getSparsePtr(unsigned int = 0) const;
+  SparseVect* sparse(unsigned int = 0) const;
 
   /** get the number of Blocks
    *  \return unsigned int
    */
   inline const unsigned int getNumberOfBlocks() const
   {
-    return tabIndex->size();
+    return _tabIndex->size();
   };
 
   /** return the array of double values of the vector
@@ -232,7 +232,7 @@ public:
    * \param unsigned int: block number
    * \return a pointer to a SiconosVector
    */
-  inline SP::SiconosVector getVectorPtr(unsigned int pos)
+  inline SP::SiconosVector vector(unsigned int pos)
   {
     return vect[pos];
   };
@@ -241,7 +241,7 @@ public:
    * \param unsigned int: block number
    * \return a pointer to a SiconosVector
    */
-  inline SPC::SiconosVector getVectorPtr(unsigned int pos) const
+  inline SPC::SiconosVector vector(unsigned int pos) const
   {
     return vect[pos];
   };
@@ -275,15 +275,15 @@ public:
    */
   inline Index getTabIndex() const
   {
-    return *tabIndex;
+    return *_tabIndex;
   }
 
   /** get a pointer to the index tab
    * \return SP::Index
    */
-  inline const SP::Index getTabIndexPtr() const
+  inline const SP::Index tabIndex() const
   {
-    return tabIndex;
+    return _tabIndex;
   }
 
   /** get an iterator that points to the first element of tabIndex
@@ -291,7 +291,7 @@ public:
    */
   inline Index::iterator tabIndexBegin()
   {
-    return tabIndex->begin();
+    return _tabIndex->begin();
   }
 
   /** get an iterator that points to tabIndex.end()
@@ -299,7 +299,7 @@ public:
    */
   inline Index::iterator tabIndexEnd()
   {
-    return tabIndex->end();
+    return _tabIndex->end();
   }
 
   /** get an iterator that points to the first element of tabIndex
@@ -307,7 +307,7 @@ public:
    */
   inline Index::const_iterator tabIndexBegin() const
   {
-    return tabIndex->begin();
+    return _tabIndex->begin();
   }
 
   /** get an iterator that points to tabIndex.end()
@@ -315,7 +315,7 @@ public:
    */
   inline Index::const_iterator tabIndexEnd() const
   {
-    return tabIndex->end();
+    return _tabIndex->end();
   }
 
   /** get the number of the vector that handles element at position "pos"

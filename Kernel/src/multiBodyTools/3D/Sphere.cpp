@@ -36,16 +36,15 @@ void normalize(SP::SiconosVector q, unsigned int i)
 void Sphere::computeMass()
 {
 
-  SP::SiconosVector q = getQPtr();
   SP::SiconosVector qold;
 
 
-  if (getQMemoryPtr())
-    qold = getQMemoryPtr()->getSiconosVector(0);
+  if (qMemory())
+    qold = qMemory()->getSiconosVector(0);
 
-  normalize(q, 3);
-  normalize(q, 4);
-  normalize(q, 5);
+  normalize(q(), 3);
+  normalize(q(), 4);
+  normalize(q(), 5);
 
   if (qold)
   {
@@ -54,18 +53,18 @@ void Sphere::computeMass()
     normalize(qold, 5);
   }
 
-  double theta = getQPtr()->getValue(3);
+  double theta = q()->getValue(3);
 
   assert(fabs(theta) - std::numeric_limits<double>::epsilon() >= 0.);
   //assert (fabs(theta) - _2PI < 0.);
 
-  (*mass)(4, 5) = (*mass)(5, 4) = I * cos(theta);
+  (*_mass)(4, 5) = (*_mass)(5, 4) = I * cos(theta);
 
 }
 
 void Sphere::computeNNL()
 {
-  Sphere::computeNNL(getQPtr(), getVelocityPtr());
+  Sphere::computeNNL(q(), velocity());
 }
 
 void Sphere::computeNNL(SP::SiconosVector q, SP::SiconosVector v)
@@ -88,11 +87,11 @@ void Sphere::computeNNL(SP::SiconosVector q, SP::SiconosVector v)
 
   double sintheta   = sin(theta);
 
-  (*NNL)(0) = (*NNL)(1) = (*NNL)(2) = 0;
+  (*_NNL)(0) = (*_NNL)(1) = (*_NNL)(2) = 0;
 
-  (*NNL)(3) = I * psidot * phidot * sintheta;
-  (*NNL)(4) = -I * psidot * thetadot * sintheta;
-  (*NNL)(5) = -I * phidot * thetadot * sintheta;
+  (*_NNL)(3) = I * psidot * phidot * sintheta;
+  (*_NNL)(4) = -I * psidot * thetadot * sintheta;
+  (*_NNL)(5) = -I * phidot * thetadot * sintheta;
 }
 
 
@@ -100,12 +99,12 @@ void Sphere::computeNNL(SP::SiconosVector q, SP::SiconosVector v)
 void Sphere::computeJacobianQNNL()
 {
 
-  Sphere::computeJacobianQNNL(getQPtr(), getVelocityPtr());
+  Sphere::computeJacobianQNNL(q(), velocity());
 }
 void Sphere::computeJacobianQDotNNL()
 {
 
-  Sphere::computeJacobianQDotNNL(getQPtr(), getVelocityPtr());
+  Sphere::computeJacobianQDotNNL(q(), velocity());
 }
 
 void Sphere::computeJacobianQNNL(SP::SiconosVector q, SP::SiconosVector v)
@@ -120,11 +119,11 @@ void Sphere::computeJacobianQNNL(SP::SiconosVector q, SP::SiconosVector v)
 
   double costheta = cos(theta);
 
-  jacobianQNNL->zero();
+  _jacobianQNNL->zero();
 
-  (*jacobianQNNL)(3, 3) = -I * psidot * phidot * costheta;
-  (*jacobianQNNL)(4, 3) = I * psidot * thetadot * costheta;
-  (*jacobianQNNL)(5, 3) = I * psidot * thetadot * costheta;
+  (*_jacobianQNNL)(3, 3) = -I * psidot * phidot * costheta;
+  (*_jacobianQNNL)(4, 3) = I * psidot * thetadot * costheta;
+  (*_jacobianQNNL)(5, 3) = I * psidot * thetadot * costheta;
 
 
 }
@@ -140,20 +139,20 @@ void Sphere::computeJacobianQDotNNL(SP::SiconosVector q, SP::SiconosVector v)
 
   double sintheta   = sin(theta);
 
-  jacobianQDotNNL->zero();
+  _jacobianQDotNNL->zero();
 
 
-  (*jacobianQDotNNL)(3, 3) = 0;
-  (*jacobianQDotNNL)(3, 4) = I * psidot * sintheta;
-  (*jacobianQDotNNL)(3, 5) = I * phidot * sintheta;
+  (*_jacobianQDotNNL)(3, 3) = 0;
+  (*_jacobianQDotNNL)(3, 4) = I * psidot * sintheta;
+  (*_jacobianQDotNNL)(3, 5) = I * phidot * sintheta;
 
-  (*jacobianQDotNNL)(4, 3) = -I * psidot * sintheta;
-  (*jacobianQDotNNL)(4, 4) = 0;
-  (*jacobianQDotNNL)(4, 5) = -I * thetadot * sintheta;
+  (*_jacobianQDotNNL)(4, 3) = -I * psidot * sintheta;
+  (*_jacobianQDotNNL)(4, 4) = 0;
+  (*_jacobianQDotNNL)(4, 5) = -I * thetadot * sintheta;
 
-  (*jacobianQDotNNL)(5, 3) =  -I * phidot * sintheta;
-  (*jacobianQDotNNL)(5, 4) =  -I * thetadot * sintheta;
-  (*jacobianQDotNNL)(5, 5) = 0;
+  (*_jacobianQDotNNL)(5, 3) =  -I * phidot * sintheta;
+  (*_jacobianQDotNNL)(5, 4) =  -I * thetadot * sintheta;
+  (*_jacobianQDotNNL)(5, 5) = 0;
 
 }
 
@@ -164,13 +163,13 @@ Sphere::Sphere(double r, double m,
   : LagrangianDS(qinit, vinit), radius(r), massValue(m)
 {
 
-  normalize(getQPtr(), 3);
-  normalize(getQPtr(), 4);
-  normalize(getQPtr(), 5);
-  ndof = 6;
+  normalize(q(), 3);
+  normalize(q(), 4);
+  normalize(q(), 5);
+  _ndof = 6;
 
-  assert(qinit->size() == ndof);
-  assert(vinit->size() == ndof);
+  assert(qinit->size() == _ndof);
+  assert(vinit->size() == _ndof);
 
   double theta    = qinit->getValue(3);
   double phi      = qinit->getValue(4);
@@ -181,19 +180,19 @@ Sphere::Sphere(double r, double m,
   double psidot   = vinit->getValue(5);
 
 
-  mass.reset(new SimpleMatrix(ndof, ndof));
-  mass->zero();
+  _mass.reset(new SimpleMatrix(_ndof, _ndof));
+  _mass->zero();
   I = massValue * radius * radius * 2. / 5.;
-  (*mass)(0, 0) = (*mass)(1, 1) = (*mass)(2, 2) = massValue;    ;
-  (*mass)(3, 3) = (*mass)(4, 4) = (*mass)(5, 5) = I;
+  (*_mass)(0, 0) = (*_mass)(1, 1) = (*_mass)(2, 2) = massValue;    ;
+  (*_mass)(3, 3) = (*_mass)(4, 4) = (*_mass)(5, 5) = I;
 
   computeMass();
 
-  jacobianQNNL.reset(new SimpleMatrix(ndof, ndof));
-  jacobianQDotNNL.reset(new SimpleMatrix(ndof, ndof));
+  _jacobianQNNL.reset(new SimpleMatrix(_ndof, _ndof));
+  _jacobianQDotNNL.reset(new SimpleMatrix(_ndof, _ndof));
 
-  NNL.reset(new SimpleVector(ndof));
-  NNL->zero();
+  _NNL.reset(new SimpleVector(_ndof));
+  _NNL->zero();
 
   computeNNL();
 

@@ -30,27 +30,27 @@ unsigned int DynamicalSystem::count = 0;
 
 // Default constructor (protected)
 DynamicalSystem::DynamicalSystem(DS::TYPES type):
-  DSType(type), number(count++), n(0), stepsInMemory(1)
+  _DSType(type), _number(count++), _n(0), _stepsInMemory(1)
 {
   zeroPlungin();
   mNormRef = 1;
-  x.resize(2);
-  workV.resize(sizeWorkV);
+  _x.resize(2);
+  _workV.resize(sizeWorkV);
 }
 
 // From XML file
 DynamicalSystem::DynamicalSystem(SP::DynamicalSystemXML dsXML):
-  DSType(dsXML->getType()), number(dsXML->getNumber()), n(0), stepsInMemory(1), dsxml(dsXML)
+  _DSType(dsXML->getType()), _number(dsXML->number()), _n(0), _stepsInMemory(1), _dsxml(dsXML)
 {
   mNormRef = 1;
   assert(dsXML && "DynamicalSystem::DynamicalSystem - DynamicalSystemXML paramater must not be NULL");
 
   // Update count: must be at least equal to number for future DS creation
-  count = number;
+  count = number();
   zeroPlungin();
   // Only the following data are set in this general constructor:
   //  - DSTye
-  //  - number
+  //  - _number
   //  - z
   //  - stepsInMemory
   // All others are dependent of the derived class type.
@@ -58,25 +58,25 @@ DynamicalSystem::DynamicalSystem(SP::DynamicalSystemXML dsXML):
   // === Initial conditions ===
   // Warning: n is set thanks to vector of initial conditions size. That will be set in derived classes constructor.
 
-  x.resize(2);
+  _x.resize(2);
 
   // z - Optional parameter.
-  if (dsxml->hasZ())
-    z.reset(new SimpleVector(dsxml->getZ()));
+  if (_dsxml->hasZ())
+    _z.reset(new SimpleVector(_dsxml->getZ()));
 
-  if (dsxml->hasStepsInMemory()) stepsInMemory = dsxml->getStepsInMemory();
-  workV.resize(sizeWorkV);
+  if (_dsxml->hasStepsInMemory()) _stepsInMemory = _dsxml->getStepsInMemory();
+  _workV.resize(sizeWorkV);
 }
 
 // From a minimum set of data
 DynamicalSystem::DynamicalSystem(DS::TYPES type, unsigned int newN):
-  DSType(type), number(count++), n(newN), stepsInMemory(1)
+  _DSType(type), _number(count++), _n(newN), _stepsInMemory(1)
 {
   mNormRef = 1;
-  x.resize(2);
-  workV.resize(sizeWorkV);
+  _x.resize(2);
+  _workV.resize(sizeWorkV);
   mResiduFree.reset(new SimpleVector(getDim()));
-  r.reset(new SimpleVector(getDim()));
+  _r.reset(new SimpleVector(getDim()));
 }
 
 
@@ -84,12 +84,12 @@ bool DynamicalSystem::checkDynamicalSystem()
 {
   bool output = true;
   // n
-  if (n == 0)
+  if (_n == 0)
   {
     RuntimeException::selfThrow("DynamicalSystem::checkDynamicalSystem - number of degrees of freedom is equal to 0.");
     output = false;
   }
-  if (!x0)
+  if (!_x0)
   {
     RuntimeException::selfThrow("DynamicalSystem::checkDynamicalSystem - x0 not set.");
     output = false;
@@ -107,28 +107,28 @@ void DynamicalSystem::zeroPlungin()
 void DynamicalSystem::setX0(const SiconosVector& newValue)
 {
   // check dimensions ...
-  if (newValue.size() != n)
+  if (newValue.size() != _n)
     RuntimeException::selfThrow("DynamicalSystem::setX0 - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
 
-  if (x0)
-    *x0 = newValue;
+  if (_x0)
+    *_x0 = newValue;
 
   else
   {
     if (newValue.isBlock())
-      x0.reset(new BlockVector(newValue));
+      _x0.reset(new BlockVector(newValue));
     else
-      x0.reset(new SimpleVector(newValue));
+      _x0.reset(new SimpleVector(newValue));
   }
-  mNormRef = x0->norm2() + 1;
+  mNormRef = _x0->norm2() + 1;
 }
 
 void DynamicalSystem::setX0Ptr(SP::SiconosVector newPtr)
 {
   // check dimensions ...
-  assert(newPtr->size() == n && "DynamicalSystem::setX0Ptr - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
-  x0 = newPtr;
-  mNormRef = x0->norm2() + 1;
+  assert(newPtr->size() == _n && "DynamicalSystem::setX0Ptr - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
+  _x0 = newPtr;
+  mNormRef = _x0->norm2() + 1;
 }
 
 void DynamicalSystem::setX(const SiconosVector& newValue)
@@ -137,13 +137,13 @@ void DynamicalSystem::setX(const SiconosVector& newValue)
   // We suppose that both x and (*x)[0] are properly allocated.
 
   // check dimensions ...
-  if (newValue.size() != n)
+  if (newValue.size() != _n)
     RuntimeException::selfThrow("DynamicalSystem::setX - inconsistent sizes between x input and n - Maybe you forget to set n?");
 
-  if (! x[0])
-    x[0].reset(new SimpleVector(newValue));
+  if (! _x[0])
+    _x[0].reset(new SimpleVector(newValue));
   else
-    *(x[0]) = newValue;
+    *(_x[0]) = newValue;
 }
 
 void DynamicalSystem::setXPtr(SP::SiconosVector newPtr)
@@ -151,10 +151,10 @@ void DynamicalSystem::setXPtr(SP::SiconosVector newPtr)
   // Warning: this only sets the pointer x[0]
 
   // check dimensions ...
-  if (newPtr->size() != n)
+  if (newPtr->size() != _n)
     RuntimeException::selfThrow("DynamicalSystem::setXPtr - inconsistent sizes between x input and n - Maybe you forget to set n?");
 
-  x[0] = newPtr;
+  _x[0] = newPtr;
 }
 
 void DynamicalSystem::setRhs(const SiconosVector& newValue)
@@ -162,13 +162,13 @@ void DynamicalSystem::setRhs(const SiconosVector& newValue)
   // Warning: this only sets the value of x[1]
 
   // check dimensions ...
-  if (newValue.size() != n)
+  if (newValue.size() != _n)
     RuntimeException::selfThrow("DynamicalSystem::setRhs - inconsistent sizes between x input and n - Maybe you forget to set n?");
 
-  if (! x[1])
-    x[1].reset(new SimpleVector(newValue));
+  if (! _x[1])
+    _x[1].reset(new SimpleVector(newValue));
   else
-    *(x[1]) = newValue;
+    *(_x[1]) = newValue;
 }
 
 void DynamicalSystem::setRhsPtr(SP::SiconosVector newPtr)
@@ -176,38 +176,38 @@ void DynamicalSystem::setRhsPtr(SP::SiconosVector newPtr)
   // Warning: this only sets the pointer (*x)[1]
 
   // check dimensions ...
-  if (newPtr->size() != n)
+  if (newPtr->size() != _n)
     RuntimeException::selfThrow("DynamicalSystem::setRhsPtr - inconsistent sizes between x input and n - Maybe you forget to set n?");
 
-  x[1] = newPtr;
+  _x[1] = newPtr;
 }
 void DynamicalSystem::setR(const SiconosVector& newValue)
 {
   // check dimensions ...
-  if (newValue.size() != n)
+  if (newValue.size() != _n)
     RuntimeException::selfThrow("DynamicalSystem::setR - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
 
-  if (r)
-    *r = newValue;
+  if (_r)
+    *_r = newValue;
 
   else
-    r.reset(new SimpleVector(newValue));
+    _r.reset(new SimpleVector(newValue));
 }
 
 void DynamicalSystem::setRPtr(SP::SiconosVector newPtr)
 {
   // check dimensions ...
-  if (newPtr->size() != n)
+  if (newPtr->size() != _n)
     RuntimeException::selfThrow("DynamicalSystem::setRPtr - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
 
-  r = newPtr;
+  _r = newPtr;
 
 }
 
 void DynamicalSystem::setJacobianXRhs(const SiconosMatrix& newValue)
 {
   // check dimensions ...
-  if (newValue.size(0) != n || newValue.size(1) != n)
+  if (newValue.size(0) != _n || newValue.size(1) != _n)
     RuntimeException::selfThrow("DynamicalSystem::setJacobianXRhs - inconsistent sizes between jacobianXRhs input and n - Maybe you forget to set n?");
 
   if (_jacXRhs)
@@ -220,7 +220,7 @@ void DynamicalSystem::setJacobianXRhs(const SiconosMatrix& newValue)
 void DynamicalSystem::setJacobianXRhsPtr(SP::SiconosMatrix newPtr)
 {
   // check dimensions ...
-  if (newPtr->size(0) != n || newPtr->size(1) != n)
+  if (newPtr->size(0) != _n || newPtr->size(1) != _n)
     RuntimeException::selfThrow("DynamicalSystem::setJacobianXRhsPtr - inconsistent sizes between _jacXRhs input and n - Maybe you forget to set n?");
 
   _jacXRhs = newPtr;
@@ -228,25 +228,25 @@ void DynamicalSystem::setJacobianXRhsPtr(SP::SiconosMatrix newPtr)
 
 void DynamicalSystem::setZ(const SiconosVector& newValue)
 {
-  if (z)
+  if (_z)
   {
-    if (newValue.size() != z->size())
+    if (newValue.size() != _z->size())
       RuntimeException::selfThrow("DynamicalSystem::setZ - inconsistent sizes between input and existing z - To change z size use setZPtr.");
-    *z = newValue;
+    *_z = newValue;
   }
   else
   {
 
     if (newValue.isBlock())
-      z.reset(new BlockVector(newValue));
+      _z.reset(new BlockVector(newValue));
     else
-      z.reset(new SimpleVector(newValue));
+      _z.reset(new SimpleVector(newValue));
   }
 }
 
 void DynamicalSystem::setZPtr(SP::SiconosVector newPtr)
 {
-  z = newPtr;
+  _z = newPtr;
 }
 /*
 void DynamicalSystem::setG(const PVFint& newValue)
@@ -286,8 +286,8 @@ void DynamicalSystem::initMemory(unsigned int steps)
     cout << "Warning : FirstOrderNonLinearDS::initMemory with size equal to zero" << endl;
   else
   {
-    stepsInMemory = steps;
-    xMemory.reset(new SiconosMemory(steps));
+    _stepsInMemory = steps;
+    _xMemory.reset(new SiconosMemory(steps));
 
   }
 }
@@ -317,18 +317,18 @@ void DynamicalSystem::setComputeJacobianDotXGFunction(const string& pluginPath, 
 void DynamicalSystem::computeG(double time)
 {
   if (_pluginG->fPtr)
-    ((FPtr6)(_pluginG->fPtr))(time, n, &(*x[0])(0), &(*x[1])(0), &(*g)(0), z->size(), &(*z)(0));
+    ((FPtr6)(_pluginG->fPtr))(time, _n, &(*_x[0])(0), &(*_x[1])(0), &(*_g)(0), _z->size(), &(*_z)(0));
 }
 
 void DynamicalSystem::computeJacobianXG(double time)
 {
   if (_pluginJacXG->fPtr)
-    ((FPtr6) _pluginJacXG->fPtr)(time, n, &(*x[0])(0), &(*x[1])(0), &(*_jacXG)(0, 0), z->size(), &(*z)(0));
+    ((FPtr6) _pluginJacXG->fPtr)(time, _n, &(*_x[0])(0), &(*_x[1])(0), &(*_jacXG)(0, 0), _z->size(), &(*_z)(0));
 }
 void DynamicalSystem::computeJacobianDotXG(double time)
 {
   if (_pluginJacXDotG->fPtr)
-    ((FPtr6)(_pluginJacXDotG->fPtr))(time, n, &(*x[0])(0), &(*x[1])(0), &(*_jacXDotG)(0, 0), z->size(), &(*z)(0));
+    ((FPtr6)(_pluginJacXDotG->fPtr))(time, _n, &(*_x[0])(0), &(*_x[1])(0), &(*_jacXDotG)(0, 0), _z->size(), &(*_z)(0));
 }
 // void DynamicalSystem::computeJacobianZG(double time){
 //   if (pluginJacobianXGPtr)
@@ -341,7 +341,7 @@ void DynamicalSystem::saveDSToXML()
 {
   RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - Not yet tested for DS: do not use it.");
 
-  if (!dsxml)
+  if (!_dsxml)
     RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - The DynamicalSystemXML object doesn't exists");
 
   // --- Specific (depending on derived class) DS data ---
@@ -354,7 +354,9 @@ void DynamicalSystem::saveDSToXML()
 
 double DynamicalSystem::dsConvergenceIndicator()
 {
-  RuntimeException::selfThrow("DynamicalSystem:dsConvergenceIndicator - not yet implemented for Dynamical system type :" + DSType);
+  RuntimeException::selfThrow
+  ("DynamicalSystem:dsConvergenceIndicator - not yet implemented for Dynamical system type :"
+   + _DSType);
   return 1.0;
 }
 

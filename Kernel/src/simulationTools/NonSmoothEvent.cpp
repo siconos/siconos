@@ -51,8 +51,8 @@ void NonSmoothEvent::process(SP::Simulation simulation)
     //       simulation->updateIndexSets();
 
     // Get the required index sets ...
-    SP::UnitaryRelationsGraph indexSet1 = simulation->getIndexSetPtr(1);
-    SP::UnitaryRelationsGraph indexSet2 = simulation->getIndexSetPtr(2);
+    SP::UnitaryRelationsGraph indexSet1 = simulation->indexSet(1);
+    SP::UnitaryRelationsGraph indexSet2 = simulation->indexSet(2);
     bool found = true;
     UnitaryRelationsGraph::VIterator ui, uiend;
     for (boost::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)

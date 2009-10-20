@@ -455,14 +455,14 @@ void SimpleVectorTest::testOperators2()
   SP::SiconosVector w(new SimpleVector(*sv));
   z->zero();
   *z += *w;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(*z->getDensePtr() - *w->getSparsePtr()) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(*z->dense() - *w->sparse()) < tol, true);
   *z *= 3;
   *z -= *w;
   for (unsigned int i = 0; i < size; i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(*z->getDensePtr() - 2 * *w->getSparsePtr()) < tol, true);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(*z->dense() - 2 * *w->sparse()) < tol, true);
   *z /= 2.0;
   for (unsigned int i = 0; i < size; i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(*z->getDensePtr() - *w->getSparsePtr()) < tol, true);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(*z->dense() - *w->sparse()) < tol, true);
 
   // sparse += -= sparse
   SP::SiconosVector v(new SimpleVector(5, SPARSE));
@@ -1122,7 +1122,7 @@ void SimpleVectorTest::testSubscal()
   for (unsigned int i = 0; i < size; ++i)
   {
     if (i != 4 && i != 5)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys->getSparsePtr())(i) - (*yref->getDensePtr())(i)) < tol, true);
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys->sparse())(i) - (*yref->dense())(i)) < tol, true);
   }
   cout << "-->  subscal test ended with success." << endl;
 }

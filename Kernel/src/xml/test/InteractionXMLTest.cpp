@@ -60,7 +60,7 @@ void InteractionXMLTest::tearDown()
 
 void InteractionXMLTest::testGetNumber()
 {
-  CPPUNIT_ASSERT_MESSAGE("testGetNumber ", interaction.getNumber() == 120);
+  CPPUNIT_ASSERT_MESSAGE("testGetNumber ", interaction.number() == 120);
   cout << "InteractionXMLTest >>> testGetNumber ................................ OK\n ";
 }
 

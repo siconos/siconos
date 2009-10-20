@@ -75,25 +75,25 @@ class PrimalFrictionContact : public LinearOSNS
 protected:
 
   /** Type (dimension) of the contact problem (2D or 3D) */
-  int contactProblemDim;
+  int _contactProblemDim;
 
   /** size of the local problem to solve */
-  unsigned int sizeLocalOutput;
+  unsigned int _sizeLocalOutput;
 
   /** contains the vector localVelocity of a PrimalFrictionContact system */
-  SP::SiconosVector localVelocity;
+  SP::SiconosVector _localVelocity;
 
   /** contains the vector localReaction of a PrimalFrictionContact system */
-  SP::SiconosVector localReaction;
+  SP::SiconosVector _localReaction;
 
   /** contains the vector localVelocity of a PrimalFrictionContact system */
-  SP::SiconosVector tildeLocalVelocity;
+  SP::SiconosVector _tildeLocalVelocity;
 
   /** contains the matrix M of a PrimalFrictionContact system */
   SP::OSNSMatrix H;
 
   /** contains the vector q of a PrimalFrictionContact system */
-  SP::MuStorage mu;
+  SP::MuStorage _mu;
 
   /** Pointer to the function used to call the Numerics driver to solve the problem */
   PFC_Driver primalFrictionContact_driver;
@@ -124,7 +124,7 @@ public:
    */
   inline int getPrimalFrictionContactDim() const
   {
-    return contactProblemDim;
+    return _contactProblemDim;
   }
 
   /** get dimension of the problem
@@ -132,7 +132,7 @@ public:
    */
   inline const unsigned int getLocalSizeOutput() const
   {
-    return sizeLocalOutput;
+    return _sizeLocalOutput;
   }
 
   /** set the value of sizeOutput
@@ -140,7 +140,7 @@ public:
    */
   inline void setLocalSizeOutput(const unsigned int newVal)
   {
-    sizeLocalOutput = newVal;
+    _sizeLocalOutput = newVal;
   }
 
   // --- LocalVelocity ---
@@ -150,15 +150,15 @@ public:
    */
   inline const SimpleVector getLocalVelocity() const
   {
-    return *localVelocity;
+    return *_localVelocity;
   }
 
   /** get localVelocity
    *  \return pointer on a SimpleVector
    */
-  inline SP::SiconosVector getLocalVelocityPtr() const
+  inline SP::SiconosVector localVelocity() const
   {
-    return localVelocity;
+    return _localVelocity;
   }
 
   /** set the value of localVelocity to newValue
@@ -171,7 +171,7 @@ public:
    */
   inline void setLocalVelocityPtr(SP::SiconosVector newPtr)
   {
-    localVelocity = newPtr;
+    _localVelocity = newPtr;
   }
 
   // --- Reaction ---
@@ -181,15 +181,15 @@ public:
    */
   inline const SimpleVector getLocalReaction() const
   {
-    return *localReaction;
+    return *_localReaction;
   }
 
   /** get localReaction, the initial state of the DynamicalSystem
    *  \return pointer on a SimpleVector
    */
-  inline SP::SiconosVector getLocalReactionPtr() const
+  inline SP::SiconosVector localReaction() const
   {
-    return localReaction;
+    return _localReaction;
   }
 
   /** set the value of localReaction to newValue
@@ -202,7 +202,7 @@ public:
    */
   inline void setLocalReactionPtr(SP::SiconosVector newPtr)
   {
-    localReaction = newPtr;
+    _localReaction = newPtr;
   }
 
   // --- TildeLocalVelocity ---
@@ -213,15 +213,15 @@ public:
    */
   inline const SimpleVector getTildeLocalVelocity() const
   {
-    return *tildeLocalVelocity;
+    return *_tildeLocalVelocity;
   }
 
   /** get tildeLocalVelocity
    *  \return pointer on a SimpleVector
    */
-  inline SP::SiconosVector getTildeLocalVelocityPtr() const
+  inline SP::SiconosVector tildeLocalVelocity() const
   {
-    return tildeLocalVelocity;
+    return _tildeLocalVelocity;
   }
 
   /** set the value of tildeLocalVelocity to newValue
@@ -234,7 +234,7 @@ public:
    */
   inline void setTildeLocalVelocityPtr(SP::SiconosVector newPtr)
   {
-    tildeLocalVelocity = newPtr;
+    _tildeLocalVelocity = newPtr;
   }
 
   // --- H ---
@@ -266,15 +266,15 @@ public:
    */
   inline const std::vector<double> getMu() const
   {
-    return *mu;
+    return *_mu;
   }
 
   /** get a pointer to mu, the list of the friction coefficients
    *  \return pointer on a std::vector<double>
    */
-  inline SP::MuStorage getMuPtr() const
+  inline SP::MuStorage mu() const
   {
-    return mu;
+    return _mu;
   }
 
   /** get the value of the component number i of mu, the vector of the friction coefficients
@@ -283,7 +283,7 @@ public:
    */
   inline const double getMu(unsigned int i) const
   {
-    return (*mu)[i];
+    return (*_mu)[i];
   }
 
   /** set the driver-function used to solve the problem

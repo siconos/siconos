@@ -66,10 +66,10 @@ void NonSmoothDynamicalSystemTest::testBuildNonSmoothDynamicalSystem1()
   cout << "------- Xml Constructor test -------" << endl;
   SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem(tmpxml));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemA : ", nsds->getDSVectorSize() == 2, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemB : ", nsds->getDynamicalSystemPtr(0)->getNumber() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemC : ", nsds->getDynamicalSystemPtr(1)->getNumber() == 8, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemB : ", nsds->dynamicalSystem(0)->number() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemC : ", nsds->dynamicalSystem(1)->number() == 8, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemD : ", nsds->getInteractionVectorSize() == 1, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemE : ", nsds->getInteractionPtr(0)->getNumber() == 12, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemE : ", nsds->interaction(0)->number() == 12, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemF : ", nsds->isBVP() == false, true);
   cout << " ------- Constructor xml NonSmoothDynamicalSystem ok -------" << endl;
 }
@@ -80,10 +80,10 @@ void NonSmoothDynamicalSystemTest::testBuildNonSmoothDynamicalSystem2()
   SP::NonSmoothDynamicalSystem  nsds1(new NonSmoothDynamicalSystem(tmpxml));
   SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem(*nsds1));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2A : ", nsds->getDSVectorSize() == 2, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2B : ", nsds->getDynamicalSystemPtr(0)->getNumber() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2C : ", nsds->getDynamicalSystemPtr(1)->getNumber() == 8, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2B : ", nsds->dynamicalSystem(0)->number() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2C : ", nsds->dynamicalSystem(1)->number() == 8, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2D : ", nsds->getInteractionVectorSize() == 1, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2E : ", nsds->getInteractionPtr(0)->getNumber() == 12, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2E : ", nsds->interaction(0)->number() == 12, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2F : ", nsds->isBVP() == false, true);
   cout << "------- Constructor copy NonSmoothDynamicalSystem ok -------" << endl;
 }
@@ -102,9 +102,9 @@ void NonSmoothDynamicalSystemTest::testaddDynamicalSystem()
 
   nsds->addDynamicalSystem(ltids);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testaddDynamicalSystemA : ", nsds->getDSVectorSize() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testaddDynamicalSystemB: ", nsds->getDynamicalSystemPtr(0)->getNumber() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testaddDynamicalSystemC : ", nsds->getDynamicalSystemPtr(1)->getNumber() == 8, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testaddDynamicalSystemC : ", nsds->getDynamicalSystemPtr(2)->getNumber() == 23, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testaddDynamicalSystemB: ", nsds->dynamicalSystem(0)->number() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testaddDynamicalSystemC : ", nsds->dynamicalSystem(1)->number() == 8, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testaddDynamicalSystemC : ", nsds->dynamicalSystem(2)->number() == 23, true);
   cout << "------- test addDynamicalSystem ok -------" << endl;
 }
 
@@ -120,8 +120,8 @@ void NonSmoothDynamicalSystemTest::testaddInteraction()
   SP::Interaction inter(new Interaction(interxml));
   nsds->addInteraction(inter);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2D : ", nsds->getInteractionVectorSize() == 2, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2E : ", nsds->getInteractionPtr(0)->getNumber() == 12, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2E : ", nsds->getInteractionPtr(1)->getNumber() == 12, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2E : ", nsds->interaction(0)->number() == 12, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2E : ", nsds->interaction(1)->number() == 12, true);
   cout << " ------- test addInteractiontest ok -------" << endl;
 }
 

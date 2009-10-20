@@ -119,7 +119,7 @@ FirstOrderLinearR::FirstOrderLinearR(const SiconosMatrix& newC, const SiconosMat
 void FirstOrderLinearR::initialize(SP::Interaction inter)
 {
   assert(inter && "FirstOrderLinearR::initialize failed. No Interaction linked to the present relation.");
-  interaction = inter;
+  _interaction = inter;
 
   // Note: do not call FirstOrderR::initialize to avoid jacobianH and jacobianG allocation.
 
@@ -132,9 +132,9 @@ void FirstOrderLinearR::initialize(SP::Interaction inter)
 
   // Check if various operators sizes are consistent.
   // Reference: interaction.
-  unsigned int sizeY = getInteractionPtr()->getSizeOfY();
-  unsigned int sizeX = getInteractionPtr()->getSizeOfDS();
-  unsigned int sizeZ = getInteractionPtr()->getSizeZ();
+  unsigned int sizeY = interaction()->getSizeOfY();
+  unsigned int sizeX = interaction()->getSizeOfDS();
+  unsigned int sizeZ = interaction()->getSizeZ();
 
   // The initialization of each matrix/vector depends on the way the Relation was built ie if the matrix/vector
   // was read from xml or not
@@ -168,7 +168,7 @@ void FirstOrderLinearR::initialize(SP::Interaction inter)
   }
   if (!e && plugine->fPtr)
   {
-    unsigned int sizeY = getInteractionPtr()->getSizeOfY();
+    unsigned int sizeY = interaction()->getSizeOfY();
     e.reset(new SimpleVector(sizeY));
   }
 
@@ -194,9 +194,9 @@ void FirstOrderLinearR::computeC(double time)
   {
     if (pluginjXH->fPtr)
     {
-      unsigned int sizeY = getInteractionPtr()->getSizeOfY();
-      unsigned int sizeX = getInteractionPtr()->getSizeOfDS();
-      unsigned int sizeZ = getInteractionPtr()->getSizeZ();
+      unsigned int sizeY = interaction()->getSizeOfY();
+      unsigned int sizeX = interaction()->getSizeOfDS();
+      unsigned int sizeZ = interaction()->getSizeZ();
       *workZ = *data[z];
       ((FOMatPtr1)(pluginjXH->fPtr))(time, sizeY, sizeX, &(*JacXH)(0, 0), sizeZ, &(*workZ)(0));
       // Copy data that might have been changed in the plug-in call.
@@ -211,8 +211,8 @@ void FirstOrderLinearR::computeD(double time)
   {
     if (pluginjLH->fPtr)
     {
-      unsigned int sizeY = getInteractionPtr()->getSizeOfY();
-      unsigned int sizeZ = getInteractionPtr()->getSizeZ();
+      unsigned int sizeY = interaction()->getSizeOfY();
+      unsigned int sizeZ = interaction()->getSizeZ();
       *workZ = *data[z];
       ((FOMatPtr1)(pluginjLH->fPtr))(time, sizeY, sizeY, &(*JacLH)(0, 0), sizeZ, &(*workZ)(0));
       // Copy data that might have been changed in the plug-in call.
@@ -226,8 +226,8 @@ void FirstOrderLinearR::computeF(double time)
 {
   if (F && pluginf->fPtr)
   {
-    unsigned int sizeY = getInteractionPtr()->getSizeOfY();
-    unsigned int sizeZ = getInteractionPtr()->getSizeZ();
+    unsigned int sizeY = interaction()->getSizeOfY();
+    unsigned int sizeZ = interaction()->getSizeZ();
     *workZ = *data[z];
     ((FOMatPtr1)(pluginf->fPtr))(time, sizeY, sizeZ, &(*F)(0, 0), sizeZ, &(*workZ)(0));
     // Copy data that might have been changed in the plug-in call.
@@ -240,8 +240,8 @@ void FirstOrderLinearR::computeE(double time)
 
   if (e && plugine->fPtr)
   {
-    unsigned int sizeY = getInteractionPtr()->getSizeOfY();
-    unsigned int sizeZ = getInteractionPtr()->getSizeZ();
+    unsigned int sizeY = interaction()->getSizeOfY();
+    unsigned int sizeZ = interaction()->getSizeZ();
     *workZ = *data[z];
     ((FOVecPtr) plugine->fPtr)(time, sizeY, &(*e)(0), sizeZ, &(*workZ)(0));
     // Copy data that might have been changed in the plug-in call.
@@ -249,13 +249,13 @@ void FirstOrderLinearR::computeE(double time)
   }
 }
 
-void FirstOrderLinearR::computeB(double time)
+void FirstOrderLinearR::computeb(double time)
 {
   if (JacLG && pluginjLG->fPtr)
   {
-    unsigned int sizeY = getInteractionPtr()->getSizeOfY();
-    unsigned int sizeX = getInteractionPtr()->getSizeOfDS();
-    unsigned int sizeZ = getInteractionPtr()->getSizeZ();
+    unsigned int sizeY = interaction()->getSizeOfY();
+    unsigned int sizeX = interaction()->getSizeOfDS();
+    unsigned int sizeZ = interaction()->getSizeZ();
     *workZ = *data[z];
     ((FOMatPtr1) pluginjLG->fPtr)(time, sizeX, sizeY, &(*JacLG)(0, 0), sizeZ, &(*workZ)(0));
     // Copy data that might have been changed in the plug-in call.
@@ -283,8 +283,8 @@ void FirstOrderLinearR::computeOutput(double time, unsigned int)
   // y[0]
 
   // We get y and lambda of the interaction (pointers)
-  SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
-  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(0);
+  SP::SiconosVector y = interaction()->y(0);
+  SP::SiconosVector lambda = interaction()->lambda(0);
 
   // compute y
   if (JacXH)
@@ -304,10 +304,10 @@ void FirstOrderLinearR::computeOutput(double time, unsigned int)
 
 void FirstOrderLinearR::computeInput(double time, unsigned int level)
 {
-  computeB(time);
+  computeb(time);
 
   // We get lambda of the interaction (pointers)
-  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(level);
+  SP::SiconosVector lambda = interaction()->lambda(level);
   prod(*JacLG, *lambda, *data[r], false);
 }
 

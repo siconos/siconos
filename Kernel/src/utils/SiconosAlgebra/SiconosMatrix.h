@@ -151,12 +151,12 @@ public:
   /** reserved to BlockMatrix - get the index tab for rows
    * \return a pointer to a standard vector of int
    */
-  virtual const SP::Index getTabRowPtr() const ;
+  virtual const SP::Index tabRow() const ;
 
   /** reserved to BlockMatrix - get the index tab of columns
    * \return a pointer to a standard vector of int
    */
-  virtual const SP::Index getTabColPtr() const ;
+  virtual const SP::Index tabCol() const ;
 
   /** get an iterator pointing at the beginning of the block matrix
   *  \return a BlockIterator1
@@ -232,49 +232,49 @@ public:
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a DenseMat*
    */
-  virtual  DenseMat* getDensePtr(unsigned int = 0, unsigned int = 0) const PURE_DEF;
+  virtual  DenseMat* dense(unsigned int = 0, unsigned int = 0) const PURE_DEF;
 
   /** get a pointer on TriangMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a TriangMat*
    */
-  virtual TriangMat* getTriangPtr(unsigned int = 0, unsigned int = 0) const PURE_DEF;
+  virtual TriangMat* triang(unsigned int = 0, unsigned int = 0) const PURE_DEF;
 
   /** get a pointer on SymMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a SymMat*
    */
-  virtual SymMat* getSymPtr(unsigned int = 0, unsigned int = 0) const PURE_DEF;
+  virtual SymMat* sym(unsigned int = 0, unsigned int = 0) const PURE_DEF;
 
   /** get a pointer on BandedMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a BandedMat*
    */
-  virtual BandedMat* getBandedPtr(unsigned int = 0, unsigned int = 0) const PURE_DEF;
+  virtual BandedMat* banded(unsigned int = 0, unsigned int = 0) const PURE_DEF;
 
   /** get a pointer on SparseMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a SparseMat*
    */
-  virtual SparseMat* getSparsePtr(unsigned int = 0, unsigned int = 0) const PURE_DEF;
+  virtual SparseMat* sparse(unsigned int = 0, unsigned int = 0) const PURE_DEF;
 
   /** get a pointer on ZeroMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a ZeroMat*
    */
-  virtual ZeroMat* getZeroPtr(unsigned int = 0, unsigned int = 0) const PURE_DEF;
+  virtual ZeroMat* zero(unsigned int = 0, unsigned int = 0) const PURE_DEF;
 
   /** get a pointer on Identity matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return an IdentityMat*
    */
-  virtual IdentityMat* getIdentityPtr(unsigned int = 0, unsigned int = 0) const PURE_DEF;
+  virtual IdentityMat* identity(unsigned int = 0, unsigned int = 0) const PURE_DEF;
 
   /** return the adress of the array of double values of the matrix ( for block(i,j) if this is a block matrix)
    *  \param: row position for the required block
@@ -343,13 +343,13 @@ public:
    *  \param unsigned int row
    *  \param unsigned int col
    */
-  virtual SP::SiconosMatrix getBlockPtr(unsigned int = 0, unsigned int = 0) PURE_DEF;
+  virtual SP::SiconosMatrix block(unsigned int = 0, unsigned int = 0) PURE_DEF;
 
   /** get block at position row-col if BlockMatrix, else if SimpleMatrix return this
    *  \param unsigned int row
    *  \param unsigned int col
    */
-  virtual SPC::SiconosMatrix getBlockPtr(unsigned int = 0, unsigned int = 0) const PURE_DEF;
+  virtual SPC::SiconosMatrix block(unsigned int = 0, unsigned int = 0) const PURE_DEF;
 
   /** get row index of current matrix and save it into vOut
    *  \param unsigned int: index of required line
@@ -418,15 +418,15 @@ public:
       }
     }
     else if (num == 1)
-      *getDensePtr() *= s;
+      *dense() *= s;
     else if (num == 2)
-      *getTriangPtr() *= s;
+      *triang() *= s;
     else if (num == 3)
-      *getSymPtr() *= s;
+      *sym() *= s;
     else if (num == 4)
-      *getSparsePtr() *= s;
+      *sparse() *= s;
     else if (num == 5)
-      *getBandedPtr() *= s;
+      *banded() *= s;
     else if (num == 6) {} // nothing!
     else //if(num == 7)
       SiconosMatrixException::selfThrow(" SP::SiconosMatrix = (double) : invalid type of matrix");
@@ -450,15 +450,15 @@ public:
       }
     }
     else if (num == 1)
-      *getDensePtr() /= s;
+      *dense() /= s;
     else if (num == 2)
-      *getTriangPtr() /= s;
+      *triang() /= s;
     else if (num == 3)
-      *getSymPtr() /= s;
+      *sym() /= s;
     else if (num == 4)
-      *getSparsePtr() /= s;
+      *sparse() /= s;
     else if (num == 5)
-      *getBandedPtr() /= s;
+      *banded() /= s;
     else if (num == 6) {} // nothing!
     else //if(num == 7)
       SiconosMatrixException::selfThrow(" SiconosMatrix *= (double) : invalid type of matrix");

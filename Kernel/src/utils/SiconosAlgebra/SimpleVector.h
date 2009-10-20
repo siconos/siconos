@@ -120,7 +120,7 @@ public:
    *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    *  \return a DenseVect*
    */
-  inline DenseVect* getDensePtr(unsigned int = 0) const
+  inline DenseVect* dense(unsigned int = 0) const
   {
     return vect.Dense;
   };
@@ -129,7 +129,7 @@ public:
    *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    *  \return a SparseVect*
    */
-  SparseVect* getSparsePtr(unsigned int = 0) const;
+  SparseVect* sparse(unsigned int = 0) const;
 
   /** return the array of double values of the vector
    *  \param unsigned int: vector position (only for block vector)
@@ -169,7 +169,7 @@ public:
   /** return the current object. This function is really usefull only for block vector
    * \return a pointer to a SiconosVector
    */
-  inline SP::SiconosVector getVectorPtr(unsigned int)
+  inline SP::SiconosVector vector(unsigned int)
   {
     return shared_from_this();
   };
@@ -177,7 +177,7 @@ public:
   /** return the current object. This function is really usefull only for block vector
    * \return a pointer to a SiconosVector
    */
-  inline SPC::SiconosVector getVectorPtr(unsigned int) const
+  inline SPC::SiconosVector vector(unsigned int) const
   {
     return shared_from_this();
   };

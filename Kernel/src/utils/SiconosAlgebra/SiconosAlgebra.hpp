@@ -114,7 +114,9 @@ const std::string DEFAULT_FORMAT = "ascii";
 /** value used to compare matrices. Matrices A and B are equal when (A-B).normInf()<tolerance. */
 const double tolerance = std::numeric_limits<double>::epsilon();
 
-/** UBLAS_TYPE  is an enumerated type of DENSE, TRIANGULAR, SYMMETRIC, SPARSE, BANDED. It is used to describe the type of matrix or vector we want to construct.
+/** UBLAS_TYPE is an enumerated type of DENSE, TRIANGULAR, SYMMETRIC,
+    SPARSE, BANDED. It is used to describe the type of matrix or
+    vector we want to construct.
  */
 enum UBLAS_TYPE {DENSE = 1, TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO, IDENTITY};
 
@@ -128,7 +130,8 @@ enum UBLAS_TYPE {DENSE = 1, TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO, IDENTIT
 class SiconosMatrix;
 DEFINE_SPTR(SiconosMatrix);
 
-/** A collection of pointers to matrices ; blocksMat is a typedef of boost::ublas::numeric::mapped_matrix<SiconosMatrix* > */
+/** A collection of pointers to matrices ; blocksMat is a typedef of
+    boost::ublas::numeric::mapped_matrix<SiconosMatrix* > */
 typedef ublas::compressed_matrix<SP::SiconosMatrix> BlocksMat;
 
 /**  iterator for BlocksMat*/
@@ -143,10 +146,12 @@ typedef BlocksMat::const_iterator2 ConstBlockIterator2;
 class SiconosVector;
 DEFINE_SPTR(SiconosVector);
 
-/** Some containers for vectors - Used for example to handle x and its derivatives in DynamicalSystem. */
+/** Some containers for vectors - Used for example to handle x and its
+    derivatives in DynamicalSystem. */
 typedef std::vector<SP::SiconosVector> VectorOfVectors;
 
-/** Some containers for matrices - Used for example to handle the various jacobian in LagrangianDS. */
+/** Some containers for matrices - Used for example to handle the
+    various jacobian in LagrangianDS. */
 typedef std::vector<SP::SiconosMatrix> VectorOfMatrices;
 
 /** Iterator through vector of matrices */

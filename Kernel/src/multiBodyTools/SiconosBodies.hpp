@@ -44,7 +44,7 @@ public:
 
   virtual void compute();
 
-  SP::Model getModelPtr()
+  SP::Model model()
   {
     return model_;
   }

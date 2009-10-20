@@ -113,12 +113,12 @@ void FirstOrderNonLinearDSXML::setXMemory(const SiconosMemory& smem)
     xMemoryXML.reset(new SiconosMemoryXML(NULL, rootNode, DS_XMEMORY));
     xMemoryNode = xMemoryXML->getSiconosMemoryXMLNode();
     xMemoryXML->setSiconosMemorySize(smem.getMemorySize());
-    xMemoryXML->setSiconosMemoryVector(*smem.getVectorMemoryPtr());
+    xMemoryXML->setSiconosMemoryVector(*smem.vectorMemory());
   }
   else
   {
     xMemoryXML->setSiconosMemorySize(smem.getMemorySize());
-    xMemoryXML->setSiconosMemoryVector(*smem.getVectorMemoryPtr());
+    xMemoryXML->setSiconosMemoryVector(*smem.vectorMemory());
   }
 }
 

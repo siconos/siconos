@@ -43,7 +43,7 @@ void ExampleActuator::actuate()
   (*myZ)(1) = 132;
   (*myZ)(2) = 212;
 
-  for (itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
+  for (itDS = _allDS->begin(); itDS != _allDS->end(); ++itDS)
     (*itDS)->setZPtr(myZ);
 
 }

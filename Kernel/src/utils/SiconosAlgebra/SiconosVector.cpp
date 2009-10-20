@@ -35,9 +35,9 @@ Index SiconosVector::getTabIndex() const
   return tmp;
 }
 
-const SP::Index SiconosVector::getTabIndexPtr() const
+const SP::Index SiconosVector::tabIndex() const
 {
-  SiconosVectorException::selfThrow("SiconosVector::getTabIndexPtr() : not implemented for this type of vector (Simple?) reserved to BlockVectors.");
+  SiconosVectorException::selfThrow("SiconosVector::tabIndex() : not implemented for this type of vector (Simple?) reserved to BlockVectors.");
   // fake to avoid error on warning.
   return SP::Index();
 }
@@ -78,8 +78,8 @@ const bool isComparableTo(const SiconosVector& v1, const SiconosVector& v2)
 
   if ((!v1.isBlock() || !v2.isBlock()) && (v1.size() == v2.size())) return true;
 
-  const SP::Index I1 = v1.getTabIndexPtr();
-  const SP::Index I2 = v2.getTabIndexPtr();
+  const SP::Index I1 = v1.tabIndex();
+  const SP::Index I2 = v2.tabIndex();
 
   return (*I1 == *I2);
 }
@@ -93,9 +93,9 @@ void swap(SiconosVector& x, SiconosVector& y)
   if (numX == numY)
   {
     if (numX == 1) // ublas swap seems to be much more efficient than atlas::swap (bindings) ...
-      swap(*x.getDensePtr(), *y.getDensePtr());
+      swap(*x.dense(), *y.dense());
     else if (numX == 4)
-      swap(*x.getSparsePtr(), *y.getSparsePtr());
+      swap(*x.sparse(), *y.sparse());
     else
       SiconosVectorException::selfThrow("Swap(x,y): not yet implemented for block vectors.");
   }

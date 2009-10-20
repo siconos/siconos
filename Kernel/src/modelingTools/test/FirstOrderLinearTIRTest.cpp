@@ -214,12 +214,12 @@ void FirstOrderLinearTIRTest::testSetBPtr()
 
 void FirstOrderLinearTIRTest::testGetJacPtr()
 {
-  cout << "--> Test: getJacPtr." << endl;
+  cout << "--> Test: jac." << endl;
   SP::FirstOrderLinearTIR folr(new FirstOrderLinearTIR(C, B));
   folr->setDPtr(D);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJacH: ", folr->getJacXHPtr() == C, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJacH: ", folr->getJacLHPtr() == D, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJacH: ", folr->getJacLGPtr() == B, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJacH: ", folr->jacXH() == C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJacH: ", folr->jacLH() == D, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJacH: ", folr->jacLG() == B, true);
 
   cout << "--> setBPtr test ended with success." << endl;
 }

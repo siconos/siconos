@@ -93,10 +93,10 @@ void FirstOrderType1R::initialize(SP::Interaction inter)
   FirstOrderR::initialize(inter);
 
   // Check if an Interaction is connected to the Relation.
-  unsigned int sizeY = getInteractionPtr()->getSizeOfY();
-  unsigned int sizeDS = getInteractionPtr()->getSizeOfDS();
-  unsigned int sizeZ = getInteractionPtr()->getSizeZ();
-  if (!getInteractionPtr())
+  unsigned int sizeY = interaction()->getSizeOfY();
+  unsigned int sizeDS = interaction()->getSizeOfDS();
+  unsigned int sizeZ = interaction()->getSizeZ();
+  if (!interaction())
     RuntimeException::selfThrow("FirstOrderR::initialize failed. No Interaction linked to the present relation.");
 
   // Update data member (links to DS variables)
@@ -137,7 +137,7 @@ void FirstOrderType1R::computeOutput(double t, unsigned int)
 {
   assert(pluginH && "FirstOrderType1R::computeOutput() is not linked to a plugin function");
 
-  SP::SiconosVector y = getInteractionPtr()->getYPtr(0);
+  SP::SiconosVector y = interaction()->y(0);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
 
   *workX = *data[x];
@@ -159,7 +159,7 @@ void FirstOrderType1R::computeInput(double t, unsigned int level)
 {
   assert(pluginG && "FirstOrderType1R::computeInput() is not linked to a plugin function");
 
-  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(level);
+  SP::SiconosVector lambda = interaction()->lambda(level);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
 
   *workX = *data[r];
@@ -187,7 +187,7 @@ void FirstOrderType1R::computeJacXH(double)
   *workX = *data[x];
   *workZ = *data[z];
 
-  unsigned int sizeY = getInteractionPtr()->getSizeOfY();
+  unsigned int sizeY = interaction()->getSizeOfY();
   unsigned int sizeX = data[x]->size();
   unsigned int sizeZ = data[z]->size();
 
@@ -202,7 +202,7 @@ void FirstOrderType1R::computeJacLG(double)
   assert(index == 0 && "FirstOrderType1R::computeJacobianG(index): index is out of range");
   assert(pluginjLG && "FirstOrderType1R::computeJacobianG() failed; not linked to a plug-in function.");
 
-  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(0);
+  SP::SiconosVector lambda = interaction()->lambda(0);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
   *workZ = *data[z];
   *workY = *lambda;

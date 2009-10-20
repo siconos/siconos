@@ -39,20 +39,20 @@ MLCP2::MLCP2(SP::NonSmoothSolver newSolver, const string& newId):
 
 void MLCP2::initialize(SP::Simulation simulation)
 {
-  SP::DynamicalSystemsSet  DSSet = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  SP::DynamicalSystemsSet  DSSet = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
   if (DSSet->begin() == DSSet->end())
     printf("DSSet is empty\n");
   else
     printf("DSSet is not empty\n");
   updateDSBlocks();
   updateDSUnitaryBlocks();
-  DSSet = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  DSSet = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
   if (DSSet->begin() == DSSet->end())
     printf("DSSet is empty\n");
   else
     printf("DSSet is not empty\n");
   updateUnitaryDSBlocks();
-  DSSet = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  DSSet = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
   if (DSSet->begin() == DSSet->end())
     printf("DSSet is empty\n");
   else
@@ -63,8 +63,8 @@ void MLCP2::initialize(SP::Simulation simulation)
 }
 void MLCP2::updateM()
 {
-  SP::UnitaryRelationsGraph URSet = simulation->getIndexSetPtr(levelMin);
-  SP::DynamicalSystemsSet  DSSet = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  SP::UnitaryRelationsGraph URSet = simulation->indexSet(levelMin);
+  SP::DynamicalSystemsSet  DSSet = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
   if (!M)
   {
     // Creates and fills M using UR of indexSet
@@ -99,19 +99,19 @@ void MLCP2::updateM()
 
 //   // Get index set from Simulation
 
-//   indexSet = simulation->getIndexSetPtr(levelMin);
-//   isTimeInvariant = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->isTimeInvariant();
+//   indexSet = simulation->indexSet(levelMin);
+//   isTimeInvariant = simulation->model()->nonSmoothDynamicalSystem()->topology()->isTimeInvariant();
 
 //   if (!isTimeInvariant || mFirstCall){
 //     for(itUR1 = indexSet->begin(); itUR1!=indexSet->end();++itUR1){
-//       computeBlock(&(*itUR1));
+//       computeblock(&(*itUR1));
 //     }
-//     DynamicalSystemsSet * allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+//     DynamicalSystemsSet * allDS = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
 //     for(itDS=allDS->begin(); itDS!= allDS->end(); ++itDS){
-//       computeBlock(&(*itDS));
+//       computeblock(&(*itDS));
 //       for(itUR1 = indexSet->begin(); itUR1!=indexSet->end();++itUR1){
-//  computeBlock(&(*itDS),&(*itUR1));
-//  computeBlock(&(*itUR1),&(*itDS));
+//  computeblock(&(*itDS),&(*itUR1));
+//  computeblock(&(*itUR1),&(*itDS));
 //       }
 //     }
 //   }
@@ -128,7 +128,7 @@ void MLCP2::computeDSBlock(SP::DynamicalSystem DS)
     DSBlocks[DS].reset(new SimpleMatrix(DS->getDim(), DS->getDim()));
     n += DS->getDim();
   }
-  SP::OneStepIntegrator Osi = simulation->getIntegratorOfDSPtr(DS); // get OneStepIntegrator of current dynamical system
+  SP::OneStepIntegrator Osi = simulation->integratorOfDS(DS); // get OneStepIntegrator of current dynamical system
   const OSI::TYPES  osiType = Osi->getType();
   if (osiType == OSI::MOREAU2)
   {
@@ -181,7 +181,7 @@ void MLCP2::computeQ(double time)
   q->zero();
 
   // === Get index set from Simulation ===
-  SP::UnitaryRelationsGraph indexSet = simulation->getIndexSetPtr(levelMin);
+  SP::UnitaryRelationsGraph indexSet = simulation->indexSet(levelMin);
   // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
 
   unsigned int pos = 0;
@@ -193,16 +193,16 @@ void MLCP2::computeQ(double time)
     // Compute q, this depends on the type of non smooth problem, on the relation type and on the non smooth law
     pos = M->getPositionOfUnitaryBlock(*itCurrent);
     //update e(ti+1)
-    SP::SiconosVector  e = boost::static_pointer_cast<FirstOrderLinearR>((*itCurrent)->getInteractionPtr()->getRelationPtr())->getEPtr();
+    SP::SiconosVector  e = boost::static_pointer_cast<FirstOrderLinearR>((*itCurrent)->interaction()->relation())->getEPtr();
     boost::static_pointer_cast<SimpleVector>(q)->addBlock(pos, *e);
   }
-  SP::DynamicalSystemsSet  allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  SP::DynamicalSystemsSet  allDS = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
   for (DSIterator itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
   {
     pos = M->getPositionOfDSBlock(*itDS);
 
 
-    SP::OneStepIntegrator Osi = simulation->getIntegratorOfDSPtr(*itDS); // get OneStepIntegrator of current dynamical system
+    SP::OneStepIntegrator Osi = simulation->integratorOfDS(*itDS); // get OneStepIntegrator of current dynamical system
     const OSI::TYPES osiType = Osi->getType();
     if (osiType == OSI::MOREAU2)
     {
@@ -226,7 +226,7 @@ void MLCP2::preCompute(double time)
   // M, sizeOutput have been computed in initialize and are uptodate.
 
   // Get topology
-  SP::Topology topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  SP::Topology topology = simulation->model()->nonSmoothDynamicalSystem()->topology();
 
   if (!topology->isTimeInvariant())
   {
@@ -234,8 +234,8 @@ void MLCP2::preCompute(double time)
     updateUnitaryBlocks();
 
     // Updates matrix M
-    SP::UnitaryRelationsSet URSet = simulation->getIndexSetPtr(levelMin);
-    SP::DynamicalSystemsSet DSSet = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+    SP::UnitaryRelationsSet URSet = simulation->indexSet(levelMin);
+    SP::DynamicalSystemsSet DSSet = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
     //fill M block
     M->fill(URSet, DSSet, unitaryBlocks, DSBlocks, DSUnitaryBlocks, unitaryDSBlocks);
     sizeOutput = M->size();
@@ -308,7 +308,7 @@ int MLCP2::compute(double time)
     //      exit(1);
     //mlcpDefaultSolver *pSolver = new mlcpDefaultSolver(m,n);
     //      displayMLCP2(&numerics_problem);
-    info = mlcp_driver(&numerics_problem, _z->getArray(), _w->getArray(), (solver->getNumericsSolverOptionsPtr()).get(), numerics_options.get());
+    info = mlcp_driver(&numerics_problem, _z->getArray(), _w->getArray(), (solver->numericsSolverOptions()).get(), numerics_options.get());
 
     // --- Recovering of the desired variables from MLCP2 output ---
     postCompute();
@@ -324,7 +324,7 @@ void MLCP2::postCompute()
   // Only UnitaryRelations (ie Interactions) of indexSet(leveMin) are concerned.
 
   // === Get index set from Topology ===
-  SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
+  SP::UnitaryRelationsSet indexSet = simulation->indexSet(levelMin);
 
   // y and lambda vectors
   SP::SiconosVector lambda, y, x;
@@ -342,13 +342,13 @@ void MLCP2::postCompute()
     pos = M->getPositionOfUnitaryBlock(*itCurrent);
 
     // Get Y and Lambda for the current Unitary Relation
-    y = (*itCurrent)->getYPtr(levelMin);
-    lambda = (*itCurrent)->getLambdaPtr(levelMin);
+    y = (*itCurrent)->y(levelMin);
+    lambda = (*itCurrent)->lambda(levelMin);
     // Copy w/z values, starting from index pos into y/lambda.
     setBlock(*(_w.get()), y, y->size(), pos, 0);// Warning: yEquivalent is saved in y !!
     setBlock(*(_z.get()), lambda, lambda->size(), pos, 0);
   }
-  SP::DynamicalSystemsSet allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();
+  SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();
   for (DSIterator itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
   {
     pos = M->getPositionOfDSBlock(*itDS);

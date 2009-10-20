@@ -22,11 +22,11 @@
 
 void Disk::MassSetup()
 {
-  mass.reset(new SimpleMatrix(ndof, ndof));
+  _mass.reset(new SimpleMatrix(_ndof, _ndof));
   //  mass->resize(ndof,ndof);
-  mass->zero();
-  (*mass)(0, 0) = (*mass)(1, 1) = massValue;
-  (*mass)(2, 2) = massValue * radius * radius / 2.;
+  _mass->zero();
+  (*_mass)(0, 0) = (*_mass)(1, 1) = massValue;
+  (*_mass)(2, 2) = massValue * radius * radius / 2.;
 }
 
 Disk::Disk(double r, double m,

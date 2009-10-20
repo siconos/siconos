@@ -110,7 +110,7 @@ public:
   /** get a pointer on matrix JacH[index]
    *  \return a pointer on a SiconosMatrix
    */
-  virtual  SP::SiconosMatrix getJacXHPtr() const
+  virtual  SP::SiconosMatrix jacXH() const
   {
     return JacXH;
   }
@@ -145,7 +145,7 @@ public:
   /** get a pointer on matrix JacG[index]
    *  \return a pointer on a SiconosMatrix
    */
-  virtual SP::SiconosMatrix getJacLGPtr() const
+  virtual SP::SiconosMatrix jacLG() const
   {
     return JacLG;
   }
@@ -235,7 +235,7 @@ public:
   */
   SP::SiconosMatrix getCPtr()
   {
-    return getJacXHPtr();
+    return jacXH();
   }
   /**
    * return a SP on the D matrix.
@@ -243,7 +243,7 @@ public:
    */
   SP::SiconosMatrix getDPtr()
   {
-    return getJacLHPtr();
+    return jacLH();
   }
   /**
    * return a SP on the B matrix.
@@ -251,7 +251,7 @@ public:
    */
   SP::SiconosMatrix getBPtr()
   {
-    return getJacLGPtr();
+    return jacLG();
   }
 
 

@@ -53,8 +53,8 @@ void Relation::zeroPlugin()
 void Relation::initializeMemory()
 {
   mResiduy.reset(new BlockVector());
-  unsigned int nslawSize = getInteractionPtr()->getNonSmoothLawPtr()->getNsLawSize();
-  unsigned int numberOfRelations = getInteractionPtr()->getNumberOfRelations();
+  unsigned int nslawSize = interaction()->nonSmoothLaw()->size();
+  unsigned int numberOfRelations = interaction()->numberOfRelations();
   for (unsigned int j = 0; j < numberOfRelations ; ++j)
     mResiduy->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
 
@@ -75,10 +75,10 @@ void Relation::display() const
        << relationType
        << " and subtype "
        << subType << endl;
-  if (interaction.lock())
+  if (_interaction.lock())
     cout
         << "- Interaction id"
-        << interaction.lock()->getId()
+        << _interaction.lock()->getId()
         << endl;
   else cout << "- Linked interaction -> NULL" << endl;
 }
@@ -93,9 +93,9 @@ void Relation::computeResiduY(double t)
   //      cout<<"Relation::computeResiduY mH_alpha"<<endl;
   //      mH_alpha->display();
   //      cout<<"Relation::computeResiduY Y"<<endl;
-  //      getInteractionPtr()->getYPtr(0)->display();
+  //      interaction()->y(0)->display();
 
-  (*mResiduy) += *(getInteractionPtr()->getYPtr(0));
+  (*mResiduy) += *(interaction()->y(0));
 
   //      cout<<" Relation::computeResiduY residuY"<<endl;
   //      mResiduy->display();

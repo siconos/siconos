@@ -76,10 +76,10 @@ protected:
   std::string simulationType;
 
   /** the default time discretisation scheme */
-  SP::TimeDiscretisation timeDiscretisation;
+  SP::TimeDiscretisation _timeDiscretisation;
 
   /** tool to manage all events */
-  SP::EventsManager eventsManager;
+  SP::EventsManager _eventsManager;
 
   /** current starting time for integration */
   double tinit;
@@ -111,7 +111,7 @@ protected:
   SP::SimulationXML simulationxml;
 
   /** A link to the Model which contains the Simulation */
-  boost::weak_ptr<Model> model;
+  boost::weak_ptr<Model> _model;
 
   /** int used to set the minimal derivative order used in the OSNS
       variables */
@@ -232,9 +232,9 @@ public:
   /** get the TimeDiscretisation of the Simulation
    *  \return the TimeDiscretisation
    */
-  inline SP::TimeDiscretisation getTimeDiscretisationPtr()
+  inline SP::TimeDiscretisation timeDiscretisation()
   {
-    return timeDiscretisation;
+    return _timeDiscretisation;
   };
 
   /** set the TimeDiscretisation of the Simulation
@@ -242,7 +242,7 @@ public:
    */
   inline void setTimeDiscretisationPtr(SP::TimeDiscretisation td)
   {
-    timeDiscretisation = td;
+    _timeDiscretisation = td;
   }
 
   /** get time instant k of the time discretisation
@@ -250,7 +250,7 @@ public:
    */
   inline const double getTk() const
   {
-    return timeDiscretisation->getCurrentTime();
+    return _timeDiscretisation->currentTime();
   };
 
   /** get time instant k+1 of the time discretisation - Warning: this
@@ -260,15 +260,15 @@ public:
   */
   inline const double getTkp1() const
   {
-    return timeDiscretisation->getNextTime();
+    return _timeDiscretisation->getNextTime();
   };
 
   /** get the EventsManager
    *  \return a pointer to EventsManager
    */
-  inline SP::EventsManager getEventsManagerPtr() const
+  inline SP::EventsManager eventsManager() const
   {
-    return eventsManager;
+    return _eventsManager;
   };
 
   /** get "current time" (ie starting point for current integration,
@@ -277,7 +277,7 @@ public:
    */
   inline const double getStartingTime() const
   {
-    return eventsManager->getStartingTime();
+    return _eventsManager->getStartingTime();
   };
 
   /** get "next time" (ie ending point for current integration, time
@@ -286,7 +286,7 @@ public:
    */
   inline const double getNextTime() const
   {
-    return eventsManager->getNextTime();
+    return _eventsManager->getNextTime();
   };
 
   /** get the current time step size ("next time"-"current time")
@@ -303,7 +303,7 @@ public:
    */
   inline const bool hasNextEvent() const
   {
-    return eventsManager->hasNextEvent();
+    return _eventsManager->hasNextEvent();
   };
 
   /** get all the Integrators of the Simulation
@@ -322,12 +322,12 @@ public:
   /** searchs the integrator of the DS number "numberDS"
    * \param an int ("numberDS")
    */
-  SP::OneStepIntegrator getIntegratorOfDSPtr(int) const ;
+  SP::OneStepIntegrator integratorOfDS(int) const ;
 
   /** get the integrator of "ds"
    * \param a pointer to DynamicalSystem ("ds")
    */
-  SP::OneStepIntegrator getIntegratorOfDSPtr(SP::DynamicalSystem) const ;
+  SP::OneStepIntegrator integratorOfDS(SP::DynamicalSystem) const ;
 
   /** get the number of OSIs in the Simulation (ie the size of allOSI)
    *  \return an unsigned int
@@ -353,9 +353,9 @@ public:
   /** get a pointer to indexSets[i]
    *  \return a UnitaryRelationsSet
    */
-  SP::UnitaryRelationsGraph getIndexSetPtr(unsigned int i)
+  SP::UnitaryRelationsGraph indexSet(unsigned int i)
   {
-    return (model.lock()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getIndexSetPtr(i)) ;
+    return (_model.lock()->nonSmoothDynamicalSystem()->topology()->indexSet(i)) ;
   };
 
 
@@ -388,7 +388,7 @@ public:
    *  \param a string, the name of the osns
    *  \return a pointer to OneStepNSProblem
    */
-  SP::OneStepNSProblem getOneStepNSProblemPtr(const std::string&);
+  SP::OneStepNSProblem oneStepNSProblem(const std::string&);
 
   /** set allNSProblems map - Warning: no copy between
       OneStepNSProblem of each map, pointers links!
@@ -421,7 +421,7 @@ public:
   /** get the SimulationXML* of the Simulation
    *  \return a pointer on the SimulationXML of the Simulation
    */
-  inline SP::SimulationXML getSimulationXMLPtr() const
+  inline SP::SimulationXML simulationXML() const
   {
     return simulationxml;
   }
@@ -437,9 +437,9 @@ public:
   /** get the Model which contains the Simulation
    *  \return SP::Model : the Model which the Simulation
    */
-  inline SP::Model getModelPtr() const
+  inline SP::Model model() const
   {
-    return model.lock();
+    return _model.lock();
   }
 
   /** set the Model which contains the Simulation
@@ -447,7 +447,7 @@ public:
    */
   inline void setModelPtr(SP::Model m)
   {
-    model = boost::weak_ptr<Model>(m);
+    _model = boost::weak_ptr<Model>(m);
   }
 
   /** get tolerance

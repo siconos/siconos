@@ -30,6 +30,21 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 Notes:
 
 Main Changes:
+2009 October Maurice Bremond <maurice.bremond@inrialpes.fr>
+	* from get<Member>Ptr() to member()
+	* member prefix with _
+
+[...]
+
+	
+2009 March Maurice Bremond <maurice.bremond@inrialpes.fr>
+	* Add SiconosGraph, to replace maps of DynamicalSystems and maps
+	of UnitaryRelations. 
+
+2008 December Maurice Bremond <maurice.bremond@inrialpes.fr>
+	* Sparse Matrix : from siconos coordinates storage to boost storage
+	with compress Row
+
 	
 2008 October Franck Perignon <franck.perignon@inrialpes.fr> 
 	* Add DynamicalSystem Factory

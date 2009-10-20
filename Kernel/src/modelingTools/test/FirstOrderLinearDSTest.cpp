@@ -82,14 +82,14 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1()
   cout << "--> Test: constructor xml." << endl;
   SP::FirstOrderLinearDS ds(new FirstOrderLinearDS(tmpxml1));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1A : ", ds->getType() == DS::FOLDS, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1B : ", ds->getNumber() == 13, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1B : ", ds->number() == 13, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1D : ", ds->getStepsInMemory() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1D : ", ds->getN() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1E : ", ds->getX0() == *x0, true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1F : ", ds->getB()==*b0, true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1G : ", ds->getA()==*A0, true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1H : ", ds->getAPtr()->isPlugged(),false);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1I : ", ds->getBPtr()->isPlugged(),false);
+  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1H : ", ds->A()->isPlugged(),false);
+  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1I : ", ds->b()->isPlugged(),false);
   cout << "--> Constructor xml test ended with success." << endl;
 }
 
@@ -99,21 +99,21 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS2()
   cout << "--> Test: constructor xml 2." << endl;
   SP::FirstOrderLinearDS ds(new FirstOrderLinearDS(tmpxml2));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2A : ", ds->getType() == DS::FOLDS, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2B : ", ds->getNumber() == 2, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2B : ", ds->number() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2D : ", ds->getN() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2E : ", ds->getX0() == 2 * *x0, true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2F : ", ds->getAPtr()->isPlugged(), true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2G : ", ds->getBPtr()->isPlugged(), true);
+  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2F : ", ds->A()->isPlugged(), true);
+  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2G : ", ds->b()->isPlugged(), true);
 
   double time = 1.5;
   ds->initialize("TimeStepping", time);
-  //   ds->computeB(time);
+  //   ds->computeb(time);
   //   ds->computeA(time);
   SP::SimpleVector x01(new SimpleVector(3));
   (*x01)(0) = 0;
   (*x01)(1) = 1;
   (*x01)(2) = 2;
-  ds->getBPtr()->display();
+  ds->b()->display();
 
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2I : ", ds->getB()== time* *x01, true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2J : ", ds->getA()== 2**A0, true);
@@ -125,7 +125,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS2()
 
   ds->computeRhs(time);
 
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2M : ", (*(ds->getRhsPtr()))==prod(*(ds->getAPtr()), 2**x0) + ds->getB() , true);
+  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2M : ", (*(ds->rhsPtr()))==prod(*(ds->getA()), 2**x0) + ds->getB() , true);
 
   cout << "--> Constructor xml 2 test ended with success." << endl;
 }
@@ -135,7 +135,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS2()
 void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS3()
 {
   cout << "--> Test: constructor 3." << endl;
-  SP::FirstOrderLinearDS ds(new FirstOrderLinearDS(*x0, "TestPlugin:computeA", "TestPlugin:computeB"));
+  SP::FirstOrderLinearDS ds(new FirstOrderLinearDS(*x0, "TestPlugin:computeA", "TestPlugin:computeb"));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3A : ", ds->getType() == DS::FOLDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3C : ", ds->getN() == 3, true);
@@ -144,7 +144,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS3()
   double time = 1.5;
   ds->initialize("TimeStepping", time);
   //   ds->computeA(time);
-  //   ds->computeB(time);
+  //   ds->computeb(time);
   ds->computeRhs(time);
   SP::SimpleVector x01(new SimpleVector(3));
   (*x01)(0) = 0;
@@ -153,11 +153,11 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS3()
 
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3I : ", ds->getB()== time* *x01, true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3J : ", ds->getA()== 2**A0, true);
-  //  ds->getRhsPtr()->display();
+  //  ds->rhs()->display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3E : ", ds->getRhs() == (time* *x01 + 2 * prod(*A0, *x0)) , true);
 
   ds->computeRhs(time);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2M : ", *(ds->getRhsPtr())==(2*prod(*A0 , *x0) + ds->getB() ), true);
+  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS2M : ", *(ds->rhs())==(2*prod(*A0 , *x0) + ds->getB() ), true);
   cout << "--> Constructor 3 test ended with success." << endl;
 }
 
@@ -177,7 +177,7 @@ void FirstOrderLinearDSTest::testSetAPtr()
   cout << "--> Test: setAPtr." << endl;
   SP::FirstOrderLinearDS ds1(new FirstOrderLinearDS(tmpxml2));
   ds1->setAPtr(A0p);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetAPtr : ", ds1->getAPtr() == A0p, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetAPtr : ", ds1->A() == A0p, true);
   cout << "--> setAPtr test ended with success." << endl;
 }
 
@@ -197,8 +197,8 @@ void FirstOrderLinearDSTest::testSetBPtr()
 {
   cout << "--> Test: setBPtr." << endl;
   FirstOrderLinearDS* ds1(new FirstOrderLinearDS(tmpxml2));
-  ds1->setBPtr(b0);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetBPtr : ", ds1->getBPtr() == b0, true);
+  ds1->setb(b0);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetBPtr : ", ds1->b() == b0, true);
   cout << "--> setBPtr test ended with success." << endl;
 }
 

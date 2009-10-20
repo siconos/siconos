@@ -117,16 +117,16 @@ void PrimalFrictionContact::initialize(SP::Simulation sim)
   }
 
   // get topology
-  SP::Topology topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  SP::Topology topology = simulation->model()->nonSmoothDynamicalSystem()->topology();
 
   // Note that unitaryBlocks is up to date since updateUnitaryBlocks has been called during OneStepNSProblem::initialize()
 
   // Fill vector of friction coefficients
-  SP::UnitaryRelationsSet I0 = topology->getIndexSet0Ptr();
+  SP::UnitaryRelationsSet I0 = topology->indexSet0();
   mu.reset(new MuStorage());
   mu->reserve(I0->size());
 
-  SP::DynamicalSystemsSet allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();;
+  SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();;
 
   // If the topology is TimeInvariant ie if M structure does not change during simulation:
   if (topology->isTimeInvariant() &&   !OSNSInteractions->isEmpty())
@@ -142,7 +142,7 @@ void PrimalFrictionContact::initialize(SP::Simulation sim)
       M->fill(allDS, DSBlocks);
     }
     // Get index set from Simulation
-    SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
+    SP::UnitaryRelationsSet indexSet = simulation->indexSet(levelMin);
     if (!H)
       // Creates and fills M using UR of indexSet
       H.reset(new OSNSMatrix(indexSet, allDS, unitaryDSBlocks, MStorageType));
@@ -153,7 +153,7 @@ void PrimalFrictionContact::initialize(SP::Simulation sim)
     }
 
     for (ConstUnitaryRelationsIterator itUR = indexSet->begin(); itUR != indexSet->end(); ++itUR)
-      mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL> ((*itUR)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
+      mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL> ((*itUR)->interaction()->nonSmoothLaw())->getMu());
 
   }
   else // in that case, M and mu will be updated during preCompute
@@ -164,7 +164,7 @@ void PrimalFrictionContact::initialize(SP::Simulation sim)
       if (MStorageType == 0)
         M.reset(new OSNSMatrix(maxSize, 0));
       else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered DynamicalSystemsSet
-        M.reset(new OSNSMatrix(simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems()->size(), 1));
+        M.reset(new OSNSMatrix(simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems()->size(), 1));
     }
     if (!H)
     {
@@ -173,7 +173,7 @@ void PrimalFrictionContact::initialize(SP::Simulation sim)
       else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered DynamicalSystemsSet
 
 
-        H.reset(new OSNSMatrix(simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems()->size(), simulation->getIndexSetPtr(levelMin)->size()   , 1));
+        H.reset(new OSNSMatrix(simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems()->size(), simulation->indexSet(levelMin)->size()   , 1));
     }
   }
 }
@@ -194,7 +194,7 @@ void PrimalFrictionContact::computeDSBlock(SP::DynamicalSystem DS)
   string osiType; // type of the current one step integrator
   string dsType; // type of the current Dynamical System;
 
-  Osi = simulation->getIntegratorOfDSPtr(DS); // get OneStepIntegrator of current dynamical system
+  Osi = simulation->integratorOfDS(DS); // get OneStepIntegrator of current dynamical system
   osiType = Osi->getType();
   if (osiType == MOREAU || osiType == MOREAU2)
   {
@@ -235,7 +235,7 @@ void PrimalFrictionContact::computeQ(const double time)
     q->resize(sizeOutput);
   q->zero();
 
-  SP::DynamicalSystemsSet allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();;
+  SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();;
   DSIterator itDS;
 
   // type of the current one step integrator
@@ -249,7 +249,7 @@ void PrimalFrictionContact::computeQ(const double time)
 
 void PrimalFrictionContact::computeQBlock(SP::DynamicalSystem DS, unsigned int pos)
 {
-  SP::OneStepIntegrator  Osi = simulation->getIntegratorOfDSPtr(DS);
+  SP::OneStepIntegrator  Osi = simulation->integratorOfDS(DS);
   string osiType = Osi->getType();
   unsigned int sizeDS;
   if (osiType == MOREAU2)
@@ -272,13 +272,13 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::UnitaryRelation U
   string simulationType = simulation->getType();
 
   SP::DynamicalSystem ds = *(UR->dynamicalSystemsBegin());
-  string osiType = simulation->getIntegratorOfDSPtr(ds)->getType();
+  string osiType = simulation->integratorOfDS(ds)->getType();
 
   unsigned int sizeY = UR->getNonSmoothLawSize();
   std::vector<unsigned int> coord(8);
 
   unsigned int relativePosition = UR->getRelativePosition();
-  SP::Interaction mainInteraction = UR->getInteractionPtr();
+  SP::Interaction mainInteraction = UR->interaction();
   coord[0] = relativePosition;
   coord[1] = relativePosition + sizeY;
   coord[2] = 0;
@@ -287,7 +287,7 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::UnitaryRelation U
   coord[7] = pos + sizeY;
 
   SP::SiconosMatrix  H;
-  SP::SiconosVector workX = UR->getWorkXPtr();
+  SP::SiconosVector workX = UR->workX();
   if (osiType == MOREAU2)
   {
   }
@@ -301,7 +301,7 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::UnitaryRelation U
     if (nslawType == NEWTONIMPACTNSLAW)
     {
 
-      e = (boost::static_pointer_cast<NewtonImpactNSL>(mainInteraction->getNonSmoothLawPtr()))->getE();
+      e = (boost::static_pointer_cast<NewtonImpactNSL>(mainInteraction->nonSmoothLaw()))->getE();
 
       std::vector<unsigned int> subCoord(4);
       if (simulationType == "TimeStepping")
@@ -310,7 +310,7 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::UnitaryRelation U
         subCoord[1] = UR->getNonSmoothLawSize();
         subCoord[2] = pos;
         subCoord[3] = pos + subCoord[1];
-        subscal(e, *UR->getYOldPtr(levelMin), *q, subCoord, false);
+        subscal(e, *UR->yOld(levelMin), *q, subCoord, false);
       }
       else if (simulationType == "EventDriven")
       {
@@ -326,11 +326,11 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::UnitaryRelation U
     else if (nslawType == NEWTONIMPACTFRICTIONNSLAW)
     {
 
-      e = (boost::static_pointer_cast<NewtonImpactFrictionNSL>(mainInteraction->getNonSmoothLawPtr()))->getEn();
+      e = (boost::static_pointer_cast<NewtonImpactFrictionNSL>(mainInteraction->nonSmoothLaw()))->getEn();
 
       // Only the normal part is multiplied by e
       if (simulationType == "TimeStepping")
-        (*tildeLocalVelocity)(pos) +=  e * (*UR->getYOldPtr(levelMin))(0);
+        (*tildeLocalVelocity)(pos) +=  e * (*UR->yOld(levelMin))(0);
 
       else RuntimeException::selfThrow("FrictionContact::computetildeLocalVelocityBlock not yet implemented for this type of relation and a non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
 
@@ -347,7 +347,7 @@ void PrimalFrictionContact::computeTildeLocalVelocity(const double time)
     tildeLocalVelocity->resize(sizeLocalOutput);
   tildeLocalVelocity->zero();
   // === Get index set from Simulation ===
-  SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
+  SP::UnitaryRelationsSet indexSet = simulation->indexSet(levelMin);
   // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
 
   unsigned int pos = 0;
@@ -370,9 +370,9 @@ void PrimalFrictionContact::preCompute(const double time)
   // M, sizeOutput have been computed in initialize and are uptodate.
 
   // Get topology
-  SP::Topology topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
-  SP::DynamicalSystemsSet allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();;
-  SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
+  SP::Topology topology = simulation->model()->nonSmoothDynamicalSystem()->topology();
+  SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();;
+  SP::UnitaryRelationsSet indexSet = simulation->indexSet(levelMin);
 
   if (!topology->isTimeInvariant())
   {
@@ -385,7 +385,7 @@ void PrimalFrictionContact::preCompute(const double time)
 
 
     // Updates matrix M
-    SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
+    SP::UnitaryRelationsSet indexSet = simulation->indexSet(levelMin);
     M->fill(allDS, DSBlocks);
     H->fill(indexSet, allDS, unitaryDSBlocks);
     sizeOutput = M->size();
@@ -419,7 +419,7 @@ void PrimalFrictionContact::preCompute(const double time)
     // Update mu
     mu->clear();
     for (ConstUnitaryRelationsIterator itUR = indexSet->begin(); itUR != indexSet->end(); ++itUR)
-      mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL>((*itUR)->getInteractionPtr()->getNonSmoothLawPtr())->getMu());
+      mu->push_back(boost::static_pointer_cast<NewtonImpactFrictionNSL>((*itUR)->interaction()->nonSmoothLaw())->getMu());
   }
 
   // Computes q
@@ -471,7 +471,7 @@ int PrimalFrictionContact::compute(double time)
     //  }
     //       M->display();
     //       q->display();
-    //      info = (*primalFrictionContact_driver)(&numerics_problem, reaction->getArray() , velocity->getArray() , solver->getNumericsSolverOptionsPtr(), numerics_options);
+    //      info = (*primalFrictionContact_driver)(&numerics_problem, reaction->getArray() , velocity->getArray() , solver->numericsSolverOptions(), numerics_options);
     //  cout << " step 2 "<< info << endl;
     //  _z->display();
     //  velocity->display();
@@ -489,7 +489,7 @@ void PrimalFrictionContact::postCompute()
   // Only UnitaryRelations (ie Interactions) of indexSet(leveMin) are concerned.
 
   // === Get index set from Topology ===
-  SP::UnitaryRelationsSet indexSet = simulation->getIndexSetPtr(levelMin);
+  SP::UnitaryRelationsSet indexSet = simulation->indexSet(levelMin);
 
   // y and lambda vectors
   SP::SiconosVector  y, lambda;
@@ -507,8 +507,8 @@ void PrimalFrictionContact::postCompute()
   //       pos = H->getPositionOfUnitaryBlock(*itCurrent);
 
   //       // Get Y and Lambda for the current Unitary Relation
-  //       y = (*itCurrent)->getYPtr(levelMin);
-  //       lambda = (*itCurrent)->getLambdaPtr(levelMin);
+  //       y = (*itCurrent)->y(levelMin);
+  //       lambda = (*itCurrent)->lambda(levelMin);
 
   //       // Copy velocity/_z values, starting from index pos into y/lambda.
 
@@ -517,7 +517,7 @@ void PrimalFrictionContact::postCompute()
 
   //     }
 
-  SP::DynamicalSystemsSet allDS = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getDynamicalSystems();;
+  SP::DynamicalSystemsSet allDS = simulation->model()->nonSmoothDynamicalSystem()->getDynamicalSystems();;
   DSIterator itDS;
   unsigned int sizeDS;
   SP::OneStepIntegrator  Osi;
@@ -531,7 +531,7 @@ void PrimalFrictionContact::postCompute()
 
   //       pos = M->getPositionOfDSBlock(*itDS);
   //       sizeDS = (*itDS)->getDim();
-  //       setBlock((static_cast<LagrangianDS*>(*itDS))->getVelocityPtr(),velocity,sizeDS, pos, 0 );
+  //       setBlock((static_cast<LagrangianDS*>(*itDS))->velocity(),velocity,sizeDS, pos, 0 );
 
   //     }
 

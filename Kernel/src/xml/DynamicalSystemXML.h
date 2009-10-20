@@ -67,7 +67,7 @@ public:
   /** Return the number of the DynamicalSystem
       \return an integer
   */
-  inline const int getNumber() const
+  inline const int number() const
   {
     return SiconosDOMTreeTools::getAttributeValue<int>(rootNode, NUMBER_ATTRIBUTE);
   }

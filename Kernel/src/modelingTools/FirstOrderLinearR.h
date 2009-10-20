@@ -325,7 +325,7 @@ public:
 
   //   /** Function to compute matrix B
   //    */
-  void computeB(double);
+  void computeb(double);
 
   //   /** initialize the relation (check sizes, memory allocation ...)
   //       \param SP to Interaction: the interaction that owns this relation

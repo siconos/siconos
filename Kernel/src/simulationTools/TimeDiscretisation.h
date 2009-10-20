@@ -49,7 +49,7 @@
     \section tdMfunc Main functions:
     - setCurrentTimeStep(), to set current h. This value will be used for all future time steps, until next change.
     - increment(), shift to next time step (increment k, and shift t[k] and t[k+1])
-    - getCurrentTime(), return t[k]
+    - currentTime(), return t[k]
 
     \section tdBuild Construction
 
@@ -78,7 +78,7 @@ private:
   TkVector tk;
 
   /** the XML object linked to the TimeDiscretisation to read XML data */
-  SP::TimeDiscretisationXML timeDiscretisationXML;
+  SP::TimeDiscretisationXML _timeDiscretisationXML;
 
   /** Indic. flag which sets the way the time-discretisation is built.*/
   int tdCase;
@@ -133,7 +133,7 @@ public:
   /** get the time step
    *  \return the value of t[k+1] - t[k], the current time step
    */
-  const double getCurrentTimeStep() const
+  const double currentTimeStep() const
   {
     return h;
   };
@@ -163,7 +163,7 @@ public:
   void setTk(const TkVector&);
 
   /** Get the current time instant value ( tk[pos] ) */
-  double getCurrentTime() const
+  double currentTime() const
   {
     return tk[pos];
   };
@@ -177,9 +177,9 @@ public:
   /** get the TimeDiscretisationXML of the TimeDiscretisation
    *  \return a pointer on the TimeDiscretisationXML of the TimeDiscretisation
    */
-  inline SP::TimeDiscretisationXML getTimeDiscretisationXMLPtr() const
+  inline SP::TimeDiscretisationXML timeDiscretisationXML() const
   {
-    return timeDiscretisationXML;
+    return _timeDiscretisationXML;
   }
 
   /** set the TimeDiscretisationXML of the TimeDiscretisation
@@ -187,7 +187,7 @@ public:
    */
   inline void setTimeDiscretisationXMLPtr(SP::TimeDiscretisationXML timediscrxml)
   {
-    timeDiscretisationXML = timediscrxml;
+    _timeDiscretisationXML = timediscrxml;
   }
 
   /** Steps to next time step. */

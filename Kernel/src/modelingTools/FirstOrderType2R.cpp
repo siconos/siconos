@@ -60,10 +60,10 @@ void FirstOrderType2R::initialize(SP::Interaction inter)
   FirstOrderR::initialize(inter);
 
   // Check if an Interaction is connected to the Relation.
-  unsigned int sizeY = getInteractionPtr()->getSizeOfY();
-  unsigned int sizeDS = getInteractionPtr()->getSizeOfDS();
-  unsigned int sizeZ = getInteractionPtr()->getSizeZ();
-  if (!getInteractionPtr())
+  unsigned int sizeY = interaction()->getSizeOfY();
+  unsigned int sizeDS = interaction()->getSizeOfDS();
+  unsigned int sizeZ = interaction()->getSizeZ();
+  if (!interaction())
     RuntimeException::selfThrow("FirstOrderR::initialize failed. No Interaction linked to the present relation.");
 
   // Update data member (links to DS variables)
@@ -112,12 +112,12 @@ void FirstOrderType2R::computeInput(double t, unsigned int level)
 {
 
   /**compute the newr */
-  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(level);
+  SP::SiconosVector lambda = interaction()->lambda(level);
   *workX = *data[g_alpha];
   *workL = *lambda;
-  *workL -= *(getInteractionPtr()->getLambdaOldPtr(level));
+  *workL -= *(interaction()->lambdaOld(level));
   //  cout<<"FirstOrderType2R::computeInput : diff lambda"<<endl;
-  //  getInteractionPtr()->getLambdaOldPtr(level)->display();
+  //  interaction()->lambdaOld(level)->display();
   //  lambda->display();
   //  workL->display();
   //  cout<<"FirstOrderType2R::computeInput : g_alpha"<<endl;
@@ -177,7 +177,7 @@ void FirstOrderType2R::preparNewtonIteration()
 
   /** compute the comtribution in xp, for the next iteration*/
   /** */
-  SP::SiconosVector lambda = getInteractionPtr()->getLambdaPtr(0);
+  SP::SiconosVector lambda = interaction()->lambda(0);
   *workL = *lambda;
 
   //     cout<<"FirstOrderType2R::preparNewtonIteration, lambda: \n";

@@ -163,7 +163,7 @@ void Lsodar::initialize(SP::Simulation sim)
   string type;
   // initialize xWork with x values of the dynamical systems present in the set.
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
-    xWork->insertPtr((*it)->getXPtr());
+    xWork->insertPtr((*it)->x());
 
   //   Integer parameters for LSODAR are saved in vector intParam.
   //   The link with variable names in opkdmain.f is indicated in comments
@@ -172,7 +172,7 @@ void Lsodar::initialize(SP::Simulation sim)
   intData[0] = xWork->size();
 
   // 2 - Ng, number of constraints:
-  intData[1] =  simulationLink->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getNumberOfConstraints();
+  intData[1] =  simulationLink->model()->nonSmoothDynamicalSystem()->topology()->getNumberOfConstraints();
 
   // 3 - Itol, itask, iopt
   intData[2] = 1; // itol, 1 if ATOL is a scalar, else 2 (ATOL array)
@@ -310,7 +310,7 @@ void Lsodar::updateState(unsigned int level)
   }
   else if (level == 2)// compute acceleration ie RHS and its jacobian.
   {
-    double time = simulationLink->getModelPtr()->getCurrentTime();
+    double time = simulationLink->model()->currentTime();
     for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
       (*it)->update(time);
   }

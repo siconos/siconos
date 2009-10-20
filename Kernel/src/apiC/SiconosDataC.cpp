@@ -52,7 +52,7 @@ void DataC::setStatus(int status)
   _Status = status;
 };
 
-Model * DataC::getModelPtr()
+Model * DataC::model()
 {
   if (!_Model)
     RuntimeException::selfThrow("ApiC::Model is NULL");
@@ -65,7 +65,7 @@ void  DataC::setModelPtr(Model *ptrModel)
   _Model = ptrModel;
 };
 
-Simulation * DataC::getSimulationPtr()
+Simulation * DataC::simulation()
 {
   if (!_Simulation)
     RuntimeException::selfThrow("ApiC::Simulation is NULL");
@@ -77,7 +77,7 @@ void DataC::setSimulationPtr(Simulation * ptrSimulation)
   _Simulation = ptrSimulation;
 };
 
-NonSmoothDynamicalSystem * DataC::getNonSmoothDynamicalSystemPtr()
+NonSmoothDynamicalSystem * DataC::nonSmoothDynamicalSystem()
 {
   if (!_NSDS)
     RuntimeException::selfThrow("ApiC::NSDS is NULL");
@@ -90,7 +90,7 @@ void DataC::setNonSmoothDynamicalSystemPtr(NonSmoothDynamicalSystem * ptr)
   _NSDS = ptr;
 };
 
-TimesSet * DataC::getTimesSetPtr()
+TimesSet * DataC::timesSet()
 {
   if (!_TimesSet)
     RuntimeException::selfThrow("ApiC::TimesSet is NULL");
@@ -99,7 +99,7 @@ TimesSet * DataC::getTimesSetPtr()
 };
 
 
-DynamicalSystemsSet * DataC::getDynamicalSystemsSetPtr()
+DynamicalSystemsSet * DataC::dynamicalSystemsSet()
 {
   if (!_DSSet)
     RuntimeException::selfThrow("ApiC::DSSet is NULL");
@@ -107,7 +107,7 @@ DynamicalSystemsSet * DataC::getDynamicalSystemsSetPtr()
   return _DSSet;
 };
 
-InteractionsSet* DataC::getInteractionsSetPtr()
+InteractionsSet* DataC::interactionsSet()
 {
   if (!_InteractionsSet)
     RuntimeException::selfThrow("ApiC::InteractionsSet is NULL");
@@ -116,7 +116,7 @@ InteractionsSet* DataC::getInteractionsSetPtr()
 };
 
 
-RelationsSet* DataC::getRelationsSetPtr()
+RelationsSet* DataC::relationsSet()
 {
   if (!_RelationsSet)
     RuntimeException::selfThrow("ApiC::RelationsSet is NULL");
@@ -125,7 +125,7 @@ RelationsSet* DataC::getRelationsSetPtr()
 };
 
 
-NonSmoothLawSet* DataC::getNonSmoothLawSetPtr()
+NonSmoothLawSet* DataC::nonSmoothLawSet()
 {
   if (!_NSLawSet)
     RuntimeException::selfThrow("ApiC::NonSmoothLawSet is NULL");
@@ -133,7 +133,7 @@ NonSmoothLawSet* DataC::getNonSmoothLawSetPtr()
   return _NSLawSet;
 };
 
-EventsManager* DataC::getEventsManagerPtr()
+EventsManager* DataC::eventsManager()
 {
   if (!_EventsManager)
     RuntimeException::selfThrow("ApiC::EventsManager is NULL");

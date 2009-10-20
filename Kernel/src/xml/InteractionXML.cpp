@@ -158,9 +158,9 @@ void InteractionXML::loadInteraction(SP::Interaction inter)
   //        * Creation of the RelationXML object
   //        */
   //       xmlNodePtr InteractionContentNode;
-  //       if( inter->getRelationPtr() != NULL )
+  //       if( inter->relation() != NULL )
   //  {
-  //    type = inter->getRelationPtr()->getType();
+  //    type = inter->relation()->getType();
   //    InteractionContentNode = xmlNewChild( this->rootNode, NULL, (xmlChar*)INTERACTION_CONTENT_TAG.c_str(), NULL );
 
   //    if (type == RELATION)
@@ -168,7 +168,7 @@ void InteractionXML::loadInteraction(SP::Interaction inter)
   //        node = xmlNewChild( InteractionContentNode, NULL, (xmlChar*)RELATION_TAG.c_str(), NULL );
   //        relationXML = new RelationXML(node);
   //        // linkage between the Relation and his RelationXML
-  //        inter->getRelationPtr()->setRelationXML( relationXML );
+  //        inter->relation()->setRelationXML( relationXML );
   //      }
   //    else if (type == LAGRANGIANLINEARRELATION)
   //      {
@@ -177,10 +177,10 @@ void InteractionXML::loadInteraction(SP::Interaction inter)
   //        newRelationXml = new LagrangianLinearRXML();
 
   //        // linkage between the Relation and his RelationXML
-  //        inter->getRelationPtr()->setRelationXML( newRelationXml );
+  //        inter->relation()->setRelationXML( newRelationXml );
 
   //        // creation of the RelationXML
-  //        static_cast<LagrangianLinearRXML*>(newRelationXml)->updateRelationXML( node, inter->getRelationPtr() );
+  //        static_cast<LagrangianLinearRXML*>(newRelationXml)->updateRelationXML( node, inter->relation() );
 
   //        relationXML = newRelationXml;
   //      }
@@ -191,10 +191,10 @@ void InteractionXML::loadInteraction(SP::Interaction inter)
   //        newRelationXml = new LagrangianRXML();
 
   //        // linkage between the Relation and his RelationXML
-  //        inter->getRelationPtr()->setRelationXML( newRelationXml );
+  //        inter->relation()->setRelationXML( newRelationXml );
 
   //        // creation of the RelationXML
-  //        static_cast<LagrangianRXML*>(newRelationXml)->updateRelationXML( node, inter->getRelationPtr() );
+  //        static_cast<LagrangianRXML*>(newRelationXml)->updateRelationXML( node, inter->relation() );
 
   //        relationXML = newRelationXml;
   //      }
@@ -205,10 +205,10 @@ void InteractionXML::loadInteraction(SP::Interaction inter)
   //        newRelationXml = new LinearTIRXML();
 
   //        // linkage between the Relation and his RelationXML
-  //        inter->getRelationPtr()->setRelationXML( newRelationXml );
+  //        inter->relation()->setRelationXML( newRelationXml );
 
   //        // creation of the RelationXML
-  //        static_cast<LinearTIRXML*>(newRelationXml)->updateRelationXML( node, inter->getRelationPtr() );
+  //        static_cast<LinearTIRXML*>(newRelationXml)->updateRelationXML( node, inter->relation() );
 
   //        relationXML = newRelationXml;
   //      }
@@ -223,9 +223,9 @@ void InteractionXML::loadInteraction(SP::Interaction inter)
   //       /*
   //        * now, creation of the NonSmoothLawXML object
   //        */
-  //       if( inter->getNonSmoothLawPtr() != NULL )
+  //       if( inter->nonSmoothLaw() != NULL )
   //  {
-  //    type = inter->getNonSmoothLawPtr()->getType();
+  //    type = inter->nonSmoothLaw()->getType();
   //    //node = xmlNewChild( this->rootNode, NULL, (xmlChar*)INTERACTION_NS_LAW.c_str(), NULL );
   //    if (type == COMPLEMENTARITYCONDITIONNSLAW)
   //      {
@@ -234,10 +234,10 @@ void InteractionXML::loadInteraction(SP::Interaction inter)
   //        nslxml = new ComplementarityConditionNSLXML();
 
   //        // linkage between the Relation and his RelationXML
-  //        inter->getNonSmoothLawPtr()->setNonSmoothLawXML( nslxml );
+  //        inter->nonSmoothLaw()->setNonSmoothLawXML( nslxml );
 
   //        // creation of the RelationXML
-  //        static_cast<ComplementarityConditionNSLXML*>(nslxml)->updateNonSmoothLawXML( node, inter->getNonSmoothLawPtr() );
+  //        static_cast<ComplementarityConditionNSLXML*>(nslxml)->updateNonSmoothLawXML( node, inter->nonSmoothLaw() );
 
   //        this->nSLawXML = nslxml;
   //      }
@@ -248,10 +248,10 @@ void InteractionXML::loadInteraction(SP::Interaction inter)
   //        nslxml = new RelayNSLXML();
 
   //        // linkage between the Relation and his RelationXML
-  //        inter->getNonSmoothLawPtr()->setNonSmoothLawXML( nslxml );
+  //        inter->nonSmoothLaw()->setNonSmoothLawXML( nslxml );
 
   //        // creation of the RelationXML
-  //        static_cast<RelayNSLXML*>(nslxml)->updateNonSmoothLawXML( node, inter->getNonSmoothLawPtr() );
+  //        static_cast<RelayNSLXML*>(nslxml)->updateNonSmoothLawXML( node, inter->nonSmoothLaw() );
 
   //        this->nSLawXML = nslxml;
   //      }
@@ -262,10 +262,10 @@ void InteractionXML::loadInteraction(SP::Interaction inter)
   //        nslxml = new NewtonImpactNSLXML();
 
   //        // linkage between the Relation and his RelationXML
-  //        inter->getNonSmoothLawPtr()->setNonSmoothLawXML( nslxml );
+  //        inter->nonSmoothLaw()->setNonSmoothLawXML( nslxml );
 
   //        // creation of the RelationXML
-  //        static_cast<NewtonImpactNSLXML*>(nslxml)->updateNonSmoothLawXML( node, inter->getNonSmoothLawPtr() );
+  //        static_cast<NewtonImpactNSLXML*>(nslxml)->updateNonSmoothLawXML( node, inter->nonSmoothLaw() );
 
   //        this->nSLawXML = nslxml;
   //      }
@@ -276,10 +276,10 @@ void InteractionXML::loadInteraction(SP::Interaction inter)
   //        nslxml = new NewtonImpactFrictionNSLXML();
 
   //        // linkage between the Relation and his RelationXML
-  //        inter->getNonSmoothLawPtr()->setNonSmoothLawXML( nslxml );
+  //        inter->nonSmoothLaw()->setNonSmoothLawXML( nslxml );
 
   //        // creation of the RelationXML
-  //        static_cast<NewtonImpactFrictionNSLXML*>(nslxml)->updateNonSmoothLawXML( node, inter->getNonSmoothLawPtr() );
+  //        static_cast<NewtonImpactFrictionNSLXML*>(nslxml)->updateNonSmoothLawXML( node, inter->nonSmoothLaw() );
 
   //        this->nSLawXML = nslxml;
   //      }

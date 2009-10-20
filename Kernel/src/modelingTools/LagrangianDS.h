@@ -119,55 +119,55 @@ protected:
   // -- MEMBERS --
 
   /** number of degrees of freedom of the system */
-  unsigned int ndof;
+  unsigned int _ndof;
 
   /** state of the system. See details on top of page. */
-  VectorOfVectors q;
+  VectorOfVectors _q;
 
   /** initial coordinates of the system */
-  SP::SiconosVector q0;
+  SP::SiconosVector _q0;
 
   /** initial velocity of the system */
-  SP::SiconosVector velocity0;
+  SP::SiconosVector _velocity0;
 
   /** memory of previous coordinates of the system */
-  SP::SiconosMemory qMemory;
+  SP::SiconosMemory _qMemory;
 
   /** memory of previous velocities of the system */
-  SP::SiconosMemory velocityMemory;
+  SP::SiconosMemory _velocityMemory;
 
   /** "Reaction" due to the non smooth law - The index corresponds to the dynamic levels. */
-  std::vector<SP::SiconosVector> p;
+  std::vector<SP::SiconosVector> _p;
 
   /** mass of the system */
-  SP::SiconosMatrix mass;
+  SP::SiconosMatrix _mass;
 
   /** internal strength of the system */
-  SP::SiconosVector fInt;
+  SP::SiconosVector _fInt;
 
   /** jacobian_q Fint*/
-  SP::SiconosMatrix jacobianQFInt;
+  SP::SiconosMatrix _jacobianQFInt;
   /** jacobian_{qDot} Fint*/
-  SP::SiconosMatrix jacobianQDotFInt;
+  SP::SiconosMatrix _jacobianQDotFInt;
 
   /** external strength of the system */
-  SP::SiconosVector fExt;
+  SP::SiconosVector _fExt;
 
   /** non-linear inertia term of the system */
-  SP::SiconosVector NNL;
+  SP::SiconosVector _NNL;
 
   /** jacobian_q QNNL*/
-  SP::SiconosMatrix jacobianQNNL;
+  SP::SiconosMatrix _jacobianQNNL;
   /** jacobian_{qDot} QNNL*/
-  SP::SiconosMatrix jacobianQDotNNL;
+  SP::SiconosMatrix _jacobianQDotNNL;
 
   /** fL(q[0],q[1],t)= fExt - fInt -NNL */
-  SP::SiconosVector fL;
+  SP::SiconosVector _fL;
 
   /** jacobian_q FL*/
-  SP::SiconosMatrix jacobianQFL;
+  SP::SiconosMatrix _jacobianQFL;
   /** jacobian_{qDot} FL*/
-  SP::SiconosMatrix jacobianQDotFL;
+  SP::SiconosMatrix _jacobianQDotFL;
 
   /** set links with DS members
    */
@@ -327,7 +327,7 @@ public:
    */
   inline const unsigned int getNdof() const
   {
-    return ndof;
+    return _ndof;
   };
 
   /** to set ndof
@@ -335,7 +335,7 @@ public:
    */
   inline void setNdof(unsigned int newNdof)
   {
-    ndof = newNdof;
+    _ndof = newNdof;
   };
 
   /** return the dim. of the system (n for first order, ndof for Lagrangian). Usefull to avoid if(typeOfDS) when size is required.
@@ -343,25 +343,17 @@ public:
    */
   virtual inline const unsigned int getDim() const
   {
-    return ndof;
+    return _ndof;
   }
 
   // -- q --
 
-  /** get the value of q
-   *  \return SimpleVector
-   */
-  inline const SimpleVector getQ() const
-  {
-    return *q[0];
-  }
-
   /** get q
    *  \return pointer on a SiconosVector
    */
-  inline SP::SiconosVector getQPtr() const
+  inline SP::SiconosVector q() const
   {
-    return q[0];
+    return _q[0];
   }
 
   /** set the value of q to newValue
@@ -376,20 +368,12 @@ public:
 
   // -- q0 --
 
-  /** get the value of q0
-   *  \return SimpleVector
-   */
-  inline const SimpleVector getQ0() const
-  {
-    return *q0;
-  }
-
   /** get q0
    *  \return pointer on a SiconosVector
    */
-  inline SP::SiconosVector getQ0Ptr() const
+  inline SP::SiconosVector q0() const
   {
-    return q0;
+    return _q0;
   }
 
   /** set the value of q0 to newValue
@@ -407,27 +391,19 @@ public:
   /** get all the values of the state vector q stored in memory
    *  \return a memory
    */
-  inline SP::SiconosMemory getQMemoryPtr() const
+  inline SP::SiconosMemory qMemory() const
   {
-    return qMemory;
+    return _qMemory;
   }
 
   // -- velocity --
 
-  /** get the value of velocity
-   *  \return SimpleVector
-   */
-  inline const SimpleVector getVelocity() const
-  {
-    return *q[1];
-  }
-
   /** get velocity
    *  \return pointer on a SiconosVector
    */
-  inline SP::SiconosVector getVelocityPtr() const
+  inline SP::SiconosVector velocity() const
   {
-    return q[1];
+    return _q[1];
   }
 
   /** set the value of velocity to newValue
@@ -442,26 +418,13 @@ public:
 
   // -- velocity0 --
 
-  /** get the value of velocity0
-   *  \return SimpleVector
-   */
-  inline const SimpleVector getVelocity0() const
-  {
-    return *velocity0;
-  }
-
   /** get velocity0
    *  \return pointer on a SiconosVector
    */
-  inline SP::SiconosVector getVelocity0Ptr() const
+  inline SP::SiconosVector velocity0() const
   {
-    return velocity0;
+    return _velocity0;
   }
-
-  /** set the value of velocity0 to newValue
-   *  \param SiconosVector newValue
-   */
-  void setVelocity0(const SiconosVector&);
 
   /** set Velocity0 to pointer newPtr
    *  \param SP::SiconosVector newPtr
@@ -473,36 +436,27 @@ public:
   /** get acceleration
    *  \return pointer on a SiconosVector
    */
-  SP::SiconosVector getAccelerationPtr() const ;
+  SP::SiconosVector acceleration() const ;
 
   // Velocity memory
 
   /** get all the values of the state vector velocity stored in memory
    *  \return a memory
    */
-  inline SP::SiconosMemory getVelocityMemoryPtr() const
+  inline SP::SiconosMemory velocityMemory() const
   {
-    return velocityMemory;
+    return _velocityMemory;
   }
 
   // -- p --
-
-  /** get the value of p[index]
-   *  \param unsigned int, required level for p, default = 2
-   *  \return SimpleVector
-   */
-  inline const SimpleVector getP(unsigned int level = 2) const
-  {
-    return *(p[level]);
-  }
 
   /** get p
    *  \param unsigned int, required level for p, default = 2
    *  \return pointer on a SiconosVector
    */
-  inline SP::SiconosVector getPPtr(unsigned int level = 2) const
+  inline SP::SiconosVector p(unsigned int level = 2) const
   {
-    return p[level];
+    return _p[level];
   }
 
   /** set the value of p to newValue
@@ -522,9 +476,9 @@ public:
   /** get mass
    *  \return pointer on a plugged-matrix
    */
-  inline SP::SiconosMatrix getMassPtr() const
+  inline SP::SiconosMatrix mass() const
   {
-    return mass;
+    return _mass;
   }
 
   /** set mass to pointer newPtr
@@ -532,15 +486,15 @@ public:
    */
   inline void setMassPtr(SP::SiconosMatrix newPtr)
   {
-    mass = newPtr;
+    _mass = newPtr;
   }
 
   /** get MassLU: a copy of the mass matrix which is LU-factorized. Temporary function?
    *  \return a pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix getMassLUPtr() const
+  inline SP::SiconosMatrix massLU() const
   {
-    return (workMatrix[invMass]);
+    return (_workMatrix[invMass]);
   }
 
   // --- fInt ---
@@ -548,9 +502,9 @@ public:
   /** get fInt
    *  \return pointer on a plugged vector
    */
-  inline SP::SiconosVector getFIntPtr() const
+  inline SP::SiconosVector fInt() const
   {
-    return fInt;
+    return _fInt;
   }
 
 
@@ -559,7 +513,7 @@ public:
    */
   inline void setFIntPtr(SP::SiconosVector newPtr)
   {
-    fInt = newPtr;
+    _fInt = newPtr;
   }
 
   // -- Fext --
@@ -567,9 +521,9 @@ public:
   /** get fExt
    *  \return pointer on a plugged vector
    */
-  inline SP::SiconosVector getFExtPtr() const
+  inline SP::SiconosVector fExt() const
   {
-    return fExt;
+    return _fExt;
   }
 
 
@@ -578,7 +532,7 @@ public:
    */
   inline void setFExtPtr(SP::SimpleVector newPtr)
   {
-    fExt = newPtr;
+    _fExt = newPtr;
   }
 
   // -- NNL --
@@ -586,9 +540,9 @@ public:
   /** get NNL
    *  \return pointer on a plugged vector
    */
-  inline SP::SiconosVector getNNLPtr() const
+  inline SP::SiconosVector NNL() const
   {
-    return NNL;
+    return _NNL;
   }
 
 
@@ -597,7 +551,7 @@ public:
    */
   inline void setNNLPtr(SP::SiconosVector newPtr)
   {
-    NNL = newPtr;
+    _NNL = newPtr;
   }
 
 
@@ -606,18 +560,18 @@ public:
   /** get jacobianQFInt
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix getJacobianqFIntPtr() const
+  inline SP::SiconosMatrix jacobianqFInt() const
   {
-    return jacobianQFInt;
+    return _jacobianQFInt;
   }
   /** get jacobianQDotFInt
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix getJacobianqDotFIntPtr() const
+  inline SP::SiconosMatrix jacobianqDotFInt() const
   {
-    return jacobianQDotFInt;
+    return _jacobianQDotFInt;
   }
-  //  inline SP::SiconosMatrix getJacobianZFIntPtr() const { return jacobianZFInt; }
+  //  inline SP::SiconosMatrix jacobianZFInt() const { return jacobianZFInt; }
 
 
   /** set jacobianQFInt to pointer newPtr
@@ -625,14 +579,14 @@ public:
    */
   inline void setJacobianQFIntPtr(SP::SiconosMatrix newPtr)
   {
-    jacobianQFInt = newPtr;
+    _jacobianQFInt = newPtr;
   }
   /** set jacobianQDotFInt to pointer newPtr
    *  \param a SP SiconosMatrix
    */
   inline void setJacobianQDotFIntPtr(SP::SiconosMatrix newPtr)
   {
-    jacobianQDotFInt = newPtr;
+    _jacobianQDotFInt = newPtr;
   }
 
   // -- Jacobian NNL --
@@ -641,16 +595,16 @@ public:
   /** get jacobianQNNL
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix getJacobianQNNLPtr() const
+  inline SP::SiconosMatrix jacobianQNNL() const
   {
-    return jacobianQNNL;
+    return _jacobianQNNL;
   }
   /** get jacobianQDotNNL
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix getJacobianQDotNNLPtr() const
+  inline SP::SiconosMatrix jacobianQDotNNL() const
   {
-    return jacobianQDotNNL;
+    return _jacobianQDotNNL;
   }
 
 
@@ -659,14 +613,14 @@ public:
    */
   inline void setJacobianQNNLPtr(SP::SiconosMatrix newPtr)
   {
-    jacobianQNNL = newPtr;
+    _jacobianQNNL = newPtr;
   }
   /** set jacobianQDotNNL to pointer newPtr
    *  \param a SP SiconosMatrix
    */
   inline void setJacobianQDotNNLPtr(SP::SiconosMatrix newPtr)
   {
-    jacobianQDotNNL = newPtr;
+    _jacobianQDotNNL = newPtr;
   }
 
   // -- fL --
@@ -676,15 +630,15 @@ public:
    */
   inline const SimpleVector getFL() const
   {
-    return *fL;
+    return *_fL;
   }
 
   /** get fL
    *  \return pointer on a SiconosVector
    */
-  inline SP::SiconosVector getFLPtr() const
+  inline SP::SiconosVector fL() const
   {
-    return fL;
+    return _fL;
   }
 
   // -- Jacobian fL --
@@ -693,18 +647,18 @@ public:
   /** get JacobianFL
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix getJacobianQFLPtr() const
+  inline SP::SiconosMatrix jacobianQFL() const
   {
-    return jacobianQFL;
+    return _jacobianQFL;
   }
   /** get JacobianFL
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix getJacobianQDotFLPtr() const
+  inline SP::SiconosMatrix jacobianQDotFL() const
   {
-    return jacobianQDotFL;
+    return _jacobianQDotFL;
   }
-  //  inline SP::SiconosMatrix getJacobianZFLPtr() const { return jacobianZFL; }
+  //  inline SP::SiconosMatrix jacobianZFL() const { return jacobianZFL; }
 
   // --- PLUGINS RELATED FUNCTIONS ---
 

@@ -28,11 +28,11 @@ void SiconosBodies::compute()
 
     playground_->buildInteractions();
 
-    model_->getSimulationPtr()->updateInteractions();
+    model_->simulation()->updateInteractions();
 
-    model_->getSimulationPtr()->advanceToEvent();
+    model_->simulation()->advanceToEvent();
 
-    model_->getSimulationPtr()->processEvents();
+    model_->simulation()->processEvents();
 
   }
 
