@@ -1,0 +1,93 @@
+This section is about the Newton-Euler equations:
+
+\subsection{The dynamical system}
+
+\begin{equation}
+\label{NE_Dyn1}
+\begin{array}{l}
+m \dot{V}(t) = F_{ext}  \\
+I \dot \Omega +\Omega \wedge I\Omega = M_{ext}
+\end{array}
+%\caption{Newton-Euler dynamical equations}
+\end{equation}
+
+Where $V$ is the velocity of the center of mass and $\Omega$ is the angular speed in the
+referential attached to the object.
+
+\subsection{The relation}
+X is the position and the orientation, we don't focus on its representation.
+\begin{equation}
+\label{Relation}
+\begin{array}{l}
+Y=H(X)  \\
+R=G(X,\lambda)
+\end{array}
+\end{equation}
+
+
+The first equation is derivative:
+\[\dot Y = C \dot X + \dot H\]
+It exists an operator T :
+\[T:  \left(\begin{array}{l} V\\ \Omega\end{array}\right) \to \dot X \]
+  Using T leads to :
+\[\dot Y = C T \left(\begin{array}{l} V\\ \Omega\end{array}\right) + \dot H\]
+
+\subsection{discretization $t_k \to t_{k+1}$}
+The goal of this section is to describe the computation done in Siconos.
+\subsubsection{explicit case}
+The dynamical system~\ref{NE_Dyn1} leads to the system:
+\begin{equation}
+  \left(\begin{array}{cc} m&0\\0&I\end{array}\right)
+   \left(\begin{array}{c} V_{k+1} - V_k\\ \Omega _{k+1} - \Omega _{k}\end{array}\right)=
+   h\left(\begin{array}{c} Fext_k\\ Mext_k - \Omega _k \wedge I\Omega _k \end{array}\right)+
+   h B \lambda _{k+1}
+  \end{equation}
+Using $W = \left(\begin{array}{cc} m&0\\0&I\end{array}\right) ^{-1} $
+\begin{equation}
+  \label{NE_dis_explicit}
+  \fbox{$
+   \left(\begin{array}{c} V_{k+1} \\ \Omega _{k+1}\end{array}\right)=
+   hW\left(\begin{array}{c} Fext_k\\ Mext_k - \Omega _k \wedge I\Omega _k \end{array}\right)+
+   hWB \lambda _{k+1}+
+   \left(\begin{array}{c} V_{k} \\ \Omega _{k}\end{array}\right)
+   $}
+  \end{equation}
+
+The relation~\ref{Relation} leads to the system:
+
+\[\dot Y _{k+1}= C T \left(\begin{array}{l} V_{k+1} \\ \Omega _{k+1} \end{array}\right) + \dot H _{k} \]
+Substitute $  \left(\begin{array}{l} V_{k+1} \\ \Omega _{k+1} \end{array}\right) $
+using~\ref{NE_dis_explicit} leads:
+
+\[\dot Y _{k+1}= C T \lbrack hW\left(\begin{array}{c} Fext_k\\ Mext_k - \Omega _k \wedge I\Omega _k \end{array}\right)+
+   hWB \lambda _{k+1}+
+   \left(\begin{array}{c} V_{k} \\ \Omega _{k}\end{array}\right) \rbrack
+   + \dot H _{k} \]
+Ones gets:
+\[\fbox{$
+\dot Y _{k+1}= hC T W B \lambda _{k+1} +hCTW \left(\begin{array}{c} Fext_k\\ Mext_k - \Omega _k
+   \wedge I\Omega _k \end{array}\right) + CT \left(\begin{array}{c} V_{k} \\ \Omega
+   _{k}\end{array}\right) +\dot H _{k} $}\]
+
+
+Solving the one step problem gives $\lambda _{k+1}$, from~\ref{NE_dis_explicit} we get
+$ \left(\begin{array}{l} V_{k+1} \\ \Omega _{k+1} \end{array}\right) $. $V$ and $\Omega$ are integrated
+to get $X_{k+1}$.
+
+\subsection{Quaternion case}
+We chose $X= \left(\begin{array}{l} X_g \\q \end{array}\right) $. $X_g$ are the coordinates of the center of mass, and $q$ is a quaternion
+  represented the orientation of solid. It means :
+  \[q_k(0,GM_0)q_k^c = (0,GM_k)\]
+Where G is the center of mass, and M any point of the solid.\\
+This section describes the $T$ operator in this case. Computation using quaternion leads to the relation:
+\[\dot q = \frac{1}{2} q (0,\Omega)\]
+So using the matrix formulation:
+\[\dot q = \frac{1}{2}  \left(\begin{array}{cccc} q_0&-q_1&-q_2&-q_3 \\ q_1&q_0&-q_3&q_2\\
+  q_2&q_3&q_0&-q_1\\ q_3&-q_2&-q_1&q_0\end{array}\right)  \left(\begin{array}{c} 0 \\ \Omega
+  \end{array}\right) =
+  T_q   \Omega  \]
+  That lead to :
+  \[ \dot X = \left(\begin{array}{cc} I_3 & 0 \\ 0 &
+  T_q \end{array}\right) \left(\begin{array}{c} V\\ \Omega  \end{array}\right)  = T \left(\begin{array}{c} V\\ \Omega  \end{array}\right)\]
+
+It is noteworthy that $T$ must be updated at each step. 
