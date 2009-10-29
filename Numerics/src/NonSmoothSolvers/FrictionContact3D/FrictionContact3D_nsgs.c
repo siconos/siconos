@@ -26,7 +26,7 @@
 #include "LA.h"
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <math.h>
 void fake_compute_error_nsgs(FrictionContact_Problem* problem, double *reaction, double *velocity, double tolerance, double* error)
 {
   int n = 3 * problem->numberOfContacts;
@@ -150,24 +150,70 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
   int contact; /* Number of the current row of blocks in M */
 
   dparam[0] = dparam[2]; // set the tolerance for the local solver
-  while ((iter < itermax) && (hasNotConverged > 0))
+
+  if (iparam[1] == 1 || iparam[1] == 2)
   {
-    ++iter;
-    /* Loop through the contact points */
-    //DCOPY( n , q , incx , velocity , incy );
-    for (contact = 0 ; contact < nc ; ++contact)
-      (*local_solver)(contact, n, reaction, iparam, dparam);
 
-    /* **** Criterium convergence **** */
-    (*computeError)(problem, reaction , velocity, tolerance, &error);
+    while ((iter < itermax) && (hasNotConverged > 0))
+    {
+      double reactionold[3];
+      ++iter;
+      /* Loop through the contact points */
+      //DCOPY( n , q , incx , velocity , incy );
+      error = 0.0;
+      for (contact = 0 ; contact < nc ; ++contact)
+      {
+        reactionold[0] = reaction[3 * contact];
+        reactionold[1] = reaction[3 * contact + 1];
+        reactionold[2] = reaction[3 * contact + 2];
+        (*local_solver)(contact, n, reaction, iparam, dparam);
+        error += pow(reaction[3 * contact] - reactionold[0], 2) +
+                 pow(reaction[3 * contact + 1] - reactionold[1], 2) +
+                 pow(reaction[3 * contact + 2] - reactionold[2], 2);
 
-    if (verbose > 0)
-      printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e\n", iter, error);
+      }
 
-    if (error < tolerance) hasNotConverged = 0;
-    *info = hasNotConverged;
+      /* **** Criterium convergence **** */
+      error = sqrt(error);
+      if (verbose > 0)
+        printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e\n", iter, error);
+      if (error < tolerance) hasNotConverged = 0;
+      *info = hasNotConverged;
+    }
+
+    if (iparam[1] == 1) /* Full criterium */
+    {
+      double absolute_error;
+      (*computeError)(problem, reaction , velocity, tolerance, &absolute_error);
+      if (verbose > 0)
+      {
+        if (absolute_error > error)
+        {
+          printf("----------------------------------- FC3D - NSGS - Warning absolute Error = %14.7e is larger than incremental error = %14.7e\n", absolute_error, error);
+        }
+      }
+    }
   }
+  else
+  {
+    while ((iter < itermax) && (hasNotConverged > 0))
+    {
+      ++iter;
+      /* Loop through the contact points */
+      //DCOPY( n , q , incx , velocity , incy );
+      for (contact = 0 ; contact < nc ; ++contact)
+        (*local_solver)(contact, n, reaction, iparam, dparam);
 
+      /* **** Criterium convergence **** */
+      (*computeError)(problem, reaction , velocity, tolerance, &error);
+
+      if (verbose > 0)
+        printf("----------------------------------- FC3D - NSGS - Iteration %i Error = %14.7e\n", iter, error);
+
+      if (error < tolerance) hasNotConverged = 0;
+      *info = hasNotConverged;
+    }
+  }
   dparam[0] = tolerance;
   dparam[1] = error;
 

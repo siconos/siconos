@@ -79,6 +79,7 @@ extern "C" {
       \param info return 0 if the solution is found
       \param options the solver options :
       iparam[0] : Maximum iteration number
+      iparam[1] : error computation. 0 : Complete error computation with velocity computation 1: Light error computation with incremental values on reaction verification of absolute error at the end 2: only light error computation (velocity not computed)
       iparam[4] : localsolver choice 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 2: projection on Disk  with diagonalization,
   */
 
