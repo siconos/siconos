@@ -435,6 +435,7 @@ void frictionContact3D_projectionOnCone_solve(int contact, int dimReaction, doub
   projectionOnCone(&reaction[pos], mu_i);
 
 }
+
 void frictionContact3D_projectionOnCone_with_regularization_solve(int contact, int dimReaction, double* reaction, int* iparam, double* dparam)
 {
   /* Current block position */
@@ -454,7 +455,6 @@ void frictionContact3D_projectionOnCone_with_regularization_solve(int contact, i
   /*   double at = 2*(alpha - beta)/((alpha + beta)*(alpha + beta)); */
 
   double an = 1. / (MLocal[0] + mu_i);
-
   int incx = 1, incy = 1;
   double worktmp[3];
   double normUT;

@@ -245,7 +245,7 @@ void printInFile(const NumericsMatrix* const m, FILE* file)
     fprintf(file, "%i\t%i\n", m->size0, m->size1);
     for (int i = 0; i < m->size1 * m->size0; i++)
     {
-      fprintf(file, "%lf ", m->matrix0[i]);
+      fprintf(file, "%32.24e ", m->matrix0[i]);
       if ((i + 1) % m->size1 == 0)
         fprintf(file, "\n");
     }
@@ -329,6 +329,7 @@ void readInFile(NumericsMatrix* const m, FILE *file)
 
 void readInFileName(NumericsMatrix* const m, const char *filename)
 {
+
 }
 
 void readInFileForScilab(NumericsMatrix* const M, FILE *file) {};

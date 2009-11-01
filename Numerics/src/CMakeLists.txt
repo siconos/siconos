@@ -124,6 +124,8 @@ NEW_TEST(MLCPtest main_mlcp.cpp)
 
 NEW_TEST(Relaytest main_relay.c)
 
+NEW_TEST(FrictionContact_Problemtest main_FC3D.c)
+
 END_TEST()
 
 BEGIN_TEST(utils/test)

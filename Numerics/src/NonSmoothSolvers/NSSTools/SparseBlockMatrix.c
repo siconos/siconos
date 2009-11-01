@@ -700,7 +700,7 @@ void printSBM(const SparseBlockStructuredMatrix* const m)
         {
           for (int j = 0; j < nbColumns; j++)
           {
-            printf("block[%i](%i,%i) = %f\n", blockNum, i, j, m->block[blockNum][i + j * nbRows]);
+            printf("block[%i](%i,%i) = %12.8e\n", blockNum, i, j, m->block[blockNum][i + j * nbRows]);
           }
         }
       }
@@ -777,7 +777,7 @@ void printInFileSBM(const SparseBlockStructuredMatrix* const m, FILE * file)
       fprintf(file, "%i\n", blockNum);
       for (int i = 0; i < nbRows * nbColumns; i++)
       {
-        fprintf(file, "%lf\n", m->block[blockNum][i]);
+        fprintf(file, "%32le\n", m->block[blockNum][i]);
       }
 
     }
@@ -866,7 +866,7 @@ void readInFileSBM(SparseBlockStructuredMatrix* const m, FILE *file)
       m->block[blockNum] = (double*)malloc(nbRows * nbColumns * sizeof(double));
       for (int i = 0; i < nbRows * nbColumns; i++)
       {
-        fscanf(file, "%lf\n", &(m->block[blockNum][i]));
+        fscanf(file, "%32le\n", &(m->block[blockNum][i]));
       }
 
     }
