@@ -398,3 +398,217 @@ void frictionContact3D_AC_free()
     free(MLocal);
   MLocal = NULL;
 }
+
+
+int AlartCurnierNewton(int Fsize, double * reactionBlock, int *iparam, double *dparam)
+{
+
+  int ITMAX = iparam[0];
+  int i, j, inew, INEWTON;
+  int STATUS;
+  double MU = mu_i;
+  double TOL = dparam[0];
+  double RVN, RVT, RVS, RV, RV1, RV3;
+  double PhiT4, PhiS4, Phi3;
+  double Treshold, DET, DET1;
+  double d1, d2, d3, AA, BB, CC;
+  double ERW, WREF;
+
+  double Rloci[3], WRloc[3], WRloci[3], Rerror[3], Verror[3], Rloc[3], S[3];
+  double A[3][3], AWB[3][3], W[3][3];
+  Rloc[0] = reactionBlock[1];
+  S[0] = qLocal[1];
+  Rloc[1] = reactionBlock[2];
+  S[1] = qLocal[2];
+  Rloc[2] = reactionBlock[0];
+  S[2] = qLocal[0];
+  W[2][2] =  MLocal[0 + 0 * 3];
+  W[2][1] =  MLocal[0 + 2 * 3];
+  W[2][0] =  MLocal[0 + 1 * 3];
+  W[1][2] =  MLocal[2 + 0 * 3];
+  W[1][1] =  MLocal[2 + 2 * 3];
+  W[1][0] =  MLocal[2 + 1 * 3];
+  W[0][2] =  MLocal[1 + 0 * 3];
+  W[0][1] =  MLocal[1 + 2 * 3];
+  W[0][0] =  MLocal[1 + 1 * 3];
+
+
+
+  double RhoN;
+  double RhoT;
+  double SW;
+  double DW;
+
+  SW = W[0][0] + W[1][1];
+
+  DW = SW * SW - 4.0 * (W[0][0] * W[1][1] - W[1][0] * W[0][1]);
+
+  if (DW > 0.0) DW = sqrt(DW);
+  else DW = 0.0;
+
+  RhoN = 1.0 / W[2][2];
+  RhoT = 2.0 * (SW - DW) / ((SW + DW) * (SW + DW));
+
+
+
+
+  for (i = 0 ; i < 3 ; ++i)  WRloc[i] = W[i][0] * Rloc[0] + W[i][1] * Rloc[1] + W[i][2] * Rloc[2];
+
+  /* début des itérations de Newton, ITMAX est le nombre d'itérations maximum */
+
+  for (inew = 0 ; inew < ITMAX ; ++inew)
+  {
+
+    for (i = 0 ; i < 3 ; ++i)
+    {
+      WRloci[i] =  WRloc[i];
+      Rloci[i]  =  Rloc[i];
+      for (j = 0 ; j < 3 ; ++j)
+      {
+        AWB[i][j] = 0.0;
+        A[i][j] = 0.0;
+      }
+    }
+    /* On cherche à exprimer la matrice gradient:
+     * Dphi=| I  -W  |
+     *      | Ap  Bp |
+     * p étant l'indice inew.
+     * On effectue tour à tour les projections sur le cone
+     * positif et sur le cone de Coulomb pour exprimer les différentes
+     * valeurs des matrices Ap et Bp.
+     */
+
+    RVN = Rloc[2] - RhoN * (WRloc[2] + S[2]);
+
+    if (RVN >= 0.0)
+    {
+
+      /* Projection sur le cone positif */
+
+      Phi3 = RhoN * (WRloc[2] + S[2]);
+
+      for (i = 0 ; i < 3 ; ++i) AWB[2][i] = RhoN * W[2][i];
+      STATUS = 1;
+    }
+    else
+    {
+      Phi3 = Rloc[2];
+      AWB[2][2] = 1.0;
+      AWB[2][1] = 0.0;
+      AWB[2][0] = 0.0;
+      STATUS = 0;
+    }
+
+    RVT = Rloc[1] - RhoT * (WRloc[1] + S[1]);
+    RVS = Rloc[0] - RhoT * (WRloc[0] + S[0]);
+
+    RV = sqrt(RVT * RVT + RVS * RVS);
+
+    Treshold = MU * Rloc[2];
+
+    if ((RV < Treshold) || (RV < 1.e-20))
+    {
+
+      PhiT4 = RhoT * (WRloc[1] + S[1]);
+      PhiS4 = RhoT * (WRloc[0] + S[0]);
+
+      for (i = 0 ; i < 2 ; ++i)
+        for (j = 0 ; j < 3 ; ++j)
+          AWB[i][j] = RhoT * W[i][j];
+      STATUS = 1;
+    }
+    else
+    {
+
+      RV1 = 1.0 / RV;
+      PhiT4 = Rloc[1] - Treshold * RVT * RV1;
+      PhiS4 = Rloc[0] - Treshold * RVS * RV1;
+
+      AWB[0][2] = -MU * RVS * RV1;
+      AWB[1][2] = -MU * RVT * RV1;
+
+      RV3 = Treshold * RV1 * RV1 * RV1;
+
+      A[1][1] = RV3 * RVS * RVS;
+      A[1][0] = -RV3 * RVT * RVS;
+      A[0][1] = A[1][0];
+      A[0][0] = RV3 * RVT * RVT;
+
+      for (i = 0 ; i < 2 ; ++i) AWB[i][i] = 1.0 - A[i][i];
+      AWB[1][0] = - A[1][0];
+      AWB[0][1] = - A[0][1];
+
+      for (i = 0 ; i < 2 ; ++i)
+        for (j = 0 ; j < 2 ; ++j)
+          A[i][j] = RhoT * A[i][j];
+
+      for (i = 0 ; i < 2 ; ++i)
+        for (j = 0 ; j < 2 ; ++j) AWB[i][j] += A[i][0] * W[0][j] + A[i][1] * W[1][j];
+      STATUS = 2;
+    }
+
+    d1 = AWB[1][1] * AWB[2][2] - AWB[1][2] * AWB[2][1];
+    d2 = AWB[1][0] * AWB[2][2] - AWB[2][0] * AWB[1][2];
+    d3 = AWB[1][0] * AWB[2][1] - AWB[2][0] * AWB[1][1];
+
+    DET = AWB[0][0] * d1 - AWB[0][1] * d2 + AWB[0][2] * d3;
+
+    if (fabs(DET) < 1.e-20)
+    {
+      printf("DET NULL\n");
+    }
+
+    DET1 = 1.0 / DET;
+
+    AA
+      = (AWB[0][1] * AWB[1][2] - AWB[1][1] * AWB[0][2]) * PhiS4
+        - (AWB[0][0] * AWB[1][2] - AWB[1][0] * AWB[0][2]) * PhiT4
+        + (AWB[0][0] * AWB[1][1] - AWB[1][0] * AWB[0][1]) * Phi3;
+
+    Rloc[2] = fmax(0.0 , Rloc[2] - AA * DET1);
+
+    BB
+      = -(AWB[0][1] * AWB[2][2] - AWB[2][1] * AWB[0][2]) * PhiS4
+        + (AWB[0][0] * AWB[2][2] - AWB[2][0] * AWB[0][2]) * PhiT4
+        - (AWB[0][0] * AWB[2][1] - AWB[2][0] * AWB[0][1]) * Phi3;
+
+    Rloc[1] = Rloc[1] - BB * DET1;
+
+    CC = d1 * PhiS4 - d2 * PhiT4 + d3 * Phi3;
+
+    Rloc[0] = Rloc[0] - CC * DET1;
+
+    for (i = 0 ; i < 3 ; ++i) WRloc[i] = W[i][0] * Rloc[0] + W[i][1] * Rloc[1] + W[i][2] * Rloc[2];
+
+    WREF = 0.0;
+    ERW  = 0.0;
+
+    for (i = 0 ; i < 3 ; ++i)
+    {
+      Rerror[i] = Rloci[i] - Rloc[i];
+      Verror[i] = WRloci[i] - WRloc[i];
+      ERW  += Rerror[i] * Verror[i];
+      WREF += WRloc[i] * Rloci[i];
+    }
+
+    if (WREF < 1.e-20) WREF = 1.0;
+    ERW = ERW / WREF;
+
+    INEWTON = inew + 1;
+    if (fabs(ERW) < TOL * TOL)  break;
+  }
+  if (verbose > 0)
+  {
+    printf("-----------------------------------    AlartCurnierNewton number of iteration = %i \n", INEWTON);
+    printf("-----------------------------------    AlartCurnierNewton error = %.10e \n", ERW);
+  }
+
+  dparam[1] = ERW;
+  reactionBlock[0] = Rloc[2];
+  reactionBlock[1] = Rloc[0];
+  reactionBlock[2] = Rloc[1];
+  if (fabs(ERW) > TOL * TOL)  return 1;
+  else return 0;
+
+
+}

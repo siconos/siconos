@@ -95,6 +95,13 @@ extern "C" {
   /** free memory for friction contact 3D Alart-Curnier solver */
   void frictionContact3D_AC_free();
 
+  /** Home made Alart-Curnier local formulation taken from Confeti. this routine has to be severely optimized !!
+      \param int Fsize :  size of the local problem
+      \param reactionBlock : local reaction
+      \param iparam :
+      \param dparam :
+  */
+  int AlartCurnierNewton(int Fsize, double * reactionBlock, int *iparam, double *dparam);
 #ifdef __cplusplus
 }
 #endif

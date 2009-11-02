@@ -87,30 +87,31 @@ int test_Series(FrictionContact_Problem* problem, double tolerance, double local
   }
   printf("\n");
 
-  /*     localsolver = 1; // 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 3: projection on Disk  with diagonalization,    */
+  localsolver = 1; // 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 3: projection on Disk  with diagonalization,
 
-  /*     numerics_solver_options.iparam[0] = nmax ; */
-  /*     numerics_solver_options.iparam[1] = 0 ; */
-  /*     numerics_solver_options.iparam[2] = 0 ; */
-  /*     numerics_solver_options.iparam[3] = 0 ;    */
-  /*     numerics_solver_options.iparam[4] = localsolver ; */
+  numerics_solver_options.iparam[0] = nmax ;
+  numerics_solver_options.iparam[1] = 0 ;
+  numerics_solver_options.iparam[2] = 0 ;
+  numerics_solver_options.iparam[3] = 0 ;
+  numerics_solver_options.iparam[4] = localsolver ;
 
-  /*     numerics_solver_options.dparam[0] = tolerance ; */
-  /*     numerics_solver_options.dparam[1] = 0.0 ; */
-  /*     numerics_solver_options.dparam[2] = localtolerance ; */
-  /*     numerics_solver_options.dparam[3] = 0.0 ; */
-  /*     numerics_solver_options.dparam[4] = 0.0 ; */
+  numerics_solver_options.dparam[0] = tolerance ;
+  numerics_solver_options.dparam[1] = 0.0 ;
+  numerics_solver_options.dparam[2] = localtolerance ;
+  numerics_solver_options.dparam[3] = 0.0 ;
+  numerics_solver_options.dparam[4] = 0.0 ;
 
-  /*     info = frictionContact3D_driver(problem,  */
-  /*            reaction , velocity,  */
-  /*            &numerics_solver_options, &numerics_options); */
-  /*        printf("\n"); */
-  /*     for (int k = 0 ; k < 3*NC; k++){ */
-  /*  printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]); */
-  /*  velocity[k]=0.0; */
-  /*  reaction[k]=0.0; */
-  /*     }    */
-  /*     printf("\n"); */
+  info = frictionContact3D_driver(problem,
+                                  reaction , velocity,
+                                  &numerics_solver_options, &numerics_options);
+  printf("\n");
+  for (int k = 0 ; k < 3 * NC; k++)
+  {
+    printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
+    velocity[k] = 0.0;
+    reaction[k] = 0.0;
+  }
+  printf("\n");
 
 
 
