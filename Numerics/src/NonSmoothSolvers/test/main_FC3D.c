@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "FrictionContact_Problem.h"
+#include "NonSmoothDrivers.h"
 #include "LA.h"
 #include <math.h>
 
@@ -34,6 +34,90 @@ int test_Series(FrictionContact_Problem* problem)
 {
   int info = -1;
 
+  // Numerics and Solver Options
+
+  Numerics_Options numerics_options;
+  numerics_options.verboseMode = 1; // turn verbose mode to off by default
+
+
+  Solver_Options numerics_solver_options;
+  numerics_solver_options.filterOn = 0;
+  numerics_solver_options.isSet = 1;
+
+  strcpy(numerics_solver_options.solverName, "NSGS");
+
+  numerics_solver_options.iSize = 5;
+  numerics_solver_options.iparam = (int*)malloc(numerics_solver_options.iSize * sizeof(int));
+  numerics_solver_options.dSize = 5;
+  numerics_solver_options.dparam = (double*)malloc(numerics_solver_options.dSize * sizeof(double));
+
+
+
+
+
+
+
+  int nmax = 10000; // Max number of iteration
+  double tolerance = 1e-16;
+  double localtolerance = 1e-16;
+
+
+  numerics_solver_options.iparam[0] = nmax ;
+  numerics_solver_options.iparam[1] = 0 ;
+  numerics_solver_options.dparam[0] = tolerance ;
+  numerics_solver_options.dparam[2] = localtolerance ;
+
+  int NC = problem->numberOfContacts;
+  double *reaction = (double*)malloc(3 * NC * sizeof(double));
+  double *velocity = (double*)malloc(3 * NC * sizeof(double));
+
+  int localsolver = 0; // 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 3: projection on Disk  with diagonalization,
+  numerics_solver_options.iparam[4] = localsolver ;
+
+  info = frictionContact3D_driver(problem,
+                                  reaction , velocity,
+                                  &numerics_solver_options, &numerics_options);
+
+  printf("\n");
+  for (int k = 0 ; k < 3 * NC; k++) printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
+  printf("\n");
+
+  localsolver = 1; // 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 3: projection on Disk  with diagonalization,
+  numerics_solver_options.iparam[4] = localsolver ;
+  info = frictionContact3D_driver(problem,
+                                  reaction , velocity,
+                                  &numerics_solver_options, &numerics_options);
+
+  printf("\n");
+  for (int k = 0 ; k < 3 * NC; k++) printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
+  printf("\n");
+
+  localsolver = 2; // 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 3: projection on Disk  with diagonalization,
+  numerics_solver_options.iparam[4] = localsolver ;
+  info = frictionContact3D_driver(problem,
+                                  reaction , velocity,
+                                  &numerics_solver_options, &numerics_options);
+
+  printf("\n");
+  for (int k = 0 ; k < 3 * NC; k++) printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
+  printf("\n");
+
+  localsolver = 3; // 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 3: projection on Disk  with diagonalization,
+  numerics_solver_options.iparam[4] = localsolver ;
+
+  info = frictionContact3D_driver(problem,
+                                  reaction , velocity,
+                                  &numerics_solver_options, &numerics_options);
+
+  printf("\n");
+  for (int k = 0 ; k < 3 * NC; k++) printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
+  printf("\n");
+
+
+  free(reaction);
+  free(velocity);
+
+  printf("info =%i\n", info);
 
   return info;
 }
@@ -55,7 +139,7 @@ int main(void)
     testfile[i] = (char *)malloc(20 * sizeof(char));
   }
 
-  testfile[0] = "./DATA/Example1_Fc3D_SBM.dat" ;
+  testfile[0] = "./DATA/Example1_Fc3D_SBM.dat";
   int info = -1;
   FILE * file;
 
@@ -70,11 +154,9 @@ int main(void)
     fclose(file);
 
 
-    file = fopen("test.dat", "w");
-    frictionContact3D_printInFile(testproblem, file);
-    fclose(file);
-
-
+    /*    file = fopen("test.dat","w");      */
+    /*    frictionContact3D_printInFile(testproblem,file ); */
+    /*    fclose(file); */
 
     info = test_Series(testproblem);
 
