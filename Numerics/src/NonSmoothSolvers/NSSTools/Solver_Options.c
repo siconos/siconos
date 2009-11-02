@@ -121,7 +121,7 @@ void printSolverOptions(Solver_Options* options)
     {
       printf(" - double parameters (see %s documentation to know what is each parameter): ", options->solverName);
       for (int i = 0; i < options->dSize; ++i)
-        printf("%.10lf\t", options->dparam[i]);
+        printf("%.10le\t", options->dparam[i]);
       printf("\n");
     }
   }

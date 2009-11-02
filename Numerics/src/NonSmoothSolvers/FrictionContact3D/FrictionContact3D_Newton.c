@@ -108,7 +108,14 @@ void frictionContact3D_Newton_solve(int contact, int dimReaction, double* reacti
   (*updateSolver)(contact, reaction);
   int pos = Fsize * contact; /* Current block position */
   double * reactionBlock = &reaction[pos];
-  int info = nonSmoothNewton(Fsize, reactionBlock, &F, &jacobianF, iparam, dparam);
+
+
+
+  int info = nonSmoothDirectNewton(Fsize, reactionBlock, &F, &jacobianF, iparam, dparam);
+
+
+
+
   if (info > 0)
   {
     if (verbose > 0)

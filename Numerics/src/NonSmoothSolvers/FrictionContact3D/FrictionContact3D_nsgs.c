@@ -149,7 +149,14 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
   int hasNotConverged = 1;
   int contact; /* Number of the current row of blocks in M */
 
-  dparam[0] = dparam[2]; // set the tolerance for the local solver
+  double localdparam[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
+  int localiparam[5] = {0, 0, 0, 0, 0};
+
+  localiparam[0] = itermax / 10;
+  localdparam[0] = dparam[2];
+
+
+  /*  dparam[0]= dparam[2]; // set the tolerance for the local solver */
 
   if (iparam[1] == 1 || iparam[1] == 2)
   {
@@ -166,7 +173,7 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
         reactionold[0] = reaction[3 * contact];
         reactionold[1] = reaction[3 * contact + 1];
         reactionold[2] = reaction[3 * contact + 2];
-        (*local_solver)(contact, n, reaction, iparam, dparam);
+        (*local_solver)(contact, n, reaction, localiparam, localdparam);
         error += pow(reaction[3 * contact] - reactionold[0], 2) +
                  pow(reaction[3 * contact + 1] - reactionold[1], 2) +
                  pow(reaction[3 * contact + 2] - reactionold[2], 2);

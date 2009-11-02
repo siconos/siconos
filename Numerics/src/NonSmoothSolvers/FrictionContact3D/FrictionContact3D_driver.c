@@ -112,15 +112,16 @@ int frictionContact3D_printInFile(FrictionContact_Problem*  problem, FILE* file)
     fprintf(stderr, "Numerics, FrictionContact_Problem printInFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
+  int i;
   int nc = problem->numberOfContacts;
   fprintf(file, "%d\n", nc);
   printInFile(problem->M, file);
-  for (int i = 0; i < problem->M->size1; i++)
+  for (i = 0; i < problem->M->size1; i++)
   {
     fprintf(file, "%32.24e ", problem->q[i]);
   }
   fprintf(file, "\n");
-  for (int i = 0; i < nc; i++)
+  for (i = 0; i < nc; i++)
   {
     fprintf(file, "%32.24e ", problem->mu[i]);
   }
@@ -132,6 +133,7 @@ int frictionContact3D_printInFile(FrictionContact_Problem*  problem, FILE* file)
 int frictionContact3D_newFromFile(FrictionContact_Problem* problem, FILE* file)
 {
   int nc = 0;
+  int i;
   fscanf(file, "%d\n", &nc);
   problem->numberOfContacts = nc;
   problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
@@ -139,14 +141,14 @@ int frictionContact3D_newFromFile(FrictionContact_Problem* problem, FILE* file)
   readInFile(problem->M, file);
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
-  for (int i = 0; i < problem->M->size1; i++)
+  for (i = 0; i < problem->M->size1; i++)
   {
     fscanf(file, "%lf ", &(problem->q[i]));
   }
 
   fscanf(file, "\n");
   problem->mu = (double *) malloc(nc * sizeof(double));
-  for (int i = 0; i < nc; i++)
+  for (i = 0; i < nc; i++)
   {
     fscanf(file, "%lf ", &(problem->mu[i]));
   }

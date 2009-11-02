@@ -197,3 +197,118 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
     return 1;
   else return 0;
 }
+
+int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr* jacobianPhi, int* iparam, double* dparam)
+{
+  if (phi == NULL || jacobianPhi == NULL)
+  {
+    fprintf(stderr, "NonSmoothNewton error: phi or its jacobian function = NULL pointer.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  int itermax = iparam[0]; // maximum number of iterations allowed
+  int niter = 0; // current iteration number
+  double tolerance = dparam[0];
+  if (verbose > 0)
+  {
+    printf(" ============= Starting of Newton process =============\n");
+    printf(" - tolerance: %14.7e\n - maximum number of iterations: %i\n", tolerance, itermax);
+  }
+
+  int incx = 1;
+  int n2 = n * n;
+  int infoDGESV;
+
+  /* Memory allocation for phi and its jacobian */
+  double * phiVector = (double*)malloc(n * sizeof(*phiVector));
+  double *jacobianPhiMatrix = (double*)malloc(n2 * sizeof(*jacobianPhiMatrix));
+  /** merit function and its jacobian */
+  double psi;
+  double *jacobian_psi = (double*)malloc(n * sizeof(*jacobian_psi));
+  int* ipiv = (int *)malloc(n * sizeof(*ipiv));
+  if (phiVector == NULL || jacobianPhiMatrix == NULL ||  jacobian_psi == NULL || ipiv == NULL)
+  {
+    fprintf(stderr, "NonSmoothNewton, memory allocation failed.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  /** The algorithm is alg 4.1 of the paper of Kanzow and Kleinmichel, "A new class of semismooth Newton-type methods
+      for nonlinear complementarity problems", in Computational Optimization and Applications, 11, 227-251 (1998).
+
+      We try to keep the same notations
+  */
+
+  double norm_jacobian_psi, normPhi;
+  double terminationCriterion = 1;
+  if (jacobian_psi == NULL)
+  {
+    fprintf(stderr, "NonSmoothNewton, memory allocation failed for jacobian_psi.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  /** Iterations ... */
+  while ((niter < itermax) && (terminationCriterion > tolerance))
+  {
+    ++niter;
+    /** Computes phi and its jacobian */
+    (*phi)(n, z, phiVector, 0);
+    (*jacobianPhi)(n, z, jacobianPhiMatrix, 1);
+    /* Computes the jacobian of the merit function, jacobian_psi = transpose(jacobianPhiMatrix).phiVector */
+    DGEMV(LA_TRANS, n, n, 1.0, jacobianPhiMatrix, n, phiVector, incx, 0.0, jacobian_psi, incx);
+    norm_jacobian_psi = DNRM2(n, jacobian_psi, 1);
+
+    /* Computes norm2(phi) */
+    normPhi = DNRM2(n, phiVector, 1);
+    /* Computes merit function */
+    psi = 0.5 * normPhi * normPhi;
+
+    /* Stops if the termination criterion is satisfied */
+    terminationCriterion = norm_jacobian_psi;
+    if (terminationCriterion < tolerance)
+      break;
+
+    /* Search direction calculation
+    Find a solution dk of jacobianPhiMatrix.d = -phiVector.
+    dk is saved in phiVector.
+    */
+    DSCAL(n , -1.0 , phiVector, incx);
+    DGESV(n, 1, jacobianPhiMatrix, n, ipiv, phiVector, n, infoDGESV);
+
+    double tk = -1;
+
+    DAXPY(n , tk , phiVector , 1 , z , 1);
+
+
+
+    if (verbose > 0)
+    {
+      printf("Non Smooth Newton, iteration number %i, error equal to %14.7e .\n", niter, terminationCriterion);
+      printf(" -----------------------------------------------------------------------\n");
+    }
+  }
+
+  /* Total number of iterations */
+  iparam[1] = niter;
+  /* Final error */
+  dparam[1] = terminationCriterion;
+
+  /** Free memory*/
+  free(phiVector);
+  free(jacobianPhiMatrix);
+  free(jacobian_psi);
+  free(ipiv);
+
+  if (verbose > 0)
+  {
+    if (dparam[1] > tolerance)
+      printf("Non Smooth Newton warning: no convergence after %i iterations\n" , niter);
+
+    else
+      printf("Non Smooth Newton: convergence after %i iterations\n" , niter);
+    printf(" The residue is : %e \n", dparam[1]);
+  }
+
+  if (dparam[1] > tolerance)
+    return 1;
+  else return 0;
+}

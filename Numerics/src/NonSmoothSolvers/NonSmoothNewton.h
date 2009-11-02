@@ -41,7 +41,7 @@ typedef void (*UpdateSolverPtr)(int, double*);
 extern "C" {
 #endif
 
-  /** Newton solver
+  /** Newton solver with line Search
    \param size of the vector z
    \param the vector z, unknown vector, in-out argument
    \param pointer to \f$ \phi \f$ function
@@ -54,6 +54,20 @@ extern "C" {
      - [1]: error
   */
   int nonSmoothNewton(int, double*, NewtonFunctionPtr*, NewtonFunctionPtr*, int*, double*);
+
+  /** Newton solver without line Search
+  \param size of the vector z
+  \param the vector z, unknown vector, in-out argument
+  \param pointer to \f$ \phi \f$ function
+  \param pointer to \f$ \nabla_z \phi(z) \f$ function
+  \param iparam vector of int parameters:\n
+   - [0] : max. number of iterations
+   - [1] : number of iterations processed
+  \param dparam vector of double parameters:\n
+   - [0]: tolerance
+   - [1]: error
+  */
+  int nonSmoothDirectNewton(int, double*, NewtonFunctionPtr*, NewtonFunctionPtr*, int*, double*);
 
   /** Armijo Linesearch
       \param n, size of the vector z
