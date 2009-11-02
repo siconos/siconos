@@ -104,7 +104,8 @@ int checkTrivialCase(int n, double* q, double* velocity, double* reaction, int* 
   }
   return info;
 }
-int frictionContact3D_printInFile(FrictionContact_Problem* const problem, FILE* file)
+
+int frictionContact3D_printInFile(FrictionContact_Problem*  problem, FILE* file)
 {
   if (! problem)
   {
@@ -152,4 +153,15 @@ int frictionContact3D_newFromFile(FrictionContact_Problem* problem, FILE* file)
   fscanf(file, "\n");
   fscanf(file, "%d\n", &(problem->isComplete));
   return 0;
+}
+void freeFrictionContact_problem(FrictionContact_Problem* problem)
+{
+
+  freeNumericsMatrix(problem->M);
+  free(problem->M);
+  free(problem->mu);
+  free(problem->q);
+  free(problem);
+  problem = NULL;
+
 }

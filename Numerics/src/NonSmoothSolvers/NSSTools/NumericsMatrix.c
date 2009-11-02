@@ -178,7 +178,10 @@ void freeNumericsMatrix(NumericsMatrix* m)
     m->matrix0 = NULL;
   }
   else
+  {
     freeSBM(m->matrix1);
+    free(m->matrix1);
+  }
 }
 
 

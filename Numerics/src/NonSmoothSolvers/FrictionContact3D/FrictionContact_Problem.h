@@ -115,8 +115,9 @@ typedef struct
 } FrictionContact_Problem;
 
 
-int frictionContact3D_printInFile(FrictionContact_Problem* const problem, FILE* file);
+int frictionContact3D_printInFile(FrictionContact_Problem*  problem, FILE* file);
 
-int frictionContact3D_newFromFile(FrictionContact_Problem* const problem, FILE* file);
+int frictionContact3D_newFromFile(FrictionContact_Problem*  problem, FILE* file);
 
+void freeFrictionContact_problem(FrictionContact_Problem* problem);
 #endif

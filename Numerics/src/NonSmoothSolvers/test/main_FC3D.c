@@ -116,6 +116,8 @@ int test_Series(FrictionContact_Problem* problem)
 
   free(reaction);
   free(velocity);
+  free(numerics_solver_options.iparam);
+  free(numerics_solver_options.dparam);
 
   printf("info =%i\n", info);
 
@@ -134,10 +136,10 @@ int main(void)
 
   int ntestfile = 1;
   char ** testfile = (char **)malloc(ntestfile * sizeof(char *));
-  for (int i = 0 ; i < ntestfile; i++)
-  {
-    testfile[i] = (char *)malloc(20 * sizeof(char));
-  }
+  /*   for (int i =0 ; i< ntestfile; i++)  */
+  /*       { */
+  /*    testfile[i] = (char *)malloc(20*sizeof(char)); */
+  /*       } */
 
   testfile[0] = "./DATA/Example1_Fc3D_SBM.dat";
   int info = -1;
@@ -160,10 +162,12 @@ int main(void)
 
     info = test_Series(testproblem);
 
+    freeFrictionContact_problem(testproblem);
 
   }
+  /*   for (int i =0 ; i< ntestfile; i++) free(testfile[i]); */
 
-
+  free(testfile);
 
 
 
