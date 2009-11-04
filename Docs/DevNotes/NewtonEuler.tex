@@ -32,59 +32,56 @@ It exists an operator T :
   Using T leads to :
 \[\dot Y = C T \left(\begin{array}{l} V\\ \Omega\end{array}\right) + \dot H\]
 
-\subsection{discretization $t_k \to t_{k+1}$}
-The goal of this section is to describe the computation done in Siconos.
+\subsection{discretization $t_k \to t_{k+1}$, and implementation in Siconos}
+The goal of this section is to describe the computation done in Siconos. The unknown are rename
+using the Siconos convention.
+\subsubsection{the unknowns}
+About the DS:
+\[\_v_{k}=\left(\begin{array}{c} V_k\\ \Omega _{k}\end{array}\right)\]
+And $\_q_{k}$ represent the system, usually it could be the coordinate of the center of mass and a
+representation of the orientation.
+
 \subsubsection{explicit case}
 The dynamical system~\ref{NE_Dyn1} leads to the system:
 \begin{equation}
   \left(\begin{array}{cc} m&0\\0&I\end{array}\right)
-   \left(\begin{array}{c} V_{k+1} - V_k\\ \Omega _{k+1} - \Omega _{k}\end{array}\right)=
-   h\left(\begin{array}{c} Fext_k\\ Mext_k - \Omega _k \wedge I\Omega _k \end{array}\right)+
-   h B \lambda _{k+1}
+   (\_v_{k+1}-\_v_{k})=
+   h \_Fl_k +
+    ^t(CT) h\lambda _{k+1}
   \end{equation}
+  With \[\_Fl_k = \left(\begin{array}{c} Fext_k\\ Mext_k - \Omega _k \wedge I\Omega _k \end{array}\right)\]
 Using $W = \left(\begin{array}{cc} m&0\\0&I\end{array}\right) ^{-1} $
 \begin{equation}
   \label{NE_dis_explicit}
   \fbox{$
-   \left(\begin{array}{c} V_{k+1} \\ \Omega _{k+1}\end{array}\right)=
-   hW\left(\begin{array}{c} Fext_k\\ Mext_k - \Omega _k \wedge I\Omega _k \end{array}\right)+
-   hWB \lambda _{k+1}+
-   \left(\begin{array}{c} V_{k} \\ \Omega _{k}\end{array}\right)
+   \_v_{k+1}=
+   W (h \_Fl_k)+
+   W ^t(CT)h\lambda _{k+1}+ \_v_k
    $}
   \end{equation}
+  This computation is done in Moreau::updateState, using:
+  \[\_ResiduFree_k = -h \_Fl_k\]
+  \[Xfree_k = -W \_ResiduFree_k + \_v_k\]
 
 The relation~\ref{Relation} leads to the system:
 
-\[\dot Y _{k+1}= C T \left(\begin{array}{l} V_{k+1} \\ \Omega _{k+1} \end{array}\right) + \dot H _{k} \]
-Substitute $  \left(\begin{array}{l} V_{k+1} \\ \Omega _{k+1} \end{array}\right) $
-using~\ref{NE_dis_explicit} leads:
+\[\dot Y _{k+1}= C T \_v_{k+1} + \dot H _{k} \]
+Substitute $  \_v_{k+1} $ using~\ref{NE_dis_explicit} leads:
 
-\[\dot Y _{k+1}= C T \lbrack hW\left(\begin{array}{c} Fext_k\\ Mext_k - \Omega _k \wedge I\Omega _k \end{array}\right)+
-   hWB \lambda _{k+1}+
-   \left(\begin{array}{c} V_{k} \\ \Omega _{k}\end{array}\right) \rbrack
-   + \dot H _{k} \]
+\[\dot Y _{k+1}= C T \lbrack W h\_Fl_k+
+   hW^t(CT) \lambda _{k+1}+ \_v_k \rbrack
+   + \dot H _{k} = C T \lbrack  hW ^t(CT) \lambda _{k+1}+ Xfree_k \rbrack
+   + \dot H _{k}\]
 Ones gets:
 \[\fbox{$
-\dot Y _{k+1}= hC T W B \lambda _{k+1} +hCTW \left(\begin{array}{c} Fext_k\\ Mext_k - \Omega _k
-   \wedge I\Omega _k \end{array}\right) + CT \left(\begin{array}{c} V_{k} \\ \Omega
-   _{k}\end{array}\right) +\dot H _{k} $}\]
+\dot Y _{k+1}= C T W ^t(CT) (h\lambda _{k+1}) + CT Xfree_k +\dot H _{k} $}\]
 
 
-Solving the one step problem gives $\lambda _{k+1}$, from~\ref{NE_dis_explicit} we get
-$ \left(\begin{array}{l} V_{k+1} \\ \Omega _{k+1} \end{array}\right) $. $V$ and $\Omega$ are integrated
-to get $X_{k+1}$.
-
-\paragraph{Implementation in Siconos:}
-\begin{enumerate}
-  \item[--] The Moreau::comouteResiduFree computes ds->residuFree = -FL that is
-  $-\left(\begin{array}{c} Fext_k\\ Mext_k - \Omega _k \wedge I\Omega _k \end{array}\right) $ thanks
-  ds::computeFL
-  \item[--] The Moreau::computeFreeState computes $X_{free} = T(V_i^{k+1} - hW (ResiduFree))$
-    \item[--] LinearOSNS::computeQBlock computes $q=C X_{free}$
-  \end{enumerate}
+Solving the one step problem gives $h\lambda _{k+1}$, and from~\ref{NE_dis_explicit} we get
+$ \_v_{k+1} $. At least, $ \_v_{k+1} $ is used to compute $\dot \_q_{k+1}$, provided $\_q_{k+1}$.
 
 \subsection{Quaternion case}
-We chose $X= \left(\begin{array}{l} X_g \\q \end{array}\right) $. $X_g$ are the coordinates of the center of mass, and $q$ is a quaternion
+Working in 3D, we chose $\_q= \left(\begin{array}{l} X_g \\q \end{array}\right) $. $X_g$ are the 3 coordinates of the center of mass, and $q$ is a quaternion
   represented the orientation of solid. It means :
   \[q_k(0,GM_0)q_k^c = (0,GM_k)\]
 Where G is the center of mass, and M any point of the solid.\\
@@ -96,8 +93,13 @@ So using the matrix formulation:
   \end{array}\right) =
   T_q   \Omega  \]
   That lead to :
-  \[ \dot X = \left(\begin{array}{cc} I_3 & 0 \\ 0 &
-  T_q \end{array}\right) \left(\begin{array}{c} V\\ \Omega  \end{array}\right)  = T \left(\begin{array}{c} V\\ \Omega  \end{array}\right)\]
+  \[ \dot \_q = \left(\begin{array}{cc} I_3 & 0 \\ 0 &
+  T_q \end{array}\right) \left(\begin{array}{c} V\\ \Omega  \end{array}\right)  = T
+  \left(\begin{array}{c} V\\ \Omega  \end{array}\right)=T \_v\]
 
 It is noteworthy that $T$ must be updated at each step.
 
+
+\subsection{Case of the Relation between many DS}
+We focus on relation using 2 DS:
+\[Y=H(\_q1,\_q2)\]
