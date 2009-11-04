@@ -25,7 +25,7 @@ R=G(X,\lambda)
 \end{equation}
 
 
-The first equation is derivative:
+The first equation is derived:
 \[\dot Y = C \dot X + \dot H\]
 It exists an operator T :
 \[T:  \left(\begin{array}{l} V\\ \Omega\end{array}\right) \to \dot X \]
@@ -74,6 +74,15 @@ Solving the one step problem gives $\lambda _{k+1}$, from~\ref{NE_dis_explicit} 
 $ \left(\begin{array}{l} V_{k+1} \\ \Omega _{k+1} \end{array}\right) $. $V$ and $\Omega$ are integrated
 to get $X_{k+1}$.
 
+\paragraph{Implementation in Siconos:}
+\begin{enumerate}
+  \item[--] The Moreau::comouteResiduFree computes ds->residuFree = -FL that is
+  $-\left(\begin{array}{c} Fext_k\\ Mext_k - \Omega _k \wedge I\Omega _k \end{array}\right) $ thanks
+  ds::computeFL
+  \item[--] The Moreau::computeFreeState computes $X_{free} = T(V_i^{k+1} - hW (ResiduFree))$
+    \item[--] LinearOSNS::computeQBlock computes $q=C X_{free}$
+  \end{enumerate}
+
 \subsection{Quaternion case}
 We chose $X= \left(\begin{array}{l} X_g \\q \end{array}\right) $. $X_g$ are the coordinates of the center of mass, and $q$ is a quaternion
   represented the orientation of solid. It means :
@@ -90,4 +99,5 @@ So using the matrix formulation:
   \[ \dot X = \left(\begin{array}{cc} I_3 & 0 \\ 0 &
   T_q \end{array}\right) \left(\begin{array}{c} V\\ \Omega  \end{array}\right)  = T \left(\begin{array}{c} V\\ \Omega  \end{array}\right)\]
 
-It is noteworthy that $T$ must be updated at each step. 
+It is noteworthy that $T$ must be updated at each step.
+
