@@ -23,6 +23,7 @@
 #include "Model.h"
 #include "Moreau.h"
 #include "Lsodar.h"
+#include "NewtonEulerR.h"
 #include "FirstOrderLinearR.h"
 #include "FirstOrderLinearTIR.h"
 #include "LagrangianLinearTIR.h"
@@ -244,16 +245,22 @@ void LinearOSNS::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelatio
 
 
     }
-    else if (relationType1 == Lagrangian || relationType2 == Lagrangian)
+    else if (relationType1 == Lagrangian || relationType2 == Lagrangian || relationType1 == NewtonEuler || relationType2 == NewtonEuler)
     {
       if (UR1 == UR2)
       {
         SP::SiconosMatrix work(new SimpleMatrix(*leftUnitaryBlock));
         work->trans();
+        //        cout<<"LinearOSNS::computeUnitaryBlock leftUnitaryBlock"<<endl;
+        //        leftUnitaryBlock->display();
         centralUnitaryBlocks[*itDS]->PLUForwardBackwardInPlace(*work);
         //*currentUnitaryBlock +=  *leftUnitaryBlock ** work;
         prod(*leftUnitaryBlock, *work, *currentUnitaryBlock, false);
         //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftUnitaryBlock,*work,1.0,*currentUnitaryBlock);
+        //*currentUnitaryBlock *=h;
+        //        cout<<"LinearOSNS::computeUnitaryBlock"<<endl;
+        //        currentUnitaryBlock->display();
+
       }
       else
       {
@@ -443,6 +450,26 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
       for (int i = 0; i < sizeY; i++)
         _q->setValue(relativePosition + i, _q->getValue(relativePosition + i) + H_alpha->getValue(relativePosition + i));
     }
+    else if (relationType == NewtonEuler)
+    {
+      SP::SiconosMatrix CT =  boost::static_pointer_cast<NewtonEulerR>(mainInteraction->relation())->jacQHT();
+      //  SP::SiconosVector WorkX = UR->workX();
+      SP::SiconosVector Xfree;
+      Xfree = UR->workFree();
+
+      if (CT)
+      {
+
+        assert(Xfree);
+        assert(_q);
+
+        coord[3] = CT->size(1);
+        coord[5] = CT->size(1);
+
+        subprod(*CT, *Xfree, *_q, coord, true);
+      }
+
+    }
     else
     {
       C = mainInteraction->relation()->getCPtr();
@@ -500,7 +527,7 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
     RuntimeException::selfThrow("LinearOSNS::computeQBlock not yet implemented for OSI of type " + osiType);
 
   // Add "non-smooth law effect" on q
-  if (UR->getRelationType() == Lagrangian)
+  if (UR->getRelationType() == Lagrangian || UR->getRelationType() == NewtonEuler)
   {
     SP::SiconosVisitor nslEffectOnSim(new _NSLEffectOnSim(this, UR, pos));
     simulation()->accept(*nslEffectOnSim);

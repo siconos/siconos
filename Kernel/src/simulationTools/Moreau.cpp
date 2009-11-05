@@ -21,6 +21,7 @@
 #include "Simulation.h"
 #include "Model.h"
 #include "NonSmoothDynamicalSystem.h"
+#include "NewtonEulerDS.h"
 #include "LagrangianLinearTIDS.h"
 #include "FirstOrderLinearTIDS.h"
 
@@ -326,6 +327,16 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
   }
 
   // === ===
+  else if (dsType == NENLDS)
+  {
+    SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS> (ds);
+
+    //    scal(1.0/h,*(d->luW()),*(d->luW()));
+    cout << "Moreau::initW luW before LUFact\n";
+    d->luW()->display();
+    d->luW()->PLUFactorizationInPlace();
+
+  }
   else RuntimeException::selfThrow("Moreau::computeW - not yet implemented for Dynamical system type :" + dsType);
 
   // Remark: W is not LU-factorized nor inversed here.
@@ -701,6 +712,43 @@ double Moreau::computeResidu()
       normResidu = d->workFree()->norm2();
 
     }
+    else if (dsType == NENLDS)
+    {
+      // residu = M(q*)(v_k,i+1 - v_i) - h*theta*fL(t,v_k,i+1, q_k,i+1) - h*(1-theta)*fL(ti,vi,qi) - pi+1
+
+      // -- Convert the DS into a Lagrangian one.
+      SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS> (ds);
+
+      // Get state i (previous time step) from Memories -> var. indexed with "Old"
+      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
+      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
+
+      SP::SiconosVector q = d->q();
+
+
+      SP::SiconosMatrix W = d->W();
+      SP::SiconosVector v = d->velocity(); // v = v_k,i+1
+      prod(*W, (*v - *vold), *residuFree); // residuFree = M(v - vold)
+      if (d->fL())  // if fL exists
+      {
+        // computes fL(ti,vi,qi)
+        SP::SiconosVector fLold = d->fLMemory()->getSiconosVector(0);
+        double coef = -h * (1 - theta);
+        // residuFree += coef * fL_i
+        scal(coef, *fLold, *residuFree, false);
+
+        // computes fL(ti+1, v_k,i+1, q_k,i+1) = fL(t,v,q)
+
+        // d->computeFL(t,q,v) ?
+        d->computeFL(t);
+        coef = -h * theta;
+        // residuFree += coef * fL_k,i+1
+        scal(coef, *d->fL(), *residuFree, false);
+      }
+      *(d->workFree()) = *residuFree;
+      *(d->workFree()) -= *d->p(2);
+      normResidu = d->workFree()->norm2();
+    }
     else
       RuntimeException::selfThrow("Moreau::computeResidu - not yet implemented for Dynamical system type: " + dsType);
 
@@ -964,6 +1012,50 @@ void Moreau::computeFreeState()
 
       *vfree += *vold;
     }
+    else if (dsType == NENLDS)
+    {
+      // IN to be updated at current time: W, M, q, v, fL
+      // IN at told: qi,vi, fLi
+
+      // Note: indices i/i+1 corresponds to value at the beginning/end of the time step.
+      // Index k stands for Newton iteration and thus corresponds to the last computed
+      // value, ie the one saved in the DynamicalSystem.
+      // "i" values are saved in memory vectors.
+
+      // vFree = v_k,i+1 - W^{-1} ResiduFree
+      // with
+      // ResiduFree = M(q_k,i+1)(v_k,i+1 - v_i) - h*theta*fL(t,v_k,i+1, q_k,i+1) - h*(1-theta)*fL(ti,vi,qi)
+
+      // -- Convert the DS into a Lagrangian one.
+      SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS> (ds);
+
+      // Get state i (previous time step) from Memories -> var. indexed with "Old"
+      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
+      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
+
+      // --- ResiduFree computation ---
+      // ResFree = M(v-vold) - h*[theta*fL(t) + (1-theta)*fL(told)]
+      //
+      // vFree pointer is used to compute and save ResiduFree in this first step.
+      SP::SiconosVector vfree = d->workFree();//workX[d];
+      (*vfree) = *(d->residuFree());
+
+      // -- Update W --
+      // Note: during computeW, mass and jacobians of fL will be computed/
+      SP::SiconosVector v = d->velocity(); // v = v_k,i+1
+
+
+
+      // -- vfree =  v - W^{-1} ResiduFree --
+      // At this point vfree = residuFree
+      // -> Solve WX = vfree and set vfree = X
+      d->luW()->PLUForwardBackwardInPlace(*vfree);
+      //    scal(h,*vfree,*vfree);
+      // -> compute real vfree
+      *vfree *= -1.0;
+      *vfree += *v;
+
+    }
     else
       RuntimeException::selfThrow("Moreau::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
   }
@@ -1138,6 +1230,68 @@ void Moreau::updateState(unsigned int level)
           simulationLink->setRelativeConvergenceCriterionHeld(false);
       }
 
+    }
+    else if (dsType == NENLDS)
+    {
+      // get dynamical system
+      SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS> (ds);
+      SP::SiconosVector v = d->velocity();
+
+      //  cout<<"Moreau::updatestate prev v"<<endl;
+      //  v->display();
+
+      /*d->p has been fill by the Relation->computeInput, it constains B \lambda _{k+1}*/
+      *v = *d->p(level); // v = p
+      d->luW()->PLUForwardBackwardInPlace(*v);
+
+      //  cout<<"Moreau::updatestate hWB lambda"<<endl;
+      //  v->display();
+
+      *v +=  * ds->workFree();
+
+      //  cout<<"Moreau::updatestate work free"<<endl;
+      //  ds->workFree()->display();
+      //  cout<<"Moreau::updatestate new v"<<endl;
+      //  v->display();
+
+      //compute q
+      //first step consists in computing  \dot q.
+      //second step consists in updating q.
+      //
+      SP::SiconosMatrix T = d->T();
+      SP::SiconosVector dotq = d->dotq();
+      prod(*T, *v, *dotq, true);
+      //  cout<<"Moreau::updateState v"<<endl;
+      //  v->display();
+      //  cout<<"Moreau::updateState dotq"<<endl;
+      //  dotq->display();
+
+
+
+
+      SP::SiconosVector q = d->q();
+
+      //  -> get previous time step state
+      SP::SiconosVector dotqold = d->dotqMemory()->getSiconosVector(0);
+      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
+      // *q = *qold + h*(theta * *v +(1.0 - theta)* *vold)
+      double coeff = h * theta;
+      scal(coeff, *dotq, *q) ; // q = h*theta*v
+      coeff = h * (1 - theta);
+      scal(coeff, *dotqold, *q, false); // q += h(1-theta)*vold
+      *q += *qold;
+      //  cout<<"new q before normalizing"<<endl;
+      //  q->display();
+
+      //q[3:6] must be normalized
+      double normq = sqrt(q->getValue(3) * q->getValue(3) + q->getValue(4) * q->getValue(4) + q->getValue(5) * q->getValue(5) + q->getValue(6) * q->getValue(6));
+      //  printf("-> normq : %f\n",normq);
+      normq = 1 / normq;
+      q->setValue(3, q->getValue(3) * normq);
+      q->setValue(4, q->getValue(4) * normq);
+      q->setValue(5, q->getValue(5) * normq);
+      q->setValue(6, q->getValue(6) * normq);
+      d->updateT();
     }
     else RuntimeException::selfThrow("Moreau::updateState - not yet implemented for Dynamical system type: " + dsType);
   }

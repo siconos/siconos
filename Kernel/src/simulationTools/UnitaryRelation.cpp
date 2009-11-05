@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "LagrangianDS.h"
+#include "NewtonEulerDS.h"
 #include "UnitaryRelation.h"
 #include "RelationTypes.hpp"
 #include "NewtonImpactNSL.h"
@@ -24,6 +25,7 @@
 #include "RuntimeException.h"
 #include "FirstOrderNonLinearDS.h"
 #include "FirstOrderR.h"
+#include "NewtonEulerR.h"
 
 using namespace std;
 using namespace RELATION;
@@ -164,14 +166,17 @@ void UnitaryRelation::initialize(const std::string& simulationType)
 void UnitaryRelation::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SP::SiconosMatrix UnitaryBlock) const
 {
   unsigned int k = 0;
+  unsigned int NumDS = 0;
   DSIterator itDS;
   itDS = interaction()->dynamicalSystemsBegin();
+  int sizey = interaction()->getSizeOfY();
 
   // look for ds and its position in G
   while (*itDS != ds && itDS != interaction()->dynamicalSystemsEnd())
   {
     k += (*itDS)->getDim();
     itDS++;
+    NumDS++;
   }
 
   // check dimension (1)
@@ -192,6 +197,41 @@ void UnitaryRelation::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SP::Sicon
   {
     SP::LagrangianR r = boost::static_pointer_cast<LagrangianR> (interaction()->relation());
     originalMatrix = r->jacQH();
+  }
+  else if (relationType == NewtonEuler)
+  {
+    SP::NewtonEulerR r = boost::static_pointer_cast<NewtonEulerR> (interaction()->relation());
+    //      SP::BlockMatrix C = boost::static_pointer_cast<BlockMatrix> (r->jacQH());
+    SP::SiconosMatrix C = r->jacQH();
+    originalMatrix = r->jacQHT();
+
+    //      SP::BlockMatrix jacQHT_block = boost::static_pointer_cast<BlockMatrix> (originalMatrix);
+
+    //      SP::SiconosMatrix C_DS_block = C->block(NumDS,0);
+    //      SP::SiconosMatrix CT_DS_block = jacQHT_block->block(NumDS,0);
+    //      cout<<" UnitaryRelation::getLeftUnitaryBlockForDS : C_DS_block"<<endl;
+    //      C_DS_block->display();
+    SP::SimpleMatrix auxBloc(new SimpleMatrix(sizey, 7));
+    SP::SimpleMatrix auxBloc2(new SimpleMatrix(sizey, 6));
+    Index dimIndex(2);
+    Index startIndex(4);
+    startIndex[0] = 0;
+    startIndex[1] = 0;
+    startIndex[0] = 0;
+    startIndex[1] = 7 * k / 6;
+    dimIndex[0] = sizey;
+    dimIndex[1] = 7;
+    setBlock(C, auxBloc, dimIndex, startIndex);
+    SP::NewtonEulerDS d =  boost::static_pointer_cast<NewtonEulerDS> (ds);
+    SP::SiconosMatrix T = d->T();
+
+    prod(*auxBloc, *T, *auxBloc2);
+    //      prod(*C_DS_block,*T,*CT_DS_block);
+
+    startIndex[1] = k;
+    dimIndex[1] = 6;
+    setBlock(auxBloc2, originalMatrix, dimIndex, startIndex);
+
   }
   else
     RuntimeException::selfThrow("UnitaryRelation::getLeftUnitaryBlockForDS, not yet implemented for relations of type " + relationType);
@@ -237,12 +277,11 @@ void UnitaryRelation::getRightUnitaryBlockForDS(SP::DynamicalSystem ds, SP::Sico
   {
     originalMatrix = interaction()->relation()->jacLG();
   }
-  else if (relationType == Lagrangian) // Note: the transpose will be done in LCP or MLCP ...
+  else if (relationType == Lagrangian || relationType == NewtonEuler)
   {
-    originalMatrix = interaction()->relation()->jacLH();
+    RuntimeException::selfThrow("UnitaryRelation::getRightUnitaryBlockForDS, call not permit " + relationType);
   }
-  else
-    RuntimeException::selfThrow("UnitaryRelation::getRightUnitaryBlockForDS, not yet implemented for relations of type " + relationType);
+  RuntimeException::selfThrow("UnitaryRelation::getRightUnitaryBlockForDS, not yet implemented for relations of type " + relationType);
 
   if (! originalMatrix)
     RuntimeException::selfThrow("UnitaryRelation::getRightUnitaryBlockForDS(DS, UnitaryBlock, ...): the right unitaryBlock is a NULL pointer (miss matrix B or H or gradients ...in relation ?)");

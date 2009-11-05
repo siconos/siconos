@@ -26,6 +26,7 @@
 #include "Model.h"
 #include "Moreau.h"
 #include "LagrangianDS.h"
+#include "NewtonEulerDS.h"
 
 using namespace std;
 using namespace DS;
@@ -584,7 +585,11 @@ void OneStepNSProblem::getOSIMaps(SP::UnitaryRelation UR, MapOfDSMatrices& centr
     osiType = Osi->getType();
     if (osiType == OSI::MOREAU)
     {
-      centralUnitaryBlocks[*itDS] = (boost::static_pointer_cast<Moreau> (Osi))->getWPtr(*itDS); // get its W matrix ( pointer link!)
+      dsType = (*itDS)->getType();
+      if (dsType != NENLDS)
+        centralUnitaryBlocks[*itDS] = (boost::static_pointer_cast<Moreau> (Osi))->getWPtr(*itDS); // get its W matrix ( pointer link!)
+      else
+        centralUnitaryBlocks[*itDS] = (boost::static_pointer_cast<NewtonEulerDS> (*itDS))->luW(); // get its W matrix ( pointer link!)
       Theta[*itDS] = (boost::static_pointer_cast<Moreau> (Osi))->getTheta(*itDS);
     }
     else if (osiType == OSI::LSODAR) // Warning: LagrangianDS only at the time !!!
