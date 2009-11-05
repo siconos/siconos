@@ -254,7 +254,7 @@ public:
    *  \param an unsigned int i
    *  \param a ref to a SiconosVector
    */
-  void setBlock(unsigned int, const SiconosVector&);
+  virtual void setBlock(unsigned int, const SiconosVector&);
 
   /** add the input vector to the elements starting from position i.
    *  \param an unsigned int i
@@ -409,6 +409,13 @@ public:
    *  \param init, a bool, default = true
    */
   friend void subscal(double, const SiconosVector&, SiconosVector&, const std::vector<unsigned int>&, bool = true);
+
+  /** cross product
+   *  \param V1, a SimpleVector of dimention 3.
+   *  \param V2, aSimpleVector of dimention 3.
+   *  \param VOUT, aSimpleVector of dimention 3, the resulting cross product between V1 and V2.
+   */
+  friend void cross_product(const SiconosVector&, const SiconosVector&, SiconosVector&);
 
 };
 

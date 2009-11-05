@@ -1748,3 +1748,18 @@ void subscal(double a, const SiconosVector & x, SiconosVector & y, const std::ve
     }
   }
 }
+void cross_product(const SiconosVector& V1, const SiconosVector& V2, SiconosVector& VOUT)
+{
+  if (V1.size() != 3 || V2.size() != 3 || VOUT.size() != 3)
+    SiconosVectorException::selfThrow("SiconosVector::cross_product allowed only with dim 3.");
+
+  double aux = V1.getValue(1) * V2.getValue(2) - V1.getValue(2) * V2.getValue(1);
+  VOUT.setValue(0, aux);
+
+  aux = V1.getValue(2) * V2.getValue(0) - V1.getValue(0) * V2.getValue(2);
+  VOUT.setValue(1, aux);
+
+  aux = V1.getValue(0) * V2.getValue(1) - V1.getValue(1) * V2.getValue(0);
+  VOUT.setValue(1, aux);
+
+}
