@@ -30,9 +30,11 @@
 #include <math.h>
 
 
-int test_Series(FrictionContact_Problem* problem, double tolerance, double localtolerance)
+int test_Series_nsgs(FrictionContact_Problem* problem,
+                     double tolerance, double localtolerance,
+                     int nLocalSolver, int * localSolverList)
 {
-  int info = -1;
+  int info = -1, i;
 
   // Numerics and Solver Options
 
@@ -56,126 +58,55 @@ int test_Series(FrictionContact_Problem* problem, double tolerance, double local
   double *reaction = (double*)malloc(3 * NC * sizeof(double));
   double *velocity = (double*)malloc(3 * NC * sizeof(double));
 
+  int nmax ; // Max number of iteration
 
-
-  int nmax = 200; // Max number of iteration
-  int localsolver = 0; // 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 3: projection on Disk  with diagonalization,
-
-
-  numerics_solver_options.iparam[0] = nmax ;
-  numerics_solver_options.iparam[1] = 0 ;
-  numerics_solver_options.iparam[2] = 0 ;
-  numerics_solver_options.iparam[3] = 0 ;
-  numerics_solver_options.iparam[4] = localsolver ;
-
-  numerics_solver_options.dparam[0] = tolerance ;
-  numerics_solver_options.dparam[1] = 0.0 ;
-  numerics_solver_options.dparam[2] = localtolerance ;
-  numerics_solver_options.dparam[3] = 0.0 ;
-  numerics_solver_options.dparam[4] = 0.0 ;
-
-  info = frictionContact3D_driver(problem,
-                                  reaction , velocity,
-                                  &numerics_solver_options, &numerics_options);
-
-  printf("\n");
-  for (int k = 0 ; k < 3 * NC; k++)
+  for (i = 0; i < nLocalSolver; i++)
   {
-    printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
-    velocity[k] = 0.0;
-    reaction[k] = 0.0;
+    nmax = 100;
+    // 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 3: projection on Disk  with diagonalization,
+    for (int k = 0 ; k < 3 * NC; k++)
+    {
+      velocity[k] = 0.0;
+      reaction[k] = 0.0;
+    }
+    numerics_solver_options.iparam[0] = nmax ;
+    numerics_solver_options.iparam[1] = 0 ;
+    numerics_solver_options.iparam[2] = 0 ;
+    numerics_solver_options.iparam[3] = 0 ;
+    numerics_solver_options.iparam[4] = localSolverList[i] ;
+
+    numerics_solver_options.dparam[0] = tolerance ;
+    numerics_solver_options.dparam[1] = 0.0 ;
+    numerics_solver_options.dparam[2] = localtolerance ;
+    numerics_solver_options.dparam[3] = 0.0 ;
+    numerics_solver_options.dparam[4] = 0.0 ;
+
+    info = frictionContact3D_driver(problem,
+                                    reaction , velocity,
+                                    &numerics_solver_options, &numerics_options);
+
+    printf("\n");
+    for (int k = 0 ; k < 3 * NC; k++)
+    {
+      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
+    }
+    printf("\n");
+    printf("info =%i\n", info);
+    /*  if (info) */
+    /*      { */
+    /*    char c; */
+    /*    printf("Press a key to continue:"); */
+    /*        scanf("%c",&c); */
+
+    /*      } */
+
   }
-  printf("\n");
-
-  localsolver = 1; // 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 3: projection on Disk  with diagonalization,
-
-  numerics_solver_options.iparam[0] = nmax ;
-  numerics_solver_options.iparam[1] = 0 ;
-  numerics_solver_options.iparam[2] = 0 ;
-  numerics_solver_options.iparam[3] = 0 ;
-  numerics_solver_options.iparam[4] = localsolver ;
-
-  numerics_solver_options.dparam[0] = tolerance ;
-  numerics_solver_options.dparam[1] = 0.0 ;
-  numerics_solver_options.dparam[2] = localtolerance ;
-  numerics_solver_options.dparam[3] = 0.0 ;
-  numerics_solver_options.dparam[4] = 0.0 ;
-
-  info = frictionContact3D_driver(problem,
-                                  reaction , velocity,
-                                  &numerics_solver_options, &numerics_options);
-  printf("\n");
-  for (int k = 0 ; k < 3 * NC; k++)
-  {
-    printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
-    velocity[k] = 0.0;
-    reaction[k] = 0.0;
-  }
-  printf("\n");
-
-
-
-  localsolver = 2; // 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 3: projection on Disk  with diagonalization,
-
-  numerics_solver_options.iparam[0] = nmax ;
-  numerics_solver_options.iparam[1] = 0 ;
-  numerics_solver_options.iparam[2] = 0 ;
-  numerics_solver_options.iparam[3] = 0 ;
-  numerics_solver_options.iparam[4] = localsolver ;
-
-  numerics_solver_options.dparam[0] = tolerance ;
-  numerics_solver_options.dparam[1] = 0.0 ;
-  numerics_solver_options.dparam[2] = localtolerance ;
-  numerics_solver_options.dparam[3] = 0.0 ;
-  numerics_solver_options.dparam[4] = 0.0 ;
-
-  info = frictionContact3D_driver(problem,
-                                  reaction , velocity,
-                                  &numerics_solver_options, &numerics_options);
-
-  printf("\n");
-  for (int k = 0 ; k < 3 * NC; k++)
-  {
-    printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
-    velocity[k] = 0.0;
-    reaction[k] = 0.0;
-  }
-  printf("\n");
-
-  localsolver = 3; // 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 3: projection on Disk  with diagonalization,
-  numerics_solver_options.iparam[0] = nmax ;
-  numerics_solver_options.iparam[1] = 0 ;
-  numerics_solver_options.iparam[2] = 0 ;
-  numerics_solver_options.iparam[3] = 0 ;
-  numerics_solver_options.iparam[4] = localsolver ;
-
-  numerics_solver_options.dparam[0] = tolerance ;
-  numerics_solver_options.dparam[1] = 0.0 ;
-  numerics_solver_options.dparam[2] = localtolerance ;
-  numerics_solver_options.dparam[3] = 0.0 ;
-  numerics_solver_options.dparam[4] = 0.0 ;
-
-  info = frictionContact3D_driver(problem,
-                                  reaction , velocity,
-                                  &numerics_solver_options, &numerics_options);
-
-
-  printf("\n");
-  for (int k = 0 ; k < 3 * NC; k++)
-  {
-    printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
-    velocity[k] = 0.0;
-    reaction[k] = 0.0;
-  }
-  printf("\n");
-
 
   free(reaction);
   free(velocity);
   free(numerics_solver_options.iparam);
   free(numerics_solver_options.dparam);
 
-  printf("info =%i\n", info);
 
   return info;
 }
@@ -189,8 +120,10 @@ int main(void)
 
   FrictionContact_Problem * testproblem = NULL;
 
-  int ntestfile = 2;
+  int ntestfile = 4, i;
   char ** testfile = (char **)malloc(ntestfile * sizeof(char *));
+  int ** localSolverList = (int **)malloc(ntestfile * sizeof(int *));
+  int * nLocalSolver = (int *)malloc(ntestfile * sizeof(int));
   /*   for (int i =0 ; i< ntestfile; i++)  */
   /*       { */
   /*    testfile[i] = (char *)malloc(20*sizeof(char)); */
@@ -198,18 +131,44 @@ int main(void)
 
   double*  tol = (double*)malloc(ntestfile * sizeof(double));
   double*  localtol = (double*)malloc(ntestfile * sizeof(double));
-
+  int ilocal;
+  ilocal = 0;
   testfile[0] = "./DATA/Example1_Fc3D_SBM.dat";
   tol[0] = 1e-16;
   localtol[0] = 1e-16;
+  nLocalSolver[0] = 4;
+  localSolverList[0] = (int *)malloc(nLocalSolver[0] * sizeof(int));
+  for (i = 0; i < nLocalSolver[0] ; i++) localSolverList[0][i] = i;
 
-  testfile[1] = "./DATA/Confeti-ex03-Fc3D-SBM.dat";
+
+
+  testfile[1] = "./DATA/Confeti-ex13-4contact-Fc3D-SBM.dat";
   tol[1] = 1e-5;
   localtol[1] = 1e-6;
+
+  nLocalSolver[1] = 3;
+  localSolverList[1] = (int *)malloc(nLocalSolver[1] * sizeof(int));
+  for (i = 0; i < nLocalSolver[1] ; i++) localSolverList[1][i] = i;
+
+  testfile[2] = "./DATA/Confeti-ex03-Fc3D-SBM.dat";
+  tol[2] = 1e-5;
+  localtol[2] = 1e-6;
+  nLocalSolver[2] = 4;
+  localSolverList[2] = (int *)malloc(nLocalSolver[2] * sizeof(int));
+  for (i = 0; i < nLocalSolver[2] ; i++) localSolverList[2][i] = i;
+
+  testfile[3] = "./DATA/Confeti-ex13-Fc3D-SBM.dat";
+  tol[3] = 1e-5;
+  localtol[3] = 1e-6;
+  nLocalSolver[3] = 1;
+  localSolverList[3] = (int *)malloc(nLocalSolver[3] * sizeof(int));
+  /*   for (i=0; i<nLocalSolver[3] ; i++) localSolverList[3][i]=i;   */
+  localSolverList[3][0] = 1;
+
   int info = -1;
   FILE * file;
 
-  for (int i = 0 ; i < ntestfile; i++)
+  for (i = 0 ; i < ntestfile; i++)
   {
     printf("Test file number %i -- %s\n", i, testfile[i]);
     testproblem = (FrictionContact_Problem*)malloc(sizeof(FrictionContact_Problem));
@@ -227,7 +186,7 @@ int main(void)
 
 
 
-    info = test_Series(testproblem, tol[i], localtol[i]);
+    info = test_Series_nsgs(testproblem, tol[i], localtol[i], nLocalSolver[i], localSolverList[i]);
 
     freeFrictionContact_problem(testproblem);
 
@@ -237,6 +196,9 @@ int main(void)
   free(testfile);
   free(tol);
   free(localtol);
+  for (i = 0 ; i < ntestfile; i++) free(localSolverList[i]);
+  free(localSolverList);
+  free(nLocalSolver);
 
 
 

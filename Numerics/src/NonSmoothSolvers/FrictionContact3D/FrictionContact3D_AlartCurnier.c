@@ -449,12 +449,8 @@ int AlartCurnierNewton(int Fsize, double * reactionBlock, int *iparam, double *d
   RhoN = 1.0 / W[2][2];
   RhoT = 2.0 * (SW - DW) / ((SW + DW) * (SW + DW));
 
-
-
-
   for (i = 0 ; i < 3 ; ++i)  WRloc[i] = W[i][0] * Rloc[0] + W[i][1] * Rloc[1] + W[i][2] * Rloc[2];
 
-  /* début des itérations de Newton, ITMAX est le nombre d'itérations maximum */
 
   for (inew = 0 ; inew < ITMAX ; ++inew)
   {
@@ -597,10 +593,9 @@ int AlartCurnierNewton(int Fsize, double * reactionBlock, int *iparam, double *d
     INEWTON = inew + 1;
     if (fabs(ERW) < TOL * TOL)  break;
   }
-  if (verbose > 0)
+  if (verbose > 1)
   {
-    printf("-----------------------------------    AlartCurnierNewton number of iteration = %i \n", INEWTON);
-    printf("-----------------------------------    AlartCurnierNewton error = %.10e \n", ERW);
+    printf("-----------------------------------    AlartCurnierNewton number of iteration = %i  error = %.10e \n", INEWTON, ERW);
   }
 
   dparam[1] = ERW;

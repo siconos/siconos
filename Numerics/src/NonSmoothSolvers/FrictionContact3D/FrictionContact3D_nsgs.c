@@ -44,7 +44,14 @@ void initializeLocalSolver_nsgs(int n, SolverPtr* solve, FreeSolverPtr* freeSolv
 {
   /** Connect to local solver */
   /* Projection */
-  if (iparam[4] == 3)
+  if (iparam[4] == 8)
+  {
+    *solve = &frictionContact3D_projectionWithDiagonalization_solve;
+    *freeSolver = &frictionContact3D_projection_free;
+    *computeError = &FrictionContact3D_compute_error;
+    frictionContact3D_projection_initialize(n, M, q, mu);
+  }
+  else  if (iparam[4] == 3)
   {
     *solve = &frictionContact3D_projectionWithDiagonalization_solve;
     *freeSolver = &frictionContact3D_projection_free;

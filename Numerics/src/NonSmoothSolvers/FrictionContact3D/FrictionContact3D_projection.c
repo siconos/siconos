@@ -149,6 +149,62 @@ void frictionContact3D_projection_update(int contact, double* reaction)
   mu_i = mu[contact];
 }
 
+void frictionContact3D_projectionWithDiagonalization_update(int contact, double* reaction)
+{
+  /* Build a local problem for a specific contact
+     reaction corresponds to the global vector (size n) of the global problem.
+  */
+
+  /* Call the update function which depends on the storage for MGlobal/MBGlobal */
+  /* Build a local problem for a specific contact
+   reaction corresponds to the global vector (size n) of the global problem.
+  */
+
+  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
+  projection_fillMLocal(contact);
+
+  /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
+   excluding the block corresponding to the current contact. ****/
+
+  int in = 3 * contact, it = in + 1, is = it + 1;
+  int inc = n * in;
+  /* reaction current block set to zero, to exclude current contact block */
+  /*   double rin= reaction[in] ; double rit= reaction[it] ; double ris= reaction[is] ;  */
+  /* qLocal computation*/
+  qLocal[0] = qGlobal[in];
+  qLocal[1] = qGlobal[it];
+  qLocal[2] = qGlobal[is];
+
+  if (MGlobal->storageType == 0)
+  {
+    double * MM = MGlobal->matrix0;
+    int incx = n, incy = 1;
+    qLocal[0] += DDOT(n , &MM[in] , incx , reaction , incy);
+    qLocal[1] += DDOT(n , &MM[it] , incx , reaction , incy);
+    qLocal[2] += DDOT(n , &MM[is] , incx , reaction , incy);
+    // Substract diagonal term
+    qLocal[0] -= MM[in + n * in] * reaction[in];
+    qLocal[1] -= MM[it + n * it] * reaction[it];
+    qLocal[2] -= MM[is + n * is] * reaction[is];
+  }
+  else if (MGlobal->storageType == 1)
+  {
+    /* qLocal += rowMB * reaction
+       with rowMB the row of blocks of MGlobal which corresponds to the current contact
+    */
+    subRowProdSBM(n, 3, contact, MGlobal->matrix1, reaction, qLocal, 0);
+    // Substract diagonal term
+    qLocal[0] -= MLocal[0] * reaction[in];
+    qLocal[1] -= MLocal[4] * reaction[it];
+    qLocal[2] -= MLocal[8] * reaction[is];
+
+  }
+  /*   reaction[in] = rin; reaction[it] = rit; reaction[is] = ris; */
+
+  /* Friction coefficient for current block*/
+  mu_i = mu[contact];
+}
+
 void projection_fillMLocal_with_regularization(int contact, double rho)
 {
   // Dense storage
@@ -248,13 +304,15 @@ void frictionContact3D_projection_update_with_regularization(int contact, double
   /* Friction coefficient for current block*/
   mu_i = mu[contact];
 }
+
 void frictionContact3D_projectionWithDiagonalization_solve(int contact, int dimReaction, double* reaction, int* iparam, double* dparam)
 {
   /* Current block position */
   int pos = contact * nLocal;
 
   /* Builds local problem for the current contact */
-  frictionContact3D_projection_update(contact, reaction);
+  /*  frictionContact3D_projection_update(contact, reaction); */
+  frictionContact3D_projectionWithDiagonalization_update(contact, reaction);
 
   double mrn, num, mu2 = mu_i * mu_i;
 
@@ -305,8 +363,12 @@ void frictionContact3D_projectionOnConeWithLocalIteration_solve(int contact, int
   /*   double beta = alpha*alpha - 4*det; */
   /*   double at = 2*(alpha - beta)/((alpha + beta)*(alpha + beta)); */
 
-  double an = 1. / (MLocal[0] + mu_i);
+  double an = 1. / (MLocal[0]);
 
+  double at = 1.0 / (MLocal[4] + mu_i);
+  double as = 1.0 / (MLocal[8] + mu_i);
+  at = an;
+  as = an;
   int incx = 1, incy = 1;
 
 
@@ -316,15 +378,13 @@ void frictionContact3D_projectionOnConeWithLocalIteration_solve(int contact, int
   double localerror = 1.0;
   //printf ("localerror = %14.7e\n",localerror );
   int localiter = 0;
-  while ((localerror > dparam[0]) && (localiter < iparam[0]))
+  double localtolerance = dparam[0];
+
+  /*     printf ("localtolerance = %14.7e\n",localtolerance ); */
+  while ((localerror > localtolerance) && (localiter < iparam[0]))
   {
     localiter ++;
 
-    if (verbose > 1)
-    {
-      printf("----------------------\n");
-      printf("localiter = %i\n", localiter);
-    }
     /*    printf ("reaction[pos] = %14.7e\n",reaction[pos]); */
     /*    printf ("reaction[pos+1] = %14.7e\n",reaction[pos+1]); */
     /*    printf ("reaction[pos+2] = %14.7e\n",reaction[pos+2]); */
@@ -354,11 +414,11 @@ void frictionContact3D_projectionOnConeWithLocalIteration_solve(int contact, int
 
 
     reaction[pos] -= an * (worktmp[0] + mu_i * normUT);
-    reaction[pos + 1] -= an * worktmp[1];
-    reaction[pos + 2] -= an * worktmp[2];
+    reaction[pos + 1] -= at * worktmp[1];
+    reaction[pos + 2] -= as * worktmp[2];
     worktmp[0] = reaction[pos] + an * (worktmp[0] + mu_i * normUT);
-    worktmp[1] = reaction[pos + 1] + an * worktmp[1];
-    worktmp[2] = reaction[pos + 2] + an * worktmp[2];
+    worktmp[1] = reaction[pos + 1] + at * worktmp[1];
+    worktmp[2] = reaction[pos + 2] + as * worktmp[2];
 
 
     projectionOnCone(&reaction[pos], mu_i);
@@ -370,11 +430,17 @@ void frictionContact3D_projectionOnConeWithLocalIteration_solve(int contact, int
     /*    printf ("worktmp[0] = %14.7e\n",worktmp[0]); */
     /*    printf ("worktmp[1] = %14.7e\n",worktmp[1]); */
     /*    printf ("worktmp[2] = %14.7e\n",worktmp[2]); */
+    /*           if (verbose>1) */
+    /*             { */
+    /*               printf ("reaction[pos] = %14.7e\n",reaction[pos]);  */
+    /*               printf ("reaction[pos+1] = %14.7e\n",reaction[pos+1]);  */
+    /*               printf ("reaction[pos+2] = %14.7e\n",reaction[pos+2]);  */
+    /*             } */
+
     if (verbose > 1)
     {
-      printf("reaction[pos] = %14.7e\n", reaction[pos]);
-      printf("reaction[pos+1] = %14.7e\n", reaction[pos + 1]);
-      printf("reaction[pos+2] = %14.7e\n", reaction[pos + 2]);
+      printf("---------------------- contact number = %i \t   localiter = %i\t error = %.10e \n", contact, localiter, localerror);
+
     }
     /*    DCOPY( nLocal , qLocal, incx , worktmp , incy ); */
     /*    DGEMV(LA_NOTRANS, nLocal, nLocal, 1.0, MLocal, 3, &reaction[pos], incx, 1.0, worktmp, incy ); */
@@ -397,13 +463,8 @@ void frictionContact3D_projectionOnConeWithLocalIteration_solve(int contact, int
     /* /\*    printf ("Modified velocity[0] = %14.7e\n",worktmp[0]+mu_i*normUT); *\/ */
     /* /\*    printf ("Modified velocity[1] = %14.7e\n",worktmp[1]); *\/ */
     /* /\*    printf ("Modified velocity[2] = %14.7e\n",worktmp[2]); *\/ */
-
-
-
-
-
-
   }
+
 }
 void frictionContact3D_projectionOnCone_solve(int contact, int dimReaction, double* reaction, int* iparam, double* dparam)
 {
@@ -444,8 +505,6 @@ void frictionContact3D_projectionOnCone_with_regularization_solve(int contact, i
   /* Builds local problem for the current contact */
   double rho = dparam[3];
 
-
-
   frictionContact3D_projection_update_with_regularization(contact, reaction, rho);
 
   /*double an = 1./(MLocal[0]);*/
@@ -454,7 +513,8 @@ void frictionContact3D_projectionOnCone_with_regularization_solve(int contact, i
   /*   double beta = alpha*alpha - 4*det; */
   /*   double at = 2*(alpha - beta)/((alpha + beta)*(alpha + beta)); */
 
-  double an = 1. / (MLocal[0] + mu_i);
+  //double an = 1./(MLocal[0]+mu_i);
+  double an = 1. / (MLocal[0]);
   int incx = 1, incy = 1;
   double worktmp[3];
   double normUT;
@@ -494,7 +554,7 @@ void frictionContact3D_projectionOnCone_velocity_solve(int contact, int dimVeloc
   /*   double beta = alpha*alpha - 4*det; */
   /*   double at = 2*(alpha - beta)/((alpha + beta)*(alpha + beta)); */
 
-  double an = 1. / (MLocal[0] + mu_i);
+  double an = 1. / (MLocal[0]);
   int incx = 1, incy = 1;
   double worktmp[3];
   double normUT;
