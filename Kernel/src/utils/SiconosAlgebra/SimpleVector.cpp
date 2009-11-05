@@ -1760,6 +1760,6 @@ void cross_product(const SiconosVector& V1, const SiconosVector& V2, SiconosVect
   VOUT.setValue(1, aux);
 
   aux = V1.getValue(0) * V2.getValue(1) - V1.getValue(1) * V2.getValue(0);
-  VOUT.setValue(1, aux);
+  VOUT.setValue(2, aux);
 
 }
