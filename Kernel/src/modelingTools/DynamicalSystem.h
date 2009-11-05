@@ -759,7 +759,6 @@ public:
   /*! @name Plugins management  */
   //@{
   /** to set a specified function to compute g
-   *  \param index (0: \f$ \nabla_x \f$, 1: \f$ \nabla_{\dot x} \f$ )
    *  \param string pluginPath : the complete path to the plugin
    *  \param string functionName : the function name to use in this library
    */
@@ -779,7 +778,6 @@ public:
   //  void setComputeJacobianZGFunction( const std::string&  pluginPath, const std::string&  functionName);
 
   /** set a specified function to compute jacobianG
-   *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \param a pointer on the plugin function
    */
   void setComputeJacobianXGFunction(FPtr6);
@@ -793,7 +791,6 @@ public:
 
   /** default function to compute the gradient of g
    *  \param double time : the current time
-   *  \param index (0: \f$ \nabla_x \f$, 1: \f$ \nabla_{\dot x} \f$ )
    */
   void computeJacobianXG(double);
   void computeJacobianDotXG(double);

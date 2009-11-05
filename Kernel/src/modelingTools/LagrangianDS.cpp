@@ -986,30 +986,30 @@ LagrangianDS* LagrangianDS::convert(DynamicalSystem* ds)
   return (dsCvgIndic);
   }*/
 
-void LagrangianDS::computeQFree(double time, unsigned int level, SP::SiconosVector qFreeOut)
-{
-  // to compute qFree, derivative number level. Mainly used in EventDriven to compute second derivative
-  // of q for Output y computation.
+// void LagrangianDS::computeQFree(double time, unsigned int level, SP::SiconosVector qFreeOut)
+// {
+//   // to compute qFree, derivative number level. Mainly used in EventDriven to compute second derivative
+//   // of q for Output y computation.
 
-  if (qFreeOut->size() != _ndof)
-    RuntimeException::selfThrow("LagrangianDS::computeQFree - Wrong size for output (different from _ndof)");
+//   if(qFreeOut->size()!=_ndof)
+//     RuntimeException::selfThrow("LagrangianDS::computeQFree - Wrong size for output (different from _ndof)");
 
 
-  if (level != 2)
-    RuntimeException::selfThrow("LagrangianDS::computeQFree - Only implemented for second derivative.");
+//   if(level!=2)
+//     RuntimeException::selfThrow("LagrangianDS::computeQFree - Only implemented for second derivative.");
 
-  // Warning: we suppose that all other operators are up to date (FInt, FExt ...)
+//   // Warning: we suppose that all other operators are up to date (FInt, FExt ...)
 
-  qFreeOut->zero();
-  if (_fInt)
-    *qFreeOut -= *_fInt;
-  if (_fExt)
-    *qFreeOut += *_fExt;
-  if (_NNL)
-    *qFreeOut -= *_NNL;
+//   qFreeOut->zero();
+//   if( _fInt )
+//     *qFreeOut -= *_fInt;
+//   if( _fExt )
+//     *qFreeOut += *_fExt;
+//   if( _NNL )
+//     *qFreeOut -= *_NNL;
 
-  _workMatrix[invMass]->PLUForwardBackwardInPlace(*qFreeOut);
-}
+//   _workMatrix[invMass]->PLUForwardBackwardInPlace(*qFreeOut);
+// }
 
 void LagrangianDS::resetNonSmoothPart()
 {

@@ -35,6 +35,8 @@ Note that not all files from the current location are listed below, since some o
 
 #include "LagrangianLinearTIDS.h"
 #include "FirstOrderLinearTIDS.h"
+#include "NewtonEulerDS.h"
+#include "NewtonEulerR.h"
 
 #include "NonSmoothDynamicalSystem.h"
 

@@ -41,7 +41,8 @@ enum TYPES
   /** Lagrangian, Second Order,  Non Linear DS */
   LNLDS,
   /** Lagrangian, Second Order,  Linear and Time-Invariant Coefficients DS */
-  LLTIDS
+  LLTIDS,
+  NENLDS
 };
 
 }

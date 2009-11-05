@@ -33,7 +33,9 @@ enum TYPES
   /** First Order */
   FirstOrder,
   /** Lagrangian */
-  Lagrangian
+  Lagrangian,
+  /** Lagrangian */
+  NewtonEuler
 };
 
 /** List of possible Relations subtypes*/
