@@ -37,7 +37,7 @@
 
     \param blocknumber0           : the first dimension of the block matrix (number of block rows)
     \param blocknumber1           : the second dimension of the block matrix (number of block columns)
-    \param *blocksize0       : the list of sums of the number of rows of the first column of blocks of M: blocksize[i] = blocksize[i-1] + ni,\n
+    \param *blocksize0            : the list of sums of the number of rows of the first column of blocks of M: blocksize[i] = blocksize[i-1] + ni,\n
     ni being the number of rows of the  block at  row i
     *blocksize0       : the list of sums of the number of columns of the first row of blocks of M: blocksize[i] = blocksize[i-1] + ni,\n
     ni being the number of columns of the block at  column i
