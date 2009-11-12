@@ -374,7 +374,8 @@ public:
   //   /** print the data to the screen
   //    */
   void display() const;
-  virtual void setComputeEFunction(const std::string& pluginPath, const std::string& functionName);
+  void setComputeEFunction(FOVecPtr ptrFunct);
+  //  virtual void setComputeEFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param Relation * : the relation which must be converted
