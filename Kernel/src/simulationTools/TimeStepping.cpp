@@ -312,7 +312,7 @@ void TimeStepping::initLevelMax()
 
 void TimeStepping::nextStep()
 {
-  _eventsManager->processEvents();
+  processEvents();
 }
 
 
@@ -420,6 +420,9 @@ void   TimeStepping::prepareNewtonIteration()
 
   /*reset to zero the ds buffers*/
   SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+
+
+  /* should be evaluated only if needed */
   for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
   {
     dsGraph->bundle(*vi)->preparStep();

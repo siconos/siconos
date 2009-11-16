@@ -447,5 +447,12 @@ void Simulation::run(const std::string&, double, unsigned int)
 void Simulation::processEvents()
 {
   _eventsManager->processEvents();
+
+  /* should be evaluated only if needed */
+  SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();
+  for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
+  {
+    dsGraph->bundle(*vi)->endStep();
+  }
 }
 

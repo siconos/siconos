@@ -143,7 +143,7 @@ public:
    *  \param double : current time
    *  \param unsigned int: number of the derivative to compute, optional, default = 0.
    */
-  void computeOutput(double, unsigned int = 0);
+  virtual void computeOutput(double, unsigned int = 0);
 
   /** to compute p
    *  \param double : current time

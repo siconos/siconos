@@ -18,13 +18,13 @@
  */
 
 /*! \file SpaceFilter.hpp
- *  \brief Spatial filtering of interactions for 2D objects
+ *  \brief Spatial filtering of interactions for 2D/3D objects
  */
 
 
-/** Very simple spatial filtering of interactions between 2D
- *  lagrangian systems => to see how may be plugged more elaborated
- *  collision detection softwares.
+/** Very simple spatial filtering of interactions between 2D/3D
+ *  systems => to see how may be plugged more elaborated collision
+ *  detection softwares.
  *
  *  algorithm description:
  *   Optimized Spatial Hashing for Collision Detection of Deformable Objects
@@ -60,7 +60,7 @@ typedef std::tr1::unordered_multiset<SP::Hashed, boost::hash<SP::Hashed> > space
 class SpaceFilter : public boost::enable_shared_from_this<SpaceFilter>
 {
 
-private:
+protected:
 
   /** the bounding box factor is multiplicated by the largest object
       dimension */
@@ -116,6 +116,8 @@ private:
   friend class SpaceFilter::_FindInteractions;
   friend class SpaceFilter::_IsSameDiskPlanR;
   friend class SpaceFilter::_IsSameSpherePlanR;
+
+  SpaceFilter() {};
 
 public:
 

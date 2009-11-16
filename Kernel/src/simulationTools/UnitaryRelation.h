@@ -316,8 +316,9 @@ public:
    */
   void getRightUnitaryBlockForDS(SP::DynamicalSystem, SP::SiconosMatrix) const;
 
-  /** gets extra unitaryBlock corresponding to the present UR (see the top of this files for extra unitaryBlock meaning)
-   *  \param a pointer to a SiconosMatrix (in-out parameter)
+  /** gets extra unitaryBlock corresponding to the present UR (see the
+   *  top of this files for extra unitaryBlock meaning)
+   * \param a pointer to a SiconosMatrix (in-out parameter)
    */
   void getExtraUnitaryBlock(SP::SiconosMatrix) const;
 

@@ -850,14 +850,14 @@ public:
   virtual void resetNonSmoothPart() = 0;
 
   /**
-   * overwrite this method to do the specific work that must be done at the beginning of a computation step.
-   * It could be reset some buffer vector.(like the function resetNonSmoothPart).
+   * overwrite these methods to do the specific work that must be done
+   * at the beginning or the end of a computation step.  It could be
+   * reset some buffer vector.(like the function resetNonSmoothPart).
    *
    */
-  virtual void preparStep()
-  {
-    ;
-  };
+  virtual void preparStep() {};
+
+  virtual void endStep() {};
 
   /** visitors hook
    */
