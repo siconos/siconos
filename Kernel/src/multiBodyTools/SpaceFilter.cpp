@@ -216,13 +216,12 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
 
       if (!found)
       {
-        SP::Interaction inter(new Interaction(parent->_interID++,
-                                              2,
+        SP::Interaction inter(new Interaction(2,
                                               parent->_nslaw,
-                                              rel));
+                                              rel, parent->_interID++));
         inter->insert(ds1);
         inter->insert(ds2);
-        parent->_nsds->topology()->addInteraction(inter);
+        parent->_nsds->topology()->insertInteraction(inter);
       }
     }
     else
@@ -317,13 +316,12 @@ struct SpaceFilter::_SphereFilter : public SiconosVisitor
 
       if (!found)
       {
-        SP::Interaction inter(new Interaction(parent->_interID++,
-                                              3,
+        SP::Interaction inter(new Interaction(3,
                                               parent->_nslaw,
-                                              rel));
+                                              rel, parent->_interID++));
         inter->insert(ds1);
         inter->insert(ds2);
-        parent->_nsds->topology()->addInteraction(inter);
+        parent->_nsds->topology()->insertInteraction(inter);
       }
     }
     else
@@ -451,13 +449,12 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
     if (!found)
       // no
     {
-      SP::Interaction inter(new Interaction(_interID++,
-                                            2,
+      SP::Interaction inter(new Interaction(2,
                                             _nslaw,
-                                            relp));
+                                            relp, _interID++));
       inter->insert(ds);
 
-      _nsds->topology()->addInteraction(inter);
+      _nsds->topology()->insertInteraction(inter);
 
     }
   }
@@ -523,13 +520,12 @@ void SpaceFilter::_PlanSphereFilter(double A, double B, double C, double D, SP::
     if (!found)
       // no
     {
-      SP::Interaction inter(new Interaction(_interID++,
-                                            3,
+      SP::Interaction inter(new Interaction(3,
                                             _nslaw,
-                                            relp));
+                                            relp, _interID++));
       inter->insert(ds);
 
-      _nsds->topology()->addInteraction(inter);
+      _nsds->topology()->insertInteraction(inter);
 
     }
   }
@@ -630,9 +626,12 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
     boost::shared_ptr<_CircularFilter>
     circularFilter(new _CircularFilter(parent, ds1));
 
-
     for (j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j)
     {
+      printf("j=%d\n", j);
+
+
+
       SP::LagrangianDS ds2 = (*neighbours.first)->body;
       int ids1 = ds1->number();
       int ids2 = ds2->number();

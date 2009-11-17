@@ -182,7 +182,7 @@ public:
    *  added in Dynamical Systems graph and Unitary Relations Graph
    * \param a shared pointer to the interaction
    */
-  void addInteraction(SP::Interaction);
+  void insertInteraction(SP::Interaction);
 
   /** remove an Interaction from the topology. The interaction is
    *  removed from Dynamical Systems graph and Unitary Relations Graph.
@@ -194,7 +194,7 @@ public:
   /** add a dynamical system
    * \param a shared pointer to a dynamical system
    */
-  void addDynamicalSystem(SP::DynamicalSystem ds)
+  void insertDynamicalSystem(SP::DynamicalSystem ds)
   {
     _DSG[0]->add_vertex(ds);
   };

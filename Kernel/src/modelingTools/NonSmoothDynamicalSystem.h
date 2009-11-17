@@ -178,9 +178,9 @@ public:
   /** add an interaction to the system
    * \param a shared pointer to the interaction
    */
-  void addInteraction(SP::Interaction inter)
+  void insertInteraction(SP::Interaction inter)
   {
-    _topology->addInteraction(inter);
+    _topology->insertInteraction(inter);
   };
 
 
@@ -195,9 +195,9 @@ public:
   /** add a dynamical system
    * \param a shared pointer to a dynamical system
    */
-  void addDynamicalSystem(SP::DynamicalSystem ds)
+  void insertDynamicalSystem(SP::DynamicalSystem ds)
   {
-    _topology->addDynamicalSystem(ds);
+    _topology->insertDynamicalSystem(ds);
   };
 
 

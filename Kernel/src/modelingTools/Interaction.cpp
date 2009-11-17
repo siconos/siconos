@@ -184,7 +184,7 @@ Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, 
 }
 
 /* initialisation with empty set */
-Interaction::Interaction(int newNumber, int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel):
+Interaction::Interaction(int nInter, SP::NonSmoothLaw newNSL, SP::Relation newRel, int newNumber):
   _number(newNumber), _interactionSize(nInter), _numberOfRelations(1), _sizeOfDS(0), _sizeZ(0),
   _y(1), _nslaw(newNSL), _relation(newRel), _initialized(false)
 {
@@ -491,7 +491,7 @@ SP::DynamicalSystem Interaction::dynamicalSystem(int nb)
 {
   assert(_involvedDS->isIn(nb) &&  // if ds number nb is not in the set ...
          "Interaction::dynamicalSystem(nb), DS number nb is not in the set.");
-  return _involvedDS->getPtr(_number);
+  return _involvedDS->getPtr(nb);
 }
 
 void Interaction::setRelationPtr(SP::Relation newRelation)

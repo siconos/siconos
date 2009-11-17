@@ -190,12 +190,12 @@ public:
   Interaction(const std::string&, DynamicalSystemsSet&, int, int, SP::NonSmoothLaw, SP::Relation);
 
   /** constructor with no data
-   *  \param int : the number of this Interaction
    *  \param int : the value of interactionSize
    *  \param SP::NonSmoothLaw : a pointer to the non smooth law
    *  \param SP::Relation : a pointer to the Relation
+   *  \param int : the number of this Interaction (default 0)
    */
-  Interaction(int, int, SP::NonSmoothLaw, SP::Relation);
+  Interaction(int, SP::NonSmoothLaw, SP::Relation, int = 0);
 
   /** destructor
    */

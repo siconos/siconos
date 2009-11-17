@@ -89,8 +89,8 @@ void NonSmoothDynamicalSystemTest::testBuildNonSmoothDynamicalSystem2()
 }
 
 
-// addDynamicalSystem
-void NonSmoothDynamicalSystemTest::testaddDynamicalSystem()
+// insertDynamicalSystem
+void NonSmoothDynamicalSystemTest::testinsertDynamicalSystem()
 {
   SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem(tmpxml));
   xmlNode *node2 = SiconosDOMTreeTools::findNodeChild(node, "DS_Definition");
@@ -100,16 +100,16 @@ void NonSmoothDynamicalSystemTest::testaddDynamicalSystem()
   SP::DynamicalSystem ltids(new LagrangianLinearTIDS(tmpdsxml));
   ltids ->setNumber(23);
 
-  nsds->addDynamicalSystem(ltids);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testaddDynamicalSystemA : ", nsds->getDSVectorSize() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testaddDynamicalSystemB: ", nsds->dynamicalSystem(0)->number() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testaddDynamicalSystemC : ", nsds->dynamicalSystem(1)->number() == 8, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testaddDynamicalSystemC : ", nsds->dynamicalSystem(2)->number() == 23, true);
-  cout << "------- test addDynamicalSystem ok -------" << endl;
+  nsds->insertDynamicalSystem(ltids);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testinsertDynamicalSystemA : ", nsds->getDSVectorSize() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertDynamicalSystemB: ", nsds->dynamicalSystem(0)->number() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testinsertDynamicalSystemC : ", nsds->dynamicalSystem(1)->number() == 8, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testinsertDynamicalSystemC : ", nsds->dynamicalSystem(2)->number() == 23, true);
+  cout << "------- test insertDynamicalSystem ok -------" << endl;
 }
 
-// addInteraction
-void NonSmoothDynamicalSystemTest::testaddInteraction()
+// insertInteraction
+void NonSmoothDynamicalSystemTest::testinsertInteraction()
 {
   SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem(tmpxml));
   xmlNode *node2 = SiconosDOMTreeTools::findNodeChild(node, "Interaction_Definition");
@@ -118,11 +118,11 @@ void NonSmoothDynamicalSystemTest::testaddInteraction()
   tmp.resize(2, 1);
   SP::InteractionXML interxml(new InteractionXML(node3, tmp));
   SP::Interaction inter(new Interaction(interxml));
-  nsds->addInteraction(inter);
+  nsds->insertInteraction(inter);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2D : ", nsds->getInteractionVectorSize() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2E : ", nsds->interaction(0)->number() == 12, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2E : ", nsds->interaction(1)->number() == 12, true);
-  cout << " ------- test addInteractiontest ok -------" << endl;
+  cout << " ------- test insertInteractiontest ok -------" << endl;
 }
 
 void NonSmoothDynamicalSystemTest::End()

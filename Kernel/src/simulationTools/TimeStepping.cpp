@@ -43,9 +43,18 @@ using namespace std;
 static CheckSolverFPtr checkSolverOutput = NULL;
 
 
-TimeStepping::TimeStepping(SP::TimeDiscretisation td): Simulation(td, "TimeStepping")
+TimeStepping::TimeStepping(SP::TimeDiscretisation td,
+                           SP::OneStepIntegrator osi,
+                           SP::OneStepNSProblem osnspb)
+  : Simulation(td, "TimeStepping")
 {
+
   mComputeResiduY = false;
+
+  if (osi) insertIntegrator(osi);
+
+  if (osnspb) insertNonSmoothProblem(osnspb);
+
 }
 
 // --- XML constructor ---
@@ -223,13 +232,13 @@ void TimeStepping::updateIndexSet(unsigned int i)
 
 }
 
-void TimeStepping::recordNonSmoothProblem(SP::OneStepNSProblem osns)
+void TimeStepping::insertNonSmoothProblem(SP::OneStepNSProblem osns)
 {
   // A the time, a time stepping simulation can only have one non
   // smooth problem.
   if (!_allNSProblems->empty())
     RuntimeException::selfThrow
-    ("TimeStepping,  recordNonSmoothProblem - A non smooth problem already exist. You can not have more than one.");
+    ("TimeStepping,  insertNonSmoothProblem - A non smooth problem already exist. You can not have more than one.");
   string name = "timeStepping";
   osns->setId(name);
   (*_allNSProblems)[name] = osns;

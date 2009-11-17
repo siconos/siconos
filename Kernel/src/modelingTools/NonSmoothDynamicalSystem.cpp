@@ -85,14 +85,6 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(SP::NonSmoothDynamicalSystemX
     // Interaction inserted into the set.
   }
 
-  // === Checks that sets are not empty ===
-  if (allDSLocal->isEmpty())
-    RuntimeException::selfThrow("NonSmoothDynamicalSystem:: constructor(xml, ...): the set of DS is empty.");
-
-  if (allInteractionsLocal->isEmpty())  // Note: empty Interactions
-    // set is allowed.
-    cout << "Warning: NonSmoothDynamicalSystem:: constructor(xml, ...): the set of Interactions is empty." << endl;
-
   // === Builds topology ===
   _topology.reset(new Topology(allDSLocal, allInteractionsLocal));
 }
@@ -131,11 +123,6 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS
   BVP(isBVP)
 {
 
-  // === Checks that sets are not empty ===
-  if (listOfDS.isEmpty())
-    RuntimeException::
-    selfThrow("NonSmoothDynamicalSystem:: constructor(DynamicalSystemsSet, ...): the set of DS is empty.");
-
   //   if( listOfInteractions.isEmpty())
   //     RuntimeException::selfThrow("NonSmoothDynamicalSystem:: constructor(...,InteractionsSet, ...): the set of Interactions is empty.");
 
@@ -169,10 +156,6 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS, const bool& isBVP):
   BVP(isBVP)
 {
-
-  // === Checks that sets are not empty ===
-  if (listOfDS.isEmpty())
-    RuntimeException::selfThrow("NonSmoothDynamicalSystem:: constructor(DynamicalSystemsSet, ...): the set of DS is empty.");
 
   // === "copy" listOfDS/listOfInteractions in allDSLocal/allInteractions ===
   // Warning: DS/Interactions are not copied but pointers are inserted into the corresponding set.

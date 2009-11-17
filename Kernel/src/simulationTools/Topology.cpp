@@ -60,7 +60,7 @@ Topology::Topology(SP::InteractionsSet newInteractions) :
   for (InteractionsIterator it = newInteractions->begin();
        it != newInteractions->end(); ++it)
   {
-    addInteraction(*it);
+    insertInteraction(*it);
   }
 
   _maxRelativeDegree = 0;
@@ -85,7 +85,7 @@ Topology::Topology(SP::DynamicalSystemsSet newDSset, SP::InteractionsSet newInte
   for (InteractionsIterator it = newInteractions->begin();
        it != newInteractions->end(); ++it)
   {
-    addInteraction(*it);
+    insertInteraction(*it);
   }
 
   for (DSIterator ids = newDSset->begin(); ids != newDSset->end() ; ++ids)
@@ -252,7 +252,7 @@ const bool Topology::removeInteractionFromIndexSet(SP::Interaction inter)
 };
 
 
-void Topology::addInteraction(SP::Interaction inter)
+void Topology::insertInteraction(SP::Interaction inter)
 {
   assert(_allInteractions);
   assert(_DSG[0]->edges_number() == _URG[0]->size());

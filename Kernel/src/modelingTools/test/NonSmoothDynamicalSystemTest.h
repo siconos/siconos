@@ -36,8 +36,8 @@ private:
   //CPPUNIT_TEST(testBuildNonSmoothDynamicalSystem);
   CPPUNIT_TEST(testBuildNonSmoothDynamicalSystem1);
   CPPUNIT_TEST(testBuildNonSmoothDynamicalSystem2);
-  CPPUNIT_TEST(testaddDynamicalSystem);
-  CPPUNIT_TEST(testaddInteraction);
+  CPPUNIT_TEST(testinsertDynamicalSystem);
+  CPPUNIT_TEST(testinsertInteraction);
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
@@ -46,8 +46,8 @@ private:
 
   void testBuildNonSmoothDynamicalSystem1();
   void testBuildNonSmoothDynamicalSystem2();
-  void testaddDynamicalSystem();
-  void testaddInteraction();
+  void testinsertDynamicalSystem();
+  void testinsertInteraction();
   void End();
   // Members
 

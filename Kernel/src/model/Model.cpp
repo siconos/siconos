@@ -92,6 +92,11 @@ Model::Model(double newT0, double newT, const string& newTitle,
   else if (newT > 0 && newT <= _t0)
     RuntimeException::selfThrow
     ("Model::constructor from min data: Warning, final T lower than t0");
+
+  /* empty */
+  DynamicalSystemsSet allDS;
+  InteractionsSet allInteractions;
+  _nsds.reset(new NonSmoothDynamicalSystem(allDS, allInteractions));
   // else no T in the model!
 }
 

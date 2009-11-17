@@ -147,7 +147,7 @@ SP::OneStepIntegrator Simulation::integratorOfDS(SP::DynamicalSystem ds) const
   return it->second;
 }
 
-void Simulation::recordIntegrator(SP::OneStepIntegrator osi)
+void Simulation::insertIntegrator(SP::OneStepIntegrator osi)
 {
   _allOSI->insert(osi);
   // Note: each (ds,osi) pair will be registered into the _osiMap
@@ -226,10 +226,10 @@ void Simulation::updateIndexSets()
   }
 }
 
-void Simulation::recordNonSmoothProblem(SP::OneStepNSProblem osns)
+void Simulation::insertNonSmoothProblem(SP::OneStepNSProblem osns)
 {
   if (hasOneStepNSProblem(osns))
-    RuntimeException::selfThrow("Simulation - recordNonSmoothProblem(osns), the non smooth problem already exists in the Simulation. ");
+    RuntimeException::selfThrow("Simulation - insertNonSmoothProblem(osns), the non smooth problem already exists in the Simulation. ");
 
   string name = osns->getId();
   (*_allNSProblems)[name] = osns;

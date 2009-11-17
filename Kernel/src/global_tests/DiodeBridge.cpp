@@ -125,7 +125,7 @@ bool DiodeBridge()
 
     // One Step Integrator
     SP::Moreau OSI_RLCD(new Moreau(LSDiodeBridge, theta));
-    StratDiodeBridge->recordIntegrator(OSI_RLCD);
+    StratDiodeBridge->insertIntegrator(OSI_RLCD);
 
     // One Step non smooth problem
     IntParameters iparam(5);
@@ -136,7 +136,7 @@ bool DiodeBridge()
     SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
 
     SP::LCP LCP_RLCD(new LCP(mySolver, "LCP"));
-    StratDiodeBridge->recordNonSmoothProblem(LCP_RLCD);
+    StratDiodeBridge->insertNonSmoothProblem(LCP_RLCD);
 
     // Initialization of the model
     DiodeBridge->initialize(StratDiodeBridge);

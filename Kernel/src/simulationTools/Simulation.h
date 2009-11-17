@@ -180,7 +180,8 @@ public:
    *  that owns this simulation)
    *  \param string: simulation type, default = undefined
    */
-  Simulation(SP::TimeDiscretisation, const std::string& = "undefined");
+  Simulation(SP::TimeDiscretisation,
+             const std::string& = "undefined");
 
   /** constructor with XML object of the Simulation
       \param SimulationXML* : the XML object corresponding
@@ -337,11 +338,10 @@ public:
     return _allOSI->size();
   }
 
-  /** add an Integrator into the simulation list of integrators
-      (pointer link, no copy!)
+  /** insert an Integrator into the simulation list of integrators
    *  \param a smart pointer to a OneStepIntegrator
    */
-  void recordIntegrator(SP::OneStepIntegrator);
+  void insertIntegrator(SP::OneStepIntegrator);
 
   /** register a DS and its OSI into the osiMap.
       \param a pointer to a DynamicalSystem.
@@ -416,7 +416,7 @@ public:
       it needs to have an id clearly defined)
    *  \param a smart pointer to OneStepNSProblem
    */
-  virtual void recordNonSmoothProblem(SP::OneStepNSProblem);
+  virtual void insertNonSmoothProblem(SP::OneStepNSProblem);
 
   /** get the SimulationXML* of the Simulation
    *  \return a pointer on the SimulationXML of the Simulation
