@@ -174,8 +174,8 @@ void Spheres::init()
     osnspb_->setMStorageType(1);
     osnspb_->setNumericsVerboseMode(0);
     osnspb_->setKeepLambdaAndYState(true);
-    simulation_->recordIntegrator(osi);
-    simulation_->recordNonSmoothProblem(osnspb_);
+    simulation_->insertIntegrator(osi);
+    simulation_->insertNonSmoothProblem(osnspb_);
     //     simulation_->setCheckSolverFunction(localCheckSolverOuput);
 
     // --- Simulation initialization ---

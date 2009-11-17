@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
 
     // One Step Integrator
     SP::Moreau OSI_RLCD(new Moreau(LSDiodeBridge, theta));
-    StratDiodeBridge->recordIntegrator(OSI_RLCD);
+    StratDiodeBridge->insertIntegrator(OSI_RLCD);
 
     // One Step non smooth problem
     IntParameters iparam(5);
@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
     string solverName = "Lemke" ;
     SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     SP::LCP LCP_RLCD(new LCP(mySolver));
-    StratDiodeBridge->recordNonSmoothProblem(LCP_RLCD);
+    StratDiodeBridge->insertNonSmoothProblem(LCP_RLCD);
 
     // Initialization
     DiodeBridge->initialize(StratDiodeBridge);

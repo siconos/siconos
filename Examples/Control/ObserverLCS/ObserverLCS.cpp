@@ -148,7 +148,7 @@ int main(int argc, char* argv[])
     // -- OneStepIntegrators --
     double theta = 0.5;
     SP::Moreau myIntegrator(new Moreau(allDS, theta));
-    s->recordIntegrator(myIntegrator);
+    s->insertIntegrator(myIntegrator);
 
     // -- OneStepNsProblem --
     IntParameters iparam(5);
@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
     string solverName = "Lemke" ;
     SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     SP::LCP osnspb(new LCP(mySolver));
-    s->recordNonSmoothProblem(osnspb);
+    s->insertNonSmoothProblem(osnspb);
 
     // =========================== End of model definition ===========================
 

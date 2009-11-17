@@ -88,7 +88,7 @@ void BallsModel::initialize()
 
   // -- OneStepIntegrators --
   SP::OneStepIntegrator OSI(new Moreau(allDS , 0.5000001));
-  s->recordIntegrator(OSI);
+  s->insertIntegrator(OSI);
 
   // -- OneStepNsProblem --
   string solverName = "Lemke";      // solver algorithm used for non-smooth problem
@@ -99,7 +99,7 @@ void BallsModel::initialize()
   //dparam[2] = 1e-8; // Local Tolerance
   SP::NonSmoothSolver Mysolver(new NonSmoothSolver(solverName, iparam, dparam));
   SP::LCP osnspb(new LCP(Mysolver));
-  s->recordNonSmoothProblem(osnspb);
+  s->insertNonSmoothProblem(osnspb);
 
   //osnspb->setNumericsVerboseMode(1);
   //  osnspb->setMStorageType(1);

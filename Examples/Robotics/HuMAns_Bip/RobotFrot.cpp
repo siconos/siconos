@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
 
     // -- OneStepIntegrators --
     SP::OneStepIntegrator OSI(new Moreau(bip, 0.500001));
-    s->recordIntegrator(OSI);
+    s->insertIntegrator(OSI);
 
     // -- OneStepNsProblem --
     string solverName = "NSGS";      // solver algorithm used for non-smooth problem
@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
     SP::NonSmoothSolver Mysolver(new NonSmoothSolver(solverName, iparam, dparam));
     SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     SP::FrictionContact osnspb(new FrictionContact(3, mySolver));
-    s->recordNonSmoothProblem(osnspb);
+    s->insertNonSmoothProblem(osnspb);
     cout << "=== End of model loading === " << endl;
 
     // =========================== End of model definition ===========================

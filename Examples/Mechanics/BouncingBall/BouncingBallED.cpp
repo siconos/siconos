@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
 
     // -- OneStepIntegrators --
     SP::Lsodar OSI(new Lsodar(ball));
-    s->recordIntegrator(OSI);
+    s->insertIntegrator(OSI);
 
     // -- OneStepNsProblem --
     IntParameters iparam(5);
@@ -126,8 +126,8 @@ int main(int argc, char* argv[])
     SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     SP::OneStepNSProblem impact(new LCP(mySolver, "impact"));
     SP::OneStepNSProblem acceleration(new LCP(mySolver, "acceleration"));
-    s->recordNonSmoothProblem(impact);
-    s->recordNonSmoothProblem(acceleration);
+    s->insertNonSmoothProblem(impact);
+    s->insertNonSmoothProblem(acceleration);
 
     // =========================== End of model definition ===========================
 

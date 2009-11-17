@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
     double theta = 0.500001;
 
     SP::OneStepIntegrator OSI(new Moreau(simplependulum, theta));
-    s->recordIntegrator(OSI);
+    s->insertIntegrator(OSI);
     // -- OneStepNsProblem --
     IntParameters iparam(5);
     iparam[0] = 2001; // Max number of iteration
@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
     string solverName = "Lemke" ;
     SP:: NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     SP::OneStepNSProblem osnspb(new LCP(mySolver));
-    s->recordNonSmoothProblem(osnspb);
+    s->insertNonSmoothProblem(osnspb);
     cout << "=== End of model loading === " << endl;
 
     // =========================== End of model definition ===========================  dataPlot(k,7) = (*inter->y(0))(0);

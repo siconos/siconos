@@ -186,7 +186,7 @@ int main(int argc, char* argv[])
     // -- OneStepIntegrators --
     double theta = 0.5000001;
     SP::OneStepIntegrator OSI(new Moreau(allDS , theta));
-    s->recordIntegrator(OSI);
+    s->insertIntegrator(OSI);
     // That means that all systems in allDS have the same theta value.
 
     // -- OneStepNsProblem --
@@ -197,7 +197,7 @@ int main(int argc, char* argv[])
     string solverName = "Lemke" ;
     SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     SP::LCP osnspb(new LCP(mySolver));
-    s->recordNonSmoothProblem(osnspb);
+    s->insertNonSmoothProblem(osnspb);
 
     //    osnspb->getSolverPtr()->setSolverBlock(true);
 

@@ -95,7 +95,7 @@ void BilliardModel::initialize()
 
   // -- OneStepIntegrators --
   SP::OneStepIntegrator OSI(new Moreau(allDS , 0.5000001));
-  s->recordIntegrator(OSI);
+  s->insertIntegrator(OSI);
 
   // -- OneStepNsProblem --
   string solverName = "NSGS";      // solver algorithm used for non-smooth problem
@@ -109,7 +109,7 @@ void BilliardModel::initialize()
   dparam[2] = 1e-8; // Local Tolerance
   SP::NonSmoothSolver Mysolver(new NonSmoothSolver(solverName, iparam, dparam));
   SP::FrictionContact osnspb(new FrictionContact(3, Mysolver));
-  s->recordNonSmoothProblem(osnspb);
+  s->insertNonSmoothProblem(osnspb);
   //osnspb->setNumericsVerboseMode(1);
   //  osnspb->setMStorageType(1);
   cout << "=== End of model loading === " << endl;

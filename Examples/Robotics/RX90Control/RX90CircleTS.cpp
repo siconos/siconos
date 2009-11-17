@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
 
     // -- OneStepIntegrators --
     SP::OneStepIntegrator OSI(new Moreau(arm, 0.5));
-    s->recordIntegrator(OSI);
+    s->insertIntegrator(OSI);
 
     IntParameters iparam(5);
     iparam[0] = 1000; // Max number of iteration
@@ -178,7 +178,7 @@ int main(int argc, char* argv[])
     SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     // -- OneStepNsProblem --
     SP::OneStepNSProblem osnsp(new LCP(mySolver));
-    s->recordNonSmoothProblem(osnsp);
+    s->insertNonSmoothProblem(osnsp);
 
     cout << "=== End of model loading === " << endl;
 

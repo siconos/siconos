@@ -117,13 +117,13 @@ int main()
   //*****BUILD THE STEP INTEGRATOR
   SP::OneStepIntegrator  aMoreau ;
   aMoreau.reset(new Moreau(aDS, 0.5));
-  aS->recordIntegrator(aMoreau);
+  aS->insertIntegrator(aMoreau);
   SP::NonSmoothSolver  mySolver(new NonSmoothSolver((*solverName), iparam, dparam, floatWorkingMem, intWorkingMem));
 
   //**** BUILD THE STEP NS PROBLEM
   SP::MLCP  aMLCP ;
   aMLCP.reset(new MLCP(mySolver, "MLCP"));
-  aS->recordNonSmoothProblem(aMLCP);
+  aS->insertNonSmoothProblem(aMLCP);
   aM->initialize(aS);
   //  Alloc working mem for the solver
   int aux = mlcp_driver_get_iwork(aMLCP->getNumericsMLCP().get(), mySolver->numericsSolverOptions().get());

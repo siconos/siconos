@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
 
     // -- OneStepIntegrators --
     SP::OneStepIntegrator vOSI(new Moreau(dynamicalSystem, theta));
-    s->recordIntegrator(vOSI);
+    s->insertIntegrator(vOSI);
 
     // -- OneStepNsProblem --
     IntParameters iparam(5);
@@ -156,7 +156,7 @@ int main(int argc, char* argv[])
     string solverName = "PGS" ;
     SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     SP::OneStepNSProblem osnspb(new FrictionContact(2, mySolver, "fc2d"));
-    s->recordNonSmoothProblem(osnspb);
+    s->insertNonSmoothProblem(osnspb);
     // OneStepNSProblem* osnspb = new FrictionContact2D(s, "Latin", 1000, 0.00001, "max", 0.6);
     // OneStepNSProblem* osnspb = new FrictionContact2D(s, "CPG", 10000, 0.00001, "max", 0.6);
 

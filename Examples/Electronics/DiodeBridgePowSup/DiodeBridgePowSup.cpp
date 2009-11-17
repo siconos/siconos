@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
     double theta = 0.5;
 
     SP::Moreau OSI_LSDiodeBridgePowSup(new Moreau(LSDiodeBridgePowSup, theta));
-    StratDiodeBridgePowSup->recordIntegrator(OSI_LSDiodeBridgePowSup);
+    StratDiodeBridgePowSup->insertIntegrator(OSI_LSDiodeBridgePowSup);
 
     IntParameters iparam(5);
     iparam[0] = 300; // Max number of iteration
@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
     string solverName = "NSQP" ;
     SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     SP::LCP LCP_DiodeBridgePowSup(new LCP(mySolver));
-    StratDiodeBridgePowSup->recordNonSmoothProblem(LCP_DiodeBridgePowSup);
+    StratDiodeBridgePowSup->insertNonSmoothProblem(LCP_DiodeBridgePowSup);
 
     DiodeBridgePowSup->initialize(StratDiodeBridgePowSup);
 

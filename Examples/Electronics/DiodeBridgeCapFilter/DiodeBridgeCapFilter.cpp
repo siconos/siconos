@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
     //Moreau* OSI_LS1DiodeBridgeCapFilter = new Moreau(LS1DiodeBridgeCapFilter,theta,StratDiodeBridgeCapFilter);
     //Moreau* OSI_LS2DiodeBridgeCapFilter = new Moreau(LS2DiodeBridgeCapFilter,theta,StratDiodeBridgeCapFilter);
     SP::Moreau OSI_LS1DiodeBridgeCapFilter(new Moreau(Inter_DS, theta));
-    StratDiodeBridgeCapFilter->recordIntegrator(OSI_LS1DiodeBridgeCapFilter);
+    StratDiodeBridgeCapFilter->insertIntegrator(OSI_LS1DiodeBridgeCapFilter);
 
     IntParameters iparam(5);
     iparam[0] = 10000; // Max number of iteration
@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
     string solverName = "Lemke" ;
     SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     SP::LCP LCP_DiodeBridgeCapFilter(new LCP(mySolver));
-    StratDiodeBridgeCapFilter->recordNonSmoothProblem(LCP_DiodeBridgeCapFilter);
+    StratDiodeBridgeCapFilter->insertNonSmoothProblem(LCP_DiodeBridgeCapFilter);
 
     DiodeBridgeCapFilter->initialize(StratDiodeBridgeCapFilter);
 

@@ -139,10 +139,10 @@ int main(int argc, char* argv[])
       SP::TimeStepping s(new TimeStepping(t));
       // -- OneStepIntegrators --
       SP::Moreau OSI(new Moreau(yoyo, theta));
-      s->recordIntegrator(OSI);
+      s->insertIntegrator(OSI);
       // -- OneStepNsProblem --
       SP::OneStepNSProblem osnspb(new LCP(mySolver));
-      s->recordNonSmoothProblem(osnspb);
+      s->insertNonSmoothProblem(osnspb);
       // --- Model initialization ---
       jeu->initialize(s);
 
@@ -225,9 +225,9 @@ int main(int argc, char* argv[])
       t.reset(new TimeDiscretisation(t0, h));
       s.reset(new TimeStepping(t));
       OSI.reset(new Moreau(yoyo, theta));
-      s->recordIntegrator(OSI);
+      s->insertIntegrator(OSI);
       osnspb.reset(new LCP(mySolver));
-      s->recordNonSmoothProblem(osnspb);
+      s->insertNonSmoothProblem(osnspb);
       jeu->initialize(s);
 
       q = yoyo->q();

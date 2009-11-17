@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
 
     // -- OneStepIntegrators --
     SP::Lsodar OSI(new Lsodar(arm));
-    s->recordIntegrator(OSI);
+    s->insertIntegrator(OSI);
     // -- OneStepNsProblem --
     IntParameters iparam(5);
     iparam[0] = 20001; // Max number of iteration
@@ -162,8 +162,8 @@ int main(int argc, char* argv[])
     SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     SP::OneStepNSProblem impact(new LCP(mySolver, "impact"));
     SP::OneStepNSProblem acceleration(new LCP(mySolver, "acceleration"));
-    s->recordNonSmoothProblem(impact);
-    s->recordNonSmoothProblem(acceleration);
+    s->insertNonSmoothProblem(impact);
+    s->insertNonSmoothProblem(acceleration);
 
     cout << "=== End of model loading === " << endl;
 

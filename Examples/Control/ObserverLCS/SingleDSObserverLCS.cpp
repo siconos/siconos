@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
     double theta = 0.5;
     // One Step Integrator
     SP::Moreau myIntegrator(new Moreau(allDS, theta));
-    s->recordIntegrator(myIntegrator);
+    s->insertIntegrator(myIntegrator);
     // OneStepNSProblem
 
 
@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
     string solverName = "Lemke" ;
     SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     SP::LCP osnspb(new LCP(mySolver));
-    s->recordNonSmoothProblem(osnspb);
+    s->insertNonSmoothProblem(osnspb);
     // ================================= Computation =================================
 
     // --- Initialisation of the simulation ---

@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
     // -- OneStepIntegrators --
     double theta = 0.5000000000000001;
     SP::OneStepIntegrator OSI_RLCD(new Moreau(LSPRC, theta));
-    StratPRC->recordIntegrator(OSI_RLCD);
+    StratPRC->insertIntegrator(OSI_RLCD);
 
     // -- OneStepNsProblem --
     IntParameters iparam(5);
@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
     string solverName = "Lemke" ;
     SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     SP::OneStepNSProblem LCP_RLCD(new LCP(mySolver));
-    StratPRC->recordNonSmoothProblem(LCP_RLCD);
+    StratPRC->insertNonSmoothProblem(LCP_RLCD);
 
     // =========================== End of model definition ===========================
 

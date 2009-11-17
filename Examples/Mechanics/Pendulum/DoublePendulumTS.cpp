@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
     double theta = 0.500001;
 
     SP::Moreau OSI(new Moreau(doublependulum, theta));
-    s->recordIntegrator(OSI);
+    s->insertIntegrator(OSI);
 
     // -- OneStepNsProblem --
     IntParameters iparam(5);
@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
     string solverName = "Lemke" ;
     SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     SP::OneStepNSProblem osnspb(new LCP(mySolver));
-    s->recordNonSmoothProblem(osnspb);
+    s->insertNonSmoothProblem(osnspb);
 
     cout << "=== End of model loading === " << endl;
 

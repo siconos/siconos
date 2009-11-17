@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
 
     // -- OneStepIntegrator --
     SP::OneStepIntegrator OSI(new Moreau(lds, theta));
-    S->recordIntegrator(OSI);
+    S->insertIntegrator(OSI);
 
     // -- OneStepNsProblem --
     IntParameters iparam(5);
@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
     string solverName = "QP" ;
     SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     SP::OneStepNSProblem osnspb(new LCP(mySolver));
-    S->recordNonSmoothProblem(osnspb);
+    S->insertNonSmoothProblem(osnspb);
 
     cout << "=== End of model loading === " << endl;
     // =========================== End of model definition ===========================

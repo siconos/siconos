@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
     // -------------------------
 
     cout << "====> Model loading ..." << endl << endl;
-    DynamicalSystemsSet allDS; // the list of DS
+
     SP::SiconosMatrix Mass(new SimpleMatrix(nDof, nDof));
     (*Mass)(0, 0) = m;
     (*Mass)(1, 1) = m;
@@ -64,9 +64,10 @@ int main(int argc, char* argv[])
     SP::SimpleVector v0(new SimpleVector(nDof));
     (*q0)(0) = position_init;
     (*v0)(0) = velocity_init;
+
     // -- The dynamical system --
     SP::LagrangianLinearTIDS ball(new LagrangianLinearTIDS(q0, v0, Mass));
-    allDS.insert(ball);
+
     // -- Set external forces (weight) --
     SP::SimpleVector weight(new SimpleVector(nDof));
     (*weight)(0) = -m * g;
@@ -76,8 +77,6 @@ int main(int argc, char* argv[])
     // --- Interactions ---
     // --------------------
 
-    InteractionsSet allInteractions;
-
     // -- nslaw --
     double e = 0.9;
 
@@ -85,38 +84,44 @@ int main(int argc, char* argv[])
     //
     SP::SiconosMatrix H(new SimpleMatrix(1, nDof));
     (*H)(0, 0) = 1.0;
-    SP::NonSmoothLaw nslaw0(new NewtonImpactNSL(e));
-    SP::Relation relation0(new LagrangianLinearTIR(*H));
 
-    SP::Interaction inter(new Interaction("floor-ball", allDS, 0, 1, nslaw0, relation0));
-    allInteractions.insert(inter);
+    SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
+    SP::Relation relation(new LagrangianLinearTIR(*H));
+
+    SP::Interaction inter(new Interaction(1, nslaw, relation));
+    inter->insert(ball);
+
     // -------------
     // --- Model ---
     // -------------
-    SP::Model bouncingBall(new Model(t0, T, allDS, allInteractions));
+    SP::Model bouncingBall(new Model(t0, T));
+    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
+    bouncingBall->nonSmoothDynamicalSystem()->insertInteraction(inter);
+
 
     // ------------------
     // --- Simulation ---
     // ------------------
 
-    // -- Time discretisation --
+    // -- (1) OneStepIntegrators --
+    SP::Moreau OSI(new Moreau(ball, theta));
+
+    // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-    SP::TimeStepping s(new TimeStepping(t));
-
-    // -- OneStepIntegrators --
-    SP::Moreau OSI(new Moreau(ball, theta));
-    s->recordIntegrator(OSI);
-
+    // -- (3) Non smooth problem
     IntParameters iparam(5);
     iparam[0] = 1000; // Max number of iteration
     DoubleParameters dparam(5);
     dparam[0] = 1e-15; // Tolerance
     string solverName = "Lemke" ;
+    // --- (3a) solver
     SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
-    // -- OneStepNsProblem --
+    // --- (3b) one step non smooth problem
     SP::OneStepNSProblem osnspb(new LCP(mySolver));
-    s->recordNonSmoothProblem(osnspb);
+
+    // -- (4) Simulation setup with (1) (2) (3)
+    SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
 
     // =========================== End of model definition ===========================
 

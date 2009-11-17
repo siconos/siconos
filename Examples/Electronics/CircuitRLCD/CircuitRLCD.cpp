@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
     double theta = 0.5000000000001;
 
     SP::Moreau OSI_RLCD(new Moreau(LSCircuitRLCD, theta));
-    StratCircuitRLCD->recordIntegrator(OSI_RLCD);
+    StratCircuitRLCD->insertIntegrator(OSI_RLCD);
 
     IntParameters iparam(5);
     iparam[0] = 101; // Max number of iteration
@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
     // -- OneStepNsProblem --
 
     SP::LCP LCP_RLCD(new LCP(mySolver));
-    StratCircuitRLCD->recordNonSmoothProblem(LCP_RLCD);
+    StratCircuitRLCD->insertNonSmoothProblem(LCP_RLCD);
 
     // Initialization
     CircuitRLCD->initialize(StratCircuitRLCD);
