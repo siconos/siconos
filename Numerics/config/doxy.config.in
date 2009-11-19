@@ -82,7 +82,8 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = @CMAKE_SOURCE_DIR@/src 
+INPUT                  = @CMAKE_SOURCE_DIR@/src \
+                         mainpage.doxygen
 FILE_PATTERNS          = *.c \
                          *.cc \
                          *.cxx \
@@ -124,11 +125,13 @@ FILE_PATTERNS          = *.c \
                          *.MM \
                          .m4
 RECURSIVE              = YES
-EXCLUDE                = ../src/netlib/odepack/test \
-                         ../src/NSSpack/test \
-                         ../src/netlib/dftemplates \
-                         ../src/netlib/dctemplates
-EXCLUDE_SYMLINKS       = NO
+EXCLUDE                = @CMAKE_SOURCE_DIR@/src/netlib/odepack/test \
+                         @CMAKE_SOURCE_DIR@/src/NSSpack/test \
+                         @CMAKE_SOURCE_DIR@/src/netlib/dftemplates \
+                         @CMAKE_SOURCE_DIR@/src/netlib/dctemplates \
+                         @CMAKE_SOURCE_DIR@/src/utils/boost-bindings \
+                         @CMAKE_SOURCE_DIR@/src/utils/AtlasLocal
+EXCLUDE_SYMLINKS       = YES
 EXCLUDE_PATTERNS       = */test/* \
                          */.svn/*
 EXAMPLE_PATH           = 

@@ -1,9 +1,61 @@
+/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
+ * Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ * Siconos is a free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * Siconos is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Siconos; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+*/
+
 #ifndef SiconosPointers_hpp
 #define SiconosPointers_hpp
 
-/* *SPtr types are smart pointers */
+/*! \file SiconosPointers.hpp
+  Siconos interface to reference-counting pointers
+*/
 
-/* http://www.boost.org/doc/libs/release/libs/smart_ptr */
+/** Siconos pointers
+
+ *  \author SICONOS Development Team - copyright INRIA
+ *  \version 3.0.0.
+ *  \date (Creation) 2008
+
+Siconos pointers are reference counting pointers. Memory pointed by a Siconos pointer is automaticaly deallocated.
+
+Basic usage :
+
+ - to declare a Siconos pointer on Siconos Object:
+
+ \verbatim
+ SP::<Siconos Object> myobject;
+ \endverbatim
+
+ - to set a Siconos pointer :
+
+ \verbatim
+ myobject.reset(new <Siconos Object>(...));
+ \endverbatim
+
+
+
+
+
+More documentation on smart pointers and reference counting:
+ * http://en.wikipedia.org/wiki/Smart_pointer
+ * http://en.wikipedia.org/wiki/Reference_counting
+ * http://www.boost.org/doc/libs/release/libs/smart_ptr
+
+ */
 
 #include <SiconosNumerics.h>
 
@@ -117,8 +169,17 @@ TYPEDEF_SAPTR(integer);
 TYPEDEF_SPTR(doublereal);
 TYPEDEF_SAPTR(doublereal);
 
+/** \namespace SP Namespace for Siconos smart pointers : memory
+    pointed by a Siconos smart pointers is automaticaly
+    deallocated */
 namespace SP = SharedPointer;
+
+/** \namespace SA Namespace for Siconos shared arrays : Siconos shared
+    arrays are automaticaly deallocated */
 namespace SA = SharedArray;
+
+/** \namespace SPC Namespace for const shared pointers : memory
+    pointed by a const shared pointers is automaticaly deallocated */
 namespace SPC = SharedPointerConst;
 
 #endif /* SiconosPointers_hpp */

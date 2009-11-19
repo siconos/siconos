@@ -47,7 +47,7 @@ struct compareEvent
 
 /** set of events, with an ordering based on Event time value (mpz_t) to compare Events
  *  A stl container of type "multiset" is used at the time
- *  \Warning This may be not the best choice => review all possibi lities */
+ *  \warning This may be not the best choice => review all possibi lities */
 typedef std::multiset<SP::Event, compareEvent > EventsContainer; // sort in a chronological way
 
 /** Iterator through a set of Events */

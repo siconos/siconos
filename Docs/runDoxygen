@@ -4,7 +4,7 @@ shift
 while [ $# -gt 0 ]; do 
     d=`dirname $1`
     cd $d
-    echo $doxygen `basename $1`
+    echo "now running: cd $d; $doxygen `basename $1`"
     $doxygen `basename $1`
     shift
     cd -

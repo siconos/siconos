@@ -17,8 +17,15 @@ Non Smooth Dynamical Systems (NSDS). The present package,
 Siconos/Numerics provides low-level algorithms to compute basic
 well-identified problems.")
 
-SET(DEBIAN_PACKAGE_DEPENDS 
-  "g++, gfortran, atlas3-base, atlas3-base-dev, atlas3-headers, doxygen")
+IF(PIPOL_IMAGE MATCHES "etch")
+  SET(DEBIAN_PACKAGE_DEPENDS 
+    "g++, gfortran, atlas3-base, atlas3-base-dev, atlas3-headers")
+ENDIF(PIPOL_IMAGE MATCHES "etch")
+
+IF(PIPOL_IMAGE MATCHES "lenny|ubuntu")
+  SET(DEBIAN_PACKAGE_DEPENDS
+    "g++, gfortran, libatlas-base-dev, libatlas-headers")
+ENDIF(PIPOL_IMAGE MATCHES "lenny|ubuntu")  
 
 
 SICONOS_PROJECT(Numerics 3 0 0)
