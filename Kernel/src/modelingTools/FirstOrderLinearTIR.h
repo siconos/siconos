@@ -56,7 +56,7 @@ protected:
 
   /** default constructor, protected
    */
-  FirstOrderLinearTIR(): FirstOrderR(RELATION::LinearTIR) {};
+  //FirstOrderLinearTIR():FirstOrderR(RELATION::LinearTIR) {};
 
 public:
 
@@ -65,6 +65,7 @@ public:
    */
   FirstOrderLinearTIR(SP::RelationXML);
 
+  FirstOrderLinearTIR();
   /** create the Relation from a set of data
    *  \param SP::SiconosMatrix : the matrix C
    *  \param SP::SiconosMatrix : the matrix B
@@ -323,6 +324,10 @@ public:
   /** print the data to the screen
    */
   void display() const;
+
+  virtual void computeJacXH(double) {};
+  virtual void computeJacLH(double) {};
+  virtual void computeJacLG(double) {};
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param Relation * : the relation which must be converted

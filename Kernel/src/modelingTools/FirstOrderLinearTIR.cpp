@@ -49,7 +49,10 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(SP::RelationXML relxml):
   else
     RuntimeException::selfThrow("FirstOrderLinearTIR:: xml constructor failed, can not find a definition for B.");
 }
-
+FirstOrderLinearTIR::FirstOrderLinearTIR():
+  FirstOrderR(LinearTIR)
+{
+}
 // Minimum data (C, B as pointers) constructor
 FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SiconosMatrix newC, SP::SiconosMatrix newB):
   FirstOrderR(LinearTIR)
