@@ -2,6 +2,7 @@
 
 #include "LA.h"
 
+#ifdef HAVE_ATLAS
 #ifndef FRAMEWORK_BLAS
 #ifdef HAVE_CLAPACK_H
 #include <clapack.h>
@@ -174,3 +175,4 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 
 } /* clapack_dtrtrs */
 #endif /* HAVE_CLAPACK_H */
+#endif

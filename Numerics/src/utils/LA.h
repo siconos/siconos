@@ -41,7 +41,9 @@ extern "C"
 #endif /* __cplusplus */
 
 /* missing */
+#ifdef HAVE_ATLAS
 int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, const enum ATLAS_UPLO Uplo, const enum CBLAS_TRANSPOSE Trans, const enum CBLAS_DIAG Diag, const int n, const int nrhs, double *a, const int lda, double *b, const int ldb);
+#endif
 
 /* LA_ORDER, LA_SIDE specific cblas/clapack */
 #ifndef LA_ORDER
