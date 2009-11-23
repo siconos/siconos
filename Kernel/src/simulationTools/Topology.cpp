@@ -26,7 +26,6 @@
 #include <boost/bind.hpp>
 #include <algorithm>
 #include <limits>
-#include <iostream.h>
 
 #define MAX_RELATIVE_DEGREE 999
 
@@ -319,7 +318,6 @@ struct Topology::SetupFromNslaw : public SiconosVisitor
 
   void visit(RelayNSL&)
   {
-    cout << "Topology visit Relay NSL" << endl;
     parent->_minRelativeDegree = std::min<int>(0, parent->_minRelativeDegree);
     parent->_maxRelativeDegree = std::max<int>(0, parent->_maxRelativeDegree);
     interaction->setRelativeDegree(0);
