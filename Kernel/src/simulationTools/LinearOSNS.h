@@ -205,7 +205,7 @@ public:
   }
 
   // --- Q ---
-  /** get the value of q, the initial state of the DynamicalSystem
+  /** get the value of q, the constant vector in the LinearOSNS
    *  \return SimpleVector
    *  \warning: SimpleVector is an abstract class => can not be an
    *  lvalue => return SimpleVector
@@ -215,7 +215,7 @@ public:
     return *_q;
   }
 
-  /** get q, the initial state of the DynamicalSystem
+  /** get q, the the constant vector in the LinearOSNS
    *  \return pointer on a SiconosVector
    */
   inline SP::SiconosVector q() const

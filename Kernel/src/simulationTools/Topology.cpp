@@ -26,6 +26,7 @@
 #include <boost/bind.hpp>
 #include <algorithm>
 #include <limits>
+#include <iostream.h>
 
 #define MAX_RELATIVE_DEGREE 999
 
@@ -287,6 +288,7 @@ class ComplementarityConditionNSL;
 class MixedComplementarityConditionNSL;
 class NewtonImpactNSL;
 class NewtonImpactFrictionNSL;
+class RelayNSL;
 
 struct Topology::SetupFromNslaw : public SiconosVisitor
 {
@@ -310,6 +312,14 @@ struct Topology::SetupFromNslaw : public SiconosVisitor
 
   void visit(MixedComplementarityConditionNSL&)
   {
+    parent->_minRelativeDegree = std::min<int>(0, parent->_minRelativeDegree);
+    parent->_maxRelativeDegree = std::max<int>(0, parent->_maxRelativeDegree);
+    interaction->setRelativeDegree(0);
+  };
+
+  void visit(RelayNSL&)
+  {
+    cout << "Topology visit Relay NSL" << endl;
     parent->_minRelativeDegree = std::min<int>(0, parent->_minRelativeDegree);
     parent->_maxRelativeDegree = std::max<int>(0, parent->_maxRelativeDegree);
     interaction->setRelativeDegree(0);
@@ -350,6 +360,8 @@ void Topology::computeRelativeDegrees()
 
     for (boost::tie(uv, uend) = _URG[0]->vertices(); uv != uend; ++uv)
     {
+
+
 
       setupFromNslaw.reset(new SetupFromNslaw(shared_from_this(),
                                               _URG[0]->bundle(*uv)->interaction()));

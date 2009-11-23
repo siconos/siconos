@@ -15,32 +15,58 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
-
+ */
 #include "Relay.h"
+
 using namespace std;
+using namespace RELATION;
 
-Relay::Relay(SP::OneStepNSProblemXML osnspbxml):
-  OneStepNSProblem("Relay", osnspbxml)
-{}
-
-Relay::~Relay()
-{}
-
-int Relay::compute(double)
+int Relay::compute(double time)
 {
-  RuntimeException::selfThrow("Relay compute: not yet implemented.");
-  return 1;
+  // --- Prepare data for Relay computing ---
+  preCompute(time);
+
+  int info = 0;
+  // --- Call Numerics driver ---
+  // Inputs:
+  // - the problem (M,q ...)
+  // - the unknowns (z,w)
+  // - the options for the solver (name, max iteration number ...)
+  // - the global options for Numerics (verbose mode ...)
+
+  if (_sizeOutput != 0)
+  {
+    // The Relay in Numerics format
+    Relay_Problem numerics_problem;
+    numerics_problem.M = &*_M->getNumericsMatrix();
+    numerics_problem.q = _q->getArray();
+    //numerics_problem.lb = _lb->getArray();
+    //numerics_problem.ub = _ub->getArray();
+    numerics_problem.size = _sizeOutput;
+
+    int nbSolvers = 1;
+    // Call Relay Driver
+    info = relay_driver(&numerics_problem, _z->getArray() , _w->getArray() ,
+                        &*_solver->numericsSolverOptions(), nbSolvers, &*_numerics_options);
+
+    // --- Recovering of the desired variables from Relay output ---
+    postCompute();
+
+  }
+
+  return info;
 }
 
-void Relay::saveNSProblemToXML()
+void Relay::display() const
 {
-  RuntimeException::selfThrow("Relay saveNSProblemToXML: not yet implemented.");
+  cout << "======= Relay of size " << _sizeOutput << " with: " << endl;
+  LinearOSNS::display();
 }
 
 Relay* Relay::convert(OneStepNSProblem* osnsp)
 {
-  Relay* r = dynamic_cast<Relay*>(osnsp);
-  return r;
+  Relay* lcp = dynamic_cast<Relay*>(osnsp);
+  return lcp;
 }
+
 

@@ -69,37 +69,37 @@ public:
   */
   bool isVerified() const;
 
-  /** to get c
-  *  \return the value of c
+  /** to get lb
+  *  \return the value of lb
   */
-  inline const double getC() const
+  inline const double getLb() const
   {
-    return c;
+    return _lb;
   };
 
   /** to set c
   *  \param a double
   */
-  inline void setC(double newVal)
+  inline void setLb(double newVal)
   {
-    c = newVal;
+    _lb = newVal;
   };
 
-  /** to get d
-  *  \return the value of d
+  /** to get ub
+  *  \return the value of ub
   */
-  inline const double getD() const
+  inline const double getUb() const
   {
-    return d;
+    return _ub;
   };
 
 
-  /** to set d
+  /** to set ub
   *  \param a double
   */
-  inline void setD(double newVal)
+  inline void setUb(double newVal)
   {
-    d = newVal;
+    _ub = newVal;
   };
 
   /** copy the data of the NonSmoothLaw to the XML tree
@@ -121,11 +121,11 @@ public:
   ACCEPT_STD_VISITORS();
 
 private:
-  /** represent the value after the non smooth event */
-  double c;
+  /** represent the lower bound of the Relay */
+  double _lb;
 
-  /** represent the value before the non smooth event */
-  double d;
+  /** represent the upper bound of the Relay*/
+  double _ub;
 
 };
 

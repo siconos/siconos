@@ -61,6 +61,7 @@ class NonSmoothLaw;
 class EqualityConditionNSL;
 class MixedComplementarityConditionNSL;
 class ComplementarityConditionNSL;
+class RelayNSL;
 class NewtonImpactNSL;
 class NewtonImpactFrictionNSL;
 
@@ -122,6 +123,7 @@ public:
   VISIT(MixedComplementarityConditionNSL);
   VISIT(EqualityConditionNSL);
   VISIT(ComplementarityConditionNSL);
+  VISIT(RelayNSL);
   VISIT(NewtonImpactNSL);
   VISIT(NewtonImpactFrictionNSL);
 
