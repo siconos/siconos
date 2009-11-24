@@ -22,6 +22,7 @@
 #include "OneStepNSProblemXML.h"
 #include "Topology.h"
 #include "LCP.h"
+#include "Relay.h"
 #include "Model.h"
 #include "TimeDiscretisation.h"
 #include "NonSmoothDynamicalSystem.h"

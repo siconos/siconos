@@ -254,7 +254,7 @@ public:
   /** To initialize the LinearOSNS problem(computes topology ...)
       \param the simulation, owner of this OSNSPB
   */
-  void initialize(SP::Simulation);
+  virtual void initialize(SP::Simulation);
 
   /** computes extra diagonal unitaryBlock-matrix that corresponds to UR1 and UR2
    *  Move this to Unitary Relation class?

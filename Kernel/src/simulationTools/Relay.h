@@ -97,7 +97,7 @@ public:
    *  (optional, default = NULL => read .opt file in Numerics)
    *  \param String: id of the problem (default = "unamed")
    */
-  Relay(SP::NonSmoothSolver newSolver = SP::NonSmoothSolver(), const std::string& newId = "unamed_lcp"):
+  Relay(SP::NonSmoothSolver newSolver = SP::NonSmoothSolver(), const std::string& newId = "unamed_relay"):
     LinearOSNS("Relay", newSolver, newId) {};
 
   /** destructor
@@ -158,7 +158,7 @@ public:
     _ub = newPtr;
   }
 
-
+  void initialize(SP::Simulation sim) ;
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
    *  \param double : current time
@@ -178,6 +178,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(Relay);
+DEFINE_SPTR(Relay);
 
 #endif // RELAY_H

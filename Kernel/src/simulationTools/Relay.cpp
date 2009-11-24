@@ -18,8 +18,16 @@
  */
 #include "Relay.h"
 
+
 using namespace std;
 using namespace RELATION;
+
+
+void Relay::initialize(SP::Simulation sim)
+{
+  LinearOSNS::initialize(sim);
+
+}
 
 int Relay::compute(double time)
 {
