@@ -1,21 +1,17 @@
 #!/bin/sh
 
 
-#PRE-PIPOL  src/nightly/siconos/trunk/Build/Pipol/pre-siconos
+#PRE-PIPOL  $HOME/src/nightly/siconos/trunk/Build/Pipol/pre-siconos
 
-#POST-PIPOL src/nightly/siconos/trunk/Build/Pipol/post-siconos
+#POST-PIPOL $HOME/src/nightly/siconos/trunk/Build/Pipol/post-siconos
 
-#PIPOL fedora 02:00
+#PIPOL fedora 01:30
 
-#PIPOL debian 02:00
+#PIPOL debian 01:30
 
-#PIPOL ubuntu 02:00
+#PIPOL ubuntu 01:30
 
-#PIPOL mac 02:00
-
-#PIPOL windows 02:00 --root
-
-
+#PIPOL mac 01:30
 
 set -x
 mode=${1:-Nightly}
