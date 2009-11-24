@@ -1,6 +1,8 @@
 /*! \page tutorialMultiBalls Tutorial - A column of three beads
 
-This tutorial deals with a column of beads, subjected to the gravity. It then introduces Lagrangian Linear systems with Lagrangian Linear Relations and Newton impact law. 
+This tutorial deals with a column of beads, subjected to the
+gravity. It then introduces Lagrangian Linear systems with Lagrangian
+Linear Relations and Newton impact law.
 
 \section tutMultiBallNSDS Building the Non-Smooth Dynamical System
 

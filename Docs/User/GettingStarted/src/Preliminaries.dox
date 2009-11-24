@@ -5,16 +5,28 @@ Since the Siconos input file is written in C++, you need at least a basic knowle
 However, you can find in this first section the main C++ commands you need to know to write a first input file. \n
 
 \section tutBuild Building/destroying and using objects
-To describe your problem, you will mainly need to build an destroy pointers to objects. 
-For example, suppose you want to build a LagrangianDS, which belongs to the base class DynamicalSystem, then do:
+To describe your problem, you will mainly need to build pointers to objects. 
+
+Siconos use smart pointers so you do not have to bother with deletion.
+
+For example, suppose you want to build a LagrangianDS, which belongs
+to the base class DynamicalSystem, then do:
+
 \code
-DynamicalSystem * nameOfMyDS = new LagrangianDS(someParameters)
+SP::DynamicalSystem nameOfMyDS(new LagrangianDS(someParameters));
 // misc.
 // ...
-delete nameOfMyDS
 \endcode
-A call to \e new reserve memory and build the object, while \e delete release memory. \n
-For each object, different types of constructors are available. For an exhaustive list see the Doxygen documentation of the class (for example click on class name "LagrangianDS" above).\n
+
+The namespace \ref SP enclose typedefs of all Siconos classes as smart
+pointers.
+
+A call to \e new reserve memory and build the object.
+
+
+For each object, different types of constructors are available. For an
+exhaustive list see the Doxygen documentation of the class (for
+example click on class name "LagrangianDS" above).
 
 
 The access to the methods of the objects is done thanks to "*" or "->":

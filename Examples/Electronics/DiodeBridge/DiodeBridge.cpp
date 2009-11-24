@@ -74,10 +74,6 @@ int main(int argc, char* argv[])
     SP::FirstOrderLinearDS LSDiodeBridge(new FirstOrderLinearDS(init_state, LS_A));
 
     // --- Interaction between linear system and non smooth system ---
-
-    DynamicalSystemsSet Inter_DS;
-    Inter_DS.insert(LSDiodeBridge);
-
     SP::SiconosMatrix Int_C(new SimpleMatrix(4, 2));
     (*Int_C)(2, 0) = -1.0;
     (*Int_C)(3, 0) = 1.0;
@@ -101,37 +97,37 @@ int main(int argc, char* argv[])
 
     SP::NonSmoothLaw nslaw(new ComplementarityConditionNSL(4));
 
-    SP::Interaction InterDiodeBridge(new Interaction("InterDiodeBridge", Inter_DS, 1, 4, nslaw, LTIRDiodeBridge));
+    SP::Interaction InterDiodeBridge(new Interaction(4, nslaw, LTIRDiodeBridge, 1));
+    InterDiodeBridge->insert(LSDiodeBridge);
 
     // --- Model creation ---
     SP::Model DiodeBridge(new Model(t0, T, Modeltitle));
-
-    // --- Non Smooth Dynamical system creation ---
-
-    SP::NonSmoothDynamicalSystem NSDSDiodeBridge(new NonSmoothDynamicalSystem(LSDiodeBridge, InterDiodeBridge, false));
-    DiodeBridge->setNonSmoothDynamicalSystemPtr(NSDSDiodeBridge);
+    DiodeBridge->nonSmoothDynamicalSystem()->insertDynamicalSystem(LSDiodeBridge);
+    DiodeBridge->nonSmoothDynamicalSystem()->insertInteraction(InterDiodeBridge);
 
     // --- Simulation specification---
 
+    // -- (1) One Step Integrator
+    double theta = 0.5;
+    SP::Moreau OSI_RLCD(new Moreau(LSDiodeBridge, theta));
+
+    // -- (2) Time discretisation
     SP::TimeDiscretisation TiDiscRLCD(new TimeDiscretisation(t0, h_step));
 
-    SP::TimeStepping StratDiodeBridge(new TimeStepping(TiDiscRLCD));
-
-    double theta = 0.5;
-
-    // One Step Integrator
-    SP::Moreau OSI_RLCD(new Moreau(LSDiodeBridge, theta));
-    StratDiodeBridge->insertIntegrator(OSI_RLCD);
-
+    // -- (3) Non smooth problem
     // One Step non smooth problem
     IntParameters iparam(5);
     iparam[0] = 1001; // Max number of iteration
     DoubleParameters dparam(5);
     dparam[0] = 0.0001; // Tolerance
     string solverName = "Lemke" ;
+    // -- (3a) solver
     SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
+    // -- (3b) one step non smooth problem
     SP::LCP LCP_RLCD(new LCP(mySolver));
-    StratDiodeBridge->insertNonSmoothProblem(LCP_RLCD);
+
+    // -- (4) Simulation setup with (1) (2) (3)
+    SP::TimeStepping StratDiodeBridge(new TimeStepping(TiDiscRLCD, OSI_RLCD, LCP_RLCD));
 
     // Initialization
     DiodeBridge->initialize(StratDiodeBridge);

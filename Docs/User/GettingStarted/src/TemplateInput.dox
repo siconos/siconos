@@ -33,8 +33,6 @@ int main(int argc, char* argv[])
     // --- Initialisation of the simulation ---
 	
     // --- Time loop ---
-    
-    // --- Free memory --- 
    }
 	
   // == Catch exceptions ==

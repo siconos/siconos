@@ -1,21 +1,34 @@
 /** \page runningSimu Running a simulation
 
-There are two different ways to run a simulation with Siconos: directly with a C++ input file or thanks to a specific interface, with Python or Scilab. \n
+There are two different ways to run a simulation with Siconos:
+directly with a C++ input file or thanks to a specific interface, with
+Python or Scilab.
 
 <b> With a C++ input file </b> \n
-First check that Siconos is well installed (see \ref siconosInstall "Siconos Installation Guide"). \n
+
+First check that Siconos is well installed (see \ref siconosInstall
+"Siconos Installation Guide").
+
 Create a directory for your example, where the following files must be present:
+
 - the main input cpp file 
-- a plugin or plugins directory, whith all the xxxPlugin.cpp files necessary for your simulation (for details on plug-in see \ref doc_usingPlugin).
+
+- a plugin or plugins directory, whith all the xxxPlugin.cpp files
+  necessary for your simulation (for details on plug-in see \ref
+  doc_usingPlugin).
+
 - the xml input file if you use xml data description
-- a src directory, with all the external files you need to be compiled and linked with Siconos.
+
+- a src directory, with all the external files you need to be compiled
+  and linked with Siconos.
 
 Then just run: 
 \verbatim 
 siconos myInputFile.cpp
 \endverbatim
 
-The simulation will then start. Note that an executable, myInputFile is created in the current directory. 
+The simulation will then start. Note that an executable, myInputFile
+is created in the current directory.
 
 For details on all the available options of siconos command just run
 \verbatim
