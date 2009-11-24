@@ -83,7 +83,7 @@ WARN_LOGFILE           =
 # configuration options related to the input files
 #---------------------------------------------------------------------------
 INPUT                  = @CMAKE_SOURCE_DIR@/src \
-                         mainpage.doxygen
+                         @CMAKE_SOURCE_DIR@/config/mainpage.doxygen
 FILE_PATTERNS          = *.c \
                          *.cc \
                          *.cxx \
