@@ -26,15 +26,16 @@
 
 /** Siconos pointers
 
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) 2008
+ \author SICONOS Development Team - copyright INRIA
+ \version 3.0.0.
+ \date (Creation) 2008
 
-Siconos pointers are reference counting pointers. Memory pointed by a Siconos pointer is automaticaly deallocated.
+ Siconos pointers are reference counting pointers. Memory pointed by a
+ Siconos pointer is automaticaly deallocated.
 
-Basic usage :
+ Basic usage :
 
- - to declare a Siconos pointer on Siconos Object:
+ - to declare a Siconos pointer on a Siconos Object:
 
  \verbatim
  SP::<Siconos Object> myobject;
@@ -47,13 +48,15 @@ Basic usage :
  \endverbatim
 
 
-
-
+Siconos pointers are boost smart pointers.
 
 More documentation on smart pointers and reference counting:
- * http://en.wikipedia.org/wiki/Smart_pointer
- * http://en.wikipedia.org/wiki/Reference_counting
- * http://www.boost.org/doc/libs/release/libs/smart_ptr
+
+ - http://en.wikipedia.org/wiki/Smart_pointer
+
+ - http://en.wikipedia.org/wiki/Reference_counting
+
+ - http://www.boost.org/doc/libs/release/libs/smart_ptr
 
  */
 
@@ -66,6 +69,21 @@ More documentation on smart pointers and reference counting:
 namespace SharedPointer {};
 namespace SharedPointerConst {};
 namespace SharedArray {};
+
+/** \namespace SP Namespace for Siconos smart pointers : memory
+    pointed by a Siconos smart pointers is automaticaly
+    deallocated */
+namespace SP = SharedPointer;
+
+/** \namespace SA Namespace for Siconos shared arrays : Siconos shared
+    arrays are automaticaly deallocated */
+namespace SA = SharedArray;
+
+/** \namespace SPC Namespace for const shared pointers : memory
+    pointed by a const shared pointers is automaticaly deallocated */
+namespace SPC = SharedPointerConst;
+
+
 
 /** Using a shared_ptr to hold a pointer to a statically allocated
    object
@@ -168,18 +186,5 @@ TYPEDEF_SPTR(integer);
 TYPEDEF_SAPTR(integer);
 TYPEDEF_SPTR(doublereal);
 TYPEDEF_SAPTR(doublereal);
-
-/** \namespace SP Namespace for Siconos smart pointers : memory
-    pointed by a Siconos smart pointers is automaticaly
-    deallocated */
-namespace SP = SharedPointer;
-
-/** \namespace SA Namespace for Siconos shared arrays : Siconos shared
-    arrays are automaticaly deallocated */
-namespace SA = SharedArray;
-
-/** \namespace SPC Namespace for const shared pointers : memory
-    pointed by a const shared pointers is automaticaly deallocated */
-namespace SPC = SharedPointerConst;
 
 #endif /* SiconosPointers_hpp */

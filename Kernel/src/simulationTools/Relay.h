@@ -178,6 +178,6 @@ public:
 
 };
 
-DEFINE_SPTR(Relay);
+TYPEDEF_SPTR(Relay);
 
 #endif // RELAY_H
