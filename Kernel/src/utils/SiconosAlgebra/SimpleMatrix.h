@@ -58,6 +58,8 @@ class SimpleVector;
  *
  *
  */
+#include "BlocksSimpleMat.hpp"
+
 class SimpleMatrix: public SiconosMatrix  , public boost::enable_shared_from_this<SimpleMatrix>
 {
 protected:
@@ -66,9 +68,6 @@ protected:
   */
   MATRIX_UBLAS_TYPE mat;
 
-  /** Default constructor
-   */
-  SimpleMatrix();
 
 private:
   /** VInt ipiv;
@@ -149,6 +148,10 @@ private:
   friend void private_prod(SPC::SiconosVector, SPC::SiconosMatrix, unsigned int, SP::SiconosVector, bool);
 
 public:
+  /** Default constructor
+   */
+  SimpleMatrix();
+  SimpleMatrix(int i);
 
   /** constructor with the type and the dimension of the Boost matrix
    *  \param unsigned int, number of rows.
@@ -575,13 +578,42 @@ public:
    *  \return a SimpleMatrix
    */
   friend const SimpleMatrix operator * (const SiconosMatrix&, double);
+  /** multiplication of a SimpleMatrix by a SimpleMatrix
+   *  \param a const SiconosMatrix&
+   *  \param a const SimpleMatrix&
+   *  \return a const SimpleMatrix
+   */
+  friend const SimpleMatrix operator * (const SimpleMatrix&, const SimpleMatrix&);
+  /** multiplication of a SP::SimpleMatrix by a SP::SimpleMatrix
+   *  \param a const SP::SiconosMatrix
+   *  \param a const SP::SimpleMatrix
+   *  \return a const SP::SimpleMatrix
+   */
+  friend  SP::SimpleMatrix operator * (const SP::SimpleMatrix, const SP::SimpleMatrix);
+  /**
+   *Default comparator
+   *\param a SP::SiconosMatrix
+   *\param a SP::SiconosMatrix
+   * return true
+   */
+  friend bool operator!= (const SimpleMatrix&, const SimpleMatrix&)
+  {
+    return true;
+  };
+  /** operator += add SP::SimpleMatrix
+   *  \param in/outSP::SiconosMatrix : a matrix A
+   *  \param SP::SiconosMatrix : a matrix B
+   */
+
+  friend  void operator +=(SP::SiconosMatrix, SP::SimpleMatrix);
+
 
   /** multiplication of a matrix by a double
    *  \param a double
    *  \param a SiconosMatrix
    *  \return a SimpleMatrix
    */
-  friend const SimpleMatrix operator * (double , const SiconosMatrix&);
+  friend  SimpleMatrix operator * (double , const SiconosMatrix&);
 
   /** division of the matrix by a double
    *  \param a SiconosMatrix
@@ -596,6 +628,13 @@ public:
    * \return a SimpleMatrix C
    */
   friend const SimpleMatrix operator +(const SiconosMatrix&, const SiconosMatrix&);
+  /** Addition of two matrices, C = A+B
+   * \param SP::SiconosMatrix A
+   * \param SP::SiconosMatrix B
+   * \return a SP::SimpleMatrix
+   */
+  friend SP::SimpleMatrix operator +(const SP::SimpleMatrix, const SP::SimpleMatrix);
+  //  friend SimpleMatrix operator +(const SimpleMatrix&,const SimpleMatrix&);
 
   /** Addition of two matrices C = A+B
    *  \param SiconosMatrix A (in)
@@ -610,6 +649,7 @@ public:
    * \return a SimpleMatrix C
    */
   friend const SimpleMatrix operator -(const SiconosMatrix&, const SiconosMatrix&);
+  //  friend const SimpleMatrix operator -(const SimpleMatrix&,const SimpleMatrix&);
 
   /** Subtraction of two matrices C = A-B
    *  \param SiconosMatrix A (in)
@@ -773,6 +813,5 @@ public:
 
 };
 
-DEFINE_SPTR(SimpleMatrix);
 
 #endif

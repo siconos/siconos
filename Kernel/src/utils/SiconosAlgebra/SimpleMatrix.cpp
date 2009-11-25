@@ -29,7 +29,7 @@
 #define OUTSIDE_FRAMEWORK_BLAS
 #endif
 
-#undef HAVE_ATLAS
+//#undef HAVE_ATLAS
 #if defined(HAVE_ATLAS) && defined(OUTSIDE_FRAMEWORK_BLAS)
 #include <boost/numeric/bindings/atlas/clapack.hpp>
 namespace lapack = boost::numeric::bindings::atlas;
@@ -59,7 +59,32 @@ namespace lapack = boost::numeric::bindings::lapack;
 using std::cout;
 using std::endl;
 
+spSimpleMatrix::spSimpleMatrix(int i): boost::shared_ptr<SimpleMatrix>(new SimpleMatrix())
+{
+  ;
+}
+spSimpleMatrix::spSimpleMatrix(): boost::shared_ptr<SimpleMatrix>(new SimpleMatrix())
+{
+  ;
+}
+
+spConstSimpleMatrix::spConstSimpleMatrix(int i): boost::shared_ptr<const SimpleMatrix>(new SimpleMatrix())
+{
+  ;
+}
+spConstSimpleMatrix::spConstSimpleMatrix(): boost::shared_ptr<const SimpleMatrix>(new SimpleMatrix())
+{
+  ;
+}
+
+
+
 // Default (protected, used only for derived classes)
+SimpleMatrix::SimpleMatrix(int i): SiconosMatrix(1, 0, 0), isPLUFactorized(false), isPLUInversed(false)
+{
+  mat.Dense = new DenseMat(ublas::zero_matrix<double>());
+};
+
 SimpleMatrix::SimpleMatrix(): SiconosMatrix(1, 0, 0), isPLUFactorized(false), isPLUInversed(false)
 {
   mat.Dense = new DenseMat(ublas::zero_matrix<double>());
@@ -1796,7 +1821,10 @@ SimpleMatrix& SimpleMatrix::operator = (const SiconosMatrix& m)
   unsigned int numM = m.getNum();
 
   if (dimRow != m.size(0) || dimCol != m.size(1))
-    SiconosMatrixException::selfThrow("SimpleMatrix::operator = failed. Inconsistent sizes.");
+  {
+    resize(m.size(0), m.size(1));
+  }
+  // SiconosMatrixException::selfThrow("SimpleMatrix::operator = failed. Inconsistent sizes.");
 
   if (numM == 6) // m = zero matrix
   {
@@ -1920,7 +1948,9 @@ SimpleMatrix& SimpleMatrix::operator = (const SimpleMatrix& m)
   unsigned int numM = m.getNum();
 
   if (dimRow != m.size(0) || dimCol != m.size(1))
-    SiconosMatrixException::selfThrow("SimpleMatrix::operator = failed. Inconsistent sizes.");
+    resize(m.size(0), m.size(1));
+
+  //    SiconosMatrixException::selfThrow("SimpleMatrix::operator = failed. Inconsistent sizes.");
 
   if (numM == 6) // m = zero matrix
   {
@@ -2067,7 +2097,9 @@ SimpleMatrix& SimpleMatrix::operator +=(const SiconosMatrix& m)
   }
 
   if (dimRow != m.size(0) || dimCol != m.size(1))
-    SiconosMatrixException::selfThrow("SimpleMatrix op+= inconsistent sizes.");
+    resize(m.size(0), m.size(1));
+
+  //  SiconosMatrixException::selfThrow("SimpleMatrix op+= inconsistent sizes.");
 
   if (numM == 0) // m is a BlockMatrix
   {
@@ -2449,7 +2481,7 @@ void SimpleMatrix::PLUInverseInPlace()
   if (!isPLUFactorized)
     PLUFactorizationInPlace();
 
-#if defined(XHAVE_ATLAS) && defined(OUTSIDE_FRAMEWORK_BLAS)
+#if defined(HAVE_ATLAS) && defined(OUTSIDE_FRAMEWORK_BLAS)
   int info = lapack::getri(*mat.Dense, *ipiv);   // solve from factorization
 
   if (info != 0)
@@ -2535,6 +2567,17 @@ void SimpleMatrix::resetLU()
   isPLUFactorized = false;
   isPLUInversed = false;
 }
+const SimpleMatrix operator * (const SimpleMatrix & A, const SimpleMatrix& B)
+{
+  return (DenseMat)prod(*A.dense() , *B.dense());
+  //  return A;
+}
+
+SP::SimpleMatrix operator * (const SP::SimpleMatrix A, const SP::SimpleMatrix B)
+{
+  SP::SimpleMatrix aux(new SimpleMatrix(*A * *B));
+  return aux;
+}
 
 const SimpleMatrix operator * (const SiconosMatrix & A, double a)
 {
@@ -2570,7 +2613,7 @@ const SimpleMatrix operator * (const SiconosMatrix & A, double a)
     return (BandedMat)(a ** A.banded());
 }
 
-const SimpleMatrix operator * (double a, const SiconosMatrix & A)
+SimpleMatrix operator * (double a, const SiconosMatrix & A)
 {
   // To compute B = a * A
 
@@ -2640,6 +2683,28 @@ const SimpleMatrix operator / (const SiconosMatrix & A, double a)
   else //if(numA==5)
     return (BandedMat)(*A.banded() / a);
 }
+
+// const SimpleMatrix operator + (const  SimpleMatrix& A, const  SimpleMatrix& B){
+//   return (DenseMat)(*A.dense() + *B.dense());
+// }
+SimpleMatrix operator + (const  SimpleMatrix& A, const  SimpleMatrix& B)
+{
+
+  return (DenseMat)(*A.dense() + *B.dense());
+}
+
+void operator +=(SP::SiconosMatrix A, SP::SimpleMatrix B)
+{
+  *A += *B;
+}
+
+
+SP::SimpleMatrix operator +(const SP::SimpleMatrix A, const SP::SimpleMatrix B)
+{
+  return SP::SimpleMatrix(new SimpleMatrix(*A + *B));
+}
+
+
 
 const SimpleMatrix operator + (const  SiconosMatrix& A, const  SiconosMatrix& B)
 {
@@ -3573,7 +3638,34 @@ const SimpleMatrix prod(const SiconosMatrix &A, const SiconosMatrix& B)
     }
   }
 }
+/**
 
+indexStart : indexStart[0] is the first raw, indexStart[1] is the first col
+dim : dim[0] number of raw, dim[1] number of col
+*/
+// void zeroBlock(const SiconosMatrix& A, index indexStart, index dim){
+//   ;
+// }
+// void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, int indexACol, bool init){
+//   // To compute C[indexAcol::] = A * B
+
+//   unsigned int numA = A.getNum();
+//   unsigned int numB = B.getNum();
+//   unsigned int numC = C.getNum();
+//   if (numA == 0 || numB == 0 || numC == 0)
+//     SiconosMatrixException::selfThrow("Matrix function prod(A,B,C,index): inconsistent sizes");
+//   // === if C is zero or identity => read-only ===
+//   if (numC == 6 || numC == 7)
+//     SiconosMatrixException::selfThrow("Matrix product ( prod(A,B,C,index) ): wrong type for resulting matrix C (read-only: zero or identity).");
+
+
+//   if (numA == 7 || numC == 6) // A = identity or 0
+//     SiconosMatrixException::selfThrow("Matrix function prod(A,B,C,index): numA == 7 || numC == 6 not yet implemented");
+
+//   int rawB = B.size(0);
+//   int colB = B.size(1);
+
+// }
 void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool init)
 {
   // To compute C = A * B
