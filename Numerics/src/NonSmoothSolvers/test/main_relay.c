@@ -96,7 +96,7 @@ int test_relay_series(Relay_Problem * problem, int* solversList)
 
   Solver_Options * options ;
   Solver_Options * local_options = NULL;
-  int numberOfSolvers ;
+  int numberOfSolvers = 0 ;
   int isSparse = 0;
   /* Dense storage */
   if (problem->M->storageType == 0)
@@ -167,7 +167,7 @@ int test_relay_series(Relay_Problem * problem, int* solversList)
     local_options->dparam = dparam;
     local_options->isSet = 1;
     local_options->filterOn = 0;
-    int info1 = relay_driver(problem, z[k] , w[k], options, &global_options);
+    int info1 = relay_driver(problem, z[k] , w[k], options, numberOfSolvers, &global_options);
     comp = DDOT(n , z[k] , incx , w[k] , incy);
     DCOPY(n , w[k], incx, wBuffer , incy);
     DAXPY(n , alpha , problem->q , incx , wBuffer , incy);
@@ -192,7 +192,7 @@ int test_relay_series(Relay_Problem * problem, int* solversList)
     local_options->iparam = NULL;
     local_options->dparam = dparam;
     local_options->isSet = 1;
-    int info1 = relay_driver(problem, z[k] , w[k], options, &global_options);
+    int info1 = relay_driver(problem, z[k] , w[k], options, numberOfSolvers, &global_options);
     comp = DDOT(n , z[k] , incx , w[k] , incy);
     DCOPY(n , w[k], incx, wBuffer , incy);
     DAXPY(n , alpha , problem->q , incx , wBuffer , incy);
@@ -221,7 +221,7 @@ int test_relay_series(Relay_Problem * problem, int* solversList)
     local_options->iparam = iparam;
     local_options->dparam = dparam;
     local_options->isSet = 1;
-    // int info1 = relay_driver( problem, z[k] , w[k], options,  &global_options );
+    // int info1 = relay_driver( problem, z[k] , w[k], options, numberOfSolvers, &global_options );
     int info1 = 0;
     comp = DDOT(n , z[k] , incx , w[k] , incy);
     DCOPY(n , w[k], incx, wBuffer , incy);

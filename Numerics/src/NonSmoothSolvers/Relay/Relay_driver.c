@@ -26,8 +26,12 @@
 #endif
 #include <time.h>
 
-int relay_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* options, Numerics_Options* global_options)
+int relay_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* options, int numberOfSolvers, Numerics_Options* global_options)
 {
+
+
+  Relay_display(problem);
+
   if (options == NULL || global_options == NULL)
     numericsError("Relay_driver", "null input for solver and/or global options");
 

@@ -24,14 +24,25 @@
 #include <float.h>
 #include "LA.h"
 #include "Relay_Solvers.h"
+#include <assert.h>
 
 void relay_pgs(Relay_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {
+
+
   double* M = problem->M->matrix0;
   double* q = problem->q;
   int n = problem -> size;
   double *a = problem->lb;
   double *b = problem->ub;
+
+  assert(M);
+  assert(q);
+  assert(n);
+  assert(a);
+  assert(b);
+
+
 
   int itermax = options->iparam[0];
   double tol = options->dparam[0];

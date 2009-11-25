@@ -19,6 +19,8 @@
 #ifndef RELAY_PROBLEM_H
 #define RELAY_PROBLEM_H
 
+
+#include <assert.h>
 /*! \page RelayProblem Primal or Dual Relay problems
   \section relayIntro The problem
   Two formulations are available, primal and dual problems.
@@ -82,8 +84,8 @@
     \param size dim of the problem
     \param M matrix of the LCP
     \param q vector
-    \param a upper bound
-    \param b lower bound
+    \param lb upper bound
+    \param ub lower bound
     \param isComplete equal to 0 if some information is missing or wrong for the problem (M or q = NULL, inconsistent sizes), else equal to 1.
  */
 typedef struct
@@ -98,10 +100,19 @@ typedef struct
 #ifdef __cplusplus
 extern "C" {
 #endif
+  /** Relay_display displays on screen a Relay_problem
+  * \param[in] p Relay_problem to be displayed
+  *
+  * \author Vincent Acary
+  */
+
+  void Relay_display(Relay_Problem* p);
+
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
+
 
