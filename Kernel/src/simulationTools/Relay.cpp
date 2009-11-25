@@ -17,17 +17,110 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "Relay.h"
+#include <iostream>
+#include <assert.h>
+#include "Tools.hpp"
+
+
+#include "Simulation.h"
+#include "RelayNSL.h"
 
 
 using namespace std;
 using namespace RELATION;
 
+/* nslaw dispatch on bounds */
+
+struct Relay::_BoundsNSLEffect : public SiconosVisitor
+{
+  Relay *parent;
+  unsigned int pos;
+  SP::UnitaryRelation UR;
+
+  _BoundsNSLEffect(Relay *p, SP::UnitaryRelation UR, unsigned int pos) :
+    parent(p), UR(UR), pos(pos) {};
+
+  void visit(RelayNSL& nslaw)
+  {
+
+    // cout << "Relay::_BoundsNSLEffect visit"  << endl;
+    for (int i = 0; i <  UR->getNonSmoothLawSize(); i++)
+    {
+      (*(parent->lb()))(pos + i) =
+        nslaw.lb();
+      (*(parent->ub()))(pos + i) =
+        nslaw.ub();
+    }
+  }
+
+  void visit(ComplementarityConditionNSL& nslaw)
+  {
+    for (int i = 0; i <  UR->getNonSmoothLawSize(); i++)
+    {
+      (*(parent->lb()))(pos + i) = 0.0;
+      (*(parent->ub()))(pos + i) = 1e+24;
+    }
+
+
+    // \warning Introduce the infinte double symbol rather 1e+24
+
+  }
+
+};
 
 void Relay::initialize(SP::Simulation sim)
 {
   LinearOSNS::initialize(sim);
+  //cout << "Relay::initialize" << endl;
+
+
+  // initialize memory for _lb and _ub
+  if (! _lb)
+    _lb.reset(new SimpleVector(maxSize()));
+  else
+  {
+    if (_lb->size() != maxSize())
+      _lb->resize(maxSize());
+  }
+  if (! _ub)
+    _ub.reset(new SimpleVector(maxSize()));
+  else
+  {
+    if (_ub->size() != maxSize())
+      _ub->resize(maxSize());
+  }
+
+  // fill _lb and _ub wiht the value of the NonSmooth Law
+
+  SP::UnitaryRelationsGraph indexSet = simulation()->indexSet(levelMin());
+
+  //cout << " _sizeOutput =" <<_sizeOutput << endl;
+  if (_lb->size() != _sizeOutput)
+  {
+    _lb->resize(_sizeOutput, false);
+    _lb->zero();
+  }
+  if (_ub->size() != _sizeOutput)
+  {
+    _ub->resize(_sizeOutput, false);
+    _ub->zero();
+  }
+
+  unsigned int pos = 0;
+  UnitaryRelationsGraph::VIterator ui, uiend;
+  for (boost::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  {
+    SP::UnitaryRelation ur = indexSet->bundle(*ui);
+
+    // Compute q, this depends on the type of non smooth problem, on
+    // the relation type and on the non smooth law
+    pos = _M->getPositionOfUnitaryBlock(ur);
+    SP::SiconosVisitor NSLEffect(new _BoundsNSLEffect(this, ur, pos));
+    ur->interaction()->nonSmoothLaw()->accept(*NSLEffect);
+  }
 
 }
+
 
 int Relay::compute(double time)
 {
@@ -48,8 +141,8 @@ int Relay::compute(double time)
     Relay_Problem numerics_problem;
     numerics_problem.M = &*_M->getNumericsMatrix();
     numerics_problem.q = _q->getArray();
-    //numerics_problem.lb = _lb->getArray();
-    //numerics_problem.ub = _ub->getArray();
+    numerics_problem.lb = _lb->getArray();
+    numerics_problem.ub = _ub->getArray();
     numerics_problem.size = _sizeOutput;
 
     int nbSolvers = 1;

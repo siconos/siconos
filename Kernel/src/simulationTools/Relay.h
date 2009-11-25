@@ -25,6 +25,8 @@
 
 #include "LinearOSNS.h"
 
+class LinearOSNS;
+class Simulation;
 /** Formalization and Resolution of a Linear Complementarity Problem (Relay)
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -81,6 +83,11 @@ protected:
   /** contains the vector ub (upper bounds) of a Relay system */
   SP::SiconosVector _ub;
 
+  /** nslaw effects : visitors experimentation
+   */
+
+  struct _BoundsNSLEffect;
+  friend class _BoundsNSLEffect;
 
 
 

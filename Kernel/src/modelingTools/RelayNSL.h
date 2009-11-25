@@ -26,13 +26,37 @@
 
 class NonSmoothLaw;
 
-/** Relay Non Smooth Law
+/** Relay NonSmoothLaw
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
- *  \date (Creation) Apr 27, 2004
+ *  \date (Creation) Apr 27, 2004 (documentation) Nov 25, 2009
  *
+ * This class formalizes the Relay nonsmmoth law  i.e.
+ * \f[
+ * \begin{array}{l}
+ * -y \in N_{[lb,ub]}(\lambda),
+ * \end{array}
+ * \f]
+ * where \f$lb\f$ is the lower bound and   \f$ub\f$ is the upper bound of the Relay law.
  *
+ * In this default case, the lower bound is set to \f$lb=-1\f$ and the upper bound ub is set to \f$ub=1\f$. We get  the well-known form of the Relay as
+ * the multi-valued sign function, i.e.
+ * \f[
+ * \left\{\begin{array}{l}
+ * -y \in N_{[-1,1]}(\lambda)\quad\quad \Longleftrightarrow -\lambda \in \mbox{sgn} (y)
+ * \end{array}\right.
+ * \f]
+ * where the multi-valued sign function is defined as
+ * \f[
+ *  \mbox{sgn} (y) =
+ *  \left\{\begin{array}{lcl}
+ *  1 &,\quad& y >0 \\
+ *  \,[-1,1] &,\quad& y =0 \\
+ *  -1 &,\quad& y <0 \\
+ *  \end{array}\right.
+ *  \f]
+ * \todo Build the Sgn NonSmoothLaw as the default instance of Relay
  */
 class RelayNSL : public NonSmoothLaw
 {
@@ -72,7 +96,7 @@ public:
   /** to get lb
   *  \return the value of lb
   */
-  inline const double getLb() const
+  inline const double lb() const
   {
     return _lb;
   };
@@ -88,7 +112,7 @@ public:
   /** to get ub
   *  \return the value of ub
   */
-  inline const double getUb() const
+  inline const double ub() const
   {
     return _ub;
   };
