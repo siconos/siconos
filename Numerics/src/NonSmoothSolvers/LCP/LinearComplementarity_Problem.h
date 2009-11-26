@@ -82,7 +82,7 @@ typedef struct
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+  void LinearComplementarity_display(LinearComplementarity_Problem* p);
 #ifdef __cplusplus
 }
 #endif

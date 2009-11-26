@@ -270,7 +270,12 @@ int lcp_driver(LinearComplementarity_Problem* problem, double *z , double *w, So
 
   /* Switch to DenseMatrix or SparseBlockMatrix solver according to the type of storage for M */
   /* Storage type for the matrix M of the LCP */
+
+  LinearComplementarity_display(problem);
+
   int storageType = problem->M->storageType;
+
+
 
   /* Sparse Block Storage */
   if (storageType == 1)
