@@ -30,7 +30,7 @@ int relay_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* 
 {
 
 
-  Relay_display(problem);
+  //Relay_display(problem);
 
   if (options == NULL || global_options == NULL)
     numericsError("Relay_driver", "null input for solver and/or global options");
@@ -71,9 +71,77 @@ int relay_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* 
     relay_pgs(problem, z , w , &info , options);
 
   else if (strcmp(name , "NLGS") == 0)
-    fprintf(stderr, "Relay_driver error: NLGS solver obsolete:\n");
+    fprintf(stderr, "Relay_driver error: NLGS solver obsolete use PGS:\n");
+  else if (strcmp(name , "Lemke") == 0)
+  {
+    fprintf(stderr, "Relay_driver error: lemke solver  not yet compeletes works only for ub=1, lb =-1:\n");
+    // conversion into LCP
+    LinearComplementarity_Problem* lcp_problem = (LinearComplementarity_Problem*)malloc(sizeof(LinearComplementarity_Problem));
+    lcp_problem->size = 2 * problem->size ;
+    lcp_problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
+    lcp_problem->M->storageType = 0;
+    lcp_problem->M->matrix1 = NULL;
+    lcp_problem->M->matrix0 = (double*)malloc(lcp_problem->size * lcp_problem->size * sizeof(double));;
+    lcp_problem->q = (double*)malloc(lcp_problem->size * sizeof(double));
+
+    double *zlcp = (double*)malloc(lcp_problem->size * sizeof(double));
+    double *wlcp = (double*)malloc(lcp_problem->size * sizeof(double));
+
+    int i, j;
+
+    for (i = 0; i < problem->size; i++)
+    {
+      for (j = 0; j < problem->size; j++)
+      {
+        lcp_problem->M->matrix0[i + j * lcp_problem->size] =  problem->M->matrix0[i + j * problem->size];
+      }
+    }
+    for (i = 0; i < problem->size; i++)
+    {
+      for (j = problem->size + 1; j < 2 * problem->size; j++)
+      {
+        lcp_problem->M->matrix0[i + j * lcp_problem->size] =  0.0;
+      }
+      lcp_problem->M->matrix0[i + (i + lcp_problem->size)*lcp_problem->size] =  1.0;
+    }
+    for (i = problem->size + 1; i < 2 * problem->size; i++)
+    {
+      for (j = 0; j < 2 * problem->size; j++)
+      {
+        lcp_problem->M->matrix0[i + j * lcp_problem->size] =  0.0;
+      }
+      lcp_problem->M->matrix0[i + (i - lcp_problem->size)*lcp_problem->size] =  -1.0;
+    }
+
+    for (i = 0; i < problem->size; i++)
+    {
+      lcp_problem->q[i] = problem->q[i];
+      lcp_problem->q[i + problem->size] = 2.0;
+      for (j = 0; j < problem->size; j++)
+      {
+        lcp_problem->q[i] -= problem->q[i + j * (problem->size)];
+      }
+    }
+
+    // Call the lcp_solver
+    info = lcp_driver(lcp_problem, zlcp , wlcp, options, numberOfSolvers, global_options);
+
+    // Conversion of result
+    for (i = 0; i < problem->size; i++)
+    {
+      z[i] = 1.0 / 2.0 * (zlcp[i] - wlcp[i + problem->size]);
+      w[i] = wlcp[i] - zlcp[i + problem->size];
+    }
+
+    free(zlcp);
+    free(wlcp);
+    free(lcp_problem->q);
+    freeNumericsMatrix(lcp_problem->M);
+    free(lcp_problem->M);
+    free(lcp_problem);
 
 
+  }
   else if (strcmp(name , "Path") == 0)
   {
     relay_path(problem, z , w , &info , options);
