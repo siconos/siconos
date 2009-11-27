@@ -147,8 +147,16 @@ int Relay::compute(double time)
 
     int nbSolvers = 1;
     // Call Relay Driver
+
+    Relay_display(&numerics_problem);
+
     info = relay_driver(&numerics_problem, _z->getArray() , _w->getArray() ,
-                        &*_solver->numericsSolverOptions(), &*_numerics_options);
+                        &*_solver->numericsSolverOptions(), nbSolvers, &*_numerics_options);
+
+    if (info != 0)
+    {
+      cout << "Warning : Problem in Relay resolution" << endl;
+    }
 
     // --- Recovering of the desired variables from Relay output ---
     postCompute();
