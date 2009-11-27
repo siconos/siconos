@@ -440,7 +440,32 @@ $H_{\alpha,l}$, row number $l$ of $H_{\alpha}$.
 
 
 WARNING: depending on linear and non linear case for the DS, there should be a factor h ahead W. See Bouncing Ball template. 
+\section{Block matrix approach}
+The built of the OSNSProblem matrix could be computed using block
+matrix structure. This section describe these matrices. It is not
+implemented in Siconos.
+Using previous notations, $n$ is the number of DS. $m$ the number of
+interations.
 
+\subsection{Block matrix of DS}
+\[\boldsymbol{M}  \boldsymbol{\dot X}=\boldsymbol{A} \boldsymbol{X} + \boldsymbol{R}\]
+where $\boldsymbol{M}=diag(M_1,...M_n)$ and
+$\boldsymbol{A}=diag(A_1,..,A_n)$.
+\[\boldsymbol{R}=\boldsymbol{B}\boldsymbol{\lambda}\]
+\[\boldsymbol{B}=\left( \begin{array} {c} B^1_{1}...B^1_m\\.\\.\\
+    B^n_1...B^n_m  \end{array}\right)\]
+Some of $B^i_j$ doesn't exist.
+\subsection{Block matrix of interaction}
+\[ \boldsymbol{Y}= \boldsymbol{C}  \boldsymbol{X}+
+\boldsymbol{D} \boldsymbol{\lambda}\]
+with $ \boldsymbol{D}=diag(D_1..D_m)$ and 
+\[ \boldsymbol{C}=\left( \begin{array} {c}
+    C^1_{1}..C^n_1\\.\\.\\C^1_{m}...C^n_{m} \end{array}\right)\]
+Some of $C^i_j$ doesn't exist.
+
+\subsection{OSNSProblem using block matrices}
+The Matrix of the OSNS Problem could be assambled using the following
+block-product-matrices $\boldsymbol{C}\boldsymbol{W}\boldsymbol{B}$.
 \chapter{Dynamical Systems formulations in Siconos.}
 
 \begin{table}[!ht]
