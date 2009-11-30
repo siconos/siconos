@@ -129,6 +129,22 @@ void lcp_buildQ()
 {
   memcpy(sQ, sQref, (sSize)*sizeof(double));
 }
+void lcp_enum_init(LinearComplementarity_Problem* problem, Solver_Options* options, int withMemAlloc)
+{
+  if (withMemAlloc)
+  {
+    options->dWork = (double *) malloc(lcp_enum_getNbDWork(problem, options) * sizeof(double));
+    options->iWork = (int *) malloc(lcp_enum_getNbIWork(problem, options) * sizeof(int));
+  }
+}
+void lcp_enum_reset(LinearComplementarity_Problem* problem, Solver_Options* options, int withMemAlloc)
+{
+  if (withMemAlloc)
+  {
+    free(options->dWork);
+    free(options->iWork);
+  }
+}
 int lcp_enum_getNbIWork(LinearComplementarity_Problem* problem, Solver_Options* options)
 {
   return 2 * (problem->size);

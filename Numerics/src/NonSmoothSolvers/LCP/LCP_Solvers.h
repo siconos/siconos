@@ -427,7 +427,18 @@ extern "C" {
   \author Olivier Bonnefon
   */
   void lcp_enum(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
-
+  /**
+  * \param[in] problem structure that represents the LCP (M, q...)
+  * \param[in-out] options structure used to define the solver and its parameters.
+  * \param[in] If withMemAlloc is not 0, then the necessary work memory is allocated.
+  */
+  void lcp_enum_init(LinearComplementarity_Problem* problem, Solver_Options* options, int withMemAlloc);
+  /**
+  * \param[in] problem structure that represents the LCP (M, q...)
+  * \param[in-out] options structure used to define the solver and its parameters.
+  * \param[in] If withMemAlloc is not 0, then the work memory is free.
+  */
+  void lcp_enum_reset(LinearComplementarity_Problem* problem, Solver_Options* options, int withMemAlloc);
 
   /** generic interface used to call any LCP solver applied on a Sparse-Block structured matrix M, with a Gauss-Seidel process
    * to solve the global problem (formulation/solving of local problems for each row of blocks)
