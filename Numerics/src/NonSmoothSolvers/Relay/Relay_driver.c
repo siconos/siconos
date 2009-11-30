@@ -72,9 +72,9 @@ int relay_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* 
 
   else if (strcmp(name , "NLGS") == 0)
     fprintf(stderr, "Relay_driver error: NLGS solver obsolete use PGS:\n");
-  else if (strcmp(name , "Lemke") == 0)
+  else if ((strcmp(name , "Lemke") == 0) || (strcmp(name , "ENUM") == 0))
   {
-    fprintf(stderr, "Relay_driver : Lemke solver  not yet compeleted.  works only for ub=1, lb =-1:\n");
+    fprintf(stderr, "Relay_driver : Lemke and ENUM solver  not yet compeleted.  works only for ub=1, lb =-1:\n");
     // conversion into LCP
     LinearComplementarity_Problem* lcp_problem = (LinearComplementarity_Problem*)malloc(sizeof(LinearComplementarity_Problem));
     lcp_problem->size = 2 * problem->size ;
@@ -124,13 +124,21 @@ int relay_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* 
       {
         lcp_problem->q[i] -= problem->M->matrix0[i + j * (problem->size)];
       }
+    }
+    int nbSolvers = 1;
+    // Call the lcp_solver
+    if ((strcmp(name , "ENUM") == 0))
+    {
+      lcp_enum_init(lcp_problem, options, 1);
 
 
     }
+    info = lcp_driver(lcp_problem, zlcp , wlcp, options, nbSolvers, global_options);
+    if ((strcmp(name , "ENUM") == 0))
+    {
+      lcp_enum_reset(lcp_problem, options, 1);
 
-    // Call the lcp_solver
-    info = lcp_driver(lcp_problem, zlcp , wlcp, options, numberOfSolvers, global_options);
-
+    }
     /*       printf("\n"); */
 
     // Conversion of result
