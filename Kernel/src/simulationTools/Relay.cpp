@@ -148,7 +148,7 @@ int Relay::compute(double time)
     int nbSolvers = 1;
     // Call Relay Driver
 
-    Relay_display(&numerics_problem);
+    //      Relay_display(&numerics_problem);
 
     info = relay_driver(&numerics_problem, _z->getArray() , _w->getArray() ,
                         &*_solver->numericsSolverOptions(), nbSolvers, &*_numerics_options);
