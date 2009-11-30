@@ -74,7 +74,7 @@ int relay_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* 
     fprintf(stderr, "Relay_driver error: NLGS solver obsolete use PGS:\n");
   else if (strcmp(name , "Lemke") == 0)
   {
-    fprintf(stderr, "Relay_driver error: lemke solver  not yet compeletes works only for ub=1, lb =-1:\n");
+    fprintf(stderr, "Relay_driver : Lemke solver  not yet compeleted.  works only for ub=1, lb =-1:\n");
     // conversion into LCP
     LinearComplementarity_Problem* lcp_problem = (LinearComplementarity_Problem*)malloc(sizeof(LinearComplementarity_Problem));
     lcp_problem->size = 2 * problem->size ;
@@ -105,7 +105,7 @@ int relay_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* 
       {
         lcp_problem->M->matrix0[i + j * lcp_problem->size] =  0.0;
       }
-      lcp_problem->M->matrix0[i + (i + problem->size)*lcp_problem->size] =  -1.0;
+      lcp_problem->M->matrix0[i + (i + problem->size)*lcp_problem->size] =  1.0;
     }
     for (i = problem->size; i < 2 * problem->size; i++)
     {
@@ -113,35 +113,47 @@ int relay_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* 
       {
         lcp_problem->M->matrix0[i + j * lcp_problem->size] =  0.0;
       }
-      lcp_problem->M->matrix0[i + (i - problem->size)*lcp_problem->size] =  1.0;
+      lcp_problem->M->matrix0[i + (i - problem->size)*lcp_problem->size] =  -1.0;
     }
 
     for (i = 0; i < problem->size; i++)
     {
       lcp_problem->q[i] = problem->q[i];
       lcp_problem->q[i + problem->size] = 2.0;
-      printf("q[ %i]=%12.10e\n", i, lcp_problem->q[i]);
       for (j = 0; j < problem->size; j++)
       {
         lcp_problem->q[i] -= problem->M->matrix0[i + j * (problem->size)];
       }
-      printf("q[ %i]=%12.10e\n", i, lcp_problem->q[i]);
+
 
     }
 
     // Call the lcp_solver
     info = lcp_driver(lcp_problem, zlcp , wlcp, options, numberOfSolvers, global_options);
 
+    /*       printf("\n"); */
+
     // Conversion of result
     for (i = 0; i < problem->size; i++)
     {
       z[i] = 1.0 / 2.0 * (zlcp[i] - wlcp[i + problem->size]);
-      printf("z[ %i]=%12.10e\n", i, z[i]);
+      //   printf("z[ %i]=%12.10e\n", i, z[i]);
 
       w[i] = wlcp[i] - zlcp[i + problem->size];
-      printf("w[ %i]=%12.10e\n", i, w[i]);
+      //printf("w[ %i]=%12.10e\n", i, w[i]);
     }
 
+    /*        for (i=0; i< lcp_problem->size; i++){  */
+    /*     printf("zlcp[ %i]=%12.10e,\t wlcp[ %i]=%12.10e \n", i, zlcp[i],i, wlcp[i]); */
+    /*        } */
+    /*        printf("\n"); */
+
+    /*        for (i=0; i< problem->size; i++){  */
+    /*     printf("z[ %i]=%12.10e,\t w[ %i]=%12.10e\n", i, z[i],i, w[i]); */
+    /*        } */
+
+
+    /*        printf("\n"); */
 
 
 
