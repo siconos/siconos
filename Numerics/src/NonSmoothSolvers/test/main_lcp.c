@@ -537,11 +537,11 @@ int test_lcp_series(LinearComplementarity_Problem * problem, int* solversList)
   }
   free(z);
   free(w);
+  free(wBuffer);
+  free(options);
 
   return info;
 
-  free(wBuffer);
-  free(options);
 
 }
 
@@ -672,6 +672,14 @@ void getProblem(char* name, LinearComplementarity_Problem *  problem)
 {
 
   FILE * LCPfile =  fopen(name, "r");
+
+  problem->M = malloc(sizeof(*(problem->M)));
+  problem->M->storageType = 0;
+  problem->M->matrix1 = NULL;
+
+
+
+
   if (LCPfile == NULL)
   {
     fprintf(stderr, "fopen LCPfile: %s\n", name);
@@ -739,6 +747,11 @@ void getProblem(char* name, LinearComplementarity_Problem *  problem)
 void getProblemSBM(char* name, LinearComplementarity_Problem *  problem)
 {
 
+  problem->M = malloc(sizeof(*(problem->M)));
+  problem->M->storageType = 1;
+  problem->M->matrix0 = NULL;
+  problem->M->matrix1 = malloc(sizeof(*(problem->M->matrix1)));
+
   FILE * LCPfile =  fopen(name, "r");
   if (LCPfile == NULL)
   {
@@ -776,12 +789,6 @@ void getProblemSBM(char* name, LinearComplementarity_Problem *  problem)
     fscanf(LCPfile , "%d" , &RowIndex[i]);
     fscanf(LCPfile , "%d" , &ColumnIndex[i]);
   }
-  for (i = 0 ; i < blmat->nbblocks ; i++)
-  {
-    printf("RowIndex[%i]= %i\n", i, RowIndex[i]);
-    printf("ColumnIndex[%i]= %i\n", i, ColumnIndex[i]);
-  }
-
 
 
   /* Boost sparse compressed : index1_data construction */
@@ -918,16 +925,10 @@ int test_matrix(void)
 
   /* LCP with dense storage */
   LinearComplementarity_Problem * problem = malloc(sizeof(*problem));
-  problem->M = malloc(sizeof(*(problem->M)));
-  problem->M->storageType = 0;
-  problem->M->matrix1 = NULL;
 
   /* LCP with sparse-block storage */
   LinearComplementarity_Problem * problemSBM = malloc(sizeof(*problemSBM));
-  problemSBM->M = malloc(sizeof(*(problemSBM->M)));
-  problemSBM->M->storageType = 1;
-  problemSBM->M->matrix0 = NULL;
-  problemSBM->M->matrix1 = malloc(sizeof(*(problemSBM->M->matrix1)));
+
 
   /* List of working solvers */
   int * solversList = NULL; /* for dense */
@@ -1190,26 +1191,28 @@ int test_matrix(void)
       printf("--------- End of unstable tests --------------------------- \n\n");
     }
 
+
     /* Free Memory */
-    if (problem->M->matrix0 != NULL)
-      free(problem->M->matrix0);
-    problem->M->matrix0 = NULL;
+
     if (problem->q != NULL)
       free(problem->q);
     problem->q = NULL;
     if (problemSBM->q != NULL)
       free(problemSBM->q);
     problemSBM->q = NULL;
-    info = infoTmp;
-    if (hasSBM == 1)
-      freeSBM(problemSBM->M->matrix1);
 
+    freeNumericsMatrix(problem->M);
+    freeNumericsMatrix(problemSBM->M);
+
+    free(problemSBM->M);
+    free(problem->M);
+    info = infoTmp;
     if (infoTmp != 0)
       break;
   }
-  free(problemSBM->M->matrix1);
+
+
   free(problemSBM);
-  free(problem->M);
   free(problem);
   printf("========================================================================================================== \n");
   printf("                                  END OF TEST MATRIX   \n");
