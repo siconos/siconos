@@ -62,24 +62,28 @@ int main()
   int dimX = 4;
   SimpleMatrix * M = 0;
   SimpleMatrix * A = 0;
-  SimpleVector* X0 = 0;
+  SimpleVector* x0 = 0;
   SimpleVector* As = 0;
   SimpleVector* mti = 0;
-  SimpleVector* xti = 0;
 
 
-  X0 = new SimpleVector(dimX);
-  xti = new SimpleVector(dimX);
-  xti->setValue(0, 0);
+  x0 = new SimpleVector(dimX);
 
-  double sT = 1e-2;
-  double sStep = 0.1e-6;
+  x0->setValue(0, 3.5481);
+  x0->setValue(1, -1.5621);
+  x0->setValue(2, 2.2862);
+  x0->setValue(3, -0.6226);
+
+
+
+  double sT = 0.5;
+  double sStep = 0.1e-2;
   int NBStep = (int) floor(sT / sStep);
 
   //  NBStep = 3;
   //*****BUILD THE DYNAMIC SYSTEM
   SP::MyDS aDS ;
-  aDS.reset(new MyDS(*xti));
+  aDS.reset(new MyDS(*x0));
 
   DynamicalSystemsSet  Inter_DS ;
   Inter_DS.insert(aDS);
@@ -97,14 +101,14 @@ int main()
 
   //*****BUILD THE NSLAW
   SP::NonSmoothLaw aNSL;
-  aNSL.reset(new MixedComplementarityConditionNSL(sN, sM));
+  aNSL.reset(new ComplementarityConditionNSL(sN));
 
 
 
 
 
   //****BUILD THE INTERACTION
-  SP::Interaction aI(new Interaction("MLCP", Inter_DS, 1, sNSLawSize, aNSL, aR));
+  SP::Interaction aI(new Interaction("LCP", Inter_DS, 1, sNSLawSize, aNSL, aR));
   //****BUILD THE SYSTEM
   SP::NonSmoothDynamicalSystem  aNSDS(new NonSmoothDynamicalSystem(aDS, aI));
 
@@ -121,19 +125,11 @@ int main()
   SP::NonSmoothSolver  mySolver(new NonSmoothSolver((*solverName), iparam, dparam, floatWorkingMem, intWorkingMem));
 
   //**** BUILD THE STEP NS PROBLEM
-  SP::MLCP  aMLCP ;
-  aMLCP.reset(new MLCP(mySolver, "MLCP"));
-  aS->insertNonSmoothProblem(aMLCP);
+  SP::LCP  aLCP ;
+  aLCP.reset(new LCP(mySolver, "LCP"));
+  aS->insertNonSmoothProblem(aLCP);
   aM->initialize(aS);
-  //  Alloc working mem for the solver
-  int aux = mlcp_driver_get_iwork(aMLCP->getNumericsMLCP().get(), mySolver->numericsSolverOptions().get());
-  intWorkingMem = (int*)malloc(aux * sizeof(int));
-  mySolver->numericsSolverOptions()->iWork = intWorkingMem;
-  aux = mlcp_driver_get_dwork(aMLCP->getNumericsMLCP().get(), mySolver->numericsSolverOptions().get());
-  floatWorkingMem = (double*)malloc(aux * sizeof(double));
-  mySolver->numericsSolverOptions()->dWork = floatWorkingMem;
 
-  mlcp_driver_init(aMLCP->getNumericsMLCP().get(), mySolver->numericsSolverOptions().get());
   //      setNumericsVerbose(1);
 
 
@@ -141,6 +137,27 @@ int main()
   SP::SiconosVector  y = aI->y(0);
   SP::SiconosVector  lambda = aI->lambda(0);
   ofstream * fout = new ofstream("simu.log");
+
+
+  unsigned int outputSize = 10; // number of required data
+  SimpleMatrix dataPlot(NBStep, outputSize);
+
+  SP::SiconosVector z = aDS->x();
+  SP::SiconosVector lambdaOut = aI->lambda(0);
+  SP::SiconosVector yOut = aI->y(0);
+
+  dataPlot(0, 0) = aM->t0(); // Initial time of the model
+  dataPlot(0, 1) = (*z)(0);
+  dataPlot(0, 2) = (*z)(1);
+  dataPlot(0, 3) = (*z)(2);
+  dataPlot(0, 4) = (*z)(3);
+  dataPlot(0, 5) = (*lambdaOut)(0);
+  dataPlot(0, 6) = (*lambdaOut)(1);
+  dataPlot(0, 7) = (*y)(0);
+  dataPlot(0, 8) = (*y)(1);
+
+
+
 
   unsigned int count = 0; // events counter.
   // do simulation while events remains in the "future events" list of events manager.
@@ -163,10 +180,25 @@ int main()
     aS->nextStep();
     x = aDS->x();
     lambda = aI->lambda(0);
+    dataPlot(k, 0) = aS->nextTime(); // Initial time of the model
+    dataPlot(k, 1) = (*z)(0);
+    dataPlot(k, 2) = (*z)(1);
+    dataPlot(k, 3) = (*z)(2);
+    dataPlot(k, 4) = (*z)(3);
+    dataPlot(k, 5) = (*lambdaOut)(0);
+    dataPlot(k, 6) = (*lambdaOut)(1);
+    dataPlot(k, 7) = (*yOut)(0);
+    dataPlot(k, 8) = (*yOut)(1);
 
 
   }
-  aMLCP->reset();
+
+
+  // --- Output files ---
+  cout << "====> Output file writing ..." << endl;
+  ioMatrix io("OptimalControl.dat", "ascii");
+  io.write(dataPlot, "noDim");
+
   delete fout;
   cout << "===== End of simulation. ==== " << endl;
   return 0;
