@@ -181,34 +181,34 @@ public:
   /** to compute y = h(q,v,t) using plug-in mechanism
    * \param: double, current time
    */
-  void computeH(double);
+  virtual void computeH(double);
 
   /** default function to compute jacobianH
    *  \param double : current time
    *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
 
   void computeJacXH(double);*/
-  void computeJacLH(double)
+  virtual void computeJacLH(double)
   {
     ;
   }
-  void computeJacQH(double)
+  virtual void computeJacQH(double)
   {
     ;
   }
-  void computeJacQDotH(double)
+  virtual void computeJacQDotH(double)
   {
     ;
   }
-  void computeJacLG(double)
+  virtual void computeJacLG(double)
   {
     ;
   }
-  void computeJacQG(double)
+  virtual void computeJacQG(double)
   {
     ;
   }
-  void computeJacQDotG(double)
+  virtual void computeJacQDotG(double)
   {
     ;
   }
