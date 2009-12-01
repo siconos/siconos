@@ -50,7 +50,7 @@ int test_relay_series(Relay_Problem * problem, int* solversList)
 
   */
 
-  int totalNBSolver = 3;
+  int totalNBSolver = 5;
 
   int nbSolvers = 0; /* Real number of solvers called in the tests */
   int i, j;
@@ -180,6 +180,55 @@ int test_relay_series(Relay_Problem * problem, int* solversList)
     /*  info = info1; */
     k++;
   }
+  if (solversList[3] == 1)
+  {
+    strcat(nameList, "    Lemke     |");
+    strcpy(local_options->solverName, "Lemke");
+    int iparam[2] = {maxIter, 0};
+    double dparam[3] = {tolerance, 0.0, 1.0};
+    local_options->iSize = 2;
+    local_options->dSize = 3;
+    local_options->iparam = iparam;
+    local_options->dparam = dparam;
+    local_options->isSet = 1;
+    int info1 = relay_driver(problem, z[k] , w[k], options, numberOfSolvers, &global_options);
+    //int info1 = 0;
+    comp = DDOT(n , z[k] , incx , w[k] , incy);
+    DCOPY(n , w[k], incx, wBuffer , incy);
+    DAXPY(n , alpha , problem->q , incx , wBuffer  , incy);
+    prodNumericsMatrix(n, n, beta, problem->M, z[k], alpha, wBuffer);
+    diff = DNRM2(n , wBuffer , incx);
+
+    printf("    Lemke   (LOG:%1d)|      %5d | %10.4g |  %10.4g |\n", info1, local_options->iparam[1], local_options->dparam[1], diff);
+
+
+    k++;
+  }
+  if (solversList[4] == 1)
+  {
+    strcat(nameList, "    ENUM     |");
+    strcpy(local_options->solverName, "ENUM");
+    int iparam[2] = {maxIter, 0};
+    double dparam[3] = {tolerance, 0.0, 1.0};
+    local_options->iSize = 2;
+    local_options->dSize = 3;
+    local_options->iparam = iparam;
+    local_options->dparam = dparam;
+    local_options->isSet = 1;
+    int info1 = relay_driver(problem, z[k] , w[k], options, numberOfSolvers, &global_options);
+    //int info1 = 0;
+    comp = DDOT(n , z[k] , incx , w[k] , incy);
+    DCOPY(n , w[k], incx, wBuffer , incy);
+    DAXPY(n , alpha , problem->q , incx , wBuffer  , incy);
+    prodNumericsMatrix(n, n, beta, problem->M, z[k], alpha, wBuffer);
+    diff = DNRM2(n , wBuffer , incx);
+
+    printf("    ENUM   (LOG:%1d)|      %5d | %10.4g |  %10.4g |\n", info1, local_options->iparam[1], local_options->dparam[1], diff);
+
+    if (info1 != 0)
+      /*  info = info1; */
+      k++;
+  }
 
 #ifdef HAVE_PATHFERRIS
   if (solversList[2] == 1)
@@ -209,32 +258,32 @@ int test_relay_series(Relay_Problem * problem, int* solversList)
     k++;
   }
 #endif
-  /* RPGS */
-  if (solversList[1] == 1)
-  {
-    strcat(nameList, "    Latin     |");
-    strcpy(local_options->solverName, "Latin");
-    int iparam[2] = {maxIter, 0};
-    double dparam[3] = {tolerance, 0.0, 1.0};
-    local_options->iSize = 2;
-    local_options->dSize = 3;
-    local_options->iparam = iparam;
-    local_options->dparam = dparam;
-    local_options->isSet = 1;
-    // int info1 = relay_driver( problem, z[k] , w[k], options, numberOfSolvers, &global_options );
-    int info1 = 0;
-    comp = DDOT(n , z[k] , incx , w[k] , incy);
-    DCOPY(n , w[k], incx, wBuffer , incy);
-    DAXPY(n , alpha , problem->q , incx , wBuffer  , incy);
-    prodNumericsMatrix(n, n, beta, problem->M, z[k], alpha, wBuffer);
-    diff = DNRM2(n , wBuffer , incx);
+  /*   /\* RPGS *\/ */
+  /*   if(solversList[1] == 1) */
+  /*     { */
+  /*       strcat(nameList,"    Latin     |"); */
+  /*       strcpy(local_options->solverName,"Latin"); */
+  /*       int iparam[2] ={maxIter, 0}; */
+  /*       double dparam[3] = {tolerance,0.0, 1.0}; */
+  /*       local_options->iSize = 2; */
+  /*       local_options->dSize = 3; */
+  /*       local_options->iparam = iparam; */
+  /*       local_options->dparam = dparam; */
+  /*       local_options->isSet = 1; */
+  /*       // int info1 = relay_driver( problem, z[k] , w[k], options, numberOfSolvers, &global_options ); */
+  /*       int info1 = 0; */
+  /*       comp = DDOT( n , z[k] , incx , w[k] , incy ); */
+  /*       DCOPY( n , w[k], incx, wBuffer , incy ); */
+  /*       DAXPY( n , alpha , problem->q , incx ,wBuffer  , incy ); */
+  /*       prodNumericsMatrix(n,n,beta, problem->M,z[k],alpha,wBuffer ); */
+  /*       diff = DNRM2( n , wBuffer , incx ); */
 
-    printf("    Latin   (LOG:%1d)|      %5d | %10.4g |  %10.4g |\n", info1, local_options->iparam[1], local_options->dparam[1], diff);
+  /*    printf("    Latin   (LOG:%1d)|      %5d | %10.4g |  %10.4g |\n",info1,local_options->iparam[1],local_options->dparam[1],diff); */
 
-    if (info1 != 0)
-      /*  info = info1; */
-      k++;
-  }
+  /*       if(info1!=0) */
+  /* /\*  info = info1; *\/ */
+  /*       k++; */
+  /*     } */
   /* =========================== Ouput: comparison between the different methods =========================== */
 
   strcat(nameList, "\n");
@@ -693,7 +742,7 @@ int test_matrix(void)
       hasDense = 1;
       hasUnstable = 0;
       {
-        int l1[3] = {1, 1, 1};
+        int l1[5] = {1, 1, 1, 1, 1};
         solversList = l1;
       }
       break;

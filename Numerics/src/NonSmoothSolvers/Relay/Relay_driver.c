@@ -75,6 +75,8 @@ int relay_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* 
   else if ((strcmp(name , "Lemke") == 0) || (strcmp(name , "ENUM") == 0))
   {
     fprintf(stderr, "Relay_driver : Lemke and ENUM solver  not yet compeleted.  works only for ub=1, lb =-1:\n");
+
+    /*\todo Complete converion of Relay into LCP with lb and ub */
     // conversion into LCP
     LinearComplementarity_Problem* lcp_problem = (LinearComplementarity_Problem*)malloc(sizeof(LinearComplementarity_Problem));
     lcp_problem->size = 2 * problem->size ;

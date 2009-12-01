@@ -28,6 +28,11 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 Notes:
 
 Changes:
+2009-01-12 Vincent Acary <vincent.acary@inrialpes.fr>
+	* Start  Relay solver with ENUM and Lemke scheme
+
+
+	
 2008-January Franck Perignon <Franck.Perignon@inrialpes.fr>
                                                                                
 	* NSSpack: split into several dir (one for each solver/formulation)
