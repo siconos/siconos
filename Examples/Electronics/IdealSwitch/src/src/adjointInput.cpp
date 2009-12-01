@@ -30,8 +30,6 @@ void adjointInput::initialize(SP::Interaction inter)
   workX->setValue(0, 0);
   workL->setValue(0, 0);
   workL->setValue(1, 0);
-  workL->setValue(2, 0);
-  workL->setValue(3, 0);
 
   *lambda = *workL;
 
@@ -87,6 +85,7 @@ void adjointInput::computeG(double t)
 {
   SP::SiconosVector lambda = interaction()->lambda(0);
   *workL = *lambda;
+  *workX = *data[x];
 
 #ifdef SICONOS_DEBUG
   std::cout << "************      computeG at: " << t << std::endl;
@@ -101,9 +100,13 @@ void adjointInput::computeG(double t)
   K2->setValue(1, 1, 0.0);
 
   SP::SimpleVector K2P(new SimpleVector(2));
-  K2P->setValue(0, _xvalue(2));
-  K2P->setValue(1, _xvalue(3));
-  K2P = K2 * K2P ;
+  SP::SimpleVector P(new SimpleVector(2));
+  P->setValue(0, workX->getValue(2));
+  P->setValue(1, workX->getValue(3));
+
+
+
+  prod(*K2, *P, *K2P, true);
 
   (*data[g_alpha]).setValue(0, -(1.0 / 2.0 * workX->getValue(1) + 1.0 / 2.0) * (workL->getValue(0)));
   (*data[g_alpha]).setValue(1, -(-1.0 / 2.0 * workX->getValue(0)) * (workL->getValue(0)));
@@ -126,16 +129,18 @@ void adjointInput::computeJacXH(double t)
 
   SP::SiconosVector lambda = interaction()->lambda(0);
   *workL = *lambda;
+  *workX = *data[x];
+
   double *h = &(*JacXH)(0, 0);
 #ifdef SICONOS_DEBUG
   std::cout << "computeJacXH " << " at " << " " << t << std::endl;
 #endif
 
 
-  h[0] = -1.0 / 2.0 * _x(3);
-  h[2] = 1.0 / 2.0 * _x(2);
-  h[4] = 1.0 / 2.0 * (_x(1) + 1.0);
-  h[6] = -1.0 / 2.0 * _x(0);
+  h[0] = -1.0 / 2.0 * workX->getValue(3);
+  h[2] = 1.0 / 2.0 * workX->getValue(2);
+  h[4] = 1.0 / 2.0 * (workX->getValue(1) + 1.0);
+  h[6] = -1.0 / 2.0 * workX->getValue(0);
   h[1] = 0.0;
   h[3] = 0.0;
   h[5] = 0.0;
@@ -221,9 +226,13 @@ void adjointInput::computeJacLG(double t)
   *workX = *data[x];
 
   SP::SimpleVector K2P(new SimpleVector(2));
-  K2P->setValue(0, workX->getValue(2));
-  K2P->setValue(1, workX->getValue(3));
-  K2P = K2 * K2P ;
+  SP::SimpleVector P(new SimpleVector(2));
+  P->setValue(0, workX->getValue(2));
+  P->setValue(1, workX->getValue(3));
+
+
+
+  prod(*K2, *P, *K2P, true);
 
 
   g[0] = -1.0 / 2.0 * (workX->getValue(1) + 1.0);

@@ -1,11 +1,9 @@
 
 #include "SiconosKernel.hpp"
-#include "circuit.h"
-#include "elecRelation.h"
+#include "adjointInput.h"
 #include "myDS.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "circuit.h"
 
 using namespace std;
 
@@ -74,7 +72,9 @@ int main()
   xti = new SimpleVector(dimX);
   xti->setValue(0, 0);
 
-  int NBStep = (int) floor(sTf / sStep);
+  double sT = 1e-2;
+  double sStep = 0.1e-6;
+  int NBStep = (int) floor(sT / sStep);
 
   //  NBStep = 3;
   //*****BUILD THE DYNAMIC SYSTEM
@@ -88,12 +88,19 @@ int main()
   SimpleMatrix* C = 0;
   SimpleMatrix* D = 0;
   SimpleMatrix* B = 0;
-  SP::elecRelation aR;
-  aR.reset(new elecRelation());
+  SP::adjointInput aR;
+  aR.reset(new adjointInput());
+
+  int sN = 2;
+  int sM = 0;
+
 
   //*****BUILD THE NSLAW
   SP::NonSmoothLaw aNSL;
   aNSL.reset(new MixedComplementarityConditionNSL(sN, sM));
+
+
+
 
 
   //****BUILD THE INTERACTION
@@ -101,7 +108,7 @@ int main()
   //****BUILD THE SYSTEM
   SP::NonSmoothDynamicalSystem  aNSDS(new NonSmoothDynamicalSystem(aDS, aI));
 
-  SP::Model  aM(new Model(0, sTf));
+  SP::Model  aM(new Model(0, sT));
   aM->setNonSmoothDynamicalSystemPtr(aNSDS);
   SP::TimeDiscretisation  aTD(new TimeDiscretisation(0, sStep));
   SP::TimeStepping aS(new TimeStepping(aTD));
@@ -138,15 +145,13 @@ int main()
   unsigned int count = 0; // events counter.
   // do simulation while events remains in the "future events" list of events manager.
   cout << " ==== Start of  simulation : " << NBStep << " steps====" << endl;
-#ifdef CLSC_CIRCUIT
-#else
-  (*fout) << "C_charge " << "V1 " << "R(t)" << endl;
-#endif
 
   for (int k = 0 ; k < NBStep ; k++)
   {
+
+    cout << " ==== Step: " << endl;
     //      if (cmp==150)
-    //        setNumericsVerbose(1);
+    setNumericsVerbose(1);
     //      else if (cmp==151)
     //        setNumericsVerbose(0);
     cout << "..." << cmp << endl;
@@ -158,61 +163,6 @@ int main()
     aS->nextStep();
     x = aDS->x();
     lambda = aI->lambda(0);
-#ifdef CLSC_CIRCUIT
-
-    //    std::cout<<"x="<<x->getValue(0)<<" Is="<<lambda->getValue(0)<<" Id="<<lambda->getValue(1)<<" V3="<<lambda->getValue(2);
-    //   std::cout<<" V4="<<lambda->getValue(3)<<" V5="<<lambda->getValue(4)<<" l6="<<lambda->getValue(5)<<" l7="<<lambda->getValue(6);
-    //std::cout<<" l8="<<lambda->getValue(7)<<" l9="<<lambda->getValue(8)<<std::endl;
-    stateChanged = false;
-    if (lambda->getValue(6) > 1)
-    {
-      if (switchIsOn || k == 0)
-      {
-        switchIsOn = false;
-        stateChanged = true;
-      }
-    }
-    else
-    {
-      if (!switchIsOn || k == 0)
-      {
-        switchIsOn = true;
-        stateChanged = true;
-      }
-    }
-    if (lambda->getValue(8) > 1)
-    {
-      if (diodeIsOn || k == 0)
-      {
-        diodeIsOn = false;
-        stateChanged = true;
-      }
-    }
-    else
-    {
-      if (!diodeIsOn || k == 0)
-      {
-        diodeIsOn = true;
-        stateChanged = true;
-      }
-    }
-    if (stateChanged)
-    {
-      if (switchIsOn)
-        std::cout << "SWTCH=ON";
-      else
-        std::cout << "SWTCH=OFF";
-      if (diodeIsOn)
-        std::cout << " DIODE=ON";
-      else
-        std::cout << " DIODE=OFF";
-      std::cout << std::endl;
-    }
-
-    (*fout) << cmp << " " << x->getValue(0) << " " << lambda->getValue(0) << " " << lambda->getValue(1) << " " << lambda->getValue(2) << " " << lambda->getValue(3) << " " << lambda->getValue(4) << " " << lambda->getValue(5) << endl;
-#else
-    (*fout) << cmp << " " << x->getValue(0) << " " << lambda->getValue(0) << " " << lambda->getValue(3) + sR1 << endl;
-#endif
 
 
   }

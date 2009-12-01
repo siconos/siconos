@@ -33,30 +33,36 @@ MyDS::MyDS(const SiconosVector& x0): FirstOrderNonLinearDS(x0)
 void MyDS::computeF(double t)
 {
 
-  SP::SimpleMatrix Q = new SimpleMatrix(2, 2);
+  SP::SimpleMatrix Q(new SimpleMatrix(2, 2));
   Q->eye();
 
-  SP::SimpleVector QX = new SimpleVector(2);
-  QX->setValue(0, (_x(0) - 2.0));
-  QX->setValue(1, (_x(1) + 1.0));
-  QP = Q * QX ;
+  SP::SimpleVector QX(new SimpleVector(2));
+  SP::SimpleVector X(new SimpleVector(2));
+
+  X->setValue(0, (_x[0]->getValue(0) - 2.0));
+  X->setValue(1, (_x[0]->getValue(1) + 1.0));
+
+  prod(*Q, *X, *QX, true);
 
 
-  SP::SimpleMatrix K1 = new SimpleMatrix(2, 2);
+
+  SP::SimpleMatrix K1(new SimpleMatrix(2, 2));
   K1->setValue(0, 0, 0.0);
   K1->setValue(0, 1, -1.0 / 2.0);
   K1->setValue(1, 0, +1.0 / 2.0);
   K1->setValue(1, 1, +1.0);
 
-  SP::SimpleVector K1P = new SimpleVector(2);
-  K1P->setValue(0, _x(2));
-  K1P->setValue(1, _x(3));
-  K1P = K1 * K1P ;
+  SP::SimpleVector K1P(new SimpleVector(2));
+  SP::SimpleVector P(new SimpleVector(2));
+  P->setValue(0, _x[0]->getValue(2));
+  P->setValue(1, _x[0]->getValue(3));
+  prod(*K1, *P, *K1P, true);
 
-  mf->setValue(0, -1.0 / 2.0 * _x(1) - 1.0 / 2.0);
-  mf->setValue(1, -1.0 / 2.0 * _x(0) - _x(2));
-  mf->setValue(2, -QX(0) + K1P(0));
-  mf->setValue(2, -QX(1) + K1P(1));
+
+  mf->setValue(0, -1.0 / 2.0 * _x[0]->getValue(1) - 1.0 / 2.0);
+  mf->setValue(1, -1.0 / 2.0 * _x[0]->getValue(0) - _x[0]->getValue(1));
+  mf->setValue(2, -QX->getValue(0) + K1P->getValue(0));
+  mf->setValue(2, -QX->getValue(1) + K1P->getValue(1));
 
 
 
@@ -64,71 +70,103 @@ void MyDS::computeF(double t)
 void  MyDS::computeF(double t, SP::SiconosVector _xvalue)
 {
 
-  SP::SimpleMatrix Q = new SimpleMatrix(2, 2);
+  SP::SimpleMatrix Q(new SimpleMatrix(2, 2));
   Q->eye();
 
-  SP::SimpleVector QX = new SimpleVector(2);
-  QX->setValue(0, (_xvalue(0) - 2.0));
-  QX->setValue(1, (_xvalue(1) + 1.0));
-  QP = Q * QX ;
+  SP::SimpleVector QX(new SimpleVector(2));
+  SP::SimpleVector X(new SimpleVector(2));
+
+  X->setValue(0, (_xvalue->getValue(0) - 2.0));
+  X->setValue(1, (_xvalue->getValue(1) + 1.0));
+
+  prod(*Q, *X, *QX, true);
 
 
-  SP::SimpleMatrix K1 = new SimpleMatrix(2, 2);
+
+  SP::SimpleMatrix K1(new SimpleMatrix(2, 2));
   K1->setValue(0, 0, 0.0);
   K1->setValue(0, 1, -1.0 / 2.0);
   K1->setValue(1, 0, +1.0 / 2.0);
   K1->setValue(1, 1, +1.0);
 
-  SP::SimpleVector K1P = new SimpleVector(2);
-  K1P->setValue(0, _xvalue(2));
-  K1P->setValue(1, _xvalue(3));
-  K1P = K1 * K1P ;
+  SP::SimpleVector K1P(new SimpleVector(2));
+  SP::SimpleVector P(new SimpleVector(2));
+  P->setValue(0, _xvalue->getValue(2));
+  P->setValue(1, _xvalue->getValue(3));
+  prod(*K1, *P, *K1P, true);
 
-  mf->setValue(0, -1.0 / 2.0 * _xvalue(1) - 1.0 / 2.0);
-  mf->setValue(1, -1.0 / 2.0 * _xvalue(0) - _xvalue(2));
-  mf->setValue(2, -QX(0) + K1P(0));
-  mf->setValue(2, -QX(1) + K1P(1));
+
+  mf->setValue(0, -1.0 / 2.0 * _xvalue->getValue(1) - 1.0 / 2.0);
+  mf->setValue(1, -1.0 / 2.0 * _xvalue->getValue(0) - _xvalue->getValue(1));
+  mf->setValue(2, -QX->getValue(0) + K1P->getValue(0));
+  mf->setValue(2, -QX->getValue(1) + K1P->getValue(1));
+
 }
 
 void MyDS::computeJacobianXF(double t, bool  b)
 {
+
+
+
+
+  SP::SimpleMatrix Q(new SimpleMatrix(2, 2));
+  Q->eye();
+  SP::SimpleMatrix K1(new SimpleMatrix(2, 2));
+  K1->setValue(0, 0, 0.0);
+  K1->setValue(0, 1, -1.0 / 2.0);
+  K1->setValue(1, 0, +1.0 / 2.0);
+  K1->setValue(1, 1, +1.0);
+
+
+
   _jacobianXF->setValue(0, 0, 0);
   _jacobianXF->setValue(0, 1, -1.0 / 2.0);
   _jacobianXF->setValue(0, 2, 0.0);
   _jacobianXF->setValue(0, 3, 0.0);
   _jacobianXF->setValue(1, 0, 1.0 / 2.0);
-  _jacobianXF->setValue(1, 1, -1.0 /);
+  _jacobianXF->setValue(1, 1, -1.0);
   _jacobianXF->setValue(1, 2, 0.0);
   _jacobianXF->setValue(1, 3, 0.0);
-  _jacobianXF->setValue(2, 0, -Q(0, 0));
-  _jacobianXF->setValue(2, 1, -Q(0, 1));
-  _jacobianXF->setValue(2, 2, -Q(1, 0));
-  _jacobianXF->setValue(2, 3, -Q(1, 1));
-  _jacobianXF->setValue(3, 0, K1(0, 0));
-  _jacobianXF->setValue(3, 1, K1(0, 1));
-  _jacobianXF->setValue(3, 2, K1(1, 0));
-  _jacobianXF->setValue(3, 3, K1(1, 1));
+  _jacobianXF->setValue(2, 0, -Q->getValue(0, 0));
+  _jacobianXF->setValue(2, 1, -Q->getValue(0, 1));
+  _jacobianXF->setValue(2, 2, -Q->getValue(1, 0));
+  _jacobianXF->setValue(2, 3, -Q->getValue(1, 1));
+  _jacobianXF->setValue(3, 0, K1->getValue(0, 0));
+  _jacobianXF->setValue(3, 1, K1->getValue(0, 1));
+  _jacobianXF->setValue(3, 2, K1->getValue(1, 0));
+  _jacobianXF->setValue(3, 3, K1->getValue(1, 1));
 
 }
 
 void MyDS::computeJacobianXF(double t, SP::SiconosVector v)
 {
+
+  SP::SimpleMatrix Q(new SimpleMatrix(2, 2));
+  Q->eye();
+  SP::SimpleMatrix K1(new SimpleMatrix(2, 2));
+  K1->setValue(0, 0, 0.0);
+  K1->setValue(0, 1, -1.0 / 2.0);
+  K1->setValue(1, 0, +1.0 / 2.0);
+  K1->setValue(1, 1, +1.0);
+
+
+
   _jacobianXF->setValue(0, 0, 0);
   _jacobianXF->setValue(0, 1, -1.0 / 2.0);
   _jacobianXF->setValue(0, 2, 0.0);
   _jacobianXF->setValue(0, 3, 0.0);
   _jacobianXF->setValue(1, 0, 1.0 / 2.0);
-  _jacobianXF->setValue(1, 1, -1.0 /);
+  _jacobianXF->setValue(1, 1, -1.0);
   _jacobianXF->setValue(1, 2, 0.0);
   _jacobianXF->setValue(1, 3, 0.0);
-  _jacobianXF->setValue(2, 0, -Q(0, 0));
-  _jacobianXF->setValue(2, 1, -Q(0, 1));
-  _jacobianXF->setValue(2, 2, -Q(1, 0));
-  _jacobianXF->setValue(2, 3, -Q(1, 1));
-  _jacobianXF->setValue(3, 0, K1(0, 0));
-  _jacobianXF->setValue(3, 1, K1(0, 1));
-  _jacobianXF->setValue(3, 2, K1(1, 0));
-  _jacobianXF->setValue(3, 3, K1(1, 1));
+  _jacobianXF->setValue(2, 0, -Q->getValue(0, 0));
+  _jacobianXF->setValue(2, 1, -Q->getValue(0, 1));
+  _jacobianXF->setValue(2, 2, -Q->getValue(1, 0));
+  _jacobianXF->setValue(2, 3, -Q->getValue(1, 1));
+  _jacobianXF->setValue(3, 0, K1->getValue(0, 0));
+  _jacobianXF->setValue(3, 1, K1->getValue(0, 1));
+  _jacobianXF->setValue(3, 2, K1->getValue(1, 0));
+  _jacobianXF->setValue(3, 3, K1->getValue(1, 1));
 
 }
 
