@@ -250,6 +250,9 @@ void LinearOSNS::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelatio
       if (UR1 == UR2)
       {
         SP::SiconosMatrix work(new SimpleMatrix(*leftUnitaryBlock));
+        //
+        //        cout<<"LinearOSNS : leftUBlock\n";
+        //        work->display();
         work->trans();
         //        cout<<"LinearOSNS::computeUnitaryBlock leftUnitaryBlock"<<endl;
         //        leftUnitaryBlock->display();
@@ -258,7 +261,7 @@ void LinearOSNS::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelatio
         prod(*leftUnitaryBlock, *work, *currentUnitaryBlock, false);
         //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftUnitaryBlock,*work,1.0,*currentUnitaryBlock);
         //*currentUnitaryBlock *=h;
-        //        cout<<"LinearOSNS::computeUnitaryBlock"<<endl;
+        //        cout<<"LinearOSNS::computeUnitaryBlock unitaryBlock"<<endl;
         //        currentUnitaryBlock->display();
 
       }
@@ -323,7 +326,10 @@ struct LinearOSNS::_TimeSteppingNSLEffect : public SiconosVisitor
     (*(parent->_q))(pos) +=  e * (*UR->yOld(parent->levelMin()))(0);
 
   }
-
+  void visit(EqualityConditionNSL& nslaw)
+  {
+    ;
+  }
 };
 
 struct LinearOSNS::_EventDrivenNSLEffect : public SiconosVisitor
