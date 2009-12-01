@@ -30,6 +30,11 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 Notes:
 
 Main Changes:
+
+2009-01-12 Vincent Acary <vincent.acary@inrialpes.fr>
+	* Start RelayNSL and Relay ONSNS
+ 	* Plug Relay Driver for PGS, ENUM and Lemke scheme
+	
 2009 October Maurice Bremond <maurice.bremond@inrialpes.fr>
 	* from get<Member>Ptr() to member()
 	* member prefix with _
