@@ -420,6 +420,8 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
   }
 
   // === ===
+  else if (dsType == NENLDS)
+    ;
   else RuntimeException::selfThrow("Moreau::computeW - not yet implemented for Dynamical system type :" + dsType);
 
   // Remark: W is not LU-factorized here.
@@ -502,8 +504,8 @@ double Moreau::computeResidu()
         // residuFree += coef * fL_k,i+1
         scal(coef, *d->f(), *residuFree, false);
       }
-      //    cout<<"Moreau: residu free"<<endl;
-      //    (*residuFree).display();
+      //      cout<<"Moreau: residu free"<<endl;
+      //      (*residuFree).display();
       (*(d->workFree())) = *residuFree;
       scal(-h, *d->r(), (*d->workFree()), false); // residu = residu - h*r
       normResidu = d->workFree()->norm2();
@@ -517,64 +519,7 @@ double Moreau::computeResidu()
       //      cout<<"Moreau FONLDS: residu r"<<endl;
       //      (*d->residur()).display();
     }
-
-    // 2 - First Order Linear Systems
-    //       else if( dsType == FOLDS)
-    //  {
-    //    // Residu = M(x_i+1 - x_i) - h*theta*(A_i+1*x_i+1 + b_i+1)  - h*(1-theta)*(Ai*xi + bi) - h*r_i+1
-
-
-
-    //    SP::FirstOrderLinearDS d = boost::static_pointer_cast<FirstOrderLinearDS>(ds);
-
-
-    //    SP::SiconosVector x = d->x(); // last saved value for x
-    //    // x value at told
-    //    SP::SiconosVector xold = d->xMemory()->getSiconosVector(0);
-
-
-
-
-    //    //If M not equal to identity matrix
-    //    SP::SiconosMatrix M = d->M();
-
-    //    *residuFree = *x;
-    //    *residuFree -= *xold;
-    //    if( M )
-    //        prod(*M,*residuFree,*residuFree, true);
-
-    //    SP::SiconosMatrix A = d->A();
-
-    //    //    if( A ){
-    //    if( d->f() ){
-    //      //        d->computeA(told);
-    //      double coeff = -h*(1-theta);
-    //      //        prod(coeff,*A,*xold,*residuFree,false);
-    //      scal(coeff, *d->fold(), *residuFree, false);
-    //      // residuFree += -h(1-theta)A_i*x_i
-    //      //        d->computeA(t);
-    //      d->computeF(t);
-    //      coeff = -h*theta;
-    //      //     prod(coeff,*A,*x,*residuFree,false);
-    //      scal(coeff, *d->f(), *residuFree, false);
-    //      // residuFree += -h theta A_{i+1}*x_{i+1}
-    //    }
-    //    SP::SiconosVector b = d->b();
-    //    if( b ){
-    //      // xFree += h(1-theta)*bi + h*theta*bi+1
-    //      //        d->computeb(told); // bi
-    //      scal(h*(1.0-theta), *d->b(), *residuFree, false);
-    //      d->computeb(t); // bi+1
-    //      scal(h*theta, *d->b(), *residuFree, false);
-    //    }
-
-
-    //    (*workX[d])=*residuFree;
-    //    scal(-h, *d->r(), (*workX[d]), false); // residu = residu - h*r
-    //    normResidu = (workX[d])->norm2();
-    //    (*d->residur())=(*d->r()) -(*d->gAlpha());
-    //  }
-    // 2bis - First Order Linear Systems with Time Invariant coefficients
+    // 2 - First Order Linear Systems with Time Invariant coefficients
     else if (dsType == FOLTIDS)
     {
       SP::FirstOrderLinearTIDS d = boost::static_pointer_cast<FirstOrderLinearTIDS>(ds);
@@ -746,6 +691,8 @@ double Moreau::computeResidu()
         scal(coef, *d->fL(), *residuFree, false);
       }
       *(d->workFree()) = *residuFree;
+      //    cout<<"Moreau::computeResidu :\n";
+      //    residuFree->display();
       *(d->workFree()) -= *d->p(2);
       normResidu = d->workFree()->norm2();
     }
@@ -851,89 +798,7 @@ void Moreau::computeFreeState()
 
     }
 
-    //       // 2 - First Order Linear Systems
-    //       else if( dsType == FOLDS)
-    //  {
-    //    // xFree = [W]^{-1} * [  (M + h(1-theta)A_i )x_i + h*theta*b_i+1 + h*(1-theta)*b_i ]
 
-    //    // IN to be updated at current time: W, b
-    //    // IN at told: A, b, x
-    //    // IN, not time dependant: M
-
-    //    SP::FirstOrderLinearDS d = boost::static_pointer_cast<FirstOrderLinearDS>(ds);
-
-    //    SP::SiconosVector xfree = d->xfree();//workX[d];
-
-    //    // x value at told
-    //    //    SP::SiconosVector xold = d->xMemory()->getSiconosVector(0);
-
-    //    *xfree=*(d->residuFree());
-    //    cout<<"Moreau::residuFree"<<endl;
-    //    xfree->display();
-
-    //    // -- Update W --
-    //    computeW(t,d);
-
-    //    W->PLUForwardBackwardInPlace(*xfree); // Solve WX = xfree and set xfree = X.
-    //    SP::SiconosVector x = d->x(); // last saved value for x
-    //    cout<<"Moreau::x"<<endl;
-    //    x->display();
-
-    //    // -> compute real xfree
-    //    *xfree *= -1.0;
-    //    *xfree += *x;
-    //    cout<<"Moreau::xfree"<<endl;
-    //    xfree->display();
-
-    //    if (!simulationLink->model()->nonSmoothDynamicalSystem()->isLinear()){
-    //      SP::SiconosVector xp = d->xp();
-    //      W->PLUForwardBackwardInPlace(*xp);
-    //      scal(h,*xp,*xp);
-    //      *xp += *xfree;
-    //      cout<<"after moreau::computefreestate xp"<<endl;
-    //      xp->display();
-    //      SP::SiconosVector xq = d->xq();
-    //      *xq=*xp;
-    //      *xq-=*x;
-    //    }
-    //  }
-    //       // 2bis - First Order Linear Systems with Time Invariant coefficients
-    //       else if( dsType == FOLTIDS)
-    //  {
-    //    // xFree = [W]^{-1} * [  (W + hA )x_i + h*b ] = xi + hW^-1(Axi + b)
-
-    //    // IN to be updated at current time: none
-    //    // IN at told: x
-    //    // IN, not time dependant: A,b,W
-
-    //    SP::FirstOrderLinearDS d = boost::static_pointer_cast<FirstOrderLinearTIDS>(ds);
-
-    //    SP::SiconosVector xfree = d->xfree();//workX[d];
-    //    *xfree=*(d->residuFree());
-
-    // //     // x value at told
-    // //     SP::SiconosVector xold = d->xMemory()->getSiconosVector(0);
-
-
-    //    W->PLUForwardBackwardInPlace(*xfree); // Solve WX = xfree and set xfree = X.
-    //    SP::SiconosVector x = d->x(); // last saved value for x
-    //    *xfree *= -1.0;
-    //    *xfree += *x; // xfree = xi + ...
-    //    //    cout<<"computeFreeState xfree"<<endl;
-    //    //    xfree->display();
-    //    if (!simulationLink->model()->nonSmoothDynamicalSystem()->isLinear()){
-    //      SP::SiconosVector xp = d->xp();
-    //      W->PLUForwardBackwardInPlace(*xp);
-    //      scal(h,*xp,*xp);
-    //      *xp += *xfree;
-    //      cout<<"after moreau::computefreestate xp"<<endl;
-    //      xp->display();
-    //      SP::SiconosVector xq = d->xq();
-    //      *xq=*xp;
-    //      *xq-=*x;
-    //    }
-
-    //  }
     // 3 - Lagrangian Non Linear Systems
     else if (dsType == LNLDS)
     {
@@ -1049,7 +914,11 @@ void Moreau::computeFreeState()
       // -- vfree =  v - W^{-1} ResiduFree --
       // At this point vfree = residuFree
       // -> Solve WX = vfree and set vfree = X
+      //    cout<<"Moreau::computeFreeState residu free"<<endl;
+      //    vfree->display();
       d->luW()->PLUForwardBackwardInPlace(*vfree);
+      //    cout<<"Moreau::computeFreeState -WRfree"<<endl;
+      //    vfree->display();
       //    scal(h,*vfree,*vfree);
       // -> compute real vfree
       *vfree *= -1.0;
