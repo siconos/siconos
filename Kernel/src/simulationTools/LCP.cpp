@@ -42,9 +42,24 @@ int LCP::compute(double time)
     numerics_problem.q = _q->getArray();
     numerics_problem.size = _sizeOutput;
     int nbSolvers = 1;
+    const char * name = &*_solver->numericsSolverOptions()->solverName;
+    if ((strcmp(name , "ENUM") == 0))
+    {
+      lcp_enum_init(&numerics_problem, &*_solver->numericsSolverOptions(), 1);
+
+
+    }
+
     // Call LCP Driver
     info = lcp_driver(&numerics_problem, _z->getArray() , _w->getArray() ,
                       &*_solver->numericsSolverOptions(), nbSolvers, &*_numerics_options);
+
+    if ((strcmp(name , "ENUM") == 0))
+    {
+      lcp_enum_reset(&numerics_problem, &*_solver->numericsSolverOptions(), 1);
+
+
+    }
 
     // --- Recovering of the desired variables from LCP output ---
     postCompute();
