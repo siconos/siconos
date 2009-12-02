@@ -63,6 +63,7 @@ make test
 
 To generate Doxygen documentation:
 \verbatim
+CMAKE -DWITH_DOCUMENTATION=ON
 make doc
 \endverbatim
 

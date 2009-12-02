@@ -26,9 +26,9 @@ Atlas usually comes with \b Blas (Basic Linear Algebra Subprograms) and \b Lapac
 \verbatim
 yum install atlas atlas-devel 
 \endverbatim
-\b Debian
+\b Debian/Ubuntu
 \verbatim
-apt-get install atlas atlas-devel
+apt-get install libatlas libatlas-headers
 \endverbatim
 
 \e More: \n
@@ -38,7 +38,7 @@ About \b Blas: http://www.netlib.org/blas/
 About \b Lapack: http://www.netlib.org/lapack/
 
 About \b Atlas: http://math-atlas.sourceforge.net/
-
+1
 \subsection xml 3 - libxml2
 The XML C parser and toolkit. Required for XML file reading and writing.
 
@@ -112,12 +112,10 @@ See http://www.stack.nl/~dimitri/doxygen/install.html for details.
 \section sicInstPlatforms Platforms
 
 Siconos v3.0.0 has been successfully compiled on:
-- amd64-linux-debian-testing, i386-linux-debian-etch
-- amd64-linux-fedora-core7 and core8
-- i386-linux-fedora-core7 and core8
-- i386-linux-debian-etch
-- i386-linux-ubuntu-feisty
-- Mac-osx Leopard
+- {i386, amd64} linux-debian {testing, etch, lenny}
+- {i386, amd64} linux-fedora core  7-11
+- {i386, amd64} linux-ubuntu {feisty - jaunty}
+- mac-osx Leopard
 
 For: 
 
@@ -128,7 +126,8 @@ the maintainer would be glad to hear about that.
 
 \section libext External libraries versions
 
-Here is a list of the (recommended) version of the various external libraries used to compile Siconos (on Fedora Core 8)
+Here is a list of the minimal recommended version of the various
+external libraries used to compile Siconos (on Fedora Core 8)
 
 Compiler: gcc 4.1.2 \n
 
