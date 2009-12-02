@@ -63,12 +63,12 @@ The aim of this class is to provide some members and functions for all dynamical
 \b Members access:
 In a general way, "Name" being the targeted member, use:
 - getName() to get a copy of the content of the object
-- getNamePtr() to get a pointer to the object
+- name() to get a pointer to the object
 - setName(obj) to copy obj into Name
 - setNamePtr(objPtr) to link objPtr with Name
 
 Remark: \f$ (x,\dot x) \f$ are saved in the class member x, with x[0]=\f$ x \f$ and x[1]=\f$ \dot x \f$. 
-Use functions getX()/getXPtr(), setX()/setXPtr() to access \f$ x \f$ and getRhs/getRhsPtr() for \f$ \dot x \f$. 
+Use functions getX()/X(), setX()/setXPtr() to access \f$ x \f$ and getRhs/getRhsPtr() for \f$ \dot x \f$. 
 
 \b Main \b functions \b of \b the \b interface
 - computeRhs to compute \f$ \dot x \f$
@@ -88,7 +88,7 @@ For instance, if you want to use the internal forces operators in Lagrangian sys
 First case:
 \code
 // we suppose that ds is an existing pointer to a LagrangianDS
-SiconosMatrix * myF = new SimpleVector(3);
+SP::SiconosMatrix myF(new SimpleVector(3));
 // fill my G in ...		
 ds->setFInt(*myF); // copy myF values into fInt
 // OR

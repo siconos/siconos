@@ -60,7 +60,7 @@ Then cpp input file looks like:
 double mu , lambda;
 // ... give mu and lambda the required values
 // ... declare and built your dynamical system
-DynamicalSystem * lds = new LagrangianDS(...);
+SP::DynamicalSystem lds(new LagrangianDS(...));
 // Link with the plug-in function
 lds->setComputeFExtFunction("myPlugin.so", "myFExt");
 
@@ -77,7 +77,7 @@ lds->setZ(myZ);
 //
 //=== Second way, with setZPtr function (pointer link) ===
 // declare and built a pointer to SimpleVector of size 2
-SimpleVector * myZPtr = new SimpleVector(2);
+SP::SimpleVector myZPtr(new SimpleVector(2));
 (*myZPtr)(0) = mu;
 (*myZPtr)(1) = lambda;
 

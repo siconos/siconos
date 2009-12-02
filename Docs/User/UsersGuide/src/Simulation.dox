@@ -57,14 +57,14 @@ Just take care to avoid redundant or conflicting information. See the constructo
 Example: 
 \code
 
-Model * m = new Model(t0); // only initial time is provided
+SP::Model m(new Model(t0)); // only initial time is provided
 double h = ...;
 unsigned int nSteps = ...;
-TimeDiscretisation * td = new TimeDiscretisation(h, nSteps,m);
+SP::TimeDiscretisation td(new TimeDiscretisation(h, nSteps,m));
 // tk and final time will be automatically computed. 
 // 
 // Then a simulation is created and associated to m through td. 
-Simulation * s = new TimeStepping(td);
+SP::Simulation s(new TimeStepping(td));
 \endcode
 
 \subsection docSimuOSI One Step Integrators
@@ -90,14 +90,14 @@ Main variables: \f$ \theta \f$ (a double) and \f$ W \f$ (a matrix of double). On
 \code
 // allDS is a set of DynamicalSystems : ds1, ds2 ...
 // s is a Simulation*
-Moreau * integrator = new Moreau(allDS, 0.5, s);
+SP::Moreau integrator(new Moreau(allDS, 0.5, s));
 // all values of theta are initialized to 0.5
 
 double theta = integrator->getTheta(ds1);
 // returns the value of theta for the dynamical system ds1.
 
-SiconosMatrix * W = integrator->getW(ds1);
-// W is a SimpleMatrix *, that represents the W linked to ds1. 
+SP::SiconosMatrix W(integrator->getW(ds1));
+// W is a SP::SimpleMatrix, that represents the W linked to ds1. 
 \endcode 
 
 \subsubsection docSimuLsodar Lsodar
@@ -108,8 +108,8 @@ That will be detailed in \ref docSimuED.
 
 Construction:
 \code
-// allDS is a set of DynamicalSystems and s a Simulation*
-Lsodar * integrator = new Lsodar(allDS,s);
+// allDS is a set of DynamicalSystems and s a SP::Simulation
+SP::Lsodar integrator(new Lsodar(allDS,s));
 \endcode
 At the time, all specific parameters of Lsodar are set by default, but you can set them thanks to set functions. See Lsodar class doxygen documentation for details.
 

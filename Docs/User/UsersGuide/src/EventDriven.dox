@@ -61,12 +61,12 @@ Thus, a general step  of integration for EventDriven will looks like:
 "While there are some events in the unProcessedEvents set, integrate the smooth dynamics between current and next event and then process with the behavior at event".
 Or:
 \code
-EventDriven * s = new EventDriven(myModel);
+SP::EventDriven s(new EventDriven(myModel));
 
 s->initialize();
 
 // We get the events manager
-EventsManager * eventsManager = s->getEventsManagerPtr();
+SP::EventsManager eventsManager = s->eventsManager();
 
 // while there are some events ...
 while(eventsManager->hasNextEvent())

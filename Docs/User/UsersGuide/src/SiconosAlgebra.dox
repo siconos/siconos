@@ -18,15 +18,15 @@ For example:
 \code
 
 // a SimpleVector of size 4
-SimpleVector * v1 = new SimpleVector(4);
+SP::SimpleVector v1(new SimpleVector(4));
 // a SimpleVector of size 2.
-SiconosVector * v2 = new SimpleVector(2);
+SP::SiconosVector v2(new SimpleVector(2));
 // Note that since Simple is derived from Siconos, 
 // the previous line is equivalent to
-// SimpleVector * v2 = new SimpleVector(2);
+// SP::SimpleVector v2(new SimpleVector(2));
 
 // A BlockVector that contains two SimpleVector
-SiconosVector * myBlockV = new BlockVector(v1, v2);
+SP::SiconosVector myBlockV(new BlockVector(v1, v2));
 
 (*myBlockV)[0]->display(); // display v1
 // (*myBlockV)[0] represents the same pointer as v1.
@@ -51,16 +51,16 @@ Some details about the way to build these objects and the existing operators and
 \code
 int size = 4;
 // Dense vector, as a pointer
-SiconosVector * v = new SimpleVector(size); 
+SP::SiconosVector v(new SimpleVector(size)); 
 // Or without pointers
 SimpleVector w(size);
 // Sparse vector
-SiconosVector * z = new SimpleVector(size,SPARSE);
+SP::SiconosVector z(new SimpleVector(size,SPARSE));
 // Read the vector from the file vect.dat (only for dense) 
-SiconosVector * v2 = new SimpleVector("vect.dat",1); // 1: ascii, 0:binary
+SP::SiconosVector v2(new SimpleVector("vect.dat",1)); // 1: ascii, 0:binary
 // Dense vector, initialized with a scalar value
 double a = 3.2;
-SimpleVector w2(size, a);
+SP::SimpleVector w2(size, a);
 // => w2(i) = a, for all i.
 // vector initialized with a std::vector
 std::vector stl_v(4);
@@ -77,14 +77,14 @@ For more details on other constructors (copy ...) see the doxygen documentation 
 \code
 int row = 3, col = 3;
 // row X col Dense matrix:
-SiconosMatrix * m = new SimpleMatrix(row,col);
+SP::SiconosMatrix m(new SimpleMatrix(row,col));
 // row X col matrix, all elements initialized with a scalar value:
 double a = 4.4;
-SiconosMatrix * m = new SimpleMatrix(row,col,a);
+SP::SiconosMatrix m(new SimpleMatrix(row,col,a));
 // row X row Symmetric matrix:
-SiconosMatrix * m = new SimpleMatrix(row,row,SYMMETRIC);
+SP::SiconosMatrix m(new SimpleMatrix(row,row,SYMMETRIC));
 // Read from a file
-SiconosMatrix * m2 = new SimpleMatrix("mat.dat",1); // 1: ascii, 0:binary
+SP::SiconosMatrix m2(new SimpleMatrix("mat.dat",1)); // 1: ascii, 0:binary
 \endcode
 	
 For more details on other constructors (copy ...) see the doxygen documentation for class SimpleMatrix.
@@ -101,12 +101,12 @@ The usual ways of construction are described below.
 \code
 
 // SimpleVector construction
-SiconosVector * v1 = new SimpleVector(2);
-SiconosVector * v2 = new SimpleVector(4);
+SP::SiconosVector v1(new SimpleVector(2));
+SP::SiconosVector v2(new SimpleVector(4));
 // ...
 
 // Build an empty vector and insert some existing vectors.
-SiconosVector * V0 = new BlockVector();
+SP::SiconosVector V0(new BlockVector());
 
 // Pointer insertion: 
 V0->insertPtr(v1); 
@@ -126,7 +126,7 @@ V0->insert(*v2);
 Or:
 \code
 
-SiconosVector * V0 = new BlockVector(v1,v2);
+SP::SiconosVector V0(new BlockVector(v1,v2));
 // with the same effect as insertPtr(vi) 
 
 \endcode
@@ -134,14 +134,14 @@ SiconosVector * V0 = new BlockVector(v1,v2);
 - To build a block of n vectors of the same size:
 \code
 
-SiconosVector * V1 = new BlockVector(n, sizeOfABlock);	
+SP::SiconosVector V1(new BlockVector(n, sizeOfABlock));	
 
 \endcode 
 
 Note that a BlockVector can also contain some other BlockVector. \n
 \code
 
-SiconosVector * V1 = new BlockVector();
+SP::SiconosVector V1(new BlockVector());
 V1->insertPtr(V0);
 V1->insertPtr(v1);
 
@@ -157,26 +157,26 @@ Constructors for block-matrices:
 unsigned int nRow = 2 ; // number of blocks in a row.
 unsigned int nCol = 3 ; // number of blocks in a column.
 
-// Then we build a list (stl vector) of nRow*nCol SiconosMatrix*:
-std::vector<SiconosMatrix*> mList(nRow*nCol);
+// Then we build a list (stl vector) of nRow*nCol SP::SiconosMatrix:
+std::vector<SP::SiconosMatrix> mList(nRow*nCol);
 mList.push_back(m0);
 // ...
 mList.push_back(m5);
-// We suppose that m0 ... m5 are some pre-built SiconosMatrix*
+// We suppose that m0 ... m5 are some pre-built SP::SiconosMatrix
 // (either Simple or Block).
 
 // BlockMatrix construction:
-SiconosMatrix * M = new BlockMatrix( mList, nRow, nCol);
+SP::SiconosMatrix M(new BlockMatrix( mList, nRow, nCol));
 
 // M is now a nRowXnCol matrix composed with m0 ...m5
 
 \endcode
 
-- with 4 SiconosMatrix *
+- with 4 SP::SiconosMatrix
 \code
 
-// m1 ... m4 some SiconosMatrix*
-SiconosMatrix * M = new BlockMatrix(m1,m2,m3,m4);
+// m1 ... m4 some SP::SiconosMatrix
+SP::SiconosMatrix M(new BlockMatrix(m1,m2,m3,m4));
 
 // M is a 2X2 blocks matrix 
 // (first row: m1, m2, second: m3, m4).
@@ -230,7 +230,7 @@ m->resize(a,b); // resize m, available also for vectors
 \endcode
 - Single elements access or assignment: operator "()" or \e get/setValue functions.
 \code
-SiconosVector * v = new SimpleVector(3); // v = [0 0 0]
+SP::SiconosVector v(new SimpleVector(3)); // v = [0 0 0]
 SimpleVector w(4);  			 // w = [0 0 0 0]
 (*v)(0) = 4;				 // v = [4 0 0] 
 // equivalent to:
@@ -243,7 +243,7 @@ w.setValue( 2,v->getValue(0) );
 \endcode	
 In the same way for matrices:
 \code
-SiconosMatrix * M = new SimpleMatrix(3,3); // M = [ 0 0 0 ]
+SP::SiconosMatrix M(new SimpleMatrix(3,3)); // M = [ 0 0 0 ]
 					   //     [ 0 0 0 ]
 					   //     [ 0 0 0 ]
 SimpleMatrix P(1,2);   			   // P = [ 0 0 ]
@@ -259,7 +259,7 @@ cout << P.getValue(0,1); // display 12.0
 \endcode
 <em> Note: for sparse matrices, assignment with operator "()" fails. It is then necessary to use setValue function.</em>
 \code
-SiconosMatrix * A = new SimpleMatrix(10,10,SPARSE);
+SP::SiconosMatrix A(new SimpleMatrix(10,10,SPARSE));
 (*A)(0,0) = 12; // WRONG
 A->setValue(0,0,12); // OK
 \endcode
@@ -267,9 +267,9 @@ For BlockVector:
 "()" and \e get/setValue functions have the same action as for SimpleVectors:
 \code
 // We suppose that v1 and v2 are two pointers to SimpleVector of size 3 and 4.
-SiconosVector * vB = new BlockVector(v1,v2); // vB = [ [1 2 3] [4 5 6 7] ]
-(*vB)(4) = 12; 				     // vB = [ [1 2 3] [4 12 6 7] ]
-vB->setValue(6,8.6); 		             // vB = [ [1 2 3] [4 12 6 8.6] ]	
+SP::SiconosVector vB(new BlockVector(v1,v2)); // vB = [ [1 2 3] [4 5 6 7] ]
+(*vB)(4) = 12; 				      // vB = [ [1 2 3] [4 12 6 7] ]
+vB->setValue(6,8.6); 		              // vB = [ [1 2 3] [4 12 6 8.6] ]	
 // Warning: the given input for position is an "absolute" one, not a block position.
 \endcode
 Remark: \e get/setValue functions are equivalent to "()" operator but mainly useful in Siconos-Python, since in that case operators can not be overloaded and thus
@@ -292,8 +292,8 @@ x = y;
 // else it results in a Siconos Exception.
 
 // Else copy constructor: memory allocation and initialization with B or x
-SiconosMatrix * A = new SimpleMatrix(*B);
-SiconosVector * x = new SimpleVector(*y);
+SP::SiconosMatrix A(new SimpleMatrix(*B));
+SP::SiconosVector x(new SimpleVector(*y));
 
 \endcode
 
@@ -432,8 +432,8 @@ To handle a specific block, use "[ ]" or \e getVector and \e getVectorPtr functi
 
 \code
 
-SiconosVector * v3 = new SimpleVector(3);  // v3 = [0 0 0]
-SiconosVector * v4 = new SimpleVector(4);  // v4 = [0 0 0 0]
+SP::SiconosVector v3(new SimpleVector(3));  // v3 = [0 0 0]
+SP::SiconosVector v4(new SimpleVector(4));  // v4 = [0 0 0 0]
 
 // get and copy a block:
 *v3 = *(*vB[0]); 			   // v3 = v1 = [1 2 3]
@@ -448,7 +448,7 @@ v4 = vB->getVectorPtr(1);		   // v4 = v2 = [4 12 6 8.6]
 v4 = (*vB)[1];			           // v4 = v2 = [4 12 6 8.6]. 
 
 // Assignment:
-SiconosVector * v5 = new SimpleVector(3);  // v5 = [0 0 0]
+SP::SiconosVector v5(new SimpleVector(3));  // v5 = [0 0 0]
 
 *(*vB)[0] = *v5; //  vB = [ [0 0 0] [4 5 6 7] ]
 		 //  AND v1 = [0 0 0] because of pointer link between vB[0] and v1.

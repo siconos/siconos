@@ -794,8 +794,8 @@ Knowing all values at the beginning of the time step \f$ [t_i,t_{i+1}] \f$,
 -# go to next time step
 
 \code
-TimeStepping * s = new TimeStepping(myModel);
-TimeDiscretisation * t = new TimeDiscretisation(timeStep,s);
+SP::TimeStepping s(new TimeStepping(myModel));  
+SP::TimeDiscretisation t(new TimeDiscretisation(timeStep,s));
 
 s->initialize();
 
@@ -804,14 +804,14 @@ int N = t->getNSteps(); // Number of time steps
 // --- Time loop ---
 while(k < N)// for each time step ...
 {
-// compute xFree, or qFree,vFree
-s->computeFreeStep();
-// Formalize and solve a LCP
-computeOneStepNSProblem("timeStepping");
-// Update state, using last computed values
-s->update(level); // 
-// transfer of state i+1 into state i and time incrementation
-s->nextStep();
+  // compute xFree, or qFree,vFree
+  s->computeFreeStep();
+  // Formalize and solve a LCP
+  computeOneStepNSProblem("timeStepping");
+  // Update state, using last computed values
+  s->update(level); // 
+  // transfer of state i+1 into state i and time incrementation
+  s->nextStep();
 }
 \endcode
 
@@ -831,7 +831,7 @@ If you want to change that, it's possible by defining a specific function of the
 //
 // your inputFile.cpp
 //
-void myF(int info, Simulation* s)
+void myF(int info, SP::Simulation s)
 {
 // ...
 }
@@ -840,7 +840,7 @@ int main(int argc, char* argv[])
 {
 // 
 // ...
-TimeStepping * s = ...
+SP::TimeStepping s = ...
 s->setCheckSolverFunction(&myF);
 \endcode
 Then after each call to s->computeOneStepNS(...), your function myF will be called. \n

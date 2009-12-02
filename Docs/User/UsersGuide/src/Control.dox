@@ -11,14 +11,14 @@ Rules:
 
 - define a control manager linked to an EXISTING model:
 \code
-ControlManager cm = new ControlManager(myModel);
+SP::ControlManager cm(new ControlManager(myModel));
 \endcode
 - add Sensors and Actuators to this manager:
 \code
-    TimeDiscretisation t1(t0,h);	
-    Sensor * s1	= cm->addSensor(typeS1,t1);
-    TimeDiscretisation t2(t0,h);	
-    Actuator* a1 = cm->addActuator(typeA1,t2);
+    SP::TimeDiscretisation t1(t0,h);	
+    SP::Sensor s1 = cm->addSensor(typeS1,t1);
+    SP::TimeDiscretisation t2(t0,h);	
+    SP::Actuator a1 = cm->addActuator(typeA1,t2);
     // ... 
 \endcode
 typeS1 and typeA1 are integers which represent the type of the Sensor/Actuator. See corresponding
