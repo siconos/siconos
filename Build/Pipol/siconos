@@ -1,9 +1,9 @@
 #!/bin/sh
 
 
-#PRE-PIPOL  $HOME/src/nightly/siconos/trunk/Build/Pipol/pre-siconos
+#PRE-PIPOL  /home/admin/bremond/src/nightly/siconos/trunk/Build/Pipol/pre-siconos
 
-#POST-PIPOL $HOME/src/nightly/siconos/trunk/Build/Pipol/post-siconos
+#POST-PIPOL /home/admin/bremond/src/nightly/siconos/trunk/Build/Pipol/post-siconos
 
 #PIPOL fedora 01:30
 
