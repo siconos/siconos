@@ -853,7 +853,7 @@ void NewtonEulerDS::updateT()
   _T->setValue(5, 4, q0);
   _T->setValue(5, 5, -q1);
   _T->setValue(6, 3, -q2);
-  _T->setValue(6, 4, -q1);
+  _T->setValue(6, 4, q1);
   _T->setValue(6, 5, q0);
 
 }
