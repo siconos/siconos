@@ -1,3 +1,5 @@
+w/* DO NOT EDIT THE PART BELOW : this is the unmodified doxygen.css */
+/* MODIFICATION only below MODIFICATIONS-START-HERE */
 
 h1, h2, h3 { 
    background-color: #e8eef2; 
@@ -449,48 +451,104 @@ address {
 
 
 
-/* modifs */
+/* MODIFICATIONS-START-HERE */
 
-.header .title {
+.container {
     background-color: white;
-    font-size: 300%;
-    color: #B0B0B0;
+    margin: 0 auto;
+    padding: 0;
+    width: 90%;
+    overflow: auto;
+    border: #BBBBBB solid 1px;
+}
+
+.header {
+    margin:0.5em;
+    padding:0.3em;
+    overflow: auto;
+    border: #BBBBBB solid 1px;
+}
+
+.title {
+    font-size: 400%;
+    background-color: white;
+    color: #909090;
     float: left;
 }
 
-.header .right { 
-    float right;
+.left {
+    float: left;
+    width: 14%;
+    overflow: auto;
 }
 
-.header .contact {
+.siconosnavig { 
+    text-align:left;
+    float: left;
+}
+
+.siconosnavig h3 {
+    font-style: normal;
+    color: #909090;
+}
+
+.mainnavig { 
+    border:1px solid #BBBBBB;
+    margin:0.5em;
+    padding:0.3em;
+}
+
+.docnavig { 
+    border:1px solid #BBBBBB;
+    margin:0.5em;
+    padding:0.3em;
+}
+
+.linksnavig { 
+    border:1px solid #BBBBBB;
+    margin:0.5em;
+    padding:0.3em;
+}
+
+.content {
+    float: right;
+    width: 86%;
+    overflow: auto;
+}
+
+.doxygen {
+    border:1px solid #BBBBBB;
+    margin:0.5em;
+    padding:0.5em;
+    position: relative;
+    clear:right;
+}
+
+.right { 
+    float: right;
+}
+
+.contact {
     text-align: right;
     color: #B0B0B0;
 }
 
-.header .logoleft { 
+.logoleft { 
     float: right;
     text-align: right;
 }
 
-.header .logoright { 
+.logoright { 
     text-align: right;
     float: right;
 }
 
 .subheader {
-    padding: 20px;
-    background-color:white;
-    border-top:1px solid #777777;
-    clear:both;
-}
-
-.siconosnavig { 
-
     margin:0.5em;
     padding:0.3em;
-    text-align:left;
-    color: white;
-    float: left;
+    background-color:white;
+    border:1px solid #BBBBBB;
+    clear:both;
 }
 
 .subsiconosnavig {
@@ -499,13 +557,11 @@ address {
 .siconosnavig ul { 
     margin: 0;
     padding: 0;
-//    border-bottom: #DDDDDD solid 1px;
     list-style-type: none; 
 }
 
 .siconosnavig ul li { 
     padding: 10px;
-//    border-bottom: #DDDDDD solid 1px;
 }
 
 .siconosnavig ul li:hover { 
@@ -518,21 +574,9 @@ address {
 }
 
 
-.content {
-    margin:0.5em 0.5em 0 14.2em;
-    padding:0.3em 1ex;
-    text-align:justify;
-}
-
-.doxygen {
-    position: relative;
-    clear:right;
-    border-bottom: #777777 solid 1px;
-}
-
 #top {
     height: 50px;
-    padding: 0 10px;
+    padding: .3em;
     font-weight: bold;
 }
 
@@ -547,7 +591,6 @@ address {
 
 #top ul li a {
     padding: 15px 15px 15px 15px;
-    line-height: 10px;
     float: left;
 }
 
@@ -561,7 +604,7 @@ h1 {
 }
 
 .navigation { 
-    border-bottom: #777777 solid 1px;
+    border: #BBBBBB solid 1px;
 }
 
 body, table, div, p, dl {
@@ -585,7 +628,7 @@ a:hover {
 
 
 .address {
-    text-size: small;
+    font-size: small;
     background-color:white;
     clear:both;
     float: right;
@@ -593,30 +636,14 @@ a:hover {
 
 body {
     background-color: #EEEEEE;
-    color:black;
+    color: #333333;
+
 }
 
 .fragment {
     font-size: 100%;
 }
 
-
-.left {
-    border-right:1px solid #777777;
-    clear: both;
-    float: left;
-    margin: 0 0 0 0.1em;
-    padding: 0;
-    width: 12em;
-}
-
-.container {
-    background-color: white;
-    margin: 0 auto;
-    padding: 0;
-    width: 80%;
-    overflow: auto;
-}
 
 div { 
     display: block;
