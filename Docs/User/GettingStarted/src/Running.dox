@@ -32,7 +32,7 @@ is created in the current directory.
 
 For details on all the available options of siconos command just run
 \verbatim
-siconos
+man siconos
 \endverbatim
 
  

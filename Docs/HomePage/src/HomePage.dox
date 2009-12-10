@@ -1,131 +1,15 @@
-/** \mainpage Siconos Software Home Page 
+/** \mainpage Welcome
 \anchor siconosHomePage
-\htmlonly
-<div class="logoleft">
-<a href="http:///www.inrialpes.fr/bipop/"><img src="logo_bipop.png" alt="BIPOP" border=none></a>
-</div>
-<div class="logoright">
-<a href="http://www.inrialpes.fr/"><img src="http://devel.inria.fr/logo_inria.png" alt="INRIA" border=none></a>
-</div>
-    <div id="side">
-              <div id="menu">
-		<ul>
-		  <li><a href="#aboutA"> About</a></li>
-		  <li><a href="#shortTour"> Short Tour</a></li>
-		  <li><a href="#downloadHP"> Download</a></li>
-		  <li><a href="https://gforge.inria.fr/projects/siconos/"> Siconos Forge</a></li>
-		  <li><a href="#contacts"> Contacts</a></li>
-		  <li><a href="./SiconosDocList.html"> Help and Documentation</a></li>
-		  <li><a href="#relatedProjects"> Related Projects</a></li>
-		  <li><a href="#uLinks"> Useful links</a></li>
-		</ul>
 
-              </div>
-              <div class="side_title">Latest news</div>
-        <div class="sidenotes">
-          <ul>
-            <li><span class="title"><a href="http://www.springer.com/978-3-540-75391-9">New Book on Nonsmooth Dynamical Systems Simulation </a></span><span class="date">01.03.2008</span></li>
-	</ul>
-          <ul>
-            <li><span class="title"><a href="https://gforge.inria.fr/frs/?group_id=9">Siconos Software v3.0.0 </a></span><span class="date">20.08.2008</span>Download the last release of the Siconos platform</li>
-          </ul>
-        </div>
-      </div>
-<!-- Specific boby content start -->
- <div id="content">
-\endhtmlonly
-\anchor aboutA
-\section about About
-The Siconos Platform is a scientific computing software dedicated to the modeling, simulation, control and analysis of <b>Non Smooth Dynamical Systems (NSDS)</b>. Especially, the following classes of NSDS are addressed:
+The Siconos Platform is a scientific computing software dedicated to
+the modeling, simulation, control and analysis of <b>Non Smooth
+Dynamical Systems (NSDS)</b>. Especially, the following classes of
+NSDS are addressed:
+
 <ul>
-<li> Mechanical systems with contact, impact and friction</li>
-<li> Electrical circuits with ideal and piecewise linear components</li>
-<li> Differential inclusions and Complementarity systems</li>
+  <li> Mechanical systems with contact, impact and friction</li>
+  <li> Electrical circuits with ideal and piecewise linear components</li>
+  <li> Differential inclusions and Complementarity systems</li>
 </ul>
 
-For a comprehensive introduction to Siconos, we refer to the <a href="http://hal.inria.fr/action/open_file.php?url=http://hal.inria.fr/docs/00/16/36/84/PDF/RT-0340.pdf&amp;docid=163684">INRIA technical report RT 340</a>
-
-\subsection MainObj What are the main objectives and motivations?
-Besides the standard features which are required for a software of scientific computing, the objectives of this project are the
-following :
-- To provide a common framework (modeling and simulation tools)
-for non smooth problems present in various scientific fields : applied
-Mathematics, Mechanics, Robotics, Electrical networks, \e etc.
-- To be able to rely on existing developments, as well for the
-modeling tools as for the simulation tools. The platform will not
-re-implement the dedicated tools, which are already used for the
-modeling of specific systems in various fields, but will provide a
-framework to their integration. In the same way, we want to re-use
-improved numerical low-level routines.
-- To support exchanges and comparisons of methods between
-researchers.
-- To disseminate the know-how to other fields of research and
-industry.
-- To take into account the diversity of users (end users,
-experts, software developers, framework builders,
-industrial users, etc ... ).
-- To set up standards in terms of modeling of the NSDS.
-- To ensure software quality by the use of modern software design
-methods.
-
-This project was a part of the European project <a href="http://siconos.inrialpes.fr/">SICONOS</a>.
-
-\subsection license License
-This software is distributed under the
-<a href="http://www.gnu.org/copyleft/gpl.html">GNU General Public License</a>
-\subsection publi Related publications
-You can find here some publications at the origin of this software on <a href="http://siconos.inrialpes.fr/"> Siconos European Project Home Page</a>.\n
-
-\anchor shortTour
-\section siconosShortTour Siconos Short Tour
-
-To begin with Siconos you can first <a href="#downloadHP"> download</a> the Siconos platform and then read the \ref installGuide "Siconos installation guide". 
-
-Then you can try some \ref EMBasicsExamples "Basic examples" before reading \ref gettingStarted "Getting Started With Siconos" where some tutorials are proposed. 
-
-For a comprehensive introduction to Siconos, we also refer to <a href="http://hal.inria.fr/action/open_file.php?url=http://hal.inria.fr/docs/00/16/36/84/PDF/RT-0340.pdf&amp;docid=163684">INRIA technical report RT 340</a> where you can get an overview of Siconos platform's philosophy.
-
-See also the \ref siconosExamplesManual "Siconos Examples Manual" for an overview of all the available examples. 
-
-The full list of all sort of documentation guides or tools is provided in \ref docList "Siconos Help and Documentation".
-
-\anchor downloadHP
-\section d Downloads
-
-To download the platform, please visit <a href="https://gforge.inria.fr/frs/?group_id=9"> Siconos Gforge download page</a>.
-
-Either binaries or sources can be freely downloaded.
-
-- \b Binaries: see the <a href="https://gforge.inria.fr/frs/?group_id=9"> Siconos Gforge download page</a>. \n
-If your OS or distribution is not in the list, please contact us, we might be able to generate the corresponding binaries.
-- \b Sources: to download the sources of any package of the Siconos software a login and a password are required. \n
-To get them, please fill in this form : \subpage downloadForm.
-
-The available version is the last stable one ( version 3.0.0 at the time). \n
-
-Since Siconos is under constant development, some functionnalities you required may have been achieved in the last (unstable) version. \n
-Thus, do not hesitate to contact us to get it.
-
-\anchor contact
-\section contacts Contacts
-<a href="mailto:vincent.acary@ nospam inrialpes.fr"> Vincent Acary</a>\n
-<a href="mailto:franck.perignon@ nospam inrialpes.fr"> Franck Pérignon</a>\n
-
-\anchor relatedProjects
-\section projects Related Projects 
-<ul>
- <li><a href="http://confeti.gforge.inria.fr/"> Confeti </a></li>. Mechanical modeling and simulation for the Virtual Reality.Collisions, contact and friction.
-<li><a href="http://www.lmgc.univ-montp2.fr/~dubois/LMGC90/index.html"> LMGC90 </a></li>.This software is an open platform for modelling interaction problems between elements including multi-physics. It allows to model: granular material made of rigid or deformable bodies and with complex interactions (contact, friction, cohesion, wear, etc.), discrete media, masonry, fracture, wear.
-</ul>
-
-\anchor uLinks
-\section links Useful Links
-
-\subpage developments \n
-\subpage related \n
-\subpage scientificComputing 
-
-\htmlonly
-</div>
-\endhtmlonly
 */

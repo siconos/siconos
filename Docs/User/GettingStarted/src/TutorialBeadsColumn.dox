@@ -6,7 +6,11 @@ Linear Relations and Newton impact law.
 
 \section tutMultiBallNSDS Building the Non-Smooth Dynamical System
 
-As described in the figure below, we consider a ball of mass m and radius R, described by 3 generalized coordinates \f$ q=(z,x,\theta) \f$. The ball is subjected to the gravity g. The system is also constituted by a rigid plane, defined by its position h with respect to the axis Oz. We assume that the position of the plane is fixed.  \n
+As described in the figure below, we consider a ball of mass m and
+radius R, described by 3 generalized coordinates \f$ q=(z,x,\theta)
+\f$. The ball is subjected to the gravity g. The system is also
+constituted by a rigid plane, defined by its position h with respect
+to the axis Oz. We assume that the position of the plane is fixed. \n
 
 \image html bouncingBall.png
 \image latex bouncingBall.eps "A ball bouncing on the ground" width=8cm
@@ -47,9 +51,15 @@ double velocity_init = 0.0;      // initial velocity for lowest bead.
 double R = 0.1;                  // balls radius
 \endcode
 
-Then, we define some initial conditions for the balls, and create the corresponding Dynamical Systems, all of type Lagrangian, Linear and Time Invariant. 
-All the systems are inserted in a container, a DynamicalSystemsSet, named allDS. \n
-From now on, to simplify writing, we suppose that all balls have the same mass, m = 1,  and the same radius, R=0.1. 
+Then, we define some initial conditions for the balls, and create the
+corresponding Dynamical Systems, all of type Lagrangian, Linear and
+Time Invariant.
+
+All the systems are inserted in a container, a DynamicalSystemsSet,
+named allDS. 
+
+From now on, to simplify writing, we suppose that all
+balls have the same mass, m = 1, and the same radius, R=0.1.
 
 \code
 // -------------------------
@@ -57,10 +67,9 @@ From now on, to simplify writing, we suppose that all balls have the same mass, 
 // -------------------------
 
     unsigned int i;
-    // A set of DS that will handle all the "balls"
-    DynamicalSystemsSet allDS; 
+
     // mass matrix, set to identity
-    SiconosMatrix *Mass = new SimpleMatrix(nDof,nDof);
+    SP::SiconosMatrix Mass = new SimpleMatrix(nDof,nDof);
     Mass->eye();
     (*Mass)(2,2) = 3.0/5*R*R;
 

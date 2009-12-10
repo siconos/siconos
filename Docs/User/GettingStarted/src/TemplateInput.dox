@@ -1,5 +1,4 @@
 /*! \page GSMainTemplate Siconos input file template
-
 \code
 // Header file
 #include "SiconosKernel.h"
@@ -11,11 +10,12 @@ int main(int argc, char* argv[])
   boost::timer time;
   time.restart();
   // Exception handling
-  try{
+  try
+  {
     // == User-defined parameters ==
-	
+    
     // ================= Creation of the model =======================
-
+    
     // == Creation of the NonSmoothDynamicalSystem ==
     // -- DynamicalSystem(s) --
     // -- Interaction --
@@ -33,14 +33,14 @@ int main(int argc, char* argv[])
     // --- Initialisation of the simulation ---
 	
     // --- Time loop ---
-   }
-	
+  }
+  
   // == Catch exceptions ==
   catch(SiconosException e)
     {cout << e.report() << endl;}
   catch(...)
     {cout << "Exception caught in mySample.cpp" << endl;}
-
+  
   // == get elapsed time ==
   cout << "Computation Time " << time.elapsed()  << endl;  
 }
