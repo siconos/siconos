@@ -88,10 +88,10 @@ protected:
   SP::SiconosMatrix _M;
 
   /** f(x,t,z) */
-  SP::SiconosVector mf;
+  SP::SiconosVector _f;
 
   /** to store f(x_k,t_k,z_k)*/
-  SP::SiconosVector mfold;
+  SP::SiconosVector _fold;
 
   /** Gradient of \f$ f(x,t,z) \f$ with respect to \f$ x\f$*/
   SP::SiconosMatrix _jacobianXF;
@@ -104,8 +104,9 @@ protected:
     *  @param  : the size of the vector z
     *  @param  : a vector of parameters, z
     */
-  FNLDSPtrfct _computeFPtr;
-  std::string _pluginNameComputeFPtr;
+  SP::PluggedObject _pluginf;
+  //  FNLDSPtrfct _computeFPtr;
+  //  std::string _pluginNameComputeFPtr;
 
 
   /** DynamicalSystem plug-in to compute the gradient of f(x,t,z) with respect to the state: \f$ \nabla_x f: (x,t,z) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
@@ -116,24 +117,27 @@ protected:
    * @param  : the size of the vector z
    * @param[in,out] z: a vector of parameters, z
    */
-  FNLDSPtrfct computeJacobianXFPtr;
-  std::string pluginNameComputeJacobianXFPtr;
+  SP::PluggedObject _pluginJacxf;
+  //   FNLDSPtrfct computeJacobianXFPtr;
+  //   std::string pluginNameComputeJacobianXFPtr;
 
-  FNLDSPtrfct  pluginComputeM;
-  std::string pluginNamePluginComputeM;
+  SP::PluggedObject _pluginM;
+
+  //  FNLDSPtrfct  pluginComputeM;
+  //  std::string pluginNamePluginComputeM;
 
   /**  the previous r vectors */
   SP::SiconosMemory _rMemory;
 
   /** Residu r*/
-  SP::SimpleVector mResidur;
+  SP::SimpleVector _residur;
 
   /** g_alpha*/
-  SP::SimpleVector mG_alpha;
+  SP::SimpleVector _g_alpha;
   //  SP::SiconosVector mXfree;
 
-  SP::SiconosVector mXp;
-  SP::SiconosVector mXq;
+  SP::SiconosVector _xp;
+  SP::SiconosVector _xq;
 
 
 
@@ -183,14 +187,14 @@ public:
 
   inline SP::SiconosVector gAlpha() const
   {
-    return mG_alpha;
+    return _g_alpha;
   }
 
 
 
   inline SP::SiconosVector residur() const
   {
-    return mResidur;
+    return _residur;
   }
 
 
@@ -271,7 +275,7 @@ public:
   /** get the value of f
    *  \return plugged vector
 
-  inline const PVF getF() const { return *mf; }
+  inline const PVF getF() const { return *_f; }
   */
 
   /** get f
@@ -279,11 +283,11 @@ public:
    */
   inline SP::SiconosVector f() const
   {
-    return mf;
+    return _f;
   }
   inline SP::SiconosVector fold() const
   {
-    return mfold;
+    return _fold;
   }
 
   /** set the value of f to newValue
@@ -296,7 +300,7 @@ public:
    */
   inline void setFPtr(SP::SiconosVector newPtr)
   {
-    mf = newPtr;
+    _f = newPtr;
   }
 
   // --- jacobianXF ---
@@ -475,14 +479,14 @@ public:
    */
   inline SP::SiconosVector xp() const
   {
-    return mXp;
+    return _xp;
   };
   /*
    * get the Xq work vector.
    */
   inline SP::SiconosVector xq() const
   {
-    return mXq;
+    return _xq;
   };
   /*
    * get the Xfree work vector.

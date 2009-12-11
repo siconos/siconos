@@ -77,28 +77,28 @@ class Relation
 protected:
   /** Plug-in to compute h(...)
   */
-  SP::PluggedObject pluginH;
+  SP::PluggedObject _pluginh;
 
   /** Plug-in to compute \f$ \nabla_x h(..)\f$
    */
-  SP::PluggedObject pluginjXH;
+  SP::PluggedObject _plunginJacxh;
   /** Plug-in to compute \f$ \nabla_{\lambda} h(..)\f$
    */
-  SP::PluggedObject pluginjLH;
+  SP::PluggedObject _pluginJacLh;
 
   /** Plug-in to compute g(...)
    */
-  SP::PluggedObject pluginG;
+  SP::PluggedObject _pluging;
 
   /** Plug-in to compute \f$ \nabla_\lambda g(lambda,t,z)\f$
    */
-  SP::PluggedObject pluginjLG;
+  SP::PluggedObject _pluginJacLg;
   /** Plug-in to compute f.$
    */
-  SP::PluggedObject pluginf;
+  SP::PluggedObject _pluginf;
   /** Plug-in to compute e.$
    */
-  SP::PluggedObject plugine;
+  SP::PluggedObject _plugine;
   /** To initialize all the plugin functions with NULL.
    */
   void zeroPlugin();
@@ -128,24 +128,24 @@ protected:
   SP::RelationXML relationxml;
 
   /** work vector for x */
-  SP::SimpleVector workR;
+  SP::SimpleVector _workR;
 
   /** work vector for x */
-  SP::SimpleVector workX;
+  SP::SimpleVector _workX;
 
   /** work vector for z */
-  SP::SimpleVector workZ;
+  SP::SimpleVector _workZ;
 
   /** work vector for y */
-  SP::SimpleVector workY;
+  SP::SimpleVector _workY;
 
   /** work vector for lambda */
-  SP::SimpleVector workL;
+  SP::SimpleVector _workL;
 
   /** The residu y of the newton iterations*/
-  SP::SiconosVector mResiduy;
+  SP::SiconosVector _Residuy;
   /*value of h at the current newton iteration*/
-  SP::SiconosVector mH_alpha;
+  SP::SiconosVector _h_alpha;
 
   SP::SiconosMatrix JacLH;
 
@@ -436,7 +436,7 @@ public:
 
   inline const SP::SiconosVector getResiduY()
   {
-    return mResiduy;
+    return _Residuy;
   }
   /*
    * Compute the residuY.
@@ -451,7 +451,7 @@ public:
    */
   virtual const SP::SiconosVector Halpha()
   {
-    return mH_alpha;
+    return _h_alpha;
   };
 
   /*

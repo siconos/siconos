@@ -70,9 +70,9 @@ void FirstOrderType2R::initialize(SP::Interaction inter)
   initDSLinks();
   // Initialize work vectors
 
-  workX.reset(new SimpleVector(sizeDS));
-  workZ.reset(new SimpleVector(sizeZ));
-  workY.reset(new SimpleVector(sizeY));
+  _workX.reset(new SimpleVector(sizeDS));
+  _workZ.reset(new SimpleVector(sizeZ));
+  _workY.reset(new SimpleVector(sizeY));
 
   // The initialization of each component depends on the way the Relation was built ie if the matrix/vector
   // was read from xml or not
@@ -113,24 +113,24 @@ void FirstOrderType2R::computeInput(double t, unsigned int level)
 
   /**compute the newr */
   SP::SiconosVector lambda = interaction()->lambda(level);
-  *workX = *data[g_alpha];
-  *workL = *lambda;
-  *workL -= *(interaction()->lambdaOld(level));
+  *_workX = *data[g_alpha];
+  *_workL = *lambda;
+  *_workL -= *(interaction()->lambdaOld(level));
   //  cout<<"FirstOrderType2R::computeInput : diff lambda"<<endl;
   //  interaction()->lambdaOld(level)->display();
   //  lambda->display();
-  //  workL->display();
+  //  _workL->display();
   //  cout<<"FirstOrderType2R::computeInput : g_alpha"<<endl;
-  //  workX->display();
-  prod(*getBPtr(), *workL, *workX, false);
+  //  _workX->display();
+  prod(*getBPtr(), *_workL, *_workX, false);
   //  cout<<"FirstOrderType2R::computeInput : result g_alpha - B*diffL"<<endl;
-  //  workX->display();
-  *data[r] += *workX;
+  //  _workX->display();
+  *data[r] += *_workX;
 
   /*compute the new g_alpha*/
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-  *workX = *data[x];
-  *workZ = *data[z];
+  *_workX = *data[x];
+  *_workZ = *data[z];
 
 
   computeG(t);
@@ -138,13 +138,13 @@ void FirstOrderType2R::computeInput(double t, unsigned int level)
   //  data[g_alpha]->display();
   /*  unsigned int sizeL = lambda->size();
   unsigned int sizeZ = data[z]->size();
-  unsigned int sizeR = workX->size();
+  unsigned int sizeR = _workX->size();
 
-  input(sizeL, &(*workL)(0), sizeR, &(*workX)(0),sizeR, &(*workR)(0), sizeZ, &(*workZ)(0));
+  input(sizeL, &(*_workL)(0), sizeR, &(*_workX)(0),sizeR, &(*__workR)(0), sizeZ, &(*_workZ)(0));
 
 
-  *data[g_alpha] = *workR;
-  *data[z] = *workZ;
+  *data[g_alpha] = *_workR;
+  *data[z] = *_workZ;
   */
 
 }
@@ -178,26 +178,26 @@ void FirstOrderType2R::preparNewtonIteration()
   /** compute the comtribution in xp, for the next iteration*/
   /** */
   SP::SiconosVector lambda = interaction()->lambda(0);
-  *workL = *lambda;
+  *_workL = *lambda;
 
   //     cout<<"FirstOrderType2R::preparNewtonIteration, lambda: \n";
-  //     workL->display();
+  //     _workL->display();
 
-  scal(-1.0, *workL, *workL);
-  prod(*(getBPtr()), *workL, *workX, true);
+  scal(-1.0, *_workL, *_workL);
+  prod(*(getBPtr()), *_workL, *_workX, true);
 
   //      cout<<"FirstOrderType2R::preparNewtonIteration, -B*lambda: \n";
-  //      workX->display();
+  //      _workX->display();
 
   //      cout<<"FirstOrderType2R::preparNewtonIteration, g_alpha: \n";
   //      data[g_alpha]->display();
 
-  *workX += *data[g_alpha];
+  *_workX += *data[g_alpha];
 
 
-  *data[ds_xp] += *workX;
+  *data[ds_xp] += *_workX;
   //     cout<<"FirstOrderType2R::preparNewtonIteration,xp= g_alpha -B*lambda : \n";
-  //     workX->display();
+  //     _workX->display();
 }
 
 

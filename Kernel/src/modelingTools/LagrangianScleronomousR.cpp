@@ -68,25 +68,25 @@ LagrangianScleronomousR::LagrangianScleronomousR(const string& computeH, const s
 void LagrangianScleronomousR::computeH(double)
 {
   // arg= time. Unused in this function but required for interface.
-  if (pluginH->fPtr)
+  if (_pluginh->fPtr)
   {
     // get vector y of the current interaction
     SP::SiconosVector y = interaction()->y(0);
 
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    *workX = *data[q0];
-    *workZ = *data[z];
-    *workY = *y;
+    *_workX = *data[q0];
+    *_workZ = *data[z];
+    *_workY = *y;
 
-    unsigned int sizeQ = workX->size();
+    unsigned int sizeQ = _workX->size();
     unsigned int sizeY = y->size();
-    unsigned int sizeZ = workZ->size();
+    unsigned int sizeZ = _workZ->size();
 
-    ((FPtr3)(pluginH->fPtr))(sizeQ, &(*workX)(0) , sizeY, &(*workY)(0), sizeZ, &(*workZ)(0));
+    ((FPtr3)(_pluginh->fPtr))(sizeQ, &(*_workX)(0) , sizeY, &(*_workY)(0), sizeZ, &(*_workZ)(0));
 
     // Copy data that might have been changed in the plug-in call.
-    *data[z] = *workZ;
-    *y = *workY;
+    *data[z] = *_workZ;
+    *y = *_workY;
   }
   // else nothing
 }
@@ -103,17 +103,17 @@ void LagrangianScleronomousR::computeJacQH(double)
   if (pluginjQH->fPtr)
   {
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    *workX = *data[q0];
-    *workZ = *data[z];
+    *_workX = *data[q0];
+    *_workZ = *data[z];
 
     unsigned int sizeY = JacQH->size(0);
-    unsigned int sizeQ = workX->size();
-    unsigned int sizeZ = workZ->size();
+    unsigned int sizeQ = _workX->size();
+    unsigned int sizeZ = _workZ->size();
 
-    ((FPtr3)(pluginjQH->fPtr))(sizeQ, &(*workX)(0), sizeY, &(*JacQH)(0, 0), sizeZ, &(*workZ)(0));
+    ((FPtr3)(pluginjQH->fPtr))(sizeQ, &(*_workX)(0), sizeY, &(*JacQH)(0, 0), sizeZ, &(*_workZ)(0));
 
     // Copy data that might have been changed in the plug-in call.
-    *data[z] = *workZ;
+    *data[z] = *_workZ;
   }
   //  else nothing!
 }

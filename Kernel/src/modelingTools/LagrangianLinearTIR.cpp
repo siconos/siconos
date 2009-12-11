@@ -117,7 +117,7 @@ void LagrangianLinearTIR::initComponents()
          "LagrangianLinearTIR::initComponents inconsistent sizes between F matrix and the interaction.");
 
 
-  workL.reset(new SimpleVector(sizeY));
+  _workL.reset(new SimpleVector(sizeY));
 
 }
 
@@ -158,9 +158,9 @@ void LagrangianLinearTIR::computeInput(double time, const unsigned int level)
   // get lambda of the concerned interaction
   //  string name = "p"+toString<unsigned int>(level);
 
-  *workL = *interaction()->lambda(level);
+  *_workL = *interaction()->lambda(level);
   // computation of p = Ht lambda
-  prod(*workL, *JacQH, *data[p0 + level], false);
+  prod(*_workL, *JacQH, *data[p0 + level], false);
   //gemv(CblasTrans,1.0,*H,*lambda,1.0, *data[name]); => not yet implemented for BlockVectors.
 }
 /*

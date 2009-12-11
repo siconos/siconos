@@ -42,12 +42,23 @@ void LagrangianDS::connectToDS()
   _x[1].reset(new BlockVector(_q[1], _q[2]));
   // Everything concerning rhs and its jacobian is handled in initRhs and computeXXX related functions.
 }
-
+void LagrangianDS::zeroPlugin()
+{
+  DynamicalSystem::zeroPlugin();
+  _pluginMass.reset(new PluggedObject());
+  _pluginFInt.reset(new PluggedObject());
+  _pluginFExt.reset(new PluggedObject());
+  _pluginNNL.reset(new PluggedObject());
+  _pluginJacQFInt.reset(new PluggedObject());
+  _pluginJacQDotFInt.reset(new PluggedObject());
+  _pluginJacQNNL.reset(new PluggedObject());
+  _pluginJacQDotNNL.reset(new PluggedObject());
+}
 
 LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0):
   DynamicalSystem(DS::LNLDS, 2 * newQ0->size()), _ndof(newQ0->size())
 {
-  zeroPlungin();
+  zeroPlugin();
   // -- Memory allocation for vector and matrix members --
   // Initial conditions
   _q0 = newQ0;
@@ -58,9 +69,9 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   _q[0].reset(new SimpleVector(*_q0));
   _q[1].reset(new SimpleVector(*_velocity0));
   _q[2].reset(new SimpleVector(_ndof));
-  mResiduFree.reset(new SimpleVector(getDim()));
-  //   mXp.reset(new SimpleVector(getDim()));
-  //   mXq.reset(new SimpleVector(getDim()));
+  _residuFree.reset(new SimpleVector(getDim()));
+  //   _xp.reset(new SimpleVector(getDim()));
+  //   _xq.reset(new SimpleVector(getDim()));
   //   mXfree.reset(new SimpleVector(getDim()));
   //   r.reset(new SimpleVector(getDim()));
 
@@ -72,7 +83,7 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
 LagrangianDS::LagrangianDS():
   DynamicalSystem(DS::LNLDS), _ndof(0)
 {
-  zeroPlungin();
+  zeroPlugin();
   // Protected constructor - Only call from derived class(es).
   _q.resize(3);
   _p.resize(3);
@@ -83,7 +94,7 @@ LagrangianDS::LagrangianDS():
 LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
   DynamicalSystem(dsxml), _ndof(0)
 {
-  zeroPlungin();
+  zeroPlugin();
   /*  // -- Lagrangian  xml object --
   SP::LagrangianDSXML lgptr = boost::static_pointer_cast <LagrangianDSXML>(dsxml);
 
@@ -117,7 +128,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
     q[1].reset(new SimpleVector(*velocity0));
 
   q[2].reset(new SimpleVector(ndof));
-  mResiduFree.reset(new SimpleVector(getDim()));
+  _residuFree.reset(new SimpleVector(getDim()));
   p.resize(3);
   // Memories
   if ( lgptr->hasQMemory() ) // qMemory
@@ -210,7 +221,7 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
 LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0, SP::SiconosMatrix newMass):
   DynamicalSystem(DS::LNLDS, 2 * newQ0->size()), _ndof(newQ0->size())
 {
-  zeroPlungin();
+  zeroPlugin();
   // --- LAGRANGIAN INHERITED CLASS MEMBERS ---
   // -- Memory allocation for vector and matrix members --
 
@@ -226,7 +237,7 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   _q[0].reset(new SimpleVector(*_q0));
   _q[1].reset(new SimpleVector(*_velocity0));
   _q[2].reset(new SimpleVector(_ndof));
-  mResiduFree.reset(new SimpleVector(getDim()));
+  _residuFree.reset(new SimpleVector(getDim()));
 
 
   _p.resize(3);
@@ -237,7 +248,7 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
 LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0, const string& massName):
   DynamicalSystem(DS::LNLDS), _ndof(newQ0->size())
 {
-  zeroPlungin();
+  zeroPlugin();
   // Initial conditions
   _q0 = newQ0;
   _velocity0 = newVelocity0;
@@ -247,23 +258,12 @@ LagrangianDS::LagrangianDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocit
   _q[0].reset(new SimpleVector(*_q0));
   _q[1].reset(new SimpleVector(*_velocity0));
   _q[2].reset(new SimpleVector(_ndof));
-  mResiduFree.reset(new SimpleVector(getDim()));
+  _residuFree.reset(new SimpleVector(getDim()));
 
   // Mass
   setComputeMassFunction(SSL::getPluginName(massName), SSL::getPluginFunctionName(massName));
 
   _p.resize(3);
-}
-void LagrangianDS::zeroPlungin()
-{
-  computeJacobianQNNLPtr = NULL;
-  computeJacobianQDotNNLPtr = NULL;
-  computeJacobianQFIntPtr = NULL;
-  computeJacobianQDotFIntPtr = NULL;
-  computeNNLPtr = NULL;
-  computeFExtPtr = NULL;
-  computeFIntPtr = NULL;
-  computeMassPtr = NULL;
 }
 
 // Destructor
@@ -296,7 +296,7 @@ bool LagrangianDS::checkDynamicalSystem()
   }
 
   // fInt
-  if ((_fInt && computeFIntPtr) && (! _jacobianQFInt || ! _jacobianQDotFInt))
+  if ((_fInt && _pluginFInt->fPtr) && (! _jacobianQFInt || ! _jacobianQDotFInt))
     // ie if fInt is defined and not constant => its Jacobian must be defined (but not necessarily plugged)
   {
     RuntimeException::selfThrow("LagrangianDS::checkDynamicalSystem - You defined fInt but not its Jacobian (according to q and velocity).");
@@ -304,7 +304,7 @@ bool LagrangianDS::checkDynamicalSystem()
   }
 
   // NNL
-  if ((_NNL  && computeNNLPtr) && (! _jacobianQNNL || ! _jacobianQDotNNL))
+  if ((_NNL  && _pluginNNL->fPtr) && (! _jacobianQNNL || ! _jacobianQDotNNL))
     // ie if NNL is defined and not constant => its Jacobian must be defined (but not necessarily plugged)
   {
     RuntimeException::selfThrow("LagrangianDS::checkDynamicalSystem - You defined NNL but not its Jacobian (according to q and velocity).");
@@ -382,13 +382,13 @@ void LagrangianDS::initRhs(double time)
   _workMatrix[idMatrix].reset(new SimpleMatrix(_ndof, _ndof, IDENTITY));
 
   if (flag1 && flag2)
-    _jacXRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[jacobianXBloc10], _workMatrix[jacobianXBloc11]));
+    _jacxRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[jacobianXBloc10], _workMatrix[jacobianXBloc11]));
   else if (flag1) // flag2 = false
-    _jacXRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[jacobianXBloc10], _workMatrix[zeroMatrix]));
+    _jacxRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[jacobianXBloc10], _workMatrix[zeroMatrix]));
   else if (flag2) // flag1 = false
-    _jacXRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[zeroMatrix], _workMatrix[jacobianXBloc11]));
+    _jacxRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[zeroMatrix], _workMatrix[jacobianXBloc11]));
   else
-    _jacXRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[zeroMatrix], _workMatrix[zeroMatrix]));
+    _jacxRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[zeroMatrix], _workMatrix[zeroMatrix]));
 }
 
 void LagrangianDS::initialize(const string& simulationType, double time, unsigned int sizeOfMemory)
@@ -403,21 +403,21 @@ void LagrangianDS::initialize(const string& simulationType, double time, unsigne
   // If z has not been set, we initialize it with a null vector of size 1, since z is required in plug-in functions call.
   if (! _z)
     _z.reset(new SimpleVector(1));
-  if (computeNNLPtr && !_NNL)
+  if (_pluginNNL->fPtr && !_NNL)
     _NNL.reset(new SimpleVector(_ndof));
-  if (computeJacobianQDotNNLPtr && !_jacobianQDotNNL)
+  if (_pluginJacQDotNNL->fPtr && !_jacobianQDotNNL)
     _jacobianQDotNNL.reset(new SimpleMatrix(_ndof, _ndof));
-  if (computeJacobianQNNLPtr && ! _jacobianQNNL)
+  if (_pluginJacQNNL->fPtr && ! _jacobianQNNL)
     _jacobianQNNL.reset(new SimpleMatrix(_ndof, _ndof));
 
-  if (computeFExtPtr && !_fExt)
+  if (_pluginFExt->fPtr && !_fExt)
     _fExt.reset(new SimpleVector(_ndof));
 
-  if (computeFIntPtr && ! _fInt)
+  if (_pluginFInt->fPtr && ! _fInt)
     _fInt.reset(new SimpleVector(_ndof));
-  if (computeJacobianQFIntPtr && !_jacobianQFInt)
+  if (_pluginJacQFInt->fPtr && !_jacobianQFInt)
     _jacobianQFInt.reset(new SimpleMatrix(_ndof, _ndof));
-  if (computeJacobianQDotFIntPtr && !_jacobianQDotFInt)
+  if (_pluginJacQDotFInt->fPtr && !_jacobianQDotFInt)
     _jacobianQDotFInt.reset(new SimpleMatrix(_ndof, _ndof));
 
 
@@ -595,54 +595,54 @@ void LagrangianDS::setJacobianNNL(unsigned int i, const PMNNL& newValue)
 
 void LagrangianDS::computeMass()
 {
-  if (computeMassPtr)
-    (computeMassPtr)(_ndof, &(*_q[0])(0), &(*_mass)(0, 0), _z->size(), &(*_z)(0));
+  if (_pluginMass->fPtr)
+    ((FPtrMass)_pluginMass->fPtr)(_ndof, &(*_q[0])(0), &(*_mass)(0, 0), _z->size(), &(*_z)(0));
 }
 
 void LagrangianDS::computeMass(SP::SiconosVector q2)
 {
-  if (computeMassPtr)
-    (computeMassPtr)(_ndof, &(*q2)(0), &(*_mass)(0, 0), _z->size(), &(*_z)(0));
+  if (_pluginMass->fPtr)
+    ((FPtrMass)_pluginMass->fPtr)(_ndof, &(*q2)(0), &(*_mass)(0, 0), _z->size(), &(*_z)(0));
 }
 
 void LagrangianDS::computeFInt(double time)
 {
-  if (computeFIntPtr)
-    (computeFIntPtr)(time, _ndof, &(*_q[0])(0), &(*_q[1])(0), &(*_fInt)(0), _z->size(), &(*_z)(0));
+  if (_pluginFInt->fPtr)
+    ((FPtr6)_pluginFInt->fPtr)(time, _ndof, &(*_q[0])(0), &(*_q[1])(0), &(*_fInt)(0), _z->size(), &(*_z)(0));
 }
 void LagrangianDS::computeFInt(double time, SP::SiconosVector q2, SP::SiconosVector velocity2)
 {
-  if (computeFIntPtr)
-    (computeFIntPtr)(time, _ndof, &(*q2)(0), &(*velocity2)(0), &(*_fInt)(0), _z->size(), &(*_z)(0));
+  if (_pluginFInt->fPtr)
+    ((FPtr6)_pluginFInt->fPtr)(time, _ndof, &(*q2)(0), &(*velocity2)(0), &(*_fInt)(0), _z->size(), &(*_z)(0));
 }
 
 void LagrangianDS::computeFExt(double time)
 {
-  if (computeFExtPtr)
-    (computeFExtPtr)(time, _ndof, &(*_fExt)(0), _z->size(), &(*_z)(0));
+  if (_pluginFExt->fPtr)
+    ((FPtrFExt)_pluginFExt->fPtr)(time, _ndof, &(*_fExt)(0), _z->size(), &(*_z)(0));
 }
 
 void LagrangianDS::computeNNL()
 {
-  if (computeNNLPtr)
-    (computeNNLPtr)(_ndof, &(*_q[0])(0), &(*_q[1])(0), &(*_NNL)(0), _z->size(), &(*_z)(0));
+  if (_pluginNNL->fPtr)
+    ((FPtr5)_pluginNNL->fPtr)(_ndof, &(*_q[0])(0), &(*_q[1])(0), &(*_NNL)(0), _z->size(), &(*_z)(0));
 }
 
 void LagrangianDS::computeNNL(SP::SiconosVector q2, SP::SiconosVector velocity2)
 {
-  if (computeNNLPtr)
-    (computeNNLPtr)(_ndof, &(*q2)(0), &(*velocity2)(0), &(*_NNL)(0), _z->size(), &(*_z)(0));
+  if (_pluginNNL->fPtr)
+    ((FPtr5)_pluginNNL->fPtr)(_ndof, &(*q2)(0), &(*velocity2)(0), &(*_NNL)(0), _z->size(), &(*_z)(0));
 }
 
 void LagrangianDS::computeJacobianQFInt(double time)
 {
-  if (computeJacobianQFIntPtr)
-    (computeJacobianQFIntPtr)(time, _ndof, &(*_q[0])(0), &(*_q[1])(0), &(*_jacobianQFInt)(0, 0), _z->size(), &(*_z)(0));
+  if (_pluginJacQFInt->fPtr)
+    ((FPtr6)_pluginJacQFInt->fPtr)(time, _ndof, &(*_q[0])(0), &(*_q[1])(0), &(*_jacobianQFInt)(0, 0), _z->size(), &(*_z)(0));
 }
 void LagrangianDS::computeJacobianQDotFInt(double time)
 {
-  if (computeJacobianQDotFIntPtr)
-    (computeJacobianQDotFIntPtr)(time, _ndof, &(*_q[0])(0), &(*_q[1])(0), &(*_jacobianQDotFInt)(0, 0), _z->size(), &(*_z)(0));
+  if (_pluginJacQDotFInt->fPtr)
+    ((FPtr6)_pluginJacQDotFInt->fPtr)(time, _ndof, &(*_q[0])(0), &(*_q[1])(0), &(*_jacobianQDotFInt)(0, 0), _z->size(), &(*_z)(0));
 }
 // void LagrangianDS::computeJacobianZFInt(double time){
 //   if(computeJacobianZFIntPtr)
@@ -651,13 +651,13 @@ void LagrangianDS::computeJacobianQDotFInt(double time)
 
 void LagrangianDS::computeJacobianQFInt(double time, SP::SiconosVector q2, SP::SiconosVector velocity2)
 {
-  if (computeJacobianQFIntPtr)
-    (computeJacobianQFIntPtr)(time, _ndof, &(*q2)(0), &(*velocity2)(0), &(*_jacobianQFInt)(0, 0), _z->size(), &(*_z)(0));
+  if (_pluginJacQFInt->fPtr)
+    ((FPtr6)_pluginJacQFInt->fPtr)(time, _ndof, &(*q2)(0), &(*velocity2)(0), &(*_jacobianQFInt)(0, 0), _z->size(), &(*_z)(0));
 }
 void LagrangianDS::computeJacobianQDotFInt(double time, SP::SiconosVector q2, SP::SiconosVector velocity2)
 {
-  if (computeJacobianQDotFIntPtr)
-    (computeJacobianQDotFIntPtr)(time, _ndof, &(*q2)(0), &(*velocity2)(0), &(*_jacobianQDotFInt)(0, 0), _z->size(), &(*_z)(0));
+  if (_pluginJacQDotFInt->fPtr)
+    ((FPtr6)_pluginJacQDotFInt->fPtr)(time, _ndof, &(*q2)(0), &(*velocity2)(0), &(*_jacobianQDotFInt)(0, 0), _z->size(), &(*_z)(0));
 }
 // void LagrangianDS::computeJacobianZFInt( double time, SP::SiconosVector q2, SP::SiconosVector velocity2){
 //   if(computeJacobianZFIntPtr)
@@ -666,13 +666,13 @@ void LagrangianDS::computeJacobianQDotFInt(double time, SP::SiconosVector q2, SP
 
 void LagrangianDS::computeJacobianQNNL()
 {
-  if (computeJacobianQNNLPtr)
-    (computeJacobianQNNLPtr)(_ndof, &(*_q[0])(0), &(*_q[1])(0), &(*_jacobianQNNL)(0, 0), _z->size(), &(*_z)(0));
+  if (_pluginJacQNNL->fPtr)
+    ((FPtr5)_pluginJacQNNL->fPtr)(_ndof, &(*_q[0])(0), &(*_q[1])(0), &(*_jacobianQNNL)(0, 0), _z->size(), &(*_z)(0));
 }
 void LagrangianDS::computeJacobianQDotNNL()
 {
-  if (computeJacobianQDotNNLPtr)
-    (computeJacobianQDotNNLPtr)(_ndof, &(*_q[0])(0), &(*_q[1])(0), &(*_jacobianQDotNNL)(0, 0), _z->size(), &(*_z)(0));
+  if (_pluginJacQDotNNL->fPtr)
+    ((FPtr5)_pluginJacQDotNNL->fPtr)(_ndof, &(*_q[0])(0), &(*_q[1])(0), &(*_jacobianQDotNNL)(0, 0), _z->size(), &(*_z)(0));
 }
 // void LagrangianDS::computeJacobianZNNL(){
 //   if(computeJacobianZNNLPtr)
@@ -681,13 +681,13 @@ void LagrangianDS::computeJacobianQDotNNL()
 
 void LagrangianDS::computeJacobianQNNL(SP::SiconosVector q2, SP::SiconosVector velocity2)
 {
-  if (computeJacobianQNNLPtr)
-    (computeJacobianQNNLPtr)(_ndof, &(*q2)(0), &(*velocity2)(0), &(*_jacobianQNNL)(0, 0), _z->size(), &(*_z)(0));
+  if (_pluginJacQNNL->fPtr)
+    ((FPtr5)_pluginJacQNNL->fPtr)(_ndof, &(*q2)(0), &(*velocity2)(0), &(*_jacobianQNNL)(0, 0), _z->size(), &(*_z)(0));
 }
 void LagrangianDS::computeJacobianQDotNNL(SP::SiconosVector q2, SP::SiconosVector velocity2)
 {
-  if (computeJacobianQDotNNLPtr)
-    (computeJacobianQDotNNLPtr)(_ndof, &(*q2)(0), &(*velocity2)(0), &(*_jacobianQDotNNL)(0, 0), _z->size(), &(*_z)(0));
+  if (_pluginJacQDotNNL->fPtr)
+    ((FPtr5)_pluginJacQDotNNL->fPtr)(_ndof, &(*q2)(0), &(*velocity2)(0), &(*_jacobianQDotNNL)(0, 0), _z->size(), &(*_z)(0));
 }
 // void LagrangianDS::computeJacobianZNNL(unsigned int i, SP::SiconosVector q2, SP::SiconosVector velocity2){
 //   if(computeJacobianZNNLPtr)
@@ -735,7 +735,7 @@ void LagrangianDS::computeJacobianXRhs(double time, bool isDSup)
 
   if (_jacobianQFL)
   {
-    SP::SiconosMatrix bloc10 = _jacXRhs->block(1, 0);
+    SP::SiconosMatrix bloc10 = _jacxRhs->block(1, 0);
     computeJacobianQFL(time);
     *bloc10 = *_jacobianQFL;
     _workMatrix[invMass]->PLUForwardBackwardInPlace(*bloc10);
@@ -743,7 +743,7 @@ void LagrangianDS::computeJacobianXRhs(double time, bool isDSup)
 
   if (_jacobianQDotFL)
   {
-    SP::SiconosMatrix bloc11 = _jacXRhs->block(1, 1);
+    SP::SiconosMatrix bloc11 = _jacxRhs->block(1, 1);
     computeJacobianQDotFL(time);
     *bloc11 = *_jacobianQDotFL;
     _workMatrix[invMass]->PLUForwardBackwardInPlace(*bloc11);
@@ -1026,41 +1026,46 @@ void LagrangianDS::computePostImpactVelocity()
 
 void LagrangianDS::setComputeNNLFunction(const std::string& pluginPath, const std::string&  functionName)
 {
-  Plugin::setFunction(&computeNNLPtr, pluginPath, functionName);
+  //    Plugin::setFunction(&computeNNLPtr, pluginPath,functionName);
+  _pluginNNL->setComputeFunction(pluginPath, functionName);
 }
 void LagrangianDS::setComputeNNLFunction(FPtr5 fct)
 {
-  computeNNLPtr = fct;
+  _pluginNNL->setComputeFunction((void *)fct);
+  //    computeNNLPtr=fct;
 }
 void LagrangianDS::setComputeJacobianQFIntFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
-  Plugin::setFunction(&computeJacobianQFIntPtr, pluginPath, functionName);
+  //    Plugin::setFunction(&computeJacobianQFIntPtr, pluginPath,functionName);
+  _pluginJacQFInt->setComputeFunction(pluginPath, functionName);
 }
 void LagrangianDS::setComputeJacobianQDotFIntFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
-  Plugin::setFunction(&computeJacobianQDotFIntPtr, pluginPath, functionName);
+  //    Plugin::setFunction(&computeJacobianQDotFIntPtr, pluginPath,functionName);
+  _pluginJacQDotFInt->setComputeFunction(pluginPath, functionName);
 }
 void LagrangianDS::setComputeJacobianQFIntFunction(FPtr6 fct)
 {
-  computeJacobianQFIntPtr = fct;
+  _pluginJacQFInt->setComputeFunction((void *)fct);
 }
 void LagrangianDS::setComputeJacobianQDotFIntFunction(FPtr6 fct)
 {
-  computeJacobianQDotFIntPtr = fct;
+  _pluginJacQDotFInt->setComputeFunction((void *)fct);
 }
 void LagrangianDS::setComputeJacobianQNNLFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
-  Plugin::setFunction(&computeJacobianQNNLPtr, pluginPath, functionName);
+  _pluginJacQNNL->setComputeFunction(pluginPath, functionName); // Plugin::setFunction(&computeJacobianQNNLPtr, pluginPath,functionName);
 }
 void LagrangianDS::setComputeJacobianQDotNNLFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
-  Plugin::setFunction(&computeJacobianQDotNNLPtr, pluginPath, functionName);
+  _pluginJacQDotNNL->setComputeFunction(pluginPath, functionName);
+  // Plugin::setFunction(&computeJacobianQDotNNLPtr, pluginPath,functionName);
 }
 void LagrangianDS::setComputeJacobianQNNLFunction(FPtr5 fct)
 {
-  computeJacobianQNNLPtr = fct;
-}
+  _pluginJacQNNL->setComputeFunction((void *)fct);
+}//computeJacobianQNNLPtr=fct;}
 void LagrangianDS::setComputeJacobianQDotNNLFunction(FPtr5 fct)
 {
-  computeJacobianQDotNNLPtr = fct;
-}
+  _pluginJacQDotNNL->setComputeFunction((void *)fct);
+}//computeJacobianQDotNNLPtr=fct;}

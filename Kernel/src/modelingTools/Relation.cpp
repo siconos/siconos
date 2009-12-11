@@ -41,26 +41,26 @@ Relation::Relation(SP::RelationXML relxml,
 }
 void Relation::zeroPlugin()
 {
-  pluginH.reset(new PluggedObject());
-  pluginjXH.reset(new PluggedObject());
-  pluginjLH.reset(new PluggedObject());
-  pluginG.reset(new PluggedObject());
-  pluginjLG.reset(new PluggedObject());
-  pluginf.reset(new PluggedObject());
-  plugine.reset(new PluggedObject());
+  _pluginh.reset(new PluggedObject());
+  _plunginJacxh.reset(new PluggedObject());
+  _pluginJacLh.reset(new PluggedObject());
+  _pluging.reset(new PluggedObject());
+  _pluginJacLg.reset(new PluggedObject());
+  _pluginf.reset(new PluggedObject());
+  _plugine.reset(new PluggedObject());
 }
 
 void Relation::initializeMemory()
 {
-  mResiduy.reset(new BlockVector());
+  _Residuy.reset(new BlockVector());
   unsigned int nslawSize = interaction()->nonSmoothLaw()->size();
   unsigned int numberOfRelations = interaction()->numberOfRelations();
   for (unsigned int j = 0; j < numberOfRelations ; ++j)
-    mResiduy->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
+    _Residuy->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
 
-  mH_alpha.reset(new BlockVector());
+  _h_alpha.reset(new BlockVector());
   for (unsigned int j = 0; j < numberOfRelations; ++j)
-    mH_alpha->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
+    _h_alpha->insertPtr(SP::SimpleVector(new SimpleVector(nslawSize)));
 
 }
 
@@ -87,18 +87,18 @@ void Relation::display() const
 void Relation::computeResiduY(double t)
 {
   //Residu_y = y_alpha_k+1 - H_alpha;
-  *mResiduy = *mH_alpha;
-  scal(-1, *mResiduy, *mResiduy);
+  *_Residuy = *_h_alpha;
+  scal(-1, *_Residuy, *_Residuy);
 
-  //      cout<<"Relation::computeResiduY mH_alpha"<<endl;
-  //      mH_alpha->display();
+  //      cout<<"Relation::computeResiduY _h_alpha"<<endl;
+  //      _h_alpha->display();
   //      cout<<"Relation::computeResiduY Y"<<endl;
   //      interaction()->y(0)->display();
 
-  (*mResiduy) += *(interaction()->y(0));
+  (*_Residuy) += *(interaction()->y(0));
 
   //      cout<<" Relation::computeResiduY residuY"<<endl;
-  //      mResiduy->display();
+  //      _Residuy->display();
 
 }
 void Relation::computeG(double t)
@@ -108,14 +108,14 @@ void Relation::computeG(double t)
 
 void Relation::setComputeJacLHFunction(const std::string& pluginPath, const std::string& functionName)
 {
-  pluginjLH->setComputeFunction(pluginPath, functionName);
-  //  Plugin::setFunction(&pluginjLH, pluginPath, functionName);
+  _pluginJacLh->setComputeFunction(pluginPath, functionName);
+  //  Plugin::setFunction(&_pluginJacLh, pluginPath, functionName);
   //    SSL::buildPluginName(pluginNamejLOutput,pluginPath,functionName);
 }
 void Relation::setComputeJacXHFunction(const std::string& pluginPath, const std::string& functionName)
 {
-  pluginjXH->setComputeFunction(pluginPath, functionName);
-  //    Plugin::setFunction(&pluginjXH, pluginPath, functionName);
+  _plunginJacxh->setComputeFunction(pluginPath, functionName);
+  //    Plugin::setFunction(&_plunginJacxh, pluginPath, functionName);
 }
 
 /** To set a plug-in function to compute input function g
@@ -124,19 +124,19 @@ void Relation::setComputeJacXHFunction(const std::string& pluginPath, const std:
  */
 void Relation::setComputeGFunction(const std::string& pluginPath, const std::string& functionName)
 {
-  pluginG->setComputeFunction(pluginPath, functionName);
+  _pluging->setComputeFunction(pluginPath, functionName);
   //    SSL::buildPluginName(pluginNameInput,pluginPath,functionName);
 }
 void Relation::setComputeFFunction(const std::string& pluginPath, const std::string& functionName)
 {
   //  Plugin::setFunction(&pluginf, pluginPath, functionName,gName);
-  pluginf->setComputeFunction(pluginPath, functionName);
+  _pluginf->setComputeFunction(pluginPath, functionName);
   //    SSL::buildPluginName(pluginNamefplugin,pluginPath,functionName);
 }
 void Relation::setComputeEFunction(const std::string& pluginPath, const std::string& functionName)
 {
-  plugine->setComputeFunction(pluginPath, functionName);
-  //Plugin::setFunction(&plugine, pluginPath, functionName,gName);
+  _plugine->setComputeFunction(pluginPath, functionName);
+  //Plugin::setFunction(&_plugine, pluginPath, functionName,gName);
   //    SSL::buildPluginName(pluginNameeplugin,pluginPath,functionName);
 }
 
@@ -147,15 +147,15 @@ void Relation::setComputeEFunction(const std::string& pluginPath, const std::str
  */
 void Relation::setComputeJacLGFunction(const std::string& pluginPath, const std::string& functionName)
 {
-  pluginjLG->setComputeFunction(pluginPath, functionName);
-  //  Plugin::setFunction(&pluginjLG, pluginPath, functionName);
+  _pluginJacLg->setComputeFunction(pluginPath, functionName);
+  //  Plugin::setFunction(&_pluginJacLg, pluginPath, functionName);
   //    SSL::buildPluginName(pluginNamejLOutput,pluginPath,functionName);
 }
 
 void Relation::setComputeHFunction(const std::string& pluginPath, const std::string& functionName)
 {
-  pluginH->setComputeFunction(pluginPath, functionName);
-  //  Plugin::setFunction(&pluginH, pluginPath, functionName,hName);
+  _pluginh->setComputeFunction(pluginPath, functionName);
+  //  Plugin::setFunction(&_pluginh, pluginPath, functionName,hName);
   //    SSL::buildPluginName(pluginNameOutput,pluginPath,functionName);
 }
 void Relation::saveRelationToXML() const

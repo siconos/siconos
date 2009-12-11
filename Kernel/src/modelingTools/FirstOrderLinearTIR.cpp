@@ -127,7 +127,7 @@ void FirstOrderLinearTIR::initialize(SP::Interaction inter)
   if (e)
     assert(e->size() == sizeY && "FirstOrderLinearTIR::initialize , inconsistent size between C and e.");
 
-  workZ.reset(new SimpleVector(sizeZ));
+  _workZ.reset(new SimpleVector(sizeZ));
 }
 
 void FirstOrderLinearTIR::computeH(double time)

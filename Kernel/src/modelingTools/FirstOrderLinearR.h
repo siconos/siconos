@@ -57,9 +57,9 @@ class FirstOrderLinearR : public FirstOrderR
 protected:
 
   /** F*/
-  SP::SiconosMatrix F;
+  SP::SiconosMatrix _F;
   /** e*/
-  SP::SiconosVector e;
+  SP::SiconosVector _e;
 
 
 
@@ -213,7 +213,7 @@ public:
    */
   inline SP::SiconosMatrix getFPtr() const
   {
-    return F;
+    return _F;
   }
 
   /** set the value of F to newValue
@@ -228,7 +228,7 @@ public:
    */
   inline void setFPtr(SP::SiconosMatrix newPtr)
   {
-    F = newPtr;
+    _F = newPtr;
   }
 
   /** set a specified function to compute the matrix F
@@ -248,7 +248,7 @@ public:
    */
   inline SP::SiconosVector getEPtr() const
   {
-    return e;
+    return _e;
   }
 
   /** set the value of e to newValue

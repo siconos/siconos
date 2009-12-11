@@ -65,15 +65,15 @@ void FirstOrderLinearTIDS::initRhs(double time)
 
   computeRhs(time);
 
-  if (! _jacXRhs)  // if not allocated with a set or anything else
+  if (! _jacxRhs)  // if not allocated with a set or anything else
   {
-    if (_A && ! _M)  // if M is not defined, then A = _jacXRhs, no memory allocation for that one.
-      _jacXRhs = _A;
+    if (_A && ! _M)  // if M is not defined, then A = _jacxRhs, no memory allocation for that one.
+      _jacxRhs = _A;
     else if (_A && _M)
     {
-      _jacXRhs.reset(new SimpleMatrix(*_A)); // Copy A into _jacXRhs
-      // Solve M_jacXRhs = A
-      _invM->PLUForwardBackwardInPlace(*_jacXRhs);
+      _jacxRhs.reset(new SimpleMatrix(*_A)); // Copy A into _jacxRhs
+      // Solve M_jacxRhs = A
+      _invM->PLUForwardBackwardInPlace(*_jacxRhs);
     }
     // else no allocation, jacobian is equal to 0.
   }
@@ -97,7 +97,7 @@ void FirstOrderLinearTIDS::computeRhs(const double time, const bool)
 
 void FirstOrderLinearTIDS::computeJacobianXRhs(const double time, const bool)
 {
-  // Nothing to be done: _jacXRhs is constant and computed during initialize. But this function is required to avoid call to base class function.
+  // Nothing to be done: _jacxRhs is constant and computed during initialize. But this function is required to avoid call to base class function.
 }
 
 void FirstOrderLinearTIDS::display() const

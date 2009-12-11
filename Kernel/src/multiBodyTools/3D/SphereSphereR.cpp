@@ -43,8 +43,8 @@ void SphereSphereR::computeH(double)
 
   // Warning: temporary method to have contiguous values in memory,
   // copy of block to simple.
-  *workX = *data[q0];
-  double *q = &(*workX)(0);
+  *_workX = *data[q0];
+  double *q = &(*_workX)(0);
 
   SP::SiconosVector y = interaction()->y(0);
 

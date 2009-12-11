@@ -31,6 +31,8 @@
 class DynamicalSystem;
 /** Pointer to function for plug-in. For NNL and its jacobian. */
 typedef void (*FPtr5)(unsigned int, const double*, const double*, double*, unsigned int, double*);
+typedef void (*FPtrMass)(unsigned int, const double*, double*, unsigned int, double*);
+typedef  void (*FPtrFExt)(double, unsigned int, double*, unsigned int, double*);
 
 /** Lagrangian non linear dynamical systems - Derived from DynamicalSystem -
  *
@@ -187,7 +189,9 @@ protected:
    * @param  size of vector z
    * @param[in,out] z : a vector of user-defined parameters
    */
-  void (*computeMassPtr)(unsigned int, const double*, double*, unsigned int, double*);
+  //  void (*computeMassPtr)(unsigned int, const double*, double*, unsigned int, double*);
+  SP::PluggedObject _pluginMass;
+
 
   /** LagrangianDS plug-in to compute internal forces \f$F_{int}(t,q,\dot q)\f$ - id = "fInt"
    * @param time : current time
@@ -198,7 +202,8 @@ protected:
    * @param  size of vector z
    * @param[in,out] z : a vector of user-defined parameters
    */
-  FPtr6 computeFIntPtr;
+  SP::PluggedObject _pluginFInt;
+  //  FPtr6 computeFIntPtr;
 
   /** LagrangianDS plug-in to compute external forces \f$F_{Ext}(t)\f$, id = "fExt"
    * @param time : current time
@@ -207,7 +212,8 @@ protected:
    * @param  size of vector z
    * @param[in,out] z : a vector of user-defined parameters
    */
-  void (*computeFExtPtr)(double, unsigned int, double*, unsigned int, double*);
+  //  void (*computeFExtPtr)(double, unsigned int, double*, unsigned int, double* );
+  SP::PluggedObject _pluginFExt;
 
   /** LagrangianDS plug-in to compute \f$NNL(\dot q, q)\f$, id = "NNL"
    * @param sizeOfq : size of vector q
@@ -217,7 +223,8 @@ protected:
    * @param  size of vector z
    * @param[in,out] z  : a vector of user-defined parameters
    */
-  FPtr5 computeNNLPtr;
+  //  FPtr5 computeNNLPtr;
+  SP::PluggedObject _pluginNNL;
 
   /** LagrangianDS plug-in to compute \f$\nabla_qF_{Int}(\dot q, q, t)\f$, id = "jacobianQFInt"
    * @param time : current time
@@ -228,7 +235,8 @@ protected:
    * @param  size of vector z
    * @param[in,out] z  : a vector of user-defined parameters
    */
-  FPtr6 computeJacobianQFIntPtr;
+  //  FPtr6 computeJacobianQFIntPtr;
+  SP::PluggedObject _pluginJacQFInt;
 
   /** LagrangianDS plug-in to compute \f$\nabla_{\dot q}F_{Int}(\dot q, q, t)\f$, id = "jacobianQDotFInt"
    * @param time : current time
@@ -239,7 +247,8 @@ protected:
    * @param  size of vector z
    * @param[in,out] z  : a vector of user-defined parameters
    */
-  FPtr6 computeJacobianQDotFIntPtr;
+  //  FPtr6 computeJacobianQDotFIntPtr;
+  SP::PluggedObject _pluginJacQDotFInt;
 
   /** LagrangianDS plug-in to compute \f$\nabla_qNNL(\dot q, q)\f$, id = "jacobianQNNL"
    * @param sizeOfq : size of vector q
@@ -249,7 +258,8 @@ protected:
    * @param  size of vector z
    * @param[in,out] z  : a vector of user-defined parameters
    */
-  FPtr5 computeJacobianQNNLPtr;
+  //  FPtr5 computeJacobianQNNLPtr;
+  SP::PluggedObject _pluginJacQNNL;
   /** LagrangianDS plug-in to compute \f$\nabla_{\dot q}NNL(\dot q, q)\f$, id = "jacobianQDotNNL"
    * @param sizeOfq : size of vector q
    * @param q : pointer to the first element of q
@@ -258,10 +268,10 @@ protected:
    * @param  size of vector z
    * @param[in,out] z  : a vector of user-defined parameters
    */
-  FPtr5 computeJacobianQDotNNLPtr;
+  //  FPtr5 computeJacobianQDotNNLPtr;
+  SP::PluggedObject _pluginJacQDotNNL;
 
-  void zeroPlungin();
-
+  virtual void zeroPlugin();
 public:
 
   // === CONSTRUCTORS - DESTRUCTOR ===
@@ -668,7 +678,8 @@ public:
    */
   void setComputeMassFunction(const std::string&  pluginPath, const std::string&  functionName)
   {
-    Plugin::setFunction(&computeMassPtr, pluginPath, functionName);
+    _pluginMass->setComputeFunction(pluginPath, functionName);
+    //     Plugin::setFunction(&computeMassPtr, pluginPath,functionName);
   }
 
   /** set a specified function to compute Mass
@@ -676,7 +687,8 @@ public:
    */
   void setComputeMassFunction(FPtr7 fct)
   {
-    computeMassPtr = fct;
+    _pluginMass->setComputeFunction((void*)fct);
+    //    computeMassPtr=fct;
   }
 
   /** allow to set a specified function to compute Fint
@@ -685,7 +697,8 @@ public:
    */
   void setComputeFIntFunction(const std::string&  pluginPath, const std::string&  functionName)
   {
-    Plugin::setFunction(&computeFIntPtr, pluginPath, functionName);
+    _pluginFInt->setComputeFunction(pluginPath, functionName);
+    //    Plugin::setFunction(&computeFIntPtr, pluginPath,functionName);
   }
 
   /** set a specified function to compute fInt
@@ -693,7 +706,8 @@ public:
    */
   void setComputeFIntFunction(FPtr6 fct)
   {
-    computeFIntPtr = fct;
+    _pluginFInt->setComputeFunction((void*)fct);
+    //    computeFIntPtr = fct;
   }
 
   /** allow to set a specified function to compute Fext
@@ -702,7 +716,8 @@ public:
    */
   void setComputeFExtFunction(const std::string&  pluginPath, const std::string& functionName)
   {
-    Plugin::setFunction(&computeFExtPtr, pluginPath, functionName);
+    _pluginFExt->setComputeFunction(pluginPath, functionName);
+    //    Plugin::setFunction(&computeFExtPtr, pluginPath,functionName);
   }
 
   /** set a specified function to compute fExt
@@ -710,7 +725,8 @@ public:
    */
   void setComputeFExtFunction(VectorFunctionOfTime fct)
   {
-    computeFExtPtr = fct ;
+    _pluginFExt->setComputeFunction((void*)fct);
+    //   computeFExtPtr = fct ;
   }
 
   /** allow to set a specified function to compute the inertia

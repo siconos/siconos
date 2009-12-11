@@ -32,8 +32,8 @@ unsigned int DynamicalSystem::count = 0;
 DynamicalSystem::DynamicalSystem(DS::TYPES type):
   _DSType(type), _number(count++), _n(0), _stepsInMemory(1)
 {
-  zeroPlungin();
-  mNormRef = 1;
+  zeroPlugin();
+  _normRef = 1;
   _x.resize(2);
   _workV.resize(sizeWorkV);
 }
@@ -42,12 +42,12 @@ DynamicalSystem::DynamicalSystem(DS::TYPES type):
 DynamicalSystem::DynamicalSystem(SP::DynamicalSystemXML dsXML):
   _DSType(dsXML->getType()), _number(dsXML->number()), _n(0), _stepsInMemory(1), _dsxml(dsXML)
 {
-  mNormRef = 1;
+  _normRef = 1;
   assert(dsXML && "DynamicalSystem::DynamicalSystem - DynamicalSystemXML paramater must not be NULL");
 
   // Update count: must be at least equal to number for future DS creation
   count = number();
-  zeroPlungin();
+  zeroPlugin();
   // Only the following data are set in this general constructor:
   //  - DSTye
   //  - _number
@@ -72,10 +72,10 @@ DynamicalSystem::DynamicalSystem(SP::DynamicalSystemXML dsXML):
 DynamicalSystem::DynamicalSystem(DS::TYPES type, unsigned int newN):
   _DSType(type), _number(count++), _n(newN), _stepsInMemory(1)
 {
-  mNormRef = 1;
+  _normRef = 1;
   _x.resize(2);
   _workV.resize(sizeWorkV);
-  mResiduFree.reset(new SimpleVector(getDim()));
+  _residuFree.reset(new SimpleVector(getDim()));
   _r.reset(new SimpleVector(getDim()));
 }
 
@@ -96,11 +96,11 @@ bool DynamicalSystem::checkDynamicalSystem()
   }
   return output;
 }
-void DynamicalSystem::zeroPlungin()
+void DynamicalSystem::zeroPlugin()
 {
-  _pluginJacXG.reset(new PluggedObject());
-  _pluginJacXDotG.reset(new PluggedObject());
-  _pluginG.reset(new PluggedObject());
+  _pluginJacxG.reset(new PluggedObject());
+  _pluginJacxDotG.reset(new PluggedObject());
+  _pluging.reset(new PluggedObject());
 }
 // Setters
 
@@ -120,7 +120,7 @@ void DynamicalSystem::setX0(const SiconosVector& newValue)
     else
       _x0.reset(new SimpleVector(newValue));
   }
-  mNormRef = _x0->norm2() + 1;
+  _normRef = _x0->norm2() + 1;
 }
 
 void DynamicalSystem::setX0Ptr(SP::SiconosVector newPtr)
@@ -128,7 +128,7 @@ void DynamicalSystem::setX0Ptr(SP::SiconosVector newPtr)
   // check dimensions ...
   assert(newPtr->size() == _n && "DynamicalSystem::setX0Ptr - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
   _x0 = newPtr;
-  mNormRef = _x0->norm2() + 1;
+  _normRef = _x0->norm2() + 1;
 }
 
 void DynamicalSystem::setX(const SiconosVector& newValue)
@@ -210,20 +210,20 @@ void DynamicalSystem::setJacobianXRhs(const SiconosMatrix& newValue)
   if (newValue.size(0) != _n || newValue.size(1) != _n)
     RuntimeException::selfThrow("DynamicalSystem::setJacobianXRhs - inconsistent sizes between jacobianXRhs input and n - Maybe you forget to set n?");
 
-  if (_jacXRhs)
-    *_jacXRhs = newValue;
+  if (_jacxRhs)
+    *_jacxRhs = newValue;
 
   else
-    _jacXRhs.reset(new SimpleMatrix(newValue));
+    _jacxRhs.reset(new SimpleMatrix(newValue));
 }
 
 void DynamicalSystem::setJacobianXRhsPtr(SP::SiconosMatrix newPtr)
 {
   // check dimensions ...
   if (newPtr->size(0) != _n || newPtr->size(1) != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setJacobianXRhsPtr - inconsistent sizes between _jacXRhs input and n - Maybe you forget to set n?");
+    RuntimeException::selfThrow("DynamicalSystem::setJacobianXRhsPtr - inconsistent sizes between _jacxRhs input and n - Maybe you forget to set n?");
 
-  _jacXRhs = newPtr;
+  _jacxRhs = newPtr;
 }
 
 void DynamicalSystem::setZ(const SiconosVector& newValue)
@@ -294,21 +294,21 @@ void DynamicalSystem::initMemory(unsigned int steps)
 
 void DynamicalSystem::setComputeGFunction(const string& pluginPath, const string& functionName)
 {
-  _pluginG->setComputeFunction(pluginPath, functionName);
+  _pluging->setComputeFunction(pluginPath, functionName);
 }
 
 void DynamicalSystem::setComputeGFunction(FPtr6 fct)
 {
-  _pluginG->setComputeFunction((void *)fct);
+  _pluging->setComputeFunction((void *)fct);
 }
 
 void DynamicalSystem::setComputeJacobianXGFunction(const string& pluginPath, const string& functionName)
 {
-  _pluginJacXG->setComputeFunction(pluginPath, functionName);
+  _pluginJacxG->setComputeFunction(pluginPath, functionName);
 }
 void DynamicalSystem::setComputeJacobianDotXGFunction(const string& pluginPath, const string& functionName)
 {
-  _pluginJacXDotG->setComputeFunction(pluginPath, functionName);
+  _pluginJacxDotG->setComputeFunction(pluginPath, functionName);
 }
 // void DynamicalSystem::setComputeJacobianZGFunction( const string& pluginPath, const string& functionName){
 //   Plugin::setFunction(&pluginJacobianZGPtr, pluginPath,functionName);
@@ -316,19 +316,19 @@ void DynamicalSystem::setComputeJacobianDotXGFunction(const string& pluginPath, 
 
 void DynamicalSystem::computeG(double time)
 {
-  if (_pluginG->fPtr)
-    ((FPtr6)(_pluginG->fPtr))(time, _n, &(*_x[0])(0), &(*_x[1])(0), &(*_g)(0), _z->size(), &(*_z)(0));
+  if (_pluging->fPtr)
+    ((FPtr6)(_pluging->fPtr))(time, _n, &(*_x[0])(0), &(*_x[1])(0), &(*_g)(0), _z->size(), &(*_z)(0));
 }
 
 void DynamicalSystem::computeJacobianXG(double time)
 {
-  if (_pluginJacXG->fPtr)
-    ((FPtr6) _pluginJacXG->fPtr)(time, _n, &(*_x[0])(0), &(*_x[1])(0), &(*_jacXG)(0, 0), _z->size(), &(*_z)(0));
+  if (_pluginJacxG->fPtr)
+    ((FPtr6) _pluginJacxG->fPtr)(time, _n, &(*_x[0])(0), &(*_x[1])(0), &(*_jacxG)(0, 0), _z->size(), &(*_z)(0));
 }
 void DynamicalSystem::computeJacobianDotXG(double time)
 {
-  if (_pluginJacXDotG->fPtr)
-    ((FPtr6)(_pluginJacXDotG->fPtr))(time, _n, &(*_x[0])(0), &(*_x[1])(0), &(*_jacXDotG)(0, 0), _z->size(), &(*_z)(0));
+  if (_pluginJacxDotG->fPtr)
+    ((FPtr6)(_pluginJacxDotG->fPtr))(time, _n, &(*_x[0])(0), &(*_x[1])(0), &(*_jacxDotG)(0, 0), _z->size(), &(*_z)(0));
 }
 // void DynamicalSystem::computeJacobianZG(double time){
 //   if (pluginJacobianXGPtr)

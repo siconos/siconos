@@ -44,9 +44,9 @@ void LagrangianR::initComponents()
              "LagrangianScleronomousR::initComponents inconsistent sizes between JacH[0] matrix and the interaction.");
   }
 
-  workX.reset(new SimpleVector(sizeDS));
-  workZ.reset(new SimpleVector(interaction()->getSizeZ()));
-  workY.reset(new SimpleVector(sizeY));
+  _workX.reset(new SimpleVector(sizeDS));
+  _workZ.reset(new SimpleVector(interaction()->getSizeZ()));
+  _workY.reset(new SimpleVector(sizeY));
 }
 
 void LagrangianR::initialize(SP::Interaction inter)

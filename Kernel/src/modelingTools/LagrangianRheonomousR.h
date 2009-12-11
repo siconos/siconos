@@ -111,7 +111,7 @@ protected:
    * @param sizeZ : size of vector z
    * @param[in,out] z : a vector of user-defined parameters
    */
-  SP::PluggedObject _pluginhDotPtr;
+  SP::PluggedObject _pluginhDot;
   //  FPtr4 hDotPtr;
 
   /** LagrangianRheonomousR plug-in to compute G0(q,t,z), gradient of h accoring to q
@@ -123,7 +123,7 @@ protected:
    * @param sizeZ : size of vector z
    * @param[in,out] z : a vector of user-defined parameters
    */
-  SP::PluggedObject _pluginjQH;
+  SP::PluggedObject _pluginJacQH;
   //  FPtr4 computeJacQHPtr;
 
 

@@ -63,7 +63,7 @@ void LagrangianCompliantR::initComponents()
 {
   LagrangianR::initComponents();
   unsigned int sizeY = interaction()->getSizeOfY();
-  workL.reset(new SimpleVector(sizeY));
+  _workL.reset(new SimpleVector(sizeY));
 
   if (! JacLH)
     JacLH.reset(new SimpleMatrix(sizeY, sizeY));
@@ -80,20 +80,20 @@ void LagrangianCompliantR::computeH(double time)
     SP::SiconosVector lambda = interaction()->lambda(0);
 
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    *workX = *data[q0];
-    *workZ = *data[z];
-    *workY = *y;
-    *workL = *lambda;
+    *_workX = *data[q0];
+    *_workZ = *data[z];
+    *_workY = *y;
+    *_workL = *lambda;
 
-    unsigned int sizeQ = workX->size();
+    unsigned int sizeQ = _workX->size();
     unsigned int sizeY = y->size();
-    unsigned int sizeZ = workZ->size();
+    unsigned int sizeZ = _workZ->size();
 
-    hPtr(sizeQ, &(*workX)(0), sizeY, &(*workL)(0), &(*workY)(0), sizeZ, &(*workZ)(0));
+    hPtr(sizeQ, &(*_workX)(0), sizeY, &(*_workL)(0), &(*_workY)(0), sizeZ, &(*_workZ)(0));
 
     // Copy data that might have been changed in the plug-in call.
-    *data[z] = *workZ;
-    *y = *workY;
+    *data[z] = *_workZ;
+    *y = *_workY;
   }
 }
 
@@ -103,18 +103,18 @@ void LagrangianCompliantR::computeJacQH(double time)
   if (JacQHPtr)
   {
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    *workX = *data[q0];
-    *workZ = *data[z];
+    *_workX = *data[q0];
+    *_workZ = *data[z];
 
     unsigned int sizeY = JacQH->size(0);
-    unsigned int sizeQ = workX->size();
-    unsigned int sizeZ = workZ->size();
+    unsigned int sizeQ = _workX->size();
+    unsigned int sizeZ = _workZ->size();
 
     // get vector lambda of the current interaction
-    *workL = *interaction()->lambda(0);
-    (JacQHPtr)(sizeQ, &(*workX)(0), sizeY, &(*workL)(0), &(*JacQH)(0, 0), sizeZ, &(*workZ)(0));
+    *_workL = *interaction()->lambda(0);
+    (JacQHPtr)(sizeQ, &(*_workX)(0), sizeY, &(*_workL)(0), &(*JacQH)(0, 0), sizeZ, &(*_workZ)(0));
     // Copy data that might have been changed in the plug-in call.
-    *data[z] = *workZ;
+    *data[z] = *_workZ;
   }
 }
 void LagrangianCompliantR::computeJacLH(double time)
@@ -123,18 +123,18 @@ void LagrangianCompliantR::computeJacLH(double time)
   if (JacLHPtr)
   {
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    *workX = *data[q0];
-    *workZ = *data[z];
+    *_workX = *data[q0];
+    *_workZ = *data[z];
 
     unsigned int sizeY = JacQH->size(0);
-    unsigned int sizeQ = workX->size();
-    unsigned int sizeZ = workZ->size();
+    unsigned int sizeQ = _workX->size();
+    unsigned int sizeZ = _workZ->size();
 
     // get vector lambda of the current interaction
-    *workL = *interaction()->lambda(0);
-    (JacLHPtr)(sizeQ, &(*workX)(0), sizeY, &(*workL)(0), &(*JacLH)(0, 0), sizeZ, &(*workZ)(0));
+    *_workL = *interaction()->lambda(0);
+    (JacLHPtr)(sizeQ, &(*_workX)(0), sizeY, &(*_workL)(0), &(*JacLH)(0, 0), sizeZ, &(*_workZ)(0));
     // Copy data that might have been changed in the plug-in call.
-    *data[z] = *workZ;
+    *data[z] = *_workZ;
   }
 }
 

@@ -26,10 +26,7 @@ using namespace std;
 
 // From xml file
 FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML): FirstOrderNonLinearDS(dsXML)
-  , _pluginNameAPtr("unknown"), _pluginNamebPtr("Unknown")
 {
-  _APtr = NULL;
-  _bPtr = NULL;
 
   /*
   // pointer to xml
@@ -70,35 +67,29 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML): FirstOrder
 
 // From a minimum set of data, A and b connected to a plug-in
 FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, const string& APlugin, const string& bPlugin):
-  FirstOrderNonLinearDS(newX0), _pluginNameAPtr("unknown"), _pluginNamebPtr("Unknown")
+  FirstOrderNonLinearDS(newX0)
 {
-  _APtr = NULL;
-  _bPtr = NULL;
 
   _DSType = DS::FOLDS;
-  Plugin::setFunction(&_APtr, SSL::getPluginName(APlugin), SSL::getPluginFunctionName(APlugin));
-  Plugin::setFunction(&_bPtr, SSL::getPluginName(bPlugin), SSL::getPluginFunctionName(bPlugin));
-  _pluginNameAPtr = APlugin;
-  _pluginNamebPtr = bPlugin;
+  _pluginA->setComputeFunction(APlugin);
+  _pluginb->setComputeFunction(bPlugin);
 
-  mf.reset(new SimpleVector(getDim()));
+  _f.reset(new SimpleVector(getDim()));
 
 
   checkDynamicalSystem();
 }
 FirstOrderLinearDS::FirstOrderLinearDS(const SiconosVector& newX0, const std::string& APlugin, const std::string& bPlugin):
-  FirstOrderNonLinearDS(createSPtrSiconosVector((SiconosVector&) newX0)), _pluginNameAPtr("unknown"), _pluginNamebPtr("Unknown")
+  FirstOrderNonLinearDS(createSPtrSiconosVector((SiconosVector&) newX0))
 {
   //  SP::SiconosVector sp_aux = createSPtrSiconosVector ((SiconosVector&) newX0);
   //  FirstOrderNonLinearDS::FirstOrderNonLinearDS();
 
   _DSType = DS::FOLDS;
-  Plugin::setFunction(&_APtr, SSL::getPluginName(APlugin), SSL::getPluginFunctionName(APlugin));
-  Plugin::setFunction(&_bPtr, SSL::getPluginName(bPlugin), SSL::getPluginFunctionName(bPlugin));
-  _pluginNameAPtr = APlugin;
-  _pluginNamebPtr = bPlugin;
+  _pluginA->setComputeFunction(APlugin);
+  _pluginb->setComputeFunction(bPlugin);
 
-  mf.reset(new SimpleVector(getDim()));
+  _f.reset(new SimpleVector(getDim()));
 
 
   checkDynamicalSystem();
@@ -108,12 +99,10 @@ FirstOrderLinearDS::FirstOrderLinearDS(const SiconosVector& newX0, const std::st
 // From a minimum set of data, A from a given matrix
 
 FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatrix newA):
-  FirstOrderNonLinearDS(newX0), _pluginNameAPtr("unknown"), _pluginNamebPtr("Unknown")
+  FirstOrderNonLinearDS(newX0)
 {
-  _APtr = NULL;
-  _bPtr = NULL;
   _DSType = DS::FOLDS;
-  mf.reset(new SimpleVector(getDim()));
+  _f.reset(new SimpleVector(getDim()));
   assert(((newA->size(0) == _n) && (newA->size(1) == _n)) &&
          "FirstOrderLinearDS - constructor(number,x0,A): inconsistent dimensions with problem size for input matrix A");
 
@@ -123,10 +112,8 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatri
 
 // From a minimum set of data, A from a given matrix
 FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatrix newA, SP::SiconosVector newB):
-  FirstOrderNonLinearDS(newX0), _pluginNameAPtr("unknown"), _pluginNamebPtr("Unknown")
+  FirstOrderNonLinearDS(newX0)
 {
-  _APtr = NULL;
-  _bPtr = NULL;
   _DSType = DS::FOLDS;
   assert(((newA->size(0) == _n) && (newA->size(1) == _n)) &&
          "FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with problem size for input matrix A");
@@ -135,7 +122,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatri
 
   _A = newA;
   _b = newB;
-  mf.reset(new SimpleVector(getDim()));
+  _f.reset(new SimpleVector(getDim()));
 
   checkDynamicalSystem();
 }
@@ -150,12 +137,12 @@ bool FirstOrderLinearDS::checkDynamicalSystem() // useless ...?
 void FirstOrderLinearDS::initRhs(double time)
 {
   computeRhs(time); // If necessary, this will also compute A and b.
-  if (! _jacXRhs)  // if not allocated with a set or anything else
+  if (! _jacxRhs)  // if not allocated with a set or anything else
   {
     if (_A && ! _M)  // if M is not defined, then A = jacobianXRhs, no memory allocation for that one.
-      _jacXRhs = _A;
+      _jacxRhs = _A;
     else if (_A && _M)
-      _jacXRhs.reset(new SimpleMatrix(_n, _n));
+      _jacxRhs.reset(new SimpleMatrix(_n, _n));
     // else no allocation, jacobian is equal to 0.
   }
   computeJacobianXRhs(time);
@@ -190,17 +177,20 @@ void FirstOrderLinearDS::setB(const Plugged_Vector_FTime& newValue)
 */
 void FirstOrderLinearDS::setComputeAFunction(const string& pluginPath, const string& functionName)
 {
-  Plugin::setFunction(&_APtr, pluginPath, functionName);
+  _pluginA->setComputeFunction(pluginPath, functionName);
+  //   Plugin::setFunction(&_APtr, pluginPath, functionName);
   //   SSL::buildPluginName(pluginNameAPtr,pluginPath,functionName);
 }
 
 void FirstOrderLinearDS::setComputeAFunction(LDSPtrFunction fct)
 {
-  _APtr = fct;
+  _pluginA->setComputeFunction((void*)fct);
+  //  _APtr=fct;
 }
 void FirstOrderLinearDS::setComputebFunction(const string& pluginPath, const string& functionName)
 {
-  Plugin::setFunction(&_bPtr, pluginPath, functionName);
+  //  Plugin::setFunction(&_bPtr, pluginPath, functionName);
+  _pluginb->setComputeFunction(pluginPath, functionName);
   if (!_b)
     _b.reset(new SimpleVector(getDim()));
   //  SSL::buildPluginName(pluginNamebPtr,pluginPath,functionName);
@@ -208,20 +198,21 @@ void FirstOrderLinearDS::setComputebFunction(const string& pluginPath, const str
 
 void FirstOrderLinearDS::setComputebFunction(LDSPtrFunction fct)
 {
-  _bPtr = fct;
+  _pluginb->setComputeFunction((void*)fct);
+  //  _bPtr = fct;
 }
 
 
 void FirstOrderLinearDS::computeA(const double time)
 {
-  if (_A && _APtr)
-    (_APtr)(time, _n, &(*_A)(0, 0), _z->size(), &(*_z)(0));
+  if (_A && _pluginA->fPtr)
+    ((LDSPtrFunction)_pluginA->fPtr)(time, _n, &(*_A)(0, 0), _z->size(), &(*_z)(0));
 }
 
 void FirstOrderLinearDS::computeb(const double time)
 {
-  if (_b && _bPtr)
-    (_bPtr)(time, _n, &(*_b)(0), _z->size(), &(*_z)(0));
+  if (_b && _pluginb->fPtr)
+    ((LDSPtrFunction)_pluginb->fPtr)(time, _n, &(*_b)(0), _z->size(), &(*_z)(0));
 }
 /*This function is called only by Lsodar and eventDriven*/
 void FirstOrderLinearDS::computeRhs(const double time, const bool)
@@ -260,12 +251,12 @@ void FirstOrderLinearDS::computeJacobianXRhs(const double time, const bool)
 
   if (_M && _A)
   {
-    *_jacXRhs = *_A;
+    *_jacxRhs = *_A;
     // copy M into invM for LU-factorisation, at the first call of this function.
     if (! _invM)
       _invM.reset(new SimpleMatrix(*_M));
     // solve MjacobianXRhs = A
-    _invM->PLUForwardBackwardInPlace(*_jacXRhs);
+    _invM->PLUForwardBackwardInPlace(*_jacxRhs);
   }
   // else jacobianXRhs = A, pointers equality.
 
@@ -300,21 +291,21 @@ FirstOrderLinearDS* FirstOrderLinearDS::convert(DynamicalSystem* ds)
 }
 void FirstOrderLinearDS::computeF(double time)
 {
-  prod(*_A, *_x[0], *mf);
+  prod(*_A, *_x[0], *_f);
   if (_b)
   {
     //    computeb(time);
-    *mf += *_b;
+    *_f += *_b;
   }
 }
 
 void FirstOrderLinearDS::computeF(double time, SP::SiconosVector x2)
 {
   RuntimeException::selfThrow("FirstOrderLinearDS::computeF - Must not be used");
-  prod(*_A, *x2, *mf);
+  prod(*_A, *x2, *_f);
   if (_b)
   {
     computeb(time);
-    *mf += *_b;
+    *_f += *_b;
   }
 }

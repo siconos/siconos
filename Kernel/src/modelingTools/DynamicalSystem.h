@@ -180,7 +180,7 @@ protected:
   SP::SiconosVector _x0;
 
   /** ResiduFree  */
-  SP::SiconosVector mResiduFree;
+  SP::SiconosVector _residuFree;
 
   /** the input vector due to the non-smooth law \f$ r \in R^{n}\f$
       (multiplier, force, ...)*/
@@ -189,17 +189,17 @@ protected:
 
 
   /** used by the relative convergence criteron*/
-  double mNormRef;
+  double _normRef;
 
   /** state of the system, \f$  x \in R^{n}\f$ - With \f$ x[0]=\f$ x \f$ , x[1]= \f$ \dot x \f$ . */
   VectorOfVectors _x;
 
   /** jacobian according to x of the right-hand side (\f$ \dot x =
       f(x,t) + r \f$) */
-  SP::SiconosMatrix _jacXRhs;
+  SP::SiconosMatrix _jacxRhs;
 
-  SP::SiconosMatrix _jacXG;
-  SP::SiconosMatrix _jacXDotG;
+  SP::SiconosMatrix _jacxG;
+  SP::SiconosMatrix _jacxDotG;
   //  SP::SiconosMatrix jacobianZG;
 
   /** Arbitrary algebraic values vector, z, discret state of the
@@ -220,7 +220,7 @@ protected:
    *  @param   the size of the vector z
    *  @param   a vector of parameters, z
    */
-  SP::PluggedObject _pluginG;
+  SP::PluggedObject _pluging;
 
   /** Plug-in to compute jacobianG (computeJacobianGPtr[i] for jacobianG[i]).
    *  @param   current time
@@ -231,8 +231,8 @@ protected:
    *  @param   the size of the vector z
    *  @param   a vector of parameters, z
    */
-  SP::PluggedObject _pluginJacXG;
-  SP::PluggedObject _pluginJacXDotG;
+  SP::PluggedObject _pluginJacxG;
+  SP::PluggedObject _pluginJacxDotG;
 
 
   /** the  previous state vectors stored in memory*/
@@ -257,7 +257,7 @@ protected:
    * \param DS::TYPES the type of the system, default=FONLDS, non-linear first order system.
    */
   DynamicalSystem(DS::TYPES = DS::FONLDS);
-  void zeroPlungin();
+  virtual void zeroPlugin();
 
 protected:
   /** a vector reserved to compute the freeState.*/
@@ -376,9 +376,9 @@ public:
     return _x0;
   }
 
-  inline const double& getNormRef()
+  inline const double& normRef()
   {
-    return mNormRef;
+    return _normRef;
   };
 
   // --- R ---
@@ -417,7 +417,7 @@ public:
    */
   inline SP::SiconosVector residuFree() const
   {
-    return mResiduFree;
+    return _residuFree;
   }
 
 
@@ -498,7 +498,7 @@ public:
    */
   inline const SimpleMatrix getJacobianXRhs() const
   {
-    return *_jacXRhs;
+    return *_jacxRhs;
   }
 
   /** get gradient according to \f$ x \f$ of the right-hand side (pointer)
@@ -506,7 +506,7 @@ public:
    */
   inline SP::SiconosMatrix jacobianXRhs() const
   {
-    return _jacXRhs;
+    return _jacxRhs;
   }
 
   /** set the value of JacobianXRhs to newValue
@@ -590,11 +590,11 @@ public:
       */
   inline SP::SiconosMatrix jacobianXG() const
   {
-    return _jacXG;
+    return _jacxG;
   }
   inline SP::SiconosMatrix jacobianXDotG() const
   {
-    return _jacXDotG;
+    return _jacxDotG;
   }
   //  inline SP::SiconosMatrix jacobianZG() const { return jacobianZG; }
 
@@ -610,11 +610,11 @@ public:
       */
   inline void setJacobianXGPtr(SP::SiconosMatrix newPtr)
   {
-    _jacXG = newPtr;
+    _jacxG = newPtr;
   }
   inline void setJacobianXDotGPtr(SP::SiconosMatrix newPtr)
   {
-    _jacXDotG = newPtr;
+    _jacxDotG = newPtr;
   }
   //  inline void setJacobianZGPtr( SP::SiconosMatrix newPtr) {jacobianZG = newPtr;}
 

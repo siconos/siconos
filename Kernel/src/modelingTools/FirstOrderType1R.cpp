@@ -103,9 +103,9 @@ void FirstOrderType1R::initialize(SP::Interaction inter)
   initDSLinks();
   // Initialize work vectors
 
-  workX.reset(new SimpleVector(sizeDS));
-  workZ.reset(new SimpleVector(sizeZ));
-  workY.reset(new SimpleVector(sizeY));
+  _workX.reset(new SimpleVector(sizeDS));
+  _workZ.reset(new SimpleVector(sizeZ));
+  _workY.reset(new SimpleVector(sizeY));
 
   // The initialization of each component depends on the way the Relation was built ie if the matrix/vector
   // was read from xml or not
@@ -135,86 +135,86 @@ void FirstOrderType1R::computeG(double t)
 
 void FirstOrderType1R::computeOutput(double t, unsigned int)
 {
-  assert(pluginH && "FirstOrderType1R::computeOutput() is not linked to a plugin function");
+  assert(_pluginh && "FirstOrderType1R::computeOutput() is not linked to a plugin function");
 
   SP::SiconosVector y = interaction()->y(0);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
 
-  *workX = *data[x];
-  *workZ = *data[z];
-  *workY = *y;
+  *_workX = *data[x];
+  *_workZ = *data[z];
+  *_workY = *y;
 
   unsigned int sizeY = y->size();
   unsigned int sizeX = data[x]->size();
   unsigned int sizeZ = data[z]->size(); //
 
-  ((Type1Ptr)(pluginH->fPtr))(sizeX, &(*workX)(0), sizeY, &(*workY)(0), sizeZ, &(*workZ)(0));
+  ((Type1Ptr)(_pluginh->fPtr))(sizeX, &(*_workX)(0), sizeY, &(*_workY)(0), sizeZ, &(*_workZ)(0));
 
   // Rebuilt y/z from Tmp
-  *y = *workY;
-  *data[z] = *workZ;
+  *y = *_workY;
+  *data[z] = *_workZ;
 }
 
 void FirstOrderType1R::computeInput(double t, unsigned int level)
 {
-  assert(pluginG && "FirstOrderType1R::computeInput() is not linked to a plugin function");
+  assert(_pluging && "FirstOrderType1R::computeInput() is not linked to a plugin function");
 
   SP::SiconosVector lambda = interaction()->lambda(level);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
 
-  *workX = *data[r];
-  *workZ = *data[z];
-  *workY = *lambda;
+  *_workX = *data[r];
+  *_workZ = *data[z];
+  *_workY = *lambda;
 
   unsigned int sizeY = lambda->size();
   unsigned int sizeZ = data[z]->size();
-  unsigned int sizeR = workX->size();
+  unsigned int sizeR = _workX->size();
 
 
-  ((Type1Ptr)(pluginG->fPtr))(sizeY, &(*workY)(0), sizeR, &(*workX)(0), sizeZ, &(*workZ)(0));
+  ((Type1Ptr)(_pluging->fPtr))(sizeY, &(*_workY)(0), sizeR, &(*_workX)(0), sizeZ, &(*_workZ)(0));
 
-  *data[r] = *workX;
-  *data[z] = *workZ;
+  *data[r] = *_workX;
+  *data[z] = *_workZ;
 }
 
 void FirstOrderType1R::computeJacXH(double)
 {
   //
   assert(index == 0 && "FirstOrderType1R::computeJacobianH(index): index is out of range");
-  assert(pluginjXH && "FirstOrderType1R::computeJacobianH() failed; not linked to a plug-in function.");
+  assert(_plunginJacxh && "FirstOrderType1R::computeJacobianH() failed; not linked to a plug-in function.");
 
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-  *workX = *data[x];
-  *workZ = *data[z];
+  *_workX = *data[x];
+  *_workZ = *data[z];
 
   unsigned int sizeY = interaction()->getSizeOfY();
   unsigned int sizeX = data[x]->size();
   unsigned int sizeZ = data[z]->size();
 
-  ((Type1Ptr)(pluginjXH->fPtr))(sizeX, &(*workX)(0), sizeY, &(*(JacXH))(0, 0), sizeZ, &(*workZ)(0));
+  ((Type1Ptr)(_plunginJacxh->fPtr))(sizeX, &(*_workX)(0), sizeY, &(*(JacXH))(0, 0), sizeZ, &(*_workZ)(0));
 
   // Rebuilt z from Tmp
-  *data[z] = *workZ;
+  *data[z] = *_workZ;
 }
 
 void FirstOrderType1R::computeJacLG(double)
 {
   assert(index == 0 && "FirstOrderType1R::computeJacobianG(index): index is out of range");
-  assert(pluginjLG && "FirstOrderType1R::computeJacobianG() failed; not linked to a plug-in function.");
+  assert(_pluginJacLg && "FirstOrderType1R::computeJacobianG() failed; not linked to a plug-in function.");
 
   SP::SiconosVector lambda = interaction()->lambda(0);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-  *workZ = *data[z];
-  *workY = *lambda;
+  *_workZ = *data[z];
+  *_workY = *lambda;
 
   unsigned int sizeY = lambda->size();
   unsigned int sizeX = data[x]->size();
   unsigned int sizeZ = data[z]->size();
 
-  ((Type1Ptr)(pluginjLG->fPtr))(sizeY, &(*workY)(0), sizeX, &(*(JacLG))(0, 0), sizeZ, &(*workZ)(0));
+  ((Type1Ptr)(_pluginJacLg->fPtr))(sizeY, &(*_workY)(0), sizeX, &(*(JacLG))(0, 0), sizeZ, &(*_workZ)(0));
 
   // Rebuilt z from Tmp
-  *data[z] = *workZ;
+  *data[z] = *_workZ;
 }
 
 FirstOrderType1R* FirstOrderType1R::convert(Relation *r)

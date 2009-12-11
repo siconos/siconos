@@ -62,10 +62,10 @@ void FirstOrderR::initialize(SP::Interaction inter)
   initDSLinks();
   // Initialize work vectors
 
-  workR.reset(new SimpleVector(sizeX));
-  workX.reset(new SimpleVector(sizeX));
-  workZ.reset(new SimpleVector(sizeZ));
-  workY.reset(new SimpleVector(sizeY));
+  _workR.reset(new SimpleVector(sizeX));
+  _workX.reset(new SimpleVector(sizeX));
+  _workZ.reset(new SimpleVector(sizeZ));
+  _workY.reset(new SimpleVector(sizeY));
 }
 
 void FirstOrderR::computeJacXH(double)

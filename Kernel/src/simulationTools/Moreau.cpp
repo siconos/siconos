@@ -278,7 +278,7 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
     else
       W->eye();
 
-    // d->computeJacobianXF(t); // Computation of JacXF is not required here
+    // d->computeJacobianXF(t); // Computation of JacxF is not required here
     // since it must have been done in OSI->initialize, before a call to this function.
 
     // Add -h*theta*jacobian_XF to W
@@ -1042,7 +1042,7 @@ void Moreau::updateState(unsigned int level)
       if (baux)
       {
         ds->subWorkVector(x, DynamicalSystem::local_buffer);
-        double aux = ((ds->getWorkVector(DynamicalSystem::local_buffer))->norm2()) / (ds->getNormRef());
+        double aux = ((ds->getWorkVector(DynamicalSystem::local_buffer))->norm2()) / (ds->normRef());
         if (aux > RelativeTol)
           simulationLink->setRelativeConvergenceCriterionHeld(false);
       }
@@ -1094,7 +1094,7 @@ void Moreau::updateState(unsigned int level)
       if (baux)
       {
         ds->subWorkVector(q, DynamicalSystem::local_buffer);
-        double aux = ((ds->getWorkVector(DynamicalSystem::local_buffer))->norm2()) / (ds->getNormRef());
+        double aux = ((ds->getWorkVector(DynamicalSystem::local_buffer))->norm2()) / (ds->normRef());
         if (aux > RelativeTol)
           simulationLink->setRelativeConvergenceCriterionHeld(false);
       }

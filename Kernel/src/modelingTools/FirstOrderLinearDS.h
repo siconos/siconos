@@ -87,8 +87,9 @@ protected:
   * @param size of vector z
   * @param[in,out] z a vector of user-defined parameters
   */
-  LDSPtrFunction _APtr;
-  std::string _pluginNameAPtr;
+  //  LDSPtrFunction _APtr;
+  //  std::string _pluginNameAPtr;
+  SP::PluggedObject _pluginA;
 
   /** FirstOrderLinearDS plug-in to compute b(t,z), id = "b"
   * @param time : current time
@@ -97,8 +98,9 @@ protected:
   * @param size of vector z
   * @param[in,out] param  : a vector of user-defined parameters
   */
-  LDSPtrFunction _bPtr;
-  std::string _pluginNamebPtr;
+  //  LDSPtrFunction _bPtr;
+  //  std::string _pluginNamebPtr;
+  SP::PluggedObject _pluginb;
 
   /** default constructor
    */

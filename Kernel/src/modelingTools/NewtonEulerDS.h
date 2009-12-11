@@ -201,7 +201,7 @@ protected:
    */
   FPtr5 computeJacobianQDotNNLPtr;
 
-  void zeroPlungin();
+  void zeroPlugin();
 
 public:
 

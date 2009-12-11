@@ -50,10 +50,10 @@ void NewtonEulerR::initComponents()
     _jacQHT.reset(new SimpleMatrix(_ysize, _xsize));
 
 
-  workX.reset(new SimpleVector(_xsize));
+  _workX.reset(new SimpleVector(_xsize));
   _workQ.reset(new SimpleVector(_qsize));
-  workZ.reset(new SimpleVector(interaction()->getSizeZ()));
-  workY.reset(new SimpleVector(_ysize));
+  _workZ.reset(new SimpleVector(interaction()->getSizeZ()));
+  _workY.reset(new SimpleVector(_ysize));
 }
 
 void NewtonEulerR::initialize(SP::Interaction inter)

@@ -55,7 +55,7 @@ NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Velocity0, 
   DynamicalSystem(DS::NENLDS, 6)
 {
   _p.resize(3);
-  zeroPlungin();
+  zeroPlugin();
   // --- NEWTONEULER INHERITED CLASS MEMBERS ---
   // -- Memory allocation for vector and matrix members --
 
@@ -73,7 +73,7 @@ NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Velocity0, 
   _v.reset(new SimpleVector(_n));
   (*_q) = (*_q0);
   _dotq.reset(new SimpleVector(_qDim));
-  mResiduFree.reset(new SimpleVector(_n));
+  _residuFree.reset(new SimpleVector(_n));
   _W.reset(new SimpleMatrix(_n, _n));
   _luW.reset(new SimpleMatrix(_n, _n));
   _W->zero();
@@ -100,7 +100,7 @@ NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Velocity0, 
   _T->setValue(2, 2, 1.0);
   updateT();
 }
-void NewtonEulerDS::zeroPlungin()
+void NewtonEulerDS::zeroPlugin()
 {
   computeJacobianQNNLPtr = NULL;
   computeJacobianQDotNNLPtr = NULL;
@@ -217,13 +217,13 @@ void NewtonEulerDS::initRhs(double time)
   //   _workMatrix[idMatrix].reset(new SimpleMatrix(_ndof, _ndof, IDENTITY));
 
   //   if(flag1&&flag2)
-  //     _jacXRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[jacobianXBloc10], _workMatrix[jacobianXBloc11]));
+  //     _jacxRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[jacobianXBloc10], _workMatrix[jacobianXBloc11]));
   //   else if(flag1) // flag2 = false
-  //     _jacXRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[jacobianXBloc10], _workMatrix[zeroMatrix]));
+  //     _jacxRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[jacobianXBloc10], _workMatrix[zeroMatrix]));
   //   else if(flag2) // flag1 = false
-  //     _jacXRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[zeroMatrix], _workMatrix[jacobianXBloc11]));
+  //     _jacxRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[zeroMatrix], _workMatrix[jacobianXBloc11]));
   //   else
-  //     _jacXRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[zeroMatrix], _workMatrix[zeroMatrix]));
+  //     _jacxRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[zeroMatrix], _workMatrix[zeroMatrix]));
 }
 
 void NewtonEulerDS::initialize(const string& simulationType, double time, unsigned int sizeOfMemory)
