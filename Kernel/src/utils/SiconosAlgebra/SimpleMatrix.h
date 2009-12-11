@@ -583,7 +583,7 @@ public:
    *  \param a const SimpleMatrix&
    *  \return a const SimpleMatrix
    */
-  friend const SimpleMatrix operator * (const SimpleMatrix&, const SimpleMatrix&);
+  //  friend const SimpleMatrix operator * (const SimpleMatrix&,const SimpleMatrix&);
   /** multiplication of a SP::SimpleMatrix by a SP::SimpleMatrix
    *  \param a const SP::SiconosMatrix
    *  \param a const SP::SimpleMatrix

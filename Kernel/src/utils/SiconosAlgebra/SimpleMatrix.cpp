@@ -2567,15 +2567,15 @@ void SimpleMatrix::resetLU()
   isPLUFactorized = false;
   isPLUInversed = false;
 }
-const SimpleMatrix operator * (const SimpleMatrix & A, const SimpleMatrix& B)
-{
-  return (DenseMat)prod(*A.dense() , *B.dense());
-  //  return A;
-}
+// const SimpleMatrix operator * (const SimpleMatrix & A, const SimpleMatrix& B )
+// {
+//   return (DenseMat)prod(*A.dense() , *B.dense());
+//   //  return A;
+// }
 
 SP::SimpleMatrix operator * (const SP::SimpleMatrix A, const SP::SimpleMatrix B)
 {
-  SP::SimpleMatrix aux(new SimpleMatrix(*A * *B));
+  SP::SimpleMatrix aux(new SimpleMatrix((DenseMat)prod(*(*A).dense() , *(*B).dense())));
   return aux;
 }
 
