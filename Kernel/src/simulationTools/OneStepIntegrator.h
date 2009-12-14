@@ -169,6 +169,11 @@ public:
    */
   void setDynamicalSystems(const DynamicalSystemsSet&);
 
+  /** insert a dynamical system in this Integrator
+   *  \param a SP::DynamicalSystem
+   */
+  virtual void insertDynamicalSystem(SP::DynamicalSystem ds);
+
   /** get the set of Interactions associated with the Integrator
    *  \return an InteractionsSet
    */

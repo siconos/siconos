@@ -39,20 +39,24 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
  *
  * See User's guide, \ref docSimuMoreauTS for details.
  *
- * Moreau class is used to define some time-integrators methods for a list of dynamical systems.
- * Each DynamicalSystem is associated to a SiconosMatrix, named "W", and a double, "theta", through two
- * STL maps:
- * - WMap, with WMap[ds] = a pointer to a SiconosMatrix
- * - thetaMap, thetaMap[ds] = a double
- * ds being a SP::DynamicalSystem
+ * Moreau class is used to define some time-integrators methods for a
+ * list of dynamical systems.
+
+ * A Moreau instance is defined by the value of theta and the list of
+ * concerned dynamical systems.  Each DynamicalSystem is associated to
+ * a SiconosMatrix, named "W"
  *
- * W matrices are initialized and computed in initW and computeW. Depending on the DS type, they
- * may depend on time and DS state (x).
+ * W matrices are initialized and computed in initW and
+ * computeW. Depending on the DS type, they may depend on time and DS
+ * state (x).
  *
  * Main functions:
  *
- * - computeFreeState(): computes xfree (or vfree), dynamical systems state without taking non-smooth part into account \n
- * - updateState(): computes x (q,v), the complete dynamical systems states.
+ * - computeFreeState(): computes xfree (or vfree), dynamical systems
+ *   state without taking non-smooth part into account \n
+ *
+ * - updateState(): computes x (q,v), the complete dynamical systems
+ *    states.
  *
  */
 class Moreau : public OneStepIntegrator
@@ -63,7 +67,7 @@ protected:
   MapOfDSMatrices WMap;
 
   /** Stl map that associates a theta parameter for the integration scheme to each DynamicalSystem of the OSI */
-  MapOfDouble thetaMap;
+  double _theta;
 
   /** Default constructor
    */
@@ -88,12 +92,6 @@ public:
    *  \param theta value for all these DS.
    */
   Moreau(DynamicalSystemsSet&, double);
-
-  /** constructor from a minimum set of data
-   *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
-   *  \param Map of theta values for the DS.
-   */
-  Moreau(DynamicalSystemsSet&, const MapOfDouble&);
 
   /** destructor
    */
@@ -141,30 +139,15 @@ public:
 
   // -- theta --
 
-  /** get theta map
-   *  \return a MapOfDouble
-   */
-  inline MapOfDouble getThetaMap() const
-  {
-    return thetaMap;
-  };
-
-  /** set theta map
-   *  \param a MapOfDouble
-   */
-  void setThetaMap(const MapOfDouble&);
-
-  /** get thetaMap[ds]
-   *  \param a DynamicalSystem
+  /** get theta
    *  \return a double
    */
-  const double getTheta(SP::DynamicalSystem);
+  const double theta();
 
-  /** set the value of thetaMap[ds]
+  /** set the value of theta
    *  \param a double
-   *  \param a DynamicalSystem
    */
-  void setTheta(double, SP::DynamicalSystem);
+  void setTheta(double);
 
   // --- OTHER FUNCTIONS ---
 
@@ -215,6 +198,11 @@ public:
   /** Displays the data of the Moreau's integrator
    */
   void display();
+
+  /** insert a dynamical system in this Integrator
+   *  \param a SP::DynamicalSystem
+   */
+  void insertDynamicalSystem(SP::DynamicalSystem ds);
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param OneStepIntegrator* : the integrator which must be converted

@@ -69,6 +69,9 @@ class Simulation;
 class TimeStepping;
 class EventDriven;
 
+class Lmgc2DDSK;
+
+
 //namespace Siconos
 //{
 
@@ -130,6 +133,8 @@ public:
   VISIT(Simulation);
   VISIT(TimeStepping);
   VISIT(EventDriven);
+
+  VISIT(Lmgc2DDSK);
 };
 
 //}

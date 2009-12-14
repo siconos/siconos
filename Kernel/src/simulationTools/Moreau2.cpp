@@ -70,11 +70,9 @@ void Moreau2::computeFreeState()
   SP::SiconosMatrix  W; // W Moreau matrix of the current DS.
   SP::SiconosMatrix  M; // W Moreau matrix of the current DS.
   DS::TYPES dsType ; // Type of the current DS.
-  double theta; // Theta parameter of the current ds.
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     ds = *it; // the considered dynamical system
-    theta = thetaMap[ds]; // Its theta parameter
     dsType = ds->getType(); // Its type
     W = WMap[ds]; // Its W Moreau matrix of iteration.
 
@@ -105,7 +103,7 @@ void Moreau2::computeFreeState()
       if (A)
       {
         d->computeA(told);
-        double coeff = h * (1 - theta);
+        double coeff = h * (1 - _theta);
         prod(coeff, *A, *xold, *ffree, false);
         // fFree += h(1-theta)A_i*x_i
       }
@@ -114,9 +112,9 @@ void Moreau2::computeFreeState()
       {
         // fFree += h(1-theta)*bi + h*theta*bi+1
         //        d->computeb(told); // bi
-        scal(h * (1.0 - theta), *d->b(), *ffree, false);
+        scal(h * (1.0 - _theta), *d->b(), *ffree, false);
         d->computeb(t); // bi+1
-        scal(h * theta, *d->b(), *ffree, false);
+        scal(h * _theta, *d->b(), *ffree, false);
       }
 
       // -- Update W --
@@ -139,7 +137,7 @@ void Moreau2::computeFreeState()
 
       SP::SiconosMatrix A = d->A();
       if (A)
-        prod(h * (1 - theta), *A, *xold, *ffree, true); // ffree = h*(1-theta)*A*xi
+        prod(h * (1 - _theta), *A, *xold, *ffree, true); // ffree = h*(1-theta)*A*xi
       else
         ffree->zero();
       SP::SiconosVector b = d->b();
@@ -186,13 +184,13 @@ void Moreau2::computeFreeState()
       {
         // computes fL(ti,vi,qi)
         d->computeFL(told, qold, vold);
-        double coef = h * (1 - theta);
+        double coef = h * (1 - _theta);
         // ffree += coef * fL_i
         scal(coef, *d->fL(), *ffree, false);
 
         // computes fL(ti+1, v_k,i+1, q_k,i+1) = fL(t,v,q)
         d->computeFL(t);
-        coef = h * theta;
+        coef = h * _theta;
         // ffree += coef * fL_k,i+1
         scal(coef, *d->fL(), *ffree, false);
       }
@@ -238,7 +236,7 @@ void Moreau2::computeFreeState()
       SP::SiconosMatrix  K = d->getKPtr();
       if (K)
       {
-        coeff = -h * h * theta;
+        coeff = -h * h * _theta;
         prod(coeff, *K, *vold, *ffree, false); // ffree += -h^2*theta*K*vi
         prod(-h, *K, *qold, *ffree, false); // ffree += -h*K*qi
       }
@@ -248,11 +246,11 @@ void Moreau2::computeFreeState()
       {
         // computes Fext(ti)
         d->computeFExt(told);
-        coeff = h * (1 - theta);
+        coeff = h * (1 - _theta);
         scal(coeff, *Fext, *ffree, false); // ffree += h*(1-theta) * fext(ti)
         // computes Fext(ti+1)
         d->computeFExt(t);
-        coeff = h * theta;
+        coeff = h * _theta;
         scal(coeff, *Fext, *ffree, false); // ffree += h*theta * fext(ti+1)
       }
 

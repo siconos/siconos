@@ -551,12 +551,11 @@ public:
    */
   virtual void saveNSProblemToXML() = 0;
 
-  /** get the OSI-related matrices used to compute the current Unitary Relation unitaryBlock (Ex: for Moreau, W and Theta)
+  /** get the OSI-related matrices used to compute the current Unitary Relation unitaryBlock (Ex: for Moreau, W)
    *  \param a pointer to UnitaryRelation
    *  \param a MapOfDSMatrices(in-out parameter)
-   *  \param a MapOfDouble(in-out parameter)
    */
-  virtual void getOSIMaps(SP::UnitaryRelation, MapOfDSMatrices&, MapOfDouble&);
+  virtual void getOSIMaps(SP::UnitaryRelation, MapOfDSMatrices&);
 
 
   /** clear associated maps */

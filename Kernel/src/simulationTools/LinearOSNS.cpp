@@ -188,8 +188,7 @@ void LinearOSNS::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelatio
   // If OSI = MOREAU, centralUnitaryBlocks = W if OSI = LSODAR,
   // centralUnitaryBlocks = M (mass matrices)
   MapOfDSMatrices centralUnitaryBlocks;
-  MapOfDouble Theta; // If OSI = LSODAR, Theta remains empty
-  getOSIMaps(UR1, centralUnitaryBlocks, Theta);
+  getOSIMaps(UR1, centralUnitaryBlocks);
 
   SP::SiconosMatrix currentUnitaryBlock = _unitaryBlocks[UR1][UR2];
 

@@ -95,6 +95,11 @@ void OneStepIntegrator::setDynamicalSystems(const DynamicalSystemsSet& newSet)
   OSIDynamicalSystems->insert(newSet.begin(), newSet.end());
 }
 
+void OneStepIntegrator::insertDynamicalSystem(SP::DynamicalSystem ds)
+{
+  OSIDynamicalSystems->insert(ds);
+}
+
 void OneStepIntegrator::setInteractions(const InteractionsSet& newSet)
 {
   OSIInteractions->insert(newSet.begin(), newSet.end());

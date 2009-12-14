@@ -570,10 +570,10 @@ void OneStepNSProblem::saveNSProblemToXML()
   RuntimeException::selfThrow("OneStepNSProblem::saveNSProblemToXML - Not yet implemented");
 }
 
-void OneStepNSProblem::getOSIMaps(SP::UnitaryRelation UR, MapOfDSMatrices& centralUnitaryBlocks, MapOfDouble& Theta)
+void OneStepNSProblem::getOSIMaps(SP::UnitaryRelation UR, MapOfDSMatrices& centralUnitaryBlocks)
 {
-  // === OSI = MOREAU : gets W matrices and scalar Theta of each DS concerned by the UnitaryRelation ===
-  // === OSI = LSODAR : gets M matrices of each DS concerned by the UnitaryRelation, Theta remains empty ===
+  // === OSI = MOREAU : gets W matrices ===
+  // === OSI = LSODAR : gets M matrices of each DS concerned by the UnitaryRelation ===
 
   SP::OneStepIntegrator Osi;
   OSI::TYPES osiType; // type of the current one step integrator
@@ -590,7 +590,6 @@ void OneStepNSProblem::getOSIMaps(SP::UnitaryRelation UR, MapOfDSMatrices& centr
         centralUnitaryBlocks[*itDS] = (boost::static_pointer_cast<Moreau> (Osi))->getWPtr(*itDS); // get its W matrix ( pointer link!)
       else
         centralUnitaryBlocks[*itDS] = (boost::static_pointer_cast<NewtonEulerDS> (*itDS))->luW(); // get its W matrix ( pointer link!)
-      Theta[*itDS] = (boost::static_pointer_cast<Moreau> (Osi))->getTheta(*itDS);
     }
     else if (osiType == OSI::LSODAR) // Warning: LagrangianDS only at the time !!!
     {

@@ -628,10 +628,6 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
 
     for (j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j)
     {
-      printf("j=%d\n", j);
-
-
-
       SP::LagrangianDS ds2 = (*neighbours.first)->body;
       int ids1 = ds1->number();
       int ids2 = ds2->number();

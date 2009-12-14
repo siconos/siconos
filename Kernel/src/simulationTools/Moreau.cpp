@@ -33,7 +33,7 @@ using namespace RELATION;
 Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
   OneStepIntegrator(OSI::MOREAU)
 {
-  // Note: we do not call xml constructor of OSI, but default one, since we need to download theta and DS at the same time.
+  // Note: we do not call xml constructor of OSI, but default one, since we need to download _theta and DS at the same time.
 
   if (!osiXML)
     RuntimeException::selfThrow("Moreau::xml constructor - OneStepIntegratorXML object == NULL.");
@@ -41,7 +41,7 @@ Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
   integratorXml = osiXML;
   SP::MoreauXML moreauXml = boost::static_pointer_cast<MoreauXML>(osiXML);
 
-  // Required inputs: a list of DS and one theta per DS.
+  // Required inputs: a list of DS and one _theta per DS.
   // No xml entries at the time for sizeMem and W.
 
   if (!osiXML->hasDSList())
@@ -66,9 +66,12 @@ Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
       OSIDynamicalSystems->insert(*it);
       // get corresponding theta. In xml they must be sorted in an order that corresponds to growing DS-numbers order.
       if (moreauXml->hasAllTheta()) // if one single value for all theta
-        thetaMap[*it] = thetaXml[0];
+        _theta = thetaXml[0];
       else
-        thetaMap[*it] = thetaXml[i++];
+      {
+        // should not happen
+        RuntimeException::selfThrow("Multiples theta values for Moreau integrator are not valid anymore : use several Moreau instantiation instead.");
+      }
     }
   }
   else
@@ -86,9 +89,11 @@ Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
       ds = dsList->getPtr(*it);
       OSIDynamicalSystems->insert(ds);
       if (moreauXml->hasAllTheta()) // if one single value for all theta
-        thetaMap[ds] = thetaXml[0];
+        _theta = thetaXml[0];
       else
-        thetaMap[ds] = thetaXml[i++];
+      {
+        RuntimeException::selfThrow("Multiples theta values for Moreau integrator are not valid anymore : use several Moreau instantiation instead.");
+      }
     }
   }
   // W loading: not yet implemented
@@ -97,22 +102,24 @@ Moreau::Moreau(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList):
 }
 
 // --- constructor from a minimum set of data ---
-Moreau::Moreau(SP::DynamicalSystem newDS, double newTheta): OneStepIntegrator(OSI::MOREAU)
+Moreau::Moreau(SP::DynamicalSystem newDS, double newTheta) :
+  OneStepIntegrator(OSI::MOREAU)
 {
   OSIDynamicalSystems->insert(newDS);
-  thetaMap[newDS] = newTheta;
+  _theta = newTheta;
 }
 
 // --- constructor from a set of data ---
-Moreau::Moreau(DynamicalSystemsSet& newDS, double newTheta): OneStepIntegrator(OSI::MOREAU, newDS)
+Moreau::Moreau(DynamicalSystemsSet& newDS, double newTheta):
+  OneStepIntegrator(OSI::MOREAU, newDS)
 {
-  for (DSIterator itDS = OSIDynamicalSystems->begin(); itDS != OSIDynamicalSystems->end(); ++itDS)
-    thetaMap[*itDS] = newTheta;
+  _theta = newTheta;
 }
 
-Moreau::Moreau(DynamicalSystemsSet& newDS, const MapOfDouble& newTheta): OneStepIntegrator(OSI::MOREAU, newDS)
+// Note: OSIDynamicalSystems and thetaMap must disappear
+void Moreau::insertDynamicalSystem(SP::DynamicalSystem ds)
 {
-  thetaMap = newTheta;
+  OSIDynamicalSystems->insert(ds);
 }
 
 void Moreau::setWMap(const MapOfDSMatrices& newMap)
@@ -202,23 +209,14 @@ void Moreau::setWPtr(SP::SiconosMatrix newPtr, SP::DynamicalSystem ds)
   WMap[ds] = newPtr;                  // link with new pointer
 }
 
-void Moreau::setThetaMap(const MapOfDouble& newMap) // useless function ?
+inline const double Moreau::theta()
 {
-  thetaMap = newMap;
+  return _theta;
 }
 
-const double Moreau::getTheta(SP::DynamicalSystem ds)
+void Moreau::setTheta(double newTheta)
 {
-  if (!ds)
-    RuntimeException::selfThrow("Moreau::getTheta(ds) - ds == NULL");
-  return thetaMap[ds];
-}
-
-void Moreau::setTheta(double newTheta, SP::DynamicalSystem ds)
-{
-  if (!ds)
-    RuntimeException::selfThrow("Moreau::setTheta(val,ds) - ds == NULL");
-  thetaMap[ds] = newTheta;
+  _theta = newTheta;
 }
 
 void Moreau::initialize(SP::Simulation sim)
@@ -263,13 +261,12 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
 
   SP::SiconosMatrix W = WMap[ds];
   double h = simulationLink->timeStep();
-  double theta = thetaMap[ds];
   DS::TYPES dsType = ds->getType();
 
   // 1 - First order non linear systems
   if (dsType == FONLDS || dsType == FOLDS || dsType == FOLTIDS)
   {
-    // W =  M - h*theta* [jacobian_x f(t,x,z)]
+    // W =  M - h*_theta* [jacobian_x f(t,x,z)]
     SP::FirstOrderNonLinearDS d = boost::static_pointer_cast<FirstOrderNonLinearDS> (ds);
 
     // Copy M or I if M is Null into W
@@ -281,8 +278,8 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
     // d->computeJacobianXF(t); // Computation of JacxF is not required here
     // since it must have been done in OSI->initialize, before a call to this function.
 
-    // Add -h*theta*jacobian_XF to W
-    scal(-h * theta, *d->jacobianXF(), *W, false);
+    // Add -h*_theta*jacobian_XF to W
+    scal(-h * _theta, *d->jacobianXF(), *W, false);
   }
   // 2 - First order linear systems
   //   else if (dsType == FOLDS || dsType == FOLTIDS)
@@ -293,7 +290,7 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
   //       else
   //  W->eye();
 
-  //       scal(-h*theta, *d->A(),*W,false);
+  //       scal(-h*_theta, *d->A(),*W,false);
   //     }
   // 3 - Lagrangian non linear systems
   else if (dsType == LNLDS)
@@ -305,10 +302,10 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
     *W = *d->mass();
 
     if (C)
-      scal(-h * theta, *C, *W, false); // W -= h*theta*C
+      scal(-h * _theta, *C, *W, false); // W -= h*_theta*C
 
     if (K)
-      scal(-h * h * theta * theta, *K, *W, false); //*W -= h*h*theta*theta**K;
+      scal(-h * h * _theta * _theta, *K, *W, false); //*W -= h*h*_theta*_theta**K;
   }
   // 4 - Lagrangian linear systems
   else if (dsType == LLTIDS)
@@ -320,10 +317,10 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
     *W = *d->mass();
 
     if (C)
-      scal(h * theta, *C, *W, false); // W += h*theta *C
+      scal(h * _theta, *C, *W, false); // W += h*_theta *C
 
     if (K)
-      scal(h * h * theta * theta, *K, *W, false); // W = h*h*theta*theta*K
+      scal(h * h * _theta * _theta, *K, *W, false); // W = h*h*_theta*_theta*K
   }
 
   // === ===
@@ -357,7 +354,6 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
          "Moreau::computeW(t,ds) - W(ds) does not exists. Maybe you forget to initialize the osi?");
 
   double h = simulationLink->timeStep();
-  double theta = thetaMap[ds];
   DS::TYPES dsType = ds->getType();
 
   SP::SiconosMatrix W = WMap[ds];
@@ -365,7 +361,7 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
   // 1 - First order non linear systems
   if (dsType == FONLDS)
   {
-    // W =  M - h*theta* [jacobian_x f(t,x,z)]
+    // W =  M - h*_theta* [jacobian_x f(t,x,z)]
     SP::FirstOrderNonLinearDS d = boost::static_pointer_cast<FirstOrderNonLinearDS> (ds);
 
     // Copy M or I if M is Null into W
@@ -375,8 +371,8 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
       W->eye();
 
     d->computeJacobianXF(t);
-    // Add -h*theta*jacobian_XF to W
-    scal(-h * theta, *d->jacobianXF(), *W, false);
+    // Add -h*_theta*jacobian_XF to W
+    scal(-h * _theta, *d->jacobianXF(), *W, false);
   }
   // 2 - First order linear systems
   else if (dsType == FOLDS || dsType == FOLTIDS)
@@ -389,7 +385,7 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
       *W = *d->M();
     else
       W->eye();
-    scal(-h * theta, *d->A(), *W, false);
+    scal(-h * _theta, *d->A(), *W, false);
   }
   // 3 - Lagrangian non linear systems
   else if (dsType == LNLDS)
@@ -404,13 +400,13 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
     if (C)
     {
       d->computeJacobianQDotFL(t);
-      scal(-h * theta, *C, *W, false); // W -= h*theta*C
+      scal(-h * _theta, *C, *W, false); // W -= h*_theta*C
     }
 
     if (K)
     {
       d->computeJacobianQFL(t);
-      scal(-h * h * theta * theta, *K, *W, false); //*W -= h*h*theta*theta**K;
+      scal(-h * h * _theta * _theta, *K, *W, false); //*W -= h*h*_theta*_theta**K;
     }
   }
   // 4 - Lagrangian linear systems
@@ -453,7 +449,6 @@ double Moreau::computeResidu()
   DSIterator it;
   SP::DynamicalSystem ds; // Current Dynamical System.
   DS::TYPES dsType ; // Type of the current DS.
-  double theta; // Theta parameter of the current ds.
 
   double maxResidu = 0;
   double normResidu = maxResidu;
@@ -461,7 +456,6 @@ double Moreau::computeResidu()
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     ds = *it; // the considered dynamical system
-    theta = thetaMap[ds]; // Its theta parameter
     dsType = ds->getType(); // Its type
     SP::SiconosVector residuFree = ds->residuFree();
     // 1 - First Order Non Linear Systems
@@ -494,13 +488,13 @@ double Moreau::computeResidu()
       {
         // computes f(ti,xi)
         //        d->computeF(told,xold);
-        double coef = -h * (1 - theta);
+        double coef = -h * (1 - _theta);
         // residuFree += coef * f_i
         scal(coef, *d->fold(), *residuFree, false);
 
         // computes f(ti+1, x_k,i+1) = f(t,x)
         d->computeF(t);
-        coef = -h * theta;
+        coef = -h * _theta;
         // residuFree += coef * fL_k,i+1
         scal(coef, *d->f(), *residuFree, false);
       }
@@ -595,7 +589,7 @@ double Moreau::computeResidu()
       {
         // computes fL(ti,vi,qi)
         d->computeFL(told, qold, vold);
-        double coef = -h * (1 - theta);
+        double coef = -h * (1 - _theta);
         // residuFree += coef * fL_i
         scal(coef, *d->fL(), *residuFree, false);
 
@@ -603,7 +597,7 @@ double Moreau::computeResidu()
 
         // d->computeFL(t,q,v) ?
         d->computeFL(t);
-        coef = -h * theta;
+        coef = -h * _theta;
         // residuFree += coef * fL_k,i+1
         scal(coef, *d->fL(), *residuFree, false);
       }
@@ -634,8 +628,8 @@ double Moreau::computeResidu()
       SP::SiconosMatrix K = d->getKPtr();
       if (K)
       {
-        coeff = -h * h * theta;
-        prod(coeff, *K, *vold, *residuFree, false); // vfree += -h^2*theta*K*vi
+        coeff = -h * h * _theta;
+        prod(coeff, *K, *vold, *residuFree, false); // vfree += -h^2*_theta*K*vi
         prod(-h, *K, *qold, *residuFree, false); // vfree += -h*K*qi
       }
 
@@ -644,12 +638,12 @@ double Moreau::computeResidu()
       {
         // computes Fext(ti)
         d->computeFExt(told);
-        coeff = h * (1 - theta);
-        scal(coeff, *Fext, *residuFree, false); // vfree += h*(1-theta) * fext(ti)
+        coeff = h * (1 - _theta);
+        scal(coeff, *Fext, *residuFree, false); // vfree += h*(1-_theta) * fext(ti)
         // computes Fext(ti+1)
         d->computeFExt(t);
-        coeff = h * theta;
-        scal(coeff, *Fext, *residuFree, false); // vfree += h*theta * fext(ti+1)
+        coeff = h * _theta;
+        scal(coeff, *Fext, *residuFree, false); // vfree += h*_theta * fext(ti+1)
       }
 
       (* d->workFree()) = *residuFree;
@@ -659,7 +653,7 @@ double Moreau::computeResidu()
     }
     else if (dsType == NENLDS)
     {
-      // residu = M(q*)(v_k,i+1 - v_i) - h*theta*fL(t,v_k,i+1, q_k,i+1) - h*(1-theta)*fL(ti,vi,qi) - pi+1
+      // residu = M(q*)(v_k,i+1 - v_i) - h*_theta*fL(t,v_k,i+1, q_k,i+1) - h*(1-_theta)*fL(ti,vi,qi) - pi+1
 
       // -- Convert the DS into a Lagrangian one.
       SP::NewtonEulerDS d = boost::static_pointer_cast<NewtonEulerDS> (ds);
@@ -678,7 +672,7 @@ double Moreau::computeResidu()
       {
         // computes fL(ti,vi,qi)
         SP::SiconosVector fLold = d->fLMemory()->getSiconosVector(0);
-        double coef = -h * (1 - theta);
+        double coef = -h * (1 - _theta);
         // residuFree += coef * fL_i
         scal(coef, *fLold, *residuFree, false);
 
@@ -686,7 +680,7 @@ double Moreau::computeResidu()
 
         // d->computeFL(t,q,v) ?
         d->computeFL(t);
-        coef = -h * theta;
+        coef = -h * _theta;
         // residuFree += coef * fL_k,i+1
         scal(coef, *d->fL(), *residuFree, false);
       }
@@ -727,11 +721,9 @@ void Moreau::computeFreeState()
   SP::DynamicalSystem ds; // Current Dynamical System.
   SP::SiconosMatrix W; // W Moreau matrix of the current DS.
   DS::TYPES dsType ; // Type of the current DS.
-  double theta; // Theta parameter of the current ds.
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     ds = *it; // the considered dynamical system
-    theta = thetaMap[ds]; // Its theta parameter
     dsType = ds->getType(); // Its type
     W = WMap[ds]; // Its W Moreau matrix of iteration.
 
@@ -940,12 +932,10 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
 
   DSIterator it;
   SP::SiconosMatrix W;
-  double theta;
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     SP::DynamicalSystem ds = *it;
     W = WMap[ds];
-    theta = thetaMap[ds];
     DS::TYPES dsType = ds->getType();
 
     if (dsType == LLTIDS)
@@ -976,7 +966,7 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
       SP::SiconosMatrix K = d->getKPtr();
       if (K)
       {
-        coeff = -h * h * theta;
+        coeff = -h * h * _theta;
         prod(coeff, *K, *vold, *v, false); // v += -h^2*theta*K*vi
         prod(-h, *K, *qold, *v, false); // v += -h*K*qi
       }
@@ -986,11 +976,11 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
       {
         // computes Fext(ti)
         d->computeFExt(tinit);
-        coeff = h * (1 - theta);
+        coeff = h * (1 - _theta);
         scal(coeff, *Fext, *v, false); // v += h*(1-theta) * fext(ti)
         // computes Fext(ti+1)
         d->computeFExt(tout);
-        coeff = h * theta;
+        coeff = h * _theta;
         scal(coeff, *Fext, *v, false); // v += h*theta * fext(ti+1)
       }
       // -> Solve WX = v and set v = X
@@ -1012,12 +1002,10 @@ void Moreau::updateState(unsigned int level)
 
   DSIterator it;
   SP::SiconosMatrix W;
-  double theta;
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
   {
     SP::DynamicalSystem ds = *it;
     W = WMap[ds];
-    theta = thetaMap[ds];
     // Get the DS type
 
     DS::TYPES dsType = ds->getType();
@@ -1085,9 +1073,9 @@ void Moreau::updateState(unsigned int level)
       SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
       // *q = *qold + h*(theta * *v +(1.0 - theta)* *vold)
-      double coeff = h * theta;
+      double coeff = h * _theta;
       scal(coeff, *v, *q) ; // q = h*theta*v
-      coeff = h * (1 - theta);
+      coeff = h * (1 - _theta);
       scal(coeff, *vold, *q, false); // q += h(1-theta)*vold
       *q += *qold;
 
@@ -1144,9 +1132,9 @@ void Moreau::updateState(unsigned int level)
       SP::SiconosVector dotqold = d->dotqMemory()->getSiconosVector(0);
       SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
       // *q = *qold + h*(theta * *v +(1.0 - theta)* *vold)
-      double coeff = h * theta;
+      double coeff = h * _theta;
       scal(coeff, *dotq, *q) ; // q = h*theta*v
-      coeff = h * (1 - theta);
+      coeff = h * (1 - _theta);
       scal(coeff, *dotqold, *q, false); // q += h(1-theta)*vold
       *q += *qold;
       //  cout<<"new q before normalizing"<<endl;
@@ -1179,7 +1167,7 @@ void Moreau::display()
     cout << "--> W of dynamical system number " << (*it)->number() << ": " << endl;
     if (WMap[*it]) WMap[*it]->display();
     else cout << "-> NULL" << endl;
-    cout << "--> and corresponding theta is: " << thetaMap[*it] << endl;
+    cout << "--> and corresponding theta is: " << _theta << endl;
   }
   cout << "================================" << endl;
 }
