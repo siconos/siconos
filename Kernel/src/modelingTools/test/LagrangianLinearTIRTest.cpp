@@ -204,7 +204,7 @@ void LagrangianLinearTIRTest::testGetJacPtr()
   cout << "--> Test: jac." << endl;
   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(C));
   folr->setDPtr(D);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJacQH: ", folr->jacQH() == C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJacqh: ", folr->jacQH() == C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJacLH: ", folr->jacLH() == D, true);
 
   cout << "--> setBPtr test ended with success." << endl;

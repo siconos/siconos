@@ -51,14 +51,14 @@ LagrangianLinearTIR::LagrangianLinearTIR(SP::RelationXML relxml):
 LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix newC):
   LagrangianR(LinearTIR)
 {
-  JacQH = newC;
+  Jacqh = newC;
 }
 
 // Constructor from a complete set of data
 LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix newC, SP::SiconosMatrix newD, SP::SiconosMatrix newF, SP::SiconosVector newE):
   LagrangianR(LinearTIR)
 {
-  JacQH = newC;
+  Jacqh = newC;
   JacLH = newD;
   F = newF;
   e = newE;
@@ -68,7 +68,7 @@ LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix newC, SP::SiconosMatr
 LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix newC, SP::SiconosVector newE):
   LagrangianR(LinearTIR)
 {
-  JacQH = newC;
+  Jacqh = newC;
   e = newE;
 }
 
@@ -76,7 +76,7 @@ LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix newC, SP::SiconosVect
 LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC):
   LagrangianR(LinearTIR)
 {
-  JacQH.reset(new SimpleMatrix(newC));
+  Jacqh.reset(new SimpleMatrix(newC));
 }
 
 // Constructor from a complete set of data (matrices)
@@ -84,7 +84,7 @@ LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC, const Sicono
   LagrangianR(LinearTIR)
 {
   RuntimeException::selfThrow("LagrangianLinearTIR::LagrangianLinearTIR,  copy matrix in constructor\n");
-  JacQH.reset(new SimpleMatrix(newC));
+  Jacqh.reset(new SimpleMatrix(newC));
   JacLH.reset(new SimpleMatrix(newD));
   F.reset(new SimpleMatrix(newF));
   e.reset(new SimpleVector(newE));
@@ -95,7 +95,7 @@ LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC, const Sicono
   LagrangianR(LinearTIR)
 {
   RuntimeException::selfThrow("LagrangianLinearTIR::LagrangianLinearTIR,  copy matrix in constructor\n");
-  JacQH.reset(new SimpleMatrix(newC));
+  Jacqh.reset(new SimpleMatrix(newC));
   e.reset(new SimpleVector(newE));
 }
 
@@ -104,7 +104,7 @@ void LagrangianLinearTIR::initComponents()
   unsigned int sizeY = interaction()->getSizeOfY();
   unsigned int sizeDS = interaction()->getSizeOfDS();
 
-  assert((JacQH) ? (JacQH->size(1) == sizeDS && JacQH->size(0) == sizeY) : 1 &&
+  assert((Jacqh) ? (Jacqh->size(1) == sizeDS && Jacqh->size(0) == sizeY) : 1 &&
          "LagrangianLinearTIR::initComponents inconsistent sizes between H matrix and the interaction.");
 
   assert((JacLH) ? (JacLH->size(0) == sizeY && JacLH->size(1) != sizeY) : 1 &&
@@ -125,7 +125,7 @@ void LagrangianLinearTIR::computeh(double time)
 {
   computeOutput(time, 0);
 }
-void LagrangianLinearTIR::computeG(double time)
+void LagrangianLinearTIR::computeg(double time)
 {
   computeInput(time, 0);
 }
@@ -137,7 +137,7 @@ void LagrangianLinearTIR::computeOutput(double time, unsigned int derivativeNumb
   SP::SiconosVector lambda = interaction()->lambda(derivativeNumber);
 
   //string name = "q"+toString<unsigned int>(derivativeNumber);
-  prod(*JacQH, *data[q0 + derivativeNumber], *y);
+  prod(*Jacqh, *data[q0 + derivativeNumber], *y);
 
   if (derivativeNumber == 0)
   {
@@ -160,7 +160,7 @@ void LagrangianLinearTIR::computeInput(double time, const unsigned int level)
 
   *_workL = *interaction()->lambda(level);
   // computation of p = Ht lambda
-  prod(*_workL, *JacQH, *data[p0 + level], false);
+  prod(*_workL, *Jacqh, *data[p0 + level], false);
   //gemv(CblasTrans,1.0,*H,*lambda,1.0, *data[name]); => not yet implemented for BlockVectors.
 }
 /*
@@ -180,7 +180,7 @@ void LagrangianLinearTIR::saveRelationToXML() const
   assert(relationxml &&
          "LagrangianLinearTIR::saveRelationToXML - object RelationXML does not exist");
 
-  (boost::static_pointer_cast<LinearRXML>(relationxml))->setC(*JacQH) ;
+  (boost::static_pointer_cast<LinearRXML>(relationxml))->setC(*Jacqh) ;
   (boost::static_pointer_cast<LinearRXML>(relationxml))->setE(*e) ;
   (boost::static_pointer_cast<LinearRXML>(relationxml))->setD(*JacLH) ;
   (boost::static_pointer_cast<LinearRXML>(relationxml))->setF(*F) ;
@@ -196,8 +196,8 @@ void LagrangianLinearTIR::display() const
   LagrangianR::display();
   cout << "===== Lagrangian Linear Relation display ===== " << endl;
   cout << " C: " << endl;
-  if (JacQH)
-    JacQH->display();
+  if (Jacqh)
+    Jacqh->display();
   else
     cout << " -> NULL " << endl;
   cout << " e: " << endl;

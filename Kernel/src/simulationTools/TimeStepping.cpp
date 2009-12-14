@@ -364,7 +364,7 @@ void TimeStepping::computeInitialResidu()
   SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
   for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
   {
-    (*it)->relation()->computeG(tkp1);
+    (*it)->relation()->computeg(tkp1);
     (*it)->relation()->computeh(tkp1);
   }
 

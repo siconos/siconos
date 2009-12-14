@@ -86,7 +86,7 @@ class LagrangianRheonomousR : public LagrangianR
 {
 
 protected:
-  SP::SiconosMatrix _JacQH;
+  SP::SiconosMatrix _Jacqh;
   /** plugged vector used to compute hDot */
   SP::SiconosVector _hDot;
 
@@ -99,7 +99,7 @@ protected:
    * @param sizeZ : size of vector z
    * @param[in,out] z : a vector of user-defined parameters
    */
-  //  SP::PluggedObject pluginjQH
+  //  SP::PluggedObject pluginjqh
   //  FPtr4 hPtr;
 
   /** LagrangianRheonomousR plug-in to compute hDot(q,t,z)
@@ -123,7 +123,7 @@ protected:
    * @param sizeZ : size of vector z
    * @param[in,out] z : a vector of user-defined parameters
    */
-  SP::PluggedObject _pluginJacQH;
+  SP::PluggedObject _pluginJacqh;
   //  FPtr4 computeJacqhPtr;
 
 
@@ -163,7 +163,7 @@ public:
   /** get vector hDot
    *  \return a SimpleVector
 
-  inline const SimpleVector getHDot() const { return *hDot; }
+  inline const SimpleVector gethDot() const { return *hDot; }
    */
 
   /** get a pointer on vector hDot
@@ -191,7 +191,7 @@ public:
   /** To get the name of hDot plugin
    *  \return a string
    */
-  inline const std::string getHDotName() const
+  inline const std::string gethDotName() const
   {
     return "no name";
   }
@@ -204,8 +204,8 @@ public:
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    */
-  void setComputeHDotFunction(const std::string& , const std::string&);
-  //  virtual void setComputeHFunction(const std::string& pluginPath, const std::string& functionName);
+  void setComputehDotFunction(const std::string& , const std::string&);
+  //  virtual void setComputehFunction(const std::string& pluginPath, const std::string& functionName);
   /** to compute y = h(q,v,t) using plug-in mechanism
    * \param: double, current time
    */
@@ -238,7 +238,7 @@ public:
    *  \param Relation* : the relation which must be converted
    * \return a pointer on the relation if it is of the right type, NULL otherwise
    */
-  virtual void computeG(double time);
+  virtual void computeg(double time);
   static LagrangianRheonomousR* convert(Relation *r);
 };
 

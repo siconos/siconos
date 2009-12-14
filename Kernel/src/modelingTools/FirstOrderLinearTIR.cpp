@@ -135,7 +135,7 @@ void FirstOrderLinearTIR::computeh(double time)
   computeOutput(time, 0);
 }
 
-void FirstOrderLinearTIR::computeG(double time)
+void FirstOrderLinearTIR::computeg(double time)
 {
   computeInput(time, 0);
 }

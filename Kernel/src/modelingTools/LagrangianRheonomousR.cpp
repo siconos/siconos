@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-// \todo : create a work vector for all tmp vectors used in computeG, computeh ...
+// \todo : create a work vector for all tmp vectors used in computeg, computeh ...
 
 #include "LagrangianRheonomousR.hpp"
 #include "RelationXML.hpp"
@@ -33,26 +33,26 @@ LagrangianRheonomousR::LagrangianRheonomousR(SP::RelationXML LRxml): LagrangianR
   // h plug-in
   if (!LRxml->hasH())
     RuntimeException::selfThrow("LagrangianRheonomousR:: xml constructor failed, can not find a definition for h.");
-  hName = LRxml->getHPlugin();
-  setComputeHFunction(SSL::getPluginName(hName), SSL::getPluginFunctionName(hName));
+  hName = LRxml->gethPlugin();
+  setComputehFunction(SSL::getPluginName(hName), SSL::getPluginFunctionName(hName));
 
   // Read hDot
   if (!LRxml->hasHDot())
     RuntimeException::selfThrow("LagrangianRheonomousR:: xml constructor failed, can not find a definition for hDot.");
   if (LRxml->isHDotPlugin())
   {
-    //    hDot.reset(new PVT2(LRxml->getHDotPlugin()));
-    _pluginhDot->setComputeFunction(SSL::getPluginName(LRxml->getHDotPlugin()), SSL::getPluginFunctionName(LRxml->getHDotPlugin()));
+    //    hDot.reset(new PVT2(LRxml->gethDotPlugin()));
+    _pluginhDot->setComputeFunction(SSL::getPluginName(LRxml->gethDotPlugin()), SSL::getPluginFunctionName(LRxml->gethDotPlugin()));
   }
   else
-    _hDot.reset(new SimpleVector(LRxml->getHDotVector()));
+    _hDot.reset(new SimpleVector(LRxml->gethDotVector()));
 
   if (!LRxml->hasJacobianH())
     RuntimeException::selfThrow("LagrangianRheonomousR:: xml constructor failed, can not find a definition for G0.");
   if (LRxml->isJacobianHPlugin(0))
-    _pluginJacQH->setComputeFunction(LRxml->getJacobianHPlugin(0));
+    _pluginJacqh->setComputeFunction(LRxml->getJacobianHPlugin(0));
   else
-    JacQH.reset(new SimpleMatrix(LRxml->getJacobianHMatrix(0)));
+    Jacqh.reset(new SimpleMatrix(LRxml->getJacobianHMatrix(0)));
 }
 
 // constructor from a set of data
@@ -60,16 +60,16 @@ LagrangianRheonomousR::LagrangianRheonomousR(const string& computeh, const strin
   LagrangianR(RheonomousR)
 {
   // h
-  setComputeHFunction(SSL::getPluginName(computeh), SSL::getPluginFunctionName(computeh));
+  setComputehFunction(SSL::getPluginName(computeh), SSL::getPluginFunctionName(computeh));
 
   // hDot
-  setComputeHDotFunction(SSL::getPluginName(computehDot), SSL::getPluginFunctionName(computehDot));
-  _pluginJacQH.reset(new PluggedObject());
-  _pluginJacQH->setComputeFunction(strcomputeJacqh);
+  setComputehDotFunction(SSL::getPluginName(computehDot), SSL::getPluginFunctionName(computehDot));
+  _pluginJacqh.reset(new PluggedObject());
+  _pluginJacqh->setComputeFunction(strcomputeJacqh);
 
   unsigned int sizeY = interaction()->getSizeOfY();
   unsigned int sizeQ = _workX->size();
-  JacQH.reset(new SimpleMatrix(sizeY, sizeQ));
+  Jacqh.reset(new SimpleMatrix(sizeY, sizeQ));
 }
 
 void LagrangianRheonomousR::initComponents()
@@ -83,11 +83,11 @@ void LagrangianRheonomousR::initComponents()
   else
     _hDot->resize(sizeY);
 }
-// void LagrangianRheonomousR::setComputeHFunction(const string& pluginPath, const string& functionName){
+// void LagrangianRheonomousR::setComputehFunction(const string& pluginPath, const string& functionName){
 //   Plugin::setFunction(&hPtr, pluginPath, functionName);
 // }
 
-void LagrangianRheonomousR::setComputeHDotFunction(const string& pluginPath, const string& functionName)
+void LagrangianRheonomousR::setComputehDotFunction(const string& pluginPath, const string& functionName)
 {
   _pluginhDot->setComputeFunction(pluginPath, functionName);
 }
@@ -117,9 +117,9 @@ void LagrangianRheonomousR::computeh(double time)
   }
   // else nothing
 }
-void LagrangianRheonomousR::computeG(double time)
+void LagrangianRheonomousR::computeg(double time)
 {
-  assert(false && "LagrangianScleronomousR::computeG : G is computed in computeInput!\n");
+  assert(false && "LagrangianScleronomousR::computeg : G is computed in computeInput!\n");
 }
 
 void LagrangianRheonomousR::computehDot(double time)
@@ -146,17 +146,17 @@ void LagrangianRheonomousR::computehDot(double time)
 void LagrangianRheonomousR::computeJacqh(double time)
 {
   // Note that second input arg is useless.
-  if (_pluginJacQH->fPtr)
+  if (_pluginJacqh->fPtr)
   {
     // Warning: temporary method to have contiguous values in
     // memory, copy of block to simple.
     *_workX = *data[q0];
     *_workZ = *data[z];
 
-    unsigned int sizeY = JacQH->size(0);
+    unsigned int sizeY = Jacqh->size(0);
     unsigned int sizeQ = _workX->size();
     unsigned int sizeZ = _workZ->size();
-    ((FPtr4)(_pluginJacQH->fPtr))(sizeQ, &(*_workX)(0), time, sizeY, &(*JacQH)(0, 0), sizeZ, &(*_workZ)(0));
+    ((FPtr4)(_pluginJacqh->fPtr))(sizeQ, &(*_workX)(0), time, sizeY, &(*Jacqh)(0, 0), sizeZ, &(*_workZ)(0));
     // Copy data that might have been changed in the plug-in call.
     *data[z] = *_workZ;
   }
@@ -174,11 +174,11 @@ void LagrangianRheonomousR::computeOutput(double time, unsigned int derivativeNu
     if (derivativeNumber == 1)
     {
       computehDot(time); // \todo: save hDot directly into y[1] ?
-      prod(*JacQH, *data[q1], *y);
+      prod(*Jacqh, *data[q1], *y);
       *y += *_hDot;
     }
     else if (derivativeNumber == 2)
-      prod(*JacQH, *data[q2], *y); // Approx:,  ...
+      prod(*Jacqh, *data[q2], *y); // Approx:,  ...
     // \warning :  the computation of y[2] (in event-driven simulation for instance) is approximated by  y[2] = JacH[0]q[2]. For the moment, other terms are neglected (especially, partial derivatives with respect to time).
     else
       RuntimeException::selfThrow("LagrangianRheonomousR::computeOutput(time,index), index out of range or not yet implemented.");
@@ -191,7 +191,7 @@ void LagrangianRheonomousR::computeInput(double time, unsigned int level)
   // get lambda of the concerned interaction
   SP::SiconosVector lambda = interaction()->lambda(level);
   // data[name] += trans(G) * lambda
-  prod(*lambda, *JacQH, *data[p0 + level], false);
+  prod(*lambda, *Jacqh, *data[p0 + level], false);
 
   //   SP::SiconosMatrix  GT = new SimpleMatrix(*G[0]);
   //   GT->trans();

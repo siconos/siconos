@@ -20,8 +20,8 @@
 
 // ===== Lagrangian DS  =====
 
-// Plugins for Fext, Fint, QNLInertia (vectors), Mass, JacobianQQNLInertia, JacobianVelocityQNLInertia,
-// JacobianQFint and JacobianVelocityFint (matrices)
+// Plugins for Fext, Fint, QNLInertia (vectors), Mass, JacobianqQNLInertia, JacobianVelocityQNLInertia,
+// JacobianqFint and JacobianVelocityFint (matrices)
 
 extern "C" void computeFInt(unsigned int *sizeOfq, const double *time, double *q, double *velocity, double *fInt)
 {
@@ -62,7 +62,7 @@ extern "C" void computeMass(unsigned int *sizeOfq, const double *time, double *q
 }
 
 
-extern "C" void computeJacobianQFInt(unsigned int *sizeOfq, const double *time, double *q, double *velocity, double *jacob)
+extern "C" void computeJacobianqFInt(unsigned int *sizeOfq, const double *time, double *q, double *velocity, double *jacob)
 {
 
   unsigned int n = *sizeOfq;
@@ -85,7 +85,7 @@ extern "C" void computeJacobianVelocityFInt(unsigned int *sizeOfq, const double 
 
 }
 
-extern "C" void computeJacobianQQNLInertia(unsigned int *sizeOfq, double *q, double *velocity, double *jacob)
+extern "C" void computeJacobianqQNLInertia(unsigned int *sizeOfq, double *q, double *velocity, double *jacob)
 {
   unsigned int n = *sizeOfq;
   for (unsigned int i = 0; i < n; i++)

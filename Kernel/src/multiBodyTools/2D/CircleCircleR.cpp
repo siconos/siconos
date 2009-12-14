@@ -51,7 +51,7 @@ void CircleCircleR::computeh(double)
 void CircleCircleR::computeJacqh(double)
 {
 
-  SimpleMatrix *g = (SimpleMatrix *) JacQH.get();
+  SimpleMatrix *g = (SimpleMatrix *) Jacqh.get();
 
   double x1 = (*data[q0])(0);
   double y1 = (*data[q0])(1);

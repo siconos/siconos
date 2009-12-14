@@ -61,7 +61,7 @@ extern "C" void computeNNL(unsigned int sizeOfq, const double *q, const double *
     NNL[i] = i * q[i];
 }
 
-extern "C" void computeJacobianQFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
+extern "C" void computeJacobianqFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
 {
   for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];
@@ -73,7 +73,7 @@ extern "C" void computeJacobianVelocityFInt(double time, unsigned int sizeOfq, c
     jacob[i] = i * q[0];
 }
 
-extern "C" void computeJacobianQNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
+extern "C" void computeJacobianqNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
 {
   for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];

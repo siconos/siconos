@@ -82,7 +82,7 @@ public:
   /** Returns the chosen value in xml file for the time step
    *   \return a double
    */
-  inline double getH() const
+  inline double geth() const
   {
     return  SiconosDOMTreeTools::getContentValue<double>(hNode);
   }

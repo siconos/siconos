@@ -67,8 +67,8 @@ protected:
 
 
   /** Jacobian matrices of H */
-  SP::SiconosMatrix JacQH;
-  SP::SiconosMatrix JacQDotH;
+  SP::SiconosMatrix Jacqh;
+  SP::SiconosMatrix JacqDotH;
   SP::SiconosMatrix JacLH;
 
   /** basic constructor
@@ -104,11 +104,11 @@ public:
    */
   inline SP::SiconosMatrix jacQH() const
   {
-    return JacQH;
+    return Jacqh;
   }
   inline SP::SiconosMatrix jacQDotH() const
   {
-    return JacQDotH;
+    return JacqDotH;
   }
   inline SP::SiconosMatrix jacLH() const
   {
@@ -131,9 +131,9 @@ public:
    *  \param SP::SiconosMatrix  newPtr
    *  \param unsigned int: index position in JacH vector
    */
-  inline void setJacQHPtr(SP::SiconosMatrix newPtr)
+  inline void setJacqhPtr(SP::SiconosMatrix newPtr)
   {
-    JacQH = newPtr ;
+    Jacqh = newPtr ;
   }
 
   /** To get the name of JacH[i] plugin
@@ -183,11 +183,11 @@ public:
   {
     ;
   }
-  void computeJacQG(double)
+  void computeJacqG(double)
   {
     ;
   }
-  void computeJacQDotG(double)
+  void computeJacqDotG(double)
   {
     ;
   }
@@ -201,8 +201,8 @@ public:
   /* compute all the G Jacobian */
   virtual void computeJacG(double t)
   {
-    computeJacQG(t);
-    computeJacQDotG(t);
+    computeJacqG(t);
+    computeJacqDotG(t);
     computeJacLG(t);
   }
 

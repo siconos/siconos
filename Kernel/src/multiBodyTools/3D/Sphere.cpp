@@ -96,18 +96,18 @@ void Sphere::computeNNL(SP::SiconosVector q, SP::SiconosVector v)
 
 
 
-void Sphere::computeJacobianQNNL()
+void Sphere::computeJacobianqNNL()
 {
 
-  Sphere::computeJacobianQNNL(q(), velocity());
+  Sphere::computeJacobianqNNL(q(), velocity());
 }
-void Sphere::computeJacobianQDotNNL()
+void Sphere::computeJacobianqDotNNL()
 {
 
-  Sphere::computeJacobianQDotNNL(q(), velocity());
+  Sphere::computeJacobianqDotNNL(q(), velocity());
 }
 
-void Sphere::computeJacobianQNNL(SP::SiconosVector q, SP::SiconosVector v)
+void Sphere::computeJacobianqNNL(SP::SiconosVector q, SP::SiconosVector v)
 {
   double theta    = q->getValue(3);
   double phi      = q->getValue(4);
@@ -127,7 +127,7 @@ void Sphere::computeJacobianQNNL(SP::SiconosVector q, SP::SiconosVector v)
 
 
 }
-void Sphere::computeJacobianQDotNNL(SP::SiconosVector q, SP::SiconosVector v)
+void Sphere::computeJacobianqDotNNL(SP::SiconosVector q, SP::SiconosVector v)
 {
   double theta    = q->getValue(3);
   double phi      = q->getValue(4);

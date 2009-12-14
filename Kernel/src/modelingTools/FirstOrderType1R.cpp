@@ -30,8 +30,8 @@ FirstOrderType1R::FirstOrderType1R(SP::RelationXML FORxml):
   // input g
   if (FORxml->hasG())
   {
-    gName = FORxml->getGPlugin();
-    setComputeGFunction(SSL::getPluginName(gName), SSL::getPluginFunctionName(gName));
+    gName = FORxml->getgPlugin();
+    setComputegFunction(SSL::getPluginName(gName), SSL::getPluginFunctionName(gName));
     // Gradients
     if (!FORxml->hasJacobianG())
       RuntimeException::selfThrow("FirstOrderType1R xml constructor failed. No input for gradient(s) of g function.");
@@ -50,8 +50,8 @@ FirstOrderType1R::FirstOrderType1R(SP::RelationXML FORxml):
   // output h
   if (FORxml->hasH())
   {
-    hName = FORxml->getHPlugin();
-    setComputeHFunction(SSL::getPluginName(hName), SSL::getPluginFunctionName(hName));
+    hName = FORxml->gethPlugin();
+    setComputehFunction(SSL::getPluginName(hName), SSL::getPluginFunctionName(hName));
     // Gradients
     if (!FORxml->hasJacobianH())
       RuntimeException::selfThrow("FirstOrderType1R xml constructor failed. No input for gradients of h function.");
@@ -72,8 +72,8 @@ FirstOrderType1R::FirstOrderType1R(const string& computeOut, const string& compu
 {
   // Size vector of pointers to functions.
   // Connect input and output to plug-in
-  setComputeHFunction(SSL::getPluginName(computeOut), SSL::getPluginFunctionName(computeOut));
-  setComputeGFunction(SSL::getPluginName(computeIn), SSL::getPluginFunctionName(computeIn));
+  setComputehFunction(SSL::getPluginName(computeOut), SSL::getPluginFunctionName(computeOut));
+  setComputegFunction(SSL::getPluginName(computeIn), SSL::getPluginFunctionName(computeIn));
   // The jacobians are not set, and thus considered as null matrices at this point.
 }
 
@@ -82,8 +82,8 @@ FirstOrderType1R::FirstOrderType1R(const string& computeOut, const string& compu
 {
   // Size vector of pointers to functions.
   // Connect input and output to plug-in
-  setComputeHFunction(SSL::getPluginName(computeOut), SSL::getPluginFunctionName(computeOut));
-  setComputeGFunction(SSL::getPluginName(computeIn), SSL::getPluginFunctionName(computeIn));
+  setComputehFunction(SSL::getPluginName(computeOut), SSL::getPluginFunctionName(computeOut));
+  setComputegFunction(SSL::getPluginName(computeIn), SSL::getPluginFunctionName(computeIn));
   setComputeJacXHFunction(SSL::getPluginName(computeJX), SSL::getPluginFunctionName(computeJX));
   setComputeJacLGFunction(SSL::getPluginName(computeJL), SSL::getPluginFunctionName(computeJL));
 }
@@ -128,7 +128,7 @@ void FirstOrderType1R::computeh(double t)
   computeOutput(t, 0);
 }
 
-void FirstOrderType1R::computeG(double t)
+void FirstOrderType1R::computeg(double t)
 {
   computeInput(t, 0);
 }
@@ -199,8 +199,8 @@ void FirstOrderType1R::computeJacXH(double)
 
 void FirstOrderType1R::computeJacLG(double)
 {
-  assert(index == 0 && "FirstOrderType1R::computeJacobianG(index): index is out of range");
-  assert(_pluginJacLg && "FirstOrderType1R::computeJacobianG() failed; not linked to a plug-in function.");
+  assert(index == 0 && "FirstOrderType1R::computeJacobiang(index): index is out of range");
+  assert(_pluginJacLg && "FirstOrderType1R::computeJacobiang() failed; not linked to a plug-in function.");
 
   SP::SiconosVector lambda = interaction()->lambda(0);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.

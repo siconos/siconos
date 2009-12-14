@@ -292,12 +292,12 @@ void DynamicalSystem::initMemory(unsigned int steps)
   }
 }
 
-void DynamicalSystem::setComputeGFunction(const string& pluginPath, const string& functionName)
+void DynamicalSystem::setComputegFunction(const string& pluginPath, const string& functionName)
 {
   _pluging->setComputeFunction(pluginPath, functionName);
 }
 
-void DynamicalSystem::setComputeGFunction(FPtr6 fct)
+void DynamicalSystem::setComputegFunction(FPtr6 fct)
 {
   _pluging->setComputeFunction((void *)fct);
 }
@@ -314,7 +314,7 @@ void DynamicalSystem::setComputeJacobianDotXGFunction(const string& pluginPath, 
 //   Plugin::setFunction(&pluginJacobianZGPtr, pluginPath,functionName);
 // }
 
-void DynamicalSystem::computeG(double time)
+void DynamicalSystem::computeg(double time)
 {
   if (_pluging->fPtr)
     ((FPtr6)(_pluging->fPtr))(time, _n, &(*_x[0])(0), &(*_x[1])(0), &(*_g)(0), _z->size(), &(*_z)(0));

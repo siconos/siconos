@@ -96,9 +96,9 @@ typedef  void (*FPtrFExt)(double, unsigned int, double*, unsigned int, double*);
  *        => computeFInt     (setComputeFIntFunction)
  *        => computeFExt     (setComputeFExtFunction)
  *        => computeNNL      (setComputeNNLFunction)
- *        => computeJacobianQFInt         (setComputeJacobianQFIntFunction)
+ *        => computeJacobianqFInt         (setComputeJacobianqFIntFunction)
  *        => computeJacobianVelocityFInt  (setComputeJacobianVelocityFIntFunction)
- *        => computeJacobianQNNL          (setComputeJacobianQNNLFunction)
+ *        => computeJacobianqNNL          (setComputeJacobianqNNLFunction)
  *        => computeJacobianVelocityNNL   (setComputeJacobianVelocityNNLFunction)
  *        => computeRhs            (no set function)
  *        => computeJacobianXRhs   (no set function)
@@ -235,8 +235,8 @@ protected:
    * @param  size of vector z
    * @param[in,out] z  : a vector of user-defined parameters
    */
-  //  FPtr6 computeJacobianQFIntPtr;
-  SP::PluggedObject _pluginJacQFInt;
+  //  FPtr6 computeJacobianqFIntPtr;
+  SP::PluggedObject _pluginJacqFInt;
 
   /** LagrangianDS plug-in to compute \f$\nabla_{\dot q}F_{Int}(\dot q, q, t)\f$, id = "jacobianQDotFInt"
    * @param time : current time
@@ -247,8 +247,8 @@ protected:
    * @param  size of vector z
    * @param[in,out] z  : a vector of user-defined parameters
    */
-  //  FPtr6 computeJacobianQDotFIntPtr;
-  SP::PluggedObject _pluginJacQDotFInt;
+  //  FPtr6 computeJacobianqDotFIntPtr;
+  SP::PluggedObject _pluginJacqDotFInt;
 
   /** LagrangianDS plug-in to compute \f$\nabla_qNNL(\dot q, q)\f$, id = "jacobianQNNL"
    * @param sizeOfq : size of vector q
@@ -258,8 +258,8 @@ protected:
    * @param  size of vector z
    * @param[in,out] z  : a vector of user-defined parameters
    */
-  //  FPtr5 computeJacobianQNNLPtr;
-  SP::PluggedObject _pluginJacQNNL;
+  //  FPtr5 computeJacobianqNNLPtr;
+  SP::PluggedObject _pluginJacqNNL;
   /** LagrangianDS plug-in to compute \f$\nabla_{\dot q}NNL(\dot q, q)\f$, id = "jacobianQDotNNL"
    * @param sizeOfq : size of vector q
    * @param q : pointer to the first element of q
@@ -268,8 +268,8 @@ protected:
    * @param  size of vector z
    * @param[in,out] z  : a vector of user-defined parameters
    */
-  //  FPtr5 computeJacobianQDotNNLPtr;
-  SP::PluggedObject _pluginJacQDotNNL;
+  //  FPtr5 computeJacobianqDotNNLPtr;
+  SP::PluggedObject _pluginJacqDotNNL;
 
   virtual void zeroPlugin();
 public:
@@ -587,14 +587,14 @@ public:
   /** set jacobianQFInt to pointer newPtr
    *  \param a SP SiconosMatrix
    */
-  inline void setJacobianQFIntPtr(SP::SiconosMatrix newPtr)
+  inline void setJacobianqFIntPtr(SP::SiconosMatrix newPtr)
   {
     _jacobianQFInt = newPtr;
   }
   /** set jacobianQDotFInt to pointer newPtr
    *  \param a SP SiconosMatrix
    */
-  inline void setJacobianQDotFIntPtr(SP::SiconosMatrix newPtr)
+  inline void setJacobianqDotFIntPtr(SP::SiconosMatrix newPtr)
   {
     _jacobianQDotFInt = newPtr;
   }
@@ -621,14 +621,14 @@ public:
   /** set jacobianQNNL to pointer newPtr
    *  \param a SP SiconosMatrix
    */
-  inline void setJacobianQNNLPtr(SP::SiconosMatrix newPtr)
+  inline void setJacobianqNNLPtr(SP::SiconosMatrix newPtr)
   {
     _jacobianQNNL = newPtr;
   }
   /** set jacobianQDotNNL to pointer newPtr
    *  \param a SP SiconosMatrix
    */
-  inline void setJacobianQDotNNLPtr(SP::SiconosMatrix newPtr)
+  inline void setJacobianqDotNNLPtr(SP::SiconosMatrix newPtr)
   {
     _jacobianQDotNNL = newPtr;
   }
@@ -744,41 +744,41 @@ public:
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    */
-  void setComputeJacobianQFIntFunction(const std::string&  pluginPath, const std::string&  functionName);
+  void setComputeJacobianqFIntFunction(const std::string&  pluginPath, const std::string&  functionName);
   /** allow to set a specified function to compute the jacobian following qDot of the internal strength compared to the state
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    */
-  void setComputeJacobianQDotFIntFunction(const std::string&  pluginPath, const std::string&  functionName);
+  void setComputeJacobianqDotFIntFunction(const std::string&  pluginPath, const std::string&  functionName);
 
   /** set a specified function to compute jacobian following q of the FInt
    *  \param a pointer on the plugin function
    */
-  void setComputeJacobianQFIntFunction(FPtr6 fct);
+  void setComputeJacobianqFIntFunction(FPtr6 fct);
   /** set a specified function to compute jacobian following qDot of the FInt
    *  \param a pointer on the plugin function
    */
-  void setComputeJacobianQDotFIntFunction(FPtr6 fct);
+  void setComputeJacobianqDotFIntFunction(FPtr6 fct);
 
   /** allow to set a specified function to compute the jacobian following q of the the external strength compared to the state
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    */
-  void setComputeJacobianQNNLFunction(const std::string&  pluginPath, const std::string&  functionName);
+  void setComputeJacobianqNNLFunction(const std::string&  pluginPath, const std::string&  functionName);
   /** allow to set a specified function to compute the jacobian following qDot of the the external strength compared to the state
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    */
-  void setComputeJacobianQDotNNLFunction(const std::string&  pluginPath, const std::string&  functionName);
+  void setComputeJacobianqDotNNLFunction(const std::string&  pluginPath, const std::string&  functionName);
 
   /** set a specified function to compute the jacobian following q of NNL
    *  \param a pointer on the plugin function
    */
-  void setComputeJacobianQNNLFunction(FPtr5 fct);
+  void setComputeJacobianqNNLFunction(FPtr5 fct);
   /** set a specified function to compute the jacobian following qDot of NNL
    *  \param a pointer on the plugin function
    */
-  void setComputeJacobianQDotNNLFunction(FPtr5 fct);
+  void setComputeJacobianqDotNNLFunction(FPtr5 fct);
 
   /** default function to compute the mass
    */
@@ -818,36 +818,36 @@ public:
   /** To compute the jacobian following q of the internal strengths compared to the state
    *  \param double time : the current time
    */
-  virtual void computeJacobianQFInt(double);
+  virtual void computeJacobianqFInt(double);
   /** To compute the jacobian following qDot of the internal strengths compared to the state
    *  \param double time : the current time
    */
-  virtual void computeJacobianQDotFInt(double);
+  virtual void computeJacobianqDotFInt(double);
 
   /** To compute the jacobian following q of the internal strengths compared to state q
    *  \param double time : the current time, SP::SiconosVector: pointers on the state vectors q and velocity
    */
-  virtual void computeJacobianQFInt(double , SP::SiconosVector q, SP::SiconosVector velocity);
+  virtual void computeJacobianqFInt(double , SP::SiconosVector q, SP::SiconosVector velocity);
   /** To compute the jacobian following qDot of the internal strengths compared to state q
    *  \param double time : the current time, SP::SiconosVector: pointers on the state vectors q and velocity
    */
-  virtual void computeJacobianQDotFInt(double , SP::SiconosVector q, SP::SiconosVector velocity);
+  virtual void computeJacobianqDotFInt(double , SP::SiconosVector q, SP::SiconosVector velocity);
 
   /** function to compute the jacobian following q of the inertia strengths compared to the state q
    */
-  virtual void computeJacobianQNNL();
+  virtual void computeJacobianqNNL();
   /** function to compute the jacobian following qDot of the inertia strengths compared to the state q
    */
-  virtual void computeJacobianQDotNNL();
+  virtual void computeJacobianqDotNNL();
 
   /** function to compute the jacobian following q of the inertia strengths compared to the state q
    *  \param SP::SiconosVector: pointers on the state vectors q and velocity
    */
-  virtual void computeJacobianQNNL(SP::SiconosVector q, SP::SiconosVector velocity);
+  virtual void computeJacobianqNNL(SP::SiconosVector q, SP::SiconosVector velocity);
   /** function to compute the jacobian following qDot of the inertia strengths compared to the state q
    *  \param SP::SiconosVector: pointers on the state vectors q and velocity
    */
-  virtual void computeJacobianQDotNNL(SP::SiconosVector q, SP::SiconosVector velocity);
+  virtual void computeJacobianqDotNNL(SP::SiconosVector q, SP::SiconosVector velocity);
 
   /** Default function to compute the right-hand side term
    *  \param double time : current time
@@ -876,11 +876,11 @@ public:
   /** Default function to compute the jacobian following q of fL
    *  \param double, the current time
    */
-  virtual void computeJacobianQFL(double);
+  virtual void computeJacobianqFL(double);
   /** Default function to compute the jacobian following qDot of fL
    *  \param double, the current time
    */
-  virtual void computeJacobianQDotFL(double);
+  virtual void computeJacobianqDotFL(double);
 
   // --- miscellaneous ---
 

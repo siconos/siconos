@@ -141,10 +141,10 @@ void RelationXML::setHPlugin(const string&  plugin)
   else SiconosDOMTreeTools::setStringAttributeValue(hNode, "plugin", plugin);
 }
 
-string RelationXML::getHPlugin() const
+string RelationXML::gethPlugin() const
 {
   if (!isHPlugin())
-    XMLException::selfThrow("RelationXML - getComputeHPlugin : h is not calculated from a plugin");
+    XMLException::selfThrow("RelationXML - getComputehPlugin : h is not calculated from a plugin");
   return  SiconosDOMTreeTools::getStringAttributeValue(hNode, "plugin");
 }
 
@@ -152,16 +152,16 @@ void RelationXML::setGPlugin(const string&  plugin)
 {
   if (!gNode)
   {
-    gNode = SiconosDOMTreeTools::createSingleNode(rootNode, "computeG");
+    gNode = SiconosDOMTreeTools::createSingleNode(rootNode, "computeg");
     xmlNewProp(gNode, (xmlChar*)"plugin", (xmlChar*)plugin.c_str());
   }
   else SiconosDOMTreeTools::setStringAttributeValue(gNode, "plugin", plugin);
 }
 
-string RelationXML::getGPlugin() const
+string RelationXML::getgPlugin() const
 {
   if (!isGPlugin())
-    XMLException::selfThrow("RelationXML - getComputeGPlugin : g is not calculated from a plugin");
+    XMLException::selfThrow("RelationXML - getComputegPlugin : g is not calculated from a plugin");
   return  SiconosDOMTreeTools::getStringAttributeValue(gNode, "plugin");
 }
 

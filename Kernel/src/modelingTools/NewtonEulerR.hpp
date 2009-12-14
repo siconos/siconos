@@ -71,8 +71,8 @@ protected:
   SP::SimpleVector _workQ;
 
   /** Jacobian matrices of H */
-  SP::SiconosMatrix JacQH;
-  SP::SiconosMatrix JacQDotH;
+  SP::SiconosMatrix Jacqh;
+  SP::SiconosMatrix JacqDotH;
   SP::SiconosMatrix JacLH;
 
   /*updated in UR*/
@@ -112,15 +112,15 @@ public:
    */
   inline SP::SiconosMatrix jacQH() const
   {
-    return JacQH;
+    return Jacqh;
   }
-  inline void setJacQH(SP::SiconosMatrix newJacQH)
+  inline void setJacqh(SP::SiconosMatrix newJacqh)
   {
-    JacQH = newJacQH;
+    Jacqh = newJacqh;
   }
   inline SP::SiconosMatrix jacQDotH() const
   {
-    return JacQDotH;
+    return JacqDotH;
   }
   inline SP::SiconosMatrix jacLH() const
   {
@@ -131,9 +131,9 @@ public:
   {
     return _jacQHT;
   }
-  inline void setJacQHT(SP::SiconosMatrix newJacQHT)
+  inline void setJacqhT(SP::SiconosMatrix newJacqhT)
   {
-    _jacQHT = newJacQHT;
+    _jacQHT = newJacqhT;
   }
 
   /** set the value of JacH[index] to newValue (copy)
@@ -152,9 +152,9 @@ public:
    *  \param SP::SiconosMatrix  newPtr
    *  \param unsigned int: index position in JacH vector
    */
-  inline void setJacQHPtr(SP::SiconosMatrix newPtr)
+  inline void setJacqhPtr(SP::SiconosMatrix newPtr)
   {
-    JacQH = newPtr ;
+    Jacqh = newPtr ;
   }
 
   /** To get the name of JacH[i] plugin
@@ -204,11 +204,11 @@ public:
   {
     ;
   }
-  virtual void computeJacQG(double)
+  virtual void computeJacqG(double)
   {
     ;
   }
-  virtual void computeJacQDotG(double)
+  virtual void computeJacqDotG(double)
   {
     ;
   }
@@ -222,8 +222,8 @@ public:
   /* compute all the G Jacobian */
   virtual void computeJacG(double t)
   {
-    computeJacQG(t);
-    computeJacQDotG(t);
+    computeJacqG(t);
+    computeJacqDotG(t);
     computeJacLG(t);
   }
 

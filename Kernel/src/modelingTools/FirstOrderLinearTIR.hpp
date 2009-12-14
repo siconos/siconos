@@ -130,7 +130,7 @@ public:
   /** default function to compute g
    *  \param double : current time
    */
-  void computeG(double);
+  void computeg(double);
 
   /** default function to compute y
    *  \param double: not used

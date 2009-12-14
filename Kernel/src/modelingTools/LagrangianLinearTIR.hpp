@@ -126,7 +126,7 @@ public:
    *  \param double : current time
    */
   void computeh(double);
-  void computeG(double time);
+  void computeg(double time);
 
 
   /** default function to compute y
@@ -154,7 +154,7 @@ public:
    */
   inline SP::SiconosMatrix getCPtr() const
   {
-    return JacQH;
+    return Jacqh;
   }
 
   /** set the value of C to newValue
@@ -171,7 +171,7 @@ public:
    */
   inline void setCPtr(SP::SiconosMatrix newPtr)
   {
-    JacQH = newPtr;
+    Jacqh = newPtr;
   }
 
   // -- D --

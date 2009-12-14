@@ -45,7 +45,7 @@ TimeDiscretisation::TimeDiscretisation(SP::TimeDiscretisationXML tdXML, double t
   // --- Read the data ---
   if (hasH) // T is useless
   {
-    h = _timeDiscretisationXML->getH();
+    h = _timeDiscretisationXML->geth();
     tk.reserve(2);
     tk.push_back(t0);
     tk.push_back(t0 + h);

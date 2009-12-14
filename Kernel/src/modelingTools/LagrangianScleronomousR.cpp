@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-// \todo : create a work vector for all tmp vectors used in computeG, computeh ...
+// \todo : create a work vector for all tmp vectors used in computeg, computeh ...
 
 #include "LagrangianScleronomousR.hpp"
 #include "RelationXML.hpp"
@@ -34,16 +34,16 @@ LagrangianScleronomousR::LagrangianScleronomousR(SP::RelationXML LRxml): Lagrang
   if (!LRxml->hasH())
     RuntimeException::selfThrow("LagrangianScleronomousR:: xml constructor failed, can not find a definition for h.");
 
-  hName = LRxml->getHPlugin();
-  setComputeHFunction(SSL::getPluginName(hName), SSL::getPluginFunctionName(hName));
+  hName = LRxml->gethPlugin();
+  setComputehFunction(SSL::getPluginName(hName), SSL::getPluginFunctionName(hName));
 
   if (!LRxml->hasJacobianH())
     RuntimeException::selfThrow("LagrangianScleronomousR:: xml constructor failed, can not find a definition for JacH0.");
   //  LRxml->readJacobianXML<PluggedMatrix,SP_PluggedMatrix>(JacH[0], LRxml, 0);
   if (LRxml->isJacobianHPlugin(0))
-    pluginjQH->setComputeFunction(LRxml->getJacobianHPlugin(0));
+    pluginjqh->setComputeFunction(LRxml->getJacobianHPlugin(0));
   else
-    JacQH.reset(new SimpleMatrix(LRxml->getJacobianHMatrix(0)));
+    Jacqh.reset(new SimpleMatrix(LRxml->getJacobianHMatrix(0)));
 
 }
 
@@ -51,14 +51,14 @@ LagrangianScleronomousR::LagrangianScleronomousR(SP::RelationXML LRxml): Lagrang
 LagrangianScleronomousR::LagrangianScleronomousR(const string& computeh, const std::string& strcomputeJacqh):
   LagrangianR(ScleronomousR)
 {
-  setComputeHFunction(SSL::getPluginName(computeh), SSL::getPluginFunctionName(computeh));
+  setComputehFunction(SSL::getPluginName(computeh), SSL::getPluginFunctionName(computeh));
 
-  pluginjQH.reset(new PluggedObject());
-  pluginjQH->setComputeFunction(strcomputeJacqh);
+  pluginjqh.reset(new PluggedObject());
+  pluginjqh->setComputeFunction(strcomputeJacqh);
 
   //  unsigned int sizeY = interaction()->getSizeOfY();
   //  unsigned int sizeQ = workX->size();
-  //  JacQH.reset(new SimpleMatrix(sizeY,sizeQ));
+  //  Jacqh.reset(new SimpleMatrix(sizeY,sizeQ));
 
   // Warning: we cannot allocate memory for JacH[0] matrix since no interaction
   // is connected to the relation. This will be done during initialize.
@@ -90,9 +90,9 @@ void LagrangianScleronomousR::computeh(double)
   }
   // else nothing
 }
-void LagrangianScleronomousR::computeG(double, unsigned int)
+void LagrangianScleronomousR::computeg(double, unsigned int)
 {
-  assert(false && "LagrangianScleronomousR::computeG : G is computed in computeInput!\n");
+  assert(false && "LagrangianScleronomousR::computeg : G is computed in computeInput!\n");
 }
 void LagrangianScleronomousR::computeJacqh(double)
 {
@@ -100,17 +100,17 @@ void LagrangianScleronomousR::computeJacqh(double)
   // Last arg: index for G - Useless, always equal to 0 for this kind of relation.
 
   //
-  if (pluginjQH->fPtr)
+  if (pluginjqh->fPtr)
   {
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
     *_workX = *data[q0];
     *_workZ = *data[z];
 
-    unsigned int sizeY = JacQH->size(0);
+    unsigned int sizeY = Jacqh->size(0);
     unsigned int sizeQ = _workX->size();
     unsigned int sizeZ = _workZ->size();
 
-    ((FPtr3)(pluginjQH->fPtr))(sizeQ, &(*_workX)(0), sizeY, &(*JacQH)(0, 0), sizeZ, &(*_workZ)(0));
+    ((FPtr3)(pluginjqh->fPtr))(sizeQ, &(*_workX)(0), sizeY, &(*Jacqh)(0, 0), sizeZ, &(*_workZ)(0));
 
     // Copy data that might have been changed in the plug-in call.
     *data[z] = *_workZ;
@@ -127,9 +127,9 @@ void LagrangianScleronomousR::computeOutput(double time, unsigned int derivative
     computeJacqh(time);
     SP::SiconosVector y = interaction()->y(derivativeNumber) ;
     if (derivativeNumber == 1)
-      prod(*JacQH, *data[q1], *y);
+      prod(*Jacqh, *data[q1], *y);
     else if (derivativeNumber == 2)
-      prod(*JacQH, *data[q2], *y);
+      prod(*Jacqh, *data[q2], *y);
     else
       RuntimeException::selfThrow("LagrangianScleronomousR::computeOutput(t,index), index out of range");
   }
@@ -141,7 +141,7 @@ void LagrangianScleronomousR::computeInput(double time, unsigned int level)
   // get lambda of the concerned interaction
   SP::SiconosVector lambda = interaction()->lambda(level);
   // data[name] += trans(G) * lambda
-  prod(*lambda, *JacQH, *data[p0 + level], false);
+  prod(*lambda, *Jacqh, *data[p0 + level], false);
 
 }
 

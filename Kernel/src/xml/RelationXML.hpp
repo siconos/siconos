@@ -125,7 +125,7 @@ public:
   /** To get the name of the plug-in function used to compute h.
    *   \return a string.
    */
-  std::string getHPlugin() const ;
+  std::string gethPlugin() const ;
 
   /** Return true if h is calculated from a plugin
    * \return a bool. */
@@ -161,20 +161,20 @@ public:
   /** Return hDot plug-in name, if it exists
    *   \return a string
    */
-  inline std::string getHDotPlugin() const
+  inline std::string gethDotPlugin() const
   {
     if (!isHDotPlugin())
-      XMLException::selfThrow("RelationRXML - getHDotPlugin : hDot is not plugged.");
+      XMLException::selfThrow("RelationRXML - gethDotPlugin : hDot is not plugged.");
     return  SiconosDOMTreeTools::getStringAttributeValue(hDotNode, "plugin");
   }
 
   /** Return hDot vector.
    *   \return a SimpleVector.
    */
-  inline const SimpleVector getHDotVector() const
+  inline const SimpleVector gethDotVector() const
   {
     if (isHDotPlugin())
-      XMLException::selfThrow("RelationRXML - getHDotVector : hDot is plugged, not set with a vector.");
+      XMLException::selfThrow("RelationRXML - gethDotVector : hDot is plugged, not set with a vector.");
     return  SiconosDOMTreeTools::getSiconosVectorValue(hDotNode);
   }
 
@@ -198,7 +198,7 @@ public:
   /** To get the name of the plug-in function used to compute g.
    *   \return a string.
    */
-  std::string getGPlugin() const ;
+  std::string getgPlugin() const ;
 
   /** Return true if g is calculated from a plugin
    * \return a bool. */

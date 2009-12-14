@@ -90,7 +90,7 @@ public:
     return C;
   };
 
-  double getHypotAB()
+  double gethypotAB()
   {
     return sqrA2pB2;
   };

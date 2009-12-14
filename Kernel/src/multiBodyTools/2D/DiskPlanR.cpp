@@ -188,7 +188,7 @@ JacH(q) =  [                                                ]
 void DiskPlanR::computeJacqh(double)
 {
 
-  SimpleMatrix *g = (SimpleMatrix *) JacQH.get();
+  SimpleMatrix *g = (SimpleMatrix *) Jacqh.get();
 
   double x = (*data[q0])(0);
   double y = (*data[q0])(1);

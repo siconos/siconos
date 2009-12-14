@@ -198,7 +198,7 @@ public:
   /** default function to compute g
    *  \param double : current time
    */
-  void computeG(double) = 0;
+  void computeg(double) = 0;
 
   /** default function to compute jacobianH
    *  \param double : current time

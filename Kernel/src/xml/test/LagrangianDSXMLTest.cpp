@@ -98,9 +98,9 @@ void LagrangianDSXMLTest::testIsPlugin()
   CPPUNIT_ASSERT_MESSAGE("test isQNLInertiaPlugin : ", ds.isQNLInertiaPlugin());
   CPPUNIT_ASSERT_MESSAGE("test isFintPlugin : ", ds.isFintPlugin());
   CPPUNIT_ASSERT_MESSAGE("test isFextPlugin : ", ds.isFextPlugin());
-  CPPUNIT_ASSERT_MESSAGE("test isJacobianQFintPlugin : ", ds.isJacobianQFintPlugin());
+  CPPUNIT_ASSERT_MESSAGE("test isJacobianqFintPlugin : ", ds.isJacobianqFintPlugin());
   CPPUNIT_ASSERT_MESSAGE("test isJacobianVelocityFintPlugin : ", ds.isJacobianVelocityFintPlugin());
-  CPPUNIT_ASSERT_MESSAGE("test isJacobianQQNLInertiaPlugin : ", ds.isJacobianQQNLInertiaPlugin());
+  CPPUNIT_ASSERT_MESSAGE("test isJacobianqQNLInertiaPlugin : ", ds.isJacobianqQNLInertiaPlugin());
   CPPUNIT_ASSERT_MESSAGE("test isJacobianVelocityQNLInertiaPlugin : ", ds.isJacobianVelocityQNLInertiaPlugin());
 
   cout << "LagrangianDSXMLTest >>> testIsPlugin .............................. OK\n ";

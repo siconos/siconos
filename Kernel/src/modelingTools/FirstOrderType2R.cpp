@@ -38,8 +38,8 @@ FirstOrderType2R::FirstOrderType2R(const string& computeOut, const string& compu
 {
   // Size vector of pointers to functions.
   // Connect input and output to plug-in
-  setComputeHFunction(SSL::getPluginName(computeOut), SSL::getPluginFunctionName(computeOut));
-  setComputeGFunction(SSL::getPluginName(computeIn), SSL::getPluginFunctionName(computeIn));
+  setComputehFunction(SSL::getPluginName(computeOut), SSL::getPluginFunctionName(computeOut));
+  setComputegFunction(SSL::getPluginName(computeIn), SSL::getPluginFunctionName(computeIn));
   // The jacobians are not set, and thus considered as null matrices at this point.
 }
 
@@ -48,8 +48,8 @@ FirstOrderType2R::FirstOrderType2R(const string& computeOut, const string& compu
 {
   // Size vector of pointers to functions.
   // Connect input and output to plug-in
-  setComputeHFunction(SSL::getPluginName(computeOut), SSL::getPluginFunctionName(computeOut));
-  setComputeGFunction(SSL::getPluginName(computeIn), SSL::getPluginFunctionName(computeIn));
+  setComputehFunction(SSL::getPluginName(computeOut), SSL::getPluginFunctionName(computeOut));
+  setComputegFunction(SSL::getPluginName(computeIn), SSL::getPluginFunctionName(computeIn));
 
   setComputeJacXHFunction(SSL::getPluginName(computeJX), SSL::getPluginFunctionName(computeJX));
   setComputeJacLGFunction(SSL::getPluginName(computeJL), SSL::getPluginFunctionName(computeJL));
@@ -98,7 +98,7 @@ void FirstOrderType2R::computeh(double t)
   computeOutput(t, 0);
 }
 
-void FirstOrderType2R::computeG(double t)
+void FirstOrderType2R::computeg(double t)
 {
   computeInput(t, 0);
 }
@@ -133,7 +133,7 @@ void FirstOrderType2R::computeInput(double t, unsigned int level)
   *_workZ = *data[z];
 
 
-  computeG(t);
+  computeg(t);
   //  cout<<"next g_alpha"<<endl;
   //  data[g_alpha]->display();
   /*  unsigned int sizeL = lambda->size();

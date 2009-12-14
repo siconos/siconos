@@ -50,13 +50,13 @@ EXTERN int sicSetComputeMassFunction(int nIdDs, char *libname, char *func);
 
 EXTERN int sicSetComputeNNLFunction(int nIdDs, char *libname, char *func);
 
-EXTERN int sicSetComputeJacobianQNNLFunction(int nIdDs, char *libname, char *func);
+EXTERN int sicSetComputeJacobianqNNLFunction(int nIdDs, char *libname, char *func);
 
 EXTERN int sicSetComputeJacobianVelocityNNLFunction(int nIdDs, char *libname, char *func);
 
 EXTERN int sicSetComputeFIntFunction(int nIdDs, char *libname, char *func);
 
-EXTERN int sicSetComputeJacobianQFIntFunction(int nIdDs, char *libname, char *func);
+EXTERN int sicSetComputeJacobianqFIntFunction(int nIdDs, char *libname, char *func);
 
 EXTERN int sicSetComputeJacobianVelocityFIntFunction(int nIdDs, char *libname, char *func);
 

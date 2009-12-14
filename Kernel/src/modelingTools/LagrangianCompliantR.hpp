@@ -69,8 +69,8 @@ protected:
     */
   FPtr2 hPtr;
   std::string pluginNameHPtr;
-  FPtr2 JacQHPtr;
-  std::string pluginNameJacQHPtr;
+  FPtr2 JacqhPtr;
+  std::string pluginNameJacqhPtr;
   FPtr2 JacLHPtr;
   std::string pluginNameJacLHPtr;
 

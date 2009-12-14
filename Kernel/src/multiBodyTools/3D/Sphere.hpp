@@ -67,11 +67,11 @@ public:
 
   void computeNNL();
 
-  void computeJacobianQNNL();
-  void computeJacobianQDotNNL();
+  void computeJacobianqNNL();
+  void computeJacobianqDotNNL();
 
-  void computeJacobianQNNL(SP::SiconosVector, SP::SiconosVector);
-  void computeJacobianQDotNNL(SP::SiconosVector, SP::SiconosVector);
+  void computeJacobianqNNL(SP::SiconosVector, SP::SiconosVector);
+  void computeJacobianqDotNNL(SP::SiconosVector, SP::SiconosVector);
 
 
   /** visitors hook

@@ -400,7 +400,7 @@ void EventDriven::computeJacobianF(SP::OneStepIntegrator osi,
   }
 }
 
-void EventDriven::computeG(SP::OneStepIntegrator osi,
+void EventDriven::computeg(SP::OneStepIntegrator osi,
                            integer * sizeOfX, doublereal* time,
                            doublereal* x, integer * ng,
                            doublereal * gOut)
@@ -423,7 +423,7 @@ void EventDriven::computeG(SP::OneStepIntegrator osi,
   // fill in xWork vector (ie all the x of the ds of this osi) with x
   lsodar->fillXWork(sizeOfX, x); // That may be not necessary? Check if
   // computeF is called for each
-  // computeG.
+  // computeg.
 
   double t = *time;
   model()->setCurrentTime(t);

@@ -242,7 +242,7 @@ public:
   /** get H
    *  \return pointer on a OSNSMatrix
    */
-  inline SP::OSNSMatrix getHPtr() const
+  inline SP::OSNSMatrix gethPtr() const
   {
     return H;
   }

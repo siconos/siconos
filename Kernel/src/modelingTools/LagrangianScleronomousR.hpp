@@ -92,7 +92,7 @@ protected:
    * @param sizeZ : size of vector z
    * @param[in,out] z: pointer to z vector(s) from DS.
    */
-  SP::PluggedObject pluginjQH;
+  SP::PluggedObject pluginjqh;
   /** basic constructor
       \param the sub-type of the relation
   */
@@ -136,7 +136,7 @@ public:
    * \param: unsigned int
    */
   //  void computeJacqh(double);
-  void computeG(double, unsigned int = 0);
+  void computeg(double, unsigned int = 0);
 
 
   /** to compute output

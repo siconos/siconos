@@ -112,7 +112,7 @@ public:
    *  \param integer*, size of vector g (ie number of constraints)
    *  \param doublereal*, g (in-out parameter)
    */
-  void computeG(SP::OneStepIntegrator, integer*, doublereal*, doublereal*, integer*, doublereal*);
+  void computeg(SP::OneStepIntegrator, integer*, doublereal*, doublereal*, integer*, doublereal*);
 
   /** update input for impact case (ie compute p[1])
    */

@@ -77,13 +77,13 @@ typedef void (*FPtr6)(double, unsigned int, const double*, const double*, double
 
   Operators and the functions used to compute them:
 
-  - g: computeG(t)
+  - g: computeg(t)
 
   - jacobianXG[0] = \f$ \nabla_x g(t,\dot x,x,z) \f$:
-    computeJacobianG(0,...)
+    computeJacobiang(0,...)
 
   - jacobianXG[1] = \f$ \nabla_{\dot x} g(t,\dot x,x,z) \f$:
-    computeJacobianG(1,...)
+    computeJacobiang(1,...)
 
   By default, the DynamicalSystem is considered to be an Initial Value
   Problem (IVP) and the initial conditions are given by
@@ -222,7 +222,7 @@ protected:
    */
   SP::PluggedObject _pluging;
 
-  /** Plug-in to compute jacobianG (computeJacobianGPtr[i] for jacobianG[i]).
+  /** Plug-in to compute jacobianG (computeJacobiangPtr[i] for jacobianG[i]).
    *  @param   current time
    *  @param   the size of the vector x
    *  @param   the pointer to the first element of the vector x[0]=\f$ x \f$
@@ -551,7 +551,7 @@ public:
   // --- g ---
   /** get the value of g
    *  \return plugged vector
-  inline const PVFint getG() const { return *g; }
+  inline const PVFint getg() const { return *g; }
    */
 
   /** get g
@@ -762,12 +762,12 @@ public:
    *  \param string pluginPath : the complete path to the plugin
    *  \param string functionName : the function name to use in this library
    */
-  void setComputeGFunction(const std::string&  pluginPath, const std::string& functionName);
+  void setComputegFunction(const std::string&  pluginPath, const std::string& functionName);
 
   /** set a specified function to compute g
    *  \param a pointer on the plugin function
    */
-  void setComputeGFunction(FPtr6 fct);
+  void setComputegFunction(FPtr6 fct);
 
   /** to set a specified function to compute jacobianG
    *  \param string pluginPath : the complete path to the plugin
@@ -787,7 +787,7 @@ public:
   /** Default function to compute g
    *  \param double, the current time
    */
-  void computeG(double);
+  void computeg(double);
 
   /** default function to compute the gradient of g
    *  \param double time : the current time

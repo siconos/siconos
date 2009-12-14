@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-// \todo : create a work vector for all tmp vectors used in computeG, computeh ...
+// \todo : create a work vector for all tmp vectors used in computeg, computeh ...
 
 #include "NewtonEulerR.hpp"
 #include "RelationXML.hpp"
@@ -34,16 +34,16 @@ void NewtonEulerR::initComponents()
 
   // The initialization of JacH[0] depends on the way the Relation was built ie if the matrix
   // was read from xml or not
-  if (! JacQH)
-    JacQH.reset(new SimpleMatrix(_ysize, _qsize));
+  if (! Jacqh)
+    Jacqh.reset(new SimpleMatrix(_ysize, _qsize));
   else
   {
-    if (JacQH->size(0) == 0) // if the matrix dim are null
+    if (Jacqh->size(0) == 0) // if the matrix dim are null
     {
-      JacQH->resize(_ysize, _qsize);
+      Jacqh->resize(_ysize, _qsize);
     }
     else
-      assert((JacQH->size(1) == _qsize && JacQH->size(0) == _ysize) &&
+      assert((Jacqh->size(1) == _qsize && Jacqh->size(0) == _ysize) &&
              "NewtonEuler::initComponents inconsistent sizes between JacH[0] matrix and the interaction.");
   }
   if (! _jacQHT)
@@ -99,8 +99,8 @@ void NewtonEulerR::computeh(double)
 {
   SP::SiconosVector y = interaction()->y(0);
   *_workQ = *data[q0];
-  //prod(*JacQH,*data[q0],*y);
-  prod(*JacQH, *_workQ, *y);
+  //prod(*Jacqh,*data[q0],*y);
+  prod(*Jacqh, *_workQ, *y);
 }
 
 //  void NewtonEulerR::computeJacXH(double)
@@ -133,9 +133,9 @@ void NewtonEulerR::computeOutput(double t, unsigned int derivativeNumber)
   {
     SP::SiconosVector y = interaction()->y(derivativeNumber);
     if (derivativeNumber == 1)
-      prod(*JacQH, *data[q1], *y);
+      prod(*Jacqh, *data[q1], *y);
     else //if(derivativeNumber == 2)
-      //  prod(*JacQH,*data[q2],*y); // Approx: y[2] = JacH[0]q[2], other terms are neglected ...
+      //  prod(*Jacqh,*data[q2],*y); // Approx: y[2] = JacH[0]q[2], other terms are neglected ...
       //   else
       RuntimeException::selfThrow("LagrangianCompliantR::computeOutput(time,index), index out of range or not yet implemented.");
   }

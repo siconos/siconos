@@ -399,13 +399,13 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
 
     if (C)
     {
-      d->computeJacobianQDotFL(t);
+      d->computeJacobianqDotFL(t);
       scal(-h * _theta, *C, *W, false); // W -= h*_theta*C
     }
 
     if (K)
     {
-      d->computeJacobianQFL(t);
+      d->computeJacobianqFL(t);
       scal(-h * h * _theta * _theta, *K, *W, false); //*W -= h*h*_theta*_theta**K;
     }
   }

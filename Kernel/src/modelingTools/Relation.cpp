@@ -101,7 +101,7 @@ void Relation::computeResiduY(double t)
   //      _Residuy->display();
 
 }
-void Relation::computeG(double t)
+void Relation::computeg(double t)
 {
   computeInput(t);
 }
@@ -122,7 +122,7 @@ void Relation::setComputeJacXHFunction(const std::string& pluginPath, const std:
  *  \param string : the complete path to the plugin
  *  \param string : the function name to use in this plugin
  */
-void Relation::setComputeGFunction(const std::string& pluginPath, const std::string& functionName)
+void Relation::setComputegFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluging->setComputeFunction(pluginPath, functionName);
   //    SSL::buildPluginName(pluginNameInput,pluginPath,functionName);
@@ -152,7 +152,7 @@ void Relation::setComputeJacLGFunction(const std::string& pluginPath, const std:
   //    SSL::buildPluginName(pluginNamejLOutput,pluginPath,functionName);
 }
 
-void Relation::setComputeHFunction(const std::string& pluginPath, const std::string& functionName)
+void Relation::setComputehFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluginh->setComputeFunction(pluginPath, functionName);
   //  Plugin::setFunction(&_pluginh, pluginPath, functionName,hName);

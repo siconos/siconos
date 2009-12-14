@@ -62,7 +62,7 @@ void TimeDiscretisationXMLTest::testIsConstant()
 
 void TimeDiscretisationXMLTest::testH()
 {
-  CPPUNIT_ASSERT_MESSAGE("test H value", td.getH() == 0.1);
+  CPPUNIT_ASSERT_MESSAGE("test H value", td.geth() == 0.1);
 
   cout << "TimeDiscretisationXMLTest >>> testH ................................. OK\n ";
 }
@@ -90,8 +90,8 @@ void TimeDiscretisationXMLTest::testGetTk()
 
 void TimeDiscretisationXMLTest::testGetHminHmax()
 {
-  CPPUNIT_ASSERT_MESSAGE("test HMin value", td.getHMin() == 0);
-  CPPUNIT_ASSERT_MESSAGE("test HMin value", td.getHMax() == 5);
+  CPPUNIT_ASSERT_MESSAGE("test HMin value", td.gethMin() == 0);
+  CPPUNIT_ASSERT_MESSAGE("test HMin value", td.gethMax() == 5);
 
   cout << "TimeDiscretisationXMLTest >>> testGetHminHmax ....................... OK\n ";
 }

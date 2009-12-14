@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-// \todo : create a work vector for all tmp vectors used in computeG, computeh ...
+// \todo : create a work vector for all tmp vectors used in computeg, computeh ...
 
 #include "LagrangianR.hpp"
 #include "RelationXML.hpp"
@@ -33,14 +33,14 @@ void LagrangianR::initComponents()
 
   // The initialization of JacH[0] depends on the way the Relation was built ie if the matrix
   // was read from xml or not
-  if (! JacQH)
-    JacQH.reset(new SimpleMatrix(sizeY, sizeDS));
+  if (! Jacqh)
+    Jacqh.reset(new SimpleMatrix(sizeY, sizeDS));
   else
   {
-    if (JacQH->size(0) == 0) // if the matrix dim are null
-      JacQH->resize(sizeY, sizeDS);
+    if (Jacqh->size(0) == 0) // if the matrix dim are null
+      Jacqh->resize(sizeY, sizeDS);
     else
-      assert((JacQH->size(1) == sizeDS && JacQH->size(0) == sizeY) &&
+      assert((Jacqh->size(1) == sizeDS && Jacqh->size(0) == sizeY) &&
              "LagrangianScleronomousR::initComponents inconsistent sizes between JacH[0] matrix and the interaction.");
   }
 

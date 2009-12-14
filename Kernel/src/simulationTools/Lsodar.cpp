@@ -147,7 +147,7 @@ void Lsodar::f(integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xd
 
 void Lsodar::g(integer* nEq, doublereal*  time, doublereal* x, integer* ng, doublereal* gOut)
 {
-  boost::static_pointer_cast<EventDriven>(simulationLink)->computeG(shared_from_this(), nEq, time, x, ng, gOut);
+  boost::static_pointer_cast<EventDriven>(simulationLink)->computeg(shared_from_this(), nEq, time, x, ng, gOut);
 }
 
 void Lsodar::jacobianF(integer* sizeOfX, doublereal* time, doublereal* x, integer* ml, integer* mu,  doublereal* jacob, integer* nrowpd)

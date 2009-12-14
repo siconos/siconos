@@ -77,7 +77,7 @@ void normalize(SP::SiconosVector, unsigned int);
 
 void SpherePlanR::computeJacqh(double)
 {
-  SimpleMatrix *g = (SimpleMatrix *)JacQH.get();
+  SimpleMatrix *g = (SimpleMatrix *)Jacqh.get();
 
   double theta = (*data[q0])(3);
   double phi   = (*data[q0])(4);

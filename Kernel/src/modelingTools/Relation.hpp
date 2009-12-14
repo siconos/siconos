@@ -238,7 +238,7 @@ public:
   /** To get the name of h plugin
    *  \return a string
    */
-  inline const std::string getHName() const
+  inline const std::string gethName() const
   {
     return hName;
   }
@@ -246,7 +246,7 @@ public:
   /** To get the name of g plugin
    *  \return a string
    */
-  inline const std::string getGName() const
+  inline const std::string getgName() const
   {
     return gName;
   }
@@ -341,7 +341,7 @@ public:
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    */
-  virtual void setComputeHFunction(const std::string& pluginPath, const std::string& functionName);
+  virtual void setComputehFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** To set a plug-in function to compute  \f$ \nabla_x h(..)\f$
    *  \param string : the complete path to the plugin
@@ -358,7 +358,7 @@ public:
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    */
-  virtual void setComputeGFunction(const std::string& pluginPath, const std::string& functionName);
+  virtual void setComputegFunction(const std::string& pluginPath, const std::string& functionName);
   /** To set a plug-in function to compute input function F
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
@@ -387,7 +387,7 @@ public:
   /** default function to compute g
    *  \param double : current time
    */
-  virtual void computeG(double t);
+  virtual void computeg(double t);
 
   /** default function to compute jacobianH
    *  \param double : current time
