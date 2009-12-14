@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "FirstOrderLinearDSXML.h"
+#include "FirstOrderLinearDSXML.hpp"
 using namespace std;
 
 FirstOrderLinearDSXML::FirstOrderLinearDSXML() :

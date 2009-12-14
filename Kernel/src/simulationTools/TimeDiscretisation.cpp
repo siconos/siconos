@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "TimeDiscretisation.h"
-#include "RuntimeException.h"
+#include "TimeDiscretisation.hpp"
+#include "RuntimeException.hpp"
 #include "Tools.hpp"
 #include <math.h>
 using namespace std;

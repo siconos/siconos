@@ -17,8 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-#include "DynamicalSystemFactory.h"
-#include "RuntimeException.h"
+#include "DynamicalSystemFactory.hpp"
+#include "RuntimeException.hpp"
 
 namespace DynamicalSystemFactory
 {

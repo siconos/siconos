@@ -29,13 +29,13 @@ Include files related to the different types of relations
 #ifndef RelationTypes_hpp
 #define RelationTypes_hpp
 
-#include "FirstOrderType1R.h"
-#include "FirstOrderLinearR.h"
-#include "FirstOrderLinearTIR.h"
-#include "LagrangianLinearTIR.h"
-#include "LagrangianScleronomousR.h"
-#include "LagrangianRheonomousR.h"
-#include "LagrangianCompliantR.h"
+#include "FirstOrderType1R.hpp"
+#include "FirstOrderLinearR.hpp"
+#include "FirstOrderLinearTIR.hpp"
+#include "LagrangianLinearTIR.hpp"
+#include "LagrangianScleronomousR.hpp"
+#include "LagrangianRheonomousR.hpp"
+#include "LagrangianCompliantR.hpp"
 
 #endif
 

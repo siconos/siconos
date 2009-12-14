@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "ioObject.h"
-#include "RuntimeException.h"
+#include "ioObject.hpp"
+#include "RuntimeException.hpp"
 
 ioObject::ioObject(const std::string& m): FileName("NoName.dat"), Mode(m)
 {}

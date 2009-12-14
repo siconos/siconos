@@ -16,10 +16,10 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "ActuatorEvent.h"
-#include "EventFactory.h"
-#include "Actuator.h"
-#include "TimeDiscretisation.h"
+#include "ActuatorEvent.hpp"
+#include "EventFactory.hpp"
+#include "Actuator.hpp"
+#include "TimeDiscretisation.hpp"
 using namespace std;
 using namespace EventFactory;
 

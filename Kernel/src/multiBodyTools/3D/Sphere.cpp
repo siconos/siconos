@@ -18,7 +18,7 @@
  *
  */
 
-#include "Sphere.h"
+#include "Sphere.hpp"
 
 static double _2PI = 2 * M_PI;
 

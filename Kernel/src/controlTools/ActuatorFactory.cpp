@@ -17,8 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-#include "ActuatorFactory.h"
-#include "RuntimeException.h"
+#include "ActuatorFactory.hpp"
+#include "RuntimeException.hpp"
 
 using namespace std;
 

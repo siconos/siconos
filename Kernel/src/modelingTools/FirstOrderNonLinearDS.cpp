@@ -16,9 +16,9 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "FirstOrderNonLinearDS.h"
-#include "FirstOrderNonLinearDSXML.h"
-#include "BlockVector.h"
+#include "FirstOrderNonLinearDS.hpp"
+#include "FirstOrderNonLinearDSXML.hpp"
+#include "BlockVector.hpp"
 #include "Plugin.hpp"
 #include "PluginTypes.hpp"
 

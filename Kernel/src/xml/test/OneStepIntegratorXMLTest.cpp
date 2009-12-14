@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "OneStepIntegratorXMLTest.h"
+#include "OneStepIntegratorXMLTest.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);

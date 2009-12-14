@@ -21,9 +21,9 @@
 #include <boost/numeric/ublas/vector_proxy.hpp>  // for project
 #include <boost/numeric/bindings/atlas/cblas1.hpp>
 
-#include "SimpleVector.h"
-#include "SimpleMatrix.h"
-#include "ioVector.h"
+#include "SimpleVector.hpp"
+#include "SimpleMatrix.hpp"
+#include "ioVector.hpp"
 
 
 // =================================================

@@ -16,9 +16,9 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "SiconosMemoryTest.h"
-#include "SimpleVector.h"
-#include "BlockVector.h"
+#include "SiconosMemoryTest.hpp"
+#include "SimpleVector.hpp"
+#include "BlockVector.hpp"
 
 using std::cout;
 using std::endl;

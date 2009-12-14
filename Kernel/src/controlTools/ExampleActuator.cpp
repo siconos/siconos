@@ -16,10 +16,10 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "ExampleActuator.h"
-#include "DynamicalSystem.h"
-#include "ActuatorFactory.h"
-#include "ioMatrix.h"
+#include "ExampleActuator.hpp"
+#include "DynamicalSystem.hpp"
+#include "ActuatorFactory.hpp"
+#include "ioMatrix.hpp"
 using namespace std;
 using namespace ActuatorFactory;
 

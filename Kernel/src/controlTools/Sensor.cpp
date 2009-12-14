@@ -17,12 +17,12 @@
 * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-#include "Sensor.h"
-#include "SensorEvent.h"
-#include "Model.h"
-#include "TimeDiscretisation.h"
-#include "EventFactory.h"
-#include "Simulation.h"
+#include "Sensor.hpp"
+#include "SensorEvent.hpp"
+#include "Model.hpp"
+#include "TimeDiscretisation.hpp"
+#include "EventFactory.hpp"
+#include "Simulation.hpp"
 #include <iostream>
 using namespace std;
 

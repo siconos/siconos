@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-#include "SimpleVectorTest.h"
+#include "SimpleVectorTest.hpp"
 
 using namespace std;
 using namespace boost::numeric::ublas;

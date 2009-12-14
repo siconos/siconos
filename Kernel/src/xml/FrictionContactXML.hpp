@@ -23,9 +23,9 @@
 #ifndef __FrictionContactXML__
 #define __FrictionContactXML__
 
-#include "OneStepNSProblemXML.h"
-#include "SimpleMatrix.h"
-#include "SimpleVector.h"
+#include "OneStepNSProblemXML.hpp"
+#include "SimpleMatrix.hpp"
+#include "SimpleVector.hpp"
 
 class OneStepNSProblem;
 

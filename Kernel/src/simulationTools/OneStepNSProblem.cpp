@@ -16,17 +16,17 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "OneStepNSProblem.h"
-#include "OneStepNSProblemXML.h"
-#include "NonSmoothDynamicalSystem.h"
-#include "UnitaryRelation.h"
-#include "Interaction.h"
-#include "Topology.h"
-#include "Simulation.h"
-#include "Model.h"
-#include "Moreau.h"
-#include "LagrangianDS.h"
-#include "NewtonEulerDS.h"
+#include "OneStepNSProblem.hpp"
+#include "OneStepNSProblemXML.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "UnitaryRelation.hpp"
+#include "Interaction.hpp"
+#include "Topology.hpp"
+#include "Simulation.hpp"
+#include "Model.hpp"
+#include "Moreau.hpp"
+#include "LagrangianDS.hpp"
+#include "NewtonEulerDS.hpp"
 
 using namespace std;
 using namespace DS;

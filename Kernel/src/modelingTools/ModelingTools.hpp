@@ -21,22 +21,22 @@ Include files related to modelingTools
 Note that not all files from the current location are listed below, since some of them are already included inside the ones below.
 */
 
-#include "EqualityConditionNSL.h"
-#include "ComplementarityConditionNSL.h"
-#include "MixedComplementarityConditionNSL.h"
-#include "RelayNSL.h"
-#include "NewtonImpactNSL.h"
-#include "NewtonImpactFrictionNSL.h"
+#include "EqualityConditionNSL.hpp"
+#include "ComplementarityConditionNSL.hpp"
+#include "MixedComplementarityConditionNSL.hpp"
+#include "RelayNSL.hpp"
+#include "NewtonImpactNSL.hpp"
+#include "NewtonImpactFrictionNSL.hpp"
 
-#include "Interaction.h"
+#include "Interaction.hpp"
 
 #include "RelationTypes.hpp"
-#include "FirstOrderType2R.h"
+#include "FirstOrderType2R.hpp"
 
-#include "LagrangianLinearTIDS.h"
-#include "FirstOrderLinearTIDS.h"
-#include "NewtonEulerDS.h"
-#include "NewtonEulerR.h"
+#include "LagrangianLinearTIDS.hpp"
+#include "FirstOrderLinearTIDS.hpp"
+#include "NewtonEulerDS.hpp"
+#include "NewtonEulerR.hpp"
 
-#include "NonSmoothDynamicalSystem.h"
+#include "NonSmoothDynamicalSystem.hpp"
 

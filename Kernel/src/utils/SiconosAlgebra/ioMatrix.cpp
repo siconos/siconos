@@ -20,9 +20,9 @@
 #include <fstream>
 #include <iterator>
 
-#include "ioMatrix.h"
-#include "SimpleMatrix.h"
-#include "SiconosMatrixException.h"
+#include "ioMatrix.hpp"
+#include "SimpleMatrix.hpp"
+#include "SiconosMatrixException.hpp"
 
 
 // Default (private)

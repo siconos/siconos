@@ -39,14 +39,14 @@
 #define SpaceFilter_hpp
 
 #include "SiconosKernel.hpp"
-#include "Circle.h"
-#include "Disk.h"
-#include "DiskDiskR.h"
-#include "CircleCircleR.h"
-#include "DiskPlanR.h"
-#include "Sphere.h"
-#include "SphereSphereR.h"
-#include "SpherePlanR.h"
+#include "Circle.hpp"
+#include "Disk.hpp"
+#include "DiskDiskR.hpp"
+#include "CircleCircleR.hpp"
+#include "DiskPlanR.hpp"
+#include "Sphere.hpp"
+#include "SphereSphereR.hpp"
+#include "SpherePlanR.hpp"
 #include "ExternalBody.hpp"
 
 #include <tr1/unordered_set>

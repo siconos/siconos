@@ -16,9 +16,9 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "NewtonEulerDS.h"
-#include "BlockVector.h"
-#include "BlockMatrix.h"
+#include "NewtonEulerDS.hpp"
+#include "BlockVector.hpp"
+#include "BlockMatrix.hpp"
 
 using namespace std;
 

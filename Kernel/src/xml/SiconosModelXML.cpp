@@ -16,12 +16,12 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "SiconosModelXML.h"
-#include "Model.h"
-#include "Simulation.h"
-#include "NonSmoothDynamicalSystem.h"
-#include "SimulationXML.h"
-#include "NonSmoothDynamicalSystemXML.h"
+#include "SiconosModelXML.hpp"
+#include "Model.hpp"
+#include "Simulation.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "SimulationXML.hpp"
+#include "NonSmoothDynamicalSystemXML.hpp"
 
 using namespace std;
 

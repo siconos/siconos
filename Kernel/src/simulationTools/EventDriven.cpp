@@ -17,19 +17,19 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-#include "EventDriven.h"
-#include "SimulationXML.h"
-#include "OneStepNSProblemXML.h"
-#include "SimulationXML.h"
-#include "UnitaryRelation.h"
-#include "Lsodar.h"
-#include "LCP.h"
-#include "Model.h"
-#include "Interaction.h"
-#include "EventsManager.h"
-#include "NonSmoothDynamicalSystem.h"
-#include "Topology.h"
-#include "DynamicalSystem.h"
+#include "EventDriven.hpp"
+#include "SimulationXML.hpp"
+#include "OneStepNSProblemXML.hpp"
+#include "SimulationXML.hpp"
+#include "UnitaryRelation.hpp"
+#include "Lsodar.hpp"
+#include "LCP.hpp"
+#include "Model.hpp"
+#include "Interaction.hpp"
+#include "EventsManager.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "Topology.hpp"
+#include "DynamicalSystem.hpp"
 
 using namespace std;
 

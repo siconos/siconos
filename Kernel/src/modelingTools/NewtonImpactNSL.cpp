@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "NewtonImpactNSL.h"
-#include "NewtonImpactNSLXML.h"
+#include "NewtonImpactNSL.hpp"
+#include "NewtonImpactNSLXML.hpp"
 using namespace std;
 
 NewtonImpactNSL::NewtonImpactNSL(): NonSmoothLaw(1), _e(0.0)

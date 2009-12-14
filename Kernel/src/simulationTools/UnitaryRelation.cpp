@@ -16,16 +16,16 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "LagrangianDS.h"
-#include "NewtonEulerDS.h"
-#include "UnitaryRelation.h"
+#include "LagrangianDS.hpp"
+#include "NewtonEulerDS.hpp"
+#include "UnitaryRelation.hpp"
 #include "RelationTypes.hpp"
-#include "NewtonImpactNSL.h"
-#include "NewtonImpactFrictionNSL.h"
-#include "RuntimeException.h"
-#include "FirstOrderNonLinearDS.h"
-#include "FirstOrderR.h"
-#include "NewtonEulerR.h"
+#include "NewtonImpactNSL.hpp"
+#include "NewtonImpactFrictionNSL.hpp"
+#include "RuntimeException.hpp"
+#include "FirstOrderNonLinearDS.hpp"
+#include "FirstOrderR.hpp"
+#include "NewtonEulerR.hpp"
 
 using namespace std;
 using namespace RELATION;

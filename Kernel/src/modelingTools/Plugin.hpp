@@ -24,7 +24,7 @@
 #ifndef PLUGIN_HPP
 #define PLUGIN_HPP
 
-#include "SiconosSharedLibrary.h"
+#include "SiconosSharedLibrary.hpp"
 
 class Plugin
 {

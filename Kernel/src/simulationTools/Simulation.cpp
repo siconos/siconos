@@ -16,24 +16,24 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "Simulation.h"
-#include "SimulationXML.h"
-#include "DynamicalSystem.h"
-#include "NonSmoothDynamicalSystem.h"
-#include "Topology.h"
-#include "Interaction.h"
-#include "Relation.h"
-#include "OneStepIntegratorXML.h"
-#include "EventsManager.h"
+#include "Simulation.hpp"
+#include "SimulationXML.hpp"
+#include "DynamicalSystem.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "Topology.hpp"
+#include "Interaction.hpp"
+#include "Relation.hpp"
+#include "OneStepIntegratorXML.hpp"
+#include "EventsManager.hpp"
 
 // One Step Integrators
-#include "Moreau.h"
-#include "Lsodar.h"
+#include "Moreau.hpp"
+#include "Lsodar.hpp"
 
 // One Step Non Smooth Problems
-#include "LCP.h"
-#include "QP.h"
-#include "Relay.h"
+#include "LCP.hpp"
+#include "QP.hpp"
+#include "Relay.hpp"
 
 using namespace std;
 

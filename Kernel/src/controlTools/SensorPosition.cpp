@@ -16,13 +16,13 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "SensorPosition.h"
-#include "SensorFactory.h"
-#include "ioMatrix.h"
-#include "DynamicalSystem.h"
-#include "Model.h"
-#include "TimeDiscretisation.h"
-#include "NonSmoothDynamicalSystem.h"
+#include "SensorPosition.hpp"
+#include "SensorFactory.hpp"
+#include "ioMatrix.hpp"
+#include "DynamicalSystem.hpp"
+#include "Model.hpp"
+#include "TimeDiscretisation.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
 
 using namespace std;
 using namespace SensorFactory;

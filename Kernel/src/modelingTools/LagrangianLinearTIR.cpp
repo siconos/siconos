@@ -16,11 +16,11 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "LagrangianLinearTIR.h"
-#include "LinearRXML.h"
-#include "Interaction.h"
+#include "LagrangianLinearTIR.hpp"
+#include "LinearRXML.hpp"
+#include "Interaction.hpp"
 //
-#include "LagrangianDS.h"
+#include "LagrangianDS.hpp"
 
 using namespace std;
 using namespace RELATION;

@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "NonSmoothSolver.h"
-#include "RuntimeException.h"
+#include "NonSmoothSolver.hpp"
+#include "RuntimeException.hpp"
 #include <iterator>
 #include <iostream>
 

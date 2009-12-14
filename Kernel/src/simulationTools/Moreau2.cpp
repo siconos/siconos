@@ -16,14 +16,14 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "Moreau2.h"
-#include "Simulation.h"
-#include "Model.h"
-#include "NonSmoothDynamicalSystem.h"
-#include "TimeDiscretisation.h"
+#include "Moreau2.hpp"
+#include "Simulation.hpp"
+#include "Model.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "TimeDiscretisation.hpp"
 
-#include "LagrangianLinearTIDS.h"
-#include "FirstOrderLinearTIDS.h"
+#include "LagrangianLinearTIDS.hpp"
+#include "FirstOrderLinearTIDS.hpp"
 
 using namespace std;
 using namespace RELATION;

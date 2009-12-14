@@ -16,14 +16,14 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "Relay.h"
+#include "Relay.hpp"
 #include <iostream>
 #include <assert.h>
 #include "Tools.hpp"
 
 
-#include "Simulation.h"
-#include "RelayNSL.h"
+#include "Simulation.hpp"
+#include "RelayNSL.hpp"
 
 
 using namespace std;

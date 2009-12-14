@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "SiconosGraphTest.h"
+#include "SiconosGraphTest.hpp"
 
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(SiconosGraphTest);

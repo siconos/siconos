@@ -17,14 +17,14 @@
 * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-#include "ControlManager.h"
-#include "EventsManager.h"
-#include "Model.h"
-#include "Sensor.h"
-#include "SensorFactory.h"
-#include "ActuatorFactory.h"
-#include "Simulation.h"
-#include "TimeDiscretisation.h"
+#include "ControlManager.hpp"
+#include "EventsManager.hpp"
+#include "Model.hpp"
+#include "Sensor.hpp"
+#include "SensorFactory.hpp"
+#include "ActuatorFactory.hpp"
+#include "Simulation.hpp"
+#include "TimeDiscretisation.hpp"
 
 using namespace std;
 

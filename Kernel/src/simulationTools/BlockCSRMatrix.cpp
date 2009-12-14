@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "BlockCSRMatrix.h"
+#include "BlockCSRMatrix.hpp"
 
 using namespace std;
 

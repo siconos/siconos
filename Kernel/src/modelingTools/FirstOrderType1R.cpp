@@ -16,10 +16,10 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "FirstOrderType1R.h"
-#include "RelationXML.h"
-#include "Interaction.h"
-#include "FirstOrderNonLinearDS.h"
+#include "FirstOrderType1R.hpp"
+#include "RelationXML.hpp"
+#include "Interaction.hpp"
+#include "FirstOrderNonLinearDS.hpp"
 
 using namespace std;
 

@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-#include "FunctionTest.h"
+#include "FunctionTest.hpp"
 
 using namespace std;
 

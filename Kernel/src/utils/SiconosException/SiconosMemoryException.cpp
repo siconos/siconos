@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "SiconosMemoryException.h"
+#include "SiconosMemoryException.hpp"
 using namespace std;
 
 SiconosMemoryException::SiconosMemoryException() :

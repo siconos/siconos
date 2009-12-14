@@ -20,11 +20,11 @@
 \brief Include files related to controlTools.
 */
 
-#include "SensorFactory.h"
-#include "SensorPosition.h"
-#include "SensorEvent.h"
-#include "ActuatorFactory.h"
-#include "ExampleActuator.h"
-#include "ActuatorEvent.h"
-#include "ControlManager.h"
+#include "SensorFactory.hpp"
+#include "SensorPosition.hpp"
+#include "SensorEvent.hpp"
+#include "ActuatorFactory.hpp"
+#include "ExampleActuator.hpp"
+#include "ActuatorEvent.hpp"
+#include "ControlManager.hpp"
 

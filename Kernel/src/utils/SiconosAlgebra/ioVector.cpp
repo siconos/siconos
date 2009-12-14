@@ -16,9 +16,9 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "ioVector.h"
-#include "SimpleVector.h"
-#include "SiconosVectorException.h"
+#include "ioVector.hpp"
+#include "SimpleVector.hpp"
+#include "SiconosVectorException.hpp"
 #include <boost/numeric/ublas/io.hpp>
 #include<fstream>
 

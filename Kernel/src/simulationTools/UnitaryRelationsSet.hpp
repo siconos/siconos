@@ -23,7 +23,7 @@
 #define UnitaryRelationsSET_H
 
 #include "SiconosSet.hpp"
-#include "UnitaryRelation.h"
+#include "UnitaryRelation.hpp"
 
 #include "SiconosPointers.hpp"
 

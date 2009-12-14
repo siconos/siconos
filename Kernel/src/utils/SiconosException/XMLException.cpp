@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "XMLException.h"
+#include "XMLException.hpp"
 using namespace std;
 
 XMLException::XMLException():

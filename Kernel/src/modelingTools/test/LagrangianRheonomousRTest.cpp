@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "LagrangianRheonomousRTest.h"
+#include "LagrangianRheonomousRTest.hpp"
 using namespace std;
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \

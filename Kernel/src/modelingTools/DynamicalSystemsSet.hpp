@@ -22,7 +22,7 @@ Set of SP::DynamicalSystem
 #ifndef DSSET_H
 #define DSSET_H
 
-#include "DynamicalSystem.h"
+#include "DynamicalSystem.hpp"
 #include "SiconosSet.hpp"
 
 #include <boost/shared_ptr.hpp>

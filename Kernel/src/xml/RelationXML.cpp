@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "RelationXML.h"
-#include "SimpleMatrix.h"
+#include "RelationXML.hpp"
+#include "SimpleMatrix.hpp"
 using namespace std;
 using namespace RELATION;
 

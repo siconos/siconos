@@ -17,8 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-#include "RelayNSL.h"
-#include "RelayNSLXML.h"
+#include "RelayNSL.hpp"
+#include "RelayNSLXML.hpp"
 using namespace std;
 
 // Default (private)

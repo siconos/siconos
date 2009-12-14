@@ -17,8 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-#include "SensorFactory.h"
-#include "RuntimeException.h"
+#include "SensorFactory.hpp"
+#include "RuntimeException.hpp"
 
 using namespace std;
 

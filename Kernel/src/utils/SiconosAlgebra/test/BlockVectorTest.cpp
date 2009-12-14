@@ -17,10 +17,10 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-#include "BlockVectorTest.h"
-#include "BlockVector.h"
-#include "SimpleMatrix.h"
-#include "SimpleVector.h"
+#include "BlockVectorTest.hpp"
+#include "BlockVector.hpp"
+#include "SimpleMatrix.hpp"
+#include "SimpleVector.hpp"
 
 using namespace std;
 using namespace boost::numeric::ublas;

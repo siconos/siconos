@@ -43,7 +43,7 @@
 
 */
 
-#include "RuntimeException.h"
+#include "RuntimeException.hpp"
 
 /* objects that may be visited (1) */
 class DynamicalSystem;

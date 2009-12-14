@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "MixedComplementarityConditionNSL.h"
+#include "MixedComplementarityConditionNSL.hpp"
 using namespace std;
 
 MixedComplementarityConditionNSL::MixedComplementarityConditionNSL(unsigned int newSize, unsigned int equalitySize): NonSmoothLaw(newSize + equalitySize)

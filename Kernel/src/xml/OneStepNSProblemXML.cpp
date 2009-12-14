@@ -17,8 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-#include "OneStepNSProblemXML.h"
-#include "NonSmoothSolverXML.h"
+#include "OneStepNSProblemXML.hpp"
+#include "NonSmoothSolverXML.hpp"
 
 using namespace std;
 

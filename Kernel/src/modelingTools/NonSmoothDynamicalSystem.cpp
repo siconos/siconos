@@ -16,13 +16,13 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "NonSmoothDynamicalSystem.h"
-#include "NonSmoothDynamicalSystemXML.h"
-#include "DynamicalSystemXML.h"
-#include "Topology.h"
-#include "Interaction.h"
-#include "LagrangianLinearTIDS.h"
-#include "FirstOrderLinearTIDS.h"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "NonSmoothDynamicalSystemXML.hpp"
+#include "DynamicalSystemXML.hpp"
+#include "Topology.hpp"
+#include "Interaction.hpp"
+#include "LagrangianLinearTIDS.hpp"
+#include "FirstOrderLinearTIDS.hpp"
 
 using namespace std;
 using namespace DS;

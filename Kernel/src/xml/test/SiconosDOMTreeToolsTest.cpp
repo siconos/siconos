@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "SiconosDOMTreeToolsTest.h"
+#include "SiconosDOMTreeToolsTest.hpp"
 #include <float.h>
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \

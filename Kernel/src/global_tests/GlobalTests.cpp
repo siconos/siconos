@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-#include "GlobalTests.h"
+#include "GlobalTests.hpp"
 
 using namespace std;
 

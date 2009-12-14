@@ -18,17 +18,17 @@
  */
 
 #include "SiconosPointers.hpp"
-#include "SimulationXML.h"
+#include "SimulationXML.hpp"
 
-#include "OneStepIntegratorXML.h"
-#include "OneStepNSProblemXML.h"
-#include "TimeDiscretisationXML.h"
+#include "OneStepIntegratorXML.hpp"
+#include "OneStepNSProblemXML.hpp"
+#include "TimeDiscretisationXML.hpp"
 
 // includes to be deleted thanks to factories ?
 
-#include "LsodarXML.h"
-#include "MoreauXML.h"
-#include "QPXML.h"
+#include "LsodarXML.hpp"
+#include "MoreauXML.hpp"
+#include "QPXML.hpp"
 #include "FrictionContactXML.hpp"
 
 using namespace std;

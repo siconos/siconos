@@ -16,20 +16,20 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "LinearOSNS.h"
-#include "OneStepNSProblemXML.h"
-#include "Simulation.h"
-#include "Topology.h"
-#include "Model.h"
-#include "Moreau.h"
-#include "Lsodar.h"
-#include "NewtonEulerR.h"
-#include "FirstOrderLinearR.h"
-#include "FirstOrderLinearTIR.h"
-#include "LagrangianLinearTIR.h"
-#include "NewtonImpactNSL.h"
-#include "NewtonImpactFrictionNSL.h"
-#include "NonSmoothDynamicalSystem.h"
+#include "LinearOSNS.hpp"
+#include "OneStepNSProblemXML.hpp"
+#include "Simulation.hpp"
+#include "Topology.hpp"
+#include "Model.hpp"
+#include "Moreau.hpp"
+#include "Lsodar.hpp"
+#include "NewtonEulerR.hpp"
+#include "FirstOrderLinearR.hpp"
+#include "FirstOrderLinearTIR.hpp"
+#include "LagrangianLinearTIR.hpp"
+#include "NewtonImpactNSL.hpp"
+#include "NewtonImpactFrictionNSL.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
 
 using namespace std;
 using namespace RELATION;

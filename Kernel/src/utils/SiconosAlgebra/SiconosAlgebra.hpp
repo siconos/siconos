@@ -37,7 +37,7 @@
 #include <boost/numeric/bindings/atlas/cblas_enum.hpp>
 
 #include "SiconosPointers.hpp"
-#include "SiconosConst.h"
+#include "SiconosConst.hpp"
 #include "Tools.hpp"
 #include <deque>
 

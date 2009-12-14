@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "NonSmoothDynamicalSystemTest.h"
+#include "NonSmoothDynamicalSystemTest.hpp"
 using namespace std;
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \

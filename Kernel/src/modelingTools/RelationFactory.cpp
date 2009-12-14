@@ -17,8 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-#include "RelationFactory.h"
-#include "RuntimeException.h"
+#include "RelationFactory.hpp"
+#include "RuntimeException.hpp"
 
 namespace RelationFactory
 {

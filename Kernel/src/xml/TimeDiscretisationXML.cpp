@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-#include "TimeDiscretisationXML.h"
+#include "TimeDiscretisationXML.hpp"
 
 TimeDiscretisationXML::TimeDiscretisationXML(xmlNodePtr timeDiscretisationNode):
   rootNode(timeDiscretisationNode), hNode(NULL), NNode(NULL), tkNode(NULL)

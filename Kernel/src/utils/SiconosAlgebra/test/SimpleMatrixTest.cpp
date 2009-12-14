@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "SimpleMatrixTest.h"
-#include "SimpleVector.h"
+#include "SimpleMatrixTest.hpp"
+#include "SimpleVector.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);

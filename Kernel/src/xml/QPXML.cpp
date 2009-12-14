@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "QPXML.h"
+#include "QPXML.hpp"
 using namespace std;
 
 QPXML::QPXML() : OneStepNSProblemXML(), QNode(NULL), pNode(NULL)

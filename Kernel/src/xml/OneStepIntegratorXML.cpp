@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "OneStepIntegratorXML.h"
+#include "OneStepIntegratorXML.hpp"
 using namespace std;
 
 OneStepIntegratorXML::OneStepIntegratorXML():

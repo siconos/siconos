@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "EqualityConditionNSL.h"
+#include "EqualityConditionNSL.hpp"
 using namespace std;
 
 EqualityConditionNSL::EqualityConditionNSL(unsigned int newSize): NonSmoothLaw(newSize)

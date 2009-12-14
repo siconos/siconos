@@ -19,10 +19,10 @@
 
 // \todo : create a work vector for all tmp vectors used in computeG, computeH ...
 
-#include "LagrangianCompliantR.h"
-#include "RelationXML.h"
-#include "Interaction.h"
-#include "LagrangianDS.h"
+#include "LagrangianCompliantR.hpp"
+#include "RelationXML.hpp"
+#include "Interaction.hpp"
+#include "LagrangianDS.hpp"
 #include "Plugin.hpp"
 
 using namespace std;

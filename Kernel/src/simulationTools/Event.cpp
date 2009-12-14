@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "Event.h"
-#include "RuntimeException.h"
+#include "Event.hpp"
+#include "RuntimeException.hpp"
 #include <math.h>
 using namespace std;
 

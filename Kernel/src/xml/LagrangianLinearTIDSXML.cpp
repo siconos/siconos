@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "LagrangianLinearTIDSXML.h"
+#include "LagrangianLinearTIDSXML.hpp"
 using namespace std;
 
 LagrangianLinearTIDSXML::LagrangianLinearTIDSXML():

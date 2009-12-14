@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "NonSmoothLawXML.h"
+#include "NonSmoothLawXML.hpp"
 using namespace std;
 
 NonSmoothLawXML::NonSmoothLawXML(): rootNode(NULL), sizeNode(NULL)

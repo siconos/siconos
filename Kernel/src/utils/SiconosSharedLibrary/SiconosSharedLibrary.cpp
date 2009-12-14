@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "SiconosSharedLibrary.h"
-#include "SiconosSharedLibraryException.h"
+#include "SiconosSharedLibrary.hpp"
+#include "SiconosSharedLibraryException.hpp"
 using namespace std;
 
 std::vector<PluginHandle> SiconosSharedLibrary::isPlugged;

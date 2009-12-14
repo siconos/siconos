@@ -24,7 +24,7 @@
 
 
 
-#include "SiconosKernel.h"
+#include "SiconosKernel.hpp"
 
 enum DATAC_STATUS {DATAC_NULL, DATAC_MODEL, DATAC_INIT, DATAC_FULL };
 typedef  std::vector <NonSmoothLaw*> NonSmoothLawSet;

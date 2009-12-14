@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "Equality.h"
-#include "Simulation.h"
+#include "Equality.hpp"
+#include "Simulation.hpp"
 using namespace std;
 using namespace RELATION;
 

@@ -17,8 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-#include "EventFactory.h"
-#include "RuntimeException.h"
+#include "EventFactory.hpp"
+#include "RuntimeException.hpp"
 #include <iostream>
 
 using namespace std;

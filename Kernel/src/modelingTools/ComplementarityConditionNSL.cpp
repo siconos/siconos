@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "ComplementarityConditionNSL.h"
+#include "ComplementarityConditionNSL.hpp"
 using namespace std;
 
 ComplementarityConditionNSL::ComplementarityConditionNSL(unsigned int newSize): NonSmoothLaw(newSize)

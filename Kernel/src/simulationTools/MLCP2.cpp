@@ -16,14 +16,14 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "MLCP2.h"
-#include "Moreau2.h"
-#include "Simulation.h"
-#include "Model.h"
-#include "NonSmoothDynamicalSystem.h"
-#include "OneStepIntegrator.h"
-#include "FirstOrderLinearR.h"
-#include "Topology.h"
+#include "MLCP2.hpp"
+#include "Moreau2.hpp"
+#include "Simulation.hpp"
+#include "Model.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "OneStepIntegrator.hpp"
+#include "FirstOrderLinearR.hpp"
+#include "Topology.hpp"
 
 using namespace std;
 

@@ -19,7 +19,7 @@
  */
 
 #include <math.h>
-#include "CircleCircleR.h"
+#include "CircleCircleR.hpp"
 
 CircleCircleR::CircleCircleR(double r, double rr) : CircularR()
 {

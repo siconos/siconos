@@ -19,10 +19,10 @@
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
 
-#include "BlockMatrix.h"
-#include "SimpleMatrix.h"
-#include "SimpleVector.h"
-#include "SiconosMatrixException.h"
+#include "BlockMatrix.hpp"
+#include "SimpleMatrix.hpp"
+#include "SimpleVector.hpp"
+#include "SiconosMatrixException.hpp"
 
 
 using std::cout;

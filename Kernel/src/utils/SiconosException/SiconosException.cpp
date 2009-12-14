@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "SiconosException.h"
+#include "SiconosException.hpp"
 using namespace std;
 
 SiconosException::SiconosException(): reportMsg("Siconos Exception")

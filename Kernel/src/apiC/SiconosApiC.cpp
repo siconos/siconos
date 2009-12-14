@@ -17,9 +17,9 @@ y/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-#include "SiconosKernel.h"
-#include "SiconosDataC.h"
-#include "SiconosApiC.h"
+#include "SiconosKernel.hpp"
+#include "SiconosDataC.hpp"
+#include "SiconosApiC.hpp"
 
 using namespace std;
 

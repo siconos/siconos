@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "LCP.h"
+#include "LCP.hpp"
 
 using namespace std;
 using namespace RELATION;

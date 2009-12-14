@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-#include "RelayNSLXML.h"
+#include "RelayNSLXML.hpp"
 using namespace std;
 
 RelayNSLXML::RelayNSLXML(): CNode(NULL), DNode(NULL)

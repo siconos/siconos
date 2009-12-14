@@ -19,7 +19,7 @@
  */
 
 #include <math.h>
-#include "SphereSphereR.h"
+#include "SphereSphereR.hpp"
 
 SphereSphereR::SphereSphereR(double r, double rr) : LagrangianScleronomousR()
 {

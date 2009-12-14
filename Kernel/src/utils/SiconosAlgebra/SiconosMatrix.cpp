@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "SiconosMatrix.h"
+#include "SiconosMatrix.hpp"
 
 // Constructor with the type-number
 SiconosMatrix::SiconosMatrix(unsigned int newNum): dimRow(0), dimCol(0), num(newNum)

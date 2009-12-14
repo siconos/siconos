@@ -16,13 +16,13 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "FrictionContact.h"
+#include "FrictionContact.hpp"
 #include "FrictionContactXML.hpp"
-#include "Topology.h"
-#include "Simulation.h"
-#include "Model.h"
-#include "NonSmoothDynamicalSystem.h"
-#include "NewtonImpactFrictionNSL.h"
+#include "Topology.hpp"
+#include "Simulation.hpp"
+#include "Model.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "NewtonImpactFrictionNSL.hpp"
 
 using namespace std;
 using namespace RELATION;

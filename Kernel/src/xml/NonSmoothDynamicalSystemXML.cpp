@@ -16,15 +16,15 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "NonSmoothDynamicalSystemXML.h"
+#include "NonSmoothDynamicalSystemXML.hpp"
 
 //---  Following includes to be suppressed thanks to factory (?) ---
 
 // DS
-#include "LagrangianDSXML.h"
-#include "InteractionXML.h"
-#include "LagrangianLinearTIDSXML.h"
-#include "FirstOrderLinearDSXML.h"
+#include "LagrangianDSXML.hpp"
+#include "InteractionXML.hpp"
+#include "LagrangianLinearTIDSXML.hpp"
+#include "FirstOrderLinearDSXML.hpp"
 
 using namespace std;
 

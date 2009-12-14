@@ -16,9 +16,9 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "MLCP.h"
-#include "MixedComplementarityConditionNSL.h"
-#include "Simulation.h"
+#include "MLCP.hpp"
+#include "MixedComplementarityConditionNSL.hpp"
+#include "Simulation.hpp"
 
 using namespace std;
 using namespace RELATION;

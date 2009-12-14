@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-#include "SiconosVector.h"
+#include "SiconosVector.hpp"
 
 // Default (protected) constructor
 SiconosVector::SiconosVector(unsigned int newNum): sizeV(0), num(newNum)

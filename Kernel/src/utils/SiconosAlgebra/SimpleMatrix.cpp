@@ -43,9 +43,9 @@ namespace lapack = boost::numeric::bindings::lapack;
 #include <boost/numeric/ublas/vector_proxy.hpp>
 #include <boost/numeric/ublas/operation_sparse.hpp>
 
-#include "SimpleMatrix.h"
-#include "SimpleVector.h"
-#include "ioMatrix.h"
+#include "SimpleMatrix.hpp"
+#include "SimpleVector.hpp"
+#include "ioMatrix.hpp"
 
 
 

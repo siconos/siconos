@@ -17,8 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-#include "QP.h"
-#include "QPXML.h"
+#include "QP.hpp"
+#include "QPXML.hpp"
 
 using namespace std;
 

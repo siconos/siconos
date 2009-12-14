@@ -19,10 +19,10 @@
 // === Test file for LinearDS class ===
 // -> call successively all the constructors and display new object.
 
-#include "Model.h"
-#include "FirstOrderLinearDS.h"
-#include "SimpleVector.h"
-#include "SiconosMatrix.h"
+#include "Model.hpp"
+#include "FirstOrderLinearDS.hpp"
+#include "SimpleVector.hpp"
+#include "SiconosMatrix.hpp"
 #include <sys/time.h>
 #include <iostream>
 #include <math.h>

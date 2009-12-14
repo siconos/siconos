@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "FirstOrderNonLinearDSXML.h"
-#include "SiconosMemoryXML.h"
+#include "FirstOrderNonLinearDSXML.hpp"
+#include "SiconosMemoryXML.hpp"
 
 using namespace std;
 

@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "FirstOrderLinearDSTest.h"
+#include "FirstOrderLinearDSTest.hpp"
 using namespace std;
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \

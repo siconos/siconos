@@ -2,7 +2,7 @@
 #define PluggedObject_H
 
 #include "SiconosPointers.hpp"
-#include "SiconosSharedLibrary.h"
+#include "SiconosSharedLibrary.hpp"
 #include <string>
 
 /*! \file PluggedObject.hpp

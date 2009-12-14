@@ -39,7 +39,7 @@ Typedef for simulation-related objects
 const double MACHINE_PREC = std::numeric_limits<double>::epsilon();
 
 
-//#include "OneStepIntegrator.h"
+//#include "OneStepIntegrator.hpp"
 
 
 // ================== Objects to handle DS ==================
@@ -165,7 +165,7 @@ typedef DSOSIMap::const_iterator DSOSIConstIterator;
 
 // ================== Objects to handle OSNS ==================
 
-#include "OneStepNSProblem.h"
+#include "OneStepNSProblem.hpp"
 /** Map of OSNS */
 typedef std::map<std::string, SP::OneStepNSProblem > OneStepNSProblems;
 

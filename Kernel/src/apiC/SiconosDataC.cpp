@@ -17,7 +17,7 @@
 * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-#include "SiconosDataC.h"
+#include "SiconosDataC.hpp"
 
 
 DataC::DataC()

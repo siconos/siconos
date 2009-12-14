@@ -19,8 +19,8 @@
 
 // \Warning these tests are not complete: add xml constructor.
 
-#include "Interaction.h"
-#include "FirstOrderType1RTest.h"
+#include "Interaction.hpp"
+#include "FirstOrderType1RTest.hpp"
 using namespace std;
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \

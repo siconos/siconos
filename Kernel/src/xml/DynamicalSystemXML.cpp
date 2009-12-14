@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "DynamicalSystemXML.h"
+#include "DynamicalSystemXML.hpp"
 using namespace std;
 using namespace DS;
 

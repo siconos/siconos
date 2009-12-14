@@ -21,27 +21,27 @@ Include files related to simulationTools
 Note that not all files from the current location are listed below, since some of them are already included inside the ones below.
 */
 
-#include "ComplementarityConditionNSLXML.h"
-#include "NewtonImpactFrictionNSLXML.h"
-#include "NewtonImpactNSLXML.h"
-#include "RelayNSLXML.h"
+#include "ComplementarityConditionNSLXML.hpp"
+#include "NewtonImpactFrictionNSLXML.hpp"
+#include "NewtonImpactNSLXML.hpp"
+#include "RelayNSLXML.hpp"
 
-#include "FirstOrderLinearDSXML.h"
-#include "LagrangianLinearTIDSXML.h"
+#include "FirstOrderLinearDSXML.hpp"
+#include "LagrangianLinearTIDSXML.hpp"
 
 #include "FrictionContactXML.hpp"
-#include "QPXML.h"
+#include "QPXML.hpp"
 
-#include "MoreauXML.h"
-#include "LsodarXML.h"
+#include "MoreauXML.hpp"
+#include "LsodarXML.hpp"
 
-#include "LinearRXML.h"
+#include "LinearRXML.hpp"
 
-#include "SiconosModelXML.h"
-#include "SiconosMemoryXML.h"
-#include "TimeDiscretisationXML.h"
-#include "NonSmoothDynamicalSystemXML.h"
-#include "SimulationXML.h"
-#include "NonSmoothSolverXML.h"
-#include "InteractionXML.h"
+#include "SiconosModelXML.hpp"
+#include "SiconosMemoryXML.hpp"
+#include "TimeDiscretisationXML.hpp"
+#include "NonSmoothDynamicalSystemXML.hpp"
+#include "SimulationXML.hpp"
+#include "NonSmoothSolverXML.hpp"
+#include "InteractionXML.hpp"
 

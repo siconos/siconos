@@ -17,21 +17,21 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-#include "TimeStepping.h"
-#include "SimulationXML.h"
-#include "OneStepNSProblemXML.h"
-#include "Topology.h"
-#include "LCP.h"
-#include "Relay.h"
-#include "Model.h"
-#include "TimeDiscretisation.h"
-#include "NonSmoothDynamicalSystem.h"
-#include "UnitaryRelation.h"
-#include "OneStepIntegrator.h"
-#include "Interaction.h"
-#include "EventsManager.h"
-#include "FrictionContact.h"
-#include "Moreau.h"
+#include "TimeStepping.hpp"
+#include "SimulationXML.hpp"
+#include "OneStepNSProblemXML.hpp"
+#include "Topology.hpp"
+#include "LCP.hpp"
+#include "Relay.hpp"
+#include "Model.hpp"
+#include "TimeDiscretisation.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "UnitaryRelation.hpp"
+#include "OneStepIntegrator.hpp"
+#include "Interaction.hpp"
+#include "EventsManager.hpp"
+#include "FrictionContact.hpp"
+#include "Moreau.hpp"
 
 using namespace std;
 

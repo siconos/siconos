@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "SiconosSharedLibraryException.h"
+#include "SiconosSharedLibraryException.hpp"
 using namespace std;
 
 SiconosSharedLibraryException::SiconosSharedLibraryException() :

@@ -16,18 +16,18 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "InteractionXML.h"
+#include "InteractionXML.hpp"
 
 //---  Following includes to be suppressed thanks to factory (?) ---
 // Relations
-#include "LinearRXML.h"
+#include "LinearRXML.hpp"
 // Nslaw
-#include "ComplementarityConditionNSLXML.h"
-#include "RelayNSLXML.h"
-#include "NewtonImpactNSLXML.h"
-#include "NewtonImpactFrictionNSLXML.h"
+#include "ComplementarityConditionNSLXML.hpp"
+#include "RelayNSLXML.hpp"
+#include "NewtonImpactNSLXML.hpp"
+#include "NewtonImpactFrictionNSLXML.hpp"
 
-#include "NonSmoothLaw.h"
+#include "NonSmoothLaw.hpp"
 using namespace std;
 
 

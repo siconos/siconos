@@ -17,13 +17,13 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-#include "Lsodar.h"
-#include "EventDriven.h"
-#include "LagrangianLinearTIDS.h"
-#include "BlockVector.h"
-#include "NonSmoothDynamicalSystem.h"
-#include "Model.h"
-#include "Topology.h"
+#include "Lsodar.hpp"
+#include "EventDriven.hpp"
+#include "LagrangianLinearTIDS.hpp"
+#include "BlockVector.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "Model.hpp"
+#include "Topology.hpp"
 
 using namespace std;
 

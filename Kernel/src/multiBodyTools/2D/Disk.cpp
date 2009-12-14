@@ -18,7 +18,7 @@
  *
  */
 
-#include "Disk.h"
+#include "Disk.hpp"
 
 void Disk::MassSetup()
 {

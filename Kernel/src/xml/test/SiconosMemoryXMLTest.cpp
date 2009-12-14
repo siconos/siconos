@@ -18,7 +18,7 @@
 */
 //$id$
 
-#include "SiconosMemoryXMLTest.h"
+#include "SiconosMemoryXMLTest.hpp"
 using namespace std;
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \

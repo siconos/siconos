@@ -17,14 +17,14 @@
 * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-#include "Actuator.h"
-#include "ActuatorEvent.h"
-#include "Sensor.h"
-#include "Model.h"
-#include "TimeDiscretisation.h"
-#include "EventFactory.h"
-#include "DynamicalSystem.h"
-#include "Simulation.h"
+#include "Actuator.hpp"
+#include "ActuatorEvent.hpp"
+#include "Sensor.hpp"
+#include "Model.hpp"
+#include "TimeDiscretisation.hpp"
+#include "EventFactory.hpp"
+#include "DynamicalSystem.hpp"
+#include "Simulation.hpp"
 #include <iostream>
 using namespace std;
 

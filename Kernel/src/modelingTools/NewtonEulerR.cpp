@@ -19,10 +19,10 @@
 
 // \todo : create a work vector for all tmp vectors used in computeG, computeH ...
 
-#include "NewtonEulerR.h"
-#include "RelationXML.h"
-#include "Interaction.h"
-#include "NewtonEulerDS.h"
+#include "NewtonEulerR.hpp"
+#include "RelationXML.hpp"
+#include "Interaction.hpp"
+#include "NewtonEulerDS.hpp"
 
 using namespace std;
 

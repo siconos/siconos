@@ -18,7 +18,7 @@
  *
  */
 
-#include "CircularR.h"
+#include "CircularR.hpp"
 
 CircularR::CircularR() : LagrangianScleronomousR() {};
 double CircularR::distance(double, double, double, double, double, double)

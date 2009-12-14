@@ -20,24 +20,24 @@
 Include files related to utils directory
 */
 
-#include "BlockMatrix.h"
-#include "BlockVector.h"
-#include "SimpleMatrix.h"
-#include "SimpleVector.h"
-#include "ioMatrix.h"
-#include "ioVector.h"
+#include "BlockMatrix.hpp"
+#include "BlockVector.hpp"
+#include "SimpleMatrix.hpp"
+#include "SimpleVector.hpp"
+#include "ioMatrix.hpp"
+#include "ioVector.hpp"
 
-#include "RuntimeException.h"
-#include "SiconosMatrixException.h"
-#include "XMLException.h"
-#include "SiconosVectorException.h"
-#include "SiconosSharedLibraryException.h"
+#include "RuntimeException.hpp"
+#include "SiconosMatrixException.hpp"
+#include "XMLException.hpp"
+#include "SiconosVectorException.hpp"
+#include "SiconosSharedLibraryException.hpp"
 
-#include "SiconosMemory.h"
+#include "SiconosMemory.hpp"
 
-#include "SiconosSharedLibrary.h"
+#include "SiconosSharedLibrary.hpp"
 
 #include "Tools.hpp"
 #include "Cmp.hpp"
 #include "SiconosSet.hpp"
-#include "check.h"
+#include "check.hpp"

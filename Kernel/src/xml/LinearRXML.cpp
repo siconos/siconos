@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "LinearRXML.h"
+#include "LinearRXML.hpp"
 using namespace std;
 
 LinearRXML::LinearRXML(): RelationXML(), CNode(NULL), DNode(NULL), FNode(NULL), eNode(NULL), BNode(NULL)

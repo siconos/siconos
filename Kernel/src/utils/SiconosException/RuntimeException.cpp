@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "RuntimeException.h"
+#include "RuntimeException.hpp"
 using namespace std;
 
 RuntimeException::RuntimeException():

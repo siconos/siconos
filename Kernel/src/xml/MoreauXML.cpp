@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "MoreauXML.h"
+#include "MoreauXML.hpp"
 using namespace std;
 
 MoreauXML::MoreauXML(): OneStepIntegratorXML(), thetaNode(NULL), WNode(NULL)

@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "NonSmoothSolverXML.h"
-#include "NonSmoothSolver.h" // For DEFAULT_XXX constants
+#include "NonSmoothSolverXML.hpp"
+#include "NonSmoothSolver.hpp" // For DEFAULT_XXX constants
 
 NonSmoothSolverXML::NonSmoothSolverXML(xmlNodePtr solverNode):
   rootNode(solverNode), iparamNode(NULL), dparamNode(NULL)

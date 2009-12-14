@@ -16,11 +16,11 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "EventsManager.h"
-#include "EventFactory.h"
-#include "TimeDiscretisation.h"
-#include "Model.h"
-#include "Simulation.h"
+#include "EventsManager.hpp"
+#include "EventFactory.hpp"
+#include "TimeDiscretisation.hpp"
+#include "Model.hpp"
+#include "Simulation.hpp"
 #include <math.h>
 #include <limits> // for ULONG_MAX
 using namespace std;

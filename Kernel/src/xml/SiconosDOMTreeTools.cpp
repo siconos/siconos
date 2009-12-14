@@ -16,12 +16,12 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "SiconosDOMTreeTools.h"
-#include "ioVector.h"
-#include "ioMatrix.h"
-#include "SimpleVector.h"
-#include "SimpleMatrix.h"
-#include "RuntimeException.h"
+#include "SiconosDOMTreeTools.hpp"
+#include "ioVector.hpp"
+#include "ioMatrix.hpp"
+#include "SimpleVector.hpp"
+#include "SimpleMatrix.hpp"
+#include "RuntimeException.hpp"
 
 using namespace std;
 

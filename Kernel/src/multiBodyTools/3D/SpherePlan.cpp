@@ -19,7 +19,7 @@
  */
 
 #include <math.h>
-#include "SpherePlanR.h"
+#include "SpherePlanR.hpp"
 
 SpherePlanR::SpherePlanR(double r, double A, double B, double C, double D)
   : LagrangianScleronomousR(), r(r), A(A), B(B), C(C), D(D)

@@ -17,16 +17,16 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include <assert.h>
-#include "Interaction.h"
-#include "InteractionXML.h"
-#include "NonSmoothLawXML.h"
-#include "RelationXML.h"
+#include "Interaction.hpp"
+#include "InteractionXML.hpp"
+#include "NonSmoothLawXML.hpp"
+#include "RelationXML.hpp"
 #include "RelationTypes.hpp"
-#include "ComplementarityConditionNSL.h"
-#include "RelayNSL.h"
-#include "NewtonImpactNSL.h"
-#include "NewtonImpactFrictionNSL.h"
-#include "DynamicalSystem.h"
+#include "ComplementarityConditionNSL.hpp"
+#include "RelayNSL.hpp"
+#include "NewtonImpactNSL.hpp"
+#include "NewtonImpactFrictionNSL.hpp"
+#include "DynamicalSystem.hpp"
 
 using namespace std;
 using namespace RELATION;

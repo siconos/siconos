@@ -16,10 +16,10 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "NonSmoothEvent.h"
-#include "EventFactory.h"
-#include "EventDriven.h"
-#include "OneStepIntegrator.h"
+#include "NonSmoothEvent.hpp"
+#include "EventFactory.hpp"
+#include "EventDriven.hpp"
+#include "OneStepIntegrator.hpp"
 
 using namespace std;
 using namespace EventFactory;

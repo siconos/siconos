@@ -17,16 +17,16 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-#include "Model.h"
-#include "SiconosModelXML.h"
+#include "Model.hpp"
+#include "SiconosModelXML.hpp"
 #include "KernelConfig.h"
-#include "SimulationXML.h"
-#include "NonSmoothDynamicalSystem.h"
-#include "NonSmoothDynamicalSystemXML.h"
-#include "TimeDiscretisation.h"
-#include "TimeStepping.h"
-#include "EventDriven.h"
-#include "Topology.h"
+#include "SimulationXML.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "NonSmoothDynamicalSystemXML.hpp"
+#include "TimeDiscretisation.hpp"
+#include "TimeStepping.hpp"
+#include "EventDriven.hpp"
+#include "Topology.hpp"
 
 using namespace std;
 

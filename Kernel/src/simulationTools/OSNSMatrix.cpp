@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include <assert.h>
-#include "OSNSMatrix.h"
+#include "OSNSMatrix.hpp"
 #include "Tools.hpp"
 
 using namespace std;

@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "SiconosMatrixException.h"
+#include "SiconosMatrixException.hpp"
 using namespace std;
 
 SiconosMatrixException::SiconosMatrixException() :

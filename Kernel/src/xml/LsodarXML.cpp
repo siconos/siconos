@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "LsodarXML.h"
+#include "LsodarXML.hpp"
 using namespace std;
 
 LsodarXML::LsodarXML() : OneStepIntegratorXML()

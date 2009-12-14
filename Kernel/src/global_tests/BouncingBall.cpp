@@ -25,7 +25,7 @@
 //
 // ======================================================================================================
 
-#include "GlobalTests.h"
+#include "GlobalTests.hpp"
 #include "SiconosKernel.hpp"
 using namespace std;
 

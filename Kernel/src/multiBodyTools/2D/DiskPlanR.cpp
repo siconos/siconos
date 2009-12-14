@@ -19,8 +19,8 @@
  */
 
 #include <math.h>
-#include "DiskPlanR.h"
-#include "Disk.h"
+#include "DiskPlanR.hpp"
+#include "Disk.hpp"
 
 void DiskPlanR::init(double r, double A, double B, double C,
                      double xC, double yC, double w)

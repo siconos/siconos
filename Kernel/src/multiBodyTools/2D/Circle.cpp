@@ -18,7 +18,7 @@
  *
  */
 
-#include "Circle.h"
+#include "Circle.hpp"
 
 void Circle::MassSetup()
 {

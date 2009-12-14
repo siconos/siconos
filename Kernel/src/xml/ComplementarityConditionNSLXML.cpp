@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "ComplementarityConditionNSLXML.h"
+#include "ComplementarityConditionNSLXML.hpp"
 using namespace std;
 
 ComplementarityConditionNSLXML::ComplementarityConditionNSLXML(): NonSmoothLawXML()

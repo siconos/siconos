@@ -16,9 +16,9 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "TimeDiscretisationEvent.h"
-#include "EventFactory.h"
-#include "Simulation.h"
+#include "TimeDiscretisationEvent.hpp"
+#include "EventFactory.hpp"
+#include "Simulation.hpp"
 using namespace std;
 using namespace EventFactory;
 

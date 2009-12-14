@@ -16,12 +16,12 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "Topology.h"
-#include "NonSmoothLaw.h"
-#include "NonSmoothDynamicalSystem.h"
-#include "Interaction.h"
-#include "UnitaryRelation.h"
-#include "EqualityConditionNSL.h"
+#include "Topology.hpp"
+#include "NonSmoothLaw.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "Interaction.hpp"
+#include "UnitaryRelation.hpp"
+#include "EqualityConditionNSL.hpp"
 
 #include <boost/bind.hpp>
 #include <algorithm>

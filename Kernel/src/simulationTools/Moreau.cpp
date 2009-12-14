@@ -16,14 +16,14 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "Moreau.h"
-#include "MoreauXML.h"
-#include "Simulation.h"
-#include "Model.h"
-#include "NonSmoothDynamicalSystem.h"
-#include "NewtonEulerDS.h"
-#include "LagrangianLinearTIDS.h"
-#include "FirstOrderLinearTIDS.h"
+#include "Moreau.hpp"
+#include "MoreauXML.hpp"
+#include "Simulation.hpp"
+#include "Model.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "NewtonEulerDS.hpp"
+#include "LagrangianLinearTIDS.hpp"
+#include "FirstOrderLinearTIDS.hpp"
 
 using namespace std;
 using namespace DS;

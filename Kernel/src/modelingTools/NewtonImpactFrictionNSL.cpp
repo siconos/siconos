@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "NewtonImpactFrictionNSL.h"
-#include "NewtonImpactFrictionNSLXML.h"
+#include "NewtonImpactFrictionNSL.hpp"
+#include "NewtonImpactFrictionNSLXML.hpp"
 using namespace std;
 
 // Default (private)

@@ -24,7 +24,7 @@ Set of SP::Interaction
 #define InteractionsSET_H
 
 #include "SiconosSet.hpp"
-#include "Interaction.h"
+#include "Interaction.hpp"
 
 /** A set of pointers to interactions, sorted in a growing order according to their address */
 typedef SiconosSet<Interaction, double*> InteractionsSet;

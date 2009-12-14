@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "Relation.h"
+#include "Relation.hpp"
 
 using namespace std;
 

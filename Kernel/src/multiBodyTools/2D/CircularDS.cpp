@@ -18,7 +18,7 @@
  *
  */
 
-#include "CircularDS.h"
+#include "CircularDS.hpp"
 
 CircularDS::CircularDS(double r, double m,
                        SP::SiconosVector qinit,

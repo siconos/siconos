@@ -16,9 +16,9 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "FirstOrderLinearTIR.h"
-#include "LinearRXML.h"
-#include "Interaction.h"
+#include "FirstOrderLinearTIR.hpp"
+#include "LinearRXML.hpp"
+#include "Interaction.hpp"
 
 using namespace std;
 using namespace RELATION;

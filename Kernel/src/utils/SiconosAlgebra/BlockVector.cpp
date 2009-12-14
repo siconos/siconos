@@ -20,8 +20,8 @@
 #include <boost/numeric/ublas/vector_proxy.hpp>  // for project
 #include <vector>
 
-#include "BlockVector.h"
-#include "SimpleVector.h"
+#include "BlockVector.hpp"
+#include "SimpleVector.hpp"
 
 
 // =================================================

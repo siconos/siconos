@@ -28,7 +28,7 @@
 #include <map>
 #include <iostream>
 #include "Cmp.hpp"
-#include "RuntimeException.h"
+#include "RuntimeException.hpp"
 
 /** Set (STL) of pointers to T -
  *

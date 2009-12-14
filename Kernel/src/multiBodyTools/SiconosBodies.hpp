@@ -22,7 +22,7 @@
 #ifndef SiconosBodies_hpp
 #define SiconosBodies_hpp
 
-#include "Model.h"
+#include "Model.hpp"
 #include "SpaceFilter.hpp"
 
 /**

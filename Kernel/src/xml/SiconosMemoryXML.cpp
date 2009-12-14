@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "SiconosMemoryXML.h"
-#include "SimpleVector.h"
+#include "SiconosMemoryXML.hpp"
+#include "SimpleVector.hpp"
 
 using namespace std;
 
