@@ -193,7 +193,7 @@ public:
   /** default function to compute h
    *  \param double : current time
    */
-  void computeH(double) = 0;
+  void computeh(double) = 0;
 
   /** default function to compute g
    *  \param double : current time

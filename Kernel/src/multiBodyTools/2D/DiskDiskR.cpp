@@ -35,7 +35,7 @@ double DiskDiskR::distance(double x1, double y1, double r1,
 }
 
 
-void DiskDiskR::computeH(double)
+void DiskDiskR::computeh(double)
 {
 
   double q_0 = (*data[q0])(0);
@@ -48,7 +48,7 @@ void DiskDiskR::computeH(double)
 
 };
 
-void DiskDiskR::computeJacQH(double)
+void DiskDiskR::computeJacqh(double)
 {
 
   SimpleMatrix *g = (SimpleMatrix *)JacQH.get();

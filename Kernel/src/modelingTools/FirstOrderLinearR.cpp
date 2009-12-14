@@ -263,7 +263,7 @@ void FirstOrderLinearR::computeb(double time)
   }
 }
 
-void FirstOrderLinearR::computeH(double time)
+void FirstOrderLinearR::computeh(double time)
 {
   computeOutput(time, 0);
 }

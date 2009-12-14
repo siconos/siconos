@@ -181,7 +181,7 @@ public:
   /** to compute y = h(q,v,t) using plug-in mechanism
    * \param: double, current time
    */
-  virtual void computeH(double);
+  virtual void computeh(double);
 
   /** default function to compute jacobianH
    *  \param double : current time
@@ -192,11 +192,11 @@ public:
   {
     ;
   }
-  virtual void computeJacQH(double)
+  virtual void computeJacqh(double)
   {
     ;
   }
-  virtual void computeJacQDotH(double)
+  virtual void computeJacqDoth(double)
   {
     ;
   }
@@ -215,8 +215,8 @@ public:
   /* compute all the H Jacobian */
   virtual void computeJacH(double t)
   {
-    computeJacQH(t);
-    computeJacQDotH(t);
+    computeJacqh(t);
+    computeJacqDoth(t);
     computeJacLH(t);
   }
   /* compute all the G Jacobian */

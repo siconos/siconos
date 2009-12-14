@@ -45,9 +45,9 @@ public:
 
   double distance(double, double, double, double, double, double, double, double);
 
-  void computeH(double);
+  void computeh(double);
 
-  void computeJacQH(double);
+  void computeJacqh(double);
 
   /** visitors hook
    */

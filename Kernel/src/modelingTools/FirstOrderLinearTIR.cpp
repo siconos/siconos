@@ -130,7 +130,7 @@ void FirstOrderLinearTIR::initialize(SP::Interaction inter)
   _workZ.reset(new SimpleVector(sizeZ));
 }
 
-void FirstOrderLinearTIR::computeH(double time)
+void FirstOrderLinearTIR::computeh(double time)
 {
   computeOutput(time, 0);
 }

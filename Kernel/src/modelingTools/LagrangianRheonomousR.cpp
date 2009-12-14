@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-// \todo : create a work vector for all tmp vectors used in computeG, computeH ...
+// \todo : create a work vector for all tmp vectors used in computeG, computeh ...
 
 #include "LagrangianRheonomousR.hpp"
 #include "RelationXML.hpp"
@@ -56,16 +56,16 @@ LagrangianRheonomousR::LagrangianRheonomousR(SP::RelationXML LRxml): LagrangianR
 }
 
 // constructor from a set of data
-LagrangianRheonomousR::LagrangianRheonomousR(const string& computeH, const string& computeHDot, const string& strcomputeJacQH):
+LagrangianRheonomousR::LagrangianRheonomousR(const string& computeh, const string& computehDot, const string& strcomputeJacqh):
   LagrangianR(RheonomousR)
 {
   // h
-  setComputeHFunction(SSL::getPluginName(computeH), SSL::getPluginFunctionName(computeH));
+  setComputeHFunction(SSL::getPluginName(computeh), SSL::getPluginFunctionName(computeh));
 
   // hDot
-  setComputeHDotFunction(SSL::getPluginName(computeHDot), SSL::getPluginFunctionName(computeHDot));
+  setComputeHDotFunction(SSL::getPluginName(computehDot), SSL::getPluginFunctionName(computehDot));
   _pluginJacQH.reset(new PluggedObject());
-  _pluginJacQH->setComputeFunction(strcomputeJacQH);
+  _pluginJacQH->setComputeFunction(strcomputeJacqh);
 
   unsigned int sizeY = interaction()->getSizeOfY();
   unsigned int sizeQ = _workX->size();
@@ -92,7 +92,7 @@ void LagrangianRheonomousR::setComputeHDotFunction(const string& pluginPath, con
   _pluginhDot->setComputeFunction(pluginPath, functionName);
 }
 
-void LagrangianRheonomousR::computeH(double time)
+void LagrangianRheonomousR::computeh(double time)
 {
   if (_pluginh->fPtr)
   {
@@ -122,7 +122,7 @@ void LagrangianRheonomousR::computeG(double time)
   assert(false && "LagrangianScleronomousR::computeG : G is computed in computeInput!\n");
 }
 
-void LagrangianRheonomousR::computeHDot(double time)
+void LagrangianRheonomousR::computehDot(double time)
 {
   if (_pluginhDot->fPtr)
   {
@@ -143,7 +143,7 @@ void LagrangianRheonomousR::computeHDot(double time)
   // else nothing
 }
 
-void LagrangianRheonomousR::computeJacQH(double time)
+void LagrangianRheonomousR::computeJacqh(double time)
 {
   // Note that second input arg is useless.
   if (_pluginJacQH->fPtr)
@@ -166,14 +166,14 @@ void LagrangianRheonomousR::computeJacQH(double time)
 void LagrangianRheonomousR::computeOutput(double time, unsigned int derivativeNumber)
 {
   if (derivativeNumber == 0)
-    computeH(time);
+    computeh(time);
   else
   {
     SP::SiconosVector y = interaction()->y(derivativeNumber);
-    computeJacQH(time);
+    computeJacqh(time);
     if (derivativeNumber == 1)
     {
-      computeHDot(time); // \todo: save hDot directly into y[1] ?
+      computehDot(time); // \todo: save hDot directly into y[1] ?
       prod(*JacQH, *data[q1], *y);
       *y += *_hDot;
     }
@@ -187,7 +187,7 @@ void LagrangianRheonomousR::computeOutput(double time, unsigned int derivativeNu
 
 void LagrangianRheonomousR::computeInput(double time, unsigned int level)
 {
-  computeJacQH(time);
+  computeJacqh(time);
   // get lambda of the concerned interaction
   SP::SiconosVector lambda = interaction()->lambda(level);
   // data[name] += trans(G) * lambda

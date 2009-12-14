@@ -60,7 +60,7 @@ double SpherePlanR::distance(double x, double y, double z, double rad)
 }
 
 
-void SpherePlanR::computeH(double)
+void SpherePlanR::computeh(double)
 {
 
   double q_0 = (*data[q0])(0);
@@ -75,7 +75,7 @@ void SpherePlanR::computeH(double)
 
 void normalize(SP::SiconosVector, unsigned int);
 
-void SpherePlanR::computeJacQH(double)
+void SpherePlanR::computeJacqh(double)
 {
   SimpleMatrix *g = (SimpleMatrix *)JacQH.get();
 

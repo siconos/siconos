@@ -135,7 +135,7 @@ void RelationXML::setHPlugin(const string&  plugin)
 {
   if (!hNode)
   {
-    hNode = SiconosDOMTreeTools::createSingleNode(rootNode, "computeH");
+    hNode = SiconosDOMTreeTools::createSingleNode(rootNode, "computeh");
     xmlNewProp(hNode, (xmlChar*)"plugin", (xmlChar*)plugin.c_str());
   }
   else SiconosDOMTreeTools::setStringAttributeValue(hNode, "plugin", plugin);

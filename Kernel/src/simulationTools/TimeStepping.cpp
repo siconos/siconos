@@ -365,7 +365,7 @@ void TimeStepping::computeInitialResidu()
   for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
   {
     (*it)->relation()->computeG(tkp1);
-    (*it)->relation()->computeH(tkp1);
+    (*it)->relation()->computeh(tkp1);
   }
 
   SP::DynamicalSystemsGraph dsGraph = model()->nonSmoothDynamicalSystem()->dynamicalSystems();

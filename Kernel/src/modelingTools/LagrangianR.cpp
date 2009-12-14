@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-// \todo : create a work vector for all tmp vectors used in computeG, computeH ...
+// \todo : create a work vector for all tmp vectors used in computeG, computeh ...
 
 #include "LagrangianR.hpp"
 #include "RelationXML.hpp"
@@ -88,9 +88,9 @@ void LagrangianR::initialize(SP::Interaction inter)
 }
 
 
-void LagrangianR::computeH(double)
+void LagrangianR::computeh(double)
 {
-  RuntimeException::selfThrow("LagrangianR::computeH: not yet implemented (or useless) for Lagrangian relation of type " + subType);
+  RuntimeException::selfThrow("LagrangianR::computeh: not yet implemented (or useless) for Lagrangian relation of type " + subType);
 }
 
 //  void LagrangianR::computeJacXH(double)

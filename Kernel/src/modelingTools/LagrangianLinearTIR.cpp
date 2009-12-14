@@ -121,7 +121,7 @@ void LagrangianLinearTIR::initComponents()
 
 }
 
-void LagrangianLinearTIR::computeH(double time)
+void LagrangianLinearTIR::computeh(double time)
 {
   computeOutput(time, 0);
 }

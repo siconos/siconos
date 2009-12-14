@@ -90,7 +90,7 @@ public:
   LagrangianCompliantR(SP::RelationXML);
 
   /** constructor from a set of data
-   *  \param string : the name of the plugin to computeH
+   *  \param string : the name of the plugin to computeh
    *  \param vector<string> : a list of names for the plugin to compute the jacobians of h
    */
   LagrangianCompliantR(const std::string&, const std::vector<std::string>&);
@@ -102,13 +102,13 @@ public:
   /** to compute y = h(q,v,t) using plug-in mechanism
    * \param: double, current time
    */
-  void computeH(double);
+  void computeh(double);
 
   /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
    * \param: double, current time
    * \param: unsigned int
    */
-  void computeJacQH(double);
+  void computeJacqh(double);
   void computeJacLH(double);
 
   /** to compute output

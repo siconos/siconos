@@ -126,16 +126,16 @@ public:
   /** to compute y = h(q,v,t) using plug-in mechanism
    * \param: double, current time
    */
-  virtual void computeH(double);
+  virtual void computeh(double);
 
-  virtual void computeJacQH(double);
+  virtual void computeJacqh(double);
 
 
   /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
    * \param: double, current time
    * \param: unsigned int
    */
-  //  void computeJacQH(double);
+  //  void computeJacqh(double);
   void computeG(double, unsigned int = 0);
 
 

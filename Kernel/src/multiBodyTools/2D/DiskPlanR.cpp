@@ -110,7 +110,7 @@ double DiskPlanR::distance(double x, double y, double rad)
 }
 
 /* called compute H, but only the gap function is needed! */
-void DiskPlanR::computeH(double)
+void DiskPlanR::computeh(double)
 {
   SiconosVector *y = interaction()->y(0).get();
   double q_0 = (*data[q0])(0);
@@ -185,7 +185,7 @@ JacH(q) =  [                                                ]
 */
 
 
-void DiskPlanR::computeJacQH(double)
+void DiskPlanR::computeJacqh(double)
 {
 
   SimpleMatrix *g = (SimpleMatrix *) JacQH.get();

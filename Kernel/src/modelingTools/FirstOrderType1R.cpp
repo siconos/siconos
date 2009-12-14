@@ -123,7 +123,7 @@ void FirstOrderType1R::initialize(SP::Interaction inter)
            "FirstOrderType1R::initialize inconsistent sizes between JacG[0] matrix and the interaction.");
 }
 
-void FirstOrderType1R::computeH(double t)
+void FirstOrderType1R::computeh(double t)
 {
   computeOutput(t, 0);
 }

@@ -38,7 +38,7 @@ double SphereSphereR::distance(double x1, double y1, double z1, double r1, doubl
 }
 
 
-void SphereSphereR::computeH(double)
+void SphereSphereR::computeh(double)
 {
 
   // Warning: temporary method to have contiguous values in memory,
@@ -53,7 +53,7 @@ void SphereSphereR::computeH(double)
 
 };
 
-void SphereSphereR::computeJacQH(double)
+void SphereSphereR::computeJacqh(double)
 {
 
   double r, A, B, C, D, nN, nU;

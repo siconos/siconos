@@ -110,9 +110,9 @@ public:
     return width;
   };
 
-  void computeH(double);
+  void computeh(double);
 
-  void computeJacQH(double);
+  void computeJacqh(double);
 
   bool equal(double, double, double, double);
 

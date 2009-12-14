@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-// \todo : create a work vector for all tmp vectors used in computeG, computeH ...
+// \todo : create a work vector for all tmp vectors used in computeG, computeh ...
 
 #include "LagrangianCompliantR.hpp"
 #include "RelationXML.hpp"
@@ -45,10 +45,10 @@ LagrangianCompliantR::LagrangianCompliantR(SP::RelationXML LRxml): LagrangianR(L
 }
 
 // constructor from a set of data
-LagrangianCompliantR::LagrangianCompliantR(const string& computeH, const std::vector<string> & computeG): LagrangianR(CompliantR)
+LagrangianCompliantR::LagrangianCompliantR(const string& computeh, const std::vector<string> & computeG): LagrangianR(CompliantR)
 {
-  Plugin::setFunction(&hPtr, SSL::getPluginName(computeH), SSL::getPluginFunctionName(computeH));
-  pluginNameHPtr = computeH;
+  Plugin::setFunction(&hPtr, SSL::getPluginName(computeh), SSL::getPluginFunctionName(computeh));
+  pluginNameHPtr = computeh;
   Plugin::setFunction(&JacQHPtr, SSL::getPluginName(computeG[0]), SSL::getPluginFunctionName(computeG[0]));
   pluginNameJacQHPtr = computeG[0];
   Plugin::setFunction(&JacLHPtr, SSL::getPluginName(computeG[1]), SSL::getPluginFunctionName(computeG[1]));
@@ -71,7 +71,7 @@ void LagrangianCompliantR::initComponents()
     JacLH->resize(sizeY, sizeY);
 }
 
-void LagrangianCompliantR::computeH(double time)
+void LagrangianCompliantR::computeh(double time)
 {
   if (hPtr)
   {
@@ -97,7 +97,7 @@ void LagrangianCompliantR::computeH(double time)
   }
 }
 
-void LagrangianCompliantR::computeJacQH(double time)
+void LagrangianCompliantR::computeJacqh(double time)
 {
 
   if (JacQHPtr)
@@ -141,11 +141,11 @@ void LagrangianCompliantR::computeJacLH(double time)
 void LagrangianCompliantR::computeOutput(double time, unsigned int derivativeNumber)
 {
   if (derivativeNumber == 0)
-    computeH(time);
+    computeh(time);
   else
   {
     SP::SiconosVector y = interaction()->y(derivativeNumber);
-    computeJacQH(time);
+    computeJacqh(time);
     computeJacLH(time);
     if (derivativeNumber == 1)
     {
@@ -163,7 +163,7 @@ void LagrangianCompliantR::computeOutput(double time, unsigned int derivativeNum
 
 void LagrangianCompliantR::computeInput(const double time, const unsigned int level)
 {
-  computeJacQH(time);
+  computeJacqh(time);
   // get lambda of the concerned interaction
   SP::SiconosVector lambda = interaction()->lambda(level);
 

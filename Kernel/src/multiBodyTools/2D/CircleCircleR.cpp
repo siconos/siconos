@@ -35,7 +35,7 @@ double CircleCircleR::distance(double x1, double y1, double r1, double x2, doubl
 
 }
 
-void CircleCircleR::computeH(double)
+void CircleCircleR::computeh(double)
 {
 
   double q_0 = (*data[q0])(0);
@@ -48,7 +48,7 @@ void CircleCircleR::computeH(double)
 
 };
 
-void CircleCircleR::computeJacQH(double)
+void CircleCircleR::computeJacqh(double)
 {
 
   SimpleMatrix *g = (SimpleMatrix *) JacQH.get();

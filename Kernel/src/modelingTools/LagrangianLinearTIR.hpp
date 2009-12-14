@@ -125,7 +125,7 @@ public:
   /** default function to compute h
    *  \param double : current time
    */
-  void computeH(double);
+  void computeh(double);
   void computeG(double time);
 
 

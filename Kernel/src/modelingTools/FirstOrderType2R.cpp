@@ -93,7 +93,7 @@ void FirstOrderType2R::initialize(SP::Interaction inter)
          "FirstOrderType2R::initialize inconsistent sizes between JacG[0] matrix and the interaction.");
 }
 
-void FirstOrderType2R::computeH(double t)
+void FirstOrderType2R::computeh(double t)
 {
   computeOutput(t, 0);
 }
@@ -105,7 +105,7 @@ void FirstOrderType2R::computeG(double t)
 
 void FirstOrderType2R::computeOutput(double t, unsigned int)
 {
-  computeH(t);
+  computeh(t);
 }
 
 void FirstOrderType2R::computeInput(double t, unsigned int level)

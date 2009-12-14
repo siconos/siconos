@@ -124,7 +124,7 @@ protected:
    * @param[in,out] z : a vector of user-defined parameters
    */
   SP::PluggedObject _pluginJacQH;
-  //  FPtr4 computeJacQHPtr;
+  //  FPtr4 computeJacqhPtr;
 
 
 
@@ -209,18 +209,18 @@ public:
   /** to compute y = h(q,v,t) using plug-in mechanism
    * \param: double, current time
    */
-  void computeH(double);
+  void computeh(double);
 
   /** to compute hDot using plug-in mechanism
    * \param: double, current time
    */
-  void computeHDot(double);
+  void computehDot(double);
 
   /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
    * \param: double, current time
    * \param: unsigned int
    */
-  void computeJacQH(double);
+  void computeJacqh(double);
 
   /** to compute output
    *  \param double : current time

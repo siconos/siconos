@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-// \todo : create a work vector for all tmp vectors used in computeG, computeH ...
+// \todo : create a work vector for all tmp vectors used in computeG, computeh ...
 
 #include "LagrangianScleronomousR.hpp"
 #include "RelationXML.hpp"
@@ -48,13 +48,13 @@ LagrangianScleronomousR::LagrangianScleronomousR(SP::RelationXML LRxml): Lagrang
 }
 
 // constructor from a set of data
-LagrangianScleronomousR::LagrangianScleronomousR(const string& computeH, const std::string& strcomputeJacQH):
+LagrangianScleronomousR::LagrangianScleronomousR(const string& computeh, const std::string& strcomputeJacqh):
   LagrangianR(ScleronomousR)
 {
-  setComputeHFunction(SSL::getPluginName(computeH), SSL::getPluginFunctionName(computeH));
+  setComputeHFunction(SSL::getPluginName(computeh), SSL::getPluginFunctionName(computeh));
 
   pluginjQH.reset(new PluggedObject());
-  pluginjQH->setComputeFunction(strcomputeJacQH);
+  pluginjQH->setComputeFunction(strcomputeJacqh);
 
   //  unsigned int sizeY = interaction()->getSizeOfY();
   //  unsigned int sizeQ = workX->size();
@@ -65,7 +65,7 @@ LagrangianScleronomousR::LagrangianScleronomousR(const string& computeH, const s
   // We only set the name of the plugin-function and connect it to the user-defined function.
 }
 
-void LagrangianScleronomousR::computeH(double)
+void LagrangianScleronomousR::computeh(double)
 {
   // arg= time. Unused in this function but required for interface.
   if (_pluginh->fPtr)
@@ -94,7 +94,7 @@ void LagrangianScleronomousR::computeG(double, unsigned int)
 {
   assert(false && "LagrangianScleronomousR::computeG : G is computed in computeInput!\n");
 }
-void LagrangianScleronomousR::computeJacQH(double)
+void LagrangianScleronomousR::computeJacqh(double)
 {
   // First arg: time. Useless.
   // Last arg: index for G - Useless, always equal to 0 for this kind of relation.
@@ -121,10 +121,10 @@ void LagrangianScleronomousR::computeJacQH(double)
 void LagrangianScleronomousR::computeOutput(double time, unsigned int derivativeNumber)
 {
   if (derivativeNumber == 0)
-    computeH(time);
+    computeh(time);
   else
   {
-    computeJacQH(time);
+    computeJacqh(time);
     SP::SiconosVector y = interaction()->y(derivativeNumber) ;
     if (derivativeNumber == 1)
       prod(*JacQH, *data[q1], *y);
@@ -137,7 +137,7 @@ void LagrangianScleronomousR::computeOutput(double time, unsigned int derivative
 
 void LagrangianScleronomousR::computeInput(double time, unsigned int level)
 {
-  computeJacQH(time);
+  computeJacqh(time);
   // get lambda of the concerned interaction
   SP::SiconosVector lambda = interaction()->lambda(level);
   // data[name] += trans(G) * lambda

@@ -51,9 +51,9 @@ public:
 
   double distance(double, double, double, double);
 
-  void computeH(double);
+  void computeh(double);
 
-  void computeJacQH(double);
+  void computeJacqh(double);
 
   bool equal(double _A, double _B, double _C, double _D, double _r)
   {

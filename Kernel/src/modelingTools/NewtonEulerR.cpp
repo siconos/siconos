@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-// \todo : create a work vector for all tmp vectors used in computeG, computeH ...
+// \todo : create a work vector for all tmp vectors used in computeG, computeh ...
 
 #include "NewtonEulerR.hpp"
 #include "RelationXML.hpp"
@@ -95,7 +95,7 @@ void NewtonEulerR::initialize(SP::Interaction inter)
 }
 
 
-void NewtonEulerR::computeH(double)
+void NewtonEulerR::computeh(double)
 {
   SP::SiconosVector y = interaction()->y(0);
   *_workQ = *data[q0];
@@ -127,7 +127,7 @@ void NewtonEulerR::computeOutput(double t, unsigned int derivativeNumber)
   /*implemented for the bouncing ball*/
   if (derivativeNumber == 0)
   {
-    computeH(t);
+    computeh(t);
   }
   else
   {
@@ -151,7 +151,7 @@ void NewtonEulerR::computeInput(double t, unsigned int level)
 
 
 
-  //  computeJacQH(time);
+  //  computeJacqh(time);
   // get lambda of the concerned interaction
   SP::SiconosVector lambda = interaction()->lambda(level);
 
