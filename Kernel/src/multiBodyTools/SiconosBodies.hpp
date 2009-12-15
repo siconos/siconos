@@ -18,15 +18,16 @@
  *
  */
 
-
+/*! \file SiconosBodies.hpp
+  \brief SiconosBodies class - model + plans + space filter
+*/
 #ifndef SiconosBodies_hpp
 #define SiconosBodies_hpp
 
 #include "Model.hpp"
 #include "SpaceFilter.hpp"
 
-/**
-   a Siconos Model, some plans and space filtering capabilities
+/** SiconosBodies : a Siconos Model, some plans and space filtering capabilities
  */
 
 class SiconosBodies

@@ -135,7 +135,7 @@ bool NewtonEulerDS::checkDynamicalSystem()
 
 
   // fInt
-  //   if( ( _fInt && computeFIntPtr) && ( ! _jacobianQFInt || ! _jacobianQDotFInt ) )
+  //   if( ( _fInt && computeFIntPtr) && ( ! _jacobianqFInt || ! _jacobianqDotFInt ) )
   //     // ie if fInt is defined and not constant => its Jacobian must be defined (but not necessarily plugged)
   //     {
   //       RuntimeException::selfThrow("NewtonEulerDS::checkDynamicalSystem - You defined fInt but not its Jacobian (according to q and velocity).");
@@ -143,7 +143,7 @@ bool NewtonEulerDS::checkDynamicalSystem()
   //     }
 
   // NNL
-  if ((_NNL  && computeNNLPtr) && (! _jacobianQNNL || ! _jacobianQDotNNL))
+  if ((_NNL  && computeNNLPtr) && (! _jacobianqNNL || ! _jacobianqDotNNL))
     // ie if NNL is defined and not constant => its Jacobian must be defined (but not necessarily plugged)
   {
     RuntimeException::selfThrow("NewtonEulerDS::checkDynamicalSystem - You defined NNL but not its Jacobian (according to q and velocity).");
@@ -175,8 +175,8 @@ void NewtonEulerDS::initFL()
 
   _fL.reset(new SimpleVector(_n));
 
-  _jacobianQFL.reset(new SimpleMatrix(_n, _qDim));
-  _jacobianQDotFL.reset(new SimpleMatrix(_n, _qDim));
+  _jacobianqFL.reset(new SimpleMatrix(_n, _qDim));
+  _jacobianqDotFL.reset(new SimpleMatrix(_n, _qDim));
 }
 
 void NewtonEulerDS::initRhs(double time)
@@ -195,20 +195,20 @@ void NewtonEulerDS::initRhs(double time)
   // Copy of Mass into _workMatrix for LU-factorization.
 
   bool flag1 = false, flag2 = false;
-  if (_jacobianQFL)
+  if (_jacobianqFL)
   {
     // Solve MjacobianX(1,0) = jacobianFL[0]
     computeJacobianqFL(time);
 
-    //      _workMatrix[jacobianXBloc10].reset(new SimpleMatrix(*_jacobianQFL));
+    //      _workMatrix[jacobianXBloc10].reset(new SimpleMatrix(*_jacobianqFL));
     flag1 = true;
   }
 
-  if (_jacobianQDotFL)
+  if (_jacobianqDotFL)
   {
     // Solve MjacobianX(1,1) = jacobianFL[1]
     computeJacobianqDotFL(time);
-    //      _workMatrix[jacobianXBloc11].reset(new SimpleMatrix(*_jacobianQDotFL));
+    //      _workMatrix[jacobianXBloc11].reset(new SimpleMatrix(*_jacobianqDotFL));
     //      _workMatrix[invMass]->PLUForwardBackwardInPlace(*_workMatrix[jacobianXBloc11]);
     flag2 = true;
   }
@@ -240,20 +240,20 @@ void NewtonEulerDS::initialize(const string& simulationType, double time, unsign
     _z.reset(new SimpleVector(1));
   if (computeNNLPtr && !_NNL)
     _NNL.reset(new SimpleVector(_n));
-  if (computeJacobianqDotNNLPtr && !_jacobianQDotNNL)
-    _jacobianQDotNNL.reset(new SimpleMatrix(_n, _n));
-  if (computeJacobianqNNLPtr && ! _jacobianQNNL)
-    _jacobianQNNL.reset(new SimpleMatrix(_n, _n));
+  if (computeJacobianqDotNNLPtr && !_jacobianqDotNNL)
+    _jacobianqDotNNL.reset(new SimpleMatrix(_n, _n));
+  if (computeJacobianqNNLPtr && ! _jacobianqNNL)
+    _jacobianqNNL.reset(new SimpleMatrix(_n, _n));
 
   if (computeFExtPtr && !_fExt)
     _fExt.reset(new SimpleVector(_n));
 
   //   if ( computeFIntPtr && ! _fInt)
   //     _fInt.reset(new SimpleVector(_n));
-  //   if (computeJacobianqFIntPtr && !_jacobianQFInt)
-  //     _jacobianQFInt.reset(new SimpleMatrix(_n,_n));
-  //   if (computeJacobianqDotFIntPtr && !_jacobianQDotFInt)
-  //     _jacobianQDotFInt.reset(new SimpleMatrix(_n,_n));
+  //   if (computeJacobianqFIntPtr && !_jacobianqFInt)
+  //     _jacobianqFInt.reset(new SimpleMatrix(_n,_n));
+  //   if (computeJacobianqDotFIntPtr && !_jacobianqDotFInt)
+  //     _jacobianqDotFInt.reset(new SimpleMatrix(_n,_n));
 
 
   //
@@ -463,11 +463,11 @@ void NewtonEulerDS::computeNNL(SP::SiconosVector q2, SP::SiconosVector velocity2
 
 // void NewtonEulerDS::computeJacobianqFInt(double time){
 //   if(computeJacobianqFIntPtr)
-//       (computeJacobianqFIntPtr)(time, _n, &(*_q[0])(0), &(*_q[1])(0), &(*_jacobianQFInt)(0,0), _z->size(), &(*_z)(0));
+//       (computeJacobianqFIntPtr)(time, _n, &(*_q[0])(0), &(*_q[1])(0), &(*_jacobianqFInt)(0,0), _z->size(), &(*_z)(0));
 // }
 // void NewtonEulerDS::computeJacobianqDotFInt(double time){
 //   if(computeJacobianqDotFIntPtr)
-//       (computeJacobianqDotFIntPtr)(time, _n, &(*_q)(0), &(*_v)(0), &(*_jacobianQDotFInt)(0,0), _z->size(), &(*_z)(0));
+//       (computeJacobianqDotFIntPtr)(time, _n, &(*_q)(0), &(*_v)(0), &(*_jacobianqDotFInt)(0,0), _z->size(), &(*_z)(0));
 // }
 // void NewtonEulerDS::computeJacobianZFInt(double time){
 //   if(computeJacobianZFIntPtr)
@@ -476,11 +476,11 @@ void NewtonEulerDS::computeNNL(SP::SiconosVector q2, SP::SiconosVector velocity2
 
 // void NewtonEulerDS::computeJacobianqFInt( double time, SP::SiconosVector q2, SP::SiconosVector velocity2){
 //   if(computeJacobianqFIntPtr)
-//       (computeJacobianqFIntPtr)(time, _n, &(*q2)(0), &(*velocity2)(0), &(*_jacobianQFInt)(0,0), _z->size(), &(*_z)(0));
+//       (computeJacobianqFIntPtr)(time, _n, &(*q2)(0), &(*velocity2)(0), &(*_jacobianqFInt)(0,0), _z->size(), &(*_z)(0));
 // }
 // void NewtonEulerDS::computeJacobianqDotFInt( double time, SP::SiconosVector q2, SP::SiconosVector velocity2){
 //   if(computeJacobianqDotFIntPtr)
-//       (computeJacobianqDotFIntPtr)(time, _n, &(*q2)(0), &(*velocity2)(0), &(*_jacobianQDotFInt)(0,0), _z->size(), &(*_z)(0));
+//       (computeJacobianqDotFIntPtr)(time, _n, &(*q2)(0), &(*velocity2)(0), &(*_jacobianqDotFInt)(0,0), _z->size(), &(*_z)(0));
 // }
 // void NewtonEulerDS::computeJacobianZFInt( double time, SP::SiconosVector q2, SP::SiconosVector velocity2){
 //   if(computeJacobianZFIntPtr)
@@ -490,12 +490,12 @@ void NewtonEulerDS::computeNNL(SP::SiconosVector q2, SP::SiconosVector velocity2
 void NewtonEulerDS::computeJacobianqNNL()
 {
   if (computeJacobianqNNLPtr)
-    (computeJacobianqNNLPtr)(_n, &(*_q)(0), &(*_v)(0), &(*_jacobianQNNL)(0, 0), _z->size(), &(*_z)(0));
+    (computeJacobianqNNLPtr)(_n, &(*_q)(0), &(*_v)(0), &(*_jacobianqNNL)(0, 0), _z->size(), &(*_z)(0));
 }
 void NewtonEulerDS::computeJacobianqDotNNL()
 {
   if (computeJacobianqDotNNLPtr)
-    (computeJacobianqDotNNLPtr)(_n, &(*_q)(0), &(*_v)(0), &(*_jacobianQDotNNL)(0, 0), _z->size(), &(*_z)(0));
+    (computeJacobianqDotNNLPtr)(_n, &(*_q)(0), &(*_v)(0), &(*_jacobianqDotNNL)(0, 0), _z->size(), &(*_z)(0));
 }
 // void NewtonEulerDS::computeJacobianZNNL(){
 //   if(computeJacobianZNNLPtr)
@@ -505,12 +505,12 @@ void NewtonEulerDS::computeJacobianqDotNNL()
 void NewtonEulerDS::computeJacobianqNNL(SP::SiconosVector q2, SP::SiconosVector velocity2)
 {
   if (computeJacobianqNNLPtr)
-    (computeJacobianqNNLPtr)(_n, &(*q2)(0), &(*velocity2)(0), &(*_jacobianQNNL)(0, 0), _z->size(), &(*_z)(0));
+    (computeJacobianqNNLPtr)(_n, &(*q2)(0), &(*velocity2)(0), &(*_jacobianqNNL)(0, 0), _z->size(), &(*_z)(0));
 }
 void NewtonEulerDS::computeJacobianqDotNNL(SP::SiconosVector q2, SP::SiconosVector velocity2)
 {
   if (computeJacobianqDotNNLPtr)
-    (computeJacobianqDotNNLPtr)(_n, &(*q2)(0), &(*velocity2)(0), &(*_jacobianQDotNNL)(0, 0), _z->size(), &(*_z)(0));
+    (computeJacobianqDotNNLPtr)(_n, &(*q2)(0), &(*velocity2)(0), &(*_jacobianqDotNNL)(0, 0), _z->size(), &(*_z)(0));
 }
 // void NewtonEulerDS::computeJacobianZNNL(unsigned int i, SP::SiconosVector q2, SP::SiconosVector velocity2){
 //   if(computeJacobianZNNLPtr)
@@ -622,7 +622,7 @@ void NewtonEulerDS::computeFL(double time)
 
 void NewtonEulerDS::computeJacobianqFL(double time)
 {
-  if (_jacobianQFL)
+  if (_jacobianqFL)
   {
     //      computeJacobianqFInt(time);
     computeJacobianqNNL();
@@ -632,18 +632,18 @@ void NewtonEulerDS::computeJacobianqFL(double time)
     {
       //if not that means that jacobianFL[i] is already (pointer-)connected with
       // either jacobianFInt or jacobianNNL
-      _jacobianQFL->zero();
-      //    if( _jacobianQFInt )
-      //      *_jacobianQFL-=*_jacobianQFInt;
-      if (_jacobianQNNL)
-        *_jacobianQFL -= *_jacobianQNNL;
+      _jacobianqFL->zero();
+      //    if( _jacobianqFInt )
+      //      *_jacobianqFL-=*_jacobianqFInt;
+      if (_jacobianqNNL)
+        *_jacobianqFL -= *_jacobianqNNL;
     }
   }
   //else nothing.
 }
 void NewtonEulerDS::computeJacobianqDotFL(double time)
 {
-  if (_jacobianQDotFL)
+  if (_jacobianqDotFL)
   {
     //      computeJacobianqDotFInt(time);
     computeJacobianqDotNNL();
@@ -653,11 +653,11 @@ void NewtonEulerDS::computeJacobianqDotFL(double time)
     {
       //if not that means that jacobianFL[i] is already (pointer-)connected with
       // either jacobianFInt or jacobianNNL
-      _jacobianQDotFL->zero();
-      //    if( _jacobianQDotFInt )
-      //      *_jacobianQDotFL-=*_jacobianQDotFInt;
-      if (_jacobianQDotNNL)
-        *_jacobianQDotFL -= *_jacobianQDotNNL;
+      _jacobianqDotFL->zero();
+      //    if( _jacobianqDotFInt )
+      //      *_jacobianqDotFL-=*_jacobianqDotFInt;
+      if (_jacobianqDotNNL)
+        *_jacobianqDotFL -= *_jacobianqDotNNL;
     }
   }
   //else nothing.

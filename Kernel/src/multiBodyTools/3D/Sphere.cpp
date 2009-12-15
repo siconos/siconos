@@ -119,11 +119,11 @@ void Sphere::computeJacobianqNNL(SP::SiconosVector q, SP::SiconosVector v)
 
   double costheta = cos(theta);
 
-  _jacobianQNNL->zero();
+  _jacobianqNNL->zero();
 
-  (*_jacobianQNNL)(3, 3) = -I * psidot * phidot * costheta;
-  (*_jacobianQNNL)(4, 3) = I * psidot * thetadot * costheta;
-  (*_jacobianQNNL)(5, 3) = I * psidot * thetadot * costheta;
+  (*_jacobianqNNL)(3, 3) = -I * psidot * phidot * costheta;
+  (*_jacobianqNNL)(4, 3) = I * psidot * thetadot * costheta;
+  (*_jacobianqNNL)(5, 3) = I * psidot * thetadot * costheta;
 
 
 }
@@ -139,20 +139,20 @@ void Sphere::computeJacobianqDotNNL(SP::SiconosVector q, SP::SiconosVector v)
 
   double sintheta   = sin(theta);
 
-  _jacobianQDotNNL->zero();
+  _jacobianqDotNNL->zero();
 
 
-  (*_jacobianQDotNNL)(3, 3) = 0;
-  (*_jacobianQDotNNL)(3, 4) = I * psidot * sintheta;
-  (*_jacobianQDotNNL)(3, 5) = I * phidot * sintheta;
+  (*_jacobianqDotNNL)(3, 3) = 0;
+  (*_jacobianqDotNNL)(3, 4) = I * psidot * sintheta;
+  (*_jacobianqDotNNL)(3, 5) = I * phidot * sintheta;
 
-  (*_jacobianQDotNNL)(4, 3) = -I * psidot * sintheta;
-  (*_jacobianQDotNNL)(4, 4) = 0;
-  (*_jacobianQDotNNL)(4, 5) = -I * thetadot * sintheta;
+  (*_jacobianqDotNNL)(4, 3) = -I * psidot * sintheta;
+  (*_jacobianqDotNNL)(4, 4) = 0;
+  (*_jacobianqDotNNL)(4, 5) = -I * thetadot * sintheta;
 
-  (*_jacobianQDotNNL)(5, 3) =  -I * phidot * sintheta;
-  (*_jacobianQDotNNL)(5, 4) =  -I * thetadot * sintheta;
-  (*_jacobianQDotNNL)(5, 5) = 0;
+  (*_jacobianqDotNNL)(5, 3) =  -I * phidot * sintheta;
+  (*_jacobianqDotNNL)(5, 4) =  -I * thetadot * sintheta;
+  (*_jacobianqDotNNL)(5, 5) = 0;
 
 }
 
@@ -188,8 +188,8 @@ Sphere::Sphere(double r, double m,
 
   computeMass();
 
-  _jacobianQNNL.reset(new SimpleMatrix(_ndof, _ndof));
-  _jacobianQDotNNL.reset(new SimpleMatrix(_ndof, _ndof));
+  _jacobianqNNL.reset(new SimpleMatrix(_ndof, _ndof));
+  _jacobianqDotNNL.reset(new SimpleMatrix(_ndof, _ndof));
 
   _NNL.reset(new SimpleVector(_ndof));
   _NNL->zero();

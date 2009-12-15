@@ -18,11 +18,14 @@
  *
  */
 
+/*! \file ExternalBody.hpp
+  \brief External visitable lagrangian class.
+*/
+
 #ifndef ExternalBody_hpp
 #define ExternalBody_hpp
 
 DEFINE_SPTR(SpaceFilter);
-
 
 class ExternalBody : public LagrangianDS,
   public boost::enable_shared_from_this<ExternalBody>

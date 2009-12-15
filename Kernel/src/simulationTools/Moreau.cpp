@@ -296,8 +296,8 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
   else if (dsType == LNLDS)
   {
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
-    SP::SiconosMatrix K = d->jacobianQFL(); // jacobian according to q
-    SP::SiconosMatrix C = d->jacobianQDotFL(); // jacobian according to velocity
+    SP::SiconosMatrix K = d->jacobianqFL(); // jacobian according to q
+    SP::SiconosMatrix C = d->jacobianqDotFL(); // jacobian according to velocity
 
     *W = *d->mass();
 
@@ -391,8 +391,8 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
   else if (dsType == LNLDS)
   {
     SP::LagrangianDS d = boost::static_pointer_cast<LagrangianDS> (ds);
-    SP::SiconosMatrix K = d->jacobianQFL(); // jacobian according to q
-    SP::SiconosMatrix C = d->jacobianQDotFL(); // jacobian according to velocity
+    SP::SiconosMatrix K = d->jacobianqFL(); // jacobian according to q
+    SP::SiconosMatrix C = d->jacobianqDotFL(); // jacobian according to velocity
 
     d->computeMass();
     *W = *d->mass();

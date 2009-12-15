@@ -19,7 +19,6 @@
 
 /*! \file LagrangianDS.h
   \brief LagrangianDS class - Second Order Non Linear Dynamical Systems.
-
 */
 
 #ifndef LAGRANGIANNLDS_H
@@ -148,9 +147,9 @@ protected:
   SP::SiconosVector _fInt;
 
   /** jacobian_q Fint*/
-  SP::SiconosMatrix _jacobianQFInt;
+  SP::SiconosMatrix _jacobianqFInt;
   /** jacobian_{qDot} Fint*/
-  SP::SiconosMatrix _jacobianQDotFInt;
+  SP::SiconosMatrix _jacobianqDotFInt;
 
   /** external strength of the system */
   SP::SiconosVector _fExt;
@@ -159,17 +158,17 @@ protected:
   SP::SiconosVector _NNL;
 
   /** jacobian_q QNNL*/
-  SP::SiconosMatrix _jacobianQNNL;
+  SP::SiconosMatrix _jacobianqNNL;
   /** jacobian_{qDot} QNNL*/
-  SP::SiconosMatrix _jacobianQDotNNL;
+  SP::SiconosMatrix _jacobianqDotNNL;
 
   /** fL(q[0],q[1],t)= fExt - fInt -NNL */
   SP::SiconosVector _fL;
 
   /** jacobian_q FL*/
-  SP::SiconosMatrix _jacobianQFL;
+  SP::SiconosMatrix _jacobianqFL;
   /** jacobian_{qDot} FL*/
-  SP::SiconosMatrix _jacobianQDotFL;
+  SP::SiconosMatrix _jacobianqDotFL;
 
   /** set links with DS members
    */
@@ -226,7 +225,7 @@ protected:
   //  FPtr5 computeNNLPtr;
   SP::PluggedObject _pluginNNL;
 
-  /** LagrangianDS plug-in to compute \f$\nabla_qF_{Int}(\dot q, q, t)\f$, id = "jacobianQFInt"
+  /** LagrangianDS plug-in to compute \f$\nabla_qF_{Int}(\dot q, q, t)\f$, id = "jacobianqFInt"
    * @param time : current time
    * @param sizeOfq : size of vector q
    * @param q : pointer to the first element of q
@@ -238,7 +237,7 @@ protected:
   //  FPtr6 computeJacobianqFIntPtr;
   SP::PluggedObject _pluginJacqFInt;
 
-  /** LagrangianDS plug-in to compute \f$\nabla_{\dot q}F_{Int}(\dot q, q, t)\f$, id = "jacobianQDotFInt"
+  /** LagrangianDS plug-in to compute \f$\nabla_{\dot q}F_{Int}(\dot q, q, t)\f$, id = "jacobianqDotFInt"
    * @param time : current time
    * @param sizeOfq : size of vector q
    * @param q : pointer to the first element of q
@@ -250,7 +249,7 @@ protected:
   //  FPtr6 computeJacobianqDotFIntPtr;
   SP::PluggedObject _pluginJacqDotFInt;
 
-  /** LagrangianDS plug-in to compute \f$\nabla_qNNL(\dot q, q)\f$, id = "jacobianQNNL"
+  /** LagrangianDS plug-in to compute \f$\nabla_qNNL(\dot q, q)\f$, id = "jacobianqNNL"
    * @param sizeOfq : size of vector q
    * @param q : pointer to the first element of q
    * @param velocity : pointer to the first element of velocity
@@ -260,7 +259,7 @@ protected:
    */
   //  FPtr5 computeJacobianqNNLPtr;
   SP::PluggedObject _pluginJacqNNL;
-  /** LagrangianDS plug-in to compute \f$\nabla_{\dot q}NNL(\dot q, q)\f$, id = "jacobianQDotNNL"
+  /** LagrangianDS plug-in to compute \f$\nabla_{\dot q}NNL(\dot q, q)\f$, id = "jacobianqDotNNL"
    * @param sizeOfq : size of vector q
    * @param q : pointer to the first element of q
    * @param velocity : pointer to the first element of velocity
@@ -567,70 +566,70 @@ public:
 
   // -- Jacobian Fint --
 
-  /** get jacobianQFInt
+  /** get jacobianqFInt
    *  \return pointer on a SiconosMatrix
    */
   inline SP::SiconosMatrix jacobianqFInt() const
   {
-    return _jacobianQFInt;
+    return _jacobianqFInt;
   }
-  /** get jacobianQDotFInt
+  /** get jacobianqDotFInt
    *  \return pointer on a SiconosMatrix
    */
   inline SP::SiconosMatrix jacobianqDotFInt() const
   {
-    return _jacobianQDotFInt;
+    return _jacobianqDotFInt;
   }
   //  inline SP::SiconosMatrix jacobianZFInt() const { return jacobianZFInt; }
 
 
-  /** set jacobianQFInt to pointer newPtr
+  /** set jacobianqFInt to pointer newPtr
    *  \param a SP SiconosMatrix
    */
   inline void setJacobianqFIntPtr(SP::SiconosMatrix newPtr)
   {
-    _jacobianQFInt = newPtr;
+    _jacobianqFInt = newPtr;
   }
-  /** set jacobianQDotFInt to pointer newPtr
+  /** set jacobianqDotFInt to pointer newPtr
    *  \param a SP SiconosMatrix
    */
   inline void setJacobianqDotFIntPtr(SP::SiconosMatrix newPtr)
   {
-    _jacobianQDotFInt = newPtr;
+    _jacobianqDotFInt = newPtr;
   }
 
   // -- Jacobian NNL --
 
 
-  /** get jacobianQNNL
+  /** get jacobianqNNL
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix jacobianQNNL() const
+  inline SP::SiconosMatrix jacobianqNNL() const
   {
-    return _jacobianQNNL;
+    return _jacobianqNNL;
   }
-  /** get jacobianQDotNNL
+  /** get jacobianqDotNNL
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix jacobianQDotNNL() const
+  inline SP::SiconosMatrix jacobianqDotNNL() const
   {
-    return _jacobianQDotNNL;
+    return _jacobianqDotNNL;
   }
 
 
-  /** set jacobianQNNL to pointer newPtr
+  /** set jacobianqNNL to pointer newPtr
    *  \param a SP SiconosMatrix
    */
   inline void setJacobianqNNLPtr(SP::SiconosMatrix newPtr)
   {
-    _jacobianQNNL = newPtr;
+    _jacobianqNNL = newPtr;
   }
-  /** set jacobianQDotNNL to pointer newPtr
+  /** set jacobianqDotNNL to pointer newPtr
    *  \param a SP SiconosMatrix
    */
   inline void setJacobianqDotNNLPtr(SP::SiconosMatrix newPtr)
   {
-    _jacobianQDotNNL = newPtr;
+    _jacobianqDotNNL = newPtr;
   }
 
   // -- fL --
@@ -657,16 +656,16 @@ public:
   /** get JacobianFL
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix jacobianQFL() const
+  inline SP::SiconosMatrix jacobianqFL() const
   {
-    return _jacobianQFL;
+    return _jacobianqFL;
   }
   /** get JacobianFL
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix jacobianQDotFL() const
+  inline SP::SiconosMatrix jacobianqDotFL() const
   {
-    return _jacobianQDotFL;
+    return _jacobianqDotFL;
   }
   //  inline SP::SiconosMatrix jacobianZFL() const { return jacobianZFL; }
 
