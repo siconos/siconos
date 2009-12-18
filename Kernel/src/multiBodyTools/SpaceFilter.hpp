@@ -44,6 +44,7 @@
 #include "DiskDiskR.hpp"
 #include "CircleCircleR.hpp"
 #include "DiskPlanR.hpp"
+#include "DiskMovingPlanR.hpp"
 #include "Sphere.hpp"
 #include "SphereSphereR.hpp"
 #include "SpherePlanR.hpp"
@@ -56,6 +57,10 @@
 DEFINE_SPTR(Hashed);
 
 typedef std::tr1::unordered_multiset<SP::Hashed, boost::hash<SP::Hashed> > space_hash;
+
+typedef ublas::matrix<FTime, ublas::column_major, std::vector<FTime> > FMatrix;
+
+TYPEDEF_SPTR(FMatrix);
 
 class SpaceFilter : public boost::enable_shared_from_this<SpaceFilter>
 {
@@ -75,6 +80,9 @@ protected:
   /** plans */
   SP::SiconosMatrix _plans;
 
+  /** moving plans */
+  SP::FMatrix _moving_plans;
+
   /** the whole NonSmoothDynamicalSystem */
   SP::NonSmoothDynamicalSystem _nsds;
 
@@ -87,6 +95,8 @@ protected:
   void _PlanCircularFilter(double A, double B, double C,
                            double xCenter, double yCenter, double width,
                            SP::CircularDS ds);
+
+  void _MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, double time);
 
   void _PlanSphereFilter(double A, double B, double C, double D,
                          SP::Sphere ds);
@@ -108,6 +118,7 @@ protected:
 
   /* to compare relation */
   struct _IsSameDiskPlanR;
+  struct _IsSameDiskMovingPlanR;
   struct _IsSameSpherePlanR;
 
   friend class SpaceFilter::_CircularFilter;
@@ -115,6 +126,7 @@ protected:
   friend class SpaceFilter::_BodyHash;
   friend class SpaceFilter::_FindInteractions;
   friend class SpaceFilter::_IsSameDiskPlanR;
+  friend class SpaceFilter::_IsSameDiskMovingPlanR;
   friend class SpaceFilter::_IsSameSpherePlanR;
 
   SpaceFilter() {};
@@ -122,9 +134,9 @@ protected:
 public:
 
   SpaceFilter(unsigned int bboxfactor, unsigned int cellsize,
-              SP::NonSmoothDynamicalSystem nsds, SP::NonSmoothLaw nslaw, SP::SiconosMatrix plans) :
+              SP::NonSmoothDynamicalSystem nsds, SP::NonSmoothLaw nslaw, SP::SiconosMatrix plans, SP::FMatrix moving_plans) :
     _bboxfactor(bboxfactor), _cellsize(cellsize), _interID(0),
-    _nsds(nsds), _nslaw(nslaw), _plans(plans)
+    _nsds(nsds), _nslaw(nslaw), _plans(plans), _moving_plans(moving_plans)
   {};
 
 
@@ -154,7 +166,7 @@ public:
   /** search potential interactions
    *
    */
-  virtual void buildInteractions();
+  virtual void buildInteractions(double);
 
 };
 

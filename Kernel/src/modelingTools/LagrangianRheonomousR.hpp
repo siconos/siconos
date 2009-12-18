@@ -209,18 +209,18 @@ public:
   /** to compute y = h(q,v,t) using plug-in mechanism
    * \param: double, current time
    */
-  void computeh(double);
+  virtual void computeh(double);
 
   /** to compute hDot using plug-in mechanism
    * \param: double, current time
    */
-  void computehDot(double);
+  virtual void computehDot(double);
 
   /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
    * \param: double, current time
    * \param: unsigned int
    */
-  void computeJacqh(double);
+  virtual void computeJacqh(double);
 
   /** to compute output
    *  \param double : current time
@@ -238,7 +238,6 @@ public:
    *  \param Relation* : the relation which must be converted
    * \return a pointer on the relation if it is of the right type, NULL otherwise
    */
-  virtual void computeg(double time);
   static LagrangianRheonomousR* convert(Relation *r);
 };
 

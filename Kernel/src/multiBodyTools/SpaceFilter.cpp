@@ -371,7 +371,7 @@ struct SpaceFilter::_IsSameDiskPlanR : public SiconosVisitor
     flag = false;
   };
 
-  void visit(SP::ExternalBody)
+  void visit(SP::DiskMovingPlanR)
   {
     flag = false;
   };
@@ -380,6 +380,38 @@ struct SpaceFilter::_IsSameDiskPlanR : public SiconosVisitor
   void visit(SP::DiskPlanR rel)
   {
     flag = rel->equal(A, B, C, r, xCenter, yCenter, width);
+  };
+
+};
+
+struct SpaceFilter::_IsSameDiskMovingPlanR : public SiconosVisitor
+{
+  FTime AF, BF, CF;
+  double r;
+  bool flag;
+  SP::SpaceFilter parent;
+  _IsSameDiskMovingPlanR(SP::SpaceFilter p, FTime AF, FTime BF, FTime CF, double r) :
+    parent(p), AF(AF), BF(BF), CF(CF), r(r), flag(false) {};
+
+
+  void visit(SP::DiskDiskR)
+  {
+    flag = false;
+  };
+
+  void visit(SP::CircleCircleR)
+  {
+    flag = false;
+  };
+
+  void visit(SP::DiskPlanR)
+  {
+    flag = false;
+  };
+
+  void visit(SP::DiskMovingPlanR rel)
+  {
+    flag = rel->equal(AF, BF, CF, r);
   };
 
 };
@@ -470,6 +502,88 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
 
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameDiskPlanR->flag)
+      {
+        _nsds->topology()->
+        removeInteraction(DSG0->bundle(*oei)->interaction());
+        break;
+      }
+    }
+  }
+};
+
+
+
+/* proximity detection between circular object and plans */
+void SpaceFilter::_MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, double time)
+{
+  double r = ds->getRadius();
+
+  /* tolerance */
+  double tol = r;
+
+  SP::DynamicalSystemsGraph DSG0 = _nsds->topology()->dSG(0);
+
+  boost::shared_ptr<_IsSameDiskMovingPlanR>
+  isSameDiskMovingPlanR(new _IsSameDiskMovingPlanR(shared_from_this(),
+                        (*_moving_plans)(i, 0),
+                        (*_moving_plans)(i, 1),
+                        (*_moving_plans)(i, 2),
+                        r));
+
+  // all DS must be in DS graph
+  assert(DSG0->bundle(DSG0->descriptor(ds)) == ds);
+  SP::DiskMovingPlanR relp(new DiskMovingPlanR((*_moving_plans)(i, 0), (*_moving_plans)(i, 1), (*_moving_plans)(i, 2),
+                           (*_moving_plans)(i, 3), (*_moving_plans)(i, 4), (*_moving_plans)(i, 5), r));
+
+  relp->init(time);
+
+  if (relp->distance(ds->getQ(0),
+                     ds->getQ(1),
+                     ds->getRadius()) < tol)
+
+  {
+    // is interaction in graph ?
+    bool found = false;
+    DynamicalSystemsGraph::OEIterator oei, oeiend;
+    for (boost::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
+         oei != oeiend; ++oei)
+    {
+      DSG0->bundle(*oei)->interaction()
+      ->relation()->accept(isSameDiskMovingPlanR);
+      if (DSG0->bundle(DSG0->target(*oei)) == ds
+          && isSameDiskMovingPlanR->flag)
+      {
+        // re-init
+        boost::static_pointer_cast<DiskMovingPlanR>(DSG0->bundle(*oei)->interaction()
+            ->relation())->init(time);
+        found = true;
+        break;
+      }
+    }
+    if (!found)
+      // no
+    {
+      SP::Interaction inter(new Interaction(2,
+                                            _nslaw,
+                                            relp, _interID++));
+      inter->insert(ds);
+
+      _nsds->topology()->insertInteraction(inter);
+
+    }
+  }
+  else
+  {
+    // is interaction in graph ?
+    DynamicalSystemsGraph::OEIterator oei, oeiend;
+    for (boost::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
+         oei != oeiend; ++oei)
+    {
+      DSG0->bundle(*oei)->interaction()
+      ->relation()->accept(isSameDiskMovingPlanR);
+
+      if (DSG0->bundle(DSG0->target(*oei)) == ds
+          && isSameDiskMovingPlanR->flag)
       {
         _nsds->topology()->
         removeInteraction(DSG0->bundle(*oei)->interaction());
@@ -592,22 +706,35 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
           boost::hash<interPair> > interPairs;
 
   SP::SpaceFilter parent;
-  _FindInteractions(SP::SpaceFilter p) : parent(p) {};
+  double time;
+  _FindInteractions(SP::SpaceFilter p, double time) : parent(p), time(time) {};
 
   void visit_circular(SP::CircularDS  ds1)
   {
     assert(parent->_plans->size(0) > 0);
 
     // interactions with plans
-    for (unsigned int i = 0; i < parent->_plans->size(0); ++i)
+
+    if (parent->_plans)
     {
-      parent->_PlanCircularFilter((*parent->_plans)(i, 0),
-                                  (*parent->_plans)(i, 1),
-                                  (*parent->_plans)(i, 2),
-                                  (*parent->_plans)(i, 3),
-                                  (*parent->_plans)(i, 4),
-                                  (*parent->_plans)(i, 5),
-                                  ds1);
+      for (unsigned int i = 0; i < parent->_plans->size(0); ++i)
+      {
+        parent->_PlanCircularFilter((*parent->_plans)(i, 0),
+                                    (*parent->_plans)(i, 1),
+                                    (*parent->_plans)(i, 2),
+                                    (*parent->_plans)(i, 3),
+                                    (*parent->_plans)(i, 4),
+                                    (*parent->_plans)(i, 5),
+                                    ds1);
+      }
+    }
+
+    if (parent->_moving_plans)
+    {
+      for (unsigned int i = 0; i < parent->_moving_plans->size1(); ++i)
+      {
+        parent->_MovingPlanCircularFilter(i, ds1, time);
+      }
     }
 
     SP::SiconosVector Q1 = ds1->q();
@@ -727,7 +854,7 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
 
 
 /* general proximity detection */
-void SpaceFilter::buildInteractions()
+void SpaceFilter::buildInteractions(double time)
 {
 
   DSIterator it1;
@@ -738,7 +865,7 @@ void SpaceFilter::buildInteractions()
   boost::shared_ptr<_BodyHash>
   hasher(new _BodyHash(shared_from_this()));
   boost::shared_ptr<_FindInteractions>
-  findInteractions(new _FindInteractions(shared_from_this()));
+  findInteractions(new _FindInteractions(shared_from_this(), time));
 
 
   _hash_table.clear();

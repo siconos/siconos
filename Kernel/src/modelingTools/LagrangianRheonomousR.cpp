@@ -117,10 +117,6 @@ void LagrangianRheonomousR::computeh(double time)
   }
   // else nothing
 }
-void LagrangianRheonomousR::computeg(double time)
-{
-  assert(false && "LagrangianScleronomousR::computeg : G is computed in computeInput!\n");
-}
 
 void LagrangianRheonomousR::computehDot(double time)
 {

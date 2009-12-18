@@ -35,6 +35,7 @@ class SiconosBodies
 
 protected:
 
+  SP::FMatrix _moving_plans;
   SP::SiconosMatrix plans_;
   SP::Model model_;
   SP::SpaceFilter playground_;
@@ -50,7 +51,12 @@ public:
     return model_;
   }
 
-  SP::SiconosMatrix getPlansPtr()
+
+  SP::FMatrix movingPlans()
+  {
+    return _moving_plans;
+  }
+  SP::SiconosMatrix plans()
   {
     return plans_;
   }

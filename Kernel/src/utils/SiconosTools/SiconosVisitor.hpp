@@ -52,6 +52,7 @@ class Disk;
 class Circle;
 class CircleCircleR;
 class DiskDiskR;
+class DiskMovingPlanR;
 class DiskPlanR;
 class Sphere;
 class SphereSphereR;
@@ -116,6 +117,7 @@ public:
   VISIT(Disk);
   VISIT(Circle);
   VISIT(DiskPlanR);
+  VISIT(DiskMovingPlanR);
   VISIT(CircleCircleR);
   VISIT(DiskDiskR);
   VISIT(Sphere);

@@ -128,16 +128,10 @@ public:
    */
   virtual void computeh(double);
 
-  virtual void computeJacqh(double);
-
-
   /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
    * \param: double, current time
-   * \param: unsigned int
    */
-  //  void computeJacqh(double);
-  void computeg(double, unsigned int = 0);
-
+  virtual void computeJacqh(double);
 
   /** to compute output
    *  \param double : current time

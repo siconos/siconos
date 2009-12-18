@@ -26,7 +26,7 @@ void SiconosBodies::compute()
   try
   {
 
-    playground_->buildInteractions();
+    playground_->buildInteractions(model_->currentTime());
 
     model_->simulation()->updateInteractions();
 

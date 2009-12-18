@@ -90,10 +90,7 @@ void LagrangianScleronomousR::computeh(double)
   }
   // else nothing
 }
-void LagrangianScleronomousR::computeg(double, unsigned int)
-{
-  assert(false && "LagrangianScleronomousR::computeg : G is computed in computeInput!\n");
-}
+
 void LagrangianScleronomousR::computeJacqh(double)
 {
   // First arg: time. Useless.
