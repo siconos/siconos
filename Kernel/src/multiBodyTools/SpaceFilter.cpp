@@ -553,9 +553,6 @@ void SpaceFilter::_MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, d
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameDiskMovingPlanR->flag)
       {
-        // re-init
-        boost::static_pointer_cast<DiskMovingPlanR>(DSG0->bundle(*oei)->interaction()
-            ->relation())->init(time);
         found = true;
         break;
       }

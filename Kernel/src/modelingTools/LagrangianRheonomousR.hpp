@@ -86,7 +86,6 @@ class LagrangianRheonomousR : public LagrangianR
 {
 
 protected:
-  SP::SiconosMatrix _Jacqh;
   /** plugged vector used to compute hDot */
   SP::SiconosVector _hDot;
 

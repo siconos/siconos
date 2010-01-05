@@ -37,7 +37,7 @@ class DiskMovingPlanR : public LagrangianRheonomousR,
   public boost::enable_shared_from_this<DiskMovingPlanR>
 {
 private:
-  double _A, _B, _C, _ADot, _BDot, _CDot, _sqrA2pB2, _r, _AADot, _BBDot, _cubsqrA2pB2;
+  double _time, _A, _B, _C, _ADot, _BDot, _CDot, _sqrA2pB2, _r, _AADot, _BBDot, _cubsqrA2pB2;
 
 
   SP::PluggedObject _AFunction;

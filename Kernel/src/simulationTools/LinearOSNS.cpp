@@ -30,6 +30,7 @@
 #include "NewtonImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
+#include "LagrangianRheonomousR.hpp"
 
 using namespace std;
 using namespace RELATION;
@@ -494,6 +495,30 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
         subprod(*C, *Xfree, *_q, coord, true);
       }
 
+      if (relationType == Lagrangian && (relationSubType == RheonomousR))
+      {
+        SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
+        ID->eye();
+
+        std::vector<unsigned int> xcoord(8);
+        xcoord[0] = 0;
+        xcoord[1] = sizeY;
+        xcoord[2] = 0;
+        xcoord[3] = sizeY;
+        xcoord[4] = 0;
+        xcoord[5] = sizeY;
+        xcoord[6] = pos;
+        xcoord[7] = pos + sizeY;
+
+        boost::static_pointer_cast<LagrangianRheonomousR>
+        (UR->interaction()->relation())->computehDot(simulation()->getTkp1());
+        subprod(*ID,
+                *(boost::static_pointer_cast<LagrangianRheonomousR>
+                  (UR->interaction()->relation())->hDot()),
+                *_q,
+                xcoord,
+                false); // y += hDot
+      }
       if (relationType == FirstOrder && (relationSubType == LinearTIR || relationSubType == LinearR))
       {
         // In the first order linear case it may be required to add e + FZ to q.

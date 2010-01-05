@@ -240,16 +240,15 @@ void Simulation::updateInteractions()
 
   SP::InteractionsSet allInteractions =
     model()->nonSmoothDynamicalSystem()->interactions();
+  initLevelMax();
 
-  //if(!allInteractions->isEmpty())  // ie if some Interactions have been declared
-  {
-    initLevelMax();
+  double time = model()->currentTime(); // init with current model time
 
-    std::for_each(allInteractions->begin(), allInteractions->end(),
-                  boost::bind(&Interaction::initialize, _1, _tinit, _levelMax + 1));
+  std::for_each(allInteractions->begin(), allInteractions->end(),
+                boost::bind(&Interaction::initialize, _1, time, _levelMax + 1));
 
-    initOSNS();
-  };
+  initOSNS();
+
 }
 
 void Simulation::initialize(SP::Model m, bool withOSI)

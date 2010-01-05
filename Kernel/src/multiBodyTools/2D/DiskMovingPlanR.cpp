@@ -23,7 +23,7 @@
 
 DiskMovingPlanR::DiskMovingPlanR(FTime FA, FTime FB, FTime FC,
                                  FTime FAD, FTime FBD, FTime FCD,
-                                 double radius)
+                                 double radius) : LagrangianRheonomousR()
 {
   setComputeAFunction(FA);
   setComputeBFunction(FB);
@@ -37,27 +37,33 @@ DiskMovingPlanR::DiskMovingPlanR(FTime FA, FTime FB, FTime FC,
 
 void DiskMovingPlanR::init(double time)
 {
-  computeA(time);
-  computeB(time);
-  computeC(time);
-  computeADot(time);
-  computeBDot(time);
-  computeCDot(time);
+  if (time != _time)
+  {
+    _time = time;
+    computeA(time);
+    computeB(time);
+    computeC(time);
+    computeADot(time);
+    computeBDot(time);
+    computeCDot(time);
 
-  _sqrA2pB2 = hypot(_A, _B);
-  _AADot = _A * _ADot;
-  _BBDot = _B * _BDot;
-  _cubsqrA2pB2 = _sqrA2pB2 * _sqrA2pB2 * _sqrA2pB2;
+    _sqrA2pB2 = hypot(_A, _B);
+    _AADot = _A * _ADot;
+    _BBDot = _B * _BDot;
+    _cubsqrA2pB2 = _sqrA2pB2 * _sqrA2pB2 * _sqrA2pB2;
+  }
 }
 
 double DiskMovingPlanR::distance(double x, double y, double rad)
 {
-  return (fabs(_A * x + _B * y + _C) / _sqrA2pB2);
+  return (fabs(_A * x + _B * y + _C) / _sqrA2pB2 - rad);
 }
 
-/* called compute h, but only the gap function is needed! */
-void DiskMovingPlanR::computeh(double)
+/* Called compute h, but only the gap function is needed! */
+void DiskMovingPlanR::computeh(double time)
 {
+  init(time);
+
   SiconosVector *y = interaction()->y(0).get();
   double q_0 = (*data[q0])(0);
   double q_1 = (*data[q0])(1);
@@ -66,15 +72,14 @@ void DiskMovingPlanR::computeh(double)
 
 }
 
-void DiskMovingPlanR::computeJacqh(double)
+void DiskMovingPlanR::computeJacqh(double time)
 {
+  init(time);
 
   SimpleMatrix *g = (SimpleMatrix *) Jacqh.get();
 
   double x = (*data[q0])(0);
   double y = (*data[q0])(1);
-
-  printf("%g,%g,%g\n", _A, _B, _C);
 
   double D1 = _A * x + _B * y + _C;
   double signD1 = copysign(1, D1);
@@ -87,8 +92,9 @@ void DiskMovingPlanR::computeJacqh(double)
   (*g)(1, 2) = -_r;
 }
 
-void DiskMovingPlanR::computehDot(double)
+void DiskMovingPlanR::computehDot(double time)
 {
+  init(time);
 
   double x = (*data[q0])(0);
   double y = (*data[q0])(1);

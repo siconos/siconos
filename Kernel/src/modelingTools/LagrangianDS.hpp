@@ -46,15 +46,24 @@ typedef  void (*FPtrFExt)(double, unsigned int, double*, unsigned int, double*);
  * M(q,z) \ddot q + NNL(\dot q, q, z) + F_{Int}(\dot q , q , t, z) = F_{Ext}(t, z) + p
  * \f]
  * where
- *    - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
- *    - \f$ \dot q  \in R^{ndof} \f$  the velocity, i. e. the time derivative of the  generalized coordinates.
- *    - \f$ \ddot q  \in R^{ndof} \f$  the acceleration, i. e. the second time derivative of the  generalized coordinates.
- *    - \f$ p  \in R^{ndof} \f$  the forces due to the Non Smooth Interaction. In the particular case of Non Smooth evolution, the variable p contains the impulse and not the force.
- *    -  \f$ M(q)  \in  R^{ndof \times ndof}  \f$ is the inertia term saved in the SiconosMatrix mass.
- *    -  \f$ NNL(\dot q, q)  \in R^{ndof}\f$ is the non linear inertia term saved in the SiconosVector NNL.
- *    -  \f$ F_{Int}(\dot q , q , t)  \in R^{ndof} \f$ are the internal forces saved in the SiconosVector fInt.
- *    -  \f$ F_{Ext}(t)  \in R^{ndof}  \f$ are the external forces saved in the SiconosVector fExt.
- *    -  \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic variables, some sort of discret state.
+ * - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
+ * - \f$ \dot q \in R^{ndof} \f$ the velocity, i. e. the time
+ *      derivative of the generalized coordinates.
+ * - \f$ \ddot q \in R^{ndof} \f$ the acceleration, i. e. the second
+ *       time derivative of the generalized coordinates.
+ * - \f$ p \in R^{ndof} \f$ the forces due to the Non Smooth
+ *       Interaction. In the particular case of Non Smooth evolution,
+ *       the variable p contains the impulse and not the force.
+ * - \f$ M(q) \in R^{ndof \times ndof} \f$ is the inertia term saved
+ *       in the SiconosMatrix mass.
+ * - \f$ NNL(\dot q, q) \in R^{ndof}\f$ is the non linear inertia term
+ *       saved in the SiconosVector NNL.
+ * - \f$ F_{Int}(\dot q , q , t) \in R^{ndof} \f$ are the internal
+ *       forces saved in the SiconosVector fInt.
+ * - \f$ F_{Ext}(t) \in R^{ndof} \f$ are the external forces saved in
+ *       the SiconosVector fExt.
+ * - \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic
+ *       variables, some sort of discret state.
  *
  *  Or:
  * \f[
@@ -87,9 +96,12 @@ typedef  void (*FPtrFExt)(double, unsigned int, double*, unsigned int, double*);
  *
  *  Main functionalities to handle a LagrangianDS are:
  *
- *    - Construction: the only required operator is M. All the operators can be set using the plug-in mechanism.
- *    - Initialization: compute state members and operators for time=t0 (usually done when calling simulation->initialize)
- *    - Computation at time t, thanks to "compute" functions. Any call to one of the following functions requires that the plug-in
+ * - Construction: the only required operator is M. All the operators
+ *      can be set using the plug-in mechanism.
+ * - Initialization: compute state members and operators for time=t0
+ *     (usually done when calling simulation->initialize)
+ * - Computation at time t, thanks to "compute" functions. Any call to
+ *      one of the following functions requires that the plug-in
  *      has been set properly thanks to the corresponding setPluginFunction:
  *        => computeMass     (setComputeMassFunction)
  *        => computeFInt     (setComputeFIntFunction)
