@@ -45,7 +45,7 @@ int myLu(LinearSystem_Problem* problem, double *z ,  Solver_Options* options)
   /* Checks inputs */
   if (problem == NULL || z == NULL)
     numericsError("Equality_Problem", "null input for Equality_Problem and/or unknowns (z)");
-
+  //displayLS(problem);
   memcpy(Maux, problem->M->matrix0, n2 * sizeof(double));
   memcpy(z, problem->q, n * sizeof(double));
 
@@ -75,3 +75,27 @@ int LinearSystem_driver(LinearSystem_Problem* problem, double *z , double *w, So
   return myLu(problem, z , options);
 }
 
+void displayLS(LinearSystem_Problem* p)
+{
+  printf("Numerics LinearSystem DISPLAY:\n-------------\n");
+  if (!p)
+    printf("p is null \n");
+  int size = p->size;
+
+  printf("size :%d \n", size);
+  if (p->M)
+  {
+    printf("M matrix:\n");
+    displayMat(p->M->matrix0, size, size, size);
+  }
+  else
+    printf("No M matrix:\n");
+  if (p->q)
+  {
+    printf("q matrix:\n");
+    displayMat(p->q, size, 1, 0);
+  }
+  else
+    printf("No q:\n");
+
+}

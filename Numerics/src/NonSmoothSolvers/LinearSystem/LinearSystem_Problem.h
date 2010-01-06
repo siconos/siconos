@@ -64,7 +64,7 @@ typedef struct
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+  void displayLS(LinearSystem_Problem* p);
 #ifdef __cplusplus
 }
 #endif
