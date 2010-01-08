@@ -128,12 +128,12 @@ NEW_TEST(FrictionContact_Problemtest main_FC3D.c)
 
 END_TEST()
 
-BEGIN_TEST(utils/test)
+#BEGIN_TEST(utils/test)
 	
-NEW_TEST(pinvtest testpinv.c)
+#NEW_TEST(pinvtest testpinv.c)
 
 
-END_TEST()
+#END_TEST()
 IF(PRINT_ENV)
   INCLUDE(CMakeLog)
 ENDIF(PRINT_ENV)
