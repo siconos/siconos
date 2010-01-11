@@ -51,5 +51,56 @@ void LinearComplementarity_display(LinearComplementarity_Problem* p)
     printf("No q vector:\n");
 
 }
+
+
+
+
+int linearComplementarity_printInFile(LinearComplementarity_Problem*  problem, FILE* file)
+{
+  if (! problem)
+  {
+    fprintf(stderr, "Numerics, LinearComplementarity_Problem printInFile failed, NULL input.\n");
+    exit(EXIT_FAILURE);
+  }
+  int i;
+  int n = problem->size;
+  fprintf(file, "%d\n", n);
+  printInFile(problem->M, file);
+  for (i = 0; i < problem->M->size1; i++)
+  {
+    fprintf(file, "%32.24e ", problem->q[i]);
+  }
+  return 1;
+}
+
+int linearComplementarity_newFromFile(LinearComplementarity_Problem* problem, FILE* file)
+{
+  int n = 0;
+  int i;
+  fscanf(file, "%d\n", &n);
+  problem->size = n;
+  problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
+
+  readInFile(problem->M, file);
+
+  problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
+  for (i = 0; i < problem->M->size1; i++)
+  {
+    fscanf(file, "%lf ", &(problem->q[i]));
+  }
+  return 1;
+}
+
+void freeLinearComplementarity_problem(LinearComplementarity_Problem* problem)
+{
+  freeNumericsMatrix(problem->M);
+  free(problem->M);
+  free(problem->q);
+  free(problem);
+  problem = NULL;
+}
+
+
+
 #endif
 

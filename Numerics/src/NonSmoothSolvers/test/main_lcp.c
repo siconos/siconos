@@ -634,6 +634,9 @@ int test_mmc(void)
   problem->q = q;
   problem->M = MM;
 
+
+
+
   // Call tests
 
   printf(" ----------------------------------------------------------\n");
@@ -741,6 +744,16 @@ void getProblem(char* name, LinearComplementarity_Problem *  problem)
   fclose(LCPfile);
   if (sol != NULL)
     free(sol);
+
+  char newname[30] = "./tmp/";
+  strcat(newname, name);
+  printf("newname = %s\n", newname);
+
+  FILE *foutput =  fopen(newname, "w");
+  linearComplementarity_printInFile(problem, foutput);
+  fclose(foutput);
+
+
 }
 
 /* To read in a file a LinearComplementarity_Problem with a "SparseBlockStructuredMatrix*" storage for M */

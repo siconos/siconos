@@ -83,6 +83,12 @@ typedef struct
 extern "C" {
 #endif
   void LinearComplementarity_display(LinearComplementarity_Problem* p);
+
+  int linearComplementarity_printInFile(LinearComplementarity_Problem*  problem, FILE* file);
+
+  int linearComplementarity_newFromFile(LinearComplementarity_Problem* problem, FILE* file);
+
+  void freeLinearComplementarity_problem(LinearComplementarity_Problem* problem);
 #ifdef __cplusplus
 }
 #endif

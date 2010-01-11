@@ -23,6 +23,7 @@ SET(SiconosNumerics_DIRS
   netlib/dftemplates
   NonSmoothSolvers
   NonSmoothSolvers/LCP
+  NonSmoothSolvers/LCP/test-utils
   NonSmoothSolvers/MLCP
   NonSmoothSolvers/LinearSystem
   NonSmoothSolvers/InterfaceToPathFerris
@@ -99,25 +100,27 @@ CONFIGURE_FILE(SiconosNumerics.h  unit.mod.proxy COPYONLY)
 # wrapper are not needed
 SET(TEST_WRAP)
 
+
 BEGIN_TEST(netlib/odepack/test)
  
-NEW_TEST(test1 DLSODES-test.f)
-NEW_TEST(test2 DLSODAR-test.f)
-NEW_TEST(test3 DLSODI-test.f)
-NEW_TEST(test4 DLSODPK-test.f)
-NEW_TEST(test5 DLSODA-test.f)
-NEW_TEST(test6 DLSODE-test.f)
-NEW_TEST(test7 DLSODIS-test.f)
-NEW_TEST(test8 DLSODKR-test.f)
-NEW_TEST(test9 DLSOIBT-test.f)
-NEW_TEST(test10 test-funcC-inC.cpp funC.cpp)
+NEW_TEST(odepacktest1 DLSODES-test.f)
+NEW_TEST(odepacktest2 DLSODAR-test.f)
+NEW_TEST(odepacktest3 DLSODI-test.f)
+NEW_TEST(odepacktest4 DLSODPK-test.f)
+NEW_TEST(odepacktest5 DLSODA-test.f)
+NEW_TEST(odepacktest6 DLSODE-test.f)
+NEW_TEST(odepacktest7 DLSODIS-test.f)
+NEW_TEST(odepacktest8 DLSODKR-test.f)
+NEW_TEST(odepacktest9 DLSOIBT-test.f)
+
+NEW_TEST(odepacktest10 test-funcC-inC.cpp funC.cpp)
  
 END_TEST()
  
 BEGIN_TEST(NonSmoothSolvers/test)
  
 NEW_TEST(NumericsMatrixTest main_NumericsMatrix.c)
-NEW_TEST(LCPtest main_lcp.c)
+#NEW_TEST(LCPtest main_lcp.c)
 
 ##SET(MLCPtest_PROPERTIES WILL_FAIL TRUE)
 NEW_TEST(MLCPtest main_mlcp.cpp)
@@ -127,6 +130,28 @@ NEW_TEST(Relaytest main_relay.c)
 NEW_TEST(FrictionContact_Problemtest main_FC3D.c)
 
 END_TEST()
+
+BEGIN_TEST(NonSmoothSolvers/LCP/test)
+
+NEW_TEST(LCPtest1 lcp_test1.c)
+NEW_TEST(LCPtest2 lcp_test2.c)
+NEW_TEST(LCPtest3 lcp_test3.c)
+NEW_TEST(LCPtest4 lcp_test4.c)
+NEW_TEST(LCPtest5 lcp_test5.c)
+NEW_TEST(LCPtest6 lcp_test6.c)
+NEW_TEST(LCPtest7 lcp_test7.c)
+NEW_TEST(LCPtest8 lcp_test8.c)
+NEW_TEST(LCPtest9 lcp_test9.c)
+SET(LCPtest10_PROPERTIES WILL_FAIL TRUE)
+NEW_TEST(LCPtest10 lcp_test10.c)
+
+
+IF(PathFerris_FOUND)
+NEW_TEST(LCPtest11 lcp_test11.c)
+ENDIF(PathFerris_FOUND)
+
+END_TEST()
+
 
 #BEGIN_TEST(utils/test)
 	

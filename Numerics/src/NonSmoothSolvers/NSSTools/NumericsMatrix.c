@@ -252,7 +252,6 @@ void printInFile(const NumericsMatrix* const m, FILE* file)
       if ((i + 1) % m->size1 == 0)
         fprintf(file, "\n");
     }
-    fprintf(file, "\n (warning: column-major) \n");
   }
   else if (storageType == 1)
     printInFileSBM(m->matrix1, file);
@@ -307,20 +306,22 @@ void readInFile(NumericsMatrix* const m, FILE *file)
   fscanf(file, "%d", &(m->size0));
   fscanf(file, "%d", &(m->size1));
   int storageType = m->storageType;
+
   if (storageType == 0)
   {
-    /* fprintf(file,"%i\t%i\n",m->size0,m->size1); */
-    /*  fprintf(file,"["); */
-    /*  for(int i = 0; i<m->size1*m->size0; i++){ */
-    /*      fprintf(file,"%lf ",m->matrix0[i]); */
-    /*      if ((i+1)%m->size1 == 0) */
-    /*    fprintf(file,"\n"); */
-    /*  } */
-    /*  fprintf(file,"]"); */
-    /*  fprintf(file,"\n (warning: column-major) \n"); */
+    fscanf(file, "%d\t%d\n", &(m->size0), &(m->size1));
 
-    fprintf(stderr, "Numerics, NumericsMatrix,readInFile for storageType %i not yet implemented.\n", storageType);
-    exit(EXIT_FAILURE);
+    m->matrix0 = (double *)malloc(m->size1 * m->size0 * sizeof(double));
+
+    for (int i = 0; i < m->size1 * m->size0; i++)
+    {
+      fscanf(file, "%le", &(m->matrix0[i]));
+      if ((i + 1) % m->size1 == 0)
+        fscanf(file, "\n");
+    }
+
+    //  fprintf(stderr,"Numerics, NumericsMatrix,readInFile for storageType %i not yet implemented.\n",storageType);
+    //  exit(EXIT_FAILURE);
   }
   else if (storageType == 1)
   {

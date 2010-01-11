@@ -71,6 +71,7 @@ int frictionContact3D_newFromFile(FrictionContact_Problem* problem, FILE* file)
   fscanf(file, "%d\n", &(problem->isComplete));
   return 0;
 }
+
 void freeFrictionContact_problem(FrictionContact_Problem* problem)
 {
 
