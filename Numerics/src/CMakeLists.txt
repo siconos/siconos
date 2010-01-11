@@ -122,7 +122,7 @@ BEGIN_TEST(NonSmoothSolvers/test)
 NEW_TEST(NumericsMatrixTest main_NumericsMatrix.c)
 #NEW_TEST(LCPtest main_lcp.c)
 
-##SET(MLCPtest_PROPERTIES WILL_FAIL TRUE)
+#SET(MLCPtest_PROPERTIES WILL_FAIL TRUE)
 NEW_TEST(MLCPtest main_mlcp.cpp)
 
 NEW_TEST(Relaytest main_relay.c)
@@ -142,13 +142,92 @@ NEW_TEST(LCPtest6 lcp_test6.c)
 NEW_TEST(LCPtest7 lcp_test7.c)
 NEW_TEST(LCPtest8 lcp_test8.c)
 NEW_TEST(LCPtest9 lcp_test9.c)
-SET(LCPtest10_PROPERTIES WILL_FAIL TRUE)
-NEW_TEST(LCPtest10 lcp_test10.c)
-
-
+#SET(LCPtest10_PROPERTIES WILL_FAIL TRUE)
+#NEW_TEST(LCPtest10 lcp_test10.c)
 IF(PathFerris_FOUND)
 NEW_TEST(LCPtest11 lcp_test11.c)
 ENDIF(PathFerris_FOUND)
+
+NEW_TEST(LCPtest20 lcp_test20.c)
+NEW_TEST(LCPtest21 lcp_test21.c)
+SET(LCPtest22_PROPERTIES WILL_FAIL TRUE)
+NEW_TEST(LCPtest22 lcp_test22.c)
+
+NEW_TEST(LCPtest23 lcp_test23.c)
+NEW_TEST(LCPtest24 lcp_test24.c)
+NEW_TEST(LCPtest25 lcp_test25.c)
+NEW_TEST(LCPtest26 lcp_test26.c)
+NEW_TEST(LCPtest27 lcp_test27.c)
+NEW_TEST(LCPtest28 lcp_test28.c)
+NEW_TEST(LCPtest29 lcp_test29.c)
+IF(PathFerris_FOUND)
+NEW_TEST(LCPtest30 lcp_test30.c)
+ENDIF(PathFerris_FOUND)
+
+NEW_TEST(LCPtest40 lcp_test40.c)
+NEW_TEST(LCPtest41 lcp_test41.c)
+NEW_TEST(LCPtest42 lcp_test42.c)
+NEW_TEST(LCPtest43 lcp_test43.c)
+NEW_TEST(LCPtest44 lcp_test44.c)
+NEW_TEST(LCPtest45 lcp_test45.c)
+NEW_TEST(LCPtest46 lcp_test46.c)
+NEW_TEST(LCPtest47 lcp_test47.c)
+NEW_TEST(LCPtest48 lcp_test48.c)
+
+
+
+NEW_TEST(LCPtest50 lcp_test50.c)
+NEW_TEST(LCPtest51 lcp_test51.c)
+NEW_TEST(LCPtest52 lcp_test52.c)
+NEW_TEST(LCPtest53 lcp_test53.c)
+NEW_TEST(LCPtest54 lcp_test54.c)
+NEW_TEST(LCPtest55 lcp_test55.c)
+NEW_TEST(LCPtest56 lcp_test56.c)
+NEW_TEST(LCPtest57 lcp_test57.c)
+NEW_TEST(LCPtest58 lcp_test58.c)
+
+NEW_TEST(LCPtest60 lcp_test60.c)
+NEW_TEST(LCPtest61 lcp_test61.c)
+NEW_TEST(LCPtest62 lcp_test62.c)
+NEW_TEST(LCPtest63 lcp_test63.c)
+NEW_TEST(LCPtest64 lcp_test64.c)
+NEW_TEST(LCPtest65 lcp_test65.c)
+NEW_TEST(LCPtest66 lcp_test66.c)
+NEW_TEST(LCPtest67 lcp_test67.c)
+NEW_TEST(LCPtest68 lcp_test68.c)
+
+NEW_TEST(LCPtest70 lcp_test70.c)
+NEW_TEST(LCPtest71 lcp_test71.c)
+SET(LCPtest72_PROPERTIES WILL_FAIL TRUE)
+NEW_TEST(LCPtest72 lcp_test72.c)
+NEW_TEST(LCPtest73 lcp_test73.c)
+NEW_TEST(LCPtest74 lcp_test74.c)
+NEW_TEST(LCPtest75 lcp_test75.c)
+NEW_TEST(LCPtest76 lcp_test76.c)
+NEW_TEST(LCPtest77 lcp_test77.c)
+NEW_TEST(LCPtest78 lcp_test78.c)
+
+NEW_TEST(LCPtest80 lcp_test80.c)
+NEW_TEST(LCPtest81 lcp_test81.c)
+NEW_TEST(LCPtest82 lcp_test82.c)
+NEW_TEST(LCPtest83 lcp_test83.c)
+NEW_TEST(LCPtest84 lcp_test84.c)
+NEW_TEST(LCPtest85 lcp_test85.c)
+NEW_TEST(LCPtest86 lcp_test86.c)
+NEW_TEST(LCPtest87 lcp_test87.c)
+NEW_TEST(LCPtest88 lcp_test88.c)
+
+
+
+
+
+
+
+
+
+
+
+
 
 END_TEST()
 
