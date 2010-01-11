@@ -19,12 +19,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
-#include "lcp_test_function.h"
+#include "relay_test_function.h"
 
 
-void fillParamWithRespectToSolver(Solver_Options *options, char * solvername, LinearComplementarity_Problem* problem)
+void relay_fillParamWithRespectToSolver(Solver_Options *options, char * solvername, Relay_Problem* problem)
 {
-  int maxIter = 1001;
+  int maxIter = 50000;
   double tolerance = 1e-8;
   if (strcmp(solvername , "PGS") == 0 || strcmp(solvername , "CPG") == 0 || strcmp(solvername , "Lemke") == 0 || strcmp(solvername , "NewtonMin") == 0)
   {
@@ -85,16 +85,16 @@ void fillParamWithRespectToSolver(Solver_Options *options, char * solvername, Li
 
 }
 
-int lcp_test_function(FILE * f, char * solvername)
+int relay_test_function(FILE * f, char * solvername)
 {
 
   int i, info = 0 ;
-  LinearComplementarity_Problem* problem = (LinearComplementarity_Problem *)malloc(sizeof(LinearComplementarity_Problem));
+  Relay_Problem* problem = (Relay_Problem *)malloc(sizeof(Relay_Problem));
 
-  info = linearComplementarity_newFromFile(problem, f);
+  info = relay_newFromFile(problem, f);
 
   FILE * foutput  =  fopen("./lcp_mmc.verif", "w");
-  info = linearComplementarity_printInFile(problem, foutput);
+  info = relay_printInFile(problem, foutput);
 
 
   Numerics_Options global_options;
@@ -114,7 +114,7 @@ int lcp_test_function(FILE * f, char * solvername)
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
-  fillParamWithRespectToSolver(options, solvername, problem);
+  relay_fillParamWithRespectToSolver(options, solvername, problem);
 
   options->isSet = 1;
   options->filterOn = 0;
@@ -122,7 +122,7 @@ int lcp_test_function(FILE * f, char * solvername)
   double * w = malloc(problem->size * sizeof(double));
 
 
-  info = lcp_driver(problem, z , w, options, numberOfSolvers, &global_options);
+  info = relay_driver(problem, z , w, options, numberOfSolvers, &global_options);
 
   for (i = 0 ; i < problem->size ; i++)
   {
@@ -149,8 +149,7 @@ int lcp_test_function(FILE * f, char * solvername)
 
   free(options);
 
-  freeLinearComplementarity_problem(problem);
-  printf("End of test on ./data/lcp_mmc.dat\n");
+  freeRelay_problem(problem);
 
 
   return info;
@@ -159,16 +158,16 @@ int lcp_test_function(FILE * f, char * solvername)
 }
 
 
-int lcp_test_function_SBM(FILE * f, char * solvername)
+int relay_test_function_SBM(FILE * f, char * solvername)
 {
 
   int i, info = 0 ;
-  LinearComplementarity_Problem* problem = (LinearComplementarity_Problem *)malloc(sizeof(LinearComplementarity_Problem));
+  Relay_Problem* problem = (Relay_Problem *)malloc(sizeof(Relay_Problem));
 
-  info = linearComplementarity_newFromFile(problem, f);
+  info = relay_newFromFile(problem, f);
 
   FILE * foutput  =  fopen("./lcp_mmc.verif", "w");
-  info = linearComplementarity_printInFile(problem, foutput);
+  info = relay_printInFile(problem, foutput);
 
 
   Numerics_Options global_options;
@@ -203,7 +202,7 @@ int lcp_test_function_SBM(FILE * f, char * solvername)
     local_options->iparam[i] = 0;
     local_options->dparam[i] = 0.0;
   }
-  fillParamWithRespectToSolver(local_options, solvername, problem);
+  relay_fillParamWithRespectToSolver(local_options, solvername, problem);
 
   local_options->isSet = 1;
   local_options->filterOn = 0;
@@ -213,7 +212,7 @@ int lcp_test_function_SBM(FILE * f, char * solvername)
   double * w = malloc(problem->size * sizeof(double));
 
 
-  info = lcp_driver(problem, z , w, options, numberOfSolvers, &global_options);
+  info = relay_driver(problem, z , w, options, numberOfSolvers, &global_options);
 
   for (i = 0 ; i < problem->size ; i++)
   {
@@ -241,7 +240,7 @@ int lcp_test_function_SBM(FILE * f, char * solvername)
 
   free(options);
 
-  freeLinearComplementarity_problem(problem);
+  freeRelay_problem(problem);
 
 
   return info;

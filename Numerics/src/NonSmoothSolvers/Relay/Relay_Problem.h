@@ -108,6 +108,11 @@ extern "C" {
 
   void Relay_display(Relay_Problem* p);
 
+  int relay_printInFile(Relay_Problem*  problem, FILE* file);
+
+  int relay_newFromFile(Relay_Problem* problem, FILE* file);
+
+  void freeRelay_problem(Relay_Problem* problem);
 
 #ifdef __cplusplus
 }

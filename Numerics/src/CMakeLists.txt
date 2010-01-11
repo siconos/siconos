@@ -30,6 +30,7 @@ SET(SiconosNumerics_DIRS
   NonSmoothSolvers/pfc3D
   NonSmoothSolvers/QP
   NonSmoothSolvers/Relay
+  NonSmoothSolvers/Relay/test-utils
   NonSmoothSolvers/FrictionContact2D
   NonSmoothSolvers/FrictionContact3D
   NonSmoothSolvers/NCP
@@ -217,20 +218,16 @@ NEW_TEST(LCPtest86 lcp_test86.c)
 NEW_TEST(LCPtest87 lcp_test87.c)
 NEW_TEST(LCPtest88 lcp_test88.c)
 
-
-
-
-
-
-
-
-
-
-
-
-
 END_TEST()
 
+BEGIN_TEST(NonSmoothSolvers/Relay/test)
+
+NEW_TEST(Relaytest1 relay_test1.c)
+
+NEW_TEST(Relaytest10 relay_test10.c)
+NEW_TEST(Relaytest11 relay_test11.c)
+NEW_TEST(Relaytest12 relay_test12.c)
+END_TEST()
 
 #BEGIN_TEST(utils/test)
 	

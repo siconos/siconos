@@ -472,7 +472,12 @@ int test_mmc(void)
   problem->M = MM;
   problem->ub = a;
   problem->lb = b;
+  char newname[30] = "relay1.dat";
+  printf("newname = %s\n", newname);
 
+  FILE *foutput =  fopen(newname, "w");
+  relay_printInFile(problem, foutput);
+  fclose(foutput);
   // Call tests
 
   printf(" ----------------------------------------------------------\n");
@@ -738,6 +743,12 @@ int test_matrix(void)
     {
     case 0:
       getProblem("DATA/relay_deudeu.dat", problem);
+      char newname[30] = "relay_deudeu.dat";
+      printf("newname = %s\n", newname);
+
+      FILE *foutput =  fopen(newname, "w");
+      relay_printInFile(problem, foutput);
+      fclose(foutput);
       hasSBM = 0;
       hasDense = 1;
       hasUnstable = 0;

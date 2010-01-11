@@ -64,9 +64,77 @@ void Relay_display(Relay_Problem* p)
   }
   else
     printf("No ub vector:\n");
-
-
-
 }
+
+
+
+
+int relay_printInFile(Relay_Problem*  problem, FILE* file)
+{
+  if (! problem)
+  {
+    fprintf(stderr, "Numerics, Relay_Problem printInFile failed, NULL input.\n");
+    exit(EXIT_FAILURE);
+  }
+  int i;
+  int n = problem->size;
+  fprintf(file, "%d\n", n);
+  printInFile(problem->M, file);
+  for (i = 0; i < problem->M->size1; i++)
+  {
+    fprintf(file, "%32.24e ", problem->q[i]);
+  }
+  for (i = 0; i < problem->M->size1; i++)
+  {
+    fprintf(file, "%32.24e ", problem->lb[i]);
+  }
+  for (i = 0; i < problem->M->size1; i++)
+  {
+    fprintf(file, "%32.24e ", problem->ub[i]);
+  }
+  return 1;
+}
+
+int relay_newFromFile(Relay_Problem* problem, FILE* file)
+{
+  int n = 0;
+  int i;
+  fscanf(file, "%d\n", &n);
+  problem->size = n;
+  problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
+
+  readInFile(problem->M, file);
+
+  problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
+  for (i = 0; i < problem->M->size1; i++)
+  {
+    fscanf(file, "%lf ", &(problem->q[i]));
+  }
+  problem->lb = (double *) malloc(problem->M->size1 * sizeof(double));
+  for (i = 0; i < problem->M->size1; i++)
+  {
+    fscanf(file, "%lf ", &(problem->lb[i]));
+  }
+  problem->ub = (double *) malloc(problem->M->size1 * sizeof(double));
+  for (i = 0; i < problem->M->size1; i++)
+  {
+    fscanf(file, "%lf ", &(problem->ub[i]));
+  }
+  return 1;
+}
+
+void freeRelay_problem(Relay_Problem* problem)
+{
+  freeNumericsMatrix(problem->M);
+  free(problem->M);
+  free(problem->q);
+  free(problem->lb);
+  free(problem->ub);
+  free(problem);
+  problem = NULL;
+}
+
+
+
 #endif
 
