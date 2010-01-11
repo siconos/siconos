@@ -14,14 +14,17 @@ For more details on specific topics see the \ref usersGuide "Siconos User's Guid
 
 \section GScontents Contents:
 
-
 \subpage start_NSP
 
-\subpage doc_prelim
-
 \subpage SiconosTutorial 
+
+\subpage runningSimu
 
 \subpage usingxml 
 
 \subpage UsingPython 
+
+\subpage cppPrelim
+
+
 */

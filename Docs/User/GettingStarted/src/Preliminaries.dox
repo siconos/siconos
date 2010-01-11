@@ -1,4 +1,4 @@
-/*! \page cppPrelim Preliminaries on C++
+/*! \page cppPrelim Preliminaries on C++ with Siconos
 
 Since the Siconos input file is written in C++, you need at least a basic knowledge of this language. See for example
 <a href="http://www.ibiblio.org/pub/docs/books/eckel/">Thinking in C++</a> from Bruce Eckel.\n

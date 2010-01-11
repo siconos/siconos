@@ -1,15 +1,16 @@
 /** \mainpage Welcome
 \anchor siconosHomePage
 
-The Siconos Platform is a scientific computing software dedicated to
-the modeling, simulation, control and analysis of <b>Non Smooth
-Dynamical Systems (NSDS)</b>. Especially, the following classes of
-NSDS are addressed:
+Siconos is a scientific computing software dedicated to
+ <b>Non Smooth Dynamical Systems (NSDS)</b>.
 
+Most of the  well known of NSDS are adressed, that are:
 <ul>
+  <li> Hybrid systems and switched systems</li>     
   <li> Mechanical systems with contact, impact and friction</li>
   <li> Electrical circuits with ideal and piecewise linear components</li>
   <li> Differential inclusions and Complementarity systems</li>
+  <li> Sliding mode control and Optimal Control with state constraints </li>
 </ul>
 
 */

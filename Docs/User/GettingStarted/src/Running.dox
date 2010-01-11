@@ -1,4 +1,4 @@
-/** \page runningSimu Running a simulation
+/** \page runningSimu How to run a simulation
 
 There are two different ways to run a simulation with Siconos:
 directly with a C++ input file or thanks to a specific interface, with
