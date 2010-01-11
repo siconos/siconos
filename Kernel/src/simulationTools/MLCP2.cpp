@@ -132,7 +132,7 @@ void MLCP2::computeDSBlock(SP::DynamicalSystem DS)
   const OSI::TYPES  osiType = Osi->getType();
   if (osiType == OSI::MOREAU2)
   {
-    DSBlocks[DS] = (boost::static_pointer_cast<Moreau2> (Osi))->getWPtr(DS); // get its W matrix ( pointer link!)
+    DSBlocks[DS] = (boost::static_pointer_cast<Moreau2> (Osi))->W(DS); // get its W matrix ( pointer link!)
     (*DSBlocks[DS]) *= -1.0;
     DSBlocks[DS]->display();
   }
@@ -193,7 +193,7 @@ void MLCP2::computeQ(double time)
     // Compute q, this depends on the type of non smooth problem, on the relation type and on the non smooth law
     pos = M->getPositionOfUnitaryBlock(*itCurrent);
     //update e(ti+1)
-    SP::SiconosVector  e = boost::static_pointer_cast<FirstOrderLinearR>((*itCurrent)->interaction()->relation())->getEPtr();
+    SP::SiconosVector  e = boost::static_pointer_cast<FirstOrderLinearR>((*itCurrent)->interaction()->relation())->e();
     boost::static_pointer_cast<SimpleVector>(q)->addBlock(pos, *e);
   }
   SP::DynamicalSystemsSet  allDS = simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems();
@@ -352,7 +352,7 @@ void MLCP2::postCompute()
   for (DSIterator itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
   {
     pos = M->getPositionOfDSBlock(*itDS);
-    x = (*itDS)->getXPtr();
+    x = (*itDS)->X();
     setBlock(*(_z.get()), x, x->size(), pos, 0);
   }
 

@@ -198,7 +198,7 @@ void PrimalFrictionContact::computeDSBlock(SP::DynamicalSystem DS)
   osiType = Osi->getType();
   if (osiType == MOREAU || osiType == MOREAU2)
   {
-    DSBlocks[DS] = (boost::static_pointer_cast<Moreau> (Osi))->getWPtr(DS); // get its W matrix ( pointer link!)
+    DSBlocks[DS] = (boost::static_pointer_cast<Moreau> (Osi))->W(DS); // get its W matrix ( pointer link!)
     //       cout << "PrimalFrictionContact::computeDSBlock(SP::DynamicalSystem DS) " << endl;
     //       DSBlocks[DS]->display();
   }

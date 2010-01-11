@@ -229,11 +229,11 @@ void Moreau2::computeFreeState()
       // vFree pointer is used to compute and save ResiduFree in this first step.
       double coeff;
 
-      SP::SiconosMatrix  C = d->getCPtr();
+      SP::SiconosMatrix  C = d->C();
       if (C)
         prod(-h, *C, *vold, *ffree, false); // ffree += -h*C*vi
 
-      SP::SiconosMatrix  K = d->getKPtr();
+      SP::SiconosMatrix  K = d->K();
       if (K)
       {
         coeff = -h * h * _theta;

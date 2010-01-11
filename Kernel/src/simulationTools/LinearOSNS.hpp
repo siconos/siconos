@@ -131,7 +131,7 @@ public:
   /** get w, the initial state of the DynamicalSystem
    *  \return pointer on a SimpleVector
    */
-  inline SP::SiconosVector getWPtr() const
+  inline SP::SiconosVector W() const
   {
     return _w;
   }
@@ -163,7 +163,7 @@ public:
   /** get z, the initial state of the DynamicalSystem
    *  \return pointer on a SiconosVector
    */
-  inline SP::SiconosVector getZPtr() const
+  inline SP::SiconosVector Z() const
   {
     return _z;
   }
@@ -186,7 +186,7 @@ public:
   /** get M
    *  \return pointer on a OSNSMatrix
    */
-  inline SP::OSNSMatrix getMPtr() const
+  inline SP::OSNSMatrix M() const
   {
     return _M;
   }

@@ -123,7 +123,7 @@ public:
    * \param a pointer to DynamicalSystem, optional, default = NULL. get W[0] in that case
    * \return pointer to a SiconosMatrix
    */
-  SP::SiconosMatrix getWPtr(SP::DynamicalSystem ds);
+  SP::SiconosMatrix W(SP::DynamicalSystem ds);
 
   /** set the value of W[ds] to newValue
    * \param SiconosMatrix newValue

@@ -122,7 +122,7 @@ void FirstOrderType2R::computeInput(double t, unsigned int level)
   //  _workL->display();
   //  cout<<"FirstOrderType2R::computeInput : g_alpha"<<endl;
   //  _workX->display();
-  prod(*getBPtr(), *_workL, *_workX, false);
+  prod(*B(), *_workL, *_workX, false);
   //  cout<<"FirstOrderType2R::computeInput : result g_alpha - B*diffL"<<endl;
   //  _workX->display();
   *data[r] += *_workX;
@@ -184,7 +184,7 @@ void FirstOrderType2R::preparNewtonIteration()
   //     _workL->display();
 
   scal(-1.0, *_workL, *_workL);
-  prod(*(getBPtr()), *_workL, *_workX, true);
+  prod(*(B()), *_workL, *_workX, true);
 
   //      cout<<"FirstOrderType2R::preparNewtonIteration, -B*lambda: \n";
   //      _workX->display();

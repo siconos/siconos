@@ -95,10 +95,10 @@ typedef std::map<SP::Event, VectorMap>  DataSet;
    string, used to identify the data, and a SiconosVector.  As an
    example consider the case where you need to save the state vector x
    of a DynamicalSystem, then you can define a Data object, with
-   "myDS_X" as an id and yourDS->getXPtr() as the SiconosVector. For
+   "myDS_X" as an id and yourDS->X() as the SiconosVector. For
    myEvent being an Event where you need to save data, you get:
    (data[myEvent])["myDS_X] =
-   model->nonSmoothDynamicalSystem()->dynamicalSystem()->getXPtr()
+   model->nonSmoothDynamicalSystem()->dynamicalSystem()->X()
 
    See \ref UMSiconosControl for details on how to define its own Sensor.
 

@@ -60,10 +60,10 @@ protected:
   //SP::SiconosMatrix D;
 
   /** F matrix, coefficient of z */
-  SP::SiconosMatrix F;
+  SP::SiconosMatrix _F;
 
   /** e*/
-  SP::SiconosVector e;
+  SP::SiconosVector _e;
 
   /** Default constructor
    */
@@ -152,7 +152,7 @@ public:
   /** get C
    *  \return pointer on a plugged matrix
    */
-  inline SP::SiconosMatrix getCPtr() const
+  inline SP::SiconosMatrix C() const
   {
     return Jacqh;
   }
@@ -185,7 +185,7 @@ public:
   /** get D
    *  \return pointer on a plugged matrix
    */
-  inline SP::SiconosMatrix getDPtr() const
+  inline SP::SiconosMatrix D() const
   {
     return JacLH;
   }
@@ -212,15 +212,15 @@ public:
   /** get the value of F
    *  \return plugged matrix
 
-  inline const SimpleMatrix getF() const { return *F; }
+  inline const SimpleMatrix getF() const { return *_F; }
   */
 
   /** get F
    *  \return pointer on a plugged matrix
    */
-  inline SP::SiconosMatrix getFPtr() const
+  inline SP::SiconosMatrix F() const
   {
-    return F;
+    return _F;
   }
 
   /** set the value of F to newValue
@@ -237,7 +237,7 @@ public:
    */
   inline void setFPtr(SP::SiconosMatrix newPtr)
   {
-    F = newPtr;
+    _F = newPtr;
   }
 
   // -- e --
@@ -250,9 +250,9 @@ public:
   /** get e
    *  \return pointer on a plugged vector
    */
-  inline SP::SiconosVector getEPtr() const
+  inline SP::SiconosVector e() const
   {
-    return e;
+    return _e;
   }
 
   /** set the value of e to newValue
@@ -269,7 +269,7 @@ public:
    */
   inline void setEPtr(SP::SiconosVector newPtr)
   {
-    e = newPtr;
+    _e = newPtr;
   }
 
   /** get matrix JacH[index]

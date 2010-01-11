@@ -293,17 +293,17 @@ public:
   * The matrix C in the linear case, else it returns Jacobian of the output with respect to x.
   *
   */
-  virtual SP::SiconosMatrix getCPtr() = 0;
+  virtual SP::SiconosMatrix C() = 0;
   /**
    * return a SP on the D matrix.
    * The matrix D in the linear case, else it returns Jacobian of the output with respect to lambda.
    */
-  virtual SP::SiconosMatrix getDPtr() = 0;
+  virtual SP::SiconosMatrix D() = 0;
   /**
    * return a SP on the B matrix.
    * The matrix B in the linear case, else it returns Jacobian of the input with respect to lambda.
    */
-  virtual SP::SiconosMatrix getBPtr() = 0;
+  virtual SP::SiconosMatrix B() = 0;
 
 
 

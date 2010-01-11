@@ -134,7 +134,7 @@ public:
   /** get C
    *  \return pointer on a plugged matrix
    */
-  //inline SP::SiconosMatrix getCPtr() const { return JacH.at(0); }
+  //inline SP::SiconosMatrix C() const { return JacH.at(0); }
 
   /** set the value of C to newValue
    *  \param a plugged matrix
@@ -171,7 +171,7 @@ public:
   /** get D
    *  \return pointer on a plugged matrix
    */
-  //inline SP::SiconosMatrix getDPtr() const { return JacH.at(1); }
+  //inline SP::SiconosMatrix D() const { return JacH.at(1); }
 
   /** set the value of D to newValue
    *  \param a plugged matrix
@@ -211,7 +211,7 @@ public:
   /** get F
    *  \return pointer on a plugged matrix
    */
-  inline SP::SiconosMatrix getFPtr() const
+  inline SP::SiconosMatrix F() const
   {
     return _F;
   }
@@ -246,7 +246,7 @@ public:
   /** get e
    *  \return pointer on a plugged vector
    */
-  inline SP::SiconosVector getEPtr() const
+  inline SP::SiconosVector e() const
   {
     return _e;
   }
@@ -283,7 +283,7 @@ public:
   /** get B
    *  \return pointer on a plugged matrix
    */
-  //inline SP_PluggedMatrix getBPtr() const { return JacG.at(0); }
+  //inline SP_PluggedMatrix B() const { return JacG.at(0); }
 
   /** set the value of B to newValue
    *  \param a plugged matrix

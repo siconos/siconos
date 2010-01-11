@@ -85,10 +85,10 @@ protected:
   LagrangianLinearTIDS();
 
   /** specific matrix for a LagrangianLinearTIDS */
-  SP::SiconosMatrix K;
+  SP::SiconosMatrix _K;
 
   /** specific matrix for a LagrangianLinearTIDS */
-  SP::SiconosMatrix C;
+  SP::SiconosMatrix _C;
 
 public:
 
@@ -143,15 +143,15 @@ public:
    */
   inline const SimpleMatrix getK() const
   {
-    return *K;
+    return *_K;
   }
 
   /** get K
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix getKPtr() const
+  inline SP::SiconosMatrix K() const
   {
-    return K;
+    return _K;
   }
 
   /** set the value of K to newValue
@@ -173,9 +173,9 @@ public:
   /** get C
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix getCPtr() const
+  inline SP::SiconosMatrix C() const
   {
-    return C;
+    return _C;
   }
 
   /** set the value of C to newValue

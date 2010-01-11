@@ -587,7 +587,7 @@ void OneStepNSProblem::getOSIMaps(SP::UnitaryRelation UR, MapOfDSMatrices& centr
     {
       dsType = (*itDS)->getType();
       if (dsType != NENLDS)
-        centralUnitaryBlocks[*itDS] = (boost::static_pointer_cast<Moreau> (Osi))->getWPtr(*itDS); // get its W matrix ( pointer link!)
+        centralUnitaryBlocks[*itDS] = (boost::static_pointer_cast<Moreau> (Osi))->W(*itDS); // get its W matrix ( pointer link!)
       else
         centralUnitaryBlocks[*itDS] = (boost::static_pointer_cast<NewtonEulerDS> (*itDS))->luW(); // get its W matrix ( pointer link!)
     }

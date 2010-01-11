@@ -39,10 +39,10 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(SP::RelationXML relxml):
     JacLH.reset(new SimpleMatrix(folrXML->getD()));
 
   if (folrXML->hasF())
-    F.reset(new SimpleMatrix(folrXML->getF()));
+    _F.reset(new SimpleMatrix(folrXML->getF()));
 
   if (folrXML->hasE())
-    e.reset(new SimpleVector(folrXML->getE()));
+    _e.reset(new SimpleVector(folrXML->getE()));
 
   if (folrXML->hasB())
     JacLG.reset(new SimpleMatrix(folrXML->getB()));
@@ -68,8 +68,8 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SiconosMatrix newC, SP::SiconosMatr
   JacXH = newC;
   JacLG = newB;
   JacLH = newD;
-  F = newF;
-  e = newE;
+  _F = newF;
+  _e = newE;
 }
 
 // Minimum data (C, B as matrices) constructor
@@ -88,8 +88,8 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(const SiconosMatrix& newC, const Sicono
   JacXH = createSPtrSiconosMatrix((SiconosMatrix&) newC);
   JacLG = createSPtrSiconosMatrix((SiconosMatrix&) newB);
   JacLH = createSPtrSiconosMatrix((SiconosMatrix&) newD);
-  F = createSPtrSiconosMatrix((SiconosMatrix&) newF);
-  e = createSPtrSiconosVector((SiconosVector&) newE);
+  _F = createSPtrSiconosMatrix((SiconosMatrix&) newF);
+  _e = createSPtrSiconosVector((SiconosVector&) newE);
 }
 
 void FirstOrderLinearTIR::initialize(SP::Interaction inter)
@@ -122,10 +122,10 @@ void FirstOrderLinearTIR::initialize(SP::Interaction inter)
     assert((JacLH->size(0) == sizeY || JacLH->size(1) == sizeY) && "FirstOrderLinearTIR::initialize , inconsistent size between C and D.");
 
 
-  if (F)
-    assert(((F->size(0) != sizeY) && (F->size(1) != sizeZ)) && "FirstOrderLinearTIR::initialize , inconsistent size between C and F.");
-  if (e)
-    assert(e->size() == sizeY && "FirstOrderLinearTIR::initialize , inconsistent size between C and e.");
+  if (_F)
+    assert(((_F->size(0) != sizeY) && (_F->size(1) != sizeZ)) && "FirstOrderLinearTIR::initialize , inconsistent size between C and F.");
+  if (_e)
+    assert(_e->size() == sizeY && "FirstOrderLinearTIR::initialize , inconsistent size between C and e.");
 
   _workZ.reset(new SimpleVector(sizeZ));
 }
@@ -158,11 +158,11 @@ void FirstOrderLinearTIR::computeOutput(double time, unsigned int)
   if (JacLH)
     prod(*JacLH, *lambda, *y, false);
 
-  if (e)
-    *y += *e;
+  if (_e)
+    *y += *_e;
 
-  if (F)
-    prod(*F, *data[z], *y, false);
+  if (_F)
+    prod(*_F, *data[z], *y, false);
 }
 
 void FirstOrderLinearTIR::computeInput(double time, unsigned int level)
@@ -182,10 +182,10 @@ void FirstOrderLinearTIR::display() const
   if (JacLH) JacLH->display();
   else cout << "->NULL" << endl;
   cout << "| F " << endl;
-  if (F) F->display();
+  if (_F) _F->display();
   else cout << "->NULL" << endl;
   cout << "| e " << endl;
-  if (e) e->display();
+  if (_e) _e->display();
   else cout << "->NULL" << endl;
   cout << "| B " << endl;
   if (JacLG) JacLG->display();

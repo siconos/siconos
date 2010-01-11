@@ -88,7 +88,7 @@ void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR1()
 {
   cout << "--> Test: constructor 1." << endl;
   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(C));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR1a : ", folr->getCPtr() == C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR1a : ", folr->C() == C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR1c : ", folr->getType() == RELATION::Lagrangian, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR1d : ", folr->getSubType() == RELATION::LinearTIR, true);
   cout << "--> Constructor 1 test ended with success." << endl;
@@ -109,8 +109,8 @@ void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR3()
 {
   cout << "--> Test: constructor 3." << endl;
   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(C, e));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR3a : ", folr->getCPtr() == C, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR3d : ", folr->getEPtr() == e, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR3a : ", folr->C() == C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR3d : ", folr->e() == e, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR3f : ", folr->getType() == RELATION::Lagrangian, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR3g : ", folr->getSubType() == RELATION::LinearTIR, true);
   cout << "--> Constructor 3 test ended with success." << endl;
@@ -157,7 +157,7 @@ void LagrangianLinearTIRTest::testSetCPtr()
   tmp->zero();
   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(*tmp));
   folr->setCPtr(C);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetCPtr : ", folr->getCPtr() == C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetCPtr : ", folr->C() == C, true);
   cout << "--> setCPtr test ended with success." << endl;
 }
 
@@ -169,7 +169,7 @@ void LagrangianLinearTIRTest::testSetDPtr()
   cout << "--> Test: setDPtr." << endl;
   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(*C));
   folr->setDPtr(D);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetDPtr: ", folr->getDPtr() == D, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetDPtr: ", folr->D() == D, true);
   cout << "--> setDPtr test ended with success." << endl;
 }
 
@@ -181,7 +181,7 @@ void LagrangianLinearTIRTest::testSetFPtr()
   cout << "--> Test: setFPtr." << endl;
   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(*C));
   folr->setFPtr(F);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetFPtr: ", folr->getFPtr() == F, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetFPtr: ", folr->F() == F, true);
   cout << "--> setFPtr test ended with success." << endl;
 }
 
@@ -193,7 +193,7 @@ void LagrangianLinearTIRTest::testSetEPtr()
   cout << "--> Test: setEPtr." << endl;
   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(*C));
   folr->setEPtr(e);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetEPtr: ", folr->getEPtr() == e, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetEPtr: ", folr->e() == e, true);
   cout << "--> setEPtr test ended with success." << endl;
 }
 

@@ -41,7 +41,7 @@ LagrangianLinearTIR::LagrangianLinearTIR(SP::RelationXML relxml):
     D.reset(new SimpleMatrix(folrXML->getD()));
 
   if(folrXML->hasF())
-    F.reset(new SimpleMatrix(folrXML->getF()));
+    _F.reset(new SimpleMatrix(folrXML->getF()));
 
   if(folrXML->hasE())
   e.reset(new SimpleVector(folrXML->getE()));*/
@@ -60,8 +60,8 @@ LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix newC, SP::SiconosMatr
 {
   Jacqh = newC;
   JacLH = newD;
-  F = newF;
-  e = newE;
+  _F = newF;
+  _e = newE;
 }
 
 // Minimum data (C, e as pointers) constructor
@@ -69,7 +69,7 @@ LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix newC, SP::SiconosVect
   LagrangianR(LinearTIR)
 {
   Jacqh = newC;
-  e = newE;
+  _e = newE;
 }
 
 // Minimum data (C as matrix) constructor
@@ -86,8 +86,8 @@ LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC, const Sicono
   RuntimeException::selfThrow("LagrangianLinearTIR::LagrangianLinearTIR,  copy matrix in constructor\n");
   Jacqh.reset(new SimpleMatrix(newC));
   JacLH.reset(new SimpleMatrix(newD));
-  F.reset(new SimpleMatrix(newF));
-  e.reset(new SimpleVector(newE));
+  _F.reset(new SimpleMatrix(newF));
+  _e.reset(new SimpleVector(newE));
 }
 
 // Constructor from C and e as matrix/vector
@@ -96,7 +96,7 @@ LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC, const Sicono
 {
   RuntimeException::selfThrow("LagrangianLinearTIR::LagrangianLinearTIR,  copy matrix in constructor\n");
   Jacqh.reset(new SimpleMatrix(newC));
-  e.reset(new SimpleVector(newE));
+  _e.reset(new SimpleVector(newE));
 }
 
 void LagrangianLinearTIR::initComponents()
@@ -109,11 +109,11 @@ void LagrangianLinearTIR::initComponents()
 
   assert((JacLH) ? (JacLH->size(0) == sizeY && JacLH->size(1) != sizeY) : 1 &&
          "LagrangianLinearTIR::initComponents inconsistent sizes between D matrix and the interaction.");
-  assert((e) ? (e->size() == sizeY) : 1 &&
+  assert((_e) ? (_e->size() == sizeY) : 1 &&
          "LagrangianLinearTIR::initComponents inconsistent sizes between e vector and the dimension of the interaction.");
 
-  assert((F) ?
-         (F->size(0) == interaction()->getSizeZ() && F->size(1) == interaction()->getSizeZ()) : 1 &&
+  assert((_F) ?
+         (_F->size(0) == interaction()->getSizeZ() && _F->size(1) == interaction()->getSizeZ()) : 1 &&
          "LagrangianLinearTIR::initComponents inconsistent sizes between F matrix and the interaction.");
 
 
@@ -141,10 +141,10 @@ void LagrangianLinearTIR::computeOutput(double time, unsigned int derivativeNumb
 
   if (derivativeNumber == 0)
   {
-    if (e)
-      *y += *e;
-    if (F)
-      prod(*F, *data[z], *y, false);
+    if (_e)
+      *y += *_e;
+    if (_F)
+      prod(*_F, *data[z], *y, false);
   }
 
   if (JacLH)
@@ -181,9 +181,9 @@ void LagrangianLinearTIR::saveRelationToXML() const
          "LagrangianLinearTIR::saveRelationToXML - object RelationXML does not exist");
 
   (boost::static_pointer_cast<LinearRXML>(relationxml))->setC(*Jacqh) ;
-  (boost::static_pointer_cast<LinearRXML>(relationxml))->setE(*e) ;
+  (boost::static_pointer_cast<LinearRXML>(relationxml))->setE(*_e) ;
   (boost::static_pointer_cast<LinearRXML>(relationxml))->setD(*JacLH) ;
-  (boost::static_pointer_cast<LinearRXML>(relationxml))->setF(*F) ;
+  (boost::static_pointer_cast<LinearRXML>(relationxml))->setF(*_F) ;
 }
 
 LagrangianLinearTIR* LagrangianLinearTIR::convert(Relation *r)
@@ -201,8 +201,8 @@ void LagrangianLinearTIR::display() const
   else
     cout << " -> NULL " << endl;
   cout << " e: " << endl;
-  if (e)
-    e->display();
+  if (_e)
+    _e->display();
   else
     cout << " -> NULL " << endl;
   cout << " D: " << endl;
@@ -211,8 +211,8 @@ void LagrangianLinearTIR::display() const
   else
     cout << " -> NULL " << endl;
   cout << " F: " << endl;
-  if (F)
-    F->display();
+  if (_F)
+    _F->display();
   else
     cout << " -> NULL " << endl;
   cout << "===================================== " << endl;

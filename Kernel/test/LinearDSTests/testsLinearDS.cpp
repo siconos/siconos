@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
     // constructor from a set of data, A from a plugin.
     lds1.reset(new FirstOrderLinearDS(1, size, *x0, "LDSPlugin.so", "computeA"));
     lds1->computeA(2);
-    lds1->getAPtr()->display();
+    lds1->A()->display();
 
     // constructor from a set of data, A a given matrix.
     SP::SiconosMatrix A(new SiconosMatrix("mat.dat", true));

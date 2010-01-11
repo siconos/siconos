@@ -149,12 +149,12 @@ const SimpleMatrix Moreau::getW(SP::DynamicalSystem ds)
   return *(WMap[ds]); // Copy !!
 }
 
-SP::SiconosMatrix Moreau::getWPtr(SP::DynamicalSystem ds)
+SP::SiconosMatrix Moreau::W(SP::DynamicalSystem ds)
 {
-  assert(ds && "Moreau::getWPtr(ds): ds == NULL.");
+  assert(ds && "Moreau::W(ds): ds == NULL.");
   //  return WMap[0];
   //  if(WMap[ds]==NULL)
-  //    RuntimeException::selfThrow("Moreau::getWPtr(ds): W[ds] == NULL.");
+  //    RuntimeException::selfThrow("Moreau::W(ds): W[ds] == NULL.");
   return WMap[ds];
 }
 
@@ -285,8 +285,8 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
   //   else if (dsType == FOLDS || dsType == FOLTIDS)
   //     {
   //       SP::FirstOrderLinearDS d = boost::static_pointer_cast<FirstOrderLinearDS> (ds);
-  //       if( d->getMPtr() )
-  //  *W = *d->getMPtr();
+  //       if( d->M() )
+  //  *W = *d->M();
   //       else
   //  W->eye();
 
@@ -311,8 +311,8 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
   else if (dsType == LLTIDS)
   {
     SP::LagrangianLinearTIDS d = boost::static_pointer_cast<LagrangianLinearTIDS> (ds);
-    SP::SiconosMatrix K = d->getKPtr();
-    SP::SiconosMatrix C = d->getCPtr();
+    SP::SiconosMatrix K = d->K();
+    SP::SiconosMatrix C = d->C();
 
     *W = *d->mass();
 
@@ -621,11 +621,11 @@ double Moreau::computeResidu()
       residuFree->zero();
       double coeff;
       // -- No need to update W --
-      SP::SiconosMatrix C = d->getCPtr();
+      SP::SiconosMatrix C = d->C();
       if (C)
         prod(-h, *C, *vold, *residuFree, false); // vfree += -h*C*vi
 
-      SP::SiconosMatrix K = d->getKPtr();
+      SP::SiconosMatrix K = d->K();
       if (K)
       {
         coeff = -h * h * _theta;
@@ -959,11 +959,11 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
 
       double coeff;
       // -- No need to update W --
-      SP::SiconosMatrix C = d->getCPtr();
+      SP::SiconosMatrix C = d->C();
       if (C)
         prod(-h, *C, *vold, *v, false); // v += -h*C*vi
 
-      SP::SiconosMatrix K = d->getKPtr();
+      SP::SiconosMatrix K = d->K();
       if (K)
       {
         coeff = -h * h * _theta;

@@ -434,8 +434,8 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
     //      Xfree->display();
     if (relationType == FirstOrder && relationSubType == Type2R)
     {
-      C = mainInteraction->relation()->getCPtr();
-      D = mainInteraction->relation()->getDPtr();
+      C = mainInteraction->relation()->C();
+      D = mainInteraction->relation()->D();
       if (D)
       {
         coord[3] = D->size(1);
@@ -478,7 +478,7 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
     }
     else
     {
-      C = mainInteraction->relation()->getCPtr();
+      C = mainInteraction->relation()->C();
       //  SP::SiconosVector WorkX = UR->workX();
       SP::SiconosVector Xfree;
       Xfree = UR->workFree();
@@ -526,13 +526,13 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
         SP::SiconosVector e;
         if (relationSubType == LinearTIR)
         {
-          e = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->relation())->getEPtr();
-          F = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->relation())->getFPtr();
+          e = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->relation())->e();
+          F = boost::static_pointer_cast<FirstOrderLinearTIR>(mainInteraction->relation())->F();
         }
         else
         {
-          e = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->getEPtr();
-          F = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->getFPtr();
+          e = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->e();
+          F = boost::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->F();
         }
 
         if (e)

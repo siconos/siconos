@@ -437,7 +437,7 @@ void   TimeStepping::prepareNewtonIteration()
   {
     dsGraph->bundle(*vi)->preparStep();
     //     (*itds)->xp()->zero();
-    //     (*itds)->getRPtr()->zero();
+    //     (*itds)->R()->zero();
   }
   /**/
   for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)

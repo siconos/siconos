@@ -84,7 +84,7 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1D : ", ds->getN() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1E : ", ds->getX0() == *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1E : ", ds->getM() == *M, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1H : ", ds->getFPtr()->isPlugged(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1H : ", ds->F()->isPlugged(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1I : ", ds->jacobianXF()->isPlugged(), false);
 
   cout << "--> Constructor xml test ended with success." << endl;
@@ -99,12 +99,12 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2A : ", ds->getType() == DS::FONLDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2D : ", ds->getN() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2E : ", ds->getX0() == 2 * *x0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2F : ", ds->getFPtr()->isPlugged(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2F : ", ds->F()->isPlugged(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2G : ", ds->jacobianXF()->isPlugged(), true);
   ds->initialize("TimeStepping", 0.5);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2H : ", ds->getF() == *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2I : ", ds->getJacobianXF() == *J0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2I : ", !ds->getMPtr(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2I : ", !ds->M(), false);
   cout << "--> Constructor xml 2 test ended with success." << endl;
 }
 
@@ -123,7 +123,7 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3E : ", ds->getRhs() == time* *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2H : ", ds->getF() == time* *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2I : ", ds->getJacobianXF() == *J0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2I : ", !ds->getMPtr(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2I : ", !ds->M(), false);
   cout << "--> Constructor 3 test ended with success." << endl;
 }
 
