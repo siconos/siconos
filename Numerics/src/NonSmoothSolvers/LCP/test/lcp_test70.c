@@ -24,12 +24,12 @@
 int main(void)
 {
   int info = 0 ;
-  printf("Test on ./data/lcp_trivial.dat\n");
+  printf("Test on ./data/lcp_ortiz.dat\n");
 
-  FILE * finput  =  fopen("./data/lcp_trivial_block.dat", "r");
+  FILE * finput  =  fopen("./data/lcp_ortiz.dat", "r");
 
-  char local_solvername[20] = "RPGS";
-  info = lcp_test_function_SBM(finput, local_solvername);
+  char solvername[10] = "PGS";
+  info = lcp_test_function(finput, solvername);
 
   fclose(finput);
 

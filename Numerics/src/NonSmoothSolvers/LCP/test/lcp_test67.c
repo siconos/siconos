@@ -24,7 +24,7 @@
 int main(void)
 {
   int info = 0 ;
-  printf("Test on ./data/lcp_mmc.dat\n");
+  printf("Test on ./data/lcp_trivial.dat\n");
 
   FILE * finput  =  fopen("./data/lcp_trivial_block.dat", "r");
 
