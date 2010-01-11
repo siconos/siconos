@@ -48,10 +48,10 @@ void DiskDiskR::computeh(double)
 
 };
 
-void DiskDiskR::computeJacqh(double)
+void DiskDiskR::computeJachq(double)
 {
 
-  SimpleMatrix *g = (SimpleMatrix *)Jacqh.get();
+  SimpleMatrix *g = (SimpleMatrix *)Jachq.get();
 
   double x1 = (*data[q0])(0);
   double y1 = (*data[q0])(1);

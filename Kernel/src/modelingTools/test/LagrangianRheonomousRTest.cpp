@@ -71,7 +71,7 @@ void LagrangianRheonomousRTest::testBuildLagrangianRheonomousR0()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR1a : ", R1->getType() == RELATION::Lagrangian, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR1b : ", R1->getSubType() == RELATION::RheonomousR, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR1c : ", R1->gethName() == "TestPlugin:hRheo", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR1d : ", R1->getJacHName(0) == "TestPlugin:G0Rheo", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR1d : ", R1->getJachName(0) == "TestPlugin:G0Rheo", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR1d : ", R1->gethDotName() == "TestPlugin:hDot", true);
   cout << " xml Constructor (1) LagrangianRheonomousR ok" << endl;
 }
@@ -83,7 +83,7 @@ void LagrangianRheonomousRTest::testBuildLagrangianRheonomousR2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3a : ", R1->getType() == RELATION::Lagrangian, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3b : ", R1->getSubType() == RELATION::RheonomousR, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3c : ", R1->gethName() == "TestPlugin:hRheo", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3d : ", R1->getJacHName(0) == "TestPlugin:G0Rheo", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3d : ", R1->getJachName(0) == "TestPlugin:G0Rheo", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3d : ", R1->gethDotName() == "TestPlugin:hDot", true);
   cout << " data Constructor LagrangianRheonomousR ok" << endl;
 }

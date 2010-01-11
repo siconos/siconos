@@ -51,15 +51,15 @@ LagrangianLinearTIR::LagrangianLinearTIR(SP::RelationXML relxml):
 LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix newC):
   LagrangianR(LinearTIR)
 {
-  Jacqh = newC;
+  Jachq = newC;
 }
 
 // Constructor from a complete set of data
 LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix newC, SP::SiconosMatrix newD, SP::SiconosMatrix newF, SP::SiconosVector newE):
   LagrangianR(LinearTIR)
 {
-  Jacqh = newC;
-  JacLH = newD;
+  Jachq = newC;
+  Jachlambda = newD;
   _F = newF;
   _e = newE;
 }
@@ -68,7 +68,7 @@ LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix newC, SP::SiconosMatr
 LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix newC, SP::SiconosVector newE):
   LagrangianR(LinearTIR)
 {
-  Jacqh = newC;
+  Jachq = newC;
   _e = newE;
 }
 
@@ -76,7 +76,7 @@ LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix newC, SP::SiconosVect
 LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC):
   LagrangianR(LinearTIR)
 {
-  Jacqh.reset(new SimpleMatrix(newC));
+  Jachq.reset(new SimpleMatrix(newC));
 }
 
 // Constructor from a complete set of data (matrices)
@@ -84,8 +84,8 @@ LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC, const Sicono
   LagrangianR(LinearTIR)
 {
   RuntimeException::selfThrow("LagrangianLinearTIR::LagrangianLinearTIR,  copy matrix in constructor\n");
-  Jacqh.reset(new SimpleMatrix(newC));
-  JacLH.reset(new SimpleMatrix(newD));
+  Jachq.reset(new SimpleMatrix(newC));
+  Jachlambda.reset(new SimpleMatrix(newD));
   _F.reset(new SimpleMatrix(newF));
   _e.reset(new SimpleVector(newE));
 }
@@ -95,7 +95,7 @@ LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC, const Sicono
   LagrangianR(LinearTIR)
 {
   RuntimeException::selfThrow("LagrangianLinearTIR::LagrangianLinearTIR,  copy matrix in constructor\n");
-  Jacqh.reset(new SimpleMatrix(newC));
+  Jachq.reset(new SimpleMatrix(newC));
   _e.reset(new SimpleVector(newE));
 }
 
@@ -104,10 +104,10 @@ void LagrangianLinearTIR::initComponents()
   unsigned int sizeY = interaction()->getSizeOfY();
   unsigned int sizeDS = interaction()->getSizeOfDS();
 
-  assert((Jacqh) ? (Jacqh->size(1) == sizeDS && Jacqh->size(0) == sizeY) : 1 &&
+  assert((Jachq) ? (Jachq->size(1) == sizeDS && Jachq->size(0) == sizeY) : 1 &&
          "LagrangianLinearTIR::initComponents inconsistent sizes between H matrix and the interaction.");
 
-  assert((JacLH) ? (JacLH->size(0) == sizeY && JacLH->size(1) != sizeY) : 1 &&
+  assert((Jachlambda) ? (Jachlambda->size(0) == sizeY && Jachlambda->size(1) != sizeY) : 1 &&
          "LagrangianLinearTIR::initComponents inconsistent sizes between D matrix and the interaction.");
   assert((_e) ? (_e->size() == sizeY) : 1 &&
          "LagrangianLinearTIR::initComponents inconsistent sizes between e vector and the dimension of the interaction.");
@@ -137,7 +137,7 @@ void LagrangianLinearTIR::computeOutput(double time, unsigned int derivativeNumb
   SP::SiconosVector lambda = interaction()->lambda(derivativeNumber);
 
   //string name = "q"+toString<unsigned int>(derivativeNumber);
-  prod(*Jacqh, *data[q0 + derivativeNumber], *y);
+  prod(*Jachq, *data[q0 + derivativeNumber], *y);
 
   if (derivativeNumber == 0)
   {
@@ -147,8 +147,8 @@ void LagrangianLinearTIR::computeOutput(double time, unsigned int derivativeNumb
       prod(*_F, *data[z], *y, false);
   }
 
-  if (JacLH)
-    prod(*JacLH, *lambda, *y, false) ;
+  if (Jachlambda)
+    prod(*Jachlambda, *lambda, *y, false) ;
 
 
 }
@@ -160,13 +160,13 @@ void LagrangianLinearTIR::computeInput(double time, const unsigned int level)
 
   *_workL = *interaction()->lambda(level);
   // computation of p = Ht lambda
-  prod(*_workL, *Jacqh, *data[p0 + level], false);
+  prod(*_workL, *Jachq, *data[p0 + level], false);
   //gemv(CblasTrans,1.0,*H,*lambda,1.0, *data[name]); => not yet implemented for BlockVectors.
 }
 /*
-const SimpleMatrix LagrangianLinearTIR::getJacXH(unsigned int  index ) const
+const SimpleMatrix LagrangianLinearTIR::getJachx(unsigned int  index ) const
 {
-  assert(index<2&&"LagrangianLinearTIR::getJacH(index) error, index is out of range.");
+  assert(index<2&&"LagrangianLinearTIR::getJach(index) error, index is out of range.");
   if(index == 0)
     return *C;
   else
@@ -180,9 +180,9 @@ void LagrangianLinearTIR::saveRelationToXML() const
   assert(relationxml &&
          "LagrangianLinearTIR::saveRelationToXML - object RelationXML does not exist");
 
-  (boost::static_pointer_cast<LinearRXML>(relationxml))->setC(*Jacqh) ;
+  (boost::static_pointer_cast<LinearRXML>(relationxml))->setC(*Jachq) ;
   (boost::static_pointer_cast<LinearRXML>(relationxml))->setE(*_e) ;
-  (boost::static_pointer_cast<LinearRXML>(relationxml))->setD(*JacLH) ;
+  (boost::static_pointer_cast<LinearRXML>(relationxml))->setD(*Jachlambda) ;
   (boost::static_pointer_cast<LinearRXML>(relationxml))->setF(*_F) ;
 }
 
@@ -196,8 +196,8 @@ void LagrangianLinearTIR::display() const
   LagrangianR::display();
   cout << "===== Lagrangian Linear Relation display ===== " << endl;
   cout << " C: " << endl;
-  if (Jacqh)
-    Jacqh->display();
+  if (Jachq)
+    Jachq->display();
   else
     cout << " -> NULL " << endl;
   cout << " e: " << endl;
@@ -206,8 +206,8 @@ void LagrangianLinearTIR::display() const
   else
     cout << " -> NULL " << endl;
   cout << " D: " << endl;
-  if (JacLH)
-    JacLH->display();
+  if (Jachlambda)
+    Jachlambda->display();
   else
     cout << " -> NULL " << endl;
   cout << " F: " << endl;

@@ -32,22 +32,22 @@ void NewtonEulerR::initComponents()
   _xsize = interaction()->getSizeOfDS();
   _qsize = 7 * (_xsize / 6);
 
-  // The initialization of JacH[0] depends on the way the Relation was built ie if the matrix
+  // The initialization of Jach[0] depends on the way the Relation was built ie if the matrix
   // was read from xml or not
-  if (! Jacqh)
-    Jacqh.reset(new SimpleMatrix(_ysize, _qsize));
+  if (! Jachq)
+    Jachq.reset(new SimpleMatrix(_ysize, _qsize));
   else
   {
-    if (Jacqh->size(0) == 0) // if the matrix dim are null
+    if (Jachq->size(0) == 0) // if the matrix dim are null
     {
-      Jacqh->resize(_ysize, _qsize);
+      Jachq->resize(_ysize, _qsize);
     }
     else
-      assert((Jacqh->size(1) == _qsize && Jacqh->size(0) == _ysize) &&
-             "NewtonEuler::initComponents inconsistent sizes between JacH[0] matrix and the interaction.");
+      assert((Jachq->size(1) == _qsize && Jachq->size(0) == _ysize) &&
+             "NewtonEuler::initComponents inconsistent sizes between Jach[0] matrix and the interaction.");
   }
-  if (! _jacQHT)
-    _jacQHT.reset(new SimpleMatrix(_ysize, _xsize));
+  if (! _jachqT)
+    _jachqT.reset(new SimpleMatrix(_ysize, _xsize));
 
 
   _workX.reset(new SimpleVector(_xsize));
@@ -99,15 +99,15 @@ void NewtonEulerR::computeh(double)
 {
   SP::SiconosVector y = interaction()->y(0);
   *_workQ = *data[q0];
-  //prod(*Jacqh,*data[q0],*y);
-  prod(*Jacqh, *_workQ, *y);
+  //prod(*Jachq,*data[q0],*y);
+  prod(*Jachq, *_workQ, *y);
 }
 
-//  void NewtonEulerR::computeJacXH(double)
+//  void NewtonEulerR::computeJachx(double)
 // {
 //   RuntimeException::selfThrow("FirstOrderR::computeJacobianXH, not (yet) implemented or forbidden for relations of type "+subType);
 // }
-//  void NewtonEulerR::computeJacLH(double)
+//  void NewtonEulerR::computeJachlambda(double)
 // {
 //   RuntimeException::selfThrow("FirstOrderR::computeJacobianLH, not (yet) implemented or forbidden for relations of type "+subType);
 // }
@@ -133,9 +133,9 @@ void NewtonEulerR::computeOutput(double t, unsigned int derivativeNumber)
   {
     SP::SiconosVector y = interaction()->y(derivativeNumber);
     if (derivativeNumber == 1)
-      prod(*Jacqh, *data[q1], *y);
+      prod(*Jachq, *data[q1], *y);
     else //if(derivativeNumber == 2)
-      //  prod(*Jacqh,*data[q2],*y); // Approx: y[2] = JacH[0]q[2], other terms are neglected ...
+      //  prod(*Jachq,*data[q2],*y); // Approx: y[2] = Jach[0]q[2], other terms are neglected ...
       //   else
       RuntimeException::selfThrow("LagrangianCompliantR::computeOutput(time,index), index out of range or not yet implemented.");
   }
@@ -151,10 +151,10 @@ void NewtonEulerR::computeInput(double t, unsigned int level)
 
 
 
-  //  computeJacqh(time);
+  //  computeJachq(time);
   // get lambda of the concerned interaction
   SP::SiconosVector lambda = interaction()->lambda(level);
 
   // data[name] += trans(G) * lambda
-  prod(*lambda, *_jacQHT, *data[p0 + level], false);
+  prod(*lambda, *_jachqT, *data[p0 + level], false);
 }

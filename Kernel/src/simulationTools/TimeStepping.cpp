@@ -423,8 +423,8 @@ void   TimeStepping::prepareNewtonIteration()
   SP::InteractionsSet allInteractions = model()->nonSmoothDynamicalSystem()->interactions();
   for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end(); it++)
   {
-    (*it)->relation()->computeJacH(getTkp1());
-    (*it)->relation()->computeJacG(getTkp1());
+    (*it)->relation()->computeJach(getTkp1());
+    (*it)->relation()->computeJacg(getTkp1());
   }
 
 

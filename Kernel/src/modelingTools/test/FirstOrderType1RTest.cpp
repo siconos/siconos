@@ -52,10 +52,10 @@ void FirstOrderType1RTest::testBuildFirstOrderType1R1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1c : ", R1->getSubType() == RELATION::Type1R, true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1d : ", R1->gethName()=="TestPlugin:hT1", true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1e : ", R1->getgName()=="TestPlugin:gT1", true);
-  R1->setComputeJacXHFunction("TestPlugin.so", "Jh0T1");
-  R1->setComputeJacLGFunction("TestPlugin.so", "Jg0T1");
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1e : ", R1->getJacHName(0)=="TestPlugin:Jh0T1", true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1g : ", R1->getJacGName(0)=="TestPlugin:Jg0T1", true);
+  R1->setComputeJachxFunction("TestPlugin.so", "Jh0T1");
+  R1->setComputeJacglambdaFunction("TestPlugin.so", "Jg0T1");
+  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1e : ", R1->getJachName(0)=="TestPlugin:Jh0T1", true);
+  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1g : ", R1->getJacgName(0)=="TestPlugin:Jg0T1", true);
   cout << "--> Constructor1 test ended with success." << endl;
 }
 
@@ -67,8 +67,8 @@ void FirstOrderType1RTest::testBuildFirstOrderType1R2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2c : ", R2->getSubType() == RELATION::Type1R, true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2d : ", R2->gethName()=="TestPlugin:hT1", true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2e : ", R2->getgName()=="TestPlugin:gT1", true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2e : ", R2->getJacHName(0)=="TestPlugin:Jh0T1", true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2g : ", R2->getJacGName(0)=="TestPlugin:Jg0T1", true);
+  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2e : ", R2->getJachName(0)=="TestPlugin:Jh0T1", true);
+  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2g : ", R2->getJacgName(0)=="TestPlugin:Jg0T1", true);
   cout << "--> Constructor2 test ended with success." << endl;
 }
 
@@ -116,8 +116,8 @@ void FirstOrderType1RTest::testBuildFirstOrderType1R3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R3b : ", R1->getSubType() == RELATION::Type1R, true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R3c : ", R1->gethName()=="TestPlugin:hT1", true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R3d : ", R1->getgName()=="TestPlugin:gT1", true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R3e : ", R1->getJacHName(0)=="TestPlugin:Jh0T1", true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R3g : ", R1->getJacGName(0)=="TestPlugin:Jg0T1", true);
+  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R3e : ", R1->getJachName(0)=="TestPlugin:Jh0T1", true);
+  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R3g : ", R1->getJacgName(0)=="TestPlugin:Jg0T1", true);
   cout << "--> Constructor xml test ended with success." << endl;
 }
 

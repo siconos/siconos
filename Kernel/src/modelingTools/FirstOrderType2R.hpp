@@ -50,7 +50,7 @@
 class FirstOrderType2R : public FirstOrderR
 {
 protected:
-  SP::SimpleMatrix JacXG;
+  SP::SimpleMatrix jacgx;
 
 
 public:
@@ -97,17 +97,17 @@ public:
    *  \param double : not used
    *  \param not used
    */
-  virtual void computeJacXH(double);
-  virtual void computeJacLH(double);
+  virtual void computeJachx(double);
+  virtual void computeJachlambda(double);
 
   /** default function to compute jacobianG according to lambda
    *  \param double : current time
    *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
    */
-  virtual void computeJacLG(double);
-  virtual void computeJacXG(double);
+  virtual void computeJacglambda(double);
+  virtual void computejacgx(double);
 
-  virtual void computeJacG(double t);
+  virtual void computeJacg(double t);
 
   /** default function to compute y
    *  \param double: not used
@@ -121,7 +121,7 @@ public:
    */
   virtual void computeInput(double, unsigned int = 0);
   /*
-    inline SP_PluggedMatrix getB(){return JacG.at(1);};
+    inline SP_PluggedMatrix getB(){return Jacg.at(1);};
   */
 
   virtual void preparNewtonIteration();

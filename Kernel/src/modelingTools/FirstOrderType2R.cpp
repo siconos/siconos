@@ -51,8 +51,8 @@ FirstOrderType2R::FirstOrderType2R(const string& computeOut, const string& compu
   setComputehFunction(SSL::getPluginName(computeOut), SSL::getPluginFunctionName(computeOut));
   setComputegFunction(SSL::getPluginName(computeIn), SSL::getPluginFunctionName(computeIn));
 
-  setComputeJacXHFunction(SSL::getPluginName(computeJX), SSL::getPluginFunctionName(computeJX));
-  setComputeJacLGFunction(SSL::getPluginName(computeJL), SSL::getPluginFunctionName(computeJL));
+  setComputeJachxFunction(SSL::getPluginName(computeJX), SSL::getPluginFunctionName(computeJX));
+  setComputeJacglambdaFunction(SSL::getPluginName(computeJL), SSL::getPluginFunctionName(computeJL));
 }
 
 void FirstOrderType2R::initialize(SP::Interaction inter)
@@ -76,21 +76,21 @@ void FirstOrderType2R::initialize(SP::Interaction inter)
 
   // The initialization of each component depends on the way the Relation was built ie if the matrix/vector
   // was read from xml or not
-  if (!JacXH)
-    JacXH.reset(new SimpleMatrix(sizeY, sizeDS));
-  if (!JacLH)
-    JacLH.reset(new SimpleMatrix(sizeY, sizeY));
-  if (!JacXG)
-    JacXG.reset(new SimpleMatrix(sizeDS, sizeDS));
-  if (!JacLG)
-    JacLG.reset(new SimpleMatrix(sizeDS, sizeY));
+  if (!Jachx)
+    Jachx.reset(new SimpleMatrix(sizeY, sizeDS));
+  if (!Jachlambda)
+    Jachlambda.reset(new SimpleMatrix(sizeY, sizeY));
+  if (!jacgx)
+    jacgx.reset(new SimpleMatrix(sizeDS, sizeDS));
+  if (!Jacglambda)
+    Jacglambda.reset(new SimpleMatrix(sizeDS, sizeY));
 
 
-  assert((JacXH->size(1) == sizeDS && JacXH->size(0) == sizeY) &&
-         "FirstOrderType2R::initialize inconsistent sizes between JacH[0] matrix and the interaction.");
+  assert((Jachx->size(1) == sizeDS && Jachx->size(0) == sizeY) &&
+         "FirstOrderType2R::initialize inconsistent sizes between Jach[0] matrix and the interaction.");
 
-  assert((JacLG->size(0) == sizeDS && JacLG->size(1) == sizeY) &&
-         "FirstOrderType2R::initialize inconsistent sizes between JacG[0] matrix and the interaction.");
+  assert((Jacglambda->size(0) == sizeDS && Jacglambda->size(1) == sizeY) &&
+         "FirstOrderType2R::initialize inconsistent sizes between Jacg[0] matrix and the interaction.");
 }
 
 void FirstOrderType2R::computeh(double t)
@@ -149,27 +149,27 @@ void FirstOrderType2R::computeInput(double t, unsigned int level)
 
 }
 
-void FirstOrderType2R::computeJacLH(double)
+void FirstOrderType2R::computeJachlambda(double)
 {
-  RuntimeException::selfThrow("FirstOrderType2R::computeJacLH must be overload.");
+  RuntimeException::selfThrow("FirstOrderType2R::computeJachlambda must be overload.");
 }
-void FirstOrderType2R::computeJacXH(double)
+void FirstOrderType2R::computeJachx(double)
 {
-  RuntimeException::selfThrow("FirstOrderType2R::computeJacXH must be overload.");
+  RuntimeException::selfThrow("FirstOrderType2R::computeJachx must be overload.");
 }
 
-void FirstOrderType2R::computeJacLG(double)
+void FirstOrderType2R::computeJacglambda(double)
 {
-  RuntimeException::selfThrow("FirstOrderType2R::computeJacLG must be overload.");
+  RuntimeException::selfThrow("FirstOrderType2R::computeJacglambda must be overload.");
 }
-void FirstOrderType2R::computeJacXG(double)
+void FirstOrderType2R::computejacgx(double)
 {
-  RuntimeException::selfThrow("FirstOrderType2R::computeJacXG must be overload.");
+  RuntimeException::selfThrow("FirstOrderType2R::computejacgx must be overload.");
 }
-void FirstOrderType2R::computeJacG(double t)
+void FirstOrderType2R::computeJacg(double t)
 {
-  computeJacLG(t);
-  computeJacXG(t);
+  computeJacglambda(t);
+  computejacgx(t);
 }
 
 void FirstOrderType2R::preparNewtonIteration()

@@ -72,11 +72,11 @@ void DiskMovingPlanR::computeh(double time)
 
 }
 
-void DiskMovingPlanR::computeJacqh(double time)
+void DiskMovingPlanR::computeJachq(double time)
 {
   init(time);
 
-  SimpleMatrix *g = (SimpleMatrix *) Jacqh.get();
+  SimpleMatrix *g = (SimpleMatrix *) Jachq.get();
 
   double x = (*data[q0])(0);
   double y = (*data[q0])(1);

@@ -97,13 +97,13 @@ public:
    *  \param double : not used
    *  \param not used
    */
-  void computeJacXH(double);
+  void computeJachx(double);
 
   /** default function to compute jacobianG according to lambda
    *  \param double : current time
    *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
    */
-  void computeJacLG(double);
+  void computeJacglambda(double);
 
   /** default function to compute y
    *  \param double: not used

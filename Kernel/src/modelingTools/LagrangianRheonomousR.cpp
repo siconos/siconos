@@ -50,13 +50,13 @@ LagrangianRheonomousR::LagrangianRheonomousR(SP::RelationXML LRxml): LagrangianR
   if (!LRxml->hasJacobianH())
     RuntimeException::selfThrow("LagrangianRheonomousR:: xml constructor failed, can not find a definition for G0.");
   if (LRxml->isJacobianHPlugin(0))
-    _pluginJacqh->setComputeFunction(LRxml->getJacobianHPlugin(0));
+    _pluginJachq->setComputeFunction(LRxml->getJacobianHPlugin(0));
   else
-    Jacqh.reset(new SimpleMatrix(LRxml->getJacobianHMatrix(0)));
+    Jachq.reset(new SimpleMatrix(LRxml->getJacobianHMatrix(0)));
 }
 
 // constructor from a set of data
-LagrangianRheonomousR::LagrangianRheonomousR(const string& computeh, const string& computehDot, const string& strcomputeJacqh):
+LagrangianRheonomousR::LagrangianRheonomousR(const string& computeh, const string& computehDot, const string& strcomputeJachq):
   LagrangianR(RheonomousR)
 {
   // h
@@ -64,12 +64,12 @@ LagrangianRheonomousR::LagrangianRheonomousR(const string& computeh, const strin
 
   // hDot
   setComputehDotFunction(SSL::getPluginName(computehDot), SSL::getPluginFunctionName(computehDot));
-  _pluginJacqh.reset(new PluggedObject());
-  _pluginJacqh->setComputeFunction(strcomputeJacqh);
+  _pluginJachq.reset(new PluggedObject());
+  _pluginJachq->setComputeFunction(strcomputeJachq);
 
   unsigned int sizeY = interaction()->getSizeOfY();
   unsigned int sizeQ = _workX->size();
-  Jacqh.reset(new SimpleMatrix(sizeY, sizeQ));
+  Jachq.reset(new SimpleMatrix(sizeY, sizeQ));
 }
 
 void LagrangianRheonomousR::initComponents()
@@ -139,20 +139,20 @@ void LagrangianRheonomousR::computehDot(double time)
   // else nothing
 }
 
-void LagrangianRheonomousR::computeJacqh(double time)
+void LagrangianRheonomousR::computeJachq(double time)
 {
   // Note that second input arg is useless.
-  if (_pluginJacqh->fPtr)
+  if (_pluginJachq->fPtr)
   {
     // Warning: temporary method to have contiguous values in
     // memory, copy of block to simple.
     *_workX = *data[q0];
     *_workZ = *data[z];
 
-    unsigned int sizeY = Jacqh->size(0);
+    unsigned int sizeY = Jachq->size(0);
     unsigned int sizeQ = _workX->size();
     unsigned int sizeZ = _workZ->size();
-    ((FPtr4)(_pluginJacqh->fPtr))(sizeQ, &(*_workX)(0), time, sizeY, &(*Jacqh)(0, 0), sizeZ, &(*_workZ)(0));
+    ((FPtr4)(_pluginJachq->fPtr))(sizeQ, &(*_workX)(0), time, sizeY, &(*Jachq)(0, 0), sizeZ, &(*_workZ)(0));
     // Copy data that might have been changed in the plug-in call.
     *data[z] = *_workZ;
   }
@@ -166,18 +166,18 @@ void LagrangianRheonomousR::computeOutput(double time, unsigned int derivativeNu
   else
   {
     SP::SiconosVector y = interaction()->y(derivativeNumber);
-    computeJacqh(time);
+    computeJachq(time);
     if (derivativeNumber == 1)
     {
       computehDot(time); // \todo: save hDot directly into y[1] ?
-      prod(*Jacqh, *data[q1], *y);
+      prod(*Jachq, *data[q1], *y);
       *y += *_hDot;
     }
     else if (derivativeNumber == 2)
-      prod(*Jacqh, *data[q2], *y); // Approx:,  ...
+      prod(*Jachq, *data[q2], *y); // Approx:,  ...
     // \warning : the computation of y[2] (in event-driven
     // simulation for instance) is approximated by y[2] =
-    // JacH[0]q[2]. For the moment, other terms are neglected
+    // Jach[0]q[2]. For the moment, other terms are neglected
     // (especially, partial derivatives with respect to time).
     else
       RuntimeException::selfThrow("LagrangianRheonomousR::computeOutput(time,index), index out of range or not yet implemented.");
@@ -186,11 +186,11 @@ void LagrangianRheonomousR::computeOutput(double time, unsigned int derivativeNu
 
 void LagrangianRheonomousR::computeInput(double time, unsigned int level)
 {
-  computeJacqh(time);
+  computeJachq(time);
   // get lambda of the concerned interaction
   SP::SiconosVector lambda = interaction()->lambda(level);
   // data[name] += trans(G) * lambda
-  prod(*lambda, *Jacqh, *data[p0 + level], false);
+  prod(*lambda, *Jachq, *data[p0 + level], false);
 
   //   SP::SiconosMatrix  GT = new SimpleMatrix(*G[0]);
   //   GT->trans();

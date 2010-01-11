@@ -67,9 +67,9 @@ protected:
 
 
   /** Jacobian matrices of H */
-  SP::SiconosMatrix Jacqh;
+  SP::SiconosMatrix Jachq;
   SP::SiconosMatrix JacqDotH;
-  SP::SiconosMatrix JacLH;
+  SP::SiconosMatrix Jachlambda;
 
   /** basic constructor
       \param the sub-type of the relation
@@ -92,63 +92,63 @@ public:
    */
   virtual ~LagrangianR() {};
 
-  // -- JacH --
+  // -- Jach --
 
-  /** get matrix JacH[index]
+  /** get matrix Jach[index]
    *  \return a SimpleMatrix
-  inline const SimpleMatrix getJacH(unsigned int  index = 0) const { return *(JacH.at(index)); }
+  inline const SimpleMatrix getJach(unsigned int  index = 0) const { return *(Jach.at(index)); }
    */
 
-  /** get a pointer on matrix JacH[index]
+  /** get a pointer on matrix Jach[index]
    *  \return a pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix jacQH() const
+  inline SP::SiconosMatrix jachq() const
   {
-    return Jacqh;
+    return Jachq;
   }
   inline SP::SiconosMatrix jacQDotH() const
   {
     return JacqDotH;
   }
-  inline SP::SiconosMatrix jacLH() const
+  inline SP::SiconosMatrix jachlambda() const
   {
-    return JacLH;
+    return Jachlambda;
   }
 
-  /** set the value of JacH[index] to newValue (copy)
+  /** set the value of Jach[index] to newValue (copy)
    *  \param SiconosMatrix newValue
-   *  \param unsigned int: index position in JacH vector
+   *  \param unsigned int: index position in Jach vector
 
-  template <class U> void setJacH(const U& newValue, unsigned int index = 0)
+  template <class U> void setJach(const U& newValue, unsigned int index = 0)
     {
-      assert(index>=JacH.size()&&"LagrangianR:: setJacH(mat,index), index out of range. Maybe you do not set the sub-type of the relation?");
+      assert(index>=Jach.size()&&"LagrangianR:: setJach(mat,index), index out of range. Maybe you do not set the sub-type of the relation?");
 
-      if(JacH[index]) JacH[index]->resize(newValue.size(0), newValue.size(1));
-      setObject<PluggedMatrix,SP_PluggedMatrix,U>(JacH[index],newValue);
+      if(Jach[index]) Jach[index]->resize(newValue.size(0), newValue.size(1));
+      setObject<PluggedMatrix,SP_PluggedMatrix,U>(Jach[index],newValue);
     }
   */
-  /** set JacH[index] to pointer newPtr (pointer link)
+  /** set Jach[index] to pointer newPtr (pointer link)
    *  \param SP::SiconosMatrix  newPtr
-   *  \param unsigned int: index position in JacH vector
+   *  \param unsigned int: index position in Jach vector
    */
-  inline void setJacqhPtr(SP::SiconosMatrix newPtr)
+  inline void setJachqPtr(SP::SiconosMatrix newPtr)
   {
-    Jacqh = newPtr ;
+    Jachq = newPtr ;
   }
 
-  /** To get the name of JacH[i] plugin
+  /** To get the name of Jach[i] plugin
    *  \return a string
-  const std::string getJacHName(unsigned int i) const {return JacH[i]->getPluginName();}
+  const std::string getJachName(unsigned int i) const {return Jach[i]->getPluginName();}
    */
 
-  /** true if JacH[i] is plugged
+  /** true if Jach[i] is plugged
    *  \return a bool
-  const bool isJacHPlugged(unsigned int i) const {return JacH[i]->isPlugged();}
+  const bool isJachPlugged(unsigned int i) const {return Jach[i]->isPlugged();}
    */
 
   /** Gets the number of computed jacobians for h
       \return an unsigned int.
-  inline unsigned int numberOfJacobiansForH() const { return JacH.size();}
+  inline unsigned int numberOfJacobiansForH() const { return Jach.size();}
   */
 
 
@@ -166,44 +166,44 @@ public:
    *  \param double : current time
    *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
 
-  void computeJacXH(double);*/
-  void computeJacLH(double)
+  void computeJachx(double);*/
+  void computeJachlambda(double)
   {
     ;
   }
-  void computeJacqh(double)
+  void computeJachq(double)
   {
     ;
   }
-  void computeJacqDoth(double)
+  void computeJachqDot(double)
   {
     ;
   }
-  void computeJacLG(double)
+  void computeJacglambda(double)
   {
     ;
   }
-  void computeJacqG(double)
+  void computeJacgq(double)
   {
     ;
   }
-  void computeJacqDotG(double)
+  void computeJacgqDot(double)
   {
     ;
   }
   /* compute all the H Jacobian */
-  virtual void computeJacH(double t)
+  virtual void computeJach(double t)
   {
-    computeJacqh(t);
-    computeJacqDoth(t);
-    computeJacLH(t);
+    computeJachq(t);
+    computeJachqDot(t);
+    computeJachlambda(t);
   }
   /* compute all the G Jacobian */
-  virtual void computeJacG(double t)
+  virtual void computeJacg(double t)
   {
-    computeJacqG(t);
-    computeJacqDotG(t);
-    computeJacLG(t);
+    computeJacgq(t);
+    computeJacgqDot(t);
+    computeJacglambda(t);
   }
 
 
@@ -233,7 +233,7 @@ public:
   */
   virtual SP::SiconosMatrix C()
   {
-    return jacQH();
+    return jachq();
   }
   /**
    * return a SP on the D matrix.
@@ -241,7 +241,7 @@ public:
    */
   virtual SP::SiconosMatrix D()
   {
-    return jacLH();
+    return jachlambda();
   }
   /**
    * return a SP on the B matrix.
@@ -249,7 +249,7 @@ public:
    */
   virtual SP::SiconosMatrix B()
   {
-    return jacLG();
+    return jacglambda();
   }
 
   /** main relation members display

@@ -191,26 +191,26 @@ void UnitaryRelation::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SP::Sicon
   if (relationType == FirstOrder)
   {
     SP::FirstOrderR r = boost::static_pointer_cast<FirstOrderR> (interaction()->relation());
-    originalMatrix = r->jacXH();
+    originalMatrix = r->jachX();
   }
   else if (relationType == Lagrangian)
   {
     SP::LagrangianR r = boost::static_pointer_cast<LagrangianR> (interaction()->relation());
-    originalMatrix = r->jacQH();
+    originalMatrix = r->jachq();
   }
   else if (relationType == NewtonEuler)
   {
     SP::NewtonEulerR r = boost::static_pointer_cast<NewtonEulerR> (interaction()->relation());
-    //      SP::BlockMatrix C = boost::static_pointer_cast<BlockMatrix> (r->jacQH());
-    SP::SiconosMatrix C = r->jacQH();
-    //      cout<<"UR : r->jacQH():\n";
+    //      SP::BlockMatrix C = boost::static_pointer_cast<BlockMatrix> (r->jachq());
+    SP::SiconosMatrix C = r->jachq();
+    //      cout<<"UR : r->jachq():\n";
     //      C->display();
-    originalMatrix = r->jacQHT();
+    originalMatrix = r->jachqT();
 
-    //      SP::BlockMatrix jacQHT_block = boost::static_pointer_cast<BlockMatrix> (originalMatrix);
+    //      SP::BlockMatrix jachqT_block = boost::static_pointer_cast<BlockMatrix> (originalMatrix);
 
     //      SP::SiconosMatrix C_DS_block = C->block(NumDS,0);
-    //      SP::SiconosMatrix CT_DS_block = jacQHT_block->block(NumDS,0);
+    //      SP::SiconosMatrix CT_DS_block = jachqT_block->block(NumDS,0);
     //      cout<<" UnitaryRelation::getLeftUnitaryBlockForDS : C_DS_block"<<endl;
     //      C_DS_block->display();
     SP::SimpleMatrix auxBloc(new SimpleMatrix(sizey, 7));
@@ -283,7 +283,7 @@ void UnitaryRelation::getRightUnitaryBlockForDS(SP::DynamicalSystem ds, SP::Sico
 
   if (relationType == FirstOrder)
   {
-    originalMatrix = interaction()->relation()->jacLG();
+    originalMatrix = interaction()->relation()->jacglambda();
   }
   else if (relationType == Lagrangian || relationType == NewtonEuler)
   {
@@ -322,7 +322,7 @@ void UnitaryRelation::getExtraUnitaryBlock(SP::SiconosMatrix UnitaryBlock) const
 
   SP::SiconosMatrix D;
   //  if(interaction()->relation()->getNumberOfJacobiansForH()>1)
-  D = interaction()->relation()->jacLH();
+  D = interaction()->relation()->jachlambda();
 
   if (! D)
   {

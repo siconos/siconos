@@ -38,10 +38,10 @@ LagrangianCompliantR::LagrangianCompliantR(SP::RelationXML LRxml): LagrangianR(L
   setComputehFunction(SSL::getPluginName(hName), SSL::getPluginFunctionName(hName));
 
   //   if(!LRxml->hasJacobianH())
-  //     RuntimeException::selfThrow("LagrangianCompliantR:: xml constructor failed, can not find a definition for JacH0.");
-  //   JacH.resize(2);
-  //   LRxml->readJacobianXML<PluggedMatrix,SP_PluggedMatrix>(JacH[0], LRxml, 0);
-  //   LRxml->readJacobianXML<PluggedMatrix,SP_PluggedMatrix>(JacH[1], LRxml, 1);
+  //     RuntimeException::selfThrow("LagrangianCompliantR:: xml constructor failed, can not find a definition for Jach0.");
+  //   Jach.resize(2);
+  //   LRxml->readJacobianXML<PluggedMatrix,SP_PluggedMatrix>(Jach[0], LRxml, 0);
+  //   LRxml->readJacobianXML<PluggedMatrix,SP_PluggedMatrix>(Jach[1], LRxml, 1);
 }
 
 // constructor from a set of data
@@ -49,12 +49,12 @@ LagrangianCompliantR::LagrangianCompliantR(const string& computeh, const std::ve
 {
   Plugin::setFunction(&hPtr, SSL::getPluginName(computeh), SSL::getPluginFunctionName(computeh));
   pluginNameHPtr = computeh;
-  Plugin::setFunction(&JacqhPtr, SSL::getPluginName(computeg[0]), SSL::getPluginFunctionName(computeg[0]));
-  pluginNameJacqhPtr = computeg[0];
-  Plugin::setFunction(&JacLHPtr, SSL::getPluginName(computeg[1]), SSL::getPluginFunctionName(computeg[1]));
-  pluginNameJacLHPtr = computeg[1];
+  Plugin::setFunction(&JachqPtr, SSL::getPluginName(computeg[0]), SSL::getPluginFunctionName(computeg[0]));
+  pluginNameJachqPtr = computeg[0];
+  Plugin::setFunction(&JachlambdaPtr, SSL::getPluginName(computeg[1]), SSL::getPluginFunctionName(computeg[1]));
+  pluginNameJachlambdaPtr = computeg[1];
 
-  // Warning: we cannot allocate memory for JacH[0] matrix since no interaction
+  // Warning: we cannot allocate memory for Jach[0] matrix since no interaction
   // is connected to the relation. This will be done during initialize.
   // We only set the name of the plugin-function and connect it to the user-defined function.
 }
@@ -65,10 +65,10 @@ void LagrangianCompliantR::initComponents()
   unsigned int sizeY = interaction()->getSizeOfY();
   _workL.reset(new SimpleVector(sizeY));
 
-  if (! JacLH)
-    JacLH.reset(new SimpleMatrix(sizeY, sizeY));
+  if (! Jachlambda)
+    Jachlambda.reset(new SimpleMatrix(sizeY, sizeY));
   else
-    JacLH->resize(sizeY, sizeY);
+    Jachlambda->resize(sizeY, sizeY);
 }
 
 void LagrangianCompliantR::computeh(double time)
@@ -97,42 +97,42 @@ void LagrangianCompliantR::computeh(double time)
   }
 }
 
-void LagrangianCompliantR::computeJacqh(double time)
+void LagrangianCompliantR::computeJachq(double time)
 {
 
-  if (JacqhPtr)
+  if (JachqPtr)
   {
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
     *_workX = *data[q0];
     *_workZ = *data[z];
 
-    unsigned int sizeY = Jacqh->size(0);
+    unsigned int sizeY = Jachq->size(0);
     unsigned int sizeQ = _workX->size();
     unsigned int sizeZ = _workZ->size();
 
     // get vector lambda of the current interaction
     *_workL = *interaction()->lambda(0);
-    (JacqhPtr)(sizeQ, &(*_workX)(0), sizeY, &(*_workL)(0), &(*Jacqh)(0, 0), sizeZ, &(*_workZ)(0));
+    (JachqPtr)(sizeQ, &(*_workX)(0), sizeY, &(*_workL)(0), &(*Jachq)(0, 0), sizeZ, &(*_workZ)(0));
     // Copy data that might have been changed in the plug-in call.
     *data[z] = *_workZ;
   }
 }
-void LagrangianCompliantR::computeJacLH(double time)
+void LagrangianCompliantR::computeJachlambda(double time)
 {
 
-  if (JacLHPtr)
+  if (JachlambdaPtr)
   {
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
     *_workX = *data[q0];
     *_workZ = *data[z];
 
-    unsigned int sizeY = Jacqh->size(0);
+    unsigned int sizeY = Jachq->size(0);
     unsigned int sizeQ = _workX->size();
     unsigned int sizeZ = _workZ->size();
 
     // get vector lambda of the current interaction
     *_workL = *interaction()->lambda(0);
-    (JacLHPtr)(sizeQ, &(*_workX)(0), sizeY, &(*_workL)(0), &(*JacLH)(0, 0), sizeZ, &(*_workZ)(0));
+    (JachlambdaPtr)(sizeQ, &(*_workX)(0), sizeY, &(*_workL)(0), &(*Jachlambda)(0, 0), sizeZ, &(*_workZ)(0));
     // Copy data that might have been changed in the plug-in call.
     *data[z] = *_workZ;
   }
@@ -145,17 +145,17 @@ void LagrangianCompliantR::computeOutput(double time, unsigned int derivativeNum
   else
   {
     SP::SiconosVector y = interaction()->y(derivativeNumber);
-    computeJacqh(time);
-    computeJacLH(time);
+    computeJachq(time);
+    computeJachlambda(time);
     if (derivativeNumber == 1)
     {
       SP::SiconosVector lambda = interaction()->lambda(derivativeNumber);
-      // y = JacH[0] q1 + JacH[1] lambda
-      prod(*Jacqh, *data[q1], *y);
-      prod(*JacLH, *lambda, *y, false);
+      // y = Jach[0] q1 + Jach[1] lambda
+      prod(*Jachq, *data[q1], *y);
+      prod(*Jachlambda, *lambda, *y, false);
     }
     else if (derivativeNumber == 2)
-      prod(*Jacqh, *data[q2], *y); // Approx: y[2] = JacH[0]q[2], other terms are neglected ...
+      prod(*Jachq, *data[q2], *y); // Approx: y[2] = Jach[0]q[2], other terms are neglected ...
     else
       RuntimeException::selfThrow("LagrangianCompliantR::computeOutput(time,index), index out of range or not yet implemented.");
   }
@@ -163,12 +163,12 @@ void LagrangianCompliantR::computeOutput(double time, unsigned int derivativeNum
 
 void LagrangianCompliantR::computeInput(const double time, const unsigned int level)
 {
-  computeJacqh(time);
+  computeJachq(time);
   // get lambda of the concerned interaction
   SP::SiconosVector lambda = interaction()->lambda(level);
 
   // data[name] += trans(G) * lambda
-  prod(*lambda, *Jacqh, *data[p0 + level], false);
+  prod(*lambda, *Jachq, *data[p0 + level], false);
 
   //   SP::SiconosMatrix  GT = new SimpleMatrix(*G[0]);
   //   GT->trans();

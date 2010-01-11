@@ -198,7 +198,7 @@ protected:
       f(x,t) + r \f$) */
   SP::SiconosMatrix _jacxRhs;
 
-  SP::SiconosMatrix _jacxG;
+  SP::SiconosMatrix _jacgx;
   SP::SiconosMatrix _jacxDotG;
   //  SP::SiconosMatrix jacobianZG;
 
@@ -231,7 +231,7 @@ protected:
    *  @param   the size of the vector z
    *  @param   a vector of parameters, z
    */
-  SP::PluggedObject _pluginJacxG;
+  SP::PluggedObject _pluginJacgx;
   SP::PluggedObject _pluginJacxDotG;
 
 
@@ -590,7 +590,7 @@ public:
       */
   inline SP::SiconosMatrix jacobianXG() const
   {
-    return _jacxG;
+    return _jacgx;
   }
   inline SP::SiconosMatrix jacobianXDotG() const
   {
@@ -610,7 +610,7 @@ public:
       */
   inline void setJacobianXGPtr(SP::SiconosMatrix newPtr)
   {
-    _jacxG = newPtr;
+    _jacgx = newPtr;
   }
   inline void setJacobianXDotGPtr(SP::SiconosMatrix newPtr)
   {

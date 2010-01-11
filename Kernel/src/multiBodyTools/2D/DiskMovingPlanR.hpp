@@ -58,7 +58,7 @@ public:
 
   void computeh(double);
 
-  void computeJacqh(double);
+  void computeJachq(double);
 
   void computehDot(double);
 

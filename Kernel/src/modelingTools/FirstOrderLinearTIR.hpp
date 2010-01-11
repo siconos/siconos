@@ -157,7 +157,7 @@ public:
    */
   inline SP::SiconosMatrix C() const
   {
-    return JacXH;
+    return Jachx;
   }
 
   /** set the value of C to newValue
@@ -172,7 +172,7 @@ public:
    */
   inline void setCPtr(SP::SiconosMatrix newPtr)
   {
-    JacXH = newPtr;
+    Jachx = newPtr;
   }
 
   // -- D --
@@ -187,7 +187,7 @@ public:
    */
   inline SP::SiconosMatrix D() const
   {
-    return JacLH;
+    return Jachlambda;
   }
 
   /** set the value of D to newValue
@@ -202,7 +202,7 @@ public:
    */
   inline void setDPtr(SP::SiconosMatrix newPtr)
   {
-    JacLH = newPtr;
+    Jachlambda = newPtr;
   }
 
   // -- F --
@@ -279,7 +279,7 @@ public:
    */
   inline SP::SiconosMatrix B() const
   {
-    return JacLG;
+    return Jacglambda;
   }
 
   /** set the value of B to newValue
@@ -296,24 +296,24 @@ public:
    */
   inline void setBPtr(SP::SiconosMatrix newPtr)
   {
-    JacLG = newPtr;
+    Jacglambda = newPtr;
   }
 
-  /** get matrix JacH[index]
+  /** get matrix Jach[index]
    *  \return a SimpleMatrix
-  const SimpleMatrix getJacXH() const;
+  const SimpleMatrix getJachx() const;
    */
 
-  /** get a pointer on matrix JacH[index]
+  /** get a pointer on matrix Jach[index]
    *  \return a pointer on a SiconosMatrix
    */
 
-  /** get matrix JacG[index]
+  /** get matrix Jacg[index]
    *  \return a SimpleMatrix
-  const SimpleMatrix getJacG(unsigned int  index = 0) const;
+  const SimpleMatrix getJacg(unsigned int  index = 0) const;
    */
 
-  /** get a pointer on matrix JacG[index]
+  /** get a pointer on matrix Jacg[index]
    *  \return a pointer on a SiconosMatrix
    */
 
@@ -325,9 +325,9 @@ public:
    */
   void display() const;
 
-  virtual void computeJacXH(double) {};
-  virtual void computeJacLH(double) {};
-  virtual void computeJacLG(double) {};
+  virtual void computeJachx(double) {};
+  virtual void computeJachlambda(double) {};
+  virtual void computeJacglambda(double) {};
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param Relation * : the relation which must be converted

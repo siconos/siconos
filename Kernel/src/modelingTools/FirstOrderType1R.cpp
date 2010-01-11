@@ -38,12 +38,12 @@ FirstOrderType1R::FirstOrderType1R(SP::RelationXML FORxml):
 
     if (FORxml->isJacobianGPlugin(0))
     {
-      //  JacG[0].reset(new PluggedMatrix(FORxml->getJacobianGPlugin(0)));
-      setComputeJacLGFunction(SSL::getPluginName(gName), SSL::getPluginFunctionName(gName));
+      //  Jacg[0].reset(new PluggedMatrix(FORxml->getJacobianGPlugin(0)));
+      setComputeJacglambdaFunction(SSL::getPluginName(gName), SSL::getPluginFunctionName(gName));
     }
     else
     {
-      JacLG.reset(new SimpleMatrix(FORxml->getJacobianGMatrix(0)));
+      Jacglambda.reset(new SimpleMatrix(FORxml->getJacobianGMatrix(0)));
     }
   }
 
@@ -57,12 +57,12 @@ FirstOrderType1R::FirstOrderType1R(SP::RelationXML FORxml):
       RuntimeException::selfThrow("FirstOrderType1R xml constructor failed. No input for gradients of h function.");
     if (FORxml->isJacobianHPlugin(0))
     {
-      setComputeJacXHFunction(SSL::getPluginName(gName), SSL::getPluginFunctionName(gName));
-      //  JacH[0].reset(new PluggedMatrix(FORxml->getJacobianHPlugin(0)));
+      setComputeJachxFunction(SSL::getPluginName(gName), SSL::getPluginFunctionName(gName));
+      //  Jach[0].reset(new PluggedMatrix(FORxml->getJacobianHPlugin(0)));
     }
     else
     {
-      JacXH.reset(new SimpleMatrix(FORxml->getJacobianHMatrix(0)));
+      Jachx.reset(new SimpleMatrix(FORxml->getJacobianHMatrix(0)));
     }
   }
 }
@@ -84,8 +84,8 @@ FirstOrderType1R::FirstOrderType1R(const string& computeOut, const string& compu
   // Connect input and output to plug-in
   setComputehFunction(SSL::getPluginName(computeOut), SSL::getPluginFunctionName(computeOut));
   setComputegFunction(SSL::getPluginName(computeIn), SSL::getPluginFunctionName(computeIn));
-  setComputeJacXHFunction(SSL::getPluginName(computeJX), SSL::getPluginFunctionName(computeJX));
-  setComputeJacLGFunction(SSL::getPluginName(computeJL), SSL::getPluginFunctionName(computeJL));
+  setComputeJachxFunction(SSL::getPluginName(computeJX), SSL::getPluginFunctionName(computeJX));
+  setComputeJacglambdaFunction(SSL::getPluginName(computeJL), SSL::getPluginFunctionName(computeJL));
 }
 
 void FirstOrderType1R::initialize(SP::Interaction inter)
@@ -109,18 +109,18 @@ void FirstOrderType1R::initialize(SP::Interaction inter)
 
   // The initialization of each component depends on the way the Relation was built ie if the matrix/vector
   // was read from xml or not
-  if (JacXH->size(0) == 0) // if the matrix dim are null
-    JacXH->resize(sizeY, sizeDS);
+  if (Jachx->size(0) == 0) // if the matrix dim are null
+    Jachx->resize(sizeY, sizeDS);
   else
-    assert((JacXH->size(1) == sizeDS && JacXH->size(0) == sizeY) &&
-           "FirstOrderType1R::initialize inconsistent sizes between JacH[0] matrix and the interaction.");
+    assert((Jachx->size(1) == sizeDS && Jachx->size(0) == sizeY) &&
+           "FirstOrderType1R::initialize inconsistent sizes between Jach[0] matrix and the interaction.");
 
   // Same work for jacobianLambdaG
-  if (JacLG->size(0) == 0) // if the matrix dim are null
-    JacLG->resize(sizeDS, sizeY);
+  if (Jacglambda->size(0) == 0) // if the matrix dim are null
+    Jacglambda->resize(sizeDS, sizeY);
   else
-    assert((JacLG->size(0) == sizeDS && JacLG->size(1) == sizeY) &&
-           "FirstOrderType1R::initialize inconsistent sizes between JacG[0] matrix and the interaction.");
+    assert((Jacglambda->size(0) == sizeDS && Jacglambda->size(1) == sizeY) &&
+           "FirstOrderType1R::initialize inconsistent sizes between Jacg[0] matrix and the interaction.");
 }
 
 void FirstOrderType1R::computeh(double t)
@@ -177,11 +177,11 @@ void FirstOrderType1R::computeInput(double t, unsigned int level)
   *data[z] = *_workZ;
 }
 
-void FirstOrderType1R::computeJacXH(double)
+void FirstOrderType1R::computeJachx(double)
 {
   //
   assert(index == 0 && "FirstOrderType1R::computeJacobianH(index): index is out of range");
-  assert(_plunginJacxh && "FirstOrderType1R::computeJacobianH() failed; not linked to a plug-in function.");
+  assert(_plunginJachx && "FirstOrderType1R::computeJacobianH() failed; not linked to a plug-in function.");
 
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
   *_workX = *data[x];
@@ -191,13 +191,13 @@ void FirstOrderType1R::computeJacXH(double)
   unsigned int sizeX = data[x]->size();
   unsigned int sizeZ = data[z]->size();
 
-  ((Type1Ptr)(_plunginJacxh->fPtr))(sizeX, &(*_workX)(0), sizeY, &(*(JacXH))(0, 0), sizeZ, &(*_workZ)(0));
+  ((Type1Ptr)(_plunginJachx->fPtr))(sizeX, &(*_workX)(0), sizeY, &(*(Jachx))(0, 0), sizeZ, &(*_workZ)(0));
 
   // Rebuilt z from Tmp
   *data[z] = *_workZ;
 }
 
-void FirstOrderType1R::computeJacLG(double)
+void FirstOrderType1R::computeJacglambda(double)
 {
   assert(index == 0 && "FirstOrderType1R::computeJacobiang(index): index is out of range");
   assert(_pluginJacLg && "FirstOrderType1R::computeJacobiang() failed; not linked to a plug-in function.");
@@ -211,7 +211,7 @@ void FirstOrderType1R::computeJacLG(double)
   unsigned int sizeX = data[x]->size();
   unsigned int sizeZ = data[z]->size();
 
-  ((Type1Ptr)(_pluginJacLg->fPtr))(sizeY, &(*_workY)(0), sizeX, &(*(JacLG))(0, 0), sizeZ, &(*_workZ)(0));
+  ((Type1Ptr)(_pluginJacLg->fPtr))(sizeY, &(*_workY)(0), sizeX, &(*(Jacglambda))(0, 0), sizeZ, &(*_workZ)(0));
 
   // Rebuilt z from Tmp
   *data[z] = *_workZ;

@@ -31,12 +31,12 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(SP::RelationXML relxml):
   // get matrices values. All are optional.
 
   if (folrXML->hasC())
-    JacXH.reset(new SimpleMatrix(folrXML->getC()));
+    Jachx.reset(new SimpleMatrix(folrXML->getC()));
   else
     RuntimeException::selfThrow("FirstOrderLinearTIR:: xml constructor failed, can not find a definition for C.");
 
   if (folrXML->hasD())
-    JacLH.reset(new SimpleMatrix(folrXML->getD()));
+    Jachlambda.reset(new SimpleMatrix(folrXML->getD()));
 
   if (folrXML->hasF())
     _F.reset(new SimpleMatrix(folrXML->getF()));
@@ -45,7 +45,7 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(SP::RelationXML relxml):
     _e.reset(new SimpleVector(folrXML->getE()));
 
   if (folrXML->hasB())
-    JacLG.reset(new SimpleMatrix(folrXML->getB()));
+    Jacglambda.reset(new SimpleMatrix(folrXML->getB()));
   else
     RuntimeException::selfThrow("FirstOrderLinearTIR:: xml constructor failed, can not find a definition for B.");
 }
@@ -57,17 +57,17 @@ FirstOrderLinearTIR::FirstOrderLinearTIR():
 FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SiconosMatrix newC, SP::SiconosMatrix newB):
   FirstOrderR(LinearTIR)
 {
-  JacXH = newC;
-  JacLG = newB;
+  Jachx = newC;
+  Jacglambda = newB;
 }
 
 // Constructor from a complete set of data
 FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SiconosMatrix newC, SP::SiconosMatrix newD, SP::SiconosMatrix newF, SP::SiconosVector newE, SP::SiconosMatrix newB):
   FirstOrderR(LinearTIR)
 {
-  JacXH = newC;
-  JacLG = newB;
-  JacLH = newD;
+  Jachx = newC;
+  Jacglambda = newB;
+  Jachlambda = newD;
   _F = newF;
   _e = newE;
 }
@@ -76,8 +76,8 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SiconosMatrix newC, SP::SiconosMatr
 FirstOrderLinearTIR::FirstOrderLinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newB):
   FirstOrderR(LinearTIR)
 {
-  JacXH = createSPtrSiconosMatrix((SiconosMatrix&) newC);
-  JacLG = createSPtrSiconosMatrix((SiconosMatrix&) newB);
+  Jachx = createSPtrSiconosMatrix((SiconosMatrix&) newC);
+  Jacglambda = createSPtrSiconosMatrix((SiconosMatrix&) newB);
 }
 
 // Constructor from a complete set of data (matrices)
@@ -85,9 +85,9 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(const SiconosMatrix& newC, const Sicono
   FirstOrderR(LinearTIR)
 {
 
-  JacXH = createSPtrSiconosMatrix((SiconosMatrix&) newC);
-  JacLG = createSPtrSiconosMatrix((SiconosMatrix&) newB);
-  JacLH = createSPtrSiconosMatrix((SiconosMatrix&) newD);
+  Jachx = createSPtrSiconosMatrix((SiconosMatrix&) newC);
+  Jacglambda = createSPtrSiconosMatrix((SiconosMatrix&) newB);
+  Jachlambda = createSPtrSiconosMatrix((SiconosMatrix&) newD);
   _F = createSPtrSiconosMatrix((SiconosMatrix&) newF);
   _e = createSPtrSiconosVector((SiconosVector&) newE);
 }
@@ -101,9 +101,9 @@ void FirstOrderLinearTIR::initialize(SP::Interaction inter)
 
   // Update data member (links to DS variables)
   initDSLinks();
-  if (!JacXH)
+  if (!Jachx)
     RuntimeException::selfThrow("FirstOrderLinearTIR::initialize() C is null and is a required input.");
-  if (!JacLG)
+  if (!Jacglambda)
     RuntimeException::selfThrow("FirstOrderLinearTIR::initialize() B is null and is a required input.");
 
   // Check if various operators sizes are consistent.
@@ -112,14 +112,14 @@ void FirstOrderLinearTIR::initialize(SP::Interaction inter)
   unsigned int sizeX = interaction()->getSizeOfDS();
   unsigned int sizeZ = interaction()->getSizeZ();
 
-  assert((JacXH->size(0) == sizeY && JacXH->size(1) == sizeX) && "FirstOrderLinearTIR::initialize , inconsistent size between C and Interaction.");
+  assert((Jachx->size(0) == sizeY && Jachx->size(1) == sizeX) && "FirstOrderLinearTIR::initialize , inconsistent size between C and Interaction.");
 
-  assert((JacLG->size(1) == sizeY && JacLG->size(0) == sizeX) && "FirstOrderLinearTIR::initialize , inconsistent size between B and interaction.");
+  assert((Jacglambda->size(1) == sizeY && Jacglambda->size(0) == sizeX) && "FirstOrderLinearTIR::initialize , inconsistent size between B and interaction.");
 
   // C and B are the minimum inputs. The others may remain null.
 
-  if (JacLH)
-    assert((JacLH->size(0) == sizeY || JacLH->size(1) == sizeY) && "FirstOrderLinearTIR::initialize , inconsistent size between C and D.");
+  if (Jachlambda)
+    assert((Jachlambda->size(0) == sizeY || Jachlambda->size(1) == sizeY) && "FirstOrderLinearTIR::initialize , inconsistent size between C and D.");
 
 
   if (_F)
@@ -150,13 +150,13 @@ void FirstOrderLinearTIR::computeOutput(double time, unsigned int)
   SP::SiconosVector lambda = interaction()->lambda(0);
 
   // compute y
-  if (JacXH)
-    prod(*JacXH, *data[x], *y);
+  if (Jachx)
+    prod(*Jachx, *data[x], *y);
   else
     y->zero();
 
-  if (JacLH)
-    prod(*JacLH, *lambda, *y, false);
+  if (Jachlambda)
+    prod(*Jachlambda, *lambda, *y, false);
 
   if (_e)
     *y += *_e;
@@ -169,17 +169,17 @@ void FirstOrderLinearTIR::computeInput(double time, unsigned int level)
 {
   // We get lambda of the interaction (pointers)
   SP::SiconosVector lambda = interaction()->lambda(level);
-  prod(*JacLG, *lambda, *data[r], false);
+  prod(*Jacglambda, *lambda, *data[r], false);
 }
 
 void FirstOrderLinearTIR::display() const
 {
   cout << " ===== Linear Time Invariant relation display ===== " << endl;
   cout << "| C " << endl;
-  if (JacXH) JacXH->display();
+  if (Jachx) Jachx->display();
   else cout << "->NULL" << endl;
   cout << "| D " << endl;
-  if (JacLH) JacLH->display();
+  if (Jachlambda) Jachlambda->display();
   else cout << "->NULL" << endl;
   cout << "| F " << endl;
   if (_F) _F->display();
@@ -188,7 +188,7 @@ void FirstOrderLinearTIR::display() const
   if (_e) _e->display();
   else cout << "->NULL" << endl;
   cout << "| B " << endl;
-  if (JacLG) JacLG->display();
+  if (Jacglambda) Jacglambda->display();
   else cout << "->NULL" << endl;
   cout << " ================================================== " << endl;
 }
@@ -199,11 +199,11 @@ void FirstOrderLinearTIR::saveRelationToXML() const
   RuntimeException::selfThrow("FirstOrderLinearTIR::saveRelationToXML, no yet implemented.");
 
   //   SP::FirstOrderLinearTIRXML folrXML = (boost::static_pointer_cast<FirstOrderLinearTIRXML>(relationxml));
-  //   folrXML->setC( *JacXH );
-  //   folrXML->setD( *JacLH );
+  //   folrXML->setC( *Jachx );
+  //   folrXML->setD( *Jachlambda );
   //   folrXML->setF( *F );
   //   folrXML->setE( *e );
-  //   folrXML->setB( *JacLG );
+  //   folrXML->setB( *Jacglambda );
 }
 
 FirstOrderLinearTIR* FirstOrderLinearTIR::convert(Relation *r)

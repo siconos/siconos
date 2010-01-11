@@ -81,10 +81,10 @@ protected:
 
   /** Plug-in to compute \f$ \nabla_x h(..)\f$
    */
-  SP::PluggedObject _plunginJacxh;
+  SP::PluggedObject _plunginJachx;
   /** Plug-in to compute \f$ \nabla_{\lambda} h(..)\f$
    */
-  SP::PluggedObject _pluginJacLh;
+  SP::PluggedObject _pluginJachlambda;
 
   /** Plug-in to compute g(...)
    */
@@ -147,7 +147,7 @@ protected:
   /*value of h at the current newton iteration*/
   SP::SiconosVector _h_alpha;
 
-  SP::SiconosMatrix JacLH;
+  SP::SiconosMatrix Jachlambda;
 
 
   /** basic constructor
@@ -251,18 +251,18 @@ public:
     return gName;
   }
 
-  /** To get the name of JacH[i] plugin
+  /** To get the name of Jach[i] plugin
    *  \return a string
    */
-  virtual const std::string getJacHName(unsigned int) const
+  virtual const std::string getJachName(unsigned int) const
   {
     return "unamed";
   }
 
-  /** To get the name of JacG[i] plugin
+  /** To get the name of Jacg[i] plugin
    *  \return a string
    */
-  virtual const std::string getJacGName(unsigned int) const
+  virtual const std::string getJacgName(unsigned int) const
   {
     return "unamed";
   }
@@ -277,14 +277,14 @@ public:
 
   inline const bool isGPlugged() const {return input;}
   */
-  /** true if JacH[i] is plugged
+  /** true if Jach[i] is plugged
    *  \return a bool
-  virtual const bool isJacHPlugged(unsigned int) const {return false;}
+  virtual const bool isJachPlugged(unsigned int) const {return false;}
    */
 
-  /** true if JacG[i] is plugged
+  /** true if Jacg[i] is plugged
    *  \return a bool
-  virtual const bool isJacGPlugged(unsigned int) const {return false;}
+  virtual const bool isJacgPlugged(unsigned int) const {return false;}
    */
 
 
@@ -307,32 +307,32 @@ public:
 
 
 
-  /** get matrix JacH[index]
+  /** get matrix Jach[index]
    *  \return a SimpleMatrix
-  virtual const SimpleMatrix getJacH(unsigned int  index = 0) const = 0;
+  virtual const SimpleMatrix getJach(unsigned int  index = 0) const = 0;
    */
 
-  /** get a pointer on matrix JacH[index]
+  /** get a pointer on matrix Jach[index]
    *  \return a pointer on a SiconosMatrix
-  virtual SP::SiconosMatrix jacXH() const = 0;
-  virtual SP::SiconosMatrix jacLH() const = 0;
+  virtual SP::SiconosMatrix jachX() const = 0;
+  virtual SP::SiconosMatrix jachlambda() const = 0;
    */
 
-  /** get matrix JacG[index]
+  /** get matrix Jacg[index]
    *  \return a SimpleMatrix
-  virtual const SimpleMatrix getJacG(unsigned int  index = 0) const
+  virtual const SimpleMatrix getJacg(unsigned int  index = 0) const
   {
-    RuntimeException::selfThrow("Relation::getJacG() - not implemented for this type of relation (probably Lagrangian): "+getType());
+    RuntimeException::selfThrow("Relation::getJacg() - not implemented for this type of relation (probably Lagrangian): "+getType());
     return SimpleMatrix(0,0);
   }
    */
 
-  /** get a pointer on matrix JacG[index]
+  /** get a pointer on matrix Jacg[index]
    *  \return a pointer on a SiconosMatrix
    */
-  virtual SP::SiconosMatrix jacLG() const
+  virtual SP::SiconosMatrix jacglambda() const
   {
-    RuntimeException::selfThrow("Relation::jacG() - not implemented for this type of relation (probably Lagrangian): " + getType());
+    RuntimeException::selfThrow("Relation::jacg() - not implemented for this type of relation (probably Lagrangian): " + getType());
     return SP::SiconosMatrix();
   }
 
@@ -347,12 +347,12 @@ public:
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    */
-  virtual void setComputeJacXHFunction(const std::string& pluginPath, const std::string& functionName);
+  virtual void setComputeJachxFunction(const std::string& pluginPath, const std::string& functionName);
   /** To set a plug-in function to compute  \f$ \nabla_{\lambda} h(..)\f$
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    */
-  virtual void setComputeJacLHFunction(const std::string& pluginPath, const std::string& functionName);
+  virtual void setComputeJachlambdaFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** To set a plug-in function to compute input function g
    *  \param string : the complete path to the plugin
@@ -371,7 +371,7 @@ public:
    *  \param string : the function name to use in this plugin
    *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
    */
-  virtual void setComputeJacLGFunction(const std::string& pluginPath, const std::string& functionName);
+  virtual void setComputeJacglambdaFunction(const std::string& pluginPath, const std::string& functionName);
 
   /** initialize the relation (check sizes, memory allocation ...)
       \param SP to Interaction: the interaction that owns this relation
@@ -393,23 +393,23 @@ public:
    *  \param double : current time
    *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
 
-  virtual void computeJacXH(double) = 0;
-  virtual void computeJacLH(double) = 0;
+  virtual void computeJachx(double) = 0;
+  virtual void computeJachlambda(double) = 0;
   */
   /** default function to compute jacobianG according to lambda
    *  \param double : current time
    *  \param index for jacobian: at the time only one possible
    *  jacobian => i = 0 is the default value .
    */
-  virtual void computeJacLG(double)
+  virtual void computeJacglambda(double)
   {
-    ;//RuntimeException::selfThrow("Relation::computeJacG() - not implemented for this type of relation (probably Lagrangian): "+getType());
+    ;//RuntimeException::selfThrow("Relation::computeJacg() - not implemented for this type of relation (probably Lagrangian): "+getType());
   }
 
   /* compute all the H Jacobian */
-  virtual void computeJacH(double) = 0;
+  virtual void computeJach(double) = 0;
   /* compute all the G Jacobian */
-  virtual void computeJacG(double) = 0;
+  virtual void computeJacg(double) = 0;
 
 
   /** default function to compute y
@@ -425,9 +425,9 @@ public:
    *  compute input
    */
   virtual void computeInput(double, unsigned int = 0) = 0;
-  virtual inline SP::SiconosMatrix jacLH() const
+  virtual inline SP::SiconosMatrix jachlambda() const
   {
-    return JacLH;
+    return Jachlambda;
   }
 
 

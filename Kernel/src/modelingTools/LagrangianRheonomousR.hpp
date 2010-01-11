@@ -122,8 +122,8 @@ protected:
    * @param sizeZ : size of vector z
    * @param[in,out] z : a vector of user-defined parameters
    */
-  SP::PluggedObject _pluginJacqh;
-  //  FPtr4 computeJacqhPtr;
+  SP::PluggedObject _pluginJachq;
+  //  FPtr4 computeJachqPtr;
 
 
 
@@ -219,7 +219,7 @@ public:
    * \param: double, current time
    * \param: unsigned int
    */
-  virtual void computeJacqh(double);
+  virtual void computeJachq(double);
 
   /** to compute output
    *  \param double : current time

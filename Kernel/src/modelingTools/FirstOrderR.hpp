@@ -75,9 +75,9 @@ protected:
 
 
 
-  SP::SiconosMatrix JacXH;
+  SP::SiconosMatrix Jachx;
 
-  SP::SiconosMatrix JacLG;
+  SP::SiconosMatrix Jacglambda;
 
   /** basic constructor
    *  \param the type of the relation
@@ -100,88 +100,88 @@ public:
    */
   virtual ~FirstOrderR() {};
 
-  // -- JacH --
+  // -- Jach --
 
-  /** get matrix JacH[index]
+  /** get matrix Jach[index]
    *  \return a SimpleMatrix
 
-  virtual inline const SimpleMatrix getJacXH() const { return *(JacH.at(index)); }
+  virtual inline const SimpleMatrix getJachx() const { return *(Jach.at(index)); }
   */
-  /** get a pointer on matrix JacH[index]
+  /** get a pointer on matrix Jach[index]
    *  \return a pointer on a SiconosMatrix
    */
-  virtual  SP::SiconosMatrix jacXH() const
+  virtual  SP::SiconosMatrix jachX() const
   {
-    return JacXH;
+    return Jachx;
   }
 
-  /** set the value of JacH[index] to newValue (copy)
+  /** set the value of Jach[index] to newValue (copy)
    *  \param SiconosMatrix newValue
-   *  \param unsigned int: index position in JacH vector
+   *  \param unsigned int: index position in Jach vector
 
   void setJacobianH(const SiconosMatrix&, unsigned int = 0);
   */
 
-  /** set JacH[index] to pointer newPtr (pointer link)
+  /** set Jach[index] to pointer newPtr (pointer link)
    *  \param SP::SiconosMatrix  newPtr
-   *  \param unsigned int: index position in JacH vector
+   *  \param unsigned int: index position in Jach vector
    */
-  inline void setJacXHPtr(SP::SiconosMatrix newPtr)
+  inline void setJachxPtr(SP::SiconosMatrix newPtr)
   {
-    JacXH = newPtr ;
+    Jachx = newPtr ;
   }
-  inline void setJacLHPtr(SP::SiconosMatrix newPtr)
+  inline void setJachlambdaPtr(SP::SiconosMatrix newPtr)
   {
-    JacLH = newPtr ;
+    Jachlambda = newPtr ;
   }
 
-  // -- JacG --
+  // -- Jacg --
 
-  /** get matrix JacG[index]
+  /** get matrix Jacg[index]
    *  \return a SimpleMatrix
 
-  inline const SimpleMatrix getJacG(unsigned int  index = 0) const { return *(JacG.at(index)); }
+  inline const SimpleMatrix getJacg(unsigned int  index = 0) const { return *(Jacg.at(index)); }
   */
-  /** get a pointer on matrix JacG[index]
+  /** get a pointer on matrix Jacg[index]
    *  \return a pointer on a SiconosMatrix
    */
-  virtual SP::SiconosMatrix jacLG() const
+  virtual SP::SiconosMatrix jacglambda() const
   {
-    return JacLG;
+    return Jacglambda;
   }
 
-  /** set the value of JacG[index] to newValue (copy)
+  /** set the value of Jacg[index] to newValue (copy)
    *  \param SiconosMatrix newValue
-   *  \param unsigned int: index position in JacG vector
+   *  \param unsigned int: index position in Jacg vector
 
-  void setJacG(const U& newValue, unsigned int index )
+  void setJacg(const U& newValue, unsigned int index )
     {
-      assert(index<JacG.size()&&"FirstOrderR:: setJacG(mat,index), index out of range. Maybe you do not set the sub-type of the relation?");
-      if(JacG[index]) JacG[index]->resize(newValue.size(0), newValue.size(1));
-      setObject<PluggedMatrix,SP_PluggedMatrix,U>(JacG[index],newValue);
+      assert(index<Jacg.size()&&"FirstOrderR:: setJacg(mat,index), index out of range. Maybe you do not set the sub-type of the relation?");
+      if(Jacg[index]) Jacg[index]->resize(newValue.size(0), newValue.size(1));
+      setObject<PluggedMatrix,SP_PluggedMatrix,U>(Jacg[index],newValue);
     };
   */
 
-  /** set JacG[index] to pointer newPtr (pointer link)
+  /** set Jacg[index] to pointer newPtr (pointer link)
    *  \param SP::SiconosMatrix  newPtr
-   *  \param unsigned int: index position in JacG vector
+   *  \param unsigned int: index position in Jacg vector
    */
-  inline void setJacLGPtr(SP::SiconosMatrix newPtr)
+  inline void setJacglambdaPtr(SP::SiconosMatrix newPtr)
   {
-    JacLG = newPtr ;
+    Jacglambda = newPtr ;
   }
 
-  /** To get the name of JacH[i] plugin
+  /** To get the name of Jach[i] plugin
    *  \return a string
-  const std::string getJacHName(unsigned int i) const {return JacH[i]->getPluginName();}
+  const std::string getJachName(unsigned int i) const {return Jach[i]->getPluginName();}
    */
 
-  /** To get the name of JacG[i] plugin
+  /** To get the name of Jacg[i] plugin
    *  \return a string
-  const std::string getJacGName(unsigned int i) const {return JacG[i]->getPluginName();}
+  const std::string getJacgName(unsigned int i) const {return Jacg[i]->getPluginName();}
    */
 
-  /** true if JacH[i] is plugged
+  /** true if Jach[i] is plugged
    *  \return a bool
    */
 
@@ -204,12 +204,12 @@ public:
    *  \param double : current time
    *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
    */
-  virtual void computeJacXH(double);
-  virtual void computeJacLH(double);
-  virtual void computeJacH(double t)
+  virtual void computeJachx(double);
+  virtual void computeJachlambda(double);
+  virtual void computeJach(double t)
   {
-    computeJacXH(t);
-    computeJacLH(t);
+    computeJachx(t);
+    computeJachlambda(t);
   }
 
 
@@ -217,11 +217,11 @@ public:
    *  \param double : current time
    *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
    */
-  void computeJacLG(double);
+  void computeJacglambda(double);
 
-  virtual void computeJacG(double t)
+  virtual void computeJacg(double t)
   {
-    computeJacLG(t);
+    computeJacglambda(t);
   }
 
 
@@ -235,7 +235,7 @@ public:
   */
   SP::SiconosMatrix C()
   {
-    return jacXH();
+    return jachX();
   }
   /**
    * return a SP on the D matrix.
@@ -243,7 +243,7 @@ public:
    */
   SP::SiconosMatrix D()
   {
-    return jacLH();
+    return jachlambda();
   }
   /**
    * return a SP on the B matrix.
@@ -251,7 +251,7 @@ public:
    */
   SP::SiconosMatrix B()
   {
-    return jacLG();
+    return jacglambda();
   }
 
 

@@ -69,10 +69,10 @@ protected:
     */
   FPtr2 hPtr;
   std::string pluginNameHPtr;
-  FPtr2 JacqhPtr;
-  std::string pluginNameJacqhPtr;
-  FPtr2 JacLHPtr;
-  std::string pluginNameJacLHPtr;
+  FPtr2 JachqPtr;
+  std::string pluginNameJachqPtr;
+  FPtr2 JachlambdaPtr;
+  std::string pluginNameJachlambdaPtr;
 
   /** default constructor
    */
@@ -108,8 +108,8 @@ public:
    * \param: double, current time
    * \param: unsigned int
    */
-  void computeJacqh(double);
-  void computeJacLH(double);
+  void computeJachq(double);
+  void computeJachlambda(double);
 
   /** to compute output
    *  \param Interaction : the interaction that owns y

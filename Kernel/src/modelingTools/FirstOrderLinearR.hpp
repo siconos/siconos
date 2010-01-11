@@ -129,25 +129,25 @@ public:
   /** get the value of C
    *  \return plugged matrix
 
-  inline const PluggedMatrix getC() const { return *(JacH.at(0)); }
+  inline const PluggedMatrix getC() const { return *(Jach.at(0)); }
   */
   /** get C
    *  \return pointer on a plugged matrix
    */
-  //inline SP::SiconosMatrix C() const { return JacH.at(0); }
+  //inline SP::SiconosMatrix C() const { return Jach.at(0); }
 
   /** set the value of C to newValue
    *  \param a plugged matrix
 
   template <class U> void setC(const U& newValue)
     {
-      setJacH(newValue,0);
+      setJach(newValue,0);
     }
   */
   /** set C to pointer newPtr
    *  \param a SP to plugged matrix
 
-  inline void setCPtr(SP_PluggedMatrix newPtr) {JacH[0] = newPtr;}
+  inline void setCPtr(SP_PluggedMatrix newPtr) {Jach[0] = newPtr;}
   */
   /** set a specified function to compute the matrix C
    *  \param string : the complete path to the plugin
@@ -157,7 +157,7 @@ public:
 
   void setComputeCFunction(const std::string& pluginPath, const std::string& functionName)
   {
-    setComputeJacXHFunction(pluginPath,  functionName);
+    setComputeJachxFunction(pluginPath,  functionName);
   }
 
 
@@ -166,20 +166,20 @@ public:
   /** get the value of D
    *  \return plugged matrix
    */
-  //inline const PluggedMatrix getD() const { return *(JacH.at(1)); }
+  //inline const PluggedMatrix getD() const { return *(Jach.at(1)); }
 
   /** get D
    *  \return pointer on a plugged matrix
    */
-  //inline SP::SiconosMatrix D() const { return JacH.at(1); }
+  //inline SP::SiconosMatrix D() const { return Jach.at(1); }
 
   /** set the value of D to newValue
    *  \param a plugged matrix
 
   void setD(const U& newValue)
     {
-      if(JacH.size()<2) JacH.resize(2);
-      setJacH(newValue,1);
+      if(Jach.size()<2) Jach.resize(2);
+      setJach(newValue,1);
     }
     */
 
@@ -188,7 +188,7 @@ public:
    */
   void setDPtr(SP::SiconosMatrix newPtr)
   {
-    JacLH = newPtr;
+    Jachlambda = newPtr;
   }
 
   /** set a specified function to compute the matrix D
@@ -197,7 +197,7 @@ public:
    */
   void setComputeDFunction(const std::string& pluginPath, const std::string& functionName)
   {
-    setComputeJacLHFunction(pluginPath,  functionName);
+    setComputeJachlambdaFunction(pluginPath,  functionName);
   }
 
 
@@ -278,24 +278,24 @@ public:
   /** get the value of B
    *  \return plugged matrix
    */
-  //inline const PluggedMatrix getB() const { return *(JacG.at(0)); }
+  //inline const PluggedMatrix getB() const { return *(Jacg.at(0)); }
 
   /** get B
    *  \return pointer on a plugged matrix
    */
-  //inline SP_PluggedMatrix B() const { return JacG.at(0); }
+  //inline SP_PluggedMatrix B() const { return Jacg.at(0); }
 
   /** set the value of B to newValue
    *  \param a plugged matrix
 
   void setB(const & newValue){
-    setJacG(newValue,0);
+    setJacg(newValue,0);
   }
   */
   /** set B to pointer newPtr
    *  \param a SP to plugged matrix
    */
-  //   inline void setBPtr(SP::SiconosMatrix newPtr) {JacLG = newPtr;}
+  //   inline void setBPtr(SP::SiconosMatrix newPtr) {Jacglambda = newPtr;}
 
   //   /** set a specified function to compute the matrix B
   //    *  \param string : the complete path to the plugin
@@ -303,7 +303,7 @@ public:
   //    */
   void setComputebFunction(const std::string& pluginPath, const std::string& functionName)
   {
-    setComputeJacLGFunction(pluginPath,  functionName);
+    setComputeJacglambdaFunction(pluginPath,  functionName);
   }
 
 
@@ -346,14 +346,14 @@ public:
   //    *  \param double : not used
   //    *  \param not used
   //    */
-  //   void computeJacXH(double);
-  //   void computeJacLH(double);
+  //   void computeJachx(double);
+  //   void computeJachlambda(double);
 
   //   /** default function to compute jacobianG according to lambda
   //    *  \param double : current time
   //    *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
   //    */
-  //   void computeJacLG(double);
+  //   void computeJacglambda(double);
 
   //   /** default function to compute y
   //    *  \param double: not used

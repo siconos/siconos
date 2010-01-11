@@ -458,7 +458,7 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
     }
     else if (relationType == NewtonEuler)
     {
-      SP::SiconosMatrix CT =  boost::static_pointer_cast<NewtonEulerR>(mainInteraction->relation())->jacQHT();
+      SP::SiconosMatrix CT =  boost::static_pointer_cast<NewtonEulerR>(mainInteraction->relation())->jachqT();
       //  SP::SiconosVector WorkX = UR->workX();
       SP::SiconosVector Xfree;
       Xfree = UR->workFree();

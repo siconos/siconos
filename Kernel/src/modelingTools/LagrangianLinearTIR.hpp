@@ -154,7 +154,7 @@ public:
    */
   inline SP::SiconosMatrix C() const
   {
-    return Jacqh;
+    return Jachq;
   }
 
   /** set the value of C to newValue
@@ -171,7 +171,7 @@ public:
    */
   inline void setCPtr(SP::SiconosMatrix newPtr)
   {
-    Jacqh = newPtr;
+    Jachq = newPtr;
   }
 
   // -- D --
@@ -187,7 +187,7 @@ public:
    */
   inline SP::SiconosMatrix D() const
   {
-    return JacLH;
+    return Jachlambda;
   }
 
   /** set the value of D to newValue
@@ -204,7 +204,7 @@ public:
    */
   inline void setDPtr(SP::SiconosMatrix newPtr)
   {
-    JacLH = newPtr;
+    Jachlambda = newPtr;
   }
 
   // -- F --
@@ -272,13 +272,13 @@ public:
     _e = newPtr;
   }
 
-  /** get matrix JacH[index]
+  /** get matrix Jach[index]
    *  \return a SimpleMatrix
-  const SimpleMatrix getJacXH() const;
-  const SimpleMatrix getJacLH() const;
+  const SimpleMatrix getJachx() const;
+  const SimpleMatrix getJachlambda() const;
    */
 
-  /** get a pointer on matrix JacH[index]
+  /** get a pointer on matrix Jach[index]
    *  \return a pointer on a SiconosMatrix
    */
 

@@ -31,17 +31,17 @@ void LagrangianR::initComponents()
   unsigned int sizeY = interaction()->getSizeOfY();
   unsigned int sizeDS = interaction()->getSizeOfDS();
 
-  // The initialization of JacH[0] depends on the way the Relation was built ie if the matrix
+  // The initialization of Jach[0] depends on the way the Relation was built ie if the matrix
   // was read from xml or not
-  if (! Jacqh)
-    Jacqh.reset(new SimpleMatrix(sizeY, sizeDS));
+  if (! Jachq)
+    Jachq.reset(new SimpleMatrix(sizeY, sizeDS));
   else
   {
-    if (Jacqh->size(0) == 0) // if the matrix dim are null
-      Jacqh->resize(sizeY, sizeDS);
+    if (Jachq->size(0) == 0) // if the matrix dim are null
+      Jachq->resize(sizeY, sizeDS);
     else
-      assert((Jacqh->size(1) == sizeDS && Jacqh->size(0) == sizeY) &&
-             "LagrangianScleronomousR::initComponents inconsistent sizes between JacH[0] matrix and the interaction.");
+      assert((Jachq->size(1) == sizeDS && Jachq->size(0) == sizeY) &&
+             "LagrangianScleronomousR::initComponents inconsistent sizes between Jach[0] matrix and the interaction.");
   }
 
   _workX.reset(new SimpleVector(sizeDS));
@@ -93,11 +93,11 @@ void LagrangianR::computeh(double)
   RuntimeException::selfThrow("LagrangianR::computeh: not yet implemented (or useless) for Lagrangian relation of type " + subType);
 }
 
-//  void LagrangianR::computeJacXH(double)
+//  void LagrangianR::computeJachx(double)
 // {
 //   RuntimeException::selfThrow("FirstOrderR::computeJacobianXH, not (yet) implemented or forbidden for relations of type "+subType);
 // }
-//  void LagrangianR::computeJacLH(double)
+//  void LagrangianR::computeJachlambda(double)
 // {
 //   RuntimeException::selfThrow("FirstOrderR::computeJacobianLH, not (yet) implemented or forbidden for relations of type "+subType);
 // }

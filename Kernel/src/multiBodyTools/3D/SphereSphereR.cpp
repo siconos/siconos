@@ -53,14 +53,14 @@ void SphereSphereR::computeh(double)
 
 };
 
-void SphereSphereR::computeJacqh(double)
+void SphereSphereR::computeJachq(double)
 {
 
   double r, A, B, C, D, nN, nU;
   /* u ^ v  = n */
   double u1, u2, u3, v1, v2, v3, n1, n2, n3, r1u1, r1u2, r1u3, r1v1, r1v2, r1v3, r2u1, r2u2, r2u3, r2v1, r2v2, r2v3;
 
-  SimpleMatrix *g = (SimpleMatrix *)Jacqh.get();
+  SimpleMatrix *g = (SimpleMatrix *)Jachq.get();
 
   double q_0 = (*data[q0])(0);
   double q_1 = (*data[q0])(1);

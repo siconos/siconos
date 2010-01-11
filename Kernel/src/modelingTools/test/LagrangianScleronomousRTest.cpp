@@ -71,7 +71,7 @@ void LagrangianScleronomousRTest::testBuildLagrangianScleronomousR0()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1a : ", R1->getType() == RELATION::Lagrangian, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1b : ", R1->getSubType() == RELATION::ScleronomousR, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1c : ", R1->gethName() == "TestPlugin:hSclero", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1d : ", R1->getJacHName(0) == "TestPlugin:G0Sclero", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1d : ", R1->getJachName(0) == "TestPlugin:G0Sclero", true);
   cout << " xml Constructor (1) LagrangianScleronomousR ok" << endl;
 }
 
@@ -82,7 +82,7 @@ void LagrangianScleronomousRTest::testBuildLagrangianScleronomousR2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3a : ", R1->getType() == RELATION::Lagrangian, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3b : ", R1->getSubType() == RELATION::ScleronomousR, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3c : ", R1->gethName() == "TestPlugin:hSclero", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3d : ", R1->getJacHName(0) == "TestPlugin:G0Sclero", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3d : ", R1->getJachName(0) == "TestPlugin:G0Sclero", true);
   cout << " data Constructor LagrangianScleronomousR ok" << endl;
 }
 

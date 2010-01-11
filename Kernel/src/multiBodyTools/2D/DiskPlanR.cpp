@@ -99,7 +99,7 @@ double DiskPlanR::distance(double x, double y, double rad)
 
     if (hypot(xCenter - x0, yCenter - y0) >= halfWidth)
     {
-      // ... and no jacH...
+      // ... and no jach...
       double r = fmin(hypot(x - x1, y - y1), hypot(x - x2, y - y2));
       return r - rad;
     }
@@ -174,7 +174,7 @@ void DiskPlanR::computeh(double)
            [        _________              _________        ]
            [       /  2    2              /  2    2         ]
            [     \/  A  + B             \/  A  + B          ]
-JacH(q) =  [                                                ]
+Jach(q) =  [                                                ]
            [         -B                     A               ]
            [    ------------           ------------       -r]
            [       _________              _________         ]
@@ -185,10 +185,10 @@ JacH(q) =  [                                                ]
 */
 
 
-void DiskPlanR::computeJacqh(double)
+void DiskPlanR::computeJachq(double)
 {
 
-  SimpleMatrix *g = (SimpleMatrix *) Jacqh.get();
+  SimpleMatrix *g = (SimpleMatrix *) Jachq.get();
 
   double x = (*data[q0])(0);
   double y = (*data[q0])(1);

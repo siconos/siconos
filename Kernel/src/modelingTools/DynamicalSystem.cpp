@@ -98,7 +98,7 @@ bool DynamicalSystem::checkDynamicalSystem()
 }
 void DynamicalSystem::zeroPlugin()
 {
-  _pluginJacxG.reset(new PluggedObject());
+  _pluginJacgx.reset(new PluggedObject());
   _pluginJacxDotG.reset(new PluggedObject());
   _pluging.reset(new PluggedObject());
 }
@@ -304,7 +304,7 @@ void DynamicalSystem::setComputegFunction(FPtr6 fct)
 
 void DynamicalSystem::setComputeJacobianXGFunction(const string& pluginPath, const string& functionName)
 {
-  _pluginJacxG->setComputeFunction(pluginPath, functionName);
+  _pluginJacgx->setComputeFunction(pluginPath, functionName);
 }
 void DynamicalSystem::setComputeJacobianDotXGFunction(const string& pluginPath, const string& functionName)
 {
@@ -322,8 +322,8 @@ void DynamicalSystem::computeg(double time)
 
 void DynamicalSystem::computeJacobianXG(double time)
 {
-  if (_pluginJacxG->fPtr)
-    ((FPtr6) _pluginJacxG->fPtr)(time, _n, &(*_x[0])(0), &(*_x[1])(0), &(*_jacxG)(0, 0), _z->size(), &(*_z)(0));
+  if (_pluginJacgx->fPtr)
+    ((FPtr6) _pluginJacgx->fPtr)(time, _n, &(*_x[0])(0), &(*_x[1])(0), &(*_jacgx)(0, 0), _z->size(), &(*_z)(0));
 }
 void DynamicalSystem::computeJacobianDotXG(double time)
 {

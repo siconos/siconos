@@ -42,8 +42,8 @@ Relation::Relation(SP::RelationXML relxml,
 void Relation::zeroPlugin()
 {
   _pluginh.reset(new PluggedObject());
-  _plunginJacxh.reset(new PluggedObject());
-  _pluginJacLh.reset(new PluggedObject());
+  _plunginJachx.reset(new PluggedObject());
+  _pluginJachlambda.reset(new PluggedObject());
   _pluging.reset(new PluggedObject());
   _pluginJacLg.reset(new PluggedObject());
   _pluginf.reset(new PluggedObject());
@@ -106,16 +106,16 @@ void Relation::computeg(double t)
   computeInput(t);
 }
 
-void Relation::setComputeJacLHFunction(const std::string& pluginPath, const std::string& functionName)
+void Relation::setComputeJachlambdaFunction(const std::string& pluginPath, const std::string& functionName)
 {
-  _pluginJacLh->setComputeFunction(pluginPath, functionName);
-  //  Plugin::setFunction(&_pluginJacLh, pluginPath, functionName);
+  _pluginJachlambda->setComputeFunction(pluginPath, functionName);
+  //  Plugin::setFunction(&_pluginJachlambda, pluginPath, functionName);
   //    SSL::buildPluginName(pluginNamejLOutput,pluginPath,functionName);
 }
-void Relation::setComputeJacXHFunction(const std::string& pluginPath, const std::string& functionName)
+void Relation::setComputeJachxFunction(const std::string& pluginPath, const std::string& functionName)
 {
-  _plunginJacxh->setComputeFunction(pluginPath, functionName);
-  //    Plugin::setFunction(&_plunginJacxh, pluginPath, functionName);
+  _plunginJachx->setComputeFunction(pluginPath, functionName);
+  //    Plugin::setFunction(&_plunginJachx, pluginPath, functionName);
 }
 
 /** To set a plug-in function to compute input function g
@@ -145,7 +145,7 @@ void Relation::setComputeEFunction(const std::string& pluginPath, const std::str
  *  \param string : the function name to use in this plugin
  *  \param index for jacobian (0: jacobian according to x, 1 according to lambda)
  */
-void Relation::setComputeJacLGFunction(const std::string& pluginPath, const std::string& functionName)
+void Relation::setComputeJacglambdaFunction(const std::string& pluginPath, const std::string& functionName)
 {
   _pluginJacLg->setComputeFunction(pluginPath, functionName);
   //  Plugin::setFunction(&_pluginJacLg, pluginPath, functionName);

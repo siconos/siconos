@@ -131,7 +131,7 @@ public:
   /** to compute the jacobian of h using plug-in mechanism. Index shows which jacobian is computed
    * \param: double, current time
    */
-  virtual void computeJacqh(double);
+  virtual void computeJachq(double);
 
   /** to compute output
    *  \param double : current time

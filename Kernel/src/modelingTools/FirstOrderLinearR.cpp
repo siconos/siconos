@@ -46,25 +46,25 @@ FirstOrderLinearR::FirstOrderLinearR(const string& CName, const string& BName):
   // Warning: we cannot allocate memory for C/D matrix since no interaction
   // is connected to the relation. This will be done during initialize.
   // We only set the name of the plugin-function and connect it to the user-defined function.
-  _plunginJacxh->setComputeFunction(CName);
+  _plunginJachx->setComputeFunction(CName);
   _pluginJacLg->setComputeFunction(BName);
-  //  Plugin::setFunction(_plunginJacxh,CName);
+  //  Plugin::setFunction(_plunginJachx,CName);
   //Plugin::setFunction(_pluginJacLg,BName);
-  //  JacH[0].reset(new PluggedMatrix(CName));
-  //  JacG[0].reset(new PluggedMatrix(BName));
+  //  Jach[0].reset(new PluggedMatrix(CName));
+  //  Jacg[0].reset(new PluggedMatrix(BName));
 }
 
 // Constructor from a complete set of data (plugin)
 FirstOrderLinearR::FirstOrderLinearR(const string& CName, const string& DName, const string& FName, const string& EName, const string& BName): FirstOrderR(LinearR)
 {
-  _plunginJacxh->setComputeFunction(CName);
-  _pluginJacLh->setComputeFunction(DName);
+  _plunginJachx->setComputeFunction(CName);
+  _pluginJachlambda->setComputeFunction(DName);
   _pluginJacLg->setComputeFunction(BName);
   _pluginf->setComputeFunction(FName);
   _plugine->setComputeFunction(EName);
 
-  //   Plugin::setFunction(_plunginJacxh,CName);
-  //   Plugin::setFunction(_pluginJacLh,DName);
+  //   Plugin::setFunction(_plunginJachx,CName);
+  //   Plugin::setFunction(_pluginJachlambda,DName);
   //   Plugin::setFunction(_pluginJacLg,BName);
 
   //   Plugin::setFunction(_pluginf,FName);
@@ -78,17 +78,17 @@ FirstOrderLinearR::FirstOrderLinearR(const string& CName, const string& DName, c
 FirstOrderLinearR::FirstOrderLinearR(SP::SiconosMatrix newC, SP::SiconosMatrix newB):
   FirstOrderR(LinearR)
 {
-  JacXH = newC;
-  JacLG = newB;
+  Jachx = newC;
+  Jacglambda = newB;
 }
 
 // // Constructor from a complete set of data
 FirstOrderLinearR::FirstOrderLinearR(SP::SiconosMatrix  newC, SP::SiconosMatrix newD, SP::SiconosMatrix newF, SP::SiconosVector newE, SP::SiconosMatrix newB):
   FirstOrderR(LinearR)
 {
-  JacXH = newC;
-  JacLG = newB;
-  JacLH = newD;
+  Jachx = newC;
+  Jacglambda = newB;
+  Jachlambda = newD;
   _F = newF;
   _e = newE;
 }
@@ -125,9 +125,9 @@ void FirstOrderLinearR::initialize(SP::Interaction inter)
 
   // Update data member (links to DS variables)
   initDSLinks();
-  if (!JacXH)
+  if (!Jachx)
     RuntimeException::selfThrow("FirstOrderLinearR::initialize() C is null and is a required input.");
-  if (!JacLG)
+  if (!Jacglambda)
     RuntimeException::selfThrow("FirstOrderLinearR::initialize() B is null and is a required input.");
 
   // Check if various operators sizes are consistent.
@@ -138,25 +138,25 @@ void FirstOrderLinearR::initialize(SP::Interaction inter)
 
   // The initialization of each matrix/vector depends on the way the Relation was built ie if the matrix/vector
   // was read from xml or not
-  if (JacXH->size(0) == 0)
-    JacXH->resize(sizeX, sizeY);
+  if (Jachx->size(0) == 0)
+    Jachx->resize(sizeX, sizeY);
   else
-    assert((JacXH->size(0) == sizeY && JacXH->size(1) == sizeX) && "FirstOrderLinearR::initialize , inconsistent size between C and Interaction.");
+    assert((Jachx->size(0) == sizeY && Jachx->size(1) == sizeX) && "FirstOrderLinearR::initialize , inconsistent size between C and Interaction.");
 
 
-  if (JacLG->size(0) == 0)
-    JacLG->resize(sizeY, sizeX);
+  if (Jacglambda->size(0) == 0)
+    Jacglambda->resize(sizeY, sizeX);
   else
-    assert((JacLG->size(1) == sizeY && JacLG->size(0) == sizeX) && "FirstOrderLinearR::initialize , inconsistent size between B and interaction.");
+    assert((Jacglambda->size(1) == sizeY && Jacglambda->size(0) == sizeX) && "FirstOrderLinearR::initialize , inconsistent size between B and interaction.");
 
   // C and B are the minimum inputs. The others may remain null.
 
-  if (JacLH)
+  if (Jachlambda)
   {
-    if (JacLH->size(0) == 0)
-      JacLH->resize(sizeY, sizeY);
+    if (Jachlambda->size(0) == 0)
+      Jachlambda->resize(sizeY, sizeY);
     else
-      assert((JacLH->size(0) == sizeY || JacLH->size(1) == sizeY) && "FirstOrderLinearR::initialize , inconsistent size between C and D.");
+      assert((Jachlambda->size(0) == sizeY || Jachlambda->size(1) == sizeY) && "FirstOrderLinearR::initialize , inconsistent size between C and D.");
   }
 
   if (_F)
@@ -190,15 +190,15 @@ void FirstOrderLinearR::initialize(SP::Interaction inter)
 
 void FirstOrderLinearR::computeC(double time)
 {
-  if (JacXH)
+  if (Jachx)
   {
-    if (_plunginJacxh->fPtr)
+    if (_plunginJachx->fPtr)
     {
       unsigned int sizeY = interaction()->getSizeOfY();
       unsigned int sizeX = interaction()->getSizeOfDS();
       unsigned int sizeZ = interaction()->getSizeZ();
       *_workZ = *data[z];
-      ((FOMatPtr1)(_plunginJacxh->fPtr))(time, sizeY, sizeX, &(*JacXH)(0, 0), sizeZ, &(*_workZ)(0));
+      ((FOMatPtr1)(_plunginJachx->fPtr))(time, sizeY, sizeX, &(*Jachx)(0, 0), sizeZ, &(*_workZ)(0));
       // Copy data that might have been changed in the plug-in call.
       *data[z] = *_workZ;
     }
@@ -207,14 +207,14 @@ void FirstOrderLinearR::computeC(double time)
 
 void FirstOrderLinearR::computeD(double time)
 {
-  if (JacLH)
+  if (Jachlambda)
   {
-    if (_pluginJacLh->fPtr)
+    if (_pluginJachlambda->fPtr)
     {
       unsigned int sizeY = interaction()->getSizeOfY();
       unsigned int sizeZ = interaction()->getSizeZ();
       *_workZ = *data[z];
-      ((FOMatPtr1)(_pluginJacLh->fPtr))(time, sizeY, sizeY, &(*JacLH)(0, 0), sizeZ, &(*_workZ)(0));
+      ((FOMatPtr1)(_pluginJachlambda->fPtr))(time, sizeY, sizeY, &(*Jachlambda)(0, 0), sizeZ, &(*_workZ)(0));
       // Copy data that might have been changed in the plug-in call.
       *data[z] = *_workZ;
     }
@@ -251,13 +251,13 @@ void FirstOrderLinearR::computeE(double time)
 
 void FirstOrderLinearR::computeb(double time)
 {
-  if (JacLG && _pluginJacLg->fPtr)
+  if (Jacglambda && _pluginJacLg->fPtr)
   {
     unsigned int sizeY = interaction()->getSizeOfY();
     unsigned int sizeX = interaction()->getSizeOfDS();
     unsigned int sizeZ = interaction()->getSizeZ();
     *_workZ = *data[z];
-    ((FOMatPtr1) _pluginJacLg->fPtr)(time, sizeX, sizeY, &(*JacLG)(0, 0), sizeZ, &(*_workZ)(0));
+    ((FOMatPtr1) _pluginJacLg->fPtr)(time, sizeX, sizeY, &(*Jacglambda)(0, 0), sizeZ, &(*_workZ)(0));
     // Copy data that might have been changed in the plug-in call.
     *data[z] = *_workZ;
   }
@@ -287,13 +287,13 @@ void FirstOrderLinearR::computeOutput(double time, unsigned int)
   SP::SiconosVector lambda = interaction()->lambda(0);
 
   // compute y
-  if (JacXH)
-    prod(*JacXH, *data[x], *y);
+  if (Jachx)
+    prod(*Jachx, *data[x], *y);
   else
     y->zero();
 
-  if (JacLH)
-    prod(*JacLH, *lambda, *y, false);
+  if (Jachlambda)
+    prod(*Jachlambda, *lambda, *y, false);
 
   if (_e)
     *y += *_e;
@@ -308,17 +308,17 @@ void FirstOrderLinearR::computeInput(double time, unsigned int level)
 
   // We get lambda of the interaction (pointers)
   SP::SiconosVector lambda = interaction()->lambda(level);
-  prod(*JacLG, *lambda, *data[r], false);
+  prod(*Jacglambda, *lambda, *data[r], false);
 }
 
 void FirstOrderLinearR::display() const
 {
   cout << " ===== Linear Time Invariant relation display ===== " << endl;
   cout << "| C " << endl;
-  if (JacXH) JacXH->display();
+  if (Jachx) Jachx->display();
   else cout << "->NULL" << endl;
   cout << "| D " << endl;
-  if (JacLH) JacLH->display();
+  if (Jachlambda) Jachlambda->display();
   else cout << "->NULL" << endl;
   cout << "| F " << endl;
   if (_F) _F->display();
@@ -327,7 +327,7 @@ void FirstOrderLinearR::display() const
   if (_e) _e->display();
   else cout << "->NULL" << endl;
   cout << "| B " << endl;
-  if (JacLG) JacLG->display();
+  if (Jacglambda) Jacglambda->display();
   else cout << "->NULL" << endl;
   cout << " ================================================== " << endl;
 }
@@ -348,11 +348,11 @@ void FirstOrderLinearR::saveRelationToXML() const
     RuntimeException::selfThrow("FirstOrderLinearR::saveRelationToXML, no yet implemented.");
 
   SP::LinearRXML folrXML = (boost::static_pointer_cast<LinearRXML>(relationxml));
-  folrXML->setC(*JacXH);
-  folrXML->setD(*JacLH);
+  folrXML->setC(*Jachx);
+  folrXML->setD(*Jachlambda);
   folrXML->setF(*_F);
   folrXML->setE(*_e);
-  folrXML->setB(*JacLG);
+  folrXML->setB(*Jacglambda);
 }
 
 FirstOrderLinearR* FirstOrderLinearR::convert(Relation *r)
