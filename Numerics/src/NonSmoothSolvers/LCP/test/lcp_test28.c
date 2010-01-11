@@ -16,20 +16,23 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#ifndef LCP_TEST_FUNCTION_H
-#define LCP_TEST_FUNCTION_H
+#include <stdio.h>
+#include <stdlib.h>
+#include "NonSmoothDrivers.h"
+#include "lcp_test_function.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-  void fillParamWithRespectToSolver(Solver_Options *options, char * solvername, LinearComplementarity_Problem* problem);
-  int lcp_test_function(FILE * f, char * solvername);
-  int lcp_test_function_SBM(FILE * f, char * solvername);
+int main(void)
+{
+  int info = 0 ;
+  printf("Test on ./data/lcp_mmc.dat\n");
 
-#ifdef __cplusplus
+  FILE * finput  =  fopen("./data/lcp_deudeu.dat", "r");
+
+  char solvername[10] = "NewtonMin";
+  info = lcp_test_function(finput, solvername);
+
+  fclose(finput);
+
+
+  return info;
 }
-#endif
-
-#endif
-
-
