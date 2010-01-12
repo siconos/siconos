@@ -53,7 +53,7 @@ void FrictionContact::initialize(SP::Simulation sim)
 
   // Connect to the right function according to dim. of the problem
   if (_contactProblemDim == 2)
-    _frictionContact_driver = &pfc_2D_driver;
+    _frictionContact_driver = &frictionContact2D_driver;
   else // if(_contactProblemDim == 3)
     _frictionContact_driver = &frictionContact3D_driver;
 
@@ -112,6 +112,10 @@ int FrictionContact::compute(double time)
   {
     // The FrictionContact Problem in Numerics format
     FrictionContact_Problem numerics_problem;
+    if (_contactProblemDim == 2)
+      numerics_problem.dimension = 2;
+    else // if(_contactProblemDim == 3)
+      numerics_problem.dimension = 3;
     numerics_problem.M = &*_M->getNumericsMatrix();
     numerics_problem.q = &*_q->getArray();
     numerics_problem.numberOfContacts = _sizeOutput / _contactProblemDim;
