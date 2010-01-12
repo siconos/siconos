@@ -24,7 +24,7 @@
 #include "LA.h"
 #include "FrictionContact2D_Solvers.h"
 
-void pfc_2D_nlgs(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, Solver_Options* options)
+void FrictionContact2D_nlgs(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, Solver_Options* options)
 {
   int nc = problem->numberOfContacts;
   double * vec = problem->M->matrix0;

@@ -27,65 +27,9 @@
 
 int pfc_2D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options)
 {
-  if (options == NULL || global_options == NULL)
-    numericsError("pfc_2D_driver", "null input for solver and/or global options");
-
-  /* Set global options */
-  setNumericsOptions(global_options);
-
-  /* Checks inputs */
-  if (problem == NULL || reaction == NULL || velocity == NULL)
-    numericsError("pfc_2D_driver", "null input for FrictionContact_Problem and/or unknowns (reaction,velocity)");
-
-  /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
-
-
-  //  if(storageType == 1)
-  //  numericsError("pfc_2D_driver", "not yet implemented for Sparse Block Storage");
-
-  /* If the options for solver have not been set, read default values in .opt file */
-  int NoDefaultOptions = options->isSet; /* true(1) if the Solver_Options structure has been filled in else false(0) */
-
-  if (NoDefaultOptions == 0)
-  {
-    readSolverOptions(2, options);
-    options->filterOn = 1;
-  }
-
-  if (verbose > 0)
-    printSolverOptions(options);
-
-  /*************************************************
-   *  1 - Call specific solver
-   *************************************************/
-
-  /* Solver name */
-  char * name = options->solverName;
-  if (verbose == 1)
-    printf(" ========================== Call %s solver for primal Friction Contact 2D problem ==========================\n", name);
-
-  /****** NLGS algorithm ******/
-  if (strcmp(name , "NLGS") == 0 || strcmp(name , "PGS") == 0)
-    pfc_2D_nlgs(problem, reaction, velocity, &info, options);
-
-  else if (strcmp(name , "NSGS") == 0 || strcmp(name , "PGS2") == 0)
-    frictionContact2D_sparse_nsgs(problem, reaction, velocity, &info, options);
-
-  /****** CPG algorithm ******/
-  else if (strcmp(name , "CPG") == 0)
-    pfc_2D_cpg(problem, reaction, velocity, &info, options);
-
-  /****** Latin algorithm ******/
-  else if (strcmp(name , "Latin") == 0)
-    pfc_2D_latin(problem, reaction, velocity, &info, options);
-
-  /*error */
-  else
-  {
-    fprintf(stderr, "pfc_2D_driver error: unknown solver named: %s\n", name);
-    exit(EXIT_FAILURE);
-  }
+  if (options == NULL || global_options == NULL)
+    numericsError("pfc_2D_driver", " Obsolete. Use FrictionContact2D_driver");
 
   return info;
 

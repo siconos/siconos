@@ -16,9 +16,9 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/*!\file pfc_2D_projc.c
+/*!\file FrictionContact2D_projc.c
  *
- * pfc_2D_projc is a specific projection operator related to CPG (conjugated projected gradient) algorithm for primal contact problem with friction.\n
+ * FrictionContact2D_projc is a specific projection operator related to CPG (conjugated projected gradient) algorithm for primal contact problem with friction.\n
  *
  * \author Sheherazade Nineb.
  *
@@ -30,7 +30,7 @@
 #include <math.h>
 
 
-void pfc_2D_projc(double xi[], int *nn, int statusi[], double pi[], double fric[], double *projc1, int *projc2)
+void FrictionContact2D_projc(double xi[], int *nn, int statusi[], double pi[], double fric[], double *projc1, int *projc2)
 {
 
   int     i, nc, n = *nn, stat;

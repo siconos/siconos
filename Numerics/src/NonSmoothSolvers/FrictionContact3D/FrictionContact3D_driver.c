@@ -28,7 +28,8 @@
 
 int frictionContact3D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options)
 {
-
+  if (options == NULL || global_options == NULL)
+    numericsError("FrictionContact3D_driver", "null input for solver and/or global options");
   /* Set global options */
   setNumericsOptions(global_options);
 

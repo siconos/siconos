@@ -66,18 +66,32 @@ int frictionContact2D_driver(FrictionContact_Problem* problem, double *reaction 
       if (verbose)
         printf(" ========================== Call NSGS solver for Friction-Contact 2D problem ==========================\n");
 
-    };
+      /****** NLGS algorithm ******/
+      if (strcmp(name , "NLGS") == 0 || strcmp(name , "PGS") == 0)
+        FrictionContact2D_nlgs(problem, reaction, velocity, &info, options);
 
-    if (strcmp(name, "NSGS") == 0)
-    {
-      if (verbose)
-        printf(" ========================== Call NSGS solver for Friction-Contact 2D problem ==========================\n");
-      /*frictionContact2D_nsgs(problem, reaction , velocity , &info , options);*/
+      /****** CPG algorithm ******/
+      else if (strcmp(name , "CPG") == 0)
+        FrictionContact2D_cpg(problem, reaction, velocity, &info, options);
+
+      /****** Latin algorithm ******/
+      else if (strcmp(name , "Latin") == 0)
+        FrictionContact2D_latin(problem, reaction, velocity, &info, options);
+
+      /*error */
+      else
+      {
+        fprintf(stderr, "FrictionContact2D_driver error: unknown solver named: %s\n", name);
+        exit(EXIT_FAILURE);
+      }
     }
 
 
-
   }
+
+
+
+
   return info;
 
 }

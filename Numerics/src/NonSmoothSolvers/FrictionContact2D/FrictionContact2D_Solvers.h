@@ -62,7 +62,7 @@ extern "C" {
        \param[in,out] options Solver_Options structure
        \author Nineb Sheherazade.
   */
-  void pfc_2D_cpg(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, Solver_Options* options);
+  void FrictionContact2D_cpg(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, Solver_Options* options);
 
   /**  Non Linear Gauss Seidel solver for primal contact problem with friction in 2D case.
        \param[in] problem the friction-contact problem
@@ -72,7 +72,7 @@ extern "C" {
        \param[in,out] options Solver_Options structure
        \author Nineb Sheherazade.
   */
-  void pfc_2D_nlgs(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, Solver_Options* options);
+  void FrictionContact2D_nlgs(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, Solver_Options* options);
 
   /**  latin solver for primal contact problem with friction in the 2D case.
        \param[in] problem the friction-contact problem
@@ -82,9 +82,9 @@ extern "C" {
        \param[in,out] options Solver_Options structure
        \author Nineb Sheherazade.
   */
-  void pfc_2D_latin(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, Solver_Options* options);
+  void FrictionContact2D_latin(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, Solver_Options* options);
 
-  /** pfc_2D_projc is a specific projection operator related to CPG (conjugated projected gradient) algorithm for primal contact problem with friction.\n
+  /** FrictionContact2D_projc is a specific projection operator related to CPG (conjugated projected gradient) algorithm for primal contact problem with friction.\n
    *
    *
    * \param xi        On enter, the intermediate iterate which goes to be projected (projc1).
@@ -98,9 +98,9 @@ extern "C" {
    * \author Sheherazade Nineb.
    *
    */
-  void pfc_2D_projc(double* xi, int* n, int* statusi, double* p, double* fric, double *reaction, int *status);
+  void FrictionContact2D_projc(double* xi, int* n, int* statusi, double* p, double* fric, double *reaction, int *status);
 
-  /** pfc_2D_projf is a specific projection operator related to CPG (conjugated projected gradient) algorithm
+  /** FrictionContact2D_projf is a specific projection operator related to CPG (conjugated projected gradient) algorithm
    *              for primal contact problem with friction.\n
    *
    *
@@ -113,114 +113,7 @@ extern "C" {
    * \author Shéhérazade Nineb.
    *
    */
-  void pfc_2D_projf(int* statusi, int* n , double *y , double *fric, double *projf1);
-
-  /**  specific latin solver for dual contact problem with friction in the 2D case.\n
-       \param[in] problem the friction-contact problem
-       \param[out] reaction global vector
-       \param[out] velocity global vector
-       \param[in,out] info termination value
-       \param[in,out] options Solver_Options structure
-       \author Nineb Sheherazade.
-  */
-  void dfc_2D_latin(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, Solver_Options* options);
-
-  /**   This subroutine allows the formulation in the LCP (Linear  Complementary Problem) form
-       of a 2D contact problem with friction.\n
-       \param dim_F1    On enter a pointer over integers, the dimension of the DFC_2D problem,
-       \param mu      On enter a pointer over doubles, the friction coefficient,
-       \param K1        On enter a pointer over doubles containing the components of the
-       rigidity matrix with a fortran90 storage,
-       \param F1        On enter a pointer over doubles containing the right hand side,
-       \param ddl_n     On enter a pointer over integers , the contact in normal direction dof
-       (not prescribed),
-       \param ddl_tt    On enter a pointer over integers, the contact in tangential direction dof
-       (not prescribed)
-       \param dim_nc    On enter a pointer over integers, the dimension of the vector ddl_tt.
-       \param ddl_d     On enter a pointer over integers, the prescribed dof,
-       \param dim_d     On enter a pointer over integers, the dimension of the vector ddl_d,
-       \param J1        On enter a pointer over doubles, gap in normal contact direction.
-       \n\n
-       \param MM        On return a pointer over doubles containing the components of a double
-       matrix (3*dim_nc,3*dim_nc) with a fortran90 allocation.
-       \param q         On return a pointer over doubles, a double vector (3*dim_nc).
-       \author Nineb Sheherazade.
-  */
-  void dfc_2D2lcp(int *, double *, double *, double *, int *, int *, int * , int *, int *, double * , double *, double *);
-
-  /**   This routine allows to give the solution of the 2D contact problem with friction given. \n
-       \param dim_F1    On enter a pointer over integers, the dimension of the DFC_2D problem,
-       \param ztel      On enter a pointer over doubles, the solution given by a LCP solver.
-       \param wtel      On enter a pointer over doubles, the solution given by a LCP solver.
-       \param K1        On enter a pointer over doubles containing the components of the
-       rigidity matrix with a fortran90 storage,
-       \param F1        On enter a pointer over doubles containing the right hand side,
-       \param J1        On enter a pointer over doubles, gap in normal contact direction.
-       \param ddl_n     On enter a pointer over integers , the contact in normal direction dof
-       (not prescribed),
-       \param ddl_tt    On enter a pointer over integers, the contact in tangential direction dof
-       (not prescribed)
-       \param dim_tt    On enter a pointer over integers, the dimension of the vector ddl_tt.
-       \param ddl_d     On enter a pointer over integers, the prescribed dof,
-       \param dim_d     On enter a pointer over integers, the dimension of the vector ddl_d,
-       \n\n
-       \param U2        On return a pointer over doubles, the solution of the contact friction problem U2(dim_F1).
-       \param F2        On return a pointer over doubles, the solution of the contact friction problem F2(dim_F1).
-       \author Nineb Sheherazade.
-  */
-  void lcp2dfc_2D(int *, double *, double *, double *, double *, double *,  int *, int *,
-                  int *, int *, int *,  double *, double *);
-
-  /** Formulation in the condensed form of a 2D contact problem with friction (DFC_2D).\n
-      \param dim_F1    On enter a pointer over integers, the dimension of the DFC_2D problem,
-      \param mu      On enter a pointer over doubles, the friction coefficient,
-      \param K1        On enter a pointer over doubles containing the components of the
-      rigidity matrix with a fortran90 storage,
-      \param F1        On enter a pointer over doubles containing the right hand side,
-      \param ddl_n     On enter a pointer over integers , the contact in normal direction dof
-      (not prescribed),
-      \param ddl_tt    On enter a pointer over integers, the contact in tangential direction dof
-      (not prescribed)
-      \param dim_nc    On enter a pointer over integers, the dimension of the vector ddl_tt.
-      \param ddl_d     On enter a pointer over integers, the prescribed dof,
-      \param dim_d     On enter a pointer over integers, the dimension of the vector ddl_d,
-      \param J1        On enter a pointer over doubles, gap in normal contact direction.
-      \n\n
-      \param MM        On return a pointer over doubles containing the components of a double
-      matrix (2*dim_nc,2*dim_nc) with a fortran90 allocation.
-      \param q         On return a pointer over doubles, a double vector (2*dim_nc).
-      \author Nineb Sheherazade.
-  */
-  void dfc_2D2cond_2D(int *, double *, double *, double *, int *, int *, int * , int *, int *, double * , double *, double *);
-
-  /** Solution of the 2D contact problem with friction given.\n
-      \param dim_F1    On enter a pointer over integers, the dimension of the DFC_2D problem,
-      \param ztel      On enter a pointer over doubles, the solution given by a dfc_2D solver.
-      \param wtel      On enter a pointer over doubles, the solution given by a dfc_2D solver.
-      \param K1        On enter a pointer over doubles containing the components of the
-      rigidity matrix with a fortran90 storage,
-      \param F1        On enter a pointer over doubles containing the right hand side,
-      \param J1        On enter a pointer over doubles, gap in normal contact direction.
-      \param ddl_n     On enter a pointer over integers , the contact in normal direction dof
-      (not prescribed),
-      \param ddl_tt    On enter a pointer over integers, the contact in tangential direction dof
-      (not prescribed)
-      \param dim_tt    On enter a pointer over integers, the dimension of the vector ddl_tt.
-      \param ddl_d     On enter a pointer over integers, the prescribed dof,
-      \param dim_d     On enter a pointer over integers, the dimension of the vector ddl_d,
-      \n\n
-      \param U2        On return a pointer over doubles, the solution of the contact friction problem U2(dim_F1).
-      \param F2        On return a pointer over doubles, the solution of the contact friction problem F2(dim_F1).
-      \author Nineb Sheherazade.
-  */
-  void cond_2D2dfc_2D(int *, double *, double *, double *, double *, double *,  int *, int *,
-                      int *, int *, int *,  double *, double *);
-
-  /** */
-  void projf(int*, int*, double*, double*, double*);
-
-  /** */
-  void projc(double*, int*, int*, double*, double*, double*, int*);
+  void FrictionContact2D_projf(int* statusi, int* n , double *y , double *fric, double *projf1);
 
   /** */
   void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, double *w, int *info, Solver_Options* options) ;

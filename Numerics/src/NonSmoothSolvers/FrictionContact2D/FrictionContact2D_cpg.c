@@ -21,7 +21,7 @@
 #include "LA.h"
 #include <math.h>
 
-void pfc_2D_cpg(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, Solver_Options* options)
+void FrictionContact2D_cpg(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, Solver_Options* options)
 {
   int nc = problem->numberOfContacts;
   double * vec = problem->M->matrix0;
@@ -199,7 +199,7 @@ void pfc_2D_cpg(FrictionContact_Problem* problem , double *reaction , double *ve
     alphaf = alpha;
     DAXPY(n, alphaf, p, incx, xi, incy);
 
-    pfc_2D_projc(xi, &n, statusi, p, fric, reaction, stat);
+    FrictionContact2D_projc(xi, &n, statusi, p, fric, reaction, stat);
 
 
     /*         r(:)=b(:)-matmul(A,x)          */
@@ -210,9 +210,9 @@ void pfc_2D_cpg(FrictionContact_Problem* problem , double *reaction , double *ve
     betaf  = -1.;
     DGEMV(LA_NOTRANS, n, n, alphaf, vec, n, reaction, incx, betaf, r, incy);
 
-    pfc_2D_projf(statusi, &n, r, fric, w);
+    FrictionContact2D_projf(statusi, &n, r, fric, w);
 
-    pfc_2D_projf(statusi, &n, p, fric, z);
+    FrictionContact2D_projf(statusi, &n, p, fric, z);
 
 
     wAp    = DDOT(n, w, incx, Ap, incy);
