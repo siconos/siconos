@@ -118,11 +118,6 @@ NEW_TEST(odepacktest10 test-funcC-inC.cpp funC.cpp)
  
 END_TEST()
  
-BEGIN_TEST(NonSmoothSolvers/test)
- 
-NEW_TEST(FrictionContact_Problemtest main_FC3D.c)
-
-END_TEST()
 
 BEGIN_TEST(NonSmoothSolvers/NSSTools/test) 
 NEW_TEST(NumericsMatrixTest main_NumericsMatrix.c)
@@ -232,6 +227,11 @@ END_TEST()
 
 BEGIN_TEST(NonSmoothSolvers/MLCP/test)
 NEW_TEST(MLCPtest main_mlcp.cpp)
+END_TEST()
+BEGIN_TEST(NonSmoothSolvers/FrictionContact3D/test)
+ 
+NEW_TEST(FrictionContact_Problemtest main_FC3D.c)
+
 END_TEST()
 
 

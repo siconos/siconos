@@ -133,7 +133,7 @@ int main(void)
   double*  localtol = (double*)malloc(ntestfile * sizeof(double));
   int ilocal;
   ilocal = 0;
-  testfile[0] = "./DATA/Example1_Fc3D_SBM.dat";
+  testfile[0] = "./data/Example1_Fc3D_SBM.dat";
   tol[0] = 1e-16;
   localtol[0] = 1e-16;
   nLocalSolver[0] = 4;
@@ -142,7 +142,7 @@ int main(void)
 
 
 
-  testfile[1] = "./DATA/Confeti-ex13-4contact-Fc3D-SBM.dat";
+  testfile[1] = "./data/Confeti-ex13-4contact-Fc3D-SBM.dat";
   tol[1] = 1e-5;
   localtol[1] = 1e-6;
 
@@ -150,14 +150,14 @@ int main(void)
   localSolverList[1] = (int *)malloc(nLocalSolver[1] * sizeof(int));
   for (i = 0; i < nLocalSolver[1] ; i++) localSolverList[1][i] = i;
 
-  testfile[2] = "./DATA/Confeti-ex03-Fc3D-SBM.dat";
+  testfile[2] = "./data/Confeti-ex03-Fc3D-SBM.dat";
   tol[2] = 1e-5;
   localtol[2] = 1e-6;
   nLocalSolver[2] = 4;
   localSolverList[2] = (int *)malloc(nLocalSolver[2] * sizeof(int));
   for (i = 0; i < nLocalSolver[2] ; i++) localSolverList[2][i] = i;
 
-  testfile[3] = "./DATA/Confeti-ex13-Fc3D-SBM.dat";
+  testfile[3] = "./data/Confeti-ex13-Fc3D-SBM.dat";
   tol[3] = 1e-5;
   localtol[3] = 1e-6;
   nLocalSolver[3] = 1;
