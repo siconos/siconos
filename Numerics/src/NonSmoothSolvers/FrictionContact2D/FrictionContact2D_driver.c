@@ -46,11 +46,19 @@ int frictionContact2D_driver(FrictionContact_Problem* problem, double *reaction 
   if (verbose > 0)
     printSolverOptions(options);
 
+
+
+
+
   /* Solver name */
   char * name = options->solverName;
 
 
   int info = -1 ;
+
+  if (problem->dimension != 2)
+    numericsError("FrictionContact2D_driver", "Dimension of the problem : problem-> dimension is not compatible");
+
 
   /* Non Smooth Gauss Seidel (NSGS) */
   if (strcmp(name, "NSGS") == 0)

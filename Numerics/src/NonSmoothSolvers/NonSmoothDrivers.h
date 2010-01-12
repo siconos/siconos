@@ -53,7 +53,6 @@ Other functions and useful tools related to NonSmoothSolvers are listed in NSSTo
   Last Modifications : Mathieu Renouf , Pascal Denoyelle, Franck Perignon
   \todo solve_qp does not exist
 
-  Note: all pfc_3D functions, structures ... are out of date and will be soon removed.
   Use FrictionContact3D tools.
 */
 #ifndef NonSmoothSolvers_H
@@ -66,17 +65,13 @@ Other functions and useful tools related to NonSmoothSolvers are listed in NSSTo
 #include "FrictionContact2D_Solvers.h"
 #include "FrictionContact3D_Solvers.h"
 #include "PrimalFrictionContact3D_Solvers.h"
-#include "pfc_3D_Solvers.h"
+
 #include "NonSmoothNewton.h"
 
 
 /** Union of specific methods (one for each type of problem)
     Deprecated.
 */
-typedef union
-{
-  method_pfc_3D pfc_3D;
-} method;
 
 #ifdef __cplusplus
 extern "C" {
@@ -123,31 +118,7 @@ extern "C" {
   */
   int LinearSystem_driver(LinearSystem_Problem* problem, double *z , double *w, Solver_Options* options);
 
-  /** General interface to solver for pfc 3D problems - Out of date (will be removed soon) */
-  int pfc_3D_driver(int, double*, double*, method*, double*, double*, double*);
 
-  /** General interface to solvers for primal friction 3D problem, with a sparse block storage for M - Out of date (will be removed soon)
-   *   \param n    Dimension of the system. Then, the number of contacts is n/3.
-   *  \param M    components of the double matrix with a fortran allocation.
-   *  \param q    the components of the second member of the system.
-   *  \param pt   structure
-   *  \param z    the solution of the problem.
-   *  \param w    the complementarity solution of the problem.
-   *  \param mu   the list of friction coefficients. mu[i] corresponds to contact number i.
-   *  \param iter On return, an integer, the final number of block iterations
-   *  \param local_iter On return, an integer, the total number of local iterations
-   *  \param error   On return, a double, the final value of error criteria.
-   *
-   *  \return     result (0 is successful otherwise 1).
-   *
-   *  \author Franck Perignon.
-   *
-   * The available solvers are (with the corresponding keywords):
-   *
-   *   - NSGS for non-smooth Gauss Seidel
-   *
-   */
-  int pfc_3D_driver_block(int, SparseBlockStructuredMatrix*, double*, method*, double*, double*, double*);
 
   /** General interface to solvers for primal friction-contact 2D problem
       \param[in] , the structure which handles the Friction-Contact problem
@@ -157,6 +128,7 @@ extern "C" {
       \param[in] general options for Numerics (verbose mode ...)
       \return result (0 if successful otherwise 1).
       \author Nineb Sheherazade.
+      \todo Obsolete
   */
   int pfc_2D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options);
 

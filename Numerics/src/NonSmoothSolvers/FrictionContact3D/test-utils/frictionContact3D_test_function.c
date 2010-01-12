@@ -49,10 +49,10 @@ int frictionContact3D_test_function(FILE * f, char * solvername, int * iparam, d
   int i, k, info = -1 ;
   FrictionContact_Problem* problem = (FrictionContact_Problem *)malloc(sizeof(FrictionContact_Problem));
 
-  info = frictionContact3D_newFromFile(problem, f);
+  info = frictionContact_newFromFile(problem, f);
 
-  FILE * foutput  =  fopen("./lcp_mmc.verif", "w");
-  info = frictionContact3D_printInFile(problem, foutput);
+  FILE * foutput  =  fopen("checkinput.dat", "w");
+  info = frictionContact_printInFile(problem, foutput);
 
 
   Numerics_Options global_options;

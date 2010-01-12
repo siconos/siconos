@@ -20,7 +20,7 @@
 #include "FrictionContact_Problem.h"
 
 
-int frictionContact3D_printInFile(FrictionContact_Problem*  problem, FILE* file)
+int frictionContact_printInFile(FrictionContact_Problem*  problem, FILE* file)
 {
   if (! problem)
   {
@@ -28,6 +28,9 @@ int frictionContact3D_printInFile(FrictionContact_Problem*  problem, FILE* file)
     exit(EXIT_FAILURE);
   }
   int i;
+
+  int d  = problem->dimension;
+  fprintf(file, "%d\n", d);
   int nc = problem->numberOfContacts;
   fprintf(file, "%d\n", nc);
   printInFile(problem->M, file);
@@ -45,10 +48,12 @@ int frictionContact3D_printInFile(FrictionContact_Problem*  problem, FILE* file)
   return 0;
 }
 
-int frictionContact3D_newFromFile(FrictionContact_Problem* problem, FILE* file)
+int frictionContact_newFromFile(FrictionContact_Problem* problem, FILE* file)
 {
-  int nc = 0;
+  int nc = 0, d = 0;
   int i;
+  fscanf(file, "%d\n", &d);
+  problem->dimension = d;
   fscanf(file, "%d\n", &nc);
   problem->numberOfContacts = nc;
   problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));

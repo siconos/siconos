@@ -99,6 +99,7 @@
 #include "NumericsMatrix.h"
 
 /** The structure that defines a Friction-Contact (3D or 2D) problem
+    \param dimension dimension of the contact space (3D or 2D )
     \param numberOfContacts the number of contacts
     \param M matrix (n X n, with n = 2 or 3*numberOfContacts)
     \param q vector (n)
@@ -107,6 +108,7 @@
 */
 typedef struct
 {
+  int dimension;
   int numberOfContacts;
   NumericsMatrix* M;
   double* q;
@@ -118,9 +120,9 @@ typedef struct
 #ifdef __cplusplus
 extern "C" {
 #endif
-  int frictionContact3D_printInFile(FrictionContact_Problem*  problem, FILE* file);
+  int frictionContact_printInFile(FrictionContact_Problem*  problem, FILE* file);
 
-  int frictionContact3D_newFromFile(FrictionContact_Problem*  problem, FILE* file);
+  int frictionContact_newFromFile(FrictionContact_Problem*  problem, FILE* file);
 
   void freeFrictionContact_problem(FrictionContact_Problem* problem);
 
