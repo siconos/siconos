@@ -72,6 +72,7 @@ DynamicalSystem::DynamicalSystem(SP::DynamicalSystemXML dsXML):
 DynamicalSystem::DynamicalSystem(DS::TYPES type, unsigned int newN):
   _DSType(type), _number(count++), _n(newN), _stepsInMemory(1)
 {
+  zeroPlugin();
   _normRef = 1;
   _x.resize(2);
   _workV.resize(sizeWorkV);

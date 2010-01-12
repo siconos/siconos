@@ -71,6 +71,8 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, const string& AP
 {
 
   _DSType = DS::FOLDS;
+  _pluginb.reset(new PluggedObject());
+  _pluginA.reset(new PluggedObject());
   _pluginA->setComputeFunction(APlugin);
   _pluginb->setComputeFunction(bPlugin);
 
@@ -86,6 +88,8 @@ FirstOrderLinearDS::FirstOrderLinearDS(const SiconosVector& newX0, const std::st
   //  FirstOrderNonLinearDS::FirstOrderNonLinearDS();
 
   _DSType = DS::FOLDS;
+  _pluginb.reset(new PluggedObject());
+  _pluginA.reset(new PluggedObject());
   _pluginA->setComputeFunction(APlugin);
   _pluginb->setComputeFunction(bPlugin);
 
@@ -103,6 +107,8 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatri
 {
   _DSType = DS::FOLDS;
   _f.reset(new SimpleVector(getDim()));
+  _pluginb.reset(new PluggedObject());
+  _pluginA.reset(new PluggedObject());
   assert(((newA->size(0) == _n) && (newA->size(1) == _n)) &&
          "FirstOrderLinearDS - constructor(number,x0,A): inconsistent dimensions with problem size for input matrix A");
 
@@ -115,6 +121,8 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatri
   FirstOrderNonLinearDS(newX0)
 {
   _DSType = DS::FOLDS;
+  _pluginb.reset(new PluggedObject());
+  _pluginA.reset(new PluggedObject());
   assert(((newA->size(0) == _n) && (newA->size(1) == _n)) &&
          "FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with problem size for input matrix A");
   assert(newB->size() == _n &&

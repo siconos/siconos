@@ -162,14 +162,14 @@ void FirstOrderType2R::computeJacglambda(double)
 {
   RuntimeException::selfThrow("FirstOrderType2R::computeJacglambda must be overload.");
 }
-void FirstOrderType2R::computejacgx(double)
+void FirstOrderType2R::computeJacgx(double)
 {
   RuntimeException::selfThrow("FirstOrderType2R::computejacgx must be overload.");
 }
 void FirstOrderType2R::computeJacg(double t)
 {
   computeJacglambda(t);
-  computejacgx(t);
+  computeJacgx(t);
 }
 
 void FirstOrderType2R::preparNewtonIteration()

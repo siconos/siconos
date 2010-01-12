@@ -336,10 +336,9 @@ void FirstOrderLinearR::display() const
 //   FirstOrderR::setComputeEFunction(pluginPath,functionName);
 
 // }
-void FirstOrderLinearR::setComputeEFunction(FOVecPtr ptrFunct)
-{
-  _plugine->setComputeFunction((void*)ptrFunct);
-}
+// void FirstOrderLinearR::setComputeEFunction(FOVecPtr ptrFunct){
+//   _plugine->setComputeFunction((void*)ptrFunct);
+// }
 
 
 void FirstOrderLinearR::saveRelationToXML() const

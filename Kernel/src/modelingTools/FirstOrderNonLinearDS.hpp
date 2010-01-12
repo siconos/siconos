@@ -156,6 +156,7 @@ protected:
   */
   FirstOrderNonLinearDS(SP::SiconosVector);
   FirstOrderNonLinearDS(const SiconosVector& SiconosVector);
+  virtual void zeroPlugin();
 
 public:
 

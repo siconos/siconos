@@ -105,7 +105,7 @@ public:
    *  \param index for jacobian: at the time only one possible jacobian => i = 0 is the default value .
    */
   virtual void computeJacglambda(double);
-  virtual void computejacgx(double);
+  virtual void computeJacgx(double);
 
   virtual void computeJacg(double t);
 
