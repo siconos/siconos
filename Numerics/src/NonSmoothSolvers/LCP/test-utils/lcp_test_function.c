@@ -117,7 +117,7 @@ int lcp_test_function(FILE * f, char * solvername)
   fillParamWithRespectToSolver(options, solvername, problem);
 
   options->isSet = 1;
-  options->filterOn = 0;
+  options->filterOn = 1;
   double * z = malloc(problem->size * sizeof(double));
   double * w = malloc(problem->size * sizeof(double));
 
@@ -206,7 +206,7 @@ int lcp_test_function_SBM(FILE * f, char * solvername)
   fillParamWithRespectToSolver(local_options, solvername, problem);
 
   local_options->isSet = 1;
-  local_options->filterOn = 0;
+  local_options->filterOn = 1;
 
 
   double * z = malloc(problem->size * sizeof(double));

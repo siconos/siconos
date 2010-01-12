@@ -702,7 +702,7 @@ void test_matrix(void)
     case 0:
       printf("\n\n 2x2 MLCP **************************************************************************");
       strcpy(summary[itest].file, "2x2 MLCP");
-      if ((MLCPfile = fopen("MATRIX/deudeu_mlcp.dat", "r")) == NULL)
+      if ((MLCPfile = fopen("data/deudeu_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: deudeu_mlcp.dat");
         exit(1);
@@ -712,7 +712,7 @@ void test_matrix(void)
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n PD **************************************************************************");
       strcpy(summary[itest].file, "PD");
-      if ((MLCPfile = fopen("MATRIX/PD_mlcp.dat", "r")) == NULL)
+      if ((MLCPfile = fopen("data/PD_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: PD_mlcp.dat");
         exit(1);
@@ -722,7 +722,7 @@ void test_matrix(void)
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n m2n1_mlcp.dat **************************************************************************");
       strcpy(summary[itest].file, "m2n1_mlcp");
-      if ((MLCPfile = fopen("MATRIX/m2n1_mlcp.dat", "r")) == NULL)
+      if ((MLCPfile = fopen("data/m2n1_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: m2n1SOL_mlcp.dat");
         exit(1);
@@ -732,7 +732,7 @@ void test_matrix(void)
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n relay2_mlcp.dat **************************************************************************");
       strcpy(summary[itest].file, "relay2_mlcp");
-      if ((MLCPfile = fopen("MATRIX/relay2_mlcp.dat", "r")) == NULL)
+      if ((MLCPfile = fopen("data/relay2_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: relay2_mlcp.dat");
         exit(1);
@@ -742,7 +742,7 @@ void test_matrix(void)
       //       printf("BEGIN A NEWTEST  **************************************************************************");
       //       printf("\n\n simple_mlcp.dat **************************************************************************");
       //       strcpy(summary[itest].file,"simple_mlcp");
-      //       if( ( MLCPfile = fopen( "MATRIX/simple_mlcp.dat","r" ) ) == NULL ){
+      //       if( ( MLCPfile = fopen( "data/simple_mlcp.dat","r" ) ) == NULL ){
       //  perror("fopen MLCPfile: simple_mlcp.dat");
       //  exit(1);
       //       }
@@ -751,7 +751,7 @@ void test_matrix(void)
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n deltasigma2_mlcp.dat **************************************************************************");
       strcpy(summary[itest].file, "deltasigma2_mlcp");
-      if ((MLCPfile = fopen("MATRIX/deltasigma2_mlcp.dat", "r")) == NULL)
+      if ((MLCPfile = fopen("data/deltasigma2_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: deltasigma2_mlcp.dat");
         exit(1);
@@ -761,7 +761,7 @@ void test_matrix(void)
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n relay3_mlcp.dat **************************************************************************");
       strcpy(summary[itest].file, "relay3_mlcp");
-      if ((MLCPfile = fopen("MATRIX/relay3_mlcp.dat", "r")) == NULL)
+      if ((MLCPfile = fopen("data/relay3_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: relay3_mlcp.dat");
         exit(1);
@@ -771,7 +771,7 @@ void test_matrix(void)
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n deltasigma_mlcp.dat **************************************************************************");
       strcpy(summary[itest].file, "deltasigma_mlcp");
-      if ((MLCPfile = fopen("MATRIX/deltasigma_mlcp.dat", "r")) == NULL)
+      if ((MLCPfile = fopen("data/deltasigma_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: deltasigma_mlcp.dat");
         exit(1);
@@ -781,7 +781,7 @@ void test_matrix(void)
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n m3n2_mlcp.dat **************************************************************************");
       strcpy(summary[itest].file, "m3n2_mlcp");
-      if ((MLCPfile = fopen("MATRIX/m3n2_mlcp.dat", "r")) == NULL)
+      if ((MLCPfile = fopen("data/m3n2_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: m3n2SOL_mlcp.dat");
         exit(1);
@@ -791,7 +791,7 @@ void test_matrix(void)
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n PDSym_mlcp.dat **************************************************************************");
       strcpy(summary[itest].file, "PDSym_mlcp");
-      if ((MLCPfile = fopen("MATRIX/PDSym_mlcp.dat", "r")) == NULL)
+      if ((MLCPfile = fopen("data/PDSym_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: PDSym_mlcp.dat");
         exit(1);
@@ -801,7 +801,7 @@ void test_matrix(void)
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n RLCD_mlcp MLCP **************************************************************************");
       strcpy(summary[itest].file, "RLCD_mlcp MLCP");
-      if ((MLCPfile = fopen("MATRIX/RLCD_mlcp.dat", "r")) == NULL)
+      if ((MLCPfile = fopen("data/RLCD_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: RLCD_mlcp.dat");
         exit(1);
@@ -811,7 +811,7 @@ void test_matrix(void)
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n Rectangular_1_n0_m4_mlcp MLCP **************************************************************************");
       strcpy(summary[itest].file, "Rectangular_1_n0_m4_mlcp MLCP");
-      if ((MLCPfile = fopen("MATRIX/Rectangular_1_n0_m4_mlcp.dat", "r")) == NULL)
+      if ((MLCPfile = fopen("data/Rectangular_1_n0_m4_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: Rectangular_1_n0_m4_mlcp.dat");
         exit(1);
@@ -821,7 +821,7 @@ void test_matrix(void)
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n Rectangular_mlcp MLCP **************************************************************************");
       strcpy(summary[itest].file, "Rectangular_mlcp MLCP");
-      if ((MLCPfile = fopen("MATRIX/Rectangular_mlcp.dat", "r")) == NULL)
+      if ((MLCPfile = fopen("data/Rectangular_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: Rectangular_mlcp.dat");
         exit(1);
@@ -831,7 +831,7 @@ void test_matrix(void)
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n diodeBridge MLCP **************************************************************************");
       strcpy(summary[itest].file, "diodeBridge MLCP");
-      if ((MLCPfile = fopen("MATRIX/diodeBridge_mlcp.dat", "r")) == NULL)
+      if ((MLCPfile = fopen("data/diodeBridge_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: diodeBridge_mlcp.dat");
         exit(1);
@@ -841,7 +841,7 @@ void test_matrix(void)
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n RCD **************************************************************************");
       strcpy(summary[itest].file, "RCD");
-      if ((MLCPfile = fopen("MATRIX/RCD_mlcp.dat", "r")) == NULL)
+      if ((MLCPfile = fopen("data/RCD_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: RCD_mlcp.dat");
         exit(1);
@@ -851,7 +851,7 @@ void test_matrix(void)
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n diodeBridge 20 MLCP **************************************************************************");
       strcpy(summary[itest].file, "diodeBridge 20 MLCP");
-      if ((MLCPfile = fopen("MATRIX/diodeBridge20_mlcp.dat", "r")) == NULL)
+      if ((MLCPfile = fopen("data/diodeBridge20_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: diodeBridge20_mlcp.dat");
         exit(1);
@@ -861,7 +861,7 @@ void test_matrix(void)
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n diodeBridge 40 MLCP **************************************************************************");
       strcpy(summary[itest].file, "diodeBridge 40 MLCP");
-      if ((MLCPfile = fopen("MATRIX/diodeBridge40_mlcp.dat", "r")) == NULL)
+      if ((MLCPfile = fopen("data/diodeBridge40_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: diodeBridge40_mlcp.dat");
         exit(1);
@@ -871,7 +871,7 @@ void test_matrix(void)
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n Buck converter **************************************************************************");
       strcpy(summary[itest].file, "BuckConverter_mlcp");
-      if ((MLCPfile = fopen("MATRIX/BuckConverter_mlcp.dat", "r")) == NULL)
+      if ((MLCPfile = fopen("data/BuckConverter_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: BuckConverter_mlcp.dat");
         exit(1);
@@ -881,7 +881,7 @@ void test_matrix(void)
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n Buck converter FB failed **************************************************************************");
       strcpy(summary[itest].file, "Buck2");
-      if ((MLCPfile = fopen("MATRIX/Buck2_mlcp.dat", "r")) == NULL)
+      if ((MLCPfile = fopen("data/Buck2_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: Buck2_mlcp.dat");
         exit(1);
@@ -891,7 +891,7 @@ void test_matrix(void)
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n Buck converter First step **************************************************************************");
       strcpy(summary[itest].file, "BuckFirstStep");
-      if ((MLCPfile = fopen("MATRIX/BuckFirstStep_mlcp.dat", "r")) == NULL)
+      if ((MLCPfile = fopen("data/BuckFirstStep_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: BuckFirstStep_mlcp.dat");
         exit(1);
@@ -901,7 +901,7 @@ void test_matrix(void)
       printf("BEGIN A NEWTEST  **************************************************************************");
       printf("\n\n Relay **************************************************************************");
       strcpy(summary[itest].file, "relay_mlcp");
-      if ((MLCPfile = fopen("MATRIX/relay_mlcp.dat", "r")) == NULL)
+      if ((MLCPfile = fopen("data/relay_mlcp.dat", "r")) == NULL)
       {
         perror("fopen MLCPfile: relay_mlcp.dat");
         exit(1);

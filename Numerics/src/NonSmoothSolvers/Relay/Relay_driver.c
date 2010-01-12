@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 
 #include <stdio.h>
@@ -26,7 +26,8 @@
 #endif
 #include <time.h>
 
-int relay_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* options, int numberOfSolvers, Numerics_Options* global_options)
+int relay_driver(Relay_Problem* problem, double *z , double *w,
+                 Solver_Options* options, int numberOfSolvers, Numerics_Options* global_options)
 {
 
 
@@ -74,9 +75,7 @@ int relay_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* 
     fprintf(stderr, "Relay_driver error: NLGS solver obsolete use PGS:\n");
   else if ((strcmp(name , "Lemke") == 0) || (strcmp(name , "ENUM") == 0))
   {
-    fprintf(stderr, "Relay_driver : Lemke and ENUM solver  not yet compeleted.  works only for ub=1, lb =-1:\n");
 
-    /*\todo Complete converion of Relay into LCP with lb and ub */
     // conversion into LCP
     LinearComplementarity_Problem* lcp_problem = (LinearComplementarity_Problem*)malloc(sizeof(LinearComplementarity_Problem));
     lcp_problem->size = 2 * problem->size ;
@@ -93,7 +92,6 @@ int relay_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* 
     double *wlcp = (double*)malloc(lcp_problem->size * sizeof(double));
 
     int i, j;
-
     for (i = 0; i < problem->size; i++)
     {
       for (j = 0; j < problem->size; j++)
@@ -121,12 +119,19 @@ int relay_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* 
     for (i = 0; i < problem->size; i++)
     {
       lcp_problem->q[i] = problem->q[i];
-      lcp_problem->q[i + problem->size] = 2.0;
+      lcp_problem->q[i + problem->size] = problem->ub[i] - problem->lb[i];
       for (j = 0; j < problem->size; j++)
       {
-        lcp_problem->q[i] -= problem->M->matrix0[i + j * (problem->size)];
+        lcp_problem->q[i] -= problem->M->matrix0[i + j * (problem->size)] * problem->ub[i];
       }
     }
+
+
+    FILE * fcheck = fopen("lcp_relay.dat", "w");
+    info = linearComplementarity_printInFile(lcp_problem, fcheck);
+
+
+
     int nbSolvers = 1;
     // Call the lcp_solver
     if ((strcmp(name , "ENUM") == 0))
@@ -136,6 +141,9 @@ int relay_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* 
 
     }
     info = lcp_driver(lcp_problem, zlcp , wlcp, options, nbSolvers, global_options);
+    if (options->filterOn > 0)
+      lcp_compute_error(lcp_problem, zlcp, wlcp, options->dparam[0], &(options->dparam[1]));
+
     if ((strcmp(name , "ENUM") == 0))
     {
       lcp_enum_reset(lcp_problem, options, 1);

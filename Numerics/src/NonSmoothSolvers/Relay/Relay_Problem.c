@@ -84,10 +84,12 @@ int relay_printInFile(Relay_Problem*  problem, FILE* file)
   {
     fprintf(file, "%32.24e ", problem->q[i]);
   }
+  fprintf(file, "\n");
   for (i = 0; i < problem->M->size1; i++)
   {
     fprintf(file, "%32.24e ", problem->lb[i]);
   }
+  fprintf(file, "\n");
   for (i = 0; i < problem->M->size1; i++)
   {
     fprintf(file, "%32.24e ", problem->ub[i]);
@@ -110,11 +112,13 @@ int relay_newFromFile(Relay_Problem* problem, FILE* file)
   {
     fscanf(file, "%lf ", &(problem->q[i]));
   }
+  fscanf(file, "\n");
   problem->lb = (double *) malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++)
   {
     fscanf(file, "%lf ", &(problem->lb[i]));
   }
+  fscanf(file, "\n");
   problem->ub = (double *) malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++)
   {

@@ -16,19 +16,23 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#ifndef RELAY_TEST_FUNCTION_H
-#define RELAY_TEST_FUNCTION_H
+#include <stdio.h>
+#include <stdlib.h>
+#include "NonSmoothDrivers.h"
+#include "relay_test_function.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-  void relay_fillParamWithRespectToSolver(Solver_Options *options, char * solvername, Relay_Problem* problem);
-  int relay_test_function(FILE * f, char * solvername);
+int main(void)
+{
+  int info = 0 ;
+  printf("Test on ./data/relay1.dat\n");
 
-#ifdef __cplusplus
+  FILE * finput  =  fopen("./data/relay1.dat", "r");
+
+  char solvername[10] = "PATH";
+  info = relay_test_function(finput, solvername);
+
+  fclose(finput);
+
+
+  return info;
 }
-#endif
-
-#endif
-
-

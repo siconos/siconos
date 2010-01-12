@@ -120,16 +120,12 @@ END_TEST()
  
 BEGIN_TEST(NonSmoothSolvers/test)
  
-NEW_TEST(NumericsMatrixTest main_NumericsMatrix.c)
-#NEW_TEST(LCPtest main_lcp.c)
-
-#SET(MLCPtest_PROPERTIES WILL_FAIL TRUE)
-NEW_TEST(MLCPtest main_mlcp.cpp)
-
-NEW_TEST(Relaytest main_relay.c)
-
 NEW_TEST(FrictionContact_Problemtest main_FC3D.c)
 
+END_TEST()
+
+BEGIN_TEST(NonSmoothSolvers/NSSTools/test) 
+NEW_TEST(NumericsMatrixTest main_NumericsMatrix.c)
 END_TEST()
 
 BEGIN_TEST(NonSmoothSolvers/LCP/test)
@@ -223,18 +219,29 @@ END_TEST()
 BEGIN_TEST(NonSmoothSolvers/Relay/test)
 
 NEW_TEST(Relaytest1 relay_test1.c)
+NEW_TEST(Relaytest2 relay_test2.c)
+
+IF(PathFerris_FOUND)
+NEW_TEST(Relaytest3 relay_test3.c)
+ENDIF(PathFerris_FOUND)
 
 NEW_TEST(Relaytest10 relay_test10.c)
 NEW_TEST(Relaytest11 relay_test11.c)
 NEW_TEST(Relaytest12 relay_test12.c)
 END_TEST()
 
+BEGIN_TEST(NonSmoothSolvers/MLCP/test)
+NEW_TEST(MLCPtest main_mlcp.cpp)
+END_TEST()
+
+
 #BEGIN_TEST(utils/test)
-	
 #NEW_TEST(pinvtest testpinv.c)
-
-
 #END_TEST()
+
+
+
+
 IF(PRINT_ENV)
   INCLUDE(CMakeLog)
 ENDIF(PRINT_ENV)
