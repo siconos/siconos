@@ -107,13 +107,13 @@ public:
    *  \param bool isDSup : flag to avoid recomputation of operators
    *  \exception RuntimeException
    */
-  virtual void computeJacobianXF(double, bool  = false);
+  virtual void computeJacobianfx(double, bool  = false);
 
   /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$ with x different from current saved state.
    *  \param double time : current time
    *  \param SP::SiconosVector
    */
-  virtual void computeJacobianXF(double, SP::SiconosVector);
+  virtual void computeJacobianfx(double, SP::SiconosVector);
 
   /** Default function to the right-hand side term
    *  \param double time : current time

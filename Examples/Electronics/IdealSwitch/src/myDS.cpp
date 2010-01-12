@@ -22,29 +22,29 @@
 
 MyDS::MyDS(const SiconosVector& x0): FirstOrderNonLinearDS(x0)
 {
-  _jacobianXF.reset(new SimpleMatrix(1, 1));
-  mf.reset(new SimpleVector(1));
+  _jacobianfx.reset(new SimpleMatrix(1, 1));
+  _f.reset(new SimpleVector(1));
   _M.reset(new SimpleMatrix(1, 1));
   _M->eye();
 }
 
 void MyDS::computeF(double t)
 {
-  mf->setValue(0, 0);
+  _f->setValue(0, 0);
 }
 void  MyDS::computeF(double, SP::SiconosVector)
 {
-  mf->setValue(0, 0);
+  _f->setValue(0, 0);
 }
 
-void MyDS::computeJacobianXF(double t, bool  b)
+void MyDS::computeJacobianfx(double t, bool  b)
 {
-  _jacobianXF->setValue(0, 0, 0);
+  _jacobianfx->setValue(0, 0, 0);
 }
 
-void MyDS::computeJacobianXF(double t, SP::SiconosVector v)
+void MyDS::computeJacobianfx(double t, SP::SiconosVector v)
 {
-  _jacobianXF->setValue(0, 0, 0);
+  _jacobianfx->setValue(0, 0, 0);
 
 }
 
