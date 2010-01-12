@@ -20,8 +20,8 @@
 
 // ===== Lagrangian DS  =====
 
-// Plugins for Fext, Fint, QNLInertia (vectors), Mass, JacobianqQNLInertia, JacobianVelocityQNLInertia,
-// JacobianqFint and JacobianVelocityFint (matrices)
+// Plugins for Fext, FInt, QNLInertia (vectors), Mass, JacobianQNLInertiaq, JacobianQNLInertiaVelocity,
+// JacobianFIntq and JacobianFintVelocity (matrices)
 
 extern "C" void computeFInt(unsigned int *sizeOfq, const double *time, double *q, double *velocity, double *fInt)
 {
@@ -62,7 +62,7 @@ extern "C" void computeMass(unsigned int *sizeOfq, const double *time, double *q
 }
 
 
-extern "C" void computeJacobianqFInt(unsigned int *sizeOfq, const double *time, double *q, double *velocity, double *jacob)
+extern "C" void computeJacobianFIntq(unsigned int *sizeOfq, const double *time, double *q, double *velocity, double *jacob)
 {
 
   unsigned int n = *sizeOfq;
@@ -74,7 +74,7 @@ extern "C" void computeJacobianqFInt(unsigned int *sizeOfq, const double *time, 
 
 }
 
-extern "C" void computeJacobianVelocityFInt(unsigned int *sizeOfq, const double *time, double *q, double *velocity, double *jacob)
+extern "C" void computeJacobianFintVelocity(unsigned int *sizeOfq, const double *time, double *q, double *velocity, double *jacob)
 {
   unsigned int n = *sizeOfq;
   for (unsigned int i = 0; i < n; i++)
@@ -85,7 +85,7 @@ extern "C" void computeJacobianVelocityFInt(unsigned int *sizeOfq, const double 
 
 }
 
-extern "C" void computeJacobianqQNLInertia(unsigned int *sizeOfq, double *q, double *velocity, double *jacob)
+extern "C" void computeJacobianQNLInertiaq(unsigned int *sizeOfq, double *q, double *velocity, double *jacob)
 {
   unsigned int n = *sizeOfq;
   for (unsigned int i = 0; i < n; i++)
@@ -95,7 +95,7 @@ extern "C" void computeJacobianqQNLInertia(unsigned int *sizeOfq, double *q, dou
   }
 }
 
-extern "C" void computeJacobianVelocityQNLInertia(unsigned int *sizeOfq, double *q, double *velocity, double *jacob)
+extern "C" void computeJacobianQNLInertiaVelocity(unsigned int *sizeOfq, double *q, double *velocity, double *jacob)
 {
   unsigned int n = *sizeOfq;
   for (unsigned int i = 0; i < n; i++)

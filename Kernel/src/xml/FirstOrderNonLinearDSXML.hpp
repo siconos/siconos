@@ -36,7 +36,7 @@ const std::string DS_R = "R";
 const std::string DS_XMEMORY = "xMemory";
 const std::string DS_M = "M";
 const std::string DS_F = "f";
-const std::string DS_JACOBIANXF = "jacobianXF";
+const std::string DS_JACOBIANXF = "jacobianfx";
 
 class SiconosMemory;
 class SiconosMemoryXML;
@@ -62,7 +62,7 @@ protected:
   xmlNodePtr xNode;/**<  state (usefull is start from recovery xml-file*/
   xmlNodePtr MNode; /**< M in \f$ M \dot x = f(x,t,z) \f$ */
   xmlNodePtr fNode;/**< f(x,t) */
-  xmlNodePtr jacobianXFNode;/**< jacobian of f according to x */
+  xmlNodePtr jacobianfxNode;/**< jacobian of f according to x */
   xmlNodePtr xMemoryNode;/**<  memory vector for x*/
   SP::SiconosMemoryXML xMemoryXML;/** <xml object for xMemory*/
 
@@ -130,7 +130,7 @@ public:
   inline const std::string getMPlugin() const
   {
     if (!isMPlugin())
-      XMLException::selfThrow("FirstOrderNonLinearDSXML - getMPlugin : jacobianXF is not calculated from a plugin since a jacobianXF matrix is given.");
+      XMLException::selfThrow("FirstOrderNonLinearDSXML - getMPlugin : jacobianfx is not calculated from a plugin since a jacobianfx matrix is given.");
     return  SiconosDOMTreeTools::getStringAttributeValue(MNode, "matrixPlugin");
   }
 
@@ -140,7 +140,7 @@ public:
   inline const SimpleMatrix getMMatrix() const
   {
     if (isMPlugin())
-      XMLException::selfThrow("FirstOrderNonLinearDSXML - getMMatrix : jacobianXF matrix is not given since M is calculated using a plug-in");
+      XMLException::selfThrow("FirstOrderNonLinearDSXML - getMMatrix : jacobianfx matrix is not given since M is calculated using a plug-in");
     return  SiconosDOMTreeTools::getSiconosMatrixValue(MNode);
   }
 
@@ -149,7 +149,7 @@ public:
    */
   void setMMatrix(const SiconosMatrix&v);
 
-  /** to save the JacobianXF plugin of the LagrangianDSXML
+  /** to save the Jacobianfx plugin of the LagrangianDSXML
    *   \param a string (name of the plug-in)
    */
   void setMPlugin(const std::string& plugin);
@@ -185,36 +185,36 @@ public:
    */
   void setFPlugin(const std::string& plugin);
 
-  // === JacobianXF ===
-  /** Return the name of the jacobianXF plug-in
+  // === Jacobianfx ===
+  /** Return the name of the jacobianfx plug-in
    *  \return a string
    */
-  inline const std::string getJacobianXFPlugin() const
+  inline const std::string getJacobianfxPlugin() const
   {
-    if (!isJacobianXFPlugin())
-      XMLException::selfThrow("FirstOrderNonLinearDSXML - getJacobianXFPlugin : jacobianXF is not calculated from a plugin since a jacobianXF matrix is given.");
-    return  SiconosDOMTreeTools::getStringAttributeValue(jacobianXFNode, "matrixPlugin");
+    if (!isJacobianfxPlugin())
+      XMLException::selfThrow("FirstOrderNonLinearDSXML - getJacobianfxPlugin : jacobianfx is not calculated from a plugin since a jacobianfx matrix is given.");
+    return  SiconosDOMTreeTools::getStringAttributeValue(jacobianfxNode, "matrixPlugin");
   }
 
-  /** return jacobianXF matrix
+  /** return jacobianfx matrix
    *   \return SimpleMatrix
    */
-  inline const SimpleMatrix getJacobianXFMatrix() const
+  inline const SimpleMatrix getJacobianfxMatrix() const
   {
-    if (isJacobianXFPlugin())
-      XMLException::selfThrow("FirstOrderNonLinearDSXML - getJacobianXFMatrix : jacobianXF matrix is not given since jacobianXF is calculated using a plug-in");
-    return  SiconosDOMTreeTools::getSiconosMatrixValue(jacobianXFNode);
+    if (isJacobianfxPlugin())
+      XMLException::selfThrow("FirstOrderNonLinearDSXML - getJacobianfxMatrix : jacobianfx matrix is not given since jacobianfx is calculated using a plug-in");
+    return  SiconosDOMTreeTools::getSiconosMatrixValue(jacobianfxNode);
   }
 
-  /** to save the jacobianXF matrix
+  /** to save the jacobianfx matrix
    *   \param a SiconosMatrix
    */
-  void setJacobianXFMatrix(const SiconosMatrix&v);
+  void setJacobianfxMatrix(const SiconosMatrix&v);
 
-  /** to save the JacobianXF plugin of the LagrangianDSXML
+  /** to save the Jacobianfx plugin of the LagrangianDSXML
    *   \param a string (name of the plug-in)
    */
-  void setJacobianXFPlugin(const std::string& plugin);
+  void setJacobianfxPlugin(const std::string& plugin);
 
   /** Returns the xMemoryXML* of the DynamicalSystemXML
    *   \return SiconosMemoryXML*
@@ -269,12 +269,12 @@ public:
     return (fNode);
   }
 
-  /** returns true if jacobianXFNode is defined
+  /** returns true if jacobianfxNode is defined
    *  \return a bool
    */
-  inline bool hasJacobianXF() const
+  inline bool hasJacobianfx() const
   {
-    return (jacobianXFNode);
+    return (jacobianfxNode);
   }
 
   /** Return true if M is calculated from a plugin
@@ -293,12 +293,12 @@ public:
     return xmlHasProp(fNode, (xmlChar *) VECTORPLUGIN.c_str());
   }
 
-  /** Return true if jacobianXF is calculated from a plugin
+  /** Return true if jacobianfx is calculated from a plugin
    *  \return a bool
    */
-  inline bool isJacobianXFPlugin() const
+  inline bool isJacobianfxPlugin() const
   {
-    return xmlHasProp(jacobianXFNode, (xmlChar *) MATRIXPLUGIN.c_str());
+    return xmlHasProp(jacobianfxNode, (xmlChar *) MATRIXPLUGIN.c_str());
   }
 };
 DEFINE_SPTR(FirstOrderNonLinearDSXML);

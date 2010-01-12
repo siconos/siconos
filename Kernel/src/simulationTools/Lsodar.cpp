@@ -137,7 +137,7 @@ void Lsodar::computeJacobianRhs(double t)
 {
   DSIterator it;
   for (it = OSIDynamicalSystems->begin(); it != OSIDynamicalSystems->end(); ++it)
-    (*it)->computeJacobianXRhs(t);
+    (*it)->computeJacobianRhsx(t);
 }
 
 void Lsodar::f(integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xdot)

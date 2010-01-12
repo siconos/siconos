@@ -391,7 +391,7 @@ void EventDriven::computeJacobianF(SP::OneStepIntegrator osi,
   unsigned int i = 0;
   for (it = lsodar->dynamicalSystemsBegin(); it != lsodar->dynamicalSystemsEnd(); ++it)
   {
-    SP::SiconosMatrix jacotmp = (*it)->jacobianXRhs(); // Pointer link !
+    SP::SiconosMatrix jacotmp = (*it)->jacobianRhsx(); // Pointer link !
     for (unsigned int j = 0 ; j < (*it)->getN() ; ++j)
     {
       for (unsigned k = 0 ; k < (*it)->getDim() ; ++k)

@@ -23,12 +23,12 @@ using namespace std;
 
 FirstOrderNonLinearDSXML::FirstOrderNonLinearDSXML():
   DynamicalSystemXML(), x0Node(NULL), xNode(NULL), MNode(NULL),
-  fNode(NULL), jacobianXFNode(NULL), xMemoryNode(NULL)
+  fNode(NULL), jacobianfxNode(NULL), xMemoryNode(NULL)
 {}
 
 FirstOrderNonLinearDSXML::FirstOrderNonLinearDSXML(xmlNodePtr DSNode, bool isBVP):
   DynamicalSystemXML(DSNode, isBVP), x0Node(NULL), xNode(NULL), MNode(NULL),
-  fNode(NULL), jacobianXFNode(NULL), xMemoryNode(NULL)
+  fNode(NULL), jacobianfxNode(NULL), xMemoryNode(NULL)
 {
   xmlNodePtr node;
 
@@ -45,7 +45,7 @@ FirstOrderNonLinearDSXML::FirstOrderNonLinearDSXML(xmlNodePtr DSNode, bool isBVP
     fNode = node;
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DS_JACOBIANXF)))
-    jacobianXFNode = node;
+    jacobianfxNode = node;
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DS_XMEMORY)))
   {
@@ -90,20 +90,20 @@ void FirstOrderNonLinearDSXML::setFPlugin(const std::string& plugin)
     SiconosDOMTreeTools::setStringAttributeValue(fNode, "vectorPlugin", plugin);
 }
 
-void FirstOrderNonLinearDSXML::setJacobianXFMatrix(const SiconosMatrix&m)
+void FirstOrderNonLinearDSXML::setJacobianfxMatrix(const SiconosMatrix&m)
 {
-  SiconosDOMTreeTools::setSiconosMatrixNodeValue(jacobianXFNode, m);
+  SiconosDOMTreeTools::setSiconosMatrixNodeValue(jacobianfxNode, m);
 }
 
-void FirstOrderNonLinearDSXML::setJacobianXFPlugin(const std::string& plugin)
+void FirstOrderNonLinearDSXML::setJacobianfxPlugin(const std::string& plugin)
 {
-  if (!jacobianXFNode)
+  if (!jacobianfxNode)
   {
-    jacobianXFNode = SiconosDOMTreeTools::createSingleNode(rootNode, DS_JACOBIANXF);
-    xmlNewProp(jacobianXFNode, (xmlChar*)("matrixPlugin"), (xmlChar*)plugin.c_str());
+    jacobianfxNode = SiconosDOMTreeTools::createSingleNode(rootNode, DS_JACOBIANXF);
+    xmlNewProp(jacobianfxNode, (xmlChar*)("matrixPlugin"), (xmlChar*)plugin.c_str());
   }
   else
-    SiconosDOMTreeTools::setStringAttributeValue(jacobianXFNode, "matrixPlugin", plugin);
+    SiconosDOMTreeTools::setStringAttributeValue(jacobianfxNode, "matrixPlugin", plugin);
 }
 
 void FirstOrderNonLinearDSXML::setXMemory(const SiconosMemory& smem)

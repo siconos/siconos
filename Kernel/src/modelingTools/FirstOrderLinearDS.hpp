@@ -57,7 +57,7 @@ typedef   void (*LDSPtrFunction)(double, unsigned int, double*, unsigned int, do
  *
  * - Construction: A and b are optional, and can be given as a
  *   matrix/vector or a plug-in.
- * - Initialization: compute values at time=t0 (rhs, jacobianXF, A
+ * - Initialization: compute values at time=t0 (rhs, jacobianfx, A
  *    ...), usually done when calling simulation->initialize.
  * - Computation at time t, by calling "compute" functions
  *      => computeA
@@ -170,7 +170,7 @@ public:
     return _A;
   }
 
-  virtual SP::SiconosMatrix jacobianXF() const
+  virtual SP::SiconosMatrix jacobianfx() const
   {
     return _A;
   };
@@ -236,7 +236,7 @@ public:
 
   // --- plugins related functions
 
-  /** set a specified function to compute the matrix A => same action as setComputeJacobianXFFunction
+  /** set a specified function to compute the matrix A => same action as setComputeJacobianfxFunction
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
@@ -261,7 +261,7 @@ public:
   void setComputebFunction(LDSPtrFunction fct);
 
   /** default function to compute matrix A => same action as
-      computeJacobianXF
+      computeJacobianfx
    */
   void computeA(double);
 
@@ -281,7 +281,7 @@ public:
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
    */
-  void computeJacobianXRhs(double, bool  = false);
+  void computeJacobianRhsx(double, bool  = false);
 
   // --- xml related functions ---
 

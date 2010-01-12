@@ -33,7 +33,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML): FirstOrder
   SP::FirstOrderLinearDSXML foldsxml = (boost::static_pointer_cast <FirstOrderLinearDSXML>(dsxml));
 
   // Check if f is given as a plug-in in xml input file.
-  if (foldsxml->hasF() || foldsxml->hasJacobianXF())
+  if (foldsxml->hasF() || foldsxml->hasJacobianfx())
     RuntimeException::selfThrow("FirstOrderLinearDS - xml constructor, you give a f or its jacobian as a plug-in for a FirstOrderLinearDS -> set rather A and b plug-in.");
 
   string plugin;
@@ -139,13 +139,13 @@ void FirstOrderLinearDS::initRhs(double time)
   computeRhs(time); // If necessary, this will also compute A and b.
   if (! _jacxRhs)  // if not allocated with a set or anything else
   {
-    if (_A && ! _M)  // if M is not defined, then A = jacobianXRhs, no memory allocation for that one.
+    if (_A && ! _M)  // if M is not defined, then A = jacobianRhsx, no memory allocation for that one.
       _jacxRhs = _A;
     else if (_A && _M)
       _jacxRhs.reset(new SimpleMatrix(_n, _n));
     // else no allocation, jacobian is equal to 0.
   }
-  computeJacobianXRhs(time);
+  computeJacobianRhsx(time);
 }
 
 void FirstOrderLinearDS::updatePlugins(double time)
@@ -218,7 +218,7 @@ void FirstOrderLinearDS::computeb(const double time)
 void FirstOrderLinearDS::computeRhs(const double time, const bool)
 {
   // second argument is useless at the time - Used in derived classes
-  // compute A=jacobianXF
+  // compute A=jacobianfx
 
   *_x[1] = * _r;
 
@@ -245,7 +245,7 @@ void FirstOrderLinearDS::computeRhs(const double time, const bool)
   }
 }
 
-void FirstOrderLinearDS::computeJacobianXRhs(const double time, const bool)
+void FirstOrderLinearDS::computeJacobianRhsx(const double time, const bool)
 {
   computeA(time);
 
@@ -255,10 +255,10 @@ void FirstOrderLinearDS::computeJacobianXRhs(const double time, const bool)
     // copy M into invM for LU-factorisation, at the first call of this function.
     if (! _invM)
       _invM.reset(new SimpleMatrix(*_M));
-    // solve MjacobianXRhs = A
+    // solve MjacobianRhsx = A
     _invM->PLUForwardBackwardInPlace(*_jacxRhs);
   }
-  // else jacobianXRhs = A, pointers equality.
+  // else jacobianRhsx = A, pointers equality.
 
 }
 

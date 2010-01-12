@@ -204,11 +204,11 @@ void DynamicalSystem::setRPtr(SP::SiconosVector newPtr)
 
 }
 
-void DynamicalSystem::setJacobianXRhs(const SiconosMatrix& newValue)
+void DynamicalSystem::setJacobianRhsx(const SiconosMatrix& newValue)
 {
   // check dimensions ...
   if (newValue.size(0) != _n || newValue.size(1) != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setJacobianXRhs - inconsistent sizes between jacobianXRhs input and n - Maybe you forget to set n?");
+    RuntimeException::selfThrow("DynamicalSystem::setJacobianRhsx - inconsistent sizes between jacobianRhsx input and n - Maybe you forget to set n?");
 
   if (_jacxRhs)
     *_jacxRhs = newValue;
@@ -217,11 +217,11 @@ void DynamicalSystem::setJacobianXRhs(const SiconosMatrix& newValue)
     _jacxRhs.reset(new SimpleMatrix(newValue));
 }
 
-void DynamicalSystem::setJacobianXRhsPtr(SP::SiconosMatrix newPtr)
+void DynamicalSystem::setJacobianRhsxPtr(SP::SiconosMatrix newPtr)
 {
   // check dimensions ...
   if (newPtr->size(0) != _n || newPtr->size(1) != _n)
-    RuntimeException::selfThrow("DynamicalSystem::setJacobianXRhsPtr - inconsistent sizes between _jacxRhs input and n - Maybe you forget to set n?");
+    RuntimeException::selfThrow("DynamicalSystem::setJacobianRhsxPtr - inconsistent sizes between _jacxRhs input and n - Maybe you forget to set n?");
 
   _jacxRhs = newPtr;
 }
@@ -249,24 +249,24 @@ void DynamicalSystem::setZPtr(SP::SiconosVector newPtr)
   _z = newPtr;
 }
 /*
-void DynamicalSystem::setG(const PVFint& newValue)
+void DynamicalSystem::setG(const PVFInt& newValue)
 {
   assert(newValue.size()==n&&"DynamicalSystem - setG: inconsistent dimensions with problem size for input vector g");
 
   if( !g  )
-    g.reset(new PVFint(newValue));
+    g.reset(new PVFInt(newValue));
   else
     *g = newValue;
 }
 */
 /*
-void DynamicalSystem::setJacobianG(unsigned int i, const PMFint& newValue)
+void DynamicalSystem::setJacobianG(unsigned int i, const PMFInt& newValue)
 {
   assert(newValue.size(0)==n&&"DynamicalSystem - setJacobianG: inconsistent dimensions with problem size for matrix jacobianG.");
   assert(newValue.size(1)==n&&"DynamicalSystem - setJacobianG: inconsistent dimensions with problem size for matrix jacobianG.");
 
   if( !jacobianG [i] )
-    jacobianG[i].reset(new PMFint(newValue));
+    jacobianG[i].reset(new PMFInt(newValue));
   else
     *jacobianG[i] = newValue;
 }
@@ -275,7 +275,7 @@ void DynamicalSystem::setJacobianG(unsigned int i, const PMFint& newValue)
 void DynamicalSystem::update(double time)
 {
   computeRhs(time);
-  computeJacobianXRhs(time);
+  computeJacobianRhsx(time);
 }
 
 // ===== MEMORY MANAGEMENT FUNCTIONS =====

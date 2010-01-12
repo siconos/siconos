@@ -95,7 +95,7 @@ void FirstOrderLinearTIDS::computeRhs(const double time, const bool)
     _invM->PLUForwardBackwardInPlace(*_x[1]);
 }
 
-void FirstOrderLinearTIDS::computeJacobianXRhs(const double time, const bool)
+void FirstOrderLinearTIDS::computeJacobianRhsx(const double time, const bool)
 {
   // Nothing to be done: _jacxRhs is constant and computed during initialize. But this function is required to avoid call to base class function.
 }

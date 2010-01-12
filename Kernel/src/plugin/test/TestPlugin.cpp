@@ -26,7 +26,7 @@ extern "C" void computeF(double time, unsigned int sizeOfX, const double* x, dou
     f[i] = time * x[i];
 }
 
-extern "C" void computeJacobianXF(double time, unsigned int sizeOfX, const double* x, double* jacob, unsigned int sizeZ, double* z)
+extern "C" void computeJacobianfx(double time, unsigned int sizeOfX, const double* x, double* jacob, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < sizeOfX * sizeOfX; i++)
     jacob[i] = i + 1;
@@ -61,25 +61,25 @@ extern "C" void computeNNL(unsigned int sizeOfq, const double *q, const double *
     NNL[i] = i * q[i];
 }
 
-extern "C" void computeJacobianqFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
+extern "C" void computeJacobianFIntq(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
 {
   for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];
 }
 
-extern "C" void computeJacobianVelocityFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
+extern "C" void computeJacobianFintVelocity(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
 {
   for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];
 }
 
-extern "C" void computeJacobianqNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
+extern "C" void computeJacobianNNLq(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
 {
   for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];
 }
 
-extern "C" void computeJacobianVelocityNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
+extern "C" void computeJacobianNNLVelocity(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeOfZ, double* z)
 {
   for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];

@@ -201,7 +201,7 @@ public:
    *  \param bool isDSup : flag to avoid recomputation of operators
    *  \exception RuntimeException
    */
-  void computeJacobianXRhs(double, bool  = false);
+  void computeJacobianRhsx(double, bool  = false);
 
   // --- Miscellaneous ---
 

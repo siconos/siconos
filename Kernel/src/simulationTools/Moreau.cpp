@@ -275,11 +275,11 @@ void Moreau::initW(double t, SP::DynamicalSystem ds)
     else
       W->eye();
 
-    // d->computeJacobianXF(t); // Computation of JacxF is not required here
+    // d->computeJacobianfx(t); // Computation of JacxF is not required here
     // since it must have been done in OSI->initialize, before a call to this function.
 
     // Add -h*_theta*jacobian_XF to W
-    scal(-h * _theta, *d->jacobianXF(), *W, false);
+    scal(-h * _theta, *d->jacobianfx(), *W, false);
   }
   // 2 - First order linear systems
   //   else if (dsType == FOLDS || dsType == FOLTIDS)
@@ -370,9 +370,9 @@ void Moreau::computeW(double t, SP::DynamicalSystem ds)
     else
       W->eye();
 
-    d->computeJacobianXF(t);
+    d->computeJacobianfx(t);
     // Add -h*_theta*jacobian_XF to W
-    scal(-h * _theta, *d->jacobianXF(), *W, false);
+    scal(-h * _theta, *d->jacobianfx(), *W, false);
   }
   // 2 - First order linear systems
   else if (dsType == FOLDS || dsType == FOLTIDS)

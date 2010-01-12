@@ -170,7 +170,7 @@ void LagrangianLinearTIDSTest::testcomputeDS()
   SP::LagrangianLinearTIDS copy = boost::static_pointer_cast<LagrangianLinearTIDS>(ds);
   double time = 1.5;
   ds->initialize("EventDriven", time);
-  SP::SiconosMatrix jx = ds->jacobianXRhs();
+  SP::SiconosMatrix jx = ds->jacobianRhsx();
   SP::SiconosVector vf = ds->rhs();
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSI : ", *(vf->vector(0)) == *velocity0, true);

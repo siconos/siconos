@@ -105,10 +105,10 @@ typedef void (*FPtr6)(double, unsigned int, const double*, const double*, double
   Right-hand side (\f$ \dot x \f$) of the equation is computed thanks
   to computeRhs(t)
 
-  and its Jacobian according to x, named jacobianXRhs, with
-  computeJacobianXRhs(t).
+  and its Jacobian according to x, named jacobianRhsx, with
+  computeJacobianRhsx(t).
 
-  <b> Those two functions (computeRhs and computeJacobianXRhs) are
+  <b> Those two functions (computeRhs and computeJacobianRhsx) are
   pure virtual and must be implemented in all the derived
   classes. </b>
 
@@ -491,12 +491,12 @@ public:
    */
   void setRhsPtr(SP::SiconosVector);
 
-  // --- JacobianXRhs ---
+  // --- JacobianRhsx ---
 
   /** get the value of the gradient according to \f$ x \f$ of the right-hand side
    *  \return SimpleMatrix
    */
-  inline const SimpleMatrix getJacobianXRhs() const
+  inline const SimpleMatrix getJacobianRhsx() const
   {
     return *_jacxRhs;
   }
@@ -504,20 +504,20 @@ public:
   /** get gradient according to \f$ x \f$ of the right-hand side (pointer)
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix jacobianXRhs() const
+  inline SP::SiconosMatrix jacobianRhsx() const
   {
     return _jacxRhs;
   }
 
-  /** set the value of JacobianXRhs to newValue
+  /** set the value of JacobianRhsx to newValue
    *  \param SiconosMatrix newValue
    */
-  void setJacobianXRhs(const SiconosMatrix&);
+  void setJacobianRhsx(const SiconosMatrix&);
 
-  /** set JacobianXRhs to pointer newPtr
+  /** set JacobianRhsx to pointer newPtr
    *  \param SP::SiconosMatrix  newPtr
    */
-  void setJacobianXRhsPtr(SP::SiconosMatrix newPtr);
+  void setJacobianRhsxPtr(SP::SiconosMatrix newPtr);
 
   // -- z --
 
@@ -551,7 +551,7 @@ public:
   // --- g ---
   /** get the value of g
    *  \return plugged vector
-  inline const PVFint getg() const { return *g; }
+  inline const PVFInt getg() const { return *g; }
    */
 
   /** get g
@@ -565,7 +565,7 @@ public:
   /** set the value of g to newValue
    *  \param a plugged vector
 
-  void setG(const PVFint&);
+  void setG(const PVFInt&);
   */
 
   /** set g to pointer newPtr
@@ -581,7 +581,7 @@ public:
     \param index of the desired jacobian
     *  \return a plugged-matrix
 
-  inline const PMFint getJacobianG(unsigned int i) const { return *(jacobianG[i]); }
+  inline const PMFInt getJacobianG(unsigned int i) const { return *(jacobianG[i]); }
   */
 
   /** get jacobianG
@@ -601,7 +601,7 @@ public:
   /** set the value of jacobianG to newValue
       \param index of the desired jacobian
       *  \param plugged-matrix newValue
-  void setJacobianG(unsigned int, const PMFint&);
+  void setJacobianG(unsigned int, const PMFInt&);
       */
 
   /** set jacobianG to pointer newPtr
@@ -819,7 +819,7 @@ public:
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
    */
-  virtual void computeJacobianXRhs(double, bool  = false) = 0;
+  virtual void computeJacobianRhsx(double, bool  = false) = 0;
 
   //@}
 

@@ -112,7 +112,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML):
 
   string plugin;
 
-  // f and jacobianXF are required for DynamicalSystem but not for derived class.
+  // f and jacobianfx are required for DynamicalSystem but not for derived class.
   // Then we can not set exception if they are not given.
   if(fonlds->hasM())
     {
@@ -145,18 +145,18 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML):
   }
     }
 
-  if(fonlds->hasJacobianXF())
+  if(fonlds->hasJacobianfx())
     {
-      if ( fonlds->isJacobianXFPlugin())
+      if ( fonlds->isJacobianfxPlugin())
   {
-    plugin = fonlds->getJacobianXFPlugin();
-    setComputeJacobianXFFunction(SSL::getPluginName( plugin ), SSL::getPluginFunctionName( plugin ));
+    plugin = fonlds->getJacobianfxPlugin();
+    setComputeJacobianfxFunction(SSL::getPluginName( plugin ), SSL::getPluginFunctionName( plugin ));
   }
-      else // This means that jacobianXF is constant
+      else // This means that jacobianfx is constant
   {
-          jacobianXF.reset(new PMJF(fonlds->getJacobianXFMatrix()));
-    if(jacobianXF->size(0)!=n || jacobianXF->size(1)!=n)
-      RuntimeException::selfThrow("FirstOrderNonLinearDS:: xml constructor, jacobianXF size differs from n!");
+          jacobianfx.reset(new PMJF(fonlds->getJacobianfxMatrix()));
+    if(jacobianfx->size(0)!=n || jacobianfx->size(1)!=n)
+      RuntimeException::selfThrow("FirstOrderNonLinearDS:: xml constructor, jacobianfx size differs from n!");
   }
     }
 
@@ -168,7 +168,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML):
 }
 
 // From a minimum set of data
-FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0, const string& fPlugin, const string& jacobianXFPlugin):
+FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0, const string& fPlugin, const string& jacobianfxPlugin):
   DynamicalSystem(DS::FONLDS, newX0.size())
 {
   // == Initial conditions ==
@@ -196,10 +196,10 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const SiconosVector& newX0, const s
   // == f and its jacobian ==
   // Allocation and link with the plug-in
   _pluginf->setComputeFunction(fPlugin);
-  _pluginJacxf->setComputeFunction(jacobianXFPlugin);
-  //  Plugin::setFunction(&computeJacobianXFPtr, SSL::getPluginName( jacobianXFPlugin ),SSL::getPluginFunctionName( jacobianXFPlugin ));
+  _pluginJacxf->setComputeFunction(jacobianfxPlugin);
+  //  Plugin::setFunction(&computeJacobianfxPtr, SSL::getPluginName( jacobianfxPlugin ),SSL::getPluginFunctionName( jacobianfxPlugin ));
   //  _pluginNameComputeFPtr = fPlugin;
-  //  pluginNameComputeJacobianXFPtr = jacobianXFPlugin;
+  //  pluginNameComputeJacobianfxPtr = jacobianfxPlugin;
 
   checkDynamicalSystem();
 }
@@ -253,39 +253,39 @@ void FirstOrderNonLinearDS::setF(const PVF& newValue)
     *_f = newValue;
     }*/
 /*
-void FirstOrderNonLinearDS::setJacobianXF(const PMJF& newValue)
+void FirstOrderNonLinearDS::setJacobianfx(const PMJF& newValue)
 {
- assert(newValue.size(0)==n&&"FirstOrderNonLinearDS - setJacobianXF: inconsistent dimensions with problem size for input matrix M.");
- assert(newValue.size(1)==n&&"FirstOrderNonLinearDS - setJacobianXF: inconsistent dimensions with problem size for input matrix M.");
+ assert(newValue.size(0)==n&&"FirstOrderNonLinearDS - setJacobianfx: inconsistent dimensions with problem size for input matrix M.");
+ assert(newValue.size(1)==n&&"FirstOrderNonLinearDS - setJacobianfx: inconsistent dimensions with problem size for input matrix M.");
 
- if( ! jacobianXF )
-   jacobianXF.reset(new PMJF(newValue));
+ if( ! jacobianfx )
+   jacobianfx.reset(new PMJF(newValue));
  else
-   *jacobianXF = newValue;
+   *jacobianfx = newValue;
 }
 */
 void FirstOrderNonLinearDS::initRhs(double time)
 {
-  // compute initial values for f and jacobianXF, initialize right-hand side.
+  // compute initial values for f and jacobianfx, initialize right-hand side.
   computeRhs(time); // this will compute, if required, f and M.
 
   if (! _jacxRhs)  // if not allocated with a set or anything else
   {
-    if (_jacobianXF && ! _M)  // if M is not defined, then jacobianXF = jacobianXRhs, no memory allocation for that one.
-      _jacxRhs = _jacobianXF;
-    else if (_jacobianXF && _M)
+    if (_jacobianfx && ! _M)  // if M is not defined, then jacobianfx = jacobianRhsx, no memory allocation for that one.
+      _jacxRhs = _jacobianfx;
+    else if (_jacobianfx && _M)
       _jacxRhs.reset(new SimpleMatrix(_n, _n));
 
     // else no allocation, jacobian is equal to 0.
   }
-  computeJacobianXRhs(time);
+  computeJacobianRhsx(time);
 }
 
 void FirstOrderNonLinearDS::updatePlugins(double time)
 {
   computeM(time);
   computeF(time);
-  computeJacobianXF(time);
+  computeJacobianfx(time);
 }
 
 void FirstOrderNonLinearDS::initialize(const string& simulationType, double time, unsigned int sizeOfMemory)
@@ -351,12 +351,12 @@ void FirstOrderNonLinearDS::setComputeFFunction(FPtr1 fct)
   _pluginf->setComputeFunction((void *)fct);
 }
 
-void FirstOrderNonLinearDS::setComputeJacobianXFFunction(const string& pluginPath, const string& functionName)
+void FirstOrderNonLinearDS::setComputeJacobianfxFunction(const string& pluginPath, const string& functionName)
 {
   _pluginJacxf->setComputeFunction(pluginPath, functionName);
 }
 
-void FirstOrderNonLinearDS::setComputeJacobianXFFunction(FPtr1 fct)
+void FirstOrderNonLinearDS::setComputeJacobianfxFunction(FPtr1 fct)
 {
   _pluginJacxf->setComputeFunction((void *)fct);
 }
@@ -394,18 +394,18 @@ void FirstOrderNonLinearDS::computeF(double time, SP::SiconosVector x2)
   // else nothing!
 }
 
-void FirstOrderNonLinearDS::computeJacobianXF(double time, bool)
+void FirstOrderNonLinearDS::computeJacobianfx(double time, bool)
 {
   // second argument is useless at the time - Used in derived classes
   if (_pluginJacxf->fPtr)
-    ((FNLDSPtrfct)_pluginJacxf->fPtr)(time, _n, &((*(_x[0]))(0)), &(*_jacobianXF)(0, 0), _z->size(), &(*_z)(0));
+    ((FNLDSPtrfct)_pluginJacxf->fPtr)(time, _n, &((*(_x[0]))(0)), &(*_jacobianfx)(0, 0), _z->size(), &(*_z)(0));
 }
 
-void FirstOrderNonLinearDS::computeJacobianXF(double time, SP::SiconosVector x2)
+void FirstOrderNonLinearDS::computeJacobianfx(double time, SP::SiconosVector x2)
 {
   // second argument is useless at the time - Used in derived classes
   if (_pluginJacxf->fPtr)
-    ((FNLDSPtrfct)_pluginJacxf->fPtr)(time, _n, &((*x2)(0)), &(*_jacobianXF)(0, 0), _z->size(), &(*_z)(0));
+    ((FNLDSPtrfct)_pluginJacxf->fPtr)(time, _n, &((*x2)(0)), &(*_jacobianfx)(0, 0), _z->size(), &(*_z)(0));
 }
 
 void FirstOrderNonLinearDS::computeRhs(double time, bool)
@@ -431,24 +431,24 @@ void FirstOrderNonLinearDS::computeRhs(double time, bool)
   }
 }
 
-void FirstOrderNonLinearDS::computeJacobianXRhs(double time, bool)
+void FirstOrderNonLinearDS::computeJacobianRhsx(double time, bool)
 {
   // second argument is useless at the time - Used in derived classes
 
-  // compute jacobian of rhs according to x, = M-1(jacobianXF + jacobianX(T.u))
+  // compute jacobian of rhs according to x, = M-1(jacobianfx + jacobianX(T.u))
   // At the time, second term is set to zero.
-  computeJacobianXF(time);
-  // solve M*jacobianXRhS = jacobianXF
-  if (_M && _jacobianXF)
+  computeJacobianfx(time);
+  // solve M*jacobianXRhS = jacobianfx
+  if (_M && _jacobianfx)
   {
-    *_jacxRhs = *_jacobianXF;
+    *_jacxRhs = *_jacobianfx;
     // copy _M into _invM for LU-factorisation, at the first call of this function.
     if (! _invM)
       _invM.reset(new SimpleMatrix(*_M));
 
     _invM->PLUForwardBackwardInPlace(*_jacxRhs);
   }
-  // else jacobianXRhs = jacobianXF, pointers equality set in initRhs
+  // else jacobianRhsx = jacobianfx, pointers equality set in initRhs
 
 }
 
@@ -464,8 +464,8 @@ void FirstOrderNonLinearDS::saveSpecificDataToXML()
 
   //   if( _computeFPtr)
   //     fonlds->setFPlugin(_pluginNameComputeFPtr);
-  //   if( computeJacobianXFPtr)
-  //     fonlds->setJacobianXFPlugin(pluginNamePluginComputeM);
+  //   if( computeJacobianfxPtr)
+  //     fonlds->setJacobianfxPlugin(pluginNamePluginComputeM);
 }
 
 // ===== MISCELLANEOUS ====

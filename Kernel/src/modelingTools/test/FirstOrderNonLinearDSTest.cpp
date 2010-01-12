@@ -85,7 +85,7 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1E : ", ds->getX0() == *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1E : ", ds->getM() == *M, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1H : ", ds->F()->isPlugged(), false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1I : ", ds->jacobianXF()->isPlugged(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1I : ", ds->jacobianfx()->isPlugged(), false);
 
   cout << "--> Constructor xml test ended with success." << endl;
 }
@@ -100,10 +100,10 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2D : ", ds->getN() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2E : ", ds->getX0() == 2 * *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2F : ", ds->F()->isPlugged(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2G : ", ds->jacobianXF()->isPlugged(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2G : ", ds->jacobianfx()->isPlugged(), true);
   ds->initialize("TimeStepping", 0.5);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2H : ", ds->getF() == *x0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2I : ", ds->getJacobianXF() == *J0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2I : ", ds->getJacobianfx() == *J0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2I : ", !ds->M(), false);
   cout << "--> Constructor xml 2 test ended with success." << endl;
 }
@@ -113,7 +113,7 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS2()
 void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS3()
 {
   cout << "--> Test: constructor 3." << endl;
-  SP::FirstOrderNonLinearDS ds(new FirstOrderNonLinearDS(*x0, "TestPlugin:computeF", "TestPlugin:computeJacobianXF"));
+  SP::FirstOrderNonLinearDS ds(new FirstOrderNonLinearDS(*x0, "TestPlugin:computeF", "TestPlugin:computeJacobianfx"));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3A : ", ds->getType() == DS::FONLDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3C : ", ds->getN() == 3, true);
@@ -122,7 +122,7 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS3()
   ds->initialize("TimeStepping", time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3E : ", ds->getRhs() == time* *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2H : ", ds->getF() == time* *x0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2I : ", ds->getJacobianXF() == *J0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2I : ", ds->getJacobianfx() == *J0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2I : ", !ds->M(), false);
   cout << "--> Constructor 3 test ended with success." << endl;
 }
@@ -188,23 +188,23 @@ void FirstOrderNonLinearDSTest::testSetRPtr()
 }
 
 // set JacobianX
-void FirstOrderNonLinearDSTest::testSetJacobianXF()
+void FirstOrderNonLinearDSTest::testSetJacobianfx()
 {
-  cout << "--> Test: setJacobianXF." << endl;
+  cout << "--> Test: setJacobianfx." << endl;
   SP::FirstOrderNonLinearDS ds1(new FirstOrderNonLinearDS(tmpxml2));
-  ds1->setJacobianXF(*J0);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetJacobianX : ", ds1->getJacobianXF() == *J0, true);
-  cout << "--> setJacobianXF test ended with success." << endl;
+  ds1->setJacobianfx(*J0);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetJacobianX : ", ds1->getJacobianfx() == *J0, true);
+  cout << "--> setJacobianfx test ended with success." << endl;
 }
 
 // setJacobianXPtr
-void FirstOrderNonLinearDSTest::testSetJacobianXFPtr()
+void FirstOrderNonLinearDSTest::testSetJacobianfxPtr()
 {
-  cout << "--> Test: setJacobianXFPtr." << endl;
+  cout << "--> Test: setJacobianfxPtr." << endl;
   SP::FirstOrderNonLinearDS ds1(new FirstOrderNonLinearDS(tmpxml2));
-  ds1->setJacobianXFPtr(J0);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetJacobianXFPtr : ", ds1->getJacobianXF() == *J0, true);
-  cout << "--> setJacobianXFPtr test ended with success." << endl;
+  ds1->setJacobianfxPtr(J0);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetJacobianfxPtr : ", ds1->getJacobianfx() == *J0, true);
+  cout << "--> setJacobianfxPtr test ended with success." << endl;
 }
 
 // init

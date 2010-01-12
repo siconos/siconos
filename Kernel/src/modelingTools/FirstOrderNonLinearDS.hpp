@@ -60,8 +60,8 @@ typedef void (*FNLDSPtrfct)(double, unsigned int, const double*, double*, unsign
  * To define a boundary Value Problem, the pointer on  a BoundaryCondition must be set.
  *
  * \f$ f(x,t) \f$ is a plug-in function, and can be computed using computeF(t).
- * Its Jacobian according to x is denoted jacobianXF, and computed thanks to computeJacobianXF(t).
- * f and jacobianXF can be plugged to external functions thanks to setComputeFFunction/setComputeJacobianXFFunction.
+ * Its Jacobian according to x is denoted jacobianfx, and computed thanks to computeJacobianfx(t).
+ * f and jacobianfx can be plugged to external functions thanks to setComputeFFunction/setComputeJacobianfxFunction.
  *
  * Right-hand side of the equation is computed thanks to computeRhs(t).
  *
@@ -69,10 +69,10 @@ typedef void (*FNLDSPtrfct)(double, unsigned int, const double*, double*, unsign
  *    \dot x =  M^{-1}(f(x,t,z)+ r)
  * \f]
  *
- * Its Jacobian according to x is jacobianXRhs:
+ * Its Jacobian according to x is jacobianRhsx:
  *
  *  \f[
- *   jacobianXRhs = \nabla_xrhs(x,t,z) = M^{-1}\nabla_xf(x,t,z)
+ *   jacobianRhsx = \nabla_xrhs(x,t,z) = M^{-1}\nabla_xf(x,t,z)
  *  \f]
  *
  * At the time:
@@ -94,7 +94,7 @@ protected:
   SP::SiconosVector _fold;
 
   /** Gradient of \f$ f(x,t,z) \f$ with respect to \f$ x\f$*/
-  SP::SiconosMatrix _jacobianXF;
+  SP::SiconosMatrix _jacobianfx;
 
   /** DynamicalSystem plug-in to compute f(x,t,z) - id="f".
     *  @param  : current time
@@ -113,13 +113,13 @@ protected:
    * @param time : current time
    * @param sizeOfX : size of vector x
    * @param x : pointer to the first element of x
-   * @param[in,out] jacob : pointer to the first element of jacobianXF matrix
+   * @param[in,out] jacob : pointer to the first element of jacobianfx matrix
    * @param  : the size of the vector z
    * @param[in,out] z: a vector of parameters, z
    */
   SP::PluggedObject _pluginJacxf;
-  //   FNLDSPtrfct computeJacobianXFPtr;
-  //   std::string pluginNameComputeJacobianXFPtr;
+  //   FNLDSPtrfct computeJacobianfxPtr;
+  //   std::string pluginNameComputeJacobianfxPtr;
 
   SP::PluggedObject _pluginM;
 
@@ -169,7 +169,7 @@ public:
   /** constructor from a set of data
    *  \param SiconosVector : initial state of this DynamicalSystem
    *  \param string : plugin name for f of this DynamicalSystem
-   *  \param string : plugin name for jacobianXF of this DynamicalSystem
+   *  \param string : plugin name for jacobianfx of this DynamicalSystem
    *  \exception RuntimeException
    */
   FirstOrderNonLinearDS(const SiconosVector&, const std::string&, const std::string&);
@@ -303,31 +303,31 @@ public:
     _f = newPtr;
   }
 
-  // --- jacobianXF ---
-  /** get the value of jacobianXF
+  // --- jacobianfx ---
+  /** get the value of jacobianfx
    *  \return a plugged-matrix
 
-  inline const PMJF getJacobianXF() const { return *jacobianXF; }
+  inline const PMJF getJacobianfx() const { return *jacobianfx; }
   */
-  /** get jacobianXF
+  /** get jacobianfx
    *  \return pointer on a plugged-matrix
    */
-  virtual SP::SiconosMatrix jacobianXF() const
+  virtual SP::SiconosMatrix jacobianfx() const
   {
-    return _jacobianXF;
+    return _jacobianfx;
   }
 
-  /** set the value of jacobianXF to newValue
+  /** set the value of jacobianfx to newValue
    *  \param plugged-matrix newValue
 
-  void setJacobianXF(const PMJF&);
+  void setJacobianfx(const PMJF&);
   */
-  /** set jacobianXF to pointer newPtr
+  /** set jacobianfx to pointer newPtr
    *  \param a plugged matrix SP
    */
-  inline void setJacobianXFPtr(SP::SiconosMatrix newPtr)
+  inline void setJacobianfxPtr(SP::SiconosMatrix newPtr)
   {
-    _jacobianXF = newPtr;
+    _jacobianfx = newPtr;
   }
 
   /** Initialization function for the rhs and its jacobian.
@@ -389,17 +389,17 @@ public:
    */
   void setComputeFFunction(FPtr1 fct);
 
-  /** to set a specified function to compute jacobianXF
+  /** to set a specified function to compute jacobianfx
    *  \param string pluginPath : the complete path to the plugin
    *  \param the string functionName : function name to use in this library
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeJacobianXFFunction(const std::string&  pluginPath, const std::string&  functionName);
+  void setComputeJacobianfxFunction(const std::string&  pluginPath, const std::string&  functionName);
 
-  /** set a specified function to compute jacobianXF
+  /** set a specified function to compute jacobianfx
    *  \param FPtr1 : a pointer on the plugin function
    */
-  void setComputeJacobianXFFunction(FPtr1 fct);
+  void setComputeJacobianfxFunction(FPtr1 fct);
 
   // --- compute plugin functions ---
 
@@ -430,7 +430,7 @@ public:
    *  \param bool isDSup : flag to avoid recomputation of operators
    *  \exception RuntimeException
    */
-  void computeJacobianXF(double, bool  = false);
+  void computeJacobianfx(double, bool  = false);
 
   /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n}
    *   \times R \mapsto R^{n \times n} \f$ with x different from
@@ -438,7 +438,7 @@ public:
    *  \param double time : current time
    *  \param SP::SiconosVector
    */
-  void computeJacobianXF(double, SP::SiconosVector);
+  void computeJacobianfx(double, SP::SiconosVector);
 
   /** Default function to the right-hand side term
    *  \param double time : current time
@@ -452,7 +452,7 @@ public:
    *  \param bool isDSup : flag to avoid recomputation of operators
    *  \exception RuntimeException
    */
-  void computeJacobianXRhs(double, bool  = false);
+  void computeJacobianRhsx(double, bool  = false);
 
   // ===== XML MANAGEMENT FUNCTIONS =====
 

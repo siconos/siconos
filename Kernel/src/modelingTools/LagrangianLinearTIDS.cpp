@@ -34,9 +34,9 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(SP::DynamicalSystemXML dsxml): Lagran
 {
   SP::LagrangianLinearTIDSXML lltidsxml = boost::static_pointer_cast <LagrangianLinearTIDSXML>(dsxml);
 
-  // If Fint or NNL is given: ignored.
+  // If FInt or NNL is given: ignored.
   if (lltidsxml->hasFInt() ||  lltidsxml->hasNNL())
-    cout << "!!!!! Warning : LagrangianLinearTIDS: xml constructor, Fint or NNL input will be ignored in xml file." << endl;
+    cout << "!!!!! Warning : LagrangianLinearTIDS: xml constructor, FInt or NNL input will be ignored in xml file." << endl;
 
   // K and C
 
@@ -121,7 +121,7 @@ void LagrangianLinearTIDS::initRhs(double time)
   _workMatrix[zeroMatrix].reset(new SimpleMatrix(_ndof, _ndof, ZERO));
   _workMatrix[idMatrix].reset(new SimpleMatrix(_ndof, _ndof, IDENTITY));
 
-  // jacobianXRhs
+  // jacobianRhsx
   if (_K)
   {
     //  bloc10 of jacobianX is solution of Mass*Bloc10 = K
@@ -232,9 +232,9 @@ void LagrangianLinearTIDS::computeRhs(double time, bool)
   _workMatrix[invMass]->PLUForwardBackwardInPlace(*_q[2]);
 }
 
-void LagrangianLinearTIDS::computeJacobianXRhs(double time, bool)
+void LagrangianLinearTIDS::computeJacobianRhsx(double time, bool)
 {
-  // Nothing to be done since jacobianXRhs is constant and filled during initialize.
+  // Nothing to be done since jacobianRhsx is constant and filled during initialize.
   // But this function is required, since it is called from Lsodar (if not present, the one of LagrangianDS will be called)
 }
 

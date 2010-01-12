@@ -44,8 +44,8 @@ private:
   CPPUNIT_TEST(testSetXPtr);
   CPPUNIT_TEST(testSetR);
   CPPUNIT_TEST(testSetRPtr);
-  CPPUNIT_TEST(testSetJacobianXF);
-  CPPUNIT_TEST(testSetJacobianXFPtr);
+  CPPUNIT_TEST(testSetJacobianfx);
+  CPPUNIT_TEST(testSetJacobianfxPtr);
   CPPUNIT_TEST(testInitMemory);
   CPPUNIT_TEST(testSwap);
   CPPUNIT_TEST(End);
@@ -63,8 +63,8 @@ private:
   void testSetXPtr();
   void testSetR();
   void testSetRPtr();
-  void testSetJacobianXF();
-  void testSetJacobianXFPtr();
+  void testSetJacobianfx();
+  void testSetJacobianfxPtr();
   void testInitMemory();
   void testSwap();
   void End();
