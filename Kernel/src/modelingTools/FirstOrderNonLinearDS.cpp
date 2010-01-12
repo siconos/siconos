@@ -295,7 +295,7 @@ void FirstOrderNonLinearDS::initRhs(double time)
 void FirstOrderNonLinearDS::updatePlugins(double time)
 {
   computeM(time);
-  computeF(time);
+  computef(time);
   computeJacobianfx(time);
 }
 
@@ -392,13 +392,13 @@ void FirstOrderNonLinearDS::computeM(double time, SP::SiconosVector x2)
   // else nothing!
 }
 
-void FirstOrderNonLinearDS::computeF(double time)
+void FirstOrderNonLinearDS::computef(double time)
 {
   if (_pluginf->fPtr)
     ((FNLDSPtrfct)_pluginf->fPtr)(time, _n, &((*(_x[0]))(0)) , &(*_f)(0), _z->size(), &(*_z)(0));
 }
 
-void FirstOrderNonLinearDS::computeF(double time, SP::SiconosVector x2)
+void FirstOrderNonLinearDS::computef(double time, SP::SiconosVector x2)
 {
   if (_pluginf->fPtr)
     ((FNLDSPtrfct)_pluginf->fPtr)(time, _n, &((*x2)(0)) , &(*_f)(0), _z->size(), &(*_z)(0));
@@ -429,7 +429,7 @@ void FirstOrderNonLinearDS::computeRhs(double time, bool)
 
   if (_f)
   {
-    computeF(time);
+    computef(time);
     *(_x[1]) += *_f;
   }
 

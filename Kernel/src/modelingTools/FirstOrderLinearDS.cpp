@@ -297,7 +297,7 @@ FirstOrderLinearDS* FirstOrderLinearDS::convert(DynamicalSystem* ds)
   FirstOrderLinearDS* lsds = dynamic_cast<FirstOrderLinearDS*>(ds);
   return lsds;
 }
-void FirstOrderLinearDS::computeF(double time)
+void FirstOrderLinearDS::computef(double time)
 {
   prod(*_A, *_x[0], *_f);
   if (_b)
@@ -307,7 +307,7 @@ void FirstOrderLinearDS::computeF(double time)
   }
 }
 
-void FirstOrderLinearDS::computeF(double time, SP::SiconosVector x2)
+void FirstOrderLinearDS::computef(double time, SP::SiconosVector x2)
 {
   RuntimeException::selfThrow("FirstOrderLinearDS::computeF - Must not be used");
   prod(*_A, *x2, *_f);

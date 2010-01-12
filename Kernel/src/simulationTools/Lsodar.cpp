@@ -44,10 +44,10 @@ extern "C" void Lsodar_g_wrapper(integer* nEq, doublereal* time, doublereal* x, 
   return global_object->g(nEq, time, x, ng, gOut);
 }
 
-// Function to wrap jacobianF: same signature as argument JAC (arg 16) in DLSODAR (see opkdmain.f in Numerics)
-extern "C" void Lsodar_jacobianF_wrapper(integer* sizeOfX, doublereal* time, doublereal* x, integer* ml, integer* mu,  doublereal* jacob, integer* nrowpd)
+// Function to wrap jacobianf: same signature as argument JAC (arg 16) in DLSODAR (see opkdmain.f in Numerics)
+extern "C" void Lsodar_jacobianf_wrapper(integer* sizeOfX, doublereal* time, doublereal* x, integer* ml, integer* mu,  doublereal* jacob, integer* nrowpd)
 {
-  return global_object->jacobianF(sizeOfX, time, x, ml, mu, jacob, nrowpd);
+  return global_object->jacobianfx(sizeOfX, time, x, ml, mu, jacob, nrowpd);
 }
 
 Lsodar::Lsodar(SP::OneStepIntegratorXML osiXML, SP::DynamicalSystemsSet dsList, SP::InteractionsSet interactionsList):
@@ -142,7 +142,7 @@ void Lsodar::computeJacobianRhs(double t)
 
 void Lsodar::f(integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xdot)
 {
-  boost::static_pointer_cast<EventDriven>(simulationLink)->computeF(shared_from_this(), sizeOfX, time, x, xdot);
+  boost::static_pointer_cast<EventDriven>(simulationLink)->computef(shared_from_this(), sizeOfX, time, x, xdot);
 }
 
 void Lsodar::g(integer* nEq, doublereal*  time, doublereal* x, integer* ng, doublereal* gOut)
@@ -150,9 +150,9 @@ void Lsodar::g(integer* nEq, doublereal*  time, doublereal* x, integer* ng, doub
   boost::static_pointer_cast<EventDriven>(simulationLink)->computeg(shared_from_this(), nEq, time, x, ng, gOut);
 }
 
-void Lsodar::jacobianF(integer* sizeOfX, doublereal* time, doublereal* x, integer* ml, integer* mu,  doublereal* jacob, integer* nrowpd)
+void Lsodar::jacobianfx(integer* sizeOfX, doublereal* time, doublereal* x, integer* ml, integer* mu,  doublereal* jacob, integer* nrowpd)
 {
-  boost::static_pointer_cast<EventDriven>(simulationLink)->computeJacobianF(shared_from_this(), sizeOfX, time, x, jacob);
+  boost::static_pointer_cast<EventDriven>(simulationLink)->computeJacobianfx(shared_from_this(), sizeOfX, time, x, jacob);
 }
 
 void Lsodar::initialize(SP::Simulation sim)
@@ -245,7 +245,7 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
   fpointer pointerToF = Lsodar_f_wrapper;
 
   // function to compute the Jacobian/x of the rhs.
-  jacopointer pointerToJacobianF = Lsodar_jacobianF_wrapper; // function to compute the Jacobian/x of the rhs.
+  jacopointer pointerToJacobianF = Lsodar_jacobianf_wrapper; // function to compute the Jacobian/x of the rhs.
 
   // function to compute the constraints
   gpointer pointerToG;

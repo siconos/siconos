@@ -93,7 +93,7 @@ public:
    *  \param doublereal*, x:array of double
    *  \param doublereal*, derivative of x (in-out parameter)
    */
-  void computeF(SP::OneStepIntegrator, integer*, doublereal*, doublereal*, doublereal*);
+  void computef(SP::OneStepIntegrator, integer*, doublereal*, doublereal*, doublereal*);
 
   /** compute jacobian of the right-hand side
    *  \param pointer to OneStepIntegrator.
@@ -102,7 +102,7 @@ public:
    *  \param doublereal*, x:array of double
    *  \param doublereal*, jacobian of f according to x (in-out parameter)
    */
-  void computeJacobianF(SP::OneStepIntegrator, integer*, doublereal*, doublereal*,  doublereal*);
+  void computeJacobianfx(SP::OneStepIntegrator, integer*, doublereal*, doublereal*,  doublereal*);
 
   /** compute constraint function g(x,t,...) for osi.
    *  \param pointer to OneStepIntegrator.

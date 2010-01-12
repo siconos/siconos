@@ -59,7 +59,7 @@ typedef void (*FNLDSPtrfct)(double, unsigned int, const double*, double*, unsign
  * \f]
  * To define a boundary Value Problem, the pointer on  a BoundaryCondition must be set.
  *
- * \f$ f(x,t) \f$ is a plug-in function, and can be computed using computeF(t).
+ * \f$ f(x,t) \f$ is a plug-in function, and can be computed using computef(t).
  * Its Jacobian according to x is denoted jacobianfx, and computed thanks to computeJacobianfx(t).
  * f and jacobianfx can be plugged to external functions thanks to setComputeFFunction/setComputeJacobianfxFunction.
  *
@@ -418,13 +418,13 @@ public:
   /** Default function to compute \f$ f: (x,t)\f$
    * \param double time : current time
    */
-  virtual void computeF(double);
+  virtual void computef(double);
 
   /** function to compute \f$ f: (x,t)\f$ with x different from current saved state.
    * \param double time : current time
    * \param SP::SiconosVector
    */
-  virtual void computeF(double, SP::SiconosVector);
+  virtual void computef(double, SP::SiconosVector);
 
   /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
    *  \param double time : current time

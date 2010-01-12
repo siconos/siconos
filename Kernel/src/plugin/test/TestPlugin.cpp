@@ -20,7 +20,7 @@
 
 // ==== Dynamical System ====
 
-extern "C" void computeF(double time, unsigned int sizeOfX, const double* x, double* f, unsigned int sizeZ, double* z)
+extern "C" void computef(double time, unsigned int sizeOfX, const double* x, double* f, unsigned int sizeZ, double* z)
 {
   for (unsigned int i = 0; i < sizeOfX; i++)
     f[i] = time * x[i];

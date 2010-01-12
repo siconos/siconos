@@ -177,14 +177,14 @@ public:
   /**  function to compute \f$ f: (x,t)\f$
    * \param double time : current time
    */
-  virtual void computeF(double);
+  virtual void computef(double);
 
   /** function to compute \f$ f: (x,t)\f$ with x different from
       current saved state.
    * \param double time : current time
    * \param SP::SiconosVector
    */
-  virtual void computeF(double, SP::SiconosVector);
+  virtual void computef(double, SP::SiconosVector);
 
 
   /** set the value of A to newValue

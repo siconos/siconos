@@ -487,13 +487,13 @@ double Moreau::computeResidu()
       if (d->f())
       {
         // computes f(ti,xi)
-        //        d->computeF(told,xold);
+        //        d->computef(told,xold);
         double coef = -h * (1 - _theta);
         // residuFree += coef * f_i
         scal(coef, *d->fold(), *residuFree, false);
 
         // computes f(ti+1, x_k,i+1) = f(t,x)
-        d->computeF(t);
+        d->computef(t);
         coef = -h * _theta;
         // residuFree += coef * fL_k,i+1
         scal(coef, *d->f(), *residuFree, false);

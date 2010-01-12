@@ -310,7 +310,7 @@ void EventDriven::initLevelMax()
     _levelMax++;
 }
 
-void EventDriven::computeF(SP::OneStepIntegrator osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
+void EventDriven::computef(SP::OneStepIntegrator osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
 {
 
   // computeF is supposed to fill xdot in, using the definition of the
@@ -318,7 +318,7 @@ void EventDriven::computeF(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
 
   // Check osi type: only lsodar is allowed.
   if (osi->getType() != OSI::LSODAR)
-    RuntimeException::selfThrow("EventDriven::computeF(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
+    RuntimeException::selfThrow("EventDriven::computef(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
 
   SP::Lsodar lsodar = boost::static_pointer_cast<Lsodar>(osi);
 
@@ -358,14 +358,14 @@ void EventDriven::computeF(SP::OneStepIntegrator osi, integer * sizeOfX, doubler
   }
 }
 
-void EventDriven::computeJacobianF(SP::OneStepIntegrator osi,
-                                   integer *sizeOfX,
-                                   doublereal *time,
-                                   doublereal *x,
-                                   doublereal *jacob)
+void EventDriven::computeJacobianfx(SP::OneStepIntegrator osi,
+                                    integer *sizeOfX,
+                                    doublereal *time,
+                                    doublereal *x,
+                                    doublereal *jacob)
 {
   if (osi->getType() != OSI::LSODAR)
-    RuntimeException::selfThrow("EventDriven::computeF(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
+    RuntimeException::selfThrow("EventDriven::computef(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
 
   SP::Lsodar lsodar = boost::static_pointer_cast<Lsodar>(osi);
 
@@ -428,7 +428,7 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
   double t = *time;
   model()->setCurrentTime(t);
 
-  // IN: - lambda[2] obtained during LCP call in computeF()
+  // IN: - lambda[2] obtained during LCP call in computef()
   //     - y[0]: need to be updated.
 
   if (!_allNSProblems->empty())
@@ -443,7 +443,7 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
       // Relation is in indexSets[2]
     {
       // Get lambda at acc. level, solution of LCP acc, called
-      // during computeF().
+      // during computef().
       lambda = ur->lambda(2);
       for (unsigned int i = 0; i < nsLawSize; i++)
         gOut[k++] = (*lambda)(i);

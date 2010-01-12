@@ -188,7 +188,7 @@ public:
 
   void g(integer* nEq, doublereal* time, doublereal* x, integer* ng, doublereal* gOut);
 
-  void jacobianF(integer*, doublereal*, doublereal*, integer*, integer*,  doublereal*, integer*);
+  void jacobianfx(integer*, doublereal*, doublereal*, integer*, integer*,  doublereal*, integer*);
 
   /** initialization of the integrator
       \param the simulation, owner of this OSI
