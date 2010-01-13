@@ -341,6 +341,22 @@ struct Topology::SetupFromNslaw : public SiconosVisitor
 
 };
 
+void Topology::attach(SP::Interaction inter, SP::DynamicalSystem ds)
+{
+  // interactions should not know attached dynamical systems in the
+  // future
+  InteractionsIterator it = _allInteractions->find(inter);
+  if (it != _allInteractions->end())
+  {
+    _allInteractions->erase(*it);
+    removeInteractionFromIndexSet(inter);
+  }
+
+  inter->insert(ds);
+  insertInteraction(inter);
+
+};
+
 
 // Compute min & max of relative degrees
 void Topology::computeRelativeDegrees()

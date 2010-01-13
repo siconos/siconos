@@ -209,6 +209,15 @@ public:
     _topology->removeDynamicalSystem(ds);
   };
 
+  /** attach an interaction to a dynamical system
+   * \param a SP::Interaction
+   * \param a SP::DynamicalSystem
+   */
+  void attach(SP::Interaction inter, SP::DynamicalSystem ds)
+  {
+    _topology->attach(inter, ds);
+  }
+
 
   /** get Dynamical system number I
       -   *  \param the identifier of the DynamicalSystem to get

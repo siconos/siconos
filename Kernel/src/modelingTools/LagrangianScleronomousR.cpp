@@ -41,7 +41,10 @@ LagrangianScleronomousR::LagrangianScleronomousR(SP::RelationXML LRxml): Lagrang
     RuntimeException::selfThrow("LagrangianScleronomousR:: xml constructor failed, can not find a definition for Jach0.");
   //  LRxml->readJacobianXML<PluggedMatrix,SP_PluggedMatrix>(Jach[0], LRxml, 0);
   if (LRxml->isJacobianHPlugin(0))
+  {
+    pluginjqh.reset(new PluggedObject());
     pluginjqh->setComputeFunction(LRxml->getJacobianHPlugin(0));
+  }
   else
     Jachq.reset(new SimpleMatrix(LRxml->getJacobianHMatrix(0)));
 

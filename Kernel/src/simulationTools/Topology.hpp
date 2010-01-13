@@ -204,6 +204,12 @@ public:
    */
   void removeDynamicalSystem(SP::DynamicalSystem ds);
 
+  /** attach a dynamical system to a relation
+   * \param a SP::Interaction
+   * \param a SP::DynamicalSystem
+   */
+  void attach(SP::Interaction, SP::DynamicalSystem);
+
   /** get a pointer to the graph of all Unitary Relations.
    *  \return a SP::UnitaryRelationsGraph
    */
