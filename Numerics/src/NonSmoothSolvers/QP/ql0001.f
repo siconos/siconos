@@ -1,4 +1,4 @@
-C Siconos-Numerics version 3.0.0, Copyright INRIA 2005-2008.
+C Siconos-Numerics, Copyright INRIA 2005-2010.
 C Siconos is a program dedicated to modeling, simulation and control
 C of non smooth dynamical systems.	
 C Siconos is a free software; you can redistribute it and/or modify
@@ -14,7 +14,7 @@ C You should have received a copy of the GNU General Public License
 C along with Siconos; if not, write to the Free Software
 C Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 C
-C Contact: Vincent ACARY vincent.acary@inrialpes.fr 
+C Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr 
 C	
       subroutine ql0001(m,me,mmax,n,nmax,mnn,c,d,a,b,xl,xu,
      1      x,u,iout,ifail,iprint,war,lwar,iwar,liwar,eps)

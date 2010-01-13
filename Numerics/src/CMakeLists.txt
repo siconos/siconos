@@ -233,25 +233,25 @@ BEGIN_TEST(NonSmoothSolvers/FrictionContact3D/test)
  
 #NEW_TEST(FrictionContact_Problemtest main_FC3D.c)
 
-NEW_TEST(FrictionContact_Problemtest1 frictionContact3D_test1.c)
-NEW_TEST(FrictionContact_Problemtest2 frictionContact3D_test2.c)
-NEW_TEST(FrictionContact_Problemtest3 frictionContact3D_test3.c)
-NEW_TEST(FrictionContact_Problemtest4 frictionContact3D_test4.c)
+NEW_TEST(FrictionContact_Problemtest1 FrictionContact3D_test1.c)
+NEW_TEST(FrictionContact_Problemtest2 FrictionContact3D_test2.c)
+NEW_TEST(FrictionContact_Problemtest3 FrictionContact3D_test3.c)
+NEW_TEST(FrictionContact_Problemtest4 FrictionContact3D_test4.c)
 
-NEW_TEST(FrictionContact_Problemtest10 frictionContact3D_test10.c)
-NEW_TEST(FrictionContact_Problemtest11 frictionContact3D_test11.c)
-NEW_TEST(FrictionContact_Problemtest12 frictionContact3D_test12.c)
+NEW_TEST(FrictionContact_Problemtest10 FrictionContact3D_test10.c)
+NEW_TEST(FrictionContact_Problemtest11 FrictionContact3D_test11.c)
+NEW_TEST(FrictionContact_Problemtest12 FrictionContact3D_test12.c)
 SET(FrictionContact_Problemtest13_PROPERTIES WILL_FAIL TRUE)
-NEW_TEST(FrictionContact_Problemtest13 frictionContact3D_test13.c)
+NEW_TEST(FrictionContact_Problemtest13 FrictionContact3D_test13.c)
 
-NEW_TEST(FrictionContact_Problemtest20 frictionContact3D_test20.c)
+NEW_TEST(FrictionContact_Problemtest20 FrictionContact3D_test20.c)
 
 
 SET(FrictionContact_Problemtest21_PROPERTIES WILL_FAIL TRUE)
-NEW_TEST(FrictionContact_Problemtest21 frictionContact3D_test21.c)
-NEW_TEST(FrictionContact_Problemtest22 frictionContact3D_test22.c)
+NEW_TEST(FrictionContact_Problemtest21 FrictionContact3D_test21.c)
+NEW_TEST(FrictionContact_Problemtest22 FrictionContact3D_test22.c)
 
-NEW_TEST(FrictionContact_Problemtest30 frictionContact3D_test30.c)
+NEW_TEST(FrictionContact_Problemtest30 FrictionContact3D_test30.c)
 
 
 END_TEST()
