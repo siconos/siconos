@@ -17,17 +17,17 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-/*! \file Sphere
+/*! \file SphereLDS
   \brief Definition of a 2D circular shape - Inherits from LagrangianDS
 */
 
 
-#ifndef Sphere_h
-#define Sphere_h
+#ifndef SphereLDS_h
+#define SphereLDS_h
 
 #include "LagrangianDS.hpp"
 
-class Sphere : public LagrangianDS, public boost::enable_shared_from_this<Sphere>
+class SphereLDS : public LagrangianDS, public boost::enable_shared_from_this<SphereLDS>
 {
 protected:
   double radius;
@@ -36,9 +36,9 @@ protected:
 
 public:
 
-  Sphere(double, double, SP::SiconosVector, SP::SiconosVector);
+  SphereLDS(double, double, SP::SiconosVector, SP::SiconosVector);
 
-  ~Sphere();
+  ~SphereLDS();
 
   inline double getQ(unsigned int pos)
   {
@@ -80,6 +80,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(Sphere);
+TYPEDEF_SPTR(SphereLDS);
 
-#endif /* Sphere_h */
+#endif /* SphereLDS_h */

@@ -18,7 +18,7 @@
  *
  */
 
-#include "Sphere.hpp"
+#include "SphereLDS.hpp"
 
 static double _2PI = 2 * M_PI;
 
@@ -33,7 +33,7 @@ void normalize(SP::SiconosVector q, unsigned int i)
 
 }
 
-void Sphere::computeMass()
+void SphereLDS::computeMass()
 {
 
   SP::SiconosVector qold;
@@ -62,12 +62,12 @@ void Sphere::computeMass()
 
 }
 
-void Sphere::computeNNL()
+void SphereLDS::computeNNL()
 {
-  Sphere::computeNNL(q(), velocity());
+  SphereLDS::computeNNL(q(), velocity());
 }
 
-void Sphere::computeNNL(SP::SiconosVector q, SP::SiconosVector v)
+void SphereLDS::computeNNL(SP::SiconosVector q, SP::SiconosVector v)
 {
 
   assert(q->size() == 6);
@@ -96,18 +96,18 @@ void Sphere::computeNNL(SP::SiconosVector q, SP::SiconosVector v)
 
 
 
-void Sphere::computeJacobianNNLq()
+void SphereLDS::computeJacobianNNLq()
 {
 
-  Sphere::computeJacobianNNLq(q(), velocity());
+  SphereLDS::computeJacobianNNLq(q(), velocity());
 }
-void Sphere::computeJacobianNNLqDot()
+void SphereLDS::computeJacobianNNLqDot()
 {
 
-  Sphere::computeJacobianNNLqDot(q(), velocity());
+  SphereLDS::computeJacobianNNLqDot(q(), velocity());
 }
 
-void Sphere::computeJacobianNNLq(SP::SiconosVector q, SP::SiconosVector v)
+void SphereLDS::computeJacobianNNLq(SP::SiconosVector q, SP::SiconosVector v)
 {
   double theta    = q->getValue(3);
   double phi      = q->getValue(4);
@@ -127,7 +127,7 @@ void Sphere::computeJacobianNNLq(SP::SiconosVector q, SP::SiconosVector v)
 
 
 }
-void Sphere::computeJacobianNNLqDot(SP::SiconosVector q, SP::SiconosVector v)
+void SphereLDS::computeJacobianNNLqDot(SP::SiconosVector q, SP::SiconosVector v)
 {
   double theta    = q->getValue(3);
   double phi      = q->getValue(4);
@@ -157,9 +157,9 @@ void Sphere::computeJacobianNNLqDot(SP::SiconosVector q, SP::SiconosVector v)
 }
 
 
-Sphere::Sphere(double r, double m,
-               SP::SiconosVector qinit,
-               SP::SiconosVector vinit)
+SphereLDS::SphereLDS(double r, double m,
+                     SP::SiconosVector qinit,
+                     SP::SiconosVector vinit)
   : LagrangianDS(qinit, vinit), radius(r), massValue(m)
 {
 
@@ -199,5 +199,5 @@ Sphere::Sphere(double r, double m,
 
 }
 
-Sphere::~Sphere()
+SphereLDS::~SphereLDS()
 {}

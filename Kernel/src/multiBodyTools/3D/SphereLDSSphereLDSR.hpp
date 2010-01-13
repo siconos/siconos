@@ -18,21 +18,21 @@
  *
  */
 
-/*! \file SphereSphereR.h
+/*! \file SphereLDSSphereLDSR.h
   \brief Two spheres relation - Inherits from LagrangianScleronomousR
 */
 
-#ifndef SphereSphereR_h
-#define SphereSphereR_h
+#ifndef SphereLDSSphereLDSR_h
+#define SphereLDSSphereLDSR_h
 
 #include "LagrangianScleronomousR.hpp"
 
-class SphereSphereR : public LagrangianScleronomousR, public boost::enable_shared_from_this<SphereSphereR>
+class SphereLDSSphereLDSR : public LagrangianScleronomousR, public boost::enable_shared_from_this<SphereLDSSphereLDSR>
 {
 private:
   double r1, r2, r1pr2;
 
-  SphereSphereR();
+  SphereLDSSphereLDSR();
 
 public:
 
@@ -41,7 +41,7 @@ public:
   \param disk1 radius
   \param disk2 radius
   */
-  SphereSphereR(double, double);
+  SphereLDSSphereLDSR(double, double);
 
   double distance(double, double, double, double, double, double, double, double);
 
@@ -55,6 +55,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(SphereSphereR);
+TYPEDEF_SPTR(SphereLDSSphereLDSR);
 
-#endif /* SphereSphereR_h */
+#endif /* SphereLDSSphereLDSR_h */

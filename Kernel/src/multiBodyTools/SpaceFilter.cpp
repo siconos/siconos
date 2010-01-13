@@ -33,11 +33,11 @@ public:
 
 };
 
-class HashedSphere : public Hashed
+class HashedSphereLDS : public Hashed
 {
 public:
-  SP::Sphere body;
-  HashedSphere(SP::Sphere d, int i, int j, int k) : Hashed(d, i, j, k) {};
+  SP::SphereLDS body;
+  HashedSphereLDS(SP::SphereLDS d, int i, int j, int k) : Hashed(d, i, j, k) {};
 
 };
 
@@ -63,7 +63,7 @@ std::size_t hash_value(SP::Hashed const& h)
 
 TYPEDEF_SPTR(HashedCircle);
 TYPEDEF_SPTR(HashedDisk);
-TYPEDEF_SPTR(HashedSphere);
+TYPEDEF_SPTR(HashedSphereLDS);
 
 /* the hashing is done with a visitor */
 class SpaceFilter::_BodyHash : public SiconosVisitor
@@ -116,7 +116,7 @@ public:
     }
   }
 
-  void visit(SP::Sphere pds)
+  void visit(SP::SphereLDS pds)
   {
     int i, j, k, imin, imax, jmin, jmax, kmin, kmax;
 
@@ -263,16 +263,16 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
 };
 
 /* proximity detection for sphere objects */
-struct SpaceFilter::_SphereFilter : public SiconosVisitor
+struct SpaceFilter::_SphereLDSFilter : public SiconosVisitor
 {
   SP::SpaceFilter parent;
-  SP::Sphere ds1;
+  SP::SphereLDS ds1;
 
-  _SphereFilter(SP::SpaceFilter p, SP::Sphere s) : parent(p), ds1(s) {};
+  _SphereLDSFilter(SP::SpaceFilter p, SP::SphereLDS s) : parent(p), ds1(s) {};
 
-  void visit(SP::Sphere ds2)
+  void visit(SP::SphereLDS ds2)
   {
-    SP::SphereSphereR rel;
+    SP::SphereLDSSphereLDSR rel;
     SP::DynamicalSystemsGraph DSG0 = parent->_nsds->topology()->dSG(0);
 
     assert(ds1 != ds2);
@@ -300,7 +300,7 @@ struct SpaceFilter::_SphereFilter : public SiconosVisitor
 
     if (d < 2 * tol)
     {
-      rel.reset(new SphereSphereR(r1, r2));
+      rel.reset(new SphereLDSSphereLDSR(r1, r2));
 
       bool found = false;
       DynamicalSystemsGraph::OEIterator oei, oeiend;
@@ -417,20 +417,20 @@ struct SpaceFilter::_IsSameDiskMovingPlanR : public SiconosVisitor
 };
 
 /* sphere plan relation comparison */
-struct SpaceFilter::_IsSameSpherePlanR : public SiconosVisitor
+struct SpaceFilter::_IsSameSphereLDSPlanR : public SiconosVisitor
 {
   double A, B, C, D, r;
   bool flag;
   SP::SpaceFilter parent;
-  _IsSameSpherePlanR(SP::SpaceFilter p, double A, double B, double C, double D, double r):
+  _IsSameSphereLDSPlanR(SP::SpaceFilter p, double A, double B, double C, double D, double r):
     parent(p), A(A), B(B), C(C), D(D), r(r), flag(false) {};
 
-  void visit(SP::SphereSphereR)
+  void visit(SP::SphereLDSSphereLDSR)
   {
     flag = false;
   };
 
-  void visit(SP::SpherePlanR rel)
+  void visit(SP::SphereLDSPlanR rel)
   {
     flag = rel->equal(A, B, C, D, r);
   };
@@ -591,7 +591,7 @@ void SpaceFilter::_MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, d
 };
 
 /* proximity detection between circular object and plans */
-void SpaceFilter::_PlanSphereFilter(double A, double B, double C, double D, SP::Sphere ds)
+void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, SP::SphereLDS ds)
 {
   double r = ds->getRadius();
 
@@ -600,13 +600,13 @@ void SpaceFilter::_PlanSphereFilter(double A, double B, double C, double D, SP::
 
   SP::DynamicalSystemsGraph DSG0 = _nsds->topology()->dSG(0);
 
-  boost::shared_ptr<_IsSameSpherePlanR>
-  isSameSpherePlanR(new _IsSameSpherePlanR(shared_from_this(), A, B, C, D, r));
+  boost::shared_ptr<_IsSameSphereLDSPlanR>
+  isSameSphereLDSPlanR(new _IsSameSphereLDSPlanR(shared_from_this(), A, B, C, D, r));
 
 
   // all DS must be in DS graph
   assert(DSG0->bundle(DSG0->descriptor(ds)) == ds);
-  SP::SpherePlanR relp(new SpherePlanR(r, A, B, C, D));
+  SP::SphereLDSPlanR relp(new SphereLDSPlanR(r, A, B, C, D));
   if (relp->distance(ds->getQ(0),
                      ds->getQ(1),
                      ds->getQ(2),
@@ -620,9 +620,9 @@ void SpaceFilter::_PlanSphereFilter(double A, double B, double C, double D, SP::
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)->interaction()
-      ->relation()->accept(isSameSpherePlanR);
+      ->relation()->accept(isSameSphereLDSPlanR);
       if (DSG0->bundle(DSG0->target(*oei)) == ds
-          && isSameSpherePlanR->flag)
+          && isSameSphereLDSPlanR->flag)
       {
         found = true;
         break;
@@ -648,10 +648,10 @@ void SpaceFilter::_PlanSphereFilter(double A, double B, double C, double D, SP::
          oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)->interaction()
-      ->relation()->accept(isSameSpherePlanR);
+      ->relation()->accept(isSameSphereLDSPlanR);
 
       if (DSG0->bundle(DSG0->target(*oei)) == ds
-          && isSameSpherePlanR->flag)
+          && isSameSphereLDSPlanR->flag)
       {
         _nsds->topology()->
         removeInteraction(DSG0->bundle(*oei)->interaction());
@@ -677,10 +677,10 @@ void SpaceFilter::insert(SP::Circle ds, int i, int j, int k)
   _hash_table.insert(hashed);
 };
 
-void SpaceFilter::insert(SP::Sphere ds, int i, int j, int k)
+void SpaceFilter::insert(SP::SphereLDS ds, int i, int j, int k)
 {
 
-  SP::Hashed hashed(new HashedSphere(ds, i, j, k));
+  SP::Hashed hashed(new HashedSphereLDS(ds, i, j, k));
   _hash_table.insert(hashed);
 };
 
@@ -787,15 +787,15 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
     visit_circular(disk);
   };
 
-  void visit(SP::Sphere ds1)
+  void visit(SP::SphereLDS ds1)
   {
     // interactions with plans
     for (unsigned int i = 0; i < parent->_plans->size(0); ++i)
     {
-      parent->_PlanSphereFilter((*parent->_plans)(i, 0),
-                                (*parent->_plans)(i, 1),
-                                (*parent->_plans)(i, 2),
-                                (*parent->_plans)(i, 3), ds1);
+      parent->_PlanSphereLDSFilter((*parent->_plans)(i, 0),
+                                   (*parent->_plans)(i, 1),
+                                   (*parent->_plans)(i, 2),
+                                   (*parent->_plans)(i, 3), ds1);
     }
 
     SP::SiconosVector Q1 = ds1->q();
@@ -814,7 +814,7 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
     unsigned int j;
     interPairs declaredInteractions;
 
-    boost::shared_ptr<_SphereFilter> sphereFilter(new _SphereFilter(parent, ds1));
+    boost::shared_ptr<_SphereLDSFilter> sphereFilter(new _SphereLDSFilter(parent, ds1));
 
     for (j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j)
     {

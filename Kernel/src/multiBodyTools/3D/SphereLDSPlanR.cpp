@@ -19,9 +19,9 @@
  */
 
 #include <math.h>
-#include "SpherePlanR.hpp"
+#include "SphereLDSPlanR.hpp"
 
-SpherePlanR::SpherePlanR(double r, double A, double B, double C, double D)
+SphereLDSPlanR::SphereLDSPlanR(double r, double A, double B, double C, double D)
   : LagrangianScleronomousR(), r(r), A(A), B(B), C(C), D(D)
 {
   nN = sqrt(A * A + B * B + C * C);
@@ -53,14 +53,14 @@ SpherePlanR::SpherePlanR(double r, double A, double B, double C, double D)
 
 }
 
-double SpherePlanR::distance(double x, double y, double z, double rad)
+double SphereLDSPlanR::distance(double x, double y, double z, double rad)
 {
 
   return (fabs(A * x + B * y + C * z + D) / nN - rad);
 }
 
 
-void SpherePlanR::computeh(double)
+void SphereLDSPlanR::computeh(double)
 {
 
   double q_0 = (*data[q0])(0);
@@ -75,7 +75,7 @@ void SpherePlanR::computeh(double)
 
 void normalize(SP::SiconosVector, unsigned int);
 
-void SpherePlanR::computeJachq(double)
+void SphereLDSPlanR::computeJachq(double)
 {
   SimpleMatrix *g = (SimpleMatrix *)_jachq.get();
 

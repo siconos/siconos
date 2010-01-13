@@ -18,16 +18,16 @@
  *
  */
 
-/*! \file SpherePlanR.h
-  \brief Sphere relation with a plan - Inherits from LagrangianScleronomousR
+/*! \file SphereLDSPlanR.h
+  \brief SphereLDS relation with a plan - Inherits from LagrangianScleronomousR
 */
 
-#ifndef SpherePlanR_h
-#define SpherePlanR_h
+#ifndef SphereLDSPlanR_h
+#define SphereLDSPlanR_h
 
 #include "CircularR.hpp"
 
-class SpherePlanR : public LagrangianScleronomousR, public boost::enable_shared_from_this<SpherePlanR>
+class SphereLDSPlanR : public LagrangianScleronomousR, public boost::enable_shared_from_this<SphereLDSPlanR>
 {
 private:
 
@@ -36,7 +36,7 @@ private:
   /* u ^ v  = n */
   double u1, u2, u3, v1, v2, v3, n1, n2, n3, ru1, ru2, ru3, rv1, rv2, rv3;
 
-  SpherePlanR();
+  SphereLDSPlanR();
 
 public:
 
@@ -47,7 +47,7 @@ public:
   \param B
   \param C
   */
-  SpherePlanR(double, double, double, double, double);
+  SphereLDSPlanR(double, double, double, double, double);
 
   double distance(double, double, double, double);
 
@@ -66,6 +66,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(SpherePlanR);
+TYPEDEF_SPTR(SphereLDSPlanR);
 
-#endif /* SpherePlanR_h */
+#endif /* SphereLDSPlanR_h */

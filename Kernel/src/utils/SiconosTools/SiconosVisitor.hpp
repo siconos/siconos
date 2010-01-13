@@ -47,16 +47,16 @@
 
 /* objects that may be visited (1) */
 class DynamicalSystem;
-class Sphere;
+class SphereLDS;
 class Disk;
 class Circle;
 class CircleCircleR;
 class DiskDiskR;
 class DiskMovingPlanR;
 class DiskPlanR;
-class Sphere;
-class SphereSphereR;
-class SpherePlanR;
+class SphereLDS;
+class SphereLDSSphereLDSR;
+class SphereLDSPlanR;
 class ExternalBody;
 class NonSmoothLaw;
 class EqualityConditionNSL;
@@ -120,9 +120,9 @@ public:
   VISIT(DiskMovingPlanR);
   VISIT(CircleCircleR);
   VISIT(DiskDiskR);
-  VISIT(Sphere);
-  VISIT(SphereSphereR);
-  VISIT(SpherePlanR);
+  VISIT(SphereLDS);
+  VISIT(SphereLDSSphereLDSR);
+  VISIT(SphereLDSPlanR);
   VISIT(ExternalBody);
   VISIT(NonSmoothLaw);
   VISIT(MixedComplementarityConditionNSL);

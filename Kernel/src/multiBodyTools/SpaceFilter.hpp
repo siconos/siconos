@@ -45,9 +45,9 @@
 #include "CircleCircleR.hpp"
 #include "DiskPlanR.hpp"
 #include "DiskMovingPlanR.hpp"
-#include "Sphere.hpp"
-#include "SphereSphereR.hpp"
-#include "SpherePlanR.hpp"
+#include "SphereLDS.hpp"
+#include "SphereLDSSphereLDSR.hpp"
+#include "SphereLDSPlanR.hpp"
 #include "ExternalBody.hpp"
 
 #include <tr1/unordered_set>
@@ -98,15 +98,15 @@ protected:
 
   void _MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, double time);
 
-  void _PlanSphereFilter(double A, double B, double C, double D,
-                         SP::Sphere ds);
+  void _PlanSphereLDSFilter(double A, double B, double C, double D,
+                            SP::SphereLDS ds);
 
   /* visitors defined as Inner class */
   /* note : cf Thinking in C++, vol2, the inner class idiom. */
 
   /* each kind of proximity detection */
   struct _CircularFilter;
-  struct _SphereFilter;
+  struct _SphereLDSFilter;
 
 
 
@@ -119,15 +119,15 @@ protected:
   /* to compare relation */
   struct _IsSameDiskPlanR;
   struct _IsSameDiskMovingPlanR;
-  struct _IsSameSpherePlanR;
+  struct _IsSameSphereLDSPlanR;
 
   friend class SpaceFilter::_CircularFilter;
-  friend class SpaceFilter::_SphereFilter;
+  friend class SpaceFilter::_SphereLDSFilter;
   friend class SpaceFilter::_BodyHash;
   friend class SpaceFilter::_FindInteractions;
   friend class SpaceFilter::_IsSameDiskPlanR;
   friend class SpaceFilter::_IsSameDiskMovingPlanR;
-  friend class SpaceFilter::_IsSameSpherePlanR;
+  friend class SpaceFilter::_IsSameSphereLDSPlanR;
 
   SpaceFilter() {};
 
@@ -147,7 +147,7 @@ public:
 
   void insert(SP::Circle, int, int, int);
 
-  void insert(SP::Sphere, int, int, int);
+  void insert(SP::SphereLDS, int, int, int);
 
 
   /** get parameters

@@ -19,16 +19,16 @@
  */
 
 #include <math.h>
-#include "SphereSphereR.hpp"
+#include "SphereLDSSphereLDSR.hpp"
 
-SphereSphereR::SphereSphereR(double r, double rr) : LagrangianScleronomousR()
+SphereLDSSphereLDSR::SphereLDSSphereLDSR(double r, double rr) : LagrangianScleronomousR()
 {
   r1 = r;
   r2 = rr;
   r1pr2 = r1 + r2;
 }
 
-double SphereSphereR::distance(double x1, double y1, double z1, double r1, double x2, double y2, double z2, double r2)
+double SphereLDSSphereLDSR::distance(double x1, double y1, double z1, double r1, double x2, double y2, double z2, double r2)
 {
   double dx = x1 - x2;
   double dy = y1 - y2;
@@ -38,7 +38,7 @@ double SphereSphereR::distance(double x1, double y1, double z1, double r1, doubl
 }
 
 
-void SphereSphereR::computeh(double)
+void SphereLDSSphereLDSR::computeh(double)
 {
 
   // Warning: temporary method to have contiguous values in memory,
@@ -53,7 +53,7 @@ void SphereSphereR::computeh(double)
 
 };
 
-void SphereSphereR::computeJachq(double)
+void SphereLDSSphereLDSR::computeJachq(double)
 {
 
   double r, A, B, C, D, nN, nU;
