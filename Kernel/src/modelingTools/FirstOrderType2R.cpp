@@ -78,8 +78,8 @@ void FirstOrderType2R::initialize(SP::Interaction inter)
   // was read from xml or not
   if (!Jachx)
     Jachx.reset(new SimpleMatrix(sizeY, sizeDS));
-  if (!Jachlambda)
-    Jachlambda.reset(new SimpleMatrix(sizeY, sizeY));
+  if (!_jachlambda)
+    _jachlambda.reset(new SimpleMatrix(sizeY, sizeY));
   if (!jacgx)
     jacgx.reset(new SimpleMatrix(sizeDS, sizeDS));
   if (!Jacglambda)

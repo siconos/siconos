@@ -48,6 +48,13 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(SP::DynamicalSystemXML dsxml): Lagran
   {
     _C.reset(new SimpleMatrix(lltidsxml->getC()));
   }
+
+  if (lltidsxml->hasFExt())
+  {
+    string plugin = lltidsxml->getFExtPlugin();
+    setComputeFExtFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+    _fExt.reset(new SimpleVector(_ndof));
+  }
 }
 
 // --- Constructor from a set of data - _Mass, K and C ---
@@ -243,29 +250,29 @@ void LagrangianLinearTIDS::saveSpecificDataToXML()
   assert(_dsxml &&
          "LagrangianLinearTIDS::saveDSToXML - object DynamicalSystemXML does not exist");
 
-  /*  SP::LagrangianDSXML lgptr = boost::static_pointer_cast <LagrangianDSXML>(dsxml);
-  lgptr->setMassMatrix( *_mass );
-  lgptr->setQ( *_q[0] );
-  lgptr->setQ0( *_q0 );
-  lgptr->setQMemory( *qMemory );
-  lgptr->setVelocity( *_q[1] );
-  lgptr->setVelocity0( *velocity0 );
-  lgptr->setVelocityMemory( *velocityMemory );
+  SP::LagrangianDSXML lgptr = boost::static_pointer_cast <LagrangianDSXML>(_dsxml);
+  lgptr->setMassMatrix(*_mass);
+  lgptr->setQ(*_q[0]);
+  lgptr->setQ0(*_q0);
+  lgptr->setQMemory(*_qMemory);
+  lgptr->setVelocity(*_q[1]);
+  lgptr->setVelocity0(*_velocity0);
+  lgptr->setVelocityMemory(*_velocityMemory);
 
   // FExt
-  if( lgptr->hasFExt() )
-    {
-      if( !lgptr->isFExtPlugin())
+  if (lgptr->hasFExt())
   {
-    lgptr->setFExtVector( *_fExt );
-  }
-    }
-  else
+    if (!lgptr->isFExtPlugin())
     {
-      lgptr->setFExtPlugin(_fExt->getPluginName());
+      lgptr->setFExtVector(*_fExt);
     }
-  (boost::static_pointer_cast <LagrangianLinearTIDSXML>(dsxml))->setK( *K );
-  (boost::static_pointer_cast <LagrangianLinearTIDSXML>(dsxml))->setC( *C );*/
+  }
+  else
+  {
+    lgptr->setFExtPlugin(_pluginFExt->getPluginName());
+  }
+  (boost::static_pointer_cast <LagrangianLinearTIDSXML>(_dsxml))->setK(*_K);
+  (boost::static_pointer_cast <LagrangianLinearTIDSXML>(_dsxml))->setC(*_C);
 }
 
 LagrangianLinearTIDS* LagrangianLinearTIDS::convert(DynamicalSystem* ds)

@@ -67,9 +67,9 @@ protected:
 
 
   /** Jacobian matrices of H */
-  SP::SiconosMatrix Jachq;
-  SP::SiconosMatrix JacqDotH;
-  SP::SiconosMatrix Jachlambda;
+  SP::SiconosMatrix _jachq;
+  SP::SiconosMatrix _jachqDot;
+  SP::SiconosMatrix _jachlambda;
 
   /** basic constructor
       \param the sub-type of the relation
@@ -104,15 +104,15 @@ public:
    */
   inline SP::SiconosMatrix jachq() const
   {
-    return Jachq;
+    return _jachq;
   }
   inline SP::SiconosMatrix jacQDotH() const
   {
-    return JacqDotH;
+    return _jachqDot;
   }
   inline SP::SiconosMatrix jachlambda() const
   {
-    return Jachlambda;
+    return _jachlambda;
   }
 
   /** set the value of Jach[index] to newValue (copy)
@@ -133,7 +133,7 @@ public:
    */
   inline void setJachqPtr(SP::SiconosMatrix newPtr)
   {
-    Jachq = newPtr ;
+    _jachq = newPtr ;
   }
 
   /** To get the name of Jach[i] plugin

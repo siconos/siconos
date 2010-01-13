@@ -187,7 +187,7 @@ public:
    */
   inline SP::SiconosMatrix D() const
   {
-    return Jachlambda;
+    return _jachlambda;
   }
 
   /** set the value of D to newValue
@@ -202,7 +202,7 @@ public:
    */
   inline void setDPtr(SP::SiconosMatrix newPtr)
   {
-    Jachlambda = newPtr;
+    _jachlambda = newPtr;
   }
 
   // -- F --

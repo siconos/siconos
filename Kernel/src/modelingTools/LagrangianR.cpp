@@ -33,14 +33,14 @@ void LagrangianR::initComponents()
 
   // The initialization of Jach[0] depends on the way the Relation was built ie if the matrix
   // was read from xml or not
-  if (! Jachq)
-    Jachq.reset(new SimpleMatrix(sizeY, sizeDS));
+  if (! _jachq)
+    _jachq.reset(new SimpleMatrix(sizeY, sizeDS));
   else
   {
-    if (Jachq->size(0) == 0) // if the matrix dim are null
-      Jachq->resize(sizeY, sizeDS);
+    if (_jachq->size(0) == 0) // if the matrix dim are null
+      _jachq->resize(sizeY, sizeDS);
     else
-      assert((Jachq->size(1) == sizeDS && Jachq->size(0) == sizeY) &&
+      assert((_jachq->size(1) == sizeDS && _jachq->size(0) == sizeY) &&
              "LagrangianScleronomousR::initComponents inconsistent sizes between Jach[0] matrix and the interaction.");
   }
 
@@ -92,15 +92,6 @@ void LagrangianR::computeh(double)
 {
   RuntimeException::selfThrow("LagrangianR::computeh: not yet implemented (or useless) for Lagrangian relation of type " + subType);
 }
-
-//  void LagrangianR::computeJachx(double)
-// {
-//   RuntimeException::selfThrow("FirstOrderR::computeJacobianXH, not (yet) implemented or forbidden for relations of type "+subType);
-// }
-//  void LagrangianR::computeJachlambda(double)
-// {
-//   RuntimeException::selfThrow("FirstOrderR::computeJacobianLH, not (yet) implemented or forbidden for relations of type "+subType);
-// }
 
 void LagrangianR::saveRelationToXML() const
 {

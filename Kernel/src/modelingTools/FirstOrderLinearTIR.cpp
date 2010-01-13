@@ -36,7 +36,7 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(SP::RelationXML relxml):
     RuntimeException::selfThrow("FirstOrderLinearTIR:: xml constructor failed, can not find a definition for C.");
 
   if (folrXML->hasD())
-    Jachlambda.reset(new SimpleMatrix(folrXML->getD()));
+    _jachlambda.reset(new SimpleMatrix(folrXML->getD()));
 
   if (folrXML->hasF())
     _F.reset(new SimpleMatrix(folrXML->getF()));
@@ -67,7 +67,7 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SiconosMatrix newC, SP::SiconosMatr
 {
   Jachx = newC;
   Jacglambda = newB;
-  Jachlambda = newD;
+  _jachlambda = newD;
   _F = newF;
   _e = newE;
 }
@@ -87,7 +87,7 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(const SiconosMatrix& newC, const Sicono
 
   Jachx = createSPtrSiconosMatrix((SiconosMatrix&) newC);
   Jacglambda = createSPtrSiconosMatrix((SiconosMatrix&) newB);
-  Jachlambda = createSPtrSiconosMatrix((SiconosMatrix&) newD);
+  _jachlambda = createSPtrSiconosMatrix((SiconosMatrix&) newD);
   _F = createSPtrSiconosMatrix((SiconosMatrix&) newF);
   _e = createSPtrSiconosVector((SiconosVector&) newE);
 }
@@ -118,8 +118,8 @@ void FirstOrderLinearTIR::initialize(SP::Interaction inter)
 
   // C and B are the minimum inputs. The others may remain null.
 
-  if (Jachlambda)
-    assert((Jachlambda->size(0) == sizeY || Jachlambda->size(1) == sizeY) && "FirstOrderLinearTIR::initialize , inconsistent size between C and D.");
+  if (_jachlambda)
+    assert((_jachlambda->size(0) == sizeY || _jachlambda->size(1) == sizeY) && "FirstOrderLinearTIR::initialize , inconsistent size between C and D.");
 
 
   if (_F)
@@ -155,8 +155,8 @@ void FirstOrderLinearTIR::computeOutput(double time, unsigned int)
   else
     y->zero();
 
-  if (Jachlambda)
-    prod(*Jachlambda, *lambda, *y, false);
+  if (_jachlambda)
+    prod(*_jachlambda, *lambda, *y, false);
 
   if (_e)
     *y += *_e;
@@ -179,7 +179,7 @@ void FirstOrderLinearTIR::display() const
   if (Jachx) Jachx->display();
   else cout << "->NULL" << endl;
   cout << "| D " << endl;
-  if (Jachlambda) Jachlambda->display();
+  if (_jachlambda) _jachlambda->display();
   else cout << "->NULL" << endl;
   cout << "| F " << endl;
   if (_F) _F->display();
@@ -200,7 +200,7 @@ void FirstOrderLinearTIR::saveRelationToXML() const
 
   //   SP::FirstOrderLinearTIRXML folrXML = (boost::static_pointer_cast<FirstOrderLinearTIRXML>(relationxml));
   //   folrXML->setC( *Jachx );
-  //   folrXML->setD( *Jachlambda );
+  //   folrXML->setD( *_jachlambda );
   //   folrXML->setF( *F );
   //   folrXML->setE( *e );
   //   folrXML->setB( *Jacglambda );

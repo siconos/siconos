@@ -52,7 +52,7 @@ LagrangianRheonomousR::LagrangianRheonomousR(SP::RelationXML LRxml): LagrangianR
   if (LRxml->isJacobianHPlugin(0))
     _pluginJachq->setComputeFunction(LRxml->getJacobianHPlugin(0));
   else
-    Jachq.reset(new SimpleMatrix(LRxml->getJacobianHMatrix(0)));
+    _jachq.reset(new SimpleMatrix(LRxml->getJacobianHMatrix(0)));
 }
 
 // constructor from a set of data
@@ -69,7 +69,7 @@ LagrangianRheonomousR::LagrangianRheonomousR(const string& computeh, const strin
 
   unsigned int sizeY = interaction()->getSizeOfY();
   unsigned int sizeQ = _workX->size();
-  Jachq.reset(new SimpleMatrix(sizeY, sizeQ));
+  _jachq.reset(new SimpleMatrix(sizeY, sizeQ));
 }
 
 void LagrangianRheonomousR::initComponents()
@@ -149,10 +149,10 @@ void LagrangianRheonomousR::computeJachq(double time)
     *_workX = *data[q0];
     *_workZ = *data[z];
 
-    unsigned int sizeY = Jachq->size(0);
+    unsigned int sizeY = _jachq->size(0);
     unsigned int sizeQ = _workX->size();
     unsigned int sizeZ = _workZ->size();
-    ((FPtr4)(_pluginJachq->fPtr))(sizeQ, &(*_workX)(0), time, sizeY, &(*Jachq)(0, 0), sizeZ, &(*_workZ)(0));
+    ((FPtr4)(_pluginJachq->fPtr))(sizeQ, &(*_workX)(0), time, sizeY, &(*_jachq)(0, 0), sizeZ, &(*_workZ)(0));
     // Copy data that might have been changed in the plug-in call.
     *data[z] = *_workZ;
   }
@@ -170,11 +170,11 @@ void LagrangianRheonomousR::computeOutput(double time, unsigned int derivativeNu
     if (derivativeNumber == 1)
     {
       computehDot(time); // \todo: save hDot directly into y[1] ?
-      prod(*Jachq, *data[q1], *y);
+      prod(*_jachq, *data[q1], *y);
       *y += *_hDot;
     }
     else if (derivativeNumber == 2)
-      prod(*Jachq, *data[q2], *y); // Approx:,  ...
+      prod(*_jachq, *data[q2], *y); // Approx:,  ...
     // \warning : the computation of y[2] (in event-driven
     // simulation for instance) is approximated by y[2] =
     // Jach[0]q[2]. For the moment, other terms are neglected
@@ -190,7 +190,7 @@ void LagrangianRheonomousR::computeInput(double time, unsigned int level)
   // get lambda of the concerned interaction
   SP::SiconosVector lambda = interaction()->lambda(level);
   // data[name] += trans(G) * lambda
-  prod(*lambda, *Jachq, *data[p0 + level], false);
+  prod(*lambda, *_jachq, *data[p0 + level], false);
 
   //   SP::SiconosMatrix  GT = new SimpleMatrix(*G[0]);
   //   GT->trans();

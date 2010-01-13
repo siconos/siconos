@@ -69,9 +69,9 @@ protected:
     */
   FPtr2 hPtr;
   std::string pluginNameHPtr;
-  FPtr2 JachqPtr;
+  FPtr2 _jachqPtr;
   std::string pluginNameJachqPtr;
-  FPtr2 JachlambdaPtr;
+  FPtr2 _jachlambdaPtr;
   std::string pluginNameJachlambdaPtr;
 
   /** default constructor

@@ -49,9 +49,9 @@ LagrangianCompliantR::LagrangianCompliantR(const string& computeh, const std::ve
 {
   Plugin::setFunction(&hPtr, SSL::getPluginName(computeh), SSL::getPluginFunctionName(computeh));
   pluginNameHPtr = computeh;
-  Plugin::setFunction(&JachqPtr, SSL::getPluginName(computeg[0]), SSL::getPluginFunctionName(computeg[0]));
+  Plugin::setFunction(&_jachqPtr, SSL::getPluginName(computeg[0]), SSL::getPluginFunctionName(computeg[0]));
   pluginNameJachqPtr = computeg[0];
-  Plugin::setFunction(&JachlambdaPtr, SSL::getPluginName(computeg[1]), SSL::getPluginFunctionName(computeg[1]));
+  Plugin::setFunction(&_jachlambdaPtr, SSL::getPluginName(computeg[1]), SSL::getPluginFunctionName(computeg[1]));
   pluginNameJachlambdaPtr = computeg[1];
 
   // Warning: we cannot allocate memory for Jach[0] matrix since no interaction
@@ -65,10 +65,10 @@ void LagrangianCompliantR::initComponents()
   unsigned int sizeY = interaction()->getSizeOfY();
   _workL.reset(new SimpleVector(sizeY));
 
-  if (! Jachlambda)
-    Jachlambda.reset(new SimpleMatrix(sizeY, sizeY));
+  if (! _jachlambda)
+    _jachlambda.reset(new SimpleMatrix(sizeY, sizeY));
   else
-    Jachlambda->resize(sizeY, sizeY);
+    _jachlambda->resize(sizeY, sizeY);
 }
 
 void LagrangianCompliantR::computeh(double time)
@@ -100,19 +100,19 @@ void LagrangianCompliantR::computeh(double time)
 void LagrangianCompliantR::computeJachq(double time)
 {
 
-  if (JachqPtr)
+  if (_jachqPtr)
   {
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
     *_workX = *data[q0];
     *_workZ = *data[z];
 
-    unsigned int sizeY = Jachq->size(0);
+    unsigned int sizeY = _jachq->size(0);
     unsigned int sizeQ = _workX->size();
     unsigned int sizeZ = _workZ->size();
 
     // get vector lambda of the current interaction
     *_workL = *interaction()->lambda(0);
-    (JachqPtr)(sizeQ, &(*_workX)(0), sizeY, &(*_workL)(0), &(*Jachq)(0, 0), sizeZ, &(*_workZ)(0));
+    (_jachqPtr)(sizeQ, &(*_workX)(0), sizeY, &(*_workL)(0), &(*_jachq)(0, 0), sizeZ, &(*_workZ)(0));
     // Copy data that might have been changed in the plug-in call.
     *data[z] = *_workZ;
   }
@@ -120,19 +120,19 @@ void LagrangianCompliantR::computeJachq(double time)
 void LagrangianCompliantR::computeJachlambda(double time)
 {
 
-  if (JachlambdaPtr)
+  if (_jachlambdaPtr)
   {
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.
     *_workX = *data[q0];
     *_workZ = *data[z];
 
-    unsigned int sizeY = Jachq->size(0);
+    unsigned int sizeY = _jachq->size(0);
     unsigned int sizeQ = _workX->size();
     unsigned int sizeZ = _workZ->size();
 
     // get vector lambda of the current interaction
     *_workL = *interaction()->lambda(0);
-    (JachlambdaPtr)(sizeQ, &(*_workX)(0), sizeY, &(*_workL)(0), &(*Jachlambda)(0, 0), sizeZ, &(*_workZ)(0));
+    (_jachlambdaPtr)(sizeQ, &(*_workX)(0), sizeY, &(*_workL)(0), &(*_jachlambda)(0, 0), sizeZ, &(*_workZ)(0));
     // Copy data that might have been changed in the plug-in call.
     *data[z] = *_workZ;
   }
@@ -151,11 +151,11 @@ void LagrangianCompliantR::computeOutput(double time, unsigned int derivativeNum
     {
       SP::SiconosVector lambda = interaction()->lambda(derivativeNumber);
       // y = Jach[0] q1 + Jach[1] lambda
-      prod(*Jachq, *data[q1], *y);
-      prod(*Jachlambda, *lambda, *y, false);
+      prod(*_jachq, *data[q1], *y);
+      prod(*_jachlambda, *lambda, *y, false);
     }
     else if (derivativeNumber == 2)
-      prod(*Jachq, *data[q2], *y); // Approx: y[2] = Jach[0]q[2], other terms are neglected ...
+      prod(*_jachq, *data[q2], *y); // Approx: y[2] = Jach[0]q[2], other terms are neglected ...
     else
       RuntimeException::selfThrow("LagrangianCompliantR::computeOutput(time,index), index out of range or not yet implemented.");
   }
@@ -168,7 +168,7 @@ void LagrangianCompliantR::computeInput(const double time, const unsigned int le
   SP::SiconosVector lambda = interaction()->lambda(level);
 
   // data[name] += trans(G) * lambda
-  prod(*lambda, *Jachq, *data[p0 + level], false);
+  prod(*lambda, *_jachq, *data[p0 + level], false);
 
   //   SP::SiconosMatrix  GT = new SimpleMatrix(*G[0]);
   //   GT->trans();

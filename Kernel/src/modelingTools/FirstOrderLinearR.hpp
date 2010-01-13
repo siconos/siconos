@@ -188,7 +188,7 @@ public:
    */
   void setDPtr(SP::SiconosMatrix newPtr)
   {
-    Jachlambda = newPtr;
+    _jachlambda = newPtr;
   }
 
   /** set a specified function to compute the matrix D

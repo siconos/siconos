@@ -34,16 +34,16 @@ void NewtonEulerR::initComponents()
 
   // The initialization of Jach[0] depends on the way the Relation was built ie if the matrix
   // was read from xml or not
-  if (! Jachq)
-    Jachq.reset(new SimpleMatrix(_ysize, _qsize));
+  if (! _jachq)
+    _jachq.reset(new SimpleMatrix(_ysize, _qsize));
   else
   {
-    if (Jachq->size(0) == 0) // if the matrix dim are null
+    if (_jachq->size(0) == 0) // if the matrix dim are null
     {
-      Jachq->resize(_ysize, _qsize);
+      _jachq->resize(_ysize, _qsize);
     }
     else
-      assert((Jachq->size(1) == _qsize && Jachq->size(0) == _ysize) &&
+      assert((_jachq->size(1) == _qsize && _jachq->size(0) == _ysize) &&
              "NewtonEuler::initComponents inconsistent sizes between Jach[0] matrix and the interaction.");
   }
   if (! _jachqT)
@@ -99,8 +99,8 @@ void NewtonEulerR::computeh(double)
 {
   SP::SiconosVector y = interaction()->y(0);
   *_workQ = *data[q0];
-  //prod(*Jachq,*data[q0],*y);
-  prod(*Jachq, *_workQ, *y);
+  //prod(*_jachq,*data[q0],*y);
+  prod(*_jachq, *_workQ, *y);
 }
 
 //  void NewtonEulerR::computeJachx(double)
@@ -133,9 +133,9 @@ void NewtonEulerR::computeOutput(double t, unsigned int derivativeNumber)
   {
     SP::SiconosVector y = interaction()->y(derivativeNumber);
     if (derivativeNumber == 1)
-      prod(*Jachq, *data[q1], *y);
+      prod(*_jachq, *data[q1], *y);
     else //if(derivativeNumber == 2)
-      //  prod(*Jachq,*data[q2],*y); // Approx: y[2] = Jach[0]q[2], other terms are neglected ...
+      //  prod(*_jachq,*data[q2],*y); // Approx: y[2] = Jach[0]q[2], other terms are neglected ...
       //   else
       RuntimeException::selfThrow("LagrangianCompliantR::computeOutput(time,index), index out of range or not yet implemented.");
   }

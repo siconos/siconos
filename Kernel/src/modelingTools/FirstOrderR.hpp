@@ -132,7 +132,7 @@ public:
   }
   inline void setJachlambdaPtr(SP::SiconosMatrix newPtr)
   {
-    Jachlambda = newPtr ;
+    _jachlambda = newPtr ;
   }
 
   // -- Jacg --

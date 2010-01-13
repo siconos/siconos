@@ -95,124 +95,144 @@ LagrangianDS::LagrangianDS(SP::DynamicalSystemXML dsxml):
   DynamicalSystem(dsxml), _ndof(0)
 {
   zeroPlugin();
-  /*  // -- Lagrangian  xml object --
+  // -- Lagrangian  xml object --
   SP::LagrangianDSXML lgptr = boost::static_pointer_cast <LagrangianDSXML>(dsxml);
 
   // === Initial conditions ===
   // Warning: ndof is given by q0.size() !!
-  if ( ! lgptr->hasQ0())
+  if (! lgptr->hasQ0())
     RuntimeException::selfThrow("LagrangianDS:: xml constructor, q0 is a required input");
 
-  q0.reset(new SimpleVector(lgptr->getQ0())); // required node in xml file
-  ndof = q0->size();
+  _q0.reset(new SimpleVector(lgptr->getQ0())); // required node in xml file
+  _ndof = _q0->size();
 
-  if ( ! lgptr->hasVelocity0())
+  if (! lgptr->hasVelocity0())
     RuntimeException::selfThrow("LagrangianDS:: xml constructor, v0 is a required input");
 
-  velocity0.reset(new SimpleVector(lgptr->getVelocity0())); // required node in xml file
+  _velocity0.reset(new SimpleVector(lgptr->getVelocity0())); // required node in xml file
 
-  if(velocity0->size()!=ndof)
+  if (_velocity0->size() != _ndof)
     RuntimeException::selfThrow("LagrangianDS::xml constructor - size of input velocity0 differs from ndof");
 
   // --- Current State (optional input) ---
 
-  q.resize(3);
+  _q.resize(3);
 
-  if ( lgptr->hasQ() )
-    q[0].reset(new SimpleVector(lgptr->getQ())); // Means that first q is different from q0 ?? Strange case ...
+  if (lgptr->hasQ())
+    _q[0].reset(new SimpleVector(lgptr->getQ())); // Means that first q is different from q0 ?? Strange case ...
   else
-    q[0].reset(new SimpleVector(*q0));           // initialize q with q0
-  if ( lgptr->hasVelocity() )
-    q[1].reset(new SimpleVector(lgptr->getVelocity0())); // same remark as for q
+    _q[0].reset(new SimpleVector(*_q0));           // initialize q with q0
+  if (lgptr->hasVelocity())
+    _q[1].reset(new SimpleVector(lgptr->getVelocity0())); // same remark as for q
   else
-    q[1].reset(new SimpleVector(*velocity0));
+    _q[1].reset(new SimpleVector(*_velocity0));
 
-  q[2].reset(new SimpleVector(ndof));
+  _q[2].reset(new SimpleVector(_ndof));
   _residuFree.reset(new SimpleVector(getDim()));
-  p.resize(3);
+  _p.resize(3);
   // Memories
-  if ( lgptr->hasQMemory() ) // qMemory
-    qMemory.reset(new SiconosMemory( lgptr->getQMemoryXML() ));
+  if (lgptr->hasQMemory())   // qMemory
+    _qMemory.reset(new SiconosMemory(lgptr->getQMemoryXML()));
 
-  if ( lgptr->hasVelocityMemory() ) // velocityMemory
-    velocityMemory.reset(new SiconosMemory( lgptr->getVelocityMemoryXML() ));
+  if (lgptr->hasVelocityMemory())   // velocityMemory
+    _velocityMemory.reset(new SiconosMemory(lgptr->getVelocityMemoryXML()));
 
   string plugin;
   // mass
-  if( lgptr->isMassPlugin()) // if mass is plugged
-    {
-      plugin = lgptr->getMassPlugin();
-      setComputeMassFunction(SSL::getPluginName( plugin ), SSL::getPluginFunctionName( plugin ));
-    }
+  if (lgptr->isMassPlugin()) // if mass is plugged
+  {
+    plugin = lgptr->getMassPlugin();
+    setComputeMassFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+  }
   else
-    mass.reset(new PMMass(lgptr->getMassMatrix()));
+    _mass.reset(new SimpleMatrix(lgptr->getMassMatrix()));
 
   // === Optional inputs ===
 
-  jacobianFInt.resize(2);
-  jacobianNNL.resize(2);
   // fInt
-  if( lgptr->hasFInt() ) // if fInt is given
-    {
-      if( lgptr->isFIntPlugin()) // if fInt is plugged
+  if (lgptr->hasFInt())  // if fInt is given
   {
-    plugin = lgptr->getFIntPlugin();
-    setComputeFIntFunction(SSL::getPluginName( plugin ), SSL::getPluginFunctionName( plugin ));
-  }
-      else
-  fInt.reset(new PVFInt(lgptr->getFIntVector()));
+    if (lgptr->isFIntPlugin()) // if fInt is plugged
+    {
+      plugin = lgptr->getFIntPlugin();
+      setComputeFIntFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
     }
+    else
+      _fInt.reset(new SimpleVector(lgptr->getFIntVector()));
+  }
 
   // _fExt
-  if( lgptr->hasFExt() ) // if _fExt is given
-    {
-      if( lgptr->isFExtPlugin())// if _fExt is plugged
+  if (lgptr->hasFExt())  // if _fExt is given
   {
-    plugin = lgptr->getFExtPlugin();
-    setComputeFExtFunction(SSL::getPluginName( plugin ), SSL::getPluginFunctionName( plugin ));
-  }
-      else
-  _fExt.reset(new Plugged_Vector_FTime(lgptr->getFExtVector()));
+    if (lgptr->isFExtPlugin())// if _fExt is plugged
+    {
+      plugin = lgptr->getFExtPlugin();
+      setComputeFExtFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
     }
+    else
+      _fExt.reset(new SimpleVector(lgptr->getFExtVector()));
+  }
 
   // NNL
-  if( lgptr ->hasNNL())// if NNL is given
-    {
-      if( lgptr->isNNLPlugin())// if NNL is plugged
+  if (lgptr ->hasNNL())// if NNL is given
   {
-    plugin = lgptr->getNNLPlugin();
-    setComputeNNLFunction(SSL::getPluginName( plugin ), SSL::getPluginFunctionName( plugin ));
-  }
-      else
-  NNL.reset(new PVNNL(lgptr->getNNLVector()));
+    if (lgptr->isNNLPlugin())// if NNL is plugged
+    {
+      plugin = lgptr->getNNLPlugin();
+      setComputeNNLFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
     }
+    else
+      _NNL.reset(new SimpleVector(lgptr->getNNLVector()));
+  }
 
-  for(unsigned int i=0;i<2;++i)
+  // jacobian q of fInt
+  if (lgptr ->hasJacobianFInt(0))// if given
+  {
+    if (lgptr->isJacobianFIntPlugin(0))// if is plugged
     {
-      // jacobian(s) of fInt
-      if( lgptr ->hasJacobianFInt(i))// if given
-  {
-    if( lgptr->isJacobianFIntPlugin(i))// if is plugged
-      {
-        plugin = lgptr->getJacobianFIntPlugin(i);
-        setComputeJacobianFIntFunction(i,SSL::getPluginName( plugin ), SSL::getPluginFunctionName( plugin ));
-      }
+      plugin = lgptr->getJacobianFIntPlugin(0);
+      setComputeJacobianFIntqFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+    }
     else
-      jacobianFInt[i].reset(new PMFInt(lgptr->getJacobianFIntMatrix(i)));
+      _jacobianFIntq.reset(new SimpleMatrix(lgptr->getJacobianFIntMatrix(0)));
   }
 
-      // jacobian of NNL
-      if( lgptr -> hasJacobianNNL(i)) // if given
+  // jacobian qdot of fInt
+  if (lgptr ->hasJacobianFInt(1))// if given
   {
-    if( lgptr->isJacobianNNLPlugin(i))// if is plugged
-      {
-        plugin = lgptr->getJacobianNNLPlugin(i);
-        setComputeJacobianNNLFunction(i,SSL::getPluginName( plugin ), SSL::getPluginFunctionName( plugin ));
-      }
+    if (lgptr->isJacobianFIntPlugin(1))// if is plugged
+    {
+      plugin = lgptr->getJacobianFIntPlugin(1);
+      setComputeJacobianFIntqDotFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+    }
     else
-      jacobianNNL[i].reset(new PMNNL(lgptr->getJacobianNNLMatrix(i)));
+      _jacobianFIntqDot.reset(new SimpleMatrix(lgptr->getJacobianFIntMatrix(1)));
   }
-  }*/
+
+
+  // Jacobian q of NNL
+  if (lgptr -> hasJacobianNNL(0)) // if given
+  {
+    if (lgptr->isJacobianNNLPlugin(0))// if is plugged
+    {
+      plugin = lgptr->getJacobianNNLPlugin(0);
+      setComputeJacobianNNLqFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+    }
+    else
+      _jacobianNNLq.reset(new SimpleMatrix(lgptr->getJacobianNNLMatrix(0)));
+  }
+  // Jacobian qdot of NNL
+  if (lgptr -> hasJacobianNNL(1)) // if given
+  {
+    if (lgptr->isJacobianNNLPlugin(1))// if is plugged
+    {
+      plugin = lgptr->getJacobianNNLPlugin(1);
+      setComputeJacobianNNLqDotFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+    }
+    else
+      _jacobianNNLqDot.reset(new SimpleMatrix(lgptr->getJacobianNNLMatrix(1)));
+  }
+
 }
 
 // From a set of data; Mass filled-in directly from a siconosMatrix -
@@ -529,69 +549,6 @@ void LagrangianDS::setPPtr(SP::SiconosVector newPtr, unsigned int level)
     RuntimeException::selfThrow("LagrangianDS - setPPtr: inconsistent input vector size ");
   _p[level] = newPtr;
 }
-/*
-void LagrangianDS::setMass(const PMMass& newValue)
-{
-  assert(newValue.size(0)==_ndof&&"LagrangianDS - setMass: inconsistent dimensions with problem size for matrix mass.");
-  assert(newValue.size(1)==_ndof&&"LagrangianDS - setMass: inconsistent dimensions with problem size for matrix mass.");
-
-  if( !mass  )
-    mass.reset(new PMMass(newValue));
-  else
-    *mass = newValue;
-}
-void LagrangianDS::setFInt(const PVFInt& newValue)
-{
-  assert(newValue.size()==_ndof&&"LagrangianDS - setFInt: inconsistent dimensions with problem size for input vector fInt");
-
-  if( ! fInt )
-    fInt.reset(new PVFInt(newValue));
-  else
-    *_fInt = newValue;
-}
-
-void LagrangianDS::setFExt(const SimpleVector& newValue)
-{
-  assert(newValue.size()==_ndof&&"LagrangianDS - setFExt: inconsistent dimensions with problem size for input vector fExt");
-
-  if( !fExt )
-    fExt.reset(new Plugged_Vector_FTime(newValue));
-  else
-    *_fExt = newValue;
-}
-
-void LagrangianDS::setNNL(const PVNNL& newValue)
-{
-  assert(newValue.size()==_ndof&&"LagrangianDS - setNNL: inconsistent dimensions with problem size for input vector NNL");
-
-  if( !NNL )
-    NNL.reset(new PVNNL(newValue));
-  else
-    *NNL = newValue;
-}
-
-void LagrangianDS::setJacobianFInt(unsigned int i, const PMFInt& newValue)
-{
-  assert(newValue.size(0)==_ndof&&"LagrangianDS -setJacobianFInt : inconsistent dimensions with problem size for matrix JacobianFInt.");
-  assert(newValue.size(1)==_ndof&&"LagrangianDS -setJacobianFInt : inconsistent dimensions with problem size for matrix JacobianFInt.");
-
-  if( ! jacobianFInt[i] )
-    jacobianFInt[i].reset(new PMFInt(newValue));
-  else
-    *_jacobianFInt[i] = newValue;
-}
-
-void LagrangianDS::setJacobianNNL(unsigned int i, const PMNNL& newValue)
-{
-  assert(newValue.size(0)==_ndof&&"LagrangianDS - setJacobianNNL: inconsistent dimensions with problem size for matrix JacobianNNL.");
-  assert(newValue.size(1)==_ndof&&"LagrangianDS - setJacobianNNL: inconsistent dimensions with problem size for matrix JacobianNNL.");
-
-  if( ! jacobianNNL[i] )
-    jacobianNNL[i].reset(new PMNNL(newValue));
-  else
-    *_jacobianNNL[i] = newValue;
-}
-*/
 
 void LagrangianDS::computeMass()
 {
@@ -861,66 +818,66 @@ void LagrangianDS::computeJacobianqDotFL(double time)
 void LagrangianDS::saveSpecificDataToXML()
 {
   // --- other data ---
-  /*  if(!dsxml)
+  if (!_dsxml)
     RuntimeException::selfThrow("LagrangianDS::saveDSToXML - object DynamicalSystemXML does not exist");
 
-  SP::LagrangianDSXML lgptr = boost::static_pointer_cast <LagrangianDSXML>(dsxml);
-  lgptr->setMassPlugin(mass->getPluginName());
-  lgptr->setQ( *_q[0] );
-  lgptr->setQ0( *_q0 );
-  lgptr->setQMemory( *_qMemory );
-  lgptr->setVelocity( *q[1] );
-  lgptr->setVelocity0( *velocity0 );
-  lgptr->setVelocityMemory( *velocityMemory );
+  SP::LagrangianDSXML lgptr = boost::static_pointer_cast <LagrangianDSXML>(_dsxml);
+  lgptr->setMassPlugin(_pluginMass->getPluginName());
+  lgptr->setQ(*_q[0]);
+  lgptr->setQ0(*_q0);
+  lgptr->setQMemory(*_qMemory);
+  lgptr->setVelocity(*_q[1]);
+  lgptr->setVelocity0(*_velocity0);
+  lgptr->setVelocityMemory(*_velocityMemory);
 
   // FExt
-  if( lgptr->hasFExt() )
-    {
-      if( !lgptr->isFExtPlugin())
-  lgptr->setFExtVector( *_fExt );
-    }
+  if (lgptr->hasFExt())
+  {
+    if (!lgptr->isFExtPlugin())
+      lgptr->setFExtVector(*_fExt);
+  }
   else
-    lgptr->setFExtPlugin(fExt->getPluginName());
+    lgptr->setFExtPlugin(_pluginFExt->getPluginName());
 
   // FInt
-  if( lgptr->hasFInt() )
-    {
-      if( !lgptr->isFIntPlugin())
-  if( fInt->size() > 0 )
-    lgptr->setFIntVector(*_fInt);
-  else cout<<"Warning : FInt can't be saved, the FInt vector is not defined."<<endl;
-    }
+  if (lgptr->hasFInt())
+  {
+    if (!lgptr->isFIntPlugin())
+      if (_fInt->size() > 0)
+        lgptr->setFIntVector(*_fInt);
+      else cout << "Warning : FInt can't be saved, the FInt vector is not defined." << endl;
+  }
   else
-    lgptr->setFIntPlugin(fInt->getPluginName());
+    lgptr->setFIntPlugin(_pluginFInt->getPluginName());
 
-  for(unsigned int i=0;i<2;++i)
+  for (unsigned int i = 0; i < 2; ++i)
+  {
+    // Jacobian FInt
+    if (lgptr->hasJacobianFInt(i))
     {
-      // Jacobian FInt
-      if( lgptr->hasJacobianFInt(i) )
-  {
-    if( !lgptr->isJacobianFIntPlugin(i))
-      lgptr->setJacobianFIntMatrix(i,*_jacobianFInt[i]);
-  }
-      else
-  lgptr->setJacobianFIntPlugin(i,jacobianFInt[i]->getPluginName());
-
-      // JacobianNNLq
-      if( lgptr->hasJacobianNNL(i) )
-  {
-    if( !lgptr->isJacobianNNLPlugin(i))
-      lgptr->setJacobianNNLMatrix(i, *_jacobianNNL[i] );
-  }
-      else
-  lgptr->setJacobianNNLPlugin(i,jacobianNNL[i]->getPluginName());
+      if (!lgptr->isJacobianFIntPlugin(i))
+        lgptr->setJacobianFIntMatrix(i, i ? *_jacobianFIntqDot : *_jacobianFIntq);
     }
+    else
+      lgptr->setJacobianFIntPlugin(i, i ? _pluginJacqDotFInt->getPluginName() : _pluginJacqFInt->getPluginName());
+
+    // JacobianNNLq
+    if (lgptr->hasJacobianNNL(i))
+    {
+      if (!lgptr->isJacobianNNLPlugin(i))
+        lgptr->setJacobianNNLMatrix(i, i ? *_jacobianNNLqDot : *_jacobianNNLq);
+    }
+    else
+      lgptr->setJacobianNNLPlugin(i, i ? _pluginJacqDotNNL->getPluginName() : _pluginJacqNNL->getPluginName());
+  }
   // NNL
-  if( lgptr->hasNNL() )
-    {
-      if( !lgptr->isNNLPlugin())
-  lgptr->setNNLVector(*_NNL);
-    }
+  if (lgptr->hasNNL())
+  {
+    if (!lgptr->isNNLPlugin())
+      lgptr->setNNLVector(*_NNL);
+  }
   else
-  lgptr->setNNLPlugin(NNL->getPluginName());*/
+    lgptr->setNNLPlugin(_pluginNNL->getPluginName());
 }
 
 void LagrangianDS::display() const

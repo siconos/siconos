@@ -88,7 +88,7 @@ FirstOrderLinearR::FirstOrderLinearR(SP::SiconosMatrix  newC, SP::SiconosMatrix 
 {
   Jachx = newC;
   Jacglambda = newB;
-  Jachlambda = newD;
+  _jachlambda = newD;
   _F = newF;
   _e = newE;
 }
@@ -151,12 +151,12 @@ void FirstOrderLinearR::initialize(SP::Interaction inter)
 
   // C and B are the minimum inputs. The others may remain null.
 
-  if (Jachlambda)
+  if (_jachlambda)
   {
-    if (Jachlambda->size(0) == 0)
-      Jachlambda->resize(sizeY, sizeY);
+    if (_jachlambda->size(0) == 0)
+      _jachlambda->resize(sizeY, sizeY);
     else
-      assert((Jachlambda->size(0) == sizeY || Jachlambda->size(1) == sizeY) && "FirstOrderLinearR::initialize , inconsistent size between C and D.");
+      assert((_jachlambda->size(0) == sizeY || _jachlambda->size(1) == sizeY) && "FirstOrderLinearR::initialize , inconsistent size between C and D.");
   }
 
   if (_F)
@@ -207,14 +207,14 @@ void FirstOrderLinearR::computeC(double time)
 
 void FirstOrderLinearR::computeD(double time)
 {
-  if (Jachlambda)
+  if (_jachlambda)
   {
     if (_pluginJachlambda->fPtr)
     {
       unsigned int sizeY = interaction()->getSizeOfY();
       unsigned int sizeZ = interaction()->getSizeZ();
       *_workZ = *data[z];
-      ((FOMatPtr1)(_pluginJachlambda->fPtr))(time, sizeY, sizeY, &(*Jachlambda)(0, 0), sizeZ, &(*_workZ)(0));
+      ((FOMatPtr1)(_pluginJachlambda->fPtr))(time, sizeY, sizeY, &(*_jachlambda)(0, 0), sizeZ, &(*_workZ)(0));
       // Copy data that might have been changed in the plug-in call.
       *data[z] = *_workZ;
     }
@@ -292,8 +292,8 @@ void FirstOrderLinearR::computeOutput(double time, unsigned int)
   else
     y->zero();
 
-  if (Jachlambda)
-    prod(*Jachlambda, *lambda, *y, false);
+  if (_jachlambda)
+    prod(*_jachlambda, *lambda, *y, false);
 
   if (_e)
     *y += *_e;
@@ -318,7 +318,7 @@ void FirstOrderLinearR::display() const
   if (Jachx) Jachx->display();
   else cout << "->NULL" << endl;
   cout << "| D " << endl;
-  if (Jachlambda) Jachlambda->display();
+  if (_jachlambda) _jachlambda->display();
   else cout << "->NULL" << endl;
   cout << "| F " << endl;
   if (_F) _F->display();
@@ -348,7 +348,7 @@ void FirstOrderLinearR::saveRelationToXML() const
 
   SP::LinearRXML folrXML = (boost::static_pointer_cast<LinearRXML>(relationxml));
   folrXML->setC(*Jachx);
-  folrXML->setD(*Jachlambda);
+  folrXML->setD(*_jachlambda);
   folrXML->setF(*_F);
   folrXML->setE(*_e);
   folrXML->setB(*Jacglambda);

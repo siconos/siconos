@@ -147,7 +147,7 @@ protected:
   /*value of h at the current newton iteration*/
   SP::SiconosVector _h_alpha;
 
-  SP::SiconosMatrix Jachlambda;
+  SP::SiconosMatrix _jachlambda;
 
 
   /** basic constructor
@@ -427,7 +427,7 @@ public:
   virtual void computeInput(double, unsigned int = 0) = 0;
   virtual inline SP::SiconosMatrix jachlambda() const
   {
-    return Jachlambda;
+    return _jachlambda;
   }
 
 

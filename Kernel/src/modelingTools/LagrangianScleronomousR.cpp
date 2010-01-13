@@ -46,7 +46,7 @@ LagrangianScleronomousR::LagrangianScleronomousR(SP::RelationXML LRxml): Lagrang
     pluginjqh->setComputeFunction(LRxml->getJacobianHPlugin(0));
   }
   else
-    Jachq.reset(new SimpleMatrix(LRxml->getJacobianHMatrix(0)));
+    _jachq.reset(new SimpleMatrix(LRxml->getJacobianHMatrix(0)));
 
 }
 
@@ -61,7 +61,7 @@ LagrangianScleronomousR::LagrangianScleronomousR(const string& computeh, const s
 
   //  unsigned int sizeY = interaction()->getSizeOfY();
   //  unsigned int sizeQ = workX->size();
-  //  Jachq.reset(new SimpleMatrix(sizeY,sizeQ));
+  //  _jachq.reset(new SimpleMatrix(sizeY,sizeQ));
 
   // Warning: we cannot allocate memory for Jach[0] matrix since no interaction
   // is connected to the relation. This will be done during initialize.
@@ -106,11 +106,11 @@ void LagrangianScleronomousR::computeJachq(double)
     *_workX = *data[q0];
     *_workZ = *data[z];
 
-    unsigned int sizeY = Jachq->size(0);
+    unsigned int sizeY = _jachq->size(0);
     unsigned int sizeQ = _workX->size();
     unsigned int sizeZ = _workZ->size();
 
-    ((FPtr3)(pluginjqh->fPtr))(sizeQ, &(*_workX)(0), sizeY, &(*Jachq)(0, 0), sizeZ, &(*_workZ)(0));
+    ((FPtr3)(pluginjqh->fPtr))(sizeQ, &(*_workX)(0), sizeY, &(*_jachq)(0, 0), sizeZ, &(*_workZ)(0));
 
     // Copy data that might have been changed in the plug-in call.
     *data[z] = *_workZ;
@@ -127,9 +127,9 @@ void LagrangianScleronomousR::computeOutput(double time, unsigned int derivative
     computeJachq(time);
     SP::SiconosVector y = interaction()->y(derivativeNumber) ;
     if (derivativeNumber == 1)
-      prod(*Jachq, *data[q1], *y);
+      prod(*_jachq, *data[q1], *y);
     else if (derivativeNumber == 2)
-      prod(*Jachq, *data[q2], *y);
+      prod(*_jachq, *data[q2], *y);
     else
       RuntimeException::selfThrow("LagrangianScleronomousR::computeOutput(t,index), index out of range");
   }
@@ -141,7 +141,7 @@ void LagrangianScleronomousR::computeInput(double time, unsigned int level)
   // get lambda of the concerned interaction
   SP::SiconosVector lambda = interaction()->lambda(level);
   // data[name] += trans(G) * lambda
-  prod(*lambda, *Jachq, *data[p0 + level], false);
+  prod(*lambda, *_jachq, *data[p0 + level], false);
 
 }
 

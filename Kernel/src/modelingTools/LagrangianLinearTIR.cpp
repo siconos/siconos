@@ -29,37 +29,37 @@ using namespace RELATION;
 LagrangianLinearTIR::LagrangianLinearTIR(SP::RelationXML relxml):
   LagrangianR(relxml, LinearTIR)
 {
-  /*  SP::LinearRXML folrXML = boost::static_pointer_cast<LinearRXML>(relationxml);
+  SP::LinearRXML folrXML = boost::static_pointer_cast<LinearRXML>(relxml);
   // get matrices values. All are optional.
 
-  if(folrXML->hasC())
-    C.reset(new SimpleMatrix(folrXML->getC()));
+  if (folrXML->hasC())
+    _jachq.reset(new SimpleMatrix(folrXML->getC()));
   else
     RuntimeException::selfThrow("LagrangianLinearTIR:: xml constructor failed, can not find a definition for C.");
 
-  if(folrXML->hasD())
-    D.reset(new SimpleMatrix(folrXML->getD()));
+  if (folrXML->hasD())
+    _jachlambda.reset(new SimpleMatrix(folrXML->getD()));
 
-  if(folrXML->hasF())
+  if (folrXML->hasF())
     _F.reset(new SimpleMatrix(folrXML->getF()));
 
-  if(folrXML->hasE())
-  e.reset(new SimpleVector(folrXML->getE()));*/
+  if (folrXML->hasE())
+    _e.reset(new SimpleVector(folrXML->getE()));
 }
 
 // Minimum data (C as pointer) constructor
 LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix newC):
   LagrangianR(LinearTIR)
 {
-  Jachq = newC;
+  _jachq = newC;
 }
 
 // Constructor from a complete set of data
 LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix newC, SP::SiconosMatrix newD, SP::SiconosMatrix newF, SP::SiconosVector newE):
   LagrangianR(LinearTIR)
 {
-  Jachq = newC;
-  Jachlambda = newD;
+  _jachq = newC;
+  _jachlambda = newD;
   _F = newF;
   _e = newE;
 }
@@ -68,7 +68,7 @@ LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix newC, SP::SiconosMatr
 LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix newC, SP::SiconosVector newE):
   LagrangianR(LinearTIR)
 {
-  Jachq = newC;
+  _jachq = newC;
   _e = newE;
 }
 
@@ -76,7 +76,7 @@ LagrangianLinearTIR::LagrangianLinearTIR(SP::SiconosMatrix newC, SP::SiconosVect
 LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC):
   LagrangianR(LinearTIR)
 {
-  Jachq.reset(new SimpleMatrix(newC));
+  _jachq.reset(new SimpleMatrix(newC));
 }
 
 // Constructor from a complete set of data (matrices)
@@ -84,8 +84,8 @@ LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC, const Sicono
   LagrangianR(LinearTIR)
 {
   RuntimeException::selfThrow("LagrangianLinearTIR::LagrangianLinearTIR,  copy matrix in constructor\n");
-  Jachq.reset(new SimpleMatrix(newC));
-  Jachlambda.reset(new SimpleMatrix(newD));
+  _jachq.reset(new SimpleMatrix(newC));
+  _jachlambda.reset(new SimpleMatrix(newD));
   _F.reset(new SimpleMatrix(newF));
   _e.reset(new SimpleVector(newE));
 }
@@ -95,7 +95,7 @@ LagrangianLinearTIR::LagrangianLinearTIR(const SiconosMatrix& newC, const Sicono
   LagrangianR(LinearTIR)
 {
   RuntimeException::selfThrow("LagrangianLinearTIR::LagrangianLinearTIR,  copy matrix in constructor\n");
-  Jachq.reset(new SimpleMatrix(newC));
+  _jachq.reset(new SimpleMatrix(newC));
   _e.reset(new SimpleVector(newE));
 }
 
@@ -104,10 +104,10 @@ void LagrangianLinearTIR::initComponents()
   unsigned int sizeY = interaction()->getSizeOfY();
   unsigned int sizeDS = interaction()->getSizeOfDS();
 
-  assert((Jachq) ? (Jachq->size(1) == sizeDS && Jachq->size(0) == sizeY) : 1 &&
+  assert((_jachq) ? (_jachq->size(1) == sizeDS && _jachq->size(0) == sizeY) : 1 &&
          "LagrangianLinearTIR::initComponents inconsistent sizes between H matrix and the interaction.");
 
-  assert((Jachlambda) ? (Jachlambda->size(0) == sizeY && Jachlambda->size(1) != sizeY) : 1 &&
+  assert((_jachlambda) ? (_jachlambda->size(0) == sizeY && _jachlambda->size(1) != sizeY) : 1 &&
          "LagrangianLinearTIR::initComponents inconsistent sizes between D matrix and the interaction.");
   assert((_e) ? (_e->size() == sizeY) : 1 &&
          "LagrangianLinearTIR::initComponents inconsistent sizes between e vector and the dimension of the interaction.");
@@ -137,7 +137,7 @@ void LagrangianLinearTIR::computeOutput(double time, unsigned int derivativeNumb
   SP::SiconosVector lambda = interaction()->lambda(derivativeNumber);
 
   //string name = "q"+toString<unsigned int>(derivativeNumber);
-  prod(*Jachq, *data[q0 + derivativeNumber], *y);
+  prod(*_jachq, *data[q0 + derivativeNumber], *y);
 
   if (derivativeNumber == 0)
   {
@@ -147,8 +147,8 @@ void LagrangianLinearTIR::computeOutput(double time, unsigned int derivativeNumb
       prod(*_F, *data[z], *y, false);
   }
 
-  if (Jachlambda)
-    prod(*Jachlambda, *lambda, *y, false) ;
+  if (_jachlambda)
+    prod(*_jachlambda, *lambda, *y, false) ;
 
 
 }
@@ -160,7 +160,7 @@ void LagrangianLinearTIR::computeInput(double time, const unsigned int level)
 
   *_workL = *interaction()->lambda(level);
   // computation of p = Ht lambda
-  prod(*_workL, *Jachq, *data[p0 + level], false);
+  prod(*_workL, *_jachq, *data[p0 + level], false);
   //gemv(CblasTrans,1.0,*H,*lambda,1.0, *data[name]); => not yet implemented for BlockVectors.
 }
 /*
@@ -180,9 +180,9 @@ void LagrangianLinearTIR::saveRelationToXML() const
   assert(relationxml &&
          "LagrangianLinearTIR::saveRelationToXML - object RelationXML does not exist");
 
-  (boost::static_pointer_cast<LinearRXML>(relationxml))->setC(*Jachq) ;
+  (boost::static_pointer_cast<LinearRXML>(relationxml))->setC(*_jachq) ;
   (boost::static_pointer_cast<LinearRXML>(relationxml))->setE(*_e) ;
-  (boost::static_pointer_cast<LinearRXML>(relationxml))->setD(*Jachlambda) ;
+  (boost::static_pointer_cast<LinearRXML>(relationxml))->setD(*_jachlambda) ;
   (boost::static_pointer_cast<LinearRXML>(relationxml))->setF(*_F) ;
 }
 
@@ -196,8 +196,8 @@ void LagrangianLinearTIR::display() const
   LagrangianR::display();
   cout << "===== Lagrangian Linear Relation display ===== " << endl;
   cout << " C: " << endl;
-  if (Jachq)
-    Jachq->display();
+  if (_jachq)
+    _jachq->display();
   else
     cout << " -> NULL " << endl;
   cout << " e: " << endl;
@@ -206,8 +206,8 @@ void LagrangianLinearTIR::display() const
   else
     cout << " -> NULL " << endl;
   cout << " D: " << endl;
-  if (Jachlambda)
-    Jachlambda->display();
+  if (_jachlambda)
+    _jachlambda->display();
   else
     cout << " -> NULL " << endl;
   cout << " F: " << endl;
