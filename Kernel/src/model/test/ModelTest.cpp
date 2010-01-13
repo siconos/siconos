@@ -46,7 +46,7 @@ void ModelTest::testBuildModel0()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->finalT() == -1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->currentTime() == t0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", !M->simulation(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", !M->nonSmoothDynamicalSystem(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->nonSmoothDynamicalSystem(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", !M->siconosModelXML(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->title() == "none", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel0 : ", M->author() == "nobody", true);
@@ -64,7 +64,7 @@ void ModelTest::testBuildModel1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->finalT() == T, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->currentTime() == t0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", !M->simulation(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", !M->nonSmoothDynamicalSystem(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->nonSmoothDynamicalSystem(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", !M->siconosModelXML(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->title() == "none", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->author() == "nobody", true);
@@ -82,7 +82,7 @@ void ModelTest::testBuildModel2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->finalT() == T, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->currentTime() == t0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", !M->simulation(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", !M->nonSmoothDynamicalSystem(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->nonSmoothDynamicalSystem(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", !M->siconosModelXML(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->title() == "myModel", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1 : ", M->author() == "SiconosTeam", true);
