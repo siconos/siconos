@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
+/* Siconos-Kernel, Copyright INRIA 2005-2010.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -14,7 +14,7 @@
  * along with Siconos; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
 #include <boost/numeric/ublas/matrix_proxy.hpp>

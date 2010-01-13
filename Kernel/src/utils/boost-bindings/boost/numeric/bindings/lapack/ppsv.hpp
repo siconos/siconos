@@ -10,7 +10,7 @@
  * University of Zagreb, Croatia.
  *
  */
-/* Modified to include xPPTRI by Kian Ming A. Chai (14 May 2008) */
+/* Modified to include xPPTRI by Kian Ming A. Chai (14 May 2010) */
 
 #ifndef BOOST_NUMERIC_BINDINGS_LAPACK_PPSV_HPP
 #define BOOST_NUMERIC_BINDINGS_LAPACK_PPSV_HPP

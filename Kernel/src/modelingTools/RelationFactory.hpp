@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 3.0.0, Copyright INRIA 2005-2008.
+/* Siconos-Kernel, Copyright INRIA 2005-2010.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -14,7 +14,7 @@
  * along with Siconos; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
 /*! \file RelationFactory.h
@@ -53,7 +53,7 @@ template<class SubType> SP::Relation factory(int name)
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
- *  \date (Creation) November 2008
+ *  \date (Creation) November 2010
  *
  * Relation factory.
  * Use:
@@ -89,7 +89,7 @@ public :
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 3.0.0.
- *  \date (Creation) November 2008
+ *  \date (Creation) November 2010
  *
  * Class used for auto-registration of Relation-type objects.
  *

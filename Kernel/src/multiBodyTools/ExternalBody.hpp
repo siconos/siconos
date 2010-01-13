@@ -14,7 +14,7 @@
  * along with Siconos; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  *
  */
 
