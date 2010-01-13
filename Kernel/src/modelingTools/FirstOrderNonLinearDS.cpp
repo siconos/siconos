@@ -88,86 +88,86 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML):
   DynamicalSystem(dsXML)
 {
   zeroPlugin();
-  /*  // -- FONLDS xml object --
-  SP::FirstOrderNonLinearDSXML fonlds = boost::static_pointer_cast <FirstOrderNonLinearDSXML>(dsxml);
+  // -- FONLDS xml object --
+  SP::FirstOrderNonLinearDSXML fonlds = boost::static_pointer_cast <FirstOrderNonLinearDSXML>(dsXML);
 
   // === Initial conditions ===
   // Warning: n is set thanks to x0 size
-  if ( ! fonlds->hasX0())
+  if (! fonlds->hasX0())
     RuntimeException::selfThrow("FirstOrderNonLinearDS:: xml constructor, x0 is a required input");
 
-  x0.reset(new SimpleVector(fonlds->getX0()));
+  _x0.reset(new SimpleVector(fonlds->getX0()));
 
-  n = x0->size();
+  _n = _x0->size();
 
   // === Current state (optional input) ===
   // x is composed of two blocks of size n, (*x)[0] = \f$ x \f$ and (*x)[1]=\f$ \dot x \f$.
 
-  if ( fonlds->hasX())
-    x[0].reset(new SimpleVector(fonlds->getX()));
+  if (fonlds->hasX())
+    _x[0].reset(new SimpleVector(fonlds->getX()));
   else // (*x)[0] initialize with x0.
-    x[0].reset(new SimpleVector(*x0));
+    _x[0].reset(new SimpleVector(*_x0));
   // build and initialize right-hand side
-  x[1].reset(new SimpleVector(n));
+  _x[1].reset(new SimpleVector(_n));
   // r
 
-  r.reset(new SimpleVector(n));
+  _r.reset(new SimpleVector(_n));
 
   string plugin;
 
   // f and jacobianfx are required for DynamicalSystem but not for derived class.
   // Then we can not set exception if they are not given.
-  if(fonlds->hasM())
+  if (fonlds->hasM())
+  {
+    if (fonlds->isMPlugin())
     {
-      if ( fonlds->isMPlugin())
-  {
-    plugin = fonlds->getMPlugin();
-    setComputeMFunction(SSL::getPluginName( plugin ), SSL::getPluginFunctionName( plugin ));
-  }
-      else // This means that M is constant
-  {
-          M.reset(new PMJF(fonlds->getMMatrix()));
-    if(M->size(0)!=n || M->size(1)!=n)
-      RuntimeException::selfThrow("FirstOrderNonLinearDS:: xml constructor, M size differs from n!");
-  }
+      plugin = fonlds->getMPlugin();
+      setComputeMFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
     }
-
-  if(fonlds->hasF())
+    else // This means that M is constant
     {
-      if(fonlds->isFPlugin())
-  {
-    plugin = fonlds->getFPlugin();
-    setComputeFFunction(SSL::getPluginName( plugin ), SSL::getPluginFunctionName( plugin ));
-  }
-      else
-  {
-    if(fonlds->getFVector().size()!=n)
-      RuntimeException::selfThrow("FirstOrderNonLinearDS:: xml constructor, f size differs from n!");
-
-          _f.reset(new PVF(fonlds->getFVector()));
-  }
+      _M.reset(new SimpleMatrix(fonlds->getMMatrix()));
+      if (_M->size(0) != _n || _M->size(1) != _n)
+        RuntimeException::selfThrow("FirstOrderNonLinearDS:: xml constructor, M size differs from n!");
     }
+  }
 
-  if(fonlds->hasJacobianfx())
+  if (fonlds->hasF())
+  {
+    if (fonlds->isFPlugin())
     {
-      if ( fonlds->isJacobianfxPlugin())
-  {
-    plugin = fonlds->getJacobianfxPlugin();
-    setComputeJacobianfxFunction(SSL::getPluginName( plugin ), SSL::getPluginFunctionName( plugin ));
-  }
-      else // This means that jacobianfx is constant
-  {
-          jacobianfx.reset(new PMJF(fonlds->getJacobianfxMatrix()));
-    if(jacobianfx->size(0)!=n || jacobianfx->size(1)!=n)
-      RuntimeException::selfThrow("FirstOrderNonLinearDS:: xml constructor, jacobianfx size differs from n!");
-  }
+      plugin = fonlds->getFPlugin();
+      setComputeFFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
     }
+    else
+    {
+      if (fonlds->getFVector().size() != _n)
+        RuntimeException::selfThrow("FirstOrderNonLinearDS:: xml constructor, f size differs from n!");
+
+      _f.reset(new SimpleVector(fonlds->getFVector()));
+    }
+  }
+
+  if (fonlds->hasJacobianfx())
+  {
+    if (fonlds->isJacobianfxPlugin())
+    {
+      plugin = fonlds->getJacobianfxPlugin();
+      setComputeJacobianfxFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
+    }
+    else // This means that jacobianfx is constant
+    {
+      _jacobianfx.reset(new SimpleMatrix(fonlds->getJacobianfxMatrix()));
+      if (_jacobianfx->size(0) != _n || _jacobianfx->size(1) != _n)
+        RuntimeException::selfThrow("FirstOrderNonLinearDS:: xml constructor, jacobianfx size differs from n!");
+    }
+  }
 
   // Memory
-  if ( fonlds->hasXMemory())
-    xMemory.reset(new SiconosMemory( fonlds->getXMemoryXML() ));
+  if (fonlds->hasXMemory())
+    _xMemory.reset(new SiconosMemory(fonlds->getXMemoryXML()));
 
-    checkDynamicalSystem();*/
+  checkDynamicalSystem();
 }
 
 // From a minimum set of data
@@ -473,10 +473,10 @@ void FirstOrderNonLinearDS::saveSpecificDataToXML()
   if (!fonlds)
     RuntimeException::selfThrow("FirstOrderNonLinearDS::saveSpecificDataToXML - The DynamicalSystemXML object doesn't exists");
 
-  //   if( _computeFPtr)
-  //     fonlds->setFPlugin(_pluginNameComputeFPtr);
-  //   if( computeJacobianfxPtr)
-  //     fonlds->setJacobianfxPlugin(pluginNamePluginComputeM);
+  if (_pluginf->fPtr)
+    fonlds->setFPlugin(_pluginf->getPluginName());
+  if (_pluginJacxf->fPtr)
+    fonlds->setJacobianfxPlugin(_pluginJacxf->getPluginName());
 }
 
 // ===== MISCELLANEOUS ====

@@ -28,9 +28,8 @@ using namespace std;
 FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML): FirstOrderNonLinearDS(dsXML)
 {
 
-  /*
   // pointer to xml
-  SP::FirstOrderLinearDSXML foldsxml = (boost::static_pointer_cast <FirstOrderLinearDSXML>(dsxml));
+  SP::FirstOrderLinearDSXML foldsxml = (boost::static_pointer_cast <FirstOrderLinearDSXML>(dsXML));
 
   // Check if f is given as a plug-in in xml input file.
   if (foldsxml->hasF() || foldsxml->hasJacobianfx())
@@ -38,31 +37,30 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML): FirstOrder
 
   string plugin;
   // A
-  if(foldsxml->hasA())
-    {
-      if(foldsxml->isAPlugin())
+  if (foldsxml->hasA())
   {
-    plugin = foldsxml->getAPlugin();
-    setComputeAFunction(SSL::getPluginName( plugin ), SSL::getPluginFunctionName( plugin ));
-  }
-      else
-  A.reset(new Plugged_Matrix_FTime(foldsxml->getA()));
+    if (foldsxml->isAPlugin())
+    {
+      plugin = foldsxml->getAPlugin();
+      setComputeAFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
     }
+    else
+      _A.reset(new SimpleMatrix(foldsxml->getA()));
+  }
 
   // b
-  if(foldsxml->hasB())
-    {
-      if(foldsxml->isBPlugin())
+  if (foldsxml->hasB())
   {
-    plugin = foldsxml->getBPlugin();
-    setComputeBFunction(SSL::getPluginName( plugin ), SSL::getPluginFunctionName( plugin ));
-  }
-      else
-  b.reset(new Plugged_Vector_FTime(foldsxml->getBVector()));
+    if (foldsxml->isBPlugin())
+    {
+      plugin = foldsxml->getBPlugin();
+      setComputebFunction(SSL::getPluginName(plugin), SSL::getPluginFunctionName(plugin));
     }
+    else
+      _b.reset(new SimpleVector(foldsxml->getBVector()));
+  }
 
   checkDynamicalSystem();
-  */
 }
 
 // From a minimum set of data, A and b connected to a plug-in
