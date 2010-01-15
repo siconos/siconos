@@ -341,9 +341,9 @@ struct Topology::SetupFromNslaw : public SiconosVisitor
 
 };
 
-void Topology::attach(SP::Interaction inter, SP::DynamicalSystem ds)
+void Topology::link(SP::Interaction inter, SP::DynamicalSystem ds)
 {
-  // interactions should not know attached dynamical systems in the
+  // interactions should not know linked dynamical systems in the
   // future
   InteractionsIterator it = _allInteractions->find(inter);
   if (it != _allInteractions->end())

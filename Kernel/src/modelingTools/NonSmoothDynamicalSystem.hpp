@@ -209,13 +209,13 @@ public:
     _topology->removeDynamicalSystem(ds);
   };
 
-  /** attach an interaction to a dynamical system
+  /** link an interaction to a dynamical system
    * \param a SP::Interaction
    * \param a SP::DynamicalSystem
    */
-  void attach(SP::Interaction inter, SP::DynamicalSystem ds)
+  void link(SP::Interaction inter, SP::DynamicalSystem ds)
   {
-    _topology->attach(inter, ds);
+    _topology->link(inter, ds);
   }
 
 
