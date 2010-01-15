@@ -75,6 +75,7 @@ int main(int argc, char* argv[])
 
   FrictionContact_Problem NumericsProblem;
   NumericsProblem.numberOfContacts = NC;
+  NumericsProblem.dimension = 3;
   NumericsProblem.isComplete = 0;
   NumericsProblem.mu = mu;
   NumericsProblem.q = q;
@@ -127,9 +128,9 @@ int main(int argc, char* argv[])
   numerics_solver_options.dparam = (double*)malloc(numerics_solver_options.dSize * sizeof(double));
 
   int nmax = 10000; // Max number of iteration
-  int localsolver = 0; // 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 2: projection on Disk  with diagonalization,
-  double tolerance = 1e-10;
-  double localtolerance = 1e-12;
+  int localsolver = 3; // 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 3: projection on Disk  with diagonalization,
+  double tolerance = 1e-16;
+  double localtolerance = 1e-16;
 
 
   numerics_solver_options.iparam[0] = nmax ;
@@ -138,21 +139,32 @@ int main(int argc, char* argv[])
   numerics_solver_options.dparam[2] = localtolerance ;
 
   //Driver call
-  frictionContact3D_driver(&NumericsProblem,
-                           reaction , velocity,
-                           &numerics_solver_options, &numerics_options);
+  FILE * ff =  fopen("Example1_Fc3D_SBM.dat", "w");
+  frictionContact_printInFile(&NumericsProblem, ff);
+  fclose(ff);
 
+
+  int info = frictionContact3D_driver(&NumericsProblem,
+                                      reaction , velocity,
+                                      &numerics_solver_options, &numerics_options);
 
 
   // Solver output
   printf("\n");
   for (k = 0 ; k < 3 * NC; k++) printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e \n ", k, velocity[k], k , reaction[k]);
   printf("\n");
+  ff =  fopen("Example1_Fc3D_SBM-solution.dat", "w");
+  for (k = 0 ; k < 3 * NC; k++) fprintf(ff, "%32.24e", velocity[k]);
+  fprintf(ff, "\n");
+  for (k = 0 ; k < 3 * NC; k++) fprintf(ff, "%32.24e", reaction[k]);
+  fprintf(ff, "\n");
+  fclose(ff);
+
 
 
   free(reaction);
   free(velocity);
   free(MM);
   free(MBlockMatrix);
-
+  return info;
 }

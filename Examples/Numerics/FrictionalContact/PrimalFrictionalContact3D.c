@@ -119,28 +119,35 @@ int main(int argc, char* argv[])
 
   int i = 0, j = 0, k = 0;
 
-  PrimalFrictionContact_Problem NumericsProblem;
-  NumericsProblem.numberOfContacts = NC;
-  NumericsProblem.isComplete = 0;
-  NumericsProblem.mu = mu;
-  NumericsProblem.q = q;
-  NumericsProblem.b = b;
+  PrimalFrictionContact_Problem numericsProblem;
+  numericsProblem.numberOfContacts = NC;
+  numericsProblem.dimension = 3;
+  numericsProblem.isComplete = 0;
+  numericsProblem.mu = mu;
+  numericsProblem.q = q;
+  numericsProblem.b = b;
 
 
-  NumericsProblem.M = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));
-  NumericsMatrix *MM = NumericsProblem.M ;
+  numericsProblem.M = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));
+  NumericsMatrix *MM = numericsProblem.M ;
   MM->storageType = 0;
   MM->matrix0 = M;
   MM->size0 = n;
   MM->size1 = n;
 
 
-  NumericsProblem.H  = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));
-  NumericsMatrix *HH = NumericsProblem.H;
+  numericsProblem.H  = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));
+  NumericsMatrix *HH = numericsProblem.H;
   HH->storageType = 0;
   HH->matrix0 = H;
   HH->size0 = n;
   HH->size1 = m;
+
+
+  /*     FILE * foutput = fopen("Example_PrimalFrictionContact.dat", "w"); */
+  /*     primalFrictionContact_printInFile(&numericsProblem,  foutput ); */
+  /*     fclose(foutput); */
+
 
 
   // Unknown Declaration
@@ -159,7 +166,7 @@ int main(int argc, char* argv[])
   numerics_solver_options.filterOn = 0;
   numerics_solver_options.isSet = 1;
 
-  strcpy(numerics_solver_options.solverName, "NSGS_WR");
+  strcpy(numerics_solver_options.solverName, "PROX_WR");
   strcpy(numerics_solver_options.solverName, "NSGS");
 
   numerics_solver_options.iSize = 5;
@@ -183,7 +190,7 @@ int main(int argc, char* argv[])
 
   //Driver call
   i = 0;
-  info = primalFrictionContact3D_driver(&NumericsProblem,
+  info = primalFrictionContact3D_driver(&numericsProblem,
                                         reaction , velocity, globalVelocity,
                                         &numerics_solver_options, &numerics_options);
 
@@ -194,16 +201,13 @@ int main(int argc, char* argv[])
   for (k = 0 ; k < n; k++) printf("globalVelocity[%i] = %12.8e \t \n ", k, globalVelocity[k]);
   printf("\n");
 
-
   free(reaction);
   free(velocity);
   free(globalVelocity);
-  free(NumericsProblem.M);
-  free(NumericsProblem.H);
+  free(numericsProblem.M);
+  free(numericsProblem.H);
   free(numerics_solver_options.iparam);
   free(numerics_solver_options.dparam);
-
-
   return info;
 
 

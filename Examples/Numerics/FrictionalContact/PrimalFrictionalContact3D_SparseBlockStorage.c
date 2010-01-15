@@ -141,15 +141,16 @@ int main(int argc, char* argv[])
   int m = 3 * NC;
   int n = Ndof;
 
-  PrimalFrictionContact_Problem NumericsProblem;
-  NumericsProblem.numberOfContacts = NC;
-  NumericsProblem.isComplete = 0;
-  NumericsProblem.mu = mu;
-  NumericsProblem.q = q;
-  NumericsProblem.b = b;
+  PrimalFrictionContact_Problem numericsProblem;
+  numericsProblem.numberOfContacts = NC;
+  numericsProblem.dimension = 3;
+  numericsProblem.isComplete = 0;
+  numericsProblem.mu = mu;
+  numericsProblem.q = q;
+  numericsProblem.b = b;
 
-  NumericsProblem.M = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));
-  NumericsMatrix *MM =  NumericsProblem.M;
+  numericsProblem.M = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));
+  NumericsMatrix *MM =  numericsProblem.M;
   MM->storageType = 1;
   MM->size0 = Ndof;
   MM->size1 = Ndof;
@@ -174,8 +175,8 @@ int main(int argc, char* argv[])
   MBlockMatrix->index2_data =  index2_data;
 
 
-  NumericsProblem.H = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));
-  NumericsMatrix *HH =  NumericsProblem.H;
+  numericsProblem.H = (NumericsMatrix*)malloc(sizeof(NumericsMatrix));
+  NumericsMatrix *HH =  numericsProblem.H;
   HH->storageType = 1;
   HH->size0 = Ndof;
   HH->size1 = 3 * NC;
@@ -199,6 +200,9 @@ int main(int argc, char* argv[])
   HBlockMatrix->index1_data =  hindex1_data;
   HBlockMatrix->index2_data =  hindex2_data;
 
+  FILE * foutput = fopen("Example_PrimalFrictionContact_SBM.dat", "w");
+  primalFrictionContact_printInFile(&numericsProblem,  foutput);
+  fclose(foutput);
 
 
   // Unknown Declaration
@@ -238,7 +242,7 @@ int main(int argc, char* argv[])
   numerics_solver_options.dparam[2] = localtolerance ;
 
   //Driver call
-  info = primalFrictionContact3D_driver(&NumericsProblem,
+  info = primalFrictionContact3D_driver(&numericsProblem,
                                         reaction , velocity, globalVelocity,
                                         &numerics_solver_options, &numerics_options);
 

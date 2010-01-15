@@ -46,9 +46,7 @@
   FrictionContact3D problems needs some specific parameters, given to the FrictionContact3D_driver() function thanks to a Solver_Options structure. \n
   They are:\n
      - the name of the solver (ex: NSGS), used to switch to the right solver function
-     - iparam[0]: max. number of iterations allowed
-     - iparam[1]:
-     - dparam[0]: tolerance
+
      - isStorageSparse: 1 if a SparseBlockStructuredMatrix is used for M, else 0 (double* storage)
 
 
@@ -84,6 +82,7 @@ int main(int argc, char* argv[])
 
   FrictionContact_Problem NumericsProblem;
   NumericsProblem.numberOfContacts = NC;
+  NumericsProblem.dimension = 3;
   NumericsProblem.isComplete = 0;
   NumericsProblem.mu = mu;
   NumericsProblem.q = q;
@@ -119,12 +118,13 @@ int main(int argc, char* argv[])
   numerics_solver_options.dparam = (double*)malloc(numerics_solver_options.dSize * sizeof(double));
 
   int nmax = 10000; // Max number of iteration
-  int localsolver = 0; // 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 2: projection on Disk  with diagonalization,
+  int localsolver = 0; // 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 3: projection on Disk  with diagonalization,
   double tolerance = 1e-10;
   double localtolerance = 1e-12;
 
 
   numerics_solver_options.iparam[0] = nmax ;
+  numerics_solver_options.iparam[1] = 2 ;
   numerics_solver_options.iparam[4] = localsolver ;
   numerics_solver_options.dparam[0] = tolerance ;
   numerics_solver_options.dparam[2] = localtolerance ;

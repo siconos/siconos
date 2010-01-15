@@ -192,7 +192,7 @@ int main(int argc, char* argv[])
   HBlockMatrix->blocknumber0 = 4;
   HBlockMatrix->blocknumber1 = 2;
   int blocksize0[4] = {3, 6, 9, 12} ;
-  int blocksize1[2] = {3, 6, 9} ;
+  int blocksize1[3] = {3, 6, 9} ;
   HBlockMatrix->blocksize0 = blocksize0;
   HBlockMatrix->blocksize1 = blocksize1;
   HBlockMatrix->filled1 = 5;
@@ -212,7 +212,7 @@ int main(int argc, char* argv[])
   for (k = 0 ; k < m; k++)
   {
     velocity[k] = 0.0;
-    reaction[k];
+    reaction[k] = 0.0;
   }
   for (k = 0 ; k < n; k++) globalVelocity[k] = 0.0;
   // Numerics and Solver Options
@@ -231,8 +231,13 @@ int main(int argc, char* argv[])
 
   numerics_solver_options.iSize = 5;
   numerics_solver_options.iparam = (int*)malloc(numerics_solver_options.iSize * sizeof(int));
+  int ii ;
+  for (ii = 0; ii < numerics_solver_options.iSize; ii++)
+    numerics_solver_options.iparam[ii] = 0;
   numerics_solver_options.dSize = 5;
   numerics_solver_options.dparam = (double*)malloc(numerics_solver_options.dSize * sizeof(double));
+  for (ii = 0; ii < numerics_solver_options.dSize; ii++)
+    numerics_solver_options.dparam[ii] = 0;
 
   int nmax = 100; // Max number of iteration
   int localsolver = 0; // 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 2: projection on Disk  with diagonalization,
