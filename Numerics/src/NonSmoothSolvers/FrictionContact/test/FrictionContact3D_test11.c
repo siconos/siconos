@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
-#include "frictionContact3D_test_function.h"
+#include "frictionContact_test_function.h"
 
 int main(void)
 {
@@ -35,7 +35,7 @@ int main(void)
 
   int iparam[5] = {10001, 0, 0, 0, 1} ;
   double dparam[5] = {1e-5, 0, 1e-6, 0, 0};
-  info = frictionContact3D_test_function(finput, solvername, iparam, dparam);
+  info = frictionContact_test_function(finput, solvername, iparam, dparam);
 
   fclose(finput);
   printf("End of test on %s\n", filename);

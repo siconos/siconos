@@ -16,30 +16,20 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "frictionContact_test_function.h"
+#ifndef FRICTIONCONTACT_TEST_FUNCTION_H
+#define FRICTIONCONTACT_TEST_FUNCTION_H
 
-int main(void)
-{
-  int info = 0 ;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-  char  filename[50] = "./data/Confeti-ex13-4contact-Fc3D-SBM.dat";
-
-  printf("Test on %s\n", filename);
-
-  FILE * finput  =  fopen(filename, "r");
-
-  char solvername[10] = "NSGS";
-
-  int iparam[5] = {10001, 0, 0, 0, 2} ;
-  double dparam[5] = {1e-5, 0, 1e-6, 0, 0};
-  info = frictionContact_test_function(finput, solvername, iparam, dparam);
-
-  fclose(finput);
-  printf("End of test on %s\n", filename);
+  int frictionContact_test_function(FILE * f, char * solvername, int * iparam, double * dparam);
 
 
-  return info;
+#ifdef __cplusplus
 }
+#endif
+
+#endif
+
+

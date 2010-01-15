@@ -19,31 +19,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
-#include "frictionContact3D_test_function.h"
+#include "frictionContact_test_function.h"
 
 
-void frictionContact3D_fillParamWithRespectToSolver(Solver_Options *options, char * solvername, FrictionContact_Problem* problem)
-{
-
-
-  int maxIter = 1001;
-  double tolerance = 1e-8;
-  double localtolerance = 1e-8;
-  int localsolver = 1;
-
-  if (strcmp(solvername , "NSGS") == 0)
-  {
-    options->iSize = 5;
-    options->dSize = 5;
-    options->iparam[0] = maxIter;
-    options->iparam[4] = localsolver;
-    options->dparam[0] = tolerance;
-    options->dparam[2] = localtolerance;
-  }
-
-}
-
-int frictionContact3D_test_function(FILE * f, char * solvername, int * iparam, double * dparam)
+int frictionContact_test_function(FILE * f, char * solvername, int * iparam, double * dparam)
 {
 
   int i, k, info = -1 ;
@@ -84,15 +63,25 @@ int frictionContact3D_test_function(FILE * f, char * solvername, int * iparam, d
   }
 
   int NC = problem->numberOfContacts;
+  int dim = problem->dimension;
+  double *reaction = (double*)malloc(dim * NC * sizeof(double));
+  double *velocity = (double*)malloc(dim * NC * sizeof(double));
 
-  double *reaction = (double*)malloc(3 * NC * sizeof(double));
-  double *velocity = (double*)malloc(3 * NC * sizeof(double));
 
-  info = frictionContact3D_driver(problem,
-                                  reaction , velocity,
-                                  options, &global_options);
+  if (dim == 2)
+  {
+    info = frictionContact2D_driver(problem,
+                                    reaction , velocity,
+                                    options, &global_options);
+  }
+  else if (dim == 3)
+  {
+    info = frictionContact3D_driver(problem,
+                                    reaction , velocity,
+                                    options, &global_options);
+  }
   printf("\n");
-  for (k = 0 ; k < 3 * NC; k++)
+  for (k = 0 ; k < dim * NC; k++)
   {
     printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
   }
