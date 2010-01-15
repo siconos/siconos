@@ -1076,33 +1076,33 @@ void test_matrix(void)
       printf(" test %s  :\n", summary[itest].file);
       printf(" ===================================================  \n");
       if (sRunMethod[ENUM_ID])
-        printf(" ENUM %s %d \t", summary[itest].cv[ENUM_ID][sIdWithSol], summary[itest].times[ENUM_ID][sIdWithSol]);
+        printf(" ENUM %s %ld \t", summary[itest].cv[ENUM_ID][sIdWithSol], summary[itest].times[ENUM_ID][sIdWithSol]);
       if (sRunMethod[PGS_IM_ID])
-        printf(" PGS IM %s %d \t", summary[itest].cv[PGS_IM_ID][sIdWithSol], summary[itest].times[PGS_IM_ID][sIdWithSol]);
+        printf(" PGS IM %s %ld \t", summary[itest].cv[PGS_IM_ID][sIdWithSol], summary[itest].times[PGS_IM_ID][sIdWithSol]);
       if (sRunMethod[PGS_EX_ID])
-        printf(" PGS EX %s %d \t", summary[itest].cv[PGS_EX_ID][sIdWithSol], summary[itest].times[PGS_EX_ID][sIdWithSol]);
+        printf(" PGS EX %s %ld \t", summary[itest].cv[PGS_EX_ID][sIdWithSol], summary[itest].times[PGS_EX_ID][sIdWithSol]);
       if (sRunMethod[RPGS_ID])
-        printf(" RPGS %s %d \t", summary[itest].cv[RPGS_ID][sIdWithSol], summary[itest].times[RPGS_ID][sIdWithSol]);
+        printf(" RPGS %s %ld \t", summary[itest].cv[RPGS_ID][sIdWithSol], summary[itest].times[RPGS_ID][sIdWithSol]);
       if (sRunMethod[PSOR_05_ID])
-        printf(" PSOR 05 %s %d \t", summary[itest].cv[PSOR_05_ID][sIdWithSol], summary[itest].times[PSOR_05_ID][sIdWithSol]);
+        printf(" PSOR 05 %s %ld \t", summary[itest].cv[PSOR_05_ID][sIdWithSol], summary[itest].times[PSOR_05_ID][sIdWithSol]);
       if (sRunMethod[PSOR_1_ID])
-        printf(" PSOR 1 %s %d \t", summary[itest].cv[PSOR_1_ID][sIdWithSol], summary[itest].times[PSOR_1_ID][sIdWithSol]);
+        printf(" PSOR 1 %s %ld \t", summary[itest].cv[PSOR_1_ID][sIdWithSol], summary[itest].times[PSOR_1_ID][sIdWithSol]);
       if (sRunMethod[PSOR_15_ID])
-        printf(" PSOR 15 %s %d \t", summary[itest].cv[PSOR_15_ID][sIdWithSol], summary[itest].times[PSOR_15_ID][sIdWithSol]);
+        printf(" PSOR 15 %s %ld \t", summary[itest].cv[PSOR_15_ID][sIdWithSol], summary[itest].times[PSOR_15_ID][sIdWithSol]);
       if (sRunMethod[PSOR_2_ID])
-        printf(" PSOR 2 %s %d \t \n", summary[itest].cv[PSOR_2_ID][sIdWithSol], summary[itest].times[PSOR_2_ID][sIdWithSol]);
+        printf(" PSOR 2 %s %ld \t \n", summary[itest].cv[PSOR_2_ID][sIdWithSol], summary[itest].times[PSOR_2_ID][sIdWithSol]);
       if (sRunMethod[RPSOR_ID])
-        printf(" RPSOR %s %d \t", summary[itest].cv[RPSOR_ID][sIdWithSol], summary[itest].times[RPSOR_ID][sIdWithSol]);
+        printf(" RPSOR %s %ld \t", summary[itest].cv[RPSOR_ID][sIdWithSol], summary[itest].times[RPSOR_ID][sIdWithSol]);
       if (sRunMethod[PATH_ID])
-        printf(" PATH %s %d \t", summary[itest].cv[PATH_ID][sIdWithSol], summary[itest].times[PATH_ID][sIdWithSol]);
+        printf(" PATH %s %ld \t", summary[itest].cv[PATH_ID][sIdWithSol], summary[itest].times[PATH_ID][sIdWithSol]);
       if (sRunMethod[SIMPLEX_ID])
-        printf(" SIMPLEX %s %d \t", summary[itest].cv[SIMPLEX_ID][sIdWithSol], summary[itest].times[SIMPLEX_ID][sIdWithSol]);
+        printf(" SIMPLEX %s %ld \t", summary[itest].cv[SIMPLEX_ID][sIdWithSol], summary[itest].times[SIMPLEX_ID][sIdWithSol]);
       if (sRunMethod[DIRECT_ENUM_ID])
-        printf(" DIR_ENUM %s %d ", summary[itest].cv[DIRECT_ENUM_ID][sIdWithSol], summary[itest].times[DIRECT_ENUM_ID][sIdWithSol]);
+        printf(" DIR_ENUM %s %ld ", summary[itest].cv[DIRECT_ENUM_ID][sIdWithSol], summary[itest].times[DIRECT_ENUM_ID][sIdWithSol]);
       if (sRunMethod[FB_ID])
-        printf(" FB %s %d ", summary[itest].cv[FB_ID][sIdWithSol], summary[itest].times[FB_ID][sIdWithSol]);
+        printf(" FB %s %ld ", summary[itest].cv[FB_ID][sIdWithSol], summary[itest].times[FB_ID][sIdWithSol]);
       if (sRunMethod[DIRECT_FB_ID])
-        printf(" DIR_FB %s %d ", summary[itest].cv[DIRECT_FB_ID][sIdWithSol], summary[itest].times[DIRECT_FB_ID][sIdWithSol]);
+        printf(" DIR_FB %s %ld ", summary[itest].cv[DIRECT_FB_ID][sIdWithSol], summary[itest].times[DIRECT_FB_ID][sIdWithSol]);
       printf("\n");
     }
   }

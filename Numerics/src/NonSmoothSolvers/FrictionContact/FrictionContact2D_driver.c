@@ -25,8 +25,22 @@
 #include "FrictionContact2D_Solvers.h"
 #include "NonSmoothDrivers.h"
 
+#ifdef DUMP_PROBLEM
+static int fccounter = 0;
+#endif
+
 int frictionContact2D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options)
 {
+
+#ifdef DUMP_PROBLEM
+  char fname[256];
+  sprintf(fname, "FrictionContactProblem%.5d.dat", fccounter++);
+
+  FILE * foutput  =  fopen(fname, "w");
+  frictionContact_printInFile(problem, foutput);
+  fclose(foutput);
+#endif
+
   if (options == NULL || global_options == NULL)
     numericsError("FrictionContact2D_driver", "null input for solver and/or global options");
 

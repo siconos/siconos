@@ -38,7 +38,7 @@ void numericsError(char * functionName, char* message)
   strcat(output, functionName);
   strcat(output, message);
   strcat(output, ".\n");
-  fprintf(stderr, output);
+  fprintf(stderr, "%s", output);
   exit(EXIT_FAILURE);
 }
 
@@ -48,6 +48,6 @@ void numericsWarning(char * functionName, char* message)
   strcat(output, functionName);
   strcat(output, message);
   strcat(output, ".\n");
-  fprintf(stderr, output);
+  fprintf(stderr, "%s", output);
   exit(EXIT_FAILURE);
 }
