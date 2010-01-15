@@ -19,6 +19,7 @@
  */
 
 #include "BodiesViewer.hpp"
+
 #include <GL/gl.h>
 #include <GL/glu.h>
 

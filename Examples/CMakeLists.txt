@@ -11,6 +11,7 @@ SET(EXAMPLES_DIRECTORIES
   Control
   Electronics
   Mechanics
+  Numerics
   Robotics/HuMAns_pa10
 )
 

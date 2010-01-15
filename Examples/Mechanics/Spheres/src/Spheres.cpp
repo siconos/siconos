@@ -160,6 +160,7 @@ void Spheres::init()
     IntParameters iparam(5);
     iparam[0] = 100;// Max number of iterations
     iparam[1] = 20; // compute error iterations
+    iparam[4] = 1; // compute error iterations
 
     DoubleParameters dparam(5);
     dparam[0] = 1e-6; // Tolerance

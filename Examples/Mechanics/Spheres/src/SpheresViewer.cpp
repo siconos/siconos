@@ -35,7 +35,7 @@ void SpheresViewer::init()
   setForegroundColor(QColor(0, 0, 0));
 
   // camera
-  camera()->setPosition(Vec(0., -1.0, 0.1));
+  camera()->setPosition(Vec(1., -1.0, 0.5));
   //camera()->lookAt(sceneCenter());
   //camera()->setType(Camera::ORTHOGRAPHIC);
   camera()->showEntireScene();
