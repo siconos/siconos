@@ -267,6 +267,13 @@ NEW_TEST(FrictionContact2D_Problemtest21 FrictionContact2D_test21.c)
 NEW_TEST(FrictionContact2D_Problemtest22 FrictionContact2D_test22.c)
 NEW_TEST(FrictionContact2D_Problemtest23 FrictionContact2D_test23.c)
 
+NEW_TEST(PFC3D_test1 PrimalFrictionContact3D_test1.c)
+NEW_TEST(PFC3D_test2 PrimalFrictionContact3D_test2.c)
+NEW_TEST(PFC3D_test3 PrimalFrictionContact3D_test3.c)
+SET(PFC3D_test4_PROPERTIES WILL_FAIL TRUE)
+NEW_TEST(PFC3D_test4 PrimalFrictionContact3D_test4.c)
+SET(PFC3D_test5_PROPERTIES WILL_FAIL TRUE)
+NEW_TEST(PFC3D_test5 PrimalFrictionContact3D_test5.c)
 
 END_TEST()
 

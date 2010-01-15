@@ -75,6 +75,7 @@
 #include "NumericsMatrix.h"
 
 /** The structure that defines a Friction-Contact (3D or 2D)problem
+    \param dimension dimension of the contact space (3D or 2D )
     \param numberOfContacts, the number of contacts
     \param M matrix (n X n, with n = 2 or 3*numberOfContacts)
     \param H matrix (n X m, with n = 2 or 3*numberOfContacts)
@@ -85,6 +86,7 @@
 */
 typedef struct
 {
+  int dimension;
   int numberOfContacts;
   NumericsMatrix* M;
   NumericsMatrix* H;
@@ -94,4 +96,16 @@ typedef struct
   int isComplete;
 } PrimalFrictionContact_Problem;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+  int primalFrictionContact_printInFile(PrimalFrictionContact_Problem*  problem, FILE* file);
+
+  int primalFrictionContact_newFromFile(PrimalFrictionContact_Problem*  problem, FILE* file);
+
+  void freePrimalFrictionContact_problem(PrimalFrictionContact_Problem* problem);
+
+#ifdef __cplusplus
+}
+#endif
 #endif

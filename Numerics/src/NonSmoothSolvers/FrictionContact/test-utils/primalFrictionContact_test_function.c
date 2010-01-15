@@ -19,19 +19,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
-#include "frictionContact_test_function.h"
+#include "primalFrictionContact_test_function.h"
 
 
-int frictionContact_test_function(FILE * f, char * solvername, int * iparam, double * dparam)
+int primalFrictionContact_test_function(FILE * f, char * solvername, int * iparam, double * dparam)
 {
 
   int i, k, info = -1 ;
-  FrictionContact_Problem* problem = (FrictionContact_Problem *)malloc(sizeof(FrictionContact_Problem));
+  PrimalFrictionContact_Problem* problem = (PrimalFrictionContact_Problem *)malloc(sizeof(PrimalFrictionContact_Problem));
 
-  info = frictionContact_newFromFile(problem, f);
+  info = primalFrictionContact_newFromFile(problem, f);
 
   FILE * foutput  =  fopen("checkinput.dat", "w");
-  info = frictionContact_printInFile(problem, foutput);
+  info = primalFrictionContact_printInFile(problem, foutput);
 
 
   Numerics_Options global_options;
@@ -61,21 +61,23 @@ int frictionContact_test_function(FILE * f, char * solvername, int * iparam, dou
 
   int NC = problem->numberOfContacts;
   int dim = problem->dimension;
+  int n = problem->M->size1;
+
+
   double *reaction = (double*)malloc(dim * NC * sizeof(double));
   double *velocity = (double*)malloc(dim * NC * sizeof(double));
+  double *globalvelocity = (double*)malloc(n * sizeof(double));
 
 
   if (dim == 2)
   {
-    info = frictionContact2D_driver(problem,
-                                    reaction , velocity,
-                                    options, &global_options);
+    info = 1;
   }
   else if (dim == 3)
   {
-    info = frictionContact3D_driver(problem,
-                                    reaction , velocity,
-                                    options, &global_options);
+    info = primalFrictionContact3D_driver(problem,
+                                          reaction , velocity, globalvelocity,
+                                          options, &global_options);
   }
   printf("\n");
   for (k = 0 ; k < dim * NC; k++)
@@ -104,7 +106,7 @@ int frictionContact_test_function(FILE * f, char * solvername, int * iparam, dou
 
   free(options);
 
-  freeFrictionContact_problem(problem);
+  freePrimalFrictionContact_problem(problem);
 
 
   return info;

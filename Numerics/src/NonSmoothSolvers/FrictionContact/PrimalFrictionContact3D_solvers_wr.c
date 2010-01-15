@@ -42,11 +42,13 @@ extern int  Primal_MisLU;
 int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, FrictionContact_Problem* localproblem)
 {
   int info = -1;
+
   NumericsMatrix *M = problem->M;
   NumericsMatrix *H = problem->H;
 
 
   localproblem->numberOfContacts = problem->numberOfContacts;
+  localproblem->dimension =  problem->dimension;
   localproblem->isComplete = 0;
   localproblem->mu =  problem->mu;
 

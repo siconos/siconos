@@ -55,7 +55,7 @@ void initializePrimalLocalSolver(int n, SolverPrimalPtr* solve, FreeSolverPrimal
   }
   else
   {
-    fprintf(stderr, "Numerics, FrictionContact3D_nsgs failed. Unknown solver.\n");
+    fprintf(stderr, "Numerics, FrictionContact3D_nsgs failed. Unknown local solver set by iparam[4]\n");
     exit(EXIT_FAILURE);
   }
 }

@@ -49,7 +49,7 @@ int frictionContact3D_driver(FrictionContact_Problem* problem, double *reaction 
   int info = -1 ;
 
   if (problem->dimension != 3)
-    numericsError("FrictionContact3D_driver", "Dimension of the problem : problem-> dimension is not compatible");
+    numericsError("FrictionContact3D_driver", "Dimension of the problem : problem-> dimension is not compatible or is not set");
 
 
   /* Non Smooth Gauss Seidel (NSGS) */
