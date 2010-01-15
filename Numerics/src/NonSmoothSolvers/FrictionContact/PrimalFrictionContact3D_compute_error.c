@@ -24,7 +24,6 @@
 #include "projectionOnCone.h"
 #include <math.h>
 #include <assert.h>
-
 extern int *Primal_ipiv;
 extern int  Primal_MisInverse;
 extern int  Primal_MisLU;
@@ -65,7 +64,7 @@ int PrimalFrictionContact3D_compute_error(PrimalFrictionContact_Problem* problem
     int infoDGETRS = -1;
     DCOPY(n, qtmp, 1, globalVelocitytmp, 1);
     assert(Primal_MisLU);
-    DGETRS(LA_NOTRANS, n, n,  M->matrix0, n, Primal_ipiv, globalVelocitytmp , n, infoDGETRS);
+    DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Primal_ipiv, globalVelocitytmp , n, infoDGETRS);
     assert(!infoDGETRS);
   }
 

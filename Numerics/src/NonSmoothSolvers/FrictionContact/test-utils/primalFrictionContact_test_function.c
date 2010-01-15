@@ -84,6 +84,10 @@ int primalFrictionContact_test_function(FILE * f, char * solvername, int * ipara
   {
     printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
   }
+  for (k = 0 ; k < n; k++)
+  {
+    printf("GlocalVelocity[%i] = %12.8e\n", k, globalvelocity[k]);
+  }
   printf("\n");
 
   if (!info)

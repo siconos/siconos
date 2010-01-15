@@ -56,7 +56,6 @@ typedef void (*FreeSolverPrimalPtr)(PrimalFrictionContact_Problem*);
 
 
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif

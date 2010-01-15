@@ -153,10 +153,9 @@ void primalFrictionContact3D_nsgs(PrimalFrictionContact_Problem* problem, double
       int infoDGETRS = -1;
       DCOPY(n, qtmp, 1, globalVelocity, 1);
       assert(Primal_MisLU);
-      DGETRS(LA_NOTRANS, n, n,  M->matrix0, n, Primal_ipiv, globalVelocity , n, infoDGETRS);
+      DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Primal_ipiv, globalVelocity , n, infoDGETRS);
       assert(!infoDGETRS);
     }
-
     /* Compute current local velocity */
     /*      velocity <--b */
     DCOPY(m, b, 1, velocity, 1);
