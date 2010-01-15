@@ -170,7 +170,6 @@ int internalPrecompute(MixedLinearComplementarity_Problem* problem)
   }
 #endif
   return 1;
-
 }
 /*memory management about floatWorkingMem and intWorkingMem*/
 int internalAddConfig(MixedLinearComplementarity_Problem* problem, int * zw, int init)

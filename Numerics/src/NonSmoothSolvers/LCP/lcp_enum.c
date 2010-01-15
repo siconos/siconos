@@ -129,6 +129,14 @@ void lcp_buildQ()
 {
   memcpy(sQ, sQref, (sSize)*sizeof(double));
 }
+int lcp_enum_getNbIWork(LinearComplementarity_Problem* problem, Solver_Options* options)
+{
+  return 2 * (problem->size);
+}
+int lcp_enum_getNbDWork(LinearComplementarity_Problem* problem, Solver_Options* options)
+{
+  return 3 * (problem->size) + (problem->size) * (problem->size);
+}
 void lcp_enum_init(LinearComplementarity_Problem* problem, Solver_Options* options, int withMemAlloc)
 {
   if (withMemAlloc)
@@ -145,14 +153,7 @@ void lcp_enum_reset(LinearComplementarity_Problem* problem, Solver_Options* opti
     free(options->iWork);
   }
 }
-int lcp_enum_getNbIWork(LinearComplementarity_Problem* problem, Solver_Options* options)
-{
-  return 2 * (problem->size);
-}
-int lcp_enum_getNbDWork(LinearComplementarity_Problem* problem, Solver_Options* options)
-{
-  return 3 * (problem->size) + (problem->size) * (problem->size);
-}
+
 
 void lcp_enum(LinearComplementarity_Problem* problem, double *z, double *w, int *info , Solver_Options* options)
 {

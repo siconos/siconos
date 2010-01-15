@@ -167,7 +167,6 @@ void frictionContact3D_projectionWithDiagonalization_update(int contact, double*
    excluding the block corresponding to the current contact. ****/
 
   int in = 3 * contact, it = in + 1, is = it + 1;
-  int inc = n * in;
   /* reaction current block set to zero, to exclude current contact block */
   /*   double rin= reaction[in] ; double rit= reaction[it] ; double ris= reaction[is] ;  */
   /* qLocal computation*/
