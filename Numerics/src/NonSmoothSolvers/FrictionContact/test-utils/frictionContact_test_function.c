@@ -50,17 +50,14 @@ int frictionContact_test_function(FILE * f, char * solvername, int * iparam, dou
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
   options->iWork = NULL;
-
-  if (strcmp(solvername , "NSGS") == 0)
+  options->iSize = 5;
+  options->dSize = 5;
+  for (i = 0; i < 5; i++)
   {
-    options->iSize = 5;
-    options->dSize = 5;
-    for (i = 0; i < 5; i++)
-    {
-      options->iparam[i] = iparam[i];
-      options->dparam[i] = dparam[i];
-    }
+    options->iparam[i] = iparam[i];
+    options->dparam[i] = dparam[i];
   }
+
 
   int NC = problem->numberOfContacts;
   int dim = problem->dimension;
