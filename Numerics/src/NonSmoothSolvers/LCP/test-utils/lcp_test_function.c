@@ -26,6 +26,8 @@ void fillParamWithRespectToSolver(Solver_Options *options, char * solvername, Li
 {
   int maxIter = 1001;
   double tolerance = 1e-8;
+  double lighttolerance = 1e-5;
+
   if (strcmp(solvername , "PGS") == 0 || strcmp(solvername , "CPG") == 0 || strcmp(solvername , "Lemke") == 0 || strcmp(solvername , "NewtonMin") == 0)
   {
     options->iSize = 2;
@@ -47,7 +49,7 @@ void fillParamWithRespectToSolver(Solver_Options *options, char * solvername, Li
     options->iSize = 2;
     options->dSize = 3;
     options->iparam[0] = maxIter;
-    options->dparam[0] = tolerance;
+    options->dparam[0] = lighttolerance;
     options->dparam[2] = 0.3;
   }
   else if (strcmp(solvername , "Latin_w") == 0)
@@ -55,7 +57,7 @@ void fillParamWithRespectToSolver(Solver_Options *options, char * solvername, Li
     options->iSize = 2;
     options->dSize = 4;
     options->iparam[0] = maxIter;
-    options->dparam[0] = tolerance;
+    options->dparam[0] = lighttolerance;
     options->dparam[2] = 0.3;
     options->dparam[3] = 1.0;
   }
