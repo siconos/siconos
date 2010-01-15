@@ -19,10 +19,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
-#include "frictionContact3D_test_function.h"
+#include "frictionContact2D_test_function.h"
 
 
-void frictionContact3D_fillParamWithRespectToSolver(Solver_Options *options, char * solvername, FrictionContact_Problem* problem)
+void frictionContact2D_fillParamWithRespectToSolver(Solver_Options *options, char * solvername, FrictionContact_Problem* problem)
 {
 
 
@@ -43,7 +43,7 @@ void frictionContact3D_fillParamWithRespectToSolver(Solver_Options *options, cha
 
 }
 
-int frictionContact3D_test_function(FILE * f, char * solvername, int * iparam, double * dparam)
+int frictionContact2D_test_function(FILE * f, char * solvername, int * iparam, double * dparam)
 {
 
   int i, k, info = -1 ;
@@ -88,7 +88,7 @@ int frictionContact3D_test_function(FILE * f, char * solvername, int * iparam, d
   double *reaction = (double*)malloc(3 * NC * sizeof(double));
   double *velocity = (double*)malloc(3 * NC * sizeof(double));
 
-  info = frictionContact3D_driver(problem,
+  info = frictionContact2D_driver(problem,
                                   reaction , velocity,
                                   options, &global_options);
   printf("\n");

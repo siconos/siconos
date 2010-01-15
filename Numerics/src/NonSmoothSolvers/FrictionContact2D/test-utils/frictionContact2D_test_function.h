@@ -16,14 +16,14 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#ifndef FC3D_TEST_FUNCTION_H
-#define FC3D_TEST_FUNCTION_H
+#ifndef FC2D_TEST_FUNCTION_H
+#define FC2D_TEST_FUNCTION_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-  int frictionContact3D_test_function(FILE * f, char * solvername, int * iparam, double * dparam);
+  int frictionContact2D_test_function(FILE * f, char * solvername, int * iparam, double * dparam);
 
 
 #ifdef __cplusplus
