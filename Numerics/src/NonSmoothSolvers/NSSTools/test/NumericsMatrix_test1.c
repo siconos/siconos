@@ -54,26 +54,6 @@ int main(void)
   info = test_prodNumericsMatrix(NMM);
   printf("End of ProdNumericsMatrix ...\n");
   if (info != 0) return info;
-  /*   i=1; */
-  /*   while (i > 0) */
-  /*       { */
-  info = test_prodNumericsMatrixNumericsMatrix(NMM);
-  printf("End of ProdNumericsMatrixNumericsMatrix ...\n");
-  /* i++;} */
-  if (info != 0) return info;
-  info = test_subRowprod(NMM[0], NMM[1]);
-  printf("End of Sub-Prod ...\n");
-  if (info != 0) return info;
-  info = test_subRowprodNonSquare(NMM[2], NMM[3]);
-  printf("End of Sub-Prod Non Square...\n");
-  if (info != 0) return info;
-  info = test_rowProdNoDiag(NMM[0], NMM[1]);
-  printf("End of Sub-Prod no diag ...\n");
-  if (info != 0) return info;
-  info = test_rowProdNoDiagNonSquare(NMM[2], NMM[3]);
-  printf("End of Sub-Prod no diag Non Square...\n");
-  if (info != 0) return info;
-
   /* free memory */
 
   for (i = 0 ; i < nmm; i++)

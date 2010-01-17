@@ -35,6 +35,7 @@ SET(SiconosNumerics_DIRS
   NonSmoothSolvers/NCP			
   NonSmoothSolvers/MCP
   NonSmoothSolvers/NSSTools
+  NonSmoothSolvers/NSSTools/test-utils
   utils)
 
 #
@@ -120,6 +121,8 @@ END_TEST()
 
 BEGIN_TEST(NonSmoothSolvers/NSSTools/test) 
 NEW_TEST(NumericsMatrixTest main_NumericsMatrix.c)
+NEW_TEST(NumericsMatrixTest1 NumericsMatrix_test1.c)
+NEW_TEST(NumericsMatrixTest2 NumericsMatrix_test2.c)
 END_TEST()
 
 BEGIN_TEST(NonSmoothSolvers/LCP/test)
