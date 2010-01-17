@@ -63,7 +63,11 @@ int frictionContact_test_function(FILE * f, char * solvername, int * iparam, dou
   int dim = problem->dimension;
   double *reaction = (double*)malloc(dim * NC * sizeof(double));
   double *velocity = (double*)malloc(dim * NC * sizeof(double));
-
+  for (k = 0 ; k < dim * NC; k++)
+  {
+    velocity[k] = 0.0;
+    reaction[k] = 0.0;
+  }
 
   if (dim == 2)
   {
