@@ -75,9 +75,6 @@ int main(int argc, char* argv[])
     // 2 corresponds to the position of FExt in the stl vector of possible parameters. 0 is mass, 1 FInt and so on.
     // Now the DS number will be available in FExt plugin.
 
-    DynamicalSystemsSet allDS;
-    allDS.insert(lds);
-
     // --------------------
     // --- Interactions ---
     // --------------------
@@ -87,22 +84,21 @@ int main(int argc, char* argv[])
 
     // Interaction Follower-floor
     //
-    SimpleMatrix H(1, nDof);
-    H(0, 0) = 1.0;
+    SP::SiconosMatrix H(new SimpleMatrix(1, nDof));
+    (*H)(0, 0) = 1.0;
     SP::NonSmoothLaw nslaw0(new NewtonImpactNSL(e));
     SP::Relation relation0(new LagrangianLinearTIR(H));
-    DynamicalSystemsSet dsConcerned;
-    dsConcerned.insert(lds);
-
-    SP::Interaction inter(new Interaction("Follower-Ground", dsConcerned, 0, 1, nslaw0, relation0));
-    InteractionsSet allInteractions;
-    allInteractions.insert(inter);
+    SP::Interaction inter(new Interaction(1, nslaw0, relation0));
 
     // -------------
     // --- Model ---
     // -------------
 
-    SP::Model Follower(new Model(t0, T, allDS, allInteractions));
+    SP::Model Follower(new Model(t0, T));
+
+    Follower->nonSmoothDynamicalSystem()->insertDynamicalSystem(lds);
+    Follower->nonSmoothDynamicalSystem()->link(inter, lds);
+
 
     // ----------------
     // --- Simulation ---
@@ -111,12 +107,8 @@ int main(int argc, char* argv[])
     // -- Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-    SP::TimeStepping S(new TimeStepping(t));
-
-
     // -- OneStepIntegrator --
     SP::OneStepIntegrator OSI(new Moreau(lds, theta));
-    S->insertIntegrator(OSI);
 
     // -- OneStepNsProblem --
     IntParameters iparam(5);
@@ -126,6 +118,9 @@ int main(int argc, char* argv[])
     string solverName = "QP" ;
     SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     SP::OneStepNSProblem osnspb(new LCP(mySolver));
+
+    SP::TimeStepping S(new TimeStepping(t));
+    S->insertIntegrator(OSI);
     S->insertNonSmoothProblem(osnspb);
 
     cout << "=== End of model loading === " << endl;
