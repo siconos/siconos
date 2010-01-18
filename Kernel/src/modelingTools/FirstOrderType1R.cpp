@@ -30,8 +30,7 @@ FirstOrderType1R::FirstOrderType1R(SP::RelationXML FORxml):
   // input g
   if (FORxml->hasG())
   {
-    gName = FORxml->getgPlugin();
-    setComputegFunction(SSL::getPluginName(gName), SSL::getPluginFunctionName(gName));
+    setComputegFunction(SSL::getPluginName(FORxml->getgPlugin()), SSL::getPluginFunctionName(FORxml->getgPlugin()));
     // Gradients
     if (!FORxml->hasJacobianG())
       RuntimeException::selfThrow("FirstOrderType1R xml constructor failed. No input for gradient(s) of g function.");
@@ -39,7 +38,7 @@ FirstOrderType1R::FirstOrderType1R(SP::RelationXML FORxml):
     if (FORxml->isJacobianGPlugin(0))
     {
       //  Jacg[0].reset(new PluggedMatrix(FORxml->getJacobianGPlugin(0)));
-      setComputeJacglambdaFunction(SSL::getPluginName(gName), SSL::getPluginFunctionName(gName));
+      setComputeJacglambdaFunction(SSL::getPluginName(FORxml->getgPlugin()), SSL::getPluginFunctionName(FORxml->getgPlugin()));
     }
     else
     {
@@ -50,14 +49,13 @@ FirstOrderType1R::FirstOrderType1R(SP::RelationXML FORxml):
   // output h
   if (FORxml->hasH())
   {
-    hName = FORxml->gethPlugin();
-    setComputehFunction(SSL::getPluginName(hName), SSL::getPluginFunctionName(hName));
+    setComputehFunction(SSL::getPluginName(FORxml->gethPlugin()), SSL::getPluginFunctionName(FORxml->gethPlugin()));
     // Gradients
     if (!FORxml->hasJacobianH())
       RuntimeException::selfThrow("FirstOrderType1R xml constructor failed. No input for gradients of h function.");
     if (FORxml->isJacobianHPlugin(0))
     {
-      setComputeJachxFunction(SSL::getPluginName(gName), SSL::getPluginFunctionName(gName));
+      setComputeJachxFunction(SSL::getPluginName(FORxml->getgPlugin()), SSL::getPluginFunctionName(FORxml->getgPlugin()));
       //  Jach[0].reset(new PluggedMatrix(FORxml->getJacobianHPlugin(0)));
     }
     else
@@ -181,7 +179,7 @@ void FirstOrderType1R::computeJachx(double)
 {
   //
   assert(index == 0 && "FirstOrderType1R::computeJacobianH(index): index is out of range");
-  assert(_plunginJachx && "FirstOrderType1R::computeJacobianH() failed; not linked to a plug-in function.");
+  assert(_pluginJachx && "FirstOrderType1R::computeJacobianH() failed; not linked to a plug-in function.");
 
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
   *_workX = *data[x];
@@ -191,7 +189,7 @@ void FirstOrderType1R::computeJachx(double)
   unsigned int sizeX = data[x]->size();
   unsigned int sizeZ = data[z]->size();
 
-  ((Type1Ptr)(_plunginJachx->fPtr))(sizeX, &(*_workX)(0), sizeY, &(*(Jachx))(0, 0), sizeZ, &(*_workZ)(0));
+  ((Type1Ptr)(_pluginJachx->fPtr))(sizeX, &(*_workX)(0), sizeY, &(*(Jachx))(0, 0), sizeZ, &(*_workZ)(0));
 
   // Rebuilt z from Tmp
   *data[z] = *_workZ;

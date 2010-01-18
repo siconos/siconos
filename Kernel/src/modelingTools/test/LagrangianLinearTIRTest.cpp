@@ -129,20 +129,20 @@ void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR4()
 // data constructor (5)
 void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR5()
 {
-  cout << "--> Test: constructor 5." << endl;
-  SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(*C, *D, *F, *e));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR5f : ", folr->getType() == RELATION::Lagrangian, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR5g : ", folr->getSubType() == RELATION::LinearTIR, true);
+  cout << "--> Test: constructor 5: obsolet" << endl;
+  //   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(*C,*D,*F,*e));
+  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR5f : ", folr->getType()==RELATION::Lagrangian, true);
+  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR5g : ", folr->getSubType()==RELATION::LinearTIR, true);
   cout << "--> Constructor 5 test ended with success." << endl;
 }
 
 // data constructor (6)
 void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR6()
 {
-  cout << "--> Test: constructor 6." << endl;
-  SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(*C, *e));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR6f : ", folr->getType() == RELATION::Lagrangian, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR6g : ", folr->getSubType() == RELATION::LinearTIR, true);
+  cout << "--> Test: constructor 6: obsolet" << endl;
+  //   SP::LagrangianLinearTIR folr(new LagrangianLinearTIR(*C,*e));
+  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR6f : ", folr->getType()==RELATION::Lagrangian, true);
+  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR6g : ", folr->getSubType()==RELATION::LinearTIR, true);
   cout << "--> Constructor 5 test ended with success." << endl;
 }
 

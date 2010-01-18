@@ -71,8 +71,8 @@ void LagrangianCompliantRTest::testBuildLagrangianCompliantR0()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1a : ", R1->getType() == RELATION::Lagrangian, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1b : ", R1->getSubType() == RELATION::CompliantR, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1c : ", R1->gethName() == "TestPlugin:hCompl", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1d : ", R1->getJachName(0) == "TestPlugin:G0Compl", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1e : ", R1->getJachName(1) == "TestPlugin:G1Compl", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1d : ", R1->getJachqName() == "TestPlugin:G0Compl", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR1e : ", R1->getJachlambdaName() == "TestPlugin:G1Compl", true);
   cout << " xml Constructor (1) LagrangianCompliantR ok" << endl;
 }
 
@@ -87,8 +87,8 @@ void LagrangianCompliantRTest::testBuildLagrangianCompliantR2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3a : ", R1->getType() == RELATION::Lagrangian, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3b : ", R1->getSubType() == RELATION::CompliantR, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3c : ", R1->gethName() == "TestPlugin:hCompl", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3d : ", R1->getJachName(0) == "TestPlugin:G0Compl", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3e : ", R1->getJachName(1) == "TestPlugin:G1Compl", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3d : ", R1->getJachqName() == "TestPlugin:G0Compl", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3e : ", R1->getJachlambdaName() == "TestPlugin:G1Compl", true);
   cout << " data Constructor LagrangianCompliantR ok" << endl;
 }
 

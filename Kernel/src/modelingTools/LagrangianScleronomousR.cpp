@@ -34,15 +34,14 @@ LagrangianScleronomousR::LagrangianScleronomousR(SP::RelationXML LRxml): Lagrang
   if (!LRxml->hasH())
     RuntimeException::selfThrow("LagrangianScleronomousR:: xml constructor failed, can not find a definition for h.");
 
-  hName = LRxml->gethPlugin();
-  setComputehFunction(SSL::getPluginName(hName), SSL::getPluginFunctionName(hName));
+  setComputehFunction(SSL::getPluginName(LRxml->gethPlugin()), SSL::getPluginFunctionName(LRxml->gethPlugin()));
 
   if (!LRxml->hasJacobianH())
     RuntimeException::selfThrow("LagrangianScleronomousR:: xml constructor failed, can not find a definition for Jach0.");
   //  LRxml->readJacobianXML<PluggedMatrix,SP_PluggedMatrix>(Jach[0], LRxml, 0);
+  pluginjqh.reset(new PluggedObject());
   if (LRxml->isJacobianHPlugin(0))
   {
-    pluginjqh.reset(new PluggedObject());
     pluginjqh->setComputeFunction(LRxml->getJacobianHPlugin(0));
   }
   else
@@ -144,7 +143,13 @@ void LagrangianScleronomousR::computeInput(double time, unsigned int level)
   prod(*lambda, *_jachq, *data[p0 + level], false);
 
 }
+const std::string LagrangianScleronomousR::getJachqName() const
+{
+  if (pluginjqh->fPtr)
+    return pluginjqh->getPluginName();
+  return "unamed";
 
+}
 LagrangianScleronomousR* LagrangianScleronomousR::convert(Relation *r)
 {
   return dynamic_cast<LagrangianScleronomousR*>(r);

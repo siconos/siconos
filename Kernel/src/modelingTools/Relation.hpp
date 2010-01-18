@@ -81,7 +81,7 @@ protected:
 
   /** Plug-in to compute \f$ \nabla_x h(..)\f$
    */
-  SP::PluggedObject _plunginJachx;
+  SP::PluggedObject _pluginJachx;
   /** Plug-in to compute \f$ \nabla_{\lambda} h(..)\f$
    */
   SP::PluggedObject _pluginJachlambda;
@@ -115,10 +115,10 @@ protected:
   boost::weak_ptr<Interaction> _interaction;
 
   /** Name of the plugin function used to compute h*/
-  std::string hName;
+  //  std::string hName;
 
   /** Name of the plugin function used to compute g*/
-  std::string gName;
+  //  std::string gName;
 
   /** A map of vectors, used to save links (pointers) to DS objects of
       the interaction */
@@ -238,34 +238,22 @@ public:
   /** To get the name of h plugin
    *  \return a string
    */
-  inline const std::string gethName() const
-  {
-    return hName;
-  }
+  const std::string gethName() const ;
 
   /** To get the name of g plugin
    *  \return a string
    */
-  inline const std::string getgName() const
-  {
-    return gName;
-  }
+  const std::string getgName() const;
 
   /** To get the name of Jach[i] plugin
    *  \return a string
    */
-  virtual const std::string getJachName(unsigned int) const
-  {
-    return "unamed";
-  }
+  virtual const std::string getJachxName() const ;
 
   /** To get the name of Jacg[i] plugin
    *  \return a string
    */
-  virtual const std::string getJacgName(unsigned int) const
-  {
-    return "unamed";
-  }
+  virtual const std::string getJacgName(unsigned int) const;
 
   /** true if h is plugged
    *  \return a bool
@@ -314,7 +302,7 @@ public:
 
   /** get a pointer on matrix Jach[index]
    *  \return a pointer on a SiconosMatrix
-  virtual SP::SiconosMatrix jachx() const = 0;
+  virtual SP::SiconosMatrix jachX() const = 0;
   virtual SP::SiconosMatrix jachlambda() const = 0;
    */
 

@@ -135,7 +135,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS2()
 void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS3()
 {
   cout << "--> Test: constructor 3." << endl;
-  SP::FirstOrderLinearDS ds(new FirstOrderLinearDS(*x0, "TestPlugin:computeA", "TestPlugin:computeb"));
+  SP::FirstOrderLinearDS ds(new FirstOrderLinearDS(*x0, "TestPlugin:computeA", "TestPlugin:computeB"));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3A : ", ds->getType() == DS::FOLDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS3C : ", ds->getN() == 3, true);

@@ -67,12 +67,10 @@ protected:
     * @param sizeZ : size of vector z.
     * @param[in,out] z : a vector of user-defined parameters
     */
-  FPtr2 hPtr;
-  std::string pluginNameHPtr;
-  FPtr2 _jachqPtr;
-  std::string pluginNameJachqPtr;
-  FPtr2 _jachlambdaPtr;
-  std::string pluginNameJachlambdaPtr;
+
+
+  SP::PluggedObject _pluginJachq;
+  SP::PluggedObject _pluginJachlambda;
 
   /** default constructor
    */
@@ -81,6 +79,7 @@ protected:
   /** initialize G matrices or components specific to derived classes.
    */
   void initComponents();
+  void zeroPlugin();
 
 public:
 
@@ -110,6 +109,9 @@ public:
    */
   void computeJachq(double);
   void computeJachlambda(double);
+  const std::string getJachlambdaName() const;
+  const std::string getJachqName() const;
+
 
   /** to compute output
    *  \param Interaction : the interaction that owns y

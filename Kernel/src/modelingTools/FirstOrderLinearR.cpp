@@ -46,7 +46,7 @@ FirstOrderLinearR::FirstOrderLinearR(const string& CName, const string& BName):
   // Warning: we cannot allocate memory for C/D matrix since no interaction
   // is connected to the relation. This will be done during initialize.
   // We only set the name of the plugin-function and connect it to the user-defined function.
-  _plunginJachx->setComputeFunction(CName);
+  _pluginJachx->setComputeFunction(CName);
   _pluginJacLg->setComputeFunction(BName);
   //  Plugin::setFunction(_plunginJachx,CName);
   //Plugin::setFunction(_pluginJacLg,BName);
@@ -57,7 +57,7 @@ FirstOrderLinearR::FirstOrderLinearR(const string& CName, const string& BName):
 // Constructor from a complete set of data (plugin)
 FirstOrderLinearR::FirstOrderLinearR(const string& CName, const string& DName, const string& FName, const string& EName, const string& BName): FirstOrderR(LinearR)
 {
-  _plunginJachx->setComputeFunction(CName);
+  _pluginJachx->setComputeFunction(CName);
   _pluginJachlambda->setComputeFunction(DName);
   _pluginJacLg->setComputeFunction(BName);
   _pluginf->setComputeFunction(FName);
@@ -192,13 +192,13 @@ void FirstOrderLinearR::computeC(double time)
 {
   if (Jachx)
   {
-    if (_plunginJachx->fPtr)
+    if (_pluginJachx->fPtr)
     {
       unsigned int sizeY = interaction()->getSizeOfY();
       unsigned int sizeX = interaction()->getSizeOfDS();
       unsigned int sizeZ = interaction()->getSizez();
       *_workZ = *data[z];
-      ((FOMatPtr1)(_plunginJachx->fPtr))(time, sizeY, sizeX, &(*Jachx)(0, 0), sizeZ, &(*_workZ)(0));
+      ((FOMatPtr1)(_pluginJachx->fPtr))(time, sizeY, sizeX, &(*Jachx)(0, 0), sizeZ, &(*_workZ)(0));
       // Copy data that might have been changed in the plug-in call.
       *data[z] = *_workZ;
     }

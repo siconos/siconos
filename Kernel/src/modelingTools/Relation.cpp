@@ -23,7 +23,7 @@ using namespace std;
 // Default constructor
 Relation::Relation(RELATION::TYPES newType,
                    RELATION::SUBTYPES newSub):
-  relationType(newType), subType(newSub), hName("unamed"), gName("unamed")
+  relationType(newType), subType(newSub)
 {
   zeroPlugin();
 }
@@ -33,7 +33,7 @@ Relation::Relation(SP::RelationXML relxml,
                    RELATION::TYPES newType,
                    RELATION::SUBTYPES newSub):
   relationType(newType), subType(newSub),
-  relationxml(relxml), hName("unamed"), gName("unamed")
+  relationxml(relxml)
 {
   zeroPlugin();
   if (! relationxml)
@@ -42,7 +42,7 @@ Relation::Relation(SP::RelationXML relxml,
 void Relation::zeroPlugin()
 {
   _pluginh.reset(new PluggedObject());
-  _plunginJachx.reset(new PluggedObject());
+  _pluginJachx.reset(new PluggedObject());
   _pluginJachlambda.reset(new PluggedObject());
   _pluging.reset(new PluggedObject());
   _pluginJacLg.reset(new PluggedObject());
@@ -65,9 +65,40 @@ void Relation::initializeMemory()
 }
 
 
+
+
 Relation::~Relation()
 {
 }
+
+
+const std::string Relation::getJachxName() const
+{
+  if (_pluginJachx->fPtr)
+    return _pluginJachx->getPluginName();
+  return "unamed";
+}
+
+const std::string Relation::gethName() const
+{
+  if (_pluginh->fPtr)
+    return _pluginh->getPluginName();
+  return "unamed";
+
+}
+const std::string Relation::getgName() const
+{
+  if (_pluging->fPtr)
+    return _pluging->getPluginName();
+  return "unamed";
+
+}
+
+const std::string Relation::getJacgName(unsigned int) const
+{
+  return "unamed";
+}
+
 
 void Relation::display() const
 {
@@ -114,8 +145,8 @@ void Relation::setComputeJachlambdaFunction(const std::string& pluginPath, const
 }
 void Relation::setComputeJachxFunction(const std::string& pluginPath, const std::string& functionName)
 {
-  _plunginJachx->setComputeFunction(pluginPath, functionName);
-  //    Plugin::setFunction(&_plunginJachx, pluginPath, functionName);
+  _pluginJachx->setComputeFunction(pluginPath, functionName);
+  //    Plugin::setFunction(&_pluginJachx, pluginPath, functionName);
 }
 
 /** To set a plug-in function to compute input function g

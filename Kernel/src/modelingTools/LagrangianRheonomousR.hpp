@@ -135,7 +135,7 @@ protected:
   /** default constructor
    */
   LagrangianRheonomousR(): LagrangianR(RELATION::RheonomousR) {  };
-
+  void zeroPlugin();
 public:
 
   /** constructor from xml file
@@ -190,10 +190,9 @@ public:
   /** To get the name of hDot plugin
    *  \return a string
    */
-  inline const std::string gethDotName() const
-  {
-    return "no name";
-  }
+  const std::string gethDotName() const ;
+
+  const std::string getJachqName() const ;
 
   /** true if hDot is plugged
    *  \return a bool

@@ -30,6 +30,8 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::DynamicalSystemXML dsXML): FirstOrder
 
   // pointer to xml
   SP::FirstOrderLinearDSXML foldsxml = (boost::static_pointer_cast <FirstOrderLinearDSXML>(dsXML));
+  _pluginb.reset(new PluggedObject());
+  _pluginA.reset(new PluggedObject());
 
   // Check if f is given as a plug-in in xml input file.
   if (foldsxml->hasF() || foldsxml->hasJacobianfx())
@@ -92,6 +94,8 @@ FirstOrderLinearDS::FirstOrderLinearDS(const SiconosVector& newX0, const std::st
   _pluginb->setComputeFunction(bPlugin);
 
   _f.reset(new SimpleVector(getDim()));
+  _A.reset(new SimpleMatrix(getDim(), getDim()));
+  _b.reset(new SimpleVector(getDim()));
 
 
   checkDynamicalSystem();

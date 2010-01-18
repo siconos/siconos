@@ -71,6 +71,7 @@ protected:
   SP::SiconosMatrix _jachqDot;
   SP::SiconosMatrix _jachlambda;
 
+
   /** basic constructor
       \param the sub-type of the relation
    */

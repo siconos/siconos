@@ -30,11 +30,11 @@ using namespace RELATION;
 // xml constructor
 LagrangianRheonomousR::LagrangianRheonomousR(SP::RelationXML LRxml): LagrangianR(LRxml, RheonomousR)
 {
+  zeroPlugin();
   // h plug-in
   if (!LRxml->hasH())
     RuntimeException::selfThrow("LagrangianRheonomousR:: xml constructor failed, can not find a definition for h.");
-  hName = LRxml->gethPlugin();
-  setComputehFunction(SSL::getPluginName(hName), SSL::getPluginFunctionName(hName));
+  setComputehFunction(SSL::getPluginName(LRxml->gethPlugin()), SSL::getPluginFunctionName(LRxml->gethPlugin()));
 
   // Read hDot
   if (!LRxml->hasHDot())
@@ -59,12 +59,12 @@ LagrangianRheonomousR::LagrangianRheonomousR(SP::RelationXML LRxml): LagrangianR
 LagrangianRheonomousR::LagrangianRheonomousR(const string& computeh, const string& computehDot, const string& strcomputeJachq):
   LagrangianR(RheonomousR)
 {
+  zeroPlugin();
   // h
   setComputehFunction(SSL::getPluginName(computeh), SSL::getPluginFunctionName(computeh));
 
   // hDot
   setComputehDotFunction(SSL::getPluginName(computehDot), SSL::getPluginFunctionName(computehDot));
-  _pluginJachq.reset(new PluggedObject());
   _pluginJachq->setComputeFunction(strcomputeJachq);
 
   unsigned int sizeY = interaction()->getSizeOfY();
@@ -91,7 +91,24 @@ void LagrangianRheonomousR::setComputehDotFunction(const string& pluginPath, con
 {
   _pluginhDot->setComputeFunction(pluginPath, functionName);
 }
+void LagrangianRheonomousR::zeroPlugin()
+{
+  _pluginhDot.reset(new PluggedObject());
+  _pluginJachq.reset(new PluggedObject());
+}
+const std::string LagrangianRheonomousR::getJachqName() const
+{
+  if (_pluginJachq->fPtr)
+    return _pluginJachq->getPluginName();
+  return "unamed";
+}
+const std::string LagrangianRheonomousR::gethDotName() const
+{
 
+  if (_pluginhDot->fPtr)
+    return _pluginhDot->getPluginName();
+  return "unamed";
+}
 void LagrangianRheonomousR::computeh(double time)
 {
   if (_pluginh->fPtr)

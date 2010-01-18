@@ -313,7 +313,8 @@ void FirstOrderNonLinearDS::initialize(const string& simulationType, double time
   initMemory(sizeOfMemory);
 
   updatePlugins(time);
-  *_fold = *_f;
+  if (_f)
+    *_fold = *_f;
 
   if (simulationType == "EventDriven")
   {
