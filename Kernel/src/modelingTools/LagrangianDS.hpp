@@ -690,7 +690,7 @@ public:
   void setComputeMassFunction(const std::string&  pluginPath, const std::string&  functionName)
   {
     _pluginMass->setComputeFunction(pluginPath, functionName);
-    //     Plugin::setFunction(&computeMassPtr, pluginPath,functionName);
+    if (!_mass) _mass.reset(new SimpleMatrix(_ndof, _ndof));
   }
 
   /** set a specified function to compute Mass
@@ -709,6 +709,7 @@ public:
   void setComputeFIntFunction(const std::string&  pluginPath, const std::string&  functionName)
   {
     _pluginFInt->setComputeFunction(pluginPath, functionName);
+    if (!_fInt) _fInt.reset(new SimpleVector(_ndof));
     //    Plugin::setFunction(&computeFIntPtr, pluginPath,functionName);
   }
 
@@ -728,6 +729,7 @@ public:
   void setComputeFExtFunction(const std::string&  pluginPath, const std::string& functionName)
   {
     _pluginFExt->setComputeFunction(pluginPath, functionName);
+    if (!_fExt) _fExt.reset(new SimpleVector(_ndof));
     //    Plugin::setFunction(&computeFExtPtr, pluginPath,functionName);
   }
 
