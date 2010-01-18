@@ -23,7 +23,7 @@ void elecRelation::initialize(SP::Interaction inter)
 
   _workL.reset(new SimpleVector(interaction()->getSizeOfY()));
   Jachx->resize(sizeY, sizeDS);
-  Jachlambda->resize(sizeY, sizeY);
+  _jachlambda->resize(sizeY, sizeY);
 
   jacgx->resize(sizeDS, sizeDS);
   Jacglambda->resize(sizeDS, sizeY);
@@ -189,7 +189,7 @@ void elecRelation::computeJachlambda(double t)
 
   SP::SiconosVector lambda = interaction()->lambda(0);
   *_workL = *lambda;
-  double *h = &(*Jachlambda)(0, 0);
+  double *h = &(*_jachlambda)(0, 0);
 #ifdef SICONOS_DEBUG
   std::cout << "computeJachlambda " << " at " << " " << t << std::endl;
 #endif
