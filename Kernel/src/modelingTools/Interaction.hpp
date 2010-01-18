@@ -310,7 +310,7 @@ public:
   /** get the sum of z sizes, for DS involved in interaction
    *  \return an unsigned int
    */
-  inline const unsigned int getSizeZ() const
+  inline const unsigned int getSizez() const
   {
     return _sizeZ;
   }

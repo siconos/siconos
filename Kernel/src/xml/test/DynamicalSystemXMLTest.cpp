@@ -96,10 +96,10 @@ void DynamicalSystemXMLTest::testGetStepsInMemory()
   cout << "DynamicalSystemXMLTest >>> testGetStepsInMemory ..................... OK\n ";
 }
 
-void DynamicalSystemXMLTest::testGetX()
+void DynamicalSystemXMLTest::testGetx()
 {
 
-  CPPUNIT_ASSERT_MESSAGE("testGetX : ", ds.getX() == vectorRef);
+  CPPUNIT_ASSERT_MESSAGE("testGetX : ", ds.getx() == vectorRef);
   CPPUNIT_ASSERT_MESSAGE("testGetX0 : ", ds.getX0() == vectorRef);
   CPPUNIT_ASSERT_MESSAGE("testGetXDot : ", ds.getXDot() == vectorRef);
 

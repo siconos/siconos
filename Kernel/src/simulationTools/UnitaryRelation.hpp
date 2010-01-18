@@ -280,7 +280,7 @@ public:
   };
 
   /** Get a pointer to workX */
-  inline SP::SiconosVector workX()
+  inline SP::SiconosVector workx()
   {
     return _workX;
   };
@@ -295,7 +295,7 @@ public:
 
 
   /** Get a pointer to workX */
-  inline SP::SiconosVector workZ()
+  inline SP::SiconosVector workz()
   {
     return _workZ;
   };

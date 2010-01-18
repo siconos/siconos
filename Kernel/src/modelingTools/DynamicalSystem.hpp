@@ -439,7 +439,7 @@ public:
    * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
    */
 
-  inline const SimpleVector getX() const
+  inline const SimpleVector getx() const
   {
     return *(_x[0]);
   }
@@ -525,7 +525,7 @@ public:
    * \return a SimpleVector
    * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
    */
-  inline const SimpleVector getZ() const
+  inline const SimpleVector getz() const
   {
     return *_z;
   }

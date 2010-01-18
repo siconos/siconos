@@ -134,7 +134,7 @@ void FirstOrderLinearR::initialize(SP::Interaction inter)
   // Reference: interaction.
   unsigned int sizeY = interaction()->getSizeOfY();
   unsigned int sizeX = interaction()->getSizeOfDS();
-  unsigned int sizeZ = interaction()->getSizeZ();
+  unsigned int sizeZ = interaction()->getSizez();
 
   // The initialization of each matrix/vector depends on the way the Relation was built ie if the matrix/vector
   // was read from xml or not
@@ -196,7 +196,7 @@ void FirstOrderLinearR::computeC(double time)
     {
       unsigned int sizeY = interaction()->getSizeOfY();
       unsigned int sizeX = interaction()->getSizeOfDS();
-      unsigned int sizeZ = interaction()->getSizeZ();
+      unsigned int sizeZ = interaction()->getSizez();
       *_workZ = *data[z];
       ((FOMatPtr1)(_plunginJachx->fPtr))(time, sizeY, sizeX, &(*Jachx)(0, 0), sizeZ, &(*_workZ)(0));
       // Copy data that might have been changed in the plug-in call.
@@ -212,7 +212,7 @@ void FirstOrderLinearR::computeD(double time)
     if (_pluginJachlambda->fPtr)
     {
       unsigned int sizeY = interaction()->getSizeOfY();
-      unsigned int sizeZ = interaction()->getSizeZ();
+      unsigned int sizeZ = interaction()->getSizez();
       *_workZ = *data[z];
       ((FOMatPtr1)(_pluginJachlambda->fPtr))(time, sizeY, sizeY, &(*_jachlambda)(0, 0), sizeZ, &(*_workZ)(0));
       // Copy data that might have been changed in the plug-in call.
@@ -227,7 +227,7 @@ void FirstOrderLinearR::computeF(double time)
   if (_F && _pluginf->fPtr)
   {
     unsigned int sizeY = interaction()->getSizeOfY();
-    unsigned int sizeZ = interaction()->getSizeZ();
+    unsigned int sizeZ = interaction()->getSizez();
     *_workZ = *data[z];
     ((FOMatPtr1)(_pluginf->fPtr))(time, sizeY, sizeZ, &(*_F)(0, 0), sizeZ, &(*_workZ)(0));
     // Copy data that might have been changed in the plug-in call.
@@ -241,7 +241,7 @@ void FirstOrderLinearR::computeE(double time)
   if (_e && _plugine->fPtr)
   {
     unsigned int sizeY = interaction()->getSizeOfY();
-    unsigned int sizeZ = interaction()->getSizeZ();
+    unsigned int sizeZ = interaction()->getSizez();
     *_workZ = *data[z];
     ((FOVecPtr) _plugine->fPtr)(time, sizeY, &(*_e)(0), sizeZ, &(*_workZ)(0));
     // Copy data that might have been changed in the plug-in call.
@@ -255,7 +255,7 @@ void FirstOrderLinearR::computeb(double time)
   {
     unsigned int sizeY = interaction()->getSizeOfY();
     unsigned int sizeX = interaction()->getSizeOfDS();
-    unsigned int sizeZ = interaction()->getSizeZ();
+    unsigned int sizeZ = interaction()->getSizez();
     *_workZ = *data[z];
     ((FOMatPtr1) _pluginJacLg->fPtr)(time, sizeX, sizeY, &(*Jacglambda)(0, 0), sizeZ, &(*_workZ)(0));
     // Copy data that might have been changed in the plug-in call.

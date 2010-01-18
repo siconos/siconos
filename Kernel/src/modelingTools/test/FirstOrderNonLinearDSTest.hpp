@@ -59,7 +59,7 @@ private:
   void testBuildFirstOrderNonLinearDS3();
   void testSetX0();
   void testSetX0Ptr();
-  void testSetX();
+  void testSetx();
   void testSetXPtr();
   void testSetR();
   void testSetRPtr();

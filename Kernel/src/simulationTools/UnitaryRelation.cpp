@@ -197,7 +197,7 @@ void UnitaryRelation::getLeftUnitaryBlockForDS(SP::DynamicalSystem ds, SP::Sicon
   if (relationType == FirstOrder)
   {
     SP::FirstOrderR r = boost::static_pointer_cast<FirstOrderR> (interaction()->relation());
-    originalMatrix = r->jachX();
+    originalMatrix = r->jachx();
   }
   else if (relationType == Lagrangian)
   {

@@ -930,7 +930,7 @@ public:
    *  \param unsigned int: derivative number
    *  \param SP::SiconosVector: in-out parameter, qFree
    */
-  //  void computeQFree(double, unsigned int, SP::SiconosVector);
+  //  void computeqFree(double, unsigned int, SP::SiconosVector);
 
   /** set p[...] to zero
    */

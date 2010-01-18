@@ -67,7 +67,7 @@ private:
   void testGetId();
   void testGetN();
   void testGetStepsInMemory();
-  void testGetX();
+  void testGetx();
 
 public:
   void setUp();

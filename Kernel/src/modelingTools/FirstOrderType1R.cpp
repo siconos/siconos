@@ -95,7 +95,7 @@ void FirstOrderType1R::initialize(SP::Interaction inter)
   // Check if an Interaction is connected to the Relation.
   unsigned int sizeY = interaction()->getSizeOfY();
   unsigned int sizeDS = interaction()->getSizeOfDS();
-  unsigned int sizeZ = interaction()->getSizeZ();
+  unsigned int sizeZ = interaction()->getSizez();
   if (!interaction())
     RuntimeException::selfThrow("FirstOrderR::initialize failed. No Interaction linked to the present relation.");
 

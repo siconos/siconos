@@ -103,8 +103,8 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(SP::DynamicalSystemXML dsXML):
   // === Current state (optional input) ===
   // x is composed of two blocks of size n, (*x)[0] = \f$ x \f$ and (*x)[1]=\f$ \dot x \f$.
 
-  if (fonlds->hasX())
-    _x[0].reset(new SimpleVector(fonlds->getX()));
+  if (fonlds->hasx())
+    _x[0].reset(new SimpleVector(fonlds->getx()));
   else // (*x)[0] initialize with x0.
     _x[0].reset(new SimpleVector(*_x0));
   // build and initialize right-hand side

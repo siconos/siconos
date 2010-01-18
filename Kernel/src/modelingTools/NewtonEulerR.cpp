@@ -52,7 +52,7 @@ void NewtonEulerR::initComponents()
 
   _workX.reset(new SimpleVector(_xsize));
   _workQ.reset(new SimpleVector(_qsize));
-  _workZ.reset(new SimpleVector(interaction()->getSizeZ()));
+  _workZ.reset(new SimpleVector(interaction()->getSizez()));
   _workY.reset(new SimpleVector(_ysize));
 }
 

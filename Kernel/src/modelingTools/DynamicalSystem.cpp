@@ -61,8 +61,8 @@ DynamicalSystem::DynamicalSystem(SP::DynamicalSystemXML dsXML):
   _x.resize(2);
 
   // z - Optional parameter.
-  if (_dsxml->hasZ())
-    _z.reset(new SimpleVector(_dsxml->getZ()));
+  if (_dsxml->hasz())
+    _z.reset(new SimpleVector(_dsxml->getz()));
 
   if (_dsxml->hasStepsInMemory()) _stepsInMemory = _dsxml->getStepsInMemory();
   _workV.resize(sizeWorkV);

@@ -943,17 +943,17 @@ LagrangianDS* LagrangianDS::convert(DynamicalSystem* ds)
   return (dsCvgIndic);
   }*/
 
-// void LagrangianDS::computeQFree(double time, unsigned int level, SP::SiconosVector qFreeOut)
+// void LagrangianDS::computeqFree(double time, unsigned int level, SP::SiconosVector qFreeOut)
 // {
 //   // to compute qFree, derivative number level. Mainly used in EventDriven to compute second derivative
 //   // of q for Output y computation.
 
 //   if(qFreeOut->size()!=_ndof)
-//     RuntimeException::selfThrow("LagrangianDS::computeQFree - Wrong size for output (different from _ndof)");
+//     RuntimeException::selfThrow("LagrangianDS::computeqFree - Wrong size for output (different from _ndof)");
 
 
 //   if(level!=2)
-//     RuntimeException::selfThrow("LagrangianDS::computeQFree - Only implemented for second derivative.");
+//     RuntimeException::selfThrow("LagrangianDS::computeqFree - Only implemented for second derivative.");
 
 //   // Warning: we suppose that all other operators are up to date (FInt, FExt ...)
 

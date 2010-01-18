@@ -110,7 +110,7 @@ public:
   /** get a pointer on matrix Jach[index]
    *  \return a pointer on a SiconosMatrix
    */
-  virtual  SP::SiconosMatrix jachX() const
+  virtual  SP::SiconosMatrix jachx() const
   {
     return Jachx;
   }
@@ -235,7 +235,7 @@ public:
   */
   SP::SiconosMatrix C()
   {
-    return jachX();
+    return jachx();
   }
   /**
    * return a SP on the D matrix.

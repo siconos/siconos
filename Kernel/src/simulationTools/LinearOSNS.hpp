@@ -155,7 +155,7 @@ public:
    *  \warning: SimpleVector is an abstract class => can not be an
    *  lvalue => return SimpleVector
    */
-  inline const SimpleVector getZ() const
+  inline const SimpleVector getz() const
   {
     return *_z;
   }
@@ -163,7 +163,7 @@ public:
   /** get z, the initial state of the DynamicalSystem
    *  \return pointer on a SiconosVector
    */
-  inline SP::SiconosVector Z() const
+  inline SP::SiconosVector z() const
   {
     return _z;
   }
@@ -267,12 +267,12 @@ public:
       \param SP::UnitaryRelation, the UR which corresponds to the considered block
       \param unsigned int, the position of the first element of yOut to be set
   */
-  void computeQBlock(SP::UnitaryRelation, unsigned int);
+  void computeqBlock(SP::UnitaryRelation, unsigned int);
 
   /** compute vector q
    *  \param double : current time
    */
-  void computeQ(double);
+  void computeq(double);
 
   /** pre-treatment for LinearOSNS
    *  \param double : current time

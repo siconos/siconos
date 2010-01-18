@@ -386,7 +386,7 @@ struct LinearOSNS::_NSLEffectOnSim : public SiconosVisitor
 
 };
 
-void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
+void LinearOSNS::computeqBlock(SP::UnitaryRelation UR, unsigned int pos)
 {
 
   // Get relation and non smooth law types
@@ -422,14 +422,14 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
   H_alpha = UR->interaction()->relation()->Halpha();
 
 
-  // ??? cf svn r 1456 Xfree = UR->workX()
+  // ??? cf svn r 1456 Xfree = UR->workx()
   // ==> Event driven does not work without this
 
   SP::SiconosVector Xfree;
   if (osiType == OSI::MOREAU)
     Xfree = UR->workFree();
   else if (osiType == OSI::LSODAR)
-    Xfree = UR->workX();
+    Xfree = UR->workx();
 
   if (osiType == OSI::MOREAU || osiType == OSI::LSODAR)
   {
@@ -535,7 +535,7 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
 
         if (F)
         {
-          SP::SiconosVector  workZ = UR->workZ();
+          SP::SiconosVector  workZ = UR->workz();
           coord[3] = F->size(1);
           coord[5] = F->size(1);
           subprod(*F, *workZ, *_q, coord, false);
@@ -549,7 +549,7 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
   {
   }
   else
-    RuntimeException::selfThrow("LinearOSNS::computeQBlock not yet implemented for OSI of type " + osiType);
+    RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for OSI of type " + osiType);
 
   // Add "non-smooth law effect" on q
   if (UR->getRelationType() == Lagrangian || UR->getRelationType() == NewtonEuler)
@@ -562,7 +562,7 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
 
 }
 
-void LinearOSNS::computeQ(double time)
+void LinearOSNS::computeq(double time)
 {
   if (_q->size() != _sizeOutput)
     _q->resize(_sizeOutput);
@@ -583,7 +583,7 @@ void LinearOSNS::computeQ(double time)
     // Compute q, this depends on the type of non smooth problem, on
     // the relation type and on the non smooth law
     pos = _M->getPositionOfUnitaryBlock(ur);
-    computeQBlock(ur, pos); // free output is saved in y
+    computeqBlock(ur, pos); // free output is saved in y
   }
 }
 
@@ -652,7 +652,7 @@ void LinearOSNS::preCompute(double time)
   }
 
   // Computes q of LinearOSNS
-  computeQ(time);
+  computeq(time);
 
 }
 

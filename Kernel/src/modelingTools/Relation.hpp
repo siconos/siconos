@@ -314,7 +314,7 @@ public:
 
   /** get a pointer on matrix Jach[index]
    *  \return a pointer on a SiconosMatrix
-  virtual SP::SiconosMatrix jachX() const = 0;
+  virtual SP::SiconosMatrix jachx() const = 0;
   virtual SP::SiconosMatrix jachlambda() const = 0;
    */
 

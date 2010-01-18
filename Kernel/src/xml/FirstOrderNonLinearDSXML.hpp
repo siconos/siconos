@@ -101,7 +101,7 @@ public:
   /** Returns the x state-vector of the DynamicalSystem
    *   \return SimpleVector
    */
-  inline const SimpleVector getX() const
+  inline const SimpleVector getx() const
   {
     return  SiconosDOMTreeTools::getSiconosVectorValue(xNode);
   }
@@ -111,7 +111,7 @@ public:
    */
   inline void setX(const SiconosVector& v)
   {
-    if (!hasX())
+    if (!hasx())
       xNode = SiconosDOMTreeTools::createVectorNode(rootNode, DS_X, v);
     else SiconosDOMTreeTools::setSiconosVectorNodeValue(xNode, v);
   }
@@ -240,7 +240,7 @@ public:
   /** returns true if xNode is defined
    *  \return a bool
    */
-  inline bool hasX() const
+  inline bool hasx() const
   {
     return (xNode);
   }

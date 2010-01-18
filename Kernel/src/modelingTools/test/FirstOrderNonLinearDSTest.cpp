@@ -148,12 +148,12 @@ void FirstOrderNonLinearDSTest::testSetX0Ptr()
 }
 
 // setX
-void FirstOrderNonLinearDSTest::testSetX()
+void FirstOrderNonLinearDSTest::testSetx()
 {
   cout << "--> Test: setX." << endl;
   SP::FirstOrderNonLinearDS ds1(new FirstOrderNonLinearDS(tmpxml2));
   ds1->setX(*x0);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetX : ", ds1->getX() == *x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetX : ", ds1->getx() == *x0, true);
   cout << "--> setX test ended with success." << endl;
 }
 
@@ -163,7 +163,7 @@ void FirstOrderNonLinearDSTest::testSetXPtr()
   cout << "--> Test: setXPtr." << endl;
   SP::FirstOrderNonLinearDS ds1(new FirstOrderNonLinearDS(tmpxml2));
   ds1->setXPtr(x0);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetXPtr : ", ds1->getX() == *x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetXPtr : ", ds1->getx() == *x0, true);
   cout << "--> setXPtr test ended with success." << endl;
 }
 

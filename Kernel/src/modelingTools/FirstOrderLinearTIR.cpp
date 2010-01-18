@@ -110,7 +110,7 @@ void FirstOrderLinearTIR::initialize(SP::Interaction inter)
   // Reference: interaction.
   unsigned int sizeY = interaction()->getSizeOfY();
   unsigned int sizeX = interaction()->getSizeOfDS();
-  unsigned int sizeZ = interaction()->getSizeZ();
+  unsigned int sizeZ = interaction()->getSizez();
 
   assert((Jachx->size(0) == sizeY && Jachx->size(1) == sizeX) && "FirstOrderLinearTIR::initialize , inconsistent size between C and Interaction.");
 

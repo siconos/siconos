@@ -103,7 +103,7 @@ public:
   /** compute vector q
   *  \param double : current time
   */
-  void computeQ(double);
+  void computeq(double);
 
   /** pre-treatment for MLCP
   *  \param double : current time

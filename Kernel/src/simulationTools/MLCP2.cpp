@@ -174,7 +174,7 @@ void MLCP2::computeDSUnitaryBlock(SP::DynamicalSystem DS, SP::UnitaryRelation UR
 }
 
 
-void MLCP2::computeQ(double time)
+void MLCP2::computeq(double time)
 {
   if (q->size() != sizeOutput)
     q->resize(sizeOutput);
@@ -255,7 +255,7 @@ void MLCP2::preCompute(double time)
   }
 
   // Computes q of MLCP2
-  computeQ(time);
+  computeq(time);
 
 }
 void displayNM_(const NumericsMatrix* const m)
@@ -352,7 +352,7 @@ void MLCP2::postCompute()
   for (DSIterator itDS = allDS->begin(); itDS != allDS->end(); ++itDS)
   {
     pos = M->getPositionOfDSBlock(*itDS);
-    x = (*itDS)->X();
+    x = (*itDS)->x();
     setBlock(*(_z.get()), x, x->size(), pos, 0);
   }
 

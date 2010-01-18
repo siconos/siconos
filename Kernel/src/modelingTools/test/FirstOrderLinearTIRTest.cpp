@@ -217,7 +217,7 @@ void FirstOrderLinearTIRTest::testGetJacPtr()
   cout << "--> Test: jac." << endl;
   SP::FirstOrderLinearTIR folr(new FirstOrderLinearTIR(C, B));
   folr->setDPtr(D);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJach: ", folr->jachX() == C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJach: ", folr->jachx() == C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJach: ", folr->jachlambda() == D, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJach: ", folr->jacglambda() == B, true);
 

@@ -113,7 +113,7 @@ void LagrangianLinearTIR::initComponents()
          "LagrangianLinearTIR::initComponents inconsistent sizes between e vector and the dimension of the interaction.");
 
   assert((_F) ?
-         (_F->size(0) == interaction()->getSizeZ() && _F->size(1) == interaction()->getSizeZ()) : 1 &&
+         (_F->size(0) == interaction()->getSizez() && _F->size(1) == interaction()->getSizez()) : 1 &&
          "LagrangianLinearTIR::initComponents inconsistent sizes between F matrix and the interaction.");
 
 

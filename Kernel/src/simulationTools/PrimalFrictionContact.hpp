@@ -325,12 +325,12 @@ public:
       \param SP::UnitaryRelation, the UR which corresponds to the considered block
        \param unsigned int, the position of the first element of yOut to be set
   */
-  void computeQBlock(SP::DynamicalSystem, unsigned int);
+  void computeqBlock(SP::DynamicalSystem, unsigned int);
 
   /** compute vector q
    *  \param double : current time
    */
-  void computeQ(double time);
+  void computeq(double time);
 
   /** To compute a part of the "tildeLovalVelocity" vector of the OSNS
       \param SP::UnitaryRelation, the UR which corresponds to the considered block

@@ -45,7 +45,7 @@ void LagrangianR::initComponents()
   }
 
   _workX.reset(new SimpleVector(sizeDS));
-  _workZ.reset(new SimpleVector(interaction()->getSizeZ()));
+  _workZ.reset(new SimpleVector(interaction()->getSizez()));
   _workY.reset(new SimpleVector(sizeY));
 }
 

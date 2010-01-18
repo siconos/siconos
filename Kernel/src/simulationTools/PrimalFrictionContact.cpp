@@ -229,7 +229,7 @@ void PrimalFrictionContact::computeUnitaryDSBlock(SP::UnitaryRelation UR, SP::Dy
   else RuntimeException::selfThrow("PrimalFrictionContact::computeUnitaryDSBlock not yet implemented for relation of type " + relationType);
 }
 
-void PrimalFrictionContact::computeQ(const double time)
+void PrimalFrictionContact::computeq(const double time)
 {
   if (q->size() != sizeOutput)
     q->resize(sizeOutput);
@@ -243,11 +243,11 @@ void PrimalFrictionContact::computeQ(const double time)
   for (itDS = allDS->begin(); itDS !=  allDS->end(); ++itDS)
   {
     pos = M->getPositionOfDSBlock(*itDS);
-    computeQBlock((*itDS), pos);
+    computeqBlock((*itDS), pos);
   }
 }
 
-void PrimalFrictionContact::computeQBlock(SP::DynamicalSystem DS, unsigned int pos)
+void PrimalFrictionContact::computeqBlock(SP::DynamicalSystem DS, unsigned int pos)
 {
   SP::OneStepIntegrator  Osi = simulation->integratorOfDS(DS);
   string osiType = Osi->getType();
@@ -259,7 +259,7 @@ void PrimalFrictionContact::computeQBlock(SP::DynamicalSystem DS, unsigned int p
   }
   else
   {
-    RuntimeException::selfThrow("PrimalFrictionContact::computeQ. Not yet implemented for Integrator type : " + osiType);
+    RuntimeException::selfThrow("PrimalFrictionContact::computeq. Not yet implemented for Integrator type : " + osiType);
   }
 }
 void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::UnitaryRelation UR, unsigned int pos)
@@ -287,7 +287,7 @@ void PrimalFrictionContact::computeTildeLocalVelocityBlock(SP::UnitaryRelation U
   coord[7] = pos + sizeY;
 
   SP::SiconosMatrix  H;
-  SP::SiconosVector workX = UR->workX();
+  SP::SiconosVector workX = UR->workx();
   if (osiType == MOREAU2)
   {
   }
@@ -423,7 +423,7 @@ void PrimalFrictionContact::preCompute(const double time)
   }
 
   // Computes q
-  computeQ(time);
+  computeq(time);
   computeTildeLocalVelocity(time);
 
 }

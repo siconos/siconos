@@ -80,7 +80,7 @@ public:
   /** Returns the z vector, discret state of the DynamicalSystem
    *  \return SimpleVector
    */
-  inline const SimpleVector getZ() const
+  inline const SimpleVector getz() const
   {
     return  SiconosDOMTreeTools::getSiconosVectorValue(zNode);
   }
@@ -90,7 +90,7 @@ public:
    */
   inline void setZ(const SiconosVector& v)
   {
-    if (!hasZ())
+    if (!hasz())
       zNode = SiconosDOMTreeTools::createVectorNode(rootNode, "z", v);
     else SiconosDOMTreeTools::setSiconosVectorNodeValue(zNode, v);
   }
@@ -119,7 +119,7 @@ public:
   /** returns true if zNode is defined
    *  \return a bool
    */
-  inline bool hasZ() const
+  inline bool hasz() const
   {
     return (zNode);
   }

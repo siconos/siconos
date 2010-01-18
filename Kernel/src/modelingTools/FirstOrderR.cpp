@@ -56,7 +56,7 @@ void FirstOrderR::initialize(SP::Interaction inter)
   // Check if an Interaction is connected to the Relation.
   unsigned int sizeY = interaction()->getSizeOfY();
   unsigned int sizeX = interaction()->getSizeOfDS();
-  unsigned int sizeZ = interaction()->getSizeZ();
+  unsigned int sizeZ = interaction()->getSizez();
 
   // Update data member (links to DS variables)
   initDSLinks();
