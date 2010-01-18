@@ -86,17 +86,20 @@ int main(int argc, char* argv[])
     (*H)(0, 0) = 1.0;
 
     SP::NonSmoothLaw nslaw(new NewtonImpactNSL(e));
-    SP::Relation relation(new LagrangianLinearTIR(*H));
+    SP::Relation relation(new LagrangianLinearTIR(H));
 
     SP::Interaction inter(new Interaction(1, nslaw, relation));
-    inter->insert(ball);
 
     // -------------
     // --- Model ---
     // -------------
     SP::Model bouncingBall(new Model(t0, T));
+
+    // add the dynamical system in the non smooth dynamical system
     bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
-    bouncingBall->nonSmoothDynamicalSystem()->insertInteraction(inter);
+
+    // link the interaction and the dynamical system
+    bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball);
 
 
     // ------------------

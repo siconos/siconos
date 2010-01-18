@@ -53,20 +53,18 @@ int main(int argc, char* argv[])
     // -------------------------
 
     cout << "====> Model loading ..." << endl << endl;
-    DynamicalSystemsSet allDS; // the list of DS
     SP::SiconosMatrix Mass(new SimpleMatrix(nDof, nDof));
     (*Mass)(0, 0) = m;
     (*Mass)(1, 1) = m;
     (*Mass)(2, 2) = 3. / 5 * m * R * R;
 
     // -- Initial positions and velocities --
-    SP::SiconosVector q0(new SimpleVector(nDof));
-    SP::SiconosVector v0(new SimpleVector(nDof));
+    SP::SimpleVector q0(new SimpleVector(nDof));
+    SP::SimpleVector v0(new SimpleVector(nDof));
     (*q0)(0) = position_init;
     (*v0)(0) = velocity_init;
     // -- The dynamical system --
-    SP::LagrangianLinearTIDS ball(new LagrangianLinearTIDS(*q0, *v0, *Mass));
-    allDS.insert(ball);
+    SP::LagrangianLinearTIDS ball(new LagrangianLinearTIDS(q0, v0, Mass));
     // -- Set external forces (weight) --
     SP::SimpleVector weight(new SimpleVector(nDof));
     (*weight)(0) = -m * g;
@@ -76,8 +74,6 @@ int main(int argc, char* argv[])
     // --- Interactions ---
     // --------------------
 
-    InteractionsSet allInteractions;
-
     // -- nslaw --
     double e = 0.9;
 
@@ -86,38 +82,37 @@ int main(int argc, char* argv[])
     SP::SiconosMatrix H(new SimpleMatrix(1, nDof));
     (*H)(0, 0) = 1.0;
     SP::NonSmoothLaw  nslaw0(new NewtonImpactNSL(e));
-    SP::Relation relation0(new LagrangianLinearTIR(*H));
+    SP::Relation relation0(new LagrangianLinearTIR(H));
 
-    SP::Interaction inter(new Interaction("floor-ball", allDS, 0, 1, nslaw0, relation0));
-    allInteractions.insert(inter);
+    SP::Interaction inter(new Interaction(1, nslaw0, relation0));
 
     // --------------------------------
     // --- NonSmoothDynamicalSystem ---
     // --------------------------------
-    bool isBVP = 0;
-    SP::NonSmoothDynamicalSystem nsds(new NonSmoothDynamicalSystem(allDS, allInteractions, isBVP));
 
     // -------------
     // --- Model ---
     // -------------
 
     SP::Model bouncingBall(new Model(t0, T));
-    bouncingBall->setNonSmoothDynamicalSystemPtr(nsds); // set NonSmoothDynamicalSystem of this model
+
+    // add the dynamical system in the non smooth dynamical system
+    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
+
+    // link the interaction and the dynamical system
+    bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball);
 
     // ----------------
     // --- Simulation ---
     // ----------------
 
-    // -- Time discretisation --
+    // -- (1) OneStepIntegrators --
+    SP::OneStepIntegrator OSI(new Lsodar(ball));
+
+    // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-    SP::EventDriven s(new EventDriven(t));
-
-    // -- OneStepIntegrators --
-    SP::Lsodar OSI(new Lsodar(ball));
-    s->insertIntegrator(OSI);
-
-    // -- OneStepNsProblem --
+    // -- (3) Non smooth problem --
     IntParameters iparam(5);
     iparam[0] = 1000; // Max number of iteration
     DoubleParameters dparam(5);
@@ -126,6 +121,10 @@ int main(int argc, char* argv[])
     SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
     SP::OneStepNSProblem impact(new LCP(mySolver, "impact"));
     SP::OneStepNSProblem acceleration(new LCP(mySolver, "acceleration"));
+
+    // -- (4) Simulation setup with (1) (2) (3)
+    SP::EventDriven s(new EventDriven(t));
+    s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact);
     s->insertNonSmoothProblem(acceleration);
 
