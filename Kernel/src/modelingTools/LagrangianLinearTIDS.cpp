@@ -147,10 +147,12 @@ void LagrangianLinearTIDS::initRhs(double time)
   else
     _workMatrix[jacobianXBloc11] = _workMatrix[zeroMatrix] ;
 
-  _jacxRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix], _workMatrix[jacobianXBloc10], _workMatrix[jacobianXBloc11]));
+  _jacxRhs.reset(new BlockMatrix(_workMatrix[zeroMatrix], _workMatrix[idMatrix],
+                                 _workMatrix[jacobianXBloc10], _workMatrix[jacobianXBloc11]));
 }
 
-void LagrangianLinearTIDS::initialize(const string& simulationType, double time, unsigned int sizeOfMemory)
+void LagrangianLinearTIDS::initialize(const string& simulationType,
+                                      double time, unsigned int sizeOfMemory)
 {
   // Memory allocation for p[0], p[1], p[2].
   initP(simulationType);
@@ -161,12 +163,15 @@ void LagrangianLinearTIDS::initialize(const string& simulationType, double time,
   if (!_workFree)
     _workFree.reset(new SimpleVector(getDim()));
 
-  // If z has not been set, we initialize it with a null vector of size 1, since z is required in plug-in functions call.
+  // If z has not been set, we initialize it with a null vector of
+  // size 1, since z is required in plug-in functions call.
   if (! _z)
     _z.reset(new SimpleVector(1));
 
   // Set variables of top-class DynamicalSystem
-  connectToDS(); // note that connection can not be done during constructor call, since user can complete the ds after (add plugin or anything else).
+  connectToDS(); // note that connection can not be done during
+  // constructor call, since user can complete the ds
+  // after (add plugin or anything else).
 
   checkDynamicalSystem();
 
@@ -241,8 +246,10 @@ void LagrangianLinearTIDS::computeRhs(double time, bool)
 
 void LagrangianLinearTIDS::computeJacobianRhsx(double time, bool)
 {
-  // Nothing to be done since jacobianRhsx is constant and filled during initialize.
-  // But this function is required, since it is called from Lsodar (if not present, the one of LagrangianDS will be called)
+  // Nothing to be done since jacobianRhsx is constant and filled
+  // during initialize.  But this function is required, since it is
+  // called from Lsodar (if not present, the one of LagrangianDS will
+  // be called)
 }
 
 void LagrangianLinearTIDS::saveSpecificDataToXML()

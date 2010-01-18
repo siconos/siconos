@@ -420,18 +420,20 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
   Xq = UR->xq();
   lambda = UR->interaction()->lambda(0);
   H_alpha = UR->interaction()->relation()->Halpha();
-  //  cout<<"LinearOSNS::computeQblock lambda "<< endl;
-  //  lambda->display();
-  //  cout<<"LinearOSNS::computeQblock H_alpha "<< endl;
-  //  H_alpha->display();
 
+
+  // ??? cf svn r 1456 Xfree = UR->workX()
+  // ==> Event driven does not work without this
+
+  SP::SiconosVector Xfree;
+  if (osiType == OSI::MOREAU)
+    Xfree = UR->workFree();
+  else if (osiType == OSI::LSODAR)
+    Xfree = UR->workX();
 
   if (osiType == OSI::MOREAU || osiType == OSI::LSODAR)
   {
-    SP::SiconosVector Xfree;
-    Xfree = UR->workFree();
-    //      cout<<"LinearOSNS::computeQblock xfree "<<endl;
-    //      Xfree->display();
+
     if (relationType == FirstOrder && relationSubType == Type2R)
     {
       C = mainInteraction->relation()->C();
@@ -450,8 +452,7 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
         coord[3] = C->size(1);
         coord[5] = C->size(1);
         subprod(*C, *Xq, *_q, coord, false);
-        //    cout<<"Xq "<<endl;
-        //    Xq->display();
+
       }
       for (int i = 0; i < sizeY; i++)
         _q->setValue(relativePosition + i, _q->getValue(relativePosition + i) + H_alpha->getValue(relativePosition + i));
@@ -459,9 +460,6 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
     else if (relationType == NewtonEuler)
     {
       SP::SiconosMatrix CT =  boost::static_pointer_cast<NewtonEulerR>(mainInteraction->relation())->jachqT();
-      //  SP::SiconosVector WorkX = UR->workX();
-      SP::SiconosVector Xfree;
-      Xfree = UR->workFree();
 
       if (CT)
       {
@@ -479,9 +477,6 @@ void LinearOSNS::computeQBlock(SP::UnitaryRelation UR, unsigned int pos)
     else
     {
       C = mainInteraction->relation()->C();
-      //  SP::SiconosVector WorkX = UR->workX();
-      SP::SiconosVector Xfree;
-      Xfree = UR->workFree();
 
       if (C)
       {

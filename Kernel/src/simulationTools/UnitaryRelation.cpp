@@ -149,14 +149,20 @@ void UnitaryRelation::initialize(const std::string& simulationType)
     {
       for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
       {
-        _workX->insertPtr((*it)->x());
-        //      mWorkXq->insertPtr((*it)->xq());
+        SP::FirstOrderNonLinearDS fds = boost::static_pointer_cast<FirstOrderNonLinearDS>(*it);
+        _workX->insertPtr(fds->x());
+        _workFree->insertPtr(fds->workFree());
+        mWorkXq->insertPtr(fds->xq());
       }
     }
     else // Lagrangian
     {
       for (DSIterator it = dynamicalSystemsBegin(); it != dynamicalSystemsEnd(); ++it)
+      {
         _workX->insertPtr((boost::static_pointer_cast<LagrangianDS>(*it))->velocity());
+        _workFree->insertPtr((boost::static_pointer_cast<LagrangianDS>(*it))->workFree());
+      }
+
     }
   }
   //   else
