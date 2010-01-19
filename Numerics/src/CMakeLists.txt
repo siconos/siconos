@@ -242,40 +242,40 @@ BEGIN_TEST(NonSmoothSolvers/FrictionContact/test)
 
 
 # (see NonSmoothSolvers/FrictionContact/test/README for short details)
-NEW_TEST(FrictionContact3D_Problemtest1 FrictionContact3D_test1.c)
-NEW_TEST(FrictionContact3D_Problemtest2 FrictionContact3D_test2.c)
-NEW_TEST(FrictionContact3D_Problemtest3 FrictionContact3D_test3.c)
-NEW_TEST(FrictionContact3D_Problemtest4 FrictionContact3D_test4.c)
-SET(FrictionContact3D_Problemtest5_PROPERTIES WILL_FAIL TRUE)
-NEW_TEST(FrictionContact3D_Problemtest5 FrictionContact3D_test5.c)
+NEW_TEST(FC3Dtest1 FrictionContact3D_test1.c)
+NEW_TEST(FC3Dtest2 FrictionContact3D_test2.c)
+NEW_TEST(FC3Dtest3 FrictionContact3D_test3.c)
+NEW_TEST(FC3Dtest4 FrictionContact3D_test4.c)
+SET(FC3Dtest5_PROPERTIES WILL_FAIL TRUE)
+NEW_TEST(FC3Dtest5 FrictionContact3D_test5.c)
 
 IF(PathFerris_FOUND)
-NEW_TEST(FrictionContact3D_Problemtest6 FrictionContact3D_test6.c)
+NEW_TEST(FC3Dtest6 FrictionContact3D_test6.c)
 ENDIF(PathFerris_FOUND)
 
-SET(FrictionContact3D_Problemtest7_PROPERTIES WILL_FAIL TRUE)
-NEW_TEST(FrictionContact3D_Problemtest7 FrictionContact3D_test7.c)
+SET(FC3Dtest7_PROPERTIES WILL_FAIL TRUE)
+NEW_TEST(FC3Dtest7 FrictionContact3D_test7.c)
 
 
 
 
 
-#NEW_TEST(FrictionContact3D_Problemtest10)
-#NEW_TEST(FrictionContact3D_Problemtest11 FrictionContact3D_test11.c)
-#NEW_TEST(FrictionContact3D_Problemtest12 FrictionContact3D_test12.c)
-#SET(FrictionContact3D_Problemtest13_PROPERTIES WILL_FAIL TRUE)
-#NEW_TEST(FrictionContact3D_Problemtest13 FrictionContact3D_test13.c)
+#NEW_TEST(FC3Dtest10)
+#NEW_TEST(FC3Dtest11 FrictionContact3D_test11.c)
+#NEW_TEST(FC3Dtest12 FrictionContact3D_test12.c)
+#SET(FC3Dtest13_PROPERTIES WILL_FAIL TRUE)
+#NEW_TEST(FC3Dtest13 FrictionContact3D_test13.c)
 
-#NEW_TEST(FrictionContact3D_Problemtest20 FrictionContact3D_test20.c)
+#NEW_TEST(FC3Dtest20 FrictionContact3D_test20.c)
 
 
-#SET(FrictionContact3D_Problemtest21_PROPERTIES WILL_FAIL TRUE)
-#NEW_TEST(FrictionContact3D_Problemtest21 FrictionContact3D_test21.c)
-#NEW_TEST(FrictionContact3D_Problemtest22 FrictionContact3D_test22.c)
+#SET(FC3Dtest21_PROPERTIES WILL_FAIL TRUE)
+#NEW_TEST(FC3Dtest21 FrictionContact3D_test21.c)
+#NEW_TEST(FC3Dtest22 FrictionContact3D_test22.c)
 
-#NEW_TEST(FrictionContact_Problemtest30 FrictionContact3D_test30.c)
+#NEW_TEST(FC3Dtest30 FrictionContact3D_test30.c)
 
-NEW_TEST(FrictionContact3D_Problemtest100 FrictionContact3D_test100.c)
+NEW_TEST(FC3Dtest100 FrictionContact3D_test100.c)
 
 
 ## test 2D dense on two differents files
