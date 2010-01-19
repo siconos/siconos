@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <assert.h>
 void readSolverOptions(int driverType, Solver_Options* options)
 {
   /* To each problem, corresponds a XXX_parameters.opt file where default parameters can be read, XXX being the problem name (LCP, FrictionContact3D ...) */
@@ -60,7 +60,7 @@ void readSolverOptions(int driverType, Solver_Options* options)
   case 1:
     strcat(name, "dfc2D_parameters.opt");
   case 2:
-    strcat(name, "pfc2D_parameters.opt");
+    strcat(name, "FrictionContact2D_parameters.opt");
   case 3:
     strcat(name, "FrictionContact3D_parameters.opt");
     ficin = fopen(name, "r");
@@ -112,20 +112,31 @@ void printSolverOptions(Solver_Options* options)
     printf("The solver is named %s \n", options->solverName);
     if (options->iparam != NULL)
     {
-      printf(" - int parameters (see %s documentation to know what is each parameter): ", options->solverName);
+      printf(" - int parameters\t");
       for (int i = 0; i < options->iSize; ++i)
         printf("%d\t", options->iparam[i]);
       printf("\n");
     }
     if (options->dparam != NULL)
     {
-      printf(" - double parameters (see %s documentation to know what is each parameter): ", options->solverName);
+      printf(" - double parameters\t");
       for (int i = 0; i < options->dSize; ++i)
-        printf("%.10le\t", options->dparam[i]);
+        printf("%.6le\t", options->dparam[i]);
       printf("\n");
     }
   }
-  printf("\n ================================================== \n");
+  printf("See %s documentation to know what is each parameter)\n", options->solverName);
+  printf("The solver has %i internal (or local) solvers\n", options->numberOfInternalSolvers);
+  if (options->numberOfInternalSolvers > 0)
+  {
+    for (int i = 1; i < options->numberOfInternalSolvers + 1; i++)
+    {
+      assert(&options[i]);
+      printf("The internal or local solver number %i is %s \n", i, options[i].solverName);
+    }
+
+  }
+
 }
 
 void deleteSolverOptions(Solver_Options* op)

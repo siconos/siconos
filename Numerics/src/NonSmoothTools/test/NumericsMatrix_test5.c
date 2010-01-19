@@ -51,18 +51,15 @@ int main(void)
     return info;
   }
   printf("Construction ok ...\n");
-  info = test_prodNumericsMatrixNumericsMatrix(NMM);
-  printf("End of ProdNumericsMatrixNumericsMatrix ...\n");
-
+  info = test_rowProdNoDiag(NMM[0], NMM[1]);
+  printf("End of Sub-Prod no diag ...\n");
+  if (info != 0) return info;
 
   /* free memory */
 
   for (i = 0 ; i < nmm; i++)
   {
-    if (NMM[i]->matrix0)
-      free(NMM[i]->matrix0);
-    if (NMM[i]->matrix1)
-      freeSBM(NMM[i]->matrix1);
+    freeNumericsMatrix(NMM[i]);
     free(NMM[i]);
   }
 

@@ -26,11 +26,11 @@
 #include <assert.h>
 #include "pinv.h"
 
-void initializeLocalSolver_nsgs_velocity(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, int* iparam)
+void initializeLocalSolver_nsgs_velocity(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, Solver_Options* localsolver_options)
 {
   /** Connect to local solver */
   /* Projection */
-  if (iparam[4] == 0)
+  if (strcmp(localsolver_options->solverName, "ProjectionOnCone_velocity") == 0)
   {
     *solve = &frictionContact3D_projectionOnCone_velocity_solve;
     *freeSolver = &frictionContact3D_projection_free;
@@ -39,7 +39,7 @@ void initializeLocalSolver_nsgs_velocity(int n, SolverPtr* solve, FreeSolverPtr*
   }
   else
   {
-    fprintf(stderr, "Numerics, FrictionContact3D_nsgs_velocity failed. Unknown solver number %i.\n", iparam[4]);
+    fprintf(stderr, "Numerics, FrictionContact3D_nsgs_velocity failed. Unknown internal solver : %s.\n", localsolver_options->solverName);
     exit(EXIT_FAILURE);
   }
 }
@@ -49,6 +49,7 @@ void frictionContact3D_nsgs_velocity(FrictionContact_Problem* problem, double *r
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
+
   /* Number of contacts */
   int nc = problem->numberOfContacts;
   double* q = problem->q;
@@ -70,6 +71,10 @@ void frictionContact3D_nsgs_velocity(FrictionContact_Problem* problem, double *r
   SolverPtr local_solver = NULL;
   FreeSolverPtr freeSolver = NULL;
   ComputeErrorPtr computeError = NULL;
+
+
+
+
 
   if (M->storageType == 0)
   {
@@ -94,11 +99,22 @@ void frictionContact3D_nsgs_velocity(FrictionContact_Problem* problem, double *r
     fprintf(stderr, "Numerics, frictionContact3D_nsgs_velocity. Not yet implemented for storageType %i\n", M->storageType);
     exit(EXIT_FAILURE);
   }
+  if (options->numberOfInternalSolvers < 1)
+  {
+    numericsError("frictionContact3D_nsgs_velocity", "The NSGS method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
+  }
+  assert(&options[1]);
 
+  Solver_Options * localsolver_options = &options[1];
+  if (verbose > 0)
+  {
+    printf("Local solver data :");
+    printSolverOptions(localsolver_options);
+  }
 
 
   /* Connect local solver */
-  initializeLocalSolver_nsgs_velocity(n, &local_solver, &freeSolver, &computeError, M, q, mu, iparam);
+  initializeLocalSolver_nsgs_velocity(n, &local_solver, &freeSolver, &computeError, M, q, mu, localsolver_options);
 
   /*****  NSGS_VELOCITY Iterations *****/
   int iter = 0; /* Current iteration number */
@@ -114,7 +130,7 @@ void frictionContact3D_nsgs_velocity(FrictionContact_Problem* problem, double *r
     //DCOPY( n , q , incx , velocity , incy );
     for (contact = 0 ; contact < nc ; ++contact)
     {
-      (*local_solver)(contact, n, velocity, iparam, dparam);
+      (*local_solver)(contact, n, velocity, localsolver_options);
       for (int ncc = 0; ncc < 3; ncc ++)
       {
         printf("velocity[%i]=%14.7e\t", ncc, velocity[contact * 3 + ncc]);

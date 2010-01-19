@@ -34,8 +34,8 @@ SET(SiconosNumerics_DIRS
   NonSmoothSolvers/FrictionContact/test-utils
   NonSmoothSolvers/NCP			
   NonSmoothSolvers/MCP
-  NonSmoothSolvers/NSSTools
-  NonSmoothSolvers/NSSTools/test-utils
+  NonSmoothTools
+  NonSmoothTools/test-utils
   utils)
 
 #
@@ -119,10 +119,15 @@ NEW_TEST(odepacktest10 test-funcC-inC.cpp funC.cpp)
 END_TEST()
  
 
-BEGIN_TEST(NonSmoothSolvers/NSSTools/test) 
-NEW_TEST(NumericsMatrixTest main_NumericsMatrix.c)
+BEGIN_TEST(NonSmoothTools/test) 
+#NEW_TEST(NumericsMatrixTest main_NumericsMatrix.c)
+NEW_TEST(NumericsMatrixTest0 NumericsMatrix_test0.c)
 NEW_TEST(NumericsMatrixTest1 NumericsMatrix_test1.c)
 NEW_TEST(NumericsMatrixTest2 NumericsMatrix_test2.c)
+NEW_TEST(NumericsMatrixTest3 NumericsMatrix_test3.c)
+NEW_TEST(NumericsMatrixTest4 NumericsMatrix_test4.c)
+NEW_TEST(NumericsMatrixTest5 NumericsMatrix_test5.c)
+NEW_TEST(NumericsMatrixTest6 NumericsMatrix_test6.c)
 END_TEST()
 
 BEGIN_TEST(NonSmoothSolvers/LCP/test)
@@ -234,44 +239,64 @@ BEGIN_TEST(NonSmoothSolvers/FrictionContact/test)
  
 #NEW_TEST(FrictionContact_Problemtest main_FC3D.c)
 
+
+# test NSGS with various local solvers 
+# (see NonSmoothSolvers/FrictionContact/test/README for short details)
 NEW_TEST(FrictionContact3D_Problemtest1 FrictionContact3D_test1.c)
 NEW_TEST(FrictionContact3D_Problemtest2 FrictionContact3D_test2.c)
 NEW_TEST(FrictionContact3D_Problemtest3 FrictionContact3D_test3.c)
 NEW_TEST(FrictionContact3D_Problemtest4 FrictionContact3D_test4.c)
+SET(FrictionContact3D_Problemtest5_PROPERTIES WILL_FAIL TRUE)
+NEW_TEST(FrictionContact3D_Problemtest5 FrictionContact3D_test5.c)
 
-NEW_TEST(FrictionContact3D_Problemtest10 FrictionContact3D_test10.c)
-NEW_TEST(FrictionContact3D_Problemtest11 FrictionContact3D_test11.c)
-NEW_TEST(FrictionContact3D_Problemtest12 FrictionContact3D_test12.c)
-SET(FrictionContact3D_Problemtest13_PROPERTIES WILL_FAIL TRUE)
-NEW_TEST(FrictionContact3D_Problemtest13 FrictionContact3D_test13.c)
+IF(PathFerris_FOUND)
+NEW_TEST(FrictionContact3D_Problemtest6 FrictionContact3D_test6.c)
+ENDIF(PathFerris_FOUND)
 
-NEW_TEST(FrictionContact3D_Problemtest20 FrictionContact3D_test20.c)
+SET(FrictionContact3D_Problemtest7_PROPERTIES WILL_FAIL TRUE)
+NEW_TEST(FrictionContact3D_Problemtest7 FrictionContact3D_test7.c)
+
+NEW_TEST(FrictionContact3D_Problemtest8 FrictionContact3D_test8.c)
 
 
-SET(FrictionContact3D_Problemtest21_PROPERTIES WILL_FAIL TRUE)
-NEW_TEST(FrictionContact3D_Problemtest21 FrictionContact3D_test21.c)
-NEW_TEST(FrictionContact3D_Problemtest22 FrictionContact3D_test22.c)
 
-NEW_TEST(FrictionContact_Problemtest30 FrictionContact3D_test30.c)
+
+#NEW_TEST(FrictionContact3D_Problemtest10 FrictionContact3D_test10.c)
+#NEW_TEST(FrictionContact3D_Problemtest11 FrictionContact3D_test11.c)
+#NEW_TEST(FrictionContact3D_Problemtest12 FrictionContact3D_test12.c)
+#SET(FrictionContact3D_Problemtest13_PROPERTIES WILL_FAIL TRUE)
+#NEW_TEST(FrictionContact3D_Problemtest13 FrictionContact3D_test13.c)
+
+#NEW_TEST(FrictionContact3D_Problemtest20 FrictionContact3D_test20.c)
+
+
+#SET(FrictionContact3D_Problemtest21_PROPERTIES WILL_FAIL TRUE)
+#NEW_TEST(FrictionContact3D_Problemtest21 FrictionContact3D_test21.c)
+#NEW_TEST(FrictionContact3D_Problemtest22 FrictionContact3D_test22.c)
+
+#NEW_TEST(FrictionContact_Problemtest30 FrictionContact3D_test30.c)
 
 
 ## test 2D dense on two differents files
-NEW_TEST(FrictionContact2D_Problemtest1 FrictionContact2D_test1.c)
-NEW_TEST(FrictionContact2D_Problemtest2 FrictionContact2D_test2.c)
-NEW_TEST(FrictionContact2D_Problemtest3 FrictionContact2D_test3.c)
-NEW_TEST(FrictionContact2D_Problemtest10 FrictionContact2D_test10.c)
-NEW_TEST(FrictionContact2D_Problemtest11 FrictionContact2D_test11.c)
-NEW_TEST(FrictionContact2D_Problemtest12 FrictionContact2D_test12.c)
+#NEW_TEST(FrictionContact2D_Problemtest1 FrictionContact2D_test1.c)
+#NEW_TEST(FrictionContact2D_Problemtest2 FrictionContact2D_test2.c)
+#NEW_TEST(FrictionContact2D_Problemtest3 FrictionContact2D_test3.c)
+
+
+#NEW_TEST(FrictionContact2D_Problemtest10 FrictionContact2D_test10.c)
+#NEW_TEST(FrictionContact2D_Problemtest11 FrictionContact2D_test11.c)
+#NEW_TEST(FrictionContact2D_Problemtest12 FrictionContact2D_test12.c)
 
 
 ## test 2D sparse on 4 differents files
-NEW_TEST(FrictionContact2D_Problemtest20 FrictionContact2D_test20.c)
-NEW_TEST(FrictionContact2D_Problemtest21 FrictionContact2D_test21.c)
-NEW_TEST(FrictionContact2D_Problemtest22 FrictionContact2D_test22.c)
-NEW_TEST(FrictionContact2D_Problemtest23 FrictionContact2D_test23.c)
+#NEW_TEST(FrictionContact2D_Problemtest20 FrictionContact2D_test20.c)
+#NEW_TEST(FrictionContact2D_Problemtest21 FrictionContact2D_test21.c)
+#NEW_TEST(FrictionContact2D_Problemtest22 FrictionContact2D_test22.c)
+#NEW_TEST(FrictionContact2D_Problemtest23 FrictionContact2D_test23.c)
 
 NEW_TEST(PFC3D_test1 PrimalFrictionContact3D_test1.c)
 NEW_TEST(PFC3D_test2 PrimalFrictionContact3D_test2.c)
+SET(PFC3D_test3_PROPERTIES WILL_FAIL TRUE)
 NEW_TEST(PFC3D_test3 PrimalFrictionContact3D_test3.c)
 SET(PFC3D_test4_PROPERTIES WILL_FAIL TRUE)
 NEW_TEST(PFC3D_test4 PrimalFrictionContact3D_test4.c)

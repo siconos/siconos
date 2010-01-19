@@ -20,6 +20,7 @@
 #include "LA.h"
 #include "FrictionContact3D_Solvers.h"
 #include "projectionOnCone.h"
+#include "projectionOnCylinder.h"
 
 
 #include <stdlib.h>
@@ -304,8 +305,11 @@ void frictionContact3D_projection_update_with_regularization(int contact, double
   mu_i = mu[contact];
 }
 
-void frictionContact3D_projectionWithDiagonalization_solve(int contact, int dimReaction, double* reaction, int* iparam, double* dparam)
+void frictionContact3D_projectionWithDiagonalization_solve(int contact, int dimReaction, double* reaction, Solver_Options * options)
 {
+
+
+
   /* Current block position */
   int pos = contact * nLocal;
 
@@ -347,8 +351,14 @@ void frictionContact3D_projectionWithDiagonalization_solve(int contact, int dimR
 }
 
 
-void frictionContact3D_projectionOnConeWithLocalIteration_solve(int contact, int dimReaction, double* reaction, int* iparam, double* dparam)
+void frictionContact3D_projectionOnConeWithLocalIteration_solve(int contact, int dimReaction, double* reaction, Solver_Options* options)
 {
+  /* int and double parameters */
+  int* iparam = options->iparam;
+  double* dparam = options->dparam;
+
+
+
   /* Current block position */
   int pos = contact * nLocal;
 
@@ -465,7 +475,7 @@ void frictionContact3D_projectionOnConeWithLocalIteration_solve(int contact, int
   }
 
 }
-void frictionContact3D_projectionOnCone_solve(int contact, int dimReaction, double* reaction, int* iparam, double* dparam)
+void frictionContact3D_projectionOnCone_solve(int contact, int dimReaction, double* reaction, Solver_Options * options)
 {
   /* Current block position */
   int pos = contact * nLocal;
@@ -496,8 +506,12 @@ void frictionContact3D_projectionOnCone_solve(int contact, int dimReaction, doub
 
 }
 
-void frictionContact3D_projectionOnCone_with_regularization_solve(int contact, int dimReaction, double* reaction, int* iparam, double* dparam)
+void frictionContact3D_projectionOnCone_with_regularization_solve(int contact, int dimReaction, double* reaction, Solver_Options* options)
 {
+  /* int and double parameters */
+  /* int* iparam = options->iparam; */
+  double* dparam = options->dparam;
+
   /* Current block position */
   int pos = contact * nLocal;
 
@@ -538,8 +552,11 @@ void frictionContact3D_projection_free()
   MLocal = NULL;
 }
 
-void frictionContact3D_projectionOnCone_velocity_solve(int contact, int dimVelocity, double* velocity, int* iparam, double* dparam)
+void frictionContact3D_projectionOnCone_velocity_solve(int contact, int dimVelocity, double* velocity,  Solver_Options* options)
 {
+  /* int and double parameters */
+  /*     int* iparam = options->iparam; */
+  /*     double* dparam = options->dparam; */
   /* Current block position */
   int pos = contact * nLocal;
 
@@ -573,3 +590,37 @@ void frictionContact3D_projectionOnCone_velocity_solve(int contact, int dimVeloc
 
 
 
+void frictionContact3D_projectionOnCylinder_solve(int contact, int dimReaction, double* reaction, Solver_Options* options)
+{
+  /* int and double parameters */
+  /*   int* iparam = options->iparam; */
+  /*   double* dparam = options->dparam; */
+
+  /* Current block position */
+  int pos = contact * nLocal;
+
+  /* Builds local problem for the current contact */
+  frictionContact3D_projection_update(contact, reaction);
+
+
+  /*double an = 1./(MLocal[0]);*/
+  /*   double alpha = MLocal[nLocal+1] + MLocal[2*nLocal+2]; */
+  /*   double det = MLocal[1*nLocal+1]*MLocal[2*nLocal+2] - MLocal[2*nLocal+1] + MLocal[1*nLocal+2]; */
+  /*   double beta = alpha*alpha - 4*det; */
+  /*   double at = 2*(alpha - beta)/((alpha + beta)*(alpha + beta)); */
+
+  double an = 1. / (MLocal[0] + mu_i);
+
+  int incx = 1, incy = 1;
+  double worktmp[3];
+
+
+  DCOPY(nLocal , qLocal, incx , worktmp , incy);
+  DGEMV(LA_NOTRANS, nLocal, nLocal, 1.0, MLocal, 3, &reaction[pos], incx, 1.0, worktmp, incy);
+  reaction[pos]   -= an * worktmp[0];
+  reaction[pos + 1] -= an * worktmp[1];
+  reaction[pos + 2] -= an * worktmp[2];
+
+  projectionOnCylinder(&reaction[pos], mu_i);
+
+}

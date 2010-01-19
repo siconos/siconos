@@ -18,7 +18,7 @@
  */
 #include "FrictionContact3D_Newton.h"
 #include "FrictionContact3D_Path.h"
-#include "FrictionContact3D_FixedP.h"
+#include "FrictionContact3D_NCPGlockerFixedPoint.h"
 #include "FrictionContact3D_projection.h"
 #include "FrictionContact3D_Solvers.h"
 #include "FrictionContact3D_compute_error.h"
@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <assert.h>
 void fake_compute_error_nsgs(FrictionContact_Problem* problem, double *reaction, double *velocity, double tolerance, double* error)
 {
   int n = 3 * problem->numberOfContacts;
@@ -40,82 +41,87 @@ void fake_compute_error_nsgs(FrictionContact_Problem* problem, double *reaction,
   }
 }
 
-void initializeLocalSolver_nsgs(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, int* iparam)
+void initializeLocalSolver_nsgs(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, Solver_Options * localsolver_options)
 {
+
+
+
   /** Connect to local solver */
   /* Projection */
-  if (iparam[4] == 8)
+  if (strcmp(localsolver_options->solverName, "ProjectionOnConeWithDiagonalization") == 0)
   {
     *solve = &frictionContact3D_projectionWithDiagonalization_solve;
     *freeSolver = &frictionContact3D_projection_free;
     *computeError = &FrictionContact3D_compute_error;
     frictionContact3D_projection_initialize(n, M, q, mu);
   }
-  else  if (iparam[4] == 3)
-  {
-    *solve = &frictionContact3D_projectionWithDiagonalization_solve;
-    *freeSolver = &frictionContact3D_projection_free;
-    *computeError = &FrictionContact3D_compute_error;
-    frictionContact3D_projection_initialize(n, M, q, mu);
-  }
-  else if (iparam[4] == 0)
+  else if (strcmp(localsolver_options->solverName, "ProjectionOnCone") == 0)
   {
     *solve = &frictionContact3D_projectionOnCone_solve;
     *freeSolver = &frictionContact3D_projection_free;
     *computeError = &FrictionContact3D_compute_error;
     frictionContact3D_projection_initialize(n, M, q, mu);
   }
-  else if (iparam[4] == 2)
+  else if (strcmp(localsolver_options->solverName, "ProjectionOnConeWithLocalIteration") == 0)
   {
     *solve = &frictionContact3D_projectionOnConeWithLocalIteration_solve;
     *freeSolver = &frictionContact3D_projection_free;
     *computeError = &FrictionContact3D_compute_error;
     frictionContact3D_projection_initialize(n, M, q, mu);
   }
-  /* Newton solver (Alart-Curnier) */
-  else if (iparam[4] == 1)
-  {
-    *solve = &frictionContact3D_Newton_solve;
-    *freeSolver = &frictionContact3D_Newton_free;
-    *computeError = &FrictionContact3D_compute_error;
-    frictionContact3D_Newton_initialize(n, M, q, mu, iparam);
-  }
-  /* Newton solver (Glocker-Fischer-Burmeister)*/
-  else if (iparam[4] == 6)
-  {
-    *solve = &frictionContact3D_Newton_solve;
-    *freeSolver = &frictionContact3D_Newton_free;
-    *computeError = &FrictionContact3D_compute_error;
-    // *computeError = &fake_compute_error;
-    frictionContact3D_Newton_initialize(n, M, q, mu, iparam);
-  }
-  /* Path solver (Glocker Formulation) */
-  else if (iparam[4] == 4)
-  {
-    *solve = &frictionContact3D_Path_solve;
-    *freeSolver = &frictionContact3D_Path_free;
-    *computeError = &FrictionContact3D_compute_error;
-    // *computeError = &fake_compute_error;
-    frictionContact3D_Path_initialize(n, M, q, mu, iparam);
-  }
-  /* Fixed Point solver (Glocker Formulation) */
-  else if (iparam[4] == 5)
-  {
-    *solve = &frictionContact3D_FixedP_solve;
-    *freeSolver = &frictionContact3D_FixedP_free;
-    *computeError = &fake_compute_error_nsgs;
-    frictionContact3D_FixedP_initialize(n, M, q, mu, iparam);
-  }
-  else if (iparam[4] == 7)
+  else if (strcmp(localsolver_options->solverName, "projectionOnConeWithRegularization") == 0)
   {
     *solve = &frictionContact3D_projectionOnCone_with_regularization_solve;
     *freeSolver = &frictionContact3D_projection_free;
     *computeError = &FrictionContact3D_compute_error;
     frictionContact3D_projection_initialize_with_regularization(n, M, q, mu);
   }
+  /* Newton solver (Alart-Curnier) */
+  else if (strcmp(localsolver_options->solverName, "AlartCurnierNewton") == 0)
+  {
+    *solve = &frictionContact3D_Newton_solve;
+    *freeSolver = &frictionContact3D_Newton_free;
+    *computeError = &FrictionContact3D_compute_error;
+    frictionContact3D_Newton_initialize(n, M, q, mu, localsolver_options);
+  }
+  /* Newton solver (Glocker-Fischer-Burmeister)*/
+  else if (strcmp(localsolver_options->solverName, "NCPGlockerFBNewton") == 0)
+  {
+    *solve = &frictionContact3D_Newton_solve;
+    *freeSolver = &frictionContact3D_Newton_free;
+    *computeError = &FrictionContact3D_compute_error;
+    // *computeError = &fake_compute_error;
+    frictionContact3D_Newton_initialize(n, M, q, mu, localsolver_options);
+  }
+  /* Path solver (Glocker Formulation) */
+  else if (strcmp(localsolver_options->solverName, "NCPGlockerFBPATH") == 0)
+  {
+    *solve = &frictionContact3D_Path_solve;
+    *freeSolver = &frictionContact3D_Path_free;
+    *computeError = &FrictionContact3D_compute_error;
+    // *computeError = &fake_compute_error;
+    frictionContact3D_Path_initialize(n, M, q, mu, localsolver_options);
+  }
+  /* Fixed Point solver (Glocker Formulation) */
+  else if (strcmp(localsolver_options->solverName, "NCPGlockerFBFixedPoint") == 0)
+  {
+    *solve = &frictionContact3D_FixedP_solve;
+    *freeSolver = &frictionContact3D_FixedP_free;
+    *computeError = &fake_compute_error_nsgs;
+    frictionContact3D_FixedP_initialize(n, M, q, mu, localsolver_options);
+  }
+  /*iparam[4] > 10 are reserved for Tresca resolution */
+  else if (strcmp(localsolver_options->solverName, "projectionOnCylinder") == 0)
+  {
+    *solve = &frictionContact3D_projectionOnCylinder_solve;
+    *freeSolver = &frictionContact3D_projection_free;
+    *computeError = &FrictionContact3D_compute_error;
+    frictionContact3D_projection_initialize(n, M, q, mu);
+  }
+
   else
   {
-    fprintf(stderr, "Numerics, FrictionContact3D_nsgs failed. Unknown solver number %i.\n", iparam[4]);
+    fprintf(stderr, "Numerics, FrictionContact3D_nsgs failed. Unknown internal solver : %s.\n", localsolver_options->solverName);
     exit(EXIT_FAILURE);
   }
 }
@@ -143,24 +149,35 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
   if (*info == 0)
     return;
 
+  if (options->numberOfInternalSolvers < 1)
+  {
+    numericsError("frictionContact3D_nsgs", "The NSGS method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
+  }
+  assert(&options[1]);
+
+  Solver_Options * localsolver_options = &options[1];
+
+
+  if (verbose > 0)
+  {
+    printf("Local solver data :");
+    printSolverOptions(localsolver_options);
+  }
+
+
+
   SolverPtr local_solver = NULL;
   FreeSolverPtr freeSolver = NULL;
   ComputeErrorPtr computeError = NULL;
 
   /* Connect local solver */
-  initializeLocalSolver_nsgs(n, &local_solver, &freeSolver, &computeError, M, q, mu, iparam);
+  initializeLocalSolver_nsgs(n, &local_solver, &freeSolver, &computeError, M, q, mu, localsolver_options);
 
   /*****  NSGS Iterations *****/
   int iter = 0; /* Current iteration number */
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
   int contact; /* Number of the current row of blocks in M */
-
-  double localdparam[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
-  int localiparam[5] = {0, 0, 0, 0, 0};
-
-  localiparam[0] = itermax / 10;
-  localdparam[0] = dparam[2];
 
 
   /*  dparam[0]= dparam[2]; // set the tolerance for the local solver */
@@ -180,7 +197,7 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
         reactionold[0] = reaction[3 * contact];
         reactionold[1] = reaction[3 * contact + 1];
         reactionold[2] = reaction[3 * contact + 2];
-        (*local_solver)(contact, n, reaction, localiparam, localdparam);
+        (*local_solver)(contact, n, reaction, localsolver_options);
         error += pow(reaction[3 * contact] - reactionold[0], 2) +
                  pow(reaction[3 * contact + 1] - reactionold[1], 2) +
                  pow(reaction[3 * contact + 2] - reactionold[2], 2);
@@ -216,7 +233,7 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
       /* Loop through the contact points */
       //DCOPY( n , q , incx , velocity , incy );
       for (contact = 0 ; contact < nc ; ++contact)
-        (*local_solver)(contact, n, reaction, iparam, dparam);
+        (*local_solver)(contact, n, reaction, localsolver_options);
 
       /* **** Criterium convergence **** */
       (*computeError)(problem, reaction , velocity, tolerance, &error);

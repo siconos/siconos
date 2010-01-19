@@ -396,9 +396,9 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
     for (j = 0; j < C.size1; j++)
     {
       printf("Cref[%i+%i*%i]= %lf\t\t", i, j, C.size0, Cref[i + j * C.size0]);
-      printf("Cmatrix0[%i+%i*%i]= %lf\n", i, j, C.size0, C.matrix0[i + j * C.size0]);
+      printf("Cmatrix0[%i+%i*%i]= %lf\t", i, j, C.size0, C.matrix0[i + j * C.size0]);
       err += (Cref[i + j * C.size0] - C.matrix0[i + j * C.size0]) * (Cref[i + j * C.size0] - C.matrix0[i + j * C.size0]);
-      printf("err = %lf", err);
+      printf("err = %lf\n", err);
     }
   }
   if (err < tol)
@@ -556,8 +556,8 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
   free(C2ref);
   free(Cref);
   free(C.matrix0);
-  freeSBM(SBM4);
-  freeSBM(SBM3);
+  freeNumericsMatrix(&C3);
+  freeNumericsMatrix(&C4);
 
 
 
@@ -624,8 +624,12 @@ int test_subRowprod(NumericsMatrix* M1, NumericsMatrix* M2)
   sizeY = 2;
   int pos = 1; // pos of the required row of blocks
   y = malloc(sizeY * sizeof(double));
+
   for (i = 0; i < sizeY; i++)
+  {
+    y[i] = 0.0;
     yref[i] = DDOT(n, &(M1->matrix0[4 + i]), incx, x, incy);
+  }
   /* Sparse ... */
   subRowProd(n, sizeY, pos, M2, x, y, 1);
   for (i = 0; i < sizeY; i++)
@@ -726,8 +730,12 @@ int test_subRowprodNonSquare(NumericsMatrix* M3, NumericsMatrix* M4)
   sizeY = 2;
   int pos = 1; // pos of the required row of blocks
   y = malloc(sizeY * sizeof(double));
+
   for (i = 0; i < sizeY; i++)
+  {
+    y[i] = 0.0;
     yref[i] = DDOT(m, &(M3->matrix0[4 + i]), incx, x, incy);
+  }
   /* Sparse ... */
   subRowProd(sizeX, sizeY, pos, M4, x, y, 1);
   for (i = 0; i < sizeY; i++)
@@ -824,6 +832,9 @@ int test_rowProdNoDiag(NumericsMatrix* M1, NumericsMatrix* M2)
   sizeY = 2;
   int pos = 1; // pos of the required row of blocks
   y = malloc(sizeY * sizeof(double));
+  for (i = 0; i < sizeY; i++) y[i] = 0.0;
+
+
   yref[0] = 40;
   yref[1] = 16;
 

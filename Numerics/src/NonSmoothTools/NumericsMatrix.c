@@ -293,13 +293,49 @@ void printInFileForScilab(const NumericsMatrix* const m, FILE* file)
 
 void printInFileName(const NumericsMatrix* const m, const char *filename)
 {
+  FILE* foutput = fopen(filename, "w");
+  printInFile(m, foutput);
+  fclose(foutput);
 }
 
 void readInFile(NumericsMatrix* const m, FILE *file)
 {
   if (! m)
   {
-    fprintf(stderr, "Numerics, NumericsMatrix printInFile failed, NULL input.\n");
+    fprintf(stderr, "Numerics, NumericsMatrix readInFile failed, NULL input.\n");
+    exit(EXIT_FAILURE);
+  }
+  fscanf(file, "%d", &(m->storageType));
+  fscanf(file, "%d", &(m->size0));
+  fscanf(file, "%d", &(m->size1));
+  int storageType = m->storageType;
+
+  if (storageType == 0)
+  {
+    fscanf(file, "%d\t%d\n", &(m->size0), &(m->size1));
+
+    for (int i = 0; i < m->size1 * m->size0; i++)
+    {
+      fscanf(file, "%le", &(m->matrix0[i]));
+      if ((i + 1) % m->size1 == 0)
+        fscanf(file, "\n");
+    }
+
+
+  }
+  else if (storageType == 1)
+  {
+    m->matrix0 = NULL;
+    readInFileSBM(m->matrix1, file);
+  }
+}
+
+
+void newFromFile(NumericsMatrix* const m, FILE *file)
+{
+  if (! m)
+  {
+    fprintf(stderr, "Numerics, NumericsMatrix newFromFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
   fscanf(file, "%d", &(m->storageType));
@@ -320,20 +356,25 @@ void readInFile(NumericsMatrix* const m, FILE *file)
         fscanf(file, "\n");
     }
 
-    //  fprintf(stderr,"Numerics, NumericsMatrix,readInFile for storageType %i not yet implemented.\n",storageType);
-    //  exit(EXIT_FAILURE);
+
   }
   else if (storageType == 1)
   {
     m->matrix0 = NULL;
     m->matrix1 = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
-    readInFileSBM(m->matrix1, file);
+    newFromFileSBM(m->matrix1, file);
   }
 }
 
 void readInFileName(NumericsMatrix* const m, const char *filename)
 {
-
+  FILE* finput = fopen(filename, "r");
+  printInFile(m, finput);
+  fclose(finput);
 }
 
-void readInFileForScilab(NumericsMatrix* const M, FILE *file) {};
+void readInFileForScilab(NumericsMatrix* const M, FILE *file)
+{
+  fprintf(stderr, "Numerics, NumericsMatrix,readInFileForScilab");
+  exit(EXIT_FAILURE);
+};

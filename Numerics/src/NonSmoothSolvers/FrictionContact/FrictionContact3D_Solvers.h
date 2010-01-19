@@ -22,8 +22,6 @@
 /*!\file FrictionContact3D_Solvers.h
   \brief Subroutines for the resolution of contact problems with friction (3-dimensional case).\n
 
-  \author Mathieu Renouf, Franck Perignon.
-
 */
 
 /*! \page FC3DSolvers Friction-Contact 3D problems Solvers
@@ -50,11 +48,11 @@ For each solver, the input argument are:
 #include "FrictionContact3D_AlartCurnier.h"
 #include "FrictionContact3D_projection.h"
 #include "FrictionContact3D_Newton.h"
-#include "FrictionContact3D_FixedP.h"
+#include "FrictionContact3D_NCPGlockerFixedPoint.h"
 #include "FrictionContact3D2NCP_Glocker.h"
 
 /** pointer to function used to call local solver */
-typedef void (*SolverPtr)(int, int, double*, int*, double*);
+typedef void (*SolverPtr)(int, int, double*, Solver_Options *);
 
 /** pointer to function used to post-processed results after a call to the (local) solver */
 typedef void (*PostSolverPtr)(int, double*);
@@ -104,12 +102,24 @@ extern "C" {
       \param info return 0 if the solution is found
       \param options the solver options :
       iparam[0] : Maximum iteration number
-      iparam[4] : localsolver choice 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 2: projection on Disk  with diagonalization,
+      iparam[4] : internalsolver choice 0: NSGS 1: DeSaxce Fixed Point : Default internal solver NSGS.
   */
   void frictionContact3D_proximal(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options);
 
+  /** Fixed point solver for friction-contact 3D problem based on the Tresca
+  problem with fixed friction threshold
+    \param problem, the friction-contact 3D problem to solve
+    \param velocity global vector (n), in-out parameter
+    \param reaction global vector (n), in-out parameters
+    \param info return 0 if the solution is found
+    \param options the solver options :
+    iparam[0] : Maximum iteration number
+    iparam[4] : internalsolver choice 0: NSGS 1: DeSaxce Fixed Point : Default internal solver NSGS.
+  */
+  void frictionContact3D_TrescaFixedPoint(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options);
 
-  /** Projected Gradient solver for friction-contact 3D problem
+
+  /**Fixed Point solver for friction-contact 3D problem based on the De Saxce Formulation
       \param problem, the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
       \param reaction global vector (n), in-out parameters
@@ -117,7 +127,10 @@ extern "C" {
       \param options the solver options :
       iparam[0] : Maximum iteration number
   */
-  void frictionContact3D_projectedgradient(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options);
+  void frictionContact3D_DeSaxceFixedPoint(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options);
+
+
+
 
   /** Check for trivial solution in the friction-contact 3D problem
       \param dim of the problem

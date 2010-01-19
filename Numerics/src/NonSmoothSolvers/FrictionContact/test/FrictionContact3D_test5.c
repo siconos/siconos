@@ -41,14 +41,14 @@ int setSolver_Options(Solver_Options * options)
   options->dSize = 5;
   for (i = 0; i < 5; i++)
   {
-    options->iparam[i] = 0;
+    options->iparam[i] = 0.0;
     options->dparam[i] = 0.0;
   }
   options->iparam[0] = 1001;
   options->dparam[0] = 1e-16;
 
 
-  strcpy(options[1].solverName, "ProjectionOnConeWithDiagonalization");
+  strcpy(options[1].solverName, "NCPGlockerFBNewton");
   options[1].numberOfInternalSolvers = 0;
   options[1].isSet = 1;
   options[1].filterOn = 1;
@@ -62,7 +62,7 @@ int setSolver_Options(Solver_Options * options)
   options[1].dSize = 5;
   for (i = 0; i < 5; i++)
   {
-    options[1].iparam[i] = 0;
+    options[1].iparam[i] = 0.0;
     options[1].dparam[i] = 0.0;
   }
   return 0;

@@ -81,7 +81,7 @@ int linearComplementarity_newFromFile(LinearComplementarity_Problem* problem, FI
   problem->size = n;
   problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
 
-  readInFile(problem->M, file);
+  newFromFile(problem->M, file);
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++)

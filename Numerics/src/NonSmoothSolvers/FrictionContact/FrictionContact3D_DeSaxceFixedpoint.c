@@ -19,12 +19,13 @@
 #include "projectionOnCone.h"
 #include "FrictionContact3D_Solvers.h"
 #include "FrictionContact3D_compute_error.h"
-#include "NCP_Solvers.h"
 #include "LA.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-void frictionContact3D_projectedgradient(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options)
+
+
+void frictionContact3D_DeSaxceFixedPoint(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options)
 {
   /* int and double parameters */
   int* iparam = options->iparam;
@@ -49,7 +50,7 @@ void frictionContact3D_projectedgradient(FrictionContact_Problem* problem, doubl
 
 
 
-  /*****  Projected Gradient (PG) Iterations *****/
+  /*****  Fixed point iterations *****/
   int iter = 0; /* Current iteration number */
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
@@ -67,9 +68,9 @@ void frictionContact3D_projectedgradient(FrictionContact_Problem* problem, doubl
   }
   else
   {
-    /* Variable Projected Gradient*/
+    /* Variable step in fixed*/
     isVariable = 1;
-    printf("Variable Projected gradient\n");
+    printf("Variable step in fixed point iterations\n");
     rhomax = -dparam[3];
     rho = rhomax;
   }
@@ -135,12 +136,12 @@ void frictionContact3D_projectedgradient(FrictionContact_Problem* problem, doubl
     FrictionContact3D_compute_error(problem, reaction , velocity, tolerance, &error);
 
     if (verbose > 0)
-      printf("----------------------------------- FC3D - Projected Gradient (PG) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
+      printf("----------------------------------- FC3D - DeSaxce Fixed Point (DSFP) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
 
     if (error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
-  printf("----------------------------------- FC3D - Projected Gradient (PG) - #Iteration %i Final Error = %14.7e\n", iter, error);
+  printf("----------------------------------- FC3D - DeSaxce Fixed point (DSFP) - #Iteration %i Final Error = %14.7e\n", iter, error);
   dparam[0] = tolerance;
   dparam[1] = error;
   free(velocitytmp);

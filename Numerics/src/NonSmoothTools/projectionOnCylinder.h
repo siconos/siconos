@@ -15,31 +15,20 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
- */
-#include <stdio.h>
-#include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "primalFrictionContact_test_function.h"
+*/
 
-int main(void)
-{
-  int info = 0 ;
-
-  char filename[50] = "./data/Example_PrimalFrictionContact.dat";
-
-  printf("Test on %s\n", filename);
-
-  FILE * finput  =  fopen(filename, "r");
-
-  char solvername[10] = "DSFP_WR";
-
-  int iparam[5] = {100001, 0, 0, 0, 0} ;
-  double dparam[5] = {1e-5, 0, 0.0, 1.0, 0};
-  info = primalFrictionContact_test_function(finput, solvername, iparam, dparam);
-
-  fclose(finput);
-  printf("End of test on %s\n", filename);
-
-
-  return info;
+#ifndef ProjectionOnCylinder_H
+#define ProjectionOnCylinder_H
+#ifdef __cplusplus
+extern "C" {
+#endif
+  /** projectionOnCylinder Projection onto the positive Cylinder of radius R  \f$K \{ r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq R \}
+  \param[in-out] the vector to be projected
+  \param[in] R the radius of the cone
+  */
+  void projectionOnCylinder(double* r, double  R);
+#ifdef __cplusplus
 }
+#endif
+
+#endif

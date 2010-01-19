@@ -66,7 +66,7 @@ void jacobianF_GlockerFischerBurmeister(int sizeF, double* reaction, double* jac
 }
 
 
-void frictionContact3D_Newton_initialize(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0, int* iparam)
+void frictionContact3D_Newton_initialize(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0, Solver_Options * localsolver_options)
 {
 
   /*
@@ -74,7 +74,7 @@ void frictionContact3D_Newton_initialize(int n0, const NumericsMatrix*const M0, 
   */
 
   /* Alart-Curnier formulation */
-  if (iparam[4] == 1)
+  if (strcmp(localsolver_options->solverName, "AlartCurnierNewton") == 0)
   {
     Fsize = 3;
     frictionContact3D_AC_initialize(n0, M0, q0, mu0);
@@ -86,7 +86,7 @@ void frictionContact3D_Newton_initialize(int n0, const NumericsMatrix*const M0, 
 
   }
   /* Glocker formulation - Fischer-Burmeister function used in Newton */
-  else if (iparam[4] == 2)
+  else if (strcmp(localsolver_options->solverName, "NCPGlockerFBNewton") == 0)
   {
     Fsize = 5;
     NCPGlocker_initialize(n0, M0, q0, mu0);
@@ -103,16 +103,24 @@ void frictionContact3D_Newton_initialize(int n0, const NumericsMatrix*const M0, 
   }
 }
 
-void frictionContact3D_Newton_solve(int contact, int dimReaction, double* reaction, int* iparam, double* dparam)
+void frictionContact3D_Newton_solve(int contact, int dimReaction, double* reaction, Solver_Options * options)
 {
   (*updateSolver)(contact, reaction);
   int pos = Fsize * contact; /* Current block position */
   double * reactionBlock = &reaction[pos];
 
-  int info = AlartCurnierNewton(Fsize, reactionBlock, iparam, dparam);
+  int * iparam = options->iparam;
+  double * dparam = options->dparam;
 
-  //int info = nonSmoothDirectNewton(Fsize, reactionBlock, &F, &jacobianF, iparam, dparam);
-
+  int info;
+  if (strcmp(options->solverName, "AlartCurnierNewton") == 0)
+  {
+    info = AlartCurnierNewton(Fsize, reactionBlock, iparam, dparam);
+  }
+  else
+  {
+    info = nonSmoothDirectNewton(Fsize, reactionBlock, &F, &jacobianF, iparam, dparam);
+  }
   if (info > 0)
   {
     if (verbose > 0)

@@ -86,14 +86,14 @@ int primalFrictionContact3D_driver(PrimalFrictionContact_Problem* problem, doubl
     primalFrictionContact3D_proximal_wr(problem, reaction , velocity, globalVelocity, &info, options);
 
   }
-  else if (strcmp(name, "PG_WR") == 0)
+  else if (strcmp(name, "DSFP_WR") == 0)
   {
     if (verbose == 1)
-      printf(" ========================== Call PG_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
+      printf(" ========================== Call DSFP_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
     Primal_ipiv = NULL;
     Primal_MisInverse = 0;
     Primal_MisLU = 0;
-    primalFrictionContact3D_projectedgradient_wr(problem, reaction , velocity, globalVelocity, &info, options);
+    primalFrictionContact3D_DeSaxceFixedPoint_wr(problem, reaction , velocity, globalVelocity, &info, options);
 
   }
   else if (strcmp(name, "NSGS") == 0)

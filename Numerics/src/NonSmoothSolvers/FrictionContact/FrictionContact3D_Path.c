@@ -72,7 +72,7 @@ int jacobianF_GlockerPath(int sizeF, int nnz, double* reaction, int* col_start, 
 }
 
 
-void frictionContact3D_Path_initialize(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0, int* iparam)
+void frictionContact3D_Path_initialize(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0, Solver_Options * localsolver_options)
 {
 
   /*
@@ -80,7 +80,7 @@ void frictionContact3D_Path_initialize(int n0, const NumericsMatrix*const M0, co
   */
 
   /* Glocker formulation */
-  if (iparam[4] == 3)
+  if (strcmp(localsolver_options->solverName, "NCPGlockerFBPATH") == 0)
   {
     Fsize = 5;
     NCPGlocker_initialize(n0, M0, q0, mu0);
@@ -97,8 +97,12 @@ void frictionContact3D_Path_initialize(int n0, const NumericsMatrix*const M0, co
   }
 }
 
-void frictionContact3D_Path_solve(int contact, int dimReaction, double* reaction, int* iparam, double* dparam)
+void frictionContact3D_Path_solve(int contact, int dimReaction, double* reaction, Solver_Options * options)
 {
+  int * iparam = options->iparam;
+  double * dparam = options->dparam;
+
+
   (*updateSolver)(contact, reaction);
   int pos = Fsize * contact; /* Current block position */
   double * reactionBlock = &reaction[pos];

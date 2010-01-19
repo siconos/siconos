@@ -15,31 +15,58 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+*/
+
+/*
+  Tests functions for NumericsMatrix structure
+
  */
+
 #include <stdio.h>
 #include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "primalFrictionContact_test_function.h"
-
+#include <string.h>
+#include "NumericsMatrix.h"
+#include "LA.h"
+#include <math.h>
+#include "numericsMatrixTestFunction.h"
 int main(void)
 {
-  int info = 0 ;
 
-  char filename[50] = "./data/Example_PrimalFrictionContact.dat";
+  printf("========= Starts Numerics tests for NumericsMatrix ========= \n");
 
-  printf("Test on %s\n", filename);
-
-  FILE * finput  =  fopen(filename, "r");
-
-  char solvername[10] = "DSFP_WR";
-
-  int iparam[5] = {100001, 0, 0, 0, 0} ;
-  double dparam[5] = {1e-5, 0, 0.0, 1.0, 0};
-  info = primalFrictionContact_test_function(finput, solvername, iparam, dparam);
-
-  fclose(finput);
-  printf("End of test on %s\n", filename);
+  int i, nmm = 4 ;
+  NumericsMatrix ** NMM = malloc(nmm * sizeof(NumericsMatrix *)) ;
 
 
+  for (i = 0 ; i < nmm; i++)
+  {
+    NMM[i] = malloc(sizeof(NumericsMatrix));
+  }
+
+
+  int info = test_BuildNumericsMatrix(NMM);
+  if (info != 0)
+  {
+    printf("Construction failed ...\n");
+    return info;
+  }
+  printf("Construction ok ...\n");
+  info = test_subRowprodNonSquare(NMM[2], NMM[3]);
+  printf("End of Sub-Prod Non Square...\n");
+  if (info != 0) return info;
+
+  /* free memory */
+
+  for (i = 0 ; i < nmm; i++)
+  {
+    freeNumericsMatrix(NMM[i]);
+    free(NMM[i]);
+  }
+  free(NMM);
+
+
+
+  printf("========= End Numerics tests for NumericsMatrix ========= \n");
   return info;
 }
+

@@ -17,6 +17,8 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
+
+
 #ifndef Solver_Options_H
 #define Solver_Options_H
 
@@ -115,6 +117,7 @@ Note that options[i+1] is used for row i of M, while i<nbSolvers-1 and options[n
 /** Structure used to send options (name, parameters and so on) to a specific solver-driver (mainly from Kernel to Numerics).
     \param isSet int equal to false(0) if the parameters below have not been set (ie need to read default values) else true(1)
     \param solverName name of the solver
+    \param numberOfSolvers : the number of internal or local solvers used by the solver
     \param iSize size of vectors iparam \n
     \param iparam a list of int parameters (depends on each solver, see solver doc.)
     \param dSize size of vector dparam \n
@@ -135,6 +138,7 @@ typedef struct
   int filterOn;
   double * dWork;
   int * iWork;
+  int numberOfInternalSolvers;
 } Solver_Options;
 
 #ifdef __cplusplus

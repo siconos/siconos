@@ -788,7 +788,7 @@ void printInFileNameSBM(const SparseBlockStructuredMatrix* const m, const char *
 {
 
 }
-void readInFileSBM(SparseBlockStructuredMatrix* const m, FILE *file)
+void newFromFileSBM(SparseBlockStructuredMatrix* const m, FILE *file)
 {
   if (! m)
   {
@@ -864,6 +864,84 @@ void readInFileSBM(SparseBlockStructuredMatrix* const m, FILE *file)
         printf("Numerics, SparseBlockStructuredMatrix readInFileSBM failed, problem in block numbering. \n");
       }
       m->block[blockNum] = (double*)malloc(nbRows * nbColumns * sizeof(double));
+      for (int i = 0; i < nbRows * nbColumns; i++)
+      {
+        fscanf(file, "%32le\n", &(m->block[blockNum][i]));
+      }
+
+    }
+  }
+}
+
+void readInFileSBM(SparseBlockStructuredMatrix* const m, FILE *file)
+{
+  if (! m)
+  {
+    fprintf(stderr, "Numerics, SparseBlockStructuredMatrix readInFileSBM failed, NULL input.\n");
+    exit(EXIT_FAILURE);
+  }
+  fscanf(file, "%d", &(m->nbblocks));
+
+  if (m->nbblocks == 0)  return;
+
+  fscanf(file, "%d", &(m->blocknumber0));
+  fscanf(file, "%d", &(m->blocknumber1));
+
+  for (int i = 0; i < m->blocknumber0; i++)
+  {
+    fscanf(file, "%d", &(m->blocksize0[i]));
+  }
+  for (int i = 0; i < m->blocknumber1; i++)
+  {
+    fscanf(file, "%d", &(m->blocksize1[i]));
+  }
+
+  int filled1 = 0, filled2 = 0;
+  fscanf(file, "%d", &(filled1));
+  m->filled1 = filled1;
+  fscanf(file, "%d", &(filled2));
+  m->filled2 = filled2;
+
+  int index1_dataCurrent = 0;
+  for (int i = 0; i < m->filled1; i++)
+  {
+    fscanf(file, "%d", &(index1_dataCurrent));
+    m->index1_data[i] = index1_dataCurrent;
+  }
+  int index2_dataCurrent = 0;
+  for (int i = 0; i < m->filled2; i++)
+  {
+    fscanf(file, "%d", &(index2_dataCurrent));
+    m->index2_data[i] = index2_dataCurrent;
+  }
+  int currentRowNumber ;
+  int colNumber;
+  int nbRows, nbColumns;
+  int blockk;
+  for (currentRowNumber = 0 ; currentRowNumber < m->filled1 - 1; ++currentRowNumber)
+  {
+    for (unsigned int blockNum = m->index1_data[currentRowNumber];
+         blockNum < m->index1_data[currentRowNumber + 1]; ++blockNum)
+    {
+      assert(blockNum < m->filled2);
+      colNumber = m->index2_data[blockNum];
+      /* Get dim. of the current block */
+      nbRows = m->blocksize0[currentRowNumber];
+
+      if (currentRowNumber != 0)
+        nbRows -= m->blocksize0[currentRowNumber - 1];
+
+      nbColumns = m->blocksize1[colNumber];
+      if (colNumber != 0)
+        nbColumns -= m->blocksize1[colNumber - 1];
+      //fprintf(file,"block[%i] of size %dX%d\n", blockNum, nbRows,nbColumns);
+
+      fscanf(file, "%d", &(blockk));
+      if (blockk != blockNum)
+      {
+        printf("Numerics, SparseBlockStructuredMatrix readInFileSBM failed, problem in block numbering. \n");
+      }
+
       for (int i = 0; i < nbRows * nbColumns; i++)
       {
         fscanf(file, "%32le\n", &(m->block[blockNum][i]));

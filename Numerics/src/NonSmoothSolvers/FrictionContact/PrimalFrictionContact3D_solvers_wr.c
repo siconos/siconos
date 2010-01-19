@@ -404,7 +404,7 @@ void  primalFrictionContact3D_proximal_wr(PrimalFrictionContact_Problem* problem
 
 }
 
-void  primalFrictionContact3D_projectedgradient_wr(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, Solver_Options* options)
+void  primalFrictionContact3D_DeSaxceFixedPoint_wr(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, Solver_Options* options)
 {
 
   // Reformulation
@@ -412,7 +412,7 @@ void  primalFrictionContact3D_projectedgradient_wr(PrimalFrictionContact_Problem
 
   reformulationIntoLocalProblem(problem, localproblem);
 
-  frictionContact3D_projectedgradient(localproblem, reaction , velocity , info , options);
+  frictionContact3D_DeSaxceFixedPoint(localproblem, reaction , velocity , info , options);
 
   computeGlobalVelocity(problem, reaction, globalVelocity);
   freeLocalProblem(localproblem);

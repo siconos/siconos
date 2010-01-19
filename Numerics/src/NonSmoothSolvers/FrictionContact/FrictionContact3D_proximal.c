@@ -82,7 +82,7 @@ void frictionContact3D_proximal(FrictionContact_Problem* problem, double *reacti
   internalSolverPtr internalsolver;
 
   if (iparam[2] == 0) internalsolver = &frictionContact3D_nsgs;
-  else if (iparam[2] == 1)internalsolver = &frictionContact3D_projectedgradient;
+  else if (iparam[2] == 1)internalsolver = &frictionContact3D_DeSaxceFixedPoint;
   else  internalsolver = &frictionContact3D_nsgs;
 
 

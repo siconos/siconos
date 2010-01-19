@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#ifndef FRICTIONCONTACT3DFixedP_H
-#define FRICTIONCONTACT3DFixedP_H
+#ifndef FRICTIONCONTACT3DNCPGlockerFixedPoint_H
+#define FRICTIONCONTACT3DNCPGlockerFixedPoint_H
 
 /*!\file FrictionContact3D_FixedP.h
   \brief Typedef and functions declarations related to NCP-Fixed Point solver for 3 dimension frictional contact problems.
@@ -30,6 +30,7 @@
 
 */
 #include "NumericsMatrix.h"
+#include "Solver_Options.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,18 +43,17 @@ extern "C" {
       \param matrix M of the global problem
       \param vector q of the global problem
       \param vector of the friction coefficients
-      \param vector of int parameters
+      \param  Solver_Options * options of the solver
   */
-  void frictionContact3D_FixedP_initialize(int , const NumericsMatrix*const , const double*const , const double*const , int*);
+  void frictionContact3D_FixedP_initialize(int , const NumericsMatrix*const , const double*const , const double*const , Solver_Options *);
 
   /** solve friction-contact 3D problem with Fixed Point
       \param number (position in global matrix) of the considered contact
       \param dim. of the global problem
       \param global reaction (only the block corresponding to the current contact will be modified,
-      \param vector of int parameters (max iteration numnber ...)
-      \param vector of double parameters (tolerance ...)
+      \param  Solver_Options * options of the solver
    */
-  void frictionContact3D_FixedP_solve(int , int , double* , int* , double*);
+  void frictionContact3D_FixedP_solve(int , int , double* , Solver_Options *);
 
   /** free memory for friction contact 3D Fixed Point solver */
   void frictionContact3D_FixedP_free();

@@ -58,10 +58,7 @@ int main(void)
 
   for (i = 0 ; i < nmm; i++)
   {
-    if (NMM[i]->matrix0)
-      free(NMM[i]->matrix0);
-    if (NMM[i]->matrix1)
-      freeSBM(NMM[i]->matrix1);
+    freeNumericsMatrix(NMM[i]);
     free(NMM[i]);
   }
 

@@ -59,19 +59,19 @@ int frictionContact3D_driver(FrictionContact_Problem* problem, double *reaction 
       printf(" ========================== Call NSGS solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_nsgs(problem, reaction , velocity , &info , options);
   }
-  /* Proximal point algorithm */
-  else if (strcmp(name, "PROX") == 0)
+  /* Tresca Fixed point algorithm */
+  else if (strcmp(name, "TFP") == 0)
   {
     if (verbose == 1)
-      printf(" ========================== Call PROX solver for Friction-Contact 3D problem ==========================\n");
-    frictionContact3D_proximal(problem, reaction , velocity , &info , options);
+      printf(" ========================== Call TFP (Tresca Fixed Point) solver for Friction-Contact 3D problem ==========================\n");
+    frictionContact3D_TrescaFixedPoint(problem, reaction , velocity , &info , options);
   }
   /* Projected Gradient algorithm */
-  else if (strcmp(name, "PG") == 0)
+  else if (strcmp(name, "DSFP") == 0)
   {
     if (verbose == 1)
-      printf(" ========================== Call Projected Gradinet (PG) solver for Friction-Contact 3D problem ==========================\n");
-    frictionContact3D_projectedgradient(problem, reaction , velocity , &info , options);
+      printf(" ========================== Call DeSaxce Fized Point (DSFP) solver for Friction-Contact 3D problem ==========================\n");
+    frictionContact3D_DeSaxceFixedPoint(problem, reaction , velocity , &info , options);
   }
   else
   {

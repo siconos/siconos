@@ -18,7 +18,7 @@
  */
 #include "NonSmoothNewton.h"
 #include "NCP_Path.h"
-#include "FrictionContact3D_FixedP.h"
+#include "FrictionContact3D_NCPGlockerFixedPoint.h"
 #include "Numerics_Options.h"
 #include "LA.h"
 #include "FrictionContact3D2NCP_Glocker.h"

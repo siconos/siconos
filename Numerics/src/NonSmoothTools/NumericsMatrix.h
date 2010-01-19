@@ -195,11 +195,17 @@ extern "C" {
 
   void printInFile(const NumericsMatrix* const M, FILE* file);
 
-  /** Read in file  of the matrix content
+  /** Read in file  of the matrix content without performing memory allocation
      \param M the matrix to be read
      \param filename the corresponding  file
   */
   void readInFile(NumericsMatrix* const M, FILE *file);
+
+  /** Create from file a NumericsMatrix with  memory allocation
+     \param M the matrix to be read
+     \param filename the corresponding  file
+  */
+  void newFromFile(NumericsMatrix* const M, FILE *file);
 
   /** PrintInFileForScilab  of the matrix content
    \param M the matrix to be printed

@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "LA.h"
+#include "Numerics_options.h"
 
 
 
@@ -157,7 +158,7 @@ double pinv(double * A, int n, int m, double tolerance)
   return conditioning;
 #else
 #include <stdio.h>
-  fprintf(stderr, "Numerics. pinv.c dgesvd not found\n");
+  numericsError("pinv", "DGESVD not found");
   return 0.0;
 #endif
 }

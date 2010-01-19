@@ -15,31 +15,27 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
- */
-#include <stdio.h>
-#include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "primalFrictionContact_test_function.h"
+*/
+#include <math.h>
 
-int main(void)
+void projectionOnCylinder(double* r, double  R)
 {
-  int info = 0 ;
-
-  char filename[50] = "./data/Example_PrimalFrictionContact.dat";
-
-  printf("Test on %s\n", filename);
-
-  FILE * finput  =  fopen(filename, "r");
-
-  char solvername[10] = "DSFP_WR";
-
-  int iparam[5] = {100001, 0, 0, 0, 0} ;
-  double dparam[5] = {1e-5, 0, 0.0, 1.0, 0};
-  info = primalFrictionContact_test_function(finput, solvername, iparam, dparam);
-
-  fclose(finput);
-  printf("End of test on %s\n", filename);
-
-
-  return info;
+  double normT = sqrt(r[1] * r[1] + r[2] * r[2]);
+  if (0.0 <= - r[0])
+  {
+    r[0] = 0.0;
+    r[1] = 0.0;
+    r[2] = 0.0;
+    return ;
+  }
+  else if (normT <= R)
+  {
+    return ;
+  }
+  else
+  {
+    r[1] = R * r[1] / normT;
+    r[2] = R * r[2] / normT;
+    return;
+  }
 }

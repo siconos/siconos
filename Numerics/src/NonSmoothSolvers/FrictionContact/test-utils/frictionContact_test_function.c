@@ -22,10 +22,10 @@
 #include "frictionContact_test_function.h"
 
 
-int frictionContact_test_function(FILE * f, char * solvername, int * iparam, double * dparam)
+int frictionContact_test_function(FILE * f, Solver_Options * options)
 {
 
-  int i, k, info = -1 ;
+  int k, info = -1 ;
   FrictionContact_Problem* problem = (FrictionContact_Problem *)malloc(sizeof(FrictionContact_Problem));
 
   info = frictionContact_newFromFile(problem, f);
@@ -33,31 +33,8 @@ int frictionContact_test_function(FILE * f, char * solvername, int * iparam, dou
   FILE * foutput  =  fopen("checkinput.dat", "w");
   info = frictionContact_printInFile(problem, foutput);
 
-
   Numerics_Options global_options;
-  global_options.verboseMode = 1; // turn verbose mode to off by default
-
-  Solver_Options * options ;
-  options = malloc(sizeof(*options));
-  options->isSet = 1;
-  options->filterOn = 1;
-
-  strcpy(options->solverName, solvername);
-  printf("solverName ==> %s\n", options->solverName);
-  options->iSize = 5;
-  options->dSize = 5;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
-  options->iWork = NULL;
-  options->iSize = 5;
-  options->dSize = 5;
-  for (i = 0; i < 5; i++)
-  {
-    options->iparam[i] = iparam[i];
-    options->dparam[i] = dparam[i];
-  }
-
+  global_options.verboseMode = 2; // turn verbose mode to off by default
 
   int NC = problem->numberOfContacts;
   int dim = problem->dimension;
@@ -98,15 +75,6 @@ int frictionContact_test_function(FILE * f, char * solvername, int * iparam, dou
   }
   free(reaction);
   free(velocity);
-
-  free(options->iparam);
-  free(options->dparam);
-
-
-  if (!options->dWork) free(options->dWork);
-  if (!options->iWork) free(options->iWork);
-
-  free(options);
 
   freeFrictionContact_problem(problem);
 

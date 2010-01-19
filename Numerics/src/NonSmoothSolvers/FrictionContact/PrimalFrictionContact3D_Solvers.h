@@ -112,7 +112,7 @@ extern "C" {
      dparam[2] : localtolerance
      dparam[1] : (out) error
   */
-  void primalFrictionContact3D_projectedgradient_wr(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  Solver_Options* options);
+  void primalFrictionContact3D_DeSaxceFixedPoint_wr(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  Solver_Options* options);
 
   /**  Non-Smooth Gauss Seidel solver  for friction-contact 3D problem with iteration on velocities
         \param problem, the friction-contact 3D problem to solve
