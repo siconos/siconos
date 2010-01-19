@@ -240,7 +240,7 @@ BEGIN_TEST(NonSmoothSolvers/FrictionContact/test)
 #NEW_TEST(FrictionContact_Problemtest main_FC3D.c)
 
 
-# test NSGS with various local solvers 
+
 # (see NonSmoothSolvers/FrictionContact/test/README for short details)
 NEW_TEST(FrictionContact3D_Problemtest1 FrictionContact3D_test1.c)
 NEW_TEST(FrictionContact3D_Problemtest2 FrictionContact3D_test2.c)
@@ -256,12 +256,11 @@ ENDIF(PathFerris_FOUND)
 SET(FrictionContact3D_Problemtest7_PROPERTIES WILL_FAIL TRUE)
 NEW_TEST(FrictionContact3D_Problemtest7 FrictionContact3D_test7.c)
 
-NEW_TEST(FrictionContact3D_Problemtest8 FrictionContact3D_test8.c)
 
 
 
 
-#NEW_TEST(FrictionContact3D_Problemtest10 FrictionContact3D_test10.c)
+#NEW_TEST(FrictionContact3D_Problemtest10)
 #NEW_TEST(FrictionContact3D_Problemtest11 FrictionContact3D_test11.c)
 #NEW_TEST(FrictionContact3D_Problemtest12 FrictionContact3D_test12.c)
 #SET(FrictionContact3D_Problemtest13_PROPERTIES WILL_FAIL TRUE)
@@ -275,6 +274,8 @@ NEW_TEST(FrictionContact3D_Problemtest8 FrictionContact3D_test8.c)
 #NEW_TEST(FrictionContact3D_Problemtest22 FrictionContact3D_test22.c)
 
 #NEW_TEST(FrictionContact_Problemtest30 FrictionContact3D_test30.c)
+
+NEW_TEST(FrictionContact3D_Problemtest100 FrictionContact3D_test100.c)
 
 
 ## test 2D dense on two differents files
