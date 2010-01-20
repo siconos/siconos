@@ -42,46 +42,9 @@ int setSolver_Options(Solver_Options * options)
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
-  options->iparam[0] = 1001;
-  options->dparam[0] = 1e-08;
-  options->dparam[3] = 0.5;
-
-  strcpy(options[1].solverName, "NSGS");
-  options[1].numberOfInternalSolvers = 1;
-  options[1].isSet = 1;
-  options[1].filterOn = 1;
-  options[1].iSize = 5;
-  options[1].dSize = 5;
-  options[1].iparam = (int *)malloc(options->iSize * sizeof(int));
-  options[1].dparam = (double *)malloc(options->dSize * sizeof(double));
-  options[1].dWork = NULL;
-  options[1].iWork = NULL;
-  for (i = 0; i < 5; i++)
-  {
-    options[1].iparam[i] = 0;
-    options[1].dparam[i] = 0.0;
-  }
-  options[1].iparam[0] = 100;
-  options[1].dparam[0] = 1e-8;
-
-
-  strcpy(options[2].solverName, "AlartCurnierNewton");
-  options[2].numberOfInternalSolvers = 0;
-  options[2].isSet = 1;
-  options[2].filterOn = 1;
-  options[2].iSize = 5;
-  options[2].dSize = 5;
-  options[2].iparam = (int *)malloc(options->iSize * sizeof(int));
-  options[2].dparam = (double *)malloc(options->dSize * sizeof(double));
-  options[2].dWork = NULL;
-  options[2].iWork = NULL;
-  for (i = 0; i < 5; i++)
-  {
-    options[2].iparam[i] = 0;
-    options[2].dparam[i] = 0.0;
-  }
-  options[2].iparam[0] = 10;
-  options[2].dparam[0] = 1e-8;
+  options->iparam[0] = 2001;
+  options->dparam[0] = 1e-03;
+  options->dparam[3] = 0.001;
 
   return 0;
 }
@@ -100,7 +63,7 @@ int main(void)
 
   FILE * finput  =  fopen(filename, "r");
 
-  int nbsolvers = 3;
+  int nbsolvers = 1;
   Solver_Options * options = (Solver_Options *)malloc(nbsolvers * sizeof(*options));
   info = setSolver_Options(options);
 

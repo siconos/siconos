@@ -30,6 +30,12 @@ FrictionContact3D_test30.c
 FrictionContact3D_test31.c 
 FrictionContact3D_test32.c 
 
+
+* test NSGV with default solver
+** first test file ./data/Example1_Fc3D_SBM.dat
+FrictionContact3D_test50.c
+
+
 * test TFP with NSGS internal solver
 
 ** first test file ./data/Example1_Fc3D_SBM.dat

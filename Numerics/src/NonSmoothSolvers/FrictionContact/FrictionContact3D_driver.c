@@ -59,6 +59,19 @@ int frictionContact3D_driver(FrictionContact_Problem* problem, double *reaction 
       printf(" ========================== Call NSGS solver for Friction-Contact 3D problem ==========================\n");
     frictionContact3D_nsgs(problem, reaction , velocity , &info , options);
   }
+  else if (strcmp(name, "NSGSV") == 0)
+  {
+    if (verbose == 1)
+      printf(" ========================== Call NSGSV solver for Friction-Contact 3D problem ==========================\n");
+    frictionContact3D_nsgs_velocity(problem, reaction , velocity , &info , options);
+  }
+  /* Proximal point algorithm */
+  else if (strcmp(name, "PROX") == 0)
+  {
+    if (verbose == 1)
+      printf(" ========================== Call PROX (Proximal Point) solver for Friction-Contact 3D problem ==========================\n");
+    frictionContact3D_proximal(problem, reaction , velocity , &info , options);
+  }
   /* Tresca Fixed point algorithm */
   else if (strcmp(name, "TFP") == 0)
   {

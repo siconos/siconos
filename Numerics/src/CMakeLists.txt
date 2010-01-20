@@ -235,7 +235,7 @@ END_TEST()
 BEGIN_TEST(NonSmoothSolvers/FrictionContact/test)
  
 #NEW_TEST(FrictionContact_Problemtest main_FC3D.c)
-
+ NEW_TEST(FC3D_DefaultSolverOptionstest FrictionContact3D_DefaultSolverOptions_test.c)
 
 
 # (see NonSmoothSolvers/FrictionContact/test/README for short details)
@@ -273,6 +273,16 @@ NEW_TEST(FC3Dtest30 FrictionContact3D_test30.c)
 NEW_TEST(FC3Dtest31 FrictionContact3D_test31.c)
 NEW_TEST(FC3Dtest32 FrictionContact3D_test32.c)
 
+SET(FC3Dtest50_PROPERTIES WILL_FAIL TRUE)
+NEW_TEST(FC3Dtest50 FrictionContact3D_test50.c)
+
+
+NEW_TEST(FC3Dtest60 FrictionContact3D_test60.c)
+
+SET(FC3Dtest50_PROPERTIES WILL_FAIL TRUE)
+NEW_TEST(FC3Dtest70 FrictionContact3D_test70.c)
+
+
 NEW_TEST(FC3Dtest100 FrictionContact3D_test100.c)
 SET(FC3Dtest110_PROPERTIES WILL_FAIL TRUE)
 NEW_TEST(FC3Dtest110 FrictionContact3D_test110.c)
@@ -303,7 +313,6 @@ NEW_TEST(PFC3D_test1 PrimalFrictionContact3D_test1.c)
 NEW_TEST(PFC3D_test2 PrimalFrictionContact3D_test2.c)
 NEW_TEST(PFC3D_test3 PrimalFrictionContact3D_test3.c)
 NEW_TEST(PFC3D_test4 PrimalFrictionContact3D_test4.c)
-SET(PFC3D_test5_PROPERTIES WILL_FAIL TRUE)
 NEW_TEST(PFC3D_test5 PrimalFrictionContact3D_test5.c)
 
 END_TEST()

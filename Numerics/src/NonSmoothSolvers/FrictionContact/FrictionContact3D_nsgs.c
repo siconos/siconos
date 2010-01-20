@@ -266,7 +266,7 @@ int frictionContact3D_nsgs_setDefaultSolverOptions(Solver_Options** arrayOfSolve
 
 
   strcpy(options->solverName, "NSGS");
-  printf("solverName ==> %s\n", options->solverName);
+
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;
   options->filterOn = 1;

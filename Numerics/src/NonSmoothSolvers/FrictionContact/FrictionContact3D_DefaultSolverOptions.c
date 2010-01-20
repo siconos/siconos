@@ -1,0 +1,91 @@
+/* Siconos-Numerics, Copyright INRIA 2005-2010.
+ * Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ * Siconos is a free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * Siconos is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Siconos; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
+*/
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <float.h>
+#include "LA.h"
+#include "Numerics_Options.h"
+#include "FrictionContact3D_Solvers.h"
+#include "NonSmoothDrivers.h"
+
+int frictionContact3D_setDefaultSolverOptions(Solver_Options** arrayOfSolver_Options, char *solvername)
+{
+  int info = -1;
+  if (strcmp(solvername, "NSGS") == 0)
+  {
+    info =    frictionContact3D_nsgs_setDefaultSolverOptions(arrayOfSolver_Options);
+  }
+  else if (strcmp(solvername, "NSGSV") == 0)
+  {
+    info =    frictionContact3D_nsgs_velocity_setDefaultSolverOptions(arrayOfSolver_Options);
+  }
+  else if (strcmp(solvername, "PROX") == 0)
+  {
+    info =    frictionContact3D_proximal_setDefaultSolverOptions(arrayOfSolver_Options);
+  }
+  else if (strcmp(solvername, "TFP") == 0)
+  {
+    info =    frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(arrayOfSolver_Options);
+  }
+  else if (strcmp(solvername, "DSFP") == 0)
+  {
+    info =    frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(arrayOfSolver_Options);
+  }
+  else
+  {
+    numericsError("frictionContact3D_setDefaultSolverOptions", "Unknow Solver");
+
+  }
+
+
+  return info;
+}
+int frictionContact3D_deleteDefaultSolverOptions(Solver_Options** arrayOfSolver_Options, char *solvername)
+{
+  int info = -1;
+  if (strcmp(solvername, "NSGS") == 0)
+  {
+    info =    frictionContact3D_nsgs_deleteDefaultSolverOptions(arrayOfSolver_Options);
+  }
+  else if (strcmp(solvername, "NSGSV") == 0)
+  {
+    info =    frictionContact3D_nsgs_velocity_deleteDefaultSolverOptions(arrayOfSolver_Options);
+  }
+  else if (strcmp(solvername, "PROX") == 0)
+  {
+    info =    frictionContact3D_proximal_deleteDefaultSolverOptions(arrayOfSolver_Options);
+  }
+  else if (strcmp(solvername, "TFP") == 0)
+  {
+    info =    frictionContact3D_TrescaFixedPoint_deleteDefaultSolverOptions(arrayOfSolver_Options);
+  }
+  else if (strcmp(solvername, "DSFP") == 0)
+  {
+    info =    frictionContact3D_DeSaxceFixedPoint_deleteDefaultSolverOptions(arrayOfSolver_Options);
+  }
+  else
+  {
+    numericsError("frictionContact3D_deleteDefaultSolverOptions", "Unknow Solver");
+
+  }
+
+  return info;
+}
