@@ -31,7 +31,7 @@
 
 */
 #include "NumericsMatrix.h"
-#include "Solver_options.h"
+#include "Solver_Options.h"
 
 #ifdef __cplusplus
 extern "C" {

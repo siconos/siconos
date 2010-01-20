@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "LA.h"
-#include "Numerics_options.h"
+#include "Numerics_Options.h"
 
 
 
