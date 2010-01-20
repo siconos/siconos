@@ -17,6 +17,7 @@ MACRO(SICONOS_PROJECT
 
   # Set cmake policies (cmake >= 2.6)
   IF(COMMAND CMAKE_POLICY)
+
     CMAKE_POLICY(VERSION 2.6.0)
 
     # minimum version required
@@ -44,6 +45,9 @@ MACRO(SICONOS_PROJECT
     #list command no longer ignores empty elements.
     CMAKE_POLICY(SET CMP0007 NEW)
                         
+    #list command no longer ignores empty elements.
+    cmake_policy(SET CMP0011 NEW)
+
   ENDIF(COMMAND CMAKE_POLICY)
 
   # Build options

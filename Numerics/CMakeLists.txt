@@ -1,6 +1,11 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.4)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+  
+if(COMMAND cmake_policy)
+  cmake_policy(VERSION 2.6.0)
+  cmake_policy(SET CMP0011 NEW)
+endif(COMMAND cmake_policy)
 
 ENABLE_LANGUAGE(C)
 ENABLE_LANGUAGE(CXX)

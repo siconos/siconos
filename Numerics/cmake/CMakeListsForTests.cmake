@@ -2,6 +2,11 @@
 # This is the test cmake configuration
 # built from @CMAKE_SOURCE_DIR@/cmake/CMakeListsForTests.cmake.in 
 
+if(COMMAND cmake_policy)
+  cmake_policy(VERSION 2.6.0)
+  cmake_policy(SET CMP0003 NEW)
+endif(COMMAND cmake_policy)
+
 IF(FORTRAN_COMPILER_LIB_DIRECTORIES)
   LINK_DIRECTORIES(${FORTRAN_COMPILER_LIB_DIRECTORIES})
 ENDIF(FORTRAN_COMPILER_LIB_DIRECTORIES)
