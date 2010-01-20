@@ -83,6 +83,17 @@ extern "C" {
 
   void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options);
 
+  /** set the default solver parameters and perform memory allocation for NSGS
+      \param Solver_Options ** the pointer to the array of options to set
+  */
+  int frictionContact3D_nsgs_setDefaultSolverOptions(Solver_Options** arrayOfSolverOptions);
+
+  /** delete the default solver parameters and perform memory allocation for NSGS
+      \param Solver_Options ** the pointer to the array options to delete
+  */
+  int frictionContact3D_nsgs_deleteDefaultSolverOptions(Solver_Options** arrayOfSolverOptions);
+
+
   /** Non-Smooth Gauss Seidel in velocity solver for friction-contact 3D problem
      \param problem, the friction-contact 3D problem to solve
      \param velocity global vector (n), in-out parameter
@@ -128,8 +139,6 @@ extern "C" {
       iparam[0] : Maximum iteration number
   */
   void frictionContact3D_DeSaxceFixedPoint(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options);
-
-
 
 
   /** Check for trivial solution in the friction-contact 3D problem

@@ -15,29 +15,32 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
- */
+*/
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <float.h>
+#include "LA.h"
+#include "Numerics_Options.h"
+#include "FrictionContact3D_Solvers.h"
 #include "NonSmoothDrivers.h"
-#include "frictionContact_test_function.h"
 
-
-int main(void)
+int frictionContact3D_setDefaultSolverOptions(Solver_Options** arrayOfSolver_Options, char *solvername)
 {
-  int info = 0 ;
-  printf("Test on ./data/Example1_Fc3D_SBM.dat\n");
-
-  FILE * finput  =  fopen("./data/Example1_Fc3D_SBM.dat", "r");
-  Solver_Options * options;
-  info = frictionContact3D_setDefaultSolverOptions(&options, "NSGS");
-  strcpy(options[1].solverName, "ProjectionOnCone");
-  options[1].iparam[0] = 0;
-  options[1].dparam[0] = 0.0;
-
-  info = frictionContact_test_function(finput, options);
-
-  frictionContact3D_deleteDefaultSolverOptions(&options, "NSGS");
-  fclose(finput);
-  printf("\nEnd of test on ./data/Example1_Fc3D_SBM.dat\n");
+  int info = -1;
+  if (strcmp(solvername, "NSGS") == 0)
+  {
+    info =    frictionContact3D_nsgs_setDefaultSolverOptions(arrayOfSolver_Options);
+  }
+  return info;
+}
+int frictionContact3D_deleteDefaultSolverOptions(Solver_Options** arrayOfSolver_Options, char *solvername)
+{
+  int info = -1;
+  if (strcmp(solvername, "NSGS") == 0)
+  {
+    info =    frictionContact3D_nsgs_deleteDefaultSolverOptions(arrayOfSolver_Options);
+  }
   return info;
 }

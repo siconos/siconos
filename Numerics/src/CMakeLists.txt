@@ -103,7 +103,6 @@ SET(TEST_WRAP)
 
 
 BEGIN_TEST(netlib/odepack/test)
- 
 NEW_TEST(odepacktest1 DLSODES-test.f)
 NEW_TEST(odepacktest2 DLSODAR-test.f)
 NEW_TEST(odepacktest3 DLSODI-test.f)
@@ -113,9 +112,7 @@ NEW_TEST(odepacktest6 DLSODE-test.f)
 NEW_TEST(odepacktest7 DLSODIS-test.f)
 NEW_TEST(odepacktest8 DLSODKR-test.f)
 NEW_TEST(odepacktest9 DLSOIBT-test.f)
-
 NEW_TEST(odepacktest10 test-funcC-inC.cpp funC.cpp)
- 
 END_TEST()
  
 
