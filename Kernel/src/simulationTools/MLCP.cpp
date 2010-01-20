@@ -255,4 +255,12 @@ MLCP* MLCP::convert(OneStepNSProblem* osnsp)
   return lcp;
 }
 
+void MLCP::initialize(SP::Simulation sim)
+{
+  // General initialize for LinearOSNS
+  LinearOSNS::initialize(sim);
 
+  // Initialization of the NonSmoothSolver
+  _solver->initialize(shared_from_this());
+
+}

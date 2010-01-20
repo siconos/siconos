@@ -98,6 +98,10 @@ public:
    */
   int compute(double);
 
+  /** initialize
+   */
+  void initialize(SP::Simulation sim);
+
   /** print the data to the screen
    */
   void display() const;

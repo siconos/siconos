@@ -84,6 +84,14 @@ void FrictionContact::initialize(SP::Simulation sim)
                      (indexSet->bundle(*ui)->interaction()->nonSmoothLaw())->mu());
     }
   }
+
+  // Initialization of the NonSmoothSolver
+  _solver->initialize(shared_from_this());
+
+
+
+
+
 }
 
 int FrictionContact::compute(double time)

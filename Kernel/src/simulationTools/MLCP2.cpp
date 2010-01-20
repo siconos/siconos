@@ -365,3 +365,12 @@ MLCP2* MLCP2::convert(OneStepNSProblem* osnsp)
 }
 
 
+void MLCP2::initialize(SP::Simulation sim)
+{
+  // General initialize for LinearOSNS
+  Linear::initialize(sim);
+
+  // Initialization of the NonSmoothSolver
+  _solver->initialize(shared_from_this());
+
+}

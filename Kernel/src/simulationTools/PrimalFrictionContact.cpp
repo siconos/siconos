@@ -176,6 +176,10 @@ void PrimalFrictionContact::initialize(SP::Simulation sim)
         H.reset(new OSNSMatrix(simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation->indexSet(levelMin)->size()   , 1));
     }
   }
+  // Initialization of the NonSmoothSolver
+  _solver->initialize(shared_from_this());
+
+
 }
 
 void PrimalFrictionContact::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)

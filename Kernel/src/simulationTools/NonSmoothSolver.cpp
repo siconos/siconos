@@ -18,6 +18,7 @@
  */
 #include "NonSmoothSolver.hpp"
 #include "RuntimeException.hpp"
+#include "FrictionContact.hpp"
 #include <iterator>
 #include <iostream>
 
@@ -53,7 +54,7 @@ NonSmoothSolver::NonSmoothSolver(): _name("undefined"), isSet(false)
 {
   int_parameters.reset(new IntParameters(NB_PARAM));
   double_parameters.reset(new DoubleParameters(NB_PARAM));
-  fillSolverOptions();
+
 }
 
 // Copy constructor
@@ -62,7 +63,7 @@ NonSmoothSolver::NonSmoothSolver(const NonSmoothSolver& newS):
 {
   int_parameters.reset(new IntParameters(*newS.intParameters()));
   double_parameters.reset(new DoubleParameters(*newS.doubleParameters()));
-  fillSolverOptions();
+
 }
 
 // Constructor from a set of data
@@ -71,7 +72,7 @@ NonSmoothSolver::NonSmoothSolver(const std::string& newName, IntParameters& ipar
 {
   int_parameters.reset(new IntParameters(iparam));
   double_parameters.reset(new DoubleParameters(dparam));
-  fillSolverOptions();
+
 }
 NonSmoothSolver::NonSmoothSolver(const std::string& newName, IntParameters& iparam, DoubleParameters& dparam, double * dWork, int * iWork):
   _name(newName), isSet(true)
@@ -104,7 +105,7 @@ NonSmoothSolver::NonSmoothSolver(SP::NonSmoothSolverXML solvXML):
   //       std::cout << "NonSmoothSolver xml constructor warning: too large number of provided int and/or double parameters. "<< std::endl;
   //       std::cout << "Some of them might be ignored. Check in the solver documentation to know what are the required parameters." << std::endl;
   //     }
-  fillSolverOptions();
+
 
 }
 
@@ -115,6 +116,22 @@ NonSmoothSolver::NonSmoothSolver(const string& inputFile):
 
 NonSmoothSolver::~NonSmoothSolver()
 {}
+
+
+
+void NonSmoothSolver::initialize(SP::OneStepNSProblem)
+{
+
+
+
+
+  fillSolverOptions();
+
+
+}
+
+
+
 
 void NonSmoothSolver::display() const
 {
@@ -138,3 +155,25 @@ void NonSmoothSolver::saveNonSmoothSolverToXML()
   RuntimeException::selfThrow("NonSmoothSolver, saveNonSmoothSolverToXML: not yet implemented");
 }
 
+
+/* OneStepNSproblem dispatch */
+class FrictionContact;
+// class LCP;
+// class MLCP;
+// class Relay;
+// class MLCP2;
+// class PrimalFrictionContact;
+
+struct NonSmoothSolver::_ONSNPEffectOnSolverOptions : public SiconosVisitor
+{
+  NonSmoothSolver *parent;
+
+  _ONSNPEffectOnSolverOptions(NonSmoothSolver *p) : parent(p) {};
+
+  void visit(FrictionContact& osnsp)
+  {
+
+  }
+
+  // note : no NewtonImpactFrictionNSL
+};

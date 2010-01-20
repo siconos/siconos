@@ -118,7 +118,8 @@ void Relay::initialize(SP::Simulation sim)
     SP::SiconosVisitor NSLEffect(new _BoundsNSLEffect(this, ur, pos));
     ur->interaction()->nonSmoothLaw()->accept(*NSLEffect);
   }
-
+  // Initialization of the NonSmoothSolver
+  _solver->initialize(shared_from_this());
 }
 
 

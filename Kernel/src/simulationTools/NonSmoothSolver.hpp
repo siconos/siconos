@@ -100,6 +100,11 @@ private:
    */
   void fillSolverOptions();
 
+  /** OneStepNSproblem effect on Solver_Options by  visitors
+   */
+  struct _ONSNPEffectOnSolverOptions;
+
+
 public:
 
   /** Default constructor - All parameters unset.
@@ -215,6 +220,12 @@ public:
   {
     RuntimeException::selfThrow("NonSmoothSolver::setSolverToDefault not implemented") ;
   };
+
+  /** initialize the NonSmoothSolver( fill SolverOptions)
+     \param the simulation, owner of this OSNSPB
+   */
+  void initialize(SP::OneStepNSProblem);
+
 
   /** To display solver data
    */

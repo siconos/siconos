@@ -542,6 +542,8 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
   // Set to the number of possible scalar constraints declared in the topology.
   if (_maxSize == 0) // if maxSize not set explicitely by user before initialize
     _maxSize = simulation()->model()->nonSmoothDynamicalSystem()->topology()->numberOfConstraints();
+
+
 }
 
 void OneStepNSProblem::saveInMemory()
