@@ -109,44 +109,35 @@ int main(int argc, char* argv[])
 
   double *reaction = (double*)malloc(3 * NC * sizeof(double));
   double *velocity = (double*)malloc(3 * NC * sizeof(double));
-
+  for (int i = 0; i < 3 * NC; i++)
+  {
+    reaction[i] = 0.0;
+    velocity[i] = 0.0;
+  }
   // Numerics and Solver Options
 
   Numerics_Options numerics_options;
-  numerics_options.verboseMode = 1; // turn verbose mode to off by default
+  numerics_options.verboseMode = 2; // turn verbose mode to off by default
 
 
-  Solver_Options numerics_solver_options;
-  numerics_solver_options.filterOn = 0;
-  numerics_solver_options.isSet = 1;
-
-  strcpy(numerics_solver_options.solverName, "NSGS");
-
-  numerics_solver_options.iSize = 5;
-  numerics_solver_options.iparam = (int*)malloc(numerics_solver_options.iSize * sizeof(int));
-  numerics_solver_options.dSize = 5;
-  numerics_solver_options.dparam = (double*)malloc(numerics_solver_options.dSize * sizeof(double));
-
-  int nmax = 10000; // Max number of iteration
-  int localsolver = 3; // 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 3: projection on Disk  with diagonalization,
-  double tolerance = 1e-16;
-  double localtolerance = 1e-16;
-
-
-  numerics_solver_options.iparam[0] = nmax ;
-  numerics_solver_options.iparam[4] = localsolver ;
-  numerics_solver_options.dparam[0] = tolerance ;
-  numerics_solver_options.dparam[2] = localtolerance ;
 
   //Driver call
   FILE * ff =  fopen("Example1_Fc3D_SBM.dat", "w");
   frictionContact_printInFile(&NumericsProblem, ff);
   fclose(ff);
 
+  Solver_Options *numerics_solver_options;
+  frictionContact3D_setDefaultSolverOptions(&numerics_solver_options, "NSGS");
+
+  numerics_solver_options->dparam[0] = 1e-16;
+
 
   int info = frictionContact3D_driver(&NumericsProblem,
                                       reaction , velocity,
-                                      &numerics_solver_options, &numerics_options);
+                                      numerics_solver_options, &numerics_options);
+
+
+  frictionContact3D_deleteDefaultSolverOptions(&numerics_solver_options, "NSGS");
 
 
   // Solver output

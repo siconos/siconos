@@ -210,42 +210,38 @@ int main(int argc, char* argv[])
   double *reaction = (double*)malloc(m * sizeof(double));
   double *velocity = (double*)malloc(m * sizeof(double));
   double *globalVelocity = (double*)malloc(n * sizeof(double));
-
+  for (k = 0 ; k < m; k++)
+  {
+    velocity[k] = 0.0;
+    reaction[k] = 0.0;
+  };
+  for (k = 0 ; k < n; k++)
+  {
+    globalVelocity[k] = 0.0;
+  };
   // Numerics and Solver Options
 
   Numerics_Options numerics_options;
   numerics_options.verboseMode = 1; // turn verbose mode to off by default
 
 
-  Solver_Options numerics_solver_options;
-  numerics_solver_options.filterOn = 0;
-  numerics_solver_options.isSet = 1;
-  strcpy(numerics_solver_options.solverName, "NSGS");
-
-  strcpy(numerics_solver_options.solverName, "NSGS_WR");
-
-  numerics_solver_options.iSize = 5;
-  numerics_solver_options.iparam = (int*)malloc(numerics_solver_options.iSize * sizeof(int));
-  numerics_solver_options.dSize = 5;
-  numerics_solver_options.dparam = (double*)malloc(numerics_solver_options.dSize * sizeof(double));
-
-  int nmax = 10000; // Max number of iteration
-  int localsolver = 0; // 0: projection on Cone, 1: Newton/AlartCurnier,  2: projection on Cone with local iteration, 2: projection on Disk  with diagonalization,
-  double tolerance = 1e-10;
-  double localtolerance = 1e-12;
 
 
+  Solver_Options * numerics_solver_options;
+  char solvername[10] = "NSGS";
 
-  numerics_solver_options.iparam[0] = nmax ;
-  numerics_solver_options.iparam[4] = localsolver ;
-  numerics_solver_options.dparam[0] = tolerance ;
-  numerics_solver_options.dparam[2] = localtolerance ;
+  /*\warning Must be adpated  for future primalFrictionContact3D_setDefaultSolverOptions*/
+  frictionContact3D_setDefaultSolverOptions(&numerics_solver_options, solvername);
+  numerics_solver_options->dparam[0] = 1e-14;
+  numerics_solver_options->iparam[0] = 100000;
 
   //Driver call
   info = primalFrictionContact3D_driver(&numericsProblem,
                                         reaction , velocity, globalVelocity,
-                                        &numerics_solver_options, &numerics_options);
+                                        numerics_solver_options, &numerics_options);
 
+  /*\warning Must be adpated  for future primalFrictionContact3D_setDefaultSolverOptions*/
+  frictionContact3D_deleteDefaultSolverOptions(&numerics_solver_options, solvername);
 
 
   // Solver output
@@ -266,8 +262,6 @@ int main(int argc, char* argv[])
   free(MM);
   free(HH);
 
-  free(numerics_solver_options.iparam);
-  free(numerics_solver_options.dparam);
 
   /*     while (1) sleep(60); */
 
