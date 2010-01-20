@@ -106,36 +106,61 @@ void printSolverOptions(Solver_Options* options)
 {
   printf("\n ========== Numerics Non Smooth Solver parameters: \n");
   if (options->isSet == 0)
-    printf("The solver parameters have not been set.\n");
+    printf("The solver parameters have not been set. \t options->isSet = %i \n", options->isSet);
   else
   {
-    printf("The solver is named %s \n", options->solverName);
+    printf("The solver parameters below have  been set \t options->isSet = %i\n", options->isSet);
+    printf("Name of the solver\t\t\t\t options->solverName = %s \n", options->solverName);
+    printf("number of internal (or local) solvers \t\t options->numberOfInternalSolvers = %i\n", options->numberOfInternalSolvers);
+    if (options->numberOfInternalSolvers > 0)
+    {
+      for (int i = 1; i < options->numberOfInternalSolvers + 1; i++)
+      {
+        assert(&options[i]);
+        printf("Name internal or local solver\t\t\t options[%i].solverName = %s \t \n", i, options[i].solverName);
+      }
+
+    }
     if (options->iparam != NULL)
     {
-      printf(" - int parameters\t");
+      printf("int parameters \t\t\t\t\t options->iparam\n");
+      printf("size of the int parameters\t\t\t options->iSize = %i\n", options->iSize);
       for (int i = 0; i < options->iSize; ++i)
-        printf("%d\t", options->iparam[i]);
-      printf("\n");
+        printf("\t\t\t\t\t\t options->iparam[%i] = %d\n", i, options->iparam[i]);
     }
     if (options->dparam != NULL)
     {
-      printf(" - double parameters\t");
-      for (int i = 0; i < options->dSize; ++i)
-        printf("%.6le\t", options->dparam[i]);
-      printf("\n");
+      printf("double parameters \t\t\t\t options->dparam\n");
+      printf("size of the double parameters\t\t\t options->dSize = %i\n", options->dSize);
+      for (int i = 0; i < options->iSize; ++i)
+        printf("\t\t\t\t\t\t options->dparam[%i] = %.6le\n", i, options->dparam[i]);
     }
   }
-  printf("See %s documentation to know what is each parameter)\n", options->solverName);
-  printf("The solver has %i internal (or local) solvers\n", options->numberOfInternalSolvers);
-  if (options->numberOfInternalSolvers > 0)
+  if (options->iWork == NULL)
   {
-    for (int i = 1; i < options->numberOfInternalSolvers + 1; i++)
-    {
-      assert(&options[i]);
-      printf("The internal or local solver number %i is %s \n", i, options[i].solverName);
-    }
-
+    printf("integer work array have not been allocated. \t options->iWork = NULL \n");
   }
+  else
+  {
+    printf("integer work array have been allocated. \t options->iWork = %p \n", options->iWork);
+    printf("integer work array size \t\t\t options->iSize = %i \n", options->iSize);
+  }
+  if (options->dWork == NULL)
+  {
+    printf("double work array have not been allocated. \t options->dWork = NULL \n");
+  }
+  else
+  {
+    printf("double work array have been allocated. \t options->dWork = %p \n", options->dWork);
+    printf("double work array size \t\t\t options->dSize = %i \n", options->dSize);
+  }
+
+
+
+
+  printf("See %s documentation for parameters definition)\n", options->solverName);
+
+  printf("\n");
 
 }
 
