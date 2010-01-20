@@ -89,9 +89,21 @@ int setSolver_Options(Solver_Options * options)
   return 0;
 }
 
-void freeSolver_Options(Solver_Options * options)
+
+
+int main(void)
 {
-  for (int i = 0; i < options->numberOfInternalSolvers + 1; i++)
+  int info = 0 ;
+  char filename[50] = "./data/Example1_Fc3D_SBM.dat";
+  printf("Test on %s\n", filename);
+  FILE * finput  =  fopen(filename, "r");
+  int nbsolvers = 3;
+  Solver_Options * options = (Solver_Options *)malloc(nbsolvers * sizeof(*options));  ;
+  info = setSolver_Options(options);
+  printf("solverName ==> %s\n", options->solverName);
+  info = frictionContact_test_function(finput, options);
+
+  for (int i = 0; i < nbsolvers; i++)
   {
     free(options[i].iparam);
     free(options[i].dparam);
@@ -99,22 +111,8 @@ void freeSolver_Options(Solver_Options * options)
     if (!options[i].iWork) free(options[i].iWork);
   }
   free(options);
-}
 
-
-int main(void)
-{
-  int info = 0 ;
-  printf("Test on ./data/Example1_Fc3D_SBM.dat\n");
-
-  FILE * finput  =  fopen("./data/Example1_Fc3D_SBM.dat", "r");
-  int nbsolvers = 3;
-  Solver_Options * options = (Solver_Options *)malloc(nbsolvers * sizeof(*options));  ;
-  info = setSolver_Options(options);
-  printf("solverName ==> %s\n", options->solverName);
-  info = frictionContact_test_function(finput, options);
-  freeSolver_Options(options);
   fclose(finput);
-  printf("End of test on ./data/Example1_Fc3D_SBM.dat\n");
+  printf("End of test on %s\n", filename);
   return info;
 }

@@ -88,9 +88,9 @@ int main(void)
 
   FILE * finput  =  fopen("./data/Example1_Fc3D_SBM.dat", "r");
   int nbsolvers = 2;
-  Solver_Options * options = (Solver_Options *)malloc(nbsolvers * sizeof(*options));  ;
+  Solver_Options * options = (Solver_Options *)malloc(nbsolvers * sizeof(*options));
   info = setSolver_Options(options);
-  printf("solverName ==> %s\n", options->solverName);
+
   info = frictionContact_test_function(finput, options);
   freeSolver_Options(options);
   fclose(finput);

@@ -23,6 +23,7 @@
 #include "LA.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 
 void frictionContact3D_proximal(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options)
@@ -48,22 +49,12 @@ void frictionContact3D_proximal(FrictionContact_Problem* problem, double *reacti
   if (*info == 0)
     return;
 
-  Solver_Options *internalsolver_options = malloc(sizeof(Solver_Options));
-  internalsolver_options->iSize = 5;
-  internalsolver_options->dSize = 5;
-  internalsolver_options->iparam = (int*)malloc(internalsolver_options->iSize * sizeof(int));
-  internalsolver_options->dparam = (double*)malloc(internalsolver_options->iSize * sizeof(double));
-  for (int i = 0; i <   internalsolver_options->iSize; i++)
+  if (options->numberOfInternalSolvers < 1)
   {
-    internalsolver_options->iparam[i] = iparam[i];
+    numericsError("frictionContact3D_proximal", "The PROX method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
   }
-  for (int i = 0; i <   internalsolver_options->dSize; i++)
-  {
-    internalsolver_options->dparam[i] = dparam[i];
-  }
-  /*number of internal iterations */
-  int ninternaliteration = iparam[1];
-  internalsolver_options->iparam[0] = ninternaliteration;
+  assert(&options[1]);
+  Solver_Options *internalsolver_options = &options[1];
 
 
   /*****  PROXIMAL Iterations *****/
@@ -71,7 +62,12 @@ void frictionContact3D_proximal(FrictionContact_Problem* problem, double *reacti
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
 
-  dparam[0] = dparam[2]; // set the tolerance for the local solver
+
+
+
+
+
+
   double rho = dparam[3];
   double minusrho = -1.0 * rho;
 
@@ -81,8 +77,8 @@ void frictionContact3D_proximal(FrictionContact_Problem* problem, double *reacti
 
   internalSolverPtr internalsolver;
 
-  if (iparam[2] == 0) internalsolver = &frictionContact3D_nsgs;
-  else if (iparam[2] == 1)internalsolver = &frictionContact3D_DeSaxceFixedPoint;
+  if (strcmp(internalsolver_options->solverName, "NSGS") == 0) internalsolver = &frictionContact3D_nsgs;
+  else if (strcmp(internalsolver_options->solverName, "DeSaxceFixedPoint") == 0)internalsolver = &frictionContact3D_DeSaxceFixedPoint;
   else  internalsolver = &frictionContact3D_nsgs;
 
 
@@ -143,9 +139,7 @@ void frictionContact3D_proximal(FrictionContact_Problem* problem, double *reacti
   dparam[1] = error;
 
   free(reactionold);
-  free(internalsolver_options->iparam);
-  free(internalsolver_options->dparam);
-  free(internalsolver_options);
+
 
 
 }

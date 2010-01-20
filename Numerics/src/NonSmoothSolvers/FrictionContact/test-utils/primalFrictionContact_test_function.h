@@ -18,12 +18,12 @@
  */
 #ifndef PRIMALFRICTIONCONTACT_TEST_FUNCTION_H
 #define PRIMALFRICTIONCONTACT_TEST_FUNCTION_H
-
+#include "Solver_Options.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-  int primalFrictionContact_test_function(FILE * f, char * solvername, int * iparam, double * dparam);
+  int primalFrictionContact_test_function(FILE * f, Solver_Options *);
 
 
 #ifdef __cplusplus

@@ -260,22 +260,29 @@ NEW_TEST(FC3Dtest7 FrictionContact3D_test7.c)
 
 
 
-#NEW_TEST(FC3Dtest10)
-#NEW_TEST(FC3Dtest11 FrictionContact3D_test11.c)
-#NEW_TEST(FC3Dtest12 FrictionContact3D_test12.c)
-#SET(FC3Dtest13_PROPERTIES WILL_FAIL TRUE)
-#NEW_TEST(FC3Dtest13 FrictionContact3D_test13.c)
+NEW_TEST(FC3Dtest10 FrictionContact3D_test10.c)
+NEW_TEST(FC3Dtest11 FrictionContact3D_test11.c)
+NEW_TEST(FC3Dtest12 FrictionContact3D_test12.c)
+SET(FC3Dtest13_PROPERTIES WILL_FAIL TRUE)
+NEW_TEST(FC3Dtest13 FrictionContact3D_test13.c)
 
-#NEW_TEST(FC3Dtest20 FrictionContact3D_test20.c)
+NEW_TEST(FC3Dtest20 FrictionContact3D_test20.c)
+NEW_TEST(FC3Dtest21 FrictionContact3D_test21.c)
+NEW_TEST(FC3Dtest22 FrictionContact3D_test22.c)
+SET(FC3Dtest23_PROPERTIES WILL_FAIL TRUE)
+NEW_TEST(FC3Dtest23 FrictionContact3D_test23.c)
 
-
-#SET(FC3Dtest21_PROPERTIES WILL_FAIL TRUE)
-#NEW_TEST(FC3Dtest21 FrictionContact3D_test21.c)
-#NEW_TEST(FC3Dtest22 FrictionContact3D_test22.c)
-
-#NEW_TEST(FC3Dtest30 FrictionContact3D_test30.c)
+NEW_TEST(FC3Dtest30 FrictionContact3D_test30.c)
+NEW_TEST(FC3Dtest31 FrictionContact3D_test31.c)
+NEW_TEST(FC3Dtest32 FrictionContact3D_test32.c)
 
 NEW_TEST(FC3Dtest100 FrictionContact3D_test100.c)
+SET(FC3Dtest110_PROPERTIES WILL_FAIL TRUE)
+NEW_TEST(FC3Dtest110 FrictionContact3D_test110.c)
+SET(FC3Dtest120_PROPERTIES WILL_FAIL TRUE)
+NEW_TEST(FC3Dtest120 FrictionContact3D_test120.c)
+SET(FC3Dtest130_PROPERTIES WILL_FAIL TRUE)
+NEW_TEST(FC3Dtest130 FrictionContact3D_test130.c)
 
 
 ## test 2D dense on two differents files
@@ -297,9 +304,7 @@ NEW_TEST(FC3Dtest100 FrictionContact3D_test100.c)
 
 NEW_TEST(PFC3D_test1 PrimalFrictionContact3D_test1.c)
 NEW_TEST(PFC3D_test2 PrimalFrictionContact3D_test2.c)
-SET(PFC3D_test3_PROPERTIES WILL_FAIL TRUE)
 NEW_TEST(PFC3D_test3 PrimalFrictionContact3D_test3.c)
-SET(PFC3D_test4_PROPERTIES WILL_FAIL TRUE)
 NEW_TEST(PFC3D_test4 PrimalFrictionContact3D_test4.c)
 SET(PFC3D_test5_PROPERTIES WILL_FAIL TRUE)
 NEW_TEST(PFC3D_test5 PrimalFrictionContact3D_test5.c)

@@ -22,10 +22,10 @@
 #include "primalFrictionContact_test_function.h"
 
 
-int primalFrictionContact_test_function(FILE * f, char * solvername, int * iparam, double * dparam)
+int primalFrictionContact_test_function(FILE * f, Solver_Options * options)
 {
 
-  int i, k, info = -1 ;
+  int k, info = -1 ;
   PrimalFrictionContact_Problem* problem = (PrimalFrictionContact_Problem *)malloc(sizeof(PrimalFrictionContact_Problem));
 
   info = primalFrictionContact_newFromFile(problem, f);
@@ -36,28 +36,6 @@ int primalFrictionContact_test_function(FILE * f, char * solvername, int * ipara
 
   Numerics_Options global_options;
   global_options.verboseMode = 1; // turn verbose mode to off by default
-
-  Solver_Options * options ;
-  options = malloc(sizeof(*options));
-  options->isSet = 1;
-  options->filterOn = 1;
-
-  strcpy(options->solverName, solvername);
-  printf("solverName ==> %s\n", options->solverName);
-  options->iSize = 5;
-  options->dSize = 5;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
-  options->iWork = NULL;
-  options->iSize = 5;
-  options->dSize = 5;
-  for (i = 0; i < 5; i++)
-  {
-    options->iparam[i] = iparam[i];
-    options->dparam[i] = dparam[i];
-  }
-
 
   int NC = problem->numberOfContacts;
   int dim = problem->dimension;
@@ -108,15 +86,7 @@ int primalFrictionContact_test_function(FILE * f, char * solvername, int * ipara
   }
   free(reaction);
   free(velocity);
-
-  free(options->iparam);
-  free(options->dparam);
-
-
-  if (!options->dWork) free(options->dWork);
-  if (!options->iWork) free(options->iWork);
-
-  free(options);
+  free(globalvelocity);
 
   freePrimalFrictionContact_problem(problem);
 
