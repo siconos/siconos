@@ -238,3 +238,68 @@ void lcp_lexicolemke(LinearComplementarity_Problem* problem, double *zlem , doub
   for (i = 0 ; i < dim ; ++i) free(A[i]);
   free(A);
 }
+
+
+int linearComplementarity_lexicolemke_setDefaultSolverOptions(Solver_Options** arrayOfSolver_Options)
+{
+  int i;
+  if (verbose > 0)
+  {
+    printf("Set the Default Solver_Options for the Lemke Solver\n");
+  }
+  int nbSolvers = 1 ;
+  Solver_Options * options = (Solver_Options *)malloc(nbSolvers * sizeof(Solver_Options));
+  arrayOfSolver_Options[0] = options;
+
+
+  strcpy(options->solverName, "Lemke");
+
+  options->numberOfInternalSolvers = 1;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 5;
+  options->dSize = 5;
+  options->iparam = (int *)malloc(options->iSize * sizeof(int));
+  options->dparam = (double *)malloc(options->dSize * sizeof(double));
+  options->dWork = NULL;
+  options->iWork = NULL;
+  for (i = 0; i < 5; i++)
+  {
+    options->iparam[i] = 0;
+    options->dparam[i] = 0.0;
+  }
+  options->iparam[0] = 1000;
+  options->dparam[0] = 1e-6;
+
+
+  return 0;
+}
+
+int linearComplementarity_lexicolemke_deleteDefaultSolverOptions(Solver_Options** arrayOfSolver_Options)
+{
+
+  int i;
+  if (verbose > 0)
+  {
+    printf("Set the Default Solver_Options for the Lemke Solver\n");
+  }
+
+  Solver_Options * options = arrayOfSolver_Options[0];
+
+  int nbSolvers = 1 ;
+  for (i = 0; i < nbSolvers; i++)
+  {
+    if (options[i].iparam) free(options[i].iparam);
+    options[i].iparam = NULL;
+    if (options[i].dparam) free(options[i].dparam);
+    options[i].dparam = NULL;
+    if (options[i].dWork)  free(options[i].dWork);
+    options[i].dWork = NULL;
+    if (options[i].iWork)  free(options[i].iWork);
+    options[i].iWork = NULL;
+  }
+  free(options);
+
+
+  return 0;
+}

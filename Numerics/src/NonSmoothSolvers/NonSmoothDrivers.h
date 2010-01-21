@@ -90,7 +90,19 @@ extern "C" {
       - >0 : otherwise see each solver for more information about the log info
       \author Franck Perignon
   */
-  int lcp_driver(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options, int numberOfSolvers, Numerics_Options* global_options);
+  int linearComplementarity_driver(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options, int numberOfSolvers, Numerics_Options* global_options);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+      \param Solver_Options ** the pointer to the array of options to set
+      \param char * the string which identify the solver
+  */
+  int linearComplementarity_setDefaultSolverOptions(LinearComplementarity_Problem* problem, Solver_Options** options, char *);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+       \param Solver_Options ** the pointer to the arrayof options to delete
+       \param char * the string which identify the solver
+   */
+  int linearComplementarity_deleteDefaultSolverOptions(Solver_Options** options, char *);
 
   /** General interface to solver for MLCP problems
       \param[in] problem the MixedLinearComplementarity_Problem structure which handles the problem (M,q)

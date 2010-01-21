@@ -124,7 +124,7 @@ int lcp_test_function(FILE * f, char * solvername)
   double * w = malloc(problem->size * sizeof(double));
 
 
-  info = lcp_driver(problem, z , w, options, numberOfSolvers, &global_options);
+  info = linearComplementarity_driver(problem, z , w, options, numberOfSolvers, &global_options);
 
   for (i = 0 ; i < problem->size ; i++)
   {
@@ -276,7 +276,7 @@ int lcp_test_function_SBM(FILE * f, char * solvername)
   double * w = malloc(problem->size * sizeof(double));
 
 
-  info = lcp_driver(problem, z , w, options, numberOfSolvers, &global_options);
+  info = linearComplementarity_driver(problem, z , w, options, numberOfSolvers, &global_options);
 
   for (i = 0 ; i < problem->size ; i++)
   {

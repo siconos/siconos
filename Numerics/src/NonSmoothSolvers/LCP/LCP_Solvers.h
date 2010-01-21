@@ -204,6 +204,16 @@ extern "C" {
    */
   void lcp_qp(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+      \param Solver_Options ** the pointer to the array of options to set
+  */
+  int linearComplementarity_qp_setDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+        \param Solver_Options ** the pointer to the arrayof options to delete
+    */
+  int linearComplementarity_qp_deleteDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
+
   /** lcp_cpg is a CPG (Conjugated Projected Gradient) solver for LCP based on quadratic minimization.
    * \param[in] problem structure that represents the LCP (M, q...)
    * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
@@ -215,10 +225,19 @@ extern "C" {
    3: pWp nul
    * \param[in-out] options structure used to define the solver and its parameters.
    *
-
    \author Mathieu Renouf.
   */
   void lcp_cpg(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+    \param Solver_Options ** the pointer to the array of options to set
+  */
+  int linearComplementarity_cpg_setDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+  \param Solver_Options ** the pointer to the arrayof options to delete
+  */
+  int linearComplementarity_cpg_deleteDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
 
   /** lcp_pgs (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver for LCP.\n
    * \param[in] problem structure that represents the LCP (M, q...)
@@ -229,9 +248,18 @@ extern "C" {
    1 : iter = itermax\n
    2 : negative diagonal term
    \param[in-out] options structure used to define the solver and its parameters.
-   \author Mathieu Renouf
   */
   void lcp_pgs(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+      \param Solver_Options ** the pointer to the array of options to set
+  */
+  int linearComplementarity_pgs_setDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+        \param Solver_Options ** the pointer to the arrayof options to delete
+    */
+  int linearComplementarity_pgs_deleteDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
 
   /** lcp_rpgs (Regularized Projected Gauss-Seidel ) is a solver for LCP, able to handle matrices with null diagonal terms.\n
    * \param[in] problem structure that represents the LCP (M, q...)
@@ -250,6 +278,16 @@ extern "C" {
   */
   void lcp_rpgs(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+      \param Solver_Options ** the pointer to the array of options to set
+  */
+  int linearComplementarity_rpgs_setDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+        \param Solver_Options ** the pointer to the arrayof options to delete
+    */
+  int linearComplementarity_rpgs_deleteDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
+
   /** lcp_psor Projected Succesive over relaxation solver for LCP. See cottle, Pang Stone Chap 5
    * \param[in] problem structure that represents the LCP (M, q...)
    * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
@@ -259,15 +297,22 @@ extern "C" {
    1 : iter = itermax\n
    2 : negative diagonal term
    * \param[in-out] options structure used to define the solver and its parameters.
-
-   \author  Vincent Acary
-
    \todo use the relax parameter
    \todo add test
    \todo add a vector of relaxation parameter wtith an auto sizing (see SOR algorithm for linear solver.)
 
   */
   void lcp_psor(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+      \param Solver_Options ** the pointer to the array of options to set
+  */
+  int linearComplementarity_psor_setDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+        \param Solver_Options ** the pointer to the arrayof options to delete
+    */
+  int linearComplementarity_psor_deleteDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
 
   /** lcp_nsqp use a quadratic programm formulation for solving an non symmetric LCP
    * \param[in] problem structure that represents the LCP (M, q...)
@@ -286,6 +331,16 @@ extern "C" {
    */
   void lcp_nsqp(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+      \param Solver_Options ** the pointer to the array of options to set
+  */
+  int linearComplementarity_nsqp_setDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+        \param Solver_Options ** the pointer to the arrayof options to delete
+    */
+  int linearComplementarity_nsqp_deleteDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
+
   /** lcp_latin (LArge Time INcrements) is a basic latin solver for LCP.
    * \param[in] problem structure that represents the LCP (M, q...)
    * \param[in-out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
@@ -300,6 +355,15 @@ extern "C" {
    \author Nineb Sheherazade.
   */
   void lcp_latin(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+      \param Solver_Options ** the pointer to the array of options to set
+  */
+  int linearComplementarity_latin_setDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+        \param Solver_Options ** the pointer to the arrayof options to delete
+    */
+  int linearComplementarity_latin_deleteDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
 
   /** lcp_latin_w (LArge Time INcrements) is a basic latin solver with relaxation for LCP.\n
    * \param[in] problem structure that represents the LCP (M, q...)
@@ -316,6 +380,16 @@ extern "C" {
    \author Nineb Sheherazade.
   */
   void lcp_latin_w(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+      \param Solver_Options ** the pointer to the array of options to set
+  */
+  int linearComplementarity_latin_w_setDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+        \param Solver_Options ** the pointer to the arrayof options to delete
+    */
+  int linearComplementarity_latin_w_deleteDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
 
   /** lcp_lexicolemke is a direct solver for LCP based on pivoting method principle for degenerate problem \n
       Choice of pivot variable is performed via lexicographic ordering \n
@@ -336,6 +410,16 @@ extern "C" {
 
   */
   void lcp_lexicolemke(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+      \param Solver_Options ** the pointer to the array of options to set
+  */
+  int linearComplementarity_lexicolemke_setDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+        \param Solver_Options ** the pointer to the arrayof options to delete
+    */
+  int linearComplementarity_lexicolemke_deleteDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
 
   /** lcp_newton_min uses a nonsmooth Newton method based on the min formulation  (or max formulation) of the LCP
       \f$
@@ -370,6 +454,16 @@ extern "C" {
   */
   void lcp_newton_min(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+      \param Solver_Options ** the pointer to the array of options to set
+  */
+  int linearComplementarity_newton_min_setDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+        \param Solver_Options ** the pointer to the arrayof options to delete
+    */
+  int linearComplementarity_newton_min_deleteDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
+
   /** lcp_newton_FB use a nonsmooth newton method based on the Fischer-Bursmeister convex function
    *
    *
@@ -399,7 +493,17 @@ extern "C" {
    * \todo Add rules for the computation of the penalization rho
    * \todo Add a globalization strategy based on a decrease of a merit function. (Nonmonotone LCP) Reference in Ferris Kanzow 2002
    */
+
   void lcp_newton_FB(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+      \param Solver_Options ** the pointer to the array of options to set
+  */
+  int linearComplementarity_newton_FB_setDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+        \param Solver_Options ** the pointer to the arrayof options to delete
+    */
+  int linearComplementarity_newton_FB_deleteDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
 
   /**
    * \param[in] problem structure that represents the LCP (M, q...)
@@ -414,6 +518,15 @@ extern "C" {
    \author Olivier Bonnefon
   */
   void lcp_path(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+      \param Solver_Options ** the pointer to the array of options to set
+  */
+  int linearComplementarity_path_setDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+        \param Solver_Options ** the pointer to the arrayof options to delete
+    */
+  int linearComplementarity_path_deleteDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
 
   /**
   * \param[in] problem structure that represents the LCP (M, q...)
@@ -426,6 +539,8 @@ extern "C" {
 
   \author Olivier Bonnefon
   */
+
+
   void lcp_enum(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
   /**
   * \param[in] problem structure that represents the LCP (M, q...)
@@ -439,6 +554,16 @@ extern "C" {
   * \param[in] If withMemAlloc is not 0, then the work memory is free.
   */
   void lcp_enum_reset(LinearComplementarity_Problem* problem, Solver_Options* options, int withMemAlloc);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+      \param Solver_Options ** the pointer to the array of options to set
+  */
+  int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarity_Problem* problem, Solver_Options** arrayOfSolver_Options);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+        \param Solver_Options ** the pointer to the arrayof options to delete
+    */
+  int linearComplementarity_enum_deleteDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
 
   /** generic interface used to call any LCP solver applied on a Sparse-Block structured matrix M, with a Gauss-Seidel process
    * to solve the global problem (formulation/solving of local problems for each row of blocks)
@@ -454,6 +579,15 @@ extern "C" {
    * \author Mathieu Renouf, Pascal Denoyelle, Franck Perignon
    */
   void lcp_GaussSeidel_SBM(LinearComplementarity_Problem* problem, double *z, double *w, int* info, Solver_Options* options, int numberOfSolvers);
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+      \param Solver_Options ** the pointer to the array of options to set
+  */
+  int linearComplementarity_qp_setDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
+
+  /** set the default solver parameters and perform memory allocation for LinearComplementarity
+        \param Solver_Options ** the pointer to the arrayof options to delete
+    */
+  int linearComplementarity_qp_deleteDefaultSolverOptions(Solver_Options** arrayOfSolver_Options);
 
   /** This function computes the input vector \f$ w = Mz + q \f$ and checks the validity of the vector z as a solution \n
    * of the LCP : \n

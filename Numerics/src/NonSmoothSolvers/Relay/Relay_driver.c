@@ -140,7 +140,7 @@ int relay_driver(Relay_Problem* problem, double *z , double *w,
 
 
     }
-    info = lcp_driver(lcp_problem, zlcp , wlcp, options, nbSolvers, global_options);
+    info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, options, nbSolvers, global_options);
     if (options->filterOn > 0)
       lcp_compute_error(lcp_problem, zlcp, wlcp, options->dparam[0], &(options->dparam[1]));
 

@@ -29,6 +29,9 @@
  * double *z : size n+m
  * double *w : size n+m
  */
+
+/*\warning omega is not explicitely used. must be completed    */
+
 void mlcp_psor(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {
   double* A = problem->A;
@@ -59,7 +62,7 @@ void mlcp_psor(MixedLinearComplementarity_Problem* problem, double *z, double *w
   itermax = options->iparam[0];
   tol   = options->dparam[0];
   omega = options->dparam[2];
-  printf("omega %f\n", omega);
+  printf("omega %f\n is not used !!!!!", omega);
 
   /* Initialize output */
 
