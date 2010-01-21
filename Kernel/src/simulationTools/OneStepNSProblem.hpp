@@ -557,6 +557,9 @@ public:
    */
   virtual void getOSIMaps(SP::UnitaryRelation, MapOfDSMatrices&);
 
+  /** visitors hook
+   */
+  ACCEPT_STD_VISITORS();
 
   /** clear associated maps */
   void clear();

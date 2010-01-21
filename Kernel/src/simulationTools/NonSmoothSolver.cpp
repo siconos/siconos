@@ -18,7 +18,10 @@
  */
 #include "NonSmoothSolver.hpp"
 #include "RuntimeException.hpp"
+#include "SiconosVisitor.hpp"
+#include "OneStepNSProblem.hpp"
 #include "FrictionContact.hpp"
+
 #include <iterator>
 #include <iostream>
 
@@ -119,16 +122,7 @@ NonSmoothSolver::~NonSmoothSolver()
 
 
 
-void NonSmoothSolver::initialize(SP::OneStepNSProblem)
-{
 
-
-
-
-  fillSolverOptions();
-
-
-}
 
 
 
@@ -158,22 +152,85 @@ void NonSmoothSolver::saveNonSmoothSolverToXML()
 
 /* OneStepNSproblem dispatch */
 class FrictionContact;
-// class LCP;
-// class MLCP;
-// class Relay;
+class LCP;
+class MLCP;
+class Relay;
 // class MLCP2;
 // class PrimalFrictionContact;
 
-struct NonSmoothSolver::_ONSNPEffectOnSolverOptions : public SiconosVisitor
+struct NonSmoothSolver::_ONSNPEffectOnBuildSolverOptions : public SiconosVisitor
 {
   NonSmoothSolver *parent;
 
-  _ONSNPEffectOnSolverOptions(NonSmoothSolver *p) : parent(p) {};
+  _ONSNPEffectOnBuildSolverOptions(NonSmoothSolver *p) :
+    parent(p) {};
 
-  void visit(FrictionContact& osnsp)
+  void visit(LCP& osnsp)
   {
+    std::cout << " NonSmoothSolver visit the LCP" << std::endl;
+    parent->fillSolverOptions();
+  }
+  void visit(FrictionContact& fc3d)
+  {
+    std::cout << " NonSmoothSolver visit the FrictionContact" << std::endl;
+    if (fc3d.getFrictionContactDim() == 2)
+    {
+      parent->fillSolverOptions();
+    }
+    else if (fc3d.getFrictionContactDim() == 3)
+    {
+      Solver_Options * options ;
+      parent->numerics_solver_options.reset(options);
 
+      size_t size = parent->name().size() + 1;
+      char * solverName = new char[ size ];
+      strncpy(solverName, parent->name().c_str(), size);
+
+      frictionContact3D_setDefaultSolverOptions(&options, solverName);
+
+
+
+    }
+    else
+      RuntimeException::selfThrow("NonSmoothSolver, FrictionContact->getFrictionContactDim() is unkonwn");
   }
 
-  // note : no NewtonImpactFrictionNSL
+  void visit(MLCP& osnsp)
+  {
+    parent->fillSolverOptions();
+  }
+  void visit(Relay& osnsp)
+  {
+    parent->fillSolverOptions();
+  }
+  //   void visit(MLCP2& osnsp )
+  //   {
+  //     parent->fillSolverOptions();
+  //   }
+  //   void visit(PrimalFrictionContact& osnsp )
+  //   {
+  //     parent->fillSolverOptions();
+  //   }
+
 };
+
+void NonSmoothSolver::initialize(OneStepNSProblem * osnsp)
+{
+  SP::SiconosVisitor ONSNPEffectOnBuildSolverOptions(new _ONSNPEffectOnBuildSolverOptions(this));
+
+  (osnsp)->accept(*ONSNPEffectOnBuildSolverOptions);
+
+}
+
+// void NonSmoothSolver::initialize(SP::OneStepNSProblem osnsp)
+// {
+//   SP::SiconosVisitor ONSNPEffectOnSolverOptions(new _ONSNPEffectOnSolverOptions(this));
+
+//   (osnsp)->accept(*ONSNPEffectOnSolverOptions);
+
+// }
+// void NonSmoothSolver::initialize(SP::LCP lcp)
+// {
+//  std:cout << "initialize for LCP" << std::endl;
+//   fillSolverOptions();
+// }

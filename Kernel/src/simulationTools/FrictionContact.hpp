@@ -162,6 +162,13 @@ public:
    * \return a pointer on the problem if it is of the right type, NULL otherwise
    */
   static FrictionContact* convert(OneStepNSProblem* osnsp);
+
+  /** visitors hook
+   */
+  ACCEPT_STD_VISITORS();
+
+
+
 };
 
 TYPEDEF_SPTR(FrictionContact);

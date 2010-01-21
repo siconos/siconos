@@ -112,8 +112,11 @@ public:
    */
   static LCP* convert(OneStepNSProblem* osnsp);
 
-};
+  /** visitors hook
+  */
+  ACCEPT_STD_VISITORS();
 
-TYPEDEF_SPTR(LCP);
+
+};
 
 #endif // LCP_H

@@ -119,7 +119,7 @@ void Relay::initialize(SP::Simulation sim)
     ur->interaction()->nonSmoothLaw()->accept(*NSLEffect);
   }
   // Initialization of the NonSmoothSolver
-  _solver->initialize(shared_from_this());
+  _solver->initialize(this) ;
 }
 
 

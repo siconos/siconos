@@ -175,6 +175,11 @@ DEFINE_SPTR(RelationXML);
 DEFINE_SPTR(Simulation);
 DEFINE_SPTR(SimulationXML);
 
+DEFINE_SPTR(LCP);
+
+
+
+
 
 DEFINE_SPTR(MixedComplementarityConditionNSL);
 TYPEDEF_SPTR(MixedLinearComplementarity_Problem);

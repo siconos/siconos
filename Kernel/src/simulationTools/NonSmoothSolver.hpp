@@ -100,9 +100,9 @@ private:
    */
   void fillSolverOptions();
 
-  /** OneStepNSproblem effect on Solver_Options by  visitors
+  /** OneStepNSproblem effect on the build of Solver_Options by  visitors
    */
-  struct _ONSNPEffectOnSolverOptions;
+  struct _ONSNPEffectOnBuildSolverOptions;
 
 
 public:
@@ -224,7 +224,8 @@ public:
   /** initialize the NonSmoothSolver( fill SolverOptions)
      \param the simulation, owner of this OSNSPB
    */
-  void initialize(SP::OneStepNSProblem);
+  void initialize(OneStepNSProblem *);
+
 
 
   /** To display solver data

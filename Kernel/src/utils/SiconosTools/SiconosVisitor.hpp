@@ -70,6 +70,8 @@ class Simulation;
 class TimeStepping;
 class EventDriven;
 
+class LCP;
+class FrictionContact;
 class Lmgc2DDSK;
 
 
@@ -135,6 +137,10 @@ public:
   VISIT(Simulation);
   VISIT(TimeStepping);
   VISIT(EventDriven);
+  VISIT(OneStepNSProblem);
+
+  VISIT(LCP);
+  VISIT(FrictionContact);
 
   VISIT(Lmgc2DDSK);
 };

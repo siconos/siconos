@@ -261,6 +261,6 @@ void MLCP::initialize(SP::Simulation sim)
   LinearOSNS::initialize(sim);
 
   // Initialization of the NonSmoothSolver
-  _solver->initialize(shared_from_this());
+  _solver->initialize(this);
 
 }
