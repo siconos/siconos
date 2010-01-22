@@ -102,74 +102,101 @@ void readSolverOptions(int driverType, Solver_Options* options)
   }
 }
 
-void printSolverOptions(Solver_Options* options)
+void recursive_printSolverOptions(Solver_Options* options, int level)
 {
-  printf("\n ========== Numerics Non Smooth Solver parameters: \n");
+  char* marge;
+  int i;
+  marge = (char*) malloc((level + 1) * sizeof(char));
+  for (i = 0; i < level; i++)
+    marge[i] = ' ';
+  printf("%s\n ========== Numerics Non Smooth Solver parameters: \n", marge);
   if (options->isSet == 0)
-    printf("The solver parameters have not been set. \t options->isSet = %i \n", options->isSet);
+    printf("%sThe solver parameters have not been set. \t options->isSet = %i \n", marge, options->isSet);
   else
   {
-    printf("The solver parameters below have  been set \t options->isSet = %i\n", options->isSet);
-    printf("Name of the solver\t\t\t\t options->solverName = %s \n", options->solverName);
-    printf("number of internal (or local) solvers \t\t options->numberOfInternalSolvers = %i\n", options->numberOfInternalSolvers);
-    if (options->numberOfInternalSolvers > 0)
-    {
-      for (int i = 1; i < options->numberOfInternalSolvers + 1; i++)
-      {
-        assert(&options[i]);
-        printf("Name internal or local solver\t\t\t options[%i].solverName = %s \t \n", i, options[i].solverName);
-      }
-
-    }
+    printf("%sThe solver parameters below have  been set \t options->isSet = %i\n", marge, options->isSet);
+    printf("%sName of the solver\t\t\t\t options->solverName = %s \n", marge, options->solverName);
     if (options->iparam != NULL)
     {
-      printf("int parameters \t\t\t\t\t options->iparam\n");
-      printf("size of the int parameters\t\t\t options->iSize = %i\n", options->iSize);
+      printf("%sint parameters \t\t\t\t\t options->iparam\n", marge);
+      printf("%ssize of the int parameters\t\t\t options->iSize = %i\n", marge, options->iSize);
       for (int i = 0; i < options->iSize; ++i)
-        printf("\t\t\t\t\t\t options->iparam[%i] = %d\n", i, options->iparam[i]);
+        printf("%s\t\t\t\t\t\t options->iparam[%i] = %d\n", marge, i, options->iparam[i]);
     }
     if (options->dparam != NULL)
     {
-      printf("double parameters \t\t\t\t options->dparam\n");
-      printf("size of the double parameters\t\t\t options->dSize = %i\n", options->dSize);
+      printf("%sdouble parameters \t\t\t\t options->dparam\n", marge);
+      printf("%ssize of the double parameters\t\t\t options->dSize = %i\n", marge, options->dSize);
       for (int i = 0; i < options->iSize; ++i)
-        printf("\t\t\t\t\t\t options->dparam[%i] = %.6le\n", i, options->dparam[i]);
+        printf("%s\t\t\t\t\t\t options->dparam[%i] = %.6le\n", marge, i, options->dparam[i]);
     }
   }
   if (options->iWork == NULL)
   {
-    printf("integer work array have not been allocated. \t options->iWork = NULL \n");
+    printf("%sinteger work array have not been allocated. \t options->iWork = NULL \n", marge);
   }
   else
   {
-    printf("integer work array have been allocated. \t options->iWork = %p \n", options->iWork);
-    printf("integer work array size \t\t\t options->iSize = %i \n", options->iSize);
+    printf("%sinteger work array have been allocated. \t options->iWork = %p \n", marge, options->iWork);
+    printf("%sinteger work array size \t\t\t options->iSize = %i \n", marge, options->iSize);
   }
   if (options->dWork == NULL)
   {
-    printf("double work array have not been allocated. \t options->dWork = NULL \n");
+    printf("%sdouble work array have not been allocated. \t options->dWork = NULL \n", marge);
   }
   else
   {
-    printf("double work array have been allocated. \t options->dWork = %p \n", options->dWork);
-    printf("double work array size \t\t\t options->dSize = %i \n", options->dSize);
+    printf("%sdouble work array have been allocated. \t options->dWork = %p \n", marge, options->dWork);
+    printf("%sdouble work array size \t\t\t options->dSize = %i \n", marge, options->dSize);
   }
 
 
 
 
-  printf("See %s documentation for parameters definition)\n", options->solverName);
+  printf("%sSee %s documentation for parameters definition)\n", marge, options->solverName);
 
   printf("\n");
 
-}
+  printf("%snumber of internal (or local) solvers \t\t options->numberOfInternalSolvers = %i\n", marge, options->numberOfInternalSolvers);
+  for (i = 0; i < options->numberOfInternalSolvers; i++)
+  {
+    recursive_printSolverOptions(options->internalSolvers + i, level + 1);
+  }
+  free(marge);
 
-void deleteSolverOptions(Solver_Options* op)
+}
+void printSolverOptions(Solver_Options* options)
 {
+  recursive_printSolverOptions(options, 0);
+}
+void recursive_deleteSolverOptions(Solver_Options* op)
+{
+
+  for (int i = 0; i < op->numberOfInternalSolvers; i++)
+    recursive_deleteSolverOptions(&(op->internalSolvers[i]));
+
+  if (op->numberOfInternalSolvers && op->internalSolvers)
+    free(op->internalSolvers);
+  op->internalSolvers = 0;
   if (op->iparam)
     free(op->iparam);
+  op->iparam = 0;
   if (op->dparam)
     free(op->dparam);
-  op->iparam = 0;
   op->dparam = 0;
+  if (op->iWork)
+    free(op->iWork);
+  op->iWork = 0;
+  if (op->dWork)
+    free(op->dWork);
+  op->dWork = 0;
 }
+
+
+void deleteSubSolverOption(Solver_Options* op)
+{
+  for (int i = 0; i < op->numberOfInternalSolvers; i++)
+    recursive_deleteSolverOptions(&(op->internalSolvers[i]));
+
+}
+
