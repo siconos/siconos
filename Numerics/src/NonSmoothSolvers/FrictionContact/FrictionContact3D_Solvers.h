@@ -70,6 +70,26 @@ typedef void (*internalSolverPtr)(FrictionContact_Problem*, double*, double*, in
 extern "C" {
 #endif
 
+  /** General interface to solvers for friction-contact 3D problem
+  \param[in] , the structure which handles the Friction-Contact problem
+  \param[in-out] , reaction global vector (n)
+  \param[in-out] , velocity global vector (n)
+  \param[in,out] options structure used to define the solver(s) and their parameters
+  \param[in] general options for Numerics (verbose mode ...)
+  \return result (0 if successful otherwise 1).
+  */
+  int frictionContact3D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options);
+
+  /** set the default solver parameters and perform memory allocation for frictionContact3D
+      \param Solver_Options ** the pointer to the array of options to set
+      \param char * the string which identify the solver
+  */
+  int frictionContact3D_setDefaultSolverOptions(Solver_Options* options, char *);
+
+
+
+
+
   /** Non-Smooth Gauss Seidel solver for friction-contact 3D problem
       \param problem, the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
@@ -86,12 +106,9 @@ extern "C" {
   /** set the default solver parameters and perform memory allocation for NSGS
       \param Solver_Options ** the pointer to the array of options to set
   */
-  int frictionContact3D_nsgs_setDefaultSolverOptions(Solver_Options** arrayOfSolverOptions);
+  int frictionContact3D_nsgs_setDefaultSolverOptions(Solver_Options* options);
 
-  /** delete the default solver parameters and perform memory allocation for NSGS
-      \param Solver_Options ** the pointer to the array options to delete
-  */
-  int frictionContact3D_nsgs_deleteDefaultSolverOptions(Solver_Options** arrayOfSolverOptions);
+
 
 
   /** Non-Smooth Gauss Seidel in velocity solver for friction-contact 3D problem
@@ -109,12 +126,7 @@ extern "C" {
   /** set the default solver parameters and perform memory allocation for NSGSV
       \param Solver_Options ** the pointer to the array of options to set
   */
-  int frictionContact3D_nsgs_velocity_setDefaultSolverOptions(Solver_Options** arrayOfSolverOptions);
-
-  /* delete the default solver parameters and perform memory allocation for NSGSV
-      \param Solver_Options ** the pointer to the array options to delete
-  */
-  int frictionContact3D_nsgs_velocity_deleteDefaultSolverOptions(Solver_Options** arrayOfSolverOptions);
+  int frictionContact3D_nsgs_velocity_setDefaultSolverOptions(Solver_Options* options);
 
   /** Proximal point solver for friction-contact 3D problem
       \param problem, the friction-contact 3D problem to solve
@@ -130,12 +142,7 @@ extern "C" {
   /** set the default solver parameters and perform memory allocation for PROX
     \param Solver_Options ** the pointer to the array of options to set
   */
-  int frictionContact3D_proximal_setDefaultSolverOptions(Solver_Options** arrayOfSolverOptions);
-
-  /* delete the default solver parameters and perform memory allocation for PROX
-      \param Solver_Options ** the pointer to the array options to delete
-  */
-  int frictionContact3D_proximal_deleteDefaultSolverOptions(Solver_Options** arrayOfSolverOptions);
+  int frictionContact3D_proximal_setDefaultSolverOptions(Solver_Options* options);
 
   /** Fixed point solver for friction-contact 3D problem based on the Tresca
   problem with fixed friction threshold
@@ -153,12 +160,7 @@ extern "C" {
   /** set the default solver parameters and perform memory allocation for TFP
     \param Solver_Options ** the pointer to the array of options to set
   */
-  int frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(Solver_Options** arrayOfSolverOptions);
-
-  /* delete the default solver parameters and perform memory allocation for TFP
-      \param Solver_Options ** the pointer to the array options to delete
-  */
-  int frictionContact3D_TrescaFixedPoint_deleteDefaultSolverOptions(Solver_Options** arrayOfSolverOptions);
+  int frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(Solver_Options* options);
 
   /**Fixed Point solver for friction-contact 3D problem based on the De Saxce Formulation
       \param problem, the friction-contact 3D problem to solve
@@ -173,12 +175,7 @@ extern "C" {
   /** set the default solver parameters and perform memory allocation for DSFP
     \param Solver_Options ** the pointer to the array of options to set
   */
-  int frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(Solver_Options** arrayOfSolverOptions);
-
-  /* delete the default solver parameters and perform memory allocation for DSFP
-      \param Solver_Options ** the pointer to the array options to delete
-  */
-  int frictionContact3D_DeSaxceFixedPoint_deleteDefaultSolverOptions(Solver_Options** arrayOfSolverOptions);
+  int frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(Solver_Options* options);
 
   /** Check for trivial solution in the friction-contact 3D problem
       \param dim of the problem

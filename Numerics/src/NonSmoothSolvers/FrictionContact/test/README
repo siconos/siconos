@@ -32,7 +32,7 @@ FrictionContact3D_test32.c
 
 
 * test NSGV with default solver
-** first test file ./data/Example1_Fc3D_SBM.dat
+** first test file 
 FrictionContact3D_test50.c
 
 

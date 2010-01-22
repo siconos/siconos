@@ -26,28 +26,28 @@
 #include "FrictionContact3D_Solvers.h"
 #include "NonSmoothDrivers.h"
 
-int frictionContact3D_setDefaultSolverOptions(Solver_Options** arrayOfSolver_Options, char *solvername)
+int frictionContact3D_setDefaultSolverOptions(Solver_Options* options, char *solvername)
 {
   int info = -1;
   if (strcmp(solvername, "NSGS") == 0)
   {
-    info =    frictionContact3D_nsgs_setDefaultSolverOptions(arrayOfSolver_Options);
+    info =    frictionContact3D_nsgs_setDefaultSolverOptions(options);
   }
   else if (strcmp(solvername, "NSGSV") == 0)
   {
-    info =    frictionContact3D_nsgs_velocity_setDefaultSolverOptions(arrayOfSolver_Options);
+    info =    frictionContact3D_nsgs_velocity_setDefaultSolverOptions(options);
   }
   else if (strcmp(solvername, "PROX") == 0)
   {
-    info =    frictionContact3D_proximal_setDefaultSolverOptions(arrayOfSolver_Options);
+    info =    frictionContact3D_proximal_setDefaultSolverOptions(options);
   }
   else if (strcmp(solvername, "TFP") == 0)
   {
-    info =    frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(arrayOfSolver_Options);
+    info =    frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(options);
   }
   else if (strcmp(solvername, "DSFP") == 0)
   {
-    info =    frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(arrayOfSolver_Options);
+    info =    frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(options);
   }
   else
   {
@@ -55,37 +55,6 @@ int frictionContact3D_setDefaultSolverOptions(Solver_Options** arrayOfSolver_Opt
 
   }
 
-
-  return info;
-}
-int frictionContact3D_deleteDefaultSolverOptions(Solver_Options** arrayOfSolver_Options, char *solvername)
-{
-  int info = -1;
-  if (strcmp(solvername, "NSGS") == 0)
-  {
-    info =    frictionContact3D_nsgs_deleteDefaultSolverOptions(arrayOfSolver_Options);
-  }
-  else if (strcmp(solvername, "NSGSV") == 0)
-  {
-    info =    frictionContact3D_nsgs_velocity_deleteDefaultSolverOptions(arrayOfSolver_Options);
-  }
-  else if (strcmp(solvername, "PROX") == 0)
-  {
-    info =    frictionContact3D_proximal_deleteDefaultSolverOptions(arrayOfSolver_Options);
-  }
-  else if (strcmp(solvername, "TFP") == 0)
-  {
-    info =    frictionContact3D_TrescaFixedPoint_deleteDefaultSolverOptions(arrayOfSolver_Options);
-  }
-  else if (strcmp(solvername, "DSFP") == 0)
-  {
-    info =    frictionContact3D_DeSaxceFixedPoint_deleteDefaultSolverOptions(arrayOfSolver_Options);
-  }
-  else
-  {
-    numericsError("frictionContact3D_deleteDefaultSolverOptions", "Unknow Solver");
-
-  }
 
   return info;
 }

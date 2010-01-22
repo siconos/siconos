@@ -25,16 +25,20 @@
 int main(void)
 {
   int info = 0 ;
-  printf("Test on ./data/Example1_Fc3D_SBM.dat\n");
 
-  FILE * finput  =  fopen("./data/Example1_Fc3D_SBM.dat", "r");
-  Solver_Options * options;
-  info = frictionContact3D_setDefaultSolverOptions(&options, "PROX");
+  char filename[50] = "./data/Example1_Fc3D_SBM.dat";
+  printf("Test on %s\n", filename);
+
+  FILE * finput  =  fopen(filename, "r");
+  Solver_Options * options = (Solver_Options *) malloc(sizeof(Solver_Options));
+  info = frictionContact3D_setDefaultSolverOptions(options, "PROX");
+
 
   info = frictionContact_test_function(finput, options);
 
-  frictionContact3D_deleteDefaultSolverOptions(&options, "PROX");
+  deleteSolverOptions(options);
+  free(options);
   fclose(finput);
-  printf("\nEnd of test on ./data/Example1_Fc3D_SBM.dat\n");
+  printf("\nEnd of test on %s\n", filename);
   return info;
 }

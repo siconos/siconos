@@ -28,15 +28,17 @@ int main(void)
   printf("Test on ./data/Example1_Fc3D_SBM.dat\n");
 
   FILE * finput  =  fopen("./data/Example1_Fc3D_SBM.dat", "r");
-  Solver_Options * options;
-  info = frictionContact3D_setDefaultSolverOptions(&options, "NSGS");
-  strcpy(options[1].solverName, "ProjectionOnCone");
-  options[1].iparam[0] = 0;
-  options[1].dparam[0] = 0.0;
+  Solver_Options * options = (Solver_Options *) malloc(sizeof(Solver_Options));
+  info = frictionContact3D_setDefaultSolverOptions(options, "NSGS");
+  options->dparam[0] = 1e-16;
+  strcpy(options->internalSolvers->solverName, "ProjectionOnCone");
+  options->internalSolvers->iparam[0] = 0;
+  options->internalSolvers->dparam[0] = 0.0;
 
   info = frictionContact_test_function(finput, options);
 
-  frictionContact3D_deleteDefaultSolverOptions(&options, "NSGS");
+  deleteSolverOptions(options);
+  free(options);
   fclose(finput);
   printf("\nEnd of test on ./data/Example1_Fc3D_SBM.dat\n");
   return info;

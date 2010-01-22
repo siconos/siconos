@@ -21,96 +21,24 @@
 #include "NonSmoothDrivers.h"
 #include "frictionContact_test_function.h"
 
-int setSolver_Options(Solver_Options * options)
-{
-
-  int i;
-
-  strcpy(options->solverName, "TFP");
-  printf("solverName ==> %s\n", options->solverName);
-  options->numberOfInternalSolvers = 1;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
-  options->iWork = NULL;
-  options->iSize = 5;
-  options->dSize = 5;
-  for (i = 0; i < 5; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->iparam[0] = 101;
-  options->dparam[0] = 1e-16;
-
-
-  strcpy(options[1].solverName, "NSGS");
-  options[1].numberOfInternalSolvers = 1;
-  options[1].isSet = 1;
-  options[1].filterOn = 1;
-  options[1].iSize = 5;
-  options[1].dSize = 5;
-  options[1].iparam = (int *)malloc(options->iSize * sizeof(int));
-  options[1].dparam = (double *)malloc(options->dSize * sizeof(double));
-  options[1].dWork = NULL;
-  options[1].iWork = NULL;
-  options[1].iSize = 5;
-  options[1].dSize = 5;
-  for (i = 0; i < 5; i++)
-  {
-    options[1].iparam[i] = 0;
-    options[1].dparam[i] = 0.0;
-  }
-  options[1].iparam[0] = 20;
-  options[1].dparam[0] = 1e-8;
-
-  strcpy(options[2].solverName, "projectionOnCylinder");
-  options[2].numberOfInternalSolvers = 0;
-  options[2].isSet = 1;
-  options[2].filterOn = 1;
-  options[2].iSize = 5;
-  options[2].dSize = 5;
-  options[2].iparam = (int *)malloc(options->iSize * sizeof(int));
-  options[2].dparam = (double *)malloc(options->dSize * sizeof(double));
-  options[2].dWork = NULL;
-  options[2].iWork = NULL;
-  options[2].iSize = 5;
-  options[2].dSize = 5;
-  for (i = 0; i < 5; i++)
-  {
-    options[2].iparam[i] = 0;
-    options[2].dparam[i] = 0.0;
-  }
-
-  return 0;
-}
-
 
 int main(void)
 {
   int info = 0 ;
+
   char filename[50] = "./data/Confeti-ex13-Fc3D-SBM.dat";
   printf("Test on %s\n", filename);
-  FILE * finput  =  fopen(filename, "r");
-  int nbsolvers = 3;
-  Solver_Options * options = (Solver_Options *)malloc(nbsolvers * sizeof(*options));  ;
-  info = setSolver_Options(options);
-  printf("solverName ==> %s\n", options->solverName);
-  info = frictionContact_test_function(finput, options);
-  for (int i = 0; i < nbsolvers; i++)
-  {
-    free(options[i].iparam);
-    free(options[i].dparam);
-    if (!options[i].dWork) free(options[i].dWork);
-    if (!options[i].iWork) free(options[i].iWork);
-  }
-  free(options);
 
+  FILE * finput  =  fopen(filename, "r");
+  Solver_Options * options = (Solver_Options *) malloc(sizeof(Solver_Options));
+  info = frictionContact3D_setDefaultSolverOptions(options, "TFP");
+  options->iparam[0] = 20;
+
+  info = frictionContact_test_function(finput, options);
+
+  deleteSolverOptions(options);
+  free(options);
   fclose(finput);
-  printf("End of test on %s\n", filename);
+  printf("\nEnd of test on %s\n", filename);
   return info;
 }

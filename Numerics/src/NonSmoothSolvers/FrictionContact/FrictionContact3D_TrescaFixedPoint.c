@@ -52,9 +52,8 @@ void frictionContact3D_TrescaFixedPoint(FrictionContact_Problem* problem, double
   {
     numericsError("frictionContact3D_TrescaFixedpoint", "The Tresca Fixed Point method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
   }
-  assert(&options[1]);
 
-  Solver_Options * internalsolver_options = &options[1];
+  Solver_Options * internalsolver_options = options->internalSolvers;
 
   if (verbose > 0)
   {
@@ -128,16 +127,15 @@ void frictionContact3D_TrescaFixedPoint(FrictionContact_Problem* problem, double
   free(mu);
 }
 
-int frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(Solver_Options** arrayOfSolver_Options)
+
+
+int frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(Solver_Options* options)
 {
   int i;
   if (verbose > 0)
   {
     printf("Set the Default Solver_Options for the TFP Solver\n");
   }
-  int nbSolvers = 3 ;
-  Solver_Options * options = (Solver_Options *)malloc(nbSolvers * sizeof(Solver_Options));
-  arrayOfSolver_Options[0] = options;
 
   strcpy(options->solverName, "TFP");
 
@@ -155,75 +153,19 @@ int frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(Solver_Options** 
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
-  options->iparam[0] = 1001;
-  options->dparam[0] = 1e-08;
-  options->dparam[3] = 1.0;
+  options->iparam[0] = 1000;
+  options->dparam[0] = 1e-4;
+  options->internalSolvers = (Solver_Options *)malloc(sizeof(Solver_Options));
 
-  strcpy(options[1].solverName, "NSGS");
-  options[1].numberOfInternalSolvers = 1;
-  options[1].isSet = 1;
-  options[1].filterOn = 1;
-  options[1].iSize = 5;
-  options[1].dSize = 5;
-  options[1].iparam = (int *)malloc(options[1].iSize * sizeof(int));
-  options[1].dparam = (double *)malloc(options[1].dSize * sizeof(double));
-  options[1].dWork = NULL;
-  options[1].iWork = NULL;
-  for (i = 0; i < 5; i++)
-  {
-    options[1].iparam[i] = 0;
-    options[1].dparam[i] = 0.0;
-  }
-  options[1].iparam[0] = 100;
-  options[1].dparam[0] = 1e-8;
+  frictionContact3D_nsgs_setDefaultSolverOptions(options->internalSolvers);
+
+  Solver_Options * subsubsolver = options->internalSolvers->internalSolvers;
 
 
-  strcpy(options[2].solverName, "AlartCurnierNewton");
-  options[2].numberOfInternalSolvers = 0;
-  options[2].isSet = 1;
-  options[2].filterOn = 1;
-  options[2].iSize = 5;
-  options[2].dSize = 5;
-  options[2].iparam = (int *)malloc(options[2].iSize * sizeof(int));
-  options[2].dparam = (double *)malloc(options[2].dSize * sizeof(double));
-  options[2].dWork = NULL;
-  options[2].iWork = NULL;
-  for (i = 0; i < 5; i++)
-  {
-    options[2].iparam[i] = 0;
-    options[2].dparam[i] = 0.0;
-  }
-  options[2].iparam[0] = 10;
-  options[2].dparam[0] = 1e-8;
+  subsubsolver->iparam[0] = 0;
+  subsubsolver->dparam[0] = 0.0;
 
-
-  return 0;
-}
-
-int frictionContact3D_TrescaFixedPoint_deleteDefaultSolverOptions(Solver_Options** arrayOfSolver_Options)
-{
-  int i;
-  if (verbose > 0)
-  {
-    printf("Set the Default Solver_Options for the TFP Solver\n");
-  }
-
-  Solver_Options * options = arrayOfSolver_Options[0];
-
-  int nbSolvers = 3 ;
-  for (i = 0; i < nbSolvers; i++)
-  {
-    if (options[i].iparam) free(options[i].iparam);
-    options[i].iparam = NULL;
-    if (options[i].dparam) free(options[i].dparam);
-    options[i].dparam = NULL;
-    if (options[i].dWork)  free(options[i].dWork);
-    options[i].dWork = NULL;
-    if (options[i].iWork)  free(options[i].iWork);
-    options[i].iWork = NULL;
-  }
-  free(options);
-
+  strcpy(subsubsolver->solverName, "projectionOnCylinder");
 
   return 0;
 }

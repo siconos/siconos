@@ -28,32 +28,26 @@ int main(void)
   int info = 0 ;
   Solver_Options * options;
 
-  info = frictionContact3D_setDefaultSolverOptions(&options, "NSGS");
+  info = frictionContact3D_setDefaultSolverOptions(options, "NSGS");
   printSolverOptions(options);
-  printSolverOptions(&options[1]);
-  frictionContact3D_deleteDefaultSolverOptions(&options, "NSGS");
+  deleteSolverOptions(options);
 
-  info = frictionContact3D_setDefaultSolverOptions(&options, "NSGSV");
+  info = frictionContact3D_setDefaultSolverOptions(options, "NSGSV");
   printSolverOptions(options);
-  printSolverOptions(&options[1]);
-  frictionContact3D_deleteDefaultSolverOptions(&options, "NSGSV");
+  deleteSolverOptions(options);
 
-  info = frictionContact3D_setDefaultSolverOptions(&options, "PROX");
+  info = frictionContact3D_setDefaultSolverOptions(options, "PROX");
   printSolverOptions(options);
-  printSolverOptions(&options[1]);
-  printSolverOptions(&options[2]);
-  frictionContact3D_deleteDefaultSolverOptions(&options, "PROX");
+  deleteSolverOptions(options);
 
-  info = frictionContact3D_setDefaultSolverOptions(&options, "TFP");
+  info = frictionContact3D_setDefaultSolverOptions(options, "TFP");
   printSolverOptions(options);
-  printSolverOptions(&options[1]);
-  printSolverOptions(&options[2]);
-  frictionContact3D_deleteDefaultSolverOptions(&options, "TFP");
+  deleteSolverOptions(options);
 
-  info = frictionContact3D_setDefaultSolverOptions(&options, "DSFP");
+  info = frictionContact3D_setDefaultSolverOptions(options, "DSFP");
   printSolverOptions(options);
+  deleteSolverOptions(options);
 
-  frictionContact3D_deleteDefaultSolverOptions(&options, "DSFP");
 
   printf("\n End of test on Default Solver_Options\n");
   return info;
