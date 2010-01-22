@@ -11,6 +11,7 @@
  *
  *
  */
+
 void mlcp_direct_FB_init(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
 void mlcp_direct_FB_reset();
 

@@ -30,6 +30,15 @@
  * double *z : size n+m
  * double *w : size n+m
  */
+int mixedLinearComplementarity_rpsor_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver)
+{
+  pSolver->dparam[2] = 0.5; /*rho*/
+  pSolver->dparam[3] = 2; /*ohmega*/
+
+  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
+  return 0;
+}
+
 void mlcp_rpsor(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {
   double* A = problem->A;

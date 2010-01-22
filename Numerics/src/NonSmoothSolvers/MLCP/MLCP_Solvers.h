@@ -453,8 +453,25 @@ extern "C" {
     \author Vincent Acary form the routine  filter_result_LCP.c of Pascal Denoyelle
   */
   int mlcp_compute_error(MixedLinearComplementarity_Problem* problem, double *z, double *w, double tolerance, double * error);
+  void  mixedLinearComplementarity_default_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pOptions);
+  void  mixedLinearComplementarity_deleteDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pOptions);
+
+  int mixedLinearComplementarity_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pOptions, char *solvername);
 
 
+  int mixedLinearComplementarity_directEnum_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
+  int mixedLinearComplementarity_directFB_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
+  int mixedLinearComplementarity_directPath_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
+
+  int mixedLinearComplementarity_directPathEnum_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
+  int mixedLinearComplementarity_directSimplex_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
+  int mixedLinearComplementarity_enum_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
+  int mixedLinearComplementarity_fb_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
+  int mixedLinearComplementarity_path_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
+  int mixedLinearComplementarity_pathEnum_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
+  int mixedLinearComplementarity_pgs_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
+  int mixedLinearComplementarity_rpgs_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
+  int mixedLinearComplementarity_simplex_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
 
 
 #ifdef __cplusplus

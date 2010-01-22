@@ -43,6 +43,11 @@ static int * siWorkPath = 0;
 static double * sdWorkEnum = 0;
 static double * sdWorkPath = 0;
 
+int mixedLinearComplementarity_pathEnum_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver)
+{
+  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
+  return 0;
+}
 
 
 int mlcp_path_enum_getNbIWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)

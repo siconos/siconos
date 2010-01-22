@@ -38,7 +38,11 @@ dim(v)=nn
 static int sN;
 static int sM;
 
-
+int mixedLinearComplementarity_directPath_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver)
+{
+  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
+  return 0;
+}
 
 
 int mlcp_direct_path_getNbIWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)

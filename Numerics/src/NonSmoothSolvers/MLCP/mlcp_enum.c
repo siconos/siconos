@@ -111,6 +111,13 @@ static double* sU;
 /* } */
 
 
+int mixedLinearComplementarity_enum_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver)
+{
+  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
+  return 0;
+}
+
+
 void buildQ()
 {
   memcpy(sQ, sQref, sMl * sizeof(double));

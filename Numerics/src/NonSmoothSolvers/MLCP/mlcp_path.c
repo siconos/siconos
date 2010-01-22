@@ -31,6 +31,14 @@
 Warning: this function requires MLCP with M and q, not (A,B,C,D).
 The input structure MixedLinearComplementarity_Problem is supposed to fit with this form.
 */
+int mixedLinearComplementarity_path_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver)
+{
+#ifdef HAVE_PATHFERRIS
+  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
+#endif
+  return 0;
+}
+
 
 void mlcp_path(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {

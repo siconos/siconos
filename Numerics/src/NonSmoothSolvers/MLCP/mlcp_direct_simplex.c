@@ -40,6 +40,11 @@ static int sN;
 static int sM;
 
 
+int mixedLinearComplementarity_directSimplex_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver)
+{
+  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
+  return 0;
+}
 
 
 int mlcp_direct_simplex_getNbIWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)

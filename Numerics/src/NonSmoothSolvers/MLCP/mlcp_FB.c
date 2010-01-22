@@ -32,6 +32,12 @@ static int sN = 0;
 static int sM = 0;
 static MixedLinearComplementarity_Problem* sProblem;
 static double* sFz = 0;
+int mixedLinearComplementarity_fb_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver)
+{
+  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
+  return 0;
+}
+
 /*
 Warning: this function requires MLCP with M and q, not (A,B,C,D).
 The input structure MixedLinearComplementarity_Problem is supposed to fit with this form.

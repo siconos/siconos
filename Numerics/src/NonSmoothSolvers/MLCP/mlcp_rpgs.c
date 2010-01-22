@@ -24,6 +24,15 @@
 #include <math.h>
 #include <float.h>
 #define EPSDIAG DBL_EPSILON
+
+int mixedLinearComplementarity_rpgs_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver)
+{
+  pSolver->dparam[2] = 0.5; /*rho*/
+  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
+  return 0;
+}
+
+
 /*
  *
  * double *z : size n+m

@@ -43,6 +43,11 @@ static int * siWorkDirect = 0;
 static double * sdWorkFB = 0;
 static double * sdWorkDirect = 0;
 
+int mixedLinearComplementarity_directFB_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver)
+{
+  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
+  return 0;
+}
 
 
 int mlcp_direct_FB_getNbIWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)

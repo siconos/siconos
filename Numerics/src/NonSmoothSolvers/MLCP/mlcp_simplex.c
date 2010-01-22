@@ -40,6 +40,14 @@ dim(v)=nn
 static int sIsInitialize = 0;
 #endif
 
+int mixedLinearComplementarity_simplex_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver)
+{
+#ifdef HAVE_MLCPSIMPLEX
+  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
+#endif
+  return 0;
+}
+
 void mlcp_simplex_init(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
 {
 #ifdef HAVE_MLCPSIMPLEX
