@@ -92,7 +92,7 @@ void fillParamWithRespectToSolver_SBM(Solver_Options *options, char * solvername
 {
   int maxIter = 1001;
   double tolerance = 1e-8;
-  double lighttolerance = 1e-5;
+  double lighttolerance = 1e-8;
 
   if (strcmp(solvername , "PGS") == 0 || strcmp(solvername , "CPG") == 0 || strcmp(solvername , "Lemke") == 0 || strcmp(solvername , "NewtonMin") == 0)
   {
@@ -110,7 +110,7 @@ void fillParamWithRespectToSolver_SBM(Solver_Options *options, char * solvername
   {
     options->iparam[0] = maxIter;
     options->dparam[0] = lighttolerance;
-    options->dparam[2] = 0.3;
+    options->dparam[2] = 1.0;
   }
   else if (strcmp(solvername , "Latin_w") == 0)
   {
@@ -240,9 +240,9 @@ int lcp_test_function_SBM(FILE * f, char * solvername)
 
   info = linearComplementarity_setDefaultSolverOptions(problem, options, "PGS_SBM");
 
-  strcpy(options[1].solverName, solvername);
+  strcpy(options->internalSolvers->solverName, solvername);
 
-  fillParamWithRespectToSolver_SBM(&options[1], solvername, problem);
+  fillParamWithRespectToSolver_SBM(options->internalSolvers, solvername, problem);
 
 
 

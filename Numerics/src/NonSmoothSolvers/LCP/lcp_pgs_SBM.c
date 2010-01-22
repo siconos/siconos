@@ -128,10 +128,13 @@ void lcp_pgs_SBM(LinearComplementarity_Problem* problem, double *z, double *w, i
   {
     numericsError("lcp_pgs_SBM", "The PGS_SBM method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
   }
-  assert(&options[1]);
+
+
 
   /*Number of the local solver */
   int localSolverNum = options->numberOfInternalSolvers ;
+  Solver_Options * internalSolvers = options->internalSolvers ;
+
   int pos = 0;
   /* Output from local solver */
   int infoLocal = -1;
@@ -140,7 +143,7 @@ void lcp_pgs_SBM(LinearComplementarity_Problem* problem, double *z, double *w, i
   {
     ++iter;
     /* Loop over the rows of blocks in blmat */
-    localSolverNum = 1;
+    localSolverNum = 0;
     pos = 0;
     /*       DCOPY(problem->size,w,1,wBackup,1); */
     for (rowNumber = 0; rowNumber < blmat->blocknumber0; ++rowNumber)
@@ -148,13 +151,13 @@ void lcp_pgs_SBM(LinearComplementarity_Problem* problem, double *z, double *w, i
       /* Local problem formalization */
       buildLocalProblem(rowNumber, blmat, local_problem, q, z);
       /* Solve local problem */
-      infoLocal = lcp_driver_DenseMatrix(local_problem, &z[pos], &w[pos], &options[localSolverNum]);
+      infoLocal = lcp_driver_DenseMatrix(local_problem, &z[pos], &w[pos], &internalSolvers[localSolverNum]);
       pos += local_problem->size;
       /* sum of local number of iterations (output from local_driver)*/
       if (options[localSolverNum].iparam != NULL)
-        options[0].iparam[2] += options[localSolverNum].iparam[1];
+        options[0].iparam[2] += internalSolvers[localSolverNum].iparam[1];
       /* sum of local errors (output from local_driver)*/
-      options[0].dparam[2] += options[localSolverNum].dparam[1];
+      options[0].dparam[2] += internalSolvers[localSolverNum].dparam[1];
 
       if (infoLocal > 0)
       {
@@ -163,14 +166,14 @@ void lcp_pgs_SBM(LinearComplementarity_Problem* problem, double *z, double *w, i
         //free(local_problem);
         /* Number of GS iterations */
         options[0].iparam[1] = iter;
-        fprintf(stderr, "lcp_GaussSeidel_SBM error: local LCP solver failed at global iteration %d.\n for block-row number %d. Output info equal to %d.\n", iter, rowNumber, infoLocal);
+        fprintf(stderr, "lcp_PGS_SBM error: local LCP solver failed at global iteration %d.\n for block-row number %d. Output info equal to %d.\n", iter, rowNumber, infoLocal);
         //exit(EXIT_FAILURE);
 
         break;
 
       }
 
-      while (localSolverNum < options->numberOfInternalSolvers)
+      while (localSolverNum < options->numberOfInternalSolvers - 1)
         localSolverNum++;
     }
 
