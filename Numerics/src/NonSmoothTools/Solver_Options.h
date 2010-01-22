@@ -129,8 +129,9 @@ Note that options[i+1] is used for row i of M, while i<nbSolvers-1 and options[n
 */
 typedef struct
 {
+  int solverId;
   int isSet;
-  char solverName[64];
+  char solverName[64] ;
   int iSize;
   int * iparam;
   int dSize;
@@ -139,6 +140,7 @@ typedef struct
   double * dWork;
   int * iWork;
   int numberOfInternalSolvers;
+  struct Solver_Options * internalSolvers;
 } Solver_Options;
 
 #ifdef __cplusplus
