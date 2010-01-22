@@ -172,7 +172,7 @@ void lcp_pgs_SBM(LinearComplementarity_Problem* problem, double *z, double *w, i
         break;
 
       }
-
+      /*\warning: a very strange implementation ?*/
       while (localSolverNum < options->numberOfInternalSolvers - 1)
         localSolverNum++;
     }
