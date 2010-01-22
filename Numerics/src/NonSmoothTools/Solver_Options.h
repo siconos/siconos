@@ -127,7 +127,7 @@ Note that options[i+1] is used for row i of M, while i<nbSolvers-1 and options[n
     \param dWork is a pointer on a working memory zone (for doubles) reserved for the solver .
     \param iWork is a pointer on a working memory zone (for integers) reserved for the solver .
 */
-typedef struct
+typedef struct _Solver_Options
 {
   int solverId;
   int isSet;
@@ -140,7 +140,7 @@ typedef struct
   double * dWork;
   int * iWork;
   int numberOfInternalSolvers;
-  struct Solver_Options * internalSolvers;
+  struct _Solver_Options * internalSolvers;
 } Solver_Options;
 
 #ifdef __cplusplus

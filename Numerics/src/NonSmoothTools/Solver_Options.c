@@ -109,6 +109,8 @@ void recursive_printSolverOptions(Solver_Options* options, int level)
   marge = (char*) malloc((level + 1) * sizeof(char));
   for (i = 0; i < level; i++)
     marge[i] = ' ';
+  marge[level] = '\0';
+
   printf("%s\n ========== Numerics Non Smooth Solver parameters: \n", marge);
   if (options->isSet == 0)
     printf("%sThe solver parameters have not been set. \t options->isSet = %i \n", marge, options->isSet);
@@ -193,10 +195,27 @@ void recursive_deleteSolverOptions(Solver_Options* op)
 }
 
 
-void deleteSubSolverOption(Solver_Options* op)
+void deleteSolverOptions(Solver_Options* op)
 {
   for (int i = 0; i < op->numberOfInternalSolvers; i++)
     recursive_deleteSolverOptions(&(op->internalSolvers[i]));
+  if (op->numberOfInternalSolvers && op->internalSolvers)
+    free(op->internalSolvers);
+  op->internalSolvers = 0;
+  if (op->iparam)
+    free(op->iparam);
+  op->iparam = 0;
+  if (op->dparam)
+    free(op->dparam);
+  op->dparam = 0;
+  if (op->iWork)
+    free(op->iWork);
+  op->iWork = 0;
+  if (op->dWork)
+    free(op->dWork);
+  op->dWork = 0;
+
+
 
 }
 

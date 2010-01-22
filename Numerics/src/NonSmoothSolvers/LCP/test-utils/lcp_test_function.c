@@ -87,6 +87,60 @@ void fillParamWithRespectToSolver(Solver_Options *options, char * solvername, Li
 
 }
 
+
+void fillParamWithRespectToSolver_SBM(Solver_Options *options, char * solvername, LinearComplementarity_Problem* problem)
+{
+  int maxIter = 1001;
+  double tolerance = 1e-8;
+  double lighttolerance = 1e-5;
+
+  if (strcmp(solvername , "PGS") == 0 || strcmp(solvername , "CPG") == 0 || strcmp(solvername , "Lemke") == 0 || strcmp(solvername , "NewtonMin") == 0)
+  {
+    options->iparam[0] = maxIter;
+    options->dparam[0] = tolerance;
+  }
+
+  else if (strcmp(solvername , "RPGS") == 0)
+  {
+    options->iparam[0] = maxIter;
+    options->dparam[0] = tolerance;
+    options->dparam[2] = 1.0;
+  }
+  else if (strcmp(solvername , "Latin") == 0)
+  {
+    options->iparam[0] = maxIter;
+    options->dparam[0] = lighttolerance;
+    options->dparam[2] = 0.3;
+  }
+  else if (strcmp(solvername , "Latin_w") == 0)
+  {
+    options->iparam[0] = maxIter;
+    options->dparam[0] = lighttolerance;
+    options->dparam[2] = 0.3;
+    options->dparam[3] = 1.0;
+  }
+  else if (strcmp(solvername , "PATH") == 0 || strcmp(solvername , "QP") == 0 || strcmp(solvername , "NSQP") == 0)
+  {
+    options->dparam[0] = tolerance;
+  }
+  else if (strcmp(solvername , "ENUM") == 0)
+  {
+    options->dparam[0] = tolerance;
+    options->dWork = (double*) malloc((3 * problem->size + problem->size * problem->size) * sizeof(double));
+    options->iWork = (int*) malloc(2 * problem->size * sizeof(int));
+  }
+  else if (strcmp(solvername , "NewtonFB") == 0)
+  {
+    options->iparam[0] = maxIter;
+    options->dparam[0] = tolerance;
+
+  }
+
+
+}
+
+
+
 int lcp_test_function(FILE * f, char * solvername)
 {
 
@@ -101,9 +155,8 @@ int lcp_test_function(FILE * f, char * solvername)
 
   Numerics_Options global_options;
   global_options.verboseMode = 1;
-  int numberOfSolvers = 1;
   Solver_Options * options ;
-  options = malloc(numberOfSolvers * sizeof(*options));
+  options = malloc(sizeof(*options));
 
   strcpy(options->solverName, solvername);
   printf("solverName ==> %s\n", options->solverName);
@@ -122,9 +175,15 @@ int lcp_test_function(FILE * f, char * solvername)
   options->filterOn = 1;
   double * z = malloc(problem->size * sizeof(double));
   double * w = malloc(problem->size * sizeof(double));
+  for (i = 0; i < problem->size; i++)
+  {
+    z[i] = 0.0;
+    w[i] = 0.0;
+  }
 
 
-  info = linearComplementarity_driver(problem, z , w, options, numberOfSolvers, &global_options);
+
+  info = linearComplementarity_driver(problem, z , w, options, &global_options);
 
   for (i = 0 ; i < problem->size ; i++)
   {
@@ -160,76 +219,10 @@ int lcp_test_function(FILE * f, char * solvername)
 
 }
 
-void fillParamWithRespectToSolver_SBM(Solver_Options *options,  LinearComplementarity_Problem* problem)
-{
-  int maxIter = 1001;
-  double tolerance = 1e-8;
-  double lighttolerance = 1e-5;
-  char * solvername = options[1].solverName;
-
-
-  if (strcmp(solvername , "PGS") == 0 || strcmp(solvername , "CPG") == 0 || strcmp(solvername , "Lemke") == 0 || strcmp(solvername , "NewtonMin") == 0)
-  {
-    options[0].iparam[0] = maxIter;
-    options[0].dparam[0] = tolerance;
-    options[1].iparam[0] = maxIter;
-    options[1].dparam[0] = tolerance;
-  }
-
-  else if (strcmp(solvername , "RPGS") == 0)
-  {
-    options[0].iparam[0] = maxIter;
-    options[0].dparam[0] = tolerance;
-    options[1].iparam[0] = maxIter;
-    options[1].dparam[0] = tolerance;
-    options[1].dparam[2] = 1.0;
-  }
-  else if (strcmp(solvername , "Latin") == 0)
-  {
-    options[0].iparam[0] = maxIter;
-    options[0].dparam[0] = lighttolerance;
-    options[1].iparam[0] = maxIter;
-    options[1].dparam[0] = tolerance;
-    options[1].dparam[2] = 0.3;
-  }
-  else if (strcmp(solvername , "Latin_w") == 0)
-  {
-    options[0].iparam[0] = maxIter;
-    options[0].dparam[0] = lighttolerance;
-    options[1].iparam[0] = maxIter;
-    options[1].dparam[0] = tolerance;
-    options[1].dparam[2] = 0.3;
-    options[1].dparam[3] = 1.0;
-  }
-  else if (strcmp(solvername , "PATH") == 0 || strcmp(solvername , "QP") == 0 || strcmp(solvername , "NSQP") == 0)
-  {
-    options[0].iparam[0] = maxIter;
-    options[0].dparam[0] = tolerance;
-    options[1].dparam[0] = tolerance;
-  }
-  else if (strcmp(solvername , "ENUM") == 0)
-  {
-    options[0].iparam[0] = maxIter;
-    options[0].dparam[0] = tolerance;
-    options[1].dparam[0] = tolerance;
-    options[1].dWork = (double*) malloc((3 * problem->size + problem->size * problem->size) * sizeof(double));
-    options[1].iWork = (int*) malloc(2 * problem->size * sizeof(int));
-  }
-  else if (strcmp(solvername , "NewtonFB") == 0)
-  {
-    options[0].iparam[0] = maxIter;
-    options[0].dparam[0] = tolerance;
-    options[1].iparam[0] = maxIter;
-    options[1].dparam[0] = tolerance;
-
-  }
-
-
-}
 int lcp_test_function_SBM(FILE * f, char * solvername)
 {
 
-  int i, k, info = 0 ;
+  int i, info = 0 ;
   LinearComplementarity_Problem* problem = (LinearComplementarity_Problem *)malloc(sizeof(LinearComplementarity_Problem));
 
   info = linearComplementarity_newFromFile(problem, f);
@@ -240,43 +233,30 @@ int lcp_test_function_SBM(FILE * f, char * solvername)
 
   Numerics_Options global_options;
   global_options.verboseMode = 1;
-  int numberOfSolvers = 2;
-  Solver_Options * options ;
-  options = malloc(numberOfSolvers * sizeof(*options));
 
-  options[0].isSet = 1;
-  options[0].filterOn = 0;
-
-  strcpy(options[0].solverName, "GaussSeidel_SBM");
-  Solver_Options * local_options = &options[1];
-  strcpy(local_options->solverName, solvername);
-  local_options->isSet = 1;
-  local_options->filterOn = 1;
-  printf("solverName ==> %s\n", local_options->solverName);
-
-  for (k = 0; k < numberOfSolvers; k++)
-  {
-    options[k].iSize = 5;
-    options[k].dSize = 5;
-    options[k].iparam = (int *)malloc(options[k].iSize * sizeof(int));
-    options[k].dparam = (double *)malloc(options[k].dSize * sizeof(double));
-    for (i = 0; i < 5; i++)
-    {
-      options[k].iparam[i] = 0;
-      options[k].dparam[i] = 0.0;
-    }
-  }
-  fillParamWithRespectToSolver_SBM(options, problem);
+  Solver_Options * options = (Solver_Options *)malloc(sizeof(Solver_Options));
 
 
+
+  info = linearComplementarity_setDefaultSolverOptions(problem, options, "PGS_SBM");
+
+  strcpy(options[1].solverName, solvername);
+
+  fillParamWithRespectToSolver_SBM(&options[1], solvername, problem);
 
 
 
   double * z = malloc(problem->size * sizeof(double));
   double * w = malloc(problem->size * sizeof(double));
 
+  for (i = 0; i < problem->size; i++)
+  {
+    z[i] = 0.0;
+    w[i] = 0.0;
+  }
 
-  info = linearComplementarity_driver(problem, z , w, options, numberOfSolvers, &global_options);
+
+  info = linearComplementarity_driver(problem, z , w, options, &global_options);
 
   for (i = 0 ; i < problem->size ; i++)
   {
@@ -293,16 +273,10 @@ int lcp_test_function_SBM(FILE * f, char * solvername)
   }
   free(z);
   free(w);
-  for (k = 0; k < numberOfSolvers; k++)
-  {
-    free(options[k].iparam);
-    free(options[k].dparam);
-  }
-
-  if (!local_options->dWork) free(local_options->dWork);
-  if (!local_options->iWork) free(local_options->iWork);
+  // info = linearComplementarity_deleteDefaultSolverOptions(&options,solvername);
 
 
+  deleteSolverOptions(options);
   free(options);
 
   freeLinearComplementarity_problem(problem);

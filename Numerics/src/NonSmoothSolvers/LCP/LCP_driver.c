@@ -25,7 +25,7 @@
 #include "NonSmoothDrivers.h"
 
 
-int lcp_driver_SparseBlockMatrix(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options, int numberOfSolvers)
+int lcp_driver_SparseBlockMatrix(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options)
 {
   /* Checks storage type for the matrix M of the LCP */
   if (problem->M->storageType == 0)
@@ -74,8 +74,8 @@ int lcp_driver_SparseBlockMatrix(LinearComplementarity_Problem* problem, double 
     printf(" ========================== Call %s SparseBlockMatrix solver for Linear Complementarity problem ==========================\n", name);
 
   /****** Gauss Seidel block solver ******/
-  if (strcmp(name , "GaussSeidel_SBM") == 0)
-    lcp_GaussSeidel_SBM(problem, z , w , &info , options, numberOfSolvers);
+  if (strcmp(name , "PGS") == 0)
+    lcp_pgs_SBM(problem, z , w , &info , options);
   else
   {
     fprintf(stderr, "LCP_driver_SparseBlockMatrix error: unknown solver named: %s\n", name);
@@ -253,7 +253,7 @@ int lcp_driver_DenseMatrix(LinearComplementarity_Problem* problem, double *z , d
 
 }
 
-int linearComplementarity_driver(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options, int numberOfSolvers, Numerics_Options* global_options)
+int linearComplementarity_driver(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options,  Numerics_Options* global_options)
 {
   if (options == NULL || global_options == NULL)
     numericsError("lcp_driver", "null input for solver and/or global options");
@@ -280,14 +280,10 @@ int linearComplementarity_driver(LinearComplementarity_Problem* problem, double 
   /* Sparse Block Storage */
   if (storageType == 1)
   {
-    if (numberOfSolvers < 2)
-      printf(" ========================== LCP_driver warning: only SparseBlockMatrix solver has been defined.\n");
-    info = lcp_driver_SparseBlockMatrix(problem, z , w, options, numberOfSolvers);
+    info = lcp_driver_SparseBlockMatrix(problem, z , w, options);
   }
   else
   {
-    if (numberOfSolvers > 1)
-      printf(" ========================== LCP_driver warning: more than one solver have been defined. All but the first one will be ignored.\n");
     info = lcp_driver_DenseMatrix(problem, z , w, options);
   }
   return info;

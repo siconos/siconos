@@ -70,39 +70,13 @@ Other functions and useful tools related to NonSmoothSolvers are listed in NSSTo
 
 
 /** Union of specific methods (one for each type of problem)
-    Deprecated.
+    Deprecated. 98
 */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-  /** General interface to solvers for Linear Complementarity Problems
-      \param[in] problem the LinearComplementarity_Problem structure which handles the problem (M,q)
-      \param[in,out] z a n-vector of doubles which contains the solution of the problem.
-      \param[in,out] w a n-vector of doubles which contains the solution of the problem.
-      \param[in,out] options structure used to define the solver(s) and their parameters
-      \param[in] numberOfSolvers size of the vector options, ie number of solvers \n
-      (if numberOfSolvers>1, options[0] represent the global (block) solver and options[i>0] the local ones).
-      \param[in] general options for Numerics (verbose mode ...)
-      \return info termination value
-      - 0 : successful\n
-      - >0 : otherwise see each solver for more information about the log info
-      \author Franck Perignon
-  */
-  int linearComplementarity_driver(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options, int numberOfSolvers, Numerics_Options* global_options);
-
-  /** set the default solver parameters and perform memory allocation for LinearComplementarity
-      \param Solver_Options ** the pointer to the array of options to set
-      \param char * the string which identify the solver
-  */
-  int linearComplementarity_setDefaultSolverOptions(LinearComplementarity_Problem* problem, Solver_Options** options, char *);
-
-  /** set the default solver parameters and perform memory allocation for LinearComplementarity
-       \param Solver_Options ** the pointer to the arrayof options to delete
-       \param char * the string which identify the solver
-   */
-  int linearComplementarity_deleteDefaultSolverOptions(Solver_Options** options, char *);
 
   /** General interface to solver for MLCP problems
       \param[in] problem the MixedLinearComplementarity_Problem structure which handles the problem (M,q)
@@ -130,20 +104,6 @@ extern "C" {
   */
   int LinearSystem_driver(LinearSystem_Problem* problem, double *z , double *w, Solver_Options* options);
 
-
-
-  /** General interface to solvers for primal friction-contact 2D problem
-      \param[in] , the structure which handles the Friction-Contact problem
-      \param[in-out] , reaction global vector (n)
-      \param[in-out] , velocity global vector (n)
-      \param[in,out] options structure used to define the solver(s) and their parameters
-      \param[in] general options for Numerics (verbose mode ...)
-      \return result (0 if successful otherwise 1).
-      \author Nineb Sheherazade.
-      \todo Obsolete
-  */
-  int pfc_2D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options);
-
   /** General interface to solvers for friction-contact 2D problem
       \param[in] , the structure which handles the Friction-Contact problem
       \param[in-out] , reaction global vector (n)
@@ -153,39 +113,6 @@ extern "C" {
       \return result (0 if successful otherwise 1).
   */
   int frictionContact2D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options);
-
-  /** General interface to solver for dual friction-contact problems
-      \param[in] , the structure which handles the Friction-Contact problem
-      \param[in-out] , reaction global vector (n)
-      \param[in-out] , velocity global vector (n)
-      \param[in,out] options structure used to define the solver(s) and their parameters
-      \param[in] general options for Numerics (verbose mode ...)
-      \param[in,out] iparamDFC vector of dfc specific parameters (int):
-         - [0] ddl_n:    contact in normal direction dof (not prescribed) (on enter)
-         - [1] ddl_tt:   contact in tangential direction dof (not prescribed) (on enter)
-         - [2] ddl_d:    prescribed dof (on enter)
-         - [3] dim_tt:    dimension of ddl_tt (= dimension of ddl_n) (on enter)
-         - [4] dim_d:     dimension of ddl_d (on enter)
-      \param[in] J1 gap in normal contact direction
-      \return result (0 if successful otherwise 1).
-      This problem can be solved thanks to dfc_2D solvers or thanks to lcp solvers after:\n
-      - either a condensation makes thanks to dfc_2D2cond_2D.c and cond_2D2dfc_2D.c,
-      - or a new formulation of this problem in the LCP form due to the dfc_2D2lcp.c and lcp2dfc_2D.c routines.
-      \author Nineb Sheherazade
-  */
-  int dfc_2D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options, int* iparamDFC, double* J1);
-
-  /** General interface to solver for dual-relay problems
-      \param[in] problem the Relay_Problem structure which handles the problem (M,q)
-      \param[in,out] z a n-vector of doubles which contains the solution of the problem.
-      \param[in,out] w a n-vector of doubles which contains the solution of the problem.
-      \param[in,out] options structure used to define the solver(s) and their parameters
-      \return info termination value
-      - 0 : successful\n
-      - >0 : otherwise see each solver for more information about the log info
-   * \author Nineb Sheherazade.
-   */
-  int dr_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* options, Numerics_Options* global_options);
 
   /** General interface to solver for primal-relay problems
       \param[in] problem the Relay_Problem structure which handles the problem (M,q)
@@ -197,7 +124,7 @@ extern "C" {
       - >0 : otherwise see each solver for more information about the log info
    * \author Nineb Sheherazade.
    */
-  int relay_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* options, int numberOfSolvers,  Numerics_Options* global_options);
+  int relay_driver(Relay_Problem* problem, double *z , double *w, Solver_Options* options,  Numerics_Options* global_options);
 
   /** General interface to solvers for friction-contact 3D problem
       \param[in] , the structure which handles the Friction-Contact problem

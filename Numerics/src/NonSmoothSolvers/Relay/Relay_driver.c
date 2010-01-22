@@ -27,7 +27,7 @@
 #include <time.h>
 
 int relay_driver(Relay_Problem* problem, double *z , double *w,
-                 Solver_Options* options, int numberOfSolvers, Numerics_Options* global_options)
+                 Solver_Options* options, Numerics_Options* global_options)
 {
 
 
@@ -130,9 +130,6 @@ int relay_driver(Relay_Problem* problem, double *z , double *w,
     FILE * fcheck = fopen("lcp_relay.dat", "w");
     info = linearComplementarity_printInFile(lcp_problem, fcheck);
 
-
-
-    int nbSolvers = 1;
     // Call the lcp_solver
     if ((strcmp(name , "ENUM") == 0))
     {
@@ -140,7 +137,7 @@ int relay_driver(Relay_Problem* problem, double *z , double *w,
 
 
     }
-    info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, options, nbSolvers, global_options);
+    info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, options, global_options);
     if (options->filterOn > 0)
       lcp_compute_error(lcp_problem, zlcp, wlcp, options->dparam[0], &(options->dparam[1]));
 

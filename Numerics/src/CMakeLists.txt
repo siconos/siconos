@@ -129,6 +129,8 @@ END_TEST()
 
 BEGIN_TEST(NonSmoothSolvers/LCP/test)
 
+NEW_TEST(LCP_DefaultSolverOptionstest LinearComplementarity_DefaultSolverOptions_test.c)
+
 NEW_TEST(LCPtest1 lcp_test1.c)
 NEW_TEST(LCPtest2 lcp_test2.c)
 NEW_TEST(LCPtest3 lcp_test3.c)

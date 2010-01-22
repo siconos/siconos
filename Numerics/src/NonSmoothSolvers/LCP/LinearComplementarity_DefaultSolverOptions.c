@@ -26,137 +26,69 @@
 #include "LCP_Solvers.h"
 #include "NonSmoothDrivers.h"
 
-int linearComplementarity_setDefaultSolverOptions(LinearComplementarity_Problem* problem, Solver_Options** arrayOfSolver_Options, char *solvername)
+int linearComplementarity_setDefaultSolverOptions(LinearComplementarity_Problem* problem, Solver_Options* options, char *solvername)
 {
+
   int info = -1;
-  if (strcmp(solvername , "GaussSeidel_SBM") == 0)
+  if (strcmp(solvername , "PGS_SBM") == 0)
   {
-    info =    linearComplementarity_qp_setDefaultSolverOptions(arrayOfSolver_Options);
+    info =    linearComplementarity_pgs_SBM_setDefaultSolverOptions(options);
   }
   else if (strcmp(solvername, "QP") == 0)
   {
-    info =    linearComplementarity_qp_setDefaultSolverOptions(arrayOfSolver_Options);
+    info =    linearComplementarity_qp_setDefaultSolverOptions(options);
   }
   else if (strcmp(solvername, "NSQP") == 0)
   {
-    info =    linearComplementarity_nsqp_setDefaultSolverOptions(arrayOfSolver_Options);
+    info =    linearComplementarity_nsqp_setDefaultSolverOptions(options);
   }
   else if (strcmp(solvername, "CPG") == 0)
   {
-    info =    linearComplementarity_cpg_setDefaultSolverOptions(arrayOfSolver_Options);
+    info =    linearComplementarity_cpg_setDefaultSolverOptions(options);
   }
   else if (strcmp(solvername, "PGS") == 0)
   {
-    info =    linearComplementarity_pgs_setDefaultSolverOptions(arrayOfSolver_Options);
+    info =    linearComplementarity_pgs_setDefaultSolverOptions(options);
   }
   else if (strcmp(solvername, "RPGS") == 0)
   {
-    info =    linearComplementarity_rpgs_setDefaultSolverOptions(arrayOfSolver_Options);
+    info =    linearComplementarity_rpgs_setDefaultSolverOptions(options);
   }
   else if (strcmp(solvername, "PSOR") == 0)
   {
-    info =    linearComplementarity_psor_setDefaultSolverOptions(arrayOfSolver_Options);
+    info =    linearComplementarity_psor_setDefaultSolverOptions(options);
   }
   else if (strcmp(solvername, "Latin") == 0)
   {
-    info =    linearComplementarity_latin_setDefaultSolverOptions(arrayOfSolver_Options);
+    info =    linearComplementarity_latin_setDefaultSolverOptions(options);
   }
   else if (strcmp(solvername, "Latin_w") == 0)
   {
-    info =    linearComplementarity_latin_w_setDefaultSolverOptions(arrayOfSolver_Options);
+    info =    linearComplementarity_latin_w_setDefaultSolverOptions(options);
   }
   else if (strcmp(solvername , "Lemke") == 0 || strcmp(solvername , "LexicoLemke") == 0)
   {
-    info =    linearComplementarity_lexicolemke_setDefaultSolverOptions(arrayOfSolver_Options);
+    info =    linearComplementarity_lexicolemke_setDefaultSolverOptions(options);
   }
   else if (strcmp(solvername, "Path") == 0)
   {
-    info =    linearComplementarity_path_setDefaultSolverOptions(arrayOfSolver_Options);
+    info =    linearComplementarity_path_setDefaultSolverOptions(options);
   }
   else if (strcmp(solvername, "ENUM") == 0)
   {
-    info =    linearComplementarity_enum_setDefaultSolverOptions(problem, arrayOfSolver_Options);
+    info =    linearComplementarity_enum_setDefaultSolverOptions(problem, options);
   }
   else if (strcmp(solvername, "NewtonMin") == 0)
   {
-    info =    linearComplementarity_newton_min_setDefaultSolverOptions(arrayOfSolver_Options);
+    info =    linearComplementarity_newton_min_setDefaultSolverOptions(options);
   }
   else if (strcmp(solvername, "NewtonFB") == 0)
   {
-    info =    linearComplementarity_newton_FB_setDefaultSolverOptions(arrayOfSolver_Options);
+    info =    linearComplementarity_newton_FB_setDefaultSolverOptions(options);
   }
   else
   {
     numericsError("linearComplementarity_setDefaultSolverOptions", "Unknow Solver");
-
-  }
-
-
-  return info;
-}
-
-int linearComplementarity_deleteDefaultSolverOptions(Solver_Options** arrayOfSolver_Options, char *solvername)
-{
-  int info = -1;
-  if (strcmp(solvername , "GaussSeidel_SBM") == 0)
-  {
-    info =    linearComplementarity_qp_deleteDefaultSolverOptions(arrayOfSolver_Options);
-  }
-  else if (strcmp(solvername, "QP") == 0)
-  {
-    info =    linearComplementarity_qp_deleteDefaultSolverOptions(arrayOfSolver_Options);
-  }
-  else if (strcmp(solvername, "NSQP") == 0)
-  {
-    info =    linearComplementarity_nsqp_deleteDefaultSolverOptions(arrayOfSolver_Options);
-  }
-  else if (strcmp(solvername, "CPG") == 0)
-  {
-    info =    linearComplementarity_cpg_deleteDefaultSolverOptions(arrayOfSolver_Options);
-  }
-  else if (strcmp(solvername, "PGS") == 0)
-  {
-    info =    linearComplementarity_pgs_deleteDefaultSolverOptions(arrayOfSolver_Options);
-  }
-  else if (strcmp(solvername, "RPGS") == 0)
-  {
-    info =    linearComplementarity_rpgs_deleteDefaultSolverOptions(arrayOfSolver_Options);
-  }
-  else if (strcmp(solvername, "PSOR") == 0)
-  {
-    info =    linearComplementarity_psor_deleteDefaultSolverOptions(arrayOfSolver_Options);
-  }
-  else if (strcmp(solvername, "Latin") == 0)
-  {
-    info =    linearComplementarity_latin_deleteDefaultSolverOptions(arrayOfSolver_Options);
-  }
-  else if (strcmp(solvername, "Latin_w") == 0)
-  {
-    info =    linearComplementarity_latin_w_deleteDefaultSolverOptions(arrayOfSolver_Options);
-  }
-  else if (strcmp(solvername , "Lemke") == 0 || strcmp(solvername , "LexicoLemke") == 0)
-  {
-    info =    linearComplementarity_lexicolemke_deleteDefaultSolverOptions(arrayOfSolver_Options);
-  }
-  else if (strcmp(solvername, "Path") == 0)
-  {
-    info =    linearComplementarity_path_deleteDefaultSolverOptions(arrayOfSolver_Options);
-  }
-  else if (strcmp(solvername, "ENUM") == 0)
-  {
-    info =    linearComplementarity_enum_deleteDefaultSolverOptions(arrayOfSolver_Options);
-  }
-  else if (strcmp(solvername, "NewtonMin") == 0)
-  {
-    info =    linearComplementarity_newton_min_deleteDefaultSolverOptions(arrayOfSolver_Options);
-  }
-  else if (strcmp(solvername, "NewtonFB") == 0)
-  {
-    info =    linearComplementarity_newton_FB_deleteDefaultSolverOptions(arrayOfSolver_Options);
-  }
-  else
-  {
-    numericsError("linearComplementarity_deleteDefaultSolverOptions", "Unknow Solver");
 
   }
 

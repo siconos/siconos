@@ -99,9 +99,8 @@ int relay_test_function(FILE * f, char * solvername)
 
   Numerics_Options global_options;
   global_options.verboseMode = 1;
-  int numberOfSolvers = 1;
   Solver_Options * options ;
-  options = malloc(numberOfSolvers * sizeof(*options));
+  options = malloc(sizeof(*options));
 
   strcpy(options->solverName, solvername);
   printf("solvername ==> %s\n", options->solverName);
@@ -125,7 +124,7 @@ int relay_test_function(FILE * f, char * solvername)
   double * w = malloc(problem->size * sizeof(double));
 
 
-  info = relay_driver(problem, z , w, options, numberOfSolvers, &global_options);
+  info = relay_driver(problem, z , w, options, &global_options);
 
   for (i = 0 ; i < problem->size ; i++)
   {

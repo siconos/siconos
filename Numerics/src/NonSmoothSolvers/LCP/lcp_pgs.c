@@ -131,21 +131,19 @@ void lcp_pgs(LinearComplementarity_Problem* problem, double *z, double *w, int *
 
   free(diag);
 }
-int linearComplementarity_pgs_setDefaultSolverOptions(Solver_Options** arrayOfSolver_Options)
+int linearComplementarity_pgs_setDefaultSolverOptions(Solver_Options* options)
 {
   int i;
   if (verbose > 0)
   {
     printf("Set the Default Solver_Options for the PGS Solver\n");
   }
-  int nbSolvers = 1 ;
-  Solver_Options * options = (Solver_Options *)malloc(nbSolvers * sizeof(Solver_Options));
-  arrayOfSolver_Options[0] = options;
 
 
   strcpy(options->solverName, "PGS");
 
-  options->numberOfInternalSolvers = 1;
+  options->numberOfInternalSolvers = 0;
+  options->internalSolvers = NULL;
   options->isSet = 1;
   options->filterOn = 1;
   options->iSize = 5;
@@ -167,31 +165,3 @@ int linearComplementarity_pgs_setDefaultSolverOptions(Solver_Options** arrayOfSo
   return 0;
 }
 
-int linearComplementarity_pgs_deleteDefaultSolverOptions(Solver_Options** arrayOfSolver_Options)
-{
-
-  int i;
-  if (verbose > 0)
-  {
-    printf("Set the Default Solver_Options for the PGS Solver\n");
-  }
-
-  Solver_Options * options = arrayOfSolver_Options[0];
-
-  int nbSolvers = 1 ;
-  for (i = 0; i < nbSolvers; i++)
-  {
-    if (options[i].iparam) free(options[i].iparam);
-    options[i].iparam = NULL;
-    if (options[i].dparam) free(options[i].dparam);
-    options[i].dparam = NULL;
-    if (options[i].dWork)  free(options[i].dWork);
-    options[i].dWork = NULL;
-    if (options[i].iWork)  free(options[i].iWork);
-    options[i].iWork = NULL;
-  }
-  free(options);
-
-
-  return 0;
-}

@@ -56,7 +56,7 @@ void buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const b
 
 }
 
-void lcp_GaussSeidel_SBM(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options, int numberOfSolvers)
+void lcp_pgs_SBM(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {
   /* Notes:
 
@@ -69,7 +69,7 @@ void lcp_GaussSeidel_SBM(LinearComplementarity_Problem* problem, double *z, doub
   */
   if (problem->M->matrix1 == NULL)
   {
-    fprintf(stderr, "lcp_GS_SBS error: wrong storage type for input matrix M of the LCP.\n");
+    fprintf(stderr, "lcp_GS_SBM error: wrong storage type for input matrix M of the LCP.\n");
     exit(EXIT_FAILURE);
   }
 
@@ -123,8 +123,15 @@ void lcp_GaussSeidel_SBM(LinearComplementarity_Problem* problem, double *z, doub
   /* Output from local solver */
   options[0].iparam[2] = 0;
   options[0].dparam[2] = 0.0;
+
+  if (options->numberOfInternalSolvers < 1)
+  {
+    numericsError("lcp_pgs_SBM", "The PGS_SBM method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
+  }
+  assert(&options[1]);
+
   /*Number of the local solver */
-  int localSolverNum = 1;
+  int localSolverNum = options->numberOfInternalSolvers ;
   int pos = 0;
   /* Output from local solver */
   int infoLocal = -1;
@@ -163,7 +170,7 @@ void lcp_GaussSeidel_SBM(LinearComplementarity_Problem* problem, double *z, doub
 
       }
 
-      while (localSolverNum < numberOfSolvers - 1)
+      while (localSolverNum < options->numberOfInternalSolvers)
         localSolverNum++;
     }
 
@@ -189,3 +196,35 @@ void lcp_GaussSeidel_SBM(LinearComplementarity_Problem* problem, double *z, doub
 }
 
 
+
+int linearComplementarity_pgs_SBM_setDefaultSolverOptions(Solver_Options* options)
+{
+  int i;
+  if (verbose > 0)
+  {
+    printf("Set the Default Solver_Options for the PGS Solver\n");
+  }
+  strcpy(options->solverName, "PGS_SBM");
+
+  options->numberOfInternalSolvers = 1;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 5;
+  options->dSize = 5;
+  options->iparam = (int *)malloc(options->iSize * sizeof(int));
+  options->dparam = (double *)malloc(options->dSize * sizeof(double));
+  options->dWork = NULL;
+  options->iWork = NULL;
+  for (i = 0; i < 5; i++)
+  {
+    options->iparam[i] = 0;
+    options->dparam[i] = 0.0;
+  }
+  options->iparam[0] = 1000;
+  options->dparam[0] = 1e-6;
+  options->internalSolvers = (Solver_Options*)malloc(options->numberOfInternalSolvers * sizeof(Solver_Options));
+
+  linearComplementarity_pgs_setDefaultSolverOptions(options->internalSolvers);
+
+  return 0;
+}
