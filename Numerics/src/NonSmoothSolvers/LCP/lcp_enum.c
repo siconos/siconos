@@ -152,6 +152,8 @@ void lcp_enum_reset(LinearComplementarity_Problem* problem, Solver_Options* opti
     free(options->dWork);
     free(options->iWork);
   }
+  options->dWork = NULL;
+  options->iWork = NULL;
 }
 
 

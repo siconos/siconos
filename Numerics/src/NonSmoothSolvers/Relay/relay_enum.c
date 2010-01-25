@@ -41,6 +41,7 @@ void relay_enum(Relay_Problem* problem, double *z, double *w, int *info, Solver_
   /*  FILE * fcheck = fopen("lcp_relay.dat","w"); */
   /*  info = linearComplementarity_printInFile(lcp_problem,fcheck); */
 
+
   // Call the lcp_solver
   if ((strcmp(options->solverName , "ENUM") == 0))
   {
@@ -100,8 +101,8 @@ int relay_enum_setDefaultSolverOptions(Relay_Problem* problem, Solver_Options* o
   options->dSize = 5;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = (double*) malloc((3 * problem->size + problem->size * problem->size) * sizeof(double));
-  options->iWork = (int*) malloc(2 * problem->size * sizeof(int));
+  options->dWork = NULL ;/* (double*) malloc((3*problem->size +problem->size*problem->size)*sizeof(double)); */
+  options->iWork = NULL ; /* (int*) malloc(2*problem->size*sizeof(int)); */
   for (i = 0; i < 5; i++)
   {
     options->iparam[i] = 0;
