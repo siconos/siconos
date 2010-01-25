@@ -69,8 +69,8 @@ void mlcp_path(MixedLinearComplementarity_Problem* problem, double *z, double *w
   double * m_ij = (double *)calloc(nnz + 1, sizeof(double));
   double * lb = (double *)calloc(dim + 1, sizeof(double));
   double * ub = (double *)calloc(dim + 1, sizeof(double));
-  double * u = z;
-  double * v = z + n;
+  //  double * u = z;
+  //  double * v = z+n;
   double err;
 
 

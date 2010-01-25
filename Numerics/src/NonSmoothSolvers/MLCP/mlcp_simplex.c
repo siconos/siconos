@@ -74,17 +74,17 @@ void mlcp_simplex_reset()
 void mlcp_simplex(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {
 #ifdef HAVE_MLCPSIMPLEX
-  double tol ;
-  double * workingFloat = options->dWork;
-  int * workingInt = options->iWork;
-  int lin;
-  int npm = (problem->n) + (problem->m);
-  int npm2 = npm * npm;
-  int NRHS = 1;
-  int one = 1;
-  int * ipiv;
-  int check;
-  int DGESVinfo = 1;
+  //  double tol ;
+  //  double * workingFloat=options->dWork;
+  //  int * workingInt=options->iWork;
+  //  int lin;
+  //  int npm=(problem->n)+(problem->m);
+  //  int npm2 = npm*npm;
+  //  int NRHS=1;
+  //  int one=1;
+  //  int * ipiv;
+  //  int check;
+  //  int DGESVinfo=1;
   int nn = problem->n;
   int mm = problem->m;
 

@@ -633,14 +633,7 @@ void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, do
     mlcp_driver_reset(problem, &mlcpOptions);
 
   }
-
-  free(mlcpOptions.dWork);
-  free(mlcpOptions.iWork);
-  mlcpOptions.dWork = 0;
-  mlcpOptions.iWork = 0;
-
-  deleteSolverOptions(&mlcpOptions);
-
+  mixedLinearComplementarity_deleteDefaultSolverOptions(NULL, &mlcpOptions);
 
 
 

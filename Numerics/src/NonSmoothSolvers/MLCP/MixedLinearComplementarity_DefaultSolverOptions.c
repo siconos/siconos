@@ -74,10 +74,10 @@ void  mixedLinearComplementarity_deleteDefaultSolverOptions(MixedLinearComplemen
     free(pOptions->iWork);
   if (pOptions->dWork)
     free(pOptions->dWork);
-  pOptions->iparam = (int*)0;
-  pOptions->dparam = (double*)0;
-  pOptions->iWork = (int*)0;
-  pOptions->dWork = (double*)0;
+  pOptions->iparam = NULL;
+  pOptions->dparam = NULL;
+  pOptions->iWork = NULL;
+  pOptions->dWork = NULL;
 
 }
 
