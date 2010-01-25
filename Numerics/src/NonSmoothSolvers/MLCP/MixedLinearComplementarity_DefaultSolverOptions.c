@@ -30,8 +30,6 @@
 
 void  mixedLinearComplementarity_default_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pOptions)
 {
-  /*Alloc structure*/
-  pOptions = (Solver_Options *)malloc(sizeof(Solver_Options));
   pOptions->isSet = 0;
   pOptions->iSize = 10;
   pOptions->iparam = 0;
@@ -81,62 +79,66 @@ void  mixedLinearComplementarity_deleteDefaultSolverOptions(MixedLinearComplemen
 
 }
 
-int mixedLinearComplementarity_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pOptions, char *solvername)
+int mixedLinearComplementarity_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pOptions)
 {
   int info = -1;
 
 
-  if (strcmp(solvername , "DIRECT_ENUM") == 0)
+  if (strcmp(pOptions->solverName , "DIRECT_ENUM") == 0)
   {
     info =    mixedLinearComplementarity_directEnum_setDefaultSolverOptions(problem, pOptions);
   }
-  else if (strcmp(solvername, "PATH_ENUM") == 0)
+  else if (strcmp(pOptions->solverName, "PATH_ENUM") == 0)
   {
     info =    mixedLinearComplementarity_pathEnum_setDefaultSolverOptions(problem, pOptions);
   }
-  else if (strcmp(solvername, "DIRECT_PATH_ENUM") == 0)
+  else if (strcmp(pOptions->solverName, "DIRECT_PATH_ENUM") == 0)
   {
     info =    mixedLinearComplementarity_directPathEnum_setDefaultSolverOptions(problem, pOptions);
   }
-  else if (strcmp(solvername, "DIRECT_SIMPLEX") == 0)
+  else if (strcmp(pOptions->solverName, "DIRECT_SIMPLEX") == 0)
   {
     info =    mixedLinearComplementarity_directSimplex_setDefaultSolverOptions(problem, pOptions);
   }
-  else if (strcmp(solvername, "DIRECT_PATH") == 0)
+  else if (strcmp(pOptions->solverName, "DIRECT_PATH") == 0)
   {
     info =    mixedLinearComplementarity_directPath_setDefaultSolverOptions(problem, pOptions);
   }
-  else if (strcmp(solvername, "DIRECT_FB") == 0)
+  else if (strcmp(pOptions->solverName, "DIRECT_FB") == 0)
   {
     info =    mixedLinearComplementarity_directFB_setDefaultSolverOptions(problem, pOptions);
   }
-  else if (strcmp(solvername, "SIMPLEX") == 0)
+  else if (strcmp(pOptions->solverName, "SIMPLEX") == 0)
   {
     info =    mixedLinearComplementarity_simplex_setDefaultSolverOptions(problem, pOptions);
   }
-  else if (strcmp(solvername, "PGS") == 0)
+  else if (strcmp(pOptions->solverName, "PGS") == 0)
   {
     info =    mixedLinearComplementarity_pgs_setDefaultSolverOptions(problem, pOptions);
   }
-  else if (strcmp(solvername, "RPGS") == 0)
+  else if (strcmp(pOptions->solverName, "RPGS") == 0)
   {
     info =    mixedLinearComplementarity_rpgs_setDefaultSolverOptions(problem, pOptions);
   }
-  else if (strcmp(solvername, "RPSOR") == 0)
+  else if (strcmp(pOptions->solverName, "RPSOR") == 0)
   {
     info =    mixedLinearComplementarity_rpsor_setDefaultSolverOptions(problem, pOptions);
   }
-  else if (strcmp(solvername, "PATH") == 0)
+  else if (strcmp(pOptions->solverName, "PATH") == 0)
   {
     info =    mixedLinearComplementarity_path_setDefaultSolverOptions(problem, pOptions);
   }
-  else if (strcmp(solvername, "ENUM") == 0)
+  else if (strcmp(pOptions->solverName, "ENUM") == 0)
   {
     info =    mixedLinearComplementarity_enum_setDefaultSolverOptions(problem, pOptions);
   }
-  else if (strcmp(solvername, "FB") == 0)
+  else if (strcmp(pOptions->solverName, "FB") == 0)
   {
     info =    mixedLinearComplementarity_fb_setDefaultSolverOptions(problem, pOptions);
+  }
+  else if (strcmp(pOptions->solverName, "PSOR") == 0)
+  {
+    info = mixedLinearComplementarity_psor_setDefaultSolverOptions(problem, pOptions);
   }
   else
   {

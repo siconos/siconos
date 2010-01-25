@@ -121,7 +121,7 @@ int mlcp_compute_error(MixedLinearComplementarity_Problem* problem, double *z, d
 
   if (*error > tolerance)
   {
-    /*if (verbose > 0) printf(" Numerics - mlcp_compute_error failed: error = %g > tolerance = %g.\n",*error, tolerance);*/
+    /*if (isVerbose > 0) printf(" Numerics - mlcp_compute_error failed: error = %g > tolerance = %g.\n",*error, tolerance);*/
     if (verbose)
       printf(" Numerics - mlcp_compute_error failed: error = %g > tolerance = %g.\n", *error, tolerance);
     /* displayMLCP(problem);*/

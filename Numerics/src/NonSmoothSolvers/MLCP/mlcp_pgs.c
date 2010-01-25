@@ -33,8 +33,8 @@
 int mixedLinearComplementarity_pgs_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver)
 {
 
-  pSolver->iparam[2] = 0; //implicit
   mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
+  pSolver->iparam[2] = 0; //implicit
   return 0;
 }
 void mlcp_pgs(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)

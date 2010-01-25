@@ -27,8 +27,8 @@
 
 int mixedLinearComplementarity_rpgs_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver)
 {
-  pSolver->dparam[2] = 0.5; /*rho*/
   mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
+  pSolver->dparam[2] = 0.5; /*rho*/
   return 0;
 }
 

@@ -31,7 +31,11 @@
  */
 
 /*\warning omega is not explicitely used. must be completed    */
-
+int mixedLinearComplementarity_psor_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver)
+{
+  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
+  return 0;
+}
 void mlcp_psor(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {
   double* A = problem->A;

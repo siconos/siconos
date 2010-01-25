@@ -32,10 +32,10 @@
  */
 int mixedLinearComplementarity_rpsor_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver)
 {
-  pSolver->dparam[2] = 0.5; /*rho*/
-  pSolver->dparam[3] = 2; /*ohmega*/
 
   mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
+  pSolver->dparam[2] = 0.5; /*rho*/
+  pSolver->dparam[3] = 2; /*ohmega*/
   return 0;
 }
 

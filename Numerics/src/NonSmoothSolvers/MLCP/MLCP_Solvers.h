@@ -471,7 +471,7 @@ extern "C" {
       \param Problem * the pointer to the array of options to set.
       \param Solver_Options * the pointer to option.
   */
-  int mixedLinearComplementarity_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pOptions, char *solvername);
+  int mixedLinearComplementarity_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pOptions);
   int mixedLinearComplementarity_directEnum_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
   int mixedLinearComplementarity_directFB_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
   int mixedLinearComplementarity_directPath_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
@@ -485,6 +485,7 @@ extern "C" {
   int mixedLinearComplementarity_rpgs_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
   int mixedLinearComplementarity_simplex_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
   int mixedLinearComplementarity_rpsor_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
+  int mixedLinearComplementarity_psor_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
 
 #ifdef __cplusplus
 }
