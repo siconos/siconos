@@ -59,6 +59,22 @@ typedef void (*FreeSolverPrimalPtr)(PrimalFrictionContact_Problem*);
 #ifdef __cplusplus
 extern "C" {
 #endif
+  /** General interface to solvers for primal friction-contact 3D problem
+    \param[in] , the structure which handles the Friction-Contact problem
+    \param[in-out] , reaction global vector (n)
+    \param[in-out] , velocity global vector (n)
+    \param[in,out] options structure used to define the solver(s) and their parameters
+    \param[in] general options for Numerics (verbose mode ...)
+    \return result (0 if successful otherwise 1).
+  */
+  int primalFrictionContact3D_driver(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, Solver_Options* options, Numerics_Options* global_options);
+
+  /** set the default solver parameters and perform memory allocation for PrimalFrictionContact3D
+      \param Solver_Options ** the pointer to the array of options to set
+      \param char * the string which identify the solver
+  */
+  int primalFrictionContact3D_setDefaultSolverOptions(Solver_Options* options, char * solverName);
+
   /** Check for trivial solution in the friction-contact 3D problem
        \param dim of the problem
        \param q global vector (n)

@@ -21,36 +21,6 @@
 #include "NonSmoothDrivers.h"
 #include "primalFrictionContact_test_function.h"
 
-int setSolver_Options(Solver_Options * options)
-{
-
-  int i;
-
-  strcpy(options->solverName, "DSFP_WR");
-  printf("solverName ==> %s\n", options->solverName);
-  options->numberOfInternalSolvers = 1;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
-  options->iWork = NULL;
-  for (i = 0; i < 5; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->iparam[0] = 2001;
-  options->dparam[0] = 1e-03;
-  options->dparam[3] = 0.001;
-
-  return 0;
-}
-
-
-
 
 
 int main(void)
@@ -63,19 +33,13 @@ int main(void)
 
   FILE * finput  =  fopen(filename, "r");
 
-  int nbsolvers = 1;
-  Solver_Options * options = (Solver_Options *)malloc(nbsolvers * sizeof(*options));
-  info = setSolver_Options(options);
+  Solver_Options * options = (Solver_Options *)malloc(sizeof(Solver_Options));
+
+  primalFrictionContact3D_setDefaultSolverOptions(options, "DSFP_WR");
+
 
   info = primalFrictionContact_test_function(finput, options);
-
-  for (int i = 0; i < nbsolvers; i++)
-  {
-    free(options[i].iparam);
-    free(options[i].dparam);
-    if (!options[i].dWork) free(options[i].dWork);
-    if (!options[i].iWork) free(options[i].iWork);
-  }
+  deleteSolverOptions(options);
   free(options);
   fclose(finput);
   printf("End of test on %s\n", filename);

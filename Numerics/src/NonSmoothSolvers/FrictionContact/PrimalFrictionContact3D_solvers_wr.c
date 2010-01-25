@@ -349,12 +349,36 @@ void  primalFrictionContact3D_nsgs_wr(PrimalFrictionContact_Problem* problem, do
 
   reformulationIntoLocalProblem(problem, localproblem);
 
-  frictionContact3D_nsgs(localproblem, reaction , velocity , info , options);
+  frictionContact3D_nsgs(localproblem, reaction , velocity , info , options->internalSolvers);
 
   computeGlobalVelocity(problem, reaction, globalVelocity);
   freeLocalProblem(localproblem);
 
 
+}
+int primalFrictionContact3D_nsgs_wr_setDefaultSolverOptions(Solver_Options* options)
+{
+
+
+  if (verbose > 0)
+  {
+    printf("Set the Default Solver_Options for the NSGS_WR Solver\n");
+  }
+
+  strcpy(options->solverName, "NSGS_WR");
+
+  options->numberOfInternalSolvers = 1;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 0;
+  options->dSize = 0;
+  options->iparam = NULL;
+  options->dparam = NULL;
+  options->dWork = NULL;
+  options->iWork = NULL;
+  options->internalSolvers = (Solver_Options *)malloc(sizeof(Solver_Options));
+  frictionContact3D_nsgs_setDefaultSolverOptions(options->internalSolvers);
+  return 0;
 }
 
 void  primalFrictionContact3D_nsgs_velocity_wr(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, Solver_Options* options)
@@ -381,10 +405,35 @@ void  primalFrictionContact3D_nsgs_velocity_wr(PrimalFrictionContact_Problem* pr
     localproblem->M->matrix1 = NULL;
   }
 
-  frictionContact3D_nsgs_velocity(localproblem, reaction , velocity , info , options);
+  frictionContact3D_nsgs_velocity(localproblem, reaction , velocity , info , options->internalSolvers);
 
   computeGlobalVelocity(problem, reaction, globalVelocity);
   freeLocalProblem(localproblem);
+
+}
+int primalFrictionContact3D_nsgs_velocity_wr_setDefaultSolverOptions(Solver_Options* options)
+{
+
+
+  if (verbose > 0)
+  {
+    printf("Set the Default Solver_Options for the NSGSV_WR Solver\n");
+  }
+
+  strcpy(options->solverName, "NSGSV_WR");
+
+  options->numberOfInternalSolvers = 1;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 0;
+  options->dSize = 0;
+  options->iparam = NULL;
+  options->dparam = NULL;
+  options->dWork = NULL;
+  options->iWork = NULL;
+  options->internalSolvers = (Solver_Options *)malloc(sizeof(Solver_Options));
+  frictionContact3D_nsgs_velocity_setDefaultSolverOptions(options->internalSolvers);
+  return 0;
 
 }
 
@@ -396,14 +445,37 @@ void  primalFrictionContact3D_proximal_wr(PrimalFrictionContact_Problem* problem
 
   reformulationIntoLocalProblem(problem, localproblem);
 
-  frictionContact3D_proximal(localproblem, reaction , velocity , info , options);
+  frictionContact3D_proximal(localproblem, reaction , velocity , info , options->internalSolvers);
 
   computeGlobalVelocity(problem, reaction, globalVelocity);
   freeLocalProblem(localproblem);
 
 
 }
+int primalFrictionContact3D_proximal_wr_setDefaultSolverOptions(Solver_Options* options)
+{
 
+
+  if (verbose > 0)
+  {
+    printf("Set the Default Solver_Options for the PROX_WR Solver\n");
+  }
+
+  strcpy(options->solverName, "PROX_WR");
+
+  options->numberOfInternalSolvers = 1;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 0;
+  options->dSize = 0;
+  options->iparam = NULL;
+  options->dparam = NULL;
+  options->dWork = NULL;
+  options->iWork = NULL;
+  options->internalSolvers = (Solver_Options *)malloc(sizeof(Solver_Options));
+  frictionContact3D_proximal_setDefaultSolverOptions(options->internalSolvers);
+  return 0;
+}
 void  primalFrictionContact3D_DeSaxceFixedPoint_wr(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, Solver_Options* options)
 {
 
@@ -412,10 +484,34 @@ void  primalFrictionContact3D_DeSaxceFixedPoint_wr(PrimalFrictionContact_Problem
 
   reformulationIntoLocalProblem(problem, localproblem);
 
-  frictionContact3D_DeSaxceFixedPoint(localproblem, reaction , velocity , info , options);
+  frictionContact3D_DeSaxceFixedPoint(localproblem, reaction , velocity , info , options->internalSolvers);
 
   computeGlobalVelocity(problem, reaction, globalVelocity);
   freeLocalProblem(localproblem);
 
 
+}
+int primalFrictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(Solver_Options* options)
+{
+
+
+  if (verbose > 0)
+  {
+    printf("Set the Default Solver_Options for the DSFP_WR Solver\n");
+  }
+
+  strcpy(options->solverName, "DSFP_WR");
+
+  options->numberOfInternalSolvers = 1;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 0;
+  options->dSize = 0;
+  options->iparam = NULL;
+  options->dparam = NULL;
+  options->dWork = NULL;
+  options->iWork = NULL;
+  options->internalSolvers = (Solver_Options *)malloc(sizeof(Solver_Options));
+  frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(options->internalSolvers);
+  return 0;
 }
