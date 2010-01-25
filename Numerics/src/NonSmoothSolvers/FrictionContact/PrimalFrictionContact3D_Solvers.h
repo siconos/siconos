@@ -101,6 +101,9 @@ extern "C" {
   */
   void primalFrictionContact3D_nsgs_wr(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  Solver_Options* options);
 
+  int primalFrictionContact3D_nsgs_wr_setDefaultSolverOptions(Solver_Options* options);
+
+
   /** Proximal point solver with reformulation for friction-contact 3D problem
     \param problem, the friction-contact 3D problem to solve
     \param velocity global vector (n), in-out parameter
@@ -116,6 +119,7 @@ extern "C" {
   */
   void primalFrictionContact3D_proximal_wr(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  Solver_Options* options);
 
+  int primalFrictionContact3D_proximal_wr_setDefaultSolverOptions(Solver_Options* options);
   /** Projected Gradient solver with reformulation for friction-contact 3D problem
      \param problem, the friction-contact 3D problem to solve
      \param velocity global vector (n), in-out parameter
@@ -129,6 +133,7 @@ extern "C" {
      dparam[1] : (out) error
   */
   void primalFrictionContact3D_DeSaxceFixedPoint_wr(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  Solver_Options* options);
+  int primalFrictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(Solver_Options* options);
 
   /**  Non-Smooth Gauss Seidel solver  for friction-contact 3D problem with iteration on velocities
         \param problem, the friction-contact 3D problem to solve
@@ -144,7 +149,7 @@ extern "C" {
     */
   void  primalFrictionContact3D_nsgs_velocity_wr(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, Solver_Options* options);
 
-
+  int primalFrictionContact3D_nsgs_velocity_wr_setDefaultSolverOptions(Solver_Options* options);
   /** Non-Smooth Gauss Seidel solver  for friction-contact 3D problem
         \param problem, the friction-contact 3D problem to solve
         \param velocity global vector (n), in-out parameter

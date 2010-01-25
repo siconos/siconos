@@ -15,32 +15,42 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
- */
+*/
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <float.h>
+#include "LA.h"
+#include "Numerics_Options.h"
+#include "FrictionContact2D_Solvers.h"
 #include "NonSmoothDrivers.h"
-#include "frictionContact_test_function.h"
 
-int main(void)
+int frictionContact2D_setDefaultSolverOptions(Solver_Options* options, char *solvername)
 {
-  int info = 0 ;
+  int info = -1;
+  if (strcmp(solvername, "NSGS") == 0)
+  {
+    info =    frictionContact2D_sparse_nsgs_setDefaultSolverOptions(options);
+  }
+  else if (strcmp(solvername, "PGS") == 0 || strcmp(solvername , "NLGS") == 0)
+  {
+    info =    frictionContact2D_nlgs_setDefaultSolverOptions(options);
+  }
+  else if (strcmp(solvername, "CPG") == 0)
+  {
+    info =    frictionContact2D_cpg_setDefaultSolverOptions(options);
+  }
+  else if (strcmp(solvername, "Latin") == 0)
+  {
+    info =    frictionContact2D_latin_setDefaultSolverOptions(options);
+  }
 
-  char filename[50] = "./data/FrictionContactProblem00374.dat";
+  else
+  {
+    numericsError("frictionContact2D_setDefaultSolverOptions", "Unknow Solver");
 
-  printf("Test on %s\n", filename);
-
-  FILE * finput  =  fopen(filename, "r");
-
-
-  Solver_Options * options = malloc(sizeof(Solver_Options));
-  info = frictionContact2D_setDefaultSolverOptions(options, "NLGS");
-
-  info = frictionContact_test_function(finput, options);
-
-  deleteSolverOptions(options);
-  free(options);
-  fclose(finput);
-  printf("End of test on %s\n", filename);
+  }
 
 
   return info;

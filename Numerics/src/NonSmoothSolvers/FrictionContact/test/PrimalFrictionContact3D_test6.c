@@ -19,24 +19,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
-#include "frictionContact_test_function.h"
+#include "primalFrictionContact_test_function.h"
+
+
 
 int main(void)
 {
   int info = 0 ;
 
-  char filename[50] = "./data/FrictionContactProblem00374.dat";
+  char filename[50] = "./data/Example_PrimalFrictionContact.dat";
 
   printf("Test on %s\n", filename);
 
   FILE * finput  =  fopen(filename, "r");
 
+  Solver_Options * options = (Solver_Options *)malloc(sizeof(Solver_Options));
 
-  Solver_Options * options = malloc(sizeof(Solver_Options));
-  info = frictionContact2D_setDefaultSolverOptions(options, "NLGS");
+  primalFrictionContact3D_setDefaultSolverOptions(options, "NSGSV_WR");
 
-  info = frictionContact_test_function(finput, options);
 
+  info = primalFrictionContact_test_function(finput, options);
   deleteSolverOptions(options);
   free(options);
   fclose(finput);

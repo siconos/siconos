@@ -31,12 +31,14 @@ int main(void)
 
   FILE * finput  =  fopen(filename, "r");
 
-  char solvername[10] = "NLGS";
 
-  int iparam[5] = {10001, 0, 0, 0, 1} ;
-  double dparam[5] = {1e-5, 0, 0.0, 0, 0};
-  info = frictionContact_test_function(finput, solvername, iparam, dparam);
+  Solver_Options * options = malloc(sizeof(Solver_Options));
+  info = frictionContact2D_setDefaultSolverOptions(options, "NLGS");
 
+  info = frictionContact_test_function(finput, options);
+
+  deleteSolverOptions(options);
+  free(options);
   fclose(finput);
   printf("End of test on %s\n", filename);
 

@@ -25,18 +25,23 @@ int main(void)
 {
   int info = 0 ;
 
-  char filename[50] = "./data/FrictionContactProblem00237.dat";
+  char filename[50] = "./data/FrictionContactProblem00727.dat";
 
   printf("Test on %s\n", filename);
 
   FILE * finput  =  fopen(filename, "r");
 
-  char solvername[10] = "NSGS";
 
-  int iparam[5] = {10001, 0, 0, 0, 1} ;
-  double dparam[5] = {1e-5, 0, 0.0, 0, 0};
-  info = frictionContact_test_function(finput, solvername, iparam, dparam);
+  Solver_Options * options = malloc(sizeof(Solver_Options));
+  info = frictionContact2D_setDefaultSolverOptions(options, "NSGS");
+  options->dparam[0] = 1e-12;
+  options->iparam[0] = 5000;
 
+
+  info = frictionContact_test_function(finput, options);
+
+  deleteSolverOptions(options);
+  free(options);
   fclose(finput);
   printf("End of test on %s\n", filename);
 

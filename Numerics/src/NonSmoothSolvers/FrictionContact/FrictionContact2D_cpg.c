@@ -299,3 +299,33 @@ void FrictionContact2D_cpg(FrictionContact_Problem* problem , double *reaction ,
 
 
 }
+int frictionContact2D_cpg_setDefaultSolverOptions(Solver_Options *options)
+{
+  int i;
+  if (verbose > 0)
+  {
+    printf("Set the Default Solver_Options for the CPG Solver\n");
+  }
+
+  strcpy(options->solverName, "CPG");
+
+  options->numberOfInternalSolvers = 0;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 5;
+  options->dSize = 5;
+  options->iparam = (int *)malloc(options->iSize * sizeof(int));
+  options->dparam = (double *)malloc(options->dSize * sizeof(double));
+  options->dWork = NULL;
+  options->iWork = NULL;
+  for (i = 0; i < 5; i++)
+  {
+    options->iparam[i] = 0;
+    options->dparam[i] = 0.0;
+  }
+  options->iparam[0] = 1000;
+  options->dparam[0] = 1e-4;
+  options ->internalSolvers = NULL;
+  return 0;
+}
+

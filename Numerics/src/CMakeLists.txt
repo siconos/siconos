@@ -298,16 +298,18 @@ NEW_TEST(FrictionContact2D_Problemtest2 FrictionContact2D_test2.c)
 NEW_TEST(FrictionContact2D_Problemtest3 FrictionContact2D_test3.c)
 
 
-#NEW_TEST(FrictionContact2D_Problemtest10 FrictionContact2D_test10.c)
-#NEW_TEST(FrictionContact2D_Problemtest11 FrictionContact2D_test11.c)
-#NEW_TEST(FrictionContact2D_Problemtest12 FrictionContact2D_test12.c)
+NEW_TEST(FrictionContact2D_Problemtest10 FrictionContact2D_test10.c)
+NEW_TEST(FrictionContact2D_Problemtest11 FrictionContact2D_test11.c)
+NEW_TEST(FrictionContact2D_Problemtest12 FrictionContact2D_test12.c)
 
 
 ## test 2D sparse on 4 differents files
-#NEW_TEST(FrictionContact2D_Problemtest20 FrictionContact2D_test20.c)
-#NEW_TEST(FrictionContact2D_Problemtest21 FrictionContact2D_test21.c)
-#NEW_TEST(FrictionContact2D_Problemtest22 FrictionContact2D_test22.c)
-#NEW_TEST(FrictionContact2D_Problemtest23 FrictionContact2D_test23.c)
+NEW_TEST(FrictionContact2D_Problemtest20 FrictionContact2D_test20.c)
+NEW_TEST(FrictionContact2D_Problemtest21 FrictionContact2D_test21.c)
+NEW_TEST(FrictionContact2D_Problemtest22 FrictionContact2D_test22.c)
+NEW_TEST(FrictionContact2D_Problemtest23 FrictionContact2D_test23.c)
+
+
 
 NEW_TEST(PFC3D_test1 PrimalFrictionContact3D_test1.c)
 NEW_TEST(PFC3D_test2 PrimalFrictionContact3D_test2.c)

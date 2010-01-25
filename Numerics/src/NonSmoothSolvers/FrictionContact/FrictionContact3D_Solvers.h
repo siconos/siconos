@@ -81,7 +81,7 @@ extern "C" {
   int frictionContact3D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options);
 
   /** set the default solver parameters and perform memory allocation for FrictionContact3D
-      \param Solver_Options ** the pointer to the array of options to set
+      \param Solver_Options * the pointer to the options to set
       \param char * the string which identify the solver
   */
   int frictionContact3D_setDefaultSolverOptions(Solver_Options* options, char *);
