@@ -22,69 +22,6 @@
 #include "relay_test_function.h"
 
 
-void relay_fillParamWithRespectToSolver(Solver_Options *options, char * solvername, Relay_Problem* problem)
-{
-  int maxIter = 50000;
-  double tolerance = 1e-8;
-  if (strcmp(solvername , "PGS") == 0 || strcmp(solvername , "CPG") == 0 || strcmp(solvername , "Lemke") == 0 || strcmp(solvername , "NewtonMin") == 0)
-  {
-    options->iSize = 2;
-    options->dSize = 2;
-    options->iparam[0] = maxIter;
-    options->dparam[0] = tolerance;
-  }
-
-  else if (strcmp(solvername , "RPGS") == 0)
-  {
-    options->iSize = 2;
-    options->dSize = 3;
-    options->iparam[0] = maxIter;
-    options->dparam[0] = tolerance;
-    options->dparam[2] = 1.0;
-  }
-  else if (strcmp(solvername , "Latin") == 0)
-  {
-    options->iSize = 2;
-    options->dSize = 3;
-    options->iparam[0] = maxIter;
-    options->dparam[0] = tolerance;
-    options->dparam[2] = 0.3;
-  }
-  else if (strcmp(solvername , "Latin_w") == 0)
-  {
-    options->iSize = 2;
-    options->dSize = 4;
-    options->iparam[0] = maxIter;
-    options->dparam[0] = tolerance;
-    options->dparam[2] = 0.3;
-    options->dparam[3] = 1.0;
-  }
-  else if (strcmp(solvername , "PATH") == 0 || strcmp(solvername , "QP") == 0 || strcmp(solvername , "NSQP") == 0)
-  {
-    options->iSize = 0;
-    options->dSize = 2;
-    options->dparam[0] = tolerance;
-  }
-  else if (strcmp(solvername , "ENUM") == 0)
-  {
-    options->iSize = 2;
-    options->dSize = 2;
-    options->dparam[0] = tolerance;
-    options->dWork = (double*) malloc((3 * problem->size + problem->size * problem->size) * sizeof(double));
-    options->iWork = (int*) malloc(2 * problem->size * sizeof(int));
-  }
-  else if (strcmp(solvername , "NewtonFB") == 0)
-  {
-    options->iSize = 2;
-    options->dSize = 2;
-    options->iparam[0] = maxIter;
-    options->dparam[0] = tolerance;
-
-  }
-
-
-}
-
 int relay_test_function(FILE * f, char * solvername)
 {
 
@@ -93,35 +30,33 @@ int relay_test_function(FILE * f, char * solvername)
 
   info = relay_newFromFile(problem, f);
 
-  FILE * foutput  =  fopen("./lcp_mmc.verif", "w");
+  FILE * foutput  =  fopen("./relay.verif", "w");
   info = relay_printInFile(problem, foutput);
 
 
   Numerics_Options global_options;
   global_options.verboseMode = 1;
-  Solver_Options * options ;
-  options = malloc(sizeof(*options));
 
-  strcpy(options->solverName, solvername);
-  printf("solvername ==> %s\n", options->solverName);
-  options->dWork = NULL;
-  options->iWork = NULL;
 
-  options->iSize = 10;
-  options->dSize = 10;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  for (i = 0; i < 10; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  relay_fillParamWithRespectToSolver(options, solvername, problem);
 
-  options->isSet = 1;
-  options->filterOn = 1;
+  Solver_Options * options = malloc(sizeof(Solver_Options));
+
+  relay_setDefaultSolverOptions(problem, options, solvername);
+
+  int maxIter = 50000;
+  double tolerance = 1e-8;
+  options->iparam[0] = maxIter;
+  options->dparam[0] = tolerance;
+
+
   double * z = malloc(problem->size * sizeof(double));
   double * w = malloc(problem->size * sizeof(double));
+
+  for (i = 0; i <  problem->size ; i++)
+  {
+    z[i] = 0.0;
+    w[i] = 0.0;
+  }
 
 
   info = relay_driver(problem, z , w, options, &global_options);
@@ -142,11 +77,7 @@ int relay_test_function(FILE * f, char * solvername)
   free(z);
   free(w);
 
-  free(options->iparam);
-  free(options->dparam);
-
-  if (!options->dWork) free(options->dWork);
-  if (!options->iWork) free(options->iWork);
+  deleteSolverOptions(options);
 
   free(options);
 

@@ -238,7 +238,7 @@ int lcp_test_function_SBM(FILE * f, char * solvername)
 
 
 
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, "PGS_SBM");
+  info = linearComplementarity_setDefaultSolverOptions(problem, options, "NSGS_SBM");
 
   strcpy(options->internalSolvers->solverName, solvername);
 

@@ -32,7 +32,7 @@
 
 #define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
 
-/* in lcp_GaussSeidel_SBM.c */
+/* in lcp_nsgs_SBM.c */
 void buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat,
                        LinearComplementarity_Problem* local_problem,
                        double* q, double* z);

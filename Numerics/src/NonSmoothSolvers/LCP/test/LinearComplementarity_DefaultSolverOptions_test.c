@@ -31,12 +31,10 @@ int main(void)
 
   info = linearComplementarity_newFromFile(problem, finput);
 
-
-
   fclose(finput);
 
 
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, "PGS_SBM");
+  info = linearComplementarity_setDefaultSolverOptions(problem, options, "NSGS_SBM");
   printSolverOptions(options);
   deleteSolverOptions(options);
 

@@ -58,7 +58,7 @@
   Ref: "The Linear Complementarity Problem" Cottle, Pang, Stone (1992)\n
   - lcp_newton_min(), nonsmooth Newton method based on the min formulation  (or max formulation) of the LCP
   - lcp_newton_FB(), uses a nonsmooth newton method based on the Fischer-Bursmeister convex function
-  - lcp_GaussSeidel_SBM(), Gauss-Seidel solver based on a Sparse-Block storage for the matrix M of the LCP.
+  - lcp_nsgs_SBM(), Gauss-Seidel solver based on a Sparse-Block storage for the matrix M of the LCP.
 
   (see the functions/solvers list in LCP_Solvers.h)
 
