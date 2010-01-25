@@ -73,113 +73,13 @@ int relay_driver(Relay_Problem* problem, double *z , double *w,
 
   else if (strcmp(name , "NLGS") == 0)
     fprintf(stderr, "Relay_driver error: NLGS solver obsolete use PGS:\n");
-  else if ((strcmp(name , "Lemke") == 0) || (strcmp(name , "ENUM") == 0))
+  else if ((strcmp(name , "Lemke") == 0))
   {
-
-    // conversion into LCP
-    LinearComplementarity_Problem* lcp_problem = (LinearComplementarity_Problem*)malloc(sizeof(LinearComplementarity_Problem));
-    lcp_problem->size = 2 * problem->size ;
-    lcp_problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
-    lcp_problem->M->size0 = 2 * problem->size ;
-    lcp_problem->M->size1 = 2 * problem->size ;
-
-    lcp_problem->M->storageType = 0;
-    lcp_problem->M->matrix1 = NULL;
-    lcp_problem->M->matrix0 = (double*)malloc(lcp_problem->size * lcp_problem->size * sizeof(double));;
-    lcp_problem->q = (double*)malloc(lcp_problem->size * sizeof(double));
-
-    double *zlcp = (double*)malloc(lcp_problem->size * sizeof(double));
-    double *wlcp = (double*)malloc(lcp_problem->size * sizeof(double));
-
-    int i, j;
-    for (i = 0; i < problem->size; i++)
-    {
-      for (j = 0; j < problem->size; j++)
-      {
-        lcp_problem->M->matrix0[i + j * lcp_problem->size] =  problem->M->matrix0[i + j * problem->size];
-      }
-    }
-    for (i = 0; i < problem->size; i++)
-    {
-      for (j = problem->size; j < 2 * problem->size; j++)
-      {
-        lcp_problem->M->matrix0[i + j * lcp_problem->size] =  0.0;
-      }
-      lcp_problem->M->matrix0[i + (i + problem->size)*lcp_problem->size] =  1.0;
-    }
-    for (i = problem->size; i < 2 * problem->size; i++)
-    {
-      for (j = 0; j < 2 * problem->size; j++)
-      {
-        lcp_problem->M->matrix0[i + j * lcp_problem->size] =  0.0;
-      }
-      lcp_problem->M->matrix0[i + (i - problem->size)*lcp_problem->size] =  -1.0;
-    }
-
-    for (i = 0; i < problem->size; i++)
-    {
-      lcp_problem->q[i] = problem->q[i];
-      lcp_problem->q[i + problem->size] = problem->ub[i] - problem->lb[i];
-      for (j = 0; j < problem->size; j++)
-      {
-        lcp_problem->q[i] -= problem->M->matrix0[i + j * (problem->size)] * problem->ub[i];
-      }
-    }
-
-
-    FILE * fcheck = fopen("lcp_relay.dat", "w");
-    info = linearComplementarity_printInFile(lcp_problem, fcheck);
-
-    // Call the lcp_solver
-    if ((strcmp(name , "ENUM") == 0))
-    {
-      lcp_enum_init(lcp_problem, options, 1);
-
-
-    }
-    info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, options, global_options);
-    if (options->filterOn > 0)
-      lcp_compute_error(lcp_problem, zlcp, wlcp, options->dparam[0], &(options->dparam[1]));
-
-    if ((strcmp(name , "ENUM") == 0))
-    {
-      lcp_enum_reset(lcp_problem, options, 1);
-
-    }
-    /*       printf("\n"); */
-
-    // Conversion of result
-    for (i = 0; i < problem->size; i++)
-    {
-      z[i] = 1.0 / 2.0 * (zlcp[i] - wlcp[i + problem->size]);
-      //   printf("z[ %i]=%12.10e\n", i, z[i]);
-
-      w[i] = wlcp[i] - zlcp[i + problem->size];
-      //printf("w[ %i]=%12.10e\n", i, w[i]);
-    }
-
-    /*        for (i=0; i< lcp_problem->size; i++){  */
-    /*     printf("zlcp[ %i]=%12.10e,\t wlcp[ %i]=%12.10e \n", i, zlcp[i],i, wlcp[i]); */
-    /*        } */
-    /*        printf("\n"); */
-
-    /*        for (i=0; i< problem->size; i++){  */
-    /*     printf("z[ %i]=%12.10e,\t w[ %i]=%12.10e\n", i, z[i],i, w[i]); */
-    /*        } */
-
-
-    /*        printf("\n"); */
-
-
-
-    free(zlcp);
-    free(wlcp);
-    free(lcp_problem->q);
-    freeNumericsMatrix(lcp_problem->M);
-    free(lcp_problem->M);
-    free(lcp_problem);
-
-
+    relay_lexicolemke(problem, z , w , &info , options, global_options);
+  }
+  else if ((strcmp(name , "ENUM") == 0))
+  {
+    relay_enum(problem, z , w , &info , options, global_options);
   }
   else if (strcmp(name , "Path") == 0)
   {
@@ -196,4 +96,5 @@ int relay_driver(Relay_Problem* problem, double *z , double *w,
 
   return info;
 }
+
 

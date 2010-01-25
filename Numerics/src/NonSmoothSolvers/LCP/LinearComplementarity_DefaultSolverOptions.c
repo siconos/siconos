@@ -30,9 +30,9 @@ int linearComplementarity_setDefaultSolverOptions(LinearComplementarity_Problem*
 {
 
   int info = -1;
-  if (strcmp(solvername , "PGS_SBM") == 0)
+  if (strcmp(solvername , "NSGS_SBM") == 0)
   {
-    info =    linearComplementarity_pgs_SBM_setDefaultSolverOptions(options);
+    info =    linearComplementarity_nsgs_SBM_setDefaultSolverOptions(options);
   }
   else if (strcmp(solvername, "QP") == 0)
   {

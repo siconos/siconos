@@ -15,43 +15,39 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
- */
+*/
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <float.h>
+#include "LA.h"
+#include "Numerics_Options.h"
+#include "Relay_Solvers.h"
 #include "NonSmoothDrivers.h"
-#include "frictionContact_test_function.h"
 
-
-int main(void)
+int relay_setDefaultSolverOptions(Relay_Problem* problem, Solver_Options* options, char *solvername)
 {
-  printf("\n Start of test on Default Solver_Options\n");
-  int info = 0 ;
-  Solver_Options * options = (Solver_Options *)malloc(sizeof(Solver_Options));
+
+  int info = -1;
+  if (strcmp(solvername , "PGS") == 0)
+  {
+    info =    relay_pgs_setDefaultSolverOptions(options);
+  }
+  else if (strcmp(solvername , "Lemke") == 0 || strcmp(solvername , "LexicoLemke") == 0)
+  {
+    info =    relay_lexicolemke_setDefaultSolverOptions(options);
+  }
+  else if (strcmp(solvername, "ENUM") == 0)
+  {
+    info =    relay_enum_setDefaultSolverOptions(problem, options);
+  }
+  else
+  {
+    numericsError("Relay_setDefaultSolverOptions", "Unknow Solver");
+
+  }
 
 
-
-  info = frictionContact3D_setDefaultSolverOptions(options, "NSGS");
-  printSolverOptions(options);
-  deleteSolverOptions(options);
-
-  info = frictionContact3D_setDefaultSolverOptions(options, "NSGSV");
-  printSolverOptions(options);
-  deleteSolverOptions(options);
-
-  info = frictionContact3D_setDefaultSolverOptions(options, "PROX");
-  printSolverOptions(options);
-  deleteSolverOptions(options);
-
-  info = frictionContact3D_setDefaultSolverOptions(options, "TFP");
-  printSolverOptions(options);
-  deleteSolverOptions(options);
-
-  info = frictionContact3D_setDefaultSolverOptions(options, "DSFP");
-  printSolverOptions(options);
-  deleteSolverOptions(options);
-
-  free(options);
-
-  printf("\n End of test on Default Solver_Options\n");
   return info;
 }

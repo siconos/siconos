@@ -131,3 +131,34 @@ void relay_pgs(Relay_Problem* problem, double *z, double *w, int *info, Solver_O
 
 
 }
+int relay_pgs_setDefaultSolverOptions(Solver_Options* options)
+{
+  int i;
+  if (verbose > 0)
+  {
+    printf("Set the Default Solver_Options for the PGS Solver\n");
+  }
+  strcpy(options->solverName, "PGS");
+
+  options->numberOfInternalSolvers = 0;
+  options->internalSolvers = NULL;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 5;
+  options->dSize = 5;
+  options->iparam = (int *)malloc(options->iSize * sizeof(int));
+  options->dparam = (double *)malloc(options->dSize * sizeof(double));
+  options->dWork = NULL;
+  options->iWork = NULL;
+  for (i = 0; i < 5; i++)
+  {
+    options->iparam[i] = 0;
+    options->dparam[i] = 0.0;
+  }
+  options->iparam[0] = 1000;
+  options->dparam[0] = 1e-6;
+  options->dparam[1] = 1.0;
+
+  return 0;
+}
+

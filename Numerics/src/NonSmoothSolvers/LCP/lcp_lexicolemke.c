@@ -265,7 +265,6 @@ int linearComplementarity_lexicolemke_setDefaultSolverOptions(Solver_Options* op
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
-  options->iparam[0] = 1000;
   options->dparam[0] = 1e-6;
 
 

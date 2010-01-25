@@ -169,7 +169,7 @@ Gauss-Seidel for Sparse-Block matrices. \n
 Matrix M of the LCP must be a SparseBlockStructuredMatrix. \n
 This solver first build a local problem for each row of blocks and then call any of the other solvers through lcp_driver().
 
-\bf function: lcp_pgs_SBM() \n
+\bf function: lcp_nsgs_SBM() \n
 \bf parameters:
 - iparam[0] (in): maximum number of iterations allowed for GS process
 - iparam[1] (out): number of GS iterations processed
@@ -213,11 +213,7 @@ extern "C" {
   */
   int linearComplementarity_setDefaultSolverOptions(LinearComplementarity_Problem* problem, Solver_Options* options, char *);
 
-  /** set the default solver parameters and perform memory allocation for LinearComplementarity
-       \param Solver_Options ** the pointer to the arrayof options to delete
-       \param char * the string which identify the solver
-   */
-  int linearComplementarity_deleteDefaultSolverOptions(Solver_Options* options, char *);
+
 
 
   /** lcp_qp uses a quadratic programm formulation for solving a LCP
@@ -556,11 +552,11 @@ extern "C" {
    (if numberOfSolvers>1, options[0] represent the global (block) solver and options[i>0] the local ones).
    * \author Mathieu Renouf, Pascal Denoyelle, Franck Perignon
    */
-  void lcp_pgs_SBM(LinearComplementarity_Problem* problem, double *z, double *w, int* info, Solver_Options* options);
+  void lcp_nsgs_SBM(LinearComplementarity_Problem* problem, double *z, double *w, int* info, Solver_Options* options);
   /** set the default solver parameters and perform memory allocation for LinearComplementarity
       \param Solver_Options ** the pointer to the array of options to set
   */
-  int linearComplementarity_pgs_SBM_setDefaultSolverOptions(Solver_Options* options);
+  int linearComplementarity_nsgs_SBM_setDefaultSolverOptions(Solver_Options* options);
 
 
   /** This function computes the input vector \f$ w = Mz + q \f$ and checks the validity of the vector z as a solution \n

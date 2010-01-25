@@ -56,7 +56,7 @@ void buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const b
 
 }
 
-void lcp_pgs_SBM(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
+void lcp_nsgs_SBM(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
 {
   /* Notes:
 
@@ -69,7 +69,7 @@ void lcp_pgs_SBM(LinearComplementarity_Problem* problem, double *z, double *w, i
   */
   if (problem->M->matrix1 == NULL)
   {
-    fprintf(stderr, "lcp_GS_SBM error: wrong storage type for input matrix M of the LCP.\n");
+    fprintf(stderr, "lcp_NSGS_SBM error: wrong storage type for input matrix M of the LCP.\n");
     exit(EXIT_FAILURE);
   }
 
@@ -90,7 +90,7 @@ void lcp_pgs_SBM(LinearComplementarity_Problem* problem, double *z, double *w, i
   int nbOfNonNullBlocks = blmat->nbblocks;
   if (nbOfNonNullBlocks < 1)
   {
-    fprintf(stderr, "Numerics::lcp_GaussSeidel_SBM error: empty M matrix (all blocks = NULL).\n");
+    fprintf(stderr, "Numerics::lcp_NSGS_SBM error: empty M matrix (all blocks = NULL).\n");
     exit(EXIT_FAILURE);
   }
 
@@ -126,7 +126,7 @@ void lcp_pgs_SBM(LinearComplementarity_Problem* problem, double *z, double *w, i
 
   if (options->numberOfInternalSolvers < 1)
   {
-    numericsError("lcp_pgs_SBM", "The PGS_SBM method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
+    numericsError("lcp_nsgs_SBM", "The NSGS_SBM method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
   }
 
 
@@ -166,13 +166,13 @@ void lcp_pgs_SBM(LinearComplementarity_Problem* problem, double *z, double *w, i
         //free(local_problem);
         /* Number of GS iterations */
         options[0].iparam[1] = iter;
-        fprintf(stderr, "lcp_PGS_SBM error: local LCP solver failed at global iteration %d.\n for block-row number %d. Output info equal to %d.\n", iter, rowNumber, infoLocal);
+        fprintf(stderr, "lcp_NSGS_SBM error: local LCP solver failed at global iteration %d.\n for block-row number %d. Output info equal to %d.\n", iter, rowNumber, infoLocal);
         //exit(EXIT_FAILURE);
 
         break;
 
       }
-      /*\warning: a very strange implementation ?*/
+
       while (localSolverNum < options->numberOfInternalSolvers - 1)
         localSolverNum++;
     }
@@ -200,14 +200,14 @@ void lcp_pgs_SBM(LinearComplementarity_Problem* problem, double *z, double *w, i
 
 
 
-int linearComplementarity_pgs_SBM_setDefaultSolverOptions(Solver_Options* options)
+int linearComplementarity_nsgs_SBM_setDefaultSolverOptions(Solver_Options* options)
 {
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default Solver_Options for the PGS Solver\n");
+    printf("Set the Default Solver_Options for the NSGS Solver\n");
   }
-  strcpy(options->solverName, "PGS_SBM");
+  strcpy(options->solverName, "NSGS_SBM");
 
   options->numberOfInternalSolvers = 1;
   options->isSet = 1;

@@ -74,8 +74,8 @@ int lcp_driver_SparseBlockMatrix(LinearComplementarity_Problem* problem, double 
     printf(" ========================== Call %s SparseBlockMatrix solver for Linear Complementarity problem ==========================\n", name);
 
   /****** Gauss Seidel block solver ******/
-  if (strcmp(name , "PGS_SBM") == 0)
-    lcp_pgs_SBM(problem, z , w , &info , options);
+  if (strcmp(name , "NSGS_SBM") == 0)
+    lcp_nsgs_SBM(problem, z , w , &info , options);
   else
   {
     fprintf(stderr, "LCP_driver_SparseBlockMatrix error: unknown solver named: %s\n", name);
