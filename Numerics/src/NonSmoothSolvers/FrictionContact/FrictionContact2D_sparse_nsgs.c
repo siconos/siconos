@@ -257,4 +257,5 @@ int frictionContact2D_sparse_nsgs_setDefaultSolverOptions(Solver_Options *option
   options->iparam[0] = 1000;
   options->dparam[0] = 1e-4;
   options ->internalSolvers = NULL;
+  return 0;
 }

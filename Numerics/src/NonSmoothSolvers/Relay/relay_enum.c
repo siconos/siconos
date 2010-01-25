@@ -47,7 +47,7 @@ void relay_enum(Relay_Problem* problem, double *z, double *w, int *info, Solver_
   {
     lcp_enum_init(lcp_problem, options, 1);
   }
-  info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, options, global_options);
+  * info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, options, global_options);
   if (options->filterOn > 0)
     lcp_compute_error(lcp_problem, zlcp, wlcp, options->dparam[0], &(options->dparam[1]));
 

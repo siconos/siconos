@@ -174,6 +174,11 @@ extern "C" {
   */
   int frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(Solver_Options* options);
 
+  /** set the default solver parameters and perform memory allocation for AlartCurnierNewton
+    \param Solver_Options ** the pointer to the array of options to set
+  */
+  int frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(Solver_Options* options);
+
   /** Check for trivial solution in the friction-contact 3D problem
       \param dim of the problem
       \param q global vector (n)

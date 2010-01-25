@@ -84,7 +84,7 @@ extern "C" {
   /** set the default solver parameters and perform memory allocation for CPG
   \param Solver_Options * the pointer to the options to set
    */
-  int frictionContact3D_cpg_setDefaultSolverOptions(Solver_Options* options);
+  int frictionContact2D_cpg_setDefaultSolverOptions(Solver_Options* options);
   /**  Non Linear Gauss Seidel solver for primal contact problem with friction in 2D case.
        \param[in] problem the friction-contact problem
        \param[out] reaction global vector
@@ -98,7 +98,7 @@ extern "C" {
   /** set the default solver parameters and perform memory allocation for LATIN
   \param Solver_Options * the pointer to the options to set
   */
-  int frictionContact3D_nlgs_setDefaultSolverOptions(Solver_Options* options);
+  int frictionContact2D_nlgs_setDefaultSolverOptions(Solver_Options* options);
 
   /**  latin solver for primal contact problem with friction in the 2D case.
        \param[in] problem the friction-contact problem
@@ -113,7 +113,7 @@ extern "C" {
   /** set the default solver parameters and perform memory allocation for LATIN
   \param Solver_Options * the pointer to the options to set
   */
-  int frictionContact3D_latin_setDefaultSolverOptions(Solver_Options* options);
+  int frictionContact2D_latin_setDefaultSolverOptions(Solver_Options* options);
 
   /** FrictionContact2D_projc is a specific projection operator related to CPG (conjugated projected gradient) algorithm for primal contact problem with friction.\n
    *
@@ -152,7 +152,7 @@ extern "C" {
   /** set the default solver parameters and perform memory allocation for NSGS
   \param Solver_Options * the pointer to the options to set
   */
-  int frictionContact3D_sparse_nsgs_setDefaultSolverOptions(Solver_Options* options);
+  int frictionContact2D_sparse_nsgs_setDefaultSolverOptions(Solver_Options* options);
 
 
 #ifdef __cplusplus

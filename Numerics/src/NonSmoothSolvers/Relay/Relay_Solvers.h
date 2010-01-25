@@ -61,6 +61,7 @@ LArge Time INcrements solver
 */
 
 #include "Relay_Problem.h"
+#include "LinearComplementarity_Problem.h"
 #include "Solver_Options.h"
 
 #ifdef __cplusplus
@@ -229,6 +230,14 @@ extern "C" {
      */
   int projectiononbox(double *z , double *lb, double * ub, int n);
 
+  /** This function transform a Relay_Problem into a LinearComplementarity_Problem
+     * \param[in] A pointer to a Relay_problem to transform
+     * \param[out] A pointer to a LinearComplementarity_problem resulting from the reformulation
+     * \author Vincent Acary
+     */
+
+
+  void relay_tolcp(Relay_Problem* problem, LinearComplementarity_Problem * lcp_problem);
 
 #ifdef __cplusplus
 }

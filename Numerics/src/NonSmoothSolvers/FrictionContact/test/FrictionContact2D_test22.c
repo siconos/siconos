@@ -25,7 +25,7 @@ int main(void)
 {
   int info = 0 ;
 
-  char filename[50] = "./data/FrictionContactProblem00727.dat";
+  char filename[50] = "./data/FrictionContactProblem00071.dat";
 
   printf("Test on %s\n", filename);
 
