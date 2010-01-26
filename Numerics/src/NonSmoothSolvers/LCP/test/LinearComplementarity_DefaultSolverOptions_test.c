@@ -75,7 +75,7 @@ int main(void)
   printSolverOptions(options);
   deleteSolverOptions(options);
 
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, "Path");
+  info = linearComplementarity_setDefaultSolverOptions(problem, options, "PATH");
   printSolverOptions(options);
   deleteSolverOptions(options);
 
