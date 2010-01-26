@@ -31,6 +31,8 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
+
+
   try
   {
 
@@ -112,16 +114,10 @@ int main(int argc, char* argv[])
     // -- (2) Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-    // -- (3) Non smooth problem
-    IntParameters iparam(5);
-    iparam[0] = 1000; // Max number of iteration
-    DoubleParameters dparam(5);
-    dparam[0] = 1e-15; // Tolerance
-    string solverName = "Lemke" ;
-    // --- (3a) solver
-    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
-    // --- (3b) one step non smooth problem
-    SP::OneStepNSProblem osnspb(new LCP(mySolver));
+    // --- (3) one step non smooth problem
+    SP::OneStepNSProblem osnspb(new LCP());
+
+
 
     // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
@@ -181,6 +177,9 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     ioMatrix io("result.dat", "ascii");
     io.write(dataPlot, "noDim");
+
+
+
   }
 
   catch (SiconosException e)
@@ -191,5 +190,7 @@ int main(int argc, char* argv[])
   {
     cout << "Exception caught in BouncingBallTS.cpp" << endl;
   }
+
+
 
 }
