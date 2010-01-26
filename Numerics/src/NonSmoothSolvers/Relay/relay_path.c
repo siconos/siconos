@@ -35,7 +35,7 @@ void relay_path(Relay_Problem* problem, double *z, double *w, int *info , Solver
   if (!problem->M->matrix0)
   {
     printf("relay_path only implemented for dense storage\n");
-    return info;
+    //      return info;
   }
 
 
@@ -50,7 +50,7 @@ void relay_path(Relay_Problem* problem, double *z, double *w, int *info , Solver
   /* size of the RELAY */
   int n = problem->size;
 
-  double tol = options->dparam[0];
+  //  double tol = options->dparam[0];
   MCP_Termination termination;
 
   nnz = nbNonNulElems(n, M, 1.0e-18);
@@ -116,3 +116,29 @@ void relay_path(Relay_Problem* problem, double *z, double *w, int *info , Solver
 
   return;
 }
+int relay_path_setDefaultSolverOptions(Solver_Options* options)
+{
+#ifdef HAVE_PATHFERRIS
+  //  int i;
+  if (verbose > 0)
+  {
+    printf("Set the Default Solver_Options for the PATH Solver\n");
+  }
+  strcpy(options->solverName, "PATH");
+
+  options->numberOfInternalSolvers = 0;
+  options->internalSolvers = NULL;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 2;
+  options->dSize = 2;
+  options->iparam = (int *)malloc(options->iSize * sizeof(int));
+  options->dparam = (double *)malloc(options->dSize * sizeof(double));
+  options->dWork = NULL;
+  options->iWork = NULL;
+  options->dparam[0] = 1e-6;
+  options->dparam[1] = 1.0;
+#endif /*HAVE_PATHFERRIS*/
+  return 0;
+}
+

@@ -151,6 +151,10 @@ extern "C" {
   */
   void relay_path(Relay_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
 
+  /** set the default solver parameters and perform memory allocation for ENUM
+      \param Solver_Options * the pointer to options to set
+  */
+  int relay_path_setDefaultSolverOptions(Solver_Options* options);
 
   /** pr_latin is a specific latin solver for primal relay problems.
    * \param[in] problem structure that represents the Relay (M, q...)

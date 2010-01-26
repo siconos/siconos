@@ -42,6 +42,10 @@ int relay_setDefaultSolverOptions(Relay_Problem* problem, Solver_Options* option
   {
     info =    relay_enum_setDefaultSolverOptions(problem, options);
   }
+  else if (strcmp(solvername, "PATH") == 0)
+  {
+    info =    relay_path_setDefaultSolverOptions(options);
+  }
   else
   {
     numericsError("Relay_setDefaultSolverOptions", "Unknow Solver");

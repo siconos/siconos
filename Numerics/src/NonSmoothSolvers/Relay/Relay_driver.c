@@ -81,7 +81,7 @@ int relay_driver(Relay_Problem* problem, double *z , double *w,
   {
     relay_enum(problem, z , w , &info , options, global_options);
   }
-  else if (strcmp(name , "Path") == 0)
+  else if (strcmp(name , "PATH") == 0)
   {
     relay_path(problem, z , w , &info , options);
   }

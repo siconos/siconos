@@ -250,6 +250,7 @@ NEW_TEST(FC3Dtest5 FrictionContact3D_test5.c)
 
 IF(PathFerris_FOUND)
 NEW_TEST(FC3Dtest6 FrictionContact3D_test6.c)
+SET(FC3Dtest6_PROPERTIES WILL_FAIL TRUE)
 ENDIF(PathFerris_FOUND)
 
 SET(FC3Dtest7_PROPERTIES WILL_FAIL TRUE)

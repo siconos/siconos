@@ -226,7 +226,7 @@ int lcp_driver_DenseMatrix(LinearComplementarity_Problem* problem, double *z , d
   /* IN: itermax, tolerance, rho
      OUT: iter, error
   */
-  else   if (strcmp(name , "Path") == 0)
+  else   if (strcmp(name , "PATH") == 0)
     lcp_path(problem, z , w , &info , options);
 
   /****** Enumeratif Solver ******/
