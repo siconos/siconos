@@ -70,7 +70,7 @@ int linearComplementarity_setDefaultSolverOptions(LinearComplementarity_Problem*
   {
     info =    linearComplementarity_lexicolemke_setDefaultSolverOptions(options);
   }
-  else if (strcmp(solvername, "Path") == 0)
+  else if (strcmp(solvername, "PATH") == 0)
   {
     info =    linearComplementarity_path_setDefaultSolverOptions(options);
   }
@@ -88,7 +88,7 @@ int linearComplementarity_setDefaultSolverOptions(LinearComplementarity_Problem*
   }
   else
   {
-    numericsError("linearComplementarity_setDefaultSolverOptions", "Unknow Solver");
+    numericsError("linearComplementarity_setDefaultSolverOptions", "   Unknow Solver");
 
   }
 
