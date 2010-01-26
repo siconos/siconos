@@ -28,8 +28,8 @@ MLCP::MLCP(SP::OneStepNSProblemXML onestepnspbxml):
   LinearOSNS(onestepnspbxml, "MLCP") {}
 
 // Constructor from a set of data
-MLCP::MLCP(SP::NonSmoothSolver newSolver, const string& newId):
-  LinearOSNS("MLCP", newSolver, newId) {}
+MLCP::MLCP(const string& newNumericsSolvername, const string& newId):
+  LinearOSNS(newNumericsSolvername, "MLCP", newId) {}
 
 void MLCP::updateM()
 {
@@ -62,7 +62,7 @@ void MLCP::updateM()
 
 void  MLCP::reset()
 {
-  mlcp_driver_reset(&numerics_problem, (solver()->numericsSolverOptions()).get());
+  mlcp_driver_reset(&numerics_problem, &*_numerics_solver_options);
 }
 
 void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
@@ -226,7 +226,7 @@ int MLCP::compute(double time)
     {
       //  display();
       info = mlcp_driver(&numerics_problem, _z->getArray(), _w->getArray(),
-                         (solver()->numericsSolverOptions()).get(), &*_numerics_options);
+                         &*_numerics_solver_options, &*_numerics_options);
     }
     catch (...)
     {
@@ -260,7 +260,6 @@ void MLCP::initialize(SP::Simulation sim)
   // General initialize for LinearOSNS
   LinearOSNS::initialize(sim);
 
-  // Initialization of the NonSmoothSolver
-  _solver->initialize(this);
+
 
 }

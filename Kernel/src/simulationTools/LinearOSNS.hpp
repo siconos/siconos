@@ -103,15 +103,13 @@ public:
   LinearOSNS(SP::OneStepNSProblemXML, const std::string&);
 
   /** constructor from data
+      \param string, numerics_solver_name
       \param string, ns problem type    \
-      \param Solver* pointer to object that contains solver algorithm
-      and formulation \n (optional, default = NULL => read .opt file
-      in Numerics)
       \param String: id of the problem (default = "unamed")
   */
   LinearOSNS(const std::string&,
-             SP::NonSmoothSolver = SP::NonSmoothSolver(),
-             const std::string& = "unamed_lcp");
+             const std::string&,
+             const std::string& = "unamed");
 
   /** destructor
    */

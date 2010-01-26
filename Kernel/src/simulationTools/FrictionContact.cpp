@@ -39,6 +39,16 @@ FrictionContact::FrictionContact(SP::OneStepNSProblemXML osNsPbXml):
 
   _contactProblemDim = xmlFC->getProblemDim();
 
+  // initialize the _numerics_solver_options
+  size_t size = _numerics_solver_name.size() + 1;
+  char * solvername = new char[ size ];
+  strncpy(solvername, _numerics_solver_name.c_str(), size);
+
+  if (_contactProblemDim == 2)
+    frictionContact2D_setDefaultSolverOptions(&*_numerics_solver_options, solvername);
+  else // if(_contactProblemDim == 3)
+    frictionContact3D_setDefaultSolverOptions(&*_numerics_solver_options, solvername);
+
 }
 
 void FrictionContact::initialize(SP::Simulation sim)
@@ -85,9 +95,6 @@ void FrictionContact::initialize(SP::Simulation sim)
     }
   }
 
-  // Initialization of the NonSmoothSolver
-  _solver->initialize(this);
-
 
 
 
@@ -133,7 +140,7 @@ int FrictionContact::compute(double time)
     info = (*_frictionContact_driver)(&numerics_problem,
                                       &*_z->getArray() ,
                                       &*_w->getArray() ,
-                                      (_solver->numericsSolverOptions()).get(),
+                                      &*_numerics_solver_options,
                                       &*_numerics_options);
     postCompute();
 
@@ -153,6 +160,11 @@ FrictionContact* FrictionContact::convert(OneStepNSProblem* osnsp)
 {
   FrictionContact* fc2d = dynamic_cast<FrictionContact*>(osnsp);
   return fc2d;
+}
+
+FrictionContact::~FrictionContact()
+{
+  deleteSolverOptions(&*_numerics_solver_options);
 }
 
 

@@ -118,8 +118,6 @@ void Relay::initialize(SP::Simulation sim)
     SP::SiconosVisitor NSLEffect(new _BoundsNSLEffect(this, ur, pos));
     ur->interaction()->nonSmoothLaw()->accept(*NSLEffect);
   }
-  // Initialization of the NonSmoothSolver
-  _solver->initialize(this) ;
 }
 
 
@@ -152,7 +150,7 @@ int Relay::compute(double time)
     //      Relay_display(&numerics_problem);
 
     info = relay_driver(&numerics_problem, _z->getArray() , _w->getArray() ,
-                        &*_solver->numericsSolverOptions(), nbSolvers, &*_numerics_options);
+                        &*_numerics_solver_options, &*_numerics_options);
 
     if (info != 0)
     {

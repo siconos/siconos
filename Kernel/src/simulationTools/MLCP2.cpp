@@ -28,8 +28,8 @@
 using namespace std;
 
 // Constructor from a set of data
-MLCP2::MLCP2(SP::NonSmoothSolver newSolver, const string& newId):
-  MLCP(newSolver, newId)
+MLCP2::MLCP2(const string& newNumericsSolverName, const string& newId):
+  MLCP(newNumericsSolverName, newId)
 {
   mFirstCall = true;
   m = 0;
@@ -370,7 +370,5 @@ void MLCP2::initialize(SP::Simulation sim)
   // General initialize for LinearOSNS
   Linear::initialize(sim);
 
-  // Initialization of the NonSmoothSolver
-  _solver->initialize(shared_from_this());
 
 }

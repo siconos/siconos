@@ -42,6 +42,5 @@ Note that not all files from the current location are listed below, since some o
 #include "TimeDiscretisationXML.hpp"
 #include "NonSmoothDynamicalSystemXML.hpp"
 #include "SimulationXML.hpp"
-#include "NonSmoothSolverXML.hpp"
 #include "InteractionXML.hpp"
 

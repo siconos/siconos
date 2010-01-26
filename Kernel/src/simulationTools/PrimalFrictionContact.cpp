@@ -44,9 +44,9 @@ PrimalFrictionContact::PrimalFrictionContact(SP::OneStepNSProblemXML osNsPbXml):
 
 // Constructor from a set of data
 // Required input: simulation
-// Optional: NonSmoothSolver and id
-PrimalFrictionContact::PrimalFrictionContact(int dimPb, SP::NonSmoothSolver  newSolver, const string& newId):
-  LinearOSNS("PrimalFrictionContact", newSolver, newId), contactProblemDim(dimPb)
+// Optional: newNumericsSolverName
+PrimalFrictionContact::PrimalFrictionContact(int dimPb, const string& newNumericsSolverName , const string& newId):
+  LinearOSNS(newNumericsSolverName, "PrimalFrictionContact", newId), contactProblemDim(dimPb)
 {}
 
 void PrimalFrictionContact::setLocalVelocity(const SiconosVector& newValue)
@@ -176,8 +176,6 @@ void PrimalFrictionContact::initialize(SP::Simulation sim)
         H.reset(new OSNSMatrix(simulation->model()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation->indexSet(levelMin)->size()   , 1));
     }
   }
-  // Initialization of the NonSmoothSolver
-  _solver->initialize(shared_from_this());
 
 
 }

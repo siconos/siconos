@@ -107,11 +107,10 @@ public:
 
   /** constructor from data
    *  \param int dim (2D or 3D) of the friction-contact problem
-   *  \param Solver* pointer to object that contains solver algorithm and formulation \n
-   *  (optional, default = NULL => read .opt file in Numerics)
+   *  \param string numericsSolvername
    *  \param string id of the problem (optional)
    */
-  PrimalFrictionContact(int, SP::NonSmoothSolver = SP::NonSmoothSolver(), const std::string& = "unamed_friction_contact_problem");
+  PrimalFrictionContact(int, const std::string& = "NSGS" , const std::string& = "unamed_friction_contact_problem");
 
   /** destructor
    */

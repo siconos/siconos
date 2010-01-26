@@ -105,7 +105,7 @@ public:
   *  (optional, default = NULL => read .opt file in Numerics)
   *  \param String: id of the problem (default = "unamed")
   */
-  MLCP(SP::NonSmoothSolver = SP::NonSmoothSolver(), const std::string& = "unamed_mlcp");
+  MLCP(const std::string& , const std::string& = "unamed_mlcp");
 
   /** destructor
   */

@@ -25,7 +25,7 @@
 
 #include "SiconosPointers.hpp"
 #include "SiconosDOMTreeTools.hpp"
-#include "NonSmoothSolverXML.hpp"
+
 
 class OneStepNSProblem;
 class NonSmoothSolverXML;
@@ -82,16 +82,16 @@ protected:
   xmlNodePtr dimNode;
   /** node used to list the interactions involved in the OSNSS (tag Interactions_Concerned) */
   xmlNodePtr interactionsConcernedNode;
-  /** node used to define solver (tag: NonSmoothSolver) - Child of rootNode */
-  xmlNodePtr solverNode;
+  /** node used to define solver (tag: NumericsSolverName) - Child of rootNode */
+  xmlNodePtr numericsSolverNameNode;
   /** solverXML object */
-  SP::NonSmoothSolverXML solverXML;
+
 
 public:
 
   /** Default constructor */
   inline OneStepNSProblemXML(): rootNode(NULL), dimNode(NULL), interactionsConcernedNode(NULL),
-    solverNode(NULL) {};
+    numericsSolverNameNode(NULL) {};
 
   /** Build a OneStepNSProblemXML object from a DOM tree describing a OneStepNSProblem
    *   \param OneStepNSProblemNode : the OneStepNSProblem DOM tree
@@ -143,22 +143,6 @@ public:
    */
   void setAllInteractions(const bool&);
 
-  /** to xml object that handles solver
-   *   \return a pointer to a NonSmoothSolverXML
-   */
-  inline SP::NonSmoothSolverXML nonSmoothSolverXML() const
-  {
-    return solverXML;
-  }
-
-  /** set xml object that handles solver
-   *   \param a pointer to a NonSmoothSolverXML
-   */
-  inline void setNonSmoothSolverXMLPtr(SP::NonSmoothSolverXML newPtr)
-  {
-    solverXML = newPtr;
-  }
-
   /** Checks if attribute "storageType" is given in formalization tag
    *  \return a bool
    */
@@ -177,13 +161,6 @@ public:
     return SiconosDOMTreeTools::getAttributeValue<int>(rootNode, "StorageType");
   }
 
-  /** checks if tag Solver exists
-   *  \return bool : true if tag Solver exists
-   */
-  inline bool hasNonSmoothSolver() const
-  {
-    return solverNode;
-  }
 
   /** makes the operations to create a OneStepNSProblemXML to the SimulationXML
    *   \param xmlNodePtr : the root node of the OneStepNSProblemXML
@@ -200,10 +177,25 @@ public:
   }
 
   /** Return true if the id attribute of the rootNode is present.
-   *   \return a bool   */
+     *   \return a bool   */
   inline bool hasId() const
   {
     return SiconosDOMTreeTools::hasAttributeValue(rootNode, "Id");
+  }
+
+  /** Return the  NumericsSolverName of the OneStepNSProblem (attribute of the root node)
+   *   \return a string
+   */
+  inline std::string getNumericsSolverName() const
+  {
+    return SiconosDOMTreeTools::getStringAttributeValue(rootNode, "NumericsSolverName");
+  }
+
+  /** Return true if the NumericsSolverName attribute of the rootNode is present.
+  *   \return a bool   */
+  inline bool hasNumericsSolverName() const
+  {
+    return SiconosDOMTreeTools::hasAttributeValue(rootNode, "NumericsSolverName");
   }
 
   /** return a vector<int> of the number of the interactions related to the OSNS

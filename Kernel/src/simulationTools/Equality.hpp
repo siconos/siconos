@@ -45,7 +45,6 @@
  *  The Equality main components are:
  *  - a problem (variables M,q and size of the problem), which directly corresponds to the LinearComplementarityProblem structure of Numerics
  *  - the unknowns z and w
- *  - a NonSmoothSolver, used to define a solver and its parameters (connected to Solver_Options structure of Numerics)
  *
  *  A Equality is connected to a simulation that handles a NonSmoothDynamicalSystem and its Topology. \n
  *  IndexSets from simulation are used to know which constraints (UnitaryRelation) are active or not. \n
@@ -78,8 +77,8 @@ public:
    *  (optional, default = NULL => read .opt file in Numerics)
    *  \param String: id of the problem (default = "unamed")
    */
-  Equality(SP::NonSmoothSolver newSolver = SP::NonSmoothSolver(), const std::string& newId = "unamed_equality"):
-    LinearOSNS("Equality", newSolver, newId) {};
+  Equality(const std::string& newNumericsSolverName = "toto", const std::string& newId = "unamed_equality"):
+    LinearOSNS(newNumericsSolverName, "Equality", newId) {};
 
   /** destructor
    */

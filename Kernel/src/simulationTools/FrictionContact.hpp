@@ -51,7 +51,7 @@ typedef int (*Driver)(FrictionContact_Problem*, double*, double*, Solver_Options
  *
  * \b Construction:
  *   - XML reading (inputs = xml node with tag "OneStepNSProblem" and a SP::Simulation)
- *   - Constructor from data (inputs = Simulations*, id, SP::NonSmoothSolver) - The solver is optional.
+ *   - Constructor from data (inputs = Simulations*, id) - The solver is optional.
  * Main functions:
  *
  * \b Main functions:
@@ -89,13 +89,13 @@ public:
    *  (optional, default = NULL => read .opt file in Numerics)
    *  \param string id of the problem (optional)
    */
-  FrictionContact(int dimPb, SP::NonSmoothSolver newSolver = SP::NonSmoothSolver(),
+  FrictionContact(int dimPb, const std::string& newNumericsSolverName = "NSGS" ,
                   const std::string& newId = "unamed_friction_contact_problem"):
-    LinearOSNS("FrictionContact", newSolver, newId), _contactProblemDim(dimPb) {};
+    LinearOSNS(newNumericsSolverName, "FrictionContact", newId), _contactProblemDim(dimPb) {};
 
   /** destructor
    */
-  ~FrictionContact() {};
+  ~FrictionContact();
 
   // GETTERS/SETTERS
 

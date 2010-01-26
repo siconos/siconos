@@ -46,9 +46,9 @@ LinearOSNS::LinearOSNS(SP::OneStepNSProblemXML onestepnspbxml,
 }
 
 // Constructor from a set of data
-LinearOSNS::LinearOSNS(const string& name, SP::NonSmoothSolver newSolver,
+LinearOSNS::LinearOSNS(const string& numericsSolverName,  const string& name,
                        const string& newId):
-  OneStepNSProblem(name, newId, newSolver), _MStorageType(0), _keepLambdaAndYState(false)
+  OneStepNSProblem(name, newId, numericsSolverName), _MStorageType(0), _keepLambdaAndYState(false)
 {}
 
 // Setters

@@ -27,7 +27,6 @@
 #include "SimulationTypeDef.hpp"
 #include "Numerics_Options.h"
 #include "NumericsMatrix.h"
-#include "NonSmoothSolver.hpp"
 #include "OSNSMatrix.hpp"
 
 class Simulation;
@@ -35,7 +34,7 @@ class DynamicalSystem;
 class UnitaryRelation;
 class SiconosMatrix;
 TYPEDEF_SPTR(Numerics_Options);
-
+TYPEDEF_SPTR(Solver_Options);
 
 /** default name for the OneStepNSProblem of the simulation */
 const std::string DEFAULT_OSNS_NAME = "unamed";
@@ -85,6 +84,16 @@ class OneStepNSProblem : public boost::enable_shared_from_this<OneStepNSProblem>
 
 protected:
 
+  /** Algorithm/solver name */
+  std::string _numerics_solver_name;
+
+  /** Numerics structure used to solve solver options */
+  SP::Solver_Options _numerics_solver_options;
+
+
+
+
+
   /** type of the OneStepNSProblem (LCP ...) */
   std::string _nspbType;
 
@@ -113,8 +122,6 @@ protected:
       Dynamical A and UnitaryRelation B are coupled through DSunitaryBlockMatrixAB.  */
   MapOfDSMapOfUnitaryMatrices _DSUnitaryBlocks;
 
-  /** Solver for Non Smooth Problem*/
-  SP::NonSmoothSolver _solver;
 
   /** link to the simulation that owns the NSPb */
   SP::Simulation _simulation;
@@ -186,17 +193,39 @@ public:
   /** constructor from data
    *  \param string: problem type
    *  \param string : id
-   *  \param Solver *: pointer on object that contains solver
-   *  algorithm definition (optional)
+   *  \param string : solvername
    */
-  OneStepNSProblem(const std::string&, const std::string&,
-                   SP::NonSmoothSolver = SP::NonSmoothSolver());
+  OneStepNSProblem(const std::string&, const std::string&, const std::string&);
 
   /** destructor
    */
   virtual ~OneStepNSProblem();
 
   // --- GETTERS/SETTERS ---
+
+  /** To get the solver algorithm name
+    *  \return a string
+    */
+  inline const std::string numericsSolverName() const
+  {
+    return _numerics_solver_name;
+  };
+
+  /** To set the solver algorithm name
+   *  \param a string
+   */
+  inline void setNumericsSolverName(const std::string& newVal)
+  {
+    _numerics_solver_name = newVal;
+  };
+
+  /** To get the Solver_Options structure
+   *  \return , the numerics structure used to save solver parameters
+   */
+  inline SP::Solver_Options numericsSolverOptions() const
+  {
+    return _numerics_solver_options;
+  };
 
   /** to get the type of the OneStepNSProblem
    *  \return string
@@ -326,19 +355,6 @@ public:
    *  \param a MapOfDSMapOfUnitaryMatrices
    */
   void setDSUnitaryBlocks(const MapOfDSMapOfUnitaryMatrices&);
-
-  /** get the NonSmoothSolver
-   *  \return a pointer on NonSmoothSolver
-   */
-  inline SP::NonSmoothSolver solver() const
-  {
-    return _solver;
-  }
-
-  /** set the NonSmoothSolver of the OneStepNSProblem
-   *  \param: a pointer on NonSmoothSolver
-   */
-  void setNonSmoothSolverPtr(SP::NonSmoothSolver);
 
   /** get the Simulation
    *  \return a pointer on Simulation

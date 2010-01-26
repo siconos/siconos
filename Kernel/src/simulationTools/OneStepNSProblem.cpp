@@ -50,32 +50,29 @@ OneStepNSProblem::OneStepNSProblem(const string& pbType,
   if (_onestepnspbxml->hasId())
     _id = _onestepnspbxml->getId();
 
-  // === read solver related data ===
-  if (_onestepnspbxml->hasNonSmoothSolver())
-    _solver.reset(new NonSmoothSolver(_onestepnspbxml->nonSmoothSolverXML()));
-  else // solver = default one
-    _solver.reset(new NonSmoothSolver());
+  if (_onestepnspbxml->hasNumericsSolverName())
+    _id = _onestepnspbxml->getNumericsSolverName();
+
 
   // Numerics general options
   _numerics_options.reset(new Numerics_Options());
   _numerics_options->verboseMode = 0; // turn verbose mode to off by default
+
+  _numerics_solver_options.reset(new Solver_Options);
+
 }
 
 // Constructor with given simulation and a pointer on Solver (Warning, solver is an optional argument)
-OneStepNSProblem::OneStepNSProblem(const string& pbType, const string& newId, SP::NonSmoothSolver newSolver):
-  _nspbType(pbType), _id(newId), _sizeOutput(0), _solver(newSolver),
-  _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0)
+OneStepNSProblem::OneStepNSProblem(const string& pbType, const string& newId, const string& newNumericsSolverName):
+  _numerics_solver_name(newNumericsSolverName), _nspbType(pbType), _id(newId), _sizeOutput(0), _levelMin(0), _levelMax(0), _maxSize(0), _CPUtime(0), _nbIter(0)
 {
-  if (!newSolver)
-  {
-    // If the user does not provide any Solver, an empty one is
-    // built.  Data will be read from XXX.opt file in Numerics.
-    _solver.reset(new NonSmoothSolver());
-  }
 
   // Numerics general options
   _numerics_options.reset(new Numerics_Options());
   _numerics_options->verboseMode = 0; // turn verbose mode to off by default
+
+  _numerics_solver_options.reset(new Solver_Options);
+
 }
 
 SP::SiconosMatrix OneStepNSProblem::unitaryBlock(SP::UnitaryRelation UR1,
@@ -167,10 +164,6 @@ void OneStepNSProblem::setDSUnitaryBlocks(const MapOfDSMapOfUnitaryMatrices& new
   RuntimeException::selfThrow("OneStepNSProblem::setDSUnitaryBlocks - Not implemented: forbidden operation.");
 }
 
-void OneStepNSProblem::setNonSmoothSolverPtr(SP::NonSmoothSolver newSolv)
-{
-  _solver = newSolv;
-}
 
 void OneStepNSProblem::updateUnitaryBlocks()
 {

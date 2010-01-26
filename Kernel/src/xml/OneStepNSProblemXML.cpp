@@ -18,13 +18,12 @@
  */
 
 #include "OneStepNSProblemXML.hpp"
-#include "NonSmoothSolverXML.hpp"
+
 
 using namespace std;
 
 OneStepNSProblemXML::OneStepNSProblemXML(xmlNodePtr oneStepNSProblemXMLNode):
-  rootNode(oneStepNSProblemXMLNode), dimNode(NULL), interactionsConcernedNode(NULL),
-  solverNode(NULL)
+  rootNode(oneStepNSProblemXMLNode), dimNode(NULL), interactionsConcernedNode(NULL), numericsSolverNameNode(NULL)
 {
   // rootNode == formalisation type (LCP ...)
 
@@ -36,12 +35,12 @@ OneStepNSProblemXML::OneStepNSProblemXML(xmlNodePtr oneStepNSProblemXMLNode):
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "Interactions_Concerned")))
     interactionsConcernedNode = node;
 
-  // Solver
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "NonSmoothSolver")))
-  {
-    solverNode = node;
-    solverXML.reset(new NonSmoothSolverXML(solverNode));
-  }
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "NumericsSolverName")))
+    numericsSolverNameNode = node;
+
+
+
+
   //  else -> nothing, it's up to OneStepNSProblem constructor to deal with the fact that no solver has been given
 }
 
@@ -58,7 +57,6 @@ bool OneStepNSProblemXML::hasAllInteractions() const
     return SiconosDOMTreeTools::getAttributeValue<bool>(interactionsConcernedNode, ALL_ATTRIBUTE);
   else return false;
 }
-
 void OneStepNSProblemXML::setAllInteractions(const bool& all)
 {
   if (!hasAllInteractions())
@@ -73,10 +71,6 @@ void OneStepNSProblemXML::setAllInteractions(const bool& all)
   }
 }
 
-void OneStepNSProblemXML::updateOneStepNSProblemXML(xmlNode* node, SP::OneStepNSProblem osnspb)
-{
-  rootNode = node;
-}
 
 void OneStepNSProblemXML::getInteractionsNumbers(vector<int>& inNumbers)
 {

@@ -55,14 +55,13 @@
  *  The MLCP main components are:
  *  - a problem (variables A,B,C,D,a,b and size of the problem), which directly corresponds to the MixedLinearComplementarityProblem structure of Numerics
  *  - the unknowns u,v and z
- *  - a NonSmoothSolver, used to define a solver and its parameters (connected to Solver_Options structure of Numerics)
  *
  *  A MLCP is connected to a simulation that handles a NonSmoothDynamicalSystem and its Topology. \n
  *  IndexSets from simulation are used to know which constraints (UnitaryRelation) are active or not. \n
  *
  * \b Construction:
  *   - XML reading (inputs = xml node with tag "OneStepNSProblem" and a SP::Simulation)
- *   - Constructor from data (inputs = Simulations*, id, SP::NonSmoothSolver) - The solver is optional.
+ *   - Constructor from data (inputs = Simulations*, id, NumericsSolverName) - The solver is optional.
  * Main functions:
  *
  * \b Main functions:
@@ -88,7 +87,7 @@ public:
   *  (optional, default = NULL => read .opt file in Numerics)
   *  \param String: id of the problem (default = "unamed")
   */
-  MLCP2(SP::NonSmoothSolver = SP::NonSmoothSolver(), const std::string& = "unamed_mlcp");
+  MLCP2(const std::string& , const std::string& = "unamed_mlcp");
 
   /** destructor
   */

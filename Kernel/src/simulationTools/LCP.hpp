@@ -24,7 +24,7 @@
 #define LCP_H
 
 #include "LinearOSNS.hpp"
-
+TYPEDEF_SPTR(LinearComplementarity_Problem);
 /** Formalization and Resolution of a Linear Complementarity Problem (LCP)
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -48,7 +48,6 @@
  *  The LCP main components are:
  *  - a problem (variables M,q and size of the problem), which directly corresponds to the LinearComplementarityProblem structure of Numerics
  *  - the unknowns z and w
- *  - a NonSmoothSolver, used to define a solver and its parameters (connected to Solver_Options structure of Numerics)
  *
  *  A LCP is connected to a simulation that handles a NonSmoothDynamicalSystem and its Topology. \n
  *  IndexSets from simulation are used to know which constraints (UnitaryRelation) are active or not. \n
@@ -72,6 +71,11 @@
  */
 class LCP : public LinearOSNS
 {
+protected:
+
+  /** Numerics problem to solve */
+  SP::LinearComplementarity_Problem _numerics_problem;
+
 public:
 
   /** xml constructor
@@ -85,12 +89,11 @@ public:
    *  (optional, default = NULL => read .opt file in Numerics)
    *  \param String: id of the problem (default = "unamed")
    */
-  LCP(SP::NonSmoothSolver newSolver = SP::NonSmoothSolver(), const std::string& newId = "unamed_lcp"):
-    LinearOSNS("LCP", newSolver, newId) {};
+  LCP(const std::string& newNewNumericsSolverName = "Lemke", const std::string& newId = "unamed_lcp");
 
   /** destructor
    */
-  ~LCP() {};
+  ~LCP();
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
    *  \param double : current time

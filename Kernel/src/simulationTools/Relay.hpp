@@ -104,8 +104,8 @@ public:
    *  (optional, default = NULL => read .opt file in Numerics)
    *  \param String: id of the problem (default = "unamed")
    */
-  Relay(SP::NonSmoothSolver newSolver = SP::NonSmoothSolver(), const std::string& newId = "unamed_relay"):
-    LinearOSNS("Relay", newSolver, newId) {};
+  Relay(const std::string& newNumericsSolverName = "Lemke", const std::string& newId = "unamed_relay"):
+    LinearOSNS(newNumericsSolverName, "Relay", newId) {};
 
   /** destructor
    */

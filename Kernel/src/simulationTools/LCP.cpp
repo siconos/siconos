@@ -21,6 +21,22 @@
 using namespace std;
 using namespace RELATION;
 
+
+LCP::LCP(const std::string& newNewNumericsSolverName , const std::string& newId):
+  LinearOSNS(newNewNumericsSolverName, "LCP", newId)
+{
+  _numerics_problem.reset(new  LinearComplementarity_Problem);
+
+  size_t size = _numerics_solver_name.size() + 1;
+  char * solvername = new char[ size ];
+  strncpy(solvername, _numerics_solver_name.c_str(), size);
+  linearComplementarity_setDefaultSolverOptions(&*_numerics_problem   , &*_numerics_solver_options, solvername);
+
+
+
+};
+
+
 int LCP::compute(double time)
 {
   // --- Prepare data for LCP computing ---
@@ -37,26 +53,25 @@ int LCP::compute(double time)
   if (_sizeOutput != 0)
   {
     // The LCP in Numerics format
-    LinearComplementarity_Problem numerics_problem;
-    numerics_problem.M = &*_M->getNumericsMatrix();
-    numerics_problem.q = _q->getArray();
-    numerics_problem.size = _sizeOutput;
+    _numerics_problem->M = &*_M->getNumericsMatrix();
+    _numerics_problem->q = _q->getArray();
+    _numerics_problem->size = _sizeOutput;
     int nbSolvers = 1;
-    const char * name = &*_solver->numericsSolverOptions()->solverName;
+    const char * name = &*_numerics_solver_options->solverName;
     if ((strcmp(name , "ENUM") == 0))
     {
-      lcp_enum_init(&numerics_problem, &*_solver->numericsSolverOptions(), 1);
+      lcp_enum_init(&*_numerics_problem, &*_numerics_solver_options, 1);
 
 
     }
 
     // Call LCP Driver
-    info = lcp_driver(&numerics_problem, _z->getArray() , _w->getArray() ,
-                      &*_solver->numericsSolverOptions(), nbSolvers, &*_numerics_options);
+    info = linearComplementarity_driver(&*_numerics_problem, _z->getArray() , _w->getArray() ,
+                                        &*_numerics_solver_options, &*_numerics_options);
 
     if ((strcmp(name , "ENUM") == 0))
     {
-      lcp_enum_reset(&numerics_problem, &*_solver->numericsSolverOptions(), 1);
+      lcp_enum_reset(&*_numerics_problem, &*_numerics_solver_options, 1);
 
 
     }
@@ -86,7 +101,10 @@ void LCP::initialize(SP::Simulation sim)
   // General initialize for LinearOSNS
   LinearOSNS::initialize(sim);
 
-  // Initialization of the NonSmoothSolver
-  _solver->initialize(this);
 
+}
+
+LCP::~LCP()
+{
+  deleteSolverOptions(&*_numerics_solver_options);
 }
