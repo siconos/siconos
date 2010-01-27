@@ -132,39 +132,34 @@ int main(int argc, char* argv[])
 
     // --- Model creation ---
     SP::Model DiodeBridgeCapFilter(new Model(t0, T, Modeltitle));
+    // add the dynamical system in the non smooth dynamical system
+    DiodeBridgeCapFilter->nonSmoothDynamicalSystem()->insertDynamicalSystem(LS1DiodeBridgeCapFilter);
+    // link the interaction and the dynamical system
+    DiodeBridgeCapFilter->nonSmoothDynamicalSystem()->link(InterDiodeBridgeCapFilter, LS1DiodeBridgeCapFilter);
 
-    // --- Dynamical system creation ---
-    InteractionsSet allInteractions;
-    allInteractions.insert(InterDiodeBridgeCapFilter);
-    SP::NonSmoothDynamicalSystem NSDSDiodeBridgeCapFilter(new NonSmoothDynamicalSystem(Inter_DS, allInteractions, false));
-    DiodeBridgeCapFilter->setNonSmoothDynamicalSystemPtr(NSDSDiodeBridgeCapFilter);
 
-    // --- Simulation specification---
+    // ------------------
+    // --- Simulation ---
+    // ------------------
 
-    SP::TimeDiscretisation TiDisc(new TimeDiscretisation(t0, h_step));
-
-    SP::TimeStepping StratDiodeBridgeCapFilter(new TimeStepping(TiDisc));
-
+    // -- (1) OneStepIntegrators --
     double theta = 1.0;
-    //Moreau* OSI_LS1DiodeBridgeCapFilter = new Moreau(LS1DiodeBridgeCapFilter,theta,StratDiodeBridgeCapFilter);
-    //Moreau* OSI_LS2DiodeBridgeCapFilter = new Moreau(LS2DiodeBridgeCapFilter,theta,StratDiodeBridgeCapFilter);
-    SP::Moreau OSI_LS1DiodeBridgeCapFilter(new Moreau(Inter_DS, theta));
-    StratDiodeBridgeCapFilter->insertIntegrator(OSI_LS1DiodeBridgeCapFilter);
+    SP::Moreau aOSI(new Moreau(Inter_DS, theta));
+    // -- (2) Time discretisation --
+    SP::TimeDiscretisation aTiDisc(new TimeDiscretisation(t0, h_step));
+    // -- (3) Non smooth problem
+    SP::LCP aLCP(new LCP());
+    // -- (4) Simulation setup with (1) (2) (3)
+    SP::TimeStepping aTS(new TimeStepping(aTiDisc, aOSI, aLCP));
 
-    IntParameters iparam(5);
-    iparam[0] = 10000; // Max number of iteration
-    DoubleParameters dparam(5);
-    dparam[0] = 1e-7; // Tolerance
-    string solverName = "Lemke" ;
-    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
-    SP::LCP LCP_DiodeBridgeCapFilter(new LCP(mySolver));
-    StratDiodeBridgeCapFilter->insertNonSmoothProblem(LCP_DiodeBridgeCapFilter);
-
-    DiodeBridgeCapFilter->initialize(StratDiodeBridgeCapFilter);
+    // Initialization
+    cout << "====> Initialisation ..." << endl << endl;
+    DiodeBridgeCapFilter->initialize(aTS);
+    cout << " ---> End of initialization." << endl;
 
 
     int k = 0;
-    double h = StratDiodeBridgeCapFilter->timeStep();
+    double h = aTS->timeStep();
     int N = (int)((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
@@ -204,11 +199,11 @@ int main(int argc, char* argv[])
       k++;
 
       // solve ...
-      StratDiodeBridgeCapFilter->computeOneStep();
+      aTS->computeOneStep();
 
       // --- Get values to be plotted ---
       // time
-      dataPlot(k, 0) = StratDiodeBridgeCapFilter->nextTime();
+      dataPlot(k, 0) = aTS->nextTime();
 
       // inductor voltage
       dataPlot(k, 1) = (*LS1DiodeBridgeCapFilter->x())(0);
@@ -228,7 +223,7 @@ int main(int argc, char* argv[])
       // diode F1 current
       dataPlot(k, 6) = (InterDiodeBridgeCapFilter->getLambda(0))(2);
 
-      StratDiodeBridgeCapFilter->nextStep();
+      aTS->nextStep();
 
     }
 

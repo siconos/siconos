@@ -111,36 +111,42 @@ int main(int argc, char* argv[])
 
     SP::Interaction InterDiodeBridgePowSup(new Interaction("InterDiodeBridgePowSup", allDS, 1, 4, nslaw, LTIRDiodeBridgePowSup));
 
-    SP::NonSmoothDynamicalSystem NSDSDiodeBridgePowSup(new NonSmoothDynamicalSystem(LSDiodeBridgePowSup, InterDiodeBridgePowSup, false));
 
     // --- Model creation ---
     SP::Model DiodeBridgePowSup(new Model(t0, T, Modeltitle));
-    DiodeBridgePowSup->setNonSmoothDynamicalSystemPtr(NSDSDiodeBridgePowSup);
+    // add the dynamical system in the non smooth dynamical system
+    DiodeBridgePowSup->nonSmoothDynamicalSystem()->insertDynamicalSystem(LSDiodeBridgePowSup);
+    // link the interaction and the dynamical system
+    DiodeBridgePowSup->nonSmoothDynamicalSystem()->link(InterDiodeBridgePowSup, LSDiodeBridgePowSup);
 
-    // --- Simulation specification---
 
-    SP::TimeDiscretisation TiDisc(new TimeDiscretisation(t0, h_step));
+    // ------------------
+    // --- Simulation ---
+    // ------------------
 
-    SP::TimeStepping StratDiodeBridgePowSup(new TimeStepping(TiDisc));
 
+    // -- (1) OneStepIntegrators --
     double theta = 0.5;
+    SP::Moreau aOSI(new Moreau(LSDiodeBridgePowSup, theta));
 
-    SP::Moreau OSI_LSDiodeBridgePowSup(new Moreau(LSDiodeBridgePowSup, theta));
-    StratDiodeBridgePowSup->insertIntegrator(OSI_LSDiodeBridgePowSup);
+    // -- (2) Time discretisation --
+    SP::TimeDiscretisation aTiDisc(new TimeDiscretisation(t0, h_step));
 
-    IntParameters iparam(5);
-    iparam[0] = 300; // Max number of iteration
-    DoubleParameters dparam(5);
-    dparam[0] = 1e-8; // Tolerance
-    string solverName = "NSQP" ;
-    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
-    SP::LCP LCP_DiodeBridgePowSup(new LCP(mySolver));
-    StratDiodeBridgePowSup->insertNonSmoothProblem(LCP_DiodeBridgePowSup);
+    // -- (3) Non smooth problem
+    SP::LCP aLCP(new LCP("NSQP"));
 
-    DiodeBridgePowSup->initialize(StratDiodeBridgePowSup);
+    // -- (4) Simulation setup with (1) (2) (3)
+    SP::TimeStepping aTS(new TimeStepping(aTiDisc, aOSI, aLCP));
+
+    // Initialization
+    cout << "====> Initialisation ..." << endl << endl;
+    DiodeBridgePowSup->initialize(aTS);
+    cout << " ---> End of initialization." << endl;
+
+
 
     k = 0;
-    double h = StratDiodeBridgePowSup->timeStep();
+    double h = aTS->timeStep();
     int N = (int)((T - t0) / h); // Number of time steps
     cout << "Number of time steps = " << N << endl;
     tinst = k * h_step;
@@ -169,7 +175,7 @@ int main(int argc, char* argv[])
     dataPlot(k, 0) = DiodeBridgePowSup->t0();
 
     // source voltage
-    dataPlot(k, 1) = (LSDiodeBridgePowSup->getZ())(4);
+    dataPlot(k, 1) = (LSDiodeBridgePowSup->z())->getValue(4);
 
     // source current
     dataPlot(k, 2) = i_DF1 - i_DR2;
@@ -204,7 +210,7 @@ int main(int argc, char* argv[])
       tinst = k * h_step;
 
       // solve ...
-      StratDiodeBridgePowSup->computeOneStep();
+      aTS->computeOneStep();
 
       // --- Get values to be plotted ---
       i_DF1 = (InterDiodeBridgePowSup->getLambda(0))(2);
@@ -218,10 +224,10 @@ int main(int argc, char* argv[])
       v_DR2 = -(*InterDiodeBridgePowSup->y(0))(3) + DiodeThreshold;
 
       // time
-      dataPlot(k, 0) = StratDiodeBridgePowSup->nextTime();
+      dataPlot(k, 0) = aTS->nextTime();
 
       // source voltage
-      dataPlot(k, 1) = (LSDiodeBridgePowSup->getZ())(4);
+      dataPlot(k, 1) = (LSDiodeBridgePowSup->z())->getValue(4);
 
       // source current
       dataPlot(k, 2) = i_DF1 - i_DR2;
@@ -244,7 +250,7 @@ int main(int argc, char* argv[])
       // diode R2 current
       dataPlot(k, 8) = i_DR2;
 
-      StratDiodeBridgePowSup->nextStep();
+      aTS->nextStep();
     }
 
 

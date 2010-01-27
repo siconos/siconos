@@ -102,39 +102,36 @@ int main(int argc, char* argv[])
 
     // --- Model creation ---
     SP::Model DiodeBridge(new Model(t0, T, Modeltitle));
+    // add the dynamical system in the non smooth dynamical system
     DiodeBridge->nonSmoothDynamicalSystem()->insertDynamicalSystem(LSDiodeBridge);
-    DiodeBridge->nonSmoothDynamicalSystem()->insertInteraction(InterDiodeBridge);
+    // link the interaction and the dynamical system
+    DiodeBridge->nonSmoothDynamicalSystem()->link(InterDiodeBridge, LSDiodeBridge);
 
-    // --- Simulation specification---
+    // ------------------
+    // --- Simulation ---
+    // ------------------
 
-    // -- (1) One Step Integrator
+
+    // -- (1) OneStepIntegrators --
     double theta = 0.5;
-    SP::Moreau OSI_RLCD(new Moreau(LSDiodeBridge, theta));
+    SP::Moreau aOSI(new Moreau(LSDiodeBridge, theta));
 
-    // -- (2) Time discretisation
-    SP::TimeDiscretisation TiDiscRLCD(new TimeDiscretisation(t0, h_step));
+    // -- (2) Time discretisation --
+    SP::TimeDiscretisation aTiDisc(new TimeDiscretisation(t0, h_step));
 
     // -- (3) Non smooth problem
-    // One Step non smooth problem
-    IntParameters iparam(5);
-    iparam[0] = 1001; // Max number of iteration
-    DoubleParameters dparam(5);
-    dparam[0] = 0.0001; // Tolerance
-    string solverName = "Lemke" ;
-    // -- (3a) solver
-    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
-    // -- (3b) one step non smooth problem
-    SP::LCP LCP_RLCD(new LCP(mySolver));
+    SP::LCP aLCP(new LCP());
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping StratDiodeBridge(new TimeStepping(TiDiscRLCD, OSI_RLCD, LCP_RLCD));
+    SP::TimeStepping aTS(new TimeStepping(aTiDisc, aOSI, aLCP));
 
     // Initialization
-    DiodeBridge->initialize(StratDiodeBridge);
+    cout << "====> Initialisation ..." << endl << endl;
+    DiodeBridge->initialize(aTS);
     cout << " ---> End of initialization." << endl;
 
     int k = 0;
-    double h = StratDiodeBridge->timeStep();
+    double h = aTS->timeStep();
     int N = (int)((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
@@ -174,11 +171,11 @@ int main(int argc, char* argv[])
     for (k = 1 ; k < N ; ++k)
     {
       // solve ...
-      StratDiodeBridge->computeOneStep();
+      aTS->computeOneStep();
 
       // --- Get values to be plotted ---
       // time
-      dataPlot(k, 0) = StratDiodeBridge->nextTime();
+      dataPlot(k, 0) = aTS->nextTime();
 
       // inductor voltage
       dataPlot(k, 1) = (*x)(0);
@@ -198,7 +195,7 @@ int main(int argc, char* argv[])
       // diode F1 current
       dataPlot(k, 6) = (*lambda)(2);
 
-      StratDiodeBridge->nextStep();
+      aTS->nextStep();
 
     }
 

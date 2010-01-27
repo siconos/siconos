@@ -102,42 +102,39 @@ int main(int argc, char* argv[])
 
     SP::Interaction InterPRC(new Interaction("InterPRC", dsConcerned, 1, 4, nslaw, LTIRPRC));
 
-    // --- Non Smooth Dynamical system  ---
-    SP::NonSmoothDynamicalSystem NSDSPRC(new NonSmoothDynamicalSystem(LSPRC, InterPRC));
 
     // --- Model creation ---
     SP::Model PRC(new Model(t0, T, Modeltitle, Author, Description, Date));
-    PRC->setNonSmoothDynamicalSystemPtr(NSDSPRC); // set NonSmoothDynamicalSystem of this model
+    // add the dynamical system in the non smooth dynamical system
+    PRC->nonSmoothDynamicalSystem()->insertDynamicalSystem(LSPRC);
+    // link the interaction and the dynamical system
+    PRC->nonSmoothDynamicalSystem()->link(InterPRC, LSPRC);
 
-    // --- Simulation specification---
+    // ------------------
+    // --- Simulation ---
+    // ------------------
+    // -- (1) OneStepIntegrators --
+    double theta = 0.5;
+    SP::Moreau aOSI(new Moreau(LSPRC, theta));
 
-    // -- Time discretisation --
-    SP::TimeDiscretisation TiDiscRLCD(new TimeDiscretisation(t0, h_step));
-    SP::TimeStepping StratPRC(new TimeStepping(TiDiscRLCD));
+    // -- (2) Time discretisation --
+    SP::TimeDiscretisation aTiDisc(new TimeDiscretisation(t0, h_step));
 
-    // -- OneStepIntegrators --
-    double theta = 0.5000000000000001;
-    SP::OneStepIntegrator OSI_RLCD(new Moreau(LSPRC, theta));
-    StratPRC->insertIntegrator(OSI_RLCD);
+    // -- (3) Non smooth problem
+    SP::LCP aLCP(new LCP());
 
-    // -- OneStepNsProblem --
-    IntParameters iparam(5);
-    iparam[0] = 10001; // Max number of iteration
-    DoubleParameters dparam(5);
-    dparam[0] = 0.000001; // Tolerance
-    string solverName = "Lemke" ;
-    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
-    SP::OneStepNSProblem LCP_RLCD(new LCP(mySolver));
-    StratPRC->insertNonSmoothProblem(LCP_RLCD);
+    // -- (4) Simulation setup with (1) (2) (3)
+    SP::TimeStepping aTS(new TimeStepping(aTiDisc, aOSI, aLCP));
+
 
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
     cout << "====> Simulation initialisation ..." << endl << endl;
-    PRC->initialize(StratPRC);
+    PRC->initialize(aTS);
 
-    double h = StratPRC->timeStep();
+    double h = aTS->timeStep();
     int N = (int)((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
@@ -167,15 +164,15 @@ int main(int argc, char* argv[])
     cout << "====> Start computation ... " << endl << endl;
     for (k = 1 ; k < N ; ++k)
     {
-      StratPRC->computeOneStep();
+      aTS->computeOneStep();
       // --- Get values to be plotted ---
-      dataPlot(k, 0) = StratPRC->nextTime();
+      dataPlot(k, 0) = aTS->nextTime();
       dataPlot(k, 1) = (*x)(0);
       dataPlot(k, 2) = (*x)(1);
       dataPlot(k, 3) = (*x)(2);
       dataPlot(k, 4) = (*x)(3);
       // solve ...
-      StratPRC->nextStep();
+      aTS->nextStep();
     }
     // Number of time iterations
     cout << "End of computation - Number of iterations done: " << k - 1 << endl;

@@ -98,37 +98,30 @@ int main(int argc, char* argv[])
 
     // --- Non Smooth Dynamical system creation ---
 
-    InteractionsSet allInteractions;
-    allInteractions.insert(InterCircuitRLCD);
+    // add the dynamical system in the non smooth dynamical system
+    CircuitRLCD->nonSmoothDynamicalSystem()->insertDynamicalSystem(LSCircuitRLCD);
 
-    SP::NonSmoothDynamicalSystem NSDSCircuitRLCD(new NonSmoothDynamicalSystem(Inter_DS, allInteractions, false));
-    CircuitRLCD->setNonSmoothDynamicalSystemPtr(NSDSCircuitRLCD);
+    // link the interaction and the dynamical system
+    CircuitRLCD->nonSmoothDynamicalSystem()->link(InterCircuitRLCD, LSCircuitRLCD);
 
-    // --- Simulation specification---
 
-    SP::TimeDiscretisation TiDiscRLCD(new TimeDiscretisation(t0, h_step));
-
-    SP::TimeStepping StratCircuitRLCD(new TimeStepping(TiDiscRLCD));
-
+    // ------------------
+    // --- Simulation ---
+    // ------------------
     double theta = 0.5000000000001;
 
+    // -- (1) OneStepIntegrators --
     SP::Moreau OSI_RLCD(new Moreau(LSCircuitRLCD, theta));
-    StratCircuitRLCD->insertIntegrator(OSI_RLCD);
+    // -- (2) Time discretisation --
+    SP::TimeDiscretisation TiDiscRLCD(new TimeDiscretisation(t0, h_step));
+    // --- (3) one step non smooth problem
+    SP::LCP LCP_RLCD(new LCP());
 
-    IntParameters iparam(5);
-    iparam[0] = 101; // Max number of iteration
-    DoubleParameters dparam(5);
-    dparam[0] = 1e-8; // Tolerance
-    string solverName = "Lemke" ;
-    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
-    // -- OneStepNsProblem --
+    // -- (4) Simulation setup with (1) (2) (3)
+    SP::TimeStepping StratCircuitRLCD(new TimeStepping(TiDiscRLCD, OSI_RLCD, LCP_RLCD));
 
-    SP::LCP LCP_RLCD(new LCP(mySolver));
-    StratCircuitRLCD->insertNonSmoothProblem(LCP_RLCD);
-
-    // Initialization
+    cout << "====> Initialisation ..." << endl << endl;
     CircuitRLCD->initialize(StratCircuitRLCD);
-
     cout << " -----> End of initialization." << endl;
 
     double h = StratCircuitRLCD->timeStep();
