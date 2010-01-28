@@ -255,8 +255,16 @@ int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarity_Pro
   options->dSize = 5;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = (double*) malloc((3 * problem->size + problem->size * problem->size) * sizeof(double));
-  options->iWork = (int*) malloc(2 * problem->size * sizeof(int));
+  if (problem)
+  {
+    options->dWork = (double*) malloc((3 * problem->size + problem->size * problem->size) * sizeof(double));
+    options->iWork = (int*) malloc(2 * problem->size * sizeof(int));
+  }
+  else
+  {
+    options->dWork = NULL;
+    options->iWork = NULL;
+  }
   for (i = 0; i < 5; i++)
   {
     options->iparam[i] = 0;
