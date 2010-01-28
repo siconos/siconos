@@ -590,7 +590,7 @@ void LinearOSNS::computeq(double time)
 void LinearOSNS::preCompute(double time)
 {
   // This function is used to prepare data for the
-  // LinearComplementarity_Problem
+  // LinearComplementarityProblem
 
   // - computation of M and q
   // - set _sizeOutput

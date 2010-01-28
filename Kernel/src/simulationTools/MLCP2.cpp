@@ -217,7 +217,7 @@ void MLCP2::computeq(double time)
 
 void MLCP2::preCompute(double time)
 {
-  // This function is used to prepare data for the MixedLinearComplementarity_Problem
+  // This function is used to prepare data for the MixedLinearComplementarityProblem
   // - computation of M and q
   // - set sizeOutput
   // - check dim. for z,w

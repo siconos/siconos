@@ -105,9 +105,9 @@ protected:
   /** non-linear inertia term of the system */
   SP::SiconosVector _NNL;
 
-  /** jacobian_q QNNL*/
+  /** jacobian_q NNLq*/
   SP::SiconosMatrix _jacobianNNLq;
-  /** jacobian_{qDot} QNNL*/
+  /** jacobian_{qDot} NNLq*/
   SP::SiconosMatrix _jacobianNNLqDot;
 
   /** fL(q[0],q[1],t)= fExt - fInt -NNL */

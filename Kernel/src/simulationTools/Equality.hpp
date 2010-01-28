@@ -63,7 +63,7 @@
 class Equality : public LinearOSNS
 {
 private:
-  LinearSystem_Problem _numerics_problem;
+  LinearSystemProblem _numerics_problem;
 public:
 
   /** xml constructor

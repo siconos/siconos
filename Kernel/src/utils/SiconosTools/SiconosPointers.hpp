@@ -182,7 +182,7 @@ DEFINE_SPTR(LCP);
 
 
 DEFINE_SPTR(MixedComplementarityConditionNSL);
-TYPEDEF_SPTR(MixedLinearComplementarity_Problem);
+TYPEDEF_SPTR(MixedLinearComplementarityProblem);
 
 DEFINE_SPTR(TimeDiscretisationXML);
 

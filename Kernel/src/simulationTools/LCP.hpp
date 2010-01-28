@@ -24,7 +24,7 @@
 #define LCP_H
 
 #include "LinearOSNS.hpp"
-TYPEDEF_SPTR(LinearComplementarity_Problem);
+TYPEDEF_SPTR(LinearComplementarityProblem);
 /** Formalization and Resolution of a Linear Complementarity Problem (LCP)
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -74,7 +74,7 @@ class LCP : public LinearOSNS
 protected:
 
   /** Numerics problem to solve */
-  SP::LinearComplementarity_Problem _numerics_problem;
+  SP::LinearComplementarityProblem _numerics_problem;
 
 public:
 

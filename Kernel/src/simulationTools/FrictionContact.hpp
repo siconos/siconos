@@ -25,7 +25,7 @@
 #include "LinearOSNS.hpp"
 
 /** Pointer to function of the type used for drivers for FrictionContact problems in Numerics */
-typedef int (*Driver)(FrictionContact_Problem*, double*, double*, Solver_Options*, Numerics_Options*);
+typedef int (*Driver)(FrictionContactProblem*, double*, double*, SolverOptions*, NumericsOptions*);
 
 /** Formalization and Resolution of a Friction-Contact Problem
  *

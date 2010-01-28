@@ -55,7 +55,7 @@
  *  The MLCP main components are:
  *  - a problem (variables A,B,C,D,a,b and size of the problem), which directly corresponds to the MixedLinearComplementarityProblem structure of Numerics
  *  - the unknowns u,v and z
- *  - a NonSmoothSolver, used to define a solver and its parameters (connected to Solver_Options structure of Numerics)
+ *  - a NonSmoothSolver, used to define a solver and its parameters (connected to SolverOptions structure of Numerics)
  *
  *  A MLCP is connected to a simulation that handles a NonSmoothDynamicalSystem and its Topology. \n
  *  IndexSets from simulation are used to know which constraints (UnitaryRelation) are active or not. \n
@@ -87,7 +87,7 @@ protected:
   int _m;
 
   /** The MLCP instance */
-  MixedLinearComplementarity_Problem numerics_problem;
+  MixedLinearComplementarityProblem numerics_problem;
 
   /** default constructor (private)
    */
@@ -122,11 +122,11 @@ public:
 
   // --- numerics MLCP ---
   /** get the pointer on the Numerics MLCP,
-  *  \return SP::MixedLinearComplementarity_Problem
+  *  \return SP::MixedLinearComplementarityProblem
   */
-  inline SP::MixedLinearComplementarity_Problem getNumericsMLCP()
+  inline SP::MixedLinearComplementarityProblem getNumericsMLCP()
   {
-    return createSPtrMixedLinearComplementarity_Problem(numerics_problem);
+    return createSPtrMixedLinearComplementarityProblem(numerics_problem);
   }
 
   /** Build or reinit M and the NumericsProblem*/

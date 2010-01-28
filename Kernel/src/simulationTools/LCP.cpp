@@ -25,7 +25,7 @@ using namespace RELATION;
 LCP::LCP(const std::string& newNewNumericsSolverName , const std::string& newId):
   LinearOSNS(newNewNumericsSolverName, "LCP", newId)
 {
-  _numerics_problem.reset(new  LinearComplementarity_Problem);
+  _numerics_problem.reset(new  LinearComplementarityProblem);
 
   size_t size = _numerics_solver_name.size() + 1;
   char * solvername = new char[ size ];

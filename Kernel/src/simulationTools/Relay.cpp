@@ -137,7 +137,7 @@ int Relay::compute(double time)
   if (_sizeOutput != 0)
   {
     // The Relay in Numerics format
-    Relay_Problem numerics_problem;
+    RelayProblem numerics_problem;
     numerics_problem.M = &*_M->getNumericsMatrix();
     numerics_problem.q = _q->getArray();
     numerics_problem.lb = _lb->getArray();

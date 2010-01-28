@@ -440,7 +440,7 @@ int PrimalFrictionContact::compute(double time)
   if (sizeOutput != 0)
   {
     // The PrimalFrictionContact Problem in Numerics format
-    PrimalFrictionContact_Problem numerics_problem;
+    PrimalFrictionContactProblem numerics_problem;
     numerics_problem.M = M->getNumericsMatrix();
     numerics_problem.q = q->getArray();
     numerics_problem.numberOfContacts = sizeOutput / contactProblemDim;

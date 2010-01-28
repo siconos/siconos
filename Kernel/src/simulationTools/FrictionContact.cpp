@@ -126,7 +126,7 @@ int FrictionContact::compute(double time)
   if (_sizeOutput != 0)
   {
     // The FrictionContact Problem in Numerics format
-    FrictionContact_Problem numerics_problem;
+    FrictionContactProblem numerics_problem;
     if (_contactProblemDim == 2)
       numerics_problem.dimension = 2;
     else // if(_contactProblemDim == 3)

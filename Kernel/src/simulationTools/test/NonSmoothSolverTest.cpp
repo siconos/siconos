@@ -53,7 +53,7 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver0()
   std::vector<double> d0 = *NSS->doubleParameters();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverA : ", NSS->isSolverSet(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverB : ", NSS->name() == "undefined", true);
-  SP::Solver_Options opt = NSS->numericsSolverOptions();
+  SP::SolverOptions opt = NSS->numericsSolverOptions();
   int * i1 = opt->iparam;
   double * d1 = opt->dparam;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverE : ", opt->isSet == 0, true);
@@ -77,7 +77,7 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver1()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverC : ", i0[i] == iparam[i], true);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverD : ", d0[i] == dparam[i], true);
   }
-  SP::Solver_Options opt = NSS->numericsSolverOptions();
+  SP::SolverOptions opt = NSS->numericsSolverOptions();
   int * i1 = opt->iparam;
   double * d1 = opt->dparam;
 
@@ -108,7 +108,7 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver2()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverC : ", i0[i] == iparam[i], true);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverD : ", d0[i] == dparam[i], true);
   }
-  SP::Solver_Options opt = NSS->numericsSolverOptions();
+  SP::SolverOptions opt = NSS->numericsSolverOptions();
   int * i1 = opt->iparam;
   double * d1 = opt->dparam;
 
@@ -160,7 +160,7 @@ void NonSmoothSolverTest::testBuildNonSmoothSolver3()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverC : ", i0[i] == iparam[i], true);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothSolverD : ", d0[i] == dparam[i], true);
   }
-  SP::Solver_Options opt = NSS->numericsSolverOptions();
+  SP::SolverOptions opt = NSS->numericsSolverOptions();
   int * i1 = opt->iparam;
   double * d1 = opt->dparam;
 

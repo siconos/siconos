@@ -25,7 +25,7 @@
 
 #include "InteractionsSet.hpp"
 #include "SimulationTypeDef.hpp"
-#include "Numerics_Options.h"
+#include "NumericsOptions.h"
 #include "NumericsMatrix.h"
 #include "OSNSMatrix.hpp"
 
@@ -33,8 +33,8 @@ class Simulation;
 class DynamicalSystem;
 class UnitaryRelation;
 class SiconosMatrix;
-TYPEDEF_SPTR(Numerics_Options);
-TYPEDEF_SPTR(Solver_Options);
+TYPEDEF_SPTR(NumericsOptions);
+TYPEDEF_SPTR(SolverOptions);
 
 /** default name for the OneStepNSProblem of the simulation */
 const std::string DEFAULT_OSNS_NAME = "unamed";
@@ -88,7 +88,7 @@ protected:
   std::string _numerics_solver_name;
 
   /** Numerics structure used to solve solver options */
-  SP::Solver_Options _numerics_solver_options;
+  SP::SolverOptions _numerics_solver_options;
 
 
 
@@ -165,7 +165,7 @@ protected:
 
   /** Numerics (C) structure used to define global options for
       Numerics functions calls */
-  SP::Numerics_Options _numerics_options;
+  SP::NumericsOptions _numerics_options;
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
 
@@ -219,10 +219,10 @@ public:
     _numerics_solver_name = newVal;
   };
 
-  /** To get the Solver_Options structure
+  /** To get the SolverOptions structure
    *  \return , the numerics structure used to save solver parameters
    */
-  inline SP::Solver_Options numericsSolverOptions() const
+  inline SP::SolverOptions numericsSolverOptions() const
   {
     return _numerics_solver_options;
   };

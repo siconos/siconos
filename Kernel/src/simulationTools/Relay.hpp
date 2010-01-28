@@ -50,7 +50,7 @@ class Simulation;
  *  The Relay main components are:
  *  - a problem (variables M,q and size of the problem), which directly corresponds to the LinearComplementarityProblem structure of Numerics
  *  - the unknowns z and w
- *  - a NonSmoothSolver, used to define a solver and its parameters (connected to Solver_Options structure of Numerics)
+ *  - a NonSmoothSolver, used to define a solver and its parameters (connected to SolverOptions structure of Numerics)
  *
  *  A Relay is connected to a simulation that handles a NonSmoothDynamicalSystem and its Topology. \n
  *  IndexSets from simulation are used to know which constraints (UnitaryRelation) are active or not. \n

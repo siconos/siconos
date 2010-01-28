@@ -55,10 +55,10 @@ OneStepNSProblem::OneStepNSProblem(const string& pbType,
 
 
   // Numerics general options
-  _numerics_options.reset(new Numerics_Options());
+  _numerics_options.reset(new NumericsOptions());
   _numerics_options->verboseMode = 0; // turn verbose mode to off by default
 
-  _numerics_solver_options.reset(new Solver_Options);
+  _numerics_solver_options.reset(new SolverOptions);
 
 }
 
@@ -68,10 +68,10 @@ OneStepNSProblem::OneStepNSProblem(const string& pbType, const string& newId, co
 {
 
   // Numerics general options
-  _numerics_options.reset(new Numerics_Options());
+  _numerics_options.reset(new NumericsOptions());
   _numerics_options->verboseMode = 0; // turn verbose mode to off by default
 
-  _numerics_solver_options.reset(new Solver_Options);
+  _numerics_solver_options.reset(new SolverOptions);
 
 }
 

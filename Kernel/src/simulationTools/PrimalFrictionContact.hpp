@@ -27,7 +27,7 @@
 #include "SimpleMatrix.hpp"
 
 /** Pointer to function of the type used for drivers for PrimalFrictionContact problems in Numerics */
-typedef int (*PFC_Driver)(PrimalFrictionContact_Problem*, double*, double*, Solver_Options*, Numerics_Options*);
+typedef int (*PFC_Driver)(PrimalFrictionContactProblem*, double*, double*, SolverOptions*, NumericsOptions*);
 
 /** Formalization and Resolution of a Friction-Contact Problem
  *
