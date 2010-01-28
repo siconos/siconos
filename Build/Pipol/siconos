@@ -14,6 +14,7 @@
 #PIPOL mac 01:30
 
 set -x
+set -e
 mode=${1:-Nightly}
 
 export LC_ALL=C
@@ -36,12 +37,14 @@ esac
 
 # a local copy because make Nightly will update this sources.
 src_setup() {
-    for mod in Numerics Kernel Examples ; do 
-        [ -d $mod ] || svn co svn+ssh://bremond@scm.gforge.inria.fr/svn/siconos/trunk/$mod <&-
-        cd $mod; { 
-            svn update -r $local_revision
-        }; cd -
-    done
+    pushd $PIPOL_WDIR; { 
+        for mod in Numerics Kernel Examples ; do 
+            [ -d $mod ] || svn co svn+ssh://bremond@scm.gforge.inria.fr/svn/siconos/trunk/$mod <&-
+            pushd $mod; { 
+                svn update -r $local_revision
+            }; popd
+        done
+    }; popd
 }
 
 make_1() {

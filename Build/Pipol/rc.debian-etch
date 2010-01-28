@@ -1,0 +1,5 @@
+#!/bin/sh
+
+sudo apt-get upgrade
+
+sudo apt-get -y --force-yes install cmake gfortran gcc libboost-graph-dev atlas3-base atlas3-headers libxml2
