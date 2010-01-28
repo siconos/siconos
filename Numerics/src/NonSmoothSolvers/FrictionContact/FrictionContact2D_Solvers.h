@@ -33,7 +33,7 @@ For each solver, the input argument are:
 - a FrictionContact_Problem
 - the unknowns (reaction,velocity)2
 - info, the termination value (0: convergence, >0 problem which depends on the solver)
-- a Solver_Options structure, which handles iparam and dparam
+- a SolverOptions structure, which handles iparam and dparam
 
 \section fc2Dcpg CPG Solver
 
@@ -48,7 +48,7 @@ For each solver, the input argument are:
 
 #include "FrictionContact_Problem.h"
 #include "Numerics_Options.h"
-#include "Solver_Options.h"
+#include "SolverOptions.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -62,58 +62,58 @@ extern "C" {
       \param[in] general options for Numerics (verbose mode ...)
       \return result (0 if successful otherwise 1).
   */
-  int frictionContact2D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options);
+  int frictionContact2D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, SolverOptions* options, Numerics_Options* global_options);
 
 
   /** set the default solver parameters and perform memory allocation for FrictionContact3D
-      \param Solver_Options * the pointer to the options to set
+      \param SolverOptions * the pointer to the options to set
       \param char * the string which identify the solver
   */
-  int frictionContact2D_setDefaultSolverOptions(Solver_Options* options, char *solvername);
+  int frictionContact2D_setDefaultSolverOptions(SolverOptions* options, char *solvername);
 
   /**  cpg (conjugated projected gradient) solver for primal contact problems with friction (2D)
        \param[in] problem the friction-contact problem
        \param[out] reaction global vector
        \param[out] velocity global vector
        \param[in,out] info termination value
-       \param[in,out] options Solver_Options structure
+       \param[in,out] options SolverOptions structure
        \author Nineb Sheherazade.
   */
-  void FrictionContact2D_cpg(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, Solver_Options* options);
+  void FrictionContact2D_cpg(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for CPG
-  \param Solver_Options * the pointer to the options to set
+  \param SolverOptions * the pointer to the options to set
    */
-  int frictionContact2D_cpg_setDefaultSolverOptions(Solver_Options* options);
+  int frictionContact2D_cpg_setDefaultSolverOptions(SolverOptions* options);
   /**  Non Linear Gauss Seidel solver for primal contact problem with friction in 2D case.
        \param[in] problem the friction-contact problem
        \param[out] reaction global vector
        \param[out] velocity global vector
        \param[in,out] info termination value
-       \param[in,out] options Solver_Options structure
+       \param[in,out] options SolverOptions structure
        \author Nineb Sheherazade.
   */
-  void FrictionContact2D_nlgs(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, Solver_Options* options);
+  void FrictionContact2D_nlgs(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for LATIN
-  \param Solver_Options * the pointer to the options to set
+  \param SolverOptions * the pointer to the options to set
   */
-  int frictionContact2D_nlgs_setDefaultSolverOptions(Solver_Options* options);
+  int frictionContact2D_nlgs_setDefaultSolverOptions(SolverOptions* options);
 
   /**  latin solver for primal contact problem with friction in the 2D case.
        \param[in] problem the friction-contact problem
        \param[out] reaction global vector
        \param[out] velocity global vector
        \param[in,out] info termination value
-       \param[in,out] options Solver_Options structure
+       \param[in,out] options SolverOptions structure
        \author Nineb Sheherazade.
   */
-  void FrictionContact2D_latin(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, Solver_Options* options);
+  void FrictionContact2D_latin(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for LATIN
-  \param Solver_Options * the pointer to the options to set
+  \param SolverOptions * the pointer to the options to set
   */
-  int frictionContact2D_latin_setDefaultSolverOptions(Solver_Options* options);
+  int frictionContact2D_latin_setDefaultSolverOptions(SolverOptions* options);
 
   /** FrictionContact2D_projc is a specific projection operator related to CPG (conjugated projected gradient) algorithm for primal contact problem with friction.\n
    *
@@ -147,12 +147,12 @@ extern "C" {
   void FrictionContact2D_projf(int* statusi, int* n , double *y , double *fric, double *projf1);
 
   /** */
-  void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, double *w, int *info, Solver_Options* options) ;
+  void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, double *w, int *info, SolverOptions* options) ;
 
   /** set the default solver parameters and perform memory allocation for NSGS
-  \param Solver_Options * the pointer to the options to set
+  \param SolverOptions * the pointer to the options to set
   */
-  int frictionContact2D_sparse_nsgs_setDefaultSolverOptions(Solver_Options* options);
+  int frictionContact2D_sparse_nsgs_setDefaultSolverOptions(SolverOptions* options);
 
 
 #ifdef __cplusplus

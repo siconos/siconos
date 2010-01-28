@@ -32,7 +32,7 @@ For each solver, the input argument are:
 - a FrictionContact_Problem
 - the unknowns (reaction,velocity)
 - info, the termination value (0: convergence, >0 problem which depends on the solver)
-- a Solver_Options structure, which handles iparam and dparam
+- a SolverOptions structure, which handles iparam and dparam
 
 \section fc3Dnsgs Non-Smooth Gauss Seidel Solver
 
@@ -44,7 +44,7 @@ For each solver, the input argument are:
 
 #include "FrictionContact_Problem.h"
 #include "Numerics_Options.h"
-#include "Solver_Options.h"
+#include "SolverOptions.h"
 #include "FrictionContact3D_AlartCurnier.h"
 #include "FrictionContact3D_projection.h"
 #include "FrictionContact3D_Newton.h"
@@ -52,7 +52,7 @@ For each solver, the input argument are:
 #include "FrictionContact3D2NCP_Glocker.h"
 
 /** pointer to function used to call local solver */
-typedef void (*SolverPtr)(int, int, double*, Solver_Options *);
+typedef void (*SolverPtr)(int, int, double*, SolverOptions *);
 
 /** pointer to function used to post-processed results after a call to the (local) solver */
 typedef void (*PostSolverPtr)(int, double*);
@@ -64,7 +64,7 @@ typedef void (*ComputeErrorPtr)(FrictionContact_Problem*, double*, double*, doub
 typedef void (*FreeSolverPtr)();
 
 /** pointer to function used to call internal solver for proximal point solver */
-typedef void (*internalSolverPtr)(FrictionContact_Problem*, double*, double*, int *, Solver_Options *);
+typedef void (*internalSolverPtr)(FrictionContact_Problem*, double*, double*, int *, SolverOptions *);
 
 #ifdef __cplusplus
 extern "C" {
@@ -78,13 +78,13 @@ extern "C" {
   \param[in] general options for Numerics (verbose mode ...)
   \return result (0 if successful otherwise 1).
   */
-  int frictionContact3D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, Solver_Options* options, Numerics_Options* global_options);
+  int frictionContact3D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, SolverOptions* options, Numerics_Options* global_options);
 
   /** set the default solver parameters and perform memory allocation for FrictionContact3D
-      \param Solver_Options * the pointer to the options to set
+      \param SolverOptions * the pointer to the options to set
       \param char * the string which identify the solver
   */
-  int frictionContact3D_setDefaultSolverOptions(Solver_Options* options, char *);
+  int frictionContact3D_setDefaultSolverOptions(SolverOptions* options, char *);
 
 
   /** Non-Smooth Gauss Seidel solver for friction-contact 3D problem
@@ -95,15 +95,15 @@ extern "C" {
       \param options the solver options :
       iparam[0] : Maximum iteration number
       iparam[1] : error computation. 0 : Complete error computation with velocity computation 1: Light error computation with incremental values on reaction verification of absolute error at the end 2: only light error computation (velocity not computed)
-      The internal (local) solver must set by the Solver_Options options[1]
+      The internal (local) solver must set by the SolverOptions options[1]
   */
 
-  void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options);
+  void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for NSGS
-      \param Solver_Options ** the pointer to the array of options to set
+      \param SolverOptions ** the pointer to the array of options to set
   */
-  int frictionContact3D_nsgs_setDefaultSolverOptions(Solver_Options* options);
+  int frictionContact3D_nsgs_setDefaultSolverOptions(SolverOptions* options);
 
 
 
@@ -115,15 +115,15 @@ extern "C" {
      \param info return 0 if the solution is found
      \param options the solver options :
      iparam[0] : Maximum iteration number
-     The internal (local) solver must set by the Solver_Options options[1]
+     The internal (local) solver must set by the SolverOptions options[1]
   */
 
-  void frictionContact3D_nsgs_velocity(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options);
+  void frictionContact3D_nsgs_velocity(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for NSGSV
-      \param Solver_Options ** the pointer to the array of options to set
+      \param SolverOptions ** the pointer to the array of options to set
   */
-  int frictionContact3D_nsgs_velocity_setDefaultSolverOptions(Solver_Options* options);
+  int frictionContact3D_nsgs_velocity_setDefaultSolverOptions(SolverOptions* options);
 
   /** Proximal point solver for friction-contact 3D problem
       \param problem, the friction-contact 3D problem to solve
@@ -132,14 +132,14 @@ extern "C" {
       \param info return 0 if the solution is found
       \param options the solver options :
       iparam[0] : Maximum iteration number
-      The internal (local) solver must set by the Solver_Options options[1]
+      The internal (local) solver must set by the SolverOptions options[1]
   */
-  void frictionContact3D_proximal(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options);
+  void frictionContact3D_proximal(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for PROX
-    \param Solver_Options ** the pointer to the array of options to set
+    \param SolverOptions ** the pointer to the array of options to set
   */
-  int frictionContact3D_proximal_setDefaultSolverOptions(Solver_Options* options);
+  int frictionContact3D_proximal_setDefaultSolverOptions(SolverOptions* options);
 
   /** Fixed point solver for friction-contact 3D problem based on the Tresca
   problem with fixed friction threshold
@@ -149,15 +149,15 @@ extern "C" {
     \param info return 0 if the solution is found
     \param options the solver options :
     iparam[0] : Maximum iteration number
-    The internal (local) solver must set by the Solver_Options options[1]
+    The internal (local) solver must set by the SolverOptions options[1]
   */
-  void frictionContact3D_TrescaFixedPoint(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options);
+  void frictionContact3D_TrescaFixedPoint(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
 
   /** set the default solver parameters and perform memory allocation for TFP
-    \param Solver_Options ** the pointer to the array of options to set
+    \param SolverOptions ** the pointer to the array of options to set
   */
-  int frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(Solver_Options* options);
+  int frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* options);
 
   /**Fixed Point solver for friction-contact 3D problem based on the De Saxce Formulation
       \param problem, the friction-contact 3D problem to solve
@@ -167,17 +167,17 @@ extern "C" {
       \param options the solver options :
       iparam[0] : Maximum iteration number
   */
-  void frictionContact3D_DeSaxceFixedPoint(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options);
+  void frictionContact3D_DeSaxceFixedPoint(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for DSFP
-    \param Solver_Options ** the pointer to the array of options to set
+    \param SolverOptions ** the pointer to the array of options to set
   */
-  int frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(Solver_Options* options);
+  int frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for AlartCurnierNewton
-    \param Solver_Options ** the pointer to the array of options to set
+    \param SolverOptions ** the pointer to the array of options to set
   */
-  int frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(Solver_Options* options);
+  int frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(SolverOptions* options);
 
   /** Check for trivial solution in the friction-contact 3D problem
       \param dim of the problem

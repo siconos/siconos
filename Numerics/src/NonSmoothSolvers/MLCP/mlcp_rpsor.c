@@ -30,7 +30,7 @@
  * double *z : size n+m
  * double *w : size n+m
  */
-int mixedLinearComplementarity_rpsor_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver)
+int mixedLinearComplementarity_rpsor_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pSolver)
 {
 
   mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
@@ -39,7 +39,7 @@ int mixedLinearComplementarity_rpsor_setDefaultSolverOptions(MixedLinearCompleme
   return 0;
 }
 
-void mlcp_rpsor(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
+void mlcp_rpsor(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   double* A = problem->A;
   double* B = problem->B;

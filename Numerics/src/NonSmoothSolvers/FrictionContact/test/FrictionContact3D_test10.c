@@ -28,7 +28,7 @@ int main(void)
   printf("Test on ./data/Example1_Fc3D_SBM.dat\n");
 
   FILE * finput  =  fopen("./data/Confeti-ex13-4contact-Fc3D-SBM.dat", "r");
-  Solver_Options * options = (Solver_Options *) malloc(sizeof(Solver_Options));
+  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
   info = frictionContact3D_setDefaultSolverOptions(options, "NSGS");
   options->dparam[0] = 1e-5;
   options->iparam[0] = 10000;

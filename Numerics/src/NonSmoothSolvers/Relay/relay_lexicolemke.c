@@ -27,7 +27,7 @@
 #include "LCP_Solvers.h"
 #include <assert.h>
 
-void relay_lexicolemke(Relay_Problem* problem, double *z, double *w, int *info, Solver_Options* options,  Numerics_Options* global_options)
+void relay_lexicolemke(Relay_Problem* problem, double *z, double *w, int *info, SolverOptions* options,  Numerics_Options* global_options)
 {
   int i;
   // conversion into LCP
@@ -77,12 +77,12 @@ void relay_lexicolemke(Relay_Problem* problem, double *z, double *w, int *info, 
 }
 
 
-int relay_lexicolemke_setDefaultSolverOptions(Solver_Options* options)
+int relay_lexicolemke_setDefaultSolverOptions(SolverOptions* options)
 {
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default Solver_Options for the Lemke Solver\n");
+    printf("Set the Default SolverOptions for the Lemke Solver\n");
   }
   strcpy(options->solverName, "Lemke");
   options->numberOfInternalSolvers = 0;

@@ -22,7 +22,7 @@
 #include "lcp_test_function.h"
 
 
-void fillParamWithRespectToSolver(Solver_Options *options, char * solvername, LinearComplementarity_Problem* problem)
+void fillParamWithRespectToSolver(SolverOptions *options, char * solvername, LinearComplementarity_Problem* problem)
 {
   int maxIter = 1001;
   double tolerance = 1e-8;
@@ -88,7 +88,7 @@ void fillParamWithRespectToSolver(Solver_Options *options, char * solvername, Li
 }
 
 
-void fillParamWithRespectToSolver_SBM(Solver_Options *options, char * solvername, LinearComplementarity_Problem* problem)
+void fillParamWithRespectToSolver_SBM(SolverOptions *options, char * solvername, LinearComplementarity_Problem* problem)
 {
   int maxIter = 1001;
   double tolerance = 1e-8;
@@ -155,7 +155,7 @@ int lcp_test_function(FILE * f, char * solvername)
 
   Numerics_Options global_options;
   global_options.verboseMode = 1;
-  Solver_Options * options ;
+  SolverOptions * options ;
   options = malloc(sizeof(*options));
 
   strcpy(options->solverName, solvername);
@@ -234,7 +234,7 @@ int lcp_test_function_SBM(FILE * f, char * solvername)
   Numerics_Options global_options;
   global_options.verboseMode = 1;
 
-  Solver_Options * options = (Solver_Options *)malloc(sizeof(Solver_Options));
+  SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
 
 
 

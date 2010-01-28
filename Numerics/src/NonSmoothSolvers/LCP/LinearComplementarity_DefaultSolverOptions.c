@@ -26,7 +26,7 @@
 #include "LCP_Solvers.h"
 #include "NonSmoothDrivers.h"
 
-int linearComplementarity_setDefaultSolverOptions(LinearComplementarity_Problem* problem, Solver_Options* options, char *solvername)
+int linearComplementarity_setDefaultSolverOptions(LinearComplementarity_Problem* problem, SolverOptions* options, char *solvername)
 {
 
   int info = -1;

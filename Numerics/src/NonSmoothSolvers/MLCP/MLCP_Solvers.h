@@ -34,7 +34,7 @@ For each solver, the input argument are:
 - a MixedLinearComplementarity_Problem
 - the unknowns (z,w)
 - info, the termination value (0: convergence, >0 problem which depends on the solver)
-- a Solver_Options structure, which handles iparam and dparam
+- a SolverOptions structure, which handles iparam and dparam
 
 \section mlcpPGS PGS Solver
 Projected Gauss-Seidel solver
@@ -177,7 +177,7 @@ The direct and simplex solver must be initialize: \n
 */
 
 #include "Numerics_Options.h"
-#include "Solver_Options.h"
+#include "SolverOptions.h"
 #include "MixedLinearComplementarity_Problem.h"
 
 #ifdef __cplusplus
@@ -207,7 +207,7 @@ extern "C" {
       \param[in] options structure used to define the solver(s) and their parameters
       \author Olivier Bonnefon
   */
-  void mlcp_driver_init(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
+  void mlcp_driver_init(MixedLinearComplementarity_Problem* problem, SolverOptions* options);
   /** General interface to reset a solver.\n
       Must be call for the following solvers:\n
       - mlcp_enum
@@ -221,7 +221,7 @@ extern "C" {
       \param[in] options structure used to define the solver(s) and their parameters
       \author Olivier Bonnefon
   */
-  void mlcp_driver_reset(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
+  void mlcp_driver_reset(MixedLinearComplementarity_Problem* problem, SolverOptions* options);
 
   /** General interface to get the number of integers that must be allocated for the solver.\n
       Must be use for the following solvers:\n
@@ -238,7 +238,7 @@ extern "C" {
 
       \author Olivier Bonnefon
   */
-  int mlcp_driver_get_iwork(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
+  int mlcp_driver_get_iwork(MixedLinearComplementarity_Problem* problem, SolverOptions* options);
   /** General interface to get the number of doubles that must be allocated for the solver.\n
       Must be use for the following solvers:\n
       - mlcp_enum
@@ -254,7 +254,7 @@ extern "C" {
 
       \author Olivier Bonnefon
   */
-  int mlcp_driver_get_dwork(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
+  int mlcp_driver_get_dwork(MixedLinearComplementarity_Problem* problem, SolverOptions* options);
 
   /**  mlcp_pgs (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver for MLCP.
    * \param[in] problem structure that represents the MLCP (n,m,M, q...)
@@ -267,7 +267,7 @@ extern "C" {
    \param[in-out] options structure used to define the solver and its parameters.
    \author Vincent Acary
   */
-  void mlcp_pgs(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+  void mlcp_pgs(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /**  mlcp_rpgs (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver for MLCP.
    * \param[in] problem structure that represents the MLCP (n,m,M, q...)
@@ -280,7 +280,7 @@ extern "C" {
    \param[in-out] options structure used to define the solver and its parameters.
    \author Vincent Acary
   */
-  void mlcp_rpgs(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+  void mlcp_rpgs(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /** mlcp_psor (projected successive overrelaxation method) is a solver for MLCP.
    * \param[in] problem structure that represents the MLCP (n,m,M, q...)
@@ -293,7 +293,7 @@ extern "C" {
    \param[in-out] options structure used to define the solver and its parameters.
    \author Vincent Acary
   */
-  void mlcp_psor(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+  void mlcp_psor(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /** mlcp_rpsor (regularized projected successive overrelaxation method) is a solver for MLCP.
    * \param[in] problem structure that represents the MLCP (n,m,M, q...)
@@ -306,7 +306,7 @@ extern "C" {
    \param[in-out] options structure used to define the solver and its parameters.
    \author Vincent Acary
   */
-  void mlcp_rpsor(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+  void mlcp_rpsor(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /** path solver
    * \param[in] problem structure that represents the MLCP (n,m,M, q...)
@@ -319,7 +319,7 @@ extern "C" {
    \param[in-out] options structure used to define the solver and its parameters.
    \author Olivier Bonnefon
   */
-  void mlcp_path(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+  void mlcp_path(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /** enum solver
    * \param[in] problem structure that represents the MLCP (n,mM, q...)
@@ -331,7 +331,7 @@ extern "C" {
    \param[in-out] options structure used to define the solver and its parameters.
    \author Olivier Bonnefon
   */
-  void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+  void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /** direct solver
    * \param[in] problem structure that represents the MLCP (n,mM, q...)
@@ -343,7 +343,7 @@ extern "C" {
    \param[in-out] options structure used to define the solver and its parameters.
    \author Olivier Bonnefon
   */
-  void mlcp_direct(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+  void mlcp_direct(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /** direct-enum solver
   * \param[in] problem structure that represents the MLCP (n,mM, q...)
@@ -355,7 +355,7 @@ extern "C" {
   \param[in-out] options structure used to define the solver and its parameters.
   \author Olivier Bonnefon
   */
-  void mlcp_direct_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+  void mlcp_direct_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /** direct-simplex solver
    * \param[in] problem structure that represents the MLCP (n,mM, q...)
@@ -367,7 +367,7 @@ extern "C" {
    \param[in-out] options structure used to define the solver and its parameters.
    \author Olivier Bonnefon
   */
-  void mlcp_direct_simplex(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+  void mlcp_direct_simplex(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /** direct-path solver
   * \param[in] problem structure that represents the MLCP (n,mM, q...)
@@ -379,7 +379,7 @@ extern "C" {
   \param[in-out] options structure used to define the solver and its parameters.
   \author Olivier Bonnefon
   */
-  void mlcp_direct_path(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+  void mlcp_direct_path(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options);
 
 
   /** simplex solver
@@ -392,7 +392,7 @@ extern "C" {
    \param[in-out] options structure used to define the solver and its parameters.
    \author Olivier Bonnefon
   */
-  void mlcp_simplex(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+  void mlcp_simplex(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /** Fischer Burmeister solver
    * \param[in] problem structure that represents the MLCP (n,mM, q...)
@@ -404,7 +404,7 @@ extern "C" {
    \param[in-out] options structure used to define the solver and its parameters.
    \author Olivier Bonnefon
   */
-  void mlcp_FB(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+  void mlcp_FB(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options);
   /** Direct Fischer Burmeister solver
    * \param[in] problem structure that represents the MLCP (n,mM, q...)
    * \param[out] z a m+n-vector of doubles which contains the initial solution and returns the solution of the problem.
@@ -415,10 +415,10 @@ extern "C" {
    \param[in-out] options structure used to define the solver and its parameters.
    \author Olivier Bonnefon
   */
-  void mlcp_direct_FB(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options);
+  void mlcp_direct_FB(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   // need a svn add mlcp_GaussSeidel_SBM ...
-  //  void mlcp_GaussSeidel_SBM(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options, int numberOfSolvers);
+  //  void mlcp_GaussSeidel_SBM(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options, int numberOfSolvers);
 
   /**
     This function checks the validity of the vector z as a solution \n
@@ -457,35 +457,35 @@ extern "C" {
   /*
     Default memory allocator.
       \param Problem * the pointer to the array of options to set.
-      \param Solver_Options * the pointer to option.
+      \param SolverOptions * the pointer to option.
   */
-  void  mixedLinearComplementarity_default_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pOptions);
+  void  mixedLinearComplementarity_default_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pOptions);
   /*
     Default memory manager to free the memory located in the options.
       \param Problem * the pointer to the array of options to set.
-      \param Solver_Options * the pointer to option.
+      \param SolverOptions * the pointer to option.
    */
-  void  mixedLinearComplementarity_deleteDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pOptions);
+  void  mixedLinearComplementarity_deleteDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pOptions);
 
   /** set the default solver parameters and perform memory allocation for MixedLinearComplementarity
       \param Problem * the pointer to the array of options to set.
-      \param Solver_Options * the pointer to option.
+      \param SolverOptions * the pointer to option.
   */
-  int mixedLinearComplementarity_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pOptions);
-  int mixedLinearComplementarity_directEnum_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
-  int mixedLinearComplementarity_directFB_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
-  int mixedLinearComplementarity_directPath_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
-  int mixedLinearComplementarity_directPathEnum_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
-  int mixedLinearComplementarity_directSimplex_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
-  int mixedLinearComplementarity_enum_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
-  int mixedLinearComplementarity_fb_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
-  int mixedLinearComplementarity_path_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
-  int mixedLinearComplementarity_pathEnum_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
-  int mixedLinearComplementarity_pgs_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
-  int mixedLinearComplementarity_rpgs_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
-  int mixedLinearComplementarity_simplex_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
-  int mixedLinearComplementarity_rpsor_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
-  int mixedLinearComplementarity_psor_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver);
+  int mixedLinearComplementarity_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pOptions);
+  int mixedLinearComplementarity_directEnum_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pSolver);
+  int mixedLinearComplementarity_directFB_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pSolver);
+  int mixedLinearComplementarity_directPath_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pSolver);
+  int mixedLinearComplementarity_directPathEnum_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pSolver);
+  int mixedLinearComplementarity_directSimplex_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pSolver);
+  int mixedLinearComplementarity_enum_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pSolver);
+  int mixedLinearComplementarity_fb_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pSolver);
+  int mixedLinearComplementarity_path_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pSolver);
+  int mixedLinearComplementarity_pathEnum_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pSolver);
+  int mixedLinearComplementarity_pgs_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pSolver);
+  int mixedLinearComplementarity_rpgs_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pSolver);
+  int mixedLinearComplementarity_simplex_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pSolver);
+  int mixedLinearComplementarity_rpsor_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pSolver);
+  int mixedLinearComplementarity_psor_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pSolver);
 
 #ifdef __cplusplus
 }

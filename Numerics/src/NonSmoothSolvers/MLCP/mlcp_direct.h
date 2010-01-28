@@ -13,10 +13,10 @@
 
 void mlcp_direct_addConfig(MixedLinearComplementarity_Problem* problem, int * zw);
 void mlcp_direct_addConfigFromWSolution(MixedLinearComplementarity_Problem* problem, double * wSol);
-void mlcp_direct_init(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
+void mlcp_direct_init(MixedLinearComplementarity_Problem* problem, SolverOptions* options);
 void mlcp_direct_reset();
 
-int mlcp_direct_getNbIWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
-int mlcp_direct_getNbDWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
+int mlcp_direct_getNbIWork(MixedLinearComplementarity_Problem* problem, SolverOptions* options);
+int mlcp_direct_getNbDWork(MixedLinearComplementarity_Problem* problem, SolverOptions* options);
 
 #endif //MLCP_DIRECT_H

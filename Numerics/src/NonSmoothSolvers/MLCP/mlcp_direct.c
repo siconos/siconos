@@ -83,11 +83,11 @@ int * myiMalloc(int n)
   spCurInt = spCurInt + n;
   return aux;
 }
-int mlcp_direct_getNbIWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
+int mlcp_direct_getNbIWork(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
 {
   return (problem->n + problem->m) * (options->iparam[5] + 1) + options->iparam[5] * problem->m;
 }
-int mlcp_direct_getNbDWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
+int mlcp_direct_getNbDWork(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
 {
   return  problem->n + problem->m + (options->iparam[5]) * ((problem->n + problem->m) * (problem->n + problem->m)) + (problem->n + problem->m);
 }
@@ -103,7 +103,7 @@ int mlcp_direct_getNbDWork(MixedLinearComplementarity_Problem* problem, Solver_O
  *
  */
 
-void mlcp_direct_init(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
+void mlcp_direct_init(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
 {
   spCurDouble = options->dWork;
   spCurInt = options->iWork;
@@ -311,7 +311,7 @@ int solveWithCurConfig(MixedLinearComplementarity_Problem* problem)
  * double *w : size n+m
  * info : output. info == 0 if success
  */
-void mlcp_direct(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
+void mlcp_direct(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   int find = 0;
   int lin = 0;

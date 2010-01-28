@@ -305,7 +305,7 @@ void frictionContact3D_projection_update_with_regularization(int contact, double
   mu_i = mu[contact];
 }
 
-void frictionContact3D_projectionWithDiagonalization_solve(int contact, int dimReaction, double* reaction, Solver_Options * options)
+void frictionContact3D_projectionWithDiagonalization_solve(int contact, int dimReaction, double* reaction, SolverOptions * options)
 {
 
 
@@ -351,7 +351,7 @@ void frictionContact3D_projectionWithDiagonalization_solve(int contact, int dimR
 }
 
 
-void frictionContact3D_projectionOnConeWithLocalIteration_solve(int contact, int dimReaction, double* reaction, Solver_Options* options)
+void frictionContact3D_projectionOnConeWithLocalIteration_solve(int contact, int dimReaction, double* reaction, SolverOptions* options)
 {
   /* int and double parameters */
   int* iparam = options->iparam;
@@ -475,7 +475,7 @@ void frictionContact3D_projectionOnConeWithLocalIteration_solve(int contact, int
   }
 
 }
-void frictionContact3D_projectionOnCone_solve(int contact, int dimReaction, double* reaction, Solver_Options * options)
+void frictionContact3D_projectionOnCone_solve(int contact, int dimReaction, double* reaction, SolverOptions * options)
 {
   /* Current block position */
   int pos = contact * nLocal;
@@ -506,7 +506,7 @@ void frictionContact3D_projectionOnCone_solve(int contact, int dimReaction, doub
 
 }
 
-void frictionContact3D_projectionOnCone_with_regularization_solve(int contact, int dimReaction, double* reaction, Solver_Options* options)
+void frictionContact3D_projectionOnCone_with_regularization_solve(int contact, int dimReaction, double* reaction, SolverOptions* options)
 {
   /* int and double parameters */
   /* int* iparam = options->iparam; */
@@ -552,7 +552,7 @@ void frictionContact3D_projection_free()
   MLocal = NULL;
 }
 
-void frictionContact3D_projectionOnCone_velocity_solve(int contact, int dimVelocity, double* velocity,  Solver_Options* options)
+void frictionContact3D_projectionOnCone_velocity_solve(int contact, int dimVelocity, double* velocity,  SolverOptions* options)
 {
   /* int and double parameters */
   /*     int* iparam = options->iparam; */
@@ -590,7 +590,7 @@ void frictionContact3D_projectionOnCone_velocity_solve(int contact, int dimVeloc
 
 
 
-void frictionContact3D_projectionOnCylinder_solve(int contact, int dimReaction, double* reaction, Solver_Options* options)
+void frictionContact3D_projectionOnCylinder_solve(int contact, int dimReaction, double* reaction, SolverOptions* options)
 {
   /* int and double parameters */
   /*   int* iparam = options->iparam; */

@@ -23,7 +23,7 @@
 #include "LA.h"
 #include "Relay_Solvers.h"
 
-void dr_nlgs(Relay_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
+void dr_nlgs(Relay_Problem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   double* vec = problem->M->matrix0;
   double* q = problem->q;

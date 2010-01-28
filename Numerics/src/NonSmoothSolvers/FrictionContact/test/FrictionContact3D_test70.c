@@ -30,7 +30,7 @@ int main(void)
   printf("Test on %s\n", filename);
 
   FILE * finput  =  fopen(filename, "r");
-  Solver_Options * options = (Solver_Options *) malloc(sizeof(Solver_Options));
+  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
   info = frictionContact3D_setDefaultSolverOptions(options, "DSFP");
 
 

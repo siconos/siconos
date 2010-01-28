@@ -34,7 +34,7 @@
 /* return 0 if ok
 * otherwise return !=0
 */
-int myLu(LinearSystem_Problem* problem, double *z ,  Solver_Options* options)
+int myLu(LinearSystem_Problem* problem, double *z ,  SolverOptions* options)
 {
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
@@ -66,7 +66,7 @@ int myLu(LinearSystem_Problem* problem, double *z ,  Solver_Options* options)
   return info;
 }
 
-int LinearSystem_driver(LinearSystem_Problem* problem, double *z , double *w, Solver_Options* options)
+int LinearSystem_driver(LinearSystem_Problem* problem, double *z , double *w, SolverOptions* options)
 {
   int i;
   if (problem->M->storageType == 1)

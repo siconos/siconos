@@ -32,7 +32,7 @@ int main(void)
   FILE * finput  =  fopen(filename, "r");
 
 
-  Solver_Options * options = malloc(sizeof(Solver_Options));
+  SolverOptions * options = malloc(sizeof(SolverOptions));
   info = frictionContact2D_setDefaultSolverOptions(options, "NSGS");
   options->dparam[0] = 1e-12;
   options->iparam[0] = 5000;

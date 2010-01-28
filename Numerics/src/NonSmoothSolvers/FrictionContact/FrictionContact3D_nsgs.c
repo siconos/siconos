@@ -41,7 +41,7 @@ void fake_compute_error_nsgs(FrictionContact_Problem* problem, double *reaction,
   }
 }
 
-void initializeLocalSolver_nsgs(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, Solver_Options * localsolver_options)
+void initializeLocalSolver_nsgs(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, SolverOptions * localsolver_options)
 {
 
 
@@ -126,7 +126,7 @@ void initializeLocalSolver_nsgs(int n, SolverPtr* solve, FreeSolverPtr* freeSolv
   }
 }
 
-void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options)
+void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
   /* int and double parameters */
   int* iparam = options->iparam;
@@ -155,7 +155,7 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
   }
   assert(&options[1]);
 
-  Solver_Options * localsolver_options = options->internalSolvers;
+  SolverOptions * localsolver_options = options->internalSolvers;
 
 
   SolverPtr local_solver = NULL;
@@ -245,12 +245,12 @@ void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, 
   (*freeSolver)();
 }
 
-int frictionContact3D_nsgs_setDefaultSolverOptions(Solver_Options* options)
+int frictionContact3D_nsgs_setDefaultSolverOptions(SolverOptions* options)
 {
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default Solver_Options for the NSGS Solver\n");
+    printf("Set the Default SolverOptions for the NSGS Solver\n");
   }
 
   strcpy(options->solverName, "NSGS");
@@ -271,7 +271,7 @@ int frictionContact3D_nsgs_setDefaultSolverOptions(Solver_Options* options)
   }
   options->iparam[0] = 1000;
   options->dparam[0] = 1e-4;
-  options->internalSolvers = (Solver_Options *)malloc(sizeof(Solver_Options));
+  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(options->internalSolvers);
 
   return 0;

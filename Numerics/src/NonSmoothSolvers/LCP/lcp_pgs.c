@@ -26,7 +26,7 @@
 #include "LCP_Solvers.h"
 #include <assert.h>
 
-void lcp_pgs(LinearComplementarity_Problem* problem, double *z, double *w, int *info , Solver_Options* options)
+void lcp_pgs(LinearComplementarity_Problem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */
   double * M = problem->M->matrix0;
@@ -131,12 +131,12 @@ void lcp_pgs(LinearComplementarity_Problem* problem, double *z, double *w, int *
 
   free(diag);
 }
-int linearComplementarity_pgs_setDefaultSolverOptions(Solver_Options* options)
+int linearComplementarity_pgs_setDefaultSolverOptions(SolverOptions* options)
 {
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default Solver_Options for the PGS Solver\n");
+    printf("Set the Default SolverOptions for the PGS Solver\n");
   }
 
 

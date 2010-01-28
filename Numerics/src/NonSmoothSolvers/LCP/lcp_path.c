@@ -27,7 +27,7 @@
 #include "InterfaceToPathFerris/SimpleLCP.h"
 #endif /*HAVE_PATHFERRIS*/
 
-void lcp_path(LinearComplementarity_Problem* problem, double *z, double *w, int *info , Solver_Options* options)
+void lcp_path(LinearComplementarity_Problem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   *info = 1;
 #ifdef HAVE_PATHFERRIS
@@ -101,12 +101,12 @@ void lcp_path(LinearComplementarity_Problem* problem, double *z, double *w, int 
 
   return;
 }
-int linearComplementarity_path_setDefaultSolverOptions(Solver_Options* options)
+int linearComplementarity_path_setDefaultSolverOptions(SolverOptions* options)
 {
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default Solver_Options for the PATH Solver\n");
+    printf("Set the Default SolverOptions for the PATH Solver\n");
   }
 
 

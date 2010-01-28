@@ -19,18 +19,18 @@
 
 
 
-#ifndef Solver_Options_H
-#define Solver_Options_H
+#ifndef SolverOptions_H
+#define SolverOptions_H
 
-/*!\file Solver_Options.h
+/*!\file SolverOptions.h
   \brief Structure used to send options (name, parameters and so on) to a specific solver-driver (mainly from Kernel to Numerics).
   \author Franck Perignon
 */
 
 /*! \page NumericsSolver Solvers definition in Numerics
 
-To define a non-smooth problem in Numerics, the structure Solver_Options is used. It handles the name of the solver and its input-output parameters.\n
-Solver_Options main components are:
+To define a non-smooth problem in Numerics, the structure SolverOptions is used. It handles the name of the solver and its input-output parameters.\n
+SolverOptions main components are:
  - a name
  - two lists of input-output parameters (int: iparam, double: dparam) and their sizes
 
@@ -41,10 +41,10 @@ See for example:
 
 As an example, consider \ref LCProblem : \n
 M is a NumericsMatrix and can be saved as a double* or as a SparseBlockStructuredMatrix.\n
-One needs to define a Solver_Options, say "options", by choosing one solver among those given in \ref LCPSolvers and set:
+One needs to define a SolverOptions, say "options", by choosing one solver among those given in \ref LCPSolvers and set:
 \code
 int nbSolvers = 1;
-Solver_Options options;
+SolverOptions options;
 strcpy(options.solverName,"PGS");
 int iparam[2] ={maxIter, 0};
 double dparam[2] = {tolerance,0.0};
@@ -62,7 +62,7 @@ which will result in the resolution of the LCP defined in myProblem thanks to a 
 
 On the other side if M is saved as a SparseBlockStructuredMatrix, with N rows of blocks, one needs to used a \n
 "block-solver" with possibly one or more specific local solver dedicated to each local problem.\n
-In that case options must be a vector of Solver_Options, with:\n
+In that case options must be a vector of SolverOptions, with:\n
  - options[0] the definition for the global "block" solver
  - options[i], i>0, the solvers used for each local problem.
 
@@ -70,7 +70,7 @@ In that case options must be a vector of Solver_Options, with:\n
 \code
 // First define a vector of options
 int nbSolvers = 3;
-Solver_Options options[nbSolvers];
+SolverOptions options[nbSolvers];
 
 // The global solver:
 strcpy(options[0].solverName,"GaussSeidel_SBM");
@@ -127,7 +127,7 @@ Note that options[i+1] is used for row i of M, while i<nbSolvers-1 and options[n
     \param dWork is a pointer on a working memory zone (for doubles) reserved for the solver .
     \param iWork is a pointer on a working memory zone (for integers) reserved for the solver .
 */
-typedef struct _Solver_Options
+typedef struct _SolverOptions
 {
   int solverId;
   int isSet;
@@ -140,14 +140,14 @@ typedef struct _Solver_Options
   double * dWork;
   int * iWork;
   int numberOfInternalSolvers;
-  struct _Solver_Options * internalSolvers;
-} Solver_Options;
+  struct _SolverOptions * internalSolvers;
+} SolverOptions;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-  /** Read default parameters values for a solver and save them in a Solver_Options structure
+  /** Read default parameters values for a solver and save them in a SolverOptions structure
       \param[in] driverName, type of the considered problem \n
       0: LCP\n
       1: MLCP\n
@@ -158,17 +158,17 @@ extern "C" {
       6: NCP
       \param[out] options, structure used to save the parameters
    */
-  void readSolverOptions(int, Solver_Options*);
+  void readSolverOptions(int, SolverOptions*);
 
   /** screen display of solver parameters
       \param options, the structure to be diplayed
   */
-  void printSolverOptions(Solver_Options*);
+  void printSolverOptions(SolverOptions*);
 
   /** delete the solver parameters :
       delete iparam and dparam;
   */
-  void deleteSolverOptions(Solver_Options*);
+  void deleteSolverOptions(SolverOptions *);
 
 #ifdef __cplusplus
 }

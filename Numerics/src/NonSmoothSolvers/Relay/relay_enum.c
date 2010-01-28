@@ -27,7 +27,7 @@
 #include "LCP_Solvers.h"
 #include <assert.h>
 
-void relay_enum(Relay_Problem* problem, double *z, double *w, int *info, Solver_Options* options, Numerics_Options* global_options)
+void relay_enum(Relay_Problem* problem, double *z, double *w, int *info, SolverOptions* options, Numerics_Options* global_options)
 {
   int i;
   // conversion into LCP
@@ -84,12 +84,12 @@ void relay_enum(Relay_Problem* problem, double *z, double *w, int *info, Solver_
 
 }
 
-int relay_enum_setDefaultSolverOptions(Relay_Problem* problem, Solver_Options* options)
+int relay_enum_setDefaultSolverOptions(Relay_Problem* problem, SolverOptions* options)
 {
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default Solver_Options for the ENUM Solver\n");
+    printf("Set the Default SolverOptions for the ENUM Solver\n");
   }
 
   strcpy(options->solverName, "ENUM");

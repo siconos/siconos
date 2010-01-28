@@ -74,7 +74,7 @@
   (see the functions/solvers list in FrictionContact3D_Solvers.h)
 
   \section fc3DParam Required and optional parameters
-  FrictionContact3D problems needs some specific parameters, given to the FrictionContact3D_driver() function thanks to a Solver_Options structure. \n
+  FrictionContact3D problems needs some specific parameters, given to the FrictionContact3D_driver() function thanks to a SolverOptions structure. \n
   They are:\n
      - the name of the solver (ex: NSGS), used to switch to the right solver function
      - iparam[0]: max. number of iterations allowed

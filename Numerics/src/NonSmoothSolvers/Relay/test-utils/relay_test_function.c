@@ -39,7 +39,7 @@ int relay_test_function(FILE * f, char * solvername)
 
 
 
-  Solver_Options * options = malloc(sizeof(Solver_Options));
+  SolverOptions * options = malloc(sizeof(SolverOptions));
 
   relay_setDefaultSolverOptions(problem, options, solvername);
 

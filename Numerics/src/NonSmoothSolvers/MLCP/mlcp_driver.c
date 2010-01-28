@@ -28,7 +28,7 @@
 #include "NonSmoothDrivers.h"
 #endif
 
-void mlcp_driver_init(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
+void mlcp_driver_init(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
 {
   char * name = options->solverName;
 
@@ -49,7 +49,7 @@ void mlcp_driver_init(MixedLinearComplementarity_Problem* problem, Solver_Option
   else if (strcmp(name , "FB") == 0)
     mlcp_FB_init(problem, options);
 }
-void mlcp_driver_reset(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
+void mlcp_driver_reset(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
 {
   char * name = options->solverName;
   if (strcmp(name , "DIRECT_ENUM") == 0)
@@ -67,7 +67,7 @@ void mlcp_driver_reset(MixedLinearComplementarity_Problem* problem, Solver_Optio
   else if (strcmp(name , "SIMPLEX") == 0)
     mlcp_simplex_reset();
 }
-int mlcp_driver_get_iwork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
+int mlcp_driver_get_iwork(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
 {
   char * name = options->solverName;
   if (strcmp(name , "DIRECT_ENUM") == 0)
@@ -88,7 +88,7 @@ int mlcp_driver_get_iwork(MixedLinearComplementarity_Problem* problem, Solver_Op
     return  mlcp_direct_FB_getNbIWork(problem, options);
   return 0;
 }
-int mlcp_driver_get_dwork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
+int mlcp_driver_get_dwork(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
 {
   char * name = options->solverName;
   if (strcmp(name , "DIRECT_ENUM") == 0)
@@ -110,7 +110,7 @@ int mlcp_driver_get_dwork(MixedLinearComplementarity_Problem* problem, Solver_Op
   return 0;
 }
 
-int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *w, Solver_Options* options, Numerics_Options* global_options)
+int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *w, SolverOptions* options, Numerics_Options* global_options)
 {
 
 

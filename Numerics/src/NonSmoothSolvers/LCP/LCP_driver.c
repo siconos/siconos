@@ -24,22 +24,7 @@
 #include "Numerics_Options.h"
 #include "NonSmoothDrivers.h"
 
-#define LCP_LEMKE "Lemke"
-#define LCP_NSGS_SBM "NSGS_SBM"
-#define LCP_PGS "PGS"
-#define LCP_CPG "CPG"
-#define LCP_LATIN "Latin"
-#define LCP_LATIN_W "Latin_w"
-#define LCP_QP "QP"
-#define LCP_NSQP "NSQP"
-#define LCP_NEWTONMIN "NewtonMin"
-#define LCP_NEWTONFB "NewtonFB"
-#define LCP_PSOR "PSOR"
-#define LCP_RPGS "RPGS"
-#define LCP_PATH "PATH"
-#define LCP_ENUM "ENUM"
-
-int lcp_driver_SparseBlockMatrix(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options)
+int lcp_driver_SparseBlockMatrix(LinearComplementarity_Problem* problem, double *z , double *w, SolverOptions* options)
 {
   /* Checks storage type for the matrix M of the LCP */
   if (problem->M->storageType == 0)
@@ -106,7 +91,7 @@ int lcp_driver_SparseBlockMatrix(LinearComplementarity_Problem* problem, double 
 
 }
 
-int lcp_driver_DenseMatrix(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options)
+int lcp_driver_DenseMatrix(LinearComplementarity_Problem* problem, double *z , double *w, SolverOptions* options)
 {
   /* Note: inputs are not checked since it is supposed to be done in lcp_driver() function which calls the present one. */
 
@@ -115,7 +100,7 @@ int lcp_driver_DenseMatrix(LinearComplementarity_Problem* problem, double *z , d
     numericsError("lcp_driver_DenseMatrix", "forbidden type of storage for the matrix M of the LCP");
 
   /* If the options for solver have not been set, read default values in .opt file */
-  int NoDefaultOptions = options->isSet; /* true(1) if the Solver_Options structure has been filled in else false(0) */
+  int NoDefaultOptions = options->isSet; /* true(1) if the SolverOptions structure has been filled in else false(0) */
 
   if (NoDefaultOptions == 0)
   {
@@ -267,7 +252,7 @@ int lcp_driver_DenseMatrix(LinearComplementarity_Problem* problem, double *z , d
 
 }
 
-int linearComplementarity_driver(LinearComplementarity_Problem* problem, double *z , double *w, Solver_Options* options,  Numerics_Options* global_options)
+int linearComplementarity_driver(LinearComplementarity_Problem* problem, double *z , double *w, SolverOptions* options,  Numerics_Options* global_options)
 {
   if (options == NULL || global_options == NULL)
     numericsError("lcp_driver", "null input for solver and/or global options");

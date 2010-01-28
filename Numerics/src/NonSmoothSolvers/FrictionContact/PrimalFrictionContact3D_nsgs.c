@@ -61,7 +61,7 @@ void initializePrimalLocalSolver(int n, SolverPrimalPtr* solve, FreeSolverPrimal
 }
 
 
-void primalFrictionContact3D_nsgs(PrimalFrictionContact_Problem* problem, double *reaction, double *velocity, double *globalVelocity, int* info, Solver_Options* options)
+void primalFrictionContact3D_nsgs(PrimalFrictionContact_Problem* problem, double *reaction, double *velocity, double *globalVelocity, int* info, SolverOptions* options)
 {
   /* int and double parameters */
   int* iparam = options->iparam;

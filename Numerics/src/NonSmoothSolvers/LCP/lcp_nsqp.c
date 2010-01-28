@@ -24,7 +24,7 @@
 #include "LCP_Solvers.h"
 #include "QP_Solvers.h"
 
-void lcp_nsqp(LinearComplementarity_Problem* problem, double *z, double *w, int *info , Solver_Options* options)
+void lcp_nsqp(LinearComplementarity_Problem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */
   double * M = problem->M->matrix0;
@@ -146,12 +146,12 @@ void lcp_nsqp(LinearComplementarity_Problem* problem, double *z, double *w, int 
   free(iwar);
   free(war);
 }
-int linearComplementarity_nsqp_setDefaultSolverOptions(Solver_Options* options)
+int linearComplementarity_nsqp_setDefaultSolverOptions(SolverOptions* options)
 {
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default Solver_Options for the NSQP Solver\n");
+    printf("Set the Default SolverOptions for the NSQP Solver\n");
   }
 
 

@@ -25,7 +25,7 @@
 #include <math.h>
 
 
-void frictionContact3D_DeSaxceFixedPoint(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options)
+void frictionContact3D_DeSaxceFixedPoint(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
   /* int and double parameters */
   int* iparam = options->iparam;
@@ -154,12 +154,12 @@ void frictionContact3D_DeSaxceFixedPoint(FrictionContact_Problem* problem, doubl
 }
 
 
-int frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(Solver_Options* options)
+int frictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* options)
 {
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default Solver_Options for the DSFP Solver\n");
+    printf("Set the Default SolverOptions for the DSFP Solver\n");
   }
 
   strcpy(options->solverName, "DSFP");

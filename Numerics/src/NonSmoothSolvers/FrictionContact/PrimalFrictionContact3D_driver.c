@@ -30,14 +30,14 @@ int  Primal_MisInverse = 0;
 int  Primal_MisLU = 0;
 
 
-int primalFrictionContact3D_driver(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity,  Solver_Options* options, Numerics_Options* global_options)
+int primalFrictionContact3D_driver(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity,  SolverOptions* options, Numerics_Options* global_options)
 {
 
   /* Set global options */
   setNumericsOptions(global_options);
 
   /* If the options for solver have not been set, read default values in .opt file */
-  int NoDefaultOptions = options->isSet; /* true(1) if the Solver_Options structure has been filled in else false(0) */
+  int NoDefaultOptions = options->isSet; /* true(1) if the SolverOptions structure has been filled in else false(0) */
 
   if (!NoDefaultOptions)
     readSolverOptions(3, options);

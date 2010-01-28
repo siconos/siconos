@@ -62,7 +62,7 @@
   (see the functions/solvers list in PrimalFrictionContact3D_Solvers.h)
 
   \section pfc3DParam Required and optional parameters
-  PrimalFrictionContact3D problems needs some specific parameters, given to the PrimalFrictionContact3D_driver() function thanks to a Solver_Options structure. \n
+  PrimalFrictionContact3D problems needs some specific parameters, given to the PrimalFrictionContact3D_driver() function thanks to a SolverOptions structure. \n
 
 
 */

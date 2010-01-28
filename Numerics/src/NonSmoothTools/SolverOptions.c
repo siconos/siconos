@@ -16,12 +16,12 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#include "Solver_Options.h"
+#include "SolverOptions.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-void readSolverOptions(int driverType, Solver_Options* options)
+void readSolverOptions(int driverType, SolverOptions* options)
 {
   /* To each problem, corresponds a XXX_parameters.opt file where default parameters can be read, XXX being the problem name (LCP, FrictionContact3D ...) */
 
@@ -102,7 +102,7 @@ void readSolverOptions(int driverType, Solver_Options* options)
   }
 }
 
-void recursive_printSolverOptions(Solver_Options* options, int level)
+void recursive_printSolverOptions(SolverOptions* options, int level)
 {
   char* marge;
   int i;
@@ -167,11 +167,11 @@ void recursive_printSolverOptions(Solver_Options* options, int level)
   free(marge);
 
 }
-void printSolverOptions(Solver_Options* options)
+void printSolverOptions(SolverOptions* options)
 {
   recursive_printSolverOptions(options, 0);
 }
-void recursive_deleteSolverOptions(Solver_Options* op)
+void recursive_deleteSolverOptions(SolverOptions* op)
 {
 
   for (int i = 0; i < op->numberOfInternalSolvers; i++)
@@ -195,7 +195,7 @@ void recursive_deleteSolverOptions(Solver_Options* op)
 }
 
 
-void deleteSolverOptions(Solver_Options* op)
+void deleteSolverOptions(SolverOptions* op)
 {
   for (int i = 0; i < op->numberOfInternalSolvers; i++)
     recursive_deleteSolverOptions(&(op->internalSolvers[i]));

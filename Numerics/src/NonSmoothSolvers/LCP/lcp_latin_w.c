@@ -25,7 +25,7 @@
 #include "LA.h"
 #include "LCP_Solvers.h"
 
-void lcp_latin_w(LinearComplementarity_Problem* problem, double *z, double *w, int *info , Solver_Options* options)
+void lcp_latin_w(LinearComplementarity_Problem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */
   double * M = problem->M->matrix0;
@@ -449,12 +449,12 @@ void lcp_latin_w(LinearComplementarity_Problem* problem, double *z, double *w, i
 
 
 }
-int linearComplementarity_latin_w_setDefaultSolverOptions(Solver_Options* options)
+int linearComplementarity_latin_w_setDefaultSolverOptions(SolverOptions* options)
 {
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default Solver_Options for the Latin_w Solver\n");
+    printf("Set the Default SolverOptions for the Latin_w Solver\n");
   }
 
   strcpy(options->solverName, "Latin_w");

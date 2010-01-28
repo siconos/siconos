@@ -22,7 +22,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-  void fillParamWithRespectToSolver(Solver_Options *options, char * solvername, LinearComplementarity_Problem* problem);
+  void fillParamWithRespectToSolver(SolverOptions *options, char * solvername, LinearComplementarity_Problem* problem);
   int lcp_test_function(FILE * f, char * solvername);
   int lcp_test_function_SBM(FILE * f, char * solvername);
 

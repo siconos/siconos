@@ -32,7 +32,7 @@ static int sN = 0;
 static int sM = 0;
 static MixedLinearComplementarity_Problem* sProblem;
 static double* sFz = 0;
-int mixedLinearComplementarity_fb_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver)
+int mixedLinearComplementarity_fb_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pSolver)
 {
   mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
   return 0;
@@ -42,12 +42,12 @@ int mixedLinearComplementarity_fb_setDefaultSolverOptions(MixedLinearComplementa
 Warning: this function requires MLCP with M and q, not (A,B,C,D).
 The input structure MixedLinearComplementarity_Problem is supposed to fit with this form.
 */
-int mlcp_FB_getNbIWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
+int mlcp_FB_getNbIWork(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
 {
   return nonSmoothNewtonNeigh_getNbIWork(problem->n, problem->m);
 
 }
-int mlcp_FB_getNbDWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
+int mlcp_FB_getNbDWork(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
 {
   return problem->n + problem->m + nonSmoothNewtonNeigh_getNbDWork(problem->n, problem->m);
 }
@@ -79,7 +79,7 @@ void jacobianF_MCPFischerBurmeister(int size, double* z, double* jacobianFMatrix
 
 
 
-void mlcp_FB_init(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
+void mlcp_FB_init(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
 {
 
   /*
@@ -106,7 +106,7 @@ void mlcp_FB_reset()
 }
 
 
-void mlcp_FB(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
+void mlcp_FB(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   *info = 1;
 

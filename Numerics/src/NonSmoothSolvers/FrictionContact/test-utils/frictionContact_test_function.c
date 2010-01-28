@@ -22,7 +22,7 @@
 #include "frictionContact_test_function.h"
 
 
-int frictionContact_test_function(FILE * f, Solver_Options * options)
+int frictionContact_test_function(FILE * f, SolverOptions * options)
 {
 
   int k, info = -1 ;

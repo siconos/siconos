@@ -22,7 +22,7 @@
 #include "primalFrictionContact_test_function.h"
 
 
-int primalFrictionContact_test_function(FILE * f, Solver_Options * options)
+int primalFrictionContact_test_function(FILE * f, SolverOptions * options)
 {
 
   int k, info = -1 ;

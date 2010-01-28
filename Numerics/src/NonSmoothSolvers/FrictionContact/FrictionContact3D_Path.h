@@ -31,7 +31,7 @@
 
 */
 #include "SparseBlockMatrix.h"
-#include "Solver_Options.h"
+#include "SolverOptions.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,18 +41,18 @@ extern "C" {
       \param matrix M of the global problem
       \param vector q of the global problem
       \param vector of the friction coefficients
-      \param  Solver_Options * options of the solver
+      \param  SolverOptions * options of the solver
    */
-  void frictionContact3D_Path_initialize(int, const NumericsMatrix*const, const double*const, const double*const, Solver_Options *);
+  void frictionContact3D_Path_initialize(int, const NumericsMatrix*const, const double*const, const double*const, SolverOptions *);
 
   /** solve friction-contact 3D problem with Path
       \param number (position in global matrix) of the considered contact
       \param dim. of the global problem
       \param global reaction (only the block corresponding to the current contact will be modified,
       \param vector of int parameters (max iteration numnber ...)
-      \param  Solver_Options * options of the solver
+      \param  SolverOptions * options of the solver
    */
-  void frictionContact3D_Path_solve(int, int, double*, Solver_Options*);
+  void frictionContact3D_Path_solve(int, int, double*, SolverOptions*);
 
   /** free memory for friction contact 3D Path solver */
   void frictionContact3D_Path_free();

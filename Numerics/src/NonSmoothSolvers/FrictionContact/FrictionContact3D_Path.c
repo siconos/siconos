@@ -72,7 +72,7 @@ int jacobianF_GlockerPath(int sizeF, int nnz, double* reaction, int* col_start, 
 }
 
 
-void frictionContact3D_Path_initialize(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0, Solver_Options * localsolver_options)
+void frictionContact3D_Path_initialize(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0, SolverOptions * localsolver_options)
 {
 
   /*
@@ -97,7 +97,7 @@ void frictionContact3D_Path_initialize(int n0, const NumericsMatrix*const M0, co
   }
 }
 
-void frictionContact3D_Path_solve(int contact, int dimReaction, double* reaction, Solver_Options * options)
+void frictionContact3D_Path_solve(int contact, int dimReaction, double* reaction, SolverOptions * options)
 {
   int * iparam = options->iparam;
   double * dparam = options->dparam;

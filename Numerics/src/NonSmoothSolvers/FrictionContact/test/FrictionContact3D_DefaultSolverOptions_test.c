@@ -24,9 +24,9 @@
 
 int main(void)
 {
-  printf("\n Start of test on Default Solver_Options\n");
+  printf("\n Start of test on Default SolverOptions\n");
   int info = 0 ;
-  Solver_Options * options = (Solver_Options *)malloc(sizeof(Solver_Options));
+  SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
 
 
 
@@ -52,6 +52,6 @@ int main(void)
 
   free(options);
 
-  printf("\n End of test on Default Solver_Options\n");
+  printf("\n End of test on Default SolverOptions\n");
   return info;
 }

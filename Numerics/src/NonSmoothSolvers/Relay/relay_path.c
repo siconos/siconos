@@ -27,7 +27,7 @@
 #include "InterfaceToPathFerris/SimpleLCP.h"
 #endif /*HAVE_PATHFERRIS*/
 
-void relay_path(Relay_Problem* problem, double *z, double *w, int *info , Solver_Options* options)
+void relay_path(Relay_Problem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   *info = 1;
 #ifdef HAVE_PATHFERRIS
@@ -116,13 +116,13 @@ void relay_path(Relay_Problem* problem, double *z, double *w, int *info , Solver
 
   return;
 }
-int relay_path_setDefaultSolverOptions(Solver_Options* options)
+int relay_path_setDefaultSolverOptions(SolverOptions* options)
 {
 #ifdef HAVE_PATHFERRIS
   //  int i;
   if (verbose > 0)
   {
-    printf("Set the Default Solver_Options for the PATH Solver\n");
+    printf("Set the Default SolverOptions for the PATH Solver\n");
   }
   strcpy(options->solverName, "PATH");
 

@@ -27,7 +27,7 @@
 #include "LCP_Solvers.h"
 
 #define EPSDIAG DBL_EPSILON
-void lcp_rpgs(LinearComplementarity_Problem* problem, double *z, double *w, int *info , Solver_Options* options)
+void lcp_rpgs(LinearComplementarity_Problem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */
   double * M = problem->M->matrix0;
@@ -214,12 +214,12 @@ void lcp_rpgs(LinearComplementarity_Problem* problem, double *z, double *w, int 
 
   return;
 }
-int linearComplementarity_rpgs_setDefaultSolverOptions(Solver_Options* options)
+int linearComplementarity_rpgs_setDefaultSolverOptions(SolverOptions* options)
 {
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default Solver_Options for the RPGS Solver\n");
+    printf("Set the Default SolverOptions for the RPGS Solver\n");
   }
 
 

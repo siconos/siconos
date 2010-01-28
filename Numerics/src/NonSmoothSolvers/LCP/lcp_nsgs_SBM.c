@@ -56,7 +56,7 @@ void buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const b
 
 }
 
-void lcp_nsgs_SBM(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
+void lcp_nsgs_SBM(LinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   /* Notes:
 
@@ -133,7 +133,7 @@ void lcp_nsgs_SBM(LinearComplementarity_Problem* problem, double *z, double *w, 
 
   /*Number of the local solver */
   int localSolverNum = options->numberOfInternalSolvers ;
-  Solver_Options * internalSolvers = options->internalSolvers ;
+  SolverOptions * internalSolvers = options->internalSolvers ;
 
   int pos = 0;
   /* Output from local solver */
@@ -200,12 +200,12 @@ void lcp_nsgs_SBM(LinearComplementarity_Problem* problem, double *z, double *w, 
 
 
 
-int linearComplementarity_nsgs_SBM_setDefaultSolverOptions(Solver_Options* options)
+int linearComplementarity_nsgs_SBM_setDefaultSolverOptions(SolverOptions* options)
 {
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default Solver_Options for the NSGS Solver\n");
+    printf("Set the Default SolverOptions for the NSGS Solver\n");
   }
   strcpy(options->solverName, "NSGS_SBM");
 
@@ -225,7 +225,7 @@ int linearComplementarity_nsgs_SBM_setDefaultSolverOptions(Solver_Options* optio
   }
   options->iparam[0] = 1000;
   options->dparam[0] = 1e-6;
-  options->internalSolvers = (Solver_Options*)malloc(options->numberOfInternalSolvers * sizeof(Solver_Options));
+  options->internalSolvers = (SolverOptions*)malloc(options->numberOfInternalSolvers * sizeof(SolverOptions));
 
   linearComplementarity_pgs_setDefaultSolverOptions(options->internalSolvers);
 

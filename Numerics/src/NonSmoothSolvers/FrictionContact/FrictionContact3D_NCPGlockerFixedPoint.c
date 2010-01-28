@@ -54,7 +54,7 @@ void F_GlockerFixedP(int sizeF, double* reaction, double* FVector, int up2Date)
  */
 
 
-void frictionContact3D_FixedP_initialize(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0, Solver_Options * localsolver_options)
+void frictionContact3D_FixedP_initialize(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0, SolverOptions * localsolver_options)
 {
 
   /*
@@ -77,7 +77,7 @@ void frictionContact3D_FixedP_initialize(int n0, const NumericsMatrix*const M0, 
   }
 }
 
-void frictionContact3D_FixedP_solve(int contact, int dimReaction, double* reaction, Solver_Options * options)
+void frictionContact3D_FixedP_solve(int contact, int dimReaction, double* reaction, SolverOptions * options)
 {
   int * iparam = options->iparam;
   double * dparam = options->dparam;

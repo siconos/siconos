@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 
-  int frictionContact_test_function(FILE * f, Solver_Options * options);
+  int frictionContact_test_function(FILE * f, SolverOptions * options);
 
 
 #ifdef __cplusplus

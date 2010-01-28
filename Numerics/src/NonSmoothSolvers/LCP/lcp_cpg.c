@@ -24,7 +24,7 @@
 #include "LA.h"
 #include "LCP_Solvers.h"
 
-void lcp_cpg(LinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
+void lcp_cpg(LinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */
   double * M = problem->M->matrix0;
@@ -270,12 +270,12 @@ void lcp_cpg(LinearComplementarity_Problem* problem, double *z, double *w, int *
   free(zz);
 
 }
-int linearComplementarity_cpg_setDefaultSolverOptions(Solver_Options* options)
+int linearComplementarity_cpg_setDefaultSolverOptions(SolverOptions* options)
 {
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default Solver_Options for the CPG Solver\n");
+    printf("Set the Default SolverOptions for the CPG Solver\n");
   }
 
   strcpy(options->solverName, "CPG");

@@ -26,7 +26,7 @@
 #include <assert.h>
 #include "pinv.h"
 
-void initializeLocalSolver_nsgs_velocity(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, Solver_Options* localsolver_options)
+void initializeLocalSolver_nsgs_velocity(int n, SolverPtr* solve, FreeSolverPtr* freeSolver, ComputeErrorPtr* computeError, const NumericsMatrix* const M, const double* const q, const double* const mu, SolverOptions* localsolver_options)
 {
   /** Connect to local solver */
   /* Projection */
@@ -44,7 +44,7 @@ void initializeLocalSolver_nsgs_velocity(int n, SolverPtr* solve, FreeSolverPtr*
   }
 }
 
-void frictionContact3D_nsgs_velocity(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options)
+void frictionContact3D_nsgs_velocity(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
   /* int and double parameters */
   int* iparam = options->iparam;
@@ -105,7 +105,7 @@ void frictionContact3D_nsgs_velocity(FrictionContact_Problem* problem, double *r
   }
 
 
-  Solver_Options * localsolver_options = options->internalSolvers;
+  SolverOptions * localsolver_options = options->internalSolvers;
 
   /* Connect local solver */
   initializeLocalSolver_nsgs_velocity(n, &local_solver, &freeSolver, &computeError, M, q, mu, localsolver_options);
@@ -151,12 +151,12 @@ void frictionContact3D_nsgs_velocity(FrictionContact_Problem* problem, double *r
   /***** Free memory *****/
   (*freeSolver)();
 }
-int frictionContact3D_nsgs_velocity_setDefaultSolverOptions(Solver_Options* options)
+int frictionContact3D_nsgs_velocity_setDefaultSolverOptions(SolverOptions* options)
 {
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default Solver_Options for the NSGSV Solver\n");
+    printf("Set the Default SolverOptions for the NSGSV Solver\n");
   }
 
   strcpy(options->solverName, "NSGSV");
@@ -177,7 +177,7 @@ int frictionContact3D_nsgs_velocity_setDefaultSolverOptions(Solver_Options* opti
   }
   options->iparam[0] = 1000;
   options->dparam[0] = 1e-4;
-  options->internalSolvers = (Solver_Options *)malloc(sizeof(Solver_Options));
+  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   frictionContact3D_AlartCurnierNewton_setDefaultSolverOptions(options->internalSolvers);
 
   return 0;

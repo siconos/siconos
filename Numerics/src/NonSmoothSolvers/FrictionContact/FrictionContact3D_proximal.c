@@ -26,7 +26,7 @@
 #include <assert.h>
 
 
-void frictionContact3D_proximal(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options)
+void frictionContact3D_proximal(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
   /* int and double parameters */
   int* iparam = options->iparam;
@@ -53,7 +53,7 @@ void frictionContact3D_proximal(FrictionContact_Problem* problem, double *reacti
   {
     numericsError("frictionContact3D_proximal", "The PROX method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
   }
-  Solver_Options *internalsolver_options = options->internalSolvers;
+  SolverOptions *internalsolver_options = options->internalSolvers;
 
 
   /*****  PROXIMAL Iterations *****/
@@ -144,12 +144,12 @@ void frictionContact3D_proximal(FrictionContact_Problem* problem, double *reacti
 }
 
 
-int frictionContact3D_proximal_setDefaultSolverOptions(Solver_Options* options)
+int frictionContact3D_proximal_setDefaultSolverOptions(SolverOptions* options)
 {
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default Solver_Options for the PROX Solver\n");
+    printf("Set the Default SolverOptions for the PROX Solver\n");
   }
 
   strcpy(options->solverName, "PROX");
@@ -170,7 +170,7 @@ int frictionContact3D_proximal_setDefaultSolverOptions(Solver_Options* options)
   }
   options->iparam[0] = 1000;
   options->dparam[0] = 1e-4;
-  options->internalSolvers = (Solver_Options *)malloc(sizeof(Solver_Options));
+  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   frictionContact3D_nsgs_setDefaultSolverOptions(options->internalSolvers);
 
   return 0;

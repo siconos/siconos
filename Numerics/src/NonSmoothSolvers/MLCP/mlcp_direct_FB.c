@@ -43,19 +43,19 @@ static int * siWorkDirect = 0;
 static double * sdWorkFB = 0;
 static double * sdWorkDirect = 0;
 
-int mixedLinearComplementarity_directFB_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, Solver_Options* pSolver)
+int mixedLinearComplementarity_directFB_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pSolver)
 {
   mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
   return 0;
 }
 
 
-int mlcp_direct_FB_getNbIWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
+int mlcp_direct_FB_getNbIWork(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
 {
   int aux = mlcp_FB_getNbIWork(problem, options);
   return mlcp_direct_getNbIWork(problem, options) + aux;
 }
-int mlcp_direct_FB_getNbDWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
+int mlcp_direct_FB_getNbDWork(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
 {
   int aux = mlcp_FB_getNbDWork(problem, options);
   return mlcp_direct_getNbDWork(problem, options) + aux;
@@ -72,7 +72,7 @@ int mlcp_direct_FB_getNbDWork(MixedLinearComplementarity_Problem* problem, Solve
  *
  */
 
-void mlcp_direct_FB_init(MixedLinearComplementarity_Problem* problem, Solver_Options* options)
+void mlcp_direct_FB_init(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
 {
   sN = problem->n;
   sM = problem->m;
@@ -113,7 +113,7 @@ void mlcp_direct_FB_reset()
  * double *w : size n+m
  * info : output. info == 0 if success
  */
-void mlcp_direct_FB(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, Solver_Options* options)
+void mlcp_direct_FB(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   /*First, try direct solver*/
   mlcp_direct(problem, z, w, info, options);

@@ -96,7 +96,7 @@ int frictionContact2DLocalSolve(double *W, double *q, double mu, double *P, doub
 
 
 void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, double *w,
-                                   int *info, Solver_Options* options)
+                                   int *info, SolverOptions* options)
 {
   /* Notes:
      - we suppose that the trivial solution case has been checked before,
@@ -230,12 +230,12 @@ void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, 
 }
 
 
-int frictionContact2D_sparse_nsgs_setDefaultSolverOptions(Solver_Options *options)
+int frictionContact2D_sparse_nsgs_setDefaultSolverOptions(SolverOptions *options)
 {
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default Solver_Options for the NSGS Solver\n");
+    printf("Set the Default SolverOptions for the NSGS Solver\n");
   }
 
   strcpy(options->solverName, "NSGS");

@@ -33,7 +33,7 @@ int main(void)
 
   FILE * finput  =  fopen(filename, "r");
 
-  Solver_Options * options = (Solver_Options *)malloc(sizeof(Solver_Options));
+  SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
 
   primalFrictionContact3D_setDefaultSolverOptions(options, "NSGSV_WR");
 

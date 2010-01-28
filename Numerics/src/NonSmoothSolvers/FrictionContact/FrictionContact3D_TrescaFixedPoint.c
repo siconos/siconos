@@ -25,7 +25,7 @@
 #include <assert.h>
 
 
-void frictionContact3D_TrescaFixedPoint(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, Solver_Options* options)
+void frictionContact3D_TrescaFixedPoint(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
   /* int and double parameters */
   int* iparam = options->iparam;
@@ -53,7 +53,7 @@ void frictionContact3D_TrescaFixedPoint(FrictionContact_Problem* problem, double
     numericsError("frictionContact3D_TrescaFixedpoint", "The Tresca Fixed Point method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
   }
 
-  Solver_Options * internalsolver_options = options->internalSolvers;
+  SolverOptions * internalsolver_options = options->internalSolvers;
 
   if (verbose > 0)
   {
@@ -129,12 +129,12 @@ void frictionContact3D_TrescaFixedPoint(FrictionContact_Problem* problem, double
 
 
 
-int frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(Solver_Options* options)
+int frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* options)
 {
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default Solver_Options for the TFP Solver\n");
+    printf("Set the Default SolverOptions for the TFP Solver\n");
   }
 
   strcpy(options->solverName, "TFP");
@@ -155,11 +155,11 @@ int frictionContact3D_TrescaFixedPoint_setDefaultSolverOptions(Solver_Options* o
   }
   options->iparam[0] = 1000;
   options->dparam[0] = 1e-4;
-  options->internalSolvers = (Solver_Options *)malloc(sizeof(Solver_Options));
+  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
 
   frictionContact3D_nsgs_setDefaultSolverOptions(options->internalSolvers);
 
-  Solver_Options * subsubsolver = options->internalSolvers->internalSolvers;
+  SolverOptions * subsubsolver = options->internalSolvers->internalSolvers;
 
 
   subsubsolver->iparam[0] = 0;

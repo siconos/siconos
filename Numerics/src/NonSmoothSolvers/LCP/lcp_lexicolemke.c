@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include "LCP_Solvers.h"
 
-void lcp_lexicolemke(LinearComplementarity_Problem* problem, double *zlem , double *wlem , int *info , Solver_Options* options)
+void lcp_lexicolemke(LinearComplementarity_Problem* problem, double *zlem , double *wlem , int *info , SolverOptions* options)
 {
   /* matrix M of the lcp */
   double * M = problem->M->matrix0;
@@ -240,12 +240,12 @@ void lcp_lexicolemke(LinearComplementarity_Problem* problem, double *zlem , doub
 }
 
 
-int linearComplementarity_lexicolemke_setDefaultSolverOptions(Solver_Options* options)
+int linearComplementarity_lexicolemke_setDefaultSolverOptions(SolverOptions* options)
 {
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default Solver_Options for the Lemke Solver\n");
+    printf("Set the Default SolverOptions for the Lemke Solver\n");
   }
 
 

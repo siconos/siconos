@@ -66,7 +66,7 @@ void jacobianF_GlockerFischerBurmeister(int sizeF, double* reaction, double* jac
 }
 
 
-void frictionContact3D_Newton_initialize(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0, Solver_Options * localsolver_options)
+void frictionContact3D_Newton_initialize(int n0, const NumericsMatrix*const M0, const double*const q0, const double*const mu0, SolverOptions * localsolver_options)
 {
 
   /*
@@ -103,7 +103,7 @@ void frictionContact3D_Newton_initialize(int n0, const NumericsMatrix*const M0, 
   }
 }
 
-void frictionContact3D_Newton_solve(int contact, int dimReaction, double* reaction, Solver_Options * options)
+void frictionContact3D_Newton_solve(int contact, int dimReaction, double* reaction, SolverOptions * options)
 {
   (*updateSolver)(contact, reaction);
   int pos = Fsize * contact; /* Current block position */

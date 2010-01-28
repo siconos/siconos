@@ -30,7 +30,7 @@ int main(void)
   printf("Test on ./data/Example1_Fc3D_SBM.dat\n");
 
   FILE * finput  =  fopen("./data/Example1_Fc3D_SBM.dat", "r");
-  Solver_Options * options = (Solver_Options *) malloc(sizeof(Solver_Options));
+  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
   info = frictionContact3D_setDefaultSolverOptions(options, "NSGS");
   options->dparam[0] = 1e-16;
   strcpy(options->internalSolvers->solverName, "NCPGlockerBPATH");

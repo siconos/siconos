@@ -25,7 +25,7 @@
 #include "LA.h"
 #include "LCP_Solvers.h"
 /*\warning omega is not explicitely used. must be completed    */
-void lcp_psor(LinearComplementarity_Problem* problem, double *z, double *w, int *info , Solver_Options* options)
+void lcp_psor(LinearComplementarity_Problem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */
   double * M = problem->M->matrix0;
@@ -176,12 +176,12 @@ void lcp_psor(LinearComplementarity_Problem* problem, double *z, double *w, int 
 
   return;
 }
-int linearComplementarity_psor_setDefaultSolverOptions(Solver_Options* options)
+int linearComplementarity_psor_setDefaultSolverOptions(SolverOptions* options)
 {
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default Solver_Options for the PSOR Solver\n");
+    printf("Set the Default SolverOptions for the PSOR Solver\n");
   }
 
 

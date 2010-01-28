@@ -26,7 +26,7 @@
 #include "FrictionContact2D_Solvers.h"
 #include "NonSmoothDrivers.h"
 
-int frictionContact2D_setDefaultSolverOptions(Solver_Options* options, char *solvername)
+int frictionContact2D_setDefaultSolverOptions(SolverOptions* options, char *solvername)
 {
   int info = -1;
   if (strcmp(solvername, "NSGS") == 0)

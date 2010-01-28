@@ -25,7 +25,7 @@
 #include "LA.h"
 #include "FrictionContact2D_Solvers.h"
 
-void FrictionContact2D_latin(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, Solver_Options* options)
+void FrictionContact2D_latin(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, SolverOptions* options)
 {
   int nc = problem->numberOfContacts;
   double * vec = problem->M->matrix0;
@@ -550,12 +550,12 @@ void FrictionContact2D_latin(FrictionContact_Problem* problem , double *reaction
 
 
 }
-int frictionContact2D_latin_setDefaultSolverOptions(Solver_Options *options)
+int frictionContact2D_latin_setDefaultSolverOptions(SolverOptions *options)
 {
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default Solver_Options for the Latin Solver\n");
+    printf("Set the Default SolverOptions for the Latin Solver\n");
   }
 
   strcpy(options->solverName, "Latin");

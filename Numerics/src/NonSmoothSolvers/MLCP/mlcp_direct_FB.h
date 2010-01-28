@@ -12,11 +12,11 @@
  *
  */
 
-void mlcp_direct_FB_init(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
+void mlcp_direct_FB_init(MixedLinearComplementarity_Problem* problem, SolverOptions* options);
 void mlcp_direct_FB_reset();
 
-int mlcp_direct_FB_getNbIWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
-int mlcp_direct_FB_getNbDWork(MixedLinearComplementarity_Problem* problem, Solver_Options* options);
+int mlcp_direct_FB_getNbIWork(MixedLinearComplementarity_Problem* problem, SolverOptions* options);
+int mlcp_direct_FB_getNbDWork(MixedLinearComplementarity_Problem* problem, SolverOptions* options);
 
 
 #endif //MLCP_DIRECT_FB_H
