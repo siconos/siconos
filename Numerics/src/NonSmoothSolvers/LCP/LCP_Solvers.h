@@ -180,10 +180,6 @@ This solver first build a local problem for each row of blocks and then call any
 
 */
 
-#define SICONOS_MLCP_ENUM "ENUM"
-#define SICONOS_LCP_LEMKE 2
-
-
 #include "Numerics_Options.h"
 #include "LinearComplementarity_Problem.h"
 #include "Solver_Options.h"
