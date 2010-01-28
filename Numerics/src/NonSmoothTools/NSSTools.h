@@ -26,7 +26,8 @@
 */
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
   /** Search for the max. element of a vector

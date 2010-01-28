@@ -120,7 +120,8 @@ typedef struct
 #include "stdio.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
   /** Matrix - vector product y = alpha*A*x + beta*y
       \param[in] sizeX dim of the vector x

@@ -97,7 +97,8 @@ typedef struct
 } PrimalFrictionContactProblem;
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
   int primalFrictionContact_printInFile(PrimalFrictionContactProblem*  problem, FILE* file);
 

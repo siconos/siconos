@@ -20,7 +20,8 @@
 #ifndef ProjectionOnCylinder_H
 #define ProjectionOnCylinder_H
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
   /** projectionOnCylinder Projection onto the positive Cylinder of radius R  \f$K \{ r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq R \}
   \param[in-out] the vector to be projected

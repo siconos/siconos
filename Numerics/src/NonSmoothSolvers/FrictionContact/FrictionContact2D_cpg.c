@@ -225,7 +225,7 @@ void FrictionContact2D_cpg(FrictionContactProblem* problem , double *reaction , 
     DAXPY(n, alphaf, z, incx, p, incy);
 
 
-    /*    alphaf  = 1.;
+    /*  alphaf  = 1.;
     betaf   = 0.;
     dgemv_( &notrans, (integer *)&n, (integer *)&n, &alphaf, vec , (integer *)&n, p, &incx, &betaf, Ap, &incy );
 

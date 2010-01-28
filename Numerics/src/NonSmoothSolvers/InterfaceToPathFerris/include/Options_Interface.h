@@ -44,11 +44,11 @@ typedef struct
 
 typedef struct
 {
-  Char name[OPTION_NAME_SIZE];  /* Name of the options                       */
-  Boolean print;    /* Flag set to true if we want this options  */
+  Char name[OPTION_NAME_SIZE]; /* Name of the options                       */
+  Boolean print;  /* Flag set to true if we want this options  */
   /* printed during a Options_Display( ).      */
-  Int type;     /* Type for the option                       */
-  Option_Value value;   /* Value for the option                      */
+  Int type;   /* Type for the option                       */
+  Option_Value value;  /* Value for the option                      */
 } Option;
 
 /*****************************************************************************/
@@ -57,14 +57,14 @@ typedef struct
 
 struct _Option_Set
 {
-  Int numOptions;   /* Number of algorithm defined options       */
-  Int numTypes;     /* Total number of types defined (3 plus any */
+  Int numOptions;  /* Number of algorithm defined options       */
+  Int numTypes;   /* Total number of types defined (3 plus any */
   /* new enumerated types)                     */
 
-  Option *options;    /* Actual table of options                   */
+  Option *options;  /* Actual table of options                   */
 
   Void(CB_FPTR defaults)(Void); /* Function to set the defaults              */
-  Void(CB_FPTR destroy)(Void);  /* Function to destroy the option set        */
+  Void(CB_FPTR destroy)(Void); /* Function to destroy the option set        */
 
   Void(CB_FPTR *output)(const int, const int);
   /* Table for outputing the options.  First   */

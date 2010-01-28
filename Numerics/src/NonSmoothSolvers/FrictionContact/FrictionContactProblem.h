@@ -118,7 +118,8 @@ typedef struct
 
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
   int frictionContact_printInFile(FrictionContactProblem*  problem, FILE* file);
 

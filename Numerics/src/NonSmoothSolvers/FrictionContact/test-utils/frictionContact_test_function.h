@@ -20,7 +20,8 @@
 #define FRICTIONCONTACT_TEST_FUNCTION_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
   int frictionContact_test_function(FILE * f, SolverOptions * options);

@@ -27,7 +27,8 @@
 */
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
   int Fixe(int n, double* z, int* iparam, double* dparam);

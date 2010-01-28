@@ -196,7 +196,7 @@ void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, con
           {
             BlockCexists = 1;
             C->nbblocks++;
-            /*               printf("C block number %i exists for %i %i ",C->nbblocks, currentRowNumberofA, currentColNumberofB ); */
+            /*           printf("C block number %i exists for %i %i ",C->nbblocks, currentRowNumberofA, currentColNumberofB ); */
 
             C->filled2++;
             int Cblosksize0 = A->blocksize0[currentRowNumberofA];
@@ -205,7 +205,7 @@ void allocateMemoryForProdSBMSBM(const SparseBlockStructuredMatrix* const A, con
             int Cblocksize1 = B->blocksize1[currentColNumberofB];
             if (currentColNumberofB != 0)
               Cblocksize1 -= B->blocksize1[currentColNumberofB - 1];
-            /*               printf("of size %dX%d\n",Cblosksize0,Cblocksize1  ); */
+            /*           printf("of size %dX%d\n",Cblosksize0,Cblocksize1  ); */
             Cblocktmp[C->nbblocks] = (double*)malloc(Cblosksize0 * Cblocksize1 * sizeof(double));
             for (i = 0; i < Cblosksize0 * Cblocksize1; i++) Cblocktmp[C->nbblocks][i] = 0.0;
 
@@ -348,14 +348,14 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
       {
         assert(blockNumAA < A->filled2);
         colNumberAA = A->index2_data[blockNumAA];
-        /*            printf("blockNumAA = %i, colNumberAA = %i\n",blockNumAA,colNumberAA  ); */
+        /*          printf("blockNumAA = %i, colNumberAA = %i\n",blockNumAA,colNumberAA  ); */
 
         for (unsigned int blockNumBB = Bindex3_data[currentColNumberofB];
              blockNumBB < Bindex3_data[currentColNumberofB + 1]; ++blockNumBB)
         {
           rowNumberBB = Bindex4_data[blockNumBB];
-          /*             printf("blockNumBB = %i, rowNumberBB = %i\n",blockNumBB,rowNumberBB  ); */
-          /*             printf("blocMap[blockNumBB] = %i, rowNumberBB = %i\n",blockMap[blockNumBB],rowNumberBB  ); */
+          /*          printf("blockNumBB = %i, rowNumberBB = %i\n",blockNumBB,rowNumberBB  ); */
+          /*          printf("blocMap[blockNumBB] = %i, rowNumberBB = %i\n",blockMap[blockNumBB],rowNumberBB  ); */
 
           if (rowNumberBB == colNumberAA)
           {
@@ -365,7 +365,7 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
               CblockPassed = 0;
             }
             assert(Cnbblocks < C->nbblocks);
-            /*               printf("Compute C block number %i for %i %i ", Cnbblocks,currentRowNumberofA, currentColNumberofB ); */
+            /*           printf("Compute C block number %i for %i %i ", Cnbblocks,currentRowNumberofA, currentColNumberofB ); */
 
             int Ablocksize0 = A->blocksize0[currentRowNumberofA];
             if (currentRowNumberofA != 0)
@@ -374,7 +374,7 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
             int Bblocksize1 = B->blocksize1[currentColNumberofB];
             if (currentColNumberofB != 0)
               Bblocksize1 -= B->blocksize1[currentColNumberofB - 1];
-            /*               printf("of size %dX%d\n",Ablocksize0,Bblocksize1  ); */
+            /*           printf("of size %dX%d\n",Ablocksize0,Bblocksize1  ); */
 
             int Ablocksize1 = A->blocksize1[colNumberAA];
             if (colNumberAA != 0)
@@ -385,35 +385,36 @@ void prodSBMSBM(double alpha, const SparseBlockStructuredMatrix* const A, const 
               Bblocksize0 -= B->blocksize0[rowNumberBB - 1];
 
 
-            /*               printf("Contribution of the product of blocks matrices A(%i,%i) and B(%i,%i) of  sizes %dX%d by %dX%d\n",currentRowNumberofA,colNumberAA,rowNumberBB, currentColNumberofB,   Ablocksize0,Ablocksize1,Bblocksize0,Bblocksize1   ); */
+            /*           printf("Contribution of the product of blocks matrices A(%i,%i) and B(%i,%i) of  sizes %dX%d by %dX%d\n",currentRowNumberofA,colNumberAA,rowNumberBB, currentColNumberofB,   Ablocksize0,Ablocksize1,Bblocksize0,Bblocksize1   ); */
 
             assert(Ablocksize1 == Bblocksize0);
             /* for (i=0;i<Ablocksize0;i++) */
-            /*             { */
-            /*                 for (j=0;j<Ablocksize1;j++)  { */
-            /*               printf("A->block[%i](%i,%i) = %f\n",blockNumAA,i,j, A->block[blockNumAA][i+j*Ablocksize0]); */
-            /*                 } */
-            /*             } */
+            /*        { */
+            /*            for (j=0;j<Ablocksize1;j++)  { */
+            /*         printf("A->block[%i](%i,%i) = %f\n",blockNumAA,i,j, A->block[blockNumAA][i+j*Ablocksize0]); */
+            /*            } */
+            /*        } */
 
-            /*                for (i=0;i<Bblocksize0;i++) */
-            /*             { */
-            /*                 for (j=0;j<Bblocksize1;j++)  { */
-            /*               printf("B->block[%i](%i,%i) = %f\n",blockNumBB,i,j, B->block[blockMap[blockNumBB]][i+j*Bblocksize0]); */
-            /*                 } */
-            /*             } */
+            /*            for (i=0;i<Bblocksize0;i++) */
+            /*        { */
+            /*            for (j=0;j<Bblocksize1;j++)  { */
+            /*         printf("B->block[%i](%i,%i) = %f\n",blockNumBB,i,j, B->block[blockMap[blockNumBB]][i+j*Bblocksize0]); */
+            /*            } */
+            /*        } */
 
-            /*                printf("DGEMM call\n"); */
+            /*            printf("DGEMM call\n"); */
             DGEMM(LA_NOTRANS, LA_NOTRANS, Ablocksize0, Bblocksize1, Ablocksize1, alpha, A->block[blockNumAA], Ablocksize0, B->block[blockMap[blockNumBB]], Bblocksize0, beta, C->block[Cnbblocks], Ablocksize0);
 
 
-            /*               for (i=0;i<Ablocksize0;i++) */
-            /*             { */
-            /*                 for (j=0;j<Bblocksize1;j++)  { */
-            /*               printf("C->block[%i](%i,%i) = %f\n",Cnbblocks,i,j, C->block[Cnbblocks][i+j*Ablocksize0]); */
-            /*                 } */
-            /*             } */
+            /*           for (i=0;i<Ablocksize0;i++) */
+            /*        { */
+            /*            for (j=0;j<Bblocksize1;j++)  { */
+            /*         printf("C->block[%i](%i,%i) = %f\n",Cnbblocks,i,j, C->block[Cnbblocks][i+j*Ablocksize0]); */
+            /*            } */
+            /*        } */
 
-          }; /* printf("\n"); */
+          }
+          ; /* printf("\n"); */
 
         } /*  printf("\n"); */
 
@@ -1199,7 +1200,7 @@ int transposeSBM(const SparseBlockStructuredMatrix* const A, SparseBlockStructur
           assert(i + j * nbRows < nbRows * nbColumns);
           assert(j + i * nbColumns < nbRows * nbColumns);
 
-          B->block[blockNum] [i + j * nbRows ] =  A->block[blockMap[blockNum]] [j + i * nbColumns] ;
+          B->block[blockNum] [i + j * nbRows ] = A->block[blockMap[blockNum]] [j + i * nbColumns] ;
         }
       }
 

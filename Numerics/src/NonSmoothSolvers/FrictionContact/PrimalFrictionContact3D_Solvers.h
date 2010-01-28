@@ -57,7 +57,8 @@ typedef void (*FreeSolverPrimalPtr)(PrimalFrictionContactProblem*);
 
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
   /** General interface to solvers for primal friction-contact 3D problem
     \param[in] , the structure which handles the Friction-Contact problem

@@ -261,7 +261,7 @@ int linesearch2_Armijo(int n, double *z, double psi_k, double descentCondition)
         }
       }
 
-      /*  printf("merit = %e, merit_k=%e,tk= %e,tkaux=%e \n",merit,merit_k,tk,tkaux);*/
+      /* printf("merit = %e, merit_k=%e,tk= %e,tkaux=%e \n",merit,merit_k,tk,tkaux);*/
       DCOPY(sN, sz2, incx, z, incx);
       break;
     }
@@ -524,12 +524,12 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
 
     if (niter > 2)
     {
-      /*  if(10*(itermax)*fabs(prev_psi_z-psi_z) < psi_z){*/
+      /* if(10*(itermax)*fabs(prev_psi_z-psi_z) < psi_z){*/
       if (10 * norm_jacobian_psi_z < tolerance || !resls || NbLookingForANewZ > iterMaxWithSameZ)
       {
         NbLookingForANewZ = 0;
         resls = 1;
-        /*    if (NbLookingForANewZ % 10 ==1 && 0){
+        /*   if (NbLookingForANewZ % 10 ==1 && 0){
           printf("Try NonMonotomnelineSearch\n");
           DCOPY(n,sgrad_psi_z,1,sdir_descent,1);
           DSCAL( n , -1.0 ,sdir_descent,incx);
@@ -544,7 +544,7 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
           printf("begin plot prev dir\n");
           plotMerit(z, 0, 0);
           printf("end\n");
-          /*      gets(&c);*/
+          /*     gets(&c);*/
           (*sFphi)(n, sZsol, szaux, 0);
           printf("value psi(zsol)=%e\n", DNRM2(n, szaux, 1));
           DCOPY(n, sZsol, incx, szaux, incx);
@@ -558,7 +558,7 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
           printf("begin plot zzsol dir\n");
           plotMerit(z, 0, 0);
           printf("end\n");
-          /*      gets(&c);*/
+          /*     gets(&c);*/
           norm = aux;
         }
 
@@ -624,10 +624,10 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
 
 
             aux = DDOT(n, sgrad_psi_zaux, 1, szzaux, 1);
-            /*        aux1 = DNRM2(n,szzaux,1);
+            /*       aux1 = DNRM2(n,szzaux,1);
             aux1 = DNRM2(n,sgrad_psi_zaux,1);*/
             aux = aux / (DNRM2(n, szzaux, 1) * DNRM2(n, sgrad_psi_zaux, 1));
-            /*        printf("aux: %e\n",aux);*/
+            /*       printf("aux: %e\n",aux);*/
             if (aux < 0.1 * (j + 1))
             {
               //zaux is the new point.
@@ -720,7 +720,7 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
       /*printf("begin plot new descent dir\n");
       plotMerit(z);
       printf("end\n");
-        gets(&c);*/
+       gets(&c);*/
     }
     /*      coef=fabs(norm_jacobian_psi_z*norm_jacobian_psi_z/descentCondition);
     if (coef <1){
@@ -735,7 +735,7 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
     printf("begin plot new descent dir\n");
     plotMerit(z);
     printf("end\n");
-      gets(&c);
+     gets(&c);
     }*/
     /*      memcpy(oldz,z,n*sizeof(double));*/
 
@@ -743,7 +743,7 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
     if (!resls && niter > 1)
     {
 
-      /*  displayMat(sjacobianPhi_z,n,n,n);
+      /* displayMat(sjacobianPhi_z,n,n,n);
       printf("begin plot new descent dir\n");
       plotMerit(oldz,psi_z, descentCondition);
       printf("end\n");
@@ -764,9 +764,9 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
 
     /*      if( 1 || verbose>0)
     {
-    printf("Non Smooth Newton, iteration number %i, error grad equal to %14.7e , psi value is %14.7e .\n",niter, terminationCriterion,psi_z);
-     printf(" -----------------------------------------------------------------------\n");
-     }*/
+     printf("Non Smooth Newton, iteration number %i, error grad equal to %14.7e , psi value is %14.7e .\n",niter, terminationCriterion,psi_z);
+       printf(" -----------------------------------------------------------------------\n");
+       }*/
   }
 
   /* Total number of iterations */

@@ -91,7 +91,7 @@ void FrictionContact2D_projf(int etat[], int *nn, double y[], double fric[], dou
 
       projf1[2 * i + 1] = maxa;
     }
-    else                                /*   Etat de contact adhérent   */
+    else                                /*  Etat de contact adhérent   */
     {
       projf1[2 * i]   = y[2 * i];
       projf1[2 * i + 1] = y[2 * i + 1];

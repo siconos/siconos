@@ -26,7 +26,6 @@
 void prodNumericsMatrix(int sizeX, int sizeY, double alpha, const NumericsMatrix* const A, const double* const x, double beta, double* y)
 {
 
-
   assert(A);
   assert(x);
   assert(y);

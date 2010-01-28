@@ -23,7 +23,8 @@
 #define NUMERICSMATRIX_TEST_FUNCTION_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
   int test_BuildNumericsMatrix(NumericsMatrix** MM);
   int test_prodNumericsMatrix(NumericsMatrix** MM);

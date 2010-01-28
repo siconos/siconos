@@ -320,7 +320,7 @@ int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat, SparseBlockStr
       {
         adrbldiag = blmat->block[i];
       }
-      else                        /* extra diagonal block  */
+      else                      /* extra diagonal block  */
       {
         for (j = colprecbl ; j < colcurbl ; j++) indiccol += blmat->blocksize[j];
         colprecbl = colcurbl;

@@ -20,7 +20,8 @@
 #define LCP_TEST_FUNCTION_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
   void fillParamWithRespectToSolver(SolverOptions *options, char * solvername, LinearComplementarityProblem* problem);
   int lcp_test_function(FILE * f, char * solvername);

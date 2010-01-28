@@ -217,7 +217,7 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
       }
     }
 
-    /*   beta = -w.Mp / pMp  */
+    /*  beta = -w.Mp / pMp  */
 
     rp = DDOT(n , ww, incx, w, incy);
 

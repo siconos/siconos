@@ -20,7 +20,8 @@
 #define PRIMALFRICTIONCONTACT_TEST_FUNCTION_H
 #include "SolverOptions.h"
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
   int primalFrictionContact_test_function(FILE * f, SolverOptions *);

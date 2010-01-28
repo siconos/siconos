@@ -67,7 +67,8 @@ typedef void (*FreeSolverPtr)();
 typedef void (*internalSolverPtr)(FrictionContactProblem*, double*, double*, int *, SolverOptions *);
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
   /** General interface to solvers for friction-contact 3D problem

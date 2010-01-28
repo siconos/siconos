@@ -98,7 +98,8 @@ typedef struct
 } RelayProblem;
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
   /** Relay_display displays on screen a Relay_problem
   * \param[in] p Relay_problem to be displayed

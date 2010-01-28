@@ -112,7 +112,7 @@ void frictionContact3D_projection_update(int contact, double* reaction)
   projection_fillMLocal(contact);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
-   excluding the block corresponding to the current contact. ****/
+     excluding the block corresponding to the current contact. ****/
 
   int in = 3 * contact, it = in + 1, is = it + 1;
   /* reaction current block set to zero, to exclude current contact block */
@@ -165,7 +165,7 @@ void frictionContact3D_projectionWithDiagonalization_update(int contact, double*
   projection_fillMLocal(contact);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
-   excluding the block corresponding to the current contact. ****/
+     excluding the block corresponding to the current contact. ****/
 
   int in = 3 * contact, it = in + 1, is = it + 1;
   /* reaction current block set to zero, to exclude current contact block */
@@ -267,7 +267,7 @@ void frictionContact3D_projection_update_with_regularization(int contact, double
   projection_fillMLocal_with_regularization(contact, rho);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
-   excluding the block corresponding to the current contact. ****/
+     excluding the block corresponding to the current contact. ****/
 
   int in = 3 * contact, it = in + 1, is = it + 1;
   /* reaction current block set to zero, to exclude current contact block */
@@ -435,7 +435,7 @@ void frictionContact3D_projectionOnConeWithLocalIteration_solve(int contact, int
     localerror =  sqrt((worktmp[0] - reaction[pos]) * (worktmp[0] - reaction[pos]) +
                        (worktmp[1] - reaction[pos + 1]) * (worktmp[1] - reaction[pos + 1]) +
                        (worktmp[2] - reaction[pos + 2]) * (worktmp[2] - reaction[pos + 2]));
-    /*      printf ("localerror = %14.7e\n",localerror );  */
+    /*     printf ("localerror = %14.7e\n",localerror );  */
     /*    printf ("worktmp[0] = %14.7e\n",worktmp[0]); */
     /*    printf ("worktmp[1] = %14.7e\n",worktmp[1]); */
     /*    printf ("worktmp[2] = %14.7e\n",worktmp[2]); */
@@ -460,9 +460,9 @@ void frictionContact3D_projectionOnConeWithLocalIteration_solve(int contact, int
 
     /*    projectionOnCone(worktmp, mu_i);   */
     /*    localerror2 =  sqrt( (worktmp[0]-reaction[pos])*(worktmp[0]-reaction[pos]) + */
-    /*            (worktmp[1]-reaction[pos+1])*(worktmp[1]-reaction[pos+1])+ */
-    /*            (worktmp[2]-reaction[pos+2])*(worktmp[2]-reaction[pos+2]) ); */
-    /*      printf ("localerror2 = %14.7e\n",localerror2 );  */
+    /*          (worktmp[1]-reaction[pos+1])*(worktmp[1]-reaction[pos+1])+ */
+    /*          (worktmp[2]-reaction[pos+2])*(worktmp[2]-reaction[pos+2]) ); */
+    /*     printf ("localerror2 = %14.7e\n",localerror2 );  */
 
 
     /* /\*    printf ("velocity[0] = %14.7e\n",worktmp[0]); *\/ */

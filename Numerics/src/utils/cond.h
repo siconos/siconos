@@ -21,7 +21,8 @@
 #define Cond_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
   /** Compute the conditioning of dense matrix with column major storage
   \param A the matrix to be read

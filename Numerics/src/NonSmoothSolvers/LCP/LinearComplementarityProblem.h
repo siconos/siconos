@@ -80,7 +80,8 @@ typedef struct
 } LinearComplementarityProblem;
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
   void LinearComplementarity_display(LinearComplementarityProblem* p);
 

@@ -28,7 +28,8 @@
 */
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
   /** Error computation for friction-contact 3D problem

@@ -70,7 +70,7 @@ int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, do
     double *D = problem->D;
 
     /* Compute "equalities" part, we = Au + Cv + a - Must be equal to 0 */
-    DCOPY(NbLines - m , a , incx , w , incy);//  we = w[0..n-1] <-- a
+    DCOPY(NbLines - m , a , incx , w , incy); //  we = w[0..n-1] <-- a
     DGEMV(LA_NOTRANS , NbLines - m, n , 1.0 , A , NbLines - m , &z[0] , incx , 1.0 , w , incy); // we <-- A*u + we
     DGEMV(LA_NOTRANS , NbLines - m, m , 1.0 , C , NbLines - m , &z[n] , incx , 1.0 , w , incy); // we <-- C*v + we
 

@@ -69,7 +69,7 @@ static double e3[2];
 static double IpInv[4];
 static double IpInvTranspose[4];
 static double I[4];
-# define PI 3.14159265358979323846  /* pi */
+# define PI 3.14159265358979323846 /* pi */
 
 void computeE(unsigned int i, double* e)
 {

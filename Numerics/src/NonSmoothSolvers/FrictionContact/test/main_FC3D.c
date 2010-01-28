@@ -94,9 +94,9 @@ int test_Series_nsgs(FrictionContactProblem* problem,
     printf("info =%i\n", info);
     /*  if (info) */
     /*      { */
-    /*    char c; */
-    /*    printf("Press a key to continue:"); */
-    /*        scanf("%c",&c); */
+    /*   char c; */
+    /*   printf("Press a key to continue:"); */
+    /*     scanf("%c",&c); */
 
     /*      } */
 
@@ -180,7 +180,7 @@ int main(void)
     fclose(file);
 
 
-    /*    file = fopen("test.dat","w");      */
+    /*    file = fopen("test.dat","w");     */
     /*    frictionContact3D_printInFile(testproblem,file ); */
     /*    fclose(file); */
 

@@ -42,7 +42,8 @@ typedef struct
 extern int verbose;
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
   /* Set verbose mode in numerics

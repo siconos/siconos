@@ -34,7 +34,8 @@
 #include "SolverOptions.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
   /** Initialize friction-contact 3D Newton solver
       \param dim. of the global problem

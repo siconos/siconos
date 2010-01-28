@@ -286,7 +286,8 @@ typedef doublereal E_f; /* real function with -R not specified */
    for compiling libF77 and libI77. */
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
   extern int abort_(void);
   extern double c_abs(f2c_complex *);
   extern void c_cos(f2c_complex *, f2c_complex *);

@@ -168,7 +168,7 @@ void lcp_newton_min(LinearComplementarityProblem* problem, double *z, double *w,
 
     /* / iteration*/
     alpha = -1.0;
-    DAXPY(n , alpha , H , incx , z , incy);      /* /  z-H --> z*/
+    DAXPY(n , alpha , H , incx , z , incy);     /* /  z-H --> z*/
     DAXPY(n , alpha , &H[n] , incx , w , incy);  /* /  w-H --> w*/
 
     /* / Construction of the RHS for the next iterate and for the error evalutaion*/
@@ -177,7 +177,7 @@ void lcp_newton_min(LinearComplementarityProblem* problem, double *z, double *w,
     DCOPY(n , q , incx , H , incy);                                         /* / q --> H*/
     DGEMV(LA_NOTRANS , n , n , a1 , M , n , z , incx , b1 , H , incy);  /* / Mz+q --> H*/
     alpha = -1.0;
-    DAXPY(n , alpha , w , incx , H , incy);                                /* / w-Mz-q --> H*/
+    DAXPY(n , alpha , w , incx , H , incy);                               /* / w-Mz-q --> H*/
 
     for (i = n; i < m; i++)
     {

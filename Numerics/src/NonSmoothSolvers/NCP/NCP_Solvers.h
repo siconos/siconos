@@ -45,7 +45,8 @@
 #include "NCP_FixedP.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
   /**

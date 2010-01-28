@@ -14,9 +14,9 @@ we want to solve the problem
 (cf F. Cadoux, "An optimization-based algorithm for Coulomb frictional contact", Esaim-Procs)
 where
 - (v,u,r) are the unknown
-  * v : generalized velocities
-  * u : relative velocities at contact points
-  * r : contact impulses
+ * v : generalized velocities
+ * u : relative velocities at contact points
+ * r : contact impulses
 - M, f, H, w as well as well as the friction coefficients mu and the transition matrix to the local base E are input data. They are specified by the input args of the constructor of solverAC. Note that the convention is that the normal (given in E) goes from B to A, and that if one of the colliding objects does not belong to the simulation, it must be body B. The matrix HA[i] (resp. HB[i]) gives the velocity of A (resp. B) at the i-th contact point.
 */
 

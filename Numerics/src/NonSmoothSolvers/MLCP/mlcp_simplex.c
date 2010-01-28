@@ -64,11 +64,11 @@ void mlcp_simplex_reset()
   sIsInitialize = 0;
 #endif
 }
-/*  tolVar =options->dparam[0];      tolerance to consider that a var is null
- *  tolComp = options->dparam[1];      tolerance to consider that complementarity holds
+/*  tolVar =options->dparam[0];    tolerance to consider that a var is null
+ *  tolComp = options->dparam[1];    tolerance to consider that complementarity holds
  *  tolNegVar = options->dparam[2];     tolerance to consider a value is negative
- *  nIterMax = options->iparam[0];     max number of nodes to consider in tree search
- *  options->iparam[1];    verbose if not 0
+ *  nIterMax = options->iparam[0];   max number of nodes to consider in tree search
+ *  options->iparam[1];   verbose if not 0
  *  info : output. info == 0 if success.
 */
 void mlcp_simplex(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
@@ -91,7 +91,7 @@ void mlcp_simplex(MixedLinearComplementarityProblem* problem, double *z, double 
   if (!sIsInitialize)
     extern_mlcp_simplex_init_with_M(&nn , &mm, problem->M->matrix0);
 
-  extern_mlcp_simplex(problem->q, problem->q + nn, z, z + nn, w , info ,   options->iparam , options->dparam);
+  extern_mlcp_simplex(problem->q, problem->q + nn, z, z + nn, w , info ,  options->iparam , options->dparam);
 
   if (!sIsInitialize)
     extern_mlcp_simplex_stop();

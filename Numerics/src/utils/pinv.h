@@ -21,7 +21,8 @@
 #define Pinv_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
   /** Compute the pseudo-inverse of dense matrix with column major storage
   \param A the matrix to be inversed

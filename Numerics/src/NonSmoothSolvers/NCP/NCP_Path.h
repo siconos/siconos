@@ -35,7 +35,8 @@
 */
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
   /** Path solver for NCP problem

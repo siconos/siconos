@@ -181,7 +181,8 @@ The direct and simplex solver must be initialize: \n
 #include "MixedLinearComplementarityProblem.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 #include "mlcp_enum.h"

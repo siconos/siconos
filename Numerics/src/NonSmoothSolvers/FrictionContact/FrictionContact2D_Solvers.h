@@ -51,7 +51,8 @@ For each solver, the input argument are:
 #include "SolverOptions.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
   /** General interface to solvers for friction-contact 2D problem
@@ -82,7 +83,7 @@ extern "C" {
   void FrictionContact2D_cpg(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for CPG
-  \param SolverOptions * the pointer to the options to set
+   \param SolverOptions * the pointer to the options to set
    */
   int frictionContact2D_cpg_setDefaultSolverOptions(SolverOptions* options);
   /**  Non Linear Gauss Seidel solver for primal contact problem with friction in 2D case.

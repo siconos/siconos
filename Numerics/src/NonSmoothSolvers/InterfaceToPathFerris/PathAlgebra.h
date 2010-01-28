@@ -9,7 +9,8 @@
 
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
   /** Numerics dense matrix to Path Sparse matrix
       \param size0, number of rows of input matrix

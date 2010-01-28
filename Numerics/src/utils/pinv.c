@@ -135,7 +135,7 @@ double pinv(double * A, int n, int m, double tolerance)
   /*     for (int i = 0;  i < n; i++){ */
   /*  for (int j = 0;  j < n; j++) */
   /*      { */
-  /*    U[j+i*n] = S[i]*U[j+i*n]; */
+  /*   U[j+i*n] = S[i]*U[j+i*n]; */
   /*      } */
   /*     } */
 
@@ -143,10 +143,10 @@ double pinv(double * A, int n, int m, double tolerance)
   /*  for (int j = 0;  j < m; j++) */
   /*      { */
 
-  /*    A[i+j*n] =0.0; */
-  /*    for (int k = 0;  k < rank; k++){ */
-  /*        A[i+j*n] += VT[k+i*n]*U[j+k*n]; */
-  /*    } */
+  /*   A[i+j*n] =0.0; */
+  /*   for (int k = 0;  k < rank; k++){ */
+  /*       A[i+j*n] += VT[k+i*n]*U[j+k*n]; */
+  /*   } */
   /*      } */
   /*     } */
 

@@ -34,7 +34,7 @@ typedef struct _MCP MCP;
 /*                 problem size and number of nonzeros in the Jacobian.      */
 /*                 If the estimated size passed into the creation routine    */
 /*                 as smaller than the actual problem size, the code will    */
-/*             reallocate memory.                                        */
+/*            reallocate memory.                                        */
 /*                                                                           */
 /* - MCP_Destroy - deallocate the given MCP structure.  Further use of the   */
 /*                 structure is prohibited.                                  */

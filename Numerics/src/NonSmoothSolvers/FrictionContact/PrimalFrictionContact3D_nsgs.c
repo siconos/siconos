@@ -104,7 +104,7 @@ void primalFrictionContact3D_nsgs(PrimalFrictionContactProblem* problem, double 
 
   if (H->storageType != M->storageType)
   {
-    //      if(verbose==1)
+    //     if(verbose==1)
     fprintf(stderr, "Numerics, PrimalFrictionContact3D_nsgs. H->storageType != M->storageType :This case is not taken into account.\n");
     exit(EXIT_FAILURE);
   }

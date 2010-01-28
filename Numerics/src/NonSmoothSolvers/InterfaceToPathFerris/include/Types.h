@@ -34,12 +34,12 @@ typedef enum
 /*****************************************************************************/
 
 typedef Int Basis_Type;
-#define Basis_Unknown    0  /* Basis type not known                      */
+#define Basis_Unknown    0 /* Basis type not known                      */
 #define Basis_Basic      1      /* Strictly between bounds, variable basic   */
-#define Basis_SuperBasic 2  /* Strictly between bounds, variable nonbasic*/
-#define Basis_LowerBound 3  /* At lower bound, slack is basic            */
-#define Basis_UpperBound 4  /* At upper bound, slack is basic            */
-#define Basis_Fixed  5  /* Variable was fixed and removed            */
+#define Basis_SuperBasic 2 /* Strictly between bounds, variable nonbasic*/
+#define Basis_LowerBound 3 /* At lower bound, slack is basic            */
+#define Basis_UpperBound 4 /* At upper bound, slack is basic            */
+#define Basis_Fixed  5 /* Variable was fixed and removed            */
 
 /*****************************************************************************/
 /* MCP_Type - valid types for the MCP_SetProblemClass( ) function.           */
@@ -84,7 +84,7 @@ typedef enum
 typedef enum
 {
   CNS_CNS,                  /* The problem is a general nonlinear cns        */
-  CNS_LCNS        /* The problem is a linear cns                   */
+  CNS_LCNS      /* The problem is a linear cns                   */
 } CNS_Type;
 
 /*****************************************************************************/
@@ -113,9 +113,9 @@ typedef enum
 
 typedef enum
 {
-  LCP_LCP,         /* The problem is a linear mcp                  */
-  LCP_QP,        /* The problem is KKT conditions for qp         */
-  LCP_LP         /* The problem is KKT conditions for lp         */
+  LCP_LCP,       /* The problem is a linear mcp                  */
+  LCP_QP,       /* The problem is KKT conditions for qp         */
+  LCP_LP        /* The problem is KKT conditions for lp         */
 } LCP_Type;
 
 /*****************************************************************************/
@@ -125,14 +125,14 @@ typedef enum
 typedef enum
 {
   LCP_Solved = 1,      /* The problem was solved                       */
-  LCP_Distance,        /* Distance limit has been reached              */
-  LCP_RayTerm,         /* A ray termination occurred                   */
-  LCP_Singular,        /* A singular basis was encountered             */
-  LCP_Cycle,         /* A cycle was detected                         */
-  LCP_Reset,         /* A reset was required, but not performed      */
+  LCP_Distance,       /* Distance limit has been reached              */
+  LCP_RayTerm,       /* A ray termination occurred                   */
+  LCP_Singular,       /* A singular basis was encountered             */
+  LCP_Cycle,       /* A cycle was detected                         */
+  LCP_Reset,       /* A reset was required, but not performed      */
   LCP_IterationLimit,        /* The iteration limit was reached              */
   LCP_Infeasible,            /* Problem has no solution                      */
-  LCP_Error,         /* An error occurred within the code            */
+  LCP_Error,       /* An error occurred within the code            */
   LCP_OK
 } LCP_Termination;
 
@@ -165,10 +165,10 @@ typedef enum
 
 typedef struct
 {
-  Double residual;       /* Value of residual at final point             */
-  Double distance;       /* Distance between initial and final point     */
-  Double steplength;       /* Steplength taken                             */
-  Double total_time;       /* Amount of time spent in the code             */
+  Double residual;      /* Value of residual at final point             */
+  Double distance;      /* Distance between initial and final point     */
+  Double steplength;      /* Steplength taken                             */
+  Double total_time;      /* Amount of time spent in the code             */
 
   Double maximum_distance;   /* Maximum distance from init point allowed     */
 
@@ -178,13 +178,13 @@ typedef struct
   Int function_evaluations;  /* Function evaluations performed               */
   Int jacobian_evaluations;  /* Jacobian evaluations performed               */
   Int gradient_steps;      /* Gradient steps taken                         */
-  Int restarts;        /* Restarts used                                */
+  Int restarts;       /* Restarts used                                */
 
   Int generate_output;       /* Mask where output can be displayed.          */
   Int generated_output;      /* Mask where output displayed.                 */
 
-  Boolean forward;       /* Move forward?                                */
-  Boolean backtrace;       /* Back track?                                  */
+  Boolean forward;      /* Move forward?                                */
+  Boolean backtrace;      /* Back track?                                  */
   Boolean gradient;      /* Take gradient step?                          */
 
   Boolean use_start;         /* Use the starting point provided?             */

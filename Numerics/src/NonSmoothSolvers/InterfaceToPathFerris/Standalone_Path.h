@@ -38,7 +38,8 @@ typedef int (*FuncEvalPtr)(int, double*, double*);
 typedef int (*JacEvalPtr)(int, int, double*, int*, int*, int*, double*);
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
   /** Routine used to call Path solver -
       The main path routine takes the following as arguments:

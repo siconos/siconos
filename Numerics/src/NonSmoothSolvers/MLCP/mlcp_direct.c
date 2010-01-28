@@ -219,7 +219,7 @@ void mlcp_direct_addConfig(MixedLinearComplementarityProblem* problem, int * zw)
     }
     internalAddConfig(problem, zw, 1);
   }
-  else  /*Replace an old one*/
+  else /*Replace an old one*/
   {
     struct dataComplementarityConf * aux = spFirstCC;
     while (aux->next) aux = aux->next;

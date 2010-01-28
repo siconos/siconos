@@ -47,7 +47,8 @@
 */
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
   /** NCP Fischer Burmeister function, \f$ \phi(z,F(z)) \f$

@@ -31,7 +31,7 @@ typedef struct _CNS CNS;
 /*                 problem size and number of nonzeros in the Jacobian.      */
 /*                 If the estimated size passed into the creation routine    */
 /*                 as smaller than the actual problem size, the code will    */
-/*             reallocate memory.                                        */
+/*            reallocate memory.                                        */
 /*                                                                           */
 /* - CNS_Destroy - deallocate the given CNS structure.  Further use of the   */
 /*                 structure is prohibited.                                  */

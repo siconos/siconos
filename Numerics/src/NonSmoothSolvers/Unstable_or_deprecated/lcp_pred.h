@@ -34,7 +34,8 @@ typedef struct
 
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
   /** Solver with extract-predict mechanism - Unstable version (under development) */

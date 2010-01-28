@@ -153,10 +153,10 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
     {
       if (fabs(M1->matrix0[i + j * M1->size0] - getValueSBM(M2->matrix1, i, j)) > tol) info = 1;
 
-      /*      printf("%i\t%i\n",i,j); */
-      /*     printf("%lf\n",M1->matrix0[i+j*M1->size0]-getValueSBM(M2->matrix1,i,j));  */
-      /*     printf("%lf\n",M1->matrix0[i+j*M1->size0]); */
-      /*     printf("%lf\n",getValueSBM(M2->matrix1,i,j));    */
+      /*    printf("%i\t%i\n",i,j); */
+      /*    printf("%lf\n",M1->matrix0[i+j*M1->size0]-getValueSBM(M2->matrix1,i,j));  */
+      /*    printf("%lf\n",M1->matrix0[i+j*M1->size0]); */
+      /*    printf("%lf\n",getValueSBM(M2->matrix1,i,j));   */
 
       if (info == 1) break;
     }
@@ -219,10 +219,10 @@ int test_BuildNumericsMatrix(NumericsMatrix** MM)
     {
       if (fabs(M3->matrix0[i + j * M3->size0] - getValueSBM(M4->matrix1, i, j)) > tol) info = 1;
 
-      /*     printf("%i\t%i\n",i,j); */
-      /*     printf("%lf\n",M3->matrix0[i+j*M3->size0]-getValueSBM(M4->matrix1,i,j)); */
-      /*     printf("%lf\n",M3->matrix0[i+j*M3->size0]); */
-      /*     printf("%lf\n",getValueSBM(M4->matrix1,i,j)); */
+      /*    printf("%i\t%i\n",i,j); */
+      /*    printf("%lf\n",M3->matrix0[i+j*M3->size0]-getValueSBM(M4->matrix1,i,j)); */
+      /*    printf("%lf\n",M3->matrix0[i+j*M3->size0]); */
+      /*    printf("%lf\n",getValueSBM(M4->matrix1,i,j)); */
 
       if (info == 1) break;
     }
@@ -489,10 +489,10 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
     {
       if (fabs(Cref[i + j * C3.size0] - getValueSBM(C3.matrix1, i, j)) > tol) info = 1;
 
-      /*     printf("%i\t%i\n",i,j); */
-      /*     printf("%lf\n",fabs(Cref[i+j*C3.size0]-getValueSBM(C3.matrix1,i,j) )); */
-      /*       printf("%lf\n",Cref[i+j*C3.size0]);  */
-      /*       printf("%lf\n",getValueSBM(C3.matrix1,i,j));  */
+      /*    printf("%i\t%i\n",i,j); */
+      /*    printf("%lf\n",fabs(Cref[i+j*C3.size0]-getValueSBM(C3.matrix1,i,j) )); */
+      /*     printf("%lf\n",Cref[i+j*C3.size0]);  */
+      /*     printf("%lf\n",getValueSBM(C3.matrix1,i,j));  */
 
       if (info == 1) break;
     }
@@ -533,10 +533,10 @@ int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM)
     {
       if (fabs(C2ref[i + j * C4.size0] - getValueSBM(C4.matrix1, i, j)) > tol) info = 1;
 
-      /*     printf("%i\t%i\n",i,j); */
-      /*     printf("%lf\n",fabs(C2ref[i+j*C4.size0]-getValueSBM(C4.matrix1,i,j) )); */
-      /*       printf("%lf\n",C2ref[i+j*C4.size0]); */
-      /*       printf("%lf\n",getValueSBM(C4.matrix1,i,j)); */
+      /*    printf("%i\t%i\n",i,j); */
+      /*    printf("%lf\n",fabs(C2ref[i+j*C4.size0]-getValueSBM(C4.matrix1,i,j) )); */
+      /*     printf("%lf\n",C2ref[i+j*C4.size0]); */
+      /*     printf("%lf\n",getValueSBM(C4.matrix1,i,j)); */
 
       if (info == 1) break;
     }

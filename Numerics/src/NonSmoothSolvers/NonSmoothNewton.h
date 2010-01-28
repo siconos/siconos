@@ -38,7 +38,8 @@ typedef void (*NewtonFunctionPtr)(int, double*, double*, int);
 typedef void (*UpdateSolverPtr)(int, double*);
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
   /** Newton solver with line Search

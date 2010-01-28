@@ -33,7 +33,8 @@
 #include "SolverOptions.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
   void F_GlockerFixedP(int sizeF, double* reaction, double* FVector, int up2Date);

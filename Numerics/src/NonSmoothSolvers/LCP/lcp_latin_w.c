@@ -56,7 +56,7 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
   double   *k, *kinv, *DPO;
   double   *zn, *wn;
 
-  /*  char trans='T', notrans='N', uplo='U', diag='N';  */
+  /* char trans='T', notrans='N', uplo='U', diag='N'; */
 
   n2 = n * n;
   incx = 1;
@@ -253,7 +253,7 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
   while ((iter1 < itt) && (err1 > errmax))
   {
 
-    /*        Linear stage (zc,wc) -> (z,w)*/
+    /*       Linear stage (zc,wc) -> (z,w)*/
 
 
     alpha = 1.;
@@ -332,7 +332,7 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
 
 
 
-    /*         Convergence criterium                */
+    /*        Convergence criterium                */
 
 
     DCOPY(n, w, incx, wnum1, incy);
@@ -350,7 +350,7 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
     DGEMV(LA_TRANS, n, n, alpha, k, n, znum1, incx, beta, wnum1, incy);
 
 
-    /*    wnum1(:) =(w(:)-wc(:))+matmul( k(:,:),(z(:)-zc(:)))   */
+    /*   wnum1(:) =(w(:)-wc(:))+matmul( k(:,:),(z(:)-zc(:)))   */
 
 
 

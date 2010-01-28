@@ -21,7 +21,7 @@
 #if !defined(MID)
 #  define MID(a,b,c)  (((a) < (b)) ?                   \
                        (((b) < (c)) ? (b) : (c)) :     \
-             (((a) < (c)) ? (a) : (c)))
+           (((a) < (c)) ? (a) : (c)))
 #endif
 
 #if !defined(ABS)

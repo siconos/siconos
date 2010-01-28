@@ -57,7 +57,7 @@ int reformulationIntoLocalProblem(PrimalFrictionContactProblem* problem, Frictio
 
   if (H->storageType != M->storageType)
   {
-    //      if(verbose==1)
+    //     if(verbose==1)
     printf(" ->storageType != M->storageType :This case is not taken into account\n");
     return info;
   }

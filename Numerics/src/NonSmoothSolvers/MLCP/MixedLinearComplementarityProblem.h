@@ -133,7 +133,8 @@ typedef struct
 void displayMat(double * M, int Nblin, int Nbcol, int incLin);
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
   void displayMLCP(MixedLinearComplementarityProblem* p);
 

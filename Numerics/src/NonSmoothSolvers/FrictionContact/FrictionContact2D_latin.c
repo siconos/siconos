@@ -50,8 +50,8 @@ void FrictionContact2D_latin(FrictionContactProblem* problem , double *reaction 
 
   double  *kn, *kt;
 
-  //  char    trans='T', diag='N';
-  //  char    uplo='U', notrans='N';
+  // char    trans='T', diag='N';
+  // char    uplo='U', notrans='N';
 
 
 
@@ -348,7 +348,7 @@ void FrictionContact2D_latin(FrictionContactProblem* problem , double *reaction 
     }
 
 
-    /*           Normal party                           */
+    /*          Normal party                           */
 
 
 
@@ -403,7 +403,7 @@ void FrictionContact2D_latin(FrictionContactProblem* problem , double *reaction 
 
 
 
-      if (nt < 1.e-8)  tc = 0.;
+      if (nt < 1.e-8) tc = 0.;
       else tc = wf[ino] / nt;
 
 

@@ -45,7 +45,8 @@
 #include "SparseBlockMatrix.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
   /** Initialize friction-contact 3D Alart-Curnier formulation

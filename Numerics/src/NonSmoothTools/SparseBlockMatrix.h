@@ -113,7 +113,8 @@ typedef struct
 } SparseBlockStructuredMatrixPred;
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
   /** SparseMatrix - vector product y = alpha*A*x + beta*y
@@ -195,8 +196,8 @@ extern "C" {
 
 
   /** print in file  of the matrix content
-    \param M the matrix to be displayed
-    \param file the corresponding file
+   \param M the matrix to be displayed
+   \param file the corresponding file
      */
   void printInFileNameSBM(const SparseBlockStructuredMatrix* const M, const char *filename);
   /** read in file  of the matrix content

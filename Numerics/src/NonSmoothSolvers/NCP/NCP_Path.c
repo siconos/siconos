@@ -22,7 +22,7 @@
 #include <math.h>
 #include "Standalone_Path.h"
 
-static int fill_structure;  /* Do we need to fill in the structure of    */
+static int fill_structure; /* Do we need to fill in the structure of    */
 /* the Jacobian?                             */
 
 int NCP_Path(int n, double* z, FuncEvalPtr F, JacEvalPtr jacobianF, int* iparam, double* dparam)

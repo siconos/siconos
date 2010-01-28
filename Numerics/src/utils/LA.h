@@ -74,13 +74,13 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
   (ORDER, args)
 #define LAPACK_4(F,A1,A2,A3,A4,INFO) \
   INFO = F(LA_ORDER,A1,A2,A3,A4)
-#define LAPACK_5(F,A1,A2,A3,A4,A5,INFO)   \
+#define LAPACK_5(F,A1,A2,A3,A4,A5,INFO)  \
   INFO = F(LA_ORDER,A1,A2,A3,A4,A5)
-#define LAPACK_6(F,A1,A2,A3,A4,A5,A6,INFO)  \
+#define LAPACK_6(F,A1,A2,A3,A4,A5,A6,INFO) \
   INFO = F(LA_ORDER,A1,A2,A3,A4,A5,A6)
 #define LAPACK_7(F,A1,A2,A3,A4,A5,A6,A7,INFO) \
   INFO = F(LA_ORDER,A1,A2,A3,A4,A5,A6,A7)
-#define LAPACK_8(F,A1,A2,A3,A4,A5,A6,A7,A8,INFO)  \
+#define LAPACK_8(F,A1,A2,A3,A4,A5,A6,A7,A8,INFO) \
   INFO = F(LA_ORDER,A1,A2,A3,A4,A5,A6,A7,A8)
 #define LAPACK_9(F,A1,A2,A3,A4,A5,A6,A7,A8,A9,INFO) \
   INFO = F(LA_ORDER,A1,A2,A3,A4,A5,A6,A7,A8,A9)
@@ -293,8 +293,8 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
      int C_LWORK = LWORK; \
      double * C_WORK = WORK; \
      F77NAME(dgesvd)(JOBU,JOBVT, FCAST(integer,C_M) , FCAST(integer,C_N),  FCASTP(double, A), FCAST(integer,C_LDA),FCASTP(double,S), \
-         FCASTP(double,U),FCAST(integer, C_LDU), FCASTP(double,VT),FCAST(integer, C_LDVT),\
-         FCASTP(double,C_WORK) ,  FCAST(integer,C_LWORK), FCAST(integer,INFO));\
+       FCASTP(double,U),FCAST(integer, C_LDU), FCASTP(double,VT),FCAST(integer, C_LDVT),\
+       FCASTP(double,C_WORK) ,  FCAST(integer,C_LWORK), FCAST(integer,INFO));\
   })
 /* DGESVD -
  * DGESVD  computes the singular value decomposition (SVD) of a real
@@ -332,7 +332,7 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 *  with a general N-by-N matrix A using the LU factorization computed
 *  by DGETRF.
  */
-#define DGETRS(TRANS,N,NRHS,A,LDA,IPIV,B,LDB,INFO)  \
+#define DGETRS(TRANS,N,NRHS,A,LDA,IPIV,B,LDB,INFO) \
     ({ int C_N = N; \
      int C_NRHS = NRHS; \
      int C_LDA = LDA; \

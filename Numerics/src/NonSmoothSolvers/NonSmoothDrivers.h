@@ -74,7 +74,8 @@ Other functions and useful tools related to NonSmoothSolvers are listed in NSSTo
 */
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 

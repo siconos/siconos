@@ -20,7 +20,8 @@
 #ifndef ProjectionOnCone_H
 #define ProjectionOnCone_H
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
   /** projectionOnCone Projection on the second Order Cone in \f$R^3\f$, \f$K \{ r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq mu r_1  \}
   \param[in-out] the vector to be projected

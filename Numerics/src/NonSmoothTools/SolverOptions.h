@@ -144,7 +144,8 @@ typedef struct _SolverOptions
 } SolverOptions;
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
   /** Read default parameters values for a solver and save them in a SolverOptions structure

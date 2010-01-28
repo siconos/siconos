@@ -40,7 +40,8 @@
 #include "SolverOptions.h"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
   /** Initialize friction-contact 3D projection

@@ -116,7 +116,7 @@ void frictionContact3D_AC_update(int contact, double * reaction)
   AC_fillMLocal(contact);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
-   excluding the block corresponding to the current contact. ****/
+     excluding the block corresponding to the current contact. ****/
 
   int in = 3 * contact, it = in + 1, is = it + 1;
   /* reaction current block set to zero, to exclude current contact block */

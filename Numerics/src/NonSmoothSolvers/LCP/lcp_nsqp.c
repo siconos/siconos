@@ -57,7 +57,7 @@ void lcp_nsqp(LinearComplementarityProblem* problem, double *z, double *w, int *
   /* /n :        number of variables.
   //nmax :     row dimension of C. nmax must be greater or equal to n.*/
   nmax = n;
-  /* /mnn :      must be equal to m + n + n.  */
+  /* /mnn :      must be equal to m + n + n. */
   mnn = m + n + n;
 
   for (i = 0; i < n; i++)

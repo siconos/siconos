@@ -200,7 +200,8 @@ This solver first build a local problem for each row of blocks and then call any
 #define LCP_ENUM "ENUM"
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
   /** General interface to solvers for Linear Complementarity Problems
@@ -442,7 +443,7 @@ extern "C" {
       2 : Problem in resolution in DGESV\n
       *                0 : convergence  / minimization sucessfull\n
       *                1 : Too Many iterations\n
-      *               2 : Accuracy insuficient to satisfy convergence criterion\n
+      *              2 : Accuracy insuficient to satisfy convergence criterion\n
       *                5 : Length of working array insufficient\n
       *                Other : The constraints are inconstent\n
       * \param[in-out] options structure used to define the solver and its parameters.
@@ -591,13 +592,13 @@ extern "C" {
   /*   /\** Function used to extract from LCP matrix the part which corresponds to non null z */
   /*    *\/ */
   /*   int extractLCP( NumericsMatrix* MGlobal, double *z , int *indic, int *indicop, double *submatlcp , double *submatlcpop, */
-  /*      int *ipiv , int *sizesublcp , int *sizesublcpop); */
+  /*     int *ipiv , int *sizesublcp , int *sizesublcpop); */
 
   /*   /\** Function used to solve the problem with sub-matrices from extractLCP */
   /*    *\/ */
   /*   int predictLCP(int sizeLCP, double* q, double *z , double *w , double tol, */
-  /*    int *indic , int *indicop , double *submatlcp , double *submatlcpop , */
-  /*     int *ipiv , int *sizesublcp , int *sizesublcpop , double *subq , double *bufz , double *newz); */
+  /*   int *indic , int *indicop , double *submatlcp , double *submatlcpop , */
+  /*    int *ipiv , int *sizesublcp , int *sizesublcpop , double *subq , double *bufz , double *newz); */
 
   /** Interface to solvers for Linear Complementarity Problems, dedicated to dense matrix storage
       \param[in] problem the LinearComplementarityProblem structure which handles the problem (M,q)

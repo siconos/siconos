@@ -20,7 +20,8 @@
 #define RELAY_TEST_FUNCTION_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
   void relay_fillParamWithRespectToSolver(SolverOptions *options, char * solvername, RelayProblem* problem);
   int relay_test_function(FILE * f, char * solvername);
