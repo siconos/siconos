@@ -29,7 +29,13 @@ MLCP::MLCP(SP::OneStepNSProblemXML onestepnspbxml):
 
 // Constructor from a set of data
 MLCP::MLCP(const string& newNumericsSolvername, const string& newId):
-  LinearOSNS(newNumericsSolvername, "MLCP", newId) {}
+  LinearOSNS(newNumericsSolvername, "MLCP", newId)
+{
+  strcpy(_numerics_solver_options->solverName, newNumericsSolvername.c_str());
+  mixedLinearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options);
+
+
+}
 
 void MLCP::updateM()
 {
@@ -40,16 +46,16 @@ void MLCP::updateM()
   {
     // Creates and fills M using UR of indexSet
     _M.reset(new OSNSMatrix(indexSet, _unitaryBlocks, _MStorageType));
-    numerics_problem.M = &*_M->getNumericsMatrix();
-    numerics_problem.A = 0;
-    numerics_problem.B = 0;
-    numerics_problem.C = 0;
-    numerics_problem.D = 0;
-    numerics_problem.a = 0;
-    numerics_problem.b = 0;
-    numerics_problem.problemType = 0;
-    numerics_problem.n = _n;
-    numerics_problem.m = _m;
+    _numerics_problem.M = &*_M->getNumericsMatrix();
+    _numerics_problem.A = 0;
+    _numerics_problem.B = 0;
+    _numerics_problem.C = 0;
+    _numerics_problem.D = 0;
+    _numerics_problem.a = 0;
+    _numerics_problem.b = 0;
+    _numerics_problem.problemType = 0;
+    _numerics_problem.n = _n;
+    _numerics_problem.m = _m;
   }
   else
   {
@@ -62,7 +68,7 @@ void MLCP::updateM()
 
 void  MLCP::reset()
 {
-  mlcp_driver_reset(&numerics_problem, &*_numerics_solver_options);
+  mlcp_driver_reset(&_numerics_problem, &*_numerics_solver_options);
 }
 
 void MLCP::computeUnitaryBlock(SP::UnitaryRelation UR1, SP::UnitaryRelation UR2)
@@ -213,19 +219,19 @@ int MLCP::compute(double time)
 
   if (_sizeOutput != 0)
   {
-    numerics_problem.q = _q->getArray();
+    _numerics_problem.q = _q->getArray();
     int nbSolvers = 1;
     // Call MLCP Driver
     //printf("MLCP display");
     //printf("n %d m %d",n,m);
-    //displayNM(numerics_problem.M);
+    //displayNM(_numerics_problem.M);
     //      exit(1);
     //mlcpDefaultSolver *pSolver = new mlcpDefaultSolver(m,n);
-    //      displayMLCP(&numerics_problem);
+    //      displayMLCP(&_numerics_problem);
     try
     {
       //  display();
-      info = mlcp_driver(&numerics_problem, _z->getArray(), _w->getArray(),
+      info = mlcp_driver(&_numerics_problem, _z->getArray(), _w->getArray(),
                          &*_numerics_solver_options, &*_numerics_options);
     }
     catch (...)

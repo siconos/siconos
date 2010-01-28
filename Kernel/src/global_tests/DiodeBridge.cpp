@@ -128,14 +128,14 @@ bool DiodeBridge()
     StratDiodeBridge->insertIntegrator(OSI_RLCD);
 
     // One Step non smooth problem
-    IntParameters iparam(5);
-    iparam[0] = 1001; // Max number of iteration
-    DoubleParameters dparam(5);
-    dparam[0] = 0.0001; // Tolerance
-    string solverName = "Lemke" ;
-    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
+    //    IntParameters iparam(5);
+    //    iparam[0] = 1001; // Max number of iteration
+    //    DoubleParameters dparam(5);
+    //    dparam[0] = 0.0001; // Tolerance
+    //    string solverName = "Lemke" ;
+    //SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName,iparam,dparam));
 
-    SP::LCP LCP_RLCD(new LCP(mySolver, "LCP"));
+    SP::LCP LCP_RLCD(new LCP());
     StratDiodeBridge->insertNonSmoothProblem(LCP_RLCD);
 
     // Initialization of the model

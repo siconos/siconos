@@ -87,7 +87,7 @@ protected:
   int _m;
 
   /** The MLCP instance */
-  MixedLinearComplementarityProblem numerics_problem;
+  MixedLinearComplementarityProblem _numerics_problem;
 
   /** default constructor (private)
    */
@@ -105,7 +105,7 @@ public:
   *  (optional, default = NULL => read .opt file in Numerics)
   *  \param String: id of the problem (default = "unamed")
   */
-  MLCP(const std::string& , const std::string& = "unamed_mlcp");
+  MLCP(const std::string& newNewNumericsSolverName = "ENUM", const std::string& = "unamed_mlcp");
 
   /** destructor
   */
@@ -126,7 +126,7 @@ public:
   */
   inline SP::MixedLinearComplementarityProblem getNumericsMLCP()
   {
-    return createSPtrMixedLinearComplementarityProblem(numerics_problem);
+    return createSPtrMixedLinearComplementarityProblem(_numerics_problem);
   }
 
   /** Build or reinit M and the NumericsProblem*/
