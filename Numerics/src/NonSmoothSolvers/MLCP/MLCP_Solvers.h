@@ -195,6 +195,22 @@ extern "C"
 #include "mlcp_direct_FB.h"
 #include "mlcp_FB.h"
 
+
+#define MLCP_PGS "PGS"
+#define MLCP_RPGS "RPGS"
+#define MLCP_PSOR "PSOR"
+#define MLCP_RPSOR "RPSOR"
+#define MLCP_PATH "PATH"
+#define MLCP_ENUM "ENUM"
+#define MLCP_SIMPLEX "SIMPLEX"
+#define MLCP_DIRECT_ENUM "DIRECT_ENUM"
+#define MLCP_PATH_ENUM "PATH_ENUM"
+#define MLCP_DIRECT_SIMPLEX "DIRECT_SIMPLEX"
+#define MLCP_DIRECT_PATH "DIRECT_PATH"
+#define MLCP_DIRECT_PATH_ENUM "DIRECT_PATH_ENUM"
+#define MLCP_FB "FB"
+#define MLCP_DIRECT_FB "DIRECT_FB"
+
   /** General interface to initialize a solver.\n
       Must be call for the following solvers:\n
       - mlcp_enum

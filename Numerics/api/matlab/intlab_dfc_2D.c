@@ -1838,7 +1838,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     else if (strcmp(buf, mot7) == 0)
       toto = dfc_2D_solver(vec, q, &mrows1, &meth_dfc_2D, z, w);
     /*   else if (strcmp(buf, mot5) == 0)
-    toto = dfc_2D_solver(vec, q, &mrows1, &meth_dfc_2D, z, w);*/
+     toto = dfc_2D_solver(vec, q, &mrows1, &meth_dfc_2D, z, w);*/
     else printf("Warning : Unknown solving method : %s\n", buf);
 
     *info = toto;

@@ -116,33 +116,33 @@ typedef union
 
 
 void lcp_lemke( double *vec, double *qqq,int *nn, int *itermax, double *zlem,
-         double *wlem, int *it_end, double *res, int *info );
+      double *wlem, int *it_end, double *res, int *info );
 
 void lcp_qp( int *nn , double *vec , double *q , double *z , double *w , int *info ,
-       int *iparamLCP , double *dparamLCP );
+    int *iparamLCP , double *dparamLCP );
 
 void lcp_cpg( int *nn , double *vec , double *q , double *z , double *w , int *info ,
-        int *iparamLCP , double *dparamLCP );
+     int *iparamLCP , double *dparamLCP );
 
 void lcp_nlgs( int *nn , double *vec , double *q , double *z , double *w , int *info ,
-         int *iparamLCP , double *dparamLCP );
+      int *iparamLCP , double *dparamLCP );
 
 void lcp_nsqp( int *nn , double *vec , double *q , double *z , double *w , int *info ,
-         int *iparamLCP , double *dparamLCP );
+      int *iparamLCP , double *dparamLCP );
 
 void lcp_latin( int *nn , double *vec , double *q , double *z , double *w , int *info ,
-          int *iparamLCP , double *dparamLCP );
+       int *iparamLCP , double *dparamLCP );
 
 
 void lcp_latin_w( int *nn , double *vec , double *q , double *z , double *w , int *info ,
-          int *iparamLCP , double *dparamLCP );
+       int *iparamLCP , double *dparamLCP );
 
 
 void lcp_lexicolemke( int *nn , double *vec , double *q , double *z , double *w , int *info ,
-          int *iparamLCP , double *dparamLCP );
+      int *iparamLCP , double *dparamLCP );
 
 void lcp_newton_min( int *nn , double *vec , double *q , double *z , double *w , int *info ,
-          int *iparamLCP , double *dparamLCP );
+      int *iparamLCP , double *dparamLCP );
 
 
 */

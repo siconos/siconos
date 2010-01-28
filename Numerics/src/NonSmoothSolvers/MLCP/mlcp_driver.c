@@ -153,57 +153,57 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w
 
       }*/
   /****** PGS algorithm ******/
-  if (strcmp(name , "PGS") == 0)
+  if (strcmp(name , MLCP_PGS) == 0)
     mlcp_pgs(problem, z , w , &info , options);
 
   /****** RPGS algorithm ******/
-  else if (strcmp(name , "RPGS") == 0)
+  else if (strcmp(name , MLCP_RPGS) == 0)
     mlcp_rpgs(problem, z , w , &info , options);
 
   /****** PSOR algorithm ******/
-  else if (strcmp(name , "PSOR") == 0)
+  else if (strcmp(name , MLCP_PSOR) == 0)
     mlcp_psor(problem, z , w , &info , options);
 
   /****** RPSOR algorithm ******/
-  else if (strcmp(name , "RPSOR") == 0)
+  else if (strcmp(name , MLCP_RPSOR) == 0)
     mlcp_rpsor(problem, z , w , &info , options);
 
   /****** PATH algorithm ******/
-  else if (strcmp(name , "PATH") == 0)
+  else if (strcmp(name , MLCP_PATH) == 0)
     mlcp_path(problem, z , w , &info , options);
 
   /****** ENUM algorithm ******/
-  else if (strcmp(name , "ENUM") == 0)
+  else if (strcmp(name , MLCP_ENUM) == 0)
     mlcp_enum(problem, z , w , &info , options);
 
   /****** SIMPLEX algorithm ******/
-  else if (strcmp(name , "SIMPLEX") == 0)
+  else if (strcmp(name , MLCP_SIMPLEX) == 0)
     mlcp_simplex(problem, z , w , &info , options);
 
   /****** DIRECT ENUM algorithm ******/
-  else if (strcmp(name , "DIRECT_ENUM") == 0)
+  else if (strcmp(name , MLCP_DIRECT_ENUM) == 0)
     mlcp_direct_enum(problem, z , w , &info , options);
-  else if (strcmp(name , "PATH_ENUM") == 0)
+  else if (strcmp(name , MLCP_PATH_ENUM) == 0)
     mlcp_path_enum(problem, z , w , &info , options);
 
   /****** DIRECT SIMPLEX algorithm ******/
-  else if (strcmp(name , "DIRECT_SIMPLEX") == 0)
+  else if (strcmp(name , MLCP_DIRECT_SIMPLEX) == 0)
     mlcp_direct_simplex(problem, z , w , &info , options);
 
   /****** DIRECT PATH algorithm ******/
-  else if (strcmp(name , "DIRECT_PATH") == 0)
+  else if (strcmp(name , MLCP_DIRECT_PATH) == 0)
     mlcp_direct_path(problem, z , w , &info , options);
-  else if (strcmp(name , "DIRECT_PATH_ENUM") == 0)
+  else if (strcmp(name , MLCP_DIRECT_PATH_ENUM) == 0)
     mlcp_direct_path_enum(problem, z , w , &info , options);
 
   /****** FB algorithm ******/
-  else if (strcmp(name , "FB") == 0)
+  else if (strcmp(name , MLCP_FB) == 0)
     mlcp_FB(problem, z , w , &info , options);
   /****** DIRECT FB algorithm ******/
-  else if (strcmp(name , "DIRECT_FB") == 0)
+  else if (strcmp(name , MLCP_DIRECT_FB) == 0)
     mlcp_direct_FB(problem, z , w , &info , options);
   // need a svn add mlcp_GaussSeidel_SBM ...
-  //  else if( strcmp( name , "MLCP_SBM" ) == 0 )
+  //  else if( strcmp( name , MLCP_MLCP_SBM ) == 0 )
   //    mlcp_GaussSeidel_SBM( problem, z , w , &info , options,1);
 
   /*error */

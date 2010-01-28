@@ -223,7 +223,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       {
 
         /* sort3 = pr[index2];
-           sort3 = pr[index2];  */
+           sort3 = pr[index2]; */
 
         itermax = pr3bis[index2];
         /*itermax = sort3;*/
