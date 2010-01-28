@@ -244,7 +244,7 @@ public:
     viewer_->drawings_.push_back(drawing);
   }
 
-  void visit(SP::Sphere d)
+  void visit(SP::SphereLDS d)
   {
     SP::Drawing drawing(new Drawing(d));
     drawing->setID(i_);
@@ -293,7 +293,7 @@ public:
                       disk->getRadius(), c);
   }
 
-  void visit(SP::Sphere sphere)
+  void visit(SP::SphereLDS sphere)
   {
     float c[3];
     c[0] = 1 ;
@@ -366,7 +366,7 @@ public:
                        GETY(disk) + Cal * GETYFE(disk) / dFe, Cal / 10.);
   }
 
-  void visit(SP::Sphere sphere)
+  void visit(SP::SphereLDS sphere)
   {
     float c[3], dFe, Cal;
     c[0] = .6 ;
@@ -416,7 +416,7 @@ public:
     r = disk->getRadius();
   }
 
-  void visit(SP::Sphere sphere)
+  void visit(SP::SphereLDS sphere)
   {
     x = GETX(sphere);
     y = GETY(sphere);
@@ -479,7 +479,7 @@ public:
 
   };
 
-  void visit(SP::Sphere sphere)
+  void visit(SP::SphereLDS sphere)
   {
 
     float x2 = GETX(sphere);

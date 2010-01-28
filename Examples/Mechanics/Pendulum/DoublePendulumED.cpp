@@ -75,11 +75,11 @@ int main(int argc, char* argv[])
 
     // external plug-in
     doublependulum->setComputeNNLFunction("DoublePendulumPlugin.so", "NNL");
-    doublependulum->setComputeJacobianQDotNNLFunction("DoublePendulumPlugin.so", "jacobianVNNL");
-    doublependulum->setComputeJacobianQNNLFunction("DoublePendulumPlugin.so", "jacobianQNNL");
+    doublependulum->setComputeJacobianNNLqDotFunction("DoublePendulumPlugin.so", "jacobianVNNL");
+    doublependulum->setComputeJacobianNNLqFunction("DoublePendulumPlugin.so", "jacobianNNLq");
     doublependulum->setComputeFIntFunction("DoublePendulumPlugin.so", "FInt");
-    doublependulum->setComputeJacobianQDotFIntFunction("DoublePendulumPlugin.so", "jacobianVFInt");
-    doublependulum->setComputeJacobianQFIntFunction("DoublePendulumPlugin.so", "jacobianQFInt");
+    doublependulum->setComputeJacobianFIntqDotFunction("DoublePendulumPlugin.so", "jacobianVFInt");
+    doublependulum->setComputeJacobianFIntqFunction("DoublePendulumPlugin.so", "jacobianFIntq");
 
     allDS.insert(doublependulum);
 
@@ -117,21 +117,17 @@ int main(int argc, char* argv[])
     // -- Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-    SP::EventDriven s(new EventDriven(t));
-
     // -- OneStepIntegrators --
     SP::Lsodar OSI(new Lsodar(doublependulum));
-    s->insertIntegrator(OSI);
 
-    // -- OneStepNsProblem --
-    IntParameters iparam(5);
-    iparam[0] = 1010; // Max number of iteration
-    DoubleParameters dparam(5);
-    dparam[0] = 0.0001; // Tolerance
-    string solverName = "Lemke" ;
-    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
-    SP::OneStepNSProblem impact(new LCP(mySolver, "impact"));
-    SP::OneStepNSProblem acceleration(new LCP(mySolver, "acceleration"));
+
+    // -- OneStepNSProblems --
+    SP::OneStepNSProblem impact(new LCP("impact"));
+    SP::OneStepNSProblem acceleration(new LCP("acceleration"));
+
+    SP::EventDriven s(new EventDriven(t));
+
+    s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact);
     s->insertNonSmoothProblem(acceleration);
 

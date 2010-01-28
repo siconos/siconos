@@ -124,17 +124,19 @@ int main(int argc, char* argv[])
     s->insertIntegrator(myIntegrator);
 
     // -- OneStepNsProblem --
-    IntParameters iparam(5);
-    iparam[0] = 10000; // Max number of iteration
-    DoubleParameters dparam(5);
-    dparam[0] = 1e-6; // Tolerance
-    //
 
-    string solverName = "ENUM" ;
-    //string solverName = "Lemke" ;
-    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
-    SP::LCP osnspb1(new LCP(mySolver));
-    SP::Relay osnspb(new Relay(mySolver));
+    SP::LCP osnspb1(new LCP());
+    SP::Relay osnspb(new Relay());
+
+    osnspb1->setNumericsSolverName("ENUM");
+    osnspb->setNumericsSolverName("ENUM");
+
+    // max number of iterations and tolerances
+    osnspb1->numericsSolverOptions()->iparam[0] = 10000;
+    osnspb1->numericsSolverOptions()->dparam[0] = 1e-6;
+    osnspb->numericsSolverOptions()->iparam[0] = 10000;
+    osnspb->numericsSolverOptions()->dparam[0] = 1e-6;
+
     s->insertNonSmoothProblem(osnspb);
 
     // =========================== End of model definition ===========================

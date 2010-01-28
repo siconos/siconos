@@ -46,7 +46,7 @@ extern "C" void NNL(unsigned int sizeOfq, const double *q, const double *velocit
   NLEffects(NNL, q_local, v_local);
 }
 
-extern "C" void jacobianQNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacobq, unsigned int sizeOfZ, double* z)
+extern "C" void jacobianNNLq(unsigned int sizeOfq, const double *q, const double *velocity, double *jacobq, unsigned int sizeOfZ, double* z)
 {
   //dummy function
 }

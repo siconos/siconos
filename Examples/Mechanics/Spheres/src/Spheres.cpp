@@ -117,7 +117,7 @@ void Spheres::init()
 
 
       SP::LagrangianDS body;
-      body.reset(new Sphere(R, m, boost::shared_ptr<SimpleVector>(qTmp), boost::shared_ptr<SimpleVector>(vTmp)));
+      body.reset(new SphereLDS(R, m, boost::shared_ptr<SimpleVector>(qTmp), boost::shared_ptr<SimpleVector>(vTmp)));
 
       // -- Set external forces (weight) --
       SP::SimpleVector FExt;

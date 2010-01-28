@@ -51,7 +51,7 @@ extern "C" void NNL(unsigned int sizeOfq, const double *q, const double *velocit
 
 }
 
-extern "C" void jacobianQNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
+extern "C" void jacobianNNLq(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   jacob[0] =  0.0;
   jacob[1] = -2.0 * m2 * l1 * velocity[0] * sin(q[0] - q[1]);
@@ -74,7 +74,7 @@ extern "C" void FInt(double time, unsigned int sizeOfq, const double *q, const d
   fInt[0] = sin(q[0]) * gravity * (m1 + m2);
   fInt[1] = sin(q[1]) * gravity * m2;
 }
-extern "C" void jacobianQFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
+extern "C" void jacobianFIntq(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   jacob[0] = cos(q[0]) * gravity * (m1 + m2);
   jacob[1] = 0.0;

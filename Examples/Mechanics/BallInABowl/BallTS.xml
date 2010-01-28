@@ -100,7 +100,7 @@
 			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			
 			<Moreau>
 				<DS_Concerned vectorSize='2'>1 2</DS_Concerned>
-				<Theta vectorSize='2'>0.5 1.0</Theta>
+				<Theta all="0.5"></Theta>
 			</Moreau>
 			</OneStepIntegrator_Definition>
 		<!-- One Step NS Problem of th Simulation-->

@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
     //    arm->setComputeMassFunction("RX90Plugin.so","mass");
     arm->setComputeNNLFunction("RX90Plugin.so", "NNL");
     arm->setComputeJacobianNNLFunction(1, "RX90Plugin.so", "jacobianVNNL");
-    arm->setComputeJacobianNNLFunction(0, "RX90Plugin.so", "jacobianQNNL");
+    arm->setComputeJacobianNNLFunction(0, "RX90Plugin.so", "jacobianNNLq");
     arm->setComputeFIntFunction("RX90Plugin.so", "U");
     arm->setComputeJacobianFIntFunction(1, "RX90Plugin.so", "jacobFintV");
     arm->setComputeJacobianFIntFunction(0, "RX90Plugin.so", "jacobFintQ");

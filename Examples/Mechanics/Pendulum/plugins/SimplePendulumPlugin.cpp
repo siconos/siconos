@@ -41,7 +41,7 @@ extern "C" void FInt(double time, unsigned int sizeOfq, const double *q, const d
 {
   fInt[0] =  m1 * sin(q[0]) * gravity;
 }
-extern "C" void jacobianQFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
+extern "C" void jacobianFIntq(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   jacob[0] =  cos(q[0]) * gravity * (m1);
 }

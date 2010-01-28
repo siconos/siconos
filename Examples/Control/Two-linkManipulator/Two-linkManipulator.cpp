@@ -102,11 +102,11 @@ int main(int argc, char* argv[])
     // external plug-in
     arm->setComputeMassFunction("Two-linkPlugin.so", "mass");
     arm->setComputeNNLFunction("Two-linkPlugin.so", "NNL");
-    arm->setComputeJacobianQDotNNLFunction("Two-linkPlugin.so", "jacobianVNNL");
-    arm->setComputeJacobianQNNLFunction("Two-linkPlugin.so", "jacobianQNNL");
+    arm->setComputeJacobianNNLqDotFunction("Two-linkPlugin.so", "jacobianVNNL");
+    arm->setComputeJacobianNNLqFunction("Two-linkPlugin.so", "jacobianNNLq");
     arm->setComputeFIntFunction("Two-linkPlugin.so", "U");
-    arm->setComputeJacobianQDotFIntFunction("Two-linkPlugin.so", "jacobFintV");
-    arm->setComputeJacobianQFIntFunction("Two-linkPlugin.so", "jacobFintQ");
+    arm->setComputeJacobianFIntqDotFunction("Two-linkPlugin.so", "jacobFintV");
+    arm->setComputeJacobianFIntqFunction("Two-linkPlugin.so", "jacobFintQ");
     arm->setZPtr(z);
 
     allDS.insert(arm);

@@ -55,7 +55,7 @@ extern "C" void NNL(unsigned int sizeOfq, const double *q, const double *velocit
   NNL[1] = m2 * l1 * l2 * sin(q[1]) * velocity[0] * velocity[0] / 2;
 }
 
-extern "C" void jacobianQNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacobq, unsigned int sizeOfZ, double* z)
+extern "C" void jacobianNNLq(unsigned int sizeOfq, const double *q, const double *velocity, double *jacobq, unsigned int sizeOfZ, double* z)
 {
   jacobq[0] = 0;
   jacobq[1] = 0;

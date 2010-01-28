@@ -60,7 +60,7 @@
   (see the functions/solvers list in PrimalFrictionContact3D_Solvers.h)
 
   \section pfc3DParam Required and optional parameters
-  PrimalFrictionContact3D problems needs some specific parameters, given to the PrimalFrictionContact3D_driver() function thanks to a Solver_Options structure. \n
+  PrimalFrictionContact3D problems needs some specific parameters, given to the PrimalFrictionContact3D_driver() function thanks to a SolverOptions structure. \n
 
   \brief
 */
@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
   int m = 3 * NC;
   int n = Ndof;
 
-  PrimalFrictionContact_Problem NumericsProblem;
+  PrimalFrictionContactProblem NumericsProblem;
   NumericsProblem.numberOfContacts = NC;
   NumericsProblem.dimension = 3;
   NumericsProblem.isComplete = 0;
@@ -218,11 +218,11 @@ int main(int argc, char* argv[])
   for (k = 0 ; k < n; k++) globalVelocity[k] = 0.0;
   // Numerics and Solver Options
 
-  Numerics_Options numerics_options;
+  NumericsOptions numerics_options;
   numerics_options.verboseMode = 1; // turn verbose mode to off by default
 
 
-  Solver_Options numerics_solver_options;
+  SolverOzptions numerics_solver_options;
   numerics_solver_options.filterOn = 0;
   numerics_solver_options.isSet = 1;
 

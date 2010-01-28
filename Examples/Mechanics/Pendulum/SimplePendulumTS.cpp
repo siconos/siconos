@@ -85,8 +85,8 @@ int main(int argc, char* argv[])
 
 
     simplependulum->setComputeFIntFunction("SimplePendulumPlugin.so", "FInt");
-    simplependulum->setComputeJacobianQDotFIntFunction("SimplePendulumPlugin.so", "jacobianVFInt");
-    simplependulum->setComputeJacobianQFIntFunction("SimplePendulumPlugin.so", "jacobianQFInt");
+    simplependulum->setComputeJacobianFIntqDotFunction("SimplePendulumPlugin.so", "jacobianVFInt");
+    simplependulum->setComputeJacobianFIntqFunction("SimplePendulumPlugin.so", "jacobianFIntq");
 
     allDS.insert(simplependulum);
 

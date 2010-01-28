@@ -113,14 +113,8 @@ int main(int argc, char* argv[])
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
     // -- (3) Non smooth problem --
-    IntParameters iparam(5);
-    iparam[0] = 1000; // Max number of iteration
-    DoubleParameters dparam(5);
-    dparam[0] = 1e-15; // Tolerance
-    string solverName = "Lemke" ;
-    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
-    SP::OneStepNSProblem impact(new LCP(mySolver, "impact"));
-    SP::OneStepNSProblem acceleration(new LCP(mySolver, "acceleration"));
+    SP::OneStepNSProblem impact(new LCP("impact"));
+    SP::OneStepNSProblem acceleration(new LCP("acceleration"));
 
     // -- (4) Simulation setup with (1) (2) (3)
     SP::EventDriven s(new EventDriven(t));

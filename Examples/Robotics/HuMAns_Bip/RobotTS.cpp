@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
     // external plug-in
     bip->setComputeMassFunction("RobotPlugin.so", "mass");
     bip->setComputeNNLFunction("RobotPlugin.so", "NNL");
-    bip->setComputeJacobianNNLFunction(0, "RobotPlugin.so", "jacobianQNNL");
+    bip->setComputeJacobianNNLFunction(0, "RobotPlugin.so", "jacobianNNLq");
     bip->setComputeJacobianNNLFunction(1, "RobotPlugin.so", "jacobianVNNL");
 
     allDS.insert(bip);

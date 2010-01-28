@@ -17,7 +17,7 @@ extern "C" void NNL(unsigned int sizeOfq, const double *q, const double *velocit
   NLEffects(NNL, q, velocity);
 }
 
-extern "C" void jacobianQNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
+extern "C" void jacobianNNLq(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   // compute jacobian matrix
   JacobianQNLEffects(jacob, q, velocity);
@@ -38,7 +38,7 @@ extern "C" void jacobianVNNL(unsigned int sizeOfq, const double *q, const  doubl
 //   for(i = 0; i<n ; i++)
 //     fInt[i] = 0.0;
 // }
-// extern "C" void jacobianQFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
+// extern "C" void jacobianFIntq(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 // {
 //   unsigned int i;
 //   unsigned int n = sizeOfq * sizeOfq;

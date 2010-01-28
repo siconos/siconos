@@ -37,6 +37,31 @@ using namespace std;
 void localCheckSolverOuput(int, Simulation*)
 {};
 
+double A(double t)
+{
+  return 0. ;
+}
+double B(double t)
+{
+  return 1. ;
+}
+double C(double t)
+{
+  return 0. ;
+} //1.1*cos(32.*M_PI*t) ;}
+double DA(double t)
+{
+  return 0. ;
+}
+double DB(double t)
+{
+  return 0. ;
+}
+double DC(double t)
+{
+  return 0. ;
+} //-1.1*32.*M_PI*sin(32.*M_PI*t) ;}
+
 
 // ================= Creation of the model =======================
 void Disks::init()
@@ -134,6 +159,16 @@ void Disks::init()
       (*plans_)(i, 4) = tmpr->getYCenter();
     }
 
+    _moving_plans.reset(new FMatrix(1, 6));
+    (*_moving_plans)(0, 0) = &A;
+    (*_moving_plans)(0, 1) = &B;
+    (*_moving_plans)(0, 2) = &C;
+    (*_moving_plans)(0, 3) = &DA;
+    (*_moving_plans)(0, 4) = &DB;
+    (*_moving_plans)(0, 5) = &DC;
+
+
+
     SP::SiconosMatrix Disks;
     Disks.reset(new SimpleMatrix("disks.dat", true));
 
@@ -200,8 +235,7 @@ void Disks::init()
     iparam[1] = 20; // compute error iterations
 
     DoubleParameters dparam(5);
-    dparam[0] = 1e-3; // Tolerance
-
+    dparam[0] = 1e-2; // Tolerance
     SP::NonSmoothSolver mySolver;
     mySolver.reset(new NonSmoothSolver(solverName, iparam, dparam));
     osnspb_.reset(new FrictionContact(2, mySolver));
@@ -210,18 +244,17 @@ void Disks::init()
     osnspb_->setMStorageType(1);
     osnspb_->setNumericsVerboseMode(0);
     osnspb_->setKeepLambdaAndYState(true);
-    simulation_->recordIntegrator(osi);
-    simulation_->recordNonSmoothProblem(osnspb_);
+    simulation_->insertIntegrator(osi);
+    simulation_->insertNonSmoothProblem(osnspb_);
     //simulation_->setCheckSolverFunction(localCheckSolverOuput);
 
     // --- Simulation initialization ---
 
     std::cout << "====> Simulation initialisation ..." << std::endl << std::endl;
 
-    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0, 0, 0.8, 2));
+    SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0, 0, 0., 2));
 
-    playground_.reset(new SpaceFilter(3, 6, nsds_, nslaw, plans_));
-    playground_->buildInteractions();
+    playground_.reset(new SpaceFilter(3, 6, nsds_, nslaw, plans_, _moving_plans));
 
     nsds_->topology()->initialize();
 
@@ -243,7 +276,53 @@ void Disks::init()
 
 
 
+
+
 // =========================== End of model definition ===========================
 
 // ================================= Computation =================================
 
+struct Disks::_Vibration : public SiconosVisitor
+{
+  SP::Disks parent;
+  bool flag;
+
+  _Vibration(SP::Disk d) : parent(d), flag(false) {};
+
+  void visit(SP::DiskPlanR r)
+  {
+
+    if (r->getA() == 0. && r->getB() == 1.)
+    {
+      flag = true;
+    }
+  }
+  void visit(SP::DiskDiskR) {};
+  void visit(SP::CircleCircleR) {};
+
+};
+
+void Disks::compute()
+{
+  try
+  {
+
+    playground_->buildInteractions(model_->currentTime());
+
+    model_->simulation()->updateInteractions();
+
+    model_->simulation()->advanceToEvent();
+
+    model_->simulation()->processEvents();
+
+  }
+
+  catch (SiconosException e)
+  {
+    std::cout << e.report() << std::endl;
+  }
+  catch (...)
+  {
+    std::cout << "Exception caught in SiconosBodies::compute()" << std::endl;
+  }
+}

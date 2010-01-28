@@ -191,14 +191,14 @@ void DisksViewer::draw()
   glColor3f(0, 0, 1);
   glLineWidth(4.);
 
-  for (unsigned int i = 0 ; i < Siconos_->getPlansPtr()->size(0) ; ++i)
+  for (unsigned int i = 0 ; i < Siconos_->plans()->size(0) ; ++i)
   {
-    double A = (*Siconos_->getPlansPtr())(i, 0);
-    double B = (*Siconos_->getPlansPtr())(i, 1);
-    double C = (*Siconos_->getPlansPtr())(i, 2);
-    double xc = (*Siconos_->getPlansPtr())(i, 3);
-    double yc = (*Siconos_->getPlansPtr())(i, 4);
-    double w = fmin(1e10, (*Siconos_->getPlansPtr())(i, 5));
+    double A = (*Siconos_->plans())(i, 0);
+    double B = (*Siconos_->plans())(i, 1);
+    double C = (*Siconos_->plans())(i, 2);
+    double xc = (*Siconos_->plans())(i, 3);
+    double yc = (*Siconos_->plans())(i, 4);
+    double w = fmin(1e10, (*Siconos_->plans())(i, 5));
     double H = hypot(A, B);
 
     if (w == 0) w = 1e10;

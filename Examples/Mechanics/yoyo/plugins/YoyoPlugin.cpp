@@ -33,7 +33,7 @@ extern "C" void F_int(double time, unsigned int sizeOfq, const double *q, const 
 }
 
 
-extern "C" void jacobianQFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
+extern "C" void jacobianFIntq(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   jacob[0] =  0;
   jacob[1] =  0;
@@ -87,7 +87,7 @@ extern "C" void F_intf(double time, unsigned int sizeOfq, const double *q, const
 }
 
 
-extern "C" void jacobianQFIntf(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
+extern "C" void jacobianFIntqf(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   jacob[0] =  0;
   jacob[1] =  0;

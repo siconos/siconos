@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
     arm->setComputeMassFunction("RobotPlugin.so", "mass");
     arm->setComputeNNLFunction("RobotPlugin.so", "NNL");
     arm->setComputeJacobianNNLFunction(1, "RobotPlugin.so", "jacobianVNNL");
-    arm->setComputeJacobianNNLFunction(0, "RobotPlugin.so", "jacobianQNNL");
+    arm->setComputeJacobianNNLFunction(0, "RobotPlugin.so", "jacobianNNLq");
 
     allDS.insert(arm);
 

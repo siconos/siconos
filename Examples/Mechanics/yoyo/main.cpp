@@ -114,8 +114,8 @@ int main(int argc, char* argv[])
 
       yoyo->setComputeFExtFunction("YoyoPlugin.so", "force_ext");
       yoyo->setComputeFIntFunction("YoyoPlugin.so", "F_int");
-      yoyo->setComputeJacobianQDotFIntFunction("YoyoPlugin.so", "jacobianVFInt");
-      yoyo->setComputeJacobianQFIntFunction("YoyoPlugin.so", "jacobianQFInt");
+      yoyo->setComputeJacobianFIntqDotFunction("YoyoPlugin.so", "jacobianVFInt");
+      yoyo->setComputeJacobianFIntqFunction("YoyoPlugin.so", "jacobianFIntq");
 
       allDS.insert(yoyo);
 
@@ -209,8 +209,8 @@ int main(int argc, char* argv[])
       yoyo.reset(new LagrangianDS(q0, v0, M));
       yoyo->setComputeFExtFunction("YoyoPlugin.so", "force_extf");
       yoyo->setComputeFIntFunction("YoyoPlugin.so", "F_intf");
-      yoyo->setComputeJacobianQDotFIntFunction("YoyoPlugin.so", "jacobianVFIntf");
-      yoyo->setComputeJacobianQFIntFunction("YoyoPlugin.so", "jacobianQFIntf");
+      yoyo->setComputeJacobianFIntqDotFunction("YoyoPlugin.so", "jacobianVFIntf");
+      yoyo->setComputeJacobianFIntqFunction("YoyoPlugin.so", "jacobianFIntqf");
 
       allDS.insert(yoyo);
 

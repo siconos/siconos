@@ -43,7 +43,7 @@
 
   (see the functions/solvers list in FrictionContact3D_Solvers.h)
 
-  FrictionContact3D problems needs some specific parameters, given to the FrictionContact3D_driver() function thanks to a Solver_Options structure. \n
+  FrictionContact3D problems needs some specific parameters, given to the FrictionContact3D_driver() function thanks to a SolverOptions structure. \n
   They are:\n
      - the name of the solver (ex: NSGS), used to switch to the right solver function
 
@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
   /*  } */
 
 
-  FrictionContact_Problem NumericsProblem;
+  FrictionContactProblem NumericsProblem;
   NumericsProblem.numberOfContacts = NC;
   NumericsProblem.dimension = 3;
   NumericsProblem.isComplete = 0;
@@ -106,13 +106,13 @@ int main(int argc, char* argv[])
   }
   // Numerics and Solver Options
 
-  Numerics_Options numerics_options;
+  NumericsOptions numerics_options;
   numerics_options.verboseMode = 1; // turn verbose mode to off by default
 
 
-  Solver_Options *numerics_solver_options;
+  SolverOptions *numerics_solver_options;
 
-  frictionContact3D_setDefaultSolverOptions(&numerics_solver_options, "NSGS");
+  frictionContact3D_setDefaultSolverOptions(numerics_solver_options, "NSGS");
   numerics_solver_options->dparam[0] = 1e-16;
 
 
@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
                            numerics_solver_options, &numerics_options);
 
 
-  frictionContact3D_deleteDefaultSolverOptions(&numerics_solver_options, "NSGS");
+  frictionContact3D_deleteDefaultSolverOptions(numerics_solver_options, "NSGS");
   // Solver output
   printf("\n");
   for (k = 0 ; k < 3 * NC; k++) printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e \n ", k, velocity[k], k , reaction[k]);

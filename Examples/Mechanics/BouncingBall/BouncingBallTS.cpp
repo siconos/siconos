@@ -117,8 +117,6 @@ int main(int argc, char* argv[])
     // --- (3) one step non smooth problem
     SP::OneStepNSProblem osnspb(new LCP());
 
-
-
     // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
 

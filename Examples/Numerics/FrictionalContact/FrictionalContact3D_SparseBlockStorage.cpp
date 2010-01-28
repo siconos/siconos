@@ -43,7 +43,7 @@
 
   (see the functions/solvers list in FrictionContact3D_Solvers.h)
 
-  FrictionContact3D problems needs some specific parameters, given to the FrictionContact3D_driver() function thanks to a Solver_Options structure. \n
+  FrictionContact3D problems needs some specific parameters, given to the FrictionContact3D_driver() function thanks to a SolverOptions structure. \n
   They are:\n
      - the name of the solver (ex: NSGS), used to switch to the right solver function
      - iparam[0]: max. number of iterations allowed
@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
   int i, j, k;
 
 
-  FrictionContact_Problem NumericsProblem;
+  FrictionContactProblem NumericsProblem;
   NumericsProblem.numberOfContacts = NC;
   NumericsProblem.dimension = 3;
   NumericsProblem.isComplete = 0;
@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
   }
   // Numerics and Solver Options
 
-  Numerics_Options numerics_options;
+  NumericsOptions numerics_options;
   numerics_options.verboseMode = 2; // turn verbose mode to off by default
 
 
@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
   frictionContact_printInFile(&NumericsProblem, ff);
   fclose(ff);
 
-  Solver_Options *numerics_solver_options;
+  SolverOptions *numerics_solver_options;
   frictionContact3D_setDefaultSolverOptions(&numerics_solver_options, "NSGS");
 
   numerics_solver_options->dparam[0] = 1e-16;

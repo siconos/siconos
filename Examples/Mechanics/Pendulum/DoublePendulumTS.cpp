@@ -78,11 +78,11 @@ int main(int argc, char* argv[])
 
     // external plug-in
     doublependulum->setComputeNNLFunction("DoublePendulumPlugin.so", "NNL");
-    doublependulum->setComputeJacobianQDotNNLFunction("DoublePendulumPlugin.so", "jacobianVNNL");
-    doublependulum->setComputeJacobianQNNLFunction("DoublePendulumPlugin.so", "jacobianQNNL");
+    doublependulum->setComputeJacobianNNLqDotFunction("DoublePendulumPlugin.so", "jacobianVNNL");
+    doublependulum->setComputeJacobianNNLqFunction("DoublePendulumPlugin.so", "jacobianNNLq");
     doublependulum->setComputeFIntFunction("DoublePendulumPlugin.so", "FInt");
-    doublependulum->setComputeJacobianQDotFIntFunction("DoublePendulumPlugin.so", "jacobianVFInt");
-    doublependulum->setComputeJacobianQFIntFunction("DoublePendulumPlugin.so", "jacobianQFInt");
+    doublependulum->setComputeJacobianFIntqDotFunction("DoublePendulumPlugin.so", "jacobianVFInt");
+    doublependulum->setComputeJacobianFIntqFunction("DoublePendulumPlugin.so", "jacobianFIntq");
 
     allDS.insert(doublependulum);
 
@@ -132,13 +132,8 @@ int main(int argc, char* argv[])
     s->insertIntegrator(OSI);
 
     // -- OneStepNsProblem --
-    IntParameters iparam(5);
-    iparam[0] = 2001; // Max number of iteration
-    DoubleParameters dparam(5);
-    dparam[0] = 0.0000005; // Tolerance
-    string solverName = "Lemke" ;
-    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
-    SP::OneStepNSProblem osnspb(new LCP(mySolver));
+    SP::OneStepNSProblem osnspb(new LCP());
+
     s->insertNonSmoothProblem(osnspb);
 
     cout << "=== End of model loading === " << endl;
