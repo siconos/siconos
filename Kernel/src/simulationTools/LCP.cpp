@@ -30,9 +30,7 @@ LCP::LCP(const std::string& newNewNumericsSolverName , const std::string& newId)
   size_t size = _numerics_solver_name.size() + 1;
   char * solvername = new char[ size ];
   strncpy(solvername, _numerics_solver_name.c_str(), size);
-  linearComplementarity_setDefaultSolverOptions(&*_numerics_problem   , &*_numerics_solver_options, solvername);
-
-
+  linearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options, solvername);
 
 };
 
