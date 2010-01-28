@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-#include "MixedLinearComplementarity_Problem.h"
+#include "MixedLinearComplementarityProblem.h"
 
 void displayMat(double * M, int Nblin, int Nbcol, int incCol)
 {
@@ -47,7 +47,7 @@ void displayMat(double * M, int Nblin, int Nbcol, int incCol)
 
 }
 
-void displayMLCP(MixedLinearComplementarity_Problem* p)
+void displayMLCP(MixedLinearComplementarityProblem* p)
 {
   int n = p->n;
   int m = p->m;

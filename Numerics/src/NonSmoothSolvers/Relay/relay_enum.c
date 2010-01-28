@@ -27,11 +27,11 @@
 #include "LCP_Solvers.h"
 #include <assert.h>
 
-void relay_enum(Relay_Problem* problem, double *z, double *w, int *info, SolverOptions* options, Numerics_Options* global_options)
+void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options, Numerics_Options* global_options)
 {
   int i;
   // conversion into LCP
-  LinearComplementarity_Problem* lcp_problem = (LinearComplementarity_Problem*)malloc(sizeof(LinearComplementarity_Problem));
+  LinearComplementarityProblem* lcp_problem = (LinearComplementarityProblem*)malloc(sizeof(LinearComplementarityProblem));
 
   relay_tolcp(problem, lcp_problem);
 
@@ -84,7 +84,7 @@ void relay_enum(Relay_Problem* problem, double *z, double *w, int *info, SolverO
 
 }
 
-int relay_enum_setDefaultSolverOptions(Relay_Problem* problem, SolverOptions* options)
+int relay_enum_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options)
 {
   int i;
   if (verbose > 0)

@@ -25,7 +25,7 @@
 #include "LA.h"
 #include "Relay_Solvers.h"
 
-void dr_latin(Relay_Problem* problem, double *z, double *w, int *info, SolverOptions* options)
+void dr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
 
   double* vec = problem->M->matrix0;

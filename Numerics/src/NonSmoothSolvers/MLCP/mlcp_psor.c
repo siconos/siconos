@@ -31,12 +31,12 @@
  */
 
 /*\warning omega is not explicitely used. must be completed    */
-int mixedLinearComplementarity_psor_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pSolver)
+int mixedLinearComplementarity_psor_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver)
 {
   mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
   return 0;
 }
-void mlcp_psor(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options)
+void mlcp_psor(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   double* A = problem->A;
   double* B = problem->B;

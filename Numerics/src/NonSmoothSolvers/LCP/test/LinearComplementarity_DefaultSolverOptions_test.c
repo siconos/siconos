@@ -27,7 +27,7 @@ int main(void)
   SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
 
   FILE * finput  =  fopen("./data/lcp_mmc.dat", "r");
-  LinearComplementarity_Problem* problem = (LinearComplementarity_Problem *)malloc(sizeof(LinearComplementarity_Problem));
+  LinearComplementarityProblem* problem = (LinearComplementarityProblem *)malloc(sizeof(LinearComplementarityProblem));
 
   info = linearComplementarity_newFromFile(problem, finput);
 

@@ -43,18 +43,18 @@ static int * siWorkPath = 0;
 static double * sdWorkEnum = 0;
 static double * sdWorkPath = 0;
 
-int mixedLinearComplementarity_pathEnum_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pSolver)
+int mixedLinearComplementarity_pathEnum_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver)
 {
   mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
   return 0;
 }
 
 
-int mlcp_path_enum_getNbIWork(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
+int mlcp_path_enum_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
   return mlcp_enum_getNbIWork(problem, options);
 }
-int mlcp_path_enum_getNbDWork(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
+int mlcp_path_enum_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
   return mlcp_enum_getNbDWork(problem, options);
 }
@@ -70,7 +70,7 @@ int mlcp_path_enum_getNbDWork(MixedLinearComplementarity_Problem* problem, Solve
  *
  */
 
-void mlcp_path_enum_init(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
+void mlcp_path_enum_init(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
   sN = problem->n;
   sM = problem->m;
@@ -106,7 +106,7 @@ void mlcp_path_enum_reset()
  * double *w : size n+m
  * info : output. info == 0 if success
  */
-void mlcp_path_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options)
+void mlcp_path_enum(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   if (!siWorkEnum)
   {

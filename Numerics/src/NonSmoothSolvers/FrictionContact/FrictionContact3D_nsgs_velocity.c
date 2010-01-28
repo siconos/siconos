@@ -44,7 +44,7 @@ void initializeLocalSolver_nsgs_velocity(int n, SolverPtr* solve, FreeSolverPtr*
   }
 }
 
-void frictionContact3D_nsgs_velocity(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
+void frictionContact3D_nsgs_velocity(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
   /* int and double parameters */
   int* iparam = options->iparam;

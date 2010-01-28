@@ -26,7 +26,7 @@ int primalFrictionContact_test_function(FILE * f, SolverOptions * options)
 {
 
   int k, info = -1 ;
-  PrimalFrictionContact_Problem* problem = (PrimalFrictionContact_Problem *)malloc(sizeof(PrimalFrictionContact_Problem));
+  PrimalFrictionContactProblem* problem = (PrimalFrictionContactProblem *)malloc(sizeof(PrimalFrictionContactProblem));
 
   info = primalFrictionContact_newFromFile(problem, f);
 

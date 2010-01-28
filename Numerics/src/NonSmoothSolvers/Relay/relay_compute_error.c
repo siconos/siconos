@@ -19,7 +19,7 @@
 
 #include "LA.h"
 #include "Numerics_Options.h" // for global options
-#include "Relay_Problem.h"
+#include "RelayProblem.h"
 
 
 int projectiononbox(double *z , double *lb, double * ub, int n)
@@ -33,7 +33,7 @@ int projectiononbox(double *z , double *lb, double * ub, int n)
   return 0;
 }
 
-int relay_compute_error(Relay_Problem* problem, double *z , double *w, double tolerance, double * error)
+int relay_compute_error(RelayProblem* problem, double *z , double *w, double tolerance, double * error)
 {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)

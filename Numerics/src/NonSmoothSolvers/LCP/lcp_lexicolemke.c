@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include "LCP_Solvers.h"
 
-void lcp_lexicolemke(LinearComplementarity_Problem* problem, double *zlem , double *wlem , int *info , SolverOptions* options)
+void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , double *wlem , int *info , SolverOptions* options)
 {
   /* matrix M of the lcp */
   double * M = problem->M->matrix0;

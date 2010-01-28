@@ -67,7 +67,7 @@
 
 */
 
-/*!\file PrimalFrictionContact_Problem.h
+/*!\file PrimalFrictionContactProblem.h
   \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
   \author Vincent Acary.
 */
@@ -94,16 +94,16 @@ typedef struct
   double* b;
   double* mu;
   int isComplete;
-} PrimalFrictionContact_Problem;
+} PrimalFrictionContactProblem;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-  int primalFrictionContact_printInFile(PrimalFrictionContact_Problem*  problem, FILE* file);
+  int primalFrictionContact_printInFile(PrimalFrictionContactProblem*  problem, FILE* file);
 
-  int primalFrictionContact_newFromFile(PrimalFrictionContact_Problem*  problem, FILE* file);
+  int primalFrictionContact_newFromFile(PrimalFrictionContactProblem*  problem, FILE* file);
 
-  void freePrimalFrictionContact_problem(PrimalFrictionContact_Problem* problem);
+  void freePrimalFrictionContact_problem(PrimalFrictionContactProblem* problem);
 
 #ifdef __cplusplus
 }

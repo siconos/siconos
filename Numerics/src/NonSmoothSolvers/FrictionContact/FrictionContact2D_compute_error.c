@@ -19,12 +19,12 @@
 
 #include "LA.h"
 #include "Numerics_Options.h" // for global options
-#include "FrictionContact_Problem.h"
+#include "FrictionContactProblem.h"
 #include <math.h>
 
 #define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
 
-int FrictionContact2D_compute_error(FrictionContact_Problem* problem, double *z , double *w, double tolerance, double * error)
+int FrictionContact2D_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, double * error)
 {
 
   int nc = problem->numberOfContacts;

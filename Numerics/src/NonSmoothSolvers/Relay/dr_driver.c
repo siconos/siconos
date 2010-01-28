@@ -25,7 +25,7 @@
 #include "NonSmoothDrivers.h"
 #endif
 
-int dr_driver(Relay_Problem* problem, double *z , double *w, SolverOptions* options, Numerics_Options* global_options)
+int dr_driver(RelayProblem* problem, double *z , double *w, SolverOptions* options, Numerics_Options* global_options)
 {
   if (options == NULL || global_options == NULL)
     numericsError("dr_driver", "null input for solver and/or global options");
@@ -35,7 +35,7 @@ int dr_driver(Relay_Problem* problem, double *z , double *w, SolverOptions* opti
 
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
-    numericsError("dr_driver", "null input for LinearComplementarity_Problem and/or unknowns (z,w)");
+    numericsError("dr_driver", "null input for LinearComplementarityProblem and/or unknowns (z,w)");
 
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;

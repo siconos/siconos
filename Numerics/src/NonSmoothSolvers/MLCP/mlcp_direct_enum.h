@@ -12,10 +12,10 @@
  *
  */
 
-int mlcp_direct_enum_getNbIWork(MixedLinearComplementarity_Problem* problem, SolverOptions* options);
-int mlcp_direct_enum_getNbDWork(MixedLinearComplementarity_Problem* problem, SolverOptions* options);
+int mlcp_direct_enum_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
+int mlcp_direct_enum_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
 
-void mlcp_direct_enum_init(MixedLinearComplementarity_Problem* problem, SolverOptions* options);
+void mlcp_direct_enum_init(MixedLinearComplementarityProblem* problem, SolverOptions* options);
 void mlcp_direct_enum_reset();
 
 #endif //MLCP_DIRECT_ENUM_H

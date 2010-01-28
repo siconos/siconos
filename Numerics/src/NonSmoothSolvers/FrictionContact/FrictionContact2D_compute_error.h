@@ -38,7 +38,7 @@ extern "C" {
       \param tolerance value for error computation
       \param[in,out] error value
    */
-  void FrictionContact2D_compute_error(FrictionContact_Problem* problem, double *z , double *w, double tolerance, double * error);
+  void FrictionContact2D_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, double * error);
 
 #ifdef __cplusplus
 }

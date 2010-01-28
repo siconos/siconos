@@ -40,7 +40,7 @@ dim(v)=nn
 static int sIsInitialize = 0;
 #endif
 
-int mixedLinearComplementarity_simplex_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pSolver)
+int mixedLinearComplementarity_simplex_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver)
 {
 #ifdef HAVE_MLCPSIMPLEX
   mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
@@ -48,7 +48,7 @@ int mixedLinearComplementarity_simplex_setDefaultSolverOptions(MixedLinearComple
   return 0;
 }
 
-void mlcp_simplex_init(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
+void mlcp_simplex_init(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
 #ifdef HAVE_MLCPSIMPLEX
   int nn = problem->n;
@@ -71,7 +71,7 @@ void mlcp_simplex_reset()
  *  options->iparam[1];    verbose if not 0
  *  info : output. info == 0 if success.
 */
-void mlcp_simplex(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options)
+void mlcp_simplex(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
 #ifdef HAVE_MLCPSIMPLEX
   //  double tol ;

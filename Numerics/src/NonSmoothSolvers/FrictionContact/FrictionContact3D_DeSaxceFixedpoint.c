@@ -25,7 +25,7 @@
 #include <math.h>
 
 
-void frictionContact3D_DeSaxceFixedPoint(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
+void frictionContact3D_DeSaxceFixedPoint(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
   /* int and double parameters */
   int* iparam = options->iparam;

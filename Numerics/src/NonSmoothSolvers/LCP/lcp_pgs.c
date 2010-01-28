@@ -26,7 +26,7 @@
 #include "LCP_Solvers.h"
 #include <assert.h>
 
-void lcp_pgs(LinearComplementarity_Problem* problem, double *z, double *w, int *info , SolverOptions* options)
+void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */
   double * M = problem->M->matrix0;

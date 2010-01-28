@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
-void fake_compute_error_nsgs(FrictionContact_Problem* problem, double *reaction, double *velocity, double tolerance, double* error)
+void fake_compute_error_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, double tolerance, double* error)
 {
   int n = 3 * problem->numberOfContacts;
   *error = 0.;
@@ -126,7 +126,7 @@ void initializeLocalSolver_nsgs(int n, SolverPtr* solve, FreeSolverPtr* freeSolv
   }
 }
 
-void frictionContact3D_nsgs(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
+void frictionContact3D_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
   /* int and double parameters */
   int* iparam = options->iparam;

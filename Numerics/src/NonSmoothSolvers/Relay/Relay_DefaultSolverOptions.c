@@ -26,7 +26,7 @@
 #include "Relay_Solvers.h"
 #include "NonSmoothDrivers.h"
 
-int relay_setDefaultSolverOptions(Relay_Problem* problem, SolverOptions* options, char *solvername)
+int relay_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options, char *solvername)
 {
 
   int info = -1;

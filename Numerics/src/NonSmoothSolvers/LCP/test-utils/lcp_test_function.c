@@ -22,7 +22,7 @@
 #include "lcp_test_function.h"
 
 
-void fillParamWithRespectToSolver(SolverOptions *options, char * solvername, LinearComplementarity_Problem* problem)
+void fillParamWithRespectToSolver(SolverOptions *options, char * solvername, LinearComplementarityProblem* problem)
 {
   int maxIter = 1001;
   double tolerance = 1e-8;
@@ -88,7 +88,7 @@ void fillParamWithRespectToSolver(SolverOptions *options, char * solvername, Lin
 }
 
 
-void fillParamWithRespectToSolver_SBM(SolverOptions *options, char * solvername, LinearComplementarity_Problem* problem)
+void fillParamWithRespectToSolver_SBM(SolverOptions *options, char * solvername, LinearComplementarityProblem* problem)
 {
   int maxIter = 1001;
   double tolerance = 1e-8;
@@ -145,7 +145,7 @@ int lcp_test_function(FILE * f, char * solvername)
 {
 
   int i, info = 0 ;
-  LinearComplementarity_Problem* problem = (LinearComplementarity_Problem *)malloc(sizeof(LinearComplementarity_Problem));
+  LinearComplementarityProblem* problem = (LinearComplementarityProblem *)malloc(sizeof(LinearComplementarityProblem));
 
   info = linearComplementarity_newFromFile(problem, f);
 
@@ -223,7 +223,7 @@ int lcp_test_function_SBM(FILE * f, char * solvername)
 {
 
   int i, info = 0 ;
-  LinearComplementarity_Problem* problem = (LinearComplementarity_Problem *)malloc(sizeof(LinearComplementarity_Problem));
+  LinearComplementarityProblem* problem = (LinearComplementarityProblem *)malloc(sizeof(LinearComplementarityProblem));
 
   info = linearComplementarity_newFromFile(problem, f);
 

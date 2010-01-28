@@ -44,18 +44,18 @@ static int * siWorkDirect = 0;
 static double * sdWorkPathEnum = 0;
 static double * sdWorkDirect = 0;
 
-int mixedLinearComplementarity_directPathEnum_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pSolver)
+int mixedLinearComplementarity_directPathEnum_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver)
 {
   mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
   return 0;
 }
 
 
-int mlcp_direct_path_enum_getNbIWork(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
+int mlcp_direct_path_enum_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
   return mlcp_direct_getNbIWork(problem, options) + mlcp_path_enum_getNbIWork(problem, options);
 }
-int mlcp_direct_path_enum_getNbDWork(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
+int mlcp_direct_path_enum_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
   return mlcp_direct_getNbDWork(problem, options) + mlcp_path_enum_getNbDWork(problem, options);
 }
@@ -71,7 +71,7 @@ int mlcp_direct_path_enum_getNbDWork(MixedLinearComplementarity_Problem* problem
  *
  */
 
-void mlcp_direct_path_enum_init(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
+void mlcp_direct_path_enum_init(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
   sN = problem->n;
   sM = problem->m;
@@ -111,7 +111,7 @@ void mlcp_direct_path_enum_reset()
  * double *w : size n+m
  * info : output. info == 0 if success
  */
-void mlcp_direct_path_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options)
+void mlcp_direct_path_enum(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   if (!siWorkPathEnum)
   {

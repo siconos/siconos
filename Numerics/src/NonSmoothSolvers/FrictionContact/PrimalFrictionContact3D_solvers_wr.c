@@ -39,7 +39,7 @@ extern int  Primal_MisLU;
 
 /* Global Variable for the reformulation of the problem */
 
-int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, FrictionContact_Problem* localproblem)
+int reformulationIntoLocalProblem(PrimalFrictionContactProblem* problem, FrictionContactProblem* localproblem)
 {
   int info = -1;
 
@@ -258,7 +258,7 @@ int reformulationIntoLocalProblem(PrimalFrictionContact_Problem* problem, Fricti
 
   return info;
 }
-int computeGlobalVelocity(PrimalFrictionContact_Problem* problem, double * reaction, double * globalVelocity)
+int computeGlobalVelocity(PrimalFrictionContactProblem* problem, double * reaction, double * globalVelocity)
 {
   int info = -1;
 
@@ -316,7 +316,7 @@ int computeGlobalVelocity(PrimalFrictionContact_Problem* problem, double * react
   return info;
 }
 
-int freeLocalProblem(FrictionContact_Problem* localproblem)
+int freeLocalProblem(FrictionContactProblem* localproblem)
 {
   int info = -1;
 
@@ -341,11 +341,11 @@ int freeLocalProblem(FrictionContact_Problem* localproblem)
 
 
 
-void  primalFrictionContact3D_nsgs_wr(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
+void  primalFrictionContact3D_nsgs_wr(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
 
   // Reformulation
-  FrictionContact_Problem* localproblem = (FrictionContact_Problem *) malloc(sizeof(FrictionContact_Problem));
+  FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
 
   reformulationIntoLocalProblem(problem, localproblem);
 
@@ -381,10 +381,10 @@ int primalFrictionContact3D_nsgs_wr_setDefaultSolverOptions(SolverOptions* optio
   return 0;
 }
 
-void  primalFrictionContact3D_nsgs_velocity_wr(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
+void  primalFrictionContact3D_nsgs_velocity_wr(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
   // Reformulation
-  FrictionContact_Problem* localproblem = (FrictionContact_Problem *) malloc(sizeof(FrictionContact_Problem));
+  FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
 
   reformulationIntoLocalProblem(problem, localproblem);
 
@@ -437,11 +437,11 @@ int primalFrictionContact3D_nsgs_velocity_wr_setDefaultSolverOptions(SolverOptio
 
 }
 
-void  primalFrictionContact3D_proximal_wr(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
+void  primalFrictionContact3D_proximal_wr(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
 
   // Reformulation
-  FrictionContact_Problem* localproblem = (FrictionContact_Problem *) malloc(sizeof(FrictionContact_Problem));
+  FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
 
   reformulationIntoLocalProblem(problem, localproblem);
 
@@ -476,11 +476,11 @@ int primalFrictionContact3D_proximal_wr_setDefaultSolverOptions(SolverOptions* o
   frictionContact3D_proximal_setDefaultSolverOptions(options->internalSolvers);
   return 0;
 }
-void  primalFrictionContact3D_DeSaxceFixedPoint_wr(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
+void  primalFrictionContact3D_DeSaxceFixedPoint_wr(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
 
   // Reformulation
-  FrictionContact_Problem* localproblem = (FrictionContact_Problem *) malloc(sizeof(FrictionContact_Problem));
+  FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
 
   reformulationIntoLocalProblem(problem, localproblem);
 

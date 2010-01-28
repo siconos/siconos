@@ -19,7 +19,7 @@
 #ifndef LINEARSYSTEM_PROBLEM_H
 #define LINEARSYSTEM_PROBLEM_H
 
-/*!\file LinearComplementarity_Problem.h
+/*!\file LinearComplementarityProblem.h
   \brief Structure used to define a Linear Complementarity Problem
 
   \author Franck Perignon
@@ -59,12 +59,12 @@ typedef struct
   int size;
   NumericsMatrix* M;
   double * q;
-} LinearSystem_Problem;
+} LinearSystemProblem;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-  void displayLS(LinearSystem_Problem* p);
+  void displayLS(LinearSystemProblem* p);
 #ifdef __cplusplus
 }
 #endif

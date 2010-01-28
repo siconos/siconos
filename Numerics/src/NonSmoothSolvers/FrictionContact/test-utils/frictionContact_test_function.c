@@ -26,7 +26,7 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
 {
 
   int k, info = -1 ;
-  FrictionContact_Problem* problem = (FrictionContact_Problem *)malloc(sizeof(FrictionContact_Problem));
+  FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));
 
   info = frictionContact_newFromFile(problem, f);
 

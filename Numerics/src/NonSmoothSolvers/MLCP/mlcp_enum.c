@@ -111,7 +111,7 @@ static double* sU;
 /* } */
 
 
-int mixedLinearComplementarity_enum_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pSolver)
+int mixedLinearComplementarity_enum_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver)
 {
   mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
   return 0;
@@ -138,11 +138,11 @@ void printRefSystem()
   printf("ref Q (ie -Q from mlcp beause of linear system MZ=Q):\n");
   displayMat(sQref, sMl, 1, 0);
 }
-int mlcp_enum_getNbIWork(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
+int mlcp_enum_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
   return 2 * (problem->n + problem->m);
 }
-int mlcp_enum_getNbDWork(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
+int mlcp_enum_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
 
 #ifdef ENUM_USE_DGELS
@@ -169,7 +169,7 @@ int mlcp_enum_getNbDWork(MixedLinearComplementarity_Problem* problem, SolverOpti
  * double *w : size n+m
  */
 
-void mlcp_enum(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options)
+void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   double tol ;
   double * workingFloat = options->dWork;

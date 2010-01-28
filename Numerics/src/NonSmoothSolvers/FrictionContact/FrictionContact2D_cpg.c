@@ -21,7 +21,7 @@
 #include "LA.h"
 #include <math.h>
 
-void FrictionContact2D_cpg(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, SolverOptions* options)
+void FrictionContact2D_cpg(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options)
 {
   int nc = problem->numberOfContacts;
   double * vec = problem->M->matrix0;

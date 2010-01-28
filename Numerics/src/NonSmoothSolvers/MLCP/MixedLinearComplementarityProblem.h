@@ -19,7 +19,7 @@
 #ifndef MLCP_PROBLEM_H
 #define MLCP_PROBLEM_H
 
-/*!\file MixedLinearComplementarity_Problem.h
+/*!\file MixedLinearComplementarityProblem.h
   \brief Structure used to define a Mixed Linear Complementarity Problem
 
   \author Olivier Bonnefon
@@ -128,14 +128,14 @@ typedef struct
   double *a;
   double *b;
   int problemType;
-} MixedLinearComplementarity_Problem;
+} MixedLinearComplementarityProblem;
 
 void displayMat(double * M, int Nblin, int Nbcol, int incLin);
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-  void displayMLCP(MixedLinearComplementarity_Problem* p);
+  void displayMLCP(MixedLinearComplementarityProblem* p);
 
 #ifdef __cplusplus
 }

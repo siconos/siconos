@@ -26,7 +26,7 @@ int relay_test_function(FILE * f, char * solvername)
 {
 
   int i, info = 0 ;
-  Relay_Problem* problem = (Relay_Problem *)malloc(sizeof(Relay_Problem));
+  RelayProblem* problem = (RelayProblem *)malloc(sizeof(RelayProblem));
 
   info = relay_newFromFile(problem, f);
 

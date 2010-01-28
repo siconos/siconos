@@ -8,14 +8,14 @@
 
 USING_PART_OF_NAMESPACE_EIGEN
 
-void frictionContact3D_solverAC2(FrictionContact_Problem* problem, double *reaction, double *velocity)
+void frictionContact3D_solverAC2(FrictionContactProblem* problem, double *reaction, double *velocity)
 {
   // on reçoit le problem, vérifions d'abord qu'il est complet:
   if (!problem->isComplete)
-    std::cout << "warning: the FrictionContact_Problem has member isComplete equal to 0" << std::endl;
+    std::cout << "warning: the FrictionContactProblem has member isComplete equal to 0" << std::endl;
   // et de type SparseBlockStructuredMatrix:
   if (problem->M->storageType != 1)
-    std::cout << "error: the FrictionContact_Problem should have a matix of type 1 (SparseBlockStructuredMatrix)" << std::endl;
+    std::cout << "error: the FrictionContactProblem should have a matix of type 1 (SparseBlockStructuredMatrix)" << std::endl;
   // renommons, plus courtement
   NumericsMatrix * _MM = problem->M;
   SparseBlockStructuredMatrix * _M = _MM->matrix1;

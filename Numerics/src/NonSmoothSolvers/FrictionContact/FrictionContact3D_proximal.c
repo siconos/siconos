@@ -26,7 +26,7 @@
 #include <assert.h>
 
 
-void frictionContact3D_proximal(FrictionContact_Problem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
+void frictionContact3D_proximal(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
   /* int and double parameters */
   int* iparam = options->iparam;

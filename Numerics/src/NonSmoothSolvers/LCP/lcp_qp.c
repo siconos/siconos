@@ -24,7 +24,7 @@
 #include "LCP_Solvers.h"
 #include "QP_Solvers.h"
 
-void lcp_qp(LinearComplementarity_Problem* problem, double *z, double *w, int *info , SolverOptions* options)
+void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   /* size of the LCP */
   int n = problem->size;

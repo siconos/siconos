@@ -19,7 +19,7 @@
 
 #include "LA.h"
 #include "Numerics_Options.h" // for global options
-#include "PrimalFrictionContact_Problem.h"
+#include "PrimalFrictionContactProblem.h"
 #include "PrimalFrictionContact3D_Solvers.h"
 #include "projectionOnCone.h"
 #include <math.h>
@@ -28,7 +28,7 @@ extern int *Primal_ipiv;
 extern int  Primal_MisInverse;
 extern int  Primal_MisLU;
 
-int PrimalFrictionContact3D_compute_error(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, double tolerance, double * error)
+int PrimalFrictionContact3D_compute_error(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, double tolerance, double * error)
 {
   /* Checks inputs */
   if (problem == NULL || reaction == NULL || velocity == NULL || globalVelocity == NULL)

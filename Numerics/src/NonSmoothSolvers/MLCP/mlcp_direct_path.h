@@ -13,10 +13,10 @@
  */
 
 
-int mlcp_direct_path_getNbIWork(MixedLinearComplementarity_Problem* problem, SolverOptions* options);
-int mlcp_direct_path_getNbDWork(MixedLinearComplementarity_Problem* problem, SolverOptions* options);
+int mlcp_direct_path_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
+int mlcp_direct_path_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
 
-void mlcp_direct_path_init(MixedLinearComplementarity_Problem* problem, SolverOptions* options);
+void mlcp_direct_path_init(MixedLinearComplementarityProblem* problem, SolverOptions* options);
 void mlcp_direct_path_reset();
 
 #endif //MLCP_DIRECT_PATH_H

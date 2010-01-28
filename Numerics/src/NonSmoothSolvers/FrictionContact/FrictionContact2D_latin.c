@@ -25,7 +25,7 @@
 #include "LA.h"
 #include "FrictionContact2D_Solvers.h"
 
-void FrictionContact2D_latin(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, SolverOptions* options)
+void FrictionContact2D_latin(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options)
 {
   int nc = problem->numberOfContacts;
   double * vec = problem->M->matrix0;

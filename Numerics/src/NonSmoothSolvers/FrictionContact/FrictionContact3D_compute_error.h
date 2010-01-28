@@ -38,7 +38,7 @@ extern "C" {
       \param tolerance value for error computation
       \param[in,out] error value
    */
-  void FrictionContact3D_compute_error(FrictionContact_Problem* problem, double *z , double *w, double tolerance, double * error);
+  void FrictionContact3D_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, double * error);
 
   /** Error computation for friction-contact 3D problem
       \param problem the structure which defines the friction-contact problem
@@ -47,7 +47,7 @@ extern "C" {
       \param tolerance value for error computation
       \param[in,out] error value
    */
-  void FrictionContact3D_compute_error_velocity(FrictionContact_Problem* problem, double *z , double *w, double tolerance, double * error);
+  void FrictionContact3D_compute_error_velocity(FrictionContactProblem* problem, double *z , double *w, double tolerance, double * error);
 
 #ifdef __cplusplus
 }

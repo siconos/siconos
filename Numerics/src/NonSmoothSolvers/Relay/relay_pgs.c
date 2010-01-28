@@ -26,7 +26,7 @@
 #include "Relay_Solvers.h"
 #include <assert.h>
 
-void relay_pgs(Relay_Problem* problem, double *z, double *w, int *info, SolverOptions* options)
+void relay_pgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
 
 

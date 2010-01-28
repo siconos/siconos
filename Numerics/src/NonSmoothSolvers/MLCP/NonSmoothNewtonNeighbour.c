@@ -18,7 +18,7 @@
  */
 #include "NonSmoothNewton.h"
 #include "NonSmoothNewtonNeighbour.h"
-#include "MixedLinearComplementarity_Problem.h"
+#include "MixedLinearComplementarityProblem.h"
 
 #include "Numerics_Options.h"
 #include "LA.h"

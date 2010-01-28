@@ -19,7 +19,7 @@
 
 #ifndef PrimalFrictionContact3D_compute_error_H
 #define PrimalFrictionContact3D_compute_error_H
-#include "PrimalFrictionContact_Problem.h"
+#include "PrimalFrictionContactProblem.h"
 /*!\file FrictionContact3D_compute_error.h
   \brief functions related to error computation for friction-contact problems
 
@@ -39,7 +39,7 @@ extern "C" {
       \param tolerance value for error computation
       \param[in,out] error value
    */
-  void PrimalFrictionContact3D_compute_error(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, double tolerance, double * error);
+  void PrimalFrictionContact3D_compute_error(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, double tolerance, double * error);
 
 #ifdef __cplusplus
 }

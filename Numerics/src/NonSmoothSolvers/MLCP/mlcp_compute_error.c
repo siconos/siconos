@@ -28,7 +28,7 @@
  *
  *
  */
-int mlcp_compute_error(MixedLinearComplementarity_Problem* problem, double *z, double *w, double tolerance, double * error)
+int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, double *w, double tolerance, double * error)
 {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)

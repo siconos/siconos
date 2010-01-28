@@ -30,7 +30,7 @@
 #include <math.h>
 
 
-int test_Series_nsgs(FrictionContact_Problem* problem,
+int test_Series_nsgs(FrictionContactProblem* problem,
                      double tolerance, double localtolerance,
                      int nLocalSolver, int * localSolverList)
 {
@@ -118,7 +118,7 @@ int main(void)
 
 
 
-  FrictionContact_Problem * testproblem = NULL;
+  FrictionContactProblem * testproblem = NULL;
 
   int ntestfile = 4, i;
   char ** testfile = (char **)malloc(ntestfile * sizeof(char *));
@@ -171,7 +171,7 @@ int main(void)
   for (i = 0 ; i < ntestfile; i++)
   {
     printf("Test file number %i -- %s\n", i, testfile[i]);
-    testproblem = (FrictionContact_Problem*)malloc(sizeof(FrictionContact_Problem));
+    testproblem = (FrictionContactProblem*)malloc(sizeof(FrictionContactProblem));
     file = fopen(testfile[i], "r");
     if (file)
     {

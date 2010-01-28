@@ -19,9 +19,9 @@
 
 #include "LA.h"
 #include "Numerics_Options.h" // for global options
-#include "LinearComplementarity_Problem.h"
+#include "LinearComplementarityProblem.h"
 
-int lcp_compute_error(LinearComplementarity_Problem* problem, double *z , double *w, double tolerance, double * error)
+int lcp_compute_error(LinearComplementarityProblem* problem, double *z , double *w, double tolerance, double * error)
 {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)

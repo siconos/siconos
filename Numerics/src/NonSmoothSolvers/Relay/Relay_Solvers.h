@@ -30,7 +30,7 @@
 This page gives an overview of the available solvers for relay problems and their required parameters.
 
 For each solver, the input argument are:
-- a Relay_Problem
+- a RelayProblem
 - the unknowns (z,w)
 - info, the termination value (0: convergence, >0 problem which depends on the solver)
 - a SolverOptions structure, which handles iparam and dparam
@@ -60,8 +60,8 @@ LArge Time INcrements solver
 
 */
 
-#include "Relay_Problem.h"
-#include "LinearComplementarity_Problem.h"
+#include "RelayProblem.h"
+#include "LinearComplementarityProblem.h"
 #include "SolverOptions.h"
 
 #ifdef __cplusplus
@@ -70,7 +70,7 @@ extern "C" {
 
 
   /** General interface to solver for primal-relay problems
-      \param[in] problem the Relay_Problem structure which handles the problem (M,q)
+      \param[in] problem the RelayProblem structure which handles the problem (M,q)
       \param[in,out] z a n-vector of doubles which contains the solution of the problem.
       \param[in,out] w a n-vector of doubles which contains the solution of the problem.
       \param[in,out] options structure used to define the solver(s) and their parameters
@@ -79,13 +79,13 @@ extern "C" {
       - >0 : otherwise see each solver for more information about the log info
    * \author Nineb Sheherazade.
    */
-  int relay_driver(Relay_Problem* problem, double *z , double *w, SolverOptions* options,  Numerics_Options* global_options);
+  int relay_driver(RelayProblem* problem, double *z , double *w, SolverOptions* options,  Numerics_Options* global_options);
 
   /** set the default solver parameters and perform memory allocation for LinearComplementarity
       \param SolverOptions * the pointer to options to set
       \param char * the string which identify the solver
   */
-  int relay_setDefaultSolverOptions(Relay_Problem* problem, SolverOptions* options, char *);
+  int relay_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options, char *);
 
 
   /** relay_nlgs is a projected Gauss-Seidel solver for relay problems.\n
@@ -98,7 +98,7 @@ extern "C" {
    2 = Null diagonal term\n
    \author V. Acary
   */
-  void relay_pgs(Relay_Problem* problem, double *z, double *w, int *info, SolverOptions* options);
+  void relay_pgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for PGS
       \param SolverOptions * the pointer to options to set
@@ -115,7 +115,7 @@ extern "C" {
      2 = Null diagonal term\n
      \author V. Acary
     */
-  void relay_lexicolemke(Relay_Problem* problem, double *z, double *w, int *info, SolverOptions* options, Numerics_Options* global_options);
+  void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options, Numerics_Options* global_options);
 
   /** set the default solver parameters and perform memory allocation for Lemke
       \param SolverOptions * the pointer to options to set
@@ -132,12 +132,12 @@ extern "C" {
      2 = Null diagonal term\n
      \author V. Acary
     */
-  void relay_enum(Relay_Problem* problem, double *z, double *w, int *info, SolverOptions* options, Numerics_Options* global_options);
+  void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options, Numerics_Options* global_options);
 
   /** set the default solver parameters and perform memory allocation for ENUM
       \param SolverOptions * the pointer to options to set
   */
-  int relay_enum_setDefaultSolverOptions(Relay_Problem* problem, SolverOptions* options);
+  int relay_enum_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options);
 
   /** relay_path is a resolution of the Relay with its inherent MCP formulation and using path.\n
    * \param[in] problem structure that represents the Relay (M, q...)
@@ -149,7 +149,7 @@ extern "C" {
    2 = Nul diagonal term\n
    \author V. acary
   */
-  void relay_path(Relay_Problem* problem, double *z, double *w, int *info, SolverOptions* options);
+  void relay_path(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for ENUM
       \param SolverOptions * the pointer to options to set
@@ -167,7 +167,7 @@ extern "C" {
    3 = Nul diagonal term\n
    \author Nineb Sheherazade.
   */
-  void pr_latin(Relay_Problem* problem, double *z, double *w, int *info, SolverOptions* options);
+  void pr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
 
   /** dr_latin is a specific latin (LArge Time INcrement)solver for dual relay problems.\n
@@ -181,7 +181,7 @@ extern "C" {
    3 = Nul diagonal term\n
    \author Nineb Sheherazade.
   */
-  void dr_latin(Relay_Problem* problem, double *z, double *w, int *info, SolverOptions* options)  ;
+  void dr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)  ;
 
   /**  dr_nlgs is a specific nlgs (Non Linear Gauss Seidel) solver for dual relay problems.\n
    * \param[in] problem structure that represents the Relay (M, q...)
@@ -193,7 +193,7 @@ extern "C" {
    2 = Nul diagonal term\n
    \author Nineb Sheherazade.
   */
-  void dr_nlgs(Relay_Problem* problem, double *z, double *w, int *info, SolverOptions* options);
+  void dr_nlgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /** pr_gsnl is a specific gsnl (Gauss Seidel Non Linear)solver for relay problems.
    * \param[in] problem structure that represents the Relay (M, q...)
@@ -205,7 +205,7 @@ extern "C" {
    2 = Nul diagonal term\n
    \author Nineb Sheherazade.
   */
-  void pr_gsnl(Relay_Problem* problem, double *z, double *w, int *info, SolverOptions* options);
+  void pr_gsnl(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
   /** This function computes the input vector \f$ w = Mz + q \f$ and checks the validity of the vector z as a solution \n
      * of the LCP : \n
@@ -222,7 +222,7 @@ extern "C" {
      * \return status: 0 : convergence, 1: error > tolerance
      * \author Vincent Acary
      */
-  int relay_compute_error(Relay_Problem* problem, double *z , double *w, double tolerance, double* error);
+  int relay_compute_error(RelayProblem* problem, double *z , double *w, double tolerance, double* error);
 
 
   /** This function computes the projection on the boxr \f$ [lb,ub]\f$ of the vector  \f$z\f$  \n
@@ -234,14 +234,14 @@ extern "C" {
      */
   int projectiononbox(double *z , double *lb, double * ub, int n);
 
-  /** This function transform a Relay_Problem into a LinearComplementarity_Problem
+  /** This function transform a RelayProblem into a LinearComplementarityProblem
      * \param[in] A pointer to a Relay_problem to transform
      * \param[out] A pointer to a LinearComplementarity_problem resulting from the reformulation
      * \author Vincent Acary
      */
 
 
-  void relay_tolcp(Relay_Problem* problem, LinearComplementarity_Problem * lcp_problem);
+  void relay_tolcp(RelayProblem* problem, LinearComplementarityProblem * lcp_problem);
 
 #ifdef __cplusplus
 }

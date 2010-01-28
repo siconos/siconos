@@ -28,7 +28,7 @@
 
 
 
-void  mixedLinearComplementarity_default_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pOptions)
+void  mixedLinearComplementarity_default_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pOptions)
 {
   pOptions->isSet = 0;
   pOptions->iSize = 10;
@@ -62,7 +62,7 @@ void  mixedLinearComplementarity_default_setDefaultSolverOptions(MixedLinearComp
 
 }
 
-void  mixedLinearComplementarity_deleteDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pOptions)
+void  mixedLinearComplementarity_deleteDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pOptions)
 {
   if (pOptions->iparam)
     free(pOptions->iparam);
@@ -79,7 +79,7 @@ void  mixedLinearComplementarity_deleteDefaultSolverOptions(MixedLinearComplemen
 
 }
 
-int mixedLinearComplementarity_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pOptions)
+int mixedLinearComplementarity_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pOptions)
 {
   int info = -1;
 

@@ -30,7 +30,7 @@
 This page gives an overview of the available solvers for friction-contact (2D) problems and their required parameters.
 
 For each solver, the input argument are:
-- a FrictionContact_Problem
+- a FrictionContactProblem
 - the unknowns (reaction,velocity)2
 - info, the termination value (0: convergence, >0 problem which depends on the solver)
 - a SolverOptions structure, which handles iparam and dparam
@@ -46,7 +46,7 @@ For each solver, the input argument are:
 
 */
 
-#include "FrictionContact_Problem.h"
+#include "FrictionContactProblem.h"
 #include "Numerics_Options.h"
 #include "SolverOptions.h"
 
@@ -62,7 +62,7 @@ extern "C" {
       \param[in] general options for Numerics (verbose mode ...)
       \return result (0 if successful otherwise 1).
   */
-  int frictionContact2D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, SolverOptions* options, Numerics_Options* global_options);
+  int frictionContact2D_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, Numerics_Options* global_options);
 
 
   /** set the default solver parameters and perform memory allocation for FrictionContact3D
@@ -79,7 +79,7 @@ extern "C" {
        \param[in,out] options SolverOptions structure
        \author Nineb Sheherazade.
   */
-  void FrictionContact2D_cpg(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, SolverOptions* options);
+  void FrictionContact2D_cpg(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for CPG
   \param SolverOptions * the pointer to the options to set
@@ -93,7 +93,7 @@ extern "C" {
        \param[in,out] options SolverOptions structure
        \author Nineb Sheherazade.
   */
-  void FrictionContact2D_nlgs(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, SolverOptions* options);
+  void FrictionContact2D_nlgs(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for LATIN
   \param SolverOptions * the pointer to the options to set
@@ -108,7 +108,7 @@ extern "C" {
        \param[in,out] options SolverOptions structure
        \author Nineb Sheherazade.
   */
-  void FrictionContact2D_latin(FrictionContact_Problem* problem , double *reaction , double *velocity , int *info, SolverOptions* options);
+  void FrictionContact2D_latin(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for LATIN
   \param SolverOptions * the pointer to the options to set
@@ -147,7 +147,7 @@ extern "C" {
   void FrictionContact2D_projf(int* statusi, int* n , double *y , double *fric, double *projf1);
 
   /** */
-  void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, double *w, int *info, SolverOptions* options) ;
+  void frictionContact2D_sparse_nsgs(FrictionContactProblem* problem, double *z, double *w, int *info, SolverOptions* options) ;
 
   /** set the default solver parameters and perform memory allocation for NSGS
   \param SolverOptions * the pointer to the options to set

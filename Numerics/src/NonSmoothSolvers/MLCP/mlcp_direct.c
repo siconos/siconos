@@ -83,11 +83,11 @@ int * myiMalloc(int n)
   spCurInt = spCurInt + n;
   return aux;
 }
-int mlcp_direct_getNbIWork(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
+int mlcp_direct_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
   return (problem->n + problem->m) * (options->iparam[5] + 1) + options->iparam[5] * problem->m;
 }
-int mlcp_direct_getNbDWork(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
+int mlcp_direct_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
   return  problem->n + problem->m + (options->iparam[5]) * ((problem->n + problem->m) * (problem->n + problem->m)) + (problem->n + problem->m);
 }
@@ -103,7 +103,7 @@ int mlcp_direct_getNbDWork(MixedLinearComplementarity_Problem* problem, SolverOp
  *
  */
 
-void mlcp_direct_init(MixedLinearComplementarity_Problem* problem, SolverOptions* options)
+void mlcp_direct_init(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
   spCurDouble = options->dWork;
   spCurInt = options->iWork;
@@ -142,7 +142,7 @@ void mlcp_direct_reset()
     free(aux);
   }
 }
-int internalPrecompute(MixedLinearComplementarity_Problem* problem)
+int internalPrecompute(MixedLinearComplementarityProblem* problem)
 {
   int INFO;
   mlcp_buildM(spFirstCC->zw, spFirstCC->M, problem->M->matrix0, sN, sM, sNbLines);
@@ -172,7 +172,7 @@ int internalPrecompute(MixedLinearComplementarity_Problem* problem)
   return 1;
 }
 /*memory management about floatWorkingMem and intWorkingMem*/
-int internalAddConfig(MixedLinearComplementarity_Problem* problem, int * zw, int init)
+int internalAddConfig(MixedLinearComplementarityProblem* problem, int * zw, int init)
 {
   int i;
   if (verbose)
@@ -196,7 +196,7 @@ int internalAddConfig(MixedLinearComplementarity_Problem* problem, int * zw, int
   return internalPrecompute(problem);
 }
 /*memory management about dataComplementarityConf*/
-void mlcp_direct_addConfig(MixedLinearComplementarity_Problem* problem, int * zw)
+void mlcp_direct_addConfig(MixedLinearComplementarityProblem* problem, int * zw)
 {
   if (sNumberOfCC < sMaxNumberOfCC) /*Add a configuration*/
   {
@@ -235,7 +235,7 @@ void mlcp_direct_addConfig(MixedLinearComplementarity_Problem* problem, int * zw
     internalAddConfig(problem, zw, 0);
   }
 }
-void mlcp_direct_addConfigFromWSolution(MixedLinearComplementarity_Problem* problem, double * wSol)
+void mlcp_direct_addConfigFromWSolution(MixedLinearComplementarityProblem* problem, double * wSol)
 {
   int i;
 
@@ -251,7 +251,7 @@ void mlcp_direct_addConfigFromWSolution(MixedLinearComplementarity_Problem* prob
 
 
 
-int solveWithCurConfig(MixedLinearComplementarity_Problem* problem)
+int solveWithCurConfig(MixedLinearComplementarityProblem* problem)
 {
   int lin;
   int INFO = 0;
@@ -311,7 +311,7 @@ int solveWithCurConfig(MixedLinearComplementarity_Problem* problem)
  * double *w : size n+m
  * info : output. info == 0 if success
  */
-void mlcp_direct(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options)
+void mlcp_direct(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   int find = 0;
   int lin = 0;

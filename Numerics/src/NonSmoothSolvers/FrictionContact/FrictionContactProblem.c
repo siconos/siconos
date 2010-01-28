@@ -17,14 +17,14 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 #include <stdlib.h>
-#include "PrimalFrictionContact_Problem.h"
+#include "FrictionContactProblem.h"
 
 
-int primalFrictionContact_printInFile(PrimalFrictionContact_Problem*  problem, FILE* file)
+int frictionContact_printInFile(FrictionContactProblem*  problem, FILE* file)
 {
   if (! problem)
   {
-    fprintf(stderr, "Numerics, PrimalFrictionContact_Problem printInFile failed, NULL input.\n");
+    fprintf(stderr, "Numerics, FrictionContactProblem printInFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
   int i;
@@ -34,14 +34,9 @@ int primalFrictionContact_printInFile(PrimalFrictionContact_Problem*  problem, F
   int nc = problem->numberOfContacts;
   fprintf(file, "%d\n", nc);
   printInFile(problem->M, file);
-  printInFile(problem->H, file);
   for (i = 0; i < problem->M->size1; i++)
   {
     fprintf(file, "%32.24e ", problem->q[i]);
-  }
-  for (i = 0; i < problem->H->size1; i++)
-  {
-    fprintf(file, "%32.24e ", problem->b[i]);
   }
   fprintf(file, "\n");
   for (i = 0; i < nc; i++)
@@ -53,7 +48,7 @@ int primalFrictionContact_printInFile(PrimalFrictionContact_Problem*  problem, F
   return 0;
 }
 
-int primalFrictionContact_newFromFile(PrimalFrictionContact_Problem* problem, FILE* file)
+int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)
 {
   int nc = 0, d = 0;
   int i;
@@ -64,18 +59,11 @@ int primalFrictionContact_newFromFile(PrimalFrictionContact_Problem* problem, FI
   problem->M = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
 
   newFromFile(problem->M, file);
-  problem->H = (NumericsMatrix *)malloc(sizeof(NumericsMatrix));
-  newFromFile(problem->H, file);
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
   for (i = 0; i < problem->M->size1; i++)
   {
     fscanf(file, "%lf ", &(problem->q[i]));
-  }
-  problem->b = (double *) malloc(problem->H->size1 * sizeof(double));
-  for (i = 0; i < problem->H->size1; i++)
-  {
-    fscanf(file, "%lf ", &(problem->b[i]));
   }
 
   fscanf(file, "\n");
@@ -89,16 +77,13 @@ int primalFrictionContact_newFromFile(PrimalFrictionContact_Problem* problem, FI
   return 0;
 }
 
-void freePrimalFrictionContact_problem(PrimalFrictionContact_Problem* problem)
+void freeFrictionContact_problem(FrictionContactProblem* problem)
 {
 
   freeNumericsMatrix(problem->M);
-  freeNumericsMatrix(problem->H);
   free(problem->M);
-  free(problem->H);
   free(problem->mu);
   free(problem->q);
-  free(problem->b);
   free(problem);
   problem = NULL;
 

@@ -26,7 +26,7 @@
 #include "LA.h"
 #include <assert.h>
 
-void buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat, LinearComplementarity_Problem* local_problem, double* q, double* z)
+void buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat, LinearComplementarityProblem* local_problem, double* q, double* z)
 {
 
   assert(blmat->blocksize0[rowNumber] > 0);
@@ -56,7 +56,7 @@ void buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const b
 
 }
 
-void lcp_nsgs_SBM(LinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options)
+void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   /* Notes:
 
@@ -96,7 +96,7 @@ void lcp_nsgs_SBM(LinearComplementarity_Problem* problem, double *z, double *w, 
 
   /* Local problem initialization */
 
-  LinearComplementarity_Problem * local_problem = malloc(sizeof(*local_problem));
+  LinearComplementarityProblem * local_problem = malloc(sizeof(*local_problem));
   local_problem->M = malloc(sizeof(*local_problem->M));
   local_problem->M->storageType = 0; // dense storage
   local_problem->M->matrix0 = NULL;

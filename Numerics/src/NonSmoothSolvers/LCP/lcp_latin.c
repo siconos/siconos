@@ -25,7 +25,7 @@
 #include "LA.h"
 #include "LCP_Solvers.h"
 
-void lcp_latin(LinearComplementarity_Problem* problem, double *z, double *w, int *info , SolverOptions* options)
+void lcp_latin(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   /* matrix M of the lcp */
   double * M = problem->M->matrix0;

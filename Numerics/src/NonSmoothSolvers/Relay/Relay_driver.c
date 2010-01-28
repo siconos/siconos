@@ -26,7 +26,7 @@
 #endif
 #include <time.h>
 
-int relay_driver(Relay_Problem* problem, double *z , double *w,
+int relay_driver(RelayProblem* problem, double *z , double *w,
                  SolverOptions* options, Numerics_Options* global_options)
 {
 
@@ -41,7 +41,7 @@ int relay_driver(Relay_Problem* problem, double *z , double *w,
 
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
-    numericsError("Relay_driver", "null input for Relay_Problem and/or unknowns (z,w)");
+    numericsError("Relay_driver", "null input for RelayProblem and/or unknowns (z,w)");
 
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;

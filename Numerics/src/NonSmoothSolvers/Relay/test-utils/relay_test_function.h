@@ -22,7 +22,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-  void relay_fillParamWithRespectToSolver(SolverOptions *options, char * solvername, Relay_Problem* problem);
+  void relay_fillParamWithRespectToSolver(SolverOptions *options, char * solvername, RelayProblem* problem);
   int relay_test_function(FILE * f, char * solvername);
 
 #ifdef __cplusplus

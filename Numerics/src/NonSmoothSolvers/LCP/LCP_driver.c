@@ -24,7 +24,7 @@
 #include "Numerics_Options.h"
 #include "NonSmoothDrivers.h"
 
-int lcp_driver_SparseBlockMatrix(LinearComplementarity_Problem* problem, double *z , double *w, SolverOptions* options)
+int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options)
 {
   /* Checks storage type for the matrix M of the LCP */
   if (problem->M->storageType == 0)
@@ -91,7 +91,7 @@ int lcp_driver_SparseBlockMatrix(LinearComplementarity_Problem* problem, double 
 
 }
 
-int lcp_driver_DenseMatrix(LinearComplementarity_Problem* problem, double *z , double *w, SolverOptions* options)
+int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options)
 {
   /* Note: inputs are not checked since it is supposed to be done in lcp_driver() function which calls the present one. */
 
@@ -252,7 +252,7 @@ int lcp_driver_DenseMatrix(LinearComplementarity_Problem* problem, double *z , d
 
 }
 
-int linearComplementarity_driver(LinearComplementarity_Problem* problem, double *z , double *w, SolverOptions* options,  Numerics_Options* global_options)
+int linearComplementarity_driver(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options,  Numerics_Options* global_options)
 {
   if (options == NULL || global_options == NULL)
     numericsError("lcp_driver", "null input for solver and/or global options");
@@ -262,7 +262,7 @@ int linearComplementarity_driver(LinearComplementarity_Problem* problem, double 
 
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
-    numericsError("lcp_driver", "null input for LinearComplementarity_Problem and/or unknowns (z,w)");
+    numericsError("lcp_driver", "null input for LinearComplementarityProblem and/or unknowns (z,w)");
 
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;

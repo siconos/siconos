@@ -27,11 +27,11 @@
 #include "LCP_Solvers.h"
 #include <assert.h>
 
-void relay_lexicolemke(Relay_Problem* problem, double *z, double *w, int *info, SolverOptions* options,  Numerics_Options* global_options)
+void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options,  Numerics_Options* global_options)
 {
   int i;
   // conversion into LCP
-  LinearComplementarity_Problem* lcp_problem = (LinearComplementarity_Problem*)malloc(sizeof(LinearComplementarity_Problem));
+  LinearComplementarityProblem* lcp_problem = (LinearComplementarityProblem*)malloc(sizeof(LinearComplementarityProblem));
 
   relay_tolcp(problem, lcp_problem);
 

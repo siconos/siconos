@@ -19,7 +19,7 @@
 #ifndef LCP_PROBLEM_H
 #define LCP_PROBLEM_H
 
-/*!\file LinearComplementarity_Problem.h
+/*!\file LinearComplementarityProblem.h
   \brief Structure used to define a Linear Complementarity Problem
 
   \author Franck Perignon
@@ -77,18 +77,18 @@ typedef struct
   int size;
   NumericsMatrix* M;
   double * q;
-} LinearComplementarity_Problem;
+} LinearComplementarityProblem;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-  void LinearComplementarity_display(LinearComplementarity_Problem* p);
+  void LinearComplementarity_display(LinearComplementarityProblem* p);
 
-  int linearComplementarity_printInFile(LinearComplementarity_Problem*  problem, FILE* file);
+  int linearComplementarity_printInFile(LinearComplementarityProblem*  problem, FILE* file);
 
-  int linearComplementarity_newFromFile(LinearComplementarity_Problem* problem, FILE* file);
+  int linearComplementarity_newFromFile(LinearComplementarityProblem* problem, FILE* file);
 
-  void freeLinearComplementarity_problem(LinearComplementarity_Problem* problem);
+  void freeLinearComplementarity_problem(LinearComplementarityProblem* problem);
 #ifdef __cplusplus
 }
 #endif

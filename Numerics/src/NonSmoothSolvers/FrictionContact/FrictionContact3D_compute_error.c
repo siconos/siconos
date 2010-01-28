@@ -19,13 +19,13 @@
 
 #include "LA.h"
 #include "Numerics_Options.h" // for global options
-#include "FrictionContact_Problem.h"
+#include "FrictionContactProblem.h"
 #include "FrictionContact3D_projection.h"
 #include "projectionOnCone.h"
 
 #include <math.h>
 
-int FrictionContact3D_compute_error(FrictionContact_Problem* problem, double *z , double *w, double tolerance, double * error)
+int FrictionContact3D_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, double * error)
 {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
@@ -71,7 +71,7 @@ int FrictionContact3D_compute_error(FrictionContact_Problem* problem, double *z 
     return 0;
 }
 
-int FrictionContact3D_compute_error_velocity(FrictionContact_Problem* problem, double *z , double *w, double tolerance, double * error)
+int FrictionContact3D_compute_error_velocity(FrictionContactProblem* problem, double *z , double *w, double tolerance, double * error)
 {
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)

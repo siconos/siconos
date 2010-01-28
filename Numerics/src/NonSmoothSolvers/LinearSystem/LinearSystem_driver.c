@@ -34,7 +34,7 @@
 /* return 0 if ok
 * otherwise return !=0
 */
-int myLu(LinearSystem_Problem* problem, double *z ,  SolverOptions* options)
+int myLu(LinearSystemProblem* problem, double *z ,  SolverOptions* options)
 {
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
@@ -45,7 +45,7 @@ int myLu(LinearSystem_Problem* problem, double *z ,  SolverOptions* options)
   int LAinfo;
   /* Checks inputs */
   if (problem == NULL || z == NULL)
-    numericsError("Equality_Problem", "null input for Equality_Problem and/or unknowns (z)");
+    numericsError("EqualityProblem", "null input for EqualityProblem and/or unknowns (z)");
   //displayLS(problem);
   memcpy(Maux, problem->M->matrix0, n2 * sizeof(double));
   memcpy(z, problem->q, n * sizeof(double));
@@ -66,7 +66,7 @@ int myLu(LinearSystem_Problem* problem, double *z ,  SolverOptions* options)
   return info;
 }
 
-int LinearSystem_driver(LinearSystem_Problem* problem, double *z , double *w, SolverOptions* options)
+int LinearSystem_driver(LinearSystemProblem* problem, double *z , double *w, SolverOptions* options)
 {
   int i;
   if (problem->M->storageType == 1)
@@ -76,7 +76,7 @@ int LinearSystem_driver(LinearSystem_Problem* problem, double *z , double *w, So
   return myLu(problem, z , options);
 }
 
-void displayLS(LinearSystem_Problem* p)
+void displayLS(LinearSystemProblem* p)
 {
   printf("Numerics LinearSystem DISPLAY:\n-------------\n");
   if (!p)

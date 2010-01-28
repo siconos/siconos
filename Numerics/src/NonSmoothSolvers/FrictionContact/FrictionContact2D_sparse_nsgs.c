@@ -34,7 +34,7 @@
 
 /* in lcp_nsgs_SBM.c */
 void buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat,
-                       LinearComplementarity_Problem* local_problem,
+                       LinearComplementarityProblem* local_problem,
                        double* q, double* z);
 
 int frictionContact2DLocalSolve(double *W, double *q, double mu, double *P, double *U)
@@ -95,7 +95,7 @@ int frictionContact2DLocalSolve(double *W, double *q, double mu, double *P, doub
 }
 
 
-void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, double *w,
+void frictionContact2D_sparse_nsgs(FrictionContactProblem* problem, double *z, double *w,
                                    int *info, SolverOptions* options)
 {
   /* Notes:
@@ -133,7 +133,7 @@ void frictionContact2D_sparse_nsgs(FrictionContact_Problem* problem, double *z, 
 
   /* Local problem initialization */
 
-  LinearComplementarity_Problem * local_problem =
+  LinearComplementarityProblem * local_problem =
     malloc(sizeof(*local_problem));
   local_problem->M = malloc(sizeof(*local_problem->M));
   local_problem->M->storageType = 0; // dense storage

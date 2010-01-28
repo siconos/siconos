@@ -72,7 +72,7 @@
 
 */
 
-/*!\file Relay_Problem.h
+/*!\file RelayProblem.h
   \brief Structure used to define a Relay (dual or primal) Problem
 
   \author Franck Perignon
@@ -95,7 +95,7 @@ typedef struct
   double * q;
   double * lb;
   double * ub;
-} Relay_Problem;
+} RelayProblem;
 
 #ifdef __cplusplus
 extern "C" {
@@ -106,13 +106,13 @@ extern "C" {
   * \author Vincent Acary
   */
 
-  void Relay_display(Relay_Problem* p);
+  void Relay_display(RelayProblem* p);
 
-  int relay_printInFile(Relay_Problem*  problem, FILE* file);
+  int relay_printInFile(RelayProblem*  problem, FILE* file);
 
-  int relay_newFromFile(Relay_Problem* problem, FILE* file);
+  int relay_newFromFile(RelayProblem* problem, FILE* file);
 
-  void freeRelay_problem(Relay_Problem* problem);
+  void freeRelay_problem(RelayProblem* problem);
 
 #ifdef __cplusplus
 }

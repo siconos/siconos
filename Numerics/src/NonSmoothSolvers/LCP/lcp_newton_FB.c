@@ -25,7 +25,7 @@
 #include "LA.h"
 #include "LCP_Solvers.h"
 
-void lcp_newton_FB(LinearComplementarity_Problem* problem, double *z, double *w, int *info , SolverOptions* options)
+void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */
   double * M = problem->M->matrix0;

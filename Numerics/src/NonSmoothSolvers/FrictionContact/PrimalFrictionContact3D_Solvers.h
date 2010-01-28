@@ -31,7 +31,7 @@
 This page gives an overview of the available solvers for friction-contact (3D) problems and their required parameters.
 
 For each solver, the input argument are:
-- a FrictionContact_Problem
+- a FrictionContactProblem
 - the unknowns (reaction,velocity)
 - info, the termination value (0: convergence, >0 problem which depends on the solver)
 - a SolverOptions structure, which handles iparam and dparam
@@ -43,15 +43,15 @@ For each solver, the input argument are:
 
 
 */
-#include "PrimalFrictionContact_Problem.h"
+#include "PrimalFrictionContactProblem.h"
 #include "Numerics_Options.h"
 #include "SolverOptions.h"
 
 
 typedef void (*SolverPrimalPtr)(int, int, double*, int*, double*);
 typedef void (*PostSolverPrimalPtr)(int, double*);
-typedef void (*ComputeErrorPrimalPtr)(PrimalFrictionContact_Problem*, double*, double*, double *, double, double*);
-typedef void (*FreeSolverPrimalPtr)(PrimalFrictionContact_Problem*);
+typedef void (*ComputeErrorPrimalPtr)(PrimalFrictionContactProblem*, double*, double*, double *, double, double*);
+typedef void (*FreeSolverPrimalPtr)(PrimalFrictionContactProblem*);
 
 
 
@@ -67,7 +67,7 @@ extern "C" {
     \param[in] general options for Numerics (verbose mode ...)
     \return result (0 if successful otherwise 1).
   */
-  int primalFrictionContact3D_driver(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, SolverOptions* options, Numerics_Options* global_options);
+  int primalFrictionContact3D_driver(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, SolverOptions* options, Numerics_Options* global_options);
 
   /** set the default solver parameters and perform memory allocation for PrimalFrictionContact3D
       \param SolverOptions ** the pointer to the array of options to set
@@ -99,7 +99,7 @@ extern "C" {
       dparam[2] : localtolerance
       dparam[1] : (out) error
   */
-  void primalFrictionContact3D_nsgs_wr(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
+  void primalFrictionContact3D_nsgs_wr(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
 
   int primalFrictionContact3D_nsgs_wr_setDefaultSolverOptions(SolverOptions* options);
 
@@ -117,7 +117,7 @@ extern "C" {
     dparam[2] : localtolerance
     dparam[1] : (out) error
   */
-  void primalFrictionContact3D_proximal_wr(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
+  void primalFrictionContact3D_proximal_wr(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
 
   int primalFrictionContact3D_proximal_wr_setDefaultSolverOptions(SolverOptions* options);
   /** Projected Gradient solver with reformulation for friction-contact 3D problem
@@ -132,7 +132,7 @@ extern "C" {
      dparam[2] : localtolerance
      dparam[1] : (out) error
   */
-  void primalFrictionContact3D_DeSaxceFixedPoint_wr(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
+  void primalFrictionContact3D_DeSaxceFixedPoint_wr(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
   int primalFrictionContact3D_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* options);
 
   /**  Non-Smooth Gauss Seidel solver  for friction-contact 3D problem with iteration on velocities
@@ -147,7 +147,7 @@ extern "C" {
         dparam[2] : localtolerance
         dparam[1] : (out) error
     */
-  void  primalFrictionContact3D_nsgs_velocity_wr(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options);
+  void  primalFrictionContact3D_nsgs_velocity_wr(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options);
 
   int primalFrictionContact3D_nsgs_velocity_wr_setDefaultSolverOptions(SolverOptions* options);
   /** Non-Smooth Gauss Seidel solver  for friction-contact 3D problem
@@ -166,7 +166,7 @@ extern "C" {
         \todo Improve the splitting Algorithm with a smaller granularity
         \todo Use a global projection perhaps
     */
-  void primalFrictionContact3D_nsgs(PrimalFrictionContact_Problem* problem, double *reaction , double *velocity, double* globalVelocity, int* info, SolverOptions* options);
+  void primalFrictionContact3D_nsgs(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info, SolverOptions* options);
 
 
 

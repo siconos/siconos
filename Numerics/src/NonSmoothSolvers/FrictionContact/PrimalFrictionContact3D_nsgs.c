@@ -32,7 +32,7 @@ extern int *Primal_ipiv;
 extern int  Primal_MisInverse;
 extern int  Primal_MisLU;
 
-void PrimalfrictionContact3D_projection_free(PrimalFrictionContact_Problem* problem)
+void PrimalfrictionContact3D_projection_free(PrimalFrictionContactProblem* problem)
 {
   assert(problem->M);
   if (problem->M->storageType == 0)
@@ -61,7 +61,7 @@ void initializePrimalLocalSolver(int n, SolverPrimalPtr* solve, FreeSolverPrimal
 }
 
 
-void primalFrictionContact3D_nsgs(PrimalFrictionContact_Problem* problem, double *reaction, double *velocity, double *globalVelocity, int* info, SolverOptions* options)
+void primalFrictionContact3D_nsgs(PrimalFrictionContactProblem* problem, double *reaction, double *velocity, double *globalVelocity, int* info, SolverOptions* options)
 {
   /* int and double parameters */
   int* iparam = options->iparam;

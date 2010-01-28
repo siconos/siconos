@@ -53,7 +53,7 @@
 #include "LA.h"
 /*only for debug functions*/
 #include "NonSmoothNewtonNeighbour.h"
-#include "MixedLinearComplementarity_Problem.h"
+#include "MixedLinearComplementarityProblem.h"
 
 #define NAX_NBTESTS 20
 
@@ -149,7 +149,7 @@ void solTozw(int n, int m, double *z, double *w, double *sol)
 
 }
 
-void test_mlcp_series(MixedLinearComplementarity_Problem* problem, double *z, double *w, double *sol)
+void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, double *w, double *sol)
 {
   int info;
   SolverOptions mlcpOptions;
@@ -643,7 +643,7 @@ void test_matrix(void)
 
   int iter;
   double criteria;
-  MixedLinearComplementarity_Problem problem;
+  MixedLinearComplementarityProblem problem;
   problem.n = 0;
   problem.m = 0;
   problem.q = 0;

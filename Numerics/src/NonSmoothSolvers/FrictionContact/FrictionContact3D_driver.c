@@ -26,7 +26,7 @@
 #include "FrictionContact3D_Solvers.h"
 #include "NonSmoothDrivers.h"
 
-int frictionContact3D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, SolverOptions* options, Numerics_Options* global_options)
+int frictionContact3D_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, Numerics_Options* global_options)
 {
   if (options == NULL || global_options == NULL)
     numericsError("FrictionContact3D_driver", "null input for solver and/or global options");

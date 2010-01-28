@@ -91,7 +91,7 @@
 
 */
 
-/*!\file FrictionContact_Problem.h
+/*!\file FrictionContactProblem.h
   \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
   \author Franck Perignon.
 */
@@ -114,17 +114,17 @@ typedef struct
   double* q;
   double* mu;
   int isComplete;
-} FrictionContact_Problem;
+} FrictionContactProblem;
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-  int frictionContact_printInFile(FrictionContact_Problem*  problem, FILE* file);
+  int frictionContact_printInFile(FrictionContactProblem*  problem, FILE* file);
 
-  int frictionContact_newFromFile(FrictionContact_Problem*  problem, FILE* file);
+  int frictionContact_newFromFile(FrictionContactProblem*  problem, FILE* file);
 
-  void freeFrictionContact_problem(FrictionContact_Problem* problem);
+  void freeFrictionContact_problem(FrictionContactProblem* problem);
 
 #ifdef __cplusplus
 }

@@ -24,7 +24,7 @@
 #include "LCP_Solvers.h"
 #include "QP_Solvers.h"
 
-void lcp_nsqp(LinearComplementarity_Problem* problem, double *z, double *w, int *info , SolverOptions* options)
+void lcp_nsqp(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */
   double * M = problem->M->matrix0;

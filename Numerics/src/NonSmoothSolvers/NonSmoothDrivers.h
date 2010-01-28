@@ -22,7 +22,7 @@ Numerics package proposes a set of non-smooth solvers dedicated to some specific
 
 For each type of problem, a generic interface function (driver) is provided. \n
 The main arguments of this driver are:
- - a structure of type XXX_Problem (XXX being the formulation type: LinearComplementarity_Problem, FrictionContact_Problem ...), which holds the vectors and matrices used to formalize the problem, \n
+ - a structure of type XXXProblem (XXX being the formulation type: LinearComplementarityProblem, FrictionContactProblem ...), which holds the vectors and matrices used to formalize the problem, \n
  - the unknowns \n
  - a structure of type SolverOptions, used to defined the solver type and its parameters (see \ref NumericsSolver). \n
  - a Numerics_Options structure, used to define global options (verbose mode ...)
@@ -30,7 +30,7 @@ The main arguments of this driver are:
 To get more details on each formulation, check for each type of problem in \ref NSSpackContents below.
 
 All the drivers interfaces are defined in the file NonSmoothDrivers.h .\n
-Each type of formulation is defined in a structure in the file XXX_Problem.h .
+Each type of formulation is defined in a structure in the file XXXProblem.h .
 
 \section NSSpackContents Contents
 \subpage LCProblem \n\n
@@ -61,7 +61,7 @@ Other functions and useful tools related to NonSmoothSolvers are listed in NSSTo
 #include "Relay_Solvers.h"
 #include "LCP_Solvers.h"
 #include "MLCP_Solvers.h"
-#include "LinearSystem_Problem.h"
+#include "LinearSystemProblem.h"
 #include "FrictionContact2D_Solvers.h"
 #include "FrictionContact3D_Solvers.h"
 #include "PrimalFrictionContact3D_Solvers.h"
@@ -79,7 +79,7 @@ extern "C" {
 
 
   /** General interface to solver for MLCP problems
-      \param[in] problem the MixedLinearComplementarity_Problem structure which handles the problem (M,q)
+      \param[in] problem the MixedLinearComplementarityProblem structure which handles the problem (M,q)
       \param[in,out] z a m+n-vector of doubles which contains the solution of the problem.
       \param[in,out] w a m+n-vector of doubles which contains the solution of the problem.
       \param[in,out] options structure used to define the solver(s) and their parameters
@@ -90,9 +90,9 @@ extern "C" {
       \todo Sizing the regularization parameter and apply it only on null diagnal term
       \author Vincent Acary
   */
-  int mlcp_driver(MixedLinearComplementarity_Problem* problem, double *z, double *w, SolverOptions* options, Numerics_Options* global_options);
+  int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, SolverOptions* options, Numerics_Options* global_options);
   /** General interface to solver for linear system
-      \param[in] problem the LinearSystem_Problem structure which handles the problem (M,q)
+      \param[in] problem the LinearSystemProblem structure which handles the problem (M,q)
       \param[in,out] z a n-vector of doubles solution of the problem.
       \param[out] w a n-vector of doubles which contains zeros.
       \param[in,out] options structure used to define the solver(s) and their parameters
@@ -102,7 +102,7 @@ extern "C" {
       - >0 : otherwise see each solver for more information about the log info
       \author Vincent Acary
   */
-  int LinearSystem_driver(LinearSystem_Problem* problem, double *z , double *w, SolverOptions* options);
+  int LinearSystem_driver(LinearSystemProblem* problem, double *z , double *w, SolverOptions* options);
 
   /** General interface to solvers for friction-contact 2D problem
       \param[in] , the structure which handles the Friction-Contact problem
@@ -112,7 +112,7 @@ extern "C" {
       \param[in] general options for Numerics (verbose mode ...)
       \return result (0 if successful otherwise 1).
   */
-  int frictionContact2D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, SolverOptions* options, Numerics_Options* global_options);
+  int frictionContact2D_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, Numerics_Options* global_options);
 
 
 

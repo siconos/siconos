@@ -23,15 +23,15 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-#include "Relay_Problem.h"
+#include "RelayProblem.h"
 
 
-void Relay_display(Relay_Problem* p)
+void Relay_display(RelayProblem* p)
 {
 
   assert(p);
   int i, n = p->size;
-  printf("Relay_Problem Display :\n-------------\n");
+  printf("RelayProblem Display :\n-------------\n");
   printf("size :%d \n", p->size);
   if (p->M)
   {
@@ -69,11 +69,11 @@ void Relay_display(Relay_Problem* p)
 
 
 
-int relay_printInFile(Relay_Problem*  problem, FILE* file)
+int relay_printInFile(RelayProblem*  problem, FILE* file)
 {
   if (! problem)
   {
-    fprintf(stderr, "Numerics, Relay_Problem printInFile failed, NULL input.\n");
+    fprintf(stderr, "Numerics, RelayProblem printInFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
   int i;
@@ -97,7 +97,7 @@ int relay_printInFile(Relay_Problem*  problem, FILE* file)
   return 1;
 }
 
-int relay_newFromFile(Relay_Problem* problem, FILE* file)
+int relay_newFromFile(RelayProblem* problem, FILE* file)
 {
   int n = 0;
   int i;
@@ -127,7 +127,7 @@ int relay_newFromFile(Relay_Problem* problem, FILE* file)
   return 1;
 }
 
-void freeRelay_problem(Relay_Problem* problem)
+void freeRelay_problem(RelayProblem* problem)
 {
   freeNumericsMatrix(problem->M);
   free(problem->M);

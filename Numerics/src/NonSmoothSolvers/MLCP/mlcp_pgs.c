@@ -30,14 +30,14 @@
  * double *w : size n+m
  */
 
-int mixedLinearComplementarity_pgs_setDefaultSolverOptions(MixedLinearComplementarity_Problem* problem, SolverOptions* pSolver)
+int mixedLinearComplementarity_pgs_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver)
 {
 
   mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
   pSolver->iparam[2] = 0; //implicit
   return 0;
 }
-void mlcp_pgs(MixedLinearComplementarity_Problem* problem, double *z, double *w, int *info, SolverOptions* options)
+void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
 
   double* A = problem->A;

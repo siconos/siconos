@@ -129,15 +129,15 @@ void lcp_buildQ()
 {
   memcpy(sQ, sQref, (sSize)*sizeof(double));
 }
-int lcp_enum_getNbIWork(LinearComplementarity_Problem* problem, SolverOptions* options)
+int lcp_enum_getNbIWork(LinearComplementarityProblem* problem, SolverOptions* options)
 {
   return 2 * (problem->size);
 }
-int lcp_enum_getNbDWork(LinearComplementarity_Problem* problem, SolverOptions* options)
+int lcp_enum_getNbDWork(LinearComplementarityProblem* problem, SolverOptions* options)
 {
   return 3 * (problem->size) + (problem->size) * (problem->size);
 }
-void lcp_enum_init(LinearComplementarity_Problem* problem, SolverOptions* options, int withMemAlloc)
+void lcp_enum_init(LinearComplementarityProblem* problem, SolverOptions* options, int withMemAlloc)
 {
   if (withMemAlloc)
   {
@@ -145,7 +145,7 @@ void lcp_enum_init(LinearComplementarity_Problem* problem, SolverOptions* option
     options->iWork = (int *) malloc(lcp_enum_getNbIWork(problem, options) * sizeof(int));
   }
 }
-void lcp_enum_reset(LinearComplementarity_Problem* problem, SolverOptions* options, int withMemAlloc)
+void lcp_enum_reset(LinearComplementarityProblem* problem, SolverOptions* options, int withMemAlloc)
 {
   if (withMemAlloc)
   {
@@ -157,7 +157,7 @@ void lcp_enum_reset(LinearComplementarity_Problem* problem, SolverOptions* optio
 }
 
 
-void lcp_enum(LinearComplementarity_Problem* problem, double *z, double *w, int *info , SolverOptions* options)
+void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   *info = 1;
   double tol ;
@@ -238,7 +238,7 @@ void lcp_enum(LinearComplementarity_Problem* problem, double *z, double *w, int 
     printf("lcp_enum failed!\n");
 }
 
-int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarity_Problem* problem, SolverOptions* options)
+int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarityProblem* problem, SolverOptions* options)
 {
   int i;
   if (verbose > 0)

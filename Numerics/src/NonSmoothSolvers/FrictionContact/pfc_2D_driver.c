@@ -25,7 +25,7 @@
 
 #endif
 
-int pfc_2D_driver(FrictionContact_Problem* problem, double *reaction , double *velocity, SolverOptions* options, Numerics_Options* global_options)
+int pfc_2D_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, Numerics_Options* global_options)
 {
   int info = -1;
   if (options == NULL || global_options == NULL)
