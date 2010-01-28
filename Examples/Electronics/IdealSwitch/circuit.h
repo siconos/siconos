@@ -13,7 +13,7 @@
  */
 
 static double sR = 1;
-static double sR1s = 0.0;
+static double sR1s = 0.001;
 static double sR1d = 0.001;
 static double sR2 = 1000;
 static double sL = 200e-6;

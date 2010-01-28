@@ -38,8 +38,6 @@ int main()
   bool switchIsOn;
   bool stateChanged;
   // One Step non smooth problem
-  IntParameters iparam(10);
-  DoubleParameters dparam(10);
 
   double* floatWorkingMem = 0;
   int * intWorkingMem = 0;
@@ -54,9 +52,6 @@ int main()
   /************************************************************/
   /************************************************************/
   /*Solver options*/
-  iparam[5] = 5; // nb config
-  iparam[0] = 0; // verbose
-  dparam[0] = 1e-11; // Tolerance
   solverName = &solverEnum;
 
 
@@ -118,22 +113,24 @@ int main()
   SP::OneStepIntegrator  aMoreau ;
   aMoreau.reset(new Moreau(aDS, 0.5));
   aS->insertIntegrator(aMoreau);
-  SP::NonSmoothSolver  mySolver(new NonSmoothSolver((*solverName), iparam, dparam, floatWorkingMem, intWorkingMem));
+  //  SP::NonSmoothSolver  mySolver( new NonSmoothSolver((*solverName),iparam,dparam,floatWorkingMem,intWorkingMem));
 
   //**** BUILD THE STEP NS PROBLEM
   SP::MLCP  aMLCP ;
-  aMLCP.reset(new MLCP(mySolver, "MLCP"));
+  aMLCP.reset(new MLCP());
   aS->insertNonSmoothProblem(aMLCP);
   aM->initialize(aS);
+  SP::Solver_Options numSolOptions = aMLCP->numericsSolverOptions();
   //  Alloc working mem for the solver
-  int aux = mlcp_driver_get_iwork(aMLCP->getNumericsMLCP().get(), mySolver->numericsSolverOptions().get());
+  int aux = mlcp_driver_get_iwork(aMLCP->getNumericsMLCP().get(), &*numSolOptions);
   intWorkingMem = (int*)malloc(aux * sizeof(int));
-  mySolver->numericsSolverOptions()->iWork = intWorkingMem;
-  aux = mlcp_driver_get_dwork(aMLCP->getNumericsMLCP().get(), mySolver->numericsSolverOptions().get());
+  numSolOptions->iWork = intWorkingMem;
+  aux = mlcp_driver_get_dwork(aMLCP->getNumericsMLCP().get(), &*numSolOptions);
   floatWorkingMem = (double*)malloc(aux * sizeof(double));
-  mySolver->numericsSolverOptions()->dWork = floatWorkingMem;
+  numSolOptions->dWork = floatWorkingMem;
+  //  numSolOptions->dparams[0]=1e-12;
 
-  mlcp_driver_init(aMLCP->getNumericsMLCP().get(), mySolver->numericsSolverOptions().get());
+  mlcp_driver_init(aMLCP->getNumericsMLCP().get(), &*numSolOptions);
   //      setNumericsVerbose(1);
 
 
