@@ -134,7 +134,13 @@ nightly_coverage() {
 }
 
 nightly_memcheck() {
-    make_1 $1 $2 ${mode}MemCheck
+
+    # time consuming
+    case $PIPOL_IMAGE in
+        *i386*debian-lenny*)
+            make_1 $1 $2 ${mode}MemCheck;;
+        *);;
+    esac
 }
 
 nightly_submit() {
