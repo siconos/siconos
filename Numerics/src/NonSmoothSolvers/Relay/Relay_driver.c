@@ -27,7 +27,7 @@
 #include <time.h>
 
 int relay_driver(RelayProblem* problem, double *z , double *w,
-                 SolverOptions* options, Numerics_Options* global_options)
+                 SolverOptions* options, NumericsOptions* global_options)
 {
 
 

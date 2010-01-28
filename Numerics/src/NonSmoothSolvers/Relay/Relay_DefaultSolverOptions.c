@@ -22,7 +22,7 @@
 #include <time.h>
 #include <float.h>
 #include "LA.h"
-#include "Numerics_Options.h"
+#include "NumericsOptions.h"
 #include "Relay_Solvers.h"
 #include "NonSmoothDrivers.h"
 

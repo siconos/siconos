@@ -20,7 +20,7 @@
 #include "NonSmoothNewtonNeighbour.h"
 #include "MixedLinearComplementarityProblem.h"
 
-#include "Numerics_Options.h"
+#include "NumericsOptions.h"
 #include "LA.h"
 #include "math.h"
 #include "stdio.h"

@@ -110,7 +110,7 @@ int mlcp_driver_get_dwork(MixedLinearComplementarityProblem* problem, SolverOpti
   return 0;
 }
 
-int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, SolverOptions* options, Numerics_Options* global_options)
+int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, SolverOptions* options, NumericsOptions* global_options)
 {
 
 

@@ -21,7 +21,7 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
-#include "Numerics_Options.h"
+#include "NumericsOptions.h"
 #include "NonSmoothDrivers.h"
 #include "LA.h"
 

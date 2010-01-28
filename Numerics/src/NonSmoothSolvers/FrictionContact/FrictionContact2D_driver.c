@@ -21,7 +21,7 @@
 #include <string.h>
 #include <time.h>
 #include "LA.h"
-#include "Numerics_Options.h"
+#include "NumericsOptions.h"
 #include "FrictionContact2D_Solvers.h"
 #include "NonSmoothDrivers.h"
 
@@ -29,7 +29,7 @@
 static int fccounter = 0;
 #endif
 
-int frictionContact2D_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, Numerics_Options* global_options)
+int frictionContact2D_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options)
 {
 
 #ifdef DUMP_PROBLEM

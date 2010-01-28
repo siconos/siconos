@@ -1,6 +1,6 @@
 #include "mlcp_enum_tool.h"
 #include <stdio.h>
-#include "Numerics_Options.h"
+#include "NumericsOptions.h"
 
 static unsigned long long int sCurrentEnum = 0;
 static unsigned long long int sCmpEnum = 0;

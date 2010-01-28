@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #include "NonSmoothNewton.h"
-#include "Numerics_Options.h"
+#include "NumericsOptions.h"
 #include "LA.h"
 #include "math.h"
 #include "stdio.h"

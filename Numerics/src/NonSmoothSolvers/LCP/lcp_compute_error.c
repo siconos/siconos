@@ -18,7 +18,7 @@
  */
 
 #include "LA.h"
-#include "Numerics_Options.h" // for global options
+#include "NumericsOptions.h" // for global options
 #include "LinearComplementarityProblem.h"
 
 int lcp_compute_error(LinearComplementarityProblem* problem, double *z , double *w, double tolerance, double * error)

@@ -17,10 +17,10 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-#ifndef Numerics_Options_H
-#define Numerics_Options_H
+#ifndef NumericsOptions_H
+#define NumericsOptions_H
 
-/*!\file Numerics_Options.h
+/*!\file NumericsOptions.h
   \brief General options for Numerics functions, structures and so on (mainly used to send information from Kernel to Numerics).
   \author Franck Perignon
 */
@@ -35,7 +35,7 @@
 typedef struct
 {
   int verboseMode;
-} Numerics_Options;
+} NumericsOptions;
 
 
 /* Verbose mode */
@@ -51,9 +51,9 @@ extern "C" {
   void setNumericsVerbose(int newVerboseMode);
 
   /* Set global option for numerics
-     \param opt, a Numerics_Options structure
+     \param opt, a NumericsOptions structure
    */
-  void setNumericsOptions(Numerics_Options* opt);
+  void setNumericsOptions(NumericsOptions* opt);
 
   /* message output and exit with error
      \param name of the function where error occurs

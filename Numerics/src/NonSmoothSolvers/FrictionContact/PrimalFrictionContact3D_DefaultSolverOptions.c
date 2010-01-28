@@ -22,7 +22,7 @@
 #include <time.h>
 #include <float.h>
 #include "LA.h"
-#include "Numerics_Options.h"
+#include "NumericsOptions.h"
 #include "PrimalFrictionContact3D_Solvers.h"
 #include "FrictionContact3D_Solvers.h"
 #include "NonSmoothDrivers.h"

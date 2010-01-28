@@ -34,7 +34,7 @@ int primalFrictionContact_test_function(FILE * f, SolverOptions * options)
   info = primalFrictionContact_printInFile(problem, foutput);
 
 
-  Numerics_Options global_options;
+  NumericsOptions global_options;
   global_options.verboseMode = 1; // turn verbose mode to off by default
 
   int NC = problem->numberOfContacts;

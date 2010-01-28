@@ -180,7 +180,7 @@ This solver first build a local problem for each row of blocks and then call any
 
 */
 
-#include "Numerics_Options.h"
+#include "NumericsOptions.h"
 #include "LinearComplementarityProblem.h"
 #include "SolverOptions.h"
 
@@ -216,7 +216,7 @@ extern "C" {
     - >0 : otherwise see each solver for more information about the log info
     \author Franck Perignon
   */
-  int linearComplementarity_driver(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options,  Numerics_Options* global_options);
+  int linearComplementarity_driver(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options,  NumericsOptions* global_options);
 
   /** set the default solver parameters and perform memory allocation for LinearComplementarity
       \param SolverOptions ** the pointer to the array of options to set

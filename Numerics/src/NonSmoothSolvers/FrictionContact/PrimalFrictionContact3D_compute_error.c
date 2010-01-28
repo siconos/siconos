@@ -18,7 +18,7 @@
  */
 
 #include "LA.h"
-#include "Numerics_Options.h" // for global options
+#include "NumericsOptions.h" // for global options
 #include "PrimalFrictionContactProblem.h"
 #include "PrimalFrictionContact3D_Solvers.h"
 #include "projectionOnCone.h"

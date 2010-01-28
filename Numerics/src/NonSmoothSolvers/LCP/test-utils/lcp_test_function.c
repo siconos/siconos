@@ -153,7 +153,7 @@ int lcp_test_function(FILE * f, char * solvername)
   info = linearComplementarity_printInFile(problem, foutput);
 
 
-  Numerics_Options global_options;
+  NumericsOptions global_options;
   global_options.verboseMode = 1;
   SolverOptions * options ;
   options = malloc(sizeof(*options));
@@ -231,7 +231,7 @@ int lcp_test_function_SBM(FILE * f, char * solvername)
   info = linearComplementarity_printInFile(problem, foutput);
 
 
-  Numerics_Options global_options;
+  NumericsOptions global_options;
   global_options.verboseMode = 1;
 
   SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));

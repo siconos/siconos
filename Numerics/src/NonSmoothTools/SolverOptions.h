@@ -112,7 +112,7 @@ Note that options[i+1] is used for row i of M, while i<nbSolvers-1 and options[n
 
 */
 
-#include "Numerics_Options.h"
+#include "NumericsOptions.h"
 
 /** Structure used to send options (name, parameters and so on) to a specific solver-driver (mainly from Kernel to Numerics).
     \param isSet int equal to false(0) if the parameters below have not been set (ie need to read default values) else true(1)

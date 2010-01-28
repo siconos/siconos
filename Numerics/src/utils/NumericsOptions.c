@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
-#include "Numerics_Options.h"
+#include "NumericsOptions.h"
 
 /* Default value for verbose mode: turned to off
 Warning: global variable
@@ -27,7 +27,7 @@ void setNumericsVerbose(int newVerboseMode)
   verbose = newVerboseMode;
 }
 
-void setNumericsOptions(Numerics_Options* opt)
+void setNumericsOptions(NumericsOptions* opt)
 {
   verbose = opt->verboseMode;
 }

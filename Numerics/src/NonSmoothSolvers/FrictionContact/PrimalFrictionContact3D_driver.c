@@ -23,14 +23,14 @@
 #include <float.h>
 #include <assert.h>
 
-#include "Numerics_Options.h"
+#include "NumericsOptions.h"
 #include "PrimalFrictionContact3D_Solvers.h"
 int * Primal_ipiv = NULL;
 int  Primal_MisInverse = 0;
 int  Primal_MisLU = 0;
 
 
-int primalFrictionContact3D_driver(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity,  SolverOptions* options, Numerics_Options* global_options)
+int primalFrictionContact3D_driver(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity,  SolverOptions* options, NumericsOptions* global_options)
 {
 
   /* Set global options */

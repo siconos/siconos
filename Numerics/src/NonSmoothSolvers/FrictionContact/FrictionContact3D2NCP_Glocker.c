@@ -29,7 +29,7 @@
 
 #include "LA.h"
 #include "FrictionContact3D_Solvers.h"
-#include "Numerics_Options.h"
+#include "NumericsOptions.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>

@@ -176,7 +176,7 @@ The direct and simplex solver must be initialize: \n
 
 */
 
-#include "Numerics_Options.h"
+#include "NumericsOptions.h"
 #include "SolverOptions.h"
 #include "MixedLinearComplementarityProblem.h"
 

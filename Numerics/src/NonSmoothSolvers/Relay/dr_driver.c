@@ -21,11 +21,11 @@
 #include <string.h>
 #include <time.h>
 #ifndef MEXFLAG
-#include "Numerics_Options.h"
+#include "NumericsOptions.h"
 #include "NonSmoothDrivers.h"
 #endif
 
-int dr_driver(RelayProblem* problem, double *z , double *w, SolverOptions* options, Numerics_Options* global_options)
+int dr_driver(RelayProblem* problem, double *z , double *w, SolverOptions* options, NumericsOptions* global_options)
 {
   if (options == NULL || global_options == NULL)
     numericsError("dr_driver", "null input for solver and/or global options");

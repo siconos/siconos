@@ -44,7 +44,7 @@ For each solver, the input argument are:
 
 */
 #include "PrimalFrictionContactProblem.h"
-#include "Numerics_Options.h"
+#include "NumericsOptions.h"
 #include "SolverOptions.h"
 
 
@@ -67,7 +67,7 @@ extern "C" {
     \param[in] general options for Numerics (verbose mode ...)
     \return result (0 if successful otherwise 1).
   */
-  int primalFrictionContact3D_driver(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, SolverOptions* options, Numerics_Options* global_options);
+  int primalFrictionContact3D_driver(PrimalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, SolverOptions* options, NumericsOptions* global_options);
 
   /** set the default solver parameters and perform memory allocation for PrimalFrictionContact3D
       \param SolverOptions ** the pointer to the array of options to set

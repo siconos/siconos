@@ -47,7 +47,7 @@ For each solver, the input argument are:
 */
 
 #include "FrictionContactProblem.h"
-#include "Numerics_Options.h"
+#include "NumericsOptions.h"
 #include "SolverOptions.h"
 
 #ifdef __cplusplus
@@ -62,7 +62,7 @@ extern "C" {
       \param[in] general options for Numerics (verbose mode ...)
       \return result (0 if successful otherwise 1).
   */
-  int frictionContact2D_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, Numerics_Options* global_options);
+  int frictionContact2D_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options, NumericsOptions* global_options);
 
 
   /** set the default solver parameters and perform memory allocation for FrictionContact3D

@@ -27,7 +27,7 @@
 #include "LCP_Solvers.h"
 #include <assert.h>
 
-void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options,  Numerics_Options* global_options)
+void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options,  NumericsOptions* global_options)
 {
   int i;
   // conversion into LCP

@@ -18,7 +18,7 @@
  */
 
 #include "LA.h"
-#include "Numerics_Options.h" // for global options
+#include "NumericsOptions.h" // for global options
 #include "RelayProblem.h"
 
 

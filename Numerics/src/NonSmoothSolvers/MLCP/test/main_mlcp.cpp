@@ -153,7 +153,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
 {
   int info;
   SolverOptions mlcpOptions;
-  Numerics_Options global_options;
+  NumericsOptions global_options;
   double tol1 = 1e-15;
   double tol2 = 1e-6;
   double error = 0;

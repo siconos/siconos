@@ -79,7 +79,7 @@ extern "C" {
       - >0 : otherwise see each solver for more information about the log info
    * \author Nineb Sheherazade.
    */
-  int relay_driver(RelayProblem* problem, double *z , double *w, SolverOptions* options,  Numerics_Options* global_options);
+  int relay_driver(RelayProblem* problem, double *z , double *w, SolverOptions* options,  NumericsOptions* global_options);
 
   /** set the default solver parameters and perform memory allocation for LinearComplementarity
       \param SolverOptions * the pointer to options to set
@@ -115,7 +115,7 @@ extern "C" {
      2 = Null diagonal term\n
      \author V. Acary
     */
-  void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options, Numerics_Options* global_options);
+  void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options, NumericsOptions* global_options);
 
   /** set the default solver parameters and perform memory allocation for Lemke
       \param SolverOptions * the pointer to options to set
@@ -132,7 +132,7 @@ extern "C" {
      2 = Null diagonal term\n
      \author V. Acary
     */
-  void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options, Numerics_Options* global_options);
+  void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options, NumericsOptions* global_options);
 
   /** set the default solver parameters and perform memory allocation for ENUM
       \param SolverOptions * the pointer to options to set

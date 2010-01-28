@@ -1,5 +1,5 @@
 #include "PathAlgebra.h"
-#include "Numerics_Options.h"
+#include "NumericsOptions.h"
 #include "math.h"
 
 /** tolerance value for zero */

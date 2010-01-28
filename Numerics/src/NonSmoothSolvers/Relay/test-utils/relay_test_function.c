@@ -34,7 +34,7 @@ int relay_test_function(FILE * f, char * solvername)
   info = relay_printInFile(problem, foutput);
 
 
-  Numerics_Options global_options;
+  NumericsOptions global_options;
   global_options.verboseMode = 1;
 
 

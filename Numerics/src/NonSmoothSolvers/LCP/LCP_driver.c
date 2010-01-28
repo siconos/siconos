@@ -21,7 +21,7 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
-#include "Numerics_Options.h"
+#include "NumericsOptions.h"
 #include "NonSmoothDrivers.h"
 
 int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options)
@@ -252,7 +252,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
 
 }
 
-int linearComplementarity_driver(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options,  Numerics_Options* global_options)
+int linearComplementarity_driver(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options,  NumericsOptions* global_options)
 {
   if (options == NULL || global_options == NULL)
     numericsError("lcp_driver", "null input for solver and/or global options");
