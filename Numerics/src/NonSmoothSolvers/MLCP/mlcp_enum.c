@@ -111,9 +111,10 @@ static double* sU;
 /* } */
 
 
-int mixedLinearComplementarity_enum_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver)
+int mixedLinearComplementarity_enum_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pOPtionSolver)
 {
-  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
+  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pOPtionSolver);
+  pOPtionSolver->dparam[0] = 1e-12;
   return 0;
 }
 
@@ -140,11 +141,14 @@ void printRefSystem()
 }
 int mlcp_enum_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
+  if (!problem)
+    return 0;
   return 2 * (problem->n + problem->m);
 }
 int mlcp_enum_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
-
+  if (!problem)
+    return 0;
 #ifdef ENUM_USE_DGELS
   LWORK = -1;
   int info = 0;
@@ -154,7 +158,6 @@ int mlcp_enum_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptio
 #else
   LWORK = 0;
 #endif
-
   return LWORK + 3 * (problem->M->size0) + (problem->n + problem->m) * (problem->M->size0);
 }
 
