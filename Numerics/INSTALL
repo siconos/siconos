@@ -48,7 +48,7 @@ The compilation is done out of the source directory:
    * cd <build>
    * cmake <path of the source directory> [CMAKE OPTIONS]
    * make [MAKE OPTIONS]
-   * make test
+   * make test   (if -DWITH_TESTING=ON is in CMAKE OPTIONS)
    * make install
 
 Some CMAKE OPTIONS that may be usefull:
@@ -70,11 +70,22 @@ Some CMAKE OPTIONS that may be usefull:
    * to build an optimized library (-O3 -DNDEBUG) (this is the
     default): -DCMAKE_BUILD_TYPE=Release
 
+   * to include the build of the tests suites and enable a make test
+     target
+     -DWITH_TESTING=ON
+
+   * to build the documentation
+     -DWITH_DOCUMENTATION=TRUE 
+     the documentation is generated under GeneratedDocs at the level
+     of the build directory
+
+   * to build the documentation some where
+     -DWITH_DOCUMENTATION=TRUE -DDOXYGEN_OUPUT=/some/where
+     (you may have to create the directory /some/where/Tags)
+
    * to see cmake state : -DPRINT_ENV=1
 
    * to print a cmake variable : -DPRINT_VAR=VAR_NAME
-
-        
 
 Some MAKE OPTIONS that may be usefull:
    * to see make command as executed : VERBOSE=1
