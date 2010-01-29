@@ -108,7 +108,6 @@ install_1() {
         sudo make install
         sudo chown $PIPOL_USER  install_manifest.txt
         sudo chgrp $PIPOL_GROUP install_manifest.txt
-        sudo ldconfig
     }; cd -
 }
 

@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# upload on CDash fails with cmake 2.8.0 and mac os x Leopard
+cmake_version=2.6.4
+
+cp $PIPOL_HOMEDIR/src/cmake-${cmake_version}.tar.gz .
+gunzip cmake-${cmake_version}.tar.gz
+tar xvf cmake-${cmake_version}.tar
+
+cd cmake-${cmake_version}; {
+    ./bootstrap
+    make
+    sudo make install
+}; cd -
+
+
