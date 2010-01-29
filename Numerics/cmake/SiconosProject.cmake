@@ -45,11 +45,6 @@ MACRO(SICONOS_PROJECT
     #list command no longer ignores empty elements.
     CMAKE_POLICY(SET CMP0007 NEW)
 
-    # cmake 2.8
-    IF(POLICY CMP0011)
-      CMAKE_POLICY(SET CMP0011 NEW)
-    ENDIF(POLICY CMP0011)
-
   ENDIF(COMMAND CMAKE_POLICY)
 
   # Build options

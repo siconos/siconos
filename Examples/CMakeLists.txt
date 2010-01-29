@@ -1,6 +1,12 @@
 # cmake -DCMAKE_INSTALL_PREFIX=<your installation dir> <path>
 CMAKE_MINIMUM_REQUIRED(VERSION 2.4)
 SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+
+# CMP0011 policy before first include
+# others policies are set in SiconosProject
+IF(POLICY CMP0011)
+  CMAKE_POLICY(SET CMP0011 NEW)
+ENDIF(POLICY CMP0011)
 INCLUDE(SiconosProject)
 
 ENABLE_LANGUAGE(C)
