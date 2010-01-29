@@ -39,13 +39,6 @@ int main(int argc, char* argv[])
 
     // pramètres du solveur siconos
 
-    IntParameters iparam(5);
-    iparam[0] = 1000; // Max number of iteration
-    DoubleParameters dparam(5);
-    dparam[0] = 1e-15; // Tolerance
-    string solverName = "Lemke" ;
-    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
-
 
     unsigned int outputSize = 9;
     SimpleMatrix dataPlot(N, outputSize);
@@ -141,7 +134,7 @@ int main(int argc, char* argv[])
       SP::Moreau OSI(new Moreau(yoyo, theta));
       s->insertIntegrator(OSI);
       // -- OneStepNsProblem --
-      SP::OneStepNSProblem osnspb(new LCP(mySolver));
+      SP::OneStepNSProblem osnspb(new LCP());
       s->insertNonSmoothProblem(osnspb);
       // --- Model initialization ---
       jeu->initialize(s);
@@ -226,7 +219,7 @@ int main(int argc, char* argv[])
       s.reset(new TimeStepping(t));
       OSI.reset(new Moreau(yoyo, theta));
       s->insertIntegrator(OSI);
-      osnspb.reset(new LCP(mySolver));
+      osnspb.reset(new LCP());
       s->insertNonSmoothProblem(osnspb);
       jeu->initialize(s);
 

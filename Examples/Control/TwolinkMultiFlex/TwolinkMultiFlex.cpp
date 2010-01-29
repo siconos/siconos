@@ -166,17 +166,8 @@ int main(int argc, char* argv[])
     s->insertIntegrator(OSI);
 
     // -- OneStepNsProblem --
-    IntParameters iparam(5);
-    iparam[0] = 20000; // Max number of iteration
-    DoubleParameters dparam(5);
-    dparam[0] = 1e-8; // Tolerance
-    string solverName = "Lemke" ;
-    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
-    // -- OneStepNsProblem --
-    SP::OneStepNSProblem osnspb(new LCP(mySolver));
+    SP::OneStepNSProblem osnspb(new LCP());
     s->insertNonSmoothProblem(osnspb);
-    // OneStepNSProblem  osnspb(new LCP(s,"name","Lemke",200001, 0.00001);
-
     cout << "=== End of model loading === " << endl;
 
     // =========================== End of model definition ===========================

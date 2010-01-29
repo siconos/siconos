@@ -110,9 +110,10 @@ int main(int argc, char* argv[])
   numerics_options.verboseMode = 1; // turn verbose mode to off by default
 
 
-  SolverOptions *numerics_solver_options;
+  SolverOptions *numerics_solver_options = (SolverOptions *)malloc(sizeof(SolverOptions));
 
   frictionContact3D_setDefaultSolverOptions(numerics_solver_options, "NSGS");
+
   numerics_solver_options->dparam[0] = 1e-16;
 
 
@@ -122,13 +123,14 @@ int main(int argc, char* argv[])
                            numerics_solver_options, &numerics_options);
 
 
-  frictionContact3D_deleteDefaultSolverOptions(numerics_solver_options, "NSGS");
+  deleteSolverOptions(numerics_solver_options);
+
   // Solver output
   printf("\n");
   for (k = 0 ; k < 3 * NC; k++) printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e \n ", k, velocity[k], k , reaction[k]);
   printf("\n");
 
-
+  free(numerics_solver_options);
   free(reaction);
   free(velocity);
   free(MM);

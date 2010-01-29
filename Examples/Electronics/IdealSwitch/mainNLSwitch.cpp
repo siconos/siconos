@@ -120,7 +120,7 @@ int main()
   aMLCP.reset(new MLCP());
   aS->insertNonSmoothProblem(aMLCP);
   aM->initialize(aS);
-  SP::Solver_Options numSolOptions = aMLCP->numericsSolverOptions();
+  SP::SolverOptions numSolOptions = aMLCP->numericsSolverOptions();
   //  Alloc working mem for the solver
   int aux = mlcp_driver_get_iwork(aMLCP->getNumericsMLCP().get(), &*numSolOptions);
   intWorkingMem = (int*)malloc(aux * sizeof(int));

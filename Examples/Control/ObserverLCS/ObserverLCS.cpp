@@ -151,13 +151,7 @@ int main(int argc, char* argv[])
     s->insertIntegrator(myIntegrator);
 
     // -- OneStepNsProblem --
-    IntParameters iparam(5);
-    iparam[0] = 1000; // Max number of iteration
-    DoubleParameters dparam(5);
-    dparam[0] = 1e-6; // Tolerance
-    string solverName = "Lemke" ;
-    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
-    SP::LCP osnspb(new LCP(mySolver));
+    SP::LCP osnspb(new LCP());
     s->insertNonSmoothProblem(osnspb);
 
     // =========================== End of model definition ===========================

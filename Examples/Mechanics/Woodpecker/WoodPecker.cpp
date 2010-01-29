@@ -148,17 +148,10 @@ int main(int argc, char* argv[])
     SP::OneStepIntegrator vOSI(new Moreau(dynamicalSystem, theta));
     s->insertIntegrator(vOSI);
 
-    // -- OneStepNsProblem --
-    IntParameters iparam(5);
-    iparam[0] = 1001; // Max number of iteration
-    DoubleParameters dparam(5);
-    dparam[0] = 0.00001; // Tolerance
-    string solverName = "PGS" ;
-    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
-    SP::OneStepNSProblem osnspb(new FrictionContact(2, mySolver, "fc2d"));
+
+    SP::OneStepNSProblem osnspb(new FrictionContact(2));
     s->insertNonSmoothProblem(osnspb);
-    // OneStepNSProblem* osnspb = new FrictionContact2D(s, "Latin", 1000, 0.00001, "max", 0.6);
-    // OneStepNSProblem* osnspb = new FrictionContact2D(s, "CPG", 10000, 0.00001, "max", 0.6);
+
 
     cout << "=== End of model loading === " << endl;
 

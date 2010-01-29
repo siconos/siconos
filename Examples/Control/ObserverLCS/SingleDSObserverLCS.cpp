@@ -133,13 +133,8 @@ int main(int argc, char* argv[])
 
 
     // One Step non smooth problem
-    IntParameters iparam(5);
-    iparam[0] = 1000; // Max number of iteration
-    DoubleParameters dparam(5);
-    dparam[0] = 1e-5; // Tolerance
-    string solverName = "Lemke" ;
-    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
-    SP::LCP osnspb(new LCP(mySolver));
+
+    SP::LCP osnspb(new LCP());
     s->insertNonSmoothProblem(osnspb);
     // ================================= Computation =================================
 

@@ -159,15 +159,13 @@ int main(int argc, char* argv[])
     SP::OneStepIntegrator OSI(new Moreau(arm, 0.500001));
     s->insertIntegrator(OSI);
 
+
     // -- OneStepNsProblem --
-    IntParameters iparam(5);
-    iparam[0] = 20000; // Max number of iteration
-    DoubleParameters dparam(5);
-    dparam[0] = 1e-8; // Tolerance
-    string solverName = "Lemke" ;
-    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
-    // -- OneStepNsProblem --
-    SP::OneStepNSProblem osnspb(new LCP(mySolver));
+    SP::OneStepNSProblem osnspb(new LCP());
+    osnspb->numericsSolverOptions()->dparam[0] = 1e-8;
+
+
+
     s->insertNonSmoothProblem(osnspb);
 
     cout << "=== End of model loading === " << endl;

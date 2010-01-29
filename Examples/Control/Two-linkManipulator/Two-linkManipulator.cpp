@@ -127,27 +127,27 @@ int main(int argc, char* argv[])
     SP::Interaction inter(new Interaction("floor-arm", allDS, 0, 2, nslaw, relation));
 
 
-    SimpleMatrix H1(2, 2);
-    SimpleVector b1(2);
-    H1.zero();
-    H1(0, 0) = -1;
-    H1(1, 0) = 1;
+    SP::SimpleMatrix H1(new SimpleMatrix(2, 2));
+    SP::SimpleVector b1(new SimpleVector(2));
+    H1->zero();
+    (*H1)(0, 0) = -1;
+    (*H1)(1, 0) = 1;
 
-    b1(0) = PI;
-    b1(1) = 0;
+    (*b1)(0) = PI;
+    (*b1)(1) = 0;
 
     SP::NonSmoothLaw nslaw2(new NewtonImpactNSL(e2));
     SP::Relation relation1(new LagrangianLinearTIR(H1, b1));
     SP::Interaction inter1(new Interaction("floor-arm2", allDS, 1, 2, nslaw2, relation1));
 
-    SimpleMatrix H2(2, 2);
-    SimpleVector b2(2);
-    H2.zero();
-    H2(0, 1) = -1;
-    H2(1, 1) = 1;
+    SP::SimpleMatrix H2(new SimpleMatrix(2, 2));
+    SP::SimpleVector b2(new SimpleVector(2));
+    H2->zero();
+    (*H2)(0, 1) = -1;
+    (*H2)(1, 1) = 1;
 
-    b2(0) = 0.0001;
-    b2(1) = PI - 0.0001;
+    (*b2)(0) = 0.0001;
+    (*b2)(1) = PI - 0.0001;
 
 
     SP::Relation relation2(new LagrangianLinearTIR(H2, b2));
@@ -183,14 +183,7 @@ int main(int argc, char* argv[])
     s->insertIntegrator(OSI);
 
     // -- OneStepNsProblem --
-    IntParameters iparam(5);
-    iparam[0] = 20000; // Max number of iteration
-    DoubleParameters dparam(5);
-    dparam[0] = 1e-5; // Tolerance
-    string solverName = "Lemke" ;
-    SP::NonSmoothSolver mySolver(new NonSmoothSolver(solverName, iparam, dparam));
-    // -- OneStepNsProblem --
-    SP::OneStepNSProblem osnspb(new LCP(mySolver));
+    SP::OneStepNSProblem osnspb(new LCP());
     s->insertNonSmoothProblem(osnspb);
     // OneStepNSProblem  osnspb(new LCP(s,"name","Lemke",200001, 0.00001);
 

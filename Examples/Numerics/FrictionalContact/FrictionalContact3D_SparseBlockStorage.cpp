@@ -126,8 +126,8 @@ int main(int argc, char* argv[])
   frictionContact_printInFile(&NumericsProblem, ff);
   fclose(ff);
 
-  SolverOptions *numerics_solver_options;
-  frictionContact3D_setDefaultSolverOptions(&numerics_solver_options, "NSGS");
+  SolverOptions *numerics_solver_options  = (SolverOptions *)malloc(sizeof(SolverOptions));
+  frictionContact3D_setDefaultSolverOptions(numerics_solver_options, "NSGS");
 
   numerics_solver_options->dparam[0] = 1e-16;
 
@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
                                       numerics_solver_options, &numerics_options);
 
 
-  frictionContact3D_deleteDefaultSolverOptions(&numerics_solver_options, "NSGS");
+  deleteSolverOptions(numerics_solver_options);
 
 
   // Solver output
@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
   fclose(ff);
 
 
-
+  free(numerics_solver_options);
   free(reaction);
   free(velocity);
   free(MM);
