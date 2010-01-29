@@ -3,7 +3,7 @@
 # get local and head revision numbers
 cd src/nightly/siconos ;{ 
     
-    local=`svn info | sed 's/Revision: \([0-9][0-9]*\)/\1/p;d'`
+    local=`svn info -r '{00:00}' | sed 's/Revision: \([0-9][0-9]*\)/\1/p;d'`
     head=`svn info -r HEAD | sed 's/Revision: \([0-9][0-9]*\)/\1/p;d'`
     
     echo $local > local_revision
