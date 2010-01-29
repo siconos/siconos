@@ -29,6 +29,19 @@
 using namespace std;
 using namespace RELATION;
 
+
+Relay::Relay(const std::string& newNumericsSolverName , const std::string& newId):
+  LinearOSNS(newNumericsSolverName, "Relay", newId)
+{
+  _numerics_problem.reset(new  RelayProblem);
+
+  size_t size = _numerics_solver_name.size() + 1;
+  char * solvername = new char[ size ];
+  strncpy(solvername, _numerics_solver_name.c_str(), size);
+  relay_setDefaultSolverOptions(NULL, &*_numerics_solver_options, solvername);
+
+
+};
 /* nslaw dispatch on bounds */
 
 struct Relay::_BoundsNSLEffect : public SiconosVisitor
@@ -67,6 +80,7 @@ struct Relay::_BoundsNSLEffect : public SiconosVisitor
   }
 
 };
+
 
 void Relay::initialize(SP::Simulation sim)
 {
@@ -177,4 +191,9 @@ Relay* Relay::convert(OneStepNSProblem* osnsp)
   return lcp;
 }
 
+
+Relay::~Relay()
+{
+  deleteSolverOptions(&*_numerics_solver_options);
+}
 

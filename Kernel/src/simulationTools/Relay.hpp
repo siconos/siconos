@@ -24,7 +24,7 @@
 #define RELAY_H
 
 #include "LinearOSNS.hpp"
-
+TYPEDEF_SPTR(RelayProblem);
 class LinearOSNS;
 class Simulation;
 /** Formalization and Resolution of a Linear Complementarity Problem (Relay)
@@ -83,6 +83,9 @@ protected:
   /** contains the vector ub (upper bounds) of a Relay system */
   SP::SiconosVector _ub;
 
+  /** contains the numerics proble for Relay system */
+  SP::RelayProblem _numerics_problem;
+
   /** nslaw effects : visitors experimentation
    */
 
@@ -104,12 +107,11 @@ public:
    *  (optional, default = NULL => read .opt file in Numerics)
    *  \param String: id of the problem (default = "unamed")
    */
-  Relay(const std::string& newNumericsSolverName = "Lemke", const std::string& newId = "unamed_relay"):
-    LinearOSNS(newNumericsSolverName, "Relay", newId) {};
+  Relay(const std::string& newNumericsSolverName = "Lemke", const std::string& newId = "unamed_relay");
 
   /** destructor
    */
-  ~Relay() {};
+  ~Relay();
   // --- lb ---
   /** get the value of lb, the   lower bounds of the Relay system
    *  \return SimpleVector
